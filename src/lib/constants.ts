@@ -27,8 +27,9 @@ export const TYPE: Record<string, string> = {
 
 /** 技能标签 */
 export const TAG: Record<string, string> = {
-  SingleAttack: '单攻', AoEAttack: '群攻', Blast: '扩散', Support: '辅助',
-  Enhance: '强化', Defense: '防御', Buff: '增益', Debuff: '减益',
+  SingleAttack: '单攻', AoEAttack: '群攻', Blast: '扩散', Bounce: '弹射',
+  Support: '辅助', Enhance: '强化', Defence: '防御', Impair: '削弱',
+  Restore: '恢复', MazeAttack: '秘技普攻',
 };
 
 /** 技能图标键映射（SkillIcon_{id}_{key}.webp） */
@@ -36,13 +37,16 @@ export const SKILL_ICON_KEY: Record<string, string> = {
   Normal: 'Normal', BPSkill: 'BP', Ultra: 'Ultra',
   Passive: 'Passive', Maze: 'Maze', Servant: 'Servant',
   ServantPassive: 'ServantPassive',
+  // 原版遍漏修复：MazeNormal（秘技普攻）与普攻共用图标；
+  // ElationDamage（欢愉技）CDN 键名为 Elation；Assist（助战技）无独立图标资产，回退终结技图标
+  MazeNormal: 'Normal', ElationDamage: 'Elation', Assist: 'Ultra',
 };
 
 /** type_name → 图标键反查（部分角色天赋技能 type 为 null，仅有 type_name） */
 export const SKILL_ICON_KEY_BY_NAME: Record<string, string> = {
   '普攻': 'Normal', '战技': 'BP', '终结技': 'Ultra',
   '天赋': 'Passive', '秘技': 'Maze', '忆灵技': 'Servant',
-  '忆灵天赋': 'ServantPassive',
+  '忆灵天赋': 'ServantPassive', '欢愉技': 'Elation', '助战技': 'Ultra',
 };
 
 /** 韧性条标签（show_stance_list 下标对应） */

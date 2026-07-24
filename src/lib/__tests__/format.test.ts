@@ -313,13 +313,18 @@ describe('URL 构建', () => {
     expect(memospriteId('1415', d)).toBe('11415');
     expect(memospriteId('1005', null)).toBe('11005');
   });
-  it('skillIconUrl：按类型键拼接；Servant 用忆灵 ID；未知类型空串', () => {
+  it('skillIconUrl：按类型键拼接；Servant 用忆灵 ID；缺失类型回退映射', () => {
     expect(skillIconUrl(sk({ type: 'Normal' }), '1005', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1005_Normal.webp`);
     expect(skillIconUrl(sk({ type: 'BPSkill' }), '1005', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1005_BP.webp`);
     const d = baseChar();
     d.memosprite = { icon: 'SpriteOutput/ServantIconTeam/11415B.png' };
     expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11415_Servant.webp`);
-    expect(skillIconUrl(sk({ type: 'Assist', type_name: '' }), '1005', null)).toBe('');
+    // Assist CDN 无独立图标资产，回退终结技图标
+    expect(skillIconUrl(sk({ type: 'Assist', type_name: '助战技' }), '1005', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1005_Ultra.webp`);
+    // MazeNormal（秘技普攻）与普攻共用图标
+    expect(skillIconUrl(sk({ type: 'MazeNormal', type_name: '' }), '1508', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1508_Normal.webp`);
+    // ElationDamage（欢愉技）对应 CDN 键名 Elation
+    expect(skillIconUrl(sk({ type: 'ElationDamage', type_name: '欢愉技' }), '1501', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1501_Elation.webp`);
     // type 为 null 的天赋技能回退 type_name 反查
     expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1508_Passive.webp`);
   });

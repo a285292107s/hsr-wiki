@@ -730,13 +730,17 @@ onBeforeUnmount(() => {
           >
             <span class="nk-diff-badge nk-diff-badge--removed">REMOVED</span>
             <div class="nk-skill__head">
-              <img v-if="rc.icon" class="nk-skill__icon" :src="rc.icon">
-              <div>
-                <div class="nk-skill__name">{{ rc.sk.name }}</div>
-                <div class="nk-skill__type">{{ rc.tn }}</div>
-              </div>
+              <span class="nk-skill__type-dot" :title="rc.tn"></span>
             </div>
-            <div class="nk-skill__desc" v-html="rc.descHtml"></div>
+            <div class="nk-skill__body">
+              <div class="nk-skill__title-row">
+                <img v-if="rc.icon" class="nk-skill__icon" :src="rc.icon">
+                <div class="nk-skill__title">
+                  <span class="nk-skill__name">{{ rc.sk.name }}</span>
+                </div>
+              </div>
+              <div class="nk-skill__desc" v-html="rc.descHtml"></div>
+            </div>
           </div>
           <SkillCard
             v-for="ms in memoSkills"

@@ -18,44 +18,126 @@
 .nk-ability__desc u { text-decoration: underline; text-decoration-color: rgba(203,213,225,0.5); text-underline-offset: 3px; color: #cbd5e1; }
 .nk-ability__desc .hl { color: var(--highlight); font-weight: 700; }
 
-/* ─── 技能 Tab ─── */
-.nk-skill { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin-bottom: 16px; transition: border-color 0.2s; }
+/* ─── 技能 Tab（克制配色：类型色仅用于徽章，卡片统一紫色调边框） ─── */
+.nk-skill {
+  --sk-accent: var(--primary);
+  position: relative; background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px 24px 20px; margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+/* 技能类型色（仅供徽章使用） */
+.nk-skill[data-type="Normal"]   { --sk-accent: #CBD5E1; }
+.nk-skill[data-type="BPSkill"]  { --sk-accent: #60A5FA; }
+.nk-skill[data-type="Ultra"]    { --sk-accent: #FBBF24; }
+.nk-skill[data-type="Passive"]  { --sk-accent: #2DD4BF; }
+.nk-skill[data-type="Maze"]     { --sk-accent: #F472B6; }
+.nk-skill[data-type="Servant"]  { --sk-accent: #A78BFA; }
+.nk-skill[data-type="ServantPassive"] { --sk-accent: #67E8F9; }
 .nk-skill:hover { border-color: var(--border2); }
-.nk-skill__head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-.nk-skill__icon { width: 48px; height: 48px; border-radius: 10px; border: 1px solid var(--border2); box-shadow: 0 0 12px var(--primary-glow); }
-.nk-skill__name { font-weight: 700; font-size: 1rem; }
-.nk-skill__type { font-size: 0.75rem; font-weight: 600; color: var(--primary); margin-top: 2px; }
-.nk-skill__tag { font-size: 0.5625rem; color: var(--text3); margin-left: 8px; font-weight: 400; padding: 1px 7px; border-radius: 4px; background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.15); vertical-align: middle; }
-.nk-skill__desc { font-size: 0.8125rem; line-height: 1.8; color: var(--text2); }
+/* 头部：类型色点 + 等级滑条共用一行 */
+.nk-skill__head {
+  display: flex; align-items: center; gap: 12px;
+  padding-bottom: 10px; margin-bottom: 12px;
+  border-bottom: 1px solid rgba(124,58,237,0.1);
+}
+.nk-skill__icon {
+  width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
+  border: 1px solid var(--border2); box-shadow: 0 0 12px var(--primary-glow);
+}
+.nk-skill__title-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.nk-skill__title { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.nk-skill__type-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  background: var(--sk-accent); opacity: 0.85;
+}
+.nk-skill__meta { display: flex; align-items: center; gap: 6px; }
+.nk-skill__type {
+  font-size: 0.625rem; font-weight: 700; letter-spacing: 0.03em;
+  color: var(--sk-accent); padding: 1px 7px; border-radius: 4px;
+  background: color-mix(in srgb, var(--sk-accent) 9%, transparent);
+}
+
+.nk-skill__name { font-weight: 600; font-size: 0.875rem; letter-spacing: 0.01em; line-height: 1.3; color: var(--text); }
+.nk-skill__tag {
+  font-size: 0.625rem; color: var(--text3); font-weight: 600; padding: 1px 7px;
+  border-radius: 4px; background: rgba(148,163,184,0.1); letter-spacing: 0.03em;
+}
+/* 等级滑条（头部行内，填满剩余宽度） */
+.nk-skill__slider {
+  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+}
+.nk-skill__slider input[type=range] {
+  --fill: 0%;
+  flex: 1; width: auto; height: 18px; -webkit-appearance: none; appearance: none; outline: none;
+  background: transparent; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
+}
+.nk-skill__slider input[type=range]:hover { opacity: 1; }
+.nk-skill__slider input[type=range]:disabled { opacity: 0.35; cursor: default; }
+.nk-skill__slider input[type=range]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, rgba(0,0,0,0.45) 2px 3px),
+    linear-gradient(90deg, rgba(124,58,237,0.3) var(--fill), rgba(148,163,184,0.08) var(--fill));
+}
+.nk-skill__slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 10px; height: 14px; margin-top: -4px;
+  border-radius: 2px; border: none; background: transparent; cursor: pointer;
+  box-shadow: inset 3.5px 0 0 0 rgba(226,232,240,0.55);
+}
+.nk-skill__slider input[type=range]::-moz-range-track {
+  height: 6px; border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, rgba(0,0,0,0.45) 2px 3px),
+    linear-gradient(90deg, rgba(124,58,237,0.3) var(--fill), rgba(148,163,184,0.08) var(--fill));
+}
+.nk-skill__slider input[type=range]::-moz-range-thumb {
+  width: 10px; height: 14px; border-radius: 2px; border: none; background: transparent; cursor: pointer;
+  box-shadow: inset 3.5px 0 0 0 rgba(226,232,240,0.55);
+}
+.nk-slider__val { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--primary); font-weight: 700; white-space: nowrap; }
+/* 内容区 */
+.nk-skill__body { }
+.nk-skill__desc { font-size: 0.8125rem; line-height: 1.85; color: var(--text2); }
 .nk-skill__desc .hl { color: var(--highlight); font-weight: 700; }
 .nk-skill__desc u { text-decoration: underline; text-decoration-color: rgba(203,213,225,0.5); text-underline-offset: 3px; color: #cbd5e1; }
-.nk-skill__metrics { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.nk-skill__metric { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; font-size: 0.6875rem; border-radius: 6px; background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.12); }
-.nk-skill__metric dt { display: inline; margin: 0; font-family: var(--font-hud); line-height: 1; font-size: 0.5625rem; color: var(--text3); letter-spacing: 0.04em; text-transform: uppercase; }
-.nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; line-height: 1; color: var(--metric-val); text-shadow: 0 0 8px rgba(196,181,253,0.2); }
-.nk-skill__head .nk-slider { margin-left: 10px; display: flex; align-items: center; gap: 8px; }
-.nk-slider input[type=range] { width: 90px; height: 3px; -webkit-appearance: none; background: rgba(124,58,237,0.2); border-radius: 2px; outline: none; }
-.nk-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); cursor: pointer; box-shadow: 0 0 6px var(--primary-glow); }
-.nk-slider__val { font-family: var(--font-hud); font-size: 0.625rem; color: var(--primary); font-weight: 700; white-space: nowrap; }
-.nk-skill__terms { margin-top: 12px; padding: 10px 14px; background: rgba(10,10,30,0.5); border-radius: 8px; border: 1px solid rgba(124,58,237,0.1); }
-.nk-term { font-size: 0.75rem; line-height: 1.7; color: var(--text2); }
+.nk-skill__metrics { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 12px; }
+.nk-skill__metric { display: inline-flex; align-items: baseline; gap: 6px; font-size: 0.75rem; }
+.nk-skill__metric + .nk-skill__metric::before { content: '·'; margin: 0 10px; color: var(--text3); opacity: 0.4; }
+.nk-skill__metric dt { display: inline; margin: 0; font-size: 0.6875rem; color: var(--text3); }
+.nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); }
+.nk-skill__terms {
+  margin-top: 14px; padding: 12px 16px; background: rgba(10,10,30,0.5); border-radius: 9px;
+  border: 1px solid rgba(124,58,237,0.1);
+}
+.nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
 .nk-term__name { color: var(--highlight); font-weight: 600; }
-.nk-skill__table-wrap { margin-top: 12px; }
-.nk-skill__table-btn { display: flex; align-items: center; gap: 6px; font-size: 0.6875rem; color: var(--text2); background: none; border: none; cursor: pointer; padding: 4px 0; transition: color 0.2s; }
+/* 数据表折叠（grid-rows 动画） */
+.nk-skill__table-wrap { margin-top: 14px; }
+.nk-skill__table-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.625rem; font-weight: 500; color: var(--text3);
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+  transition: color 0.2s; letter-spacing: 0.02em;
+}
 .nk-skill__table-btn:hover { color: var(--primary); }
-.nk-skill__table-btn .arrow { transition: transform 0.2s; display: inline-block; }
+.nk-skill__table-btn .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
 .nk-skill__table-btn.open .arrow { transform: rotate(90deg); }
-.nk-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-family: var(--font-hud); font-size: 0.625rem; text-align: center; display: none; }
-.nk-table.open { display: table; }
-.nk-table th { padding: 5px 8px; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 400; letter-spacing: 0.05em; }
-.nk-table td { padding: 4px 8px; color: var(--text2); border-bottom: 1px solid rgba(124,58,237,0.08); }
+.nk-table-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-table-clip.open { grid-template-rows: 1fr; }
+.nk-table-inner { overflow: hidden; min-height: 0; }
+.nk-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: var(--font-hud); font-size: 0.75rem; text-align: center; }
+.nk-table th { padding: 7px 10px; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 400; letter-spacing: 0.06em; }
+.nk-table td { padding: 6px 10px; color: var(--text2); border-bottom: 1px solid rgba(124,58,237,0.07); }
 .nk-table tr.nk-table--active td { color: var(--primary); font-weight: 700; background: var(--primary-glow); }
-.nk-skill--child { margin-top: 16px; padding: 14px 0 0; border: none; background: none; border-radius: 0; border-top: 1px dashed rgba(124,58,237,0.2); }
-.nk-skill--child .nk-skill__head { margin-bottom: 10px; gap: 10px; }
-.nk-skill--child .nk-skill__name { font-size: 0.875rem; }
+/* 子技能：父卡片内虚线分区（非嵌套卡片） */
+.nk-skill--child {
+  margin: 18px 0 0 22px; padding: 16px 0 0; border: none; background: none;
+  border-radius: 0; border-top: 1px dashed rgba(124,58,237,0.2);
+}
+.nk-skill--child:hover { border-color: transparent; border-top-color: rgba(124,58,237,0.35); }
+.nk-skill--child .nk-skill__title-row { gap: 12px; margin-bottom: 10px; }
 .nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
 .nk-skill--child .nk-skill__metrics { margin-top: 10px; }
-.nk-skill--child .nk-slider input[type=range] { width: 70px; }
 /* 阅读层收束：文本型卡片（技能/星魂/附加能力）+ 所属标题统一约束到可读行宽并居中；配装面板为 grid 布局，保持结构层全宽 */
 .nk-panel:not([data-panel="builds"]) .nk-title,
 .nk-panel .nk-skill,
@@ -139,7 +221,7 @@
 .nk-d-n { color: var(--diff-add) !important; font-weight: 700; }
 .nk-stat-box__val .nk-d-c, .nk-stat-box__val .nk-d-n { font-size: 1.15rem; }
 .nk-skill__metric dd .nk-d-c, .nk-skill__metric dd .nk-d-n { font-size: 0.625rem; font-weight: 700; }
-.nk-table td .nk-d-c, .nk-table td .nk-d-n { font-size: 0.625rem; }
+.nk-table td .nk-d-c, .nk-table td .nk-d-n { font-size: 0.6875rem; }
 /* ─── Loading ─── */
 .nk-loading { display: flex; align-items: center; justify-content: center; height: 100vh; color: var(--text3); font-family: var(--font-hud); font-size: 0.75rem; letter-spacing: 0.1em; }
 .nk-loading::after { content: ''; width: 24px; height: 24px; margin-left: 12px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: nk-spin 0.7s linear infinite; }
@@ -157,6 +239,10 @@
   .nk-tab { padding: 12px 16px; font-size: 0.75rem; }
   .nk-panel { padding: 24px 16px 60px; }
   .nk-stat-grid { grid-template-columns: repeat(2, 1fr); }
-  .nk-skill__sliders { grid-template-columns: 1fr; }
+  .nk-skill { padding: 18px 16px 16px; }
+  .nk-skill__icon { width: 44px; height: 44px; }
+  .nk-skill__head { flex-wrap: wrap; }
+  .nk-skill__slider { flex-basis: 100%; }
+  .nk-skill--child { margin-left: 10px; padding-top: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .nk-hero__bg { transition: none; } .nk-hero__spine { transition: none; } .nk-panel { animation: none; } }
