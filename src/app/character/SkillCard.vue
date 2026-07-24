@@ -204,27 +204,31 @@ const tableOpen = ref(false);
         <span class="arrow">▶</span> {{ tableOpen ? '收起数据表' : '技能数据表' }}
       </button>
       <table class="nk-table" :class="{ open: tableOpen }">
-        <tr>
-          <th>#</th>
-          <th v-for="c in table.cols" :key="c">{{ c }}</th>
-        </tr>
-        <tr
-          v-for="row in table.rows"
-          :key="row.lv"
-          :class="{ 'nk-table--active': row.lv === lv }"
-          :data-lv="row.lv"
-        >
-          <td>Lv.{{ row.lv }}</td>
-          <td v-for="(cell, i) in row.cells" :key="i">
-            <template v-if="cell.diff === 'changed'">
-              <span class="nk-d-c">{{ cell.ov }}</span><span class="nk-d-n">{{ cell.nv }}</span>
-            </template>
-            <template v-else-if="cell.diff === 'old-only'">
-              <span class="nk-d-c">{{ cell.ov }}</span>
-            </template>
-            <template v-else>{{ cell.nv }}</template>
-          </td>
-        </tr>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th v-for="c in table.cols" :key="c">{{ c }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="row in table.rows"
+            :key="row.lv"
+            :class="{ 'nk-table--active': row.lv === lv }"
+            :data-lv="row.lv"
+          >
+            <td>Lv.{{ row.lv }}</td>
+            <td v-for="(cell, i) in row.cells" :key="i">
+              <template v-if="cell.diff === 'changed'">
+                <span class="nk-d-c">{{ cell.ov }}</span><span class="nk-d-n">{{ cell.nv }}</span>
+              </template>
+              <template v-else-if="cell.diff === 'old-only'">
+                <span class="nk-d-c">{{ cell.ov }}</span>
+              </template>
+              <template v-else>{{ cell.nv }}</template>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
     <!-- 子技能（同 type+type_name 分组的后续项，嵌套在父卡片内） -->
