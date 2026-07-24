@@ -319,7 +319,9 @@ describe('URL 构建', () => {
     const d = baseChar();
     d.memosprite = { icon: 'SpriteOutput/ServantIconTeam/11415B.png' };
     expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11415_Servant.webp`);
-    expect(skillIconUrl(sk({ type: 'Assist' }), '1005', null)).toBe('');
+    expect(skillIconUrl(sk({ type: 'Assist', type_name: '' }), '1005', null)).toBe('');
+    // type 为 null 的天赋技能回退 type_name 反查
+    expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1508_Passive.webp`);
   });
   it('eidolonIconUrl / avatarDrawCardUrl', () => {
     expect(eidolonIconUrl('1005', 1)).toBe(`${CDN}/assets/hsr/rank/_dependencies/textures/1005/1005_Rank_1.webp`);

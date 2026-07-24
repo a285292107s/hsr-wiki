@@ -35,6 +35,14 @@ export const TAG: Record<string, string> = {
 export const SKILL_ICON_KEY: Record<string, string> = {
   Normal: 'Normal', BPSkill: 'BP', Ultra: 'Ultra',
   Passive: 'Passive', Maze: 'Maze', Servant: 'Servant',
+  ServantPassive: 'ServantPassive',
+};
+
+/** type_name → 图标键反查（部分角色天赋技能 type 为 null，仅有 type_name） */
+export const SKILL_ICON_KEY_BY_NAME: Record<string, string> = {
+  '普攻': 'Normal', '战技': 'BP', '终结技': 'Ultra',
+  '天赋': 'Passive', '秘技': 'Maze', '忆灵技': 'Servant',
+  '忆灵天赋': 'ServantPassive',
 };
 
 /** 韧性条标签（show_stance_list 下标对应） */

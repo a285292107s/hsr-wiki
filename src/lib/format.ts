@@ -2,7 +2,7 @@
  * 纯函数工具：格式化 / Diff / URL 构建 / 数据校验
  * 全部无状态（显式传参），可被 Vitest 直接覆盖。
  */
-import { CDN, MAX_CHAR_LEVEL, SKILL_ICON_KEY, STANCE_LABEL, TAG } from './constants';
+import { CDN, MAX_CHAR_LEVEL, SKILL_ICON_KEY, SKILL_ICON_KEY_BY_NAME, STANCE_LABEL, TAG } from './constants';
 import { NkError } from './errors';
 import type { CharacterData, CharStats, ItemDb, NameCache, Skill } from '../services/types';
 
@@ -279,9 +279,9 @@ export function memospriteId(charId: string, data: CharacterData | null): string
 }
 
 export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | null): string {
-  const key = SKILL_ICON_KEY[sk.type];
+  const key = SKILL_ICON_KEY[sk.type] || (sk.type_name && SKILL_ICON_KEY_BY_NAME[sk.type_name]) || '';
   if (!key || !charId) return '';
-  const id = sk.type === 'Servant' ? memospriteId(charId, data) : charId;
+  const id = (key === 'Servant' || key === 'ServantPassive') ? memospriteId(charId, data) : charId;
   if (!id) return '';
   return `${CDN}/assets/hsr/skillicons/SkillIcon_${id}_${key}.webp`;
 }
