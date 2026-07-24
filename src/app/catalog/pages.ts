@@ -1,6 +1,6 @@
 /**
  * 目录页配置注册表（迁移自 catalog.js 的 registerCatalogPage 调用）
- * 7 个页面：角色（专用抓取 + 筛选）/ 光锥 / 遗器 / 物品（CDN）/ 敌对 / 末日赛季 / 货币战争
+ * 7 个页面：角色（专用抓取 + 筛选）/ 光锥 / 遗器 / 物品（CDN）/ 敌对 / 终局赛季 / 货币战争
  */
 import { PATH } from '../../lib/constants';
 import { escHtml, itemIconUrl } from '../../lib/format';
@@ -317,11 +317,11 @@ const monsterPage: CatalogPageConfig = {
   },
 };
 
-/* ─── 末日内容（赛季行） ─── */
+/* ─── 终局内容（赛季行） ─── */
 
 const mazePage: CatalogPageConfig = {
   id: 'maze',
-  title: '末日内容',
+  title: '终局内容',
   dataSource: 'dom',
   cardSelector: 'a.ui-season-row',
   cardValidator: (el) => /\/maze\/\d+/.test(el.getAttribute('href') || ''),

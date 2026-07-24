@@ -170,7 +170,7 @@
 .nk-item-card__meta { display: block; font-size: 0.56rem; color: var(--text3); margin-top: 2px; }
 
 /* ═══════════════════════════════════════════
-   末日内容赛季列表（行式排版，顺应时间序列数据形态）
+   终局内容赛季列表（行式排版，顺应时间序列数据形态）
 ═══════════════════════════════════════════ */
 .nk-season-grid { grid-template-columns: 1fr; gap: 10px; }
 .nk-season-card { position: relative; background: var(--card); border: 1px solid rgba(124,58,237,0.2); border-radius: 10px; padding: 14px 20px 14px 24px; cursor: pointer; text-decoration: none; display: grid; grid-template-columns: 88px 1fr auto auto; align-items: center; gap: 18px; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s, background 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 14ms), 600ms); overflow: hidden; }
