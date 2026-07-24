@@ -83,7 +83,12 @@ async function load(): Promise<void> {
     /* 版本为空 → cdn 拉取将在下方报错 */
   }
   try {
-    if (props.config.dataSource === 'cdn') {
+    // standalone 模式无宿主 DOM 可抓：配置了 fetchData 的 dom 页面改走 CDN 列表端点；
+    // userscript 模式保持原有 DOM 抓取行为不变（生产交付物）
+    const useCdn =
+      props.config.dataSource === 'cdn' ||
+      (platform().mode === 'standalone' && !!props.config.fetchData);
+    if (useCdn) {
       if (!props.config.fetchData) throw new Error('配置缺少 fetchData');
       items.value = await props.config.fetchData({ version: app.version });
     } else {

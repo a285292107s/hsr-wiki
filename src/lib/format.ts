@@ -310,6 +310,41 @@ export function itemIconUrl(iconPath: string | null | undefined): string {
   return `${CDN}/assets/hsr/itemfigures/${m[1]}.webp`;
 }
 
+/* ─── 目录页图标 URL（standalone CDN 数据源，复现宿主卡片图片规律） ─── */
+
+/** 角色头像：avatarshopicon/{charId}.webp */
+export function avatarShopIconUrl(charId: string | number): string {
+  return charId ? `${CDN}/assets/hsr/avatarshopicon/${charId}.webp` : '';
+}
+
+/** 属性图标：element/{damageType 小写}.webp */
+export function elementIconUrl(damageType: string | null | undefined): string {
+  return damageType ? `${CDN}/assets/hsr/element/${damageType.toLowerCase()}.webp` : '';
+}
+
+/** 命途图标：pathicon/{baseType 小写}.webp */
+export function pathIconUrl(baseType: string | null | undefined): string {
+  return baseType ? `${CDN}/assets/hsr/pathicon/${baseType.toLowerCase()}.webp` : '';
+}
+
+/** 光锥立绘：lightconemediumicon/{id}.webp */
+export function lightconeIconUrl(id: string | number): string {
+  return id ? `${CDN}/assets/hsr/lightconemediumicon/${id}.webp` : '';
+}
+
+/** 敌对图像：monstermiddleicon/{basename}.webp（从 SpriteOutput/MonsterFigure/Monster_xxx.png 取末段去扩展名） */
+export function monsterIconUrl(iconPath: string | null | undefined): string {
+  if (!iconPath) return '';
+  const base = iconPath.split('/').pop()?.replace(/\.png$/i, '') || '';
+  return base ? `${CDN}/assets/hsr/monstermiddleicon/${base}.webp` : '';
+}
+
+/** 从 rank 字符串解析稀有度数字（CombatPowerAvatarRarityType4 → 4，无法解析回退 5） */
+export function parseRarity(rank: string | null | undefined): number {
+  const m = (rank || '').match(/(\d+)\s*$/);
+  return m ? Number(m[1]) : 5;
+}
+
 /* ─── 数据校验 ─── */
 
 /** 角色数据完整性校验（fail-fast，避免渲染时抛出不可读的 TypeError） */

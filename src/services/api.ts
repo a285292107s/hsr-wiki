@@ -6,6 +6,7 @@ import { CDN } from '../lib/constants';
 import { CACHE_TTL, cachedFetch, cacheHas, memStore, purgeStaleVersions } from './cache';
 import type {
   Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest,
+  CharListDb, LightconeListDb, RelicsetListDb, MonsterListDb, MazeListDb, MazeVersionMap,
 } from './types';
 
 /* ─── manifest ─── */
@@ -36,6 +37,33 @@ export function loadCharacter(ver: string, charId: string): Promise<CharacterDat
 
 export function loadItems(ver: string): Promise<ItemDb> {
   return cachedFetch<ItemDb>(`${CDN}/hsr/${ver}/zh/item.json`, `item_${ver}`, CACHE_TTL.data);
+}
+
+/* ─── 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
+
+export function loadCharacterList(ver: string): Promise<CharListDb> {
+  return cachedFetch<CharListDb>(`${CDN}/hsr/${ver}/character.json`, `charlist_${ver}`, CACHE_TTL.data);
+}
+
+export function loadLightconeList(ver: string): Promise<LightconeListDb> {
+  return cachedFetch<LightconeListDb>(`${CDN}/hsr/${ver}/lightcone.json`, `lclist_${ver}`, CACHE_TTL.data);
+}
+
+export function loadRelicsetList(ver: string): Promise<RelicsetListDb> {
+  return cachedFetch<RelicsetListDb>(`${CDN}/hsr/${ver}/relicset.json`, `relicsetlist_${ver}`, CACHE_TTL.data);
+}
+
+export function loadMonsterList(ver: string): Promise<MonsterListDb> {
+  return cachedFetch<MonsterListDb>(`${CDN}/hsr/${ver}/monster.json`, `monsterlist_${ver}`, CACHE_TTL.data);
+}
+
+export function loadMazeList(ver: string): Promise<MazeListDb> {
+  return cachedFetch<MazeListDb>(`${CDN}/hsr/${ver}/maze.json`, `mazelist_${ver}`, CACHE_TTL.data);
+}
+
+/** 赛季版本映射（version → 赛季 ID 列表；此端点带 /zh/ 路径段） */
+export function loadMazeVersions(ver: string): Promise<MazeVersionMap> {
+  return cachedFetch<MazeVersionMap>(`${CDN}/hsr/${ver}/zh/maze/version.json`, `mazever_${ver}`, CACHE_TTL.data);
 }
 
 /* ─── 遗器套装 ─── */

@@ -214,3 +214,86 @@ export interface RelicSetData {
 
 /** charId → spine 资源名（多段以 | 分隔，如 "bg|tibao1|tibao2"，解析时跳过 bg） */
 export type SpineManifest = Record<string, string>;
+
+/* ─── 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
+
+/** character.json 条目（键 = 角色 ID） */
+export interface CharListEntry {
+  /** 实装时间戳（未实装角色缺省） */
+  release?: number;
+  icon?: string;
+  /** 稀有度（CombatPowerAvatarRarityType4/5） */
+  rank?: string;
+  /** 命途（Knight/Mage/...） */
+  baseType?: string;
+  /** 属性（Ice/Quantum/...） */
+  damageType?: string;
+  en?: string;
+  zh?: string;
+  ja?: string;
+  ko?: string;
+  enhance?: unknown[];
+  desc?: string;
+}
+export type CharListDb = Record<string, CharListEntry>;
+
+/** lightcone.json 条目（键 = 光锥 ID） */
+export interface LightconeListEntry {
+  /** 稀有度（CombatPowerLightconeRarity3/4/5） */
+  rank?: string;
+  /** 命途（Rogue/Mage/...） */
+  baseType?: string;
+  atk?: number;
+  en?: string;
+  zh?: string;
+  ja?: string;
+  ko?: string;
+  desc?: string | null;
+}
+export type LightconeListDb = Record<string, LightconeListEntry>;
+
+/** relicset.json 条目（键 = 遗器套装 ID） */
+export interface RelicsetListEntry {
+  /** 图标路径（SpriteOutput/ItemIcon/71000.png → itemfigures/71000.webp） */
+  icon?: string;
+  en?: string;
+  zh?: string;
+  ja?: string;
+  ko?: string;
+  set?: Record<string, unknown>;
+}
+export type RelicsetListDb = Record<string, RelicsetListEntry>;
+
+/** monster.json 条目（键 = 敌对 ID） */
+export interface MonsterListEntry {
+  rank?: string;
+  camp?: string | null;
+  /** 图标路径（SpriteOutput/MonsterFigure/Monster_1002011.png → monstermiddleicon/Monster_1002011.webp） */
+  icon?: string;
+  child?: (number | string)[];
+  weak?: string[];
+  en?: string;
+  zh?: string;
+  ja?: string;
+  ko?: string;
+  desc?: string;
+}
+export type MonsterListDb = Record<string, MonsterListEntry>;
+
+/** maze.json 条目（键 = 赛季 ID） */
+export interface MazeListEntry {
+  param?: number[];
+  id?: string;
+  begin?: string;
+  end?: string;
+  live_begin?: string;
+  live_end?: string;
+  en?: string;
+  zh?: string;
+  ja?: string;
+  ko?: string;
+}
+export type MazeListDb = Record<string, MazeListEntry>;
+
+/** zh/maze/version.json：版本 → 赛季 ID 列表（键按版本降序） */
+export type MazeVersionMap = Record<string, (number | string)[]>;

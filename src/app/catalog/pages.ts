@@ -2,10 +2,17 @@
  * 目录页配置注册表（迁移自 catalog.js 的 registerCatalogPage 调用）
  * 7 个页面：角色（专用抓取 + 筛选）/ 光锥 / 遗器 / 物品（CDN）/ 敌对 / 终局赛季 / 货币战争
  */
-import { PATH } from '../../lib/constants';
-import { escHtml, itemIconUrl } from '../../lib/format';
-import { loadItems } from '../../services/api';
+import { CDN, PATH } from '../../lib/constants';
+import {
+  escHtml, itemIconUrl, avatarShopIconUrl, elementIconUrl, pathIconUrl,
+  lightconeIconUrl, monsterIconUrl, parseRarity,
+} from '../../lib/format';
+import {
+  loadItems, loadCharacterList, loadLightconeList, loadRelicsetList,
+  loadMonsterList, loadMazeList, loadMazeVersions,
+} from '../../services/api';
 import type { CatalogItem, CatalogPageConfig } from './types';
+import type { MazeListEntry } from '../../services/types';
 
 /** 宿主属性图标 URL 键（小写） → 中文名 */
 const ELEM_NAMES: Record<string, string> = {
@@ -60,6 +67,35 @@ const characterPage: CatalogPageConfig = {
       path,
       rarity,
     };
+  },
+  async fetchData(ctx) {
+    const db = await loadCharacterList(ctx.version);
+    const items: CatalogItem[] = [];
+    for (const [id, info] of Object.entries(db)) {
+      if (!info.zh) continue;
+      const element = (info.damageType || '').toLowerCase();
+      const path = (info.baseType || '').toLowerCase();
+      items.push({
+        id,
+        name: info.zh,
+        href: `/character/${id}`,
+        avatar: avatarShopIconUrl(id),
+        elemImg: elementIconUrl(element),
+        pathImg: pathIconUrl(path),
+        element,
+        path,
+        rarity: parseRarity(info.rank),
+        release: info.release,
+      });
+    }
+    // 对齐宿主排序：未实装（无 release）在前，其余按 release 降序，同值按 id 升序
+    items.sort((a, b) => {
+      const ra = (a.release as number | undefined) ?? Infinity;
+      const rb = (b.release as number | undefined) ?? Infinity;
+      if (ra !== rb) return rb - ra;
+      return Number(a.id) - Number(b.id);
+    });
+    return items;
   },
   buildFilters(data) {
     const pathIconMap: Record<string, string> = {};
@@ -142,6 +178,26 @@ const lightconePage: CatalogPageConfig = {
       rarity,
     };
   },
+  async fetchData(ctx) {
+    const db = await loadLightconeList(ctx.version);
+    const items: CatalogItem[] = [];
+    for (const [id, info] of Object.entries(db)) {
+      if (!info.zh) continue;
+      const path = (info.baseType || '').toLowerCase();
+      items.push({
+        id,
+        name: info.zh,
+        href: `/lightcone/${id}`,
+        img: lightconeIconUrl(id),
+        pathImg: pathIconUrl(path),
+        path,
+        rarity: parseRarity(info.rank),
+      });
+    }
+    // 对齐宿主排序：id 降序（新光锥在前）
+    items.sort((a, b) => Number(b.id) - Number(a.id));
+    return items;
+  },
   buildFilters(data) {
     const pathIconMap: Record<string, string> = {};
     data.forEach((c) => {
@@ -202,6 +258,20 @@ const relicPage: CatalogPageConfig = {
       href: card.getAttribute('href') || '#',
       img: img ? (img as HTMLImageElement).src : '',
     };
+  },
+  async fetchData(ctx) {
+    const db = await loadRelicsetList(ctx.version);
+    const items: CatalogItem[] = [];
+    for (const [id, info] of Object.entries(db)) {
+      if (!info.zh) continue;
+      items.push({
+        id,
+        name: info.zh,
+        href: `/relic/${id}`,
+        img: itemIconUrl(info.icon),
+      });
+    }
+    return items;
   },
   filters: [],
   renderCard(item, i) {
@@ -304,6 +374,20 @@ const monsterPage: CatalogPageConfig = {
       img: img ? (img as HTMLImageElement).src : '',
     };
   },
+  async fetchData(ctx) {
+    const db = await loadMonsterList(ctx.version);
+    const items: CatalogItem[] = [];
+    for (const [id, info] of Object.entries(db)) {
+      if (!info.zh) continue;
+      items.push({
+        id,
+        name: info.zh,
+        href: `/monster/${id}`,
+        img: monsterIconUrl(info.icon),
+      });
+    }
+    return items;
+  },
   filters: [],
   renderCard(item, i) {
     return `<a class="nk-mob-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" style="--i:${i}">
@@ -318,6 +402,22 @@ const monsterPage: CatalogPageConfig = {
 };
 
 /* ─── 终局内容（赛季行） ─── */
+
+/** 赛季状态：依据 begin/end 日期推导；无日期信息时返回“未知”（与宿主一致） */
+function mazeStatus(info: MazeListEntry): string {
+  const parse = (s: string | undefined): number | null => {
+    if (!s) return null;
+    const t = new Date(s).getTime();
+    return Number.isNaN(t) ? null : t;
+  };
+  const start = parse(info.live_begin) ?? parse(info.begin);
+  const end = parse(info.live_end) ?? parse(info.end);
+  const now = Date.now();
+  if (start != null && now < start) return '未开始';
+  if (end != null && now > end) return '已结束';
+  if (start != null || end != null) return '进行中';
+  return '未知';
+}
 
 const mazePage: CatalogPageConfig = {
   id: 'maze',
@@ -340,6 +440,29 @@ const mazePage: CatalogPageConfig = {
       version: labelEl ? (labelEl.textContent || '').trim() : '',
       status: statusEl ? (statusEl.textContent || '').trim() : '',
     };
+  },
+  async fetchData(ctx) {
+    const [db, verMap] = await Promise.all([loadMazeList(ctx.version), loadMazeVersions(ctx.version)]);
+    const seen = new Set<string>();
+    const items: CatalogItem[] = [];
+    // version.json 键按版本降序；同一赛季取最近归属版本，输出对齐宿主“ID/标题/版本/状态”结构
+    for (const [ver, ids] of Object.entries(verMap)) {
+      (ids || []).forEach((mid, idx) => {
+        const key = String(mid);
+        if (seen.has(key)) return;
+        seen.add(key);
+        const info = db[key];
+        if (!info || !info.zh) return;
+        items.push({
+          id: `ID ${key}`,
+          name: info.zh,
+          href: `/maze/${key}`,
+          version: `${ver} v${idx + 1}`,
+          status: mazeStatus(info),
+        });
+      });
+    }
+    return items;
   },
   filters: [],
   renderCard(item, i) {
@@ -372,6 +495,16 @@ const currencyPage: CatalogPageConfig = {
       href: card.getAttribute('href') || '#',
       img: img ? (img as HTMLImageElement).src : '',
     };
+  },
+  async fetchData() {
+    // 无 CDN 列表端点；宿主为 5 张静态卡片（此处与宿主硬编码数据保持一致）
+    return [
+      { name: '角色图鉴', href: '/currency/role', img: `${CDN}/assets/hsr/avatarroundicon/1001.webp` },
+      { name: '装备图鉴', href: '/currency/item', img: `${CDN}/assets/hsr/gridfight/equipment/350101.webp` },
+      { name: '投资环境图鉴', href: '/currency/buff', img: `${CDN}/assets/hsr/gridfight/portal/101.webp` },
+      { name: '投资策略图鉴', href: '/currency/augment', img: `${CDN}/assets/hsr/gridfight/augmentbig/100101.webp` },
+      { name: '羁绊图鉴', href: '/currency/trait', img: `${CDN}/assets/hsr/gridfight/icon/1001.webp` },
+    ];
   },
   filters: [],
   renderCard(item, i) {
