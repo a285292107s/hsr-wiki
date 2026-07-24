@@ -1,0 +1,233 @@
+/* ═══════════════════════════════════════════
+   Gaming HUD 设计系统 · 设计令牌 + 全局组件
+   迁移自 要迁移的代码/css/02-css-tokens.js
+   - :root → :host（Shadow Root 隔离）
+   - 移除宿主 DOM 覆盖规则（新架构由 failsafe 离屏隐藏宿主）
+   - #nk-app 重定义为挂载容器；角色页滚动容器拆分至 .nk-page--detail
+   - 页面过渡/Toast 改写为 Vue Transition 类名
+═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+
+:host {
+  --bg: #0F0F23;
+  --surface: rgba(15,15,35,0.85);
+  --card: rgba(20,20,45,0.7);
+  --primary: #7C3AED;
+  --primary-glow: rgba(124,58,237,0.25);
+  --accent: #F43F5E;
+  --gold: #FBBF24;
+  --text: #E2E8F0;
+  --text2: #94A3B8;
+  --text-bright: #FFFFFF;
+  --text3: #7C8DA6;
+  --border: rgba(124,58,237,0.2);
+  --border2: rgba(124,58,237,0.4);
+  --highlight: #f29e38;
+  --metric-val: #C4B5FD;
+  --diff-add: #34D399;
+  --diff-del: #F87171;
+  --diff-text: #60A5FA;
+  --badge-test: #F59E0B;
+  --font-hud: 'Orbitron', monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+  /* 布局宽度令牌：页面内容统一边界 / 正文可读行宽 */
+  --nk-content-max: 1440px;
+  --nk-detail-max: 1080px;
+  --nk-prose-max: 820px;
+  /* 动画时序令牌 */
+  --nk-dur-fast: 150ms;
+  --nk-dur-normal: 300ms;
+  --nk-dur-slow: 500ms;
+  --nk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --nk-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --nk-stagger: 40ms;
+  --nk-radius-card: 10px;
+}
+
+/* ─── 侧边栏（自建组件，Shadow DOM 内，玻璃胶囊形态） ─── */
+.ui-sidebar { position: fixed; display: flex; flex-direction: column; align-items: center; gap: 6px; background: rgba(16,14,36,0.72) !important; border-right: none !important; backdrop-filter: blur(20px) saturate(1.4) !important; -webkit-backdrop-filter: blur(20px) saturate(1.4) !important; width: 72px !important; padding: 14px 8px !important; z-index: 10000 !important; height: fit-content !important; top: 50% !important; bottom: auto !important; transform: translateY(-50%); left: 8px; border-radius: 22px !important; border: 1px solid rgba(124,58,237,0.3) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(124,58,237,0.08), inset 0 1px 0 rgba(255,255,255,0.06); }
+.ui-sidebar__brand { margin-bottom: 12px; }
+.ui-sidebar-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px !important; transition: all 0.2s !important; opacity: 0.6; color: var(--text2); }
+.ui-sidebar-link__icon { display: flex; }
+.ui-sidebar-link__icon svg { width: 20px; height: 20px; }
+.ui-sidebar-link:hover { opacity: 1; background: rgba(124,58,237,0.1) !important; }
+.ui-sidebar-link--active { opacity: 1; background: rgba(124,58,237,0.35) !important; border: 1px solid rgba(124,58,237,0.45) !important; box-shadow: 0 0 14px rgba(124,58,237,0.25); }
+
+/* ─── 挂载容器（platform.mount 创建的 #nk-app） ─── */
+#nk-app { position: fixed; inset: 0; z-index: 9999; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+#nk-app h1, #nk-app h2, #nk-app h3, #nk-app p, #nk-app dl, #nk-app dt, #nk-app dd { margin: 0; padding: 0; }
+#nk-app * { box-sizing: border-box; }
+/* Tailwind preflight 隔离：恢复被 reset 的关键默认样式 */
+#nk-app button { font: inherit; color: inherit; cursor: pointer; }
+#nk-app img { display: inline-block; vertical-align: middle; }
+#nk-app a { color: inherit; text-decoration: none; }
+
+/* ─── 角色详情页滚动容器（CharacterView 根元素） ─── */
+.nk-page--detail { position: absolute; inset: 0; left: 88px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; transition: opacity var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out); }
+
+/* 图片加载失败占位符 */
+.nk-img-error { background: rgba(124,58,237,0.06); border: 1px dashed var(--border); object-fit: contain; }
+
+/* ─── Hero: 全屏视差立绘 ─── */
+@property --spine-inner { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --spine-outer { syntax: '<percentage>'; inherits: false; initial-value: 1%; }
+.nk-hero { position: relative; height: 70vh; min-height: 400px; flex-shrink: 0; overflow: hidden; width: 100%; max-width: var(--nk-content-max); margin: 0 auto; border-radius: 0 0 12px 12px; }
+.nk-hero__bg { position: absolute; inset: 0; background-size: cover; background-position: top center; transition: opacity 0.4s ease 0.4s; }
+.nk-hero__bg.nk-dim { opacity: 0.15; transition: opacity 0.8s ease; }
+.nk-hero__spine { position: absolute; inset: 0; z-index: 1; opacity: 0; --spine-inner: 0%; --spine-outer: 1%; -webkit-mask-image: radial-gradient(circle at 50% 45%, black var(--spine-inner), transparent var(--spine-outer)); mask-image: radial-gradient(circle at 50% 45%, black var(--spine-inner), transparent var(--spine-outer)); transition: --spine-inner 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), --spine-outer 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease; }
+.nk-hero__spine.nk-ready { --spine-inner: 55%; --spine-outer: 75%; opacity: 1; transition: --spine-inner 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), --spine-outer 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease; }
+.nk-hero__spine canvas { width: 100%; height: 100%; display: block; }
+.nk-hero__toggle { position: absolute; top: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 16px; background: rgba(15,15,35,0.6); border: 1px solid var(--border); backdrop-filter: blur(8px); cursor: pointer; font-size: 0.625rem; color: var(--text2); transition: all 0.2s; user-select: none; }
+.nk-hero__toggle:hover { border-color: var(--border2); color: var(--text); }
+.nk-hero__toggle .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 6px var(--primary-glow); transition: all 0.2s; }
+.nk-hero__toggle.off .dot { background: var(--text3); box-shadow: none; }
+.nk-hero__toggle:not(.has-anim) { opacity: 0.35; cursor: default; }
+.nk-hero__toggle:not(.has-anim) .dot { background: var(--text3); box-shadow: none; }
+.nk-hero__scrim { position: absolute; inset: 0; z-index: 2; background: linear-gradient(to top, var(--bg) 0%, rgba(15,15,35,0.4) 40%, rgba(15,15,35,0.1) 100%); }
+.nk-hero__content { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px 32px; z-index: 3; }
+.nk-hero__name { font-size: 2rem; font-weight: 900; letter-spacing: -0.02em; text-shadow: 0 0 30px var(--primary-glow), 0 4px 20px rgba(0,0,0,0.5); }
+.nk-hero__stars { color: var(--gold); font-size: 1.2rem; margin: 8px 0; text-shadow: 0 0 10px rgba(251,191,36,0.4); }
+.nk-hero__tags { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.nk-hero__tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; background: rgba(124,58,237,0.1); border: 1px solid var(--border); font-size: 0.75rem; color: var(--text2); backdrop-filter: blur(8px); }
+.nk-hero__tag img { width: 16px; height: 16px; border-radius: 50%; }
+.nk-hero__stats { display: flex; gap: 24px; margin-top: 14px; }
+.nk-hero__stat { text-align: center; min-width: 48px; }
+.nk-hero__stat-val { font-family: var(--font-hud); font-size: 1.15rem; font-weight: 700; color: var(--text-bright); text-shadow: 0 0 16px var(--primary-glow), 0 2px 4px rgba(0,0,0,0.3); letter-spacing: 0.02em; }
+.nk-hero__stat-label { font-size: 0.6rem; color: var(--text2); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; opacity: 0.8; }
+
+/* ─── Tab 导航（吸顶） ─── */
+.nk-tabs { display: flex; gap: 0; padding: 0 40px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg); position: sticky; top: 0; z-index: 10; justify-content: space-between; align-items: center; }
+.nk-tabs__left { display: flex; }
+.nk-tab { padding: 14px 24px; font-size: 0.8125rem; font-weight: 600; color: var(--text3); cursor: pointer; border: none; background: none; position: relative; transition: color 0.2s; letter-spacing: 0.02em; }
+.nk-tab:hover { color: var(--text2); }
+.nk-tab--active { color: var(--primary); }
+.nk-tab--active::after { content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); border-radius: 1px; }
+
+/* ─── Tab 内容区 ─── */
+.nk-panels { flex: 1; overflow: visible; }
+.nk-panels::-webkit-scrollbar { width: 4px; }
+.nk-panels::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.nk-panel { display: none; max-width: var(--nk-detail-max); margin: 0 auto; padding: 32px 40px 80px; animation: nk-fade 0.3s var(--ease); }
+.nk-panel--active { display: block; }
+@keyframes nk-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── 通用组件 ─── */
+.nk-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; transition: border-color 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+.nk-card:hover { border-color: var(--border2); box-shadow: 0 0 20px rgba(124,58,237,0.08); }
+.nk-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(124,58,237,0.04), transparent); transition: left 0.5s; }
+.nk-card:hover::before { left: 150%; }
+.nk-title { font-family: var(--font-hud); font-size: 0.6875rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+
+/* ═══════════════════════════════════════════
+   页面切换过渡（Vue Transition 类名，方向由 navDir 决定）
+═══════════════════════════════════════════ */
+.nk-view-fwd-enter-from { opacity: 0; transform: translateX(24px); }
+.nk-view-fwd-leave-to { opacity: 0; transform: translateX(-24px); }
+.nk-view-back-enter-from { opacity: 0; transform: translateX(-24px); }
+.nk-view-back-leave-to { opacity: 0; transform: translateX(24px); }
+.nk-view-fade-enter-from { opacity: 0; transform: translateY(8px); }
+.nk-view-fade-leave-to { opacity: 0; transform: translateY(-8px); }
+.nk-view-fwd-enter-active, .nk-view-fwd-leave-active,
+.nk-view-back-enter-active, .nk-view-back-leave-active,
+.nk-view-fade-enter-active, .nk-view-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+/* 离屏页面退出文档流，避免过渡期间出现双滚动条 */
+.nk-view-fwd-leave-active, .nk-view-back-leave-active, .nk-view-fade-leave-active { position: absolute; inset: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .nk-view-fwd-enter-from, .nk-view-fwd-leave-to,
+  .nk-view-back-enter-from, .nk-view-back-leave-to,
+  .nk-view-fade-enter-from, .nk-view-fade-leave-to { opacity: 0; transform: none; }
+  .nk-view-fwd-enter-active, .nk-view-fwd-leave-active,
+  .nk-view-back-enter-active, .nk-view-back-leave-active,
+  .nk-view-fade-enter-active, .nk-view-fade-leave-active { transition: opacity 0.2s ease; }
+}
+
+/* ═══════════════════════════════════════════
+   Toast 通知（Vue TransitionGroup）
+═══════════════════════════════════════════ */
+.nk-toast-container { position: fixed; top: 16px; right: 16px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; background: rgba(15,15,35,0.95); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: 0.78rem; color: var(--text); pointer-events: auto; cursor: pointer; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
+.nk-toast-enter-from, .nk-toast-leave-to { transform: translateX(120%); opacity: 0; }
+.nk-toast-leave-active { transition: transform 0.25s ease-in, opacity 0.25s ease-in; }
+.nk-toast-move { transition: transform var(--nk-dur-normal) var(--nk-ease-out); }
+.nk-toast__icon { width: 18px; height: 18px; flex-shrink: 0; }
+.nk-toast__icon svg { width: 100%; height: 100%; }
+.nk-toast--error { border-color: rgba(248,113,113,0.4); }
+.nk-toast--error .nk-toast__icon { color: var(--diff-del); }
+.nk-toast--warn { border-color: rgba(251,191,36,0.4); }
+.nk-toast--warn .nk-toast__icon { color: var(--gold); }
+.nk-toast--info .nk-toast__icon { color: var(--primary); }
+.nk-toast--success { border-color: rgba(52,211,153,0.4); }
+.nk-toast--success .nk-toast__icon { color: var(--diff-add); }
+
+/* ═══════════════════════════════════════════
+   骨架屏 + Shimmer 动画
+═══════════════════════════════════════════ */
+.nk-sk { background: rgba(124,58,237,0.08); border-radius: 6px; }
+.nk-sk--shimmer { position: relative; overflow: hidden; }
+.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.06) 40%, rgba(124,58,237,0.12) 50%, rgba(124,58,237,0.06) 60%, transparent 100%); animation: nk-shimmer 1.6s ease-in-out infinite; }
+@keyframes nk-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.nk-skeleton { padding: 0; }
+.nk-skeleton--char { max-width: 100%; }
+.nk-skeleton__hero { position: relative; height: 70vh; min-height: 400px; border-radius: 0 0 12px 12px; overflow: hidden; margin-bottom: 0; max-width: var(--nk-content-max); margin-left: auto; margin-right: auto; background: linear-gradient(to top, rgba(15,15,35,0.8) 0%, rgba(15,15,35,0.2) 50%, transparent 100%); }
+.nk-skeleton__hero-content { position: absolute; bottom: 0; left: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 10px; }
+.nk-skeleton__tabs { display: flex; justify-content: space-between; align-items: center; padding: 0 40px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
+.nk-skeleton__tabs-left { display: flex; }
+.nk-skeleton__body { padding: 32px 40px 80px; display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
+.nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.nk-skeleton--catalog { padding: 0 24px 80px 88px; }
+.nk-skeleton__header { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.nk-skeleton__filters { padding: 12px 0; }
+.nk-skeleton__grid { display: grid; gap: 14px; padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
+
+/* ═══════════════════════════════════════════
+   错误态 / 空状态
+═══════════════════════════════════════════ */
+.nk-error-state, .nk-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 80px 24px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
+.nk-error-state__icon, .nk-empty-state__icon { width: 48px; height: 48px; color: var(--text3); opacity: 0.6; }
+.nk-error-state__icon svg, .nk-empty-state__icon svg { width: 100%; height: 100%; }
+.nk-error-state__icon { color: var(--diff-del); }
+.nk-error-state__title, .nk-empty-state__title { font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text2); text-transform: uppercase; }
+.nk-error-state__detail, .nk-empty-state__sub { font-size: 0.78rem; color: var(--text3); max-width: 400px; line-height: 1.6; }
+.nk-error-state__retry { margin-top: 8px; padding: 8px 24px; border-radius: 20px; background: var(--primary); border: none; color: var(--text-bright); font-family: var(--font-hud); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; cursor: pointer; transition: all var(--nk-dur-fast) ease; }
+.nk-error-state__retry:hover { box-shadow: 0 0 20px var(--primary-glow); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════
+   响应式适配（375px / 768px / 1024px+）
+═══════════════════════════════════════════ */
+/* 平板及以下：侧边栏收窄 */
+@media (max-width: 1023px) {
+  .ui-sidebar { width: 56px !important; padding: 12px 6px !important; border-radius: 18px !important; }
+  .nk-page--detail { left: 72px; }
+  .nk-hero { max-width: 100%; border-radius: 0; }
+  .nk-tabs { padding: 0 20px; }
+  .nk-panel { padding: 24px 20px 60px; }
+  .nk-skeleton__tabs { padding: 0 20px; }
+  .nk-skeleton__body { padding: 24px 20px 60px; }
+}
+/* 手机：侧边栏转为底部 Tab Bar */
+@media (max-width: 767px) {
+  .ui-sidebar { position: fixed !important; top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important; transform: none !important; width: 100% !important; height: 56px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-around !important; background: rgba(12,12,30,0.95) !important; backdrop-filter: blur(16px) !important; border-top: 1px solid var(--border) !important; border-radius: 0 !important; padding: 0 8px !important; z-index: 100000 !important; }
+  .ui-sidebar__brand { display: none !important; }
+  .ui-sidebar-link { border-radius: 8px !important; }
+  .nk-page--detail { left: 0; bottom: 56px; }
+  #nk-catalog-app { padding-left: 16px !important; padding-right: 16px !important; padding-bottom: 72px !important; }
+  .nk-cat-header { margin-left: -16px !important; margin-right: -16px !important; padding-left: 16px !important; padding-right: 16px !important; flex-wrap: wrap; }
+  .nk-hero { height: 50vh; min-height: 280px; border-radius: 0; }
+  .nk-hero__name { font-size: 1.5rem; }
+  .nk-hero__stats { flex-wrap: wrap; gap: 12px; }
+  .nk-tabs { padding: 0 12px; overflow-x: auto; }
+  .nk-tab { padding: 12px 16px; font-size: 0.75rem; white-space: nowrap; }
+  .nk-panel { padding: 20px 16px 72px; }
+  .nk-skeleton__hero { height: 50vh; min-height: 280px; border-radius: 0; }
+  .nk-skeleton__tabs { padding: 0 12px; }
+  .nk-skeleton__body { padding: 20px 16px 72px; }
+  .nk-skeleton--catalog { padding: 0 16px 72px 16px !important; }
+  .nk-home-hero { padding-left: 0; }
+  .nk-home-nav { padding: 48px 16px 32px 16px; }
+  .nk-home-footer { padding: 32px 16px 72px; }
+  .nk-toast-container { top: auto; bottom: 64px; right: 12px; left: 12px; }
+  .nk-toast { max-width: 100%; }
+}
