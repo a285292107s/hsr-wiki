@@ -49,6 +49,18 @@ export const SKILL_ICON_KEY_BY_NAME: Record<string, string> = {
   '忆灵天赋': 'ServantPassive', '欢愉技': 'Elation', '助战技': 'Ultra',
 };
 
+/** 行迹属性加成图标映射（property_type → trace 图标键；图标路径 `${CDN}/assets/hsr/trace/Icon{key}.webp`） */
+export const PROP_ICON: Record<string, string> = {
+  AttackAddedRatio: 'Attack', HPAddedRatio: 'MaxHP', DefenceAddedRatio: 'Defence',
+  SpeedDelta: 'Speed', CriticalChanceBase: 'CriticalChance', CriticalDamageBase: 'CriticalDamage',
+  BreakDamageAddedRatioBase: 'BreakUp', StatusProbabilityBase: 'StatusProbability',
+  StatusResistanceBase: 'StatusResistance', ElationDamageAddedRatioBase: 'Joy',
+  PhysicalAddedRatio: 'PhysicalAddedRatio', FireAddedRatio: 'FireAddedRatio',
+  IceAddedRatio: 'IceAddedRatio', ThunderAddedRatio: 'ThunderAddedRatio',
+  WindAddedRatio: 'WindAddedRatio', QuantumAddedRatio: 'QuantumAddedRatio',
+  ImaginaryAddedRatio: 'ImaginaryAddedRatio',
+};
+
 /** 韧性条标签（show_stance_list 下标对应） */
 export const STANCE_LABEL = ['SingleAttack', 'AoEAttack', 'Blast'] as const;
 

@@ -42,7 +42,7 @@
   --nk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --nk-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --nk-stagger: 40ms;
-  --nk-radius-card: 10px;
+  --nk-radius-card: 12px;
 }
 
 /* ─── 侧边栏（自建组件，Shadow DOM 内，玻璃胶囊形态） ─── */

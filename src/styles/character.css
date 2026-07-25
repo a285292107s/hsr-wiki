@@ -4,19 +4,25 @@
 ═══════════════════════════════════════════ */
 
 /* ─── 概览 Tab ─── */
-.nk-overview__desc { font-size: 0.875rem; line-height: 1.9; color: var(--text2); margin-bottom: 24px; padding: 16px; background: rgba(124,58,237,0.04); border-radius: 8px; border-left: 3px solid var(--primary); }
-.nk-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-.nk-stat-box { text-align: center; padding: 18px 12px; background: rgba(15,15,35,0.6); border: 1px solid var(--border); border-radius: 10px; transition: border-color 0.2s, box-shadow 0.2s; }
-.nk-stat-box:hover { border-color: var(--border2); box-shadow: 0 0 12px rgba(124,58,237,0.06); }
-.nk-stat-box__val { font-family: var(--font-hud); font-size: 1.5rem; font-weight: 700; color: var(--text-bright); text-shadow: 0 0 15px var(--primary-glow); }
-.nk-stat-box__label { font-size: 0.625rem; color: var(--text2); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
-.nk-ability { padding: 14px 16px; background: rgba(15,15,35,0.5); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; }
-.nk-ability__name { font-weight: 700; font-size: 0.875rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-.nk-ability__name img { width: 26px; height: 26px; border-radius: 6px; }
-.nk-ability__meta { font-size: 0.625rem; color: var(--text3); margin-left: auto; font-weight: 400; }
-.nk-ability__desc { font-size: 0.8125rem; color: var(--text2); line-height: 1.7; }
-.nk-ability__desc u { text-decoration: underline; text-decoration-color: rgba(203,213,225,0.5); text-underline-offset: 3px; color: #cbd5e1; }
-.nk-ability__desc .hl { color: var(--highlight); font-weight: 700; }
+.nk-overview__desc { font-size: 0.875rem; line-height: 1.9; color: var(--text2); margin-bottom: 24px; padding: 2px 0 2px 16px; border-left: 2px solid rgba(124,58,237,0.35); }
+.nk-bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.nk-bonus {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 12px 16px; border-radius: 8px;
+  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12);
+  transition: border-color 0.2s;
+}
+.nk-bonus:hover { border-color: var(--border2); }
+.nk-bonus__icon { width: 26px; height: 26px; margin-bottom: 5px; opacity: 0.9; }
+.nk-bonus__val { font-family: var(--font-hud); font-size: 1rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
+.nk-bonus__name { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
+/* 附加能力卡片：复用技能卡片结构原语（title-row/icon/name/tag/desc），容器风格对齐 */
+.nk-ability {
+  position: relative; background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px 18px; margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.nk-ability:hover { border-color: var(--border2); }
 
 /* ─── 技能 Tab（克制配色：类型色仅用于徽章，卡片统一紫色调边框） ─── */
 .nk-skill {
@@ -145,22 +151,26 @@
 .nk-panel .nk-ability { max-width: var(--nk-prose-max); margin-left: auto; margin-right: auto; }
 
 /* ─── 星魂 Tab ─── */
-.nk-eidolon { display: flex; gap: 18px; padding: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px; transition: border-color 0.2s; }
+/* 星魂卡片：复用技能卡片结构原语（title-row/icon/name/tag/desc），容器风格对齐 */
+.nk-eidolon {
+  position: relative; background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px 18px; margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
 .nk-eidolon:hover { border-color: var(--border2); }
-.nk-eidolon__img { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border2); box-shadow: 0 0 15px var(--primary-glow); flex-shrink: 0; }
-.nk-eidolon__badge { font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; }
-.nk-eidolon__name { font-weight: 700; font-size: 0.9375rem; margin: 4px 0; }
-.nk-eidolon__desc { font-size: 0.8125rem; color: var(--text2); line-height: 1.7; }
-.nk-eidolon__desc u { text-decoration: underline; text-decoration-color: rgba(203,213,225,0.5); text-underline-offset: 3px; color: #cbd5e1; }
-.nk-eidolon__desc .hl { color: var(--highlight); font-weight: 700; }
 
 /* ─── 配装 Tab ─── */
 .nk-build__cones { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
-.nk-build__cone { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; transition: border-color 0.2s; }
+.nk-build__cone { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; transition: border-color 0.2s; }
 .nk-build__cone:hover { border-color: var(--border2); }
 .nk-build__cone img { width: 44px; height: 44px; border-radius: 8px; box-shadow: 0 0 10px var(--primary-glow); }
 .nk-build__cone-name { font-size: 0.8125rem; font-weight: 600; }
-.nk-build__cone-rank { font-family: var(--font-hud); font-size: 0.5625rem; color: var(--primary); letter-spacing: 0.1em; }
+.nk-build__cone-rank {
+  display: inline-block; margin-top: 4px;
+  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.03em;
+  color: var(--primary); padding: 1px 7px; border-radius: 4px;
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+}
 .nk-build__teams { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
 .nk-build__team { display: flex; align-items: center; padding: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; gap: 0; }
 .nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
@@ -172,17 +182,25 @@
 .nk-build__team-alt img:hover { opacity: 1; }
 .nk-build__team-plus { color: var(--text3); font-size: 0.875rem; font-weight: 400; flex-shrink: 0; margin: 0 2px; align-self: center; }
 .nk-build__relics { margin-bottom: 20px; }
-.nk-build__stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
-.nk-build__stat { text-align: center; padding: 14px 8px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px; }
-.nk-build__stat img { width: 34px; height: 34px; margin-bottom: 6px; opacity: 0.9; }
-.nk-build__stat-label { font-size: 0.6875rem; color: var(--text2); font-weight: 500; }
-.nk-build__sub { font-size: 0.75rem; color: var(--text3); margin-bottom: 16px; padding: 8px 12px; background: rgba(124,58,237,0.05); border-radius: 6px; border: 1px solid rgba(124,58,237,0.08); }
+.nk-build__stats { display: flex; flex-wrap: wrap; gap: 6px 0; margin-bottom: 14px; }
+.nk-build__stat { display: inline-flex; align-items: center; gap: 7px; }
+.nk-build__stat + .nk-build__stat::before { content: '·'; margin: 0 14px; color: var(--text3); opacity: 0.4; }
+.nk-build__stat img { width: 20px; height: 20px; opacity: 0.9; }
+.nk-build__stat-label { font-size: 0.75rem; color: var(--text2); }
+.nk-build__sub { display: flex; align-items: baseline; gap: 8px; font-size: 0.75rem; margin-bottom: 16px; }
+.nk-build__sub-label { font-size: 0.6875rem; color: var(--text3); }
+.nk-build__sub-val { color: var(--text2); font-weight: 600; }
 .nk-build__sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-.nk-build__set { padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; transition: border-color 0.2s; }
+.nk-build__set { padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; transition: border-color 0.2s; }
 .nk-build__set:hover { border-color: var(--border2); }
 .nk-build__set-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .nk-build__set-head img { width: 44px; height: 44px; border-radius: 8px; background: rgba(0,0,0,0.3); padding: 3px; }
-.nk-build__set-badge { font-family: var(--font-hud); font-size: 0.5625rem; color: var(--primary); letter-spacing: 0.1em; text-transform: uppercase; }
+.nk-build__set-badge {
+  display: inline-block;
+  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.03em;
+  color: var(--primary); padding: 1px 7px; border-radius: 4px;
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+}
 .nk-build__set-name { font-size: 0.8125rem; font-weight: 600; }
 .nk-build__set-desc { font-size: 0.6875rem; color: var(--text3); line-height: 1.7; }
 .nk-build__set-desc .hl { color: var(--highlight); font-weight: 700; }
@@ -219,7 +237,7 @@
 .nk-d-c, .nk-inline-diff .diff-removed:not(.diff-added) { color: var(--diff-del); }
 .nk-d-c { margin-right: 4px; opacity: 0.85; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 60%, transparent); }
 .nk-d-n { color: var(--diff-add) !important; font-weight: 700; }
-.nk-stat-box__val .nk-d-c, .nk-stat-box__val .nk-d-n { font-size: 1.15rem; }
+.nk-bonus__val .nk-d-c, .nk-bonus__val .nk-d-n { font-size: 0.875rem; }
 .nk-skill__metric dd .nk-d-c, .nk-skill__metric dd .nk-d-n { font-size: 0.625rem; font-weight: 700; }
 .nk-table td .nk-d-c, .nk-table td .nk-d-n { font-size: 0.6875rem; }
 /* ─── Loading ─── */
@@ -228,7 +246,7 @@
 @keyframes nk-spin { to { transform: rotate(360deg); } }
 
 /* ─── 宽屏正文可读性：描述类文本约束到可读行宽 ─── */
-.nk-overview__desc, .nk-ability__desc, .nk-skill__desc, .nk-eidolon__desc, .nk-skill__terms { max-width: var(--nk-prose-max); }
+.nk-overview__desc, .nk-skill__desc, .nk-skill__terms { max-width: var(--nk-prose-max); }
 
 @media (max-width: 640px) {
   .nk-hero { height: 50vh; min-height: 300px; }
@@ -238,7 +256,6 @@
   .nk-tabs { padding: 0 16px; }
   .nk-tab { padding: 12px 16px; font-size: 0.75rem; }
   .nk-panel { padding: 24px 16px 60px; }
-  .nk-stat-grid { grid-template-columns: repeat(2, 1fr); }
   .nk-skill { padding: 18px 16px 16px; }
   .nk-skill__icon { width: 44px; height: 44px; }
   .nk-skill__head { flex-wrap: wrap; }

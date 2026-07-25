@@ -63,6 +63,13 @@ export interface Rank {
   extra?: Record<string, SkillExtra>;
 }
 
+/** 行迹节点属性加成（总属性加成聚合数据源） */
+export interface StatusAdd {
+  property_type: string;
+  value: number;
+  name: string;
+}
+
 export interface SkillTree {
   anchor?: string;
   avatar_promotion_limit?: number | null;
@@ -80,7 +87,7 @@ export interface SkillTree {
   point_trigger_key?: number;
   point_type?: number;
   pre_point?: number[];
-  status_add_list?: unknown[];
+  status_add_list?: StatusAdd[];
   extra?: Record<string, unknown>;
 }
 

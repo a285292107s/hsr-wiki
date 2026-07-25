@@ -2,7 +2,7 @@
 /**
  * 角色详情页（迁移自 要迁移的代码/character.js 渲染 + 交互）
  * 结构：Hero（视差立绘 + Spine 双通道）/ 吸顶 Tabs（含强化模式切换）/ 四面板
- *   概览：描述 + BASE STATS diff + TALENTS 附加能力 diff
+ *   概览：描述 + 总属性加成 diff + TALENTS 附加能力 diff
  *   技能：type+type_name 分组 + 滑条响应式 + REMOVED 卡片 + 忆灵技能
  *   星魂：E1-6 diff + 删除卡片
  *   配装：推荐光锥 / 队伍 / 遗器主副词条 + 套装（异步加载描述）
@@ -20,9 +20,9 @@ import {
   hasParamDiff, hasTextDiff, iconUrl, itemName, maxLevelStat, maxLevelValue,
   skillIconUrl, stripAllTags,
 } from '../../lib/format';
-import { CDN, CHAR_TABS, ELEM, PATH, SKILL_ORDER, TYPE } from '../../lib/constants';
+import { CDN, CHAR_TABS, ELEM, PATH, PROP_ICON, SKILL_ORDER, TYPE } from '../../lib/constants';
 import type {
-  CharacterData, CharStats, RelicSetData, Skill, SkillExtra, SkillTree,
+  CharacterData, RelicSetData, Skill, SkillExtra, SkillTree,
 } from '../../services/types';
 
 const route = useRoute();
@@ -185,25 +185,44 @@ function onKeydown(e: KeyboardEvent): void {
 
 const overviewDesc = computed(() => escHtml((d.value && d.value.desc) || '').replace(/\\n/g, '<br>'));
 
-interface StatBox { v: string | number; l: string; ov: string | number | null }
-function buildStatGrid(s: CharStats | null): { v: string | number; l: string }[] | null {
-  if (!s) return null;
-  return [
-    { v: Math.round(maxLevelValue(s.hp_base, s.hp_add)), l: '生命值' },
-    { v: Math.round(maxLevelValue(s.attack_base, s.attack_add)), l: '攻击力' },
-    { v: Math.round(maxLevelValue(s.defence_base, s.defence_add)), l: '防御力' },
-    { v: s.speed_base, l: '速度' },
-    { v: (s.critical_chance * 100).toFixed(1) + '%', l: '暴击率' },
-    { v: (s.critical_damage * 100).toFixed(0) + '%', l: '暴击伤害' },
-  ];
+interface AttrBonus { name: string; v: string; ov: string | null; icon: string }
+
+/** 聚合行迹树全部节点的 status_add_list（同 property 求和） */
+function aggregateBonuses(
+  trees: Record<string, Record<string, SkillTree>> | undefined,
+): Map<string, { name: string; sum: number }> {
+  const agg = new Map<string, { name: string; sum: number }>();
+  if (!trees) return agg;
+  for (const tree of Object.values(trees)) {
+    for (const node of Object.values(tree)) {
+      if (!node.status_add_list) continue;
+      for (const s of node.status_add_list) {
+        const cur = agg.get(s.property_type);
+        if (cur) cur.sum += s.value;
+        else agg.set(s.property_type, { name: s.name, sum: s.value });
+      }
+    }
+  }
+  return agg;
 }
-const statGrid = computed<StatBox[]>(() => {
-  const g = buildStatGrid(d.value ? maxLevelStat(d.value.stats) : null) || [];
-  const og = oldD.value ? buildStatGrid(maxLevelStat(oldD.value.stats)) : null;
-  return g.map((item, i) => ({
-    ...item,
-    ov: og && og[i].v !== item.v ? og[i].v : null,
-  }));
+
+/** 加成值格式化：速度为固定值，其余为百分比（保留 1 位小数） */
+function fmtBonus(type: string, sum: number): string {
+  if (type === 'SpeedDelta') return `+${Math.round(sum)}`;
+  return `+${Math.round(sum * 1000) / 10}%`;
+}
+
+/** 总属性加成：行迹树属性节点汇总（加强模式随 renderData 联动，支持与旧版 diff） */
+const attrBonuses = computed<AttrBonus[]>(() => {
+  const agg = aggregateBonuses(d.value ? d.value.skill_trees : undefined);
+  const oldAgg = oldD.value ? aggregateBonuses(oldD.value.skill_trees) : null;
+  return [...agg.entries()].map(([type, b]) => {
+    const v = fmtBonus(type, b.sum);
+    const ob = oldAgg && oldAgg.get(type);
+    const ov = ob && fmtBonus(type, ob.sum) !== v ? fmtBonus(type, ob.sum) : null;
+    const key = PROP_ICON[type];
+    return { name: b.name, v, ov, icon: key ? `${CDN}/assets/hsr/trace/Icon${key}.webp` : '' };
+  });
 });
 
 /** 词条（extra 按 name 去重；行迹树节点 extra 为 unknown，运行时过滤） */
@@ -671,18 +690,21 @@ onBeforeUnmount(() => {
         <!-- 概览 -->
         <div :class="['nk-panel', { 'nk-panel--active': char.activeTab === 'overview' }]" data-panel="overview">
           <div class="nk-overview__desc" v-html="overviewDesc"></div>
-          <div class="nk-title">BASE STATS</div>
-          <div class="nk-stat-grid">
-            <div v-for="g in statGrid" :key="g.l" class="nk-stat-box">
-              <div class="nk-stat-box__val">
-                <template v-if="g.ov !== null">
-                  <span class="nk-d-c">{{ g.ov }}</span><span class="nk-d-n">{{ g.v }}</span>
-                </template>
-                <template v-else>{{ g.v }}</template>
+          <template v-if="attrBonuses.length">
+            <div class="nk-title">STAT BONUSES</div>
+            <div class="nk-bonus-grid">
+              <div v-for="b in attrBonuses" :key="b.name" class="nk-bonus">
+                <img v-if="b.icon" class="nk-bonus__icon" :src="b.icon" loading="lazy">
+                <span class="nk-bonus__val">
+                  <template v-if="b.ov !== null">
+                    <span class="nk-d-c">{{ b.ov }}</span><span class="nk-d-n">{{ b.v }}</span>
+                  </template>
+                  <template v-else>{{ b.v }}</template>
+                </span>
+                <span class="nk-bonus__name">{{ b.name }}</span>
               </div>
-              <div class="nk-stat-box__label">{{ g.l }}</div>
             </div>
-          </div>
+          </template>
           <template v-if="abilities.length">
             <div class="nk-title">TALENTS</div>
             <div
@@ -694,11 +716,14 @@ onBeforeUnmount(() => {
               <span v-if="ab.status" :class="`nk-diff-badge nk-diff-badge--${ab.status}`">
                 {{ ab.status === 'changed' ? 'CHANGED' : 'NEW' }}
               </span>
-              <div class="nk-ability__name">
-                <img v-if="ab.icon" :src="ab.icon">
-                {{ ab.name }}<span class="nk-ability__meta">附加能力 {{ ab.idx + 1 }}</span>
+              <div class="nk-skill__title-row">
+                <img v-if="ab.icon" class="nk-skill__icon" :src="ab.icon">
+                <div class="nk-skill__title">
+                  <span class="nk-skill__name">{{ ab.name }}</span>
+                  <span class="nk-skill__tag">附加能力 {{ ab.idx + 1 }}</span>
+                </div>
               </div>
-              <div class="nk-ability__desc" v-html="ab.descHtml"></div>
+              <div class="nk-skill__desc" v-html="ab.descHtml"></div>
               <div v-if="ab.terms.length" class="nk-skill__terms">
                 <div v-for="t in ab.terms" :key="t.name" class="nk-term">
                   <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
@@ -765,15 +790,17 @@ onBeforeUnmount(() => {
             <span v-if="e.status" :class="`nk-diff-badge nk-diff-badge--${e.status}`">
               {{ e.status === 'changed' ? 'CHANGED' : 'NEW' }}
             </span>
-            <img class="nk-eidolon__img" :src="e.img" loading="lazy">
-            <div>
-              <div class="nk-eidolon__badge">E{{ e.num }}</div>
-              <div class="nk-eidolon__name">{{ e.name }}</div>
-              <div class="nk-eidolon__desc" v-html="e.descHtml"></div>
-              <div v-if="e.terms.length" class="nk-skill__terms">
-                <div v-for="t in e.terms" :key="t.name" class="nk-term">
-                  <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
-                </div>
+            <div class="nk-skill__title-row">
+              <img class="nk-skill__icon" :src="e.img" loading="lazy">
+              <div class="nk-skill__title">
+                <span class="nk-skill__name">{{ e.name }}</span>
+                <span class="nk-skill__tag">E{{ e.num }}</span>
+              </div>
+            </div>
+            <div class="nk-skill__desc" v-html="e.descHtml"></div>
+            <div v-if="e.terms.length" class="nk-skill__terms">
+              <div v-for="t in e.terms" :key="t.name" class="nk-term">
+                <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
               </div>
             </div>
           </div>
@@ -784,12 +811,14 @@ onBeforeUnmount(() => {
             data-status="removed"
           >
             <span class="nk-diff-badge nk-diff-badge--removed">REMOVED</span>
-            <img class="nk-eidolon__img" :src="re.img" loading="lazy">
-            <div>
-              <div class="nk-eidolon__badge">E{{ re.num }}</div>
-              <div class="nk-eidolon__name">{{ re.name }}</div>
-              <div class="nk-eidolon__desc" v-html="re.descHtml"></div>
+            <div class="nk-skill__title-row">
+              <img class="nk-skill__icon" :src="re.img" loading="lazy">
+              <div class="nk-skill__title">
+                <span class="nk-skill__name">{{ re.name }}</span>
+                <span class="nk-skill__tag">E{{ re.num }}</span>
+              </div>
             </div>
+            <div class="nk-skill__desc" v-html="re.descHtml"></div>
           </div>
         </div>
 
@@ -841,7 +870,8 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               <div v-if="relicSubs.length" class="nk-build__sub">
-                推荐副词条：{{ relicSubs.join(' / ') }}
+                <span class="nk-build__sub-label">推荐副词条</span>
+                <span class="nk-build__sub-val">{{ relicSubs.join(' / ') }}</span>
               </div>
               <div v-if="setIdList.length" class="nk-build__sets">
                 <div v-for="s in setIdList" :key="`${s.id}-${s.pc}`" class="nk-build__set">
