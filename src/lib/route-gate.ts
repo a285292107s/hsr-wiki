@@ -10,11 +10,11 @@
 
 /**
  * 第一期接管路径（base 可为 /hsr 或 /，尾斜杠可选）：
- *   首页 / 角色目录 / 角色详情 / 6 个通用目录 / 成就占位页
+ *   首页 / 角色目录 / 角色详情 / 6 个通用目录（含终局 4 路由） / 成就占位页
  * 反例：/hsr/lightcone/23063（光锥详情）→ 不匹配 → 交还宿主
  */
 const HANDLED_RE =
-  /^\/(hsr\/?)?(character\/?(\d+\/?)?|lightcone\/?|relic\/?|item\/?|monster\/?|maze\/?|currency\/?|achievement\/?)?$/;
+  /^\/(hsr\/?)?(character\/?(\d+\/?)?|lightcone\/?|relic\/?|item\/?|monster\/?|maze\/?|story\/?|boss\/?|peak\/?|currency\/?|achievement\/?)?$/;
 
 export function shouldTakeOver(pathname: string): boolean {
   return HANDLED_RE.test(pathname);

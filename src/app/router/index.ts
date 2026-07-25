@@ -3,6 +3,8 @@
  * 路径与深度沿用原脚本模块注册表（router.js）：
  *   home(0) / achievement(1) / generic-catalog(2) / character-catalog(3) / character(4)
  * 深度差决定页面过渡方向（navDir：1=前进深入，-1=返回，0=平级）。
+ * meta.endgameTab：终局 4 路由互为同页 Tab——共享 transition key 与组件 key，
+ * 互切时不触发页面过渡、不重建目录引擎。
  */
 import { createRouter, type RouteRecordRaw, type Router } from 'vue-router';
 import { ref } from 'vue';
@@ -59,7 +61,25 @@ const routes: RouteRecordRaw[] = [
     path: '/maze',
     name: 'catalog-maze',
     component: () => import('../views/CatalogView.vue'),
-    meta: { depth: 2, catalog: 'maze' },
+    meta: { depth: 2, catalog: 'maze', endgameTab: true },
+  },
+  {
+    path: '/story',
+    name: 'catalog-story',
+    component: () => import('../views/CatalogView.vue'),
+    meta: { depth: 2, catalog: 'story', endgameTab: true },
+  },
+  {
+    path: '/boss',
+    name: 'catalog-boss',
+    component: () => import('../views/CatalogView.vue'),
+    meta: { depth: 2, catalog: 'boss', endgameTab: true },
+  },
+  {
+    path: '/peak',
+    name: 'catalog-peak',
+    component: () => import('../views/CatalogView.vue'),
+    meta: { depth: 2, catalog: 'peak', endgameTab: true },
   },
   {
     path: '/currency',

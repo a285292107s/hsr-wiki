@@ -13,7 +13,7 @@ import { platform } from '../../platform';
 import { prefetchCharData } from '../../services/api';
 import { scrapeCards, waitForCards } from './scrape';
 import { useVirtualGrid, vReveal } from './use-virtual-grid';
-import type { CatalogItem, CatalogPageConfig } from './types';
+import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
 
 const props = defineProps<{ config: CatalogPageConfig }>();
 
@@ -24,6 +24,10 @@ const VIRTUAL_THRESHOLD = 400;
 
 type Phase = 'loading' | 'ready' | 'error';
 const phase = ref<Phase>('loading');
+/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
+const showSkeleton = ref(false);
+const SKELETON_DELAY = 150;
+let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
 const errorMsg = ref('');
 const items = ref<CatalogItem[]>([]);
 const query = ref('');
@@ -31,6 +35,8 @@ const activeFilters = ref<Record<string, string>>({});
 const filtersOpen = ref(true);
 
 const cancelled = { value: false };
+/** 加载代：递增序号，过期加载（Tab 已切走）的结果静默丢弃 */
+let loadGen = 0;
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 let panelTimer: ReturnType<typeof setTimeout> | null = null;
 let tiltRaf: number | null = null;
@@ -66,7 +72,7 @@ const gridHtml = computed(() =>
 
 const { cells, gridMinHeight, fastJump, start, stop, refresh } = useVirtualGrid({
   filtered,
-  config: props.config,
+  config: () => props.config,
   scroller: scrollerRef,
   grid: gridRef,
 });
@@ -74,8 +80,13 @@ const { cells, gridMinHeight, fastJump, start, stop, refresh } = useVirtualGrid(
 /* ─── 数据加载 ─── */
 
 async function load(): Promise<void> {
+  const gen = ++loadGen;
   phase.value = 'loading';
   errorMsg.value = '';
+  // 骨架屏延迟呈现：缓存命中（<150ms）时直接出列表，避免切换时骨架屏一闪而过
+  showSkeleton.value = false;
+  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
+  skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
   // 版本信息（cdn 数据源与 hover 预取使用；离线时不阻塞 dom 抓取）
   try {
     await app.initManifest();
@@ -95,19 +106,59 @@ async function load(): Promise<void> {
       const selector = props.config.cardSelector || '[data-ui="content-card"]';
       const validator = props.config.cardValidator || ((): boolean => true);
       await waitForCards(validator, selector, cancelled);
-      if (cancelled.value) return;
+      if (cancelled.value || gen !== loadGen) return;
       items.value = scrapeCards(props.config);
     }
+    if (gen !== loadGen) return; // 已被更新的加载取代
     phase.value = 'ready';
+    scrollerRef.value?.scrollTo({ top: 0 });
+    // 后台预热兄弟页数据，保证 Tab 切换时 L1 命中
+    props.config.prefetch?.({ version: app.version });
   } catch (e) {
-    if (cancelled.value) return;
+    if (cancelled.value || gen !== loadGen) return;
     errorMsg.value = e instanceof Error ? e.message : String(e);
     phase.value = 'error';
     app.toast('error', `${props.config.title}: ${errorMsg.value}`);
   } finally {
-    if (!cancelled.value) app.markDataReady();
+    if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
+    if (!cancelled.value && gen === loadGen) app.markDataReady();
   }
 }
+
+/**
+ * Tab 软切换：静默取数 + 原地替换 items。
+ * 不设 loading 态、不清空旧内容；数据已由 prefetch 预热至 L1，
+ * 命中时取数→渲染在同一帧微任务内完成。静默失败回退完整 load()。
+ */
+async function softSwitchTab(): Promise<void> {
+  const gen = ++loadGen;
+  if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
+  try {
+    const data = await props.config.fetchData!({ version: app.version });
+    if (gen !== loadGen || cancelled.value) return;
+    items.value = data;
+    phase.value = 'ready';
+    scrollerRef.value?.scrollTo({ top: 0 });
+  } catch {
+    if (gen !== loadGen || cancelled.value) return;
+    void load(); // 静默失败 → 回退完整加载（含错误态）
+  }
+}
+
+/** 目录配置轮换（终局 4 路由共享实例）：重置搜索/筛选，按数据源选择软/硬切换 */
+watch(() => props.config, (cfg) => {
+  query.value = '';
+  activeFilters.value = {};
+  stop();
+  // CDN 可静默取数 → 软切换；dom 抓取（油猴模式）需宿主先渲染目标页卡片 → 完整加载
+  const canSoft = !!cfg.fetchData &&
+    (cfg.dataSource === 'cdn' || platform().mode === 'standalone');
+  if (canSoft) {
+    void softSwitchTab();
+  } else {
+    void load();
+  }
+});
 
 /** 数据就绪且为虚拟模式 → 网格渲染后启动虚拟滚动 */
 watch(phase, async (p) => {
@@ -142,6 +193,12 @@ function onSearchInput(): void {
 
 /* ─── 卡片交互：点击路由 / hover 预取 / 3D 倾斜 ─── */
 
+function onSubNavClick(tab: CatalogSubNavItem): void {
+  if (tab.active) return;
+  // 终局内容 4 路由均为已迁移目录页：SPA 导航（油猴模式由 host-sync 同步驱动宿主渲染）
+  void router.push(tab.href);
+}
+
 function onContentClick(e: MouseEvent): void {
   const a = (e.target as HTMLElement).closest('a[href]');
   if (!a) return;
@@ -154,11 +211,9 @@ function onContentClick(e: MouseEvent): void {
     return;
   }
   // 未迁移的详情页（光锥/遗器/怪物/赛季等）：
-  // 油猴模式整页导航交还宿主（路由门在 document-start 放行）；standalone 提示
+  // 油猴模式整页导航交还宿主（路由门在 document-start 放行）；standalone 无详情页，静默忽略
   if (platform().mode === 'userscript') {
     location.href = href;
-  } else {
-    app.toast('info', '该详情页第二期支持，敬请期待');
   }
 }
 
@@ -207,6 +262,7 @@ onBeforeUnmount(() => {
   stop();
   if (searchTimer !== null) clearTimeout(searchTimer);
   if (panelTimer !== null) clearTimeout(panelTimer);
+  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
   if (tiltRaf !== null) cancelAnimationFrame(tiltRaf);
 });
 </script>
@@ -218,25 +274,8 @@ onBeforeUnmount(() => {
     @click="onContentClick"
     @pointerenter.capture="onCardHover"
   >
-    <!-- 骨架屏 -->
-    <div v-if="phase === 'loading'" class="nk-skeleton nk-skeleton--catalog">
-      <div class="nk-skeleton__header">
-        <div class="nk-sk" style="width:100px;height:18px;border-radius:4px;"></div>
-        <div class="nk-sk" style="width:200px;height:32px;border-radius:20px;"></div>
-        <div class="nk-sk" style="width:60px;height:14px;border-radius:4px;"></div>
-      </div>
-      <div class="nk-skeleton__filters">
-        <div class="nk-sk" style="width:100%;height:28px;border-radius:8px;"></div>
-      </div>
-      <div class="nk-skeleton__grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));">
-        <div v-for="i in 10" :key="i" class="nk-skeleton__card">
-          <div class="nk-sk nk-sk--shimmer" style="width:100%;aspect-ratio:3/4;border-radius:10px;"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- 错误态 -->
-    <div v-else-if="phase === 'error'" class="nk-error-state">
+    <div v-if="phase === 'error'" class="nk-error-state">
       <div class="nk-error-state__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
@@ -248,7 +287,7 @@ onBeforeUnmount(() => {
       <button class="nk-error-state__retry" @click="load">RETRY</button>
     </div>
 
-    <!-- 目录主体 -->
+    <!-- 目录主体：头部 + 子导航为稳定外壳，始终渲染；切换时仅下方卡片区刷新（对齐原站体验） -->
     <template v-else>
       <div class="nk-cat-header">
         <span class="nk-cat-title">{{ config.title }}</span>
@@ -272,6 +311,32 @@ onBeforeUnmount(() => {
         ><span class="arrow">▼</span> 筛选</button>
       </div>
 
+      <!-- 子导航标签（如终局内容分类） -->
+      <div v-if="config.subNav" class="nk-cat-subnav">
+        <a
+          v-for="tab in config.subNav"
+          :key="tab.href"
+          class="nk-cat-subnav__item"
+          :class="{ active: tab.active }"
+          :href="tab.href"
+          @click.prevent="onSubNavClick(tab)"
+        >
+          <span class="nk-cat-subnav__name">{{ tab.label }}</span>
+          <span class="nk-cat-subnav__en">{{ tab.en }}</span>
+        </a>
+      </div>
+
+      <!-- 骨架屏：延迟显示，仅占据网格区（头部/子导航保持稳定，避免切换闪烁） -->
+      <div v-if="phase === 'loading' && showSkeleton" class="nk-skeleton nk-skeleton--catalog">
+        <div class="nk-skeleton__grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));">
+          <div v-for="i in 10" :key="i" class="nk-skeleton__card">
+            <div class="nk-sk nk-sk--shimmer" style="width:100%;aspect-ratio:3/4;border-radius:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数据主体：筛选 + 网格 + 空态 -->
+      <template v-else-if="phase === 'ready'">
       <div v-if="filters.length" class="nk-cat-filters" :class="{ open: filtersOpen }">
         <div class="nk-cat-filters__inner"><div class="nk-cat-filters__body">
           <div v-for="f in filters" :key="f.key" class="nk-cat-filter-group">
@@ -324,6 +389,7 @@ onBeforeUnmount(() => {
         <span class="nk-cat-empty__text">NO MATCH FOUND</span>
         <span class="nk-cat-empty__sub">未找到匹配结果，请调整筛选条件</span>
       </div>
+      </template>
     </template>
   </div>
 </template>

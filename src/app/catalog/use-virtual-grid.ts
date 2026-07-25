@@ -62,7 +62,8 @@ export const vReveal: Directive<HTMLElement> = {
 
 export interface VirtualGridOptions {
   filtered: Ref<CatalogItem[]>;
-  config: CatalogPageConfig;
+  /** 页面配置（支持 getter，保证组件复用时始终读取最新 config） */
+  config: CatalogPageConfig | (() => CatalogPageConfig);
   /** 滚动容器（#nk-catalog-app） */
   scroller: Ref<HTMLElement | null>;
   /** 网格元素（.nk-virtual-grid） */
@@ -70,7 +71,9 @@ export interface VirtualGridOptions {
 }
 
 export function useVirtualGrid(opts: VirtualGridOptions) {
-  const { filtered, config, scroller, grid } = opts;
+  const { filtered, scroller, grid } = opts;
+  const cfg = (): CatalogPageConfig =>
+    typeof opts.config === 'function' ? opts.config() : opts.config;
 
   const cells = ref<VirtualCell[]>([]);
   const gridMinHeight = ref('0px');
@@ -88,10 +91,10 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
   function recalcMetrics(): void {
     const g = grid.value;
     const gridWidth = (g && g.clientWidth) || 800;
-    const minColW = config.virtualMinColW || 150;
+    const minColW = cfg().virtualMinColW || 150;
     cols = Math.max(2, Math.floor((gridWidth + GAP) / (minColW + GAP)));
     const colW = (gridWidth - (cols - 1) * GAP) / cols;
-    const imgRatio = config.virtualImgRatio || 1;
+    const imgRatio = cfg().virtualImgRatio || 1;
     const infoH = 36;
     rowH = colW * imgRatio + infoH + 12 + GAP;
   }
@@ -141,7 +144,7 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
         const left = c * colW;
         out.push({
           key: idx,
-          html: config.renderCard(items[idx], idx),
+          html: cfg().renderCard(items[idx], idx),
           style:
             `position:absolute;top:${r * rowH}px;left:${left.toFixed(2)}%;width:${colW.toFixed(2)}%;` +
             `padding:0 ${GAP / 2}px ${GAP}px ${GAP / 2}px;box-sizing:border-box;--reveal-delay:${delay}ms;`,

@@ -66,6 +66,35 @@ export function loadMazeVersions(ver: string): Promise<MazeVersionMap> {
   return cachedFetch<MazeVersionMap>(`${CDN}/hsr/${ver}/zh/maze/version.json`, `mazever_${ver}`, CACHE_TTL.data);
 }
 
+/** 虚构叙事赛季列表（ID 段 2xxx；无 version.json，按 ID 降序展示） */
+export function loadStoryList(ver: string): Promise<MazeListDb> {
+  return cachedFetch<MazeListDb>(`${CDN}/hsr/${ver}/maze_extra.json`, `storylist_${ver}`, CACHE_TTL.data);
+}
+
+/** 末日幻影赛季列表（ID 段 3xxx；无 version.json，按 ID 降序展示） */
+export function loadBossList(ver: string): Promise<MazeListDb> {
+  return cachedFetch<MazeListDb>(`${CDN}/hsr/${ver}/maze_boss.json`, `bosslist_${ver}`, CACHE_TTL.data);
+}
+
+/** 异相仲裁赛季列表（ID 段 1-9） */
+export function loadPeakList(ver: string): Promise<MazeListDb> {
+  return cachedFetch<MazeListDb>(`${CDN}/hsr/${ver}/maze_peak.json`, `peaklist_${ver}`, CACHE_TTL.data);
+}
+
+/** 异相仲裁赛季版本映射（此端点带 /zh/ 路径段） */
+export function loadPeakVersions(ver: string): Promise<MazeVersionMap> {
+  return cachedFetch<MazeVersionMap>(`${CDN}/hsr/${ver}/zh/peak/version.json`, `peakver_${ver}`, CACHE_TTL.data);
+}
+
+/** 终局 4 页数据并行预热入 L1 内存，保证 Tab 切换即时命中（失败静默，切换时按需单独拉取） */
+export function prefetchEndgameAll(ver: string): void {
+  void Promise.allSettled([
+    loadMazeList(ver), loadMazeVersions(ver),
+    loadStoryList(ver), loadBossList(ver),
+    loadPeakList(ver), loadPeakVersions(ver),
+  ]);
+}
+
 /* ─── 遗器套装 ─── */
 
 export function loadRelicSet(ver: string, id: number | string): Promise<RelicSetData | null> {

@@ -8,6 +8,8 @@ export interface NavItem {
   desc: string;
   /** vue-router 路径（无尾斜杠；宿主 URL 的尾斜杠由非 strict 路由兼容） */
   path: string;
+  /** 额外参与高亮判定的路径（如终局内容 4 路由共享一个侧栏项）；默认仅 path */
+  activePaths?: string[];
   /** 内联 SVG（静态可信内容，v-html 渲染） */
   icon: string;
 }
@@ -39,6 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: '终局内容', en: 'ENDGAME', desc: '忘却之庭赛季记录', path: '/maze',
+    activePaths: ['/maze', '/story', '/boss', '/peak'],
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><circle cx="12" cy="12" r="1"/></svg>',
   },
   {

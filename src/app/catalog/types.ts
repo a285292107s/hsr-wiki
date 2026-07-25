@@ -27,9 +27,18 @@ export interface CatalogContext {
   version: string;
 }
 
+export interface CatalogSubNavItem {
+  label: string;
+  en: string;
+  href: string;
+  active?: boolean;
+}
+
 export interface CatalogPageConfig {
   id: string;
   title: string;
+  /** 子导航标签（如终局内容的 4 个子分类） */
+  subNav?: CatalogSubNavItem[];
   /** dom = 抓取宿主 content-card（隐藏但持续渲染）；cdn = 直接拉取 JSON */
   dataSource: 'dom' | 'cdn';
   /** dom 模式：宿主卡片选择器（默认 [data-ui="content-card"]） */
@@ -40,6 +49,8 @@ export interface CatalogPageConfig {
   scrapeCard?: (card: Element) => CatalogItem | null;
   /** cdn 模式：拉取全量数据 */
   fetchData?: (ctx: CatalogContext) => Promise<CatalogItem[]>;
+  /** 数据就绪后后台预热兄弟页数据（终局 4 页互取，保证 Tab 切换即时命中 L1） */
+  prefetch?: (ctx: CatalogContext) => void;
   searchPlaceholder: string;
   gridClass?: string;
   /** 卡片倾斜效果选择器（非虚拟模式） */

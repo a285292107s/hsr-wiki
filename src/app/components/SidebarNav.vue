@@ -9,10 +9,12 @@ import { NAV_ITEMS, type NavItem } from './nav-items';
 
 const route = useRoute();
 
-/** 目录项高亮：精确匹配或其子路径（如 /character 在 /character/1005 下仍高亮） */
+/** 目录项高亮：精确匹配或其子路径（如 /character 在 /character/1005 下仍高亮）；
+ *  配置了 activePaths 的项（如终局内容 4 路由）对每个路径分别判定 */
 function isActive(item: NavItem): boolean {
   const p = route.path;
-  return p === item.path || p.startsWith(item.path + '/');
+  const paths = item.activePaths || [item.path];
+  return paths.some((ap) => p === ap || p.startsWith(ap + '/'));
 }
 </script>
 

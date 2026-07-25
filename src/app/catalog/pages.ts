@@ -10,9 +10,11 @@ import {
 import {
   loadItems, loadCharacterList, loadLightconeList, loadRelicsetList,
   loadMonsterList, loadMazeList, loadMazeVersions,
+  loadStoryList, loadBossList, loadPeakList, loadPeakVersions,
+  prefetchEndgameAll,
 } from '../../services/api';
-import type { CatalogItem, CatalogPageConfig } from './types';
-import type { MazeListEntry } from '../../services/types';
+import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
+import type { MazeListDb, MazeListEntry, MazeVersionMap } from '../../services/types';
 
 /** 宿主属性图标 URL 键（小写） → 中文名 */
 const ELEM_NAMES: Record<string, string> = {
@@ -401,9 +403,9 @@ const monsterPage: CatalogPageConfig = {
   },
 };
 
-/* ─── 终局内容（赛季行） ─── */
+/* ─── 终局内容（时间线赛季卡片） ─── */
 
-/** 赛季状态：依据 begin/end 日期推导；无日期信息时返回“未知”（与宿主一致） */
+/** 赛季状态：依据 begin/end 日期推导；无日期信息时返回"未知"（与宿主一致） */
 function mazeStatus(info: MazeListEntry): string {
   const parse = (s: string | undefined): number | null => {
     if (!s) return null;
@@ -419,61 +421,185 @@ function mazeStatus(info: MazeListEntry): string {
   return '未知';
 }
 
-const mazePage: CatalogPageConfig = {
-  id: 'maze',
-  title: '终局内容',
-  dataSource: 'dom',
-  cardSelector: 'a.ui-season-row',
-  cardValidator: (el) => /\/maze\/\d+/.test(el.getAttribute('href') || ''),
-  searchPlaceholder: '搜索赛季...',
-  gridClass: 'nk-cat-grid nk-season-grid',
-  cardClass: '.nk-season-card',
-  scrapeCard(el) {
-    const idEl = el.querySelector('.ui-season-row__id');
-    const titleEl = el.querySelector('.ui-season-row__heading');
-    const labelEl = el.querySelector('.ui-season-row__label');
-    const statusEl = el.querySelector('.ui-season-status');
-    return {
-      name: titleEl ? (titleEl.textContent || '').trim() : (idEl ? (idEl.textContent || '').trim() : ''),
-      href: el.getAttribute('href') || '#',
-      id: idEl ? (idEl.textContent || '').trim() : '',
-      version: labelEl ? (labelEl.textContent || '').trim() : '',
-      status: statusEl ? (statusEl.textContent || '').trim() : '',
-    };
-  },
-  async fetchData(ctx) {
-    const [db, verMap] = await Promise.all([loadMazeList(ctx.version), loadMazeVersions(ctx.version)]);
-    const seen = new Set<string>();
-    const items: CatalogItem[] = [];
-    // version.json 键按版本降序；同一赛季取最近归属版本，输出对齐宿主“ID/标题/版本/状态”结构
-    for (const [ver, ids] of Object.entries(verMap)) {
-      (ids || []).forEach((mid, idx) => {
-        const key = String(mid);
-        if (seen.has(key)) return;
-        seen.add(key);
-        const info = db[key];
-        if (!info || !info.zh) return;
-        items.push({
-          id: `ID ${key}`,
-          name: info.zh,
-          href: `/maze/${key}`,
-          version: `${ver} v${idx + 1}`,
-          status: mazeStatus(info),
-        });
-      });
-    }
-    return items;
-  },
-  filters: [],
-  renderCard(item, i) {
-    return `<a class="nk-season-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" style="--i:${i}">
-      <span class="nk-season-card__id">${escHtml(item.id)}</span>
-      <span class="nk-season-card__name">${escHtml(item.name) || '未命名赛季'}</span>
-      ${item.version ? `<span class="nk-season-card__ver">${escHtml(item.version)}</span>` : ''}
-      ${item.status ? `<span class="nk-season-card__status">${escHtml(item.status)}</span>` : ''}
-    </a>`;
-  },
+/** 格式化日期区间（YYYY.MM.DD – MM.DD） */
+function mazeDateRange(info: MazeListEntry): string {
+  const fmt = (s: string | undefined): string | null => {
+    if (!s) return null;
+    const d = new Date(s);
+    if (Number.isNaN(d.getTime())) return null;
+    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const start = fmt(info.live_begin) ?? fmt(info.begin);
+  const end = fmt(info.live_end) ?? fmt(info.end);
+  if (start && end) return `${start} – ${end}`;
+  if (start) return `${start} –`;
+  return '';
+}
+
+/** 状态 → CSS 修饰类 */
+const MAZE_STATUS_CLASS: Record<string, string> = {
+  '进行中': 'live',
+  '已结束': 'ended',
+  '未开始': 'upcoming',
+  '未知': 'unknown',
 };
+
+/** 终局内容 4 大分类（对齐宿主 4 个独立路由） */
+const ENDGAME_TABS = [
+  { label: '忘却之庭', en: 'FORGOTTEN HALL', href: '/maze' },
+  { label: '虚构叙事', en: 'PURE FICTION', href: '/story' },
+  { label: '末日幻影', en: 'APOCALYPSE', href: '/boss' },
+  { label: '异相仲裁', en: 'ANOMALY', href: '/peak' },
+] as const;
+
+/** 生成子导航（当前路由项标记 active） */
+function endgameSubNav(activeHref: string): CatalogSubNavItem[] {
+  return ENDGAME_TABS.map((t) => ({ label: t.label, en: t.en, href: t.href, active: t.href === activeHref }));
+}
+
+/** 版本标签：数字版本原样输出；特殊键（unknown/static）转为中文 */
+function verLabel(ver: string, idx: number): string {
+  if (ver === 'unknown') return '未知';
+  if (ver === 'static') return '常驻';
+  return `${ver} v${idx + 1}`;
+}
+
+interface EndgamePageOpts {
+  id: string;
+  title: string;
+  /** 本页路由（用于子导航高亮与详情链接前缀） */
+  href: string;
+  /** 校验宿主卡片归属的正则（路由 + ID 段） */
+  routeRe: RegExp;
+  loadList: (ver: string) => Promise<MazeListDb>;
+  /** 可选版本映射；无则按 ID 降序直接输出（story/boss） */
+  loadVersions?: (ver: string) => Promise<MazeVersionMap>;
+}
+
+/**
+ * 终局内容页工厂：4 页共享时间线卡片 / 状态筛选 / 子导航，
+ * 仅数据源与路由正则不同（忘却之庭 1xxx / 虚构叙事 2xxx / 末日幻影 3xxx / 异相仲裁 1-9）。
+ */
+function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
+  return {
+    id: o.id,
+    title: o.title,
+    subNav: endgameSubNav(o.href),
+    dataSource: 'dom',
+    prefetch: (ctx) => prefetchEndgameAll(ctx.version),
+    cardSelector: 'a.ui-season-row',
+    cardValidator: (el) => o.routeRe.test(el.getAttribute('href') || ''),
+    searchPlaceholder: '搜索赛季...',
+    gridClass: 'nk-cat-grid nk-season-grid',
+    cardClass: '.nk-season-card',
+    scrapeCard(el) {
+      const idEl = el.querySelector('.ui-season-row__id');
+      const titleEl = el.querySelector('.ui-season-row__heading');
+      const labelEl = el.querySelector('.ui-season-row__label');
+      const statusEl = el.querySelector('.ui-season-status');
+      return {
+        name: titleEl ? (titleEl.textContent || '').trim() : (idEl ? (idEl.textContent || '').trim() : ''),
+        href: el.getAttribute('href') || '#',
+        id: idEl ? (idEl.textContent || '').trim() : '',
+        version: labelEl ? (labelEl.textContent || '').trim() : '',
+        status: statusEl ? (statusEl.textContent || '').trim() : '',
+      };
+    },
+    async fetchData(ctx) {
+      const db = await o.loadList(ctx.version);
+      const items: CatalogItem[] = [];
+      if (o.loadVersions) {
+        // 有 version.json：按版本映射输出（maze/peak），同赛季取最近归属版本
+        const verMap = await o.loadVersions(ctx.version);
+        const seen = new Set<string>();
+        for (const [ver, ids] of Object.entries(verMap)) {
+          (ids || []).forEach((mid, idx) => {
+            const key = String(mid);
+            if (seen.has(key)) return;
+            seen.add(key);
+            const info = db[key];
+            if (!info || !info.zh) return;
+            items.push({
+              id: `ID ${key}`,
+              name: info.zh,
+              href: `${o.href}/${key}`,
+              version: verLabel(ver, idx),
+              status: mazeStatus(info),
+              dateRange: mazeDateRange(info),
+            });
+          });
+        }
+      } else {
+        // 无 version.json：直接按 ID 降序输出（story/boss，对齐宿主 2026→2001 / 3020→3001）
+        for (const [key, info] of Object.entries(db)) {
+          if (!info || !info.zh) continue;
+          items.push({
+            id: `ID ${key}`,
+            name: info.zh,
+            href: `${o.href}/${key}`,
+            version: '',
+            status: mazeStatus(info),
+            dateRange: mazeDateRange(info),
+          });
+        }
+        items.sort((a, b) => Number(String(b.id).replace(/\D/g, '')) - Number(String(a.id).replace(/\D/g, '')));
+      }
+      return items;
+    },
+    buildFilters(items) {
+      const statuses = [...new Set(items.map((i) => String(i.status || '')).filter(Boolean))];
+      if (!statuses.length) return [];
+      return [{
+        key: 'status',
+        label: '状态',
+        options: [
+          { val: '', label: '全部' },
+          ...statuses.map((s) => ({ val: s, label: s })),
+        ],
+      }];
+    },
+    renderCard(item, i) {
+      const st = String(item.status || '未知');
+      const stCls = MAZE_STATUS_CLASS[st] || 'unknown';
+      const dateRange = item.dateRange ? String(item.dateRange) : '';
+      return `<a class="nk-season-card nk-season-card--${stCls}" href="${escHtml(item.href)}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
+      <div class="nk-season-card__node"></div>
+      <div class="nk-season-card__body">
+        <div class="nk-season-card__top">
+          <span class="nk-season-card__name">${escHtml(item.name) || '未命名赛季'}</span>
+          <span class="nk-season-card__status">${escHtml(st)}</span>
+        </div>
+        <div class="nk-season-card__meta">
+          <span class="nk-season-card__id">${escHtml(item.id)}</span>
+          <span class="nk-season-card__ver${item.version && item.version !== '未知' ? '' : ' nk-season-card__ver--unknown'}">${escHtml(item.version || '未知')}</span>
+          ${dateRange ? `<span class="nk-season-card__date">${escHtml(dateRange)}</span>` : ''}
+        </div>
+      </div>
+      <svg class="nk-season-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>`;
+    },
+  };
+}
+
+const mazePage = makeEndgamePage({
+  id: 'maze', title: '终局内容', href: '/maze', routeRe: /\/maze\/\d+/,
+  loadList: loadMazeList, loadVersions: loadMazeVersions,
+});
+
+const storyPage = makeEndgamePage({
+  id: 'story', title: '终局内容', href: '/story', routeRe: /\/story\/\d+/,
+  loadList: loadStoryList,
+});
+
+const bossPage = makeEndgamePage({
+  id: 'boss', title: '终局内容', href: '/boss', routeRe: /\/boss\/\d+/,
+  loadList: loadBossList,
+});
+
+const peakPage = makeEndgamePage({
+  id: 'peak', title: '终局内容', href: '/peak', routeRe: /\/peak\/\d+/,
+  loadList: loadPeakList, loadVersions: loadPeakVersions,
+});
 
 /* ─── 货币战争（复用遗器卡片样式） ─── */
 
@@ -528,5 +654,8 @@ export const CATALOG_PAGES: Record<string, CatalogPageConfig> = {
   item: itemPage,
   monster: monsterPage,
   maze: mazePage,
+  story: storyPage,
+  boss: bossPage,
+  peak: peakPage,
   currency: currencyPage,
 };
