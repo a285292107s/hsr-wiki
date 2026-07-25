@@ -28,15 +28,22 @@ export const useCharacterStore = defineStore('character', () => {
   /** 渲染数据：加强模式 → { d: 加强视图, oldD: 重映射加强前视图 }；原始模式 → oldD=null */
   const renderData = computed(() => getRenderData(data.value, enhKey.value));
 
+  /** 加载代：单调递增。角色间快速连续导航时旧 load 可能晚于新 load 返回，
+   *  仅当代次仍为最新才允许写入状态，避免旧角色数据覆盖新角色。 */
+  let loadGen = 0;
+
   async function load(id: string): Promise<void> {
     const app = useAppStore();
+    const gen = ++loadGen;
     loading.value = true;
     error.value = null;
     try {
       charId.value = id;
       data.value = null;
       await app.initManifest();
+      if (gen !== loadGen) return; // 已被更新的加载取代
       const d = await loadCharacter(app.version, id);
+      if (gen !== loadGen) return; // 已被更新的加载取代
       validateCharData(d);
       data.value = d;
       // 原脚本行为：更新页面标题
@@ -50,13 +57,15 @@ export const useCharacterStore = defineStore('character', () => {
         app.ensureItems(),
         loadBuildNames(app.version, d, app.nameCache),
       ]);
+      if (gen !== loadGen) return; // 已被更新的加载取代
       app.mergeNames(names);
       app.markDataReady();
     } catch (e) {
+      if (gen !== loadGen) return; // 过期加载的失败静默丢弃，由最新加载接管 UI
       error.value = e instanceof Error ? e.message : String(e);
       throw e;
     } finally {
-      loading.value = false;
+      if (gen === loadGen) loading.value = false; // 过期加载不得复位最新加载持有的 loading
     }
   }
 
