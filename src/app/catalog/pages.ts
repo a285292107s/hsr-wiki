@@ -4,7 +4,7 @@
  */
 import { CDN, PATH } from '../../lib/constants';
 import {
-  escHtml, itemIconUrl, avatarShopIconUrl, elementIconUrl, pathIconUrl,
+  escHtml, stripAllTags, itemIconUrl, avatarShopIconUrl, elementIconUrl, pathIconUrl,
   lightconeIconUrl, monsterIconUrl, parseRarity,
 } from '../../lib/format';
 import {
@@ -521,7 +521,7 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
             if (!info || !info.zh) return;
             items.push({
               id: `ID ${key}`,
-              name: info.zh,
+              name: stripAllTags(info.zh),
               href: `${o.href}/${key}`,
               version: verLabel(ver, idx),
               status: mazeStatus(info),
@@ -535,7 +535,7 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
           if (!info || !info.zh) continue;
           items.push({
             id: `ID ${key}`,
-            name: info.zh,
+            name: stripAllTags(info.zh),
             href: `${o.href}/${key}`,
             version: '',
             status: mazeStatus(info),
@@ -546,31 +546,21 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
       }
       return items;
     },
-    buildFilters(items) {
-      const statuses = [...new Set(items.map((i) => String(i.status || '')).filter(Boolean))];
-      if (!statuses.length) return [];
-      return [{
-        key: 'status',
-        label: '状态',
-        options: [
-          { val: '', label: '全部' },
-          ...statuses.map((s) => ({ val: s, label: s })),
-        ],
-      }];
-    },
     renderCard(item, i) {
       const st = String(item.status || '未知');
       const stCls = MAZE_STATUS_CLASS[st] || 'unknown';
       const dateRange = item.dateRange ? String(item.dateRange) : '';
+      const num = String(item.id).replace(/\D/g, '');
+      const numCls = num.length >= 3 ? ' nk-season-card__num--long' : '';
       return `<a class="nk-season-card nk-season-card--${stCls}" href="${escHtml(item.href)}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
       <div class="nk-season-card__node"></div>
+      <span class="nk-season-card__num${numCls}">${escHtml(num)}</span>
       <div class="nk-season-card__body">
         <div class="nk-season-card__top">
           <span class="nk-season-card__name">${escHtml(item.name) || '未命名赛季'}</span>
-          <span class="nk-season-card__status">${escHtml(st)}</span>
+          ${st !== '未知' ? `<span class="nk-season-card__status">${escHtml(st)}</span>` : ''}
         </div>
         <div class="nk-season-card__meta">
-          <span class="nk-season-card__id">${escHtml(item.id)}</span>
           <span class="nk-season-card__ver${item.version && item.version !== '未知' ? '' : ' nk-season-card__ver--unknown'}">${escHtml(item.version || '未知')}</span>
           ${dateRange ? `<span class="nk-season-card__date">${escHtml(dateRange)}</span>` : ''}
         </div>
