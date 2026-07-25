@@ -108,6 +108,7 @@ function kickParallax(): void {
   if (pRaf === null) pRaf = requestAnimationFrame(parallaxLoop);
 }
 function onHeroMove(e: MouseEvent): void {
+  if (spineVisible.value) return; // 动画开启时冻结视差
   const el = heroRef.value;
   if (!el) return;
   const r = el.getBoundingClientRect();
@@ -149,6 +150,7 @@ watch(
 function toggleSpine(): void {
   if (!spineReady.value) return; // 无动画时忽略点击
   spineVisible.value = !spineVisible.value;
+  if (spineVisible.value) { ptx = 0; pty = 0; kickParallax(); } // 开启动画时立绘回中
 }
 
 /* ═══════════ Tabs / 强化模式 ═══════════ */

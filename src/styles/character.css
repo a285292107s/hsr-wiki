@@ -215,7 +215,7 @@
 /* ─── 加强摘要横幅（tabs 与面板之间） ─── */
 .nk-enh-notes { padding: 0 20px; }
 .nk-enh-notes:empty { display: none; }
-.nk-enh-notes__banner { display: flex; align-items: flex-start; gap: 12px; max-width: 900px; margin: 0 auto 4px; padding: 12px 16px; background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.15); border-left: 3px solid var(--primary); border-radius: 8px; }
+.nk-enh-notes__banner { display: flex; align-items: flex-start; gap: 12px; margin: 0 auto 4px; padding: 12px 16px; background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.15); border-left: 3px solid var(--primary); border-radius: 8px; }
 .nk-enh-notes__title { font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); font-weight: 700; white-space: nowrap; padding-top: 2px; }
 .nk-enh-notes__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
 .nk-enh-notes__list li { font-size: 0.75rem; line-height: 1.6; color: var(--text2); position: relative; padding-left: 14px; }

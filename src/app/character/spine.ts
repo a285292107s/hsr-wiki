@@ -223,7 +223,8 @@ function renderSpineSelf(
         showLoading: false, // 隐藏内置加载屏（由页面骨架屏接管）
         success(p) {
           // ── 抗锯齿修复 ──
-          // nanoka atlas 以 scale:0.32 打包（filter: Linear,Linear），全屏显示需放大约 3 倍。
+          // nanoka atlas 以低 scale 降采样打包（filter: Linear,Linear），且缩放比逐角色不同
+          // （如卡芙卡 scale:0.19 ≈ 放大 5.3 倍，部分角色 0.32 ≈ 3 倍），全屏显示需显著放大。
           // spine-player 默认 mipmaps:true，loadSkeleton() 会强制把 magFilter 覆盖为 Nearest，
           // 放大时产生块状像素锯齿。此处保留 mipmaps（缩小侧三线性+各向异性过滤），
           // 仅将放大过滤覆盖回 Linear，恢复 atlas 声明的平滑采样。

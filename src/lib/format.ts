@@ -198,9 +198,11 @@ export function fmtDescDiff(
 
 /* ─── 加强模式：视图构建 ─── */
 
-/** 深拷贝（优先 structuredClone，降级 JSON） */
+/** 深拷贝（优先 structuredClone，失败时降级 JSON——如传入 reactive Proxy 的场景） */
 export function deepClone<T>(o: T): T {
-  if (typeof structuredClone === 'function') return structuredClone(o);
+  if (typeof structuredClone === 'function') {
+    try { return structuredClone(o); } catch { /* Proxy 等不可克隆对象走 JSON 回退 */ }
+  }
   return JSON.parse(JSON.stringify(o)) as T;
 }
 

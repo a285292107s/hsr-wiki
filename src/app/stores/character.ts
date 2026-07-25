@@ -5,7 +5,7 @@
  *   → 并行（物品库 + 配装名称）→ 渲染（视图层）→ 遗器套装/Spine（视图层）
  */
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, toRaw } from 'vue';
 import { loadCharacter, loadBuildNames } from '../../services/api';
 import { getEnhancedKeys, getRenderData, validateCharData } from '../../lib/format';
 import { useAppStore } from './app';
@@ -25,8 +25,9 @@ export const useCharacterStore = defineStore('character', () => {
   /** 加强版本键列表（空 = 该角色无加强） */
   const enhKeys = computed(() => getEnhancedKeys(data.value));
 
-  /** 渲染数据：加强模式 → { d: 加强视图, oldD: 重映射加强前视图 }；原始模式 → oldD=null */
-  const renderData = computed(() => getRenderData(data.value, enhKey.value));
+  /** 渲染数据：加强模式 → { d: 加强视图, oldD: 重映射加强前视图 }；原始模式 → oldD=null
+   *  注意：必须 toRaw 解包 reactive proxy——structuredClone 无法序列化 Proxy */
+  const renderData = computed(() => getRenderData(toRaw(data.value), enhKey.value));
 
   /** 加载代：单调递增。角色间快速连续导航时旧 load 可能晚于新 load 返回，
    *  仅当代次仍为最新才允许写入状态，避免旧角色数据覆盖新角色。 */

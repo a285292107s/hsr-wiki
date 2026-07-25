@@ -42,5 +42,8 @@ __pycache__
 cdn-samples
 要迁移的代码
 
+# Test screenshots (root-level)
+/*.png
+
 # Qoder
 .qoder

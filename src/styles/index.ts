@@ -12,3 +12,18 @@ import characterCss from './character.css?inline';
 import catalogCss from './catalog.css?inline';
 
 export const appCss: string = tokensCss + characterCss + catalogCss;
+
+/**
+ * 注册可动画自定义属性（必须走 JS API）：
+ * Chrome 不处理 Shadow DOM <style> 内的 @property 规则（静默忽略），
+ * 导致 --spine-inner / --spine-outer 的 transition 退化为离散跳变（遮罩无扩散动画）。
+ * CSS.registerProperty() 为文档级注册，对 Shadow DOM 内元素同样生效。
+ */
+for (const [name, initialValue] of [
+  ['--spine-inner', '0%'],
+  ['--spine-outer', '1%'],
+] as const) {
+  try {
+    CSS.registerProperty({ name, syntax: '<percentage>', inherits: false, initialValue });
+  } catch { /* 已注册或环境不支持——降级为无遮罩动画，不影响功能 */ }
+}
