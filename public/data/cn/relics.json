@@ -1,0 +1,2622 @@
+[
+  {
+    "id": 101,
+    "name": "云无留迹的过客",
+    "icon": "icon/item/71000.png",
+    "icon_figure": "icon/item_figure/71000.png",
+    "descriptions": {
+      "2": "治疗量提高<unbreak>#1[i]%</unbreak>。",
+      "4": "在战斗开始时，立即为我方恢复1个战技点。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61011,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61012,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61013,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61014,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 102,
+    "name": "野穗伴行的快枪手",
+    "icon": "icon/item/71001.png",
+    "icon_figure": "icon/item_figure/71001.png",
+    "descriptions": {
+      "2": "攻击力提高<unbreak>#1[i]%</unbreak>。",
+      "4": "使装备者的速度提高<unbreak>#1[i]%</unbreak>，普攻造成的伤害提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61021,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61022,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61023,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61024,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 103,
+    "name": "净庭教宗的圣骑士",
+    "icon": "icon/item/71002.png",
+    "icon_figure": "icon/item_figure/71002.png",
+    "descriptions": {
+      "2": "防御力提高<unbreak>#1[i]%</unbreak>。",
+      "4": "使装备者提供的护盾量提高<unbreak>#1[i]%</unbreak>。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61031,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61032,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61033,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61034,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 104,
+    "name": "密林卧雪的猎人",
+    "icon": "icon/item/71003.png",
+    "icon_figure": "icon/item_figure/71003.png",
+    "descriptions": {
+      "2": "冰属性伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者施放终结技时，暴击伤害提高<unbreak>#1[i]%</unbreak>，持续<unbreak>#2[i]</unbreak>回合。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61041,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61042,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61043,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61044,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 105,
+    "name": "街头出身的拳王",
+    "icon": "icon/item/71004.png",
+    "icon_figure": "icon/item_figure/71004.png",
+    "descriptions": {
+      "2": "物理属性伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者施放攻击或受到攻击后，其在本场战斗中攻击力提高<unbreak>#1[i]%</unbreak>，最多叠加<unbreak>#2[i]</unbreak>层。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61051,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61052,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61053,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61054,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 106,
+    "name": "戍卫风雪的铁卫",
+    "icon": "icon/item/71005.png",
+    "icon_figure": "icon/item_figure/71005.png",
+    "descriptions": {
+      "2": "受到伤害降低<unbreak>#1[i]%</unbreak>。",
+      "4": "回合开始时，如果装备者当前生命值百分比小于等于<unbreak>#1[i]%</unbreak>，则回复等同于自身生命上限<unbreak>#2[i]%</unbreak>的生命值，并恢复<unbreak>#3[i]</unbreak>点能量。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61061,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61062,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61063,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61064,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 107,
+    "name": "熔岩锻铸的火匠",
+    "icon": "icon/item/71006.png",
+    "icon_figure": "icon/item_figure/71006.png",
+    "descriptions": {
+      "2": "火属性伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "使装备者战技造成的伤害提高<unbreak>#1[i]%</unbreak>，并使施放终结技后的下一次攻击造成的火属性伤害提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61071,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61072,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61073,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61074,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 108,
+    "name": "繁星璀璨的天才",
+    "icon": "icon/item/71007.png",
+    "icon_figure": "icon/item_figure/71007.png",
+    "descriptions": {
+      "2": "量子属性伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者对敌方目标造成伤害时，无视其<unbreak>#1[i]%</unbreak>的防御力。若目标拥有量子属性弱点，额外无视其<unbreak>#2[i]%</unbreak>的防御力。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61081,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61082,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61083,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61084,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 109,
+    "name": "激奏雷电的乐队",
+    "icon": "icon/item/71008.png",
+    "icon_figure": "icon/item_figure/71008.png",
+    "descriptions": {
+      "2": "雷属性伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者施放战技时，使装备者的攻击力提高<unbreak>#1[i]%</unbreak>，持续<unbreak>#2[i]</unbreak>回合。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61091,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61092,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61093,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61094,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 110,
+    "name": "晨昏交界的翔鹰",
+    "icon": "icon/item/71009.png",
+    "icon_figure": "icon/item_figure/71009.png",
+    "descriptions": {
+      "2": "风属性伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者施放终结技后，使其行动提前<unbreak>#1[i]%</unbreak>。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61101,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61102,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61103,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61104,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 111,
+    "name": "流星追迹的怪盗",
+    "icon": "icon/item/71010.png",
+    "icon_figure": "icon/item_figure/71010.png",
+    "descriptions": {
+      "2": "击破特攻提高<unbreak>#1[i]%</unbreak>。",
+      "4": "使装备者的击破特攻提高<unbreak>#1[i]%</unbreak>。当装备者击破敌方目标弱点后，恢复<unbreak>#2[i]</unbreak>点能量。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61111,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61112,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61113,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61114,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 112,
+    "name": "盗匪荒漠的废土客",
+    "icon": "icon/item/71011.png",
+    "icon_figure": "icon/item_figure/71011.png",
+    "descriptions": {
+      "2": "虚数属性伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "装备者对陷入负面效果的敌方目标造成伤害时暴击率提高<unbreak>#1[i]%</unbreak>，对陷入禁锢状态的敌方目标造成伤害时暴击伤害提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61121,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61122,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61123,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61124,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 113,
+    "name": "宝命长存的莳者",
+    "icon": "icon/item/71020.png",
+    "icon_figure": "icon/item_figure/71020.png",
+    "descriptions": {
+      "2": "生命上限提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者受到攻击或被我方目标消耗生命值后，暴击率提高<unbreak>#1[i]%</unbreak>，持续<unbreak>#2[i]</unbreak>回合，该效果最多叠加<unbreak>#3[i]</unbreak>层。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61131,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61132,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61133,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61134,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.2"
+  },
+  {
+    "id": 114,
+    "name": "骇域漫游的信使",
+    "icon": "icon/item/71021.png",
+    "icon_figure": "icon/item_figure/71021.png",
+    "descriptions": {
+      "2": "速度提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者对我方目标施放终结技时，我方全体速度提高<unbreak>#1[i]%</unbreak>，持续<unbreak>#2[i]</unbreak>回合，该效果无法叠加。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61141,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61142,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61143,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61144,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.2"
+  },
+  {
+    "id": 115,
+    "name": "毁烬焚骨的大公",
+    "icon": "icon/item/71024.png",
+    "icon_figure": "icon/item_figure/71024.png",
+    "descriptions": {
+      "2": "追加攻击造成的伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "装备者施放追加攻击时，根据追加攻击造成伤害的次数，每次造成伤害时使装备者的攻击力提高<unbreak>#1[i]%</unbreak>，最多叠加<unbreak>#2[i]</unbreak>次，持续<unbreak>#3[i]</unbreak>回合。该效果在装备者下一次施放追加攻击时移除。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61151,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61152,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61153,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61154,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.5"
+  },
+  {
+    "id": 116,
+    "name": "幽锁深牢的系囚",
+    "icon": "icon/item/71025.png",
+    "icon_figure": "icon/item_figure/71025.png",
+    "descriptions": {
+      "2": "攻击力提高<unbreak>#1[i]%</unbreak>。",
+      "4": "敌方目标每承受1个持续伤害效果，装备者对其造成伤害时就无视其<unbreak>#1[i]%</unbreak>的防御力，最多计入<unbreak>#2[i]</unbreak>个持续伤害效果。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61161,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61162,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61163,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61164,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.5"
+  },
+  {
+    "id": 117,
+    "name": "死水深潜的先驱",
+    "icon": "icon/item/71028.png",
+    "icon_figure": "icon/item_figure/71028.png",
+    "descriptions": {
+      "2": "对受负面状态影响的敌人造成的伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "暴击率提高<unbreak>#1[i]%</unbreak>，装备者对陷入不少于<unbreak>#4[i]</unbreak>/<unbreak>#5[i]</unbreak>个负面效果的敌方目标造成的暴击伤害提高<unbreak>#2[i]%</unbreak>/<unbreak>#3[i]%</unbreak>。装备者对敌方目标施加负面效果后，上述效果提高<unbreak>100%</unbreak>，持续<unbreak>#6[i]</unbreak>回合。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61171,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61172,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61173,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61174,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.0"
+  },
+  {
+    "id": 118,
+    "name": "机心戏梦的钟表匠",
+    "icon": "icon/item/71029.png",
+    "icon_figure": "icon/item_figure/71029.png",
+    "descriptions": {
+      "2": "击破特攻提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者对我方目标施放终结技时，我方全体击破特攻提高<unbreak>#1[i]%</unbreak>，持续<unbreak>#2[i]</unbreak>回合，该效果无法叠加。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61181,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61182,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61183,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61184,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.0"
+  },
+  {
+    "id": 119,
+    "name": "荡除蠹灾的铁骑",
+    "icon": "icon/item/71032.png",
+    "icon_figure": "icon/item_figure/71032.png",
+    "descriptions": {
+      "2": "击破特攻提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者的击破特攻大于等于<unbreak>#1[i]%</unbreak>时，对敌方目标造成的击破伤害无视其<unbreak>#3[i]%</unbreak>的防御力。当装备者的击破特攻大于等于<unbreak>#2[i]%</unbreak>时，对敌方目标造成的超击破伤害额外无视其<unbreak>#4[i]%</unbreak>的防御力。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61191,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61192,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61193,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61194,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.3"
+  },
+  {
+    "id": 120,
+    "name": "风举云飞的勇烈",
+    "icon": "icon/item/71033.png",
+    "icon_figure": "icon/item_figure/71033.png",
+    "descriptions": {
+      "2": "攻击力提高<unbreak>#1[i]%</unbreak>。",
+      "4": "使装备者的暴击率提高<unbreak>#1[i]%</unbreak>，装备者施放追加攻击时，使终结技造成的伤害提高<unbreak>#2[i]%</unbreak>，持续<unbreak>#3[i]</unbreak>回合。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61201,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61202,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61203,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61204,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.3"
+  },
+  {
+    "id": 121,
+    "name": "重循苦旅的司铎",
+    "icon": "icon/item/71038.png",
+    "icon_figure": "icon/item_figure/71038.png",
+    "descriptions": {
+      "2": "速度提高<unbreak>#1[i]%</unbreak>。",
+      "4": "对我方单体目标施放战技或终结技时，使技能目标的暴击伤害提高<unbreak>#1[i]%</unbreak>，持续<unbreak>#2[i]</unbreak>回合，该效果最多叠加<unbreak>#3[i]</unbreak>次。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61211,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61212,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61213,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61214,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.6"
+  },
+  {
+    "id": 122,
+    "name": "识海迷坠的学者",
+    "icon": "icon/item/71039.png",
+    "icon_figure": "icon/item_figure/71039.png",
+    "descriptions": {
+      "2": "暴击率提高<unbreak>#1[i]%</unbreak>。",
+      "4": "战技和终结技造成的伤害提高<unbreak>#1[i]%</unbreak>，施放终结技后，下一次施放战技时造成的伤害额外提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61221,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61222,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61223,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61224,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.6"
+  },
+  {
+    "id": 123,
+    "name": "凯歌祝捷的英豪",
+    "icon": "icon/item/71040.png",
+    "icon_figure": "icon/item_figure/71040.png",
+    "descriptions": {
+      "2": "攻击力提高<unbreak>#1[i]%</unbreak>。",
+      "4": "装备者的忆灵在场时，装备者的速度提高<unbreak>#1[i]%</unbreak>，装备者的忆灵攻击时，装备者和忆灵的暴击伤害提高<unbreak>#2[i]%</unbreak>，持续<unbreak>#3[i]</unbreak>回合。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61231,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61232,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61233,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61234,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.0"
+  },
+  {
+    "id": 124,
+    "name": "哀歌覆国的诗人",
+    "icon": "icon/item/71041.png",
+    "icon_figure": "icon/item_figure/71041.png",
+    "descriptions": {
+      "2": "量子属性伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "使装备者的速度降低<unbreak>#6[i]%</unbreak>。进入战斗前，若装备者的速度小于<unbreak>#2[i]</unbreak>/<unbreak>#3[i]</unbreak>，使装备者的暴击率提高<unbreak>#4[i]%</unbreak>/<unbreak>#5[i]%</unbreak>。该效果同时对装备者的忆灵生效。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61241,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61242,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61243,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61244,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.0"
+  },
+  {
+    "id": 125,
+    "name": "烈阳惊雷的女武神",
+    "icon": "icon/item/71044.png",
+    "icon_figure": "icon/item_figure/71044.png",
+    "descriptions": {
+      "2": "速度提高<unbreak>#1[i]%</unbreak>。",
+      "4": "当装备者及其忆灵为装备者及其忆灵以外的我方目标提供治疗后，使装备者获得【甘霖】，每回合最多触发1次，持续<unbreak>#3[i]</unbreak>回合。装备者持有【甘霖】时，速度提高<unbreak>#1[i]%</unbreak>，我方全体暴击伤害提高<unbreak>#2[i]%</unbreak>，该效果无法叠加。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61251,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61252,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61253,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61254,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.3"
+  },
+  {
+    "id": 126,
+    "name": "恶海逐波的船长",
+    "icon": "icon/item/71045.png",
+    "icon_figure": "icon/item_figure/71045.png",
+    "descriptions": {
+      "2": "暴击伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "装备者成为其他我方目标的技能目标时，获得1层【助力】，最多叠加<unbreak>#1[i]</unbreak>层。施放终结技时，若持有<unbreak>#1[i]</unbreak>层【助力】，消耗所有【助力】，使装备者攻击力提高<unbreak>#2[i]%</unbreak>，持续<unbreak>#3[i]</unbreak>回合。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61261,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61262,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61263,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61264,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.3"
+  },
+  {
+    "id": 127,
+    "name": "再创天地的救世主",
+    "icon": "icon/item/71048.png",
+    "icon_figure": "icon/item_figure/71048.png",
+    "descriptions": {
+      "2": "暴击率提高<unbreak>#1[i]%</unbreak>。",
+      "4": "装备者施放普攻或战技后，若装备者的忆灵在场，使装备者及其忆灵生命上限提高<unbreak>#1[i]%</unbreak>，我方全体造成的伤害提高<unbreak>#2[i]%</unbreak>，持续至装备者下次施放普攻或战技后。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61271,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61272,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61273,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61274,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.6"
+  },
+  {
+    "id": 128,
+    "name": "自匿星芒的隐士",
+    "icon": "icon/item/71049.png",
+    "icon_figure": "icon/item_figure/71049.png",
+    "descriptions": {
+      "2": "提供的护盾量提高<unbreak>#1[i]%</unbreak>。",
+      "4": "使装备者提供的护盾量提高<unbreak>#1[i]%</unbreak>，我方目标持有装备者提供的护盾时，暴击伤害提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61281,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61282,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61283,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61284,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.6"
+  },
+  {
+    "id": 129,
+    "name": "闪耀功勋的魔法少女",
+    "icon": "icon/item/71052.png",
+    "icon_figure": "icon/item_figure/71052.png",
+    "descriptions": {
+      "2": "暴击伤害提高<unbreak>#1[i]%</unbreak>。",
+      "4": "装备者及其忆灵造成的欢愉伤害无视目标<unbreak>#1[i]%</unbreak>的防御力，我方每累计获得<unbreak>#2[i]</unbreak>点笑点，造成的欢愉伤害额外无视目标<unbreak>#3[i]%</unbreak>的防御力，最多叠加<unbreak>#4[i]</unbreak>层。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61291,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61292,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61293,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61294,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "4.0"
+  },
+  {
+    "id": 130,
+    "name": "应天涉远的卜者",
+    "icon": "icon/item/71053.png",
+    "icon_figure": "icon/item_figure/71053.png",
+    "descriptions": {
+      "2": "速度提高<unbreak>#1[i]%</unbreak>。",
+      "4": "进入战斗前，若装备者的速度大于等于<unbreak>#1[i]</unbreak>/<unbreak>#2[i]</unbreak>，使装备者的暴击率提高<unbreak>#3[i]%</unbreak>/<unbreak>#4[i]%</unbreak>。装备者每场战斗首次施放欢愉技时，使我方全体欢愉度提高<unbreak>#5[i]%</unbreak>，该效果无法叠加。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61301,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61302,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61303,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61304,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "4.0"
+  },
+  {
+    "id": 131,
+    "name": "星如我见的领航员",
+    "icon": "icon/item/71056.png",
+    "icon_figure": "icon/item_figure/71056.png",
+    "descriptions": {
+      "2": "攻击力提高<unbreak>#1[i]%</unbreak>。",
+      "4": "装备者进入战斗时/施放战技时，使战技和终结技造成的伤害提高<unbreak>#1[i]%</unbreak>，最多叠加<unbreak>#2[i]</unbreak>层，装备者回合开始时/施放终结技后，移除<unbreak>#3[i]</unbreak>层该效果。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61311,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61312,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61313,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61314,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "4.3"
+  },
+  {
+    "id": 132,
+    "name": "叩问天工的名冶",
+    "icon": "icon/item/71057.png",
+    "icon_figure": "icon/item_figure/71057.png",
+    "descriptions": {
+      "2": "生命上限提高<unbreak>#1[i]%</unbreak>。",
+      "4": "装备者对防御力降低状态的敌方目标造成的暴击伤害提高<unbreak>#1[i]%</unbreak>。装备者对敌方目标施加防御力降低状态后，使我方全体获得【助燃】，持续<unbreak>#2[i]</unbreak>回合，该效果无法叠加，持有【助燃】的我方目标造成的伤害提高<unbreak>#3[i]%</unbreak>。该效果在装备者施放攻击后可再次触发。"
+    },
+    "require_num": [
+      2,
+      4
+    ],
+    "pieces": [
+      {
+        "id": 61321,
+        "type": "HEAD",
+        "type_name": "头部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 51,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61322,
+        "type": "HAND",
+        "type_name": "手部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 52,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61323,
+        "type": "BODY",
+        "type_name": "躯干",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 53,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 61324,
+        "type": "FOOT",
+        "type_name": "脚部",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 54,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "4.3"
+  },
+  {
+    "id": 301,
+    "name": "太空封印站",
+    "icon": "icon/item/71012.png",
+    "icon_figure": "icon/item_figure/71012.png",
+    "descriptions": {
+      "2": "使装备者的攻击力提高<unbreak>#1[i]%</unbreak>。当装备者的速度大于等于<unbreak>#2[i]</unbreak>时，攻击力额外提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63015,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63016,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 302,
+    "name": "不老者的仙舟",
+    "icon": "icon/item/71013.png",
+    "icon_figure": "icon/item_figure/71013.png",
+    "descriptions": {
+      "2": "使装备者的生命上限提高<unbreak>#1[i]%</unbreak>。当装备者的速度大于等于<unbreak>#2[i]</unbreak>时，我方全体攻击力提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63025,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63026,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 303,
+    "name": "泛银河商业公司",
+    "icon": "icon/item/71014.png",
+    "icon_figure": "icon/item_figure/71014.png",
+    "descriptions": {
+      "2": "使装备者的效果命中提高<unbreak>#1[i]%</unbreak>。同时提高装备者等同于当前效果命中<unbreak>#2[i]%</unbreak>的攻击力，最多提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63035,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63036,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 304,
+    "name": "筑城者的贝洛伯格",
+    "icon": "icon/item/71015.png",
+    "icon_figure": "icon/item_figure/71015.png",
+    "descriptions": {
+      "2": "使装备者的防御力提高<unbreak>#1[i]%</unbreak>。当装备者的效果命中大于等于<unbreak>#2[i]%</unbreak>时，防御力额外提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63045,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63046,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 305,
+    "name": "星体差分机",
+    "icon": "icon/item/71016.png",
+    "icon_figure": "icon/item_figure/71016.png",
+    "descriptions": {
+      "2": "使装备者的暴击伤害提高<unbreak>#1[i]%</unbreak>。当装备者的暴击伤害大于等于<unbreak>#2[i]%</unbreak>时，进入战斗后装备者的暴击率提高<unbreak>#3[i]%</unbreak>，持续到施放首次攻击后结束。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63055,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63056,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 306,
+    "name": "停转的萨尔索图",
+    "icon": "icon/item/71017.png",
+    "icon_figure": "icon/item_figure/71017.png",
+    "descriptions": {
+      "2": "使装备者的暴击率提高<unbreak>#1[i]%</unbreak>。当装备者当前暴击率大于等于<unbreak>#2[i]%</unbreak>时，终结技和追加攻击造成的伤害提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63065,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63066,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 307,
+    "name": "盗贼公国塔利亚",
+    "icon": "icon/item/71018.png",
+    "icon_figure": "icon/item_figure/71018.png",
+    "descriptions": {
+      "2": "使装备者的击破特攻提高<unbreak>#1[i]%</unbreak>。当装备者的速度大于等于<unbreak>#2[i]</unbreak>时，击破特攻额外提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63075,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63076,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 308,
+    "name": "生命的翁瓦克",
+    "icon": "icon/item/71019.png",
+    "icon_figure": "icon/item_figure/71019.png",
+    "descriptions": {
+      "2": "使装备者的能量恢复效率提高<unbreak>#1[i]%</unbreak>。当装备者的速度大于等于<unbreak>#2[i]</unbreak>时，进入战斗时立刻使行动提前<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63085,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63086,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.0"
+  },
+  {
+    "id": 309,
+    "name": "繁星竞技场",
+    "icon": "icon/item/71022.png",
+    "icon_figure": "icon/item_figure/71022.png",
+    "descriptions": {
+      "2": "使装备者的暴击率提高<unbreak>#1[i]%</unbreak>。当装备者的当前暴击率大于等于<unbreak>#2[i]%</unbreak>时，普攻和战技造成的伤害提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63095,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63096,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.2"
+  },
+  {
+    "id": 310,
+    "name": "折断的龙骨",
+    "icon": "icon/item/71023.png",
+    "icon_figure": "icon/item_figure/71023.png",
+    "descriptions": {
+      "2": "使装备者的效果抵抗提高<unbreak>#1[i]%</unbreak>。当装备者的效果抵抗大于等于<unbreak>#2[i]%</unbreak>时，我方全体暴击伤害提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63105,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63106,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.2"
+  },
+  {
+    "id": 311,
+    "name": "苍穹战线格拉默",
+    "icon": "icon/item/71026.png",
+    "icon_figure": "icon/item_figure/71026.png",
+    "descriptions": {
+      "2": "使装备者的攻击力提高<unbreak>#1[i]%</unbreak>。当装备者的速度大于等于<unbreak>#2[i]</unbreak>/<unbreak>#3[i]</unbreak>时，使装备者造成的伤害提高<unbreak>#4[i]%</unbreak>/<unbreak>#5[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63115,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63116,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.5"
+  },
+  {
+    "id": 312,
+    "name": "梦想之地匹诺康尼",
+    "icon": "icon/item/71027.png",
+    "icon_figure": "icon/item_figure/71027.png",
+    "descriptions": {
+      "2": "使装备者的能量恢复效率提高<unbreak>#1[i]%</unbreak>。使队伍中与装备者属性相同的我方其他角色造成的伤害提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63125,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63126,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "1.5"
+  },
+  {
+    "id": 313,
+    "name": "无主荒星茨冈尼亚",
+    "icon": "icon/item/71030.png",
+    "icon_figure": "icon/item_figure/71030.png",
+    "descriptions": {
+      "2": "使装备者的暴击率提高<unbreak>#3[i]%</unbreak>。当敌方目标被消灭时，装备者暴击伤害提高<unbreak>#1[i]%</unbreak>，最多叠加<unbreak>#2[i]</unbreak>层。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63135,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63136,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.1"
+  },
+  {
+    "id": 314,
+    "name": "出云显世与高天神国",
+    "icon": "icon/item/71031.png",
+    "icon_figure": "icon/item_figure/71031.png",
+    "descriptions": {
+      "2": "使装备者的攻击力提高<unbreak>#1[i]%</unbreak>。进入战斗时，若至少存在一名与装备者命途相同的队友，装备者的暴击率提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63145,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63146,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.1"
+  },
+  {
+    "id": 315,
+    "name": "奔狼的都蓝王朝",
+    "icon": "icon/item/71034.png",
+    "icon_figure": "icon/item_figure/71034.png",
+    "descriptions": {
+      "2": "我方角色施放追加攻击时，装备者获得一层【功勋】，最多叠加<unbreak>#1[i]</unbreak>层，每层【功勋】使装备者追加攻击造成的伤害提高<unbreak>#2[i]%</unbreak>，叠满<unbreak>#1[i]</unbreak>层时，额外使装备者的暴击伤害提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63155,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63156,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.3"
+  },
+  {
+    "id": 316,
+    "name": "劫火莲灯铸炼宫",
+    "icon": "icon/item/71035.png",
+    "icon_figure": "icon/item_figure/71035.png",
+    "descriptions": {
+      "2": "使装备者的速度提高<unbreak>#1[i]%</unbreak>。当装备者击中拥有火属性弱点的敌方目标时，击破特攻提高<unbreak>#2[i]%</unbreak>，持续<unbreak>#3[i]</unbreak>回合。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63165,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63166,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.3"
+  },
+  {
+    "id": 317,
+    "name": "沉陆海域露莎卡",
+    "icon": "icon/item/71036.png",
+    "icon_figure": "icon/item_figure/71036.png",
+    "descriptions": {
+      "2": "使装备者的能量恢复效率提高<unbreak>#1[i]%</unbreak>，如果装备者不是编队中的第一位角色，使编队中的第一位角色攻击力提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63175,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63176,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.5"
+  },
+  {
+    "id": 318,
+    "name": "奇想蕉乐园",
+    "icon": "icon/item/71037.png",
+    "icon_figure": "icon/item_figure/71037.png",
+    "descriptions": {
+      "2": "使装备者的暴击伤害提高<unbreak>#1[i]%</unbreak>，当存在装备者召唤的目标时，暴击伤害额外提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63185,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63186,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "2.5"
+  },
+  {
+    "id": 319,
+    "name": "谧宁拾骨地",
+    "icon": "icon/item/71042.png",
+    "icon_figure": "icon/item_figure/71042.png",
+    "descriptions": {
+      "2": "使装备者的生命上限提高<unbreak>#1[i]%</unbreak>。当装备者的生命上限大于等于<unbreak>#2[i]</unbreak>点时，使装备者及其忆灵的暴击伤害提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63195,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63196,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.1"
+  },
+  {
+    "id": 320,
+    "name": "渊思寂虑的巨树",
+    "icon": "icon/item/71043.png",
+    "icon_figure": "icon/item_figure/71043.png",
+    "descriptions": {
+      "2": "使装备者的速度提高<unbreak>#1[i]%</unbreak>。当装备者的速度大于等于<unbreak>#2[i]</unbreak>/<unbreak>#3[i]</unbreak>时，使装备者及其忆灵的治疗量提高<unbreak>#4[i]%</unbreak>/<unbreak>#5[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63205,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63206,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.1"
+  },
+  {
+    "id": 321,
+    "name": "妖精织梦的乐园",
+    "icon": "icon/item/71046.png",
+    "icon_figure": "icon/item_figure/71046.png",
+    "descriptions": {
+      "2": "队伍中当前在场的我方目标数量不等于4时，每多/少1名我方目标，使装备者及其忆灵造成的伤害提高<unbreak>#1[i]%</unbreak>/<unbreak>#2[i]%</unbreak>，最多叠加<unbreak>#3[i]</unbreak>/<unbreak>#4[i]</unbreak>层。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63215,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63216,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.4"
+  },
+  {
+    "id": 322,
+    "name": "沉欢醉饮的海隅",
+    "icon": "icon/item/71047.png",
+    "icon_figure": "icon/item_figure/71047.png",
+    "descriptions": {
+      "2": "使装备者的攻击力提高<unbreak>#1[i]%</unbreak>。当装备者的攻击力大于等于<unbreak>#2[i]</unbreak>/<unbreak>#3[i]</unbreak>时，使造成的持续伤害额外提高<unbreak>#4[i]%</unbreak>/<unbreak>#5[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63225,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63226,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.4"
+  },
+  {
+    "id": 323,
+    "name": "永恒之地翁法罗斯",
+    "icon": "icon/item/71050.png",
+    "icon_figure": "icon/item_figure/71050.png",
+    "descriptions": {
+      "2": "使装备者的暴击率提高<unbreak>#1[i]%</unbreak>。装备者的忆灵在场时，我方全体速度提高<unbreak>#2[i]%</unbreak>，该效果无法叠加。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63235,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63236,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.7"
+  },
+  {
+    "id": 324,
+    "name": "天国@直播间",
+    "icon": "icon/item/71051.png",
+    "icon_figure": "icon/item_figure/71051.png",
+    "descriptions": {
+      "2": "使装备者的暴击伤害提高<unbreak>#1[i]%</unbreak>，若在同一回合内消耗大于等于<unbreak>#2[i]</unbreak>点战技点，额外使装备者暴击伤害提高<unbreak>#3[i]%</unbreak>，持续<unbreak>#4[i]</unbreak>回合。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63245,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63246,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "3.7"
+  },
+  {
+    "id": 325,
+    "name": "零号关卡朋克洛德",
+    "icon": "icon/item/71054.png",
+    "icon_figure": "icon/item_figure/71054.png",
+    "descriptions": {
+      "2": "使装备者的欢愉度提高<unbreak>#1[i]%</unbreak>。战斗中欢愉度首次达到<unbreak>#2[i]%</unbreak>/<unbreak>#3[i]%</unbreak>时，使装备者暴击伤害提高<unbreak>#4[i]%</unbreak>/<unbreak>#5[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63255,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63256,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "4.1"
+  },
+  {
+    "id": 326,
+    "name": "千星荟萃之城",
+    "icon": "icon/item/71055.png",
+    "icon_figure": "icon/item_figure/71055.png",
+    "descriptions": {
+      "2": "装备者施放追加攻击时，攻击力提高<unbreak>#1[i]%</unbreak>，持续<unbreak>#2[i]</unbreak>回合。当敌方目标被消灭时，我方全体在本场战斗中暴击伤害提高<unbreak>#3[i]%</unbreak>，该效果无法叠加。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63265,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63266,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "4.1"
+  },
+  {
+    "id": 327,
+    "name": "坠星启航地",
+    "icon": "icon/item/71058.png",
+    "icon_figure": "icon/item_figure/71058.png",
+    "descriptions": {
+      "2": "使装备者的暴击率提高<unbreak>#1[i]%</unbreak>。进入战斗时，若装备者与另一名队友均为开拓同行角色，使装备者的暴击伤害提高<unbreak>#2[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63275,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63276,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "4.4"
+  },
+  {
+    "id": 328,
+    "name": "寰宇生研院",
+    "icon": "icon/item/71059.png",
+    "icon_figure": "icon/item_figure/71059.png",
+    "descriptions": {
+      "2": "进入战斗时，若装备者能量上限大于等于<unbreak>#1[i]</unbreak>点，每超过1点使装备者造成的伤害提高<unbreak>#2[f1]%</unbreak>，最多提高<unbreak>#3[i]%</unbreak>。"
+    },
+    "require_num": [
+      2
+    ],
+    "pieces": [
+      {
+        "id": 63285,
+        "type": "NECK",
+        "type_name": "位面球",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 55,
+        "sub_affix_group": 5
+      },
+      {
+        "id": 63286,
+        "type": "OBJECT",
+        "type_name": "连结绳",
+        "rarity": 5,
+        "max_level": 15,
+        "main_affix_group": 56,
+        "sub_affix_group": 5
+      }
+    ],
+    "release_version": "4.4"
+  }
+]

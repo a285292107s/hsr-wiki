@@ -1,0 +1,98 @@
+[
+  {
+    "id": "AllDamageReduce",
+    "name": "减伤"
+  },
+  {
+    "id": "AttackAddedRatio",
+    "name": "攻击力百分比"
+  },
+  {
+    "id": "AttackDelta",
+    "name": "攻击力"
+  },
+  {
+    "id": "BreakDamageAddedRatioBase",
+    "name": "击破特攻"
+  },
+  {
+    "id": "CriticalChanceBase",
+    "name": "暴击率"
+  },
+  {
+    "id": "CriticalDamageBase",
+    "name": "暴击伤害"
+  },
+  {
+    "id": "DefenceAddedRatio",
+    "name": "防御力百分比"
+  },
+  {
+    "id": "DefenceDelta",
+    "name": "防御力"
+  },
+  {
+    "id": "FireAddedRatio",
+    "name": "火属性伤害提高"
+  },
+  {
+    "id": "HPAddedRatio",
+    "name": "生命值百分比"
+  },
+  {
+    "id": "HPDelta",
+    "name": "生命值"
+  },
+  {
+    "id": "HealRatioBase",
+    "name": "治疗量"
+  },
+  {
+    "id": "IceAddedRatio",
+    "name": "冰属性伤害提高"
+  },
+  {
+    "id": "ImaginaryAddedRatio",
+    "name": "虚数属性伤害提高"
+  },
+  {
+    "id": "MaxSP",
+    "name": "最大战技点"
+  },
+  {
+    "id": "PhysicalAddedRatio",
+    "name": "物理伤害提高"
+  },
+  {
+    "id": "QuantumAddedRatio",
+    "name": "量子属性伤害提高"
+  },
+  {
+    "id": "SPRatioBase",
+    "name": "能量恢复效率"
+  },
+  {
+    "id": "SpeedAddedRatio",
+    "name": "速度百分比"
+  },
+  {
+    "id": "SpeedDelta",
+    "name": "速度"
+  },
+  {
+    "id": "StatusProbabilityBase",
+    "name": "效果命中"
+  },
+  {
+    "id": "StatusResistanceBase",
+    "name": "效果抵抗"
+  },
+  {
+    "id": "ThunderAddedRatio",
+    "name": "雷属性伤害提高"
+  },
+  {
+    "id": "WindAddedRatio",
+    "name": "风属性伤害提高"
+  }
+]
