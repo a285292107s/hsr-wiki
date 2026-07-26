@@ -270,6 +270,68 @@
     ]
   },
   {
+    "id": 1014,
+    "name": "Saber",
+    "full_name": "",
+    "rarity": 5,
+    "path": "Warrior",
+    "element": "Wind",
+    "sp_need": 360,
+    "vo_tag": "saber",
+    "icon": "icon/character/1014.png",
+    "icon_round": "icon/character_round/1014.png",
+    "icon_mini": "icon/character_mini/1014.png",
+    "icon_cutin": "icon/character_cutin/1014.png",
+    "rank_ids": [
+      101401,
+      101402,
+      101403,
+      101404,
+      101405,
+      101406
+    ],
+    "skill_ids": [
+      101401,
+      101402,
+      101403,
+      101404,
+      101406,
+      101407,
+      101408
+    ]
+  },
+  {
+    "id": 1015,
+    "name": "Archer",
+    "full_name": "",
+    "rarity": 5,
+    "path": "Rogue",
+    "element": "Quantum",
+    "sp_need": 220,
+    "vo_tag": "archer",
+    "icon": "icon/character/1015.png",
+    "icon_round": "icon/character_round/1015.png",
+    "icon_mini": "icon/character_mini/1015.png",
+    "icon_cutin": "icon/character_cutin/1015.png",
+    "rank_ids": [
+      101501,
+      101502,
+      101503,
+      101504,
+      101505,
+      101506
+    ],
+    "skill_ids": [
+      101501,
+      101502,
+      101503,
+      101504,
+      101506,
+      101507,
+      101509
+    ]
+  },
+  {
     "id": 1101,
     "name": "布洛妮娅",
     "full_name": "",
@@ -2388,7 +2450,7 @@
   },
   {
     "id": 1506,
-    "name": "银狼LV.<unbreak>999</unbreak>",
+    "name": "银狼LV.999",
     "full_name": "",
     "rarity": 5,
     "path": "Elation",
@@ -2456,6 +2518,70 @@
     ]
   },
   {
+    "id": 1508,
+    "name": "远坂凛",
+    "full_name": "",
+    "rarity": 5,
+    "path": "Mage",
+    "element": "Quantum",
+    "sp_need": 160,
+    "vo_tag": "tohsakarin",
+    "icon": "icon/character/1508.png",
+    "icon_round": "icon/character_round/1508.png",
+    "icon_mini": "icon/character_mini/1508.png",
+    "icon_cutin": "icon/character_cutin/1508.png",
+    "rank_ids": [
+      150801,
+      150802,
+      150803,
+      150804,
+      150805,
+      150806
+    ],
+    "skill_ids": [
+      150801,
+      150802,
+      150803,
+      150804,
+      150805,
+      150806,
+      150807,
+      150809
+    ]
+  },
+  {
+    "id": 1509,
+    "name": "吉尔伽美什",
+    "full_name": "",
+    "rarity": 5,
+    "path": "Warrior",
+    "element": "Thunder",
+    "sp_need": 360,
+    "vo_tag": "gilgamesh",
+    "icon": "icon/character/1509.png",
+    "icon_round": "icon/character_round/1509.png",
+    "icon_mini": "icon/character_mini/1509.png",
+    "icon_cutin": "icon/character_cutin/1509.png",
+    "rank_ids": [
+      150901,
+      150902,
+      150903,
+      150904,
+      150905,
+      150906
+    ],
+    "skill_ids": [
+      150901,
+      150902,
+      150903,
+      150904,
+      150905,
+      150906,
+      150907,
+      150909
+    ]
+  },
+  {
     "id": 1510,
     "name": "姬子•启行",
     "full_name": "",
@@ -2493,7 +2619,7 @@
   },
   {
     "id": 8001,
-    "name": "{NICKNAME}",
+    "name": "开拓者·毁灭",
     "full_name": "",
     "rarity": 5,
     "path": "Warrior",
@@ -2525,7 +2651,7 @@
   },
   {
     "id": 8002,
-    "name": "{NICKNAME}",
+    "name": "开拓者·毁灭",
     "full_name": "",
     "rarity": 5,
     "path": "Warrior",
@@ -2557,7 +2683,7 @@
   },
   {
     "id": 8003,
-    "name": "{NICKNAME}",
+    "name": "开拓者·存护",
     "full_name": "",
     "rarity": 5,
     "path": "Knight",
@@ -2588,7 +2714,7 @@
   },
   {
     "id": 8004,
-    "name": "{NICKNAME}",
+    "name": "开拓者·存护",
     "full_name": "",
     "rarity": 5,
     "path": "Knight",
@@ -2619,7 +2745,7 @@
   },
   {
     "id": 8005,
-    "name": "{NICKNAME}",
+    "name": "开拓者·同谐",
     "full_name": "",
     "rarity": 5,
     "path": "Shaman",
@@ -2649,7 +2775,7 @@
   },
   {
     "id": 8006,
-    "name": "{NICKNAME}",
+    "name": "开拓者·同谐",
     "full_name": "",
     "rarity": 5,
     "path": "Shaman",
@@ -2679,7 +2805,7 @@
   },
   {
     "id": 8007,
-    "name": "{NICKNAME}",
+    "name": "开拓者·记忆",
     "full_name": "",
     "rarity": 5,
     "path": "Memory",
@@ -2711,7 +2837,7 @@
   },
   {
     "id": 8008,
-    "name": "{NICKNAME}",
+    "name": "开拓者·记忆",
     "full_name": "",
     "rarity": 5,
     "path": "Memory",
@@ -2743,7 +2869,7 @@
   },
   {
     "id": 8009,
-    "name": "{NICKNAME}",
+    "name": "开拓者·欢愉",
     "full_name": "",
     "rarity": 5,
     "path": "Elation",
@@ -2774,7 +2900,7 @@
   },
   {
     "id": 8010,
-    "name": "{NICKNAME}",
+    "name": "开拓者·欢愉",
     "full_name": "",
     "rarity": 5,
     "path": "Elation",

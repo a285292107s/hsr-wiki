@@ -11,7 +11,7 @@ import {
   loadItems, loadCharacterList, loadLightconeList, loadRelicsetList,
   loadMonsterList, loadMazeList, loadMazeVersions,
   loadStoryList, loadBossList, loadPeakList, loadPeakVersions,
-  prefetchEndgameAll,
+  prefetchEndgameAll, loadLocalCharacterList,
 } from '../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
 import type { MazeListDb, MazeListEntry, MazeVersionMap } from '../../services/types';
@@ -47,32 +47,31 @@ const characterPage: CatalogPageConfig = {
   searchPlaceholder: '搜索角色...',
   gridClass: 'nk-cat-grid',
   cardClass: '.nk-cat-card',
-  async fetchData(ctx) {
-    const db = await loadCharacterList(ctx.version);
+  async fetchData() {
+    const list = await loadLocalCharacterList();
     const items: CatalogItem[] = [];
-    for (const [id, info] of Object.entries(db)) {
-      if (!info.zh) continue;
-      const element = (info.damageType || '').toLowerCase();
-      const path = (info.baseType || '').toLowerCase();
+    for (const info of list) {
+      if (!info.name) continue;
+      const element = info.element.toLowerCase();
+      const path = info.path.toLowerCase();
+      const id = String(info.id);
       items.push({
         id,
-        name: info.zh,
+        name: info.name,
         href: `/character/${id}`,
         avatar: avatarShopIconUrl(id),
         elemImg: elementIconUrl(element),
         pathImg: pathIconUrl(path),
         element,
         path,
-        rarity: parseRarity(info.rank),
-        release: info.release,
+        rarity: info.rarity,
       });
     }
-    // 排序：未实装（无 release）在前，其余按 release 降序，同值按 id 升序
     items.sort((a, b) => {
-      const ra = (a.release as number | undefined) ?? Infinity;
-      const rb = (b.release as number | undefined) ?? Infinity;
-      if (ra !== rb) return rb - ra;
-      return Number(a.id) - Number(b.id);
+      const aTrailblazer = Number(a.id) >= 8000;
+      const bTrailblazer = Number(b.id) >= 8000;
+      if (aTrailblazer !== bTrailblazer) return aTrailblazer ? 1 : -1;
+      return Number(b.id) - Number(a.id);
     });
     return items;
   },

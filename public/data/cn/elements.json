@@ -2,7 +2,7 @@
   {
     "id": "Fire",
     "name": "火",
-    "desc": "使用<color=#f29e38ff>火属性</color>造成<color=#f29e38ff>弱点击破</color>时，会造成火属性伤害，并施加<color=#f29e38ff>灼烧</color>状态。<color=#f29e38ff>灼烧</color>能造成火属性持续伤害。",
+    "desc": "使用火属性造成弱点击破时，会造成火属性伤害，并施加灼烧状态。灼烧能造成火属性持续伤害。",
     "color": "#F84F36",
     "icon": "icon/element/IconAttributeFire.png",
     "icon_color": "icon/element_color/IconNatureColorFire.png",
@@ -11,7 +11,7 @@
   {
     "id": "Ice",
     "name": "冰",
-    "desc": "使用<color=#f29e38ff>冰属性</color>造成<color=#f29e38ff>弱点击破</color>时，会造成冰属性伤害，并施加<color=#f29e38ff>冻结</color>状态。<color=#f29e38ff>冻结</color>会使敌人无法行动，造成冰属性附加伤害。",
+    "desc": "使用冰属性造成弱点击破时，会造成冰属性伤害，并施加冻结状态。冻结会使敌人无法行动，造成冰属性附加伤害。",
     "color": "#47C7FD",
     "icon": "icon/element/IconAttributeIce.png",
     "icon_color": "icon/element_color/IconNatureColorIce.png",
@@ -20,7 +20,7 @@
   {
     "id": "Imaginary",
     "name": "虚数",
-    "desc": "使用<color=#f29e38ff>虚数属性</color>造成<color=#f29e38ff>弱点击破</color>时，会造成虚数属性伤害，并施加<color=#f29e38ff>禁锢</color>状态。<color=#f29e38ff>禁锢</color>会使敌人行动延后，同时使其速度降低。",
+    "desc": "使用虚数属性造成弱点击破时，会造成虚数属性伤害，并施加禁锢状态。禁锢会使敌人行动延后，同时使其速度降低。",
     "color": "#F4D258",
     "icon": "icon/element/IconAttributeImaginary.png",
     "icon_color": "icon/element_color/IconNatureColorImaginary.png",
@@ -29,7 +29,7 @@
   {
     "id": "Physical",
     "name": "物理",
-    "desc": "使用<color=#f29e38ff>物理属性</color>造成<color=#f29e38ff>弱点击破</color>时，会造成物理属性伤害，并施加<color=#f29e38ff>裂伤</color>状态。<color=#f29e38ff>裂伤</color>能造成物理属性持续伤害。",
+    "desc": "使用物理属性造成弱点击破时，会造成物理属性伤害，并施加裂伤状态。裂伤能造成物理属性持续伤害。",
     "color": "#FFFFFF",
     "icon": "icon/element/IconAttributePhysical.png",
     "icon_color": "icon/element_color/IconNaturePhysical.png",
@@ -38,7 +38,7 @@
   {
     "id": "Quantum",
     "name": "量子",
-    "desc": "使用<color=#f29e38ff>量子属性</color>造成<color=#f29e38ff>弱点击破</color>时，会造成量子属性伤害，并施加<color=#f29e38ff>纠缠</color>状态。<color=#f29e38ff>纠缠</color>会使敌人行动延后，并在下个回合开始时对其造成额外的量子属性附加伤害，当其受到攻击时，会使该额外伤害提高。",
+    "desc": "使用量子属性造成弱点击破时，会造成量子属性伤害，并施加纠缠状态。纠缠会使敌人行动延后，并在下个回合开始时对其造成额外的量子属性附加伤害，当其受到攻击时，会使该额外伤害提高。",
     "color": "#1C29BA",
     "icon": "icon/element/IconAttributeQuantum.png",
     "icon_color": "icon/element_color/IconNatureColorQuantum.png",
@@ -47,7 +47,7 @@
   {
     "id": "Thunder",
     "name": "雷",
-    "desc": "使用<color=#f29e38ff>雷属性</color>造成<color=#f29e38ff>弱点击破</color>时，会造成雷属性伤害，并施加<color=#f29e38ff>触电</color>状态。<color=#f29e38ff>触电</color>能造成雷属性持续伤害。",
+    "desc": "使用雷属性造成弱点击破时，会造成雷属性伤害，并施加触电状态。触电能造成雷属性持续伤害。",
     "color": "#8872F1",
     "icon": "icon/element/IconAttributeThunder.png",
     "icon_color": "icon/element_color/IconNatureColorThunder.png",
@@ -56,7 +56,7 @@
   {
     "id": "Wind",
     "name": "风",
-    "desc": "使用<color=#f29e38ff>风属性</color>造成<color=#f29e38ff>弱点击破</color>时，会造成风属性伤害，并施加<color=#f29e38ff>风化</color>状态。<color=#f29e38ff>风化</color>能造成风属性持续伤害。",
+    "desc": "使用风属性造成弱点击破时，会造成风属性伤害，并施加风化状态。风化能造成风属性持续伤害。",
     "color": "#00FF9C",
     "icon": "icon/element/IconAttributeWind.png",
     "icon_color": "icon/element_color/IconNatureColorWind.png",

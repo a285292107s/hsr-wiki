@@ -7,6 +7,7 @@ import { CACHE_TTL, cachedFetch, cacheHas, memStore, purgeStaleVersions } from '
 import type {
   Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest,
   CharListDb, LightconeListDb, RelicsetListDb, MonsterListDb, MazeListDb, MazeVersionMap,
+  LocalCharList,
 } from './types';
 
 /* ─── manifest ─── */
@@ -206,4 +207,15 @@ export function prefetchCharData(ver: string, charId: string): void {
       /* 预取失败静默 */
     }
   })();
+}
+
+/* ─── 本地数据源（TurnBasedGameData 转换输出） ─── */
+
+const LOCAL_DATA_BASE = `${import.meta.env.BASE_URL}data/cn`;
+
+export async function loadLocalCharacterList(): Promise<LocalCharList> {
+  const url = `${LOCAL_DATA_BASE}/characters.json`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+  return res.json();
 }

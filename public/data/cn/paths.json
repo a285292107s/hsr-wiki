@@ -9,63 +9,63 @@
   {
     "id": "Elation",
     "name": "欢愉",
-    "desc": "以各自的方式制造各种<color=#f29e38ff>笑料</color>，吸引星神阿哈<color=#f29e38ff>一同狂欢</color>",
+    "desc": "以各自的方式制造各种笑料，吸引星神阿哈一同狂欢",
     "icon": "icon/path/BgPathsJoy.png",
     "icon_small": "icon/path_small/IconProfessionJoySmall.png"
   },
   {
     "id": "Knight",
     "name": "存护",
-    "desc": "具备强大的<color=#f29e38ff>保护</color>能力，通过不同的方式守护同伴",
+    "desc": "具备强大的保护能力，通过不同的方式守护同伴",
     "icon": "icon/path/BgPathsKnight.png",
     "icon_small": "icon/path_small/IconProfessionKnightSmall.png"
   },
   {
     "id": "Mage",
     "name": "智识",
-    "desc": "拥有出色的<color=#f29e38ff>群体攻击</color>能力，可以将复数的敌人一网打尽",
+    "desc": "拥有出色的群体攻击能力，可以将复数的敌人一网打尽",
     "icon": "icon/path/BgPathsnMage.png",
     "icon_small": "icon/path_small/IconProfessionMageSmall.png"
   },
   {
     "id": "Memory",
     "name": "记忆",
-    "desc": "能召唤拥有<color=#f29e38ff>特殊能力</color>的忆灵，在战斗中与团队并肩作战",
+    "desc": "能召唤拥有特殊能力的忆灵，在战斗中与团队并肩作战",
     "icon": "icon/path/BgPathsMemory.png",
     "icon_small": "icon/path_small/IconProfessionMemorySmall.png"
   },
   {
     "id": "Priest",
     "name": "丰饶",
-    "desc": "能够<color=#f29e38ff>治疗</color>我方伤势，为团队提供回复能力",
+    "desc": "能够治疗我方伤势，为团队提供回复能力",
     "icon": "icon/path/BgPathsPirest.png",
     "icon_small": "icon/path_small/IconProfessionPirestSmall.png"
   },
   {
     "id": "Rogue",
     "name": "巡猎",
-    "desc": "有着非凡的<color=#f29e38ff>单体攻击</color>能力，是战胜精英敌人的主要输出力量",
+    "desc": "有着非凡的单体攻击能力，是战胜精英敌人的主要输出力量",
     "icon": "icon/path/BgPathsRogue.png",
     "icon_small": "icon/path_small/IconProfessionRogueSmall.png"
   },
   {
     "id": "Shaman",
     "name": "同谐",
-    "desc": "能为我方施加<color=#f29e38ff>增益效果</color>，提升团队的整体战斗力",
+    "desc": "能为我方施加增益效果，提升团队的整体战斗力",
     "icon": "icon/path/BgPathsShaman.png",
     "icon_small": "icon/path_small/IconProfessionShamanSmall.png"
   },
   {
     "id": "Warlock",
     "name": "虚无",
-    "desc": "能对敌方施加<color=#f29e38ff>负面效果</color>，降低敌方战斗力争取优势",
+    "desc": "能对敌方施加负面效果，降低敌方战斗力争取优势",
     "icon": "icon/path/BgPathsWarlock.png",
     "icon_small": "icon/path_small/IconProfessionWarlockSmall.png"
   },
   {
     "id": "Warrior",
     "name": "毁灭",
-    "desc": "兼具不俗的<color=#f29e38ff>输出与生存</color>能力，能适应不同的作战环境",
+    "desc": "兼具不俗的输出与生存能力，能适应不同的作战环境",
     "icon": "icon/path/BgPathsWarrior.png",
     "icon_small": "icon/path_small/IconProfessionWarriorSmall.png"
   }

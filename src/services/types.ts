@@ -304,3 +304,24 @@ export type MazeListDb = Record<string, MazeListEntry>;
 
 /** zh/maze/version.json：版本 → 赛季 ID 列表（键按版本降序） */
 export type MazeVersionMap = Record<string, (number | string)[]>;
+
+/* ─── 本地数据源（TurnBasedGameData 转换） ─── */
+
+/** 本地角色列表条目（converter 输出格式） */
+export interface LocalCharEntry {
+  id: number;
+  name: string;
+  full_name: string;
+  rarity: number;
+  path: string;
+  element: string;
+  sp_need: number;
+  vo_tag: string;
+  icon: string;
+  icon_round: string;
+  icon_mini: string;
+  icon_cutin: string;
+  rank_ids: number[];
+  skill_ids: number[];
+}
+export type LocalCharList = LocalCharEntry[];

@@ -2,7 +2,7 @@
 
 import logging
 
-from config import EXCEL_DIR, OUTPUT_DIR, RARITY_MAP
+from config import EXCEL_DIR, OUTPUT_DIR, RARITY_MAP, PATH_NAME_FALLBACK
 from textmap import resolve_text
 from utils import load_json, save_json, map_icon_path, unwrap_value, sort_by_id
 
@@ -10,8 +10,14 @@ logger = logging.getLogger("converter")
 
 
 def convert() -> None:
-    """转换 AvatarConfig.json → characters.json。"""
+    """转换 AvatarConfig.json + AvatarConfigLD.json → characters.json。"""
     data = load_json(EXCEL_DIR / "AvatarConfig.json")
+
+    ld_path = EXCEL_DIR / "AvatarConfigLD.json"
+    if ld_path.exists():
+        ld_data = load_json(ld_path)
+        data = data + ld_data
+
     result = []
 
     for item in data:
@@ -26,6 +32,12 @@ def convert() -> None:
 
         name = resolve_text(item.get("AvatarName", {}))
         full_name = resolve_text(item.get("AvatarFullName", {}))
+        path_key = item.get("AvatarBaseType", "")
+        if name == "开拓者" and path_key:
+            path_name = PATH_NAME_FALLBACK.get(path_key, path_key)
+            name = f"开拓者·{path_name}"
+            if full_name == "开拓者":
+                full_name = name
         rarity_key = item.get("Rarity", "")
         rarity = RARITY_MAP.get(rarity_key, 0)
         sp_need = unwrap_value(item.get("SPNeed", {}))
