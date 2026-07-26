@@ -95,7 +95,7 @@
       "simple_desc": "对敌方单体造成少量雷属性伤害。",
       "type": "Normal",
       "type_name": "普攻",
-      "tag": "单攻",
+      "tag": "SingleAttack",
       "sp_base": 20,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -186,7 +186,7 @@
       "simple_desc": "为衣匠回复生命值。衣匠不在场时，<color=#f29e38ff><u>召唤忆灵</u></color>衣匠并使自身立即行动。",
       "type": "BPSkill",
       "type_name": "战技",
-      "tag": "召唤",
+      "tag": "Summon",
       "sp_base": 20,
       "bp_need": 1,
       "bp_add": 0.5,
@@ -327,7 +327,7 @@
       "simple_desc": "<color=#f29e38ff><u>召唤忆灵</u></color>衣匠，使阿格莱雅进入【至高之姿】状态并使自身立即行动，获得强化普攻。",
       "type": "Ultra",
       "type_name": "终结技",
-      "tag": "强化",
+      "tag": "Enhance",
       "sp_base": 5,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -513,7 +513,7 @@
       "simple_desc": "衣匠在场时，阿格莱雅施放攻击时使目标陷入【间隙织线】状态。攻击处于【间隙织线】状态下的敌人后，造成少量雷属性<u>附加伤害</u>。",
       "type": "Passive",
       "type_name": "天赋",
-      "tag": "强化",
+      "tag": "Enhance",
       "sp_base": 10,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -699,7 +699,7 @@
       "simple_desc": "{}",
       "type": "Maze",
       "type_name": "",
-      "tag": null,
+      "tag": "MazeAttack",
       "sp_base": null,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -724,7 +724,7 @@
       "simple_desc": "<color=#f29e38ff><u>召唤忆灵</u></color>衣匠并一同向前发起攻击，进入战斗后，恢复能量并对敌方全体造成少量雷属性伤害，随后使敌方随机目标陷入【间隙织线】状态。",
       "type": "Maze",
       "type_name": "秘技",
-      "tag": null,
+      "tag": "MazeAttack",
       "sp_base": null,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -752,7 +752,7 @@
       "simple_desc": "阿格莱雅与衣匠向目标发起<color=#f29e38ff><u>连携攻击</u></color>，对敌方单体造成雷属性伤害，对相邻目标造成少量雷属性伤害。",
       "type": "Normal",
       "type_name": "普攻",
-      "tag": "扩散",
+      "tag": "Blast",
       "sp_base": 20,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -3033,7 +3033,382 @@
     }
   },
   "enhanced": null,
-  "memosprite": null,
+  "memosprite": {
+    "name": "衣匠",
+    "icon": "SpriteOutput/ServantIconTeam/11402B.png",
+    "hp_base": "#6",
+    "hp_inherit": "#5",
+    "hp_skill": 140204,
+    "speed_base": "0",
+    "speed_inherit": "#4",
+    "aggro": 125,
+    "skills": {
+      "1140201": {
+        "id": 1140201,
+        "name": "刺纹之陷",
+        "desc": "对敌方单体造成<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>攻击力的雷属性伤害，对其相邻目标造成<color=#f29e38ff><unbreak>#2[i]%</unbreak></color>攻击力的雷属性伤害。",
+        "simple_desc": "对敌方单体与相邻目标造成少量雷属性伤害。",
+        "type": "Servant",
+        "type_name": "忆灵技",
+        "tag": "Blast",
+        "sp_base": 10,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          30,
+          0,
+          15
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              0.55,
+              0.33,
+              1
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              0.66,
+              0.396,
+              1
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              0.77,
+              0.462,
+              1
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              0.88,
+              0.528,
+              1
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              0.99,
+              0.594,
+              1
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              1.1,
+              0.66,
+              1
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              1.21,
+              0.726,
+              1
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              1.32,
+              0.792,
+              1
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              1.43,
+              0.858,
+              1
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              1.54,
+              0.924,
+              1
+            ]
+          }
+        }
+      },
+      "1140203": {
+        "id": 1140203,
+        "name": "泪水锻造的匠躯",
+        "desc": "攻击处于【间隙织线】状态的敌人后，使自身的速度提高<color=#f29e38ff><unbreak>#1[i]</unbreak></color>点，该效果最多叠加<unbreak>#3[i]</unbreak>层。衣匠行动时自动施放【刺纹之陷】，优先攻击处于【间隙织线】状态下的敌人。",
+        "simple_desc": "攻击处于【间隙织线】状态的敌人后，使<color=#f29e38ff>自身的速度提高</color>。行动时自动施放攻击，优先攻击处于【间隙织线】状态下的敌人。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Enhance",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              44,
+              3,
+              6
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              46.2,
+              3,
+              6
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              48.4,
+              3,
+              6
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              50.6,
+              3,
+              6
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              52.8,
+              3,
+              6
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              55,
+              3,
+              6
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              57.2,
+              3,
+              6
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              59.4,
+              3,
+              6
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              61.6,
+              3,
+              6
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              63.8,
+              3,
+              6
+            ]
+          }
+        }
+      },
+      "1140205": {
+        "id": 1140205,
+        "name": "飞驰之夏",
+        "desc": "衣匠被召唤时，使自身<u>行动提前</u><unbreak>#1[i]%</unbreak>。",
+        "simple_desc": "被召唤时，使自身<u>行动提前</u>。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Enhance",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              1
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              1
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              1
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              1
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              1
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              1
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              1
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              1
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              1
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              1
+            ]
+          }
+        }
+      },
+      "1140206": {
+        "id": 1140206,
+        "name": "枯草之盈",
+        "desc": "衣匠消失时，使阿格莱雅恢复<unbreak>#1[i]</unbreak>点能量。",
+        "simple_desc": "消失时，使阿格莱雅恢复能量。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Enhance",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              20
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              20
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              20
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              20
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              20
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              20
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              20
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              20
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              20
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              20
+            ]
+          }
+        }
+      }
+    }
+  },
   "unique": {},
   "stats": {
     "0": {

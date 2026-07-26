@@ -93,7 +93,7 @@
       "simple_desc": "对敌方单体造成少量风属性伤害。",
       "type": "Normal",
       "type_name": "普攻",
-      "tag": "单攻",
+      "tag": "SingleAttack",
       "sp_base": 20,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -174,7 +174,7 @@
       "simple_desc": "<color=#f29e38ff><u>召唤忆灵</u></color>小伊卡，并为我方全体回复生命值。",
       "type": "BPSkill",
       "type_name": "战技",
-      "tag": "回复",
+      "tag": "Restore",
       "sp_base": 30,
       "bp_need": 1,
       "bp_add": 0.5,
@@ -330,7 +330,7 @@
       "simple_desc": "<color=#f29e38ff><u>召唤忆灵</u></color>小伊卡，并为我方全体回复生命值。进入【雨过天晴】状态，风堇处于该状态时<color=#f29e38ff>使我方全体生命上限提高</color>。",
       "type": "Ultra",
       "type_name": "终结技",
-      "tag": "辅助",
+      "tag": "Support",
       "sp_base": 5,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -531,7 +531,7 @@
       "simple_desc": "风堇或小伊卡提供治疗时，小伊卡造成的伤害提高。",
       "type": "Passive",
       "type_name": "天赋",
-      "tag": "强化",
+      "tag": "Enhance",
       "sp_base": null,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -702,7 +702,7 @@
       "simple_desc": "{}",
       "type": "Maze",
       "type_name": "",
-      "tag": null,
+      "tag": "MazeAttack",
       "sp_base": null,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -727,7 +727,7 @@
       "simple_desc": "下一次战斗开始时，为我方全体回复生命值并<color=#f29e38ff>使生命上限提高</color>。",
       "type": "Maze",
       "type_name": "秘技",
-      "tag": "回复",
+      "tag": "Restore",
       "sp_base": null,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -2916,7 +2916,402 @@
     }
   },
   "enhanced": null,
-  "memosprite": null,
+  "memosprite": {
+    "name": "小伊卡",
+    "icon": "SpriteOutput/ServantIconTeam/11409B.png",
+    "hp_base": "0",
+    "hp_inherit": "#1",
+    "hp_skill": 140904,
+    "speed_base": "0",
+    "speed_inherit": "0",
+    "aggro": 100,
+    "skills": {
+      "1140901": {
+        "id": 1140901,
+        "name": "乌云乌云快走开！",
+        "desc": "对敌方全体造成等同于本场战斗风堇与小伊卡累计治疗数值<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>的风属性伤害并清空累计治疗数值的<unbreak>#2[i]%</unbreak>。",
+        "simple_desc": "对敌方全体造成风属性伤害。",
+        "type": "Servant",
+        "type_name": "忆灵技",
+        "tag": "AoEAttack",
+        "sp_base": 5,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          30,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              0.1,
+              0.5
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              0.12,
+              0.5
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              0.14,
+              0.5
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              0.16,
+              0.5
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              0.18,
+              0.5
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              0.2,
+              0.5
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              0.22,
+              0.5
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              0.24,
+              0.5
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              0.26,
+              0.5
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              0.28,
+              0.5
+            ]
+          }
+        }
+      },
+      "1140903": {
+        "id": 1140903,
+        "name": "牵起晴空的手",
+        "desc": "小伊卡的速度保持为0，免疫<u>负面效果</u>，并且不会出现在行动序列上。\\n若除小伊卡外的我方目标生命值降低，小伊卡会在任意目标回合开始时或行动后，消耗自身<unbreak>#1[i]%</unbreak>生命上限的生命值，并为我方生命值降低的目标回复等同于风堇<color=#f29e38ff><unbreak>#2[f1]%</unbreak></color>生命上限+<color=#f29e38ff><unbreak>#3[i]</unbreak></color>的生命值。\\n风堇处于【雨过天晴】状态时，小伊卡会在风堇施放技能后立即获得1个<u>额外回合</u>并自动施放【乌云乌云快走开！】，并且小伊卡触发天赋的治疗效果时，额外为我方全体目标回复等同于风堇<color=#f29e38ff><unbreak>#4[f1]%</unbreak></color>生命上限+<color=#f29e38ff><unbreak>#5[i]</unbreak></color>的生命值，小伊卡施放技能后使自身所有<u>持续效果</u>持续回合数减1。",
+        "simple_desc": "若除小伊卡外的我方目标<color=#f29e38ff>生命值降低</color>，小伊卡会消耗自身生命值，为该目标<color=#f29e38ff>回复生命值</color>。风堇持有【雨过天晴】时，小伊卡会在风堇施放技能后立即获得1个<u>额外回合</u>并自动施放忆灵技，小伊卡施放技能后使自身<u>持续效果</u>持续回合数减1。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Restore",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              0.04,
+              0.01,
+              10,
+              0.01,
+              10
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              0.04,
+              0.012,
+              12,
+              0.012,
+              12
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              0.04,
+              0.0139999995,
+              14,
+              0.0139999995,
+              14
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              0.04,
+              0.015999999,
+              16,
+              0.015999999,
+              16
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              0.04,
+              0.018,
+              18,
+              0.018,
+              18
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              0.04,
+              0.02,
+              20,
+              0.02,
+              20
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              0.04,
+              0.022,
+              22,
+              0.022,
+              22
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              0.04,
+              0.024,
+              24,
+              0.024,
+              24
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              0.04,
+              0.026,
+              26,
+              0.026,
+              26
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              0.04,
+              0.027999999,
+              28,
+              0.027999999,
+              28
+            ]
+          }
+        }
+      },
+      "1140905": {
+        "id": 1140905,
+        "name": "展翼，奔向日辉",
+        "desc": "被召唤时，为风堇恢复<unbreak>#1[i]</unbreak>点能量，首次被召唤时，额外恢复<unbreak>#2[i]</unbreak>点能量。",
+        "simple_desc": "被召唤时，为风堇恢复能量。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Enhance",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              15,
+              30
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              15,
+              30
+            ]
+          }
+        }
+      },
+      "1140906": {
+        "id": 1140906,
+        "name": "坠落，然后飞翔",
+        "desc": "消失时，使风堇<u>行动提前</u><unbreak>#1[i]%</unbreak>。",
+        "simple_desc": "消失时，使风堇<u>行动提前</u>。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Enhance",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              0.3
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              0.3
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              0.3
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              0.3
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              0.3
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              0.3
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              0.3
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              0.3
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              0.3
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              0.3
+            ]
+          }
+        }
+      }
+    }
+  },
   "unique": {},
   "stats": {
     "0": {

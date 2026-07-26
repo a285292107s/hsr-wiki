@@ -291,7 +291,7 @@ interface SkillGroup { main: Skill; children: Skill[] }
 /** 按 (type + type_name) 分组：首个为主技能，同组后续为子技能 */
 function groupSkills(skills: Skill[]): SkillGroup[] {
   const valid = skills.filter(
-    (s) => s.type !== 'MazeNormal' && !!s.type_name && SKILL_ORDER.includes(s.type) && !!s.desc,
+    (s) => s.type !== 'MazeNormal' && !!s.type_name && SKILL_ORDER.includes(s.type),
   );
   const map = new Map<string, SkillGroup>();
   const groups: SkillGroup[] = [];

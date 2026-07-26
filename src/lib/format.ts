@@ -2,7 +2,7 @@
  * 纯函数工具：格式化 / Diff / URL 构建 / 数据校验
  * 全部无状态（显式传参），可被 Vitest 直接覆盖。
  */
-import { CDN, MAX_CHAR_LEVEL, SKILL_ICON_KEY, SKILL_ICON_KEY_BY_NAME, STANCE_LABEL, TAG } from './constants';
+import { CDN, MAX_CHAR_LEVEL, SERVANT_ICON_KEY, SKILL_ICON_KEY, SKILL_ICON_KEY_BY_NAME, STANCE_LABEL, TAG, TRAILBLAZER_ICON_FALLBACK } from './constants';
 import { NkError } from './errors';
 import type { CharacterData, CharStats, ItemDb, NameCache, Skill } from '../services/types';
 
@@ -317,9 +317,13 @@ export function memospriteId(charId: string, data: CharacterData | null): string
 export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | null): string {
   const key = SKILL_ICON_KEY[sk.type] || (sk.type_name && SKILL_ICON_KEY_BY_NAME[sk.type_name]) || '';
   if (!key || !charId) return '';
-  const id = (key === 'Servant' || key === 'ServantPassive') ? memospriteId(charId, data) : charId;
+  let id = (key === 'Servant' || key === 'ServantPassive') ? memospriteId(charId, data) : charId;
   if (!id) return '';
-  return `${CDN}/assets/hsr/skillicons/SkillIcon_${id}_${key}.webp`;
+  // 忆灵技图标 CDN 后缀不统一，按忆灵 ID 查映射表
+  const iconKey = key === 'Servant' ? (SERVANT_ICON_KEY[id] || key) : key;
+  // 开拓者偶数变体无图标资产，回退配对奇数 ID
+  id = TRAILBLAZER_ICON_FALLBACK[id] || id;
+  return `${CDN}/assets/hsr/skillicons/SkillIcon_${id}_${iconKey}.webp`;
 }
 
 /** 星魂图标：rank/_dependencies/textures/{charId}/{charId}_Rank_{num}.webp */

@@ -46,8 +46,9 @@ const effLv = computed(() =>
   props.isChild ? Math.min(props.parentLv ?? 1, maxLv.value) : lv.value,
 );
 
-/* ─── 描述渲染（当前等级参数；diff 模式下新旧对比） ─── */
+/* ─── 描述渲染（当前等级参数；diff 模式下新旧对比；空 desc 显示 "-" 占位，对齐原站） ─── */
 const descHtml = computed(() => {
+  if (!props.sk.desc) return '-';
   const lvData = props.sk.level ? props.sk.level[String(effLv.value)] : null;
   const params = lvData ? lvData.param_list : [];
   const old = props.oldSk || null;

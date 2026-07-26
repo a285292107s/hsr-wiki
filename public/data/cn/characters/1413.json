@@ -96,7 +96,7 @@
       "simple_desc": "对指定敌方单体造成少量冰属性伤害。",
       "type": "Normal",
       "type_name": "普攻",
-      "tag": "单攻",
+      "tag": "SingleAttack",
       "sp_base": 20,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -177,7 +177,7 @@
       "simple_desc": "消耗自身生命值<u>召唤忆灵</u>「长夜」，并使<color=#f29e38ff>我方全体忆灵的暴击伤害提高</color>。若忆灵「长夜」已在场，为其回复生命值。施放时，<color=#f29e38ff>获得<color=#f29e38ff><unbreak>#3[i]</unbreak></color>点【忆质】</color>，若处于【至暗之谜】状态，额外<color=#f29e38ff>获得<color=#f29e38ff><unbreak>#5[i]</unbreak></color>点【忆质】</color>。",
       "type": "BPSkill",
       "type_name": "战技",
-      "tag": "召唤",
+      "tag": "Summon",
       "sp_base": 30,
       "bp_need": null,
       "bp_add": 0.5,
@@ -363,7 +363,7 @@
       "simple_desc": "对敌方全体造成冰属性伤害，<u>召唤忆灵</u>「长夜」并使长夜月进入【至暗之谜】状态，期间敌方受到的伤害提高，长夜月和忆灵造成的伤害提高，免疫<u>控制类负面状态</u>。",
       "type": "Ultra",
       "type_name": "终结技",
-      "tag": "群攻",
+      "tag": "AoEAttack",
       "sp_base": 5,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -519,7 +519,7 @@
       "simple_desc": "进入战斗时<u>召唤忆灵</u>「长夜」。自身或忆灵「长夜」每次<color=#f29e38ff>生命降低</color>时，使<color=#f29e38ff>自身和忆灵「长夜」的暴击伤害提高</color>，并<color=#f29e38ff>获得【忆质】</color>。\\n当长夜月持有的【忆质】数量大于等于<color=#f29e38ff><unbreak>#6[i]</unbreak></color>点时，使忆灵「长夜」立即行动。",
       "type": "Passive",
       "type_name": "天赋",
-      "tag": "强化",
+      "tag": "Enhance",
       "sp_base": null,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -720,7 +720,7 @@
       "simple_desc": "{}",
       "type": "Maze",
       "type_name": "",
-      "tag": null,
+      "tag": "MazeAttack",
       "sp_base": null,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -745,7 +745,7 @@
       "simple_desc": "下一次战斗开始时，获得与战技相同的提高忆灵暴击伤害的效果，并额外获得【忆质】。",
       "type": "Maze",
       "type_name": "秘技",
-      "tag": "辅助",
+      "tag": "Support",
       "sp_base": null,
       "bp_need": -1,
       "bp_add": 0.5,
@@ -2950,7 +2950,483 @@
     }
   },
   "enhanced": null,
-  "memosprite": null,
+  "memosprite": {
+    "name": "长夜",
+    "icon": "SpriteOutput/ServantIconTeam/11413B.png",
+    "hp_base": "0",
+    "hp_inherit": "#5",
+    "hp_skill": 141304,
+    "speed_base": "#4",
+    "speed_inherit": "0",
+    "aggro": 125,
+    "skills": {
+      "1141301": {
+        "id": 1141301,
+        "name": "追忆，蹁跹，如雨",
+        "desc": "该技能自动选择目标施放，优先攻击长夜月上次攻击的敌方目标。对敌方单体造成等同于「长夜」<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>生命上限的冰属性伤害，长夜月当前每有<unbreak>#3[i]</unbreak>点【忆质】，则额外造成等同于「长夜」<color=#f29e38ff><unbreak>#2[f1]%</unbreak></color>生命上限的冰属性伤害。施放后获得<unbreak>#4[i]</unbreak>点【忆质】。",
+        "simple_desc": "对敌方单体造成少量冰属性伤害，并根据【忆质】数量额外造成少量冰属性伤害。",
+        "type": "Servant",
+        "type_name": "忆灵技",
+        "tag": "SingleAttack",
+        "sp_base": 20,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          30,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              0.25,
+              0.05,
+              4,
+              1
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              0.3,
+              0.06,
+              4,
+              1
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              0.35,
+              0.07,
+              4,
+              1
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              0.4,
+              0.08,
+              4,
+              1
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              0.45,
+              0.09,
+              4,
+              1
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              0.5,
+              0.1,
+              4,
+              1
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              0.55,
+              0.11,
+              4,
+              1
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              0.6,
+              0.12,
+              4,
+              1
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              0.65,
+              0.13,
+              4,
+              1
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              0.7,
+              0.14,
+              4,
+              1
+            ]
+          }
+        }
+      },
+      "1141303": {
+        "id": 1141303,
+        "name": "孤独，浮游，漆黑",
+        "desc": "「长夜」免疫<u>控制类负面状态</u>，被攻击的概率提高。「长夜」在场时，长夜月和「长夜」造成的伤害提高<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>。",
+        "simple_desc": "忆灵「长夜」免疫<u>控制类负面状态</u>，被攻击的概率提高。在场时，自身和长夜月造成的伤害提高。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Support",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              0.25,
+              3
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              0.3,
+              3
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              0.35,
+              3
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              0.4,
+              3
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              0.45,
+              3
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              0.5,
+              3
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              0.55,
+              3
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              0.6,
+              3
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              0.65,
+              3
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              0.7,
+              3
+            ]
+          }
+        }
+      },
+      "1141305": {
+        "id": 1141305,
+        "name": "与夜，形影，不离",
+        "desc": "被召唤时，使自身立即行动。",
+        "simple_desc": "被召唤时，使自身立即行动。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Enhance",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": []
+          },
+          "2": {
+            "level": 2,
+            "param_list": []
+          },
+          "3": {
+            "level": 3,
+            "param_list": []
+          },
+          "4": {
+            "level": 4,
+            "param_list": []
+          },
+          "5": {
+            "level": 5,
+            "param_list": []
+          },
+          "6": {
+            "level": 6,
+            "param_list": []
+          },
+          "7": {
+            "level": 7,
+            "param_list": []
+          },
+          "8": {
+            "level": 8,
+            "param_list": []
+          },
+          "9": {
+            "level": 9,
+            "param_list": []
+          },
+          "10": {
+            "level": 10,
+            "param_list": []
+          }
+        }
+      },
+      "1141306": {
+        "id": 1141306,
+        "name": "与你，再见，无期",
+        "desc": "消失时，使长夜月的速度提高<unbreak>#1[i]%</unbreak>，若因施放【迷梦，流失，如露】消失，本次攻击每消耗了1点【忆质】额外使长夜月的速度提高<unbreak>#2[i]%</unbreak>，最多计算<unbreak>#3[i]</unbreak>点【忆质】。加速效果无法叠加，长夜月下个回合开始时移除。",
+        "simple_desc": "消失时，使长夜月的速度提高。",
+        "type": null,
+        "type_name": "忆灵天赋",
+        "tag": "Enhance",
+        "sp_base": null,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          0,
+          0,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              0.1,
+              0.01,
+              40
+            ]
+          }
+        }
+      },
+      "1141307": {
+        "id": 1141307,
+        "name": "迷梦，流失，如露",
+        "desc": "长夜月的【忆质】大于等于<unbreak>#3[i]</unbreak>点，且长夜月不处于控制状态时施放，当前每持有1点【忆质】对主目标造成等同于「长夜」<color=#f29e38ff><unbreak>#1[f1]%</unbreak></color>生命上限的冰属性伤害，对其他敌方目标造成等同于「长夜」<color=#f29e38ff><unbreak>#2[f1]%</unbreak></color>生命上限的冰属性伤害，施放后，消耗全部【忆质】和生命值，并使「长夜」消失。",
+        "simple_desc": "<color=#f29e38ff>根据【忆质】数量</color>，对主目标造成大量冰属性伤害，对其他敌方目标造成冰属性伤害。施放后，<color=#f29e38ff>消耗全部【忆质】和生命值，并使「长夜」消失</color>。",
+        "type": "Servant",
+        "type_name": "忆灵技",
+        "tag": "AoEAttack",
+        "sp_base": 10,
+        "bp_need": -1,
+        "bp_add": null,
+        "show_stance_list": [
+          90,
+          60,
+          0
+        ],
+        "skill_combo_value_delta": null,
+        "extra": {},
+        "level": {
+          "1": {
+            "level": 1,
+            "param_list": [
+              0.06,
+              0.03,
+              16
+            ]
+          },
+          "2": {
+            "level": 2,
+            "param_list": [
+              0.072,
+              0.036,
+              16
+            ]
+          },
+          "3": {
+            "level": 3,
+            "param_list": [
+              0.084,
+              0.042,
+              16
+            ]
+          },
+          "4": {
+            "level": 4,
+            "param_list": [
+              0.096,
+              0.048,
+              16
+            ]
+          },
+          "5": {
+            "level": 5,
+            "param_list": [
+              0.108,
+              0.054,
+              16
+            ]
+          },
+          "6": {
+            "level": 6,
+            "param_list": [
+              0.12,
+              0.06,
+              16
+            ]
+          },
+          "7": {
+            "level": 7,
+            "param_list": [
+              0.132,
+              0.066,
+              16
+            ]
+          },
+          "8": {
+            "level": 8,
+            "param_list": [
+              0.144,
+              0.072,
+              16
+            ]
+          },
+          "9": {
+            "level": 9,
+            "param_list": [
+              0.156,
+              0.078,
+              16
+            ]
+          },
+          "10": {
+            "level": 10,
+            "param_list": [
+              0.168,
+              0.084,
+              16
+            ]
+          }
+        }
+      }
+    }
+  },
   "unique": {},
   "stats": {
     "0": {

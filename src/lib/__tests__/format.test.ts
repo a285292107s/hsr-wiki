@@ -376,6 +376,25 @@ describe('URL 构建', () => {
     // type 为 null 的天赋技能回退 type_name 反查
     expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1508_Passive.webp`);
   });
+  it('skillIconUrl：忆灵技图标后缀按 ID 映射（CDN 命名不统一）', () => {
+    const mk = (icon: string) => { const d = baseChar(); d.memosprite = { icon }; return d; };
+    // 11402 → Servant01
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11402_Servant01.webp`);
+    // 11413 → Servant03
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11413_Servant03.webp`);
+    // 11415 → 无后缀（默认）
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', mk('SpriteOutput/ServantIconTeam/11415B.png'))).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11415_Servant.webp`);
+    // ServantPassive 不受后缀映射影响
+    expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11413_ServantPassive.webp`);
+  });
+  it('skillIconUrl：开拓者偶数变体回退奇数 ID 图标', () => {
+    expect(skillIconUrl(sk({ type: 'Normal' }), '8002', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8001_Normal.webp`);
+    expect(skillIconUrl(sk({ type: 'BPSkill' }), '8004', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8003_BP.webp`);
+    expect(skillIconUrl(sk({ type: 'Ultra' }), '8006', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8005_Ultra.webp`);
+    expect(skillIconUrl(sk({ type: 'Maze' }), '8008', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8007_Maze.webp`);
+    // 奇数 ID 不受影响
+    expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8001_Normal.webp`);
+  });
   it('eidolonIconUrl / avatarDrawCardUrl', () => {
     expect(eidolonIconUrl('1005', 1)).toBe(`${CDN}/assets/hsr/rank/_dependencies/textures/1005/1005_Rank_1.webp`);
     expect(avatarDrawCardUrl('1005')).toBe(`${CDN}/assets/hsr/avatardrawcard/1005.webp`);

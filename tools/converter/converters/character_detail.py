@@ -51,7 +51,6 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
             continue
 
         name = resolve_text(first.get("SkillName", {}))
-        tag = resolve_text(first.get("SkillTag", {}))
         type_desc = resolve_text(first.get("SkillTypeDesc", {}))
         # 保留原始标签（clean=False），让前端自行处理 <color>/<unbreak> 等
         desc = resolve_text(first.get("SkillDesc", {}), clean=False)
@@ -78,7 +77,7 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
             "simple_desc": simple_desc,
             "type": skill_type,
             "type_name": type_desc,
-            "tag": tag if tag else None,
+            "tag": first.get("SkillEffect") or None,
             "sp_base": unwrap_value(first.get("SPBase", None)),
             "bp_need": unwrap_value(first.get("BPNeed", None)),
             "bp_add": unwrap_value(first.get("SPMultipleRatio", None)),
@@ -89,6 +88,90 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
         }
 
     return result
+
+
+def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int]) -> dict[str, dict]:
+    """从 AvatarServantSkillConfig 构建忆灵技能字典。
+
+    与角色技能不同：不做 HideInUI/TriggerKey 过滤（CDN 包含全部忆灵技能），
+    type 仅取 AttackType==Servant → 'Servant'，否则 null；tag 取 SkillEffect。
+    """
+    by_id: dict[int, list[dict]] = defaultdict(list)
+    for item in servant_skill_data:
+        sid = item.get("SkillID", 0)
+        if sid in skill_ids:
+            by_id[sid].append(item)
+
+    result: dict[str, dict] = {}
+    for sid in skill_ids:  # 保持 SkillIDList 顺序
+        entries = by_id.get(sid)
+        if not entries:
+            continue
+        entries.sort(key=lambda x: x.get("Level", 1))
+        first = entries[0]
+
+        name = resolve_text(first.get("SkillName", {}))
+        type_desc = resolve_text(first.get("SkillTypeDesc", {}))
+        desc = resolve_text(first.get("SkillDesc", {}), clean=False)
+        simple_desc = resolve_text(first.get("SimpleSkillDesc", {}), clean=False)
+        skill_type = "Servant" if first.get("AttackType") == "Servant" else None
+
+        level_dict: dict[str, dict] = {}
+        for e in entries:
+            lv = str(e.get("Level", 1))
+            level_dict[lv] = {
+                "level": e.get("Level", 1),
+                "param_list": [unwrap_value(p) for p in e.get("ParamList", [])],
+            }
+
+        result[str(sid)] = {
+            "id": sid,
+            "name": name,
+            "desc": desc,
+            "simple_desc": simple_desc,
+            "type": skill_type,
+            "type_name": type_desc,
+            "tag": first.get("SkillEffect") or None,
+            "sp_base": unwrap_value(first.get("SPBase", None)),
+            "bp_need": unwrap_value(first.get("BPNeed", None)),
+            "bp_add": None,
+            "show_stance_list": [unwrap_value(x) for x in first.get("ShowStanceList", [])] or None,
+            "skill_combo_value_delta": first.get("SkillComboValueDelta", None),
+            "extra": {},
+            "level": level_dict,
+        }
+
+    return result
+
+
+def _build_memosprite(servant_config: list[dict], servant_skill_data: list[dict], avatar_id: int) -> dict | None:
+    """从 AvatarServantConfig + AvatarServantSkillConfig 构建 memosprite。
+
+    角色→忆灵映射：ServantID - 10000 = 基础角色 ID；
+    开拓者（8xxx）同时分配给配对奇偶变体（如 18007 → 8007 & 8008）。
+    """
+    for s in servant_config:
+        servant_id = s.get("ServantID", 0)
+        owner_base = servant_id - 10000
+        owners = {owner_base}
+        if 8001 <= owner_base <= 8008:
+            odd = owner_base if owner_base % 2 == 1 else owner_base - 1
+            owners = {odd, odd + 1}
+        if avatar_id not in owners:
+            continue
+
+        return {
+            "name": resolve_text(s.get("ServantName", {})),
+            "icon": s.get("ActionServantHeadIconPath", ""),
+            "hp_base": s.get("HPBase", "0"),
+            "hp_inherit": s.get("HPInherit", "0"),
+            "hp_skill": s.get("HPSkill", None),
+            "speed_base": s.get("SpeedBase", "0"),
+            "speed_inherit": s.get("SpeedInherit", "0"),
+            "aggro": unwrap_value(s.get("Aggro", {})),
+            "skills": _build_servant_skills(servant_skill_data, s.get("SkillIDList", [])),
+        }
+    return None
 
 
 def _build_ranks(rank_data: list[dict], rank_ids: list[int]) -> dict[str, dict]:
@@ -250,10 +333,11 @@ def convert() -> None:
     story_data = _maybe_load("StoryAtlas.json")
     equip_rec = _maybe_load("AvatarEquipRecommend.json")
     relic_rec = _maybe_load("AvatarRelicRecommend.json")
-    # 加强/忆灵：暂第一期不做，后续补充
+    # 加强：暂第一期不做，后续补充
     # enhanced_skill = _maybe_load("AvatarEnhancedSkill.json")
     # enhanced_tree = _maybe_load("AvatarEnhancedSkillTree.json")
-    # servant_skill = _maybe_load("AvatarServantSkillConfig.json")
+    servant_config = _maybe_load("AvatarServantConfig.json")
+    servant_skill = _maybe_load("AvatarServantSkillConfig.json")
 
     # 建立索引
     atlas_by_id: dict[int, dict] = {x["AvatarID"]: x for x in atlas_data}
@@ -362,7 +446,7 @@ def convert() -> None:
             "skills": skills,
             "skill_trees": skill_trees,
             "enhanced": None,
-            "memosprite": None,
+            "memosprite": _build_memosprite(servant_config, servant_skill, avatar_id),
             "unique": {},
             "stats": stats,
             "relics": relics,

@@ -42,6 +42,16 @@ export const SKILL_ICON_KEY: Record<string, string> = {
   MazeNormal: 'Normal', ElationDamage: 'Elation', Assist: 'Ultra',
 };
 
+/** 忆灵技图标 CDN 后缀按忆灵 ID 硬编码（资产命名不统一：无后缀/01/03）；未收录的默认 'Servant' */
+export const SERVANT_ICON_KEY: Record<string, string> = {
+  '11402': 'Servant01', '11407': 'Servant01', '11413': 'Servant03', '18007': 'Servant01',
+};
+
+/** 开拓者偶数变体（8002/04/06/08）CDN 无图标资产，回退配对奇数 ID */
+export const TRAILBLAZER_ICON_FALLBACK: Record<string, string> = {
+  '8002': '8001', '8004': '8003', '8006': '8005', '8008': '8007',
+};
+
 /** type_name → 图标键反查（部分角色天赋技能 type 为 null，仅有 type_name） */
 export const SKILL_ICON_KEY_BY_NAME: Record<string, string> = {
   '普攻': 'Normal', '战技': 'BP', '终结技': 'Ultra',
@@ -64,8 +74,8 @@ export const PROP_ICON: Record<string, string> = {
 /** 韧性条标签（show_stance_list 下标对应） */
 export const STANCE_LABEL = ['SingleAttack', 'AoEAttack', 'Blast'] as const;
 
-/** 技能展示排序（null 为分隔位） */
-export const SKILL_ORDER: (string | null)[] = ['Normal', 'BPSkill', 'Ultra', 'Passive', null, 'Maze', 'Assist'];
+/** 技能展示排序（null 为分隔位）；ElationDamage（欢愉技）置于天赋后 */
+export const SKILL_ORDER: (string | null)[] = ['Normal', 'BPSkill', 'Ultra', 'Passive', 'ElationDamage', null, 'Maze', 'Assist'];
 
 /** 角色详情页 Tab */
 export const CHAR_TABS = ['overview', 'skills', 'eidolons', 'builds'] as const;
