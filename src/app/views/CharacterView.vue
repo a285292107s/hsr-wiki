@@ -627,7 +627,10 @@ onBeforeUnmount(() => {
               <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`">
               {{ PATH[d.base_type] || d.base_type }}
             </span>
-            <span class="nk-hero__tag">能量 {{ d.sp_need }}</span>
+            <span class="nk-hero__tag">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" stroke="#a78bfa" stroke-width="2"/><path d="M12 4v7l-4 3 4-2v7l5-8h-3l3-5h-5z" fill="#c4b5fd"/></svg>
+              能量 {{ d.sp_need }}
+            </span>
           </div>
           <div class="nk-hero__stats">
             <div v-for="st in heroStats" :key="st.l" class="nk-hero__stat">
