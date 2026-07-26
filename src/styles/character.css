@@ -105,6 +105,7 @@
 .nk-skill__body { }
 .nk-skill__desc { font-size: 0.8125rem; line-height: 1.85; color: var(--text2); }
 .nk-skill__desc .hl { color: var(--highlight); font-weight: 700; }
+.nk-overview__desc .nowrap, .nk-skill__desc .nowrap, .nk-build__set-desc .nowrap { white-space: nowrap; }
 .nk-skill__desc u { text-decoration: underline; text-decoration-color: rgba(203,213,225,0.5); text-underline-offset: 3px; color: #cbd5e1; }
 .nk-skill__metrics { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 12px; }
 .nk-skill__metric { display: inline-flex; align-items: baseline; gap: 6px; font-size: 0.75rem; }

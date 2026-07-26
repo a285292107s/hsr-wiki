@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { CDN } from '../constants';
 import { NkError } from '../errors';
 import {
-  escHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtToughness,
+  escHtml, gameTagsToHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtToughness,
   paramEqual, hasParamDiff, hasTextDiff, wordDiff, renderWordDiffHtml, fmtDescDiff,
   deepClone, getEnhancedKeys, buildEnhancedView, buildEnhancedOld, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
@@ -57,21 +57,58 @@ describe('stripTags', () => {
     expect(stripTags('A{SPACE}B')).toBe('A B');
     expect(stripTags('{NICKNAME}你好')).toBe('开拓者你好');
   });
-  it('<color> 转 span+strong 后被最终清洗规则剥离（与原实现行为一致）', () => {
-    // 原 data.js stripTags 同款正则链：color 先转 span，再被 <(?!\/?u>)[^>]+> 清掉
+  it('剥离全部游戏标签（color/unbreak/u/b）', () => {
     expect(stripTags('<color=#F29E38>弱点</color>')).toBe('弱点');
-  });
-  it('剥离 <unbreak> 与其他未知标签，保留 <u>', () => {
     expect(stripTags('<unbreak>不断</unbreak>')).toBe('不断');
     expect(stripTags('<b>加粗</b>')).toBe('加粗');
-    expect(stripTags('<u>下划线</u>')).toBe('<u>下划线</u>');
+    expect(stripTags('<u>下划线</u>')).toBe('下划线');
   });
   it('剥离 {RUBY_E#...} 注音标签', () => {
     expect(stripTags('{RUBY_E#汉字}kanji')).toBe('kanji');
   });
+  it('{F#}/{M#} 提取文本，{TEXTJOIN#id} 移除', () => {
+    expect(stripTags('{F#少女}{M#少年}')).toBe('少女少年');
+    expect(stripTags('位于{TEXTJOIN#87}的场地')).toBe('位于的场地');
+  });
   it('空输入返回空串', () => {
     expect(stripTags(null)).toBe('');
     expect(stripTags('')).toBe('');
+  });
+});
+
+describe('gameTagsToHtml', () => {
+  it('<color=#hex> 转 span style color（6/8 位 hex）', () => {
+    expect(gameTagsToHtml('<color=#f29e38ff>追加攻击</color>')).toBe('<span style="color:#f29e38ff">追加攻击</span>');
+    expect(gameTagsToHtml('<color=#F29E38>弱点</color>')).toBe('<span style="color:#F29E38">弱点</span>');
+  });
+  it('非法 color 值剥离标签保留文本', () => {
+    expect(gameTagsToHtml('<color=red>文本</color>')).toBe('文本');
+    expect(gameTagsToHtml('<color=#12345>文本</color>')).toBe('文本');
+  });
+  it('<unbreak> 转 span.nowrap', () => {
+    expect(gameTagsToHtml('<unbreak>30%</unbreak>')).toBe('<span class="nowrap">30%</span>');
+    expect(gameTagsToHtml('BCI<unbreak>-34</unbreak>型灰质')).toBe('BCI<span class="nowrap">-34</span>型灰质');
+  });
+  it('保留 <u> 标签', () => {
+    expect(gameTagsToHtml('对<u>弱点击破状态</u>下的目标')).toBe('对<u>弱点击破状态</u>下的目标');
+  });
+  it('剥离未知标签（b/i/size 等）', () => {
+    expect(gameTagsToHtml('<b>加粗</b>')).toBe('加粗');
+    expect(gameTagsToHtml('<i>斜体</i>')).toBe('斜体');
+    expect(gameTagsToHtml('<size=20>字号</size>')).toBe('字号');
+  });
+  it('{NICKNAME} → 开拓者，{F#}/{M#} 提取文本', () => {
+    expect(gameTagsToHtml('{NICKNAME}的基础速度提高')).toBe('开拓者的基础速度提高');
+    expect(gameTagsToHtml('{F#老姐}{M#老哥}')).toBe('老姐老哥');
+  });
+  it('{TEXTJOIN#id} 移除，{RUBY_E#} 移除，{SPACE} → &nbsp;', () => {
+    expect(gameTagsToHtml('位于{TEXTJOIN#87}的场地')).toBe('位于的场地');
+    expect(gameTagsToHtml('{RUBY_E#汉字}kanji')).toBe('kanji');
+    expect(gameTagsToHtml('A{SPACE}B')).toBe('A&nbsp;B');
+  });
+  it('空输入返回空串', () => {
+    expect(gameTagsToHtml(null)).toBe('');
+    expect(gameTagsToHtml('')).toBe('');
   });
 });
 
@@ -124,6 +161,17 @@ describe('fmtDesc', () => {
   });
   it('换行符转 <br>', () => {
     expect(fmtDesc('第一行\n第二行')).toBe('第一行<br>第二行');
+  });
+  it('渲染 <unbreak> 为 nowrap span', () => {
+    expect(fmtDesc('提高<unbreak>30%</unbreak>')).toBe('提高<span class="nowrap">30%</span>');
+  });
+  it('渲染 <color> 为着色 span，<u> 保留', () => {
+    expect(fmtDesc('<color=#f29e38ff>追加攻击</color>')).toBe('<span style="color:#f29e38ff">追加攻击</span>');
+    expect(fmtDesc('触发<u>追加攻击</u>')).toBe('触发<u>追加攻击</u>');
+  });
+  it('{F#}/{M#} 提取文本，{NICKNAME} 替换', () => {
+    expect(fmtDesc('{F#她}{M#他}的防御提高 #1[i]%', [0.2])).toBe('她他的防御提高 <span class="hl">20%</span>');
+    expect(fmtDesc('{NICKNAME}的速度提高')).toBe('开拓者的速度提高');
   });
   it('空描述返回空串', () => {
     expect(fmtDesc(null)).toBe('');
