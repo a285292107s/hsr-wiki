@@ -37,8 +37,11 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
         entries.sort(key=lambda x: x.get("Level", 1))
         first = entries[0]
 
+        attack_type = first.get("AttackType", "")
         # 过滤内部子技能：HideInUI 或 TriggerKey 映射为 None
-        if first.get("HideInUI", False):
+        # 助战技（Assist）豁免 HideInUI 过滤：如姬子•启行的【同行协议：裁决/歼破】
+        # 虽被标记 HideInUI，但属于实际存在的助战技变体，应在 wiki 中展示
+        if first.get("HideInUI", False) and attack_type != "Assist":
             logger.debug(f"过滤 HideInUI 子技能: {sid}")
             continue
         trigger_key = first.get("SkillTriggerKey", "")
@@ -53,7 +56,6 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
         # 保留原始标签（clean=False），让前端自行处理 <color>/<unbreak> 等
         desc = resolve_text(first.get("SkillDesc", {}), clean=False)
         simple_desc = resolve_text(first.get("SimpleSkillDesc", {}), clean=False)
-        attack_type = first.get("AttackType", "")
         # 优先使用 TriggerKey 映射类型，其次 AttackType 映射，最后用原始值
         if trigger_type:
             skill_type = trigger_type
