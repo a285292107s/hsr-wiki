@@ -27,13 +27,17 @@ export const useAppStore = defineStore('app', () => {
   const toasts = ref<ToastItem[]>([]);
   let toastSeq = 0;
 
-  /** 加载 manifest 并设置版本（幂等：SPA 生命周期内只请求一次） */
+  /** 加载 manifest 并设置版本（幂等：SPA 生命周期内只请求一次；CDN 不可用时静默回退） */
   async function initManifest(): Promise<void> {
     if (latestVersion.value) return;
-    const m = await loadManifest();
-    versions.value = m.hsr?.available || [];
-    version.value = resolveVersion(m);
-    latestVersion.value = version.value;
+    try {
+      const m = await loadManifest();
+      versions.value = m.hsr?.available || [];
+      version.value = resolveVersion(m);
+      latestVersion.value = version.value;
+    } catch {
+      // CDN 不可用：静默回退，不阻塞页面加载
+    }
   }
 
   /** 确保物品库就绪（失败回退空对象，不阻塞页面） */

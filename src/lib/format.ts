@@ -267,7 +267,10 @@ export function maxLevelValue(base: number, add: number): number {
 }
 
 export function iconUrl(i: string | null | undefined): string {
-  return i ? `${CDN}/assets/hsr/skillicons/${i.replace('.png', '.webp')}` : '';
+  if (!i) return '';
+  // 从完整路径中提取文件名（兼容 converter 输出的相对路径和 CDN 原始格式）
+  const name = i.includes('/') ? i.split('/').pop()! : i;
+  return `${CDN}/assets/hsr/skillicons/${name.replace('.png', '.webp')}`;
 }
 
 /** 忆灵 ID：优先从 memosprite.icon 解析（SpriteOutput/ServantIconTeam/11415B.png → 11415），回退 1+charId */

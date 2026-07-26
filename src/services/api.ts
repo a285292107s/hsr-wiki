@@ -219,3 +219,75 @@ export async function loadLocalCharacterList(): Promise<LocalCharList> {
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
   return res.json();
 }
+
+export async function loadLocalCharacter(charId: string): Promise<CharacterData> {
+  const url = `${LOCAL_DATA_BASE}/characters/${charId}.json`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+  return res.json();
+}
+
+/**
+ * 从本地 JSON 加载配装名称（光锥/遗器套装/队伍成员）。
+ * 返回合并后的新 NameCache（不修改入参）。失败项回退为 '#id'。
+ */
+export async function loadLocalBuildNames(
+  d: CharacterData,
+  existing: NameCache = {},
+): Promise<NameCache> {
+  const result: NameCache = { ...existing };
+  const needed = new Set<string>();
+
+  (d.lightcones || []).forEach((id) => needed.add(String(id)));
+  if (d.relics) {
+    (d.relics.set4_id_list || []).concat(d.relics.set2_id_list || []).forEach((id) => needed.add(String(id)));
+  }
+  if (d.teams) d.teams.forEach((t) => (t.member_list || []).forEach((id) => needed.add(String(id))));
+
+  try {
+    const [lc, relics, chars] = await Promise.all([
+      fetch(`${LOCAL_DATA_BASE}/light_cones.json`).then((r) => (r.ok ? r.json() : [])),
+      fetch(`${LOCAL_DATA_BASE}/relics.json`).then((r) => (r.ok ? r.json() : [])),
+      fetch(`${LOCAL_DATA_BASE}/characters.json`).then((r) => (r.ok ? r.json() : [])),
+    ]);
+    for (const item of lc) if (needed.has(String(item.id)) && !result[String(item.id)]) result[String(item.id)] = item.name;
+    for (const item of relics) if (needed.has(String(item.id)) && !result[String(item.id)]) result[String(item.id)] = item.name;
+    for (const item of chars) if (needed.has(String(item.id)) && !result[String(item.id)]) result[String(item.id)] = item.name;
+  } catch { /* 失败静默 */ }
+
+  // 任何仍未找到的名称回退为 '#id'
+  for (const id of needed) {
+    if (!result[id]) result[id] = '#' + id;
+  }
+  return result;
+}
+
+/**
+ * 从本地 relics.json 加载遗器套装信息，返回与 CDN RelicSetData 兼容的结构。
+ */
+export async function loadLocalRelicSet(id: number | string): Promise<RelicSetData | null> {
+  try {
+    const res = await fetch(`${LOCAL_DATA_BASE}/relics.json`);
+    if (!res.ok) return null;
+    const list: Array<{
+      id: number; name: string; icon: string;
+      descriptions?: Record<string, string>;
+      param_list?: Record<string, number[]>;
+    }> = await res.json();
+    const item = list.find((r) => String(r.id) === String(id));
+    if (!item) return null;
+
+    const require_num: Record<string, { desc?: string; param_list?: number[] }> = {};
+    if (item.descriptions) {
+      for (const [pc, desc] of Object.entries(item.descriptions)) {
+        require_num[pc] = {
+          desc,
+          param_list: (item.param_list && item.param_list[pc]) || [],
+        };
+      }
+    }
+    return { name: item.name, icon: item.icon, require_num };
+  } catch {
+    return null;
+  }
+}

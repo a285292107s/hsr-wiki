@@ -14,7 +14,7 @@ import { useAppStore } from '../stores/app';
 import { useCharacterStore } from '../stores/character';
 import SkillCard from '../character/SkillCard.vue';
 import { initSpineViewer } from '../character/spine';
-import { loadRelicSet } from '../../services/api';
+import { loadLocalRelicSet } from '../../services/api';
 import {
   avatarDrawCardUrl, eidolonIconUrl, escHtml, fmtDesc, fmtDescDiff,
   hasParamDiff, hasTextDiff, iconUrl, itemName, maxLevelStat, maxLevelValue,
@@ -498,7 +498,7 @@ watch(
     (r.set4_id_list || []).forEach((id) => ids.push({ id, pc: 4 }));
     (r.set2_id_list || []).forEach((id) => ids.push({ id, pc: 2 }));
     ids.forEach((s) => {
-      void loadRelicSet(app.version, s.id).then((rs) => {
+      void loadLocalRelicSet(s.id).then((rs) => {
         relicSets.value = { ...relicSets.value, [String(s.id)]: rs };
       });
     });

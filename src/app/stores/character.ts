@@ -6,7 +6,7 @@
  */
 import { defineStore } from 'pinia';
 import { computed, ref, toRaw } from 'vue';
-import { loadCharacter, loadBuildNames } from '../../services/api';
+import { loadLocalCharacter, loadLocalBuildNames } from '../../services/api';
 import { getEnhancedKeys, getRenderData, validateCharData } from '../../lib/format';
 import { useAppStore } from './app';
 import type { CharacterData } from '../../services/types';
@@ -43,7 +43,7 @@ export const useCharacterStore = defineStore('character', () => {
       data.value = null;
       await app.initManifest();
       if (gen !== loadGen) return; // 已被更新的加载取代
-      const d = await loadCharacter(app.version, id);
+      const d = await loadLocalCharacter(id);
       if (gen !== loadGen) return; // 已被更新的加载取代
       validateCharData(d);
       data.value = d;
@@ -56,7 +56,7 @@ export const useCharacterStore = defineStore('character', () => {
       // 并行加载物品库 + 配装名称（名称失败回退 '#id'，不阻塞）
       const [, names] = await Promise.all([
         app.ensureItems(),
-        loadBuildNames(app.version, d, app.nameCache),
+        loadLocalBuildNames(d, app.nameCache),
       ]);
       if (gen !== loadGen) return; // 已被更新的加载取代
       app.mergeNames(names);
