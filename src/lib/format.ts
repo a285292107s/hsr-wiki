@@ -312,7 +312,7 @@ export function itemIconUrl(iconPath: string | null | undefined): string {
   return `${CDN}/assets/hsr/itemfigures/${m[1]}.webp`;
 }
 
-/* ─── 目录页图标 URL（standalone CDN 数据源，复现宿主卡片图片规律） ─── */
+/* ─── 目录页图标 URL（standalone CDN 数据源，复现卡片图片命名规律） ─── */
 
 /** 角色头像：avatarshopicon/{charId}.webp */
 export function avatarShopIconUrl(charId: string | number): string {

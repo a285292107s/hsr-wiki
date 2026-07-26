@@ -1,6 +1,6 @@
 /**
  * 路由表 + 方向过渡
- * 路径与深度沿用原脚本模块注册表（router.js）：
+ * 路径与深度沿用原项目路由注册表（router.js）：
  *   home(0) / achievement(1) / generic-catalog(2) / character-catalog(3) / character(4)
  * 深度差决定页面过渡方向（navDir：1=前进深入，-1=返回，0=平级）。
  * meta.endgameTab：终局 4 路由互为同页 Tab——共享 transition key 与组件 key，
@@ -87,8 +87,8 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, catalog: 'currency' },
   },
   {
-    // 成就页为宿主增强模块，与「宿主 100% 隐藏」新架构不兼容，第二期重构；
-    // 第一期展示占位页，保持 HOME_NAV 8 项导航完整。
+    // 成就页为尚未实现的扩展模块，第二期重构；
+    // 第一期展示占位页，保持 NAV_ITEMS 9 项导航完整。
     path: '/achievement',
     name: 'achievement',
     component: () => import('../views/PlaceholderView.vue'),

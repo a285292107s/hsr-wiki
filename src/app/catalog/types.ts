@@ -1,5 +1,5 @@
 /**
- * 通用目录引擎类型定义（迁移自 catalog.js 的 CATALOG_PAGES 注册表）
+ * 通用目录引擎类型定义（对应原 catalog.js 的 CATALOG_PAGES 注册表）
  */
 
 export interface CatalogFilterOption {

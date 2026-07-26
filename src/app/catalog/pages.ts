@@ -1,6 +1,6 @@
 /**
- * 目录页配置注册表（迁移自 catalog.js 的 registerCatalogPage 调用）
- * 7 个页面：角色（专用抓取 + 筛选）/ 光锥 / 遗器 / 物品（CDN）/ 敌对 / 终局赛季 / 货币战争
+ * 目录页配置注册表（对应原 catalog.js 的 registerCatalogPage 调用）
+ * 10 个目录页：角色（专用抓取 + 筛选）、光锥、遗器、物品、敌对、迷宫、剧情、首领、混沌、货币战争
  */
 import { CDN, PATH } from '../../lib/constants';
 import {
@@ -16,7 +16,7 @@ import {
 import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
 import type { MazeListDb, MazeListEntry, MazeVersionMap } from '../../services/types';
 
-/** 宿主属性图标 URL 键（小写） → 中文名 */
+/** 属性图标 URL 键（小写） → 中文名 */
 const ELEM_NAMES: Record<string, string> = {
   fire: '火', ice: '冰', thunder: '雷', wind: '风',
   quantum: '量子', imaginary: '虚数', physical: '物理',
@@ -67,7 +67,7 @@ const characterPage: CatalogPageConfig = {
         release: info.release,
       });
     }
-    // 对齐宿主排序：未实装（无 release）在前，其余按 release 降序，同值按 id 升序
+    // 排序：未实装（无 release）在前，其余按 release 降序，同值按 id 升序
     items.sort((a, b) => {
       const ra = (a.release as number | undefined) ?? Infinity;
       const rb = (b.release as number | undefined) ?? Infinity;
@@ -154,7 +154,7 @@ const lightconePage: CatalogPageConfig = {
         rarity: parseRarity(info.rank),
       });
     }
-    // 对齐宿主排序：id 降序（新光锥在前）
+    // 排序：id 降序（新光锥在前）
     items.sort((a, b) => Number(b.id) - Number(a.id));
     return items;
   },
@@ -338,7 +338,7 @@ const monsterPage: CatalogPageConfig = {
 
 /* ─── 终局内容（时间线赛季卡片） ─── */
 
-/** 赛季状态：依据 begin/end 日期推导；无日期信息时返回"未知"（与宿主一致） */
+/** 赛季状态：依据 begin/end 日期推导；无日期信息时返回"未知"（与原站一致） */
 function mazeStatus(info: MazeListEntry): string {
   const parse = (s: string | undefined): number | null => {
     if (!s) return null;
@@ -377,7 +377,7 @@ const MAZE_STATUS_CLASS: Record<string, string> = {
   '未知': 'unknown',
 };
 
-/** 终局内容 4 大分类（对齐宿主 4 个独立路由） */
+/** 终局内容 4 大分类（对应 4 个独立路由） */
 const ENDGAME_TABS = [
   { label: '忘却之庭', en: 'FORGOTTEN HALL', href: '/maze' },
   { label: '虚构叙事', en: 'PURE FICTION', href: '/story' },
@@ -444,7 +444,7 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
           });
         }
       } else {
-        // 无 version.json：直接按 ID 降序输出（story/boss，对齐宿主 2026→2001 / 3020→3001）
+        // 无 version.json：直接按 ID 降序输出（story/boss，对齐原站 2026→2001 / 3020→3001）
         for (const [key, info] of Object.entries(db)) {
           if (!info || !info.zh) continue;
           items.push({

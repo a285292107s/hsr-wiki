@@ -1,5 +1,5 @@
 /**
- * 三级缓存引擎（移植自原 data.js，保持 IndexedDB 存储格式兼容）
+ * 四级缓存引擎（移植自原缓存模块，保持 IndexedDB 存储格式兼容）
  *
  *   L1 内存 Map（80 条上限，淘汰最早 20%）
  *   L2 IndexedDB（nk-hsr-cache/kv，条目 { data, exp }）

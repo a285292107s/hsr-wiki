@@ -1,12 +1,12 @@
 /**
- * 全站导航配置（沿用原 home.js 的 HOME_NAV 8 项）
+ * 全站导航配置（沿用原 home.js 的导航配置，共 9 项）
  * 侧边栏（SidebarNav）与首页导航网格（HomeView）共享。
  */
 export interface NavItem {
   title: string;
   en: string;
   desc: string;
-  /** vue-router 路径（无尾斜杠；宿主 URL 的尾斜杠由非 strict 路由兼容） */
+  /** vue-router 路径（无尾斜杠；由非 strict 路由兼容尾斜杠） */
   path: string;
   /** 额外参与高亮判定的路径（如终局内容 4 路由共享一个侧栏项）；默认仅 path */
   activePaths?: string[];

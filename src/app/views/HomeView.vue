@@ -2,7 +2,7 @@
 /**
  * 首页：沉浸式品牌门户
  * 全屏视差 Hero（立绘轮播 + 鼠标视差）+ HUD 标题 + 导航卡片网格
- * 迁移自 要迁移的代码/home.js
+ * 移植自原 home.js 首页渲染
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
@@ -137,7 +137,6 @@ onMounted(async () => {
     /* 离线降级：版本显示 —，页面仍可用 */
   }
   loading.value = false;
-  app.markDataReady();
 });
 
 onBeforeUnmount(() => {

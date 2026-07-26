@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 角色详情页（迁移自 要迁移的代码/character.js 渲染 + 交互）
+ * 角色详情页（移植自原 character.js 渲染与交互逻辑）
  * 结构：Hero（视差立绘 + Spine 双通道）/ 吸顶 Tabs（含强化模式切换）/ 四面板
  *   概览：描述 + 总属性加成 diff + TALENTS 附加能力 diff
  *   技能：type+type_name 分组 + 滑条响应式 + REMOVED 卡片 + 忆灵技能

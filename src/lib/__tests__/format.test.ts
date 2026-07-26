@@ -57,8 +57,8 @@ describe('stripTags', () => {
     expect(stripTags('A{SPACE}B')).toBe('A B');
     expect(stripTags('{NICKNAME}你好')).toBe('开拓者你好');
   });
-  it('<color> 转 span+strong 后被最终清洗规则剥离（与原脚本行为一致）', () => {
-    // 原脚本 data.js stripTags 同款正则链：color 先转 span，再被 <(?!\/?u>)[^>]+> 清掉
+  it('<color> 转 span+strong 后被最终清洗规则剥离（与原实现行为一致）', () => {
+    // 原 data.js stripTags 同款正则链：color 先转 span，再被 <(?!\/?u>)[^>]+> 清掉
     expect(stripTags('<color=#F29E38>弱点</color>')).toBe('弱点');
   });
   it('剥离 <unbreak> 与其他未知标签，保留 <u>', () => {

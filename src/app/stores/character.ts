@@ -47,9 +47,9 @@ export const useCharacterStore = defineStore('character', () => {
       if (gen !== loadGen) return; // 已被更新的加载取代
       validateCharData(d);
       data.value = d;
-      // 原脚本行为：更新页面标题
+      // 原实现行为：更新页面标题
       document.title = `${d.name} - HSR Wiki`;
-      // 默认选最后一个加强版本（原脚本行为）
+      // 默认选最后一个加强版本（原实现行为）
       const keys = getEnhancedKeys(d);
       enhKey.value = keys.length ? keys[keys.length - 1] : null;
       activeTab.value = CHAR_TAB_DEFAULT;
@@ -60,7 +60,6 @@ export const useCharacterStore = defineStore('character', () => {
       ]);
       if (gen !== loadGen) return; // 已被更新的加载取代
       app.mergeNames(names);
-      app.markDataReady();
     } catch (e) {
       if (gen !== loadGen) return; // 过期加载的失败静默丢弃，由最新加载接管 UI
       error.value = e instanceof Error ? e.message : String(e);

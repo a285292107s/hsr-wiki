@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * 技能卡片（迁移自 character.js renderSkillCard + bindPanels）
- * 原脚本滑条交互依赖 data-tpl/data-lvs 属性 + DOM 重渲染，此处改为 Vue 响应式：
+ * 技能卡片（移植自原 character.js 的 renderSkillCard + bindPanels）
+ * 原实现滑条交互依赖 data-tpl/data-lvs 属性 + DOM 重渲染，此处改为 Vue 响应式：
  *   lv 变化 → descHtml / 数据表激活行自动重算（加强 diff 模式下用新旧参数重渲染描述）
  * 子技能通过文件名自引用递归渲染（原结构：子卡片嵌套在父卡片 .nk-skill 内）
  */

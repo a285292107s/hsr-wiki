@@ -61,13 +61,8 @@ export const useAppStore = defineStore('app', () => {
     toasts.value = toasts.value.filter((t) => t.id !== id);
   }
 
-  /** 首屏数据就绪标记（保留接口兼容，无实际副作用） */
-  function markDataReady(): void {
-    // no-op: 独立站无 failsafe 分段检测
-  }
-
   return {
     version, latestVersion, versions, itemDb, nameCache, toasts,
-    initManifest, ensureItems, mergeNames, toast, dismissToast, markDataReady,
+    initManifest, ensureItems, mergeNames, toast, dismissToast,
   };
 });

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 自建侧边栏（复用 HOME_NAV 8 项）
+ * 自建侧边栏（复用 NAV_ITEMS，共 9 项）
  */
 import { useRoute, RouterLink } from 'vue-router';
 import { NAV_ITEMS, type NavItem } from './nav-items';

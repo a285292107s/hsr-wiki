@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 通用目录引擎组件（迁移自 catalog.js 的 initGenericCatalog + initCatalog）
+ * 通用目录引擎组件（移植自原 catalog.js 的 initGenericCatalog + initCatalog）
  *
  * 数据源：统一走 CDN fetchData。
  * >400 条目启用虚拟网格；卡片走 renderCard HTML（v-html）+ 事件委托。
@@ -101,7 +101,6 @@ async function load(): Promise<void> {
     app.toast('error', `${props.config.title}: ${errorMsg.value}`);
   } finally {
     if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
-    if (!cancelled.value && gen === loadGen) app.markDataReady();
   }
 }
 

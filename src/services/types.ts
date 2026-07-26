@@ -9,7 +9,7 @@ export interface GameManifest {
   latest: string;
   available: string[];
   live: string;
-  /** 各版本新增内容 ID（仅增量，无完整列表端点 → 目录页必须沿用 DOM 抓取） */
+  /** 各版本新增内容 ID（仅增量，无完整列表端点 → 目录页通过 CDN 增量推断） */
   new: Record<string, (number | string)[]>;
 }
 
@@ -174,7 +174,7 @@ export interface CharacterData {
   /** 星魂 1-6 */
   ranks: Record<string, Rank>;
   skills: Record<string, Skill>;
-  /** 行迹树：pointKey → 等级 → 节点（原脚本 tree['1'] 取首级节点） */
+  /** 行迹树：pointKey → 等级 → 节点（tree['1'] 取首级节点） */
   skill_trees: Record<string, Record<string, SkillTree>>;
   /** 加强版本（键如 "1"；空 = 无加强） */
   enhanced?: Record<string, EnhancedBundle>;

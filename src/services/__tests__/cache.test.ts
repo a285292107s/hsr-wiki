@@ -1,5 +1,5 @@
 /**
- * cache.ts 三级缓存引擎测试
+ * cache.ts 四级缓存引擎测试
  *
  * 模块级状态（mem Map / pending / failCount / dbPromise）通过
  * vi.resetModules() + 动态 import 获取全新实例隔离；
