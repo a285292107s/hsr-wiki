@@ -1,8 +1,6 @@
 <script setup lang="ts">
 /**
- * 自建侧边栏（Shadow DOM 内，复用 HOME_NAV 8 项）
- * 原脚本直接改造宿主 .ui-sidebar；新架构宿主 100% 隐藏，侧边栏完全自建。
- * 点击 RouterLink → host-sync history 同步驱动宿主 SPA 渲染目标页。
+ * 自建侧边栏（复用 HOME_NAV 8 项）
  */
 import { useRoute, RouterLink } from 'vue-router';
 import { NAV_ITEMS, type NavItem } from './nav-items';

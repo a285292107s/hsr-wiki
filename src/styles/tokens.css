@@ -1,14 +1,12 @@
 /* ═══════════════════════════════════════════
    Gaming HUD 设计系统 · 设计令牌 + 全局组件
    迁移自 要迁移的代码/css/02-css-tokens.js
-   - :root → :host（Shadow Root 隔离）
-   - 移除宿主 DOM 覆盖规则（新架构由 failsafe 离屏隐藏宿主）
-   - #nk-app 重定义为挂载容器；角色页滚动容器拆分至 .nk-page--detail
+   - #app 为应用挂载容器；角色页滚动容器拆分至 .nk-page--detail
    - 页面过渡/Toast 改写为 Vue Transition 类名
 ═══════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
 
-:host {
+:root {
   --bg: #0F0F23;
   --surface: rgba(15,15,35,0.85);
   --card: rgba(20,20,45,0.7);
@@ -45,23 +43,22 @@
   --nk-radius-card: 12px;
 }
 
-/* ─── 侧边栏（自建组件，Shadow DOM 内，玻璃胶囊形态） ─── */
-.ui-sidebar { position: fixed; display: flex; flex-direction: column; align-items: center; gap: 6px; background: rgba(16,14,36,0.72) !important; border-right: none !important; backdrop-filter: blur(20px) saturate(1.4) !important; -webkit-backdrop-filter: blur(20px) saturate(1.4) !important; width: 72px !important; padding: 14px 8px !important; z-index: 10000 !important; height: fit-content !important; top: 50% !important; bottom: auto !important; transform: translateY(-50%); left: 8px; border-radius: 22px !important; border: 1px solid rgba(124,58,237,0.3) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(124,58,237,0.08), inset 0 1px 0 rgba(255,255,255,0.06); }
+/* ─── 侧边栏（自建组件，玻璃胶囊形态） ─── */
+.ui-sidebar { position: fixed; display: flex; flex-direction: column; align-items: center; gap: 6px; background: rgba(16,14,36,0.72); border-right: none; backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); width: 72px; padding: 14px 8px; z-index: 10000; height: fit-content; top: 50%; bottom: auto; transform: translateY(-50%); left: 8px; border-radius: 22px; border: 1px solid rgba(124,58,237,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(124,58,237,0.08), inset 0 1px 0 rgba(255,255,255,0.06); }
 .ui-sidebar__brand { margin-bottom: 12px; }
-.ui-sidebar-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px !important; transition: all 0.2s !important; opacity: 0.6; color: var(--text2); }
+.ui-sidebar-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; transition: all 0.2s; opacity: 0.6; color: var(--text2); }
 .ui-sidebar-link__icon { display: flex; }
 .ui-sidebar-link__icon svg { width: 20px; height: 20px; }
-.ui-sidebar-link:hover { opacity: 1; background: rgba(124,58,237,0.1) !important; }
-.ui-sidebar-link--active { opacity: 1; background: rgba(124,58,237,0.35) !important; border: 1px solid rgba(124,58,237,0.45) !important; box-shadow: 0 0 14px rgba(124,58,237,0.25); }
+.ui-sidebar-link:hover { opacity: 1; background: rgba(124,58,237,0.1); }
+.ui-sidebar-link--active { opacity: 1; background: rgba(124,58,237,0.35); border: 1px solid rgba(124,58,237,0.45); box-shadow: 0 0 14px rgba(124,58,237,0.25); }
 
-/* ─── 挂载容器（platform.mount 创建的 #nk-app） ─── */
-#nk-app { position: fixed; inset: 0; z-index: 9999; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
-#nk-app h1, #nk-app h2, #nk-app h3, #nk-app p, #nk-app dl, #nk-app dt, #nk-app dd { margin: 0; padding: 0; }
-#nk-app * { box-sizing: border-box; }
-/* Tailwind preflight 隔离：恢复被 reset 的关键默认样式 */
-#nk-app button { font: inherit; color: inherit; cursor: pointer; }
-#nk-app img { display: inline-block; vertical-align: middle; }
-#nk-app a { color: inherit; text-decoration: none; }
+/* ─── 挂载容器 ─── */
+#app { position: relative; min-height: 100vh; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+#app h1, #app h2, #app h3, #app p, #app dl, #app dt, #app dd { margin: 0; padding: 0; }
+#app * { box-sizing: border-box; }
+#app button { font: inherit; color: inherit; cursor: pointer; }
+#app img { display: inline-block; vertical-align: middle; }
+#app a { color: inherit; text-decoration: none; }
 
 /* ─── 角色详情页滚动容器（CharacterView 根元素） ─── */
 .nk-page--detail { position: absolute; inset: 0; left: 88px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; transition: opacity var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out); }
@@ -70,8 +67,6 @@
 .nk-img-error { background: rgba(124,58,237,0.06); border: 1px dashed var(--border); object-fit: contain; }
 
 /* ─── Hero: 全屏视差立绘 ─── */
-/* 注：Shadow DOM <style> 内的 @property 会被 Chrome 静默忽略，
-   实际注册由 src/styles/index.ts 的 CSS.registerProperty() 完成；此处保留作回退/文档 */
 @property --spine-inner { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @property --spine-outer { syntax: '<percentage>'; inherits: false; initial-value: 1%; }
 .nk-hero { position: relative; height: 70vh; min-height: 400px; flex-shrink: 0; overflow: hidden; width: 100%; max-width: var(--nk-detail-max); margin: 0 auto; border-radius: 0 0 12px 12px; }
@@ -201,7 +196,7 @@
 ═══════════════════════════════════════════ */
 /* 平板及以下：侧边栏收窄 */
 @media (max-width: 1023px) {
-  .ui-sidebar { width: 56px !important; padding: 12px 6px !important; border-radius: 18px !important; }
+  .ui-sidebar { width: 56px; padding: 12px 6px; border-radius: 18px; }
   .nk-page--detail { left: 72px; }
   .nk-hero { max-width: 100%; border-radius: 0; }
   .nk-tabs { padding: 0 20px; }
@@ -211,9 +206,9 @@
 }
 /* 手机：侧边栏转为底部 Tab Bar */
 @media (max-width: 767px) {
-  .ui-sidebar { position: fixed !important; top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important; transform: none !important; width: 100% !important; height: 56px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-around !important; background: rgba(12,12,30,0.95) !important; backdrop-filter: blur(16px) !important; border-top: 1px solid var(--border) !important; border-radius: 0 !important; padding: 0 8px !important; z-index: 100000 !important; }
-  .ui-sidebar__brand { display: none !important; }
-  .ui-sidebar-link { border-radius: 8px !important; }
+  .ui-sidebar { position: fixed; top: auto; bottom: 0; left: 0; right: 0; transform: none; width: 100%; height: 56px; display: flex; flex-direction: row; align-items: center; justify-content: space-around; background: rgba(12,12,30,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); border-radius: 0; padding: 0 8px; z-index: 100000; }
+  .ui-sidebar__brand { display: none; }
+  .ui-sidebar-link { border-radius: 8px; }
   .nk-page--detail { left: 0; bottom: 56px; }
   #nk-catalog-app { padding-left: 16px !important; padding-right: 16px !important; padding-bottom: 72px !important; }
   .nk-cat-header { margin-left: -16px !important; margin-right: -16px !important; padding-left: 16px !important; padding-right: 16px !important; flex-wrap: wrap; }

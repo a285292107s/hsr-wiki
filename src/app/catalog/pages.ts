@@ -44,32 +44,9 @@ const ITEM_TYPE_NAMES: Record<string, string> = {
 const characterPage: CatalogPageConfig = {
   id: 'character',
   title: '角色',
-  dataSource: 'dom',
-  cardSelector: '[data-ui="content-card"]',
-  cardValidator: (card) => /\/character\/\d+/.test(card.getAttribute('href') || ''),
   searchPlaceholder: '搜索角色...',
   gridClass: 'nk-cat-grid',
   cardClass: '.nk-cat-card',
-  scrapeCard(card) {
-    const avatarImg = card.querySelector('.relative img:first-child');
-    const elemImg = card.querySelector('img[alt="属性"]');
-    const pathImg = card.querySelector('img[alt="命途"]');
-    const nameEl = card.querySelector('.text-sm');
-    const starEl = card.querySelector('.text-amber-300');
-    const elem = elemImg ? ((elemImg as HTMLImageElement).src.match(/element\/(\w+)/) || [])[1] || '' : '';
-    const path = pathImg ? ((pathImg as HTMLImageElement).src.match(/pathicon\/(\w+)/) || [])[1] || '' : '';
-    const rarity = starEl ? starEl.querySelectorAll('span').length : 5;
-    return {
-      name: nameEl ? (nameEl.textContent || '').trim() : '',
-      href: card.getAttribute('href') || '#',
-      avatar: avatarImg ? (avatarImg as HTMLImageElement).src : '',
-      elemImg: elemImg ? (elemImg as HTMLImageElement).src : '',
-      pathImg: pathImg ? (pathImg as HTMLImageElement).src : '',
-      element: elem,
-      path,
-      rarity,
-    };
-  },
   async fetchData(ctx) {
     const db = await loadCharacterList(ctx.version);
     const items: CatalogItem[] = [];
@@ -158,28 +135,9 @@ const characterPage: CatalogPageConfig = {
 const lightconePage: CatalogPageConfig = {
   id: 'lightcone',
   title: '光锥',
-  dataSource: 'dom',
-  cardSelector: '[data-ui="content-card"]',
-  cardValidator: (card) => /\/lightcone\/\d+/.test(card.getAttribute('href') || ''),
   searchPlaceholder: '搜索光锥...',
   gridClass: 'nk-cat-grid nk-lc-grid',
   cardClass: '.nk-lc-card',
-  scrapeCard(card) {
-    const img = card.querySelector('.relative img:first-child') || card.querySelector('img');
-    const nameEl = card.querySelector('.text-sm') || card.querySelector('[class*="text"]');
-    const starEl = card.querySelector('.text-amber-300');
-    const pathImg = card.querySelector('img[alt="命途"]');
-    const rarity = starEl ? starEl.querySelectorAll('span').length : 5;
-    const path = pathImg ? ((pathImg as HTMLImageElement).src.match(/pathicon\/(\w+)/) || [])[1] || '' : '';
-    return {
-      name: nameEl ? (nameEl.textContent || '').trim() : '',
-      href: card.getAttribute('href') || '#',
-      img: img ? (img as HTMLImageElement).src : '',
-      pathImg: pathImg ? (pathImg as HTMLImageElement).src : '',
-      path,
-      rarity,
-    };
-  },
   async fetchData(ctx) {
     const db = await loadLightconeList(ctx.version);
     const items: CatalogItem[] = [];
@@ -246,21 +204,9 @@ const lightconePage: CatalogPageConfig = {
 const relicPage: CatalogPageConfig = {
   id: 'relic',
   title: '遗器',
-  dataSource: 'dom',
-  cardSelector: '[data-ui="content-card"]',
-  cardValidator: (card) => /\/relic\/\d+/.test(card.getAttribute('href') || ''),
   searchPlaceholder: '搜索遗器...',
   gridClass: 'nk-cat-grid nk-relic-grid',
   cardClass: '.nk-relic-card',
-  scrapeCard(card) {
-    const img = card.querySelector('.relative img:first-child') || card.querySelector('img');
-    const nameEl = card.querySelector('.text-sm') || card.querySelector('[class*="text"]');
-    return {
-      name: nameEl ? (nameEl.textContent || '').trim() : '',
-      href: card.getAttribute('href') || '#',
-      img: img ? (img as HTMLImageElement).src : '',
-    };
-  },
   async fetchData(ctx) {
     const db = await loadRelicsetList(ctx.version);
     const items: CatalogItem[] = [];
@@ -293,7 +239,6 @@ const relicPage: CatalogPageConfig = {
 const itemPage: CatalogPageConfig = {
   id: 'item',
   title: '物品',
-  dataSource: 'cdn',
   searchPlaceholder: '搜索物品...',
   gridClass: 'nk-cat-grid nk-item-grid',
   cardClass: '.nk-item-card',
@@ -361,21 +306,9 @@ const itemPage: CatalogPageConfig = {
 const monsterPage: CatalogPageConfig = {
   id: 'monster',
   title: '敌对物种',
-  dataSource: 'dom',
-  cardSelector: '[data-ui="content-card"]',
-  cardValidator: (card) => /\/monster\/\d+/.test(card.getAttribute('href') || ''),
   searchPlaceholder: '搜索敌对物种...',
   gridClass: 'nk-cat-grid nk-mob-grid',
   cardClass: '.nk-mob-card',
-  scrapeCard(card) {
-    const img = card.querySelector('.relative img:first-child') || card.querySelector('img');
-    const nameEl = card.querySelector('.text-sm') || card.querySelector('[class*="text"]');
-    return {
-      name: nameEl ? (nameEl.textContent || '').trim() : '',
-      href: card.getAttribute('href') || '#',
-      img: img ? (img as HTMLImageElement).src : '',
-    };
-  },
   async fetchData(ctx) {
     const db = await loadMonsterList(ctx.version);
     const items: CatalogItem[] = [];
@@ -469,42 +402,23 @@ interface EndgamePageOpts {
   title: string;
   /** 本页路由（用于子导航高亮与详情链接前缀） */
   href: string;
-  /** 校验宿主卡片归属的正则（路由 + ID 段） */
-  routeRe: RegExp;
   loadList: (ver: string) => Promise<MazeListDb>;
   /** 可选版本映射；无则按 ID 降序直接输出（story/boss） */
   loadVersions?: (ver: string) => Promise<MazeVersionMap>;
 }
 
 /**
- * 终局内容页工厂：4 页共享时间线卡片 / 状态筛选 / 子导航，
- * 仅数据源与路由正则不同（忘却之庭 1xxx / 虚构叙事 2xxx / 末日幻影 3xxx / 异相仲裁 1-9）。
+ * 终局内容页工厂：4 页共享时间线卡片 / 状态筛选 / 子导航。
  */
 function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
   return {
     id: o.id,
     title: o.title,
     subNav: endgameSubNav(o.href),
-    dataSource: 'dom',
     prefetch: (ctx) => prefetchEndgameAll(ctx.version),
-    cardSelector: 'a.ui-season-row',
-    cardValidator: (el) => o.routeRe.test(el.getAttribute('href') || ''),
     searchPlaceholder: '搜索赛季...',
     gridClass: 'nk-cat-grid nk-season-grid',
     cardClass: '.nk-season-card',
-    scrapeCard(el) {
-      const idEl = el.querySelector('.ui-season-row__id');
-      const titleEl = el.querySelector('.ui-season-row__heading');
-      const labelEl = el.querySelector('.ui-season-row__label');
-      const statusEl = el.querySelector('.ui-season-status');
-      return {
-        name: titleEl ? (titleEl.textContent || '').trim() : (idEl ? (idEl.textContent || '').trim() : ''),
-        href: el.getAttribute('href') || '#',
-        id: idEl ? (idEl.textContent || '').trim() : '',
-        version: labelEl ? (labelEl.textContent || '').trim() : '',
-        status: statusEl ? (statusEl.textContent || '').trim() : '',
-      };
-    },
     async fetchData(ctx) {
       const db = await o.loadList(ctx.version);
       const items: CatalogItem[] = [];
@@ -572,22 +486,22 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
 }
 
 const mazePage = makeEndgamePage({
-  id: 'maze', title: '终局内容', href: '/maze', routeRe: /\/maze\/\d+/,
+  id: 'maze', title: '终局内容', href: '/maze',
   loadList: loadMazeList, loadVersions: loadMazeVersions,
 });
 
 const storyPage = makeEndgamePage({
-  id: 'story', title: '终局内容', href: '/story', routeRe: /\/story\/\d+/,
+  id: 'story', title: '终局内容', href: '/story',
   loadList: loadStoryList,
 });
 
 const bossPage = makeEndgamePage({
-  id: 'boss', title: '终局内容', href: '/boss', routeRe: /\/boss\/\d+/,
+  id: 'boss', title: '终局内容', href: '/boss',
   loadList: loadBossList,
 });
 
 const peakPage = makeEndgamePage({
-  id: 'peak', title: '终局内容', href: '/peak', routeRe: /\/peak\/\d+/,
+  id: 'peak', title: '终局内容', href: '/peak',
   loadList: loadPeakList, loadVersions: loadPeakVersions,
 });
 
@@ -596,24 +510,11 @@ const peakPage = makeEndgamePage({
 const currencyPage: CatalogPageConfig = {
   id: 'currency',
   title: '货币战争',
-  dataSource: 'dom',
-  cardSelector: '[data-ui="content-card"]',
-  cardValidator: (card) => /\/currency\/[\w-]+/.test(card.getAttribute('href') || ''),
   searchPlaceholder: '搜索货币战争...',
   gridClass: 'nk-cat-grid nk-maze-grid',
   cardClass: '.nk-relic-card',
-  scrapeCard(card) {
-    const img = card.querySelector('.relative img:first-child') || card.querySelector('img');
-    const nameEl =
-      card.querySelector('.text-sm') || card.querySelector('h2') || card.querySelector('[class*="text"]');
-    return {
-      name: nameEl ? (nameEl.textContent || '').trim() : '',
-      href: card.getAttribute('href') || '#',
-      img: img ? (img as HTMLImageElement).src : '',
-    };
-  },
   async fetchData() {
-    // 无 CDN 列表端点；宿主为 5 张静态卡片（此处与宿主硬编码数据保持一致）
+    // 无 CDN 列表端点；硬编码 5 张静态卡片
     return [
       { name: '角色图鉴', href: '/currency/role', img: `${CDN}/assets/hsr/avatarroundicon/1001.webp` },
       { name: '装备图鉴', href: '/currency/item', img: `${CDN}/assets/hsr/gridfight/equipment/350101.webp` },

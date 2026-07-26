@@ -6,9 +6,8 @@
  * meta.endgameTab：终局 4 路由互为同页 Tab——共享 transition key 与组件 key，
  * 互切时不触发页面过渡、不重建目录引擎。
  */
-import { createRouter, type RouteRecordRaw, type Router } from 'vue-router';
+import { createRouter, createWebHashHistory, type RouteRecordRaw, type Router } from 'vue-router';
 import { ref } from 'vue';
-import { createHostSyncHistory, detectBase } from './host-history';
 
 /** 导航方向（驱动 nk-enter-fwd / nk-enter-back 过渡动画） */
 export const navDir = ref<1 | -1 | 0>(0);
@@ -103,9 +102,8 @@ const routes: RouteRecordRaw[] = [
 
 export function createNkRouter(): Router {
   const router = createRouter({
-    history: createHostSyncHistory(detectBase()),
+    history: createWebHashHistory(),
     routes,
-    // 滚动容器是 Shadow Root 内的 #nk-app（非 window），滚动位置管理由 App.vue 负责
   });
 
   router.beforeEach((to, from) => {

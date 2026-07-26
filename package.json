@@ -1,14 +1,12 @@
 {
   "name": "hsr-wiki",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --mode standalone",
-    "dev:monkey": "vite",
+    "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "build:standalone": "vue-tsc -b && vite build --mode standalone",
-    "preview": "vite preview --mode standalone",
+    "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -22,7 +20,6 @@
     "happy-dom": "^20.11.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.11",
-    "vite-plugin-monkey": "^8.1.0",
     "vitest": "^4.1.10",
     "vue-tsc": "^3.2.8"
   }

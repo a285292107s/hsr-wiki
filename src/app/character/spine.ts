@@ -93,7 +93,7 @@ function findSiteCanvas(): HTMLCanvasElement | null {
 
 /**
  * 初始化 Spine 查看器（双通道竞速，任一成功即定局）。
- * @param container 播放器挂载容器（.nk-hero__spine，位于 Shadow DOM 内）
+ * @param container 播放器挂载容器（.nk-hero__spine）
  * @param charId 角色 ID
  * @param onReady 动画就绪回调（视图层据此点亮切换按钮 / 压暗背景）
  * @returns 清理函数（组件卸载 / 角色切换时调用）

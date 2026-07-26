@@ -77,37 +77,6 @@ describe('fetchJSON', () => {
     await vi.advanceTimersByTimeAsync(15_000);
     await assertion;
   });
-
-  it('连续失败 ≥3 次触发降级回调', async () => {
-    const c = await fresh();
-    const sink = vi.fn();
-    c.setDegradeSink(sink);
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('down'); }));
-    await c.fetchJSON('u1').catch(() => {});
-    await c.fetchJSON('u2').catch(() => {});
-    expect(sink).not.toHaveBeenCalled();
-    await c.fetchJSON('u3').catch(() => {});
-    expect(sink).toHaveBeenCalledWith('network-failures:3');
-  });
-
-  it('成功后失败计数归零', async () => {
-    const c = await fresh();
-    const sink = vi.fn();
-    c.setDegradeSink(sink);
-    const fetchMock = vi.fn()
-      .mockRejectedValueOnce(new Error('x'))
-      .mockRejectedValueOnce(new Error('x'))
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ok: 1 }) })
-      .mockRejectedValueOnce(new Error('x'))
-      .mockRejectedValueOnce(new Error('x'));
-    vi.stubGlobal('fetch', fetchMock);
-    await c.fetchJSON('a').catch(() => {});
-    await c.fetchJSON('a').catch(() => {});
-    await c.fetchJSON('a'); // 成功 → 计数归零
-    await c.fetchJSON('a').catch(() => {});
-    await c.fetchJSON('a').catch(() => {});
-    expect(sink).not.toHaveBeenCalled(); // 2 + 2 均未连续达 3
-  });
 });
 
 /* ─── L1 内存 + memStore / memHas ─── */

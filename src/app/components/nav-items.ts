@@ -16,6 +16,10 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   {
+    title: '首页', en: 'HOME', desc: '返回首页', path: '/',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>',
+  },
+  {
     title: '角色', en: 'CHARACTERS', desc: '角色数值 · 行迹 · 配装', path: '/character',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-5 8-5s8 1.7 8 5"/></svg>',
   },

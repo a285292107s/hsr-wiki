@@ -1,26 +1,23 @@
-# HSR Wiki 重构
+# HSR Wiki
 
-寄生于 hsr.nanoka.cc 的油猴脚本 Wiki 应用——隐藏宿主、自主渲染、自主加载数据，提供崩坏：星穹铁道游戏数据的沉浸式浏览体验。
+独立部署于 GitHub Pages 的崩坏：星穹铁道游戏数据 Wiki——Gaming HUD 风格沉浸式浏览体验。
 
 ## Language
 
 ### 运行环境
 
-**宿主（Host）**:
-脚本注入的目标网站 hsr.nanoka.cc 本身——包括其 DOM、JS、路由和侧边栏。我们的应用与宿主的关系是「隐藏并取代」，而非「嵌入并增强」。
-_Avoid_: 原站、目标站、母站
+**GitHub Pages**:
+项目的唯一部署目标。纯静态托管，无服务端能力。站点地址：https://<user>.github.io/hsr_wiki/
 
-**降级（Degradation）**:
-脚本任何环节失败时，销毁自身并恢复宿主可见性的安全回退行为。降级是单向的：一旦触发，本次会话不再尝试恢复自定义 UI。
-_Avoid_: 回退、fallback、容错
+**Hash 路由**:
+使用 Vue Router 的 createWebHashHistory，URL 形如 /#/character/1001。
+选择理由：GitHub Pages 无服务端 rewrite，hash 路由刷新不 404。
+_Avoid_: history 模式（第二期自定义域名后再考虑）
 
-**Platform 层**:
-隔离应用代码与运行环境差异的适配层。定义挂载、样式注入、宿主 API 的统一接口，有且仅有两种实现：油猴模式与 Standalone 模式。
-_Avoid_: 环境层、adapter
-
-**Standalone 模式**:
-不注入宿主、直接在空白页运行的开发形态。与油猴模式共享 100% 应用代码，仅 Platform 层实现不同。
-_Avoid_: 独立模式、预览模式
+**CDN 数据源**:
+所有游戏数据运行时从 https://static.nanoka.cc 实时拉取（CORS 已开放）。
+第二期计划迁移至 https://github.com/theBowja/starrail-data。
+_Avoid_: 本地数据、构建时数据
 
 ### 游戏数据
 
@@ -29,7 +26,7 @@ _Avoid_: 独立模式、预览模式
 _Avoid_: 增强模式、改版
 
 **目录（Catalog）**:
-由通用目录引擎驱动的物品索引页。共六种：角色、光锥、遗器、物品、敌对物种、末日内容。目录 = 列表 + 筛选 + 排序，不含详情页。
+由通用目录引擎驱动的物品索引页。共六种：角色、光锥、遗器、物品、敌对物种、终局内容。目录 = 列表 + 筛选 + 排序，不含详情页。
 _Avoid_: 列表页、索引页
 
 **Manifest**:

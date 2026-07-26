@@ -39,15 +39,7 @@ export interface CatalogPageConfig {
   title: string;
   /** 子导航标签（如终局内容的 4 个子分类） */
   subNav?: CatalogSubNavItem[];
-  /** dom = 抓取宿主 content-card（隐藏但持续渲染）；cdn = 直接拉取 JSON */
-  dataSource: 'dom' | 'cdn';
-  /** dom 模式：宿主卡片选择器（默认 [data-ui="content-card"]） */
-  cardSelector?: string;
-  /** dom 模式：校验宿主卡片是否属于本页 */
-  cardValidator?: (card: Element) => boolean;
-  /** dom 模式：宿主卡片 → 条目 */
-  scrapeCard?: (card: Element) => CatalogItem | null;
-  /** cdn 模式：拉取全量数据 */
+  /** 数据获取（所有页面统一走 CDN） */
   fetchData?: (ctx: CatalogContext) => Promise<CatalogItem[]>;
   /** 数据就绪后后台预热兄弟页数据（终局 4 页互取，保证 Tab 切换即时命中 L1） */
   prefetch?: (ctx: CatalogContext) => void;

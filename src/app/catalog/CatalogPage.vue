@@ -2,16 +2,14 @@
 /**
  * 通用目录引擎组件（迁移自 catalog.js 的 initGenericCatalog + initCatalog）
  *
- * 数据源：dom = 轮询抓取宿主 content-card（隐藏但持续渲染）；cdn = 直接拉取 JSON。
+ * 数据源：统一走 CDN fetchData。
  * >400 条目启用虚拟网格；卡片走 renderCard HTML（v-html）+ 事件委托。
- * 卡片点击：角色详情 → SPA 导航；未迁移详情页 → 油猴交还宿主 / standalone 提示。
+ * 卡片点击：角色详情 → SPA 导航；未迁移详情页 → 静默忽略。
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '../stores/app';
-import { platform } from '../../platform';
 import { prefetchCharData } from '../../services/api';
-import { scrapeCards, waitForCards } from './scrape';
 import { useVirtualGrid, vReveal } from './use-virtual-grid';
 import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
 
@@ -83,36 +81,18 @@ async function load(): Promise<void> {
   const gen = ++loadGen;
   phase.value = 'loading';
   errorMsg.value = '';
-  // 骨架屏延迟呈现：缓存命中（<150ms）时直接出列表，避免切换时骨架屏一闪而过
   showSkeleton.value = false;
   if (skeletonTimer !== null) clearTimeout(skeletonTimer);
   skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
-  // 版本信息（cdn 数据源与 hover 预取使用；离线时不阻塞 dom 抓取）
   try {
     await app.initManifest();
-  } catch {
-    /* 版本为空 → cdn 拉取将在下方报错 */
-  }
+  } catch { /* 版本为空 → fetchData 将报错 */ }
   try {
-    // standalone 模式无宿主 DOM 可抓：配置了 fetchData 的 dom 页面改走 CDN 列表端点；
-    // userscript 模式保持原有 DOM 抓取行为不变（生产交付物）
-    const useCdn =
-      props.config.dataSource === 'cdn' ||
-      (platform().mode === 'standalone' && !!props.config.fetchData);
-    if (useCdn) {
-      if (!props.config.fetchData) throw new Error('配置缺少 fetchData');
-      items.value = await props.config.fetchData({ version: app.version });
-    } else {
-      const selector = props.config.cardSelector || '[data-ui="content-card"]';
-      const validator = props.config.cardValidator || ((): boolean => true);
-      await waitForCards(validator, selector, cancelled);
-      if (cancelled.value || gen !== loadGen) return;
-      items.value = scrapeCards(props.config);
-    }
-    if (gen !== loadGen) return; // 已被更新的加载取代
+    if (!props.config.fetchData) throw new Error('配置缺少 fetchData');
+    items.value = await props.config.fetchData({ version: app.version });
+    if (gen !== loadGen) return;
     phase.value = 'ready';
     scrollerRef.value?.scrollTo({ top: 0 });
-    // 后台预热兄弟页数据，保证 Tab 切换时 L1 命中
     props.config.prefetch?.({ version: app.version });
   } catch (e) {
     if (cancelled.value || gen !== loadGen) return;
@@ -150,10 +130,7 @@ watch(() => props.config, (cfg) => {
   query.value = '';
   activeFilters.value = {};
   stop();
-  // CDN 可静默取数 → 软切换；dom 抓取（油猴模式）需宿主先渲染目标页卡片 → 完整加载
-  const canSoft = !!cfg.fetchData &&
-    (cfg.dataSource === 'cdn' || platform().mode === 'standalone');
-  if (canSoft) {
+  if (cfg.fetchData) {
     void softSwitchTab();
   } else {
     void load();
@@ -195,7 +172,6 @@ function onSearchInput(): void {
 
 function onSubNavClick(tab: CatalogSubNavItem): void {
   if (tab.active) return;
-  // 终局内容 4 路由均为已迁移目录页：SPA 导航（油猴模式由 host-sync 同步驱动宿主渲染）
   void router.push(tab.href);
 }
 
@@ -208,13 +184,8 @@ function onContentClick(e: MouseEvent): void {
   const m = href.match(/\/character\/(\d+)/);
   if (m) {
     void router.push(`/character/${m[1]}`);
-    return;
   }
-  // 未迁移的详情页（光锥/遗器/怪物/赛季等）：
-  // 油猴模式整页导航交还宿主（路由门在 document-start 放行）；standalone 无详情页，静默忽略
-  if (platform().mode === 'userscript') {
-    location.href = href;
-  }
+  // 未迁移的详情页：静默忽略（第一期无详情页）
 }
 
 function onCardHover(e: Event): void {

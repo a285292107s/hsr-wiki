@@ -4,7 +4,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { loadManifest, resolveVersion, loadItems } from '../../services/api';
-import { platform } from '../../platform';
 import type { ItemDb, NameCache } from '../../services/types';
 
 export type ToastType = 'error' | 'warn' | 'info' | 'success';
@@ -62,9 +61,9 @@ export const useAppStore = defineStore('app', () => {
     toasts.value = toasts.value.filter((t) => t.id !== id);
   }
 
-  /** 首屏数据就绪 → 推进 failsafe 最后一段（幂等） */
+  /** 首屏数据就绪标记（保留接口兼容，无实际副作用） */
   function markDataReady(): void {
-    platform().markStage('data-ready');
+    // no-op: 独立站无 failsafe 分段检测
   }
 
   return {

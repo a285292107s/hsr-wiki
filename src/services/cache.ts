@@ -4,7 +4,7 @@
  *   L1 内存 Map（80 条上限，淘汰最早 20%）
  *   L2 IndexedDB（nk-hsr-cache/kv，条目 { data, exp }）
  *   L3 in-flight 去重（同 cacheKey 并发请求复用同一 Promise）
- *   L4 网络（15s 超时；连续失败 ≥3 次触发降级回调）
+ *   L4 网络（15s 超时）
  */
 import { NkError } from '../lib/errors';
 
@@ -19,7 +19,6 @@ const DB_NAME = 'nk-hsr-cache';
 const STORE = 'kv';
 const DB_VER = 1;
 const FETCH_TIMEOUT = 15000;
-const DEGRADE_THRESHOLD = 3;
 const MEM_MAX = 80;
 
 interface CacheEntry {
@@ -88,16 +87,7 @@ const idb = {
   },
 };
 
-/* ─── 全局降级回调（由 bootstrap 注册 → platform().degrade） ─── */
-
-let failCount = 0;
-let degradeSink: ((reason: string) => void) | null = null;
-
-export function setDegradeSink(fn: ((reason: string) => void) | null): void {
-  degradeSink = fn;
-}
-
-/* ─── 网络请求（最底层）+ 失败计数 ─── */
+/* ─── 网络请求（最底层） ─── */
 
 export async function fetchJSON<T>(url: string): Promise<T> {
   const ctrl = new AbortController();
@@ -106,11 +96,8 @@ export async function fetchJSON<T>(url: string): Promise<T> {
     const r = await fetch(url, { signal: ctrl.signal });
     if (!r.ok) throw new NkError(`HTTP ${r.status}: ${url}`, true);
     const data = (await r.json()) as T;
-    failCount = 0;
     return data;
   } catch (e) {
-    failCount++;
-    if (failCount >= DEGRADE_THRESHOLD) degradeSink?.(`network-failures:${failCount}`);
     if (e instanceof NkError) throw e;
     if (e instanceof Error && (e.name === 'AbortError' || (e as DOMException).code === 20 /* ABORT_ERR */)) {
       throw new NkError(`Request timed out: ${url}`, true);

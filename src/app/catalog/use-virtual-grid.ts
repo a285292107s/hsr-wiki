@@ -4,7 +4,7 @@
  * 迁移自 catalog.js 的 initVirtualGrid / renderVirtualRows，适配点：
  * - 原实现增量 DOM 补丁（insertAdjacentHTML / remove）；此处重建 cells 数组，
  *   由 Vue 按 key（条目索引）diff——滚动时保留的单元格 DOM 复用，新增的挂载即观察。
- * - 滚动容器是 #nk-catalog-app（Shadow DOM 内自滚动容器），不再是 window。
+ * - 滚动容器是 #nk-catalog-app（自滚动容器）。
  * - 动态 buffer（滚动速度越快缓冲行越多）与 reveal 延迟策略原样保留。
  */
 import { nextTick, ref, type Directive, type Ref } from 'vue';
