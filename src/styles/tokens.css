@@ -83,6 +83,13 @@
 .nk-hero__toggle:not(.has-anim) .dot { background: var(--text3); box-shadow: none; }
 .nk-hero__scrim { position: absolute; inset: 0; z-index: 2; background: linear-gradient(to top, var(--bg) 0%, rgba(15,15,35,0.4) 40%, rgba(15,15,35,0.1) 100%); }
 .nk-hero__content { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px 40px; z-index: 3; }
+.nk-hero__camp {
+  display: inline-flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.18em; color: rgba(230,224,250,0.92);
+  text-shadow: 0 0 3px rgba(8,8,24,0.95), 0 0 8px rgba(8,8,24,0.8), 0 1px 12px rgba(8,8,24,0.6);
+}
+.nk-hero__camp::before { content: ''; width: 14px; height: 1px; background: rgba(167,139,250,0.85); box-shadow: 0 0 4px rgba(8,8,24,0.9); }
 .nk-hero__name { font-size: 2rem; font-weight: 900; letter-spacing: -0.02em; text-shadow: 0 0 30px var(--primary-glow), 0 4px 20px rgba(0,0,0,0.5); }
 .nk-hero__stars { color: var(--gold); font-size: 1.2rem; margin: 8px 0; text-shadow: 0 0 10px rgba(251,191,36,0.4); }
 .nk-hero__tags { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }

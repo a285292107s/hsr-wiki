@@ -187,6 +187,48 @@ function onKeydown(e: KeyboardEvent): void {
 
 const overviewDesc = computed(() => escHtml((d.value && d.value.desc) || '').replace(/\\n/g, '<br>'));
 
+/* ─── 角色档案（阵营 + 四语 CV） ─── */
+
+interface ProfileRow { label: string; value: string }
+const profileRows = computed<ProfileRow[]>(() => {
+  const info = d.value && d.value.chara_info;
+  if (!info) return [];
+  const rows: ProfileRow[] = [];
+  const va = info.va;
+  if (va) {
+    const defs: [string, string | null | undefined][] = [
+      ['CV · 中文', va.chinese], ['CV · 日语', va.japanese],
+      ['CV · 韩语', va.korean], ['CV · 英语', va.english],
+    ];
+    for (const [label, v] of defs) {
+      if (v) rows.push({ label, value: v });
+    }
+  }
+  return rows;
+});
+
+/* ─── 角色故事（折叠手风琴） ─── */
+
+interface StoryEntry { key: string; idx: number; html: string }
+const storyEntries = computed<StoryEntry[]>(() => {
+  const info = d.value && d.value.chara_info;
+  if (!info || !info.stories) return [];
+  return Object.entries(info.stories)
+    .filter(([, v]) => !!v)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([key, v]) => ({
+      key,
+      idx: Number(key) + 1,
+      html: escHtml(v as string).replace(/\\n/g, '<br>'),
+    }));
+});
+const openStory = ref<string | null>(null);
+function toggleStory(key: string): void {
+  openStory.value = openStory.value === key ? null : key;
+}
+// 切换角色时重置故事展开状态
+watch(() => char.charId, () => { openStory.value = null; });
+
 interface AttrBonus { name: string; v: string; ov: string | null; icon: string }
 
 /** 聚合行迹树全部节点的 status_add_list（同 property 求和） */
@@ -616,6 +658,7 @@ onBeforeUnmount(() => {
           <span class="dot"></span>动画
         </button>
         <div class="nk-hero__content">
+          <div v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</div>
           <h1 class="nk-hero__name">{{ d.name }}</h1>
           <div class="nk-hero__stars">{{ stars }}</div>
           <div class="nk-hero__tags">
@@ -695,6 +738,15 @@ onBeforeUnmount(() => {
         <!-- 概览 -->
         <div :class="['nk-panel', { 'nk-panel--active': char.activeTab === 'overview' }]" data-panel="overview">
           <div class="nk-overview__desc" v-html="overviewDesc"></div>
+          <template v-if="profileRows.length">
+            <div class="nk-title">PROFILE</div>
+            <div class="nk-profile">
+              <div v-for="p in profileRows" :key="p.label" class="nk-profile__item">
+                <span class="nk-profile__label">{{ p.label }}</span>
+                <span class="nk-profile__val">{{ p.value }}</span>
+              </div>
+            </div>
+          </template>
           <template v-if="attrBonuses.length">
             <div class="nk-title">STAT BONUSES</div>
             <div class="nk-bonus-grid">
@@ -732,6 +784,27 @@ onBeforeUnmount(() => {
               <div v-if="ab.terms.length" class="nk-skill__terms">
                 <div v-for="t in ab.terms" :key="t.name" class="nk-term">
                   <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
+                </div>
+              </div>
+            </div>
+          </template>
+          <template v-if="storyEntries.length">
+            <div class="nk-title">STORIES</div>
+            <div class="nk-stories">
+              <div
+                v-for="s in storyEntries"
+                :key="s.key"
+                :class="['nk-story', { 'nk-story--open': openStory === s.key }]"
+              >
+                <button class="nk-story__head" type="button" @click="toggleStory(s.key)">
+                  <span class="nk-story__num">{{ String(s.idx).padStart(2, '0') }}</span>
+                  <span class="nk-story__label">角色档案 · {{ s.idx }}</span>
+                  <span class="nk-story__arrow"></span>
+                </button>
+                <div class="nk-story__clip">
+                  <div class="nk-story__inner">
+                    <div class="nk-story__text" v-html="s.html"></div>
+                  </div>
                 </div>
               </div>
             </div>

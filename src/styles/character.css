@@ -5,6 +5,44 @@
 
 /* ─── 概览 Tab ─── */
 .nk-overview__desc { font-size: 0.875rem; line-height: 1.9; color: var(--text2); margin-bottom: 24px; padding: 2px 0 2px 16px; border-left: 2px solid rgba(124,58,237,0.35); }
+/* 角色档案（阵营 + CV） */
+.nk-profile { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 24px; max-width: var(--nk-prose-max); }
+.nk-profile__item {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 16px; border-radius: 8px;
+  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12);
+  transition: border-color 0.2s;
+}
+.nk-profile__item:hover { border-color: var(--border2); }
+.nk-profile__label { font-size: 0.625rem; font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
+.nk-profile__val { font-size: 0.8125rem; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
+/* 角色故事（折叠手风琴） */
+.nk-stories { display: flex; flex-direction: column; gap: 8px; max-width: var(--nk-prose-max); margin: 0 auto; }
+.nk-story { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+.nk-story:hover { border-color: var(--border2); }
+.nk-story__head {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 14px 20px; background: none; border: none; cursor: pointer;
+  text-align: left; transition: background 0.15s;
+}
+.nk-story__head:hover { background: rgba(124,58,237,0.04); }
+.nk-story__num { font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700; color: var(--primary); opacity: 0.8; min-width: 1.6em; }
+.nk-story__label { font-size: 0.8125rem; font-weight: 600; color: var(--text2); letter-spacing: 0.02em; flex: 1; }
+.nk-story--open .nk-story__label { color: var(--text); }
+.nk-story__arrow {
+  width: 7px; height: 7px; flex-shrink: 0;
+  border-right: 1.5px solid var(--text3); border-bottom: 1.5px solid var(--text3);
+  transform: rotate(-45deg); transition: transform 0.25s var(--nk-ease-out);
+}
+.nk-story--open .nk-story__arrow { transform: rotate(45deg); }
+.nk-story__clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-story--open .nk-story__clip { grid-template-rows: 1fr; }
+.nk-story__inner { overflow: hidden; min-height: 0; }
+.nk-story__text {
+  font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
+  border-top: 1px dashed rgba(124,58,237,0.15);
+  padding: 14px 20px 18px;
+}
 .nk-bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 24px; }
 .nk-bonus {
   display: flex; flex-direction: column; gap: 3px;

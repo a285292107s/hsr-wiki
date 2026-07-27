@@ -157,9 +157,17 @@ export interface CharacterData {
   name: string;
   desc?: string;
   chara_info?: {
-    camp?: unknown;
-    va?: Record<string, string | null>;
-    stories?: Record<string, unknown>;
+    /** 所属阵营（如「星穹列车」「星核猎手」） */
+    camp?: string | null;
+    /** 四语配音演员 */
+    va?: {
+      chinese?: string | null;
+      japanese?: string | null;
+      korean?: string | null;
+      english?: string | null;
+    };
+    /** 角色故事（键 "0"~"4"，对应游戏内档案第 1~5 篇） */
+    stories?: Record<string, string | null>;
     voicelines?: unknown[];
   };
   /** 稀有度（CombatPowerAvatarRarityType4/5） */
