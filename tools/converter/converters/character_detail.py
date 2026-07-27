@@ -349,6 +349,9 @@ def convert() -> None:
     if tree_config_ld_path.exists():
         tree_config = tree_config + load_json(tree_config_ld_path)
     promo_config = load_json(EXCEL_DIR / "AvatarPromotionConfig.json")
+    promo_ld_path = EXCEL_DIR / "AvatarPromotionConfigLD.json"
+    if promo_ld_path.exists():
+        promo_config = promo_config + load_json(promo_ld_path)
 
     # 补充源表：可能有或没有
     _maybe_load = lambda name: load_json(EXCEL_DIR / name) if (EXCEL_DIR / name).exists() else []
@@ -356,7 +359,11 @@ def convert() -> None:
     camp_data = _maybe_load("AvatarCamp.json")
     story_data = _maybe_load("StoryAtlas.json")
     equip_rec = _maybe_load("AvatarEquipRecommend.json")
+    equip_rec_ld = _maybe_load("AvatarEquipRecommendLD.json")
+    equip_rec = equip_rec + equip_rec_ld
     relic_rec = _maybe_load("AvatarRelicRecommend.json")
+    relic_rec_ld = _maybe_load("AvatarRelicRecommendLD.json")
+    relic_rec = relic_rec + relic_rec_ld
     # 加强：暂第一期不做，后续补充
     # enhanced_skill = _maybe_load("AvatarEnhancedSkill.json")
     # enhanced_tree = _maybe_load("AvatarEnhancedSkillTree.json")

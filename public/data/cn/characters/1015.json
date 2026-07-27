@@ -2397,9 +2397,230 @@
   "enhanced": null,
   "memosprite": null,
   "unique": {},
-  "stats": {},
-  "relics": {},
-  "lightcones": [],
+  "stats": {
+    "0": {
+      "attack_base": 84.48,
+      "attack_add": 4.224,
+      "defence_base": 66,
+      "defence_add": 3.3,
+      "hp_base": 158.4,
+      "hp_add": 7.92,
+      "speed_base": 105,
+      "critical_chance": 0.05,
+      "critical_damage": 0.5,
+      "base_aggro": 75,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 4000
+        },
+        {
+          "ItemID": 111001,
+          "ItemNum": 5
+        }
+      ]
+    },
+    "1": {
+      "attack_base": 118.272,
+      "attack_add": 4.224,
+      "defence_base": 92.4,
+      "defence_add": 3.3,
+      "hp_base": 221.76,
+      "hp_add": 7.92,
+      "speed_base": 105,
+      "critical_chance": 0.05,
+      "critical_damage": 0.5,
+      "base_aggro": 75,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 8000
+        },
+        {
+          "ItemID": 111001,
+          "ItemNum": 10
+        }
+      ]
+    },
+    "2": {
+      "attack_base": 152.064,
+      "attack_add": 4.224,
+      "defence_base": 118.8,
+      "defence_add": 3.3,
+      "hp_base": 285.12,
+      "hp_add": 7.92,
+      "speed_base": 105,
+      "critical_chance": 0.05,
+      "critical_damage": 0.5,
+      "base_aggro": 75,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 16000
+        },
+        {
+          "ItemID": 111002,
+          "ItemNum": 6
+        },
+        {
+          "ItemID": 110436,
+          "ItemNum": 3
+        }
+      ]
+    },
+    "3": {
+      "attack_base": 185.856,
+      "attack_add": 4.224,
+      "defence_base": 145.2,
+      "defence_add": 3.3,
+      "hp_base": 348.48,
+      "hp_add": 7.92,
+      "speed_base": 105,
+      "critical_chance": 0.05,
+      "critical_damage": 0.5,
+      "base_aggro": 75,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 40000
+        },
+        {
+          "ItemID": 111002,
+          "ItemNum": 9
+        },
+        {
+          "ItemID": 110436,
+          "ItemNum": 7
+        }
+      ]
+    },
+    "4": {
+      "attack_base": 219.648,
+      "attack_add": 4.224,
+      "defence_base": 171.6,
+      "defence_add": 3.3,
+      "hp_base": 411.84,
+      "hp_add": 7.92,
+      "speed_base": 105,
+      "critical_chance": 0.05,
+      "critical_damage": 0.5,
+      "base_aggro": 75,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 80000
+        },
+        {
+          "ItemID": 111003,
+          "ItemNum": 6
+        },
+        {
+          "ItemID": 110436,
+          "ItemNum": 20
+        }
+      ]
+    },
+    "5": {
+      "attack_base": 253.44,
+      "attack_add": 4.224,
+      "defence_base": 198,
+      "defence_add": 3.3,
+      "hp_base": 475.2,
+      "hp_add": 7.92,
+      "speed_base": 105,
+      "critical_chance": 0.05,
+      "critical_damage": 0.5,
+      "base_aggro": 75,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 160000
+        },
+        {
+          "ItemID": 111003,
+          "ItemNum": 9
+        },
+        {
+          "ItemID": 110436,
+          "ItemNum": 35
+        }
+      ]
+    },
+    "6": {
+      "attack_base": 287.232,
+      "attack_add": 4.224,
+      "defence_base": 224.4,
+      "defence_add": 3.3,
+      "hp_base": 538.56,
+      "hp_add": 7.92,
+      "speed_base": 105,
+      "critical_chance": 0.05,
+      "critical_damage": 0.5,
+      "base_aggro": 75,
+      "cost": []
+    }
+  },
+  "relics": {
+    "avatar_id": 1015,
+    "set4_id_list": [
+      108,
+      122,
+      102
+    ],
+    "set2_id_list": [
+      309,
+      301,
+      306
+    ],
+    "property_list3": [
+      "CriticalChanceBase",
+      "CriticalDamageBase"
+    ],
+    "property_list4": [
+      "AttackAddedRatio",
+      "SpeedDelta"
+    ],
+    "property_list5": [
+      "QuantumAddedRatio",
+      "AttackAddedRatio"
+    ],
+    "property_list6": [
+      "AttackAddedRatio",
+      "SPRatioBase"
+    ],
+    "property_list": [
+      {
+        "relic_type": "BODY",
+        "property_type": "CriticalChanceBase"
+      },
+      {
+        "relic_type": "FOOT",
+        "property_type": "AttackAddedRatio"
+      },
+      {
+        "relic_type": "NECK",
+        "property_type": "QuantumAddedRatio"
+      },
+      {
+        "relic_type": "OBJECT",
+        "property_type": "AttackAddedRatio"
+      }
+    ],
+    "sub_affix_property_list": [
+      "CriticalChanceBase",
+      "CriticalDamageBase",
+      "AttackAddedRatio",
+      "SpeedDelta"
+    ],
+    "score_rank_list": [
+      336,
+      281
+    ]
+  },
+  "lightcones": [
+    23046,
+    24001
+  ],
   "teams": [],
   "skin": {}
 }
