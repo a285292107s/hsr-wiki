@@ -760,7 +760,7 @@
         "avatar_promotion_limit": null,
         "avatar_level_limit": null,
         "default_unlock": true,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Normal.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Normal.png",
         "level_up_skill_id": [
           1100601
         ],
@@ -781,7 +781,7 @@
         "avatar_promotion_limit": 2,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Normal.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Normal.png",
         "level_up_skill_id": [
           1100601
         ],
@@ -815,7 +815,7 @@
         "avatar_promotion_limit": 3,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Normal.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Normal.png",
         "level_up_skill_id": [
           1100601
         ],
@@ -849,7 +849,7 @@
         "avatar_promotion_limit": 4,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Normal.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Normal.png",
         "level_up_skill_id": [
           1100601
         ],
@@ -883,7 +883,7 @@
         "avatar_promotion_limit": 5,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Normal.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Normal.png",
         "level_up_skill_id": [
           1100601
         ],
@@ -917,7 +917,7 @@
         "avatar_promotion_limit": 6,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Normal.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Normal.png",
         "level_up_skill_id": [
           1100601
         ],
@@ -953,7 +953,7 @@
         "avatar_promotion_limit": null,
         "avatar_level_limit": null,
         "default_unlock": true,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -974,7 +974,7 @@
         "avatar_promotion_limit": 1,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1004,7 +1004,7 @@
         "avatar_promotion_limit": 2,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1038,7 +1038,7 @@
         "avatar_promotion_limit": 3,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1072,7 +1072,7 @@
         "avatar_promotion_limit": 4,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1106,7 +1106,7 @@
         "avatar_promotion_limit": 4,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1140,7 +1140,7 @@
         "avatar_promotion_limit": 5,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1174,7 +1174,7 @@
         "avatar_promotion_limit": 5,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1212,7 +1212,7 @@
         "avatar_promotion_limit": 6,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1250,7 +1250,7 @@
         "avatar_promotion_limit": 6,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_BP.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_BP.png",
         "level_up_skill_id": [
           1100602
         ],
@@ -1290,7 +1290,7 @@
         "avatar_promotion_limit": null,
         "avatar_level_limit": null,
         "default_unlock": true,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1311,7 +1311,7 @@
         "avatar_promotion_limit": 1,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1341,7 +1341,7 @@
         "avatar_promotion_limit": 2,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1375,7 +1375,7 @@
         "avatar_promotion_limit": 3,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1409,7 +1409,7 @@
         "avatar_promotion_limit": 4,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1443,7 +1443,7 @@
         "avatar_promotion_limit": 4,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1477,7 +1477,7 @@
         "avatar_promotion_limit": 5,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1511,7 +1511,7 @@
         "avatar_promotion_limit": 5,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1549,7 +1549,7 @@
         "avatar_promotion_limit": 6,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1587,7 +1587,7 @@
         "avatar_promotion_limit": 6,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Ultra.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Ultra.png",
         "level_up_skill_id": [
           1100603
         ],
@@ -1627,7 +1627,7 @@
         "avatar_promotion_limit": null,
         "avatar_level_limit": null,
         "default_unlock": true,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1648,7 +1648,7 @@
         "avatar_promotion_limit": 1,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1678,7 +1678,7 @@
         "avatar_promotion_limit": 2,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1712,7 +1712,7 @@
         "avatar_promotion_limit": 3,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1746,7 +1746,7 @@
         "avatar_promotion_limit": 4,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1780,7 +1780,7 @@
         "avatar_promotion_limit": 4,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1814,7 +1814,7 @@
         "avatar_promotion_limit": 5,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1848,7 +1848,7 @@
         "avatar_promotion_limit": 5,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1886,7 +1886,7 @@
         "avatar_promotion_limit": 6,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1924,7 +1924,7 @@
         "avatar_promotion_limit": 6,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Passive.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Passive.png",
         "level_up_skill_id": [
           1100604
         ],
@@ -1964,7 +1964,7 @@
         "avatar_promotion_limit": null,
         "avatar_level_limit": null,
         "default_unlock": true,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Maze.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Maze.png",
         "level_up_skill_id": [
           1100607
         ],
@@ -1987,7 +1987,7 @@
         "avatar_promotion_limit": 2,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_SkillTree1.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_SkillTree1.png",
         "level_up_skill_id": [],
         "material_list": [
           {
@@ -2024,7 +2024,7 @@
         "avatar_promotion_limit": 4,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_SkillTree2.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_SkillTree2.png",
         "level_up_skill_id": [],
         "material_list": [
           {
@@ -2065,7 +2065,7 @@
         "avatar_promotion_limit": 6,
         "avatar_level_limit": null,
         "default_unlock": false,
-        "icon": "icon/skill/Avatar/11006/SkillIcon_11006_SkillTree3.png",
+        "icon": "icon/skill/Avatar/1006/SkillIcon_1006_SkillTree3.png",
         "level_up_skill_id": [],
         "material_list": [
           {

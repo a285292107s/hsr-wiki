@@ -1,6 +1,7 @@
 """角色详情转换器：从多张源表拼装 CDN CharacterData 格式。"""
 
 import logging
+import re
 from collections import defaultdict
 
 from config import EXCEL_DIR, OUTPUT_DIR, SKILL_TYPE_MAP, PATH_NAME_FALLBACK
@@ -199,6 +200,29 @@ def _build_ranks(rank_data: list[dict], rank_ids: list[int]) -> dict[str, dict]:
     return result
 
 
+def _normalize_tree_icon(icon: str, avatar_id: int) -> str:
+    """将「进阶」行迹的图标从 1{avatar_id} 伪目录归一到角色自身 ID 目录。
+
+    部分角色的源数据存在「进阶」行迹重复行（EnhancedID），其 IconPath 指向
+    1{avatar_id} 目录（如卡芙卡 1005 → 11005），该目录在 CDN 上可能不存在，
+    导致附加能力图标 404。这里仅针对这种 1{avatar_id} 伪目录归一到角色自身 ID。
+
+    注意：其他跨 ID 引用是有意为之、不能改动。例如开拓者偶数变体（8002/8004…）
+    自身无图标资产，源数据引用配对奇数 ID（8001/8003…）的真实图标。
+    """
+    if not icon:
+        return icon
+    m = re.match(r"^icon/skill/Avatar/(\d+)/(.+)$", icon)
+    if not m:
+        return icon
+    other_id, filename = m.group(1), m.group(2)
+    # 仅归一 1{avatar_id} 伪目录，其余跨 ID 引用保持不变
+    if other_id != f"1{avatar_id}":
+        return icon
+    filename = filename.replace(f"SkillIcon_{other_id}_", f"SkillIcon_{avatar_id}_", 1)
+    return f"icon/skill/Avatar/{avatar_id}/{filename}"
+
+
 def _build_skill_trees(tree_data: list[dict], avatar_id: int) -> dict[str, dict[str, dict]]:
     """从 AvatarSkillTreeConfig 构建 skill_trees。
     输出格式：{ anchor_key: { level_str: node } }
@@ -232,7 +256,7 @@ def _build_skill_trees(tree_data: list[dict], avatar_id: int) -> dict[str, dict[
                 "avatar_promotion_limit": e.get("AvatarPromotionLimit"),
                 "avatar_level_limit": e.get("AvatarLevelLimit"),
                 "default_unlock": e.get("DefaultUnlock", False),
-                "icon": map_icon_path(e.get("IconPath", "")),
+                "icon": _normalize_tree_icon(map_icon_path(e.get("IconPath", "")), avatar_id),
                 "level_up_skill_id": e.get("LevelUpSkillID", []),
                 "material_list": e.get("MaterialList", []),
                 "max_level": e.get("MaxLevel", 1),
