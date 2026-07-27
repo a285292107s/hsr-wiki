@@ -236,7 +236,7 @@
 
 @keyframes nk-season-pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 6px rgba(52,211,153,0.4); } 50% { box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 14px rgba(52,211,153,0.7); } }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .nk-season-grid { padding-left: 16px; }
   .nk-season-grid::before { left: 3px; }
   .nk-season-card { padding: 14px 14px 14px 20px; gap: 10px; }
@@ -333,7 +333,7 @@
 @keyframes nk-home-scroll-drop { 0% { top: -100%; } 60%, 100% { top: 100%; } }
 
 /* ── 响应式 ── */
-@media (max-width: 1199px) { .nk-home-nav__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1023px) { .nk-home-nav__grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 767px) {
   .nk-home-nav__grid { grid-template-columns: 1fr; }
   .nk-home-nav { padding: 56px 20px 32px 92px; }

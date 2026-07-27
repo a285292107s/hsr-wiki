@@ -20,7 +20,7 @@ import {
   hasParamDiff, hasTextDiff, iconUrl, itemName, maxLevelStat, maxLevelValue,
   skillIconUrl, stripAllTags,
 } from '../../lib/format';
-import { CDN, CHAR_TABS, ELEM, PATH, PROP_ICON, SKILL_ORDER, TYPE } from '../../lib/constants';
+import { CDN, CHAR_TABS, ELEM, MAX_CHAR_LEVEL, PATH, PROP_ICON, SKILL_ORDER, TYPE } from '../../lib/constants';
 import type {
   CharacterData, RelicSetData, Skill, SkillExtra, SkillTree,
 } from '../../services/types';
@@ -68,23 +68,32 @@ const stars = computed(() =>
   d.value ? '★'.repeat(parseInt(d.value.rarity.replace(/\D/g, ''), 10) || 5) : '',
 );
 
-interface HeroStat { v: number; l: string; ov: number | null }
+interface HeroStat { v: number | string; l: string; ov: number | string | null; icon: string; raw: number }
+/** 全部 8 项展示属性：HP/ATK/DEF/SPD + 暴击率/暴击伤害/嘲讽/能量消耗（参考官方 Wiki 头部） */
 const heroStats = computed<HeroStat[]>(() => {
   const dd = d.value;
   if (!dd) return [];
   const s = maxLevelStat(dd.stats);
   if (!s) return [];
   const o = oldD.value ? maxLevelStat(oldD.value.stats) : null;
-  const mk = (v: number, l: string, ov: number | null): HeroStat => ({
-    v, l, ov: ov !== null && ov !== v ? ov : null,
+  const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
+  const mk = (v: number | string, l: string, ov: number | string | null, icon: string, raw: number): HeroStat => ({
+    v, l, ov, icon, raw,
   });
   return [
-    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), 'HP', o ? Math.round(maxLevelValue(o.hp_base, o.hp_add)) : null),
-    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), 'ATK', o ? Math.round(maxLevelValue(o.attack_base, o.attack_add)) : null),
-    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), 'DEF', o ? Math.round(maxLevelValue(o.defence_base, o.defence_add)) : null),
-    mk(s.speed_base, 'SPD', o ? o.speed_base : null),
+    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), 'HP', o ? Math.round(maxLevelValue(o.hp_base, o.hp_add)) : null, 'hp', 0),
+    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), 'ATK', o ? Math.round(maxLevelValue(o.attack_base, o.attack_add)) : null, 'atk', 1),
+    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), 'DEF', o ? Math.round(maxLevelValue(o.defence_base, o.defence_add)) : null, 'def', 2),
+    mk(s.speed_base, 'SPD', o ? o.speed_base : null, 'spd', 3),
+    mk(fmtPct(s.critical_chance), '暴击率', o && o.critical_chance !== s.critical_chance ? fmtPct(o.critical_chance) : null, 'crit-rate', 4),
+    mk(fmtPct(s.critical_damage), '暴击伤害', o && o.critical_damage !== s.critical_damage ? fmtPct(o.critical_damage) : null, 'crit-dmg', 5),
+    mk(s.base_aggro ?? 0, '嘲讽值', o ? (o.base_aggro ?? 0) : null, 'taunt', 6),
+    mk(dd.sp_need ?? 0, '能量消耗', oldD.value ? (oldD.value.sp_need ?? null) : null, 'energy', 7),
   ];
 });
+
+/** 当前等级上限（本地数据源无等级上限字段，固定为最大等级） */
+const levelLimit = computed<number>(() => MAX_CHAR_LEVEL);
 
 /* ─── 视差（同首页 lerp 方案，作用于 Hero 立绘背景） ─── */
 const heroRef = ref<HTMLElement | null>(null);
@@ -580,19 +589,22 @@ onBeforeUnmount(() => {
     <!-- ─── 加载骨架屏 ─── -->
     <div v-if="phase === 'loading'" class="nk-skeleton nk-skeleton--char">
       <div class="nk-skeleton__hero">
-        <div class="nk-skeleton__hero-content">
-          <div class="nk-sk nk-sk--shimmer" style="width:140px;height:28px;border-radius:6px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:100px;height:16px;border-radius:4px;"></div>
-          <div style="display:flex;gap:10px;">
-            <div class="nk-sk nk-sk--shimmer" style="width:72px;height:24px;border-radius:20px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:64px;height:24px;border-radius:20px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:68px;height:24px;border-radius:20px;"></div>
+        <div class="nk-skeleton__hero-visual">
+          <div class="nk-sk nk-sk--shimmer" style="position:absolute;inset:0;border-radius:0;"></div>
+        </div>
+        <div class="nk-skeleton__hero-panel">
+          <div class="nk-sk nk-sk--shimmer" style="width:90px;height:14px;border-radius:4px;"></div>
+          <div class="nk-sk nk-sk--shimmer" style="width:180px;height:28px;border-radius:6px;"></div>
+          <div class="nk-sk nk-sk--shimmer" style="width:120px;height:14px;border-radius:4px;"></div>
+          <div style="display:flex;gap:8px;">
+            <div class="nk-sk nk-sk--shimmer" style="width:64px;height:22px;border-radius:14px;"></div>
+            <div class="nk-sk nk-sk--shimmer" style="width:60px;height:22px;border-radius:14px;"></div>
+            <div class="nk-sk nk-sk--shimmer" style="width:70px;height:22px;border-radius:14px;"></div>
           </div>
-          <div style="display:flex;gap:24px;margin-top:4px;">
-            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:32px;border-radius:6px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:32px;border-radius:6px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:32px;border-radius:6px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:32px;border-radius:6px;"></div>
+          <div class="nk-sk nk-sk--shimmer" style="width:100%;height:14px;border-radius:4px;margin-top:14px;"></div>
+          <div class="nk-sk nk-sk--shimmer" style="width:100%;height:6px;border-radius:3px;"></div>
+          <div class="nk-skeleton__stat-grid" style="margin-top:12px;">
+            <div v-for="i in 8" :key="i" class="nk-sk nk-sk--shimmer" style="height:48px;border-radius:8px;"></div>
           </div>
         </div>
       </div>
@@ -638,54 +650,71 @@ onBeforeUnmount(() => {
 
     <!-- ─── 正文 ─── -->
     <template v-else-if="d">
-      <!-- Hero -->
+      <!-- Hero（左右结构：左视觉区 / 右信息面板，宽屏自适应提升空间利用率） -->
       <div ref="heroRef" class="nk-hero" @mousemove="onHeroMove" @mouseleave="onHeroLeave">
-        <div
-          ref="heroBgRef"
-          class="nk-hero__bg"
-          :class="{ 'nk-dim': spineVisible }"
-          :style="{ backgroundImage: `url(${heroBg})` }"
-        ></div>
-        <div ref="spineRef" class="nk-hero__spine" :class="{ 'nk-ready': spineVisible }"></div>
-        <div class="nk-hero__scrim"></div>
-        <button
-          class="nk-hero__toggle"
-          :class="{ off: !spineVisible, 'has-anim': spineReady }"
-          :title="spineReady ? undefined : '该角色暂无动画展示'"
-          type="button"
-          @click="toggleSpine"
-        >
-          <span class="dot"></span>动画
-        </button>
-        <div class="nk-hero__content">
-          <div v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</div>
-          <h1 class="nk-hero__name">{{ d.name }}</h1>
-          <div class="nk-hero__stars">{{ stars }}</div>
-          <div class="nk-hero__tags">
-            <span class="nk-hero__tag">
-              <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`">
-              {{ ELEM[d.damage_type] || d.damage_type }}
-            </span>
-            <span class="nk-hero__tag">
-              <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`">
-              {{ PATH[d.base_type] || d.base_type }}
-            </span>
-            <span class="nk-hero__tag">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" stroke="#a78bfa" stroke-width="2"/><path d="M12 4v7l-4 3 4-2v7l5-8h-3l3-5h-5z" fill="#c4b5fd"/></svg>
-              能量 {{ d.sp_need }}
-            </span>
-          </div>
-          <div class="nk-hero__stats">
-            <div v-for="st in heroStats" :key="st.l" class="nk-hero__stat">
-              <div class="nk-hero__stat-val">
-                <template v-if="st.ov !== null">
-                  <span class="nk-d-c">{{ st.ov }}</span><span class="nk-d-n">{{ st.v }}</span>
-                </template>
-                <template v-else>{{ st.v }}</template>
-              </div>
-              <div class="nk-hero__stat-label">{{ st.l }}</div>
+        <div class="nk-hero__visual">
+          <div
+            ref="heroBgRef"
+            class="nk-hero__bg"
+            :class="{ 'nk-dim': spineVisible }"
+            :style="{ backgroundImage: `url(${heroBg})` }"
+          ></div>
+          <div ref="spineRef" class="nk-hero__spine" :class="{ 'nk-ready': spineVisible }"></div>
+          <div class="nk-hero__scrim"></div>
+          <button
+            class="nk-hero__toggle"
+            :class="{ off: !spineVisible, 'has-anim': spineReady }"
+            :title="spineReady ? undefined : '该角色暂无动画展示'"
+            type="button"
+            @click="toggleSpine"
+          >
+            <span class="dot"></span>动画
+          </button>
+        </div>
+        <div class="nk-hero__panel">
+          <header class="nk-hero__head">
+            <div v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</div>
+            <h1 class="nk-hero__name">{{ d.name }}</h1>
+            <div class="nk-hero__meta">
+              <span class="nk-hero__stars">{{ stars }}</span>
+              <span class="nk-hero__tag">
+                <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`">
+                {{ ELEM[d.damage_type] || d.damage_type }}
+              </span>
+              <span class="nk-hero__tag">
+                <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`">
+                {{ PATH[d.base_type] || d.base_type }}
+              </span>
+              <span class="nk-hero__id">
+                <span class="nk-hero__id-num">{{ char.charId }}</span>
+              </span>
             </div>
-          </div>
+          </header>
+
+          <section v-if="heroStats.length" class="nk-hero__section">
+            <div class="nk-hero__section-title">
+              <span class="nk-hero__section-bar"></span>
+              <span>属性</span>
+            </div>
+            <div class="nk-hero__level">
+              <span class="nk-hero__level-label">Lv. {{ levelLimit }}/{{ MAX_CHAR_LEVEL }}</span>
+              <div class="nk-hero__level-track">
+                <div class="nk-hero__level-fill" :style="{ width: `${(levelLimit / MAX_CHAR_LEVEL) * 100}%` }"></div>
+              </div>
+            </div>
+            <div class="nk-hero__stats">
+              <div v-for="st in heroStats" :key="st.l" class="nk-hero__stat">
+                <span class="nk-hero__stat-icon" :data-icon="st.icon" aria-hidden="true"></span>
+                <span class="nk-hero__stat-label">{{ st.l }}</span>
+                <span class="nk-hero__stat-val">
+                  <template v-if="st.ov !== null">
+                    <span class="nk-d-c">{{ st.ov }}</span><span class="nk-d-n">{{ st.v }}</span>
+                  </template>
+                  <template v-else>{{ st.v }}</template>
+                </span>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
 
