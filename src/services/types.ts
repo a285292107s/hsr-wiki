@@ -333,3 +333,57 @@ export interface LocalCharEntry {
   skill_ids: number[];
 }
 export type LocalCharList = LocalCharEntry[];
+
+/* ─── 本地目录列表（converter 输出，数组形态） ─── */
+
+/** 物品列表条目（converter 输出；稀有度为数字，目录页需映射回字符串键） */
+export interface LocalItemEntry {
+  id: number;
+  name: string;
+  desc: string;
+  bg_desc: string;
+  main_type: string;
+  sub_type: string;
+  /** 数字稀有度（SuperRare=5 … Normal=1） */
+  rarity: number;
+  purpose_type: number;
+  icon: string;
+  figure_icon: string;
+}
+export type LocalItemList = LocalItemEntry[];
+
+/** 光锥列表条目 */
+export interface LocalLightConeEntry {
+  id: number;
+  name: string;
+  rarity: number;
+  path: string;
+  skill_id: number;
+  skill_name: string;
+  skill_desc: string;
+  icon: string;
+  icon_figure: string;
+}
+export type LocalLightConeList = LocalLightConeEntry[];
+
+/** 遗器套装列表条目 */
+export interface LocalRelicEntry {
+  id: number;
+  name: string;
+  icon: string;
+  icon_figure: string;
+  descriptions: string[];
+  require_num: number;
+  pieces: { id: number; name: string }[];
+  release_version: string;
+}
+export type LocalRelicList = LocalRelicEntry[];
+
+/** 敌对物种列表条目 */
+export interface LocalMonsterEntry {
+  id: number;
+  name: string;
+  icon: string;
+  type?: string;
+}
+export type LocalMonsterList = LocalMonsterEntry[];

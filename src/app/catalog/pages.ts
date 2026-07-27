@@ -5,13 +5,13 @@
 import { CDN, PATH } from '../../lib/constants';
 import {
   escHtml, stripAllTags, itemIconUrl, avatarShopIconUrl, elementIconUrl, pathIconUrl,
-  lightconeIconUrl, monsterIconUrl, parseRarity,
+  lightconeIconUrl, monsterIconUrl,
 } from '../../lib/format';
 import {
-  loadItems, loadLightconeList, loadRelicsetList,
-  loadMonsterList, loadMazeList, loadMazeVersions,
-  loadStoryList, loadBossList, loadPeakList, loadPeakVersions,
-  prefetchEndgameAll, loadLocalCharacterList,
+  loadLocalItems, loadLocalLightCones, loadLocalRelicSets, loadLocalMonsterList,
+  loadLocalMazeList, loadLocalStoryList, loadLocalBossList,
+  loadLocalPeakList,
+  prefetchEndgameAll, loadLocalCharacterList, RARITY_NUM_TO_KEY,
 } from '../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
 import type { MazeListDb, MazeListEntry, MazeVersionMap } from '../../services/types';
@@ -137,20 +137,20 @@ const lightconePage: CatalogPageConfig = {
   searchPlaceholder: '搜索光锥...',
   gridClass: 'nk-cat-grid nk-lc-grid',
   cardClass: '.nk-lc-card',
-  async fetchData(ctx) {
-    const db = await loadLightconeList(ctx.version);
+  async fetchData() {
+    const list = await loadLocalLightCones();
     const items: CatalogItem[] = [];
-    for (const [id, info] of Object.entries(db)) {
-      if (!info.zh) continue;
-      const path = (info.baseType || '').toLowerCase();
+    for (const info of list) {
+      if (!info.name) continue;
+      const path = (info.path || '').toLowerCase();
       items.push({
-        id,
-        name: info.zh,
-        href: `/lightcone/${id}`,
-        img: lightconeIconUrl(id),
+        id: String(info.id),
+        name: info.name,
+        href: `/lightcone/${info.id}`,
+        img: lightconeIconUrl(String(info.id)),
         pathImg: pathIconUrl(path),
         path,
-        rarity: parseRarity(info.rank),
+        rarity: info.rarity,
       });
     }
     // 排序：id 降序（新光锥在前）
@@ -206,15 +206,15 @@ const relicPage: CatalogPageConfig = {
   searchPlaceholder: '搜索遗器...',
   gridClass: 'nk-cat-grid nk-relic-grid',
   cardClass: '.nk-relic-card',
-  async fetchData(ctx) {
-    const db = await loadRelicsetList(ctx.version);
+  async fetchData() {
+    const list = await loadLocalRelicSets();
     const items: CatalogItem[] = [];
-    for (const [id, info] of Object.entries(db)) {
-      if (!info.zh) continue;
+    for (const info of list) {
+      if (!info.name) continue;
       items.push({
-        id,
-        name: info.zh,
-        href: `/relic/${id}`,
+        id: String(info.id),
+        name: info.name,
+        href: `/relic/${info.id}`,
         img: itemIconUrl(info.icon),
       });
     }
@@ -233,7 +233,7 @@ const relicPage: CatalogPageConfig = {
   },
 };
 
-/* ─── 物品（CDN 数据源，>400 条触发虚拟滚动） ─── */
+/* ─── 物品（本地数据源，>400 条触发虚拟滚动） ─── */
 
 const itemPage: CatalogPageConfig = {
   id: 'item',
@@ -243,17 +243,17 @@ const itemPage: CatalogPageConfig = {
   cardClass: '.nk-item-card',
   virtualMinColW: 110,
   virtualImgRatio: 1,
-  async fetchData(ctx) {
-    const db = await loadItems(ctx.version);
+  async fetchData() {
+    const list = await loadLocalItems();
     const items: CatalogItem[] = [];
-    for (const [id, info] of Object.entries(db)) {
-      if (!info.item_name) continue;
+    for (const info of list) {
+      if (!info.name) continue;
       items.push({
-        id,
-        name: info.item_name,
-        subType: info.item_sub_type || '',
-        rarity: info.rarity || 'Normal',
-        icon: itemIconUrl(info.item_figure_icon_path),
+        id: String(info.id),
+        name: info.name,
+        subType: info.sub_type || '',
+        rarity: RARITY_NUM_TO_KEY[info.rarity] || 'Normal',
+        icon: itemIconUrl(info.figure_icon),
       });
     }
     const rarityOrder: Record<string, number> = { SuperRare: 0, VeryRare: 1, Rare: 2, NotNormal: 3, Normal: 4 };
@@ -308,15 +308,15 @@ const monsterPage: CatalogPageConfig = {
   searchPlaceholder: '搜索敌对物种...',
   gridClass: 'nk-cat-grid nk-mob-grid',
   cardClass: '.nk-mob-card',
-  async fetchData(ctx) {
-    const db = await loadMonsterList(ctx.version);
+  async fetchData() {
+    const list = await loadLocalMonsterList();
     const items: CatalogItem[] = [];
-    for (const [id, info] of Object.entries(db)) {
-      if (!info.zh) continue;
+    for (const info of list) {
+      if (!info.name) continue;
       items.push({
-        id,
-        name: info.zh,
-        href: `/monster/${id}`,
+        id: String(info.id),
+        name: info.name,
+        href: `/monster/${info.id}`,
         img: monsterIconUrl(info.icon),
       });
     }
@@ -486,22 +486,22 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
 
 const mazePage = makeEndgamePage({
   id: 'maze', title: '终局内容', href: '/maze',
-  loadList: loadMazeList, loadVersions: loadMazeVersions,
+  loadList: loadLocalMazeList,
 });
 
 const storyPage = makeEndgamePage({
   id: 'story', title: '终局内容', href: '/story',
-  loadList: loadStoryList,
+  loadList: loadLocalStoryList,
 });
 
 const bossPage = makeEndgamePage({
   id: 'boss', title: '终局内容', href: '/boss',
-  loadList: loadBossList,
+  loadList: loadLocalBossList,
 });
 
 const peakPage = makeEndgamePage({
   id: 'peak', title: '终局内容', href: '/peak',
-  loadList: loadPeakList, loadVersions: loadPeakVersions,
+  loadList: loadLocalPeakList,
 });
 
 /* ─── 货币战争（复用遗器卡片样式） ─── */

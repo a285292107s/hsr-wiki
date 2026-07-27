@@ -63,13 +63,15 @@ pnpm test:watch
 
 ## 数据架构
 
-数据源为混合模式（第二期迁移进行中）：
+第二期数据源统一已完成——**全部目录页均走本地数据**（随站部署到 GitHub Pages），无运行时 CDN 列表拉取：
 
-- **角色数据（已迁移本地）**：列表 / 详情 / 配装名 / 遗器套装走本地转换数据 `public/data/cn/`（随站部署到 GitHub Pages），由 `tools/converter/` 从 `DimbreathBot/TurnBasedGameData` 产出，加载接口集中在 `src/services/api.ts` 的 `loadLocal*` 系列。
-- **其余目录与资源（仍走 CDN）**：光锥 / 遗器 / 物品 / 敌对 / 终局等目录页运行时实时拉取 `https://static.nanoka.cc`（CORS 已验证 `access-control-allow-origin: *`），API 层为纯函数，由 Pinia store 编排，支持内存 + IndexedDB 双层缓存（`src/services/cache.ts`）。
-- **图片资源**：图标、Spine `.skel`/`.atlas` 始终通过 `https://static.nanoka.cc` 加载，前端拼接固定 CDN 前缀（`src/lib/constants.ts` 中 `CDN`）。
+- **角色 / 光锥 / 遗器 / 物品 / 敌对**：列表数据由 `tools/converter/` 从 `DimBasedGameData` 产出本地 JSON（`public/data/cn/` 下的 `characters.json`、`light_cones.json`、`relics.json`、`items.json`、`monsters.json`），加载接口集中在 `src/services/api.ts` 的 `loadLocal*` 系列；物品库 `ItemDb`（供角色详情页物品名解析）由 `loadLocalItemDb()` 从 `items.json` 数组转换得到。
+- **终局内容（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）**：赛季列表由 `tools/converter/converters/endgame.py` 从 `ChallengeMazeConfig` / `ChallengeStoryMazeConfig` / `ChallengeBossMazeConfig` / `ChallengePeakConfig` 产出（按 `GroupID`/`ID` 分组 + TextMap 名称），落地为 `public/data/cn/maze.json`、`maze_extra.json`、`maze_boss.json`、`maze_peak.json`，经 `loadLocalMaze*`/`loadLocalStory*`/`loadLocalBoss*`/`loadLocalPeak*` 加载。**不生成 `*-version.json`**——上游解包数据中不存在"赛季 → 游戏版本"的时间线表，版本分组无法从源可靠重建，故四季统一按赛季 ID 降序展示，赛季版本标签显示"未知"（与原站 story/boss 行为一致）。
+- **图片资源**：图标、Spine `.skel`/`.atlas` 仍通过 `https://static.nanoka.cc` 加载（前端拼接固定 CDN 前缀 `src/lib/constants.ts` 中 `CDN`）；目录卡片图标经 `lightconeIconUrl` / `itemIconUrl` / `monsterIconUrl` 由本地数据中的 id / 路径派生，无需额外请求。
 
-> 迁移路线：角色已先行切本地；其余目录页待 converter 覆盖后逐步迁移，过程中两套数据源并存属预期。
+> `cdn-samples/` 仅作 CDN 响应结构的**参考样本**，其 JSON **严禁作为数据源**读取或随站部署（见 `cdn-samples/README.md`）。本地数据一律由 `tools/converter/convert.py` 从 `vendor/TurnBasedGameData` 真实产出。
+>
+> 本地数据需随上游解包更新时，重跑 `tools/converter/convert.py` 即可，前端无需改动。
 
 ## 数据转换工具
 
@@ -78,7 +80,7 @@ pnpm test:watch
 ```bash
 cd tools/converter
 pip install -r requirements.txt     # 需 python-xxhash 等
-python convert.py                   # 依次转换 通用/角色/光锥/遗器 数据
+python convert.py                   # 依次转换 通用/角色/光锥/遗器/敌对/终局 数据
 ```
 
 转换逻辑按模块拆分于 `tools/converter/converters/`：
@@ -87,6 +89,8 @@ python convert.py                   # 依次转换 通用/角色/光锥/遗器 �
 |---|---|
 | `paths.py` / `elements.py` / `properties.py` | `paths.json`、`elements.json`、`properties.json` |
 | `items.py` | `items.json` |
+| `monsters.py` | `monsters.json` |
+| `endgame.py` | `maze.json`、`maze_extra.json`、`maze_boss.json`、`maze_peak.json` |
 | `characters.py` / `character_ranks.py` / `character_skills.py` / `character_detail.py` | `characters.json`、`character_ranks.json`、`character_skills.json`、`characters/<id>.json` |
 | `light_cones.py` | `light_cones.json` |
 | `relics.py` / `relic_affixes.py` | `relics.json`、`relic_main_affixes.json`、`relic_sub_affixes.json` |

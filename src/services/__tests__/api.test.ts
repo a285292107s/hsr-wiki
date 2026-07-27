@@ -1,7 +1,7 @@
 /**
  * api.ts API 层测试
  * 内联 fixture 参照 cdn-samples 真实结构（manifest / spine manifest 的 "bg|a|b" 多段格式）。
- * 注：角色数据已从 CDN 迁移到本地（见 loadLocal*），此处仅覆盖仍走 CDN 的接口与纯函数。
+ * 二期数据源已统一为本地：此处覆盖本地数据加载（loadLocal*）、物品库转换与纯函数。
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { CDN } from '../../lib/constants';
@@ -50,7 +50,7 @@ describe('URL 构建与版本解析', () => {
   });
 });
 
-/* ─── manifest / 物品加载 ─── */
+/* ─── manifest / 本地数据加载 ─── */
 
 describe('数据加载', () => {
   it('loadManifest 返回清单并走缓存', async () => {
@@ -62,11 +62,31 @@ describe('数据加载', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1); // 第二次命中内存
   });
 
-  it('loadItems 返回物品库', async () => {
+  it('loadLocalItems 返回本地物品数组', async () => {
     const api = await freshApi();
-    vi.stubGlobal('fetch', routeFetch({ 'item.json': { '23013': { item_name: 'X', item_sub_type: 'Lightcone', rarity: 'SuperRare' } } }));
-    const items = await api.loadItems('4.3.1');
-    expect(items['23013'].item_name).toBe('X');
+    vi.stubGlobal('fetch', routeFetch({
+      'items.json': [
+        { id: 23013, name: '星琼', desc: '', bg_desc: '', main_type: 'Virtual', sub_type: 'Virtual', rarity: 5, purpose_type: 0, icon: '', figure_icon: 'icon/item_figure/23013.png' },
+      ],
+    }));
+    const items = await api.loadLocalItems();
+    expect(items[0].id).toBe(23013);
+    expect(items[0].name).toBe('星琼');
+  });
+
+  it('loadLocalItemDb 将数字稀有度映射为字符串键并构建 Record', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', routeFetch({
+      'items.json': [
+        { id: 23013, name: '星琼', desc: '', bg_desc: '', main_type: 'Virtual', sub_type: 'Virtual', rarity: 5, purpose_type: 0, icon: '', figure_icon: '' },
+        { id: 1001, name: '便当', desc: '', bg_desc: '', main_type: 'Food', sub_type: 'Food', rarity: 3, purpose_type: 0, icon: '', figure_icon: '' },
+      ],
+    }));
+    const db = await api.loadLocalItemDb();
+    expect(db['23013'].item_name).toBe('星琼');
+    expect(db['23013'].rarity).toBe('SuperRare');
+    expect(db['1001'].rarity).toBe('Rare');
+    expect(db['23013'].item_figure_icon_path).toBe('');
   });
 });
 

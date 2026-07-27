@@ -3,7 +3,7 @@
  */
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { loadManifest, resolveVersion, loadItems } from '../../services/api';
+import { loadManifest, resolveVersion, loadLocalItemDb } from '../../services/api';
 import type { ItemDb, NameCache } from '../../services/types';
 
 export type ToastType = 'error' | 'warn' | 'info' | 'success';
@@ -45,7 +45,7 @@ export const useAppStore = defineStore('app', () => {
     if (Object.keys(itemDb.value).length) return;
     await initManifest();
     try {
-      itemDb.value = await loadItems(version.value);
+      itemDb.value = await loadLocalItemDb();
     } catch {
       itemDb.value = {};
     }

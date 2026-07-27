@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from textmap import load_textmap
 from converters import paths, elements, items, properties
 from converters import characters, character_ranks, character_skills, character_detail
-from converters import light_cones, relics, relic_affixes
+from converters import light_cones, relics, relic_affixes, monsters, endgame
 
 logging.basicConfig(
     level=logging.INFO,
@@ -56,6 +56,14 @@ def main() -> None:
     logger.info("--- 遗器数据 ---")
     relics.convert()
     relic_affixes.convert()
+
+    # 6. 敌对物种数据
+    logger.info("--- 敌对物种数据 ---")
+    monsters.convert()
+
+    # 7. 终局内容数据（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）
+    logger.info("--- 终局内容数据 ---")
+    endgame.convert()
 
     elapsed = time.time() - start
     logger.info("=== 转换完成，耗时 %.1fs ===", elapsed)

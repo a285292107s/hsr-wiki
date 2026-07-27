@@ -1,16 +1,17 @@
 /**
  * API 层：全部为纯函数（显式传参，无全局状态），由 Pinia store 编排调用。
  *
- * 数据源为混合模式（第二期迁移进行中）：
+ * 数据源（第二期已完成统一）：
  * - 角色（列表/详情/配装名/遗器套装）走本地转换数据（public/data/cn，随站部署）；
- * - 其余目录（光锥/遗器/物品/敌对/终局）与全部图片、Spine 动画仍走 CDN。
+ * - 光锥/遗器/物品/敌对/终局目录均走本地数据（converter 输出或 cdn-samples 落地）；
+ * - 图片资源与 Spine 动画仍走 CDN（static.nanoka.cc）。
  */
 import { CDN } from '../lib/constants';
 import { CACHE_TTL, cachedFetch, purgeStaleVersions } from './cache';
 import type {
   Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest,
-  LightconeListDb, RelicsetListDb, MonsterListDb, MazeListDb, MazeVersionMap,
-  LocalCharList,
+  MazeListDb, LocalCharList,
+  LocalItemList, LocalLightConeList, LocalRelicList, LocalMonsterList,
 } from './types';
 
 /* ─── manifest ─── */
@@ -27,61 +28,76 @@ export function resolveVersion(m: Manifest): string {
   return m.hsr?.latest || (m.hsr?.available || [])[0] || '';
 }
 
-/* ─── 物品数据库 ─── */
+/* ─── 本地目录数据（随站部署，二期统一数据源） ─── */
 
-export function loadItems(ver: string): Promise<ItemDb> {
-  return cachedFetch<ItemDb>(`${CDN}/hsr/${ver}/zh/item.json`, `item_${ver}`, CACHE_TTL.data);
+/** 数字稀有度 → 字符串键（与 ItemInfo.rarity 及目录页 ITEM_RARITY_MAP 对齐） */
+export const RARITY_NUM_TO_KEY: Record<number, string> = {
+  5: 'SuperRare', 4: 'VeryRare', 3: 'Rare', 2: 'NotNormal', 1: 'Normal',
+};
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+  return (await res.json()) as T;
 }
 
-/* ─── 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
-
-export function loadLightconeList(ver: string): Promise<LightconeListDb> {
-  return cachedFetch<LightconeListDb>(`${CDN}/hsr/${ver}/lightcone.json`, `lclist_${ver}`, CACHE_TTL.data);
+export function loadLocalItems(): Promise<LocalItemList> {
+  return fetchJson<LocalItemList>(`${LOCAL_DATA_BASE}/items.json`);
 }
 
-export function loadRelicsetList(ver: string): Promise<RelicsetListDb> {
-  return cachedFetch<RelicsetListDb>(`${CDN}/hsr/${ver}/relicset.json`, `relicsetlist_${ver}`, CACHE_TTL.data);
+/** 物品库（Record 形态，供角色详情页 itemName 解析；由本地数组转换） */
+export async function loadLocalItemDb(): Promise<ItemDb> {
+  const list = await loadLocalItems();
+  const db: ItemDb = {};
+  for (const it of list) {
+    db[String(it.id)] = {
+      item_name: it.name,
+      item_sub_type: it.sub_type,
+      purpose_type: it.purpose_type,
+      rarity: RARITY_NUM_TO_KEY[it.rarity] || 'Normal',
+      item_figure_icon_path: it.figure_icon,
+    };
+  }
+  return db;
 }
 
-export function loadMonsterList(ver: string): Promise<MonsterListDb> {
-  return cachedFetch<MonsterListDb>(`${CDN}/hsr/${ver}/monster.json`, `monsterlist_${ver}`, CACHE_TTL.data);
+export function loadLocalLightCones(): Promise<LocalLightConeList> {
+  return fetchJson<LocalLightConeList>(`${LOCAL_DATA_BASE}/light_cones.json`);
 }
 
-export function loadMazeList(ver: string): Promise<MazeListDb> {
-  return cachedFetch<MazeListDb>(`${CDN}/hsr/${ver}/maze.json`, `mazelist_${ver}`, CACHE_TTL.data);
+export function loadLocalRelicSets(): Promise<LocalRelicList> {
+  return fetchJson<LocalRelicList>(`${LOCAL_DATA_BASE}/relics.json`);
 }
 
-/** 赛季版本映射（version → 赛季 ID 列表；此端点带 /zh/ 路径段） */
-export function loadMazeVersions(ver: string): Promise<MazeVersionMap> {
-  return cachedFetch<MazeVersionMap>(`${CDN}/hsr/${ver}/zh/maze/version.json`, `mazever_${ver}`, CACHE_TTL.data);
+export function loadLocalMonsterList(): Promise<LocalMonsterList> {
+  return fetchJson<LocalMonsterList>(`${LOCAL_DATA_BASE}/monsters.json`);
 }
 
-/** 虚构叙事赛季列表（ID 段 2xxx；无 version.json，按 ID 降序展示） */
-export function loadStoryList(ver: string): Promise<MazeListDb> {
-  return cachedFetch<MazeListDb>(`${CDN}/hsr/${ver}/maze_extra.json`, `storylist_${ver}`, CACHE_TTL.data);
+export function loadLocalMazeList(): Promise<MazeListDb> {
+  return fetchJson<MazeListDb>(`${LOCAL_DATA_BASE}/maze.json`);
 }
 
-/** 末日幻影赛季列表（ID 段 3xxx；无 version.json，按 ID 降序展示） */
-export function loadBossList(ver: string): Promise<MazeListDb> {
-  return cachedFetch<MazeListDb>(`${CDN}/hsr/${ver}/maze_boss.json`, `bosslist_${ver}`, CACHE_TTL.data);
+export function loadLocalStoryList(): Promise<MazeListDb> {
+  return fetchJson<MazeListDb>(`${LOCAL_DATA_BASE}/maze_extra.json`);
 }
 
-/** 异相仲裁赛季列表（ID 段 1-9） */
-export function loadPeakList(ver: string): Promise<MazeListDb> {
-  return cachedFetch<MazeListDb>(`${CDN}/hsr/${ver}/maze_peak.json`, `peaklist_${ver}`, CACHE_TTL.data);
+export function loadLocalBossList(): Promise<MazeListDb> {
+  return fetchJson<MazeListDb>(`${LOCAL_DATA_BASE}/maze_boss.json`);
 }
 
-/** 异相仲裁赛季版本映射（此端点带 /zh/ 路径段） */
-export function loadPeakVersions(ver: string): Promise<MazeVersionMap> {
-  return cachedFetch<MazeVersionMap>(`${CDN}/hsr/${ver}/zh/peak/version.json`, `peakver_${ver}`, CACHE_TTL.data);
+export function loadLocalPeakList(): Promise<MazeListDb> {
+  return fetchJson<MazeListDb>(`${LOCAL_DATA_BASE}/maze_peak.json`);
 }
 
-/** 终局 4 页数据并行预热入 L1 内存，保证 Tab 切换即时命中（失败静默，切换时按需单独拉取） */
-export function prefetchEndgameAll(ver: string): void {
+/**
+ * 终局 4 页数据并行预热入 L1 内存，保证 Tab 切换即时命中（失败静默）。
+ * 注意：源数据无"赛季→版本"时间线，四季统一按 ID 降序展示，无需 version 预取。
+ */
+export function prefetchEndgameAll(_ver: string): void {
   void Promise.allSettled([
-    loadMazeList(ver), loadMazeVersions(ver),
-    loadStoryList(ver), loadBossList(ver),
-    loadPeakList(ver), loadPeakVersions(ver),
+    loadLocalMazeList(),
+    loadLocalStoryList(), loadLocalBossList(),
+    loadLocalPeakList(),
   ]);
 }
 
