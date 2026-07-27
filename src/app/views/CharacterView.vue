@@ -96,6 +96,8 @@ const heroStats = computed<HeroStat[]>(() => {
 const levelLimit = computed<number>(() => MAX_CHAR_LEVEL);
 
 /* ─── 视差（同首页 lerp 方案，作用于 Hero 立绘背景） ─── */
+/** 仅精确指针设备启用视差（触屏滚动会模拟 mousemove，导致立绘抖动） */
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const heroRef = ref<HTMLElement | null>(null);
 const heroBgRef = ref<HTMLElement | null>(null);
 let ptx = 0, pty = 0, pcx = 0, pcy = 0;
@@ -117,7 +119,7 @@ function kickParallax(): void {
   if (pRaf === null) pRaf = requestAnimationFrame(parallaxLoop);
 }
 function onHeroMove(e: MouseEvent): void {
-  if (spineVisible.value) return; // 动画开启时冻结视差
+  if (!finePointer || spineVisible.value) return; // 触屏不触发；动画开启时冻结视差
   const el = heroRef.value;
   if (!el) return;
   const r = el.getBoundingClientRect();
@@ -191,6 +193,37 @@ function onKeydown(e: KeyboardEvent): void {
   const idx = ['1', '2', '3', '4'].indexOf(e.key);
   if (idx >= 0) char.setTab(CHAR_TABS[idx]);
 }
+
+/* ─── Tabs 横向滚动淡出提示（检测溢出；滚到末尾自动隐藏） ─── */
+const tabsRef = ref<HTMLElement | null>(null);
+const tabsOverflow = ref(false);
+const tabsAtEnd = ref(false);
+const tabsFade = computed(() => tabsOverflow.value && !tabsAtEnd.value);
+let tabsRo: ResizeObserver | null = null;
+function checkTabsOverflow(): void {
+  const el = tabsRef.value;
+  if (!el) { tabsOverflow.value = false; return; }
+  tabsOverflow.value = el.scrollWidth > el.clientWidth + 2;
+  tabsAtEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+}
+function onTabsScroll(): void {
+  const el = tabsRef.value;
+  if (!el) return;
+  tabsAtEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+}
+watch(
+  () => phase.value,
+  () => {
+    void nextTick(() => {
+      if (tabsRo) { tabsRo.disconnect(); tabsRo = null; }
+      if (tabsRef.value) {
+        tabsRo = new ResizeObserver(checkTabsOverflow);
+        tabsRo.observe(tabsRef.value);
+      }
+      checkTabsOverflow();
+    });
+  },
+);
 
 /* ═══════════ 概览面板 ═══════════ */
 
@@ -576,6 +609,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown);
   if (pRaf !== null) cancelAnimationFrame(pRaf);
+  if (tabsRo) { tabsRo.disconnect(); tabsRo = null; }
   if (spineCleanup) {
     spineCleanup();
     spineCleanup = null;
@@ -609,13 +643,15 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <div class="nk-skeleton__tabs">
-        <div class="nk-skeleton__tabs-left">
-          <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
+        <div class="nk-skeleton__tabs-bar">
+          <div class="nk-skeleton__tabs-left">
+            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
+            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
+            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
+            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
+          </div>
+          <div class="nk-sk nk-sk--shimmer" style="width:120px;height:28px;border-radius:8px;"></div>
         </div>
-        <div class="nk-sk nk-sk--shimmer" style="width:120px;height:28px;border-radius:8px;"></div>
       </div>
       <div class="nk-skeleton__body">
         <div class="nk-sk nk-sk--shimmer" style="width:100%;height:60px;border-radius:8px;"></div>
@@ -718,37 +754,39 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- Tabs + 强化模式切换器 -->
+      <!-- Tabs + 强化模式切换器（外壳全宽吸顶，内容条与面板同宽居中） -->
       <div class="nk-tabs">
-        <div class="nk-tabs__left">
-          <button
-            v-for="t in TAB_DEFS"
-            :key="t.key"
-            :class="['nk-tab', { 'nk-tab--active': char.activeTab === t.key }]"
-            type="button"
-            @click="char.setTab(t.key)"
-          >
-            {{ t.label }}
-          </button>
-        </div>
-        <div v-if="char.enhKeys.length" class="nk-enh-toggle">
-          <span class="nk-enh-toggle__label">强化模式</span>
-          <button
-            :class="['nk-enh-toggle__btn', { 'nk-enh-toggle__btn--active': !char.enhKey }]"
-            type="button"
-            @click="char.setEnhKey(null)"
-          >
-            原始
-          </button>
-          <button
-            v-for="k in char.enhKeys"
-            :key="k"
-            :class="['nk-enh-toggle__btn', { 'nk-enh-toggle__btn--active': char.enhKey === k }]"
-            type="button"
-            @click="char.setEnhKey(k)"
-          >
-            强化 V{{ k }}
-          </button>
+        <div ref="tabsRef" class="nk-tabs__bar" :class="{ 'nk-tabs--fade': tabsFade }" @scroll.passive="onTabsScroll">
+          <div class="nk-tabs__left">
+            <button
+              v-for="t in TAB_DEFS"
+              :key="t.key"
+              :class="['nk-tab', { 'nk-tab--active': char.activeTab === t.key }]"
+              type="button"
+              @click="char.setTab(t.key)"
+            >
+              {{ t.label }}
+            </button>
+          </div>
+          <div v-if="char.enhKeys.length" class="nk-enh-toggle">
+            <span class="nk-enh-toggle__label">强化模式</span>
+            <button
+              :class="['nk-enh-toggle__btn', { 'nk-enh-toggle__btn--active': !char.enhKey }]"
+              type="button"
+              @click="char.setEnhKey(null)"
+            >
+              原始
+            </button>
+            <button
+              v-for="k in char.enhKeys"
+              :key="k"
+              :class="['nk-enh-toggle__btn', { 'nk-enh-toggle__btn--active': char.enhKey === k }]"
+              type="button"
+              @click="char.setEnhKey(k)"
+            >
+              强化 V{{ k }}
+            </button>
+          </div>
         </div>
       </div>
 
