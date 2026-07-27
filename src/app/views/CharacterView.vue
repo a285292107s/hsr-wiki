@@ -307,7 +307,10 @@ const attrBonuses = computed<AttrBonus[]>(() => {
     const ob = oldAgg && oldAgg.get(type);
     const ov = ob && fmtBonus(type, ob.sum) !== v ? fmtBonus(type, ob.sum) : null;
     const key = PROP_ICON[type];
-    return { name: b.name, v, ov, icon: key ? `${CDN}/assets/hsr/trace/Icon${key}.webp` : '' };
+    return {
+      name: PROP_NAMES[type] || (b.name && b.name !== '{}' ? b.name : type),
+      v, ov, icon: key ? `${CDN}/assets/hsr/trace/Icon${key}.webp` : '',
+    };
   });
 });
 
@@ -501,15 +504,23 @@ const removedEidolons = computed(() => {
 const PROP_NAMES: Record<string, string> = {
   CriticalDamageBase: '暴击伤害', CriticalChanceBase: '暴击率', SpeedDelta: '速度',
   HPAddedRatio: '生命值%', AttackAddedRatio: '攻击力%', SPRatioBase: '能量恢复效率',
-  BreakDamageAddedRatio: '击破特攻', FireAddedRatio: '火属性伤害提高',
+  BreakDamageAddedRatio: '击破特攻', BreakDamageAddedRatioBase: '击破特攻',
+  FireAddedRatio: '火属性伤害提高',
   PhysicalAddedRatio: '物理属性伤害提高', IceAddedRatio: '冰属性伤害提高',
-  LightningAddedRatio: '雷属性伤害提高', WindAddedRatio: '风属性伤害提高',
+  LightningAddedRatio: '雷属性伤害提高', ThunderAddedRatio: '雷属性伤害提高',
+  WindAddedRatio: '风属性伤害提高',
   QuantumAddedRatio: '量子属性伤害提高', ImaginaryAddedRatio: '虚数属性伤害提高',
   HPDelta: '生命值', AttackDelta: '攻击力', DefenceDelta: '防御力',
-  DefenceAddedRatio: '防御力%', EffectHitRateBase: '效果命中', EffectResistBase: '效果抵抗',
+  DefenceAddedRatio: '防御力%', HealRatioBase: '治疗量加成',
+  EffectHitRateBase: '效果命中', EffectResistBase: '效果抵抗',
+  StatusProbabilityBase: '效果命中', StatusResistanceBase: '效果抵抗',
+  ElationDamageAddedRatioBase: '欢愉伤害提高',
 };
 const SLOT_ICONS: Record<string, string> = {
   BODY: 'IconRelicBody', FOOT: 'IconRelicFoot', NECK: 'IconRelicNeck', OBJECT: 'IconRelicGoods',
+};
+const SLOT_NAMES: Record<string, string> = {
+  HEAD: '头部', HAND: '手部', BODY: '躯干', FOOT: '脚部', NECK: '位面球', OBJECT: '连结绳',
 };
 
 const cones = computed(() =>
@@ -1004,19 +1015,24 @@ onBeforeUnmount(() => {
           <template v-if="hasRelicSection">
             <div class="nk-title">RELICS</div>
             <div class="nk-build__relics">
-              <div v-if="relicMainStats.length" class="nk-build__stats">
+              <!-- 主词条槽位卡片 -->
+              <div v-if="relicMainStats.length" class="nk-relic-slots">
                 <div
                   v-for="p in relicMainStats"
                   :key="p.relic_type + p.property_type"
-                  class="nk-build__stat"
+                  class="nk-relic-slot"
                 >
-                  <img :src="`${CDN}/assets/hsr/relicfigures/${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`">
-                  <div class="nk-build__stat-label">{{ PROP_NAMES[p.property_type] || p.property_type }}</div>
+                  <img class="nk-relic-slot__icon" :src="`${CDN}/assets/hsr/relicfigures/${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`">
+                  <span class="nk-relic-slot__stat">{{ PROP_NAMES[p.property_type] || p.property_type }}</span>
+                  <span class="nk-relic-slot__slot">{{ SLOT_NAMES[p.relic_type] || p.relic_type }}</span>
                 </div>
               </div>
-              <div v-if="relicSubs.length" class="nk-build__sub">
-                <span class="nk-build__sub-label">推荐副词条</span>
-                <span class="nk-build__sub-val">{{ relicSubs.join(' / ') }}</span>
+              <!-- 推荐副词条卡片 -->
+              <div v-if="relicSubs.length" class="nk-relic-sub">
+                <span class="nk-relic-sub__label">推荐副词条</span>
+                <div class="nk-relic-sub__list">
+                  <span v-for="s in relicSubs" :key="s" class="nk-relic-sub__chip">{{ s }}</span>
+                </div>
               </div>
               <div v-if="setIdList.length" class="nk-build__sets">
                 <div v-for="s in setIdList" :key="`${s.id}-${s.pc}`" class="nk-build__set">

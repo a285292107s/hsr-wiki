@@ -21,15 +21,16 @@ def convert() -> None:
     # 加载套装效果配置
     skill_data = load_json(EXCEL_DIR / "RelicSetSkillConfig.json")
 
-    # 按 SetID 聚合套装效果
-    set_skills: dict[int, dict[int, str]] = {}  # set_id → {require_num: desc}
+    # 按 SetID 聚合套装效果（desc 模板 + AbilityParamList 参数值）
+    set_skills: dict[int, dict[int, tuple[str, list]]] = {}  # set_id → {require_num: (desc, params)}
     for skill in skill_data:
         set_id = skill.get("SetID", 0)
         require_num = skill.get("RequireNum", 0)
         desc = resolve_text(skill.get("SkillDesc", ""))
+        params = [unwrap_value(p) for p in skill.get("AbilityParamList", [])]
         if set_id not in set_skills:
             set_skills[set_id] = {}
-        set_skills[set_id][require_num] = desc
+        set_skills[set_id][require_num] = (desc, params)
 
     # 按 SetID 聚合部位，只保留最高稀有度（5星）
     set_pieces: dict[int, list] = {}  # set_id → [piece, ...]
@@ -62,7 +63,12 @@ def convert() -> None:
         if not item.get("Release", False):
             continue
 
-        descriptions = set_skills.get(set_id, {})
+        descriptions: dict[int, str] = {}
+        param_list: dict[str, list] = {}
+        for rn, (desc, params) in set_skills.get(set_id, {}).items():
+            descriptions[rn] = desc
+            if params:
+                param_list[str(rn)] = params
         pieces = set_pieces.get(set_id, [])
         # 按部位顺序排序
         type_order = {"HEAD": 0, "HAND": 1, "BODY": 2, "FOOT": 3, "NECK": 4, "OBJECT": 5}
@@ -74,6 +80,7 @@ def convert() -> None:
             "icon": map_icon_path(item.get("SetIconPath", "")),
             "icon_figure": map_icon_path(item.get("SetIconFigurePath", "")),
             "descriptions": descriptions,
+            "param_list": param_list,
             "require_num": item.get("SetSkillList", []),
             "pieces": pieces,
             "release_version": item.get("ReleaseVersion", ""),

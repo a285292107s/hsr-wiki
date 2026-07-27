@@ -226,14 +226,34 @@
 .nk-build__team-alt img:hover { opacity: 1; }
 .nk-build__team-plus { color: var(--text3); font-size: 0.875rem; font-weight: 400; flex-shrink: 0; margin: 0 2px; align-self: center; }
 .nk-build__relics { margin-bottom: 20px; }
-.nk-build__stats { display: flex; flex-wrap: wrap; gap: 6px 0; margin-bottom: 14px; }
-.nk-build__stat { display: inline-flex; align-items: center; gap: 7px; }
-.nk-build__stat + .nk-build__stat::before { content: '·'; margin: 0 14px; color: var(--text3); opacity: 0.4; }
-.nk-build__stat img { width: 20px; height: 20px; opacity: 0.9; }
-.nk-build__stat-label { font-size: 0.75rem; color: var(--text2); }
-.nk-build__sub { display: flex; align-items: baseline; gap: 8px; font-size: 0.75rem; margin-bottom: 16px; }
-.nk-build__sub-label { font-size: 0.6875rem; color: var(--text3); }
-.nk-build__sub-val { color: var(--text2); font-weight: 600; }
+/* RELICS 主词条槽位卡片（auto-fit 网格，宽屏下现有项扩展填满整行） */
+.nk-relic-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.nk-relic-slot {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 14px 12px 12px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px;
+  transition: border-color 0.2s;
+}
+.nk-relic-slot:hover { border-color: var(--border2); }
+.nk-relic-slot__icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(0,0,0,0.3); padding: 4px; margin-bottom: 4px; }
+.nk-relic-slot__stat { font-size: 0.8125rem; font-weight: 600; color: var(--text-bright); text-align: center; }
+.nk-relic-slot__slot { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
+/* 推荐副词条卡片 */
+.nk-relic-sub {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
+  padding: 12px 16px; margin-bottom: 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  transition: border-color 0.2s;
+}
+.nk-relic-sub:hover { border-color: var(--border2); }
+.nk-relic-sub__label { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; flex-shrink: 0; }
+.nk-relic-sub__list { display: flex; flex-wrap: wrap; gap: 6px; }
+.nk-relic-sub__chip {
+  font-size: 0.75rem; font-weight: 600; color: var(--text2);
+  padding: 2px 10px; border-radius: 4px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent);
+}
 .nk-build__sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .nk-build__set { padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; transition: border-color 0.2s; }
 .nk-build__set:hover { border-color: var(--border2); }

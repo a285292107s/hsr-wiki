@@ -73,10 +73,13 @@ def resolve_text(ref: Any, clean: bool = True) -> str:
 
     result = ""
 
-    # Hash 对象
-    if isinstance(ref, dict) and "Hash" in ref:
-        key = str(ref["Hash"])
-        result = _text_map.get(key, "")
+    # 空字典 / 无 Hash 的字典：视为空引用
+    if isinstance(ref, dict):
+        if "Hash" in ref:
+            key = str(ref["Hash"])
+            result = _text_map.get(key, "")
+        else:
+            return ""
 
     # 字面量字符串
     elif isinstance(ref, str):
