@@ -58,7 +58,7 @@
 .nk-cat-chip.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 10px rgba(124,58,237,0.2); }
 
 /* 网格 */
-.nk-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 14px; padding-top: 16px; }
+.nk-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; padding-top: 16px; }
 .nk-virtual-grid { display: block; position: relative; }
 /* 虚拟网格卡片：Observer 驱动的入场动画 */
 .nk-virtual-cell .nk-item-card,
@@ -352,7 +352,12 @@
    目录页响应式网格
 ═══════════════════════════════════════════ */
 @media (max-width: 767px) {
-  .nk-cat-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+  /* ── mobile：侧边栏降级为底部 Tab Bar，释放竖栏预留的 88px 左内边距 ── */
+  #nk-catalog-app { padding-left: 16px; padding-right: 16px; }
+  .nk-cat-header { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
+  /* 网格列数由统一 minmax(150px) 流式决定，不在此覆盖，避免 768px 断点列数突变（3↔6） */
+  .nk-cat-grid { gap: 10px; }
   .nk-lc-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
   .nk-relic-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
   .nk-item-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
