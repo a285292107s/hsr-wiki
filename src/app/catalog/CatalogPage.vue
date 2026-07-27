@@ -2,14 +2,13 @@
 /**
  * 通用目录引擎组件（移植自原 catalog.js 的 initGenericCatalog + initCatalog）
  *
- * 数据源：统一走 CDN fetchData。
+ * 数据源：角色走本地转换数据；其余目录统一走 CDN fetchData。
  * >400 条目启用虚拟网格；卡片走 renderCard HTML（v-html）+ 事件委托。
  * 卡片点击：角色详情 → SPA 导航；未迁移详情页 → 静默忽略。
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '../stores/app';
-import { prefetchCharData } from '../../services/api';
 import { useVirtualGrid, vReveal } from './use-virtual-grid';
 import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
 
@@ -187,14 +186,6 @@ function onContentClick(e: MouseEvent): void {
   // 未迁移的详情页：静默忽略（第一期无详情页）
 }
 
-function onCardHover(e: Event): void {
-  if (props.config.id !== 'character') return;
-  const card = (e.target as HTMLElement).closest('.nk-cat-card');
-  if (!card) return;
-  const m = (card.getAttribute('href') || '').match(/\/character\/(\d+)/);
-  if (m) prefetchCharData(app.version, m[1]);
-}
-
 function onGridMove(e: MouseEvent): void {
   const selector = props.config.cardClass || '.nk-cat-card';
   const card = (e.target as HTMLElement).closest(selector);
@@ -242,7 +233,6 @@ onBeforeUnmount(() => {
     id="nk-catalog-app"
     ref="scrollerRef"
     @click="onContentClick"
-    @pointerenter.capture="onCardHover"
   >
     <!-- 错误态 -->
     <div v-if="phase === 'error'" class="nk-error-state">

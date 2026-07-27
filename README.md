@@ -4,7 +4,7 @@
 
 - 站点地址：`https://<user>.github.io/hsr_wiki/`
 - 技术栈：Vue 3 + TypeScript + Vite + Pinia + Vue Router（Hash 模式）
-- 数据源：运行时从 `https://static.nanoka.cc` 拉取（CDN 已开放 CORS），第二期引入 `TurnBasedGameData` 本地转换数据
+- 数据源：混合模式——角色走本地转换数据（随站部署），其余目录与图片/Spine 走 `https://static.nanoka.cc` CDN（CORS 已开放）
 
 ## 技术栈
 
@@ -27,10 +27,8 @@ hsr wiki/
 ├── public/
 │   └── data/cn/              # 由转换工具产出的本地数据 JSON（随站部署）
 ├── src/
-│   ├── app/                  # 应用层：视图、组件、路由、store、目录/角色模块
-│   ├── components/           # 复用组件
+│   ├── app/                  # 应用层：视图、组件、路由、store、目录/角色模块（含 src/app/components 复用组件）
 │   ├── lib/                  # 纯函数工具（format、constants、errors）
-│   ├── platform/             # 平台适配（历史遗留，当前可忽略）
 │   ├── services/             # API 层（api.ts / cache.ts / types.ts）
 │   ├── styles/               # 全局样式（tokens / character / catalog）
 │   ├── main.ts               # 唯一入口
@@ -65,12 +63,13 @@ pnpm test:watch
 
 ## 数据架构
 
-站点数据来源分两期演进：
+数据源为混合模式（第二期迁移进行中）：
 
-- **第一期（当前）**：运行时实时拉取 `https://static.nanoka.cc`（CORS 已验证 `access-control-allow-origin: *`）。API 层为纯函数，集中位于 `src/services/api.ts`，由 Pinia store 编排调用，支持内存 + IndexedDB 双层缓存（`src/services/cache.ts`）。
-- **第二期**：引入 `DimbreathBot/TurnBasedGameData` 官方解包数据，经 `tools/converter/` 转换为扁平索引 JSON，输出到 `public/data/cn/`，随仓库部署到 GitHub Pages。前端已预留本地数据加载接口（`loadLocalCharacterList` / `loadLocalCharacter` 等）。
+- **角色数据（已迁移本地）**：列表 / 详情 / 配装名 / 遗器套装走本地转换数据 `public/data/cn/`（随站部署到 GitHub Pages），由 `tools/converter/` 从 `DimbreathBot/TurnBasedGameData` 产出，加载接口集中在 `src/services/api.ts` 的 `loadLocal*` 系列。
+- **其余目录与资源（仍走 CDN）**：光锥 / 遗器 / 物品 / 敌对 / 终局等目录页运行时实时拉取 `https://static.nanoka.cc`（CORS 已验证 `access-control-allow-origin: *`），API 层为纯函数，由 Pinia store 编排，支持内存 + IndexedDB 双层缓存（`src/services/cache.ts`）。
+- **图片资源**：图标、Spine `.skel`/`.atlas` 始终通过 `https://static.nanoka.cc` 加载，前端拼接固定 CDN 前缀（`src/lib/constants.ts` 中 `CDN`）。
 
-图片资源（图标、Spine `.skel`/`.atlas`）始终通过 `https://static.nanoka.cc` 加载，前端拼接固定 CDN 前缀（`src/lib/constants.ts` 中 `CDN`）。
+> 迁移路线：角色已先行切本地；其余目录页待 converter 覆盖后逐步迁移，过程中两套数据源并存属预期。
 
 ## 数据转换工具
 

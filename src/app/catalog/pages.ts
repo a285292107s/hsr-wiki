@@ -8,7 +8,7 @@ import {
   lightconeIconUrl, monsterIconUrl, parseRarity,
 } from '../../lib/format';
 import {
-  loadItems, loadCharacterList, loadLightconeList, loadRelicsetList,
+  loadItems, loadLightconeList, loadRelicsetList,
   loadMonsterList, loadMazeList, loadMazeVersions,
   loadStoryList, loadBossList, loadPeakList, loadPeakVersions,
   prefetchEndgameAll, loadLocalCharacterList,

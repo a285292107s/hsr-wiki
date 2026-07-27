@@ -1,12 +1,15 @@
 /**
- * CDN API 层：全部为纯函数（显式传参，无全局状态），由 Pinia store 编排调用。
- * ⚠️ 运行时必须始终从 https://static.nanoka.cc 实时拉取（cdn-samples 仅供类型参考）
+ * API 层：全部为纯函数（显式传参，无全局状态），由 Pinia store 编排调用。
+ *
+ * 数据源为混合模式（第二期迁移进行中）：
+ * - 角色（列表/详情/配装名/遗器套装）走本地转换数据（public/data/cn，随站部署）；
+ * - 其余目录（光锥/遗器/物品/敌对/终局）与全部图片、Spine 动画仍走 CDN。
  */
 import { CDN } from '../lib/constants';
-import { CACHE_TTL, cachedFetch, cacheHas, memStore, purgeStaleVersions } from './cache';
+import { CACHE_TTL, cachedFetch, purgeStaleVersions } from './cache';
 import type {
   Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest,
-  CharListDb, LightconeListDb, RelicsetListDb, MonsterListDb, MazeListDb, MazeVersionMap,
+  LightconeListDb, RelicsetListDb, MonsterListDb, MazeListDb, MazeVersionMap,
   LocalCharList,
 } from './types';
 
@@ -24,16 +27,6 @@ export function resolveVersion(m: Manifest): string {
   return m.hsr?.latest || (m.hsr?.available || [])[0] || '';
 }
 
-/* ─── 角色数据 ─── */
-
-export function characterUrl(ver: string, charId: string): string {
-  return `${CDN}/hsr/${ver}/zh/character/${charId}.json`;
-}
-
-export function loadCharacter(ver: string, charId: string): Promise<CharacterData> {
-  return cachedFetch<CharacterData>(characterUrl(ver, charId), `char_${ver}_${charId}`, CACHE_TTL.data);
-}
-
 /* ─── 物品数据库 ─── */
 
 export function loadItems(ver: string): Promise<ItemDb> {
@@ -41,10 +34,6 @@ export function loadItems(ver: string): Promise<ItemDb> {
 }
 
 /* ─── 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
-
-export function loadCharacterList(ver: string): Promise<CharListDb> {
-  return cachedFetch<CharListDb>(`${CDN}/hsr/${ver}/character.json`, `charlist_${ver}`, CACHE_TTL.data);
-}
 
 export function loadLightconeList(ver: string): Promise<LightconeListDb> {
   return cachedFetch<LightconeListDb>(`${CDN}/hsr/${ver}/lightcone.json`, `lclist_${ver}`, CACHE_TTL.data);
@@ -96,16 +85,6 @@ export function prefetchEndgameAll(ver: string): void {
   ]);
 }
 
-/* ─── 遗器套装 ─── */
-
-export function loadRelicSet(ver: string, id: number | string): Promise<RelicSetData | null> {
-  return cachedFetch<RelicSetData>(
-    `${CDN}/hsr/${ver}/zh/relicset/${id}.json`,
-    `relicset_${ver}_${id}`,
-    CACHE_TTL.data,
-  ).catch(() => null);
-}
-
 /* ─── Spine 动画清单 ─── */
 
 export async function resolveSpineName(charId: string): Promise<string | null> {
@@ -128,85 +107,6 @@ export async function resolveSpineName(charId: string): Promise<string | null> {
 /** Spine 资源基地址（.skel / .atlas 后缀由调用方拼接） */
 export function spineBaseUrl(charId: string, name: string): string {
   return `${CDN}/assets/hsr/spine/${charId}/${name}`;
-}
-
-/* ─── 配装名称批量加载（光锥/遗器套装/队伍成员） ─── */
-
-/** 简单并发限制器：限制同 host 并发请求数（HTTP/1.1 同源 6 连接上限留余量） */
-async function pLimit<T>(
-  concurrency: number,
-  items: T[],
-  worker: (item: T, index: number) => Promise<void>,
-): Promise<void> {
-  const queue = items.slice();
-  let idx = 0;
-  const run = async (): Promise<void> => {
-    while (queue.length) {
-      const i = idx++;
-      const item = queue.shift() as T;
-      await worker(item, i);
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, run));
-}
-
-/**
- * 收集角色配装引用的名称（光锥/遗器套装/队伍成员），4 并发拉取各自 JSON 的 name 字段。
- * 返回合并后的新 NameCache（不修改入参）。失败项回退为 '#id'。
- */
-export async function loadBuildNames(
-  ver: string,
-  d: CharacterData,
-  existing: NameCache = {},
-): Promise<NameCache> {
-  const paths = new Set<string>();
-  (d.lightcones || []).forEach((id) => paths.add('lightcone/' + id));
-  if (d.relics) {
-    (d.relics.set4_id_list || []).concat(d.relics.set2_id_list || []).forEach((id) => paths.add('relicset/' + id));
-  }
-  if (d.teams) d.teams.forEach((t) => (t.member_list || []).forEach((id) => paths.add('character/' + id)));
-
-  const result: NameCache = { ...existing };
-  await pLimit(4, [...paths], async (path) => {
-    const id = path.split('/')[1];
-    if (result[id]) return; // 已有则跳过
-    try {
-      const j = await cachedFetch<{ name?: string }>(
-        `${CDN}/hsr/${ver}/zh/${path}.json`,
-        `name_${ver}_${path}`,
-        CACHE_TTL.data,
-      );
-      result[id] = j.name || '#' + id;
-    } catch {
-      result[id] = '#' + id;
-    }
-  });
-  return result;
-}
-
-/* ─── Hover 预取：列表页悬停时提前加载角色数据（火并忘） ─── */
-
-const prefetched = new Set<string>();
-
-export function prefetchCharData(ver: string, charId: string): void {
-  if (!ver || !charId || prefetched.has(charId)) return;
-  prefetched.add(charId);
-  void (async () => {
-    try {
-      const key = `char_${ver}_${charId}`;
-      if (await cacheHas(key)) return; // 内存/IDB 已有
-      // 低优先级网络预取
-      const url = characterUrl(ver, charId);
-      const opts: RequestInit & { priority?: string } = {};
-      if ('priority' in Request.prototype) opts.priority = 'low';
-      const r = await fetch(url, opts);
-      if (!r.ok) return;
-      const data = await r.json();
-      memStore(key, data, CACHE_TTL.data);
-    } catch {
-      /* 预取失败静默 */
-    }
-  })();
 }
 
 /* ─── 本地数据源（TurnBasedGameData 转换输出） ─── */
