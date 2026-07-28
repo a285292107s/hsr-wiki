@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════
    目录页 + 首页样式（移植自原 catalog/home 样式）
    - 卡片 / 搜索 / 筛选视觉延续原站风格
-   - 成就工作区与通用主题化页面样式已移至第二期重构
 ═══════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════
@@ -217,14 +216,20 @@
 .nk-item-grid { --nk-grid-min: 110px; --nk-grid-gap: 10px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); }
 .nk-item-card { --rarity-color: #94A3B8; position: relative; background: var(--card); border: 1px solid rgba(124,58,237,0.15); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 12ms), 600ms); cursor: default; }
 .nk-item-card:hover { transform: translateY(-4px) scale(1.03); border-color: color-mix(in srgb, var(--rarity-color) 40%, transparent); box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px color-mix(in srgb, var(--rarity-color) 15%, transparent); }
-.nk-item-card__img { position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; padding: 10px; background: radial-gradient(ellipse at 50% 60%, color-mix(in srgb, var(--rarity-color) 8%, transparent) 0%, transparent 70%); }
+.nk-item-card__img { position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; padding: 6px; }
 .nk-item-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.03) 70%, transparent 100%); mix-blend-mode: screen; opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
 .nk-item-card:hover .nk-item-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; }
-.nk-item-card__img img { width: 64%; height: 64%; object-fit: contain; transition: transform 0.3s var(--ease); filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
+.nk-item-card__img img { width: 72%; height: 72%; object-fit: contain; transition: transform 0.3s var(--ease); filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
 .nk-item-card:hover .nk-item-card__img img { transform: scale(1.12); }
 .nk-item-card__info { width: 100%; padding: 6px 8px 8px; text-align: center; }
 .nk-item-card__name { display: block; font-size: 0.68rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nk-item-card__meta { display: block; font-size: 0.56rem; color: var(--text3); margin-top: 2px; }
+/* 无图标占位：默认显示；有效图标加载完成后隐藏，加载失败（is-broken）时回退显示 */
+.nk-item-card__pic.is-broken { display: none; }
+.nk-item-card__noimg { width: 70%; height: 70%; display: flex; align-items: center; justify-content: center; color: color-mix(in srgb, var(--rarity-color) 60%, var(--text3)); opacity: 0.66; transition: transform 0.3s var(--ease), opacity 0.3s, color 0.3s; }
+.nk-item-card__noimg svg { width: 100%; height: 100%; }
+.nk-item-card:hover .nk-item-card__noimg { transform: scale(1.12); opacity: 1; color: color-mix(in srgb, var(--rarity-color) 75%, var(--text)); }
+.nk-item-card__pic:not(.is-broken) ~ .nk-item-card__noimg { display: none; }
 
 /* ═══════════════════════════════════════════
    终局内容赛季列表（时间线卡片设计）
@@ -434,5 +439,4 @@
 .nk-cat-card__img img, .nk-relic-card__img img, .nk-item-card__img img, .nk-mob-card__img img { background: rgba(20,20,45,0.6); }
 .nk-cat-card[data-rarity="5"] .nk-cat-card__img img { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(20,20,45,0.6)); }
 .nk-cat-card[data-rarity="4"] .nk-cat-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.08), rgba(20,20,45,0.6)); }
-.nk-item-card[data-rarity="SuperRare"] .nk-item-card__img img { background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(20,20,45,0.6)); }
 .nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.06), rgba(20,20,45,0.6)); }

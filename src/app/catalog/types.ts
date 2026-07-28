@@ -39,7 +39,7 @@ export interface CatalogPageConfig {
   title: string;
   /** 子导航标签（如终局内容的 4 个子分类） */
   subNav?: CatalogSubNavItem[];
-  /** 数据获取（所有页面统一走 CDN） */
+  /** 数据获取：角色走本地转换数据；其余目录走 CDN */
   fetchData?: (ctx: CatalogContext) => Promise<CatalogItem[]>;
   /** 数据就绪后后台预热兄弟页数据（终局 4 页互取，保证 Tab 切换即时命中 L1） */
   prefetch?: (ctx: CatalogContext) => void;

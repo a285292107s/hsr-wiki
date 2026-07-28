@@ -79,8 +79,8 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
   const gridMinHeight = ref('0px');
   const fastJump = ref(false);
 
-  let cols = 4;
-  let rowH = 200;
+  let cols: number;
+  let rowH: number;
   let lastStart = -1;
   let lastEnd = -1;
   let lastScrollTop = 0;
@@ -255,5 +255,5 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     render(true);
   }
 
-  return { cells, gridMinHeight, fastJump, start, stop, refresh, render };
+  return { cells, gridMinHeight, fastJump, start, stop, refresh };
 }

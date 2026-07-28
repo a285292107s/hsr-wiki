@@ -39,6 +39,13 @@ const ITEM_TYPE_NAMES: Record<string, string> = {
   Mission: '任务', Gameplay: '玩法',
 };
 
+/** 物品无图标时的占位图形（立方体/物资标识） */
+const ITEM_NO_ICON_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+  + '<path d="M21 8v8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.73l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/>'
+  + '<path d="M3.27 6.96 12 12.01l8.73-5.05"/>'
+  + '<path d="M12 22.08V12"/></svg>';
+
 /* ─── 角色目录 ─── */
 
 const characterPage: CatalogPageConfig = {
@@ -196,7 +203,6 @@ const lightconePage: CatalogPageConfig = {
       <div class="nk-lc-card__img">
         <img class="lc-avatar" src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
         <div class="nk-sk nk-sk--shimmer nk-lc-card__shimmer" aria-hidden="true"></div>
-        <!-- sheen-wrap：倾斜 11°（与光锥 PNG 相框倾斜角度一致）的容器，用自身 overflow:hidden 天然裁剪子元素扫光，扫光在里面运动就严格限制在相框范围内，形状/方向 100% 贴合相框，替代 clip-path 近似方案 -->
         <div class="nk-lc-card__sheen-wrap" aria-hidden="true"></div>
         ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${PATH[path] || path}"></div>` : ''}
         <div class="nk-lc-card__info">
@@ -311,9 +317,14 @@ const itemPage: CatalogPageConfig = {
     const r = ITEM_RARITY_MAP[String(item.rarity)] || ITEM_RARITY_MAP.Normal;
     const subType = String(item.subType || '');
     const typeName = ITEM_TYPE_NAMES[subType] || subType;
+    const hasIcon = Boolean(item.icon);
+    const pic = hasIcon
+      ? `<img class="nk-item-card__pic" src="${escHtml(item.icon)}" alt="${escHtml(item.name)}" loading="lazy" onerror="this.classList.add('is-broken')">`
+      : '';
     return `<div class="nk-item-card" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-sub-type="${escHtml(subType)}" style="--i:${i};--rarity-color:${r.color}">
       <div class="nk-item-card__img">
-        <img src="${escHtml(item.icon)}" alt="${escHtml(item.name)}" loading="lazy">
+        ${pic}
+        <div class="nk-item-card__noimg" aria-hidden="true">${ITEM_NO_ICON_SVG}</div>
       </div>
       <div class="nk-item-card__info">
         <span class="nk-item-card__name">${escHtml(item.name)}</span>
