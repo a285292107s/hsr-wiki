@@ -221,6 +221,8 @@ const relicPage: CatalogPageConfig = {
         set_type: reqNums.includes(4) ? '4' : '2',
       });
     }
+    // 默认按 ID 降序：新遗器（ID 大）排在前面
+    items.sort((a, b) => Number(b.id) - Number(a.id));
     return items;
   },
   filters: [

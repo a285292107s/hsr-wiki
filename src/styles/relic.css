@@ -1,8 +1,11 @@
 /* ═══════════════════════════════════════════
    遗器详情页样式
-   复用角色/光锥页设计语言（nk-hero / nk-title / nk-panel），
-   遗器专属组件：套装类型徽章 / 套装效果卡 / 主词条分组 / 副词条网格
+   复用角色/光锥页设计语言（nk-hero / nk-tabs / nk-panel），
+   遗器专属组件：套装类型徽章 / 套装效果卡 / 主词条对比表 / 副词条档位徽章
 ═══════════════════════════════════════════ */
+
+/* ─── 遗器 Tabs 模式：每个 panel 独立，首项无需顶部间距 ─── */
+.nk-panel--relic { padding-top: 4px; }
 
 /* ─── Hero 遗器变体 ─── */
 .nk-hero--relic .nk-hero__visual { min-height: 300px; }
@@ -38,16 +41,32 @@
   color: var(--text3); letter-spacing: 0.06em;
 }
 
-/* Hero 部位预览行 */
-.nk-relic-hero-pieces { display: flex; gap: 10px; flex-wrap: wrap; }
+/* Hero 部位预览：网格布局，含图标 + 部位名标签 */
+.nk-relic-hero-pieces {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 10px;
+  max-width: 480px;
+}
 .nk-relic-hero-piece {
-  width: 52px; height: 52px; border-radius: 10px;
-  background: var(--card); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  padding: 6px; transition: border-color 0.2s, transform 0.2s var(--ease);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 8px 4px 6px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  transition: border-color 0.2s, transform 0.2s var(--ease);
 }
 .nk-relic-hero-piece:hover { border-color: var(--border2); transform: translateY(-2px); }
-.nk-relic-hero-piece img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)); }
+.nk-relic-hero-piece__img {
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+}
+.nk-relic-hero-piece__img img {
+  width: 100%; height: 100%; object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+.nk-relic-hero-piece__slot {
+  font-size: 0.65rem; font-weight: 600; color: var(--text2);
+  letter-spacing: 0.04em; text-align: center; line-height: 1;
+}
 
 /* ─── 套装效果 ─── */
 .nk-relic-effects { display: flex; flex-direction: column; gap: 12px; }
@@ -66,54 +85,164 @@
 .nk-relic-effect__desc { font-size: 0.8125rem; line-height: 1.8; color: var(--text2); }
 .nk-relic-effect__desc .hl { color: var(--highlight); font-weight: 600; }
 
-/* ─── 主词条 ─── */
+/* ─── 主词条对比表 ─── */
 .nk-relic-affix-note {
-  margin: -4px 0 12px;
+  margin: 12px 0 12px;
   font-size: 0.6875rem; line-height: 1.7; color: var(--text3); letter-spacing: 0.03em;
 }
-.nk-relic-affix-groups { display: flex; flex-direction: column; gap: 12px; }
-.nk-relic-affix-group {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  padding: 12px 16px; transition: border-color 0.2s;
-}
-.nk-relic-affix-group:hover { border-color: var(--border2); }
-.nk-relic-affix-group__head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.nk-relic-affix-group__icon {
-  width: 28px; height: 28px; object-fit: contain; border-radius: 6px;
-  background: rgba(0,0,0,0.3); padding: 3px;
-}
-.nk-relic-affix-group__slot { font-size: 0.8125rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.03em; }
-.nk-relic-affix-rows { display: flex; flex-direction: column; }
-.nk-relic-affix-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 6px 0; border-bottom: 1px dashed rgba(124,58,237,0.12);
-}
-.nk-relic-affix-row:last-child { border-bottom: none; }
-.nk-relic-affix-row__name { font-size: 0.78rem; color: var(--text2); }
-.nk-relic-affix-row__val {
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
-  color: var(--text3); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;
-}
-.nk-relic-affix-row__arrow { color: var(--primary); opacity: 0.7; }
-.nk-relic-affix-row__max { color: var(--metric-val); }
 
-/* ─── 副词条网格 ─── */
-.nk-relic-subgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-.nk-relic-subcell {
-  display: flex; flex-direction: column; gap: 6px;
-  padding: 12px 14px; background: var(--card);
+/* ─── 副词条：关键指标徽章 + 简述 ─── */
+.nk-relic-submeta { margin: 12px 0 14px; }
+.nk-relic-submeta__badges {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 8px;
+}
+.nk-relic-submeta__badge {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 5px 10px;
+  background: rgba(124,58,237,0.08);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: 999px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.nk-relic-submeta__badge:hover { border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.12); }
+.nk-relic-submeta__badge--accent {
+  background: rgba(124,58,237,0.18);
+  border-color: rgba(124,58,237,0.5);
+}
+.nk-relic-submeta__badge--accent:hover {
+  background: rgba(124,58,237,0.24);
+  border-color: rgba(124,58,237,0.7);
+}
+.nk-relic-submeta__val {
+  font-family: var(--font-hud); font-size: 0.8125rem; font-weight: 700;
+  color: var(--text-bright); letter-spacing: 0.02em;
+  line-height: 1;
+}
+.nk-relic-submeta__badge--accent .nk-relic-submeta__val { color: var(--metric-val); }
+.nk-relic-submeta__lbl {
+  font-size: 0.625rem; font-weight: 600; color: var(--text3);
+  letter-spacing: 0.04em; line-height: 1;
+}
+.nk-relic-submeta__hint {
+  font-size: 0.6875rem; line-height: 1.7; color: var(--text3);
+  letter-spacing: 0.02em;
+}
+.nk-relic-affix-table-wrap {
+  position: relative;
+  overflow-x: auto;
   border: 1px solid var(--border); border-radius: 12px;
+  background: var(--card);
+  -webkit-overflow-scrolling: touch;
+}
+/* 横向滚动渐变提示：右侧淡出阴影暗示可滑动（不裁切内容） */
+.nk-relic-affix-table-wrap::after {
+  content: ''; position: absolute;
+  top: 0; right: 0; bottom: 0; width: 24px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--card) 80%);
+  border-radius: 0 12px 12px 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.nk-relic-affix-table-wrap.is-scrollable::after { opacity: 1; }
+.nk-relic-affix-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.75rem;
+}
+.nk-relic-affix-table__prop-h,
+.nk-relic-affix-table__slot-h {
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(124,58,237,0.2);
+  background: rgba(124,58,237,0.06);
+  vertical-align: middle;
+}
+.nk-relic-affix-table__prop-h {
+  position: sticky; left: 0; z-index: 2;
+  text-align: left; min-width: 72px;
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
+  color: var(--text3); letter-spacing: 0.08em;
+  background: rgba(20,20,45,0.95);
+  backdrop-filter: blur(8px);
+}
+.nk-relic-affix-table__slot-h {
+  text-align: center; min-width: 72px;
+}
+.nk-relic-affix-table__icon {
+  width: 40px; height: 40px; object-fit: contain; border-radius: 8px;
+  background: rgba(0,0,0,0.3); padding: 4px;
+  display: block; margin: 0 auto 6px;
+}
+.nk-relic-affix-table__slot-name {
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
+  color: var(--text2); letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.nk-relic-affix-table__prop {
+  position: sticky; left: 0; z-index: 1;
+  padding: 8px 10px;
+  font-size: 0.72rem; font-weight: 600; color: var(--text2);
+  background: rgba(20,20,45,0.85);
+  backdrop-filter: blur(4px);
+  border-right: 1px solid rgba(124,58,237,0.12);
+  white-space: nowrap;
+}
+.nk-relic-affix-table__cell {
+  padding: 8px 8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(124,58,237,0.08);
+  white-space: nowrap;
+}
+.nk-relic-affix-table tbody tr:last-child .nk-relic-affix-table__cell { border-bottom: none; }
+.nk-relic-affix-table tbody tr:hover .nk-relic-affix-table__cell { background: rgba(124,58,237,0.04); }
+.nk-relic-affix-table__init {
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 500;
+  color: var(--text3);
+}
+.nk-relic-affix-table__arrow {
+  color: var(--primary); opacity: 0.7;
+  margin: 0 4px;
+}
+.nk-relic-affix-table__max {
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
+  color: var(--metric-val);
+}
+.nk-relic-affix-table__empty {
+  color: var(--text3); opacity: 0.35; font-size: 0.875rem;
+}
+
+/* ─── 副词条：档位徽章网格 ─── */
+.nk-relic-subgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.nk-relic-subcell {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 10px 12px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 10px;
   transition: border-color 0.2s;
 }
 .nk-relic-subcell:hover { border-color: var(--border2); }
-.nk-relic-subcell__name { font-size: 0.75rem; font-weight: 600; color: var(--text); }
-.nk-relic-subcell__tiers { display: flex; flex-wrap: wrap; gap: 2px 8px; }
-.nk-relic-subcell__tier {
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600; color: var(--text3);
+.nk-relic-subcell__head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-.nk-relic-subcell__tier.is-top { color: var(--text-bright); }
+.nk-relic-subcell__name { font-size: 0.75rem; font-weight: 600; color: var(--text); }
 .nk-relic-subcell__max {
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700; color: var(--metric-val);
+  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700;
+  color: var(--metric-val); letter-spacing: 0.03em;
+  padding: 2px 8px; border-radius: 10px;
+  background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.25);
+  white-space: nowrap;
+}
+.nk-relic-subcell__tiers {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+}
+.nk-relic-subcell__tier {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 4px 2px;
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
+  color: var(--text3);
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.12);
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
 }
 
 /* ─── 遗器来历（部位故事） ─── */
@@ -126,13 +255,14 @@
   padding: 16px 18px; transition: border-color 0.2s;
 }
 .nk-relic-story:hover { border-color: var(--border2); }
-.nk-relic-story__head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.nk-relic-story__head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .nk-relic-story__icon {
-  width: 40px; height: 40px; object-fit: contain; border-radius: 8px;
-  background: rgba(0,0,0,0.3); padding: 4px; flex-shrink: 0;
+  width: 52px; height: 52px; object-fit: contain; border-radius: 8px;
+  background: rgba(0,0,0,0.3); padding: 5px; flex-shrink: 0;
+  border: 1px solid var(--border);
 }
 .nk-relic-story__heading { display: flex; flex-direction: column; gap: 2px; }
-.nk-relic-story__name { font-size: 0.875rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
+.nk-relic-story__name { font-size: 0.9375rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
 .nk-relic-story__slot {
   font-family: var(--font-hud); font-size: 0.6rem; font-weight: 600;
   color: var(--text3); letter-spacing: 0.12em;
@@ -152,5 +282,29 @@
 /* ─── 响应式 ─── */
 @media (max-width: 640px) {
   .nk-hero--relic .nk-hero__visual { min-height: 220px; }
-  .nk-relic-subgrid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  /* 部位预览：窄屏每行最多 3 个 */
+  .nk-relic-hero-pieces { grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); max-width: 100%; }
+  .nk-relic-hero-piece__img { width: 48px; height: 48px; }
+  /* 副词条网格：单列堆叠，便于 4 档徽章横向展开 */
+  .nk-relic-subgrid { grid-template-columns: 1fr; }
+  /* 主词条表：缩小首列，腾出空间给数值列；表头紧凑化 */
+  .nk-relic-affix-table__prop-h, .nk-relic-affix-table__prop { min-width: 56px; padding-left: 6px; padding-right: 6px; font-size: 0.625rem; }
+  .nk-relic-affix-table__slot-h { min-width: 64px; padding: 8px 4px; }
+  .nk-relic-affix-table__icon { width: 30px; height: 30px; padding: 3px; margin-bottom: 3px; }
+  .nk-relic-affix-table__slot-name { font-size: 0.625rem; letter-spacing: 0.02em; }
+  .nk-relic-affix-table__cell { padding: 6px 4px; }
+  .nk-relic-affix-table__init, .nk-relic-affix-table__max { font-size: 0.625rem; }
+  .nk-relic-affix-table__arrow { margin: 0 2px; }
+}
+
+@media (min-width: 768px) {
+  /* 平板：部位预览居中显示，避免拉伸过宽 */
+  .nk-relic-hero-pieces { max-width: 100%; }
+  /* 副词条：2 列 */
+  .nk-relic-subgrid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+  /* 桌面：副词条 3 列，提升密度 */
+  .nk-relic-subgrid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 }

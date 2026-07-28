@@ -23,6 +23,19 @@ export const useRelicStore = defineStore('relic', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
+  /** 当前激活的 Tab */
+  type RelicTab = 'effect' | 'main' | 'sub' | 'story';
+  const TABS: ReadonlyArray<{ key: RelicTab; label: string }> = [
+    { key: 'effect', label: '套装效果' },
+    { key: 'main', label: '主词条' },
+    { key: 'sub', label: '副词条' },
+    { key: 'story', label: '来历' },
+  ];
+  const activeTab = ref<RelicTab>('effect');
+  function setTab(key: string): void {
+    if (TABS.some((t) => t.key === key)) activeTab.value = key as RelicTab;
+  }
+
   /** 加载代：遗器间快速导航时防止旧数据覆盖新数据 */
   let loadGen = 0;
 
@@ -62,7 +75,8 @@ export const useRelicStore = defineStore('relic', () => {
     data.value = null;
     loading.value = false;
     error.value = null;
+    activeTab.value = 'effect';
   }
 
-  return { relicId, data, mainAffixes, subAffixes, stories, loading, error, load, reset };
+  return { relicId, data, mainAffixes, subAffixes, stories, loading, error, load, reset, TABS, activeTab, setTab };
 });

@@ -4,7 +4,7 @@
  * 结构：Hero（套装图 + 基础信息）/ 套装效果（2件/4件）/ 部位（5星部件）/ 主词条（各部位可选）/ 副词条（强化池）
  * 数据：relics.json（按 ID 查找）+ relic_main_affixes.json + relic_sub_affixes.json
  */
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useRelicStore } from '../stores/relic';
@@ -21,6 +21,19 @@ const relic = useRelicStore();
 const phase = computed<'loading' | 'error' | 'ready'>(() =>
   relic.error ? 'error' : relic.data ? 'ready' : 'loading',
 );
+/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
+const showSkeleton = ref(false);
+const SKELETON_DELAY = 150;
+let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
+watch(phase, (p) => {
+  if (p === 'loading') {
+    if (skeletonTimer !== null) clearTimeout(skeletonTimer);
+    skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
+  } else {
+    if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
+    showSkeleton.value = false;
+  }
+}, { immediate: true });
 const d = computed(() => relic.data);
 
 async function load(id: string): Promise<void> {
@@ -112,6 +125,43 @@ function mainAffixMax(a: RelicMainAffix, maxLevel: number): number {
   return a.base_value + a.level_add * maxLevel;
 }
 
+/* ─── 主词条对比表：行=属性，列=部位，单元格=初始→满值 ─── */
+
+interface MainAffixCell { piece: LocalRelicPiece; affix: RelicMainAffix | null }
+interface MainAffixRow {
+  property: string;
+  name: string;
+  cells: MainAffixCell[];
+}
+
+/** 对比表列：部位列表 */
+const mainAffixColumns = computed<LocalRelicPiece[]>(() => pieces.value);
+
+/** 对比表行：每个属性对应各部位的 affix（无则 null） */
+const mainAffixRows = computed<MainAffixRow[]>(() => {
+  const props: string[] = [];
+  const seen = new Set<string>();
+  const cellsByProp = new Map<string, Map<string, RelicMainAffix>>();
+  for (const g of pieceAffixGroups.value) {
+    for (const a of g.affixes) {
+      if (!seen.has(a.property)) {
+        seen.add(a.property);
+        props.push(a.property);
+        cellsByProp.set(a.property, new Map());
+      }
+      cellsByProp.get(a.property)!.set(String(g.piece.id), a);
+    }
+  }
+  return props.map((prop) => ({
+    property: prop,
+    name: PROP_NAMES[prop] || prop,
+    cells: mainAffixColumns.value.map((piece) => ({
+      piece,
+      affix: cellsByProp.get(prop)?.get(String(piece.id)) || null,
+    })),
+  }));
+});
+
 /* ═══════════ 副词条（强化池） ═══════════ */
 
 const subAffixList = computed<RelicSubAffix[]>(() => {
@@ -120,12 +170,15 @@ const subAffixList = computed<RelicSubAffix[]>(() => {
   return relic.subAffixes.filter((a) => a.group_id === group);
 });
 
-/** 副词条数值档位固定 4 档（base + i×step, i=0..3），与游戏内掉落档位一致 */
-const SUB_AFFIX_TIER_COUNT = 4;
+/** 副词条数值档位 = step_num + 1（BaseValue 是最高档，每档递减 step_value） */
+function subAffixTierCount(a: RelicSubAffix): number {
+  return (a.step_num ?? 0) + 1;
+}
 
-/** 单条副词条的 4 个数值档位 */
+/** 单条副词条的所有数值档位（从低到高排列） */
 function subAffixTiers(a: RelicSubAffix): number[] {
-  return Array.from({ length: SUB_AFFIX_TIER_COUNT }, (_, i) => a.base_value + a.step_value * i);
+  const count = subAffixTierCount(a);
+  return Array.from({ length: count }, (_, i) => a.base_value - a.step_value * (a.step_num - i));
 }
 
 /** 满级强化信息：+15 遗器在 +3/+6/+9/+12/+15 共 5 次强化，单条满值倍率 = 1 初始 + 5 = 6 */
@@ -135,10 +188,9 @@ const enhanceInfo = computed(() => {
   return { maxLevel, rolls, multiplier: 1 + rolls };
 });
 
-/** 单条副词条理论满值：最高档 × (1 初始 + 满级强化次数) */
+/** 单条副词条理论满值：最高档（=base_value）× (1 初始 + 满级强化次数) */
 function subAffixMax(a: RelicSubAffix): number {
-  const maxTier = a.base_value + a.step_value * (SUB_AFFIX_TIER_COUNT - 1);
-  return maxTier * enhanceInfo.value.multiplier;
+  return a.base_value * enhanceInfo.value.multiplier;
 }
 
 /* ═══════════ 遗器来历（部位故事） ═══════════ */
@@ -176,33 +228,75 @@ const pieceStories = computed<PieceStoryItem[]>(() => {
   return items;
 });
 
+/* ═══════════ 主词条表横向滚动检测 ═══════════ */
+
+/** 表格内容溢出时显示右侧渐变提示；滚到末尾移除提示 */
+const affixWrapRef = ref<HTMLElement | null>(null);
+const affixScrollable = ref(false);
+let affixRo: ResizeObserver | null = null;
+
+function checkAffixOverflow(): void {
+  const el = affixWrapRef.value;
+  if (!el) { affixScrollable.value = false; return; }
+  affixScrollable.value = el.scrollWidth > el.clientWidth + 2;
+}
+function onAffixScroll(): void {
+  const el = affixWrapRef.value;
+  if (!el) return;
+  // 滚到末尾时移除渐变提示（已无更多内容可看）
+  const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+  affixScrollable.value = !atEnd && el.scrollWidth > el.clientWidth + 2;
+}
+
+watch(
+  () => [phase.value, mainAffixRows.value.length] as const,
+  () => {
+    void nextTick(() => {
+      if (affixRo) { affixRo.disconnect(); affixRo = null; }
+      if (affixWrapRef.value) {
+        affixRo = new ResizeObserver(checkAffixOverflow);
+        affixRo.observe(affixWrapRef.value);
+      }
+      checkAffixOverflow();
+    });
+  },
+);
+
 /* ═══════════ 卸载清理 ═══════════ */
 
 onBeforeUnmount(() => {
+  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
+  if (affixRo) { affixRo.disconnect(); affixRo = null; }
   relic.reset();
 });
 </script>
 
 <template>
-  <div class="nk-page--detail">
-    <!-- ─── 加载骨架屏 ─── -->
-    <div v-if="phase === 'loading'" class="nk-skeleton nk-skeleton--relic">
+  <div class="nk-page--detail" :aria-busy="phase === 'loading'">
+    <!-- ─── 加载骨架屏（延迟显示，缓存命中不闪屏） ─── -->
+    <div
+      v-if="phase === 'loading' && showSkeleton"
+      class="nk-skeleton nk-skeleton--relic"
+      role="status"
+      aria-live="polite"
+      aria-label="遗器详情加载中"
+    >
       <div class="nk-skeleton__hero">
         <div class="nk-skeleton__hero-visual">
-          <div class="nk-sk nk-sk--shimmer" style="position:absolute;inset:0;border-radius:0;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--fill"></div>
         </div>
         <div class="nk-skeleton__hero-panel">
-          <div class="nk-sk nk-sk--shimmer" style="width:180px;height:28px;border-radius:6px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:120px;height:14px;border-radius:4px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-lg"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-md"></div>
           <div style="display:flex;gap:8px;">
-            <div class="nk-sk nk-sk--shimmer" style="width:80px;height:22px;border-radius:14px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:60px;height:22px;border-radius:14px;"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--chip nk-sk--bar-sm"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:60px;"></div>
           </div>
         </div>
       </div>
       <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--shimmer" style="width:100%;height:80px;border-radius:8px;"></div>
-        <div class="nk-sk nk-sk--shimmer" style="width:100%;height:160px;border-radius:8px;"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
       </div>
     </div>
 
@@ -245,7 +339,7 @@ onBeforeUnmount(() => {
             <div class="nk-relic-type-en">{{ setTypeEn }}</div>
           </header>
 
-          <!-- 部位预览 -->
+          <!-- 部位预览：图标 + 部位名标签，网格布局 -->
           <section v-if="pieces.length" class="nk-hero__section">
             <div class="nk-hero__section-title">
               <span class="nk-hero__section-bar"></span>
@@ -253,8 +347,16 @@ onBeforeUnmount(() => {
               <span class="nk-relic-count">{{ pieces.length }} 件</span>
             </div>
             <div class="nk-relic-hero-pieces">
-              <div v-for="p in pieces" :key="p.id" class="nk-relic-hero-piece" :title="SLOT_NAMES[p.type] || p.type">
-                <img :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" loading="lazy" @error="onPieceImgError($event, p)">
+              <div
+                v-for="p in pieces"
+                :key="p.id"
+                class="nk-relic-hero-piece"
+                :title="SLOT_NAMES[p.type] || p.type"
+              >
+                <div class="nk-relic-hero-piece__img">
+                  <img :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" loading="lazy" @error="onPieceImgError($event, p)">
+                </div>
+                <span class="nk-relic-hero-piece__slot">{{ SLOT_NAMES[p.type] || p.type }}</span>
               </div>
             </div>
           </section>
@@ -262,13 +364,30 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- 内容面板 -->
+      <div class="nk-tabs">
+        <div class="nk-tabs__bar">
+          <div class="nk-tabs__left">
+            <button
+              v-for="t in relic.TABS"
+              :key="t.key"
+              type="button"
+              :class="['nk-tab', { 'nk-tab--active': relic.activeTab === t.key }]"
+              @click="relic.setTab(t.key)"
+            >{{ t.label }}</button>
+          </div>
+        </div>
+      </div>
+
       <div class="nk-panels">
-        <div class="nk-panel nk-panel--active">
-          <!-- 套装效果 -->
+        <!-- 套装效果 -->
+        <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'effect' }]" data-panel="effect">
           <template v-if="setEffects.length">
-            <div class="nk-title">SET EFFECT</div>
             <div class="nk-relic-effects">
-              <div v-for="eff in setEffects" :key="eff.num" class="nk-relic-effect">
+              <div
+                v-for="eff in setEffects"
+                :key="eff.num"
+                class="nk-relic-effect"
+              >
                 <div class="nk-relic-effect__head">
                   <span class="nk-relic-effect__num">{{ eff.num }}件套</span>
                 </div>
@@ -276,56 +395,98 @@ onBeforeUnmount(() => {
               </div>
             </div>
           </template>
+        </div>
 
-          <!-- 主词条 -->
-          <template v-if="pieceAffixGroups.some(g => g.affixes.length)">
-            <div class="nk-title">MAIN AFFIXES</div>
-            <div class="nk-relic-affix-note">主词条初始值 → 满级（+{{ pieces[0]?.max_level || 15 }}）</div>
-            <div class="nk-relic-affix-groups">
-              <div v-for="g in pieceAffixGroups" :key="g.piece.id" class="nk-relic-affix-group">
-                <div class="nk-relic-affix-group__head">
-                  <img class="nk-relic-affix-group__icon" :src="pieceIconUrl(g.piece)" :alt="SLOT_NAMES[g.piece.type] || g.piece.type" loading="lazy" @error="onPieceImgError($event, g.piece)">
-                  <span class="nk-relic-affix-group__slot">{{ SLOT_NAMES[g.piece.type] || g.piece.type }}</span>
-                </div>
-                <div class="nk-relic-affix-rows">
-                  <div v-for="a in g.affixes" :key="a.affix_id" class="nk-relic-affix-row">
-                    <span class="nk-relic-affix-row__name">{{ PROP_NAMES[a.property] || a.property }}</span>
-                    <span class="nk-relic-affix-row__val">
-                      {{ fmtAffix(a.base_value, a.property, a.base_value) }}
-                      <span class="nk-relic-affix-row__arrow">→</span>
-                      <span class="nk-relic-affix-row__max">{{ fmtAffix(mainAffixMax(a, g.piece.max_level), a.property, a.base_value) }}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
+        <!-- 主词条 -->
+        <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'main' }]" data-panel="main">
+          <template v-if="mainAffixRows.length">
+            <div class="nk-relic-affix-note">初始 → 满级（+{{ pieces[0]?.max_level || 15 }}）</div>
+            <div
+              ref="affixWrapRef"
+              class="nk-relic-affix-table-wrap"
+              :class="{ 'is-scrollable': affixScrollable }"
+              @scroll.passive="onAffixScroll"
+            >
+              <table class="nk-relic-affix-table">
+                <thead>
+                  <tr>
+                    <th class="nk-relic-affix-table__prop-h">词条</th>
+                    <th
+                      v-for="p in mainAffixColumns"
+                      :key="p.id"
+                      class="nk-relic-affix-table__slot-h"
+                    >
+                      <img class="nk-relic-affix-table__icon" :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" loading="lazy" @error="onPieceImgError($event, p)">
+                      <span class="nk-relic-affix-table__slot-name">{{ SLOT_NAMES[p.type] || p.type }}</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in mainAffixRows" :key="row.property">
+                    <td class="nk-relic-affix-table__prop">{{ row.name }}</td>
+                    <td v-for="cell in row.cells" :key="cell.piece.id" class="nk-relic-affix-table__cell">
+                      <template v-if="cell.affix">
+                        <span class="nk-relic-affix-table__init">{{ fmtAffix(cell.affix.base_value, row.property, cell.affix.base_value) }}</span>
+                        <span class="nk-relic-affix-table__arrow">→</span>
+                        <span class="nk-relic-affix-table__max">{{ fmtAffix(mainAffixMax(cell.affix, cell.piece.max_level), row.property, cell.affix.base_value) }}</span>
+                      </template>
+                      <span v-else class="nk-relic-affix-table__empty" aria-label="该部位无此词条">—</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </template>
+        </div>
 
-          <!-- 副词条 -->
+        <!-- 副词条 -->
+        <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'sub' }]" data-panel="sub">
           <template v-if="subAffixList.length">
-            <div class="nk-title">SUB AFFIXES</div>
-            <div class="nk-relic-affix-note">
-              副词条含 {{ SUB_AFFIX_TIER_COUNT }} 个数值档位，掉落时随机取 1 档；满级 +{{ enhanceInfo.maxLevel }} 共 {{ enhanceInfo.rolls }} 次强化（+3/+6/+9/+12/+15），每次随机为 1 条累加 1 档，单条理论满值 = 最高档 × {{ enhanceInfo.multiplier }}。
+            <div class="nk-relic-submeta">
+              <div class="nk-relic-submeta__badges">
+                <span class="nk-relic-submeta__badge">
+                  <span class="nk-relic-submeta__val">{{ subAffixTierCount(subAffixList[0]) }}</span>
+                  <span class="nk-relic-submeta__lbl">数值档位</span>
+                </span>
+                <span class="nk-relic-submeta__badge">
+                  <span class="nk-relic-submeta__val">+{{ enhanceInfo.maxLevel }}</span>
+                  <span class="nk-relic-submeta__lbl">满级</span>
+                </span>
+                <span class="nk-relic-submeta__badge">
+                  <span class="nk-relic-submeta__val">{{ enhanceInfo.rolls }}</span>
+                  <span class="nk-relic-submeta__lbl">次强化</span>
+                </span>
+                <span class="nk-relic-submeta__badge nk-relic-submeta__badge--accent">
+                  <span class="nk-relic-submeta__val">×{{ enhanceInfo.multiplier }}</span>
+                  <span class="nk-relic-submeta__lbl">满值倍率</span>
+                </span>
+              </div>
+              <p class="nk-relic-submeta__hint">
+                掉落随机取 1 档；强化在 +3/+6/+9/+12/+15 随机累加 1 条 1 档，理论满值 = 最高档 × {{ enhanceInfo.multiplier }}。
+              </p>
             </div>
             <div class="nk-relic-subgrid">
               <div v-for="a in subAffixList" :key="a.affix_id" class="nk-relic-subcell">
-                <span class="nk-relic-subcell__name">{{ PROP_NAMES[a.property] || a.property }}</span>
+                <div class="nk-relic-subcell__head">
+                  <span class="nk-relic-subcell__name">{{ PROP_NAMES[a.property] || a.property }}</span>
+                  <span class="nk-relic-subcell__max">满值 {{ fmtAffix(subAffixMax(a), a.property, a.base_value) }}</span>
+                </div>
                 <div class="nk-relic-subcell__tiers">
                   <span
                     v-for="(t, i) in subAffixTiers(a)"
                     :key="i"
                     class="nk-relic-subcell__tier"
-                    :class="{ 'is-top': i === SUB_AFFIX_TIER_COUNT - 1 }"
+                    :title="`第 ${i + 1} 档`"
                   >{{ fmtAffix(t, a.property, a.base_value) }}</span>
                 </div>
-                <span class="nk-relic-subcell__max">满值 {{ fmtAffix(subAffixMax(a), a.property, a.base_value) }}</span>
               </div>
             </div>
           </template>
+        </div>
 
-          <!-- 遗器来历 -->
+        <!-- 遗器来历 -->
+        <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'story' }]" data-panel="story">
           <template v-if="pieceStories.length">
-            <div class="nk-title">STORIES</div>
             <div class="nk-relic-stories">
               <article v-for="s in pieceStories" :key="s.piece.id" class="nk-relic-story">
                 <div class="nk-relic-story__head">
