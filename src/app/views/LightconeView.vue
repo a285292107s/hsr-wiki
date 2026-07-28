@@ -4,7 +4,7 @@
  * 结构：Hero（光锥立绘 + 基础信息）/ 技能（叠影等级滑条）/ 属性（晋阶阶段）/ 故事
  * 交互：叠影 1-5 切换实时重渲染技能数值
  */
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';
@@ -21,6 +21,19 @@ const lc = useLightconeStore();
 const phase = computed<'loading' | 'error' | 'ready'>(() =>
   lc.error ? 'error' : lc.data ? 'ready' : 'loading',
 );
+/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
+const showSkeleton = ref(false);
+const SKELETON_DELAY = 150;
+let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
+watch(phase, (p) => {
+  if (p === 'loading') {
+    if (skeletonTimer !== null) clearTimeout(skeletonTimer);
+    skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
+  } else {
+    if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
+    showSkeleton.value = false;
+  }
+}, { immediate: true });
 const d = computed(() => lc.data);
 
 async function load(id: string): Promise<void> {
@@ -125,33 +138,40 @@ const storyHtml = computed(() =>
 /* ═══════════ 卸载清理 ═══════════ */
 
 onBeforeUnmount(() => {
+  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
   lc.reset();
 });
 </script>
 
 <template>
-  <div class="nk-page--detail">
-    <!-- ─── 加载骨架屏 ─── -->
-    <div v-if="phase === 'loading'" class="nk-skeleton nk-skeleton--lc">
+  <div class="nk-page--detail" :aria-busy="phase === 'loading'">
+    <!-- ─── 加载骨架屏（延迟显示，缓存命中不闪屏） ─── -->
+    <div
+      v-if="phase === 'loading' && showSkeleton"
+      class="nk-skeleton nk-skeleton--lc"
+      role="status"
+      aria-live="polite"
+      aria-label="光锥详情加载中"
+    >
       <div class="nk-skeleton__hero">
         <div class="nk-skeleton__hero-visual">
-          <div class="nk-sk nk-sk--shimmer" style="position:absolute;inset:0;border-radius:0;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--fill"></div>
         </div>
         <div class="nk-skeleton__hero-panel">
-          <div class="nk-sk nk-sk--shimmer" style="width:180px;height:28px;border-radius:6px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:120px;height:14px;border-radius:4px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-lg"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-md"></div>
           <div style="display:flex;gap:8px;">
-            <div class="nk-sk nk-sk--shimmer" style="width:64px;height:22px;border-radius:14px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:60px;height:22px;border-radius:14px;"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:64px;"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:60px;"></div>
           </div>
           <div class="nk-skeleton__stat-grid" style="margin-top:16px;">
-            <div v-for="i in 3" :key="i" class="nk-sk nk-sk--shimmer" style="height:48px;border-radius:8px;"></div>
+            <div v-for="i in 3" :key="i" class="nk-sk nk-sk--shimmer nk-sk--stat"></div>
           </div>
         </div>
       </div>
       <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--shimmer" style="width:100%;height:80px;border-radius:8px;"></div>
-        <div class="nk-sk nk-sk--shimmer" style="width:100%;height:160px;border-radius:8px;"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
       </div>
     </div>
 

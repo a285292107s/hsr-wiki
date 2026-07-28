@@ -34,6 +34,19 @@ const char = useCharacterStore();
 const phase = computed<'loading' | 'error' | 'ready'>(() =>
   char.error ? 'error' : char.data ? 'ready' : 'loading',
 );
+/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
+const showSkeleton = ref(false);
+const SKELETON_DELAY = 150;
+let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
+watch(phase, (p) => {
+  if (p === 'loading') {
+    if (skeletonTimer !== null) clearTimeout(skeletonTimer);
+    skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
+  } else {
+    if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
+    showSkeleton.value = false;
+  }
+}, { immediate: true });
 /** 渲染数据：加强模式 → 加强视图 + 重映射旧视图；原始模式 → oldD=null */
 const d = computed<CharacterData | null>(() => char.renderData.d);
 const oldD = computed<CharacterData | null>(() => char.renderData.oldD);
@@ -599,6 +612,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown);
   if (pRaf !== null) cancelAnimationFrame(pRaf);
   if (tabsRo) { tabsRo.disconnect(); tabsRo = null; }
+  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
   if (spineCleanup) {
     spineCleanup();
     spineCleanup = null;
@@ -608,54 +622,60 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="nk-page--detail">
-    <!-- ─── 加载骨架屏 ─── -->
-    <div v-if="phase === 'loading'" class="nk-skeleton nk-skeleton--char">
+  <div class="nk-page--detail" :aria-busy="phase === 'loading'">
+    <!-- ─── 加载骨架屏（延迟显示，缓存命中不闪屏） ─── -->
+    <div
+      v-if="phase === 'loading' && showSkeleton"
+      class="nk-skeleton nk-skeleton--char"
+      role="status"
+      aria-live="polite"
+      aria-label="角色详情加载中"
+    >
       <div class="nk-skeleton__hero">
         <div class="nk-skeleton__hero-visual">
-          <div class="nk-sk nk-sk--shimmer" style="position:absolute;inset:0;border-radius:0;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--fill"></div>
         </div>
         <div class="nk-skeleton__hero-panel">
-          <div class="nk-sk nk-sk--shimmer" style="width:90px;height:14px;border-radius:4px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:180px;height:28px;border-radius:6px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:120px;height:14px;border-radius:4px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:90px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-lg"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-md"></div>
           <div style="display:flex;gap:8px;">
-            <div class="nk-sk nk-sk--shimmer" style="width:64px;height:22px;border-radius:14px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:60px;height:22px;border-radius:14px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:70px;height:22px;border-radius:14px;"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:64px;"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:60px;"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:70px;"></div>
           </div>
-          <div class="nk-sk nk-sk--shimmer" style="width:100%;height:14px;border-radius:4px;margin-top:14px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:100%;height:6px;border-radius:3px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--block" style="margin-top:14px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--bar-line"></div>
           <div class="nk-skeleton__stat-grid" style="margin-top:12px;">
-            <div v-for="i in 8" :key="i" class="nk-sk nk-sk--shimmer" style="height:48px;border-radius:8px;"></div>
+            <div v-for="i in 8" :key="i" class="nk-sk nk-sk--shimmer nk-sk--stat"></div>
           </div>
         </div>
       </div>
       <div class="nk-skeleton__tabs">
         <div class="nk-skeleton__tabs-bar">
           <div class="nk-skeleton__tabs-left">
-            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
-            <div class="nk-sk nk-sk--shimmer" style="width:48px;height:14px;border-radius:4px;"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-xs"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-xs"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-xs"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-xs"></div>
           </div>
-          <div class="nk-sk nk-sk--shimmer" style="width:120px;height:28px;border-radius:8px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-md"></div>
         </div>
       </div>
       <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--shimmer" style="width:100%;height:60px;border-radius:8px;"></div>
-        <div class="nk-sk nk-sk--shimmer" style="width:100px;height:14px;border-radius:4px;"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--block-sm"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:100px;"></div>
         <div class="nk-skeleton__stat-grid">
-          <div v-for="i in 6" :key="i" class="nk-sk nk-sk--shimmer" style="width:100%;height:56px;border-radius:8px;"></div>
+          <div v-for="i in 6" :key="i" class="nk-sk nk-sk--shimmer nk-sk--block" style="height:56px;"></div>
         </div>
-        <div class="nk-sk nk-sk--shimmer" style="width:80px;height:14px;border-radius:4px;"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-sm"></div>
         <div class="nk-skeleton__ability">
-          <div class="nk-sk nk-sk--shimmer" style="width:120px;height:16px;border-radius:4px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:100%;height:36px;border-radius:6px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-md nk-sk--bar-md"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--block" style="height:36px;border-radius:6px;"></div>
         </div>
         <div class="nk-skeleton__ability">
-          <div class="nk-sk nk-sk--shimmer" style="width:100px;height:16px;border-radius:4px;"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width:100%;height:36px;border-radius:6px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-md" style="width:100px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--block" style="height:36px;border-radius:6px;"></div>
         </div>
       </div>
     </div>

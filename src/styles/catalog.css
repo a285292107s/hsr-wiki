@@ -27,6 +27,7 @@
 .nk-cat-filter-btn .arrow { display: inline-block; transition: transform 0.2s; font-size: 0.5rem; }
 .nk-cat-filter-btn.active { background: var(--primary); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 14px rgba(124,58,237,0.4); }
 .nk-cat-filter-btn.active .arrow { transform: rotate(180deg); }
+.nk-cat-filter-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* 子导航标签（终局内容分类） */
 .nk-cat-subnav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 16px 0 4px; }
@@ -57,8 +58,11 @@
 .nk-cat-chip:hover { border-color: var(--border2); color: var(--text); }
 .nk-cat-chip.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 10px rgba(124,58,237,0.2); }
 
-/* 网格 */
-.nk-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; padding-top: 16px; }
+/* 网格
+   列宽抽变量：骨架屏与真实网格共用同一 minmax，避免切换时列数突变导致 CLS */
+.nk-cat-grid,
+.nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 14px; }
+.nk-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); padding-top: 16px; }
 .nk-virtual-grid { display: block; position: relative; }
 /* 虚拟网格卡片：Observer 驱动的入场动画 */
 .nk-virtual-cell .nk-item-card,
@@ -135,7 +139,7 @@
 /* ═══════════════════════════════════════════
    光锥列表页
 ═══════════════════════════════════════════ */
-.nk-lc-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.nk-lc-grid { --nk-grid-min: 140px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
 .nk-lc-card { --holo-color: rgba(180,85,255,0.7); position: relative; isolation: isolate; background: transparent; border: 1px solid transparent; border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
 /* hover 用稀有度辉光（box-shadow）代替矩形描边，避免静止态的双层相框感 */
 .nk-lc-card:hover { transform: perspective(900px) translateY(-6px) rotateX(calc(var(--ry, 0) * 7deg)) rotateY(calc(var(--rx, 0) * 7deg)); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 18px color-mix(in srgb, var(--holo-color) 40%, transparent), 0 0 44px color-mix(in srgb, var(--holo-color) 18%, transparent); }
@@ -162,7 +166,7 @@
 /* ═══════════════════════════════════════════
    遗器列表页
 ═══════════════════════════════════════════ */
-.nk-relic-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+.nk-relic-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
 .nk-relic-card { position: relative; isolation: isolate; background: var(--card); border: 1px solid rgba(124,58,237,0.25); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
 .nk-relic-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: var(--border2); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px rgba(124,58,237,0.15); }
 .nk-relic-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, rgba(124,58,237,0.08) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 12px; }
@@ -176,7 +180,7 @@
 /* ═══════════════════════════════════════════
    物品列表页
 ═══════════════════════════════════════════ */
-.nk-item-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.nk-item-grid { --nk-grid-min: 110px; --nk-grid-gap: 10px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); }
 .nk-item-card { --rarity-color: #94A3B8; position: relative; background: var(--card); border: 1px solid rgba(124,58,237,0.15); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 12ms), 600ms); cursor: default; }
 .nk-item-card:hover { transform: translateY(-4px) scale(1.03); border-color: color-mix(in srgb, var(--rarity-color) 40%, transparent); box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px color-mix(in srgb, var(--rarity-color) 15%, transparent); }
 .nk-item-card__img { position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; padding: 10px; background: radial-gradient(ellipse at 50% 60%, color-mix(in srgb, var(--rarity-color) 8%, transparent) 0%, transparent 70%); }
@@ -261,7 +265,7 @@
 /* ═══════════════════════════════════════════
    敌对物种列表页
 ═══════════════════════════════════════════ */
-.nk-mob-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+.nk-mob-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
 .nk-mob-card { position: relative; background: var(--card); border: 1px solid rgba(244,63,94,0.2); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); transform-style: preserve-3d; }
 .nk-mob-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: rgba(244,63,94,0.4); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px rgba(244,63,94,0.12); }
 .nk-mob-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, rgba(244,63,94,0.06) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 10px; }
@@ -363,19 +367,19 @@
   #nk-catalog-app { padding-left: 16px; padding-right: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
   .nk-cat-header { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
   .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
-  /* 网格列数由统一 minmax(150px) 流式决定，不在此覆盖，避免 768px 断点列数突变（3↔6） */
-  .nk-cat-grid { gap: 10px; }
-  .nk-lc-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
-  .nk-relic-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-  .nk-item-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
-  .nk-mob-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  /* 网格列宽覆盖：仅改 --nk-grid-min，骨架屏与真实网格共用变量保持一致 */
+  .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
+  .nk-lc-grid { --nk-grid-min: 105px; }
+  .nk-relic-grid { --nk-grid-min: 100px; }
+  .nk-item-grid { --nk-grid-min: 90px; --nk-grid-gap: 8px; }
+  .nk-mob-grid { --nk-grid-min: 100px; }
   .nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   .nk-cat-search { max-width: none; min-width: 0; }
   .nk-cat-filter-group { flex-direction: column; gap: 6px; }
   .nk-home-nav__grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 374px) {
-  .nk-cat-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .nk-cat-grid, .nk-skeleton__grid { grid-template-columns: repeat(2, 1fr); --nk-grid-gap: 8px; }
   .nk-item-grid { grid-template-columns: repeat(2, 1fr); }
 }
 

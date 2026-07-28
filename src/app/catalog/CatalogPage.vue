@@ -266,6 +266,7 @@ onBeforeUnmount(() => {
   <div
     id="nk-catalog-app"
     ref="scrollerRef"
+    :aria-busy="phase === 'loading'"
     @click="onContentClick"
   >
     <!-- 错误态 -->
@@ -296,11 +297,12 @@ onBeforeUnmount(() => {
             @input="(e) => { query = (e.target as HTMLInputElement).value; onSearchInput(); }"
           >
         </div>
-        <span class="nk-cat-count">{{ filtered.length }} / {{ items.length }}</span>
+        <span class="nk-cat-count">{{ phase === 'loading' ? '—' : `${filtered.length} / ${items.length}` }}</span>
         <button
           v-if="filters.length"
           class="nk-cat-filter-btn"
           :class="{ active: filtersOpen }"
+          :disabled="phase === 'loading'"
           @click="toggleFilters"
         ><span class="arrow">▼</span> 筛选</button>
       </div>
@@ -320,11 +322,18 @@ onBeforeUnmount(() => {
         </a>
       </div>
 
-      <!-- 骨架屏：延迟显示，仅占据网格区（头部/子导航保持稳定，避免切换闪烁） -->
-      <div v-if="phase === 'loading' && showSkeleton" class="nk-skeleton nk-skeleton--catalog">
-        <div class="nk-skeleton__grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));">
-          <div v-for="i in 10" :key="i" class="nk-skeleton__card">
-            <div class="nk-sk nk-sk--shimmer" style="width:100%;aspect-ratio:3/4;border-radius:10px;"></div>
+      <!-- 骨架屏：延迟显示，仅占据网格区（头部/子导航保持稳定，避免切换闪烁）
+           复用 config.gridClass 与真实网格共用 --nk-grid-min/--nk-grid-gap，消除 CLS -->
+      <div
+        v-if="phase === 'loading' && showSkeleton"
+        class="nk-skeleton nk-skeleton--catalog"
+        role="status"
+        aria-live="polite"
+        :aria-label="`${config.title}加载中`"
+      >
+        <div class="nk-skeleton__grid" :class="config.gridClass">
+          <div v-for="i in 16" :key="i" class="nk-skeleton__card">
+            <div class="nk-sk nk-sk--shimmer nk-skeleton__card-img"></div>
           </div>
         </div>
       </div>

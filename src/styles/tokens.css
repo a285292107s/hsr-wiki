@@ -371,9 +371,25 @@ background-position: center 15%;
 /* ═══════════════════════════════════════════
    骨架屏 + Shimmer 动画
 ═══════════════════════════════════════════ */
-.nk-sk { background: rgba(124,58,237,0.08); border-radius: 6px; }
+.nk-sk { background: rgba(124,58,237,0.12); border-radius: 6px; }
 .nk-sk--shimmer { position: relative; overflow: hidden; }
-.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.06) 40%, rgba(124,58,237,0.12) 50%, rgba(124,58,237,0.06) 60%, transparent 100%); animation: nk-shimmer 1.6s ease-in-out infinite; }
+/* 骨架语义类：抽取常用尺寸，避免逐处 inline style 硬编码 */
+.nk-sk--text-sm { height: 14px; border-radius: 4px; }
+.nk-sk--text-md { height: 16px; border-radius: 4px; }
+.nk-sk--title { height: 28px; border-radius: 6px; }
+.nk-sk--chip { height: 22px; border-radius: 14px; }
+.nk-sk--stat { height: 48px; border-radius: 8px; }
+.nk-sk--block { width: 100%; border-radius: 8px; }
+.nk-sk--block-sm { width: 100%; height: 60px; border-radius: 8px; }
+.nk-sk--block-md { width: 100%; height: 80px; border-radius: 8px; }
+.nk-sk--block-lg { width: 100%; height: 160px; border-radius: 8px; }
+.nk-sk--bar-xs { width: 48px; }
+.nk-sk--bar-sm { width: 80px; }
+.nk-sk--bar-md { width: 120px; }
+.nk-sk--bar-lg { width: 180px; }
+.nk-sk--fill { position: absolute; inset: 0; border-radius: 0; }
+.nk-sk--bar-line { width: 100%; height: 6px; border-radius: 3px; }
+.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.08) 35%, rgba(180,85,255,0.18) 50%, rgba(124,58,237,0.08) 65%, transparent 100%); animation: nk-shimmer 1.4s linear infinite; }
 @keyframes nk-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 .nk-skeleton { padding: 0; }
 .nk-skeleton--char { max-width: 100%; }
@@ -398,7 +414,14 @@ background-position: center 15%;
 .nk-skeleton--catalog { padding: 0 24px 80px 88px; }
 .nk-skeleton__header { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .nk-skeleton__filters { padding: 12px 0; }
-.nk-skeleton__grid { display: grid; gap: 14px; padding-top: 16px; }
+.nk-skeleton__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min, 150px), 1fr)); gap: var(--nk-grid-gap, 14px); padding-top: 16px; }
+/* 骨架卡占位：默认 3:4（角色/光锥）；遗器/物品/敌对物种为 1:1，由 gridClass 上下文覆盖 */
+.nk-skeleton__card-img { width: 100%; aspect-ratio: 3 / 4; border-radius: 10px; }
+.nk-relic-grid .nk-skeleton__card-img,
+.nk-item-grid .nk-skeleton__card-img,
+.nk-mob-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
+/* 时间线赛季：横向占位条，匹配真实卡片形态 */
+.nk-season-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 64px; border-radius: 12px; }
 @media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
 
 /* ═══════════════════════════════════════════
