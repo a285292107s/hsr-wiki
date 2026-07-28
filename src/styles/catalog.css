@@ -123,6 +123,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .nk-cat-card:hover .nk-cat-card__img::before, .nk-cat-card:focus-visible .nk-cat-card__img::before { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); will-change: auto; }
+  .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: none; opacity: 0.12; transform: translate3d(215%,0,0); will-change: auto; }
   /* 禁用所有卡片入场动画 */
   .nk-cat-card, .nk-lc-card, .nk-relic-card, .nk-item-card, .nk-season-card, .nk-mob-card { animation: none; }
   .nk-virtual-cell .nk-item-card, .nk-virtual-cell .nk-cat-card, .nk-virtual-cell .nk-lc-card { opacity: 1; transform: none; }
@@ -139,29 +140,62 @@
 /* ═══════════════════════════════════════════
    光锥列表页
 ═══════════════════════════════════════════ */
-.nk-lc-grid { --nk-grid-min: 140px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-.nk-lc-card { --holo-color: rgba(180,85,255,0.7); position: relative; isolation: isolate; background: transparent; border: 1px solid transparent; border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
-/* hover 用稀有度辉光（box-shadow）代替矩形描边，避免静止态的双层相框感 */
-.nk-lc-card:hover { transform: perspective(900px) translateY(-6px) rotateX(calc(var(--ry, 0) * 7deg)) rotateY(calc(var(--rx, 0) * 7deg)); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 18px color-mix(in srgb, var(--holo-color) 40%, transparent), 0 0 44px color-mix(in srgb, var(--holo-color) 18%, transparent); }
-/* 稀有度配色上移至 hover：静止态去掉常驻边框，避免与图片自带框双框叠加；稀有度由 ★ 星级体现 */
-.nk-lc-card[data-rarity="5"] { --holo-color: rgba(255,215,0,0.6); }
-.nk-lc-card[data-rarity="4"] { --holo-color: rgba(192,132,252,0.6); }
-/* 图片区背景透明：让光锥图片自带的框成为卡片唯一可见边界，去掉内层矩形 */
-.nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: hidden; background: transparent; }
+.nk-lc-grid { --nk-grid-min: 150px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
+/* 静止态：完全无框。仅图片自身的倾斜玻璃相框是唯一视觉边界。overflow:visible 让 drop-shadow（基于图片 alpha 轮廓投影）不被裁剪 */
+.nk-lc-card { position: relative; background: transparent; border: 1px solid transparent; overflow: visible; cursor: pointer; text-decoration: none; display: block; transition: transform 0.25s var(--ease), filter 0.25s var(--ease), box-shadow 0.25s var(--ease); animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); }
+/* :focus-visible 键盘态：仅 3px 紫色 focus ring（无障碍 §1 规范），不加抬升/柔光，避免与图片框叠加 */
+.nk-lc-card:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(124,58,237,0.5); }
+/* Hover：仅 hover 精细设备生效。用 filter:drop-shadow() 替代 box-shadow → 阴影/光晕基于图片 alpha 轮廓（倾斜+切角形状）投影，而不是矩形 DOM 盒 → 光晕形状与图片相框完全同心同方向同切角，不会构成矩形"第二个画框" */
+@media (hover: hover) and (pointer: fine) {
+  /* drop-shadow 四层：投影+贴近轮廓高浓度贴边辉光+中层色晕+远距离柔光。贴边层 22% 浓度确保"边框发光"感，不构成矩形外框 */
+  .nk-lc-card:hover { transform: translateY(-5px) scale(1.025); filter: drop-shadow(0 14px 22px rgba(0,0,0,0.68)) drop-shadow(0 0 14px color-mix(in srgb, var(--holo-color, transparent) 32%, transparent)) drop-shadow(0 0 36px color-mix(in srgb, var(--holo-color, transparent) 22%, transparent)) drop-shadow(0 0 64px color-mix(in srgb, var(--holo-color, transparent) 10%, transparent)); }
+  .nk-lc-card:hover .nk-lc-card__img img.lc-avatar { transform: scale(1.16); }
+  .nk-lc-card:hover .nk-lc-card__badge img { transform: scale(1.1); }
+}
+/* 稀有度配色：浓度从 0.6→0.85，颜色更饱和更实，drop-shadow 光晕投射后更清晰可见；3 星默认值从透明 rgba 改为实紫红色，不再缺失 hover 光晕 */
+.nk-lc-card { --holo-color: rgba(180,85,255,0.85); }
+.nk-lc-card[data-rarity="5"] { --holo-color: rgba(255,200,0,0.92); }
+.nk-lc-card[data-rarity="4"] { --holo-color: rgba(168,85,247,0.92); }
+/* 图片区背景透明。isolation:isolate 保持 sheen-wrap::before 的 mix-blend-mode:screen 与下层隔离；overflow:visible 保证外层卡片 drop-shadow 不受裁剪（filter 在 .nk-lc-card hover 上） */
+.nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: visible; isolation: isolate; }
 /* 加载骨架：图片未就绪时显示 shimmer，加载完成后（img.loaded）淡出；不引入矩形底，避免双层相框 */
-.nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 3; border-radius: 0; transition: opacity 0.35s ease; }
+.nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 5; border-radius: 0; transition: opacity 0.35s ease; }
 .nk-lc-card__img img.loaded ~ .nk-lc-card__shimmer { opacity: 0; pointer-events: none; }
-.nk-lc-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); transform-origin: center; backface-visibility: hidden; }
-.nk-lc-card:hover .nk-lc-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
-.nk-lc-card__img img.lc-avatar { width: 100%; height: 100%; object-fit: contain; padding: 6px; transition: transform 0.4s var(--ease); }
-.nk-lc-card:hover .nk-lc-card__img img.lc-avatar { transform: scale(1.06); }
-.nk-lc-card__img::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 45%; background: linear-gradient(to top, rgba(20,20,45,0.85), transparent); pointer-events: none; }
-.nk-lc-card__badge { position: absolute; top: 6px; right: 6px; z-index: 2; }
-.nk-lc-card__badge img { width: 22px; height: 22px; border-radius: 50%; background: rgba(15,15,35,0.75); border: 1px solid var(--border); padding: 2px; transition: transform 0.3s, box-shadow 0.3s; }
-.nk-lc-card:hover .nk-lc-card__badge img { transform: scale(1.15); box-shadow: 0 0 10px var(--primary-glow); }
-.nk-lc-card__info { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 8px 10px; }
-.nk-lc-card__stars { font-size: 0.6rem; letter-spacing: 1.5px; color: var(--gold); text-shadow: 0 0 6px rgba(251,191,36,0.5); line-height: 1; }
-.nk-lc-card__name { font-size: 0.75rem; font-weight: 700; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
+/* 光锥图片 z-index:1 作为最底层，扫光（z-index:2）在图片上方掠过 → 玻璃反光效果 */
+.nk-lc-card__img img.lc-avatar { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; padding: 6px; transform: scale(1.12); transform-origin: center center; transition: transform 0.3s var(--ease); }
+/* sheen-wrap：与光锥 PNG 相框倾斜角度/大小/位置一致的倾斜裁剪容器
+   - 光锥 PNG：3:4 画布，相框白底是四角 45° 切角的倾斜矩形（占图 92-93%），内艺术图再 11° 顺时针倾斜
+   - 旋转角度：rotate(11deg) 与相框内艺术图的倾斜同向
+   - 缩放：transform 追加 scale(1.12)，与图片 img 的 scale(1.12) 同步，使容器随放大后的画面外扩、始终贴合相框边缘
+   - 尺寸与位置：inset:9% 9.5% 为缩放前的设计内收值（缩放前约占内容盒 81% 宽 / 82% 高）；overflow:hidden 负责把超出相框的扫光立刻裁掉
+   - pointer-events:none：不拦截点击
+   - z-index:2：扫光在图片(z=1)上方（玻璃反光），在徽章/信息/骨架(z=3/4)下方 */
+.nk-lc-card__sheen-wrap { position: absolute; inset: 9% 9.5%; z-index: 2; overflow: hidden; pointer-events: none; transform: rotate(11deg) scale(1.12); transform-origin: center center;
+  /* 羽化裁切边缘：扫光带沿相框矩形边被 overflow 硬裁后会在边缘形成生硬分割线；
+     用四周渐隐的 mask（两方向渐变相交）让光带在接近边线时平滑消隐，消除硬边 */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  mask-composite: intersect; }
+/* sheen-wrap::before（扫光）：扫光相对倾斜容器水平滑入滑出（不再 rotate），容器本身 rotate(11°) = 视觉上扫光沿相框倾斜长边方向滑行
+   - 宽度 46% × 高度 180%：与角色卡片扫光带宽度一致（光带厚度统一）；高度 180% 仍覆盖倾斜容器的完整对角线（≈ 220px）
+   - 入场 left:-70%：从相框左上切角外侧进入
+   - 动画终点 translate3d(430%…）：从相框右下切角外侧离开 */
+.nk-lc-card__sheen-wrap::before { content: ""; position: absolute; width: 46%; height: 180%; top: -40%; left: -70%; z-index: 1; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color, #b455ff) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color, #b455ff) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; backface-visibility: hidden; transform: translate3d(0,0,0); }
+@media (hover: hover) and (pointer: fine) {
+  .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
+}
+/* 命途徽章 z-index:4 → 不被扫光遮挡 */
+.nk-lc-card__badge { position: absolute; top: 8px; right: 8px; z-index: 4; }
+/* 徽章：背景透明无边框（hairline 0.08 在深色背景下仍能被感知成"小圆画框"），仅保留阴影确保图标在亮色区域上仍清晰 */
+.nk-lc-card__badge img { width: 22px; height: 22px; border-radius: 50%; background: transparent; border: none; padding: 2px; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); box-shadow: 0 1px 5px rgba(0,0,0,0.35); }
+.nk-lc-card__info { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 12px 11px; }
+.nk-lc-card__stars { font-size: 0.66rem; letter-spacing: 2px; color: var(--gold); text-shadow: 0 0 6px rgba(251,191,36,0.5); line-height: 1; }
+.nk-lc-card__name { font-size: 0.82rem; font-weight: 700; line-height: 1.25; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
 
 /* ═══════════════════════════════════════════
    遗器列表页
@@ -352,7 +386,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nk-lc-card:hover .nk-lc-card__img::before { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); will-change: auto; }
   .nk-home-hero__bg { transition: none; }
   .nk-home-hero__title span, .nk-home-hero__title2 span, .nk-home-hero__badge, .nk-home-hero__tagline, .nk-home-hero__scroll, .nk-home-card { animation: none; }
   .nk-home-card:hover .nk-home-card__sheen { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); will-change: auto; }
@@ -369,7 +402,7 @@
   .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
   /* 网格列宽覆盖：仅改 --nk-grid-min，骨架屏与真实网格共用变量保持一致 */
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
-  .nk-lc-grid { --nk-grid-min: 105px; }
+  .nk-lc-grid { --nk-grid-min: 150px; }
   .nk-relic-grid { --nk-grid-min: 100px; }
   .nk-item-grid { --nk-grid-min: 90px; --nk-grid-gap: 8px; }
   .nk-mob-grid { --nk-grid-min: 100px; }
@@ -398,12 +431,8 @@
 /* ═══════════════════════════════════════════
    图片懒加载占位色（基于稀有度）
 ═══════════════════════════════════════════ */
-.nk-cat-card__img img, .nk-lc-card__img img, .nk-relic-card__img img, .nk-item-card__img img, .nk-mob-card__img img { background: rgba(20,20,45,0.6); }
-.nk-cat-card[data-rarity="5"] .nk-cat-card__img img, .nk-lc-card[data-rarity="5"] .nk-lc-card__img img { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(20,20,45,0.6)); }
-.nk-cat-card[data-rarity="4"] .nk-cat-card__img img, .nk-lc-card[data-rarity="4"] .nk-lc-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.08), rgba(20,20,45,0.6)); }
-/* 光锥：图片元素背景也要透明，否则矩形底 + 图片框仍构成双层相框（仅覆盖光锥，其余卡片保留占位色） */
-.nk-lc-card__img img { background: transparent; }
-.nk-lc-card[data-rarity="5"] .nk-lc-card__img img,
-.nk-lc-card[data-rarity="4"] .nk-lc-card__img img { background: transparent; }
+.nk-cat-card__img img, .nk-relic-card__img img, .nk-item-card__img img, .nk-mob-card__img img { background: rgba(20,20,45,0.6); }
+.nk-cat-card[data-rarity="5"] .nk-cat-card__img img { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(20,20,45,0.6)); }
+.nk-cat-card[data-rarity="4"] .nk-cat-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.08), rgba(20,20,45,0.6)); }
 .nk-item-card[data-rarity="SuperRare"] .nk-item-card__img img { background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(20,20,45,0.6)); }
 .nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.06), rgba(20,20,45,0.6)); }

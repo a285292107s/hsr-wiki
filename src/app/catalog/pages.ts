@@ -153,8 +153,15 @@ const lightconePage: CatalogPageConfig = {
         rarity: info.rarity,
       });
     }
-    // 排序：id 降序（新光锥在前）
-    items.sort((a, b) => Number(b.id) - Number(a.id));
+    // 排序：id 降序（新光锥在前），黑塔商店特殊光锥（id ≥ 24000）排在尾部
+    items.sort((a, b) => {
+      const aId = Number(a.id);
+      const bId = Number(b.id);
+      const aHerta = aId >= 24000 ? 1 : 0;
+      const bHerta = bId >= 24000 ? 1 : 0;
+      if (aHerta !== bHerta) return aHerta - bHerta;
+      return bId - aId;
+    });
     return items;
   },
   buildFilters(data) {
@@ -189,6 +196,8 @@ const lightconePage: CatalogPageConfig = {
       <div class="nk-lc-card__img">
         <img class="lc-avatar" src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
         <div class="nk-sk nk-sk--shimmer nk-lc-card__shimmer" aria-hidden="true"></div>
+        <!-- sheen-wrap：倾斜 11°（与光锥 PNG 相框倾斜角度一致）的容器，用自身 overflow:hidden 天然裁剪子元素扫光，扫光在里面运动就严格限制在相框范围内，形状/方向 100% 贴合相框，替代 clip-path 近似方案 -->
+        <div class="nk-lc-card__sheen-wrap" aria-hidden="true"></div>
         ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${PATH[path] || path}"></div>` : ''}
         <div class="nk-lc-card__info">
           <span class="nk-lc-card__stars">${stars}</span>
