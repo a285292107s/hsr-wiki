@@ -211,16 +211,27 @@ const relicPage: CatalogPageConfig = {
     const items: CatalogItem[] = [];
     for (const info of list) {
       if (!info.name) continue;
+      const reqNums = Array.isArray(info.require_num) ? info.require_num : [];
       items.push({
         id: String(info.id),
         name: info.name,
         href: `/relic/${info.id}`,
         img: itemIconUrl(info.icon),
+        set_type: reqNums.includes(4) ? '4' : '2',
       });
     }
     return items;
   },
-  filters: [],
+  filters: [
+    {
+      key: 'set_type', label: '套装类型',
+      options: [
+        { val: '', label: '全部' },
+        { val: '4', label: '4件套 · 隧洞' },
+        { val: '2', label: '2件套 · 位面' },
+      ],
+    },
+  ],
   renderCard(item, i) {
     return `<a class="nk-relic-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" style="--i:${i}">
       <div class="nk-relic-card__img">

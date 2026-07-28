@@ -372,8 +372,10 @@ export interface LocalRelicEntry {
   name: string;
   icon: string;
   icon_figure: string;
-  descriptions: string[];
-  require_num: number;
+  descriptions: Record<string, string>;
+  param_list?: Record<string, number[]>;
+  /** 套装效果所需件数，如 [2,4]（隧洞遗器）或 [2]（位面饰品） */
+  require_num: number[];
   pieces: { id: number; name: string }[];
   release_version: string;
 }
