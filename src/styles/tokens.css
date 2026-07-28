@@ -48,21 +48,83 @@
   position: fixed;
   top: auto; bottom: 0; left: 0; right: 0; transform: none;
   width: 100%; height: calc(56px + env(safe-area-inset-bottom, 0px));
-  display: flex; flex-direction: row; align-items: center; justify-content: space-around;
+  display: flex; flex-direction: row; align-items: stretch;
   background: rgba(12,12,30,0.95);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border); border-radius: 0;
-  padding: 0 8px env(safe-area-inset-bottom, 0px); z-index: 100000;
+  padding: 0 4px env(safe-area-inset-bottom, 0px); z-index: 100000;
 }
 .ui-sidebar__brand { display: none; }
-.ui-sidebar-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; transition: all 0.2s; opacity: 0.6; color: var(--text2); }
+/* 全槽位触控目标：9 项在 375px 下物理上无法满足 44px 宽 + 8px 间距，
+   改用 flex:1 填满整行消除死区，高度由 align-items: stretch 撑满 56px 栏高（≥ 44px 标准） */
+.ui-sidebar-link {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  /* background/padding 显式重置：<button>（“更多”）否则继承 UA 默认 buttonface 灰底，在深色栏中看似高亮 */
+  background: transparent; padding: 0;
+  border: 1px solid transparent; border-radius: 10px;
+  color: var(--text2); opacity: 0.72;
+  transition: color 0.2s, opacity 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
 .ui-sidebar-link__icon { display: flex; }
 .ui-sidebar-link__icon svg { width: 20px; height: 20px; }
+.ui-sidebar-link__label { font-size: 10px; line-height: 1; letter-spacing: 0.01em; white-space: nowrap; }
 .ui-sidebar-link:hover { opacity: 1; background: rgba(124,58,237,0.1); }
-.ui-sidebar-link--active { opacity: 1; background: rgba(124,58,237,0.35); border: 1px solid rgba(124,58,237,0.45); box-shadow: 0 0 14px rgba(124,58,237,0.25); }
+.ui-sidebar-link:active { opacity: 1; background: rgba(124,58,237,0.18); }
+.ui-sidebar-link:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.ui-sidebar-link--active { opacity: 1; color: var(--metric-val); background: rgba(124,58,237,0.22); border-color: rgba(124,58,237,0.4); box-shadow: 0 0 12px rgba(124,58,237,0.18); }
+
+/* ─── 手机“更多”聚合：底部栏仅留 3 主项 + 更多按钮，其余 6 项收入上拉抽屉 ─── */
+/* 收纳项在底部栏隐藏（平板/桌面恢复显示） */
+.ui-sidebar-link--in-more { display: none; }
+/* 抽屉遮罩：位于底部栏上方（z 低于栏，保证栏始终可点），点遮罩关闭 */
+.ui-more {
+  position: fixed; left: 0; right: 0; top: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  z-index: 99990;
+  display: flex; align-items: flex-end;
+  background: rgba(8,8,20,0.55);
+}
+.ui-more__sheet {
+  width: 100%;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  padding: 18px 14px 22px;
+  background: rgba(16,14,36,0.94);
+  backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-top: 1px solid rgba(124,58,237,0.35);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
+}
+.ui-more__item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 6px 12px;
+  border: 1px solid rgba(124,58,237,0.14); border-radius: 12px;
+  background: rgba(124,58,237,0.05);
+  color: var(--text2);
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ui-more__item:active { background: rgba(124,58,237,0.16); }
+.ui-more__item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.ui-more__item--active { color: var(--metric-val); background: rgba(124,58,237,0.18); border-color: rgba(124,58,237,0.4); }
+.ui-more__icon { display: flex; }
+.ui-more__icon svg { width: 24px; height: 24px; }
+.ui-more__label { font-size: 0.72rem; font-weight: 600; }
+.ui-more__en { font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.12em; color: var(--text3); }
+/* 抽屉过渡 */
+.ui-more-enter-from, .ui-more-leave-to { opacity: 0; }
+.ui-more-enter-from .ui-more__sheet, .ui-more-leave-to .ui-more__sheet { transform: translateY(16px); }
+.ui-more-enter-active, .ui-more-leave-active { transition: opacity 0.18s ease; }
+.ui-more-enter-active .ui-more__sheet, .ui-more-leave-active .ui-more__sheet { transition: transform 0.18s var(--nk-ease-out); }
+@media (prefers-reduced-motion: reduce) {
+  .ui-more-enter-active, .ui-more-leave-active,
+  .ui-more-enter-active .ui-more__sheet, .ui-more-leave-active .ui-more__sheet { transition: none; }
+}
 
 /* ─── 挂载容器 ─── */
-#app { position: relative; min-height: 100vh; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+/* overflow: clip —— 页面过渡期间 translate 位移会溢出边界，不裁切会导致视口滚动条闪现→内容抖动（各页面均内部滚动，裁切安全；fixed 的侧边栏/Toast 不受影响） */
+#app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
 #app h1, #app h2, #app h3, #app p, #app dl, #app dt, #app dd { margin: 0; padding: 0; }
 #app * { box-sizing: border-box; }
 #app button { font: inherit; color: inherit; cursor: pointer; }
@@ -70,7 +132,7 @@
 #app a { color: inherit; text-decoration: none; }
 
 /* ─── 角色详情页滚动容器（CharacterView 根元素） ─── */
-.nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; transition: opacity var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out); }
+.nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; }
 
 /* 图片加载失败占位符 */
 .nk-img-error { background: rgba(124,58,237,0.06); border: 1px dashed var(--border); object-fit: contain; }
@@ -274,6 +336,11 @@ background-position: center 15%;
 .nk-view-fade-enter-active, .nk-view-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 /* 离屏页面退出文档流，避免过渡期间出现双滚动条 */
 .nk-view-fwd-leave-active, .nk-view-back-leave-active, .nk-view-fade-leave-active { position: absolute; inset: 0; }
+/* 手机断点：纯淡入淡出、无位移、更快速，消除底部导航切换闪烁 */
+@media (max-width: 767px) {
+  .nk-view-fade-enter-from, .nk-view-fade-leave-to { opacity: 0; transform: none; }
+  .nk-view-fade-enter-active, .nk-view-fade-leave-active { transition: opacity 0.12s ease; }
+}
 @media (prefers-reduced-motion: reduce) {
   .nk-view-fwd-enter-from, .nk-view-fwd-leave-to,
   .nk-view-back-enter-from, .nk-view-back-leave-to,
@@ -337,6 +404,13 @@ background-position: center 15%;
 /* ═══════════════════════════════════════════
    错误态 / 空状态
 ═══════════════════════════════════════════ */
+/* 占位页容器：与其他页面根元素保持同构（absolute + 内部滚动），避免过渡时布局模式切换跳变 */
+.nk-placeholder { position: absolute; inset: 0; overflow-y: auto; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 0 24px calc(56px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 768px) { .nk-placeholder { padding-bottom: 0; } }
+.nk-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
+.nk-empty__icon { font-size: 2.5rem; opacity: 0.8; }
+.nk-empty__title { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text2); }
+.nk-empty__sub { font-size: 0.78rem; color: var(--text3); line-height: 1.6; }
 .nk-error-state, .nk-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 80px 24px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
 .nk-error-state__icon, .nk-empty-state__icon { width: 48px; height: 48px; color: var(--text3); opacity: 0.6; }
 .nk-error-state__icon svg, .nk-empty-state__icon svg { width: 100%; height: 100%; }
@@ -361,9 +435,16 @@ background-position: center 15%;
     background: rgba(16,14,36,0.72); backdrop-filter: blur(20px) saturate(1.4);
     border: 1px solid rgba(124,58,237,0.3);
     box-shadow: 0 8px 32px rgba(0,0,0,0.55);
-    top: 50%; bottom: auto; left: 8px; transform: translateY(-50%);
+    top: 50%; bottom: auto; left: 8px; right: auto; transform: translateY(-50%);
     height: fit-content; z-index: 10000;
   }
+  /* 平板/桌面：图标式竖排，隐藏文字标签；触控目标提升至 44px（iPad 触屏标准） */
+  .ui-sidebar-link { flex: none; width: 44px; height: 44px; }
+  .ui-sidebar-link__label { display: none; }
+  /* 平板/桌面：恢复全部 9 项，隐藏“更多”入口与抽屉（含手机展开后旋屏的防御） */
+  .ui-sidebar-more { display: none; }
+  .ui-sidebar-link--in-more { display: flex; }
+  .ui-more { display: none; }
   .nk-page--detail { left: 72px; bottom: 0; }
   .nk-hero__panel { padding: 28px 36px; gap: 22px; }
   .nk-hero__name { font-size: 1.85rem; }
@@ -419,8 +500,15 @@ background-position: center 15%;
   .nk-hero__visual { aspect-ratio: auto; height: 38vh; height: 38dvh; }
   .nk-skeleton__hero-visual { aspect-ratio: auto; height: 38vh; height: 38dvh; }
 }
+/* ── 矮视口 + 平板布局（手机横屏触发 ≥768px 断点）：压缩侧边栏避免纵向裁切导致中间项不可达 ── */
+@media (min-width: 768px) and (max-height: 500px) {
+  .ui-sidebar { gap: 3px; padding: 8px 6px; }
+  .ui-sidebar-link { width: 36px; height: 36px; }
+  .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
+}
 /* ── 触屏设备（hover: none）：重置点击后粘滞的 hover 态 ── */
 @media (hover: none) {
+  .ui-sidebar-link:not(.ui-sidebar-link--active):hover { opacity: 0.72; background: transparent; }
   .nk-tab:hover { color: var(--text3); }
   .nk-tab--active:hover { color: var(--primary); }
   .nk-hero__stat:hover { border-color: rgba(124,58,237,0.12); background: rgba(20,20,45,0.5); }

@@ -10,25 +10,27 @@ export interface NavItem {
   path: string;
   /** 额外参与高亮判定的路径（如终局内容 4 路由共享一个侧栏项）；默认仅 path */
   activePaths?: string[];
+  /** 主项：手机底部栏始终展示；未标记者收纳进“更多”抽屉（平板/桌面不受影响，均展示） */
+  primary?: boolean;
   /** 内联 SVG（静态可信内容，v-html 渲染） */
   icon: string;
 }
 
 export const NAV_ITEMS: NavItem[] = [
   {
-    title: '首页', en: 'HOME', desc: '返回首页', path: '/',
+    title: '首页', en: 'HOME', desc: '返回首页', path: '/', primary: true,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>',
   },
   {
-    title: '角色', en: 'CHARACTERS', desc: '角色数值 · 行迹 · 配装', path: '/character',
+    title: '角色', en: 'CHARACTERS', desc: '角色数值 · 行迹 · 配装', path: '/character', primary: true,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-5 8-5s8 1.7 8 5"/></svg>',
   },
   {
-    title: '光锥', en: 'LIGHT CONES', desc: '光锥数值与效果图鉴', path: '/lightcone',
+    title: '光锥', en: 'LIGHT CONES', desc: '光锥数值与效果图鉴', path: '/lightcone', primary: true,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 10-7 10L5 12z"/><path d="M12 2v20"/></svg>',
   },
   {
-    title: '遗器', en: 'RELICS', desc: '遗器套装与词条', path: '/relic',
+    title: '遗器', en: 'RELICS', desc: '遗器套装与词条', path: '/relic', primary: true,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 4v6c0 4.4-3 8.4-7 10-4-1.6-7-5.6-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
   },
   {

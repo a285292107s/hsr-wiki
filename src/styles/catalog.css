@@ -7,7 +7,7 @@
 /* ═══════════════════════════════════════════
    角色列表页（完全重构）
 ═══════════════════════════════════════════ */
-#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px 88px; background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.05) 0%, transparent 60%); transition: opacity var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out); }
+#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px 88px; background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.05) 0%, transparent 60%); }
 #nk-catalog-app::-webkit-scrollbar { width: 6px; }
 #nk-catalog-app::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 #nk-catalog-app::-webkit-scrollbar-track { background: transparent; }
@@ -274,7 +274,7 @@
 /* ═══════════════════════════════════════════
    首页：沉浸式品牌门户（完全重渲染）
 ═══════════════════════════════════════════ */
-#nk-home-app { position: absolute; inset: 0; left: 0; font-family: var(--font-body); color: var(--text); background: var(--bg); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; transition: opacity var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out); }
+#nk-home-app { position: absolute; inset: 0; left: 0; font-family: var(--font-body); color: var(--text); background: var(--bg); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
 #nk-home-app h1, #nk-home-app p { margin: 0; padding: 0; }
 
@@ -336,7 +336,8 @@
 @media (max-width: 1023px) { .nk-home-nav__grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 767px) {
   .nk-home-nav__grid { grid-template-columns: 1fr; }
-  .nk-home-nav { padding: 56px 20px 32px 92px; }
+  /* 修正：左 92px 为桌面侧栏残留（移动端应左右对称）；底部需避开 56px 底部导航条 + safe-area，防止末张导航卡被遮挡 */
+  .nk-home-nav { padding: 56px 20px calc(88px + env(safe-area-inset-bottom, 0px)); }
   .nk-home-hero { padding-left: 0; }
 }
 
@@ -353,7 +354,7 @@
 ═══════════════════════════════════════════ */
 @media (max-width: 767px) {
   /* ── mobile：侧边栏降级为底部 Tab Bar，释放竖栏预留的 88px 左内边距 ── */
-  #nk-catalog-app { padding-left: 16px; padding-right: 16px; }
+  #nk-catalog-app { padding-left: 16px; padding-right: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
   .nk-cat-header { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
   .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
   /* 网格列数由统一 minmax(150px) 流式决定，不在此覆盖，避免 768px 断点列数突变（3↔6） */
