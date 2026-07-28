@@ -20,7 +20,7 @@ import {
   hasParamDiff, hasTextDiff, iconUrl, itemName, maxLevelStat, maxLevelValue,
   skillIconUrl, stripAllTags,
 } from '../../lib/format';
-import { CDN, CHAR_TABS, ELEM, MAX_CHAR_LEVEL, PATH, PROP_ICON, SKILL_ORDER, TYPE } from '../../lib/constants';
+import { CDN, CHAR_TABS, ELEM, MAX_CHAR_LEVEL, PATH, PROP_ICON, PROP_NAMES, SKILL_ORDER, SLOT_ICONS, SLOT_NAMES, TYPE } from '../../lib/constants';
 import type {
   CharacterData, RelicSetData, Skill, SkillExtra, SkillTree,
 } from '../../services/types';
@@ -500,28 +500,6 @@ const removedEidolons = computed(() => {
 });
 
 /* ═══════════ 配装面板 ═══════════ */
-
-const PROP_NAMES: Record<string, string> = {
-  CriticalDamageBase: '暴击伤害', CriticalChanceBase: '暴击率', SpeedDelta: '速度',
-  HPAddedRatio: '生命值%', AttackAddedRatio: '攻击力%', SPRatioBase: '能量恢复效率',
-  BreakDamageAddedRatio: '击破特攻', BreakDamageAddedRatioBase: '击破特攻',
-  FireAddedRatio: '火属性伤害提高',
-  PhysicalAddedRatio: '物理属性伤害提高', IceAddedRatio: '冰属性伤害提高',
-  LightningAddedRatio: '雷属性伤害提高', ThunderAddedRatio: '雷属性伤害提高',
-  WindAddedRatio: '风属性伤害提高',
-  QuantumAddedRatio: '量子属性伤害提高', ImaginaryAddedRatio: '虚数属性伤害提高',
-  HPDelta: '生命值', AttackDelta: '攻击力', DefenceDelta: '防御力',
-  DefenceAddedRatio: '防御力%', HealRatioBase: '治疗量加成',
-  EffectHitRateBase: '效果命中', EffectResistBase: '效果抵抗',
-  StatusProbabilityBase: '效果命中', StatusResistanceBase: '效果抵抗',
-  ElationDamageAddedRatioBase: '欢愉伤害提高',
-};
-const SLOT_ICONS: Record<string, string> = {
-  BODY: 'IconRelicBody', FOOT: 'IconRelicFoot', NECK: 'IconRelicNeck', OBJECT: 'IconRelicGoods',
-};
-const SLOT_NAMES: Record<string, string> = {
-  HEAD: '头部', HAND: '手部', BODY: '躯干', FOOT: '脚部', NECK: '位面球', OBJECT: '连结绳',
-};
 
 const cones = computed(() =>
   ((d.value && d.value.lightcones) || []).map((id, i) => ({

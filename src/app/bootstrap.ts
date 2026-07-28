@@ -6,6 +6,7 @@ import '../styles/tokens.css';
 import '../styles/character.css';
 import '../styles/catalog.css';
 import '../styles/lightcone.css';
+import '../styles/relic.css';
 
 export async function bootstrap(): Promise<void> {
   const app = createApp(App);

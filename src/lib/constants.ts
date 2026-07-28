@@ -79,3 +79,37 @@ export const SKILL_ORDER: (string | null)[] = ['Normal', 'BPSkill', 'Ultra', 'Pa
 
 /** 角色详情页 Tab */
 export const CHAR_TABS = ['overview', 'skills', 'eidolons', 'builds'] as const;
+
+/* ─── 遗器属性 / 部位映射（角色配装与遗器详情页共用） ─── */
+
+/** 属性类型 → 中文名（遗器主副词条 / 行迹加成共用） */
+export const PROP_NAMES: Record<string, string> = {
+  CriticalDamageBase: '暴击伤害', CriticalChanceBase: '暴击率', SpeedDelta: '速度',
+  HPAddedRatio: '生命值%', AttackAddedRatio: '攻击力%', SPRatioBase: '能量恢复效率',
+  BreakDamageAddedRatio: '击破特攻', BreakDamageAddedRatioBase: '击破特攻',
+  FireAddedRatio: '火属性伤害提高',
+  PhysicalAddedRatio: '物理属性伤害提高', IceAddedRatio: '冰属性伤害提高',
+  LightningAddedRatio: '雷属性伤害提高', ThunderAddedRatio: '雷属性伤害提高',
+  WindAddedRatio: '风属性伤害提高',
+  QuantumAddedRatio: '量子属性伤害提高', ImaginaryAddedRatio: '虚数属性伤害提高',
+  HPDelta: '生命值', AttackDelta: '攻击力', DefenceDelta: '防御力',
+  DefenceAddedRatio: '防御力%', HealRatioBase: '治疗量加成',
+  EffectHitRateBase: '效果命中', EffectResistBase: '效果抵抗',
+  StatusProbabilityBase: '效果命中', StatusResistanceBase: '效果抵抗',
+  ElationDamageAddedRatioBase: '欢愉伤害提高',
+};
+
+/** 部位 → 遗器部位图标键（CDN: relicfigures/{key}.webp；HEAD/HAND 无独立图标） */
+export const SLOT_ICONS: Record<string, string> = {
+  BODY: 'IconRelicBody', FOOT: 'IconRelicFoot', NECK: 'IconRelicNeck', OBJECT: 'IconRelicGoods',
+};
+
+/** 部位 → 中文名 */
+export const SLOT_NAMES: Record<string, string> = {
+  HEAD: '头部', HAND: '手部', BODY: '躯干', FOOT: '脚部', NECK: '位面球', OBJECT: '连结绳',
+};
+
+/** 部位 → 图标索引（CDN: relicfigures/IconRelic_{setId}_{index}.webp） */
+export const SLOT_INDEX: Record<string, number> = {
+  HEAD: 1, HAND: 2, BODY: 3, FOOT: 4, NECK: 5, OBJECT: 6,
+};

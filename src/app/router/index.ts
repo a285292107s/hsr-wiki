@@ -51,6 +51,12 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, catalog: 'relic' },
   },
   {
+    path: '/relic/:id(\\d+)',
+    name: 'relic',
+    component: () => import('../views/RelicView.vue'),
+    meta: { depth: 3 },
+  },
+  {
     path: '/item',
     name: 'catalog-item',
     component: () => import('../views/CatalogView.vue'),

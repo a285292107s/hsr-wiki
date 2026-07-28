@@ -4,7 +4,7 @@
  * 结构：Hero（光锥立绘 + 基础信息）/ 技能（叠影等级滑条）/ 属性（晋阶阶段）/ 故事
  * 交互：叠影 1-5 切换实时重渲染技能数值
  */
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';

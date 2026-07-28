@@ -189,6 +189,11 @@ function onContentClick(e: MouseEvent): void {
     void router.push(`/lightcone/${lc[1]}`);
     return;
   }
+  const relic = href.match(/\/relic\/(\d+)/);
+  if (relic) {
+    void router.push(`/relic/${relic[1]}`);
+    return;
+  }
   // 未迁移的详情页：静默忽略
 }
 

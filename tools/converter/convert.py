@@ -56,6 +56,7 @@ def main() -> None:
     # 5. 遗器数据
     logger.info("--- 遗器数据 ---")
     relics.convert()
+    relics.convert_stories()
     relic_affixes.convert()
 
     # 6. 敌对物种数据

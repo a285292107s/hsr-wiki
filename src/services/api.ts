@@ -12,7 +12,7 @@ import type {
   Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest,
   MazeListDb, LocalCharList,
   LocalItemList, LocalLightConeList, LocalRelicList, LocalMonsterList,
-  LightConeDetail,
+  LightConeDetail, LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
 } from './types';
 
 /* ─── manifest ─── */
@@ -149,6 +149,29 @@ export async function loadLocalLightConeDetail(id: string): Promise<LightConeDet
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
   return res.json();
+}
+
+/** 从本地 relics.json 加载单个遗器套装详情（按 ID 查找） */
+export async function loadLocalRelicDetail(id: string): Promise<LocalRelicEntry> {
+  const list = await loadLocalRelicSets();
+  const item = list.find((r) => String(r.id) === String(id));
+  if (!item) throw new Error(`遗器套装不存在: ${id}`);
+  return item;
+}
+
+/** 遗器主词条表（relic_main_affixes.json） */
+export function loadLocalRelicMainAffixes(): Promise<RelicMainAffixList> {
+  return fetchJson<RelicMainAffixList>(`${LOCAL_DATA_BASE}/relic_main_affixes.json`);
+}
+
+/** 遗器副词条表（relic_sub_affixes.json） */
+export function loadLocalRelicSubAffixes(): Promise<RelicSubAffixList> {
+  return fetchJson<RelicSubAffixList>(`${LOCAL_DATA_BASE}/relic_sub_affixes.json`);
+}
+
+/** 遗器来历表（relic_stories.json，set_id → 部位类型 → 故事） */
+export function loadLocalRelicStories(): Promise<RelicStoriesMap> {
+  return fetchJson<RelicStoriesMap>(`${LOCAL_DATA_BASE}/relic_stories.json`);
 }
 
 /**

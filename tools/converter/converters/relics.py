@@ -89,3 +89,30 @@ def convert() -> None:
     # 按 id 排序输出为列表
     sorted_result = [result[k] for k in sorted(result.keys(), key=int)]
     save_json(sorted_result, OUTPUT_DIR / "relics.json")
+
+
+def convert_stories() -> None:
+    """转换 RelicDataInfo.json → relic_stories.json（遗器来历/部位故事）。
+
+    每个部位含：name（部位名）/ desc（短描述）/ story（完整来历，保留 \\n 与 <i> 标签）。
+    输出结构：{ set_id: { piece_type: { name, desc, story } } }，仅详情页按需加载。
+    """
+    info_data = load_json(EXCEL_DIR / "RelicDataInfo.json")
+
+    result: dict[str, dict[str, dict]] = {}
+    for item in info_data:
+        set_id = item.get("SetID", 0)
+        piece_type = item.get("Type", "")
+        story = resolve_text(item.get("BGStoryContent", ""), clean=False)
+        # 无来历文本的部位不输出（避免空块）
+        if not story:
+            continue
+        result.setdefault(str(set_id), {})[piece_type] = {
+            "name": resolve_text(item.get("RelicName", "")),
+            "desc": resolve_text(item.get("ItemBGDesc", ""), clean=False),
+            "story": story,
+        }
+
+    # 按 set_id 排序输出
+    sorted_result = {k: result[k] for k in sorted(result.keys(), key=int)}
+    save_json(sorted_result, OUTPUT_DIR / "relic_stories.json")

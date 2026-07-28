@@ -58,7 +58,7 @@ const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><c
       :key="item.path"
       :to="item.path"
       :title="`${item.title} · ${item.en}`"
-      :aria-current="isActive(item) ? 'page' : null"
+      :aria-current="isActive(item) ? 'page' : undefined"
       :class="[
         'ui-sidebar-link',
         { 'ui-sidebar-link--active': isActive(item), 'ui-sidebar-link--in-more': !item.primary },
