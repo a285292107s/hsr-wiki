@@ -33,11 +33,52 @@ const ITEM_RARITY_MAP: Record<string, { stars: number; label: string; color: str
   Normal: { stars: 1, label: '1★', color: '#94A3B8' },
 };
 
+/** 物品 sub_type → 中文名（覆盖数据中出现的所有子类型，避免卡片回退成英文） */
 const ITEM_TYPE_NAMES: Record<string, string> = {
-  Material: '材料', Virtual: '货币', AvatarExp: '经验', EquipmentExp: '光锥经验',
-  RelicExp: '遗器经验', Gift: '礼物', Food: '食物', Book: '书籍',
-  Mission: '任务', Gameplay: '玩法',
+  // Material 主类型
+  Material: '材料',
+  ComposeMaterial: '合成素材',
+  CommonMonsterDrop: '怪物掉落',
+  WeeklyMonsterDrop: '周本掉落',
+  TracePath: '行迹素材',
+  AvatarRank: '星魂素材',
+  AvatarExp: '角色经验',
+  EquipmentExp: '光锥经验',
+  RelicExp: '遗器经验',
+  PlanetFesItem: '星穹电影节道具',
+  MuseumStuff: '博物馆藏品',
+  MuseumExhibit: '博物馆展件',
+  AetherSkill: '以太战线·技能',
+  AetherSpirit: '以太战线·精灵',
+  ElfRestaurantItem: '精灵餐厅道具',
+  HipplenOutfit: '希儿朋服装',
+  FightFestSkill: '角斗大会技能',
+  DiceCombatDice: '模拟宇宙·战斗骰',
+  DiceCombatAvatar: '模拟宇宙·命途骰',
+  IdleLiveItem: '摸鱼道具',
+  MatchThreeV2: '三消道具',
+  PixAirMaterial: '像素飞机道具',
+  // Virtual 主类型
+  Virtual: '货币',
+  // Usable 主类型
+  Book: '书籍',
+  Food: '食物',
+  Gift: '礼物',
+  Formula: '配方',
+  TravelBrochurePaster: '旅行手帐贴纸',
+  ChessRogueDiceSurface: '诡弈骰子面',
+  ForceOpitonalGift: '剧情赠礼',
+  RogueMedal: '模拟宇宙勋章',
+  FindChest: '寻宝道具',
+  // Mission 主类型
+  Mission: '任务道具',
 };
+
+/** 类型筛选的优先展示顺序（其余按字母序排在后面） */
+const ITEM_TYPE_PREFERRED = [
+  'Material', 'Virtual', 'Food', 'Book', 'Gift', 'Mission',
+  'AvatarExp', 'EquipmentExp', 'RelicExp', 'Formula',
+];
 
 /** 物品无图标时的占位图形（立方体/物资标识） */
 const ITEM_NO_ICON_SVG =
@@ -289,30 +330,45 @@ const itemPage: CatalogPageConfig = {
     items.sort((a, b) => (rarityOrder[String(a.rarity)] ?? 5) - (rarityOrder[String(b.rarity)] ?? 5));
     return items;
   },
-  filters: [
-    {
-      key: 'rarity', label: '稀有度',
-      options: [
-        { val: '', label: '全部' },
-        { val: 'SuperRare', label: '5★' },
-        { val: 'VeryRare', label: '4★' },
-        { val: 'Rare', label: '3★' },
-        { val: 'NotNormal', label: '2★' },
-      ],
-    },
-    {
-      key: 'subType', label: '类型',
-      options: [
-        { val: '', label: '全部' },
-        { val: 'Material', label: '材料' },
-        { val: 'Virtual', label: '货币' },
-        { val: 'AvatarExp', label: '经验' },
-        { val: 'EquipmentExp', label: '光锥经验' },
-        { val: 'Gift', label: '礼物' },
-        { val: 'Food', label: '食物' },
-      ],
-    },
-  ],
+  buildFilters(data) {
+    // 动态从数据汇总所有 sub_type，保证筛选选项始终完整（新增类型自动出现）
+    const seen = new Set<string>();
+    const subTypes: string[] = [];
+    for (const item of data) {
+      const st = String(item.subType || '');
+      if (st && !seen.has(st)) {
+        seen.add(st);
+        subTypes.push(st);
+      }
+    }
+    subTypes.sort((a, b) => {
+      const ia = ITEM_TYPE_PREFERRED.indexOf(a);
+      const ib = ITEM_TYPE_PREFERRED.indexOf(b);
+      if (ia !== -1 || ib !== -1) {
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      }
+      return a.localeCompare(b);
+    });
+    const subTypeOptions = [
+      { val: '', label: '全部' },
+      ...subTypes.map((st) => ({ val: st, label: ITEM_TYPE_NAMES[st] || st })),
+    ];
+    return [
+      {
+        key: 'rarity', label: '稀有度',
+        options: [
+          { val: '', label: '全部' },
+          { val: 'SuperRare', label: '5★' },
+          { val: 'VeryRare', label: '4★' },
+          { val: 'Rare', label: '3★' },
+          { val: 'NotNormal', label: '2★' },
+        ],
+      },
+      { key: 'subType', label: '类型', options: subTypeOptions },
+    ];
+  },
   renderCard(item, i) {
     const r = ITEM_RARITY_MAP[String(item.rarity)] || ITEM_RARITY_MAP.Normal;
     const subType = String(item.subType || '');
