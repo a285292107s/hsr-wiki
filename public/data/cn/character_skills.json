@@ -50,7 +50,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1001/SkillIcon_1001_Normal.png",
     "max_level": 1
   },
@@ -116,7 +116,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1002/SkillIcon_1002_Normal.png",
     "max_level": 1
   },
@@ -182,7 +182,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1003/SkillIcon_1003_Normal.png",
     "max_level": 1
   },
@@ -248,7 +248,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1004/SkillIcon_1004_Normal.png",
     "max_level": 1
   },
@@ -314,7 +314,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1005/SkillIcon_1005_Normal.png",
     "max_level": 1
   },
@@ -380,7 +380,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1006/SkillIcon_1006_Normal.png",
     "max_level": 1
   },
@@ -446,7 +446,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1008/SkillIcon_1008_Normal.png",
     "max_level": 1
   },
@@ -512,7 +512,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1009/SkillIcon_1009_Normal.png",
     "max_level": 1
   },
@@ -578,7 +578,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1013/SkillIcon_1013_Normal.png",
     "max_level": 1
   },
@@ -644,7 +644,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1101/SkillIcon_1101_Normal.png",
     "max_level": 1
   },
@@ -710,7 +710,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1102/SkillIcon_1102_Normal.png",
     "max_level": 1
   },
@@ -776,7 +776,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1103/SkillIcon_1103_Normal.png",
     "max_level": 1
   },
@@ -842,7 +842,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1104/SkillIcon_1104_Normal.png",
     "max_level": 1
   },
@@ -908,7 +908,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1105/SkillIcon_1105_Normal.png",
     "max_level": 1
   },
@@ -974,7 +974,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1106/SkillIcon_1106_Normal.png",
     "max_level": 1
   },
@@ -1040,7 +1040,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1107/SkillIcon_1107_Normal.png",
     "max_level": 1
   },
@@ -1106,7 +1106,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1108/SkillIcon_1108_Normal.png",
     "max_level": 1
   },
@@ -1172,7 +1172,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1109/SkillIcon_1109_Normal.png",
     "max_level": 1
   },
@@ -1249,7 +1249,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1110/SkillIcon_1110_Normal.png",
     "max_level": 1
   },
@@ -1315,7 +1315,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1111/SkillIcon_1111_Normal.png",
     "max_level": 1
   },
@@ -1392,7 +1392,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1112/SkillIcon_1112_Normal.png",
     "max_level": 1
   },
@@ -1458,7 +1458,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1201/SkillIcon_1201_Normal.png",
     "max_level": 1
   },
@@ -1535,7 +1535,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1202/SkillIcon_1202_Normal.png",
     "max_level": 1
   },
@@ -1601,7 +1601,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1203/SkillIcon_1203_Normal.png",
     "max_level": 1
   },
@@ -1667,7 +1667,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1204/SkillIcon_1204_Normal.png",
     "max_level": 1
   },
@@ -1733,7 +1733,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1205/SkillIcon_1205_Normal.png",
     "max_level": 1
   },
@@ -1810,7 +1810,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1206/SkillIcon_1206_Normal.png",
     "max_level": 1
   },
@@ -1876,7 +1876,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1207/SkillIcon_1207_Normal.png",
     "max_level": 1
   },
@@ -1942,7 +1942,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1208/SkillIcon_1208_Normal.png",
     "max_level": 1
   },
@@ -2008,7 +2008,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1209/SkillIcon_1209_Normal.png",
     "max_level": 1
   },
@@ -2074,7 +2074,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1210/SkillIcon_1210_Normal.png",
     "max_level": 1
   },
@@ -2140,7 +2140,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1211/SkillIcon_1211_Normal.png",
     "max_level": 1
   },
@@ -2206,7 +2206,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1212/SkillIcon_1212_Normal.png",
     "max_level": 1
   },
@@ -2283,7 +2283,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1213/SkillIcon_1213_Normal.png",
     "max_level": 1
   },
@@ -2316,7 +2316,7 @@
     "type": "BPSkill",
     "type_name": "战技",
     "desc": "取消强化。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Com/SkillIcon_CommonReturn.png",
     "max_level": 1
   },
@@ -2393,7 +2393,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1214/SkillIcon_1214_Normal.png",
     "max_level": 1
   },
@@ -2459,7 +2459,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1215/SkillIcon_1215_Normal.png",
     "max_level": 1
   },
@@ -2525,7 +2525,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1217/SkillIcon_1217_Normal.png",
     "max_level": 1
   },
@@ -2591,7 +2591,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1218/SkillIcon_1218_Normal.png",
     "max_level": 1
   },
@@ -2657,7 +2657,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1220/SkillIcon_1220_Normal.png",
     "max_level": 1
   },
@@ -2700,7 +2700,7 @@
     "tag": "单攻",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "终结技期间可无视弱点属性削减敌方韧性，目标未被击破时飞霄弱点击破效率提高。\\n对敌方单体发动#3[i]次【闪裂刃舞】或【钺贯天冲】，最后造成风属性伤害。",
     "icon": "icon/skill/Avatar/1220/SkillIcon_1220_Ultra.png",
     "max_level": 15
@@ -2756,7 +2756,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1221/SkillIcon_1221_Normal.png",
     "max_level": 1
   },
@@ -2822,7 +2822,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1222/SkillIcon_1222_Normal.png",
     "max_level": 1
   },
@@ -2888,7 +2888,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1223/SkillIcon_1223_Normal.png",
     "max_level": 1
   },
@@ -2954,7 +2954,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1224/SkillIcon_1224_Normal.png",
     "max_level": 1
   },
@@ -3031,7 +3031,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1225/SkillIcon_1225_Normal.png",
     "max_level": 1
   },
@@ -3108,7 +3108,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1301/SkillIcon_1301_Normal.png",
     "max_level": 1
   },
@@ -3185,7 +3185,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1302/SkillIcon_1302_Normal.png",
     "max_level": 1
   },
@@ -3262,7 +3262,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1303/SkillIcon_1303_Normal.png",
     "max_level": 1
   },
@@ -3328,7 +3328,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1304/SkillIcon_1304_Normal.png",
     "max_level": 1
   },
@@ -3394,7 +3394,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1305/SkillIcon_1305_Normal.png",
     "max_level": 1
   },
@@ -3460,7 +3460,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1306/SkillIcon_1306_Normal.png",
     "max_level": 1
   },
@@ -3526,7 +3526,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1307/SkillIcon_1307_Normal.png",
     "max_level": 1
   },
@@ -3592,7 +3592,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1308/SkillIcon_1308_Normal.png",
     "max_level": 1
   },
@@ -3613,7 +3613,7 @@
     "tag": "群攻",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对敌方单体造成少量雷属性伤害，并消去目标最多3层【集真赤】。消去【集真赤】时，对敌方全体造成1次少量雷属性伤害，每消去1层【集真赤】本次伤害倍率提高。",
     "icon": "icon/skill/Avatar/1308/SkillIcon_1308_Ultra.png",
     "max_level": 15
@@ -3624,7 +3624,7 @@
     "tag": "群攻",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对敌方单体造成少量雷属性伤害，并消去目标最多3层【集真赤】。消去【集真赤】时，对敌方全体造成1次少量雷属性伤害，每消去1层【集真赤】本次伤害倍率提高。",
     "icon": "icon/skill/Avatar/1308/SkillIcon_1308_Ultra.png",
     "max_level": 15
@@ -3635,7 +3635,7 @@
     "tag": "群攻",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对敌方单体造成少量雷属性伤害，并消去目标最多3层【集真赤】。消去【集真赤】时，对敌方全体造成1次少量雷属性伤害，每消去1层【集真赤】本次伤害倍率提高。",
     "icon": "icon/skill/Avatar/1308/SkillIcon_1308_Ultra.png",
     "max_level": 15
@@ -3646,7 +3646,7 @@
     "tag": "群攻",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对敌方全体造成雷属性伤害并移除所有【集真赤】。",
     "icon": "icon/skill/Avatar/1308/SkillIcon_1308_Ultra.png",
     "max_level": 15
@@ -3702,7 +3702,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1309/SkillIcon_1309_Normal.png",
     "max_level": 1
   },
@@ -3768,7 +3768,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1310/SkillIcon_1310_Normal02.png",
     "max_level": 1
   },
@@ -3856,7 +3856,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1312/SkillIcon_1312_Normal.png",
     "max_level": 1
   },
@@ -3922,7 +3922,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1313/SkillIcon_1313_Normal.png",
     "max_level": 1
   },
@@ -3988,7 +3988,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1314/SkillIcon_1314_Normal.png",
     "max_level": 1
   },
@@ -4054,7 +4054,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1315/SkillIcon_1315_MazeNormal.png",
     "max_level": 1
   },
@@ -4131,7 +4131,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1317/SkillIcon_1317_Normal.png",
     "max_level": 1
   },
@@ -4152,7 +4152,7 @@
     "tag": "扩散",
     "type": "Normal",
     "type_name": "普攻",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对指定敌方单体造成少量虚数属性伤害，并对其相邻目标造成少量虚数属性伤害。攻击没有虚数弱点的敌人也可以削减韧性。",
     "icon": "icon/skill/Avatar/1317/SkillIcon_1317_Normal02.png",
     "max_level": 10
@@ -4163,7 +4163,7 @@
     "tag": "扩散",
     "type": "Normal",
     "type_name": "普攻",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对指定敌方单体造成少量虚数属性伤害，并对其相邻目标造成少量虚数属性伤害。攻击没有虚数弱点的敌人也可以削减韧性。",
     "icon": "icon/skill/Avatar/1317/SkillIcon_1317_Normal02.png",
     "max_level": 10
@@ -4174,7 +4174,7 @@
     "tag": "群攻",
     "type": "Normal",
     "type_name": "普攻",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对敌方全体造成少量虚数属性伤害。攻击没有虚数弱点的敌人也可以削减韧性。",
     "icon": "icon/skill/Avatar/1317/SkillIcon_1317_Normal02.png",
     "max_level": 10
@@ -4185,7 +4185,7 @@
     "tag": "扩散",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "",
     "icon": "icon/skill/Avatar/1317/SkillIcon_1317_Ultra.png",
     "max_level": 15
@@ -4196,7 +4196,7 @@
     "tag": "扩散",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "",
     "icon": "icon/skill/Avatar/1317/SkillIcon_1317_Ultra.png",
     "max_level": 15
@@ -4207,7 +4207,7 @@
     "tag": "群攻",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "",
     "icon": "icon/skill/Avatar/1317/SkillIcon_1317_Ultra.png",
     "max_level": 15
@@ -4218,8 +4218,8 @@
     "tag": "扩散",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
-    "simple_desc": "{}",
+    "desc": "",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1317/SkillIcon_1317_Ultra.png",
     "max_level": 15
   },
@@ -4285,7 +4285,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1321/SkillIcon_1321_Normal.png",
     "max_level": 1
   },
@@ -4351,7 +4351,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1401/SkillIcon_1401_Normal.png",
     "max_level": 1
   },
@@ -4428,7 +4428,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1402/SkillIcon_1402_Normal.png",
     "max_level": 1
   },
@@ -4460,7 +4460,7 @@
     "tag": "回复",
     "type": "BPSkill",
     "type_name": "战技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "为衣匠回复生命值。衣匠不在场时，召唤忆灵衣匠并使自身立即行动。",
     "icon": "icon/skill/Avatar/1402/SkillIcon_1402_BP.png",
     "max_level": 15
@@ -4516,7 +4516,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1403/SkillIcon_1403_Normal.png",
     "max_level": 1
   },
@@ -4582,7 +4582,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1404/SkillIcon_1404_Normal.png",
     "max_level": 1
   },
@@ -4670,7 +4670,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1405/SkillIcon_1405_Normal.png",
     "max_level": 1
   },
@@ -4736,7 +4736,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1406/SkillIcon_1406_Normal.png",
     "max_level": 1
   },
@@ -4802,7 +4802,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1407/SkillIcon_1407_Normal.png",
     "max_level": 1
   },
@@ -4890,7 +4890,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1408/SkillIcon_1408_Normal.png",
     "max_level": 1
   },
@@ -4989,7 +4989,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1409/SkillIcon_1409_Normal.png",
     "max_level": 1
   },
@@ -5055,7 +5055,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1410/SkillIcon_1410_Normal.png",
     "max_level": 1
   },
@@ -5121,7 +5121,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1412/SkillIcon_1412_Maze02.png",
     "max_level": 1
   },
@@ -5187,7 +5187,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1413/SkillIcon_1413_Normal.png",
     "max_level": 1
   },
@@ -5208,7 +5208,7 @@
     "tag": "辅助",
     "type": "BPSkill",
     "type_name": "战技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "消耗自身生命值召唤忆灵「长夜」，并使我方全体忆灵的暴击伤害提高。若忆灵「长夜」已在场，为其回复生命值。施放时，获得#3[i]点【忆质】，若处于【至暗之谜】状态，额外获得#5[i]点【忆质】。",
     "icon": "icon/skill/Avatar/1413/SkillIcon_1413_BP.png",
     "max_level": 15
@@ -5264,7 +5264,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1414/SkillIcon_1414_Normal.png",
     "max_level": 1
   },
@@ -5330,7 +5330,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1415/SkillIcon_1415_Normal.png",
     "max_level": 1
   },
@@ -5374,7 +5374,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1415/SkillIcon_1415_Normal.png",
     "max_level": 1
   },
@@ -5429,7 +5429,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1501/SkillIcon_1501_Normal.png",
     "max_level": 1
   },
@@ -5472,8 +5472,8 @@
     "tag": "扩散",
     "type": "Normal",
     "type_name": "普攻",
-    "desc": "{}",
-    "simple_desc": "{}",
+    "desc": "",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1501/SkillIcon_1501_Normal02.png",
     "max_level": 10
   },
@@ -5539,7 +5539,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1502/SkillIcon_1502_Normal.png",
     "max_level": 1
   },
@@ -5616,7 +5616,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1504/SkillIcon_1504_Normal.png",
     "max_level": 1
   },
@@ -5682,7 +5682,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1505/SkillIcon_1505_Normal.png",
     "max_level": 1
   },
@@ -5759,7 +5759,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1506/SkillIcon_1506_Normal.png",
     "max_level": 1
   },
@@ -5791,7 +5791,7 @@
     "tag": "群攻",
     "type": "Normal",
     "type_name": "普攻",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对敌方全体造成大量虚数属性欢愉伤害，由敌方全体均分。对生命值最高的目标基于总伤害值造成真实伤害。",
     "icon": "SpriteOutput/Battle/SpecialUltraSP/1506/UltraItem/Icon/UltraItem_1506_01.png",
     "max_level": 10
@@ -5802,7 +5802,7 @@
     "tag": "群攻",
     "type": "Normal",
     "type_name": "普攻",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对敌方全体造成大量虚数属性欢愉伤害，由敌方全体均分。恢复战技点。",
     "icon": "SpriteOutput/Battle/SpecialUltraSP/1506/UltraItem/Icon/UltraItem_1506_02.png",
     "max_level": 10
@@ -5813,7 +5813,7 @@
     "tag": "群攻",
     "type": "Normal",
     "type_name": "普攻",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "对敌方全体造成大量虚数属性欢愉伤害，由敌方全体均分。获得笑点。",
     "icon": "SpriteOutput/Battle/SpecialUltraSP/1506/UltraItem/Icon/UltraItem_1506_03.png",
     "max_level": 10
@@ -5891,7 +5891,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1507/SkillIcon_1507_Normal.png",
     "max_level": 1
   },
@@ -5923,8 +5923,8 @@
     "tag": "群攻",
     "type": "BPSkill",
     "type_name": "战技",
-    "desc": "{}",
-    "simple_desc": "{}",
+    "desc": "",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1507/SkillIcon_1507_BP.png",
     "max_level": 15
   },
@@ -5990,7 +5990,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/1510/SkillIcon_1510_Normal.png",
     "max_level": 1
   },
@@ -6033,7 +6033,7 @@
     "tag": "群攻",
     "type": "Ultra",
     "type_name": "终结技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "造成#2[i]次伤害，每次伤害对敌方随机单体造成火属性伤害。",
     "icon": "icon/skill/Avatar/1510/SkillIcon_1510_Ultra.png",
     "max_level": 15
@@ -6122,7 +6122,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/8001/SkillIcon_8001_Normal.png",
     "max_level": 1
   },
@@ -6210,7 +6210,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/8001/SkillIcon_8001_Normal.png",
     "max_level": 1
   },
@@ -6298,7 +6298,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/8003/SkillIcon_8003_Normal.png",
     "max_level": 1
   },
@@ -6375,7 +6375,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/8003/SkillIcon_8003_Normal.png",
     "max_level": 1
   },
@@ -6452,7 +6452,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/8005/SkillIcon_8005_Normal.png",
     "max_level": 1
   },
@@ -6518,7 +6518,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/8005/SkillIcon_8005_Normal.png",
     "max_level": 1
   },
@@ -6584,7 +6584,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/8007/SkillIcon_8007_Normal.png",
     "max_level": 1
   },
@@ -6616,7 +6616,7 @@
     "tag": "回复",
     "type": "BPSkill",
     "type_name": "战技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "召唤忆灵迷迷。若迷迷已在场，为迷迷回复生命值，并使迷迷获得充能。",
     "icon": "icon/skill/Avatar/8007/SkillIcon_8007_BP.png",
     "max_level": 15
@@ -6672,7 +6672,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/8007/SkillIcon_8007_Normal.png",
     "max_level": 1
   },
@@ -6704,7 +6704,7 @@
     "tag": "回复",
     "type": "BPSkill",
     "type_name": "战技",
-    "desc": "{}",
+    "desc": "",
     "simple_desc": "召唤忆灵迷迷。若迷迷已在场，为迷迷回复生命值，并使迷迷获得充能。",
     "icon": "icon/skill/Avatar/8007/SkillIcon_8007_BP.png",
     "max_level": 15
@@ -6914,7 +6914,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11004/SkillIcon_11004_Normal.png",
     "max_level": 1
   },
@@ -6980,7 +6980,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11005/SkillIcon_11005_Normal.png",
     "max_level": 1
   },
@@ -7046,7 +7046,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11006/SkillIcon_11006_Normal.png",
     "max_level": 1
   },
@@ -7112,7 +7112,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11102/SkillIcon_11102_Normal.png",
     "max_level": 1
   },
@@ -7178,7 +7178,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11205/SkillIcon_11205_Normal.png",
     "max_level": 1
   },
@@ -7255,7 +7255,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11212/SkillIcon_11212_Normal.png",
     "max_level": 1
   },
@@ -7332,7 +7332,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11217/SkillIcon_11217_Normal.png",
     "max_level": 1
   },
@@ -7398,7 +7398,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11306/SkillIcon_11306_Normal.png",
     "max_level": 1
   },
@@ -7464,7 +7464,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11307/SkillIcon_11307_Normal.png",
     "max_level": 1
   },
@@ -7530,7 +7530,7 @@
     "type": "Maze",
     "type_name": "",
     "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-    "simple_desc": "{}",
+    "simple_desc": "",
     "icon": "icon/skill/Avatar/11310/SkillIcon_11310_Normal02.png",
     "max_level": 1
   },

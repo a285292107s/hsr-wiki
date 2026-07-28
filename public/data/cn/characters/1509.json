@@ -7,7 +7,7 @@
       "chinese": "藤新",
       "japanese": "関智一",
       "korean": "김종엽",
-      "english": "{}"
+      "english": ""
     },
     "stories": {
       "0": "在宇宙之外的某个世界中，人类历史最初的英雄王。\\n三分之二是神、三分之一是人的他，理所当然地拥有支配一切的特权（自称）。\\n今天也一如既往地放声大笑着，直到被某个世仇女神牵连进异界——\\n这一次，他将再次夺回身为王的一切。",
@@ -672,7 +672,7 @@
       "id": 150906,
       "name": "攻击",
       "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-      "simple_desc": "{}",
+      "simple_desc": "",
       "type": "Maze",
       "type_name": "",
       "tag": "MazeAttack",
@@ -2300,7 +2300,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.026999999,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2342,7 +2342,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2384,7 +2384,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.026999999,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2426,7 +2426,7 @@
           {
             "property_type": "ThunderAddedRatio",
             "value": 0.032,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2468,7 +2468,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2510,7 +2510,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.06,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2552,7 +2552,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2594,7 +2594,7 @@
           {
             "property_type": "ThunderAddedRatio",
             "value": 0.048,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2636,7 +2636,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.08,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2678,7 +2678,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.053,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}

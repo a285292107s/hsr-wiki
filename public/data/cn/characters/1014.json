@@ -7,7 +7,7 @@
       "chinese": "白杺瓒",
       "japanese": "川澄 綾子",
       "korean": "정유정",
-      "english": "{}"
+      "english": ""
     },
     "stories": {
       "0": "孤独的英灵走过命运的长夜， 圆桌的旗帜仍在梦中舒展。卡美洛的骑士之王，此时尚未抵达理想乡。\\n仍是少女的她于这场特殊的「圣杯战争」中应召前来，当再度面临石中剑的抉择，她将如何突破过往的幻境？\\n——「我未实现的愿望，也将在此作结。」",
@@ -688,7 +688,7 @@
       "id": 101406,
       "name": "攻击",
       "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-      "simple_desc": "{}",
+      "simple_desc": "",
       "type": "Maze",
       "type_name": "",
       "tag": "MazeAttack",
@@ -2237,7 +2237,7 @@
           {
             "property_type": "WindAddedRatio",
             "value": 0.032,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2279,7 +2279,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.026999999,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2321,7 +2321,7 @@
           {
             "property_type": "WindAddedRatio",
             "value": 0.032,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2363,7 +2363,7 @@
           {
             "property_type": "HPAddedRatio",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2405,7 +2405,7 @@
           {
             "property_type": "WindAddedRatio",
             "value": 0.048,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2447,7 +2447,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2489,7 +2489,7 @@
           {
             "property_type": "WindAddedRatio",
             "value": 0.048,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2531,7 +2531,7 @@
           {
             "property_type": "HPAddedRatio",
             "value": 0.06,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2573,7 +2573,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.053,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2615,7 +2615,7 @@
           {
             "property_type": "WindAddedRatio",
             "value": 0.064,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}

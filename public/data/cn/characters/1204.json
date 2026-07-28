@@ -171,7 +171,7 @@
       "id": 120406,
       "name": "攻击",
       "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-      "simple_desc": "{}",
+      "simple_desc": "",
       "type": "Maze",
       "type_name": "",
       "tag": "MazeAttack",
@@ -2034,7 +2034,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2076,7 +2076,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.026999999,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2118,7 +2118,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2160,7 +2160,7 @@
           {
             "property_type": "DefenceAddedRatio",
             "value": 0.05,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2202,7 +2202,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.06,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2244,7 +2244,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2286,7 +2286,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.06,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2328,7 +2328,7 @@
           {
             "property_type": "DefenceAddedRatio",
             "value": 0.075,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2370,7 +2370,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.053,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2410,7 +2410,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.08,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}

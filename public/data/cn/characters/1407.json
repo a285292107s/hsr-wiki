@@ -782,7 +782,7 @@
       "id": 140706,
       "name": "攻击",
       "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-      "simple_desc": "{}",
+      "simple_desc": "",
       "type": "Maze",
       "type_name": "",
       "tag": "MazeAttack",
@@ -2222,7 +2222,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.026999999,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2264,7 +2264,7 @@
           {
             "property_type": "QuantumAddedRatio",
             "value": 0.032,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2306,7 +2306,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.026999999,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2348,7 +2348,7 @@
           {
             "property_type": "CriticalDamageBase",
             "value": 0.053,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2390,7 +2390,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2432,7 +2432,7 @@
           {
             "property_type": "QuantumAddedRatio",
             "value": 0.048,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2474,7 +2474,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2516,7 +2516,7 @@
           {
             "property_type": "CriticalDamageBase",
             "value": 0.08,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2558,7 +2558,7 @@
           {
             "property_type": "QuantumAddedRatio",
             "value": 0.064,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2600,7 +2600,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.053,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -3528,7 +3528,7 @@
       "1140710": {
         "id": 1140710,
         "name": "燎尽黯泽的焰息",
-        "desc": "{}",
+        "desc": "",
         "simple_desc": "消耗自身生命值，对敌方全体造成量子属性伤害，且本回合不会结束。重复施放技能时，技能最多获得3次强化。生命值小于等于<color=#f29e38ff><unbreak>#5[i]%</unbreak></color>时，施放该技能会主动触发忆灵天赋【灼掠幽墟的晦翼】的技能效果。",
         "type": "Servant",
         "type_name": "忆灵技",
@@ -3609,7 +3609,7 @@
       "1140711": {
         "id": 1140711,
         "name": "燎尽黯泽的焰息",
-        "desc": "{}",
+        "desc": "",
         "simple_desc": "消耗自身生命值，对敌方全体造成量子属性伤害，且本回合不会结束。重复施放技能时，技能最多获得3次强化。生命值小于等于<color=#f29e38ff><unbreak>#5[i]%</unbreak></color>时，施放该技能会主动触发忆灵天赋【灼掠幽墟的晦翼】的技能效果。",
         "type": "Servant",
         "type_name": "忆灵技",

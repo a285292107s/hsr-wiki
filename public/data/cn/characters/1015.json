@@ -7,7 +7,7 @@
       "chinese": "吴磊",
       "japanese": "諏訪部 順一",
       "korean": "임채헌",
-      "english": "{}"
+      "english": ""
     },
     "stories": {
       "0": "绝望轮番上演于过去与未来之间，无数理想曾在红色衣衫之间燃尽。但，请别被这一抹灰烬欺骗——\\n若是有人假借理想之名营造虚幻的美梦，他必将再度燃烧，与世间的伪善战斗到底。\\n无论身在何处，他始终是正义的伙伴。",
@@ -587,7 +587,7 @@
       "id": 101506,
       "name": "攻击",
       "desc": "攻击敌人，进入战斗后削弱敌方目标对应属性韧性。",
-      "simple_desc": "{}",
+      "simple_desc": "",
       "type": "Maze",
       "type_name": "",
       "tag": "MazeAttack",
@@ -2013,7 +2013,7 @@
           {
             "property_type": "QuantumAddedRatio",
             "value": 0.032,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2055,7 +2055,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2097,7 +2097,7 @@
           {
             "property_type": "QuantumAddedRatio",
             "value": 0.032,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2137,7 +2137,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.026999999,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2179,7 +2179,7 @@
           {
             "property_type": "QuantumAddedRatio",
             "value": 0.048,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2221,7 +2221,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.06,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2261,7 +2261,7 @@
           {
             "property_type": "QuantumAddedRatio",
             "value": 0.048,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2303,7 +2303,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2345,7 +2345,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.08,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2387,7 +2387,7 @@
           {
             "property_type": "QuantumAddedRatio",
             "value": 0.064,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}

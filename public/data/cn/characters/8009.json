@@ -4,10 +4,10 @@
   "chara_info": {
     "camp": null,
     "va": {
-      "chinese": "{}",
-      "japanese": "{}",
-      "korean": "{}",
-      "english": "{}"
+      "chinese": "",
+      "japanese": "",
+      "korean": "",
+      "english": ""
     },
     "stories": {
       "0": null,
@@ -2184,7 +2184,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2224,7 +2224,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.026999999,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2266,7 +2266,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2308,7 +2308,7 @@
           {
             "property_type": "CriticalDamageBase",
             "value": 0.053,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2350,7 +2350,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.06,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2392,7 +2392,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.04,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2434,7 +2434,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.06,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2476,7 +2476,7 @@
           {
             "property_type": "CriticalDamageBase",
             "value": 0.08,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2518,7 +2518,7 @@
           {
             "property_type": "CriticalChanceBase",
             "value": 0.053,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
@@ -2560,7 +2560,7 @@
           {
             "property_type": "AttackAddedRatio",
             "value": 0.08,
-            "name": "{}"
+            "name": ""
           }
         ],
         "extra": {}
