@@ -136,11 +136,17 @@
    光锥列表页
 ═══════════════════════════════════════════ */
 .nk-lc-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-.nk-lc-card { --holo-color: rgba(180,85,255,0.7); position: relative; isolation: isolate; background: var(--card); border: 1px solid rgba(124,58,237,0.3); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
-.nk-lc-card:hover { transform: perspective(900px) translateY(-6px) rotateX(calc(var(--ry, 0) * 7deg)) rotateY(calc(var(--rx, 0) * 7deg)); border-color: rgba(124,58,237,0.18); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 16px rgba(124,58,237,0.18), 0 0 44px rgba(124,58,237,0.08); }
-.nk-lc-card[data-rarity="5"] { --holo-color: rgba(255,215,0,0.6); border-color: rgba(251,191,36,0.25); }
-.nk-lc-card[data-rarity="4"] { --holo-color: rgba(192,132,252,0.6); border-color: rgba(192,132,252,0.2); }
-.nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: hidden; background: rgba(10,10,30,0.5); }
+.nk-lc-card { --holo-color: rgba(180,85,255,0.7); position: relative; isolation: isolate; background: transparent; border: 1px solid transparent; border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
+/* hover 用稀有度辉光（box-shadow）代替矩形描边，避免静止态的双层相框感 */
+.nk-lc-card:hover { transform: perspective(900px) translateY(-6px) rotateX(calc(var(--ry, 0) * 7deg)) rotateY(calc(var(--rx, 0) * 7deg)); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 18px color-mix(in srgb, var(--holo-color) 40%, transparent), 0 0 44px color-mix(in srgb, var(--holo-color) 18%, transparent); }
+/* 稀有度配色上移至 hover：静止态去掉常驻边框，避免与图片自带框双框叠加；稀有度由 ★ 星级体现 */
+.nk-lc-card[data-rarity="5"] { --holo-color: rgba(255,215,0,0.6); }
+.nk-lc-card[data-rarity="4"] { --holo-color: rgba(192,132,252,0.6); }
+/* 图片区背景透明：让光锥图片自带的框成为卡片唯一可见边界，去掉内层矩形 */
+.nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: hidden; background: transparent; }
+/* 加载骨架：图片未就绪时显示 shimmer，加载完成后（img.loaded）淡出；不引入矩形底，避免双层相框 */
+.nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 3; border-radius: 0; transition: opacity 0.35s ease; }
+.nk-lc-card__img img.loaded ~ .nk-lc-card__shimmer { opacity: 0; pointer-events: none; }
 .nk-lc-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); transform-origin: center; backface-visibility: hidden; }
 .nk-lc-card:hover .nk-lc-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
 .nk-lc-card__img img.lc-avatar { width: 100%; height: 100%; object-fit: contain; padding: 6px; transition: transform 0.4s var(--ease); }
@@ -391,5 +397,9 @@
 .nk-cat-card__img img, .nk-lc-card__img img, .nk-relic-card__img img, .nk-item-card__img img, .nk-mob-card__img img { background: rgba(20,20,45,0.6); }
 .nk-cat-card[data-rarity="5"] .nk-cat-card__img img, .nk-lc-card[data-rarity="5"] .nk-lc-card__img img { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(20,20,45,0.6)); }
 .nk-cat-card[data-rarity="4"] .nk-cat-card__img img, .nk-lc-card[data-rarity="4"] .nk-lc-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.08), rgba(20,20,45,0.6)); }
+/* 光锥：图片元素背景也要透明，否则矩形底 + 图片框仍构成双层相框（仅覆盖光锥，其余卡片保留占位色） */
+.nk-lc-card__img img { background: transparent; }
+.nk-lc-card[data-rarity="5"] .nk-lc-card__img img,
+.nk-lc-card[data-rarity="4"] .nk-lc-card__img img { background: transparent; }
 .nk-item-card[data-rarity="SuperRare"] .nk-item-card__img img { background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(20,20,45,0.6)); }
 .nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.06), rgba(20,20,45,0.6)); }

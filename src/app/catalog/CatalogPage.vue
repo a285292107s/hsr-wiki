@@ -135,11 +135,34 @@ watch(() => props.config, (cfg) => {
   }
 });
 
-/** 数据就绪且为虚拟模式 → 网格渲染后启动虚拟滚动 */
+/** 非虚拟网格：图片加载完成后加 .loaded，触发 shimmer 淡出（光锥卡片用） */
+function markImagesLoaded(): void {
+  const g = gridRef.value;
+  if (!g) return;
+  g.querySelectorAll<HTMLImageElement>('img:not(.loaded)').forEach((img) => {
+    if (img.complete) {
+      img.classList.add('loaded');
+    } else {
+      const done = (): void => img.classList.add('loaded');
+      img.addEventListener('load', done, { once: true });
+      img.addEventListener('error', done, { once: true });
+    }
+  });
+}
+
+/** 数据就绪 → 虚拟网格启动滚动；非虚拟网格标记图片加载态 */
 watch(phase, async (p) => {
-  if (p === 'ready' && useVirtual.value) {
+  if (p !== 'ready') return;
+  await nextTick();
+  if (useVirtual.value) start();
+  else markImagesLoaded();
+});
+
+/** 非虚拟网格筛选/搜索重渲染后，重新标记图片加载态 */
+watch(gridHtml, async () => {
+  if (!useVirtual.value) {
     await nextTick();
-    start();
+    markImagesLoaded();
   }
 });
 

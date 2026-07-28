@@ -188,6 +188,7 @@ const lightconePage: CatalogPageConfig = {
     return `<a class="nk-lc-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-path="${escHtml(path)}" style="--i:${i}">
       <div class="nk-lc-card__img">
         <img class="lc-avatar" src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
+        <div class="nk-sk nk-sk--shimmer nk-lc-card__shimmer" aria-hidden="true"></div>
         ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${PATH[path] || path}"></div>` : ''}
         <div class="nk-lc-card__info">
           <span class="nk-lc-card__stars">${stars}</span>
