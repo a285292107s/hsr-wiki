@@ -5,6 +5,7 @@ import { createNkRouter } from './router';
 import '../styles/tokens.css';
 import '../styles/character.css';
 import '../styles/catalog.css';
+import '../styles/lightcone.css';
 
 export async function bootstrap(): Promise<void> {
   const app = createApp(App);

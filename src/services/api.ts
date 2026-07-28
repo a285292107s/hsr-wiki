@@ -12,6 +12,7 @@ import type {
   Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest,
   MazeListDb, LocalCharList,
   LocalItemList, LocalLightConeList, LocalRelicList, LocalMonsterList,
+  LightConeDetail,
 } from './types';
 
 /* ─── manifest ─── */
@@ -138,6 +139,13 @@ export async function loadLocalCharacterList(): Promise<LocalCharList> {
 
 export async function loadLocalCharacter(charId: string): Promise<CharacterData> {
   const url = `${LOCAL_DATA_BASE}/characters/${charId}.json`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+  return res.json();
+}
+
+export async function loadLocalLightConeDetail(id: string): Promise<LightConeDetail> {
+  const url = `${LOCAL_DATA_BASE}/light_cones/${id}.json`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
   return res.json();

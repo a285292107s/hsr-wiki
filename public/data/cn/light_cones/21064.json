@@ -1,0 +1,205 @@
+{
+  "id": 21064,
+  "name": "菇菇嘎嘎历险记",
+  "rarity": 4,
+  "path": "Elation",
+  "desc": "欢愉命途专属的光锥，光锥技能仅对该命途生效。",
+  "story": "<i>「三菇凉，欢迎来到花花秘境~♥~」</i>\\n<i>「布菇丹，不要板着脸，笑一笑嘛！」</i>\\n<i>「灰宝菇，你已经为本大王的魅力倾倒了吗？太棒了！」</i>\\n<i>「至于咕咕菇——就你了，看起来很美味嘛～」</i>\\n\\n快跑，快跑，人心的欲望是个填不满的兔子洞——\\n来呀，来呀，笑起来，成为花花世界的一员——\\n\\n<i>「欢迎加入你的专属节目：每个人都能成为可爱的火花！」</i>",
+  "max_promotion": 6,
+  "max_rank": 5,
+  "skill": {
+    "id": 21064,
+    "name": "乱斗",
+    "desc": "使装备者的欢愉度提高<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>。装备者施放欢愉技时，使敌方全体受到的欢愉伤害提高<color=#f29e38ff><unbreak>#2[i]%</unbreak></color>，持续<unbreak>#3[i]</unbreak>回合。",
+    "level": {
+      "1": {
+        "level": 1,
+        "param_list": [
+          0.12,
+          0.06,
+          2
+        ]
+      },
+      "2": {
+        "level": 2,
+        "param_list": [
+          0.14,
+          0.07,
+          2
+        ]
+      },
+      "3": {
+        "level": 3,
+        "param_list": [
+          0.16,
+          0.08,
+          2
+        ]
+      },
+      "4": {
+        "level": 4,
+        "param_list": [
+          0.18,
+          0.09,
+          2
+        ]
+      },
+      "5": {
+        "level": 5,
+        "param_list": [
+          0.2,
+          0.1,
+          2
+        ]
+      }
+    }
+  },
+  "stats": {
+    "0": {
+      "hp_base": 38.4,
+      "hp_add": 5.76,
+      "attack_base": 21.6,
+      "attack_add": 3.24,
+      "defence_base": 18,
+      "defence_add": 2.7,
+      "max_level": 20,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 4000
+        },
+        {
+          "ItemID": 116001,
+          "ItemNum": 5
+        }
+      ]
+    },
+    "1": {
+      "hp_base": 84.48,
+      "hp_add": 5.76,
+      "attack_base": 47.52,
+      "attack_add": 3.24,
+      "defence_base": 39.6,
+      "defence_add": 2.7,
+      "max_level": 30,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 8000
+        },
+        {
+          "ItemID": 110261,
+          "ItemNum": 3
+        },
+        {
+          "ItemID": 116001,
+          "ItemNum": 10
+        }
+      ]
+    },
+    "2": {
+      "hp_base": 145.92,
+      "hp_add": 5.76,
+      "attack_base": 82.08,
+      "attack_add": 3.24,
+      "defence_base": 68.4,
+      "defence_add": 2.7,
+      "max_level": 40,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 16000
+        },
+        {
+          "ItemID": 110262,
+          "ItemNum": 3
+        },
+        {
+          "ItemID": 116002,
+          "ItemNum": 6
+        }
+      ]
+    },
+    "3": {
+      "hp_base": 207.36,
+      "hp_add": 5.76,
+      "attack_base": 116.64,
+      "attack_add": 3.24,
+      "defence_base": 97.2,
+      "defence_add": 2.7,
+      "max_level": 50,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 40000
+        },
+        {
+          "ItemID": 110262,
+          "ItemNum": 6
+        },
+        {
+          "ItemID": 116002,
+          "ItemNum": 9
+        }
+      ]
+    },
+    "4": {
+      "hp_base": 268.8,
+      "hp_add": 5.76,
+      "attack_base": 151.2,
+      "attack_add": 3.24,
+      "defence_base": 126,
+      "defence_add": 2.7,
+      "max_level": 60,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 80000
+        },
+        {
+          "ItemID": 110263,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 116003,
+          "ItemNum": 5
+        }
+      ]
+    },
+    "5": {
+      "hp_base": 330.24,
+      "hp_add": 5.76,
+      "attack_base": 185.76,
+      "attack_add": 3.24,
+      "defence_base": 154.8,
+      "defence_add": 2.7,
+      "max_level": 70,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 160000
+        },
+        {
+          "ItemID": 110263,
+          "ItemNum": 8
+        },
+        {
+          "ItemID": 116003,
+          "ItemNum": 7
+        }
+      ]
+    },
+    "6": {
+      "hp_base": 391.68,
+      "hp_add": 5.76,
+      "attack_base": 220.32,
+      "attack_add": 3.24,
+      "defence_base": 183.6,
+      "defence_add": 2.7,
+      "max_level": 80,
+      "cost": []
+    }
+  },
+  "icon": "icon/light_cone/21064.png",
+  "icon_figure": "icon/light_cone_figure/21064.png"
+}

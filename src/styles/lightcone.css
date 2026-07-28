@@ -1,0 +1,149 @@
+/* ═══════════════════════════════════════════
+   光锥详情页样式
+   复用角色页设计语言（nk-hero / nk-skill / nk-title），
+   光锥专属组件：立绘背景 / 叠影滑条 / 数值对比表 / 晋阶表 / 突破材料
+═══════════════════════════════════════════ */
+
+/* ─── Hero 光锥变体 ─── */
+.nk-hero--lc .nk-hero__visual { min-height: 320px; }
+.nk-hero__bg--lc {
+  background-size: contain;
+  background-position: center 20%;
+  background-repeat: no-repeat;
+  filter: saturate(1.05);
+}
+.nk-hero__stats--lc { grid-template-columns: repeat(3, 1fr); }
+.nk-lc-lv {
+  margin-left: auto;
+  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
+  color: var(--text3); letter-spacing: 0.06em;
+}
+
+/* ─── 叠影等级滑条 ─── */
+.nk-lc-rank-slider { gap: 12px; }
+.nk-lc-rank-label {
+  font-size: 0.6875rem; font-weight: 700; color: var(--primary);
+  letter-spacing: 0.08em; white-space: nowrap;
+  font-family: var(--font-hud);
+}
+
+/* ─── 叠影数值对比表 ─── */
+.nk-lc-rank-table-wrap {
+  margin-top: 16px; overflow-x: auto;
+  border: 1px solid rgba(124,58,237,0.12); border-radius: 8px;
+}
+.nk-lc-rank-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.75rem; text-align: center;
+}
+.nk-lc-rank-table th,
+.nk-lc-rank-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(124,58,237,0.08);
+}
+.nk-lc-rank-table thead th {
+  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700;
+  color: var(--text3); letter-spacing: 0.06em;
+  background: rgba(124,58,237,0.04);
+}
+.nk-lc-rank-table tbody tr:last-child td { border-bottom: none; }
+.nk-lc-rank-table td {
+  font-family: var(--font-hud); font-weight: 600; color: var(--text2);
+  transition: color 0.15s, background 0.15s;
+}
+.nk-lc-rank-table__param {
+  text-align: left; color: var(--text3); font-weight: 600;
+  font-family: var(--font-hud); font-size: 0.6875rem;
+}
+.nk-lc-rank-table--active {
+  color: var(--text-bright) !important;
+  background: rgba(124,58,237,0.12);
+}
+thead .nk-lc-rank-table--active { color: var(--primary) !important; }
+
+/* ─── 晋阶属性表 ─── */
+.nk-lc-asc-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(124,58,237,0.12); border-radius: 8px;
+  margin-bottom: 16px;
+}
+.nk-lc-asc-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.75rem; text-align: center;
+}
+.nk-lc-asc-table th,
+.nk-lc-asc-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(124,58,237,0.08);
+}
+.nk-lc-asc-table thead th {
+  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700;
+  color: var(--text3); letter-spacing: 0.06em;
+  background: rgba(124,58,237,0.04);
+}
+.nk-lc-asc-table tbody tr:last-child td { border-bottom: none; }
+.nk-lc-asc-table tbody tr:hover td { background: rgba(124,58,237,0.04); }
+.nk-lc-asc-table td {
+  font-family: var(--font-hud); font-weight: 600; color: var(--text2);
+}
+.nk-lc-asc-table__phase {
+  font-weight: 700; color: var(--primary);
+}
+
+/* ─── 突破材料 ─── */
+.nk-lc-costs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.nk-lc-cost {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 16px; border-radius: 8px;
+  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12);
+  transition: border-color 0.2s;
+}
+.nk-lc-cost:hover { border-color: var(--border2); }
+.nk-lc-cost__phase {
+  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700;
+  color: var(--text3); letter-spacing: 0.05em; white-space: nowrap;
+  min-width: 4.5em;
+}
+.nk-lc-cost__items { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.nk-lc-cost__item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.75rem; color: var(--text2);
+}
+.nk-lc-cost__item img {
+  width: 32px; height: 32px; border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.nk-lc-cost__credit {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 6px;
+  background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
+  color: var(--gold); font-size: 1rem;
+}
+.nk-lc-cost__num {
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
+  color: var(--text2);
+}
+
+/* ─── 卡面描述（STORY） ─── */
+.nk-lc-story {
+  font-size: 0.8125rem; line-height: 2; color: var(--text2);
+  padding: 4px 0 12px;
+}
+.nk-lc-story i {
+  font-style: normal; color: var(--text-bright);
+}
+.nk-lc-skill-note {
+  margin-top: 10px; padding: 8px 12px;
+  border-left: 2px solid rgba(124,58,237,0.25);
+  background: rgba(124,58,237,0.04); border-radius: 0 6px 6px 0;
+  font-size: 0.75rem; line-height: 1.6; color: var(--text3);
+}
+
+/* ─── 骨架屏变体 ─── */
+.nk-skeleton--lc .nk-skeleton__stat-grid { grid-template-columns: repeat(3, 1fr); }
+
+/* ─── 响应式 ─── */
+@media (max-width: 640px) {
+  .nk-hero--lc .nk-hero__visual { min-height: 240px; }
+  .nk-lc-cost { flex-direction: column; align-items: flex-start; gap: 8px; }
+}

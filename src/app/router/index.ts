@@ -39,6 +39,12 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, catalog: 'lightcone' },
   },
   {
+    path: '/lightcone/:id(\\d+)',
+    name: 'lightcone',
+    component: () => import('../views/LightconeView.vue'),
+    meta: { depth: 3 },
+  },
+  {
     path: '/relic',
     name: 'catalog-relic',
     component: () => import('../views/CatalogView.vue'),

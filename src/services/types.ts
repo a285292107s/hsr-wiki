@@ -387,3 +387,55 @@ export interface LocalMonsterEntry {
   type?: string;
 }
 export type LocalMonsterList = LocalMonsterEntry[];
+
+/* ─── 光锥详情（converter 输出，每光锥一个 JSON） ─── */
+
+/** 光锥技能等级条目 */
+export interface LightConeSkillLevel {
+  level: number;
+  param_list: number[];
+}
+
+/** 光锥技能 */
+export interface LightConeSkill {
+  id: number;
+  name: string;
+  desc: string;
+  /** 叠影等级 1-5 → 参数列表 */
+  level: Record<string, LightConeSkillLevel>;
+}
+
+/** 光锥晋阶属性条目 */
+export interface LightConeStats {
+  hp_base: number;
+  hp_add: number;
+  attack_base: number;
+  attack_add: number;
+  defence_base: number;
+  defence_add: number;
+  /** 该晋阶阶段的等级上限 */
+  max_level: number;
+  /** 晋阶消耗（ItemID + ItemNum） */
+  cost: { ItemID: number; ItemNum: number }[];
+}
+
+/** 光锥详情数据（light_cones/{id}.json） */
+export interface LightConeDetail {
+  id: number;
+  name: string;
+  /** 数字稀有度 3/4/5 */
+  rarity: number;
+  /** 命途（Priest/Rogue/...） */
+  path: string;
+  /** 物品描述（道具简介） */
+  desc: string;
+  /** 卡面描述（含 <i> 对话标签与 \n 换行） */
+  story?: string;
+  max_promotion: number;
+  max_rank: number;
+  skill: LightConeSkill;
+  /** 晋阶阶段 0-6 → 属性 */
+  stats: Record<string, LightConeStats>;
+  icon: string;
+  icon_figure: string;
+}

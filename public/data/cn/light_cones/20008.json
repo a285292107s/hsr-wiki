@@ -1,0 +1,195 @@
+{
+  "id": 20008,
+  "name": "嘉果",
+  "rarity": 3,
+  "path": "Priest",
+  "desc": "丰饶命途专属的光锥，光锥技能仅对该命途生效。",
+  "story": "自时光中凝取的稀薄力量。正是所有微不足道的刹那，编织成了壮绝的命运。\\n\\n<i>「口渴时，万物总是甜的。」</i>",
+  "max_promotion": 6,
+  "max_rank": 5,
+  "skill": {
+    "id": 20008,
+    "name": "甘美",
+    "desc": "战斗开始时，立即为我方全体恢复<color=#f29e38ff><unbreak>#1[i]</unbreak></color>点能量。",
+    "level": {
+      "1": {
+        "level": 1,
+        "param_list": [
+          6
+        ]
+      },
+      "2": {
+        "level": 2,
+        "param_list": [
+          7.5
+        ]
+      },
+      "3": {
+        "level": 3,
+        "param_list": [
+          9
+        ]
+      },
+      "4": {
+        "level": 4,
+        "param_list": [
+          10.5
+        ]
+      },
+      "5": {
+        "level": 5,
+        "param_list": [
+          12
+        ]
+      }
+    }
+  },
+  "stats": {
+    "0": {
+      "hp_base": 43.2,
+      "hp_add": 6.48,
+      "attack_base": 14.4,
+      "attack_add": 2.16,
+      "defence_base": 9,
+      "defence_add": 1.35,
+      "max_level": 20,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 3000
+        },
+        {
+          "ItemID": 111001,
+          "ItemNum": 4
+        }
+      ]
+    },
+    "1": {
+      "hp_base": 95.04,
+      "hp_add": 6.48,
+      "attack_base": 31.68,
+      "attack_add": 2.16,
+      "defence_base": 19.8,
+      "defence_add": 1.35,
+      "max_level": 30,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 6000
+        },
+        {
+          "ItemID": 110171,
+          "ItemNum": 2
+        },
+        {
+          "ItemID": 111001,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "2": {
+      "hp_base": 164.16,
+      "hp_add": 6.48,
+      "attack_base": 54.72,
+      "attack_add": 2.16,
+      "defence_base": 34.2,
+      "defence_add": 1.35,
+      "max_level": 40,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 12000
+        },
+        {
+          "ItemID": 110172,
+          "ItemNum": 2
+        },
+        {
+          "ItemID": 111002,
+          "ItemNum": 4
+        }
+      ]
+    },
+    "3": {
+      "hp_base": 233.28,
+      "hp_add": 6.48,
+      "attack_base": 77.76,
+      "attack_add": 2.16,
+      "defence_base": 48.6,
+      "defence_add": 1.35,
+      "max_level": 50,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 30000
+        },
+        {
+          "ItemID": 110172,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 111002,
+          "ItemNum": 6
+        }
+      ]
+    },
+    "4": {
+      "hp_base": 302.4,
+      "hp_add": 6.48,
+      "attack_base": 100.8,
+      "attack_add": 2.16,
+      "defence_base": 63,
+      "defence_add": 1.35,
+      "max_level": 60,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 60000
+        },
+        {
+          "ItemID": 110173,
+          "ItemNum": 3
+        },
+        {
+          "ItemID": 111003,
+          "ItemNum": 3
+        }
+      ]
+    },
+    "5": {
+      "hp_base": 371.52,
+      "hp_add": 6.48,
+      "attack_base": 123.84,
+      "attack_add": 2.16,
+      "defence_base": 77.4,
+      "defence_add": 1.35,
+      "max_level": 70,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 120000
+        },
+        {
+          "ItemID": 110173,
+          "ItemNum": 6
+        },
+        {
+          "ItemID": 111003,
+          "ItemNum": 5
+        }
+      ]
+    },
+    "6": {
+      "hp_base": 440.64,
+      "hp_add": 6.48,
+      "attack_base": 146.88,
+      "attack_add": 2.16,
+      "defence_base": 91.8,
+      "defence_add": 1.35,
+      "max_level": 80,
+      "cost": []
+    }
+  },
+  "icon": "icon/light_cone/20008.png",
+  "icon_figure": "icon/light_cone_figure/20008.png"
+}

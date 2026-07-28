@@ -1,0 +1,205 @@
+{
+  "id": 21027,
+  "name": "早餐的仪式感",
+  "rarity": 4,
+  "path": "Mage",
+  "desc": "智识命途专属的光锥，光锥技能仅对该命途生效。",
+  "story": "虽然餐桌已经摆好…\\n有人要先喝一杯红茶；\\n有人要先拍一张照片；\\n有人要先读一份报纸；\\n有人要先记一页笔记；\\n有人要先玩一会手机。\\n\\n<i>「都给我趁热吃帕！」</i>",
+  "max_promotion": 6,
+  "max_rank": 5,
+  "skill": {
+    "id": 21027,
+    "name": "各就其位",
+    "desc": "使装备者造成伤害提高<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>。每消灭1个敌方目标，装备者的攻击力提高<color=#f29e38ff><unbreak>#2[i]%</unbreak></color>，该效果最多叠加<unbreak>#3[i]</unbreak>层。",
+    "level": {
+      "1": {
+        "level": 1,
+        "param_list": [
+          0.12,
+          0.04,
+          3
+        ]
+      },
+      "2": {
+        "level": 2,
+        "param_list": [
+          0.15,
+          0.05,
+          3
+        ]
+      },
+      "3": {
+        "level": 3,
+        "param_list": [
+          0.18,
+          0.06,
+          3
+        ]
+      },
+      "4": {
+        "level": 4,
+        "param_list": [
+          0.21,
+          0.07,
+          3
+        ]
+      },
+      "5": {
+        "level": 5,
+        "param_list": [
+          0.24,
+          0.08,
+          3
+        ]
+      }
+    }
+  },
+  "stats": {
+    "0": {
+      "hp_base": 38.4,
+      "hp_add": 5.76,
+      "attack_base": 21.6,
+      "attack_add": 3.24,
+      "defence_base": 18,
+      "defence_add": 2.7,
+      "max_level": 20,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 4000
+        },
+        {
+          "ItemID": 111001,
+          "ItemNum": 5
+        }
+      ]
+    },
+    "1": {
+      "hp_base": 84.48,
+      "hp_add": 5.76,
+      "attack_base": 47.52,
+      "attack_add": 3.24,
+      "defence_base": 39.6,
+      "defence_add": 2.7,
+      "max_level": 30,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 8000
+        },
+        {
+          "ItemID": 110131,
+          "ItemNum": 3
+        },
+        {
+          "ItemID": 111001,
+          "ItemNum": 10
+        }
+      ]
+    },
+    "2": {
+      "hp_base": 145.92,
+      "hp_add": 5.76,
+      "attack_base": 82.08,
+      "attack_add": 3.24,
+      "defence_base": 68.4,
+      "defence_add": 2.7,
+      "max_level": 40,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 16000
+        },
+        {
+          "ItemID": 110132,
+          "ItemNum": 3
+        },
+        {
+          "ItemID": 111002,
+          "ItemNum": 6
+        }
+      ]
+    },
+    "3": {
+      "hp_base": 207.36,
+      "hp_add": 5.76,
+      "attack_base": 116.64,
+      "attack_add": 3.24,
+      "defence_base": 97.2,
+      "defence_add": 2.7,
+      "max_level": 50,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 40000
+        },
+        {
+          "ItemID": 110132,
+          "ItemNum": 6
+        },
+        {
+          "ItemID": 111002,
+          "ItemNum": 9
+        }
+      ]
+    },
+    "4": {
+      "hp_base": 268.8,
+      "hp_add": 5.76,
+      "attack_base": 151.2,
+      "attack_add": 3.24,
+      "defence_base": 126,
+      "defence_add": 2.7,
+      "max_level": 60,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 80000
+        },
+        {
+          "ItemID": 110133,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 111003,
+          "ItemNum": 5
+        }
+      ]
+    },
+    "5": {
+      "hp_base": 330.24,
+      "hp_add": 5.76,
+      "attack_base": 185.76,
+      "attack_add": 3.24,
+      "defence_base": 154.8,
+      "defence_add": 2.7,
+      "max_level": 70,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 160000
+        },
+        {
+          "ItemID": 110133,
+          "ItemNum": 8
+        },
+        {
+          "ItemID": 111003,
+          "ItemNum": 7
+        }
+      ]
+    },
+    "6": {
+      "hp_base": 391.68,
+      "hp_add": 5.76,
+      "attack_base": 220.32,
+      "attack_add": 3.24,
+      "defence_base": 183.6,
+      "defence_add": 2.7,
+      "max_level": 80,
+      "cost": []
+    }
+  },
+  "icon": "icon/light_cone/21027.png",
+  "icon_figure": "icon/light_cone_figure/21027.png"
+}

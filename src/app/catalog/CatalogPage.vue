@@ -182,8 +182,14 @@ function onContentClick(e: MouseEvent): void {
   const m = href.match(/\/character\/(\d+)/);
   if (m) {
     void router.push(`/character/${m[1]}`);
+    return;
   }
-  // 未迁移的详情页：静默忽略（第一期无详情页）
+  const lc = href.match(/\/lightcone\/(\d+)/);
+  if (lc) {
+    void router.push(`/lightcone/${lc[1]}`);
+    return;
+  }
+  // 未迁移的详情页：静默忽略
 }
 
 function onGridMove(e: MouseEvent): void {

@@ -1,0 +1,210 @@
+{
+  "id": 23049,
+  "name": "致长夜的星光",
+  "rarity": 5,
+  "path": "Memory",
+  "desc": "记忆命途专属的光锥，光锥技能仅对该命途生效。",
+  "story": "在岁月的罅隙，唯有她的心跳回荡。\\n一如从前的许多个日夜——在夜色中守望，在夜色中沉眠。\\n\\n她珍藏着交托于她的回忆。\\n少女自空白的起点出发，用靓丽的色彩涂抹一站站曾停留的地方。陈设温馨的列车，性格各异的伙伴，璀璨绮丽的星球…像一个美好到令人流连的梦。\\n\\n<i>「真正的三月七之旅现在才要开始！」</i>\\n少女的宣言仿佛就在耳边。\\n\\n她望向遥远的星空，一束光即将抵达——\\n那是列车的灯光，像一颗流星。\\n\\n<i>「晚安，三月…待你醒来的那一天，将属于开拓的旅途继续下去吧♭」</i>\\n\\n忆潮涌起，她将愿望深藏心底，那微小的心声与光芒\\n——她都不曾遗忘。",
+  "max_promotion": 6,
+  "max_rank": 5,
+  "skill": {
+    "id": 23049,
+    "name": "未眠",
+    "desc": "使装备者的生命上限提高<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>。装备者的忆灵施放技能时，使装备者获得【夜色】。装备者持有【夜色】时，我方全体忆灵造成的伤害无视目标<color=#f29e38ff><unbreak>#2[i]%</unbreak></color>的防御力，装备者和装备者忆灵造成的伤害提高<color=#f29e38ff><unbreak>#3[i]%</unbreak></color>，装备者的忆灵消失时为装备者恢复<color=#f29e38ff><unbreak>#4[i]</unbreak></color>点能量，同类效果无法叠加。",
+    "level": {
+      "1": {
+        "level": 1,
+        "param_list": [
+          0.3,
+          0.2,
+          0.3,
+          8
+        ]
+      },
+      "2": {
+        "level": 2,
+        "param_list": [
+          0.375,
+          0.225,
+          0.375,
+          10
+        ]
+      },
+      "3": {
+        "level": 3,
+        "param_list": [
+          0.45,
+          0.25,
+          0.45,
+          12
+        ]
+      },
+      "4": {
+        "level": 4,
+        "param_list": [
+          0.525,
+          0.275,
+          0.525,
+          14
+        ]
+      },
+      "5": {
+        "level": 5,
+        "param_list": [
+          0.6,
+          0.3,
+          0.6,
+          16
+        ]
+      }
+    }
+  },
+  "stats": {
+    "0": {
+      "hp_base": 52.8,
+      "hp_add": 7.92,
+      "attack_base": 24,
+      "attack_add": 3.6,
+      "defence_base": 21,
+      "defence_add": 3.15,
+      "max_level": 20,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 5000
+        },
+        {
+          "ItemID": 115011,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "1": {
+      "hp_base": 116.16,
+      "hp_add": 7.92,
+      "attack_base": 52.8,
+      "attack_add": 3.6,
+      "defence_base": 46.2,
+      "defence_add": 3.15,
+      "max_level": 30,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 10000
+        },
+        {
+          "ItemID": 110251,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 115011,
+          "ItemNum": 12
+        }
+      ]
+    },
+    "2": {
+      "hp_base": 200.64,
+      "hp_add": 7.92,
+      "attack_base": 91.2,
+      "attack_add": 3.6,
+      "defence_base": 79.8,
+      "defence_add": 3.15,
+      "max_level": 40,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 20000
+        },
+        {
+          "ItemID": 110252,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 115012,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "3": {
+      "hp_base": 285.12,
+      "hp_add": 7.92,
+      "attack_base": 129.6,
+      "attack_add": 3.6,
+      "defence_base": 113.4,
+      "defence_add": 3.15,
+      "max_level": 50,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 50000
+        },
+        {
+          "ItemID": 110252,
+          "ItemNum": 8
+        },
+        {
+          "ItemID": 115012,
+          "ItemNum": 12
+        }
+      ]
+    },
+    "4": {
+      "hp_base": 369.6,
+      "hp_add": 7.92,
+      "attack_base": 168,
+      "attack_add": 3.6,
+      "defence_base": 147,
+      "defence_add": 3.15,
+      "max_level": 60,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 100000
+        },
+        {
+          "ItemID": 110253,
+          "ItemNum": 5
+        },
+        {
+          "ItemID": 115013,
+          "ItemNum": 6
+        }
+      ]
+    },
+    "5": {
+      "hp_base": 454.08,
+      "hp_add": 7.92,
+      "attack_base": 206.4,
+      "attack_add": 3.6,
+      "defence_base": 180.6,
+      "defence_add": 3.15,
+      "max_level": 70,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 200000
+        },
+        {
+          "ItemID": 110253,
+          "ItemNum": 10
+        },
+        {
+          "ItemID": 115013,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "6": {
+      "hp_base": 538.56,
+      "hp_add": 7.92,
+      "attack_base": 244.8,
+      "attack_add": 3.6,
+      "defence_base": 214.2,
+      "defence_add": 3.15,
+      "max_level": 80,
+      "cost": []
+    }
+  },
+  "icon": "icon/light_cone/23049.png",
+  "icon_figure": "icon/light_cone_figure/23049.png"
+}

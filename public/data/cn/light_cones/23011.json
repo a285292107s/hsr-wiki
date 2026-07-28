@@ -1,0 +1,215 @@
+{
+  "id": 23011,
+  "name": "她已闭上双眼",
+  "rarity": 5,
+  "path": "Knight",
+  "desc": "存护命途专属的光锥，光锥技能仅对该命途生效。",
+  "story": "额间的痛楚将伴随余生，但仍不及过去的万分之一。\\n她自以为神机妙算，直到故人离去。\\n如今她「看见」万象更迭，时移世变…\\n但她已闭上双眼，因为未来已经落定\\n——在「第三眼」中。",
+  "max_promotion": 6,
+  "max_rank": 5,
+  "skill": {
+    "id": 23011,
+    "name": "视界",
+    "desc": "使装备者的生命上限提高<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>，能量恢复效率提高<color=#f29e38ff><unbreak>#4[i]%</unbreak></color>。当装备者的生命值降低时，使我方全体造成的伤害提高<color=#f29e38ff><unbreak>#2[f1]%</unbreak></color>，持续<unbreak>#5[i]</unbreak>回合。\\n每个波次开始时，为我方全体回复等同于各自已损失生命值<color=#f29e38ff><unbreak>#3[i]%</unbreak></color>的生命值。",
+    "level": {
+      "1": {
+        "level": 1,
+        "param_list": [
+          0.24,
+          0.09,
+          0.8,
+          0.12,
+          2
+        ]
+      },
+      "2": {
+        "level": 2,
+        "param_list": [
+          0.28,
+          0.105,
+          0.85,
+          0.14,
+          2
+        ]
+      },
+      "3": {
+        "level": 3,
+        "param_list": [
+          0.32,
+          0.12,
+          0.9,
+          0.16,
+          2
+        ]
+      },
+      "4": {
+        "level": 4,
+        "param_list": [
+          0.36,
+          0.135,
+          0.95,
+          0.18,
+          2
+        ]
+      },
+      "5": {
+        "level": 5,
+        "param_list": [
+          0.4,
+          0.15,
+          1,
+          0.2,
+          2
+        ]
+      }
+    }
+  },
+  "stats": {
+    "0": {
+      "hp_base": 57.6,
+      "hp_add": 8.64,
+      "attack_base": 19.2,
+      "attack_add": 2.88,
+      "defence_base": 24,
+      "defence_add": 3.6,
+      "max_level": 20,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 5000
+        },
+        {
+          "ItemID": 113011,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "1": {
+      "hp_base": 126.72,
+      "hp_add": 8.64,
+      "attack_base": 42.24,
+      "attack_add": 2.88,
+      "defence_base": 52.8,
+      "defence_add": 3.6,
+      "max_level": 30,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 10000
+        },
+        {
+          "ItemID": 110141,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 113011,
+          "ItemNum": 12
+        }
+      ]
+    },
+    "2": {
+      "hp_base": 218.88,
+      "hp_add": 8.64,
+      "attack_base": 72.96,
+      "attack_add": 2.88,
+      "defence_base": 91.2,
+      "defence_add": 3.6,
+      "max_level": 40,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 20000
+        },
+        {
+          "ItemID": 110142,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 113012,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "3": {
+      "hp_base": 311.04,
+      "hp_add": 8.64,
+      "attack_base": 103.68,
+      "attack_add": 2.88,
+      "defence_base": 129.6,
+      "defence_add": 3.6,
+      "max_level": 50,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 50000
+        },
+        {
+          "ItemID": 110142,
+          "ItemNum": 8
+        },
+        {
+          "ItemID": 113012,
+          "ItemNum": 12
+        }
+      ]
+    },
+    "4": {
+      "hp_base": 403.2,
+      "hp_add": 8.64,
+      "attack_base": 134.4,
+      "attack_add": 2.88,
+      "defence_base": 168,
+      "defence_add": 3.6,
+      "max_level": 60,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 100000
+        },
+        {
+          "ItemID": 110143,
+          "ItemNum": 5
+        },
+        {
+          "ItemID": 113013,
+          "ItemNum": 6
+        }
+      ]
+    },
+    "5": {
+      "hp_base": 495.36,
+      "hp_add": 8.64,
+      "attack_base": 165.12,
+      "attack_add": 2.88,
+      "defence_base": 206.4,
+      "defence_add": 3.6,
+      "max_level": 70,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 200000
+        },
+        {
+          "ItemID": 110143,
+          "ItemNum": 10
+        },
+        {
+          "ItemID": 113013,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "6": {
+      "hp_base": 587.52,
+      "hp_add": 8.64,
+      "attack_base": 195.84,
+      "attack_add": 2.88,
+      "defence_base": 244.8,
+      "defence_add": 3.6,
+      "max_level": 80,
+      "cost": []
+    }
+  },
+  "icon": "icon/light_cone/23011.png",
+  "icon_figure": "icon/light_cone_figure/23011.png"
+}

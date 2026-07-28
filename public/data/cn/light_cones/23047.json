@@ -1,0 +1,225 @@
+{
+  "id": 23047,
+  "name": "海洋为何而歌",
+  "rarity": 5,
+  "path": "Warlock",
+  "desc": "虚无命途专属的光锥，光锥技能仅对该命途生效。",
+  "story": "浪花奔涌，涛声响彻天际。\\n鱼儿洄游在那空无一物的海，旧日的泡沫翻腾，那一曲乐声似乎仍在回荡。\\n\\n<i>「尊贵的公主，与我们共飨盛宴吧！」</i>\\n为了回应这深海的呼唤，她随那黑潮起舞，直至盛大的舞台上只剩她一人。\\n\\n<i>「海洋的剑士，你为何沉默，为何而歌？」</i>\\n行于大地的每一步，她忍受痛苦，鲜少歌唱，只有那血色的锋刃奏出生命的悲鸣。\\n\\n<i>「剑旗爵，随我一同，征服星海！」</i>\\n当她寻到这炙热的灯火，她终于执起琴弓，以为那就是欢宴的开始。\\n\\n……\\n\\n<i>「海列屈拉…海列屈拉…一曲唱毕，你还要游向哪里？」</i>\\n\\n当虚妄的希望碎裂，她总是以一曲孤独的旋律回答人们的诘问，却使所有听者心醉魂迷——\\n\\n又或许…无论在人世或深海， 真正能听到的，唯有奏者自己。",
+  "max_promotion": 6,
+  "max_rank": 5,
+  "skill": {
+    "id": 23047,
+    "name": "独奏",
+    "desc": "使装备者的效果命中提高<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>，当有敌方目标陷入装备者施加的负面效果时，有<unbreak>#2[i]%</unbreak>的基础概率使其陷入【魂迷】状态，持续<unbreak>#3[i]</unbreak>回合，同类效果无法叠加。【魂迷】状态下，每有1个装备者施加的负面效果，受到的持续伤害提高<color=#f29e38ff><unbreak>#4[f1]%</unbreak></color>，该效果最多叠加<unbreak>#5[i]</unbreak>层，受到我方目标攻击时，使攻击者速度提高<color=#f29e38ff><unbreak>#6[f1]%</unbreak></color>，持续<unbreak>#7[i]</unbreak>回合。当装备者陷入无法战斗状态时，移除所有【魂迷】。",
+    "level": {
+      "1": {
+        "level": 1,
+        "param_list": [
+          0.4,
+          0.8,
+          3,
+          0.05,
+          6,
+          0.1,
+          3
+        ]
+      },
+      "2": {
+        "level": 2,
+        "param_list": [
+          0.45,
+          0.8,
+          3,
+          0.0625,
+          6,
+          0.125,
+          3
+        ]
+      },
+      "3": {
+        "level": 3,
+        "param_list": [
+          0.5,
+          0.8,
+          3,
+          0.075,
+          6,
+          0.15,
+          3
+        ]
+      },
+      "4": {
+        "level": 4,
+        "param_list": [
+          0.55,
+          0.8,
+          3,
+          0.0875,
+          6,
+          0.175,
+          3
+        ]
+      },
+      "5": {
+        "level": 5,
+        "param_list": [
+          0.6,
+          0.8,
+          3,
+          0.1,
+          6,
+          0.2,
+          3
+        ]
+      }
+    }
+  },
+  "stats": {
+    "0": {
+      "hp_base": 43.2,
+      "hp_add": 6.48,
+      "attack_base": 28.8,
+      "attack_add": 4.32,
+      "defence_base": 21,
+      "defence_add": 3.15,
+      "max_level": 20,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 5000
+        },
+        {
+          "ItemID": 115001,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "1": {
+      "hp_base": 95.04,
+      "hp_add": 6.48,
+      "attack_base": 63.36,
+      "attack_add": 4.32,
+      "defence_base": 46.2,
+      "defence_add": 3.15,
+      "max_level": 30,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 10000
+        },
+        {
+          "ItemID": 110221,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 115001,
+          "ItemNum": 12
+        }
+      ]
+    },
+    "2": {
+      "hp_base": 164.16,
+      "hp_add": 6.48,
+      "attack_base": 109.44,
+      "attack_add": 4.32,
+      "defence_base": 79.8,
+      "defence_add": 3.15,
+      "max_level": 40,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 20000
+        },
+        {
+          "ItemID": 110222,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 115002,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "3": {
+      "hp_base": 233.28,
+      "hp_add": 6.48,
+      "attack_base": 155.52,
+      "attack_add": 4.32,
+      "defence_base": 113.4,
+      "defence_add": 3.15,
+      "max_level": 50,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 50000
+        },
+        {
+          "ItemID": 110222,
+          "ItemNum": 8
+        },
+        {
+          "ItemID": 115002,
+          "ItemNum": 12
+        }
+      ]
+    },
+    "4": {
+      "hp_base": 302.4,
+      "hp_add": 6.48,
+      "attack_base": 201.6,
+      "attack_add": 4.32,
+      "defence_base": 147,
+      "defence_add": 3.15,
+      "max_level": 60,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 100000
+        },
+        {
+          "ItemID": 110223,
+          "ItemNum": 5
+        },
+        {
+          "ItemID": 115003,
+          "ItemNum": 6
+        }
+      ]
+    },
+    "5": {
+      "hp_base": 371.52,
+      "hp_add": 6.48,
+      "attack_base": 247.68,
+      "attack_add": 4.32,
+      "defence_base": 180.6,
+      "defence_add": 3.15,
+      "max_level": 70,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 200000
+        },
+        {
+          "ItemID": 110223,
+          "ItemNum": 10
+        },
+        {
+          "ItemID": 115003,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "6": {
+      "hp_base": 440.64,
+      "hp_add": 6.48,
+      "attack_base": 293.76,
+      "attack_add": 4.32,
+      "defence_base": 214.2,
+      "defence_add": 3.15,
+      "max_level": 80,
+      "cost": []
+    }
+  },
+  "icon": "icon/light_cone/23047.png",
+  "icon_figure": "icon/light_cone_figure/23047.png"
+}

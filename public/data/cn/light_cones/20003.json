@@ -1,0 +1,205 @@
+{
+  "id": 20003,
+  "name": "琥珀",
+  "rarity": 3,
+  "path": "Knight",
+  "desc": "存护命途专属的光锥，光锥技能仅对该命途生效。",
+  "story": "自时光中凝取的稀薄力量。正是所有微不足道的刹那，编织成了壮绝的命运。\\n\\n<i>「只有不受时光局限的事物，才能在时光中长生久传。」</i>",
+  "max_promotion": 6,
+  "max_rank": 5,
+  "skill": {
+    "id": 20003,
+    "name": "静滞",
+    "desc": "使装备者的防御力提高<color=#f29e38ff><unbreak>#1[i]%</unbreak></color>。当装备者当前生命值百分比小于<unbreak>#2[i]%</unbreak>时，其防御力额外提高<color=#f29e38ff><unbreak>#3[i]%</unbreak></color>。",
+    "level": {
+      "1": {
+        "level": 1,
+        "param_list": [
+          0.16,
+          0.5,
+          0.16
+        ]
+      },
+      "2": {
+        "level": 2,
+        "param_list": [
+          0.2,
+          0.5,
+          0.2
+        ]
+      },
+      "3": {
+        "level": 3,
+        "param_list": [
+          0.24,
+          0.5,
+          0.24
+        ]
+      },
+      "4": {
+        "level": 4,
+        "param_list": [
+          0.28,
+          0.5,
+          0.28
+        ]
+      },
+      "5": {
+        "level": 5,
+        "param_list": [
+          0.32,
+          0.5,
+          0.32
+        ]
+      }
+    }
+  },
+  "stats": {
+    "0": {
+      "hp_base": 38.4,
+      "hp_add": 5.76,
+      "attack_base": 12,
+      "attack_add": 1.8,
+      "defence_base": 15,
+      "defence_add": 2.25,
+      "max_level": 20,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 3000
+        },
+        {
+          "ItemID": 111001,
+          "ItemNum": 4
+        }
+      ]
+    },
+    "1": {
+      "hp_base": 84.48,
+      "hp_add": 5.76,
+      "attack_base": 26.4,
+      "attack_add": 1.8,
+      "defence_base": 33,
+      "defence_add": 2.25,
+      "max_level": 30,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 6000
+        },
+        {
+          "ItemID": 110141,
+          "ItemNum": 2
+        },
+        {
+          "ItemID": 111001,
+          "ItemNum": 8
+        }
+      ]
+    },
+    "2": {
+      "hp_base": 145.92,
+      "hp_add": 5.76,
+      "attack_base": 45.6,
+      "attack_add": 1.8,
+      "defence_base": 57,
+      "defence_add": 2.25,
+      "max_level": 40,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 12000
+        },
+        {
+          "ItemID": 110142,
+          "ItemNum": 2
+        },
+        {
+          "ItemID": 111002,
+          "ItemNum": 4
+        }
+      ]
+    },
+    "3": {
+      "hp_base": 207.36,
+      "hp_add": 5.76,
+      "attack_base": 64.8,
+      "attack_add": 1.8,
+      "defence_base": 81,
+      "defence_add": 2.25,
+      "max_level": 50,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 30000
+        },
+        {
+          "ItemID": 110142,
+          "ItemNum": 4
+        },
+        {
+          "ItemID": 111002,
+          "ItemNum": 6
+        }
+      ]
+    },
+    "4": {
+      "hp_base": 268.8,
+      "hp_add": 5.76,
+      "attack_base": 84,
+      "attack_add": 1.8,
+      "defence_base": 105,
+      "defence_add": 2.25,
+      "max_level": 60,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 60000
+        },
+        {
+          "ItemID": 110143,
+          "ItemNum": 3
+        },
+        {
+          "ItemID": 111003,
+          "ItemNum": 3
+        }
+      ]
+    },
+    "5": {
+      "hp_base": 330.24,
+      "hp_add": 5.76,
+      "attack_base": 103.2,
+      "attack_add": 1.8,
+      "defence_base": 129,
+      "defence_add": 2.25,
+      "max_level": 70,
+      "cost": [
+        {
+          "ItemID": 2,
+          "ItemNum": 120000
+        },
+        {
+          "ItemID": 110143,
+          "ItemNum": 6
+        },
+        {
+          "ItemID": 111003,
+          "ItemNum": 5
+        }
+      ]
+    },
+    "6": {
+      "hp_base": 391.68,
+      "hp_add": 5.76,
+      "attack_base": 122.4,
+      "attack_add": 1.8,
+      "defence_base": 153,
+      "defence_add": 2.25,
+      "max_level": 80,
+      "cost": []
+    }
+  },
+  "icon": "icon/light_cone/20003.png",
+  "icon_figure": "icon/light_cone_figure/20003.png"
+}

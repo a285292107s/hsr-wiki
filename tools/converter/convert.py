@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from textmap import load_textmap
 from converters import paths, elements, items, properties
 from converters import characters, character_ranks, character_skills, character_detail
-from converters import light_cones, relics, relic_affixes, monsters, endgame
+from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,6 +51,7 @@ def main() -> None:
     # 4. 光锥数据
     logger.info("--- 光锥数据 ---")
     light_cones.convert()
+    light_cone_detail.convert()
 
     # 5. 遗器数据
     logger.info("--- 遗器数据 ---")
