@@ -5,8 +5,10 @@
  * 方向由 router beforeEach 计算的 navDir 驱动。
  * viewKey：终局 4 路由（meta.endgameTab）共享同一 key，互切不触发页面过渡。
  * 手机断点（<768px）统一使用快速纯淡入淡出，避免方向滑移造成闪烁。
+ * 模式主题：route.meta.cw 驱动 <html data-theme="cw">（货币战争全壳暗金），
+ * 切换瞬间挂载 .theme-transitioning 实现 400ms 世界“褪色重染”。
  */
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import { navDir } from './router';
 import SidebarNav from './components/SidebarNav.vue';
@@ -28,6 +30,29 @@ const transitionName = computed(() =>
 );
 
 const viewKey = computed(() => (route.meta.endgameTab ? 'endgame' : route.path));
+
+/* ─── 货币战争模式：全壳暗金主题切换 ─── */
+const isCw = computed(() => !!route.meta.cw);
+let themeTimer: ReturnType<typeof setTimeout> | null = null;
+
+function applyTheme(cw: boolean, animate: boolean): void {
+  const root = document.documentElement;
+  if (animate) {
+    root.classList.add('theme-transitioning');
+    if (themeTimer !== null) clearTimeout(themeTimer);
+    themeTimer = setTimeout(() => {
+      root.classList.remove('theme-transitioning');
+      themeTimer = null;
+    }, 450);
+  }
+  if (cw) root.dataset.theme = 'cw';
+  else delete root.dataset.theme;
+}
+
+/* 首次加载（深链直达 CW 页）不播放渐变，直接应用主题 */
+applyTheme(isCw.value, false);
+watch(isCw, (cw) => applyTheme(cw, true));
+onBeforeUnmount(() => { if (themeTimer !== null) clearTimeout(themeTimer); });
 </script>
 
 <template>

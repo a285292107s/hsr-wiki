@@ -217,7 +217,7 @@ export interface CurrencyRoleSkill {
   bp_need: number | null;
   bp_add: number | null;
   show_stance_list: number[] | null;
-  extra: Record<string, { name: string; desc: string; param: unknown[] }> | null;
+  extra: Record<string, { name: string; desc: string; param: number[] }> | null;
   level: Record<string, { level: number; param_list: number[] }> | null;
 }
 

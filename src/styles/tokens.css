@@ -41,6 +41,73 @@
   --nk-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --nk-stagger: 40ms;
   --nk-radius-card: 12px;
+  /* ─── 外壳语义变量（侧栏/抽屉/目录头/卡片边框）：常规紫调默认，CW 暗金覆盖 ─── */
+  --nk-shell-bg: rgba(12,12,30,0.95);
+  --nk-shell-hover: rgba(124,58,237,0.1);
+  --nk-shell-press: rgba(124,58,237,0.18);
+  --nk-shell-active-bg: rgba(124,58,237,0.22);
+  --nk-shell-active-border: rgba(124,58,237,0.4);
+  --nk-shell-glow: rgba(124,58,237,0.18);
+  --nk-sheet-bg: rgba(16,14,36,0.94);
+  --nk-sheet-border: rgba(124,58,237,0.35);
+  --nk-sheet-item-bg: rgba(124,58,237,0.05);
+  --nk-sheet-item-border: rgba(124,58,237,0.14);
+  --nk-header-bg: rgba(15,15,35,0.92);
+  --nk-header-border: rgba(124,58,237,0.12);
+  --nk-input-bg: rgba(124,58,237,0.06);
+  --nk-input-border: rgba(124,58,237,0.18);
+  --nk-page-tint: rgba(124,58,237,0.05);
+  --nk-card-border: rgba(124,58,237,0.3);
+}
+
+/* ═══ 货币战争模式：全壳暗金主题（黑底 + 金点缀） ═══
+   由 App.vue 根据 route.meta.cw 挂载 <html data-theme="cw">。
+   硬约束：导航小字（≤0.75rem）用高亮度暖白，对比度 ≥4.5:1 */
+[data-theme="cw"] {
+  --bg: #0A0906;
+  --surface: rgba(16,14,9,0.88);
+  --card: rgba(24,21,13,0.72);
+  --primary: #D4AF37;
+  --primary-glow: rgba(212,175,55,0.25);
+  --accent: #C98A2D;
+  --gold: #FCD34D;
+  --text: rgba(255,248,230,0.92);
+  --text2: rgba(242,232,207,0.7);
+  --text-bright: #FFF8E6;
+  --text3: rgba(232,222,197,0.52);
+  --border: rgba(212,175,55,0.18);
+  --border2: rgba(212,175,55,0.4);
+  --highlight: #FCD34D;
+  --metric-val: #F5D67B;
+  /* 外壳：暗金侧栏/底部栏 */
+  --nk-shell-bg: rgba(12,10,5,0.96);
+  --nk-shell-hover: rgba(212,175,55,0.1);
+  --nk-shell-press: rgba(212,175,55,0.16);
+  --nk-shell-active-bg: rgba(212,175,55,0.16);
+  --nk-shell-active-border: rgba(212,175,55,0.45);
+  --nk-shell-glow: rgba(212,175,55,0.2);
+  --nk-sheet-bg: rgba(20,17,9,0.95);
+  --nk-sheet-border: rgba(212,175,55,0.35);
+  --nk-sheet-item-bg: rgba(212,175,55,0.06);
+  --nk-sheet-item-border: rgba(212,175,55,0.16);
+  --nk-header-bg: rgba(14,12,7,0.94);
+  --nk-header-border: rgba(212,175,55,0.14);
+  --nk-input-bg: rgba(212,175,55,0.06);
+  --nk-input-border: rgba(212,175,55,0.2);
+  --nk-page-tint: rgba(212,175,55,0.04);
+  --nk-card-border: rgba(212,175,55,0.28);
+}
+
+/* 主题切换瞬间的渐变过渡（App.vue 临时挂载 ~450ms 后移除，
+   避免常驻 transition 干扰日常 hover 响应速度） */
+.theme-transitioning,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition: background-color 400ms var(--nk-ease-out),
+              color 400ms var(--nk-ease-out),
+              border-color 400ms var(--nk-ease-out),
+              box-shadow 400ms var(--nk-ease-out) !important;
 }
 
 /* ─── 侧边栏（mobile-first：底部 Tab Bar） ─── */
@@ -49,12 +116,20 @@
   top: auto; bottom: 0; left: 0; right: 0; transform: none;
   width: 100%; height: calc(56px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: row; align-items: stretch;
-  background: rgba(12,12,30,0.95);
+  background: var(--nk-shell-bg);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border); border-radius: 0;
   padding: 0 4px env(safe-area-inset-bottom, 0px); z-index: 100000;
 }
-.ui-sidebar__brand { display: none; }
+/* ─── 交换按钮与导航板块的分隔线（mobile-first：底部栏为纵向细线） ─── */
+.ui-sidebar-divider {
+  flex: none;
+  width: 1px; height: 22px;
+  align-self: center;
+  margin: 0 3px;
+  background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
+  opacity: 0.8;
+}
 /* 全槽位触控目标：9 项在 375px 下物理上无法满足 44px 宽 + 8px 间距，
    改用 flex:1 填满整行消除死区，高度由 align-items: stretch 撑满 56px 栏高（≥ 44px 标准） */
 .ui-sidebar-link {
@@ -70,10 +145,10 @@
 .ui-sidebar-link__icon { display: flex; }
 .ui-sidebar-link__icon svg { width: 20px; height: 20px; }
 .ui-sidebar-link__label { font-size: 10px; line-height: 1; letter-spacing: 0.01em; white-space: nowrap; }
-.ui-sidebar-link:hover { opacity: 1; background: rgba(124,58,237,0.1); }
-.ui-sidebar-link:active { opacity: 1; background: rgba(124,58,237,0.18); }
+.ui-sidebar-link:hover { opacity: 1; background: var(--nk-shell-hover); }
+.ui-sidebar-link:active { opacity: 1; background: var(--nk-shell-press); }
 .ui-sidebar-link:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-.ui-sidebar-link--active { opacity: 1; color: var(--metric-val); background: rgba(124,58,237,0.22); border-color: rgba(124,58,237,0.4); box-shadow: 0 0 12px rgba(124,58,237,0.18); }
+.ui-sidebar-link--active { opacity: 1; color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); box-shadow: 0 0 12px var(--nk-shell-glow); }
 
 /* ─── 手机“更多”聚合：底部栏仅留 3 主项 + 更多按钮，其余 6 项收入上拉抽屉 ─── */
 /* 收纳项在底部栏隐藏（平板/桌面恢复显示） */
@@ -90,24 +165,24 @@
   width: 100%;
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
   padding: 18px 14px 22px;
-  background: rgba(16,14,36,0.94);
+  background: var(--nk-sheet-bg);
   backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border-top: 1px solid rgba(124,58,237,0.35);
+  border-top: 1px solid var(--nk-sheet-border);
   border-radius: 18px 18px 0 0;
   box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
 }
 .ui-more__item {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   padding: 14px 6px 12px;
-  border: 1px solid rgba(124,58,237,0.14); border-radius: 12px;
-  background: rgba(124,58,237,0.05);
+  border: 1px solid var(--nk-sheet-item-border); border-radius: 12px;
+  background: var(--nk-sheet-item-bg);
   color: var(--text2);
   transition: color 0.2s, background 0.2s, border-color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-.ui-more__item:active { background: rgba(124,58,237,0.16); }
+.ui-more__item:active { background: var(--nk-shell-press); }
 .ui-more__item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-.ui-more__item--active { color: var(--metric-val); background: rgba(124,58,237,0.18); border-color: rgba(124,58,237,0.4); }
+.ui-more__item--active { color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); }
 .ui-more__icon { display: flex; }
 .ui-more__icon svg { width: 24px; height: 24px; }
 .ui-more__label { font-size: 0.72rem; font-weight: 600; }
@@ -455,8 +530,8 @@ background-position: center 15%;
     position: fixed;
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     width: 56px; padding: 12px 6px; border-radius: 18px;
-    background: rgba(16,14,36,0.72); backdrop-filter: blur(20px) saturate(1.4);
-    border: 1px solid rgba(124,58,237,0.3);
+    background: var(--nk-sheet-bg); backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid var(--nk-sheet-border);
     box-shadow: 0 8px 32px rgba(0,0,0,0.55);
     top: 50%; bottom: auto; left: 8px; right: auto; transform: translateY(-50%);
     height: fit-content; z-index: 10000;
@@ -464,6 +539,13 @@ background-position: center 15%;
   /* 平板/桌面：图标式竖排，隐藏文字标签；触控目标提升至 44px（iPad 触屏标准） */
   .ui-sidebar-link { flex: none; width: 44px; height: 44px; }
   .ui-sidebar-link__label { display: none; }
+  /* 平板/桌面：分隔线转为横向，把交换按钮与竖排导航板块隔开 */
+  .ui-sidebar-divider {
+    width: auto; height: 1px;
+    align-self: stretch;
+    margin: 4px 8px;
+    background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
+  }
   /* 平板/桌面：恢复全部 9 项，隐藏“更多”入口与抽屉（含手机展开后旋屏的防御） */
   .ui-sidebar-more { display: none; }
   .ui-sidebar-link--in-more { display: flex; }
@@ -488,7 +570,7 @@ background-position: center 15%;
 }
 /* ── 桌面（≥1024px）：Hero 左右结构，视觉区 ≈ 42% + 信息面板 ≈ 58% ── */
 @media (min-width: 1024px) {
-  .ui-sidebar { width: 72px; padding: 14px 8px; border-radius: 22px; box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(124,58,237,0.08); }
+  .ui-sidebar { width: 72px; padding: 14px 8px; border-radius: 22px; box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px var(--nk-shell-glow); }
   .nk-page--detail { left: 88px; }
   .nk-hero {
     flex-direction: row;

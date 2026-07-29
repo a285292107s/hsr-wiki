@@ -1,10 +1,9 @@
 /**
  * 路由表 + 方向过渡
- * 路径与深度沿用原项目路由注册表（router.js）：
- *   home(0) / achievement(1) / generic-catalog(2) / character-catalog(3) / character(4)
  * 深度差决定页面过渡方向（navDir：1=前进深入，-1=返回，0=平级）。
  * meta.endgameTab：终局 4 路由互为同页 Tab——共享 transition key 与组件 key，
  * 互切时不触发页面过渡、不重建目录引擎。
+ * meta.cw：货币战争模式路由——驱动全壳暗金主题（data-theme="cw"）与 CW 导航配置。
  */
 import { createRouter, createWebHashHistory, type RouteRecordRaw, type Router } from 'vue-router';
 import { ref } from 'vue';
@@ -92,27 +91,51 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/CatalogView.vue'),
     meta: { depth: 2, catalog: 'peak', endgameTab: true },
   },
+  /* ─── 货币战争模式（独立路由树，meta.cw 驱动全壳暗金主题与 CW 导航） ─── */
   {
     path: '/currency',
-    name: 'catalog-currency',
-    component: () => import('../views/CatalogView.vue'),
-    meta: { depth: 2, catalog: 'currency' },
+    name: 'currency-hub',
+    component: () => import('../views/CurrencyHubView.vue'),
+    meta: { depth: 0, cw: true },
   },
   {
     path: '/currency/role',
     name: 'catalog-currency-role',
     component: () => import('../views/CatalogView.vue'),
-    meta: { depth: 3, catalog: 'currency-role' },
+    meta: { depth: 1, catalog: 'currency-role', cw: true },
   },
   {
     path: '/currency/role/:id(\\d+)',
     name: 'currency-role',
     component: () => import('../views/CurrencyRoleView.vue'),
-    meta: { depth: 4 },
+    meta: { depth: 2, cw: true },
   },
   {
-    // 成就页为尚未实现的扩展模块，第二期重构；
-    // 第一期展示占位页，保持 NAV_ITEMS 9 项导航完整。
+    path: '/currency/item',
+    name: 'currency-item',
+    component: () => import('../views/PlaceholderView.vue'),
+    meta: { depth: 1, cw: true, title: '装备图鉴' },
+  },
+  {
+    path: '/currency/buff',
+    name: 'currency-buff',
+    component: () => import('../views/PlaceholderView.vue'),
+    meta: { depth: 1, cw: true, title: '投资环境' },
+  },
+  {
+    path: '/currency/augment',
+    name: 'currency-augment',
+    component: () => import('../views/PlaceholderView.vue'),
+    meta: { depth: 1, cw: true, title: '投资策略' },
+  },
+  {
+    path: '/currency/trait',
+    name: 'currency-trait',
+    component: () => import('../views/PlaceholderView.vue'),
+    meta: { depth: 1, cw: true, title: '羁绊图鉴' },
+  },
+  {
+    // 成就页为尚未实现的扩展模块，第二期重构；第一期展示占位页。
     path: '/achievement',
     name: 'achievement',
     component: () => import('../views/PlaceholderView.vue'),

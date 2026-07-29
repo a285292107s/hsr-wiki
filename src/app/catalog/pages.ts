@@ -1,8 +1,8 @@
 /**
  * 目录页配置注册表（对应原 catalog.js 的 registerCatalogPage 调用）
- * 10 个目录页：角色（专用抓取 + 筛选）、光锥、遗器、物品、敌对、迷宫、剧情、首领、混沌、货币战争
+ * 9 个目录页：角色、光锥、遗器、物品、敌对、迷宫、剧情、首领、混沌（货币战争枢纽已独立为 CurrencyHubView）
  */
-import { CDN, PATH } from '../../lib/constants';
+import { PATH } from '../../lib/constants';
 import {
   escHtml, stripAllTags, itemIconUrl, avatarShopIconUrl, elementIconUrl, pathIconUrl,
   lightconeIconUrl, monsterIconUrl,
@@ -595,37 +595,6 @@ const peakPage = makeEndgamePage({
   loadList: loadLocalPeakList,
 });
 
-/* ─── 货币战争（复用遗器卡片样式） ─── */
-
-const currencyPage: CatalogPageConfig = {
-  id: 'currency',
-  title: '货币战争',
-  searchPlaceholder: '搜索货币战争...',
-  gridClass: 'nk-cat-grid nk-maze-grid',
-  cardClass: '.nk-relic-card',
-  async fetchData() {
-    // 无 CDN 列表端点；硬编码 5 张静态卡片
-    return [
-      { name: '角色图鉴', href: '/currency/role', img: `${CDN}/assets/hsr/avatarroundicon/1001.webp` },
-      { name: '装备图鉴', href: '/currency/item', img: `${CDN}/assets/hsr/gridfight/equipment/350101.webp` },
-      { name: '投资环境图鉴', href: '/currency/buff', img: `${CDN}/assets/hsr/gridfight/portal/101.webp` },
-      { name: '投资策略图鉴', href: '/currency/augment', img: `${CDN}/assets/hsr/gridfight/augmentbig/100101.webp` },
-      { name: '羁绊图鉴', href: '/currency/trait', img: `${CDN}/assets/hsr/gridfight/icon/1001.webp` },
-    ];
-  },
-  filters: [],
-  renderCard(item, i) {
-    return `<a class="nk-relic-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" style="--i:${i}">
-      <div class="nk-relic-card__img">
-        <img src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
-      </div>
-      <div class="nk-relic-card__info">
-        <span class="nk-relic-card__name">${escHtml(item.name)}</span>
-      </div>
-    </a>`;
-  },
-};
-
 /* ─── 货币战争 · 角色图鉴 ─── */
 
 const FB_LABEL: Record<string, string> = {
@@ -677,7 +646,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
 
 const currencyRolePage: CatalogPageConfig = {
   id: 'currency-role',
-  title: '货币战争 · 角色图鉴',
+  title: '角色',
   searchPlaceholder: '搜索角色…',
   gridClass: 'nk-cat-grid nk-crole-grid',
   cardClass: '.nk-crole-card',
@@ -811,6 +780,5 @@ export const CATALOG_PAGES: Record<string, CatalogPageConfig> = {
   story: storyPage,
   boss: bossPage,
   peak: peakPage,
-  currency: currencyPage,
   'currency-role': currencyRolePage,
 };

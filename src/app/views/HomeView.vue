@@ -7,11 +7,14 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useAppStore } from '../stores/app';
-import { NAV_ITEMS } from '../components/nav-items';
+import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
 import { CDN } from '../../lib/constants';
 
 const app = useAppStore();
 const loading = ref(true);
+
+/* ─── 导航卡片：常规 7 板块 + 货币战争网关卡片（金色第二入口） ─── */
+const navCards = [...NORMAL_NAV_ITEMS, CW_GATEWAY];
 
 /* ─── 立绘轮播（双缓冲交叉淡入，6s 间隔） ─── */
 
@@ -192,7 +195,7 @@ onBeforeUnmount(() => {
         <div class="nk-home-nav__head">
           <span class="nk-home-nav__label">SECTIONS</span>
           <span class="nk-home-nav__line"></span>
-          <span class="nk-home-nav__count">0{{ NAV_ITEMS.length }}</span>
+          <span class="nk-home-nav__count">0{{ navCards.length }}</span>
         </div>
         <div
           ref="gridRef"
@@ -201,10 +204,11 @@ onBeforeUnmount(() => {
           @mouseleave="onGridLeave"
         >
           <RouterLink
-            v-for="(n, i) in NAV_ITEMS"
+            v-for="(n, i) in navCards"
             :key="n.path"
             :to="n.path"
             class="nk-home-card"
+            :class="{ 'nk-home-card--gateway': n.path === CW_GATEWAY.path }"
             :style="{ '--i': i }"
           >
             <div class="nk-home-card__sheen"></div>

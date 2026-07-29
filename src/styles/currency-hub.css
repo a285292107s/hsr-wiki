@@ -1,0 +1,337 @@
+/* ═══════════════════════════════════════════
+   货币战争枢纽页（/currency）·「星际和平交易所」
+   暗金主题：黑底 + 金色点缀。仅在 data-theme="cw" 下呈现，
+   色值直接取 CW 调色板（--primary 金 / --gold 亮金 / --metric-val 暖金）。
+   BEM 前缀：nk-cwhub-*
+   ═══════════════════════════════════════════ */
+
+/* ── 容器：仿 catalog 布局，左侧让出桌面侧栏 88px ── */
+#nk-cwhub-app {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0 64px 80px;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -8%, rgba(212,175,55,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(201,138,45,0.06) 0%, transparent 60%),
+    var(--bg);
+}
+#nk-cwhub-app::-webkit-scrollbar { width: 6px; }
+#nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+#nk-cwhub-app::-webkit-scrollbar-track { background: transparent; }
+
+/* ═══ 行情滚动条：交易所式开场 ═══ */
+.nk-cwhub-ticker {
+  position: relative;
+  overflow: hidden;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(90deg, rgba(212,175,55,0.08), rgba(212,175,55,0.02) 50%, rgba(212,175,55,0.08));
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.nk-cwhub-ticker__track {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: nk-cwhub-ticker-scroll 38s linear infinite;
+}
+.nk-cwhub-ticker:hover .nk-cwhub-ticker__track { animation-play-state: paused; }
+.nk-cwhub-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  font-family: var(--font-hud);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+}
+.nk-cwhub-ticker__item b { font-weight: 700; color: var(--text); }
+.nk-cwhub-ticker__item i { font-style: normal; font-weight: 700; }
+.nk-cwhub-ticker__item.is-up i { color: var(--diff-add); }
+.nk-cwhub-ticker__item.is-down i { color: var(--diff-del); }
+.nk-cwhub-ticker__item em { font-style: normal; color: var(--border2); margin-left: 12px; font-size: 0.5rem; }
+@keyframes nk-cwhub-ticker-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+
+/* ═══ 主视觉区 ═══ */
+.nk-cwhub-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 460px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px 48px 40px;
+  border-bottom: 1px solid var(--border);
+}
+/* K 线纹理：底部对齐的金色烛柱 */
+.nk-cwhub-hero__candles {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 62%;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 0 24px;
+  opacity: 0.5;
+  mask-image: linear-gradient(to top, #000 0%, transparent 92%);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 92%);
+}
+.nk-cwhub-candle {
+  flex: 1 1 0;
+  min-width: 3px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(to top, rgba(212,175,55,0.55), rgba(212,175,55,0.06));
+  box-shadow: 0 0 8px rgba(212,175,55,0.12);
+  transform-origin: bottom;
+  animation: nk-cwhub-candle-pulse 4.2s ease-in-out infinite;
+}
+.nk-cwhub-candle.is-up { background: linear-gradient(to top, rgba(52,211,153,0.5), rgba(52,211,153,0.05)); box-shadow: 0 0 8px rgba(52,211,153,0.1); }
+@keyframes nk-cwhub-candle-pulse { 0%, 100% { transform: scaleY(1); opacity: 0.85; } 50% { transform: scaleY(0.82); opacity: 1; } }
+
+/* 金色光斑粒子 */
+.nk-cwhub-hero__particles { position: absolute; inset: 0; pointer-events: none; }
+.nk-cwhub-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FCD34D 0%, rgba(252,211,77,0) 70%);
+  box-shadow: 0 0 10px rgba(252,211,77,0.6);
+  opacity: 0;
+  animation: nk-cwhub-float ease-in-out infinite;
+}
+@keyframes nk-cwhub-float {
+  0% { opacity: 0; transform: translateY(12px) scale(0.7); }
+  35% { opacity: 0.9; }
+  70% { opacity: 0.5; }
+  100% { opacity: 0; transform: translateY(-26px) scale(1.15); }
+}
+/* 中央金色辉光 */
+.nk-cwhub-hero__glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 720px; height: 420px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(212,175,55,0.16) 0%, transparent 68%);
+  pointer-events: none;
+  filter: blur(6px);
+}
+
+/* 标题内容 */
+.nk-cwhub-hero__content { position: relative; z-index: 2; max-width: 720px; }
+.nk-cwhub-hero__kicker {
+  font-family: var(--font-hud);
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(252,211,77,0.4);
+  animation: nk-cwhub-fade-up 0.6s var(--ease) 0.05s backwards;
+}
+.nk-cwhub-hero__title {
+  margin: 14px 0 0;
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: 0.06em;
+  color: var(--text-bright);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7), 0 0 36px rgba(212,175,55,0.35);
+  animation: nk-cwhub-fade-up 0.7s var(--ease) 0.15s backwards;
+}
+.nk-cwhub-hero__en {
+  margin-top: 10px;
+  font-family: var(--font-hud);
+  font-size: clamp(0.9rem, 2.4vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  color: var(--primary);
+  text-shadow: 0 0 24px rgba(212,175,55,0.4);
+  animation: nk-cwhub-fade-up 0.7s var(--ease) 0.28s backwards;
+}
+.nk-cwhub-hero__tagline {
+  margin: 22px 0 0;
+  max-width: 560px;
+  font-size: 0.86rem;
+  line-height: 1.85;
+  color: var(--text2);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  animation: nk-cwhub-fade-up 0.7s var(--ease) 0.4s backwards;
+}
+@keyframes nk-cwhub-fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── 数据概览条：玻璃面板 + Orbitron 数字 ── */
+.nk-cwhub-stats {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin-top: 38px;
+  max-width: 720px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--border);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(252,211,77,0.08);
+  animation: nk-cwhub-fade-up 0.7s var(--ease) 0.52s backwards;
+}
+.nk-cwhub-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  background: linear-gradient(160deg, rgba(24,21,13,0.92), rgba(14,12,7,0.92));
+  backdrop-filter: blur(8px);
+}
+.nk-cwhub-stat__val {
+  font-family: var(--font-hud);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--metric-val);
+  text-shadow: 0 0 18px rgba(212,175,55,0.35);
+  font-variant-numeric: tabular-nums;
+}
+.nk-cwhub-stat__label { font-size: 0.66rem; letter-spacing: 0.14em; color: var(--text3); }
+
+/* ═══ 五大板块入口 ═══ */
+.nk-cwhub-sections { max-width: var(--nk-content-max); margin: 0 auto; padding: 56px 48px 0; }
+.nk-cwhub-sections__head { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; }
+.nk-cwhub-sections__label { font-family: var(--font-hud); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.24em; color: var(--primary); text-shadow: 0 0 16px var(--primary-glow); }
+.nk-cwhub-sections__line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
+.nk-cwhub-sections__count { font-family: var(--font-hud); font-size: 0.6rem; letter-spacing: 0.15em; color: var(--text3); }
+
+.nk-cwhub-sections__grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 132px; gap: 14px; }
+
+/* 板块卡片：暗金渐变 + 金边 + hover 辉光 + sheen 扫光 */
+.nk-cwhub-card {
+  --holo-color: rgba(252,211,77,0.75);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--nk-card-border);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--text);
+  overflow: hidden;
+  cursor: pointer;
+  background:
+    linear-gradient(150deg, rgba(212,175,55,0.10) 0%, rgba(20,17,9,0.5) 48%, rgba(212,175,55,0.04) 100%),
+    var(--card);
+  transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  animation: nk-cwhub-card-in 0.5s var(--ease) backwards;
+  animation-delay: calc(0.15s + var(--i, 0) * 70ms);
+}
+@keyframes nk-cwhub-card-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.nk-cwhub-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(252,211,77,0.7);
+  box-shadow: 0 16px 44px rgba(0,0,0,0.5), 0 0 26px rgba(212,175,55,0.28);
+}
+/* 已上线板块（featured）：占 2×2，强调金色 */
+.nk-cwhub-card--featured {
+  grid-column: span 2;
+  grid-row: span 2;
+  border-color: rgba(212,175,55,0.5);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(212,175,55,0.18) 0%, transparent 55%),
+    linear-gradient(150deg, rgba(212,175,55,0.12) 0%, rgba(24,20,10,0.6) 55%, rgba(212,175,55,0.05) 100%),
+    var(--card);
+}
+.nk-cwhub-card--featured .nk-cwhub-card__cn { font-size: 1.5rem; }
+.nk-cwhub-card--featured .nk-cwhub-card__icon { width: 56px; height: 56px; }
+.nk-cwhub-card--featured .nk-cwhub-card__icon svg { width: 28px; height: 28px; }
+.nk-cwhub-card--featured .nk-cwhub-card__desc { -webkit-line-clamp: 3; white-space: normal; }
+
+/* sheen 扫光 */
+.nk-cwhub-card__sheen {
+  position: absolute;
+  width: 46%; height: 190%;
+  top: -45%; left: -65%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(252,211,77,0.06) 30%, rgba(255,255,255,0.16) 50%, rgba(252,211,77,0.06) 70%, transparent 100%);
+  mix-blend-mode: screen;
+  filter: blur(1.4px);
+  opacity: 0;
+  transform: translate3d(0,0,0) rotate(-22deg);
+}
+.nk-cwhub-card:hover .nk-cwhub-card__sheen { animation: nk-cwhub-sheen 1.3s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
+@keyframes nk-cwhub-sheen { 0% { opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate3d(300%,0,0) rotate(-22deg); } }
+
+/* LIVE / SOON 角标 */
+.nk-cwhub-card__badge {
+  position: absolute;
+  top: 14px; right: 14px;
+  z-index: 3;
+  font-family: var(--font-hud);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid;
+}
+.nk-cwhub-card__badge.is-live { color: #0A0906; background: var(--gold); border-color: var(--gold); box-shadow: 0 0 14px rgba(252,211,77,0.5); }
+.nk-cwhub-card__badge.is-soon { color: var(--text3); background: rgba(212,175,55,0.06); border-color: var(--border); }
+
+.nk-cwhub-card__icon {
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  background: rgba(212,175,55,0.12);
+  border: 1px solid var(--border);
+  color: var(--gold);
+  transition: all 0.3s;
+}
+.nk-cwhub-card__icon svg { width: 22px; height: 22px; }
+.nk-cwhub-card:hover .nk-cwhub-card__icon { background: rgba(212,175,55,0.2); border-color: rgba(252,211,77,0.6); box-shadow: 0 0 16px rgba(212,175,55,0.35); color: #FDE68A; }
+
+.nk-cwhub-card__body { position: relative; z-index: 2; min-width: 0; }
+.nk-cwhub-card__cn { font-size: 1rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
+.nk-cwhub-card__en { font-family: var(--font-hud); font-size: 0.52rem; font-weight: 500; letter-spacing: 0.16em; color: var(--primary); margin-top: 3px; }
+.nk-cwhub-card__desc { font-size: 0.7rem; line-height: 1.5; color: var(--text3); margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.nk-cwhub-card__arrow { width: 18px; height: 18px; align-self: flex-end; color: var(--text3); position: relative; z-index: 2; transition: transform 0.25s var(--ease), color 0.25s; }
+.nk-cwhub-card:hover .nk-cwhub-card__arrow { transform: translateX(4px); color: var(--gold); }
+
+/* ── 页脚 ── */
+.nk-cwhub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 56px 48px 8px; text-align: center; font-family: var(--font-hud); font-size: 0.55rem; letter-spacing: 0.2em; color: var(--text3); opacity: 0.7; }
+
+/* ═══ 响应式 ═══ */
+@media (max-width: 1023px) {
+  .nk-cwhub-sections__grid { grid-template-columns: repeat(2, 1fr); }
+  .nk-cwhub-card--featured { grid-column: span 2; grid-row: span 1; }
+}
+@media (max-width: 767px) {
+  /* 移动端：侧栏降级为底部 Tab Bar，释放左侧预留，底部避开导航条 */
+  #nk-cwhub-app { padding: 0 0 calc(80px + env(safe-area-inset-bottom, 0px)) 0; }
+  .nk-cwhub-hero { min-height: 400px; padding: 48px 20px 32px; }
+  .nk-cwhub-stats { grid-template-columns: repeat(2, 1fr); }
+  .nk-cwhub-stat__val { font-size: 1.4rem; }
+  .nk-cwhub-sections { padding: 40px 20px 0; }
+  .nk-cwhub-sections__grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
+  .nk-cwhub-card { min-height: 96px; }
+  .nk-cwhub-card--featured { grid-column: span 1; grid-row: span 1; }
+  .nk-cwhub-card__desc { white-space: normal; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+  .nk-cwhub-footer { padding: 40px 20px 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-cwhub-ticker__track,
+  .nk-cwhub-candle,
+  .nk-cwhub-particle,
+  .nk-cwhub-hero__kicker,
+  .nk-cwhub-hero__title,
+  .nk-cwhub-hero__en,
+  .nk-cwhub-hero__tagline,
+  .nk-cwhub-stats,
+  .nk-cwhub-card { animation: none; }
+  .nk-cwhub-card:hover .nk-cwhub-card__sheen { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); }
+}
