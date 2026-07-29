@@ -115,3 +115,39 @@ describe('resolveSpineName', () => {
     await expect(api.resolveSpineName('1005')).resolves.toBeNull();
   });
 });
+
+/* ─── 单例缓存：静态 JSON 只请求一次，失败后重试 ─── */
+
+describe('单例缓存', () => {
+  it('loadLocalRelicSets 多次调用只触发一次 fetch', async () => {
+    const api = await freshApi();
+    const fetchMock = routeFetch({ 'relics.json': [{ id: 1, name: '测试' }] });
+    vi.stubGlobal('fetch', fetchMock);
+    const [a, b] = await Promise.all([api.loadLocalRelicSets(), api.loadLocalRelicSets()]);
+    expect(a).toBe(b); // 同一引用
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('loadLocalCharacterList 失败后再次调用会重试', async () => {
+    const api = await freshApi();
+    let callCount = 0;
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      callCount++;
+      if (callCount === 1) throw new Error('network down');
+      return { ok: true, status: 200, json: async () => [{ id: 1001, name: '角色' }] };
+    }));
+    await expect(api.loadLocalCharacterList()).rejects.toThrow();
+    const list = await api.loadLocalCharacterList();
+    expect(list[0].name).toBe('角色');
+    expect(callCount).toBe(2);
+  });
+
+  it('loadLocalLightCones 多次调用只触发一次 fetch', async () => {
+    const api = await freshApi();
+    const fetchMock = routeFetch({ 'light_cones.json': [{ id: 23001, name: '光锥' }] });
+    vi.stubGlobal('fetch', fetchMock);
+    await api.loadLocalLightCones();
+    await api.loadLocalLightCones();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});

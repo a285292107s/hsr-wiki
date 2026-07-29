@@ -9,6 +9,15 @@ from config import ICON_PATH_MAP
 
 logger = logging.getLogger("converter")
 
+# 全局输出模式：True=紧凑（生产），False=缩进（调试）
+COMPACT_OUTPUT = True
+
+
+def set_compact(value: bool) -> None:
+    """设置输出模式（由 CLI --pretty 控制）。"""
+    global COMPACT_OUTPUT
+    COMPACT_OUTPUT = not value
+
 
 def load_json(filepath: Path) -> Any:
     """加载 JSON 文件。"""
@@ -17,10 +26,13 @@ def load_json(filepath: Path) -> Any:
 
 
 def save_json(data: Any, filepath: Path) -> None:
-    """保存 JSON 文件，紧凑可读，中文不转义。"""
+    """保存 JSON 文件，中文不转义。默认紧凑模式，--pretty 时缩进。"""
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        if COMPACT_OUTPUT:
+            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+        else:
+            json.dump(data, f, ensure_ascii=False, indent=2)
     logger.info("已保存 %s（%s 条）", filepath, len(data) if isinstance(data, (list, dict)) else "?")
 
 

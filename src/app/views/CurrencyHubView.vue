@@ -7,7 +7,8 @@
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { CW_NAV_ITEMS } from '../components/nav-items';
-import { loadLocalCurrencyRoles } from '../../services/api';
+import { loadLocalCurrencyRoles, loadLocalCurrencySeasons } from '../../services/api';
+import type { CurrencySeason } from '../../services/types';
 
 /* ─── 行情滚动条（装饰性：游戏内货币的交易所行情） ─── */
 const TICKER = [
@@ -41,6 +42,9 @@ const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
 /* ─── 数据概览（驱动自转换产物，随版本自动更新） ─── */
 const stats = ref({ roles: 0, traits: 0, equip: 0, version: '—' });
 
+/* ─── 赛季扩充说明（驱动自 season 转换器产物） ─── */
+const seasons = ref<CurrencySeason[]>([]);
+
 /** 数字滚动（rAF · 900ms ease-out） */
 function countUp(key: 'roles' | 'traits' | 'equip', target: number): void {
   const t0 = performance.now();
@@ -68,6 +72,13 @@ onMounted(async () => {
     stats.value.version = data.version && data.version !== 'local' ? data.version : 'LOCAL';
   } catch {
     /* 离线降级：统计保持 0，页面结构仍完整 */
+  }
+
+  try {
+    const sData = await loadLocalCurrencySeasons();
+    seasons.value = sData.seasons ?? [];
+  } catch {
+    /* 离线降级：赛季说明不展示，不影响其它板块 */
   }
 });
 
@@ -179,6 +190,26 @@ const sections = CW_NAV_ITEMS.map((s) => ({ ...s, live: LIVE_PATHS.has(s.path) }
         </RouterLink>
       </div>
     </nav>
+
+    <!-- ═══ 赛季扩充说明 ═══ -->
+    <section v-if="seasons.length" class="nk-cwhub-season" aria-label="赛季扩充说明">
+      <div class="nk-cwhub-season__head">
+        <span class="nk-cwhub-season__label">SEASON&nbsp;INTEL</span>
+        <span class="nk-cwhub-season__line"></span>
+        <span class="nk-cwhub-season__count">{{ seasons.length }}</span>
+      </div>
+      <article
+        v-for="s in seasons"
+        :key="s.id"
+        class="nk-cwhub-season__card"
+      >
+        <span class="nk-cwhub-season__tag">赛季扩充说明</span>
+        <h2 class="nk-cwhub-season__title">{{ s.title }}</h2>
+        <div class="nk-cwhub-season__body">
+          <p v-for="(p, i) in s.body.split('\n').filter(Boolean)" :key="i">{{ p }}</p>
+        </div>
+      </article>
+    </section>
 
     <footer class="nk-cwhub-footer">DATA SOURCE — TurnBasedGameData · GRIDFIGHT</footer>
   </div>

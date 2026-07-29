@@ -7,13 +7,17 @@
  * - 图片资源与 Spine 动画仍走 CDN（static.nanoka.cc）。
  */
 import { CDN } from '../lib/constants';
-import { CACHE_TTL, cachedFetch, purgeStaleVersions } from './cache';
+import { CACHE_TTL, cachedFetch, fetchJSON, purgeStaleVersions } from './cache';
 import type {
   Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest,
   MazeListDb, LocalCharList,
   LocalItemList, LocalLightConeList, LocalRelicList, LocalMonsterList,
   LightConeDetail, LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
+  CurrencyRoleList, CurrencyRoleDetail, CurrencySeasonList,
 } from './types';
+
+/** 本地数据根路径（随站部署，Vite base 自动带前缀） */
+const LOCAL_DATA_BASE = `${import.meta.env.BASE_URL}data/cn`;
 
 /* ─── manifest ─── */
 
@@ -36,14 +40,14 @@ export const RARITY_NUM_TO_KEY: Record<number, string> = {
   5: 'SuperRare', 4: 'VeryRare', 3: 'Rare', 2: 'NotNormal', 1: 'Normal',
 };
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-  return (await res.json()) as T;
-}
+/* ─── 单例 Promise：静态 JSON 只请求一次，失败自动重置允许重试 ─── */
+
+let _charsP: Promise<LocalCharList> | null = null;
+let _lightConesP: Promise<LocalLightConeList> | null = null;
+let _relicsP: Promise<LocalRelicList> | null = null;
 
 export function loadLocalItems(): Promise<LocalItemList> {
-  return fetchJson<LocalItemList>(`${LOCAL_DATA_BASE}/items.json`);
+  return fetchJSON<LocalItemList>(`${LOCAL_DATA_BASE}/items.json`);
 }
 
 /** 物品库（Record 形态，供角色详情页 itemName 解析；由本地数组转换） */
@@ -63,31 +67,39 @@ export async function loadLocalItemDb(): Promise<ItemDb> {
 }
 
 export function loadLocalLightCones(): Promise<LocalLightConeList> {
-  return fetchJson<LocalLightConeList>(`${LOCAL_DATA_BASE}/light_cones.json`);
+  if (!_lightConesP) {
+    _lightConesP = fetchJSON<LocalLightConeList>(`${LOCAL_DATA_BASE}/light_cones.json`)
+      .catch((e) => { _lightConesP = null; throw e; });
+  }
+  return _lightConesP;
 }
 
 export function loadLocalRelicSets(): Promise<LocalRelicList> {
-  return fetchJson<LocalRelicList>(`${LOCAL_DATA_BASE}/relics.json`);
+  if (!_relicsP) {
+    _relicsP = fetchJSON<LocalRelicList>(`${LOCAL_DATA_BASE}/relics.json`)
+      .catch((e) => { _relicsP = null; throw e; });
+  }
+  return _relicsP;
 }
 
 export function loadLocalMonsterList(): Promise<LocalMonsterList> {
-  return fetchJson<LocalMonsterList>(`${LOCAL_DATA_BASE}/monsters.json`);
+  return fetchJSON<LocalMonsterList>(`${LOCAL_DATA_BASE}/monsters.json`);
 }
 
 export function loadLocalMazeList(): Promise<MazeListDb> {
-  return fetchJson<MazeListDb>(`${LOCAL_DATA_BASE}/maze.json`);
+  return fetchJSON<MazeListDb>(`${LOCAL_DATA_BASE}/maze.json`);
 }
 
 export function loadLocalStoryList(): Promise<MazeListDb> {
-  return fetchJson<MazeListDb>(`${LOCAL_DATA_BASE}/maze_extra.json`);
+  return fetchJSON<MazeListDb>(`${LOCAL_DATA_BASE}/maze_extra.json`);
 }
 
 export function loadLocalBossList(): Promise<MazeListDb> {
-  return fetchJson<MazeListDb>(`${LOCAL_DATA_BASE}/maze_boss.json`);
+  return fetchJSON<MazeListDb>(`${LOCAL_DATA_BASE}/maze_boss.json`);
 }
 
 export function loadLocalPeakList(): Promise<MazeListDb> {
-  return fetchJson<MazeListDb>(`${LOCAL_DATA_BASE}/maze_peak.json`);
+  return fetchJSON<MazeListDb>(`${LOCAL_DATA_BASE}/maze_peak.json`);
 }
 
 /**
@@ -128,27 +140,20 @@ export function spineBaseUrl(charId: string, name: string): string {
 
 /* ─── 本地数据源（TurnBasedGameData 转换输出） ─── */
 
-const LOCAL_DATA_BASE = `${import.meta.env.BASE_URL}data/cn`;
-
-export async function loadLocalCharacterList(): Promise<LocalCharList> {
-  const url = `${LOCAL_DATA_BASE}/characters.json`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-  return res.json();
+export function loadLocalCharacterList(): Promise<LocalCharList> {
+  if (!_charsP) {
+    _charsP = fetchJSON<LocalCharList>(`${LOCAL_DATA_BASE}/characters.json`)
+      .catch((e) => { _charsP = null; throw e; });
+  }
+  return _charsP;
 }
 
-export async function loadLocalCharacter(charId: string): Promise<CharacterData> {
-  const url = `${LOCAL_DATA_BASE}/characters/${charId}.json`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-  return res.json();
+export function loadLocalCharacter(charId: string): Promise<CharacterData> {
+  return fetchJSON<CharacterData>(`${LOCAL_DATA_BASE}/characters/${charId}.json`);
 }
 
-export async function loadLocalLightConeDetail(id: string): Promise<LightConeDetail> {
-  const url = `${LOCAL_DATA_BASE}/light_cones/${id}.json`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-  return res.json();
+export function loadLocalLightConeDetail(id: string): Promise<LightConeDetail> {
+  return fetchJSON<LightConeDetail>(`${LOCAL_DATA_BASE}/light_cones/${id}.json`);
 }
 
 /** 从本地 relics.json 加载单个遗器套装详情（按 ID 查找） */
@@ -161,169 +166,31 @@ export async function loadLocalRelicDetail(id: string): Promise<LocalRelicEntry>
 
 /** 遗器主词条表（relic_main_affixes.json） */
 export function loadLocalRelicMainAffixes(): Promise<RelicMainAffixList> {
-  return fetchJson<RelicMainAffixList>(`${LOCAL_DATA_BASE}/relic_main_affixes.json`);
+  return fetchJSON<RelicMainAffixList>(`${LOCAL_DATA_BASE}/relic_main_affixes.json`);
 }
 
 /** 遗器副词条表（relic_sub_affixes.json） */
 export function loadLocalRelicSubAffixes(): Promise<RelicSubAffixList> {
-  return fetchJson<RelicSubAffixList>(`${LOCAL_DATA_BASE}/relic_sub_affixes.json`);
+  return fetchJSON<RelicSubAffixList>(`${LOCAL_DATA_BASE}/relic_sub_affixes.json`);
 }
 
 /** 遗器来历表（relic_stories.json，set_id → 部位类型 → 故事） */
 export function loadLocalRelicStories(): Promise<RelicStoriesMap> {
-  return fetchJson<RelicStoriesMap>(`${LOCAL_DATA_BASE}/relic_stories.json`);
+  return fetchJSON<RelicStoriesMap>(`${LOCAL_DATA_BASE}/relic_stories.json`);
 }
 
 /* ─── 货币战争 · 角色图鉴（独立 CDN 数据源，converter 落地） ─── */
 
-/** 羁绊层级效果（GridFightTraitLayer） */
-export interface CurrencyRoleTraitLayer {
-  /** 激活所需人数 */
-  layer: number;
-  /** 品质（Silver/Gold，首层为 null） */
-  quality: string | null;
-  /** 效果描述（含 #N[i] 占位符，用 params 渲染） */
-  desc: string;
-  /** 描述参数 */
-  params: number[];
-  /** 羁绊成员属性加成 */
-  member_props: Array<{ name: string; property_type: string; value: number }>;
-  /** 全员属性加成 */
-  all_props: Array<{ name: string; property_type: string; value: number }>;
-}
-
-export interface CurrencyRoleTrait {
-  id: number;
-  name: string | null;
-  activation_type: string | null;
-  icon: string;
-  desc: string;
-  /** 简述 */
-  simple_desc: string;
-  /** 基础描述参数（渲染 desc 中的 #N[i] 占位符） */
-  desc_params: number[];
-  /** 层级效果列表（按 layer 升序） */
-  layers: CurrencyRoleTraitLayer[];
-}
-
-export interface CurrencyRoleSkill {
-  id: number;
-  name: string;
-  desc: string;
-  simple_desc: string;
-  type: string | null;
-  tag: string | null;
-  sp_base: number | null;
-  bp_need: number | null;
-  bp_add: number | null;
-  show_stance_list: number[] | null;
-  extra: Record<string, { name: string; desc: string; param: number[] }> | null;
-  level: Record<string, { level: number; param_list: number[] }> | null;
-}
-
-export interface CurrencyRoleStar {
-  star: number;
-  front_one_word_desc: string | null;
-  back_one_word_desc: string | null;
-  front_power_base: number | null;
-  back_power_base: number | null;
-  front_show_skill: CurrencyRoleSkill[];
-  back_show_skill: CurrencyRoleSkill[];
-  servant_show_skill: CurrencyRoleSkill[];
-  general_property_modify_list: unknown[] | null;
-  back_speed_rewrite: number | null;
-  back_speed_added_ratio: number | null;
-  back_energy_bar: number | null;
-  back_max_sp: number | null;
-  back_initial_sp: number | null;
-  back_initial_energy_bar: number | null;
-  luck_chance: number | null;
-  luck_damage: number | null;
-  extra_heal_base: number | null;
-  extra_shield_base: number | null;
-  stance_damage_display: unknown | null;
-  show_stance_list: number[] | null;
-  recommend: CurrencyRoleRecommend | null;
-}
-
-/** 推荐装备（按前后排分组） */
-export interface CurrencyRoleRecommend {
-  front?: { first: number[]; second: number[] };
-  back?: { first: number[]; second: number[] };
-}
-
-export interface CurrencyRoleDetail {
-  id: number;
-  name: string;
-  rarity: number;
-  front_back_type: string | null;
-  heal_or_shield_display: string | null;
-  charge_type: string[];
-  max_sp_icon: string;
-  is_expert: boolean;
-  trait_list: number[];
-  traits: CurrencyRoleTrait[];
-  stars: Record<string, CurrencyRoleStar>;
-  rank: CurrencyRoleRank[];
-  equipment: CurrencyRoleEquipment[];
-}
-
-/** 后台角色命座（GridFightBackRoleRank） */
-export interface CurrencyRoleRank {
-  rank_id: number;
-  rank: number;
-  name: string;
-  desc: string;
-  icon: string;
-  owner_props: Array<{ name: string; property_type: string; value: number }>;
-  all_props: Array<{ name: string; property_type: string; value: number }>;
-  param_list: number[];
-}
-
-/** 专属装备等级条目（GridFightBackEquipment） */
-export interface CurrencyRoleEquipment {
-  equipment_id: number;
-  level: number;
-  desc: string;
-  param_list: number[];
-  owner_props: Array<{ name: string; property_type: string; value: number }>;
-  all_props: Array<{ name: string; property_type: string; value: number }>;
-}
-
-/** 货币战争角色特质摘要（列表数据，由 converter 从 TextMap 解析） */
-export interface CurrencyRoleTraitSummary {
-  id: number;
-  name: string;
-  cat: 'faction' | 'combat' | 'special';
-}
-
-export interface CurrencyRoleEntry {
-  id: number;
-  name: string;
-  rarity: number;
-  front_back_type: string | null;
-  heal_or_shield_display: string | null;
-  charge_type: string[];
-  is_expert: boolean;
-  max_sp_icon: string;
-  trait_list: number[];
-  /** 特质摘要（id + name + cat），供列表页展示与筛选 */
-  traits: CurrencyRoleTraitSummary[];
-  /** 专属装备 ID（部分角色有） */
-  equipment_id: number | null;
-}
-
-export interface CurrencyRoleList {
-  version: string;
-  roles: CurrencyRoleEntry[];
-}
-
 export function loadLocalCurrencyRoles(): Promise<CurrencyRoleList> {
-  return fetchJson<CurrencyRoleList>(`${LOCAL_DATA_BASE}/currency/role.json`);
+  return fetchJSON<CurrencyRoleList>(`${LOCAL_DATA_BASE}/currency/role.json`);
 }
 
 export function loadLocalCurrencyRole(id: string): Promise<CurrencyRoleDetail> {
-  return fetchJson<CurrencyRoleDetail>(`${LOCAL_DATA_BASE}/currency/role/${id}.json`);
+  return fetchJSON<CurrencyRoleDetail>(`${LOCAL_DATA_BASE}/currency/role/${id}.json`);
+}
+
+export function loadLocalCurrencySeasons(): Promise<CurrencySeasonList> {
+  return fetchJSON<CurrencySeasonList>(`${LOCAL_DATA_BASE}/currency/season.json`);
 }
 
 /**
@@ -345,9 +212,9 @@ export async function loadLocalBuildNames(
 
   try {
     const [lc, relics, chars] = await Promise.all([
-      fetch(`${LOCAL_DATA_BASE}/light_cones.json`).then((r) => (r.ok ? r.json() : [])),
-      fetch(`${LOCAL_DATA_BASE}/relics.json`).then((r) => (r.ok ? r.json() : [])),
-      fetch(`${LOCAL_DATA_BASE}/characters.json`).then((r) => (r.ok ? r.json() : [])),
+      fetchJSON<LocalLightConeList>(`${LOCAL_DATA_BASE}/light_cones.json`),
+      fetchJSON<LocalRelicList>(`${LOCAL_DATA_BASE}/relics.json`),
+      fetchJSON<LocalCharList>(`${LOCAL_DATA_BASE}/characters.json`),
     ]);
     for (const item of lc) if (needed.has(String(item.id)) && !result[String(item.id)]) result[String(item.id)] = item.name;
     for (const item of relics) if (needed.has(String(item.id)) && !result[String(item.id)]) result[String(item.id)] = item.name;
@@ -366,13 +233,7 @@ export async function loadLocalBuildNames(
  */
 export async function loadLocalRelicSet(id: number | string): Promise<RelicSetData | null> {
   try {
-    const res = await fetch(`${LOCAL_DATA_BASE}/relics.json`);
-    if (!res.ok) return null;
-    const list: Array<{
-      id: number; name: string; icon: string;
-      descriptions?: Record<string, string>;
-      param_list?: Record<string, number[]>;
-    }> = await res.json();
+    const list = await fetchJSON<LocalRelicList>(`${LOCAL_DATA_BASE}/relics.json`);
     const item = list.find((r) => String(r.id) === String(id));
     if (!item) return null;
 

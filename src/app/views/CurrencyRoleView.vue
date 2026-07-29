@@ -8,11 +8,11 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { CDN } from '../../lib/constants';
 import { fmtDesc, avatarShopIconUrl, avatarDrawCardUrl, iconUrl } from '../../lib/format';
-import {
-  loadLocalCurrencyRole,
-  type CurrencyRoleDetail, type CurrencyRoleStar, type CurrencyRoleSkill,
-  type CurrencyRoleTrait, type CurrencyRoleTraitLayer, type CurrencyRoleRank,
-} from '../../services/api';
+import { loadLocalCurrencyRole } from '../../services/api';
+import type {
+  CurrencyRoleDetail, CurrencyRoleStar, CurrencyRoleSkill,
+  CurrencyRoleTrait, CurrencyRoleTraitLayer, CurrencyRoleRank,
+} from '../../services/types';
 
 const route = useRoute();
 const roleId = computed(() => String(route.params.id));

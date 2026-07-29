@@ -304,6 +304,73 @@
 /* ── 页脚 ── */
 .nk-cwhub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 56px 48px 8px; text-align: center; font-family: var(--font-hud); font-size: 0.55rem; letter-spacing: 0.2em; color: var(--text3); opacity: 0.7; }
 
+/* ═══ 赛季扩充说明 ═══ */
+.nk-cwhub-season { max-width: var(--nk-content-max); margin: 0 auto; padding: 64px 48px 0; }
+.nk-cwhub-season__head { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; }
+.nk-cwhub-season__label { font-family: var(--font-hud); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.24em; color: var(--primary); text-shadow: 0 0 16px var(--primary-glow); }
+.nk-cwhub-season__line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
+.nk-cwhub-season__count { font-family: var(--font-hud); font-size: 0.6rem; letter-spacing: 0.15em; color: var(--text3); }
+
+.nk-cwhub-season__card {
+  position: relative;
+  padding: 26px 28px 28px;
+  border: 1px solid var(--nk-card-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(212,175,55,0.14) 0%, transparent 55%),
+    linear-gradient(150deg, rgba(212,175,55,0.10) 0%, rgba(20,17,9,0.5) 50%, rgba(212,175,55,0.04) 100%),
+    var(--card);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(252,211,77,0.08);
+  animation: nk-cwhub-card-in 0.5s var(--ease) 0.1s backwards;
+}
+.nk-cwhub-season__card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--gold), rgba(212,175,55,0.1));
+  box-shadow: 0 0 16px rgba(212,175,55,0.4);
+}
+.nk-cwhub-season__tag {
+  display: inline-block;
+  font-family: var(--font-hud);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #0A0906;
+  background: var(--gold);
+  box-shadow: 0 0 14px rgba(252,211,77,0.5);
+}
+.nk-cwhub-season__title {
+  margin: 16px 0 18px;
+  font-size: clamp(1.2rem, 3vw, 1.7rem);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
+  text-shadow: 0 0 28px rgba(212,175,55,0.3);
+}
+.nk-cwhub-season__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 920px;
+}
+.nk-cwhub-season__body p {
+  margin: 0;
+  font-size: clamp(0.82rem, 1.6vw, 0.94rem);
+  line-height: 1.95;
+  color: var(--text2);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  /* 列表项首字加粗强调（• 引导的要点） */
+}
+.nk-cwhub-season__body p:where(:not([data-plain])) {
+  padding-left: 0;
+}
+
 /* ═══ 响应式 ═══ */
 @media (max-width: 1023px) {
   .nk-cwhub-sections__grid { grid-template-columns: repeat(2, 1fr); }
@@ -320,6 +387,8 @@
   .nk-cwhub-card { min-height: 96px; }
   .nk-cwhub-card--featured { grid-column: span 1; grid-row: span 1; }
   .nk-cwhub-card__desc { white-space: normal; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+  .nk-cwhub-season { padding: 44px 20px 0; }
+  .nk-cwhub-season__card { padding: 22px 18px 24px; }
   .nk-cwhub-footer { padding: 40px 20px 8px; }
 }
 
@@ -332,6 +401,7 @@
   .nk-cwhub-hero__en,
   .nk-cwhub-hero__tagline,
   .nk-cwhub-stats,
-  .nk-cwhub-card { animation: none; }
+  .nk-cwhub-card,
+  .nk-cwhub-season__card { animation: none; }
   .nk-cwhub-card:hover .nk-cwhub-card__sheen { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); }
 }

@@ -37,6 +37,9 @@ coverage
 __pycache__
 *.pyc
 
+# Converter incremental state
+tools/converter/.converter-state.json
+
 # Local reference data
 cdn-samples
 
