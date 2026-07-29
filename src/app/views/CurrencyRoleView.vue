@@ -5,7 +5,7 @@
  * 展示：沉浸式头图 → 锚点导航 → 羁绊（层级进度）→ 命座（时间线）→ 装备（等级递进）→ 星级详情
  */
 import { computed, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { CDN } from '../../lib/constants';
 import { fmtDesc, avatarShopIconUrl, avatarDrawCardUrl, iconUrl } from '../../lib/format';
 import {
@@ -15,7 +15,6 @@ import {
 } from '../../services/api';
 
 const route = useRoute();
-const router = useRouter();
 const roleId = computed(() => String(route.params.id));
 const data = ref<CurrencyRoleDetail | null>(null);
 const loading = ref(true);
@@ -231,13 +230,6 @@ const traitGroups = computed(() => {
 
 <template>
   <div class="nk-crole">
-    <!-- 返回按钮 -->
-    <div class="nk-crole__topbar">
-      <button class="nk-crole__back" @click="router.push('/currency/role')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-        <span>角色图鉴</span>
-      </button>
-    </div>
 
     <!-- 加载骨架屏 -->
     <div v-if="loading" class="nk-crole__skeleton">

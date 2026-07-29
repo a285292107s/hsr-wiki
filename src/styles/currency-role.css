@@ -151,34 +151,6 @@
   margin: 0 auto;
   padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
 }
-.nk-crole__topbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  padding: 12px 16px;
-  background: linear-gradient(180deg, var(--bg) 60%, transparent);
-  pointer-events: none;
-}
-.nk-crole__back {
-  pointer-events: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 40px;
-  background: rgba(15, 15, 35, 0.8);
-  backdrop-filter: blur(12px);
-  color: var(--text2);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s var(--ease);
-}
-.nk-crole__back svg { flex: none; }
-.nk-crole__back:hover { color: var(--text-bright); border-color: var(--border2); box-shadow: 0 0 16px var(--primary-glow); }
-.nk-crole__back:active { transform: scale(0.96); }
-.nk-crole__back:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* 状态：错误态 */
 .nk-crole__state { padding: 60px 20px; text-align: center; color: var(--text2); display: flex; flex-direction: column; align-items: center; gap: 12px; }
@@ -220,7 +192,7 @@
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center top;
+  background-position: center;
   filter: saturate(1.15) brightness(0.85);
   transform: scale(1.02);
 }
@@ -867,7 +839,7 @@
 /* 尊重「减少动态效果」偏好 */
 @media (prefers-reduced-motion: reduce) {
   .nk-crole-star--in { animation: none; }
-  .nk-crole-star-tab, .nk-crole__back { transition: border-color 0.2s, color 0.2s, background 0.2s; }
+  .nk-crole-star-tab { transition: border-color 0.2s, color 0.2s, background 0.2s; }
 }
 
 /* ═══ 响应式 ═══ */
@@ -876,8 +848,8 @@
     max-width: calc(980px + 88px);
     padding-left: 88px;
   }
-  .nk-crole__topbar { padding: 16px 24px; }
   .nk-crole-hero { min-height: 340px; }
+  .nk-crole-hero__bg { background-position: center; }
   .nk-crole-hero__content { padding: 32px; gap: 24px; }
   .nk-crole-hero__portrait { width: 140px; height: 140px; }
   .nk-crole-hero__name { font-size: 34px; }
