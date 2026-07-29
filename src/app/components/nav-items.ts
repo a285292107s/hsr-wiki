@@ -2,8 +2,9 @@
  * 全站导航配置（双模式：常规 7 板块 + 货币战争 5 板块）
  * 侧边栏（SidebarNav）与首页导航网格（HomeView）共享。
  *
- * 「交换」（SWAP_ITEM）为导航首项：点击跳转对方模式的枢纽页（/ ↔ /currency），
- * 标签固定，附双色状态点指示当前模式（紫=常规，金=货币战争）。
+ * 「交换」（SWAP_ITEM）为导航首项：点击跳转对方模式的枢纽页（/ ↔ /currency）。
+ * 手机底部栏统一 6 槽位：常规 = 交换 + 4 主项 + 更多；CW = 交换 + 5 板块。
+ * 槽位数一致保证模式切换时按钮位置不偏移。
  */
 export interface NavItem {
   title: string;
@@ -13,7 +14,8 @@ export interface NavItem {
   path: string;
   /** 额外参与高亮判定的路径（如终局内容 4 路由共享一个侧栏项）；默认仅 path */
   activePaths?: string[];
-  /** 主项：手机底部栏始终展示；未标记者收纳进"更多"抽屉（平板/桌面不受影响，均展示） */
+  /** 主项：手机底部栏始终展示；未标记者收纳进"更多"抽屉（平板/桌面不受影响，均展示）。
+   *  常规模式需恰好 4 个主项，与 CW 的 5 板块 + 交换凑成统一 6 槽位 */
   primary?: boolean;
   /** 手机底部栏两字短标签（CW 模式 6 槽位平铺时使用）；缺省回退 title */
   short?: string;
@@ -43,7 +45,7 @@ export const NORMAL_NAV_ITEMS: NavItem[] = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 4v6c0 4.4-3 8.4-7 10-4-1.6-7-5.6-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
   },
   {
-    title: '物品', en: 'ITEMS', desc: '材料 · 消耗品 · 货币', path: '/item',
+    title: '物品', en: 'ITEMS', desc: '材料 · 消耗品 · 货币', path: '/item', primary: true,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>',
   },
   {

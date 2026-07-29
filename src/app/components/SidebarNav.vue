@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * 自建侧边栏（双模式导航）
- * 首项为「交换」按钮：跳转对方模式枢纽页（/ ↔ /currency），附双色状态点（紫=常规，金=CW）。
- * 常规模式：7 板块；手机（<768px）底部栏 = 交换 + 3 主项 + "更多"抽屉。
+ * 自建侧边栏（双模式导航，手机底部栏统一 6 槽位，切换时按钮位置不偏移）
+ * 首项为「交换」按钮：跳转对方模式枢纽页（/ ↔ /currency）。
+ * 常规模式：7 板块；手机（<768px）底部栏 = 交换 + 4 主项 + "更多"抽屉。
  * CW 模式：5 板块；手机底部栏 = 交换 + 5 板块平铺（短标签），无抽屉。
  * 平板/桌面：竖排图标侧栏，当前模式全部板块展示 + 顶部 brand 标识。
  */
@@ -23,6 +23,15 @@ const navItems = computed<NavItem[]>(() => (isCw.value ? CW_NAV_ITEMS : NORMAL_N
 function onSwap(): void {
   void router.push(isCw.value ? '/' : '/currency');
 }
+
+/* ─── 模式切换过渡：导航板块「重凝」动画（交换按钮与分隔线保持不动） ─── */
+const swapping = ref(false);
+let swapTimer: ReturnType<typeof setTimeout> | null = null;
+watch(isCw, () => {
+  swapping.value = true;
+  if (swapTimer !== null) clearTimeout(swapTimer);
+  swapTimer = setTimeout(() => { swapping.value = false; }, 420);
+});
 
 /** 目录项高亮：精确匹配或其子路径（如 /currency/role 在 /currency/role/1001 下仍高亮）；
  *  配置了 activePaths 的项（如终局内容 4 路由）对每个路径分别判定 */
@@ -60,14 +69,17 @@ watch(moreOpen, async (open) => {
     moreBtnRef.value?.focus();
   }
 });
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown);
+  if (swapTimer !== null) clearTimeout(swapTimer);
+});
 
 /** "更多"入口图标（横三点，与其他图标同族） */
 const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>';
 </script>
 
 <template>
-  <nav class="ui-sidebar" :class="{ 'ui-sidebar--cw': isCw }" aria-label="主导航">
+  <nav class="ui-sidebar" :class="{ 'ui-sidebar--cw': isCw, 'ui-sidebar--swap-anim': swapping }" aria-label="主导航">
     <!-- 交换按钮：模式切换入口（与下方导航板块以分隔线区隔） -->
     <button
       type="button"
