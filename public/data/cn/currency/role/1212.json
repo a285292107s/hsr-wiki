@@ -20,14 +20,213 @@
       "name": "狼狩",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1008.png",
-      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。"
+      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "desc_params": [
+        10,
+        0.5,
+        4
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.15,
+            0.15
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.15
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.15
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.5,
+            0.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.5
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 8,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.9,
+            0.9
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.9
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.9
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2006,
       "name": "燃血",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2006.png",
-      "desc": "【燃血】队员的和提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。"
+      "desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "simple_desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "desc_params": [
+        40000,
+        0,
+        0.05,
+        0.02,
+        10000,
+        5,
+        1000,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.1,
+            0.1
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.1
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.2,
+            0.25
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.25
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.3,
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.4
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 8,
+          "quality": "Gold",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.45,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.45
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -36,24 +235,49 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "消耗自身和全体前台目标的生命值攻击敌人，提高我方小队暴击伤害，生命值较低时施放终结技攻击敌人会回复生命值。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 150,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_max_sp": 140,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 80,
       "extra_shield_base": 80,
-      "stance_damage_display": null,
+      "stance_damage_display": 20,
       "show_stance_list": [
         60,
         20,
         30
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030107,
+            35030405
+          ],
+          "second": [
+            35030102,
+            35030307,
+            35030306
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030107,
+            35030405
+          ],
+          "second": [
+            35030102,
+            35030307,
+            35030306
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -72,7 +296,21 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。镜流以#1[i]%的速度行动。",
+              "param": [
+                2,
+                0.33,
+                2.4,
+                1.2,
+                0.02,
+                0.6,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -104,7 +342,18 @@
             60
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "生命值低于生命上限的#1[i]%时施放。",
+              "param": [
+                0.05,
+                6,
+                3,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -174,24 +423,49 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "消耗自身和全体前台目标的生命值攻击敌人，提高我方小队暴击伤害，生命值较低时施放终结技攻击敌人会回复生命值。",
       "front_power_base": 140,
-      "back_power_base": null,
+      "back_power_base": 210,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_max_sp": 140,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 80,
       "extra_shield_base": 80,
-      "stance_damage_display": null,
+      "stance_damage_display": 20,
       "show_stance_list": [
         60,
         20,
         30
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030107,
+            35030405
+          ],
+          "second": [
+            35030102,
+            35030307,
+            35030306
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030107,
+            35030405
+          ],
+          "second": [
+            35030102,
+            35030307,
+            35030306
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -210,7 +484,21 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。镜流以#1[i]%的速度行动。",
+              "param": [
+                2.5,
+                0.33,
+                3,
+                1.5,
+                0.02,
+                0.8,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -242,7 +530,18 @@
             60
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "生命值低于生命上限的#1[i]%时施放。",
+              "param": [
+                0.05,
+                7.5,
+                3.75,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -312,24 +611,49 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "消耗自身和全体前台目标的生命值攻击敌人，提高我方小队暴击伤害，生命值较低时施放终结技攻击敌人会回复生命值。",
       "front_power_base": 180,
-      "back_power_base": null,
+      "back_power_base": 270,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_max_sp": 140,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 80,
       "extra_shield_base": 80,
-      "stance_damage_display": null,
+      "stance_damage_display": 20,
       "show_stance_list": [
         60,
         20,
         30
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030107,
+            35030405
+          ],
+          "second": [
+            35030102,
+            35030307,
+            35030306
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030107,
+            35030405
+          ],
+          "second": [
+            35030102,
+            35030307,
+            35030306
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -348,7 +672,21 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。镜流以#1[i]%的速度行动。",
+              "param": [
+                3,
+                0.33,
+                4.32,
+                2.16,
+                0.02,
+                1,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -380,7 +718,18 @@
             60
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "生命值低于生命上限的#1[i]%时施放。",
+              "param": [
+                0.05,
+                10.8,
+                5.4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -446,6 +795,197 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 121201,
+      "rank": 1,
+      "name": "月犯天关",
+      "desc": "施放终结技或强化战技时，镜流的暴击伤害提高#1[i]%，持续#3[i]回合，并且额外对主目标造成1次等同于镜流#2[i]%最大生命值的冰属性伤害。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11212/SkillIcon_11212_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.36,
+        0.8,
+        1
+      ]
+    },
+    {
+      "rank_id": 121202,
+      "rank": 2,
+      "name": "朔晕七星",
+      "desc": "施放终结技后，下一次强化战技的伤害提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11212/SkillIcon_11212_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.8
+      ]
+    },
+    {
+      "rank_id": 121203,
+      "rank": 3,
+      "name": "半璧迫望",
+      "desc": "镜流的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11212/SkillIcon_11212_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 121204,
+      "rank": 4,
+      "name": "持秉玄烛",
+      "desc": "镜流的暴击伤害提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11212/SkillIcon_11212_Rank4.png",
+      "owner_props": [
+        {
+          "name": "CriticalDamageBase",
+          "property_type": "CriticalDamageBase",
+          "value": 1
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        1
+      ]
+    },
+    {
+      "rank_id": 121205,
+      "rank": 5,
+      "name": "晦入三台",
+      "desc": "镜流的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11212/SkillIcon_11212_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 121206,
+      "rank": 6,
+      "name": "蚀变于娄",
+      "desc": "镜流的速度提高#1[i]%，冰属性抗性穿透提高#2[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11212/SkillIcon_11212_Rank6.png",
+      "owner_props": [
+        {
+          "name": "SpeedAddedRatio",
+          "property_type": "SpeedAddedRatio",
+          "value": 0.2
+        },
+        {
+          "name": "IcePenetrate",
+          "property_type": "IcePenetrate",
+          "value": 0.2
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.2,
+        0.2
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23014,
+      "level": 1,
+      "desc": "镜流的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23014,
+      "level": 2,
+      "desc": "镜流的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23014,
+      "level": 3,
+      "desc": "镜流的独立伤害增幅提高#1。",
+      "param_list": [
+        0.24,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.24
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23014,
+      "level": 4,
+      "desc": "镜流的独立伤害增幅提高#1。",
+      "param_list": [
+        0.3,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.3
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23014,
+      "level": 5,
+      "desc": "镜流的独立伤害增幅提高#1。",
+      "param_list": [
+        0.36,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.36
+        }
+      ],
+      "all_props": []
+    }
+  ]
 }

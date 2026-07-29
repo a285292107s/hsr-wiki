@@ -19,14 +19,143 @@
       "name": "公司",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1004.png",
-      "desc": "【公司】队员的和提高。"
+      "desc": "【公司】队员的后排战力和护盾量提高。",
+      "simple_desc": "【公司】队员的后排战力和护盾量提高。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%后排战力，#2[i]%护盾量。",
+          "params": [
+            0.3,
+            0.1
+          ],
+          "member_props": [
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraShieldAddedRatio",
+              "property_type": "ExtraShieldAddedRatio",
+              "value": 0.1
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Gold",
+          "desc": "#1[i]%后排战力，#2[i]%护盾量。",
+          "params": [
+            1,
+            0.25
+          ],
+          "member_props": [
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 1
+            },
+            {
+              "name": "ExtraShieldAddedRatio",
+              "property_type": "ExtraShieldAddedRatio",
+              "value": 0.25
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2001,
       "name": "追击",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2001.png",
-      "desc": "【追击】队员的提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的，持续至任意敌方目标回合开始。"
+      "desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌方目标回合开始。",
+      "simple_desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，并在攻击后额外附伤。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌人回合开始。",
+      "desc_params": [
+        0.05,
+        0.2,
+        0,
+        0,
+        1,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            1.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 1.2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -35,7 +164,7 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "行动时攻击敌方全体并有概率获得金币。我方小队攻击后使托帕&账账行动提前。敌人受到的伤害提高。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 200,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -52,7 +181,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030306,
+            35030303
+          ],
+          "second": [
+            35030103,
+            35030307,
+            35030104
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030306,
+            35030303
+          ],
+          "second": [
+            35030103,
+            35030307,
+            35030104
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -71,7 +225,19 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。托帕&账账以#1[i]%的速度行动。",
+              "param": [
+                2,
+                11,
+                0.3,
+                1,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -143,7 +309,7 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "行动时攻击敌方全体并有概率获得金币。我方小队攻击后使托帕&账账行动提前。敌人受到的伤害提高。",
       "front_power_base": 160,
-      "back_power_base": null,
+      "back_power_base": 320,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -160,7 +326,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030306,
+            35030303
+          ],
+          "second": [
+            35030103,
+            35030307,
+            35030104
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030306,
+            35030303
+          ],
+          "second": [
+            35030103,
+            35030307,
+            35030104
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -179,7 +370,19 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。托帕&账账以#1[i]%的速度行动。",
+              "param": [
+                2.5,
+                13.75,
+                0.5,
+                1,
+                5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -251,7 +454,7 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "行动时攻击敌方全体并有概率获得金币。我方小队攻击后使托帕&账账行动提前。敌人受到的伤害提高。",
       "front_power_base": 220,
-      "back_power_base": null,
+      "back_power_base": 2000,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -268,7 +471,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030306,
+            35030303
+          ],
+          "second": [
+            35030103,
+            35030307,
+            35030104
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030306,
+            35030303
+          ],
+          "second": [
+            35030103,
+            35030307,
+            35030104
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -287,7 +515,19 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。托帕&账账以#1[i]%的速度行动。",
+              "param": [
+                3,
+                55,
+                1,
+                5,
+                99
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -355,6 +595,191 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 111201,
+      "rank": 1,
+      "name": "未来市场",
+      "desc": "陷入【负债证明】状态下的敌方目标受到攻击时，将会陷入【被执行】状态，单次攻击内最多生效1次。\\n【被执行】使敌方目标受到的暴击伤害提高#1[i]%，最多叠加#2[i]层。【负债证明】被移除时，【被执行】也会被移除。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1112/SkillIcon_1112_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.25,
+        2
+      ]
+    },
+    {
+      "rank_id": 111202,
+      "rank": 2,
+      "name": "善意收购",
+      "desc": "托帕&账账的速度提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1112/SkillIcon_1112_Rank2.png",
+      "owner_props": [
+        {
+          "name": "SpeedAddedRatio",
+          "property_type": "SpeedAddedRatio",
+          "value": 0.2
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.2
+      ]
+    },
+    {
+      "rank_id": 111203,
+      "rank": 3,
+      "name": "抓大放小",
+      "desc": "托帕&账账的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1112/SkillIcon_1112_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 111204,
+      "rank": 4,
+      "name": "敏捷处理",
+      "desc": "账账行动后，下次行动提前#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1112/SkillIcon_1112_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.2
+      ]
+    },
+    {
+      "rank_id": 111205,
+      "rank": 5,
+      "name": "需求膨胀",
+      "desc": "托帕&账账的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1112/SkillIcon_1112_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 111206,
+      "rank": 6,
+      "name": "激励机制",
+      "desc": "【支付困难？】造成的伤害改为原伤害的#2[i]%，托帕&账账的全属性抗性穿透提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1112/SkillIcon_1112_Rank6.png",
+      "owner_props": [
+        {
+          "name": "AllDamageTypePenetrate",
+          "property_type": "AllDamageTypePenetrate",
+          "value": 0.2
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.2,
+        1.2
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23016,
+      "level": 1,
+      "desc": "托帕&账账的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23016,
+      "level": 2,
+      "desc": "托帕&账账的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23016,
+      "level": 3,
+      "desc": "托帕&账账的独立伤害增幅提高#1。",
+      "param_list": [
+        0.24,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.24
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23016,
+      "level": 4,
+      "desc": "托帕&账账的独立伤害增幅提高#1。",
+      "param_list": [
+        0.3,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.3
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23016,
+      "level": 5,
+      "desc": "托帕&账账的独立伤害增幅提高#1。",
+      "param_list": [
+        0.36,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.36
+        }
+      ],
+      "all_props": []
+    }
+  ]
 }

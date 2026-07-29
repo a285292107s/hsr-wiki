@@ -18,21 +18,254 @@
       "name": "贝洛伯格",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1005.png",
-      "desc": "【贝洛伯格】队员行动后为【造物引擎】充能，【造物引擎】的能量充满后立即攻击敌方目标，并让本场战斗中造成伤害最多的【贝洛伯格】角色立即行动。\\n【贝洛伯格】队员和【造物引擎】的提高。"
+      "desc": "【贝洛伯格】队员行动后为【造物引擎】充能，【造物引擎】的能量充满后立即攻击敌方目标，并让本场战斗中造成伤害最多的【贝洛伯格】角色立即行动。\\n【贝洛伯格】队员和【造物引擎】的全伤害提高。",
+      "simple_desc": "【贝洛伯格】队员行动后为【造物引擎】充能，能量充满后攻击敌人并让本场战斗中造成伤害最多的贝洛伯格角色立即行动。\\n贝洛伯格队员和【造物引擎】的全伤害提高。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%全伤害。",
+          "params": [
+            0.36
+          ],
+          "member_props": [
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.36
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Gold",
+          "desc": "#1[i]%全伤害。",
+          "params": [
+            0.72
+          ],
+          "member_props": [
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.72
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 1006,
       "name": "星间旅人",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1006.png",
-      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。"
+      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "simple_desc": "【星间旅人】角色会为你的小队提高特定属性，随场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.2,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.45,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.75,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.5,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            3,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2008,
       "name": "持续伤害",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2008.png",
-      "desc": "【持续伤害】队员的持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。"
+      "desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "simple_desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "desc_params": [
+        2.5,
+        2,
+        2.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -41,7 +274,7 @@
       "front_one_word_desc": "桑博战技的弹射次数增加，且可以额外触发满层的风化效果。",
       "back_one_word_desc": "行动时施放战技攻击敌人，使其陷入风化并在满层后额外触发风化效果。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 100,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -54,7 +287,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030307,
+            35030102,
+            35030708
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030101
+          ]
+        },
+        "back": {
+          "first": [
+            35030101,
+            35030507,
+            35030708
+          ],
+          "second": [
+            35030303,
+            35030208,
+            35030107
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 11080401,
@@ -130,7 +388,17 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。桑博以#3[i]%的速度行动。",
+              "param": [
+                6,
+                0.56,
+                2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -202,7 +470,7 @@
       "front_one_word_desc": "桑博战技的弹射次数增加，且可以额外触发满层的风化效果。",
       "back_one_word_desc": "行动时施放战技攻击敌人，使其陷入风化并在满层后额外触发风化效果。",
       "front_power_base": 160,
-      "back_power_base": null,
+      "back_power_base": 160,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -215,7 +483,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030307,
+            35030102,
+            35030708
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030101
+          ]
+        },
+        "back": {
+          "first": [
+            35030101,
+            35030507,
+            35030708
+          ],
+          "second": [
+            35030303,
+            35030208,
+            35030107
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 11080402,
@@ -291,7 +584,17 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。桑博以#3[i]%的速度行动。",
+              "param": [
+                7,
+                0.56,
+                2.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -363,7 +666,7 @@
       "front_one_word_desc": "桑博战技的弹射次数增加，且可以额外触发满层的风化效果。",
       "back_one_word_desc": "行动时施放战技攻击敌人，使其陷入风化并在满层后额外触发风化效果。",
       "front_power_base": 220,
-      "back_power_base": null,
+      "back_power_base": 220,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -376,7 +679,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030307,
+            35030102,
+            35030708
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030101
+          ]
+        },
+        "back": {
+          "first": [
+            35030101,
+            35030507,
+            35030708
+          ],
+          "second": [
+            35030303,
+            35030208,
+            35030107
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 11080403,
@@ -452,7 +780,17 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。桑博以#3[i]%的速度行动。",
+              "param": [
+                8,
+                0.56,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -524,7 +862,7 @@
       "front_one_word_desc": "桑博战技的弹射次数增加，且可以额外触发满层的风化效果。",
       "back_one_word_desc": "行动时施放战技攻击敌人，使其陷入风化并在满层后额外触发风化效果。",
       "front_power_base": 280,
-      "back_power_base": null,
+      "back_power_base": 280,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -537,7 +875,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030307,
+            35030102,
+            35030708
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030101
+          ]
+        },
+        "back": {
+          "first": [
+            35030101,
+            35030507,
+            35030708
+          ],
+          "second": [
+            35030303,
+            35030208,
+            35030107
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 11080404,
@@ -613,7 +976,17 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。桑博以#3[i]%的速度行动。",
+              "param": [
+                9,
+                0.56,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -681,6 +1054,93 @@
       ]
     }
   },
-  "rank": [],
+  "rank": [
+    {
+      "rank_id": 110801,
+      "rank": 1,
+      "name": "加码的爱",
+      "desc": "施放战技时，对敌方随机单体额外造成#1[i]次伤害。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1108/SkillIcon_1108_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        1
+      ]
+    },
+    {
+      "rank_id": 110802,
+      "rank": 2,
+      "name": "热情会传染",
+      "desc": "风化状态下的敌方目标被消灭时，使敌方全体有#1[i]%的基础概率叠加#2[i]层等同于天赋的风化状态。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1108/SkillIcon_1108_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        1,
+        1
+      ]
+    },
+    {
+      "rank_id": 110803,
+      "rank": 3,
+      "name": "大数字！",
+      "desc": "桑博的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1108/SkillIcon_1108_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.05
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.05
+      ]
+    },
+    {
+      "rank_id": 110804,
+      "rank": 4,
+      "name": "爱之深，恨之切",
+      "desc": "战技击中风化状态大于等于#1[i]层的敌方目标时，使其当前承受的风化状态立即产生相当于原伤害#2[i]%的伤害。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1108/SkillIcon_1108_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        5,
+        0.08
+      ]
+    },
+    {
+      "rank_id": 110805,
+      "rank": 5,
+      "name": "超大数字！",
+      "desc": "桑博的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1108/SkillIcon_1108_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.05
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.05
+      ]
+    },
+    {
+      "rank_id": 110806,
+      "rank": 6,
+      "name": "消费升级",
+      "desc": "天赋施加的风化状态的伤害倍率提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1108/SkillIcon_1108_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.15
+      ]
+    }
+  ],
   "equipment": []
 }

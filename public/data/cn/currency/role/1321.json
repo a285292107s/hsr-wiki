@@ -19,14 +19,163 @@
       "name": "盛会之星",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1010.png",
-      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。"
+      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。",
+      "simple_desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "获得选定【巨星】的加成。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "加成提高。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "加成提高。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "加成提高。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "加成提高。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2002,
       "name": "击破",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2002.png",
-      "desc": "【击破】队员的前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。"
+      "desc": "【击破】队员的前排战力后排战力前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。",
+      "simple_desc": "【击破】队员的前排战力后排战力前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌人的初始韧性和韧性恢复量降低。",
+      "desc_params": [
+        1.2,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.2,
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1.5,
+            1.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 1.5
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 1.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            3.2,
+            3.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 3.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 3.2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -35,7 +184,7 @@
       "front_one_word_desc": "大丽花的追加攻击段数提高。",
       "back_one_word_desc": "敌人未处于弱点击破状态也可受到超击破伤害。大丽花和一名前台角色成为【共舞者】，削韧时可造成超击破伤害，且大丽花的追加攻击段数提高。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 100,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -48,7 +197,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030104,
+            35030203,
+            35030101
+          ],
+          "second": [
+            35030707,
+            35030708,
+            35030507
+          ]
+        },
+        "back": {
+          "first": [
+            35030104,
+            35030203,
+            35030101
+          ],
+          "second": [
+            35030707,
+            35030708,
+            35030507
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13210401,
@@ -66,7 +240,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。大丽花以#4[i]%的速度行动。",
+              "param": [
+                0.3,
+                5,
+                2,
+                2,
+                0.6,
+                4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -100,7 +288,17 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                1.6,
+                0.5,
+                0
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -128,7 +326,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。大丽花以#4[i]%的速度行动。",
+              "param": [
+                0.3,
+                5,
+                2,
+                2,
+                0.6,
+                4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -174,7 +386,7 @@
       "front_one_word_desc": "大丽花的追加攻击段数提高。",
       "back_one_word_desc": "敌人未处于弱点击破状态也可受到超击破伤害。大丽花和一名前台角色成为【共舞者】，削韧时可造成超击破伤害，且大丽花的追加攻击段数提高。",
       "front_power_base": 160,
-      "back_power_base": null,
+      "back_power_base": 160,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -187,7 +399,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030104,
+            35030203,
+            35030101
+          ],
+          "second": [
+            35030707,
+            35030708,
+            35030507
+          ]
+        },
+        "back": {
+          "first": [
+            35030104,
+            35030203,
+            35030101
+          ],
+          "second": [
+            35030707,
+            35030708,
+            35030507
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13210402,
@@ -205,7 +442,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。大丽花以#4[i]%的速度行动。",
+              "param": [
+                0.36,
+                5,
+                2.4,
+                2.5,
+                0.8,
+                4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -239,7 +490,17 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                2,
+                0.5,
+                0
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -267,7 +528,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。大丽花以#4[i]%的速度行动。",
+              "param": [
+                0.36,
+                5,
+                2.4,
+                2.5,
+                0.8,
+                4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -313,7 +588,7 @@
       "front_one_word_desc": "大丽花的追加攻击段数提高。",
       "back_one_word_desc": "敌人未处于弱点击破状态也可受到超击破伤害。大丽花和一名前台角色成为【共舞者】，削韧时可造成超击破伤害，且大丽花的追加攻击段数提高。",
       "front_power_base": 220,
-      "back_power_base": null,
+      "back_power_base": 220,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -326,7 +601,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030104,
+            35030203,
+            35030101
+          ],
+          "second": [
+            35030707,
+            35030708,
+            35030507
+          ]
+        },
+        "back": {
+          "first": [
+            35030104,
+            35030203,
+            35030101
+          ],
+          "second": [
+            35030707,
+            35030708,
+            35030507
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13210403,
@@ -344,7 +644,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。大丽花以#4[i]%的速度行动。",
+              "param": [
+                0.45,
+                5,
+                3,
+                3,
+                1.2,
+                4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -378,7 +692,17 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                2.88,
+                0.5,
+                0
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -406,7 +730,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。大丽花以#4[i]%的速度行动。",
+              "param": [
+                0.45,
+                5,
+                3,
+                3,
+                1.2,
+                4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -452,7 +790,7 @@
       "front_one_word_desc": "大丽花的追加攻击段数提高。",
       "back_one_word_desc": "敌人未处于弱点击破状态也可受到超击破伤害。大丽花和一名前台角色成为【共舞者】，削韧时可造成超击破伤害，且大丽花的追加攻击段数提高。",
       "front_power_base": 280,
-      "back_power_base": null,
+      "back_power_base": 280,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -465,7 +803,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030104,
+            35030203,
+            35030101
+          ],
+          "second": [
+            35030707,
+            35030708,
+            35030507
+          ]
+        },
+        "back": {
+          "first": [
+            35030104,
+            35030203,
+            35030101
+          ],
+          "second": [
+            35030707,
+            35030708,
+            35030507
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13210404,
@@ -483,7 +846,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。大丽花以#4[i]%的速度行动。",
+              "param": [
+                0.54,
+                5,
+                3.6,
+                3,
+                1.8,
+                4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -517,7 +894,17 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                4.48,
+                0.5,
+                0
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -545,7 +932,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。大丽花以#4[i]%的速度行动。",
+              "param": [
+                0.54,
+                5,
+                3.6,
+                3,
+                1.8,
+                4,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -587,6 +988,213 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 132101,
+      "rank": 1,
+      "name": "当一朵花含苞待放",
+      "desc": "为【共舞者】提供的超击破伤害倍率对我方小队全体角色生效，其中【共舞者】的倍率额外提高#4[i]%。【共舞者】施放攻击后，对受到攻击的敌方目标额外造成等同于其韧性上限#1[i]%的固定削韧（至少#2[i]点，至多#3[i]点）。该效果每个敌方目标只能触发1次，敌方目标受到致命攻击后重置该目标的可触发次数。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1321/SkillIcon_1321_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.25,
+        10,
+        300,
+        0.4
+      ]
+    },
+    {
+      "rank_id": 132102,
+      "rank": 2,
+      "name": "新生，鲜灵，爱怜",
+      "desc": "敌方目标全属性抗性降低#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1321/SkillIcon_1321_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.2
+      ]
+    },
+    {
+      "rank_id": 132103,
+      "rank": 3,
+      "name": "可惜花瓣薄如蝉翼",
+      "desc": "我方小队的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1321/SkillIcon_1321_BP.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.03
+        }
+      ],
+      "param_list": [
+        0.03
+      ]
+    },
+    {
+      "rank_id": 132104,
+      "rank": 4,
+      "name": "可惜花蕊为虫剥蚀",
+      "desc": "角色赋能中追加攻击的伤害次数增加#3[i]次，施放时使敌方全体目标受到的伤害提高#1[i]%，持续#2[i]回合。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1321/SkillIcon_1321_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.12,
+        2,
+        5
+      ]
+    },
+    {
+      "rank_id": 132105,
+      "rank": 5,
+      "name": "凋落，腐烂，憎恨",
+      "desc": "我方小队的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1321/SkillIcon_1321_Ultra.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.03
+        }
+      ],
+      "param_list": [
+        0.03
+      ]
+    },
+    {
+      "rank_id": 132106,
+      "rank": 6,
+      "name": "然而它总是，致命美丽",
+      "desc": "【共舞者】的击破特攻提高#1[i]%。施放天赋的追加攻击时，使所有【共舞者】下一次行动提前#2[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1321/SkillIcon_1321_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        1.5,
+        0.2
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23050,
+      "level": 1,
+      "desc": "大丽花的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.04,
+        0.04
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.04
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.04
+        }
+      ]
+    },
+    {
+      "equipment_id": 23050,
+      "level": 2,
+      "desc": "大丽花的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.06,
+        0.06
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.06
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.06
+        }
+      ]
+    },
+    {
+      "equipment_id": 23050,
+      "level": 3,
+      "desc": "大丽花的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.08,
+        0.08
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ]
+    },
+    {
+      "equipment_id": 23050,
+      "level": 4,
+      "desc": "大丽花的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.1,
+        0.1
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.1
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.1
+        }
+      ]
+    },
+    {
+      "equipment_id": 23050,
+      "level": 5,
+      "desc": "大丽花的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.12,
+        0.12
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ]
+    }
+  ]
 }

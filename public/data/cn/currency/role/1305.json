@@ -18,21 +18,304 @@
       "name": "银河学者",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1003.png",
-      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。"
+      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。",
+      "simple_desc": "基于【银河学者】们的星级叠加【猫猫糕】，并根据层数获得额外奖励。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.8,
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.8
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            2,
+            2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 1006,
       "name": "星间旅人",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1006.png",
-      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。"
+      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "simple_desc": "【星间旅人】角色会为你的小队提高特定属性，随场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.2,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.45,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.75,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.5,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            3,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2001,
       "name": "追击",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2001.png",
-      "desc": "【追击】队员的提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的，持续至任意敌方目标回合开始。"
+      "desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌方目标回合开始。",
+      "simple_desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，并在攻击后额外附伤。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌人回合开始。",
+      "desc_params": [
+        0.05,
+        0.2,
+        0,
+        0,
+        1,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            1.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 1.2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -54,7 +337,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030102,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030108,
+            35030202,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030102,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030108,
+            35030202,
+            35030307
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13050401,
@@ -131,7 +439,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030102,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030108,
+            35030202,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030102,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030108,
+            35030202,
+            35030307
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13050402,
@@ -208,7 +541,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030102,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030108,
+            35030202,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030102,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030108,
+            35030202,
+            35030307
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13050403,

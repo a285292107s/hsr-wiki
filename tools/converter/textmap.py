@@ -28,6 +28,7 @@ def clean_text(text: str) -> str:
     - {NICKNAME} → 开拓者
     - {SPACE} → 空格
     - {RUBY_...} 标签 → 移除
+    - <property type=XXX ...> → 友好属性名（羁绊/技能效果属性，如"全伤害""生命值"）
     - <color=...>...</color> → 保留文字，去掉标签
     - <unbreak>...</unbreak> → 保留文字，去掉标签
     - 其他未知标签 → 移除
@@ -42,6 +43,10 @@ def clean_text(text: str) -> str:
     # 移除 RUBY 标签
     text = re.sub(r"\{RUBY_[EB]#(?:[^}]*)\}", "", text)
 
+    # <property type=XXX display=all> → 友好属性名（自走棋羁绊/技能的效果属性引用）
+    # 原标签无内容、无闭合，直接删除会导致描述残缺（如"的和提高"丢失属性名）
+    text = re.sub(r"<property\s+type=(\w+)[^>]*>", _property_label, text)
+
     # 处理 <color=...>...</color> → 保留文字
     text = re.sub(r"<color=([^>]+)>", "", text)
     text = re.sub(r"</color>", "", text)
@@ -54,6 +59,44 @@ def clean_text(text: str) -> str:
     text = re.sub(r"<[^>]+>", "", text)
 
     return text
+
+
+# <property type=XXX> 标签的属性名映射（去"提高"后缀，用名词形式以适配"的X和Y提高"句式）
+# key 为去末尾数字后缀后的属性类型（如 ExtraHPAddedRatio1 → ExtraHPAddedRatio）
+_PROPERTY_LABEL: dict[str, str] = {
+    "ExtraAllDamageTypeAddedRatio": "全伤害",
+    "ExtraHPAddedRatio": "生命值",
+    "ExtraAttackAddedRatio": "攻击力",
+    "ExtraDefenceAddedRatio": "防御力",
+    "ExtraSpeedAddedRatio": "速度",
+    "ExtraBackPowerAddedRatio": "后排战力",
+    "ExtraFrontPowerAddedRatio": "前排战力",
+    "ExtraShieldAddedRatio": "护盾量",
+    "ExtraCriticalChanceBase": "暴击率",
+    "ExtraCriticalDamageBase": "暴击伤害",
+    "ExtraBreakDamageAddedRatio": "击破特攻",
+    "ExtraHealRatioBase": "治疗量",
+    "ExtraHealRatio": "治疗量",
+    "ExtraSPAddedRatio": "战技点",
+    "ExtraSP": "战技点",
+    "ExtraInitSP": "初始战技点",
+    "ExtraMaxSP": "战技点上限",
+    "ExtraLuckChance": "幸运触发率",
+    "ExtraLuckDamage": "幸运伤害",
+    "ExtraQuantumResonance": "量子共鸣",
+    "ExtraEnergyRatio": "能量恢复效率",
+    "ExtraStatusProbabilityBase": "效果命中",
+    "ExtraStatusResistanceBase": "效果抵抗",
+    "ExtraElationDamageAddedRatio": "欢愉伤害",
+}
+
+
+def _property_label(match: "re.Match[str]") -> str:
+    """<property type=XXX> → 友好属性名；未命中时回退到去后缀的 type 名。"""
+    t = match.group(1)
+    base = re.sub(r"\d+$", "", t)  # 去末尾数字后缀（层级版本号）
+    return _PROPERTY_LABEL.get(base) or _PROPERTY_LABEL.get(t) or base
+
 
 
 def resolve_text(ref: Any, clean: bool = True) -> str:

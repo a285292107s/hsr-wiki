@@ -4,9 +4,16 @@
   - AvatarConfig.json                   → 角色名（Hash → TextMap → 中文）
   - GridFightRoleBasicInfo.json         → 角色基础信息列表
   - GridFightRoleStar.json              → 各星级战力/属性修正/技能列表
-  - GridFightTraitBasicInfo.json        → 羁绊信息（名、描述、图标等）
+  - GridFightTraitBasicInfo.json        → 羁绊信息（名、描述、图标、描述参数等）
+  - GridFightTraitLayer.json            → 羁绊层级效果（激活人数/品质/属性加成）
   - GridFightFrontSkill.json            → 前排技能文本
   - GridFightBackBESkillConfig.json     → 后排/BE 技能文本
+  - GridFightBackSkillExtraDesc.json    → 技能附加条件描述
+  - GridFightBackRoleRank.json          → 后台角色命座（BackendRankList 引用）
+  - GridFightBackEquipment.json         → 专属装备（EquipmentID 引用，按等级）
+  - GridFightRoleRecommendEquip.json    → 推荐装备 ID 列表
+  - GridFightServantStar.json           → 随从星级配置（随从技能列表）
+  - GridFightServantSkill.json          → 随从技能文本
   - TextMap/TextMapCHS.json             → 中文文本映射
 
 输出（与前端现有类型兼容）：
@@ -88,6 +95,90 @@ def _flatten_property_mods(lst: list | None) -> list[dict]:
     return out
 
 
+def _index_trait_layers(data: list[dict], mazebuff_index: dict[int, dict] | None = None) -> dict[int, list[dict]]:
+    """GridFightTraitLayer.json → TraitID → 层级效果列表。
+
+    每层包含：激活人数(layer)、品质(quality)、效果描述(desc)、
+    描述参数(params)、羁绊成员属性(member_props)、全员属性(all_props)。
+    当直接字段为空时，回退到 MazebuffID 对应的 GridFightTraitMazebuff 描述。
+    """
+    if mazebuff_index is None:
+        mazebuff_index = {}
+    out: dict[int, list[dict]] = {}
+    for entry in data:
+        tid = entry.get("TraitID")
+        if tid is None:
+            continue
+        desc = resolve_text(entry.get("PropertyDesc", {}))
+        params = [_unwrap(p, 0) for p in (entry.get("PropertyParamList") or [])]
+        member_props = _flatten_property_mods(entry.get("TraitMemberPropertyList"))
+        all_props = _flatten_property_mods(entry.get("AllMemberPropertyList"))
+        # 回退：直接字段为空时，从 MazebuffID 关联的 buff 补全描述
+        if not desc and not member_props and not all_props:
+            mb_id = entry.get("MazebuffID")
+            mb = mazebuff_index.get(mb_id) if mb_id else None
+            if mb:
+                desc = resolve_text(mb.get("BuffDesc") or mb.get("BuffSimpleDesc", {}))
+                params = [_unwrap(p, 0) for p in (mb.get("ParamList") or [])]
+        node = {
+            "layer": entry.get("Layer", 0),
+            "quality": entry.get("Quality") or None,
+            "desc": desc,
+            "params": params,
+            "member_props": member_props,
+            "all_props": all_props,
+        }
+        out.setdefault(tid, []).append(node)
+    # 按 layer 升序
+    for tid in out:
+        out[tid].sort(key=lambda x: x["layer"])
+    return out
+
+
+def _index_equipment(data: list[dict]) -> dict[int, list[dict]]:
+    """GridFightBackEquipment.json → RoleID → 按等级的装备条目列表。"""
+    out: dict[int, list[dict]] = {}
+    for entry in data:
+        rid = entry.get("RoleID")
+        if rid is None:
+            continue
+        out.setdefault(rid, []).append(entry)
+    for rid in out:
+        out[rid].sort(key=lambda x: x.get("Level", 0))
+    return out
+
+
+def _index_recommend(data: list[dict]) -> dict[int, dict]:
+    """GridFightRoleRecommendEquip.json → RoleID → 推荐装备。
+
+    输出格式：{"front": {"first": [...], "second": [...]}, "back": {...}}
+    """
+    out: dict[int, dict] = {}
+    for entry in data:
+        rid = entry.get("RoleID")
+        if rid is None:
+            continue
+        fb = str(entry.get("FrontBackType", "")).lower()
+        node = out.setdefault(rid, {})
+        node[fb] = {
+            "first": list(entry.get("FirstRecommendEquipList") or []),
+            "second": list(entry.get("SecondRecommendEquipList") or []),
+        }
+    return out
+
+
+def _index_servant_star(data: list[dict]) -> dict[tuple[int, int], dict]:
+    """GridFightServantStar.json → (ID, Star) → 条目。"""
+    out: dict[tuple[int, int], dict] = {}
+    for entry in data:
+        rid = entry.get("ID")
+        star = entry.get("Star")
+        if rid is None or star is None:
+            continue
+        out[(rid, star)] = entry
+    return out
+
+
 # ---------- 主转换函数 ----------
 
 def convert() -> None:
@@ -106,6 +197,16 @@ def convert() -> None:
     star_data = _load_excel("GridFightRoleStar.json")
     front_skills = _build_index(_load_excel("GridFightFrontSkill.json"), "SkillID")
     back_skills = _build_index(_load_excel("GridFightBackBESkillConfig.json"), "SkillID")
+
+    # 新增数据源
+    trait_mazebuff_index = _build_index(_load_excel("GridFightTraitMazebuff.json"), "ID")
+    trait_layers = _index_trait_layers(_load_excel("GridFightTraitLayer.json"), trait_mazebuff_index)
+    rank_index = _build_index(_load_excel("GridFightBackRoleRank.json"), "RankID")
+    equip_by_role = _index_equipment(_load_excel("GridFightBackEquipment.json"))
+    recommend_by_role = _index_recommend(_load_excel("GridFightRoleRecommendEquip.json"))
+    servant_star_index = _index_servant_star(_load_excel("GridFightServantStar.json"))
+    servant_skills = _build_index(_load_excel("GridFightServantSkill.json"), "SkillID")
+    skill_extra = _build_index(_load_excel("GridFightBackSkillExtraDesc.json"), "SkillID")
 
     # 2. 构建角色名映射 AvatarID → 中文名
     name_map: dict[int, str] = {}
@@ -177,6 +278,8 @@ def convert() -> None:
                 continue
             trait_name = resolve_text(tr.get("TraitName", {}))
             trait_desc = resolve_text(tr.get("TraitBaseDesc", {}))
+            trait_simple = resolve_text(tr.get("TraitBaseSimpleDesc", {}))
+            base_params = [_unwrap(p, 0) for p in (tr.get("BaseDescParamList") or [])]
 
             traits_out.append({
                 "id": tid,
@@ -184,7 +287,44 @@ def convert() -> None:
                 "activation_type": tr.get("ActivationType"),
                 "icon": tr.get("IconPath", ""),
                 "desc": trait_desc,
+                "simple_desc": trait_simple,
+                "desc_params": base_params,
+                "layers": trait_layers.get(tid, []),
             })
+
+        # 命座（后台角色等级强化，BackendRankList → GridFightBackRoleRank）
+        ranks_out: list[dict] = []
+        for rank_id in (role_raw.get("BackendRankList") or []):
+            rk = rank_index.get(rank_id)
+            if rk is None:
+                continue
+            ranks_out.append({
+                "rank_id": rank_id,
+                "rank": rk.get("Rank", 0),
+                "name": resolve_text(rk.get("Name", {})),
+                "desc": resolve_text(rk.get("Desc", {})),
+                "icon": rk.get("IconPath", ""),
+                "owner_props": _flatten_property_mods(rk.get("OwnerGeneralPropertyList")),
+                "all_props": _flatten_property_mods(rk.get("AllMemberGeneralPropertyList")),
+                "param_list": [_unwrap(p, 0) for p in (rk.get("DescParamList") or [])],
+            })
+
+        # 专属装备（EquipmentID → GridFightBackEquipment，按等级）
+        equipment_out: list[dict] = []
+        equip_id = role_raw.get("EquipmentID")
+        if equip_id:
+            for lv_entry in equip_by_role.get(rid, []):
+                equipment_out.append({
+                    "equipment_id": equip_id,
+                    "level": lv_entry.get("Level", 0),
+                    "desc": resolve_text(lv_entry.get("BackEquipmentDesc", {})),
+                    "param_list": [_unwrap(p, 0) for p in (lv_entry.get("ParamList") or [])],
+                    "owner_props": _flatten_property_mods(lv_entry.get("OwnerGeneralPropertyList")),
+                    "all_props": _flatten_property_mods(lv_entry.get("AllMemberGeneralPropertyList")),
+                })
+
+        # 推荐装备（按前后排分组）
+        recommend_out = recommend_by_role.get(rid)
 
         # 该角色在各星级下的数据
         role_stars = star_by_role.get(rid, [])
@@ -198,10 +338,10 @@ def convert() -> None:
             be_skill_ids: list[int] = star_entry.get("BESkillIDList") or []
             back_show_ids: list[int] = star_entry.get("BackShowSkillIDList") or []
 
-            front_skills_out = [_build_skill(sid, front_skills, {}) for sid in front_skill_ids]
-            back_skills_out = [_build_skill(sid, back_skills, {"sp_base": None}) for sid in be_skill_ids]
+            front_skills_out = [_build_skill(sid, front_skills, {}, skill_extra) for sid in front_skill_ids]
+            back_skills_out = [_build_skill(sid, back_skills, {"sp_base": None}, skill_extra) for sid in be_skill_ids]
             # 把 "back_show" 也加进来（与 be 去重或单独分组的逻辑看情况）
-            back_show_out = [_build_skill(sid, back_skills, {"sp_base": None}) for sid in back_show_ids]
+            back_show_out = [_build_skill(sid, back_skills, {"sp_base": None}, skill_extra) for sid in back_show_ids]
             # 合并去重
             seen_ids = {sk["id"] for sk in back_skills_out}
             for bsk in back_show_out:
@@ -209,28 +349,36 @@ def convert() -> None:
                     back_skills_out.append(bsk)
                     seen_ids.add(bsk["id"])
 
+            # 随从技能（ServantStar 中 ServantShowSkiilIDList → ServantSkill）
+            servant_skills_out: list[dict] = []
+            sv_key = (rid, star_entry["Star"])
+            sv_entry = servant_star_index.get(sv_key)
+            if sv_entry:
+                for sid in (sv_entry.get("ServantShowSkiilIDList") or []):
+                    servant_skills_out.append(_build_skill(sid, servant_skills, {}, skill_extra))
+
             star_node = {
                 "star": star_entry["Star"],
                 "front_one_word_desc": resolve_text(star_entry.get("FrontOneWordDesc", {})),
                 "back_one_word_desc": resolve_text(star_entry.get("BackOneWordDesc", {})),
                 "front_power_base": _unwrap(star_entry.get("FrontPowerBase")),
-                "back_power_base": None,
+                "back_power_base": _unwrap(star_entry.get("BackPowerBase")),
                 "back_speed_rewrite": None,
                 "back_speed_added_ratio": None,
-                "back_energy_bar": None,
-                "back_max_sp": None,
-                "back_initial_sp": None,
-                "back_initial_energy_bar": None,
+                "back_energy_bar": _unwrap(star_entry.get("BackEnergyBar")),
+                "back_max_sp": _unwrap(star_entry.get("BackMaxSP")),
+                "back_initial_sp": _unwrap(star_entry.get("BackInitialSP")),
+                "back_initial_energy_bar": _unwrap(star_entry.get("BackInitialEnergyBar")),
                 "luck_chance": _unwrap(star_entry.get("LuckChance")),
                 "luck_damage": _unwrap(star_entry.get("LuckDamage")),
                 "extra_heal_base": _unwrap(star_entry.get("ExtraHealBase")),
                 "extra_shield_base": _unwrap(star_entry.get("ExtraShieldBase")),
-                "stance_damage_display": None,
+                "stance_damage_display": _unwrap(star_entry.get("StanceDamageDisplay")),
                 "show_stance_list": _flatten_stance_list(star_entry.get("ShowStanceList")),
-                "recommend": None,
+                "recommend": recommend_out,
                 "front_show_skill": front_skills_out,
                 "back_show_skill": back_skills_out,
-                "servant_show_skill": [],
+                "servant_show_skill": servant_skills_out,
                 "general_property_modify_list": _flatten_property_mods(
                     star_entry.get("GeneralPropertyModifyList")
                 ),
@@ -249,8 +397,8 @@ def convert() -> None:
             "trait_list": base["trait_list"],
             "traits": traits_out,
             "stars": stars_out,
-            "rank": [],       # 暂无来源解析
-            "equipment": [],
+            "rank": ranks_out,
+            "equipment": equipment_out,
         }
 
         (detail_dir / f"{rid}.json").write_text(
@@ -270,6 +418,7 @@ def _build_skill(
     sid: int,
     skill_index: dict[int, dict],
     overrides: dict[str, Any] | None = None,
+    extra_index: dict[int, dict] | None = None,
 ) -> dict:
     """根据 SkillID 从索引中查找并构建输出格式的技能对象。"""
     sk = skill_index.get(sid)
@@ -290,6 +439,22 @@ def _build_skill(
     stance_list = _flatten_stance_list(sk.get("ShowStanceList"))
     pl = [_unwrap(p, 0) for p in (sk.get("ParamList") or [])]
 
+    # 附加条件描述（GridFightBackSkillExtraDesc）
+    extra: dict[str, Any] = {}
+    if extra_index:
+        ex = extra_index.get(sid)
+        if ex:
+            ex_desc = resolve_text(ex.get("ConditionDesc", {}))
+            ex_simple = resolve_text(ex.get("ConditionSimpleDesc", {}))
+            if ex_desc or ex_simple:
+                extra = {
+                    "condition": {
+                        "name": "触发条件",
+                        "desc": ex_desc or ex_simple,
+                        "param": [_unwrap(p, 0) for p in (ex.get("ParamList") or [])],
+                    }
+                }
+
     result = {
         "id": sid,
         "name": name,
@@ -302,7 +467,7 @@ def _build_skill(
         "bp_add": bp_add,
         "show_stance_list": stance_list,
         "skill_combo_value_delta": None,
-        "extra": {},
+        "extra": extra,
         "level": {
             "1": {"level": 1, "param_list": pl},
         },

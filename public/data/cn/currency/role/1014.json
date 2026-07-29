@@ -20,14 +20,141 @@
       "name": "命运圣杯",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1013.png",
-      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前/后台强度提高。"
+      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前排战力后排战力前/后台强度提高。",
+      "simple_desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前排战力后排战力前/后台强度提高。",
+      "desc_params": [],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.25,
+            0.25
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.5,
+            0.5
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1,
+            1
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1.8,
+            1.8
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2004,
       "name": "能量",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
-      "desc": "【能量】队员的提高。在场上生成【能量地块】，可提供和能量恢复。"
+      "desc": "【能量】队员的ExtraUltraDamageAddedRatio提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
+      "simple_desc": "【能量】队员的ExtraUltraDamageAddedRatio提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
+      "desc_params": [
+        0.3,
+        0.03,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "params": [
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraUltraDamageAddedRatio1",
+              "property_type": "ExtraUltraDamageAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "params": [
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraUltraDamageAddedRatio1",
+              "property_type": "ExtraUltraDamageAddedRatio1",
+              "value": 0.4
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraUltraDamageAddedRatio1",
+              "property_type": "ExtraUltraDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 10,
+          "quality": "Multicolor",
+          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "params": [
+            2.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraUltraDamageAddedRatio1",
+              "property_type": "ExtraUltraDamageAddedRatio1",
+              "value": 2.4
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -36,7 +163,7 @@
       "front_one_word_desc": "我方小队其他目标施放终结技后，使Saber的终结技能弹射更多次数。",
       "back_one_word_desc": "我方小队其他目标施放终结技后，Saber叠加【炉心共鸣】并使终结技弹射次数提高，行动时基于其层数恢复能量。",
       "front_power_base": 150,
-      "back_power_base": null,
+      "back_power_base": 150,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -53,7 +180,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030308,
+            35030108,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030308,
+            35030107,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10149901,
@@ -100,7 +252,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。每移除1层【炉心共鸣】，Saber恢复#4[i]点能量。",
+              "param": [
+                3.6,
+                1.4,
+                10,
+                10
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -129,7 +292,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。Saber以#1[i]%的速度行动。",
+              "param": [
+                2,
+                2,
+                2,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -202,7 +376,7 @@
       "front_one_word_desc": "我方小队其他目标施放终结技后，使Saber的终结技能弹射更多次数。",
       "back_one_word_desc": "我方小队其他目标施放终结技后，Saber叠加【炉心共鸣】并使终结技弹射次数提高，行动时基于其层数恢复能量。",
       "front_power_base": 240,
-      "back_power_base": null,
+      "back_power_base": 240,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -219,7 +393,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030308,
+            35030108,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030308,
+            35030107,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10149902,
@@ -266,7 +465,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。每移除1层【炉心共鸣】，Saber恢复#4[i]点能量。",
+              "param": [
+                4.5,
+                1.75,
+                10,
+                10
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -295,7 +505,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。Saber以#1[i]%的速度行动。",
+              "param": [
+                2.5,
+                2.5,
+                2.5,
+                3.75
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -368,7 +589,7 @@
       "front_one_word_desc": "我方小队其他目标施放终结技后，使Saber的终结技能弹射更多次数。",
       "back_one_word_desc": "我方小队其他目标施放终结技后，Saber叠加【炉心共鸣】并使终结技弹射次数提高，行动时基于其层数恢复能量。",
       "front_power_base": 330,
-      "back_power_base": null,
+      "back_power_base": 330,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -385,7 +606,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030308,
+            35030108,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030308,
+            35030107,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10149903,
@@ -432,7 +678,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。每移除1层【炉心共鸣】，Saber恢复#4[i]点能量。",
+              "param": [
+                6.48,
+                2.52,
+                10,
+                10
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -461,7 +718,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。Saber以#1[i]%的速度行动。",
+              "param": [
+                3,
+                3.6,
+                3.6,
+                5.4
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -530,6 +798,183 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 101401,
+      "rank": 1,
+      "name": "失落的白垩坚城",
+      "desc": "Saber造成的终结技伤害提高#1[i]%。Saber施放普攻后，获得#2[i]点【炉心共鸣】。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1014/SkillIcon_1014_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.6,
+        1
+      ]
+    },
+    {
+      "rank_id": 101402,
+      "rank": 2,
+      "name": "尘封的圆桌誓言",
+      "desc": "Saber造成伤害时无视目标#1[i]%的防御力。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1014/SkillIcon_1014_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.15
+      ]
+    },
+    {
+      "rank_id": 101403,
+      "rank": 3,
+      "name": "十五个世纪的追寻",
+      "desc": "Saber的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1014/SkillIcon_1014_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 101404,
+      "rank": 4,
+      "name": "十六个冬日的奇遇",
+      "desc": "Saber的风属性抗性穿透提高#1[i]%。施放终结技后，Saber的风属性抗性穿透提高#2[i]%，该效果最多叠加#3[i]层。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1014/SkillIcon_1014_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.08,
+        0.04,
+        3
+      ]
+    },
+    {
+      "rank_id": 101405,
+      "rank": 5,
+      "name": "于抵达理想的黎明",
+      "desc": "Saber的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1014/SkillIcon_1014_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 101406,
+      "rank": 6,
+      "name": "守护命运长夜",
+      "desc": "Saber造成的终结技伤害的风属性抗性穿透提高#1[i]%，Saber可积攒的溢出能量提高到#4[i]点。进入战斗首次施放终结技后，为Saber固定恢复#3[i]点能量，该效果每再施放#2[i]次终结技可触发1次。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1014/SkillIcon_1014_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.2,
+        3,
+        300,
+        200
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23045,
+      "level": 1,
+      "desc": "Saber的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23045,
+      "level": 2,
+      "desc": "Saber的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23045,
+      "level": 3,
+      "desc": "Saber的独立伤害增幅提高#1。",
+      "param_list": [
+        0.24,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.24
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23045,
+      "level": 4,
+      "desc": "Saber的独立伤害增幅提高#1。",
+      "param_list": [
+        0.3,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.3
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23045,
+      "level": 5,
+      "desc": "Saber的独立伤害增幅提高#1。",
+      "param_list": [
+        0.36,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.36
+        }
+      ],
+      "all_props": []
+    }
+  ]
 }

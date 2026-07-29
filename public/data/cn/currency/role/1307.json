@@ -21,21 +21,144 @@
       "name": "盛会之星",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1010.png",
-      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。"
+      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。",
+      "simple_desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "获得选定【巨星】的加成。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "加成提高。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "加成提高。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "加成提高。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "加成提高。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2008,
       "name": "持续伤害",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2008.png",
-      "desc": "【持续伤害】队员的持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。"
+      "desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "simple_desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "desc_params": [
+        2.5,
+        2,
+        2.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 3002,
       "name": "命运卜者",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/3002.png",
-      "desc": "黑天鹅每累计参与#1[i]场战斗后可以打开占卜屋，并选择1张启示卡以获得对应强化。"
+      "desc": "黑天鹅每累计参与#1[i]场战斗后可以打开占卜屋，并选择1张启示卡以获得对应强化。",
+      "simple_desc": "黑天鹅每累计参与#1[i]场战斗后可以打开占卜屋，并选择1张启示卡以获得对应强化。",
+      "desc_params": [
+        2
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": "Unique",
+          "desc": "黑天鹅参与战斗后可以打开占卜屋，并选择1张启示卡以获得对应强化。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -44,7 +167,7 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "为敌人添加可叠加层数的持续伤害【奥迹】，敌人回合触发【奥迹】时自身恢复能量，终结技可维持【奥迹】层数。【奥迹】的可叠加层数能超过上限。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 200,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -61,7 +184,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030107,
+            35030307,
+            35030205
+          ],
+          "second": [
+            35030507,
+            35030308,
+            35030303
+          ]
+        },
+        "back": {
+          "first": [
+            35030107,
+            35030307,
+            35030205
+          ],
+          "second": [
+            35030507,
+            35030308,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -80,7 +228,20 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。黑天鹅以#6[i]%的速度行动。",
+              "param": [
+                3,
+                3,
+                1,
+                0.2,
+                3,
+                2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -111,7 +272,20 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。\\n战技恢复#5[i]点能量，敌方目标回合开始【奥迹】造成伤害时，每层【奥迹】使黑天鹅恢复#6[f1]点能量。",
+              "param": [
+                5,
+                2,
+                0.25,
+                1,
+                30,
+                0.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -192,7 +366,7 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "为敌人添加可叠加层数的持续伤害【奥迹】，敌人回合触发【奥迹】时自身恢复能量，终结技可维持【奥迹】层数。【奥迹】的可叠加层数能超过上限。",
       "front_power_base": 160,
-      "back_power_base": null,
+      "back_power_base": 320,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -209,7 +383,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030107,
+            35030307,
+            35030205
+          ],
+          "second": [
+            35030507,
+            35030308,
+            35030303
+          ]
+        },
+        "back": {
+          "first": [
+            35030107,
+            35030307,
+            35030205
+          ],
+          "second": [
+            35030507,
+            35030308,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -228,7 +427,20 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。黑天鹅以#6[i]%的速度行动。",
+              "param": [
+                3.75,
+                3,
+                1,
+                0.3,
+                3,
+                2.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -259,7 +471,20 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。\\n战技恢复#5[i]点能量，敌方目标回合开始【奥迹】造成伤害时，每层【奥迹】使黑天鹅恢复#6[f1]点能量。",
+              "param": [
+                6.25,
+                2,
+                0.35,
+                1,
+                30,
+                0.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -340,7 +565,7 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "为敌人添加可叠加层数的持续伤害【奥迹】，敌人回合触发【奥迹】时自身恢复能量，终结技可维持【奥迹】层数。【奥迹】的可叠加层数能超过上限。",
       "front_power_base": 220,
-      "back_power_base": null,
+      "back_power_base": 2000,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -357,7 +582,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030107,
+            35030307,
+            35030205
+          ],
+          "second": [
+            35030507,
+            35030308,
+            35030303
+          ]
+        },
+        "back": {
+          "first": [
+            35030107,
+            35030307,
+            35030205
+          ],
+          "second": [
+            35030507,
+            35030308,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -376,7 +626,20 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。黑天鹅以#6[i]%的速度行动。",
+              "param": [
+                15,
+                3,
+                1,
+                0.4,
+                3,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -407,7 +670,20 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。\\n战技恢复#5[i]点能量，敌方目标回合开始【奥迹】造成伤害时，每层【奥迹】使黑天鹅恢复#6[f1]点能量。",
+              "param": [
+                25,
+                2,
+                0.5,
+                1,
+                30,
+                0.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -484,6 +760,194 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 130701,
+      "rank": 1,
+      "name": "三磅石，七阶柱",
+      "desc": "处于风化、裂伤、灼烧、触电状态下的敌方目标对应的风、物理、火、雷属性抗性分别降低#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11307/SkillIcon_11307_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.25
+      ]
+    },
+    {
+      "rank_id": 130702,
+      "rank": 2,
+      "name": "羔羊，请勿为我恸哭",
+      "desc": "敌方目标进入战斗时，有#1[i]%的基础概率陷入#2[i]层【奥迹】。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11307/SkillIcon_11307_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        1,
+        30
+      ]
+    },
+    {
+      "rank_id": 130703,
+      "rank": 3,
+      "name": "上界如此，下界亦然",
+      "desc": "黑天鹅的独立伤害增幅提高#1[i]%，我方小队的独立伤害增幅提高#2[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11307/SkillIcon_11307_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.05
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.02
+        }
+      ],
+      "param_list": [
+        0.05,
+        0.02
+      ]
+    },
+    {
+      "rank_id": 130704,
+      "rank": 4,
+      "name": "泪水，亦是礼物",
+      "desc": "【揭露】状态下，敌方目标受到的伤害额外提高#1[i]%，且每回合开始时或被消灭时使黑天鹅恢复#2[i]点能量。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11307/SkillIcon_11307_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.1,
+        8
+      ]
+    },
+    {
+      "rank_id": 130705,
+      "rank": 5,
+      "name": "候鸟之路",
+      "desc": "黑天鹅的独立伤害增幅提高#1[i]%，我方小队的独立伤害增幅提高#2[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11307/SkillIcon_11307_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.05
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.02
+        }
+      ],
+      "param_list": [
+        0.05,
+        0.02
+      ]
+    },
+    {
+      "rank_id": 130706,
+      "rank": 6,
+      "name": "万神皆善，苦役者未知",
+      "desc": "【奥迹】可以叠加的层数提高#1[i]层。角色赋能中，我方小队发动攻击后使目标陷入【奥迹】的叠加层数提高#2[i]。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/11307/SkillIcon_11307_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        30,
+        1
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23022,
+      "level": 1,
+      "desc": "黑天鹅的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23022,
+      "level": 2,
+      "desc": "黑天鹅的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23022,
+      "level": 3,
+      "desc": "黑天鹅的独立伤害增幅提高#1。",
+      "param_list": [
+        0.24,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.24
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23022,
+      "level": 4,
+      "desc": "黑天鹅的独立伤害增幅提高#1。",
+      "param_list": [
+        0.3,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.3
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23022,
+      "level": 5,
+      "desc": "黑天鹅的独立伤害增幅提高#1。",
+      "param_list": [
+        0.36,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.36
+        }
+      ],
+      "all_props": []
+    }
+  ]
 }

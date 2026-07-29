@@ -20,14 +20,189 @@
       "name": "狼狩",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1008.png",
-      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。"
+      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "desc_params": [
+        10,
+        0.5,
+        4
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.15,
+            0.15
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.15
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.15
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.5,
+            0.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.5
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 8,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.9,
+            0.9
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.9
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.9
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2004,
       "name": "能量",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
-      "desc": "【能量】队员的提高。在场上生成【能量地块】，可提供和能量恢复。"
+      "desc": "【能量】队员的ExtraUltraDamageAddedRatio提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
+      "simple_desc": "【能量】队员的ExtraUltraDamageAddedRatio提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
+      "desc_params": [
+        0.3,
+        0.03,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "params": [
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraUltraDamageAddedRatio1",
+              "property_type": "ExtraUltraDamageAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "params": [
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraUltraDamageAddedRatio1",
+              "property_type": "ExtraUltraDamageAddedRatio1",
+              "value": 0.4
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraUltraDamageAddedRatio1",
+              "property_type": "ExtraUltraDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 10,
+          "quality": "Multicolor",
+          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "params": [
+            2.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraUltraDamageAddedRatio1",
+              "property_type": "ExtraUltraDamageAddedRatio1",
+              "value": 2.4
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -36,13 +211,13 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "我方攻击或受到攻击后为云璃恢复能量，施放终结技攻击敌人后获得【剑盾】以保护我方前台并发动反击。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 200,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_energy_bar": 3,
+      "back_max_sp": 120,
+      "back_initial_sp": 120,
+      "back_initial_energy_bar": 1,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 80,
@@ -53,7 +228,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030808,
+            35030307
+          ],
+          "second": [
+            35030102,
+            35030303,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030808,
+            35030307
+          ],
+          "second": [
+            35030102,
+            35030303,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -72,7 +272,23 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。我方前台目标/我方其他后台目标/敌方目标发动攻击后，云璃恢复#1[i]/#2[i]/#3[i]点能量。",
+              "param": [
+                12,
+                12,
+                20,
+                2,
+                4.8,
+                2.4,
+                6,
+                2,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -149,13 +365,13 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "我方攻击或受到攻击后为云璃恢复能量，施放终结技攻击敌人后获得【剑盾】以保护我方前台并发动反击。",
       "front_power_base": 160,
-      "back_power_base": null,
+      "back_power_base": 320,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_energy_bar": 3,
+      "back_max_sp": 120,
+      "back_initial_sp": 120,
+      "back_initial_energy_bar": 1,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 80,
@@ -166,7 +382,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030808,
+            35030307
+          ],
+          "second": [
+            35030102,
+            35030303,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030808,
+            35030307
+          ],
+          "second": [
+            35030102,
+            35030303,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -185,7 +426,23 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。我方前台目标/我方其他后台目标/敌方目标发动攻击后，云璃恢复#1[i]/#2[i]/#3[i]点能量。",
+              "param": [
+                12,
+                12,
+                20,
+                2,
+                6,
+                3,
+                6,
+                2.5,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -262,13 +519,13 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "我方攻击或受到攻击后为云璃恢复能量，施放终结技攻击敌人后获得【剑盾】以保护我方前台并发动反击。",
       "front_power_base": 220,
-      "back_power_base": null,
+      "back_power_base": 2000,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_energy_bar": 3,
+      "back_max_sp": 120,
+      "back_initial_sp": 120,
+      "back_initial_energy_bar": 1,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 80,
@@ -279,7 +536,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030808,
+            35030307
+          ],
+          "second": [
+            35030102,
+            35030303,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030808,
+            35030307
+          ],
+          "second": [
+            35030102,
+            35030303,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -298,7 +580,23 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。我方前台目标/我方其他后台目标/敌方目标发动攻击后，云璃恢复#1[i]/#2[i]/#3[i]点能量。",
+              "param": [
+                60,
+                60,
+                120,
+                2,
+                24,
+                12,
+                6,
+                10,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -371,6 +669,205 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 122101,
+      "rank": 1,
+      "name": "沉锋离垢",
+      "desc": "云璃造成的伤害提高#1[i]%，【勘破•灭】的额外伤害次数增加#2[i]次。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1221/SkillIcon_1221_Rank1.png",
+      "owner_props": [
+        {
+          "name": "AllDamageTypeAddedRatio",
+          "property_type": "AllDamageTypeAddedRatio",
+          "value": 0.2
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.2,
+        3
+      ]
+    },
+    {
+      "rank_id": 122102,
+      "rank": 2,
+      "name": "初芒破生",
+      "desc": "发动反击造成伤害时无视敌方目标#1[i]%的防御力。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1221/SkillIcon_1221_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.2
+      ]
+    },
+    {
+      "rank_id": 122103,
+      "rank": 3,
+      "name": "九尺运斤",
+      "desc": "云璃的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1221/SkillIcon_1221_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 122104,
+      "rank": 4,
+      "name": "大匠击橐",
+      "desc": "我方小队的效果抵抗提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1221/SkillIcon_1221_Rank4.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "StatusResistanceBase",
+          "property_type": "StatusResistanceBase",
+          "value": 0.25
+        }
+      ],
+      "param_list": [
+        0.25
+      ]
+    },
+    {
+      "rank_id": 122105,
+      "rank": 5,
+      "name": "恒兵匪石",
+      "desc": "云璃的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1221/SkillIcon_1221_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 122106,
+      "rank": 6,
+      "name": "剑胆琴心",
+      "desc": "云璃的暴击率提高#1[i]%，全属性抗性穿透提高#2[i]%。我方前台/我方其他后台/敌方目标发动攻击后，云璃额外恢复#3[i]/#4[i]/#5[i]点能量。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1221/SkillIcon_1221_Rank6.png",
+      "owner_props": [
+        {
+          "name": "CriticalChanceBase",
+          "property_type": "CriticalChanceBase",
+          "value": 0.15
+        },
+        {
+          "name": "AllDamageTypePenetrate",
+          "property_type": "AllDamageTypePenetrate",
+          "value": 0.2
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.15,
+        0.2,
+        3,
+        3,
+        10
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23030,
+      "level": 1,
+      "desc": "云璃的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23030,
+      "level": 2,
+      "desc": "云璃的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23030,
+      "level": 3,
+      "desc": "云璃的独立伤害增幅提高#1。",
+      "param_list": [
+        0.24,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.24
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23030,
+      "level": 4,
+      "desc": "云璃的独立伤害增幅提高#1。",
+      "param_list": [
+        0.3,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.3
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23030,
+      "level": 5,
+      "desc": "云璃的独立伤害增幅提高#1。",
+      "param_list": [
+        0.36,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.36
+        }
+      ],
+      "all_props": []
+    }
+  ]
 }

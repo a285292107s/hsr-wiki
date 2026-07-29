@@ -21,14 +21,225 @@
       "name": "星间旅人",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1006.png",
-      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。"
+      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "simple_desc": "【星间旅人】角色会为你的小队提高特定属性，随场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.2,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.45,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.75,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.5,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            3,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2012,
       "name": "欢愉",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2012.png",
-      "desc": "【欢愉】队员的提高。\\n备战阶段召唤【阿哈】为小队提供增益，【阿哈】拥有初始属性并穿戴3件随机简易装备，可将物品栏中简易装备拖拽给阿哈，与阿哈装备栏中的简易装备依次合成对应进阶装备。合成进阶装备后，本局该栏位将会被固定，无法合成其它进阶装备。"
+      "desc": "【欢愉】队员的幸运触发率提高。\\n备战阶段召唤【阿哈】为小队提供增益，【阿哈】拥有初始属性并穿戴3件随机简易装备，可将物品栏中简易装备拖拽给阿哈，与阿哈装备栏中的简易装备依次合成对应进阶装备。合成进阶装备后，本局该栏位将会被固定，无法合成其它进阶装备。",
+      "simple_desc": "【欢愉】队员的幸运触发率提高。\\n备战阶段召唤【阿哈】为小队提供增益，【阿哈】拥有初始属性并穿戴3件随机简易装备，可将物品栏中简易装备拖拽给阿哈，合成对应进阶装备。",
+      "desc_params": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%幸运触发率。",
+          "params": [
+            0.08
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.08
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%幸运触发率。",
+          "params": [
+            0.16
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.16
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "#1[i]%幸运触发率。",
+          "params": [
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.24
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Multicolor",
+          "desc": "#1[i]%幸运触发率。",
+          "params": [
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.4
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -37,12 +248,12 @@
       "front_one_word_desc": "施放终结技时获得【阿哈】的属性加成，并永久提高伤害增幅。",
       "back_one_word_desc": "绯英在我方获得【好活当赏】时，获得【好活当赏】和能量，施放终结技时额外获得【阿哈】的属性加成，并永久提高伤害增幅。",
       "front_power_base": 125,
-      "back_power_base": null,
+      "back_power_base": 125,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
+      "back_energy_bar": 240,
+      "back_max_sp": 480,
+      "back_initial_sp": 240,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
@@ -50,7 +261,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030108,
+            35030102
+          ],
+          "second": [
+            35030101,
+            35030202,
+            35030204
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030108,
+            35030102
+          ],
+          "second": [
+            35030101,
+            35030303,
+            35030304
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 15050401,
@@ -157,7 +393,19 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。绯英以#5[i]%的速度行动。",
+              "param": [
+                1,
+                4,
+                2,
+                5,
+                2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -187,7 +435,19 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。战技恢复#5[i]点能量。",
+              "param": [
+                1.6,
+                7,
+                1.2,
+                5,
+                30
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -347,12 +607,12 @@
       "front_one_word_desc": "施放终结技时获得【阿哈】的属性加成，并永久提高伤害增幅。",
       "back_one_word_desc": "绯英在我方获得【好活当赏】时，获得【好活当赏】和能量，施放终结技时额外获得【阿哈】的属性加成，并永久提高伤害增幅。",
       "front_power_base": 200,
-      "back_power_base": null,
+      "back_power_base": 200,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
+      "back_energy_bar": 240,
+      "back_max_sp": 480,
+      "back_initial_sp": 240,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
@@ -360,7 +620,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030108,
+            35030102
+          ],
+          "second": [
+            35030101,
+            35030202,
+            35030204
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030108,
+            35030102
+          ],
+          "second": [
+            35030101,
+            35030303,
+            35030304
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 15050402,
@@ -467,7 +752,19 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。绯英以#5[i]%的速度行动。",
+              "param": [
+                1,
+                5,
+                2.5,
+                5,
+                2.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -497,7 +794,19 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。战技恢复#5[i]点能量。",
+              "param": [
+                2,
+                7,
+                1.5,
+                5,
+                30
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -657,12 +966,12 @@
       "front_one_word_desc": "施放终结技时获得【阿哈】的属性加成，并永久提高伤害增幅。",
       "back_one_word_desc": "绯英在我方获得【好活当赏】时，获得【好活当赏】和能量，施放终结技时额外获得【阿哈】的属性加成，并永久提高伤害增幅。",
       "front_power_base": 275,
-      "back_power_base": null,
+      "back_power_base": 275,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
+      "back_energy_bar": 240,
+      "back_max_sp": 480,
+      "back_initial_sp": 240,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
@@ -670,7 +979,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030108,
+            35030102
+          ],
+          "second": [
+            35030101,
+            35030202,
+            35030204
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030108,
+            35030102
+          ],
+          "second": [
+            35030101,
+            35030303,
+            35030304
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 15050403,
@@ -777,7 +1111,19 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。绯英以#5[i]%的速度行动。",
+              "param": [
+                1,
+                7.2,
+                3.6,
+                5,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -807,7 +1153,19 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。战技恢复#5[i]点能量。",
+              "param": [
+                2.88,
+                7,
+                2.16,
+                5,
+                30
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -967,12 +1325,12 @@
       "front_one_word_desc": "施放终结技时获得【阿哈】的属性加成，并永久提高伤害增幅。",
       "back_one_word_desc": "绯英在我方获得【好活当赏】时，获得【好活当赏】和能量，施放终结技时额外获得【阿哈】的属性加成，并永久提高伤害增幅。",
       "front_power_base": 350,
-      "back_power_base": null,
+      "back_power_base": 350,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
+      "back_energy_bar": 240,
+      "back_max_sp": 480,
+      "back_initial_sp": 240,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
@@ -980,7 +1338,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030108,
+            35030102
+          ],
+          "second": [
+            35030101,
+            35030202,
+            35030204
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030108,
+            35030102
+          ],
+          "second": [
+            35030101,
+            35030303,
+            35030304
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 15050404,
@@ -1087,7 +1470,19 @@
             30
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。绯英以#5[i]%的速度行动。",
+              "param": [
+                1,
+                11.2,
+                5.6,
+                5,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -1117,7 +1512,19 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。战技恢复#5[i]点能量。",
+              "param": [
+                4.48,
+                7,
+                3.36,
+                5,
+                30
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -1273,6 +1680,196 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 150501,
+      "rank": 1,
+      "name": "故乡，为祈福起舞",
+      "desc": "全属性抗性穿透提高#2[i]%，【狐狸老师】施放攻击后会额外触发一次欢愉技。欢愉技会使自身额外获得#1[i]点【好活当赏】。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1505/SkillIcon_1505_Rank1.png",
+      "owner_props": [
+        {
+          "name": "AllDamageTypePenetrate",
+          "property_type": "AllDamageTypePenetrate",
+          "value": 0.2
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        10,
+        0.2
+      ]
+    },
+    {
+      "rank_id": 150502,
+      "rank": 2,
+      "name": "遥途，求长开不谢",
+      "desc": "暴击伤害提高#3[i]%，参演编号小于绯英的队友获得【好活当赏】/我方队友的【好活当赏】结束时，绯英额外获得其中的#1[i]%/#2[i]%变成自身的【好活当赏】。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1505/SkillIcon_1505_Rank2.png",
+      "owner_props": [
+        {
+          "name": "CriticalDamageBase",
+          "property_type": "CriticalDamageBase",
+          "value": 0.36
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.5,
+        1,
+        0.36
+      ]
+    },
+    {
+      "rank_id": 150503,
+      "rank": 3,
+      "name": "尺剑，吞赤月妖邪",
+      "desc": "绯英的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1505/SkillIcon_1505_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 150504,
+      "rank": 4,
+      "name": "花田，遭恶徒摘落",
+      "desc": "绯英造成的伤害无视敌方目标#1[i]%的防御力。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1505/SkillIcon_1505_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.15
+      ]
+    },
+    {
+      "rank_id": 150505,
+      "rank": 5,
+      "name": "乐园，见悲喜苦乐",
+      "desc": "绯英的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1505/SkillIcon_1505_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 150506,
+      "rank": 6,
+      "name": "少女，见浮生入梦",
+      "desc": "绯英的【好活当赏】的持续时间增加#2[i]回合。绯英造成的欢愉伤害增笑#1[i]%，每持有100点【好活当赏】额外增笑#3[f1]%，最高计入1000点【好活当赏】。进入战斗首次施放终结技后，为绯英固定恢复#4[i]点能量，该效果每再施放#5[i]次终结技可触发1次。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1505/SkillIcon_1505_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.15,
+        1,
+        0.02,
+        120,
+        4
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23058,
+      "level": 1,
+      "desc": "绯英的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23058,
+      "level": 2,
+      "desc": "绯英的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23058,
+      "level": 3,
+      "desc": "绯英的独立伤害增幅提高#1。",
+      "param_list": [
+        0.24,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.24
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23058,
+      "level": 4,
+      "desc": "绯英的独立伤害增幅提高#1。",
+      "param_list": [
+        0.3,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.3
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23058,
+      "level": 5,
+      "desc": "绯英的独立伤害增幅提高#1。",
+      "param_list": [
+        0.36,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.36
+        }
+      ],
+      "all_props": []
+    }
+  ]
 }

@@ -20,14 +20,249 @@
       "name": "星间旅人",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1006.png",
-      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。"
+      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "simple_desc": "【星间旅人】角色会为你的小队提高特定属性，随场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.2,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.45,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.75,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.5,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            3,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2003,
       "name": "群攻",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
-      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+      "desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "simple_desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "desc_params": [
+        0.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.12,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.12
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.12
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.24,
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.24
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.24
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.36,
+            0.36
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.36
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -36,12 +271,12 @@
       "front_one_word_desc": "命中目标后为我方小队叠加增益，两种终结技都会造成额外伤害。",
       "back_one_word_desc": "行动时攻击敌人。施放终结技时，根据幸运一击率改为施放强化终结技。命中目标后为我方小队叠加增益。",
       "front_power_base": 125,
-      "back_power_base": null,
+      "back_power_base": 125,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
+      "back_max_sp": 90,
+      "back_initial_sp": 90,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
@@ -49,7 +284,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030408,
+            35030308
+          ],
+          "second": [
+            35030204,
+            35030102,
+            35030208
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030408,
+            35030308
+          ],
+          "second": [
+            35030204,
+            35030102,
+            35030208
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13020301,
@@ -67,7 +327,15 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。",
+              "param": [
+                1.2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -95,7 +363,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "施放【驻于花庭，赐与尽美】时，有幸运一击率*#4[i]%的固定概率，改为施放强化终结技【驻「我」华庭，授予至勋】。",
+              "param": [
+                1.2,
+                5,
+                1,
+                0.6
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -156,7 +435,16 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。银枝以#2[i]%的速度行动。",
+              "param": [
+                1.2,
+                2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -183,7 +471,15 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。",
+              "param": [
+                1.2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -209,7 +505,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "施放【驻于花庭，赐与尽美】时，有幸运一击率*#4[i]%的固定概率，改为施放强化终结技【驻「我」华庭，授予至勋】。",
+              "param": [
+                1.2,
+                5,
+                1,
+                0.6
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -282,12 +589,12 @@
       "front_one_word_desc": "命中目标后为我方小队叠加增益，两种终结技都会造成额外伤害。",
       "back_one_word_desc": "行动时攻击敌人。施放终结技时，根据幸运一击率改为施放强化终结技。命中目标后为我方小队叠加增益。",
       "front_power_base": 200,
-      "back_power_base": null,
+      "back_power_base": 200,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
+      "back_max_sp": 90,
+      "back_initial_sp": 90,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
@@ -295,7 +602,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030408,
+            35030308
+          ],
+          "second": [
+            35030204,
+            35030102,
+            35030208
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030408,
+            35030308
+          ],
+          "second": [
+            35030204,
+            35030102,
+            35030208
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13020302,
@@ -313,7 +645,15 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。",
+              "param": [
+                1.2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -341,7 +681,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "施放【驻于花庭，赐与尽美】时，有幸运一击率*#4[i]%的固定概率，改为施放强化终结技【驻「我」华庭，授予至勋】。",
+              "param": [
+                1.2,
+                5,
+                1,
+                0.8
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -402,7 +753,16 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。银枝以#2[i]%的速度行动。",
+              "param": [
+                1.2,
+                2.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -429,7 +789,15 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。",
+              "param": [
+                1.2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -455,7 +823,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "施放【驻于花庭，赐与尽美】时，有幸运一击率*#4[i]%的固定概率，改为施放强化终结技【驻「我」华庭，授予至勋】。",
+              "param": [
+                1.2,
+                5,
+                1,
+                0.8
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -528,12 +907,12 @@
       "front_one_word_desc": "命中目标后为我方小队叠加增益，两种终结技都会造成额外伤害。",
       "back_one_word_desc": "行动时攻击敌人。施放终结技时，根据幸运一击率改为施放强化终结技。命中目标后为我方小队叠加增益。",
       "front_power_base": 275,
-      "back_power_base": null,
+      "back_power_base": 275,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
+      "back_max_sp": 90,
+      "back_initial_sp": 90,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
@@ -541,7 +920,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030408,
+            35030308
+          ],
+          "second": [
+            35030204,
+            35030102,
+            35030208
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030408,
+            35030308
+          ],
+          "second": [
+            35030204,
+            35030102,
+            35030208
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13020303,
@@ -559,7 +963,15 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。",
+              "param": [
+                1.2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -587,7 +999,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "施放【驻于花庭，赐与尽美】时，有幸运一击率*#4[i]%的固定概率，改为施放强化终结技【驻「我」华庭，授予至勋】。",
+              "param": [
+                1.2,
+                5,
+                1,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -648,7 +1071,16 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。银枝以#2[i]%的速度行动。",
+              "param": [
+                1.2,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -675,7 +1107,15 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。",
+              "param": [
+                1.2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -701,7 +1141,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "施放【驻于花庭，赐与尽美】时，有幸运一击率*#4[i]%的固定概率，改为施放强化终结技【驻「我」华庭，授予至勋】。",
+              "param": [
+                1.2,
+                5,
+                1,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -774,12 +1225,12 @@
       "front_one_word_desc": "命中目标后为我方小队叠加增益，两种终结技都会造成额外伤害。",
       "back_one_word_desc": "行动时攻击敌人。施放终结技时，根据幸运一击率改为施放强化终结技。命中目标后为我方小队叠加增益。",
       "front_power_base": 350,
-      "back_power_base": null,
+      "back_power_base": 350,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
-      "back_initial_sp": null,
+      "back_max_sp": 90,
+      "back_initial_sp": 90,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
       "luck_damage": 1,
@@ -787,7 +1238,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030408,
+            35030308
+          ],
+          "second": [
+            35030204,
+            35030102,
+            35030208
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030408,
+            35030308
+          ],
+          "second": [
+            35030204,
+            35030102,
+            35030208
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13020304,
@@ -805,7 +1281,15 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。",
+              "param": [
+                1.2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -833,7 +1317,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "施放【驻于花庭，赐与尽美】时，有幸运一击率*#4[i]%的固定概率，改为施放强化终结技【驻「我」华庭，授予至勋】。",
+              "param": [
+                1.2,
+                5,
+                1,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -894,7 +1389,16 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。银枝以#2[i]%的速度行动。",
+              "param": [
+                1.2,
+                3.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -921,7 +1425,15 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "满能量时施放。",
+              "param": [
+                1.2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -947,7 +1459,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "施放【驻于花庭，赐与尽美】时，有幸运一击率*#4[i]%的固定概率，改为施放强化终结技【驻「我」华庭，授予至勋】。",
+              "param": [
+                1.2,
+                5,
+                1,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -1016,6 +1539,180 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 130201,
+      "rank": 1,
+      "name": "审美王国的缺口",
+      "desc": "每层【升格】额外使暴击伤害提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1302/SkillIcon_1302_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.04
+      ]
+    },
+    {
+      "rank_id": 130202,
+      "rank": 2,
+      "name": "玛瑙石的谦卑",
+      "desc": "施放终结技时，若敌方目标数量大于等于#1[i]个时，攻击力提高#2[i]%，持续#3[i]回合。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1302/SkillIcon_1302_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        3,
+        0.4,
+        1
+      ]
+    },
+    {
+      "rank_id": 130203,
+      "rank": 3,
+      "name": "荆棘路的荣光",
+      "desc": "银枝的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1302/SkillIcon_1302_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 130204,
+      "rank": 4,
+      "name": "号角的奉献",
+      "desc": "战斗开始时，我方小队获得#1[i]层【升格】，并使天赋的效果可叠加上限提高#2[i]层。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1302/SkillIcon_1302_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        2,
+        2
+      ]
+    },
+    {
+      "rank_id": 130205,
+      "rank": 5,
+      "name": "宇宙某处的雪",
+      "desc": "银枝的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1302/SkillIcon_1302_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 130206,
+      "rank": 6,
+      "name": "「你」的光芒",
+      "desc": "施放终结技时，无视敌方目标#1[i]%的防御力。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1302/SkillIcon_1302_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.3
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23018,
+      "level": 1,
+      "desc": "银枝的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23018,
+      "level": 2,
+      "desc": "银枝的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23018,
+      "level": 3,
+      "desc": "银枝的独立伤害增幅提高#1。",
+      "param_list": [
+        0.24,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.24
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23018,
+      "level": 4,
+      "desc": "银枝的独立伤害增幅提高#1。",
+      "param_list": [
+        0.3,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.3
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23018,
+      "level": 5,
+      "desc": "银枝的独立伤害增幅提高#1。",
+      "param_list": [
+        0.36,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.36
+        }
+      ],
+      "all_props": []
+    }
+  ]
 }

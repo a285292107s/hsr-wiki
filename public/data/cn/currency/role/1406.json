@@ -18,21 +18,297 @@
       "name": "夜之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1012.png",
-      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前/后台强度提高。"
+      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前排战力后排战力前/后台强度提高。",
+      "simple_desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前排战力后排战力前/后台强度提高。",
+      "desc_params": [
+        2
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1.2,
+            1.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 1.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 1.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            2.4,
+            2.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 2.4
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 2.4
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2001,
       "name": "追击",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2001.png",
-      "desc": "【追击】队员的提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的，持续至任意敌方目标回合开始。"
+      "desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌方目标回合开始。",
+      "simple_desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，并在攻击后额外附伤。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌人回合开始。",
+      "desc_params": [
+        0.05,
+        0.2,
+        0,
+        0,
+        1,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            1.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 1.2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2007,
       "name": "减益",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2007.png",
-      "desc": "【减益】队员的前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。"
+      "desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
+      "simple_desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
+      "desc_params": [
+        2,
+        3,
+        0.1,
+        0,
+        0.03,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.2,
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1.2,
+            1.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 1.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 1.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 8,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            2.5,
+            2.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 2.5
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 2.5
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -54,7 +330,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030507,
+            35030106,
+            35030101
+          ],
+          "second": [
+            35030407,
+            35030203,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030507,
+            35030106,
+            35030101
+          ],
+          "second": [
+            35030407,
+            35030203,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14069801,
@@ -128,7 +429,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030507,
+            35030106,
+            35030101
+          ],
+          "second": [
+            35030407,
+            35030203,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030507,
+            35030106,
+            35030101
+          ],
+          "second": [
+            35030407,
+            35030203,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14069802,
@@ -202,7 +528,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030507,
+            35030106,
+            35030101
+          ],
+          "second": [
+            35030407,
+            35030203,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030507,
+            35030106,
+            35030101
+          ],
+          "second": [
+            35030407,
+            35030203,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14069803,
@@ -276,7 +627,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030507,
+            35030106,
+            35030101
+          ],
+          "second": [
+            35030407,
+            35030203,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030507,
+            35030106,
+            35030101
+          ],
+          "second": [
+            35030407,
+            35030203,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14069804,

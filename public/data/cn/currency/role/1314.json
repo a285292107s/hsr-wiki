@@ -19,14 +19,167 @@
       "name": "公司",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1004.png",
-      "desc": "【公司】队员的和提高。"
+      "desc": "【公司】队员的后排战力和护盾量提高。",
+      "simple_desc": "【公司】队员的后排战力和护盾量提高。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%后排战力，#2[i]%护盾量。",
+          "params": [
+            0.3,
+            0.1
+          ],
+          "member_props": [
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraShieldAddedRatio",
+              "property_type": "ExtraShieldAddedRatio",
+              "value": 0.1
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Gold",
+          "desc": "#1[i]%后排战力，#2[i]%护盾量。",
+          "params": [
+            1,
+            0.25
+          ],
+          "member_props": [
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 1
+            },
+            {
+              "name": "ExtraShieldAddedRatio",
+              "property_type": "ExtraShieldAddedRatio",
+              "value": 0.25
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2003,
       "name": "群攻",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
-      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+      "desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "simple_desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "desc_params": [
+        0.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.12,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.12
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.12
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.24,
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.24
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.24
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.36,
+            0.36
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.36
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -35,13 +188,13 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "使前台角色成为【收债人】，速度与暴击伤害提高，并在击中目标时为翡翠计数，以发动追加攻击。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 100,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 8,
       "back_max_sp": null,
       "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_initial_energy_bar": 4,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 60,
@@ -52,7 +205,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030205,
+            35030303
+          ],
+          "second": [
+            35030102,
+            35030708,
+            35030104
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030205,
+            35030303
+          ],
+          "second": [
+            35030102,
+            35030708,
+            35030104
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -71,7 +249,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                30,
+                0.2,
+                0.25,
+                0.02
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -143,13 +332,13 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "使前台角色成为【收债人】，速度与暴击伤害提高，并在击中目标时为翡翠计数，以发动追加攻击。",
       "front_power_base": 160,
-      "back_power_base": null,
+      "back_power_base": 160,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 8,
       "back_max_sp": null,
       "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_initial_energy_bar": 4,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 60,
@@ -160,7 +349,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030205,
+            35030303
+          ],
+          "second": [
+            35030102,
+            35030708,
+            35030104
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030205,
+            35030303
+          ],
+          "second": [
+            35030102,
+            35030708,
+            35030104
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -179,7 +393,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                45,
+                0.3,
+                0.25,
+                0.02
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -251,13 +476,13 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "使前台角色成为【收债人】，速度与暴击伤害提高，并在击中目标时为翡翠计数，以发动追加攻击。",
       "front_power_base": 220,
-      "back_power_base": null,
+      "back_power_base": 220,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 8,
       "back_max_sp": null,
       "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_initial_energy_bar": 4,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 60,
@@ -268,7 +493,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030205,
+            35030303
+          ],
+          "second": [
+            35030102,
+            35030708,
+            35030104
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030205,
+            35030303
+          ],
+          "second": [
+            35030102,
+            35030708,
+            35030104
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -287,7 +537,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                60,
+                0.4,
+                0.25,
+                0.02
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -359,20 +620,45 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "使前台角色成为【收债人】，速度与暴击伤害提高，并在击中目标时为翡翠计数，以发动追加攻击。",
       "front_power_base": 280,
-      "back_power_base": null,
+      "back_power_base": 280,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 8,
       "back_max_sp": null,
       "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_initial_energy_bar": 4,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 60,
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030304,
+            35030205,
+            35030303
+          ],
+          "second": [
+            35030102,
+            35030708,
+            35030104
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030205,
+            35030303
+          ],
+          "second": [
+            35030102,
+            35030708,
+            35030104
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -391,7 +677,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                75,
+                0.5,
+                0.25,
+                0.02
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -459,6 +756,192 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 131401,
+      "rank": 1,
+      "name": "无私？亦可交割",
+      "desc": "翡翠天赋的追加攻击伤害提高#1[i]%，持有【收债人】状态的角色施放攻击后击中敌方目标数量等于2/1名时，翡翠额外获得#2[i]/#3[i]点充能。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1314/SkillIcon_1314_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.32,
+        1,
+        2
+      ]
+    },
+    {
+      "rank_id": 131402,
+      "rank": 2,
+      "name": "道德？谨此核押",
+      "desc": "翡翠的暴击率提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1314/SkillIcon_1314_Rank2.png",
+      "owner_props": [
+        {
+          "name": "CriticalChanceBase",
+          "property_type": "CriticalChanceBase",
+          "value": 0.18
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.18
+      ]
+    },
+    {
+      "rank_id": 131403,
+      "rank": 3,
+      "name": "坦率？只待典当",
+      "desc": "翡翠的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1314/SkillIcon_1314_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 131404,
+      "rank": 4,
+      "name": "真诚？唯凭认沽",
+      "desc": "翡翠造成伤害时无视敌方目标#1[i]%的防御力。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1314/SkillIcon_1314_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.12
+      ]
+    },
+    {
+      "rank_id": 131405,
+      "rank": 5,
+      "name": "希冀？已然绝卖",
+      "desc": "翡翠的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1314/SkillIcon_1314_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.08
+      ]
+    },
+    {
+      "rank_id": 131406,
+      "rank": 6,
+      "name": "公平？仍须保荐",
+      "desc": "翡翠的全属性抗性穿透提高#1[i]%。角色赋能中，触发追加攻击所需和消耗的充能降低为#2[i]点。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1314/SkillIcon_1314_Rank6.png",
+      "owner_props": [
+        {
+          "name": "AllDamageTypePenetrate",
+          "property_type": "AllDamageTypePenetrate",
+          "value": 0.2
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.2,
+        6
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23028,
+      "level": 1,
+      "desc": "翡翠的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23028,
+      "level": 2,
+      "desc": "翡翠的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23028,
+      "level": 3,
+      "desc": "翡翠的独立伤害增幅提高#1。",
+      "param_list": [
+        0.24,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.24
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23028,
+      "level": 4,
+      "desc": "翡翠的独立伤害增幅提高#1。",
+      "param_list": [
+        0.3,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.3
+        }
+      ],
+      "all_props": []
+    },
+    {
+      "equipment_id": 23028,
+      "level": 5,
+      "desc": "翡翠的独立伤害增幅提高#1。",
+      "param_list": [
+        0.36,
+        0
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.36
+        }
+      ],
+      "all_props": []
+    }
+  ]
 }

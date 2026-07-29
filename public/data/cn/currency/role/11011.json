@@ -17,14 +17,84 @@
       "name": "贝洛伯格",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1005.png",
-      "desc": "【贝洛伯格】队员行动后为【造物引擎】充能，【造物引擎】的能量充满后立即攻击敌方目标，并让本场战斗中造成伤害最多的【贝洛伯格】角色立即行动。\\n【贝洛伯格】队员和【造物引擎】的提高。"
+      "desc": "【贝洛伯格】队员行动后为【造物引擎】充能，【造物引擎】的能量充满后立即攻击敌方目标，并让本场战斗中造成伤害最多的【贝洛伯格】角色立即行动。\\n【贝洛伯格】队员和【造物引擎】的全伤害提高。",
+      "simple_desc": "【贝洛伯格】队员行动后为【造物引擎】充能，能量充满后攻击敌人并让本场战斗中造成伤害最多的贝洛伯格角色立即行动。\\n贝洛伯格队员和【造物引擎】的全伤害提高。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%全伤害。",
+          "params": [
+            0.36
+          ],
+          "member_props": [
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.36
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Gold",
+          "desc": "#1[i]%全伤害。",
+          "params": [
+            0.72
+          ],
+          "member_props": [
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.72
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 3001,
       "name": "大守护者",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/3001.png",
-      "desc": "布洛妮娅会基于小队中【贝洛伯格】和【燃血】角色的数量，加入人数更多的羁绊并获得相应技能。\\n我方前台行动后布洛妮娅获得#1[i]点充能，充能满后布洛妮娅召唤可可利亚攻击敌方全体。"
+      "desc": "布洛妮娅会基于小队中【贝洛伯格】和【燃血】角色的数量，加入人数更多的羁绊并获得相应技能。\\n我方前台行动后布洛妮娅获得#1[i]点充能，充能满后布洛妮娅召唤可可利亚攻击敌方全体。",
+      "simple_desc": "布洛妮娅会基于小队中【贝洛伯格】和【燃血】角色的数量，加入人数更多的羁绊并获得相应技能。\\n我方前台行动一定次数后，布洛妮娅召唤可可利亚攻击敌方全体。",
+      "desc_params": [
+        1,
+        8,
+        12,
+        2.4,
+        1.5,
+        10,
+        1,
+        4,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": "Unique",
+          "desc": "充能满#2[i]点后，可可利亚发动攻击对敌方全体造成布洛妮娅#3[i]%攻击力+#4[i]%生命上限的虚数属性伤害，该次攻击必定暴击。\\n羁绊效果随布洛妮娅的星级而提高：\\n1星：初始已计入#8[i]次行动。\\n2星：造成的伤害为原伤害的#5[i]%，初始已计入#8[i]次行动。\\n3星：造成的伤害为原伤害的#6[i]%，充能满#7[i]点后可可利亚就会发动攻击。",
+          "params": [
+            1,
+            8,
+            12,
+            2.4,
+            1.5,
+            10,
+            1,
+            4
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -46,7 +116,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 110110201,
@@ -151,7 +246,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 110110202,
@@ -256,7 +376,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 110110203,

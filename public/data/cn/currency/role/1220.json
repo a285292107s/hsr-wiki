@@ -17,14 +17,189 @@
       "name": "狼狩",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1008.png",
-      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。"
+      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "desc_params": [
+        10,
+        0.5,
+        4
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.15,
+            0.15
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.15
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.15
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.5,
+            0.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.5
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 8,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.9,
+            0.9
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.9
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.9
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2001,
       "name": "追击",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2001.png",
-      "desc": "【追击】队员的提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的，持续至任意敌方目标回合开始。"
+      "desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌方目标回合开始。",
+      "simple_desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，并在攻击后额外附伤。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌人回合开始。",
+      "desc_params": [
+        0.05,
+        0.2,
+        0,
+        0,
+        1,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "params": [
+            1.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraInsertDamageAddedRatio1",
+              "property_type": "ExtraInsertDamageAddedRatio1",
+              "value": 1.2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -46,7 +221,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030307,
+            35030102
+          ],
+          "second": [
+            35030204,
+            35030408,
+            35030105
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030307,
+            35030102
+          ],
+          "second": [
+            35030204,
+            35030408,
+            35030105
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 12200401,
@@ -152,7 +352,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030307,
+            35030102
+          ],
+          "second": [
+            35030204,
+            35030408,
+            35030105
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030307,
+            35030102
+          ],
+          "second": [
+            35030204,
+            35030408,
+            35030105
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 12200402,
@@ -258,7 +483,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030307,
+            35030102
+          ],
+          "second": [
+            35030204,
+            35030408,
+            35030105
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030307,
+            35030102
+          ],
+          "second": [
+            35030204,
+            35030408,
+            35030105
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 12200403,
@@ -364,7 +614,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030808,
+            35030307,
+            35030102
+          ],
+          "second": [
+            35030204,
+            35030408,
+            35030105
+          ]
+        },
+        "back": {
+          "first": [
+            35030808,
+            35030307,
+            35030102
+          ],
+          "second": [
+            35030204,
+            35030408,
+            35030105
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 12200404,

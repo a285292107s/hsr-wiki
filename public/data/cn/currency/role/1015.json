@@ -18,21 +18,203 @@
       "name": "命运圣杯",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1013.png",
-      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前/后台强度提高。"
+      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前排战力后排战力前/后台强度提高。",
+      "simple_desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前排战力后排战力前/后台强度提高。",
+      "desc_params": [],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.25,
+            0.25
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.5,
+            0.5
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1,
+            1
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1.8,
+            1.8
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2011,
       "name": "战技点",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2011.png",
-      "desc": "我方战技点上限提高，我方小队获得，施放战技或普攻时获得，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。"
+      "desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
+      "simple_desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
+      "desc_params": [
+        2,
+        0.12,
+        0.12,
+        0.02,
+        0.06,
+        4,
+        1,
+        0.2,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.12,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.12
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.12
+            }
+          ]
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.24,
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.24
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.24
+            }
+          ]
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.4,
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.4
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.4
+            }
+          ]
+        },
+        {
+          "layer": 8,
+          "quality": "Multicolor",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.8,
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.8
+            }
+          ]
+        }
+      ]
     },
     {
       "id": 3003,
       "name": "魔术师",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/3003.png",
-      "desc": "Archer攻击后获得#1[i]点充能，充能满#2[i]点后，消耗#2[i]点充能立即进行投影，使我方小队中#3[i]名随机角色获得1件与其匹配的临时装备，临时装备在战斗结束后消失。"
+      "desc": "Archer攻击后获得#1[i]点充能，充能满#2[i]点后，消耗#2[i]点充能立即进行投影，使我方小队中#3[i]名随机角色获得1件与其匹配的临时装备，临时装备在战斗结束后消失。",
+      "simple_desc": "Archer攻击一定次数后，使我方角色获得临时装备。",
+      "desc_params": [
+        1,
+        6,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": "Unique",
+          "desc": "Archer攻击一定次数后，使我方角色获得临时装备。",
+          "params": [
+            1,
+            6,
+            3
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -58,7 +240,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030207,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030202,
+            35030307,
+            35030102
+          ]
+        },
+        "back": {
+          "first": [
+            35030207,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030202,
+            35030307,
+            35030102
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10150201,
@@ -168,7 +375,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030207,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030202,
+            35030307,
+            35030102
+          ]
+        },
+        "back": {
+          "first": [
+            35030207,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030202,
+            35030307,
+            35030102
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10150202,
@@ -278,7 +510,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030207,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030202,
+            35030307,
+            35030102
+          ]
+        },
+        "back": {
+          "first": [
+            35030207,
+            35030101,
+            35030204
+          ],
+          "second": [
+            35030202,
+            35030307,
+            35030102
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10150203,

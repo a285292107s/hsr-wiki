@@ -20,21 +20,301 @@
       "name": "昼之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
-      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和提高。"
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
+      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度，#3[i]%速度。",
+          "params": [
+            0.1,
+            0.1,
+            0.05
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.05
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.18,
+            0.18,
+            0.09
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.18
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.18
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.09
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.36,
+            0.36,
+            0.18
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.18
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.6,
+            0.6,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2003,
       "name": "群攻",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
-      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+      "desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "simple_desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "desc_params": [
+        0.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.12,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.12
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.12
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.24,
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.24
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.24
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.36,
+            0.36
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.36
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2009,
       "name": "量子同频",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2009.png",
-      "desc": "敌人受到的伤害提高。\\n【量子同频】角色获得可强化技能效果的【同频】。"
+      "desc": "敌人受到的伤害提高。\\n【量子同频】角色获得可强化技能效果的【同频】量子共鸣。",
+      "simple_desc": "敌人受到的伤害提高。\\n【量子同频】角色获得可强化技能效果的【同频】量子共鸣。",
+      "desc_params": [
+        0.15,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "获得#2[i]层【同频】量子共鸣，敌方目标受到的伤害提高#1[i]%。",
+          "params": [
+            0.15,
+            1
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "获得#2[i]层【同频】量子共鸣，敌方目标受到的伤害提高#1[i]%。",
+          "params": [
+            0.3,
+            2
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Gold",
+          "desc": "获得#2[i]层【同频】量子共鸣，敌方目标受到的伤害提高#1[i]%。",
+          "params": [
+            0.6,
+            3
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "获得#2[i]层【同频】量子共鸣，敌方目标受到的伤害提高#1[i]%。",
+          "params": [
+            1,
+            4
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -43,29 +323,54 @@
       "front_one_word_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
       "back_one_word_desc": "战斗开始时立即施放终结技。我方小队每施放一定次数终结技后，缇宝发动追加攻击。",
       "front_power_base": 125,
-      "back_power_base": null,
+      "back_power_base": 125,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_energy_bar": 2,
+      "back_max_sp": 120,
       "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_initial_energy_bar": 1,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 60,
       "extra_shield_base": 60,
-      "stance_damage_display": null,
+      "stance_damage_display": 20,
       "show_stance_list": [
         60,
         20,
         30
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030407,
+            35030405
+          ],
+          "second": [
+            35030204,
+            35030708,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030407,
+            35030405
+          ],
+          "second": [
+            35030304,
+            35030708,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14030301,
           "name": "猜猜这里住着谁",
-          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
+          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*量子共鸣)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
           "simple_desc": "开启结界，对敌方全体造成少量量子属性伤害。结界持续期间，敌方受到的伤害提高，并根据攻击敌人的个数对被攻击目标中生命值最高的目标造成少量量子属性附加伤害。",
           "type": "终结技",
           "tag": "群攻",
@@ -78,7 +383,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.3,
+                0.3,
+                0.12,
+                0.1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -124,8 +440,8 @@
         {
           "id": 14030301,
           "name": "猜猜这里住着谁",
-          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
-          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
+          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*量子共鸣)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
+          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。量子共鸣会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
           "type": "终结技",
           "tag": "群攻",
           "sp_base": null,
@@ -137,7 +453,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.3,
+                0.3,
+                0.12,
+                0.1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -209,29 +536,54 @@
       "front_one_word_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
       "back_one_word_desc": "战斗开始时立即施放终结技。我方小队每施放一定次数终结技后，缇宝发动追加攻击。",
       "front_power_base": 175,
-      "back_power_base": null,
+      "back_power_base": 175,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_energy_bar": 2,
+      "back_max_sp": 120,
       "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_initial_energy_bar": 1,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 60,
       "extra_shield_base": 60,
-      "stance_damage_display": null,
+      "stance_damage_display": 20,
       "show_stance_list": [
         60,
         20,
         30
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030407,
+            35030405
+          ],
+          "second": [
+            35030204,
+            35030708,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030407,
+            35030405
+          ],
+          "second": [
+            35030304,
+            35030708,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14030302,
           "name": "猜猜这里住着谁",
-          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
+          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*量子共鸣)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
           "simple_desc": "开启结界，对敌方全体造成少量量子属性伤害。结界持续期间，敌方受到的伤害提高，并根据攻击敌人的个数对被攻击目标中生命值最高的目标造成少量量子属性附加伤害。",
           "type": "终结技",
           "tag": "群攻",
@@ -244,7 +596,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.375,
+                0.36,
+                0.15,
+                0.12
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -290,8 +653,8 @@
         {
           "id": 14030302,
           "name": "猜猜这里住着谁",
-          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
-          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
+          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*量子共鸣)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
+          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。量子共鸣会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
           "type": "终结技",
           "tag": "群攻",
           "sp_base": null,
@@ -303,7 +666,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.375,
+                0.36,
+                0.15,
+                0.12
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -375,29 +749,54 @@
       "front_one_word_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
       "back_one_word_desc": "战斗开始时立即施放终结技。我方小队每施放一定次数终结技后，缇宝发动追加攻击。",
       "front_power_base": 225,
-      "back_power_base": null,
+      "back_power_base": 225,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_energy_bar": 2,
+      "back_max_sp": 120,
       "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_initial_energy_bar": 1,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 60,
       "extra_shield_base": 60,
-      "stance_damage_display": null,
+      "stance_damage_display": 20,
       "show_stance_list": [
         60,
         20,
         30
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030407,
+            35030405
+          ],
+          "second": [
+            35030204,
+            35030708,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030407,
+            35030405
+          ],
+          "second": [
+            35030304,
+            35030708,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14030303,
           "name": "猜猜这里住着谁",
-          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
+          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*量子共鸣)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
           "simple_desc": "开启结界，对敌方全体造成少量量子属性伤害。结界持续期间，敌方受到的伤害提高，并根据攻击敌人的个数对被攻击目标中生命值最高的目标造成少量量子属性附加伤害。",
           "type": "终结技",
           "tag": "群攻",
@@ -410,7 +809,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.54,
+                0.42,
+                0.216,
+                0.14
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -456,8 +866,8 @@
         {
           "id": 14030303,
           "name": "猜猜这里住着谁",
-          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
-          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
+          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*量子共鸣)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
+          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。量子共鸣会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
           "type": "终结技",
           "tag": "群攻",
           "sp_base": null,
@@ -469,7 +879,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.54,
+                0.42,
+                0.216,
+                0.14
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -541,25 +962,50 @@
       "front_one_word_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
       "back_one_word_desc": "战斗开始时立即施放终结技。我方小队每施放一定次数终结技后，缇宝发动追加攻击。",
       "front_power_base": 275,
-      "back_power_base": null,
+      "back_power_base": 275,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_energy_bar": 2,
+      "back_max_sp": 120,
       "back_initial_sp": null,
-      "back_initial_energy_bar": null,
+      "back_initial_energy_bar": 1,
       "luck_chance": 0.05,
       "luck_damage": 1,
       "extra_heal_base": 60,
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030407,
+            35030405
+          ],
+          "second": [
+            35030204,
+            35030708,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030407,
+            35030405
+          ],
+          "second": [
+            35030304,
+            35030708,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14030304,
           "name": "猜猜这里住着谁",
-          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
+          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*量子共鸣)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
           "simple_desc": "开启结界，对敌方全体造成少量量子属性伤害。结界持续期间，敌方受到的伤害提高，并根据攻击敌人的个数对被攻击目标中生命值最高的目标造成少量量子属性附加伤害。",
           "type": "终结技",
           "tag": "群攻",
@@ -572,7 +1018,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.84,
+                0.48,
+                0.336,
+                0.16
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -618,8 +1075,8 @@
         {
           "id": 14030304,
           "name": "猜猜这里住着谁",
-          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
-          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
+          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*量子共鸣)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
+          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。量子共鸣会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
           "type": "终结技",
           "tag": "群攻",
           "sp_base": null,
@@ -631,7 +1088,18 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.84,
+                0.48,
+                0.336,
+                0.16
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -699,6 +1167,222 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 140301,
+      "rank": 1,
+      "name": "拾起砂糖的祭典",
+      "desc": "结界持续期间，我方小队攻击敌人后，对结界造成附加伤害的目标额外造成等同于本次攻击总伤害值#1[i]%的真实伤害。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1403/SkillIcon_1403_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.24
+      ]
+    },
+    {
+      "rank_id": 140302,
+      "rank": 2,
+      "name": "探访佳梦的向导",
+      "desc": "结界造成的附加伤害提高至原伤害的#1[i]%。结界造成附加伤害时，会额外造成#2[i]次附加伤害。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1403/SkillIcon_1403_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        1.2,
+        1
+      ]
+    },
+    {
+      "rank_id": 140303,
+      "rank": 3,
+      "name": "盛满晨曦的宝藏",
+      "desc": "缇宝的独立伤害增幅提高#1[i]%，我方小队的独立伤害增幅提高#2[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1403/SkillIcon_1403_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.05
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.02
+        }
+      ],
+      "param_list": [
+        0.05,
+        0.02
+      ]
+    },
+    {
+      "rank_id": 140304,
+      "rank": 4,
+      "name": "心意相契的安宁",
+      "desc": "我方小队造成伤害时无视敌方目标#1[i]%的防御力。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1403/SkillIcon_1403_Rank4.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.18
+      ]
+    },
+    {
+      "rank_id": 140305,
+      "rank": 5,
+      "name": "开启奇迹的时钟",
+      "desc": "缇宝的独立伤害增幅提高#1[i]%，我方小队的独立伤害增幅提高#2[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1403/SkillIcon_1403_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.05
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.02
+        }
+      ],
+      "param_list": [
+        0.05,
+        0.02
+      ]
+    },
+    {
+      "rank_id": 140306,
+      "rank": 6,
+      "name": "星月满天的明日",
+      "desc": "缇宝施放终结技后，对敌方全体目标发动天赋的追加攻击。天赋的追加攻击造成的伤害提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1403/SkillIcon_1403_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        7.29
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23038,
+      "level": 1,
+      "desc": "缇宝的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.04,
+        0.04
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.04
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.04
+        }
+      ]
+    },
+    {
+      "equipment_id": 23038,
+      "level": 2,
+      "desc": "缇宝的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.06,
+        0.06
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.06
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.06
+        }
+      ]
+    },
+    {
+      "equipment_id": 23038,
+      "level": 3,
+      "desc": "缇宝的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.08,
+        0.08
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.08
+        }
+      ]
+    },
+    {
+      "equipment_id": 23038,
+      "level": 4,
+      "desc": "缇宝的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.1,
+        0.1
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.1
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.1
+        }
+      ]
+    },
+    {
+      "equipment_id": 23038,
+      "level": 5,
+      "desc": "缇宝的独立伤害增幅提高#1，我方小队的独立伤害增幅提高#2。",
+      "param_list": [
+        0.12,
+        0.12
+      ],
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ]
+    }
+  ]
 }

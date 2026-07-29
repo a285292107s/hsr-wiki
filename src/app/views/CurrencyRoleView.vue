@@ -1,16 +1,17 @@
 <script setup lang="ts">
 /**
- * 货币战争 · 角色详情页
+ * 货币战争 · 角色详情页（v2 重构）
  * 数据：本地转换数据（public/data/cn/currency/role/<id>.json，由 converter 落地）
- * 展示：基础定位、羁绊（特质）、各星级技能 / 属性 / 战力等。
+ * 展示：沉浸式头图 → 锚点导航 → 羁绊（层级进度）→ 命座（时间线）→ 装备（等级递进）→ 星级详情
  */
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { CDN } from '../../lib/constants';
-import { fmtDesc, avatarShopIconUrl, avatarDrawCardUrl } from '../../lib/format';
+import { fmtDesc, avatarShopIconUrl, avatarDrawCardUrl, iconUrl } from '../../lib/format';
 import {
   loadLocalCurrencyRole,
-  type CurrencyRoleDetail, type CurrencyRoleStar, type CurrencyRoleSkill, type CurrencyRoleTrait,
+  type CurrencyRoleDetail, type CurrencyRoleStar, type CurrencyRoleSkill,
+  type CurrencyRoleTrait, type CurrencyRoleTraitLayer, type CurrencyRoleRank,
 } from '../../services/api';
 
 const route = useRoute();
@@ -36,8 +37,12 @@ const SKILL_GROUP_LABEL: Record<string, string> = {
 /* 属性修正 raw key → 友好中文名（货币战争专属 Extra* 字段） */
 const PROP_LABEL: Record<string, string> = {
   ExtraAllDamageTypeAddedRatio4: '全伤害提高',
+  ExtraAllDamageTypeAddedRatio1: '全伤害提高',
+  ExtraAllDamageTypeAddedRatio5: '全伤害提高',
   ExtraInitSP: '初始战技点',
+  ExtraHPAddedRatio1: '生命值提高',
   ExtraHPAddedRatio2: '生命值提高',
+  ExtraSpeedAddedRatio1: '速度提高',
   ExtraSpeedAddedRatio2: '速度提高',
   ExtraAttackAddedRatio: '攻击力提高',
   ExtraDefenceAddedRatio: '防御力提高',
@@ -45,13 +50,31 @@ const PROP_LABEL: Record<string, string> = {
   ExtraCriticalDamageBase: '暴击伤害提高',
   ExtraBreakDamageAddedRatio: '击破特攻提高',
   ExtraHealRatioBase: '治疗量提高',
+  ExtraHealAddedRatio: '治疗量提高',
   ExtraShieldRatioBase: '护盾量提高',
+  ExtraShieldAddedRatio: '护盾量提高',
   ExtraLuckChance: '幸运触发率提高',
   ExtraLuckDamage: '幸运伤害提高',
+  ExtraFrontPowerAddedRatio1: '前排战力提高',
+  ExtraBackPowerAddedRatio1: '后排战力提高',
+  ExtraDOTDamageAddedRatio1: '持续伤害提高',
+  ExtraElementDamageAddedRatio1: '属性伤害提高',
+  ExtraInsertDamageAddedRatio1: '追加攻击伤害提高',
+  ExtraNormalDamageAddedRatio1: '普攻伤害提高',
+  ExtraSkillDamageAddedRatio1: '战技伤害提高',
+  ExtraUltraDamageAddedRatio1: '终结技伤害提高',
+  SpeedAddedRatio: '速度提高',
+  AttackAddedRatio: '攻击力提高',
+  DefenceAddedRatio: '防御力提高',
+  HPAddedRatio: '生命值提高',
 };
 function propLabel(m: Record<string, unknown>): string {
   const key = String(m.property_type || m.name || '');
   return PROP_LABEL[key] || key.replace(/^Extra/, '').replace(/AddedRatio\d*$/, '');
+}
+/** 属性值格式化：绝对值 < 1 视为比率转百分比 */
+function propValue(v: number): string {
+  return Math.abs(v) < 1 ? `${(v * 100).toFixed(0)}%` : String(v);
 }
 
 const starKeys = computed(() =>
@@ -135,9 +158,36 @@ function maxParams(skill: CurrencyRoleSkill): number[] | undefined {
 function skillDesc(skill: CurrencyRoleSkill): string {
   return fmtDesc(skill.desc, maxParams(skill));
 }
-function traitDesc(desc: string): string {
-  return fmtDesc(desc).replace(/#\d+\[i\]/g, '');
+/** 羁绊描述：用 desc_params 渲染占位符（无参数时回退剥离占位符） */
+function traitDesc(t: CurrencyRoleTrait): string {
+  if (t.desc_params && t.desc_params.length) return fmtDesc(t.desc, t.desc_params);
+  return fmtDesc(t.desc).replace(/#\d+\[i\]/g, '');
 }
+/** 羁绊层级效果描述：用层级 params 渲染 */
+function layerDesc(ly: CurrencyRoleTraitLayer): string {
+  if (ly.params && ly.params.length) return fmtDesc(ly.desc, ly.params);
+  return fmtDesc(ly.desc).replace(/#\d+\[i\]/g, '');
+}
+/** 命座描述：用 param_list 渲染 */
+function rankDesc(rk: CurrencyRoleRank): string {
+  if (rk.param_list && rk.param_list.length) return fmtDesc(rk.desc, rk.param_list);
+  return fmtDesc(rk.desc).replace(/#\d+\[i\]/g, '');
+}
+function rankIconUrl(rk: CurrencyRoleRank): string {
+  return rk.icon ? iconUrl(rk.icon) : '';
+}
+const QUALITY_LABEL: Record<string, string> = { Silver: '银', Gold: '金', Multicolor: '彩' };
+
+/* ─── Tab 面板切换（与角色/遗器详情页一致） ─── */
+const TABS = [
+  { key: 'traits', label: '羁绊' },
+  { key: 'ranks', label: '命座' },
+  { key: 'equips', label: '装备' },
+  { key: 'stars', label: '星级' },
+] as const;
+type TabKey = typeof TABS[number]['key'];
+const activeTab = ref<TabKey>('traits');
+function setTab(key: TabKey) { activeTab.value = key; }
 function traitIconUrl(t: CurrencyRoleTrait): string {
   return `${CDN}/assets/hsr/gridfight/icon/${t.id}.webp`;
 }
@@ -150,6 +200,11 @@ function stanceText(list: number[] | null): string {
 }
 
 /* ─── 特质分类 ─── */
+const ACTIVATION_LABEL: Record<string, string> = {
+  GreaterEqualThan: '数量达标',
+  Equal: '数量相等',
+  LessThan: '数量少于',
+};
 const TRAIT_CATEGORY = {
   faction: { label: '阵营', css: '--faction', range: [1000, 2000] as [number, number] },
   combat:  { label: '战斗', css: '--combat',  range: [2000, 3000] as [number, number] },
@@ -176,10 +231,15 @@ const traitGroups = computed(() => {
 
 <template>
   <div class="nk-crole">
+    <!-- 返回按钮 -->
     <div class="nk-crole__topbar">
-      <button class="nk-crole__back" @click="router.push('/currency/role')">← 角色图鉴</button>
+      <button class="nk-crole__back" @click="router.push('/currency/role')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        <span>角色图鉴</span>
+      </button>
     </div>
 
+    <!-- 加载骨架屏 -->
     <div v-if="loading" class="nk-crole__skeleton">
       <div class="nk-crole__skeleton-hero">
         <div class="nk-crole__skeleton-portrait nk-sk nk-sk--shimmer"></div>
@@ -190,12 +250,14 @@ const traitGroups = computed(() => {
         </div>
       </div>
       <div class="nk-crole__skeleton-tabs">
-        <div class="nk-sk nk-sk--shimmer nk-sk--chip" v-for="n in 3" :key="n" style="width: 56px"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--chip" v-for="n in 4" :key="n" style="width: 56px"></div>
       </div>
       <div class="nk-crole__skeleton-grid">
         <div class="nk-sk nk-sk--shimmer nk-sk--block-md" v-for="n in 4" :key="n"></div>
       </div>
     </div>
+
+    <!-- 错误态 -->
     <div v-else-if="error" class="nk-crole__state nk-crole__state--err">
       <span class="nk-crole__state-icon">⚠</span>
       <p>{{ error }}</p>
@@ -203,60 +265,179 @@ const traitGroups = computed(() => {
     </div>
 
     <template v-else-if="data">
-      <!-- 头部 -->
-      <header class="nk-crole-hero" :data-rarity="data.rarity" :style="{ '--draw': `url(${avatarDrawCardUrl(data.id)})` }">
-        <div class="nk-crole-hero__portrait">
-          <img :src="avatarShopIconUrl(data.id)" :alt="data.name" loading="lazy" @error="hideOnError" />
-        </div>
-        <div class="nk-crole-hero__info">
-          <span class="nk-crole-hero__hud">CURRENCY ROLE · 货币战争</span>
-          <h1 class="nk-crole-hero__name">{{ data.name }}</h1>
-          <div class="nk-crole-hero__sub">
-            <span class="nk-crole-id">ID {{ data.id }}</span>
-            <span v-if="data.rarity >= 1 && data.rarity <= 6" class="nk-crole-stars">★{{ '★'.repeat(data.rarity - 1) }}</span>
-            <span v-else class="nk-crole-stars">{{ data.rarity }}</span>
+      <!-- ═══ 沉浸式 Hero ═══ -->
+      <header class="nk-crole-hero" :data-rarity="data.rarity">
+        <div class="nk-crole-hero__bg" :style="{ backgroundImage: `url(${avatarDrawCardUrl(data.id)})` }"></div>
+        <div class="nk-crole-hero__scrim"></div>
+        <div class="nk-crole-hero__content">
+          <div class="nk-crole-hero__portrait" :data-rarity="data.rarity">
+            <img :src="avatarShopIconUrl(data.id)" :alt="data.name" loading="eager" @error="hideOnError" />
           </div>
-          <!-- 基础标签 -->
-          <div class="nk-crole-hero__tags">
-            <span v-if="data.front_back_type" class="nk-crole-chip nk-crole-chip--fb">{{ FB_LABEL[data.front_back_type] || data.front_back_type }}</span>
-            <span v-if="data.heal_or_shield_display" class="nk-crole-chip nk-crole-chip--heal">{{ HEAL_LABEL[data.heal_or_shield_display] || data.heal_or_shield_display }}</span>
-            <span v-for="c in data.charge_type" :key="c" class="nk-crole-chip nk-crole-chip--charge">{{ CHARGE_LABEL[c] || c }}</span>
-            <span v-if="data.is_expert" class="nk-crole-chip nk-crole-chip--exp">专家</span>
-          </div>
-          <!-- 特质标签（按分类分组） -->
-          <div v-if="traitGroups.length" class="nk-crole-hero__traits">
-            <div v-for="grp in traitGroups" :key="grp.cat" class="nk-crole-traitgrp">
-              <span class="nk-crole-traitgrp__dot" :class="`nk-crole-traitgrp__dot--${grp.cat}`"></span>
-              <span
-                v-for="tr in grp.items"
-                :key="tr.id"
-                class="nk-crole-traitchip"
-                :class="`nk-crole-traitchip--${grp.cat}`"
-              >{{ tr.name || '?' }}</span>
+          <div class="nk-crole-hero__info">
+            <span class="nk-crole-hero__hud">GRID FIGHT · 货币战争</span>
+            <h1 class="nk-crole-hero__name">{{ data.name }}</h1>
+            <div class="nk-crole-hero__meta">
+              <span class="nk-crole-hero__id">#{{ data.id }}</span>
+              <span v-if="data.rarity >= 1 && data.rarity <= 6" class="nk-crole-hero__stars">{{ '★'.repeat(data.rarity) }}</span>
+            </div>
+            <div class="nk-crole-hero__tags">
+              <span v-if="data.front_back_type" class="nk-crole-chip nk-crole-chip--fb">{{ FB_LABEL[data.front_back_type] || data.front_back_type }}</span>
+              <span v-if="data.heal_or_shield_display" class="nk-crole-chip nk-crole-chip--heal">{{ HEAL_LABEL[data.heal_or_shield_display] || data.heal_or_shield_display }}</span>
+              <span v-for="c in data.charge_type" :key="c" class="nk-crole-chip nk-crole-chip--charge">{{ CHARGE_LABEL[c] || c }}</span>
+              <span v-if="data.is_expert" class="nk-crole-chip nk-crole-chip--exp">专家</span>
+            </div>
+            <div v-if="traitGroups.length" class="nk-crole-hero__traits">
+              <div v-for="grp in traitGroups" :key="grp.cat" class="nk-crole-traitgrp">
+                <span class="nk-crole-traitgrp__dot" :class="`nk-crole-traitgrp__dot--${grp.cat}`"></span>
+                <span v-for="tr in grp.items" :key="tr.id" class="nk-crole-traitchip" :class="`nk-crole-traitchip--${grp.cat}`">{{ tr.name || '?' }}</span>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <!-- 羁绊 -->
-      <section v-if="data.traits.length" class="nk-crole-section nk-crole-section--in" style="--si: 1">
+      <!-- ═══ Tab 导航 ═══ -->
+      <div class="nk-tabs">
+        <div class="nk-tabs__bar">
+          <div class="nk-tabs__left">
+            <button
+              v-for="t in TABS"
+              :key="t.key"
+              type="button"
+              :class="['nk-tab', { 'nk-tab--active': activeTab === t.key }]"
+              @click="setTab(t.key)"
+            >{{ t.label }}</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="nk-panels">
+      <!-- ═══ 羁绊 ═══ -->
+      <div :class="['nk-panel', { 'nk-panel--active': activeTab === 'traits' }]" data-panel="traits">
         <h2 class="nk-crole-section__title">羁绊</h2>
         <div class="nk-crole-traits">
-          <div v-for="t in data.traits" :key="t.id" class="nk-crole-trait">
-            <div class="nk-crole-trait__icon">
-              <img v-if="traitIconUrl(t)" :src="traitIconUrl(t)" :alt="t.name || ''" loading="lazy" @error="hideOnError" />
+          <article v-for="t in data.traits" :key="t.id" class="nk-crole-trait" :data-cat="catOfTrait(t.id)">
+            <div class="nk-crole-trait__header">
+              <div class="nk-crole-trait__icon">
+                <img :src="traitIconUrl(t)" :alt="t.name || ''" loading="lazy" @error="hideOnError" />
+              </div>
+              <div class="nk-crole-trait__heading">
+                <h3 class="nk-crole-trait__name">{{ t.name }}</h3>
+                <span class="nk-crole-trait__cat" :class="`nk-crole-trait__cat--${catOfTrait(t.id)}`">{{ TRAIT_CATEGORY[catOfTrait(t.id)].label }}</span>
+              </div>
+              <span v-if="t.activation_type" class="nk-crole-trait__act">{{ ACTIVATION_LABEL[t.activation_type] || t.activation_type }}</span>
             </div>
-            <div class="nk-crole-trait__body">
-              <div class="nk-crole-trait__name">{{ t.name }}</div>
-              <div v-if="t.activation_type" class="nk-crole-trait__act">触发：{{ t.activation_type }}</div>
-              <div class="nk-crole-trait__desc" v-html="traitDesc(t.desc)"></div>
+            <p class="nk-crole-trait__desc" v-html="traitDesc(t)"></p>
+            <!-- 层级进度 -->
+            <div v-if="t.layers && t.layers.length" class="nk-crole-layers">
+              <div class="nk-crole-layers__track">
+                <div
+                  v-for="ly in t.layers"
+                  :key="ly.layer"
+                  class="nk-crole-layers__node"
+                  :class="ly.quality ? `nk-crole-layers__node--${ly.quality.toLowerCase()}` : ''"
+                >
+                  <span class="nk-crole-layers__dot"></span>
+                  <span class="nk-crole-layers__label">{{ ly.layer }}人</span>
+                  <span v-if="ly.quality" class="nk-crole-layers__quality">{{ QUALITY_LABEL[ly.quality] || ly.quality }}</span>
+                </div>
+              </div>
+              <div class="nk-crole-layers__details">
+                <div
+                  v-for="ly in t.layers"
+                  :key="ly.layer"
+                  class="nk-crole-layer"
+                  :class="ly.quality ? `nk-crole-layer--${ly.quality.toLowerCase()}` : ''"
+                >
+                  <div class="nk-crole-layer__head">
+                    <span class="nk-crole-layer__threshold">{{ ly.layer }}人</span>
+                    <span v-if="ly.quality" class="nk-crole-layer__quality">{{ QUALITY_LABEL[ly.quality] || ly.quality }}</span>
+                  </div>
+                  <div v-if="ly.desc" class="nk-crole-layer__desc" v-html="layerDesc(ly)"></div>
+                  <ul v-if="ly.member_props.length || ly.all_props.length" class="nk-crole-layer__props">
+                    <li v-for="(p, pi) in ly.member_props" :key="'m' + pi">
+                      <span class="nk-crole-layer__scope">成员</span>
+                      <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
+                      <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
+                    </li>
+                    <li v-for="(p, pi) in ly.all_props" :key="'a' + pi">
+                      <span class="nk-crole-layer__scope nk-crole-layer__scope--all">全员</span>
+                      <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
+                      <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- ═══ 命座（时间线） ═══ -->
+      <div :class="['nk-panel', { 'nk-panel--active': activeTab === 'ranks' }]" data-panel="ranks">
+        <h2 class="nk-crole-section__title">命座</h2>
+        <div class="nk-crole-timeline">
+          <div v-for="rk in data.rank" :key="rk.rank_id" class="nk-crole-timeline__item">
+            <div class="nk-crole-timeline__rail">
+              <div class="nk-crole-timeline__icon">
+                <img v-if="rankIconUrl(rk)" :src="rankIconUrl(rk)" :alt="rk.name" loading="lazy" @error="hideOnError" />
+                <span v-else class="nk-crole-timeline__num">{{ rk.rank }}</span>
+              </div>
+              <div class="nk-crole-timeline__line"></div>
+            </div>
+            <div class="nk-crole-timeline__card">
+              <div class="nk-crole-timeline__head">
+                <span class="nk-crole-timeline__step">R{{ rk.rank }}</span>
+                <span class="nk-crole-timeline__name">{{ rk.name }}</span>
+              </div>
+              <p class="nk-crole-timeline__desc" v-html="rankDesc(rk)"></p>
+              <ul v-if="rk.owner_props.length || rk.all_props.length" class="nk-crole-layer__props">
+                <li v-for="(p, pi) in rk.owner_props" :key="'o' + pi">
+                  <span class="nk-crole-layer__scope">自身</span>
+                  <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
+                  <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
+                </li>
+                <li v-for="(p, pi) in rk.all_props" :key="'a' + pi">
+                  <span class="nk-crole-layer__scope nk-crole-layer__scope--all">全员</span>
+                  <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
+                  <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <!-- 星级切换 -->
-      <section class="nk-crole-section nk-crole-section--in" style="--si: 2">
+      <!-- ═══ 专属装备（等级递进） ═══ -->
+      <div :class="['nk-panel', { 'nk-panel--active': activeTab === 'equips' }]" data-panel="equips">
+        <h2 class="nk-crole-section__title">专属装备</h2>
+        <div class="nk-crole-equips">
+          <div v-for="eq in data.equipment" :key="eq.level" class="nk-crole-equip">
+            <div class="nk-crole-equip__lv">
+              <span class="nk-crole-equip__lv-num">{{ eq.level }}</span>
+              <span class="nk-crole-equip__lv-label">Lv</span>
+            </div>
+            <div class="nk-crole-equip__body">
+              <p class="nk-crole-equip__desc" v-html="fmtDesc(eq.desc, eq.param_list)"></p>
+              <ul v-if="eq.owner_props.length || eq.all_props.length" class="nk-crole-layer__props">
+                <li v-for="(p, pi) in eq.owner_props" :key="'o' + pi">
+                  <span class="nk-crole-layer__scope">自身</span>
+                  <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
+                  <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
+                </li>
+                <li v-for="(p, pi) in eq.all_props" :key="'a' + pi">
+                  <span class="nk-crole-layer__scope nk-crole-layer__scope--all">全员</span>
+                  <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
+                  <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ 星级详情 ═══ -->
+      <div :class="['nk-panel', { 'nk-panel--active': activeTab === 'stars' }]" data-panel="stars">
         <h2 class="nk-crole-section__title">星级详情</h2>
         <div class="nk-crole-stars-tabs">
           <button
@@ -304,7 +485,7 @@ const traitGroups = computed(() => {
                 <div v-if="stanceText(sk.show_stance_list)" class="nk-crole-skill__stance">韧性 {{ stanceText(sk.show_stance_list) }}</div>
                 <ul v-if="sk.extra" class="nk-crole-skill__extra">
                   <li v-for="(ex, ek) in sk.extra" :key="ek">
-                    <b>{{ ex.name }}：</b>{{ ex.desc }}
+                    <b>{{ ex.name }}：</b><span v-html="fmtDesc(ex.desc, ex.param)"></span>
                   </li>
                 </ul>
               </div>
@@ -338,7 +519,8 @@ const traitGroups = computed(() => {
             </ul>
           </div>
         </div>
-      </section>
+      </div>
+      </div><!-- /.nk-panels -->
     </template>
   </div>
 </template>

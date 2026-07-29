@@ -17,14 +17,149 @@
       "name": "燃血",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2006.png",
-      "desc": "【燃血】队员的和提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。"
+      "desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "simple_desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "desc_params": [
+        40000,
+        0,
+        0.05,
+        0.02,
+        10000,
+        5,
+        1000,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.1,
+            0.1
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.1
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.2,
+            0.25
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.25
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.3,
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.4
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 8,
+          "quality": "Gold",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.45,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.45
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 3001,
       "name": "大守护者",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/3001.png",
-      "desc": "布洛妮娅会基于小队中【贝洛伯格】和【燃血】角色的数量，加入人数更多的羁绊并获得相应技能。\\n我方前台行动后布洛妮娅获得#1[i]点充能，充能满后布洛妮娅召唤可可利亚攻击敌方全体。"
+      "desc": "布洛妮娅会基于小队中【贝洛伯格】和【燃血】角色的数量，加入人数更多的羁绊并获得相应技能。\\n我方前台行动后布洛妮娅获得#1[i]点充能，充能满后布洛妮娅召唤可可利亚攻击敌方全体。",
+      "simple_desc": "布洛妮娅会基于小队中【贝洛伯格】和【燃血】角色的数量，加入人数更多的羁绊并获得相应技能。\\n我方前台行动一定次数后，布洛妮娅召唤可可利亚攻击敌方全体。",
+      "desc_params": [
+        1,
+        8,
+        12,
+        2.4,
+        1.5,
+        10,
+        1,
+        4,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": "Unique",
+          "desc": "充能满#2[i]点后，可可利亚发动攻击对敌方全体造成布洛妮娅#3[i]%攻击力+#4[i]%生命上限的虚数属性伤害，该次攻击必定暴击。\\n羁绊效果随布洛妮娅的星级而提高：\\n1星：初始已计入#8[i]次行动。\\n2星：造成的伤害为原伤害的#5[i]%，初始已计入#8[i]次行动。\\n3星：造成的伤害为原伤害的#6[i]%，充能满#7[i]点后可可利亚就会发动攻击。",
+          "params": [
+            1,
+            8,
+            12,
+            2.4,
+            1.5,
+            10,
+            1,
+            4
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -46,7 +181,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 110120201,
@@ -153,7 +313,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 110120202,
@@ -260,7 +445,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        },
+        "back": {
+          "first": [
+            35030203,
+            35030207,
+            35030206
+          ],
+          "second": [
+            35030204,
+            35030407,
+            35030106
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 110120203,

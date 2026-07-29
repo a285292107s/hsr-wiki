@@ -17,14 +17,211 @@
       "name": "巡海游侠",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1009.png",
-      "desc": "【巡海游侠】队员获得和。若将【巡海游侠】放置于后台，则位于后台的【巡海游侠】的星级会使前台【巡海游侠】额外获得和。"
+      "desc": "【巡海游侠】队员获得全伤害和速度。若将【巡海游侠】放置于后台，则位于后台的【巡海游侠】的星级会使前台【巡海游侠】额外获得全伤害和速度。",
+      "simple_desc": "【巡海游侠】们获得全伤害和速度。若将【巡海游侠】放置于后台，则位于后台的【巡海游侠】的星级会使前台【巡海游侠】额外获得全伤害和速度。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": null,
+          "desc": "#1[i]%全伤害，#2[i]%速度。",
+          "params": [
+            0.08,
+            0.08
+          ],
+          "member_props": [
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.08
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.08
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%全伤害，#2[i]%速度。",
+          "params": [
+            0.16,
+            0.16
+          ],
+          "member_props": [
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.16
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.16
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Gold",
+          "desc": "#1[i]%全伤害，#2[i]%速度。",
+          "params": [
+            0.28,
+            0.28
+          ],
+          "member_props": [
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.28
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.28
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Gold",
+          "desc": "#1[i]%全伤害，#2[i]%速度。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2007,
       "name": "减益",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2007.png",
-      "desc": "【减益】队员的前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。"
+      "desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
+      "simple_desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
+      "desc_params": [
+        2,
+        3,
+        0.1,
+        0,
+        0.03,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.2,
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1.2,
+            1.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 1.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 1.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 8,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            2.5,
+            2.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 2.5
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 2.5
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -46,7 +243,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13089901,
@@ -119,7 +341,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13089902,
@@ -192,7 +439,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030808,
+            35030408
+          ],
+          "second": [
+            35030202,
+            35030208,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 13089903,

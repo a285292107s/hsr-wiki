@@ -20,14 +20,215 @@
       "name": "夜之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1012.png",
-      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前/后台强度提高。"
+      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前排战力后排战力前/后台强度提高。",
+      "simple_desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前排战力后排战力前/后台强度提高。",
+      "desc_params": [
+        2
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1.2,
+            1.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 1.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 1.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            2.4,
+            2.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 2.4
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 2.4
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2011,
       "name": "战技点",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2011.png",
-      "desc": "我方战技点上限提高，我方小队获得，施放战技或普攻时获得，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。"
+      "desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
+      "simple_desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
+      "desc_params": [
+        2,
+        0.12,
+        0.12,
+        0.02,
+        0.06,
+        4,
+        1,
+        0.2,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.12,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.12
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.12
+            }
+          ]
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.24,
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.24
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.24
+            }
+          ]
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.4,
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.4
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.4
+            }
+          ]
+        },
+        {
+          "layer": 8,
+          "quality": "Multicolor",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.8,
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.8
+            }
+          ]
+        }
+      ]
     }
   ],
   "stars": {
@@ -36,10 +237,10 @@
       "front_one_word_desc": "回合开始时恢复战技点，复制角色战技并额外施放的效率提高，可复制【战技点】羁绊内原有队员的普攻。",
       "back_one_word_desc": "行动后恢复战技点，强化前台单体角色并复制其战技以额外施放，可复制【战技点】羁绊内原有队员的普攻。",
       "front_power_base": 150,
-      "back_power_base": null,
+      "back_power_base": 150,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 6,
       "back_max_sp": null,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
@@ -53,7 +254,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030206,
+            35030203,
+            35030407
+          ],
+          "second": [
+            35030101,
+            35030207,
+            35030606
+          ]
+        },
+        "back": {
+          "first": [
+            35030206,
+            35030203,
+            35030407
+          ],
+          "second": [
+            35030101,
+            35030207,
+            35030606
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14120201,
@@ -71,7 +297,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放，刻律德菈以#7[i]%的速度行动。",
+              "param": [
+                0.72,
+                1,
+                10,
+                6,
+                0.1,
+                1,
+                2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -130,7 +370,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放，刻律德菈以#7[i]%的速度行动。",
+              "param": [
+                0.72,
+                1,
+                10,
+                6,
+                0.1,
+                1,
+                2
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -232,10 +486,10 @@
       "front_one_word_desc": "回合开始时恢复战技点，复制角色战技并额外施放的效率提高，可复制【战技点】羁绊内原有队员的普攻。",
       "back_one_word_desc": "行动后恢复战技点，强化前台单体角色并复制其战技以额外施放，可复制【战技点】羁绊内原有队员的普攻。",
       "front_power_base": 240,
-      "back_power_base": null,
+      "back_power_base": 240,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 6,
       "back_max_sp": null,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
@@ -249,7 +503,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030206,
+            35030203,
+            35030407
+          ],
+          "second": [
+            35030101,
+            35030207,
+            35030606
+          ]
+        },
+        "back": {
+          "first": [
+            35030206,
+            35030203,
+            35030407
+          ],
+          "second": [
+            35030101,
+            35030207,
+            35030606
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14120202,
@@ -267,7 +546,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放，刻律德菈以#7[i]%的速度行动。",
+              "param": [
+                0.96,
+                1,
+                10,
+                6,
+                0.1,
+                2,
+                2.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -326,7 +619,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放，刻律德菈以#7[i]%的速度行动。",
+              "param": [
+                0.96,
+                1,
+                10,
+                6,
+                0.1,
+                2,
+                2.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -428,10 +735,10 @@
       "front_one_word_desc": "回合开始时恢复战技点，复制角色战技并额外施放的效率提高，可复制【战技点】羁绊内原有队员的普攻。",
       "back_one_word_desc": "行动后恢复战技点，强化前台单体角色并复制其战技以额外施放，可复制【战技点】羁绊内原有队员的普攻。",
       "front_power_base": 330,
-      "back_power_base": null,
+      "back_power_base": 330,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 6,
       "back_max_sp": null,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
@@ -445,7 +752,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030206,
+            35030203,
+            35030407
+          ],
+          "second": [
+            35030101,
+            35030207,
+            35030606
+          ]
+        },
+        "back": {
+          "first": [
+            35030206,
+            35030203,
+            35030407
+          ],
+          "second": [
+            35030101,
+            35030207,
+            35030606
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14120203,
@@ -463,7 +795,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放，刻律德菈以#7[i]%的速度行动。",
+              "param": [
+                1.2,
+                1,
+                10,
+                6,
+                0.1,
+                3,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -522,7 +868,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放，刻律德菈以#7[i]%的速度行动。",
+              "param": [
+                1.2,
+                1,
+                10,
+                6,
+                0.1,
+                3,
+                3
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -620,6 +980,181 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 141201,
+      "rank": 1,
+      "name": "夺走一切王冠",
+      "desc": "持有【军功】的角色造成伤害时无视目标#1[i]%的防御力。若当前【军功】已升级为【爵位】，则该角色造成战技伤害时额外无视目标#2[i]%的防御力。刻律德菈施放战技时，为指定我方目标恢复#3[i]点能量。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1412/SkillIcon_1412_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.16,
+        0.2,
+        2
+      ]
+    },
+    {
+      "rank_id": 141202,
+      "rank": 2,
+      "name": "凝聚万众宏愿",
+      "desc": "持有【军功】的角色造成的伤害提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1412/SkillIcon_1412_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.4
+      ]
+    },
+    {
+      "rank_id": 141203,
+      "rank": 3,
+      "name": "燃尽旧日律法",
+      "desc": "我方小队的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1412/SkillIcon_1412_BP.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.03
+        }
+      ],
+      "param_list": [
+        0.03
+      ]
+    },
+    {
+      "rank_id": 141204,
+      "rank": 4,
+      "name": "重塑天地人间",
+      "desc": "我方小队造成的伤害提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1412/SkillIcon_1412_Rank4.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "AllDamageTypeAddedRatio",
+          "property_type": "AllDamageTypeAddedRatio",
+          "value": 0.25
+        }
+      ],
+      "param_list": [
+        0.25
+      ]
+    },
+    {
+      "rank_id": 141205,
+      "rank": 5,
+      "name": "帮助与加害，全数奉还",
+      "desc": "我方小队的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1412/SkillIcon_1412_Ultra.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.03
+        }
+      ],
+      "param_list": [
+        0.03
+      ]
+    },
+    {
+      "rank_id": 141206,
+      "rank": 6,
+      "name": "征途只在，星辰大海",
+      "desc": "持有【军功】的角色全属性抗性穿透提高#1[i]%，且【军功】触发的附加伤害倍率提高#2[i]%。场上存在持有【军功】的队友时，刻律德菈全属性抗性穿透提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1412/SkillIcon_1412_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.2,
+        3
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23048,
+      "level": 1,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.06
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.06
+        }
+      ]
+    },
+    {
+      "equipment_id": 23048,
+      "level": 2,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.09
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.09
+        }
+      ]
+    },
+    {
+      "equipment_id": 23048,
+      "level": 3,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ]
+    },
+    {
+      "equipment_id": 23048,
+      "level": 4,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.15
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.15
+        }
+      ]
+    },
+    {
+      "equipment_id": 23048,
+      "level": 5,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ]
+    }
+  ]
 }

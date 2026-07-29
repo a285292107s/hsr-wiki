@@ -17,14 +17,189 @@
       "name": "银河学者",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1003.png",
-      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。"
+      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。",
+      "simple_desc": "基于【银河学者】们的星级叠加【猫猫糕】，并根据层数获得额外奖励。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.8,
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.8
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            2,
+            2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2003,
       "name": "群攻",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
-      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+      "desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "simple_desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "desc_params": [
+        0.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.12,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.12
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.12
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.24,
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.24
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.24
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.36,
+            0.36
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.36
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -33,7 +208,7 @@
       "front_one_word_desc": "更容易发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
       "back_one_word_desc": "敌人生命值降低后发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 100,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -50,7 +225,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030104,
+            35030208
+          ],
+          "second": [
+            35030708,
+            35030205,
+            35030202
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030104,
+            35030208
+          ],
+          "second": [
+            35030708,
+            35030205,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10130401,
@@ -190,7 +390,7 @@
       "front_one_word_desc": "更容易发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
       "back_one_word_desc": "敌人生命值降低后发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
       "front_power_base": 160,
-      "back_power_base": null,
+      "back_power_base": 160,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -207,7 +407,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030104,
+            35030208
+          ],
+          "second": [
+            35030708,
+            35030205,
+            35030202
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030104,
+            35030208
+          ],
+          "second": [
+            35030708,
+            35030205,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10130402,
@@ -347,7 +572,7 @@
       "front_one_word_desc": "更容易发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
       "back_one_word_desc": "敌人生命值降低后发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
       "front_power_base": 220,
-      "back_power_base": null,
+      "back_power_base": 220,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -364,7 +589,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030104,
+            35030208
+          ],
+          "second": [
+            35030708,
+            35030205,
+            35030202
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030104,
+            35030208
+          ],
+          "second": [
+            35030708,
+            35030205,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10130403,
@@ -504,7 +754,7 @@
       "front_one_word_desc": "更容易发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
       "back_one_word_desc": "敌人生命值降低后发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
       "front_power_base": 280,
-      "back_power_base": null,
+      "back_power_base": 280,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
@@ -517,7 +767,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030104,
+            35030208
+          ],
+          "second": [
+            35030708,
+            35030205,
+            35030202
+          ]
+        },
+        "back": {
+          "first": [
+            35030304,
+            35030104,
+            35030208
+          ],
+          "second": [
+            35030708,
+            35030205,
+            35030303
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 10130404,
@@ -653,6 +928,110 @@
       ]
     }
   },
-  "rank": [],
+  "rank": [
+    {
+      "rank_id": 101301,
+      "rank": 1,
+      "name": "落井当下石",
+      "desc": "黑塔的暴击伤害提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1013/SkillIcon_1013_Rank1.png",
+      "owner_props": [
+        {
+          "name": "CriticalDamageBase",
+          "property_type": "CriticalDamageBase",
+          "value": 0.3
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.3
+      ]
+    },
+    {
+      "rank_id": 101302,
+      "rank": 2,
+      "name": "得胜必追击",
+      "desc": "天赋每触发1次，自身暴击率提高#1[i]%，该效果最多叠加#2[i]层。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1013/SkillIcon_1013_Rank2.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.03,
+        5
+      ]
+    },
+    {
+      "rank_id": 101303,
+      "rank": 3,
+      "name": "我就是这样女子",
+      "desc": "黑塔的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1013/SkillIcon_1013_BP.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.05
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.05
+      ]
+    },
+    {
+      "rank_id": 101304,
+      "rank": 4,
+      "name": "打人要打脸",
+      "desc": "黑塔造成的伤害提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1013/SkillIcon_1013_Rank4.png",
+      "owner_props": [
+        {
+          "name": "AllDamageTypeAddedRatio",
+          "property_type": "AllDamageTypeAddedRatio",
+          "value": 0.15
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.15
+      ]
+    },
+    {
+      "rank_id": 101305,
+      "rank": 5,
+      "name": "骂人不留口",
+      "desc": "黑塔的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1013/SkillIcon_1013_Ultra.png",
+      "owner_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.05
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.05
+      ]
+    },
+    {
+      "rank_id": 101306,
+      "rank": 6,
+      "name": "世上没人能负我",
+      "desc": "黑塔的攻击力提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1013/SkillIcon_1013_Rank6.png",
+      "owner_props": [
+        {
+          "name": "AttackAddedRatio",
+          "property_type": "AttackAddedRatio",
+          "value": 0.25
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        0.25
+      ]
+    }
+  ],
   "equipment": []
 }

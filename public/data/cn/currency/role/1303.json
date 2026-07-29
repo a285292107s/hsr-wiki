@@ -19,14 +19,189 @@
       "name": "银河学者",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1003.png",
-      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。"
+      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。",
+      "simple_desc": "基于【银河学者】们的星级叠加【猫猫糕】，并根据层数获得额外奖励。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.3,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.8,
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.8
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            2,
+            2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2002,
       "name": "击破",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2002.png",
-      "desc": "【击破】队员的前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。"
+      "desc": "【击破】队员的前排战力后排战力前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。",
+      "simple_desc": "【击破】队员的前排战力后排战力前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌人的初始韧性和韧性恢复量降低。",
+      "desc_params": [
+        1.2,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "params": [
+            0.2,
+            0.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.2
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            1.5,
+            1.5
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 1.5
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 1.5
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力。",
+          "params": [
+            3.2,
+            3.2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 3.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 3.2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -35,11 +210,11 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "终结技使我方小队全属性抗性穿透提高并在攻击后施加【残梅绽】，触发时可充能【击破】羁绊。我方小队伤害和击破效率提高。",
       "front_power_base": 100,
-      "back_power_base": null,
+      "back_power_base": 125,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_max_sp": 130,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
@@ -52,7 +227,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030106,
+            35030606,
+            35030203
+          ],
+          "second": [
+            35030508,
+            35030103,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030106,
+            35030606,
+            35030203
+          ],
+          "second": [
+            35030508,
+            35030103,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -71,7 +271,16 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.6,
+                0.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -98,7 +307,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。阮•梅以#1[i]%的速度行动。",
+              "param": [
+                2,
+                0.2,
+                0.2,
+                0.1,
+                0.5,
+                200,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -144,11 +367,11 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "终结技使我方小队全属性抗性穿透提高并在攻击后施加【残梅绽】，触发时可充能【击破】羁绊。我方小队伤害和击破效率提高。",
       "front_power_base": 160,
-      "back_power_base": null,
+      "back_power_base": 200,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_max_sp": 130,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
@@ -161,7 +384,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030106,
+            35030606,
+            35030203
+          ],
+          "second": [
+            35030508,
+            35030103,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030106,
+            35030606,
+            35030203
+          ],
+          "second": [
+            35030508,
+            35030103,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -180,7 +428,16 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.75,
+                0.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -207,7 +464,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。阮•梅以#1[i]%的速度行动。",
+              "param": [
+                2.5,
+                0.25,
+                0.2,
+                0.1,
+                1,
+                200,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -253,11 +524,11 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "终结技使我方小队全属性抗性穿透提高并在攻击后施加【残梅绽】，触发时可充能【击破】羁绊。我方小队伤害和击破效率提高。",
       "front_power_base": 220,
-      "back_power_base": null,
+      "back_power_base": 275,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_max_sp": 130,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
@@ -270,7 +541,32 @@
         0,
         0
       ],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030106,
+            35030606,
+            35030203
+          ],
+          "second": [
+            35030508,
+            35030103,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030106,
+            35030606,
+            35030203
+          ],
+          "second": [
+            35030508,
+            35030103,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -289,7 +585,16 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                0.9,
+                0.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -316,7 +621,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。阮•梅以#1[i]%的速度行动。",
+              "param": [
+                3,
+                0.3,
+                0.2,
+                0.1,
+                1.5,
+                200,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -362,11 +681,11 @@
       "front_one_word_desc": "",
       "back_one_word_desc": "终结技使我方小队全属性抗性穿透提高并在攻击后施加【残梅绽】，触发时可充能【击破】羁绊。我方小队伤害和击破效率提高。",
       "front_power_base": 280,
-      "back_power_base": null,
+      "back_power_base": 350,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
       "back_energy_bar": null,
-      "back_max_sp": null,
+      "back_max_sp": 130,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
       "luck_chance": 0.05,
@@ -375,7 +694,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030106,
+            35030606,
+            35030203
+          ],
+          "second": [
+            35030508,
+            35030103,
+            35030607
+          ]
+        },
+        "back": {
+          "first": [
+            35030106,
+            35030606,
+            35030203
+          ],
+          "second": [
+            35030508,
+            35030103,
+            35030607
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [
         {
@@ -394,7 +738,16 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "战斗开始时施放。",
+              "param": [
+                1.05,
+                0.5
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -421,7 +774,21 @@
             0
           ],
           "skill_combo_value_delta": null,
-          "extra": {},
+          "extra": {
+            "condition": {
+              "name": "触发条件",
+              "desc": "行动时施放。阮•梅以#1[i]%的速度行动。",
+              "param": [
+                3,
+                0.35,
+                0.2,
+                0.1,
+                2,
+                200,
+                1
+              ]
+            }
+          },
           "level": {
             "1": {
               "level": 1,
@@ -463,6 +830,184 @@
       ]
     }
   },
-  "rank": [],
-  "equipment": []
+  "rank": [
+    {
+      "rank_id": 130301,
+      "rank": 1,
+      "name": "神经仿绣图",
+      "desc": "我方小队造成伤害时无视目标#1[i]%的防御力。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1303/SkillIcon_1303_Rank1.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        0.2
+      ]
+    },
+    {
+      "rank_id": 130302,
+      "rank": 2,
+      "name": "芦前漫步",
+      "desc": "我方小队的攻击力提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1303/SkillIcon_1303_Rank2.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "AttackAddedRatio",
+          "property_type": "AttackAddedRatio",
+          "value": 0.4
+        }
+      ],
+      "param_list": [
+        0.4
+      ]
+    },
+    {
+      "rank_id": 130303,
+      "rank": 3,
+      "name": "彩缎烟衫绿婆娑",
+      "desc": "我方小队的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1303/SkillIcon_1303_Ultra.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.03
+        }
+      ],
+      "param_list": [
+        0.03
+      ]
+    },
+    {
+      "rank_id": 130304,
+      "rank": 4,
+      "name": "寻神铜镜前",
+      "desc": "阮梅的击破特攻提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1303/SkillIcon_1303_Rank4.png",
+      "owner_props": [
+        {
+          "name": "BreakDamageAddedRatioBase",
+          "property_type": "BreakDamageAddedRatioBase",
+          "value": 1
+        }
+      ],
+      "all_props": [],
+      "param_list": [
+        1
+      ]
+    },
+    {
+      "rank_id": 130305,
+      "rank": 5,
+      "name": "手弄慵鬟玲珑钗",
+      "desc": "我方小队的独立伤害增幅提高#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1303/SkillIcon_1303_BP.png",
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.03
+        }
+      ],
+      "param_list": [
+        0.03
+      ]
+    },
+    {
+      "rank_id": 130306,
+      "rank": 6,
+      "name": "半脱纱巾落团扇",
+      "desc": "【残梅绽】造成的伤害提高为原伤害的#1[i]%。",
+      "icon": "SpriteOutput/SkillIcons/Avatar/1303/SkillIcon_1303_Rank6.png",
+      "owner_props": [],
+      "all_props": [],
+      "param_list": [
+        10
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "equipment_id": 23019,
+      "level": 1,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.06
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.06
+        }
+      ]
+    },
+    {
+      "equipment_id": 23019,
+      "level": 2,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.09
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.09
+        }
+      ]
+    },
+    {
+      "equipment_id": 23019,
+      "level": 3,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.12
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.12
+        }
+      ]
+    },
+    {
+      "equipment_id": 23019,
+      "level": 4,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.15
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.15
+        }
+      ]
+    },
+    {
+      "equipment_id": 23019,
+      "level": 5,
+      "desc": "我方小队的独立伤害增幅提高#1。",
+      "param_list": [
+        0.18
+      ],
+      "owner_props": [],
+      "all_props": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio3",
+          "property_type": "ExtraAllDamageTypeAddedRatio3",
+          "value": 0.18
+        }
+      ]
+    }
+  ]
 }

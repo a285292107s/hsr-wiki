@@ -17,14 +17,235 @@
       "name": "仙舟",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1007.png",
-      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前/后台强度和提高。"
+      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前排战力后排战力前/后台强度和速度提高。",
+      "simple_desc": "【仙舟】召唤【神君】。【仙舟】队员行动后为【神君】叠加段数并使其行动提前。\\n【仙舟】队员的前排战力后排战力前/后台强度和速度提高。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度，#3[i]%速度。",
+          "params": [
+            0.2,
+            0.2,
+            0.08
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.08
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.4,
+            0.4,
+            0.16
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.4
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.4
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.16
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.8,
+            0.8,
+            0.32
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.8
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.8
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.32
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 10,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            2,
+            2,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 2
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 2
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2003,
       "name": "群攻",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
-      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+      "desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "simple_desc": "【群攻】队员的幸运触发率提高，幸运伤害提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。",
+      "desc_params": [
+        0.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.12,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.12
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.12
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Silver",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.24,
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.24
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.24
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.36,
+            0.36
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.36
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%幸运触发率，#2[i]%幸运伤害。",
+          "params": [
+            0.6,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraLuckDamage",
+              "property_type": "ExtraLuckDamage",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -46,7 +267,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030108,
+            35030307
+          ],
+          "second": [
+            35030202,
+            35030101,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030108,
+            35030307
+          ],
+          "second": [
+            35030202,
+            35030101,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 120410401,
@@ -153,7 +399,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030108,
+            35030307
+          ],
+          "second": [
+            35030202,
+            35030101,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030108,
+            35030307
+          ],
+          "second": [
+            35030202,
+            35030101,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 120410402,
@@ -260,7 +531,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030108,
+            35030307
+          ],
+          "second": [
+            35030202,
+            35030101,
+            35030205
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030108,
+            35030307
+          ],
+          "second": [
+            35030202,
+            35030101,
+            35030205
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 120410403,

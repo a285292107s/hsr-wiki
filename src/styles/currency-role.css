@@ -127,38 +127,66 @@
   .nk-crole-card:focus-visible .nk-crole-card__avatar img { transform: none; }
 }
 
-/* 详情页容器（移动优先：紧凑内边距 + 底部导航 safe-area 避让） */
+/* 列表卡片上的特质标签 */
+.nk-crole-card__traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  margin-top: 4px;
+}
+.nk-crole-tcard-trait {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  line-height: 1.45;
+}
+.nk-crole-tcard-trait--faction { background: rgba(167, 139, 250, 0.14); color: #c4b5fd; }
+.nk-crole-tcard-trait--combat  { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; }
+.nk-crole-tcard-trait--special { background: rgba(251, 146, 60, 0.14); color: #fdba74; }
+
+/* 详情页容器（移动优先） */
 .nk-crole {
   max-width: 980px;
   margin: 0 auto;
-  padding: 14px 14px calc(72px + env(safe-area-inset-bottom, 0px));
+  padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
 }
-.nk-crole__topbar { margin-bottom: 12px; }
+.nk-crole__topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, var(--bg) 60%, transparent);
+  pointer-events: none;
+}
 .nk-crole__back {
+  pointer-events: auto;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-height: 40px;
-  background: var(--card);
+  background: rgba(15, 15, 35, 0.8);
+  backdrop-filter: blur(12px);
   color: var(--text2);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 8px 16px;
   cursor: pointer;
   font-size: 13px;
-  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s var(--ease);
 }
-.nk-crole__back:hover { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 16px rgba(244,63,94,0.18); }
-.nk-crole__back:active { transform: scale(0.97); }
+.nk-crole__back svg { flex: none; }
+.nk-crole__back:hover { color: var(--text-bright); border-color: var(--border2); box-shadow: 0 0 16px var(--primary-glow); }
+.nk-crole__back:active { transform: scale(0.96); }
 .nk-crole__back:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* 状态：错误态含图标 + 重试 */
-.nk-crole__state { padding: 40px 20px; text-align: center; color: var(--text2); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+/* 状态：错误态 */
+.nk-crole__state { padding: 60px 20px; text-align: center; color: var(--text2); display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .nk-crole__state--err { color: #ff8a8a; }
-.nk-crole__state-icon { font-size: 32px; line-height: 1; }
+.nk-crole__state-icon { font-size: 36px; line-height: 1; }
 .nk-crole__state p { margin: 0; }
 .nk-crole__retry {
-  margin-top: 4px; padding: 8px 22px; border-radius: 999px;
+  margin-top: 4px; padding: 10px 24px; border-radius: 999px;
   background: var(--primary); border: none; color: #fff;
   font-family: var(--font-hud); font-size: 12px; font-weight: 700; letter-spacing: 0.12em;
   cursor: pointer; transition: box-shadow 0.2s, transform 0.2s;
@@ -166,102 +194,102 @@
 .nk-crole__retry:hover { box-shadow: 0 0 18px var(--primary-glow); transform: translateY(-1px); }
 .nk-crole__retry:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
 
-/* 骨架屏（复用全局 nk-sk--shimmer 令牌） */
-.nk-crole__skeleton { display: flex; flex-direction: column; gap: 20px; }
+/* 骨架屏 */
+.nk-crole__skeleton { display: flex; flex-direction: column; gap: 20px; padding: 16px; }
 .nk-crole__skeleton-hero { display: flex; gap: 16px; padding: 18px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); }
-.nk-crole__skeleton-portrait { width: 100px; height: 100px; flex: none; border-radius: 14px; }
+.nk-crole__skeleton-portrait { width: 100px; height: 100px; flex: none; border-radius: 50%; }
 .nk-crole__skeleton-info { flex: 1; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
 .nk-crole__skeleton-tabs { display: flex; gap: 8px; }
 .nk-crole__skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 
-/* 头部：稀有度光晕 + 渐变面板 + HUD 字体（移动优先） */
+/* ═══ 沉浸式 Hero ═══ */
 .nk-crole-hero {
   --holo-color: rgba(124, 58, 237, 0.45);
   position: relative;
-  display: flex;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 16px;
   overflow: hidden;
-  background: var(--card);
-  border: 1px solid var(--border);
-  animation: nk-crole-in 0.4s var(--ease) backwards;
+  min-height: 280px;
+  display: flex;
+  align-items: flex-end;
 }
-/* 稀有度配色（与列表卡片一致） */
-.nk-crole-hero[data-rarity="5"] { --holo-color: rgba(255, 215, 0, 0.5); border-color: rgba(251, 191, 36, 0.28); }
-.nk-crole-hero[data-rarity="4"] { --holo-color: rgba(192, 132, 252, 0.5); border-color: rgba(192, 132, 252, 0.22); }
-.nk-crole-hero[data-rarity="3"] { --holo-color: rgba(96, 165, 250, 0.45); border-color: rgba(96, 165, 250, 0.18); }
-.nk-crole-hero[data-rarity="2"] { --holo-color: rgba(74, 222, 128, 0.4); border-color: rgba(74, 222, 128, 0.15); }
-.nk-crole-hero[data-rarity="1"] { --holo-color: rgba(148, 163, 184, 0.35); border-color: rgba(148, 163, 184, 0.14); }
-.nk-crole-hero::before {
-  content: '';
+.nk-crole-hero[data-rarity="5"] { --holo-color: rgba(255, 215, 0, 0.5); }
+.nk-crole-hero[data-rarity="4"] { --holo-color: rgba(192, 132, 252, 0.5); }
+.nk-crole-hero[data-rarity="3"] { --holo-color: rgba(96, 165, 250, 0.45); }
+.nk-crole-hero[data-rarity="2"] { --holo-color: rgba(74, 222, 128, 0.4); }
+.nk-crole-hero[data-rarity="1"] { --holo-color: rgba(148, 163, 184, 0.35); }
+.nk-crole-hero__bg {
   position: absolute;
   inset: 0;
-  background: var(--draw) center / cover no-repeat;
-  opacity: 0.14;
-  filter: saturate(1.1);
+  background-size: cover;
+  background-position: center top;
+  filter: saturate(1.15) brightness(0.85);
+  transform: scale(1.02);
 }
-/* 稀有度顶部光晕 */
-.nk-crole-hero::after {
-  content: '';
+.nk-crole-hero__scrim {
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 60%;
-  background: radial-gradient(ellipse 80% 100% at 30% 0%, var(--holo-color) 0%, transparent 70%);
-  opacity: 0.5;
-  pointer-events: none;
+  inset: 0;
+  background:
+    linear-gradient(0deg, var(--bg) 0%, rgba(15,15,35,0.6) 40%, rgba(15,15,35,0.25) 70%, rgba(15,15,35,0.4) 100%),
+    radial-gradient(ellipse 80% 60% at 30% 80%, var(--holo-color) 0%, transparent 60%);
 }
-.nk-crole-hero > * { position: relative; z-index: 1; }
+.nk-crole-hero__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  width: 100%;
+  padding: 24px 20px;
+}
 .nk-crole-hero__portrait {
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   flex: none;
-  border-radius: 14px;
+  border-radius: 50%;
   overflow: hidden;
+  border: 3px solid color-mix(in srgb, var(--holo-color) 70%, transparent);
+  box-shadow:
+    0 0 0 6px rgba(15, 15, 35, 0.6),
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 24px color-mix(in srgb, var(--holo-color) 40%, transparent);
   background: var(--surface);
-  border: 1px solid var(--border2);
-  box-shadow: 0 6px 22px rgba(0,0,0,0.4), 0 0 18px color-mix(in srgb, var(--holo-color) 30%, transparent);
 }
 .nk-crole-hero__portrait img { width: 100%; height: 100%; object-fit: cover; }
 .nk-crole-hero__info {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 8px;
   min-width: 0;
+  padding-bottom: 4px;
 }
 .nk-crole-hero__hud {
   font-family: var(--font-hud);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--text3);
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
 }
 .nk-crole-hero__name {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 900;
   letter-spacing: -0.01em;
   margin: 0;
-  color: var(--text-bright);
-  text-shadow: 0 0 24px color-mix(in srgb, var(--holo-color) 60%, transparent);
-  line-height: 1.15;
-  word-break: break-word;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6), 0 0 32px color-mix(in srgb, var(--holo-color) 50%, transparent);
+  line-height: 1.1;
 }
-.nk-crole-hero__sub {
+.nk-crole-hero__meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: var(--text2);
-  font-size: 13px;
+  gap: 12px;
 }
-.nk-crole-id {
+.nk-crole-hero__id {
   font-family: var(--font-hud);
   font-size: 12px;
   letter-spacing: 0.08em;
-  color: var(--text3);
+  color: rgba(255, 255, 255, 0.45);
 }
-.nk-crole-stars { color: #ffcf5c; letter-spacing: 2px; text-shadow: 0 0 10px rgba(251,191,36,0.4); }
+.nk-crole-hero__stars { color: #ffcf5c; font-size: 15px; letter-spacing: 2px; text-shadow: 0 0 12px rgba(251,191,36,0.5); }
 .nk-crole-hero__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-crole-hero__traits {
   display: flex;
@@ -285,59 +313,29 @@
 .nk-crole-traitgrp__dot--faction { background: #a78bfa; }
 .nk-crole-traitgrp__dot--combat  { background: #38bdf8; }
 .nk-crole-traitgrp__dot--special { background: #fb923c; }
-
 .nk-crole-traitchip {
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 999px;
   line-height: 1.4;
+  backdrop-filter: blur(4px);
 }
-.nk-crole-traitchip--faction {
-  background: rgba(167, 139, 250, 0.16);
-  color: #c4b5fd;
-}
-.nk-crole-traitchip--combat {
-  background: rgba(56, 189, 248, 0.16);
-  color: #7dd3fc;
-}
-.nk-crole-traitchip--special {
-  background: rgba(251, 146, 60, 0.16);
-  color: #fdba74;
-}
-
-/* 列表卡片上的特质标签 */
-.nk-crole-card__traits {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  justify-content: center;
-  margin-top: 4px;
-}
-.nk-crole-tcard-trait {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  line-height: 1.45;
-}
-.nk-crole-tcard-trait--faction { background: rgba(167, 139, 250, 0.14); color: #c4b5fd; }
-.nk-crole-tcard-trait--combat  { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; }
-.nk-crole-tcard-trait--special { background: rgba(251, 146, 60, 0.14); color: #fdba74; }
+.nk-crole-traitchip--faction { background: rgba(167, 139, 250, 0.2); color: #c4b5fd; }
+.nk-crole-traitchip--combat { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; }
+.nk-crole-traitchip--special { background: rgba(251, 146, 60, 0.2); color: #fdba74; }
 
 .nk-crole-chip {
   font-size: 12px;
   padding: 3px 10px;
   border-radius: 999px;
-  background: var(--surface);
-  color: var(--text);
+  backdrop-filter: blur(4px);
 }
 .nk-crole-chip--fb { background: rgba(80, 160, 255, 0.2); color: #9ccbff; }
 .nk-crole-chip--heal { background: rgba(120, 220, 150, 0.2); color: #9fe6b4; }
 .nk-crole-chip--charge { background: rgba(255, 200, 90, 0.2); color: #ffd98a; }
 .nk-crole-chip--exp { background: rgba(255, 120, 160, 0.22); color: #ff9ec0; }
 
-/* 段落：HUD 标题（Orbitron 大写 + 渐变指示条，与主站 nk-hero__section-title 统一） */
-.nk-crole-section { margin-top: 22px; }
-.nk-crole-section--in { animation: nk-crole-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--si, 0) * 80ms), 480ms); }
+/* ═══ 通用段落 ═══ */
 .nk-crole-section__title {
   display: flex;
   align-items: center;
@@ -347,52 +345,338 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin: 0 0 14px;
+  margin: 0 0 18px;
   color: var(--text-bright);
 }
 .nk-crole-section__title::before {
   content: '';
   flex: none;
-  width: 4px; height: 16px;
+  width: 4px; height: 18px;
   border-radius: 2px;
   background: linear-gradient(180deg, var(--primary), var(--accent));
-  box-shadow: 0 0 6px var(--primary-glow);
+  box-shadow: 0 0 8px var(--primary-glow);
 }
 
-/* 羁绊 */
+/* ═══ 羁绊 ═══ */
 .nk-crole-traits {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 .nk-crole-trait {
-  display: flex;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 14px;
+  padding: 18px;
+  border-radius: 16px;
   background: var(--card);
   border: 1px solid var(--border);
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
+  border-left: 3px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.nk-crole-trait:hover { border-color: var(--border2); box-shadow: 0 6px 22px rgba(0,0,0,0.35), 0 0 16px rgba(124,58,237,0.08); transform: translateY(-2px); }
+.nk-crole-trait[data-cat="faction"] { border-left-color: #a78bfa; }
+.nk-crole-trait[data-cat="combat"]  { border-left-color: #38bdf8; }
+.nk-crole-trait[data-cat="special"] { border-left-color: #fb923c; }
+.nk-crole-trait:hover { border-color: var(--border2); box-shadow: 0 8px 28px rgba(0,0,0,0.3); }
+.nk-crole-trait__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
 .nk-crole-trait__icon {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   flex: none;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   background: var(--surface);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .nk-crole-trait__icon img { width: 100%; height: 100%; object-fit: contain; }
-.nk-crole-trait__name { font-weight: 600; }
-.nk-crole-trait__act { font-size: 12px; color: var(--text2); margin: 2px 0 4px; }
-.nk-crole-trait__desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
+.nk-crole-trait__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.nk-crole-trait__name { font-weight: 700; font-size: 16px; margin: 0; color: var(--text-bright); }
+.nk-crole-trait__cat {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  line-height: 1.5;
+}
+.nk-crole-trait__cat--faction { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; }
+.nk-crole-trait__cat--combat  { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; }
+.nk-crole-trait__cat--special { background: rgba(251, 146, 60, 0.16); color: #fdba74; }
+.nk-crole-trait__act {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  margin-left: auto;
+  flex: none;
+}
+.nk-crole-trait__desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0; }
 .nk-crole-trait__desc span { color: #ffcf5c; }
 
-/* 星级切换：≥44px 触控目标 + focus-visible + 动画下划线指示器 */
+/* 羁绊层级进度条 */
+.nk-crole-layers { margin-top: 14px; }
+.nk-crole-layers__track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 8px 0;
+  position: relative;
+}
+.nk-crole-layers__track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--border), var(--border2), var(--border));
+  transform: translateY(-50%);
+}
+.nk-crole-layers__node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  z-index: 1;
+}
+.nk-crole-layers__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--text3);
+  transition: all 0.2s;
+}
+.nk-crole-layers__node--silver .nk-crole-layers__dot { border-color: #94a3b8; background: rgba(148, 163, 184, 0.3); box-shadow: 0 0 8px rgba(148, 163, 184, 0.4); }
+.nk-crole-layers__node--gold .nk-crole-layers__dot { border-color: #fbbf24; background: rgba(251, 191, 36, 0.3); box-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
+.nk-crole-layers__node--multicolor .nk-crole-layers__dot { border-color: #f472b6; background: rgba(244, 114, 182, 0.3); box-shadow: 0 0 10px rgba(244, 114, 182, 0.5); }
+.nk-crole-layers__label {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text2);
+  letter-spacing: 0.04em;
+}
+.nk-crole-layers__quality {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 0 5px;
+  border-radius: 999px;
+  line-height: 1.6;
+}
+.nk-crole-layers__node--silver .nk-crole-layers__quality { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+.nk-crole-layers__node--gold .nk-crole-layers__quality { background: rgba(251, 191, 36, 0.12); color: #fcd34d; }
+.nk-crole-layers__node--multicolor .nk-crole-layers__quality { background: rgba(244, 114, 182, 0.12); color: #f9a8d4; }
+
+/* 层级详情（扁平化：左侧品质色轨 + 分隔线，不再嵌套卡片） */
+.nk-crole-layers__details {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.nk-crole-layer {
+  position: relative;
+  padding: 8px 0 8px 14px;
+  border-left: 2px solid var(--border);
+  transition: border-color 0.2s;
+}
+.nk-crole-layer + .nk-crole-layer { margin-top: 6px; }
+.nk-crole-layer--silver { border-left-color: rgba(148, 163, 184, 0.55); }
+.nk-crole-layer--gold   { border-left-color: rgba(251, 191, 36, 0.6); }
+.nk-crole-layer--multicolor { border-left-color: rgba(244, 114, 182, 0.6); }
+.nk-crole-layer__head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.nk-crole-layer__threshold {
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+.nk-crole-layer__quality {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 0 6px;
+  border-radius: 999px;
+  line-height: 1.6;
+}
+.nk-crole-layer--silver .nk-crole-layer__quality { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
+.nk-crole-layer--gold .nk-crole-layer__quality   { background: rgba(251, 191, 36, 0.16); color: #fcd34d; }
+.nk-crole-layer--multicolor .nk-crole-layer__quality { background: rgba(244, 114, 182, 0.14); color: #f9a8d4; }
+.nk-crole-layer__desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.nk-crole-layer__desc span { color: #ffcf5c; }
+.nk-crole-layer__props {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.nk-crole-layer__props li { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.nk-crole-layer__scope {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(124, 58, 237, 0.14);
+  color: #c4b5fd;
+  line-height: 1.6;
+}
+.nk-crole-layer__scope--all { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; }
+.nk-crole-layer__pname { color: var(--text2); }
+.nk-crole-layer__pval { color: #6ee7b7; font-weight: 700; font-size: 12px; }
+
+/* ═══ 命座（时间线） ═══ */
+.nk-crole-timeline {
+  display: flex;
+  flex-direction: column;
+}
+.nk-crole-timeline__item {
+  display: flex;
+  gap: 16px;
+  position: relative;
+}
+.nk-crole-timeline__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: none;
+  width: 48px;
+}
+.nk-crole-timeline__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--surface);
+  border: 2px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  z-index: 1;
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+.nk-crole-timeline__icon img { width: 100%; height: 100%; object-fit: contain; }
+.nk-crole-timeline__num { font-family: var(--font-hud); font-size: 16px; font-weight: 800; color: var(--accent); }
+.nk-crole-timeline__line {
+  flex: 1;
+  width: 2px;
+  background: linear-gradient(180deg, var(--border2), var(--border));
+  min-height: 16px;
+}
+.nk-crole-timeline__item:last-child .nk-crole-timeline__line { display: none; }
+.nk-crole-timeline__card {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.nk-crole-timeline__card:hover { border-color: var(--border2); box-shadow: 0 6px 22px rgba(0,0,0,0.3); }
+.nk-crole-timeline__head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.nk-crole-timeline__step {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(244, 63, 94, 0.1);
+}
+.nk-crole-timeline__name { font-weight: 600; font-size: 14px; color: var(--text-bright); }
+.nk-crole-timeline__desc { font-size: 13px; color: var(--text2); line-height: 1.55; margin: 0; }
+.nk-crole-timeline__desc span { color: #ffcf5c; }
+
+/* ═══ 专属装备（等级递进） ═══ */
+.nk-crole-equips {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: 24px;
+}
+.nk-crole-equips::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: linear-gradient(180deg, #6ee7b7, rgba(110, 231, 183, 0.2));
+}
+.nk-crole-equip {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 12px 0;
+  position: relative;
+}
+.nk-crole-equip::before {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 20px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6ee7b7;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 8px rgba(110, 231, 183, 0.4);
+}
+.nk-crole-equip__lv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(110, 231, 183, 0.08);
+  border: 1px solid rgba(110, 231, 183, 0.25);
+  justify-content: center;
+}
+.nk-crole-equip__lv-num {
+  font-family: var(--font-hud);
+  font-size: 16px;
+  font-weight: 800;
+  color: #6ee7b7;
+  line-height: 1;
+}
+.nk-crole-equip__lv-label {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.nk-crole-equip__body { flex: 1; min-width: 0; }
+.nk-crole-equip__desc { font-size: 13px; color: var(--text2); line-height: 1.55; margin: 0; }
+.nk-crole-equip__desc span { color: #ffcf5c; }
+
+/* ═══ 星级切换 ═══ */
 .nk-crole-stars-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 .nk-crole-star-tab {
   position: relative;
@@ -407,7 +691,7 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s var(--ease);
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s var(--ease);
 }
 .nk-crole-star-tab:hover { color: var(--text-bright); border-color: var(--border2); }
 .nk-crole-star-tab:active { transform: scale(0.96); }
@@ -449,17 +733,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(20,20,45,0.7));
+  background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(20,20,45,0.7));
   border: 1px solid var(--border);
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.nk-crole-pow:hover { border-color: var(--border2); box-shadow: 0 0 18px rgba(124,58,237,0.12); transform: translateY(-2px); }
+.nk-crole-pow:hover { border-color: var(--border2); box-shadow: 0 0 18px rgba(124,58,237,0.12); }
 .nk-crole-pow__k { color: var(--text2); font-size: 13px; }
 .nk-crole-pow__v {
   font-family: var(--font-hud);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   color: #ffcf5c;
   text-shadow: 0 0 14px rgba(251,191,36,0.35);
@@ -485,15 +769,15 @@
   gap: 12px;
 }
 .nk-crole-skill {
-  padding: 14px;
+  padding: 16px;
   border-radius: 14px;
   background: var(--card);
   border: 1px solid var(--border);
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.nk-crole-skill:hover { border-color: var(--border2); box-shadow: 0 6px 22px rgba(0,0,0,0.35), 0 0 16px rgba(124,58,237,0.08); transform: translateY(-2px); }
+.nk-crole-skill:hover { border-color: var(--border2); box-shadow: 0 6px 22px rgba(0,0,0,0.3); }
 .nk-crole-skill__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.nk-crole-skill__name { font-weight: 600; font-size: 15px; }
+.nk-crole-skill__name { font-weight: 700; font-size: 15px; color: var(--text-bright); }
 .nk-crole-skill__tag,
 .nk-crole-skill__type {
   font-size: 11px;
@@ -509,17 +793,23 @@
   color: var(--text2);
   margin: 6px 0;
 }
-.nk-crole-skill__simple { font-size: 13px; color: var(--text); margin: 6px 0; line-height: 1.5; }
+.nk-crole-skill__simple { font-size: 13px; color: var(--text); margin: 8px 0; line-height: 1.5; }
 .nk-crole-skill__desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
 .nk-crole-skill__desc span { color: #ffcf5c; }
 .nk-crole-skill__stance { margin-top: 8px; font-size: 12px; color: var(--text2); }
 .nk-crole-skill__extra {
-  margin-top: 8px;
-  padding-left: 18px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(124, 58, 237, 0.05);
+  border: 1px solid rgba(124, 58, 237, 0.12);
+  list-style: none;
   font-size: 12px;
   color: var(--text2);
 }
 .nk-crole-skill__extra li { margin: 4px 0; }
+.nk-crole-skill__extra b { color: var(--metric-val); }
+.nk-crole-skill__extra span { color: #ffcf5c; }
 
 /* 通用块 */
 .nk-crole-block { margin-top: 18px; }
@@ -564,63 +854,50 @@
 /* 星级内容切换淡入 */
 .nk-crole-star--in { animation: nk-crole-fade 0.3s var(--ease); }
 @keyframes nk-crole-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-/* 段落/头部入场 */
-@keyframes nk-crole-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* 触屏设备：重置点击后粘滞的 hover 态（避免移动端点击后卡片常驻上浮） */
+/* 触屏设备：重置粘滞 hover */
 @media (hover: none) {
   .nk-crole-trait:hover, .nk-crole-skill:hover, .nk-crole-pow:hover,
-  .nk-crole-props li:hover, .nk-crole-kv li:hover {
-    transform: none; box-shadow: none; border-color: var(--border); background: var(--card);
+  .nk-crole-props li:hover, .nk-crole-kv li:hover, .nk-crole-timeline__card:hover {
+    box-shadow: none; border-color: var(--border);
   }
-  .nk-crole-pow:hover { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(20,20,45,0.7)); }
-  .nk-crole-star-tab:active { transform: scale(0.97); }
+  .nk-crole-pow:hover { background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(20,20,45,0.7)); }
 }
 
 /* 尊重「减少动态效果」偏好 */
 @media (prefers-reduced-motion: reduce) {
-  .nk-crole-hero, .nk-crole-section--in, .nk-crole-star--in { animation: none; }
-  .nk-crole-trait, .nk-crole-skill, .nk-crole-pow, .nk-crole-props li, .nk-crole-kv li,
-  .nk-crole-star-tab, .nk-crole__back { transition: border-color 0.2s, color 0.2s, background 0.2s; transform: none; }
+  .nk-crole-star--in { animation: none; }
+  .nk-crole-star-tab, .nk-crole__back { transition: border-color 0.2s, color 0.2s, background 0.2s; }
 }
 
-/* ═══════════════════════════════════════════
-   响应式（移动优先；断点与 tokens.css 一致：767 / 768 / 1024）
-   ≥768px：侧栏由底部 Tab Bar 升级为左侧竖栏，
-   内容区需让出 88px 左偏移（与目录页 #nk-catalog-app 一致）。
-   技巧：max-width 含 88px + padding-left 88px + margin auto，
-   使内容在宽屏居中于「视口 − 侧栏」可用区，窄屏自动贴左避让。
-═══════════════════════════════════════════ */
+/* ═══ 响应式 ═══ */
 @media (min-width: 768px) {
   .nk-crole {
     max-width: calc(980px + 88px);
-    padding: 24px 32px 48px 88px;
+    padding-left: 88px;
   }
-  /* Hero 恢复桌面尺寸 */
-  .nk-crole-hero { gap: 18px; padding: 20px; border-radius: 18px; }
-  .nk-crole-hero__portrait { width: 132px; height: 132px; }
-  .nk-crole-hero__name { font-size: 28px; }
-  /* 骨架屏同步 */
-  .nk-crole__skeleton-hero { padding: 20px; gap: 18px; }
-  .nk-crole__skeleton-portrait { width: 132px; height: 132px; }
-  /* 段落间距与战力卡恢复 */
-  .nk-crole-section { margin-top: 26px; }
-  .nk-crole-powrow { gap: 12px; }
-  .nk-crole-pow { padding: 14px 18px; }
-  .nk-crole-pow__v { font-size: 26px; }
+  .nk-crole__topbar { padding: 16px 24px; }
+  .nk-crole-hero { min-height: 340px; }
+  .nk-crole-hero__content { padding: 32px; gap: 24px; }
+  .nk-crole-hero__portrait { width: 140px; height: 140px; }
+  .nk-crole-hero__name { font-size: 34px; }
+  .nk-crole-section { padding: 32px 24px 0; }
+  .nk-crole-nav { padding: 12px 24px; }
+  .nk-crole-pow__v { font-size: 28px; }
+  .nk-crole__skeleton { padding: 24px; }
+  .nk-crole__skeleton-portrait { width: 140px; height: 140px; }
 }
 @media (min-width: 1024px) {
-  .nk-crole { max-width: calc(1040px + 88px); padding: 28px 40px 56px 88px; }
-  .nk-crole-hero { gap: 22px; padding: 24px; }
-  .nk-crole-hero__name { font-size: 30px; }
-  .nk-crole-hero__portrait { width: 144px; height: 144px; }
-  .nk-crole-pow__v { font-size: 28px; }
+  .nk-crole { max-width: calc(1040px + 88px); }
+  .nk-crole-hero { min-height: 380px; }
+  .nk-crole-hero__content { padding: 40px; }
+  .nk-crole-hero__portrait { width: 160px; height: 160px; }
+  .nk-crole-hero__name { font-size: 38px; }
 }
-/* 超窄屏（≤374px）：进一步压缩 Hero 头像与间距，避免名字挤压 */
+/* 超窄屏（≤374px） */
 @media (max-width: 374px) {
-  .nk-crole { padding-left: 12px; padding-right: 12px; }
-  .nk-crole-hero { gap: 12px; padding: 12px; }
-  .nk-crole-hero__portrait { width: 84px; height: 84px; border-radius: 12px; }
-  .nk-crole-hero__name { font-size: 20px; }
-  .nk-crole__skeleton-portrait { width: 84px; height: 84px; }
+  .nk-crole-hero__content { padding: 16px 14px; gap: 14px; }
+  .nk-crole-hero__portrait { width: 88px; height: 88px; }
+  .nk-crole-hero__name { font-size: 22px; }
+  .nk-crole-section { padding: 20px 12px 0; }
 }

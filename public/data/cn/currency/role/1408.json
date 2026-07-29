@@ -16,7 +16,19 @@
       "name": "救世主",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/3005.png",
-      "desc": "白厄和卡厄斯兰那获得所有前台角色已激活的非独立羁绊效果，该效果不会影响羁绊效果激活的人数。"
+      "desc": "白厄和卡厄斯兰那获得所有前台角色已激活的非独立羁绊效果，该效果不会影响羁绊效果激活的人数。",
+      "simple_desc": "白厄和卡厄斯兰那获得所有前台角色已激活的非独立羁绊效果，该效果不会影响羁绊效果激活的人数。",
+      "desc_params": [],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": "Unique",
+          "desc": "白厄和卡厄斯兰那获得所有前台角色已激活的非独立羁绊效果。",
+          "params": [],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -28,7 +40,7 @@
       "back_power_base": null,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 12,
       "back_max_sp": null,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
@@ -38,7 +50,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030405,
+            35030205
+          ],
+          "second": [
+            35030406,
+            35030808,
+            35030208
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030405,
+            35030205
+          ],
+          "second": [
+            35030406,
+            35030808,
+            35030208
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14089901,
@@ -101,7 +138,7 @@
       "back_power_base": null,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 12,
       "back_max_sp": null,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
@@ -111,7 +148,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030405,
+            35030205
+          ],
+          "second": [
+            35030406,
+            35030808,
+            35030208
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030405,
+            35030205
+          ],
+          "second": [
+            35030406,
+            35030808,
+            35030208
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14089902,
@@ -174,7 +236,7 @@
       "back_power_base": null,
       "back_speed_rewrite": null,
       "back_speed_added_ratio": null,
-      "back_energy_bar": null,
+      "back_energy_bar": 12,
       "back_max_sp": null,
       "back_initial_sp": null,
       "back_initial_energy_bar": null,
@@ -184,7 +246,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030405,
+            35030205
+          ],
+          "second": [
+            35030406,
+            35030808,
+            35030208
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030405,
+            35030205
+          ],
+          "second": [
+            35030406,
+            35030808,
+            35030208
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14089903,

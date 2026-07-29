@@ -17,14 +17,195 @@
       "name": "昼之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
-      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和提高。"
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
+      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度，#3[i]%速度。",
+          "params": [
+            0.1,
+            0.1,
+            0.05
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.05
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.18,
+            0.18,
+            0.09
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.18
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.18
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.09
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.36,
+            0.36,
+            0.18
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.18
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.6,
+            0.6,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2008,
       "name": "持续伤害",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2008.png",
-      "desc": "【持续伤害】队员的持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。"
+      "desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "simple_desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "desc_params": [
+        2.5,
+        2,
+        2.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "params": [
+            2
+          ],
+          "member_props": [
+            {
+              "name": "ExtraDOTDamageAddedRatio1",
+              "property_type": "ExtraDOTDamageAddedRatio1",
+              "value": 2
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -46,7 +227,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030307,
+            35030202,
+            35030308
+          ],
+          "second": [
+            35030205,
+            35030808,
+            35030105
+          ]
+        },
+        "back": {
+          "first": [
+            35030307,
+            35030202,
+            35030308
+          ],
+          "second": [
+            35030205,
+            35030808,
+            35030105
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14109901,
@@ -121,7 +327,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030307,
+            35030202,
+            35030308
+          ],
+          "second": [
+            35030205,
+            35030808,
+            35030105
+          ]
+        },
+        "back": {
+          "first": [
+            35030307,
+            35030202,
+            35030308
+          ],
+          "second": [
+            35030205,
+            35030808,
+            35030105
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14109902,
@@ -196,7 +427,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030307,
+            35030202,
+            35030308
+          ],
+          "second": [
+            35030205,
+            35030808,
+            35030105
+          ]
+        },
+        "back": {
+          "first": [
+            35030307,
+            35030202,
+            35030308
+          ],
+          "second": [
+            35030205,
+            35030808,
+            35030105
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 14109903,

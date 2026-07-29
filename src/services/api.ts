@@ -176,12 +176,34 @@ export function loadLocalRelicStories(): Promise<RelicStoriesMap> {
 
 /* ─── 货币战争 · 角色图鉴（独立 CDN 数据源，converter 落地） ─── */
 
+/** 羁绊层级效果（GridFightTraitLayer） */
+export interface CurrencyRoleTraitLayer {
+  /** 激活所需人数 */
+  layer: number;
+  /** 品质（Silver/Gold，首层为 null） */
+  quality: string | null;
+  /** 效果描述（含 #N[i] 占位符，用 params 渲染） */
+  desc: string;
+  /** 描述参数 */
+  params: number[];
+  /** 羁绊成员属性加成 */
+  member_props: Array<{ name: string; property_type: string; value: number }>;
+  /** 全员属性加成 */
+  all_props: Array<{ name: string; property_type: string; value: number }>;
+}
+
 export interface CurrencyRoleTrait {
   id: number;
   name: string | null;
   activation_type: string | null;
   icon: string;
   desc: string;
+  /** 简述 */
+  simple_desc: string;
+  /** 基础描述参数（渲染 desc 中的 #N[i] 占位符） */
+  desc_params: number[];
+  /** 层级效果列表（按 layer 升序） */
+  layers: CurrencyRoleTraitLayer[];
 }
 
 export interface CurrencyRoleSkill {
@@ -221,7 +243,13 @@ export interface CurrencyRoleStar {
   extra_shield_base: number | null;
   stance_damage_display: unknown | null;
   show_stance_list: number[] | null;
-  recommend: unknown | null;
+  recommend: CurrencyRoleRecommend | null;
+}
+
+/** 推荐装备（按前后排分组） */
+export interface CurrencyRoleRecommend {
+  front?: { first: number[]; second: number[] };
+  back?: { first: number[]; second: number[] };
 }
 
 export interface CurrencyRoleDetail {
@@ -236,8 +264,30 @@ export interface CurrencyRoleDetail {
   trait_list: number[];
   traits: CurrencyRoleTrait[];
   stars: Record<string, CurrencyRoleStar>;
-  rank: unknown[];
-  equipment: unknown[];
+  rank: CurrencyRoleRank[];
+  equipment: CurrencyRoleEquipment[];
+}
+
+/** 后台角色命座（GridFightBackRoleRank） */
+export interface CurrencyRoleRank {
+  rank_id: number;
+  rank: number;
+  name: string;
+  desc: string;
+  icon: string;
+  owner_props: Array<{ name: string; property_type: string; value: number }>;
+  all_props: Array<{ name: string; property_type: string; value: number }>;
+  param_list: number[];
+}
+
+/** 专属装备等级条目（GridFightBackEquipment） */
+export interface CurrencyRoleEquipment {
+  equipment_id: number;
+  level: number;
+  desc: string;
+  param_list: number[];
+  owner_props: Array<{ name: string; property_type: string; value: number }>;
+  all_props: Array<{ name: string; property_type: string; value: number }>;
 }
 
 /** 货币战争角色特质摘要（列表数据，由 converter 从 TextMap 解析） */

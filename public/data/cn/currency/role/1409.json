@@ -18,21 +18,332 @@
       "name": "昼之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
-      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和提高。"
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
+      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%前排战力后排战力前/后台强度，#3[i]%速度。",
+          "params": [
+            0.1,
+            0.1,
+            0.05
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.05
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.18,
+            0.18,
+            0.09
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.18
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.18
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.09
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.36,
+            0.36,
+            0.18
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.36
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.18
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 9,
+          "quality": "Multicolor",
+          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "params": [
+            0.6,
+            0.6,
+            0.3
+          ],
+          "member_props": [
+            {
+              "name": "ExtraFrontPowerAddedRatio1",
+              "property_type": "ExtraFrontPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraBackPowerAddedRatio1",
+              "property_type": "ExtraBackPowerAddedRatio1",
+              "value": 0.6
+            },
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.3
+            }
+          ],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2005,
       "name": "治疗",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2005.png",
-      "desc": "我方小队的提高#1[i]%。【治疗】队员的提高。"
+      "desc": "我方小队的生命值提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
+      "simple_desc": "我方小队的生命值提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
+      "desc_params": [
+        0.12,
+        0.2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%ExtraHealAddedRatio。",
+          "params": [
+            0.2,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHealAddedRatio",
+              "property_type": "ExtraHealAddedRatio",
+              "value": 0.2
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.12
+            }
+          ]
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%ExtraHealAddedRatio。",
+          "params": [
+            0.4,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHealAddedRatio",
+              "property_type": "ExtraHealAddedRatio",
+              "value": 0.4
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.12
+            }
+          ]
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%ExtraHealAddedRatio，我方小队获得#3[i]%全伤害。",
+          "params": [
+            0.6,
+            0.12,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHealAddedRatio",
+              "property_type": "ExtraHealAddedRatio",
+              "value": 0.6
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.12
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.6
+            }
+          ]
+        }
+      ]
     },
     {
       "id": 2006,
       "name": "燃血",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2006.png",
-      "desc": "【燃血】队员的和提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。"
+      "desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "simple_desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "desc_params": [
+        40000,
+        0,
+        0.05,
+        0.02,
+        10000,
+        5,
+        1000,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.1,
+            0.1
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.1
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.1
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.2,
+            0.25
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.2
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.25
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.3,
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.3
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.4
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 8,
+          "quality": "Gold",
+          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "params": [
+            0.45,
+            0.6
+          ],
+          "member_props": [
+            {
+              "name": "ExtraHPAddedRatio1",
+              "property_type": "ExtraHPAddedRatio1",
+              "value": 0.45
+            },
+            {
+              "name": "ExtraAllDamageTypeAddedRatio1",
+              "property_type": "ExtraAllDamageTypeAddedRatio1",
+              "value": 0.6
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -54,10 +365,90 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030505,
+            35030506,
+            35030106
+          ],
+          "second": [
+            35030107,
+            35030508,
+            35030203
+          ]
+        },
+        "back": {
+          "first": [
+            35030505,
+            35030506,
+            35030106
+          ],
+          "second": [
+            35030107,
+            35030508,
+            35030203
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [],
-      "servant_show_skill": [],
+      "servant_show_skill": [
+        {
+          "id": 114090101,
+          "name": "乌云乌云快走开！",
+          "desc": "对敌方全体造成等同于本场战斗风堇、小伊卡累计治疗数值#1[i]%+我方小队其他目标累计治疗数值#3[i]%的风属性伤害并清空累计治疗数值的#2[i]%。",
+          "simple_desc": "对敌方全体造成风属性伤害。",
+          "type": "忆灵技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.1,
+                0.5,
+                0.04
+              ]
+            }
+          }
+        },
+        {
+          "id": 114099901,
+          "name": "小马冲锋",
+          "desc": "小伊卡造成的伤害提高#1[i]%。",
+          "simple_desc": "小伊卡造成的伤害提高。",
+          "type": "忆灵天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2
+              ]
+            }
+          }
+        }
+      ],
       "general_property_modify_list": [
         {
           "name": "ExtraAllDamageTypeAddedRatio4",
@@ -99,10 +490,90 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030505,
+            35030506,
+            35030106
+          ],
+          "second": [
+            35030107,
+            35030508,
+            35030203
+          ]
+        },
+        "back": {
+          "first": [
+            35030505,
+            35030506,
+            35030106
+          ],
+          "second": [
+            35030107,
+            35030508,
+            35030203
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [],
-      "servant_show_skill": [],
+      "servant_show_skill": [
+        {
+          "id": 114090102,
+          "name": "乌云乌云快走开！",
+          "desc": "对敌方全体造成等同于本场战斗风堇、小伊卡累计治疗数值#1[i]%+我方小队其他目标累计治疗数值#3[i]%的风属性伤害并清空累计治疗数值的#2[i]%。",
+          "simple_desc": "对敌方全体造成风属性伤害。",
+          "type": "忆灵技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.12,
+                0.5,
+                0.048
+              ]
+            }
+          }
+        },
+        {
+          "id": 114099902,
+          "name": "小马冲锋",
+          "desc": "小伊卡造成的伤害提高#1[i]%。",
+          "simple_desc": "小伊卡造成的伤害提高。",
+          "type": "忆灵天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5
+              ]
+            }
+          }
+        }
+      ],
       "general_property_modify_list": [
         {
           "name": "ExtraAllDamageTypeAddedRatio4",
@@ -144,10 +615,90 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030505,
+            35030506,
+            35030106
+          ],
+          "second": [
+            35030107,
+            35030508,
+            35030203
+          ]
+        },
+        "back": {
+          "first": [
+            35030505,
+            35030506,
+            35030106
+          ],
+          "second": [
+            35030107,
+            35030508,
+            35030203
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [],
-      "servant_show_skill": [],
+      "servant_show_skill": [
+        {
+          "id": 114090103,
+          "name": "乌云乌云快走开！",
+          "desc": "对敌方全体造成等同于本场战斗风堇、小伊卡累计治疗数值#1[i]%+我方小队其他目标累计治疗数值#3[i]%的风属性伤害并清空累计治疗数值的#2[i]%。",
+          "simple_desc": "对敌方全体造成风属性伤害。",
+          "type": "忆灵技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.14,
+                0.5,
+                0.055999998
+              ]
+            }
+          }
+        },
+        {
+          "id": 114099903,
+          "name": "小马冲锋",
+          "desc": "小伊卡造成的伤害提高#1[i]%。",
+          "simple_desc": "小伊卡造成的伤害提高。",
+          "type": "忆灵天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1
+              ]
+            }
+          }
+        }
+      ],
       "general_property_modify_list": [
         {
           "name": "ExtraAllDamageTypeAddedRatio4",
@@ -189,10 +740,90 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030505,
+            35030506,
+            35030106
+          ],
+          "second": [
+            35030107,
+            35030508,
+            35030203
+          ]
+        },
+        "back": {
+          "first": [
+            35030505,
+            35030506,
+            35030106
+          ],
+          "second": [
+            35030107,
+            35030508,
+            35030203
+          ]
+        }
+      },
       "front_show_skill": [],
       "back_show_skill": [],
-      "servant_show_skill": [],
+      "servant_show_skill": [
+        {
+          "id": 114090104,
+          "name": "乌云乌云快走开！",
+          "desc": "对敌方全体造成等同于本场战斗风堇、小伊卡累计治疗数值#1[i]%+我方小队其他目标累计治疗数值#3[i]%的风属性伤害并清空累计治疗数值的#2[i]%。",
+          "simple_desc": "对敌方全体造成风属性伤害。",
+          "type": "忆灵技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.16,
+                0.5,
+                0.064
+              ]
+            }
+          }
+        },
+        {
+          "id": 114099904,
+          "name": "小马冲锋",
+          "desc": "小伊卡造成的伤害提高#1[i]%。",
+          "simple_desc": "小伊卡造成的伤害提高。",
+          "type": "忆灵天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.5
+              ]
+            }
+          }
+        }
+      ],
       "general_property_modify_list": [
         {
           "name": "ExtraAllDamageTypeAddedRatio4",

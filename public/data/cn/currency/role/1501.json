@@ -18,21 +18,339 @@
       "name": "星间旅人",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1006.png",
-      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。"
+      "desc": "【星间旅人】角色会为你的小队提高特定属性，该效果会随着场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "simple_desc": "【星间旅人】角色会为你的小队提高特定属性，随场上【星间旅人】角色数量而提升。\\n【星间旅人】队员获得双倍收益。",
+      "desc_params": [
+        10
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.2,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 3,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.45,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%加成。",
+          "params": [
+            1.75,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.1,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            2.5,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Gold",
+          "desc": "#1[i]%加成。",
+          "params": [
+            3,
+            0.1,
+            0.2,
+            0.1,
+            0.1,
+            0.2,
+            0.1,
+            0.18,
+            15
+          ],
+          "member_props": [],
+          "all_props": []
+        }
+      ]
     },
     {
       "id": 2011,
       "name": "战技点",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2011.png",
-      "desc": "我方战技点上限提高，我方小队获得，施放战技或普攻时获得，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。"
+      "desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
+      "simple_desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
+      "desc_params": [
+        2,
+        0.12,
+        0.12,
+        0.02,
+        0.06,
+        4,
+        1,
+        0.2,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 2,
+          "quality": null,
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.12,
+            0.12
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.12
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.12
+            }
+          ]
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.24,
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.24
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.24
+            }
+          ]
+        },
+        {
+          "layer": 6,
+          "quality": "Gold",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.4,
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.4
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.4
+            }
+          ]
+        },
+        {
+          "layer": 8,
+          "quality": "Multicolor",
+          "desc": "#1[i]%速度。",
+          "params": [
+            0.8,
+            0.8
+          ],
+          "member_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.8
+            }
+          ],
+          "all_props": [
+            {
+              "name": "ExtraSpeedAddedRatio1",
+              "property_type": "ExtraSpeedAddedRatio1",
+              "value": 0.8
+            }
+          ]
+        }
+      ]
     },
     {
       "id": 2012,
       "name": "欢愉",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2012.png",
-      "desc": "【欢愉】队员的提高。\\n备战阶段召唤【阿哈】为小队提供增益，【阿哈】拥有初始属性并穿戴3件随机简易装备，可将物品栏中简易装备拖拽给阿哈，与阿哈装备栏中的简易装备依次合成对应进阶装备。合成进阶装备后，本局该栏位将会被固定，无法合成其它进阶装备。"
+      "desc": "【欢愉】队员的幸运触发率提高。\\n备战阶段召唤【阿哈】为小队提供增益，【阿哈】拥有初始属性并穿戴3件随机简易装备，可将物品栏中简易装备拖拽给阿哈，与阿哈装备栏中的简易装备依次合成对应进阶装备。合成进阶装备后，本局该栏位将会被固定，无法合成其它进阶装备。",
+      "simple_desc": "【欢愉】队员的幸运触发率提高。\\n备战阶段召唤【阿哈】为小队提供增益，【阿哈】拥有初始属性并穿戴3件随机简易装备，可将物品栏中简易装备拖拽给阿哈，合成对应进阶装备。",
+      "desc_params": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "layers": [
+        {
+          "layer": 3,
+          "quality": null,
+          "desc": "#1[i]%幸运触发率。",
+          "params": [
+            0.08
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.08
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 4,
+          "quality": "Silver",
+          "desc": "#1[i]%幸运触发率。",
+          "params": [
+            0.16
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.16
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 5,
+          "quality": "Gold",
+          "desc": "#1[i]%幸运触发率。",
+          "params": [
+            0.24
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.24
+            }
+          ],
+          "all_props": []
+        },
+        {
+          "layer": 7,
+          "quality": "Multicolor",
+          "desc": "#1[i]%幸运触发率。",
+          "params": [
+            0.4
+          ],
+          "member_props": [
+            {
+              "name": "ExtraLuckChance",
+              "property_type": "ExtraLuckChance",
+              "value": 0.4
+            }
+          ],
+          "all_props": []
+        }
+      ]
     }
   ],
   "stars": {
@@ -54,7 +372,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030207,
+            35030202
+          ],
+          "second": [
+            35030205,
+            35030108,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030207,
+            35030202
+          ],
+          "second": [
+            35030205,
+            35030108,
+            35030307
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 15019901,
@@ -222,7 +565,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030207,
+            35030202
+          ],
+          "second": [
+            35030205,
+            35030108,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030207,
+            35030202
+          ],
+          "second": [
+            35030205,
+            35030108,
+            35030307
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 15019902,
@@ -390,7 +758,32 @@
       "extra_shield_base": 60,
       "stance_damage_display": null,
       "show_stance_list": [],
-      "recommend": null,
+      "recommend": {
+        "front": {
+          "first": [
+            35030204,
+            35030207,
+            35030202
+          ],
+          "second": [
+            35030205,
+            35030108,
+            35030307
+          ]
+        },
+        "back": {
+          "first": [
+            35030204,
+            35030207,
+            35030202
+          ],
+          "second": [
+            35030205,
+            35030108,
+            35030307
+          ]
+        }
+      },
       "front_show_skill": [
         {
           "id": 15019903,
