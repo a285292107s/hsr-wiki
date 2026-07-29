@@ -131,7 +131,7 @@ describe('单例缓存', () => {
   it('loadLocalCharacterList 失败后再次调用会重试', async () => {
     const api = await freshApi();
     let callCount = 0;
-    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+    vi.stubGlobal('fetch', vi.fn(async (_url: string) => {
       callCount++;
       if (callCount === 1) throw new Error('network down');
       return { ok: true, status: 200, json: async () => [{ id: 1001, name: '角色' }] };

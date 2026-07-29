@@ -357,7 +357,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-width: 920px;
+  min-width: 0;
 }
 .nk-cwhub-season__body p {
   margin: 0;
@@ -365,16 +365,103 @@
   line-height: 1.95;
   color: var(--text2);
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-  /* 列表项首字加粗强调（• 引导的要点） */
 }
-.nk-cwhub-season__body p:where(:not([data-plain])) {
-  padding-left: 0;
+
+/* ── 双栏：左侧正文散文 + 右侧「扩充内容概览」要点面板 ── */
+.nk-cwhub-season__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 30px;
+  align-items: start;
 }
+
+/* 「扩充内容概览」：交易所简报式面板（口金边框 + 要点列表） */
+.nk-cwhub-season__overview {
+  position: relative;
+  min-width: 0;
+  padding: 20px 22px 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background:
+    linear-gradient(160deg, rgba(212,175,55,0.10) 0%, rgba(16,14,8,0.55) 55%, rgba(212,175,55,0.03) 100%);
+  box-shadow: inset 0 1px 0 rgba(252,211,77,0.08), 0 8px 28px rgba(0,0,0,0.3);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.nk-cwhub-season__overview:hover {
+  border-color: rgba(252,211,77,0.45);
+  box-shadow: inset 0 1px 0 rgba(252,211,77,0.12), 0 10px 34px rgba(0,0,0,0.4), 0 0 22px rgba(212,175,55,0.16);
+}
+/* 顶部金色发丝线：呼应卡片左侧竖条 */
+.nk-cwhub-season__overview::before {
+  content: "";
+  position: absolute;
+  left: 14px; right: 14px; top: 0;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent, rgba(252,211,77,0.7) 30%, rgba(252,211,77,0.7) 70%, transparent);
+  box-shadow: 0 0 12px rgba(252,211,77,0.4);
+}
+.nk-cwhub-season__ov-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.nk-cwhub-season__ov-bar {
+  flex-shrink: 0;
+  width: 4px; height: 16px;
+  border-radius: 1px;
+  background: linear-gradient(180deg, var(--gold), rgba(212,175,55,0.15));
+  box-shadow: 0 0 10px rgba(252,211,77,0.55);
+}
+.nk-cwhub-season__ov-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--text-bright);
+  text-shadow: 0 0 18px rgba(212,175,55,0.3);
+}
+.nk-cwhub-season__ov-en {
+  margin-left: auto;
+  font-family: var(--font-hud);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--primary);
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.nk-cwhub-season__ov-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.nk-cwhub-season__ov-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 0.25s, transform 0.25s var(--ease);
+  animation: nk-cwhub-fade-up 0.5s var(--ease) backwards;
+  animation-delay: calc(0.25s + var(--i, 0) * 55ms);
+}
+.nk-cwhub-season__ov-item:hover { background: rgba(212,175,55,0.09); transform: translateX(3px); }
+.nk-cwhub-season__ov-dot {
+  flex-shrink: 0;
+  font-size: 0.5rem;
+  line-height: 2.1;
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(252,211,77,0.6);
+  transition: transform 0.25s var(--ease), text-shadow 0.25s;
+}
+.nk-cwhub-season__ov-item:hover .nk-cwhub-season__ov-dot { transform: scale(1.4); text-shadow: 0 0 12px rgba(252,211,77,0.95); }
+.nk-cwhub-season__ov-text {
+  min-width: 0;
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: var(--text2);
+  transition: color 0.25s;
+}
+.nk-cwhub-season__ov-item:hover .nk-cwhub-season__ov-text { color: var(--text); }
 
 /* ═══ 响应式 ═══ */
 @media (max-width: 1023px) {
   .nk-cwhub-sections__grid { grid-template-columns: repeat(2, 1fr); }
   .nk-cwhub-card--featured { grid-column: span 2; grid-row: span 1; }
+  /* 赛季说明双栏堆叠：正文在上，概览面板在下 */
+  .nk-cwhub-season__cols { grid-template-columns: 1fr; gap: 22px; }
 }
 @media (max-width: 767px) {
   /* 移动端：侧栏降级为底部 Tab Bar，释放左侧预留，底部避开导航条 */
@@ -402,6 +489,7 @@
   .nk-cwhub-hero__tagline,
   .nk-cwhub-stats,
   .nk-cwhub-card,
-  .nk-cwhub-season__card { animation: none; }
+  .nk-cwhub-season__card,
+  .nk-cwhub-season__ov-item { animation: none; }
   .nk-cwhub-card:hover .nk-cwhub-card__sheen { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); }
 }

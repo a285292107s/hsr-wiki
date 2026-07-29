@@ -4,7 +4,7 @@
  * 「交换」的落地目标，与 HomeView 对等的"模式之家"。
  * 开场即身份：交易所行情滚动条 + K 线纹理背景 + 金色光斑粒子 + 数据概览条。
  */
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { CW_NAV_ITEMS } from '../components/nav-items';
 import { loadLocalCurrencyRoles, loadLocalCurrencySeasons } from '../../services/api';
@@ -85,6 +85,35 @@ onMounted(async () => {
 /* ─── 板块入口（角色图鉴已上线，其余占位） ─── */
 const LIVE_PATHS = new Set(['/currency/role']);
 const sections = CW_NAV_ITEMS.map((s) => ({ ...s, live: LIVE_PATHS.has(s.path) }));
+
+/* ─── 赛季扩充说明文本解析 ───
+   数据管线约定：JSON 中以字面 \n（反斜杠+n）分隔段落，与其余数据一致，
+   前端负责转渲染。此处按字面 \n 切分（(?:\\n)+ 合并连续换行）。 */
+/** 正文 → 段落数组 */
+function bodyParas(s: CurrencySeason): string[] {
+  return s.body.split(/(?:\\n)+/).map((p) => p.trim()).filter(Boolean);
+}
+/** 概览 → { heading, items }（▌标题行 + ● 条目行；缺失返回 null） */
+function overviewOf(s: CurrencySeason): { heading: string; items: string[] } | null {
+  if (!s.overview) return null;
+  const lines = s.overview.split(/(?:\\n)+/).map((l) => l.trim()).filter(Boolean);
+  let heading = '';
+  const items: string[] = [];
+  for (const l of lines) {
+    if (l.startsWith('▌')) { heading = l.replace(/^▌\s*/, ''); continue; }
+    items.push(l.replace(/^●\s*/, ''));
+  }
+  return { heading: heading || '扩充内容概览', items };
+}
+/** 预解析赛季 → 段落 + 概览，避免模板内重复计算 */
+const seasonViews = computed(() =>
+  seasons.value.map((s) => ({
+    id: s.id,
+    title: s.title,
+    paras: bodyParas(s),
+    overview: overviewOf(s),
+  })),
+);
 </script>
 
 <template>
@@ -191,22 +220,46 @@ const sections = CW_NAV_ITEMS.map((s) => ({ ...s, live: LIVE_PATHS.has(s.path) }
       </div>
     </nav>
 
-    <!-- ═══ 赛季扩充说明 ═══ -->
-    <section v-if="seasons.length" class="nk-cwhub-season" aria-label="赛季扩充说明">
+    <!-- ═══ 赛季扩充说明（正文 + 扩充内容概览补充） ═══ -->
+    <section v-if="seasonViews.length" class="nk-cwhub-season" aria-label="赛季扩充说明">
       <div class="nk-cwhub-season__head">
         <span class="nk-cwhub-season__label">SEASON&nbsp;INTEL</span>
         <span class="nk-cwhub-season__line"></span>
-        <span class="nk-cwhub-season__count">{{ seasons.length }}</span>
+        <span class="nk-cwhub-season__count">{{ seasonViews.length }}</span>
       </div>
       <article
-        v-for="s in seasons"
+        v-for="s in seasonViews"
         :key="s.id"
         class="nk-cwhub-season__card"
       >
         <span class="nk-cwhub-season__tag">赛季扩充说明</span>
         <h2 class="nk-cwhub-season__title">{{ s.title }}</h2>
-        <div class="nk-cwhub-season__body">
-          <p v-for="(p, i) in s.body.split('\n').filter(Boolean)" :key="i">{{ p }}</p>
+        <div class="nk-cwhub-season__cols">
+          <div class="nk-cwhub-season__body">
+            <p v-for="(p, i) in s.paras" :key="i">{{ p }}</p>
+          </div>
+          <aside
+            v-if="s.overview"
+            class="nk-cwhub-season__overview"
+            aria-label="扩充内容概览"
+          >
+            <div class="nk-cwhub-season__ov-head">
+              <span class="nk-cwhub-season__ov-bar" aria-hidden="true"></span>
+              <span class="nk-cwhub-season__ov-title">{{ s.overview.heading }}</span>
+              <span class="nk-cwhub-season__ov-en">EXPANSION&nbsp;OVERVIEW</span>
+            </div>
+            <ul class="nk-cwhub-season__ov-list">
+              <li
+                v-for="(it, i) in s.overview.items"
+                :key="i"
+                class="nk-cwhub-season__ov-item"
+                :style="{ '--i': i }"
+              >
+                <span class="nk-cwhub-season__ov-dot" aria-hidden="true">◆</span>
+                <span class="nk-cwhub-season__ov-text">{{ it }}</span>
+              </li>
+            </ul>
+          </aside>
         </div>
       </article>
     </section>

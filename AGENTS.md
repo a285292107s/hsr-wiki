@@ -30,7 +30,10 @@ pnpm test:watch
 # 数据转换工具（Python，需 vendor/TurnBasedGameData 子模块）
 cd tools/converter
 pip install -r requirements.txt
-python convert.py
+python convert.py                        # 全量转换（增量跳过未变更）
+python convert.py --only characters      # 仅重跑指定模块
+python convert.py --force --pretty       # 强制全量 + 缩进输出
+python -m pytest tests/ -v               # converter 单元测试
 ```
 
 部署：推送到 `main` 分支 → GitHub Actions 自动部署至 GitHub Pages。
@@ -80,18 +83,27 @@ src/
 
 `tools/converter/` 将 `vendor/TurnBasedGameData/`（git 子模块：ExcelOutput + TextMap）转换为 `public/data/cn/` 下的 JSON。
 
-- 入口：`convert.py` → 依次执行所有转换器
+- 入口：`convert.py` → 模块注册表驱动，支持 `--only` / `--force` / `--pretty` CLI 参数
+- 增量转换：`incremental.py` 基于源文件 mtime+size 签名，未变更模块自动跳过（状态存于 `.converter-state.json`，已 gitignore）
 - 文本解析：`textmap.py` 加载 `TextMapCHS.json`，同时处理 `{ "Hash": N }` 对象引用和字面量字符串键
 - 数值扁平化：源数据将所有数值包装为 `{ "Value": N }`，转换器递归展开
 - 配置：`config.py` 存放路径映射、枚举回退表、图标路径重映射表
+- 输出格式：默认紧凑 JSON（无缩进），`--pretty` 切换为缩进模式（调试用）
+- 转换摘要：每次运行结束输出各模块耗时统计
 - 输出确定性：上游解包数据更新后重跑即可，前端无需改动
 
 ### 测试
 
+**前端（Vitest）：**
 - 框架：Vitest + happy-dom
 - 位置：`src/**/__tests__/*.test.ts`
 - 范围：仅数据层（纯函数、缓存逻辑、API 契约）——不测组件
 - IndexedDB 在测试中通过 mock 提供
+
+**Converter（pytest）：**
+- 位置：`tools/converter/tests/`
+- 范围：核心工具函数（unwrap_value / map_icon_path / resolve_text / sort_by_id）
+- 运行：`cd tools/converter && python -m pytest tests/ -v`
 
 ## 项目约定
 

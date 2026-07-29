@@ -645,8 +645,10 @@ export interface CurrencySeason {
   id: string;
   /** 赛季扩充说明标题，如「货币战争•零和博弈」赛季扩充说明 V4.4 */
   title: string;
-  /** 赛季扩充说明正文（含新角色、晋升上限、羁绊加强等，换行分隔段落） */
+  /** 赛季扩充说明正文（含新角色、晋升上限、羁绊加强等，字面 \n 分隔段落） */
   body: string;
+  /** 扩充内容概览（要点式补充说明，▌标题 + ● 条目，字面 \n 分隔；可选） */
+  overview?: string;
 }
 
 export interface CurrencySeasonList {
