@@ -33,6 +33,27 @@ const SKILL_GROUP_LABEL: Record<string, string> = {
   servant_show_skill: '随从技能',
 };
 
+/* 属性修正 raw key → 友好中文名（货币战争专属 Extra* 字段） */
+const PROP_LABEL: Record<string, string> = {
+  ExtraAllDamageTypeAddedRatio4: '全伤害提高',
+  ExtraInitSP: '初始战技点',
+  ExtraHPAddedRatio2: '生命值提高',
+  ExtraSpeedAddedRatio2: '速度提高',
+  ExtraAttackAddedRatio: '攻击力提高',
+  ExtraDefenceAddedRatio: '防御力提高',
+  ExtraCriticalChanceBase: '暴击率提高',
+  ExtraCriticalDamageBase: '暴击伤害提高',
+  ExtraBreakDamageAddedRatio: '击破特攻提高',
+  ExtraHealRatioBase: '治疗量提高',
+  ExtraShieldRatioBase: '护盾量提高',
+  ExtraLuckChance: '幸运触发率提高',
+  ExtraLuckDamage: '幸运伤害提高',
+};
+function propLabel(m: Record<string, unknown>): string {
+  const key = String(m.property_type || m.name || '');
+  return PROP_LABEL[key] || key.replace(/^Extra/, '').replace(/AddedRatio\d*$/, '');
+}
+
 const starKeys = computed(() =>
   data.value ? Object.keys(data.value.stars).sort((a, b) => Number(a) - Number(b)) : [],
 );
@@ -159,16 +180,36 @@ const traitGroups = computed(() => {
       <button class="nk-crole__back" @click="router.push('/currency/role')">← 角色图鉴</button>
     </div>
 
-    <div v-if="loading" class="nk-crole__state">加载中…</div>
-    <div v-else-if="error" class="nk-crole__state nk-crole__state--err">{{ error }}</div>
+    <div v-if="loading" class="nk-crole__skeleton">
+      <div class="nk-crole__skeleton-hero">
+        <div class="nk-crole__skeleton-portrait nk-sk nk-sk--shimmer"></div>
+        <div class="nk-crole__skeleton-info">
+          <div class="nk-sk nk-sk--shimmer nk-sk--title" style="width: 50%"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width: 30%"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width: 70%"></div>
+        </div>
+      </div>
+      <div class="nk-crole__skeleton-tabs">
+        <div class="nk-sk nk-sk--shimmer nk-sk--chip" v-for="n in 3" :key="n" style="width: 56px"></div>
+      </div>
+      <div class="nk-crole__skeleton-grid">
+        <div class="nk-sk nk-sk--shimmer nk-sk--block-md" v-for="n in 4" :key="n"></div>
+      </div>
+    </div>
+    <div v-else-if="error" class="nk-crole__state nk-crole__state--err">
+      <span class="nk-crole__state-icon">⚠</span>
+      <p>{{ error }}</p>
+      <button class="nk-crole__retry" @click="load">重试</button>
+    </div>
 
     <template v-else-if="data">
       <!-- 头部 -->
-      <header class="nk-crole-hero" :style="{ '--draw': `url(${avatarDrawCardUrl(data.id)})` }">
+      <header class="nk-crole-hero" :data-rarity="data.rarity" :style="{ '--draw': `url(${avatarDrawCardUrl(data.id)})` }">
         <div class="nk-crole-hero__portrait">
           <img :src="avatarShopIconUrl(data.id)" :alt="data.name" loading="lazy" @error="hideOnError" />
         </div>
         <div class="nk-crole-hero__info">
+          <span class="nk-crole-hero__hud">CURRENCY ROLE · 货币战争</span>
           <h1 class="nk-crole-hero__name">{{ data.name }}</h1>
           <div class="nk-crole-hero__sub">
             <span class="nk-crole-id">ID {{ data.id }}</span>
@@ -198,7 +239,7 @@ const traitGroups = computed(() => {
       </header>
 
       <!-- 羁绊 -->
-      <section v-if="data.traits.length" class="nk-crole-section">
+      <section v-if="data.traits.length" class="nk-crole-section nk-crole-section--in" style="--si: 1">
         <h2 class="nk-crole-section__title">羁绊</h2>
         <div class="nk-crole-traits">
           <div v-for="t in data.traits" :key="t.id" class="nk-crole-trait">
@@ -215,7 +256,7 @@ const traitGroups = computed(() => {
       </section>
 
       <!-- 星级切换 -->
-      <section class="nk-crole-section">
+      <section class="nk-crole-section nk-crole-section--in" style="--si: 2">
         <h2 class="nk-crole-section__title">星级详情</h2>
         <div class="nk-crole-stars-tabs">
           <button
@@ -227,7 +268,7 @@ const traitGroups = computed(() => {
           >{{ k }}★</button>
         </div>
 
-        <div v-if="star" class="nk-crole-star">
+        <div v-if="star" :key="selectedStar" class="nk-crole-star nk-crole-star--in">
           <!-- 一句话描述 -->
           <div v-if="star.front_one_word_desc || star.back_one_word_desc" class="nk-crole-oneliner">
             <p v-if="star.front_one_word_desc"><b>前排</b>{{ star.front_one_word_desc }}</p>
@@ -275,7 +316,7 @@ const traitGroups = computed(() => {
             <h3 class="nk-crole-block__title">属性修正</h3>
             <ul class="nk-crole-props">
               <li v-for="(m, i) in propertyMods" :key="i">
-                <span class="nk-crole-props__name">{{ (m.name as string) || (m.property_type as string) || '属性' }}</span>
+                <span class="nk-crole-props__name">{{ propLabel(m) }}</span>
                 <span class="nk-crole-props__val">{{ (m.value as number) < 1 ? `${((m.value as number) * 100).toFixed(1)}%` : m.value }}</span>
               </li>
             </ul>

@@ -127,54 +127,100 @@
   .nk-crole-card:focus-visible .nk-crole-card__avatar img { transform: none; }
 }
 
-/* 详情页容器 */
+/* 详情页容器（移动优先：紧凑内边距 + 底部导航 safe-area 避让） */
 .nk-crole {
   max-width: 980px;
   margin: 0 auto;
-  padding: 18px 18px 60px;
+  padding: 14px 14px calc(72px + env(safe-area-inset-bottom, 0px));
 }
 .nk-crole__topbar { margin-bottom: 12px; }
 .nk-crole__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
   background: var(--card);
   color: var(--text2);
   border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   cursor: pointer;
   font-size: 13px;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
 }
-.nk-crole__back:hover { color: var(--accent); border-color: var(--accent); }
-.nk-crole__state { padding: 40px; text-align: center; color: var(--text2); }
-.nk-crole__state--err { color: #ff8a8a; }
+.nk-crole__back:hover { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 16px rgba(244,63,94,0.18); }
+.nk-crole__back:active { transform: scale(0.97); }
+.nk-crole__back:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* 头部 */
+/* 状态：错误态含图标 + 重试 */
+.nk-crole__state { padding: 40px 20px; text-align: center; color: var(--text2); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.nk-crole__state--err { color: #ff8a8a; }
+.nk-crole__state-icon { font-size: 32px; line-height: 1; }
+.nk-crole__state p { margin: 0; }
+.nk-crole__retry {
+  margin-top: 4px; padding: 8px 22px; border-radius: 999px;
+  background: var(--primary); border: none; color: #fff;
+  font-family: var(--font-hud); font-size: 12px; font-weight: 700; letter-spacing: 0.12em;
+  cursor: pointer; transition: box-shadow 0.2s, transform 0.2s;
+}
+.nk-crole__retry:hover { box-shadow: 0 0 18px var(--primary-glow); transform: translateY(-1px); }
+.nk-crole__retry:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
+
+/* 骨架屏（复用全局 nk-sk--shimmer 令牌） */
+.nk-crole__skeleton { display: flex; flex-direction: column; gap: 20px; }
+.nk-crole__skeleton-hero { display: flex; gap: 16px; padding: 18px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); }
+.nk-crole__skeleton-portrait { width: 100px; height: 100px; flex: none; border-radius: 14px; }
+.nk-crole__skeleton-info { flex: 1; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+.nk-crole__skeleton-tabs { display: flex; gap: 8px; }
+.nk-crole__skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+
+/* 头部：稀有度光晕 + 渐变面板 + HUD 字体（移动优先） */
 .nk-crole-hero {
+  --holo-color: rgba(124, 58, 237, 0.45);
   position: relative;
   display: flex;
-  gap: 18px;
-  padding: 18px;
-  border-radius: 18px;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 16px;
   overflow: hidden;
   background: var(--card);
   border: 1px solid var(--border);
+  animation: nk-crole-in 0.4s var(--ease) backwards;
 }
+/* 稀有度配色（与列表卡片一致） */
+.nk-crole-hero[data-rarity="5"] { --holo-color: rgba(255, 215, 0, 0.5); border-color: rgba(251, 191, 36, 0.28); }
+.nk-crole-hero[data-rarity="4"] { --holo-color: rgba(192, 132, 252, 0.5); border-color: rgba(192, 132, 252, 0.22); }
+.nk-crole-hero[data-rarity="3"] { --holo-color: rgba(96, 165, 250, 0.45); border-color: rgba(96, 165, 250, 0.18); }
+.nk-crole-hero[data-rarity="2"] { --holo-color: rgba(74, 222, 128, 0.4); border-color: rgba(74, 222, 128, 0.15); }
+.nk-crole-hero[data-rarity="1"] { --holo-color: rgba(148, 163, 184, 0.35); border-color: rgba(148, 163, 184, 0.14); }
 .nk-crole-hero::before {
   content: '';
   position: absolute;
   inset: 0;
   background: var(--draw) center / cover no-repeat;
-  opacity: 0.16;
+  opacity: 0.14;
   filter: saturate(1.1);
 }
-.nk-crole-hero > * { position: relative; }
+/* 稀有度顶部光晕 */
+.nk-crole-hero::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60%;
+  background: radial-gradient(ellipse 80% 100% at 30% 0%, var(--holo-color) 0%, transparent 70%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.nk-crole-hero > * { position: relative; z-index: 1; }
 .nk-crole-hero__portrait {
-  width: 132px;
-  height: 132px;
+  width: 100px;
+  height: 100px;
   flex: none;
   border-radius: 14px;
   overflow: hidden;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border2);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.4), 0 0 18px color-mix(in srgb, var(--holo-color) 30%, transparent);
 }
 .nk-crole-hero__portrait img { width: 100%; height: 100%; object-fit: cover; }
 .nk-crole-hero__info {
@@ -182,8 +228,26 @@
   flex-direction: column;
   justify-content: center;
   gap: 8px;
+  min-width: 0;
 }
-.nk-crole-hero__name { font-size: 26px; margin: 0; }
+.nk-crole-hero__hud {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text3);
+  text-transform: uppercase;
+}
+.nk-crole-hero__name {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--text-bright);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--holo-color) 60%, transparent);
+  line-height: 1.15;
+  word-break: break-word;
+}
 .nk-crole-hero__sub {
   display: flex;
   align-items: center;
@@ -191,7 +255,13 @@
   color: var(--text2);
   font-size: 13px;
 }
-.nk-crole-stars { color: #ffcf5c; letter-spacing: 2px; }
+.nk-crole-id {
+  font-family: var(--font-hud);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+}
+.nk-crole-stars { color: #ffcf5c; letter-spacing: 2px; text-shadow: 0 0 10px rgba(251,191,36,0.4); }
 .nk-crole-hero__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-crole-hero__traits {
   display: flex;
@@ -265,13 +335,28 @@
 .nk-crole-chip--charge { background: rgba(255, 200, 90, 0.2); color: #ffd98a; }
 .nk-crole-chip--exp { background: rgba(255, 120, 160, 0.22); color: #ff9ec0; }
 
-/* 段落 */
-.nk-crole-section { margin-top: 26px; }
+/* 段落：HUD 标题（Orbitron 大写 + 渐变指示条，与主站 nk-hero__section-title 统一） */
+.nk-crole-section { margin-top: 22px; }
+.nk-crole-section--in { animation: nk-crole-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--si, 0) * 80ms), 480ms); }
 .nk-crole-section__title {
-  font-size: 18px;
-  margin: 0 0 12px;
-  padding-left: 10px;
-  border-left: 3px solid var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-hud);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+  color: var(--text-bright);
+}
+.nk-crole-section__title::before {
+  content: '';
+  flex: none;
+  width: 4px; height: 16px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+  box-shadow: 0 0 6px var(--primary-glow);
 }
 
 /* 羁绊 */
@@ -287,7 +372,9 @@
   border-radius: 14px;
   background: var(--card);
   border: 1px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
 }
+.nk-crole-trait:hover { border-color: var(--border2); box-shadow: 0 6px 22px rgba(0,0,0,0.35), 0 0 16px rgba(124,58,237,0.08); transform: translateY(-2px); }
 .nk-crole-trait__icon {
   width: 44px;
   height: 44px;
@@ -305,22 +392,31 @@
 .nk-crole-trait__desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
 .nk-crole-trait__desc span { color: #ffcf5c; }
 
-/* 星级切换 */
-.nk-crole-stars-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+/* 星级切换：≥44px 触控目标 + focus-visible + 动画下划线指示器 */
+.nk-crole-stars-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 .nk-crole-star-tab {
-  padding: 6px 14px;
+  position: relative;
+  min-height: 44px;
+  padding: 10px 18px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text2);
   cursor: pointer;
+  font-family: var(--font-hud);
   font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s var(--ease);
 }
+.nk-crole-star-tab:hover { color: var(--text-bright); border-color: var(--border2); }
+.nk-crole-star-tab:active { transform: scale(0.96); }
+.nk-crole-star-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-crole-star-tab.is-active {
-  background: var(--accent);
-  color: #1a1320;
-  border-color: var(--accent);
-  font-weight: 600;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3), 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 /* 一句话描述 + 战力 */
@@ -328,37 +424,61 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: 12px;
   background: var(--card);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
   font-size: 13px;
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 .nk-crole-oneliner b {
   display: inline-block;
-  min-width: 36px;
+  min-width: 40px;
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   color: var(--accent);
-  margin-right: 6px;
+  margin-right: 8px;
 }
-.nk-crole-powrow { display: flex; gap: 12px; margin: 12px 0; }
+.nk-crole-powrow { display: flex; gap: 10px; margin: 14px 0; }
 .nk-crole-pow {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-radius: 12px;
-  background: var(--card);
+  background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(20,20,45,0.7));
   border: 1px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
 }
+.nk-crole-pow:hover { border-color: var(--border2); box-shadow: 0 0 18px rgba(124,58,237,0.12); transform: translateY(-2px); }
 .nk-crole-pow__k { color: var(--text2); font-size: 13px; }
-.nk-crole-pow__v { font-size: 20px; font-weight: 700; color: #ffcf5c; }
+.nk-crole-pow__v {
+  font-family: var(--font-hud);
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffcf5c;
+  text-shadow: 0 0 14px rgba(251,191,36,0.35);
+  letter-spacing: 0.02em;
+}
 
 /* 技能 */
 .nk-crole-skillgroup { margin-top: 18px; }
-.nk-crole-skillgroup__title { font-size: 15px; color: var(--accent); margin: 0 0 10px; }
+.nk-crole-skillgroup__title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-hud);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--metric-val); margin: 0 0 10px;
+}
+.nk-crole-skillgroup__title::before {
+  content: ''; flex: none; width: 3px; height: 12px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+}
 .nk-crole-skills {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -369,7 +489,9 @@
   border-radius: 14px;
   background: var(--card);
   border: 1px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
 }
+.nk-crole-skill:hover { border-color: var(--border2); box-shadow: 0 6px 22px rgba(0,0,0,0.35), 0 0 16px rgba(124,58,237,0.08); transform: translateY(-2px); }
 .nk-crole-skill__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .nk-crole-skill__name { font-weight: 600; font-size: 15px; }
 .nk-crole-skill__tag,
@@ -401,7 +523,18 @@
 
 /* 通用块 */
 .nk-crole-block { margin-top: 18px; }
-.nk-crole-block__title { font-size: 15px; color: var(--accent); margin: 0 0 10px; }
+.nk-crole-block__title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-hud);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--metric-val);
+  margin: 0 0 10px;
+}
+.nk-crole-block__title::before {
+  content: ''; flex: none; width: 3px; height: 12px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+}
 .nk-crole-props,
 .nk-crole-kv {
   list-style: none;
@@ -421,6 +554,73 @@
   background: var(--card);
   border: 1px solid var(--border);
   font-size: 13px;
+  transition: border-color 0.2s, background 0.2s;
 }
+.nk-crole-props li:hover,
+.nk-crole-kv li:hover { border-color: var(--border2); background: rgba(124,58,237,0.06); }
 .nk-crole-props__val { color: #ffcf5c; font-weight: 600; }
 .nk-crole-kv b { color: #ffcf5c; }
+
+/* 星级内容切换淡入 */
+.nk-crole-star--in { animation: nk-crole-fade 0.3s var(--ease); }
+@keyframes nk-crole-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+/* 段落/头部入场 */
+@keyframes nk-crole-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 触屏设备：重置点击后粘滞的 hover 态（避免移动端点击后卡片常驻上浮） */
+@media (hover: none) {
+  .nk-crole-trait:hover, .nk-crole-skill:hover, .nk-crole-pow:hover,
+  .nk-crole-props li:hover, .nk-crole-kv li:hover {
+    transform: none; box-shadow: none; border-color: var(--border); background: var(--card);
+  }
+  .nk-crole-pow:hover { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(20,20,45,0.7)); }
+  .nk-crole-star-tab:active { transform: scale(0.97); }
+}
+
+/* 尊重「减少动态效果」偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .nk-crole-hero, .nk-crole-section--in, .nk-crole-star--in { animation: none; }
+  .nk-crole-trait, .nk-crole-skill, .nk-crole-pow, .nk-crole-props li, .nk-crole-kv li,
+  .nk-crole-star-tab, .nk-crole__back { transition: border-color 0.2s, color 0.2s, background 0.2s; transform: none; }
+}
+
+/* ═══════════════════════════════════════════
+   响应式（移动优先；断点与 tokens.css 一致：767 / 768 / 1024）
+   ≥768px：侧栏由底部 Tab Bar 升级为左侧竖栏，
+   内容区需让出 88px 左偏移（与目录页 #nk-catalog-app 一致）。
+   技巧：max-width 含 88px + padding-left 88px + margin auto，
+   使内容在宽屏居中于「视口 − 侧栏」可用区，窄屏自动贴左避让。
+═══════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .nk-crole {
+    max-width: calc(980px + 88px);
+    padding: 24px 32px 48px 88px;
+  }
+  /* Hero 恢复桌面尺寸 */
+  .nk-crole-hero { gap: 18px; padding: 20px; border-radius: 18px; }
+  .nk-crole-hero__portrait { width: 132px; height: 132px; }
+  .nk-crole-hero__name { font-size: 28px; }
+  /* 骨架屏同步 */
+  .nk-crole__skeleton-hero { padding: 20px; gap: 18px; }
+  .nk-crole__skeleton-portrait { width: 132px; height: 132px; }
+  /* 段落间距与战力卡恢复 */
+  .nk-crole-section { margin-top: 26px; }
+  .nk-crole-powrow { gap: 12px; }
+  .nk-crole-pow { padding: 14px 18px; }
+  .nk-crole-pow__v { font-size: 26px; }
+}
+@media (min-width: 1024px) {
+  .nk-crole { max-width: calc(1040px + 88px); padding: 28px 40px 56px 88px; }
+  .nk-crole-hero { gap: 22px; padding: 24px; }
+  .nk-crole-hero__name { font-size: 30px; }
+  .nk-crole-hero__portrait { width: 144px; height: 144px; }
+  .nk-crole-pow__v { font-size: 28px; }
+}
+/* 超窄屏（≤374px）：进一步压缩 Hero 头像与间距，避免名字挤压 */
+@media (max-width: 374px) {
+  .nk-crole { padding-left: 12px; padding-right: 12px; }
+  .nk-crole-hero { gap: 12px; padding: 12px; }
+  .nk-crole-hero__portrait { width: 84px; height: 84px; border-radius: 12px; }
+  .nk-crole-hero__name { font-size: 20px; }
+  .nk-crole__skeleton-portrait { width: 84px; height: 84px; }
+}
