@@ -174,6 +174,108 @@ export function loadLocalRelicStories(): Promise<RelicStoriesMap> {
   return fetchJson<RelicStoriesMap>(`${LOCAL_DATA_BASE}/relic_stories.json`);
 }
 
+/* ─── 货币战争 · 角色图鉴（独立 CDN 数据源，converter 落地） ─── */
+
+export interface CurrencyRoleTrait {
+  id: number;
+  name: string | null;
+  activation_type: string | null;
+  icon: string;
+  desc: string;
+}
+
+export interface CurrencyRoleSkill {
+  id: number;
+  name: string;
+  desc: string;
+  simple_desc: string;
+  type: string | null;
+  tag: string | null;
+  sp_base: number | null;
+  bp_need: number | null;
+  bp_add: number | null;
+  show_stance_list: number[] | null;
+  extra: Record<string, { name: string; desc: string; param: unknown[] }> | null;
+  level: Record<string, { level: number; param_list: number[] }> | null;
+}
+
+export interface CurrencyRoleStar {
+  star: number;
+  front_one_word_desc: string | null;
+  back_one_word_desc: string | null;
+  front_power_base: number | null;
+  back_power_base: number | null;
+  front_show_skill: CurrencyRoleSkill[];
+  back_show_skill: CurrencyRoleSkill[];
+  servant_show_skill: CurrencyRoleSkill[];
+  general_property_modify_list: unknown[] | null;
+  back_speed_rewrite: number | null;
+  back_speed_added_ratio: number | null;
+  back_energy_bar: number | null;
+  back_max_sp: number | null;
+  back_initial_sp: number | null;
+  back_initial_energy_bar: number | null;
+  luck_chance: number | null;
+  luck_damage: number | null;
+  extra_heal_base: number | null;
+  extra_shield_base: number | null;
+  stance_damage_display: unknown | null;
+  show_stance_list: number[] | null;
+  recommend: unknown | null;
+}
+
+export interface CurrencyRoleDetail {
+  id: number;
+  name: string;
+  rarity: number;
+  front_back_type: string | null;
+  heal_or_shield_display: string | null;
+  charge_type: string[];
+  max_sp_icon: string;
+  is_expert: boolean;
+  trait_list: number[];
+  traits: CurrencyRoleTrait[];
+  stars: Record<string, CurrencyRoleStar>;
+  rank: unknown[];
+  equipment: unknown[];
+}
+
+/** 货币战争角色特质摘要（列表数据，由 converter 从 TextMap 解析） */
+export interface CurrencyRoleTraitSummary {
+  id: number;
+  name: string;
+  cat: 'faction' | 'combat' | 'special';
+}
+
+export interface CurrencyRoleEntry {
+  id: number;
+  name: string;
+  rarity: number;
+  front_back_type: string | null;
+  heal_or_shield_display: string | null;
+  charge_type: string[];
+  is_expert: boolean;
+  max_sp_icon: string;
+  trait_list: number[];
+  /** 特质摘要（id + name + cat），供列表页展示与筛选 */
+  traits: CurrencyRoleTraitSummary[];
+  /** 专属装备 ID（部分角色有） */
+  equipment_id: number | null;
+}
+
+export interface CurrencyRoleList {
+  version: string;
+  roles: CurrencyRoleEntry[];
+}
+
+export function loadLocalCurrencyRoles(): Promise<CurrencyRoleList> {
+  return fetchJson<CurrencyRoleList>(`${LOCAL_DATA_BASE}/currency/role.json`);
+}
+
+export function loadLocalCurrencyRole(id: string): Promise<CurrencyRoleDetail> {
+  return fetchJson<CurrencyRoleDetail>(`${LOCAL_DATA_BASE}/currency/role/${id}.json`);
+}
+
 /**
  * 从本地 JSON 加载配装名称（光锥/遗器套装/队伍成员）。
  * 返回合并后的新 NameCache（不修改入参）。失败项回退为 '#id'。

@@ -1,0 +1,259 @@
+{
+  "id": 1401,
+  "name": "大黑塔",
+  "rarity": 4,
+  "front_back_type": "Front",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1003,
+    2003
+  ],
+  "traits": [
+    {
+      "id": 1003,
+      "name": "银河学者",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1003.png",
+      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。"
+    },
+    {
+      "id": 2003,
+      "name": "群攻",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
+      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "施放强化战技后生成【黑塔人偶】进行追击。我方小队中存在黑塔时，该次追击的攻击次数增加。",
+      "back_one_word_desc": "",
+      "front_power_base": 175,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14019901,
+          "name": "人偶大作战",
+          "desc": "大黑塔施放强化战技后，触发1次由#1[i]个【黑塔人偶】发动的追加攻击，参与追加攻击的每个【黑塔人偶】会造成等同于大黑塔攻击力#2[i]%的冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
+          "simple_desc": "大黑塔施放强化战技后，【黑塔人偶】发动追加攻击，造成冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.5,
+                2,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 110
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.45
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "施放强化战技后生成【黑塔人偶】进行追击。我方小队中存在黑塔时，该次追击的攻击次数增加。",
+      "back_one_word_desc": "",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14019902,
+          "name": "人偶大作战",
+          "desc": "大黑塔施放强化战技后，触发1次由#1[i]个【黑塔人偶】发动的追加攻击，参与追加攻击的每个【黑塔人偶】会造成等同于大黑塔攻击力#2[i]%的冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
+          "simple_desc": "大黑塔施放强化战技后，【黑塔人偶】发动追加攻击，造成冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                0.6,
+                2,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 110
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.885
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "施放强化战技后生成【黑塔人偶】进行追击。我方小队中存在黑塔时，该次追击的攻击次数增加。",
+      "back_one_word_desc": "",
+      "front_power_base": 500,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14019903,
+          "name": "人偶大作战",
+          "desc": "大黑塔施放强化战技后，触发1次由#1[i]个【黑塔人偶】发动的追加攻击，参与追加攻击的每个【黑塔人偶】会造成等同于大黑塔攻击力#2[i]%的冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
+          "simple_desc": "大黑塔施放强化战技后，【黑塔人偶】发动追加攻击，造成冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                1,
+                2,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 110
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.32
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.56
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

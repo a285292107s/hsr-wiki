@@ -1,0 +1,360 @@
+{
+  "id": 1112,
+  "name": "托帕&账账",
+  "rarity": 5,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "Speed"
+  ],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1004,
+    2001
+  ],
+  "traits": [
+    {
+      "id": 1004,
+      "name": "公司",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1004.png",
+      "desc": "【公司】队员的和提高。"
+    },
+    {
+      "id": 2001,
+      "name": "追击",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2001.png",
+      "desc": "【追击】队员的提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的，持续至任意敌方目标回合开始。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "行动时攻击敌方全体并有概率获得金币。我方小队攻击后使托帕&账账行动提前。敌人受到的伤害提高。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 11120201,
+          "name": "支付困难？",
+          "desc": "使账账对敌方全体造成等同于托帕#2[i]%攻击力的火属性伤害。施放此战技造成伤害时，被视为发动了追加攻击。每击中1个目标，都有#3[i]%概率获得#4[i]枚金币。每场战斗中最多通过此方式获得#5[i]枚金币。",
+          "simple_desc": "对敌方全体造成火属性伤害，并有概率获得金币。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                11,
+                0.3,
+                1,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": 11120401,
+          "name": "利滚利",
+          "desc": "我方小队其他目标发动攻击后托帕&账账行动提前#1[i]%，若该次攻击为追加攻击则行动提前#2[i]%。所有敌方目标进入战斗时会陷入【负债证明·改】，使受到的所有伤害提高#3[i]%。",
+          "simple_desc": "我方小队其他目标攻击后使托帕&账账行动提前，敌人进入战斗时受到的伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.08,
+                0.12,
+                0.5
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.6
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.45
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "行动时攻击敌方全体并有概率获得金币。我方小队攻击后使托帕&账账行动提前。敌人受到的伤害提高。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 11120202,
+          "name": "支付困难？",
+          "desc": "使账账对敌方全体造成等同于托帕#2[i]%攻击力的火属性伤害。施放此战技造成伤害时，被视为发动了追加攻击。每击中1个目标，都有#3[i]%概率获得#4[i]枚金币。每场战斗中最多通过此方式获得#5[i]枚金币。",
+          "simple_desc": "对敌方全体造成火属性伤害，并有概率获得金币。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2.5,
+                13.75,
+                0.5,
+                1,
+                5
+              ]
+            }
+          }
+        },
+        {
+          "id": 11120402,
+          "name": "利滚利",
+          "desc": "我方小队其他目标发动攻击后托帕&账账行动提前#1[i]%，若该次攻击为追加攻击则行动提前#2[i]%。所有敌方目标进入战斗时会陷入【负债证明·改】，使受到的所有伤害提高#3[i]%。",
+          "simple_desc": "我方小队其他目标攻击后使托帕&账账行动提前，敌人进入战斗时受到的伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.08,
+                0.12,
+                0.5
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.08
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.6
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "行动时攻击敌方全体并有概率获得金币。我方小队攻击后使托帕&账账行动提前。敌人受到的伤害提高。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 11120203,
+          "name": "支付困难？",
+          "desc": "使账账对敌方全体造成等同于托帕#2[i]%攻击力的火属性伤害。施放此战技造成伤害时，被视为发动了追加攻击。每击中1个目标，都有#3[i]%概率获得#4[i]枚金币。每场战斗中最多通过此方式获得#5[i]枚金币。",
+          "simple_desc": "对敌方全体造成火属性伤害，并有概率获得金币。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                55,
+                1,
+                5,
+                99
+              ]
+            }
+          }
+        },
+        {
+          "id": 11120403,
+          "name": "利滚利",
+          "desc": "我方小队其他目标发动攻击后托帕&账账行动提前#1[i]%，若该次攻击为追加攻击则行动提前#2[i]%。所有敌方目标进入战斗时会陷入【负债证明·改】，使受到的所有伤害提高#3[i]%。",
+          "simple_desc": "我方小队其他目标攻击后使托帕&账账行动提前，敌人进入战斗时受到的伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                0.5,
+                0.5
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 5
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 3
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

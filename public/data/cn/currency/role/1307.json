@@ -1,0 +1,489 @@
+{
+  "id": 1307,
+  "name": "黑天鹅",
+  "rarity": 5,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP",
+    "Speed"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1307Ultra.png",
+  "is_expert": false,
+  "trait_list": [
+    1010,
+    2008,
+    3002
+  ],
+  "traits": [
+    {
+      "id": 1010,
+      "name": "盛会之星",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1010.png",
+      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。"
+    },
+    {
+      "id": 2008,
+      "name": "持续伤害",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2008.png",
+      "desc": "【持续伤害】队员的持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。"
+    },
+    {
+      "id": 3002,
+      "name": "命运卜者",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/3002.png",
+      "desc": "黑天鹅每累计参与#1[i]场战斗后可以打开占卜屋，并选择1张启示卡以获得对应强化。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "为敌人添加可叠加层数的持续伤害【奥迹】，敌人回合触发【奥迹】时自身恢复能量，终结技可维持【奥迹】层数。【奥迹】的可叠加层数能超过上限。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13070201,
+          "name": "失坠，伪神的黄昏",
+          "desc": "对指定敌方单体及其相邻目标造成等同于黑天鹅#1[i]%攻击力的风属性伤害，同时有#3[i]%的基础概率使目标与相邻目标防御力降低#4[f1]%，持续#2[i]回合。",
+          "simple_desc": "对敌方单体及其相邻目标造成少量风属性伤害，大概率使目标防御力降低。",
+          "type": "战技",
+          "tag": "扩散",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            0,
+            30
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                3,
+                1,
+                0.2,
+                3,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 13070301,
+          "name": "沉醉于彼界的臂湾",
+          "desc": "使敌方全体目标陷入【揭露】状态，持续#2[i]回合。随后对敌方全体目标造成等同于黑天鹅#1[i]%攻击力的风属性伤害。\\n【揭露】状态下，敌方目标受到的伤害提高#3[i]%。每陷入1层【奥迹】时，有#4[i]%的固定概率使本次叠加层数额外提高1层，并且【奥迹】回合开始造成伤害后层数不会减半。",
+          "simple_desc": "对敌方全体施加【揭露】状态，使目标受到的伤害提高，使【奥迹】叠加时有概率提高本次叠加的层数，此外使【奥迹】下一次回合开始造成伤害后层数不会减半。对敌方全体造成风属性伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                2,
+                0.25,
+                1,
+                30,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13070401,
+          "name": "无端命运的机杼",
+          "desc": "敌方目标在进入战斗时或每受到1次持续伤害时，有#2[i]%的基础概率陷入#10[i]层【奥迹】。我方小队发动攻击后，有#9[i]%的基础概率为目标叠加#10[i]层【奥迹】。\\n敌方目标处于【奥迹】状态时，也会被视为同时陷入了风化、裂伤、灼烧、触电状态，每回合开始时受到等同于黑天鹅#1[i]%攻击力的风属性持续伤害，随后层数减半。每层【奥迹】使此伤害倍率提高#3[f1]%。【奥迹】可以叠加#8[i]层，层数达到上限后可继续叠加，产生伤害后移除超出上限的层数。\\n【奥迹】造成的伤害无视目标#7[i]%的防御力。仅在敌方目标回合开始【奥迹】造成伤害时，相邻目标额外受到1次等同于黑天鹅#5[i]%攻击力的风属性持续伤害。\\n我方小队造成的伤害提高#11[i]%。",
+          "simple_desc": "敌方进入战斗、受到持续伤害时和受到我方小队攻击后，有概率陷入【奥迹】。【奥迹】视为风化、裂伤、灼烧、触电状态，目标每回合受到风属性持续伤害，仅在敌方目标回合开始时对相邻目标额外造成风属性持续伤害。\\n【奥迹】层数达到上限后可继续叠加，产生伤害后移除超出上限的层数。\\n我方小队造成的伤害提高。",
+          "type": "天赋",
+          "tag": "妨害",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                0.65,
+                0.2,
+                3,
+                3,
+                7,
+                0.2,
+                50,
+                0.65,
+                1,
+                0.72
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 60
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.6
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.45
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "为敌人添加可叠加层数的持续伤害【奥迹】，敌人回合触发【奥迹】时自身恢复能量，终结技可维持【奥迹】层数。【奥迹】的可叠加层数能超过上限。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13070202,
+          "name": "失坠，伪神的黄昏",
+          "desc": "对指定敌方单体及其相邻目标造成等同于黑天鹅#1[i]%攻击力的风属性伤害，同时有#3[i]%的基础概率使目标与相邻目标防御力降低#4[f1]%，持续#2[i]回合。",
+          "simple_desc": "对敌方单体及其相邻目标造成少量风属性伤害，大概率使目标防御力降低。",
+          "type": "战技",
+          "tag": "扩散",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            0,
+            30
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3.75,
+                3,
+                1,
+                0.3,
+                3,
+                2.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13070302,
+          "name": "沉醉于彼界的臂湾",
+          "desc": "使敌方全体目标陷入【揭露】状态，持续#2[i]回合。随后对敌方全体目标造成等同于黑天鹅#1[i]%攻击力的风属性伤害。\\n【揭露】状态下，敌方目标受到的伤害提高#3[i]%。每陷入1层【奥迹】时，有#4[i]%的固定概率使本次叠加层数额外提高1层，并且【奥迹】回合开始造成伤害后层数不会减半。",
+          "simple_desc": "对敌方全体施加【揭露】状态，使目标受到的伤害提高，使【奥迹】叠加时有概率提高本次叠加的层数，此外使【奥迹】下一次回合开始造成伤害后层数不会减半。对敌方全体造成风属性伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                6.25,
+                2,
+                0.35,
+                1,
+                30,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13070402,
+          "name": "无端命运的机杼",
+          "desc": "敌方目标在进入战斗时或每受到1次持续伤害时，有#2[i]%的基础概率陷入#10[i]层【奥迹】。我方小队发动攻击后，有#9[i]%的基础概率为目标叠加#10[i]层【奥迹】。\\n敌方目标处于【奥迹】状态时，也会被视为同时陷入了风化、裂伤、灼烧、触电状态，每回合开始时受到等同于黑天鹅#1[i]%攻击力的风属性持续伤害，随后层数减半。每层【奥迹】使此伤害倍率提高#3[f1]%。【奥迹】可以叠加#8[i]层，层数达到上限后可继续叠加，产生伤害后移除超出上限的层数。\\n【奥迹】造成的伤害无视目标#7[i]%的防御力。仅在敌方目标回合开始【奥迹】造成伤害时，相邻目标额外受到1次等同于黑天鹅#5[i]%攻击力的风属性持续伤害。\\n我方小队造成的伤害提高#11[i]%。",
+          "simple_desc": "敌方进入战斗、受到持续伤害时和受到我方小队攻击后，有概率陷入【奥迹】。【奥迹】视为风化、裂伤、灼烧、触电状态，目标每回合受到风属性持续伤害，仅在敌方目标回合开始时对相邻目标额外造成风属性持续伤害。\\n【奥迹】层数达到上限后可继续叠加，产生伤害后移除超出上限的层数。\\n我方小队造成的伤害提高。",
+          "type": "天赋",
+          "tag": "妨害",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3.75,
+                0.65,
+                0.25,
+                3,
+                3.75,
+                7,
+                0.2,
+                50,
+                0.65,
+                1,
+                0.9
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 60
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.08
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.6
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "为敌人添加可叠加层数的持续伤害【奥迹】，敌人回合触发【奥迹】时自身恢复能量，终结技可维持【奥迹】层数。【奥迹】的可叠加层数能超过上限。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13070203,
+          "name": "失坠，伪神的黄昏",
+          "desc": "对指定敌方单体及其相邻目标造成等同于黑天鹅#1[i]%攻击力的风属性伤害，同时有#3[i]%的基础概率使目标与相邻目标防御力降低#4[f1]%，持续#2[i]回合。",
+          "simple_desc": "对敌方单体及其相邻目标造成少量风属性伤害，大概率使目标防御力降低。",
+          "type": "战技",
+          "tag": "扩散",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            0,
+            30
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                15,
+                3,
+                1,
+                0.4,
+                3,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": 13070303,
+          "name": "沉醉于彼界的臂湾",
+          "desc": "使敌方全体目标陷入【揭露】状态，持续#2[i]回合。随后对敌方全体目标造成等同于黑天鹅#1[i]%攻击力的风属性伤害。\\n【揭露】状态下，敌方目标受到的伤害提高#3[i]%。每陷入1层【奥迹】时，有#4[i]%的固定概率使本次叠加层数额外提高1层，并且【奥迹】回合开始造成伤害后层数不会减半。",
+          "simple_desc": "对敌方全体施加【揭露】状态，使目标受到的伤害提高，使【奥迹】叠加时有概率提高本次叠加的层数，此外使【奥迹】下一次回合开始造成伤害后层数不会减半。对敌方全体造成风属性伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                25,
+                2,
+                0.5,
+                1,
+                30,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13070403,
+          "name": "无端命运的机杼",
+          "desc": "敌方目标在进入战斗时或每受到1次持续伤害时，有#2[i]%的基础概率陷入#10[i]层【奥迹】。我方小队发动攻击后，有#9[i]%的基础概率为目标叠加#10[i]层【奥迹】。\\n敌方目标处于【奥迹】状态时，也会被视为同时陷入了风化、裂伤、灼烧、触电状态，每回合开始时受到等同于黑天鹅#1[i]%攻击力的风属性持续伤害，随后层数减半。每层【奥迹】使此伤害倍率提高#3[f1]%。【奥迹】可以叠加#8[i]层，层数达到上限后可继续叠加，产生伤害后移除超出上限的层数。\\n【奥迹】造成的伤害无视目标#7[i]%的防御力。仅在敌方目标回合开始【奥迹】造成伤害时，相邻目标额外受到1次等同于黑天鹅#5[i]%攻击力的风属性持续伤害。\\n我方小队造成的伤害提高#11[i]%。",
+          "simple_desc": "敌方进入战斗、受到持续伤害时和受到我方小队攻击后，有概率陷入【奥迹】。【奥迹】视为风化、裂伤、灼烧、触电状态，目标每回合受到风属性持续伤害，仅在敌方目标回合开始时对相邻目标额外造成风属性持续伤害。\\n【奥迹】层数达到上限后可继续叠加，产生伤害后移除超出上限的层数。\\n我方小队造成的伤害提高。",
+          "type": "天赋",
+          "tag": "妨害",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                15,
+                0.65,
+                1,
+                3,
+                15,
+                7,
+                0.2,
+                50,
+                0.65,
+                1,
+                1.2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 60
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 5
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 3
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

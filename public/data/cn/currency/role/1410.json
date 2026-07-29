@@ -1,0 +1,259 @@
+{
+  "id": 1410,
+  "name": "海瑟音",
+  "rarity": 4,
+  "front_back_type": "Front",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1011,
+    2008
+  ],
+  "traits": [
+    {
+      "id": 1011,
+      "name": "昼之半神",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和提高。"
+    },
+    {
+      "id": 2008,
+      "name": "持续伤害",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2008.png",
+      "desc": "【持续伤害】队员的持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "海瑟音攻击后为目标叠加持续伤害【深海回响】，并使其在被攻击后对自身和相邻敌人额外造成持续伤害。",
+      "back_one_word_desc": "",
+      "front_power_base": 175,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14109901,
+          "name": "海之歌",
+          "desc": "海瑟音攻击后使目标陷入#1[i]层【深海回响】。\\n【深海回响】状态下，敌方目标每回合开始时，每层受到等同于海瑟音攻击力#2[i]%的物理属性持续伤害，且受到攻击后，使其当前承受的【深海回响】立即对自身与相邻敌方目标产生相当于原伤害#3[i]%的伤害，并使当前承受的1个其他随机持续伤害状态立即产生相当于原伤害#4[i]%的伤害。",
+          "simple_desc": "海瑟音攻击后使目标陷入#1[i]层【深海回响】，回合开始时受到物理属性持续伤害。\\n敌方目标受到攻击后，【深海回响】对该目标与相邻敌人额外产生1次伤害，并使其他随机持续伤害状态额外产生1次伤害。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.6,
+                0.4,
+                0.8
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.45
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "海瑟音攻击后为目标叠加持续伤害【深海回响】，并使其在被攻击后对自身和相邻敌人额外造成持续伤害。",
+      "back_one_word_desc": "",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14109902,
+          "name": "海之歌",
+          "desc": "海瑟音攻击后使目标陷入#1[i]层【深海回响】。\\n【深海回响】状态下，敌方目标每回合开始时，每层受到等同于海瑟音攻击力#2[i]%的物理属性持续伤害，且受到攻击后，使其当前承受的【深海回响】立即对自身与相邻敌方目标产生相当于原伤害#3[i]%的伤害，并使当前承受的1个其他随机持续伤害状态立即产生相当于原伤害#4[i]%的伤害。",
+          "simple_desc": "海瑟音攻击后使目标陷入#1[i]层【深海回响】，回合开始时受到物理属性持续伤害。\\n敌方目标受到攻击后，【深海回响】对该目标与相邻敌人额外产生1次伤害，并使其他随机持续伤害状态额外产生1次伤害。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                1,
+                0.4,
+                1.2
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.885
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "海瑟音攻击后为目标叠加持续伤害【深海回响】，并使其在被攻击后对自身和相邻敌人额外造成持续伤害。",
+      "back_one_word_desc": "",
+      "front_power_base": 500,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14109903,
+          "name": "海之歌",
+          "desc": "海瑟音攻击后使目标陷入#1[i]层【深海回响】。\\n【深海回响】状态下，敌方目标每回合开始时，每层受到等同于海瑟音攻击力#2[i]%的物理属性持续伤害，且受到攻击后，使其当前承受的【深海回响】立即对自身与相邻敌方目标产生相当于原伤害#3[i]%的伤害，并使当前承受的1个其他随机持续伤害状态立即产生相当于原伤害#4[i]%的伤害。",
+          "simple_desc": "海瑟音攻击后使目标陷入#1[i]层【深海回响】，回合开始时受到物理属性持续伤害。\\n敌方目标受到攻击后，【深海回响】对该目标与相邻敌人额外产生1次伤害，并使其他随机持续伤害状态额外产生1次伤害。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                2,
+                0.4,
+                2.4
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.32
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.56
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

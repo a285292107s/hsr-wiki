@@ -1,0 +1,348 @@
+{
+  "id": 1202,
+  "name": "停云",
+  "rarity": 1,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1202Ultra.png",
+  "is_expert": true,
+  "trait_list": [
+    1007,
+    2004
+  ],
+  "traits": [
+    {
+      "id": 1007,
+      "name": "仙舟",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1007.png",
+      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前/后台强度和提高。"
+    },
+    {
+      "id": 2004,
+      "name": "能量",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
+      "desc": "【能量】队员的提高。在场上生成【能量地块】，可提供和能量恢复。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "终结技为前台单体角色恢复能量并提高造成的伤害。我方回合开始时为停云恢复能量。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 12020301,
+          "name": "庆云光覆仪祷",
+          "desc": "该技能自动选择目标施放。为我方单体前台角色恢复#2[i]点能量，同时使目标造成的伤害提高#3[i]%，持续#4[i]回合。",
+          "simple_desc": "为我方前台单体角色恢复能量，同时使目标造成的伤害提高。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                50,
+                0.2,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "终结技为前台单体角色恢复能量并提高造成的伤害。我方回合开始时为停云恢复能量。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 12020302,
+          "name": "庆云光覆仪祷",
+          "desc": "该技能自动选择目标施放。为我方单体前台角色恢复#2[i]点能量，同时使目标造成的伤害提高#3[i]%，持续#4[i]回合。",
+          "simple_desc": "为我方前台单体角色恢复能量，同时使目标造成的伤害提高。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                50,
+                0.5,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "终结技为前台单体角色恢复能量并提高造成的伤害。我方回合开始时为停云恢复能量。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 12020303,
+          "name": "庆云光覆仪祷",
+          "desc": "该技能自动选择目标施放。为我方单体前台角色恢复#2[i]点能量，同时使目标造成的伤害提高#3[i]%，持续#4[i]回合。",
+          "simple_desc": "为我方前台单体角色恢复能量，同时使目标造成的伤害提高。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                50,
+                0.8,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.6
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "终结技为前台单体角色恢复能量并提高造成的伤害。我方回合开始时为停云恢复能量。",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 12020304,
+          "name": "庆云光覆仪祷",
+          "desc": "该技能自动选择目标施放。为我方单体前台角色恢复#2[i]点能量，同时使目标造成的伤害提高#3[i]%，持续#4[i]回合。",
+          "simple_desc": "为我方前台单体角色恢复能量，同时使目标造成的伤害提高。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                50,
+                1.2,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.9
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

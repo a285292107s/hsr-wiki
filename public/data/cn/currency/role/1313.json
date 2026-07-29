@@ -1,0 +1,709 @@
+{
+  "id": 1313,
+  "name": "星期日",
+  "rarity": 3,
+  "front_back_type": "Both",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP",
+    "Speed",
+    "EnergyBar"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1313Ultra.png",
+  "is_expert": false,
+  "trait_list": [
+    1001,
+    1010,
+    2004
+  ],
+  "traits": [
+    {
+      "id": 1001,
+      "name": "列车同行",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1001.png",
+      "desc": "召唤【星穹列车】撞击敌方全体目标，并在场上留下【光轨】，使我方小队的前/后台强度提高。"
+    },
+    {
+      "id": 1010,
+      "name": "盛会之星",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1010.png",
+      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。"
+    },
+    {
+      "id": 2004,
+      "name": "能量",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
+      "desc": "【能量】队员的提高。在场上生成【能量地块】，可提供和能量恢复。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "为全体前台恢复能量，额外使后台1号位角色恢复能量且成为【蒙福者】，全体后台造成的伤害提高。",
+      "back_one_word_desc": "行动时，使前台单体立即行动。为全体前台和后台1号位恢复能量，额外使后台1号位成为【蒙福者】，并使全体后台造成的伤害提高。",
+      "front_power_base": 150,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 13139901,
+          "name": "光与我等同在",
+          "desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复与终结技相同数值能量上限的能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高#2[i]%，羁绊内队员获得双倍伤害提高效果。",
+          "simple_desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高，羁绊内队员获得双倍伤害提高效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.2
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130301,
+          "name": "轻与伤痕的赞颂",
+          "desc": "为指定我方目标恢复等同于#1[f1]%能量上限的能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高，提高数值等同于星期日#2[f1]%暴击伤害+#4[f1]%。同时为其他我方前台角色恢复#5[f1]%能量上限的能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1，共持续#3[i]回合。且仅对除星期日自身外终结技最新的施放目标生效。当星期日陷入无法战斗状态时，【蒙福者】效果也会被解除。",
+          "simple_desc": "为指定我方目标恢复能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高。同时为其他我方前台角色恢复能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1。且仅对除星期日自身外终结技最新的施放目标生效。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.39,
+                3,
+                0.14,
+                0.1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 13139901,
+          "name": "光与我等同在",
+          "desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复与终结技相同数值能量上限的能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高#2[i]%，羁绊内队员获得双倍伤害提高效果。",
+          "simple_desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高，羁绊内队员获得双倍伤害提高效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.3
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130401,
+          "name": "倾诉之肉身",
+          "desc": "施放战技时，使目标的暴击率提高#1[f1]%，持续#2[i]回合，并解除目标的#3[i]个负面效果。施放终结技时，若为目标恢复的能量不足#4[i]点，恢复的能量提高至#5[i]点。",
+          "simple_desc": "施放战技时，使目标暴击率提高，并解除负面状态。施放终结技时，至少为目标恢复一定能量。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                3,
+                1,
+                40,
+                40
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130201,
+          "name": "纸与仪典的恩赐",
+          "desc": "使我方单体角色及其召唤物立即行动，并使其造成的伤害提高#2[i]%，若目标拥有召唤物，则造成的伤害提高效果额外提高#4[i]%，持续#3[i]回合。\\n对【蒙福者】施放战技后恢复1个战技点。\\n当星期日对「同谐」命途的角色施放该技能时，无法触发立即行动效果。",
+          "simple_desc": "使我方前台及其召唤物立即行动，并使其造成的伤害提高，若目标拥有召唤物，则造成的伤害提高效果额外提高。\\n对【蒙福者】施放战技后恢复1个战技点。\\n当星期日对「同谐」命途的角色施放该技能时，无法触发立即行动效果。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.3,
+                2,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130301,
+          "name": "轻与伤痕的赞颂",
+          "desc": "为指定我方前台角色恢复等同于#1[f1]%能量上限的能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高，提高数值等同于星期日#2[f1]%暴击伤害+#4[f1]%。同时为其他我方前台角色恢复#5[f1]%能量上限的能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1，共持续#3[i]回合。且仅对终结技最新的施放目标生效。",
+          "simple_desc": "为指定我方前台角色恢复能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高。同时为其他我方前台角色恢复能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1。且仅对除星期日自身外终结技最新的施放目标生效。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.3,
+                3,
+                0.12,
+                0.1,
+                30
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "为全体前台恢复能量，额外使后台1号位角色恢复能量且成为【蒙福者】，全体后台造成的伤害提高。",
+      "back_one_word_desc": "行动时，使前台单体立即行动。为全体前台和后台1号位恢复能量，额外使后台1号位成为【蒙福者】，并使全体后台造成的伤害提高。",
+      "front_power_base": 240,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 13139902,
+          "name": "光与我等同在",
+          "desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复与终结技相同数值能量上限的能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高#2[i]%，羁绊内队员获得双倍伤害提高效果。",
+          "simple_desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高，羁绊内队员获得双倍伤害提高效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.4
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130302,
+          "name": "轻与伤痕的赞颂",
+          "desc": "为指定我方目标恢复等同于#1[f1]%能量上限的能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高，提高数值等同于星期日#2[f1]%暴击伤害+#4[f1]%。同时为其他我方前台角色恢复#5[f1]%能量上限的能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1，共持续#3[i]回合。且仅对除星期日自身外终结技最新的施放目标生效。当星期日陷入无法战斗状态时，【蒙福者】效果也会被解除。",
+          "simple_desc": "为指定我方目标恢复能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高。同时为其他我方前台角色恢复能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1。且仅对除星期日自身外终结技最新的施放目标生效。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.52,
+                3,
+                0.18,
+                0.1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 13139902,
+          "name": "光与我等同在",
+          "desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复与终结技相同数值能量上限的能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高#2[i]%，羁绊内队员获得双倍伤害提高效果。",
+          "simple_desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高，羁绊内队员获得双倍伤害提高效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.45
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130402,
+          "name": "倾诉之肉身",
+          "desc": "施放战技时，使目标的暴击率提高#1[f1]%，持续#2[i]回合，并解除目标的#3[i]个负面效果。施放终结技时，若为目标恢复的能量不足#4[i]点，恢复的能量提高至#5[i]点。",
+          "simple_desc": "施放战技时，使目标暴击率提高，并解除负面状态。施放终结技时，至少为目标恢复一定能量。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                3,
+                1,
+                40,
+                40
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130202,
+          "name": "纸与仪典的恩赐",
+          "desc": "使我方单体角色及其召唤物立即行动，并使其造成的伤害提高#2[i]%，若目标拥有召唤物，则造成的伤害提高效果额外提高#4[i]%，持续#3[i]回合。\\n对【蒙福者】施放战技后恢复1个战技点。\\n当星期日对「同谐」命途的角色施放该技能时，无法触发立即行动效果。",
+          "simple_desc": "使我方前台及其召唤物立即行动，并使其造成的伤害提高，若目标拥有召唤物，则造成的伤害提高效果额外提高。\\n对【蒙福者】施放战技后恢复1个战技点。\\n当星期日对「同谐」命途的角色施放该技能时，无法触发立即行动效果。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.25,
+                0.3,
+                2,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130302,
+          "name": "轻与伤痕的赞颂",
+          "desc": "为指定我方前台角色恢复等同于#1[f1]%能量上限的能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高，提高数值等同于星期日#2[f1]%暴击伤害+#4[f1]%。同时为其他我方前台角色恢复#5[f1]%能量上限的能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1，共持续#3[i]回合。且仅对终结技最新的施放目标生效。",
+          "simple_desc": "为指定我方前台角色恢复能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高。同时为其他我方前台角色恢复能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1。且仅对除星期日自身外终结技最新的施放目标生效。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.4,
+                3,
+                0.16,
+                0.1,
+                30
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.69
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "为全体前台恢复能量，额外使后台1号位角色恢复能量且成为【蒙福者】，全体后台造成的伤害提高。",
+      "back_one_word_desc": "行动时，使前台单体立即行动。为全体前台和后台1号位恢复能量，额外使后台1号位成为【蒙福者】，并使全体后台造成的伤害提高。",
+      "front_power_base": 330,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 13139903,
+          "name": "光与我等同在",
+          "desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复与终结技相同数值能量上限的能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高#2[i]%，羁绊内队员获得双倍伤害提高效果。",
+          "simple_desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高，羁绊内队员获得双倍伤害提高效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.8
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130303,
+          "name": "轻与伤痕的赞颂",
+          "desc": "为指定我方目标恢复等同于#1[f1]%能量上限的能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高，提高数值等同于星期日#2[f1]%暴击伤害+#4[f1]%。同时为其他我方前台角色恢复#5[f1]%能量上限的能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1，共持续#3[i]回合。且仅对除星期日自身外终结技最新的施放目标生效。当星期日陷入无法战斗状态时，【蒙福者】效果也会被解除。",
+          "simple_desc": "为指定我方目标恢复能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高。同时为其他我方前台角色恢复能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1。且仅对除星期日自身外终结技最新的施放目标生效。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.65,
+                3,
+                0.22,
+                0.1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 13139903,
+          "name": "光与我等同在",
+          "desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复与终结技相同数值能量上限的能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高#2[i]%，羁绊内队员获得双倍伤害提高效果。",
+          "simple_desc": "星期日施放终结技后，后台1号位角色也会成为【蒙福者】，并为其恢复能量，以及提高暴击伤害。当场上存在【蒙福者】时，后台角色造成的伤害提高，羁绊内队员获得双倍伤害提高效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.6
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130403,
+          "name": "倾诉之肉身",
+          "desc": "施放战技时，使目标的暴击率提高#1[f1]%，持续#2[i]回合，并解除目标的#3[i]个负面效果。施放终结技时，若为目标恢复的能量不足#4[i]点，恢复的能量提高至#5[i]点。",
+          "simple_desc": "施放战技时，使目标暴击率提高，并解除负面状态。施放终结技时，至少为目标恢复一定能量。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                3,
+                1,
+                40,
+                40
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130203,
+          "name": "纸与仪典的恩赐",
+          "desc": "使我方单体角色及其召唤物立即行动，并使其造成的伤害提高#2[i]%，若目标拥有召唤物，则造成的伤害提高效果额外提高#4[i]%，持续#3[i]回合。\\n对【蒙福者】施放战技后恢复1个战技点。\\n当星期日对「同谐」命途的角色施放该技能时，无法触发立即行动效果。",
+          "simple_desc": "使我方前台及其召唤物立即行动，并使其造成的伤害提高，若目标拥有召唤物，则造成的伤害提高效果额外提高。\\n对【蒙福者】施放战技后恢复1个战技点。\\n当星期日对「同谐」命途的角色施放该技能时，无法触发立即行动效果。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.5,
+                0.3,
+                2,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13130303,
+          "name": "轻与伤痕的赞颂",
+          "desc": "为指定我方前台角色恢复等同于#1[f1]%能量上限的能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高，提高数值等同于星期日#2[f1]%暴击伤害+#4[f1]%。同时为其他我方前台角色恢复#5[f1]%能量上限的能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1，共持续#3[i]回合。且仅对终结技最新的施放目标生效。",
+          "simple_desc": "为指定我方前台角色恢复能量，并使目标及其召唤物成为【蒙福者】，【蒙福者】的暴击伤害提高。同时为其他我方前台角色恢复能量。\\n星期日自身每回合开始时【蒙福者】状态持续回合减1。且仅对除星期日自身外终结技最新的施放目标生效。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.5,
+                3,
+                0.2,
+                0.1,
+                30
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.08
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.44
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

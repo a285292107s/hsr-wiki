@@ -1,0 +1,264 @@
+{
+  "id": 8007,
+  "name": "开拓者·记忆",
+  "rarity": 4,
+  "front_back_type": "Front",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1001,
+    2004,
+    2012
+  ],
+  "traits": [
+    {
+      "id": 1001,
+      "name": "列车同行",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1001.png",
+      "desc": "召唤【星穹列车】撞击敌方全体目标，并在场上留下【光轨】，使我方小队的前/后台强度提高。"
+    },
+    {
+      "id": 2004,
+      "name": "能量",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
+      "desc": "【能量】队员的提高。在场上生成【能量地块】，可提供和能量恢复。"
+    },
+    {
+      "id": 2012,
+      "name": "欢愉",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2012.png",
+      "desc": "【欢愉】队员的提高。\\n备战阶段召唤【阿哈】为小队提供增益，【阿哈】拥有初始属性并穿戴3件随机简易装备，可将物品栏中简易装备拖拽给阿哈，与阿哈装备栏中的简易装备依次合成对应进阶装备。合成进阶装备后，本局该栏位将会被固定，无法合成其它进阶装备。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "迷迷发动攻击后造成真实伤害，普通攻击有概率触发连击，并使敌人防御力降低。",
+      "back_one_word_desc": "",
+      "front_power_base": 175,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 80079901,
+          "name": "命途相变",
+          "desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "simple_desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.45
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "迷迷发动攻击后造成真实伤害，普通攻击有概率触发连击，并使敌人防御力降低。",
+      "back_one_word_desc": "",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 80079902,
+          "name": "命途相变",
+          "desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "simple_desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.885
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "迷迷发动攻击后造成真实伤害，普通攻击有概率触发连击，并使敌人防御力降低。",
+      "back_one_word_desc": "",
+      "front_power_base": 500,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 80079903,
+          "name": "命途相变",
+          "desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "simple_desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.32
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.56
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

@@ -1,0 +1,360 @@
+{
+  "id": 1309,
+  "name": "知更鸟",
+  "rarity": 4,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "Speed"
+  ],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1010,
+    2001
+  ],
+  "traits": [
+    {
+      "id": 1010,
+      "name": "盛会之星",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1010.png",
+      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。"
+    },
+    {
+      "id": 2001,
+      "name": "追击",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2001.png",
+      "desc": "【追击】队员的提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的，持续至任意敌方目标回合开始。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "使我方小队造成的伤害提高。行动时，使我方全体前台目标立即行动且在攻击后附加多次伤害。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13090201,
+          "name": "翎之咏叹调",
+          "desc": "使我方小队造成的伤害提高#1[i]%，羁绊内队员获得双倍提高，持续至战斗结束。",
+          "simple_desc": "我方小队造成的伤害提高。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.3
+              ]
+            }
+          }
+        },
+        {
+          "id": 13090301,
+          "name": "千音迭奏，群星赋格",
+          "desc": "知更鸟进入【协奏】状态，使我方全体前台立即行动。\\n处于【协奏】状态时，我方小队攻击力提高，提高数值等同于知更鸟攻击力的#2[f1]%+#3[i]点，羁绊内成员获得双倍提高。我方小队每次施放攻击后，知更鸟会额外造成2次等同于其自身#4[i]%攻击力的物理属性附加伤害，该伤害视为追加攻击伤害，暴击率固定为#6[i]%，暴击伤害固定为#7[i]%。\\n行动序列上出现【协奏】倒计时，倒计时回合开始时知更鸟退出【协奏】状态，倒计时固定拥有#5[i]点速度。",
+          "simple_desc": "进入【协奏】状态，使全体前台攻击力提高并立即行动，攻击后知更鸟额外造成2次物理属性附加伤害，该伤害视为追加攻击伤害。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.16,
+                150,
+                1.2,
+                200,
+                1,
+                1.5
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.45
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "使我方小队造成的伤害提高。行动时，使我方全体前台目标立即行动且在攻击后附加多次伤害。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13090202,
+          "name": "翎之咏叹调",
+          "desc": "使我方小队造成的伤害提高#1[i]%，羁绊内队员获得双倍提高，持续至战斗结束。",
+          "simple_desc": "我方小队造成的伤害提高。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.45
+              ]
+            }
+          }
+        },
+        {
+          "id": 13090302,
+          "name": "千音迭奏，群星赋格",
+          "desc": "知更鸟进入【协奏】状态，使我方全体前台立即行动。\\n处于【协奏】状态时，我方小队攻击力提高，提高数值等同于知更鸟攻击力的#2[f1]%+#3[i]点，羁绊内成员获得双倍提高。我方小队每次施放攻击后，知更鸟会额外造成2次等同于其自身#4[i]%攻击力的物理属性附加伤害，该伤害视为追加攻击伤害，暴击率固定为#6[i]%，暴击伤害固定为#7[i]%。\\n行动序列上出现【协奏】倒计时，倒计时回合开始时知更鸟退出【协奏】状态，倒计时固定拥有#5[i]点速度。",
+          "simple_desc": "进入【协奏】状态，使全体前台攻击力提高并立即行动，攻击后知更鸟额外造成2次物理属性附加伤害，该伤害视为追加攻击伤害。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.25,
+                0.2,
+                200,
+                1.5,
+                200,
+                1,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.885
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "使我方小队造成的伤害提高。行动时，使我方全体前台目标立即行动且在攻击后附加多次伤害。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13090203,
+          "name": "翎之咏叹调",
+          "desc": "使我方小队造成的伤害提高#1[i]%，羁绊内队员获得双倍提高，持续至战斗结束。",
+          "simple_desc": "我方小队造成的伤害提高。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.6
+              ]
+            }
+          }
+        },
+        {
+          "id": 13090303,
+          "name": "千音迭奏，群星赋格",
+          "desc": "知更鸟进入【协奏】状态，使我方全体前台立即行动。\\n处于【协奏】状态时，我方小队攻击力提高，提高数值等同于知更鸟攻击力的#2[f1]%+#3[i]点，羁绊内成员获得双倍提高。我方小队每次施放攻击后，知更鸟会额外造成2次等同于其自身#4[i]%攻击力的物理属性附加伤害，该伤害视为追加攻击伤害，暴击率固定为#6[i]%，暴击伤害固定为#7[i]%。\\n行动序列上出现【协奏】倒计时，倒计时回合开始时知更鸟退出【协奏】状态，倒计时固定拥有#5[i]点速度。",
+          "simple_desc": "进入【协奏】状态，使全体前台攻击力提高并立即行动，攻击后知更鸟额外造成2次物理属性附加伤害，该伤害视为追加攻击伤害。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.5,
+                0.26,
+                250,
+                2.16,
+                200,
+                1,
+                2.5
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.32
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.56
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

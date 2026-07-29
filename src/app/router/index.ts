@@ -99,6 +99,18 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, catalog: 'currency' },
   },
   {
+    path: '/currency/role',
+    name: 'catalog-currency-role',
+    component: () => import('../views/CatalogView.vue'),
+    meta: { depth: 3, catalog: 'currency-role' },
+  },
+  {
+    path: '/currency/role/:id(\\d+)',
+    name: 'currency-role',
+    component: () => import('../views/CurrencyRoleView.vue'),
+    meta: { depth: 4 },
+  },
+  {
     // 成就页为尚未实现的扩展模块，第二期重构；
     // 第一期展示占位页，保持 NAV_ITEMS 9 项导航完整。
     path: '/achievement',

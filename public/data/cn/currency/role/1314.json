@@ -1,0 +1,464 @@
+{
+  "id": 1314,
+  "name": "翡翠",
+  "rarity": 1,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "EnergyBar"
+  ],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1004,
+    2003
+  ],
+  "traits": [
+    {
+      "id": 1004,
+      "name": "公司",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1004.png",
+      "desc": "【公司】队员的和提高。"
+    },
+    {
+      "id": 2003,
+      "name": "群攻",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
+      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "使前台角色成为【收债人】，速度与暴击伤害提高，并在击中目标时为翡翠计数，以发动追加攻击。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13140201,
+          "name": "恣肆吞併的担保",
+          "desc": "该技能自动选择目标施放。指定我方单体前台角色成为【收债人】至战斗结束，使其速度提高#1[i]点，暴击伤害提高#2[i]%。\\n【收债人】施放攻击后，每个击中的敌方目标造成1次等同于翡翠#3[i]%攻击力的量子属性附加伤害，并消耗【收债人】生命上限#4[i]%的生命值，若当前生命值不足，当前生命值降至1点。",
+          "simple_desc": "该技能进入战斗后自动施放。使我方单体前台角色成为【收债人】，使其速度和暴击伤害提高。【收债人】施放攻击后，对每个击中的敌方目标造成少量量子属性附加伤害并消耗自身生命值。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                30,
+                0.2,
+                0.25,
+                0.02
+              ]
+            }
+          }
+        },
+        {
+          "id": 13140401,
+          "name": "剔烁之牙",
+          "desc": "成为【收债人】的目标施放攻击后，每击中1名敌方目标翡翠均可获得1点充能。当充能达到#1[i]点时，消耗#1[i]点充能，发动1次追加攻击，对敌方全体目标造成等同于翡翠#2[i]%攻击力的量子属性伤害。\\n翡翠的攻击力提高#3[i]%，暴击伤害提高#4[i]%。",
+          "simple_desc": "【收债人】攻击后使翡翠获得充能，充能满时翡翠发动追加攻击，攻击全体敌人。翡翠的攻击力和暴击伤害提高。",
+          "type": "天赋",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                8,
+                3.2,
+                0.25,
+                1.2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 70
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "使前台角色成为【收债人】，速度与暴击伤害提高，并在击中目标时为翡翠计数，以发动追加攻击。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13140202,
+          "name": "恣肆吞併的担保",
+          "desc": "该技能自动选择目标施放。指定我方单体前台角色成为【收债人】至战斗结束，使其速度提高#1[i]点，暴击伤害提高#2[i]%。\\n【收债人】施放攻击后，每个击中的敌方目标造成1次等同于翡翠#3[i]%攻击力的量子属性附加伤害，并消耗【收债人】生命上限#4[i]%的生命值，若当前生命值不足，当前生命值降至1点。",
+          "simple_desc": "该技能进入战斗后自动施放。使我方单体前台角色成为【收债人】，使其速度和暴击伤害提高。【收债人】施放攻击后，对每个击中的敌方目标造成少量量子属性附加伤害并消耗自身生命值。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                45,
+                0.3,
+                0.25,
+                0.02
+              ]
+            }
+          }
+        },
+        {
+          "id": 13140402,
+          "name": "剔烁之牙",
+          "desc": "成为【收债人】的目标施放攻击后，每击中1名敌方目标翡翠均可获得1点充能。当充能达到#1[i]点时，消耗#1[i]点充能，发动1次追加攻击，对敌方全体目标造成等同于翡翠#2[i]%攻击力的量子属性伤害。\\n翡翠的攻击力提高#3[i]%，暴击伤害提高#4[i]%。",
+          "simple_desc": "【收债人】攻击后使翡翠获得充能，充能满时翡翠发动追加攻击，攻击全体敌人。翡翠的攻击力和暴击伤害提高。",
+          "type": "天赋",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                8,
+                4,
+                0.3,
+                1.4
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 70
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "使前台角色成为【收债人】，速度与暴击伤害提高，并在击中目标时为翡翠计数，以发动追加攻击。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13140203,
+          "name": "恣肆吞併的担保",
+          "desc": "该技能自动选择目标施放。指定我方单体前台角色成为【收债人】至战斗结束，使其速度提高#1[i]点，暴击伤害提高#2[i]%。\\n【收债人】施放攻击后，每个击中的敌方目标造成1次等同于翡翠#3[i]%攻击力的量子属性附加伤害，并消耗【收债人】生命上限#4[i]%的生命值，若当前生命值不足，当前生命值降至1点。",
+          "simple_desc": "该技能进入战斗后自动施放。使我方单体前台角色成为【收债人】，使其速度和暴击伤害提高。【收债人】施放攻击后，对每个击中的敌方目标造成少量量子属性附加伤害并消耗自身生命值。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                60,
+                0.4,
+                0.25,
+                0.02
+              ]
+            }
+          }
+        },
+        {
+          "id": 13140403,
+          "name": "剔烁之牙",
+          "desc": "成为【收债人】的目标施放攻击后，每击中1名敌方目标翡翠均可获得1点充能。当充能达到#1[i]点时，消耗#1[i]点充能，发动1次追加攻击，对敌方全体目标造成等同于翡翠#2[i]%攻击力的量子属性伤害。\\n翡翠的攻击力提高#3[i]%，暴击伤害提高#4[i]%。",
+          "simple_desc": "【收债人】攻击后使翡翠获得充能，充能满时翡翠发动追加攻击，攻击全体敌人。翡翠的攻击力和暴击伤害提高。",
+          "type": "天赋",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                8,
+                5.76,
+                0.35,
+                1.6
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 70
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.6
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "使前台角色成为【收债人】，速度与暴击伤害提高，并在击中目标时为翡翠计数，以发动追加攻击。",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13140204,
+          "name": "恣肆吞併的担保",
+          "desc": "该技能自动选择目标施放。指定我方单体前台角色成为【收债人】至战斗结束，使其速度提高#1[i]点，暴击伤害提高#2[i]%。\\n【收债人】施放攻击后，每个击中的敌方目标造成1次等同于翡翠#3[i]%攻击力的量子属性附加伤害，并消耗【收债人】生命上限#4[i]%的生命值，若当前生命值不足，当前生命值降至1点。",
+          "simple_desc": "该技能进入战斗后自动施放。使我方单体前台角色成为【收债人】，使其速度和暴击伤害提高。【收债人】施放攻击后，对每个击中的敌方目标造成少量量子属性附加伤害并消耗自身生命值。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                75,
+                0.5,
+                0.25,
+                0.02
+              ]
+            }
+          }
+        },
+        {
+          "id": 13140404,
+          "name": "剔烁之牙",
+          "desc": "成为【收债人】的目标施放攻击后，每击中1名敌方目标翡翠均可获得1点充能。当充能达到#1[i]点时，消耗#1[i]点充能，发动1次追加攻击，对敌方全体目标造成等同于翡翠#2[i]%攻击力的量子属性伤害。\\n翡翠的攻击力提高#3[i]%，暴击伤害提高#4[i]%。",
+          "simple_desc": "【收债人】攻击后使翡翠获得充能，充能满时翡翠发动追加攻击，攻击全体敌人。翡翠的攻击力和暴击伤害提高。",
+          "type": "天赋",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                8,
+                8.96,
+                0.4,
+                1.8
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 70
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.9
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

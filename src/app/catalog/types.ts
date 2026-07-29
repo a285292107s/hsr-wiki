@@ -19,6 +19,14 @@ export interface CatalogFilter {
 export interface CatalogItem {
   name: string;
   href?: string;
+  /** 头像/图标 URL */
+  avatar?: string;
+  rarity?: number | string;
+  /** 货币战争角色扩展字段 */
+  front_back_type?: string;
+  heal_or_shield_display?: string;
+  charge_type?: string[];
+  is_expert?: boolean;
   [k: string]: unknown;
 }
 

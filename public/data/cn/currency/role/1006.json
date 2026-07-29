@@ -1,0 +1,576 @@
+{
+  "id": 1006,
+  "name": "银狼",
+  "rarity": 4,
+  "front_back_type": "Both",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "Speed"
+  ],
+  "max_sp_icon": "",
+  "is_expert": true,
+  "trait_list": [
+    1002,
+    2009
+  ],
+  "traits": [
+    {
+      "id": 1002,
+      "name": "星核猎手",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1002.png",
+      "desc": "装备最多的【星核猎手】成为【猎星人】，【星核猎手】会协助【猎星人】作战。\\n【星核猎手】的和提高。"
+    },
+    {
+      "id": 2009,
+      "name": "量子同频",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2009.png",
+      "desc": "敌人受到的伤害提高。\\n【量子同频】角色获得可强化技能效果的【同频】。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "战技强化为攻击敌方全体目标，且每层【缺陷】都会使敌人受到的伤害提高。",
+      "back_one_word_desc": "敌人防御力降低，银狼行动时攻击敌方全体并添加弱点和【缺陷】。每层【缺陷】都会使敌人受到的伤害提高。",
+      "front_power_base": 175,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 110060201,
+          "name": "是否允许更改？",
+          "desc": "有#2[i]%的基础概率为敌方全体目标添加1个场上我方目标持有属性的弱点（优先添加我方编队中的第一位角色持有属性的弱点），且该弱点对应属性的抗性降低#4[i]%，持续#3[i]回合。若添加的是敌方目标原有属性的弱点，则不会触发对应属性的抗性降低效果。\\n单个敌方目标仅能被银狼添加1个弱点，当银狼对其再次添加弱点时，仅保留最新添加的弱点。\\n有#5[i]%的基础概率额外使该目标的全属性抗性降低#6[f1]%，持续#7[i]回合。\\n对敌方全体目标造成等同于银狼#1[i]%攻击力的量子属性伤害。",
+          "simple_desc": "大概率为敌方全体添加额外的弱点，并对敌方全体造成量子属性伤害。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": 1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3.75,
+                1.4,
+                3,
+                0.2,
+                1,
+                0.1425,
+                2,
+                1,
+                1,
+                0.1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 110069901,
+          "name": "算法漏洞",
+          "desc": "植入【缺陷】时会额外植入【致命缺陷】，每层使敌方目标受到的伤害提高(#1[i]%+#2[i]%*)。当【缺陷】移除时，【致命缺陷】效果也会被移除。",
+          "simple_desc": "每种【缺陷】使敌方目标受到的伤害提高，会强化该效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.03,
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10060201,
+          "name": "是否允许更改？",
+          "desc": "有#2[i]%的基础概率为指定敌方目标添加1个场上我方目标持有属性的弱点（优先添加我方编队中的第一位角色持有属性的弱点），且该弱点对应属性的抗性降低#4[i]%，持续#3[i]回合。若添加的是敌方目标原有属性的弱点，则不会触发对应属性的抗性降低效果。\\n单个敌方目标仅能被银狼添加1个弱点，当银狼对其再次添加弱点时，仅保留最新添加的弱点。\\n有#5[i]%的基础概率额外使该目标的全属性抗性降低#6[f1]%，持续#7[i]回合。\\n对敌方全体目标造成等同于银狼#1[i]%攻击力的量子属性伤害。",
+          "simple_desc": "大概率为敌方单体添加额外的弱点，并对敌方全体造成量子属性伤害。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            30,
+            30
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                4.8,
+                1.2,
+                3,
+                0.2,
+                1,
+                0.13,
+                2,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 10060401,
+          "name": "等待程序响应…",
+          "desc": "银狼能够制造：攻击力降低#1[f1]%、防御力降低#2[f1]%、速度降低#3[f1]%3种【缺陷】，植入【缺陷】时会额外植入【致命缺陷】，每层使敌方目标受到的伤害提高(#4[i]%+#5[i]%*)。\\n银狼每次施放攻击后有#6[i]%的基础概率给受到攻击的敌方目标植入1个随机【缺陷】，持续#7[i]回合。\\n敌方目标被消灭时，银狼对其添加的弱点会转移给场上存活的未被银狼添加弱点的敌人，优先转移给精英级别及以上的目标。\\n敌方目标防御力降低#8[i]%。",
+          "simple_desc": "攻击后有概率给目标植入1个随机【缺陷】，每种【缺陷】使敌方目标受到的伤害提高，会强化该效果。敌方目标被消灭时，添加的弱点会转移。\\n敌方目标防御力降低。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.1,
+                0.08,
+                0.06,
+                0.03,
+                0.01,
+                1,
+                3,
+                0.3
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.45
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "战技强化为攻击敌方全体目标，且每层【缺陷】都会使敌人受到的伤害提高。",
+      "back_one_word_desc": "敌人防御力降低，银狼行动时攻击敌方全体并添加弱点和【缺陷】。每层【缺陷】都会使敌人受到的伤害提高。",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 110060202,
+          "name": "是否允许更改？",
+          "desc": "有#2[i]%的基础概率为敌方全体目标添加1个场上我方目标持有属性的弱点（优先添加我方编队中的第一位角色持有属性的弱点），且该弱点对应属性的抗性降低#4[i]%，持续#3[i]回合。若添加的是敌方目标原有属性的弱点，则不会触发对应属性的抗性降低效果。\\n单个敌方目标仅能被银狼添加1个弱点，当银狼对其再次添加弱点时，仅保留最新添加的弱点。\\n有#5[i]%的基础概率额外使该目标的全属性抗性降低#6[f1]%，持续#7[i]回合。\\n对敌方全体目标造成等同于银狼#1[i]%攻击力的量子属性伤害。",
+          "simple_desc": "大概率为敌方全体添加额外的弱点，并对敌方全体造成量子属性伤害。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": 1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                4.6875,
+                1.4,
+                3,
+                0.2,
+                1,
+                0.21,
+                2,
+                1,
+                1,
+                0.1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 110069902,
+          "name": "算法漏洞",
+          "desc": "植入【缺陷】时会额外植入【致命缺陷】，每层使敌方目标受到的伤害提高(#1[i]%+#2[i]%*)。当【缺陷】移除时，【致命缺陷】效果也会被移除。",
+          "simple_desc": "每种【缺陷】使敌方目标受到的伤害提高，会强化该效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.06,
+                0.02
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10060202,
+          "name": "是否允许更改？",
+          "desc": "有#2[i]%的基础概率为指定敌方目标添加1个场上我方目标持有属性的弱点（优先添加我方编队中的第一位角色持有属性的弱点），且该弱点对应属性的抗性降低#4[i]%，持续#3[i]回合。若添加的是敌方目标原有属性的弱点，则不会触发对应属性的抗性降低效果。\\n单个敌方目标仅能被银狼添加1个弱点，当银狼对其再次添加弱点时，仅保留最新添加的弱点。\\n有#5[i]%的基础概率额外使该目标的全属性抗性降低#6[f1]%，持续#7[i]回合。\\n对敌方全体目标造成等同于银狼#1[i]%攻击力的量子属性伤害。",
+          "simple_desc": "大概率为敌方单体添加额外的弱点，并对敌方全体造成量子属性伤害。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            30,
+            30
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                6,
+                1.2,
+                3,
+                0.2,
+                1,
+                0.18,
+                2,
+                2.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 10060402,
+          "name": "等待程序响应…",
+          "desc": "银狼能够制造：攻击力降低#1[f1]%、防御力降低#2[f1]%、速度降低#3[f1]%3种【缺陷】，植入【缺陷】时会额外植入【致命缺陷】，每层使敌方目标受到的伤害提高(#4[i]%+#5[i]%*)。\\n银狼每次施放攻击后有#6[i]%的基础概率给受到攻击的敌方目标植入1个随机【缺陷】，持续#7[i]回合。\\n敌方目标被消灭时，银狼对其添加的弱点会转移给场上存活的未被银狼添加弱点的敌人，优先转移给精英级别及以上的目标。\\n敌方目标防御力降低#8[i]%。",
+          "simple_desc": "攻击后有概率给目标植入1个随机【缺陷】，每种【缺陷】使敌方目标受到的伤害提高，会强化该效果。敌方目标被消灭时，添加的弱点会转移。\\n敌方目标防御力降低。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.12,
+                0.1,
+                0.07,
+                0.06,
+                0.02,
+                1,
+                3,
+                0.4
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.885
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "战技强化为攻击敌方全体目标，且每层【缺陷】都会使敌人受到的伤害提高。",
+      "back_one_word_desc": "敌人防御力降低，银狼行动时攻击敌方全体并添加弱点和【缺陷】。每层【缺陷】都会使敌人受到的伤害提高。",
+      "front_power_base": 500,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 110060203,
+          "name": "是否允许更改？",
+          "desc": "有#2[i]%的基础概率为敌方全体目标添加1个场上我方目标持有属性的弱点（优先添加我方编队中的第一位角色持有属性的弱点），且该弱点对应属性的抗性降低#4[i]%，持续#3[i]回合。若添加的是敌方目标原有属性的弱点，则不会触发对应属性的抗性降低效果。\\n单个敌方目标仅能被银狼添加1个弱点，当银狼对其再次添加弱点时，仅保留最新添加的弱点。\\n有#5[i]%的基础概率额外使该目标的全属性抗性降低#6[f1]%，持续#7[i]回合。\\n对敌方全体目标造成等同于银狼#1[i]%攻击力的量子属性伤害。",
+          "simple_desc": "大概率为敌方全体添加额外的弱点，并对敌方全体造成量子属性伤害。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": 1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                6.75,
+                1.4,
+                3,
+                0.2,
+                1,
+                0.35,
+                2,
+                1,
+                1,
+                0.1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 110069903,
+          "name": "算法漏洞",
+          "desc": "植入【缺陷】时会额外植入【致命缺陷】，每层使敌方目标受到的伤害提高(#1[i]%+#2[i]%*)。当【缺陷】移除时，【致命缺陷】效果也会被移除。",
+          "simple_desc": "每种【缺陷】使敌方目标受到的伤害提高，会强化该效果。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.09,
+                0.03
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10060203,
+          "name": "是否允许更改？",
+          "desc": "有#2[i]%的基础概率为指定敌方目标添加1个场上我方目标持有属性的弱点（优先添加我方编队中的第一位角色持有属性的弱点），且该弱点对应属性的抗性降低#4[i]%，持续#3[i]回合。若添加的是敌方目标原有属性的弱点，则不会触发对应属性的抗性降低效果。\\n单个敌方目标仅能被银狼添加1个弱点，当银狼对其再次添加弱点时，仅保留最新添加的弱点。\\n有#5[i]%的基础概率额外使该目标的全属性抗性降低#6[f1]%，持续#7[i]回合。\\n对敌方全体目标造成等同于银狼#1[i]%攻击力的量子属性伤害。",
+          "simple_desc": "大概率为敌方单体添加额外的弱点，并对敌方全体造成量子属性伤害。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            30,
+            30
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                8.64,
+                1.2,
+                3,
+                0.2,
+                1,
+                0.3,
+                2,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": 10060403,
+          "name": "等待程序响应…",
+          "desc": "银狼能够制造：攻击力降低#1[f1]%、防御力降低#2[f1]%、速度降低#3[f1]%3种【缺陷】，植入【缺陷】时会额外植入【致命缺陷】，每层使敌方目标受到的伤害提高(#4[i]%+#5[i]%*)。\\n银狼每次施放攻击后有#6[i]%的基础概率给受到攻击的敌方目标植入1个随机【缺陷】，持续#7[i]回合。\\n敌方目标被消灭时，银狼对其添加的弱点会转移给场上存活的未被银狼添加弱点的敌人，优先转移给精英级别及以上的目标。\\n敌方目标防御力降低#8[i]%。",
+          "simple_desc": "攻击后有概率给目标植入1个随机【缺陷】，每种【缺陷】使敌方目标受到的伤害提高，会强化该效果。敌方目标被消灭时，添加的弱点会转移。\\n敌方目标防御力降低。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.15,
+                0.12,
+                0.08,
+                0.09,
+                0.03,
+                1,
+                3,
+                0.6
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.32
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.56
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

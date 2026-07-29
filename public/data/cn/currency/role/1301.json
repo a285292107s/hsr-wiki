@@ -1,0 +1,572 @@
+{
+  "id": 1301,
+  "name": "加拉赫",
+  "rarity": 1,
+  "front_back_type": "Both",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "Speed"
+  ],
+  "max_sp_icon": "",
+  "is_expert": true,
+  "trait_list": [
+    1010,
+    2002,
+    2005
+  ],
+  "traits": [
+    {
+      "id": 1010,
+      "name": "盛会之星",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1010.png",
+      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。"
+    },
+    {
+      "id": 2002,
+      "name": "击破",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2002.png",
+      "desc": "【击破】队员的前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。"
+    },
+    {
+      "id": 2005,
+      "name": "治疗",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2005.png",
+      "desc": "我方小队的提高#1[i]%。【治疗】队员的提高。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "普攻永久获得强化，并获得群体治疗能力。",
+      "back_one_word_desc": "行动时攻击敌人并治疗全体前台。敌人受到的伤害提高，且被攻击后会为攻击者回复生命。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 13019901,
+          "name": "酒水免单",
+          "desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复等同于加拉赫#1[i]%生命上限+#2[i]的生命值。",
+          "simple_desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复生命值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.04,
+                640
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 13010801,
+          "name": "酒花奔涌",
+          "desc": "对敌方单体造成等同于加拉赫#2[i]%攻击力的火属性伤害。并使目标攻击力降低#3[f1]%，持续#4[i]回合。且为我方全体前台回复等同于加拉赫#5[i]%生命上限+#6[i]的生命值。",
+          "simple_desc": "对敌方单体造成火属性伤害。并使目标攻击力降低，且回复我方全体前台生命值。",
+          "type": "普攻",
+          "tag": "单攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": 1,
+          "show_stance_list": [
+            90,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                2.5,
+                0.15,
+                2,
+                0.04,
+                640
+              ]
+            }
+          }
+        },
+        {
+          "id": 13019901,
+          "name": "酩酊大醉",
+          "desc": "进入战斗时使敌方全体陷入【酩酊】状态，持续至战斗结束。【酩酊】使目标受到的伤害提高#1[f1]%。陷入【酩酊】状态的目标每次受到我方前台攻击后，会回复攻击者#2[i]点生命值。",
+          "simple_desc": "进入战斗时使敌方全体陷入【酩酊】状态，持续至战斗结束。【酩酊】使目标受到的伤害提高，并在受到攻击后为攻击者回复生命值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.08,
+                640
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "普攻永久获得强化，并获得群体治疗能力。",
+      "back_one_word_desc": "行动时攻击敌人并治疗全体前台。敌人受到的伤害提高，且被攻击后会为攻击者回复生命。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 70,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 13019902,
+          "name": "酒水免单",
+          "desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复等同于加拉赫#1[i]%生命上限+#2[i]的生命值。",
+          "simple_desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复生命值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.044999998,
+                960
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 13010802,
+          "name": "酒花奔涌",
+          "desc": "对敌方单体造成等同于加拉赫#2[i]%攻击力的火属性伤害。并使目标攻击力降低#3[f1]%，持续#4[i]回合。且为我方全体前台回复等同于加拉赫#5[i]%生命上限+#6[i]的生命值。",
+          "simple_desc": "对敌方单体造成火属性伤害。并使目标攻击力降低，且回复我方全体前台生命值。",
+          "type": "普攻",
+          "tag": "单攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": 1,
+          "show_stance_list": [
+            90,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2.5,
+                3.125,
+                0.15,
+                2,
+                0.044999998,
+                960
+              ]
+            }
+          }
+        },
+        {
+          "id": 13019902,
+          "name": "酩酊大醉",
+          "desc": "进入战斗时使敌方全体陷入【酩酊】状态，持续至战斗结束。【酩酊】使目标受到的伤害提高#1[f1]%。陷入【酩酊】状态的目标每次受到我方前台攻击后，会回复攻击者#2[i]点生命值。",
+          "simple_desc": "进入战斗时使敌方全体陷入【酩酊】状态，持续至战斗结束。【酩酊】使目标受到的伤害提高，并在受到攻击后为攻击者回复生命值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.12,
+                960
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "普攻永久获得强化，并获得群体治疗能力。",
+      "back_one_word_desc": "行动时攻击敌人并治疗全体前台。敌人受到的伤害提高，且被攻击后会为攻击者回复生命。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 13019903,
+          "name": "酒水免单",
+          "desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复等同于加拉赫#1[i]%生命上限+#2[i]的生命值。",
+          "simple_desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复生命值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.05,
+                1280
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 13010803,
+          "name": "酒花奔涌",
+          "desc": "对敌方单体造成等同于加拉赫#2[i]%攻击力的火属性伤害。并使目标攻击力降低#3[f1]%，持续#4[i]回合。且为我方全体前台回复等同于加拉赫#5[i]%生命上限+#6[i]的生命值。",
+          "simple_desc": "对敌方单体造成火属性伤害。并使目标攻击力降低，且回复我方全体前台生命值。",
+          "type": "普攻",
+          "tag": "单攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": 1,
+          "show_stance_list": [
+            90,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                4.5,
+                0.15,
+                2,
+                0.05,
+                1280
+              ]
+            }
+          }
+        },
+        {
+          "id": 13019903,
+          "name": "酩酊大醉",
+          "desc": "进入战斗时使敌方全体陷入【酩酊】状态，持续至战斗结束。【酩酊】使目标受到的伤害提高#1[f1]%。陷入【酩酊】状态的目标每次受到我方前台攻击后，会回复攻击者#2[i]点生命值。",
+          "simple_desc": "进入战斗时使敌方全体陷入【酩酊】状态，持续至战斗结束。【酩酊】使目标受到的伤害提高，并在受到攻击后为攻击者回复生命值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.16,
+                1280
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.6
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "普攻永久获得强化，并获得群体治疗能力。",
+      "back_one_word_desc": "行动时攻击敌人并治疗全体前台。敌人受到的伤害提高，且被攻击后会为攻击者回复生命。",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 13019904,
+          "name": "酒水免单",
+          "desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复等同于加拉赫#1[i]%生命上限+#2[i]的生命值。",
+          "simple_desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复生命值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.055,
+                1600
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 13010804,
+          "name": "酒花奔涌",
+          "desc": "对敌方单体造成等同于加拉赫#2[i]%攻击力的火属性伤害。并使目标攻击力降低#3[f1]%，持续#4[i]回合。且为我方全体前台回复等同于加拉赫#5[i]%生命上限+#6[i]的生命值。",
+          "simple_desc": "对敌方单体造成火属性伤害。并使目标攻击力降低，且回复我方全体前台生命值。",
+          "type": "普攻",
+          "tag": "单攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": 1,
+          "show_stance_list": [
+            90,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                7,
+                0.15,
+                2,
+                0.05,
+                1600
+              ]
+            }
+          }
+        },
+        {
+          "id": 13019904,
+          "name": "酩酊大醉",
+          "desc": "进入战斗时使敌方全体陷入【酩酊】状态，持续至战斗结束。【酩酊】使目标受到的伤害提高#1[f1]%。陷入【酩酊】状态的目标每次受到我方前台攻击后，会回复攻击者#2[i]点生命值。",
+          "simple_desc": "进入战斗时使敌方全体陷入【酩酊】状态，持续至战斗结束。【酩酊】使目标受到的伤害提高，并在受到攻击后为攻击者回复生命值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                1600
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.9
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

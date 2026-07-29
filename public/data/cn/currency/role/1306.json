@@ -1,0 +1,480 @@
+{
+  "id": 1306,
+  "name": "花火",
+  "rarity": 2,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1306Ultra.png",
+  "is_expert": false,
+  "trait_list": [
+    1010,
+    2009,
+    2011
+  ],
+  "traits": [
+    {
+      "id": 1010,
+      "name": "盛会之星",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1010.png",
+      "desc": "选择1名【盛会之星】角色作为【巨星】，使我方小队获得独特加成。"
+    },
+    {
+      "id": 2009,
+      "name": "量子同频",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2009.png",
+      "desc": "敌人受到的伤害提高。\\n【量子同频】角色获得可强化技能效果的【同频】。"
+    },
+    {
+      "id": 2011,
+      "name": "战技点",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2011.png",
+      "desc": "我方战技点上限提高，我方小队获得，施放战技或普攻时获得，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "战技点上限提高。终结技提高我方小队暴击伤害并恢复战技点，前台攻击或消耗战技点后为花火恢复能量。敌人受到的伤害提高。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13060301,
+          "name": "一人千役",
+          "desc": "为我方恢复#3[i]个战技点，若恢复时战技点溢出，则记录溢出的战技点数，最多记录#8[i]点。我方小队回合结束后若战技点小于上限，花火消耗记录值为我方恢复战技点，直至恢复至上限。并使我方小队暴击伤害提高，提高数值等同于花火#4[f1]%暴击伤害+#5[f1]%+ #7[f1]%*，羁绊内队员获得双倍暴击伤害提高，持续#6[i]回合。",
+          "simple_desc": "为我方恢复战技点，并使我方小队暴击伤害提高，羁绊内队员获得双倍。会额外提高暴击伤害。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                3,
+                6,
+                0.1,
+                0.2,
+                2,
+                0.1,
+                10
+              ]
+            }
+          }
+        },
+        {
+          "id": 13069901,
+          "name": "虚构事实",
+          "desc": "我方战技点上限提高#1[i]点。敌方目标受到的伤害提高#2[i]%。",
+          "simple_desc": "我方战技点上限提高#1[i]点。敌方目标受到的伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                0.24
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.15
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "战技点上限提高。终结技提高我方小队暴击伤害并恢复战技点，前台攻击或消耗战技点后为花火恢复能量。敌人受到的伤害提高。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13060302,
+          "name": "一人千役",
+          "desc": "为我方恢复#3[i]个战技点，若恢复时战技点溢出，则记录溢出的战技点数，最多记录#8[i]点。我方小队回合结束后若战技点小于上限，花火消耗记录值为我方恢复战技点，直至恢复至上限。并使我方小队暴击伤害提高，提高数值等同于花火#4[f1]%暴击伤害+#5[f1]%+ #7[f1]%*，羁绊内队员获得双倍暴击伤害提高，持续#6[i]回合。",
+          "simple_desc": "为我方恢复战技点，并使我方小队暴击伤害提高，羁绊内队员获得双倍。会额外提高暴击伤害。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                3,
+                6,
+                0.12,
+                0.26,
+                2,
+                0.13,
+                10
+              ]
+            }
+          }
+        },
+        {
+          "id": 13069902,
+          "name": "虚构事实",
+          "desc": "我方战技点上限提高#1[i]点。敌方目标受到的伤害提高#2[i]%。",
+          "simple_desc": "我方战技点上限提高#1[i]点。敌方目标受到的伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                0.32
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.495
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.21
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "战技点上限提高。终结技提高我方小队暴击伤害并恢复战技点，前台攻击或消耗战技点后为花火恢复能量。敌人受到的伤害提高。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13060303,
+          "name": "一人千役",
+          "desc": "为我方恢复#3[i]个战技点，若恢复时战技点溢出，则记录溢出的战技点数，最多记录#8[i]点。我方小队回合结束后若战技点小于上限，花火消耗记录值为我方恢复战技点，直至恢复至上限。并使我方小队暴击伤害提高，提高数值等同于花火#4[f1]%暴击伤害+#5[f1]%+ #7[f1]%*，羁绊内队员获得双倍暴击伤害提高，持续#6[i]回合。",
+          "simple_desc": "为我方恢复战技点，并使我方小队暴击伤害提高，羁绊内队员获得双倍。会额外提高暴击伤害。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                3,
+                6,
+                0.14,
+                0.32,
+                2,
+                0.16,
+                10
+              ]
+            }
+          }
+        },
+        {
+          "id": 13069903,
+          "name": "虚构事实",
+          "desc": "我方战技点上限提高#1[i]点。敌方目标受到的伤害提高#2[i]%。",
+          "simple_desc": "我方战技点上限提高#1[i]点。敌方目标受到的伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                4,
+                0.4
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.84
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "战技点上限提高。终结技提高我方小队暴击伤害并恢复战技点，前台攻击或消耗战技点后为花火恢复能量。敌人受到的伤害提高。",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13060304,
+          "name": "一人千役",
+          "desc": "为我方恢复#3[i]个战技点，若恢复时战技点溢出，则记录溢出的战技点数，最多记录#8[i]点。我方小队回合结束后若战技点小于上限，花火消耗记录值为我方恢复战技点，直至恢复至上限。并使我方小队暴击伤害提高，提高数值等同于花火#4[f1]%暴击伤害+#5[f1]%+ #7[f1]%*，羁绊内队员获得双倍暴击伤害提高，持续#6[i]回合。",
+          "simple_desc": "为我方恢复战技点，并使我方小队暴击伤害提高，羁绊内队员获得双倍。会额外提高暴击伤害。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                3,
+                7,
+                0.16,
+                0.38,
+                2,
+                0.19,
+                10
+              ]
+            }
+          }
+        },
+        {
+          "id": 13069904,
+          "name": "虚构事实",
+          "desc": "我方战技点上限提高#1[i]点。敌方目标受到的伤害提高#2[i]%。",
+          "simple_desc": "我方战技点上限提高#1[i]点。敌方目标受到的伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                0.48
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.185
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

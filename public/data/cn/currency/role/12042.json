@@ -1,0 +1,355 @@
+{
+  "id": 12042,
+  "name": "景元",
+  "rarity": 3,
+  "front_back_type": "Front",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1007,
+    2003
+  ],
+  "traits": [
+    {
+      "id": 1007,
+      "name": "仙舟",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1007.png",
+      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前/后台强度和提高。"
+    },
+    {
+      "id": 2003,
+      "name": "群攻",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
+      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "神君的段数叠加上限和叠加速度提升，且会在叠加一定层数后立即行动，并使景元行动提前。",
+      "back_one_word_desc": "",
+      "front_power_base": 150,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 120420401,
+          "name": "斩勘神形",
+          "desc": "战斗开始时召唤【神君】。【神君】初始拥有#1[i]点速度以及#4[i]段攻击段数，行动时发动追加攻击，每段攻击对随机敌方单体造成等同于景元攻击力#2[i]%的雷属性伤害，同时对其相邻目标造成等同于主目标#5[i]%的雷属性伤害。\\n【神君】每增加1段攻击段数，速度提高#3[i]点。【神君】在累计#7[i]段攻击段数后立即行动，行动结束后速度和攻击段数恢复至初始状态。\\n当景元陷入无法战斗状态时，【神君】消失。\\n当景元无法行动时【神君】也无法行动。",
+          "simple_desc": "战斗开始时召唤【神君】，【神君】行动时发动追加攻击，自动对随机敌方单体及其相邻目标造成少量雷属性伤害。【神君】累计#7[i]段攻击段数后立即行动。",
+          "type": "天赋",
+          "tag": "弹射",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            15,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                250,
+                2.5,
+                50,
+                5,
+                0.5,
+                999,
+                15
+              ]
+            }
+          }
+        },
+        {
+          "id": 120429901,
+          "name": "天人感应",
+          "desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】#1[i]/#2[i]段下回合的攻击段数。神君行动后，使景元行动提前#3[i]%，并恢复#4[i]个战技点。",
+          "simple_desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】攻击段数。神君行动后使景元行动提前并恢复战技点。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                3,
+                0.5,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 2
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "神君的段数叠加上限和叠加速度提升，且会在叠加一定层数后立即行动，并使景元行动提前。",
+      "back_one_word_desc": "",
+      "front_power_base": 240,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 120420402,
+          "name": "斩勘神形",
+          "desc": "战斗开始时召唤【神君】。【神君】初始拥有#1[i]点速度以及#4[i]段攻击段数，行动时发动追加攻击，每段攻击对随机敌方单体造成等同于景元攻击力#2[i]%的雷属性伤害，同时对其相邻目标造成等同于主目标#5[i]%的雷属性伤害。\\n【神君】每增加1段攻击段数，速度提高#3[i]点。【神君】在累计#7[i]段攻击段数后立即行动，行动结束后速度和攻击段数恢复至初始状态。\\n当景元陷入无法战斗状态时，【神君】消失。\\n当景元无法行动时【神君】也无法行动。",
+          "simple_desc": "战斗开始时召唤【神君】，【神君】行动时发动追加攻击，自动对随机敌方单体及其相邻目标造成少量雷属性伤害。【神君】累计#7[i]段攻击段数后立即行动。",
+          "type": "天赋",
+          "tag": "弹射",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            30,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                250,
+                3.125,
+                50,
+                5,
+                0.5,
+                999,
+                15
+              ]
+            }
+          }
+        },
+        {
+          "id": 120429902,
+          "name": "天人感应",
+          "desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】#1[i]/#2[i]段下回合的攻击段数。神君行动后，使景元行动提前#3[i]%，并恢复#4[i]个战技点。",
+          "simple_desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】攻击段数。神君行动后使景元行动提前并恢复战技点。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                3,
+                0.5,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 2
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.69
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "神君的段数叠加上限和叠加速度提升，且会在叠加一定层数后立即行动，并使景元行动提前。",
+      "back_one_word_desc": "",
+      "front_power_base": 330,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 120420403,
+          "name": "斩勘神形",
+          "desc": "战斗开始时召唤【神君】。【神君】初始拥有#1[i]点速度以及#4[i]段攻击段数，行动时发动追加攻击，每段攻击对随机敌方单体造成等同于景元攻击力#2[i]%的雷属性伤害，同时对其相邻目标造成等同于主目标#5[i]%的雷属性伤害。\\n【神君】每增加1段攻击段数，速度提高#3[i]点。【神君】在累计#7[i]段攻击段数后立即行动，行动结束后速度和攻击段数恢复至初始状态。\\n当景元陷入无法战斗状态时，【神君】消失。\\n当景元无法行动时【神君】也无法行动。",
+          "simple_desc": "战斗开始时召唤【神君】，【神君】行动时发动追加攻击，自动对随机敌方单体及其相邻目标造成少量雷属性伤害。【神君】累计#7[i]段攻击段数后立即行动。",
+          "type": "天赋",
+          "tag": "弹射",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            30,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                300,
+                4.5,
+                50,
+                5,
+                0.5,
+                999,
+                15
+              ]
+            }
+          }
+        },
+        {
+          "id": 120429903,
+          "name": "天人感应",
+          "desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】#1[i]/#2[i]段下回合的攻击段数。神君行动后，使景元行动提前#3[i]%，并恢复#4[i]个战技点。",
+          "simple_desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】攻击段数。神君行动后使景元行动提前并恢复战技点。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                3,
+                0.5,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 2
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.08
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.44
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

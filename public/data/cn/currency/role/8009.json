@@ -1,0 +1,759 @@
+{
+  "id": 8009,
+  "name": "开拓者·欢愉",
+  "rarity": 4,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP",
+    "Speed"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_8009Ultra.png",
+  "is_expert": false,
+  "trait_list": [
+    1001,
+    2004,
+    2012
+  ],
+  "traits": [
+    {
+      "id": 1001,
+      "name": "列车同行",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1001.png",
+      "desc": "召唤【星穹列车】撞击敌方全体目标，并在场上留下【光轨】，使我方小队的前/后台强度提高。"
+    },
+    {
+      "id": 2004,
+      "name": "能量",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
+      "desc": "【能量】队员的提高。在场上生成【能量地块】，可提供和能量恢复。"
+    },
+    {
+      "id": 2012,
+      "name": "欢愉",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2012.png",
+      "desc": "【欢愉】队员的提高。\\n备战阶段召唤【阿哈】为小队提供增益，【阿哈】拥有初始属性并穿戴3件随机简易装备，可将物品栏中简易装备拖拽给阿哈，与阿哈装备栏中的简易装备依次合成对应进阶装备。合成进阶装备后，本局该栏位将会被固定，无法合成其它进阶装备。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "装备最多的【欢愉】队员在阿哈时刻的欢愉技会立即重复施放一次。终结技可使目标立即施放欢愉技。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 80090201,
+          "name": "风暴甚是喧嚣",
+          "desc": "对敌方全体造成等同于开拓者#1[i]%攻击力的雷属性伤害，获得#2[i]点【好活当赏】。",
+          "simple_desc": "对敌方全体造成雷属性伤害，获得【好活当赏】。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.6,
+                20,
+                0,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 80090301,
+          "name": "放心飞，开拓永相随！",
+          "desc": "获得#6[i]个笑点，使指定我方单体暴击伤害提高#1[i]%，持续#2[i]回合，并解除该目标的控制类负面状态。\\n若目标拥有欢愉技，目标额外获得#4[i]点【好活当赏】，并使其立即施放1次固定计入#5[i]笑点的欢愉技。\\n若目标不拥有欢愉技，使其行动提前#3[i]%。",
+          "simple_desc": "获得笑点，使指定我方单体暴击伤害提高，并解除该目标的控制类负面状态。若目标拥有欢愉技，目标额外获得【好活当赏】，并使其立即施放欢愉技，否则使其行动提前。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.6,
+                3,
+                0.5,
+                10,
+                20,
+                5,
+                30
+              ]
+            }
+          }
+        },
+        {
+          "id": 80090401,
+          "name": "英雄一笑，生死难料",
+          "desc": "施放攻击后，固定恢复#1[i]点能量并获得#2[i]个笑点。\\n开拓者持有【好活当赏】时，战技对敌方全体额外造成#3[i]%的雷属性欢愉伤害，此伤害使用我方最高的【好活当赏】数值计算。\\n开拓者的欢愉度提高#4[i]%。",
+          "simple_desc": "施放攻击后恢复能量并获得笑点。\\n开拓者持有【好活当赏】时，战技对敌方全体额外造成雷属性欢愉伤害。\\n开拓者的欢愉度提高。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                10,
+                1,
+                0.6
+              ]
+            }
+          }
+        },
+        {
+          "id": 80092001,
+          "name": "我说欢愉，你耳朵聋吗？",
+          "desc": "造成#1[i]次伤害，每次对敌方随机单体造成#2[i]%的雷属性欢愉伤害。最后造成#3[i]%的雷属性欢愉伤害，由敌方全体均分。",
+          "simple_desc": "造成多次伤害，每次对敌方随机单体造成雷属性欢愉伤害，最后造成由敌方全体均分的雷属性欢愉伤害。",
+          "type": "欢愉技",
+          "tag": "弹射",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            15,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                8,
+                1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 80099901,
+          "name": "好戏连轴转",
+          "desc": "装备最多的【欢愉】羁绊角色成为【人气主播】，【人气主播】在阿哈时刻期间施放欢愉技会复制1次该技能并立即施放。",
+          "simple_desc": "装备最多的【欢愉】羁绊角色成为【人气主播】，【人气主播】在阿哈时刻期间施放欢愉技会复制1次该技能并立即施放。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        },
+        {
+          "id": 80099801,
+          "name": "无名笑语",
+          "desc": "开拓者施放欢愉技期间可以获得阿哈#1[i]%的前后台强度提高、伤害增幅、幸运一击率、幸运一击伤害、击破效率、击破特攻。",
+          "simple_desc": "开拓者施放欢愉技期间可以获得阿哈的攻击类属性加成。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1
+              ]
+            }
+          }
+        },
+        {
+          "id": 80099701,
+          "name": "命途相变",
+          "desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "simple_desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.45
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "装备最多的【欢愉】队员在阿哈时刻的欢愉技会立即重复施放一次。终结技可使目标立即施放欢愉技。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 80090202,
+          "name": "风暴甚是喧嚣",
+          "desc": "对敌方全体造成等同于开拓者#1[i]%攻击力的雷属性伤害，获得#2[i]点【好活当赏】。",
+          "simple_desc": "对敌方全体造成雷属性伤害，获得【好活当赏】。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.75,
+                30,
+                0,
+                2.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 80090302,
+          "name": "放心飞，开拓永相随！",
+          "desc": "获得#6[i]个笑点，使指定我方单体暴击伤害提高#1[i]%，持续#2[i]回合，并解除该目标的控制类负面状态。\\n若目标拥有欢愉技，目标额外获得#4[i]点【好活当赏】，并使其立即施放1次固定计入#5[i]笑点的欢愉技。\\n若目标不拥有欢愉技，使其行动提前#3[i]%。",
+          "simple_desc": "获得笑点，使指定我方单体暴击伤害提高，并解除该目标的控制类负面状态。若目标拥有欢愉技，目标额外获得【好活当赏】，并使其立即施放欢愉技，否则使其行动提前。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.8,
+                3,
+                0.5,
+                15,
+                30,
+                5,
+                30
+              ]
+            }
+          }
+        },
+        {
+          "id": 80090402,
+          "name": "英雄一笑，生死难料",
+          "desc": "施放攻击后，固定恢复#1[i]点能量并获得#2[i]个笑点。\\n开拓者持有【好活当赏】时，战技对敌方全体额外造成#3[i]%的雷属性欢愉伤害，此伤害使用我方最高的【好活当赏】数值计算。\\n开拓者的欢愉度提高#4[i]%。",
+          "simple_desc": "施放攻击后恢复能量并获得笑点。\\n开拓者持有【好活当赏】时，战技对敌方全体额外造成雷属性欢愉伤害。\\n开拓者的欢愉度提高。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                15,
+                1.25,
+                0.8
+              ]
+            }
+          }
+        },
+        {
+          "id": 80092002,
+          "name": "我说欢愉，你耳朵聋吗？",
+          "desc": "造成#1[i]次伤害，每次对敌方随机单体造成#2[i]%的雷属性欢愉伤害。最后造成#3[i]%的雷属性欢愉伤害，由敌方全体均分。",
+          "simple_desc": "造成多次伤害，每次对敌方随机单体造成雷属性欢愉伤害，最后造成由敌方全体均分的雷属性欢愉伤害。",
+          "type": "欢愉技",
+          "tag": "弹射",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            15,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                8,
+                1.25,
+                2.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 80099902,
+          "name": "好戏连轴转",
+          "desc": "装备最多的【欢愉】羁绊角色成为【人气主播】，【人气主播】在阿哈时刻期间施放欢愉技会复制1次该技能并立即施放。",
+          "simple_desc": "装备最多的【欢愉】羁绊角色成为【人气主播】，【人气主播】在阿哈时刻期间施放欢愉技会复制1次该技能并立即施放。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        },
+        {
+          "id": 80099802,
+          "name": "无名笑语",
+          "desc": "开拓者施放欢愉技期间可以获得阿哈#1[i]%的前后台强度提高、伤害增幅、幸运一击率、幸运一击伤害、击破效率、击破特攻。",
+          "simple_desc": "开拓者施放欢愉技期间可以获得阿哈的攻击类属性加成。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1
+              ]
+            }
+          }
+        },
+        {
+          "id": 80099702,
+          "name": "命途相变",
+          "desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "simple_desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.885
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "装备最多的【欢愉】队员在阿哈时刻的欢愉技会立即重复施放一次。终结技可使目标立即施放欢愉技。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 80090203,
+          "name": "风暴甚是喧嚣",
+          "desc": "对敌方全体造成等同于开拓者#1[i]%攻击力的雷属性伤害，获得#2[i]点【好活当赏】。",
+          "simple_desc": "对敌方全体造成雷属性伤害，获得【好活当赏】。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.08,
+                50,
+                0,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": 80090303,
+          "name": "放心飞，开拓永相随！",
+          "desc": "获得#6[i]个笑点，使指定我方单体暴击伤害提高#1[i]%，持续#2[i]回合，并解除该目标的控制类负面状态。\\n若目标拥有欢愉技，目标额外获得#4[i]点【好活当赏】，并使其立即施放1次固定计入#5[i]笑点的欢愉技。\\n若目标不拥有欢愉技，使其行动提前#3[i]%。",
+          "simple_desc": "获得笑点，使指定我方单体暴击伤害提高，并解除该目标的控制类负面状态。若目标拥有欢愉技，目标额外获得【好活当赏】，并使其立即施放欢愉技，否则使其行动提前。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.2,
+                3,
+                0.5,
+                25,
+                50,
+                5,
+                30
+              ]
+            }
+          }
+        },
+        {
+          "id": 80090403,
+          "name": "英雄一笑，生死难料",
+          "desc": "施放攻击后，固定恢复#1[i]点能量并获得#2[i]个笑点。\\n开拓者持有【好活当赏】时，战技对敌方全体额外造成#3[i]%的雷属性欢愉伤害，此伤害使用我方最高的【好活当赏】数值计算。\\n开拓者的欢愉度提高#4[i]%。",
+          "simple_desc": "施放攻击后恢复能量并获得笑点。\\n开拓者持有【好活当赏】时，战技对敌方全体额外造成雷属性欢愉伤害。\\n开拓者的欢愉度提高。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                25,
+                1.8,
+                1.2
+              ]
+            }
+          }
+        },
+        {
+          "id": 80092003,
+          "name": "我说欢愉，你耳朵聋吗？",
+          "desc": "造成#1[i]次伤害，每次对敌方随机单体造成#2[i]%的雷属性欢愉伤害。最后造成#3[i]%的雷属性欢愉伤害，由敌方全体均分。",
+          "simple_desc": "造成多次伤害，每次对敌方随机单体造成雷属性欢愉伤害，最后造成由敌方全体均分的雷属性欢愉伤害。",
+          "type": "欢愉技",
+          "tag": "弹射",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            15,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                8,
+                1.8,
+                3.6
+              ]
+            }
+          }
+        },
+        {
+          "id": 80099903,
+          "name": "好戏连轴转",
+          "desc": "装备最多的【欢愉】羁绊角色成为【人气主播】，【人气主播】在阿哈时刻期间施放欢愉技会复制1次该技能并立即施放。",
+          "simple_desc": "装备最多的【欢愉】羁绊角色成为【人气主播】，【人气主播】在阿哈时刻期间施放欢愉技会复制1次该技能并立即施放。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        },
+        {
+          "id": 80099803,
+          "name": "无名笑语",
+          "desc": "开拓者施放欢愉技期间可以获得阿哈#1[i]%的前后台强度提高、伤害增幅、幸运一击率、幸运一击伤害、击破效率、击破特攻。",
+          "simple_desc": "开拓者施放欢愉技期间可以获得阿哈的攻击类属性加成。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1
+              ]
+            }
+          }
+        },
+        {
+          "id": 80099703,
+          "name": "命途相变",
+          "desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "simple_desc": "开拓者处于前台时切换为【记忆】命途，处于后台时切换为【欢愉】命途，并获得相应技能。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 80
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.32
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.56
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

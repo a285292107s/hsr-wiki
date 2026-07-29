@@ -56,7 +56,15 @@ const filtered = computed<CatalogItem[]>(() => {
   return items.value.filter((item) => {
     if (q && !(item.name || '').toLowerCase().includes(q)) return false;
     for (const key of Object.keys(af)) {
-      if (af[key] && String(item[key] ?? '') !== af[key]) return false;
+      const want = af[key];
+      if (!want) continue;
+      const cur = item[key];
+      if (cur == null) return false;
+      if (Array.isArray(cur)) {
+        if (!cur.map(String).includes(want)) return false;
+      } else if (String(cur) !== want) {
+        return false;
+      }
     }
     return true;
   });
@@ -215,6 +223,15 @@ function onContentClick(e: MouseEvent): void {
   const relic = href.match(/\/relic\/(\d+)/);
   if (relic) {
     void router.push(`/relic/${relic[1]}`);
+    return;
+  }
+  const crole = href.match(/\/currency\/role\/(\d+)/);
+  if (crole) {
+    void router.push(`/currency/role/${crole[1]}`);
+    return;
+  }
+  if (/^\/currency\/role\/?$/.test(href)) {
+    void router.push('/currency/role');
     return;
   }
   // 未迁移的详情页：静默忽略

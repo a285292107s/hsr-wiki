@@ -1,0 +1,658 @@
+{
+  "id": 1013,
+  "name": "黑塔",
+  "rarity": 1,
+  "front_back_type": "Both",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1003,
+    2003
+  ],
+  "traits": [
+    {
+      "id": 1003,
+      "name": "银河学者",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1003.png",
+      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。"
+    },
+    {
+      "id": 2003,
+      "name": "群攻",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
+      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "更容易发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
+      "back_one_word_desc": "敌人生命值降低后发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 10130401,
+          "name": "还是我来吧",
+          "desc": "当敌方目标的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成等同于黑塔#2[i]%攻击力的冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "simple_desc": "当敌人的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                0.475
+              ]
+            }
+          }
+        },
+        {
+          "id": 10139901,
+          "name": "大锤附魔",
+          "desc": "每有一个敌方目标被消灭，则黑塔的前台强度与后台强度永久提高#1[i]%。",
+          "simple_desc": "每有一个敌人被消灭，则黑塔的前/后台强度永久提高#1[i]%。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10130401,
+          "name": "还是我来吧",
+          "desc": "当敌方目标的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成等同于黑塔#2[i]%攻击力的冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "simple_desc": "当敌人的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                0.8
+              ]
+            }
+          }
+        },
+        {
+          "id": 10139901,
+          "name": "大锤附魔",
+          "desc": "每有一个敌方目标被消灭，则黑塔的前台强度与后台强度永久提高#1[i]%。",
+          "simple_desc": "每有一个敌人被消灭，则黑塔的前/后台强度永久提高#1[i]%。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "更容易发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
+      "back_one_word_desc": "敌人生命值降低后发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 10130402,
+          "name": "还是我来吧",
+          "desc": "当敌方目标的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成等同于黑塔#2[i]%攻击力的冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "simple_desc": "当敌人的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                0.59375
+              ]
+            }
+          }
+        },
+        {
+          "id": 10139902,
+          "name": "大锤附魔",
+          "desc": "每有一个敌方目标被消灭，则黑塔的前台强度与后台强度永久提高#1[i]%。",
+          "simple_desc": "每有一个敌人被消灭，则黑塔的前/后台强度永久提高#1[i]%。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10130402,
+          "name": "还是我来吧",
+          "desc": "当敌方目标的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成等同于黑塔#2[i]%攻击力的冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "simple_desc": "当敌人的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "id": 10139902,
+          "name": "大锤附魔",
+          "desc": "每有一个敌方目标被消灭，则黑塔的前台强度与后台强度永久提高#1[i]%。",
+          "simple_desc": "每有一个敌人被消灭，则黑塔的前/后台强度永久提高#1[i]%。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "更容易发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
+      "back_one_word_desc": "敌人生命值降低后发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 10130403,
+          "name": "还是我来吧",
+          "desc": "当敌方目标的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成等同于黑塔#2[i]%攻击力的冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "simple_desc": "当敌人的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                0.855
+              ]
+            }
+          }
+        },
+        {
+          "id": 10139903,
+          "name": "大锤附魔",
+          "desc": "每有一个敌方目标被消灭，则黑塔的前台强度与后台强度永久提高#1[i]%。",
+          "simple_desc": "每有一个敌人被消灭，则黑塔的前/后台强度永久提高#1[i]%。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10130403,
+          "name": "还是我来吧",
+          "desc": "当敌方目标的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成等同于黑塔#2[i]%攻击力的冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "simple_desc": "当敌人的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                1.44
+              ]
+            }
+          }
+        },
+        {
+          "id": 10139903,
+          "name": "大锤附魔",
+          "desc": "每有一个敌方目标被消灭，则黑塔的前台强度与后台强度永久提高#1[i]%。",
+          "simple_desc": "每有一个敌人被消灭，则黑塔的前/后台强度永久提高#1[i]%。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.6
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "更容易发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
+      "back_one_word_desc": "敌人生命值降低后发动追加攻击，并在敌人被消灭后永久提高前/后台强度。",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 10130404,
+          "name": "还是我来吧",
+          "desc": "当敌方目标的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成等同于黑塔#2[i]%攻击力的冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "simple_desc": "当敌人的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                1.33
+              ]
+            }
+          }
+        },
+        {
+          "id": 10139904,
+          "name": "大锤附魔",
+          "desc": "每有一个敌方目标被消灭，则黑塔的前台强度与后台强度永久提高#1[i]%。",
+          "simple_desc": "每有一个敌人被消灭，则黑塔的前/后台强度永久提高#1[i]%。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10130404,
+          "name": "还是我来吧",
+          "desc": "当敌方目标的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成等同于黑塔#2[i]%攻击力的冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "simple_desc": "当敌人的当前生命值百分比小于等于#1[i]%时，黑塔发动追加攻击，对敌方全体造成冰属性伤害。精英敌人当前生命值百分比小于等于25%和75%时，黑塔也会发动追加攻击。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                2.24
+              ]
+            }
+          }
+        },
+        {
+          "id": 10139904,
+          "name": "大锤附魔",
+          "desc": "每有一个敌方目标被消灭，则黑塔的前台强度与后台强度永久提高#1[i]%。",
+          "simple_desc": "每有一个敌人被消灭，则黑塔的前/后台强度永久提高#1[i]%。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.9
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

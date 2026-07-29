@@ -1,0 +1,704 @@
+{
+  "id": 1403,
+  "name": "缇宝",
+  "rarity": 2,
+  "front_back_type": "Both",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "EnergyBar"
+  ],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1011,
+    2003,
+    2009
+  ],
+  "traits": [
+    {
+      "id": 1011,
+      "name": "昼之半神",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和提高。"
+    },
+    {
+      "id": 2003,
+      "name": "群攻",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2003.png",
+      "desc": "【群攻】队员的提高，提高。进入战斗后在敌方场上生成2个可转移伤害的【借力球】。"
+    },
+    {
+      "id": 2009,
+      "name": "量子同频",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2009.png",
+      "desc": "敌人受到的伤害提高。\\n【量子同频】角色获得可强化技能效果的【同频】。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
+      "back_one_word_desc": "战斗开始时立即施放终结技。我方小队每施放一定次数终结技后，缇宝发动追加攻击。",
+      "front_power_base": 125,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        60,
+        20,
+        30
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14030301,
+          "name": "猜猜这里住着谁",
+          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
+          "simple_desc": "开启结界，对敌方全体造成少量量子属性伤害。结界持续期间，敌方受到的伤害提高，并根据攻击敌人的个数对被攻击目标中生命值最高的目标造成少量量子属性附加伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.375,
+                0.3,
+                0.15,
+                2,
+                0.1
+              ]
+            }
+          }
+        },
+        {
+          "id": 14039901,
+          "name": "收获满满元气",
+          "desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高#1[i]%，最多叠加#2[i]层。",
+          "simple_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.12,
+                10
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 14030301,
+          "name": "猜猜这里住着谁",
+          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
+          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.3,
+                0.3,
+                0.12,
+                0.1
+              ]
+            }
+          }
+        },
+        {
+          "id": 14030401,
+          "name": "好忙好忙的缇宝",
+          "desc": "我方小队每施放#1[i]次终结技后，缇宝发动追加攻击，对敌方全体造成等同于缇宝#2[f1]%生命上限的量子属性伤害。我方小队全属性抗性穿透提高#3[i]%，羁绊内队员获得双倍。\\n缇宝造成的伤害提高#4[i]%。",
+          "simple_desc": "我方小队每施放#1[i]次终结技后，缇宝发动追加攻击，对敌方全体造成量子属性伤害。我方小队全属性抗性穿透提高，羁绊内队员获得双倍。\\n缇宝造成的伤害提高。",
+          "type": "天赋",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                0.18,
+                0.12,
+                2.16
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 60
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.1
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
+      "back_one_word_desc": "战斗开始时立即施放终结技。我方小队每施放一定次数终结技后，缇宝发动追加攻击。",
+      "front_power_base": 175,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        60,
+        20,
+        30
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14030302,
+          "name": "猜猜这里住着谁",
+          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
+          "simple_desc": "开启结界，对敌方全体造成少量量子属性伤害。结界持续期间，敌方受到的伤害提高，并根据攻击敌人的个数对被攻击目标中生命值最高的目标造成少量量子属性附加伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.46875,
+                0.36,
+                0.1875,
+                2,
+                0.12
+              ]
+            }
+          }
+        },
+        {
+          "id": 14039902,
+          "name": "收获满满元气",
+          "desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高#1[i]%，最多叠加#2[i]层。",
+          "simple_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.24,
+                10
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 14030302,
+          "name": "猜猜这里住着谁",
+          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
+          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.375,
+                0.36,
+                0.15,
+                0.12
+              ]
+            }
+          }
+        },
+        {
+          "id": 14030402,
+          "name": "好忙好忙的缇宝",
+          "desc": "我方小队每施放#1[i]次终结技后，缇宝发动追加攻击，对敌方全体造成等同于缇宝#2[f1]%生命上限的量子属性伤害。我方小队全属性抗性穿透提高#3[i]%，羁绊内队员获得双倍。\\n缇宝造成的伤害提高#4[i]%。",
+          "simple_desc": "我方小队每施放#1[i]次终结技后，缇宝发动追加攻击，对敌方全体造成量子属性伤害。我方小队全属性抗性穿透提高，羁绊内队员获得双倍。\\n缇宝造成的伤害提高。",
+          "type": "天赋",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                0.225,
+                0.15,
+                2.43
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 60
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.32
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.21
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
+      "back_one_word_desc": "战斗开始时立即施放终结技。我方小队每施放一定次数终结技后，缇宝发动追加攻击。",
+      "front_power_base": 225,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        60,
+        20,
+        30
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14030303,
+          "name": "猜猜这里住着谁",
+          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
+          "simple_desc": "开启结界，对敌方全体造成少量量子属性伤害。结界持续期间，敌方受到的伤害提高，并根据攻击敌人的个数对被攻击目标中生命值最高的目标造成少量量子属性附加伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.675,
+                0.42,
+                0.27,
+                2,
+                0.14
+              ]
+            }
+          }
+        },
+        {
+          "id": 14039903,
+          "name": "收获满满元气",
+          "desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高#1[i]%，最多叠加#2[i]层。",
+          "simple_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.42,
+                10
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 14030303,
+          "name": "猜猜这里住着谁",
+          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
+          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.54,
+                0.42,
+                0.216,
+                0.14
+              ]
+            }
+          }
+        },
+        {
+          "id": 14030403,
+          "name": "好忙好忙的缇宝",
+          "desc": "我方小队每施放#1[i]次终结技后，缇宝发动追加攻击，对敌方全体造成等同于缇宝#2[f1]%生命上限的量子属性伤害。我方小队全属性抗性穿透提高#3[i]%，羁绊内队员获得双倍。\\n缇宝造成的伤害提高#4[i]%。",
+          "simple_desc": "我方小队每施放#1[i]次终结技后，缇宝发动追加攻击，对敌方全体造成量子属性伤害。我方小队全属性抗性穿透提高，羁绊内队员获得双倍。\\n缇宝造成的伤害提高。",
+          "type": "天赋",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                0.324,
+                0.18,
+                2.7
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 60
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.54
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
+      "back_one_word_desc": "战斗开始时立即施放终结技。我方小队每施放一定次数终结技后，缇宝发动追加攻击。",
+      "front_power_base": 275,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14030304,
+          "name": "猜猜这里住着谁",
+          "desc": "开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#5[f1]%*)。受到我方目标攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。\\n结界持续#4[i]回合，自身每回合开始时结界持续回合数减1。",
+          "simple_desc": "开启结界，对敌方全体造成少量量子属性伤害。结界持续期间，敌方受到的伤害提高，并根据攻击敌人的个数对被攻击目标中生命值最高的目标造成少量量子属性附加伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": 0.5,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.05,
+                0.48,
+                0.42,
+                2,
+                0.16
+              ]
+            }
+          }
+        },
+        {
+          "id": 14039904,
+          "name": "收获满满元气",
+          "desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高#1[i]%，最多叠加#2[i]层。",
+          "simple_desc": "施放终结技和发动追加攻击后，缇宝的暴击伤害提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.6,
+                10
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 14030304,
+          "name": "猜猜这里住着谁",
+          "desc": "持续开启结界，并对敌方全体造成等同于缇宝#1[i]%生命上限的量子属性伤害。\\n结界持续期间，敌方目标受到的伤害提高(#2[f1]%+#4[f1]%*)。受到我方小队攻击后，每有1名目标受到攻击，会对被攻击目标中当前生命值最高的目标造成1次等同于缇宝#3[f1]%生命上限的量子属性附加伤害。",
+          "simple_desc": "持续开启结界，并对敌方全体造成量子属性伤害。\\n结界持续期间，敌人受到的伤害提高。会额外提高敌人受到的伤害。受到我方小队攻击后，会对被攻击目标中当前生命值最高的目标造成量子属性附加伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.84,
+                0.48,
+                0.336,
+                0.16
+              ]
+            }
+          }
+        },
+        {
+          "id": 14030404,
+          "name": "好忙好忙的缇宝",
+          "desc": "我方小队每施放#1[i]次终结技后，缇宝发动追加攻击，对敌方全体造成等同于缇宝#2[f1]%生命上限的量子属性伤害。我方小队全属性抗性穿透提高#3[i]%，羁绊内队员获得双倍。\\n缇宝造成的伤害提高#4[i]%。",
+          "simple_desc": "我方小队每施放#1[i]次终结技后，缇宝发动追加攻击，对敌方全体造成量子属性伤害。我方小队全属性抗性穿透提高，羁绊内队员获得双倍。\\n缇宝造成的伤害提高。",
+          "type": "天赋",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            15,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                0.504,
+                0.21,
+                3
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 60
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.76
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.44
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

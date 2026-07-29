@@ -1,0 +1,535 @@
+{
+  "id": 1014,
+  "name": "Saber",
+  "rarity": 3,
+  "front_back_type": "Both",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP",
+    "Speed"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1014Ultra.png",
+  "is_expert": false,
+  "trait_list": [
+    1013,
+    2004
+  ],
+  "traits": [
+    {
+      "id": 1013,
+      "name": "命运圣杯",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1013.png",
+      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前/后台强度提高。"
+    },
+    {
+      "id": 2004,
+      "name": "能量",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
+      "desc": "【能量】队员的提高。在场上生成【能量地块】，可提供和能量恢复。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "我方小队其他目标施放终结技后，使Saber的终结技能弹射更多次数。",
+      "back_one_word_desc": "我方小队其他目标施放终结技后，Saber叠加【炉心共鸣】并使终结技弹射次数提高，行动时基于其层数恢复能量。",
+      "front_power_base": 150,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 10149901,
+          "name": "王之心",
+          "desc": "我方小队其他目标施放终结技后，Saber的终结技对随机敌方单体目标造成伤害的次数提高#1[i]次，最多提高#2[i]次。",
+          "simple_desc": "我方小队其他目标施放终结技后，Saber的终结技伤害次数提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                4
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10140301,
+          "name": "誓约胜利之剑",
+          "desc": "对敌方全体目标造成等同于Saber#1[i]%攻击力的风属性伤害。并额外造成#3[i]次伤害，每次伤害对随机敌方单体目标造成等同于Saber#2[i]%攻击力的风属性伤害。",
+          "simple_desc": "对敌方全体目标造成大量风属性伤害。额外对敌方随机单体目标造成少量风属性伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            120,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3.6,
+                1.4,
+                10,
+                10
+              ]
+            }
+          }
+        },
+        {
+          "id": 10140801,
+          "name": "解放的金色王权",
+          "desc": "对敌方全体目标造成等同于Saber#2[i]%攻击力的风属性伤害，若施放时敌方目标数量为2/1，额外对敌方全体目标造成等同于Saber#3[i]%/#4[i]%攻击力的风属性伤害，并移除所有【炉心共鸣】。",
+          "simple_desc": "对敌方全体造成风属性伤害。若施放时场上敌方目标数量小于等于2，额外对敌方全体造成风属性伤害，并移除所有【炉心共鸣】。",
+          "type": "普攻",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": 1,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                2,
+                2,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": 10149901,
+          "name": "王之心",
+          "desc": "我方小队其他目标施放终结技后，Saber获得#1[i]层【炉心共鸣】，并使终结技对随机敌方单体造成伤害的次数提高#2[i]次，最多提高#3[i]次。Saber的暴击伤害提高#4[i]%。\\nSaber可积攒最多#5[i]点溢出能量，施放终结技后清空并恢复相应的能量值。",
+          "simple_desc": "我方小队其他目标施放终结技后，Saber获得【炉心共鸣】，并使终结技对随机敌方单体造成伤害的次数提高。Saber的暴击伤害提高。\\nSaber可积攒溢出能量，施放终结技后清空并恢复相应的能量值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                1,
+                4,
+                0.88,
+                120
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 180
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "我方小队其他目标施放终结技后，使Saber的终结技能弹射更多次数。",
+      "back_one_word_desc": "我方小队其他目标施放终结技后，Saber叠加【炉心共鸣】并使终结技弹射次数提高，行动时基于其层数恢复能量。",
+      "front_power_base": 240,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 10149902,
+          "name": "王之心",
+          "desc": "我方小队其他目标施放终结技后，Saber的终结技对随机敌方单体目标造成伤害的次数提高#1[i]次，最多提高#2[i]次。",
+          "simple_desc": "我方小队其他目标施放终结技后，Saber的终结技伤害次数提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                8
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10140302,
+          "name": "誓约胜利之剑",
+          "desc": "对敌方全体目标造成等同于Saber#1[i]%攻击力的风属性伤害。并额外造成#3[i]次伤害，每次伤害对随机敌方单体目标造成等同于Saber#2[i]%攻击力的风属性伤害。",
+          "simple_desc": "对敌方全体目标造成大量风属性伤害。额外对敌方随机单体目标造成少量风属性伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            120,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                4.5,
+                1.75,
+                10,
+                10
+              ]
+            }
+          }
+        },
+        {
+          "id": 10140802,
+          "name": "解放的金色王权",
+          "desc": "对敌方全体目标造成等同于Saber#2[i]%攻击力的风属性伤害，若施放时敌方目标数量为2/1，额外对敌方全体目标造成等同于Saber#3[i]%/#4[i]%攻击力的风属性伤害，并移除所有【炉心共鸣】。",
+          "simple_desc": "对敌方全体造成风属性伤害。若施放时场上敌方目标数量小于等于2，额外对敌方全体造成风属性伤害，并移除所有【炉心共鸣】。",
+          "type": "普攻",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": 1,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2.5,
+                2.5,
+                2.5,
+                3.75
+              ]
+            }
+          }
+        },
+        {
+          "id": 10149902,
+          "name": "王之心",
+          "desc": "我方小队其他目标施放终结技后，Saber获得#1[i]层【炉心共鸣】，并使终结技对随机敌方单体造成伤害的次数提高#2[i]次，最多提高#3[i]次。Saber的暴击伤害提高#4[i]%。\\nSaber可积攒最多#5[i]点溢出能量，施放终结技后清空并恢复相应的能量值。",
+          "simple_desc": "我方小队其他目标施放终结技后，Saber获得【炉心共鸣】，并使终结技对随机敌方单体造成伤害的次数提高。Saber的暴击伤害提高。\\nSaber可积攒溢出能量，施放终结技后清空并恢复相应的能量值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                6,
+                1,
+                6,
+                1,
+                120
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 180
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.69
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "我方小队其他目标施放终结技后，使Saber的终结技能弹射更多次数。",
+      "back_one_word_desc": "我方小队其他目标施放终结技后，Saber叠加【炉心共鸣】并使终结技弹射次数提高，行动时基于其层数恢复能量。",
+      "front_power_base": 330,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 10149903,
+          "name": "王之心",
+          "desc": "我方小队其他目标施放终结技后，Saber的终结技对随机敌方单体目标造成伤害的次数提高#1[i]次，最多提高#2[i]次。",
+          "simple_desc": "我方小队其他目标施放终结技后，Saber的终结技伤害次数提高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                12
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 10140303,
+          "name": "誓约胜利之剑",
+          "desc": "对敌方全体目标造成等同于Saber#1[i]%攻击力的风属性伤害。并额外造成#3[i]次伤害，每次伤害对随机敌方单体目标造成等同于Saber#2[i]%攻击力的风属性伤害。",
+          "simple_desc": "对敌方全体目标造成大量风属性伤害。额外对敌方随机单体目标造成少量风属性伤害。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            120,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                6.48,
+                2.52,
+                10,
+                10
+              ]
+            }
+          }
+        },
+        {
+          "id": 10140803,
+          "name": "解放的金色王权",
+          "desc": "对敌方全体目标造成等同于Saber#2[i]%攻击力的风属性伤害，若施放时敌方目标数量为2/1，额外对敌方全体目标造成等同于Saber#3[i]%/#4[i]%攻击力的风属性伤害，并移除所有【炉心共鸣】。",
+          "simple_desc": "对敌方全体造成风属性伤害。若施放时场上敌方目标数量小于等于2，额外对敌方全体造成风属性伤害，并移除所有【炉心共鸣】。",
+          "type": "普攻",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": 1,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                3.6,
+                3.6,
+                5.4
+              ]
+            }
+          }
+        },
+        {
+          "id": 10149903,
+          "name": "王之心",
+          "desc": "我方小队其他目标施放终结技后，Saber获得#1[i]层【炉心共鸣】，并使终结技对随机敌方单体造成伤害的次数提高#2[i]次，最多提高#3[i]次。Saber的暴击伤害提高#4[i]%。\\nSaber可积攒最多#5[i]点溢出能量，施放终结技后清空并恢复相应的能量值。",
+          "simple_desc": "我方小队其他目标施放终结技后，Saber获得【炉心共鸣】，并使终结技对随机敌方单体造成伤害的次数提高。Saber的暴击伤害提高。\\nSaber可积攒溢出能量，施放终结技后清空并恢复相应的能量值。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                7,
+                1,
+                8,
+                1.2,
+                120
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 180
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.08
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.44
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

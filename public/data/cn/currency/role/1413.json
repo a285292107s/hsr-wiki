@@ -1,0 +1,631 @@
+{
+  "id": 1413,
+  "name": "长夜月",
+  "rarity": 4,
+  "front_back_type": "Both",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "EnergyBar",
+    "MaxHP"
+  ],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1012,
+    2006
+  ],
+  "traits": [
+    {
+      "id": 1012,
+      "name": "夜之半神",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1012.png",
+      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前/后台强度提高。"
+    },
+    {
+      "id": 2006,
+      "name": "燃血",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2006.png",
+      "desc": "【燃血】队员的和提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "我方小队目标越多，全队暴击伤害、幸运一击伤害越高。",
+      "back_one_word_desc": "召唤忆灵使其行动时攻击敌人并获得【忆质】，充能满后立即攻击敌方全体并获得强化。我方小队目标越多，全队暴击伤害、幸运一击伤害越高。",
+      "front_power_base": 175,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 80,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14139901,
+          "name": "众人的美梦",
+          "desc": "我方小队当前每有1个目标，则我方小队暴击伤害提高#1[i]%，幸运一击伤害提高#2[i]%",
+          "simple_desc": "我方小队目标数量越多，暴击伤害、幸运一击伤害越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.03,
+                0.01
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 14130401,
+          "name": "今夜与我同行",
+          "desc": "进入战斗时召唤忆灵「长夜」。忆灵「长夜」初始拥有长夜月#4[i]%的速度，生命上限为长夜月的#5[i]%。忆灵「长夜」与长夜月进入战斗时生命值为生命上限的#6[i]%，暴击率提高#7[i]%。忆灵「长夜」回合结束时回复自身与长夜月等同于#1[i]%生命上限的生命值，并使长夜月获得#2[i]点【忆质】。长夜月持有的【忆质】大于等于#3[i]点时，立即使忆灵「长夜」获得1个额外回合并施放【迷梦，流失，如露】。",
+          "simple_desc": "进入战斗时召唤忆灵「长夜」。忆灵「长夜」回合结束时回复自身与长夜月的生命，并获得【忆质】。当长夜月持有的【忆质】数量大于等于#3[i]点时，忆灵「长夜」立即攻击全体敌人。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                8,
+                16,
+                2,
+                0.5,
+                0.01,
+                0.35
+              ]
+            }
+          }
+        },
+        {
+          "id": 14139901,
+          "name": "与忆海深潜",
+          "desc": "我方小队其他角色的忆灵施放技能后长夜月获得#1[i]点【忆质】，并使自身和忆灵「长夜」回复等同于各自#4[i]%生命上限的生命值。我方前台受到伤害或消耗生命值时长夜月获得#2[i]点【忆质】，并使自身和忆灵「长夜」回复等同于各自#5[i]%生命上限的生命值，该效果单次行动内最多触发1次。\\n我方小队当前每有1个目标，则我方小队暴击伤害提高#3[i]%，幸运一击伤害提高#6[i]%。",
+          "simple_desc": "我方其他忆灵施放技能或前台消耗生命也会使长夜月获得【忆质】并回复生命值。\\n我方小队当前目标数量越多，暴击伤害、幸运一击伤害越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                2,
+                0.03,
+                0.05,
+                0.05,
+                0.01
+              ]
+            }
+          }
+        },
+        {
+          "id": 114130101,
+          "name": "追忆，蹁跹，如雨",
+          "desc": "该技能自动选择目标施放。对敌方单体造成等同于「长夜」#1[i]%生命上限的冰属性伤害，长夜月当前每有#3[i]点【忆质】，则额外造成等同于「长夜」#2[f1]%生命上限的冰属性伤害。",
+          "simple_desc": "对敌方单体造成少量冰属性伤害，并根据【忆质】数量额外造成少量冰属性伤害。",
+          "type": "忆灵技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            30,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.2,
+                4
+              ]
+            }
+          }
+        },
+        {
+          "id": 114130701,
+          "name": "迷梦，流失，如露",
+          "desc": "消耗所有【忆质】发动攻击，每消耗1点【忆质】则对主目标造成等同于「长夜」#1[f1]%生命上限的冰属性伤害，对其他敌方目标造成等同于「长夜」#2[f1]%生命上限的冰属性伤害。施放后，长夜月和「长夜」生命值降低至1点，且长夜月在本场战斗中永远进入【至暗之谜】状态，期间敌方全体受到的伤害提高#4[i]%，长夜月和「长夜」造成的伤害提高#3[i]%。",
+          "simple_desc": "消耗生命值和所有【忆质】，对主目标造成大量冰属性伤害，对其他敌方目标造成冰属性伤害。同时使长夜月在本场战斗中始终处于【至暗之谜】状态，造成的伤害提高并使敌人受到的伤害提高。",
+          "type": "忆灵技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            90,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.24,
+                0.12,
+                0.6,
+                0.3
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 120
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "我方小队目标越多，全队暴击伤害、幸运一击伤害越高。",
+      "back_one_word_desc": "召唤忆灵使其行动时攻击敌人并获得【忆质】，充能满后立即攻击敌方全体并获得强化。我方小队目标越多，全队暴击伤害、幸运一击伤害越高。",
+      "front_power_base": 245,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 80,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14139902,
+          "name": "众人的美梦",
+          "desc": "我方小队当前每有1个目标，则我方小队暴击伤害提高#1[i]%，幸运一击伤害提高#2[i]%",
+          "simple_desc": "我方小队目标数量越多，暴击伤害、幸运一击伤害越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.05,
+                0.02
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 14130402,
+          "name": "今夜与我同行",
+          "desc": "进入战斗时召唤忆灵「长夜」。忆灵「长夜」初始拥有长夜月#4[i]%的速度，生命上限为长夜月的#5[i]%。忆灵「长夜」与长夜月进入战斗时生命值为生命上限的#6[i]%，暴击率提高#7[i]%。忆灵「长夜」回合结束时回复自身与长夜月等同于#1[i]%生命上限的生命值，并使长夜月获得#2[i]点【忆质】。长夜月持有的【忆质】大于等于#3[i]点时，立即使忆灵「长夜」获得1个额外回合并施放【迷梦，流失，如露】。",
+          "simple_desc": "进入战斗时召唤忆灵「长夜」。忆灵「长夜」回合结束时回复自身与长夜月的生命，并获得【忆质】。当长夜月持有的【忆质】数量大于等于#3[i]点时，忆灵「长夜」立即攻击全体敌人。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                8,
+                16,
+                2.5,
+                0.5,
+                0.01,
+                0.35
+              ]
+            }
+          }
+        },
+        {
+          "id": 14139902,
+          "name": "与忆海深潜",
+          "desc": "我方小队其他角色的忆灵施放技能后长夜月获得#1[i]点【忆质】，并使自身和忆灵「长夜」回复等同于各自#4[i]%生命上限的生命值。我方前台受到伤害或消耗生命值时长夜月获得#2[i]点【忆质】，并使自身和忆灵「长夜」回复等同于各自#5[i]%生命上限的生命值，该效果单次行动内最多触发1次。\\n我方小队当前每有1个目标，则我方小队暴击伤害提高#3[i]%，幸运一击伤害提高#6[i]%。",
+          "simple_desc": "我方其他忆灵施放技能或前台消耗生命也会使长夜月获得【忆质】并回复生命值。\\n我方小队当前目标数量越多，暴击伤害、幸运一击伤害越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                2,
+                0.05,
+                0.05,
+                0.05,
+                0.02
+              ]
+            }
+          }
+        },
+        {
+          "id": 114130102,
+          "name": "追忆，蹁跹，如雨",
+          "desc": "该技能自动选择目标施放。对敌方单体造成等同于「长夜」#1[i]%生命上限的冰属性伤害，长夜月当前每有#3[i]点【忆质】，则额外造成等同于「长夜」#2[f1]%生命上限的冰属性伤害。",
+          "simple_desc": "对敌方单体造成少量冰属性伤害，并根据【忆质】数量额外造成少量冰属性伤害。",
+          "type": "忆灵技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            30,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.25,
+                0.25,
+                4
+              ]
+            }
+          }
+        },
+        {
+          "id": 114130702,
+          "name": "迷梦，流失，如露",
+          "desc": "消耗所有【忆质】发动攻击，每消耗1点【忆质】则对主目标造成等同于「长夜」#1[f1]%生命上限的冰属性伤害，对其他敌方目标造成等同于「长夜」#2[f1]%生命上限的冰属性伤害。施放后，长夜月和「长夜」生命值降低至1点，且长夜月在本场战斗中永远进入【至暗之谜】状态，期间敌方全体受到的伤害提高#4[i]%，长夜月和「长夜」造成的伤害提高#3[i]%。",
+          "simple_desc": "消耗生命值和所有【忆质】，对主目标造成大量冰属性伤害，对其他敌方目标造成冰属性伤害。同时使长夜月在本场战斗中始终处于【至暗之谜】状态，造成的伤害提高并使敌人受到的伤害提高。",
+          "type": "忆灵技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            90,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.3,
+                0.15,
+                0.8,
+                0.35
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 120
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.56
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "我方小队目标越多，全队暴击伤害、幸运一击伤害越高。",
+      "back_one_word_desc": "召唤忆灵使其行动时攻击敌人并获得【忆质】，充能满后立即攻击敌方全体并获得强化。我方小队目标越多，全队暴击伤害、幸运一击伤害越高。",
+      "front_power_base": 400,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 80,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14139903,
+          "name": "众人的美梦",
+          "desc": "我方小队当前每有1个目标，则我方小队暴击伤害提高#1[i]%，幸运一击伤害提高#2[i]%",
+          "simple_desc": "我方小队目标数量越多，暴击伤害、幸运一击伤害越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.08,
+                0.03
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 14130403,
+          "name": "今夜与我同行",
+          "desc": "进入战斗时召唤忆灵「长夜」。忆灵「长夜」初始拥有长夜月#4[i]%的速度，生命上限为长夜月的#5[i]%。忆灵「长夜」与长夜月进入战斗时生命值为生命上限的#6[i]%，暴击率提高#7[i]%。忆灵「长夜」回合结束时回复自身与长夜月等同于#1[i]%生命上限的生命值，并使长夜月获得#2[i]点【忆质】。长夜月持有的【忆质】大于等于#3[i]点时，立即使忆灵「长夜」获得1个额外回合并施放【迷梦，流失，如露】。",
+          "simple_desc": "进入战斗时召唤忆灵「长夜」。忆灵「长夜」回合结束时回复自身与长夜月的生命，并获得【忆质】。当长夜月持有的【忆质】数量大于等于#3[i]点时，忆灵「长夜」立即攻击全体敌人。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.5,
+                8,
+                16,
+                3,
+                0.5,
+                0.01,
+                0.35
+              ]
+            }
+          }
+        },
+        {
+          "id": 14139903,
+          "name": "与忆海深潜",
+          "desc": "我方小队其他角色的忆灵施放技能后长夜月获得#1[i]点【忆质】，并使自身和忆灵「长夜」回复等同于各自#4[i]%生命上限的生命值。我方前台受到伤害或消耗生命值时长夜月获得#2[i]点【忆质】，并使自身和忆灵「长夜」回复等同于各自#5[i]%生命上限的生命值，该效果单次行动内最多触发1次。\\n我方小队当前每有1个目标，则我方小队暴击伤害提高#3[i]%，幸运一击伤害提高#6[i]%。",
+          "simple_desc": "我方其他忆灵施放技能或前台消耗生命也会使长夜月获得【忆质】并回复生命值。\\n我方小队当前目标数量越多，暴击伤害、幸运一击伤害越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                2,
+                0.08,
+                0.05,
+                0.05,
+                0.03
+              ]
+            }
+          }
+        },
+        {
+          "id": 114130103,
+          "name": "追忆，蹁跹，如雨",
+          "desc": "该技能自动选择目标施放。对敌方单体造成等同于「长夜」#1[i]%生命上限的冰属性伤害，长夜月当前每有#3[i]点【忆质】，则额外造成等同于「长夜」#2[f1]%生命上限的冰属性伤害。",
+          "simple_desc": "对敌方单体造成少量冰属性伤害，并根据【忆质】数量额外造成少量冰属性伤害。",
+          "type": "忆灵技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            30,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.8,
+                0.36,
+                4
+              ]
+            }
+          }
+        },
+        {
+          "id": 114130703,
+          "name": "迷梦，流失，如露",
+          "desc": "消耗所有【忆质】发动攻击，每消耗1点【忆质】则对主目标造成等同于「长夜」#1[f1]%生命上限的冰属性伤害，对其他敌方目标造成等同于「长夜」#2[f1]%生命上限的冰属性伤害。施放后，长夜月和「长夜」生命值降低至1点，且长夜月在本场战斗中永远进入【至暗之谜】状态，期间敌方全体受到的伤害提高#4[i]%，长夜月和「长夜」造成的伤害提高#3[i]%。",
+          "simple_desc": "消耗生命值和所有【忆质】，对主目标造成大量冰属性伤害，对其他敌方目标造成冰属性伤害。同时使长夜月在本场战斗中始终处于【至暗之谜】状态，造成的伤害提高并使敌人受到的伤害提高。",
+          "type": "忆灵技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            90,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.432,
+                0.216,
+                1,
+                0.4
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 120
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.82
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.56
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

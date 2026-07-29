@@ -1,0 +1,330 @@
+{
+  "id": 1402,
+  "name": "阿格莱雅",
+  "rarity": 1,
+  "front_back_type": "Front",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1011,
+    2004
+  ],
+  "traits": [
+    {
+      "id": 1011,
+      "name": "昼之半神",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和提高。"
+    },
+    {
+      "id": 2004,
+      "name": "能量",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
+      "desc": "【能量】队员的提高。在场上生成【能量地块】，可提供和能量恢复。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "忆灵天赋的速度增益的层数上限提高，且每层额外提高伤害。强化普攻视为终结技伤害。",
+      "back_one_word_desc": "",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14029901,
+          "name": "盛夏双人舞",
+          "desc": "阿格莱雅的强化普攻造成的伤害视为终结技伤害。忆灵衣匠天赋的速度提高效果上限提高#1[i]层，每层额外使造成的伤害提高#2[i]%，阿格莱雅获得忆灵天赋的速度提高层数时，每层也会使阿格莱雅造成的伤害提高#2[i]%。\\n每场战斗中，阿格莱雅首次施放终结技后额外固定恢复#3[i]点能量。",
+          "simple_desc": "阿格莱雅的强化普攻造成的伤害视为终结技伤害。忆灵天赋的速度提高效果可叠加的上限提高，且每层额外使造成的伤害提高。\\n每场战斗中，阿格莱雅首次施放终结技后额外固定恢复能量。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                0.04,
+                60
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 280
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "忆灵天赋的速度增益的层数上限提高，且每层额外提高伤害。强化普攻视为终结技伤害。",
+      "back_one_word_desc": "",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14029902,
+          "name": "盛夏双人舞",
+          "desc": "阿格莱雅的强化普攻造成的伤害视为终结技伤害。忆灵衣匠天赋的速度提高效果上限提高#1[i]层，每层额外使造成的伤害提高#2[i]%，阿格莱雅获得忆灵天赋的速度提高层数时，每层也会使阿格莱雅造成的伤害提高#2[i]%。\\n每场战斗中，阿格莱雅首次施放终结技后额外固定恢复#3[i]点能量。",
+          "simple_desc": "阿格莱雅的强化普攻造成的伤害视为终结技伤害。忆灵天赋的速度提高效果可叠加的上限提高，且每层额外使造成的伤害提高。\\n每场战斗中，阿格莱雅首次施放终结技后额外固定恢复能量。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                0.05,
+                60
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 280
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "忆灵天赋的速度增益的层数上限提高，且每层额外提高伤害。强化普攻视为终结技伤害。",
+      "back_one_word_desc": "",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14029903,
+          "name": "盛夏双人舞",
+          "desc": "阿格莱雅的强化普攻造成的伤害视为终结技伤害。忆灵衣匠天赋的速度提高效果上限提高#1[i]层，每层额外使造成的伤害提高#2[i]%，阿格莱雅获得忆灵天赋的速度提高层数时，每层也会使阿格莱雅造成的伤害提高#2[i]%。\\n每场战斗中，阿格莱雅首次施放终结技后额外固定恢复#3[i]点能量。",
+          "simple_desc": "阿格莱雅的强化普攻造成的伤害视为终结技伤害。忆灵天赋的速度提高效果可叠加的上限提高，且每层额外使造成的伤害提高。\\n每场战斗中，阿格莱雅首次施放终结技后额外固定恢复能量。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                4,
+                0.06,
+                60
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 280
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.6
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "忆灵天赋的速度增益的层数上限提高，且每层额外提高伤害。强化普攻视为终结技伤害。",
+      "back_one_word_desc": "",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14029904,
+          "name": "盛夏双人舞",
+          "desc": "阿格莱雅的强化普攻造成的伤害视为终结技伤害。忆灵衣匠天赋的速度提高效果上限提高#1[i]层，每层额外使造成的伤害提高#2[i]%，阿格莱雅获得忆灵天赋的速度提高层数时，每层也会使阿格莱雅造成的伤害提高#2[i]%。\\n每场战斗中，阿格莱雅首次施放终结技后额外固定恢复#3[i]点能量。",
+          "simple_desc": "阿格莱雅的强化普攻造成的伤害视为终结技伤害。忆灵天赋的速度提高效果可叠加的上限提高，且每层额外使造成的伤害提高。\\n每场战斗中，阿格莱雅首次施放终结技后额外固定恢复能量。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                0.07,
+                60
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.25
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 280
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.9
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.3
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

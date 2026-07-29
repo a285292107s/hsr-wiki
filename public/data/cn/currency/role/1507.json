@@ -1,0 +1,793 @@
+{
+  "id": 1507,
+  "name": "千冶•刃",
+  "rarity": 2,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxHP",
+    "EnergyBar"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1507Ultra.png",
+  "is_expert": false,
+  "trait_list": [
+    1002,
+    2006,
+    2007
+  ],
+  "traits": [
+    {
+      "id": 1002,
+      "name": "星核猎手",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1002.png",
+      "desc": "装备最多的【星核猎手】成为【猎星人】，【星核猎手】会协助【猎星人】作战。\\n【星核猎手】的和提高。"
+    },
+    {
+      "id": 2006,
+      "name": "燃血",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2006.png",
+      "desc": "【燃血】队员的和提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。"
+    },
+    {
+      "id": 2007,
+      "name": "减益",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2007.png",
+      "desc": "【减益】队员的前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "进入战斗前为自己打造装备。\\n消耗生命值攻击敌人，施放终结技回复生命。展开结界削弱敌方并增益我方，全队攻击使千冶•刃额外施放战技。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 100,
+      "extra_shield_base": 100,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 15070201,
+          "name": "刃下，归葬",
+          "desc": "对敌方全体造成等同于千冶•刃#1[i]%生命上限的火属性伤害，并额外造成#2[i]次伤害，每次伤害对敌方随机单体造成等同于千冶•刃#3[i]%生命上限的火属性伤害。\\n若当前生命值不足，施放战技时千冶•刃的当前生命值降低至1点。",
+          "simple_desc": "对敌方全体造成火属性伤害，随后对敌方单体造成少量火属性伤害，弹射#2[i]次。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            15,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.8,
+                4,
+                0.3,
+                0.25,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 15070301,
+          "name": "骸骨当炉，血肉即薪",
+          "desc": "使敌方全体陷入【煞火缠身】，【煞火缠身】状态下敌方目标的防御力降低#5[i]%，受到的伤害提高#4[i]%。随后消耗等同于千冶•刃生命上限#1[i]%的生命值展开结界，结界持续期间，千冶•刃获得【无量忿怒】状态。【无量忿怒】状态下暴击率提高#2[i]%，暴击伤害提高#3[i]%。若当前生命值不足，施放本技能时千冶•刃的当前生命值降低至1点。",
+          "simple_desc": "使敌方全体防御力降低，受到的伤害提高。随后消耗自身生命值开启结界。结界持续期间，自身暴击率提高，暴击伤害提高。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.2,
+                0.6,
+                0.4,
+                0.3
+              ]
+            }
+          }
+        },
+        {
+          "id": 15071401,
+          "name": "千冶铸一，万劫烬灭",
+          "desc": "对敌方全体造成等同于千冶•刃#1[i]%生命上限的火属性伤害。回复自身全部生命值。",
+          "simple_desc": "对敌方全体造成大量火属性伤害。回复自身全部生命值。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                4,
+                0.05
+              ]
+            }
+          }
+        },
+        {
+          "id": 15070401,
+          "name": "因果尽偿",
+          "desc": "结界持续期间，我方前台每次攻击敌方后，使对应敌方目标陷入【煞火缠身】状态并使千冶•刃获得1点充能，我方后台每次攻击敌方后，使对应敌方目标陷入【煞火缠身】状态，并且每攻击#2[i]次使千冶•刃获得1点充能。当充能达到#1[i]点时消耗#1[i]点，并使千冶•刃额外施放1次战技，本次战技不消耗生命值且视为追加攻击。\\n结界持续期间，我方小队造成的伤害提高#3[i]%，造成的终结技伤害提高#4[i]%，千冶•刃造成的伤害额外提高#5[i]%。",
+          "simple_desc": "结界持续期间，我方小队攻击敌方后使敌方陷入【煞火缠身】状态并使千冶•刃获得充能，当充能达到#1[i]点时千冶•刃额外施放1次无消耗战技。\\n结界持续期间，我方小队造成的伤害提高，我方小队造成的终结技伤害提高，千冶•刃造成的伤害额外提高。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                9,
+                2,
+                0.4,
+                0.6,
+                0.6
+              ]
+            }
+          }
+        },
+        {
+          "id": 15079901,
+          "name": "天工巧手",
+          "desc": "进入战斗前千冶•刃获得1件与其匹配的临时装备，临时装备在战斗结束后消失。若千冶•刃已经穿戴了3件装备，则随机将其中1件临时升级为特权装备，临时的特权装备在战斗结束后恢复为原本的装备。",
+          "simple_desc": "进入战斗前千冶•刃获得1件与其匹配的临时装备，临时装备在战斗结束后消失。若千冶•刃已经穿戴了3件装备，则随机将其中1件临时升级为特权装备，临时的特权装备在战斗结束后恢复为原本的装备。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 120
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.1
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "进入战斗前为自己打造装备。\\n消耗生命值攻击敌人，施放终结技回复生命。展开结界削弱敌方并增益我方，全队攻击使千冶•刃额外施放战技。",
+      "front_power_base": 140,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 100,
+      "extra_shield_base": 100,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 15070202,
+          "name": "刃下，归葬",
+          "desc": "对敌方全体造成等同于千冶•刃#1[i]%生命上限的火属性伤害，并额外造成#2[i]次伤害，每次伤害对敌方随机单体造成等同于千冶•刃#3[i]%生命上限的火属性伤害。\\n若当前生命值不足，施放战技时千冶•刃的当前生命值降低至1点。",
+          "simple_desc": "对敌方全体造成火属性伤害，随后对敌方单体造成少量火属性伤害，弹射#2[i]次。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            15,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                4,
+                0.375,
+                0.25,
+                2.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 15070302,
+          "name": "骸骨当炉，血肉即薪",
+          "desc": "使敌方全体陷入【煞火缠身】，【煞火缠身】状态下敌方目标的防御力降低#5[i]%，受到的伤害提高#4[i]%。随后消耗等同于千冶•刃生命上限#1[i]%的生命值展开结界，结界持续期间，千冶•刃获得【无量忿怒】状态。【无量忿怒】状态下暴击率提高#2[i]%，暴击伤害提高#3[i]%。若当前生命值不足，施放本技能时千冶•刃的当前生命值降低至1点。",
+          "simple_desc": "使敌方全体防御力降低，受到的伤害提高。随后消耗自身生命值开启结界。结界持续期间，自身暴击率提高，暴击伤害提高。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.2,
+                0.9,
+                0.5,
+                0.3
+              ]
+            }
+          }
+        },
+        {
+          "id": 15071402,
+          "name": "千冶铸一，万劫烬灭",
+          "desc": "对敌方全体造成等同于千冶•刃#1[i]%生命上限的火属性伤害。回复自身全部生命值。",
+          "simple_desc": "对敌方全体造成大量火属性伤害。回复自身全部生命值。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                5,
+                0.05
+              ]
+            }
+          }
+        },
+        {
+          "id": 15070402,
+          "name": "因果尽偿",
+          "desc": "结界持续期间，我方前台每次攻击敌方后，使对应敌方目标陷入【煞火缠身】状态并使千冶•刃获得1点充能，我方后台每次攻击敌方后，使对应敌方目标陷入【煞火缠身】状态，并且每攻击#2[i]次使千冶•刃获得1点充能。当充能达到#1[i]点时消耗#1[i]点，并使千冶•刃额外施放1次战技，本次战技不消耗生命值且视为追加攻击。\\n结界持续期间，我方小队造成的伤害提高#3[i]%，造成的终结技伤害提高#4[i]%，千冶•刃造成的伤害额外提高#5[i]%。",
+          "simple_desc": "结界持续期间，我方小队攻击敌方后使敌方陷入【煞火缠身】状态并使千冶•刃获得充能，当充能达到#1[i]点时千冶•刃额外施放1次无消耗战技。\\n结界持续期间，我方小队造成的伤害提高，我方小队造成的终结技伤害提高，千冶•刃造成的伤害额外提高。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                9,
+                2,
+                0.5,
+                0.75,
+                0.75
+              ]
+            }
+          }
+        },
+        {
+          "id": 15079902,
+          "name": "天工巧手",
+          "desc": "进入战斗前千冶•刃获得1件与其匹配的临时装备，临时装备在战斗结束后消失。若千冶•刃已经穿戴了3件装备，则随机将其中1件临时升级为特权装备，临时的特权装备在战斗结束后恢复为原本的装备。",
+          "simple_desc": "进入战斗前千冶•刃获得1件与其匹配的临时装备，临时装备在战斗结束后消失。若千冶•刃已经穿戴了3件装备，则随机将其中1件临时升级为特权装备，临时的特权装备在战斗结束后恢复为原本的装备。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 120
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.32
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.21
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "进入战斗前为自己打造装备。\\n消耗生命值攻击敌人，施放终结技回复生命。展开结界削弱敌方并增益我方，全队攻击使千冶•刃额外施放战技。",
+      "front_power_base": 180,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 100,
+      "extra_shield_base": 100,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 15070203,
+          "name": "刃下，归葬",
+          "desc": "对敌方全体造成等同于千冶•刃#1[i]%生命上限的火属性伤害，并额外造成#2[i]次伤害，每次伤害对敌方随机单体造成等同于千冶•刃#3[i]%生命上限的火属性伤害。\\n若当前生命值不足，施放战技时千冶•刃的当前生命值降低至1点。",
+          "simple_desc": "对敌方全体造成火属性伤害，随后对敌方单体造成少量火属性伤害，弹射#2[i]次。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            15,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.44,
+                4,
+                0.54,
+                0.25,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": 15070303,
+          "name": "骸骨当炉，血肉即薪",
+          "desc": "使敌方全体陷入【煞火缠身】，【煞火缠身】状态下敌方目标的防御力降低#5[i]%，受到的伤害提高#4[i]%。随后消耗等同于千冶•刃生命上限#1[i]%的生命值展开结界，结界持续期间，千冶•刃获得【无量忿怒】状态。【无量忿怒】状态下暴击率提高#2[i]%，暴击伤害提高#3[i]%。若当前生命值不足，施放本技能时千冶•刃的当前生命值降低至1点。",
+          "simple_desc": "使敌方全体防御力降低，受到的伤害提高。随后消耗自身生命值开启结界。结界持续期间，自身暴击率提高，暴击伤害提高。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.2,
+                1.2,
+                0.6,
+                0.3
+              ]
+            }
+          }
+        },
+        {
+          "id": 15071403,
+          "name": "千冶铸一，万劫烬灭",
+          "desc": "对敌方全体造成等同于千冶•刃#1[i]%生命上限的火属性伤害。回复自身全部生命值。",
+          "simple_desc": "对敌方全体造成大量火属性伤害。回复自身全部生命值。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                7.2,
+                0.05
+              ]
+            }
+          }
+        },
+        {
+          "id": 15070403,
+          "name": "因果尽偿",
+          "desc": "结界持续期间，我方前台每次攻击敌方后，使对应敌方目标陷入【煞火缠身】状态并使千冶•刃获得1点充能，我方后台每次攻击敌方后，使对应敌方目标陷入【煞火缠身】状态，并且每攻击#2[i]次使千冶•刃获得1点充能。当充能达到#1[i]点时消耗#1[i]点，并使千冶•刃额外施放1次战技，本次战技不消耗生命值且视为追加攻击。\\n结界持续期间，我方小队造成的伤害提高#3[i]%，造成的终结技伤害提高#4[i]%，千冶•刃造成的伤害额外提高#5[i]%。",
+          "simple_desc": "结界持续期间，我方小队攻击敌方后使敌方陷入【煞火缠身】状态并使千冶•刃获得充能，当充能达到#1[i]点时千冶•刃额外施放1次无消耗战技。\\n结界持续期间，我方小队造成的伤害提高，我方小队造成的终结技伤害提高，千冶•刃造成的伤害额外提高。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                9,
+                2,
+                0.6,
+                0.9,
+                0.9
+              ]
+            }
+          }
+        },
+        {
+          "id": 15079903,
+          "name": "天工巧手",
+          "desc": "进入战斗前千冶•刃获得1件与其匹配的临时装备，临时装备在战斗结束后消失。若千冶•刃已经穿戴了3件装备，则随机将其中1件临时升级为特权装备，临时的特权装备在战斗结束后恢复为原本的装备。",
+          "simple_desc": "进入战斗前千冶•刃获得1件与其匹配的临时装备，临时装备在战斗结束后消失。若千冶•刃已经穿戴了3件装备，则随机将其中1件临时升级为特权装备，临时的特权装备在战斗结束后恢复为原本的装备。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 120
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.54
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "进入战斗前为自己打造装备。\\n消耗生命值攻击敌人，施放终结技回复生命。展开结界削弱敌方并增益我方，全队攻击使千冶•刃额外施放战技。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 100,
+      "extra_shield_base": 100,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 15070204,
+          "name": "刃下，归葬",
+          "desc": "对敌方全体造成等同于千冶•刃#1[i]%生命上限的火属性伤害，并额外造成#2[i]次伤害，每次伤害对敌方随机单体造成等同于千冶•刃#3[i]%生命上限的火属性伤害。\\n若当前生命值不足，施放战技时千冶•刃的当前生命值降低至1点。",
+          "simple_desc": "对敌方全体造成火属性伤害，随后对敌方单体造成少量火属性伤害，弹射#2[i]次。",
+          "type": "战技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            15,
+            30,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2.24,
+                4,
+                0.84,
+                0.25,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": 15070304,
+          "name": "骸骨当炉，血肉即薪",
+          "desc": "使敌方全体陷入【煞火缠身】，【煞火缠身】状态下敌方目标的防御力降低#5[i]%，受到的伤害提高#4[i]%。随后消耗等同于千冶•刃生命上限#1[i]%的生命值展开结界，结界持续期间，千冶•刃获得【无量忿怒】状态。【无量忿怒】状态下暴击率提高#2[i]%，暴击伤害提高#3[i]%。若当前生命值不足，施放本技能时千冶•刃的当前生命值降低至1点。",
+          "simple_desc": "使敌方全体防御力降低，受到的伤害提高。随后消耗自身生命值开启结界。结界持续期间，自身暴击率提高，暴击伤害提高。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.2,
+                0.2,
+                1.5,
+                0.7,
+                0.3
+              ]
+            }
+          }
+        },
+        {
+          "id": 15071404,
+          "name": "千冶铸一，万劫烬灭",
+          "desc": "对敌方全体造成等同于千冶•刃#1[i]%生命上限的火属性伤害。回复自身全部生命值。",
+          "simple_desc": "对敌方全体造成大量火属性伤害。回复自身全部生命值。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                11.2,
+                0.05
+              ]
+            }
+          }
+        },
+        {
+          "id": 15070404,
+          "name": "因果尽偿",
+          "desc": "结界持续期间，我方前台每次攻击敌方后，使对应敌方目标陷入【煞火缠身】状态并使千冶•刃获得1点充能，我方后台每次攻击敌方后，使对应敌方目标陷入【煞火缠身】状态，并且每攻击#2[i]次使千冶•刃获得1点充能。当充能达到#1[i]点时消耗#1[i]点，并使千冶•刃额外施放1次战技，本次战技不消耗生命值且视为追加攻击。\\n结界持续期间，我方小队造成的伤害提高#3[i]%，造成的终结技伤害提高#4[i]%，千冶•刃造成的伤害额外提高#5[i]%。",
+          "simple_desc": "结界持续期间，我方小队攻击敌方后使敌方陷入【煞火缠身】状态并使千冶•刃获得充能，当充能达到#1[i]点时千冶•刃额外施放1次无消耗战技。\\n结界持续期间，我方小队造成的伤害提高，我方小队造成的终结技伤害提高，千冶•刃造成的伤害额外提高。",
+          "type": "天赋",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                9,
+                2,
+                0.7,
+                1.05,
+                1.05
+              ]
+            }
+          }
+        },
+        {
+          "id": 15079904,
+          "name": "天工巧手",
+          "desc": "进入战斗前千冶•刃获得1件与其匹配的临时装备，临时装备在战斗结束后消失。若千冶•刃已经穿戴了3件装备，则随机将其中1件临时升级为特权装备，临时的特权装备在战斗结束后恢复为原本的装备。",
+          "simple_desc": "进入战斗前千冶•刃获得1件与其匹配的临时装备，临时装备在战斗结束后消失。若千冶•刃已经穿戴了3件装备，则随机将其中1件临时升级为特权装备，临时的特权装备在战斗结束后恢复为原本的装备。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": []
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 120
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.76
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.44
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

@@ -1,0 +1,469 @@
+{
+  "id": 1106,
+  "name": "佩拉",
+  "rarity": 2,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP",
+    "Speed"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1107Ultra.png",
+  "is_expert": true,
+  "trait_list": [
+    1005,
+    2007
+  ],
+  "traits": [
+    {
+      "id": 1005,
+      "name": "贝洛伯格",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1005.png",
+      "desc": "【贝洛伯格】队员行动后为【造物引擎】充能，【造物引擎】的能量充满后立即攻击敌方目标，并让本场战斗中造成伤害最多的【贝洛伯格】角色立即行动。\\n【贝洛伯格】队员和【造物引擎】的提高。"
+    },
+    {
+      "id": 2007,
+      "name": "减益",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2007.png",
+      "desc": "【减益】队员的前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "行动时攻击敌人，施放终结技会降低敌人防御。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        60,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 11060201,
+          "name": "低温妨害",
+          "desc": "行动时解除指定敌方单体的#2[i]个增益效果，同时造成等同于佩拉#3[i]%攻击力的冰属性伤害。",
+          "simple_desc": "行动时解除指定敌方单体目标的增益效果，同时造成冰属性伤害。",
+          "type": "战技",
+          "tag": "单攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                1,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": 11060301,
+          "name": "领域压制",
+          "desc": "有#3[i]%的基础概率使敌方每个单体目标陷入【通解】状态，同时对敌方全体造成等同于佩拉#4[i]%攻击力的冰属性伤害。\\n【通解】状态下，敌方目标防御力降低#5[i]%，持续#6[i]回合。",
+          "simple_desc": "大概率使敌方每个单体目标陷入【通解】状态，同时对敌方全体造成冰属性伤害。\\n【通解】状态下，敌方目标防御力降低。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                30,
+                8,
+                1,
+                2,
+                0.3,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.15
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "行动时攻击敌人，施放终结技会降低敌人防御。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        60,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 11060202,
+          "name": "低温妨害",
+          "desc": "行动时解除指定敌方单体的#2[i]个增益效果，同时造成等同于佩拉#3[i]%攻击力的冰属性伤害。",
+          "simple_desc": "行动时解除指定敌方单体目标的增益效果，同时造成冰属性伤害。",
+          "type": "战技",
+          "tag": "单攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2.5,
+                1,
+                3.75
+              ]
+            }
+          }
+        },
+        {
+          "id": 11060302,
+          "name": "领域压制",
+          "desc": "有#3[i]%的基础概率使敌方每个单体目标陷入【通解】状态，同时对敌方全体造成等同于佩拉#4[i]%攻击力的冰属性伤害。\\n【通解】状态下，敌方目标防御力降低#5[i]%，持续#6[i]回合。",
+          "simple_desc": "大概率使敌方每个单体目标陷入【通解】状态，同时对敌方全体造成冰属性伤害。\\n【通解】状态下，敌方目标防御力降低。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                30,
+                8,
+                1,
+                2.5,
+                0.4,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.495
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.21
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "行动时攻击敌人，施放终结技会降低敌人防御。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        60,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 11060203,
+          "name": "低温妨害",
+          "desc": "行动时解除指定敌方单体的#2[i]个增益效果，同时造成等同于佩拉#3[i]%攻击力的冰属性伤害。",
+          "simple_desc": "行动时解除指定敌方单体目标的增益效果，同时造成冰属性伤害。",
+          "type": "战技",
+          "tag": "单攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                1,
+                5.4
+              ]
+            }
+          }
+        },
+        {
+          "id": 11060303,
+          "name": "领域压制",
+          "desc": "有#3[i]%的基础概率使敌方每个单体目标陷入【通解】状态，同时对敌方全体造成等同于佩拉#4[i]%攻击力的冰属性伤害。\\n【通解】状态下，敌方目标防御力降低#5[i]%，持续#6[i]回合。",
+          "simple_desc": "大概率使敌方每个单体目标陷入【通解】状态，同时对敌方全体造成冰属性伤害。\\n【通解】状态下，敌方目标防御力降低。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                30,
+                8,
+                1,
+                3.6,
+                0.5,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.84
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "行动时攻击敌人，施放终结技会降低敌人防御。",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 11060204,
+          "name": "低温妨害",
+          "desc": "行动时解除指定敌方单体的#2[i]个增益效果，同时造成等同于佩拉#3[i]%攻击力的冰属性伤害。",
+          "simple_desc": "行动时解除指定敌方单体目标的增益效果，同时造成冰属性伤害。",
+          "type": "战技",
+          "tag": "单攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            60,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                1,
+                8.4
+              ]
+            }
+          }
+        },
+        {
+          "id": 11060304,
+          "name": "领域压制",
+          "desc": "有#3[i]%的基础概率使敌方每个单体目标陷入【通解】状态，同时对敌方全体造成等同于佩拉#4[i]%攻击力的冰属性伤害。\\n【通解】状态下，敌方目标防御力降低#5[i]%，持续#6[i]回合。",
+          "simple_desc": "大概率使敌方每个单体目标陷入【通解】状态，同时对敌方全体造成冰属性伤害。\\n【通解】状态下，敌方目标防御力降低。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                30,
+                8,
+                1,
+                5.6,
+                0.6,
+                2
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 55
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.185
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

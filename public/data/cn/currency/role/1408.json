@@ -1,0 +1,245 @@
+{
+  "id": 1408,
+  "name": "白厄",
+  "rarity": 3,
+  "front_back_type": "Front",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    3005
+  ],
+  "traits": [
+    {
+      "id": 3005,
+      "name": "救世主",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/3005.png",
+      "desc": "白厄和卡厄斯兰那获得所有前台角色已激活的非独立羁绊效果，该效果不会影响羁绊效果激活的人数。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "获得前台队友的羁绊效果和属性，前台角色星级越高自身前台强度越高。",
+      "back_one_word_desc": "",
+      "front_power_base": 150,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14089901,
+          "name": "背负希望",
+          "desc": "战斗开始时，获得#2[i]点【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的每个星级使白厄的前台强度提高#1[i]%。",
+          "simple_desc": "战斗开始时，获得【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的星级越高，白厄的前台强度越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.4,
+                4
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 0
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "获得前台队友的羁绊效果和属性，前台角色星级越高自身前台强度越高。",
+      "back_one_word_desc": "",
+      "front_power_base": 240,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14089902,
+          "name": "背负希望",
+          "desc": "战斗开始时，获得#2[i]点【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的每个星级使白厄的前台强度提高#1[i]%。",
+          "simple_desc": "战斗开始时，获得【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的星级越高，白厄的前台强度越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.8,
+                4
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 0
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.69
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "获得前台队友的羁绊效果和属性，前台角色星级越高自身前台强度越高。",
+      "back_one_word_desc": "",
+      "front_power_base": 330,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 14089903,
+          "name": "背负希望",
+          "desc": "战斗开始时，获得#2[i]点【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的每个星级使白厄的前台强度提高#1[i]%。",
+          "simple_desc": "战斗开始时，获得【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的星级越高，白厄的前台强度越高。",
+          "type": "天赋",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.2,
+                4
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 0
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.08
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.44
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

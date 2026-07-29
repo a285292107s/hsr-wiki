@@ -1,0 +1,396 @@
+{
+  "id": 1105,
+  "name": "娜塔莎",
+  "rarity": 3,
+  "front_back_type": "Both",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1105Ultra.png",
+  "is_expert": false,
+  "trait_list": [
+    1005,
+    2005
+  ],
+  "traits": [
+    {
+      "id": 1005,
+      "name": "贝洛伯格",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1005.png",
+      "desc": "【贝洛伯格】队员行动后为【造物引擎】充能，【造物引擎】的能量充满后立即攻击敌方目标，并让本场战斗中造成伤害最多的【贝洛伯格】角色立即行动。\\n【贝洛伯格】队员和【造物引擎】的提高。"
+    },
+    {
+      "id": 2005,
+      "name": "治疗",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2005.png",
+      "desc": "我方小队的提高#1[i]%。【治疗】队员的提高。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "终结技会使目标获得【礼物】，造成的伤害提高并每回合回复生命值。",
+      "back_one_word_desc": "敌人攻击后娜塔莎恢复能量。终结技会使目标获得【礼物】，造成的伤害提高并每回合回复生命值。",
+      "front_power_base": 150,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 11050301,
+          "name": "新生之礼",
+          "desc": "立即为我方全体前台目标回复等同于娜塔莎#1[f1]%生命上限+#2[i]的生命值。对所有目标提供#3[i]~#4[i]个【礼物】：每层使造成的伤害提高#5[i]%，持续#6[i]回合，最多叠加#7[i]层，并在行动时回复等同于娜塔莎#8[f1]%生命上限+#9[i]的生命值。",
+          "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.15,
+                300,
+                1,
+                3,
+                0.2,
+                2,
+                5,
+                0.075,
+                150
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 11050301,
+          "name": "新生之礼",
+          "desc": "立即为我方全体前台目标回复等同于娜塔莎#2[f1]%生命上限+#3[i]的生命值。并送出#4[i]~#5[i]个【礼物】，每层使造成的伤害提高#6[i]%，持续#7[i]回合，最多#8[i]层，并在行动时恢复娜塔莎#9[f1]%生命上限+#10[i]的生命值。",
+          "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                15,
+                0.12,
+                240,
+                1,
+                3,
+                0.2,
+                2,
+                5,
+                0.06,
+                120
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 45
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.2
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "终结技会使目标获得【礼物】，造成的伤害提高并每回合回复生命值。",
+      "back_one_word_desc": "敌人攻击后娜塔莎恢复能量。终结技会使目标获得【礼物】，造成的伤害提高并每回合回复生命值。",
+      "front_power_base": 195,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 70,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 11050302,
+          "name": "新生之礼",
+          "desc": "立即为我方全体前台目标回复等同于娜塔莎#1[f1]%生命上限+#2[i]的生命值。对所有目标提供#3[i]~#4[i]个【礼物】：每层使造成的伤害提高#5[i]%，持续#6[i]回合，最多叠加#7[i]层，并在行动时回复等同于娜塔莎#8[f1]%生命上限+#9[i]的生命值。",
+          "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.175,
+                350,
+                1,
+                3,
+                0.3,
+                2,
+                5,
+                0.0875,
+                175
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 11050302,
+          "name": "新生之礼",
+          "desc": "立即为我方全体前台目标回复等同于娜塔莎#2[f1]%生命上限+#3[i]的生命值。并送出#4[i]~#5[i]个【礼物】，每层使造成的伤害提高#6[i]%，持续#7[i]回合，最多#8[i]层，并在行动时恢复娜塔莎#9[f1]%生命上限+#10[i]的生命值。",
+          "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                15,
+                0.14,
+                280,
+                1,
+                3,
+                0.3,
+                2,
+                5,
+                0.07,
+                140
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 45
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.44
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "终结技会使目标获得【礼物】，造成的伤害提高并每回合回复生命值。",
+      "back_one_word_desc": "敌人攻击后娜塔莎恢复能量。终结技会使目标获得【礼物】，造成的伤害提高并每回合回复生命值。",
+      "front_power_base": 240,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 80,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [
+        {
+          "id": 11050303,
+          "name": "新生之礼",
+          "desc": "立即为我方全体前台目标回复等同于娜塔莎#1[f1]%生命上限+#2[i]的生命值。对所有目标提供#3[i]~#4[i]个【礼物】：每层使造成的伤害提高#5[i]%，持续#6[i]回合，最多叠加#7[i]层，并在行动时回复等同于娜塔莎#8[f1]%生命上限+#9[i]的生命值。",
+          "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
+          "type": "终结技",
+          "tag": "强化",
+          "sp_base": 0.5,
+          "bp_need": null,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.225,
+                450,
+                1,
+                3,
+                0.4,
+                2,
+                5,
+                0.1125,
+                225
+              ]
+            }
+          }
+        }
+      ],
+      "back_show_skill": [
+        {
+          "id": 11050303,
+          "name": "新生之礼",
+          "desc": "立即为我方全体前台目标回复等同于娜塔莎#2[f1]%生命上限+#3[i]的生命值。并送出#4[i]~#5[i]个【礼物】，每层使造成的伤害提高#6[i]%，持续#7[i]回合，最多#8[i]层，并在行动时恢复娜塔莎#9[f1]%生命上限+#10[i]的生命值。",
+          "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                15,
+                0.18,
+                360,
+                1,
+                3,
+                0.4,
+                2,
+                5,
+                0.09,
+                180
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 45
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.68
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

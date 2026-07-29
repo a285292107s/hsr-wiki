@@ -18,6 +18,7 @@ from textmap import load_textmap
 from converters import paths, elements, items, properties
 from converters import characters, character_ranks, character_skills, character_detail
 from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame
+from converters import currency  # noqa: E402 – 本地数据，无需网络
 
 logging.basicConfig(
     level=logging.INFO,
@@ -66,6 +67,10 @@ def main() -> None:
     # 7. 终局内容数据（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）
     logger.info("--- 终局内容数据 ---")
     endgame.convert()
+
+    # 8. 货币战争角色数据（从本地子模块读取）
+    logger.info("--- 货币战争角色数据 ---")
+    currency.convert()
 
     elapsed = time.time() - start
     logger.info("=== 转换完成，耗时 %.1fs ===", elapsed)

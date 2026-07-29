@@ -1,0 +1,468 @@
+{
+  "id": 1303,
+  "name": "阮•梅",
+  "rarity": 2,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "Speed"
+  ],
+  "max_sp_icon": "",
+  "is_expert": false,
+  "trait_list": [
+    1003,
+    2002
+  ],
+  "traits": [
+    {
+      "id": 1003,
+      "name": "银河学者",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1003.png",
+      "desc": "战斗开始时，基于【银河学者】角色的星级叠加【猫猫糕】，并在战斗后根据层数获得额外奖励。"
+    },
+    {
+      "id": 2002,
+      "name": "击破",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2002.png",
+      "desc": "【击破】队员的前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "终结技使我方小队全属性抗性穿透提高并在攻击后施加【残梅绽】，触发时可充能【击破】羁绊。我方小队伤害和击破效率提高。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13030201,
+          "name": "慢捻抹复挑",
+          "desc": "使我方小队弱点击破效率提高#2[i]%，造成的伤害提高#1[i]%，羁绊内队员造成的伤害提高双倍。",
+          "simple_desc": "我方小队造成的伤害和弱点击破效率提高。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.6,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13030301,
+          "name": "摇花缎水，沾衣不摘",
+          "desc": "阮•梅展开结界，结界关闭前不会进入自己的回合且无法行动。处于结界中时我方小队全属性抗性穿透提高#2[f1]%，羁绊内队员提高双倍。且攻击后会对敌方目标施加【残梅绽】。\\n【残梅绽】会在敌方目标尝试从弱点击破状态恢复时触发，延长目标的弱点击破状态并使其行动延后，延后数值等同于阮•梅#3[i]%的击破特攻+#4[i]%，并对其造成等同于阮•梅#5[i]%冰属性击破伤害的击破伤害。【残梅绽】触发时，【击破】羁绊的【冲击波】会获得#7[i]点充能。\\n敌方目标从弱点击破状态恢复前不可被再次附加【残梅绽】。\\n行动序列上出现【绽放】倒计时，倒计时回合开始时阮梅关闭结界并恢复行动，倒计时固定拥有#6[i]点速度。",
+          "simple_desc": "展开结界使我方小队全属性抗性穿透提高，攻击后附加【残梅绽】。【残梅绽】触发时，【击破】羁绊的【冲击波】会获得充能。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2,
+                0.2,
+                0.2,
+                0.1,
+                0.5,
+                200,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.15
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.1
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "终结技使我方小队全属性抗性穿透提高并在攻击后施加【残梅绽】，触发时可充能【击破】羁绊。我方小队伤害和击破效率提高。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13030202,
+          "name": "慢捻抹复挑",
+          "desc": "使我方小队弱点击破效率提高#2[i]%，造成的伤害提高#1[i]%，羁绊内队员造成的伤害提高双倍。",
+          "simple_desc": "我方小队造成的伤害和弱点击破效率提高。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.75,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13030302,
+          "name": "摇花缎水，沾衣不摘",
+          "desc": "阮•梅展开结界，结界关闭前不会进入自己的回合且无法行动。处于结界中时我方小队全属性抗性穿透提高#2[f1]%，羁绊内队员提高双倍。且攻击后会对敌方目标施加【残梅绽】。\\n【残梅绽】会在敌方目标尝试从弱点击破状态恢复时触发，延长目标的弱点击破状态并使其行动延后，延后数值等同于阮•梅#3[i]%的击破特攻+#4[i]%，并对其造成等同于阮•梅#5[i]%冰属性击破伤害的击破伤害。【残梅绽】触发时，【击破】羁绊的【冲击波】会获得#7[i]点充能。\\n敌方目标从弱点击破状态恢复前不可被再次附加【残梅绽】。\\n行动序列上出现【绽放】倒计时，倒计时回合开始时阮梅关闭结界并恢复行动，倒计时固定拥有#6[i]点速度。",
+          "simple_desc": "展开结界使我方小队全属性抗性穿透提高，攻击后附加【残梅绽】。【残梅绽】触发时，【击破】羁绊的【冲击波】会获得充能。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2.5,
+                0.25,
+                0.2,
+                0.1,
+                1,
+                200,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.495
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.21
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "终结技使我方小队全属性抗性穿透提高并在攻击后施加【残梅绽】，触发时可充能【击破】羁绊。我方小队伤害和击破效率提高。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        0,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13030203,
+          "name": "慢捻抹复挑",
+          "desc": "使我方小队弱点击破效率提高#2[i]%，造成的伤害提高#1[i]%，羁绊内队员造成的伤害提高双倍。",
+          "simple_desc": "我方小队造成的伤害和弱点击破效率提高。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                0.9,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13030303,
+          "name": "摇花缎水，沾衣不摘",
+          "desc": "阮•梅展开结界，结界关闭前不会进入自己的回合且无法行动。处于结界中时我方小队全属性抗性穿透提高#2[f1]%，羁绊内队员提高双倍。且攻击后会对敌方目标施加【残梅绽】。\\n【残梅绽】会在敌方目标尝试从弱点击破状态恢复时触发，延长目标的弱点击破状态并使其行动延后，延后数值等同于阮•梅#3[i]%的击破特攻+#4[i]%，并对其造成等同于阮•梅#5[i]%冰属性击破伤害的击破伤害。【残梅绽】触发时，【击破】羁绊的【冲击波】会获得#7[i]点充能。\\n敌方目标从弱点击破状态恢复前不可被再次附加【残梅绽】。\\n行动序列上出现【绽放】倒计时，倒计时回合开始时阮梅关闭结界并恢复行动，倒计时固定拥有#6[i]点速度。",
+          "simple_desc": "展开结界使我方小队全属性抗性穿透提高，攻击后附加【残梅绽】。【残梅绽】触发时，【击破】羁绊的【冲击波】会获得充能。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                0.3,
+                0.2,
+                0.1,
+                1.5,
+                200,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.84
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "4": {
+      "star": 4,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "终结技使我方小队全属性抗性穿透提高并在攻击后施加【残梅绽】，触发时可充能【击破】羁绊。我方小队伤害和击破效率提高。",
+      "front_power_base": 280,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 13030204,
+          "name": "慢捻抹复挑",
+          "desc": "使我方小队弱点击破效率提高#2[i]%，造成的伤害提高#1[i]%，羁绊内队员造成的伤害提高双倍。",
+          "simple_desc": "我方小队造成的伤害和弱点击破效率提高。",
+          "type": "战技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.05,
+                0.5
+              ]
+            }
+          }
+        },
+        {
+          "id": 13030304,
+          "name": "摇花缎水，沾衣不摘",
+          "desc": "阮•梅展开结界，结界关闭前不会进入自己的回合且无法行动。处于结界中时我方小队全属性抗性穿透提高#2[f1]%，羁绊内队员提高双倍。且攻击后会对敌方目标施加【残梅绽】。\\n【残梅绽】会在敌方目标尝试从弱点击破状态恢复时触发，延长目标的弱点击破状态并使其行动延后，延后数值等同于阮•梅#3[i]%的击破特攻+#4[i]%，并对其造成等同于阮•梅#5[i]%冰属性击破伤害的击破伤害。【残梅绽】触发时，【击破】羁绊的【冲击波】会获得#7[i]点充能。\\n敌方目标从弱点击破状态恢复前不可被再次附加【残梅绽】。\\n行动序列上出现【绽放】倒计时，倒计时回合开始时阮梅关闭结界并恢复行动，倒计时固定拥有#6[i]点速度。",
+          "simple_desc": "展开结界使我方小队全属性抗性穿透提高，攻击后附加【残梅绽】。【残梅绽】触发时，【击破】羁绊的【冲击波】会获得充能。",
+          "type": "终结技",
+          "tag": "辅助",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                3,
+                0.35,
+                0.2,
+                0.1,
+                2,
+                200,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 1
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.185
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.43
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}

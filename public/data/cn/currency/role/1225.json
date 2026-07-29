@@ -1,0 +1,357 @@
+{
+  "id": 1225,
+  "name": "忘归人",
+  "rarity": 3,
+  "front_back_type": "Back",
+  "heal_or_shield_display": "Healer",
+  "charge_type": [
+    "MaxSP"
+  ],
+  "max_sp_icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_1225Ultra.png",
+  "is_expert": false,
+  "trait_list": [
+    1007,
+    2002
+  ],
+  "traits": [
+    {
+      "id": 1007,
+      "name": "仙舟",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1007.png",
+      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前/后台强度和提高。"
+    },
+    {
+      "id": 2002,
+      "name": "击破",
+      "activation_type": "GreaterEqualThan",
+      "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2002.png",
+      "desc": "【击破】队员的前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。"
+    }
+  ],
+  "stars": {
+    "1": {
+      "star": 1,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "我方可无视属性削韧、多次造成击破伤害。敌人韧性降低后忘归人恢复能量，终结技攻击敌人可叠加易伤。",
+      "front_power_base": 100,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 12250301,
+          "name": "阳极照世，离火满缀",
+          "desc": "对敌方全体造成等同于忘归人#3[i]%攻击力的火属性伤害，并使所有敌方目标受到的伤害增加#4[i]%，持续#5[i]回合。本次攻击无视弱点属性削减敌方全体目标的韧性，击破弱点时，触发火属性的弱点击破效果。",
+          "simple_desc": "对敌方全体造成火属性伤害，并使其受到的伤害提高。本次攻击无视弱点属性削减敌方全体的韧性。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            60,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                5,
+                2,
+                0.35,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 12250401,
+          "name": "善盈后福，德气流布",
+          "desc": "敌方目标会被额外附上等同于自身韧性上限#2[i]%的【云火昭】。\\n我方攻击处于弱点击破状态的敌方目标后，会将本次攻击的削韧值转化为1次#1[i]%的超击破伤害。且我方小队的攻击无视弱点属性削减敌方的韧性，削韧值为弱点属性削韧值的50%。",
+          "simple_desc": "敌方目标会被额外附上【云火昭】。\\n我方攻击处于弱点击破状态的敌方目标后，会造成超击破伤害。且我方小队的攻击无视弱点属性削减敌方的韧性。",
+          "type": "天赋",
+          "tag": "妨害",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1,
+                0.5
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.3
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.2
+        }
+      ]
+    },
+    "2": {
+      "star": 2,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "我方可无视属性削韧、多次造成击破伤害。敌人韧性降低后忘归人恢复能量，终结技攻击敌人可叠加易伤。",
+      "front_power_base": 160,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 12250302,
+          "name": "阳极照世，离火满缀",
+          "desc": "对敌方全体造成等同于忘归人#3[i]%攻击力的火属性伤害，并使所有敌方目标受到的伤害增加#4[i]%，持续#5[i]回合。本次攻击无视弱点属性削减敌方全体目标的韧性，击破弱点时，触发火属性的弱点击破效果。",
+          "simple_desc": "对敌方全体造成火属性伤害，并使其受到的伤害提高。本次攻击无视弱点属性削减敌方全体的韧性。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            90,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                5,
+                3,
+                0.45,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 12250402,
+          "name": "善盈后福，德气流布",
+          "desc": "敌方目标会被额外附上等同于自身韧性上限#2[i]%的【云火昭】。\\n我方攻击处于弱点击破状态的敌方目标后，会将本次攻击的削韧值转化为1次#1[i]%的超击破伤害。且我方小队的攻击无视弱点属性削减敌方的韧性，削韧值为弱点属性削韧值的50%。",
+          "simple_desc": "敌方目标会被额外附上【云火昭】。\\n我方攻击处于弱点击破状态的敌方目标后，会造成超击破伤害。且我方小队的攻击无视弱点属性削减敌方的韧性。",
+          "type": "天赋",
+          "tag": "妨害",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                1.6,
+                0.5
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 0.69
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.32
+        }
+      ]
+    },
+    "3": {
+      "star": 3,
+      "front_one_word_desc": "",
+      "back_one_word_desc": "我方可无视属性削韧、多次造成击破伤害。敌人韧性降低后忘归人恢复能量，终结技攻击敌人可叠加易伤。",
+      "front_power_base": 220,
+      "back_power_base": null,
+      "back_speed_rewrite": null,
+      "back_speed_added_ratio": null,
+      "back_energy_bar": null,
+      "back_max_sp": null,
+      "back_initial_sp": null,
+      "back_initial_energy_bar": null,
+      "luck_chance": 0.05,
+      "luck_damage": 1,
+      "extra_heal_base": 60,
+      "extra_shield_base": 60,
+      "stance_damage_display": null,
+      "show_stance_list": [
+        0,
+        60,
+        0
+      ],
+      "recommend": null,
+      "front_show_skill": [],
+      "back_show_skill": [
+        {
+          "id": 12250303,
+          "name": "阳极照世，离火满缀",
+          "desc": "对敌方全体造成等同于忘归人#3[i]%攻击力的火属性伤害，并使所有敌方目标受到的伤害增加#4[i]%，持续#5[i]回合。本次攻击无视弱点属性削减敌方全体目标的韧性，击破弱点时，触发火属性的弱点击破效果。",
+          "simple_desc": "对敌方全体造成火属性伤害，并使其受到的伤害提高。本次攻击无视弱点属性削减敌方全体的韧性。",
+          "type": "终结技",
+          "tag": "群攻",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            120,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                10,
+                5,
+                4,
+                0.6,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": 12250403,
+          "name": "善盈后福，德气流布",
+          "desc": "敌方目标会被额外附上等同于自身韧性上限#2[i]%的【云火昭】。\\n我方攻击处于弱点击破状态的敌方目标后，会将本次攻击的削韧值转化为1次#1[i]%的超击破伤害。且我方小队的攻击无视弱点属性削减敌方的韧性，削韧值为弱点属性削韧值的50%。",
+          "simple_desc": "敌方目标会被额外附上【云火昭】。\\n我方攻击处于弱点击破状态的敌方目标后，会造成超击破伤害。且我方小队的攻击无视弱点属性削减敌方的韧性。",
+          "type": "天赋",
+          "tag": "妨害",
+          "sp_base": null,
+          "bp_need": -1,
+          "bp_add": null,
+          "show_stance_list": [
+            0,
+            0,
+            0
+          ],
+          "skill_combo_value_delta": null,
+          "extra": {},
+          "level": {
+            "1": {
+              "level": 1,
+              "param_list": [
+                2.4,
+                0.5
+              ]
+            }
+          }
+        }
+      ],
+      "servant_show_skill": [],
+      "general_property_modify_list": [
+        {
+          "name": "ExtraAllDamageTypeAddedRatio4",
+          "property_type": "ExtraAllDamageTypeAddedRatio4",
+          "value": 0.5
+        },
+        {
+          "name": "ExtraInitSP",
+          "property_type": "ExtraInitSP",
+          "value": 65
+        },
+        {
+          "name": "ExtraHPAddedRatio2",
+          "property_type": "ExtraHPAddedRatio2",
+          "value": 1.08
+        },
+        {
+          "name": "ExtraSpeedAddedRatio2",
+          "property_type": "ExtraSpeedAddedRatio2",
+          "value": 0.44
+        }
+      ]
+    }
+  },
+  "rank": [],
+  "equipment": []
+}
