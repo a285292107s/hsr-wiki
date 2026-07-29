@@ -40,8 +40,20 @@ __pycache__
 # Local reference data
 cdn-samples
 
-# Test screenshots (root-level)
+# Image formats (root-level)
 /*.png
+/*.jpg
+/*.jpeg
+/*.gif
+/*.bmp
+/*.webp
+/*.svg
+/*.ico
+/*.tif
+/*.tiff
+/*.avif
+/*.heic
+/*.heif
 
 # Qoder
 .qoder
