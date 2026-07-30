@@ -290,26 +290,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030307,
-            35030102,
-            35030708
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            }
           ],
           "second": [
-            35030202,
-            35030208,
-            35030101
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030101,
-            35030507,
-            35030708
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            }
           ],
           "second": [
-            35030303,
-            35030208,
-            35030107
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            }
           ]
         }
       },
@@ -486,26 +534,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030307,
-            35030102,
-            35030708
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            }
           ],
           "second": [
-            35030202,
-            35030208,
-            35030101
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030101,
-            35030507,
-            35030708
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            }
           ],
           "second": [
-            35030303,
-            35030208,
-            35030107
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            }
           ]
         }
       },
@@ -682,26 +778,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030307,
-            35030102,
-            35030708
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            }
           ],
           "second": [
-            35030202,
-            35030208,
-            35030101
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030101,
-            35030507,
-            35030708
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            }
           ],
           "second": [
-            35030303,
-            35030208,
-            35030107
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            }
           ]
         }
       },
@@ -878,26 +1022,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030307,
-            35030102,
-            35030708
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            }
           ],
           "second": [
-            35030202,
-            35030208,
-            35030101
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030101,
-            35030507,
-            35030708
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            }
           ],
           "second": [
-            35030303,
-            35030208,
-            35030107
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            }
           ]
         }
       },

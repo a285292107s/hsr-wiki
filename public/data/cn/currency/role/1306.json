@@ -139,8 +139,8 @@
       "name": "战技点",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2011.png",
-      "desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
-      "simple_desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
+      "desc": "我方战技点上限提高，我方小队获得速度增幅，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
+      "simple_desc": "我方战技点上限提高，我方小队获得速度增幅，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
       "desc_params": [
         2,
         0.12,
@@ -157,7 +157,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.12,
             0.12
@@ -180,7 +180,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.24,
             0.24
@@ -203,7 +203,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.4,
             0.4
@@ -226,7 +226,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.8,
             0.8
@@ -275,26 +275,74 @@
       "recommend": {
         "back": {
           "first": [
-            35030206,
-            35030203,
-            35030308
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030407,
-            35030606,
-            35030106
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         },
         "front": {
           "first": [
-            35030206,
-            35030203,
-            35030308
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030407,
-            35030606,
-            35030106
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         }
       },
@@ -425,26 +473,74 @@
       "recommend": {
         "back": {
           "first": [
-            35030206,
-            35030203,
-            35030308
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030407,
-            35030606,
-            35030106
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         },
         "front": {
           "first": [
-            35030206,
-            35030203,
-            35030308
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030407,
-            35030606,
-            35030106
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         }
       },
@@ -575,26 +671,74 @@
       "recommend": {
         "back": {
           "first": [
-            35030206,
-            35030203,
-            35030308
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030407,
-            35030606,
-            35030106
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         },
         "front": {
           "first": [
-            35030206,
-            35030203,
-            35030308
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030407,
-            35030606,
-            35030106
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         }
       },
@@ -721,26 +865,74 @@
       "recommend": {
         "back": {
           "first": [
-            35030206,
-            35030203,
-            35030308
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030407,
-            35030606,
-            35030106
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         },
         "front": {
           "first": [
-            35030206,
-            35030203,
-            35030308
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030407,
-            35030606,
-            35030106
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         }
       },

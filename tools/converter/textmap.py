@@ -65,12 +65,12 @@ def clean_text(text: str) -> str:
 # key 为去末尾数字后缀后的属性类型（如 ExtraHPAddedRatio1 → ExtraHPAddedRatio）
 _PROPERTY_LABEL: dict[str, str] = {
     "ExtraAllDamageTypeAddedRatio": "全伤害",
-    "ExtraHPAddedRatio": "生命值",
-    "ExtraAttackAddedRatio": "攻击力",
-    "ExtraDefenceAddedRatio": "防御力",
-    "ExtraSpeedAddedRatio": "速度",
-    "ExtraBackPowerAddedRatio": "后排战力",
-    "ExtraFrontPowerAddedRatio": "前排战力",
+    "ExtraHPAddedRatio": "生命增幅",
+    "ExtraAttackAddedRatio": "攻击增幅",
+    "ExtraDefenceAddedRatio": "防御增幅",
+    "ExtraSpeedAddedRatio": "速度增幅",
+    "ExtraBackPowerAddedRatio": "后台强度",
+    "ExtraFrontPowerAddedRatio": "前台强度",
     "ExtraShieldAddedRatio": "护盾量",
     "ExtraCriticalChanceBase": "暴击率",
     "ExtraCriticalDamageBase": "暴击伤害",

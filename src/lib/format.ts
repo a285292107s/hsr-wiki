@@ -105,6 +105,32 @@ export function fmtDesc(
   return s;
 }
 
+/**
+ * 跨星级合并渲染技能描述：每个 #N[tag]% 占位符按各星级参数集逐一取值，
+ * 以斜杠分隔（对齐官方 Wiki 的 200/250/300/300% 样式）。
+ * 各星级值全部相同时仅显示单个值。
+ */
+export function fmtDescMerged(
+  desc: string | null | undefined,
+  paramSets: Array<number[] | null | undefined>,
+): string {
+  if (!desc) return '';
+  let s = gameTagsToHtml(desc);
+  const sets = paramSets.filter((p): p is number[] => Array.isArray(p) && p.length > 0);
+  const rep = (i: string, t: string, pct: string): string => {
+    const idx = parseInt(i) - 1;
+    if (!sets.length) return `<span class="hl">?${pct}</span>`;
+    const vals = sets.map((p) => fmtVal(p[idx], t, pct === '%'));
+    const allSame = vals.every((v) => v === vals[0]);
+    const text = allSame ? `${vals[0]}${pct}` : vals.join('/') + pct;
+    return `<span class="hl">${text}</span>`;
+  };
+  s = s.replace(/#(\d+)\[([^\]]*)\](%?)/g, (_, i: string, t: string, pct: string) => rep(i, t, pct));
+  s = s.replace(/#(\d+)/g, (_, i: string) => rep(i, '', ''));
+  s = s.replace(/\\n|\n/g, '<br>');
+  return s;
+}
+
 /** 韧性条格式化（show_stance_list /3 保留 2 位） */
 export function fmtToughness(sk: Skill): string {
   const list = sk.show_stance_list;

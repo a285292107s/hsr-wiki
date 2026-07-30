@@ -12,6 +12,7 @@
   - GridFightBackRoleRank.json          → 后台角色命座（BackendRankList 引用）
   - GridFightBackEquipment.json         → 专属装备（EquipmentID 引用，按等级）
   - GridFightRoleRecommendEquip.json    → 推荐装备 ID 列表
+  - GridFightItems.json                 → 装备名称/图标（推荐装备解析）
   - GridFightServantStar.json           → 随从星级配置（随从技能列表）
   - GridFightServantSkill.json          → 随从技能文本
   - TextMap/TextMapCHS.json             → 中文文本映射
@@ -148,11 +149,24 @@ def _index_equipment(data: list[dict]) -> dict[int, list[dict]]:
     return out
 
 
-def _index_recommend(data: list[dict]) -> dict[int, dict]:
+def _index_recommend(data: list[dict], items_index: dict[int, dict] | None = None) -> dict[int, dict]:
     """GridFightRoleRecommendEquip.json → RoleID → 推荐装备。
 
     输出格式：{"front": {"first": [...], "second": [...]}, "back": {...}}
+    每个装备条目为 {"id": ..., "name": ..., "icon": ...}（从 GridFightItems 解析名称/图标）。
     """
+    items_index = items_index or {}
+
+    def _equip(eid: int) -> dict:
+        it = items_index.get(eid)
+        if it is None:
+            return {"id": eid, "name": "", "icon": ""}
+        return {
+            "id": eid,
+            "name": resolve_text(it.get("ItemName", {})),
+            "icon": it.get("IconPath", "") or "",
+        }
+
     out: dict[int, dict] = {}
     for entry in data:
         rid = entry.get("RoleID")
@@ -161,8 +175,8 @@ def _index_recommend(data: list[dict]) -> dict[int, dict]:
         fb = str(entry.get("FrontBackType", "")).lower()
         node = out.setdefault(rid, {})
         node[fb] = {
-            "first": list(entry.get("FirstRecommendEquipList") or []),
-            "second": list(entry.get("SecondRecommendEquipList") or []),
+            "first": [_equip(e) for e in (entry.get("FirstRecommendEquipList") or [])],
+            "second": [_equip(e) for e in (entry.get("SecondRecommendEquipList") or [])],
         }
     return out
 
@@ -203,7 +217,8 @@ def convert() -> None:
     trait_layers = _index_trait_layers(_load_excel("GridFightTraitLayer.json"), trait_mazebuff_index)
     rank_index = _build_index(_load_excel("GridFightBackRoleRank.json"), "RankID")
     equip_by_role = _index_equipment(_load_excel("GridFightBackEquipment.json"))
-    recommend_by_role = _index_recommend(_load_excel("GridFightRoleRecommendEquip.json"))
+    items_index = _build_index(_load_excel("GridFightItems.json"), "ID")
+    recommend_by_role = _index_recommend(_load_excel("GridFightRoleRecommendEquip.json"), items_index)
     servant_star_index = _index_servant_star(_load_excel("GridFightServantStar.json"))
     servant_skills = _build_index(_load_excel("GridFightServantSkill.json"), "SkillID")
     skill_extra = _build_index(_load_excel("GridFightBackSkillExtraDesc.json"), "SkillID")

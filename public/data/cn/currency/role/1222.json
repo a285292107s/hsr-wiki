@@ -18,8 +18,8 @@
       "name": "狼狩",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1008.png",
-      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
-      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
       "desc_params": [
         10,
         0.5,
@@ -29,7 +29,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.15,
             0.15
@@ -51,7 +51,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.3,
             0.3
@@ -73,7 +73,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.5,
             0.5
@@ -95,7 +95,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.9,
             0.9
@@ -121,8 +121,8 @@
       "name": "击破",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2002.png",
-      "desc": "【击破】队员的前排战力后排战力前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。",
-      "simple_desc": "【击破】队员的前排战力后排战力前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌人的初始韧性和韧性恢复量降低。",
+      "desc": "【击破】队员的前台强度后台强度前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌方目标的初始韧性和韧性恢复量降低。",
+      "simple_desc": "【击破】队员的前台强度后台强度前/后台强度提高，并在攻击处于弱点击破状态的敌方目标后造成超击破伤害。\\n敌人的初始韧性和韧性恢复量降低。",
       "desc_params": [
         1.2,
         0.1,
@@ -139,7 +139,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.2,
             0.2
@@ -161,7 +161,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.6,
             0.6
@@ -183,7 +183,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1.5,
             1.5
@@ -205,7 +205,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             3.2,
             3.2
@@ -231,8 +231,8 @@
       "name": "治疗",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2005.png",
-      "desc": "我方小队的生命值提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
-      "simple_desc": "我方小队的生命值提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
+      "desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
+      "simple_desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
       "desc_params": [
         0.12,
         0.2,
@@ -346,26 +346,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030707,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030707,
+              "name": "虫洞掘进钻头",
+              "icon": "SpriteOutput/GridFight/Equipment/35030707.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030105,
-            35030607
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030707,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030707,
+              "name": "虫洞掘进钻头",
+              "icon": "SpriteOutput/GridFight/Equipment/35030707.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030105,
-            35030607
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         }
       },
@@ -482,26 +530,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030707,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030707,
+              "name": "虫洞掘进钻头",
+              "icon": "SpriteOutput/GridFight/Equipment/35030707.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030105,
-            35030607
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030707,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030707,
+              "name": "虫洞掘进钻头",
+              "icon": "SpriteOutput/GridFight/Equipment/35030707.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030105,
-            35030607
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         }
       },
@@ -618,26 +714,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030707,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030707,
+              "name": "虫洞掘进钻头",
+              "icon": "SpriteOutput/GridFight/Equipment/35030707.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030105,
-            35030607
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030707,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030707,
+              "name": "虫洞掘进钻头",
+              "icon": "SpriteOutput/GridFight/Equipment/35030707.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030105,
-            35030607
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         }
       },
@@ -754,26 +898,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030707,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030707,
+              "name": "虫洞掘进钻头",
+              "icon": "SpriteOutput/GridFight/Equipment/35030707.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030105,
-            35030607
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030707,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030707,
+              "name": "虫洞掘进钻头",
+              "icon": "SpriteOutput/GridFight/Equipment/35030707.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030105,
-            35030607
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         }
       },

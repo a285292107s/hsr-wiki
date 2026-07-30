@@ -21,14 +21,14 @@
       "name": "命运圣杯",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1013.png",
-      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前排战力后排战力前/后台强度提高。",
-      "simple_desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前排战力后排战力前/后台强度提高。",
+      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前台强度后台强度前/后台强度提高。",
+      "simple_desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前台强度后台强度前/后台强度提高。",
       "desc_params": [],
       "layers": [
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.25,
             0.25
@@ -39,7 +39,7 @@
         {
           "layer": 3,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.5,
             0.5
@@ -50,7 +50,7 @@
         {
           "layer": 4,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1,
             1
@@ -61,7 +61,7 @@
         {
           "layer": 5,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1.8,
             1.8
@@ -180,26 +180,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030808,
-            35030202,
-            35030204
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030101,
-            35030102,
-            35030205
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030808,
-            35030303,
-            35030304
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            },
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            }
           ],
           "second": [
-            35030101,
-            35030102,
-            35030205
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         }
       },
@@ -541,26 +589,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030808,
-            35030202,
-            35030204
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030101,
-            35030102,
-            35030205
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030808,
-            35030303,
-            35030304
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            },
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            }
           ],
           "second": [
-            35030101,
-            35030102,
-            35030205
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         }
       },
@@ -902,26 +998,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030808,
-            35030202,
-            35030204
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030101,
-            35030102,
-            35030205
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030808,
-            35030303,
-            35030304
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            },
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            }
           ],
           "second": [
-            35030101,
-            35030102,
-            35030205
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         }
       },
@@ -1263,26 +1407,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030808,
-            35030202,
-            35030204
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030101,
-            35030102,
-            35030205
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030808,
-            35030303,
-            35030304
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            },
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            }
           ],
           "second": [
-            35030101,
-            35030102,
-            35030205
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         }
       },

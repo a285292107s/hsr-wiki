@@ -187,26 +187,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030107,
-            35030307,
-            35030205
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030507,
-            35030308,
-            35030303
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030107,
-            35030307,
-            35030205
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030507,
-            35030308,
-            35030303
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -386,26 +434,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030107,
-            35030307,
-            35030205
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030507,
-            35030308,
-            35030303
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030107,
-            35030307,
-            35030205
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030507,
-            35030308,
-            35030303
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -585,26 +681,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030107,
-            35030307,
-            35030205
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030507,
-            35030308,
-            35030303
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030107,
-            35030307,
-            35030205
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030507,
-            35030308,
-            35030303
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },

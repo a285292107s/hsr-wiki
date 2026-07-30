@@ -17,8 +17,8 @@
       "name": "昼之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
-      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
-      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前台强度后台强度前/后台强度和速度增幅提高。",
+      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前台强度后台强度前/后台强度和速度增幅提高。",
       "desc_params": [
         10
       ],
@@ -26,7 +26,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度，#3[i]%速度增幅。",
           "params": [
             0.1,
             0.1,
@@ -54,7 +54,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.18,
             0.18,
@@ -82,7 +82,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.36,
             0.36,
@@ -110,7 +110,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.6,
             0.6,
@@ -230,26 +230,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030307,
-            35030202,
-            35030308
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030205,
-            35030808,
-            35030105
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030307,
-            35030202,
-            35030308
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030205,
-            35030808,
-            35030105
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            }
           ]
         }
       },
@@ -330,26 +378,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030307,
-            35030202,
-            35030308
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030205,
-            35030808,
-            35030105
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030307,
-            35030202,
-            35030308
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030205,
-            35030808,
-            35030105
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            }
           ]
         }
       },
@@ -430,26 +526,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030307,
-            35030202,
-            35030308
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030205,
-            35030808,
-            35030105
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030307,
-            35030202,
-            35030308
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030205,
-            35030808,
-            35030105
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030105,
+              "name": "步步生花",
+              "icon": "SpriteOutput/GridFight/Equipment/35030105.png"
+            }
           ]
         }
       },

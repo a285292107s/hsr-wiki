@@ -224,11 +224,11 @@
 /* ─── 挂载容器 ─── */
 /* overflow: clip —— 页面过渡期间 translate 位移会溢出边界，不裁切会导致视口滚动条闪现→内容抖动（各页面均内部滚动，裁切安全；fixed 的侧边栏/Toast 不受影响） */
 #app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
-#app h1, #app h2, #app h3, #app p, #app dl, #app dt, #app dd { margin: 0; padding: 0; }
-#app * { box-sizing: border-box; }
-#app button { font: inherit; color: inherit; cursor: pointer; }
-#app img { display: inline-block; vertical-align: middle; }
-#app a { color: inherit; text-decoration: none; }
+:where(#app) h1, :where(#app) h2, :where(#app) h3, :where(#app) p, :where(#app) dl, :where(#app) dt, :where(#app) dd { margin: 0; padding: 0; }
+:where(#app) * { box-sizing: border-box; }
+:where(#app) button { font: inherit; color: inherit; cursor: pointer; }
+:where(#app) img { display: inline-block; vertical-align: middle; }
+:where(#app) a { color: inherit; text-decoration: none; }
 
 /* ─── 角色详情页滚动容器（CharacterView 根元素） ─── */
 .nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; }

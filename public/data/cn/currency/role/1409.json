@@ -18,8 +18,8 @@
       "name": "昼之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
-      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
-      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前排战力后排战力前/后台强度和速度提高。",
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前台强度后台强度前/后台强度和速度增幅提高。",
+      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前台强度后台强度前/后台强度和速度增幅提高。",
       "desc_params": [
         10
       ],
@@ -27,7 +27,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度，#3[i]%速度增幅。",
           "params": [
             0.1,
             0.1,
@@ -55,7 +55,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.18,
             0.18,
@@ -83,7 +83,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.36,
             0.36,
@@ -111,7 +111,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.6,
             0.6,
@@ -143,8 +143,8 @@
       "name": "治疗",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2005.png",
-      "desc": "我方小队的生命值提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
-      "simple_desc": "我方小队的生命值提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
+      "desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
+      "simple_desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
       "desc_params": [
         0.12,
         0.2,
@@ -240,8 +240,8 @@
       "name": "燃血",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2006.png",
-      "desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
-      "simple_desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "desc": "【燃血】队员的生命增幅和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "simple_desc": "【燃血】队员的生命增幅和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
       "desc_params": [
         40000,
         0,
@@ -258,7 +258,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.1,
             0.1
@@ -280,7 +280,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.2,
             0.25
@@ -302,7 +302,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.3,
             0.4
@@ -324,7 +324,7 @@
         {
           "layer": 8,
           "quality": "Gold",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.45,
             0.6
@@ -368,26 +368,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030506,
-            35030106
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030107,
-            35030508,
-            35030203
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030506,
-            35030106
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030107,
-            35030508,
-            35030203
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            }
           ]
         }
       },
@@ -493,26 +541,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030506,
-            35030106
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030107,
-            35030508,
-            35030203
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030506,
-            35030106
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030107,
-            35030508,
-            35030203
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            }
           ]
         }
       },
@@ -618,26 +714,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030506,
-            35030106
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030107,
-            35030508,
-            35030203
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030506,
-            35030106
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030107,
-            35030508,
-            35030203
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            }
           ]
         }
       },
@@ -743,26 +887,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030506,
-            35030106
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030107,
-            35030508,
-            35030203
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030506,
-            35030106
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030107,
-            35030508,
-            35030203
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            }
           ]
         }
       },

@@ -65,8 +65,8 @@
       "name": "减益",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2007.png",
-      "desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
-      "simple_desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
+      "desc": "【减益】队员的前台强度后台强度前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
+      "simple_desc": "【减益】队员的前台强度后台强度前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
       "desc_params": [
         2,
         3,
@@ -83,7 +83,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.2,
             0.2
@@ -105,7 +105,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.6,
             0.6
@@ -127,7 +127,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1.2,
             1.2
@@ -149,7 +149,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             2.5,
             2.5
@@ -197,26 +197,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030104,
-            35030607
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ],
           "second": [
-            35030507,
-            35030305,
-            35030103
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            },
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030104,
-            35030607
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ],
           "second": [
-            35030507,
-            35030305,
-            35030103
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            },
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            }
           ]
         }
       },
@@ -354,26 +402,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030104,
-            35030607
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ],
           "second": [
-            35030507,
-            35030305,
-            35030103
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            },
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030104,
-            35030607
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ],
           "second": [
-            35030507,
-            35030305,
-            35030103
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            },
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            }
           ]
         }
       },
@@ -511,26 +607,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030104,
-            35030607
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ],
           "second": [
-            35030507,
-            35030305,
-            35030103
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            },
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030104,
-            35030607
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ],
           "second": [
-            35030507,
-            35030305,
-            35030103
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            },
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            }
           ]
         }
       },
@@ -664,26 +808,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030104,
-            35030607
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ],
           "second": [
-            35030507,
-            35030305,
-            35030103
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            },
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030104,
-            35030607
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ],
           "second": [
-            35030507,
-            35030305,
-            35030103
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            },
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            }
           ]
         }
       },

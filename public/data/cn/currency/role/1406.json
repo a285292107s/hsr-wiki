@@ -18,8 +18,8 @@
       "name": "夜之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1012.png",
-      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前排战力后排战力前/后台强度提高。",
-      "simple_desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前排战力后排战力前/后台强度提高。",
+      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前台强度后台强度前/后台强度提高。",
+      "simple_desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前台强度后台强度前/后台强度提高。",
       "desc_params": [
         2
       ],
@@ -27,7 +27,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.3,
             0.3
@@ -49,7 +49,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.6,
             0.6
@@ -71,7 +71,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1.2,
             1.2
@@ -93,7 +93,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             2.4,
             2.4
@@ -205,8 +205,8 @@
       "name": "减益",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2007.png",
-      "desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
-      "simple_desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
+      "desc": "【减益】队员的前台强度后台强度前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
+      "simple_desc": "【减益】队员的前台强度后台强度前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
       "desc_params": [
         2,
         3,
@@ -223,7 +223,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.2,
             0.2
@@ -245,7 +245,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.6,
             0.6
@@ -267,7 +267,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1.2,
             1.2
@@ -289,7 +289,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             2.5,
             2.5
@@ -333,26 +333,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030507,
-            35030106,
-            35030101
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030407,
-            35030203,
-            35030607
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030507,
-            35030106,
-            35030101
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030407,
-            35030203,
-            35030607
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         }
       },
@@ -432,26 +480,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030507,
-            35030106,
-            35030101
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030407,
-            35030203,
-            35030607
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030507,
-            35030106,
-            35030101
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030407,
-            35030203,
-            35030607
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         }
       },
@@ -531,26 +627,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030507,
-            35030106,
-            35030101
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030407,
-            35030203,
-            35030607
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030507,
-            35030106,
-            35030101
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030407,
-            35030203,
-            35030607
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         }
       },
@@ -630,26 +774,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030507,
-            35030106,
-            35030101
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030407,
-            35030203,
-            35030607
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030507,
-            35030106,
-            35030101
+            {
+              "id": 35030507,
+              "name": "物质分解液",
+              "icon": "SpriteOutput/GridFight/Equipment/35030507.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030407,
-            35030203,
-            35030607
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            }
           ]
         }
       },

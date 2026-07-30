@@ -18,8 +18,8 @@
       "name": "狼狩",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1008.png",
-      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
-      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
       "desc_params": [
         10,
         0.5,
@@ -29,7 +29,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.15,
             0.15
@@ -51,7 +51,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.3,
             0.3
@@ -73,7 +73,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.5,
             0.5
@@ -95,7 +95,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.9,
             0.9
@@ -121,8 +121,8 @@
       "name": "减益",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2007.png",
-      "desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
-      "simple_desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
+      "desc": "【减益】队员的前台强度后台强度前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
+      "simple_desc": "【减益】队员的前台强度后台强度前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
       "desc_params": [
         2,
         3,
@@ -139,7 +139,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.2,
             0.2
@@ -161,7 +161,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.6,
             0.6
@@ -183,7 +183,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1.2,
             1.2
@@ -205,7 +205,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             2.5,
             2.5
@@ -319,26 +319,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030607,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030606,
-            35030305
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030607,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030606,
-            35030305
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            }
           ]
         }
       },
@@ -449,26 +497,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030607,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030606,
-            35030305
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030607,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030606,
-            35030305
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            }
           ]
         }
       },
@@ -579,26 +675,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030607,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030606,
-            35030305
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030607,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030606,
-            35030305
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            }
           ]
         }
       },
@@ -709,26 +853,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030505,
-            35030607,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030606,
-            35030305
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030505,
-            35030607,
-            35030508
+            {
+              "id": 35030505,
+              "name": "生命之环",
+              "icon": "SpriteOutput/GridFight/Equipment/35030505.png"
+            },
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            }
           ],
           "second": [
-            35030506,
-            35030606,
-            35030305
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030305,
+              "name": "掩体生成枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030305.png"
+            }
           ]
         }
       },

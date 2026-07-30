@@ -17,8 +17,8 @@
       "name": "燃血",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2006.png",
-      "desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
-      "simple_desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "desc": "【燃血】队员的生命增幅和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "simple_desc": "【燃血】队员的生命增幅和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
       "desc_params": [
         40000,
         0,
@@ -35,7 +35,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.1,
             0.1
@@ -57,7 +57,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.2,
             0.25
@@ -79,7 +79,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.3,
             0.4
@@ -101,7 +101,7 @@
         {
           "layer": 8,
           "quality": "Gold",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.45,
             0.6
@@ -184,26 +184,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030207,
-            35030206
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            }
           ],
           "second": [
-            35030204,
-            35030407,
-            35030106
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030207,
-            35030206
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            }
           ],
           "second": [
-            35030204,
-            35030407,
-            35030106
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         }
       },
@@ -316,26 +364,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030207,
-            35030206
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            }
           ],
           "second": [
-            35030204,
-            35030407,
-            35030106
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030207,
-            35030206
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            }
           ],
           "second": [
-            35030204,
-            35030407,
-            35030106
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         }
       },
@@ -448,26 +544,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030207,
-            35030206
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            }
           ],
           "second": [
-            35030204,
-            35030407,
-            35030106
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030207,
-            35030206
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            }
           ],
           "second": [
-            35030204,
-            35030407,
-            35030106
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ]
         }
       },

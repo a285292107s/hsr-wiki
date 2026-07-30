@@ -53,26 +53,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030405,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030406,
-            35030808,
-            35030208
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030204,
-            35030405,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030406,
-            35030808,
-            35030208
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         }
       },
@@ -151,26 +199,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030405,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030406,
-            35030808,
-            35030208
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030204,
-            35030405,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030406,
-            35030808,
-            35030208
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         }
       },
@@ -249,26 +345,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030405,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030406,
-            35030808,
-            35030208
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030204,
-            35030405,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ],
           "second": [
-            35030406,
-            35030808,
-            35030208
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            },
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         }
       },

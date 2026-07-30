@@ -21,8 +21,8 @@
       "name": "仙舟",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1007.png",
-      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前排战力后排战力前/后台强度和速度提高。",
-      "simple_desc": "【仙舟】召唤【神君】。【仙舟】队员行动后为【神君】叠加段数并使其行动提前。\\n【仙舟】队员的前排战力后排战力前/后台强度和速度提高。",
+      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前台强度后台强度前/后台强度和速度增幅提高。",
+      "simple_desc": "【仙舟】召唤【神君】。【仙舟】队员行动后为【神君】叠加段数并使其行动提前。\\n【仙舟】队员的前台强度后台强度前/后台强度和速度增幅提高。",
       "desc_params": [
         10
       ],
@@ -30,7 +30,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度，#3[i]%速度增幅。",
           "params": [
             0.2,
             0.2,
@@ -58,7 +58,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.4,
             0.4,
@@ -86,7 +86,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.8,
             0.8,
@@ -114,7 +114,7 @@
         {
           "layer": 10,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             2,
             2,
@@ -146,8 +146,8 @@
       "name": "狼狩",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1008.png",
-      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
-      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
       "desc_params": [
         10,
         0.5,
@@ -157,7 +157,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.15,
             0.15
@@ -179,7 +179,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.3,
             0.3
@@ -201,7 +201,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.5,
             0.5
@@ -223,7 +223,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.9,
             0.9
@@ -249,8 +249,8 @@
       "name": "减益",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2007.png",
-      "desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
-      "simple_desc": "【减益】队员的前排战力后排战力前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
+      "desc": "【减益】队员的前台强度后台强度前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外真实伤害，单次行动内最多触发#1[i]次。",
+      "simple_desc": "【减益】队员的前台强度后台强度前/后台强度提高，行动时使敌方陷入负面效果时，为随机目标附加【离火】，使其造成的伤害降低，并且被攻击后受到额外伤害。",
       "desc_params": [
         2,
         3,
@@ -267,7 +267,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.2,
             0.2
@@ -289,7 +289,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.6,
             0.6
@@ -311,7 +311,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1.2,
             1.2
@@ -333,7 +333,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             2.5,
             2.5
@@ -381,26 +381,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030107,
-            35030101
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030307,
-            35030108,
-            35030303
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030107,
-            35030101
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030307,
-            35030108,
-            35030303
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -559,26 +607,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030107,
-            35030101
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030307,
-            35030108,
-            35030303
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030107,
-            35030101
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030307,
-            35030108,
-            35030303
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -737,26 +833,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030107,
-            35030101
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030307,
-            35030108,
-            35030303
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030107,
-            35030101
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            }
           ],
           "second": [
-            35030307,
-            35030108,
-            35030303
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },

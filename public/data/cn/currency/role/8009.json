@@ -21,8 +21,8 @@
       "name": "列车同行",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1001.png",
-      "desc": "召唤【星穹列车】撞击敌方全体目标，并在场上留下【光轨】，使我方小队的前排战力后排战力前/后台强度提高。",
-      "simple_desc": "召唤【星穹列车】撞击敌人并留下【光轨】，使我方小队的前排战力后排战力前/后台强度提高。",
+      "desc": "召唤【星穹列车】撞击敌方全体目标，并在场上留下【光轨】，使我方小队的前台强度后台强度前/后台强度提高。",
+      "simple_desc": "召唤【星穹列车】撞击敌人并留下【光轨】，使我方小队的前台强度后台强度前/后台强度提高。",
       "desc_params": [
         10
       ],
@@ -30,7 +30,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "战斗开始时撞击并提供1层【光轨】，使我方小队前排战力后排战力前/后台强度提高#2[i]%。",
+          "desc": "战斗开始时撞击并提供1层【光轨】，使我方小队前台强度后台强度前/后台强度提高#2[i]%。",
           "params": [
             0,
             0.2,
@@ -43,7 +43,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "列车额外以#1[i]速度撞击，每层【光轨】提供的前排战力后排战力提高至#2[i]%，最多叠加#4[i]层。【列车同行】队员获得双倍收益。",
+          "desc": "列车额外以#1[i]速度撞击，每层【光轨】提供的前台强度后台强度提高至#2[i]%，最多叠加#4[i]层。【列车同行】队员获得双倍收益。",
           "params": [
             300,
             0.4,
@@ -56,7 +56,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "每层【光轨】提供的前排战力后排战力提高至#2[i]%，可叠加上限提高至#4[i]层，每层额外使敌方全体目标防御力降低#3[i]%。",
+          "desc": "每层【光轨】提供的前台强度后台强度提高至#2[i]%，可叠加上限提高至#4[i]层，每层额外使敌方全体目标防御力降低#3[i]%。",
           "params": [
             300,
             0.6,
@@ -263,26 +263,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030407,
-            35030307
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ],
           "second": [
-            35030204,
-            35030104,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030308,
-            35030106
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030101,
-            35030104,
-            35030407
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ]
         }
       },
@@ -551,26 +599,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030407,
-            35030307
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ],
           "second": [
-            35030204,
-            35030104,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030308,
-            35030106
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030101,
-            35030104,
-            35030407
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ]
         }
       },
@@ -839,26 +935,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030407,
-            35030307
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ],
           "second": [
-            35030204,
-            35030104,
-            35030205
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030308,
-            35030106
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            },
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            }
           ],
           "second": [
-            35030101,
-            35030104,
-            35030407
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ]
         }
       },

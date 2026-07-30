@@ -180,26 +180,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030103,
-            35030203,
-            35030407
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030106,
-            35030306,
-            35030303
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030103,
-            35030203,
-            35030407
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030106,
-            35030306,
-            35030303
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -335,26 +383,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030103,
-            35030203,
-            35030407
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030106,
-            35030306,
-            35030303
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030103,
-            35030203,
-            35030407
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030106,
-            35030306,
-            35030303
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -490,26 +586,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030103,
-            35030203,
-            35030407
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030106,
-            35030306,
-            35030303
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030103,
-            35030203,
-            35030407
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030106,
-            35030306,
-            35030303
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },

@@ -567,10 +567,16 @@ export interface CurrencyRoleStar {
   recommend: CurrencyRoleRecommend | null;
 }
 
-/** 推荐装备（按前后排分组） */
+/** 推荐装备条目（从 GridFightItems 解析名称/图标） */
+export interface CurrencyRoleRecommendItem {
+  id: number;
+  name: string;
+  icon: string;
+}
+/** 推荐装备（按前后台分组） */
 export interface CurrencyRoleRecommend {
-  front?: { first: number[]; second: number[] };
-  back?: { first: number[]; second: number[] };
+  front?: { first: CurrencyRoleRecommendItem[]; second: CurrencyRoleRecommendItem[] };
+  back?: { first: CurrencyRoleRecommendItem[]; second: CurrencyRoleRecommendItem[] };
 }
 
 export interface CurrencyRoleDetail {
@@ -589,7 +595,7 @@ export interface CurrencyRoleDetail {
   equipment: CurrencyRoleEquipment[];
 }
 
-/** 后台角色命座（GridFightBackRoleRank） */
+/** 后台角色星魂（GridFightBackRoleRank） */
 export interface CurrencyRoleRank {
   rank_id: number;
   rank: number;

@@ -4,7 +4,7 @@ import { loadLocalCurrencyRoles } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 
 const FB_LABEL: Record<string, string> = {
-  Front: '前排', Back: '后排', Both: '前后台',
+  Front: '前台', Back: '后台', Both: '前后台',
 };
 const HEAL_LABEL: Record<string, string> = {
   Healer: '治疗', Shield: '护盾', Heal: '治疗', Damage: '输出',
@@ -16,14 +16,14 @@ const CHARGE_LABEL: Record<string, string> = {
 /* ─── 特质分类（与 converter _trait_cat 对齐） ─── */
 type TraitCat = 'faction' | 'combat' | 'special';
 const TRAIT_CAT_LABEL: Record<TraitCat, string> = {
-  faction: '阵营', combat: '战斗定位', special: '特殊',
+  faction: '阵营', combat: '流派', special: '特殊',
 };
 
 function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const id = String(item.id);
   const avatar = item.avatar || avatarShopIconUrl(id);
   const rarity = Number(item.rarity) || 0;
-  const stars = rarity >= 1 && rarity <= 6 ? '★'.repeat(rarity) : String(rarity);
+  const cost = rarity >= 1 ? `${rarity}费` : String(rarity);
   const fb = FB_LABEL[item.front_back_type as string] ?? (item.front_back_type as string) ?? '';
   const heal = HEAL_LABEL[item.heal_or_shield_display as string] ?? (item.heal_or_shield_display as string) ?? '';
   const charge = (item.charge_type || []).map((c) => CHARGE_LABEL[c] ?? c).join(' · ');
@@ -38,7 +38,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
       <div class="nk-crole-card__avatar"><img loading="lazy" src="${escHtml(avatar)}" alt="${escHtml(item.name)}"></div>
       <div class="nk-crole-card__body">
         <div class="nk-crole-card__name">${escHtml(item.name)}</div>
-        <div class="nk-crole-card__stars">${stars}</div>
+        <div class="nk-crole-card__stars">${cost}</div>
         <div class="nk-crole-card__tags">
           ${fb ? `<span class="nk-crole-tag nk-crole-tag--fb">${escHtml(fb)}</span>` : ''}
           ${heal ? `<span class="nk-crole-tag nk-crole-tag--heal">${escHtml(heal)}</span>` : ''}
@@ -90,12 +90,12 @@ export const currencyRolePage: CatalogPageConfig = {
         label: '稀有度',
         options: [
           { val: '', label: '全部' },
-          ...rarities.map((v) => ({ val: String(v), label: `${v}★` })),
+          ...rarities.map((v) => ({ val: String(v), label: `${v}费` })),
         ],
       });
     }
 
-    // 特质筛选：按分类（阵营 / 战斗定位 / 特殊）从数据动态汇总
+    // 特质筛选：按分类（阵营 / 流派 / 特殊）从数据动态汇总
     const traitByName = (cat: TraitCat) => {
       const seen = new Map<number, string>();
       items.forEach((it) => {

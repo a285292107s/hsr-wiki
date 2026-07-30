@@ -19,8 +19,8 @@
       "name": "公司",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1004.png",
-      "desc": "【公司】队员的后排战力和护盾量提高。",
-      "simple_desc": "【公司】队员的后排战力和护盾量提高。",
+      "desc": "【公司】队员的后台强度和护盾量提高。",
+      "simple_desc": "【公司】队员的后台强度和护盾量提高。",
       "desc_params": [
         10
       ],
@@ -28,7 +28,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%后排战力，#2[i]%护盾量。",
+          "desc": "#1[i]%后台强度，#2[i]%护盾量。",
           "params": [
             0.3,
             0.1
@@ -50,7 +50,7 @@
         {
           "layer": 3,
           "quality": "Gold",
-          "desc": "#1[i]%后排战力，#2[i]%护盾量。",
+          "desc": "#1[i]%后台强度，#2[i]%护盾量。",
           "params": [
             1,
             0.25
@@ -184,26 +184,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030306,
-            35030303
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ],
           "second": [
-            35030103,
-            35030307,
-            35030104
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030306,
-            35030303
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ],
           "second": [
-            35030103,
-            35030307,
-            35030104
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            }
           ]
         }
       },
@@ -329,26 +377,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030306,
-            35030303
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ],
           "second": [
-            35030103,
-            35030307,
-            35030104
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030306,
-            35030303
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ],
           "second": [
-            35030103,
-            35030307,
-            35030104
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            }
           ]
         }
       },
@@ -474,26 +570,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030306,
-            35030303
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ],
           "second": [
-            35030103,
-            35030307,
-            35030104
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030306,
-            35030303
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ],
           "second": [
-            35030103,
-            35030307,
-            35030104
+            {
+              "id": 35030103,
+              "name": "电磁弹射器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030103.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            }
           ]
         }
       },

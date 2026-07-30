@@ -146,26 +146,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030208,
-            35030102,
-            35030204
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030108,
-            35030101,
-            35030202
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030208,
-            35030102,
-            35030204
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030108,
-            35030101,
-            35030202
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         }
       },
@@ -327,26 +375,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030208,
-            35030102,
-            35030204
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030108,
-            35030101,
-            35030202
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030208,
-            35030102,
-            35030204
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030108,
-            35030101,
-            35030202
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         }
       },
@@ -508,26 +604,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030208,
-            35030102,
-            35030204
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030108,
-            35030101,
-            35030202
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030208,
-            35030102,
-            35030204
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            }
           ],
           "second": [
-            35030108,
-            35030101,
-            35030202
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         }
       },

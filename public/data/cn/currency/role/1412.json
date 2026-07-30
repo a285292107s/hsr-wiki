@@ -20,8 +20,8 @@
       "name": "夜之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1012.png",
-      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前排战力后排战力前/后台强度提高。",
-      "simple_desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前排战力后排战力前/后台强度提高。",
+      "desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前台强度后台强度前/后台强度提高。",
+      "simple_desc": "每个战斗阶段后生成【月光精华】，完胜后获得#1[i]倍【月光精华】。获得足够的【月光精华】后可以获取晶矿奖励。\\n【夜之半神】队员的前台强度后台强度前/后台强度提高。",
       "desc_params": [
         2
       ],
@@ -29,7 +29,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.3,
             0.3
@@ -51,7 +51,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.6,
             0.6
@@ -73,7 +73,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             1.2,
             1.2
@@ -95,7 +95,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             2.4,
             2.4
@@ -121,8 +121,8 @@
       "name": "战技点",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2011.png",
-      "desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
-      "simple_desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
+      "desc": "我方战技点上限提高，我方小队获得速度增幅，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
+      "simple_desc": "我方战技点上限提高，我方小队获得速度增幅，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
       "desc_params": [
         2,
         0.12,
@@ -139,7 +139,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.12,
             0.12
@@ -162,7 +162,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.24,
             0.24
@@ -185,7 +185,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.4,
             0.4
@@ -208,7 +208,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.8,
             0.8
@@ -257,26 +257,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030206,
-            35030203,
-            35030407
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030101,
-            35030207,
-            35030606
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030206,
-            35030203,
-            35030407
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030101,
-            35030207,
-            35030606
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         }
       },
@@ -506,26 +554,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030206,
-            35030203,
-            35030407
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030101,
-            35030207,
-            35030606
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030206,
-            35030203,
-            35030407
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030101,
-            35030207,
-            35030606
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         }
       },
@@ -755,26 +851,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030206,
-            35030203,
-            35030407
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030101,
-            35030207,
-            35030606
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030206,
-            35030203,
-            35030407
+            {
+              "id": 35030206,
+              "name": "信心注入器",
+              "icon": "SpriteOutput/GridFight/Equipment/35030206.png"
+            },
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            }
           ],
           "second": [
-            35030101,
-            35030207,
-            35030606
+            {
+              "id": 35030101,
+              "name": "反重力皮靴",
+              "icon": "SpriteOutput/GridFight/Equipment/35030101.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         }
       },

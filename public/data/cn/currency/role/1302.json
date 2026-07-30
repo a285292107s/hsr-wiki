@@ -287,26 +287,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030808,
-            35030408,
-            35030308
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030408,
+              "name": "冷笑话引擎",
+              "icon": "SpriteOutput/GridFight/Equipment/35030408.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030204,
-            35030102,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030808,
-            35030408,
-            35030308
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030408,
+              "name": "冷笑话引擎",
+              "icon": "SpriteOutput/GridFight/Equipment/35030408.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030204,
-            35030102,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         }
       },
@@ -605,26 +653,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030808,
-            35030408,
-            35030308
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030408,
+              "name": "冷笑话引擎",
+              "icon": "SpriteOutput/GridFight/Equipment/35030408.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030204,
-            35030102,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030808,
-            35030408,
-            35030308
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030408,
+              "name": "冷笑话引擎",
+              "icon": "SpriteOutput/GridFight/Equipment/35030408.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030204,
-            35030102,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         }
       },
@@ -923,26 +1019,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030808,
-            35030408,
-            35030308
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030408,
+              "name": "冷笑话引擎",
+              "icon": "SpriteOutput/GridFight/Equipment/35030408.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030204,
-            35030102,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030808,
-            35030408,
-            35030308
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030408,
+              "name": "冷笑话引擎",
+              "icon": "SpriteOutput/GridFight/Equipment/35030408.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030204,
-            35030102,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         }
       },
@@ -1241,26 +1385,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030808,
-            35030408,
-            35030308
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030408,
+              "name": "冷笑话引擎",
+              "icon": "SpriteOutput/GridFight/Equipment/35030408.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030204,
-            35030102,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030808,
-            35030408,
-            35030308
+            {
+              "id": 35030808,
+              "name": "永动机",
+              "icon": "SpriteOutput/GridFight/Equipment/35030808.png"
+            },
+            {
+              "id": 35030408,
+              "name": "冷笑话引擎",
+              "icon": "SpriteOutput/GridFight/Equipment/35030408.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030204,
-            35030102,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ]
         }
       },

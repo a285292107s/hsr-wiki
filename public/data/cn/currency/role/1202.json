@@ -19,8 +19,8 @@
       "name": "仙舟",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1007.png",
-      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前排战力后排战力前/后台强度和速度提高。",
-      "simple_desc": "【仙舟】召唤【神君】。【仙舟】队员行动后为【神君】叠加段数并使其行动提前。\\n【仙舟】队员的前排战力后排战力前/后台强度和速度提高。",
+      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前台强度后台强度前/后台强度和速度增幅提高。",
+      "simple_desc": "【仙舟】召唤【神君】。【仙舟】队员行动后为【神君】叠加段数并使其行动提前。\\n【仙舟】队员的前台强度后台强度前/后台强度和速度增幅提高。",
       "desc_params": [
         10
       ],
@@ -28,7 +28,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度，#3[i]%速度增幅。",
           "params": [
             0.2,
             0.2,
@@ -56,7 +56,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.4,
             0.4,
@@ -84,7 +84,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             0.8,
             0.8,
@@ -112,7 +112,7 @@
         {
           "layer": 10,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力，#3[i]%速度。",
+          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
           "params": [
             2,
             2,
@@ -252,26 +252,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030407,
-            35030308
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030106,
-            35030508,
-            35030606
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030407,
-            35030308
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030106,
-            35030508,
-            35030606
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         }
       },
@@ -367,26 +415,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030407,
-            35030308
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030106,
-            35030508,
-            35030606
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030407,
-            35030308
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030106,
-            35030508,
-            35030606
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         }
       },
@@ -482,26 +578,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030407,
-            35030308
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030106,
-            35030508,
-            35030606
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030407,
-            35030308
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030106,
-            35030508,
-            35030606
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         }
       },
@@ -593,26 +737,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030203,
-            35030407,
-            35030308
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030106,
-            35030508,
-            35030606
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030203,
-            35030407,
-            35030308
+            {
+              "id": 35030203,
+              "name": "武器大师",
+              "icon": "SpriteOutput/GridFight/Equipment/35030203.png"
+            },
+            {
+              "id": 35030407,
+              "name": "胜利之旗",
+              "icon": "SpriteOutput/GridFight/Equipment/35030407.png"
+            },
+            {
+              "id": 35030308,
+              "name": "蓄能帆",
+              "icon": "SpriteOutput/GridFight/Equipment/35030308.png"
+            }
           ],
           "second": [
-            35030106,
-            35030508,
-            35030606
+            {
+              "id": 35030106,
+              "name": "流星飞翼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030106.png"
+            },
+            {
+              "id": 35030508,
+              "name": "绝对热量",
+              "icon": "SpriteOutput/GridFight/Equipment/35030508.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            }
           ]
         }
       },

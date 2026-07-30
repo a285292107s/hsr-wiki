@@ -26,7 +26,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.3,
             0.3
@@ -48,7 +48,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.8,
             0.8
@@ -70,7 +70,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             2,
             2
@@ -228,26 +228,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030104,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ],
           "second": [
-            35030708,
-            35030205,
-            35030202
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030104,
-            35030208
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ],
           "second": [
-            35030708,
-            35030205,
-            35030303
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -410,26 +458,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030104,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ],
           "second": [
-            35030708,
-            35030205,
-            35030202
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030104,
-            35030208
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ],
           "second": [
-            35030708,
-            35030205,
-            35030303
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -592,26 +688,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030104,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ],
           "second": [
-            35030708,
-            35030205,
-            35030202
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030104,
-            35030208
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ],
           "second": [
-            35030708,
-            35030205,
-            35030303
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },
@@ -770,26 +914,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030104,
-            35030208
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ],
           "second": [
-            35030708,
-            35030205,
-            35030202
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030104,
-            35030208
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030104,
+              "name": "追逐星辰",
+              "icon": "SpriteOutput/GridFight/Equipment/35030104.png"
+            },
+            {
+              "id": 35030208,
+              "name": "战场进化手册",
+              "icon": "SpriteOutput/GridFight/Equipment/35030208.png"
+            }
           ],
           "second": [
-            35030708,
-            35030205,
-            35030303
+            {
+              "id": 35030708,
+              "name": "行星钻地弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030708.png"
+            },
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030303,
+              "name": "天基轨道炮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030303.png"
+            }
           ]
         }
       },

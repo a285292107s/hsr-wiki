@@ -20,8 +20,8 @@
       "name": "狼狩",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1008.png",
-      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
-      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前排战力后排战力前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
       "desc_params": [
         10,
         0.5,
@@ -31,7 +31,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前排战力后排战力前/后台强度。",
+          "desc": "#1[i]%前台强度后台强度前/后台强度。",
           "params": [
             0.15,
             0.15
@@ -53,7 +53,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.3,
             0.3
@@ -75,7 +75,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.5,
             0.5
@@ -97,7 +97,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前排战力后排战力。",
+          "desc": "#1[i]%前台强度后台强度。",
           "params": [
             0.9,
             0.9
@@ -123,8 +123,8 @@
       "name": "燃血",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2006.png",
-      "desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
-      "simple_desc": "【燃血】队员的生命值和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "desc": "【燃血】队员的生命增幅和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体目标的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
+      "simple_desc": "【燃血】队员的生命增幅和全伤害提高。战斗开始时，激活会记录【燃血】队员消耗生命值并在行动时攻击敌方全体的【燃血角斗场】。\\n【燃血】队员无法获得护盾，受到护盾时会回复#4[i]%生命上限+#7[i]生命值。",
       "desc_params": [
         40000,
         0,
@@ -141,7 +141,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.1,
             0.1
@@ -163,7 +163,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.2,
             0.25
@@ -185,7 +185,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.3,
             0.4
@@ -207,7 +207,7 @@
         {
           "layer": 8,
           "quality": "Gold",
-          "desc": "#1[i]%生命值，#2[i]%全伤害。",
+          "desc": "#1[i]%生命增幅，#2[i]%全伤害。",
           "params": [
             0.45,
             0.6
@@ -255,26 +255,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030107,
-            35030405
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            }
           ],
           "second": [
-            35030102,
-            35030307,
-            35030306
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030107,
-            35030405
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            }
           ],
           "second": [
-            35030102,
-            35030307,
-            35030306
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            }
           ]
         }
       },
@@ -443,26 +491,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030107,
-            35030405
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            }
           ],
           "second": [
-            35030102,
-            35030307,
-            35030306
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030107,
-            35030405
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            }
           ],
           "second": [
-            35030102,
-            35030307,
-            35030306
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            }
           ]
         }
       },
@@ -631,26 +727,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030304,
-            35030107,
-            35030405
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            }
           ],
           "second": [
-            35030102,
-            35030307,
-            35030306
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030304,
-            35030107,
-            35030405
+            {
+              "id": 35030304,
+              "name": "反卫星狙击枪",
+              "icon": "SpriteOutput/GridFight/Equipment/35030304.png"
+            },
+            {
+              "id": 35030107,
+              "name": "光速螺旋桨",
+              "icon": "SpriteOutput/GridFight/Equipment/35030107.png"
+            },
+            {
+              "id": 35030405,
+              "name": "热血沸腾拳",
+              "icon": "SpriteOutput/GridFight/Equipment/35030405.png"
+            }
           ],
           "second": [
-            35030102,
-            35030307,
-            35030306
+            {
+              "id": 35030102,
+              "name": "火力风暴潮",
+              "icon": "SpriteOutput/GridFight/Equipment/35030102.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            },
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            }
           ]
         }
       },

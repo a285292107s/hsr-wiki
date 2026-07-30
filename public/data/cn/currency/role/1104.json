@@ -148,26 +148,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030306,
-            35030608,
-            35030406
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030608,
+              "name": "光能盾牌",
+              "icon": "SpriteOutput/GridFight/Equipment/35030608.png"
+            },
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            }
           ],
           "second": [
-            35030607,
-            35030606,
-            35030506
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030306,
-            35030608,
-            35030406
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030608,
+              "name": "光能盾牌",
+              "icon": "SpriteOutput/GridFight/Equipment/35030608.png"
+            },
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            }
           ],
           "second": [
-            35030607,
-            35030606,
-            35030506
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            }
           ]
         }
       },
@@ -276,26 +324,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030306,
-            35030608,
-            35030406
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030608,
+              "name": "光能盾牌",
+              "icon": "SpriteOutput/GridFight/Equipment/35030608.png"
+            },
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            }
           ],
           "second": [
-            35030607,
-            35030606,
-            35030506
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030306,
-            35030608,
-            35030406
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030608,
+              "name": "光能盾牌",
+              "icon": "SpriteOutput/GridFight/Equipment/35030608.png"
+            },
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            }
           ],
           "second": [
-            35030607,
-            35030606,
-            35030506
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            }
           ]
         }
       },
@@ -404,26 +500,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030306,
-            35030608,
-            35030406
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030608,
+              "name": "光能盾牌",
+              "icon": "SpriteOutput/GridFight/Equipment/35030608.png"
+            },
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            }
           ],
           "second": [
-            35030607,
-            35030606,
-            35030506
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030306,
-            35030608,
-            35030406
+            {
+              "id": 35030306,
+              "name": "自适应外骨骼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030306.png"
+            },
+            {
+              "id": 35030608,
+              "name": "光能盾牌",
+              "icon": "SpriteOutput/GridFight/Equipment/35030608.png"
+            },
+            {
+              "id": 35030406,
+              "name": "以牙还牙甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030406.png"
+            }
           ],
           "second": [
-            35030607,
-            35030606,
-            35030506
+            {
+              "id": 35030607,
+              "name": "闪光手榴弹",
+              "icon": "SpriteOutput/GridFight/Equipment/35030607.png"
+            },
+            {
+              "id": 35030606,
+              "name": "很硬的甲",
+              "icon": "SpriteOutput/GridFight/Equipment/35030606.png"
+            },
+            {
+              "id": 35030506,
+              "name": "痛觉阻断芯片",
+              "icon": "SpriteOutput/GridFight/Equipment/35030506.png"
+            }
           ]
         }
       },

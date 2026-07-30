@@ -157,8 +157,8 @@
       "name": "战技点",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2011.png",
-      "desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
-      "simple_desc": "我方战技点上限提高，我方小队获得速度，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
+      "desc": "我方战技点上限提高，我方小队获得速度增幅，施放战技或普攻时获得全伤害，【战技点】队员获得双倍加成，持续至自身回合结束。【战技点】队员消耗战技点时，每个战技点进行1次抽奖，奖池效果可叠加。",
+      "simple_desc": "我方战技点上限提高，我方小队获得速度增幅，施放战技或普攻时获得全伤害。【战技点】队员消耗战技点时，每个战技点进行1次抽奖。",
       "desc_params": [
         2,
         0.12,
@@ -175,7 +175,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.12,
             0.12
@@ -198,7 +198,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.24,
             0.24
@@ -221,7 +221,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.4,
             0.4
@@ -244,7 +244,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%速度。",
+          "desc": "#1[i]%速度增幅。",
           "params": [
             0.8,
             0.8
@@ -375,26 +375,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030207,
-            35030202
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ],
           "second": [
-            35030205,
-            35030108,
-            35030307
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030204,
-            35030207,
-            35030202
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ],
           "second": [
-            35030205,
-            35030108,
-            35030307
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ]
         }
       },
@@ -568,26 +616,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030207,
-            35030202
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ],
           "second": [
-            35030205,
-            35030108,
-            35030307
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030204,
-            35030207,
-            35030202
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ],
           "second": [
-            35030205,
-            35030108,
-            35030307
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ]
         }
       },
@@ -761,26 +857,74 @@
       "recommend": {
         "front": {
           "first": [
-            35030204,
-            35030207,
-            35030202
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ],
           "second": [
-            35030205,
-            35030108,
-            35030307
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ]
         },
         "back": {
           "first": [
-            35030204,
-            35030207,
-            35030202
+            {
+              "id": 35030204,
+              "name": "高周波电锯",
+              "icon": "SpriteOutput/GridFight/Equipment/35030204.png"
+            },
+            {
+              "id": 35030207,
+              "name": "动能激发剑",
+              "icon": "SpriteOutput/GridFight/Equipment/35030207.png"
+            },
+            {
+              "id": 35030202,
+              "name": "碎星斩舰刀",
+              "icon": "SpriteOutput/GridFight/Equipment/35030202.png"
+            }
           ],
           "second": [
-            35030205,
-            35030108,
-            35030307
+            {
+              "id": 35030205,
+              "name": "杀红眼",
+              "icon": "SpriteOutput/GridFight/Equipment/35030205.png"
+            },
+            {
+              "id": 35030108,
+              "name": "电光履",
+              "icon": "SpriteOutput/GridFight/Equipment/35030108.png"
+            },
+            {
+              "id": 35030307,
+              "name": "斩首行动",
+              "icon": "SpriteOutput/GridFight/Equipment/35030307.png"
+            }
           ]
         }
       },
