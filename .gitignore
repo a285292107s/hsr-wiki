@@ -40,9 +40,6 @@ __pycache__
 # Converter incremental state
 tools/converter/.converter-state.json
 
-# Auto-generated data catalog (run: python gen_catalog.py)
-tools/converter/DATA_CATALOG.md
-
 # Local reference data
 cdn-samples
 
