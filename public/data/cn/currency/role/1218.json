@@ -403,7 +403,7 @@
           "bp_add": null,
           "show_stance_list": [
             0,
-            0,
+            60,
             0
           ],
           "skill_combo_value_delta": null,
@@ -581,7 +581,7 @@
           "bp_add": null,
           "show_stance_list": [
             0,
-            0,
+            60,
             0
           ],
           "skill_combo_value_delta": null,
@@ -759,7 +759,7 @@
           "bp_add": null,
           "show_stance_list": [
             0,
-            0,
+            60,
             0
           ],
           "skill_combo_value_delta": null,
@@ -937,7 +937,7 @@
           "bp_add": null,
           "show_stance_list": [
             0,
-            0,
+            60,
             0
           ],
           "skill_combo_value_delta": null,
