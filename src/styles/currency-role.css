@@ -1,5 +1,98 @@
 /* ── 货币战争 · 角色图鉴（卡片 + 详情页） ── */
 
+/* ═══ 语义色彩变量层 ═══
+   详情页全部色彩通过语义变量引用，CW 暗金主题在 [data-theme="cw"] 下覆盖。
+   常规模式回退全站紫调令牌，保证两种模式视觉自洽。 */
+.nk-crole,
+.nk-crole-hero {
+  /* Hero 遮罩底色（scrim 渐变锚点） */
+  --crole-scrim: rgba(15, 15, 35, 1);
+  --crole-scrim-60: rgba(15, 15, 35, 0.6);
+  --crole-scrim-25: rgba(15, 15, 35, 0.25);
+  --crole-scrim-40: rgba(15, 15, 35, 0.4);
+  /* 头像环外圈 */
+  --crole-portrait-ring: rgba(15, 15, 35, 0.6);
+  /* 特质三分类：阵营 / 战斗 / 特殊 */
+  --crole-faction: #a78bfa;
+  --crole-faction-soft: rgba(167, 139, 250, 0.16);
+  --crole-faction-text: #c4b5fd;
+  --crole-combat: #38bdf8;
+  --crole-combat-soft: rgba(56, 189, 248, 0.16);
+  --crole-combat-text: #7dd3fc;
+  --crole-special: #fb923c;
+  --crole-special-soft: rgba(251, 146, 60, 0.16);
+  --crole-special-text: #fdba74;
+  /* 作用域徽章：成员 / 全员 */
+  --crole-scope-bg: rgba(124, 58, 237, 0.14);
+  --crole-scope-text: #c4b5fd;
+  --crole-scope-all-bg: rgba(56, 189, 248, 0.14);
+  --crole-scope-all-text: #7dd3fc;
+  /* 数值高亮（描述内参数 / 属性值） */
+  --crole-num: #ffcf5c;
+  --crole-num-glow: rgba(251, 191, 36, 0.35);
+  /* 正向属性加成 */
+  --crole-buff: #6ee7b7;
+  --crole-buff-soft: rgba(110, 231, 183, 0.08);
+  --crole-buff-border: rgba(110, 231, 183, 0.25);
+  --crole-buff-glow: rgba(110, 231, 183, 0.4);
+  /* 面板/卡片底色 */
+  --crole-panel-tint: rgba(124, 58, 237, 0.08);
+  --crole-panel-deep: rgba(20, 20, 45, 0.7);
+  --crole-extra-bg: rgba(124, 58, 237, 0.05);
+  --crole-extra-border: rgba(124, 58, 237, 0.12);
+  /* 星级 Tab 激活态 */
+  --crole-tab-active-bg: linear-gradient(135deg, var(--primary), var(--accent));
+  --crole-tab-active-shadow: rgba(124, 58, 237, 0.3);
+  /* 星魂步骤徽章 */
+  --crole-step-bg: rgba(244, 63, 94, 0.1);
+}
+
+/* ═══ CW 暗金覆盖：交易所暖金色调 ═══
+   设计意图：黑金底色 + 琥珀/黄铜层次 + 翡翠仅留给「增值」语义 */
+[data-theme="cw"] .nk-crole,
+[data-theme="cw"] .nk-crole-hero {
+  --crole-scrim: rgba(10, 9, 6, 1);
+  --crole-scrim-60: rgba(10, 9, 6, 0.6);
+  --crole-scrim-25: rgba(10, 9, 6, 0.25);
+  --crole-scrim-40: rgba(10, 9, 6, 0.4);
+  --crole-portrait-ring: rgba(10, 9, 6, 0.6);
+  /* 特质三分类 → 暖金/琥珀/铜红 */
+  --crole-faction: #FCD34D;
+  --crole-faction-soft: rgba(252, 211, 77, 0.14);
+  --crole-faction-text: #FDE68A;
+  --crole-combat: #F59E0B;
+  --crole-combat-soft: rgba(245, 158, 11, 0.14);
+  --crole-combat-text: #FBBF24;
+  --crole-special: #E88D5A;
+  --crole-special-soft: rgba(232, 141, 90, 0.14);
+  --crole-special-text: #F5B08A;
+  /* 作用域徽章 → 金/琥珀 */
+  --crole-scope-bg: rgba(212, 175, 55, 0.16);
+  --crole-scope-text: #F5D67B;
+  --crole-scope-all-bg: rgba(245, 158, 11, 0.14);
+  --crole-scope-all-text: #FBBF24;
+  /* 数值高亮 → 亮金 + 更强辉光 */
+  --crole-num: #FCD34D;
+  --crole-num-glow: rgba(252, 211, 77, 0.4);
+  /* 正向加成 → 翡翠保留（交易「涨」语义）但调暖 */
+  --crole-buff: #5EEAB5;
+  --crole-buff-soft: rgba(94, 234, 181, 0.07);
+  --crole-buff-border: rgba(94, 234, 181, 0.22);
+  --crole-buff-glow: rgba(94, 234, 181, 0.35);
+  /* 面板底色 → 暖金微光 */
+  --crole-panel-tint: rgba(212, 175, 55, 0.07);
+  --crole-panel-deep: rgba(24, 21, 13, 0.7);
+  --crole-extra-bg: rgba(212, 175, 55, 0.05);
+  --crole-extra-border: rgba(212, 175, 55, 0.14);
+  /* 星级 Tab 激活态 → 金色渐变 + 深金文字（对比度 ≥4.5:1） */
+  --crole-tab-active-bg: linear-gradient(135deg, #FCD34D, #D4AF37);
+  --crole-tab-active-shadow: rgba(212, 175, 55, 0.35);
+  /* 星魂步骤徽章 → 琥珀 */
+  --crole-step-bg: rgba(245, 158, 11, 0.12);
+  /* 稀有度光晕默认值（未匹配 rarity 时回退金色而非紫色） */
+  --holo-color: rgba(212, 175, 55, 0.5);
+}
+
 /* 列表卡片：与主目录全息卡片视觉统一（稀有度色板 / 入场动画 / hover 扫光 / 焦点态） */
 .nk-crole-grid { --col-w: 200px; --nk-grid-min: 180px; --nk-grid-gap: 14px; }
 .nk-crole-card {
@@ -200,7 +293,7 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(0deg, var(--bg) 0%, rgba(15,15,35,0.6) 40%, rgba(15,15,35,0.25) 70%, rgba(15,15,35,0.4) 100%),
+    linear-gradient(0deg, var(--crole-scrim) 0%, var(--crole-scrim-60) 40%, var(--crole-scrim-25) 70%, var(--crole-scrim-40) 100%),
     radial-gradient(ellipse 80% 60% at 30% 80%, var(--holo-color) 0%, transparent 60%);
 }
 .nk-crole-hero__content {
@@ -220,7 +313,7 @@
   overflow: hidden;
   border: 3px solid color-mix(in srgb, var(--holo-color) 70%, transparent);
   box-shadow:
-    0 0 0 6px rgba(15, 15, 35, 0.6),
+    0 0 0 6px var(--crole-portrait-ring),
     0 8px 32px rgba(0, 0, 0, 0.5),
     0 0 24px color-mix(in srgb, var(--holo-color) 40%, transparent);
   background: var(--surface);
@@ -241,6 +334,8 @@
   color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
 }
+/* CW 模式：HUD 标签染金 */
+[data-theme="cw"] .nk-crole-hero__hud { color: rgba(252, 211, 77, 0.62); text-shadow: 0 0 12px rgba(252, 211, 77, 0.25); }
 .nk-crole-hero__name {
   font-size: 28px;
   font-weight: 900;
@@ -261,7 +356,7 @@
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.45);
 }
-.nk-crole-hero__stars { color: #ffcf5c; font-size: 15px; letter-spacing: 2px; text-shadow: 0 0 12px rgba(251,191,36,0.5); }
+.nk-crole-hero__stars { color: var(--crole-num); font-size: 15px; letter-spacing: 2px; text-shadow: 0 0 12px var(--crole-num-glow); }
 .nk-crole-hero__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-crole-hero__traits {
   display: flex;
@@ -282,9 +377,9 @@
   flex: none;
   margin-right: 2px;
 }
-.nk-crole-traitgrp__dot--faction { background: #a78bfa; }
-.nk-crole-traitgrp__dot--combat  { background: #38bdf8; }
-.nk-crole-traitgrp__dot--special { background: #fb923c; }
+.nk-crole-traitgrp__dot--faction { background: var(--crole-faction); }
+.nk-crole-traitgrp__dot--combat  { background: var(--crole-combat); }
+.nk-crole-traitgrp__dot--special { background: var(--crole-special); }
 .nk-crole-traitchip {
   font-size: 11px;
   padding: 2px 8px;
@@ -292,9 +387,9 @@
   line-height: 1.4;
   backdrop-filter: blur(4px);
 }
-.nk-crole-traitchip--faction { background: rgba(167, 139, 250, 0.2); color: #c4b5fd; }
-.nk-crole-traitchip--combat { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; }
-.nk-crole-traitchip--special { background: rgba(251, 146, 60, 0.2); color: #fdba74; }
+.nk-crole-traitchip--faction { background: var(--crole-faction-soft); color: var(--crole-faction-text); }
+.nk-crole-traitchip--combat { background: var(--crole-combat-soft); color: var(--crole-combat-text); }
+.nk-crole-traitchip--special { background: var(--crole-special-soft); color: var(--crole-special-text); }
 
 .nk-crole-chip {
   font-size: 12px;
@@ -349,9 +444,9 @@
   border-left: 3px solid var(--border);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.nk-crole-trait[data-cat="faction"] { border-left-color: #a78bfa; }
-.nk-crole-trait[data-cat="combat"]  { border-left-color: #38bdf8; }
-.nk-crole-trait[data-cat="special"] { border-left-color: #fb923c; }
+.nk-crole-trait[data-cat="faction"] { border-left-color: var(--crole-faction); }
+.nk-crole-trait[data-cat="combat"]  { border-left-color: var(--crole-combat); }
+.nk-crole-trait[data-cat="special"] { border-left-color: var(--crole-special); }
 .nk-crole-trait:hover { border-color: var(--border2); box-shadow: 0 8px 28px rgba(0,0,0,0.3); }
 .nk-crole-trait__header {
   display: flex;
@@ -388,9 +483,9 @@
   border-radius: 999px;
   line-height: 1.5;
 }
-.nk-crole-trait__cat--faction { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; }
-.nk-crole-trait__cat--combat  { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; }
-.nk-crole-trait__cat--special { background: rgba(251, 146, 60, 0.16); color: #fdba74; }
+.nk-crole-trait__cat--faction { background: var(--crole-faction-soft); color: var(--crole-faction-text); }
+.nk-crole-trait__cat--combat  { background: var(--crole-combat-soft); color: var(--crole-combat-text); }
+.nk-crole-trait__cat--special { background: var(--crole-special-soft); color: var(--crole-special-text); }
 .nk-crole-trait__act {
   font-size: 11px;
   font-weight: 600;
@@ -402,7 +497,7 @@
   flex: none;
 }
 .nk-crole-trait__desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0; }
-.nk-crole-trait__desc span { color: #ffcf5c; }
+.nk-crole-trait__desc span { color: var(--crole-num); }
 
 /* 羁绊层级进度条 */
 .nk-crole-layers { margin-top: 14px; }
@@ -498,7 +593,7 @@
 .nk-crole-layer--gold .nk-crole-layer__quality   { background: rgba(251, 191, 36, 0.16); color: #fcd34d; }
 .nk-crole-layer--multicolor .nk-crole-layer__quality { background: rgba(244, 114, 182, 0.14); color: #f9a8d4; }
 .nk-crole-layer__desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
-.nk-crole-layer__desc span { color: #ffcf5c; }
+.nk-crole-layer__desc span { color: var(--crole-num); }
 .nk-crole-layer__props {
   list-style: none;
   margin: 6px 0 0;
@@ -514,13 +609,13 @@
   letter-spacing: 0.04em;
   padding: 0 5px;
   border-radius: 4px;
-  background: rgba(124, 58, 237, 0.14);
-  color: #c4b5fd;
+  background: var(--crole-scope-bg);
+  color: var(--crole-scope-text);
   line-height: 1.6;
 }
-.nk-crole-layer__scope--all { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; }
+.nk-crole-layer__scope--all { background: var(--crole-scope-all-bg); color: var(--crole-scope-all-text); }
 .nk-crole-layer__pname { color: var(--text2); }
-.nk-crole-layer__pval { color: #6ee7b7; font-weight: 700; font-size: 12px; }
+.nk-crole-layer__pval { color: var(--crole-buff); font-weight: 700; font-size: 12px; }
 
 /* ═══ 后台星魂（时间线） ═══ */
 .nk-crole-timeline {
@@ -582,11 +677,11 @@
   color: var(--accent);
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(244, 63, 94, 0.1);
+  background: var(--crole-step-bg);
 }
 .nk-crole-timeline__name { font-weight: 600; font-size: 14px; color: var(--text-bright); }
 .nk-crole-timeline__desc { font-size: 13px; color: var(--text2); line-height: 1.55; margin: 0; }
-.nk-crole-timeline__desc span { color: #ffcf5c; }
+.nk-crole-timeline__desc span { color: var(--crole-num); }
 
 /* ═══ 推荐装备（前后台 × 优先级） ═══ */
 .nk-crole-recs {
@@ -609,11 +704,11 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 2px;
-  background: linear-gradient(90deg, rgba(255, 207, 92, 0.7), transparent 70%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--crole-num) 70%, transparent), transparent 70%);
   opacity: 0.6;
 }
 .nk-crole-rec:hover {
-  border-color: rgba(255, 207, 92, 0.35);
+  border-color: color-mix(in srgb, var(--crole-num) 35%, transparent);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
   transform: translateY(-2px);
 }
@@ -643,7 +738,7 @@
   border-radius: 999px;
   border: 1px solid;
 }
-.nk-crole-rec__prio.is-first { color: #ffcf5c; border-color: rgba(255, 207, 92, 0.4); background: rgba(255, 207, 92, 0.08); }
+.nk-crole-rec__prio.is-first { color: var(--crole-num); border-color: color-mix(in srgb, var(--crole-num) 40%, transparent); background: color-mix(in srgb, var(--crole-num) 8%, transparent); }
 .nk-crole-rec__prio.is-second { color: var(--text3); border-color: var(--border); background: rgba(255, 255, 255, 0.03); }
 .nk-crole-rec__items { display: flex; flex-wrap: wrap; gap: 8px; }
 .nk-crole-recitem {
@@ -663,8 +758,8 @@
   height: 36px;
   border-radius: 8px;
   overflow: hidden;
-  background: rgba(255, 207, 92, 0.06);
-  border: 1px solid rgba(255, 207, 92, 0.18);
+  background: color-mix(in srgb, var(--crole-num) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--crole-num) 18%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -697,7 +792,7 @@
   top: 20px;
   bottom: 20px;
   width: 2px;
-  background: linear-gradient(180deg, #6ee7b7, rgba(110, 231, 183, 0.2));
+  background: linear-gradient(180deg, var(--crole-buff), color-mix(in srgb, var(--crole-buff) 20%, transparent));
 }
 .nk-crole-equip {
   display: flex;
@@ -714,9 +809,9 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #6ee7b7;
+  background: var(--crole-buff);
   border: 2px solid var(--bg);
-  box-shadow: 0 0 8px rgba(110, 231, 183, 0.4);
+  box-shadow: 0 0 8px var(--crole-buff-glow);
 }
 .nk-crole-equip__lv {
   display: flex;
@@ -726,15 +821,15 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: rgba(110, 231, 183, 0.08);
-  border: 1px solid rgba(110, 231, 183, 0.25);
+  background: var(--crole-buff-soft);
+  border: 1px solid var(--crole-buff-border);
   justify-content: center;
 }
 .nk-crole-equip__lv-num {
   font-family: var(--font-hud);
   font-size: 16px;
   font-weight: 800;
-  color: #6ee7b7;
+  color: var(--crole-buff);
   line-height: 1;
 }
 .nk-crole-equip__lv-label {
@@ -746,7 +841,7 @@
 }
 .nk-crole-equip__body { flex: 1; min-width: 0; }
 .nk-crole-equip__desc { font-size: 13px; color: var(--text2); line-height: 1.55; margin: 0; }
-.nk-crole-equip__desc span { color: #ffcf5c; }
+.nk-crole-equip__desc span { color: var(--crole-num); }
 
 /* ═══ 角色信息详情汇总表（跨星级） ═══ */
 .nk-crole-summary {
@@ -772,9 +867,9 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: #ffcf5c;
-  background: rgba(255, 207, 92, 0.06);
-  border-bottom: 1px solid rgba(255, 207, 92, 0.18);
+  color: var(--crole-num);
+  background: color-mix(in srgb, var(--crole-num) 6%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--crole-num) 18%, transparent);
 }
 .nk-crole-summary__corner { text-align: left; }
 .nk-crole-summary__label {
@@ -813,11 +908,13 @@
 .nk-crole-star-tab:active { transform: scale(0.96); }
 .nk-crole-star-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-crole-star-tab.is-active {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: var(--crole-tab-active-bg);
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 4px 16px rgba(124,58,237,0.3), 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
+  box-shadow: 0 4px 16px var(--crole-tab-active-shadow), 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
 }
+/* CW 暗金主题：金色渐变底 + 深色文字保证对比度 */
+[data-theme="cw"] .nk-crole-star-tab.is-active { color: #1a1406; }
 
 /* 一句话描述 + 基础强度 */
 .nk-crole-oneliner {
@@ -851,18 +948,18 @@
   justify-content: space-between;
   padding: 14px 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(20,20,45,0.7));
+  background: linear-gradient(135deg, var(--crole-panel-tint), var(--crole-panel-deep));
   border: 1px solid var(--border);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.nk-crole-pow:hover { border-color: var(--border2); box-shadow: 0 0 18px rgba(124,58,237,0.12); }
+.nk-crole-pow:hover { border-color: var(--border2); box-shadow: 0 0 18px color-mix(in srgb, var(--crole-num) 12%, transparent); }
 .nk-crole-pow__k { color: var(--text2); font-size: 13px; }
 .nk-crole-pow__v {
   font-family: var(--font-hud);
   font-size: 24px;
   font-weight: 800;
-  color: #ffcf5c;
-  text-shadow: 0 0 14px rgba(251,191,36,0.35);
+  color: var(--crole-num);
+  text-shadow: 0 0 14px var(--crole-num-glow);
   letter-spacing: 0.02em;
 }
 
@@ -911,21 +1008,21 @@
 }
 .nk-crole-skill__simple { font-size: 13px; color: var(--text); margin: 8px 0; line-height: 1.5; }
 .nk-crole-skill__desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
-.nk-crole-skill__desc span { color: #ffcf5c; }
+.nk-crole-skill__desc span { color: var(--crole-num); }
 .nk-crole-skill__stance { margin-top: 8px; font-size: 12px; color: var(--text2); }
 .nk-crole-skill__extra {
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: rgba(124, 58, 237, 0.05);
-  border: 1px solid rgba(124, 58, 237, 0.12);
+  background: var(--crole-extra-bg);
+  border: 1px solid var(--crole-extra-border);
   list-style: none;
   font-size: 12px;
   color: var(--text2);
 }
 .nk-crole-skill__extra li { margin: 4px 0; }
 .nk-crole-skill__extra b { color: var(--metric-val); }
-.nk-crole-skill__extra span { color: #ffcf5c; }
+.nk-crole-skill__extra span { color: var(--crole-num); }
 
 /* 通用块 */
 .nk-crole-block { margin-top: 18px; }
@@ -963,9 +1060,9 @@
   transition: border-color 0.2s, background 0.2s;
 }
 .nk-crole-props li:hover,
-.nk-crole-kv li:hover { border-color: var(--border2); background: rgba(124,58,237,0.06); }
-.nk-crole-props__val { color: #ffcf5c; font-weight: 600; }
-.nk-crole-kv b { color: #ffcf5c; }
+.nk-crole-kv li:hover { border-color: var(--border2); background: var(--crole-panel-tint); }
+.nk-crole-props__val { color: var(--crole-num); font-weight: 600; }
+.nk-crole-kv b { color: var(--crole-num); }
 
 /* 星级内容切换淡入 */
 .nk-crole-star--in { animation: nk-crole-fade 0.3s var(--ease); }
@@ -977,7 +1074,7 @@
   .nk-crole-props li:hover, .nk-crole-kv li:hover, .nk-crole-timeline__card:hover {
     box-shadow: none; border-color: var(--border);
   }
-  .nk-crole-pow:hover { background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(20,20,45,0.7)); }
+  .nk-crole-pow:hover { background: linear-gradient(135deg, var(--crole-panel-tint), var(--crole-panel-deep)); }
 }
 
 /* 尊重「减少动态效果」偏好 */
