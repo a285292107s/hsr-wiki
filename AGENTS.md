@@ -34,6 +34,15 @@ python convert.py                        # 全量转换（增量跳过未变更�
 python convert.py --only characters      # 仅重跑指定模块
 python convert.py --force --pretty       # 强制全量 + 缩进输出
 python -m pytest tests/ -v               # converter 单元测试
+
+# 子模块数据探索工具（无需全量加载 GB 级原始文件）
+python query.py --list Avatar            # 搜索文件名
+python query.py AvatarConfig --schema    # 查看文件 schema
+python query.py AvatarConfig --id 1001   # 按 ID 查单条记录
+python query.py AvatarConfig --where "DamageType=Ice" --fields AvatarID,AvatarName --limit 5
+python query.py --resolve 6186714091647966180  # 解析 TextMap Hash
+python query.py --search "黄泉"          # TextMap 全文搜索
+python gen_catalog.py                    # 重新生成 DATA_CATALOG.md 索引
 ```
 
 部署：推送到 `main` 分支 → GitHub Actions 自动部署至 GitHub Pages。
@@ -91,6 +100,37 @@ src/
 - 输出格式：默认紧凑 JSON（无缩进），`--pretty` 切换为缩进模式（调试用）
 - 转换摘要：每次运行结束输出各模块耗时统计
 - 输出确定性：上游解包数据更新后重跑即可，前端无需改动
+
+### 子模块数据探索（AI 专用）
+
+`vendor/TurnBasedGameData` 子模块含 2140+ 个 JSON 文件（~250 MB）+ TextMap（~830 MB），**禁止直接读取原始文件**。使用以下工具：
+
+- **`DATA_CATALOG.md`**：自动生成的轻量索引，含每个文件的 schema、记录数、首条样例。查结构先读此文件。
+- **`query.py`**：精确查询 CLI，支持 `--id` / `--where` / `--fields` / `--grep` / `--schema` / `--resolve` / `--search`。
+- **`gen_catalog.py`**：子模块更新后重跑 `python gen_catalog.py` 刷新索引。
+
+### Converter 模块 → 源文件映射
+
+| 模块 | 读取的 ExcelOutput 源文件 |
+|------|---------------------------|
+| characters | AvatarConfig, AvatarConfigLD |
+| character_ranks | AvatarRankConfig |
+| character_skills | AvatarSkillConfig |
+| character_detail | AvatarConfig(LD), AvatarSkillConfig(LD), AvatarRankConfig(LD), AvatarSkillTreeConfig(LD), AvatarPromotionConfig(LD) |
+| light_cones | EquipmentConfig, EquipmentSkillConfig |
+| light_cone_detail | EquipmentConfig, EquipmentSkillConfig, EquipmentPromotionConfig, ItemConfigEquipment |
+| relics | RelicSetConfig, RelicConfig, RelicSetSkillConfig, RelicDataInfo |
+| relic_affixes | RelicMainAffixConfig, RelicSubAffixConfig |
+| monsters | MonsterTemplateConfig |
+| endgame | ChallengePeakConfig |
+| items | ItemConfig |
+| paths | AvatarBaseType |
+| elements | DamageType |
+| properties | （自建映射，无源文件） |
+| currency | AvatarConfigLD（本地数据） |
+| season | （本地数据） |
+
+> 所有模块均依赖 `TextMapCHS.json` 解析 Hash 文本引用。
 
 ### 测试
 

@@ -1,1 +1,14 @@
 # 指定在索引时要忽略的文件或文件夹。与.gitignore匹配规则一致，支持 my-security/ 和 *.log 等通配符模式。
+
+# 子模块原始数据（1GB+，AI 无需直接索引，通过 tools/converter/query.py 查询）
+vendor/
+
+# 构建产物
+dist/
+dist-standalone/
+node_modules/
+
+# 缓存
+__pycache__/
+*.pyc
+.pytest_cache/

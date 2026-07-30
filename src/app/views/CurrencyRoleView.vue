@@ -305,6 +305,12 @@ const TABS = [
 type TabKey = typeof TABS[number]['key'];
 const activeTab = ref<TabKey>('traits');
 function setTab(key: TabKey) { activeTab.value = key; }
+/** 切换角色时重置 Tab */
+watch(roleId, () => { activeTab.value = 'traits'; });
+/** 纯前台角色无后台星魂/光锥数据 */
+const noRankData = computed(() =>
+  !!data.value && !data.value.rank.length && !data.value.equipment.length,
+);
 function traitIconUrl(t: CurrencyRoleTrait): string {
   return `${CDN}/assets/hsr/gridfight/icon/${t.id}.webp`;
 }
@@ -485,6 +491,12 @@ const traitGroups = computed(() => {
 
       <!-- ═══ 后台星魂/光锥（时间线 + 专属装备） ═══ -->
       <div :class="['nk-panel', { 'nk-panel--active': activeTab === 'ranks' }]" data-panel="ranks">
+        <!-- 纯前台角色空状态提示 -->
+        <div v-if="noRankData" class="nk-crole-empty">
+          <span class="nk-crole-empty__icon">🎯</span>
+          <p class="nk-crole-empty__text">该角色为<strong>纯前台</strong>定位，不参与后台作战，因此没有后台星魂与专属光锥。</p>
+        </div>
+        <template v-else>
         <h2 class="nk-crole-section__title">后台星魂</h2>
         <div class="nk-crole-timeline">
           <div v-for="rk in data.rank" :key="rk.rank_id" class="nk-crole-timeline__item">
@@ -544,6 +556,7 @@ const traitGroups = computed(() => {
               </div>
             </div>
           </div>
+        </template>
         </template>
       </div>
 
