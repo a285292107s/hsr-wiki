@@ -69,7 +69,8 @@ onMounted(async () => {
     countUp('roles', data.roles.length);
     countUp('traits', traitSet.size);
     countUp('equip', equip);
-    stats.value.version = data.version && data.version !== 'local' ? data.version : 'LOCAL';
+    // 版本来自本地转换产物（converter 从赛季标题 TextMap 提取）
+    stats.value.version = data.version && data.version !== 'local' ? `v${data.version}` : '—';
   } catch {
     /* 离线降级：统计保持 0，页面结构仍完整 */
   }

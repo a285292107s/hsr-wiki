@@ -1,14 +1,15 @@
 <script setup lang="ts">
 /**
- * 自建侧边栏（双模式导航，手机底部栏统一 6 槽位，切换时按钮位置不偏移）
+ * 自建侧边栏（双模式导航，手机底部栏统一 7 槽位，切换时按钮位置不偏移）
  * 首项为「交换」按钮：跳转对方模式枢纽页（/ ↔ /currency）。
- * 常规模式：7 板块；手机（<768px）底部栏 = 交换 + 4 主项 + "更多"抽屉。
- * CW 模式：5 板块；手机底部栏 = 交换 + 5 板块平铺（短标签），无抽屉。
+ * 分隔线后首项为本模式枢纽页 Tab（常规=首页 /；CW=枢纽 /currency）。
+ * 常规模式：枢纽+7 板块；手机（<768px）底部栏 = 交换 + 首页 + 4 主项 + "更多"抽屉。
+ * CW 模式：枢纽+5 板块；手机底部栏 = 交换 + 枢纽 + 5 板块平铺（短标签），无抽屉。
  * 平板/桌面：竖排图标侧栏，当前模式全部板块展示 + 顶部 brand 标识。
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
-import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, SWAP_ITEM, type NavItem } from './nav-items';
+import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM, SWAP_ITEM, type NavItem } from './nav-items';
 
 const route = useRoute();
 const router = useRouter();
@@ -16,8 +17,10 @@ const router = useRouter();
 /** 当前是否处于货币战争模式（由路由 meta.cw 驱动，与 App.vue 主题切换同源） */
 const isCw = computed(() => !!route.meta.cw);
 
-/** 模式感知导航项 */
-const navItems = computed<NavItem[]>(() => (isCw.value ? CW_NAV_ITEMS : NORMAL_NAV_ITEMS));
+/** 模式感知导航项（枢纽页 Tab 置顶，其后为各板块） */
+const navItems = computed<NavItem[]>(() =>
+  isCw.value ? [CW_HUB_ITEM, ...CW_NAV_ITEMS] : [NORMAL_HUB_ITEM, ...NORMAL_NAV_ITEMS],
+);
 
 /** 「交换」：跳转对方模式的枢纽页 */
 function onSwap(): void {
@@ -34,11 +37,12 @@ watch(isCw, () => {
 });
 
 /** 目录项高亮：精确匹配或其子路径（如 /currency/role 在 /currency/role/1001 下仍高亮）；
- *  配置了 activePaths 的项（如终局内容 4 路由）对每个路径分别判定 */
+ *  配置了 activePaths 的项（如终局内容 4 路由）对每个路径分别判定；
+ *  exact 项（枢纽页）仅精确匹配，避免与板块项同时高亮 */
 function isActive(item: NavItem): boolean {
   const p = route.path;
   const paths = item.activePaths || [item.path];
-  return paths.some((ap) => p === ap || p.startsWith(ap + '/'));
+  return paths.some((ap) => p === ap || (!item.exact && p.startsWith(ap + '/')));
 }
 
 /* ─── 手机"更多"聚合（仅常规模式） ─── */
@@ -114,7 +118,7 @@ const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><c
       <span class="ui-sidebar-link__label">{{ item.short || item.title }}</span>
     </RouterLink>
 
-    <!-- 手机："更多"聚合入口（仅常规模式；CW 模式 5 板块平铺无需收纳） -->
+    <!-- 手机："更多"聚合入口（仅常规模式；CW 模式枢纽+5 板块平铺无需收纳） -->
     <button
       v-if="!isCw"
       ref="moreBtnRef"

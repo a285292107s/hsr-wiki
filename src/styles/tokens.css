@@ -130,7 +130,7 @@
   background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
   opacity: 0.8;
 }
-/* 全槽位触控目标：双模式统一 6 槽位（flex:1 填满整行消除死区），
+/* 全槽位触控目标：双模式统一 7 槽位（flex:1 填满整行消除死区），
    高度由 align-items: stretch 撑满 56px 栏高（≥ 44px 标准），
    槽位数一致保证模式切换时按钮位置不偏移 */
 .ui-sidebar-link {
@@ -166,7 +166,8 @@
 .ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(5) { animation-delay: 112ms; }
 .ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(6) { animation-delay: 140ms; }
 .ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(7) { animation-delay: 168ms; }
-.ui-sidebar--swap-anim .ui-sidebar-more { animation-delay: 196ms; }
+.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(8) { animation-delay: 196ms; }
+.ui-sidebar--swap-anim .ui-sidebar-more { animation-delay: 224ms; }
 @keyframes ui-nav-materialize {
   from { opacity: 0; filter: blur(3px); transform: scale(0.88); }
 }
@@ -174,7 +175,7 @@
   .ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) { animation: none; }
 }
 
-/* ─── 手机"更多"聚合：底部栏留 4 主项 + 更多按钮（与 CW 6 槽位对齐），其余 3 项收入上拉抽屉 ─── */
+/* ─── 手机"更多"聚合：底部栏留 首页 + 4 主项 + 更多按钮（与 CW 7 槽位对齐），其余 3 项收入上拉抽屉 ─── */
 /* 收纳项在底部栏隐藏（平板/桌面恢复显示） */
 .ui-sidebar-link--in-more { display: none; }
 /* 抽屉遮罩：位于底部栏上方（z 低于栏，保证栏始终可点），点遮罩关闭 */
@@ -557,10 +558,10 @@ background-position: center 15%;
     background: var(--nk-sheet-bg); backdrop-filter: blur(20px) saturate(1.4);
     border: 1px solid var(--nk-sheet-border);
     box-shadow: 0 8px 32px rgba(0,0,0,0.55);
-    /* 顶部锚定（取代垂直居中）：偏移量 = 常规模式 9 项 pill 总高(433px)的一半，
+    /* 顶部锚定（取代垂直居中）：偏移量 = 常规模式 10 项 pill 总高(483px)的一半，
        使默认常规模式恰好垂直居中；CW 模式共享同一顶锚点 →
        交换按钮位置恒定，且 pill 内无需占位槽、无空白玻璃 */
-    top: max(16px, calc(50% - 216px)); bottom: auto; left: 8px; right: auto; transform: none;
+    top: max(16px, calc(50% - 242px)); bottom: auto; left: 8px; right: auto; transform: none;
     height: fit-content; z-index: 10000;
   }
   /* 平板/桌面：图标式竖排，隐藏文字标签；触控目标提升至 44px（iPad 触屏标准） */
@@ -573,7 +574,7 @@ background-position: center 15%;
     margin: 4px 8px;
     background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
   }
-  /* 平板/桌面：恢复全部 9 项，隐藏"更多"入口与抽屉（含手机展开后旋屏的防御） */
+  /* 平板/桌面：恢复全部 10 项，隐藏"更多"入口与抽屉（含手机展开后旋屏的防御） */
   .ui-sidebar-more { display: none; }
   .ui-sidebar-link--in-more { display: flex; }
   .ui-more { display: none; }

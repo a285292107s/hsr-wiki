@@ -1,9 +1,10 @@
 /**
- * 全站导航配置（双模式：常规 7 板块 + 货币战争 5 板块）
+ * 全站导航配置（双模式：常规 枢纽+7 板块 + 货币战争 枢纽+5 板块）
  * 侧边栏（SidebarNav）与首页导航网格（HomeView）共享。
  *
  * 「交换」（SWAP_ITEM）为导航首项：点击跳转对方模式的枢纽页（/ ↔ /currency）。
- * 手机底部栏统一 6 槽位：常规 = 交换 + 4 主项 + 更多；CW = 交换 + 5 板块。
+ * 每个模式各有一个枢纽页 Tab（NORMAL_HUB_ITEM / CW_HUB_ITEM），指向本模式枢纽页。
+ * 手机底部栏统一 7 槽位：常规 = 交换 + 首页 + 4 主项 + 更多；CW = 交换 + 枢纽 + 5 板块。
  * 槽位数一致保证模式切换时按钮位置不偏移。
  */
 export interface NavItem {
@@ -14,10 +15,12 @@ export interface NavItem {
   path: string;
   /** 额外参与高亮判定的路径（如终局内容 4 路由共享一个侧栏项）；默认仅 path */
   activePaths?: string[];
+  /** 仅精确匹配路径时高亮（不延伸至子路径）；枢纽项专用，避免与板块项同时高亮 */
+  exact?: boolean;
   /** 主项：手机底部栏始终展示；未标记者收纳进"更多"抽屉（平板/桌面不受影响，均展示）。
-   *  常规模式需恰好 4 个主项，与 CW 的 5 板块 + 交换凑成统一 6 槽位 */
+   *  常规模式需恰好 4 个主项（+ 首页枢纽），与 CW 的枢纽 + 5 板块 + 交换凑成统一 7 槽位 */
   primary?: boolean;
-  /** 手机底部栏两字短标签（CW 模式 6 槽位平铺时使用）；缺省回退 title */
+  /** 手机底部栏两字短标签（CW 模式 7 槽位平铺时使用）；缺省回退 title */
   short?: string;
   /** 内联 SVG（静态可信内容，v-html 渲染） */
   icon: string;
@@ -29,6 +32,20 @@ export const SWAP_ITEM = {
   en: 'SWAP',
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h13"/><path d="M16 4l4 4-4 4"/><path d="M17 16H4"/><path d="M8 12l-4 4 4 4"/></svg>',
 } as const;
+
+/** 常规模式枢纽页 Tab：指向首页（/），导航板块首项 */
+export const NORMAL_HUB_ITEM: NavItem = {
+  title: '首页', en: 'HOME', desc: '常规模式枢纽 · 全站板块入口', path: '/', primary: true, exact: true,
+  activePaths: ['/', '/hsr'],
+  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>',
+};
+
+/** 货币战争模式枢纽页 Tab：指向货币战争枢纽（/currency），CW 导航板块首项。
+ *  与常规枢纽共用房屋图标——两者是功能对等的模式大本营，统一图标强化镜像语义 */
+export const CW_HUB_ITEM: NavItem = {
+  title: '枢纽', en: 'HUB', desc: '货币战争数据概览与板块入口', path: '/currency', short: '枢纽', exact: true,
+  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>',
+};
 
 /** 常规模式导航（7 板块；货币战争已升级为独立模式，由此移除） */
 export const NORMAL_NAV_ITEMS: NavItem[] = [
@@ -63,7 +80,7 @@ export const NORMAL_NAV_ITEMS: NavItem[] = [
   },
 ];
 
-/** 货币战争模式导航（5 板块；short 用于手机 6 槽位平铺） */
+/** 货币战争模式导航（5 板块；short 用于手机 7 槽位平铺） */
 export const CW_NAV_ITEMS: NavItem[] = [
   {
     title: '角色图鉴', en: 'ROLES', desc: '货币战争角色数值与羁绊', path: '/currency/role', short: '角色',

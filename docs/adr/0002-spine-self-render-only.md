@@ -1,5 +1,9 @@
 # Spine 动画仅自主渲染，放弃宿主 Canvas 快路径
 
+## 状态
+
+已接受
+
 旧版采用双通道策略：优先抢走宿主已渲染的 WebGL canvas（零开销），2s 宽限期后才启动自主渲染。Vue 迁移时砍掉快路径，仅保留自主渲染（从 CDN 加载 spine-player 4.1.23 运行时 + .skel/.atlas 资源）。
 
 **Considered Options**:

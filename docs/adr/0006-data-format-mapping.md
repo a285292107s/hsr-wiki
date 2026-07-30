@@ -2,7 +2,9 @@
 
 ## 状态
 
-已接受
+部分过时（被实现演进取代）
+
+> 本 ADR 的"StarRailRes 扁平索引格式"及"源数据通过本地解压引入（后续可改 submodule）"已过时：实际以 git submodule 引入源数据（见 ADR-0005），输出结构已演进为多模块、含 detail 子目录（`characters/`、`light_cones/`、`currency/`）并新增 monsters/maze/endgame（`maze*.json`）等数据；TextMap 解析、图片路径映射、枚举规范等策略性内容仍有效。
 
 ## 背景
 

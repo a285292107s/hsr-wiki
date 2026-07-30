@@ -16,9 +16,11 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 
-from config import OUTPUT_DIR
+from config import EXCEL_DIR, OUTPUT_DIR
 from textmap import resolve_text
+from utils import load_json
 
 logger = logging.getLogger("converter.currency.season")
 
@@ -33,6 +35,43 @@ SEASON_TEXTMAP: dict[str, dict[str, str]] = {
         "overview": "15871785773892858103",
     },
 }
+
+# 版本号格式：主版本.次版本（如 '4.4'）
+_VERSION_RE = re.compile(r"^(\d+)\.(\d+)$")
+
+# 游戏主版本来源：遗器套装每个大版本新增，其 ReleaseVersion 最大值即为当前正式服主版本。
+_VERSION_SOURCE_FILE = "RelicSetConfig.json"
+
+
+def get_currency_version() -> str:
+    """获取游戏当前主版本（正式服），作为货币战争数据版本。
+
+    数据源：ExcelOutput/RelicSetConfig.json 的 ReleaseVersion 字段，
+    取全部记录中的最大值（如 '4.4'）。无法解析时回退 'local'。
+    供 currency / season 两个转换器共享。
+    """
+    try:
+        data = load_json(EXCEL_DIR / _VERSION_SOURCE_FILE)
+    except OSError:
+        logger.warning("版本源文件读取失败：%s（回退 local）", _VERSION_SOURCE_FILE)
+        return "local"
+
+    best: tuple[int, int] | None = None
+    for item in data:
+        ver = item.get("ReleaseVersion")
+        if not isinstance(ver, str):
+            continue
+        m = _VERSION_RE.match(ver.strip())
+        if not m:
+            continue
+        parts = (int(m.group(1)), int(m.group(2)))
+        if best is None or parts > best:
+            best = parts
+
+    if best is None:
+        logger.warning("未能从 %s 解析出版本号（回退 local）", _VERSION_SOURCE_FILE)
+        return "local"
+    return f"{best[0]}.{best[1]}"
 
 
 def convert() -> None:
@@ -65,7 +104,7 @@ def convert() -> None:
 
         seasons.append(entry)
 
-    out = {"version": "local", "seasons": seasons}
+    out = {"version": get_currency_version(), "seasons": seasons}
     (out_dir / "season.json").write_text(
         json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8"
     )
