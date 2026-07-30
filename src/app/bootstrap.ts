@@ -9,6 +9,7 @@ import '../styles/lightcone.css';
 import '../styles/relic.css';
 import '../styles/currency-role.css';
 import '../styles/currency-hub.css';
+import '../styles/currency-catalog.css';
 
 export async function bootstrap(): Promise<void> {
   const app = createApp(App);

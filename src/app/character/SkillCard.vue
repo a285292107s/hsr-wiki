@@ -6,7 +6,7 @@
  * 子技能通过文件名自引用递归渲染（原结构：子卡片嵌套在父卡片 .nk-skill 内）
  */
 import { computed, ref } from 'vue';
-import type { CharacterData, Skill } from '../../services/types';
+import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
 import {
   fmtDesc, fmtDescDiff, fmtToughness, hasParamDiff, hasTextDiff, paramEqual, skillIconUrl,
 } from '../../lib/format';
@@ -25,6 +25,8 @@ const props = defineProps<{
   childSkills?: Skill[];
   /** 父卡片的当前等级（子技能共用父级滑条） */
   parentLv?: number;
+  /** 技能动画列表（米游社 Wiki 数据，仅父卡片传入） */
+  animEntries?: SkillAnimEntry[] | null;
 }>();
 
 /* ─── 技能等级滑条（响应式替代原 data-tpl/data-lvs 方案） ─── */
@@ -171,6 +173,53 @@ const table = computed<{ cols: string[]; rows: TableRow[] } | null>(() => {
   return { cols, rows };
 });
 const tableOpen = ref(false);
+
+/* ─── 技能预览（米游社 Wiki animated webp/gif，默认收纳、点开加载） ─── */
+const animOpen = ref(false);   // 折叠状态（默认收纳）
+const everOpened = ref(false); // 一旦展开即保留 img（避免重复解码大体积动画）
+const animIdx = ref(0);
+const imgDone = ref(false);
+
+/** GIF 走 OSS 实时 webp 转换（带宽优化）；webp 直连 */
+function animSrc(entry: SkillAnimEntry): string {
+  return entry.url.endsWith('.gif')
+    ? `${entry.url}?x-oss-process=image%2Fformat%2Cwebp`
+    : entry.url;
+}
+
+/** 本技能自身分得的动画：
+ *  · 父卡且组内仅 1 个技能 → 拿全部（多段动画用 tab 切换）
+ *  · 父卡且组内多个技能 → 只拿首条（其余按索引分发给子技能）
+ *  · 子卡 → 父卡已按索引切好传入（单个）
+ */
+const myAnims = computed<SkillAnimEntry[]>(() => {
+  const entries = props.animEntries;
+  if (!entries || !entries.length) return [];
+  const hasChildren = (props.childSkills?.length ?? 0) > 0;
+  return hasChildren ? entries.slice(0, 1) : entries;
+});
+
+/** 按索引分发动画给子技能：child[ci] → anim[ci + 1] */
+function animForChild(ci: number): SkillAnimEntry[] | null {
+  const entries = props.animEntries;
+  if (!entries) return null;
+  const a = entries[ci + 1];
+  return a ? [a] : null;
+}
+
+const curAnim = computed(() =>
+  myAnims.value[animIdx.value] ? animSrc(myAnims.value[animIdx.value]) : '',
+);
+function toggleAnim(): void {
+  animOpen.value = !animOpen.value;
+  if (animOpen.value) everOpened.value = true;
+}
+function selectAnim(i: number): void {
+  if (i === animIdx.value) return;
+  animIdx.value = i;
+  imgDone.value = false;
+}
+function onImgLoad(): void { imgDone.value = true; }
 </script>
 
 <template>
@@ -209,6 +258,42 @@ const tableOpen = ref(false);
       <div v-if="terms.length" class="nk-skill__terms">
         <div v-for="t in terms" :key="t.name" class="nk-term">
           <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
+        </div>
+      </div>
+      <!-- 技能预览（默认收纳，点开加载动画） -->
+      <div v-if="myAnims.length" class="nk-skill__anim">
+        <button
+          class="nk-skill__anim-toggle"
+          :class="{ open: animOpen }"
+          type="button"
+          @click="toggleAnim"
+        >
+          <span class="arrow">▶</span> 技能预览
+        </button>
+        <div class="nk-skill__anim-clip" :class="{ open: animOpen }">
+          <div class="nk-skill__anim-inner">
+            <div v-if="myAnims.length > 1" class="nk-skill__anim-tabs">
+              <button
+                v-for="(a, i) in myAnims"
+                :key="i"
+                type="button"
+                class="nk-skill__anim-tab"
+                :class="{ active: i === animIdx }"
+                @click="selectAnim(i)"
+              >{{ a.title || `${i + 1}` }}</button>
+            </div>
+            <div class="nk-skill__anim-stage" :class="{ loaded: imgDone }">
+              <img
+                v-if="everOpened && curAnim"
+                class="nk-skill__anim-img"
+                :src="curAnim"
+                :alt="`${sk.name} 技能预览`"
+                loading="lazy"
+                @load="onImgLoad"
+              >
+              <div v-if="animOpen && !imgDone" class="nk-skill__anim-ph"><span></span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -253,9 +338,9 @@ const tableOpen = ref(false);
         </div>
       </div>
     </div>
-    <!-- 子技能（同 type+type_name 分组的后续项，嵌套在父卡片内） -->
+    <!-- 子技能（同 type+type_name 分组的后续项，嵌套在父卡片内；动画按索引分发） -->
     <SkillCard
-      v-for="c in childSkills || []"
+      v-for="(c, ci) in childSkills || []"
       :key="c.id"
       :sk="c"
       :is-child="true"
@@ -265,6 +350,7 @@ const tableOpen = ref(false);
       :is-diff-mode="isDiffMode"
       :char-id="charId"
       :char-data="charData"
+      :anim-entries="animForChild(ci)"
     />
   </div>
 </template>

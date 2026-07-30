@@ -1,0 +1,151 @@
+/* ═══════════════════════════════════════════
+   货币战争 · 图鉴目录页通用卡片（装备/环境/策略/羁绊）
+   BEM 前缀：nk-cw-*
+   暗金主题下自动适配（继承 [data-theme="cw"] 令牌）
+   ═══════════════════════════════════════════ */
+
+/* ── 网格布局 ── */
+.nk-cw-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.nk-cw-grid--wide { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+/* ── 通用卡片 ── */
+.nk-cw-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  animation: nk-cw-fadein 0.35s ease both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+.nk-cw-card:hover {
+  border-color: var(--border2);
+  box-shadow: 0 0 12px var(--primary-glow);
+  transform: translateY(-2px);
+}
+
+@keyframes nk-cw-fadein {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 图标 ── */
+.nk-cw-card__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  flex-shrink: 0;
+}
+.nk-cw-card__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── 文本区 ── */
+.nk-cw-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.nk-cw-card__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.nk-cw-card__cat {
+  font-size: 0.68rem;
+  color: var(--text3);
+}
+.nk-cw-card__desc {
+  font-size: 0.72rem;
+  color: var(--text2);
+  line-height: 1.45;
+}
+/* 非宽卡片（紧凑布局）仍限制行数 */
+.nk-cw-grid:not(.nk-cw-grid--wide) .nk-cw-card__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nk-cw-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── 标签 ── */
+.nk-cw-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+.nk-cw-tag {
+  display: inline-block;
+  font-size: 0.62rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--primary-glow);
+  color: var(--primary);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.nk-cw-tag--faction { background: rgba(167,139,250,0.14); color: #c4b5fd; border-color: rgba(167,139,250,0.3); }
+.nk-cw-tag--combat  { background: rgba(56,189,248,0.14);  color: #7dd3fc; border-color: rgba(56,189,248,0.3); }
+.nk-cw-tag--special { background: rgba(251,146,60,0.14);  color: #fdba74; border-color: rgba(251,146,60,0.3); }
+.nk-cw-tag--silver  { background: rgba(148,163,184,0.14); color: #cbd5e1; border-color: rgba(148,163,184,0.3); }
+.nk-cw-tag--gold    { background: rgba(252,211,77,0.14);  color: #fcd34d; border-color: rgba(252,211,77,0.3); }
+.nk-cw-tag--prismatic {
+  background: linear-gradient(135deg, rgba(244,114,182,0.16), rgba(129,140,248,0.16), rgba(45,212,191,0.16));
+  color: #f0abfc;
+  border-color: rgba(232,121,249,0.4);
+}
+
+/* ── 羁绊层级数 ── */
+.nk-cw-trait-layers {
+  font-size: 0.62rem;
+  color: var(--text3);
+}
+
+/* ── 宽卡片（环境/策略/羁绊）：横向布局 ── */
+.nk-cw-grid--wide .nk-cw-card {
+  flex-direction: row;
+  text-align: left;
+  padding: 12px 14px;
+  gap: 12px;
+}
+.nk-cw-grid--wide .nk-cw-card__body {
+  align-items: flex-start;
+}
+.nk-cw-grid--wide .nk-cw-card__icon {
+  width: 48px;
+  height: 48px;
+}
+
+/* ── 手机端适配 ── */
+@media (max-width: 767px) {
+  .nk-cw-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  .nk-cw-grid--wide { grid-template-columns: 1fr; }
+  .nk-cw-card { padding: 10px 8px; }
+  .nk-cw-card__icon { width: 52px; height: 52px; }
+  .nk-cw-grid--wide .nk-cw-card__icon { width: 44px; height: 44px; }
+}

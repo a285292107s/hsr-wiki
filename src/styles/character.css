@@ -156,6 +156,57 @@
 }
 .nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
 .nk-term__name { color: var(--highlight); font-weight: 600; }
+/* ─── 技能预览（折叠式，点开加载动画） ─── */
+.nk-skill__anim { margin-top: 16px; }
+.nk-skill__anim-toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.625rem; font-weight: 500; color: var(--text3);
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+  transition: color 0.2s; letter-spacing: 0.02em;
+  position: relative;
+}
+.nk-skill__anim-toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
+.nk-skill__anim-toggle:hover { color: var(--primary); }
+.nk-skill__anim-toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
+.nk-skill__anim-toggle.open .arrow { transform: rotate(90deg); }
+.nk-skill__anim-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-skill__anim-clip.open { grid-template-rows: 1fr; }
+.nk-skill__anim-inner { overflow: hidden; min-height: 0; }
+.nk-skill__anim-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+.nk-skill__anim-tab {
+  font-size: 0.625rem; font-weight: 600; padding: 2px 10px;
+  border-radius: 4px; border: 1px solid var(--border);
+  background: transparent; color: var(--text3); cursor: pointer;
+  transition: all 0.2s; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nk-skill__anim-tab:hover { border-color: var(--border2); color: var(--text2); }
+.nk-skill__anim-tab.active {
+  border-color: var(--primary); color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.nk-skill__anim-stage {
+  margin-top: 10px; border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(124,58,237,0.12);
+  background: rgba(0,0,0,0.35);
+  aspect-ratio: 960 / 514;
+  position: relative;
+}
+.nk-skill__anim-img {
+  display: block; width: 100%; height: 100%; object-fit: contain;
+  opacity: 0; transition: opacity 0.4s ease;
+}
+.nk-skill__anim-stage.loaded .nk-skill__anim-img { opacity: 1; }
+/* 加载占位（脉冲动画） */
+.nk-skill__anim-ph {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.nk-skill__anim-ph span {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid rgba(124,58,237,0.25); border-top-color: var(--primary);
+  animation: nk-anim-spin 0.8s linear infinite;
+}
+@keyframes nk-anim-spin { to { transform: rotate(360deg); } }
 /* 数据表折叠（grid-rows 动画） */
 .nk-skill__table-wrap { margin-top: 14px; }
 .nk-skill__table-btn {

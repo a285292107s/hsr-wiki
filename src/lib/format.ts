@@ -405,6 +405,26 @@ export function monsterIconUrl(iconPath: string | null | undefined): string {
   return base ? `${CDN}/assets/hsr/monstermiddleicon/${base}.webp` : '';
 }
 
+/** 货币战争 GridFight 图标：SpriteOutput/GridFight/Equipment/350101.png → CDN webp */
+export function gridFightIconUrl(iconPath: string | null | undefined): string {
+  if (!iconPath) return '';
+  const m = iconPath.match(/SpriteOutput\/(.+)\.png$/i);
+  if (!m) return '';
+  return `${CDN}/assets/hsr/${m[1].toLowerCase()}.webp`;
+}
+
+/**
+ * 货币战争装备专用图标：CDN 统一存于 gridfight/equipment/{文件名}.webp（保留原始大小写）。
+ * 源路径可能为 Equipment/350101.png 或 GridItem/GridFight_WeaponBox3.png，
+ * 两者均映射到 equipment 目录，且命名图标（非数字 ID）须保留大小写。
+ */
+export function gridFightEquipIconUrl(iconPath: string | null | undefined): string {
+  if (!iconPath) return '';
+  const m = iconPath.match(/([^/]+)\.png$/i);
+  if (!m) return '';
+  return `${CDN}/assets/hsr/gridfight/equipment/${m[1]}.webp`;
+}
+
 /** 从 rank 字符串解析稀有度数字（CombatPowerAvatarRarityType4 → 4，无法解析回退 5） */
 export function parseRarity(rank: string | null | undefined): number {
   const m = (rank || '').match(/(\d+)\s*$/);

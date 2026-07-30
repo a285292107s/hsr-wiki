@@ -28,7 +28,7 @@ from incremental import load_state, save_state, should_skip, update_state
 from converters import paths, elements, items, properties
 from converters import characters, character_ranks, character_skills, character_detail
 from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame
-from converters import currency, season  # noqa: E402 – 本地数据，无需网络
+from converters import currency, season, currency_catalog  # noqa: E402 – 本地数据，无需网络
 
 logging.basicConfig(
     level=logging.INFO,
@@ -54,6 +54,7 @@ MODULES: dict[str, list] = {
     "monsters": [monsters.convert],
     "endgame": [endgame.convert],
     "currency": [currency.convert],
+    "currency_catalog": [currency_catalog.convert],
     "season": [season.convert],
 }
 

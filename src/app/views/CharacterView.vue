@@ -14,7 +14,7 @@ import { useAppStore } from '../stores/app';
 import { useCharacterStore } from '../stores/character';
 import SkillCard from '../character/SkillCard.vue';
 import { initSpineViewer } from '../character/spine';
-import { loadLocalRelicSet } from '../../services/api';
+import { loadLocalRelicSet, loadSkillAnimations } from '../../services/api';
 import {
   avatarDrawCardUrl, eidolonIconUrl, escHtml, fmtDesc, fmtDescDiff,
   hasParamDiff, hasTextDiff, iconUrl, itemName, maxLevelStat, maxLevelValue,
@@ -22,7 +22,7 @@ import {
 } from '../../lib/format';
 import { CDN, CHAR_TABS, ELEM, MAX_CHAR_LEVEL, PATH, PROP_ICON, PROP_NAMES, SKILL_ORDER, SLOT_ICONS, SLOT_NAMES, TYPE } from '../../lib/constants';
 import type {
-  CharacterData, RelicSetData, Skill, SkillExtra, SkillTree,
+  CharacterData, RelicSetData, Skill, SkillAnimEntry, SkillAnimationsDb, SkillExtra, SkillTree,
 } from '../../services/types';
 
 const route = useRoute();
@@ -54,6 +54,8 @@ const oldD = computed<CharacterData | null>(() => char.renderData.oldD);
 async function load(id: string): Promise<void> {
   try {
     await char.load(id);
+    // 技能动画映射（可选增强，失败静默）
+    loadSkillAnimations().then((db) => { animDb.value = db; }).catch(() => {});
   } catch {
     app.toast('error', `加载失败: ${char.error || '未知错误'}`);
   }
@@ -386,6 +388,16 @@ const abilities = computed<Ability[]>(() => {
 });
 
 /* ═══════════ 技能面板 ═══════════ */
+
+/* ─── 技能动画映射（米游社 Wiki 数据，charId → type → 动画列表） ─── */
+const animDb = ref<SkillAnimationsDb | null>(null);
+function animFor(sk: Skill): SkillAnimEntry[] | null {
+  const db = animDb.value;
+  if (!db || !char.charId) return null;
+  const charAnims = db[char.charId];
+  if (!charAnims) return null;
+  return charAnims[sk.type] || null;
+}
 
 interface SkillGroup { main: Skill; children: Skill[] }
 /** 按 (type + type_name) 分组：首个为主技能，同组后续为子技能 */
@@ -900,6 +912,7 @@ onBeforeUnmount(() => {
             :is-diff-mode="!!oldD"
             :char-id="char.charId"
             :char-data="d"
+            :anim-entries="animFor(g.main)"
           />
           <div
             v-for="rc in removedSkills"

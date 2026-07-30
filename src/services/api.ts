@@ -14,6 +14,8 @@ import type {
   LocalItemList, LocalLightConeList, LocalRelicList, LocalMonsterList,
   LightConeDetail, LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
   CurrencyRoleList, CurrencyRoleDetail, CurrencySeasonList,
+  CurrencyEquipList, CurrencyPortalList, CurrencyAugmentList, CurrencyTraitList,
+  SkillAnimationsDb,
 } from './types';
 
 /** 本地数据根路径（随站部署，Vite base 自动带前缀） */
@@ -33,6 +35,16 @@ export function resolveVersion(m: Manifest): string {
   return m.hsr?.latest || (m.hsr?.available || [])[0] || '';
 }
 
+/* ─── 技能动画（米游社 Wiki 抓取数据） ─── */
+
+export function loadSkillAnimations(): Promise<SkillAnimationsDb> {
+  if (!_skillAnimsP) {
+    _skillAnimsP = fetchJSON<SkillAnimationsDb>(`${LOCAL_DATA_BASE}/skill_animations.json`)
+      .catch((e) => { _skillAnimsP = null; throw e; });
+  }
+  return _skillAnimsP;
+}
+
 /* ─── 本地目录数据（随站部署，二期统一数据源） ─── */
 
 /** 数字稀有度 → 字符串键（与 ItemInfo.rarity 及目录页 ITEM_RARITY_MAP 对齐） */
@@ -45,6 +57,7 @@ export const RARITY_NUM_TO_KEY: Record<number, string> = {
 let _charsP: Promise<LocalCharList> | null = null;
 let _lightConesP: Promise<LocalLightConeList> | null = null;
 let _relicsP: Promise<LocalRelicList> | null = null;
+let _skillAnimsP: Promise<SkillAnimationsDb> | null = null;
 
 export function loadLocalItems(): Promise<LocalItemList> {
   return fetchJSON<LocalItemList>(`${LOCAL_DATA_BASE}/items.json`);
@@ -191,6 +204,22 @@ export function loadLocalCurrencyRole(id: string): Promise<CurrencyRoleDetail> {
 
 export function loadLocalCurrencySeasons(): Promise<CurrencySeasonList> {
   return fetchJSON<CurrencySeasonList>(`${LOCAL_DATA_BASE}/currency/season.json`);
+}
+
+export function loadLocalCurrencyEquipment(): Promise<CurrencyEquipList> {
+  return fetchJSON<CurrencyEquipList>(`${LOCAL_DATA_BASE}/currency/equipment.json`);
+}
+
+export function loadLocalCurrencyPortals(): Promise<CurrencyPortalList> {
+  return fetchJSON<CurrencyPortalList>(`${LOCAL_DATA_BASE}/currency/portals.json`);
+}
+
+export function loadLocalCurrencyAugments(): Promise<CurrencyAugmentList> {
+  return fetchJSON<CurrencyAugmentList>(`${LOCAL_DATA_BASE}/currency/augments.json`);
+}
+
+export function loadLocalCurrencyTraits(): Promise<CurrencyTraitList> {
+  return fetchJSON<CurrencyTraitList>(`${LOCAL_DATA_BASE}/currency/traits.json`);
 }
 
 /**

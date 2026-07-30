@@ -659,3 +659,110 @@ export interface CurrencySeason {
 export interface CurrencySeasonList {
   seasons: CurrencySeason[];
 }
+
+/* ─── 货币战争 · 装备图鉴 ─── */
+
+export interface CurrencyEquipTag {
+  id: number;
+  desc: string;
+}
+
+export interface CurrencyEquipProp {
+  name: string;
+  property_type: string;
+  value: number;
+}
+
+export interface CurrencyEquipEntry {
+  id: number;
+  name: string;
+  icon: string;
+  small_icon: string;
+  priority: number;
+  category: string;
+  category_name: string;
+  ability_name: string;
+  desc: string;
+  tags: CurrencyEquipTag[];
+  props: CurrencyEquipProp[];
+  recommend_roles: number[];
+}
+
+export interface CurrencyEquipList {
+  items: CurrencyEquipEntry[];
+}
+
+/* ─── 货币战争 · 投资环境（Portal Buff） ─── */
+
+export interface CurrencyPortalEntry {
+  id: number;
+  title: string;
+  desc: string;
+  icon: string;
+  in_book: boolean;
+  params: number[];
+}
+
+export interface CurrencyPortalList {
+  portals: CurrencyPortalEntry[];
+}
+
+/* ─── 货币战争 · 投资策略（Augment） ─── */
+
+export interface CurrencyAugmentEntry {
+  id: number;
+  name: string;
+  desc: string;
+  icon: string;
+  mini_icon: string;
+  quality: string;
+  category_id: number;
+  params: number[];
+  chapter_limit: number[];
+}
+
+export interface CurrencyAugmentList {
+  augments: CurrencyAugmentEntry[];
+}
+
+/* ─── 货币战争 · 羁绊图鉴（Trait） ─── */
+
+export interface CurrencyTraitLayer {
+  layer: number;
+  quality: string | null;
+  desc: string;
+  params: number[];
+  member_props: CurrencyEquipProp[];
+  all_props: CurrencyEquipProp[];
+}
+
+export interface CurrencyTraitEntry {
+  id: number;
+  name: string;
+  desc: string;
+  simple_desc: string;
+  icon: string;
+  mini_icon: string;
+  activation_type: string;
+  cat: 'faction' | 'combat' | 'special';
+  base_params: number[];
+  season_id: number;
+  sort_priority: number;
+  layers: CurrencyTraitLayer[];
+}
+
+export interface CurrencyTraitList {
+  traits: CurrencyTraitEntry[];
+}
+
+/* ─── skill_animations.json（米游社 Wiki 技能动画映射） ─── */
+
+/** 单条技能动画条目 */
+export interface SkillAnimEntry {
+  url: string;
+  /** 多段技能子标题（如终结技分段名） */
+  title?: string;
+}
+
+/** 技能动画数据库：charId → skillType → 动画列表 */
+export type SkillAnimationsDb = Record<string, Record<string, SkillAnimEntry[]>>;
