@@ -3,6 +3,7 @@
 状态文件存放于 tools/converter/.converter-state.json（已 gitignore）。
 """
 
+import hashlib
 import json
 import logging
 from pathlib import Path
@@ -49,13 +50,13 @@ def _file_sig(path: Path) -> str:
 
 
 def _dir_sig(directory: Path) -> str:
-    """目录签名：所有 .json 文件签名拼接的 hash。"""
+    """目录签名：所有 .json 文件签名拼接的 md5（跨进程稳定）。"""
     if not directory.exists():
         return "missing"
     sigs = []
     for f in sorted(directory.rglob("*.json")):
         sigs.append(f"{f.name}:{_file_sig(f)}")
-    return str(hash("|".join(sigs)))
+    return hashlib.md5("|".join(sigs).encode()).hexdigest()
 
 
 def _module_sig(module_name: str) -> str:

@@ -42,6 +42,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
+# Windows 控制台强制 UTF-8，避免中文输出乱码
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 # 同时支持脚本运行（from config）与模块运行（from .config）

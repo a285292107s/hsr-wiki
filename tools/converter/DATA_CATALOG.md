@@ -3,9 +3,9 @@
 > 本文件由 `gen_catalog.py` 自动生成，描述 `vendor/TurnBasedGameData/ExcelOutput/` 下所有 JSON 文件的结构。
 > AI 可通过本索引快速定位目标数据文件，再用 `query.py` 精确查询具体记录。
 
-**生成时间**: 2026-07-30 12:40:03
+**生成时间**: 2026-07-30 17:32:16
 **文件总数**: 2140
-**总大小**: 246.8 MB
+**总大小**: 246.9 MB
 
 ## TextMap
 
@@ -2221,6 +2221,32 @@
 }
 ```
 
+### GridFightEnemyDifficultyLv.json (0.26 MB, 903 条)
+
+**字段** (6): `ChapterID, AttackRatio, DefenceRatio, HPRatio, SpeedRatio, StanceRatio`
+
+**首条记录摘要**:
+```json
+{
+  "ChapterID": 1,
+  "AttackRatio": {
+    "Value": 1
+  },
+  "DefenceRatio": {
+    "Value": 1
+  },
+  "HPRatio": {
+    "Value": 1
+  },
+  "SpeedRatio": {
+    "Value": 1
+  },
+  "StanceRatio": {
+    "Value": 1
+  }
+}
+```
+
 ### GridFightBackSkillExtraDesc.json (0.25 MB, 450 条)
 
 **字段** (7): `SkillID, ConditionDesc, ParamList, ConditionSimpleDesc, SimpleParamList, ExtraEffectIDList, SimpleExtraEffectIDList`
@@ -2893,32 +2919,6 @@
   "BookSeriesNum": 1,
   "BookSeriesWorld": 2,
   "IsShowInBookshelf": true
-}
-```
-
-### GridFightEnemyDifficultyLv.json (0.17 MB, 603 条)
-
-**字段** (6): `ChapterID, AttackRatio, DefenceRatio, HPRatio, SpeedRatio, StanceRatio`
-
-**首条记录摘要**:
-```json
-{
-  "ChapterID": 1,
-  "AttackRatio": {
-    "Value": 1
-  },
-  "DefenceRatio": {
-    "Value": 1
-  },
-  "HPRatio": {
-    "Value": 1
-  },
-  "SpeedRatio": {
-    "Value": 1
-  },
-  "StanceRatio": {
-    "Value": 1
-  }
 }
 ```
 

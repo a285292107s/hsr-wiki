@@ -40,7 +40,7 @@ const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
 }));
 
 /* ─── 数据概览（驱动自转换产物，随版本自动更新） ─── */
-const stats = ref({ roles: 0, traits: 0, equip: 0, version: '—' });
+const stats = ref({ roles: 0, traits: 0, equip: 0 });
 
 /* ─── 赛季扩充说明（驱动自 season 转换器产物） ─── */
 const seasons = ref<CurrencySeason[]>([]);
@@ -69,8 +69,6 @@ onMounted(async () => {
     countUp('roles', data.roles.length);
     countUp('traits', traitSet.size);
     countUp('equip', equip);
-    // 版本来自本地转换产物（converter 从赛季标题 TextMap 提取）
-    stats.value.version = data.version && data.version !== 'local' ? `v${data.version}` : '—';
   } catch {
     /* 离线降级：统计保持 0，页面结构仍完整 */
   }
@@ -178,10 +176,6 @@ const seasonViews = computed(() =>
         <div class="nk-cwhub-stat">
           <span class="nk-cwhub-stat__val">{{ stats.equip }}</span>
           <span class="nk-cwhub-stat__label">预设光锥</span>
-        </div>
-        <div class="nk-cwhub-stat">
-          <span class="nk-cwhub-stat__val">{{ stats.version }}</span>
-          <span class="nk-cwhub-stat__label">数据版本</span>
         </div>
       </div>
     </header>

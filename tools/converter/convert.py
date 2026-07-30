@@ -14,11 +14,16 @@ import sys
 import time
 from pathlib import Path
 
+# Windows 控制台强制 UTF-8，避免中文日志乱码
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+
 # 将当前目录加入 sys.path，使子模块能正常导入
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from textmap import load_textmap
-from utils import set_compact
+from utils import set_pretty
 from incremental import load_state, save_state, should_skip, update_state
 from converters import paths, elements, items, properties
 from converters import characters, character_ranks, character_skills, character_detail
@@ -80,7 +85,7 @@ def main() -> None:
 
     # 输出模式
     if args.pretty:
-        set_compact(True)  # set_compact(True) 表示 pretty=True → 缩进
+        set_pretty(True)
 
     # 确定要运行的模块
     if args.only:

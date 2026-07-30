@@ -34,7 +34,6 @@ from typing import Any
 from config import EXCEL_DIR, OUTPUT_DIR
 from textmap import resolve_text
 from utils import load_json
-from converters.season import get_currency_version
 
 logger = logging.getLogger("converter.currency")
 
@@ -421,8 +420,8 @@ def convert() -> None:
             json.dumps(detail, ensure_ascii=False, indent=2), encoding="utf-8"
         )
 
-    # 5. 写列表（版本来自赛季标题 TextMap，与 season.json 一致）
-    list_out = {"version": get_currency_version(), "roles": roles_out}
+    # 5. 写列表
+    list_out = {"roles": roles_out}
     (out_dir / "role.json").write_text(
         json.dumps(list_out, ensure_ascii=False, indent=2), encoding="utf-8"
     )

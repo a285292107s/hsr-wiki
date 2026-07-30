@@ -641,7 +641,6 @@ export interface CurrencyRoleEntry {
 }
 
 export interface CurrencyRoleList {
-  version: string;
   roles: CurrencyRoleEntry[];
 }
 
@@ -658,6 +657,5 @@ export interface CurrencySeason {
 }
 
 export interface CurrencySeasonList {
-  version: string;
   seasons: CurrencySeason[];
 }

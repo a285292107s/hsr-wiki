@@ -13,10 +13,10 @@ logger = logging.getLogger("converter")
 COMPACT_OUTPUT = True
 
 
-def set_compact(value: bool) -> None:
-    """设置输出模式（由 CLI --pretty 控制）。"""
+def set_pretty(enabled: bool) -> None:
+    """设置输出模式（由 CLI --pretty 控制）。enabled=True 时缩进输出。"""
     global COMPACT_OUTPUT
-    COMPACT_OUTPUT = not value
+    COMPACT_OUTPUT = not enabled
 
 
 def load_json(filepath: Path) -> Any:

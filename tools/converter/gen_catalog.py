@@ -17,6 +17,11 @@ import sys
 import time
 from pathlib import Path
 
+# Windows 控制台强制 UTF-8，避免中文输出乱码
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config import EXCEL_DIR, TEXTMAP_DIR
 
