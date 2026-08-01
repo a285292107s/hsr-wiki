@@ -192,101 +192,7 @@ const PROP_GROUP: Record<string, string> = {
 /** 分组展示顺序 */
 const GROUP_ORDER = ['强度', '生存', '速度', '伤害', '机制'] as const;
 
-interface StarAttrItem {
-  key: string;
-  label: string;
-  value: string;
-  rawValue: number;
-}
-interface StarAttrGroup {
-  group: string;
-  items: StarAttrItem[];
-}
 
-/** 将当前星级所有属性合并为统一列表（GeneralPropertyModifyList + 独立字段） */
-const starAttrs = computed<StarAttrItem[]>(() => {
-  const s = star.value;
-  if (!s) return [];
-  const pct = (v: number) => (Math.abs(v) < 1 ? `${(v * 100).toFixed(0)}%` : String(v));
-  const items: StarAttrItem[] = [];
-  // GeneralPropertyModifyList
-  const list = s.general_property_modify_list;
-  if (Array.isArray(list)) {
-    for (const m of list) {
-      if (!m || typeof m !== 'object') continue;
-      const key = String((m as Record<string, unknown>).property_type || '');
-      const val = Number((m as Record<string, unknown>).value);
-      items.push({ key, label: propLabel(m as Record<string, unknown>), value: pct(val), rawValue: val });
-    }
-  }
-  // 独立字段（源数据中与 GeneralPropertyModifyList 平级的属性）
-  if (s.luck_chance != null) items.push({ key: 'ExtraLuckChance', label: '幸运一击率', value: pct(s.luck_chance), rawValue: s.luck_chance });
-  if (s.luck_damage != null) items.push({ key: 'ExtraLuckDamage', label: '幸运一击伤害', value: `${s.luck_damage}×`, rawValue: s.luck_damage });
-  if (s.extra_heal_base != null) items.push({ key: 'ExtraHealBase', label: '基础治疗强度', value: String(s.extra_heal_base), rawValue: s.extra_heal_base });
-  if (s.extra_shield_base != null) items.push({ key: 'ExtraShieldBase', label: '基础护盾强度', value: String(s.extra_shield_base), rawValue: s.extra_shield_base });
-  return items;
-});
-
-/** 按语义分组（对齐 GridFightRolePropertyConfig.Order） */
-const starAttrGroups = computed<StarAttrGroup[]>(() => {
-  const attrs = starAttrs.value;
-  if (!attrs.length) return [];
-  const map = new Map<string, StarAttrItem[]>();
-  for (const item of attrs) {
-    const g = PROP_GROUP[item.key] || '其它';
-    if (!map.has(g)) map.set(g, []);
-    map.get(g)!.push(item);
-  }
-  const out: StarAttrGroup[] = [];
-  for (const g of GROUP_ORDER) {
-    const items = map.get(g);
-    if (items?.length) out.push({ group: g, items });
-  }
-  // 未归入已知分组的放最后
-  for (const [g, items] of map) {
-    if (!(GROUP_ORDER as readonly string[]).includes(g)) out.push({ group: g, items });
-  }
-  return out;
-});
-
-/** 相邻星级强度增量：展示成长曲线（如 +60） */
-const starPowerDelta = computed<number | null>(() => {
-  const s = star.value;
-  const d = data.value;
-  if (!s || !d) return null;
-  const prev = d.stars[String(s.star - 1)];
-  if (!prev) return null;
-  const cur = s.front_power_base ?? s.back_power_base;
-  const base = prev.front_power_base ?? prev.back_power_base;
-  if (cur == null || base == null) return null;
-  return cur - base;
-});
-/** 前一级星级数据：用于属性增量对比 */
-const prevStar = computed<CurrencyRoleStar | null>(() => {
-  const s = star.value;
-  const d = data.value;
-  if (!s || !d) return null;
-  return d.stars[String(s.star - 1)] || null;
-});
-/** 获取前一级同 key 属性值（统一查 GeneralPropertyModifyList + 独立字段） */
-function prevAttrVal(key: string): number | null {
-  const prev = prevStar.value;
-  if (!prev) return null;
-  // 先查 GeneralPropertyModifyList
-  const list = prev.general_property_modify_list;
-  if (Array.isArray(list)) {
-    const hit = list.find((m) => m && (m as Record<string, unknown>).property_type === key);
-    if (hit) return Number((hit as Record<string, unknown>).value);
-  }
-  // 再查独立字段
-  const INDEP: Record<string, number | null> = {
-    ExtraLuckChance: prev.luck_chance,
-    ExtraLuckDamage: prev.luck_damage,
-    ExtraHealBase: prev.extra_heal_base,
-    ExtraShieldBase: prev.extra_shield_base,
-  };
-  return INDEP[key] ?? null;
-}
 
 /** 推荐装备：各星级数据一致，取当前选中星级，回退首个非空星级 */
 const recommend = computed<CurrencyRoleRecommend | null>(() => {
@@ -316,31 +222,97 @@ const recommendRows = computed(() => {
   return rows;
 });
 
-/** 角色信息详情汇总表：跨星级聚合 6 项核心指标（对齐官方 Wiki 表格） */
-const statSummary = computed(() => {
+/** 成长矩阵：跨星级全属性聚合（合并原「成长总览」表 + 「星级属性」分组） */
+interface MatrixRow {
+  key: string;
+  label: string;
+  values: Array<{ text: string; raw: number | null }>;
+}
+interface MatrixGroup {
+  group: string;
+  rows: MatrixRow[];
+}
+const growthMatrix = computed<MatrixGroup[]>(() => {
   const stars = data.value?.stars;
-  if (!stars) return null;
+  if (!stars) return [];
   const cols = Object.keys(stars).sort((a, b) => Number(a) - Number(b));
-  if (!cols.length) return null;
-  const pct = (v: number | null | undefined) =>
-    v == null ? '—' : (Math.abs(v) < 1 ? `${(v * 100).toFixed(0)}%` : String(v));
-  const num = (v: number | null | undefined) => (v == null ? '—' : String(v));
-  const propOf = (s: CurrencyRoleStar | undefined, key: string): number | null => {
-    const list = s?.general_property_modify_list;
-    if (!Array.isArray(list)) return null;
-    const hit = list.find((m) => m && (m as Record<string, unknown>).property_type === key);
-    return hit ? Number((hit as Record<string, unknown>).value) : null;
+  if (!cols.length) return [];
+  const pct = (v: number) => (Math.abs(v) < 1 ? `${(v * 100).toFixed(0)}%` : String(v));
+  /** 提取单星级全属性（GeneralPropertyModifyList + 独立字段），保持源序 */
+  const extract = (s: CurrencyRoleStar | undefined): Array<{ key: string; label: string; raw: number }> => {
+    if (!s) return [];
+    const items: Array<{ key: string; label: string; raw: number }> = [];
+    const list = s.general_property_modify_list;
+    if (Array.isArray(list)) {
+      for (const m of list) {
+        if (!m || typeof m !== 'object') continue;
+        const key = String((m as Record<string, unknown>).property_type || '');
+        items.push({ key, label: propLabel(m as Record<string, unknown>), raw: Number((m as Record<string, unknown>).value) });
+      }
+    }
+    if (s.luck_chance != null) items.push({ key: 'ExtraLuckChance', label: '幸运一击率', raw: s.luck_chance });
+    if (s.luck_damage != null) items.push({ key: 'ExtraLuckDamage', label: '幸运一击伤害', raw: s.luck_damage });
+    if (s.extra_heal_base != null) items.push({ key: 'ExtraHealBase', label: '基础治疗强度', raw: s.extra_heal_base });
+    if (s.extra_shield_base != null) items.push({ key: 'ExtraShieldBase', label: '基础护盾强度', raw: s.extra_shield_base });
+    return items;
   };
-  const rows: Array<{ label: string; values: string[] }> = [
-    { label: '生命增幅', values: cols.map((c) => pct(propOf(stars[c], 'ExtraHPAddedRatio2'))) },
-    { label: '基础前台强度', values: cols.map((c) => num(stars[c]?.front_power_base)) },
-    { label: '基础后台强度', values: cols.map((c) => num(stars[c]?.back_power_base)) },
-    { label: '速度增幅', values: cols.map((c) => pct(propOf(stars[c], 'ExtraSpeedAddedRatio2'))) },
-    { label: '基础治疗强度', values: cols.map((c) => num(stars[c]?.extra_heal_base)) },
-    { label: '基础护盾强度', values: cols.map((c) => num(stars[c]?.extra_shield_base)) },
-  ];
-  return { cols, rows };
+  // 以首现顺序收集全部属性 key
+  const keyOrder: string[] = [];
+  const keyLabel = new Map<string, string>();
+  for (const c of cols) {
+    for (const item of extract(stars[c])) {
+      if (!keyLabel.has(item.key)) { keyOrder.push(item.key); keyLabel.set(item.key, item.label); }
+    }
+  }
+  // 每星级 key → raw 索引
+  const starMaps = cols.map((c) => {
+    const map = new Map<string, number>();
+    for (const item of extract(stars[c])) map.set(item.key, item.raw);
+    return map;
+  });
+  // 按语义分组构建行
+  const groupMap = new Map<string, MatrixRow[]>();
+  for (const key of keyOrder) {
+    const g = PROP_GROUP[key] || '其它';
+    if (!groupMap.has(g)) groupMap.set(g, []);
+    groupMap.get(g)!.push({
+      key,
+      label: keyLabel.get(key) || key,
+      values: starMaps.map((m) => {
+        const raw = m.get(key) ?? null;
+        return { text: raw != null ? (key === 'ExtraLuckDamage' ? `${raw}×` : pct(raw)) : '—', raw };
+      }),
+    });
+  }
+  // 强度行：front/back_power_base 注入「强度」分组首位
+  const powerRows: MatrixRow[] = [];
+  const powOf = (field: 'front_power_base' | 'back_power_base') =>
+    cols.map((c) => { const raw = stars[c]?.[field] ?? null; return { text: raw != null ? String(raw) : '—', raw }; });
+  if (cols.some((c) => stars[c]?.front_power_base != null)) {
+    powerRows.push({ key: '__front_power', label: '基础前台强度', values: powOf('front_power_base') });
+  }
+  if (cols.some((c) => stars[c]?.back_power_base != null)) {
+    powerRows.push({ key: '__back_power', label: '基础后台强度', values: powOf('back_power_base') });
+  }
+  const out: MatrixGroup[] = [];
+  if (powerRows.length) out.push({ group: '强度', rows: [...powerRows, ...(groupMap.get('强度') || [])] });
+  for (const g of GROUP_ORDER) {
+    if (g === '强度') continue;
+    const rows = groupMap.get(g);
+    if (rows?.length) out.push({ group: g, rows });
+  }
+  for (const [g, rows] of groupMap) {
+    if (!(GROUP_ORDER as readonly string[]).includes(g)) out.push({ group: g, rows });
+  }
+  return out;
 });
+/** 矩阵单元格增量标记：选中列值 ≠ 前一列值 */
+function matrixUp(row: MatrixRow, colIdx: number): boolean {
+  if (colIdx <= 0) return false;
+  const cur = row.values[colIdx]?.raw;
+  const prev = row.values[colIdx - 1]?.raw;
+  return cur != null && prev != null && cur !== prev;
+}
 
 async function load() {
   loading.value = true;
@@ -685,37 +657,61 @@ const traitGroups = computed(() => {
         <div v-if="!recommendRows.length" class="nk-crole-empty">暂无装备数据</div>
       </div>
 
-      <!-- ═══ 星级详情 ═══ -->
+      <!-- ═══ 星级详情（成长矩阵：原「成长总览」+「星级属性」合并） ═══ -->
       <div :class="['nk-panel', { 'nk-panel--active': activeTab === 'stars' }]" data-panel="stars">
-        <!-- 角色信息详情汇总表（跨星级成长对照 · 点击列头联动下方星级选择器） -->
-        <template v-if="statSummary">
-          <h2 class="nk-crole-section__title">成长总览</h2>
-          <p class="nk-crole-section__hint">点击列头可切换下方星级视角</p>
-          <div class="nk-crole-summary">
-            <table class="nk-crole-summary__table">
+        <template v-if="growthMatrix.length">
+          <div class="nk-crole-gm-head">
+            <h2 class="nk-crole-section__title">成长总览</h2>
+            <div class="nk-crole-gm-pills">
+              <button
+                v-for="k in starKeys"
+                :key="k"
+                type="button"
+                class="nk-crole-gm-pill"
+                :class="{ 'is-active': k === selectedStar }"
+                @click="selectedStar = k"
+              >{{ k }}★</button>
+            </div>
+          </div>
+
+          <!-- 选中星级定位描述 -->
+          <div v-if="star && (star.front_one_word_desc || star.back_one_word_desc)" :key="'ol' + selectedStar" class="nk-crole-oneliner nk-crole-star--in">
+            <p v-if="star.front_one_word_desc"><b>前台</b>{{ star.front_one_word_desc }}</p>
+            <p v-if="star.back_one_word_desc"><b>后台</b>{{ star.back_one_word_desc }}</p>
+          </div>
+
+          <!-- 属性矩阵：行=语义分组属性（含强度），列=星级，选中列高亮 + 增量标记 -->
+          <div class="nk-crole-gm">
+            <table class="nk-crole-gm__table">
               <thead>
                 <tr>
-                  <th class="nk-crole-summary__corner"></th>
+                  <th class="nk-crole-gm__corner">属性</th>
                   <th
-                    v-for="c in statSummary.cols"
+                    v-for="c in starKeys"
                     :key="c"
-                    :class="['nk-crole-summary__star', { 'is-active': c === selectedStar }]"
+                    :class="['nk-crole-gm__star', { 'is-active': c === selectedStar }]"
                     @click="selectedStar = c"
                   >{{ c }}★</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in statSummary.rows" :key="row.label">
-                  <th class="nk-crole-summary__label">{{ row.label }}</th>
-                  <td
-                    v-for="(v, vi) in row.values"
-                    :key="vi"
-                    :class="['nk-crole-summary__val', { 'is-active': statSummary.cols[vi] === selectedStar }]"
-                  >{{ v }}</td>
-                </tr>
+                <template v-for="grp in growthMatrix" :key="grp.group">
+                  <tr class="nk-crole-gm__grp">
+                    <td :colspan="starKeys.length + 1">{{ grp.group }}</td>
+                  </tr>
+                  <tr v-for="row in grp.rows" :key="row.key">
+                    <th class="nk-crole-gm__label">{{ row.label }}</th>
+                    <td
+                      v-for="(cell, ci) in row.values"
+                      :key="ci"
+                      :class="['nk-crole-gm__val', { 'is-active': starKeys[ci] === selectedStar }]"
+                    >{{ cell.text }}<span v-if="starKeys[ci] === selectedStar && matrixUp(row, ci)" class="nk-crole-gm__up">▲</span></td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
+          <p class="nk-crole-gm__hint">点击列头或顶部星级切换视角 · ▲ 表示较上一星级有变化</p>
         </template>
 
         <!-- 技能详情（跨星级合并，斜杠分隔多星级值） -->
@@ -730,9 +726,9 @@ const traitGroups = computed(() => {
                   <span v-if="sk.tag" class="nk-crole-skill__tag">{{ sk.tag }}</span>
                   <span v-if="sk.type" class="nk-crole-skill__type">{{ sk.type }}</span>
                 </div>
-                <div class="nk-crole-skill__cost" v-if="sk.sp_base != null || sk.bp_need != null">
+                <div class="nk-crole-skill__cost" v-if="sk.sp_base != null || (sk.bp_need != null && sk.bp_need > 0)">
                   <span v-if="sk.sp_base != null">SP {{ sk.sp_base }}</span>
-                  <span v-if="sk.bp_need != null">BP {{ sk.bp_need }}<template v-if="sk.bp_add != null"> (+{{ sk.bp_add }})</template></span>
+                  <span v-if="sk.bp_need != null && sk.bp_need > 0">BP {{ sk.bp_need }}<template v-if="sk.bp_add != null"> (+{{ sk.bp_add }})</template></span>
                 </div>
                 <p class="nk-crole-skill__simple">{{ sk.simple_desc }}</p>
                 <div class="nk-crole-skill__desc" v-html="fmtDescMerged(sk.desc, sk.paramSets)"></div>
@@ -746,64 +742,6 @@ const traitGroups = computed(() => {
             </div>
           </div>
         </template>
-
-        <!-- 星级视角：定位概览 + 强度 + 统一属性分组 -->
-        <h2 class="nk-crole-section__title">星级视角</h2>
-        <div class="nk-crole-stars-tabs">
-          <button
-            v-for="k in starKeys"
-            :key="k"
-            class="nk-crole-star-tab"
-            :class="{ 'is-active': k === selectedStar }"
-            @click="selectedStar = k"
-          >{{ k }}★</button>
-        </div>
-
-        <div v-if="star" :key="selectedStar" class="nk-crole-star nk-crole-star--in">
-          <!-- 定位概览：一句话描述 + 基础强度（同星级关联数据聚合展示） -->
-          <div class="nk-crole-starov">
-            <div v-if="star.front_one_word_desc || star.back_one_word_desc" class="nk-crole-starov__desc">
-              <p v-if="star.front_one_word_desc"><b>前台</b>{{ star.front_one_word_desc }}</p>
-              <p v-if="star.back_one_word_desc"><b>后台</b>{{ star.back_one_word_desc }}</p>
-            </div>
-            <div class="nk-crole-starov__stats">
-              <div v-if="star.front_power_base != null" class="nk-crole-pow" style="--i:0">
-                <span class="nk-crole-pow__k">基础前台强度</span>
-                <span class="nk-crole-pow__vrow">
-                  <span class="nk-crole-pow__v">{{ star.front_power_base }}</span>
-                  <span v-if="starPowerDelta != null" class="nk-crole-pow__delta">+{{ starPowerDelta }}</span>
-                </span>
-              </div>
-              <div v-if="star.back_power_base != null" class="nk-crole-pow" style="--i:1">
-                <span class="nk-crole-pow__k">基础后台强度</span>
-                <span class="nk-crole-pow__vrow">
-                  <span class="nk-crole-pow__v">{{ star.back_power_base }}</span>
-                  <span v-if="starPowerDelta != null" class="nk-crole-pow__delta">+{{ starPowerDelta }}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 星级属性（统一分组 · 对齐 GridFightRolePropertyConfig.Order 语义） -->
-          <div v-if="starAttrGroups.length" class="nk-crole-block">
-            <h3 class="nk-crole-block__title">星级属性</h3>
-            <div v-for="grp in starAttrGroups" :key="grp.group" class="nk-crole-attrgrp">
-              <span class="nk-crole-attrgrp__label">{{ grp.group }}</span>
-              <ul class="nk-crole-props">
-                <li v-for="item in grp.items" :key="item.key">
-                  <span class="nk-crole-props__name">{{ item.label }}</span>
-                  <span class="nk-crole-props__vrow">
-                    <span class="nk-crole-props__val">{{ item.value }}</span>
-                    <span
-                      v-if="prevAttrVal(item.key) != null && prevAttrVal(item.key) !== item.rawValue"
-                      class="nk-crole-props__delta"
-                    >▲</span>
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
       </div>
       </div><!-- /.nk-panels -->
     </template>
