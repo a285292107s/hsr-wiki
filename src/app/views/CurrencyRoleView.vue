@@ -263,7 +263,7 @@ watch(roleId, load, { immediate: true });
 
 watch(
   data,
-  (d) => { if (d) document.title = `${d.name} · 货币战争角色图鉴`; },
+  (d) => { if (d) document.title = `${d.name} - HSR Wiki`; },
   { immediate: true },
 );
 

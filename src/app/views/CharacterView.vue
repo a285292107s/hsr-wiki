@@ -47,6 +47,10 @@ watch(phase, (p) => {
     showSkeleton.value = false;
   }
 }, { immediate: true });
+/** 动态页面标题 */
+watch(() => char.data, (data) => {
+  if (data) document.title = `${data.name} - HSR Wiki`;
+});
 /** 渲染数据：加强模式 → 加强视图 + 重映射旧视图；原始模式 → oldD=null */
 const d = computed<CharacterData | null>(() => char.renderData.d);
 const oldD = computed<CharacterData | null>(() => char.renderData.oldD);

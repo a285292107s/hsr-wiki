@@ -1,5 +1,5 @@
 /** 货币战争 · 羁绊图鉴目录页配置 */
-import { escHtml, gridFightIconUrl, fmtDesc } from '../../../lib/format';
+import { escHtml, gridFightTraitIconUrl, fmtDesc } from '../../../lib/format';
 import { loadLocalCurrencyTraits } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 
@@ -9,7 +9,7 @@ const CAT_LABEL: Record<TraitCat, string> = {
 };
 
 function renderTraitCard(item: CatalogItem, index = 0): string {
-  const icon = gridFightIconUrl(item.icon as string);
+  const icon = gridFightTraitIconUrl(item.icon as string);
   const cat = (item.cat as TraitCat) || 'special';
   const catLabel = CAT_LABEL[cat] || cat;
   const layers = (item.layers as Array<{ layer: number; quality: string | null }>) || [];

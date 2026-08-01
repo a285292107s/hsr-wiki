@@ -36,7 +36,6 @@ export const SWAP_ITEM = {
 /** 常规模式枢纽页 Tab：指向首页（/），导航板块首项 */
 export const NORMAL_HUB_ITEM: NavItem = {
   title: '首页', en: 'HOME', desc: '常规模式枢纽 · 全站板块入口', path: '/', primary: true, exact: true,
-  activePaths: ['/', '/hsr'],
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>',
 };
 
@@ -74,8 +73,8 @@ export const NORMAL_NAV_ITEMS: NavItem[] = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/></svg>',
   },
   {
-    title: '终局内容', en: 'ENDGAME', desc: '忘却之庭赛季记录', path: '/maze',
-    activePaths: ['/maze', '/story', '/boss', '/peak'],
+    title: '终局内容', en: 'ENDGAME', desc: '忘却之庭赛季记录', path: '/endgame/maze',
+    activePaths: ['/endgame/maze', '/endgame/story', '/endgame/boss', '/endgame/peak'],
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><circle cx="12" cy="12" r="1"/></svg>',
   },
 ];

@@ -7,7 +7,7 @@
  * 卡片点击：角色详情 → SPA 导航；未迁移详情页 → 静默忽略。
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useVirtualGrid, vReveal } from './use-virtual-grid';
 import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
@@ -16,6 +16,7 @@ const props = defineProps<{ config: CatalogPageConfig }>();
 
 const app = useAppStore();
 const router = useRouter();
+const route = useRoute();
 
 const VIRTUAL_THRESHOLD = 400;
 
@@ -27,8 +28,16 @@ const SKELETON_DELAY = 150;
 let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
 const errorMsg = ref('');
 const items = ref<CatalogItem[]>([]);
-const query = ref('');
-const activeFilters = ref<Record<string, string>>({});
+/** 搜索关键词（从 URL query.q 初始化） */
+const query = ref(String(route.query.q || ''));
+/** 筛选状态（从 URL query 初始化，排除 q 参数） */
+const activeFilters = ref<Record<string, string>>((() => {
+  const init: Record<string, string> = {};
+  for (const [k, v] of Object.entries(route.query)) {
+    if (k !== 'q' && typeof v === 'string' && v) init[k] = v;
+  }
+  return init;
+})());
 const filtersOpen = ref(true);
 
 const cancelled = { value: false };
@@ -41,6 +50,16 @@ let tiltPending: { card: HTMLElement; x: number; y: number } | null = null;
 
 const scrollerRef = ref<HTMLElement | null>(null);
 const gridRef = ref<HTMLElement | null>(null);
+
+/* ─── 滚动位置保存/恢复（sessionStorage，key = catalog id） ─── */
+const SCROLL_KEY = `nk-scroll:${props.config.id}`;
+/**
+ * 抑制入场交错动画：存在待恢复的滚动位置时（从详情页返回、落点在中部），
+ * 卡片 delay 按绝对索引从列表首个起算，视口内卡片会滞留最多 ~0.95s 才显现。
+ * 此时交错波浪（本为从顶部首屏设计）既错位又拖慢感知，故整体禁用入场动画。
+ * 须在 setup 同步求值（早于网格挂载），保证卡片首帧即无动画。
+ */
+const noReveal = ref(sessionStorage.getItem(SCROLL_KEY) != null);
 
 const filters = computed(() =>
   props.config.buildFilters && items.value.length
@@ -131,7 +150,7 @@ async function softSwitchTab(): Promise<void> {
   }
 }
 
-/** 目录配置轮换（终局 4 路由共享实例）：重置搜索/筛选，按数据源选择软/硬切换 */
+/** 目录配置轮换：重置搜索/筛选，按数据源选择软/硬切换 */
 watch(() => props.config, (cfg) => {
   query.value = '';
   activeFilters.value = {};
@@ -158,12 +177,22 @@ function markImagesLoaded(): void {
   });
 }
 
-/** 数据就绪 → 虚拟网格启动滚动；非虚拟网格标记图片加载态 */
+/** 数据就绪 → 虚拟网格启动滚动；非虚拟网格标记图片加载态；按需恢复滚动位置 */
 watch(phase, async (p) => {
   if (p !== 'ready') return;
   await nextTick();
-  if (useVirtual.value) start();
-  else markImagesLoaded();
+  if (useVirtual.value) {
+    start();
+    // 仅当确有存档时才等 gridMinHeight 生效 + 恢复 + 重渲染，
+    // 避免首次访问（无存档）多一帧延迟与首屏双重渲染。
+    if (sessionStorage.getItem(SCROLL_KEY) != null) {
+      await nextTick();
+      if (restoreScroll()) refresh();
+    }
+  } else {
+    markImagesLoaded();
+    restoreScroll();
+  }
 });
 
 /** 非虚拟网格筛选/搜索重渲染后，重新标记图片加载态 */
@@ -196,6 +225,20 @@ function onSearchInput(): void {
   if (searchTimer !== null) clearTimeout(searchTimer);
   searchTimer = setTimeout(() => refresh(), 150);
 }
+
+/* ─── 筛选/搜索状态同步 URL query（debounce 300ms，replace 不污染历史栈） ─── */
+let urlSyncTimer: ReturnType<typeof setTimeout> | null = null;
+watch([activeFilters, query], () => {
+  if (urlSyncTimer !== null) clearTimeout(urlSyncTimer);
+  urlSyncTimer = setTimeout(() => {
+    const params: Record<string, string> = {};
+    if (query.value.trim()) params.q = query.value.trim();
+    for (const [k, v] of Object.entries(activeFilters.value)) {
+      if (v) params[k] = v;
+    }
+    void router.replace({ query: params });
+  }, 300);
+}, { deep: true });
 
 /* ─── 卡片交互：点击路由 / hover 预取 / 3D 倾斜 ─── */
 
@@ -263,6 +306,22 @@ function onGridLeave(): void {
   });
 }
 
+/* ─── 滚动位置保存/恢复 ─── */
+function saveScroll(): void {
+  const el = scrollerRef.value;
+  if (el) sessionStorage.setItem(SCROLL_KEY, String(el.scrollTop));
+}
+
+function restoreScroll(): boolean {
+  const el = scrollerRef.value;
+  if (!el) return false;
+  const saved = sessionStorage.getItem(SCROLL_KEY);
+  if (saved == null) return false;
+  el.scrollTo({ top: Number(saved), behavior: 'instant' });
+  sessionStorage.removeItem(SCROLL_KEY);
+  return true;
+}
+
 /* ─── 生命周期 ─── */
 
 onMounted(() => {
@@ -270,11 +329,13 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  saveScroll();
   cancelled.value = true;
   stop();
   if (searchTimer !== null) clearTimeout(searchTimer);
   if (panelTimer !== null) clearTimeout(panelTimer);
   if (skeletonTimer !== null) clearTimeout(skeletonTimer);
+  if (urlSyncTimer !== null) clearTimeout(urlSyncTimer);
   if (tiltRaf !== null) cancelAnimationFrame(tiltRaf);
 });
 </script>
@@ -381,7 +442,7 @@ onBeforeUnmount(() => {
       <div
         v-if="useVirtual"
         ref="gridRef"
-        :class="[config.gridClass, 'nk-virtual-grid', { 'nk-fast-jump': fastJump }]"
+        :class="[config.gridClass, 'nk-virtual-grid', { 'nk-fast-jump': fastJump, 'nk-no-reveal': noReveal }]"
         :style="{ minHeight: gridMinHeight }"
       >
         <div
@@ -398,7 +459,7 @@ onBeforeUnmount(() => {
       <div
         v-else
         ref="gridRef"
-        :class="config.gridClass"
+        :class="[config.gridClass, { 'nk-no-reveal': noReveal }]"
         v-html="gridHtml"
         @mousemove="onGridMove"
         @mouseleave="onGridLeave"

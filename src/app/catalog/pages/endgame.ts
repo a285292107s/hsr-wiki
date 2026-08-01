@@ -4,7 +4,7 @@ import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList,
   loadLocalPeakList, prefetchEndgameAll,
 } from '../../../services/api';
-import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from '../types';
+import type { CatalogItem, CatalogPageConfig } from '../types';
 import type { MazeListDb, MazeListEntry, MazeVersionMap } from '../../../services/types';
 
 /** 赛季状态：依据 begin/end 日期推导；无日期信息时返回"未知"（与原站一致） */
@@ -46,19 +46,6 @@ const MAZE_STATUS_CLASS: Record<string, string> = {
   '未知': 'unknown',
 };
 
-/** 终局内容 4 大分类（对应 4 个独立路由） */
-const ENDGAME_TABS = [
-  { label: '忘却之庭', en: 'FORGOTTEN HALL', href: '/maze' },
-  { label: '虚构叙事', en: 'PURE FICTION', href: '/story' },
-  { label: '末日幻影', en: 'APOCALYPSE', href: '/boss' },
-  { label: '异相仲裁', en: 'ANOMALY', href: '/peak' },
-] as const;
-
-/** 生成子导航（当前路由项标记 active） */
-function endgameSubNav(activeHref: string): CatalogSubNavItem[] {
-  return ENDGAME_TABS.map((t) => ({ label: t.label, en: t.en, href: t.href, active: t.href === activeHref }));
-}
-
 /** 版本标签：数字版本原样输出；特殊键（unknown/static）转为中文 */
 function verLabel(ver: string, idx: number): string {
   if (ver === 'unknown') return '未知';
@@ -83,7 +70,6 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
   return {
     id: o.id,
     title: o.title,
-    subNav: endgameSubNav(o.href),
     prefetch: (ctx) => prefetchEndgameAll(ctx.version),
     searchPlaceholder: '搜索赛季...',
     gridClass: 'nk-cat-grid nk-season-grid',
@@ -155,21 +141,21 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
 }
 
 export const mazePage = makeEndgamePage({
-  id: 'maze', title: '终局内容', href: '/maze',
+  id: 'maze', title: '终局内容', href: '/endgame/maze',
   loadList: loadLocalMazeList,
 });
 
 export const storyPage = makeEndgamePage({
-  id: 'story', title: '终局内容', href: '/story',
+  id: 'story', title: '终局内容', href: '/endgame/story',
   loadList: loadLocalStoryList,
 });
 
 export const bossPage = makeEndgamePage({
-  id: 'boss', title: '终局内容', href: '/boss',
+  id: 'boss', title: '终局内容', href: '/endgame/boss',
   loadList: loadLocalBossList,
 });
 
 export const peakPage = makeEndgamePage({
-  id: 'peak', title: '终局内容', href: '/peak',
+  id: 'peak', title: '终局内容', href: '/endgame/peak',
   loadList: loadLocalPeakList,
 });

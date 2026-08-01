@@ -161,15 +161,15 @@
 }
 @keyframes nk-cwhub-fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ── 数据概览条：玻璃面板 + Orbitron 数字 ── */
+/* ── 数据概览条：交易所行情板式 · 5 列报价单元格 + 交错入场 ── */
 .nk-cwhub-stats {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 1px;
   margin-top: 38px;
-  max-width: 720px;
+  max-width: 860px;
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
@@ -178,23 +178,63 @@
   animation: nk-cwhub-fade-up 0.7s var(--ease) 0.52s backwards;
 }
 .nk-cwhub-stat {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 18px 20px;
-  background: linear-gradient(160deg, rgba(24,21,13,0.92), rgba(14,12,7,0.92));
+  gap: 7px;
+  padding: 15px 18px 14px;
+  background: linear-gradient(165deg, rgba(26,22,13,0.94), rgba(13,11,6,0.94));
   backdrop-filter: blur(8px);
+  transition: background 0.25s var(--ease);
+  animation: nk-cwhub-stat-in 0.55s var(--ease) calc(0.55s + var(--i) * 0.07s) backwards;
 }
+/* 单元格顶部金色强调线：默认微弱，hover 点亮 */
+.nk-cwhub-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(252,211,77,0.6), transparent);
+  opacity: 0.3;
+  transition: opacity 0.25s var(--ease);
+}
+.nk-cwhub-stat:hover {
+  background: linear-gradient(165deg, rgba(35,29,15,0.96), rgba(19,16,8,0.96));
+}
+.nk-cwhub-stat:hover::before { opacity: 1; }
+/* 分类代码：终端式小字，hover 染金 */
+.nk-cwhub-stat__code {
+  font-family: var(--font-hud);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--text3);
+  opacity: 0.65;
+  transition: color 0.25s var(--ease), opacity 0.25s var(--ease);
+}
+.nk-cwhub-stat:hover .nk-cwhub-stat__code { color: var(--gold); opacity: 1; }
 .nk-cwhub-stat__val {
   font-family: var(--font-hud);
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   font-weight: 700;
   line-height: 1;
   color: var(--metric-val);
   text-shadow: 0 0 18px rgba(212,175,55,0.35);
   font-variant-numeric: tabular-nums;
+  transition: text-shadow 0.25s var(--ease);
 }
-.nk-cwhub-stat__label { font-size: 0.66rem; letter-spacing: 0.14em; color: var(--text3); }
+.nk-cwhub-stat:hover .nk-cwhub-stat__val { text-shadow: 0 0 24px rgba(252,211,77,0.6); }
+.nk-cwhub-stat__label {
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+  transition: color 0.25s var(--ease);
+}
+.nk-cwhub-stat:hover .nk-cwhub-stat__label { color: var(--text2); }
+@keyframes nk-cwhub-stat-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* ═══ 五大板块入口 ═══ */
 .nk-cwhub-sections { max-width: var(--nk-content-max); margin: 0 auto; padding: 56px 48px 0; }
@@ -467,8 +507,11 @@
   /* 移动端：侧栏降级为底部 Tab Bar，释放左侧预留，底部避开导航条 */
   #nk-cwhub-app { padding: 0 0 calc(80px + env(safe-area-inset-bottom, 0px)) 0; }
   .nk-cwhub-hero { min-height: 400px; padding: 48px 20px 32px; }
-  .nk-cwhub-stats { grid-template-columns: repeat(3, 1fr); }
-  .nk-cwhub-stat__val { font-size: 1.4rem; }
+  .nk-cwhub-stats { grid-template-columns: repeat(5, 1fr); }
+  .nk-cwhub-stat { padding: 12px 8px 11px; gap: 5px; }
+  .nk-cwhub-stat__code { display: none; }
+  .nk-cwhub-stat__val { font-size: 1.05rem; }
+  .nk-cwhub-stat__label { font-size: 0.52rem; letter-spacing: 0.08em; }
   .nk-cwhub-sections { padding: 40px 20px 0; }
   .nk-cwhub-sections__grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
   .nk-cwhub-card { min-height: 96px; }
@@ -488,6 +531,7 @@
   .nk-cwhub-hero__en,
   .nk-cwhub-hero__tagline,
   .nk-cwhub-stats,
+  .nk-cwhub-stat,
   .nk-cwhub-card,
   .nk-cwhub-season__card,
   .nk-cwhub-season__ov-item { animation: none; }

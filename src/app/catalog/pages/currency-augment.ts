@@ -10,7 +10,7 @@ const QUALITY_LABEL: Record<string, string> = {
 const QUALITY_ORDER = ['Silver', 'Gold', 'Prismatic'];
 
 function renderAugmentCard(item: CatalogItem, index = 0): string {
-  const icon = gridFightIconUrl(item.mini_icon as string) || gridFightIconUrl(item.icon as string);
+  const icon = gridFightIconUrl(item.icon as string) || gridFightIconUrl(item.mini_icon as string);
   const quality = (item.quality as string) || '';
   const qLabel = QUALITY_LABEL[quality] || quality;
   const desc = fmtDesc(item.desc as string, item.params as number[]);

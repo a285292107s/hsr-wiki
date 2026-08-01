@@ -21,7 +21,8 @@
   text-align: center;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   animation: nk-cw-fadein 0.35s ease both;
-  animation-delay: calc(var(--i, 0) * 30ms);
+  /* 与其他卡片一致：延迟封顶 600ms，避免大量卡片（如 334 条策略）末尾卡片等待数秒才淡入 */
+  animation-delay: min(calc(var(--i, 0) * 30ms), 600ms);
 }
 .nk-cw-card:hover {
   border-color: var(--border2);
@@ -148,4 +149,27 @@
   .nk-cw-card { padding: 10px 8px; }
   .nk-cw-card__icon { width: 52px; height: 52px; }
   .nk-cw-grid--wide .nk-cw-card__icon { width: 44px; height: 44px; }
+}
+
+/* ═══ 滚动恢复时抑制入场动画 ═══
+   返回目录页且滚动位置被恢复到中部时，卡片入场交错延迟（按绝对索引从列表首个起算）
+   会让视口内卡片滞留最多 ~0.95s 才显现。此时禁用全部卡片入场动画，令其即时呈现。
+   本文件最后导入，级联优先级足以覆盖 catalog.css / currency-role.css 的卡片动画。 */
+.nk-no-reveal .nk-cat-card,
+.nk-no-reveal .nk-lc-card,
+.nk-no-reveal .nk-relic-card,
+.nk-no-reveal .nk-item-card,
+.nk-no-reveal .nk-mob-card,
+.nk-no-reveal .nk-season-card,
+.nk-no-reveal .nk-crole-card,
+.nk-no-reveal .nk-cw-card {
+  animation: none;
+}
+/* 虚拟网格：单元格默认 opacity:0 等待 .nk-revealed；抑制时直接显现并取消动画 */
+.nk-no-reveal .nk-virtual-cell .nk-item-card,
+.nk-no-reveal .nk-virtual-cell .nk-cat-card,
+.nk-no-reveal .nk-virtual-cell .nk-lc-card {
+  opacity: 1;
+  transform: none;
+  animation: none;
 }

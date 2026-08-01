@@ -9,6 +9,7 @@ import { RouterLink } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
 import { CDN } from '../../lib/constants';
+import { prefetchHighPriority } from '../router/chunks';
 
 const app = useAppStore();
 const loading = ref(true);
@@ -134,6 +135,7 @@ function scrollToNav(): void {
 
 onMounted(async () => {
   startRotation();
+  prefetchHighPriority();
   try {
     await app.initManifest();
   } catch {

@@ -35,6 +35,10 @@ watch(phase, (p) => {
   }
 }, { immediate: true });
 const d = computed(() => lc.data);
+/** 动态页面标题 */
+watch(d, (data) => {
+  if (data) document.title = `${data.name} - HSR Wiki`;
+});
 
 async function load(id: string): Promise<void> {
   try {

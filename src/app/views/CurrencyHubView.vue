@@ -7,7 +7,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { CW_NAV_ITEMS } from '../components/nav-items';
-import { loadLocalCurrencyRoles, loadLocalCurrencySeasons } from '../../services/api';
+import { loadLocalCurrencyRoles, loadLocalCurrencySeasons, loadLocalCurrencyEquipment, loadLocalCurrencyPortals, loadLocalCurrencyAugments, loadLocalCurrencyTraits } from '../../services/api';
 import type { CurrencySeason } from '../../services/types';
 
 /* ─── 行情滚动条（装饰性：游戏内货币的交易所行情） ─── */
@@ -40,13 +40,23 @@ const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
 }));
 
 /* ─── 数据概览（驱动自转换产物，随版本自动更新） ─── */
-const stats = ref({ roles: 0, traits: 0, equip: 0 });
+const stats = ref({ roles: 0, equip: 0, portals: 0, augments: 0, traits: 0 });
+
+/** 数据行配置：交易所行情板式，逐项渲染 + 交错入场 */
+const STAT_DEFS: ReadonlyArray<{ key: keyof typeof stats.value; code: string; label: string }> = [
+  { key: 'roles', code: 'ROLE', label: '角色' },
+  { key: 'equip', code: 'EQUIP', label: '装备' },
+  { key: 'portals', code: 'PORTAL', label: '投资环境' },
+  { key: 'augments', code: 'AUGMENT', label: '投资策略' },
+  { key: 'traits', code: 'TRAIT', label: '羁绊' },
+];
 
 /* ─── 赛季扩充说明（驱动自 season 转换器产物） ─── */
 const seasons = ref<CurrencySeason[]>([]);
 
 /** 数字滚动（rAF · 900ms ease-out） */
-function countUp(key: 'roles' | 'traits' | 'equip', target: number): void {
+type StatKey = keyof typeof stats.value;
+function countUp(key: StatKey, target: number): void {
   const t0 = performance.now();
   const dur = 900;
   const tick = (now: number): void => {
@@ -59,16 +69,18 @@ function countUp(key: 'roles' | 'traits' | 'equip', target: number): void {
 
 onMounted(async () => {
   try {
-    const data = await loadLocalCurrencyRoles();
-    const traitSet = new Set<number>();
-    let equip = 0;
-    for (const r of data.roles) {
-      for (const t of r.trait_list) traitSet.add(t);
-      if (r.equipment_id != null) equip++;
-    }
-    countUp('roles', data.roles.length);
-    countUp('traits', traitSet.size);
-    countUp('equip', equip);
+    const [rolesData, equipData, portalsData, augmentsData, traitsData] = await Promise.all([
+      loadLocalCurrencyRoles(),
+      loadLocalCurrencyEquipment(),
+      loadLocalCurrencyPortals(),
+      loadLocalCurrencyAugments(),
+      loadLocalCurrencyTraits(),
+    ]);
+    countUp('roles', rolesData.roles.length);
+    countUp('equip', equipData.items.length);
+    countUp('portals', portalsData.portals.filter((p) => p.in_book).length);
+    countUp('augments', augmentsData.augments.length);
+    countUp('traits', traitsData.traits.length);
   } catch {
     /* 离线降级：统计保持 0，页面结构仍完整 */
   }
@@ -165,17 +177,15 @@ const seasonViews = computed(() =>
       </div>
 
       <div class="nk-cwhub-stats" role="group" aria-label="数据概览">
-        <div class="nk-cwhub-stat">
-          <span class="nk-cwhub-stat__val">{{ stats.roles }}</span>
-          <span class="nk-cwhub-stat__label">收录角色</span>
-        </div>
-        <div class="nk-cwhub-stat">
-          <span class="nk-cwhub-stat__val">{{ stats.traits }}</span>
-          <span class="nk-cwhub-stat__label">羁绊特质</span>
-        </div>
-        <div class="nk-cwhub-stat">
-          <span class="nk-cwhub-stat__val">{{ stats.equip }}</span>
-          <span class="nk-cwhub-stat__label">预设光锥</span>
+        <div
+          v-for="(s, i) in STAT_DEFS"
+          :key="s.key"
+          class="nk-cwhub-stat"
+          :style="{ '--i': i }"
+        >
+          <span class="nk-cwhub-stat__code">{{ s.code }}</span>
+          <span class="nk-cwhub-stat__val">{{ stats[s.key] }}</span>
+          <span class="nk-cwhub-stat__label">{{ s.label }}</span>
         </div>
       </div>
     </header>

@@ -425,6 +425,18 @@ export function gridFightEquipIconUrl(iconPath: string | null | undefined): stri
   return `${CDN}/assets/hsr/gridfight/equipment/${m[1]}.webp`;
 }
 
+/**
+ * 货币战争羁绊图标：CDN 统一存于 gridfight/icon/{文件名}.webp。
+ * 源路径为 TraitIcon/Icon/1001.png 或 TraitIcon/MiniIcon/1001S.png，
+ * 均映射到 gridfight/icon/ 目录。
+ */
+export function gridFightTraitIconUrl(iconPath: string | null | undefined): string {
+  if (!iconPath) return '';
+  const m = iconPath.match(/([^/]+)\.png$/i);
+  if (!m) return '';
+  return `${CDN}/assets/hsr/gridfight/icon/${m[1]}.webp`;
+}
+
 /** 从 rank 字符串解析稀有度数字（CombatPowerAvatarRarityType4 → 4，无法解析回退 5） */
 export function parseRarity(rank: string | null | undefined): number {
   const m = (rank || '').match(/(\d+)\s*$/);

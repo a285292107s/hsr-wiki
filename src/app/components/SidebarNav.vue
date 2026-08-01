@@ -10,6 +10,7 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM, SWAP_ITEM, type NavItem } from './nav-items';
+import { prefetchByPath } from '../router/chunks';
 
 const route = useRoute();
 const router = useRouter();
@@ -113,6 +114,7 @@ const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><c
           'ui-sidebar-link--in-more': !isCw && !item.primary,
         },
       ]"
+      @pointerenter="prefetchByPath(item.path)"
     >
       <span class="ui-sidebar-link__icon" v-html="item.icon" />
       <span class="ui-sidebar-link__label">{{ item.short || item.title }}</span>

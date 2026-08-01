@@ -3,7 +3,6 @@
  * 应用外壳：侧边栏 + 方向过渡路由视图 + Toast
  * 过渡类名来自 tokens.css（nk-view-fwd / nk-view-back / nk-view-fade），
  * 方向由 router beforeEach 计算的 navDir 驱动。
- * viewKey：终局 4 路由（meta.endgameTab）共享同一 key，互切不触发页面过渡。
  * 手机断点（<768px）统一使用快速纯淡入淡出，避免方向滑移造成闪烁。
  * 模式主题：route.meta.cw 驱动 <html data-theme="cw">（货币战争全壳暗金），
  * 切换瞬间挂载 .theme-transitioning 实现 400ms 世界“褪色重染”。
@@ -29,7 +28,7 @@ const transitionName = computed(() =>
     : navDir.value > 0 ? 'nk-view-fwd' : navDir.value < 0 ? 'nk-view-back' : 'nk-view-fade',
 );
 
-const viewKey = computed(() => (route.meta.endgameTab ? 'endgame' : route.path));
+const viewKey = computed(() => route.path);
 
 /* ─── 货币战争模式：全壳暗金主题切换 ─── */
 const isCw = computed(() => !!route.meta.cw);
