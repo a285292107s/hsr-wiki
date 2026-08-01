@@ -1,5 +1,5 @@
 /** 货币战争 · 羁绊图鉴目录页配置 */
-import { escHtml, gridFightTraitIconUrl, fmtDesc } from '../../../lib/format';
+import { escHtml, gridFightTraitIconUrl } from '../../../lib/format';
 import { loadLocalCurrencyTraits } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 
@@ -12,28 +12,29 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
   const icon = gridFightTraitIconUrl(item.icon as string);
   const cat = (item.cat as TraitCat) || 'special';
   const catLabel = CAT_LABEL[cat] || cat;
-  const layers = (item.layers as Array<{ layer: number; quality: string | null }>) || [];
+  const layers = (item.layers as Array<{ layer: number }>) || [];
   const layerCount = layers.length;
-  const desc = fmtDesc(item.simple_desc as string || item.desc as string, item.base_params as number[]);
-  return `<div class="nk-cw-card nk-cw-trait-card" data-cat="${escHtml(cat)}" style="--i:${index}">
-      <div class="nk-cw-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
-      <div class="nk-cw-card__body">
-        <div class="nk-cw-card__name">${escHtml(item.name)}</div>
-        <div class="nk-cw-card__meta">
+  const simpleDesc = escHtml((item.simple_desc as string || '').slice(0, 60));
+
+  return `<a class="nk-cw-trait-card" href="/currency/trait/${escHtml(item.id)}" data-cat="${escHtml(cat)}" style="--i:${index}">
+      <div class="nk-cw-trait-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
+      <div class="nk-cw-trait-card__body">
+        <div class="nk-cw-trait-card__name">${escHtml(item.name)}</div>
+        <div class="nk-cw-trait-card__meta">
           <span class="nk-cw-tag nk-cw-tag--${cat}">${escHtml(catLabel)}</span>
-          ${layerCount ? `<span class="nk-cw-trait-layers">${layerCount} 层</span>` : ''}
+          ${layerCount ? `<span class="nk-cw-trait-card__layers">${layerCount}层</span>` : ''}
         </div>
-        <div class="nk-cw-card__desc">${desc}</div>
+        <div class="nk-cw-trait-card__desc">${simpleDesc}</div>
       </div>
-    </div>`;
+    </a>`;
 }
 
 export const currencyTraitPage: CatalogPageConfig = {
   id: 'currency-trait',
   title: '羁绊',
   searchPlaceholder: '搜索羁绊…',
-  gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
-  cardClass: '.nk-cw-card',
+  gridClass: 'nk-cat-grid nk-cw-trait-grid',
+  cardClass: '.nk-cw-trait-card',
   async fetchData() {
     const { traits } = await loadLocalCurrencyTraits();
     return traits.map((t) => ({
@@ -48,11 +49,11 @@ export const currencyTraitPage: CatalogPageConfig = {
       activation_type: t.activation_type,
       season_id: t.season_id,
       layers: t.layers,
+      remarks: t.remarks,
     }));
   },
   buildFilters(items: CatalogItem[]) {
     const filters: CatalogFilter[] = [];
-    // 分类筛选
     const cats = [...new Set(items.map((it) => it.cat as string).filter(Boolean))];
     if (cats.length) {
       filters.push({

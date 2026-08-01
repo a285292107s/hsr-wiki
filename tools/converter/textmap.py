@@ -43,8 +43,10 @@ def clean_text(text: str) -> str:
     # 移除 RUBY 标签
     text = re.sub(r"\{RUBY_[EB]#(?:[^}]*)\}", "", text)
 
-    # <property type=XXX display=all> → 友好属性名（自走棋羁绊/技能的效果属性引用）
-    # 原标签无内容、无闭合，直接删除会导致描述残缺（如"的和提高"丢失属性名）
+    # <property type=XXX ...> → 友好属性名（自走棋羁绊/技能的效果属性引用）
+    # 原标签无内容、无闭合，直接删除会导致描述残缺（如“的和提高”丢失属性名）
+    # 相邻 property 标签组：检查后续文本是否已含属性名，避免重复
+    text = _process_adjacent_properties(text)
     text = re.sub(r"<property\s+type=(\w+)[^>]*>", _property_label, text)
 
     # 处理 <color=...>...</color> → 保留文字
@@ -61,7 +63,7 @@ def clean_text(text: str) -> str:
     return text
 
 
-# <property type=XXX> 标签的属性名映射（去"提高"后缀，用名词形式以适配"的X和Y提高"句式）
+# <property type=XXX> 标签的属性名映射（去“提高”后缀，用名词形式以适配“的X和Y提高”句式）
 # key 为去末尾数字后缀后的属性类型（如 ExtraHPAddedRatio1 → ExtraHPAddedRatio）
 _PROPERTY_LABEL: dict[str, str] = {
     "ExtraAllDamageTypeAddedRatio": "全伤害",
@@ -77,6 +79,7 @@ _PROPERTY_LABEL: dict[str, str] = {
     "ExtraBreakDamageAddedRatio": "击破特攻",
     "ExtraHealRatioBase": "治疗量",
     "ExtraHealRatio": "治疗量",
+    "ExtraHealAddedRatio": "治疗量",
     "ExtraSPAddedRatio": "战技点",
     "ExtraSP": "战技点",
     "ExtraInitSP": "初始战技点",
@@ -88,6 +91,13 @@ _PROPERTY_LABEL: dict[str, str] = {
     "ExtraStatusProbabilityBase": "效果命中",
     "ExtraStatusResistanceBase": "效果抵抗",
     "ExtraElationDamageAddedRatio": "欢愉伤害",
+    "ExtraUltraDamageAddedRatio": "终结技伤害",
+    "ExtraInsertDamageAddedRatio": "追加攻击伤害",
+    "ExtraDOTDamageAddedRatio": "持续伤害",
+    "ExtraNormalDamageAddedRatio": "普攻伤害",
+    "ExtraSkillDamageAddedRatio": "战技伤害",
+    "ExtraElementDamageAddedRatio": "属性伤害",
+    "ExtraShieldRatioBase": "护盾量",
 }
 
 
@@ -96,6 +106,46 @@ def _property_label(match: "re.Match[str]") -> str:
     t = match.group(1)
     base = re.sub(r"\d+$", "", t)  # 去末尾数字后缀（层级版本号）
     return _PROPERTY_LABEL.get(base) or _PROPERTY_LABEL.get(t) or base
+
+
+def _property_label_from_tag(tag: str) -> str:
+    """从完整 <property type=XXX ...> 标签提取属性名。"""
+    m = re.search(r"type=(\w+)", tag)
+    if not m:
+        return ""
+    t = m.group(1)
+    base = re.sub(r"\d+$", "", t)
+    return _PROPERTY_LABEL.get(base) or _PROPERTY_LABEL.get(t) or base
+
+
+# 匹配一组紧密相邻的 property 标签（2个或以上）
+_ADJACENT_PROP_RE = re.compile(r"(?:<property\s+type=\w+[^>]*>){2,}")
+
+
+def _process_adjacent_properties(text: str) -> str:
+    """处理相邻 property 标签组。
+
+    游戏内相邻 property 标签显示为并排图标，后跟共享文本标签。
+    若后续文本已包含属性名（如“前/后台强度”），则移除标签避免重复；
+    若后续仅为标点，则插入属性名 + "/" 分隔。
+    """
+    def _replace_group(m: re.Match[str]) -> str:
+        group = m.group(0)
+        # 提取组内所有属性名
+        labels = [_property_label_from_tag(t) for t in re.findall(r"<property\s+[^>]+>", group)]
+        # 查看组后文本（到下一个标签或字符串结尾）
+        after = text[m.end():]
+        after_text_match = re.match(r"([^<]*)", after)
+        after_text = after_text_match.group(1) if after_text_match else ""
+        # 取后续文本中到第一个标点前的部分作为“共享标签”
+        shared = re.split(r"[。；，、！？\.]", after_text)[0]
+        if shared and any(lbl and lbl in shared for lbl in labels):
+            # 后续文本已含属性名，移除标签组（避免重复）
+            return ""
+        # 后续无属性名文本，插入 labels 以 "/" 连接
+        return "/".join(lbl for lbl in labels if lbl)
+
+    return _ADJACENT_PROP_RE.sub(_replace_group, text)
 
 
 

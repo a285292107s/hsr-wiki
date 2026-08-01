@@ -18,8 +18,8 @@
       "name": "昼之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
-      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前台强度后台强度前/后台强度和速度增幅提高。",
-      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前台强度后台强度前/后台强度和速度增幅提高。",
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和速度增幅提高。",
+      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和速度增幅提高。",
       "desc_params": [
         10
       ],
@@ -27,7 +27,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前台强度后台强度前/后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前/后台强度，#3[i]%速度增幅。",
           "params": [
             0.1,
             0.1,
@@ -55,7 +55,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             0.18,
             0.18,
@@ -83,7 +83,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             0.36,
             0.36,
@@ -111,7 +111,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             0.6,
             0.6,
@@ -143,8 +143,8 @@
       "name": "治疗",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2005.png",
-      "desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
-      "simple_desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
+      "desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的治疗量提高。",
+      "simple_desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的治疗量提高。",
       "desc_params": [
         0.12,
         0.2,
@@ -161,7 +161,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%ExtraHealAddedRatio。",
+          "desc": "#1[i]%治疗量。",
           "params": [
             0.2,
             0.12
@@ -184,7 +184,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%ExtraHealAddedRatio。",
+          "desc": "#1[i]%治疗量。",
           "params": [
             0.4,
             0.12
@@ -207,7 +207,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%ExtraHealAddedRatio，我方小队获得#3[i]%全伤害。",
+          "desc": "#1[i]%治疗量，我方小队获得#3[i]%全伤害。",
           "params": [
             0.6,
             0.12,

@@ -251,33 +251,10 @@ function onContentClick(e: MouseEvent): void {
   const a = (e.target as HTMLElement).closest('a[href]');
   if (!a) return;
   const href = a.getAttribute('href') || '';
-  if (!href || href === '#') return;
+  // 站内路径统一交给 router；外链/锚点不拦截
+  if (!href || href === '#' || href.startsWith('http')) return;
   e.preventDefault();
-  const m = href.match(/\/character\/(\d+)/);
-  if (m) {
-    void router.push(`/character/${m[1]}`);
-    return;
-  }
-  const lc = href.match(/\/lightcone\/(\d+)/);
-  if (lc) {
-    void router.push(`/lightcone/${lc[1]}`);
-    return;
-  }
-  const relic = href.match(/\/relic\/(\d+)/);
-  if (relic) {
-    void router.push(`/relic/${relic[1]}`);
-    return;
-  }
-  const crole = href.match(/\/currency\/role\/(\d+)/);
-  if (crole) {
-    void router.push(`/currency/role/${crole[1]}`);
-    return;
-  }
-  if (/^\/currency\/role\/?$/.test(href)) {
-    void router.push('/currency/role');
-    return;
-  }
-  // 未迁移的详情页：静默忽略
+  void router.push(href);
 }
 
 function onGridMove(e: MouseEvent): void {

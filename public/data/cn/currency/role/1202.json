@@ -19,8 +19,8 @@
       "name": "仙舟",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1007.png",
-      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前台强度后台强度前/后台强度和速度增幅提高。",
-      "simple_desc": "【仙舟】召唤【神君】。【仙舟】队员行动后为【神君】叠加段数并使其行动提前。\\n【仙舟】队员的前台强度后台强度前/后台强度和速度增幅提高。",
+      "desc": "【仙舟】召唤【神君】，其行动时将攻击敌方全体目标。【仙舟】队员行动后为【神君】叠加攻击段数并使其行动提前。\\n【仙舟】队员的前/后台强度和速度增幅提高。",
+      "simple_desc": "【仙舟】召唤【神君】。【仙舟】队员行动后为【神君】叠加段数并使其行动提前。\\n【仙舟】队员的前/后台强度和速度增幅提高。",
       "desc_params": [
         10
       ],
@@ -28,7 +28,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前台强度后台强度前/后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前/后台强度，#3[i]%速度增幅。",
           "params": [
             0.2,
             0.2,
@@ -56,7 +56,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             0.4,
             0.4,
@@ -84,7 +84,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             0.8,
             0.8,
@@ -112,7 +112,7 @@
         {
           "layer": 10,
           "quality": "Multicolor",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             2,
             2,
@@ -144,8 +144,8 @@
       "name": "能量",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
-      "desc": "【能量】队员的ExtraUltraDamageAddedRatio提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
-      "simple_desc": "【能量】队员的ExtraUltraDamageAddedRatio提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
+      "desc": "【能量】队员的终结技伤害提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
+      "simple_desc": "【能量】队员的终结技伤害提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
       "desc_params": [
         0.3,
         0.03,
@@ -162,7 +162,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "desc": "#1[i]%终结技伤害。",
           "params": [
             0.2
           ],
@@ -178,7 +178,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "desc": "#1[i]%终结技伤害。",
           "params": [
             0.4
           ],
@@ -194,7 +194,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "desc": "#1[i]%终结技伤害。",
           "params": [
             0.8
           ],
@@ -210,7 +210,7 @@
         {
           "layer": 10,
           "quality": "Multicolor",
-          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "desc": "#1[i]%终结技伤害。",
           "params": [
             2.4
           ],

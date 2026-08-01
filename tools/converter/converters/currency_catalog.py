@@ -23,11 +23,12 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
-from textmap import resolve_text
+from textmap import resolve_text, clean_text
 from utils import load_json
 
 logger = logging.getLogger("converter.currency_catalog")
@@ -190,14 +191,78 @@ def _convert_portals(out_dir: Path) -> int:
 # 投资策略（Augment）
 # ─────────────────────────────────────────────
 
+# <gridfightinfo type=item|role id=N> 标签正则
+_GRIDFIGHTINFO_RE = re.compile(r"<gridfightinfo\s+type=(\w+)\s+id=(\d+)\s*/?>")
+
+
+def _build_name_indexes() -> tuple[dict[int, str], dict[int, str]]:
+    """构建物品名称索引和角色名称索引，用于解析 <gridfightinfo> 标签。
+
+    Returns:
+        (item_names, role_names): ID → 名称 映射
+    """
+    # 物品名称：GridFightItems.json
+    items_raw = _load_excel("GridFightItems.json")
+    item_names: dict[int, str] = {}
+    for item in items_raw:
+        iid = item["ID"]
+        name = resolve_text(item.get("ItemName", {}))
+        if name:
+            item_names[iid] = name
+
+    # 角色名称：GridFightRoleBasicInfo.json → AvatarID → AvatarConfig(+LD).json
+    role_raw = _load_excel("GridFightRoleBasicInfo.json")
+    avatar_raw = _load_excel("AvatarConfig.json")
+    ld_path = EXCEL_DIR / "AvatarConfigLD.json"
+    if ld_path.exists():
+        avatar_raw = avatar_raw + load_json(ld_path)
+    avatar_names: dict[int, str] = {}
+    for av in avatar_raw:
+        aid = av.get("AvatarID")
+        if aid:
+            name = resolve_text(av.get("AvatarName", {}))
+            if name:
+                avatar_names[aid] = name
+
+    role_names: dict[int, str] = {}
+    for role in role_raw:
+        rid = role["ID"]
+        avatar_id = role.get("AvatarID", rid)
+        name = avatar_names.get(avatar_id, "")
+        if name:
+            role_names[rid] = name
+
+    return item_names, role_names
+
+
+def _resolve_gridfightinfo(
+    text: str,
+    item_names: dict[int, str],
+    role_names: dict[int, str],
+) -> str:
+    """将 <gridfightinfo type=item|role id=N> 标签替换为实际名称。"""
+    def _repl(m: re.Match) -> str:
+        typ, sid = m.group(1), int(m.group(2))
+        if typ == "item":
+            return item_names.get(sid, "")
+        if typ == "role":
+            return role_names.get(sid, "")
+        return ""
+    return _GRIDFIGHTINFO_RE.sub(_repl, text)
+
+
 def _convert_augments(out_dir: Path) -> int:
     raw = _load_excel("GridFightAugment.json")
+    item_names, role_names = _build_name_indexes()
 
     out: list[dict] = []
     for entry in raw:
         aid = entry["ID"]
         name = resolve_text(entry.get("HexName", {}))
-        desc = resolve_text(entry.get("HexDesc", {}))
+        # 先解析 gridfightinfo 标签为实际名称，再清洗其余标签
+        raw_desc = resolve_text(entry.get("HexDesc", {}), clean=False)
+        raw_desc = _resolve_gridfightinfo(raw_desc, item_names, role_names)
+        desc = clean_text(raw_desc)
         icon = entry.get("IconPath", "")
         mini_icon = entry.get("MiniIconPath", "")
         quality = entry.get("Quality", "")
@@ -233,6 +298,7 @@ def _convert_traits(out_dir: Path) -> int:
     raw = _load_excel("GridFightTraitBasicInfo.json")
     layer_raw = _load_excel("GridFightTraitLayer.json")
     mazebuff_raw = _load_excel("GridFightTraitMazebuff.json")
+    remark_raw = _load_excel("GridFightTraitRemark.json")
     mazebuff_index = _build_index(mazebuff_raw)
 
     # 构建层级索引
@@ -263,6 +329,26 @@ def _convert_traits(out_dir: Path) -> int:
         layer_by_trait.setdefault(tid, []).append(node)
     for tid in layer_by_trait:
         layer_by_trait[tid].sort(key=lambda x: x["layer"])
+
+    # 构建备注索引（GridFightTraitRemark → TraitID → 备注列表）
+    remark_by_trait: dict[int, list[dict]] = {}
+    for entry in remark_raw:
+        tid = entry.get("ID")
+        if tid is None:
+            continue
+        remark_desc = resolve_text(entry.get("TraitRemark", {}))
+        remark_simple = resolve_text(entry.get("TraitSimpleRemark", {}))
+        remark_params = [_unwrap(p, 0) for p in (entry.get("TraitRemarkParamList") or [])]
+        node = {
+            "desc": remark_desc,
+            "simple_desc": remark_simple,
+            "params": remark_params,
+            "text_order": entry.get("TextOrder", 0),
+        }
+        remark_by_trait.setdefault(tid, []).append(node)
+    # 按 TextOrder 排序
+    for tid in remark_by_trait:
+        remark_by_trait[tid].sort(key=lambda x: x.get("text_order", 0))
 
     out: list[dict] = []
     for entry in raw:
@@ -298,6 +384,7 @@ def _convert_traits(out_dir: Path) -> int:
             "season_id": season_id,
             "sort_priority": sort_priority,
             "layers": layer_by_trait.get(tid, []),
+            "remarks": remark_by_trait.get(tid, []),
         })
 
     out.sort(key=lambda x: x["sort_priority"])

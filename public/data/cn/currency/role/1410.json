@@ -17,8 +17,8 @@
       "name": "昼之半神",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1011.png",
-      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前台强度后台强度前/后台强度和速度增幅提高。",
-      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前台强度后台强度前/后台强度和速度增幅提高。",
+      "desc": "获得仅供【昼之半神】角色穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和速度增幅提高。",
+      "simple_desc": "获得仅供【昼之半神】穿戴的白昼装备。\\n【昼之半神】队员的前/后台强度和速度增幅提高。",
       "desc_params": [
         10
       ],
@@ -26,7 +26,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前台强度后台强度前/后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前/后台强度，#3[i]%速度增幅。",
           "params": [
             0.1,
             0.1,
@@ -54,7 +54,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             0.18,
             0.18,
@@ -82,7 +82,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             0.36,
             0.36,
@@ -110,7 +110,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%前台强度后台强度，#3[i]%速度增幅。",
+          "desc": "#1[i]%前台强度/后台强度，#3[i]%速度增幅。",
           "params": [
             0.6,
             0.6,
@@ -142,8 +142,8 @@
       "name": "持续伤害",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2008.png",
-      "desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
-      "simple_desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "desc": "【持续伤害】队员的持续伤害持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "simple_desc": "【持续伤害】队员的持续伤害持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
       "desc_params": [
         2.5,
         2,
@@ -160,7 +160,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "desc": "#1[i]%持续伤害。",
           "params": [
             0.3
           ],
@@ -176,7 +176,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "desc": "#1[i]%持续伤害。",
           "params": [
             0.8
           ],
@@ -192,7 +192,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "desc": "#1[i]%持续伤害。",
           "params": [
             2
           ],

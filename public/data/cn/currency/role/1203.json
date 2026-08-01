@@ -159,8 +159,8 @@
       "name": "治疗",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2005.png",
-      "desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
-      "simple_desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的ExtraHealAddedRatio提高。",
+      "desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的治疗量提高。",
+      "simple_desc": "我方小队的生命增幅提高#1[i]%。【治疗】队员的治疗量提高。",
       "desc_params": [
         0.12,
         0.2,
@@ -177,7 +177,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%ExtraHealAddedRatio。",
+          "desc": "#1[i]%治疗量。",
           "params": [
             0.2,
             0.12
@@ -200,7 +200,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%ExtraHealAddedRatio。",
+          "desc": "#1[i]%治疗量。",
           "params": [
             0.4,
             0.12
@@ -223,7 +223,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%ExtraHealAddedRatio，我方小队获得#3[i]%全伤害。",
+          "desc": "#1[i]%治疗量，我方小队获得#3[i]%全伤害。",
           "params": [
             0.6,
             0.12,

@@ -127,6 +127,12 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 1, catalog: 'currency-trait', cw: true, title: '货币战争 · 羁绊图鉴' },
   },
   {
+    path: '/currency/trait/:id(\\d+)',
+    name: 'currency-trait',
+    component: () => import('../views/CurrencyTraitView.vue'),
+    meta: { depth: 2, cw: true },
+  },
+  {
     // 成就页为尚未实现的扩展模块，第二期重构；第一期展示占位页。
     path: '/achievement',
     name: 'achievement',

@@ -21,14 +21,14 @@
       "name": "命运圣杯",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1013.png",
-      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前台强度后台强度前/后台强度提高。",
-      "simple_desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前台强度后台强度前/后台强度提高。",
+      "desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前/后台强度提高。",
+      "simple_desc": "【命运圣杯】提供祈愿试炼，完成试炼以获得各种奖励。\\n祈愿试炼的难度和奖励随羁绊等级提升。\\n【命运圣杯】成员的前/后台强度提高。",
       "desc_params": [],
       "layers": [
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前台强度后台强度前/后台强度。",
+          "desc": "#1[i]%前/后台强度。",
           "params": [
             0.25,
             0.25
@@ -39,7 +39,7 @@
         {
           "layer": 3,
           "quality": "Silver",
-          "desc": "#1[i]%前台强度后台强度。",
+          "desc": "#1[i]%前台强度/后台强度。",
           "params": [
             0.5,
             0.5
@@ -50,7 +50,7 @@
         {
           "layer": 4,
           "quality": "Gold",
-          "desc": "#1[i]%前台强度后台强度。",
+          "desc": "#1[i]%前台强度/后台强度。",
           "params": [
             1,
             1
@@ -61,7 +61,7 @@
         {
           "layer": 5,
           "quality": "Multicolor",
-          "desc": "#1[i]%前台强度后台强度。",
+          "desc": "#1[i]%前台强度/后台强度。",
           "params": [
             1.8,
             1.8
@@ -76,8 +76,8 @@
       "name": "能量",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2004.png",
-      "desc": "【能量】队员的ExtraUltraDamageAddedRatio提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
-      "simple_desc": "【能量】队员的ExtraUltraDamageAddedRatio提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
+      "desc": "【能量】队员的终结技伤害提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
+      "simple_desc": "【能量】队员的终结技伤害提高。在场上生成【能量地块】，可提供全伤害和能量恢复。",
       "desc_params": [
         0.3,
         0.03,
@@ -94,7 +94,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "desc": "#1[i]%终结技伤害。",
           "params": [
             0.2
           ],
@@ -110,7 +110,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "desc": "#1[i]%终结技伤害。",
           "params": [
             0.4
           ],
@@ -126,7 +126,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "desc": "#1[i]%终结技伤害。",
           "params": [
             0.8
           ],
@@ -142,7 +142,7 @@
         {
           "layer": 10,
           "quality": "Multicolor",
-          "desc": "#1[i]%ExtraUltraDamageAddedRatio。",
+          "desc": "#1[i]%终结技伤害。",
           "params": [
             2.4
           ],

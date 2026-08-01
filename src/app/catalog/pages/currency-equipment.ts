@@ -42,38 +42,84 @@ function propLabel(key: string): string {
 function propValue(v: number): string {
   return Math.abs(v) < 1 ? `${(v * 100).toFixed(0)}%` : String(v);
 }
-/** props → 效果说明文本（全量展示，数据 Wiki 不隐藏属性） */
-function buildEffectDesc(props: Array<{ name: string; property_type: string; value: number }>): string {
-  if (!props.length) return '';
-  return props
-    .map((p) => `${propLabel(p.property_type || p.name)} +${propValue(p.value)}`)
-    .join(' · ');
+
+/** 分类 → 图标边框色 */
+const CAT_BORDER: Record<string, string> = {
+  Basic: '#60a5fa',
+  Craftable: '#c084fc',
+  Radiant: '#fbbf24',
+  Emblem: '#f472b6',
+  FateEquip: '#f472b6',
+  Hack: '#2dd4bf',
+  Crown: '#fcd34d',
+  Material: '#94a3b8',
+  TraitSpecial: '#a78bfa',
+};
+
+/** 属性类型 → 行首指示色 */
+const PROP_COLOR: Record<string, string> = {
+  ExtraSpeedAddedRatio1: '#f472b6',
+  ExtraSpeedAddedRatio2: '#f472b6',
+  ExtraFrontPowerAddedRatio1: '#fb923c',
+  ExtraBackPowerAddedRatio1: '#38bdf8',
+  ExtraHPAddedRatio1: '#4ade80',
+  ExtraHPAddedRatio2: '#4ade80',
+  ExtraAllDamageTypeAddedRatio1: '#fbbf24',
+  ExtraAllDamageTypeAddedRatio4: '#fbbf24',
+  ExtraAllDamageTypeAddedRatio5: '#fbbf24',
+  ExtraCriticalChanceBase: '#f87171',
+  ExtraCriticalDamageBase: '#f87171',
+  ExtraBreakDamageAddedRatio: '#a78bfa',
+  BreakDamageAddedRatioBase: '#a78bfa',
+  StanceBreakAddedRatio: '#a78bfa',
+  ExtraHealRatioBase: '#4ade80',
+  ExtraHealAddedRatio: '#4ade80',
+  ExtraShieldRatioBase: '#60a5fa',
+  ExtraShieldAddedRatio: '#60a5fa',
+  ExtraAllDamageReduce: '#60a5fa',
+  ExtraInitSP: '#fcd34d',
+  ExtraLuckChance: '#f0abfc',
+  ExtraLuckDamage: '#f0abfc',
+};
+function propColor(key: string): string {
+  return PROP_COLOR[key] || 'var(--primary)';
 }
 
 function renderEquipCard(item: CatalogItem, index = 0): string {
   const icon = gridFightEquipIconUrl(item.icon as string);
   const tags = (item.tags as Array<{ id: number; desc: string }>) || [];
   const tagChips = tags
-    .slice(0, 3)
     .map((t) => `<span class="nk-cw-tag">${escHtml(t.desc)}</span>`)
     .join('');
   const catName = (item.category_name as string) || '';
-  const effectDesc = buildEffectDesc(
-    (item.props as Array<{ name: string; property_type: string; value: number }>) || [],
-  );
+  const cat = (item.category as string) || '';
+  const borderColor = CAT_BORDER[cat] || 'var(--border2)';
+  const props = (item.props as Array<{ name: string; property_type: string; value: number }>) || [];
+  // 属性行：逐条渲染，名称左对齐 + 数值右对齐
+  const statRows = props.length
+    ? `<div class="nk-cw-equip-stats">${props.map((p) => {
+        const color = propColor(p.property_type || p.name);
+        return `<div class="nk-cw-equip-stat">
+          <span class="nk-cw-equip-stat__dot" style="background:${color}"></span>
+          <span class="nk-cw-equip-stat__name">${escHtml(propLabel(p.property_type || p.name))}</span>
+          <span class="nk-cw-equip-stat__val">${propValue(p.value)}</span>
+        </div>`;
+      }).join('')}</div>`
+    : '';
   // 无属性加成时回退显示功能道具描述（取第一行）
-  const fallbackDesc = effectDesc ? '' : ((item.desc as string) || '').split('\\n')[0];
-  const descHtml = effectDesc || (fallbackDesc ? escHtml(fallbackDesc) : '');
+  const fallbackDesc = props.length ? '' : ((item.desc as string) || '').split('\\n')[0];
+  const descHtml = fallbackDesc ? `<div class="nk-cw-equip-desc">${escHtml(fallbackDesc)}</div>` : '';
   return `<div class="nk-cw-card nk-cw-equip-card" style="--i:${index}">
-      <div class="nk-cw-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
-      <div class="nk-cw-card__body">
-        <div class="nk-cw-card__name">${escHtml(item.name)}</div>
-        <div class="nk-cw-card__meta">
-          ${catName ? `<span class="nk-cw-card__cat">${escHtml(catName)}</span>` : ''}
-          ${tagChips}
+      <div class="nk-cw-equip-header">
+        <div class="nk-cw-equip-icon" style="border-color:${borderColor}"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
+        <div class="nk-cw-equip-title">
+          <div class="nk-cw-equip-name">${escHtml(item.name)}</div>
+          ${catName ? `<div class="nk-cw-equip-cat">${escHtml(catName)}</div>` : ''}
         </div>
-        ${descHtml ? `<div class="nk-cw-card__desc">${descHtml}</div>` : ''}
       </div>
+      ${tagChips ? `<div class="nk-cw-equip-tags">${tagChips}</div>` : ''}
+      ${statRows}
+      ${descHtml}
     </div>`;
 }
 

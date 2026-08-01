@@ -27,7 +27,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%前台强度后台强度前/后台强度。",
+          "desc": "#1[i]%前/后台强度。",
           "params": [
             0.3,
             0.3
@@ -49,7 +49,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%前台强度后台强度。",
+          "desc": "#1[i]%前台强度/后台强度。",
           "params": [
             0.8,
             0.8
@@ -71,7 +71,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前台强度后台强度。",
+          "desc": "#1[i]%前台强度/后台强度。",
           "params": [
             2,
             2
@@ -236,8 +236,8 @@
       "name": "追击",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2001.png",
-      "desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌方目标回合开始。",
-      "simple_desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，并在攻击后额外附伤。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌人回合开始。",
+      "desc": "【追击】队员的追加攻击伤害提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的追加攻击伤害，持续至任意敌方目标回合开始。",
+      "simple_desc": "【追击】队员的追加攻击伤害提高，并在攻击后额外附伤。\\n我方小队连续行动会提高【追击】队员的追加攻击伤害，持续至任意敌人回合开始。",
       "desc_params": [
         0.05,
         0.2,
@@ -254,7 +254,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "desc": "#1[i]%追加攻击伤害。",
           "params": [
             0.2
           ],
@@ -270,7 +270,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "desc": "#1[i]%追加攻击伤害。",
           "params": [
             0.5
           ],
@@ -286,7 +286,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "desc": "#1[i]%追加攻击伤害。",
           "params": [
             0.8
           ],
@@ -302,7 +302,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "desc": "#1[i]%追加攻击伤害。",
           "params": [
             1.2
           ],

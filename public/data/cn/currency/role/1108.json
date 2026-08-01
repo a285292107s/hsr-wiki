@@ -202,8 +202,8 @@
       "name": "持续伤害",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2008.png",
-      "desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
-      "simple_desc": "【持续伤害】队员的ExtraDOTDamageAddedRatio持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "desc": "【持续伤害】队员的持续伤害持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
+      "simple_desc": "【持续伤害】队员的持续伤害持续伤害增幅提高。敌方目标行动时，触发【超激发】，造成持续伤害并触发随机敌方目标的持续伤害效果。",
       "desc_params": [
         2.5,
         2,
@@ -220,7 +220,7 @@
         {
           "layer": 2,
           "quality": null,
-          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "desc": "#1[i]%持续伤害。",
           "params": [
             0.3
           ],
@@ -236,7 +236,7 @@
         {
           "layer": 4,
           "quality": "Silver",
-          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "desc": "#1[i]%持续伤害。",
           "params": [
             0.8
           ],
@@ -252,7 +252,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%ExtraDOTDamageAddedRatio。",
+          "desc": "#1[i]%持续伤害。",
           "params": [
             2
           ],

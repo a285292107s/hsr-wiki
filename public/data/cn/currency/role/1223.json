@@ -19,8 +19,8 @@
       "name": "狼狩",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/1008.png",
-      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
-      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前台强度后台强度前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备参与战斗会使其额外获得经验。\\n【狼狩】队员的前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
+      "simple_desc": "召唤【步离人】协同战斗，其在参与战斗后可以获得经验并升级。我方队员携带更多装备会使其额外获得经验。\\n【狼狩】队员的前/后台强度提高，【步离人】每次升级后使该加成提高#2[i]%。",
       "desc_params": [
         10,
         0.5,
@@ -30,7 +30,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%前台强度后台强度前/后台强度。",
+          "desc": "#1[i]%前/后台强度。",
           "params": [
             0.15,
             0.15
@@ -52,7 +52,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%前台强度后台强度。",
+          "desc": "#1[i]%前台强度/后台强度。",
           "params": [
             0.3,
             0.3
@@ -74,7 +74,7 @@
         {
           "layer": 6,
           "quality": "Gold",
-          "desc": "#1[i]%前台强度后台强度。",
+          "desc": "#1[i]%前台强度/后台强度。",
           "params": [
             0.5,
             0.5
@@ -96,7 +96,7 @@
         {
           "layer": 8,
           "quality": "Multicolor",
-          "desc": "#1[i]%前台强度后台强度。",
+          "desc": "#1[i]%前台强度/后台强度。",
           "params": [
             0.9,
             0.9
@@ -122,8 +122,8 @@
       "name": "追击",
       "activation_type": "GreaterEqualThan",
       "icon": "SpriteOutput/GridFight/TraitIcon/Icon/2001.png",
-      "desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌方目标回合开始。",
-      "simple_desc": "【追击】队员的ExtraInsertDamageAddedRatio提高，并在攻击后额外附伤。\\n我方小队连续行动会提高【追击】队员的ExtraInsertDamageAddedRatio，持续至任意敌人回合开始。",
+      "desc": "【追击】队员的追加攻击伤害提高，攻击后附加#5[i]次等同于攻击者#6[i]%攻击力的随机属性附加伤害，该伤害视为追加攻击伤害。\\n我方小队连续行动会提高【追击】队员的追加攻击伤害，持续至任意敌方目标回合开始。",
+      "simple_desc": "【追击】队员的追加攻击伤害提高，并在攻击后额外附伤。\\n我方小队连续行动会提高【追击】队员的追加攻击伤害，持续至任意敌人回合开始。",
       "desc_params": [
         0.05,
         0.2,
@@ -140,7 +140,7 @@
         {
           "layer": 3,
           "quality": null,
-          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "desc": "#1[i]%追加攻击伤害。",
           "params": [
             0.2
           ],
@@ -156,7 +156,7 @@
         {
           "layer": 5,
           "quality": "Silver",
-          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "desc": "#1[i]%追加攻击伤害。",
           "params": [
             0.5
           ],
@@ -172,7 +172,7 @@
         {
           "layer": 7,
           "quality": "Gold",
-          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "desc": "#1[i]%追加攻击伤害。",
           "params": [
             0.8
           ],
@@ -188,7 +188,7 @@
         {
           "layer": 9,
           "quality": "Multicolor",
-          "desc": "#1[i]%ExtraInsertDamageAddedRatio。",
+          "desc": "#1[i]%追加攻击伤害。",
           "params": [
             1.2
           ],

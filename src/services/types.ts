@@ -736,6 +736,12 @@ export interface CurrencyTraitLayer {
   all_props: CurrencyEquipProp[];
 }
 
+export interface CurrencyTraitRemark {
+  desc: string;
+  simple_desc: string;
+  params: number[];
+}
+
 export interface CurrencyTraitEntry {
   id: number;
   name: string;
@@ -749,6 +755,7 @@ export interface CurrencyTraitEntry {
   season_id: number;
   sort_priority: number;
   layers: CurrencyTraitLayer[];
+  remarks: CurrencyTraitRemark[];
 }
 
 export interface CurrencyTraitList {
