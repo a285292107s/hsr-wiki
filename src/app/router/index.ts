@@ -4,8 +4,9 @@
  * meta.endgameTab：终局 4 路由互为同页 Tab——共享 transition key 与组件 key，
  * 互切时不触发页面过渡、不重建目录引擎。
  * meta.cw：货币战争模式路由——驱动全壳暗金主题（data-theme="cw"）与 CW 导航配置。
+ * History 模式（Vercel SPA fallback）。
  */
-import { createRouter, createWebHashHistory, type RouteRecordRaw, type Router } from 'vue-router';
+import { createRouter, createWebHistory, type RouteRecordRaw, type Router } from 'vue-router';
 import { ref } from 'vue';
 
 /** 导航方向（驱动 nk-enter-fwd / nk-enter-back 过渡动画） */
@@ -149,7 +150,7 @@ const routes: RouteRecordRaw[] = [
 
 export function createNkRouter(): Router {
   const router = createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes,
   });
 

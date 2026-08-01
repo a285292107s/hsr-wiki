@@ -1,9 +1,8 @@
 # HSR Wiki · 崩坏：星穹铁道
 
-独立部署于 **GitHub Pages** 的《崩坏：星穹铁道》游戏数据 Wiki，提供 Gaming HUD 风格的沉浸式浏览体验（Spine 角色动画、虚拟滚动卡片、暗色数据面板等）。
+独立部署于 **Vercel** 的《崩坏：星穹铁道》游戏数据 Wiki，提供 Gaming HUD 风格的沉浸式浏览体验（Spine 角色动画、虚拟滚动卡片、暗色数据面板等）。
 
-- 站点地址：`https://<user>.github.io/hsr_wiki/`
-- 技术栈：Vue 3 + TypeScript + Vite + Pinia + Vue Router（Hash 模式）
+- 技术栈：Vue 3 + TypeScript + Vite + Pinia + Vue Router（History 模式）
 - 数据源：混合模式——角色走本地转换数据（随站部署），其余目录与图片/Spine 走 `https://static.nanoka.cc` CDN（CORS 已开放）
 
 ## 技术栈
@@ -14,7 +13,7 @@
 | 构建 | Vite |
 | 语言 | TypeScript |
 | 状态 | Pinia |
-| 路由 | Vue Router（`createWebHashHistory`） |
+| 路由 | Vue Router（`createWebHistory`） |
 | 测试 | Vitest + happy-dom |
 | 包管理 | pnpm |
 
@@ -45,7 +44,7 @@ hsr wiki/
 # 安装依赖
 pnpm install
 
-# 本地开发（访问 http://localhost:5173/hsr_wiki/）
+# 本地开发（访问 http://localhost:5173/）
 pnpm dev
 
 # 类型检查 + 生产构建
@@ -63,7 +62,7 @@ pnpm test:watch
 
 ## 数据架构
 
-第二期数据源统一已完成——**全部目录页均走本地数据**（随站部署到 GitHub Pages），无运行时 CDN 列表拉取：
+第二期数据源统一已完成——**全部目录页均走本地数据**（随站部署），无运行时 CDN 列表拉取：
 
 - **角色 / 光锥 / 遗器 / 物品 / 敌对**：列表数据由 `tools/converter/` 从 `DimBasedGameData` 产出本地 JSON（`public/data/cn/` 下的 `characters.json`、`light_cones.json`、`relics.json`、`items.json`、`monsters.json`），加载接口集中在 `src/services/api.ts` 的 `loadLocal*` 系列；物品库 `ItemDb`（供角色详情页物品名解析）由 `loadLocalItemDb()` 从 `items.json` 数组转换得到。
 - **终局内容（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）**：赛季列表由 `tools/converter/converters/endgame.py` 从 `ChallengeMazeConfig` / `ChallengeStoryMazeConfig` / `ChallengeBossMazeConfig` / `ChallengePeakConfig` 产出（按 `GroupID`/`ID` 分组 + TextMap 名称），落地为 `public/data/cn/maze.json`、`maze_extra.json`、`maze_boss.json`、`maze_peak.json`，经 `loadLocalMaze*`/`loadLocalStory*`/`loadLocalBoss*`/`loadLocalPeak*` 加载。**不生成 `*-version.json`**——上游解包数据中不存在"赛季 → 游戏版本"的时间线表，版本分组无法从源可靠重建，故四季统一按赛季 ID 降序展示，赛季版本标签显示"未知"（与原站 story/boss 行为一致）。
@@ -99,11 +98,11 @@ python convert.py                   # 依次转换 通用/角色/光锥/遗器/�
 
 ## 部署
 
-通过 GitHub Actions（`push` 到 `main` 自动部署，配置见 `docs/migration-plan.md` 第 19 步）构建并发布到 GitHub Pages。需在仓库 **Settings → Pages → Source** 选择 "GitHub Actions"。`vite.config.ts` 中 `base` 已设为 `/hsr_wiki/`，资源路径自动带前缀。
+推送到 `main` 分支后 Vercel 自动构建部署。SPA 路由重写配置见根目录 `vercel.json`。`vite.config.ts` 中 `base` 为 `/`，部署于域名根路径。
 
 ## 文档
 
 - `CONTEXT.md`：项目术语表（数据源、命途/属性枚举、图片路径映射等）。
-- `docs/migration-plan.md`：寄生油猴脚本 → GitHub Pages 独立站的迁移执行计划。
+- `docs/migration-plan.md`：寄生油猴脚本 → 独立站的迁移执行计划。
 - `docs/adr/`：架构决策记录（Spine 自主渲染、自建侧边栏、独立站、转换工具、数据格式映射等）。
 - `docs/` 下另有数据还原样例与 `ExcelOutput` / `TurnBasedGameData` 数据总结。

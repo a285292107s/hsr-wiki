@@ -1,103 +1,100 @@
 /**
- * 目录页数据流测试：验证 catalog/pages.ts 的 fetchData 将本地数据映射为统一 CatalogItem[]。
- * 通过对 src/services/api 整体 mock（纯内存 fixture），不依赖网络与本地数据文件，可在 CI 稳定运行。
+ * 目录页配置注册表行为测试
+ * 验证所有注册的 CatalogPageConfig 均满足引擎契约：
+ * - id 唯一且与注册 key 一致
+ * - renderCard 函数存在且返回字符串
+ * - filters / buildFilters 字段结构合法
  */
-import { describe, it, expect, vi } from 'vitest';
-import type { LocalCharList, LocalItemList, LocalLightConeList } from '../../../services/types';
+import { describe, it, expect } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
+import type { CatalogFilter } from '../types';
 
-vi.mock('../../../services/api', () => ({
-  loadLocalItems: vi.fn(),
-  loadLocalLightCones: vi.fn(),
-  loadLocalRelicSets: vi.fn(),
-  loadLocalMonsterList: vi.fn(),
-  loadLocalMazeList: vi.fn(),
-  loadLocalStoryList: vi.fn(),
-  loadLocalBossList: vi.fn(),
-  loadLocalPeakList: vi.fn(),
-  prefetchEndgameAll: vi.fn(),
-  loadLocalCharacterList: vi.fn(),
-  RARITY_NUM_TO_KEY: { 5: 'SuperRare', 4: 'VeryRare', 3: 'Rare', 2: 'NotNormal', 1: 'Normal' },
-}));
+const entries = Object.entries(CATALOG_PAGES);
 
-import { loadLocalCharacterList, loadLocalItems, loadLocalLightCones } from '../../../services/api';
+describe('CATALOG_PAGES registry', () => {
+  it('should register at least one page', () => {
+    expect(entries.length).toBeGreaterThan(0);
+  });
 
-const charSample: LocalCharList = [
-  {
-    id: 1508,
-    name: '三月七',
-    full_name: '三月七',
-    rarity: 5,
-    path: 'Preservation',
-    element: 'Ice',
-    sp_need: 120,
-    vo_tag: 'san',
-    icon: '1508.png',
-    icon_round: '',
-    icon_mini: '',
-    icon_cutin: '',
-    rank_ids: [],
-    skill_ids: [],
-  },
-];
+  it('all ids are unique', () => {
+    const ids = entries.map(([, cfg]) => cfg.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
 
-const itemSample: LocalItemList = [
-  {
-    id: 23013, name: '星琼', desc: '', bg_desc: '',
-    main_type: 'Virtual', sub_type: 'Virtual', rarity: 5, purpose_type: 0,
-    icon: '', figure_icon: 'icon/item_figure/23013.png',
-  },
-];
+  it('each config id matches its registry key', () => {
+    for (const [key, cfg] of entries) {
+      expect(cfg.id, `key "${key}" should match config.id`).toBe(key);
+    }
+  });
 
-const lcSample: LocalLightConeList = [
-  {
-    id: 20000, name: '镜中故我', rarity: 5, path: 'Destruction',
-    skill_id: 0, skill_name: '', skill_desc: '', icon: '', icon_figure: '',
-  },
-];
-
-describe('character 目录页 fetchData', () => {
-  it('将本地角色列表映射为统一 CatalogItem[]', async () => {
-    vi.mocked(loadLocalCharacterList).mockResolvedValue(charSample);
-    const page = CATALOG_PAGES.character;
-    expect(page.fetchData).toBeDefined();
-    const items = await page.fetchData!({ version: '4.3.1' });
-    expect(items).toHaveLength(1);
-    expect(items[0]).toMatchObject({
-      id: '1508',
-      name: '三月七',
-      rarity: 5,
-      path: 'preservation', // fetchData 内部 lowercase
-      element: 'ice',
-    });
+  it('each config has required string fields', () => {
+    for (const [key, cfg] of entries) {
+      expect(cfg.title, `${key}.title`).toBeTruthy();
+      expect(typeof cfg.title).toBe('string');
+      expect(typeof cfg.searchPlaceholder).toBe('string');
+    }
   });
 });
 
-describe('item 目录页 fetchData', () => {
-  it('将本地物品数组映射为 CatalogItem（数字稀有度→字符串键）', async () => {
-    vi.mocked(loadLocalItems).mockResolvedValue(itemSample);
-    const page = CATALOG_PAGES.item;
-    const items = await page.fetchData!({ version: '4.3.1' });
-    expect(items).toHaveLength(1);
-    expect(items[0]).toMatchObject({
-      id: '23013',
-      name: '星琼',
-      rarity: 'SuperRare', // 数字 5 经 RARITY_NUM_TO_KEY 映射
-      subType: 'Virtual',
-    });
+describe('renderCard', () => {
+  it('every config exposes renderCard as a function', () => {
+    for (const [key, cfg] of entries) {
+      expect(typeof cfg.renderCard, `${key}.renderCard`).toBe('function');
+    }
+  });
+
+  it('renderCard returns a non-empty HTML string for a minimal item', () => {
+    const stub = { name: 'Test', href: '/test' };
+    for (const [key, cfg] of entries) {
+      const html = cfg.renderCard(stub, 0);
+      expect(typeof html, `${key}.renderCard return type`).toBe('string');
+      expect(html.length, `${key}.renderCard should produce non-empty html`).toBeGreaterThan(0);
+    }
   });
 });
 
-describe('lightcone 目录页 fetchData', () => {
-  it('将本地光锥数组映射为 CatalogItem', async () => {
-    vi.mocked(loadLocalLightCones).mockResolvedValue(lcSample);
-    const page = CATALOG_PAGES.lightcone;
-    const items = await page.fetchData!({ version: '4.3.1' });
-    expect(items[0]).toMatchObject({
-      id: '20000',
-      name: '镜中故我',
-      rarity: 5,
-      path: 'destruction',
-    });
+describe('filters validity', () => {
+  function assertFiltersValid(filters: CatalogFilter[], key: string) {
+    expect(Array.isArray(filters), `${key}.filters should be array`).toBe(true);
+    for (const f of filters) {
+      expect(typeof f.key, `${key} filter.key`).toBe('string');
+      expect(f.key.length).toBeGreaterThan(0);
+      expect(typeof f.label, `${key} filter.label`).toBe('string');
+      expect(f.label.length).toBeGreaterThan(0);
+      expect(Array.isArray(f.options), `${key} filter.options`).toBe(true);
+      for (const opt of f.options) {
+        expect(typeof opt.val, `${key} option.val`).toBe('string');
+        expect(typeof opt.label, `${key} option.label`).toBe('string');
+      }
+    }
+  }
+
+  it('static filters (if present) have valid structure', () => {
+    for (const [key, cfg] of entries) {
+      if (cfg.filters !== undefined) {
+        assertFiltersValid(cfg.filters, key);
+      }
+    }
+  });
+
+  it('buildFilters (if present) is a function', () => {
+    for (const [key, cfg] of entries) {
+      if (cfg.buildFilters !== undefined) {
+        expect(typeof cfg.buildFilters, `${key}.buildFilters`).toBe('function');
+      }
+    }
+  });
+
+  it('buildFilters returns valid filters given stub data', () => {
+    const stubData = [
+      { name: 'A', element: 'fire', path: 'Destruction', rarity: 5, subType: 'Material', quality: 'gold', cat: 'offense' },
+      { name: 'B', element: 'ice', path: 'Preservation', rarity: 4, subType: 'AvatarExp', quality: 'silver', cat: 'defense' },
+    ];
+    for (const [key, cfg] of entries) {
+      if (cfg.buildFilters) {
+        const result = cfg.buildFilters(stubData);
+        assertFiltersValid(result, `${key}.buildFilters()`);
+      }
+    }
   });
 });

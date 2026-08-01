@@ -4,7 +4,7 @@ This file provides guidance to Lingma (lingma.aliyun.com) when working with code
 
 ## 项目概述
 
-HSR Wiki — 部署于 GitHub Pages 的《崩坏：星穹铁道》游戏数据 Wiki，Gaming HUD 视觉风格。数据源为本地 JSON（由 Python 工具从官方解包数据转换而来），图片与 Spine 动画走 `https://static.nanoka.cc` CDN。
+HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》游戏数据 Wiki，Gaming HUD 视觉风格。数据源为本地 JSON（由 Python 工具从官方解包数据转换而来），图片与 Spine 动画走 `https://static.nanoka.cc` CDN。
 
 ## 常用命令
 
@@ -12,7 +12,7 @@ HSR Wiki — 部署于 GitHub Pages 的《崩坏：星穹铁道》游戏数据 W
 # 安装依赖（需 Node 22+、pnpm 9+）
 pnpm install
 
-# 本地开发 → http://localhost:5173/hsr_wiki/
+# 本地开发 → http://localhost:5173/
 pnpm dev
 
 # 类型检查 + 生产构建 → dist/
@@ -45,7 +45,7 @@ python query.py --search "黄泉"          # TextMap 全文搜索
 python gen_catalog.py                    # 重新生成 DATA_CATALOG.md 索引
 ```
 
-部署：推送到 `main` 分支 → GitHub Actions 自动部署至 GitHub Pages。
+部署：推送到 `main` 分支 → Vercel 自动构建部署（SPA 路由重写见 `vercel.json`）。
 
 ## 架构
 
@@ -148,8 +148,8 @@ src/
 ## 项目约定
 
 - Vue SFC 统一使用 `<script setup lang="ts">`
-- 路由使用 `createWebHashHistory`（Hash 模式）——GitHub Pages 必需
-- Vite `base` 为 `/hsr_wiki/`——所有资源路径自动带前缀
+- 路由使用 `createWebHistory`（History 模式）——Vercel 支持 SPA fallback
+- Vite `base` 为 `/`——Vercel 部署于域名根路径
 - `cdn-samples/` 仅作参考样本，严禁作为数据源导入或随站部署
 - 目录卡片 HTML 以模板字符串渲染（非 Vue 组件），服务于虚拟滚动性能
 - CSS 采用 BEM 风格命名，统一 `nk-` 前缀（如 `nk-cat-card__img`）
