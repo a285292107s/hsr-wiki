@@ -20,10 +20,13 @@ const CAT_LABEL: Record<string, string> = {
   faction: '阵营', combat: '流派', special: '特殊',
 };
 const QUALITY_LABEL: Record<string, string> = {
-  Silver: '银', Gold: '金', Multicolor: '彩', Unique: '独特',
+  Silver: '银色', Gold: '金色', Multicolor: '彩', Unique: '独特',
 };
 const QUALITY_CSS: Record<string, string> = {
   Silver: 'silver', Gold: 'gold', Multicolor: 'multicolor', Unique: 'unique',
+};
+const ACT_LABEL: Record<string, string> = {
+  GreaterEqualThan: '≥N 人激活',
 };
 
 /* 属性名映射 */
@@ -60,6 +63,8 @@ function traitIconUrl(icon: string): string {
 
 const cat = computed(() => data.value?.cat || 'special');
 const catLabel = computed(() => CAT_LABEL[cat.value] || cat.value);
+const actLabel = computed(() => ACT_LABEL[data.value?.activation_type || ''] || '');
+
 
 async function load() {
   loading.value = true;
@@ -109,7 +114,6 @@ watch(data, (d) => { if (d) document.title = `${d.name} - HSR Wiki`; }, { immedi
               <span class="nk-ctrait-hero__cat" :class="`nk-ctrait-hero__cat--${cat}`">{{ catLabel }}</span>
             </div>
             <h1 class="nk-ctrait-hero__name">{{ data.name }}</h1>
-            <span class="nk-ctrait-hero__hud">TRAIT · 羁绊</span>
           </div>
         </div>
       </header>
@@ -132,31 +136,40 @@ watch(data, (d) => { if (d) document.title = `${d.name} - HSR Wiki`; }, { immedi
 
       <!-- ═══ 层级效果 ═══ -->
       <section v-if="data.layers && data.layers.length" class="nk-ctrait-section">
-        <h2 class="nk-ctrait-section__title">层级效果</h2>
+        <h2 class="nk-ctrait-section__title">层级效果<span v-if="actLabel" class="nk-ctrait-section__note">（{{ actLabel }}）</span></h2>
         <div class="nk-ctrait-layers">
           <article
             v-for="ly in data.layers"
             :key="ly.layer"
             class="nk-ctrait-layer"
-            :class="ly.quality ? `nk-ctrait-layer--${QUALITY_CSS[ly.quality] || ''}` : ''"
+            :class="`nk-ctrait-layer--${ly.quality ? (QUALITY_CSS[ly.quality] || '') : 'base'}`"
           >
-            <div class="nk-ctrait-layer__head">
-              <span class="nk-ctrait-layer__badge">{{ ly.layer }}</span>
-              <span class="nk-ctrait-layer__head-label">人激活</span>
-              <span v-if="ly.quality" class="nk-ctrait-layer__quality" :class="`nk-ctrait-layer__quality--${QUALITY_CSS[ly.quality] || ''}`">{{ QUALITY_LABEL[ly.quality] || ly.quality }}</span>
+            <!-- 左侧：品质菱形节点（内嵌阈值数字）+ 进度轨 -->
+            <div class="nk-ctrait-layer__mark">
+              <span class="nk-ctrait-layer__node"><span class="nk-ctrait-layer__num">{{ ly.layer }}</span></span>
             </div>
-            <div v-if="ly.desc" class="nk-ctrait-layer__desc" v-html="fmtDesc(ly.desc, ly.params)"></div>
-            <!-- 属性芯片仅在没有描述文本时展示 -->
-            <div v-if="!ly.desc && (ly.member_props.length || ly.all_props.length)" class="nk-ctrait-layer__props">
-              <div v-for="(p, pi) in ly.member_props" :key="'m'+pi" class="nk-ctrait-prop">
-                <span class="nk-ctrait-prop__scope">成员</span>
-                <span class="nk-ctrait-prop__name">{{ propLabel(p) }}</span>
-                <b class="nk-ctrait-prop__val">+{{ propValue(p.value) }}</b>
-              </div>
-              <div v-for="(p, pi) in ly.all_props" :key="'a'+pi" class="nk-ctrait-prop">
-                <span class="nk-ctrait-prop__scope nk-ctrait-prop__scope--all">全员</span>
-                <span class="nk-ctrait-prop__name">{{ propLabel(p) }}</span>
-                <b class="nk-ctrait-prop__val">+{{ propValue(p.value) }}</b>
+            <!-- 右侧：内容面板 -->
+            <div class="nk-ctrait-layer__body">
+              <header class="nk-ctrait-layer__head">
+                <span class="nk-ctrait-layer__quality">
+                  <i class="nk-ctrait-layer__qdot"></i>{{ ly.quality ? (QUALITY_LABEL[ly.quality] || ly.quality) : '基础' }}品质
+                </span>
+                <span class="nk-ctrait-layer__act">{{ ly.layer }} 人激活</span>
+              </header>
+              <div v-if="ly.desc" class="nk-ctrait-layer__desc" v-html="fmtDesc(ly.desc, ly.params)"></div>
+              <div v-if="ly.buff_desc" class="nk-ctrait-layer__buff" v-html="fmtDesc(ly.buff_desc, ly.buff_params || [])"></div>
+              <!-- 属性芯片仅在没有描述文本时展示 -->
+              <div v-if="!ly.desc && (ly.member_props.length || ly.all_props.length)" class="nk-ctrait-layer__props">
+                <div v-for="(p, pi) in ly.member_props" :key="'m'+pi" class="nk-ctrait-prop">
+                  <span class="nk-ctrait-prop__scope">成员</span>
+                  <span class="nk-ctrait-prop__name">{{ propLabel(p) }}</span>
+                  <b class="nk-ctrait-prop__val">+{{ propValue(p.value) }}</b>
+                </div>
+                <div v-for="(p, pi) in ly.all_props" :key="'a'+pi" class="nk-ctrait-prop">
+                  <span class="nk-ctrait-prop__scope nk-ctrait-prop__scope--all">全员</span>
+                  <span class="nk-ctrait-prop__name">{{ propLabel(p) }}</span>
+                  <b class="nk-ctrait-prop__val">+{{ propValue(p.value) }}</b>
+                </div>
               </div>
             </div>
           </article>
