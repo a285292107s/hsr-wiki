@@ -262,6 +262,9 @@ def convert() -> None:
     roles_out: list[dict] = []
 
     for role_raw in role_list_raw:
+        # 仅收录图鉴角色（IsInBook=true）；null/false 为内部存档形态，跳过
+        if not role_raw.get("IsInBook"):
+            continue
         rid = role_raw["ID"]
         avatar_id = role_raw.get("AvatarID", rid)
         name = name_map.get(avatar_id, f"角色 {avatar_id}")

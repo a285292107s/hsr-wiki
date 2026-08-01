@@ -81,7 +81,14 @@
               "value": 0.16
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "【神君】基础伤害段数增加至#4[i]。",
+          "buff_params": [
+            150,
+            0,
+            0,
+            6
+          ]
         },
         {
           "layer": 7,
@@ -109,7 +116,15 @@
               "value": 0.32
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "【仙舟】队员行动后叠加的伤害段数提高至#5[i]，战斗开始时【神君】立即行动。",
+          "buff_params": [
+            150,
+            0,
+            0,
+            6,
+            2
+          ]
         },
         {
           "layer": 10,
@@ -137,7 +152,14 @@
               "value": 0.6
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "【神君】基础伤害段数增加至#4[i]，每段倍率提高至#3[i]%，并更频繁地发动攻击！",
+          "buff_params": [
+            150,
+            0,
+            6,
+            10
+          ]
         }
       ]
     },
@@ -196,7 +218,11 @@
               "value": 0.3
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "#1[i]倍经验。",
+          "buff_params": [
+            2
+          ]
         },
         {
           "layer": 6,
@@ -218,7 +244,11 @@
               "value": 0.5
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "#1[i]倍经验。",
+          "buff_params": [
+            3
+          ]
         },
         {
           "layer": 8,
@@ -240,7 +270,11 @@
               "value": 0.9
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "#1[i]倍经验。",
+          "buff_params": [
+            6
+          ]
         }
       ]
     },
@@ -284,7 +318,15 @@
               "value": 0.2
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "每层造成的伤害降低#5[i]%，#3[i]%真实伤害，【离火】上限#2[i]层。",
+          "buff_params": [
+            2,
+            3,
+            0.1,
+            0,
+            0.03
+          ]
         },
         {
           "layer": 4,
@@ -306,7 +348,15 @@
               "value": 0.6
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "每层造成的伤害降低#5[i]%，#3[i]%真实伤害。",
+          "buff_params": [
+            2,
+            3,
+            0.2,
+            0,
+            0.04
+          ]
         },
         {
           "layer": 6,
@@ -328,7 +378,15 @@
               "value": 1.2
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "每层造成的伤害降低#5[i]%，#3[i]%真实伤害，【离火】上限提高到#4[i]层。",
+          "buff_params": [
+            2,
+            3,
+            0.3,
+            5,
+            0.05
+          ]
         },
         {
           "layer": 8,
@@ -350,7 +408,15 @@
               "value": 2.5
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "每层造成的伤害降低#5[i]%，#3[i]%真实伤害。",
+          "buff_params": [
+            2,
+            3,
+            0.5,
+            5,
+            0.06
+          ]
         }
       ]
     }

@@ -43,7 +43,11 @@
               "value": 0.3
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "#1[i]个【月光精华】。",
+          "buff_params": [
+            2
+          ]
         },
         {
           "layer": 4,
@@ -65,7 +69,11 @@
               "value": 0.6
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "#1[i]个【月光精华】。",
+          "buff_params": [
+            5
+          ]
         },
         {
           "layer": 7,
@@ -87,7 +95,11 @@
               "value": 1.2
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "#1[i]个【月光精华】。",
+          "buff_params": [
+            9
+          ]
         },
         {
           "layer": 9,
@@ -109,7 +121,11 @@
               "value": 2.4
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "#1[i]个【月光精华】。",
+          "buff_params": [
+            30
+          ]
         }
       ]
     },
@@ -153,7 +169,17 @@
               "value": 0.1
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "可记录#1[i]点。",
+          "buff_params": [
+            40000,
+            0,
+            0.05,
+            0.02,
+            10000,
+            5,
+            1000
+          ]
         },
         {
           "layer": 4,
@@ -175,7 +201,17 @@
               "value": 0.25
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "可记录#1[i]点，伤害倍率提高为#6[i]%。",
+          "buff_params": [
+            100000,
+            0,
+            0.05,
+            0.02,
+            10000,
+            10,
+            1000
+          ]
         },
         {
           "layer": 6,
@@ -197,7 +233,17 @@
               "value": 0.4
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "可记录#1[i]点，伤害倍率提高为#6[i]%，行动后返还消耗量的#2[i]%。",
+          "buff_params": [
+            240000,
+            0.3,
+            0.05,
+            0.02,
+            10000,
+            20,
+            1000
+          ]
         },
         {
           "layer": 8,
@@ -219,7 +265,17 @@
               "value": 0.6
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "可记录#1[i]点，伤害倍率提高为#6[i]%，行动后返还消耗量的#2[i]%。",
+          "buff_params": [
+            720000,
+            0.5,
+            0.05,
+            0.02,
+            10000,
+            40,
+            1000
+          ]
         }
       ]
     }

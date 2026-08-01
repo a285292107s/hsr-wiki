@@ -31,7 +31,9 @@
             0.25
           ],
           "member_props": [],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "开启首个祈愿试炼。",
+          "buff_params": []
         },
         {
           "layer": 3,
@@ -42,7 +44,9 @@
             0.5
           ],
           "member_props": [],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "第二个祈愿试炼，出现奖励更好、难度更高的诅咒试炼。",
+          "buff_params": []
         },
         {
           "layer": 4,
@@ -53,7 +57,9 @@
             1
           ],
           "member_props": [],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "第三个祈愿试炼。",
+          "buff_params": []
         },
         {
           "layer": 5,
@@ -64,7 +70,9 @@
             1.8
           ],
           "member_props": [],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "最终祈愿试炼。",
+          "buff_params": []
         }
       ]
     },
@@ -109,6 +117,20 @@
               "property_type": "ExtraSpeedAddedRatio1",
               "value": 0.12
             }
+          ],
+          "buff_desc": "获得#3[i]%全伤害，战技点上限提高#1[i]，可抽到小奖。",
+          "buff_params": [
+            2,
+            0.12,
+            0.12,
+            0.02,
+            0.06,
+            4,
+            1,
+            0.2,
+            0,
+            0,
+            0
           ]
         },
         {
@@ -132,6 +154,20 @@
               "property_type": "ExtraSpeedAddedRatio1",
               "value": 0.24
             }
+          ],
+          "buff_desc": "获得#3[i]%全伤害，战技点上限提高#1[i]，可抽到中奖和大奖。",
+          "buff_params": [
+            3,
+            0.24,
+            0.24,
+            0.02,
+            0.06,
+            4,
+            1,
+            0.2,
+            0.3,
+            0.04,
+            0
           ]
         },
         {
@@ -155,6 +191,21 @@
               "property_type": "ExtraSpeedAddedRatio1",
               "value": 0.4
             }
+          ],
+          "buff_desc": "获得#3[i]%全伤害，战技点上限提高#1[i]，抽奖时有概率额外获得1次特别奖，抽到更好奖励的概率提高。",
+          "buff_params": [
+            4,
+            0.48,
+            0.48,
+            0.02,
+            0.06,
+            4,
+            1,
+            0.2,
+            0.6,
+            0.04,
+            0.01,
+            2
           ]
         },
         {
@@ -178,6 +229,21 @@
               "property_type": "ExtraSpeedAddedRatio1",
               "value": 0.8
             }
+          ],
+          "buff_desc": "获得#3[i]%全伤害，战技点上限提高#1[i]，抽奖时有更高概率额外获得1次特别奖，抽到更好奖励的概率大幅提高。",
+          "buff_params": [
+            5,
+            0.8,
+            0.8,
+            0.02,
+            0.06,
+            4,
+            1,
+            0.25,
+            0.7,
+            0.05,
+            0.05,
+            5
           ]
         }
       ]

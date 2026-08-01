@@ -33,7 +33,9 @@
             0.25
           ],
           "member_props": [],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "开启首个祈愿试炼。",
+          "buff_params": []
         },
         {
           "layer": 3,
@@ -44,7 +46,9 @@
             0.5
           ],
           "member_props": [],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "第二个祈愿试炼，出现奖励更好、难度更高的诅咒试炼。",
+          "buff_params": []
         },
         {
           "layer": 4,
@@ -55,7 +59,9 @@
             1
           ],
           "member_props": [],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "第三个祈愿试炼。",
+          "buff_params": []
         },
         {
           "layer": 5,
@@ -66,7 +72,9 @@
             1.8
           ],
           "member_props": [],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "最终祈愿试炼。",
+          "buff_params": []
         }
       ]
     },
@@ -120,7 +128,14 @@
               "value": 0.4
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "【能量】角色施放终结技时，记录消耗的能量值。累计#3[i]点后，消耗#3[i]点，并对敌方全体目标造成#4[i]%基础伤害的物理属性伤害。",
+          "buff_params": [
+            0.3,
+            0.03,
+            500,
+            8
+          ]
         },
         {
           "layer": 7,
@@ -136,7 +151,14 @@
               "value": 0.8
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "累计值造成的伤害倍率提高至#4[i]%。",
+          "buff_params": [
+            0.3,
+            0.03,
+            500,
+            18
+          ]
         },
         {
           "layer": 10,
@@ -152,7 +174,15 @@
               "value": 2.4
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "场上所有地格变为【能量地块】，累计值造成的伤害倍率提高至#4[i]%。",
+          "buff_params": [
+            0.3,
+            0.03,
+            500,
+            120,
+            1
+          ]
         }
       ]
     }

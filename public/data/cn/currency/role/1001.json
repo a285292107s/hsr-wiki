@@ -107,6 +107,10 @@
               "property_type": "ExtraAllDamageTypeAddedRatio1",
               "value": 0.12
             }
+          ],
+          "buff_desc": "我方小队持有的护盾可叠加，上限#1[i]%基础生命。",
+          "buff_params": [
+            1
           ]
         },
         {
@@ -130,6 +134,10 @@
               "property_type": "ExtraAllDamageTypeAddedRatio1",
               "value": 0.4
             }
+          ],
+          "buff_desc": "我方小队持有的护盾可叠加，上限#1[i]%基础生命。",
+          "buff_params": [
+            1
           ]
         }
       ]

@@ -2279,60 +2279,6 @@
         }
       ],
       "equipment_id": 23062
-    },
-    {
-      "id": 12041,
-      "name": "景元",
-      "rarity": 1,
-      "front_back_type": "Front",
-      "heal_or_shield_display": "Healer",
-      "charge_type": [],
-      "max_sp_icon": "",
-      "is_expert": false,
-      "trait_list": [
-        1007,
-        2003
-      ],
-      "traits": [
-        {
-          "id": 1007,
-          "name": "仙舟",
-          "cat": "faction"
-        },
-        {
-          "id": 2003,
-          "name": "群攻",
-          "cat": "combat"
-        }
-      ],
-      "equipment_id": null
-    },
-    {
-      "id": 12042,
-      "name": "景元",
-      "rarity": 3,
-      "front_back_type": "Front",
-      "heal_or_shield_display": "Healer",
-      "charge_type": [],
-      "max_sp_icon": "",
-      "is_expert": false,
-      "trait_list": [
-        1007,
-        2003
-      ],
-      "traits": [
-        {
-          "id": 1007,
-          "name": "仙舟",
-          "cat": "faction"
-        },
-        {
-          "id": 2003,
-          "name": "群攻",
-          "cat": "combat"
-        }
-      ],
-      "equipment_id": null
     }
   ]
 }

@@ -205,7 +205,9 @@
               "value": 0.16
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "阿哈升至2星，解锁第2个装备栏。",
+          "buff_params": []
         },
         {
           "layer": 5,
@@ -221,7 +223,9 @@
               "value": 0.24
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "阿哈升至3星，解锁第3个装备栏。",
+          "buff_params": []
         },
         {
           "layer": 7,
@@ -237,7 +241,9 @@
               "value": 0.4
             }
           ],
-          "all_props": []
+          "all_props": [],
+          "buff_desc": "阿哈升至4星！阿哈的所有装备变成特权装备！",
+          "buff_params": []
         }
       ]
     }
