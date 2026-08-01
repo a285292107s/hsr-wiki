@@ -19,9 +19,6 @@ const error = ref('');
 const CAT_LABEL: Record<string, string> = {
   faction: '阵营', combat: '流派', special: '特殊',
 };
-const ACTIVATION_LABEL: Record<string, string> = {
-  GreaterEqualThan: '≥ 人数激活', Equal: '= 人数激活', LessThan: '< 人数激活',
-};
 const QUALITY_LABEL: Record<string, string> = {
   Silver: '银', Gold: '金', Multicolor: '彩', Unique: '独特',
 };
@@ -110,7 +107,6 @@ watch(data, (d) => { if (d) document.title = `${d.name} - HSR Wiki`; }, { immedi
           <div class="nk-ctrait-hero__info">
             <div class="nk-ctrait-hero__badges">
               <span class="nk-ctrait-hero__cat" :class="`nk-ctrait-hero__cat--${cat}`">{{ catLabel }}</span>
-              <span v-if="data.activation_type" class="nk-ctrait-hero__act">{{ ACTIVATION_LABEL[data.activation_type] || data.activation_type }}</span>
             </div>
             <h1 class="nk-ctrait-hero__name">{{ data.name }}</h1>
             <span class="nk-ctrait-hero__hud">TRAIT · 羁绊</span>
