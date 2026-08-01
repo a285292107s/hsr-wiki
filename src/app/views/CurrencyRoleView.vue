@@ -2,7 +2,7 @@
 /**
  * 货币战争 · 角色详情页（v2 重构）
  * 数据：本地转换数据（public/data/cn/currency/role/<id>.json，由 converter 落地）
- * 展示：沉浸式头图 → 锚点导航 → 羁绊（层级进度）→ 后台星魂/光锥（时间线 + 专属光锥）→ 装备（推荐）→ 星级详情
+ * 展示：沉浸式头图（羁绊图标跳转）→ Tab 导航 → 成长（矩阵 + 技能）→ 后台星魂/光锥 → 装备
  */
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -11,7 +11,7 @@ import { fmtDesc, fmtDescMerged, avatarShopIconUrl, avatarDrawCardUrl, iconUrl }
 import { loadLocalCurrencyRole } from '../../services/api';
 import type {
   CurrencyRoleDetail, CurrencyRoleStar, CurrencyRoleSkill,
-  CurrencyRoleTrait, CurrencyRoleTraitLayer, CurrencyRoleRank,
+  CurrencyRoleTrait, CurrencyRoleRank,
   CurrencyRoleRecommend, CurrencyRoleRecommendItem,
 } from '../../services/types';
 
@@ -192,8 +192,6 @@ const PROP_GROUP: Record<string, string> = {
 /** 分组展示顺序 */
 const GROUP_ORDER = ['强度', '生存', '速度', '伤害', '机制'] as const;
 
-
-
 /** 推荐装备：各星级数据一致，取当前选中星级，回退首个非空星级 */
 const recommend = computed<CurrencyRoleRecommend | null>(() => {
   const stars = data.value?.stars;
@@ -333,16 +331,6 @@ watch(
   { immediate: true },
 );
 
-/** 羁绊描述：用 desc_params 渲染占位符（无参数时回退剥离占位符） */
-function traitDesc(t: CurrencyRoleTrait): string {
-  if (t.desc_params && t.desc_params.length) return fmtDesc(t.desc, t.desc_params);
-  return fmtDesc(t.desc).replace(/#\d+\[i\]/g, '');
-}
-/** 羁绊层级效果描述：用层级 params 渲染 */
-function layerDesc(ly: CurrencyRoleTraitLayer): string {
-  if (ly.params && ly.params.length) return fmtDesc(ly.desc, ly.params);
-  return fmtDesc(ly.desc).replace(/#\d+\[i\]/g, '');
-}
 /** 后台星魂描述：用 param_list 渲染 */
 function rankDesc(rk: CurrencyRoleRank): string {
   if (rk.param_list && rk.param_list.length) return fmtDesc(rk.desc, rk.param_list);
@@ -359,20 +347,18 @@ function equipIconUrl(icon: string, id: number): string {
   }
   return `${CDN}/assets/hsr/gridfight/equipment/${id}.webp`;
 }
-const QUALITY_LABEL: Record<string, string> = { Silver: '银', Gold: '金', Multicolor: '彩' };
 
 /* ─── Tab 面板切换（与角色/遗器详情页一致） ─── */
 const TABS = [
-  { key: 'traits', label: '羁绊' },
+  { key: 'stars', label: '成长' },
   { key: 'ranks', label: '后台星魂/光锥' },
   { key: 'equips', label: '装备' },
-  { key: 'stars', label: '星级' },
 ] as const;
 type TabKey = typeof TABS[number]['key'];
-const activeTab = ref<TabKey>('traits');
+const activeTab = ref<TabKey>('stars');
 function setTab(key: TabKey) { activeTab.value = key; }
 /** 切换角色时重置 Tab */
-watch(roleId, () => { activeTab.value = 'traits'; });
+watch(roleId, () => { activeTab.value = 'stars'; });
 /** 纯前台角色无后台星魂/光锥数据 */
 const noRankData = computed(() =>
   !!data.value && !data.value.rank.length && !data.value.equipment.length,
@@ -388,16 +374,11 @@ function stanceText(list: number[] | null): string {
   return list.join(' / ');
 }
 
-/* ─── 特质分类 ─── */
-const ACTIVATION_LABEL: Record<string, string> = {
-  GreaterEqualThan: '数量达标',
-  Equal: '数量相等',
-  LessThan: '数量少于',
-};
+/* ─── 特质分类（头图羁绊图标分组，按 ID 段判定分类） ─── */
 const TRAIT_CATEGORY = {
-  faction: { label: '阵营', css: '--faction', range: [1000, 2000] as [number, number] },
-  combat:  { label: '战斗', css: '--combat',  range: [2000, 3000] as [number, number] },
-  special: { label: '特殊', css: '--special', range: [3000, 4000] as [number, number] },
+  faction: { range: [1000, 2000] as [number, number] },
+  combat:  { range: [2000, 3000] as [number, number] },
+  special: { range: [3000, 4000] as [number, number] },
 } as const;
 type TraitCat = keyof typeof TRAIT_CATEGORY;
 function catOfTrait(id: number): TraitCat {
@@ -432,7 +413,7 @@ const traitGroups = computed(() => {
         </div>
       </div>
       <div class="nk-crole__skeleton-tabs">
-        <div class="nk-sk nk-sk--shimmer nk-sk--chip" v-for="n in 4" :key="n" style="width: 56px"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--chip" v-for="n in 3" :key="n" style="width: 56px"></div>
       </div>
       <div class="nk-crole__skeleton-grid">
         <div class="nk-sk nk-sk--shimmer nk-sk--block-md" v-for="n in 4" :key="n"></div>
@@ -470,8 +451,18 @@ const traitGroups = computed(() => {
             </div>
             <div v-if="traitGroups.length" class="nk-crole-hero__traits">
               <div v-for="grp in traitGroups" :key="grp.cat" class="nk-crole-traitgrp">
-                <span class="nk-crole-traitgrp__dot" :class="`nk-crole-traitgrp__dot--${grp.cat}`"></span>
-                <span v-for="tr in grp.items" :key="tr.id" class="nk-crole-traitchip" :class="`nk-crole-traitchip--${grp.cat}`">{{ tr.name || '?' }}</span>
+                <router-link
+                  v-for="tr in grp.items"
+                  :key="tr.id"
+                  :to="`/currency/trait/${tr.id}`"
+                  class="nk-crole-herotrait"
+                  :class="`nk-crole-herotrait--${grp.cat}`"
+                >
+                  <span class="nk-crole-herotrait__icon">
+                    <img :src="traitIconUrl(tr)" :alt="tr.name || ''" loading="eager" @error="hideOnError" />
+                  </span>
+                  <span class="nk-crole-herotrait__name">{{ tr.name || '?' }}</span>
+                </router-link>
               </div>
             </div>
           </div>
@@ -494,67 +485,6 @@ const traitGroups = computed(() => {
       </div>
 
       <div class="nk-panels">
-      <!-- ═══ 羁绊 ═══ -->
-      <div :class="['nk-panel', { 'nk-panel--active': activeTab === 'traits' }]" data-panel="traits">
-        <h2 class="nk-crole-section__title">羁绊</h2>
-        <div class="nk-crole-traits">
-          <article v-for="t in data.traits" :key="t.id" class="nk-crole-trait" :data-cat="catOfTrait(t.id)">
-            <div class="nk-crole-trait__header">
-              <div class="nk-crole-trait__icon">
-                <img :src="traitIconUrl(t)" :alt="t.name || ''" loading="lazy" @error="hideOnError" />
-              </div>
-              <div class="nk-crole-trait__heading">
-                <h3 class="nk-crole-trait__name">{{ t.name }}</h3>
-                <span class="nk-crole-trait__cat" :class="`nk-crole-trait__cat--${catOfTrait(t.id)}`">{{ TRAIT_CATEGORY[catOfTrait(t.id)].label }}</span>
-              </div>
-              <span v-if="t.activation_type" class="nk-crole-trait__act">{{ ACTIVATION_LABEL[t.activation_type] || t.activation_type }}</span>
-            </div>
-            <p class="nk-crole-trait__desc" v-html="traitDesc(t)"></p>
-            <!-- 层级进度 -->
-            <div v-if="t.layers && t.layers.length" class="nk-crole-layers">
-              <div class="nk-crole-layers__track">
-                <div
-                  v-for="ly in t.layers"
-                  :key="ly.layer"
-                  class="nk-crole-layers__node"
-                  :class="ly.quality ? `nk-crole-layers__node--${ly.quality.toLowerCase()}` : ''"
-                >
-                  <span class="nk-crole-layers__dot"></span>
-                  <span class="nk-crole-layers__label">{{ ly.layer }}人</span>
-                  <span v-if="ly.quality" class="nk-crole-layers__quality">{{ QUALITY_LABEL[ly.quality] || ly.quality }}</span>
-                </div>
-              </div>
-              <div class="nk-crole-layers__details">
-                <div
-                  v-for="ly in t.layers"
-                  :key="ly.layer"
-                  class="nk-crole-layer"
-                  :class="ly.quality ? `nk-crole-layer--${ly.quality.toLowerCase()}` : ''"
-                >
-                  <div class="nk-crole-layer__head">
-                    <span class="nk-crole-layer__threshold">{{ ly.layer }}人</span>
-                    <span v-if="ly.quality" class="nk-crole-layer__quality">{{ QUALITY_LABEL[ly.quality] || ly.quality }}</span>
-                  </div>
-                  <div v-if="ly.desc" class="nk-crole-layer__desc" v-html="layerDesc(ly)"></div>
-                  <ul v-if="ly.member_props.length || ly.all_props.length" class="nk-crole-layer__props">
-                    <li v-for="(p, pi) in ly.member_props" :key="'m' + pi">
-                      <span class="nk-crole-layer__scope">成员</span>
-                      <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
-                      <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
-                    </li>
-                    <li v-for="(p, pi) in ly.all_props" :key="'a' + pi">
-                      <span class="nk-crole-layer__scope nk-crole-layer__scope--all">全员</span>
-                      <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
-                      <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-
       <!-- ═══ 后台星魂/光锥（时间线 + 专属装备） ═══ -->
       <div :class="['nk-panel', { 'nk-panel--active': activeTab === 'ranks' }]" data-panel="ranks">
         <!-- 纯前台角色空状态提示 -->

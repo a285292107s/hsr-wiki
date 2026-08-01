@@ -12,16 +12,6 @@
   --crole-scrim-40: rgba(15, 15, 35, 0.4);
   /* 头像环外圈 */
   --crole-portrait-ring: rgba(15, 15, 35, 0.6);
-  /* 特质三分类：阵营 / 战斗 / 特殊 */
-  --crole-faction: #a78bfa;
-  --crole-faction-soft: rgba(167, 139, 250, 0.16);
-  --crole-faction-text: #c4b5fd;
-  --crole-combat: #38bdf8;
-  --crole-combat-soft: rgba(56, 189, 248, 0.16);
-  --crole-combat-text: #7dd3fc;
-  --crole-special: #fb923c;
-  --crole-special-soft: rgba(251, 146, 60, 0.16);
-  --crole-special-text: #fdba74;
   /* 作用域徽章：成员 / 全员 */
   --crole-scope-bg: rgba(124, 58, 237, 0.14);
   --crole-scope-text: #c4b5fd;
@@ -56,16 +46,6 @@
   --crole-scrim-25: rgba(10, 9, 6, 0.25);
   --crole-scrim-40: rgba(10, 9, 6, 0.4);
   --crole-portrait-ring: rgba(10, 9, 6, 0.6);
-  /* 特质三分类 → 暖金/琥珀/铜红 */
-  --crole-faction: #FCD34D;
-  --crole-faction-soft: rgba(252, 211, 77, 0.14);
-  --crole-faction-text: #FDE68A;
-  --crole-combat: #F59E0B;
-  --crole-combat-soft: rgba(245, 158, 11, 0.14);
-  --crole-combat-text: #FBBF24;
-  --crole-special: #E88D5A;
-  --crole-special-soft: rgba(232, 141, 90, 0.14);
-  --crole-special-text: #F5B08A;
   /* 作用域徽章 → 金/琥珀 */
   --crole-scope-bg: rgba(212, 175, 55, 0.16);
   --crole-scope-text: #F5D67B;
@@ -360,36 +340,86 @@
 .nk-crole-hero__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-crole-hero__traits {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 4px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
 }
 .nk-crole-traitgrp {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 10px;
 }
-.nk-crole-traitgrp__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex: none;
-  margin-right: 2px;
+
+/* 头图羁绊图标按钮：菱形图标 + 名称，点击跳转羁绊详情页 */
+.nk-crole-herotrait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  outline: none;
 }
-.nk-crole-traitgrp__dot--faction { background: var(--crole-faction); }
-.nk-crole-traitgrp__dot--combat  { background: var(--crole-combat); }
-.nk-crole-traitgrp__dot--special { background: var(--crole-special); }
-.nk-crole-traitchip {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  line-height: 1.4;
-  backdrop-filter: blur(4px);
+.nk-crole-herotrait__icon {
+  position: relative;
+  display: block;
+  width: 38px;
+  height: 38px;
+  transform: rotate(45deg);
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.22s var(--nk-ease-out), border-color 0.22s, box-shadow 0.22s;
 }
-.nk-crole-traitchip--faction { background: var(--crole-faction-soft); color: var(--crole-faction-text); }
-.nk-crole-traitchip--combat { background: var(--crole-combat-soft); color: var(--crole-combat-text); }
-.nk-crole-traitchip--special { background: var(--crole-special-soft); color: var(--crole-special-text); }
+.nk-crole-herotrait__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: rotate(-45deg) scale(1.35);
+}
+.nk-crole-herotrait__name {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.02em;
+  max-width: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  transition: color 0.22s;
+}
+/* 分类色边框 */
+.nk-crole-herotrait--faction .nk-crole-herotrait__icon { border-color: rgba(167, 139, 250, 0.45); }
+.nk-crole-herotrait--combat  .nk-crole-herotrait__icon { border-color: rgba(56, 189, 248, 0.45); }
+.nk-crole-herotrait--special .nk-crole-herotrait__icon { border-color: rgba(251, 146, 60, 0.45); }
+/* hover / focus 发光 */
+.nk-crole-herotrait:hover .nk-crole-herotrait__icon,
+.nk-crole-herotrait:focus-visible .nk-crole-herotrait__icon {
+  transform: rotate(45deg) scale(1.12);
+}
+.nk-crole-herotrait--faction:hover .nk-crole-herotrait__icon,
+.nk-crole-herotrait--faction:focus-visible .nk-crole-herotrait__icon {
+  border-color: rgba(167, 139, 250, 0.85);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 14px rgba(167, 139, 250, 0.35);
+}
+.nk-crole-herotrait--combat:hover .nk-crole-herotrait__icon,
+.nk-crole-herotrait--combat:focus-visible .nk-crole-herotrait__icon {
+  border-color: rgba(56, 189, 248, 0.85);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 14px rgba(56, 189, 248, 0.35);
+}
+.nk-crole-herotrait--special:hover .nk-crole-herotrait__icon,
+.nk-crole-herotrait--special:focus-visible .nk-crole-herotrait__icon {
+  border-color: rgba(251, 146, 60, 0.85);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 14px rgba(251, 146, 60, 0.35);
+}
+.nk-crole-herotrait:hover .nk-crole-herotrait__name,
+.nk-crole-herotrait:focus-visible .nk-crole-herotrait__name {
+  color: #fff;
+}
 
 .nk-crole-chip {
   font-size: 12px;
@@ -456,175 +486,7 @@
   font-weight: 600;
 }
 
-/* ═══ 羁绊 ═══ */
-.nk-crole-traits {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.nk-crole-trait {
-  padding: 18px;
-  border-radius: 16px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--border);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.nk-crole-trait[data-cat="faction"] { border-left-color: var(--crole-faction); }
-.nk-crole-trait[data-cat="combat"]  { border-left-color: var(--crole-combat); }
-.nk-crole-trait[data-cat="special"] { border-left-color: var(--crole-special); }
-.nk-crole-trait:hover {
-  border-top-color: var(--border2);
-  border-right-color: var(--border2);
-  border-bottom-color: var(--border2);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.3), 0 0 12px color-mix(in srgb, var(--crole-num) 8%, transparent);
-}
-.nk-crole-trait__header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.nk-crole-trait__icon {
-  width: 48px;
-  height: 48px;
-  flex: none;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.nk-crole-trait__icon img { width: 100%; height: 100%; object-fit: contain; }
-.nk-crole-trait__heading {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-.nk-crole-trait__name { font-weight: 700; font-size: 16px; margin: 0; color: var(--text-bright); }
-.nk-crole-trait__cat {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 2px 8px;
-  border-radius: 999px;
-  line-height: 1.5;
-}
-.nk-crole-trait__cat--faction { background: var(--crole-faction-soft); color: var(--crole-faction-text); }
-.nk-crole-trait__cat--combat  { background: var(--crole-combat-soft); color: var(--crole-combat-text); }
-.nk-crole-trait__cat--special { background: var(--crole-special-soft); color: var(--crole-special-text); }
-.nk-crole-trait__act {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text3);
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.04);
-  margin-left: auto;
-  flex: none;
-}
-.nk-crole-trait__desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0; }
-.nk-crole-trait__desc span { color: var(--crole-num); }
-
-/* 羁绊层级进度条 */
-.nk-crole-layers { margin-top: 14px; }
-.nk-crole-layers__track {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 8px 0;
-  position: relative;
-}
-.nk-crole-layers__track::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  right: 12px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--border), var(--border2), var(--border));
-  transform: translateY(-50%);
-}
-.nk-crole-layers__node {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  z-index: 1;
-}
-.nk-crole-layers__dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 2px solid var(--text3);
-  transition: all 0.2s;
-}
-.nk-crole-layers__node--silver .nk-crole-layers__dot { border-color: #94a3b8; background: rgba(148, 163, 184, 0.3); box-shadow: 0 0 8px rgba(148, 163, 184, 0.4); }
-.nk-crole-layers__node--gold .nk-crole-layers__dot { border-color: #fbbf24; background: rgba(251, 191, 36, 0.3); box-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
-.nk-crole-layers__node--multicolor .nk-crole-layers__dot { border-color: #f472b6; background: rgba(244, 114, 182, 0.3); box-shadow: 0 0 10px rgba(244, 114, 182, 0.5); }
-.nk-crole-layers__label {
-  font-family: var(--font-hud);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text2);
-  letter-spacing: 0.04em;
-}
-.nk-crole-layers__quality {
-  font-size: 9px;
-  font-weight: 600;
-  padding: 0 5px;
-  border-radius: 999px;
-  line-height: 1.6;
-}
-.nk-crole-layers__node--silver .nk-crole-layers__quality { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
-.nk-crole-layers__node--gold .nk-crole-layers__quality { background: rgba(251, 191, 36, 0.12); color: #fcd34d; }
-.nk-crole-layers__node--multicolor .nk-crole-layers__quality { background: rgba(244, 114, 182, 0.12); color: #f9a8d4; }
-
-/* 层级详情（扁平化：左侧品质色轨 + 分隔线，不再嵌套卡片） */
-.nk-crole-layers__details {
-  display: flex;
-  flex-direction: column;
-  margin-top: 10px;
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-}
-.nk-crole-layer {
-  position: relative;
-  padding: 8px 0 8px 14px;
-  border-left: 2px solid var(--border);
-  transition: border-color 0.2s;
-}
-.nk-crole-layer + .nk-crole-layer { margin-top: 6px; }
-.nk-crole-layer--silver { border-left-color: rgba(148, 163, 184, 0.55); }
-.nk-crole-layer--gold   { border-left-color: rgba(251, 191, 36, 0.6); }
-.nk-crole-layer--multicolor { border-left-color: rgba(244, 114, 182, 0.6); }
-.nk-crole-layer__head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.nk-crole-layer__threshold {
-  font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--accent);
-}
-.nk-crole-layer__quality {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 0 6px;
-  border-radius: 999px;
-  line-height: 1.6;
-}
-.nk-crole-layer--silver .nk-crole-layer__quality { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
-.nk-crole-layer--gold .nk-crole-layer__quality   { background: rgba(251, 191, 36, 0.16); color: #fcd34d; }
-.nk-crole-layer--multicolor .nk-crole-layer__quality { background: rgba(244, 114, 182, 0.14); color: #f9a8d4; }
-.nk-crole-layer__desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
-.nk-crole-layer__desc span { color: var(--crole-num); }
+/* 羁绊层级属性芯片（后台星魂/专属光锥复用） */
 .nk-crole-layer__props {
   list-style: none;
   margin: 6px 0 0;
@@ -1088,14 +950,15 @@
 
 /* 触屏设备：重置粘滞 hover */
 @media (hover: none) {
-  .nk-crole-trait:hover {
-    box-shadow: none;
-    border-top-color: var(--border); border-right-color: var(--border); border-bottom-color: var(--border);
-  }
   .nk-crole-skill:hover,
   .nk-crole-timeline__card:hover {
     box-shadow: none; border-color: var(--border);
   }
+  .nk-crole-herotrait:hover .nk-crole-herotrait__icon { transform: rotate(45deg); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
+  .nk-crole-herotrait--faction:hover .nk-crole-herotrait__icon { border-color: rgba(167, 139, 250, 0.45); }
+  .nk-crole-herotrait--combat:hover .nk-crole-herotrait__icon { border-color: rgba(56, 189, 248, 0.45); }
+  .nk-crole-herotrait--special:hover .nk-crole-herotrait__icon { border-color: rgba(251, 146, 60, 0.45); }
+  .nk-crole-herotrait:hover .nk-crole-herotrait__name { color: rgba(255, 255, 255, 0.72); }
 }
 
 /* 尊重「减少动态效果」偏好 */
