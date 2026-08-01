@@ -20,11 +20,14 @@
     # 列出所有文件名（支持模糊搜索）
     python query.py --list Avatar
 
-    # 解析 TextMap Hash
+    # 解析 TextMap Hash（走 SQLite 缓存，首次自动建库）
     python query.py --resolve 6186714091647966180
 
     # 按文本内容搜索 TextMap（返回 hash + 文本）
     python query.py --search "黄泉"
+
+    # 强制重建 TextMap SQLite 索引（源文件签名变更时也会自动重建）
+    python query.py --rebuild-textmap
 
     # 跨文件搜索：在指定文件中搜索包含某值的记录
     python query.py AvatarConfig --grep "Ice" --limit 3
@@ -51,9 +54,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 # 同时支持脚本运行（from config）与模块运行（from .config）
 if __package__ in (None, ""):
-    from config import EXCEL_DIR, TEXTMAP_FILE  # pyright: ignore[reportImplicitRelativeImport]
+    from config import EXCEL_DIR  # pyright: ignore[reportImplicitRelativeImport]
+    import textmap_db  # pyright: ignore[reportImplicitRelativeImport]
 else:
-    from .config import EXCEL_DIR, TEXTMAP_FILE
+    from .config import EXCEL_DIR
+    from . import textmap_db
 
 # JSON 数据结构（json.load 返回的动态数据统一收敛到此类型）
 JSONValue = (
@@ -159,41 +164,17 @@ def cmd_list(keyword: str) -> None:
 
 
 def cmd_resolve(hash_val: str) -> None:
-    """解析 TextMap Hash 值。"""
-    if not TEXTMAP_FILE.exists():
-        print(f"错误: TextMap 文件不存在 {TEXTMAP_FILE}")
-        sys.exit(1)
-    print(f"加载 TextMap（可能需要几秒）...")
-    with open(TEXTMAP_FILE, encoding="utf-8") as f:
-        textmap = cast("JSONValue", json.load(f))
-    if not isinstance(textmap, dict):
-        print("错误: TextMap 不是字典结构")
-        sys.exit(1)
-    result = textmap.get(hash_val)
-    if result:
+    """解析 TextMap Hash 值（走 SQLite 缓存）。"""
+    result = textmap_db.resolve_hash(hash_val)
+    if result is not None:
         print(f"Hash {hash_val} → {result}")
     else:
         print(f"Hash {hash_val} 未命中")
 
 
 def cmd_search(keyword: str, limit: int = 20) -> None:
-    """在 TextMap 中搜索包含关键词的文本。"""
-    if not TEXTMAP_FILE.exists():
-        print(f"错误: TextMap 文件不存在 {TEXTMAP_FILE}")
-        sys.exit(1)
-    print(f"加载 TextMap（可能需要几秒）...")
-    with open(TEXTMAP_FILE, encoding="utf-8") as f:
-        textmap = cast("JSONValue", json.load(f))
-    if not isinstance(textmap, dict):
-        print("错误: TextMap 不是字典结构")
-        sys.exit(1)
-
-    results: list[tuple[str, str]] = []
-    for k, v in textmap.items():
-        if isinstance(v, str) and keyword in v:
-            results.append((k, v))
-            if len(results) >= limit:
-                break
+    """在 TextMap 中搜索包含关键词的文本（走 SQLite 缓存）。"""
+    results = textmap_db.search_text(keyword, limit=limit)
 
     print(
         f"搜索 \"{keyword}\" → {len(results)} 条结果"
@@ -320,6 +301,7 @@ def main() -> None:
     _ = parser.add_argument("--list", type=str, default=None, nargs="?", const="", help="列出文件名（可选关键词过滤）")
     _ = parser.add_argument("--resolve", type=str, default="", help="解析 TextMap Hash 值")
     _ = parser.add_argument("--search", type=str, default="", help="在 TextMap 中搜索文本")
+    _ = parser.add_argument("--rebuild-textmap", action="store_true", help="强制重建 TextMap SQLite 索引")
 
     ns = parser.parse_args()
 
@@ -335,10 +317,15 @@ def main() -> None:
     list_arg: str | None = ns.list
     resolve_arg: str = ns.resolve
     search_arg: str = ns.search
+    rebuild_textmap_arg: bool = ns.rebuild_textmap
 
     # 全局命令（不需要文件名）
     if list_arg is not None:
         cmd_list(list_arg)
+        return
+
+    if rebuild_textmap_arg:
+        textmap_db.rebuild(force=True)
         return
 
     if resolve_arg:

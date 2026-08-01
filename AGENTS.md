@@ -40,8 +40,9 @@ python query.py --list Avatar            # 搜索文件名
 python query.py AvatarConfig --schema    # 查看文件 schema
 python query.py AvatarConfig --id 1001   # 按 ID 查单条记录
 python query.py AvatarConfig --where "DamageType=Ice" --fields AvatarID,AvatarName --limit 5
-python query.py --resolve 6186714091647966180  # 解析 TextMap Hash
-python query.py --search "黄泉"          # TextMap 全文搜索
+python query.py --resolve 6186714091647966180  # 解析 TextMap Hash（走 SQLite 缓存）
+python query.py --search "黄泉"          # TextMap 全文搜索（走 SQLite 缓存）
+python query.py --rebuild-textmap        # 强制重建 TextMap SQLite 索引
 python gen_catalog.py                    # 重新生成 DATA_CATALOG.md 索引
 ```
 
@@ -95,6 +96,7 @@ src/
 - 入口：`convert.py` → 模块注册表驱动，支持 `--only` / `--force` / `--pretty` CLI 参数
 - 增量转换：`incremental.py` 基于源文件 mtime+size 签名，未变更模块自动跳过（状态存于 `.converter-state.json`，已 gitignore）
 - 文本解析：`textmap.py` 加载 `TextMapCHS.json`，同时处理 `{ "Hash": N }` 对象引用和字面量字符串键
+- TextMap 查询缓存：`textmap_db.py` 将 TextMap 预建为 SQLite 索引（`.textmap-cache.db`，已 gitignore），`query.py --resolve/--search` 走缓存（<1ms），基于 mtime_ns:size 签名自动失效重建
 - 数值扁平化：源数据将所有数值包装为 `{ "Value": N }`，转换器递归展开
 - 配置：`config.py` 存放路径映射、枚举回退表、图标路径重映射表
 - 输出格式：默认紧凑 JSON（无缩进），`--pretty` 切换为缩进模式（调试用）
@@ -106,7 +108,7 @@ src/
 `vendor/TurnBasedGameData` 子模块含 2140+ 个 JSON 文件（~250 MB）+ TextMap（~830 MB），**禁止直接读取原始文件**。使用以下工具：
 
 - **`DATA_CATALOG.md`**：自动生成的轻量索引，含每个文件的 schema、记录数、首条样例。查结构先读此文件。
-- **`query.py`**：精确查询 CLI，支持 `--id` / `--where` / `--fields` / `--grep` / `--schema` / `--resolve` / `--search`。
+- **`query.py`**：精确查询 CLI，支持 `--id` / `--where` / `--fields` / `--grep` / `--schema` / `--resolve` / `--search` / `--rebuild-textmap`。TextMap 查询（`--resolve` / `--search`）走本地 SQLite 缓存（`textmap_db.py`），首次自动建库，后续 <1ms 响应。
 - **`gen_catalog.py`**：子模块更新后重跑 `python gen_catalog.py` 刷新索引。
 
 ### Converter 模块 → 源文件映射

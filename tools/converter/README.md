@@ -114,7 +114,19 @@ python query.py --resolve 6186714091647966180
 # 按文本内容搜索（返回 hash + 文本）
 python query.py --search "黄泉"
 python query.py --search "存护" --limit 10
+
+# 强制重建 SQLite 索引（一般无需手动执行）
+python query.py --rebuild-textmap
 ```
+
+#### SQLite 缓存机制
+
+TextMap 查询走本地 SQLite 索引（`.textmap-cache.db`，已 gitignore）：
+
+- **首次查询**：自动从 `TextMapCHS.json` 建库（~5-8s，一次性）
+- **后续查询**：`--resolve` 走主键索引 <1ms；`--search` 走 LIKE 全表扫描 ~100-300ms
+- **自动失效**：基于源文件 `mtime_ns:size` 签名检测，子模块更新后下次查询自动重建
+- **手动重建**：`--rebuild-textmap` 或直接删除 DB 文件
 
 ### 参数速查
 
@@ -131,6 +143,7 @@ python query.py --search "存护" --limit 10
 | `--list [关键词]` | 列出匹配的文件名 |
 | `--resolve <Hash>` | 解析 TextMap Hash |
 | `--search <文本>` | TextMap 全文搜索 |
+| `--rebuild-textmap` | 强制重建 TextMap SQLite 索引 |
 
 ---
 
@@ -193,6 +206,7 @@ tools/converter/
 ├── utils.py                # 通用工具（load/save/unwrap/map_icon）
 ├── incremental.py          # 增量转换状态管理
 ├── query.py                # 数据查询 CLI（本文件）
+├── textmap_db.py           # TextMap SQLite 缓存（query.py 专用）
 ├── gen_catalog.py          # 索引生成器
 ├── DATA_CATALOG.md         # 自动生成的数据索引（纳入版本控制）
 ├── requirements.txt        # Python 依赖

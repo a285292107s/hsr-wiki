@@ -40,6 +40,10 @@ __pycache__
 # Converter incremental state
 tools/converter/.converter-state.json
 
+# Converter TextMap SQLite cache
+tools/converter/.textmap-cache.db
+tools/converter/.textmap-cache.db-*
+
 # Local reference data
 cdn-samples
 

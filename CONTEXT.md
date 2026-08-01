@@ -16,6 +16,9 @@
 ### TextMap
 源数据中的文本本地化映射表。key 为字符串形式的 xxhash64 哈希值，value 为对应语言的文本。简中版本为 `TextMap/TextMapCHS.json`。
 
+### TextMap SQLite 缓存
+`tools/converter/textmap_db.py` 将 TextMapCHS.json 预建为本地 SQLite 索引（`.textmap-cache.db`，已 gitignore），供 `query.py --resolve/--search` 使用。基于源文件 mtime_ns:size 签名自动检测失效并重建。仅服务开发查询路径，不影响 convert.py 生产转换。
+
 ### Hash 引用
 源数据中引用 TextMap 的方式，有两种形式：
 - **Hash 对象**：`{ "Hash": 6186714091647966180 }`，需转字符串后查 TextMap
