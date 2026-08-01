@@ -1099,6 +1099,112 @@
 .nk-crole-star--in { animation: nk-crole-fade 0.3s var(--ease); }
 @keyframes nk-crole-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ═══ 星级面板重构：成长总览表列联动 + 定位概览 + 成长增量 ═══ */
+/* 汇总表列头可点击 + 选中列高亮（与下方星级选择器双向联动） */
+.nk-crole-summary__star { cursor: pointer; transition: background 0.2s, color 0.2s; }
+.nk-crole-summary__star:hover { background: color-mix(in srgb, var(--crole-num) 12%, transparent); }
+.nk-crole-summary__star.is-active {
+  background: color-mix(in srgb, var(--crole-num) 16%, transparent);
+  box-shadow: inset 0 -2px 0 var(--crole-num);
+}
+.nk-crole-summary__val { transition: background 0.2s; }
+.nk-crole-summary__val.is-active {
+  background: color-mix(in srgb, var(--crole-num) 7%, transparent);
+  color: var(--crole-num);
+}
+
+/* 定位概览：一句话描述 + 基础强度聚合为单张卡片（同星级关联数据） */
+.nk-crole-starov {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse 90% 120% at 100% 0%, color-mix(in srgb, var(--crole-num) 7%, transparent), transparent 60%),
+    var(--card);
+  overflow: hidden;
+}
+.nk-crole-starov__desc {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.55;
+  border-bottom: 1px solid var(--border);
+}
+.nk-crole-starov__desc p { margin: 0; }
+.nk-crole-starov__desc b {
+  display: inline-block;
+  min-width: 40px;
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-right: 8px;
+}
+.nk-crole-starov__stats { display: flex; gap: 10px; padding: 12px; flex-wrap: wrap; }
+.nk-crole-starov__stats .nk-crole-pow {
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+  animation: nk-crole-fade 0.35s var(--ease) backwards;
+  animation-delay: min(calc(var(--i, 0) * 60ms), 200ms);
+}
+/* 强度数值行：主值 + 较上一级增量徽章 */
+.nk-crole-pow__vrow { display: inline-flex; align-items: baseline; gap: 8px; }
+.nk-crole-pow__delta {
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--crole-buff);
+  background: var(--crole-buff-soft);
+  border: 1px solid var(--crole-buff-border);
+  padding: 1px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+/* 属性修正：值 + 增量标记 */
+.nk-crole-props__vrow { display: inline-flex; align-items: center; gap: 6px; }
+.nk-crole-props__delta {
+  font-size: 9px;
+  line-height: 1;
+  color: var(--crole-buff);
+  text-shadow: 0 0 8px var(--crole-buff-glow);
+}
+/* 恒定属性区块标记 */
+.nk-crole-block__const {
+  margin-left: auto;
+  font-family: var(--nk-font-body, inherit);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  color: var(--text3, var(--text2));
+  opacity: 0.75;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+/* 属性分组头（对齐 GridFightRolePropertyConfig.Order 语义分组） */
+.nk-crole-attrgrp { margin-top: 14px; }
+.nk-crole-attrgrp:first-child { margin-top: 0; }
+.nk-crole-attrgrp__label {
+  display: inline-block;
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--crole-num) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--crole-num) 14%, transparent);
+}
+
 /* 触屏设备：重置粘滞 hover */
 @media (hover: none) {
   .nk-crole-trait:hover {

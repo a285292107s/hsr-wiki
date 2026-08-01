@@ -734,6 +734,9 @@ export interface CurrencyTraitLayer {
   params: number[];
   member_props: CurrencyEquipProp[];
   all_props: CurrencyEquipProp[];
+  /** Mazebuff 补充描述（攻击段数等战斗机制细节） */
+  buff_desc?: string;
+  buff_params?: number[];
 }
 
 export interface CurrencyTraitRemark {

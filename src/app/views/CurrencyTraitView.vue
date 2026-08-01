@@ -6,13 +6,14 @@
  */
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { fmtDesc, gridFightTraitIconUrl } from '../../lib/format';
-import { loadLocalCurrencyTraits } from '../../services/api';
-import type { CurrencyTraitEntry } from '../../services/types';
+import { fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../lib/format';
+import { loadLocalCurrencyTraits, loadLocalCurrencyRoles } from '../../services/api';
+import type { CurrencyTraitEntry, CurrencyRoleEntry } from '../../services/types';
 
 const route = useRoute();
 const traitId = computed(() => String(route.params.id));
 const data = ref<CurrencyTraitEntry | null>(null);
+const members = ref<CurrencyRoleEntry[]>([]);
 const loading = ref(true);
 const error = ref('');
 
@@ -70,10 +71,15 @@ async function load() {
   loading.value = true;
   error.value = '';
   try {
-    const { traits } = await loadLocalCurrencyTraits();
+    const [{ traits }, { roles }] = await Promise.all([
+      loadLocalCurrencyTraits(),
+      loadLocalCurrencyRoles(),
+    ]);
     const found = traits.find((t) => String(t.id) === traitId.value);
     if (!found) { error.value = '未找到该羁绊'; return; }
     data.value = found;
+    const tid = Number(traitId.value);
+    members.value = roles.filter((r) => r.trait_list.includes(tid));
   } catch (e) {
     error.value = (e as Error).message || '加载失败';
   } finally {
@@ -131,6 +137,23 @@ watch(data, (d) => { if (d) document.title = `${d.name} - HSR Wiki`; }, { immedi
           <div v-for="(r, ri) in data.remarks" :key="ri" class="nk-ctrait-remark">
             <div class="nk-ctrait-remark__text" v-html="fmtDesc(r.desc, r.params)"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ═══ 羁绊成员 ═══ -->
+      <section v-if="members.length" class="nk-ctrait-section">
+        <h2 class="nk-ctrait-section__title">羁绊成员<span class="nk-ctrait-section__note">（{{ members.length }} 人）</span></h2>
+        <div class="nk-ctrait-members">
+          <router-link
+            v-for="m in members"
+            :key="m.id"
+            :to="`/currency/role/${m.id}`"
+            class="nk-ctrait-member"
+          >
+            <img class="nk-ctrait-member__avatar" :src="avatarShopIconUrl(m.id)" :alt="m.name" loading="lazy" />
+            <span class="nk-ctrait-member__name">{{ m.name }}</span>
+            <span v-if="m.rarity" class="nk-ctrait-member__cost">{{ m.rarity }}费</span>
+          </router-link>
         </div>
       </section>
 

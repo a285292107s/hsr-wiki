@@ -311,13 +311,22 @@ def _convert_traits(out_dir: Path) -> int:
         params = [_unwrap(p, 0) for p in (entry.get("PropertyParamList") or [])]
         member_props = _flatten_property_mods(entry.get("TraitMemberPropertyList"))
         all_props = _flatten_property_mods(entry.get("AllMemberPropertyList"))
-        # 回退：直接字段为空时，从 MazebuffID 关联的 buff 补全描述
-        if not desc and not member_props and not all_props:
-            mb_id = entry.get("MazebuffID")
-            mb = mazebuff_index.get(mb_id) if mb_id else None
-            if mb:
-                desc = resolve_text(mb.get("BuffDesc") or mb.get("BuffSimpleDesc", {}))
-                params = [_unwrap(p, 0) for p in (mb.get("ParamList") or [])]
+        # Mazebuff 补充描述（含攻击段数等战斗机制细节）
+        buff_desc = ""
+        buff_params: list = []
+        mb_id = entry.get("MazebuffID")
+        mb = mazebuff_index.get(mb_id) if mb_id else None
+        if mb:
+            mb_desc = resolve_text(mb.get("BuffDesc") or mb.get("BuffSimpleDesc", {}))
+            mb_params = [_unwrap(p, 0) for p in (mb.get("ParamList") or [])]
+            # 回退：直接字段全空时，用 Mazebuff 作为主描述
+            if not desc and not member_props and not all_props:
+                desc = mb_desc
+                params = mb_params
+            elif mb_desc and mb_desc != desc:
+                # 补充：已有属性描述时，Mazebuff 描述作为额外机制说明
+                buff_desc = mb_desc
+                buff_params = mb_params
         node = {
             "layer": entry.get("Layer", 0),
             "quality": entry.get("Quality") or None,
@@ -326,6 +335,9 @@ def _convert_traits(out_dir: Path) -> int:
             "member_props": member_props,
             "all_props": all_props,
         }
+        if buff_desc:
+            node["buff_desc"] = buff_desc
+            node["buff_params"] = buff_params
         layer_by_trait.setdefault(tid, []).append(node)
     for tid in layer_by_trait:
         layer_by_trait[tid].sort(key=lambda x: x["layer"])

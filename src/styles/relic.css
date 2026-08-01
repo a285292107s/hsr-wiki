@@ -8,12 +8,12 @@
 .nk-panel--relic { padding-top: 4px; }
 
 /* ─── Hero 遗器变体 ─── */
-.nk-hero--relic .nk-hero__visual { min-height: 300px; }
+.nk-hero--relic .nk-hero__visual { min-height: 240px; aspect-ratio: 2 / 1; }
 .nk-hero__bg--relic {
-  background-size: contain;
-  background-position: center 25%;
+  background-size: 52%;
+  background-position: center 40%;
   background-repeat: no-repeat;
-  filter: saturate(1.05);
+  filter: saturate(1.05) drop-shadow(0 4px 18px rgba(0,0,0,0.45));
 }
 
 /* 套装类型徽章 */
@@ -281,7 +281,7 @@
 
 /* ─── 响应式 ─── */
 @media (max-width: 640px) {
-  .nk-hero--relic .nk-hero__visual { min-height: 220px; }
+  .nk-hero--relic .nk-hero__visual { min-height: 180px; aspect-ratio: 5 / 2; }
   /* 部位预览：窄屏每行最多 3 个 */
   .nk-relic-hero-pieces { grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); max-width: 100%; }
   .nk-relic-hero-piece__img { width: 48px; height: 48px; }
@@ -305,6 +305,10 @@
 }
 
 @media (min-width: 1024px) {
-  /* 桌面：副词条 3 列，提升密度 */
+  /* 桌面：遗器视觉区缩小，图标不需要占据大面积 */
+  .nk-hero--relic { min-height: auto; }
+  .nk-hero--relic .nk-hero__visual { min-height: 320px; flex: 0 0 34%; }
+  .nk-hero__bg--relic { background-size: 60%; }
+  /* 副词条 3 列，提升密度 */
   .nk-relic-subgrid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 }
