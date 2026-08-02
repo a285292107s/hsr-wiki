@@ -94,7 +94,7 @@ src/
 `tools/converter/` 将 `vendor/TurnBasedGameData/`（git 子模块：ExcelOutput + TextMap）转换为 `public/data/cn/` 下的 JSON。
 
 - 入口：`convert.py` → 模块注册表驱动，支持 `--only` / `--force` / `--pretty` CLI 参数
-- 增量转换：`incremental.py` 基于源文件 mtime+size 签名，未变更模块自动跳过（状态存于 `.converter-state.json`，已 gitignore）
+- 增量转换：`incremental.py` 基于源文件 mtime+size 签名，未变更模块自动跳过（状态存于 `.converter-state.json`，已 gitignore）；依赖声明由 `tests/test_incremental.py` AST 校验锁住，防止声明与实际读取漂移
 - 文本解析：`textmap.py` 加载 `TextMapCHS.json`，同时处理 `{ "Hash": N }` 对象引用和字面量字符串键
 - TextMap 查询缓存：`textmap_db.py` 将 TextMap 预建为 SQLite 索引（`.textmap-cache.db`，已 gitignore），`query.py --resolve/--search` 走缓存（<1ms），基于 mtime_ns:size 签名自动失效重建
 - 数值扁平化：源数据将所有数值包装为 `{ "Value": N }`，转换器递归展开
@@ -144,8 +144,9 @@ src/
 
 **Converter（pytest）：**
 - 位置：`tools/converter/tests/`
-- 范围：核心工具函数（unwrap_value / map_icon_path / resolve_text / sort_by_id）
+- 范围：工具函数（unwrap_value / map_icon_path / sort_by_id / resolve_text）、clean_text 标签清洗全分支、增量依赖 AST 一致性、character_detail 纯函数契约；合成数据 + mock TextMap，不依赖真实源数据
 - 运行：`cd tools/converter && python -m pytest tests/ -v`
+- CI：已接入 `.github/workflows/ci.yml`（push/PR）与 `data-sync.yml`（数据同步时）
 
 ## 项目约定
 

@@ -17,25 +17,55 @@ STATE_FILE = Path(__file__).resolve().parent / ".converter-state.json"
 
 # 模块 → 依赖的源文件/目录（相对于 EXCEL_DIR 或绝对路径）
 # 目录类型会递归收集所有 .json 文件的 mtime+size
+# 注意：必须覆盖 converters/<module>.py 实际读取的全部源文件（含动态/可选加载），
+# 否则源数据变更不会触发该模块重跑。tests/test_incremental.py 通过 AST 扫描
+# 校验「代码中静态可见的 load_json 调用 ⊆ 本声明」，防止手写漂移。
 MODULE_SOURCES: dict[str, list[str]] = {
     "paths": ["AvatarBaseType.json"],
     "elements": ["DamageType.json"],
     "properties": [],  # 纯静态映射，无源文件依赖
-    "items": ["ItemConfig.json", "ItemConfigAvatar.json", "ItemConfigAvatarPlayerIcon.json",
-              "ItemConfigAvatarRank.json", "ItemConfigBook.json", "ItemConfigEquipment.json"],
+    "items": ["ItemConfig.json"],
     "characters": ["AvatarConfig.json", "AvatarConfigLD.json"],
     "character_ranks": ["AvatarRankConfig.json"],
     "character_skills": ["AvatarSkillConfig.json"],
-    "character_detail": ["AvatarConfig.json", "AvatarConfigLD.json", "AvatarSkillTreeConfig.json",
-                         "AvatarPromotionConfig.json", "AvatarPromotionConfigLD.json"],
-    "light_cones": ["EquipmentConfig.json"],
+    "character_detail": [
+        "AvatarConfig.json", "AvatarConfigLD.json",
+        "AvatarSkillConfig.json", "AvatarSkillConfigLD.json",
+        "AvatarRankConfig.json", "AvatarRankConfigLD.json",
+        "AvatarSkillTreeConfig.json", "AvatarSkillTreeConfigLD.json",
+        "AvatarPromotionConfig.json", "AvatarPromotionConfigLD.json",
+        "AvatarAtlas.json", "AvatarCamp.json", "StoryAtlas.json",
+        "AvatarEquipRecommend.json", "AvatarEquipRecommendLD.json",
+        "AvatarRelicRecommend.json", "AvatarRelicRecommendLD.json",
+        "AvatarServantConfig.json", "AvatarServantSkillConfig.json",
+    ],
+    "light_cones": ["EquipmentConfig.json", "EquipmentSkillConfig.json"],
     "light_cone_detail": ["EquipmentConfig.json", "EquipmentSkillConfig.json",
-                          "EquipmentPromotionConfig.json"],
-    "relics": ["RelicConfig.json", "RelicSetConfig.json", "RelicDisplayConfig.json"],
+                          "EquipmentPromotionConfig.json", "ItemConfigEquipment.json"],
+    "relics": ["RelicSetConfig.json", "RelicConfig.json", "RelicSetSkillConfig.json",
+                "RelicDataInfo.json"],
     "relic_affixes": ["RelicMainAffixConfig.json", "RelicSubAffixConfig.json"],
-    "monsters": ["MonsterConfig.json", "NPCMonsterConfig.json"],
-    "endgame": ["RogueEndlessStageConfig.json"],
-    "currency": [],  # 本地子模块数据
+    "monsters": ["MonsterTemplateConfig.json"],
+    "endgame": ["ChallengeMazeConfig.json", "ChallengeStoryMazeConfig.json",
+                 "ChallengeBossMazeConfig.json", "ChallengePeakConfig.json"],
+    "currency": [
+        "GridFightRoleBasicInfo.json", "AvatarConfig.json", "AvatarConfigLD.json",
+        "GridFightTraitBasicInfo.json", "GridFightRoleStar.json",
+        "GridFightFrontSkill.json", "GridFightBackBESkillConfig.json",
+        "GridFightTraitMazebuff.json", "GridFightTraitLayer.json",
+        "GridFightBackRoleRank.json", "GridFightBackEquipment.json",
+        "GridFightItems.json", "GridFightRoleRecommendEquip.json",
+        "GridFightServantStar.json", "GridFightServantSkill.json",
+        "GridFightBackSkillExtraDesc.json",
+    ],
+    "currency_catalog": ["GridFightItems.json", "GridFightEquipment.json",
+                          "GridFightEquipCategoryInfo.json", "GridFightEquipTag.json",
+                          "GridFightEquipRecommendRole.json", "AvatarConfig.json",
+                          "GridFightRoleBasicInfo.json", "GridFightTraitBasicInfo.json",
+                          "GridFightTraitLayer.json", "GridFightTraitMazebuff.json",
+                          "GridFightTraitRemark.json", "GridFightAugment.json",
+                          "GridFightConsumables.json", "GridFightForge.json",
+                          "GridFightPortalBuff.json"],
     "season": [],
 }
 

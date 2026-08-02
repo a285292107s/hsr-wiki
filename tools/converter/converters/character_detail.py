@@ -406,7 +406,8 @@ def convert() -> None:
         base_type = item.get("AvatarBaseType", "")
         damage_type = item.get("DamageType", "")
         avatar_vo_tag = item.get("AvatarVOTag", "")
-        sp_need = unwrap_value(item.get("SPNeed", {}))
+        # SPNeed 缺失时输出 null（如遐蝶 1407 无该字段），前端以 ?? 0 兑底
+        sp_need = unwrap_value(item.get("SPNeed"))
         rank_ids = item.get("RankIDList", [])
         skill_ids = item.get("SkillList", [])
 
@@ -415,20 +416,18 @@ def convert() -> None:
             path_name = PATH_NAME_FALLBACK.get(base_type, base_type)
             name = f"开拓者·{path_name}"
 
-        # 描述：来自 StoryAtlas StoryID=1 第一句
+        # 描述：来自 StoryAtlas 首条故事的第一句
         desc = ""
         stories: dict[str, str | None] = {"0": None, "1": None, "2": None, "3": None, "4": None}
+        # 按 StoryID 升序取前 5 条作为故事槽位（标准角色 StoryID=1-5，
+        # 开拓者 8xxx 为 11-15，不能依赖绝对值，按顺序映射）
         avatar_stories = sorted(stories_by_avatar.get(avatar_id, []), key=lambda x: x.get("StoryID", 0))
-        for s in avatar_stories:
-            sid = s.get("StoryID", 0)
+        for idx, s in enumerate(avatar_stories[:5]):
             text = resolve_text(s.get("Story", {}))
-            if sid == 1:
+            if idx == 0:
                 # desc 取第一句（用 \\n 分隔，取第一个自然句）
                 desc = text.split("\\n")[0].strip() if text else ""
-            # StoryID 1→5 映射到 stories["0"]→"4"
-            key = str(sid - 1) if 1 <= sid <= 5 else None
-            if key is not None:
-                stories[key] = text
+            stories[str(idx)] = text
 
         # chara_info
         atlas = atlas_by_id.get(avatar_id, {})

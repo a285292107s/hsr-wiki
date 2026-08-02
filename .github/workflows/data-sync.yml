@@ -26,6 +26,11 @@ jobs:
         if: github.event_name != 'push'
         run: |
           git submodule update --remote --merge vendor/TurnBasedGameData
+          # 子模块无新提交时直接退出，避免空跑转换与提交
+          if git diff --quiet vendor/TurnBasedGameData; then
+            echo "Submodule unchanged, nothing to sync."
+            exit 0
+          fi
 
       - uses: actions/setup-python@v5
         with:
@@ -35,6 +40,11 @@ jobs:
 
       - name: Install converter dependencies
         run: pip install -r tools/converter/requirements.txt
+
+      - name: Run converter tests
+        run: |
+          cd tools/converter
+          python -m pytest tests/ -q
 
       - name: Run converter
         run: |

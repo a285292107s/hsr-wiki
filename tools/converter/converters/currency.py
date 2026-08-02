@@ -26,14 +26,13 @@
 """
 from __future__ import annotations
 
-import json
 import logging
 from pathlib import Path
 from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
 from textmap import resolve_text
-from utils import load_json
+from utils import load_json, save_json
 
 logger = logging.getLogger("converter.currency")
 
@@ -432,15 +431,11 @@ def convert() -> None:
             "equipment": equipment_out,
         }
 
-        (detail_dir / f"{rid}.json").write_text(
-            json.dumps(detail, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        save_json(detail, detail_dir / f"{rid}.json")
 
     # 5. 写列表
     list_out = {"roles": roles_out}
-    (out_dir / "role.json").write_text(
-        json.dumps(list_out, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    save_json(list_out, out_dir / "role.json")
 
     logger.info("货币战争角色数据完成：%d 个角色", len(roles_out))
 

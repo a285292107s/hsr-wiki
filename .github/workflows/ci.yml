@@ -28,3 +28,17 @@ jobs:
 
       - name: Unit tests
         run: pnpm test
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: tools/converter/requirements.txt
+
+      - name: Install converter dependencies
+        run: pip install -r tools/converter/requirements.txt
+
+      - name: Converter unit tests
+        run: |
+          cd tools/converter
+          python -m pytest tests/ -q

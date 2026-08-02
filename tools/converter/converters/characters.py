@@ -40,7 +40,8 @@ def convert() -> None:
                 full_name = name
         rarity_key = item.get("Rarity", "")
         rarity = RARITY_MAP.get(rarity_key, 0)
-        sp_need = unwrap_value(item.get("SPNeed", {}))
+        # SPNeed 缺失时输出 null（如遐蝶 1407 无该字段），前端以 ?? 0 兑底
+        sp_need = unwrap_value(item.get("SPNeed"))
 
         result.append({
             "id": avatar_id,

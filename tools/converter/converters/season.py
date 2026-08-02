@@ -14,11 +14,11 @@
 """
 from __future__ import annotations
 
-import json
 import logging
 
 from config import OUTPUT_DIR
 from textmap import resolve_text
+from utils import save_json
 
 logger = logging.getLogger("converter.currency.season")
 
@@ -66,9 +66,7 @@ def convert() -> None:
         seasons.append(entry)
 
     out = {"seasons": seasons}
-    (out_dir / "season.json").write_text(
-        json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    save_json(out, out_dir / "season.json")
     logger.info("货币战争赛季扩充说明完成：%d 个赛季", len(seasons))
 
 

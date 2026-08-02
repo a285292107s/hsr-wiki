@@ -2,6 +2,10 @@
 
 将 `vendor/TurnBasedGameData`（游戏解包子模块）转换为前端可用的 JSON 数据，并提供数据探索工具。
 
+> **职责分界**：本目录包含两层——
+> 1. **转换管线**（核心）：`convert.py` + `converters/`，源数据 → 前端 JSON
+> 2. **开发配套**：`query.py` / `gen_catalog.py` / `textmap_db.py`，为转换器开发与数据探索服务
+
 ## 环境要求
 
 - Python 3.10+
@@ -41,21 +45,26 @@ python convert.py --pretty               # 输出缩进格式（调试用，默�
 | `characters` | characters.json | AvatarConfig(LD) |
 | `character_ranks` | character_ranks.json | AvatarRankConfig |
 | `character_skills` | character_skills.json | AvatarSkillConfig |
-| `character_detail` | characters/{id}.json | 多文件联合 |
+| `character_detail` | characters/{id}.json | 多文件联合（19 个源文件） |
 | `light_cones` | light_cones.json | EquipmentConfig, EquipmentSkillConfig |
 | `light_cone_detail` | light_cones/{id}.json | 多文件联合 |
-| `relics` | relics.json, relic_stories.json | RelicSetConfig, RelicConfig 等 |
+| `relics` | relics.json, relic_stories.json | RelicSetConfig, RelicConfig, RelicSetSkillConfig, RelicDataInfo |
 | `relic_affixes` | relic_main_affixes.json, relic_sub_affixes.json | RelicMainAffixConfig, RelicSubAffixConfig |
 | `monsters` | monsters.json | MonsterTemplateConfig |
-| `endgame` | maze*.json | ChallengePeakConfig |
-| `currency` | currency/ | AvatarConfigLD（本地） |
-| `season` | currency/seasons.json | （本地数据） |
+| `endgame` | maze.json, maze_extra.json, maze_boss.json, maze_peak.json | ChallengeMaze/StoryMaze/BossMaze/PeakConfig |
+| `currency` | currency/role.json, currency/role/{id}.json | GridFight* 系列（16 个源文件） |
+| `currency_catalog` | currency/augments/equipment/portals/traits.json | GridFight* 系列（14 个源文件） |
+| `season` | currency/season.json | TextMap 纯文本 |
 
 ### 增量机制
 
 - 基于源文件 mtime + size 签名判断是否需要重跑
 - 状态存储于 `.converter-state.json`（已 gitignore）
 - `--force` 可强制忽略缓存
+- **依赖声明保障**：`incremental.py` 的 `MODULE_SOURCES` 必须覆盖各模块实际读取的全部源文件；
+  `tests/test_incremental.py` 通过 AST 扫描校验「代码中静态可见的加载调用 ⊆ 声明」，
+  防止新增/修改源文件后依赖声明漂移导致模块不重跑（历史事故：currency / character_detail /
+  monsters / endgame 的声明曾与实际读取长期不一致）
 
 ---
 
@@ -159,10 +168,14 @@ python gen_catalog.py --filter Avatar    # 仅索引文件名含 Avatar 的
 
 ### CI 自动触发
 
-`.github/workflows/catalog.yml` 在子模块指针变更时自动：
-1. 运行 `convert.py --force` 刷新前端 JSON
-2. 运行 `gen_catalog.py` 刷新索引
-3. 自动提交回 main（`[skip ci]` 防循环）
+`.github/workflows/data-sync.yml`（子模块指针变更 / 每日 04:00 UTC / 手动触发）：
+1. 拉取子模块最新（定时触发时无新提交直接退出，零成本空转）
+2. 运行 `python -m pytest tests/` 校验转换器
+3. 运行 `convert.py --force` 刷新前端 JSON
+4. 运行 `gen_catalog.py` 刷新索引
+5. 自动提交回 main（`[skip ci]` 防循环）
+
+> 转换器测试同时接入 `.github/workflows/ci.yml`（每次 push/PR 执行）。
 
 ---
 
@@ -194,6 +207,18 @@ python convert.py --only character_detail --pretty
 # 输出缩进 JSON 到 public/data/cn/，方便人工检查
 ```
 
+## 测试
+
+converter 单元测试位于 `tests/`，不依赖真实源数据（合成数据 + mock TextMap），
+运行：`cd tools/converter && python -m pytest tests/ -v`
+
+| 文件 | 覆盖范围 |
+|------|----------|
+| `test_utils.py` | 工具函数（unwrap_value / map_icon_path / sort_by_id / resolve_text） |
+| `test_textmap.py` | clean_text 标签清洗全分支（占位符 / RUBY / property / 相邻去重 / color / 未知标签） |
+| `test_incremental.py` | 增量依赖 AST 一致性校验（防声明漂移）+ 模块注册完整性 |
+| `test_character_detail.py` | character_detail 纯函数契约（技能/命座/突破/遗器/图标归一/忆灵） |
+
 ---
 
 ## 文件结构
@@ -203,9 +228,9 @@ tools/converter/
 ├── convert.py              # 主入口：模块注册 + CLI
 ├── config.py               # 路径/枚举/图标映射配置
 ├── textmap.py              # TextMap 加载 + Hash 解析
-├── utils.py                # 通用工具（load/save/unwrap/map_icon）
+├── utils.py                # 通用工具（load 带缓存/save 原子写入/unwrap/map_icon）
 ├── incremental.py          # 增量转换状态管理
-├── query.py                # 数据查询 CLI（本文件）
+├── query.py                # 数据查询 CLI
 ├── textmap_db.py           # TextMap SQLite 缓存（query.py 专用）
 ├── gen_catalog.py          # 索引生成器
 ├── DATA_CATALOG.md         # 自动生成的数据索引（纳入版本控制）
@@ -226,7 +251,11 @@ tools/converter/
 │   ├── elements.py
 │   ├── properties.py
 │   ├── currency.py
+│   ├── currency_catalog.py
 │   └── season.py
-└── tests/                  # pytest 单元测试
-    └── test_utils.py
+└── tests/                  # pytest 单元测试（84 个用例）
+    ├── test_utils.py
+    ├── test_textmap.py
+    ├── test_incremental.py
+    └── test_character_detail.py
 ```

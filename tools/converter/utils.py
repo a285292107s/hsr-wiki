@@ -2,6 +2,8 @@
 
 import json
 import logging
+import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -19,20 +21,29 @@ def set_pretty(enabled: bool) -> None:
     COMPACT_OUTPUT = not enabled
 
 
+# 源文件加载缓存：同一进程内多个模块重复加载同一源文件（如 AvatarConfig 被
+# characters/character_detail/currency 共用）时只解析一次。源数据只读不写，
+# 调用方不得原地修改返回的 dict/list。
+@lru_cache(maxsize=32)
 def load_json(filepath: Path) -> Any:
-    """加载 JSON 文件。"""
+    """加载 JSON 文件（模块级缓存，同路径只解析一次）。"""
     with open(filepath, encoding="utf-8") as f:
         return json.load(f)
 
 
 def save_json(data: Any, filepath: Path) -> None:
-    """保存 JSON 文件，中文不转义。默认紧凑模式，--pretty 时缩进。"""
+    """保存 JSON 文件，中文不转义。默认紧凑模式，--pretty 时缩进。
+
+    先写同目录临时文件再原子替换，避免进程中断留下半截 JSON。
+    """
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    with open(filepath, "w", encoding="utf-8") as f:
+    tmp = filepath.with_suffix(filepath.suffix + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
         if COMPACT_OUTPUT:
             json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
         else:
             json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, filepath)
     logger.info("已保存 %s（%s 条）", filepath, len(data) if isinstance(data, (list, dict)) else "?")
 
 

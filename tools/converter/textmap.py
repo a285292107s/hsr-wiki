@@ -198,16 +198,3 @@ def resolve_text(ref: Any, clean: bool = True) -> str:
         result = clean_text(result)
 
     return result
-
-
-def resolve_text_or_warn(ref: Any, context: str = "") -> str:
-    """解析文本引用，未命中时记 warning。"""
-    result = resolve_text(ref)
-    if not result and ref:
-        if isinstance(ref, dict) and "Hash" in ref:
-            logger.warning("TextMap 未命中 Hash=%s %s", ref["Hash"], context)
-        elif isinstance(ref, str) and ref in (
-            "AvatarRankName_100101",  # 仅对字面量 key 警告
-        ):
-            logger.warning("TextMap 未命中 key=%s %s", ref, context)
-    return result

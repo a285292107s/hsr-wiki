@@ -173,8 +173,8 @@ export interface CharacterData {
   /** 稀有度（CombatPowerAvatarRarityType4/5） */
   rarity: string;
   avatar_vo_tag?: string;
-  /** 终结技能量需求 */
-  sp_need?: number;
+  /** 终结技能量需求（部分角色如遐蝶无此字段，输出 null，前端以 ?? 0 兑底） */
+  sp_need?: number | null;
   /** 命途（Mage/Knight/...） */
   base_type: string;
   /** 属性（Quantum/Wind/...） */
@@ -323,7 +323,8 @@ export interface LocalCharEntry {
   rarity: number;
   path: string;
   element: string;
-  sp_need: number;
+  /** 终结技能量需求（部分角色如遐蝶无此字段，输出 null） */
+  sp_need: number | null;
   vo_tag: string;
   icon: string;
   icon_round: string;

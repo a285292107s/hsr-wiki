@@ -21,7 +21,6 @@
 """
 from __future__ import annotations
 
-import json
 import logging
 import re
 from pathlib import Path
@@ -29,7 +28,7 @@ from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
 from textmap import resolve_text, clean_text
-from utils import load_json
+from utils import load_json, save_json
 
 logger = logging.getLogger("converter.currency_catalog")
 
@@ -148,9 +147,7 @@ def _convert_equipment(out_dir: Path) -> int:
     # 按分类 → 优先级排序
     out.sort(key=lambda x: (x["category"], -x["priority"], x["id"]))
 
-    (out_dir / "equipment.json").write_text(
-        json.dumps({"items": out}, ensure_ascii=False), encoding="utf-8"
-    )
+    save_json({"items": out}, out_dir / "equipment.json")
     return len(out)
 
 
@@ -181,9 +178,7 @@ def _convert_portals(out_dir: Path) -> int:
 
     out.sort(key=lambda x: x["id"])
 
-    (out_dir / "portals.json").write_text(
-        json.dumps({"portals": out}, ensure_ascii=False), encoding="utf-8"
-    )
+    save_json({"portals": out}, out_dir / "portals.json")
     return len(out)
 
 
@@ -284,9 +279,7 @@ def _convert_augments(out_dir: Path) -> int:
 
     out.sort(key=lambda x: (x["category_id"], x["id"]))
 
-    (out_dir / "augments.json").write_text(
-        json.dumps({"augments": out}, ensure_ascii=False), encoding="utf-8"
-    )
+    save_json({"augments": out}, out_dir / "augments.json")
     return len(out)
 
 
@@ -401,9 +394,7 @@ def _convert_traits(out_dir: Path) -> int:
 
     out.sort(key=lambda x: x["sort_priority"])
 
-    (out_dir / "traits.json").write_text(
-        json.dumps({"traits": out}, ensure_ascii=False), encoding="utf-8"
-    )
+    save_json({"traits": out}, out_dir / "traits.json")
     return len(out)
 
 
