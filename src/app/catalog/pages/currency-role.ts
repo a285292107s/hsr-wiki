@@ -64,7 +64,7 @@ export const currencyRolePage: CatalogPageConfig = {
         id: String(r.id),
         name: r.name,
         href: `/currency/role/${r.id}`,
-        avatar: avatarShopIconUrl(r.id),
+        avatar: avatarShopIconUrl(r.avatar_id || r.id),
         rarity: r.rarity,
         front_back_type: r.front_back_type ?? 'Both',
         heal_or_shield_display: r.heal_or_shield_display,

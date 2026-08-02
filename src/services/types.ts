@@ -581,6 +581,8 @@ export interface CurrencyRoleRecommend {
 
 export interface CurrencyRoleDetail {
   id: number;
+  /** AvatarConfig 角色 ID（用于构造头像/立绘 CDN URL；可能与 role id 不同） */
+  avatar_id: number;
   name: string;
   rarity: number;
   front_back_type: string | null;
@@ -626,6 +628,8 @@ export interface CurrencyRoleTraitSummary {
 
 export interface CurrencyRoleEntry {
   id: number;
+  /** AvatarConfig 角色 ID（用于构造头像 CDN URL；可能与 role id 不同） */
+  avatar_id: number;
   name: string;
   rarity: number;
   front_back_type: string | null;

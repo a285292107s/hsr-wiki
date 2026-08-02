@@ -2,6 +2,7 @@
   "roles": [
     {
       "id": 1001,
+      "avatar_id": 1001,
       "name": "三月七",
       "rarity": 1,
       "front_back_type": "Back",
@@ -31,6 +32,7 @@
     },
     {
       "id": 1003,
+      "avatar_id": 1003,
       "name": "姬子",
       "rarity": 3,
       "front_back_type": "Back",
@@ -61,6 +63,7 @@
     },
     {
       "id": 1004,
+      "avatar_id": 1004,
       "name": "瓦尔特",
       "rarity": 5,
       "front_back_type": "Front",
@@ -94,6 +97,7 @@
     },
     {
       "id": 1006,
+      "avatar_id": 1006,
       "name": "银狼",
       "rarity": 4,
       "front_back_type": "Both",
@@ -123,6 +127,7 @@
     },
     {
       "id": 1009,
+      "avatar_id": 1009,
       "name": "艾丝妲",
       "rarity": 1,
       "front_back_type": "Front",
@@ -150,6 +155,7 @@
     },
     {
       "id": 1013,
+      "avatar_id": 1013,
       "name": "黑塔",
       "rarity": 1,
       "front_back_type": "Both",
@@ -177,6 +183,7 @@
     },
     {
       "id": 1014,
+      "avatar_id": 1014,
       "name": "Saber",
       "rarity": 3,
       "front_back_type": "Both",
@@ -207,6 +214,7 @@
     },
     {
       "id": 1015,
+      "avatar_id": 1015,
       "name": "Archer",
       "rarity": 5,
       "front_back_type": "Front",
@@ -240,6 +248,7 @@
     },
     {
       "id": 11011,
+      "avatar_id": 1101,
       "name": "布洛妮娅",
       "rarity": 5,
       "front_back_type": "Front",
@@ -267,6 +276,7 @@
     },
     {
       "id": 1102,
+      "avatar_id": 1102,
       "name": "希儿",
       "rarity": 3,
       "front_back_type": "Front",
@@ -294,6 +304,7 @@
     },
     {
       "id": 1104,
+      "avatar_id": 1104,
       "name": "杰帕德",
       "rarity": 4,
       "front_back_type": "Front",
@@ -321,6 +332,7 @@
     },
     {
       "id": 1105,
+      "avatar_id": 1105,
       "name": "娜塔莎",
       "rarity": 3,
       "front_back_type": "Both",
@@ -350,6 +362,7 @@
     },
     {
       "id": 1106,
+      "avatar_id": 1106,
       "name": "佩拉",
       "rarity": 2,
       "front_back_type": "Back",
@@ -380,6 +393,7 @@
     },
     {
       "id": 1108,
+      "avatar_id": 1108,
       "name": "桑博",
       "rarity": 1,
       "front_back_type": "Both",
@@ -413,6 +427,7 @@
     },
     {
       "id": 1112,
+      "avatar_id": 1112,
       "name": "托帕&账账",
       "rarity": 5,
       "front_back_type": "Back",
@@ -442,6 +457,7 @@
     },
     {
       "id": 1201,
+      "avatar_id": 1201,
       "name": "青雀",
       "rarity": 1,
       "front_back_type": "Front",
@@ -469,6 +485,7 @@
     },
     {
       "id": 1202,
+      "avatar_id": 1202,
       "name": "停云",
       "rarity": 1,
       "front_back_type": "Back",
@@ -498,6 +515,7 @@
     },
     {
       "id": 1203,
+      "avatar_id": 1203,
       "name": "罗刹",
       "rarity": 4,
       "front_back_type": "Back",
@@ -528,6 +546,7 @@
     },
     {
       "id": 1204,
+      "avatar_id": 1204,
       "name": "景元",
       "rarity": 5,
       "front_back_type": "Front",
@@ -555,6 +574,7 @@
     },
     {
       "id": 1205,
+      "avatar_id": 1205,
       "name": "刃",
       "rarity": 1,
       "front_back_type": "Back",
@@ -585,6 +605,7 @@
     },
     {
       "id": 1208,
+      "avatar_id": 1208,
       "name": "符玄",
       "rarity": 4,
       "front_back_type": "Back",
@@ -620,6 +641,7 @@
     },
     {
       "id": 1209,
+      "avatar_id": 1209,
       "name": "彦卿",
       "rarity": 4,
       "front_back_type": "Back",
@@ -656,6 +678,7 @@
     },
     {
       "id": 1212,
+      "avatar_id": 1212,
       "name": "镜流",
       "rarity": 3,
       "front_back_type": "Back",
@@ -686,6 +709,7 @@
     },
     {
       "id": 1213,
+      "avatar_id": 1213,
       "name": "丹恒•饮月",
       "rarity": 2,
       "front_back_type": "Front",
@@ -719,6 +743,7 @@
     },
     {
       "id": 1217,
+      "avatar_id": 1217,
       "name": "藿藿",
       "rarity": 1,
       "front_back_type": "Both",
@@ -754,6 +779,7 @@
     },
     {
       "id": 1218,
+      "avatar_id": 1218,
       "name": "椒丘",
       "rarity": 1,
       "front_back_type": "Front",
@@ -787,6 +813,7 @@
     },
     {
       "id": 1220,
+      "avatar_id": 1220,
       "name": "飞霄",
       "rarity": 1,
       "front_back_type": "Front",
@@ -814,6 +841,7 @@
     },
     {
       "id": 1221,
+      "avatar_id": 1221,
       "name": "云璃",
       "rarity": 5,
       "front_back_type": "Back",
@@ -844,6 +872,7 @@
     },
     {
       "id": 1222,
+      "avatar_id": 1222,
       "name": "灵砂",
       "rarity": 2,
       "front_back_type": "Front",
@@ -877,6 +906,7 @@
     },
     {
       "id": 1223,
+      "avatar_id": 1223,
       "name": "貊泽",
       "rarity": 1,
       "front_back_type": "Back",
@@ -906,6 +936,7 @@
     },
     {
       "id": 1225,
+      "avatar_id": 1225,
       "name": "忘归人",
       "rarity": 3,
       "front_back_type": "Back",
@@ -935,6 +966,7 @@
     },
     {
       "id": 1301,
+      "avatar_id": 1301,
       "name": "加拉赫",
       "rarity": 1,
       "front_back_type": "Both",
@@ -970,6 +1002,7 @@
     },
     {
       "id": 1303,
+      "avatar_id": 1303,
       "name": "阮•梅",
       "rarity": 2,
       "front_back_type": "Back",
@@ -999,6 +1032,7 @@
     },
     {
       "id": 1304,
+      "avatar_id": 1304,
       "name": "砂金",
       "rarity": 2,
       "front_back_type": "Front",
@@ -1032,6 +1066,7 @@
     },
     {
       "id": 1305,
+      "avatar_id": 1305,
       "name": "真理医生",
       "rarity": 3,
       "front_back_type": "Front",
@@ -1065,6 +1100,7 @@
     },
     {
       "id": 1306,
+      "avatar_id": 1306,
       "name": "花火",
       "rarity": 2,
       "front_back_type": "Back",
@@ -1100,6 +1136,7 @@
     },
     {
       "id": 1307,
+      "avatar_id": 1307,
       "name": "黑天鹅",
       "rarity": 5,
       "front_back_type": "Back",
@@ -1136,6 +1173,7 @@
     },
     {
       "id": 1308,
+      "avatar_id": 1308,
       "name": "黄泉",
       "rarity": 3,
       "front_back_type": "Front",
@@ -1163,6 +1201,7 @@
     },
     {
       "id": 1309,
+      "avatar_id": 1309,
       "name": "知更鸟",
       "rarity": 4,
       "front_back_type": "Back",
@@ -1192,6 +1231,7 @@
     },
     {
       "id": 1310,
+      "avatar_id": 1310,
       "name": "流萤",
       "rarity": 5,
       "front_back_type": "Front",
@@ -1219,6 +1259,7 @@
     },
     {
       "id": 1314,
+      "avatar_id": 1314,
       "name": "翡翠",
       "rarity": 1,
       "front_back_type": "Back",
@@ -1248,6 +1289,7 @@
     },
     {
       "id": 1315,
+      "avatar_id": 1315,
       "name": "波提欧",
       "rarity": 4,
       "front_back_type": "Front",
@@ -1275,6 +1317,7 @@
     },
     {
       "id": 1317,
+      "avatar_id": 1317,
       "name": "乱破",
       "rarity": 1,
       "front_back_type": "Front",
@@ -1302,6 +1345,7 @@
     },
     {
       "id": 1401,
+      "avatar_id": 1401,
       "name": "大黑塔",
       "rarity": 4,
       "front_back_type": "Front",
@@ -1329,6 +1373,7 @@
     },
     {
       "id": 1402,
+      "avatar_id": 1402,
       "name": "阿格莱雅",
       "rarity": 1,
       "front_back_type": "Front",
@@ -1356,6 +1401,7 @@
     },
     {
       "id": 1403,
+      "avatar_id": 1403,
       "name": "缇宝",
       "rarity": 2,
       "front_back_type": "Both",
@@ -1391,6 +1437,7 @@
     },
     {
       "id": 1404,
+      "avatar_id": 1404,
       "name": "万敌",
       "rarity": 1,
       "front_back_type": "Both",
@@ -1421,6 +1468,7 @@
     },
     {
       "id": 1405,
+      "avatar_id": 1405,
       "name": "那刻夏",
       "rarity": 3,
       "front_back_type": "Back",
@@ -1450,6 +1498,7 @@
     },
     {
       "id": 1407,
+      "avatar_id": 1407,
       "name": "遐蝶",
       "rarity": 4,
       "front_back_type": "Front",
@@ -1477,6 +1526,7 @@
     },
     {
       "id": 1408,
+      "avatar_id": 1408,
       "name": "白厄",
       "rarity": 3,
       "front_back_type": "Front",
@@ -1498,6 +1548,7 @@
     },
     {
       "id": 1409,
+      "avatar_id": 1409,
       "name": "风堇",
       "rarity": 2,
       "front_back_type": "Front",
@@ -1531,6 +1582,7 @@
     },
     {
       "id": 1406,
+      "avatar_id": 1406,
       "name": "赛飞儿",
       "rarity": 1,
       "front_back_type": "Front",
@@ -1564,6 +1616,7 @@
     },
     {
       "id": 1410,
+      "avatar_id": 1410,
       "name": "海瑟音",
       "rarity": 4,
       "front_back_type": "Front",
@@ -1591,6 +1644,7 @@
     },
     {
       "id": 1412,
+      "avatar_id": 1412,
       "name": "刻律德菈",
       "rarity": 3,
       "front_back_type": "Both",
@@ -1621,6 +1675,7 @@
     },
     {
       "id": 1413,
+      "avatar_id": 1413,
       "name": "长夜月",
       "rarity": 4,
       "front_back_type": "Both",
@@ -1651,6 +1706,7 @@
     },
     {
       "id": 1414,
+      "avatar_id": 1414,
       "name": "丹恒•腾荒",
       "rarity": 2,
       "front_back_type": "Back",
@@ -1678,6 +1734,7 @@
     },
     {
       "id": 8007,
+      "avatar_id": 8007,
       "name": "开拓者·记忆",
       "rarity": 4,
       "front_back_type": "Front",
@@ -1711,6 +1768,7 @@
     },
     {
       "id": 11012,
+      "avatar_id": 1101,
       "name": "布洛妮娅",
       "rarity": 5,
       "front_back_type": "Front",
@@ -1738,6 +1796,7 @@
     },
     {
       "id": 1415,
+      "avatar_id": 1415,
       "name": "昔涟",
       "rarity": 5,
       "front_back_type": "Front",
@@ -1771,6 +1830,7 @@
     },
     {
       "id": 1501,
+      "avatar_id": 1501,
       "name": "火花",
       "rarity": 4,
       "front_back_type": "Front",
@@ -1804,6 +1864,7 @@
     },
     {
       "id": 1502,
+      "avatar_id": 1502,
       "name": "爻光",
       "rarity": 1,
       "front_back_type": "Both",
@@ -1834,6 +1895,7 @@
     },
     {
       "id": 1302,
+      "avatar_id": 1302,
       "name": "银枝",
       "rarity": 2,
       "front_back_type": "Both",
@@ -1864,6 +1926,7 @@
     },
     {
       "id": 1321,
+      "avatar_id": 1321,
       "name": "大丽花",
       "rarity": 1,
       "front_back_type": "Both",
@@ -1893,6 +1956,7 @@
     },
     {
       "id": 8009,
+      "avatar_id": 8009,
       "name": "开拓者·欢愉",
       "rarity": 4,
       "front_back_type": "Back",
@@ -1929,6 +1993,7 @@
     },
     {
       "id": 1504,
+      "avatar_id": 1504,
       "name": "不死途",
       "rarity": 2,
       "front_back_type": "Both",
@@ -1960,6 +2025,7 @@
     },
     {
       "id": 1505,
+      "avatar_id": 1505,
       "name": "绯英",
       "rarity": 2,
       "front_back_type": "Both",
@@ -1991,6 +2057,7 @@
     },
     {
       "id": 1005,
+      "avatar_id": 1005,
       "name": "卡芙卡",
       "rarity": 2,
       "front_back_type": "Both",
@@ -2021,6 +2088,7 @@
     },
     {
       "id": 15061,
+      "avatar_id": 1506,
       "name": "银狼LV.999",
       "rarity": 3,
       "front_back_type": "Front",
@@ -2054,6 +2122,7 @@
     },
     {
       "id": 15062,
+      "avatar_id": 1506,
       "name": "银狼LV.999",
       "rarity": 4,
       "front_back_type": "Front",
@@ -2087,6 +2156,7 @@
     },
     {
       "id": 15063,
+      "avatar_id": 1506,
       "name": "银狼LV.999",
       "rarity": 5,
       "front_back_type": "Front",
@@ -2120,6 +2190,7 @@
     },
     {
       "id": 1510,
+      "avatar_id": 1510,
       "name": "姬子•启行",
       "rarity": 3,
       "front_back_type": "Front",
@@ -2147,6 +2218,7 @@
     },
     {
       "id": 1507,
+      "avatar_id": 1507,
       "name": "千冶•刃",
       "rarity": 2,
       "front_back_type": "Back",
@@ -2183,6 +2255,7 @@
     },
     {
       "id": 1313,
+      "avatar_id": 1313,
       "name": "星期日",
       "rarity": 3,
       "front_back_type": "Both",
@@ -2220,6 +2293,7 @@
     },
     {
       "id": 1508,
+      "avatar_id": 1508,
       "name": "远坂凛",
       "rarity": 1,
       "front_back_type": "Both",
@@ -2251,6 +2325,7 @@
     },
     {
       "id": 1509,
+      "avatar_id": 1509,
       "name": "吉尔伽美什",
       "rarity": 2,
       "front_back_type": "Both",

@@ -150,7 +150,7 @@ watch(data, (d) => { if (d) document.title = `${d.name} - HSR Wiki`; }, { immedi
             :to="`/currency/role/${m.id}`"
             class="nk-ctrait-member"
           >
-            <img class="nk-ctrait-member__avatar" :src="avatarShopIconUrl(m.id)" :alt="m.name" loading="lazy" />
+            <img class="nk-ctrait-member__avatar" :src="avatarShopIconUrl(m.avatar_id || m.id)" :alt="m.name" loading="lazy" />
             <span class="nk-ctrait-member__name">{{ m.name }}</span>
             <span v-if="m.rarity" class="nk-ctrait-member__cost">{{ m.rarity }}费</span>
           </router-link>

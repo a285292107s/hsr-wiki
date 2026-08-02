@@ -430,11 +430,11 @@ const traitGroups = computed(() => {
     <template v-else-if="data">
       <!-- ═══ 沉浸式 Hero ═══ -->
       <header class="nk-crole-hero" :data-rarity="data.rarity">
-        <div class="nk-crole-hero__bg" :style="{ backgroundImage: `url(${avatarDrawCardUrl(data.id)})` }"></div>
+        <div class="nk-crole-hero__bg" :style="{ backgroundImage: `url(${avatarDrawCardUrl(data.avatar_id || data.id)})` }"></div>
         <div class="nk-crole-hero__scrim"></div>
         <div class="nk-crole-hero__content">
           <div class="nk-crole-hero__portrait" :data-rarity="data.rarity">
-            <img :src="avatarShopIconUrl(data.id)" :alt="data.name" loading="eager" @error="hideOnError" />
+            <img :src="avatarShopIconUrl(data.avatar_id || data.id)" :alt="data.name" loading="eager" @error="hideOnError" />
           </div>
           <div class="nk-crole-hero__info">
             <span class="nk-crole-hero__hud">GRID FIGHT · 货币战争</span>

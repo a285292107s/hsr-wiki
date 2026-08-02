@@ -285,6 +285,7 @@ def convert() -> None:
 
         base = {
             "id": rid,
+            "avatar_id": avatar_id,
             "name": name,
             "rarity": role_raw.get("Rarity", 0),
             "front_back_type": role_raw.get("FrontBackType") or "Both",
@@ -416,6 +417,7 @@ def convert() -> None:
 
         detail = {
             "id": base["id"],
+            "avatar_id": base["avatar_id"],
             "name": base["name"],
             "rarity": base["rarity"],
             "front_back_type": base["front_back_type"],
