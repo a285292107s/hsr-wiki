@@ -368,9 +368,9 @@ def convert() -> None:
             back_show_ids: list[int] = star_entry.get("BackShowSkillIDList") or []
 
             front_skills_out = [_build_skill(sid, front_skills, {}, skill_extra) for sid in front_skill_ids]
-            back_skills_out = [_build_skill(sid, back_skills, {"sp_base": None}, skill_extra) for sid in be_skill_ids]
+            back_skills_out = [_build_skill(sid, back_skills, {}, skill_extra) for sid in be_skill_ids]
             # 把 "back_show" 也加进来（与 be 去重或单独分组的逻辑看情况）
-            back_show_out = [_build_skill(sid, back_skills, {"sp_base": None}, skill_extra) for sid in back_show_ids]
+            back_show_out = [_build_skill(sid, back_skills, {}, skill_extra) for sid in back_show_ids]
             # 合并去重
             seen_ids = {sk["id"] for sk in back_skills_out}
             for bsk in back_show_out:
@@ -459,8 +459,9 @@ def _build_skill(
     desc = resolve_text(sk.get("SkillDesc", {}))
     simple_desc = resolve_text(sk.get("SimpleSkillDesc", {}))
 
-    # SPMultipleRatio 是全局常量 0.5，无逐技能区分度，不输出
-    sp_base = None
+    # SPBase：技能产生的能量值（逐技能不同，如 5/10/20/30/40），缺失时 null。
+    # 注：SPMultipleRatio（全局常量 0.5）是充能倍率，无逐技能区分度，不输出。
+    sp_base = _unwrap(sk.get("SPBase"))
     bp_need = _unwrap(sk.get("BPNeed"))
     bp_add = _unwrap(sk.get("BPAdd"))
     stance_list = _flatten_stance_list(sk.get("ShowStanceList"))
