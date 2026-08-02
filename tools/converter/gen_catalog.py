@@ -80,7 +80,11 @@ def inspect_json_file(path: Path) -> dict:
 
 
 def truncate_record(record: dict, max_str_len: int = 40) -> dict:
-    """截断记录中的长字符串，用于样例展示。"""
+    """截断记录中的长字段，用于样例展示。
+
+    长字符串加省略号；长列表/字典改为结构化摘要（如 "<list[123]>"），
+    保证样例输出始终是合法 JSON（此前直接截断 JSON 文本会产生非法片段）。
+    """
     result = {}
     for k, v in record.items():
         if isinstance(v, str) and len(v) > max_str_len:
@@ -88,7 +92,7 @@ def truncate_record(record: dict, max_str_len: int = 40) -> dict:
         elif isinstance(v, (list, dict)):
             s = json.dumps(v, ensure_ascii=False)
             if len(s) > max_str_len:
-                result[k] = s[:max_str_len] + "..."
+                result[k] = f"<{type(v).__name__}[{len(v)}]>"
             else:
                 result[k] = v
         else:

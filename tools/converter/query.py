@@ -43,6 +43,7 @@ import json
 import sys
 from collections import Counter
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import cast
 
@@ -92,8 +93,13 @@ class QueryArgs:
     limit: int
 
 
+@lru_cache(maxsize=4)
 def load_excel(filename: str) -> JSONValue:
-    """加载 ExcelOutput 下的 JSON 文件。"""
+    """加载 ExcelOutput 下的 JSON 文件（进程内缓存，同一文件只解析一次）。
+
+    与 utils.load_json 同理：源数据只读不写，查询运行期文件不会变化，缓存安全；
+    调用方不得原地修改返回的 dict/list。
+    """
     # 支持省略 .json 后缀
     if not filename.endswith(".json"):
         filename += ".json"
@@ -162,10 +168,13 @@ def cmd_schema(data: JSONValue, filename: str) -> None:
         print(f"键数: {len(data):,}")
         sample_keys = list(data.keys())[:5]
         print(f"键样例: {sample_keys}")
-        if sample_keys:
-            first = data[sample_keys[0]]
-            if isinstance(first, dict):
-                print(f"值字段: {list(first.keys())}")
+        # 全量扫描所有值对象的字段并集（与数组型一致，防可选字段遗漏）
+        fields = set()
+        for v in data.values():
+            if isinstance(v, dict):
+                fields |= set(v.keys())
+        if fields:
+            print(f"值字段 ({len(fields)}): {', '.join(sorted(fields))}")
 
 
 def cmd_list(keyword: str) -> None:
@@ -258,16 +267,15 @@ def cmd_query(data: JSONValue, args: QueryArgs) -> None:
         grepped: list[JSONValue] = []
         for r in records:
             if isinstance(r, dict):
-                if any(
-                    keyword in json.dumps(v, ensure_ascii=False) for v in r.values()
-                ):
+                # 整条记录序列化一次（避免对每个值反复 json.dumps）
+                if keyword in json.dumps(r, ensure_ascii=False):
                     grepped.append(r)
             elif isinstance(r, str) and keyword in r:
                 grepped.append(r)
         records = grepped
         print(f"grep \"{keyword}\" → {len(records)} 条")
 
-    # --head / --limit
+    # --head / --limit（--head 为 --limit 的兼容别名，任一指定即生效）
     limit = args.limit or args.head or 10
     if len(records) > limit:
         print(f"（显示前 {limit} 条，共 {len(records)} 条）")
@@ -312,7 +320,7 @@ def main() -> None:
     _ = parser.add_argument("--where", type=str, default="", help="过滤条件（字段=值，多条件逗号分隔）")
     _ = parser.add_argument("--fields", type=str, default="", help="仅显示指定字段（逗号分隔）")
     _ = parser.add_argument("--grep", type=str, default="", help="在记录中模糊搜索包含指定文本的")
-    _ = parser.add_argument("--head", type=int, default=0, help="显示前 N 条记录")
+    _ = parser.add_argument("--head", type=int, default=0, help="显示前 N 条记录（--limit 的等价别名，保留兼容）")
     _ = parser.add_argument("--limit", type=int, default=0, help="限制输出条数")
     _ = parser.add_argument("--list", type=str, default=None, nargs="?", const="", help="列出文件名（可选关键词过滤）")
     _ = parser.add_argument("--resolve", type=str, default="", help="解析 TextMap Hash 值")
