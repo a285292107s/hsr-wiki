@@ -8,11 +8,11 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { CDN } from '../../lib/constants';
 import { fmtDesc, fmtDescMerged, avatarShopIconUrl, avatarDrawCardUrl, iconUrl } from '../../lib/format';
-import { loadLocalCurrencyRole } from '../../services/api';
+import { loadLocalCurrencyRole, loadLocalCharacter } from '../../services/api';
 import type {
   CurrencyRoleDetail, CurrencyRoleStar, CurrencyRoleSkill,
   CurrencyRoleTrait, CurrencyRoleRank,
-  CurrencyRoleRecommend, CurrencyRoleRecommendItem,
+  CurrencyRoleRecommend, CurrencyRoleRecommendItem, CharacterData,
 } from '../../services/types';
 
 const route = useRoute();
@@ -102,6 +102,7 @@ interface MergedSkill {
   desc: string;
   simple_desc: string;
   sp_base: number | null;
+  sp_need: number | null;
   bp_need: number | null;
   bp_add: number | null;
   show_stance_list: number[] | null;
@@ -153,6 +154,7 @@ const mergedSkillGroups = computed(() => {
         desc: first.desc,
         simple_desc: first.simple_desc,
         sp_base: first.sp_base,
+        sp_need: first.sp_need,
         bp_need: first.bp_need,
         bp_add: first.bp_add,
         show_stance_list: first.show_stance_list,
@@ -309,9 +311,16 @@ function matrixUp(row: MatrixRow, colIdx: number): boolean {
   return cur != null && prev != null && cur !== prev;
 }
 
+/* ─── 随从属性 #N 参数解析（#N → 常规模式角色技能 param_list） ─── */
+/** 常规模式角色数据（随从 #N 引用解析用，懒加载） */
+const charData = ref<CharacterData | null>(null);
+const charDataFailed = ref(false);
+
 async function load() {
   loading.value = true;
   error.value = '';
+  charData.value = null;
+  charDataFailed.value = false;
   try {
     data.value = await loadLocalCurrencyRole(roleId.value);
   } catch (e) {
@@ -321,6 +330,50 @@ async function load() {
   }
 }
 watch(roleId, load, { immediate: true });
+
+/** 选中星级存在随从且含 #N 引用时，懒加载常规模式角色技能数据 */
+watch(
+  star,
+  async (s) => {
+    if (!s?.servant || charData.value || charDataFailed.value) return;
+    const detail = data.value;
+    if (!detail) return;
+    const refs = [s.servant.hp_base, s.servant.hp_inherit, s.servant.speed_base, s.servant.speed_inherit]
+      .filter((v) => typeof v === 'string' && /^#\d+$/.test(v));
+    if (!refs.length) return;
+    try {
+      charData.value = await loadLocalCharacter(String(detail.avatar_id || detail.id));
+    } catch {
+      charDataFailed.value = true; // 常规模式角色不存在（如未收录），优雅降级
+    }
+  },
+  { immediate: true },
+);
+/** 解析 #N 引用；字面值原样；无法解析返回 null（隐藏） */
+function resolveServantAttr(ref: string | number | null | undefined, skillId: number | null | undefined): string | null {
+  if (ref == null || ref === '') return null;
+  if (typeof ref === 'number') return String(ref);
+  if (!/^#\d+$/.test(ref)) return String(ref);
+  const idx = parseInt(ref.slice(1), 10) - 1;
+  const pl = charData.value?.skills?.[String(skillId)]?.level?.['1']?.param_list;
+  if (pl && pl[idx] != null) return String(pl[idx]);
+  return null;
+}
+/** 随从属性展示项（仅显示可解析项） */
+const servantAttrs = computed(() => {
+  const s = star.value?.servant;
+  if (!s) return [];
+  const items: Array<{ label: string; value: string }> = [];
+  const hp = resolveServantAttr(s.hp_base, s.hp_skill);
+  const hpInh = resolveServantAttr(s.hp_inherit, s.hp_skill);
+  const spd = resolveServantAttr(s.speed_base, s.speed_skill);
+  const spdInh = resolveServantAttr(s.speed_inherit, s.speed_skill);
+  if (hp) items.push({ label: 'HP', value: hp });
+  if (hpInh) items.push({ label: '生命继承', value: `${(Number(hpInh) * 100).toFixed(0)}%` });
+  if (spd) items.push({ label: '速度', value: spd });
+  if (spdInh) items.push({ label: '速度继承', value: `${(Number(spdInh) * 100).toFixed(0)}%` });
+  return items;
+});
 
 watch(
   data,
@@ -332,6 +385,27 @@ watch(
 function rankDesc(rk: CurrencyRoleRank): string {
   if (rk.param_list && rk.param_list.length) return fmtDesc(rk.desc, rk.param_list);
   return fmtDesc(rk.desc).replace(/#\d+\[i\]/g, '');
+}
+/** 星魂机制效果：强化技能（映射为技能名）+ 能量条修改 */
+const skillNameById = computed<Map<number, string>>(() => {
+  const map = new Map<number, string>();
+  const stars = data.value?.stars;
+  if (!stars) return map;
+  for (const s of Object.values(stars)) {
+    for (const g of ['front_show_skill', 'back_show_skill', 'servant_show_skill'] as const) {
+      for (const sk of s[g] || []) map.set(sk.id, sk.name || `#${sk.id}`);
+    }
+  }
+  return map;
+});
+function rankMech(rk: CurrencyRoleRank): string {
+  const parts: string[] = [];
+  if (rk.modify_skill_list && rk.modify_skill_list.length) {
+    const names = rk.modify_skill_list.map((id) => skillNameById.value.get(id) || `#${id}`);
+    parts.push(`强化技能：${names.join('、')}`);
+  }
+  if (rk.modify_energy_bar != null) parts.push(`能量条 +${rk.modify_energy_bar}`);
+  return parts.join(' · ');
 }
 function rankIconUrl(rk: CurrencyRoleRank): string {
   return rk.icon ? iconUrl(rk.icon) : '';
@@ -444,6 +518,7 @@ const traitGroups = computed(() => {
               <span v-if="data.front_back_type" class="nk-crole-chip nk-crole-chip--fb">{{ FB_LABEL[data.front_back_type] || data.front_back_type }}</span>
               <span v-for="c in data.charge_type" :key="c" class="nk-crole-chip nk-crole-chip--charge">{{ CHARGE_LABEL[c] || c }}</span>
               <span v-if="data.is_expert" class="nk-crole-chip nk-crole-chip--exp">专家</span>
+              <span v-if="data.season_ids && data.season_ids.length" class="nk-crole-chip nk-crole-chip--season">赛季 {{ data.season_ids.join(' / ') }}</span>
             </div>
             <div v-if="traitGroups.length" class="nk-crole-hero__traits">
               <div v-for="grp in traitGroups" :key="grp.cat" class="nk-crole-traitgrp">
@@ -505,6 +580,7 @@ const traitGroups = computed(() => {
                 <span class="nk-crole-timeline__name">{{ rk.name }}</span>
               </div>
               <p class="nk-crole-timeline__desc" v-html="rankDesc(rk)"></p>
+              <p v-if="rankMech(rk)" class="nk-crole-timeline__mech">{{ rankMech(rk) }}</p>
               <ul v-if="rk.owner_props.length || rk.all_props.length" class="nk-crole-layer__props">
                 <li v-for="(p, pi) in rk.owner_props" :key="'o' + pi">
                   <span class="nk-crole-layer__scope">自身</span>
@@ -643,6 +719,10 @@ const traitGroups = computed(() => {
         <!-- 技能详情（跨星级合并，斜杠分隔多星级值） -->
         <template v-if="mergedSkillGroups.length">
           <h2 class="nk-crole-section__title">技能详情</h2>
+          <!-- 随从属性（独立区块，不依赖随从技能组存在性） -->
+          <div v-if="servantAttrs.length" class="nk-crole-servantattrs">
+            <span v-for="a in servantAttrs" :key="a.label" class="nk-crole-servantattrs__item"><b>{{ a.label }}</b>{{ a.value }}</span>
+          </div>
           <div v-for="grp in mergedSkillGroups" :key="grp.key" class="nk-crole-skillgroup">
             <h3 class="nk-crole-skillgroup__title">{{ grp.label }}</h3>
             <div class="nk-crole-skills">
@@ -652,8 +732,9 @@ const traitGroups = computed(() => {
                   <span v-if="sk.tag" class="nk-crole-skill__tag">{{ sk.tag }}</span>
                   <span v-if="sk.type" class="nk-crole-skill__type">{{ sk.type }}</span>
                 </div>
-                <div class="nk-crole-skill__cost" v-if="sk.sp_base != null || (sk.bp_need != null && sk.bp_need > 0)">
+                <div class="nk-crole-skill__cost" v-if="sk.sp_base != null || sk.sp_need != null || (sk.bp_need != null && sk.bp_need > 0)">
                   <span v-if="sk.sp_base != null">SP {{ sk.sp_base }}</span>
+                  <span v-if="sk.sp_need != null">能量 {{ sk.sp_need }}</span>
                   <span v-if="sk.bp_need != null && sk.bp_need > 0">BP {{ sk.bp_need }}<template v-if="sk.bp_add != null"> (+{{ sk.bp_add }})</template></span>
                 </div>
                 <p class="nk-crole-skill__simple">{{ sk.simple_desc }}</p>

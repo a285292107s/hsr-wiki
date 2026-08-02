@@ -555,6 +555,7 @@
 .nk-crole-chip--heal { background: rgba(120, 220, 150, 0.2); color: #9fe6b4; }
 .nk-crole-chip--charge { background: rgba(255, 200, 90, 0.2); color: #ffd98a; }
 .nk-crole-chip--exp { background: rgba(255, 120, 160, 0.22); color: #ff9ec0; }
+.nk-crole-chip--season { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
 
 /* ═══ 通用段落 ═══ */
 .nk-crole-section__title {
@@ -699,6 +700,12 @@
 .nk-crole-timeline__name { font-weight: 600; font-size: 14px; color: var(--text-bright); }
 .nk-crole-timeline__desc { font-size: 13px; color: var(--text2); line-height: 1.55; margin: 0; }
 .nk-crole-timeline__desc span { color: var(--crole-num); }
+.nk-crole-timeline__mech {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--metric-val);
+  line-height: 1.5;
+}
 
 /* ═══ 推荐装备（前后台 × 优先级） ═══ */
 .nk-crole-recs {
@@ -1020,6 +1027,25 @@
   content: ''; flex: none; width: 3px; height: 12px; border-radius: 2px;
   background: linear-gradient(180deg, var(--primary), var(--accent));
 }
+/* 随从属性行（#N 引用解析后的 HP/速度） */
+.nk-crole-servantattrs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.nk-crole-servantattrs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text2);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.nk-crole-servantattrs__item b { color: var(--metric-val); font-weight: 600; }
 .nk-crole-skills {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

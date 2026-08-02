@@ -609,6 +609,10 @@ export interface CurrencyRoleDetail {
   stars: Record<string, CurrencyRoleStar>;
   rank: CurrencyRoleRank[];
   equipment: CurrencyRoleEquipment[];
+  /** 特殊形态 AvatarID（370xxxx 系列） */
+  special_avatar_id: number | null;
+  /** 所属赛季（SeasonIDList 优先，空则回退 [SeasonID]） */
+  season_ids: number[];
 }
 
 /** 后台角色星魂（GridFightBackRoleRank） */
