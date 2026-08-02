@@ -1,4 +1,4 @@
-/** 全局常量：CDN 地址 / 命途 / 属性 / 技能类型 / 标签映射（沿用原项目数据） */
+/** 全局常量：CDN 地址 / 命途 / 属性 / 技能类型 / 韧性标签映射（沿用原项目数据） */
 
 export const CDN = 'https://static.nanoka.cc';
 
@@ -25,11 +25,9 @@ export const TYPE: Record<string, string> = {
   Maze: '秘技', Servant: '忆灵技', ServantPassive: '忆灵天赋',
 };
 
-/** 技能标签 */
-export const TAG: Record<string, string> = {
-  SingleAttack: '单攻', AoEAttack: '群攻', Blast: '扩散', Bounce: '弹射',
-  Support: '辅助', Enhance: '强化', Defence: '防御', Impair: '削弱',
-  Restore: '恢复', MazeAttack: '秘技普攻',
+/** 韧性条标签（show_stance_list 下标对应枚举 → 中文） */
+export const STANCE_TAG: Record<string, string> = {
+  SingleAttack: '单攻', AoEAttack: '群攻', Blast: '扩散',
 };
 
 /** 技能图标键映射（SkillIcon_{id}_{key}.webp） */
@@ -71,7 +69,7 @@ export const PROP_ICON: Record<string, string> = {
   ImaginaryAddedRatio: 'ImaginaryAddedRatio',
 };
 
-/** 韧性条标签（show_stance_list 下标对应） */
+/** 韧性条下标枚举（show_stance_list 下标对应） */
 export const STANCE_LABEL = ['SingleAttack', 'AoEAttack', 'Blast'] as const;
 
 /** 技能展示排序（null 为分隔位）；ElationDamage（欢愉技）置于天赋后 */

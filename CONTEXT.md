@@ -46,6 +46,10 @@
 ### 部位（Relic Type）
 遗器的装备位置，英文标识。HEAD=头部、HAND=手部、BODY=躯干、FOOT=脚部、NECK=位面球、OBJECT=连结绳。
 
+### 技能标签（Skill Tag）
+技能卡片头部显示的官方中文标签（如「单攻」「群攻」「召唤」），来自源数据 `AvatarSkillConfig.SkillTag`（Hash 引用），由转换器解析后直接输出中文文本，前端直显（不映射）。与技能效果枚举 `SkillEffect`（英文类型标识，如 SingleAttack）语义不同：前者是官方展示文案，后者是逻辑分类——常规模式与货币战争模式均以官方 SkillTag 为唯一数据源（见 ADR 0008）。
+_Avoid_: 技能效果、SkillEffect 标签
+
 # 导航与模式
 
 ### 交换（Swap）

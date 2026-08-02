@@ -69,6 +69,32 @@ class TestBuildSkills:
         result = cd._build_skills(data, [7])
         assert result["7"]["sp_base"] == 30
 
+    def test_tag_resolved_from_skill_tag(self):
+        # 官方 SkillTag（Hash 引用）解析为中文文本（方案 A，与货币战争模块一致）
+        import textmap
+        textmap._text_map["100001"] = "单攻"
+        data = [{"SkillID": 8, "Level": 1, "AttackType": "Normal", "SkillTag": {"Hash": 100001}}]
+        result = cd._build_skills(data, [8])
+        assert result["8"]["tag"] == "单攻"
+
+    def test_tag_none_when_skill_tag_missing(self):
+        data = [{"SkillID": 9, "Level": 1, "AttackType": "Normal"}]
+        result = cd._build_skills(data, [9])
+        assert result["9"]["tag"] is None
+
+    def test_unknown_trigger_no_attack_type_outputs_none(self):
+        # SkillP02（天赋 2，如 140805）无 AttackType：透传 None 而非空串，
+        # 前端 SKILL_ORDER.includes(null) 为 true 可独立成组显示（P10 修复契约）
+        data = [{"SkillID": 140805, "Level": 1, "AttackType": "", "SkillTriggerKey": "SkillP02"}]
+        result = cd._build_skills(data, [140805])
+        assert result["140805"]["type"] is None
+
+    def test_unknown_trigger_falls_back_to_attack_type(self):
+        # Skill11（强化普攻，如 141508）不在映射表 → AttackType 兜底 Normal
+        data = [{"SkillID": 141508, "Level": 1, "AttackType": "Normal", "SkillTriggerKey": "Skill11"}]
+        result = cd._build_skills(data, [141508])
+        assert result["141508"]["type"] == "Normal"
+
 
 # ─── _build_servant_skills ──────────────────────────────────────
 
@@ -89,6 +115,14 @@ class TestBuildServantSkills:
 
     def test_missing_skill_skipped(self):
         assert cd._build_servant_skills([], [99]) == {}
+
+    def test_tag_resolved_from_skill_tag(self):
+        # 忆灵技能官方 SkillTag（如 1141501 → 「群攻」）
+        import textmap
+        textmap._text_map["200001"] = "群攻"
+        data = [{"SkillID": 13, "Level": 1, "AttackType": "Servant", "SkillTag": {"Hash": 200001}}]
+        result = cd._build_servant_skills(data, [13])
+        assert result["13"]["tag"] == "群攻"
 
 
 # ─── _build_ranks ───────────────────────────────────────────────

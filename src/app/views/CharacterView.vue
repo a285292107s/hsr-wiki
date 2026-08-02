@@ -400,14 +400,14 @@ function animFor(sk: Skill): SkillAnimEntry[] | null {
   if (!db || !char.charId) return null;
   const charAnims = db[char.charId];
   if (!charAnims) return null;
-  return charAnims[sk.type] || null;
+  return charAnims[sk.type ?? ''] || null;
 }
 
 interface SkillGroup { main: Skill; children: Skill[] }
 /** 按 (type + type_name) 分组：首个为主技能，同组后续为子技能 */
 function groupSkills(skills: Skill[]): SkillGroup[] {
   const valid = skills.filter(
-    (s) => s.type !== 'MazeNormal' && !!s.type_name && SKILL_ORDER.includes(s.type),
+    (s) => !!s.type_name && SKILL_ORDER.includes(s.type),
   );
   const map = new Map<string, SkillGroup>();
   const groups: SkillGroup[] = [];
@@ -456,7 +456,7 @@ const removedSkills = computed(() => {
     const lvObj = sk.level ? sk.level[Object.keys(sk.level).pop() as string] : null;
     return {
       sk,
-      tn: sk.type_name || TYPE[sk.type] || '',
+      tn: sk.type_name || TYPE[sk.type ?? ''] || '',
       icon: skillIconUrl(sk, char.charId, dd),
       descHtml: fmtDesc(sk.desc, (lvObj && lvObj.param_list) || []),
     };

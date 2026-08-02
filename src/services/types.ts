@@ -34,6 +34,7 @@ export interface SkillLevel {
 export type SkillType =
   | 'Normal' | 'BPSkill' | 'Ultra' | 'Passive'
   | 'Maze' | 'Assist' | 'Servant' | 'ServantPassive'
+  | null
   | (string & {});
 
 export interface Skill {
@@ -43,6 +44,7 @@ export interface Skill {
   simple_desc?: string;
   type: SkillType;
   type_name: string;
+  /** 技能标签：官方 SkillTag 中文文本（如「单攻」「召唤」），空则无标签 */
   tag?: string | null;
   sp_base?: number | null;
   bp_need?: number | null;

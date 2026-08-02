@@ -11,6 +11,12 @@ from utils import load_json, save_json, map_icon_path, unwrap_value
 logger = logging.getLogger("converter")
 
 # SkillTriggerKey → CDN type 映射（优先级高于 AttackType）
+#
+# 契约说明：仅此处列出的槽位参与映射/过滤。未列出的新槽位（如 Skill11/12/13/14/21/22/04/
+# 41/51/52/53/P02）不在此表，走下方 AttackType 兜底：命中 SKILL_TYPE_MAP 则输出对应 type
+# （Skill11+Normal → Normal、Skill04+ElationDamage → ElationDamage），否则透传原值
+# （SkillP02 无 AttackType → None，如 140805「天赋 2」；前端按 null 独立成组显示，行为正确，
+# 勿映射为 Passive 以免嵌套进主天赋卡片）。行为由 tests/test_character_detail.py 契约测试锁定。
 _TRIGGER_TYPE_MAP = {
     "Skill01": "Normal",
     "Skill02": "BPSkill",
@@ -56,11 +62,18 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
         # 保留原始标签（clean=False），让前端自行处理 <color>/<unbreak> 等
         desc = resolve_text(first.get("SkillDesc", {}), clean=False)
         simple_desc = resolve_text(first.get("SimpleSkillDesc", {}), clean=False)
+        # 官方中文标签（SkillTag 解析，如「单攻」「召唤」），与货币战争模块保持一致
+        tag = resolve_text(first.get("SkillTag", {})) or None
         # 优先使用 TriggerKey 映射类型，其次 AttackType 映射，最后用原始值
         if trigger_type:
             skill_type = trigger_type
         else:
             skill_type = SKILL_TYPE_MAP.get(attack_type, attack_type)
+        # 无类型槽位（如 SkillP02「天赋 2」无 AttackType）输出 None 而非空串：
+        # 前端 SKILL_ORDER.includes(null) 为 true（分隔位），可按 null 独立成组显示；
+        # 空串会被前端过滤条件 includes('') 判为 false 而隐藏（见 P10 修复）。
+        if skill_type == "":
+            skill_type = None
 
         # 构建 level 字典
         level_dict: dict[str, dict] = {}
@@ -78,7 +91,7 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
             "simple_desc": simple_desc,
             "type": skill_type,
             "type_name": type_desc,
-            "tag": first.get("SkillEffect") or None,
+            "tag": tag,
             "sp_base": unwrap_value(first.get("SPBase", None)),
             "bp_need": unwrap_value(first.get("BPNeed", None)),
             "bp_add": unwrap_value(first.get("BPAdd", None)),
@@ -116,6 +129,8 @@ def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int]) 
         desc = resolve_text(first.get("SkillDesc", {}), clean=False)
         simple_desc = resolve_text(first.get("SimpleSkillDesc", {}), clean=False)
         skill_type = "Servant" if first.get("AttackType") == "Servant" else None
+        # 忆灵技能同样使用官方 SkillTag（如 1141501 → 「群攻」）
+        tag = resolve_text(first.get("SkillTag", {})) or None
 
         level_dict: dict[str, dict] = {}
         for e in entries:
@@ -132,7 +147,7 @@ def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int]) 
             "simple_desc": simple_desc,
             "type": skill_type,
             "type_name": type_desc,
-            "tag": first.get("SkillEffect") or None,
+            "tag": tag,
             "sp_base": unwrap_value(first.get("SPBase", None)),
             "bp_need": unwrap_value(first.get("BPNeed", None)),
             "bp_add": None,

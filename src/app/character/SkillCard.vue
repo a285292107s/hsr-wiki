@@ -10,7 +10,7 @@ import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types'
 import {
   fmtDesc, fmtDescDiff, fmtToughness, hasParamDiff, hasTextDiff, paramEqual, skillIconUrl,
 } from '../../lib/format';
-import { TAG, TYPE } from '../../lib/constants';
+import { TYPE } from '../../lib/constants';
 
 const props = defineProps<{
   sk: Skill;
@@ -118,8 +118,9 @@ const status = computed<'changed' | 'added' | null>(() => {
 });
 
 /* ─── 头部信息 ─── */
-const typeName = computed(() => props.sk.type_name || TYPE[props.sk.type] || '');
-const tagLabel = computed(() => (props.sk.tag && TAG[props.sk.tag]) || '');
+const typeName = computed(() => props.sk.type_name || TYPE[props.sk.type ?? ''] || '');
+/** 技能标签：官方 SkillTag 中文文本（如「单攻」「召唤」），空则不显示 */
+const tagLabel = computed(() => props.sk.tag || '');
 const icon = computed(() => skillIconUrl(props.sk, props.charId, props.charData));
 /** 技能类型键（用于 data-type 色彩映射） */
 const typeKey = computed(() => props.sk.type || '');
