@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
@@ -122,24 +123,39 @@ def print_json(data: JSONValue, compact: bool = False) -> None:
 
 
 def cmd_schema(data: JSONValue, filename: str) -> None:
-    """显示文件 schema 信息。"""
+    """显示文件 schema 信息（全量字段统计，非仅首条记录）。
+
+    历史教训：旧实现只基于 data[0] 推断字段，可选字段（如
+    AvatarSkillConfig 的 SPBase/HideInUI）会被漏报，导致审计误判
+    （见 docs/字段审计-AvatarSkillConfig.md F1）。现改为全量扫描：
+    统计每个字段的出现率，并按出现率降序输出。
+    """
     if isinstance(data, list):
         print(f"文件: {filename}")
         print(f"类型: array")
         print(f"记录数: {len(data):,}")
         if data and isinstance(data[0], dict):
             first = data[0]
-            fields = list(first.keys())
-            print(f"字段数: {len(fields)}")
+            counter: Counter[str] = Counter()
+            for rec in data:
+                if isinstance(rec, dict):
+                    counter.update(rec.keys())
+            fields = sorted(counter, key=lambda k: (-counter[k], k))
+            total = len(data)
+            print(f"字段数: {len(fields)}（全量扫描；首条记录仅 {len(first)} 个）")
             print(f"字段列表:")
             for field in fields:
-                val = first[field]
+                # 类型推断：优先首条记录；首条缺失时取首个包含该字段的记录
+                if field in first:
+                    val = first[field]
+                else:
+                    val = next((r[field] for r in data if isinstance(r, dict) and field in r), None)
                 type_name = type(val).__name__
                 if isinstance(val, dict) and "Hash" in val:
                     type_name = "HashRef"
                 elif isinstance(val, dict) and "Value" in val:
                     type_name = "ValueWrap"
-                print(f"  {field}: {type_name}")
+                print(f"  {field}: {type_name} (出现率 {counter[field] / total * 100:.1f}%)")
     elif isinstance(data, dict):
         print(f"文件: {filename}")
         print(f"类型: object (dict)")

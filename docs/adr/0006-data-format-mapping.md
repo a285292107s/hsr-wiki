@@ -6,7 +6,7 @@
 
 > 本 ADR 的"StarRailRes 扁平索引格式"及"源数据通过本地解压引入（后续可改 submodule）"已过时：实际以 git submodule 引入源数据（见 ADR-0005），输出结构已演进为多模块、含 detail 子目录（`characters/`、`light_cones/`、`currency/`）并新增 monsters/maze/endgame（`maze*.json`）等数据；TextMap 解析、图片路径映射、枚举规范等策略性内容仍有效。
 >
-> **2026-08 更新**：`character_ranks.json` / `character_skills.json` 已废弃删除——第二期 `character_detail` 在 `characters/{id}.json` 内自建了质量更高的星魂/技能数据（全等级参数、正确过滤、保留富文本标签），前端全面改用详情数据，两索引无消费方（见 docs/角色转换模块字段分析.md 存疑 1/2）。
+> **2026-08 更新**：`character_ranks.json` / `character_skills.json` 已废弃删除——第二期 `character_detail` 在 `characters/{id}.json` 内自建了质量更高的星魂/技能数据（全等级参数、正确过滤、保留富文本标签），前端全面改用详情数据，两索引无消费方（见 docs/audit/角色转换模块字段分析.md 存疑 1/2）。
 
 ## 背景
 

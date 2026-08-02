@@ -6,15 +6,14 @@
 
 用法:
     cd tools/converter
-    python gen_catalog.py              # 生成 DATA_CATALOG.md
-    python gen_catalog.py --top 50     # 仅索引前 50 个最大文件
-    python gen_catalog.py --filter Avatar  # 仅索引文件名含 Avatar 的
+    python gen_catalog.py              # 生成 DATA_CATALOG.md（全量索引）
+    python gen_catalog.py --top 50     # 局部索引前 50 个最大文件 → DATA_CATALOG.top50.md
+    python gen_catalog.py --filter Avatar  # 局部索引文件名含 Avatar 的 → DATA_CATALOG.filter-avatar.md
 """
 
 import argparse
 import json
 import sys
-import time
 from pathlib import Path
 
 # Windows 控制台强制 UTF-8，避免中文输出乱码
@@ -51,7 +50,13 @@ def inspect_json_file(path: Path) -> dict:
         info["type"] = "array"
         info["count"] = len(data)
         if data and isinstance(data[0], dict):
-            info["fields"] = list(data[0].keys())
+            # 遍历全部记录求字段并集：官方数据中可选字段可能仅出现在部分记录，
+            # 只取首条记录会遗漏字段（曾导致 AI 依据索引误判字段不存在）
+            fields: set[str] = set()
+            for rec in data:
+                if isinstance(rec, dict):
+                    fields |= set(rec.keys())
+            info["fields"] = sorted(fields)
             info["sample"] = truncate_record(data[0])
     elif isinstance(data, dict):
         info["type"] = "object"
@@ -62,7 +67,12 @@ def inspect_json_file(path: Path) -> dict:
         if sample_keys:
             first_val = data[sample_keys[0]]
             if isinstance(first_val, dict):
-                info["fields"] = list(first_val.keys())
+                # 值字段并集（与数组型一致，防可选字段遗漏）
+                fields = set()
+                for v in data.values():
+                    if isinstance(v, dict):
+                        fields |= set(v.keys())
+                info["fields"] = sorted(fields)
     else:
         info["type"] = type(data).__name__
 
@@ -88,15 +98,17 @@ def truncate_record(record: dict, max_str_len: int = 40) -> dict:
 
 def format_catalog(entries: list[dict], textmap_info: dict) -> str:
     """生成 Markdown 格式的目录索引。"""
+    errors = [e for e in entries if "error" in e]
     lines = [
         "# ExcelOutput 数据目录索引",
         "",
         "> 本文件由 `gen_catalog.py` 自动生成，描述 `vendor/TurnBasedGameData/ExcelOutput/` 下所有 JSON 文件的结构。",
         "> AI 可通过本索引快速定位目标数据文件，再用 `query.py` 精确查询具体记录。",
+        "> `fields` 为全部记录字段的并集（官方数据中可选字段可能仅出现在部分记录）。",
         "",
-        f"**生成时间**: {time.strftime('%Y-%m-%d %H:%M:%S')}",
         f"**文件总数**: {len(entries)}",
         f"**总大小**: {sum(e['size_mb'] for e in entries):.1f} MB",
+        f"**解析失败**: {len(errors)}",
         "",
         "## TextMap",
         "",
@@ -113,7 +125,7 @@ def format_catalog(entries: list[dict], textmap_info: dict) -> str:
         "",
         "## ExcelOutput 文件列表",
         "",
-        "按文件大小降序排列。`fields` 为首条记录的字段名（即该文件的 schema）。",
+        "按文件大小降序排列。`fields` 为全部记录的字段并集。",
         "",
     ]
 
@@ -207,10 +219,22 @@ def main():
     print("检查 TextMap ...")
     textmap_info = inspect_textmap()
 
+    # 局部索引（--top / --filter）输出到独立文件，避免覆盖全量索引
+    suffix = []
+    if args.filter:
+        suffix.append(f"filter-{args.filter.lower()}")
+    if args.top > 0:
+        suffix.append(f"top{args.top}")
+    output_file = (
+        OUTPUT_FILE.with_name(f"DATA_CATALOG.{'-'.join(suffix)}.md") if suffix else OUTPUT_FILE
+    )
+
     print("生成索引 ...")
     catalog = format_catalog(entries, textmap_info)
-    OUTPUT_FILE.write_text(catalog, encoding="utf-8")
-    print(f"✅ 已生成 {OUTPUT_FILE} ({len(catalog) / 1024:.0f} KB)")
+    output_file.write_text(catalog, encoding="utf-8")
+    print(f"✅ 已生成 {output_file} ({len(catalog) / 1024:.0f} KB)")
+    if suffix:
+        print(f"⚠️ 局部索引（{len(entries)} 个文件），请勿提交到版本控制")
 
 
 if __name__ == "__main__":

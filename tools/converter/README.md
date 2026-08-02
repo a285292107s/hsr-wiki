@@ -156,13 +156,15 @@ TextMap 查询走本地 SQLite 索引（`.textmap-cache.db`，已 gitignore）�
 
 ## gen_catalog.py — 索引生成器
 
-扫描全部 ExcelOutput 文件，生成 `DATA_CATALOG.md` 轻量索引（~760 KB），包含每个文件的 schema、记录数、首条记录摘要。
+扫描全部 ExcelOutput 文件，生成 `DATA_CATALOG.md` 轻量索引（~840 KB），包含每个文件的 schema（全部记录字段的并集）、记录数、首条记录摘要。
 
 ```bash
-python gen_catalog.py                    # 全量生成
-python gen_catalog.py --top 50           # 仅索引前 50 个最大文件
-python gen_catalog.py --filter Avatar    # 仅索引文件名含 Avatar 的
+python gen_catalog.py                    # 全量生成 DATA_CATALOG.md
+python gen_catalog.py --top 50           # 局部索引前 50 个最大文件 → DATA_CATALOG.top50.md（请勿提交）
+python gen_catalog.py --filter Avatar    # 局部索引文件名含 Avatar 的 → DATA_CATALOG.filter-avatar.md（请勿提交）
 ```
+
+> 局部索引（`--top` / `--filter`）输出到独立文件，避免覆盖全量索引；仅全量模式写入 `DATA_CATALOG.md`。
 
 ### CI 自动触发
 

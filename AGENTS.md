@@ -149,6 +149,7 @@ src/
 ## 项目约定
 
 - Vue SFC 统一使用 `<script setup lang="ts">`
+- 字段筛选遵循 `docs/audit/字段价值审计流程.md`：AI 生成解读卡（字段名→人话语义→证据→置信度→价值建议），人工裁决四档分级；AI 无权判 🔴 排除（闸门 1），StarRailRes 基线有而本地无的字段必须标 ⚪ 待定（闸门 2）
 - 路由使用 `createWebHistory`（History 模式）——Vercel 支持 SPA fallback
 - Vite `base` 为 `/`——Vercel 部署于域名根路径
 - `cdn-samples/` 仅作参考样本，严禁作为数据源导入或随站部署
