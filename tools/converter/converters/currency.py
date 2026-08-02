@@ -48,6 +48,14 @@ def _trait_cat(tid: int) -> str:
     return "special"
 
 
+def _season_ids(role: dict) -> list[int]:
+    """角色所属赛季：SeasonIDList 优先，空则回退 [SeasonID]。"""
+    ids = list(role.get("SeasonIDList") or [])
+    if not ids and role.get("SeasonID") is not None:
+        ids = [role["SeasonID"]]
+    return ids
+
+
 # ---------- 加载 ExcelOutput 源数据 ----------
 
 def _load_excel(name: str) -> list[dict]:
@@ -295,6 +303,8 @@ def convert() -> None:
             "trait_list": trait_ids,
             "traits": traits_summary,
             "equipment_id": role_raw.get("EquipmentID"),
+            "special_avatar_id": role_raw.get("SpecialAvatarID"),
+            "season_ids": _season_ids(role_raw),
         }
 
         roles_out.append(base)
@@ -318,6 +328,7 @@ def convert() -> None:
                 "desc": trait_desc,
                 "simple_desc": trait_simple,
                 "desc_params": base_params,
+                "effect_list": tr.get("TraitEffectList") or [],
                 "layers": trait_layers.get(tid, []),
             })
 
@@ -336,6 +347,9 @@ def convert() -> None:
                 "owner_props": _flatten_property_mods(rk.get("OwnerGeneralPropertyList")),
                 "all_props": _flatten_property_mods(rk.get("AllMemberGeneralPropertyList")),
                 "param_list": [_unwrap(p, 0) for p in (rk.get("DescParamList") or [])],
+                "modify_skill_list": rk.get("ModifySkillList") or [],
+                "modify_energy_bar": _unwrap(rk.get("ModifyEnergyBar"), None),
+                "rank_ability": rk.get("RankAbility") or [],
             })
 
         # 专属装备（EquipmentID → GridFightBackEquipment，按等级）
@@ -380,9 +394,20 @@ def convert() -> None:
 
             # 随从技能（ServantStar 中 ServantShowSkiilIDList → ServantSkill）
             servant_skills_out: list[dict] = []
+            servant_node: dict | None = None
             sv_key = (rid, star_entry["Star"])
             sv_entry = servant_star_index.get(sv_key)
             if sv_entry:
+                # 随从属性：源为字面值或 #N 文本参数引用（指向 HPSkill/SpeedSkill 技能描述），
+                # 忠实透传；数值需前端做参数解析才有意义
+                servant_node = {
+                    "hp_base": sv_entry.get("HPBase", "0"),
+                    "hp_inherit": sv_entry.get("HPInherit", "0"),
+                    "hp_skill": sv_entry.get("HPSkill"),
+                    "speed_base": sv_entry.get("SpeedBase", "0"),
+                    "speed_inherit": sv_entry.get("SpeedInherit", "0"),
+                    "speed_skill": sv_entry.get("SpeedSkill"),
+                }
                 for sid in (sv_entry.get("ServantShowSkiilIDList") or []):
                     servant_skills_out.append(_build_skill(sid, servant_skills, {}, skill_extra))
 
@@ -408,6 +433,7 @@ def convert() -> None:
                 "front_show_skill": front_skills_out,
                 "back_show_skill": back_skills_out,
                 "servant_show_skill": servant_skills_out,
+                "servant": servant_node,
                 "general_property_modify_list": _flatten_property_mods(
                     star_entry.get("GeneralPropertyModifyList")
                 ),
@@ -429,6 +455,8 @@ def convert() -> None:
             "stars": stars_out,
             "rank": ranks_out,
             "equipment": equipment_out,
+            "special_avatar_id": base["special_avatar_id"],
+            "season_ids": base["season_ids"],
         }
 
         save_json(detail, detail_dir / f"{rid}.json")
@@ -462,6 +490,8 @@ def _build_skill(
     # SPBase：技能产生的能量值（逐技能不同，如 5/10/20/30/40），缺失时 null。
     # 注：SPMultipleRatio（全局常量 0.5）是充能倍率，无逐技能区分度，不输出。
     sp_base = _unwrap(sk.get("SPBase"))
+    # SPNeed：终结技能量需求（如 120/220），仅终结技有值，缺失时 null
+    sp_need = _unwrap(sk.get("SPNeed"), None)
     bp_need = _unwrap(sk.get("BPNeed"))
     bp_add = _unwrap(sk.get("BPAdd"))
     stance_list = _flatten_stance_list(sk.get("ShowStanceList"))
@@ -491,6 +521,7 @@ def _build_skill(
         "type": type_desc or None,
         "tag": tag or None,
         "sp_base": sp_base,
+        "sp_need": sp_need,
         "bp_need": bp_need,
         "bp_add": bp_add,
         "show_stance_list": stance_list,

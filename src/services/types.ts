@@ -524,6 +524,8 @@ export interface CurrencyRoleTrait {
   simple_desc: string;
   /** 基础描述参数（渲染 desc 中的 #N[i] 占位符） */
   desc_params: number[];
+  /** 特质效果 ID 列表（GridFightTraitBasicInfo.TraitEffectList） */
+  effect_list: number[];
   /** 层级效果列表（按 layer 升序） */
   layers: CurrencyRoleTraitLayer[];
 }
@@ -536,6 +538,8 @@ export interface CurrencyRoleSkill {
   type: string | null;
   tag: string | null;
   sp_base: number | null;
+  /** 终结技能量需求（仅终结技有值） */
+  sp_need: number | null;
   bp_need: number | null;
   bp_add: number | null;
   show_stance_list: number[] | null;
@@ -566,6 +570,15 @@ export interface CurrencyRoleStar {
   stance_damage_display: unknown | null;
   show_stance_list: number[] | null;
   recommend: CurrencyRoleRecommend | null;
+  /** 随从属性（源为字面值或 #N 文本参数引用，忠实透传） */
+  servant: {
+    hp_base: string;
+    hp_inherit: string;
+    hp_skill: number | null;
+    speed_base: string;
+    speed_inherit: string;
+    speed_skill: number | null;
+  } | null;
 }
 
 /** 推荐装备条目（从 GridFightItems 解析名称/图标） */
@@ -608,6 +621,12 @@ export interface CurrencyRoleRank {
   owner_props: Array<{ name: string; property_type: string; value: number }>;
   all_props: Array<{ name: string; property_type: string; value: number }>;
   param_list: number[];
+  /** 星魂修改的技能 ID 列表 */
+  modify_skill_list: number[];
+  /** 星魂修改的能量条数值 */
+  modify_energy_bar: number | null;
+  /** 星魂能力 ID 列表 */
+  rank_ability: number[];
 }
 
 /** 专属装备等级条目（GridFightBackEquipment） */
@@ -643,6 +662,10 @@ export interface CurrencyRoleEntry {
   traits: CurrencyRoleTraitSummary[];
   /** 专属装备 ID（部分角色有） */
   equipment_id: number | null;
+  /** 特殊形态 AvatarID（370xxxx 系列） */
+  special_avatar_id: number | null;
+  /** 所属赛季（SeasonIDList 优先，空则回退 [SeasonID]） */
+  season_ids: number[];
 }
 
 export interface CurrencyRoleList {
