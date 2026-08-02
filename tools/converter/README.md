@@ -43,8 +43,6 @@ python convert.py --pretty               # 输出缩进格式（调试用，默�
 | `properties` | properties.json | （自建映射） |
 | `items` | items.json | ItemConfig |
 | `characters` | characters.json | AvatarConfig(LD) |
-| `character_ranks` | character_ranks.json | AvatarRankConfig |
-| `character_skills` | character_skills.json | AvatarSkillConfig |
 | `character_detail` | characters/{id}.json | 多文件联合（19 个源文件） |
 | `light_cones` | light_cones.json | EquipmentConfig, EquipmentSkillConfig |
 | `light_cone_detail` | light_cones/{id}.json | 多文件联合 |
@@ -238,8 +236,6 @@ tools/converter/
 ├── converters/             # 各模块转换器
 │   ├── characters.py
 │   ├── character_detail.py
-│   ├── character_ranks.py
-│   ├── character_skills.py
 │   ├── light_cones.py
 │   ├── light_cone_detail.py
 │   ├── relics.py

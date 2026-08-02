@@ -26,8 +26,6 @@ MODULE_SOURCES: dict[str, list[str]] = {
     "properties": [],  # 纯静态映射，无源文件依赖
     "items": ["ItemConfig.json"],
     "characters": ["AvatarConfig.json", "AvatarConfigLD.json"],
-    "character_ranks": ["AvatarRankConfig.json"],
-    "character_skills": ["AvatarSkillConfig.json"],
     "character_detail": [
         "AvatarConfig.json", "AvatarConfigLD.json",
         "AvatarSkillConfig.json", "AvatarSkillConfigLD.json",

@@ -26,7 +26,7 @@ from textmap import load_textmap
 from utils import set_pretty
 from incremental import load_state, save_state, should_skip, update_state
 from converters import paths, elements, items, properties
-from converters import characters, character_ranks, character_skills, character_detail
+from converters import characters, character_detail
 from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame
 from converters import currency, season, currency_catalog  # noqa: E402 – 本地数据，无需网络
 
@@ -44,8 +44,6 @@ MODULES: dict[str, list] = {
     "properties": [properties.convert],
     "items": [items.convert],
     "characters": [characters.convert],
-    "character_ranks": [character_ranks.convert],
-    "character_skills": [character_skills.convert],
     "character_detail": [character_detail.convert],
     "light_cones": [light_cones.convert],
     "light_cone_detail": [light_cone_detail.convert],

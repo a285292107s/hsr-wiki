@@ -116,8 +116,6 @@ src/
 | 模块 | 读取的 ExcelOutput 源文件 |
 |------|---------------------------|
 | characters | AvatarConfig, AvatarConfigLD |
-| character_ranks | AvatarRankConfig |
-| character_skills | AvatarSkillConfig |
 | character_detail | AvatarConfig(LD), AvatarSkillConfig(LD), AvatarRankConfig(LD), AvatarSkillTreeConfig(LD), AvatarPromotionConfig(LD) |
 | light_cones | EquipmentConfig, EquipmentSkillConfig |
 | light_cone_detail | EquipmentConfig, EquipmentSkillConfig, EquipmentPromotionConfig, ItemConfigEquipment |
