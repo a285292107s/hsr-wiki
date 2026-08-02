@@ -389,7 +389,7 @@
           "simple_desc": "我方小队目标数量越多，暴击伤害、幸运一击伤害越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -670,7 +670,7 @@
           "simple_desc": "我方小队目标数量越多，暴击伤害、幸运一击伤害越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -951,7 +951,7 @@
           "simple_desc": "我方小队目标数量越多，暴击伤害、幸运一击伤害越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

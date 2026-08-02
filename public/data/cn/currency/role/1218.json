@@ -464,7 +464,7 @@
           "simple_desc": "将敌方目标具有的【烬煨】层数统一设置为场上【烬煨】层数的最高值，随后开启结界并对敌方全体造成火属性伤害。处于结界中时，敌方目标受到的终结技伤害和持续伤害提高，且行动时有概率被施加1层【烬煨】。\\n进入战斗时，椒丘恢复能量。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -496,7 +496,7 @@
           "simple_desc": "我方小队施放攻击后或行动中使敌方目标陷入负面效果后，为我方前台生命值最低的目标回复生命值。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -642,7 +642,7 @@
           "simple_desc": "将敌方目标具有的【烬煨】层数统一设置为场上【烬煨】层数的最高值，随后开启结界并对敌方全体造成火属性伤害。处于结界中时，敌方目标受到的终结技伤害和持续伤害提高，且行动时有概率被施加1层【烬煨】。\\n进入战斗时，椒丘恢复能量。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -674,7 +674,7 @@
           "simple_desc": "我方小队施放攻击后或行动中使敌方目标陷入负面效果后，为我方前台生命值最低的目标回复生命值。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -820,7 +820,7 @@
           "simple_desc": "将敌方目标具有的【烬煨】层数统一设置为场上【烬煨】层数的最高值，随后开启结界并对敌方全体造成火属性伤害。处于结界中时，敌方目标受到的终结技伤害和持续伤害提高，且行动时有概率被施加1层【烬煨】。\\n进入战斗时，椒丘恢复能量。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -852,7 +852,7 @@
           "simple_desc": "我方小队施放攻击后或行动中使敌方目标陷入负面效果后，为我方前台生命值最低的目标回复生命值。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -998,7 +998,7 @@
           "simple_desc": "将敌方目标具有的【烬煨】层数统一设置为场上【烬煨】层数的最高值，随后开启结界并对敌方全体造成火属性伤害。处于结界中时，敌方目标受到的终结技伤害和持续伤害提高，且行动时有概率被施加1层【烬煨】。\\n进入战斗时，椒丘恢复能量。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -1030,7 +1030,7 @@
           "simple_desc": "我方小队施放攻击后或行动中使敌方目标陷入负面效果后，为我方前台生命值最低的目标回复生命值。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

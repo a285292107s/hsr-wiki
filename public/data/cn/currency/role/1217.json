@@ -474,7 +474,7 @@
           "simple_desc": "为除自身以外的我方小队目标恢复能量，并使其攻击力提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -700,7 +700,7 @@
           "simple_desc": "为除自身以外的我方小队目标恢复能量，并使其攻击力提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -926,7 +926,7 @@
           "simple_desc": "为除自身以外的我方小队目标恢复能量，并使其攻击力提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1148,7 +1148,7 @@
           "simple_desc": "为除自身以外的我方小队目标恢复能量，并使其攻击力提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

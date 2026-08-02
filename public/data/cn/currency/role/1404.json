@@ -385,7 +385,7 @@
           "simple_desc": "消耗充能，对指定敌方单体造成大量虚数属性伤害，对相邻目标造成大量虚数属性伤害，并永久提高生命上限。\\n该技能会自动施放。",
           "type": "战技",
           "tag": "扩散",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -415,7 +415,7 @@
           "simple_desc": "战斗开始时，万敌生命上限越高，受到来自敌人伤害造成的充能比例越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -665,7 +665,7 @@
           "simple_desc": "消耗充能，对指定敌方单体造成大量虚数属性伤害，对相邻目标造成大量虚数属性伤害，并永久提高生命上限。\\n该技能会自动施放。",
           "type": "战技",
           "tag": "扩散",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -695,7 +695,7 @@
           "simple_desc": "战斗开始时，万敌生命上限越高，受到来自敌人伤害造成的充能比例越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -945,7 +945,7 @@
           "simple_desc": "消耗充能，对指定敌方单体造成大量虚数属性伤害，对相邻目标造成大量虚数属性伤害，并永久提高生命上限。\\n该技能会自动施放。",
           "type": "战技",
           "tag": "扩散",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -975,7 +975,7 @@
           "simple_desc": "战斗开始时，万敌生命上限越高，受到来自敌人伤害造成的充能比例越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1225,7 +1225,7 @@
           "simple_desc": "消耗充能，对指定敌方单体造成大量虚数属性伤害，对相邻目标造成大量虚数属性伤害，并永久提高生命上限。\\n该技能会自动施放。",
           "type": "战技",
           "tag": "扩散",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1255,7 +1255,7 @@
           "simple_desc": "战斗开始时，万敌生命上限越高，受到来自敌人伤害造成的充能比例越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

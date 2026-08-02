@@ -362,7 +362,7 @@
           "simple_desc": "大黑塔施放强化战技后，【黑塔人偶】发动追加攻击，造成冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -510,7 +510,7 @@
           "simple_desc": "大黑塔施放强化战技后，【黑塔人偶】发动追加攻击，造成冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -658,7 +658,7 @@
           "simple_desc": "大黑塔施放强化战技后，【黑塔人偶】发动追加攻击，造成冰属性伤害，重复#3[i]次。若我方小队中存在黑塔，则黑塔的每个星级提高#4[i]次重复次数。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

@@ -413,7 +413,7 @@
           "simple_desc": "使黄金裔角色获得【黄金铸成的史诗】，黄金裔角色的角色赋能效果基于【黄金铸成的史诗】的层数提高。\\n昔涟在战斗开始时获得【追忆】，战斗中首次施放终结技时，同时激活我方全体后台的终结技。\\n昔涟在场时，天赋提供的伤害提高效果可以对我方全体后台生效。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -440,7 +440,7 @@
           "simple_desc": "获得【追忆】并展开结界，我方小队每造成1次伤害，都会再额外造成1次真实伤害。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -587,7 +587,7 @@
           "simple_desc": "使黄金裔角色获得【黄金铸成的史诗】，黄金裔角色的角色赋能效果基于【黄金铸成的史诗】的层数提高。\\n昔涟在战斗开始时获得【追忆】，战斗中首次施放终结技时，同时激活我方全体后台的终结技。\\n昔涟在场时，天赋提供的伤害提高效果可以对我方全体后台生效。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -614,7 +614,7 @@
           "simple_desc": "获得【追忆】并展开结界，我方小队每造成1次伤害，都会再额外造成1次真实伤害。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -761,7 +761,7 @@
           "simple_desc": "使黄金裔角色获得【黄金铸成的史诗】，黄金裔角色的角色赋能效果基于【黄金铸成的史诗】的层数提高。\\n昔涟在战斗开始时获得【追忆】，战斗中首次施放终结技时，同时激活我方全体后台的终结技。\\n昔涟在场时，天赋提供的伤害提高效果可以对我方全体后台生效。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -788,7 +788,7 @@
           "simple_desc": "获得【追忆】并展开结界，我方小队每造成1次伤害，都会再额外造成1次真实伤害。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [

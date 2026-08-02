@@ -1,4 +1,5 @@
 /** 货币战争 · 角色图鉴目录页配置 */
+import { CDN } from '../../../lib/constants';
 import { escHtml, avatarShopIconUrl } from '../../../lib/format';
 import { loadLocalCurrencyRoles } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
@@ -6,11 +7,9 @@ import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 const FB_LABEL: Record<string, string> = {
   Front: '前台', Back: '后台', Both: '前后台',
 };
-const HEAL_LABEL: Record<string, string> = {
-  Healer: '治疗', Shield: '护盾', Heal: '治疗', Damage: '输出',
-};
+
 const CHARGE_LABEL: Record<string, string> = {
-  Speed: '速度', EnergyBar: '能量条', MaxSP: 'SP上限', MaxHP: '生命上限', SP: '战技点',
+  Speed: '速度', EnergyBar: '充能点数', MaxSP: '终结技充能', MaxHP: '生命上限', SP: '战技点',
 };
 
 /* ─── 特质分类（与 converter _trait_cat 对齐） ─── */
@@ -19,33 +18,47 @@ const TRAIT_CAT_LABEL: Record<TraitCat, string> = {
   faction: '阵营', combat: '流派', special: '特殊',
 };
 
+/* 前后台 SVG 图标（自绘，无网络依赖）
+   设计语言：「阵型槽位」——横向胶囊条 = 行位，实心亮色 = 占据，半透明幽灵描边 = 空槽。
+   暖金 = 前台，冷靖蓝 = 后台；三图标共享同一几何，仅填充状态不同。 */
+const FB_SVG_FRONT = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" fill="#FBBF24"/><rect x="3" y="13" width="18" height="8" rx="3" fill="#FBBF24" fill-opacity=".15" stroke="#FBBF24" stroke-opacity=".62" stroke-width="1.5"/></svg>`;
+const FB_SVG_BACK = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" fill="#818CF8" fill-opacity=".15" stroke="#818CF8" stroke-opacity=".62" stroke-width="1.5"/><rect x="3" y="13" width="18" height="8" rx="3" fill="#818CF8"/></svg>`;
+const FB_SVG_BOTH = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" fill="#FBBF24"/><rect x="3" y="13" width="18" height="8" rx="3" fill="#818CF8"/></svg>`;
+
+
 function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const id = String(item.id);
   const avatar = item.avatar || avatarShopIconUrl(id);
   const rarity = Number(item.rarity) || 0;
-  const cost = rarity >= 1 ? `${rarity}费` : String(rarity);
-  const fb = FB_LABEL[item.front_back_type as string] ?? (item.front_back_type as string) ?? '';
-  const heal = HEAL_LABEL[item.heal_or_shield_display as string] ?? (item.heal_or_shield_display as string) ?? '';
+  const fbType = (item.front_back_type as string) ?? 'Both';
   const charge = (item.charge_type || []).map((c) => CHARGE_LABEL[c] ?? c).join(' · ');
-  const expert = item.is_expert ? '<span class="nk-crole-tag nk-crole-tag--exp">专家</span>' : '';
-  /* 特质标签（数据驱动，由 converter 从 TextMap 解析） */
+  const expert = item.is_expert ? '<span class="nk-crole-card__exp">专家</span>' : '';
+  /* 前后台角标（SVG 图标 + 磨砂底座，头像左上角） */
+  const fbIcon = fbType === 'Both' ? FB_SVG_BOTH
+    : fbType === 'Front' ? FB_SVG_FRONT
+    : fbType === 'Back' ? FB_SVG_BACK
+    : '';
+  const fbBadge = fbIcon ? `<span class="nk-crole-card__fb">${fbIcon}</span>` : '';
+  /* 费用菱形徽章（头像右上角，稀有度配色） */
+  const costBadge = rarity >= 1 ? `<span class="nk-crole-card__cost" title="${rarity}费"><b>${rarity}</b></span>` : '';
+  /* 特质标签（数据驱动，由 converter 从 TextMap 解析；带小图标） */
   const traits = (item.traits as Array<{ id: number; name: string; cat: TraitCat }>) || [];
   const traitChips = traits
-    .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}">${escHtml(t.name || `#${t.id}`)}</span>`)
+    .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}"><img class="nk-crole-tcard-trait__icon" src="${CDN}/assets/hsr/gridfight/icon/${t.id}.webp" alt="" loading="lazy">${escHtml(t.name || `#${t.id}`)}</span>`)
     .join('');
-  /* data-rarity 上提到锚点，配合 CSS 稀有度色板；--i 驱动入场交错动画 */
+  /* 卡牌结构：头像出血（叠加 fb 角标 + 费用菱形 + scrim 名称）+ 紧凑 body */
   return `<a class="nk-crole-card" href="${item.href}" data-id="${escHtml(id)}" data-name="${escHtml(item.name)}" data-rarity="${rarity}" style="--i:${index}">
-      <div class="nk-crole-card__avatar"><img loading="lazy" src="${escHtml(avatar)}" alt="${escHtml(item.name)}"></div>
+      <div class="nk-crole-card__avatar">
+        <img loading="lazy" src="${escHtml(avatar)}" alt="${escHtml(item.name)}">
+        ${fbBadge}
+        ${costBadge}
+        <span class="nk-crole-card__name">${escHtml(item.name)}${expert}</span>
+      </div>
       <div class="nk-crole-card__body">
-        <div class="nk-crole-card__name">${escHtml(item.name)}</div>
-        <div class="nk-crole-card__stars">${cost}</div>
-        <div class="nk-crole-card__tags">
-          ${fb ? `<span class="nk-crole-tag nk-crole-tag--fb">${escHtml(fb)}</span>` : ''}
-          ${heal ? `<span class="nk-crole-tag nk-crole-tag--heal">${escHtml(heal)}</span>` : ''}
-          ${charge ? `<span class="nk-crole-tag nk-crole-tag--charge">${escHtml(charge)}</span>` : ''}
-          ${expert}
-        </div>
         ${traitChips ? `<div class="nk-crole-card__traits">${traitChips}</div>` : ''}
+        <div class="nk-crole-card__meta">
+          ${charge ? `<span class="nk-crole-card__meta-item nk-crole-card__meta-item--charge">${escHtml(charge)}</span>` : ''}
+        </div>
       </div>
     </a>`;
 }
@@ -67,7 +80,6 @@ export const currencyRolePage: CatalogPageConfig = {
         avatar: avatarShopIconUrl(r.avatar_id || r.id),
         rarity: r.rarity,
         front_back_type: r.front_back_type ?? 'Both',
-        heal_or_shield_display: r.heal_or_shield_display,
         charge_type: r.charge_type,
         is_expert: r.is_expert,
         trait_list: r.trait_list,

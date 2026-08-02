@@ -389,7 +389,7 @@
           "simple_desc": "进入【回路连接】状态。对指定敌方单体造成大量量子属性伤害。【回路连接】状态下施放战技后，本回合不会结束，并使Archer战技造成的伤害提高。战技点不足以再次施放战技则退出【回路连接】状态。主动施放第#5[i]次战技时，消耗剩余我方所有战技点，根据消耗数量提高战技伤害倍率。",
           "type": "战技",
           "tag": "单攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 2,
           "bp_add": null,
           "show_stance_list": [
@@ -420,7 +420,7 @@
           "simple_desc": "对指定敌方单体造成大量量子属性伤害，对其余敌方目标造成量子属性伤害，并获得充能。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -572,7 +572,7 @@
           "simple_desc": "进入【回路连接】状态。对指定敌方单体造成大量量子属性伤害。【回路连接】状态下施放战技后，本回合不会结束，并使Archer战技造成的伤害提高。战技点不足以再次施放战技则退出【回路连接】状态。主动施放第#5[i]次战技时，消耗剩余我方所有战技点，根据消耗数量提高战技伤害倍率。",
           "type": "战技",
           "tag": "单攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 2,
           "bp_add": null,
           "show_stance_list": [
@@ -603,7 +603,7 @@
           "simple_desc": "对指定敌方单体造成大量量子属性伤害，对其余敌方目标造成量子属性伤害，并获得充能。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -755,7 +755,7 @@
           "simple_desc": "进入【回路连接】状态。对指定敌方单体造成大量量子属性伤害。【回路连接】状态下施放战技后，本回合不会结束，并使Archer战技造成的伤害提高。战技点不足以再次施放战技则退出【回路连接】状态。主动施放第#5[i]次战技时，消耗剩余我方所有战技点，根据消耗数量提高战技伤害倍率。",
           "type": "战技",
           "tag": "单攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 2,
           "bp_add": null,
           "show_stance_list": [
@@ -786,7 +786,7 @@
           "simple_desc": "对指定敌方单体造成大量量子属性伤害，对其余敌方目标造成量子属性伤害，并获得充能。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

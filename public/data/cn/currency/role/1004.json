@@ -449,7 +449,7 @@
           "simple_desc": "若敌人陷入了负面状态，则瓦尔特会对其造成伤害并附加【无法逃脱】，每层使速度降低，受到的伤害提高，受到来自瓦尔特的伤害额外提高。",
           "type": "天赋",
           "tag": "妨害",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -480,7 +480,7 @@
           "simple_desc": "对敌方单体造成少量虚数属性伤害，每有1个陷入【无法逃脱】的敌人额外造成1次伤害，有概率对目标施加减速状态。",
           "type": "战技",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -509,7 +509,7 @@
           "simple_desc": "对敌方全体造成虚数属性伤害，大概率施加禁锢效果。并使战斗结束的倒计时延后。\\n使敌方全体陷入【失重】状态：受到攻击时行动延后。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -663,7 +663,7 @@
           "simple_desc": "若敌人陷入了负面状态，则瓦尔特会对其造成伤害并附加【无法逃脱】，每层使速度降低，受到的伤害提高，受到来自瓦尔特的伤害额外提高。",
           "type": "天赋",
           "tag": "妨害",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -694,7 +694,7 @@
           "simple_desc": "对敌方单体造成少量虚数属性伤害，每有1个陷入【无法逃脱】的敌人额外造成1次伤害，有概率对目标施加减速状态。",
           "type": "战技",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -723,7 +723,7 @@
           "simple_desc": "对敌方全体造成虚数属性伤害，大概率施加禁锢效果。并使战斗结束的倒计时延后。\\n使敌方全体陷入【失重】状态：受到攻击时行动延后。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -877,7 +877,7 @@
           "simple_desc": "若敌人陷入了负面状态，则瓦尔特会对其造成伤害并附加【无法逃脱】，每层使速度降低，受到的伤害提高，受到来自瓦尔特的伤害额外提高。",
           "type": "天赋",
           "tag": "妨害",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -908,7 +908,7 @@
           "simple_desc": "对敌方单体造成少量虚数属性伤害，每有1个陷入【无法逃脱】的敌人额外造成1次伤害，有概率对目标施加减速状态。",
           "type": "战技",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -937,7 +937,7 @@
           "simple_desc": "对敌方全体造成虚数属性伤害，大概率施加禁锢效果。并使战斗结束的倒计时延后。\\n使敌方全体陷入【失重】状态：受到攻击时行动延后。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

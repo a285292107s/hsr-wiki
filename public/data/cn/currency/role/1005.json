@@ -304,7 +304,7 @@
           "simple_desc": "每携带1件装备，卡芙卡战技、终结技和追加攻击触发持续伤害的倍率提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -330,7 +330,7 @@
           "simple_desc": "对敌方单体造成雷属性伤害，对相邻目标造成少量雷属性伤害。\\n若攻击目标处于持续伤害类负面状态，则使持续伤害类负面状态额外产生1次伤害。",
           "type": "战技",
           "tag": "扩散",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -603,7 +603,7 @@
           "simple_desc": "每携带1件装备，卡芙卡战技、终结技和追加攻击触发持续伤害的倍率提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -629,7 +629,7 @@
           "simple_desc": "对敌方单体造成雷属性伤害，对相邻目标造成少量雷属性伤害。\\n若攻击目标处于持续伤害类负面状态，则使持续伤害类负面状态额外产生1次伤害。",
           "type": "战技",
           "tag": "扩散",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -902,7 +902,7 @@
           "simple_desc": "每携带1件装备，卡芙卡战技、终结技和追加攻击触发持续伤害的倍率提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -928,7 +928,7 @@
           "simple_desc": "对敌方单体造成雷属性伤害，对相邻目标造成少量雷属性伤害。\\n若攻击目标处于持续伤害类负面状态，则使持续伤害类负面状态额外产生1次伤害。",
           "type": "战技",
           "tag": "扩散",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -1201,7 +1201,7 @@
           "simple_desc": "每携带1件装备，卡芙卡战技、终结技和追加攻击触发持续伤害的倍率提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1227,7 +1227,7 @@
           "simple_desc": "对敌方单体造成雷属性伤害，对相邻目标造成少量雷属性伤害。\\n若攻击目标处于持续伤害类负面状态，则使持续伤害类负面状态额外产生1次伤害。",
           "type": "战技",
           "tag": "扩散",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [

@@ -519,7 +519,7 @@
           "simple_desc": "本局中根据开启过的晶矿获得【流量】，当【流量】累积一定值后，【顶级流量】会提升品质。当火花升星时，立即获得【流量】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -553,7 +553,7 @@
           "simple_desc": "火花对随机敌方目标造成若干次火属性欢愉伤害。\\n当品质提高时，会造成更多次火属性欢愉伤害。\\n该次攻击后有概率获得对应品质晶矿。",
           "type": "欢愉技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -586,7 +586,7 @@
           "simple_desc": "火花每消耗1个战技点，在阿哈回合开始时火花获得1层【涨粉】：阿哈时刻期间伤害增幅提高，持续至下次阿哈回合开始。进入战斗时火花获得#3[i]层【涨粉】。\\n行迹【炫目！人设万花筒】所需要的「欢愉」命途角色也会计算后台角色。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -614,7 +614,7 @@
           "simple_desc": "火花施放欢愉技、普攻期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -760,7 +760,7 @@
           "simple_desc": "本局中根据开启过的晶矿获得【流量】，当【流量】累积一定值后，【顶级流量】会提升品质。当火花升星时，立即获得【流量】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -794,7 +794,7 @@
           "simple_desc": "火花对随机敌方目标造成若干次火属性欢愉伤害。\\n当品质提高时，会造成更多次火属性欢愉伤害。\\n该次攻击后有概率获得对应品质晶矿。",
           "type": "欢愉技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -827,7 +827,7 @@
           "simple_desc": "火花每消耗1个战技点，在阿哈回合开始时火花获得1层【涨粉】：阿哈时刻期间伤害增幅提高，持续至下次阿哈回合开始。进入战斗时火花获得#3[i]层【涨粉】。\\n行迹【炫目！人设万花筒】所需要的「欢愉」命途角色也会计算后台角色。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -855,7 +855,7 @@
           "simple_desc": "火花施放欢愉技、普攻期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1001,7 +1001,7 @@
           "simple_desc": "本局中根据开启过的晶矿获得【流量】，当【流量】累积一定值后，【顶级流量】会提升品质。当火花升星时，立即获得【流量】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1035,7 +1035,7 @@
           "simple_desc": "火花对随机敌方目标造成若干次火属性欢愉伤害。\\n当品质提高时，会造成更多次火属性欢愉伤害。\\n该次攻击后有概率获得对应品质晶矿。",
           "type": "欢愉技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1068,7 +1068,7 @@
           "simple_desc": "火花每消耗1个战技点，在阿哈回合开始时火花获得1层【涨粉】：阿哈时刻期间伤害增幅提高，持续至下次阿哈回合开始。进入战斗时火花获得#3[i]层【涨粉】。\\n行迹【炫目！人设万花筒】所需要的「欢愉」命途角色也会计算后台角色。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1096,7 +1096,7 @@
           "simple_desc": "火花施放欢愉技、普攻期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

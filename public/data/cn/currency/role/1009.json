@@ -311,7 +311,7 @@
           "simple_desc": "对敌方单体造成少量火属性伤害，并弹射#2[i]次。",
           "type": "战技",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -338,7 +338,7 @@
           "simple_desc": "艾丝妲造成伤害后，有概率使敌人陷入可叠加的灼烧状态。",
           "type": "天赋",
           "tag": "妨害",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -486,7 +486,7 @@
           "simple_desc": "对敌方单体造成少量火属性伤害，并弹射#2[i]次。",
           "type": "战技",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -513,7 +513,7 @@
           "simple_desc": "艾丝妲造成伤害后，有概率使敌人陷入可叠加的灼烧状态。",
           "type": "天赋",
           "tag": "妨害",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -661,7 +661,7 @@
           "simple_desc": "对敌方单体造成少量火属性伤害，并弹射#2[i]次。",
           "type": "战技",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -688,7 +688,7 @@
           "simple_desc": "艾丝妲造成伤害后，有概率使敌人陷入可叠加的灼烧状态。",
           "type": "天赋",
           "tag": "妨害",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -836,7 +836,7 @@
           "simple_desc": "对敌方单体造成少量火属性伤害，并弹射#2[i]次。",
           "type": "战技",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -863,7 +863,7 @@
           "simple_desc": "艾丝妲造成伤害后，有概率使敌人陷入可叠加的灼烧状态。",
           "type": "天赋",
           "tag": "妨害",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

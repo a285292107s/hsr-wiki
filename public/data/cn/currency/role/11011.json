@@ -209,7 +209,7 @@
           "simple_desc": "解除我方单体1个负面效果，使其造成的伤害提高并立刻行动。使目标和自身前台强度与幸运一击率提高。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -239,7 +239,7 @@
           "simple_desc": "获得【集结进行曲】，持续期间内使我方小队攻击力提高，暴击伤害提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -387,7 +387,7 @@
           "simple_desc": "解除我方单体1个负面效果，使其造成的伤害提高并立刻行动。使目标和自身前台强度与幸运一击率提高。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -417,7 +417,7 @@
           "simple_desc": "获得【集结进行曲】，持续期间内使我方小队攻击力提高，暴击伤害提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -565,7 +565,7 @@
           "simple_desc": "解除我方单体1个负面效果，使其造成的伤害提高并立刻行动。使目标和自身前台强度与幸运一击率提高。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -595,7 +595,7 @@
           "simple_desc": "获得【集结进行曲】，持续期间内使我方小队攻击力提高，暴击伤害提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

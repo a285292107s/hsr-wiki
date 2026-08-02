@@ -464,7 +464,8 @@ def _build_skill(
     desc = resolve_text(sk.get("SkillDesc", {}))
     simple_desc = resolve_text(sk.get("SimpleSkillDesc", {}))
 
-    sp_base = _unwrap(sk.get("SPMultipleRatio"))
+    # SPMultipleRatio 是全局常量 0.5，无逐技能区分度，不输出
+    sp_base = None
     bp_need = _unwrap(sk.get("BPNeed"))
     bp_add = _unwrap(sk.get("BPAdd"))
     stance_list = _flatten_stance_list(sk.get("ShowStanceList"))

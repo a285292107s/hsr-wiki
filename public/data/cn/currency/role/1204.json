@@ -404,7 +404,7 @@
           "simple_desc": "战斗开始时召唤【神君】，【神君】行动时发动追加攻击，自动对随机敌方单体及其相邻目标造成少量雷属性伤害。【神君】累计#7[i]段攻击段数后立即行动。",
           "type": "天赋",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -436,7 +436,7 @@
           "simple_desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】攻击段数。神君行动后使景元行动提前并恢复战技点。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -584,7 +584,7 @@
           "simple_desc": "战斗开始时召唤【神君】，【神君】行动时发动追加攻击，自动对随机敌方单体及其相邻目标造成少量雷属性伤害。【神君】累计#7[i]段攻击段数后立即行动。",
           "type": "天赋",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -616,7 +616,7 @@
           "simple_desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】攻击段数。神君行动后使景元行动提前并恢复战技点。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -764,7 +764,7 @@
           "simple_desc": "战斗开始时召唤【神君】，【神君】行动时发动追加攻击，自动对随机敌方单体及其相邻目标造成少量雷属性伤害。【神君】累计#7[i]段攻击段数后立即行动。",
           "type": "天赋",
           "tag": "弹射",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -796,7 +796,7 @@
           "simple_desc": "景元免疫控制类负面状态，施放战技/终结技后，额外增加【神君】攻击段数。神君行动后使景元行动提前并恢复战技点。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

@@ -293,7 +293,7 @@
           "simple_desc": "我方小队其他目标施放终结技后，Saber的终结技伤害次数提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -554,7 +554,7 @@
           "simple_desc": "我方小队其他目标施放终结技后，Saber的终结技伤害次数提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -815,7 +815,7 @@
           "simple_desc": "我方小队其他目标施放终结技后，Saber的终结技伤害次数提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

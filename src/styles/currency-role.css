@@ -73,16 +73,16 @@
   --holo-color: rgba(212, 175, 55, 0.5);
 }
 
-/* 列表卡片：与主目录全息卡片视觉统一（稀有度色板 / 入场动画 / hover 扫光 / 焦点态） */
+/* 列表卡片：交易卡牌语言——头像出血 + scrim 叠名 + 菱形费用 + 磨砂角标 */
 .nk-crole-grid { --col-w: 200px; --nk-grid-min: 180px; --nk-grid-gap: 14px; }
 .nk-crole-card {
   --holo-color: rgba(124, 58, 237, 0.55);
+  --cost-c: #c084fc;
   position: relative;
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 12px 10px 14px;
+  padding: 0;
   border-radius: 14px;
   background: var(--card);
   border: 1px solid var(--nk-card-border);
@@ -95,25 +95,13 @@
   animation-delay: min(calc(var(--i, 0) * 20ms), 600ms);
   transform-style: preserve-3d;
 }
-/* 稀有度配色（与 .nk-cat-card 对齐：5★金 / 4★紫 / 3★蓝 / 2★绿 / 1★灰） */
-.nk-crole-card[data-rarity="5"] { --holo-color: rgba(255, 215, 0, 0.6); border-color: rgba(251, 191, 36, 0.25); }
-.nk-crole-card[data-rarity="4"] { --holo-color: rgba(192, 132, 252, 0.6); border-color: rgba(192, 132, 252, 0.2); }
-.nk-crole-card[data-rarity="3"] { --holo-color: rgba(96, 165, 250, 0.5); border-color: rgba(96, 165, 250, 0.18); }
-.nk-crole-card[data-rarity="2"] { --holo-color: rgba(74, 222, 128, 0.45); border-color: rgba(74, 222, 128, 0.15); }
-.nk-crole-card[data-rarity="1"] { --holo-color: rgba(148, 163, 184, 0.4); border-color: rgba(148, 163, 184, 0.14); }
+/* 稀有度配色（5★金 / 4★紫 / 3★蓝 / 2★绿 / 1★灰；--cost-c 驱动菱形费用徽章） */
+.nk-crole-card[data-rarity="5"] { --holo-color: rgba(255, 215, 0, 0.6); --cost-c: #FFD966; border-color: rgba(251, 191, 36, 0.25); }
+.nk-crole-card[data-rarity="4"] { --holo-color: rgba(192, 132, 252, 0.6); --cost-c: #C084FC; border-color: rgba(192, 132, 252, 0.2); }
+.nk-crole-card[data-rarity="3"] { --holo-color: rgba(96, 165, 250, 0.5); --cost-c: #60A5FA; border-color: rgba(96, 165, 250, 0.18); }
+.nk-crole-card[data-rarity="2"] { --holo-color: rgba(74, 222, 128, 0.45); --cost-c: #4ADE80; border-color: rgba(74, 222, 128, 0.15); }
+.nk-crole-card[data-rarity="1"] { --holo-color: rgba(148, 163, 184, 0.4); --cost-c: #94A3B8; border-color: rgba(148, 163, 184, 0.14); }
 
-/* 顶部稀有度光晕 */
-.nk-crole-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 34%;
-  background: radial-gradient(ellipse 75% 100% at 50% 0%, var(--holo-color) 0%, color-mix(in srgb, var(--holo-color) 55%, transparent) 30%, transparent 78%);
-  z-index: 0;
-  opacity: 0.32;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
 /* hover 全息斜向扫光 */
 .nk-crole-card::after {
   content: '';
@@ -131,8 +119,6 @@
   border-color: color-mix(in srgb, var(--holo-color) 60%, transparent);
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 20px color-mix(in srgb, var(--holo-color) 22%, transparent);
 }
-.nk-crole-card:hover::before,
-.nk-crole-card:focus-visible::before { opacity: 0.5; }
 .nk-crole-card:hover::after { opacity: 1; }
 /* 键盘可达性：可见焦点环 */
 .nk-crole-card:focus-visible {
@@ -141,82 +127,220 @@
 }
 .nk-crole-card > * { position: relative; z-index: 1; }
 
+/* 头像：出血至卡片边缘，顶部圆角由卡片 overflow 裁切 */
 .nk-crole-card__avatar {
+  position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 12px;
   overflow: hidden;
   background: var(--surface);
 }
-.nk-crole-card__avatar img {
+/* 稀有度内缘光晕（代替原卡片顶部光晕，沿头像边缘向内渗透） */
+.nk-crole-card__avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--holo-color) 30%, transparent);
+  pointer-events: none;
+  transition: box-shadow 0.3s;
+}
+.nk-crole-card:hover .nk-crole-card__avatar::after,
+.nk-crole-card:focus-visible .nk-crole-card__avatar::after {
+  box-shadow: inset 0 0 30px color-mix(in srgb, var(--holo-color) 48%, transparent);
+}
+.nk-crole-card__avatar > img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s var(--ease);
 }
-.nk-crole-card:hover .nk-crole-card__avatar img,
-.nk-crole-card:focus-visible .nk-crole-card__avatar img { transform: scale(1.06); }
+.nk-crole-card:hover .nk-crole-card__avatar > img,
+.nk-crole-card:focus-visible .nk-crole-card__avatar > img { transform: scale(1.06); }
+
+/* 前后台角标：磨砂方形底座 + 阵型槽位图标（左上角） */
+.nk-crole-card__fb {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(6, 5, 3, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: border-color 0.25s, transform 0.25s var(--ease);
+}
+.nk-crole-card:hover .nk-crole-card__fb { border-color: rgba(255, 255, 255, 0.32); transform: scale(1.08); }
+.nk-crole-card__fb svg {
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+/* 费用菱形徽章：45° 旋转方块 + 反转数字，稀有度描边（右上角） */
+.nk-crole-card__cost {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  transform: rotate(45deg);
+  border-radius: 5px;
+  background: rgba(6, 5, 3, 0.72);
+  border: 1.4px solid color-mix(in srgb, var(--cost-c) 75%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: box-shadow 0.25s, border-color 0.25s;
+}
+.nk-crole-card__cost b {
+  transform: rotate(-45deg);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--cost-c);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--cost-c) 55%, transparent);
+}
+.nk-crole-card:hover .nk-crole-card__cost,
+.nk-crole-card:focus-visible .nk-crole-card__cost {
+  border-color: var(--cost-c);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--cost-c) 45%, transparent);
+}
+
+/* 名称：叠加于头像底部 scrim 之上（左对齐） */
+.nk-crole-card__name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 16px 10px 7px;
+  background: linear-gradient(to top, rgba(4, 3, 2, 0.85) 15%, rgba(4, 3, 2, 0.45) 60%, transparent);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-bright);
+  text-align: left;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
 .nk-crole-card__body {
   width: 100%;
-  margin-top: 10px;
-  text-align: center;
+  padding: 7px 8px 9px;
+  text-align: left;
 }
-.nk-crole-card__name {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--text-bright);
-}
-.nk-crole-card__stars {
-  color: var(--gold);
-  letter-spacing: 2px;
-  font-size: 13px;
-  margin: 4px 0;
-}
-.nk-crole-card__tags {
+/* 功能属性元信息条（纯文字，点分隔，弱色） */
+.nk-crole-card__meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  justify-content: center;
-  margin-top: 6px;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin-top: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0.72;
 }
-.nk-crole-tag {
-  font-size: 11px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(15, 15, 35, 0.6);
-  color: var(--text2);
+.nk-crole-card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  flex-shrink: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text3);
 }
-.nk-crole-tag--fb { background: rgba(80, 160, 255, 0.18); color: #8fc4ff; }
-.nk-crole-tag--heal { background: rgba(120, 220, 150, 0.18); color: #8fe0a8; }
-.nk-crole-tag--charge { background: rgba(255, 200, 90, 0.18); color: #ffd27a; }
-.nk-crole-tag--exp { background: rgba(255, 120, 160, 0.2); color: #ff9ec0; }
+.nk-crole-card__meta-item + .nk-crole-card__meta-item::before {
+  content: '';
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+  flex-shrink: 0;
+  margin: 0 5px;
+}
+.nk-crole-card__meta-item--exp { color: #d9899f; }
+
+/* 专家徽章：紧跟角色名后方 */
+.nk-crole-card__exp {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  color: #f0c6d4;
+  background: rgba(217, 137, 159, 0.25);
+  border: 1px solid rgba(217, 137, 159, 0.45);
+  vertical-align: middle;
+}
 
 /* 尊重「减少动态效果」偏好 */
 @media (prefers-reduced-motion: reduce) {
   .nk-crole-card { animation: none; transition: border-color 0.2s, box-shadow 0.2s; }
   .nk-crole-card:hover,
   .nk-crole-card:focus-visible { transform: none; }
-  .nk-crole-card:hover .nk-crole-card__avatar img,
-  .nk-crole-card:focus-visible .nk-crole-card__avatar img { transform: none; }
+  .nk-crole-card:hover .nk-crole-card__avatar > img,
+  .nk-crole-card:focus-visible .nk-crole-card__avatar > img { transform: none; }
+  .nk-crole-card:hover .nk-crole-card__fb { transform: none; }
 }
 
-/* 列表卡片上的特质标签 */
+/* 列表卡片上的羁绊槽位（等宽网格，图标在上、名称在下，轻量无底色） */
 .nk-crole-card__traits {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  justify-content: center;
-  margin-top: 4px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
 }
 .nk-crole-tcard-trait {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  font-size: 9px;
+  font-weight: 400;
+  padding: 2px 2px 0;
+  line-height: 1.3;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
 }
-.nk-crole-tcard-trait--faction { background: rgba(167, 139, 250, 0.14); color: #c4b5fd; }
-.nk-crole-tcard-trait--combat  { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; }
-.nk-crole-tcard-trait--special { background: rgba(251, 146, 60, 0.14); color: #fdba74; }
+.nk-crole-tcard-trait__icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 4px;
+  flex-shrink: 0;
+  opacity: 0.88;
+  transition: opacity 0.2s, transform 0.2s var(--ease);
+}
+.nk-crole-card:hover .nk-crole-tcard-trait__icon {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+.nk-crole-card:hover .nk-crole-tcard-trait--faction { color: #c9b8f5; }
+.nk-crole-card:hover .nk-crole-tcard-trait--combat  { color: #9adcf8; }
+.nk-crole-card:hover .nk-crole-tcard-trait--special { color: #f8c896; }
 
 /* 详情页容器（移动优先） */
 .nk-crole {

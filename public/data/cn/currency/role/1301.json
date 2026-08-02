@@ -402,7 +402,7 @@
           "simple_desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复生命值。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -620,7 +620,7 @@
           "simple_desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复生命值。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -838,7 +838,7 @@
           "simple_desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复生命值。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1056,7 +1056,7 @@
           "simple_desc": "加拉赫的普攻始终强化为【酒花奔涌】，施放普攻后，为我方全体前台回复生命值。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

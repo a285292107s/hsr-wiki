@@ -350,7 +350,7 @@
           "simple_desc": "绯英获得能量时，将同步获得等值的【好活当赏】；绯英获得【好活当赏】时，将同步获得等值的能量。累计获得一定数量能量时，【狐狸老师】施放追加攻击对敌方全体造成物理属性伤害，并为绯英恢复能量。当绯英持有【好活当赏】时，施放战技、终结技和【狐狸老师】的追加攻击可对敌方造成物理属性欢愉伤害。\\n通过行迹【瞰众乐】和【开不败】也可以从我方后台获得【好活当赏】。",
           "type": "天赋",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -383,7 +383,7 @@
           "simple_desc": "绯英施放欢愉技、终结技期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -410,7 +410,7 @@
           "simple_desc": "绯英每次施放终结技后，伤害增幅永久提高，每场战斗最多提高#2[i]次。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -757,7 +757,7 @@
           "simple_desc": "绯英获得能量时，将同步获得等值的【好活当赏】；绯英获得【好活当赏】时，将同步获得等值的能量。累计获得一定数量能量时，【狐狸老师】施放追加攻击对敌方全体造成物理属性伤害，并为绯英恢复能量。当绯英持有【好活当赏】时，施放战技、终结技和【狐狸老师】的追加攻击可对敌方造成物理属性欢愉伤害。\\n通过行迹【瞰众乐】和【开不败】也可以从我方后台获得【好活当赏】。",
           "type": "天赋",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -790,7 +790,7 @@
           "simple_desc": "绯英施放欢愉技、终结技期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -817,7 +817,7 @@
           "simple_desc": "绯英每次施放终结技后，伤害增幅永久提高，每场战斗最多提高#2[i]次。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1164,7 +1164,7 @@
           "simple_desc": "绯英获得能量时，将同步获得等值的【好活当赏】；绯英获得【好活当赏】时，将同步获得等值的能量。累计获得一定数量能量时，【狐狸老师】施放追加攻击对敌方全体造成物理属性伤害，并为绯英恢复能量。当绯英持有【好活当赏】时，施放战技、终结技和【狐狸老师】的追加攻击可对敌方造成物理属性欢愉伤害。\\n通过行迹【瞰众乐】和【开不败】也可以从我方后台获得【好活当赏】。",
           "type": "天赋",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1197,7 +1197,7 @@
           "simple_desc": "绯英施放欢愉技、终结技期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1224,7 +1224,7 @@
           "simple_desc": "绯英每次施放终结技后，伤害增幅永久提高，每场战斗最多提高#2[i]次。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1571,7 +1571,7 @@
           "simple_desc": "绯英获得能量时，将同步获得等值的【好活当赏】；绯英获得【好活当赏】时，将同步获得等值的能量。累计获得一定数量能量时，【狐狸老师】施放追加攻击对敌方全体造成物理属性伤害，并为绯英恢复能量。当绯英持有【好活当赏】时，施放战技、终结技和【狐狸老师】的追加攻击可对敌方造成物理属性欢愉伤害。\\n通过行迹【瞰众乐】和【开不败】也可以从我方后台获得【好活当赏】。",
           "type": "天赋",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1604,7 +1604,7 @@
           "simple_desc": "绯英施放欢愉技、终结技期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1631,7 +1631,7 @@
           "simple_desc": "绯英每次施放终结技后，伤害增幅永久提高，每场战斗最多提高#2[i]次。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

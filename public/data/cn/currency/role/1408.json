@@ -133,7 +133,7 @@
           "simple_desc": "战斗开始时，获得【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的星级越高，白厄的前台强度越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -279,7 +279,7 @@
           "simple_desc": "战斗开始时，获得【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的星级越高，白厄的前台强度越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -425,7 +425,7 @@
           "simple_desc": "战斗开始时，获得【火种】。变身期间，使卡厄斯兰那的额外回合的速度基于自身的速度增幅提高。其他我方前台角色的星级越高，白厄的前台强度越高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

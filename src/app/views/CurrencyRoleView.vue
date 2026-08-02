@@ -22,11 +22,8 @@ const loading = ref(true);
 const error = ref('');
 
 const FB_LABEL: Record<string, string> = { Front: '前台', Back: '后台', Both: '前后台' };
-const HEAL_LABEL: Record<string, string> = {
-  Healer: '治疗', Shield: '护盾', Heal: '治疗', Damage: '输出',
-};
 const CHARGE_LABEL: Record<string, string> = {
-  Speed: '速度', EnergyBar: '能量条', MaxSP: 'SP上限', MaxHP: '生命上限', SP: '战技点',
+  Speed: '速度', EnergyBar: '充能点数', MaxSP: '终结技充能', MaxHP: '生命上限', SP: '战技点',
 };
 const SKILL_GROUP_LABEL: Record<string, string> = {
   front_show_skill: '前台技能',
@@ -445,7 +442,6 @@ const traitGroups = computed(() => {
             </div>
             <div class="nk-crole-hero__tags">
               <span v-if="data.front_back_type" class="nk-crole-chip nk-crole-chip--fb">{{ FB_LABEL[data.front_back_type] || data.front_back_type }}</span>
-              <span v-if="data.heal_or_shield_display" class="nk-crole-chip nk-crole-chip--heal">{{ HEAL_LABEL[data.heal_or_shield_display] || data.heal_or_shield_display }}</span>
               <span v-for="c in data.charge_type" :key="c" class="nk-crole-chip nk-crole-chip--charge">{{ CHARGE_LABEL[c] || c }}</span>
               <span v-if="data.is_expert" class="nk-crole-chip nk-crole-chip--exp">专家</span>
             </div>

@@ -282,7 +282,7 @@
           "simple_desc": "大概率为敌方全体添加额外的弱点，并对敌方全体造成量子属性伤害。",
           "type": "战技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -318,7 +318,7 @@
           "simple_desc": "每种【缺陷】使敌方目标受到的伤害提高，量子共鸣会强化该效果。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -550,7 +550,7 @@
           "simple_desc": "大概率为敌方全体添加额外的弱点，并对敌方全体造成量子属性伤害。",
           "type": "战技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -586,7 +586,7 @@
           "simple_desc": "每种【缺陷】使敌方目标受到的伤害提高，量子共鸣会强化该效果。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -818,7 +818,7 @@
           "simple_desc": "大概率为敌方全体添加额外的弱点，并对敌方全体造成量子属性伤害。",
           "type": "战技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -854,7 +854,7 @@
           "simple_desc": "每种【缺陷】使敌方目标受到的伤害提高，量子共鸣会强化该效果。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

@@ -186,7 +186,7 @@
           "simple_desc": "施放战技后立即恢复所有助战技施放次数，姬子•启行获得【领航旗语】。当姬子•启行拥有【领航旗语】时，我方小队造成的伤害提高，姬子•启行造成的伤害额外提高。每个回合开始时，立即恢复1次助战技施放次数。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -214,7 +214,7 @@
           "simple_desc": "后台开拓同行角色也可以在行动时施放助战技。",
           "type": "天赋",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -357,7 +357,7 @@
           "simple_desc": "施放战技后立即恢复所有助战技施放次数，姬子•启行获得【领航旗语】。当姬子•启行拥有【领航旗语】时，我方小队造成的伤害提高，姬子•启行造成的伤害额外提高。每个回合开始时，立即恢复1次助战技施放次数。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -385,7 +385,7 @@
           "simple_desc": "后台开拓同行角色也可以在行动时施放助战技。",
           "type": "天赋",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -528,7 +528,7 @@
           "simple_desc": "施放战技后立即恢复所有助战技施放次数，姬子•启行获得【领航旗语】。当姬子•启行拥有【领航旗语】时，我方小队造成的伤害提高，姬子•启行造成的伤害额外提高。每个回合开始时，立即恢复1次助战技施放次数。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -556,7 +556,7 @@
           "simple_desc": "后台开拓同行角色也可以在行动时施放助战技。",
           "type": "天赋",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

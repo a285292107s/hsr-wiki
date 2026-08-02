@@ -344,7 +344,7 @@
           "simple_desc": "为敌方全体添加火属性弱点。回复自身部分生命值，对敌方全体造成火属性伤害，并额外造成超击破伤害，且使其全属性抗性降低。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -375,7 +375,7 @@
           "simple_desc": "始终处于「完全燃烧」状态，行迹造成的超击破伤害倍率额外提高，且攻击未被击破的敌人也能触发超击破伤害。\\n普攻、战技额外恢复能量，终结技替换为【超新星过载】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -522,7 +522,7 @@
           "simple_desc": "为敌方全体添加火属性弱点。回复自身部分生命值，对敌方全体造成火属性伤害，并额外造成超击破伤害，且使其全属性抗性降低。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -553,7 +553,7 @@
           "simple_desc": "始终处于「完全燃烧」状态，行迹造成的超击破伤害倍率额外提高，且攻击未被击破的敌人也能触发超击破伤害。\\n普攻、战技额外恢复能量，终结技替换为【超新星过载】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -700,7 +700,7 @@
           "simple_desc": "为敌方全体添加火属性弱点。回复自身部分生命值，对敌方全体造成火属性伤害，并额外造成超击破伤害，且使其全属性抗性降低。",
           "type": "终结技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -731,7 +731,7 @@
           "simple_desc": "始终处于「完全燃烧」状态，行迹造成的超击破伤害倍率额外提高，且攻击未被击破的敌人也能触发超击破伤害。\\n普攻、战技额外恢复能量，终结技替换为【超新星过载】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

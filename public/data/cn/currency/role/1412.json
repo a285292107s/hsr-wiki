@@ -411,7 +411,7 @@
           "simple_desc": "使我方角色获得【军功】并使刻律德菈获得充能，若目标已持有【军功】则额外充能。当充能达到#4[i]点时，自动使角色的【军功】升级为【爵位】。持有【爵位】的角色造成的战技伤害的暴击伤害、全属性抗性穿透提高并可以触发奇袭。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -456,7 +456,7 @@
           "simple_desc": "刻律德菈回合开始时恢复战技点，【战技点】羁绊内原有队员持有【爵位】时，对敌人施放普攻也可触发奇袭。",
           "type": "天赋",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -708,7 +708,7 @@
           "simple_desc": "使我方角色获得【军功】并使刻律德菈获得充能，若目标已持有【军功】则额外充能。当充能达到#4[i]点时，自动使角色的【军功】升级为【爵位】。持有【爵位】的角色造成的战技伤害的暴击伤害、全属性抗性穿透提高并可以触发奇袭。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -753,7 +753,7 @@
           "simple_desc": "刻律德菈回合开始时恢复战技点，【战技点】羁绊内原有队员持有【爵位】时，对敌人施放普攻也可触发奇袭。",
           "type": "天赋",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1005,7 +1005,7 @@
           "simple_desc": "使我方角色获得【军功】并使刻律德菈获得充能，若目标已持有【军功】则额外充能。当充能达到#4[i]点时，自动使角色的【军功】升级为【爵位】。持有【爵位】的角色造成的战技伤害的暴击伤害、全属性抗性穿透提高并可以触发奇袭。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -1050,7 +1050,7 @@
           "simple_desc": "刻律德菈回合开始时恢复战技点，【战技点】羁绊内原有队员持有【爵位】时，对敌人施放普攻也可触发奇袭。",
           "type": "天赋",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

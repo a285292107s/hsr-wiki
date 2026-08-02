@@ -322,7 +322,7 @@
           "simple_desc": "银狼LV.999施放欢愉技、普攻期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -349,7 +349,7 @@
           "simple_desc": "【隐藏分】在变身期间达到#1[i]/#2[i]/#3[i]点后，银狼的伤害增幅提高。\\n进入战斗时获得#7[i]点【隐藏分】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -501,7 +501,7 @@
           "simple_desc": "银狼LV.999施放欢愉技、普攻期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -528,7 +528,7 @@
           "simple_desc": "【隐藏分】在变身期间达到#1[i]/#2[i]/#3[i]点后，银狼的伤害增幅提高。\\n进入战斗时获得#7[i]点【隐藏分】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -680,7 +680,7 @@
           "simple_desc": "银狼LV.999施放欢愉技、普攻期间可以获得阿哈的攻击类属性加成。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -707,7 +707,7 @@
           "simple_desc": "【隐藏分】在变身期间达到#1[i]/#2[i]/#3[i]点后，银狼的伤害增幅提高。\\n进入战斗时获得#7[i]点【隐藏分】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

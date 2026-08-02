@@ -273,7 +273,7 @@
           "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
           "type": "终结技",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -500,7 +500,7 @@
           "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
           "type": "终结技",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -727,7 +727,7 @@
           "simple_desc": "为我方全体前台回复生命值，并为其提供【礼物】，造成的伤害提高且行动时回复生命值。",
           "type": "终结技",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

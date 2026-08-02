@@ -526,7 +526,7 @@
           "simple_desc": "对敌方全体造成风属性伤害。",
           "type": "忆灵技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -554,7 +554,7 @@
           "simple_desc": "小伊卡造成的伤害提高。",
           "type": "忆灵天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -699,7 +699,7 @@
           "simple_desc": "对敌方全体造成风属性伤害。",
           "type": "忆灵技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -727,7 +727,7 @@
           "simple_desc": "小伊卡造成的伤害提高。",
           "type": "忆灵天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -872,7 +872,7 @@
           "simple_desc": "对敌方全体造成风属性伤害。",
           "type": "忆灵技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -900,7 +900,7 @@
           "simple_desc": "小伊卡造成的伤害提高。",
           "type": "忆灵天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1045,7 +1045,7 @@
           "simple_desc": "对敌方全体造成风属性伤害。",
           "type": "忆灵技",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1073,7 +1073,7 @@
           "simple_desc": "小伊卡造成的伤害提高。",
           "type": "忆灵天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

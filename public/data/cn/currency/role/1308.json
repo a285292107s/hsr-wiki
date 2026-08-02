@@ -368,7 +368,7 @@
           "simple_desc": "敌人陷入负面状态时，同时陷入1层【飞雷紫】。黄泉施放终结技进行攻击时移除所有【飞雷紫】并对目标造成伤害。\\n行迹【奈落】所需要的「虚无」命途角色也会计算后台角色。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -514,7 +514,7 @@
           "simple_desc": "敌人陷入负面状态时，同时陷入1层【飞雷紫】。黄泉施放终结技进行攻击时移除所有【飞雷紫】并对目标造成伤害。\\n行迹【奈落】所需要的「虚无」命途角色也会计算后台角色。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -660,7 +660,7 @@
           "simple_desc": "敌人陷入负面状态时，同时陷入1层【飞雷紫】。黄泉施放终结技进行攻击时移除所有【飞雷紫】并对目标造成伤害。\\n行迹【奈落】所需要的「虚无」命途角色也会计算后台角色。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

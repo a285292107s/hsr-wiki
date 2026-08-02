@@ -304,7 +304,7 @@
           "simple_desc": "解除我方单体1个负面效果，并使其立刻行动且造成的伤害提高。同时使目标和自身消耗生命并获得【协同作战】。目标前台强度和造成的伤害额外提高。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -335,7 +335,7 @@
           "simple_desc": "获得【冲锋进行曲】，持续期间内使我方小队攻击力提高，生命上限提高，暴击伤害提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -484,7 +484,7 @@
           "simple_desc": "解除我方单体1个负面效果，并使其立刻行动且造成的伤害提高。同时使目标和自身消耗生命并获得【协同作战】。目标前台强度和造成的伤害额外提高。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -515,7 +515,7 @@
           "simple_desc": "获得【冲锋进行曲】，持续期间内使我方小队攻击力提高，生命上限提高，暴击伤害提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -664,7 +664,7 @@
           "simple_desc": "解除我方单体1个负面效果，并使其立刻行动且造成的伤害提高。同时使目标和自身消耗生命并获得【协同作战】。目标前台强度和造成的伤害额外提高。",
           "type": "战技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -695,7 +695,7 @@
           "simple_desc": "获得【冲锋进行曲】，持续期间内使我方小队攻击力提高，生命上限提高，暴击伤害提高。",
           "type": "终结技",
           "tag": "辅助",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

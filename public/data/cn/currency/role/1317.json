@@ -360,7 +360,7 @@
           "simple_desc": "敌人被击破后，乱破对随机敌人造成虚数属性击破伤害。\\n乱破的强化普攻可以额外对攻击目标削韧。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -507,7 +507,7 @@
           "simple_desc": "敌人被击破后，乱破对随机敌人造成虚数属性击破伤害。\\n乱破的强化普攻可以额外对攻击目标削韧。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -654,7 +654,7 @@
           "simple_desc": "敌人被击破后，乱破对随机敌人造成虚数属性击破伤害。\\n乱破的强化普攻可以额外对攻击目标削韧。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -801,7 +801,7 @@
           "simple_desc": "敌人被击破后，乱破对随机敌人造成虚数属性击破伤害。\\n乱破的强化普攻可以额外对攻击目标削韧。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

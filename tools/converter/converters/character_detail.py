@@ -81,7 +81,7 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
             "tag": first.get("SkillEffect") or None,
             "sp_base": unwrap_value(first.get("SPBase", None)),
             "bp_need": unwrap_value(first.get("BPNeed", None)),
-            "bp_add": unwrap_value(first.get("SPMultipleRatio", None)),
+            "bp_add": unwrap_value(first.get("BPAdd", None)),
             "show_stance_list": [unwrap_value(x) for x in first.get("ShowStanceList", [])] or None,
             "skill_combo_value_delta": first.get("SkillComboValueDelta", None),
             "extra": {},

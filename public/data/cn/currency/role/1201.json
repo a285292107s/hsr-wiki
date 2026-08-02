@@ -434,7 +434,7 @@
           "simple_desc": "我方目标回合开始时，抽牌。自身回合开始时，若持有4张同花色牌，则清空已有牌并强化本次普攻，同时使自身攻击力提高。获得强化普攻后，还能继续施放战技抽牌以发动追加攻击。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -462,7 +462,7 @@
           "simple_desc": "回合开始时，获得#1[i]个临时战技点。未消耗的临时战技点会在回合结束时扣除。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -607,7 +607,7 @@
           "simple_desc": "我方目标回合开始时，抽牌。自身回合开始时，若持有4张同花色牌，则清空已有牌并强化本次普攻，同时使自身攻击力提高。获得强化普攻后，还能继续施放战技抽牌以发动追加攻击。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -635,7 +635,7 @@
           "simple_desc": "回合开始时，获得#1[i]个临时战技点。未消耗的临时战技点会在回合结束时扣除。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -780,7 +780,7 @@
           "simple_desc": "我方目标回合开始时，抽牌。自身回合开始时，若持有4张同花色牌，则清空已有牌并强化本次普攻，同时使自身攻击力提高。获得强化普攻后，还能继续施放战技抽牌以发动追加攻击。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -808,7 +808,7 @@
           "simple_desc": "回合开始时，获得#1[i]个临时战技点。未消耗的临时战技点会在回合结束时扣除。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -953,7 +953,7 @@
           "simple_desc": "我方目标回合开始时，抽牌。自身回合开始时，若持有4张同花色牌，则清空已有牌并强化本次普攻，同时使自身攻击力提高。获得强化普攻后，还能继续施放战技抽牌以发动追加攻击。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -981,7 +981,7 @@
           "simple_desc": "回合开始时，获得#1[i]个临时战技点。未消耗的临时战技点会在回合结束时扣除。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

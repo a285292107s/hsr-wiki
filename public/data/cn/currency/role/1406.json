@@ -497,7 +497,7 @@
           "simple_desc": "战斗开始时赛飞儿拥有一定已记录的伤害，攻击【老主顾】后额外记录伤害，并记录我方后台造成的伤害。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -644,7 +644,7 @@
           "simple_desc": "战斗开始时赛飞儿拥有一定已记录的伤害，攻击【老主顾】后额外记录伤害，并记录我方后台造成的伤害。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -791,7 +791,7 @@
           "simple_desc": "战斗开始时赛飞儿拥有一定已记录的伤害，攻击【老主顾】后额外记录伤害，并记录我方后台造成的伤害。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -938,7 +938,7 @@
           "simple_desc": "战斗开始时赛飞儿拥有一定已记录的伤害，攻击【老主顾】后额外记录伤害，并记录我方后台造成的伤害。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

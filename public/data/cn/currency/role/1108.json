@@ -401,7 +401,7 @@
           "simple_desc": "桑博的战技弹射次数提高。桑博击中敌人后有概率使目标陷入风化状态。\\n风化状态下，敌方目标每回合开始时受到风属性持续伤害，最多叠加#4[i]层。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -431,7 +431,7 @@
           "simple_desc": "若攻击了风化状态层数达到上限的敌人，则会立即使风化类持续伤害状态额外产生1次伤害。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -645,7 +645,7 @@
           "simple_desc": "桑博的战技弹射次数提高。桑博击中敌人后有概率使目标陷入风化状态。\\n风化状态下，敌方目标每回合开始时受到风属性持续伤害，最多叠加#4[i]层。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -675,7 +675,7 @@
           "simple_desc": "若攻击了风化状态层数达到上限的敌人，则会立即使风化类持续伤害状态额外产生1次伤害。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -889,7 +889,7 @@
           "simple_desc": "桑博的战技弹射次数提高。桑博击中敌人后有概率使目标陷入风化状态。\\n风化状态下，敌方目标每回合开始时受到风属性持续伤害，最多叠加#4[i]层。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -919,7 +919,7 @@
           "simple_desc": "若攻击了风化状态层数达到上限的敌人，则会立即使风化类持续伤害状态额外产生1次伤害。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -1133,7 +1133,7 @@
           "simple_desc": "桑博的战技弹射次数提高。桑博击中敌人后有概率使目标陷入风化状态。\\n风化状态下，敌方目标每回合开始时受到风属性持续伤害，最多叠加#4[i]层。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1163,7 +1163,7 @@
           "simple_desc": "若攻击了风化状态层数达到上限的敌人，则会立即使风化类持续伤害状态额外产生1次伤害。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

@@ -236,7 +236,7 @@
           "simple_desc": "对敌方单体造成量子属性伤害，并使自身速度提高。\\n任意我方目标攻击后，若被攻击后的敌方目标生命值小于等于#4[i]%，则希儿自动对其施放1次战技，该效果每个回合最多触发一次。",
           "type": "战技",
           "tag": "单攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -265,7 +265,7 @@
           "simple_desc": "希儿攻击敌人期间，若目标被消灭则获得额外回合并进入增幅状态，增幅状态下自身造成的伤害提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -292,7 +292,7 @@
           "simple_desc": "希儿战技的伤害倍率提高#1[i]%，终结技的伤害倍率提高#2[i]%。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -319,7 +319,7 @@
           "simple_desc": "希儿攻击敌人后，若敌方目标当前生命值百分比小于（#1[i]%+量子共鸣*#2[i]%），希儿立即将其处决。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -465,7 +465,7 @@
           "simple_desc": "对敌方单体造成量子属性伤害，并使自身速度提高。\\n任意我方目标攻击后，若被攻击后的敌方目标生命值小于等于#4[i]%，则希儿自动对其施放1次战技，该效果每个回合最多触发一次。",
           "type": "战技",
           "tag": "单攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -494,7 +494,7 @@
           "simple_desc": "希儿攻击敌人期间，若目标被消灭则获得额外回合并进入增幅状态，增幅状态下自身造成的伤害提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -521,7 +521,7 @@
           "simple_desc": "希儿战技的伤害倍率提高#1[i]%，终结技的伤害倍率提高#2[i]%。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -548,7 +548,7 @@
           "simple_desc": "希儿攻击敌人后，若敌方目标当前生命值百分比小于（#1[i]%+量子共鸣*#2[i]%），希儿立即将其处决。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -694,7 +694,7 @@
           "simple_desc": "对敌方单体造成量子属性伤害，并使自身速度提高。\\n任意我方目标攻击后，若被攻击后的敌方目标生命值小于等于#4[i]%，则希儿自动对其施放1次战技，该效果每个回合最多触发一次。",
           "type": "战技",
           "tag": "单攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": 1,
           "bp_add": null,
           "show_stance_list": [
@@ -723,7 +723,7 @@
           "simple_desc": "希儿攻击敌人期间，若目标被消灭则获得额外回合并进入增幅状态，增幅状态下自身造成的伤害提高。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": -1,
           "bp_add": null,
           "show_stance_list": [
@@ -750,7 +750,7 @@
           "simple_desc": "希儿战技的伤害倍率提高#1[i]%，终结技的伤害倍率提高#2[i]%。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -777,7 +777,7 @@
           "simple_desc": "希儿攻击敌人后，若敌方目标当前生命值百分比小于（#1[i]%+量子共鸣*#2[i]%），希儿立即将其处决。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [

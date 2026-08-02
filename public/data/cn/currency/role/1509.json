@@ -290,7 +290,7 @@
           "simple_desc": "全队每件装备给我方小队提供幸运一击伤害，吉尔伽美什获得额外的该效果增幅。进入战斗时，吉尔伽美什额外获得【兴致】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -318,7 +318,7 @@
           "simple_desc": "吉尔伽美什或Saber攻击时累计攻击计数，任意单位攻击后若累计攻击计数达到#5[i]，吉尔伽美什和Saber发动连携追加攻击，对敌方全体造成大量雷属性伤害以及大量风属性伤害，吉尔伽美什获得#3[i]点【兴致】，Saber恢复能量并且额外提高下一次终结技的伤害。",
           "type": "天赋",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -699,7 +699,7 @@
           "simple_desc": "全队每件装备给我方小队提供幸运一击伤害，吉尔伽美什获得额外的该效果增幅。进入战斗时，吉尔伽美什额外获得【兴致】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -727,7 +727,7 @@
           "simple_desc": "吉尔伽美什或Saber攻击时累计攻击计数，任意单位攻击后若累计攻击计数达到#5[i]，吉尔伽美什和Saber发动连携追加攻击，对敌方全体造成大量雷属性伤害以及大量风属性伤害，吉尔伽美什获得#3[i]点【兴致】，Saber恢复能量并且额外提高下一次终结技的伤害。",
           "type": "天赋",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1108,7 +1108,7 @@
           "simple_desc": "全队每件装备给我方小队提供幸运一击伤害，吉尔伽美什获得额外的该效果增幅。进入战斗时，吉尔伽美什额外获得【兴致】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1136,7 +1136,7 @@
           "simple_desc": "吉尔伽美什或Saber攻击时累计攻击计数，任意单位攻击后若累计攻击计数达到#5[i]，吉尔伽美什和Saber发动连携追加攻击，对敌方全体造成大量雷属性伤害以及大量风属性伤害，吉尔伽美什获得#3[i]点【兴致】，Saber恢复能量并且额外提高下一次终结技的伤害。",
           "type": "天赋",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1517,7 +1517,7 @@
           "simple_desc": "全队每件装备给我方小队提供幸运一击伤害，吉尔伽美什获得额外的该效果增幅。进入战斗时，吉尔伽美什额外获得【兴致】。",
           "type": "天赋",
           "tag": "强化",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
@@ -1545,7 +1545,7 @@
           "simple_desc": "吉尔伽美什或Saber攻击时累计攻击计数，任意单位攻击后若累计攻击计数达到#5[i]，吉尔伽美什和Saber发动连携追加攻击，对敌方全体造成大量雷属性伤害以及大量风属性伤害，吉尔伽美什获得#3[i]点【兴致】，Saber恢复能量并且额外提高下一次终结技的伤害。",
           "type": "天赋",
           "tag": "群攻",
-          "sp_base": 0.5,
+          "sp_base": null,
           "bp_need": null,
           "bp_add": null,
           "show_stance_list": [
