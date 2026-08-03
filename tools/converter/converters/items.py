@@ -35,6 +35,24 @@ def _is_excluded(item: dict) -> bool:
     return False
 
 
+def _parse_item(item: dict) -> dict:
+    """单条 ItemConfig 记录 → items.json 条目。"""
+    item_id = item.get("ID", 0)
+    rarity_key = item.get("Rarity", "")
+    return {
+        "id": item_id,
+        "name": resolve_text(item.get("ItemName", {})),
+        "desc": resolve_text(item.get("ItemDesc", {})),
+        "bg_desc": resolve_text(item.get("ItemBGDesc", {})),
+        "main_type": item.get("ItemMainType", ""),
+        "sub_type": item.get("ItemSubType", ""),
+        "rarity": RARITY_MAP.get(rarity_key, 0),
+        "purpose_type": item.get("PurposeType", 0),
+        "icon": map_icon_path(item.get("ItemIconPath", "")),
+        "figure_icon": map_icon_path(item.get("ItemFigureIconPath", "")),
+    }
+
+
 def convert() -> None:
     """转换 ItemConfig.json → items.json（剔除非物品类型）。"""
     data = load_json(EXCEL_DIR / "ItemConfig.json")
@@ -45,26 +63,7 @@ def convert() -> None:
         if _is_excluded(item):
             excluded += 1
             continue
-
-        item_id = item.get("ID", 0)
-        name = resolve_text(item.get("ItemName", {}))
-        desc = resolve_text(item.get("ItemDesc", {}))
-        bg_desc = resolve_text(item.get("ItemBGDesc", {}))
-        rarity_key = item.get("Rarity", "")
-        rarity = RARITY_MAP.get(rarity_key, 0)
-
-        result.append({
-            "id": item_id,
-            "name": name,
-            "desc": desc,
-            "bg_desc": bg_desc,
-            "main_type": item.get("ItemMainType", ""),
-            "sub_type": item.get("ItemSubType", ""),
-            "rarity": rarity,
-            "purpose_type": item.get("PurposeType", 0),
-            "icon": map_icon_path(item.get("ItemIconPath", "")),
-            "figure_icon": map_icon_path(item.get("ItemFigureIconPath", "")),
-        })
+        result.append(_parse_item(item))
 
     result = sort_by_id(result)
     save_json(result, OUTPUT_DIR / "items.json")

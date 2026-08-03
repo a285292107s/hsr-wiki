@@ -10,7 +10,7 @@ import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types'
 import {
   fmtDesc, fmtDescDiff, fmtToughness, hasParamDiff, hasTextDiff, paramEqual, skillIconUrl,
 } from '../../lib/format';
-import { TYPE } from '../../lib/constants';
+import { ELEM, TYPE } from '../../lib/constants';
 
 const props = defineProps<{
   sk: Skill;
@@ -85,9 +85,27 @@ const metrics = computed<Metric[]>(() => {
   if (props.sk.sp_base != null) {
     met.push({ label: '能量', html: diffValHtml(props.sk.sp_base, old ? old.sp_base : null) });
   }
-  const tough = fmtToughness(props.sk);
-  if (tough) {
-    met.push({ label: '韧性', html: diffValHtml(tough, old ? fmtToughness(old) : null) });
+  // 技能级能量需求（终结技/忆灵终结技；与 sp_base 的回复量互补，2026-08-03 审计新增）
+  if (props.sk.sp_need != null) {
+    met.push({ label: '能量需求', html: diffValHtml(props.sk.sp_need, old ? old.sp_need : null) });
+  }
+  // 削韧：优先官方直出字段（属性 + 显示值），缺失时回退 show_stance_list 换算
+  const stType = props.sk.stance_damage_type;
+  const stDisp = props.sk.stance_damage_display;
+  if (stType && stDisp != null) {
+    const oldT = old && old.stance_damage_type;
+    const oldD = old && old.stance_damage_display;
+    const fmt = (t: string, d: number | null | undefined) =>
+      `${ELEM[t] || t} ${d ?? ''}`.trim();
+    met.push({
+      label: '削韧',
+      html: diffValHtml(fmt(stType, stDisp), oldT === stType ? fmt(oldT, oldD) : null),
+    });
+  } else {
+    const tough = fmtToughness(props.sk);
+    if (tough) {
+      met.push({ label: '韧性', html: diffValHtml(tough, old ? fmtToughness(old) : null) });
+    }
   }
   if (props.sk.bp_need != null) {
     const sp = -props.sk.bp_need;
@@ -99,6 +117,53 @@ const metrics = computed<Metric[]>(() => {
   }
   return met;
 });
+
+/* ─── 技能资源消耗条件（SkillNeed，随当前等级参数渲染；2026-08-03 审计新增） ─── */
+const needHtml = computed(() => {
+  const raw = props.sk.skill_need;
+  if (!raw) return '';
+  const lvData = props.sk.level ? props.sk.level[String(effLv.value)] : null;
+  return fmtDesc(raw, (lvData && lvData.param_list) || []);
+});
+
+/* ─── 强化关联（rated_rank_id → 星魂 E 编号；rated_skill_tree_id → 行迹名；2026-08-03 审计新增） ─── */
+interface RatedLink {
+  kind: 'rank' | 'tree';
+  num: string;
+  name: string;
+}
+const ratedLinks = computed<RatedLink[]>(() => {
+  const links: RatedLink[] = [];
+  const data = props.charData;
+  if (!data) return links;
+  // 星魂：ranks 对象按 E 编号为键，匹配 rated_rank_id（如 130806 → E6）
+  const rankIds = props.sk.rated_rank_id || [];
+  if (rankIds.length && data.ranks) {
+    for (const [num, rk] of Object.entries(data.ranks)) {
+      if (rankIds.includes(rk.id)) {
+        links.push({ kind: 'rank', num: 'E' + num, name: rk.name });
+      }
+    }
+  }
+  // 行迹：point_id → point_name 反查；上游数据旧角色缺前缀（如 1005101 vs point_id 11005101），补位容错
+  const treeIds = props.sk.rated_skill_tree_id || [];
+  if (treeIds.length && data.skill_trees) {
+    const byId = new Map<number, string>();
+    for (const tree of Object.values(data.skill_trees)) {
+      for (const node of Object.values(tree)) {
+        if (node.point_id && node.point_name) byId.set(node.point_id, node.point_name);
+      }
+    }
+    for (const pid of treeIds) {
+      const name = byId.get(pid) ?? byId.get(Number('1' + String(pid)));
+      if (name) links.push({ kind: 'tree', num: String(pid), name });
+    }
+  }
+  return links;
+});
+
+/* ─── 官方技能最高等级（max_level；缺失时回退 level 表长度） ─── */
+const officialMaxLv = computed(() => props.sk.max_level ?? maxLv.value);
 
 /* ─── 内联 diff 状态（CHANGED / NEW） ─── */
 const status = computed<'changed' | 'added' | null>(() => {
@@ -235,7 +300,7 @@ function onImgLoad(): void { imgDone.value = true; }
     <div v-if="!isChild" class="nk-skill__head">
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">
-        <span class="nk-slider__val">Lv.{{ lv }}</span>
+        <span class="nk-slider__val">Lv.{{ lv }}<template v-if="officialMaxLv > 1">/{{ officialMaxLv }}</template></span>
         <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
       </div>
     </div>
@@ -251,10 +316,26 @@ function onImgLoad(): void { imgDone.value = true; }
         </div>
       </div>
       <div class="nk-skill__desc" v-html="descHtml"></div>
+      <!-- 技能资源消耗条件（如「#5点【新蕊】」→ 渲染为数值） -->
+      <div v-if="needHtml" class="nk-skill__need">
+        <span class="nk-skill__need-label">消耗</span>
+        <span class="nk-skill__need-val" v-html="needHtml"></span>
+      </div>
       <div v-if="metrics.length" class="nk-skill__metrics">
         <span v-for="m in metrics" :key="m.label" class="nk-skill__metric">
           <dt>{{ m.label }}</dt><dd v-html="m.html"></dd>
         </span>
+      </div>
+      <!-- 强化关联：受哪些星魂 / 行迹加成 -->
+      <div v-if="ratedLinks.length" class="nk-skill__links">
+        <span class="nk-skill__links-label">强化</span>
+        <span
+          v-for="l in ratedLinks"
+          :key="l.kind + l.num"
+          class="nk-skill__link"
+          :class="`nk-skill__link--${l.kind}`"
+          :title="l.name"
+        >{{ l.kind === 'rank' ? l.num : l.name }}</span>
       </div>
       <div v-if="terms.length" class="nk-skill__terms">
         <div v-for="t in terms" :key="t.name" class="nk-term">

@@ -95,6 +95,44 @@ class TestBuildSkills:
         result = cd._build_skills(data, [141508])
         assert result["141508"]["type"] == "Normal"
 
+    def test_audit_fields_output(self):
+        # 2026-08-03 字段审计收录：max_level/stance_damage_type/stance_damage_display/
+        # skill_need/sp_need/rated_rank_id/rated_skill_tree_id（见 docs/audit/字段审计-AvatarSkillConfig.md）
+        import textmap
+        textmap._text_map["300001"] = "#5点【新蕊】"
+        data = [{
+            "SkillID": 20, "Level": 1, "AttackType": "Normal",
+            "MaxLevel": 10,
+            "StanceDamageType": "Fire",
+            "StanceDamageDisplay": 10,
+            "SkillNeed": {"Hash": 300001},
+            "SPNeed": {"Value": 100},
+            "RatedRankID": [101402],
+            "RatedSkillTreeID": [1014103],
+        }]
+        result = cd._build_skills(data, [20])
+        s = result["20"]
+        assert s["max_level"] == 10
+        assert s["stance_damage_type"] == "Fire"
+        assert s["stance_damage_display"] == 10
+        assert s["skill_need"] == "#5点【新蕊】"
+        assert s["sp_need"] == 100
+        assert s["rated_rank_id"] == [101402]
+        assert s["rated_skill_tree_id"] == [1014103]
+
+    def test_audit_fields_null_when_missing(self):
+        # 源字段缺失时新字段全部输出 None（与 sp_base 等现有可选字段契约一致）
+        data = [{"SkillID": 21, "Level": 1, "AttackType": "Normal"}]
+        result = cd._build_skills(data, [21])
+        s = result["21"]
+        assert s["max_level"] is None
+        assert s["stance_damage_type"] is None
+        assert s["stance_damage_display"] is None
+        assert s["skill_need"] is None
+        assert s["sp_need"] is None
+        assert s["rated_rank_id"] is None
+        assert s["rated_skill_tree_id"] is None
+
 
 # ─── _build_servant_skills ──────────────────────────────────────
 
@@ -123,6 +161,16 @@ class TestBuildServantSkills:
         data = [{"SkillID": 13, "Level": 1, "AttackType": "Servant", "SkillTag": {"Hash": 200001}}]
         result = cd._build_servant_skills(data, [13])
         assert result["13"]["tag"] == "群攻"
+
+    def test_audit_fields_same_structure(self):
+        # 忆灵技能与角色技能保持同结构（审计字段缺失输出 None，契约一致性）
+        data = [{"SkillID": 14, "Level": 1, "AttackType": "Servant", "SPNeed": {"Value": 110}}]
+        result = cd._build_servant_skills(data, [14])
+        s = result["14"]
+        assert s["sp_need"] == 110
+        assert s["max_level"] is None
+        assert s["stance_damage_type"] is None
+        assert s["rated_rank_id"] is None
 
 
 # ─── _build_ranks ───────────────────────────────────────────────
