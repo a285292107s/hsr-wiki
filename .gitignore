@@ -44,9 +44,6 @@ tools/converter/.converter-state.json
 tools/converter/.textmap-cache.db
 tools/converter/.textmap-cache.db-*
 
-# Local reference data
-cdn-samples
-
 # Image formats (root-level)
 /*.png
 /*.jpg

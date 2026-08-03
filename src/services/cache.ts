@@ -89,14 +89,13 @@ const idb = {
 
 /* ─── 网络请求（最底层） ─── */
 
-export async function fetchJSON<T>(url: string): Promise<T> {
+async function requestText(url: string): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT);
   try {
     const r = await fetch(url, { signal: ctrl.signal });
     if (!r.ok) throw new NkError(`HTTP ${r.status}: ${url}`, true);
-    const data = (await r.json()) as T;
-    return data;
+    return await r.text();
   } catch (e) {
     if (e instanceof NkError) throw e;
     if (e instanceof Error && (e.name === 'AbortError' || (e as DOMException).code === 20 /* ABORT_ERR */)) {
@@ -105,6 +104,15 @@ export async function fetchJSON<T>(url: string): Promise<T> {
     throw new NkError(e instanceof Error ? e.message || 'Network error' : 'Network error', true);
   } finally {
     clearTimeout(timer);
+  }
+}
+
+export async function fetchJSON<T>(url: string): Promise<T> {
+  const text = await requestText(url);
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new NkError(`Invalid JSON: ${url}`, true);
   }
 }
 
@@ -152,7 +160,12 @@ export async function cacheHas(key: string): Promise<boolean> {
 
 const pending = new Map<string, Promise<unknown>>();
 
-export async function cachedFetch<T>(url: string, cacheKey: string, ttl: number): Promise<T> {
+async function cachedRequest<T>(
+  url: string,
+  cacheKey: string,
+  ttl: number,
+  load: (u: string) => Promise<T>,
+): Promise<T> {
   // L1: 内存
   if (mem.has(cacheKey)) return mem.get(cacheKey) as T;
   // L2: IndexedDB
@@ -169,7 +182,7 @@ export async function cachedFetch<T>(url: string, cacheKey: string, ttl: number)
   const inflight = pending.get(cacheKey);
   if (inflight) return inflight as Promise<T>;
   // L4: 网络
-  const p = fetchJSON<T>(url)
+  const p = load(url)
     .then((data) => {
       memSet(cacheKey, data);
       void idb.put(cacheKey, { data, exp: Date.now() + ttl }); // 异步写入，不阻塞返回
@@ -178,6 +191,10 @@ export async function cachedFetch<T>(url: string, cacheKey: string, ttl: number)
     .finally(() => pending.delete(cacheKey));
   pending.set(cacheKey, p);
   return p;
+}
+
+export function cachedFetch<T>(url: string, cacheKey: string, ttl: number): Promise<T> {
+  return cachedRequest(url, cacheKey, ttl, (u) => fetchJSON<T>(u));
 }
 
 /* ─── 清理非当前版本的旧条目（避免 IDB 无限膨胀） ─── */

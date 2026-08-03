@@ -243,8 +243,27 @@ export interface RelicSetData {
 
 /* ─── spine manifest ─── */
 
-/** charId → spine 资源名（多段以 | 分隔，如 "bg|tibao1|tibao2"，解析时跳过 bg） */
-export type SpineManifest = Record<string, string>;
+/** nanoka 源条目：.skel 二进制（Spine 4.1.23），name 多段以 | 分隔（如 "bg|tibao1"，解析时跳过 bg） */
+export interface SpineSkelEntry {
+  kind: 'skel';
+  name: string;
+}
+
+/** 官网源条目：Spine 4.2.43 JSON 骨架 + atlas + 纹理映射（atlas 逻辑纹理名 → 实际 hash URL） */
+export interface SpineOfficialEntry {
+  kind: 'official';
+  atlas: string;
+  json: string;
+  textures: Record<string, string>;
+}
+
+/** charId → spine 资源描述（本地 spine-manifest.json，随站部署） */
+export type SpineManifest = Record<string, SpineSkelEntry | SpineOfficialEntry>;
+
+/** 解析后的角色 spine 资源描述（渲染层消费） */
+export type SpineResolved =
+  | { kind: 'skel'; base: string }
+  | { kind: 'official'; atlas: string; json: string; textures: Record<string, string> };
 
 /* ─── 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
 

@@ -1,24 +1,20 @@
 /**
- * Spine 骨骼动画查看器（移植自原 spine.js 模块）
- * 双通道策略：
- * ① 快路径——复用原站已初始化的 WebGL canvas（原站可用时零额外开销、与原站渲染完全一致）
- * ② 回退——原站不可用（如角色页 SSR 500）时，动态加载 spine-player 运行时，
- *    直接从 CDN 拉取 .skel/.atlas 自主渲染（数据驱动，不依赖原站 DOM）
- * 资源路径：static.nanoka.cc/assets/hsr/spine/{charId}/{name}.skel|.atlas
- * 版本约束：CDN .skel 为 Spine 4.1.23，运行时须严格匹配 4.1.x
+ * Spine 骨骼动画查看器
+ * 仅自主渲染（ADR 0002/0009）：动态加载 spine-player 运行时，按 Spine 清单分发渲染。
+ * - skel 源：nanoka CDN .skel/.atlas（Spine 4.1.23）
+ * - official 源：官网 CDN .json 骨架 + atlas 纹理重映射（Spine 4.2.43）
+ * 资源路径：skel 为 static.nanoka.cc/assets/hsr/spine/{charId}/{name}.skel|.atlas
+ * 运行时约束：spine-player 4.2.x 向后兼容 4.1 数据、向前不兼容（升级需回归验证）
  */
-import { resolveSpineName, spineBaseUrl } from '../../services/api';
+import { resolveSpine } from '../../services/api';
+import type { SpineResolved } from '../../services/types';
 
-// spine-player 4.1.23 运行时（多 CDN 兜底，jsdelivr 优先以兼顾国内可达性）
+// spine-player 4.2.43 运行时（多 CDN 兜底，jsdelivr 优先以兼顾国内可达性）
 const SPINE_RUNTIME_CDNS = [
-  'https://cdn.jsdelivr.net/npm/@esotericsoftware/spine-player@4.1.23/dist/iife/spine-player.js',
-  'https://fastly.jsdelivr.net/npm/@esotericsoftware/spine-player@4.1.23/dist/iife/spine-player.js',
-  'https://unpkg.com/@esotericsoftware/spine-player@4.1.23/dist/iife/spine-player.js',
+  'https://cdn.jsdelivr.net/npm/@esotericsoftware/spine-player@4.2.43/dist/iife/spine-player.js',
+  'https://fastly.jsdelivr.net/npm/@esotericsoftware/spine-player@4.2.43/dist/iife/spine-player.js',
+  'https://unpkg.com/@esotericsoftware/spine-player@4.2.43/dist/iife/spine-player.js',
 ];
-/** 快路径等待窗口：超时未拿到原站 canvas 则启动自主渲染 */
-const SPINE_CANVAS_GRACE = 2000;
-// 原站可能创建的 spine canvas（viewer 容器 / hero 媒体兜底），仅用于存在性探测
-const SITE_SPINE_CANVAS = '[data-ui="character-model-viewer"] canvas, .ui-character-hero__media canvas';
 
 /* ─── spine-player 松散类型（IIFE 运行时注入全局 spine） ─── */
 
@@ -35,11 +31,16 @@ interface SpinePlayerInstance {
   config?: { atlasUrl?: string } | null;
 }
 interface SpinePlayerConfig {
-  skelUrl: string;
+  /** nanoka 源：二进制骨架（skel 与 official 二选一） */
+  skelUrl?: string;
+  /** 官网源：JSON 骨架（skel 与 official 二选一） */
+  jsonUrl?: string;
   atlasUrl: string;
+  /** 官网源：纹理路径（atlas 目录 + 逻辑名）→ 实际 hash URL 映射（ADR 0009） */
+  rawDataURIs?: Record<string, string>;
   alpha?: boolean;
   backgroundColor?: string;
-  /** nanoka atlas 无 pma 字段 = 直通 alpha 纹理，必须 false（true 会预乘混合导致边缘亮边伪影） */
+  /** nanoka/官网 atlas 均无 pma 字段 = 直通 alpha 纹理，必须 false（true 会预乘混合导致边缘亮边伪影） */
   premultipliedAlpha?: boolean;
   showControls?: boolean;
   showLoading?: boolean;
@@ -68,31 +69,8 @@ export function disposeSpineViewer(): void {
   }
 }
 
-/** 检测 canvas 是否已有实际渲染内容（采样中心像素） */
-function isCanvasPainted(cvs: HTMLCanvasElement): boolean {
-  try {
-    const ctx = cvs.getContext('webgl2') || cvs.getContext('webgl');
-    if (!ctx) return cvs.width > 0;
-    const px = new Uint8Array(4);
-    ctx.readPixels(cvs.width >> 1, cvs.height >> 1, 1, 1, ctx.RGBA, ctx.UNSIGNED_BYTE, px);
-    return px[3] > 0;
-  } catch {
-    return cvs.width > 0;
-  }
-}
-
-/** 查找可复用的原站 canvas：ready 状态的 viewer，或已绘制内容的 hero media canvas */
-function findSiteCanvas(): HTMLCanvasElement | null {
-  const viewer = document.querySelector<HTMLCanvasElement>(
-    '[data-ui="character-model-viewer"][data-status="ready"] canvas',
-  );
-  if (viewer) return viewer;
-  const fallback = document.querySelector<HTMLCanvasElement>('.ui-character-hero__media canvas');
-  return fallback && fallback.width > 0 && isCanvasPainted(fallback) ? fallback : null;
-}
-
 /**
- * 初始化 Spine 查看器（双通道竞速，任一成功即定局）。
+ * 初始化 Spine 查看器（纯自主渲染）。
  * @param container 播放器挂载容器（.nk-hero__spine）
  * @param charId 角色 ID
  * @param onReady 动画就绪回调（视图层据此点亮切换按钮 / 压暗背景）
@@ -103,91 +81,10 @@ export function initSpineViewer(
   charId: string,
   onReady: () => void,
 ): () => void {
-  const TIMEOUT = 20000; // 总超时
-  const startTime = Date.now();
-  let observer: MutationObserver | null = null;
-  let pollTimer: ReturnType<typeof setInterval> | null = null;
-  let graceTimer: ReturnType<typeof setTimeout> | null = null;
-  let safetyTimer: ReturnType<typeof setTimeout> | null = null;
-  let settled = false; // 任一通道已成功展示动画（防止双通道竞态重复渲染）
-  let selfRenderStarted = false;
-  let disposed = false;
-
-  function cleanup(): void {
-    if (observer) {
-      observer.disconnect();
-      observer = null;
-    }
-    if (pollTimer) {
-      clearInterval(pollTimer);
-      pollTimer = null;
-    }
-    if (graceTimer) {
-      clearTimeout(graceTimer);
-      graceTimer = null;
-    }
-    if (safetyTimer) {
-      clearTimeout(safetyTimer);
-      safetyTimer = null;
-    }
-  }
-
-  /* ── 通道①：复用原站 canvas ── */
-  function tryGrab(): void {
-    if (settled || disposed) return;
-    if (!container.isConnected || Date.now() - startTime > TIMEOUT) {
-      cleanup();
-      return;
-    }
-    const canvas = findSiteCanvas();
-    if (!canvas) return;
-    settled = true;
-    cleanup();
-    container.appendChild(canvas);
-    if (!disposed) onReady();
-  }
-
-  /* ── 通道②：自主渲染（spine-player） ── */
-  function startSelfRender(): void {
-    if (settled || selfRenderStarted || disposed) return;
-    selfRenderStarted = true;
-    renderSpineSelf(container, charId, (ok) => {
-      if (ok && !settled && !disposed && container.isConnected) {
-        settled = true;
-        cleanup();
-        onReady();
-      }
-    });
-  }
-
-  // 快路径接线：原站 canvas 已存在 → 轮询等其就绪；尚未出现 → 监听插入后转轮询
-  if (document.querySelector(SITE_SPINE_CANVAS)) {
-    tryGrab();
-    if (!settled && !disposed) pollTimer = setInterval(tryGrab, 100);
-  } else {
-    observer = new MutationObserver(() => {
-      if (!document.querySelector(SITE_SPINE_CANVAS)) return;
-      if (observer) {
-        observer.disconnect();
-        observer = null;
-      }
-      tryGrab();
-      if (!settled && !disposed && !pollTimer) pollTimer = setInterval(tryGrab, 100);
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
-
-  // 宽限期后仍未拿到原站 canvas → 启动自主渲染（原站大概率不可用）
-  graceTimer = setTimeout(() => {
-    if (!settled) startSelfRender();
-  }, SPINE_CANVAS_GRACE);
-
-  // 安全网：总超时后清理监听资源
-  safetyTimer = setTimeout(cleanup, TIMEOUT + 500);
-
+  renderSpineSelf(container, charId, (ok) => {
+    if (ok && container.isConnected) onReady();
+  });
   return () => {
-    disposed = true;
-    cleanup();
     disposeSpineViewer();
   };
 }
@@ -205,44 +102,24 @@ function renderSpineSelf(
   }
   void (async () => {
     try {
-      const name = await resolveSpineName(charId);
-      if (!name) return onDone(false);
+      const entry = await resolveSpine(charId);
+      if (!entry) return onDone(false);
       const ok = await loadSpineRuntime();
       if (!ok || !container.isConnected) return onDone(false);
       const Ctor = getSpineCtor();
       if (!Ctor) return onDone(false);
-      const base = spineBaseUrl(charId, name);
       disposeSpineViewer(); // 先释放上一实例（角色/路由切换），避免 WebGL 上下文与 rAF 循环泄漏
       const player = new Ctor(container, {
-        skelUrl: `${base}.skel`,
-        atlasUrl: `${base}.atlas`,
+        ...(entry.kind === 'skel'
+          ? { skelUrl: `${entry.base}.skel`, atlasUrl: `${entry.base}.atlas` }
+          : buildOfficialConfig(entry)),
         alpha: true, // WebGL 上下文开启 alpha 通道
         backgroundColor: '00000000', // 全透明背景，透出 Hero 视差立绘
         premultipliedAlpha: false,
         showControls: false, // 隐藏播放器控件条
         showLoading: false, // 隐藏内置加载屏（由页面骨架屏接管）
         success(p) {
-          // ── 抗锯齿修复 ──
-          // nanoka atlas 以低 scale 降采样打包（filter: Linear,Linear），且缩放比逐角色不同
-          // （如卡芙卡 scale:0.19 ≈ 放大 5.3 倍，部分角色 0.32 ≈ 3 倍），全屏显示需显著放大。
-          // spine-player 默认 mipmaps:true，loadSkeleton() 会强制把 magFilter 覆盖为 Nearest，
-          // 放大时产生块状像素锯齿。此处保留 mipmaps（缩小侧三线性+各向异性过滤），
-          // 仅将放大过滤覆盖回 Linear，恢复 atlas 声明的平滑采样。
-          try {
-            const atlasUrl = (p.config && p.config.atlasUrl) || '';
-            const atlas = p.assetManager && atlasUrl ? p.assetManager.require(atlasUrl) : null;
-            const gl = p.context && p.context.gl;
-            if (atlas && atlas.pages && gl) {
-              for (const page of atlas.pages) {
-                if (page.texture) {
-                  page.texture.bind();
-                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                }
-              }
-            }
-          } catch {
-            /* 过滤覆盖失败不影响播放，仅画质回退 */
-          }
+          applyQualityFixes(p);
           // spine-player 默认不播放任何动画（setEmptyAnimation），需手动选择并播放
           try {
             const anims = (p.skeleton && p.skeleton.data && p.skeleton.data.animations) || [];
@@ -270,6 +147,41 @@ function renderSpineSelf(
       onDone(false);
     }
   })();
+}
+
+/**
+ * 官网源配置：atlas 原样加载（page 名为逻辑纹理名，无 ':' 可被解析器正常识别），
+ * 通过 rawDataURIs 把「atlas 目录 + 逻辑纹理名」映射到实际 hash URL（ADR 0009）。
+ * 注意：官网 atlas 的 page 名若替换为含 ':' 的绝对 URL 会被 Spine 解析器当属性行吞掉。
+ */
+function buildOfficialConfig(
+  entry: Extract<SpineResolved, { kind: 'official' }>,
+): { jsonUrl: string; atlasUrl: string; rawDataURIs: Record<string, string> } {
+  const atlasDir = entry.atlas.slice(0, entry.atlas.lastIndexOf('/') + 1);
+  const rawDataURIs: Record<string, string> = {};
+  for (const [logicalName, realUrl] of Object.entries(entry.textures)) {
+    rawDataURIs[atlasDir + logicalName] = realUrl;
+  }
+  return { jsonUrl: entry.json, atlasUrl: entry.atlas, rawDataURIs };
+}
+
+/** 抗锯齿修复：atlas 低 scale 降采样打包，spine-player 默认 mipmaps 会强制 magFilter Nearest，覆盖回 Linear */
+function applyQualityFixes(p: SpinePlayerInstance): void {
+  try {
+    const atlasUrl = (p.config && p.config.atlasUrl) || '';
+    const atlas = p.assetManager && atlasUrl ? p.assetManager.require(atlasUrl) : null;
+    const gl = p.context && p.context.gl;
+    if (atlas && atlas.pages && gl) {
+      for (const page of atlas.pages) {
+        if (page.texture) {
+          page.texture.bind();
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        }
+      }
+    }
+  } catch {
+    /* 过滤覆盖失败不影响播放，仅画质回退 */
+  }
 }
 
 /** 动态加载 spine-player 运行时（单例 + 多 CDN 依次兜底） */

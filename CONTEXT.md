@@ -92,3 +92,25 @@ _Avoid_: 首页、入口页
 
 ### 图片路径映射
 源数据图片路径（如 `SpriteOutput/AvatarIcon/Avatar/1001.png`）到目标相对路径（如 `icon/character/1001.png`）的映射规则，在转换工具中硬编码。
+
+## 动画资源
+
+### Spine 动画源（Spine Source）
+角色骨骼动画的资源提供方，共两类：**nanoka 源**（`static.nanoka.cc`，`.skel` 二进制骨架，Spine 4.1.23）与**官网源**（`act-webstatic.mihoyo.com`，`.json` JSON 骨架，Spine 4.2.43）。详情页 Hero 区动画由 Spine 清单按角色分发到对应源。
+_Avoid_: CDN、动画资源源
+
+### 官网源（Official Source）
+米哈游官网随版本发布的活动站资源，URL 含版本 publish_key（如 4.4 为 `pz_Devp46QZiu`，4.3 为 `pz_Z1nD6naN3q`）。仅当期版本展示的角色有动画（老角色在官网无资源），旧版本资源无长期保留 SLA。
+_Avoid_: 官网 CDN、mihoyo 源
+
+### Atlas 纹理重映射（Atlas Texture Remap）
+官网 atlas 内部引用逻辑纹理名（如 `jizi_PC-Web.png`）而实际文件为 hash 命名（如 `f59cc0ed....png`），加载时需将逻辑名改写为实际 URL 再喂给播放器的机制。
+_Avoid_: 纹理替换、atlas 改写
+
+### Spine 清单（Spine Manifest）
+角色 ID → 动画资源描述的映射文件，本地随站部署（`public/data/cn/spine-manifest.json`），条目以 `kind` 区分两类源（`skel` = nanoka 二进制 / `official` = 官网 JSON 骨架）。
+_Avoid_: manifest、动画清单
+
+### Spine 运行时（Spine Runtime）
+spine-player 播放库（当前 4.2.x），版本须与骨架数据格式兼容：向后兼容（4.2 可读 4.1 数据）、向前不兼容（4.1 读不了 4.2 数据），升级需回归验证现有动画。
+_Avoid_: 播放器、运行时库

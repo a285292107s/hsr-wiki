@@ -9,7 +9,7 @@
 import { CDN } from '../lib/constants';
 import { CACHE_TTL, cachedFetch, fetchJSON, purgeStaleVersions } from './cache';
 import type {
-  Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest,
+  Manifest, CharacterData, ItemDb, NameCache, RelicSetData, SpineManifest, SpineResolved,
   MazeListDb, LocalCharList,
   LocalItemList, LocalLightConeList, LocalRelicList, LocalMonsterList,
   LightConeDetail, LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
@@ -127,20 +127,29 @@ export function prefetchEndgameAll(_ver: string): void {
   ]);
 }
 
-/* ─── Spine 动画清单 ─── */
+/* ─── Spine 动画清单（本地 spine-manifest.json，随站部署） ─── */
 
-export async function resolveSpineName(charId: string): Promise<string | null> {
+/**
+ * 解析角色 spine 资源描述：skel 条目返回 nanoka 基地址（多段名跳过 bg），
+ * official 条目原样返回官网资源（atlas/json/纹理映射）。查无或解析失败返回 null。
+ */
+export async function resolveSpine(charId: string): Promise<SpineResolved | null> {
   try {
     const manifest = await cachedFetch<SpineManifest>(
-      `${CDN}/assets/hsr/spine/manifest.json`,
-      'spine_manifest',
+      `${LOCAL_DATA_BASE}/spine-manifest.json`,
+      'spine_manifest_v5',
       CACHE_TTL.data,
     );
-    const raw = manifest && manifest[charId];
-    if (!raw) return null;
-    // 多段资源（如 "bg|tibao1|tibao2"）优先跳过背景层 bg
-    const parts = String(raw).split('|').filter(Boolean);
-    return parts.find((p) => p !== 'bg') || parts[0] || null;
+    const entry = manifest && manifest[charId];
+    if (!entry) return null;
+    if (entry.kind === 'skel') {
+      // 多段资源（如 "bg|tibao1|tibao2"）优先跳过背景层 bg
+      const parts = String(entry.name).split('|').filter(Boolean);
+      const name = parts.find((p) => p !== 'bg') || parts[0] || null;
+      if (!name) return null;
+      return { kind: 'skel', base: spineBaseUrl(charId, name) };
+    }
+    return { kind: 'official', atlas: entry.atlas, json: entry.json, textures: entry.textures };
   } catch {
     return null;
   }

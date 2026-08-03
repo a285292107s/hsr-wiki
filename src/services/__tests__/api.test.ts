@@ -19,9 +19,9 @@ function routeFetch(routes: Record<string, unknown>, failUrls: string[] = []) {
     const u = String(url);
     if (failUrls.some((f) => u.includes(f))) throw new Error('network down');
     for (const [k, v] of Object.entries(routes)) {
-      if (u.includes(k)) return { ok: true, status: 200, json: async () => v };
+      if (u.includes(k)) return { ok: true, status: 200, text: async () => JSON.stringify(v) };
     }
-    return { ok: false, status: 404, json: async () => ({}) };
+    return { ok: false, status: 404, text: async () => '{}' };
   });
 }
 
@@ -92,27 +92,43 @@ describe('数据加载', () => {
 
 /* ─── Spine 清单解析 ─── */
 
-describe('resolveSpineName', () => {
-  it('普通名 / 多段跳过 bg / 不存在 → null', async () => {
+describe('resolveSpine', () => {
+  it('skel 条目：普通名 / 多段跳过 bg / 不存在 → null', async () => {
     const api = await freshApi();
     vi.stubGlobal('fetch', routeFetch({
-      'spine/manifest.json': { '1005': 'kafuka', '1403': 'bg|tibao1|tibao2|tibao3|tibaoqj', '8009': 'nan_42' },
+      'spine-manifest.json': {
+        '1005': { kind: 'skel', name: 'kafuka' },
+        '1403': { kind: 'skel', name: 'bg|tibao1|tibao2|tibao3|tibaoqj' },
+        '8009': { kind: 'skel', name: 'nan_42' },
+      },
     }));
-    await expect(api.resolveSpineName('1005')).resolves.toBe('kafuka');
-    await expect(api.resolveSpineName('1403')).resolves.toBe('tibao1'); // 跳过 bg
-    await expect(api.resolveSpineName('9999')).resolves.toBeNull();
+    await expect(api.resolveSpine('1005')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1005/kafuka` });
+    await expect(api.resolveSpine('1403')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1403/tibao1` }); // 跳过 bg
+    await expect(api.resolveSpine('9999')).resolves.toBeNull();
+  });
+
+  it('official 条目：原样返回官网资源描述', async () => {
+    const api = await freshApi();
+    const entry = {
+      kind: 'official',
+      atlas: 'https://act-webstatic.mihoyo.com/x.atlas',
+      json: 'https://act-webstatic.mihoyo.com/x.json',
+      textures: { 'TohsakaRin.png': 'https://act-webstatic.mihoyo.com/t.png?q=90' },
+    };
+    vi.stubGlobal('fetch', routeFetch({ 'spine-manifest.json': { '1508': entry } }));
+    await expect(api.resolveSpine('1508')).resolves.toEqual(entry);
   });
 
   it('仅 bg 段 → 回退 parts[0]', async () => {
     const api = await freshApi();
-    vi.stubGlobal('fetch', routeFetch({ 'spine/manifest.json': { '1': 'bg' } }));
-    await expect(api.resolveSpineName('1')).resolves.toBe('bg');
+    vi.stubGlobal('fetch', routeFetch({ 'spine-manifest.json': { '1': { kind: 'skel', name: 'bg' } } }));
+    await expect(api.resolveSpine('1')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1/bg` });
   });
 
   it('网络失败 → null（不抛出）', async () => {
     const api = await freshApi();
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('down'); }));
-    await expect(api.resolveSpineName('1005')).resolves.toBeNull();
+    await expect(api.resolveSpine('1005')).resolves.toBeNull();
   });
 });
 
@@ -134,7 +150,7 @@ describe('单例缓存', () => {
     vi.stubGlobal('fetch', vi.fn(async (_url: string) => {
       callCount++;
       if (callCount === 1) throw new Error('network down');
-      return { ok: true, status: 200, json: async () => [{ id: 1001, name: '角色' }] };
+      return { ok: true, status: 200, text: async () => JSON.stringify([{ id: 1001, name: '角色' }]) };
     }));
     await expect(api.loadLocalCharacterList()).rejects.toThrow();
     const list = await api.loadLocalCharacterList();

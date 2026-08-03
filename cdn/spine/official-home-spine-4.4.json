@@ -1,0 +1,138 @@
+{
+  "$note": "崩坏：星穹铁道官网首页 Spine 动画资源清单（4.4版本「鸣笛于归寂之时」）。本文件仅为参考样本，严禁作为数据源导入或随站部署。",
+  "source": "https://sr.mihoyo.com/",
+  "collected_at": "2026-08-03",
+  "spine_version": "4.2.43",
+  "base_url": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/",
+  "texture_query": "?x-oss-process=image/format,webp/quality,Q_90",
+  "note_texture": "纹理 URL 均附带 OSS 处理参数（转 webp）；去掉该参数可获取原始 png。atlas 与 json 骨架文件不带处理参数。",
+  "characters": [
+    {
+      "name": "姬子",
+      "texture_id": "jizi_PC-Web",
+      "scale": 1.01,
+      "loop": true,
+      "animation": "animation",
+      "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/e3d2af170a05678591440c7b0c7c6908_1074190156988094212.atlas",
+      "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/86a40e460a5f3e79869ca37ded0317b9_285814412607347001.json",
+      "textures": [
+        {
+          "id": "jizi_PC-Web",
+          "url": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/f59cc0eda5d9a7f4c457e560a12b1380_4984880759214206734.png?x-oss-process=image/format,webp/quality,Q_90"
+        },
+        {
+          "id": "jizi_PC-Web_2",
+          "url": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/a4a5b831fb1eaf0b787294cc612210e0_2849000945483757641.png?x-oss-process=image/format,webp/quality,Q_90"
+        },
+        {
+          "id": "jizi_PC-Web_3",
+          "url": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/17bce06b779242898ef920dcfbd94647_2356125136051364207.png?x-oss-process=image/format,webp/quality,Q_90"
+        }
+      ]
+    },
+    {
+      "name": "远坂凛（Fate 联动）",
+      "texture_id": "TohsakaRin",
+      "scale": 0.83,
+      "loop": true,
+      "animation": "animation",
+      "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/d6219db1db381ca7deaed7868ba7eaa7_3205060559394643680.atlas",
+      "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/25786df602b5a5fbf32f185f40676d73_1852508389443353702.json",
+      "textures": [
+        {
+          "id": "TohsakaRin",
+          "url": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/7eeeaa4d89f3ce6234b877102ed22486_800838663379293561.png?x-oss-process=image/format,webp/quality,Q_90"
+        }
+      ]
+    },
+    {
+      "name": "吉尔伽美什（Fate 联动）",
+      "texture_id": "Gilgamesh",
+      "scale": 0.8,
+      "loop": true,
+      "animation": "animation",
+      "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/159a2d5bad8174a72c8dd645684670ce_5804459478953526071.atlas",
+      "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/1ece68d6ca0402b2215601e90e053583_5712837087527697859.json",
+      "textures": [
+        {
+          "id": "Gilgamesh",
+          "url": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/53b2d0211f32b9a454e8d27e1f0ab5e9_5069616432112372856.png?x-oss-process=image/format,webp/quality,Q_90"
+        },
+        {
+          "id": "Gilgamesh_2",
+          "url": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/29/56efa8ea41cf293b5cf7a3731892726b_3922316112719275432.png?x-oss-process=image/format,webp/quality,Q_90"
+        }
+      ]
+    }
+  ],
+  "background_animations": [
+    {
+      "note": "首页背景层动画（列车组玻璃光等特效），共 10 组，加载于 pz-ugmWxhsCCJ 节点。",
+      "groups": [
+        {
+          "idx": 1,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/8392252fb3b9d7f15bb390445dbf743c_2423686305422380946.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/588d5bf10a359cb5da19e822002bf2c1_8318367528784162633.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/a4545dedd283af12d819a7bf66ff4c62_8153907562471352955.json"
+        },
+        {
+          "idx": 2,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/82d484b18241450c9757fea7fd939a0f_174398633731910424.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/0136f8a5764cbb360a744fcc8817eefc_6017235678527119952.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/9545781fe8f9e8a9333d4a4c89dd826d_8170282559115308805.json"
+        },
+        {
+          "idx": 3,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/24/7ad9eedf151ed3fb0c0dae25618eb435_3354369616411550103.atlas",
+          "textures": [
+            "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/24/42ef9510996d3a299f7b4aa5e7abdff0_2654160501913760413.png?x-oss-process=image/format,webp/quality,Q_90",
+            "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/24/0615b2163d572354cf552560386f65e2_7442022417009769030.png?x-oss-process=image/format,webp/quality,Q_90"
+          ],
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/24/3591a45c7fc4e8bb8aa2168b4ce41393_7000985176851630546.json"
+        },
+        {
+          "idx": 4,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/99a46902ce8b1e050ff2bf8ec714fcfa_6239542366182669301.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/43761eaea3b26398d1f4eb571ef3e2e5_4656350984078341746.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/771a145e7e035c01e633afce2cf7dd32_5063561155727581343.json"
+        },
+        {
+          "idx": 5,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/cb036333b35691d902cd675d273e0978_4971188676890018149.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/b943a9c9175da17165bb0618f3616a7b_3371439983008011729.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/a16d336a61f418302c090e4b100d31ac_1966369723300577756.json"
+        },
+        {
+          "idx": 6,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/faf85a0909df4d102a0b81ae177e7951_8910694813633074185.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/e962844b80415e943fbb1c43ad715261_1010917431232207633.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/9bea8f3e6f66c12beeaf01b1a54f02a8_2231653943507686254.json"
+        },
+        {
+          "idx": 7,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/dab49929140f9e17e531d70dcb0eda83_5314880969177051750.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/08e34e9bb25ea0406bacf78db2ebfe2c_6639367985482412967.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/3ee89b2f2dd923410c302cc3427682e4_8762375603837822429.json"
+        },
+        {
+          "idx": 8,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/e4deed360c39dc00a8deebaae77cb9f4_2551484061389453029.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/16bf8ef26513ddc9ffa21979813ae651_3811219107805459212.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/4c66167d924feef5b5071e2a7c7803f8_4202497688520480033.json"
+        },
+        {
+          "idx": 9,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/bcdf650fc4349a2f723b026ab13f067f_790746020255938774.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/8bcd19804b0a6d6eb3495fed08f01223_2111882717465939156.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/8566fe0bd207e90980b43e39fae826ba_741587343669971549.json"
+        },
+        {
+          "idx": 10,
+          "atlas": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/13a523e4bdba6d4b2595cfecd93e0036_558175657527149874.atlas",
+          "texture": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/48e11c5ebf879dff6d3448cb1e13ed55_1678737867726229318.png?x-oss-process=image/format,webp/quality,Q_90",
+          "json": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/resource/puzzle/2026/06/22/458ec37253759b96e3ab8b6f27f7b2db_5803524788678203424.json"
+        }
+      ]
+    }
+  ]
+}

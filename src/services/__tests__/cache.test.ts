@@ -17,7 +17,7 @@ async function fresh() {
 }
 
 function okFetch(data: unknown) {
-  return vi.fn(async () => ({ ok: true, status: 200, json: async () => data }));
+  return vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(data) }));
 }
 
 afterEach(() => {
@@ -37,7 +37,7 @@ describe('fetchJSON', () => {
 
   it('HTTP 非 2xx → operational 错误（含状态码）', async () => {
     const c = await fresh();
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 404, json: async () => ({}) })));
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 404, text: async () => '{}' })));
     await expect(c.fetchJSON('https://x/404.json')).rejects.toMatchObject({
       name: 'NkError',
       operational: true,
@@ -240,7 +240,7 @@ describe('L3 in-flight 去重 / L4 写回', () => {
     const p2 = c.cachedFetch('https://x/a.json', 'dup_key', 60_000);
     // cachedFetch 先 await idb.get（异步），fetch 在微任务后才调用
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    resolveFn({ ok: true, status: 200, json: async () => ({ v: 1 }) });
+    resolveFn({ ok: true, status: 200, text: async () => JSON.stringify({ v: 1 }) });
     const [r1, r2] = await Promise.all([p1, p2]);
     expect(r1).toEqual({ v: 1 });
     expect(r2).toEqual({ v: 1 });
