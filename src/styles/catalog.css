@@ -327,23 +327,27 @@
 #nk-home-app * { box-sizing: border-box; }
 #nk-home-app h1, #nk-home-app p { margin: 0; padding: 0; }
 
-/* ── Hero：全屏视差立绘 ── */
-.nk-home-hero { position: relative; height: 100vh; min-height: 520px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-left: 80px; }
-.nk-home-hero__bg { position: absolute; inset: -4%; background-size: cover; background-position: center 28%; opacity: 0; transition: opacity 1.2s ease; will-change: transform, opacity; }
-.nk-home-hero__bg.nk-on { opacity: 1; }
-.nk-home-hero__glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 60% 50% at 50% 45%, rgba(124,58,237,0.12) 0%, transparent 70%); }
-.nk-home-hero__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 56% 46% at 50% 46%, rgba(8,8,20,0.62) 0%, rgba(8,8,20,0.38) 44%, transparent 74%), linear-gradient(to bottom, rgba(15,15,35,0.55) 0%, rgba(15,15,35,0.18) 30%, rgba(15,15,35,0.25) 65%, var(--bg) 100%); }
-.nk-home-hero__content { position: relative; z-index: 2; text-align: center; padding: 0 24px; }
-.nk-home-hero__badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 20px; background: rgba(15,15,35,0.6); border: 1px solid var(--border); backdrop-filter: blur(8px); font-family: var(--font-hud); font-size: 0.6rem; letter-spacing: 0.15em; color: var(--text2); animation: nk-home-fade-up 0.6s var(--ease) 0.1s backwards; }
-.nk-home-hero__badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--diff-add); box-shadow: 0 0 8px rgba(52,211,153,0.6); animation: nk-home-pulse 2s ease-in-out infinite; }
-.nk-home-hero__title { font-family: var(--font-hud); font-size: clamp(2.6rem, 7vw, 4.5rem); font-weight: 900; letter-spacing: 0.08em; line-height: 1.1; color: var(--text-bright); margin-top: 22px; perspective: 600px; text-shadow: 0 2px 6px rgba(0,0,0,0.75), 0 0 40px var(--primary-glow), 0 0 80px rgba(124,58,237,0.15), 0 4px 24px rgba(0,0,0,0.6); }
+/* ── Hero：官网 KV 场景（Spine 10 层）为主角，标题退居左下 HUD 构图 ── */
+/* 背景渐变 = Spine 加载失败/全部层失败时的视觉兜底（主背景层不透明，正常渲染时被完全遮盖） */
+.nk-home-hero { position: relative; height: 100vh; height: 100dvh; min-height: 520px; overflow: hidden; display: flex; align-items: flex-end; justify-content: flex-start; padding: 0 48px 108px 128px; background: radial-gradient(ellipse 90% 70% at 72% 22%, rgba(124,58,237,0.16) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, rgba(32,22,72,0.55) 0%, transparent 62%), linear-gradient(170deg, #161233 0%, var(--bg) 55%, #0a0a1c 100%); }
+
+/* Hero 背景 Spine（官网背景动画 home-bg：主背景 + 角色群像，全不透明呈现） */
+.nk-home-hero__spine { position: absolute; inset: 0; opacity: 0; transition: opacity 1.6s ease; pointer-events: none; overflow: hidden; }
+.nk-home-hero__spine.nk-on { opacity: 1; }
+/* 压暗层：左下文字安全区 + 底部融入页面底色（不遮挡右上方场景主体） */
+.nk-home-hero__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 85% at 0% 108%, rgba(8,8,20,0.82) 0%, rgba(8,8,20,0.5) 34%, transparent 62%), linear-gradient(to bottom, rgba(15,15,35,0.28) 0%, transparent 22%, transparent 62%, rgba(15,15,35,0.55) 88%, var(--bg) 100%); }
+.nk-home-hero__content { position: relative; z-index: 2; text-align: left; max-width: 640px; }
+/* HUD 引题行：短线 + 小字标签 */
+.nk-home-hero__kicker { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; animation: nk-home-fade-up 0.6s var(--ease) 0.25s backwards; }
+.nk-home-hero__kicker-line { width: 36px; height: 1px; background: linear-gradient(90deg, var(--primary), transparent); box-shadow: 0 0 8px var(--primary-glow); }
+.nk-home-hero__kicker-text { font-family: var(--font-hud); font-size: 0.62rem; letter-spacing: 0.32em; color: var(--text2); text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+.nk-home-hero__title { font-family: var(--font-hud); font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 900; letter-spacing: 0.08em; line-height: 1.1; color: var(--text-bright); perspective: 600px; text-shadow: 0 2px 6px rgba(0,0,0,0.75), 0 0 40px var(--primary-glow), 0 0 80px rgba(124,58,237,0.15), 0 4px 24px rgba(0,0,0,0.6); }
 .nk-home-hero__title span { display: inline-block; animation: nk-home-char-in 0.5s var(--ease) backwards; }
-.nk-home-hero__title2 { font-family: var(--font-hud); font-size: clamp(1rem, 2.6vw, 1.5rem); font-weight: 700; letter-spacing: 0.45em; color: #A78BFA; margin-top: 12px; perspective: 600px; text-shadow: 0 1px 4px rgba(0,0,0,0.7), 0 0 24px var(--primary-glow); }
-.nk-home-hero__title2 span { display: inline-block; animation: nk-home-char-in 0.5s var(--ease) backwards; }
-.nk-home-hero__tagline { margin-top: 20px; font-size: 0.85rem; color: var(--text2); letter-spacing: 0.3em; text-shadow: 0 1px 4px rgba(0,0,0,0.7); animation: nk-home-fade-up 0.6s var(--ease) 1.1s backwards; }
-/* 滚动指示器 */
-.nk-home-hero__scroll { position: absolute; bottom: 26px; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; animation: nk-home-fade-up 0.6s var(--ease) 1.4s backwards; }
+.nk-home-hero__tagline { margin-top: 16px; font-size: 0.8rem; color: var(--text2); letter-spacing: 0.22em; text-shadow: 0 1px 4px rgba(0,0,0,0.8); animation: nk-home-fade-up 0.6s var(--ease) 1.15s backwards; }
+/* 滚动指示器（右下，让位左下标题） */
+.nk-home-hero__scroll { position: absolute; bottom: 26px; right: 40px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; animation: nk-home-fade-up 0.6s var(--ease) 1.5s backwards; border: none; background: none; padding: 8px; }
 .nk-home-hero__scroll:hover { opacity: 1; }
+.nk-home-hero__scroll:focus-visible { opacity: 1; outline: 1px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 .nk-home-hero__scroll span { font-family: var(--font-hud); font-size: 0.55rem; letter-spacing: 0.25em; color: var(--text3); }
 .nk-home-hero__scroll-line { width: 1px; height: 36px; position: relative; overflow: hidden; background: linear-gradient(to bottom, var(--border2), transparent); }
 .nk-home-hero__scroll-line::after { content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent, var(--text-bright), transparent); animation: nk-home-scroll-drop 1.8s ease-in-out infinite; }
@@ -387,23 +391,27 @@
 /* ── 首页动画 ── */
 @keyframes nk-home-char-in { from { opacity: 0; transform: translateY(18px) rotateX(40deg); } to { opacity: 1; transform: translateY(0) rotateX(0); } }
 @keyframes nk-home-fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes nk-home-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 @keyframes nk-home-scroll-drop { 0% { top: -100%; } 60%, 100% { top: 100%; } }
 
 /* ── 响应式 ── */
-@media (max-width: 1023px) { .nk-home-nav__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1023px) {
+  .nk-home-nav__grid { grid-template-columns: repeat(2, 1fr); }
+  .nk-home-hero { padding: 0 32px 96px 32px; }
+}
 @media (max-width: 767px) {
   .nk-home-nav__grid { grid-template-columns: 1fr; }
   /* 修正：左 92px 为桌面侧栏残留（移动端应左右对称）；底部需避开 56px 底部导航条 + safe-area，防止末张导航卡被遮挡 */
   .nk-home-nav { padding: 56px 20px calc(88px + env(safe-area-inset-bottom, 0px)); }
-  .nk-home-hero { padding-left: 0; }
+  /* 移动端：标题保持左下构图，收窄内边距；滚动指示器隐藏（左下标题已占据视觉锚点） */
+  .nk-home-hero { padding: 0 20px calc(88px + env(safe-area-inset-bottom, 0px)) 20px; }
+  .nk-home-hero__scroll { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nk-home-hero__bg { transition: none; }
-  .nk-home-hero__title span, .nk-home-hero__title2 span, .nk-home-hero__badge, .nk-home-hero__tagline, .nk-home-hero__scroll, .nk-home-card { animation: none; }
+  .nk-home-hero__spine { transition: none; }
+  .nk-home-hero__title span, .nk-home-hero__tagline, .nk-home-hero__scroll, .nk-home-hero__kicker, .nk-home-card { animation: none; }
   .nk-home-card:hover .nk-home-card__sheen { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); will-change: auto; }
-  .nk-home-hero__scroll-line::after, .nk-home-hero__badge-dot { animation: none; }
+  .nk-home-hero__scroll-line::after { animation: none; }
 }
 
 /* ═══════════════════════════════════════════

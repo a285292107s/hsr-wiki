@@ -1,15 +1,14 @@
 <script setup lang="ts">
 /**
  * 首页：沉浸式品牌门户
- * 全屏视差 Hero（立绘轮播 + 鼠标视差）+ HUD 标题 + 导航卡片网格
- * 移植自原 home.js 首页渲染
+ * 全屏官网 KV 场景（Spine 10 层：主背景 + 角色群像）+ 左下 HUD 标题 + 导航卡片网格
  */
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
-import { CDN } from '../../lib/constants';
 import { prefetchHighPriority } from '../router/chunks';
+import { initSpineSceneViewer } from '../character/spine';
 
 const app = useAppStore();
 const loading = ref(true);
@@ -17,74 +16,18 @@ const loading = ref(true);
 /* ─── 导航卡片：常规 7 板块 + 货币战争网关卡片（金色第二入口） ─── */
 const navCards = [...NORMAL_NAV_ITEMS, CW_GATEWAY];
 
-/* ─── 立绘轮播（双缓冲交叉淡入，6s 间隔） ─── */
+/* ─── Hero 背景 Spine 场景（官网背景节点 home-bg：主背景 + 9 层角色，固定视口叠加对齐） ─── */
 
-const HOME_BG_IDS = [1005, 1112, 1213, 1307, 1408, 1224];
-const bgUrl = (id: number): string => `${CDN}/assets/hsr/avatardrawcard/${id}.webp`;
+const spineRef = ref<HTMLElement | null>(null);
+const spineReady = ref(false);
+let disposeSpine: (() => void) | null = null;
 
-const layerA = ref({ url: bgUrl(HOME_BG_IDS[0]), on: true });
-const layerB = ref({ url: '', on: false });
-let bgIdx = 0;
-let rotateTimer: ReturnType<typeof setInterval> | null = null;
-
-function startRotation(): void {
-  rotateTimer = setInterval(() => {
-    bgIdx = (bgIdx + 1) % HOME_BG_IDS.length;
-    const url = bgUrl(HOME_BG_IDS[bgIdx]);
-    const img = new Image();
-    img.onload = () => {
-      // 预加载完成后切换：新图层显示，旧图层淡出
-      if (layerA.value.on) {
-        layerB.value = { url, on: true };
-        layerA.value = { ...layerA.value, on: false };
-      } else {
-        layerA.value = { url, on: true };
-        layerB.value = { ...layerB.value, on: false };
-      }
-    };
-    img.src = url;
-  }, 6000);
-}
-
-/* ─── 鼠标视差（lerp + rAF，变换直接写入 style 避免响应式开销） ─── */
-
-const heroRef = ref<HTMLElement | null>(null);
-const bgARef = ref<HTMLElement | null>(null);
-const bgBRef = ref<HTMLElement | null>(null);
-
-let tx = 0, ty = 0, cx = 0, cy = 0;
-let parallaxRaf: number | null = null;
-
-function lerpLoop(): void {
-  cx += (tx - cx) * 0.06;
-  cy += (ty - cy) * 0.06;
-  const t = `translate3d(${(cx * 15).toFixed(2)}px, ${(cy * 10).toFixed(2)}px, 0) scale(1.06)`;
-  if (bgARef.value) bgARef.value.style.transform = t;
-  if (bgBRef.value) bgBRef.value.style.transform = t;
-  if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) {
-    parallaxRaf = requestAnimationFrame(lerpLoop);
-  } else {
-    parallaxRaf = null;
-  }
-}
-
-function kickParallax(): void {
-  if (parallaxRaf === null) parallaxRaf = requestAnimationFrame(lerpLoop);
-}
-
-function onHeroMove(e: MouseEvent): void {
-  const el = heroRef.value;
+function mountHeroSpine(): void {
+  const el = spineRef.value;
   if (!el) return;
-  const r = el.getBoundingClientRect();
-  tx = (e.clientX - r.left) / r.width - 0.5;
-  ty = (e.clientY - r.top) / r.height - 0.5;
-  kickParallax();
-}
-
-function onHeroLeave(): void {
-  tx = 0;
-  ty = 0;
-  kickParallax();
+  disposeSpine = initSpineSceneViewer(el, 'home-bg', () => {
+    spineReady.value = true;
+  });
 }
 
 /* ─── 卡片 3D 倾斜（grid 级事件委托 + rAF 节流） ─── */
@@ -125,28 +68,23 @@ function chars(str: string, base: number): { ch: string; delay: string }[] {
     delay: `${(base + i * 0.06).toFixed(2)}s`,
   }));
 }
-const titleChars = chars('NANOKA', 0.15);
-const title2Chars = chars('HSR WIKI', 0.55);
+const titleChars = chars('HSR WIKI', 0.45);
 
 const navRef = ref<HTMLElement | null>(null);
 function scrollToNav(): void {
   navRef.value?.scrollIntoView({ behavior: 'smooth' });
 }
 
-onMounted(async () => {
-  startRotation();
+onMounted(() => {
   prefetchHighPriority();
-  try {
-    await app.initManifest();
-  } catch {
-    /* 离线降级：版本显示 —，页面仍可用 */
-  }
+  // 版本号后台加载（CDN manifest 失败时静默降级为 —，不阻塞首屏）
+  void app.initManifest().catch(() => { /* 离线降级：版本显示 —，页面仍可用 */ });
   loading.value = false;
+  void nextTick().then(mountHeroSpine); // v-if 解锁后 Hero 才入 DOM，再挂载背景 Spine
 });
 
 onBeforeUnmount(() => {
-  if (rotateTimer !== null) clearInterval(rotateTimer);
-  if (parallaxRaf !== null) cancelAnimationFrame(parallaxRaf);
+  if (disposeSpine) disposeSpine();
   if (tiltRaf !== null) cancelAnimationFrame(tiltRaf);
 });
 </script>
@@ -155,39 +93,20 @@ onBeforeUnmount(() => {
   <div id="nk-home-app">
     <div v-if="loading" class="nk-loading">LOADING</div>
     <template v-else>
-      <section
-        ref="heroRef"
-        class="nk-home-hero"
-        @mousemove="onHeroMove"
-        @mouseleave="onHeroLeave"
-      >
-        <div
-          ref="bgARef"
-          class="nk-home-hero__bg nk-home-hero__bg--a"
-          :class="{ 'nk-on': layerA.on }"
-          :style="{ backgroundImage: `url('${layerA.url}')` }"
-        ></div>
-        <div
-          ref="bgBRef"
-          class="nk-home-hero__bg nk-home-hero__bg--b"
-          :class="{ 'nk-on': layerB.on }"
-          :style="layerB.url ? { backgroundImage: `url('${layerB.url}')` } : undefined"
-        ></div>
-        <div class="nk-home-hero__glow"></div>
+      <section class="nk-home-hero">
+        <div ref="spineRef" class="nk-home-hero__spine" :class="{ 'nk-on': spineReady }"></div>
         <div class="nk-home-hero__scrim"></div>
         <div class="nk-home-hero__content">
-          <div class="nk-home-hero__badge">
-            <span class="nk-home-hero__badge-dot"></span>DATA v{{ app.version || '—' }}
+          <div class="nk-home-hero__kicker">
+            <span class="nk-home-hero__kicker-line"></span>
+            <span class="nk-home-hero__kicker-text">崩坏：星穹铁道 · 数据百科</span>
           </div>
           <h1 class="nk-home-hero__title">
             <span v-for="(c, i) in titleChars" :key="i" :style="{ animationDelay: c.delay }">{{ c.ch }}</span>
           </h1>
-          <div class="nk-home-hero__title2">
-            <span v-for="(c, i) in title2Chars" :key="i" :style="{ animationDelay: c.delay }">{{ c.ch }}</span>
-          </div>
-          <p class="nk-home-hero__tagline">崩坏：星穹铁道 · 数据百科</p>
+          <p class="nk-home-hero__tagline">角色 · 光锥 · 遗器 · 全图鉴数据</p>
         </div>
-        <div class="nk-home-hero__scroll" @click="scrollToNav">
+        <div class="nk-home-hero__scroll" role="button" tabindex="0" @click="scrollToNav" @keydown.enter="scrollToNav">
           <span>SCROLL</span>
           <div class="nk-home-hero__scroll-line"></div>
         </div>

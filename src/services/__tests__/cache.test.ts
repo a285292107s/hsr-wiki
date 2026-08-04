@@ -293,3 +293,53 @@ describe('purgeStaleVersions', () => {
     expect(await c2.cacheHas('char_4.3.1_1005')).toBe(true);
   });
 });
+
+/* ─── fetchResourceStatus / fetchText（诊断页资源检查） ─── */
+
+describe('fetchResourceStatus', () => {
+  const statusFetch = (status: number) =>
+    vi.fn(async () => ({ ok: status >= 200 && status < 300, status, body: { cancel: vi.fn() } }));
+
+  it('200 → ok + 状态码', async () => {
+    const c = await fresh();
+    vi.stubGlobal('fetch', statusFetch(200));
+    await expect(c.fetchResourceStatus('https://x/a.skel')).resolves.toMatchObject({ ok: true, status: 200 });
+  });
+
+  it('404 → 不抛异常，返回 ok:false + 状态码', async () => {
+    const c = await fresh();
+    vi.stubGlobal('fetch', statusFetch(404));
+    await expect(c.fetchResourceStatus('https://x/miss.atlas')).resolves.toMatchObject({ ok: false, status: 404 });
+  });
+
+  it('网络失败 → 归一为 status 0', async () => {
+    const c = await fresh();
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
+    await expect(c.fetchResourceStatus('https://x/down.png')).resolves.toMatchObject({ ok: false, status: 0 });
+  });
+
+  it('只取响应头：取消 body 流不下载内容', async () => {
+    const c = await fresh();
+    const cancel = vi.fn();
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, body: { cancel } })));
+    await c.fetchResourceStatus('https://x/big.png');
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('fetchText', () => {
+  it('返回原始文本（atlas 解析用）', async () => {
+    const c = await fresh();
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, text: async () => 'a.png\nsize: 8, 8\n' })));
+    await expect(c.fetchText('https://x/hero.atlas')).resolves.toBe('a.png\nsize: 8, 8\n');
+  });
+
+  it('非 2xx → NkError（operational）', async () => {
+    const c = await fresh();
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 403, text: async () => '' })));
+    await expect(c.fetchText('https://x/forbidden.atlas')).rejects.toMatchObject({
+      name: 'NkError',
+      operational: true,
+    });
+  });
+});

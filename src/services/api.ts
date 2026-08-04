@@ -129,29 +129,60 @@ export function prefetchEndgameAll(_ver: string): void {
 
 /* ─── Spine 动画清单（本地 spine-manifest.json，随站部署） ─── */
 
+/** 全量 spine-manifest（审核台条目清单用；与 resolveSpine 同一缓存键） */
+export function loadSpineManifest(): Promise<SpineManifest> {
+  return cachedFetch<SpineManifest>(
+    `${LOCAL_DATA_BASE}/spine-manifest.json`,
+    'spine_manifest_v9',
+    CACHE_TTL.data,
+  );
+}
+
 /**
- * 解析角色 spine 资源描述：skel 条目返回 nanoka 基地址（多段名跳过 bg），
- * official 条目原样返回官网资源（atlas/json/纹理映射）。查无或解析失败返回 null。
+ * 解析 spine 资源描述：skel 条目返回 nanoka 基地址（多段名跳过 bg），
+ * official 条目原样返回官网资源（atlas/json/纹理映射），
+ * official-scene 条目原样返回多层场景（固定视口 + 骨架层列表）。
+ * 查无或解析失败返回 null。
  */
-export async function resolveSpine(charId: string): Promise<SpineResolved | null> {
+export async function resolveSpine(spineKey: string): Promise<SpineResolved | null> {
   try {
     const manifest = await cachedFetch<SpineManifest>(
       `${LOCAL_DATA_BASE}/spine-manifest.json`,
-      'spine_manifest_v5',
+      'spine_manifest_v9',
       CACHE_TTL.data,
     );
-    const entry = manifest && manifest[charId];
+    const entry = manifest && manifest[spineKey];
     if (!entry) return null;
     if (entry.kind === 'skel') {
       // 多段资源（如 "bg|tibao1|tibao2"）优先跳过背景层 bg
       const parts = String(entry.name).split('|').filter(Boolean);
       const name = parts.find((p) => p !== 'bg') || parts[0] || null;
       if (!name) return null;
-      return { kind: 'skel', base: spineBaseUrl(charId, name) };
+      return { kind: 'skel', base: spineBaseUrl(spineKey, name) };
+    }
+    if (entry.kind === 'official-scene') {
+      return { kind: 'official-scene', viewport: entry.viewport, layers: entry.layers };
     }
     return { kind: 'official', atlas: entry.atlas, json: entry.json, textures: entry.textures };
   } catch {
     return null;
+  }
+}
+
+/** 列出 spine-manifest 中全部 official-scene 场景键（调试页场景选择用） */
+export async function loadSpineSceneKeys(): Promise<string[]> {
+  try {
+    const manifest = await cachedFetch<SpineManifest>(
+      `${LOCAL_DATA_BASE}/spine-manifest.json`,
+      'spine_manifest_v9',
+      CACHE_TTL.data,
+    );
+    if (!manifest) return [];
+    return Object.entries(manifest)
+      .filter(([, v]) => v.kind === 'official-scene')
+      .map(([k]) => k);
+  } catch {
+    return [];
   }
 }
 

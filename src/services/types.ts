@@ -257,13 +257,24 @@ export interface SpineOfficialEntry {
   textures: Record<string, string>;
 }
 
-/** charId → spine 资源描述（本地 spine-manifest.json，随站部署） */
-export type SpineManifest = Record<string, SpineSkelEntry | SpineOfficialEntry>;
+/** 官网源多层场景条目（如枢纽页背景）：各层共享统一骨架坐标系，
+ *  渲染时所有层使用同一固定 viewport 叠加对齐（官网 1920×1080 设计画布同款方案） */
+export interface SpineSceneEntry {
+  kind: 'official-scene';
+  /** 全部层共用的固定世界视口（spine 世界坐标，y 轴向上） */
+  viewport: { x: number; y: number; width: number; height: number };
+  /** 按叠加顺序（底 → 顶）排列的骨架层 */
+  layers: { atlas: string; json: string; textures: Record<string, string> }[];
+}
 
-/** 解析后的角色 spine 资源描述（渲染层消费） */
+/** 条目键 → spine 资源描述（本地 spine-manifest.json，随站部署；键为角色 ID 或场景标识） */
+export type SpineManifest = Record<string, SpineSkelEntry | SpineOfficialEntry | SpineSceneEntry>;
+
+/** 解析后的 spine 资源描述（渲染层消费） */
 export type SpineResolved =
   | { kind: 'skel'; base: string }
-  | { kind: 'official'; atlas: string; json: string; textures: Record<string, string> };
+  | { kind: 'official'; atlas: string; json: string; textures: Record<string, string> }
+  | { kind: 'official-scene'; viewport: SpineSceneEntry['viewport']; layers: SpineSceneEntry['layers'] };
 
 /* ─── 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
 

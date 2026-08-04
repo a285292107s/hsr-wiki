@@ -2,6 +2,17 @@
 
 export const CDN = 'https://static.nanoka.cc';
 
+// spine-player 运行时版本（单一来源：生产渲染 / 调试页 / 验收报告共用；
+// 升级需回归验证：4.2.x 向后兼容 4.1 数据、向前不兼容）
+export const SPINE_RUNTIME_VERSION = '4.2.43';
+
+// spine-player 运行时（多 CDN 兜底，jsdelivr 优先以兼顾国内可达性）
+export const SPINE_RUNTIME_CDNS = [
+  `https://cdn.jsdelivr.net/npm/@esotericsoftware/spine-player@${SPINE_RUNTIME_VERSION}/dist/iife/spine-player.js`,
+  `https://fastly.jsdelivr.net/npm/@esotericsoftware/spine-player@${SPINE_RUNTIME_VERSION}/dist/iife/spine-player.js`,
+  `https://unpkg.com/@esotericsoftware/spine-player@${SPINE_RUNTIME_VERSION}/dist/iife/spine-player.js`,
+];
+
 /** 角色满级（80 级） */
 export const MAX_CHAR_LEVEL = 80;
 

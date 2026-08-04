@@ -44,6 +44,9 @@ tools/converter/.converter-state.json
 tools/converter/.textmap-cache.db
 tools/converter/.textmap-cache.db-*
 
+# Temporary workspace (debug scripts & screenshots)
+temp/
+
 # Image formats (root-level)
 /*.png
 /*.jpg

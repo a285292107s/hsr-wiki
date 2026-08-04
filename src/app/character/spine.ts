@@ -7,19 +7,22 @@
  * 运行时约束：spine-player 4.2.x 向后兼容 4.1 数据、向前不兼容（升级需回归验证）
  */
 import { resolveSpine } from '../../services/api';
-import type { SpineResolved } from '../../services/types';
-
-// spine-player 4.2.43 运行时（多 CDN 兜底，jsdelivr 优先以兼顾国内可达性）
-const SPINE_RUNTIME_CDNS = [
-  'https://cdn.jsdelivr.net/npm/@esotericsoftware/spine-player@4.2.43/dist/iife/spine-player.js',
-  'https://fastly.jsdelivr.net/npm/@esotericsoftware/spine-player@4.2.43/dist/iife/spine-player.js',
-  'https://unpkg.com/@esotericsoftware/spine-player@4.2.43/dist/iife/spine-player.js',
-];
+import type { SpineResolved, SpineSceneEntry } from '../../services/types';
+import { SPINE_RUNTIME_CDNS } from '../../lib/constants';
 
 /* ─── spine-player 松散类型（IIFE 运行时注入全局 spine） ─── */
 
 interface SpineAtlasPage {
   texture?: { bind(): void } | null;
+}
+/** spine-player 内部相机（OrthoCamera）：可见世界范围 = zoom × viewportWidth/Height */
+interface SpineCamera {
+  viewportWidth: number;
+  viewportHeight: number;
+  zoom: number;
+  position: { x: number; y: number };
+  setViewport(w: number, h: number): void;
+  update(): void;
 }
 interface SpinePlayerInstance {
   dispose(): void;
@@ -29,6 +32,9 @@ interface SpinePlayerInstance {
   context?: { gl?: WebGLRenderingContext | null } | null;
   skeleton?: { data?: { animations?: { name: string }[] } | null } | null;
   config?: { atlasUrl?: string } | null;
+  /** 4.2.43 运行时实际暴露（IIFE 全局实例） */
+  canvas?: HTMLCanvasElement | null;
+  sceneRenderer?: { camera?: SpineCamera | null } | null;
 }
 interface SpinePlayerConfig {
   /** nanoka 源：二进制骨架（skel 与 official 二选一） */
@@ -40,6 +46,22 @@ interface SpinePlayerConfig {
   rawDataURIs?: Record<string, string>;
   alpha?: boolean;
   backgroundColor?: string;
+  /** 骨架适配容器方式：contain（默认，完整可见）/ cover（铺满裁剪） */
+  fit?: 'contain' | 'cover';
+  /** 每帧钩子（drawFrame 内相机计算之后、绘制之前执行），用于强制修正相机映射 */
+  update?: (player: SpinePlayerInstance, delta: number) => void;
+  /** 固定世界视口（多层场景对齐用）：给定 x/y/width/height 后不再按动画边界自动计算；
+   *  pad* 设为数值 0 关闭默认 10% 边距 */
+  viewport?: {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    padLeft?: number | string;
+    padRight?: number | string;
+    padTop?: number | string;
+    padBottom?: number | string;
+  };
   /** nanoka/官网 atlas 均无 pma 字段 = 直通 alpha 纹理，必须 false（true 会预乘混合导致边缘亮边伪影） */
   premultipliedAlpha?: boolean;
   showControls?: boolean;
@@ -49,44 +71,309 @@ interface SpinePlayerConfig {
 }
 type SpinePlayerCtor = new (container: HTMLElement, config: SpinePlayerConfig) => SpinePlayerInstance;
 
+/* ─── 场景级渲染松散类型（单画布多骨架，spine-webgl 原生 API） ─── */
+
+interface SpineSceneSkeleton {
+  updateWorldTransform(physics: number): void;
+}
+interface SpineSceneAnimState {
+  update(d: number): void;
+  apply(s: unknown): void;
+  setAnimation(track: number, name: string, loop: boolean): void;
+}
+interface SpineSceneRenderer {
+  /** position 为 Vector3：set(x, y, z) 三参全传（z 缺省 undefined 会污染 view 矩阵） */
+  camera: { position: { set(x: number, y: number, z: number): void }; viewportWidth: number; viewportHeight: number; zoom: number };
+  begin(): void;
+  end(): void;
+  drawSkeleton(s: unknown, premultipliedAlpha?: boolean): void;
+  dispose(): void;
+}
+interface SpineSceneAssetManager {
+  setRawDataURI(path: string, url: string): void;
+  loadTextureAtlas(url: string): void;
+  loadJson(url: string): void;
+  loadAll(): Promise<unknown>;
+  get(url: string): unknown;
+}
+interface SpineLib {
+  SceneRenderer: new (canvas: HTMLCanvasElement, gl: WebGLRenderingContext, twoColorTint?: boolean) => SpineSceneRenderer;
+  AssetManager: new (gl: WebGLRenderingContext, pathPrefix: string) => SpineSceneAssetManager;
+  SkeletonJson: new (loader: unknown) => { readSkeletonData(json: unknown): unknown };
+  AtlasAttachmentLoader: new (atlas: unknown) => unknown;
+  Skeleton: new (data: unknown) => SpineSceneSkeleton;
+  AnimationState: new (data: unknown) => SpineSceneAnimState;
+  AnimationStateData: new (data: unknown) => unknown;
+  Physics: { update: number };
+}
+
+function getSpineLib(): SpineLib | null {
+  const g = globalThis as { spine?: SpineLib };
+  return g.spine ?? null;
+}
+
 let _runtimePromise: Promise<boolean> | null = null; // 运行时加载单例（避免重复下载 ~500KB）
-let _player: SpinePlayerInstance | null = null; // 当前自主渲染实例（路由/角色切换时需释放）
+let _players: SpinePlayerInstance[] = []; // 当前自主渲染单实例（角色页），路由切换时需释放；场景实例由 initSpineSceneViewer 局部管理
 
 function getSpineCtor(): SpinePlayerCtor | null {
   const g = globalThis as { spine?: { SpinePlayer?: SpinePlayerCtor } };
   return (g.spine && g.spine.SpinePlayer) || null;
 }
 
-/** 释放当前 SpinePlayer：停止 rAF 循环 + 移除播放器 DOM + 释放 WebGL 资源，避免泄漏 */
+/** 释放全部 SpinePlayer：停止 rAF 循环 + 移除播放器 DOM + 释放 WebGL 资源，避免泄漏 */
 export function disposeSpineViewer(): void {
-  if (_player) {
+  for (const p of _players) {
     try {
-      _player.dispose();
+      p.dispose();
     } catch {
       /* 已释放或运行时异常均静默 */
     }
-    _player = null;
   }
+  _players = [];
 }
 
 /**
  * 初始化 Spine 查看器（纯自主渲染）。
  * @param container 播放器挂载容器（.nk-hero__spine）
- * @param charId 角色 ID
+ * @param spineKey 清单条目键（角色 ID 或场景标识如 home-bg）
  * @param onReady 动画就绪回调（视图层据此点亮切换按钮 / 压暗背景）
+ * @param opts 可选渲染参数（fit: cover 用于背景场景铺满）
  * @returns 清理函数（组件卸载 / 角色切换时调用）
  */
 export function initSpineViewer(
   container: HTMLElement,
-  charId: string,
+  spineKey: string,
   onReady: () => void,
+  opts?: { fit?: 'contain' | 'cover' },
 ): () => void {
-  renderSpineSelf(container, charId, (ok) => {
+  renderSpineSelf(container, spineKey, (ok) => {
     if (ok && container.isConnected) onReady();
-  });
+  }, opts);
   return () => {
     disposeSpineViewer();
   };
+}
+
+/**
+ * 初始化多层场景 Spine（official-scene 条目，如枢纽页背景）。
+ * 单画布多骨架渲染（官网 Three.js 管线同款）：全部层骨架在同一画布按层序绘制，
+ * 混合 slot（screen/additive/multiply）的 dst 始终为真实画面——
+ * 修复旧版多透明画布叠放时混合对着透明 dst 产生不透明黑块的问题
+ * （打光/光效纹理含暗色高 alpha 像素，additive/screen 对透明 dst 会写出暗色不透明像素）。
+ * 全部层共享同一固定世界视口保证对齐（官网背景节点同款方案：各层骨架共享统一坐标系）。
+ * 就绪条件：资源加载完成且至少一层骨架构建成功——单层资源缺失仅跳过该层。
+ * 窄屏（<768px）仅渲染主背景层以控制 WebGL 开销，跨断点变化时自动重建。
+ * 相比旧版 N 个 SpinePlayer，仅占用 1 个 WebGL 上下文。
+ * @param container 场景挂载容器（内部自建舞台 + 单画布）
+ * @param sceneKey 清单条目键（如 home-bg）
+ * @param onReady 场景就绪回调（视图层据此点亮切换按钮 / 压暗背景）
+ * @returns 清理函数
+ */
+export function initSpineSceneViewer(
+  container: HTMLElement,
+  sceneKey: string,
+  onReady: () => void,
+): () => void {
+  let cancelled = false; // 清理后终止一切异步行为（加载完成 / 断点重建）
+  let stage: HTMLDivElement | null = null;
+  let rafId = 0;
+  let mq: MediaQueryList | null = null;
+  let rebuild: (() => void) | null = null;
+  let onStageResize: (() => void) | null = null;
+  let teardownCanvas: (() => void) | null = null;
+
+  /** 释放当前场景：渲染循环 + WebGL 资源 + 舞台 DOM + 尺寸监听（断点重建 / 组件卸载共用） */
+  const teardownScene = (): void => {
+    if (teardownCanvas) {
+      teardownCanvas();
+      teardownCanvas = null;
+    }
+    if (onStageResize) {
+      window.removeEventListener('resize', onStageResize);
+      onStageResize = null;
+    }
+    if (stage) {
+      stage.remove();
+      stage = null;
+    }
+  };
+
+  /**
+   * 构建场景舞台：单画布顺序渲染全部层（layers 顺序 = renderOrder 升序 = 官网绘制顺序）。
+   */
+  const buildScene = async (
+    layers: SpineSceneEntry['layers'],
+    vp: SpineSceneEntry['viewport'],
+    lib: SpineLib,
+  ): Promise<void> => {
+    if (cancelled || !container.isConnected) return;
+    // 官网同款方案：固定设计画布舞台（官网 boxStyle 1920×1080 同款，按视口实际比例取高），
+    // canvas buffer 尺寸与舞台 CSS 恒为 1:1 → buffer 比例永远等于视口比例；
+    // 舞台再对挂载容器做 CSS 级适配（居中）兼容任意窗口比例
+    const stageEl = document.createElement('div');
+    const ar = vp.width > 0 && vp.height > 0 ? vp.width / vp.height : 16 / 9;
+    // 高 DPR 下收缩舞台 CSS 尺寸，保证 buffer 最长边 ≤ 2560（WebGL 内存控制；舞台会被缩放到容器，不损失清晰度）
+    const dpr = window.devicePixelRatio || 1;
+    const STAGE_W = Math.round(Math.min(1920, 2560 / dpr));
+    const STAGE_H = Math.round(STAGE_W / ar);
+    stageEl.style.cssText = `position:absolute;left:50%;top:50%;width:${STAGE_W}px;height:${STAGE_H}px;overflow:hidden;pointer-events:none;`;
+    const layoutStage = (): void => {
+      const r = container.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      // 官网同款 cover 全幅铺满：任意窗口比例均无边框留白（场景主角化设计）。
+      // 官网 KV 构图主体集中于画布 4%~96% 中央带：宽屏裁上下窄带、窄屏裁两侧，主体始终可见；
+      // 透明区域由外层 Hero 渐变兑底背景承接
+      const scale = Math.max(r.width / STAGE_W, r.height / STAGE_H);
+      stageEl.style.transform = `translate(-50%,-50%) scale(${scale.toFixed(4)})`;
+    };
+    layoutStage();
+    onStageResize = layoutStage;
+    window.addEventListener('resize', layoutStage);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(STAGE_W * dpr);
+    canvas.height = Math.round(STAGE_H * dpr);
+    canvas.style.cssText = 'width:100%;height:100%;display:block;';
+    stageEl.appendChild(canvas);
+    container.appendChild(stageEl);
+    stage = stageEl;
+
+    const gl = canvas.getContext('webgl2', { alpha: true }) || canvas.getContext('webgl', { alpha: true });
+    if (!gl) return; // WebGL 不可用 → 保持视图层渐变兑底背景
+    const renderer = new lib.SceneRenderer(canvas, gl, true);
+    // 相机 = 固定世界视口（中心对齐 vp 中心，与多层骨架共享坐标系）
+    renderer.camera.position.set(vp.x + vp.width / 2, vp.y + vp.height / 2, 0);
+    renderer.camera.viewportWidth = vp.width;
+    renderer.camera.viewportHeight = vp.height;
+    renderer.camera.zoom = 1;
+
+    const manager = new lib.AssetManager(gl, '');
+    for (const layer of layers) {
+      // 官网源：atlas 原样加载 + rawDataURIs 把「atlas 目录 + 逻辑纹理名」映射到实际 hash URL（ADR 0009）
+      const atlasDir = layer.atlas.slice(0, layer.atlas.lastIndexOf('/') + 1);
+      for (const [logical, real] of Object.entries(layer.textures)) {
+        manager.setRawDataURI(atlasDir + logical, real);
+      }
+      manager.loadTextureAtlas(layer.atlas);
+      manager.loadJson(layer.json);
+    }
+
+    // 4.2.x AssetManager.loadAll 为 Promise 风格（内部 rAF 轮询完成状态）。
+    // 注意：任一资源失败 loadAll 会 reject（errors 非空），此时不视为整体失败——
+    // catch 后照常进入 then 分支，由逐层 get() 检查实现「缺失层跳过」的局部降级
+    void manager
+      .loadAll()
+      .catch(() => undefined)
+      .then(() => {
+        if (cancelled || !container.isConnected) return;
+        try {
+          const items: { skeleton: SpineSceneSkeleton; state: SpineSceneAnimState }[] = [];
+          for (const layer of layers) {
+            const atlas = manager.get(layer.atlas);
+            const json = manager.get(layer.json);
+            if (!atlas || !json) {
+              // 单层资源缺失仅跳过该层（局部降级，不拖垮整体）
+              console.warn(`[nk-wiki] spine 场景层资源缺失，已跳过: ${layer.atlas}`);
+              continue;
+            }
+            const data = new lib.SkeletonJson(new lib.AtlasAttachmentLoader(atlas)).readSkeletonData(json);
+            const skeleton = new lib.Skeleton(data);
+            const state = new lib.AnimationState(new lib.AnimationStateData(data));
+            const anims = (data as { animations?: { name: string }[] }).animations || [];
+            const chosen =
+              anims.find((a) => a.name === 'idle') ||
+              anims.find((a) => /idle|standby|stand/i.test(a.name)) ||
+              anims[0];
+            if (chosen) state.setAnimation(0, chosen.name, true);
+            items.push({ skeleton, state });
+          }
+          if (items.length === 0) throw new Error('全部场景层资源缺失');
+          applyAtlasQualityFixes(manager, layers, gl);
+          teardownCanvas = () => {
+            cancelAnimationFrame(rafId);
+            try {
+              renderer.dispose();
+              // 显式 loseContext 立即释放上下文配额（回收依赖 GC 有延迟）
+              gl.getExtension('WEBGL_lose_context')?.loseContext();
+            } catch { /* 已释放或运行时异常均静默 */ }
+          };
+          let last = performance.now();
+          const frame = (now: number): void => {
+            if (cancelled) return;
+            const delta = Math.min((now - last) / 1000, 0.1);
+            last = now;
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            renderer.begin();
+            for (const it of items) {
+              it.state.update(delta);
+              it.state.apply(it.skeleton);
+              it.skeleton.updateWorldTransform(lib.Physics.update);
+              // premultipliedAlpha 默认 false：与全站基线一致（官网/nanoka atlas 均无 pma 字段 = 直通 alpha）
+              renderer.drawSkeleton(it.skeleton);
+            }
+            renderer.end();
+            rafId = requestAnimationFrame(frame);
+          };
+          rafId = requestAnimationFrame(frame);
+          if (container.isConnected) onReady();
+        } catch (e) {
+          console.warn('[nk-wiki] spine 场景构建失败:', e);
+        }
+      })
+      .catch((e: unknown) => {
+        console.warn('[nk-wiki] spine 场景资源加载失败:', e);
+      });
+  };
+
+  void (async () => {
+    try {
+      const entry = await resolveSpine(sceneKey);
+      if (!entry || entry.kind !== 'official-scene') return;
+      const ok = await loadSpineRuntime();
+      if (!ok || !container.isConnected) return;
+      const lib = getSpineLib();
+      if (!lib) return;
+      // 窄屏降级：仅主背景层（全量层 WebGL 开销过高）；跨断点变化时重建场景
+      const mql = window.matchMedia('(min-width: 768px)');
+      mq = mql;
+      const pickLayers = (): SpineSceneEntry['layers'] =>
+        mql.matches ? entry.layers : entry.layers.slice(0, 1);
+      rebuild = (): void => {
+        if (cancelled) return;
+        teardownScene();
+        void buildScene(pickLayers(), entry.viewport, lib);
+      };
+      mq.addEventListener('change', rebuild);
+      rebuild();
+    } catch (e) {
+      console.warn('[nk-wiki] spine 场景渲染失败:', e);
+    }
+  })();
+  return () => {
+    cancelled = true;
+    if (mq && rebuild) mq.removeEventListener('change', rebuild);
+    mq = null;
+    rebuild = null;
+    teardownScene();
+  };
+}
+
+/** 选择并播放动画：优先 idle 系，否则首个（场景层动画名均为 animation） */
+function playFirstAnimation(p: SpinePlayerInstance): void {
+  try {
+    const anims = (p.skeleton && p.skeleton.data && p.skeleton.data.animations) || [];
+    const chosen =
+      anims.find((a) => a.name === 'idle') ||
+      anims.find((a) => /idle|standby|stand/i.test(a.name)) ||
+      anims[0];
+    if (chosen) {
+      p.setAnimation(chosen.name);
+      p.play();
+    }
+  } catch (e) {
+    console.warn('[nk-wiki] spine 动画选择失败:', e);
+  }
 }
 
 /* ─── 自主 Spine 渲染：manifest 解析 → 运行时加载 → SpinePlayer 实例化 ─── */
@@ -95,6 +382,7 @@ function renderSpineSelf(
   container: HTMLElement,
   charId: string,
   onDone: (ok: boolean) => void,
+  opts?: { fit?: 'contain' | 'cover' },
 ): void {
   if (!charId) {
     onDone(false);
@@ -103,7 +391,7 @@ function renderSpineSelf(
   void (async () => {
     try {
       const entry = await resolveSpine(charId);
-      if (!entry) return onDone(false);
+      if (!entry || entry.kind === 'official-scene') return onDone(false); // 场景条目走 initSpineSceneViewer
       const ok = await loadSpineRuntime();
       if (!ok || !container.isConnected) return onDone(false);
       const Ctor = getSpineCtor();
@@ -115,25 +403,14 @@ function renderSpineSelf(
           : buildOfficialConfig(entry)),
         alpha: true, // WebGL 上下文开启 alpha 通道
         backgroundColor: '00000000', // 全透明背景，透出 Hero 视差立绘
+        ...(opts?.fit ? { fit: opts.fit } : {}),
         premultipliedAlpha: false,
         showControls: false, // 隐藏播放器控件条
         showLoading: false, // 隐藏内置加载屏（由页面骨架屏接管）
         success(p) {
           applyQualityFixes(p);
           // spine-player 默认不播放任何动画（setEmptyAnimation），需手动选择并播放
-          try {
-            const anims = (p.skeleton && p.skeleton.data && p.skeleton.data.animations) || [];
-            const chosen =
-              anims.find((a) => a.name === 'idle') ||
-              anims.find((a) => /idle|standby|stand/i.test(a.name)) ||
-              anims[0];
-            if (chosen) {
-              p.setAnimation(chosen.name);
-              p.play();
-            }
-          } catch (e) {
-            console.warn('[nk-wiki] spine 动画选择失败:', e);
-          }
+          playFirstAnimation(p);
           onDone(true);
         },
         error(_p, msg) {
@@ -141,7 +418,7 @@ function renderSpineSelf(
           onDone(false);
         },
       });
-      _player = player;
+      _players.push(player);
     } catch (e) {
       console.warn('[nk-wiki] spine 自主渲染失败:', e);
       onDone(false);
@@ -164,7 +441,6 @@ function buildOfficialConfig(
   }
   return { jsonUrl: entry.json, atlasUrl: entry.atlas, rawDataURIs };
 }
-
 /** 抗锯齿修复：atlas 低 scale 降采样打包，spine-player 默认 mipmaps 会强制 magFilter Nearest，覆盖回 Linear */
 function applyQualityFixes(p: SpinePlayerInstance): void {
   try {
@@ -172,6 +448,28 @@ function applyQualityFixes(p: SpinePlayerInstance): void {
     const atlas = p.assetManager && atlasUrl ? p.assetManager.require(atlasUrl) : null;
     const gl = p.context && p.context.gl;
     if (atlas && atlas.pages && gl) {
+      for (const page of atlas.pages) {
+        if (page.texture) {
+          page.texture.bind();
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        }
+      }
+    }
+  } catch {
+    /* 过滤覆盖失败不影响播放，仅画质回退 */
+  }
+}
+
+/** 场景级抗锯齿修复（AssetManager 加载的 atlas 页同款 magFilter 覆盖） */
+function applyAtlasQualityFixes(
+  manager: SpineSceneAssetManager,
+  layers: SpineSceneEntry['layers'],
+  gl: WebGLRenderingContext,
+): void {
+  try {
+    for (const layer of layers) {
+      const atlas = manager.get(layer.atlas) as { pages?: SpineAtlasPage[] } | null;
+      if (!atlas || !atlas.pages) continue;
       for (const page of atlas.pages) {
         if (page.texture) {
           page.texture.bind();

@@ -116,6 +116,41 @@ export async function fetchJSON<T>(url: string): Promise<T> {
   }
 }
 
+/** 纯文本获取（诊断页 atlas 解析等用途），复用 15s 超时与 NkError 包装 */
+export function fetchText(url: string): Promise<string> {
+  return requestText(url);
+}
+
+export interface ResourceStatus {
+  ok: boolean;
+  /** HTTP 状态码（网络失败/超时为 0） */
+  status: number;
+  /** 往返耗时 ms */
+  ms: number;
+}
+
+/**
+ * 资源可达性检查（Spine 审核台等诊断用途）：只取响应头不消费 body（立即取消传输，不产生下载流量）。
+ * 不抛异常，超时/网络失败统一归一为 { ok:false, status:0 }，调用方按诊断语境解读。
+ */
+export async function fetchResourceStatus(url: string, timeoutMs = 15000): Promise<ResourceStatus> {
+  const t0 = performance.now();
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const r = await fetch(url, { signal: ctrl.signal });
+    try {
+      // 只取响应头：取消 body 流，避免下载大文件（skel/png 可达数 MB）
+      if (r.body && typeof r.body.cancel === 'function') r.body.cancel();
+    } catch { /* 已消费或不可取消均静默 */ }
+    return { ok: r.ok, status: r.status, ms: Math.round(performance.now() - t0) };
+  } catch {
+    return { ok: false, status: 0, ms: Math.round(performance.now() - t0) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /* ─── L1 内存缓存（SPA 生命周期内只请求一次） ─── */
 
 const mem = new Map<string, unknown>();

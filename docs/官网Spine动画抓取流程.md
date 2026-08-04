@@ -114,9 +114,28 @@ Spine 角色动画位于 `pc.nodes` 的 `@puzzle/spine-player` 节点 → `optio
 }
 ```
 
-**同 ID 唯一（重要）**：manifest 是「角色 ID → 单条目」映射，无多条目并存。
+**同 ID 唯一（重要）**：manifest 是「条目键 → 单条目」映射，无多条目并存。
 若目标角色已有 `skel` 条目（nanoka 源），写入 `official` 条目时**直接替换**该 skel 条目
 （官方源为精确角色模型，优先级更高；本次 3.4+ 的 10 个角色全部由 skel 替换为 official）。
+
+**非角色条目（场景背景）**：条目键可为场景标识而非角色 ID，如 `home-bg`（常规枢纽页 Hero 背景）。
+背景动画位于官网背景节点 `pz-ugmWxhsCCJ` 的 `spineList`（10 层：01_bg_pc 主背景 + 9 层角色），
+完整场景用 `kind: official-scene` 条目（viewport + layers 数组，底→顶顺序）。
+
+**层序陷阱（实测 4.4）**：layers 必须按官网 `spineList` 每项的 `renderOrder` **升序**排列，
+renderOrder 相同时保持 spineList 数组顺序——切勿按数组顺序直写。4.4 版第 10 层 `10_qianjign_pc`
+是**全屏黑色底衬层**（1 根骨头 + slot `hei` 全屏 mesh + 空动画，材质为黑/暗色 + multiply 压暗条），
+其 renderOrder=0 与主背景同层，应紧贴 01_bg_pc 之后、置于所有角色层之下；若被排到最顶，
+全屏黑 mesh 会盖住全部角色（枢纽页黑屏/异常的直接根因）。
+
+**多层场景对齐原理（实测）**：官网各层 posX/posY 均为 0 = 各层骨架共享统一世界坐标系，
+叠加对齐只需让所有 SpinePlayer 实例使用同一固定 `viewport: {x,y,width,height}`（pad* 设 0）；
+**viewport 恒为官网设计画布 1920×1080（中心原点，即 x=-960, y=-540, width=1920, height=1080）**：
+官网 PzSpinePlayer（Three.js 正交相机，见 lib.pc/727 chunk 源码 onResize）的相机世界范围 = 节点尺寸
+（boxStyle 19.2rem×10.8rem = 1920×1080 设计值），世界坐标与像素 1:1，各层按骨架世界坐标直接入画，
+出血部分自然裁剪。**切勿按角色层联合边界外扩推导 viewport**——旧版 2192.89×1233.5 联合边界会令画面
+整体缩小 14%，且主背景/出血角色（如姬子 y 超出画布）的取景与官网不一致。
+前端每层一个 SpinePlayer 叠放（`initSpineSceneViewer`），窄屏（<768px）降级仅主背景层。
 
 **多纹理命名规律**：atlas 多 page 时纹理键为 `name.png` / `name_2.png` / `name_3.png`…
 （与 `img[].id` 的 `name` / `name_2` / `name_3` 一一对应），如 xilian×3、tenghuang×3、jizi×3。

@@ -119,6 +119,20 @@ describe('resolveSpine', () => {
     await expect(api.resolveSpine('1508')).resolves.toEqual(entry);
   });
 
+  it('非角色键（home-bg 枢纽页背景）：official-scene 场景条目原样返回', async () => {
+    const api = await freshApi();
+    const entry = {
+      kind: 'official-scene',
+      viewport: { x: -1098.93, y: -617.69, width: 2192.89, height: 1233.5 },
+      layers: [
+        { atlas: 'https://act-webstatic.mihoyo.com/bg.atlas', json: 'https://act-webstatic.mihoyo.com/bg.json', textures: { '01_bg_pc.png': 'https://act-webstatic.mihoyo.com/bg.png' } },
+        { atlas: 'https://act-webstatic.mihoyo.com/c.atlas', json: 'https://act-webstatic.mihoyo.com/c.json', textures: { '03_c.png': 'https://act-webstatic.mihoyo.com/c.png' } },
+      ],
+    };
+    vi.stubGlobal('fetch', routeFetch({ 'spine-manifest.json': { 'home-bg': entry } }));
+    await expect(api.resolveSpine('home-bg')).resolves.toEqual(entry);
+  });
+
   it('仅 bg 段 → 回退 parts[0]', async () => {
     const api = await freshApi();
     vi.stubGlobal('fetch', routeFetch({ 'spine-manifest.json': { '1': { kind: 'skel', name: 'bg' } } }));
