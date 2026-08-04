@@ -16,7 +16,7 @@ import { createSpinePlayer } from '../../lib/spine/player';
 import { disposeSpineEntry } from '../../lib/spine/registry';
 import { getSpineLib, loadSpineRuntime } from '../../lib/spine/runtime';
 import { mountSpineScene } from '../../lib/spine/scene';
-import type { SpineLib } from '../../lib/spine/types';
+import type { SpineLib, SpineRuntimeVersion } from '../../lib/spine/types';
 
 /** 播放器注册 key 命名空间（registry 按 key 精确释放，与场景互不干扰） */
 const PLAYER_KEY = (spineKey: string): string => `player:${spineKey}`;
@@ -123,10 +123,19 @@ async function renderPlayer(
       ? buildOfficialConfig(entry)
       : null;
   if (!urls) return false;
-  const player = await createSpinePlayer(container, key, {
-    ...urls,
-    ...(opts?.fit ? { fit: opts.fit } : {}),
-  });
+  // 双运行时分派：skel（nanoka 4.1.23 二进制）→ 4.1 备用运行时；official（官网 JSON）→ 4.2 主运行时
+  const runtimeVersion: SpineRuntimeVersion = entry.kind === 'skel' ? '4.1' : '4.2';
+  const ok = await loadSpineRuntime(runtimeVersion);
+  if (!ok) return false;
+  const player = await createSpinePlayer(
+    container,
+    key,
+    {
+      ...urls,
+      ...(opts?.fit ? { fit: opts.fit } : {}),
+    },
+    runtimeVersion,
+  );
   return player !== null;
 }
 

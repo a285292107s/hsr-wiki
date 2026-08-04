@@ -12,7 +12,7 @@ import { fetchResourceStatus, fetchText } from '../../services/cache';
 import type { SpineResolved, SpineSource } from '../../services/types';
 import {
   BLEND_NAMES,
-  type SpinePlayerCtor, type SpinePlayerInstance, type SpinePlayerConfig,
+  type SpinePlayerCtor, type SpinePlayerInstance, type SpinePlayerConfig, type SpineRuntimeVersion,
 } from '../../lib/spine/types';
 import { buildOfficialConfig } from '../../lib/spine/config';
 import { disposePlayer, pickAnimName } from '../../lib/spine/player';
@@ -176,8 +176,8 @@ export function buildDiagnosis(entry: AuditEntry): string[] {
   if (all.some((t) => /Invalid|解析失败|加载失败|Could not load|must not be null|outside the bounds|string table/.test(t))) {
     advice.push(
       entry.kind === 'skel'
-        ? '骨架解析失败：nanoka skel 为 4.1.23 二进制，与 4.2.43 运行时二进制不兼容（已知问题）→ 生产角色页已回退立绘；如需动画请抓取官网 official 源（docs/官网Spine动画抓取流程.md）'
-        : '骨架/atlas 解析失败 → 核对 Spine 版本兼容（nanoka 源 4.1.23 / 官网源 4.2.43 vs 运行时 4.2.43）',
+        ? '骨架解析失败：skel 条目走 4.1.23 备用运行时 → 核对 nanoka CDN 资源状态与 4.1 运行时加载（双运行时机制见 src/lib/spine/runtime.ts）'
+        : '骨架/atlas 解析失败 → 核对 Spine 版本兼容（官网源 4.2.43 vs 运行时 4.2.43）',
     );
   }
   if (all.some((t) => t.includes('纹理映射缺失'))) {
@@ -260,16 +260,18 @@ export async function auditRender(entry: AuditEntry, opts: AuditRenderOptions): 
   entry.checks.push('L2 渲染');
   const t0 = performance.now();
   try {
-    if (!getSpineCtor()) {
-      const ok = await loadSpineRuntime();
+    const resolved = opts.resolved;
+    // 双运行时分派：skel（nanoka 4.1.23 二进制）→ 4.1 备用运行时；official/official-scene → 4.2 主运行时
+    const runtimeVersion: SpineRuntimeVersion = resolved.kind === 'skel' ? '4.1' : '4.2';
+    if (!getSpineCtor(runtimeVersion)) {
+      const ok = await loadSpineRuntime(runtimeVersion);
       if (!ok) {
-        entry.errors.push('spine-player 运行时加载失败（全部 CDN 不可达）');
+        entry.errors.push(`spine-player ${runtimeVersion} 运行时加载失败（全部 CDN 不可达）`);
         return;
       }
     }
-    const Ctor = getSpineCtor();
+    const Ctor = getSpineCtor(runtimeVersion);
     if (!Ctor) return;
-    const resolved = opts.resolved;
     if (resolved.kind === 'official-scene') {
       // 逐层串行：固定视口 + pad 0（与生产 initSpineSceneViewer 一致）
       for (let i = 0; i < resolved.layers.length; i++) {

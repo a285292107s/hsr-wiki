@@ -11,7 +11,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { loadSpineManifests, resolveSpine } from '../../services/api';
 import type { SpineResolved } from '../../services/types';
-import type { SpinePlayerInstance } from '../../lib/spine/types';
+import type { SpinePlayerInstance, SpineRuntimeVersion } from '../../lib/spine/types';
 import { buildOfficialConfig } from '../../lib/spine/config';
 import { disposePlayer, pickAnimName } from '../../lib/spine/player';
 import { getSpineCtor, loadSpineRuntime } from '../../lib/spine/runtime';
@@ -211,14 +211,16 @@ function disposePreview(): void {
 async function mountPreview(): Promise<void> {
   const resolved = detailResolved.value;
   if (!resolved) return;
-  if (!getSpineCtor()) {
-    const ok = await loadSpineRuntime();
+  // 双运行时分派：skel（nanoka 4.1 二进制）→ 4.1 备用运行时；official/official-scene → 4.2 主运行时
+  const runtimeVersion: SpineRuntimeVersion = resolved.kind === 'skel' ? '4.1' : '4.2';
+  if (!getSpineCtor(runtimeVersion)) {
+    const ok = await loadSpineRuntime(runtimeVersion);
     if (!ok) {
-      previewError.value = 'spine-player 运行时加载失败';
+      previewError.value = `spine-player ${runtimeVersion} 运行时加载失败`;
       return;
     }
   }
-  const Ctor = getSpineCtor();
+  const Ctor = getSpineCtor(runtimeVersion);
   if (!Ctor) return;
   await nextTick();
   // v-for 内的模板 ref 会被 Vue 收集为数组，展开详情时取最后一项（当前详情行）
@@ -279,7 +281,7 @@ function togglePreviewPause(): void {
   previewPaused.value = !previewPaused.value;
   try {
     if (previewPaused.value) p.pause();
-    else p.resume();
+    else p.resume ? p.resume() : p.play(); // 4.1 运行时无 resume，退化为 play
   } catch { /* 静默 */ }
 }
 

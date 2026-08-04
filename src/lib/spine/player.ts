@@ -5,7 +5,7 @@
  * 生产角色页走 createSpinePlayer；审核台因需 draw 采样回调直接 new Ctor（spine-audit.ts），
  * 双方保持同一渲染参数基线（premultipliedAlpha=false / 透明底 / 无控件与加载屏）。
  */
-import type { SpinePlayerConfig, SpinePlayerInstance } from './types';
+import type { SpinePlayerConfig, SpinePlayerInstance, SpineRuntimeVersion } from './types';
 import { registerSpineEntry } from './registry';
 import { getSpineCtor } from './runtime';
 
@@ -64,19 +64,25 @@ export function applyQualityFixes(p: SpinePlayerInstance): void {
  * - 成功：应用质量修复 + 播放首选动画 + 注册到 registry（key 粒度释放）
  * - 失败（error 回调 / 构造异常）：自动释放已创建实例并返回 null
  * @param key 注册表 key（如 `player:1001`），同 key 覆盖先释放旧实例
+ * @param runtimeVersion 运行时版本分派：skel（nanoka 4.1 二进制）→ '4.1'；official JSON/场景 → '4.2'
+ *   调用方须先 loadSpineRuntime(runtimeVersion) 就绪（4.1 无 fit 支持，内部自动剥离）
  */
 export function createSpinePlayer(
   container: HTMLElement,
   key: string,
   cfg: SpinePlayerConfig,
+  runtimeVersion: SpineRuntimeVersion = '4.2',
 ): Promise<SpinePlayerInstance | null> {
   return new Promise((resolve) => {
-    const Ctor = getSpineCtor();
+    const Ctor = getSpineCtor(runtimeVersion);
     if (!Ctor) return resolve(null);
     try {
       let created: SpinePlayerInstance | null = null;
+      // 4.1 运行时无 fit 概念：显式剥离（其余字段两版本均支持）
+      const finalCfg = { ...cfg };
+      if (runtimeVersion === '4.1') delete finalCfg.fit;
       const player = new Ctor(container, {
-        ...cfg,
+        ...finalCfg,
         alpha: true, // WebGL 上下文开启 alpha 通道
         backgroundColor: '00000000', // 全透明背景，透出 Hero 视差立绘
         premultipliedAlpha: false,

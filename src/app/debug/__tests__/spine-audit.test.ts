@@ -126,11 +126,11 @@ describe('buildDiagnosis', () => {
     expect(d.some((t) => t.includes('黑块'))).toBe(true);
   });
 
-  it('skel 条目解析失败 → nanoka 4.1.23 兼容建议', () => {
+  it('skel 条目解析失败 → 4.1 备用运行时建议', () => {
     const e = createAuditEntry('1005', 'skel', 'kafuka');
     e.errors.push('渲染失败: Could not load skeleton data: Bone name must not be null');
     const d = buildDiagnosis(e);
-    expect(d.some((t) => t.includes('4.1.23') && t.includes('回退立绘'))).toBe(true);
+    expect(d.some((t) => t.includes('4.1.23') && t.includes('备用运行时'))).toBe(true);
   });
 
   it('official 条目解析失败 → 通用版本兼容建议', () => {
@@ -138,7 +138,7 @@ describe('buildDiagnosis', () => {
     e.errors.push('渲染失败: Offset is outside the bounds of the DataView');
     const d = buildDiagnosis(e);
     expect(d.some((t) => t.includes('Spine 版本兼容'))).toBe(true);
-    expect(d.some((t) => t.includes('回退立绘'))).toBe(false); // 不误报 skel 专属建议
+    expect(d.some((t) => t.includes('备用运行时'))).toBe(false); // 不误报 skel 专属建议
   });
 
   it('无关键词匹配 → 空建议', () => {

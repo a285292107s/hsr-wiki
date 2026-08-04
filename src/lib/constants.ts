@@ -2,20 +2,33 @@
 
 export const CDN = 'https://static.nanoka.cc';
 
-// spine-player 运行时版本（单一来源：生产渲染 / 调试页 / 验收报告共用；
-// 升级需回归验证：4.2.x 向后兼容 4.1 数据、向前不兼容）
+// spine-player 主运行时版本（单一来源：生产渲染 / 调试页 / 验收报告共用；
+// 升级需回归验证：4.2.x 向后兼容 4.1 JSON 数据、二进制格式不兼容 4.1 .skel）
+// 服务官方源（official JSON / official-scene 场景）；nanoka 源（4.1.23 二进制 skel）走 SPINE_RUNTIME_41_*
+// 分派逻辑见 src/lib/spine/runtime.ts（双运行时访问器代理隔离 window.spine）
 export const SPINE_RUNTIME_VERSION = '4.2.43';
+
+// spine-player 备用运行时版本（4.1.x：仅 nanoka skel 源使用）。
+// 4.1→4.2 二进制格式为位域级重构（IK/Transform/Path 约束 flags 化），必须按源分派版本加载
+export const SPINE_RUNTIME_41_VERSION = '4.1.23';
 
 // spine-manifest 版本（缓存键后缀：spine_manifest_official_v{N} / spine_manifest_nanoka_v{N}）。
 // 必须与 public/data/cn/spine-manifest-official.json 与 spine-manifest-nanoka.json 两文件的
 // 顶层 version 字段一致，一致性由 src/services/__tests__/spine-manifest.test.ts 强制校验。
 export const SPINE_MANIFEST_VERSION = 15;
 
-// spine-player 运行时（多 CDN 兜底，jsdelivr 优先以兼顾国内可达性）
+// spine-player 主运行时（多 CDN 兜底，jsdelivr 优先以兼顾国内可达性）
 export const SPINE_RUNTIME_CDNS = [
   `https://cdn.jsdelivr.net/npm/@esotericsoftware/spine-player@${SPINE_RUNTIME_VERSION}/dist/iife/spine-player.js`,
   `https://fastly.jsdelivr.net/npm/@esotericsoftware/spine-player@${SPINE_RUNTIME_VERSION}/dist/iife/spine-player.js`,
   `https://unpkg.com/@esotericsoftware/spine-player@${SPINE_RUNTIME_VERSION}/dist/iife/spine-player.js`,
+];
+
+// spine-player 备用运行时 4.1（多 CDN 兜底同款；懒加载，仅 skel 条目首次渲染时注入）
+export const SPINE_RUNTIME_41_CDNS = [
+  `https://cdn.jsdelivr.net/npm/@esotericsoftware/spine-player@${SPINE_RUNTIME_41_VERSION}/dist/iife/spine-player.js`,
+  `https://fastly.jsdelivr.net/npm/@esotericsoftware/spine-player@${SPINE_RUNTIME_41_VERSION}/dist/iife/spine-player.js`,
+  `https://unpkg.com/@esotericsoftware/spine-player@${SPINE_RUNTIME_41_VERSION}/dist/iife/spine-player.js`,
 ];
 
 /** 角色满级（80 级） */

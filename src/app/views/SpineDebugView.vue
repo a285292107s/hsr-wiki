@@ -328,7 +328,7 @@ function togglePause(): void {
     if (!p) continue;
     try {
       if (paused.value) p.pause();
-      else p.resume();
+      else p.resume ? p.resume() : p.play(); // 4.1 运行时无 resume（本页为 4.2 场景语境，存在性判断仅防契约漂移）
     } catch { /* 静默 */ }
   }
 }
@@ -343,7 +343,7 @@ function stepFrame(): void {
     if (!p || !p.skeleton) continue;
     try {
       p.skeleton.update(STEP_DELTA);
-      p.requestFrame();
+      p.requestFrame?.(); // 4.1 运行时无 requestFrame（本页为 4.2 场景语境，可选调用防契约漂移）
     } catch { /* 静默 */ }
   }
 }

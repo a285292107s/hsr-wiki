@@ -6,8 +6,18 @@
  * - 生产编排（app/character/spine.ts）与调试验收台（SpineDebugView / SpineAuditView）共用
  * - 升级运行时（4.2.x → 新版本）时只需回归本文件契约 + 审核台 L2 渲染检查
  * 字段按运行时实际暴露按需探测，可空字段以 `?` 标注。
+ *
+ * 双运行时契约差异（已源码级验证 4.1.23 vs 4.2.43）：
+ * - 公共能力：skelUrl（4.1 内部转为 binaryUrl）、alpha/backgroundColor/premultipliedAlpha、
+ *   showControls/showLoading、preserveDrawingBuffer、success/error/update/draw 回调、
+ *   skeleton/assetManager.require/context.gl、setAnimation/play/pause/dispose、viewport 缺省兜底
+ * - 4.2 独有：fit（contain/cover）、resume、requestFrame（4.1 仅 play/pause + stopRendering）
+ * - 4.1 路径调用方必须剥离 fit、对 resume/requestFrame 做存在性判断
  */
 import type { SpineResolvedSceneLayer, SpineSceneEntry } from '../../services/types';
+
+/** 运行时版本标识：4.2=官方 JSON/场景（主），4.1=nanoka skel 二进制（备用，懒加载） */
+export type SpineRuntimeVersion = '4.1' | '4.2';
 
 /** atlas 纹理页（画质修复用） */
 export interface SpineAtlasPage {
@@ -56,9 +66,10 @@ export interface SpinePlayerInstance {
   setAnimation(name: string): void;
   play(): void;
   pause(): void;
-  resume(): void;
-  /** 手动请求渲染一帧（暂停状态下步进后刷新画面） */
-  requestFrame(): void;
+  /** 4.2 独有；4.1.23 仅 play/pause（无 resume）——调用方需存在性判断 */
+  resume?(): void;
+  /** 手动请求渲染一帧（暂停状态下步进后刷新画面）；4.2 独有，4.1.23 无 */
+  requestFrame?(): void;
   assetManager?: { require(url: string): { pages?: SpineAtlasPage[] } | null } | null;
   context?: { gl?: WebGLRenderingContext | null } | null;
   skeleton?: SkelLike | null;
@@ -79,7 +90,7 @@ export interface SpinePlayerConfig {
   rawDataURIs?: Record<string, string>;
   alpha?: boolean;
   backgroundColor?: string;
-  /** 骨架适配容器方式：contain（默认，完整可见）/ cover（铺满裁剪） */
+  /** 骨架适配容器方式：contain（默认，完整可见）/ cover（铺满裁剪）；仅 4.2 运行时支持，4.1 路径由调用方剥离 */
   fit?: 'contain' | 'cover';
   /** 每帧钩子（drawFrame 内相机计算之后、绘制之前执行），用于强制修正相机映射 */
   update?: (player: SpinePlayerInstance, delta: number) => void;
@@ -145,6 +156,8 @@ export interface SpineSceneSkeleton extends SkelLike {
 }
 
 export interface SpineLib {
+  /** spine-player 级构造器（IIFE 命名空间内与 core/webgl 类共存；runtime.getSpineCtor 读取） */
+  SpinePlayer?: SpinePlayerCtor;
   SceneRenderer: new (canvas: HTMLCanvasElement, gl: WebGLRenderingContext, twoColorTint?: boolean) => SpineSceneRenderer;
   AssetManager: new (gl: WebGLRenderingContext, pathPrefix: string) => SpineSceneAssetManager;
   SkeletonJson: new (loader: unknown) => { readSkeletonData(json: unknown): unknown };
