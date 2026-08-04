@@ -14,13 +14,17 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import { loadSpineSceneKeys, resolveSpine } from '../../services/api';
 import type { SpineResolvedSceneLayer, SpineSceneEntry } from '../../services/types';
+import { SPINE_RUNTIME_VERSION } from '../../lib/constants';
+import { buildOfficialConfig } from '../../lib/spine/config';
+import { applyBlendLastOn, applyBlendsHiddenOn, applyForceNormalOn } from '../../lib/spine/experiments';
+import { disposePlayer, pickAnimName } from '../../lib/spine/player';
+import { getSpineCtor, getSpineLib, loadSpineRuntime } from '../../lib/spine/runtime';
+import { buildSceneItems } from '../../lib/spine/scene';
 import {
-  BLEND_NAMES, DebugDrawOrderSlot, SpinePlayerCtor, SpinePlayerInstance,
-  SPINE_RUNTIME_VERSION,
-  applyBlendLastOn, applyBlendsHiddenOn, applyForceNormalOn, buildOfficialConfig,
-  buildSceneItems, disposePlayer, getSpineCtor, getSpineLib, loadSpineRuntime, pickAnimName,
+  BLEND_NAMES,
+  type DebugDrawOrderSlot, type SpinePlayerCtor, type SpinePlayerInstance,
   type SpineSceneAnimState, type SpineSceneSkeleton,
-} from '../debug/spine-shared';
+} from '../../lib/spine/types';
 import { useAppStore } from '../stores/app';
 /** 单帧步进时长（30fps 一帧） */
 const STEP_DELTA = 1 / 30;

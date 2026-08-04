@@ -11,9 +11,12 @@
 import { fetchResourceStatus, fetchText } from '../../services/cache';
 import type { SpineResolved, SpineSource } from '../../services/types';
 import {
-  BLEND_NAMES, SpinePlayerCtor, SpinePlayerInstance, SpinePlayerConfig,
-  buildOfficialConfig, disposePlayer, getSpineCtor, loadSpineRuntime, pickAnimName,
-} from './spine-shared';
+  BLEND_NAMES,
+  type SpinePlayerCtor, type SpinePlayerInstance, type SpinePlayerConfig,
+} from '../../lib/spine/types';
+import { buildOfficialConfig } from '../../lib/spine/config';
+import { disposePlayer, pickAnimName } from '../../lib/spine/player';
+import { getSpineCtor, loadSpineRuntime } from '../../lib/spine/runtime';
 
 /* ─── 常量 ─── */
 

@@ -11,10 +11,10 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { loadSpineManifests, resolveSpine } from '../../services/api';
 import type { SpineResolved } from '../../services/types';
-import {
-  SpinePlayerInstance,
-  buildOfficialConfig, disposePlayer, getSpineCtor, loadSpineRuntime, pickAnimName,
-} from '../debug/spine-shared';
+import type { SpinePlayerInstance } from '../../lib/spine/types';
+import { buildOfficialConfig } from '../../lib/spine/config';
+import { disposePlayer, pickAnimName } from '../../lib/spine/player';
+import { getSpineCtor, loadSpineRuntime } from '../../lib/spine/runtime';
 import {
   AuditEntry, AuditKind, buildDiagnosis, classifyStatus,
   createAuditEntry, auditRender, auditStaticResources,
