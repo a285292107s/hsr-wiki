@@ -5,7 +5,7 @@
  */
 
 import { SPINE_RUNTIME_CDNS } from '../../lib/constants';
-import type { SpineSceneEntry } from '../../services/types';
+import type { SpineResolvedSceneLayer } from '../../services/types';
 
 // 验收报告展示用（常量本体定义于 lib/constants.ts，生产/调试共用单一来源）
 export { SPINE_RUNTIME_VERSION } from '../../lib/constants';
@@ -151,7 +151,7 @@ export interface SceneItem {
 export function buildSceneItems(
   lib: SpineLib,
   manager: SpineSceneAssetManager,
-  layers: SpineSceneEntry['layers'],
+  layers: SpineResolvedSceneLayer[],
 ): { items: SceneItem[]; missing: string[] } {
   const items: SceneItem[] = [];
   const missing: string[] = [];

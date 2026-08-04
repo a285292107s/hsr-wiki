@@ -7,7 +7,7 @@
  * 运行时约束：spine-player 4.2.x 向后兼容 4.1 数据、向前不兼容（升级需回归验证）
  */
 import { resolveSpine } from '../../services/api';
-import type { SpineResolved, SpineSceneEntry } from '../../services/types';
+import type { SpineResolved, SpineResolvedSceneLayer, SpineSceneEntry } from '../../services/types';
 import { SPINE_RUNTIME_CDNS } from '../../lib/constants';
 import { buildSceneItems, getSpineLib, type SpineLib, type SpineSceneAssetManager } from '../debug/spine-shared';
 
@@ -162,7 +162,7 @@ export function initSpineSceneViewer(
    * 构建场景舞台：单画布顺序渲染全部层（layers 顺序 = renderOrder 升序 = 官网绘制顺序）。
    */
   const buildScene = async (
-    layers: SpineSceneEntry['layers'],
+    layers: SpineResolvedSceneLayer[],
     vp: SpineSceneEntry['viewport'],
     lib: SpineLib,
   ): Promise<void> => {
@@ -280,7 +280,7 @@ export function initSpineSceneViewer(
       // 窄屏降级：仅主背景层（全量层 WebGL 开销过高）；跨断点变化时重建场景
       const mql = window.matchMedia('(min-width: 768px)');
       mq = mql;
-      const pickLayers = (): SpineSceneEntry['layers'] =>
+            const pickLayers = (): SpineResolvedSceneLayer[] =>
         mql.matches ? entry.layers : entry.layers.slice(0, 1);
       rebuild = (): void => {
         if (cancelled) return;
@@ -333,17 +333,47 @@ function renderSpineSelf(
   }
   void (async () => {
     try {
-      const entry = await resolveSpine(charId);
-      if (!entry || entry.kind === 'official-scene') return onDone(false); // 场景条目走 initSpineSceneViewer
-      const ok = await loadSpineRuntime();
-      if (!ok || !container.isConnected) return onDone(false);
-      const Ctor = getSpineCtor();
-      if (!Ctor) return onDone(false);
       disposeSpineViewer(); // 先释放上一实例（角色/路由切换），避免 WebGL 上下文与 rAF 循环泄漏
+      // 官方源优先（resolveSpine 官方缺失时自动回退 nanoka）；场景条目走 initSpineSceneViewer
+      const entry = await resolveSpine(charId);
+      if (!entry || entry.kind === 'official-scene') return onDone(false);
+      const ok = await renderPlayer(container, entry, opts);
+      if (!ok && entry.kind === 'official') {
+        // 官方源失效（404/解析失败）→ 回退 nanoka 源（强制指定源避免再次命中官方）
+        console.warn('[nk-wiki] 官方源渲染失败，回退 nanoka 源');
+        const fallback = await resolveSpine(charId, 'nanoka');
+        if (fallback && fallback.kind === 'skel') {
+          disposeSpineViewer(); // 释放失败实例的 WebGL 上下文后再重建
+          return onDone(await renderPlayer(container, fallback, opts));
+        }
+      }
+      onDone(ok);
+    } catch (e) {
+      console.warn('[nk-wiki] spine 自主渲染失败:', e);
+      onDone(false);
+    }
+  })();
+}
+
+/** 单实例渲染（成功/失败 Promise 化）：失败由调用方决定是否回退 nanoka 源 */
+function renderPlayer(
+  container: HTMLElement,
+  entry: SpineResolved,
+  opts?: { fit?: 'contain' | 'cover' },
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const Ctor = getSpineCtor();
+    if (!Ctor) return resolve(false);
+    try {
+      // 场景条目不会走到本函数（renderSpineSelf 已拦截）；skel=nanoka 源，official=官网源
+      const urls = entry.kind === 'skel'
+        ? { skelUrl: `${entry.base}.skel`, atlasUrl: `${entry.base}.atlas` }
+        : entry.kind === 'official'
+          ? buildOfficialConfig(entry)
+          : null;
+      if (!urls) return resolve(false);
       const player = new Ctor(container, {
-        ...(entry.kind === 'skel'
-          ? { skelUrl: `${entry.base}.skel`, atlasUrl: `${entry.base}.atlas` }
-          : buildOfficialConfig(entry)),
+        ...urls,
         alpha: true, // WebGL 上下文开启 alpha 通道
         backgroundColor: '00000000', // 全透明背景，透出 Hero 视差立绘
         ...(opts?.fit ? { fit: opts.fit } : {}),
@@ -354,19 +384,19 @@ function renderSpineSelf(
           applyQualityFixes(p);
           // spine-player 默认不播放任何动画（setEmptyAnimation），需手动选择并播放
           playFirstAnimation(p);
-          onDone(true);
+          resolve(true);
         },
         error(_p, msg) {
           console.warn('[nk-wiki] spine-player 渲染失败:', msg);
-          onDone(false);
+          resolve(false);
         },
       });
       _players.push(player);
     } catch (e) {
-      console.warn('[nk-wiki] spine 自主渲染失败:', e);
-      onDone(false);
+      console.warn('[nk-wiki] spine 渲染创建失败:', e);
+      resolve(false);
     }
-  })();
+  });
 }
 
 /**
@@ -406,7 +436,7 @@ function applyQualityFixes(p: SpinePlayerInstance): void {
 /** 场景级抗锯齿修复（AssetManager 加载的 atlas 页同款 magFilter 覆盖） */
 function applyAtlasQualityFixes(
   manager: SpineSceneAssetManager,
-  layers: SpineSceneEntry['layers'],
+  layers: SpineResolvedSceneLayer[],
   gl: WebGLRenderingContext,
 ): void {
   try {

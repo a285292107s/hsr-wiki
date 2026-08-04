@@ -95,28 +95,59 @@ Spine 角色动画位于 `pc.nodes` 的 `@puzzle/spine-player` 节点 → `optio
 > | 4.4 | `pz_Devp46QZiu` | 远坂凛 1508、吉尔伽美什 1509、姬子•启行 1510 |
 > | 4.2 | （无 Wayback 快照，无法获取） | — |
 
-## manifest 写入规范（public/data/cn/spine-manifest.json）
+## manifest 写入规范（双清单：spine-manifest-official.json + spine-manifest-nanoka.json）
+
+清单于 2026-08 拆分为**双文件**，官方源优先、nanoka 源回退：
+
+- `spine-manifest-official.json`：官网源（`kind: official` / `official-scene`），**优先使用**。
+  折叠格式：顶层 `base` 为官网 CDN 公共前缀，条目的 `dir`（publish_key + 资源目录）+ 文件名拼接为完整 URL；
+- `spine-manifest-nanoka.json`：nanoka 源（仅 `kind: skel`），官方缺失/失效时的**回退源**，无 base（CDN 基址在 constants.ts）
+- 两文件顶层 `version` 必须一致，并与 `src/lib/constants.ts` 的 `SPINE_MANIFEST_VERSION` 同步
+  （不一致时 `pnpm test` / CI 的 `node tools/check-spine-manifest.mjs` 直接 FAIL）
+- 回退语义：`resolveSpine(key)` 官方优先；官方缺失 → nanoka；官方条目存在但**渲染失败**（404/解析失败）
+  → 渲染层自动用 `resolveSpine(key, 'nanoka')` 再渲染一次（`src/app/character/spine.ts`）
+- 两清单键重叠策略：**默认保留重复键**（官方角色在 nanoka 侧保留回退条目）；
+  当前 15 个官方角色中 12 个有 nanoka 回退（1508/1509/1510 为 4.4 新角色，nanoka 源未收录 → 无回退，官方失效时回退立绘）
 
 ```jsonc
+// spine-manifest-official.json
 {
-  // nanoka 源（存量，.skel 二进制，Spine 4.1.23）
-  "1005": { "kind": "skel", "name": "kafuka" },
-  // 官网源（.json 骨架，Spine 4.2.43）
-  "1508": {
-    "kind": "official",
-    "atlas": "https://act-webstatic.mihoyo.com/.../d6219db1....atlas",
-    "json": "https://act-webstatic.mihoyo.com/.../25786df6....json",
-    "textures": {
-      // 键 = atlas 实际 page 名（含扩展名！），值 = 实际 hash URL（不带 OSS 参数！）
-      "TohsakaRin.png": "https://act-webstatic.mihoyo.com/.../7eeeaa4d....png"
+  "version": 15,
+  "base": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/",
+  "entries": {
+    // 官网源（.json 骨架，Spine 4.2.43；atlas/json/textures 均为 dir 下相对文件名）
+    "1508": {
+      "kind": "official",
+      "version": "4.4",       // 对应游戏版本（诊断/回溯用）
+      "source": "home",        // home=首页轮播 / character=角色页 / wayback=历史快照
+      "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/29/",
+      "atlas": "d6219db1db381ca7deaed7868ba7eaa7_3205060559394643680.atlas",
+      "json": "25786df602b5a5fbf32f185f40676d73_1852508389443353702.json",
+      "textures": {
+        // 键 = atlas 实际 page 名（含扩展名！），值 = 相对文件名（不带 OSS 参数！）
+        "TohsakaRin.png": "7eeeaa4d89f3ce6234b877102ed22486_800838663379293561.png"
+      }
     }
+  }
+}
+
+// spine-manifest-nanoka.json
+{
+  "version": 15,
+  "entries": {
+    // nanoka 源（.skel 二进制，Spine 4.1.23；name 与 CDN 目录逐字一致，勿规范大小写）
+    "1005": { "kind": "skel", "name": "kafuka" }
   }
 }
 ```
 
-**同 ID 唯一（重要）**：manifest 是「条目键 → 单条目」映射，无多条目并存。
-若目标角色已有 `skel` 条目（nanoka 源），写入 `official` 条目时**直接替换**该 skel 条目
-（官方源为精确角色模型，优先级更高；本次 3.4+ 的 10 个角色全部由 skel 替换为 official）。
+**同 ID 唯一（重要）**：每个清单内「条目键 → 单条目」映射，无多条目并存；两清单之间**允许重复键**（官方优先，nanoka 侧成为失效回退路径，为预期行为）。
+nanoka 清单以 `static.nanoka.cc/assets/hsr/spine/manifest.json`（nanoka 站点官方清单）为基准同步，
+新角色接入官方源时在**官方清单新增 official 条目**，nanoka 侧**保留** skel 条目作为回退
+（官方源为精确角色模型，优先级更高；3.4+ 的 15 个角色中 12 个已由 skel 替换为 official 且保留 nanoka 回退，
+另含 3.1 角色页两例：缇宝 1403（tibao1 单只）+ 万敌 1404（WanDi_web，2025-02，
+该页另含 bg/tibao2/tibao3/tibaoqj 前景/star 等 KV 场景层，未接入）；
+3.0 首页轮播含乱破/丹恒饮月/黄泉/砂金单角色骨架，活动页系统自 3.0 起存在，均未接入）。
 
 **非角色条目（场景背景）**：条目键可为场景标识而非角色 ID，如 `home-bg`（常规枢纽页 Hero 背景）。
 背景动画位于官网背景节点 `pz-ugmWxhsCCJ` 的 `spineList`（10 层：01_bg_pc 主背景 + 9 层角色），
@@ -140,8 +171,18 @@ renderOrder 相同时保持 spineList 数组顺序——切勿按数组顺序直
 **多纹理命名规律**：atlas 多 page 时纹理键为 `name.png` / `name_2.png` / `name_3.png`…
 （与 `img[].id` 的 `name` / `name_2` / `name_3` 一一对应），如 xilian×3、tenghuang×3、jizi×3。
 
-**写入后必须 bump 缓存版本**：`src/services/api.ts` 中 `resolveSpine` 的 cacheKey
-（`spine_manifest_v4` → `v5`...），否则 IndexedDB 旧缓存导致新条目不生效。
+**写入后必须 bump 缓存版本**：
+
+1. 两清单（official / nanoka）顶层 `version` 同步 +1（同时 `SPINE_MANIFEST_VERSION` 常量必须同步 +1，
+   不一致时 `pnpm test` / CI 的 `node tools/check-spine-manifest.mjs` 会直接 FAIL）
+2. 运行 `node tools/check-spine-manifest.mjs`（可加 `--fetch` 做全部官方资源 HEAD 可达性检查）
+3. 缓存键 `spine_manifest_official_v{N}` / `spine_manifest_nanoka_v{N}` 随版本自动派生（`src/services/api.ts`），无需手改
+
+> 覆盖说明：official 条目覆盖 3.4（2025-05）至 4.4（2026-06）各版本官网首页角色动画；
+> 3.2/3.3 时代官网首页为旧 Nuxt 架构无 spine，4.2 版本无 Wayback 快照，均不可得。
+> home-bg 场景 = 常规枢纽页 Hero 背景（官网背景动画节点 pz-ugmWxhsCCJ 全部 10 层：
+> 01_bg_pc 主背景 + 9 层角色；各层共享统一骨架坐标系，渲染时同一固定 viewport 叠加对齐；
+> 窄屏仅主背景层）。skel 条目 name 多段以 `|` 分隔（如 "bg|tibao1"），解析时跳过 bg 段。
 
 ## 关键陷阱（全部实测踩过）
 

@@ -1,0 +1,276 @@
+{
+  "version": 15,
+  "base": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/",
+  "entries": {
+    "1321": {
+      "kind": "official",
+      "version": "3.8",
+      "source": "home",
+      "dir": "pz_Hse3Q5Sb8j/resource/puzzle/2025/12/03/",
+      "atlas": "eed86a56956e9c00a8a61b710662964a_7423284647206798398.atlas",
+      "json": "9b8aaaea7de403aa0b737eb4a3343e05_1917161363892307158.json",
+      "textures": {
+        "dali.png": "3e5546ba3d1427f85cb1f8cf0bd87595_8571010197033466065.png",
+        "dali_2.png": "d4e02f7fd2421d28e09c731de3c5de50_1414720060078387220.png"
+      }
+    },
+    "1403": {
+      "kind": "official",
+      "version": "3.1",
+      "source": "character",
+      "dir": "pz_wtJLw1INFO/resource/puzzle/2025/02/06/",
+      "atlas": "3dd48a75f88571d7e37a1d96b480e0ca_5608093848556565766.atlas",
+      "json": "2a03a5abc03fccf6a5c305bda1702cae_2344533131836131383.json",
+      "textures": {
+        "tibao1.png": "880346e0dcfd88755d7c80a1820a5b39_5443010546782515535.png"
+      }
+    },
+    "1404": {
+      "kind": "official",
+      "version": "3.1",
+      "source": "character",
+      "dir": "pz_wtJLw1INFO/resource/puzzle/2025/02/13/",
+      "atlas": "0e2a5af356390f71a94bd2ed81ae2942_3874831561867743658.atlas",
+      "json": "343ddbf6fb55f15563b49f3724a9a8fc_5202210624916420590.json",
+      "textures": {
+        "WanDi_web.png": "ea2a5cb53ca6ede0ed205d7966e044fc_4429617556160065733.png"
+      }
+    },
+    "1406": {
+      "kind": "official",
+      "version": "3.4",
+      "source": "home",
+      "dir": "pz_127WXww3Uc/resource/puzzle/2025/04/30/",
+      "atlas": "fbab966a6f7a6e311a8d7bbbc646b675_4877994277943139555.atlas",
+      "json": "e098f6ef1dca1a80d848ec1b1422d0de_5465541510941930563.json",
+      "textures": {
+        "saife.png": "fa1aec5dccde1b512de9ae2f75cbeb21_8462549989898269142.png"
+      }
+    },
+    "1409": {
+      "kind": "official",
+      "version": "3.4",
+      "source": "home",
+      "dir": "pz_127WXww3Uc/resource/puzzle/2025/05/20/",
+      "atlas": "774ff3deb428a4643684755c9423e1c9_2271273197877734870.atlas",
+      "json": "81875b476f0aaa6e12217b2c0ec8ff37_2127656295149439517.json",
+      "textures": {
+        "fejing.png": "d8af8d88baea9767dd03ccdd00f428f2_4430347568574641465.png"
+      }
+    },
+    "1410": {
+      "kind": "official",
+      "version": "3.5",
+      "source": "home",
+      "dir": "pz_2Mmoz7kMdq/resource/puzzle/2025/07/31/",
+      "atlas": "8a3fdfa046deaae40b6a1eadeefa3eb4_5933894175924609530.atlas",
+      "json": "d1788f2fb8c8757f460e9ececf15c799_3674355995803410785.json",
+      "textures": {
+        "hsy.png": "a9b6f9d222aad2939750584c366fecb6_4467650963602451988.png",
+        "hsy_2.png": "5143060f1900f6379dffe9126f99d71f_3895420444187369962.png"
+      }
+    },
+    "1412": {
+      "kind": "official",
+      "version": "3.5",
+      "source": "home",
+      "dir": "pz_2Mmoz7kMdq/resource/puzzle/2025/08/01/",
+      "atlas": "bdfa16f9f029cc1cefeda5023880ee89_8312935730997515623.atlas",
+      "json": "c87e9d461ae95f873708854eee155206_5642807192672767743.json",
+      "textures": {
+        "kldl.png": "cb85f1c54ca573ceb5d2dcb6c642d132_6784175260322166288.png",
+        "kldl_2.png": "e80ee9f141aaa1b25a72763ce988ec67_4580032501133949839.png"
+      }
+    },
+    "1413": {
+      "kind": "official",
+      "version": "3.6",
+      "source": "home",
+      "dir": "pz_acyOXI3piV/resource/puzzle/2025/09/12/",
+      "atlas": "bc673a50458342cce1d06f048ebbcdaa_8389668059466134877.atlas",
+      "json": "92276c90bf512fe41caf08e1e1a3d2bc_8608990776287420917.json",
+      "textures": {
+        "changyeyue.png": "d2ab658b289ebef125d0c5f80ab43a46_2473975125952846561.png",
+        "changyeyue_2.png": "61dff1bc638900e88b309043c3fedc88_308206944265948162.png"
+      }
+    },
+    "1414": {
+      "kind": "official",
+      "version": "3.6",
+      "source": "home",
+      "dir": "pz_acyOXI3piV/resource/puzzle/2025/09/12/",
+      "atlas": "b54989deb4036024bc3333e33510810c_871476877186174493.atlas",
+      "json": "c51a9b92adc1a69a925f1e29288547c4_3430776405937372469.json",
+      "textures": {
+        "tenghuang.png": "75682073472c756a73eaa04599e6e029_9217783160845014875.png",
+        "tenghuang_2.png": "9e690296b1a8d6f77ad7fda58adc34d6_8682917718898235249.png",
+        "tenghuang_3.png": "723d54b52ee0a7fe7073a70a6dc57993_110042494298548669.png"
+      }
+    },
+    "1415": {
+      "kind": "official",
+      "version": "3.7",
+      "source": "home",
+      "dir": "pz_5Pho3vPZz4/resource/puzzle/2025/11/07/",
+      "atlas": "c7ce0d67d86e224f3c3bd5ff94c1b0d7_170224387050208805.atlas",
+      "json": "8574eb8b8dec66b18c070f349ef9455c_6014319495556849263.json",
+      "textures": {
+        "xilian.png": "2e12d1717607d6654e69c353b3ce181a_6730149190004775995.png",
+        "xilian_2.png": "a874dd718afecc016fd938128ccc3c61_2108342982284128196.png",
+        "xilian_3.png": "3c03bc1f9905bc0378399cd6f906948a_2656251220613998867.png"
+      }
+    },
+    "1504": {
+      "kind": "official",
+      "version": "4.1",
+      "source": "home",
+      "dir": "pz_m_gHUEqYs4/resource/puzzle/2026/03/09/",
+      "atlas": "a9c41cad4257cf578bd816e6d3cafa71_3339500221000361588.atlas",
+      "json": "7074ce9da2cffe35101b4f93eb42fcdb_3347508938102463137.json",
+      "textures": {
+        "bushitu.png": "26528e52f8f4559f0d125f9b0358814e_8451510995201768651.png"
+      }
+    },
+    "1507": {
+      "kind": "official",
+      "version": "4.3",
+      "source": "home",
+      "dir": "pz_Z1nD6naN3q/resource/puzzle/2026/05/21/",
+      "atlas": "2b5e051c2864a25261ecd495a326a08f_8586653514296895034.atlas",
+      "json": "3044fb4256acc783331ec84bcca5f1b5_506962053131439953.json",
+      "textures": {
+        "ren.png": "de5156aae7f748614519d071bd478a8e_8656440533267938676.png"
+      }
+    },
+    "1508": {
+      "kind": "official",
+      "version": "4.4",
+      "source": "home",
+      "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/29/",
+      "atlas": "d6219db1db381ca7deaed7868ba7eaa7_3205060559394643680.atlas",
+      "json": "25786df602b5a5fbf32f185f40676d73_1852508389443353702.json",
+      "textures": {
+        "TohsakaRin.png": "7eeeaa4d89f3ce6234b877102ed22486_800838663379293561.png"
+      }
+    },
+    "1509": {
+      "kind": "official",
+      "version": "4.4",
+      "source": "home",
+      "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/29/",
+      "atlas": "159a2d5bad8174a72c8dd645684670ce_5804459478953526071.atlas",
+      "json": "1ece68d6ca0402b2215601e90e053583_5712837087527697859.json",
+      "textures": {
+        "Gilgamesh.png": "53b2d0211f32b9a454e8d27e1f0ab5e9_5069616432112372856.png",
+        "Gilgamesh_2.png": "56efa8ea41cf293b5cf7a3731892726b_3922316112719275432.png"
+      }
+    },
+    "1510": {
+      "kind": "official",
+      "version": "4.4",
+      "source": "home",
+      "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/29/",
+      "atlas": "e3d2af170a05678591440c7b0c7c6908_1074190156988094212.atlas",
+      "json": "86a40e460a5f3e79869ca37ded0317b9_285814412607347001.json",
+      "textures": {
+        "jizi_PC-Web.png": "f59cc0eda5d9a7f4c457e560a12b1380_4984880759214206734.png",
+        "jizi_PC-Web_2.png": "a4a5b831fb1eaf0b787294cc612210e0_2849000945483757641.png",
+        "jizi_PC-Web_3.png": "17bce06b779242898ef920dcfbd94647_2356125136051364207.png"
+      }
+    },
+    "home-bg": {
+      "kind": "official-scene",
+      "version": "4.4",
+      "source": "home",
+      "viewport": {
+        "x": -960,
+        "y": -540,
+        "width": 1920,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "8392252fb3b9d7f15bb390445dbf743c_2423686305422380946.atlas",
+          "json": "a4545dedd283af12d819a7bf66ff4c62_8153907562471352955.json",
+          "textures": {
+            "01_bg_pc.png": "588d5bf10a359cb5da19e822002bf2c1_8318367528784162633.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "13a523e4bdba6d4b2595cfecd93e0036_558175657527149874.atlas",
+          "json": "458ec37253759b96e3ab8b6f27f7b2db_5803524788678203424.json",
+          "textures": {
+            "10_qianjign_pc.png": "48e11c5ebf879dff6d3448cb1e13ed55_1678737867726229318.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "82d484b18241450c9757fea7fd939a0f_174398633731910424.atlas",
+          "json": "9545781fe8f9e8a9333d4a4c89dd826d_8170282559115308805.json",
+          "textures": {
+            "02_guiji_pc.png": "0136f8a5764cbb360a744fcc8817eefc_6017235678527119952.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/24/",
+          "atlas": "7ad9eedf151ed3fb0c0dae25618eb435_3354369616411550103.atlas",
+          "json": "3591a45c7fc4e8bb8aa2168b4ce41393_7000985176851630546.json",
+          "textures": {
+            "03_jizi_pc.png": "42ef9510996d3a299f7b4aa5e7abdff0_2654160501913760413.png",
+            "03_jizi_pc_2.png": "0615b2163d572354cf552560386f65e2_7442022417009769030.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "99a46902ce8b1e050ff2bf8ec714fcfa_6239542366182669301.atlas",
+          "json": "771a145e7e035c01e633afce2cf7dd32_5063561155727581343.json",
+          "textures": {
+            "04_daheng_pc.png": "43761eaea3b26398d1f4eb571ef3e2e5_4656350984078341746.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "cb036333b35691d902cd675d273e0978_4971188676890018149.atlas",
+          "json": "a16d336a61f418302c090e4b100d31ac_1966369723300577756.json",
+          "textures": {
+            "05_xingqiri_pc.png": "b943a9c9175da17165bb0618f3616a7b_3371439983008011729.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "faf85a0909df4d102a0b81ae177e7951_8910694813633074185.atlas",
+          "json": "9bea8f3e6f66c12beeaf01b1a54f02a8_2231653943507686254.json",
+          "textures": {
+            "06_sanyueqi_pc.png": "e962844b80415e943fbb1c43ad715261_1010917431232207633.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "dab49929140f9e17e531d70dcb0eda83_5314880969177051750.atlas",
+          "json": "3ee89b2f2dd923410c302cc3427682e4_8762375603837822429.json",
+          "textures": {
+            "07_nanzhu_pc.png": "08e34e9bb25ea0406bacf78db2ebfe2c_6639367985482412967.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "e4deed360c39dc00a8deebaae77cb9f4_2551484061389453029.atlas",
+          "json": "4c66167d924feef5b5071e2a7c7803f8_4202497688520480033.json",
+          "textures": {
+            "08_waerte_pc.png": "16bf8ef26513ddc9ffa21979813ae651_3811219107805459212.png"
+          }
+        },
+        {
+          "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/22/",
+          "atlas": "bcdf650fc4349a2f723b026ab13f067f_790746020255938774.atlas",
+          "json": "8566fe0bd207e90980b43e39fae826ba_741587343669971549.json",
+          "textures": {
+            "09_nvzhu_pc.png": "8bcd19804b0a6d6eb3495fed08f01223_2111882717465939156.png"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -9,7 +9,7 @@
  * 渲染参数与生产一致（premultipliedAlpha=false），支持暂停/继续、仅异常重跑、报告导出。
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { loadSpineManifest, resolveSpine } from '../../services/api';
+import { loadSpineManifests, resolveSpine } from '../../services/api';
 import type { SpineResolved } from '../../services/types';
 import {
   SpinePlayerInstance,
@@ -85,24 +85,21 @@ function shortErrors(e: AuditEntry): string {
 /* ─── 审核队列 ─── */
 
 async function buildEntries(): Promise<AuditEntry[]> {
-  const manifest = await loadSpineManifest();
-  return Object.entries(manifest)
-    .filter(([key]) => !key.startsWith('$')) // 跳过 $note 等元信息键
-    .map(([key, v]) => {
-      let kind: AuditKind;
-      let label: string;
-      if (v.kind === 'skel') {
-        kind = 'skel';
-        label = v.name;
-      } else if (v.kind === 'official') {
-        kind = 'official';
-        label = Object.keys(v.textures)[0] ?? '—';
-      } else {
-        kind = 'official-scene';
-        label = key;
-      }
-      return createAuditEntry(key, kind, label);
-    });
+  const { official, nanoka } = await loadSpineManifests();
+  const list: AuditEntry[] = [];
+  // 官方源（优先）：official / official-scene 条目
+  for (const [key, v] of Object.entries(official?.entries ?? {})) {
+    if (v.kind === 'official') {
+      list.push(createAuditEntry(key, 'official', Object.keys(v.textures)[0] ?? '—', 'official'));
+    } else {
+      list.push(createAuditEntry(key, 'official-scene', key, 'official'));
+    }
+  }
+  // nanoka 源（回退）：skel 条目，label 加前缀便于与官方条目区分
+  for (const [key, v] of Object.entries(nanoka?.entries ?? {})) {
+    list.push(createAuditEntry(key, 'skel', `[nanoka] ${v.name}`, 'nanoka'));
+  }
+  return list;
 }
 
 async function runQueue(list: AuditEntry[]): Promise<void> {
@@ -114,7 +111,8 @@ async function runQueue(list: AuditEntry[]): Promise<void> {
       e.status = 'running';
       let resolved: SpineResolved | null = null;
       try {
-        resolved = await resolveSpine(e.key);
+        // 按条目所属源强制解析（nanoka 条目不被官方优先拦截）
+        resolved = await resolveSpine(e.key, e.source);
       } catch {
         resolved = null;
       }
@@ -183,7 +181,8 @@ async function toggleDetail(e: AuditEntry): Promise<void> {
   expandedKey.value = e.key;
   previewError.value = '';
   try {
-    detailResolved.value = await resolveSpine(e.key);
+    // 详情预览同样按条目所属源解析
+    detailResolved.value = await resolveSpine(e.key, e.source);
   } catch {
     detailResolved.value = null;
     previewError.value = '条目不可解析';

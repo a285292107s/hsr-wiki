@@ -9,7 +9,7 @@
  *     - official-scene 条目：逐层串行渲染成功 + 元数据 + 每层默认动画采样
  */
 import { fetchResourceStatus, fetchText } from '../../services/cache';
-import type { SpineResolved } from '../../services/types';
+import type { SpineResolved, SpineSource } from '../../services/types';
 import {
   BLEND_NAMES, SpinePlayerCtor, SpinePlayerInstance, SpinePlayerConfig,
   buildOfficialConfig, disposePlayer, getSpineCtor, loadSpineRuntime, pickAnimName,
@@ -69,6 +69,8 @@ export interface AuditMeta {
 export interface AuditEntry {
   key: string;
   kind: AuditKind;
+  /** 资源源：official=官网 CDN（优先）/ nanoka=nanoka CDN（回退） */
+  source: SpineSource;
   /** 可读名（skel name / 首纹理名 / 场景键） */
   label: string;
   status: AuditStatus;
@@ -84,9 +86,9 @@ export interface AuditEntry {
   renderError: string;
 }
 
-export function createAuditEntry(key: string, kind: AuditKind, label: string): AuditEntry {
+export function createAuditEntry(key: string, kind: AuditKind, label: string, source: SpineSource = 'official'): AuditEntry {
   return {
-    key, kind, label,
+    key, kind, source, label,
     status: 'pending',
     checks: [],
     errors: [], warnings: [],

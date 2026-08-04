@@ -26,6 +26,9 @@ jobs:
       - name: Type-check & build
         run: pnpm build
 
+      - name: Spine manifest validation
+        run: node tools/check-spine-manifest.mjs
+
       - name: Unit tests
         run: pnpm test
 

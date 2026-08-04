@@ -6,6 +6,11 @@ export const CDN = 'https://static.nanoka.cc';
 // 升级需回归验证：4.2.x 向后兼容 4.1 数据、向前不兼容）
 export const SPINE_RUNTIME_VERSION = '4.2.43';
 
+// spine-manifest 版本（缓存键后缀：spine_manifest_official_v{N} / spine_manifest_nanoka_v{N}）。
+// 必须与 public/data/cn/spine-manifest-official.json 与 spine-manifest-nanoka.json 两文件的
+// 顶层 version 字段一致，一致性由 src/services/__tests__/spine-manifest.test.ts 强制校验。
+export const SPINE_MANIFEST_VERSION = 15;
+
 // spine-player 运行时（多 CDN 兜底，jsdelivr 优先以兼顾国内可达性）
 export const SPINE_RUNTIME_CDNS = [
   `https://cdn.jsdelivr.net/npm/@esotericsoftware/spine-player@${SPINE_RUNTIME_VERSION}/dist/iife/spine-player.js`,

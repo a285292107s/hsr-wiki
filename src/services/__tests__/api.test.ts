@@ -90,52 +90,139 @@ describe('数据加载', () => {
   });
 });
 
-/* ─── Spine 清单解析 ─── */
+/* ─── Spine 双清单解析（official 优先，缺失/失效回退 nanoka） ─── */
 
 describe('resolveSpine', () => {
-  it('skel 条目：普通名 / 多段跳过 bg / 不存在 → null', async () => {
-    const api = await freshApi();
-    vi.stubGlobal('fetch', routeFetch({
-      'spine-manifest.json': {
-        '1005': { kind: 'skel', name: 'kafuka' },
-        '1403': { kind: 'skel', name: 'bg|tibao1|tibao2|tibao3|tibaoqj' },
-        '8009': { kind: 'skel', name: 'nan_42' },
+  const BASE = 'https://act-webstatic.mihoyo.com/puzzle/hkrpg/';
+  /** 官方源清单（折叠格式） */
+  const officialManifest = {
+    version: 15,
+    base: BASE,
+    entries: {
+      '1508': {
+        kind: 'official',
+        dir: 'pz_Devp46QZiu/resource/puzzle/2026/06/29/',
+        atlas: 'd6219db1db381ca7deaed7868ba7eaa7_3205060559394643680.atlas',
+        json: '25786df602b5a5fbf32f185f40676d73_1852508389443353702.json',
+        textures: { 'TohsakaRin.png': '7eeeaa4d89f3ce6234b877102ed22486_800838663379293561.png' },
       },
-    }));
+      'home-bg': {
+        kind: 'official-scene',
+        viewport: { x: -960, y: -540, width: 1920, height: 1080 },
+        layers: [
+          { dir: 'pk1/d1/', atlas: 'bg.atlas', json: 'bg.json', textures: { '01_bg_pc.png': 'bg.png' } },
+        ],
+      },
+    },
+  };
+  /** nanoka 源清单（仅 skel；与官方重叠的 key 为回退条目） */
+  const nanokaManifest = {
+    version: 15,
+    entries: {
+      '1005': { kind: 'skel', name: 'kafuka' },
+      '1403': { kind: 'skel', name: 'bg|tibao1|tibao2|tibao3|tibaoqj' },
+      '8009': { kind: 'skel', name: 'nan_42' },
+    },
+  };
+
+  const route = (extra: Record<string, unknown> = {}) => routeFetch({
+    'spine-manifest-official.json': officialManifest,
+    'spine-manifest-nanoka.json': nanokaManifest,
+    ...extra,
+  });
+
+  it('skel 条目（仅 nanoka 源）：普通名 / 多段跳过 bg / 不存在 → null', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', route());
     await expect(api.resolveSpine('1005')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1005/kafuka` });
     await expect(api.resolveSpine('1403')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1403/tibao1` }); // 跳过 bg
     await expect(api.resolveSpine('9999')).resolves.toBeNull();
   });
 
-  it('official 条目：原样返回官网资源描述', async () => {
+  it('official 条目（官方源优先）：折叠格式展开为完整官网资源 URL', async () => {
     const api = await freshApi();
-    const entry = {
+    vi.stubGlobal('fetch', route());
+    await expect(api.resolveSpine('1508')).resolves.toEqual({
       kind: 'official',
-      atlas: 'https://act-webstatic.mihoyo.com/x.atlas',
-      json: 'https://act-webstatic.mihoyo.com/x.json',
-      textures: { 'TohsakaRin.png': 'https://act-webstatic.mihoyo.com/t.png?q=90' },
-    };
-    vi.stubGlobal('fetch', routeFetch({ 'spine-manifest.json': { '1508': entry } }));
-    await expect(api.resolveSpine('1508')).resolves.toEqual(entry);
+      atlas: `${BASE}pz_Devp46QZiu/resource/puzzle/2026/06/29/d6219db1db381ca7deaed7868ba7eaa7_3205060559394643680.atlas`,
+      json: `${BASE}pz_Devp46QZiu/resource/puzzle/2026/06/29/25786df602b5a5fbf32f185f40676d73_1852508389443353702.json`,
+      textures: { 'TohsakaRin.png': `${BASE}pz_Devp46QZiu/resource/puzzle/2026/06/29/7eeeaa4d89f3ce6234b877102ed22486_800838663379293561.png` },
+    });
   });
 
-  it('非角色键（home-bg 枢纽页背景）：official-scene 场景条目原样返回', async () => {
+  it('官方源命中时不请求 nanoka 清单', async () => {
     const api = await freshApi();
-    const entry = {
+    const fetchMock = route();
+    vi.stubGlobal('fetch', fetchMock);
+    await api.resolveSpine('1508');
+    const called = fetchMock.mock.calls.map((c) => String(c[0]));
+    expect(called.some((u) => u.includes('spine-manifest-nanoka'))).toBe(false);
+  });
+
+  it('官方缺失 → 回退 nanoka 源（skel）', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', route());
+    await expect(api.resolveSpine('1005')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1005/kafuka` });
+  });
+
+  it('强制 nanoka 源：resolveSpine(key, \'nanoka\') 忽略官方条目（渲染层失效回退用）', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', route());
+    await expect(api.resolveSpine('1508', 'nanoka')).resolves.toBeNull(); // 官方有而 nanoka 无
+    await expect(api.resolveSpine('1005', 'nanoka')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1005/kafuka` });
+  });
+
+  it('强制官方源：resolveSpine(key, \'official\') 未命中时不回退', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', route());
+    await expect(api.resolveSpine('1005', 'official')).resolves.toBeNull();
+  });
+
+  it('resolveSpineSource：官方优先 → nanoka → null', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', route());
+    await expect(api.resolveSpineSource('1508')).resolves.toBe('official');
+    await expect(api.resolveSpineSource('1005')).resolves.toBe('nanoka');
+    await expect(api.resolveSpineSource('9999')).resolves.toBeNull();
+  });
+
+  it('official-scene 场景条目（home-bg）：展开各层 URL', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', route());
+    await expect(api.resolveSpine('home-bg')).resolves.toEqual({
       kind: 'official-scene',
-      viewport: { x: -1098.93, y: -617.69, width: 2192.89, height: 1233.5 },
+      viewport: { x: -960, y: -540, width: 1920, height: 1080 },
       layers: [
-        { atlas: 'https://act-webstatic.mihoyo.com/bg.atlas', json: 'https://act-webstatic.mihoyo.com/bg.json', textures: { '01_bg_pc.png': 'https://act-webstatic.mihoyo.com/bg.png' } },
-        { atlas: 'https://act-webstatic.mihoyo.com/c.atlas', json: 'https://act-webstatic.mihoyo.com/c.json', textures: { '03_c.png': 'https://act-webstatic.mihoyo.com/c.png' } },
+        { atlas: `${BASE}pk1/d1/bg.atlas`, json: `${BASE}pk1/d1/bg.json`, textures: { '01_bg_pc.png': `${BASE}pk1/d1/bg.png` } },
       ],
-    };
-    vi.stubGlobal('fetch', routeFetch({ 'spine-manifest.json': { 'home-bg': entry } }));
-    await expect(api.resolveSpine('home-bg')).resolves.toEqual(entry);
+    });
+  });
+
+  it('loadSpineSceneKeys：仅列出官方清单中的场景键', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', route());
+    await expect(api.loadSpineSceneKeys()).resolves.toEqual(['home-bg']);
+  });
+
+  it('loadSpineManifests：双清单聚合（单源失败容错返回 null）', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', route());
+    const { official, nanoka } = await api.loadSpineManifests();
+    expect(official?.entries['1508']).toBeDefined();
+    expect(nanoka?.entries['1005']).toBeDefined();
+    // 官方清单请求失败 → official 为 null，nanoka 不受影响（freshApi 重置内存缓存）
+    const api2 = await freshApi();
+    vi.stubGlobal('fetch', routeFetch({ 'spine-manifest-nanoka.json': nanokaManifest }));
+    const partial = await api2.loadSpineManifests();
+    expect(partial.official).toBeNull();
+    expect(partial.nanoka?.entries['1005']).toBeDefined();
   });
 
   it('仅 bg 段 → 回退 parts[0]', async () => {
     const api = await freshApi();
-    vi.stubGlobal('fetch', routeFetch({ 'spine-manifest.json': { '1': { kind: 'skel', name: 'bg' } } }));
+    vi.stubGlobal('fetch', route({
+      'spine-manifest-nanoka.json': { version: 15, entries: { '1': { kind: 'skel', name: 'bg' } } },
+    }));
     await expect(api.resolveSpine('1')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1/bg` });
   });
 

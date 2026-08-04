@@ -13,7 +13,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { loadSpineSceneKeys, resolveSpine } from '../../services/api';
-import type { SpineSceneEntry } from '../../services/types';
+import type { SpineResolvedSceneLayer, SpineSceneEntry } from '../../services/types';
 import {
   BLEND_NAMES, DebugDrawOrderSlot, SpinePlayerCtor, SpinePlayerInstance,
   SPINE_RUNTIME_VERSION,
@@ -89,7 +89,7 @@ const els = new Map<number, HTMLElement>();
 
 let players: (SpinePlayerInstance | undefined)[] = [];
 /* 重建用：记录最近一次场景条目（保持与创建时一致） */
-let lastEntry: { viewport: SpineSceneEntry['viewport']; layers: SpineSceneEntry['layers'] } | null = null;
+let lastEntry: { viewport: SpineSceneEntry['viewport']; layers: SpineResolvedSceneLayer[] } | null = null;
 
 /** 当前占用的 WebGL 上下文总数（单层 player + 合并画布） */
 const glTotal = computed(() => playerAlive.value + (mergedOn.value ? 1 : 0));
@@ -185,7 +185,7 @@ function selectScene(key: string): void {
 }
 
 /** 为某层创建 SpinePlayer（premultiplied 由 st.premultiplied 控制） */
-function createPlayer(st: LayerState, entry: { viewport: SpineSceneEntry['viewport']; layers: SpineSceneEntry['layers'] }, Ctor: SpinePlayerCtor): void {
+function createPlayer(st: LayerState, entry: { viewport: SpineSceneEntry['viewport']; layers: SpineResolvedSceneLayer[] }, Ctor: SpinePlayerCtor): void {
   const el = els.get(st.idx);
   const layer = entry.layers[st.idx];
   if (!el || !layer) return;
