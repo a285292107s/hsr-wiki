@@ -1,11 +1,12 @@
 /**
  * SpinePlayer 单实例封装
  *
- * 创建工厂（默认参数基线 + 质量修复 + 动画播放 + registry 注册）、释放辅助与动画挑选。
- * 生产角色页走 createSpinePlayer；审核台因需 draw 采样回调直接 new Ctor（spine-audit.ts），
- * 双方保持同一渲染参数基线（premultipliedAlpha=false / 透明底 / 无控件与加载屏）。
+ * 创建工厂（默认参数基线 + 质量修复 + 动画播放 + registry 注册）、可等待结算工厂
+ * （审核台 L2 渲染队列共用：success/error/超时一次性结算 + 失败路径实例回收）、释放辅助与动画挑选。
+ * 验收台合并渲染不走 player（走 scene 管线）；单层诊断 / 审核详情预览因需同步实例句柄与
+ * 自定义上下文参数直接实例化。全部创建路径保持同一渲染参数基线（无预乘 / 透明底 / 无控件与加载屏）。
  */
-import type { SpinePlayerConfig, SpinePlayerInstance, SpineRuntimeVersion } from './types';
+import type { SpinePlayerConfig, SpinePlayerCtor, SpinePlayerInstance, SpineRuntimeVersion } from './types';
 import { registerSpineEntry } from './registry';
 import { getSpineCtor } from './runtime';
 
@@ -105,6 +106,69 @@ export function createSpinePlayer(
     } catch (e) {
       console.warn('[nk-wiki] spine 渲染创建失败:', e);
       resolve(null);
+    }
+  });
+}
+
+/** player 结算结果（created = 已创建实例；失败路径也需释放，避免 WebGL 上下文泄漏） */
+export interface PlayerOutcome {
+  ok: boolean;
+  err: string;
+  player: SpinePlayerInstance | null;
+  created: SpinePlayerInstance | null;
+}
+
+/** 结算超时缺省（加载 + 采样，含网络） */
+const SETTLE_TIMEOUT_MS = 30_000;
+
+/**
+ * 创建 player 并等待 success/error 一次性结算（审核台 L2 渲染队列共用）：
+ * 渲染参数基线（透明底 / 无预乘 / 无控件与加载屏）内置且覆盖调用方 cfg；
+ * 整体超时兜底；settled 闸门保证只结算一次；失败路径不自动释放（由调用方按 created 释放，
+ * 因失败实例可能仍需在错误分支做现场诊断）。
+ */
+export function spawnPlayer(
+  Ctor: SpinePlayerCtor,
+  host: HTMLElement,
+  cfg: SpinePlayerConfig,
+  hooks?: { onSuccess?: (p: SpinePlayerInstance) => void; onDraw?: (p: SpinePlayerInstance) => void },
+  timeoutMs = SETTLE_TIMEOUT_MS,
+): Promise<PlayerOutcome> {
+  return new Promise((resolve) => {
+    let settled = false;
+    let created: SpinePlayerInstance | null = null;
+    const timer = setTimeout(() => {
+      settle({ ok: false, err: `渲染超时（${Math.round(timeoutMs / 1000)}s）`, player: null });
+    }, timeoutMs);
+    const settle = (r: Omit<PlayerOutcome, 'created'>): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve({ ...r, created });
+    };
+    try {
+      const player = new Ctor(host, {
+        ...cfg,
+        alpha: true,
+        backgroundColor: '00000000',
+        premultipliedAlpha: false,
+        showControls: false,
+        showLoading: false,
+        success(p) {
+          hooks?.onSuccess?.(p);
+          settle({ ok: true, err: '', player: p });
+        },
+        error(_p, msg) {
+          settle({ ok: false, err: String(msg), player: null });
+        },
+        draw(p) {
+          hooks?.onDraw?.(p);
+        },
+      });
+      created = player;
+      if (!player) settle({ ok: false, err: 'player 实例创建失败', player: null });
+    } catch (e) {
+      settle({ ok: false, err: String(e), player: null });
     }
   });
 }

@@ -15,15 +15,16 @@ import {
   type SpinePlayerCtor, type SpinePlayerInstance, type SpinePlayerConfig, type SpineRuntimeVersion,
 } from '../../lib/spine/types';
 import { buildOfficialConfig } from '../../lib/spine/config';
-import { disposePlayer, pickAnimName } from '../../lib/spine/player';
+import { disposePlayer, pickAnimName, spawnPlayer } from '../../lib/spine/player';
 import { getSpineCtor, loadSpineRuntime } from '../../lib/spine/runtime';
+// 像素分析统一收口在 debug/pixels.ts（验收台共用），此处 re-export 保持既有导入路径兼容
+export { analyzePixels, type PixelAnalysis } from './pixels';
+import { analyzePixels } from './pixels';
 
 /* ─── 常量 ─── */
 
 /** 每动画采样帧数（draw 回调计数；官方条目逐动画采样深度） */
 const SAMPLE_FRAMES = 15;
-/** 单个 player 渲染整体超时（加载 + 采样，含网络） */
-const RENDER_TIMEOUT = 30000;
 
 /* ─── 结果类型 ─── */
 
@@ -101,6 +102,55 @@ export function createAuditEntry(key: string, kind: AuditKind, label: string, so
   };
 }
 
+/** 重置条目全部结果（保留 key/kind/source/label 身份字段）：重跑前调用，防旧结果叠加重复计数 */
+export function resetAuditEntry(entry: AuditEntry): void {
+  entry.status = 'pending';
+  entry.checks = [];
+  entry.errors = [];
+  entry.warnings = [];
+  entry.resources = [];
+  entry.atlasDiffs = [];
+  entry.meta = null;
+  entry.frames = [];
+  entry.loadMs = 0;
+  entry.renderError = '';
+}
+
+/* ─── 双运行时分派与 player 配置（审核队列与详情预览共用，收口唯一实现） ─── */
+
+/** 双运行时分派：skel（nanoka 4.1 二进制）→ 4.1 备用运行时；official/official-scene → 4.2 主运行时 */
+export function runtimeVersionFor(kind: AuditKind): SpineRuntimeVersion {
+  return kind === 'skel' ? '4.1' : '4.2';
+}
+
+/** 确保对应版本运行时的构造器已加载（全部 CDN 不可达时返回 null） */
+export async function ensureSpineCtor(kind: AuditKind): Promise<SpinePlayerCtor | null> {
+  const version = runtimeVersionFor(kind);
+  if (!getSpineCtor(version)) {
+    const ok = await loadSpineRuntime(version);
+    if (!ok) return null;
+  }
+  return getSpineCtor(version);
+}
+
+/** 审核/预览用 player 配置（含采样标记）：场景条目指定层 + 固定视口 pad 0（与生产 initSpineSceneViewer 一致） */
+export type AuditPlayerConfig = SpinePlayerConfig & { sampleLayer?: number; sampleAnimations?: boolean };
+
+export function buildAuditPlayerConfig(resolved: SpineResolved, sceneLayer?: number): AuditPlayerConfig {
+  if (resolved.kind === 'skel') {
+    return { skelUrl: `${resolved.base}.skel`, atlasUrl: `${resolved.base}.atlas` };
+  }
+  if (resolved.kind === 'official') {
+    return { ...buildOfficialConfig(resolved), sampleAnimations: true };
+  }
+  const layer = resolved.layers[sceneLayer ?? 0];
+  return {
+    ...buildOfficialConfig(layer),
+    viewport: { ...resolved.viewport, padLeft: 0, padRight: 0, padTop: 0, padBottom: 0 },
+    sampleLayer: sceneLayer ?? 0,
+  };
+}
+
 /* ─── 纯函数（可单测） ─── */
 
 /**
@@ -119,38 +169,6 @@ export function parseAtlasPages(atlasText: string): string[] {
     if (next && next.trimStart().startsWith('size:')) pages.push(line.trim());
   }
   return pages;
-}
-
-export interface PixelAnalysis {
-  visible: number;
-  total: number;
-  ratio: number;
-  bbox: { x0: number; y0: number; x1: number; y1: number } | null;
-}
-
-/** RGBA 像素缓冲可见性统计（alpha>0 计数 + 包围盒；readPixels 原点在左下，返回坐标已翻转为左上原点） */
-export function analyzePixels(buf: Uint8Array, w: number, h: number): PixelAnalysis {
-  let visible = 0;
-  let x0 = w; let y0 = h; let x1 = -1; let y1 = -1;
-  for (let y = 0; y < h; y++) {
-    const glY = h - 1 - y; // WebGL readPixels 从底部行开始
-    for (let x = 0; x < w; x++) {
-      const a = buf[(glY * w + x) * 4 + 3];
-      if (a > 0) {
-        visible++;
-        if (x < x0) x0 = x;
-        if (x > x1) x1 = x;
-        if (y < y0) y0 = y;
-        if (y > y1) y1 = y;
-      }
-    }
-  }
-  return {
-    visible,
-    total: w * h,
-    ratio: visible / (w * h),
-    bbox: visible ? { x0, y0, x1, y1 } : null,
-  };
 }
 
 /** 由 errors/warnings 判定终态（有 errors 即 FAIL，有 warnings 即 WARN，否则 PASS） */
@@ -193,7 +211,7 @@ export function buildDiagnosis(entry: AuditEntry): string[] {
     advice.push('骨架缺少动画 → 检查导出文件');
   }
   if (all.some((t) => t.includes('占比过高'))) {
-    advice.push('混合 slot 占比高 → 留意 additive/screen 打光层黑块风险（预乘/打光对照实验见 /debug/spine）');
+    advice.push('混合 slot 占比高 → additive/screen 打光层有黑块风险；生产已用单画布合并渲染根治（成因与方案见 docs/单层模式透明画布黑块成因与衬底方案.md）');
   }
   return advice;
 }
@@ -261,38 +279,19 @@ export async function auditRender(entry: AuditEntry, opts: AuditRenderOptions): 
   const t0 = performance.now();
   try {
     const resolved = opts.resolved;
-    // 双运行时分派：skel（nanoka 4.1.23 二进制）→ 4.1 备用运行时；official/official-scene → 4.2 主运行时
-    const runtimeVersion: SpineRuntimeVersion = resolved.kind === 'skel' ? '4.1' : '4.2';
-    if (!getSpineCtor(runtimeVersion)) {
-      const ok = await loadSpineRuntime(runtimeVersion);
-      if (!ok) {
-        entry.errors.push(`spine-player ${runtimeVersion} 运行时加载失败（全部 CDN 不可达）`);
-        return;
-      }
+    const Ctor = await ensureSpineCtor(resolved.kind);
+    if (!Ctor) {
+      entry.errors.push(`spine-player ${runtimeVersionFor(resolved.kind)} 运行时加载失败（全部 CDN 不可达）`);
+      return;
     }
-    const Ctor = getSpineCtor(runtimeVersion);
-    if (!Ctor) return;
     if (resolved.kind === 'official-scene') {
       // 逐层串行：固定视口 + pad 0（与生产 initSpineSceneViewer 一致）
       for (let i = 0; i < resolved.layers.length; i++) {
         if (opts.cancelled?.()) return;
-        const layer = resolved.layers[i];
-        await renderOnce(entry, Ctor, {
-          ...buildOfficialConfig(layer),
-          viewport: { ...resolved.viewport, padLeft: 0, padRight: 0, padTop: 0, padBottom: 0 },
-          sampleLayer: i,
-        }, opts);
+        await renderOnce(entry, Ctor, buildAuditPlayerConfig(resolved, i), opts);
       }
-    } else if (resolved.kind === 'official') {
-      await renderOnce(entry, Ctor, {
-        ...buildOfficialConfig(resolved),
-        sampleAnimations: true,
-      }, opts);
     } else {
-      await renderOnce(entry, Ctor, {
-        skelUrl: `${resolved.base}.skel`,
-        atlasUrl: `${resolved.base}.atlas`,
-      }, opts);
+      await renderOnce(entry, Ctor, buildAuditPlayerConfig(resolved), opts);
     }
   } finally {
     entry.loadMs = Math.round(performance.now() - t0);
@@ -300,11 +299,11 @@ export async function auditRender(entry: AuditEntry, opts: AuditRenderOptions): 
   }
 }
 
-/** 单实例渲染检查：建 player → 提取元数据 → 健康判定 → 动画采样 → 释放 */
+/** 单实例渲染检查：建 player（spawnPlayer 统一结算）→ 提取元数据 → 健康判定 → 动画采样 → 释放 */
 async function renderOnce(
   entry: AuditEntry,
   Ctor: SpinePlayerCtor,
-  cfg: SpinePlayerConfig & { sampleLayer?: number; sampleAnimations?: boolean },
+  cfg: AuditPlayerConfig,
   opts: AuditRenderOptions,
 ): Promise<void> {
   // 隐藏舞台：实例化前容器尺寸即确定（480×270 = 16:9，规避 buffer 比例错位陷阱）
@@ -323,69 +322,22 @@ async function renderOnce(
     resolve(sampleFrame(p, anim, layer));
   };
 
-  /** 已创建的 player 实例（失败路径也需释放，避免 WebGL 上下文泄漏） */
-  let created: SpinePlayerInstance | null = null;
-
-  const outcome = await new Promise<{ ok: boolean; err: string; player: SpinePlayerInstance | null }>((resolve) => {
-    let settled = false;
-    const timer = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        resolve({ ok: false, err: `渲染超时（${RENDER_TIMEOUT / 1000}s）`, player: null });
-      }
-    }, RENDER_TIMEOUT);
-    try {
-      const player = new Ctor(host, {
-        ...cfg,
-        alpha: true,
-        backgroundColor: '00000000',
-        premultipliedAlpha: false,
-        showControls: false,
-        showLoading: false,
-        success(p) {
-          entry.meta = extractMeta(p);
-          judgeMetaHealth(entry);
-          if (!settled) {
-            settled = true;
-            clearTimeout(timer);
-            resolve({ ok: true, err: '', player: p });
-          }
-        },
-        error(_p, msg) {
-          if (!settled) {
-            settled = true;
-            clearTimeout(timer);
-            resolve({ ok: false, err: String(msg), player: null });
-          }
-        },
-        draw(p) {
-          frames++;
-          if (pendingSample && frames >= SAMPLE_FRAMES) settleSample(p);
-        },
-      });
-      created = player;
-      if (!player) {
-        // 构造函数同步抛错已在 catch；此处防 undefined 实例
-        if (!settled) {
-          settled = true;
-          clearTimeout(timer);
-          resolve({ ok: false, err: 'player 实例创建失败', player: null });
-        }
-      }
-    } catch (e) {
-      if (!settled) {
-        settled = true;
-        clearTimeout(timer);
-        resolve({ ok: false, err: String(e), player: null });
-      }
-    }
+  const outcome = await spawnPlayer(Ctor, host, cfg, {
+    onSuccess(p) {
+      entry.meta = extractMeta(p);
+      judgeMetaHealth(entry);
+    },
+    onDraw(p) {
+      frames++;
+      if (pendingSample && frames >= SAMPLE_FRAMES) settleSample(p);
+    },
   });
 
   if (!outcome.ok || !outcome.player) {
     entry.renderError = outcome.err;
     entry.errors.push(`渲染失败: ${outcome.err}`);
     // 失败路径释放已创建的 player（error/超时后仍可能持有 WebGL 上下文）
-    if (created) disposePlayer(created);
+    if (outcome.created) disposePlayer(outcome.created);
     host.remove();
     // 与 renderOnce 开头 +1 配对，只递减一次
     opts.onGlChange?.(-1);
@@ -401,6 +353,8 @@ async function renderOnce(
         const def = pickAnimName(anims);
         return def ? [def] : [];
       })();
+  // 本次渲染新增帧起点：全透明判定只覆盖本次新增帧（多层场景逐层 renderOnce，避免旧帧重复判错）
+  const frameStart = entry.frames.length;
   for (const anim of list) {
     if (opts.cancelled?.()) break;
     try {
@@ -424,8 +378,8 @@ async function renderOnce(
     if (sample) entry.frames.push(sample);
   }
 
-  // 全透明判定（骨架空 / 视口错位 / 附件未挂载）
-  for (const f of entry.frames) {
+  // 全透明判定（骨架空 / 视口错位 / 附件未挂载）：仅本次新增帧
+  for (const f of entry.frames.slice(frameStart)) {
     if (f.visible === 0) {
       const where = f.layer !== null ? `层 ${f.layer + 1}` : `动画「${f.anim}」`;
       entry.errors.push(`${where}渲染全透明`);

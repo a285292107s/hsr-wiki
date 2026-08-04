@@ -146,7 +146,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/DebugHubView.vue'),
     meta: { depth: 0, title: '调试中心' },
   },
-  /* KV 场景验收台：每版本官网重新抓取的 official-scene 在此验收渲染（一键验收 + 逐层诊断，/debug/spine?scene=home-bg） */
+  /* KV 场景验收台：每版本官网重新抓取的 official-scene 在此验收渲染（一键验收 + 单层状态排查，/debug/spine?scene=home-bg） */
   {
     path: '/debug/spine',
     name: 'debug-spine',

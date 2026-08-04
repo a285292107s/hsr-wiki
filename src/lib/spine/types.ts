@@ -41,15 +41,15 @@ export interface SkelSlot {
   attachment?: unknown | null;
 }
 
-/** 光效后置实验：drawOrder 元素（Slot 的松散类型） */
-export interface DebugDrawOrderSlot {
+/** drawOrder 元素（Slot 的松散类型；实验辅助函数与调试验收台共用） */
+export interface DrawOrderSlot {
   data: { index: number; blendMode: number };
 }
 
-/** 骨架通用形态（player 骨架与合并渲染骨架共用实验辅助函数） */
+/** 骨架通用形态（player 骨架与场景骨架共用实验辅助函数） */
 export interface SkelLike {
   slots: SkelSlot[];
-  drawOrder?: DebugDrawOrderSlot[];
+  drawOrder?: DrawOrderSlot[];
   getAttachment(slotIndex: number, name: string): unknown;
   update(delta: number): void;
   data?: {
@@ -185,6 +185,40 @@ export interface SpineSceneMountOptions {
 
 /** 场景控制器：teardown 释放渲染循环 + WebGL 资源 + 舞台 DOM + 尺寸监听 */
 export interface SpineSceneController {
+  teardown(): void;
+}
+
+/** 场景管线挂载选项（生产 mountSpineScene 与调试验收台共用同一渲染管线） */
+export interface SpineScenePipelineOptions {
+  container: HTMLElement;
+  layers: SpineResolvedSceneLayer[];
+  viewport: SpineSceneEntry['viewport'];
+  lib: SpineLib;
+  /** WebGL 上下文保留绘制缓冲：像素采样 / PNG 导出稳定读回（调试采样用；生产默认关闭省带宽） */
+  preserveDrawingBuffer?: boolean;
+  /** 页面不可见（document.hidden）时跳过绘制省 GPU（生产默认 true；调试采样需持续出帧设为 false） */
+  skipWhenHidden?: boolean;
+  /** 舞台内联样式覆盖（缺省 = 绝对定位居中铺满容器；调试页传流式布局样式） */
+  stageCss?: string;
+  /** 资源加载完成 + 骨架构建结算（items 为空 = 全部层资源缺失；必定结算一次，可 await 作为就绪信号） */
+  onSettled?: (result: { items: SceneItem[]; missing: string[] }) => void;
+  /** 管线级错误（WebGL 不可用 / 资源加载失败 / 构建异常） */
+  onError?: (message: string) => void;
+}
+
+/** 场景管线控制器：生产/调试共用的可插桩渲染管线句柄 */
+export interface SpineScenePipelineController {
+  /** 结算 Promise：资源加载完成且骨架构建结束（同 onSettled；teardown 不改变其结算） */
+  settled: Promise<{ items: SceneItem[]; missing: string[] }>;
+  /** 渲染画布（结算前即可访问；像素采样 / PNG 导出入口） */
+  canvas: HTMLCanvasElement | null;
+  /** 已构建的层骨架（结算后非空；实验函数对骨架就地操作的入口） */
+  items: SceneItem[];
+  /** 暂停/恢复动画推进（rAF 循环照常出帧，仅 delta 置零；与 stepOnce 互斥优先） */
+  setPaused(on: boolean): void;
+  /** 单帧步进（下一帧以固定 delta 推进一次，步进帧优先于暂停） */
+  stepOnce(delta: number): void;
+  /** 释放渲染循环 + WebGL 资源 + 舞台 DOM + 尺寸监听（任意阶段可调用） */
   teardown(): void;
 }
 

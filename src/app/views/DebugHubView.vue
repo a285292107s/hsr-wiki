@@ -19,7 +19,7 @@ const entries: DebugEntry[] = [
     path: '/debug/spine',
     code: 'KV ACCEPTANCE',
     title: 'KV 场景验收台',
-    desc: '每版本官网重新抓取的 KV 场景在此验收：一键验收全部场景（逐层加载 + 合并渲染 + 黑块检测），导出 PASS/FAIL 报告；单层模式供逐层诊断。',
+    desc: '每版本官网重新抓取的 KV 场景在此验收：一键验收全部场景（逐层加载 + 合并渲染 + 黑块检测），导出 PASS/FAIL 报告；单层模式供逐层排查。',
   },
   {
     path: '/debug/spine-audit',

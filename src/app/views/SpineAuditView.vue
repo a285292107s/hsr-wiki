@@ -6,19 +6,21 @@
  *   L1 解析：骨架元数据提取（动画/皮肤/slot/附件/混合模式）
  *   L2 渲染：串行单实例渲染检查 + 像素采样（official 逐动画；skel/场景降级仅默认动画）
  * 人工只需浏览异常项 → 展开详情看资源表/纹理对照/元数据/采样 → 预览动画确认 → 按诊断建议修复。
- * 渲染参数与生产一致（premultipliedAlpha=false），支持暂停/继续、仅异常重跑、报告导出。
+ * 本文件仅承担队列编排与页面框架；审核引擎在 app/debug/spine-audit.ts，
+ * 展开详情（含预览生命周期）在 app/debug/SpineAuditDetail.vue。
  */
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { loadSpineManifests, resolveSpine } from '../../services/api';
 import type { SpineResolved } from '../../services/types';
-import type { SpinePlayerInstance, SpineRuntimeVersion } from '../../lib/spine/types';
-import { buildOfficialConfig } from '../../lib/spine/config';
-import { disposePlayer, pickAnimName } from '../../lib/spine/player';
-import { getSpineCtor, loadSpineRuntime } from '../../lib/spine/runtime';
+import { useAppStore } from '../stores/app';
+import SpineAuditDetail from '../debug/SpineAuditDetail.vue';
+import { copyText, downloadJson } from '../debug/report';
 import {
   AuditEntry, AuditKind, buildDiagnosis, classifyStatus,
-  createAuditEntry, auditRender, auditStaticResources,
+  createAuditEntry, resetAuditEntry, auditRender, auditStaticResources,
 } from '../debug/spine-audit';
+
+const app = useAppStore();
 
 /* ─── 常量与状态 ─── */
 
@@ -64,6 +66,18 @@ const grouped = computed(() => {
   return g;
 });
 
+/** 组内状态统计（组头迷你徽章） */
+function groupState(kind: AuditKind): { fail: number; warn: number; pass: number } {
+  const list = grouped.value[kind];
+  let fail = 0, warn = 0, pass = 0;
+  for (const e of list) {
+    if (e.status === 'fail') fail++;
+    else if (e.status === 'warn') warn++;
+    else if (e.status === 'pass') pass++;
+  }
+  return { fail, warn, pass };
+}
+
 function badgeText(e: AuditEntry): string {
   switch (e.status) {
     case 'fail': return 'FAIL';
@@ -108,6 +122,7 @@ async function runQueue(list: AuditEntry[]): Promise<void> {
     for (const e of list) {
       while (paused.value && !cancelled) await sleep(200);
       if (cancelled) break;
+      resetAuditEntry(e); // 重跑前清空旧结果，防 errors/frames 叠加重复计数
       e.status = 'running';
       let resolved: SpineResolved | null = null;
       try {
@@ -162,15 +177,17 @@ function togglePause(): void {
   paused.value = !paused.value;
 }
 
-/* ─── 详情下钻与预览 ─── */
+/** 停止审核：置取消标志并解除暂停阻塞，队列在下一检查点退出（在途渲染自然走完） */
+function stopAudit(): void {
+  cancelled = true;
+  paused.value = false;
+}
+
+/* ─── 详情下钻（预览生命周期由 SpineAuditDetail 子组件自管理） ─── */
 
 const detailResolved = ref<SpineResolved | null>(null);
-const previewRef = ref<HTMLElement | null>(null);
-const previewPlayer = ref<SpinePlayerInstance | null>(null);
-const previewAnims = ref<string[]>([]);
-const previewAnim = ref('');
-const previewError = ref('');
-const previewPaused = ref(false);
+/** 详情代际令牌：解析在途时若被后续展开/收起抢占，过期结果丢弃 */
+let detailEpoch = 0;
 
 async function toggleDetail(e: AuditEntry): Promise<void> {
   if (expandedKey.value === e.key) {
@@ -178,111 +195,28 @@ async function toggleDetail(e: AuditEntry): Promise<void> {
     return;
   }
   closeDetail();
-  expandedKey.value = e.key;
-  previewError.value = '';
+  const epoch = ++detailEpoch;
+  let resolved: SpineResolved | null = null;
   try {
-    // 详情预览同样按条目所属源解析
-    detailResolved.value = await resolveSpine(e.key, e.source);
+    // 按条目所属源解析（nanoka 条目不被官方优先拦截）
+    resolved = await resolveSpine(e.key, e.source);
   } catch {
-    detailResolved.value = null;
-    previewError.value = '条目不可解析';
-    return;
+    resolved = null;
   }
-  await mountPreview();
+  if (epoch !== detailEpoch) return; // 已被后续操作抢占，丢弃过期结果
+  detailResolved.value = resolved;
+  expandedKey.value = e.key;
 }
 
 function closeDetail(): void {
-  disposePreview();
+  detailEpoch++;
   detailResolved.value = null;
   expandedKey.value = null;
 }
 
-function disposePreview(): void {
-  if (previewPlayer.value) {
-    disposePlayer(previewPlayer.value);
-    previewPlayer.value = null;
-    glAlive.value--;
-  }
-  previewAnims.value = [];
-  previewAnim.value = '';
-  previewPaused.value = false;
-}
-
-async function mountPreview(): Promise<void> {
-  const resolved = detailResolved.value;
-  if (!resolved) return;
-  // 双运行时分派：skel（nanoka 4.1 二进制）→ 4.1 备用运行时；official/official-scene → 4.2 主运行时
-  const runtimeVersion: SpineRuntimeVersion = resolved.kind === 'skel' ? '4.1' : '4.2';
-  if (!getSpineCtor(runtimeVersion)) {
-    const ok = await loadSpineRuntime(runtimeVersion);
-    if (!ok) {
-      previewError.value = `spine-player ${runtimeVersion} 运行时加载失败`;
-      return;
-    }
-  }
-  const Ctor = getSpineCtor(runtimeVersion);
-  if (!Ctor) return;
-  await nextTick();
-  // v-for 内的模板 ref 会被 Vue 收集为数组，展开详情时取最后一项（当前详情行）
-  const refs = previewRef.value as unknown;
-  const host = Array.isArray(refs) ? (refs[refs.length - 1] as HTMLElement | undefined) : (refs as HTMLElement | null);
-  if (!host) return;
-  host.replaceChildren();
-  const cfg =
-    resolved.kind === 'skel'
-      ? { skelUrl: `${resolved.base}.skel`, atlasUrl: `${resolved.base}.atlas` }
-      : resolved.kind === 'official'
-        ? buildOfficialConfig(resolved)
-        : {
-            ...buildOfficialConfig(resolved.layers[0]),
-            viewport: { ...resolved.viewport, padLeft: 0, padRight: 0, padTop: 0, padBottom: 0 },
-          };
-  const player = new Ctor(host, {
-    ...cfg,
-    alpha: true,
-    backgroundColor: '00000000',
-    premultipliedAlpha: false,
-    showControls: false,
-    showLoading: false,
-    success(p) {
-      const anims = ((p.skeleton && p.skeleton.data && p.skeleton.data.animations) || []).map((a) => a.name);
-      previewAnims.value = anims;
-      const def = pickAnimName(anims);
-      if (def) {
-        previewAnim.value = def;
-        try {
-          p.setAnimation(def);
-          p.play();
-        } catch { /* 静默 */ }
-      }
-    },
-    error(_p, msg) {
-      previewError.value = String(msg);
-    },
-  });
-  previewPlayer.value = player;
-  glAlive.value++;
-}
-
-function onPreviewAnim(name: string): void {
-  previewAnim.value = name;
-  const p = previewPlayer.value;
-  if (!p) return;
-  try {
-    p.setAnimation(name);
-    p.play();
-    previewPaused.value = false;
-  } catch { /* 静默 */ }
-}
-
-function togglePreviewPause(): void {
-  const p = previewPlayer.value;
-  if (!p) return;
-  previewPaused.value = !previewPaused.value;
-  try {
-    if (previewPaused.value) p.pause();
-    else p.resume ? p.resume() : p.play(); // 4.1 运行时无 resume，退化为 play
-  } catch { /* 静默 */ }
+/** 预览 WebGL 上下文占用变化 → 汇总至顶部 GL 配额徽章 */
+function onPreviewGlChange(delta: number): void {
+  glAlive.value += delta;
 }
 
 /* ─── 报告导出 ─── */
@@ -306,15 +240,12 @@ async function exportReport(): Promise<void> {
     })),
   };
   const text = JSON.stringify(report, null, 2);
-  try {
-    await navigator.clipboard.writeText(text);
-    loadError.value = ''; // 复用顶部错误区做提示位，见 template 提示样式
-  } catch {
+  if (await copyText(text)) {
+    app.toast('success', '审核报告已复制到剪贴板');
+  } else {
     // 剪贴板不可用时下载文件兜底
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-    a.download = `spine-audit-${Date.now()}.json`;
-    a.click();
+    downloadJson(report, `spine-audit-${Date.now()}.json`);
+    app.toast('success', '剪贴板不可用，报告已下载为 JSON');
   }
 }
 
@@ -329,7 +260,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   cancelled = true;
-  closeDetail();
+  closeDetail(); // 详情子组件卸载时自行释放预览 WebGL 上下文
 });
 </script>
 
@@ -339,22 +270,31 @@ onBeforeUnmount(() => {
       <p class="nk-spine-audit__kicker">SPINE AUDIT // 导入体检</p>
       <h1>Spine 审核台</h1>
       <p class="nk-spine-audit__desc">
-        全量 manifest 条目三级诊断：L0 资源可达性 + atlas 纹理对照 → L1 骨架解析/元数据 → L2 真实渲染 + 像素采样（official 逐动画，skel/场景降级）。
-        异常项展开详情查看资源表 / 纹理对照 / 采样结果，并按诊断建议定位修复。
+        全量 manifest 三级诊断：L0 资源可达性 → L1 骨架解析 → L2 真实渲染 + 像素采样（official 逐动画，skel/场景降级）。异常项展开详情查看资源表 / 诊断建议，并可预览动画确认。
       </p>
+
       <div class="nk-spine-audit__toolbar">
         <div class="nk-spine-audit__chips">
-          <span class="nk-spine-audit__chip is-ok">PASS {{ summary.pass }}</span>
-          <span class="nk-spine-audit__chip is-fail">FAIL {{ summary.fail }}</span>
-          <span class="nk-spine-audit__chip is-warn">WARN {{ summary.warn }}</span>
-          <span class="nk-spine-audit__chip" :class="glAlive >= GL_WARN_AT ? 'is-fail' : ''" title="活跃 WebGL 上下文数（队列 1 + 预览 1）">GL {{ glAlive }}/16</span>
-          <span class="nk-spine-audit__chip" :class="running ? 'is-loading' : ''">进度 {{ summary.done }}/{{ summary.total }}</span>
+          <span class="nk-spine-audit__chip is-ok" title="通过条目数">PASS {{ summary.pass }}</span>
+          <span class="nk-spine-audit__chip is-fail" title="失败条目数 — 需人工处理">FAIL {{ summary.fail }}</span>
+          <span class="nk-spine-audit__chip is-warn" title="警告条目数 — 建议核查">WARN {{ summary.warn }}</span>
+          <span
+            class="nk-spine-audit__chip nk-spine-audit__chip--gl"
+            :class="glAlive >= GL_WARN_AT ? 'is-fail' : ''"
+            title="活跃 WebGL 上下文数（浏览器上限约 16，队列 1 + 预览 1）"
+          >GL {{ glAlive }}/16</span>
         </div>
         <div class="nk-spine-audit__bulk">
-          <button type="button" class="nk-spine-audit__btn" :disabled="running" @click="startAudit">开始审核</button>
-          <button type="button" class="nk-spine-audit__btn" v-if="running" @click="togglePause">{{ paused ? '继续' : '暂停' }}</button>
-          <button type="button" class="nk-spine-audit__btn" :disabled="running" @click="rerunIssues">仅异常重跑</button>
-          <button type="button" class="nk-spine-audit__btn" :disabled="summary.done === 0" @click="exportReport">导出报告</button>
+          <template v-if="running">
+            <span class="nk-spine-audit__progress-text" aria-live="polite">{{ summary.done }}/{{ summary.total }}</span>
+            <button type="button" class="nk-spine-audit__btn" @click="togglePause">{{ paused ? '继续' : '暂停' }}</button>
+            <button type="button" class="nk-spine-audit__btn is-danger" @click="stopAudit">停止</button>
+          </template>
+          <template v-else>
+            <button type="button" class="nk-spine-audit__btn is-primary" @click="startAudit">开始审核</button>
+            <button type="button" class="nk-spine-audit__btn" :disabled="summary.fail + summary.warn === 0" @click="rerunIssues">仅异常重跑</button>
+            <button type="button" class="nk-spine-audit__btn" :disabled="summary.done === 0" @click="exportReport">导出报告</button>
+          </template>
         </div>
       </div>
       <div class="nk-spine-audit__progress" aria-hidden="true">
@@ -370,113 +310,51 @@ onBeforeUnmount(() => {
       </select>
       <button
         type="button"
-        class="nk-spine-audit__btn"
+        class="nk-spine-audit__btn is-toggle"
         :class="{ 'is-on': onlyIssue }"
         :aria-pressed="onlyIssue"
         @click="onlyIssue = !onlyIssue"
-      >仅异常</button>
+      >{{ onlyIssue ? '仅异常 ✓' : '仅异常' }}</button>
       <span v-if="running" class="nk-spine-audit__hint">{{ paused ? '队列已暂停 — 点击「继续」' : '审核进行中…' }}</span>
     </div>
 
     <section v-for="kind in KIND_ORDER" :key="kind" class="nk-spine-audit__group">
-      <header v-if="grouped[kind].length" class="nk-spine-audit__group-head">
-        <span class="nk-spine-audit__group-name">{{ KIND_LABEL[kind] }}</span>
-        <span class="nk-spine-audit__group-count">{{ grouped[kind].length }}</span>
-      </header>
-      <div
-        v-for="(e, i) in grouped[kind]"
-        :key="e.key"
-        class="nk-spine-audit__row"
-        :class="[`is-${e.status}`, { 'is-open': expandedKey === e.key }]"
-        role="button"
-        tabindex="0"
-        @click="toggleDetail(e)"
-        @keydown.enter="toggleDetail(e)"
-      >
-        <span class="nk-spine-audit__num">{{ String(i + 1).padStart(2, '0') }}</span>
-        <span class="nk-spine-audit__key">{{ e.key }}</span>
-        <span class="nk-spine-audit__label">{{ e.label }}</span>
-        <span v-if="e.loadMs" class="nk-spine-audit__ms">{{ e.loadMs }}ms</span>
-        <span v-if="e.errors.length" class="nk-spine-audit__err" :title="e.errors.join('\n')">{{ shortErrors(e) }}</span>
-        <span v-else-if="e.warnings.length" class="nk-spine-audit__err is-warn" :title="e.warnings.join('\n')">{{ e.warnings.join(' | ').slice(0, 100) }}</span>
-        <span class="nk-spine-audit__badge" :class="`is-${e.status}`">{{ badgeText(e) }}</span>
-        <span class="nk-spine-audit__caret">{{ expandedKey === e.key ? '▾' : '▸' }}</span>
-
-        <div v-if="expandedKey === e.key" class="nk-spine-audit__detail" @click.stop>
-          <div class="nk-spine-audit__cols">
-            <div class="nk-spine-audit__col">
-              <h3 class="nk-spine-audit__sub">资源检查（L0）</h3>
-              <table class="nk-spine-audit__table">
-                <tbody>
-                  <tr v-for="r in e.resources" :key="r.url" :class="{ 'is-bad': !r.ok }">
-                    <td class="nk-spine-audit__td-url">{{ r.url }}</td>
-                    <td class="nk-spine-audit__td-status">{{ r.status || 'ERR' }}</td>
-                    <td class="nk-spine-audit__td-ms">{{ r.ms }}ms</td>
-                  </tr>
-                </tbody>
-              </table>
-              <template v-if="e.atlasDiffs.length">
-                <h3 class="nk-spine-audit__sub">纹理映射对照</h3>
-                <div v-for="(d, i) in e.atlasDiffs" :key="i" class="nk-spine-audit__diff">
-                  <p class="nk-spine-audit__diff-head">
-                    atlas pages: {{ d.diff.atlasPages.join(', ') || '—' }}
-                    <span v-if="d.layer !== null" class="nk-spine-audit__state is-off">层 {{ d.layer + 1 }}</span>
-                  </p>
-                  <p v-if="d.diff.missingInAtlas.length" class="nk-spine-audit__diff-bad">映射缺失于 atlas: {{ d.diff.missingInAtlas.join(', ') }}</p>
-                  <p v-if="d.diff.missingInManifest.length" class="nk-spine-audit__diff-warn">atlas page 未映射: {{ d.diff.missingInManifest.join(', ') }}</p>
-                  <p v-if="!d.diff.missingInAtlas.length && !d.diff.missingInManifest.length" class="nk-spine-audit__diff-ok">映射一致</p>
-                </div>
-              </template>
-            </div>
-            <div class="nk-spine-audit__col">
-              <h3 class="nk-spine-audit__sub">骨架元数据（L1）</h3>
-              <p v-if="!e.meta" class="nk-spine-audit__muted">{{ e.renderError || '渲染失败，无元数据' }}</p>
-              <template v-else>
-                <p class="nk-spine-audit__meta">动画 {{ e.meta.animations.length }} · 皮肤 {{ e.meta.skins.length }} · slot {{ e.meta.slots }} · 骨骼 {{ e.meta.bones }} · 附件 {{ e.meta.attachments }}</p>
-                <p v-if="e.meta.blendSlots.length" class="nk-spine-audit__meta">混合: {{ e.meta.blendSlots.map((b) => `S${b.index}:${b.name}`).join(' ') }}</p>
-                <h3 class="nk-spine-audit__sub">像素采样（L2）</h3>
-                <table class="nk-spine-audit__table">
-                  <tbody>
-                    <tr v-for="f in e.frames" :key="`${f.layer}-${f.anim}`" :class="{ 'is-bad': f.visible === 0 }">
-                      <td>{{ f.layer !== null ? `层${f.layer + 1}` : f.anim }}</td>
-                      <td>{{ (f.ratio * 100).toFixed(2) }}%</td>
-                      <td v-if="f.bbox">{{ f.bbox.x0 }},{{ f.bbox.y0 }} → {{ f.bbox.x1 }},{{ f.bbox.y1 }}</td>
-                      <td v-else>—</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </template>
-              <h3 class="nk-spine-audit__sub">诊断建议</h3>
-              <ul class="nk-spine-audit__advice">
-                <li v-for="(a, i) in buildDiagnosis(e)" :key="i">{{ a }}</li>
-                <li v-if="buildDiagnosis(e).length === 0" class="nk-spine-audit__muted">未发现问题</li>
-              </ul>
-            </div>
+      <template v-if="grouped[kind].length">
+        <header class="nk-spine-audit__group-head">
+          <span class="nk-spine-audit__group-name">{{ KIND_LABEL[kind] }}</span>
+          <span class="nk-spine-audit__group-count">{{ grouped[kind].length }}</span>
+          <span v-if="groupState(kind).fail" class="nk-spine-audit__group-state is-fail">✕{{ groupState(kind).fail }}</span>
+          <span v-if="groupState(kind).warn" class="nk-spine-audit__group-state is-warn">▲{{ groupState(kind).warn }}</span>
+          <span v-if="groupState(kind).pass" class="nk-spine-audit__group-state is-ok">✓{{ groupState(kind).pass }}</span>
+        </header>
+        <template v-for="(e, i) in grouped[kind]" :key="e.key">
+          <div
+            class="nk-spine-audit__row"
+            :class="[`is-${e.status}`, { 'is-open': expandedKey === e.key }]"
+            role="button"
+            tabindex="0"
+            :aria-expanded="expandedKey === e.key"
+            @click="toggleDetail(e)"
+            @keydown.enter="toggleDetail(e)"
+          >
+            <span class="nk-spine-audit__bar" aria-hidden="true"></span>
+            <span class="nk-spine-audit__num">{{ String(i + 1).padStart(2, '0') }}</span>
+            <span class="nk-spine-audit__key">{{ e.key }}</span>
+            <span class="nk-spine-audit__label">{{ e.label }}</span>
+            <span v-if="e.errors.length" class="nk-spine-audit__err" :title="e.errors.join('\n')">{{ shortErrors(e) }}</span>
+            <span v-else-if="e.warnings.length" class="nk-spine-audit__err is-warn" :title="e.warnings.join('\n')">{{ e.warnings.join(' | ').slice(0, 100) }}</span>
+            <span v-else-if="e.status === 'pass' && e.loadMs" class="nk-spine-audit__ms">{{ e.loadMs }}ms</span>
+            <span class="nk-spine-audit__badge" :class="`is-${e.status}`">{{ badgeText(e) }}</span>
+            <span class="nk-spine-audit__caret">{{ expandedKey === e.key ? '▾' : '▸' }}</span>
           </div>
-          <div class="nk-spine-audit__preview">
-            <h3 class="nk-spine-audit__sub">
-              预览
-              <span v-if="detailResolved && detailResolved.kind === 'official-scene'" class="nk-spine-audit__state is-off">场景仅主背景层</span>
-            </h3>
-            <div ref="previewRef" class="nk-spine-audit__stage"></div>
-            <p v-if="previewError" class="nk-spine-audit__error" role="alert">{{ previewError }}</p>
-            <div class="nk-spine-audit__preview-ctl">
-              <select
-                v-if="previewAnims.length > 1"
-                class="nk-spine-audit__select"
-                :value="previewAnim"
-                aria-label="预览动画"
-                @change="onPreviewAnim(($event.target as HTMLSelectElement).value)"
-              >
-                <option v-for="a in previewAnims" :key="a" :value="a">{{ a }}</option>
-              </select>
-              <button type="button" class="nk-spine-audit__btn" :disabled="!previewPlayer" @click="togglePreviewPause">
-                {{ previewPaused ? '播放' : '暂停' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+          <SpineAuditDetail
+            v-if="expandedKey === e.key"
+            :entry="e"
+            :resolved="detailResolved"
+            @gl-change="onPreviewGlChange"
+          />
+        </template>
+      </template>
     </section>
   </div>
 </template>
@@ -537,6 +415,7 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   font-family: ui-monospace, monospace;
   font-size: 12px;
+  font-weight: 600;
   color: var(--text2);
   background: color-mix(in srgb, var(--text) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
@@ -544,8 +423,16 @@ onBeforeUnmount(() => {
 .nk-spine-audit__chip.is-ok { color: #b7f2bd; border-color: rgba(127, 224, 138, 0.45); background: rgba(127, 224, 138, 0.12); }
 .nk-spine-audit__chip.is-fail { color: #ffb3b3; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.14); }
 .nk-spine-audit__chip.is-warn { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
-.nk-spine-audit__chip.is-loading { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
-.nk-spine-audit__bulk { display: flex; flex-wrap: wrap; gap: 8px; }
+.nk-spine-audit__chip--gl { opacity: 0.55; } /* 次要监控信息：弱化不抢主状态注意力 */
+.nk-spine-audit__chip--gl.is-fail { opacity: 1; }
+.nk-spine-audit__bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.nk-spine-audit__progress-text {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--text2);
+  min-width: 52px;
+  text-align: right;
+}
 
 .nk-spine-audit__progress {
   margin-top: 10px;
@@ -557,7 +444,8 @@ onBeforeUnmount(() => {
 .nk-spine-audit__progress-bar {
   height: 100%;
   border-radius: 999px;
-  background: var(--primary);
+  background: linear-gradient(90deg, var(--primary), #A78BFA);
+  box-shadow: 0 0 8px var(--primary-glow);
   transition: width 0.3s;
 }
 .nk-spine-audit__error {
@@ -581,7 +469,13 @@ onBeforeUnmount(() => {
   font-size: 12px;
   color: #ffd9a3;
 }
-.nk-spine-audit__btn.is-on { border-color: var(--primary); color: var(--primary); }
+/* 「仅异常」为审核台核心操作（人工只看异常项），开启态用主色强化 */
+.nk-spine-audit__btn.is-toggle.is-on {
+  border-color: var(--primary);
+  color: var(--text-bright);
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
+  box-shadow: 0 0 12px var(--primary-glow);
+}
 
 /* ─── 分组 ─── */
 .nk-spine-audit__group { max-width: 1480px; margin-bottom: 18px; }
@@ -608,9 +502,21 @@ onBeforeUnmount(() => {
   color: var(--text2);
   background: color-mix(in srgb, var(--text) 10%, transparent);
 }
+.nk-spine-audit__group-state {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+.nk-spine-audit__group-state.is-fail { color: #ffb3b3; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.14); }
+.nk-spine-audit__group-state.is-warn { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
+.nk-spine-audit__group-state.is-ok { color: #b7f2bd; border-color: rgba(127, 224, 138, 0.4); background: rgba(127, 224, 138, 0.1); }
 
 /* ─── 条目行 ─── */
 .nk-spine-audit__row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -620,9 +526,24 @@ onBeforeUnmount(() => {
   transition: background 0.15s;
 }
 .nk-spine-audit__row:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
-.nk-spine-audit__row.is-fail { background: rgba(229, 72, 77, 0.05); }
+/* 左侧状态条：异常强信号，PASS 弱化避免绿色噪声 */
+.nk-spine-audit__bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+}
+.nk-spine-audit__row.is-fail { background: rgba(229, 72, 77, 0.07); }
+.nk-spine-audit__row.is-fail .nk-spine-audit__bar { background: #e5484d; box-shadow: 0 0 8px rgba(229, 72, 77, 0.6); }
+.nk-spine-audit__row.is-warn { background: rgba(245, 166, 35, 0.05); }
+.nk-spine-audit__row.is-warn .nk-spine-audit__bar { background: #f5a623; box-shadow: 0 0 8px rgba(245, 166, 35, 0.5); }
 .nk-spine-audit__row.is-running { background: rgba(245, 166, 35, 0.05); }
+.nk-spine-audit__row.is-running .nk-spine-audit__bar { background: #f5a623; animation: nk-audit-pulse 1.2s ease-in-out infinite; }
+.nk-spine-audit__row.is-pass { opacity: 0.82; }
+.nk-spine-audit__row.is-pass .nk-spine-audit__bar { background: rgba(127, 224, 138, 0.55); }
 .nk-spine-audit__row.is-open { background: color-mix(in srgb, var(--text) 8%, transparent); }
+@keyframes nk-audit-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 .nk-spine-audit__num {
   padding: 1px 7px;
   border-radius: 5px;
@@ -656,7 +577,7 @@ onBeforeUnmount(() => {
   flex: none;
 }
 .nk-spine-audit__err {
-  max-width: 420px;
+  max-width: 380px;
   font-family: ui-monospace, monospace;
   font-size: 11px;
   color: #ff9c9c;
@@ -676,105 +597,11 @@ onBeforeUnmount(() => {
   flex: none;
 }
 .nk-spine-audit__badge.is-pass { color: #b7f2bd; background: rgba(127, 224, 138, 0.14); border: 1px solid rgba(127, 224, 138, 0.4); }
-.nk-spine-audit__badge.is-fail { color: #ffb3b3; background: rgba(229, 72, 77, 0.16); border: 1px solid rgba(229, 72, 77, 0.5); }
+.nk-spine-audit__badge.is-fail { color: #ffb3b3; background: rgba(229, 72, 77, 0.16); border: 1px solid rgba(229, 72, 77, 0.5); box-shadow: 0 0 8px rgba(229, 72, 77, 0.25); }
 .nk-spine-audit__badge.is-warn { color: #ffd9a3; background: rgba(245, 166, 35, 0.1); border: 1px solid rgba(245, 166, 35, 0.45); }
-.nk-spine-audit__badge.is-running { color: #ffd9a3; background: rgba(245, 166, 35, 0.1); border: 1px solid rgba(245, 166, 35, 0.45); }
+.nk-spine-audit__badge.is-running { color: #ffd9a3; background: rgba(245, 166, 35, 0.1); border: 1px solid rgba(245, 166, 35, 0.45); animation: nk-audit-pulse 1.2s ease-in-out infinite; }
 .nk-spine-audit__badge.is-pending { color: var(--text3); background: color-mix(in srgb, var(--text) 10%, transparent); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); }
 .nk-spine-audit__caret { color: var(--text3); font-size: 10px; flex: none; }
-
-/* ─── 详情 ─── */
-.nk-spine-audit__detail {
-  padding: 14px;
-  border-left: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-}
-.nk-spine-audit__cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-@media (max-width: 1024px) {
-  .nk-spine-audit__cols { grid-template-columns: 1fr; }
-}
-.nk-spine-audit__sub {
-  margin: 0 0 8px;
-  font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  color: var(--text2);
-  text-transform: uppercase;
-}
-.nk-spine-audit__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  margin-bottom: 12px;
-}
-.nk-spine-audit__table td {
-  padding: 3px 8px 3px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
-  vertical-align: top;
-}
-.nk-spine-audit__table tr.is-bad td { color: #ff9c9c; }
-.nk-spine-audit__td-url { word-break: break-all; }
-.nk-spine-audit__td-status { text-align: right; white-space: nowrap; }
-.nk-spine-audit__td-ms { text-align: right; white-space: nowrap; color: var(--text3); }
-.nk-spine-audit__diff { margin-bottom: 10px; }
-.nk-spine-audit__diff-head {
-  margin: 0 0 4px;
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  color: var(--text2);
-  word-break: break-all;
-}
-.nk-spine-audit__diff-bad { margin: 2px 0; font-size: 11px; color: #ff9c9c; word-break: break-all; }
-.nk-spine-audit__diff-warn { margin: 2px 0; font-size: 11px; color: #ffd9a3; word-break: break-all; }
-.nk-spine-audit__diff-ok { margin: 2px 0; font-size: 11px; color: #b7f2bd; }
-.nk-spine-audit__state {
-  margin-left: 6px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  font-family: var(--font-hud);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-.nk-spine-audit__state.is-off { color: var(--text3); background: color-mix(in srgb, var(--text) 10%, transparent); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); }
-.nk-spine-audit__meta {
-  margin: 0 0 6px;
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  line-height: 1.7;
-  word-break: break-all;
-}
-.nk-spine-audit__muted { margin: 0 0 6px; font-size: 12px; color: var(--text3); }
-.nk-spine-audit__advice {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 12px;
-  line-height: 1.8;
-}
-.nk-spine-audit__advice li { color: #ffd9a3; }
-
-/* ─── 预览 ─── */
-.nk-spine-audit__preview { margin-top: 16px; }
-.nk-spine-audit__stage {
-  width: 480px;
-  height: 270px;
-  max-width: 100%;
-  background:
-    linear-gradient(135deg, rgba(10, 15, 30, 0.9) 0%, rgba(19, 26, 46, 0.9) 50%, rgba(10, 15, 30, 0.9) 100%),
-    repeating-conic-gradient(#151d33 0% 25%, #0d1326 0% 50%) 0 0 / 24px 24px;
-}
-.nk-spine-audit__preview-ctl {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-}
 
 /* ─── 通用控件 ─── */
 .nk-spine-audit__select {
@@ -798,19 +625,36 @@ onBeforeUnmount(() => {
   border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
 }
 .nk-spine-audit__btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--text) 55%, transparent); }
 .nk-spine-audit__btn:active:not(:disabled) { background: color-mix(in srgb, var(--text) 14%, transparent); }
 .nk-spine-audit__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 .nk-spine-audit__btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.nk-spine-audit__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
+.nk-spine-audit__btn.is-danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.12); }
+/* 主操作按钮：仅「开始审核」使用，填充主色突出入口 */
+.nk-spine-audit__btn.is-primary {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 85%, #fff 8%), var(--primary));
+  color: var(--text-bright);
+  font-weight: 600;
+  box-shadow: 0 0 14px var(--primary-glow);
+}
+.nk-spine-audit__btn.is-primary:hover:not(:disabled) { border-color: #A78BFA; box-shadow: 0 0 20px var(--primary-glow); }
 
 @media (max-width: 560px) {
   .nk-spine-audit { padding: 16px 12px; }
-  .nk-spine-audit__stage { width: 100%; height: auto; aspect-ratio: 16 / 9; }
+  /* 移动端行内仅保留身份 + 徽章：错误摘要与耗时折叠进详情 */
+  .nk-spine-audit__err { display: none; }
+  .nk-spine-audit__ms { display: none; }
+  .nk-spine-audit__row { gap: 8px; padding: 8px 10px 8px 12px; }
+  .nk-spine-audit__label { font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nk-spine-audit__btn, .nk-spine-audit__row, .nk-spine-audit__progress-bar { transition: none; }
+  .nk-spine-audit__row.is-running .nk-spine-audit__bar,
+  .nk-spine-audit__badge.is-running { animation: none; }
 }
 </style>
