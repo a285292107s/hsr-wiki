@@ -9,6 +9,7 @@
 import { resolveSpine } from '../../services/api';
 import type { SpineResolved, SpineSceneEntry } from '../../services/types';
 import { SPINE_RUNTIME_CDNS } from '../../lib/constants';
+import { buildSceneItems, getSpineLib, type SpineLib, type SpineSceneAssetManager } from '../debug/spine-shared';
 
 /* ─── spine-player 松散类型（IIFE 运行时注入全局 spine） ─── */
 
@@ -70,47 +71,6 @@ interface SpinePlayerConfig {
   error?: (p: SpinePlayerInstance, msg: string) => void;
 }
 type SpinePlayerCtor = new (container: HTMLElement, config: SpinePlayerConfig) => SpinePlayerInstance;
-
-/* ─── 场景级渲染松散类型（单画布多骨架，spine-webgl 原生 API） ─── */
-
-interface SpineSceneSkeleton {
-  updateWorldTransform(physics: number): void;
-}
-interface SpineSceneAnimState {
-  update(d: number): void;
-  apply(s: unknown): void;
-  setAnimation(track: number, name: string, loop: boolean): void;
-}
-interface SpineSceneRenderer {
-  /** position 为 Vector3：set(x, y, z) 三参全传（z 缺省 undefined 会污染 view 矩阵） */
-  camera: { position: { set(x: number, y: number, z: number): void }; viewportWidth: number; viewportHeight: number; zoom: number };
-  begin(): void;
-  end(): void;
-  drawSkeleton(s: unknown, premultipliedAlpha?: boolean): void;
-  dispose(): void;
-}
-interface SpineSceneAssetManager {
-  setRawDataURI(path: string, url: string): void;
-  loadTextureAtlas(url: string): void;
-  loadJson(url: string): void;
-  loadAll(): Promise<unknown>;
-  get(url: string): unknown;
-}
-interface SpineLib {
-  SceneRenderer: new (canvas: HTMLCanvasElement, gl: WebGLRenderingContext, twoColorTint?: boolean) => SpineSceneRenderer;
-  AssetManager: new (gl: WebGLRenderingContext, pathPrefix: string) => SpineSceneAssetManager;
-  SkeletonJson: new (loader: unknown) => { readSkeletonData(json: unknown): unknown };
-  AtlasAttachmentLoader: new (atlas: unknown) => unknown;
-  Skeleton: new (data: unknown) => SpineSceneSkeleton;
-  AnimationState: new (data: unknown) => SpineSceneAnimState;
-  AnimationStateData: new (data: unknown) => unknown;
-  Physics: { update: number };
-}
-
-function getSpineLib(): SpineLib | null {
-  const g = globalThis as { spine?: SpineLib };
-  return g.spine ?? null;
-}
 
 let _runtimePromise: Promise<boolean> | null = null; // 运行时加载单例（避免重复下载 ~500KB）
 let _players: SpinePlayerInstance[] = []; // 当前自主渲染单实例（角色页），路由切换时需释放；场景实例由 initSpineSceneViewer 局部管理
@@ -267,26 +227,9 @@ export function initSpineSceneViewer(
       .then(() => {
         if (cancelled || !container.isConnected) return;
         try {
-          const items: { skeleton: SpineSceneSkeleton; state: SpineSceneAnimState }[] = [];
-          for (const layer of layers) {
-            const atlas = manager.get(layer.atlas);
-            const json = manager.get(layer.json);
-            if (!atlas || !json) {
-              // 单层资源缺失仅跳过该层（局部降级，不拖垮整体）
-              console.warn(`[nk-wiki] spine 场景层资源缺失，已跳过: ${layer.atlas}`);
-              continue;
-            }
-            const data = new lib.SkeletonJson(new lib.AtlasAttachmentLoader(atlas)).readSkeletonData(json);
-            const skeleton = new lib.Skeleton(data);
-            const state = new lib.AnimationState(new lib.AnimationStateData(data));
-            const anims = (data as { animations?: { name: string }[] }).animations || [];
-            const chosen =
-              anims.find((a) => a.name === 'idle') ||
-              anims.find((a) => /idle|standby|stand/i.test(a.name)) ||
-              anims[0];
-            if (chosen) state.setAnimation(0, chosen.name, true);
-            items.push({ skeleton, state });
-          }
+          // 统一骨架构建：缺失层跳过（局部降级；与调试验收台共用 buildSceneItems 保持同一语义）
+          const { items, missing } = buildSceneItems(lib, manager, layers);
+          for (const atlas of missing) console.warn(`[nk-wiki] spine 场景层资源缺失，已跳过: ${atlas}`);
           if (items.length === 0) throw new Error('全部场景层资源缺失');
           applyAtlasQualityFixes(manager, layers, gl);
           teardownCanvas = () => {

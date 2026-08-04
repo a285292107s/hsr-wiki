@@ -5,24 +5,33 @@
  * spine-manifest.json 后，在本页验收其能否正常渲染：
  * - 「一键验收」顺序加载全部场景：逐层加载状态 + 单画布合并渲染（生产 initSpineSceneViewer 同款）
  *   + 黑块自动检测（近黑不透明像素占比），生成可导出的 PASS/FAIL 报告；
- * - 单层模式保留作逐层诊断：每层独立渲染在透明画布上，混合 slot 对透明 dst 混合
- *   会产生暗色不透明块（透明画布固有现象，非资源问题）。
+ * - 单层模式保留作逐层诊断：每层独立画布渲染，画布带不透明深色衬底（LAYER_BG）——
+ *   混合 slot（screen/additive）的 dst 非透明 → 避免对透明 dst 退化产生黑块（03_jizi_pc 实证）；
+ *   合成导出前用 destination-out 抠除衬底色，得到透明底的角色叠加图。
  * 渲染参数与生产完全一致：同一固定 viewport + pad 0 + rawDataURIs 纹理重映射。
  */
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { loadSpineSceneKeys, resolveSpine } from '../../services/api';
 import type { SpineSceneEntry } from '../../services/types';
 import {
-  BLEND_NAMES, DebugDrawOrderSlot, SkelLike, SpinePlayerCtor, SpinePlayerInstance,
+  BLEND_NAMES, DebugDrawOrderSlot, SpinePlayerCtor, SpinePlayerInstance,
   SPINE_RUNTIME_VERSION,
   applyBlendLastOn, applyBlendsHiddenOn, applyForceNormalOn, buildOfficialConfig,
-  disposePlayer, getSpineCtor, loadSpineRuntime, pickAnimName,
+  buildSceneItems, disposePlayer, getSpineCtor, getSpineLib, loadSpineRuntime, pickAnimName,
+  type SpineSceneAnimState, type SpineSceneSkeleton,
 } from '../debug/spine-shared';
+import { useAppStore } from '../stores/app';
 /** 单帧步进时长（30fps 一帧） */
 const STEP_DELTA = 1 / 30;
 /** 浏览器活跃 WebGL 上下文上限约 16，达到此值预警 */
 const GL_WARN_AT = 12;
+/** 合并渲染与单层合成导出的基准画布尺寸（16:9；单层舞台 480×270 为其半尺寸） */
+const RENDER_W = 960;
+const RENDER_H = 540;
+/** 单层画布衬底色（spine-player hex 不含 #，不透明深蓝，与舞台底纹同色系）：
+ *  使混合 slot（screen/additive）的 dst 非透明 → 消除「对透明 dst 退化」产生的黑块 */
+const LAYER_BG = '0d1326';
 
 /* ─── 验收参数：黑块检测阈值（近黑不透明像素占比 %）与单场景超时 ─── */
 const NEAR_BLACK_WARN = 3;   // ≥3% 提示疑似暗块（夜景底色波动区间）
@@ -41,6 +50,8 @@ interface AcceptItem {
   verdict: 'PASS' | 'FAIL';
   reason: string;
   durationMs: number;
+  /** 验收被中止（用户点击中止 / 组件卸载 / 场景被外部切换） */
+  aborted: boolean;
 }
 
 interface LayerState {
@@ -49,6 +60,8 @@ interface LayerState {
   status: 'loading' | 'ok' | 'fail';
   error: string;
   premultiplied: boolean;
+  /** 画布衬底：true=不透明深色（LAYER_BG，混合 dst 非透明 → 无退化黑块）；false=透明（观察混合区） */
+  backing: boolean;
   blendsHidden: boolean;
   blendInfo: string;
   forceNormal: boolean;
@@ -62,6 +75,7 @@ interface LayerState {
 
 const route = useRoute();
 const router = useRouter();
+const app = useAppStore();
 
 const sceneKey = ref(typeof route.query.scene === 'string' && route.query.scene ? route.query.scene : 'home-bg');
 const sceneKeys = ref<string[]>([]);
@@ -95,6 +109,7 @@ const reportPass = computed(() => acceptReport.value.filter((r) => r.verdict ===
 
 function setLayerEl(idx: number, el: unknown): void {
   if (el instanceof HTMLElement) els.set(idx, el);
+  else els.delete(idx); // 元素卸载（ref 回调传 null）时清理，避免滞留已卸载 DOM 引用
 }
 
 function badgeText(st: LayerState): string {
@@ -102,6 +117,9 @@ function badgeText(st: LayerState): string {
 }
 
 /* ─── 场景加载 / 释放 ─── */
+
+/** 场景代际令牌：loadScene 每次递增；验收轮询检测到变化即中止当前项（外部操作抢占场景） */
+let sceneEpoch = 0;
 
 function disposeAllPlayers(): void {
   for (const p of players) {
@@ -113,6 +131,7 @@ function disposeAllPlayers(): void {
 
 /** 加载指定场景：先释放旧资源，再逐层创建 player */
 async function loadScene(key: string): Promise<void> {
+  sceneEpoch++;
   disposeAllPlayers();
   disposeMerged();
   mergedOn.value = false;
@@ -130,21 +149,23 @@ async function loadScene(key: string): Promise<void> {
     }
     viewportText.value = `viewport ${entry.viewport.width}×${entry.viewport.height} @ (${entry.viewport.x}, ${entry.viewport.y})`;
     lastEntry = entry;
-    layers.value = entry.layers.map((layer, idx) => {
-      const texKey = Object.keys(layer.textures)[0] ?? '';
-      // 默认预乘 OFF：官网 atlas 无 pma 字段且像素取证为直通 alpha（半透明像素 RGB>A 占 40%），
-      // 与枢纽页生产配置一致；ON 仅作为对照实验手动开启
-      return { idx, label: texKey.replace(/\.png$/i, ''), status: 'loading' as const, error: '', premultiplied: false, blendsHidden: false, blendInfo: '', forceNormal: false, savedBlend: new Map(), blendLast: false, savedDrawOrder: null, anims: [], currentAnim: '', loadMs: 0 };
-    });
-    await nextTick();
     const ok = await loadSpineRuntime();
     if (sceneKey.value !== key) return;
     if (!ok) {
+      // 保持 layers 为空 → 验收轮询走「无层 + 有错误」快速失败路径，不空转 90s
       loadError.value = 'spine-player 运行时加载失败（全部 CDN 不可达），点击「重新加载」重试';
       return;
     }
     const Ctor = getSpineCtor();
     if (!Ctor) return;
+    // runtime 就绪后才填充层状态（失败时保持空数组，供验收快速判定）
+    layers.value = entry.layers.map((layer, idx) => {
+      const texKey = Object.keys(layer.textures)[0] ?? '';
+      // 默认预乘 OFF：官网 atlas 无 pma 字段且像素取证为直通 alpha（半透明像素 RGB>A 占 40%），
+      // 与枢纽页生产配置一致；ON 仅作为对照实验手动开启
+      return { idx, label: texKey.replace(/\.png$/i, ''), status: 'loading' as const, error: '', premultiplied: false, backing: true, blendsHidden: false, blendInfo: '', forceNormal: false, savedBlend: new Map(), blendLast: false, savedDrawOrder: null, anims: [], currentAnim: '', loadMs: 0 };
+    });
+    await nextTick();
     for (const st of layers.value) {
       createPlayer(st, entry, Ctor);
     }
@@ -172,8 +193,9 @@ function createPlayer(st: LayerState, entry: { viewport: SpineSceneEntry['viewpo
   const player = new Ctor(el, {
     ...buildOfficialConfig(layer),
     alpha: true,
-    backgroundColor: '00000000',
+    backgroundColor: st.backing ? LAYER_BG : '00000000', // 衬底 ON=不透明深色（混合 dst 非透明无黑块）；OFF=透明（诊断混合区）
     premultipliedAlpha: st.premultiplied,
+    preserveDrawingBuffer: true, // 保留绘制缓冲：像素采样 / PNG 导出稳定（不受 rAF 暂停影响）
     viewport: { ...entry.viewport, padLeft: 0, padRight: 0, padTop: 0, padBottom: 0 },
     showControls: false,
     showLoading: false,
@@ -216,10 +238,10 @@ function onAnimChange(st: LayerState, name: string): void {
   } catch { /* 静默 */ }
 }
 
-function togglePremultiplied(idx: number): void {
+/** 重建某层 player（预乘/衬底是上下文创建参数，变更需重建） */
+function rebuildLayer(idx: number): void {
   const st = layers.value.find((l) => l.idx === idx);
   if (!st) return;
-  st.premultiplied = !st.premultiplied;
   st.status = 'loading';
   st.error = '';
   const old = players[idx];
@@ -235,12 +257,29 @@ function togglePremultiplied(idx: number): void {
   });
 }
 
-function toggleBlends(idx: number): void {
+/** 显式设置预乘（单选组）：变更时重建该层 player */
+function setPremultiplied(idx: number, on: boolean): void {
+  const st = layers.value.find((l) => l.idx === idx);
+  if (!st || st.premultiplied === on) return;
+  st.premultiplied = on;
+  rebuildLayer(idx);
+}
+
+/** 显式设置画布背景（单选组：衬底/透明）：变更时重建该层 player */
+function setBacking(idx: number, on: boolean): void {
+  const st = layers.value.find((l) => l.idx === idx);
+  if (!st || st.backing === on) return;
+  st.backing = on;
+  rebuildLayer(idx);
+}
+
+/** 显式设置打光隐藏（单选组） */
+function setBlends(idx: number, hidden: boolean): void {
   const st = layers.value.find((l) => l.idx === idx);
   const p = players[idx];
-  if (!st || !p || !p.skeleton) return;
-  st.blendsHidden = !st.blendsHidden;
-  applyBlendsHiddenOn(p.skeleton, st.blendsHidden);
+  if (!st || !p || !p.skeleton || st.blendsHidden === hidden) return;
+  st.blendsHidden = hidden;
+  applyBlendsHiddenOn(p.skeleton, hidden);
 }
 
 /** 批量隐藏/恢复全部层的打光层（对照实验） */
@@ -252,23 +291,31 @@ function toggleAllBlends(hidden: boolean): void {
   }
 }
 
-function toggleForceNormal(idx: number): void {
+/** 显式设置强制 normal（单选组） */
+function setForceNormal(idx: number, on: boolean): void {
   const st = layers.value.find((l) => l.idx === idx);
   const p = players[idx];
-  if (!st || !p || !p.skeleton) return;
-  st.forceNormal = !st.forceNormal;
-  applyForceNormalOn(p.skeleton, st.forceNormal, st.savedBlend);
+  if (!st || !p || !p.skeleton || st.forceNormal === on) return;
+  st.forceNormal = on;
+  applyForceNormalOn(p.skeleton, on, st.savedBlend);
 }
 
-function toggleBlendLast(idx: number): void {
+/** 显式设置光效后置（单选组） */
+function setBlendLast(idx: number, on: boolean): void {
   const st = layers.value.find((l) => l.idx === idx);
   const p = players[idx];
-  if (!st || !p || !p.skeleton) return;
-  st.blendLast = !st.blendLast;
-  applyBlendLastOn(p.skeleton, st.blendLast, st);
+  if (!st || !p || !p.skeleton || st.blendLast === on) return;
+  st.blendLast = on;
+  applyBlendLastOn(p.skeleton, on, st);
 }
 
 /* ─── 播放控制：暂停/恢复 + 单帧步进（两种渲染模式通用） ─── */
+
+/** 显式设置暂停状态（单选组）；togglePause 保留供 stepFrame 使用 */
+function setPaused(on: boolean): void {
+  if (paused.value === on) return;
+  togglePause();
+}
 
 function togglePause(): void {
   paused.value = !paused.value;
@@ -306,6 +353,30 @@ function downloadCanvas(canvas: HTMLCanvasElement, name: string): void {
   a.click();
 }
 
+/**
+ * 单层画布抠衬底：逐像素比较，把与衬底色完全一致的像素置透明（WebGL clearColor 为精确色值，
+ * getImageData 读回可精确匹配），保留角色/打光像素供透明底合成；
+ * 混合边缘像素带衬底残留属「尽力合成」范畴。
+ * 注：不能用 destination-out 整块填充——它不比较颜色，会把整个画布删除。
+ */
+function stripLayerBg(src: HTMLCanvasElement): HTMLCanvasElement {
+  const t = document.createElement('canvas');
+  t.width = src.width;
+  t.height = src.height;
+  const tctx = t.getContext('2d');
+  if (!tctx) return src;
+  tctx.drawImage(src, 0, 0);
+  const img = tctx.getImageData(0, 0, t.width, t.height);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i] === 13 && d[i + 1] === 19 && d[i + 2] === 38 && d[i + 3] === 255) {
+      d[i + 3] = 0;
+    }
+  }
+  tctx.putImageData(img, 0, 0);
+  return t;
+}
+
 function exportPng(): void {
   try {
     if (mergedOn.value) {
@@ -313,16 +384,17 @@ function exportPng(): void {
       if (canvas) downloadCanvas(canvas, `spine-${sceneKey.value}-merged.png`);
       return;
     }
-    // 单层画布未开 preserveDrawingBuffer，尽力合成（刚渲染完的帧通常可取到像素）
+    // 单层画布带深色衬底且 preserveDrawingBuffer=true，合成前逐层抠除衬底色 → 透明底角色叠加图
     const out = document.createElement('canvas');
-    out.width = 960;
-    out.height = 540;
+    out.width = RENDER_W;
+    out.height = RENDER_H;
     const ctx = out.getContext('2d');
     if (!ctx) return;
     for (const st of layers.value) {
       const host = els.get(st.idx);
       const c = host && host.querySelector('canvas');
-      if (c) ctx.drawImage(c, 0, 0, out.width, out.height);
+      // 仅衬底层需抠底色；透明层直接叠加
+      if (c) ctx.drawImage(st.backing ? stripLayerBg(c) : c, 0, 0, out.width, out.height);
     }
     downloadCanvas(out, `spine-${sceneKey.value}-composite.png`);
   } catch (e) {
@@ -336,6 +408,12 @@ const accepting = ref(false);
 const acceptProgress = ref('');
 const acceptReport = ref<AcceptItem[]>([]);
 const acceptError = ref('');
+/** 报告行「重验」进行中的场景（行内按钮禁用） */
+const reacceptingKey = ref<string | null>(null);
+/** 中止验收标志（普通变量即可，无需响应式） */
+let acceptCancelled = false;
+/** 组件已卸载标志：验收轮询检测到即中止（路由离开后旧循环不再继续跑场景） */
+let disposed = false;
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
@@ -364,8 +442,15 @@ async function acceptScene(key: string): Promise<AcceptItem> {
   sceneKey.value = key;
   void router.replace({ query: { scene: key } });
   await loadScene(key);
+  const epoch = sceneEpoch; // 捕获本场景代际：外部 loadScene 抢占会使轮询中止
   const deadline = t0 + ACCEPT_SCENE_TIMEOUT_MS;
+  let aborted = false;
   while (performance.now() < deadline) {
+    // 中止 / 组件卸载 / 场景被外部切换：立即退出，不空转
+    if (acceptCancelled || disposed || sceneEpoch !== epoch) {
+      aborted = true;
+      break;
+    }
     // 场景条目本身加载失败（非 official-scene / 运行时不可达）时无需等待，直接判定
     if (layers.value.length === 0 && loadError.value) break;
     const settled = layers.value.length > 0
@@ -380,9 +465,11 @@ async function acceptScene(key: string): Promise<AcceptItem> {
   const failedLayers = layers.value.filter((l) => l.status === 'fail').map((l) => `${l.label}: ${l.error}`);
   const layerOk = layers.value.filter((l) => l.status === 'ok').length;
   const reasons: string[] = [];
-  if (layers.value.length === 0) reasons.push(loadError.value || '场景条目加载失败');
+  if (aborted) reasons.push(acceptCancelled ? '已中止' : '场景被外部操作切换');
+  if (layers.value.length === 0 && loadError.value) reasons.push(loadError.value || '场景条目加载失败');
   if (failedLayers.length > 0) reasons.push(`${failedLayers.length} 层加载失败`);
   if (!mergedReady.value) reasons.push(`合并渲染失败: ${mergedError.value || '超时'}`);
+  if (mergedMissingKeys.value.length > 0) reasons.push(`缺失 ${mergedMissingKeys.value.length} 层资源（已跳过）`);
   if (nearBlackPct !== null && nearBlackPct >= NEAR_BLACK_FAIL) {
     reasons.push(`疑似黑块：近黑不透明像素 ${nearBlackPct.toFixed(2)}% ≥ ${NEAR_BLACK_FAIL}%`);
   }
@@ -398,15 +485,21 @@ async function acceptScene(key: string): Promise<AcceptItem> {
     verdict: reasons.length > 0 ? 'FAIL' : 'PASS',
     reason: reasons.join('；'),
     durationMs: Math.round(performance.now() - t0),
+    aborted,
   };
 }
 
-/** 一键验收：顺序跑全部场景（每场景结束后释放 WebGL 上下文再进下一个，不超浏览器配额） */
+/**
+ * 一键验收：顺序跑全部场景（每场景结束后释放 WebGL 上下文再进下一个，不超浏览器配额）。
+ * 可随时中止；结束后恢复验收前的场景。
+ */
 async function runAcceptance(): Promise<void> {
   if (accepting.value) return;
   accepting.value = true;
+  acceptCancelled = false;
   acceptReport.value = [];
   acceptError.value = '';
+  const originalKey = sceneKey.value; // 验收结束后恢复此场景（期间 sceneKey 被逐场景改写）
   try {
     const keys = await loadSpineSceneKeys();
     if (keys.length === 0) {
@@ -415,15 +508,41 @@ async function runAcceptance(): Promise<void> {
     }
     sceneKeys.value = keys;
     for (let i = 0; i < keys.length; i++) {
+      if (acceptCancelled) break;
       acceptProgress.value = `验收 ${i + 1}/${keys.length} — ${keys[i]}`;
       const item = await acceptScene(keys[i]);
       acceptReport.value = [...acceptReport.value, item];
+      if (item.aborted) break;
     }
   } catch (e) {
     acceptError.value = String(e);
   } finally {
     accepting.value = false;
     acceptProgress.value = '';
+    acceptCancelled = false;
+    if (sceneKey.value !== originalKey) {
+      sceneKey.value = originalKey;
+      void router.replace({ query: { ...route.query, scene: originalKey } });
+      void loadScene(originalKey);
+    }
+  }
+}
+
+/** 中止一键验收：置取消标志；当前场景轮询最快 300ms 内退出，场景间不再继续 */
+function cancelAcceptance(): void {
+  acceptCancelled = true;
+}
+
+/** 报告行「重验」：仅重跑该场景，结束后停留在该场景（不强制恢复） */
+async function reacceptScene(key: string): Promise<void> {
+  if (accepting.value || reacceptingKey.value) return;
+  reacceptingKey.value = key;
+  try {
+    const item = await acceptScene(key);
+    const idx = acceptReport.value.findIndex((r) => r.key === key);
+    if (idx >= 0) acceptReport.value[idx] = item;
+  } finally {
+    reacceptingKey.value = null;
   }
 }
 
@@ -450,8 +569,10 @@ function buildReportText(): string {
 async function copyReport(): Promise<void> {
   try {
     await navigator.clipboard.writeText(buildReportText());
+    app.toast('success', '验收报告已复制');
   } catch (e) {
     console.warn('[debug-spine] 报告复制失败:', e);
+    app.toast('error', '报告复制失败');
   }
 }
 
@@ -466,8 +587,10 @@ function downloadReportJson(): void {
     a.download = `kv-acceptance-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
+    app.toast('success', '验收报告 JSON 已下载');
   } catch (e) {
     console.warn('[debug-spine] 报告下载失败:', e);
+    app.toast('error', '报告下载失败');
   }
 }
 
@@ -488,11 +611,12 @@ const mergedRef = ref<HTMLElement | null>(null);
 const mergedBlendsHidden = ref(false);
 const mergedForceNormal = ref(false);
 const mergedBlendLast = ref(false);
+/** 合并渲染中因资源缺失被跳过的层 atlas（验收判定为 FAIL 的依据） */
+const mergedMissingKeys = ref<string[]>([]);
 
-type MergedSkeleton = SkelLike & { updateWorldTransform(physics: number): void };
 interface MergedItem {
-  skeleton: MergedSkeleton;
-  state: { update(d: number): void; apply(s: unknown): void };
+  skeleton: SpineSceneSkeleton;
+  state: SpineSceneAnimState;
   savedBlend: Map<number, number>;
   savedDrawOrder: DebugDrawOrderSlot[] | null;
 }
@@ -509,6 +633,7 @@ function disposeMerged(): void {
   mergedItems = [];
   mergedReady.value = false;
   mergedError.value = '';
+  mergedMissingKeys.value = [];
 }
 
 function toggleMerged(): void {
@@ -522,46 +647,35 @@ function toggleMerged(): void {
   });
 }
 
-function toggleMergedBlends(): void {
-  mergedBlendsHidden.value = !mergedBlendsHidden.value;
-  for (const it of mergedItems) applyBlendsHiddenOn(it.skeleton, mergedBlendsHidden.value);
+/** 显式设置渲染模式（单选组：合并渲染 / 单层模式） */
+function setMerged(on: boolean): void {
+  if (mergedOn.value === on) return;
+  toggleMerged();
 }
-function toggleMergedForceNormal(): void {
-  mergedForceNormal.value = !mergedForceNormal.value;
-  for (const it of mergedItems) applyForceNormalOn(it.skeleton, mergedForceNormal.value, it.savedBlend);
+
+/** 显式设置合并渲染打光隐藏（单选组） */
+function setMergedBlends(hidden: boolean): void {
+  if (mergedBlendsHidden.value === hidden) return;
+  mergedBlendsHidden.value = hidden;
+  for (const it of mergedItems) applyBlendsHiddenOn(it.skeleton, hidden);
 }
-function toggleMergedBlendLast(): void {
-  mergedBlendLast.value = !mergedBlendLast.value;
-  for (const it of mergedItems) applyBlendLastOn(it.skeleton, mergedBlendLast.value, it);
+/** 显式设置合并渲染强制 normal（单选组） */
+function setMergedForceNormal(on: boolean): void {
+  if (mergedForceNormal.value === on) return;
+  mergedForceNormal.value = on;
+  for (const it of mergedItems) applyForceNormalOn(it.skeleton, on, it.savedBlend);
+}
+/** 显式设置合并渲染光效后置（单选组） */
+function setMergedBlendLast(on: boolean): void {
+  if (mergedBlendLast.value === on) return;
+  mergedBlendLast.value = on;
+  for (const it of mergedItems) applyBlendLastOn(it.skeleton, on, it);
 }
 
 /** 单 canvas 顺序渲染全部层（layers 数组顺序 = renderOrder 升序 = 官网绘制顺序） */
 async function mountMerged(): Promise<void> {
   const el = mergedRef.value;
-  const g = (globalThis as { spine?: unknown }).spine as
-    | {
-        SceneRenderer: new (c: HTMLCanvasElement, gl: WebGLRenderingContext, tct: boolean) => {
-          camera: { position: { set(x: number, y: number, z: number): void }; viewportWidth: number; viewportHeight: number; zoom: number };
-          begin(): void;
-          end(): void;
-          drawSkeleton(s: unknown): void;
-          dispose(): void;
-        };
-        AssetManager: new (gl: WebGLRenderingContext, base: string) => {
-          setRawDataURI(path: string, url: string): void;
-          loadTextureAtlas(url: string): void;
-          loadJson(url: string): void;
-          loadAll(): Promise<unknown>;
-          get(url: string): unknown;
-        };
-        SkeletonJson: new (loader: unknown) => { readSkeletonData(json: unknown): unknown };
-        AtlasAttachmentLoader: new (atlas: unknown) => unknown;
-        Skeleton: new (data: unknown) => unknown;
-        Physics: { update: number };
-        AnimationState: new (data: unknown) => { update(d: number): void; apply(s: unknown): void; setAnimation(i: number, name: string, loop: boolean): void };
-        AnimationStateData: new (data: unknown) => unknown;
-      }
-    | undefined;
+  const g = getSpineLib();
   if (!el || !g || !lastEntry) return;
   disposeMerged();
   mergedBlendsHidden.value = false;
@@ -576,8 +690,8 @@ async function mountMerged(): Promise<void> {
 
   const canvas = document.createElement('canvas');
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const W = 960;
-  const H = 540;
+  const W = RENDER_W;
+  const H = RENDER_H;
   canvas.width = W * dpr;
   canvas.height = H * dpr;
   // 宽度自适应收缩（小屏），buffer 比例恒为 16:9
@@ -604,30 +718,21 @@ async function mountMerged(): Promise<void> {
       manager.loadTextureAtlas(layer.atlas);
       manager.loadJson(layer.json);
     }
-    // 4.2.x AssetManager.loadAll 为 Promise 风格（内部 rAF 轮询完成状态），完成后建骨架并启动渲染循环
+    // 4.2.x AssetManager.loadAll 为 Promise 风格（内部 rAF 轮询完成状态）。
+    // 与生产 initSpineSceneViewer 同款降级语义：loadAll reject（任一资源失败）不视为整体失败，
+    // 由 buildSceneItems 逐层 get() 跳过缺失层；缺失层记录进 mergedMissingKeys 供验收判定
     void manager
       .loadAll()
+      .catch(() => undefined)
       .then(() => {
         if (mergedDone) return;
-        const items: MergedItem[] = [];
-        try {
-          for (const layer of entry.layers) {
-            const atlas = manager.get(layer.atlas);
-            const json = manager.get(layer.json);
-            if (!atlas || !json) throw new Error(`资源缺失: ${layer.atlas}`);
-            const data = new g.SkeletonJson(new g.AtlasAttachmentLoader(atlas)).readSkeletonData(json);
-            const skeleton = new g.Skeleton(data) as unknown as MergedSkeleton;
-            const state = new g.AnimationState(new g.AnimationStateData(data));
-            const anims = (data as { animations?: { name: string }[] }).animations || [];
-            const chosen = pickAnimName(anims.map((a) => a.name));
-            if (chosen) state.setAnimation(0, chosen, true);
-            items.push({ skeleton, state, savedBlend: new Map(), savedDrawOrder: null });
-          }
-        } catch (e) {
-          mergedError.value = String(e);
+        const { items, missing } = buildSceneItems(g, manager, entry.layers);
+        mergedMissingKeys.value = missing;
+        if (items.length === 0) {
+          mergedError.value = `全部场景层资源缺失（${missing.length} 层）`;
           return;
         }
-        mergedItems = items;
+        mergedItems = items.map((it) => ({ skeleton: it.skeleton, state: it.state, savedBlend: new Map(), savedDrawOrder: null }));
         mergedReady.value = true;
         let last = performance.now();
         const frame = (now: number): void => {
@@ -679,7 +784,17 @@ onMounted(async () => {
   await loadScene(sceneKey.value);
 });
 
+// 响应地址栏 / 外部导航的 ?scene= 变化（同一路由复用 / 手改 URL 均生效；验收期间场景被抢占时由 epoch 令牌中止轮询）
+watch(
+  () => route.query.scene,
+  (v) => {
+    const k = typeof v === 'string' && v ? v : 'home-bg';
+    if (k !== sceneKey.value) selectScene(k);
+  },
+);
+
 onBeforeUnmount(() => {
+  disposed = true; // 验收轮询检测到卸载即中止，避免旧循环在组件销毁后继续跑
   disposeMerged(); // 合并渲染的 rAF 循环与 WebGL 上下文必须在此释放（否则离开页面后持续泄漏）
   disposeAllPlayers();
 });
@@ -691,29 +806,42 @@ onBeforeUnmount(() => {
       <p class="nk-spine-debug__kicker">KV SCENE ACCEPTANCE // {{ sceneKey.toUpperCase() }}</p>
       <h1>KV 场景验收台</h1>
       <p class="nk-spine-debug__desc">
-        每个游戏版本的 KV 场景资源从官网重新抓取写入 spine-manifest.json 后，在此验收其能否正常渲染：
-        「一键验收」顺序跑全部场景（逐层加载 + 单画布合并渲染 + 黑块自动检测），生成可导出的 PASS/FAIL 报告。
-        默认展示合并渲染（生产 initSpineSceneViewer 同款方案）；单层模式仅供逐层诊断——混合 slot 对透明 dst 混合会产生暗色不透明块，属透明画布固有现象而非资源问题。
+        每版本官网抓取的 KV 场景在此验收：一键验收全部场景（逐层加载 + 单画布合并渲染 + 黑块检测）→ 导出 PASS/FAIL 报告；单层模式供逐层诊断。
       </p>
+      <!-- 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 -->
+      <div class="nk-spine-debug__statusbar">
+        <span class="nk-spine-debug__chip" :class="summary.startsWith('READY') ? 'is-ok' : summary.startsWith('FAIL') ? 'is-fail' : 'is-loading'">{{ summary }}</span>
+        <span class="nk-spine-debug__chip">{{ viewportText || 'viewport —' }}</span>
+        <span class="nk-spine-debug__chip" :class="glTotal >= GL_WARN_AT ? 'is-fail' : ''" title="活跃 WebGL 上下文数（浏览器上限约 16）">GL {{ glTotal }}/16</span>
+        <span class="nk-spine-debug__chip" :class="mergedOn ? 'is-ok' : ''">模式 {{ mergedOn ? '合并' : '单层' }}</span>
+      </div>
+      <!-- 工具条：按功能分组（场景 / 渲染 / 验收），主任务「一键验收」独立于实验性操作 -->
       <div class="nk-spine-debug__toolbar">
-        <div class="nk-spine-debug__chips">
-          <select class="nk-spine-debug__select" :value="sceneKey" aria-label="选择场景" @change="selectScene(($event.target as HTMLSelectElement).value)">
+        <div class="nk-spine-debug__group">
+          <span class="nk-spine-debug__group-label">场景</span>
+          <select class="nk-spine-debug__select" :value="sceneKey" aria-label="选择场景" :disabled="accepting" @change="selectScene(($event.target as HTMLSelectElement).value)">
             <option v-for="key in (sceneKeys.includes(sceneKey) ? sceneKeys : [sceneKey, ...sceneKeys])" :key="key" :value="key">{{ key }}</option>
           </select>
-          <span class="nk-spine-debug__chip">{{ viewportText || 'viewport —' }}</span>
-          <span class="nk-spine-debug__chip" :class="summary.startsWith('READY') ? 'is-ok' : summary.startsWith('FAIL') ? 'is-fail' : 'is-loading'">{{ summary }}</span>
-          <span class="nk-spine-debug__chip" :class="glTotal >= GL_WARN_AT ? 'is-fail' : ''" title="活跃 WebGL 上下文数（浏览器上限约 16）">GL {{ glTotal }}/16</span>
-          <span class="nk-spine-debug__chip" :class="mergedOn ? 'is-ok' : ''">合并 {{ mergedOn ? 'ON' : 'OFF' }}</span>
+          <button type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="loadScene(sceneKey)">重新加载</button>
         </div>
-        <div class="nk-spine-debug__bulk">
-          <button type="button" class="nk-spine-debug__btn is-primary" :disabled="accepting" @click="runAcceptance">{{ accepting ? (acceptProgress || '验收中…') : '一键验收' }}</button>
-          <button type="button" class="nk-spine-debug__btn" @click="loadScene(sceneKey)">重新加载</button>
-          <button type="button" class="nk-spine-debug__btn" :aria-pressed="paused" @click="togglePause">{{ paused ? '播放' : '暂停' }}</button>
-          <button type="button" class="nk-spine-debug__btn" @click="stepFrame">步进 1/30s</button>
-          <button type="button" class="nk-spine-debug__btn" @click="exportPng">导出 PNG</button>
-          <button type="button" class="nk-spine-debug__btn" @click="toggleAllBlends(true)">全部隐藏打光</button>
-          <button type="button" class="nk-spine-debug__btn" @click="toggleAllBlends(false)">全部显示打光</button>
-          <button type="button" class="nk-spine-debug__btn" :class="{ merged: mergedOn }" :aria-pressed="mergedOn" @click="toggleMerged">合并渲染</button>
+        <div class="nk-spine-debug__group">
+          <span class="nk-spine-debug__group-label">渲染</span>
+          <div class="nk-spine-debug__seg" role="radiogroup" aria-label="渲染模式">
+            <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="mergedOn" :class="{ 'is-active': mergedOn }" :disabled="accepting" @click="setMerged(true)">合并渲染</button>
+            <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!mergedOn" :class="{ 'is-active': !mergedOn }" :disabled="accepting" @click="setMerged(false)">单层模式</button>
+          </div>
+          <button type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="exportPng">导出 PNG</button>
+          <div class="nk-spine-debug__seg" role="radiogroup" aria-label="播放状态">
+            <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!paused" :class="{ 'is-active': !paused }" :disabled="accepting" @click="setPaused(false)">播放</button>
+            <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="paused" :class="{ 'is-active': paused }" :disabled="accepting" @click="setPaused(true)">暂停</button>
+          </div>
+          <button type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="stepFrame">步进 1/30s</button>
+        </div>
+        <div class="nk-spine-debug__group is-accept">
+          <span class="nk-spine-debug__group-label">验收</span>
+          <button type="button" class="nk-spine-debug__btn is-primary" :disabled="accepting" @click="runAcceptance">一键验收</button>
+          <span v-if="accepting" class="nk-spine-debug__chip is-loading">{{ acceptProgress || '验收中…' }}</span>
+          <button v-if="accepting" type="button" class="nk-spine-debug__btn is-danger" @click="cancelAcceptance">中止</button>
         </div>
       </div>
       <p v-if="loadError" class="nk-spine-debug__error" role="alert">{{ loadError }}</p>
@@ -733,7 +861,7 @@ onBeforeUnmount(() => {
       <p v-if="acceptError" class="nk-spine-debug__error" role="alert">{{ acceptError }}</p>
       <table v-if="acceptReport.length > 0" class="nk-spine-debug__report-table">
         <thead>
-          <tr><th>判定</th><th>场景</th><th>层</th><th>合并</th><th>近黑占比</th><th>混合slot</th><th>耗时</th><th>原因</th></tr>
+          <tr><th>判定</th><th>场景</th><th>层</th><th>合并</th><th>近黑占比</th><th>混合slot</th><th>耗时</th><th>原因</th><th>操作</th></tr>
         </thead>
         <tbody>
           <tr v-for="r in acceptReport" :key="r.key">
@@ -745,6 +873,7 @@ onBeforeUnmount(() => {
             <td>{{ r.blendSlots }}</td>
             <td>{{ (r.durationMs / 1000).toFixed(1) }}s</td>
             <td class="nk-spine-debug__report-reason">{{ r.reason || '—' }}</td>
+            <td><button type="button" class="nk-spine-debug__btn" :disabled="reacceptingKey === r.key" @click="reacceptScene(r.key)">{{ reacceptingKey === r.key ? '验中…' : '重验' }}</button></td>
           </tr>
         </tbody>
       </table>
@@ -755,15 +884,38 @@ onBeforeUnmount(() => {
         <span class="nk-spine-debug__num">ALL</span>
         <span class="nk-spine-debug__label">单画布合并渲染（官网同款：主背景先画铺满 → 混合 dst 为真实画面）</span>
         <div class="nk-spine-debug__states">
-          <button type="button" class="nk-spine-debug__btn" :aria-pressed="mergedBlendsHidden" @click="toggleMergedBlends">打光 {{ mergedBlendsHidden ? '隐藏' : '显示' }}</button>
-          <button type="button" class="nk-spine-debug__btn" :aria-pressed="mergedForceNormal" @click="toggleMergedForceNormal">强制normal</button>
-          <button type="button" class="nk-spine-debug__btn" :aria-pressed="mergedBlendLast" @click="toggleMergedBlendLast">光效后置</button>
+          <div class="nk-spine-debug__seg2">
+            <span class="nk-spine-debug__seg2-label">打光</span>
+            <div class="nk-spine-debug__seg" role="radiogroup" aria-label="打光显示">
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!mergedBlendsHidden" :class="{ 'is-active': !mergedBlendsHidden }" :disabled="accepting" @click="setMergedBlends(false)">显示</button>
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="mergedBlendsHidden" :class="{ 'is-active': mergedBlendsHidden }" :disabled="accepting" @click="setMergedBlends(true)">隐藏</button>
+            </div>
+          </div>
+          <div class="nk-spine-debug__seg2">
+            <span class="nk-spine-debug__seg2-label">混合</span>
+            <div class="nk-spine-debug__seg" role="radiogroup" aria-label="混合模式">
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!mergedForceNormal" :class="{ 'is-active': !mergedForceNormal }" :disabled="accepting" @click="setMergedForceNormal(false)">S</button>
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="mergedForceNormal" :class="{ 'is-active': mergedForceNormal }" :disabled="accepting" @click="setMergedForceNormal(true)">N</button>
+            </div>
+          </div>
+          <div class="nk-spine-debug__seg2">
+            <span class="nk-spine-debug__seg2-label">光效</span>
+            <div class="nk-spine-debug__seg" role="radiogroup" aria-label="光效顺序">
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!mergedBlendLast" :class="{ 'is-active': !mergedBlendLast }" :disabled="accepting" @click="setMergedBlendLast(false)">原位</button>
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="mergedBlendLast" :class="{ 'is-active': mergedBlendLast }" :disabled="accepting" @click="setMergedBlendLast(true)">后置</button>
+            </div>
+          </div>
           <span class="nk-spine-debug__badge" :class="mergedReady ? 'is-ok' : mergedError ? 'is-fail' : 'is-loading'">{{ mergedReady ? 'OK' : mergedError ? 'FAIL' : '加载中' }}</span>
         </div>
       </header>
       <div ref="mergedRef" class="nk-spine-debug__merged-stage"></div>
       <p v-if="mergedError" class="nk-spine-debug__card-err" role="alert">{{ mergedError }}</p>
     </section>
+    <div v-show="!mergedOn" class="nk-spine-debug__grid-tool">
+      <span class="nk-spine-debug__group-label">诊断</span>
+      <button type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="toggleAllBlends(true)">全部隐藏打光</button>
+      <button type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="toggleAllBlends(false)">全部显示打光</button>
+    </div>
     <div v-show="!mergedOn" class="nk-spine-debug__grid">
       <section
         v-for="st in layers"
@@ -777,10 +929,6 @@ onBeforeUnmount(() => {
           <span v-if="st.blendInfo" class="nk-spine-debug__blend" :title="st.blendInfo">{{ st.blendInfo }}</span>
           <div class="nk-spine-debug__states">
             <span v-if="st.status === 'ok' && st.loadMs > 0" class="nk-spine-debug__state is-off">{{ st.loadMs }}ms</span>
-            <span class="nk-spine-debug__state" :class="st.premultiplied ? 'is-on' : 'is-off'">预乘 {{ st.premultiplied ? 'ON' : 'OFF' }}</span>
-            <span class="nk-spine-debug__state" :class="st.blendsHidden ? 'is-warn' : 'is-on'">打光 {{ st.blendsHidden ? '隐藏' : '显示' }}</span>
-            <span class="nk-spine-debug__state" :class="st.forceNormal ? 'is-warn' : 'is-on'">混合 {{ st.forceNormal ? 'N' : 'S' }}</span>
-            <span class="nk-spine-debug__state" :class="st.blendLast ? 'is-on' : 'is-off'">光效 {{ st.blendLast ? '后置' : '原位' }}</span>
             <span class="nk-spine-debug__badge" :class="`is-${st.status}`">{{ badgeText(st) }}</span>
           </div>
         </header>
@@ -792,14 +940,46 @@ onBeforeUnmount(() => {
             class="nk-spine-debug__select"
             :value="st.currentAnim"
             aria-label="选择动画"
+            :disabled="accepting"
             @change="onAnimChange(st, ($event.target as HTMLSelectElement).value)"
           >
             <option v-for="anim in st.anims" :key="anim" :value="anim">{{ anim }}</option>
           </select>
-          <button type="button" class="nk-spine-debug__btn" :aria-pressed="st.premultiplied" @click="togglePremultiplied(st.idx)">预乘</button>
-          <button type="button" class="nk-spine-debug__btn" :aria-pressed="st.blendsHidden" @click="toggleBlends(st.idx)">打光</button>
-          <button type="button" class="nk-spine-debug__btn" :aria-pressed="st.forceNormal" @click="toggleForceNormal(st.idx)">强制normal</button>
-          <button type="button" class="nk-spine-debug__btn" :aria-pressed="st.blendLast" @click="toggleBlendLast(st.idx)">光效后置</button>
+          <div class="nk-spine-debug__seg2">
+            <span class="nk-spine-debug__seg2-label" title="不透明深色衬底：混合 slot 的 dst 非透明，无透明退化黑块；切「透明」可观察混合区">背景</span>
+            <div class="nk-spine-debug__seg" role="radiogroup" :aria-label="`${st.label} 背景`">
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="st.backing" :class="{ 'is-active': st.backing }" :disabled="accepting" @click="setBacking(st.idx, true)">衬底</button>
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!st.backing" :class="{ 'is-active': !st.backing }" :disabled="accepting" @click="setBacking(st.idx, false)">透明</button>
+            </div>
+          </div>
+          <div class="nk-spine-debug__seg2">
+            <span class="nk-spine-debug__seg2-label">预乘</span>
+            <div class="nk-spine-debug__seg" role="radiogroup" :aria-label="`${st.label} 预乘`">
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!st.premultiplied" :class="{ 'is-active': !st.premultiplied }" :disabled="accepting" @click="setPremultiplied(st.idx, false)">OFF</button>
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="st.premultiplied" :class="{ 'is-active': st.premultiplied }" :disabled="accepting" @click="setPremultiplied(st.idx, true)">ON</button>
+            </div>
+          </div>
+          <div class="nk-spine-debug__seg2">
+            <span class="nk-spine-debug__seg2-label">打光</span>
+            <div class="nk-spine-debug__seg" role="radiogroup" :aria-label="`${st.label} 打光`">
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!st.blendsHidden" :class="{ 'is-active': !st.blendsHidden }" :disabled="accepting" @click="setBlends(st.idx, false)">显示</button>
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="st.blendsHidden" :class="{ 'is-active': st.blendsHidden }" :disabled="accepting" @click="setBlends(st.idx, true)">隐藏</button>
+            </div>
+          </div>
+          <div class="nk-spine-debug__seg2">
+            <span class="nk-spine-debug__seg2-label">混合</span>
+            <div class="nk-spine-debug__seg" role="radiogroup" :aria-label="`${st.label} 混合模式`">
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!st.forceNormal" :class="{ 'is-active': !st.forceNormal }" :disabled="accepting" @click="setForceNormal(st.idx, false)">S</button>
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="st.forceNormal" :class="{ 'is-active': st.forceNormal }" :disabled="accepting" @click="setForceNormal(st.idx, true)">N</button>
+            </div>
+          </div>
+          <div class="nk-spine-debug__seg2">
+            <span class="nk-spine-debug__seg2-label">光效</span>
+            <div class="nk-spine-debug__seg" role="radiogroup" :aria-label="`${st.label} 光效顺序`">
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!st.blendLast" :class="{ 'is-active': !st.blendLast }" :disabled="accepting" @click="setBlendLast(st.idx, false)">原位</button>
+              <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="st.blendLast" :class="{ 'is-active': st.blendLast }" :disabled="accepting" @click="setBlendLast(st.idx, true)">后置</button>
+            </div>
+          </div>
         </footer>
       </section>
     </div>
@@ -845,18 +1025,45 @@ onBeforeUnmount(() => {
   line-height: 1.7;
   opacity: 0.72;
 }
+/* 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 */
+.nk-spine-debug__statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
 .nk-spine-debug__toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex-wrap: wrap;
-  gap: 10px 16px;
+  gap: 10px 0;
   padding: 10px 14px;
   border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
   border-radius: 10px;
   background: color-mix(in srgb, var(--bg) 55%, transparent);
 }
-.nk-spine-debug__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* 工具条分组：场景 / 渲染 / 验收（组间分隔线建立视觉层级） */
+.nk-spine-debug__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-left: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+}
+.nk-spine-debug__group:first-child { padding-left: 0; border-left: none; }
+.nk-spine-debug__group.is-accept { margin-left: auto; }
+.nk-spine-debug__group-label {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+  text-transform: uppercase;
+}
 .nk-spine-debug__chip {
   padding: 3px 10px;
   border-radius: 999px;
@@ -870,9 +1077,45 @@ onBeforeUnmount(() => {
 .nk-spine-debug__chip.is-fail { color: #ffb3b3; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.14); }
 .nk-spine-debug__chip.is-loading { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
 .nk-spine-debug__bulk { display: flex; flex-wrap: wrap; gap: 8px; }
-.nk-spine-debug__btn.merged { border-color: var(--primary); color: var(--primary); }
+/* 渲染模式单选组（分段控件）：合并渲染 / 单层模式互斥选中 */
+.nk-spine-debug__seg {
+  display: inline-flex;
+  border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.nk-spine-debug__seg-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text2);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.nk-spine-debug__seg-btn + .nk-spine-debug__seg-btn { border-left: 1px solid color-mix(in srgb, var(--text) 22%, transparent); }
+.nk-spine-debug__seg-btn:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
+.nk-spine-debug__seg-btn.is-active { color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.nk-spine-debug__seg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.nk-spine-debug__seg-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+/* 实验参数单选组：小标签 + 分段控件（预乘/打光/混合/光效） */
+.nk-spine-debug__seg2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.nk-spine-debug__seg2-label {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  white-space: nowrap;
+}
 .nk-spine-debug__btn.is-primary { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 18%, transparent); color: var(--primary); font-weight: 600; }
 .nk-spine-debug__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.nk-spine-debug__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
 
 /* ─── 验收报告：头部汇总 + 明细表（等宽代码风） ─── */
 .nk-spine-debug__report {
@@ -933,6 +1176,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 .nk-spine-debug__select:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.nk-spine-debug__select:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── 错误（就近展示 + 读屏播报） ─── */
 .nk-spine-debug__error {
@@ -967,6 +1211,15 @@ onBeforeUnmount(() => {
 }
 
 /* ─── 层卡片网格 ─── */
+/* 单层诊断批处理条（仅单层模式可见）：批量隐藏/显示打光 */
+.nk-spine-debug__grid-tool {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 1480px;
+  padding: 0 2px 10px;
+}
 .nk-spine-debug__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));

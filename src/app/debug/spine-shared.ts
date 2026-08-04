@@ -5,6 +5,7 @@
  */
 
 import { SPINE_RUNTIME_CDNS } from '../../lib/constants';
+import type { SpineSceneEntry } from '../../services/types';
 
 // 验收报告展示用（常量本体定义于 lib/constants.ts，生产/调试共用单一来源）
 export { SPINE_RUNTIME_VERSION } from '../../lib/constants';
@@ -71,6 +72,8 @@ export interface SpinePlayerConfig {
   };
   showControls?: boolean;
   showLoading?: boolean;
+  /** 保留绘制缓冲：关闭后读回/导出只能拿到最近一帧（rAF 暂停时可能全空）；调试页开启以便稳定采样 */
+  preserveDrawingBuffer?: boolean;
   success?: (p: SpinePlayerInstance) => void;
   error?: (p: SpinePlayerInstance, msg: string) => void;
   /** 每帧钩子（drawFrame 内相机计算之后、绘制之前执行），用于强制修正相机映射 */
@@ -86,6 +89,88 @@ let _runtimeLoad: Promise<boolean> | null = null;
 export function getSpineCtor(): SpinePlayerCtor | null {
   const g = globalThis as { spine?: { SpinePlayer?: SpinePlayerCtor } };
   return (g.spine && g.spine.SpinePlayer) || null;
+}
+
+/* ─── 场景级渲染松散类型（单画布多骨架，spine-webgl 原生 API；生产 initSpineSceneViewer 与调试验收台共用） ─── */
+
+export interface SpineSceneRenderer {
+  /** position 为 Vector3：set(x, y, z) 三参全传（z 缺省 undefined 会污染 view 矩阵） */
+  camera: { position: { set(x: number, y: number, z: number): void }; viewportWidth: number; viewportHeight: number; zoom: number };
+  begin(): void;
+  end(): void;
+  drawSkeleton(s: unknown, premultipliedAlpha?: boolean): void;
+  dispose(): void;
+}
+
+export interface SpineSceneAssetManager {
+  setRawDataURI(path: string, url: string): void;
+  loadTextureAtlas(url: string): void;
+  loadJson(url: string): void;
+  loadAll(): Promise<unknown>;
+  get(url: string): unknown;
+}
+
+export interface SpineSceneAnimState {
+  update(d: number): void;
+  apply(s: unknown): void;
+  setAnimation(track: number, name: string, loop: boolean): void;
+}
+
+/** 场景层骨架：在 SkelLike（实验辅助函数通用形态）之上补充 updateWorldTransform */
+export interface SpineSceneSkeleton extends SkelLike {
+  updateWorldTransform(physics: number): void;
+}
+
+export interface SpineLib {
+  SceneRenderer: new (canvas: HTMLCanvasElement, gl: WebGLRenderingContext, twoColorTint?: boolean) => SpineSceneRenderer;
+  AssetManager: new (gl: WebGLRenderingContext, pathPrefix: string) => SpineSceneAssetManager;
+  SkeletonJson: new (loader: unknown) => { readSkeletonData(json: unknown): unknown };
+  AtlasAttachmentLoader: new (atlas: unknown) => unknown;
+  Skeleton: new (data: unknown) => SpineSceneSkeleton;
+  AnimationState: new (data: unknown) => SpineSceneAnimState;
+  AnimationStateData: new (data: unknown) => unknown;
+  Physics: { update: number };
+}
+
+/** 读取注入全局的 spine 运行时（SceneRenderer 级 API） */
+export function getSpineLib(): SpineLib | null {
+  const g = globalThis as { spine?: SpineLib };
+  return g.spine ?? null;
+}
+
+export interface SceneItem {
+  skeleton: SpineSceneSkeleton;
+  state: SpineSceneAnimState;
+}
+
+/**
+ * 统一场景层骨架构建（loadAll 完成后调用）：逐层 get()，任一层资源缺失仅跳过该层
+ * （局部降级，与生产 initSpineSceneViewer 语义一致），全部缺失时返回空 items。
+ * @returns missing 缺失层的 atlas 列表（调用方用于警告展示/验收判定）
+ */
+export function buildSceneItems(
+  lib: SpineLib,
+  manager: SpineSceneAssetManager,
+  layers: SpineSceneEntry['layers'],
+): { items: SceneItem[]; missing: string[] } {
+  const items: SceneItem[] = [];
+  const missing: string[] = [];
+  for (const layer of layers) {
+    const atlas = manager.get(layer.atlas);
+    const json = manager.get(layer.json);
+    if (!atlas || !json) {
+      missing.push(layer.atlas);
+      continue;
+    }
+    const data = new lib.SkeletonJson(new lib.AtlasAttachmentLoader(atlas)).readSkeletonData(json);
+    const skeleton = new lib.Skeleton(data) as SpineSceneSkeleton;
+    const state = new lib.AnimationState(new lib.AnimationStateData(data));
+    const anims = (data as { animations?: { name: string }[] }).animations || [];
+    const chosen = pickAnimName(anims.map((a) => a.name));
+    if (chosen) state.setAnimation(0, chosen, true);
+    items.push({ skeleton, state });
+  }
+  return { items, missing };
 }
 
 /** 动态加载 spine-player 运行时（CDN IIFE；全部 CDN 失败时返回 false 并允许下次重试） */
