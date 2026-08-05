@@ -177,7 +177,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="pageRef" class="nk-page--detail" :aria-busy="phase === 'loading'">
+  <div ref="pageRef" class="nk-page--detail nk-char-page" :aria-busy="phase === 'loading'">
     <!-- ─── 加载骨架屏（延迟显示，缓存命中不闪屏） ─── -->
     <div
       v-if="phase === 'loading' && showSkeleton"

@@ -134,6 +134,9 @@
   --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
   --nk-page-tint: color-mix(in srgb, var(--primary) 5%, transparent);
   --nk-card-border: color-mix(in srgb, var(--primary) 30%, transparent);
+  /* 中性细线（档案/规格表排版：克制的半透明白线，不随主题色；卡片/分割线用） */
+  --line-1: rgba(255,255,255,0.07);
+  --line-2: rgba(255,255,255,0.13);
 }
 
 /* ═══ 货币战争模式：全壳暗金主题（黑底 + 金点缀） ═══
@@ -173,6 +176,9 @@
   --nk-input-border: color-mix(in srgb, var(--gold-500) 20%, transparent);
   --nk-page-tint: color-mix(in srgb, var(--gold-500) 4%, transparent);
   --nk-card-border: color-mix(in srgb, var(--gold-500) 28%, transparent);
+  /* CW 主题：暖白细线 */
+  --line-1: rgba(255,248,230,0.08);
+  --line-2: rgba(255,248,230,0.15);
 }
 
 /* 主题切换瞬间的渐变过渡（App.vue 临时挂载 ~450ms 后移除，

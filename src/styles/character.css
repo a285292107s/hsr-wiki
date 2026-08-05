@@ -1,450 +1,751 @@
 /* ═══════════════════════════════════════════
-   角色详情页样式
-   移植自原角色详情页样式（无页面级作用域选择器，原样保留）
+   角色详情页样式 · 档案陈列馆（ARCHIVE）
+   设计语言：编辑式排版 —— 自动编号章节标题 / 规格表属性 / 中性细线克制卡片
+   · 主色仅用于：编号、激活态、进度条、E 徽章等关键强调
+   · 卡片全部中性细线（--line-1/--line-2），无浮起位移、无霓虹 glow
+   · 所有选择器以 .nk-char-page 限定作用域，避免污染光锥/遗器页
 ═══════════════════════════════════════════ */
 
-/* ─── 详情页卡片基底（各卡片 padding/radius 不同，仅共享背景/边框/过渡） ─── */
-/* 实底卡片：hover 浮起 + 扩散阴影（tactile feedback，墨色分层替代霓虹 glow） */
-.nk-eidolon, .nk-ability, .nk-build__team,
-.nk-build__set, .nk-relic-slot, .nk-relic-sub {
-  background: var(--card); border: 1px solid var(--border);
-  transition: border-color 0.2s, transform 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out);
-}
-.nk-eidolon:hover, .nk-ability:hover, .nk-build__team:hover,
-.nk-build__set:hover, .nk-relic-slot:hover, .nk-relic-sub:hover {
-  border-color: var(--border2); transform: translateY(-1px); box-shadow: var(--nk-shadow-card);
-}
-.nk-eidolon:active, .nk-ability:active, .nk-build__team:active,
-.nk-build__set:active, .nk-relic-slot:active, .nk-relic-sub:active { transform: translateY(0); }
-/* 半透明卡片（紫调）：浮起但不加重影，保持轻盈 */
-.nk-profile__item, .nk-bonus {
-  background: color-mix(in srgb, var(--primary) 4%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
-  transition: border-color 0.2s, transform 0.2s var(--nk-ease-out);
-}
-.nk-profile__item:hover, .nk-bonus:hover { border-color: var(--border2); transform: translateY(-1px); }
-
 /* ─── 概览区块 ─── */
-/* 概览面板：头图无缝嵌入（顶部贴齐、左右突破面板内边距与面板同宽，下方内容保持面板内边距）
-   负 margin 需配合 width: calc(100% + 2×padding) 才真正扩宽；仅负 margin 会因基础
-   width:100% 锁宽导致左右不对称（右侧留缺口） */
-.nk-panel--overview { padding-top: 0; }
-.nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-wide-max); margin: 0 -16px 0; }
+/* 概览面板：头图无缝嵌入（顶部贴齐、左右突破面板内边距与面板同宽，下方内容保持面板内边距） */
+.nk-char-page .nk-panel--overview { padding-top: 0; }
+.nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-wide-max); margin: 0 -16px 0; }
 @media (min-width: 768px) {
-  .nk-panel--overview .nk-hero { width: calc(100% + 48px); max-width: var(--nk-detail-wide-max); margin: 0 -24px 0; }
+  .nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 48px); max-width: var(--nk-detail-wide-max); margin: 0 -24px 0; }
 }
-/* 内容平铺模式（移除 Tab）：全部面板依次渲染、滚动浏览；顶部内边距仅首个面板保留（见 --overview） */
-.nk-panel--flat { display: block; padding-bottom: 28px; }
+.nk-char-page .nk-panel--flat { display: block; padding-bottom: 28px; }
 @media (min-width: 768px) {
-  .nk-panel--flat { padding-bottom: 32px; }
+  .nk-char-page .nk-panel--flat { padding-bottom: 32px; }
 }
-/* Hero 属性模块上方的一句话介绍（左边线引用块；间距由 Hero 面板 gap 提供） */
-.nk-hero__desc { font-size: 0.875rem; line-height: 1.9; color: var(--text2); padding: 2px 0 2px 16px; border-left: 2px solid color-mix(in srgb, var(--primary) 35%, transparent); }
 
-/* ─── Hero 头部左右结构（角色页专属）：左侧信息 / 右侧元素·命途竖排标签 ─── */
-.nk-hero--char .nk-hero__head { flex-direction: row; justify-content: space-between; align-items: center; gap: 16px; }
-.nk-hero--char .nk-hero__head-left { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.nk-hero--char .nk-hero__head-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-/* 竖排标签：上方图标 + 下方文字说明（放大版） */
-.nk-hero--char .nk-hero__tag--vert {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-  padding: 10px 12px; min-width: 68px; border-radius: 12px;
-  background: color-mix(in srgb, var(--primary) 8%, transparent); border: 1px solid var(--border);
-  transition: transform 0.2s var(--nk-ease-out), border-color 0.2s, background 0.2s;
+/* ═══════════ Hero · 档案陈列 ═══════════ */
+.nk-char-page .nk-hero { background: transparent; }
+
+/* 视觉区：边缘柔化改为深墨渐入（无紫雾），底部渐融面板 */
+.nk-char-page .nk-hero__visual {
+  box-shadow:
+    inset 0 0 90px 24px rgba(15,15,35,0.72),
+    inset 0 -56px 64px -24px rgba(15,15,35,0.92);
 }
-.nk-hero--char .nk-hero__tag--vert:hover { transform: translateY(-1px); }
-.nk-hero--char .nk-hero__tag--vert img { width: 32px; height: 32px; }
-.nk-hero--char .nk-hero__tag--vert span { font-size: 0.75rem; font-weight: 700; color: var(--text2); letter-spacing: 0.02em; white-space: nowrap; }
-/* 手机：竖排标签紧凑化 */
-@media (max-width: 640px) {
-  .nk-hero--char .nk-hero__head { gap: 10px; }
-  .nk-hero--char .nk-hero__tag--vert { min-width: 54px; padding: 8px 8px; gap: 4px; }
-  .nk-hero--char .nk-hero__tag--vert img { width: 24px; height: 24px; }
-  .nk-hero--char .nk-hero__tag--vert span { font-size: 0.66rem; }
+/* 档案编号角标（左下） */
+.nk-char-page .nk-hero__archive {
+  position: absolute; left: 16px; bottom: 14px; z-index: 4;
+  font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700;
+  letter-spacing: 0.3em; color: rgba(255,255,255,0.5);
+  padding: 6px 12px; border-radius: 6px;
+  background: rgba(8,8,20,0.5); border: 1px solid var(--line-1);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  pointer-events: none; user-select: none;
 }
-/* 角色档案（阵营 + CV） */
-.nk-profile { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 0 auto 24px; max-width: var(--nk-prose-max); }
-.nk-profile__item {
-  display: flex; flex-direction: column; gap: 4px;
-  padding: 12px 16px; border-radius: 8px;
+/* 动画开关：中性化 */
+.nk-char-page .nk-hero__toggle {
+  border-color: var(--line-1); background: rgba(8,8,20,0.5); color: var(--text3);
 }
-.nk-profile__label { font-size: 0.625rem; font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
-.nk-profile__val { font-size: 0.8125rem; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
-/* 角色故事（折叠手风琴） */
-.nk-stories { display: flex; flex-direction: column; gap: 8px; max-width: var(--nk-prose-max); margin: 0 auto; }
-.nk-story { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
-.nk-story:hover { border-color: var(--border2); }
-.nk-story__head {
-  display: flex; align-items: center; gap: 12px; width: 100%;
-  padding: 14px 20px; background: none; border: none; cursor: pointer;
-  text-align: left; transition: background 0.15s;
+.nk-char-page .nk-hero__toggle:hover { border-color: var(--line-2); color: var(--text2); }
+
+/* 信息面板：无毛玻璃、无渐变光带；仅底部细微渐入，让内容直接落在页面底色上 */
+.nk-char-page .nk-hero__panel {
+  background: linear-gradient(180deg, transparent, rgba(15,15,35,0.55) 60%);
+  border-top: 1px solid var(--line-1);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
 }
-.nk-story__head:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
-.nk-story__num { font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700; color: var(--primary); opacity: 0.8; min-width: 1.6em; }
-.nk-story__label { font-size: 0.8125rem; font-weight: 600; color: var(--text2); letter-spacing: 0.02em; flex: 1; }
-.nk-story--open .nk-story__label { color: var(--text); }
-.nk-story__arrow {
-  width: 7px; height: 7px; flex-shrink: 0;
-  border-right: 1.5px solid var(--text3); border-bottom: 1.5px solid var(--text3);
-  transform: rotate(-45deg); transition: transform 0.25s var(--nk-ease-out);
+
+/* 头部：meta 行（阵营 + 星级）→ 大名字；右侧横排徽章 */
+.nk-char-page .nk-hero__head { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 18px; }
+.nk-char-page .nk-hero__head-left { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.nk-char-page .nk-hero__meta-row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.nk-char-page .nk-hero__camp {
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.24em;
+  color: var(--text3); white-space: nowrap;
 }
-.nk-story--open .nk-story__arrow { transform: rotate(45deg); }
-.nk-story__clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
-.nk-story--open .nk-story__clip { grid-template-rows: 1fr; }
-.nk-story__inner { overflow: hidden; min-height: 0; }
-.nk-story__text {
+.nk-char-page .nk-hero__camp::before { width: 18px; height: 1px; background: var(--line-2); }
+.nk-char-page .nk-hero__stars {
+  font-size: 0.8rem; letter-spacing: 0.14em; color: var(--gold-400);
+  text-shadow: none;
+}
+.nk-char-page .nk-hero__name {
+  font-size: 1.75rem; font-weight: 900; letter-spacing: 0.01em;
+  color: var(--text-bright); text-shadow: none; line-height: 1.12;
+}
+/* 横排徽章（元素/命途）：方形细线，图标 + 文字 */
+.nk-char-page .nk-hero__head-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.nk-char-page .nk-hero__badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 12px 6px 8px; border-radius: 7px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--line-1);
+  font-size: 0.72rem; font-weight: 600; color: var(--text2);
+  letter-spacing: 0.05em; white-space: nowrap;
+  transition: border-color 0.2s, background 0.2s;
+}
+.nk-char-page .nk-hero__badge:hover { border-color: var(--line-2); background: rgba(255,255,255,0.05); }
+.nk-char-page .nk-hero__badge img { width: 20px; height: 20px; }
+
+/* 一句话介绍：纯文本（去左边线），可读行宽 */
+.nk-char-page .nk-hero__desc {
+  border-left: none; padding: 0;
   font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
-  border-top: 1px dashed color-mix(in srgb, var(--primary) 15%, transparent);
-  padding: 14px 20px 18px;
-}
-.nk-bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 0 auto 24px; max-width: var(--nk-prose-max); }
-.nk-bonus {
-  display: flex; flex-direction: column; gap: 3px;
-  padding: 12px 16px; border-radius: 8px;
-}
-.nk-bonus__icon { width: 26px; height: 26px; margin-bottom: 5px; opacity: 0.9; }
-.nk-bonus__val { font-family: var(--font-hud); font-size: 1rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
-.nk-bonus__name { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
-/* 附加能力卡片：复用技能卡片结构原语（title-row/icon/name/tag/desc），容器风格对齐 */
-.nk-ability {
-  position: relative; border-radius: 12px; padding: 20px 24px 18px; margin-bottom: 12px;
+  max-width: 560px;
 }
 
-/* ─── 技能区块 ───
-   卡片基础原语（.nk-skill*）已抽取至 skill-card.css（与光锥详情页共享）
-   本文件保留角色专属：需求/强化关联/词条/动画预览/数据表/子技能 ─── */
+/* 属性区段 */
+.nk-char-page .nk-hero__section { display: flex; flex-direction: column; gap: 12px; }
+.nk-char-page .nk-hero__section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.22em; color: var(--text3); text-transform: uppercase;
+}
+/* 标题装饰：短横线（取代渐变竖条） */
+.nk-char-page .nk-hero__section-bar {
+  width: 20px; height: 1px; border-radius: 0;
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+/* 规格表：行式数据（图标 + 标签 + 右对齐等宽数值），行间中性细线 */
+.nk-char-page .nk-hero__stats {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 36px;
+}
+.nk-char-page .nk-hero__stat {
+  display: grid; grid-template-columns: 15px 1fr auto; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--line-1);
+  transition: background 0.2s;
+}
+.nk-char-page .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.nk-char-page .nk-hero__stat:hover { background: rgba(255,255,255,0.02); }
+.nk-char-page .nk-hero__stat-icon { width: 15px; height: 15px; opacity: 0.9; }
+.nk-char-page .nk-hero__stat-label { font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em; }
+.nk-char-page .nk-hero__stat-val {
+  font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700;
+  color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap;
+}
+.nk-char-page .nk-hero__stat-val .nk-d-c { font-size: 0.8rem; }
+.nk-char-page .nk-hero__stat-val .nk-d-n { font-size: 0.85rem; }
+
+/* 等级条：更细的墨色轨道 */
+.nk-char-page .nk-hero__level { display: flex; align-items: center; gap: 14px; }
+.nk-char-page .nk-hero__level-label {
+  font-family: var(--font-hud); font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.08em; color: var(--text3); white-space: nowrap;
+}
+.nk-char-page .nk-hero__level-track {
+  flex: 1; height: 3px; border-radius: 2px; overflow: hidden;
+  background: rgba(255,255,255,0.06); box-shadow: none;
+}
+.nk-char-page .nk-hero__level-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--ph-400));
+  box-shadow: none;
+  transition: width 0.6s var(--nk-ease-out);
+}
+
+/* ═══════════ 章节标题 · 自动编号 + 延伸线 ═══════════ */
+.nk-char-page { counter-reset: nk-sec; }
+.nk-char-page .nk-title {
+  counter-increment: nk-sec;
+  display: flex; align-items: baseline; gap: 12px;
+  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 20px; padding-bottom: 0;
+  border-bottom: none;
+}
+/* 编号（01 02 03…，与吸顶导航同序）；重置 tokens 渐变竖条的尺寸约束 */
+.nk-char-page .nk-title::before {
+  content: counter(nk-sec, decimal-leading-zero);
+  flex: none; width: auto; height: auto; border-radius: 0;
+  background: none;
+  font-size: 0.6rem; letter-spacing: 0; color: var(--primary); opacity: 0.95;
+}
+/* 标题延伸线：从线色渐隐 */
+.nk-char-page .nk-title::after {
+  content: ''; flex: 1; height: 1px; align-self: center;
+  background: linear-gradient(90deg, var(--line-2), transparent);
+}
+/* 不计号标题（如 TEAMS 子区块） */
+.nk-char-page .nk-title--no-num { counter-increment: none; }
+.nk-char-page .nk-title--no-num::before { content: none; }
+
+/* ═══════════ 卡片体系 · 中性细线克制卡 ═══════════
+   背景微亮（非紫卡），hover 仅提升边框亮度与背景，无位移无阴影 */
+.nk-char-page .nk-skill,
+.nk-char-page .nk-eidolon,
+.nk-char-page .nk-ability,
+.nk-char-page .nk-story,
+.nk-char-page .nk-build__team,
+.nk-char-page .nk-build__set,
+.nk-char-page .nk-relic-slot,
+.nk-char-page .nk-relic-sub {
+  background: rgba(255,255,255,0.016);
+  border: 1px solid var(--line-1);
+  border-radius: 10px;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+.nk-char-page .nk-skill:hover,
+.nk-char-page .nk-eidolon:hover,
+.nk-char-page .nk-ability:hover,
+.nk-char-page .nk-story:hover,
+.nk-char-page .nk-build__team:hover,
+.nk-char-page .nk-build__set:hover,
+.nk-char-page .nk-relic-slot:hover,
+.nk-char-page .nk-relic-sub:hover {
+  border-color: var(--line-2); background: rgba(255,255,255,0.03);
+  transform: none; box-shadow: none;
+}
+.nk-char-page .nk-skill:active,
+.nk-char-page .nk-eidolon:active,
+.nk-char-page .nk-ability:active,
+.nk-char-page .nk-build__team:active,
+.nk-char-page .nk-build__set:active,
+.nk-char-page .nk-relic-slot:active,
+.nk-char-page .nk-relic-sub:active { transform: none; }
+
+/* ═══════════ 技能区块细节 ═══════════ */
+.nk-char-page .nk-skill { padding: 22px 24px 20px; }
 /* 技能资源消耗条件（SkillNeed） */
-.nk-skill__need {
+.nk-char-page .nk-skill__need {
   display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
   margin-top: 12px; font-size: 0.75rem; line-height: 1.7;
 }
-.nk-skill__need-label {
+.nk-char-page .nk-skill__need-label {
   flex-shrink: 0; font-size: 0.6875rem; font-weight: 600;
   letter-spacing: 0.05em; font-family: var(--font-hud);
   padding: 1px 7px; border-radius: 4px;
-  background: color-mix(in srgb, var(--sk-accent) 9%, transparent);
+  background: color-mix(in srgb, var(--sk-accent) 10%, transparent);
   color: var(--sk-accent);
 }
-.nk-skill__need-val { color: var(--text2); }
-.nk-skill__need-val .hl { color: var(--highlight); font-weight: 700; }
+.nk-char-page .nk-skill__need-val { color: var(--text2); }
+.nk-char-page .nk-skill__need-val .hl { color: var(--highlight); font-weight: 700; }
 /* 强化关联（受哪些星魂 / 行迹加成） */
-.nk-skill__links {
+.nk-char-page .nk-skill__links {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   margin-top: 12px;
 }
-.nk-skill__links-label {
+.nk-char-page .nk-skill__links-label {
   font-size: 0.6875rem; font-weight: 600; color: var(--text3);
   letter-spacing: 0.05em; font-family: var(--font-hud);
 }
-.nk-skill__link {
+.nk-char-page .nk-skill__link {
   display: inline-flex; align-items: center;
   font-size: 0.625rem; font-weight: 700; letter-spacing: 0.03em;
   padding: 2px 9px; border-radius: 999px;
-  border: 1px solid var(--border2);
+  border: 1px solid var(--line-1);
   cursor: default;
 }
-.nk-skill__link--rank { color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); }
-.nk-skill__link--tree { color: var(--sk-accent); background: color-mix(in srgb, var(--sk-accent) 8%, transparent); }
-.nk-skill__metrics { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 12px; }
-.nk-skill__metric { display: inline-flex; align-items: baseline; gap: 6px; font-size: 0.75rem; }
-.nk-skill__metric + .nk-skill__metric::before { content: '·'; margin: 0 10px; color: var(--text3); opacity: 0.4; }
-.nk-skill__metric dt { display: inline; margin: 0; font-size: 0.6875rem; color: var(--text3); }
-.nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); }
-.nk-skill__terms {
-  margin-top: 14px; padding: 12px 16px; background: rgba(10,10,30,0.5); border-radius: 9px;
-  border: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
+.nk-char-page .nk-skill__link--rank { color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); }
+.nk-char-page .nk-skill__link--tree { color: var(--sk-accent); background: color-mix(in srgb, var(--sk-accent) 8%, transparent); }
+.nk-char-page .nk-skill__metrics { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 12px; }
+.nk-char-page .nk-skill__metric { display: inline-flex; align-items: baseline; gap: 6px; font-size: 0.75rem; }
+.nk-char-page .nk-skill__metric + .nk-skill__metric::before { content: '·'; margin: 0 10px; color: var(--text3); opacity: 0.4; }
+.nk-char-page .nk-skill__metric dt { display: inline; margin: 0; font-size: 0.6875rem; color: var(--text3); }
+.nk-char-page .nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); }
+.nk-char-page .nk-skill__terms {
+  margin-top: 14px; padding: 12px 16px; border-radius: 8px;
+  background: rgba(8,8,20,0.4); border: 1px solid var(--line-1);
 }
-.nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
-.nk-term__name { color: var(--highlight); font-weight: 600; }
-/* ─── 技能预览（折叠式，点开加载动画） ─── */
-.nk-skill__anim { margin-top: 16px; }
-.nk-skill__anim-toggle {
+.nk-char-page .nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
+.nk-char-page .nk-term__name { color: var(--highlight); font-weight: 600; }
+/* 技能预览（折叠式，点开加载动画） */
+.nk-char-page .nk-skill__anim { margin-top: 16px; }
+.nk-char-page .nk-skill__anim-toggle {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 0.625rem; font-weight: 500; color: var(--text3);
   background: none; border: none; cursor: pointer; padding: 4px 0;
   transition: color 0.2s; letter-spacing: 0.02em;
   position: relative;
 }
-.nk-skill__anim-toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
-.nk-skill__anim-toggle:hover { color: var(--primary); }
-.nk-skill__anim-toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
-.nk-skill__anim-toggle.open .arrow { transform: rotate(90deg); }
-.nk-skill__anim-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
-.nk-skill__anim-clip.open { grid-template-rows: 1fr; }
-.nk-skill__anim-inner { overflow: hidden; min-height: 0; }
-.nk-skill__anim-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
-.nk-skill__anim-tab {
+.nk-char-page .nk-skill__anim-toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
+.nk-char-page .nk-skill__anim-toggle:hover { color: var(--primary); }
+.nk-char-page .nk-skill__anim-toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
+.nk-char-page .nk-skill__anim-toggle.open .arrow { transform: rotate(90deg); }
+.nk-char-page .nk-skill__anim-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-char-page .nk-skill__anim-clip.open { grid-template-rows: 1fr; }
+.nk-char-page .nk-skill__anim-inner { overflow: hidden; min-height: 0; }
+.nk-char-page .nk-skill__anim-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+.nk-char-page .nk-skill__anim-tab {
   font-size: 0.625rem; font-weight: 600; padding: 2px 10px;
-  border-radius: 4px; border: 1px solid var(--border);
+  border-radius: 4px; border: 1px solid var(--line-1);
   background: transparent; color: var(--text3); cursor: pointer;
   transition: all 0.2s; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.nk-skill__anim-tab:hover { border-color: var(--border2); color: var(--text2); }
-.nk-skill__anim-tab.active {
-  border-color: var(--primary); color: var(--primary);
+.nk-char-page .nk-skill__anim-tab:hover { border-color: var(--line-2); color: var(--text2); }
+.nk-char-page .nk-skill__anim-tab.active {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent); color: var(--primary);
   background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
-.nk-skill__anim-stage {
+.nk-char-page .nk-skill__anim-stage {
   margin-top: 10px; border-radius: 10px; overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
-  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--line-1);
+  background: rgba(0,0,0,0.3);
   aspect-ratio: 960 / 514;
   position: relative;
 }
-.nk-skill__anim-img {
+.nk-char-page .nk-skill__anim-img {
   display: block; width: 100%; height: 100%; object-fit: contain;
   opacity: 0; transition: opacity 0.4s ease;
 }
-.nk-skill__anim-stage.loaded .nk-skill__anim-img { opacity: 1; }
-/* 加载占位（脉冲动画） */
-.nk-skill__anim-ph {
+.nk-char-page .nk-skill__anim-stage.loaded .nk-skill__anim-img { opacity: 1; }
+.nk-char-page .nk-skill__anim-ph {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
 }
-.nk-skill__anim-ph span {
+.nk-char-page .nk-skill__anim-ph span {
   width: 28px; height: 28px; border-radius: 50%;
   border: 2px solid color-mix(in srgb, var(--primary) 25%, transparent); border-top-color: var(--primary);
   animation: nk-anim-spin 0.8s linear infinite;
 }
 @keyframes nk-anim-spin { to { transform: rotate(360deg); } }
-/* 数据表折叠（grid-rows 动画） */
-.nk-skill__table-wrap { margin-top: 14px; }
-.nk-skill__table-btn {
+/* 数据表折叠 */
+.nk-char-page .nk-skill__table-wrap { margin-top: 14px; }
+.nk-char-page .nk-skill__table-btn {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 0.625rem; font-weight: 500; color: var(--text3);
   background: none; border: none; cursor: pointer; padding: 4px 0;
   transition: color 0.2s; letter-spacing: 0.02em;
   position: relative;
 }
-/* 触控热区垂直扩展至 ≥44px */
-.nk-skill__table-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
-.nk-skill__table-btn:hover { color: var(--primary); }
-.nk-skill__table-btn .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
-.nk-skill__table-btn.open .arrow { transform: rotate(90deg); }
-.nk-table-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
-.nk-table-clip.open { grid-template-rows: 1fr; }
-.nk-table-inner { overflow: hidden; min-height: 0; }
-/* 展开后允许横向滚动（多列参数表在窄屏不被压缩） */
-.nk-table-clip.open .nk-table-inner { overflow-x: auto; }
-.nk-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: var(--font-hud); font-size: 0.75rem; text-align: center; }
-.nk-table th { padding: 7px 10px; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 400; letter-spacing: 0.06em; white-space: nowrap; }
-.nk-table td { padding: 6px 10px; color: var(--text2); border-bottom: 1px solid color-mix(in srgb, var(--primary) 7%, transparent); white-space: nowrap; }
-.nk-table tr.nk-table--active td { color: var(--primary); font-weight: 700; background: var(--primary-glow); }
-/* 子技能：父卡片内虚线分区（非嵌套卡片） */
-.nk-skill--child {
-  margin: 18px 0 0 22px; padding: 16px 0 0; border: none; background: none;
-  border-radius: 0; border-top: 1px dashed color-mix(in srgb, var(--primary) 20%, transparent);
+.nk-char-page .nk-skill__table-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
+.nk-char-page .nk-skill__table-btn:hover { color: var(--primary); }
+.nk-char-page .nk-skill__table-btn .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
+.nk-char-page .nk-skill__table-btn.open .arrow { transform: rotate(90deg); }
+.nk-char-page .nk-table-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-char-page .nk-table-clip.open { grid-template-rows: 1fr; }
+.nk-char-page .nk-table-inner { overflow: hidden; min-height: 0; }
+.nk-char-page .nk-table-clip.open .nk-table-inner { overflow-x: auto; }
+.nk-char-page .nk-table {
+  width: 100%; border-collapse: collapse; margin-top: 10px;
+  font-family: var(--font-hud); font-size: 0.75rem; text-align: center;
 }
-.nk-skill--child:hover { border-color: transparent; border-top-color: color-mix(in srgb, var(--primary) 35%, transparent); }
-.nk-skill--child .nk-skill__title-row { gap: 12px; margin-bottom: 10px; }
-.nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
-.nk-skill--child .nk-skill__metrics { margin-top: 10px; }
-/* 阅读层收束：全部区块标题 + 文本型卡片（技能/星魂/附加能力）统一约束到可读行宽并居中；
-   配装区块容器（光锥/配队/遗器）同步对齐可读行宽，避免平铺滚动时与阅读区块产生宽度跳跃 */
-.nk-panel .nk-title,
-.nk-panel .nk-skill,
-.nk-panel .nk-eidolon,
-.nk-panel .nk-ability,
-.nk-panel .nk-build__cones,
-.nk-panel .nk-build__teams,
-.nk-panel .nk-build__relics { max-width: var(--nk-prose-max); margin-left: auto; margin-right: auto; }
+.nk-char-page .nk-table th { padding: 7px 10px; color: var(--text3); border-bottom: 1px solid var(--line-1); font-weight: 400; letter-spacing: 0.06em; white-space: nowrap; }
+.nk-char-page .nk-table td { padding: 6px 10px; color: var(--text2); border-bottom: 1px solid var(--line-1); white-space: nowrap; }
+.nk-char-page .nk-table tr.nk-table--active td {
+  color: var(--primary); font-weight: 700;
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+/* 子技能：父卡片内虚线分区 */
+.nk-char-page .nk-skill--child {
+  margin: 18px 0 0 22px; padding: 16px 0 0;
+  border: none; background: none; border-radius: 0;
+  border-top: 1px dashed var(--line-2);
+}
+.nk-char-page .nk-skill--child:hover { border-color: transparent; border-top-color: var(--line-2); background: none; }
+.nk-char-page .nk-skill--child .nk-skill__title-row { gap: 12px; margin-bottom: 10px; }
+.nk-char-page .nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
+.nk-char-page .nk-skill--child .nk-skill__metrics { margin-top: 10px; }
+.nk-char-page .nk-skill__head { border-bottom-color: var(--line-1); }
+.nk-char-page .nk-skill__icon {
+  border-color: var(--line-2); border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -6px 12px rgba(0,0,0,0.3);
+}
+.nk-char-page .nk-skill__type {
+  color: var(--sk-accent); background: color-mix(in srgb, var(--sk-accent) 10%, transparent);
+}
+.nk-char-page .nk-skill__tag { background: rgba(255,255,255,0.04); color: var(--text3); }
 
-/* ─── 星魂区块 ─── */
-/* 星魂卡片：复用技能卡片结构原语（title-row/icon/name/tag/desc），容器风格对齐 */
-.nk-eidolon {
-  position: relative; border-radius: 12px; padding: 20px 24px 18px; margin-bottom: 12px;
+/* ═══════════ 星魂 · E 编号徽章 ═══════════ */
+.nk-char-page .nk-eidolon { padding: 20px 24px 18px; }
+.nk-char-page .nk-eidolon__head { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.nk-char-page .nk-eidolon__num {
+  font-family: var(--font-hud); font-size: 1.5rem; font-weight: 700; line-height: 1;
+  color: var(--primary); letter-spacing: 0.02em;
+  padding-right: 16px; border-right: 1px solid var(--line-2);
+  min-width: 56px;
 }
 
-/* ─── 配装区块 ─── */
-/* 推荐光锥网格：复用图鉴 nk-lc-card 视觉，卡片比图鉴略小 */
-.nk-build__cones { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 14px; margin-bottom: 20px; }
-.nk-build__cones .nk-lc-card__info { padding: 10px 10px 9px; gap: 2px; }
-.nk-build__cones .nk-lc-card__name { font-size: 0.72rem; }
-.nk-build__cones .nk-lc-card__stars { font-size: 0.58rem; }
-/* REC. 序号徽章（图片左上角，与命途徽章对角） */
-.nk-lc-mini__rec {
+/* ═══════════ 附加能力 ═══════════ */
+.nk-char-page .nk-ability { padding: 20px 24px 18px; }
+
+/* ═══════════ 属性加成 · 数据表格（1px 网格线） ═══════════ */
+.nk-char-page .nk-bonus-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px; padding: 0;
+  background: var(--line-1);
+  border: 1px solid var(--line-1); border-radius: 10px; overflow: hidden;
+  margin: 0 auto 24px; max-width: var(--nk-prose-max);
+}
+.nk-char-page .nk-bonus {
+  display: flex; flex-direction: row; align-items: center; gap: 10px;
+  padding: 13px 16px; border-radius: 0; border: none;
+  background: rgba(15,15,35,0.9);
+  transition: background 0.2s;
+}
+.nk-char-page .nk-bonus:hover { background: rgba(255,255,255,0.03); transform: none; }
+.nk-char-page .nk-bonus__icon { width: 22px; height: 22px; margin: 0; order: 0; opacity: 0.92; }
+.nk-char-page .nk-bonus__name {
+  order: 1; flex: 1; min-width: 0;
+  font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em;
+}
+.nk-char-page .nk-bonus__val { order: 2; font-size: 0.85rem; }
+.nk-char-page .nk-bonus__val .nk-d-c, .nk-char-page .nk-bonus__val .nk-d-n { font-size: 0.75rem; }
+
+/* ═══════════ 配装区块 ═══════════ */
+.nk-char-page .nk-build__cones { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.nk-char-page .nk-build__cones .nk-lc-card__info { padding: 10px 10px 9px; gap: 2px; }
+.nk-char-page .nk-build__cones .nk-lc-card__name { font-size: 0.72rem; }
+.nk-char-page .nk-build__cones .nk-lc-card__stars { font-size: 0.58rem; }
+/* REC. 序号徽章（图片左上角） */
+.nk-char-page .nk-lc-mini__rec {
   position: absolute; left: 10px; top: 10px; z-index: 3;
   font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em;
   color: var(--text-bright); padding: 2px 7px; border-radius: 4px;
-  background: rgba(15,15,35,0.72); border: 1px solid var(--border2);
+  background: rgba(15,15,35,0.72); border: 1px solid var(--line-1);
   backdrop-filter: blur(4px);
   pointer-events: none;
 }
-.nk-build__teams { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
-.nk-build__team { display: flex; align-items: center; padding: 16px 20px; border-radius: 12px; }
-.nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
-/* 头像跳转链接：消除 inline 基线空隙，头像居中；键盘焦点环 */
-.nk-build__team-link { display: flex; }
-.nk-build__team-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 50%; }
-.nk-build__team-slot img { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--border2); transition: transform 0.2s, box-shadow 0.2s; }
-.nk-build__team-slot img:hover { transform: scale(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
-.nk-build__team-slot--main img { width: 56px; height: 56px; border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), 0 4px 12px rgba(0,0,0,0.4); }
-.nk-build__team-alt { display: flex; gap: 3px; }
-.nk-build__team-alt img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); }
-.nk-build__team-alt .nk-build__team-link { opacity: 0.65; transition: opacity 0.2s; }
-.nk-build__team-alt .nk-build__team-link:hover { opacity: 1; }
-.nk-build__team-plus { color: var(--text3); font-size: 0.875rem; font-weight: 400; flex-shrink: 0; margin: 0 2px; align-self: center; }
-.nk-build__relics { margin-bottom: 20px; }
-/* RELICS 主词条槽位卡片（auto-fit 网格，宽屏下现有项扩展填满整行） */
-.nk-relic-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
-.nk-relic-slot {
+.nk-char-page .nk-build__teams { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.nk-char-page .nk-build__team { display: flex; align-items: center; padding: 18px 22px; border-radius: 10px; }
+.nk-char-page .nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.nk-char-page .nk-build__team-link { display: flex; }
+.nk-char-page .nk-build__team-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 50%; }
+.nk-char-page .nk-build__team-slot img {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1px solid var(--line-2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.nk-char-page .nk-build__team-slot img:hover { transform: none; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.nk-char-page .nk-build__team-slot--main img {
+  width: 52px; height: 52px;
+  border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), 0 2px 10px rgba(0,0,0,0.4);
+}
+.nk-char-page .nk-build__team-alt { display: flex; gap: 3px; }
+.nk-char-page .nk-build__team-alt img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-1); }
+.nk-char-page .nk-build__team-alt .nk-build__team-link { opacity: 0.65; transition: opacity 0.2s; }
+.nk-char-page .nk-build__team-alt .nk-build__team-link:hover { opacity: 1; }
+.nk-char-page .nk-build__team-plus { color: var(--text3); font-size: 0.8rem; font-weight: 400; flex-shrink: 0; margin: 0 2px; align-self: center; }
+.nk-char-page .nk-build__relics { margin-bottom: 20px; }
+/* 遗器主词条槽位 */
+.nk-char-page .nk-relic-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.nk-char-page .nk-relic-slot {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 14px 12px 12px; border-radius: 12px;
+  padding: 16px 12px 14px; border-radius: 10px;
 }
-.nk-relic-slot__icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(0,0,0,0.3); padding: 4px; margin-bottom: 4px; }
-.nk-relic-slot__stat { font-size: 0.8125rem; font-weight: 600; color: var(--text-bright); text-align: center; }
-.nk-relic-slot__slot { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
-/* 推荐副词条卡片 */
-.nk-relic-sub {
+.nk-char-page .nk-relic-slot__icon {
+  width: 40px; height: 40px; border-radius: 6px;
+  background: rgba(0,0,0,0.3); border: 1px solid var(--line-1); padding: 4px; margin-bottom: 4px;
+}
+.nk-char-page .nk-relic-slot__stat { font-size: 0.8125rem; font-weight: 600; color: var(--text-bright); text-align: center; }
+.nk-char-page .nk-relic-slot__slot { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
+/* 推荐副词条 */
+.nk-char-page .nk-relic-sub {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
-  padding: 12px 16px; margin-bottom: 12px; border-radius: 12px;
+  padding: 12px 16px; margin-bottom: 12px; border-radius: 10px;
 }
-.nk-relic-sub__label { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; flex-shrink: 0; }
-.nk-relic-sub__list { display: flex; flex-wrap: wrap; gap: 6px; }
-.nk-relic-sub__chip {
+.nk-char-page .nk-relic-sub__label { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; flex-shrink: 0; }
+.nk-char-page .nk-relic-sub__list { display: flex; flex-wrap: wrap; gap: 6px; }
+.nk-char-page .nk-relic-sub__chip {
   font-size: 0.75rem; font-weight: 600; color: var(--text2);
   padding: 2px 10px; border-radius: 4px;
-  background: color-mix(in srgb, var(--primary) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent);
+  background: rgba(255,255,255,0.03); border: 1px solid var(--line-1);
 }
-.nk-build__sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-.nk-build__set { padding: 14px 16px; border-radius: 12px; }
-.nk-build__set-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.nk-build__set-head img { width: 44px; height: 44px; border-radius: 8px; background: rgba(0,0,0,0.3); padding: 3px; }
-.nk-build__set-badge {
+.nk-char-page .nk-build__sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.nk-char-page .nk-build__set { padding: 14px 16px; border-radius: 10px; }
+.nk-char-page .nk-build__set-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.nk-char-page .nk-build__set-head img {
+  width: 44px; height: 44px; border-radius: 6px;
+  background: rgba(0,0,0,0.3); border: 1px solid var(--line-1); padding: 3px;
+}
+.nk-char-page .nk-build__set-badge {
   display: inline-block;
   font-size: 0.625rem; font-weight: 600; letter-spacing: 0.03em;
   color: var(--primary); padding: 1px 7px; border-radius: 4px;
-  background: color-mix(in srgb, var(--primary) 9%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
-.nk-build__set-name { font-size: 0.8125rem; font-weight: 600; }
-.nk-build__set-desc { font-size: 0.6875rem; color: var(--text3); line-height: 1.7; }
-.nk-build__set-desc .hl { color: var(--highlight); font-weight: 700; }
+.nk-char-page .nk-build__set-name { font-size: 0.8125rem; font-weight: 600; }
+.nk-char-page .nk-build__set-desc { font-size: 0.6875rem; color: var(--text3); line-height: 1.7; }
+.nk-char-page .nk-build__set-desc .hl { color: var(--highlight); font-weight: 700; }
 
-/* ─── 增强模式切换工具条（吸顶，替代原 Tab 栏；无增强角色整体不渲染） ─── */
-.nk-enh-bar { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: rgba(15,15,35,0.88); backdrop-filter: blur(14px) saturate(1.15); -webkit-backdrop-filter: blur(14px) saturate(1.15); border-bottom: 1px solid color-mix(in srgb, var(--primary) 16%, transparent); }
-.nk-enh-bar__inner { display: flex; align-items: center; gap: 8px; max-width: var(--nk-detail-max); margin: 0 auto; padding: 8px 16px; min-height: 44px; }
-.nk-enh-toggle { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
-.nk-enh-toggle__label { font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); white-space: nowrap; opacity: 0.7; margin-right: 2px; }
-.nk-enh-toggle__btn { padding: 4px 12px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); background: color-mix(in srgb, var(--primary) 6%, transparent); color: var(--text2); font-size: 0.68rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); white-space: nowrap; position: relative; }
+/* ═══════════ 档案与故事 ═══════════ */
+.nk-char-page .nk-profile {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+  margin: 0 auto 24px; max-width: var(--nk-prose-max);
+}
+.nk-char-page .nk-profile__item {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 16px; border-radius: 10px;
+  background: rgba(255,255,255,0.016); border: 1px solid var(--line-1);
+  transition: border-color 0.2s, background 0.2s;
+}
+.nk-char-page .nk-profile__item:hover { border-color: var(--line-2); background: rgba(255,255,255,0.03); transform: none; }
+.nk-char-page .nk-profile__label { font-size: 0.625rem; font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
+.nk-char-page .nk-profile__val { font-size: 0.8125rem; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
+/* 角色故事（折叠手风琴） */
+.nk-char-page .nk-stories { display: flex; flex-direction: column; gap: 8px; max-width: var(--nk-prose-max); margin: 0 auto; }
+.nk-char-page .nk-story { overflow: hidden; border-radius: 10px; }
+.nk-char-page .nk-story__head {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 14px 20px; background: none; border: none; cursor: pointer;
+  text-align: left; transition: background 0.15s;
+}
+.nk-char-page .nk-story__head:hover { background: rgba(255,255,255,0.02); }
+.nk-char-page .nk-story__num { font-family: var(--font-hud); font-size: 0.68rem; font-weight: 700; color: var(--text3); opacity: 1; min-width: 1.6em; }
+.nk-char-page .nk-story--open .nk-story__num { color: var(--primary); }
+.nk-char-page .nk-story__label { font-size: 0.8125rem; font-weight: 600; color: var(--text2); letter-spacing: 0.02em; flex: 1; }
+.nk-char-page .nk-story--open .nk-story__label { color: var(--text); }
+.nk-char-page .nk-story__arrow {
+  width: 7px; height: 7px; flex-shrink: 0;
+  border-right: 1.5px solid var(--text3); border-bottom: 1.5px solid var(--text3);
+  transform: rotate(-45deg); transition: transform 0.25s var(--nk-ease-out);
+}
+.nk-char-page .nk-story--open .nk-story__arrow { transform: rotate(45deg); }
+.nk-char-page .nk-story__clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-char-page .nk-story--open .nk-story__clip { grid-template-rows: 1fr; }
+.nk-char-page .nk-story__inner { overflow: hidden; min-height: 0; }
+.nk-char-page .nk-story__text {
+  font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
+  border-top: 1px dashed var(--line-1);
+  padding: 14px 20px 18px;
+}
+
+/* ═══════════ 吸顶工具条 ═══════════ */
+/* 基础：sticky 定位 + 内部结构（原 character.css 保留） */
+.nk-char-page .nk-enh-bar {
+  position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0;
+  background: rgba(10,10,24,0.82);
+  backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-char-page .nk-enh-bar__inner {
+  display: flex; align-items: center; gap: 8px;
+  max-width: var(--nk-detail-max); margin: 0 auto; padding: 8px 16px; min-height: 44px;
+}
+.nk-char-page .nk-enh-toggle { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.nk-char-page .nk-enh-toggle__label {
+  font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3); white-space: nowrap;
+  opacity: 0.7; margin-right: 2px;
+}
+.nk-char-page .nk-enh-toggle__btn {
+  padding: 4px 12px; border-radius: 5px;
+  border: 1px solid var(--line-1);
+  background: rgba(255,255,255,0.02);
+  color: var(--text3); font-size: 0.68rem; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font-body); white-space: nowrap;
+  position: relative;
+}
 /* 触控热区垂直扩展至 ≥44px */
-.nk-enh-toggle__btn::before { content: ''; position: absolute; left: 0; right: 0; top: -9px; bottom: -9px; }
-.nk-enh-toggle__btn:hover { border-color: var(--border2); background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--text); }
-.nk-enh-toggle__btn--active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 1px 3px rgba(0,0,0,0.35); }
-.nk-enh-toggle__btn--active:hover { background: var(--primary); color: #fff; }
+.nk-char-page .nk-enh-toggle__btn::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -9px; bottom: -9px;
+}
+.nk-char-page .nk-enh-toggle__btn:hover {
+  border-color: var(--line-2); background: rgba(255,255,255,0.04); color: var(--text2);
+}
+.nk-char-page .nk-enh-toggle__btn--active {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  color: var(--text-bright); font-weight: 700;
+  box-shadow: none;
+}
+.nk-char-page .nk-enh-toggle__btn--active:hover {
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+  color: var(--text-bright);
+}
 /* 强化切换与区块导航的分隔线 */
-.nk-enh-bar__divider { flex-shrink: 0; width: 1px; height: 18px; background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent); opacity: 0.7; margin: 0 2px; }
-/* ─── 区块导航（平铺长页章节索引条，横向可滚） ─── */
-.nk-secnav { display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-.nk-secnav::-webkit-scrollbar { display: none; }
-.nk-secnav__btn {
+.nk-char-page .nk-enh-bar__divider {
+  flex-shrink: 0; width: 1px; height: 18px;
+  background: linear-gradient(180deg, transparent, var(--line-2) 30%, var(--line-2) 70%, transparent);
+  opacity: 0.7; margin: 0 2px;
+}
+/* 分区导航（横向可滚） */
+.nk-char-page .nk-secnav {
+  display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nk-char-page .nk-secnav::-webkit-scrollbar { display: none; }
+.nk-char-page .nk-secnav__btn {
   display: inline-flex; align-items: baseline; gap: 5px;
-  padding: 5px 9px; border-radius: 6px; border: none; background: transparent;
+  padding: 5px 9px; border-radius: 4px; border: none; background: transparent;
   font-size: 0.625rem; font-weight: 600; letter-spacing: 0.04em;
   color: var(--text3); cursor: pointer; white-space: nowrap;
   transition: color 0.15s, background 0.15s; position: relative; flex-shrink: 0;
 }
 /* 触控热区垂直扩展至 ≥44px */
-.nk-secnav__btn::before { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
-.nk-secnav__btn:hover { color: var(--text2); background: color-mix(in srgb, var(--primary) 8%, transparent); }
-.nk-secnav__btn--active {
-  color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent);
+.nk-char-page .nk-secnav__btn::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px;
 }
-.nk-secnav__btn--active::after {
-  content: ''; position: absolute; left: 9px; right: 9px; bottom: -9px; height: 2px;
-  border-radius: 1px; background: var(--primary);
+.nk-char-page .nk-secnav__btn:hover { color: var(--text2); background: transparent; }
+.nk-char-page .nk-secnav__btn--active { color: var(--primary); background: transparent; }
+.nk-char-page .nk-secnav__btn--active::after {
+  content: ''; position: absolute; left: 9px; right: 9px; bottom: -9px;
+  height: 2px; border-radius: 1px; background: var(--primary); box-shadow: none;
 }
-.nk-secnav__idx { font-family: var(--font-hud); font-size: 0.5rem; opacity: 0.65; }
-.nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
+.nk-char-page .nk-secnav__idx { font-family: var(--font-hud); font-size: 0.5rem; opacity: 0.65; }
+.nk-char-page .nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
 /* 阅读进度线（工具条底部） */
-.nk-enh-bar__progress { height: 2px; width: 0; background: linear-gradient(90deg, var(--primary), var(--ph-400)); }
-/* ─── 返回顶部 ─── */
-.nk-top-btn {
+.nk-char-page .nk-enh-bar__progress {
+  height: 2px; width: 0;
+  background: linear-gradient(90deg, var(--primary), var(--ph-400));
+}
+
+/* ═══════════ 返回顶部 ═══════════ */
+.nk-char-page .nk-top-btn {
   position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   z-index: 30; width: 40px; height: 40px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(15,15,35,0.88); border: 1px solid var(--border2);
-  color: var(--text2); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  background: rgba(10,10,24,0.8); border: 1px solid var(--line-1);
+  color: var(--text3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   box-shadow: 0 4px 16px rgba(0,0,0,0.45);
 }
-.nk-top-btn svg { width: 18px; height: 18px; }
-.nk-top-btn:hover {
-  color: var(--text-bright); border-color: var(--primary);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5); transform: translateY(-2px);
+.nk-char-page .nk-top-btn svg { width: 18px; height: 18px; }
+.nk-char-page .nk-top-btn:hover {
+  color: var(--text-bright); border-color: var(--primary); box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
-.nk-top-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 @media (min-width: 768px) {
-  .nk-top-btn { right: 28px; bottom: 28px; }
+  .nk-char-page .nk-top-btn { right: 28px; bottom: 28px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .nk-top-btn { transition: none; }
-  .nk-enh-bar__progress { transition: none; }
-  .nk-eidolon:hover, .nk-ability:hover, .nk-build__team:hover, .nk-build__set:hover,
-  .nk-relic-slot:hover, .nk-relic-sub:hover, .nk-profile__item:hover, .nk-bonus:hover,
-  .nk-hero--char .nk-hero__tag--vert:hover { transform: none; box-shadow: none; }
+
+/* ═══════════ 加强摘要横幅 ═══════════ */
+.nk-char-page .nk-enh-notes { padding: 0 20px; }
+.nk-char-page .nk-enh-notes:empty { display: none; }
+.nk-char-page .nk-enh-notes__banner {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin: 0 auto 4px; padding: 12px 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--line-1); border-left: 2px solid var(--primary);
+  border-radius: 8px;
 }
-/* ─── 加强摘要横幅（工具条与面板之间） ─── */
-.nk-enh-notes { padding: 0 20px; }
-.nk-enh-notes:empty { display: none; }
-.nk-enh-notes__banner { display: flex; align-items: flex-start; gap: 12px; margin: 0 auto 4px; padding: 12px 16px; background: color-mix(in srgb, var(--primary) 6%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); border-left: 3px solid var(--primary); border-radius: 8px; }
-.nk-enh-notes__title { font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); font-weight: 700; white-space: nowrap; padding-top: 2px; }
-.nk-enh-notes__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.nk-enh-notes__list li { font-size: 0.75rem; line-height: 1.6; color: var(--text2); position: relative; padding-left: 14px; }
-.nk-enh-notes__list li::before { content: '▸'; position: absolute; left: 0; color: var(--primary); }
-/* ─── 内联 diff 状态标记 ─── */
-.nk-inline-diff { position: relative; }
-.nk-inline-diff[data-status="changed"] { border-color: color-mix(in srgb, var(--gold-300) 30%, transparent) !important; background: color-mix(in srgb, var(--gold-300) 4%, transparent) !important; }
-.nk-inline-diff[data-status="added"]   { border-color: color-mix(in srgb, var(--diff-add-soft) 30%, transparent) !important; background: color-mix(in srgb, var(--diff-add-soft) 4%, transparent) !important; }
-.nk-inline-diff[data-status="removed"] { border-color: color-mix(in srgb, var(--diff-del-soft) 30%, transparent) !important; background: color-mix(in srgb, var(--diff-del-soft) 4%, transparent) !important; opacity: 0.75; }
+.nk-char-page .nk-enh-notes__title {
+  font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--primary); font-weight: 700;
+  white-space: nowrap; padding-top: 2px;
+}
+.nk-char-page .nk-enh-notes__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.nk-char-page .nk-enh-notes__list li { font-size: 0.75rem; line-height: 1.6; color: var(--text2); position: relative; padding-left: 14px; }
+.nk-char-page .nk-enh-notes__list li::before { content: '▸'; position: absolute; left: 0; color: var(--primary); }
+
+/* ═══════════ diff 状态标记 ═══════════ */
+.nk-char-page .nk-inline-diff { position: relative; }
+.nk-char-page .nk-inline-diff[data-status="changed"] { border-color: color-mix(in srgb, var(--gold-300) 30%, transparent) !important; background: color-mix(in srgb, var(--gold-300) 4%, transparent) !important; }
+.nk-char-page .nk-inline-diff[data-status="added"]   { border-color: color-mix(in srgb, var(--diff-add-soft) 30%, transparent) !important; background: color-mix(in srgb, var(--diff-add-soft) 4%, transparent) !important; }
+.nk-char-page .nk-inline-diff[data-status="removed"] { border-color: color-mix(in srgb, var(--diff-del-soft) 30%, transparent) !important; background: color-mix(in srgb, var(--diff-del-soft) 4%, transparent) !important; opacity: 0.75; }
 /* 状态角标 */
-.nk-diff-badge { position: absolute; top: 8px; right: 8px; font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; font-weight: 700; z-index: 2; pointer-events: none; }
-.nk-diff-badge--changed { background: color-mix(in srgb, var(--gold-300) 15%, transparent); color: var(--gold-300); border: 1px solid color-mix(in srgb, var(--gold-300) 30%, transparent); }
-.nk-diff-badge--added   { background: color-mix(in srgb, var(--diff-add-soft) 15%, transparent); color: var(--diff-add-soft); border: 1px solid color-mix(in srgb, var(--diff-add-soft) 30%, transparent); }
-.nk-diff-badge--removed { background: color-mix(in srgb, var(--diff-del-soft) 15%, transparent); color: var(--diff-del-soft); border: 1px solid color-mix(in srgb, var(--diff-del-soft) 30%, transparent); }
-/* word-level diff 文本标记 */
-.diff-added   { background: color-mix(in srgb, var(--diff-add) 18%, transparent); color: var(--diff-text-add); padding: 0 2px; border-radius: 2px; }
-.diff-removed { background: color-mix(in srgb, var(--diff-del) 16%, transparent); color: var(--diff-text-del); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 50%, transparent); padding: 0 2px; border-radius: 2px; }
-/* 版本对比高亮：旧值红删除线 + 新值绿（保留用于数值对比） */
-.nk-d-c, .nk-inline-diff .diff-removed:not(.diff-added) { color: var(--diff-del); }
-.nk-d-c { margin-right: 4px; opacity: 0.85; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 60%, transparent); }
-.nk-d-n { color: var(--diff-add) !important; font-weight: 700; }
-.nk-bonus__val .nk-d-c, .nk-bonus__val .nk-d-n { font-size: 0.875rem; }
-.nk-skill__metric dd .nk-d-c, .nk-skill__metric dd .nk-d-n { font-size: 0.625rem; font-weight: 700; }
-.nk-table td .nk-d-c, .nk-table td .nk-d-n { font-size: 0.6875rem; }
-/* ─── Loading ─── */
-.nk-loading { display: flex; align-items: center; justify-content: center; height: 100vh; color: var(--text3); font-family: var(--font-hud); font-size: 0.75rem; letter-spacing: 0.1em; }
-.nk-loading::after { content: ''; width: 24px; height: 24px; margin-left: 12px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: nk-spin 0.7s linear infinite; }
-@keyframes nk-spin { to { transform: rotate(360deg); } }
-
-/* ─── 宽屏正文可读性：描述类文本约束到可读行宽（.nk-skill__desc 部分在 skill-card.css） ─── */
-.nk-hero__desc, .nk-skill__terms { max-width: var(--nk-prose-max); }
-
-/* ─── 手机端增强（≤767px，组件级紧凑调整） ─── */
-@media (max-width: 767px) {
-  .nk-skill--child { margin-left: 10px; padding-top: 12px; }
+.nk-char-page .nk-diff-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
+  font-weight: 700; z-index: 2; pointer-events: none;
 }
-@media (prefers-reduced-motion: reduce) { .nk-hero__bg { transition: none; } .nk-hero__spine { transition: none; } .nk-panel { animation: none; } }
-/* ── 键盘焦点环统一（交互按钮补齐 focus-visible） ── */
-.nk-story__head:focus-visible,
-.nk-skill__anim-toggle:focus-visible,
-.nk-skill__table-btn:focus-visible,
-.nk-enh-toggle__btn:focus-visible,
-.nk-secnav__btn:focus-visible,
-.nk-hero__toggle:focus-visible {
+.nk-char-page .nk-diff-badge--changed { background: color-mix(in srgb, var(--gold-300) 15%, transparent); color: var(--gold-300); border: 1px solid color-mix(in srgb, var(--gold-300) 30%, transparent); }
+.nk-char-page .nk-diff-badge--added   { background: color-mix(in srgb, var(--diff-add-soft) 15%, transparent); color: var(--diff-add-soft); border: 1px solid color-mix(in srgb, var(--diff-add-soft) 30%, transparent); }
+.nk-char-page .nk-diff-badge--removed { background: color-mix(in srgb, var(--diff-del-soft) 15%, transparent); color: var(--diff-del-soft); border: 1px solid color-mix(in srgb, var(--diff-del-soft) 30%, transparent); }
+/* word-level diff 文本标记 */
+.nk-char-page .diff-added   { background: color-mix(in srgb, var(--diff-add) 18%, transparent); color: var(--diff-text-add); padding: 0 2px; border-radius: 2px; }
+.nk-char-page .diff-removed { background: color-mix(in srgb, var(--diff-del) 16%, transparent); color: var(--diff-text-del); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 50%, transparent); padding: 0 2px; border-radius: 2px; }
+/* 版本对比高亮：旧值红删除线 + 新值绿 */
+.nk-char-page .nk-d-c { margin-right: 4px; opacity: 0.85; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 60%, transparent); color: var(--diff-del); }
+.nk-char-page .nk-d-n { color: var(--diff-add) !important; font-weight: 700; }
+.nk-char-page .nk-bonus__val .nk-d-c, .nk-char-page .nk-bonus__val .nk-d-n { font-size: 0.75rem; }
+.nk-char-page .nk-skill__metric dd .nk-d-c, .nk-char-page .nk-skill__metric dd .nk-d-n { font-size: 0.625rem; font-weight: 700; }
+.nk-char-page .nk-table td .nk-d-c, .nk-char-page .nk-table td .nk-d-n { font-size: 0.6875rem; }
+
+/* ═══════════ 阅读层收束（可读行宽） ═══════════ */
+.nk-char-page .nk-panel .nk-title,
+.nk-char-page .nk-panel .nk-skill,
+.nk-char-page .nk-panel .nk-eidolon,
+.nk-char-page .nk-panel .nk-ability,
+.nk-char-page .nk-panel .nk-build__cones,
+.nk-char-page .nk-panel .nk-build__teams,
+.nk-char-page .nk-panel .nk-build__relics { max-width: var(--nk-prose-max); margin-left: auto; margin-right: auto; }
+.nk-char-page .nk-hero__desc, .nk-char-page .nk-skill__terms { max-width: var(--nk-prose-max); }
+
+/* ═══════════ 骨架屏 ═══════════ */
+.nk-char-page .nk-skeleton__hero { background: linear-gradient(to top, rgba(15,15,35,0.85) 0%, rgba(15,15,35,0.3) 50%, transparent 100%); }
+.nk-char-page .nk-skeleton__hero-panel { background: linear-gradient(180deg, rgba(15,15,35,0.5), var(--bg)); }
+
+/* ═══════════ 响应式 ═══════════ */
+/* 平板 ≥768px */
+@media (min-width: 768px) {
+  .nk-char-page .nk-hero__panel { padding: 28px 32px; gap: 18px; }
+  .nk-char-page .nk-hero__name { font-size: 2rem; }
+  .nk-char-page .nk-hero__stats { gap: 0 40px; }
+  .nk-char-page .nk-hero__stat { padding: 8px 0; }
+  .nk-char-page .nk-hero__stat-val { font-size: 0.92rem; }
+  .nk-char-page .nk-hero__stat-val .nk-d-n { font-size: 0.92rem; }
+  .nk-char-page .nk-panel--flat { padding-bottom: 32px; }
+}
+/* 桌面 ≥1024px：左右结构，视觉区 44% + 档案面板 56%，面板透明 */
+@media (min-width: 1024px) {
+  .nk-char-page .nk-hero { flex-direction: row; min-height: 540px; }
+  .nk-char-page .nk-hero__visual { flex: 0 0 44%; aspect-ratio: auto; min-height: 540px; }
+  .nk-char-page .nk-hero__panel {
+    flex: 1 1 auto; border-top: none;
+    background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+    padding: 42px 46px; gap: 24px; justify-content: center;
+  }
+  .nk-char-page .nk-hero__name { font-size: 2.75rem; }
+  .nk-char-page .nk-hero__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; }
+  .nk-char-page .nk-skill { padding: 24px 28px 22px; }
+  .nk-char-page .nk-eidolon, .nk-char-page .nk-ability { padding: 22px 28px 20px; }
+}
+/* 手机横屏限高 */
+@media (max-height: 500px) and (orientation: landscape) {
+  .nk-char-page .nk-hero__archive { display: none; }
+}
+/* 手机紧凑 */
+@media (max-width: 767px) {
+  .nk-char-page .nk-hero__stats { gap: 0 20px; }
+  .nk-char-page .nk-hero__stat { padding: 6px 0; gap: 8px; grid-template-columns: 14px 1fr auto; }
+  .nk-char-page .nk-hero__stat-label { font-size: 0.68rem; }
+  .nk-char-page .nk-hero__stat-val { font-size: 0.8rem; }
+  .nk-char-page .nk-hero__stat-val .nk-d-n { font-size: 0.8rem; }
+  .nk-char-page .nk-hero__badge { padding: 5px 9px 5px 7px; }
+  .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
+  .nk-char-page .nk-skill--child { margin-left: 10px; padding-top: 12px; }
+  .nk-char-page .nk-eidolon__num { font-size: 1.25rem; min-width: 44px; padding-right: 12px; }
+}
+
+/* ═══════════ 焦点环 ═══════════ */
+.nk-char-page .nk-story__head:focus-visible,
+.nk-char-page .nk-skill__anim-toggle:focus-visible,
+.nk-char-page .nk-skill__table-btn:focus-visible,
+.nk-char-page .nk-enh-toggle__btn:focus-visible,
+.nk-char-page .nk-secnav__btn:focus-visible,
+.nk-char-page .nk-hero__toggle:focus-visible,
+.nk-char-page .nk-top-btn:focus-visible {
   outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px;
 }
-.nk-story__head:focus-visible { border-radius: 0; }
-.nk-secnav__btn:focus-visible { outline-offset: 1px; }
-/* ── 触屏设备（hover: none）：重置点击后粘滞的 hover 态 ── */
+.nk-char-page .nk-story__head:focus-visible { border-radius: 0; }
+.nk-char-page .nk-secnav__btn:focus-visible { outline-offset: 1px; }
+
+/* ═══════════ 减弱动态 ═══════════ */
+@media (prefers-reduced-motion: reduce) {
+  .nk-char-page .nk-top-btn { transition: none; }
+  .nk-char-page .nk-enh-bar__progress { transition: none; }
+  .nk-char-page .nk-hero__bg { transition: none; }
+  .nk-char-page .nk-hero__spine { transition: none; }
+  .nk-char-page .nk-panel { animation: none; }
+  .nk-char-page .nk-skill:hover,
+  .nk-char-page .nk-eidolon:hover,
+  .nk-char-page .nk-ability:hover,
+  .nk-char-page .nk-story:hover,
+  .nk-char-page .nk-build__team:hover,
+  .nk-char-page .nk-build__set:hover,
+  .nk-char-page .nk-relic-slot:hover,
+  .nk-char-page .nk-relic-sub:hover,
+  .nk-char-page .nk-profile__item:hover,
+  .nk-char-page .nk-bonus:hover { transform: none; box-shadow: none; }
+}
+
+/* ═══════════ 触屏设备：重置粘滞 hover ═══════════ */
 @media (hover: none) {
-  .nk-story__head:hover { background: none; }
-  .nk-skill__table-btn:hover { color: var(--text3); }
-  .nk-enh-toggle__btn:hover { border-color: color-mix(in srgb, var(--primary) 15%, transparent); background: color-mix(in srgb, var(--primary) 6%, transparent); color: var(--text2); }
-  .nk-enh-toggle__btn--active:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
-  .nk-build__team-slot img:hover { transform: none; box-shadow: none; }
-  .nk-eidolon:hover, .nk-ability:hover, .nk-story:hover,
-  .nk-bonus:hover, .nk-build__set:hover, .nk-profile__item:hover,
-  .nk-build__team:hover, .nk-relic-slot:hover, .nk-relic-sub:hover { border-color: var(--border); transform: none; box-shadow: none; }
-  .nk-secnav__btn:hover { color: var(--text3); background: transparent; }
-  .nk-secnav__btn--active:hover { color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); }
+  .nk-char-page .nk-story__head:hover { background: none; }
+  .nk-char-page .nk-skill__table-btn:hover { color: var(--text3); }
+  .nk-char-page .nk-skill__anim-toggle:hover { color: var(--text3); }
+  .nk-char-page .nk-enh-toggle__btn:hover { border-color: var(--line-1); background: rgba(255,255,255,0.02); color: var(--text3); }
+  .nk-char-page .nk-enh-toggle__btn--active:hover { background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: color-mix(in srgb, var(--primary) 45%, transparent); color: var(--text-bright); }
+  .nk-char-page .nk-build__team-slot img:hover { transform: none; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  .nk-char-page .nk-skill:hover,
+  .nk-char-page .nk-eidolon:hover,
+  .nk-char-page .nk-ability:hover,
+  .nk-char-page .nk-story:hover,
+  .nk-char-page .nk-bonus:hover,
+  .nk-char-page .nk-build__set:hover,
+  .nk-char-page .nk-profile__item:hover,
+  .nk-char-page .nk-build__team:hover,
+  .nk-char-page .nk-relic-slot:hover,
+  .nk-char-page .nk-relic-sub:hover { border-color: var(--line-1); background: rgba(255,255,255,0.016); transform: none; box-shadow: none; }
+  .nk-char-page .nk-secnav__btn:hover { color: var(--text3); background: transparent; }
+  .nk-char-page .nk-secnav__btn--active:hover { color: var(--primary); background: transparent; }
+  .nk-char-page .nk-hero__stat:hover { background: transparent; }
+  .nk-char-page .nk-hero__badge:hover { border-color: var(--line-1); background: rgba(255,255,255,0.03); }
 }

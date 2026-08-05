@@ -118,6 +118,7 @@ onBeforeUnmount(() => {
       ></div>
       <div ref="spineRef" class="nk-hero__spine" :class="{ 'nk-ready': spineVisible }"></div>
       <div class="nk-hero__scrim"></div>
+      <span class="nk-hero__archive">ARCHIVE · № {{ charId }}</span>
       <button
         class="nk-hero__toggle"
         :class="{ off: !spineVisible, 'has-anim': spineReady }"
@@ -131,19 +132,19 @@ onBeforeUnmount(() => {
     <div class="nk-hero__panel">
       <header class="nk-hero__head">
         <div class="nk-hero__head-left">
-          <div v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</div>
-          <h1 class="nk-hero__name">{{ d.name }}</h1>
-          <div class="nk-hero__meta">
+          <div class="nk-hero__meta-row">
+            <span v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</span>
             <span class="nk-hero__stars">{{ stars }}</span>
           </div>
+          <h1 class="nk-hero__name">{{ d.name }}</h1>
         </div>
         <div class="nk-hero__head-right">
-          <span class="nk-hero__tag nk-hero__tag--vert">
-            <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`">
+          <span class="nk-hero__badge">
+            <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`" alt="">
             <span>{{ ELEM[d.damage_type] || d.damage_type }}</span>
           </span>
-          <span class="nk-hero__tag nk-hero__tag--vert">
-            <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`">
+          <span class="nk-hero__badge">
+            <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`" alt="">
             <span>{{ PATH[d.base_type] || d.base_type }}</span>
           </span>
         </div>
@@ -156,12 +157,6 @@ onBeforeUnmount(() => {
           <span class="nk-hero__section-bar"></span>
           <span>属性</span>
         </div>
-        <div class="nk-hero__level">
-          <span class="nk-hero__level-label">Lv. {{ levelLimit }}/{{ MAX_CHAR_LEVEL }}</span>
-          <div class="nk-hero__level-track">
-            <div class="nk-hero__level-fill" :style="{ width: `${(levelLimit / MAX_CHAR_LEVEL) * 100}%` }"></div>
-          </div>
-        </div>
         <div class="nk-hero__stats">
           <div v-for="st in heroStats" :key="st.l" class="nk-hero__stat">
             <span class="nk-hero__stat-icon" :data-icon="st.icon" aria-hidden="true"></span>
@@ -172,6 +167,12 @@ onBeforeUnmount(() => {
               </template>
               <template v-else>{{ st.v }}</template>
             </span>
+          </div>
+        </div>
+        <div class="nk-hero__level">
+          <span class="nk-hero__level-label">Lv. {{ levelLimit }}/{{ MAX_CHAR_LEVEL }}</span>
+          <div class="nk-hero__level-track">
+            <div class="nk-hero__level-fill" :style="{ width: `${(levelLimit / MAX_CHAR_LEVEL) * 100}%` }"></div>
           </div>
         </div>
       </section>

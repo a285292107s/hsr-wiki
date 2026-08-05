@@ -72,11 +72,11 @@ const removedEidolons = computed(() => {
     <span v-if="e.status" :class="`nk-diff-badge nk-diff-badge--${e.status}`">
       {{ e.status === 'changed' ? 'CHANGED' : 'NEW' }}
     </span>
-    <div class="nk-skill__title-row">
+    <div class="nk-eidolon__head">
+      <span class="nk-eidolon__num">E{{ e.num }}</span>
       <img class="nk-skill__icon" :src="e.img" loading="lazy">
       <div class="nk-skill__title">
         <span class="nk-skill__name">{{ e.name }}</span>
-        <span class="nk-skill__tag">E{{ e.num }}</span>
       </div>
     </div>
     <div class="nk-skill__desc" v-html="e.descHtml"></div>
