@@ -13,6 +13,7 @@ import {
   resolveRecommend, buildRecommendRows, groupTraits,
   buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceText,
 } from '../../lib/currency-role';
+import { useLoadGeneration } from '../composables/use-load-generation';
 import { loadLocalCurrencyRole, loadLocalCharacter } from '../../services/api';
 import type {
   CurrencyRoleDetail, CurrencyRoleStar,
@@ -56,7 +57,11 @@ const growthMatrix = computed(() => buildGrowthMatrix(data.value?.stars));
 const charData = ref<CharacterData | null>(null);
 const charDataFailed = ref(false);
 
+/** 加载代：角色间快速导航时防止旧数据覆盖新数据（统一 useLoadGeneration 模式） */
+const loadGen = useLoadGeneration();
+
 async function load() {
+  const gen = loadGen.begin();
   loading.value = true;
   error.value = '';
   charData.value = null;
@@ -64,9 +69,10 @@ async function load() {
   try {
     data.value = await loadLocalCurrencyRole(roleId.value);
   } catch (e) {
+    if (!loadGen.isCurrent(gen)) return;
     error.value = (e as Error).message || '加载失败';
   } finally {
-    loading.value = false;
+    if (loadGen.isCurrent(gen)) loading.value = false;
   }
 }
 watch(roleId, load, { immediate: true });

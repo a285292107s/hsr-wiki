@@ -48,7 +48,7 @@ MODULE_SOURCES: dict[str, list[str]] = {
                  "ChallengeBossMazeConfig.json", "ChallengePeakConfig.json"],
     "currency": [
         "GridFightRoleBasicInfo.json", "AvatarConfig.json", "AvatarConfigLD.json",
-        "GridFightTraitBasicInfo.json", "GridFightRoleStar.json",
+        "GridFightRolePropertyConfig.json", "GridFightTraitBasicInfo.json", "GridFightRoleStar.json",
         "GridFightFrontSkill.json", "GridFightBackBESkillConfig.json",
         "GridFightTraitMazebuff.json", "GridFightTraitLayer.json",
         "GridFightBackRoleRank.json", "GridFightBackEquipment.json",
@@ -60,6 +60,7 @@ MODULE_SOURCES: dict[str, list[str]] = {
                           "GridFightEquipCategoryInfo.json", "GridFightEquipTag.json",
                           "GridFightEquipRecommendRole.json", "AvatarConfig.json",
                           "GridFightRoleBasicInfo.json", "GridFightTraitBasicInfo.json",
+                          "GridFightRolePropertyConfig.json",
                           "GridFightTraitLayer.json", "GridFightTraitMazebuff.json",
                           "GridFightTraitRemark.json", "GridFightAugment.json",
                           "GridFightConsumables.json", "GridFightForge.json",

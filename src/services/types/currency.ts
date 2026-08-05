@@ -2,6 +2,15 @@
 
 /* ─── 角色图鉴 ─── */
 
+/** 属性修正项（converter 落地 prop_name = TextMap 官方名；常规属性体系无此字段时前端映射表兜底） */
+export interface CurrencyPropMod {
+  name: string;
+  property_type: string;
+  value: number;
+  /** 官方名（GridFightRolePropertyConfig.PropertyName，官方改称呼重跑转换即同步） */
+  prop_name?: string;
+}
+
 /** 羁绊层级效果（GridFightTraitLayer） */
 export interface CurrencyRoleTraitLayer {
   /** 激活所需人数 */
@@ -13,9 +22,9 @@ export interface CurrencyRoleTraitLayer {
   /** 描述参数 */
   params: number[];
   /** 羁绊成员属性加成 */
-  member_props: Array<{ name: string; property_type: string; value: number }>;
+  member_props: CurrencyPropMod[];
   /** 全员属性加成 */
-  all_props: Array<{ name: string; property_type: string; value: number }>;
+  all_props: CurrencyPropMod[];
 }
 
 export interface CurrencyRoleTrait {
@@ -126,8 +135,8 @@ export interface CurrencyRoleRank {
   name: string;
   desc: string;
   icon: string;
-  owner_props: Array<{ name: string; property_type: string; value: number }>;
-  all_props: Array<{ name: string; property_type: string; value: number }>;
+  owner_props: CurrencyPropMod[];
+  all_props: CurrencyPropMod[];
   param_list: number[];
   /** 星魂修改的技能 ID 列表 */
   modify_skill_list: number[];
@@ -143,8 +152,8 @@ export interface CurrencyRoleEquipment {
   level: number;
   desc: string;
   param_list: number[];
-  owner_props: Array<{ name: string; property_type: string; value: number }>;
-  all_props: Array<{ name: string; property_type: string; value: number }>;
+  owner_props: CurrencyPropMod[];
+  all_props: CurrencyPropMod[];
 }
 
 /** 货币战争角色特质摘要（列表数据，由 converter 从 TextMap 解析） */

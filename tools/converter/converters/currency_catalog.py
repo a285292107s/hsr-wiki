@@ -29,6 +29,7 @@ from typing import Any
 from config import EXCEL_DIR, OUTPUT_DIR
 from textmap import resolve_text, clean_text
 from utils import load_json, save_json
+from converters.currency import _build_prop_names
 
 logger = logging.getLogger("converter.currency_catalog")
 
@@ -51,7 +52,12 @@ def _unwrap(v: Any, default: Any = None) -> Any:
     return v
 
 
-def _flatten_property_mods(lst: list | None) -> list[dict]:
+def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None = None) -> list[dict]:
+    """将 [{PropertyType: ..., Value: {Value: ...}}, ...] → 标准化列表。
+
+    prop_names 提供 PropertyType → 官方名（TextMap）时，额外输出 prop_name 字段；
+    未收录的属性类型不输出，由前端映射表兜底。
+    """
     if not lst:
         return []
     out = []
@@ -60,7 +66,10 @@ def _flatten_property_mods(lst: list | None) -> list[dict]:
             continue
         typ = item.get("PropertyType", "")
         val = _unwrap(item.get("Value"), 0)
-        out.append({"name": typ, "property_type": typ, "value": val})
+        node = {"name": typ, "property_type": typ, "value": val}
+        if prop_names and typ in prop_names:
+            node["prop_name"] = prop_names[typ]
+        out.append(node)
     return out
 
 
@@ -287,7 +296,7 @@ def _convert_augments(out_dir: Path) -> int:
 # 羁绊图鉴（Trait）
 # ─────────────────────────────────────────────
 
-def _convert_traits(out_dir: Path) -> int:
+def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> int:
     raw = _load_excel("GridFightTraitBasicInfo.json")
     layer_raw = _load_excel("GridFightTraitLayer.json")
     mazebuff_raw = _load_excel("GridFightTraitMazebuff.json")
@@ -302,8 +311,8 @@ def _convert_traits(out_dir: Path) -> int:
             continue
         desc = resolve_text(entry.get("PropertyDesc", {}))
         params = [_unwrap(p, 0) for p in (entry.get("PropertyParamList") or [])]
-        member_props = _flatten_property_mods(entry.get("TraitMemberPropertyList"))
-        all_props = _flatten_property_mods(entry.get("AllMemberPropertyList"))
+        member_props = _flatten_property_mods(entry.get("TraitMemberPropertyList"), prop_names)
+        all_props = _flatten_property_mods(entry.get("AllMemberPropertyList"), prop_names)
         # Mazebuff 补充描述（含攻击段数等战斗机制细节）
         buff_desc = ""
         buff_params: list = []
@@ -407,6 +416,9 @@ def convert() -> None:
     out_dir = OUTPUT_DIR / OUT_SUBDIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # 官方属性名索引（TextMap，GridFightRolePropertyConfig.PropertyName）
+    prop_names = _build_prop_names(_load_excel("GridFightRolePropertyConfig.json"))
+
     n_equip = _convert_equipment(out_dir)
     logger.info("  装备图鉴: %d 条", n_equip)
 
@@ -416,7 +428,7 @@ def convert() -> None:
     n_augment = _convert_augments(out_dir)
     logger.info("  投资策略: %d 条", n_augment)
 
-    n_trait = _convert_traits(out_dir)
+    n_trait = _convert_traits(out_dir, prop_names)
     logger.info("  羁绊图鉴: %d 条", n_trait)
 
     logger.info("货币战争图鉴数据完成")

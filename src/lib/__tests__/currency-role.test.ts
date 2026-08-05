@@ -88,6 +88,15 @@ describe('propLabel / propValue', () => {
     expect(propLabel({ name: 'PlainName' })).toBe('PlainName');
   });
 
+  it('prefers converter-provided prop_name (official TextMap name)', () => {
+    // 官方名优先于映射表；映射冲突时以官方为准（如 ExtraInitSP = 初始能量）
+    expect(propLabel({ property_type: 'ExtraInitSP', prop_name: '初始能量' })).toBe('初始能量');
+    // 无 prop_name 时回退映射表
+    expect(propLabel({ property_type: 'ExtraInitSP' })).toBe('初始能量');
+    // 空 prop_name 视为缺失
+    expect(propLabel({ property_type: 'ExtraSpeedAddedRatio1', prop_name: '' })).toBe('速度增幅');
+  });
+
   it('formats ratios as percent and absolutes as-is', () => {
     expect(propValue(0.15)).toBe('15%');
     expect(propValue(1.5)).toBe('1.5');

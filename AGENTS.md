@@ -188,6 +188,7 @@ src/
 - `cdn-samples/` 仅作参考样本，严禁作为数据源导入或随站部署
 - 目录卡片 HTML 以模板字符串渲染（非 Vue 组件），服务于虚拟滚动性能
 - CSS 采用 BEM 风格命名，统一 `nk-` 前缀（如 `nk-cat-card__img`）
+- 样式分层：tokens.css = 设计令牌 + 跨页共享原语（nk-tabs / nk-panel 等）；catalog.css = 目录引擎专属（含 v-html 卡片，scoped 无法命中）；页面 css = 页面专属（随路由懒加载）。页面间复用样式先查原语，禁止在页面 css 复制粘贴；组件专属样式（如 EndgameView 的 Tab 导航）用 SFC scoped style，不污染全局命名空间
 - 全局设计令牌位于 `src/styles/tokens.css`；不使用 CSS 预处理器
 
 ## 强制规则（MUST）

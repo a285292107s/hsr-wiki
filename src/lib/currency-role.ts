@@ -47,6 +47,7 @@ export const PROP_LABEL: Record<string, string> = {
   ExtraCriticalChanceBase: '暴击率增幅',
   ExtraCriticalDamageBase: '暴击伤害增幅',
   StanceBreakAddedRatio: '击破效率',
+  ExtraBreakDamageAddedRatio: '击破特攻',
   ExtraHealBase: '基础治疗强度',
   ExtraHealRatioBase: '治疗强度',
   ExtraHealAddedRatio: '治疗强度',
@@ -72,8 +73,11 @@ export const PROP_LABEL: Record<string, string> = {
   HPAddedRatio: '生命增幅',
 };
 
-/** 属性名解析：映射表优先，回退去前缀（Extra/AddedRatio 噪声） */
+/** 属性名解析：优先 converter 落地的 prop_name（TextMap 官方名，官方改称呼自动同步）；
+ *  缺失时查映射表，再回退去前缀（Extra/AddedRatio 噪声）。 */
 export function propLabel(m: Record<string, unknown>): string {
+  const official = m.prop_name;
+  if (typeof official === 'string' && official) return official;
   const key = String(m.property_type || m.name || '');
   return PROP_LABEL[key] || key.replace(/^Extra/, '').replace(/AddedRatio\d*$/, '');
 }

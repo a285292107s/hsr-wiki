@@ -85,8 +85,28 @@ def _flatten_stance_list(lst: list | None) -> list[int]:
     return out
 
 
-def _flatten_property_mods(lst: list | None) -> list[dict]:
-    """将 [{PropertyType: ..., Value: {Value: ...}}, ...] → 标准化列表。"""
+def _build_prop_names(data: list[dict]) -> dict[str, str]:
+    """GridFightRolePropertyConfig.json → PropertyType → 官方名（TextMap 解析）。
+
+    官方改称呼时上游 TextMap 更新 → 重跑转换即可自动同步（前端 propLabel 优先消费 prop_name）。
+    """
+    out: dict[str, str] = {}
+    for e in data:
+        t = e.get("PropertyType")
+        if not t:
+            continue
+        name = resolve_text(e.get("PropertyName", {}))
+        if name:
+            out[t] = name
+    return out
+
+
+def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None = None) -> list[dict]:
+    """将 [{PropertyType: ..., Value: {Value: ...}}, ...] → 标准化列表。
+
+    prop_names 提供 PropertyType → 官方名（TextMap）时，额外输出 prop_name 字段；
+    未收录的属性类型（常规模式属性体系）不输出，由前端映射表兜底。
+    """
     if not lst:
         return []
     out = []
@@ -95,15 +115,19 @@ def _flatten_property_mods(lst: list | None) -> list[dict]:
             continue
         typ = item.get("PropertyType", "")
         val = _unwrap(item.get("Value"), 0)
-        out.append({
+        node = {
             "name": typ,
             "property_type": typ,
             "value": val,
-        })
+        }
+        if prop_names and typ in prop_names:
+            node["prop_name"] = prop_names[typ]
+        out.append(node)
     return out
 
 
-def _index_trait_layers(data: list[dict], mazebuff_index: dict[int, dict] | None = None) -> dict[int, list[dict]]:
+def _index_trait_layers(data: list[dict], mazebuff_index: dict[int, dict] | None = None,
+                        prop_names: dict[str, str] | None = None) -> dict[int, list[dict]]:
     """GridFightTraitLayer.json → TraitID → 层级效果列表。
 
     每层包含：激活人数(layer)、品质(quality)、效果描述(desc)、
@@ -120,8 +144,8 @@ def _index_trait_layers(data: list[dict], mazebuff_index: dict[int, dict] | None
             continue
         desc = resolve_text(entry.get("PropertyDesc", {}))
         params = [_unwrap(p, 0) for p in (entry.get("PropertyParamList") or [])]
-        member_props = _flatten_property_mods(entry.get("TraitMemberPropertyList"))
-        all_props = _flatten_property_mods(entry.get("AllMemberPropertyList"))
+        member_props = _flatten_property_mods(entry.get("TraitMemberPropertyList"), prop_names)
+        all_props = _flatten_property_mods(entry.get("AllMemberPropertyList"), prop_names)
         # Mazebuff 补充描述
         buff_desc = ""
         buff_params: list = []
@@ -231,8 +255,9 @@ def convert() -> None:
     back_skills = _build_index(_load_excel("GridFightBackBESkillConfig.json"), "SkillID")
 
     # 新增数据源
+    prop_names = _build_prop_names(_load_excel("GridFightRolePropertyConfig.json"))
     trait_mazebuff_index = _build_index(_load_excel("GridFightTraitMazebuff.json"), "ID")
-    trait_layers = _index_trait_layers(_load_excel("GridFightTraitLayer.json"), trait_mazebuff_index)
+    trait_layers = _index_trait_layers(_load_excel("GridFightTraitLayer.json"), trait_mazebuff_index, prop_names)
     rank_index = _build_index(_load_excel("GridFightBackRoleRank.json"), "RankID")
     equip_by_role = _index_equipment(_load_excel("GridFightBackEquipment.json"))
     items_index = _build_index(_load_excel("GridFightItems.json"), "ID")
@@ -344,8 +369,8 @@ def convert() -> None:
                 "name": resolve_text(rk.get("Name", {})),
                 "desc": resolve_text(rk.get("Desc", {})),
                 "icon": rk.get("IconPath", ""),
-                "owner_props": _flatten_property_mods(rk.get("OwnerGeneralPropertyList")),
-                "all_props": _flatten_property_mods(rk.get("AllMemberGeneralPropertyList")),
+                "owner_props": _flatten_property_mods(rk.get("OwnerGeneralPropertyList"), prop_names),
+                "all_props": _flatten_property_mods(rk.get("AllMemberGeneralPropertyList"), prop_names),
                 "param_list": [_unwrap(p, 0) for p in (rk.get("DescParamList") or [])],
                 "modify_skill_list": rk.get("ModifySkillList") or [],
                 "modify_energy_bar": _unwrap(rk.get("ModifyEnergyBar"), None),
@@ -362,8 +387,8 @@ def convert() -> None:
                     "level": lv_entry.get("Level", 0),
                     "desc": resolve_text(lv_entry.get("BackEquipmentDesc", {})),
                     "param_list": [_unwrap(p, 0) for p in (lv_entry.get("ParamList") or [])],
-                    "owner_props": _flatten_property_mods(lv_entry.get("OwnerGeneralPropertyList")),
-                    "all_props": _flatten_property_mods(lv_entry.get("AllMemberGeneralPropertyList")),
+                    "owner_props": _flatten_property_mods(lv_entry.get("OwnerGeneralPropertyList"), prop_names),
+                    "all_props": _flatten_property_mods(lv_entry.get("AllMemberGeneralPropertyList"), prop_names),
                 })
 
         # 推荐装备（按前后排分组）
@@ -435,7 +460,7 @@ def convert() -> None:
                 "servant_show_skill": servant_skills_out,
                 "servant": servant_node,
                 "general_property_modify_list": _flatten_property_mods(
-                    star_entry.get("GeneralPropertyModifyList")
+                    star_entry.get("GeneralPropertyModifyList"), prop_names
                 ),
             }
             stars_out[skey] = star_node

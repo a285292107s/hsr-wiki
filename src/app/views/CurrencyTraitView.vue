@@ -7,6 +7,8 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../lib/format';
+import { propLabel } from '../../lib/currency-role';
+import { useLoadGeneration } from '../composables/use-load-generation';
 import { loadLocalCurrencyTraits, loadLocalCurrencyRoles } from '../../services/api';
 import type { CurrencyTraitEntry, CurrencyRoleEntry } from '../../services/types';
 // 货币战争模式专属样式（随本路由 chunk 懒加载）
@@ -32,31 +34,8 @@ const ACT_LABEL: Record<string, string> = {
   GreaterEqualThan: '≥N 人激活',
 };
 
-/* 属性名映射 */
-const PROP_LABEL: Record<string, string> = {
-  ExtraAllDamageTypeAddedRatio1: '全伤害', ExtraAllDamageTypeAddedRatio4: '全伤害', ExtraAllDamageTypeAddedRatio5: '全伤害',
-  ExtraInitSP: '初始战技点',
-  ExtraHPAddedRatio1: '生命增幅', ExtraHPAddedRatio2: '生命增幅',
-  ExtraSpeedAddedRatio1: '速度增幅', ExtraSpeedAddedRatio2: '速度增幅',
-  ExtraAttackAddedRatio: '攻击增幅', ExtraDefenceAddedRatio: '防御增幅',
-  ExtraCriticalChanceBase: '暴击率', ExtraCriticalDamageBase: '暴击伤害',
-  ExtraBreakDamageAddedRatio: '击破特攻',
-  ExtraHealRatioBase: '治疗量', ExtraHealAddedRatio: '治疗量',
-  ExtraShieldRatioBase: '护盾量', ExtraShieldAddedRatio: '护盾量',
-  ExtraLuckChance: '幸运触发率', ExtraLuckDamage: '幸运伤害',
-  ExtraFrontPowerAddedRatio1: '前台强度', ExtraBackPowerAddedRatio1: '后台强度',
-  ExtraDOTDamageAddedRatio1: '持续伤害', ExtraElementDamageAddedRatio1: '属性伤害',
-  ExtraInsertDamageAddedRatio1: '追加攻击伤害', ExtraNormalDamageAddedRatio1: '普攻伤害',
-  ExtraSkillDamageAddedRatio1: '战技伤害', ExtraUltraDamageAddedRatio1: '终结技伤害',
-  SpeedAddedRatio: '速度增幅', AttackAddedRatio: '攻击增幅',
-  DefenceAddedRatio: '防御增幅', HPAddedRatio: '生命增幅',
-};
-function propLabel(m: Record<string, unknown>): string {
-  const key = String(m.property_type || m.name || '');
-  return PROP_LABEL[key] || key.replace(/^Extra/, '').replace(/AddedRatio\d*$/, '');
-}
+/** 属性值格式化：羁绊层级属性均为比率值（0.2=20%, 1.5=150%, 3.2=320%） */
 function propValue(v: number): string {
-  // 羁绊层级属性均为比率值（0.2=20%, 1.5=150%, 3.2=320%）
   return `${(v * 100).toFixed(0)}%`;
 }
 
@@ -69,7 +48,11 @@ const catLabel = computed(() => CAT_LABEL[cat.value] || cat.value);
 const actLabel = computed(() => ACT_LABEL[data.value?.activation_type || ''] || '');
 
 
+/** 加载代：羁绊间快速导航时防止旧数据覆盖新数据（统一 useLoadGeneration 模式） */
+const loadGen = useLoadGeneration();
+
 async function load() {
+  const gen = loadGen.begin();
   loading.value = true;
   error.value = '';
   try {
@@ -77,15 +60,17 @@ async function load() {
       loadLocalCurrencyTraits(),
       loadLocalCurrencyRoles(),
     ]);
+    if (!loadGen.isCurrent(gen)) return;
     const found = traits.find((t) => String(t.id) === traitId.value);
     if (!found) { error.value = '未找到该羁绊'; return; }
     data.value = found;
     const tid = Number(traitId.value);
     members.value = roles.filter((r) => r.trait_list.includes(tid));
   } catch (e) {
+    if (!loadGen.isCurrent(gen)) return;
     error.value = (e as Error).message || '加载失败';
   } finally {
-    loading.value = false;
+    if (loadGen.isCurrent(gen)) loading.value = false;
   }
 }
 watch(traitId, load, { immediate: true });
