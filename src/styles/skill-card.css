@@ -9,21 +9,21 @@
   border-radius: 12px; padding: 24px 24px 20px; margin-bottom: 16px;
   transition: border-color 0.2s, transform 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out);
 }
-/* 技能类型色（仅供徽章使用） */
-.nk-skill[data-type="Normal"]   { --sk-accent: #CBD5E1; }
-.nk-skill[data-type="BPSkill"]  { --sk-accent: #60A5FA; }
-.nk-skill[data-type="Ultra"]    { --sk-accent: #FBBF24; }
-.nk-skill[data-type="Passive"]  { --sk-accent: #2DD4BF; }
-.nk-skill[data-type="Maze"]     { --sk-accent: #F472B6; }
-.nk-skill[data-type="Servant"]  { --sk-accent: #A78BFA; }
-.nk-skill[data-type="ServantPassive"] { --sk-accent: #67E8F9; }
+/* 技能类型色（仅供徽章使用；Ultra/Maze/Servant 已引用令牌） */
+.nk-skill[data-type="Normal"]   { --sk-accent: var(--skill-normal); }
+.nk-skill[data-type="BPSkill"]  { --sk-accent: var(--skill-bp); }
+.nk-skill[data-type="Ultra"]    { --sk-accent: var(--gold-400); }
+.nk-skill[data-type="Passive"]  { --sk-accent: var(--skill-passive); }
+.nk-skill[data-type="Maze"]     { --sk-accent: var(--prop-hp); }
+.nk-skill[data-type="Servant"]  { --sk-accent: var(--ph-400); }
+.nk-skill[data-type="ServantPassive"] { --sk-accent: var(--skill-servant-passive); }
 .nk-skill:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: var(--nk-shadow-card); }
 .nk-skill:active { transform: translateY(0); }
 /* 头部：类型色点 + 等级滑条共用一行 */
 .nk-skill__head {
   display: flex; align-items: center; gap: 12px;
   padding-bottom: 10px; margin-bottom: 12px;
-  border-bottom: 1px solid rgba(124,58,237,0.1);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
 }
 .nk-skill__icon {
   width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
@@ -63,7 +63,7 @@
   height: 8px; border-radius: 2px;
   background:
     repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,0.45) 5px 7px),
-    linear-gradient(90deg, rgba(124,58,237,0.3) var(--fill), rgba(148,163,184,0.08) var(--fill));
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent) var(--fill), rgba(148,163,184,0.08) var(--fill));
 }
 .nk-skill__slider input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 10px; height: 14px; margin-top: -3px;
@@ -74,7 +74,7 @@
   height: 8px; border-radius: 2px;
   background:
     repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,0.45) 5px 7px),
-    linear-gradient(90deg, rgba(124,58,237,0.3) var(--fill), rgba(148,163,184,0.08) var(--fill));
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent) var(--fill), rgba(148,163,184,0.08) var(--fill));
 }
 .nk-skill__slider input[type=range]::-moz-range-thumb {
   width: 10px; height: 14px; border-radius: 2px; border: none; background: transparent; cursor: pointer;

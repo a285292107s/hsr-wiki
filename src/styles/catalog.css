@@ -36,11 +36,11 @@
 .nk-cat-filter-group { display: flex; align-items: baseline; gap: 10px; margin-bottom: 7px; }
 .nk-cat-filter-label { font-family: var(--font-hud); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; color: var(--text2); flex-shrink: 0; min-width: 3.2em; }
 .nk-cat-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.nk-cat-chip { padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(124,58,237,0.15); background: transparent; color: var(--text2); font-size: 0.72rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); display: inline-flex; align-items: center; gap: 4px; }
+.nk-cat-chip { padding: 4px 12px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); background: transparent; color: var(--text2); font-size: 0.72rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); display: inline-flex; align-items: center; gap: 4px; }
 .nk-cat-chip__icon { width: 16px; height: 16px; border-radius: 50%; object-fit: contain; flex-shrink: 0; }
 .nk-cat-chip__star { width: 12px; height: 12px; color: var(--gold); flex-shrink: 0; }
 .nk-cat-chip:hover { border-color: var(--border2); color: var(--text); }
-.nk-cat-chip.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 10px rgba(124,58,237,0.2); }
+.nk-cat-chip.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 10px color-mix(in srgb, var(--primary) 20%, transparent); }
 
 /* 网格
    列宽抽变量：骨架屏与真实网格共用同一 minmax，避免切换时列数突变导致 CLS */
@@ -70,24 +70,24 @@
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-lc-card { animation: nk-card-fade 0.25s ease backwards; }
 
 /* 卡片 */
-.nk-cat-card { --elem-color: rgba(124,58,237,0.6); --holo-color: rgba(180,85,255,0.7); position: relative; isolation: isolate; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
+.nk-cat-card { --elem-color: color-mix(in srgb, var(--primary) 60%, transparent); --holo-color: color-mix(in srgb, var(--ph-400) 70%, transparent); position: relative; isolation: isolate; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
 /* 星级差异化边框（须在 :hover 规则之前，保证 hover 时元素色边框可覆盖） */
-.nk-cat-card[data-rarity="5"] { --holo-color: rgba(255,215,0,0.6); border-color: rgba(251,191,36,0.25); }
-.nk-cat-card[data-rarity="4"] { --holo-color: rgba(192,132,252,0.6); border-color: rgba(192,132,252,0.2); }
+.nk-cat-card[data-rarity="5"] { --holo-color: color-mix(in srgb, var(--rarity-5) 60%, transparent); border-color: color-mix(in srgb, var(--rarity-5) 25%, transparent); }
+.nk-cat-card[data-rarity="4"] { --holo-color: color-mix(in srgb, var(--rarity-4) 60%, transparent); border-color: color-mix(in srgb, var(--rarity-4) 20%, transparent); }
 .nk-cat-card:hover { transform: perspective(900px) translateY(-6px) rotateX(calc(var(--ry, 0) * 7deg)) rotateY(calc(var(--rx, 0) * 7deg)); border-color: color-mix(in srgb, var(--elem-color) 60%, transparent); box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 20px color-mix(in srgb, var(--elem-color) 22%, transparent), 0 0 50px color-mix(in srgb, var(--elem-color) 9%, transparent); }
-.nk-cat-card[data-rarity="5"]:hover { box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 20px color-mix(in srgb, var(--elem-color) 22%, transparent), 0 0 50px color-mix(in srgb, var(--elem-color) 9%, transparent), 0 0 14px rgba(251,191,36,0.1); }
+.nk-cat-card[data-rarity="5"]:hover { box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 20px color-mix(in srgb, var(--elem-color) 22%, transparent), 0 0 50px color-mix(in srgb, var(--elem-color) 9%, transparent), 0 0 14px color-mix(in srgb, var(--rarity-5) 10%, transparent); }
 @keyframes nk-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes nk-card-fade { from { opacity: 0; } to { opacity: 1; } }
 /* 属性色顶部光斑（椭圆顶光，如舞台灯光洒落） */
 .nk-cat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 34%; background: radial-gradient(ellipse 75% 100% at 50% 0%, var(--elem-color) 0%, color-mix(in srgb, var(--elem-color) 55%, transparent) 30%, color-mix(in srgb, var(--elem-color) 20%, transparent) 55%, transparent 78%); z-index: 2; opacity: 0.4; transition: opacity 0.3s; pointer-events: none; }
 .nk-cat-card:hover::before, .nk-cat-card:focus-visible::before { opacity: 0.48; }
-.nk-cat-card[data-element="fire"] { --elem-color: rgba(255,107,53,0.7); }
-.nk-cat-card[data-element="ice"] { --elem-color: rgba(79,195,247,0.7); }
-.nk-cat-card[data-element="thunder"] { --elem-color: rgba(171,71,188,0.7); }
-.nk-cat-card[data-element="wind"] { --elem-color: rgba(102,187,106,0.7); }
-.nk-cat-card[data-element="quantum"] { --elem-color: rgba(92,107,192,0.7); }
-.nk-cat-card[data-element="imaginary"] { --elem-color: rgba(255,213,79,0.7); }
-.nk-cat-card[data-element="physical"] { --elem-color: rgba(176,190,197,0.7); }
+.nk-cat-card[data-element="fire"] { --elem-color: color-mix(in srgb, var(--elem-fire) 70%, transparent); }
+.nk-cat-card[data-element="ice"] { --elem-color: color-mix(in srgb, var(--elem-ice) 70%, transparent); }
+.nk-cat-card[data-element="thunder"] { --elem-color: color-mix(in srgb, var(--elem-thunder) 70%, transparent); }
+.nk-cat-card[data-element="wind"] { --elem-color: color-mix(in srgb, var(--elem-wind) 70%, transparent); }
+.nk-cat-card[data-element="quantum"] { --elem-color: color-mix(in srgb, var(--elem-quantum) 70%, transparent); }
+.nk-cat-card[data-element="imaginary"] { --elem-color: color-mix(in srgb, var(--elem-imaginary) 70%, transparent); }
+.nk-cat-card[data-element="physical"] { --elem-color: color-mix(in srgb, var(--elem-physical) 70%, transparent); }
 /* 头像区 */
 .nk-cat-card__img { position: relative; aspect-ratio: 3/4; overflow: hidden; background: rgba(10,10,30,0.5); }
 /* 全息扫光：与首页/光锥卡片统一的白核高光扫过（screen 混合），在头像材质层内移动，信息与图标始终位于高光之上。 */
@@ -102,7 +102,7 @@
 .nk-cat-card:hover .nk-cat-card__elem, .nk-cat-card:hover .nk-cat-card__path { transform: scale(1.15); box-shadow: 0 0 10px var(--primary-glow); }
 /* 信息区（左下角叠加） */
 .nk-cat-card__info { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 8px 10px; }
-.nk-cat-card__stars { font-size: 0.6rem; letter-spacing: 1.5px; color: var(--gold); text-shadow: 0 0 6px rgba(251,191,36,0.5); line-height: 1; }
+.nk-cat-card__stars { font-size: 0.6rem; letter-spacing: 1.5px; color: var(--gold); text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-5) 50%, transparent); line-height: 1; }
 .nk-cat-card__name { font-size: 0.78rem; font-weight: 700; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -117,7 +117,7 @@
 /* 空结果状态 */
 .nk-cat-empty { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 72px 0; text-align: center; }
 .nk-cat-empty.show { display: flex; animation: nk-home-fade-up 0.35s var(--ease); }
-.nk-cat-empty__icon { font-family: var(--font-hud); font-size: 1.3rem; font-weight: 900; letter-spacing: 0.1em; color: rgba(124,58,237,0.4); text-shadow: 0 0 24px var(--primary-glow); }
+.nk-cat-empty__icon { font-family: var(--font-hud); font-size: 1.3rem; font-weight: 900; letter-spacing: 0.1em; color: color-mix(in srgb, var(--primary) 40%, transparent); text-shadow: 0 0 24px var(--primary-glow); }
 .nk-cat-empty__text { font-family: var(--font-hud); font-size: 0.62rem; letter-spacing: 0.22em; color: var(--text3); }
 .nk-cat-empty__sub { font-size: 0.72rem; color: var(--text3); opacity: 0.7; }
 
@@ -128,7 +128,7 @@
 /* 静止态：完全无框。仅图片自身的倾斜玻璃相框是唯一视觉边界。overflow:visible 让 drop-shadow（基于图片 alpha 轮廓投影）不被裁剪 */
 .nk-lc-card { position: relative; background: transparent; border: 1px solid transparent; overflow: visible; cursor: pointer; text-decoration: none; display: block; transition: transform 0.25s var(--ease), filter 0.25s var(--ease), box-shadow 0.25s var(--ease); animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); }
 /* :focus-visible 键盘态：仅 3px 紫色 focus ring（无障碍 §1 规范），不加抬升/柔光，避免与图片框叠加 */
-.nk-lc-card:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(124,58,237,0.5); }
+.nk-lc-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
 /* Hover：仅 hover 精细设备生效。用 filter:drop-shadow() 替代 box-shadow → 阴影/光晕基于图片 alpha 轮廓（倾斜+切角形状）投影，而不是矩形 DOM 盒 → 光晕形状与图片相框完全同心同方向同切角，不会构成矩形"第二个画框" */
 @media (hover: hover) and (pointer: fine) {
   /* drop-shadow 四层：投影+贴近轮廓高浓度贴边辉光+中层色晕+远距离柔光。贴边层 22% 浓度确保"边框发光"感，不构成矩形外框 */
@@ -137,9 +137,9 @@
   .nk-lc-card:hover .nk-lc-card__badge img { transform: scale(1.1); }
 }
 /* 稀有度配色：浓度从 0.6→0.85，颜色更饱和更实，drop-shadow 光晕投射后更清晰可见；3 星默认值从透明 rgba 改为实紫红色，不再缺失 hover 光晕 */
-.nk-lc-card { --holo-color: rgba(180,85,255,0.85); }
-.nk-lc-card[data-rarity="5"] { --holo-color: rgba(255,200,0,0.92); }
-.nk-lc-card[data-rarity="4"] { --holo-color: rgba(168,85,247,0.92); }
+.nk-lc-card { --holo-color: color-mix(in srgb, var(--ph-400) 85%, transparent); }
+.nk-lc-card[data-rarity="5"] { --holo-color: color-mix(in srgb, var(--rarity-5) 92%, transparent); }
+.nk-lc-card[data-rarity="4"] { --holo-color: color-mix(in srgb, var(--rarity-4-deep) 92%, transparent); }
 /* 图片区背景透明。isolation:isolate 保持 sheen-wrap::before 的 mix-blend-mode:screen 与下层隔离；overflow:visible 保证外层卡片 drop-shadow 不受裁剪（filter 在 .nk-lc-card hover 上） */
 .nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: visible; isolation: isolate; }
 /* 加载骨架：图片未就绪时显示 shimmer，加载完成后（img.loaded）淡出；不引入矩形底，避免双层相框 */
@@ -169,7 +169,7 @@
    - 宽度 46% × 高度 180%：与角色卡片扫光带宽度一致（光带厚度统一）；高度 180% 仍覆盖倾斜容器的完整对角线（≈ 220px）
    - 入场 left:-70%：从相框左上切角外侧进入
    - 动画终点 translate3d(430%…）：从相框右下切角外侧离开 */
-.nk-lc-card__sheen-wrap::before { content: ""; position: absolute; width: 46%; height: 180%; top: -40%; left: -70%; z-index: 1; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color, #b455ff) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color, #b455ff) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; backface-visibility: hidden; transform: translate3d(0,0,0); }
+.nk-lc-card__sheen-wrap::before { content: ""; position: absolute; width: 46%; height: 180%; top: -40%; left: -70%; z-index: 1; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color, var(--ph-400)) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color, var(--ph-400)) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; backface-visibility: hidden; transform: translate3d(0,0,0); }
 @media (hover: hover) and (pointer: fine) {
   .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
 }
@@ -178,17 +178,17 @@
 /* 徽章：背景透明无边框（hairline 0.08 在深色背景下仍能被感知成"小圆画框"），仅保留阴影确保图标在亮色区域上仍清晰 */
 .nk-lc-card__badge img { width: 22px; height: 22px; border-radius: 50%; background: transparent; border: none; padding: 2px; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); box-shadow: 0 1px 5px rgba(0,0,0,0.35); }
 .nk-lc-card__info { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 12px 11px; }
-.nk-lc-card__stars { font-size: 0.66rem; letter-spacing: 2px; color: var(--gold); text-shadow: 0 0 6px rgba(251,191,36,0.5); line-height: 1; }
+.nk-lc-card__stars { font-size: 0.66rem; letter-spacing: 2px; color: var(--gold); text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-5) 50%, transparent); line-height: 1; }
 .nk-lc-card__name { font-size: 0.82rem; font-weight: 700; line-height: 1.25; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
 
 /* ═══════════════════════════════════════════
    遗器列表页
 ═══════════════════════════════════════════ */
 .nk-relic-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-.nk-relic-card { position: relative; isolation: isolate; background: var(--card); border: 1px solid rgba(124,58,237,0.25); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
-.nk-relic-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: var(--border2); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px rgba(124,58,237,0.15); }
-.nk-relic-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, rgba(124,58,237,0.08) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 12px; }
-.nk-relic-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, rgba(180,85,255,0.06) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, rgba(180,85,255,0.06) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
+.nk-relic-card { position: relative; isolation: isolate; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
+.nk-relic-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: var(--border2); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 15%, transparent); }
+.nk-relic-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.nk-relic-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ph-400) 6%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--ph-400) 6%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
 .nk-relic-card:hover .nk-relic-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; }
 .nk-relic-card__img img { width: 72%; height: 72%; object-fit: contain; transition: transform 0.4s var(--ease); filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
 .nk-relic-card:hover .nk-relic-card__img img { transform: scale(1.1) rotate(2deg); }
@@ -199,7 +199,7 @@
    物品列表页
 ═══════════════════════════════════════════ */
 .nk-item-grid { --nk-grid-min: 110px; --nk-grid-gap: 10px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); }
-.nk-item-card { --rarity-color: #94A3B8; position: relative; background: var(--card); border: 1px solid rgba(124,58,237,0.15); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 12ms), 600ms); cursor: default; }
+.nk-item-card { --rarity-color: var(--rarity-1); position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 12ms), 600ms); cursor: default; }
 .nk-item-card:hover { transform: translateY(-4px) scale(1.03); border-color: color-mix(in srgb, var(--rarity-color) 40%, transparent); box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px color-mix(in srgb, var(--rarity-color) 15%, transparent); }
 .nk-item-card__img { position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; padding: 6px; }
 .nk-item-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.03) 70%, transparent 100%); mix-blend-mode: screen; opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
@@ -221,9 +221,9 @@
 ═══════════════════════════════════════════ */
 .nk-season-grid { grid-template-columns: 1fr; gap: 0; padding-left: 20px; position: relative; }
 /* 时间线纵轴 */
-.nk-season-grid::before { content: ''; position: absolute; left: 5px; top: 12px; bottom: 12px; width: 2px; background: linear-gradient(180deg, var(--primary) 0%, rgba(124,58,237,0.25) 40%, rgba(124,58,237,0.08) 100%); border-radius: 1px; }
+.nk-season-grid::before { content: ''; position: absolute; left: 5px; top: 12px; bottom: 12px; width: 2px; background: linear-gradient(180deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 25%, transparent) 40%, color-mix(in srgb, var(--primary) 8%, transparent) 100%); border-radius: 1px; }
 
-.nk-season-card { --st-color: var(--text3); position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 20px 18px 28px; margin-bottom: 10px; background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 4%, var(--card)) 0%, var(--card) 55%); border: 1px solid rgba(124,58,237,0.14); border-radius: 12px; cursor: pointer; text-decoration: none; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s, background 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 30ms), 600ms); overflow: visible; }
+.nk-season-card { --st-color: var(--text3); position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 20px 18px 28px; margin-bottom: 10px; background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 4%, var(--card)) 0%, var(--card) 55%); border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent); border-radius: 12px; cursor: pointer; text-decoration: none; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s, background 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 30ms), 600ms); overflow: visible; }
 /* 左侧状态色条 */
 .nk-season-card::after { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--st-color), color-mix(in srgb, var(--st-color) 30%, transparent)); opacity: 0.7; transition: opacity 0.25s, box-shadow 0.25s; }
 /* 时间线节点（左侧圆点） */
@@ -231,7 +231,7 @@
 /* 赛季序号水印 */
 .nk-season-card__num { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-family: var(--font-hud); font-size: 2.6rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--st-color) 22%, transparent); pointer-events: none; user-select: none; transition: transform 0.3s var(--ease), -webkit-text-stroke-color 0.3s, text-shadow 0.3s; z-index: 0; }
 .nk-season-card__num--long { font-size: 1.9rem; }
-.nk-season-card:hover { transform: translateX(6px); border-color: color-mix(in srgb, var(--st-color) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 8%, var(--card)) 0%, rgba(124,58,237,0.05) 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 16px color-mix(in srgb, var(--st-color) 12%, transparent); }
+.nk-season-card:hover { transform: translateX(6px); border-color: color-mix(in srgb, var(--st-color) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 8%, var(--card)) 0%, color-mix(in srgb, var(--primary) 5%, transparent) 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 16px color-mix(in srgb, var(--st-color) 12%, transparent); }
 .nk-season-card:hover::after { opacity: 1; box-shadow: 0 0 8px color-mix(in srgb, var(--st-color) 40%, transparent); }
 .nk-season-card:hover .nk-season-card__node { background: var(--st-color); box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 10px color-mix(in srgb, var(--st-color) 50%, transparent); }
 .nk-season-card:hover .nk-season-card__num { transform: translateY(-50%) translateX(-26px); -webkit-text-stroke-color: color-mix(in srgb, var(--st-color) 45%, transparent); text-shadow: 0 0 24px color-mix(in srgb, var(--st-color) 15%, transparent); }
@@ -242,7 +242,7 @@
 .nk-season-card__name { font-size: 0.92rem; font-weight: 700; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
 .nk-season-card:hover .nk-season-card__name { color: #fff; text-shadow: 0 0 12px color-mix(in srgb, var(--st-color) 30%, transparent); }
 .nk-season-card__meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.nk-season-card__ver { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--text-bright); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; padding: 3px 10px; background: rgba(124,58,237,0.22); border: 1px solid rgba(124,58,237,0.4); border-radius: 6px; text-shadow: 0 0 8px rgba(124,58,237,0.4); }
+.nk-season-card__ver { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--text-bright); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; padding: 3px 10px; background: color-mix(in srgb, var(--primary) 22%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent); border-radius: 6px; text-shadow: 0 0 8px color-mix(in srgb, var(--primary) 40%, transparent); }
 .nk-season-card__ver--unknown { color: var(--text3); font-weight: 500; background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.16); text-shadow: none; }
 .nk-season-card__date { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.02em; opacity: 0.8; }
 
@@ -253,22 +253,22 @@
 .nk-season-card__arrow { width: 15px; height: 15px; flex-shrink: 0; color: var(--text3); opacity: 0; transform: translateX(-4px); transition: opacity 0.25s, transform 0.25s, color 0.25s; position: relative; z-index: 1; }
 .nk-season-card:hover .nk-season-card__arrow { opacity: 1; transform: translateX(0); color: var(--st-color); }
 
-/* ── 状态色彩体系 ── */
-.nk-season-card--live { --st-color: #34D399; }
-.nk-season-card--live .nk-season-card__status { color: #34D399; background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.3); }
-.nk-season-card--live .nk-season-card__node { border-color: #34D399; animation: nk-season-pulse 2s ease-in-out infinite; }
+/* ── 状态色彩体系（领域层 --season-*） ── */
+.nk-season-card--live { --st-color: var(--season-live); }
+.nk-season-card--live .nk-season-card__status { color: var(--season-live); background: color-mix(in srgb, var(--season-live) 10%, transparent); border-color: color-mix(in srgb, var(--season-live) 30%, transparent); }
+.nk-season-card--live .nk-season-card__node { border-color: var(--season-live); animation: nk-season-pulse 2s ease-in-out infinite; }
 
-.nk-season-card--ended { --st-color: #64748B; }
-.nk-season-card--ended .nk-season-card__status { color: #94A3B8; background: rgba(100,116,139,0.1); border-color: rgba(100,116,139,0.25); }
+.nk-season-card--ended { --st-color: var(--season-ended); }
+.nk-season-card--ended .nk-season-card__status { color: var(--text2); background: color-mix(in srgb, var(--season-ended) 10%, transparent); border-color: color-mix(in srgb, var(--season-ended) 25%, transparent); }
 .nk-season-card--ended { opacity: 0.72; }
 .nk-season-card--ended:hover { opacity: 1; }
 
-.nk-season-card--upcoming { --st-color: #60A5FA; }
-.nk-season-card--upcoming .nk-season-card__status { color: #60A5FA; background: rgba(96,165,250,0.1); border-color: rgba(96,165,250,0.3); }
+.nk-season-card--upcoming { --st-color: var(--season-upcoming); }
+.nk-season-card--upcoming .nk-season-card__status { color: var(--season-upcoming); background: color-mix(in srgb, var(--season-upcoming) 10%, transparent); border-color: color-mix(in srgb, var(--season-upcoming) 30%, transparent); }
 
-.nk-season-card--unknown { --st-color: #FBBF24; }
+.nk-season-card--unknown { --st-color: var(--gold-400); }
 
-@keyframes nk-season-pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 6px rgba(52,211,153,0.4); } 50% { box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 14px rgba(52,211,153,0.7); } }
+@keyframes nk-season-pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 6px color-mix(in srgb, var(--season-live) 40%, transparent); } 50% { box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 14px color-mix(in srgb, var(--season-live) 70%, transparent); } }
 
 @media (max-width: 767px) {
   .nk-season-grid { padding-left: 16px; }
@@ -290,10 +290,10 @@
    敌对物种列表页
 ═══════════════════════════════════════════ */
 .nk-mob-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-.nk-mob-card { position: relative; background: var(--card); border: 1px solid rgba(244,63,94,0.2); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); transform-style: preserve-3d; }
-.nk-mob-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: rgba(244,63,94,0.4); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px rgba(244,63,94,0.12); }
-.nk-mob-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, rgba(244,63,94,0.06) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 10px; }
-.nk-mob-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, rgba(244,63,94,0.05) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.26) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, rgba(244,63,94,0.05) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
+.nk-mob-card { position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); transform-style: preserve-3d; }
+.nk-mob-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: color-mix(in srgb, var(--accent) 40%, transparent); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--accent) 12%, transparent); }
+.nk-mob-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 10px; }
+.nk-mob-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--accent) 5%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.26) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--accent) 5%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
 .nk-mob-card:hover .nk-mob-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; }
 .nk-mob-card__img img { width: 75%; height: 75%; object-fit: contain; transition: transform 0.4s var(--ease); filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
 .nk-mob-card:hover .nk-mob-card__img img { transform: scale(1.08); }
@@ -313,22 +313,25 @@
 #nk-home-app h1, #nk-home-app p { margin: 0; padding: 0; }
 
 /* ── Hero：官网 KV 场景（Spine 10 层）为主角，标题退居左下 HUD 构图 ── */
-/* 背景渐变 = Spine 加载失败/全部层失败时的视觉兜底（主背景层不透明，正常渲染时被完全遮盖） */
-.nk-home-hero { position: relative; height: 100vh; height: 100dvh; min-height: 520px; overflow: hidden; display: flex; align-items: flex-end; justify-content: flex-start; padding: 0 48px 108px 128px; background: radial-gradient(ellipse 90% 70% at 72% 22%, rgba(124,58,237,0.16) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, rgba(32,22,72,0.55) 0%, transparent 62%), linear-gradient(170deg, #161233 0%, var(--bg) 55%, #0a0a1c 100%); }
+/* 背景渐变 = Spine 加载失败/全部层失败时的视觉兜底（主背景层不透明，正常渲染时被完全遮盖）
+   内边距移入 __content：内容与导航区共用 1440 居中网格，宽屏下左右对齐不错位 */
+.nk-home-hero { position: relative; height: 100vh; height: 100dvh; min-height: 520px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding: 0 0 108px 0; background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, #0a0a1c 100%); }
 
 /* Hero 背景 Spine（官网背景动画 home-bg：主背景 + 角色群像，全不透明呈现） */
 .nk-home-hero__spine { position: absolute; inset: 0; opacity: 0; transition: opacity 1.6s ease; pointer-events: none; overflow: hidden; }
 .nk-home-hero__spine.nk-on { opacity: 1; }
 /* 压暗层：左下文字安全区 + 底部融入页面底色（不遮挡右上方场景主体） */
 .nk-home-hero__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 85% at 0% 108%, rgba(8,8,20,0.82) 0%, rgba(8,8,20,0.5) 34%, transparent 62%), linear-gradient(to bottom, rgba(15,15,35,0.28) 0%, transparent 22%, transparent 62%, rgba(15,15,35,0.55) 88%, var(--bg) 100%); }
-.nk-home-hero__content { position: relative; z-index: 2; text-align: left; max-width: 720px; }
+/* 内容与导航区同网格：max-width 1440 居中 + 左侧 128px 侧栏间隙（断点下收窄），保证 Hero 标题与下方板块区左对齐 */
+.nk-home-hero__content { position: relative; z-index: 2; text-align: left; width: 100%; max-width: var(--nk-content-max); margin: 0 auto; padding: 0 48px 0 128px; }
 /* HUD 引题行：短线 + 中文品牌附标（中文为主体的混合串，正文承载避免 Orbitron 回退等宽体） */
 .nk-home-hero__kicker { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; animation: nk-home-fade-up 0.6s var(--ease) 0.25s backwards; }
-.nk-home-hero__kicker-line { width: 40px; height: 2px; background: linear-gradient(90deg, var(--primary), transparent); box-shadow: 0 0 10px var(--primary-glow); }
-.nk-home-hero__kicker-text { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em; color: rgba(238,240,255,0.92); text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 24px var(--primary-glow); }
+.nk-home-hero__kicker-line { width: 40px; height: 2px; background: linear-gradient(90deg, var(--primary), transparent); }
+.nk-home-hero__kicker-text { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em; color: rgba(238,240,255,0.92); text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
 /* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文会回退等宽体，观感差）；
    clamp 下限 2.4rem + 上限 4.5rem：4 字短标题放大上限增强品牌冲击力，窄屏仍单行安全 */
-.nk-home-hero__title { font-family: var(--font-body); font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: 0.08em; line-height: 1.1; color: var(--text-bright); perspective: 600px; text-shadow: 0 2px 6px rgba(0,0,0,0.75), 0 0 40px var(--primary-glow), 0 0 80px rgba(124,58,237,0.15), 0 4px 24px rgba(0,0,0,0.6); }
+/* 墨色分层：移除 40/80px 弥漫紫光，仅保留黑投影 + ≤14px 边缘微光（与详情页规范一致） */
+.nk-home-hero__title { font-family: var(--font-body); font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: 0.08em; line-height: 1.1; color: var(--text-bright); perspective: 600px; text-shadow: 0 2px 6px rgba(0,0,0,0.75), 0 0 14px color-mix(in srgb, var(--primary) 18%, transparent), 0 4px 24px rgba(0,0,0,0.5); }
 .nk-home-hero__title span { display: inline-block; animation: nk-home-char-in 0.5s var(--ease) backwards; }
 /* 定位副标题：内容清单，与主标题拉开层级 */
 .nk-home-hero__tagline { margin-top: 20px; font-size: 0.88rem; color: rgba(200,212,236,0.88); letter-spacing: 0.16em; text-shadow: 0 1px 6px rgba(0,0,0,0.85); animation: nk-home-fade-up 0.6s var(--ease) 1.15s backwards; }
@@ -341,7 +344,7 @@
 .nk-home-hero__scroll-line::after { content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent, var(--text-bright), transparent); animation: nk-home-scroll-drop 1.8s ease-in-out infinite; }
 
 /* ── 导航网格 ── */
-.nk-home-nav { max-width: var(--nk-content-max); margin: 0 auto; padding: 84px 40px 48px 112px; }
+.nk-home-nav { max-width: var(--nk-content-max); margin: 0 auto; padding: 84px 40px 48px 128px; }
 /* 分区标题：中文主标题（语义）+ 英文 HUD 标签（装饰），两者构成清晰区域语义 */
 .nk-home-nav__head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 32px; }
 .nk-home-nav__title { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.06em; color: var(--text-bright); }
@@ -352,14 +355,17 @@
 .nk-home-nav__version { font-family: var(--font-hud); font-size: 0.58rem; letter-spacing: 0.18em; color: var(--text2); padding-left: 14px; margin-left: 2px; border-left: 1px solid var(--border2); white-space: nowrap; }
 .nk-home-nav__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 
-.nk-home-card { --holo-color: rgba(180,85,255,0.7); position: relative; isolation: isolate; display: flex; align-items: center; gap: 14px; padding: 22px 20px; background: var(--card); border: 1px solid rgba(124,58,237,0.22); border-radius: 12px; text-decoration: none; color: var(--text); overflow: hidden; cursor: pointer; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s, background 0.3s; animation: nk-card-in 0.45s var(--ease) backwards; animation-delay: calc(0.3s + var(--i, 0) * 60ms); transform-style: preserve-3d; }
-.nk-home-card:hover { transform: perspective(900px) translateY(-4px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.07); box-shadow: 0 12px 36px rgba(0,0,0,0.4), 0 0 18px rgba(124,58,237,0.15); }
+.nk-home-card { --holo-color: color-mix(in srgb, var(--ph-400) 70%, transparent); position: relative; isolation: isolate; display: flex; align-items: center; gap: 14px; padding: 22px 20px; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent); border-radius: 12px; text-decoration: none; color: var(--text); overflow: hidden; cursor: pointer; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s, background 0.3s; animation: nk-card-in 0.45s var(--ease) backwards; animation-delay: calc(0.3s + var(--i, 0) * 60ms); transform-style: preserve-3d; }
+/* 墨色分层：浮起收窄为 -1px，移除重阴影与弥漫光晕，仅留 ≤14px 边缘微光 */
+.nk-home-card:hover { transform: perspective(900px) translateY(-1px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: color-mix(in srgb, var(--primary) 50%, transparent); background: color-mix(in srgb, var(--primary) 7%, transparent); box-shadow: 0 0 14px color-mix(in srgb, var(--primary) 12%, transparent); }
+/* 触觉按压：:active 回位微缩，模拟物理按键反馈 */
+.nk-home-card:active { transform: perspective(900px) translateY(0) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)) scale(0.98); }
 /* 全息扫光（复用 nk-card-sheen 关键帧与渐变结构） */
 .nk-home-card__sheen { position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); transform-origin: center; backface-visibility: hidden; }
 .nk-home-card:hover .nk-home-card__sheen { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
-.nk-home-card__icon { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(124,58,237,0.1); border: 1px solid var(--border); color: var(--primary); transition: all 0.3s; }
+.nk-home-card__icon { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: color-mix(in srgb, var(--primary) 10%, transparent); border: 1px solid var(--border); color: var(--primary); transition: all 0.3s; }
 .nk-home-card__icon svg { width: 20px; height: 20px; }
-.nk-home-card:hover .nk-home-card__icon { background: var(--primary-glow); border-color: var(--border2); box-shadow: 0 0 14px rgba(124,58,237,0.25); color: var(--text-bright); }
+.nk-home-card:hover .nk-home-card__icon { background: var(--primary-glow); border-color: var(--border2); color: var(--text-bright); }
 .nk-home-card__body { flex: 1; min-width: 0; position: relative; z-index: 2; }
 .nk-home-card__title { font-size: 0.95rem; font-weight: 800; color: var(--text-bright); display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
 .nk-home-card__cn { flex-shrink: 0; }
@@ -369,25 +375,25 @@
 .nk-home-card:hover .nk-home-card__arrow { transform: translateX(4px); color: var(--primary); }
 
 /* ── 货币战争网关卡片：金色描边/暗金底纹，从紫色系中跳出（第二入口） ── */
-.nk-home-card--gateway { --holo-color: rgba(252,211,77,0.75); border-color: rgba(212,175,55,0.42); background: linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(20,16,8,0.4) 55%, rgba(212,175,55,0.06) 100%), var(--card); }
-.nk-home-card--gateway:hover { border-color: rgba(252,211,77,0.75); background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(28,22,10,0.5) 55%, rgba(212,175,55,0.1) 100%), var(--card); box-shadow: 0 12px 36px rgba(0,0,0,0.45), 0 0 22px rgba(212,175,55,0.28); }
-.nk-home-card--gateway .nk-home-card__icon { background: rgba(212,175,55,0.14); border-color: rgba(212,175,55,0.4); color: #FCD34D; }
-.nk-home-card--gateway:hover .nk-home-card__icon { background: rgba(212,175,55,0.22); border-color: rgba(252,211,77,0.7); box-shadow: 0 0 16px rgba(212,175,55,0.4); color: #FDE68A; }
-.nk-home-card--gateway .nk-home-card__cn { color: #F5D67B; }
-.nk-home-card--gateway .nk-home-card__en { color: rgba(212,175,55,0.75); }
+.nk-home-card--gateway { --holo-color: color-mix(in srgb, var(--gold-300) 75%, transparent); border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, rgba(20,16,8,0.4) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); }
+.nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-300) 75%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 20%, transparent) 0%, rgba(28,22,10,0.5) 55%, color-mix(in srgb, var(--gold-500) 10%, transparent) 100%), var(--card); box-shadow: 0 0 14px color-mix(in srgb, var(--gold-500) 16%, transparent); }
+.nk-home-card--gateway .nk-home-card__icon { background: color-mix(in srgb, var(--gold-500) 14%, transparent); border-color: color-mix(in srgb, var(--gold-500) 40%, transparent); color: var(--gold-300); }
+.nk-home-card--gateway:hover .nk-home-card__icon { background: color-mix(in srgb, var(--gold-500) 22%, transparent); border-color: color-mix(in srgb, var(--gold-300) 70%, transparent); color: var(--gold-200); }
+.nk-home-card--gateway .nk-home-card__cn { color: var(--gold-350); }
+.nk-home-card--gateway .nk-home-card__en { color: color-mix(in srgb, var(--gold-500) 75%, transparent); }
 .nk-home-card--gateway .nk-home-card__desc { color: rgba(242,232,207,0.72); }
-.nk-home-card--gateway:hover .nk-home-card__arrow { color: #FCD34D; }
+.nk-home-card--gateway:hover .nk-home-card__arrow { color: var(--gold-300); }
 /* 网关徽章：行内金色标签，明确“独立模式”入口语义（仅网关卡片显示；紧随描述尾部，窄卡不重叠） */
-.nk-home-card__badge { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 4px; font-family: var(--font-hud); font-size: 0.44rem; font-weight: 700; letter-spacing: 0.12em; line-height: 1.25; vertical-align: 1px; white-space: nowrap; color: #F5D67B; background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.35); transition: all 0.3s; }
-.nk-home-card--gateway:hover .nk-home-card__badge { background: rgba(212,175,55,0.22); border-color: rgba(252,211,77,0.7); box-shadow: 0 0 12px rgba(212,175,55,0.3); color: #FDE68A; }
+.nk-home-card__badge { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 4px; font-family: var(--font-hud); font-size: 0.44rem; font-weight: 700; letter-spacing: 0.12em; line-height: 1.25; vertical-align: 1px; white-space: nowrap; color: var(--gold-350); background: color-mix(in srgb, var(--gold-500) 12%, transparent); border: 1px solid color-mix(in srgb, var(--gold-500) 35%, transparent); transition: all 0.3s; }
+.nk-home-card--gateway:hover .nk-home-card__badge { background: color-mix(in srgb, var(--gold-500) 22%, transparent); border-color: color-mix(in srgb, var(--gold-300) 70%, transparent); color: var(--gold-200); }
 
 /* ── 页脚：品牌标语 + 拉丁格言 ── */
 .nk-home-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 56px 40px 44px 112px; text-align: center; }
 .nk-home-footer__orn { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 0 0 24px; }
 .nk-home-footer__rule { width: 72px; height: 1px; background: linear-gradient(90deg, transparent, var(--border2)); }
 .nk-home-footer__rule:last-child { background: linear-gradient(90deg, var(--border2), transparent); }
-.nk-home-footer__star { font-size: 0.9rem; color: var(--primary); text-shadow: 0 0 12px var(--primary-glow); }
-.nk-home-footer__motto { margin: 0; padding-left: 0.3em; font-family: var(--font-body); font-size: clamp(1.15rem, 2.4vw, 1.5rem); font-weight: 700; letter-spacing: 0.28em; color: var(--text-bright); text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 0 20px var(--primary-glow); }
+.nk-home-footer__star { font-size: 0.9rem; color: var(--primary); }
+.nk-home-footer__motto { margin: 0; padding-left: 0.3em; font-family: var(--font-body); font-size: clamp(1.15rem, 2.4vw, 1.5rem); font-weight: 700; letter-spacing: 0.28em; color: var(--text-bright); text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
 .nk-home-footer__latin { margin: 14px 0 0; font-family: var(--font-hud); font-size: 0.72rem; letter-spacing: 0.3em; color: var(--text2); opacity: 0.9; }
 
 /* ── 首页动画 ── */
@@ -398,17 +404,28 @@
 /* ── 响应式 ── */
 @media (max-width: 1023px) {
   .nk-home-nav__grid { grid-template-columns: repeat(2, 1fr); }
-  .nk-home-hero { padding: 0 32px 96px 32px; }
+  /* 平板：Hero 内容与导航区同步收窄左间隙（侧栏 56px + 32px 对齐），两侧保持一致 */
+  .nk-home-hero { padding: 0 0 96px 0; }
+  .nk-home-hero__content { padding: 0 32px; }
+  .nk-home-nav { padding-left: 32px; padding-right: 32px; }
 }
 @media (max-width: 767px) {
   .nk-home-nav__grid { grid-template-columns: 1fr; }
   /* 修正：左 92px 为桌面侧栏残留（移动端应左右对称）；底部需避开 56px 底部导航条 + safe-area，防止末张导航卡被遮挡 */
   .nk-home-nav { padding: 56px 20px calc(88px + env(safe-area-inset-bottom, 0px)); }
   /* 移动端：标题保持左下构图，收窄内边距；滚动指示器隐藏（左下标题已占据视觉锚点） */
-  .nk-home-hero { padding: 0 20px calc(88px + env(safe-area-inset-bottom, 0px)) 20px; }
+  .nk-home-hero { padding: 0 0 calc(88px + env(safe-area-inset-bottom, 0px)) 0; }
+  .nk-home-hero__content { padding: 0 20px; }
   .nk-home-hero__scroll { display: none; }
   /* 页脚：左侧 112px 为桌面侧栏残留，移动端左右对称 */
   .nk-home-footer { padding: 48px 20px calc(40px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* 触屏设备（hover: none）：重置粘滞 hover 态（点击后不残留浮起/微光） */
+@media (hover: none) {
+  .nk-home-card:hover { transform: none; border-color: color-mix(in srgb, var(--primary) 22%, transparent); background: var(--card); box-shadow: none; }
+  .nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, rgba(20,16,8,0.4) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); box-shadow: none; }
+  .nk-home-card--gateway:hover .nk-home-card__badge { background: color-mix(in srgb, var(--gold-500) 12%, transparent); border-color: color-mix(in srgb, var(--gold-500) 35%, transparent); color: var(--gold-350); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -457,6 +474,6 @@
    图片懒加载占位色（基于稀有度）
 ═══════════════════════════════════════════ */
 .nk-cat-card__img img, .nk-relic-card__img img, .nk-item-card__img img, .nk-mob-card__img img { background: rgba(20,20,45,0.6); }
-.nk-cat-card[data-rarity="5"] .nk-cat-card__img img { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(20,20,45,0.6)); }
-.nk-cat-card[data-rarity="4"] .nk-cat-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.08), rgba(20,20,45,0.6)); }
-.nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, rgba(192,132,252,0.06), rgba(20,20,45,0.6)); }
+.nk-cat-card[data-rarity="5"] .nk-cat-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), rgba(20,20,45,0.6)); }
+.nk-cat-card[data-rarity="4"] .nk-cat-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), rgba(20,20,45,0.6)); }
+.nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), rgba(20,20,45,0.6)); }

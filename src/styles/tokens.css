@@ -7,24 +7,96 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
 
 :root {
+  /* ═══ 原始层 Primitive：色阶事实（单一事实来源；仅允许被语义层/领域层引用） ═══ */
+  /* Purple Heart 色阶（Kigen.design） */
+  --ph-50: #f5eefd;
+  --ph-100: #e6d4fb;
+  --ph-200: #d2aaf7;
+  --ph-300: #c183f4;
+  --ph-400: #b259f0;
+  --ph-500: #a02fe0;
+  --ph-600: #8a27c2;
+  --ph-700: #6e1d9b;
+  --ph-800: #4f1271;
+  --ph-900: #2f0845;
+  --ph-950: #1e032e;
+  /* 金色阶（CW 主题 / 星级 / 网关入口；gold-350 为项目自有高亮暖金） */
+  --gold-200: #FDE68A;
+  --gold-300: #FCD34D;
+  --gold-350: #F5D67B;
+  --gold-400: #FBBF24;
+  --gold-500: #D4AF37;
+
+  /* ═══ 领域层 Domain：数据语义色（不随主题切换，仅被引用不内联） ═══ */
+  /* 稀有度 */
+  --rarity-1: #94A3B8;
+  --rarity-2: #4ADE80;
+  --rarity-3: #60A5FA;
+  --rarity-4: var(--ph-400);
+  --rarity-4-deep: #A855F7;
+  --rarity-5: var(--gold-400);
+  /* 属性图标（Hero 属性 8 项） */
+  --prop-hp: #F472B6;
+  --prop-atk: #FCA5A5;
+  --prop-def: #93C5FD;
+  --prop-spd: var(--gold-400);
+  --prop-crit-rate: var(--ph-300);
+  --prop-crit-dmg: var(--gold-400);
+  --prop-taunt: #94A3B8;
+  --prop-energy: var(--ph-400);
+  /* 元素（角色卡属性光斑/边框/图标） */
+  --elem-fire: #FF6B35;
+  --elem-ice: #4FC3F7;
+  --elem-thunder: #AB47BC;
+  --elem-wind: #66BB6A;
+  --elem-quantum: #5C6BC0;
+  --elem-imaginary: #FFD54F;
+  --elem-physical: #B0BEC5;
+  /* 技能类型徽章 */
+  --skill-normal: #CBD5E1;
+  --skill-bp: #60A5FA;
+  --skill-passive: #2DD4BF;
+  --skill-servant-passive: #67E8F9;
+  /* diff 状态（主色 --diff-add/--diff-del；软变体用于内联标记） */
+  --diff-add-soft: #6EE7B7;
+  --diff-del-soft: #FDA4AF;
+  /* 遗器套装类型 */
+  --relic-planar: #7DD3FC;
+  --relic-planar-deep: #38BDF8;
+  /* 首页 Hero 兜底渐变（Spine 加载失败时的深紫底色） */
+  --hero-bg-deep: #161233;
+  --hero-bg-tint: rgba(32,22,72,0.55);
+
+  /* ═══ 语义层 Semantic：主题映射（:root 常规紫调，[data-theme="cw"] 暗金覆盖） ═══ */
   --bg: #0F0F23;
   --surface: rgba(15,15,35,0.85);
   --card: rgba(20,20,45,0.7);
-  --primary: #7C3AED;
-  --primary-glow: rgba(124,58,237,0.25);
+  /* 主色 = Purple Heart 500（较原 violet-600 更饱和、更品红）；派生色一律 color-mix 表达 */
+  --primary: var(--ph-500);
+  --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
   --accent: #F43F5E;
-  --gold: #FBBF24;
+  --gold: var(--gold-400);
   --text: #E2E8F0;
   --text2: #94A3B8;
   --text-bright: #FFFFFF;
   --text3: #7C8DA6;
-  --border: rgba(124,58,237,0.2);
-  --border2: rgba(124,58,237,0.4);
+  --border: color-mix(in srgb, var(--primary) 20%, transparent);
+  --border2: color-mix(in srgb, var(--primary) 40%, transparent);
   --highlight: #f29e38;
-  --metric-val: #C4B5FD;
+  /* 高亮数值/激活态文字 = Purple Heart 300 */
+  --metric-val: var(--ph-300);
+  /* diff 状态（主色 --diff-add/--diff-del；软变体/文字色用于内联标记） */
   --diff-add: #34D399;
   --diff-del: #F87171;
   --diff-text: #60A5FA;
+  --diff-add-soft: #6EE7B7;
+  --diff-del-soft: #FDA4AF;
+  --diff-text-add: #ECFDF5;
+  --diff-text-del: #FEE2E2;
+  /* 终局赛季状态（live 与 diff-add 同绿、upcoming 与 diff-text 同蓝，引用保持同步） */
+  --season-live: var(--diff-add);
+  --season-upcoming: var(--diff-text);
+  --season-ended: #64748B;
   --badge-test: #F59E0B;
   --font-hud: 'Orbitron', monospace;
   --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
@@ -44,23 +116,24 @@
   /* 表面阴影：扩散式染色阴影（取代霓虹 glow，营造墨色分层质感） */
   --nk-shadow-lift: 0 2px 6px rgba(0,0,0,0.28), 0 10px 24px -8px rgba(0,0,0,0.5);
   --nk-shadow-card: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px -10px rgba(0,0,0,0.45);
-  /* ─── 外壳语义变量（侧栏/抽屉/目录头/卡片边框）：常规紫调默认，CW 暗金覆盖 ─── */
+  /* ─── 外壳语义变量（侧栏/抽屉/目录头/卡片边框）：color-mix 派生自主色，
+       主题切换自动跟随；CW 在 [data-theme="cw"] 显式覆盖为暗金 ─── */
   --nk-shell-bg: rgba(12,12,30,0.95);
-  --nk-shell-hover: rgba(124,58,237,0.1);
-  --nk-shell-press: rgba(124,58,237,0.18);
-  --nk-shell-active-bg: rgba(124,58,237,0.22);
-  --nk-shell-active-border: rgba(124,58,237,0.4);
-  --nk-shell-glow: rgba(124,58,237,0.18);
+  --nk-shell-hover: color-mix(in srgb, var(--primary) 10%, transparent);
+  --nk-shell-press: color-mix(in srgb, var(--primary) 18%, transparent);
+  --nk-shell-active-bg: color-mix(in srgb, var(--primary) 22%, transparent);
+  --nk-shell-active-border: color-mix(in srgb, var(--primary) 40%, transparent);
+  --nk-shell-glow: color-mix(in srgb, var(--primary) 18%, transparent);
   --nk-sheet-bg: rgba(16,14,36,0.94);
-  --nk-sheet-border: rgba(124,58,237,0.35);
-  --nk-sheet-item-bg: rgba(124,58,237,0.05);
-  --nk-sheet-item-border: rgba(124,58,237,0.14);
+  --nk-sheet-border: color-mix(in srgb, var(--primary) 35%, transparent);
+  --nk-sheet-item-bg: color-mix(in srgb, var(--primary) 5%, transparent);
+  --nk-sheet-item-border: color-mix(in srgb, var(--primary) 14%, transparent);
   --nk-header-bg: rgba(15,15,35,0.92);
-  --nk-header-border: rgba(124,58,237,0.12);
-  --nk-input-bg: rgba(124,58,237,0.06);
-  --nk-input-border: rgba(124,58,237,0.18);
-  --nk-page-tint: rgba(124,58,237,0.05);
-  --nk-card-border: rgba(124,58,237,0.3);
+  --nk-header-border: color-mix(in srgb, var(--primary) 12%, transparent);
+  --nk-input-bg: color-mix(in srgb, var(--primary) 6%, transparent);
+  --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
+  --nk-page-tint: color-mix(in srgb, var(--primary) 5%, transparent);
+  --nk-card-border: color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 /* ═══ 货币战争模式：全壳暗金主题（黑底 + 金点缀） ═══
@@ -70,35 +143,36 @@
   --bg: #0A0906;
   --surface: rgba(16,14,9,0.88);
   --card: rgba(24,21,13,0.72);
-  --primary: #D4AF37;
-  --primary-glow: rgba(212,175,55,0.25);
+  /* 主色 = 金色阶 500（原始层 --gold-500）；以下暗金值均为历史沉淀，与 --gold-* 色阶同源 */
+  --primary: var(--gold-500);
+  --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
   --accent: #C98A2D;
-  --gold: #FCD34D;
+  --gold: var(--gold-300);
   --text: rgba(255,248,230,0.92);
   --text2: rgba(242,232,207,0.7);
   --text-bright: #FFF8E6;
   --text3: rgba(232,222,197,0.52);
-  --border: rgba(212,175,55,0.18);
-  --border2: rgba(212,175,55,0.4);
-  --highlight: #FCD34D;
-  --metric-val: #F5D67B;
+  --border: color-mix(in srgb, var(--gold-500) 18%, transparent);
+  --border2: color-mix(in srgb, var(--gold-500) 40%, transparent);
+  --highlight: var(--gold-300);
+  --metric-val: var(--gold-350);
   /* 外壳：暗金侧栏/底部栏 */
   --nk-shell-bg: rgba(12,10,5,0.96);
-  --nk-shell-hover: rgba(212,175,55,0.1);
-  --nk-shell-press: rgba(212,175,55,0.16);
-  --nk-shell-active-bg: rgba(212,175,55,0.16);
-  --nk-shell-active-border: rgba(212,175,55,0.45);
-  --nk-shell-glow: rgba(212,175,55,0.2);
+  --nk-shell-hover: color-mix(in srgb, var(--gold-500) 10%, transparent);
+  --nk-shell-press: color-mix(in srgb, var(--gold-500) 16%, transparent);
+  --nk-shell-active-bg: color-mix(in srgb, var(--gold-500) 16%, transparent);
+  --nk-shell-active-border: color-mix(in srgb, var(--gold-500) 45%, transparent);
+  --nk-shell-glow: color-mix(in srgb, var(--gold-500) 20%, transparent);
   --nk-sheet-bg: rgba(20,17,9,0.95);
-  --nk-sheet-border: rgba(212,175,55,0.35);
-  --nk-sheet-item-bg: rgba(212,175,55,0.06);
-  --nk-sheet-item-border: rgba(212,175,55,0.16);
+  --nk-sheet-border: color-mix(in srgb, var(--gold-500) 35%, transparent);
+  --nk-sheet-item-bg: color-mix(in srgb, var(--gold-500) 6%, transparent);
+  --nk-sheet-item-border: color-mix(in srgb, var(--gold-500) 16%, transparent);
   --nk-header-bg: rgba(14,12,7,0.94);
-  --nk-header-border: rgba(212,175,55,0.14);
-  --nk-input-bg: rgba(212,175,55,0.06);
-  --nk-input-border: rgba(212,175,55,0.2);
-  --nk-page-tint: rgba(212,175,55,0.04);
-  --nk-card-border: rgba(212,175,55,0.28);
+  --nk-header-border: color-mix(in srgb, var(--gold-500) 14%, transparent);
+  --nk-input-bg: color-mix(in srgb, var(--gold-500) 6%, transparent);
+  --nk-input-border: color-mix(in srgb, var(--gold-500) 20%, transparent);
+  --nk-page-tint: color-mix(in srgb, var(--gold-500) 4%, transparent);
+  --nk-card-border: color-mix(in srgb, var(--gold-500) 28%, transparent);
 }
 
 /* 主题切换瞬间的渐变过渡（App.vue 临时挂载 ~450ms 后移除，
@@ -241,7 +315,7 @@
 .nk-page--detail::-webkit-scrollbar-track { background: transparent; }
 
 /* 图片加载失败占位符 */
-.nk-img-error { background: rgba(124,58,237,0.06); border: 1px dashed var(--border); object-fit: contain; }
+.nk-img-error { background: color-mix(in srgb, var(--primary) 6%, transparent); border: 1px dashed var(--border); object-fit: contain; }
 
 /* ─── Hero: 左右结构（宽屏左视觉 + 右信息面板；窄屏回退为堆叠） ─── */
 @property --spine-inner { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
@@ -321,17 +395,17 @@ background-position: center 15%;
   letter-spacing: 0.18em; color: rgba(230,224,250,0.92);
 }
 .nk-hero__camp::before { content: ''; width: 14px; height: 1px; background: rgba(167,139,250,0.85); }
-.nk-hero__name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text-bright); text-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 0 14px rgba(124,58,237,0.2); line-height: 1.15; }
+.nk-hero__name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text-bright); text-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 20%, transparent); line-height: 1.15; }
 .nk-hero__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.nk-hero__stars { color: var(--gold); font-size: 1.05rem; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 8px rgba(251,191,36,0.22); }
+.nk-hero__stars { color: var(--gold); font-size: 1.05rem; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 8px color-mix(in srgb, var(--rarity-5) 22%, transparent); }
 .nk-hero__tag {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 12px; border-radius: 16px;
-  background: rgba(124,58,237,0.08); border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--primary) 8%, transparent); border: 1px solid var(--border);
   font-size: 0.75rem; color: var(--text2);
   transition: border-color 0.2s, background 0.2s;
 }
-.nk-hero__tag:hover { border-color: var(--border2); background: rgba(124,58,237,0.14); }
+.nk-hero__tag:hover { border-color: var(--border2); background: color-mix(in srgb, var(--primary) 14%, transparent); }
 .nk-hero__tag img { width: 16px; height: 16px; border-radius: 50%; }
 
 /* 属性区段（标题 + 等级条 + 8 项属性网格） */
@@ -352,20 +426,20 @@ background-position: center 15%;
 }
 .nk-hero__level-track {
   flex: 1; height: 6px; border-radius: 3px; overflow: hidden;
-  background: rgba(124,58,237,0.1);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(124,58,237,0.14);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.35), inset 0 0 0 1px color-mix(in srgb, var(--primary) 14%, transparent);
 }
 .nk-hero__level-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary), #A78BFA);
+  background: linear-gradient(90deg, var(--primary), var(--ph-400));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
   transition: width 0.6s var(--nk-ease-out);
 }
 /* 8 项属性网格（mobile-first：2 列紧凑） */
 .nk-hero__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; }
-.nk-hero__stat { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid rgba(124,58,237,0.1); transition: background 0.2s; }
+.nk-hero__stat { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent); transition: background 0.2s; }
 .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.nk-hero__stat:hover { background: rgba(124,58,237,0.05); }
+.nk-hero__stat:hover { background: color-mix(in srgb, var(--primary) 5%, transparent); }
 .nk-hero__stat-icon {
   display: inline-block; width: 16px; height: 16px;
   background: var(--primary); opacity: 0.85;
@@ -374,14 +448,14 @@ background-position: center 15%;
   -webkit-mask-position: center; mask-position: center;
 }
 /* 各属性图标（mask-image SVG，颜色继承 currentColor 通过 mask 通道） */
-.nk-hero__stat-icon[data-icon="hp"]      { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 21s-7-4.5-9.5-9.5C.84 8.5 3 5 6.5 5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.5 0 5.67 3.5 4 6.5C19 16.5 12 21 12 21z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 21s-7-4.5-9.5-9.5C.84 8.5 3 5 6.5 5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.5 0 5.67 3.5 4 6.5C19 16.5 12 21 12 21z'/></svg>"); background: #F472B6; }
-.nk-hero__stat-icon[data-icon="atk"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M14 3l7 7-4 4-7-7 4-4zm-3 6l-7 7v5h5l7-7-5-5z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M14 3l7 7-4 4-7-7 4-4zm-3 6l-7 7v5h5l7-7-5-5z'/></svg>"); background: #FCA5A5; }
-.nk-hero__stat-icon[data-icon="def"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2L4 6v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V6l-8-4z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2L4 6v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V6l-8-4z'/></svg>"); background: #93C5FD; }
-.nk-hero__stat-icon[data-icon="spd"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); background: #FBBF24; }
-.nk-hero__stat-icon[data-icon="crit-rate"] { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/><circle cx='12' cy='12' r='3' fill='black'/><path stroke='black' stroke-width='2' d='M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/><circle cx='12' cy='12' r='3' fill='black'/><path stroke='black' stroke-width='2' d='M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1'/></svg>"); background: #C4B5FD; }
-.nk-hero__stat-icon[data-icon="crit-dmg"]  { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2l2.5 7.5H22l-6 4.5 2.5 8L12 17l-6.5 5 2.5-8-6-4.5h7.5z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2l2.5 7.5H22l-6 4.5 2.5 8L12 17l-6.5 5 2.5-8-6-4.5h7.5z'/></svg>"); background: #FBBF24; }
-.nk-hero__stat-icon[data-icon="taunt"]   { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2a8 8 0 00-8 8c0 1.5.3 2.9.9 4.2L2 22l8-3 1.5-2a8 8 0 008-7 8 8 0 00-7.5-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2a8 8 0 00-8 8c0 1.5.3 2.9.9 4.2L2 22l8-3 1.5-2a8 8 0 008-7 8 8 0 00-7.5-8z'/></svg>"); background: #94A3B8; }
-.nk-hero__stat-icon[data-icon="energy"]  { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); background: #A78BFA; }
+.nk-hero__stat-icon[data-icon="hp"]      { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 21s-7-4.5-9.5-9.5C.84 8.5 3 5 6.5 5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.5 0 5.67 3.5 4 6.5C19 16.5 12 21 12 21z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 21s-7-4.5-9.5-9.5C.84 8.5 3 5 6.5 5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.5 0 5.67 3.5 4 6.5C19 16.5 12 21 12 21z'/></svg>"); background: var(--prop-hp); }
+.nk-hero__stat-icon[data-icon="atk"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M14 3l7 7-4 4-7-7 4-4zm-3 6l-7 7v5h5l7-7-5-5z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M14 3l7 7-4 4-7-7 4-4zm-3 6l-7 7v5h5l7-7-5-5z'/></svg>"); background: var(--prop-atk); }
+.nk-hero__stat-icon[data-icon="def"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2L4 6v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V6l-8-4z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2L4 6v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V6l-8-4z'/></svg>"); background: var(--prop-def); }
+.nk-hero__stat-icon[data-icon="spd"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); background: var(--prop-spd); }
+.nk-hero__stat-icon[data-icon="crit-rate"] { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/><circle cx='12' cy='12' r='3' fill='black'/><path stroke='black' stroke-width='2' d='M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/><circle cx='12' cy='12' r='3' fill='black'/><path stroke='black' stroke-width='2' d='M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1'/></svg>"); background: var(--prop-crit-rate); }
+.nk-hero__stat-icon[data-icon="crit-dmg"]  { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2l2.5 7.5H22l-6 4.5 2.5 8L12 17l-6.5 5 2.5-8-6-4.5h7.5z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2l2.5 7.5H22l-6 4.5 2.5 8L12 17l-6.5 5 2.5-8-6-4.5h7.5z'/></svg>"); background: var(--prop-crit-dmg); }
+.nk-hero__stat-icon[data-icon="taunt"]   { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2a8 8 0 00-8 8c0 1.5.3 2.9.9 4.2L2 22l8-3 1.5-2a8 8 0 008-7 8 8 0 00-7.5-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2a8 8 0 00-8 8c0 1.5.3 2.9.9 4.2L2 22l8-3 1.5-2a8 8 0 008-7 8 8 0 00-7.5-8z'/></svg>"); background: var(--prop-taunt); }
+.nk-hero__stat-icon[data-icon="energy"]  { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); background: var(--prop-energy); }
 
 .nk-hero__stat-label { font-size: 0.78rem; color: var(--text2); letter-spacing: 0.02em; }
 .nk-hero__stat-val { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap; }
@@ -409,7 +483,7 @@ background-position: center 15%;
 /* ─── 通用组件 ─── */
 .nk-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; transition: border-color 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
 .nk-card:hover { border-color: var(--border2); box-shadow: var(--nk-shadow-card); }
-.nk-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(124,58,237,0.04), transparent); transition: left 0.5s; }
+.nk-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 4%, transparent), transparent); transition: left 0.5s; }
 .nk-card:hover::before { left: 150%; }
 .nk-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-hud); font-size: 0.6875rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 /* 章节标题装饰：左侧渐变竖条（与 Hero 属性标题同语言） */
@@ -455,7 +529,7 @@ background-position: center 15%;
 .nk-toast__icon svg { width: 100%; height: 100%; }
 .nk-toast--error { border-color: rgba(248,113,113,0.4); }
 .nk-toast--error .nk-toast__icon { color: var(--diff-del); }
-.nk-toast--warn { border-color: rgba(251,191,36,0.4); }
+.nk-toast--warn { border-color: color-mix(in srgb, var(--rarity-5) 40%, transparent); }
 .nk-toast--warn .nk-toast__icon { color: var(--gold); }
 .nk-toast--info .nk-toast__icon { color: var(--primary); }
 .nk-toast--success { border-color: rgba(52,211,153,0.4); }
@@ -464,7 +538,7 @@ background-position: center 15%;
 /* ═══════════════════════════════════════════
    骨架屏 + Shimmer 动画
 ═══════════════════════════════════════════ */
-.nk-sk { background: rgba(124,58,237,0.12); border-radius: 6px; }
+.nk-sk { background: color-mix(in srgb, var(--primary) 12%, transparent); border-radius: 6px; }
 .nk-sk--shimmer { position: relative; overflow: hidden; }
 /* 骨架语义类：抽取常用尺寸，避免逐处 inline style 硬编码 */
 .nk-sk--text-sm { height: 14px; border-radius: 4px; }
@@ -482,7 +556,7 @@ background-position: center 15%;
 .nk-sk--bar-lg { width: 180px; }
 .nk-sk--fill { position: absolute; inset: 0; border-radius: 0; }
 .nk-sk--bar-line { width: 100%; height: 6px; border-radius: 3px; }
-.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.08) 35%, rgba(180,85,255,0.18) 50%, rgba(124,58,237,0.08) 65%, transparent 100%); animation: nk-shimmer 1.4s linear infinite; }
+.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--primary) 8%, transparent) 35%, color-mix(in srgb, var(--ph-400) 18%, transparent) 50%, color-mix(in srgb, var(--primary) 8%, transparent) 65%, transparent 100%); animation: nk-shimmer 1.4s linear infinite; }
 @keyframes nk-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 .nk-skeleton { padding: 0; }
 .nk-skeleton--char { max-width: 100%; }

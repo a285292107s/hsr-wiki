@@ -21,10 +21,10 @@
   font-weight: 700; letter-spacing: 0.04em;
 }
 .nk-relic-type-badge--cavern {
-  color: #C4B5FD; background: rgba(124,58,237,0.16); border-color: rgba(124,58,237,0.4);
+  color: var(--ph-300); background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: color-mix(in srgb, var(--primary) 40%, transparent);
 }
 .nk-relic-type-badge--planar {
-  color: #7DD3FC; background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.35);
+  color: var(--relic-planar); background: color-mix(in srgb, var(--relic-planar-deep) 12%, transparent); border-color: color-mix(in srgb, var(--relic-planar-deep) 35%, transparent);
 }
 .nk-relic-ver {
   font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
@@ -80,7 +80,7 @@
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
   color: var(--primary); letter-spacing: 0.08em;
   padding: 3px 10px; border-radius: 12px;
-  background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.3);
+  background: color-mix(in srgb, var(--primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
 }
 .nk-relic-effect__desc { font-size: 0.8125rem; line-height: 1.8; color: var(--text2); }
 .nk-relic-effect__desc .hl { color: var(--highlight); font-weight: 600; }
@@ -100,19 +100,19 @@
 .nk-relic-submeta__badge {
   display: inline-flex; align-items: baseline; gap: 6px;
   padding: 5px 10px;
-  background: rgba(124,58,237,0.08);
-  border: 1px solid rgba(124,58,237,0.2);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
   border-radius: 999px;
   transition: border-color 0.2s, background 0.2s;
 }
-.nk-relic-submeta__badge:hover { border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.12); }
+.nk-relic-submeta__badge:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); background: color-mix(in srgb, var(--primary) 12%, transparent); }
 .nk-relic-submeta__badge--accent {
-  background: rgba(124,58,237,0.18);
-  border-color: rgba(124,58,237,0.5);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 50%, transparent);
 }
 .nk-relic-submeta__badge--accent:hover {
-  background: rgba(124,58,237,0.24);
-  border-color: rgba(124,58,237,0.7);
+  background: color-mix(in srgb, var(--primary) 24%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 70%, transparent);
 }
 .nk-relic-submeta__val {
   font-family: var(--font-hud); font-size: 0.8125rem; font-weight: 700;
@@ -153,8 +153,8 @@
 .nk-relic-affix-table__prop-h,
 .nk-relic-affix-table__slot-h {
   padding: 12px 10px;
-  border-bottom: 1px solid rgba(124,58,237,0.2);
-  background: rgba(124,58,237,0.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
   vertical-align: middle;
 }
 .nk-relic-affix-table__prop-h {
@@ -184,17 +184,17 @@
   font-size: 0.72rem; font-weight: 600; color: var(--text2);
   background: rgba(20,20,45,0.85);
   backdrop-filter: blur(4px);
-  border-right: 1px solid rgba(124,58,237,0.12);
+  border-right: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
   white-space: nowrap;
 }
 .nk-relic-affix-table__cell {
   padding: 8px 8px;
   text-align: center;
-  border-bottom: 1px solid rgba(124,58,237,0.08);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 8%, transparent);
   white-space: nowrap;
 }
 .nk-relic-affix-table tbody tr:last-child .nk-relic-affix-table__cell { border-bottom: none; }
-.nk-relic-affix-table tbody tr:hover .nk-relic-affix-table__cell { background: rgba(124,58,237,0.04); }
+.nk-relic-affix-table tbody tr:hover .nk-relic-affix-table__cell { background: color-mix(in srgb, var(--primary) 4%, transparent); }
 .nk-relic-affix-table__init {
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 500;
   color: var(--text3);
@@ -228,7 +228,7 @@
   font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700;
   color: var(--metric-val); letter-spacing: 0.03em;
   padding: 2px 8px; border-radius: 10px;
-  background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.25);
+  background: color-mix(in srgb, var(--primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
   white-space: nowrap;
 }
 .nk-relic-subcell__tiers {
@@ -239,8 +239,8 @@
   padding: 4px 2px;
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
   color: var(--text3);
-  background: rgba(124,58,237,0.06);
-  border: 1px solid rgba(124,58,237,0.12);
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
   border-radius: 6px;
   transition: background 0.2s, color 0.2s;
 }
@@ -269,8 +269,8 @@
 }
 .nk-relic-story__desc {
   margin-bottom: 10px; padding: 8px 12px;
-  border-left: 2px solid rgba(124,58,237,0.25);
-  background: rgba(124,58,237,0.04); border-radius: 0 6px 6px 0;
+  border-left: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  background: color-mix(in srgb, var(--primary) 4%, transparent); border-radius: 0 6px 6px 0;
   font-size: 0.78rem; line-height: 1.8; color: var(--text3);
 }
 .nk-relic-story__body { font-size: 0.8125rem; line-height: 2; color: var(--text2); }

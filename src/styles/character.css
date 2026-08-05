@@ -18,7 +18,7 @@
 .nk-build__set:active, .nk-relic-slot:active, .nk-relic-sub:active { transform: translateY(0); }
 /* 半透明卡片（紫调）：浮起但不加重影，保持轻盈 */
 .nk-profile__item, .nk-bonus {
-  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12);
+  background: color-mix(in srgb, var(--primary) 4%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
   transition: border-color 0.2s, transform 0.2s var(--nk-ease-out);
 }
 .nk-profile__item:hover, .nk-bonus:hover { border-color: var(--border2); transform: translateY(-1px); }
@@ -38,7 +38,7 @@
   .nk-panel--flat { padding-bottom: 32px; }
 }
 /* Hero 属性模块上方的一句话介绍（左边线引用块；间距由 Hero 面板 gap 提供） */
-.nk-hero__desc { font-size: 0.875rem; line-height: 1.9; color: var(--text2); padding: 2px 0 2px 16px; border-left: 2px solid rgba(124,58,237,0.35); }
+.nk-hero__desc { font-size: 0.875rem; line-height: 1.9; color: var(--text2); padding: 2px 0 2px 16px; border-left: 2px solid color-mix(in srgb, var(--primary) 35%, transparent); }
 
 /* ─── Hero 头部左右结构（角色页专属）：左侧信息 / 右侧元素·命途竖排标签 ─── */
 .nk-hero--char .nk-hero__head { flex-direction: row; justify-content: space-between; align-items: center; gap: 16px; }
@@ -48,7 +48,7 @@
 .nk-hero--char .nk-hero__tag--vert {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
   padding: 10px 12px; min-width: 68px; border-radius: 12px;
-  background: rgba(124,58,237,0.08); border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--primary) 8%, transparent); border: 1px solid var(--border);
   transition: transform 0.2s var(--nk-ease-out), border-color 0.2s, background 0.2s;
 }
 .nk-hero--char .nk-hero__tag--vert:hover { transform: translateY(-1px); }
@@ -78,7 +78,7 @@
   padding: 14px 20px; background: none; border: none; cursor: pointer;
   text-align: left; transition: background 0.15s;
 }
-.nk-story__head:hover { background: rgba(124,58,237,0.04); }
+.nk-story__head:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
 .nk-story__num { font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700; color: var(--primary); opacity: 0.8; min-width: 1.6em; }
 .nk-story__label { font-size: 0.8125rem; font-weight: 600; color: var(--text2); letter-spacing: 0.02em; flex: 1; }
 .nk-story--open .nk-story__label { color: var(--text); }
@@ -93,7 +93,7 @@
 .nk-story__inner { overflow: hidden; min-height: 0; }
 .nk-story__text {
   font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
-  border-top: 1px dashed rgba(124,58,237,0.15);
+  border-top: 1px dashed color-mix(in srgb, var(--primary) 15%, transparent);
   padding: 14px 20px 18px;
 }
 .nk-bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 0 auto 24px; max-width: var(--nk-prose-max); }
@@ -151,7 +151,7 @@
 .nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); }
 .nk-skill__terms {
   margin-top: 14px; padding: 12px 16px; background: rgba(10,10,30,0.5); border-radius: 9px;
-  border: 1px solid rgba(124,58,237,0.1);
+  border: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
 }
 .nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
 .nk-term__name { color: var(--highlight); font-weight: 600; }
@@ -185,7 +185,7 @@
 }
 .nk-skill__anim-stage {
   margin-top: 10px; border-radius: 10px; overflow: hidden;
-  border: 1px solid rgba(124,58,237,0.12);
+  border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
   background: rgba(0,0,0,0.35);
   aspect-ratio: 960 / 514;
   position: relative;
@@ -202,7 +202,7 @@
 }
 .nk-skill__anim-ph span {
   width: 28px; height: 28px; border-radius: 50%;
-  border: 2px solid rgba(124,58,237,0.25); border-top-color: var(--primary);
+  border: 2px solid color-mix(in srgb, var(--primary) 25%, transparent); border-top-color: var(--primary);
   animation: nk-anim-spin 0.8s linear infinite;
 }
 @keyframes nk-anim-spin { to { transform: rotate(360deg); } }
@@ -227,14 +227,14 @@
 .nk-table-clip.open .nk-table-inner { overflow-x: auto; }
 .nk-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: var(--font-hud); font-size: 0.75rem; text-align: center; }
 .nk-table th { padding: 7px 10px; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 400; letter-spacing: 0.06em; white-space: nowrap; }
-.nk-table td { padding: 6px 10px; color: var(--text2); border-bottom: 1px solid rgba(124,58,237,0.07); white-space: nowrap; }
+.nk-table td { padding: 6px 10px; color: var(--text2); border-bottom: 1px solid color-mix(in srgb, var(--primary) 7%, transparent); white-space: nowrap; }
 .nk-table tr.nk-table--active td { color: var(--primary); font-weight: 700; background: var(--primary-glow); }
 /* 子技能：父卡片内虚线分区（非嵌套卡片） */
 .nk-skill--child {
   margin: 18px 0 0 22px; padding: 16px 0 0; border: none; background: none;
-  border-radius: 0; border-top: 1px dashed rgba(124,58,237,0.2);
+  border-radius: 0; border-top: 1px dashed color-mix(in srgb, var(--primary) 20%, transparent);
 }
-.nk-skill--child:hover { border-color: transparent; border-top-color: rgba(124,58,237,0.35); }
+.nk-skill--child:hover { border-color: transparent; border-top-color: color-mix(in srgb, var(--primary) 35%, transparent); }
 .nk-skill--child .nk-skill__title-row { gap: 12px; margin-bottom: 10px; }
 .nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
 .nk-skill--child .nk-skill__metrics { margin-top: 10px; }
@@ -321,14 +321,14 @@
 .nk-build__set-desc .hl { color: var(--highlight); font-weight: 700; }
 
 /* ─── 增强模式切换工具条（吸顶，替代原 Tab 栏；无增强角色整体不渲染） ─── */
-.nk-enh-bar { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: rgba(15,15,35,0.88); backdrop-filter: blur(14px) saturate(1.15); -webkit-backdrop-filter: blur(14px) saturate(1.15); border-bottom: 1px solid rgba(124,58,237,0.16); }
+.nk-enh-bar { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: rgba(15,15,35,0.88); backdrop-filter: blur(14px) saturate(1.15); -webkit-backdrop-filter: blur(14px) saturate(1.15); border-bottom: 1px solid color-mix(in srgb, var(--primary) 16%, transparent); }
 .nk-enh-bar__inner { display: flex; align-items: center; gap: 8px; max-width: var(--nk-detail-max); margin: 0 auto; padding: 8px 16px; min-height: 44px; }
 .nk-enh-toggle { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .nk-enh-toggle__label { font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); white-space: nowrap; opacity: 0.7; margin-right: 2px; }
-.nk-enh-toggle__btn { padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(124,58,237,0.15); background: rgba(124,58,237,0.06); color: var(--text2); font-size: 0.68rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); white-space: nowrap; position: relative; }
+.nk-enh-toggle__btn { padding: 4px 12px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); background: color-mix(in srgb, var(--primary) 6%, transparent); color: var(--text2); font-size: 0.68rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); white-space: nowrap; position: relative; }
 /* 触控热区垂直扩展至 ≥44px */
 .nk-enh-toggle__btn::before { content: ''; position: absolute; left: 0; right: 0; top: -9px; bottom: -9px; }
-.nk-enh-toggle__btn:hover { border-color: var(--border2); background: rgba(124,58,237,0.1); color: var(--text); }
+.nk-enh-toggle__btn:hover { border-color: var(--border2); background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--text); }
 .nk-enh-toggle__btn--active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 1px 3px rgba(0,0,0,0.35); }
 .nk-enh-toggle__btn--active:hover { background: var(--primary); color: #fff; }
 /* 强化切换与区块导航的分隔线 */
@@ -345,7 +345,7 @@
 }
 /* 触控热区垂直扩展至 ≥44px */
 .nk-secnav__btn::before { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
-.nk-secnav__btn:hover { color: var(--text2); background: rgba(124,58,237,0.08); }
+.nk-secnav__btn:hover { color: var(--text2); background: color-mix(in srgb, var(--primary) 8%, transparent); }
 .nk-secnav__btn--active {
   color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
@@ -356,7 +356,7 @@
 .nk-secnav__idx { font-family: var(--font-hud); font-size: 0.5rem; opacity: 0.65; }
 .nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
 /* 阅读进度线（工具条底部） */
-.nk-enh-bar__progress { height: 2px; width: 0; background: linear-gradient(90deg, var(--primary), #A78BFA); }
+.nk-enh-bar__progress { height: 2px; width: 0; background: linear-gradient(90deg, var(--primary), var(--ph-400)); }
 /* ─── 返回顶部 ─── */
 .nk-top-btn {
   position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
@@ -386,24 +386,24 @@
 /* ─── 加强摘要横幅（工具条与面板之间） ─── */
 .nk-enh-notes { padding: 0 20px; }
 .nk-enh-notes:empty { display: none; }
-.nk-enh-notes__banner { display: flex; align-items: flex-start; gap: 12px; margin: 0 auto 4px; padding: 12px 16px; background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.15); border-left: 3px solid var(--primary); border-radius: 8px; }
+.nk-enh-notes__banner { display: flex; align-items: flex-start; gap: 12px; margin: 0 auto 4px; padding: 12px 16px; background: color-mix(in srgb, var(--primary) 6%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); border-left: 3px solid var(--primary); border-radius: 8px; }
 .nk-enh-notes__title { font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); font-weight: 700; white-space: nowrap; padding-top: 2px; }
 .nk-enh-notes__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
 .nk-enh-notes__list li { font-size: 0.75rem; line-height: 1.6; color: var(--text2); position: relative; padding-left: 14px; }
 .nk-enh-notes__list li::before { content: '▸'; position: absolute; left: 0; color: var(--primary); }
 /* ─── 内联 diff 状态标记 ─── */
 .nk-inline-diff { position: relative; }
-.nk-inline-diff[data-status="changed"] { border-color: rgba(252,211,77,0.3) !important; background: rgba(252,211,77,0.04) !important; }
-.nk-inline-diff[data-status="added"]   { border-color: rgba(110,231,183,0.3) !important; background: rgba(110,231,183,0.04) !important; }
-.nk-inline-diff[data-status="removed"] { border-color: rgba(253,164,175,0.3) !important; background: rgba(253,164,175,0.04) !important; opacity: 0.75; }
+.nk-inline-diff[data-status="changed"] { border-color: color-mix(in srgb, var(--gold-300) 30%, transparent) !important; background: color-mix(in srgb, var(--gold-300) 4%, transparent) !important; }
+.nk-inline-diff[data-status="added"]   { border-color: color-mix(in srgb, var(--diff-add-soft) 30%, transparent) !important; background: color-mix(in srgb, var(--diff-add-soft) 4%, transparent) !important; }
+.nk-inline-diff[data-status="removed"] { border-color: color-mix(in srgb, var(--diff-del-soft) 30%, transparent) !important; background: color-mix(in srgb, var(--diff-del-soft) 4%, transparent) !important; opacity: 0.75; }
 /* 状态角标 */
 .nk-diff-badge { position: absolute; top: 8px; right: 8px; font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; font-weight: 700; z-index: 2; pointer-events: none; }
-.nk-diff-badge--changed { background: rgba(252,211,77,0.15); color: #fcd34d; border: 1px solid rgba(252,211,77,0.3); }
-.nk-diff-badge--added   { background: rgba(110,231,183,0.15); color: #6ee7b7; border: 1px solid rgba(110,231,183,0.3); }
-.nk-diff-badge--removed { background: rgba(253,164,175,0.15); color: #fda4af; border: 1px solid rgba(253,164,175,0.3); }
+.nk-diff-badge--changed { background: color-mix(in srgb, var(--gold-300) 15%, transparent); color: var(--gold-300); border: 1px solid color-mix(in srgb, var(--gold-300) 30%, transparent); }
+.nk-diff-badge--added   { background: color-mix(in srgb, var(--diff-add-soft) 15%, transparent); color: var(--diff-add-soft); border: 1px solid color-mix(in srgb, var(--diff-add-soft) 30%, transparent); }
+.nk-diff-badge--removed { background: color-mix(in srgb, var(--diff-del-soft) 15%, transparent); color: var(--diff-del-soft); border: 1px solid color-mix(in srgb, var(--diff-del-soft) 30%, transparent); }
 /* word-level diff 文本标记 */
-.diff-added   { background: rgba(74,222,128,0.18); color: #ecfdf5; padding: 0 2px; border-radius: 2px; }
-.diff-removed { background: rgba(248,113,113,0.16); color: #fee2e2; text-decoration: line-through; text-decoration-color: rgba(248,113,113,0.5); padding: 0 2px; border-radius: 2px; }
+.diff-added   { background: color-mix(in srgb, var(--diff-add) 18%, transparent); color: var(--diff-text-add); padding: 0 2px; border-radius: 2px; }
+.diff-removed { background: color-mix(in srgb, var(--diff-del) 16%, transparent); color: var(--diff-text-del); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 50%, transparent); padding: 0 2px; border-radius: 2px; }
 /* 版本对比高亮：旧值红删除线 + 新值绿（保留用于数值对比） */
 .nk-d-c, .nk-inline-diff .diff-removed:not(.diff-added) { color: var(--diff-del); }
 .nk-d-c { margin-right: 4px; opacity: 0.85; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 60%, transparent); }
@@ -439,7 +439,7 @@
 @media (hover: none) {
   .nk-story__head:hover { background: none; }
   .nk-skill__table-btn:hover { color: var(--text3); }
-  .nk-enh-toggle__btn:hover { border-color: rgba(124,58,237,0.15); background: rgba(124,58,237,0.06); color: var(--text2); }
+  .nk-enh-toggle__btn:hover { border-color: color-mix(in srgb, var(--primary) 15%, transparent); background: color-mix(in srgb, var(--primary) 6%, transparent); color: var(--text2); }
   .nk-enh-toggle__btn--active:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
   .nk-build__team-slot img:hover { transform: none; box-shadow: none; }
   .nk-eidolon:hover, .nk-ability:hover, .nk-story:hover,

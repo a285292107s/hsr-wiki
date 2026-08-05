@@ -212,4 +212,5 @@ src/
 ### 通用
 
 - **文本数据来源**：所有展示文本必须来自现有数据源（converter 输出 JSON / TextMap），禁止在代码中写死或自建数据源。
+- **色彩三层令牌**：所有颜色必须落入 tokens.css 三层令牌体系——原始层（`--ph-*` / `--gold-*` 色阶事实）、语义层（`--primary` 等主题映射，派生色用 `color-mix(in srgb, var(--primary) X%, transparent)` 表达）、领域层（`--rarity-*` / `--prop-*` / `--elem-*` / `--skill-*` / `--diff-*` 数据语义色，不随主题）。禁止在页面 CSS/组件内联裸色值（豁免：中性灰阶/黑/白/深底色、`var()` fallback；CW 专属 `currency-*` 文件与 debug 分析色待迁移）。新增颜色先查令牌，缺失则落入对应层。可用 `node tools/check-colors.mjs --strict` 扫描未收口色值。
 - **构建守卫**：每次变更必须通过 `pnpm build`（含 vue-tsc 类型检查）+ `pnpm test` 全绿后方可提交。

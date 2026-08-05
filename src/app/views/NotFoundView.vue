@@ -29,8 +29,8 @@ import { RouterLink } from 'vue-router';
   font-size: clamp(4rem, 12vw, 8rem);
   font-weight: 900;
   letter-spacing: 0.05em;
-  color: var(--accent, #a78bfa);
-  text-shadow: 0 0 40px color-mix(in srgb, var(--accent, #a78bfa) 40%, transparent);
+  color: var(--accent, var(--ph-400));
+  text-shadow: 0 0 40px color-mix(in srgb, var(--accent, var(--ph-400)) 40%, transparent);
   line-height: 1;
 }
 
@@ -38,7 +38,7 @@ import { RouterLink } from 'vue-router';
   margin-top: 16px;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text1, #e2e8f0);
+  color: var(--text-bright, #e2e8f0);
 }
 
 .nk-notfound__desc {
@@ -52,14 +52,14 @@ import { RouterLink } from 'vue-router';
   padding: 10px 28px;
   border: 1px solid var(--border2, rgba(148, 163, 184, 0.2));
   border-radius: 6px;
-  color: var(--text1, #e2e8f0);
+  color: var(--text-bright, #e2e8f0);
   font-size: 0.875rem;
   text-decoration: none;
   transition: border-color 0.2s, background 0.2s;
 }
 
 .nk-notfound__btn:hover {
-  border-color: var(--accent, #a78bfa);
-  background: color-mix(in srgb, var(--accent, #a78bfa) 8%, transparent);
+  border-color: var(--accent, var(--ph-400));
+  background: color-mix(in srgb, var(--accent, var(--ph-400)) 8%, transparent);
 }
 </style>

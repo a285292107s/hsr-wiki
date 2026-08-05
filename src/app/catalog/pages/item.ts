@@ -5,11 +5,11 @@ import { loadLocalItems, RARITY_NUM_TO_KEY } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 
 const ITEM_RARITY_MAP: Record<string, { stars: number; label: string; color: string }> = {
-  SuperRare: { stars: 5, label: '5★', color: '#FBBF24' },
-  VeryRare: { stars: 4, label: '4★', color: '#C084FC' },
-  Rare: { stars: 3, label: '3★', color: '#60A5FA' },
-  NotNormal: { stars: 2, label: '2★', color: '#4ADE80' },
-  Normal: { stars: 1, label: '1★', color: '#94A3B8' },
+  SuperRare: { stars: 5, label: '5★', color: 'var(--gold-400)' },
+  VeryRare: { stars: 4, label: '4★', color: 'var(--rarity-4)' },
+  Rare: { stars: 3, label: '3★', color: 'var(--rarity-3)' },
+  NotNormal: { stars: 2, label: '2★', color: 'var(--rarity-2)' },
+  Normal: { stars: 1, label: '1★', color: 'var(--rarity-1)' },
 };
 
 /** 物品 sub_type → 中文名（覆盖数据中出现的所有子类型，避免卡片回退成英文） */
