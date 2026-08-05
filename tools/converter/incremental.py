@@ -6,10 +6,11 @@
 import hashlib
 import json
 import logging
+import subprocess
 from pathlib import Path
 from typing import Any
 
-from config import EXCEL_DIR, TEXTMAP_FILE
+from config import EXCEL_DIR, SOURCE_DIR, TEXTMAP_FILE
 
 logger = logging.getLogger("converter")
 
@@ -66,6 +67,9 @@ MODULE_SOURCES: dict[str, list[str]] = {
                           "GridFightConsumables.json", "GridFightForge.json",
                           "GridFightPortalBuff.json"],
     "season": [],
+    # 子模块 git 提交（无 ExcelOutput 文件依赖）：签名取 HEAD 提交哈希，
+    # 子模块更新即触发重跑；与文件依赖共用签名拼接，见 _git_sig
+    "version": ["git:HEAD"],
 }
 
 
@@ -88,6 +92,24 @@ def _dir_sig(directory: Path) -> str:
     return hashlib.md5("|".join(sigs).encode()).hexdigest()
 
 
+def _git_sig(spec: str) -> str:
+    """git 引用签名：取子模块指定引用当前指向的提交哈希（子模块更新即变化）。"""
+    ref = spec.removeprefix("git:")
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(SOURCE_DIR), "rev-parse", ref],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return "missing"
+    if proc.returncode != 0:
+        return "missing"
+    return proc.stdout.strip()
+
+
 def _module_sig(module_name: str) -> str:
     """计算模块当前源数据签名。"""
     sources = MODULE_SOURCES.get(module_name, [])
@@ -99,6 +121,9 @@ def _module_sig(module_name: str) -> str:
     parts.append(f"TextMap:{_file_sig(TEXTMAP_FILE)}")
 
     for src in sources:
+        if src.startswith("git:"):
+            parts.append(f"{src}:{_git_sig(src)}")
+            continue
         p = Path(src)
         if not p.is_absolute():
             p = EXCEL_DIR / p

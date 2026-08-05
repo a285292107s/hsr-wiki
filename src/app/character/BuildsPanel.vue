@@ -6,7 +6,8 @@
 import { computed, ref, watch } from 'vue';
 import { loadLocalRelicSet } from '../../services/api';
 import { fmtDesc, itemName } from '../../lib/format';
-import { CDN, PROP_NAMES, SLOT_ICONS, SLOT_NAMES } from '../../lib/constants';
+import { cdnUri } from '../../services/cdn';
+import { PROP_NAMES, SLOT_ICONS, SLOT_NAMES } from '../../lib/constants';
 import type { CharacterData, ItemDb, NameCache, RelicSetData } from '../../services/types';
 
 const props = defineProps<{
@@ -25,7 +26,7 @@ const cones = computed(() =>
     id,
     rank: i + 1,
     name: itemName(id, props.nameCache, props.itemDb),
-    img: `${CDN}/assets/hsr/lightconemediumicon/${id}.webp`,
+    img: cdnUri('lightconemediumicon', `${id}.webp`),
   })),
 );
 
@@ -45,11 +46,11 @@ const teams = computed<{ teamId: number; members: TeamSlot[] }[]>(() => {
       return {
         mid,
         name: itemName(mid, props.nameCache, props.itemDb),
-        img: `${CDN}/assets/hsr/avatarroundicon/${mid}.webp`,
+        img: cdnUri('avatarroundicon', `${mid}.webp`),
         backups: backups.slice(0, 4).map((b) => ({
           id: b,
           name: itemName(b, props.nameCache, props.itemDb),
-          img: `${CDN}/assets/hsr/avatarroundicon/${b}.webp`,
+          img: cdnUri('avatarroundicon', `${b}.webp`),
         })),
       };
     });
@@ -103,7 +104,7 @@ watch(
 function setIcon(data: RelicSetData | null | undefined): string {
   if (data && data.icon) {
     const iconId = data.icon.split('/').pop()!.replace('.png', '');
-    return `${CDN}/assets/hsr/itemfigures/${iconId}.webp`;
+    return cdnUri('itemfigures', `${iconId}.webp`);
   }
   return '';
 }
@@ -134,7 +135,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
     <div class="nk-build__teams">
       <div v-for="t in teams" :key="t.teamId" class="nk-build__team">
         <div class="nk-build__team-slot nk-build__team-slot--main">
-          <img :src="`${CDN}/assets/hsr/avatarroundicon/${charId}.webp`" title="当前角色">
+          <img :src="cdnUri('avatarroundicon', `${charId}.webp`)" title="当前角色">
         </div>
         <span class="nk-build__team-plus">+</span>
         <template v-for="(m, i) in t.members" :key="m.mid">
@@ -159,7 +160,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
           :key="p.relic_type + p.property_type"
           class="nk-relic-slot"
         >
-          <img class="nk-relic-slot__icon" :src="`${CDN}/assets/hsr/relicfigures/${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`">
+          <img class="nk-relic-slot__icon" :src="cdnUri('relicfigures', `${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`)">
           <span class="nk-relic-slot__stat">{{ PROP_NAMES[p.property_type] || p.property_type }}</span>
           <span class="nk-relic-slot__slot">{{ SLOT_NAMES[p.relic_type] || p.relic_type }}</span>
         </div>

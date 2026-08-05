@@ -267,4 +267,17 @@ describe('单例缓存', () => {
     await api.loadLocalLightCones();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('loadLocalVersion 返回游戏版本且多次调用只触发一次 fetch', async () => {
+    const api = await freshApi();
+    const versionFixture = {
+      game_version: '4.4.0', version_label: '4.4', client: 'OSPRODWin4.4.0',
+      build: 'D15909703_A15802547_L15874300', synced_at: '2026-07-29',
+    };
+    const fetchMock = routeFetch({ 'version.json': versionFixture });
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(api.loadLocalVersion()).resolves.toEqual(versionFixture);
+    await api.loadLocalVersion();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });

@@ -1,5 +1,6 @@
 /** 物品目录页配置 */
 import { escHtml, itemIconUrl } from '../../../lib/format';
+import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalItems, RARITY_NUM_TO_KEY } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 
@@ -135,7 +136,7 @@ export const itemPage: CatalogPageConfig = {
     const typeName = ITEM_TYPE_NAMES[subType] || subType;
     const hasIcon = Boolean(item.icon);
     const pic = hasIcon
-      ? `<img class="nk-item-card__pic" src="${escHtml(item.icon)}" alt="${escHtml(item.name)}" loading="lazy" onerror="this.classList.add('is-broken')">`
+      ? `<img class="nk-item-card__pic" src="${escHtml(item.icon)}"${cdnImgFallbackAttr(String(item.icon))} alt="${escHtml(item.name)}" loading="lazy" onerror="this.classList.add('is-broken')">`
       : '';
     return `<div class="nk-item-card" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-sub-type="${escHtml(subType)}" style="--i:${i};--rarity-color:${r.color}">
       <div class="nk-item-card__img">

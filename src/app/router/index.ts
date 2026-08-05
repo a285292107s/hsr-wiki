@@ -204,7 +204,7 @@ export function createNkRouter(): Router {
 
   router.afterEach((to) => {
     const t = to.meta.title as string | undefined;
-    document.title = t ? `${t} - HSR Wiki` : 'HSR Wiki';
+    document.title = t ? `${t} - 咸鱼百科` : '咸鱼百科';
   });
 
   return router;

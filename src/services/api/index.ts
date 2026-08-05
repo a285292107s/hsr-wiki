@@ -11,6 +11,7 @@
  */
 export { LOCAL_DATA_BASE } from './base';
 export { loadManifest, resolveVersion } from './manifest';
+export { loadLocalVersion } from './version';
 export {
   RARITY_NUM_TO_KEY, loadLocalItems, loadLocalItemDb,
   loadLocalMonsterList, loadLocalLightCones, loadLocalLightConeDetail,

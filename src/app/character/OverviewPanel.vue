@@ -6,7 +6,8 @@
 import { computed, ref } from 'vue';
 import { extraTerms } from './utils';
 import { escHtml, fmtDesc, fmtDescDiff, hasParamDiff, hasTextDiff, iconUrl } from '../../lib/format';
-import { CDN, PROP_ICON, PROP_NAMES } from '../../lib/constants';
+import { cdnUri } from '../../services/cdn';
+import { PROP_ICON, PROP_NAMES } from '../../lib/constants';
 import type { CharacterData, SkillExtra, SkillTree } from '../../services/types';
 
 const props = defineProps<{
@@ -95,7 +96,7 @@ const attrBonuses = computed<AttrBonus[]>(() => {
     const key = PROP_ICON[type];
     return {
       name: PROP_NAMES[type] || (b.name && b.name !== '{}' ? b.name : type),
-      v, ov, icon: key ? `${CDN}/assets/hsr/trace/Icon${key}.webp` : '',
+      v, ov, icon: key ? cdnUri('trace', `Icon${key}.webp`) : '',
     };
   });
 });

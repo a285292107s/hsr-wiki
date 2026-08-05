@@ -74,7 +74,7 @@ async function load() {
   }
 }
 watch(traitId, load, { immediate: true });
-watch(data, (d) => { if (d) document.title = `${d.name} - HSR Wiki`; }, { immediate: true });
+watch(data, (d) => { if (d) document.title = `${d.name} - 咸鱼百科`; }, { immediate: true });
 </script>
 
 <template>

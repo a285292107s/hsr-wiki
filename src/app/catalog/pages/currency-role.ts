@@ -1,5 +1,5 @@
 /** 货币战争 · 角色图鉴目录页配置 */
-import { CDN } from '../../../lib/constants';
+import { cdnUri } from '../../../services/cdn';
 import { escHtml, avatarShopIconUrl } from '../../../lib/format';
 import { loadLocalCurrencyRoles } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
@@ -44,7 +44,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   /* 特质标签（数据驱动，由 converter 从 TextMap 解析；带小图标） */
   const traits = (item.traits as Array<{ id: number; name: string; cat: TraitCat }>) || [];
   const traitChips = traits
-    .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}"><img class="nk-crole-tcard-trait__icon" src="${CDN}/assets/hsr/gridfight/icon/${t.id}.webp" alt="" loading="lazy">${escHtml(t.name || `#${t.id}`)}</span>`)
+    .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}"><img class="nk-crole-tcard-trait__icon" src="${cdnUri('gridfight-icon', `${t.id}.webp`)}" alt="" loading="lazy">${escHtml(t.name || `#${t.id}`)}</span>`)
     .join('');
   /* 卡牌结构：头像出血（叠加 fb 角标 + 费用菱形 + scrim 名称）+ 紧凑 body */
   return `<a class="nk-crole-card" href="${item.href}" data-id="${escHtml(id)}" data-name="${escHtml(item.name)}" data-rarity="${rarity}" style="--i:${index}">

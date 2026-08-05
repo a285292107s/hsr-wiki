@@ -60,7 +60,7 @@ export const useRelicStore = defineStore('relic', () => {
       mainAffixes.value = main;
       subAffixes.value = sub;
       stories.value = storyMap;
-      document.title = `${d.name} - HSR Wiki`;
+      document.title = `${d.name} - 咸鱼百科`;
     } catch (e) {
       if (!loadGen.isCurrent(gen)) return;
       error.value = e instanceof Error ? e.message : String(e);

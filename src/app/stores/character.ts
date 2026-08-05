@@ -48,7 +48,7 @@ export const useCharacterStore = defineStore('character', () => {
       validateCharData(d);
       data.value = d;
       // 原实现行为：更新页面标题
-      document.title = `${d.name} - HSR Wiki`;
+      document.title = `${d.name} - 咸鱼百科`;
       // 默认选最后一个加强版本（原实现行为）
       const keys = getEnhancedKeys(d);
       enhKey.value = keys.length ? keys[keys.length - 1] : null;

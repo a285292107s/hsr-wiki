@@ -9,7 +9,8 @@ import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';
 import { fmtDesc, lightconeIconUrl, itemName } from '../../lib/format';
-import { CDN, PATH } from '../../lib/constants';
+import { cdnUri } from '../../services/cdn';
+import { PATH } from '../../lib/constants';
 import type { LightConeStats } from '../../services/types';
 // 光锥详情页专属样式（随本路由 chunk 懒加载；技能卡片原语与角色页共享）
 import '../../styles/skill-card.css';
@@ -40,7 +41,7 @@ watch(phase, (p) => {
 const d = computed(() => lc.data);
 /** 动态页面标题 */
 watch(d, (data) => {
-  if (data) document.title = `${data.name} - HSR Wiki`;
+  if (data) document.title = `${data.name} - 咸鱼百科`;
 });
 
 async function load(id: string): Promise<void> {
@@ -212,7 +213,7 @@ onBeforeUnmount(() => {
             <div class="nk-hero__meta">
               <span class="nk-hero__stars">{{ stars }}</span>
               <span class="nk-hero__tag">
-                <img :src="`${CDN}/assets/hsr/pathicon/${d.path.toLowerCase()}.webp`">
+                <img :src="cdnUri('pathicon', `${d.path.toLowerCase()}.webp`)">
                 {{ PATH[d.path] || d.path }}
               </span>
               <span class="nk-hero__id">
@@ -343,7 +344,7 @@ onBeforeUnmount(() => {
                   <span v-for="c in row.cost" :key="c.id" class="nk-lc-cost__item" :title="c.name">
                     <img
                       v-if="c.id !== 2"
-                      :src="`${CDN}/assets/hsr/itemfigures/${c.id}.webp`"
+                      :src="cdnUri('itemfigures', `${c.id}.webp`)"
                       :alt="c.name"
                       loading="lazy"
                       @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"

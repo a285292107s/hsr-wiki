@@ -44,7 +44,7 @@ function chars(str: string, base: number): { ch: string; delay: string }[] {
     delay: `${(base + i * 0.06).toFixed(2)}s`,
   }));
 }
-const titleChars = chars('HSR WIKI', 0.45);
+const titleChars = chars('咸鱼百科', 0.45);
 
 const navRef = ref<HTMLElement | null>(null);
 function scrollToNav(): void {
@@ -53,8 +53,8 @@ function scrollToNav(): void {
 
 onMounted(() => {
   prefetchHighPriority();
-  // 版本号后台加载（CDN manifest 失败时静默降级为 —，不阻塞首屏）
-  void app.initManifest().catch(() => { /* 离线降级：版本显示 —，页面仍可用 */ });
+  // 游戏版本后台加载（本地 version.json；未生成时静默降级为 —）
+  void app.initVersion().catch(() => { /* 降级：游戏版本显示 — */ });
   loading.value = false;
   void nextTick().then(mountHeroSpine); // v-if 解锁后 Hero 才入 DOM，再挂载背景 Spine
 });
@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
         <div class="nk-home-hero__content">
           <div class="nk-home-hero__kicker">
             <span class="nk-home-hero__kicker-line"></span>
-            <span class="nk-home-hero__kicker-text">崩坏：星穹铁道 · 数据百科</span>
+            <span class="nk-home-hero__kicker-text">崩坏·星穹铁道wiki</span>
           </div>
           <h1 class="nk-home-hero__title">
             <span v-for="(c, i) in titleChars" :key="i" :style="{ animationDelay: c.delay }">{{ c.ch }}</span>
@@ -90,9 +90,11 @@ onBeforeUnmount(() => {
 
       <nav ref="navRef" class="nk-home-nav">
         <div class="nk-home-nav__head">
+          <span class="nk-home-nav__title">全站板块</span>
           <span class="nk-home-nav__label">SECTIONS</span>
           <span class="nk-home-nav__line"></span>
           <span class="nk-home-nav__count">0{{ navCards.length }}</span>
+          <span class="nk-home-nav__version">DATA v{{ app.gameVersion || '—' }}</span>
         </div>
         <div
           ref="gridRef"
@@ -115,7 +117,9 @@ onBeforeUnmount(() => {
                 <span class="nk-home-card__cn">{{ n.title }}</span>
                 <span class="nk-home-card__en">{{ n.en }}</span>
               </div>
-              <div class="nk-home-card__desc">{{ n.desc }}</div>
+              <div class="nk-home-card__desc">
+                {{ n.desc }}<span v-if="n.path === CW_GATEWAY.path" class="nk-home-card__badge">独立模式</span>
+              </div>
             </div>
             <svg
               class="nk-home-card__arrow"
@@ -126,7 +130,15 @@ onBeforeUnmount(() => {
         </div>
       </nav>
 
-      <footer class="nk-home-footer">DATA SOURCE — static.nanoka.cc · v{{ app.version || '—' }}</footer>
+      <footer class="nk-home-footer">
+        <div class="nk-home-footer__orn" aria-hidden="true">
+          <span class="nk-home-footer__rule"></span>
+          <span class="nk-home-footer__star">✦</span>
+          <span class="nk-home-footer__rule"></span>
+        </div>
+        <p class="nk-home-footer__motto">愿此行，终抵群星</p>
+        <p class="nk-home-footer__latin">PER ASPERA AD ASTRA</p>
+      </footer>
     </template>
   </div>
 </template>

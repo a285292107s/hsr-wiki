@@ -1,5 +1,6 @@
 /** 遗器目录页配置 */
 import { escHtml, itemIconUrl } from '../../../lib/format';
+import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalRelicSets } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 
@@ -40,7 +41,7 @@ export const relicPage: CatalogPageConfig = {
   renderCard(item, i) {
     return `<a class="nk-relic-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" style="--i:${i}">
       <div class="nk-relic-card__img">
-        <img src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
+        <img src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
       </div>
       <div class="nk-relic-card__info">
         <span class="nk-relic-card__name">${escHtml(item.name)}</span>

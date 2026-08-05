@@ -3,7 +3,7 @@
  */
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { loadManifest, resolveVersion, loadLocalItemDb } from '../../services/api';
+import { loadManifest, loadLocalVersion, resolveVersion, loadLocalItemDb } from '../../services/api';
 import type { ItemDb, NameCache } from '../../services/types';
 
 export type ToastType = 'error' | 'warn' | 'info' | 'success';
@@ -20,6 +20,8 @@ export const useAppStore = defineStore('app', () => {
   const version = ref('');
   const latestVersion = ref('');
   const versions = ref<string[]>([]);
+  /** 游戏版本（本地 version.json，converter 从子模块 git 提交解析） */
+  const gameVersion = ref('');
   /** 物品数据库（item.json） */
   const itemDb = ref<ItemDb>({});
   /** id → 名称（光锥/遗器套装/角色） */
@@ -37,6 +39,17 @@ export const useAppStore = defineStore('app', () => {
       latestVersion.value = version.value;
     } catch {
       // CDN 不可用：静默回退，不阻塞页面加载
+    }
+  }
+
+  /** 加载游戏版本（本地 version.json；未生成/失败静默回退，不阻塞页面） */
+  async function initVersion(): Promise<void> {
+    if (gameVersion.value) return;
+    try {
+      const v = await loadLocalVersion();
+      gameVersion.value = v.game_version || '';
+    } catch {
+      // 本地 JSON 缺失：静默回退，页面仍可用
     }
   }
 
@@ -66,7 +79,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   return {
-    version, latestVersion, versions, itemDb, nameCache, toasts,
-    initManifest, ensureItems, mergeNames, toast, dismissToast,
+    version, latestVersion, versions, gameVersion, itemDb, nameCache, toasts,
+    initManifest, initVersion, ensureItems, mergeNames, toast, dismissToast,
   };
 });

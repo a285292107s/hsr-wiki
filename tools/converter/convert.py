@@ -29,6 +29,7 @@ from converters import paths, elements, items, properties
 from converters import characters, character_detail
 from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame
 from converters import currency, season, currency_catalog  # noqa: E402 – 本地数据，无需网络
+from converters import version  # noqa: E402 – 子模块 git 提交信息
 
 logging.basicConfig(
     level=logging.INFO,
@@ -54,6 +55,7 @@ MODULES: dict[str, list] = {
     "currency": [currency.convert],
     "currency_catalog": [currency_catalog.convert],
     "season": [season.convert],
+    "version": [version.convert],
 }
 
 

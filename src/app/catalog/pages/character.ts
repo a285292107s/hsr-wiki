@@ -1,6 +1,7 @@
 /** 角色目录页配置 */
 import { PATH } from '../../../lib/constants';
 import { escHtml, avatarShopIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
+import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalCharacterList } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import { STAR_SVG } from './shared';
@@ -85,7 +86,7 @@ export const characterPage: CatalogPageConfig = {
     const path = String(item.path || '');
     return `<a class="nk-cat-card" href="${escHtml(item.href)}" data-element="${escHtml(element)}" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-path="${escHtml(path)}" style="--i:${i}">
     <div class="nk-cat-card__img">
-      <img class="avatar" src="${escHtml(item.avatar)}" alt="${escHtml(item.name)}" loading="lazy">
+      <img class="avatar" src="${escHtml(item.avatar)}"${cdnImgFallbackAttr(String(item.avatar || ''))} alt="${escHtml(item.name)}" loading="lazy">
       <div class="nk-cat-card__icons">
         ${item.elemImg ? `<img class="nk-cat-card__elem" src="${escHtml(item.elemImg)}" alt="${ELEM_NAMES[element] || element}">` : ''}
         ${item.pathImg ? `<img class="nk-cat-card__path" src="${escHtml(item.pathImg)}" alt="${PATH[path] || path}">` : ''}

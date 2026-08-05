@@ -1,6 +1,7 @@
 /** 光锥目录页配置 */
 import { PATH } from '../../../lib/constants';
 import { escHtml, lightconeIconUrl, pathIconUrl } from '../../../lib/format';
+import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalLightCones } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import { STAR_SVG } from './shared';
@@ -68,7 +69,7 @@ export const lightconePage: CatalogPageConfig = {
     const path = String(item.path || '');
     return `<a class="nk-lc-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-path="${escHtml(path)}" style="--i:${i}">
       <div class="nk-lc-card__img">
-        <img class="lc-avatar" src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
+        <img class="lc-avatar" src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
         <div class="nk-sk nk-sk--shimmer nk-lc-card__shimmer" aria-hidden="true"></div>
         <div class="nk-lc-card__sheen-wrap" aria-hidden="true"></div>
         ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${PATH[path] || path}"></div>` : ''}

@@ -9,7 +9,8 @@ import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useRelicStore } from '../stores/relic';
 import { fmtDesc, itemIconUrl } from '../../lib/format';
-import { CDN, PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES } from '../../lib/constants';
+import { cdnUri } from '../../services/cdn';
+import { PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES } from '../../lib/constants';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
 // 遗器详情页专属样式（随本路由 chunk 懒加载）
 import '../../styles/relic.css';
@@ -39,7 +40,7 @@ watch(phase, (p) => {
 const d = computed(() => relic.data);
 /** 动态页面标题 */
 watch(d, (data) => {
-  if (data) document.title = `${data.name} - HSR Wiki`;
+  if (data) document.title = `${data.name} - 咸鱼百科`;
 });
 
 async function load(id: string): Promise<void> {
@@ -93,10 +94,10 @@ const pieces = computed<LocalRelicPiece[]>(() => d.value?.pieces || []);
 
 /** 部位专属图标（relicfigures/IconRelic_{setId}_{slotIndex}.webp），加载失败时回退部位通用图标 */
 function pieceIconUrl(p: LocalRelicPiece): string {
-  return `${CDN}/assets/hsr/relicfigures/IconRelic_${d.value!.id}_${SLOT_INDEX[p.type] ?? 1}.webp`;
+  return cdnUri('relicfigures', `IconRelic_${d.value!.id}_${SLOT_INDEX[p.type] ?? 1}.webp`);
 }
 function slotIconUrl(p: LocalRelicPiece): string {
-  return `${CDN}/assets/hsr/relicfigures/${SLOT_ICONS[p.type] || 'IconRelicBody'}.webp`;
+  return cdnUri('relicfigures', `${SLOT_ICONS[p.type] || 'IconRelicBody'}.webp`);
 }
 function onPieceImgError(e: Event, p: LocalRelicPiece): void {
   const img = e.target as HTMLImageElement;

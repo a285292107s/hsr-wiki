@@ -100,7 +100,7 @@ const servantAttrs = computed(() => buildServantAttrs(star.value?.servant, charD
 
 watch(
   data,
-  (d) => { if (d) document.title = `${d.name} - HSR Wiki`; },
+  (d) => { if (d) document.title = `${d.name} - 咸鱼百科`; },
   { immediate: true },
 );
 
