@@ -13,7 +13,7 @@ const ELEM_NAMES: Record<string, string> = {
 
 export const characterPage: CatalogPageConfig = {
   id: 'character',
-  title: '角色',
+  title: '角色图鉴',
   searchPlaceholder: '搜索角色...',
   gridClass: 'nk-cat-grid',
   cardClass: '.nk-cat-card',

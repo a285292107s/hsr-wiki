@@ -3,7 +3,7 @@
  * Vite dynamic import 天然返回相同 Promise（模块缓存），重复调用无副作用。
  * 侧栏 hover / 首页 idle 时调用，提前加载目标路由组件 chunk。
  */
-import { loadSpineRuntime } from '../../lib/spine/runtime';
+import { loadSpineRuntime } from '../../spine/runtime';
 
 /* ─── 目录页（共享 CatalogView） ─── */
 export const preloadCatalog = () => import('../views/CatalogView.vue');
@@ -26,7 +26,6 @@ const PREFETCH_MAP: Record<string, () => Promise<unknown>> = {
   '/relic': preloadCatalog,
   '/item': preloadCatalog,
   '/monster': preloadCatalog,
-  '/maze': preloadCatalog,
   '/endgame/maze': preloadCatalog,
   '/currency': preloadCurrencyHub,
   '/currency/role': preloadCatalog,

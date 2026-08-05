@@ -8,6 +8,7 @@ import { defineStore } from 'pinia';
 import { computed, ref, toRaw } from 'vue';
 import { loadLocalCharacter, loadLocalBuildNames } from '../../services/api';
 import { getEnhancedKeys, getRenderData, validateCharData } from '../../lib/format';
+import { useLoadGeneration } from '../composables/use-load-generation';
 import { useAppStore } from './app';
 import type { CharacterData } from '../../services/types';
 
@@ -29,22 +30,21 @@ export const useCharacterStore = defineStore('character', () => {
    *  注意：必须 toRaw 解包 reactive proxy——structuredClone 无法序列化 Proxy */
   const renderData = computed(() => getRenderData(toRaw(data.value), enhKey.value));
 
-  /** 加载代：单调递增。角色间快速连续导航时旧 load 可能晚于新 load 返回，
-   *  仅当代次仍为最新才允许写入状态，避免旧角色数据覆盖新角色。 */
-  let loadGen = 0;
+  /** 加载代：单调递增（统一 useLoadGeneration 竞态保护，见 composables/use-load-generation） */
+  const loadGen = useLoadGeneration();
 
   async function load(id: string): Promise<void> {
     const app = useAppStore();
-    const gen = ++loadGen;
+    const gen = loadGen.begin();
     loading.value = true;
     error.value = null;
     try {
       charId.value = id;
       data.value = null;
       await app.initManifest();
-      if (gen !== loadGen) return; // 已被更新的加载取代
+      if (!loadGen.isCurrent(gen)) return; // 已被更新的加载取代
       const d = await loadLocalCharacter(id);
-      if (gen !== loadGen) return; // 已被更新的加载取代
+      if (!loadGen.isCurrent(gen)) return; // 已被更新的加载取代
       validateCharData(d);
       data.value = d;
       // 原实现行为：更新页面标题
@@ -58,14 +58,14 @@ export const useCharacterStore = defineStore('character', () => {
         app.ensureItems(),
         loadLocalBuildNames(d, app.nameCache),
       ]);
-      if (gen !== loadGen) return; // 已被更新的加载取代
+      if (!loadGen.isCurrent(gen)) return; // 已被更新的加载取代
       app.mergeNames(names);
     } catch (e) {
-      if (gen !== loadGen) return; // 过期加载的失败静默丢弃，由最新加载接管 UI
+      if (!loadGen.isCurrent(gen)) return; // 过期加载的失败静默丢弃，由最新加载接管 UI
       error.value = e instanceof Error ? e.message : String(e);
       throw e;
     } finally {
-      if (gen === loadGen) loading.value = false; // 过期加载不得复位最新加载持有的 loading
+      if (loadGen.isCurrent(gen)) loading.value = false; // 过期加载不得复位最新加载持有的 loading
     }
   }
 

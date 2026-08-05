@@ -17,7 +17,7 @@
  * - 页面不可见（document.hidden）时可跳过绘制（skipWhenHidden），恢复后自动续播
  * 相比旧版 N 个 SpinePlayer，仅占用 1 个 WebGL 上下文。
  */
-import type { SpineResolvedSceneLayer } from '../../services/types';
+import type { SpineResolvedSceneLayer } from '../services/types';
 import { pickAnimName } from './player';
 import type {
   SceneItem,

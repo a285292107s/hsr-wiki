@@ -9,6 +9,7 @@ import { useAppStore } from '../stores/app';
 import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
 import { prefetchHighPriority } from '../router/chunks';
 import { initSpineSceneViewer } from '../character/spine';
+import { useCardTilt } from '../composables/use-card-tilt';
 
 const app = useAppStore();
 const loading = ref(true);
@@ -30,35 +31,10 @@ function mountHeroSpine(): void {
   });
 }
 
-/* ─── 卡片 3D 倾斜（grid 级事件委托 + rAF 节流） ─── */
+/* ─── 卡片 3D 倾斜（grid 级事件委托 + rAF 节流，与目录页共用 useCardTilt） ─── */
 
 const gridRef = ref<HTMLElement | null>(null);
-let tiltRaf: number | null = null;
-let tiltPending: { card: HTMLElement; x: number; y: number } | null = null;
-
-function onGridMove(e: MouseEvent): void {
-  const card = (e.target as HTMLElement).closest('.nk-home-card');
-  if (!(card instanceof HTMLElement)) return;
-  tiltPending = { card, x: e.clientX, y: e.clientY };
-  if (tiltRaf !== null) return;
-  tiltRaf = requestAnimationFrame(() => {
-    tiltRaf = null;
-    if (!tiltPending) return;
-    const { card: c, x, y } = tiltPending;
-    tiltPending = null;
-    const rect = c.getBoundingClientRect();
-    c.style.setProperty('--rx', ((x - rect.left) / rect.width - 0.5).toFixed(3));
-    c.style.setProperty('--ry', (0.5 - (y - rect.top) / rect.height).toFixed(3));
-  });
-}
-
-function onGridLeave(): void {
-  tiltPending = null;
-  gridRef.value?.querySelectorAll<HTMLElement>('.nk-home-card').forEach((c) => {
-    c.style.setProperty('--rx', '0');
-    c.style.setProperty('--ry', '0');
-  });
-}
+const tilt = useCardTilt(gridRef, () => '.nk-home-card');
 
 /* ─── 标题逐字动画 / 滚动 / 生命周期 ─── */
 
@@ -85,7 +61,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (disposeSpine) disposeSpine();
-  if (tiltRaf !== null) cancelAnimationFrame(tiltRaf);
+  // tilt 的 rAF 清理由 useCardTilt 的 onScopeDispose 接管
 });
 </script>
 
@@ -121,8 +97,8 @@ onBeforeUnmount(() => {
         <div
           ref="gridRef"
           class="nk-home-nav__grid"
-          @mousemove="onGridMove"
-          @mouseleave="onGridLeave"
+          @mousemove="tilt.onMove"
+          @mouseleave="tilt.onLeave"
         >
           <RouterLink
             v-for="(n, i) in navCards"

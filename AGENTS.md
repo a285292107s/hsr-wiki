@@ -56,38 +56,63 @@ python gen_catalog.py                    # 重新生成 DATA_CATALOG.md 索引
 src/
 ├── main.ts              → bootstrap() 唯一入口
 ├── app/                 → 应用层
-│   ├── bootstrap.ts     → createApp + Pinia + Router + 全局 CSS 导入
+│   ├── bootstrap.ts     → createApp + Pinia + Router + 全局 CSS 导入（仅 tokens + catalog）
 │   ├── App.vue          → 外壳：SidebarNav + 方向过渡 RouterView + ToastHost
-│   ├── router/index.ts  → Hash 路由；meta.depth 驱动导航方向动画；
+│   ├── router/index.ts  → History 路由；meta.depth 驱动导航方向动画；
 │   │                        meta.endgameTab 共享 transition key（终局 4 路由 = 同页 Tab）；
-│   │                        meta.cw 触发 data-theme="cw"（货币战争暗金主题）
+│   │                        meta.cw 触发 data-theme="cw"（货币战争暗金主题）；
+│   │                        CW 目录路由经 cwCatalogView 并行加载目录专属 CSS
+│   ├── router/chunks.ts → 路由 chunk 预加载函数（侧栏 hover / 首页 idle）
 │   ├── stores/          → Pinia 状态仓库（app、character、lightcone、relic）
-│   ├── views/           → 路由级页面组件
+│   ├── views/           → 路由级页面组件（每个视图内 import 自己的专属样式）
+│   ├── composables/     → 复用组合式函数（useDelayedSkeleton / useLoadGeneration /
+│   │                        useParallax / useScrollRestore / useCardTilt）
+│   ├── character/       → 角色详情页子组件（CharHero + OverviewPanel / SkillsPanel /
+│   │                        EidolonsPanel / BuildsPanel + SkillCard + spine 编排层 + utils）
 │   ├── catalog/         → 配置驱动目录引擎（pages/ 子模块各目录配置；
-│   │                        pages.ts 为纯注册表；CatalogPage.vue 通过配置渲染任意目录）
+│   │                        pages.ts 为纯注册表；CatalogPage.vue 通过配置渲染任意目录；
+│   │                        CatalogToolbar.vue 为搜索/筛选工具条）
 │   └── components/      → 复用组件（SidebarNav、ToastHost、nav-items）
 ├── services/            → API 层（纯函数，无全局状态）
-│   ├── api.ts           → 全部数据加载器（统一走 cache.ts 的 fetchJSON；共享列表用单例 Promise）
+│   ├── api/             → 按域拆分的加载器（characters / relics / items / endgame /
+│   │                        currency / spine / manifest；index.ts 为 barrel；
+│   │                        singleton.ts 提供 singletonLoad 工厂；base.ts 提供数据基址）
 │   ├── cache.ts         → 四级缓存 + 唯一底层请求函数 fetchJSON（15s 超时 + NkError）
-│   └── types.ts         → 全部共享 TypeScript 接口（含货币战争类型）
+│   └── types/           → 按域拆分的共享接口（character / relic / spine / currency /
+│                           misc；index.ts 为 barrel）
 ├── lib/                 → 纯工具函数
 │   ├── constants.ts     → CDN 基址、枚举映射（PATH/ELEM/TYPE/TAG/SKILL_ORDER/PROP_NAMES…）
-│   ├── format.ts        → HTML 转义、标签剥离、图标 URL 构造器
+│   ├── format.ts        → 数值格式化 + 加强模式视图构建 + 数据校验；并 re-export 下列子模块
+│   ├── html.ts          → HTML 转义与富文本标签清洗（escHtml / gameTagsToHtml / stripTags）
+│   ├── diff.ts          → 参数对比与 word-level LCS diff（fmtDescDiff / wordDiff）
+│   ├── icons.ts         → 图标/图片 URL 构造器（skillIconUrl / itemName / avatarDrawCardUrl…）
 │   └── errors.ts        → NkError 错误类
-└── styles/              → 全局样式（tokens.css = 设计令牌；按模块拆分 CSS 文件）
+├── spine/               → 中立引擎层（零 Vue 依赖，有副作用：DOM/WebGL/rAF/全局注册表）
+│   ├── types.ts         → 双运行时（4.1/4.2）松散契约唯一收口
+│   ├── runtime.ts       → 运行时动态加载（访问器代理隔离 window.spine + 多 CDN 兜底）
+│   ├── config.ts        → buildOfficialConfig 官网源 URL 构造（ADR 0009）
+│   ├── player.ts        → SpinePlayer 单实例工厂 + 结算工厂 + 质量修复
+│   ├── scene.ts         → 单画布多骨架场景渲染器（固定舞台 cover 适配 + 渲染管线插桩）
+│   ├── registry.ts      → 按 key 精确释放注册表 + WebGL 上下文计数预警
+│   └── constants.ts     → 运行时版本 + CDN 列表（引擎自包含）
+└── styles/              → 全局仅 tokens.css（设计令牌）+ catalog.css（目录引擎）；
+                           页面专属 CSS（character / lightcone / relic / currency-* /
+                           skill-card）随各自路由 chunk 懒加载
 ```
 
 ### 核心架构模式
 
 1. **配置驱动目录页**：所有列表页均在 `src/app/catalog/pages/` 子模块中定义（character.ts / lightcone.ts / relic.ts / item.ts / monster.ts / endgame.ts / currency-role.ts），由 `pages.ts` 统一注册为 `CatalogPageConfig`。单一 `CatalogView.vue` 根据 `route.meta.catalog` 匹配配置渲染任意目录。新增目录 = 新增子模块 + 注册 + 路由。
 
-2. **数据流向**：`Pinia store` → 调用 `services/api.ts` 纯函数 → 从 `public/data/cn/`（随站部署）获取本地 JSON 或从 CDN 获取图片。Store 编排加载、缓存与错误处理；API 函数本身不持有状态（单例 Promise 除外）。
+2. **数据流向**：`Pinia store` → 调用 `services/api/` 纯函数 → 从 `public/data/cn/`（随站部署）获取本地 JSON 或从 CDN 获取图片。Store 编排加载、缓存与错误处理；API 函数本身不持有状态（单例 Promise 除外）。
 
 3. **本地优先数据**：全部目录/详情数据为预转换 JSON，存放于 `public/data/cn/`。仅图片与 Spine 动画在运行时从 CDN 加载。CDN 基址定义于 `src/lib/constants.ts → CDN`。
 
 4. **双模式主题**：常规模式（紫色调）vs 货币战争模式（暗金色）。路由 `meta.cw` 切换 `<html data-theme="cw">`，附带 400ms 过渡动画类。CW 路由位于 `/currency/*` 下。
 
 5. **方向性页面过渡**：Router `beforeEach` 比较 from/to 路由的 `meta.depth` 计算 `navDir`（1=前进、-1=返回、0=平级）。App.vue 据此选择过渡动画名。手机端（<768px）统一使用简单淡入淡出。
+
+6. **样式随路由懒加载**：页面专属 CSS 在对应视图组件内 `import`（CharacterView 引 character.css + skill-card.css；LightconeView 引 lightcone.css + skill-card.css；RelicView 引 relic.css；CW 视图引 currency-*.css），由 Vite 拆为独立 CSS chunk 随路由加载。CW 目录路由（共享 CatalogView）在 router 内通过 `Promise.all` 并行加载目录样式，保证样式先于渲染到达。全局仅 tokens.css + catalog.css。
 
 ### 数据转换管线（Python）
 
@@ -167,7 +192,7 @@ src/
 ### 数据层
 
 - **共享列表单例**：`characters.json` / `light_cones.json` / `relics.json` 使用模块级单例 Promise（失败自动重置允许重试）。新增同类共享数据必须沿用此模式。
-- **类型定义归属**：所有共享接口必须定义在 `services/types.ts`。`api.ts` 仅允许 `import type` + 函数实现，禁止内联定义 export interface。
+- 类型定义归属：所有共享接口必须定义在 `services/types/`（按域拆分，index.ts barrel）。`services/api/` 仅允许 `import type` + 函数实现，禁止内联定义 export interface。
 
 ### 目录页
 

@@ -26,7 +26,7 @@ function renderAugmentCard(item: CatalogItem, index = 0): string {
 
 export const currencyAugmentPage: CatalogPageConfig = {
   id: 'currency-augment',
-  title: '策略',
+  title: '货币战争 · 投资策略',
   searchPlaceholder: '搜索投资策略…',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',

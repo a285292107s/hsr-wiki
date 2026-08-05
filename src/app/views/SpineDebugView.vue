@@ -15,8 +15,8 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { loadSpineSceneKeys, resolveSpine } from '../../services/api';
-import { SPINE_RUNTIME_VERSION } from '../../lib/constants';
-import { getSpineCtor, loadSpineRuntime } from '../../lib/spine/runtime';
+import { SPINE_RUNTIME_VERSION } from '../../spine/constants';
+import { getSpineCtor, loadSpineRuntime } from '../../spine/runtime';
 import { nearBlackClass as blackClass } from '../debug/kv-acceptance';
 import { copyText, downloadCanvas, downloadJson } from '../debug/report';
 import { useKvAcceptance, type AcceptBridge } from '../debug/use-kv-acceptance';

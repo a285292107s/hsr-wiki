@@ -7,6 +7,7 @@ import { ref } from 'vue';
 import {
   loadLocalRelicDetail, loadLocalRelicMainAffixes, loadLocalRelicSubAffixes, loadLocalRelicStories,
 } from '../../services/api';
+import { useLoadGeneration } from '../composables/use-load-generation';
 import type {
   LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
 } from '../../services/types';
@@ -36,11 +37,11 @@ export const useRelicStore = defineStore('relic', () => {
     if (TABS.some((t) => t.key === key)) activeTab.value = key as RelicTab;
   }
 
-  /** 加载代：遗器间快速导航时防止旧数据覆盖新数据 */
-  let loadGen = 0;
+  /** 加载代：遗器间快速导航时防止旧数据覆盖新数据（统一 useLoadGeneration 模式） */
+  const loadGen = useLoadGeneration();
 
   async function load(id: string): Promise<void> {
-    const gen = ++loadGen;
+    const gen = loadGen.begin();
     loading.value = true;
     error.value = null;
     try {
@@ -53,7 +54,7 @@ export const useRelicStore = defineStore('relic', () => {
         subAffixes.value.length ? Promise.resolve(subAffixes.value) : loadLocalRelicSubAffixes(),
         Object.keys(stories.value).length ? Promise.resolve(stories.value) : loadLocalRelicStories(),
       ]);
-      if (gen !== loadGen) return;
+      if (!loadGen.isCurrent(gen)) return;
       if (!d || !d.name) throw new Error('遗器数据不完整');
       data.value = d;
       mainAffixes.value = main;
@@ -61,11 +62,11 @@ export const useRelicStore = defineStore('relic', () => {
       stories.value = storyMap;
       document.title = `${d.name} - HSR Wiki`;
     } catch (e) {
-      if (gen !== loadGen) return;
+      if (!loadGen.isCurrent(gen)) return;
       error.value = e instanceof Error ? e.message : String(e);
       throw e;
     } finally {
-      if (gen === loadGen) loading.value = false;
+      if (loadGen.isCurrent(gen)) loading.value = false;
     }
   }
 

@@ -13,10 +13,10 @@ import type { SpineResolved, SpineSource } from '../../services/types';
 import {
   BLEND_NAMES,
   type SpinePlayerCtor, type SpinePlayerInstance, type SpinePlayerConfig, type SpineRuntimeVersion,
-} from '../../lib/spine/types';
-import { buildOfficialConfig } from '../../lib/spine/config';
-import { disposePlayer, pickAnimName, spawnPlayer } from '../../lib/spine/player';
-import { getSpineCtor, loadSpineRuntime } from '../../lib/spine/runtime';
+} from '../../spine/types';
+import { buildOfficialConfig } from '../../spine/config';
+import { disposePlayer, pickAnimName, spawnPlayer } from '../../spine/player';
+import { getSpineCtor, loadSpineRuntime } from '../../spine/runtime';
 // 像素分析统一收口在 debug/pixels.ts（验收台共用），此处 re-export 保持既有导入路径兼容
 export { analyzePixels, type PixelAnalysis } from './pixels';
 import { analyzePixels } from './pixels';
@@ -194,7 +194,7 @@ export function buildDiagnosis(entry: AuditEntry): string[] {
   if (all.some((t) => /Invalid|解析失败|加载失败|Could not load|must not be null|outside the bounds|string table/.test(t))) {
     advice.push(
       entry.kind === 'skel'
-        ? '骨架解析失败：skel 条目走 4.1.23 备用运行时 → 核对 nanoka CDN 资源状态与 4.1 运行时加载（双运行时机制见 src/lib/spine/runtime.ts）'
+        ? '骨架解析失败：skel 条目走 4.1.23 备用运行时 → 核对 nanoka CDN 资源状态与 4.1 运行时加载（双运行时机制见 src/spine/runtime.ts）'
         : '骨架/atlas 解析失败 → 核对 Spine 版本兼容（官网源 4.2.43 vs 运行时 4.2.43）',
     );
   }

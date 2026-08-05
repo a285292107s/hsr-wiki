@@ -11,6 +11,9 @@ import { useLightconeStore } from '../stores/lightcone';
 import { fmtDesc, lightconeIconUrl, itemName } from '../../lib/format';
 import { CDN, PATH } from '../../lib/constants';
 import type { LightConeStats } from '../../services/types';
+// 光锥详情页专属样式（随本路由 chunk 懒加载；技能卡片原语与角色页共享）
+import '../../styles/skill-card.css';
+import '../../styles/lightcone.css';
 
 const route = useRoute();
 const app = useAppStore();

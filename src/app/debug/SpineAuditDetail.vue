@@ -7,8 +7,8 @@
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { SpineResolved } from '../../services/types';
-import type { SpinePlayerInstance } from '../../lib/spine/types';
-import { disposePlayer, pickAnimName } from '../../lib/spine/player';
+import type { SpinePlayerInstance } from '../../spine/types';
+import { disposePlayer, pickAnimName } from '../../spine/player';
 import {
   type AuditEntry,
   buildAuditPlayerConfig, buildDiagnosis, ensureSpineCtor, runtimeVersionFor,

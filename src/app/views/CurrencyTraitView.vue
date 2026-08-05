@@ -9,6 +9,8 @@ import { useRoute } from 'vue-router';
 import { fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../lib/format';
 import { loadLocalCurrencyTraits, loadLocalCurrencyRoles } from '../../services/api';
 import type { CurrencyTraitEntry, CurrencyRoleEntry } from '../../services/types';
+// 货币战争模式专属样式（随本路由 chunk 懒加载）
+import '../../styles/currency-trait-detail.css';
 
 const route = useRoute();
 const traitId = computed(() => String(route.params.id));

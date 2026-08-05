@@ -2,15 +2,10 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import { createNkRouter } from './router';
+// 全局样式仅保留设计令牌与共享目录引擎；页面专属样式随路由 chunk 懒加载
+// （character/lightcone/relic/currency-* 各自视图内 import）
 import '../styles/tokens.css';
-import '../styles/character.css';
 import '../styles/catalog.css';
-import '../styles/lightcone.css';
-import '../styles/relic.css';
-import '../styles/currency-role.css';
-import '../styles/currency-hub.css';
-import '../styles/currency-catalog.css';
-import '../styles/currency-trait-detail.css';
 
 export async function bootstrap(): Promise<void> {
   const app = createApp(App);

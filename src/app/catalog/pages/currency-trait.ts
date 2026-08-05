@@ -31,7 +31,7 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
 
 export const currencyTraitPage: CatalogPageConfig = {
   id: 'currency-trait',
-  title: '羁绊',
+  title: '货币战争 · 羁绊图鉴',
   searchPlaceholder: '搜索羁绊…',
   gridClass: 'nk-cat-grid nk-cw-trait-grid',
   cardClass: '.nk-cw-trait-card',

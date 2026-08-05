@@ -35,18 +35,9 @@ export interface CatalogContext {
   version: string;
 }
 
-export interface CatalogSubNavItem {
-  label: string;
-  en: string;
-  href: string;
-  active?: boolean;
-}
-
 export interface CatalogPageConfig {
   id: string;
   title: string;
-  /** 子导航标签（如终局内容的 4 个子分类） */
-  subNav?: CatalogSubNavItem[];
   /** 数据获取：角色走本地转换数据；其余目录走 CDN */
   fetchData?: (ctx: CatalogContext) => Promise<CatalogItem[]>;
   /** 数据就绪后后台预热兄弟页数据（终局 4 页互取，保证 Tab 切换即时命中 L1） */

@@ -1,7 +1,7 @@
 /**
  * Spine 骨骼动画查看器编排层（薄层）
  *
- * 仅自主渲染（ADR 0002/0009）：引擎层实现见 src/lib/spine/
+ * 仅自主渲染（ADR 0002/0009）：引擎层实现见 src/spine/
  * （types 契约 / runtime 运行时加载 / config URL 构造 / player 单实例 / scene 场景渲染器 / registry 注册表）。
  * 本文件只保留业务编排：
  * - 清单解析与源回退（resolveSpine 官方优先 → 渲染失败强制回退 nanoka）
@@ -11,12 +11,12 @@
  */
 import { resolveSpine } from '../../services/api';
 import type { SpineResolved, SpineResolvedSceneLayer, SpineSceneEntry } from '../../services/types';
-import { buildOfficialConfig } from '../../lib/spine/config';
-import { createSpinePlayer } from '../../lib/spine/player';
-import { disposeSpineEntry } from '../../lib/spine/registry';
-import { getSpineLib, loadSpineRuntime } from '../../lib/spine/runtime';
-import { mountSpineScene } from '../../lib/spine/scene';
-import type { SpineLib, SpineRuntimeVersion } from '../../lib/spine/types';
+import { buildOfficialConfig } from '../../spine/config';
+import { createSpinePlayer } from '../../spine/player';
+import { disposeSpineEntry } from '../../spine/registry';
+import { getSpineLib, loadSpineRuntime } from '../../spine/runtime';
+import { mountSpineScene } from '../../spine/scene';
+import type { SpineLib, SpineRuntimeVersion } from '../../spine/types';
 
 /** 播放器注册 key 命名空间（registry 按 key 精确释放，与场景互不干扰） */
 const PLAYER_KEY = (spineKey: string): string => `player:${spineKey}`;
@@ -45,7 +45,7 @@ export function initSpineViewer(
 
 /**
  * 初始化多层场景 Spine（official-scene 条目，如枢纽页背景）。
- * 场景渲染细节见 lib/spine/scene.ts（单画布多骨架 + 固定舞台 cover 适配）；
+ * 场景渲染细节见 spine/scene.ts（单画布多骨架 + 固定舞台 cover 适配）；
  * 本层负责：清单解析 → 运行时就绪 → 窄屏降级（<768px 仅主背景层）→ 断点变化重建。
  * @param container 场景挂载容器（内部自建舞台 + 单画布）
  * @param sceneKey 清单条目键（如 home-bg）

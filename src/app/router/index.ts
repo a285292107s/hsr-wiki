@@ -11,6 +11,21 @@ import { ref } from 'vue';
 /** 导航方向（驱动 nk-enter-fwd / nk-enter-back 过渡动画） */
 export const navDir = ref<1 | -1 | 0>(0);
 
+/**
+ * CW 目录视图：组件 chunk 与 currency-catalog.css 并行加载。
+ * 样式随导航异步依赖在路由渲染前到达，不影响 400ms 主题过渡。
+ */
+const cwCatalogView = (): Promise<typeof import('../views/CatalogView.vue').default> =>
+  Promise.all([import('../views/CatalogView.vue'), import('../../styles/currency-catalog.css')]).then(([m]) => m.default);
+
+/** 角色图鉴目录：.nk-crole-card 卡片样式定义于 currency-role.css（详情页同源），需一并加载 */
+const cwRoleCatalogView = (): Promise<typeof import('../views/CatalogView.vue').default> =>
+  Promise.all([
+    import('../views/CatalogView.vue'),
+    import('../../styles/currency-catalog.css'),
+    import('../../styles/currency-role.css'),
+  ]).then(([m]) => m.default);
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -93,7 +108,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/currency/role',
     name: 'catalog-currency-role',
-    component: () => import('../views/CatalogView.vue'),
+    component: cwRoleCatalogView,
     meta: { depth: 1, catalog: 'currency-role', cw: true, title: '货币战争 · 角色图鉴' },
   },
   {
@@ -105,25 +120,25 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/currency/item',
     name: 'catalog-currency-equipment',
-    component: () => import('../views/CatalogView.vue'),
+    component: cwCatalogView,
     meta: { depth: 1, catalog: 'currency-equipment', cw: true, title: '货币战争 · 装备图鉴' },
   },
   {
     path: '/currency/buff',
     name: 'catalog-currency-portal',
-    component: () => import('../views/CatalogView.vue'),
+    component: cwCatalogView,
     meta: { depth: 1, catalog: 'currency-portal', cw: true, title: '货币战争 · 投资环境' },
   },
   {
     path: '/currency/augment',
     name: 'catalog-currency-augment',
-    component: () => import('../views/CatalogView.vue'),
+    component: cwCatalogView,
     meta: { depth: 1, catalog: 'currency-augment', cw: true, title: '货币战争 · 投资策略' },
   },
   {
     path: '/currency/trait',
     name: 'catalog-currency-trait',
-    component: () => import('../views/CatalogView.vue'),
+    component: cwCatalogView,
     meta: { depth: 1, catalog: 'currency-trait', cw: true, title: '货币战争 · 羁绊图鉴' },
   },
   {

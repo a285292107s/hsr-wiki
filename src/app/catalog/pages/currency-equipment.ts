@@ -125,7 +125,7 @@ function renderEquipCard(item: CatalogItem, index = 0): string {
 
 export const currencyEquipmentPage: CatalogPageConfig = {
   id: 'currency-equipment',
-  title: '装备',
+  title: '货币战争 · 装备图鉴',
   searchPlaceholder: '搜索装备…',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',

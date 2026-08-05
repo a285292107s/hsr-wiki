@@ -11,6 +11,8 @@ import { useRelicStore } from '../stores/relic';
 import { fmtDesc, itemIconUrl } from '../../lib/format';
 import { CDN, PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES } from '../../lib/constants';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
+// 遗器详情页专属样式（随本路由 chunk 懒加载）
+import '../../styles/relic.css';
 
 const route = useRoute();
 const app = useAppStore();

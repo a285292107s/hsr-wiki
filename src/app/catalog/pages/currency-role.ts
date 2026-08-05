@@ -65,7 +65,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
 
 export const currencyRolePage: CatalogPageConfig = {
   id: 'currency-role',
-  title: '角色',
+  title: '货币战争 · 角色图鉴',
   searchPlaceholder: '搜索角色…',
   gridClass: 'nk-cat-grid nk-crole-grid',
   cardClass: '.nk-crole-card',

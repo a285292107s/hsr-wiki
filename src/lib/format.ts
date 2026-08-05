@@ -1,70 +1,18 @@
 /**
- * 纯函数工具：格式化 / Diff / URL 构建 / 数据校验
- * 全部无状态（显式传参），可被 Vitest 直接覆盖。
+ * 纯函数工具（barrel）：数值格式化 / 加强模式视图构建 / 数据校验。
+ * 已拆分子模块并在此 re-export 保持旧导入路径兼容：
+ * - ./html  ：转义与富文本标签（escHtml / gameTagsToHtml / stripTags / stripAllTags）
+ * - ./diff  ：参数对比与 word-level LCS（fmtDescDiff / wordDiff / hasParamDiff…）
+ * - ./icons ：图标 URL 构造器（iconUrl / skillIconUrl / itemName…）
  */
-import { CDN, MAX_CHAR_LEVEL, SERVANT_ICON_KEY, SKILL_ICON_KEY, SKILL_ICON_KEY_BY_NAME, STANCE_LABEL, STANCE_TAG, TRAILBLAZER_ICON_FALLBACK } from './constants';
+import { gameTagsToHtml } from './html';
+import { MAX_CHAR_LEVEL, STANCE_LABEL, STANCE_TAG } from './constants';
 import { NkError } from './errors';
-import type { CharacterData, CharStats, ItemDb, NameCache, Skill } from '../services/types';
+import type { CharacterData, CharStats, Skill } from '../services/types';
 
-/* ─── HTML 安全 ─── */
-
-const ESC_MAP: Record<string, string> = {
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-};
-
-/** HTML 转义：防止 CDN 数据中的特殊字符被解析为 DOM（XSS 防御） */
-export function escHtml(s: unknown): string {
-  return s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ESC_MAP[c]);
-}
-
-/**
- * 将 HSR 游戏富文本标签转换为可渲染 HTML。
- * 参照 docs/hsr-rich-text-tags.md：
- * - <color=#hex> → span style color（仅接受合法 #RRGGBB[AA]）
- * - <unbreak> → span.nowrap
- * - <u> 保留
- * - {NICKNAME} → 开拓者；{F#}/{M#} → 提取文本；{TEXTJOIN#id} → 移除（构建期应预展开）
- * - 其余未知标签剥离
- *
- * 策略：先将成对的 color/unbreak 转为 \x01(=〈)\x02(=〉) 占位符，剥离残余标签后再还原为 HTML，
- * 避免最终清洗规则误伤自己生成的 span。无效/孤立的 color 标签直接剔除。
- */
-export function gameTagsToHtml(raw: string | null | undefined): string {
-  if (!raw) return '';
-  return raw
-    .replaceAll('{SPACE}', '&nbsp;')
-    .replace(/\{NICKNAME\}/g, '开拓者')
-    .replace(/\{[FM]#([^}]*)\}/g, '$1')
-    .replace(/\{RUBY_[EB]#(?:[^}]*)?\}/g, '')
-    .replace(/\{TEXTJOIN#\d+\}/g, '')
-    // 成对 color/unbreak → 占位符（\x01=〈 \x02=〉）
-    .replace(/<color=#([0-9A-Fa-f]{6,8})>([\s\S]*?)<\/color>/g, '\x01span style="color:#$1"\x02$2\x01/span\x02')
-    .replace(/<unbreak>([\s\S]*?)<\/unbreak>/g, '\x01span class="nowrap"\x02$1\x01/span\x02')
-    // 剥离无效/孤立 color 标签、其他未知标签（保留 <u>）
-    .replace(/<color=[^>]*>/g, '')
-    .replace(/<\/color>/g, '')
-    .replace(/<(?!\/?u>)[^>]+>/g, '')
-    // 占位符还原为真实 HTML
-    .replaceAll('\x01', '<')
-    .replaceAll('\x02', '>');
-}
-
-/** 剥离全部游戏标签/占位符，输出纯文本（用于 diff 比较 / 搜索索引） */
-export function stripTags(desc: string | null | undefined): string {
-  if (!desc) return '';
-  return desc
-    .replaceAll('{SPACE}', ' ')
-    .replace(/\{NICKNAME\}/g, '开拓者')
-    .replace(/\{[FM]#([^}]*)\}/g, '$1')
-    .replace(/\{RUBY_[EB]#(?:[^}]*)?\}/g, '')
-    .replace(/\{TEXTJOIN#\d+\}/g, '')
-    .replace(/<[^>]+>/g, '');
-}
-
-/** 剥离所有 HTML 标签（用于 diff 前清理已渲染的 HTML） */
-export function stripAllTags(s: string | null | undefined): string {
-  return (s || '').replace(/<[^>]+>/g, '');
-}
+export * from './html';
+export * from './diff';
+export * from './icons';
 
 /* ─── 数值格式化 ─── */
 
@@ -146,111 +94,26 @@ export function fmtToughness(sk: Skill): string {
   return parts.join(' / ');
 }
 
-/* ─── Diff 工具 ─── */
+/* ─── 属性计算 ─── */
 
-/** 浮点安全的参数相等判定 */
-export function paramEqual(a: unknown, b: unknown): boolean {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) < 1e-9;
-  return String(a) === String(b);
+/** 稳定取最高等级的 stats（不依赖 key 插入顺序） */
+export function maxLevelStat(stats: Record<string, CharStats> | null | undefined): CharStats | null {
+  if (!stats) return null;
+  if (stats['6']) return stats['6'];
+  const keys = Object.keys(stats).map(Number).filter((k) => !isNaN(k));
+  const maxK = keys.length ? Math.max(...keys) : null;
+  return maxK != null ? stats[maxK] : (Object.values(stats).pop() ?? null);
 }
 
-export function hasParamDiff(newParams: number[], oldParams: number[]): boolean {
-  const len = Math.max(newParams.length, oldParams.length);
-  for (let i = 0; i < len; i++) {
-    if (!paramEqual(newParams[i], oldParams[i])) return true;
-  }
-  return false;
+/** 满级属性计算：base + add * (MAX_CHAR_LEVEL - 1) */
+export function maxLevelValue(base: number, add: number): number {
+  return base + add * (MAX_CHAR_LEVEL - 1);
 }
 
-/** 快速判断两段描述是否有实质差异（剥离标签后比较） */
-export function hasTextDiff(a: string | null | undefined, b: string | null | undefined): boolean {
-  return stripTags(a).replace(/\s+/g, ' ').trim() !== stripTags(b).replace(/\s+/g, ' ').trim();
-}
-
-/* ─── Word-level diff（LCS） ─── */
-
-export interface DiffOp {
-  type: 'equal' | 'add' | 'remove';
-  text: string;
-}
-
-/** 检测文本是否含中文（CJK 统一汉字 + 扩展） */
-function hasChinese(s: string): boolean {
-  return /[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(s);
-}
-
-/** 中文按字符拆分（每个汉字一个 token），英文按空白拆词 */
-export function wordDiff(oldText: string, newText: string): DiffOp[] {
-  const isCjk = hasChinese(oldText) || hasChinese(newText);
-  const oldW = isCjk ? Array.from(oldText).filter(Boolean) : oldText.split(/\s+/).filter(Boolean);
-  const newW = isCjk ? Array.from(newText).filter(Boolean) : newText.split(/\s+/).filter(Boolean);
-  const m = oldW.length;
-  const n = newW.length;
-  if (!m && !n) return [];
-  if (!m) return newW.map((w) => ({ type: 'add' as const, text: w }));
-  if (!n) return oldW.map((w) => ({ type: 'remove' as const, text: w }));
-  // LCS DP
-  const dp = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      dp[i][j] = oldW[i - 1] === newW[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
-    }
-  }
-  // Backtrack
-  const ops: DiffOp[] = [];
-  let i = m;
-  let j = n;
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && oldW[i - 1] === newW[j - 1]) {
-      ops.push({ type: 'equal', text: oldW[i - 1] }); i--; j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      ops.push({ type: 'add', text: newW[j - 1] }); j--;
-    } else {
-      ops.push({ type: 'remove', text: oldW[i - 1] }); i--;
-    }
-  }
-  return ops.reverse();
-}
-
-/** 渲染 word-diff 结果为 HTML */
-export function renderWordDiffHtml(ops: DiffOp[]): string {
-  return ops
-    .map((op) => {
-      if (op.type === 'equal') return op.text;
-      if (op.type === 'add') return `<span class="diff-added">${op.text}</span>`;
-      return `<span class="diff-removed">${op.text}</span>`;
-    })
-    .join('');
-}
-
-/**
- * 新版描述渲染（带 word-level diff）：
- * 模板文本变化 → 词级 diff；仅参数变化 → 参数级高亮（fmtDesc）。
- */
-export function fmtDescDiff(
-  desc: string | null | undefined,
-  params: number[] | null | undefined,
-  oldDesc: string | null | undefined,
-  oldParams: number[] | null | undefined,
-): string {
-  if (!desc) return '';
-  const stripped = stripTags(desc);
-  const oldStripped = oldDesc ? stripTags(oldDesc) : '';
-  const tplChanged = stripped !== oldStripped;
-  const hasPDiff = oldParams && hasParamDiff(params || [], oldParams);
-  // 仅参数变化、模板相同 → 参数级高亮
-  if (!tplChanged && hasPDiff) return fmtDesc(desc, params, oldParams);
-  // 无旧数据 → 普通渲染
-  if (!oldParams && !tplChanged) return fmtDesc(desc, params);
-  // 模板文本变化 → 词级 diff（先剥离渲染 HTML 再 diff，避免标签被当作文本）
-  if (tplChanged && oldDesc) {
-    const newRendered = stripAllTags(fmtDesc(desc, params));
-    const oldRendered = stripAllTags(fmtDesc(oldDesc, oldParams || params));
-    return renderWordDiffHtml(wordDiff(oldRendered, newRendered));
-  }
-  return fmtDesc(desc, params);
+/** 从 rank 字符串解析稀有度数字（CombatPowerAvatarRarityType4 → 4，无法解析回退 5） */
+export function parseRarity(rank: string | null | undefined): number {
+  const m = (rank || '').match(/(\d+)\s*$/);
+  return m ? Number(m[1]) : 5;
 }
 
 /* ─── 加强模式：视图构建 ─── */
@@ -305,142 +168,6 @@ export function getRenderData(
     return { d: buildEnhancedView(base, enhKey), oldD: buildEnhancedOld(base, enhKey) };
   }
   return { d: base, oldD: null };
-}
-
-/* ─── 属性 / 图标 URL ─── */
-
-/** 稳定取最高等级的 stats（不依赖 key 插入顺序） */
-export function maxLevelStat(stats: Record<string, CharStats> | null | undefined): CharStats | null {
-  if (!stats) return null;
-  if (stats['6']) return stats['6'];
-  const keys = Object.keys(stats).map(Number).filter((k) => !isNaN(k));
-  const maxK = keys.length ? Math.max(...keys) : null;
-  return maxK != null ? stats[maxK] : (Object.values(stats).pop() ?? null);
-}
-
-/** 满级属性计算：base + add * (MAX_CHAR_LEVEL - 1) */
-export function maxLevelValue(base: number, add: number): number {
-  return base + add * (MAX_CHAR_LEVEL - 1);
-}
-
-export function iconUrl(i: string | null | undefined): string {
-  if (!i) return '';
-  // 从完整路径中提取文件名（兼容 converter 输出的相对路径和 CDN 原始格式）
-  const name = i.includes('/') ? i.split('/').pop()! : i;
-  return `${CDN}/assets/hsr/skillicons/${name.replace('.png', '.webp')}`;
-}
-
-/** 忆灵 ID：优先从 memosprite.icon 解析（SpriteOutput/ServantIconTeam/11415B.png → 11415），回退 1+charId */
-export function memospriteId(charId: string, data: CharacterData | null): string {
-  const icon = data && data.memosprite && data.memosprite.icon;
-  if (icon) {
-    const m = icon.match(/(\d+)/);
-    if (m) return m[1];
-  }
-  return charId ? '1' + charId : '';
-}
-
-export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | null): string {
-  const key = SKILL_ICON_KEY[sk.type ?? ''] || (sk.type_name && SKILL_ICON_KEY_BY_NAME[sk.type_name]) || '';
-  if (!key || !charId) return '';
-  let id = (key === 'Servant' || key === 'ServantPassive') ? memospriteId(charId, data) : charId;
-  if (!id) return '';
-  // 忆灵技图标 CDN 后缀不统一，按忆灵 ID 查映射表
-  const iconKey = key === 'Servant' ? (SERVANT_ICON_KEY[id] || key) : key;
-  // 开拓者偶数变体无图标资产，回退配对奇数 ID
-  id = TRAILBLAZER_ICON_FALLBACK[id] || id;
-  return `${CDN}/assets/hsr/skillicons/SkillIcon_${id}_${iconKey}.webp`;
-}
-
-/** 星魂图标：rank/_dependencies/textures/{charId}/{charId}_Rank_{num}.webp */
-export function eidolonIconUrl(charId: string, rankNum: number | string): string {
-  return `${CDN}/assets/hsr/rank/_dependencies/textures/${charId}/${charId}_Rank_${rankNum}.webp`;
-}
-
-/** 角色立绘（全身像）：avatardrawcard/{charId}.webp */
-export function avatarDrawCardUrl(charId: string | number): string {
-  return `${CDN}/assets/hsr/avatardrawcard/${charId}.webp`;
-}
-
-/** 物品名称解析：nameCache → itemDb（item_name 字段）→ '#id' 回退 */
-export function itemName(id: string | number, nameCache: NameCache, itemDb: ItemDb): string {
-  const key = String(id);
-  return nameCache[key] || (itemDb[key] || {}).item_name || '#' + id;
-}
-
-/** 物品图标：itemfigures/{数字}.webp（从 item_figure_icon_path 解析） */
-export function itemIconUrl(iconPath: string | null | undefined): string {
-  if (!iconPath) return '';
-  const m = iconPath.match(/(\d+)\.png$/);
-  if (!m) return '';
-  return `${CDN}/assets/hsr/itemfigures/${m[1]}.webp`;
-}
-
-/* ─── 目录页图标 URL（standalone CDN 数据源，复现卡片图片命名规律） ─── */
-
-/** 角色头像：avatarshopicon/{charId}.webp */
-export function avatarShopIconUrl(charId: string | number): string {
-  return charId ? `${CDN}/assets/hsr/avatarshopicon/${charId}.webp` : '';
-}
-
-/** 属性图标：element/{damageType 小写}.webp */
-export function elementIconUrl(damageType: string | null | undefined): string {
-  return damageType ? `${CDN}/assets/hsr/element/${damageType.toLowerCase()}.webp` : '';
-}
-
-/** 命途图标：pathicon/{baseType 小写}.webp */
-export function pathIconUrl(baseType: string | null | undefined): string {
-  return baseType ? `${CDN}/assets/hsr/pathicon/${baseType.toLowerCase()}.webp` : '';
-}
-
-/** 光锥立绘：lightconemediumicon/{id}.webp */
-export function lightconeIconUrl(id: string | number): string {
-  return id ? `${CDN}/assets/hsr/lightconemediumicon/${id}.webp` : '';
-}
-
-/** 敌对图像：monstermiddleicon/{basename}.webp（从 SpriteOutput/MonsterFigure/Monster_xxx.png 取末段去扩展名） */
-export function monsterIconUrl(iconPath: string | null | undefined): string {
-  if (!iconPath) return '';
-  const base = iconPath.split('/').pop()?.replace(/\.png$/i, '') || '';
-  return base ? `${CDN}/assets/hsr/monstermiddleicon/${base}.webp` : '';
-}
-
-/** 货币战争 GridFight 图标：SpriteOutput/GridFight/Equipment/350101.png → CDN webp */
-export function gridFightIconUrl(iconPath: string | null | undefined): string {
-  if (!iconPath) return '';
-  const m = iconPath.match(/SpriteOutput\/(.+)\.png$/i);
-  if (!m) return '';
-  return `${CDN}/assets/hsr/${m[1].toLowerCase()}.webp`;
-}
-
-/**
- * 货币战争装备专用图标：CDN 统一存于 gridfight/equipment/{文件名}.webp（保留原始大小写）。
- * 源路径可能为 Equipment/350101.png 或 GridItem/GridFight_WeaponBox3.png，
- * 两者均映射到 equipment 目录，且命名图标（非数字 ID）须保留大小写。
- */
-export function gridFightEquipIconUrl(iconPath: string | null | undefined): string {
-  if (!iconPath) return '';
-  const m = iconPath.match(/([^/]+)\.png$/i);
-  if (!m) return '';
-  return `${CDN}/assets/hsr/gridfight/equipment/${m[1]}.webp`;
-}
-
-/**
- * 货币战争羁绊图标：CDN 统一存于 gridfight/icon/{文件名}.webp。
- * 源路径为 TraitIcon/Icon/1001.png 或 TraitIcon/MiniIcon/1001S.png，
- * 均映射到 gridfight/icon/ 目录。
- */
-export function gridFightTraitIconUrl(iconPath: string | null | undefined): string {
-  if (!iconPath) return '';
-  const m = iconPath.match(/([^/]+)\.png$/i);
-  if (!m) return '';
-  return `${CDN}/assets/hsr/gridfight/icon/${m[1]}.webp`;
-}
-
-/** 从 rank 字符串解析稀有度数字（CombatPowerAvatarRarityType4 → 4，无法解析回退 5） */
-export function parseRarity(rank: string | null | undefined): number {
-  const m = (rank || '').match(/(\d+)\s*$/);
-  return m ? Number(m[1]) : 5;
 }
 
 /* ─── 数据校验 ─── */

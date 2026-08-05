@@ -1,0 +1,172 @@
+<script setup lang="ts">
+/**
+ * 角色详情 Hero 区：视差立绘 + Spine 双通道 + 属性 diff 面板。
+ * 仅在数据就绪后由父组件挂载（加载期模板整体卸载），故 Spine 生命周期跟随组件挂载/卸载。
+ */
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useParallax } from '../composables/use-parallax';
+import { initSpineViewer } from './spine';
+import { avatarDrawCardUrl, maxLevelStat, maxLevelValue } from '../../lib/format';
+import { CDN, ELEM, MAX_CHAR_LEVEL, PATH } from '../../lib/constants';
+import type { CharacterData } from '../../services/types';
+
+const props = defineProps<{
+  d: CharacterData;
+  /** 加强前视图（diff 用；原始模式为 null） */
+  oldD: CharacterData | null;
+  charId: string;
+}>();
+
+/* ─── 基础展示 ─── */
+
+const heroBg = computed(() => avatarDrawCardUrl(props.charId));
+const stars = computed(() =>
+  '★'.repeat(parseInt(props.d.rarity.replace(/\D/g, ''), 10) || 5),
+);
+
+interface HeroStat { v: number | string; l: string; ov: number | string | null; icon: string; raw: number }
+/** 全部 8 项展示属性：HP/ATK/DEF/SPD + 暴击率/暴击伤害/嘲讽/能量消耗（参考官方 Wiki 头部） */
+const heroStats = computed<HeroStat[]>(() => {
+  const dd = props.d;
+  const s = maxLevelStat(dd.stats);
+  if (!s) return [];
+  const o = props.oldD ? maxLevelStat(props.oldD.stats) : null;
+  const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
+  const mk = (v: number | string, l: string, ov: number | string | null, icon: string, raw: number): HeroStat => ({
+    v, l, ov, icon, raw,
+  });
+  return [
+    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), 'HP', o ? Math.round(maxLevelValue(o.hp_base, o.hp_add)) : null, 'hp', 0),
+    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), 'ATK', o ? Math.round(maxLevelValue(o.attack_base, o.attack_add)) : null, 'atk', 1),
+    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), 'DEF', o ? Math.round(maxLevelValue(o.defence_base, o.defence_add)) : null, 'def', 2),
+    mk(s.speed_base, 'SPD', o ? o.speed_base : null, 'spd', 3),
+    mk(fmtPct(s.critical_chance), '暴击率', o && o.critical_chance !== s.critical_chance ? fmtPct(o.critical_chance) : null, 'crit-rate', 4),
+    mk(fmtPct(s.critical_damage), '暴击伤害', o && o.critical_damage !== s.critical_damage ? fmtPct(o.critical_damage) : null, 'crit-dmg', 5),
+    mk(s.base_aggro ?? 0, '嘲讽值', o ? (o.base_aggro ?? 0) : null, 'taunt', 6),
+    mk(dd.sp_need ?? 0, '能量消耗', props.oldD ? (props.oldD.sp_need ?? null) : null, 'energy', 7),
+  ];
+});
+
+/** 当前等级上限（本地数据源无等级上限字段，固定为最大等级） */
+const levelLimit = computed<number>(() => MAX_CHAR_LEVEL);
+
+/* ─── 视差（lerp 方案；动画开启时冻结） ─── */
+
+const heroRef = ref<HTMLElement | null>(null);
+const heroBgRef = ref<HTMLElement | null>(null);
+const spineVisible = ref(false);
+const { onMove: onHeroMove, onLeave: onHeroLeave, reset: resetParallax } = useParallax(
+  heroRef, heroBgRef, { enabled: () => !spineVisible.value },
+);
+
+/* ─── Spine 查看器（charId 变化时重建；加强切换不重建） ─── */
+
+const spineRef = ref<HTMLElement | null>(null);
+const spineReady = ref(false);
+let spineCleanup: (() => void) | null = null;
+
+function startSpine(id: string): void {
+  if (spineCleanup) {
+    spineCleanup();
+    spineCleanup = null;
+  }
+  spineReady.value = false;
+  spineVisible.value = false;
+  if (!id || !spineRef.value) return;
+  spineCleanup = initSpineViewer(spineRef.value, id, () => {
+    spineReady.value = true;
+    spineVisible.value = true;
+  });
+}
+
+onMounted(async () => {
+  await nextTick();
+  startSpine(props.charId);
+});
+watch(() => props.charId, async (id) => {
+  await nextTick();
+  startSpine(id);
+});
+
+function toggleSpine(): void {
+  if (!spineReady.value) return; // 无动画时忽略点击
+  spineVisible.value = !spineVisible.value;
+  if (spineVisible.value) resetParallax(); // 开启动画时立绘回中
+}
+
+onBeforeUnmount(() => {
+  if (spineCleanup) {
+    spineCleanup();
+    spineCleanup = null;
+  }
+});
+</script>
+
+<template>
+  <div ref="heroRef" class="nk-hero" @mousemove="onHeroMove" @mouseleave="onHeroLeave">
+    <div class="nk-hero__visual">
+      <div
+        ref="heroBgRef"
+        class="nk-hero__bg"
+        :class="{ 'nk-dim': spineVisible }"
+        :style="{ backgroundImage: `url(${heroBg})` }"
+      ></div>
+      <div ref="spineRef" class="nk-hero__spine" :class="{ 'nk-ready': spineVisible }"></div>
+      <div class="nk-hero__scrim"></div>
+      <button
+        class="nk-hero__toggle"
+        :class="{ off: !spineVisible, 'has-anim': spineReady }"
+        :title="spineReady ? undefined : '该角色暂无动画展示'"
+        type="button"
+        @click="toggleSpine"
+      >
+        <span class="dot"></span>动画
+      </button>
+    </div>
+    <div class="nk-hero__panel">
+      <header class="nk-hero__head">
+        <div v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</div>
+        <h1 class="nk-hero__name">{{ d.name }}</h1>
+        <div class="nk-hero__meta">
+          <span class="nk-hero__stars">{{ stars }}</span>
+          <span class="nk-hero__tag">
+            <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`">
+            {{ ELEM[d.damage_type] || d.damage_type }}
+          </span>
+          <span class="nk-hero__tag">
+            <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`">
+            {{ PATH[d.base_type] || d.base_type }}
+          </span>
+          <span class="nk-hero__id">
+            <span class="nk-hero__id-num">{{ charId }}</span>
+          </span>
+        </div>
+      </header>
+
+      <section v-if="heroStats.length" class="nk-hero__section">
+        <div class="nk-hero__section-title">
+          <span class="nk-hero__section-bar"></span>
+          <span>属性</span>
+        </div>
+        <div class="nk-hero__level">
+          <span class="nk-hero__level-label">Lv. {{ levelLimit }}/{{ MAX_CHAR_LEVEL }}</span>
+          <div class="nk-hero__level-track">
+            <div class="nk-hero__level-fill" :style="{ width: `${(levelLimit / MAX_CHAR_LEVEL) * 100}%` }"></div>
+          </div>
+        </div>
+        <div class="nk-hero__stats">
+          <div v-for="st in heroStats" :key="st.l" class="nk-hero__stat">
+            <span class="nk-hero__stat-icon" :data-icon="st.icon" aria-hidden="true"></span>
+            <span class="nk-hero__stat-label">{{ st.l }}</span>
+            <span class="nk-hero__stat-val">
+              <template v-if="st.ov !== null">
+                <span class="nk-d-c">{{ st.ov }}</span><span class="nk-d-n">{{ st.v }}</span>
+              </template>
+              <template v-else>{{ st.v }}</template>
+            </span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</template>

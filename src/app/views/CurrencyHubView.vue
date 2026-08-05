@@ -9,6 +9,8 @@ import { RouterLink } from 'vue-router';
 import { CW_NAV_ITEMS } from '../components/nav-items';
 import { loadLocalCurrencyRoles, loadLocalCurrencySeasons, loadLocalCurrencyEquipment, loadLocalCurrencyPortals, loadLocalCurrencyAugments, loadLocalCurrencyTraits } from '../../services/api';
 import type { CurrencySeason } from '../../services/types';
+// 货币战争模式专属样式（随本路由 chunk 懒加载）
+import '../../styles/currency-hub.css';
 
 /* ─── 行情滚动条（装饰性：游戏内货币的交易所行情） ─── */
 const TICKER = [

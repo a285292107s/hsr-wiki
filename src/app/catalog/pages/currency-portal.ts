@@ -17,7 +17,7 @@ function renderPortalCard(item: CatalogItem, index = 0): string {
 
 export const currencyPortalPage: CatalogPageConfig = {
   id: 'currency-portal',
-  title: '环境',
+  title: '货币战争 · 投资环境',
   searchPlaceholder: '搜索投资环境…',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',

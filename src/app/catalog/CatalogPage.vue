@@ -9,8 +9,13 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
+import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
+import { useLoadGeneration } from '../composables/use-load-generation';
+import { useScrollRestore } from '../composables/use-scroll-restore';
+import { useCardTilt } from '../composables/use-card-tilt';
+import CatalogToolbar from './CatalogToolbar.vue';
 import { useVirtualGrid, vReveal } from './use-virtual-grid';
-import type { CatalogItem, CatalogPageConfig, CatalogSubNavItem } from './types';
+import type { CatalogItem, CatalogPageConfig } from './types';
 
 const props = defineProps<{ config: CatalogPageConfig }>();
 
@@ -23,9 +28,7 @@ const VIRTUAL_THRESHOLD = 400;
 type Phase = 'loading' | 'ready' | 'error';
 const phase = ref<Phase>('loading');
 /** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
-const showSkeleton = ref(false);
-const SKELETON_DELAY = 150;
-let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
+const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 const errorMsg = ref('');
 const items = ref<CatalogItem[]>([]);
 /** 搜索关键词（从 URL query.q 初始化） */
@@ -41,25 +44,23 @@ const activeFilters = ref<Record<string, string>>((() => {
 const filtersOpen = ref(true);
 
 const cancelled = { value: false };
-/** 加载代：递增序号，过期加载（Tab 已切走）的结果静默丢弃 */
-let loadGen = 0;
+/** 加载代：过期加载（Tab 已切走）的结果静默丢弃 */
+const loadGen = useLoadGeneration();
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 let panelTimer: ReturnType<typeof setTimeout> | null = null;
-let tiltRaf: number | null = null;
-let tiltPending: { card: HTMLElement; x: number; y: number } | null = null;
 
 const scrollerRef = ref<HTMLElement | null>(null);
 const gridRef = ref<HTMLElement | null>(null);
 
 /* ─── 滚动位置保存/恢复（sessionStorage，key = catalog id） ─── */
-const SCROLL_KEY = `nk-scroll:${props.config.id}`;
+const scroll = useScrollRestore(scrollerRef, `nk-scroll:${props.config.id}`);
 /**
  * 抑制入场交错动画：存在待恢复的滚动位置时（从详情页返回、落点在中部），
  * 卡片 delay 按绝对索引从列表首个起算，视口内卡片会滞留最多 ~0.95s 才显现。
  * 此时交错波浪（本为从顶部首屏设计）既错位又拖慢感知，故整体禁用入场动画。
  * 须在 setup 同步求值（早于网格挂载），保证卡片首帧即无动画。
  */
-const noReveal = ref(sessionStorage.getItem(SCROLL_KEY) != null);
+const noReveal = ref(scroll.hasArchive);
 
 const filters = computed(() =>
   props.config.buildFilters && items.value.length
@@ -104,29 +105,24 @@ const { cells, gridMinHeight, fastJump, start, stop, refresh } = useVirtualGrid(
 /* ─── 数据加载 ─── */
 
 async function load(): Promise<void> {
-  const gen = ++loadGen;
+  const gen = loadGen.begin();
   phase.value = 'loading';
   errorMsg.value = '';
-  showSkeleton.value = false;
-  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
-  skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
   try {
     await app.initManifest();
   } catch { /* 版本为空 → fetchData 将报错 */ }
   try {
     if (!props.config.fetchData) throw new Error('配置缺少 fetchData');
     items.value = await props.config.fetchData({ version: app.version });
-    if (gen !== loadGen) return;
+    if (!loadGen.isCurrent(gen)) return;
     phase.value = 'ready';
     scrollerRef.value?.scrollTo({ top: 0 });
     props.config.prefetch?.({ version: app.version });
   } catch (e) {
-    if (cancelled.value || gen !== loadGen) return;
+    if (cancelled.value || !loadGen.isCurrent(gen)) return;
     errorMsg.value = e instanceof Error ? e.message : String(e);
     phase.value = 'error';
     app.toast('error', `${props.config.title}: ${errorMsg.value}`);
-  } finally {
-    if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
   }
 }
 
@@ -136,16 +132,15 @@ async function load(): Promise<void> {
  * 命中时取数→渲染在同一帧微任务内完成。静默失败回退完整 load()。
  */
 async function softSwitchTab(): Promise<void> {
-  const gen = ++loadGen;
-  if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
+  const gen = loadGen.begin();
   try {
     const data = await props.config.fetchData!({ version: app.version });
-    if (gen !== loadGen || cancelled.value) return;
+    if (!loadGen.isCurrent(gen) || cancelled.value) return;
     items.value = data;
     phase.value = 'ready';
     scrollerRef.value?.scrollTo({ top: 0 });
   } catch {
-    if (gen !== loadGen || cancelled.value) return;
+    if (!loadGen.isCurrent(gen) || cancelled.value) return;
     void load(); // 静默失败 → 回退完整加载（含错误态）
   }
 }
@@ -185,13 +180,13 @@ watch(phase, async (p) => {
     start();
     // 仅当确有存档时才等 gridMinHeight 生效 + 恢复 + 重渲染，
     // 避免首次访问（无存档）多一帧延迟与首屏双重渲染。
-    if (sessionStorage.getItem(SCROLL_KEY) != null) {
+    if (scroll.hasArchive) {
       await nextTick();
-      if (restoreScroll()) refresh();
+      if (scroll.restore()) refresh();
     }
   } else {
     markImagesLoaded();
-    restoreScroll();
+    scroll.restore();
   }
 });
 
@@ -219,6 +214,11 @@ function onChipClick(filterKey: string, val: string): void {
   if (useVirtual.value) refresh();
 }
 
+function onSearch(value: string): void {
+  query.value = value;
+  onSearchInput();
+}
+
 function onSearchInput(): void {
   // 非虚拟模式由 computed 即时重渲染；虚拟模式节流重建窗口
   if (!useVirtual.value) return;
@@ -242,11 +242,6 @@ watch([activeFilters, query], () => {
 
 /* ─── 卡片交互：点击路由 / hover 预取 / 3D 倾斜 ─── */
 
-function onSubNavClick(tab: CatalogSubNavItem): void {
-  if (tab.active) return;
-  void router.push(tab.href);
-}
-
 function onContentClick(e: MouseEvent): void {
   const a = (e.target as HTMLElement).closest('a[href]');
   if (!a) return;
@@ -258,46 +253,15 @@ function onContentClick(e: MouseEvent): void {
 }
 
 function onGridMove(e: MouseEvent): void {
-  const selector = props.config.cardClass || '.nk-cat-card';
-  const card = (e.target as HTMLElement).closest(selector);
-  if (!(card instanceof HTMLElement)) return;
-  tiltPending = { card, x: e.clientX, y: e.clientY };
-  if (tiltRaf !== null) return;
-  tiltRaf = requestAnimationFrame(() => {
-    tiltRaf = null;
-    if (!tiltPending) return;
-    const { card: c, x, y } = tiltPending;
-    tiltPending = null;
-    const rect = c.getBoundingClientRect();
-    c.style.setProperty('--rx', ((x - rect.left) / rect.width - 0.5).toFixed(3));
-    c.style.setProperty('--ry', (0.5 - (y - rect.top) / rect.height).toFixed(3));
-  });
+  tilt.onMove(e);
 }
 
 function onGridLeave(): void {
-  tiltPending = null;
-  const selector = props.config.cardClass || '.nk-cat-card';
-  gridRef.value?.querySelectorAll<HTMLElement>(selector).forEach((c) => {
-    c.style.setProperty('--rx', '0');
-    c.style.setProperty('--ry', '0');
-  });
+  tilt.onLeave();
 }
 
-/* ─── 滚动位置保存/恢复 ─── */
-function saveScroll(): void {
-  const el = scrollerRef.value;
-  if (el) sessionStorage.setItem(SCROLL_KEY, String(el.scrollTop));
-}
-
-function restoreScroll(): boolean {
-  const el = scrollerRef.value;
-  if (!el) return false;
-  const saved = sessionStorage.getItem(SCROLL_KEY);
-  if (saved == null) return false;
-  el.scrollTo({ top: Number(saved), behavior: 'instant' });
-  sessionStorage.removeItem(SCROLL_KEY);
-  return true;
-}
+/* ─── 卡片 3D 倾斜特效（仅非虚拟网格；rAF 清理由 composable 接管） ─── */
+const tilt = useCardTilt(gridRef, () => props.config.cardClass || '.nk-cat-card');
 
 /* ─── 生命周期 ─── */
 
@@ -306,14 +270,12 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  saveScroll();
+  scroll.save();
   cancelled.value = true;
   stop();
   if (searchTimer !== null) clearTimeout(searchTimer);
   if (panelTimer !== null) clearTimeout(panelTimer);
-  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
   if (urlSyncTimer !== null) clearTimeout(urlSyncTimer);
-  if (tiltRaf !== null) cancelAnimationFrame(tiltRaf);
 });
 </script>
 
@@ -339,45 +301,19 @@ onBeforeUnmount(() => {
 
     <!-- 目录主体：头部 + 子导航为稳定外壳，始终渲染；切换时仅下方卡片区刷新（对齐原站体验） -->
     <template v-else>
-      <div class="nk-cat-header">
-        <span class="nk-cat-title">{{ config.title }}</span>
-        <div class="nk-cat-search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4" stroke-linecap="round"/>
-          </svg>
-          <input
-            type="text"
-            :placeholder="config.searchPlaceholder"
-            :value="query"
-            @input="(e) => { query = (e.target as HTMLInputElement).value; onSearchInput(); }"
-          >
-        </div>
-        <span class="nk-cat-count">{{ phase === 'loading' ? '—' : `${filtered.length} / ${items.length}` }}</span>
-        <button
-          v-if="filters.length"
-          class="nk-cat-filter-btn"
-          :class="{ active: filtersOpen }"
-          :disabled="phase === 'loading'"
-          @click="toggleFilters"
-        ><span class="arrow">▼</span> 筛选</button>
-      </div>
+      <CatalogToolbar
+        :title="config.title"
+        :placeholder="config.searchPlaceholder"
+        :query="query"
+        :count-text="phase === 'loading' ? '—' : `${filtered.length} / ${items.length}`"
+        :has-filters="filters.length > 0"
+        :filters-open="filtersOpen"
+        :disabled="phase === 'loading'"
+        @search="onSearch"
+        @toggle-filters="toggleFilters"
+      />
 
-      <!-- 子导航标签（如终局内容分类） -->
-      <div v-if="config.subNav" class="nk-cat-subnav">
-        <a
-          v-for="tab in config.subNav"
-          :key="tab.href"
-          class="nk-cat-subnav__item"
-          :class="{ active: tab.active }"
-          :href="tab.href"
-          @click.prevent="onSubNavClick(tab)"
-        >
-          <span class="nk-cat-subnav__name">{{ tab.label }}</span>
-          <span class="nk-cat-subnav__en">{{ tab.en }}</span>
-        </a>
-      </div>
-
-      <!-- 骨架屏：延迟显示，仅占据网格区（头部/子导航保持稳定，避免切换闪烁）
+      <!-- 骨架屏：延迟显示，仅占据网格区（头部保持稳定，避免切换闪烁）
            复用 config.gridClass 与真实网格共用 --nk-grid-min/--nk-grid-gap，消除 CLS -->
       <div
         v-if="phase === 'loading' && showSkeleton"

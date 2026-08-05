@@ -56,7 +56,7 @@ function verLabel(ver: string, idx: number): string {
 interface EndgamePageOpts {
   id: string;
   title: string;
-  /** 本页路由（用于子导航高亮与详情链接前缀） */
+  /** 本页路由（用于卡片详情链接前缀） */
   href: string;
   loadList: (ver: string) => Promise<MazeListDb>;
   /** 可选版本映射；无则按 ID 降序直接输出（story/boss） */
@@ -64,7 +64,8 @@ interface EndgamePageOpts {
 }
 
 /**
- * 终局内容页工厂：4 页共享时间线卡片 / 状态筛选 / 子导航。
+ * 终局内容页工厂：4 页共享时间线卡片与状态筛选。
+ * Tab 导航由 EndgameView 布局组件承载（嵌套路由）。
  */
 function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
   return {
@@ -141,21 +142,21 @@ function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
 }
 
 export const mazePage = makeEndgamePage({
-  id: 'maze', title: '终局内容', href: '/endgame/maze',
+  id: 'maze', title: '终局内容 · 忘却之庭', href: '/endgame/maze',
   loadList: loadLocalMazeList,
 });
 
 export const storyPage = makeEndgamePage({
-  id: 'story', title: '终局内容', href: '/endgame/story',
+  id: 'story', title: '终局内容 · 虚构叙事', href: '/endgame/story',
   loadList: loadLocalStoryList,
 });
 
 export const bossPage = makeEndgamePage({
-  id: 'boss', title: '终局内容', href: '/endgame/boss',
+  id: 'boss', title: '终局内容 · 末日幻影', href: '/endgame/boss',
   loadList: loadLocalBossList,
 });
 
 export const peakPage = makeEndgamePage({
-  id: 'peak', title: '终局内容', href: '/endgame/peak',
+  id: 'peak', title: '终局内容 · 异相仲裁', href: '/endgame/peak',
   loadList: loadLocalPeakList,
 });

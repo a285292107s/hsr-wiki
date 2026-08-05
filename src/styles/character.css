@@ -62,89 +62,9 @@
 }
 .nk-ability:hover { border-color: var(--border2); }
 
-/* ─── 技能 Tab（克制配色：类型色仅用于徽章，卡片统一紫色调边框） ─── */
-.nk-skill {
-  --sk-accent: var(--primary);
-  position: relative; background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 24px 24px 20px; margin-bottom: 16px;
-  transition: border-color 0.2s;
-}
-/* 技能类型色（仅供徽章使用） */
-.nk-skill[data-type="Normal"]   { --sk-accent: #CBD5E1; }
-.nk-skill[data-type="BPSkill"]  { --sk-accent: #60A5FA; }
-.nk-skill[data-type="Ultra"]    { --sk-accent: #FBBF24; }
-.nk-skill[data-type="Passive"]  { --sk-accent: #2DD4BF; }
-.nk-skill[data-type="Maze"]     { --sk-accent: #F472B6; }
-.nk-skill[data-type="Servant"]  { --sk-accent: #A78BFA; }
-.nk-skill[data-type="ServantPassive"] { --sk-accent: #67E8F9; }
-.nk-skill:hover { border-color: var(--border2); }
-/* 头部：类型色点 + 等级滑条共用一行 */
-.nk-skill__head {
-  display: flex; align-items: center; gap: 12px;
-  padding-bottom: 10px; margin-bottom: 12px;
-  border-bottom: 1px solid rgba(124,58,237,0.1);
-}
-.nk-skill__icon {
-  width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
-  border: 1px solid var(--border2); box-shadow: 0 0 12px var(--primary-glow);
-}
-.nk-skill__title-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-.nk-skill__title { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
-.nk-skill__type-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-  background: var(--sk-accent); opacity: 0.85;
-}
-.nk-skill__meta { display: flex; align-items: center; gap: 6px; }
-.nk-skill__type {
-  font-size: 0.625rem; font-weight: 700; letter-spacing: 0.03em;
-  color: var(--sk-accent); padding: 1px 7px; border-radius: 4px;
-  background: color-mix(in srgb, var(--sk-accent) 9%, transparent);
-}
-
-.nk-skill__name { font-weight: 600; font-size: 0.875rem; letter-spacing: 0.01em; line-height: 1.3; color: var(--text); }
-.nk-skill__tag {
-  font-size: 0.625rem; color: var(--text3); font-weight: 600; padding: 1px 7px;
-  border-radius: 4px; background: rgba(148,163,184,0.1); letter-spacing: 0.03em;
-}
-/* 等级滑条（头部行内，填满剩余宽度） */
-.nk-skill__slider {
-  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
-}
-.nk-skill__slider input[type=range] {
-  --fill: 0%;
-  flex: 1; width: auto; height: 18px; -webkit-appearance: none; appearance: none; outline: none;
-  background: transparent; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
-}
-.nk-skill__slider input[type=range]:hover { opacity: 1; }
-.nk-skill__slider input[type=range]:disabled { opacity: 0.35; cursor: default; }
-.nk-skill__slider input[type=range]::-webkit-slider-runnable-track {
-  height: 8px; border-radius: 2px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,0.45) 5px 7px),
-    linear-gradient(90deg, rgba(124,58,237,0.3) var(--fill), rgba(148,163,184,0.08) var(--fill));
-}
-.nk-skill__slider input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 10px; height: 14px; margin-top: -3px;
-  border-radius: 2px; border: none; background: transparent; cursor: pointer;
-  box-shadow: inset 5px 0 0 0 rgba(226,232,240,0.6);
-}
-.nk-skill__slider input[type=range]::-moz-range-track {
-  height: 8px; border-radius: 2px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,0.45) 5px 7px),
-    linear-gradient(90deg, rgba(124,58,237,0.3) var(--fill), rgba(148,163,184,0.08) var(--fill));
-}
-.nk-skill__slider input[type=range]::-moz-range-thumb {
-  width: 10px; height: 14px; border-radius: 2px; border: none; background: transparent; cursor: pointer;
-  box-shadow: inset 5px 0 0 0 rgba(226,232,240,0.6);
-}
-.nk-slider__val { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--primary); font-weight: 700; white-space: nowrap; }
-/* 内容区 */
-.nk-skill__body { }
-.nk-skill__desc { font-size: 0.8125rem; line-height: 1.85; color: var(--text2); }
-.nk-skill__desc .hl { color: var(--highlight); font-weight: 700; }
-.nk-overview__desc .nowrap, .nk-skill__desc .nowrap, .nk-build__set-desc .nowrap { white-space: nowrap; }
-.nk-skill__desc u { text-decoration: underline; text-decoration-color: rgba(203,213,225,0.5); text-underline-offset: 3px; color: #cbd5e1; }
+/* ─── 技能 Tab ───
+   卡片基础原语（.nk-skill*）已抽取至 skill-card.css（与光锥详情页共享）
+   本文件保留角色专属：需求/强化关联/词条/动画预览/数据表/子技能 ─── */
 /* 技能资源消耗条件（SkillNeed） */
 .nk-skill__need {
   display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
@@ -394,15 +314,11 @@
 .nk-loading::after { content: ''; width: 24px; height: 24px; margin-left: 12px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: nk-spin 0.7s linear infinite; }
 @keyframes nk-spin { to { transform: rotate(360deg); } }
 
-/* ─── 宽屏正文可读性：描述类文本约束到可读行宽 ─── */
-.nk-overview__desc, .nk-skill__desc, .nk-skill__terms { max-width: var(--nk-prose-max); }
+/* ─── 宽屏正文可读性：描述类文本约束到可读行宽（.nk-skill__desc 部分在 skill-card.css） ─── */
+.nk-overview__desc, .nk-skill__terms { max-width: var(--nk-prose-max); }
 
 /* ─── 手机端增强（≤767px，组件级紧凑调整） ─── */
 @media (max-width: 767px) {
-  .nk-skill { padding: 18px 16px 16px; }
-  .nk-skill__icon { width: 44px; height: 44px; }
-  .nk-skill__head { flex-wrap: wrap; }
-  .nk-skill__slider { flex-basis: 100%; }
   .nk-skill--child { margin-left: 10px; padding-top: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .nk-hero__bg { transition: none; } .nk-hero__spine { transition: none; } .nk-panel { animation: none; } }
@@ -413,6 +329,6 @@
   .nk-enh-toggle__btn:hover { border-color: rgba(124,58,237,0.15); background: rgba(124,58,237,0.06); color: var(--text2); }
   .nk-enh-toggle__btn--active:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
   .nk-build__team-slot img:hover { transform: none; box-shadow: none; }
-  .nk-skill:hover, .nk-eidolon:hover, .nk-ability:hover, .nk-story:hover,
+  .nk-eidolon:hover, .nk-ability:hover, .nk-story:hover,
   .nk-bonus:hover, .nk-build__cone:hover, .nk-build__set:hover, .nk-profile__item:hover { border-color: var(--border); }
 }

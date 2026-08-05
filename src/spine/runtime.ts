@@ -13,7 +13,7 @@
  * 单例 Promise 按版本独立共享：全部 CDN 失败自动置空允许重试
  * （审核台「重新加载」按钮依赖此语义）。生产渲染与调试验收台共用。
  */
-import { SPINE_RUNTIME_41_CDNS, SPINE_RUNTIME_CDNS } from '../constants';
+import { SPINE_RUNTIME_41_CDNS, SPINE_RUNTIME_CDNS } from './constants';
 import type { SpineLib, SpinePlayerCtor, SpineRuntimeVersion } from './types';
 
 /** 各版本 CDN 列表（4.1=备用 / 4.2=主） */

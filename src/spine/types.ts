@@ -14,7 +14,7 @@
  * - 4.2 独有：fit（contain/cover）、resume、requestFrame（4.1 仅 play/pause + stopRendering）
  * - 4.1 路径调用方必须剥离 fit、对 resume/requestFrame 做存在性判断
  */
-import type { SpineResolvedSceneLayer, SpineSceneEntry } from '../../services/types';
+import type { SpineResolvedSceneLayer, SpineSceneEntry } from '../services/types';
 
 /** 运行时版本标识：4.2=官方 JSON/场景（主），4.1=nanoka skel 二进制（备用，懒加载） */
 export type SpineRuntimeVersion = '4.1' | '4.2';
