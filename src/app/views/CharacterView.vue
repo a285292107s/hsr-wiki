@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /**
  * 角色详情页（编排层）
- * 结构：CharHero（视差立绘 + Spine + 属性 diff）/ 吸顶 Tabs（含强化模式切换）/ 四面板
- *   概览 OverviewPanel / 技能 SkillsPanel / 星魂 EidolonsPanel / 配装 BuildsPanel
- * 本文件保留：加载编排、Tab 切换（含热键）、强化模式状态、骨架屏与错误态。
+ * 结构：吸顶增强切换工具条 / 平铺内容（头图 → 技能 → 附加能力 → 星魂 → 属性加成 →
+ *   光锥/配队 → 遗器 → 角色档案 → 配音，滚动浏览）
+ * 本文件保留：加载编排、强化模式状态、骨架屏与错误态。
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -17,7 +17,6 @@ import EidolonsPanel from '../character/EidolonsPanel.vue';
 import BuildsPanel from '../character/BuildsPanel.vue';
 import { loadSkillAnimations } from '../../services/api';
 import { stripAllTags } from '../../lib/format';
-import { CHAR_TABS } from '../../lib/constants';
 import type { CharacterData, SkillAnimationsDb } from '../../services/types';
 // 角色详情页专属样式（随本路由 chunk 懒加载；技能卡片原语与光锥页共享）
 import '../../styles/skill-card.css';
@@ -58,7 +57,6 @@ function retry(): void {
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', onKeydown);
   void load(String(route.params.id || ''));
 });
 // 角色 → 角色导航（同组件复用）时重新加载
@@ -69,14 +67,7 @@ watch(
   },
 );
 
-/* ═══════════ Tabs / 强化模式 ═══════════ */
-
-const TAB_DEFS: { key: string; label: string }[] = [
-  { key: 'overview', label: '概览' },
-  { key: 'skills', label: '技能' },
-  { key: 'eidolons', label: '星魂' },
-  { key: 'builds', label: '配装' },
-];
+/* ═══════════ 强化模式 ═══════════ */
 
 /** 加强摘要横幅（剥离 <color> 标签） */
 const enhNotes = computed<string[]>(() => {
@@ -87,60 +78,106 @@ const enhNotes = computed<string[]>(() => {
   return descs.map((t) => stripAllTags(t));
 });
 
-/** 角色页热键 1-4 切 Tab（忽略输入框，生命周期内作用域） */
-function onKeydown(e: KeyboardEvent): void {
-  if (e.ctrlKey || e.metaKey || e.altKey) return;
-  const t = e.target as HTMLElement | null;
-  if (t) {
-    const tag = t.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || t.isContentEditable) return;
-  }
-  const idx = ['1', '2', '3', '4'].indexOf(e.key);
-  if (idx >= 0) char.setTab(CHAR_TABS[idx]);
+/* ═══════════ 区块导航（平铺长页：吸顶索引条 + 当前位置高亮 + 阅读进度 + 返回顶部） ═══════════ */
+
+/** 区块定义：id 对应面板 data-panel，顺序即页面视觉顺序（hero 概览区在顶部，无需跳转） */
+const sectionDefs = [
+  { id: 'skills', label: '技能' },
+  { id: 'talents', label: '附加' },
+  { id: 'eidolons', label: '星魂' },
+  { id: 'bonuses', label: '属性' },
+  { id: 'cones', label: '光锥' },
+  { id: 'relics', label: '遗器' },
+  { id: 'stories', label: '档案' },
+  { id: 'profile', label: '配音' },
+] as const;
+
+const pageRef = ref<HTMLElement | null>(null);
+const enhBarRef = ref<HTMLElement | null>(null);
+/** 当前阅读区块（滚动位置计算；顶部概览区时为空不高亮） */
+const activeSection = ref<string>('');
+/** 页面阅读进度（0-100，驱动吸顶条底部进度线） */
+const progressPct = ref(0);
+/** 滚动超过阈值后显示返回顶部 */
+const showTop = ref(false);
+/** 系统减弱动态偏好：跳转/回顶改为瞬时滚动 */
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** 面板 DOM 引用（d 就绪后收集一次；角色切换时重新收集） */
+let panels: HTMLElement[] = [];
+let rafId = 0;
+
+function collectPanels(): void {
+  panels = Array.from(
+    pageRef.value?.querySelectorAll<HTMLElement>('.nk-panel[data-panel]') || [],
+  );
 }
 
-/* ─── Tabs 横向滚动淡出提示（检测溢出；滚到末尾自动隐藏） ─── */
-const tabsRef = ref<HTMLElement | null>(null);
-const tabsOverflow = ref(false);
-const tabsAtEnd = ref(false);
-const tabsFade = computed(() => tabsOverflow.value && !tabsAtEnd.value);
-let tabsRo: ResizeObserver | null = null;
-function checkTabsOverflow(): void {
-  const el = tabsRef.value;
-  if (!el) { tabsOverflow.value = false; return; }
-  tabsOverflow.value = el.scrollWidth > el.clientWidth + 2;
-  tabsAtEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+function onScroll(): void {
+  if (rafId) return; // rAF 节流：滚动事件高频触发，逐帧仅计算一次
+  rafId = requestAnimationFrame(() => {
+    rafId = 0;
+    const c = pageRef.value;
+    if (!c) return;
+    // 阅读进度
+    const max = c.scrollHeight - c.clientHeight;
+    progressPct.value = max > 0 ? Math.min((c.scrollTop / max) * 100, 100) : 0;
+    // 返回顶部阈值
+    showTop.value = c.scrollTop > 480;
+    // 当前区块：最后一个顶部越过工具条下沿的面板
+    if (!panels.length) return;
+    const cTop = c.getBoundingClientRect().top;
+    const offset = enhBarRef.value?.offsetHeight || 0;
+    let cur = '';
+    for (const p of panels) {
+      if (p.getBoundingClientRect().top - cTop <= offset + 12) {
+        const id = p.dataset.panel || '';
+        if (id) cur = id;
+      } else break;
+    }
+    activeSection.value = cur;
+  });
 }
-function onTabsScroll(): void {
-  const el = tabsRef.value;
+
+function jumpTo(id: string): void {
+  const c = pageRef.value;
+  if (!c) return;
+  const el = c.querySelector<HTMLElement>(`.nk-panel[data-panel="${id}"]`);
   if (!el) return;
-  tabsAtEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+  // 目标 = 面板在容器中的偏移 - 吸顶工具条高度（内容不被遮挡）
+  const offset = enhBarRef.value?.offsetHeight || 0;
+  const top = el.getBoundingClientRect().top - c.getBoundingClientRect().top + c.scrollTop - offset;
+  c.scrollTo({ top: Math.max(top, 0), behavior: reducedMotion ? 'auto' : 'smooth' });
+  activeSection.value = id;
 }
-watch(
-  () => phase.value,
-  () => {
-    void nextTick(() => {
-      if (tabsRo) { tabsRo.disconnect(); tabsRo = null; }
-      if (tabsRef.value) {
-        tabsRo = new ResizeObserver(checkTabsOverflow);
-        tabsRo.observe(tabsRef.value);
-      }
-      checkTabsOverflow();
-    });
-  },
-);
+
+function scrollTop(): void {
+  pageRef.value?.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+}
 
 /* ═══════════ 卸载清理 ═══════════ */
 
+onMounted(() => {
+  pageRef.value?.addEventListener('scroll', onScroll, { passive: true });
+});
+
+// 数据就绪后收集面板引用（模板 v-else-if 渲染，需等下一帧 DOM 稳定）
+watch(d, async (val) => {
+  if (val) {
+    await nextTick();
+    collectPanels();
+  }
+});
+
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown);
-  if (tabsRo) { tabsRo.disconnect(); tabsRo = null; }
+  pageRef.value?.removeEventListener('scroll', onScroll);
+  if (rafId) cancelAnimationFrame(rafId);
   char.reset();
 });
 </script>
 
 <template>
-  <div class="nk-page--detail" :aria-busy="phase === 'loading'">
+  <div ref="pageRef" class="nk-page--detail" :aria-busy="phase === 'loading'">
     <!-- ─── 加载骨架屏（延迟显示，缓存命中不闪屏） ─── -->
     <div
       v-if="phase === 'loading' && showSkeleton"
@@ -167,17 +204,6 @@ onBeforeUnmount(() => {
           <div class="nk-skeleton__stat-grid" style="margin-top:12px;">
             <div v-for="i in 8" :key="i" class="nk-sk nk-sk--shimmer nk-sk--stat"></div>
           </div>
-        </div>
-      </div>
-      <div class="nk-skeleton__tabs">
-        <div class="nk-skeleton__tabs-bar">
-          <div class="nk-skeleton__tabs-left">
-            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-xs"></div>
-            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-xs"></div>
-            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-xs"></div>
-            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-xs"></div>
-          </div>
-          <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-md"></div>
         </div>
       </div>
       <div class="nk-skeleton__body">
@@ -213,23 +239,10 @@ onBeforeUnmount(() => {
 
     <!-- ─── 正文 ─── -->
     <template v-else-if="d">
-      <CharHero :d="d" :old-d="oldD" :char-id="char.charId" />
-
-      <!-- Tabs + 强化模式切换器（外壳全宽吸顶，内容条与面板同宽居中） -->
-      <div class="nk-tabs">
-        <div ref="tabsRef" class="nk-tabs__bar" :class="{ 'nk-tabs--fade': tabsFade }" @scroll.passive="onTabsScroll">
-          <div class="nk-tabs__left">
-            <button
-              v-for="t in TAB_DEFS"
-              :key="t.key"
-              :class="['nk-tab', { 'nk-tab--active': char.activeTab === t.key }]"
-              type="button"
-              @click="char.setTab(t.key)"
-            >
-              {{ t.label }}
-            </button>
-          </div>
-          <div v-if="char.enhKeys.length" class="nk-enh-toggle">
+      <!-- 吸顶工具条：强化模式切换（可选）+ 区块导航 + 阅读进度线 -->
+      <div ref="enhBarRef" class="nk-enh-bar">
+        <div class="nk-enh-bar__inner">
+          <template v-if="char.enhKeys.length">
             <span class="nk-enh-toggle__label">强化模式</span>
             <button
               :class="['nk-enh-toggle__btn', { 'nk-enh-toggle__btn--active': !char.enhKey }]"
@@ -247,9 +260,36 @@ onBeforeUnmount(() => {
             >
               强化 V{{ k }}
             </button>
-          </div>
+            <span class="nk-enh-bar__divider" aria-hidden="true"></span>
+          </template>
+          <nav class="nk-secnav" aria-label="内容区块导航">
+            <button
+              v-for="(s, i) in sectionDefs"
+              :key="s.id"
+              type="button"
+              class="nk-secnav__btn"
+              :class="{ 'nk-secnav__btn--active': activeSection === s.id }"
+              :aria-current="activeSection === s.id ? 'true' : undefined"
+              @click="jumpTo(s.id)"
+            >
+              <span class="nk-secnav__idx">{{ String(i + 1).padStart(2, '0') }}</span>
+              {{ s.label }}
+            </button>
+          </nav>
         </div>
+        <div class="nk-enh-bar__progress" :style="{ width: `${progressPct}%` }"></div>
       </div>
+
+      <!-- 返回顶部（滚动超过阈值出现） -->
+      <button
+        v-show="showTop"
+        class="nk-top-btn"
+        type="button"
+        aria-label="返回顶部"
+        @click="scrollTop"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
 
       <!-- 加强摘要横幅 -->
       <div class="nk-enh-notes">
@@ -261,25 +301,48 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- 面板区（全部挂载，nk-panel--active 切换显示，保留各面板交互状态） -->
+      <!-- 内容平铺：头图 + 各区块按序排列（技能 → 附加能力 → 星魂 → 属性加成 → 光锥/配队 → 遗器 → 角色档案 → 配音） -->
       <div class="nk-panels">
-        <div :class="['nk-panel', { 'nk-panel--active': char.activeTab === 'overview' }]" data-panel="overview">
-          <OverviewPanel :d="d" :old-d="oldD" />
+        <div class="nk-panel nk-panel--overview nk-panel--flat" data-panel="hero">
+          <CharHero :d="d" :old-d="oldD" :char-id="char.charId" />
         </div>
-        <div :class="['nk-panel', { 'nk-panel--active': char.activeTab === 'skills' }]" data-panel="skills">
+        <div class="nk-panel nk-panel--flat" data-panel="skills">
           <SkillsPanel :d="d" :old-d="oldD" :char-id="char.charId" :enh-key="char.enhKey" :anim-db="animDb" />
         </div>
-        <div :class="['nk-panel', { 'nk-panel--active': char.activeTab === 'eidolons' }]" data-panel="eidolons">
+        <div class="nk-panel nk-panel--flat" data-panel="talents">
+          <OverviewPanel :d="d" :old-d="oldD" :sections="['talents']" />
+        </div>
+        <div class="nk-panel nk-panel--flat" data-panel="eidolons">
           <EidolonsPanel :d="d" :old-d="oldD" :char-id="char.charId" />
         </div>
-        <div :class="['nk-panel', { 'nk-panel--active': char.activeTab === 'builds' }]" data-panel="builds">
+        <div class="nk-panel nk-panel--flat" data-panel="bonuses">
+          <OverviewPanel :d="d" :old-d="oldD" :sections="['bonuses']" />
+        </div>
+        <div class="nk-panel nk-panel--flat" data-panel="cones">
           <BuildsPanel
             :d="d"
             :base-data="char.data"
             :char-id="char.charId"
             :name-cache="app.nameCache"
             :item-db="app.itemDb"
+            :sections="['cones', 'teams']"
           />
+        </div>
+        <div class="nk-panel nk-panel--flat" data-panel="relics">
+          <BuildsPanel
+            :d="d"
+            :base-data="char.data"
+            :char-id="char.charId"
+            :name-cache="app.nameCache"
+            :item-db="app.itemDb"
+            :sections="['relics']"
+          />
+        </div>
+        <div class="nk-panel nk-panel--flat" data-panel="stories">
+          <OverviewPanel :d="d" :old-d="oldD" :sections="['stories']" />
+        </div>
+        <div class="nk-panel nk-panel--flat" data-panel="profile">
+          <OverviewPanel :d="d" :old-d="oldD" :sections="['profile']" />
         </div>
       </div>
     </template>

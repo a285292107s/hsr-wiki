@@ -22,12 +22,17 @@ const props = defineProps<{
 
 /* ─── 技能动画映射（米游社 Wiki 数据，charId → type → 动画列表） ─── */
 
-function animFor(sk: Skill): SkillAnimEntry[] | null {
+/** 当前角色动画索引（一次查表，供 v-for 内多次调用） */
+const charAnims = computed(() => {
   const db = props.animDb;
   if (!db || !props.charId) return null;
-  const charAnims = db[props.charId];
-  if (!charAnims) return null;
-  return charAnims[sk.type ?? ''] || null;
+  return db[props.charId] || null;
+});
+
+function animFor(sk: Skill): SkillAnimEntry[] | null {
+  const db = charAnims.value;
+  if (!db) return null;
+  return db[sk.type ?? ''] || null;
 }
 
 /* ─── 技能分组（type + type_name） ─── */

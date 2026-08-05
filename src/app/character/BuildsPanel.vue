@@ -3,31 +3,60 @@
  * 配装面板：推荐光锥 / 推荐队伍 / 遗器主副词条 + 套装（描述异步加载）。
  * 套装描述加载 watch baseData（base 数据）而非渲染视图 d —— 加强切换不重复请求。
  */
-import { computed, ref, watch } from 'vue';
-import { loadLocalRelicSet } from '../../services/api';
-import { fmtDesc, itemName } from '../../lib/format';
+import { computed, onMounted, ref, watch } from 'vue';
+import { loadLocalLightCones, loadLocalRelicSet } from '../../services/api';
+import { fmtDesc, itemName, pathIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PROP_NAMES, SLOT_ICONS, SLOT_NAMES } from '../../lib/constants';
 import type { CharacterData, ItemDb, NameCache, RelicSetData } from '../../services/types';
 
-const props = defineProps<{
-  d: CharacterData;
-  /** base 数据（char.data；套装描述异步加载的触发源，加强切换不变） */
-  baseData: CharacterData | null;
-  charId: string;
-  nameCache: NameCache;
-  itemDb: ItemDb;
-}>();
+type BuildSection = 'cones' | 'teams' | 'relics';
+
+const props = withDefaults(
+  defineProps<{
+    d: CharacterData;
+    /** base 数据（char.data；套装描述异步加载的触发源，加强切换不变） */
+    baseData: CharacterData | null;
+    charId: string;
+    nameCache: NameCache;
+    itemDb: ItemDb;
+    /** 渲染区块子集（平铺拆分布局用；默认全部） */
+    sections?: BuildSection[];
+  }>(),
+  { sections: () => ['cones', 'teams', 'relics'] },
+);
 
 /* ─── 光锥 / 队伍 ─── */
 
+/** 光锥元数据（id → rarity/path，来自共享单例 light_cones.json；推荐卡片星级/命途徽章用） */
+const lcMeta = ref<Record<string, { rarity: number; path: string }>>({});
+onMounted(() => {
+  void loadLocalLightCones()
+    .then((list) => {
+      const map: Record<string, { rarity: number; path: string }> = {};
+      for (const it of list) map[String(it.id)] = { rarity: it.rarity, path: it.path || '' };
+      lcMeta.value = map;
+    })
+    .catch(() => { /* 元数据缺失时回退默认星级/无徽章，不阻塞 */ });
+});
+
 const cones = computed(() =>
-  (props.d.lightcones || []).map((id, i) => ({
-    id,
-    rank: i + 1,
-    name: itemName(id, props.nameCache, props.itemDb),
-    img: cdnUri('lightconemediumicon', `${id}.webp`),
-  })),
+  (props.d.lightcones || []).map((id, i) => {
+    const meta = lcMeta.value[String(id)];
+    const rarity = meta ? meta.rarity : 5;
+    const path = meta ? meta.path : '';
+    return {
+      id,
+      rank: i + 1,
+      name: itemName(id, props.nameCache, props.itemDb),
+      img: cdnUri('lightconemediumicon', `${id}.webp`),
+      rarity,
+      stars: '★'.repeat(rarity),
+      path,
+      pathImg: path ? pathIconUrl(path) : '',
+      href: `/lightcone/${id}`,
+    };
+  }),
 );
 
 interface TeamSlot {
@@ -86,6 +115,8 @@ const relicSets = ref<Record<string, RelicSetData | null>>({});
 watch(
   () => props.baseData,
   (data) => {
+    // 平铺拆分布局下本实例可能不渲染遗器块（如 cones+teams 实例）：跳过加载
+    if (!props.sections.includes('relics')) return;
     relicSets.value = {};
     const r = data && data.relics;
     if (!r) return;
@@ -118,31 +149,52 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
 </script>
 
 <template>
-  <template v-if="cones.length">
+  <template v-if="props.sections.includes('cones') && cones.length">
     <div class="nk-title">LIGHT CONES</div>
+    <!-- 推荐光锥卡片：复用图鉴 nk-lc-card 视觉（3:4 相框立绘 + 星级光晕 + 命途徽章 + 扫光），另加 REC. 序号徽章 -->
     <div class="nk-build__cones">
-      <div v-for="c in cones" :key="c.id" class="nk-build__cone">
-        <img :src="c.img">
-        <div>
-          <div class="nk-build__cone-name">{{ c.name }}</div>
-          <div class="nk-build__cone-rank">REC. {{ c.rank }}</div>
+      <a
+        v-for="c in cones"
+        :key="c.id"
+        class="nk-lc-card"
+        :href="c.href"
+        :data-rarity="c.rarity"
+        :title="c.name"
+      >
+        <div class="nk-lc-card__img">
+          <img class="lc-avatar" :src="c.img" :alt="c.name" loading="lazy">
+          <span class="nk-lc-mini__rec">REC. {{ c.rank }}</span>
+          <div v-if="c.pathImg" class="nk-lc-card__badge">
+            <img :src="c.pathImg" :alt="c.path">
+          </div>
+          <div class="nk-lc-card__sheen-wrap" aria-hidden="true"></div>
+          <div class="nk-lc-card__info">
+            <span class="nk-lc-card__stars">{{ c.stars }}</span>
+            <span class="nk-lc-card__name">{{ c.name }}</span>
+          </div>
         </div>
-      </div>
+      </a>
     </div>
   </template>
-  <template v-if="teams.length">
+  <template v-if="props.sections.includes('teams') && teams.length">
     <div class="nk-title">TEAMS</div>
     <div class="nk-build__teams">
       <div v-for="t in teams" :key="t.teamId" class="nk-build__team">
         <div class="nk-build__team-slot nk-build__team-slot--main">
-          <img :src="cdnUri('avatarroundicon', `${charId}.webp`)" title="当前角色">
+          <RouterLink :to="`/character/${charId}`" class="nk-build__team-link" title="当前角色">
+            <img :src="cdnUri('avatarroundicon', `${charId}.webp`)" alt="当前角色">
+          </RouterLink>
         </div>
         <span class="nk-build__team-plus">+</span>
         <template v-for="(m, i) in t.members" :key="m.mid">
           <div class="nk-build__team-slot">
-            <img :src="m.img" :title="m.name">
+            <RouterLink :to="`/character/${m.mid}`" class="nk-build__team-link" :title="m.name">
+              <img :src="m.img" :alt="m.name">
+            </RouterLink>
             <div v-if="m.backups.length" class="nk-build__team-alt">
-              <img v-for="b in m.backups" :key="b.id" :src="b.img" :title="b.name">
+              <RouterLink v-for="b in m.backups" :key="b.id" :to="`/character/${b.id}`" class="nk-build__team-link" :title="b.name">
+                <img :src="b.img" :alt="b.name">
+              </RouterLink>
             </div>
           </div>
           <span v-if="i < t.members.length - 1" class="nk-build__team-plus">+</span>
@@ -150,7 +202,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
       </div>
     </div>
   </template>
-  <template v-if="hasRelicSection">
+  <template v-if="props.sections.includes('relics') && hasRelicSection">
     <div class="nk-title">RELICS</div>
     <div class="nk-build__relics">
       <!-- 主词条槽位卡片 -->

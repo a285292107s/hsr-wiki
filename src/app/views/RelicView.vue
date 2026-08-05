@@ -339,9 +339,6 @@ onBeforeUnmount(() => {
                 {{ setTypeLabel }}
               </span>
               <span v-if="d.release_version" class="nk-hero__tag nk-relic-ver">v{{ d.release_version }}</span>
-              <span class="nk-hero__id">
-                <span class="nk-hero__id-num">{{ d.id }}</span>
-              </span>
             </div>
             <div class="nk-relic-type-en">{{ setTypeEn }}</div>
           </header>

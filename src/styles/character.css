@@ -3,17 +3,62 @@
    移植自原角色详情页样式（无页面级作用域选择器，原样保留）
 ═══════════════════════════════════════════ */
 
-/* ─── 概览 Tab ─── */
-.nk-overview__desc { font-size: 0.875rem; line-height: 1.9; color: var(--text2); margin-bottom: 24px; padding: 2px 0 2px 16px; border-left: 2px solid rgba(124,58,237,0.35); }
+/* ─── 详情页卡片基底（各卡片 padding/radius 不同，仅共享背景/边框/过渡） ─── */
+/* 实底卡片 */
+.nk-eidolon, .nk-ability, .nk-build__team,
+.nk-build__set, .nk-relic-slot, .nk-relic-sub {
+  background: var(--card); border: 1px solid var(--border); transition: border-color 0.2s;
+}
+.nk-eidolon:hover, .nk-ability:hover, .nk-build__team:hover,
+.nk-build__set:hover, .nk-relic-slot:hover, .nk-relic-sub:hover { border-color: var(--border2); }
+/* 半透明卡片（紫调） */
+.nk-profile__item, .nk-bonus {
+  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12); transition: border-color 0.2s;
+}
+.nk-profile__item:hover, .nk-bonus:hover { border-color: var(--border2); }
+
+/* ─── 概览区块 ─── */
+/* 概览面板：头图无缝嵌入（顶部贴齐、左右突破面板内边距与面板同宽，下方内容保持面板内边距）
+   负 margin 需配合 width: calc(100% + 2×padding) 才真正扩宽；仅负 margin 会因基础
+   width:100% 锁宽导致左右不对称（右侧留缺口） */
+.nk-panel--overview { padding-top: 0; }
+.nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-wide-max); margin: 0 -16px 24px; }
+@media (min-width: 768px) {
+  .nk-panel--overview .nk-hero { width: calc(100% + 48px); max-width: var(--nk-detail-wide-max); margin: 0 -24px 28px; }
+}
+/* 内容平铺模式（移除 Tab）：全部面板依次渲染、滚动浏览；顶部内边距仅首个面板保留（见 --overview） */
+.nk-panel--flat { display: block; padding-bottom: 28px; }
+@media (min-width: 768px) {
+  .nk-panel--flat { padding-bottom: 32px; }
+}
+/* Hero 属性模块上方的一句话介绍（左边线引用块；间距由 Hero 面板 gap 提供） */
+.nk-hero__desc { font-size: 0.875rem; line-height: 1.9; color: var(--text2); padding: 2px 0 2px 16px; border-left: 2px solid rgba(124,58,237,0.35); }
+
+/* ─── Hero 头部左右结构（角色页专属）：左侧信息 / 右侧元素·命途竖排标签 ─── */
+.nk-hero--char .nk-hero__head { flex-direction: row; justify-content: space-between; align-items: center; gap: 16px; }
+.nk-hero--char .nk-hero__head-left { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.nk-hero--char .nk-hero__head-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+/* 竖排标签：上方图标 + 下方文字说明（放大版） */
+.nk-hero--char .nk-hero__tag--vert {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 12px; min-width: 68px; border-radius: 12px;
+  background: rgba(124,58,237,0.08); border: 1px solid var(--border);
+}
+.nk-hero--char .nk-hero__tag--vert img { width: 32px; height: 32px; }
+.nk-hero--char .nk-hero__tag--vert span { font-size: 0.75rem; font-weight: 700; color: var(--text2); letter-spacing: 0.02em; white-space: nowrap; }
+/* 手机：竖排标签紧凑化 */
+@media (max-width: 640px) {
+  .nk-hero--char .nk-hero__head { gap: 10px; }
+  .nk-hero--char .nk-hero__tag--vert { min-width: 54px; padding: 8px 8px; gap: 4px; }
+  .nk-hero--char .nk-hero__tag--vert img { width: 24px; height: 24px; }
+  .nk-hero--char .nk-hero__tag--vert span { font-size: 0.66rem; }
+}
 /* 角色档案（阵营 + CV） */
-.nk-profile { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 24px; max-width: var(--nk-prose-max); }
+.nk-profile { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 0 auto 24px; max-width: var(--nk-prose-max); }
 .nk-profile__item {
   display: flex; flex-direction: column; gap: 4px;
   padding: 12px 16px; border-radius: 8px;
-  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12);
-  transition: border-color 0.2s;
 }
-.nk-profile__item:hover { border-color: var(--border2); }
 .nk-profile__label { font-size: 0.625rem; font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
 .nk-profile__val { font-size: 0.8125rem; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
 /* 角色故事（折叠手风琴） */
@@ -43,26 +88,20 @@
   border-top: 1px dashed rgba(124,58,237,0.15);
   padding: 14px 20px 18px;
 }
-.nk-bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.nk-bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 0 auto 24px; max-width: var(--nk-prose-max); }
 .nk-bonus {
   display: flex; flex-direction: column; gap: 3px;
   padding: 12px 16px; border-radius: 8px;
-  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12);
-  transition: border-color 0.2s;
 }
-.nk-bonus:hover { border-color: var(--border2); }
 .nk-bonus__icon { width: 26px; height: 26px; margin-bottom: 5px; opacity: 0.9; }
 .nk-bonus__val { font-family: var(--font-hud); font-size: 1rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
 .nk-bonus__name { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
 /* 附加能力卡片：复用技能卡片结构原语（title-row/icon/name/tag/desc），容器风格对齐 */
 .nk-ability {
-  position: relative; background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px 24px 18px; margin-bottom: 12px;
-  transition: border-color 0.2s;
+  position: relative; border-radius: 12px; padding: 20px 24px 18px; margin-bottom: 12px;
 }
-.nk-ability:hover { border-color: var(--border2); }
 
-/* ─── 技能 Tab ───
+/* ─── 技能区块 ───
    卡片基础原语（.nk-skill*）已抽取至 skill-card.css（与光锥详情页共享）
    本文件保留角色专属：需求/强化关联/词条/动画预览/数据表/子技能 ─── */
 /* 技能资源消耗条件（SkillNeed） */
@@ -191,64 +230,66 @@
 .nk-skill--child .nk-skill__title-row { gap: 12px; margin-bottom: 10px; }
 .nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
 .nk-skill--child .nk-skill__metrics { margin-top: 10px; }
-/* 阅读层收束：文本型卡片（技能/星魂/附加能力）+ 所属标题统一约束到可读行宽并居中；配装面板为 grid 布局，保持结构层全宽 */
-.nk-panel:not([data-panel="builds"]) .nk-title,
+/* 阅读层收束：全部区块标题 + 文本型卡片（技能/星魂/附加能力）统一约束到可读行宽并居中；
+   配装区块容器（光锥/配队/遗器）同步对齐可读行宽，避免平铺滚动时与阅读区块产生宽度跳跃 */
+.nk-panel .nk-title,
 .nk-panel .nk-skill,
 .nk-panel .nk-eidolon,
-.nk-panel .nk-ability { max-width: var(--nk-prose-max); margin-left: auto; margin-right: auto; }
+.nk-panel .nk-ability,
+.nk-panel .nk-build__cones,
+.nk-panel .nk-build__teams,
+.nk-panel .nk-build__relics { max-width: var(--nk-prose-max); margin-left: auto; margin-right: auto; }
 
-/* ─── 星魂 Tab ─── */
+/* ─── 星魂区块 ─── */
 /* 星魂卡片：复用技能卡片结构原语（title-row/icon/name/tag/desc），容器风格对齐 */
 .nk-eidolon {
-  position: relative; background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px 24px 18px; margin-bottom: 12px;
-  transition: border-color 0.2s;
+  position: relative; border-radius: 12px; padding: 20px 24px 18px; margin-bottom: 12px;
 }
-.nk-eidolon:hover { border-color: var(--border2); }
 
-/* ─── 配装 Tab ─── */
-.nk-build__cones { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
-.nk-build__cone { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; transition: border-color 0.2s; }
-.nk-build__cone:hover { border-color: var(--border2); }
-.nk-build__cone img { width: 44px; height: 44px; border-radius: 8px; box-shadow: 0 0 10px var(--primary-glow); }
-.nk-build__cone-name { font-size: 0.8125rem; font-weight: 600; }
-.nk-build__cone-rank {
-  display: inline-block; margin-top: 4px;
-  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.03em;
-  color: var(--primary); padding: 1px 7px; border-radius: 4px;
-  background: color-mix(in srgb, var(--primary) 9%, transparent);
+/* ─── 配装区块 ─── */
+/* 推荐光锥网格：复用图鉴 nk-lc-card 视觉，卡片比图鉴略小 */
+.nk-build__cones { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.nk-build__cones .nk-lc-card__info { padding: 10px 10px 9px; gap: 2px; }
+.nk-build__cones .nk-lc-card__name { font-size: 0.72rem; }
+.nk-build__cones .nk-lc-card__stars { font-size: 0.58rem; }
+/* REC. 序号徽章（图片左上角，与命途徽章对角） */
+.nk-lc-mini__rec {
+  position: absolute; left: 10px; top: 10px; z-index: 3;
+  font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em;
+  color: var(--text-bright); padding: 2px 7px; border-radius: 4px;
+  background: rgba(15,15,35,0.72); border: 1px solid var(--border2);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
 }
 .nk-build__teams { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
-.nk-build__team { display: flex; align-items: center; padding: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; gap: 0; }
+.nk-build__team { display: flex; align-items: center; padding: 16px 20px; border-radius: 12px; }
 .nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+/* 头像跳转链接：消除 inline 基线空隙，头像居中；键盘焦点环 */
+.nk-build__team-link { display: flex; }
+.nk-build__team-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 50%; }
 .nk-build__team-slot img { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--border2); transition: transform 0.2s, box-shadow 0.2s; }
 .nk-build__team-slot img:hover { transform: scale(1.1); box-shadow: 0 0 12px var(--primary-glow); }
 .nk-build__team-slot--main img { width: 56px; height: 56px; border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); }
 .nk-build__team-alt { display: flex; gap: 3px; }
-.nk-build__team-alt img { width: 30px; height: 30px; border-radius: 50%; opacity: 0.65; border: 1px solid var(--border); }
-.nk-build__team-alt img:hover { opacity: 1; }
+.nk-build__team-alt img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); }
+.nk-build__team-alt .nk-build__team-link { opacity: 0.65; transition: opacity 0.2s; }
+.nk-build__team-alt .nk-build__team-link:hover { opacity: 1; }
 .nk-build__team-plus { color: var(--text3); font-size: 0.875rem; font-weight: 400; flex-shrink: 0; margin: 0 2px; align-self: center; }
 .nk-build__relics { margin-bottom: 20px; }
 /* RELICS 主词条槽位卡片（auto-fit 网格，宽屏下现有项扩展填满整行） */
 .nk-relic-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
 .nk-relic-slot {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 14px 12px 12px; background: var(--card);
-  border: 1px solid var(--border); border-radius: 12px;
-  transition: border-color 0.2s;
+  padding: 14px 12px 12px; border-radius: 12px;
 }
-.nk-relic-slot:hover { border-color: var(--border2); }
 .nk-relic-slot__icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(0,0,0,0.3); padding: 4px; margin-bottom: 4px; }
 .nk-relic-slot__stat { font-size: 0.8125rem; font-weight: 600; color: var(--text-bright); text-align: center; }
 .nk-relic-slot__slot { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
 /* 推荐副词条卡片 */
 .nk-relic-sub {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
-  padding: 12px 16px; margin-bottom: 12px;
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  transition: border-color 0.2s;
+  padding: 12px 16px; margin-bottom: 12px; border-radius: 12px;
 }
-.nk-relic-sub:hover { border-color: var(--border2); }
 .nk-relic-sub__label { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; flex-shrink: 0; }
 .nk-relic-sub__list { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-relic-sub__chip {
@@ -258,8 +299,7 @@
   border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent);
 }
 .nk-build__sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-.nk-build__set { padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; transition: border-color 0.2s; }
-.nk-build__set:hover { border-color: var(--border2); }
+.nk-build__set { padding: 14px 16px; border-radius: 12px; }
 .nk-build__set-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .nk-build__set-head img { width: 44px; height: 44px; border-radius: 8px; background: rgba(0,0,0,0.3); padding: 3px; }
 .nk-build__set-badge {
@@ -272,8 +312,10 @@
 .nk-build__set-desc { font-size: 0.6875rem; color: var(--text3); line-height: 1.7; }
 .nk-build__set-desc .hl { color: var(--highlight); font-weight: 700; }
 
-/* ─── 加强模式切换器（嵌入 tabs 行） ─── */
-.nk-enh-toggle { display: flex; align-items: center; gap: 6px; padding: 0 20px 0 12px; flex-wrap: nowrap; }
+/* ─── 增强模式切换工具条（吸顶，替代原 Tab 栏；无增强角色整体不渲染） ─── */
+.nk-enh-bar { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
+.nk-enh-bar__inner { display: flex; align-items: center; gap: 8px; max-width: var(--nk-detail-max); margin: 0 auto; padding: 8px 16px; min-height: 44px; }
+.nk-enh-toggle { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .nk-enh-toggle__label { font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); white-space: nowrap; opacity: 0.7; margin-right: 2px; }
 .nk-enh-toggle__btn { padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(124,58,237,0.15); background: rgba(124,58,237,0.06); color: var(--text2); font-size: 0.68rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); white-space: nowrap; position: relative; }
 /* 触控热区垂直扩展至 ≥44px */
@@ -281,7 +323,56 @@
 .nk-enh-toggle__btn:hover { border-color: var(--border2); background: rgba(124,58,237,0.1); color: var(--text); }
 .nk-enh-toggle__btn--active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; box-shadow: 0 0 10px var(--primary-glow); }
 .nk-enh-toggle__btn--active:hover { background: var(--primary); color: #fff; }
-/* ─── 加强摘要横幅（tabs 与面板之间） ─── */
+/* 强化切换与区块导航的分隔线 */
+.nk-enh-bar__divider { flex-shrink: 0; width: 1px; height: 18px; background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent); opacity: 0.7; margin: 0 2px; }
+/* ─── 区块导航（平铺长页章节索引条，横向可滚） ─── */
+.nk-secnav { display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.nk-secnav::-webkit-scrollbar { display: none; }
+.nk-secnav__btn {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 5px 9px; border-radius: 6px; border: none; background: transparent;
+  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--text3); cursor: pointer; white-space: nowrap;
+  transition: color 0.15s, background 0.15s; position: relative; flex-shrink: 0;
+}
+/* 触控热区垂直扩展至 ≥44px */
+.nk-secnav__btn::before { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
+.nk-secnav__btn:hover { color: var(--text2); background: rgba(124,58,237,0.08); }
+.nk-secnav__btn--active {
+  color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.nk-secnav__btn--active::after {
+  content: ''; position: absolute; left: 9px; right: 9px; bottom: -9px; height: 2px;
+  border-radius: 1px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow);
+}
+.nk-secnav__idx { font-family: var(--font-hud); font-size: 0.5rem; opacity: 0.65; }
+.nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
+/* 阅读进度线（工具条底部） */
+.nk-enh-bar__progress { height: 2px; width: 0; background: linear-gradient(90deg, var(--primary), #A78BFA); box-shadow: 0 0 8px var(--primary-glow); }
+/* ─── 返回顶部 ─── */
+.nk-top-btn {
+  position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  z-index: 30; width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15,15,35,0.88); border: 1px solid var(--border2);
+  color: var(--text2); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+}
+.nk-top-btn svg { width: 18px; height: 18px; }
+.nk-top-btn:hover {
+  color: var(--text-bright); border-color: var(--primary);
+  box-shadow: 0 0 16px var(--primary-glow); transform: translateY(-2px);
+}
+.nk-top-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (min-width: 768px) {
+  .nk-top-btn { right: 28px; bottom: 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nk-top-btn { transition: none; }
+  .nk-enh-bar__progress { transition: none; }
+}
+/* ─── 加强摘要横幅（工具条与面板之间） ─── */
 .nk-enh-notes { padding: 0 20px; }
 .nk-enh-notes:empty { display: none; }
 .nk-enh-notes__banner { display: flex; align-items: flex-start; gap: 12px; margin: 0 auto 4px; padding: 12px 16px; background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.15); border-left: 3px solid var(--primary); border-radius: 8px; }
@@ -315,13 +406,24 @@
 @keyframes nk-spin { to { transform: rotate(360deg); } }
 
 /* ─── 宽屏正文可读性：描述类文本约束到可读行宽（.nk-skill__desc 部分在 skill-card.css） ─── */
-.nk-overview__desc, .nk-skill__terms { max-width: var(--nk-prose-max); }
+.nk-hero__desc, .nk-skill__terms { max-width: var(--nk-prose-max); }
 
 /* ─── 手机端增强（≤767px，组件级紧凑调整） ─── */
 @media (max-width: 767px) {
   .nk-skill--child { margin-left: 10px; padding-top: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .nk-hero__bg { transition: none; } .nk-hero__spine { transition: none; } .nk-panel { animation: none; } }
+/* ── 键盘焦点环统一（交互按钮补齐 focus-visible） ── */
+.nk-story__head:focus-visible,
+.nk-skill__anim-toggle:focus-visible,
+.nk-skill__table-btn:focus-visible,
+.nk-enh-toggle__btn:focus-visible,
+.nk-secnav__btn:focus-visible,
+.nk-hero__toggle:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px;
+}
+.nk-story__head:focus-visible { border-radius: 0; }
+.nk-secnav__btn:focus-visible { outline-offset: 1px; }
 /* ── 触屏设备（hover: none）：重置点击后粘滞的 hover 态 ── */
 @media (hover: none) {
   .nk-story__head:hover { background: none; }
@@ -330,5 +432,7 @@
   .nk-enh-toggle__btn--active:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
   .nk-build__team-slot img:hover { transform: none; box-shadow: none; }
   .nk-eidolon:hover, .nk-ability:hover, .nk-story:hover,
-  .nk-bonus:hover, .nk-build__cone:hover, .nk-build__set:hover, .nk-profile__item:hover { border-color: var(--border); }
+  .nk-bonus:hover, .nk-build__set:hover, .nk-profile__item:hover { border-color: var(--border); }
+  .nk-secnav__btn:hover { color: var(--text3); background: transparent; }
+  .nk-secnav__btn--active:hover { color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); }
 }

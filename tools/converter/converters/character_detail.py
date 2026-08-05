@@ -355,6 +355,26 @@ def _build_relics(relic_data: list[dict], avatar_id: int) -> dict:
     return {}
 
 
+def _build_teams(records: list[dict]) -> list[dict]:
+    """从 TeamBuildConfig 记录构建配队推荐列表（与前端 BuildsPanel 契约对齐）。
+
+    每条记录 = 一个推荐队伍：MemberList 为推荐队友，BackupListN 为第 N 个队友槽位的备选。
+    输出结构：{ team_id, member_list, backup_list1..3 }
+    """
+    teams: list[dict] = []
+    for t in records:
+        member_list = [m for m in t.get("MemberList", []) if m]
+        team: dict = {
+            "team_id": t.get("TeamID", 0),
+            "member_list": member_list,
+        }
+        for i in (1, 2, 3):
+            backups = [b for b in t.get(f"BackupList{i}", []) if b]
+            team[f"backup_list{i}"] = backups
+        teams.append(team)
+    return teams
+
+
 def convert() -> None:
     """拼装完整 CharacterData 并输出到 characters/{id}.json。"""
     # 加载所有源表
@@ -393,6 +413,8 @@ def convert() -> None:
     relic_rec = _maybe_load("AvatarRelicRecommend.json")
     relic_rec_ld = _maybe_load("AvatarRelicRecommendLD.json")
     relic_rec = relic_rec + relic_rec_ld
+    # 配队推荐（TeamBuildConfig：AvatarID 一条记录 = 一个推荐队伍）
+    team_build = _maybe_load("TeamBuildConfig.json")
     # 加强：暂第一期不做，后续补充
     # enhanced_skill = _maybe_load("AvatarEnhancedSkill.json")
     # enhanced_tree = _maybe_load("AvatarEnhancedSkillTree.json")
@@ -413,6 +435,14 @@ def convert() -> None:
     equip_by_id: dict[int, list[int]] = {
         e["AvatarID"]: e.get("EquipmentList", []) for e in equip_rec
     }
+    # 配队推荐索引：AvatarID → 队伍列表（按 TeamID 升序）
+    teams_by_avatar: dict[int, list[dict]] = defaultdict(list)
+    for t in team_build:
+        tid = t.get("AvatarID", 0)
+        if tid:
+            teams_by_avatar[tid].append(t)
+    for tid, lst in teams_by_avatar.items():
+        lst.sort(key=lambda x: x.get("TeamID", 0))
 
     output_dir = OUTPUT_DIR / "characters"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -510,7 +540,7 @@ def convert() -> None:
             "stats": stats,
             "relics": relics,
             "lightcones": lightcones,
-            "teams": [],
+            "teams": _build_teams(teams_by_avatar.get(avatar_id, [])),
             "skin": {},
         }
 

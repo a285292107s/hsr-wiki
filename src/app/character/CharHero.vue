@@ -6,7 +6,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useParallax } from '../composables/use-parallax';
 import { initSpineViewer } from './spine';
-import { avatarDrawCardUrl, maxLevelStat, maxLevelValue } from '../../lib/format';
+import { avatarDrawCardUrl, escHtml, maxLevelStat, maxLevelValue } from '../../lib/format';
 import { CDN, ELEM, MAX_CHAR_LEVEL, PATH } from '../../lib/constants';
 import type { CharacterData } from '../../services/types';
 
@@ -50,6 +50,9 @@ const heroStats = computed<HeroStat[]>(() => {
 /** 当前等级上限（本地数据源无等级上限字段，固定为最大等级） */
 const levelLimit = computed<number>(() => MAX_CHAR_LEVEL);
 
+/** 一句话介绍（跟随当前视图 desc；位于属性模块上方） */
+const heroDesc = computed(() => escHtml(props.d.desc || '').replace(/\\n/g, '<br>'));
+
 /* ─── 视差（lerp 方案；动画开启时冻结） ─── */
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -73,6 +76,8 @@ function startSpine(id: string): void {
   spineReady.value = false;
   spineVisible.value = false;
   if (!id || !spineRef.value) return;
+  // 容器复用（组件复用时残留）：清空后再挂新实例，避免重复 canvas
+  spineRef.value.innerHTML = '';
   spineCleanup = initSpineViewer(spineRef.value, id, () => {
     spineReady.value = true;
     spineVisible.value = true;
@@ -103,7 +108,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="heroRef" class="nk-hero" @mousemove="onHeroMove" @mouseleave="onHeroLeave">
+  <div ref="heroRef" class="nk-hero nk-hero--char" @mousemove="onHeroMove" @mouseleave="onHeroLeave">
     <div class="nk-hero__visual">
       <div
         ref="heroBgRef"
@@ -125,23 +130,26 @@ onBeforeUnmount(() => {
     </div>
     <div class="nk-hero__panel">
       <header class="nk-hero__head">
-        <div v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</div>
-        <h1 class="nk-hero__name">{{ d.name }}</h1>
-        <div class="nk-hero__meta">
-          <span class="nk-hero__stars">{{ stars }}</span>
-          <span class="nk-hero__tag">
+        <div class="nk-hero__head-left">
+          <div v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</div>
+          <h1 class="nk-hero__name">{{ d.name }}</h1>
+          <div class="nk-hero__meta">
+            <span class="nk-hero__stars">{{ stars }}</span>
+          </div>
+        </div>
+        <div class="nk-hero__head-right">
+          <span class="nk-hero__tag nk-hero__tag--vert">
             <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`">
-            {{ ELEM[d.damage_type] || d.damage_type }}
+            <span>{{ ELEM[d.damage_type] || d.damage_type }}</span>
           </span>
-          <span class="nk-hero__tag">
+          <span class="nk-hero__tag nk-hero__tag--vert">
             <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`">
-            {{ PATH[d.base_type] || d.base_type }}
-          </span>
-          <span class="nk-hero__id">
-            <span class="nk-hero__id-num">{{ charId }}</span>
+            <span>{{ PATH[d.base_type] || d.base_type }}</span>
           </span>
         </div>
       </header>
+
+      <div v-if="heroDesc" class="nk-hero__desc" v-html="heroDesc"></div>
 
       <section v-if="heroStats.length" class="nk-hero__section">
         <div class="nk-hero__section-title">

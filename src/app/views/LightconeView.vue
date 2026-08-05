@@ -216,9 +216,6 @@ onBeforeUnmount(() => {
                 <img :src="cdnUri('pathicon', `${d.path.toLowerCase()}.webp`)">
                 {{ PATH[d.path] || d.path }}
               </span>
-              <span class="nk-hero__id">
-                <span class="nk-hero__id-num">{{ d.id }}</span>
-              </span>
             </div>
           </header>
 

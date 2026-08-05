@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /**
- * 概览面板：描述 + 角色档案（CV）+ 总属性加成 diff + TALENTS 附加能力 diff + 角色故事手风琴。
+ * 概览面板：角色档案（CV）+ 总属性加成 diff + TALENTS 附加能力 diff + 角色故事手风琴。
+ * 一句话介绍已上移至 Hero 属性模块下方（CharHero）。
+ * 平铺布局下通过 sections 渲染区块子集（各区块可独立排列在页面序列中）。
  * openStory 状态由面板内部持有（加载期父模板整体卸载，切换角色自动重置）。
  */
 import { computed, ref } from 'vue';
@@ -10,15 +12,20 @@ import { cdnUri } from '../../services/cdn';
 import { PROP_ICON, PROP_NAMES } from '../../lib/constants';
 import type { CharacterData, SkillExtra, SkillTree } from '../../services/types';
 
-const props = defineProps<{
-  d: CharacterData;
-  /** 加强前视图（diff 用；原始模式为 null） */
-  oldD: CharacterData | null;
-}>();
+type OverviewSection = 'profile' | 'bonuses' | 'talents' | 'stories';
 
-/* ─── 描述 / 档案 / 故事 ─── */
+const props = withDefaults(
+  defineProps<{
+    d: CharacterData;
+    /** 加强前视图（diff 用；原始模式为 null） */
+    oldD: CharacterData | null;
+    /** 渲染区块子集（平铺拆分布局用；默认全部） */
+    sections?: OverviewSection[];
+  }>(),
+  { sections: () => ['profile', 'bonuses', 'talents', 'stories'] },
+);
 
-const overviewDesc = computed(() => escHtml(props.d.desc || '').replace(/\\n/g, '<br>'));
+/* ─── 档案 / 故事 ─── */
 
 interface ProfileRow { label: string; value: string }
 const profileRows = computed<ProfileRow[]>(() => {
@@ -151,8 +158,7 @@ const abilities = computed<Ability[]>(() => {
 </script>
 
 <template>
-  <div class="nk-overview__desc" v-html="overviewDesc"></div>
-  <template v-if="profileRows.length">
+  <template v-if="props.sections.includes('profile') && profileRows.length">
     <div class="nk-title">PROFILE</div>
     <div class="nk-profile">
       <div v-for="p in profileRows" :key="p.label" class="nk-profile__item">
@@ -161,7 +167,7 @@ const abilities = computed<Ability[]>(() => {
       </div>
     </div>
   </template>
-  <template v-if="attrBonuses.length">
+  <template v-if="props.sections.includes('bonuses') && attrBonuses.length">
     <div class="nk-title">STAT BONUSES</div>
     <div class="nk-bonus-grid">
       <div v-for="b in attrBonuses" :key="b.name" class="nk-bonus">
@@ -176,7 +182,7 @@ const abilities = computed<Ability[]>(() => {
       </div>
     </div>
   </template>
-  <template v-if="abilities.length">
+  <template v-if="props.sections.includes('talents') && abilities.length">
     <div class="nk-title">TALENTS</div>
     <div
       v-for="ab in abilities"
@@ -202,7 +208,7 @@ const abilities = computed<Ability[]>(() => {
       </div>
     </div>
   </template>
-  <template v-if="storyEntries.length">
+  <template v-if="props.sections.includes('stories') && storyEntries.length">
     <div class="nk-title">STORIES</div>
     <div class="nk-stories">
       <div
