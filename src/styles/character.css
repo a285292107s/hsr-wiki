@@ -4,27 +4,33 @@
 ═══════════════════════════════════════════ */
 
 /* ─── 详情页卡片基底（各卡片 padding/radius 不同，仅共享背景/边框/过渡） ─── */
-/* 实底卡片 */
+/* 实底卡片：hover 浮起 + 扩散阴影（tactile feedback，墨色分层替代霓虹 glow） */
 .nk-eidolon, .nk-ability, .nk-build__team,
 .nk-build__set, .nk-relic-slot, .nk-relic-sub {
-  background: var(--card); border: 1px solid var(--border); transition: border-color 0.2s;
+  background: var(--card); border: 1px solid var(--border);
+  transition: border-color 0.2s, transform 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out);
 }
 .nk-eidolon:hover, .nk-ability:hover, .nk-build__team:hover,
-.nk-build__set:hover, .nk-relic-slot:hover, .nk-relic-sub:hover { border-color: var(--border2); }
-/* 半透明卡片（紫调） */
-.nk-profile__item, .nk-bonus {
-  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12); transition: border-color 0.2s;
+.nk-build__set:hover, .nk-relic-slot:hover, .nk-relic-sub:hover {
+  border-color: var(--border2); transform: translateY(-1px); box-shadow: var(--nk-shadow-card);
 }
-.nk-profile__item:hover, .nk-bonus:hover { border-color: var(--border2); }
+.nk-eidolon:active, .nk-ability:active, .nk-build__team:active,
+.nk-build__set:active, .nk-relic-slot:active, .nk-relic-sub:active { transform: translateY(0); }
+/* 半透明卡片（紫调）：浮起但不加重影，保持轻盈 */
+.nk-profile__item, .nk-bonus {
+  background: rgba(124,58,237,0.04); border: 1px solid rgba(124,58,237,0.12);
+  transition: border-color 0.2s, transform 0.2s var(--nk-ease-out);
+}
+.nk-profile__item:hover, .nk-bonus:hover { border-color: var(--border2); transform: translateY(-1px); }
 
 /* ─── 概览区块 ─── */
 /* 概览面板：头图无缝嵌入（顶部贴齐、左右突破面板内边距与面板同宽，下方内容保持面板内边距）
    负 margin 需配合 width: calc(100% + 2×padding) 才真正扩宽；仅负 margin 会因基础
    width:100% 锁宽导致左右不对称（右侧留缺口） */
 .nk-panel--overview { padding-top: 0; }
-.nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-wide-max); margin: 0 -16px 24px; }
+.nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-wide-max); margin: 0 -16px 0; }
 @media (min-width: 768px) {
-  .nk-panel--overview .nk-hero { width: calc(100% + 48px); max-width: var(--nk-detail-wide-max); margin: 0 -24px 28px; }
+  .nk-panel--overview .nk-hero { width: calc(100% + 48px); max-width: var(--nk-detail-wide-max); margin: 0 -24px 0; }
 }
 /* 内容平铺模式（移除 Tab）：全部面板依次渲染、滚动浏览；顶部内边距仅首个面板保留（见 --overview） */
 .nk-panel--flat { display: block; padding-bottom: 28px; }
@@ -43,7 +49,9 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
   padding: 10px 12px; min-width: 68px; border-radius: 12px;
   background: rgba(124,58,237,0.08); border: 1px solid var(--border);
+  transition: transform 0.2s var(--nk-ease-out), border-color 0.2s, background 0.2s;
 }
+.nk-hero--char .nk-hero__tag--vert:hover { transform: translateY(-1px); }
 .nk-hero--char .nk-hero__tag--vert img { width: 32px; height: 32px; }
 .nk-hero--char .nk-hero__tag--vert span { font-size: 0.75rem; font-weight: 700; color: var(--text2); letter-spacing: 0.02em; white-space: nowrap; }
 /* 手机：竖排标签紧凑化 */
@@ -268,8 +276,8 @@
 .nk-build__team-link { display: flex; }
 .nk-build__team-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 50%; }
 .nk-build__team-slot img { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--border2); transition: transform 0.2s, box-shadow 0.2s; }
-.nk-build__team-slot img:hover { transform: scale(1.1); box-shadow: 0 0 12px var(--primary-glow); }
-.nk-build__team-slot--main img { width: 56px; height: 56px; border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); }
+.nk-build__team-slot img:hover { transform: scale(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
+.nk-build__team-slot--main img { width: 56px; height: 56px; border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), 0 4px 12px rgba(0,0,0,0.4); }
 .nk-build__team-alt { display: flex; gap: 3px; }
 .nk-build__team-alt img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); }
 .nk-build__team-alt .nk-build__team-link { opacity: 0.65; transition: opacity 0.2s; }
@@ -313,7 +321,7 @@
 .nk-build__set-desc .hl { color: var(--highlight); font-weight: 700; }
 
 /* ─── 增强模式切换工具条（吸顶，替代原 Tab 栏；无增强角色整体不渲染） ─── */
-.nk-enh-bar { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
+.nk-enh-bar { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: rgba(15,15,35,0.88); backdrop-filter: blur(14px) saturate(1.15); -webkit-backdrop-filter: blur(14px) saturate(1.15); border-bottom: 1px solid rgba(124,58,237,0.16); }
 .nk-enh-bar__inner { display: flex; align-items: center; gap: 8px; max-width: var(--nk-detail-max); margin: 0 auto; padding: 8px 16px; min-height: 44px; }
 .nk-enh-toggle { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .nk-enh-toggle__label { font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); white-space: nowrap; opacity: 0.7; margin-right: 2px; }
@@ -321,7 +329,7 @@
 /* 触控热区垂直扩展至 ≥44px */
 .nk-enh-toggle__btn::before { content: ''; position: absolute; left: 0; right: 0; top: -9px; bottom: -9px; }
 .nk-enh-toggle__btn:hover { border-color: var(--border2); background: rgba(124,58,237,0.1); color: var(--text); }
-.nk-enh-toggle__btn--active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; box-shadow: 0 0 10px var(--primary-glow); }
+.nk-enh-toggle__btn--active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 1px 3px rgba(0,0,0,0.35); }
 .nk-enh-toggle__btn--active:hover { background: var(--primary); color: #fff; }
 /* 强化切换与区块导航的分隔线 */
 .nk-enh-bar__divider { flex-shrink: 0; width: 1px; height: 18px; background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent); opacity: 0.7; margin: 0 2px; }
@@ -343,12 +351,12 @@
 }
 .nk-secnav__btn--active::after {
   content: ''; position: absolute; left: 9px; right: 9px; bottom: -9px; height: 2px;
-  border-radius: 1px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow);
+  border-radius: 1px; background: var(--primary);
 }
 .nk-secnav__idx { font-family: var(--font-hud); font-size: 0.5rem; opacity: 0.65; }
 .nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
 /* 阅读进度线（工具条底部） */
-.nk-enh-bar__progress { height: 2px; width: 0; background: linear-gradient(90deg, var(--primary), #A78BFA); box-shadow: 0 0 8px var(--primary-glow); }
+.nk-enh-bar__progress { height: 2px; width: 0; background: linear-gradient(90deg, var(--primary), #A78BFA); }
 /* ─── 返回顶部 ─── */
 .nk-top-btn {
   position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
@@ -362,7 +370,7 @@
 .nk-top-btn svg { width: 18px; height: 18px; }
 .nk-top-btn:hover {
   color: var(--text-bright); border-color: var(--primary);
-  box-shadow: 0 0 16px var(--primary-glow); transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5); transform: translateY(-2px);
 }
 .nk-top-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 @media (min-width: 768px) {
@@ -371,6 +379,9 @@
 @media (prefers-reduced-motion: reduce) {
   .nk-top-btn { transition: none; }
   .nk-enh-bar__progress { transition: none; }
+  .nk-eidolon:hover, .nk-ability:hover, .nk-build__team:hover, .nk-build__set:hover,
+  .nk-relic-slot:hover, .nk-relic-sub:hover, .nk-profile__item:hover, .nk-bonus:hover,
+  .nk-hero--char .nk-hero__tag--vert:hover { transform: none; box-shadow: none; }
 }
 /* ─── 加强摘要横幅（工具条与面板之间） ─── */
 .nk-enh-notes { padding: 0 20px; }
@@ -432,7 +443,8 @@
   .nk-enh-toggle__btn--active:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
   .nk-build__team-slot img:hover { transform: none; box-shadow: none; }
   .nk-eidolon:hover, .nk-ability:hover, .nk-story:hover,
-  .nk-bonus:hover, .nk-build__set:hover, .nk-profile__item:hover { border-color: var(--border); }
+  .nk-bonus:hover, .nk-build__set:hover, .nk-profile__item:hover,
+  .nk-build__team:hover, .nk-relic-slot:hover, .nk-relic-sub:hover { border-color: var(--border); transform: none; box-shadow: none; }
   .nk-secnav__btn:hover { color: var(--text3); background: transparent; }
   .nk-secnav__btn--active:hover { color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); }
 }

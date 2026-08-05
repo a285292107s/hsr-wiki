@@ -7,7 +7,7 @@
   --sk-accent: var(--primary);
   position: relative; background: var(--card); border: 1px solid var(--border);
   border-radius: 12px; padding: 24px 24px 20px; margin-bottom: 16px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, transform 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out);
 }
 /* 技能类型色（仅供徽章使用） */
 .nk-skill[data-type="Normal"]   { --sk-accent: #CBD5E1; }
@@ -17,7 +17,8 @@
 .nk-skill[data-type="Maze"]     { --sk-accent: #F472B6; }
 .nk-skill[data-type="Servant"]  { --sk-accent: #A78BFA; }
 .nk-skill[data-type="ServantPassive"] { --sk-accent: #67E8F9; }
-.nk-skill:hover { border-color: var(--border2); }
+.nk-skill:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: var(--nk-shadow-card); }
+.nk-skill:active { transform: translateY(0); }
 /* 头部：类型色点 + 等级滑条共用一行 */
 .nk-skill__head {
   display: flex; align-items: center; gap: 12px;
@@ -26,7 +27,8 @@
 }
 .nk-skill__icon {
   width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
-  border: 1px solid var(--border2); box-shadow: 0 0 12px var(--primary-glow);
+  border: 1px solid var(--border2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -6px 12px rgba(0,0,0,0.25);
 }
 .nk-skill__title-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
 .nk-skill__title { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
@@ -98,5 +100,9 @@
 }
 /* ── 触屏设备（hover: none）：重置点击后粘滞的 hover 态 ── */
 @media (hover: none) {
-  .nk-skill:hover { border-color: var(--border); }
+  .nk-skill:hover { border-color: var(--border); transform: none; box-shadow: none; }
+}
+/* ── 减弱动态：禁用浮起位移 ── */
+@media (prefers-reduced-motion: reduce) {
+  .nk-skill:hover { transform: none; box-shadow: none; }
 }
