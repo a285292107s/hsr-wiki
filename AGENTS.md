@@ -9,7 +9,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》游戏数据 Wiki，
 ## 常用命令
 
 ```bash
-# 安装依赖（需 Node 22+、pnpm 9+）
+# 安装依赖（需 Node 22+；本地 packageManager 为 pnpm 11，CI 固定 pnpm 9）
 pnpm install
 
 # 本地开发 → http://localhost:5173/
@@ -59,9 +59,9 @@ src/
 │   ├── bootstrap.ts     → createApp + Pinia + Router + 全局 CSS 导入（仅 tokens + catalog）
 │   ├── App.vue          → 外壳：SidebarNav + 方向过渡 RouterView + ToastHost
 │   ├── router/index.ts  → History 路由；meta.depth 驱动导航方向动画；
-│   │                        meta.endgameTab 共享 transition key（终局 4 路由 = 同页 Tab）；
+│   │                        终局 /endgame/* 为嵌套路由，Tab 切换由 EndgameView 布局组件处理；
 │   │                        meta.cw 触发 data-theme="cw"（货币战争暗金主题）；
-│   │                        CW 目录路由经 cwCatalogView 并行加载目录专属 CSS
+│   │                        CW 目录路由经 cwCatalogView / cwRoleCatalogView 并行加载目录专属 CSS
 │   ├── router/chunks.ts → 路由 chunk 预加载函数（侧栏 hover / 首页 idle）
 │   ├── stores/          → Pinia 状态仓库（app、character、lightcone、relic）
 │   ├── views/           → 路由级页面组件（每个视图内 import 自己的专属样式）
@@ -86,7 +86,8 @@ src/
 │   ├── html.ts          → HTML 转义与富文本标签清洗（escHtml / gameTagsToHtml / stripTags）
 │   ├── diff.ts          → 参数对比与 word-level LCS diff（fmtDescDiff / wordDiff）
 │   ├── icons.ts         → 图标/图片 URL 构造器（skillIconUrl / itemName / avatarDrawCardUrl…）
-│   └── errors.ts        → NkError 错误类
+│   ├── errors.ts        → NkError 错误类
+│   └── currency-role.ts → 货币战争角色详情数据转换（标签映射 / 跨星级合并 / #N 引用解析）
 ├── spine/               → 中立引擎层（零 Vue 依赖，有副作用：DOM/WebGL/rAF/全局注册表）
 │   ├── types.ts         → 双运行时（4.1/4.2）松散契约唯一收口
 │   ├── runtime.ts       → 运行时动态加载（访问器代理隔离 window.spine + 多 CDN 兜底）
@@ -110,17 +111,17 @@ src/
 
 ### 核心架构模式
 
-1. **配置驱动目录页**：所有列表页均在 `src/app/catalog/pages/` 子模块中定义（character.ts / lightcone.ts / relic.ts / item.ts / monster.ts / endgame.ts / currency-role.ts），由 `pages.ts` 统一注册为 `CatalogPageConfig`。单一 `CatalogView.vue` 根据 `route.meta.catalog` 匹配配置渲染任意目录。新增目录 = 新增子模块 + 注册 + 路由。
+1. **配置驱动目录页**：所有列表页均在 `src/app/catalog/pages/` 子模块中定义（character.ts / lightcone.ts / relic.ts / item.ts / monster.ts / endgame.ts（导出 maze/story/boss/peak 四页配置）/ currency-role.ts / currency-equipment.ts / currency-portal.ts / currency-augment.ts / currency-trait.ts，shared.ts 提供共享常量），由 `pages.ts` 统一注册为 `CatalogPageConfig`（共 14 个目录）。单一 `CatalogView.vue` 根据 `route.meta.catalog` 匹配配置渲染任意目录。新增目录 = 新增子模块 + 注册 + 路由。
 
 2. **数据流向**：`Pinia store` → 调用 `services/api/` 纯函数 → 从 `public/data/cn/`（随站部署）获取本地 JSON 或从 CDN 获取图片。Store 编排加载、缓存与错误处理；API 函数本身不持有状态（单例 Promise 除外）。
 
 3. **本地优先数据**：全部目录/详情数据为预转换 JSON，存放于 `public/data/cn/`。仅图片与 Spine 动画在运行时从 CDN 加载。CDN 基址定义于 `src/lib/constants.ts → CDN`。
 
-4. **双模式主题**：常规模式（紫色调）vs 货币战争模式（暗金色）。路由 `meta.cw` 切换 `<html data-theme="cw">`，附带 400ms 过渡动画类。CW 路由位于 `/currency/*` 下。
+4. **双模式主题**：常规模式（紫色调）vs 货币战争模式（暗金色）。路由 `meta.cw` 切换 `<html data-theme="cw">`，附带 450ms 过渡动画类。CW 路由位于 `/currency/*` 下。
 
 5. **方向性页面过渡**：Router `beforeEach` 比较 from/to 路由的 `meta.depth` 计算 `navDir`（1=前进、-1=返回、0=平级）。App.vue 据此选择过渡动画名。手机端（<768px）统一使用简单淡入淡出。
 
-6. **样式随路由懒加载**：页面专属 CSS 在对应视图组件内 `import`（CharacterView 引 character.css + skill-card.css；LightconeView 引 lightcone.css + skill-card.css；RelicView 引 relic.css；CW 视图引 currency-*.css），由 Vite 拆为独立 CSS chunk 随路由加载。CW 目录路由（共享 CatalogView）在 router 内通过 `Promise.all` 并行加载目录样式，保证样式先于渲染到达。全局仅 tokens.css + catalog.css。
+6. **样式随路由懒加载**：页面专属 CSS 在对应视图组件内 `import`（CharacterView 引 character.css + skill-card.css；LightconeView 引 lightcone.css + skill-card.css；RelicView 引 relic.css；CW 视图引 currency-*.css），由 Vite 拆为独立 CSS chunk 随路由加载。CW 目录路由（共享 CatalogView）在 router 内通过 `Promise.all` 并行加载目录样式（角色图鉴目录经 `cwRoleCatalogView` 额外加载 currency-role.css），保证样式先于渲染到达。全局仅 tokens.css + catalog.css。
 
 ### 数据转换管线（Python）
 
@@ -155,12 +156,13 @@ src/
 | relics | RelicSetConfig, RelicConfig, RelicSetSkillConfig, RelicDataInfo |
 | relic_affixes | RelicMainAffixConfig, RelicSubAffixConfig |
 | monsters | MonsterTemplateConfig |
-| endgame | ChallengePeakConfig |
+| endgame | ChallengeMazeConfig, ChallengeStoryMazeConfig, ChallengeBossMazeConfig, ChallengePeakConfig |
 | items | ItemConfig |
 | paths | AvatarBaseType |
 | elements | DamageType |
 | properties | （自建映射，无源文件） |
 | currency | AvatarConfigLD（本地数据） |
+| currency_catalog | GridFightItems, GridFightEquipment, GridFightEquipCategoryInfo, GridFightEquipTag, GridFightEquipRecommendRole, GridFightPortalBuff, GridFightAugment, GridFightTraitBasicInfo, GridFightTraitLayer, GridFightTraitMazebuff |
 | season | （本地数据） |
 
 > 所有模块均依赖 `TextMapCHS.json` 解析 Hash 文本引用。
@@ -175,7 +177,7 @@ src/
 
 **Converter（pytest）：**
 - 位置：`tools/converter/tests/`
-- 范围：工具函数（unwrap_value / map_icon_path / sort_by_id / resolve_text）、clean_text 标签清洗全分支、增量依赖 AST 一致性、character_detail 纯函数契约；合成数据 + mock TextMap，不依赖真实源数据
+- 范围：工具函数（unwrap_value / map_icon_path / sort_by_id / resolve_text）、clean_text 标签清洗全分支、增量依赖 AST 一致性、character_detail / currency 纯函数契约、gen_catalog 索引生成、query / textmap_db TextMap 缓存查询；合成数据 + mock TextMap，不依赖真实源数据
 - 运行：`cd tools/converter && python -m pytest tests/ -v`
 - CI：已接入 `.github/workflows/ci.yml`（push/PR）与 `data-sync.yml`（数据同步时）
 
@@ -185,7 +187,6 @@ src/
 - 字段筛选遵循 `docs/audit/字段价值审计流程.md`：AI 生成解读卡（字段名→人话语义→证据→置信度→价值建议），人工裁决四档分级；AI 无权判 🔴 排除（闸门 1），StarRailRes 基线有而本地无的字段必须标 ⚪ 待定（闸门 2）
 - 路由使用 `createWebHistory`（History 模式）——Vercel 支持 SPA fallback
 - Vite `base` 为 `/`——Vercel 部署于域名根路径
-- `cdn-samples/` 仅作参考样本，严禁作为数据源导入或随站部署
 - 目录卡片 HTML 以模板字符串渲染（非 Vue 组件），服务于虚拟滚动性能
 - CSS 采用 BEM 风格命名，统一 `nk-` 前缀（如 `nk-cat-card__img`）
 - 样式分层：tokens.css = 设计令牌 + 跨页共享原语（nk-tabs / nk-panel 等）；catalog.css = 目录引擎专属（含 v-html 卡片，scoped 无法命中）；页面 css = 页面专属（随路由懒加载）。页面间复用样式先查原语，禁止在页面 css 复制粘贴；组件专属样式（如 EndgameView 的 Tab 导航）用 SFC scoped style，不污染全局命名空间

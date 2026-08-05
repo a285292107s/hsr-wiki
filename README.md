@@ -64,11 +64,11 @@ pnpm test:watch
 
 第二期数据源统一已完成——**全部目录页均走本地数据**（随站部署），无运行时 CDN 列表拉取：
 
-- **角色 / 光锥 / 遗器 / 物品 / 敌对**：列表数据由 `tools/converter/` 从 `DimBasedGameData` 产出本地 JSON（`public/data/cn/` 下的 `characters.json`、`light_cones.json`、`relics.json`、`items.json`、`monsters.json`），加载接口集中在 `src/services/api.ts` 的 `loadLocal*` 系列；物品库 `ItemDb`（供角色详情页物品名解析）由 `loadLocalItemDb()` 从 `items.json` 数组转换得到。
+- **角色 / 光锥 / 遗器 / 物品 / 敌对**：列表数据由 `tools/converter/` 从 `TurnBasedGameData` 产出本地 JSON（`public/data/cn/` 下的 `characters.json`、`light_cones.json`、`relics.json`、`items.json`、`monsters.json`），加载接口集中在 `src/services/api/` 的 `loadLocal*` 系列；物品库 `ItemDb`（供角色详情页物品名解析）由 `loadLocalItemDb()` 从 `items.json` 数组转换得到。
 - **终局内容（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）**：赛季列表由 `tools/converter/converters/endgame.py` 从 `ChallengeMazeConfig` / `ChallengeStoryMazeConfig` / `ChallengeBossMazeConfig` / `ChallengePeakConfig` 产出（按 `GroupID`/`ID` 分组 + TextMap 名称），落地为 `public/data/cn/maze.json`、`maze_extra.json`、`maze_boss.json`、`maze_peak.json`，经 `loadLocalMaze*`/`loadLocalStory*`/`loadLocalBoss*`/`loadLocalPeak*` 加载。**不生成 `*-version.json`**——上游解包数据中不存在"赛季 → 游戏版本"的时间线表，版本分组无法从源可靠重建，故四季统一按赛季 ID 降序展示，赛季版本标签显示"未知"（与原站 story/boss 行为一致）。
 - **图片资源**：图标、Spine `.skel`/`.atlas` 仍通过 `https://static.nanoka.cc` 加载（前端拼接固定 CDN 前缀 `src/lib/constants.ts` 中 `CDN`）；目录卡片图标经 `lightconeIconUrl` / `itemIconUrl` / `monsterIconUrl` 由本地数据中的 id / 路径派生，无需额外请求。
 
-> `cdn-samples/` 仅作 CDN 响应结构的**参考样本**，其 JSON **严禁作为数据源**读取或随站部署（见 `cdn-samples/README.md`）。本地数据一律由 `tools/converter/convert.py` 从 `vendor/TurnBasedGameData` 真实产出。
+> 全部本地数据由 `tools/converter/convert.py` 从 `vendor/TurnBasedGameData` 真实产出，严禁以任何外部样本作为数据源读取或随站部署。
 >
 > 本地数据需随上游解包更新时，重跑 `tools/converter/convert.py` 即可，前端无需改动。
 

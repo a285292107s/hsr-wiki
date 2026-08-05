@@ -1,6 +1,6 @@
 /**
  * format.ts 纯函数单元测试
- * 内联 fixture 参照 cdn-samples 真实数据结构手工构造（测试不读取样本文件，运行时更不依赖）。
+ * 内联 fixture 参照本地转换数据真实结构手工构造（测试不读取数据文件，运行时更不依赖）。
  */
 import { describe, it, expect } from 'vitest';
 import { CDN } from '../constants';
@@ -14,7 +14,7 @@ import {
 } from '../format';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
 
-/* ─── fixture（最小化 CharacterData，结构对齐 cdn-samples/local-character-1508.json） ─── */
+/* ─── fixture（最小化 CharacterData，结构对齐本地转换数据角色 JSON） ─── */
 
 const sk = (over: Partial<Skill> = {}): Skill => ({
   id: 100501,

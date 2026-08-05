@@ -1,6 +1,6 @@
 /**
- * api.ts API 层测试
- * 内联 fixture 参照 cdn-samples 真实结构（manifest / spine manifest 的 "bg|a|b" 多段格式）。
+ * services/api API 层测试
+ * 内联 fixture 参照真实响应结构手工构造（manifest / spine manifest 的 "bg|a|b" 多段格式）。
  * 二期数据源已统一为本地：此处覆盖本地数据加载（loadLocal*）、物品库转换与纯函数。
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';

@@ -6,7 +6,7 @@
  *
  * 数据源（第二期已完成统一）：
  * - 角色（列表/详情/配装名/遗器套装）走本地转换数据（public/data/cn，随站部署）；
- * - 光锥/遗器/物品/敌对/终局目录均走本地数据（converter 输出或 cdn-samples 落地）；
+ * - 光锥/遗器/物品/敌对/终局目录均走本地数据（converter 输出）；
  * - 图片资源与 Spine 动画仍走 CDN（static.nanoka.cc）。
  */
 export { LOCAL_DATA_BASE } from './base';
