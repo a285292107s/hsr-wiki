@@ -7,9 +7,9 @@
  * 关键约束：rAF 循环与 WebGL 上下文必须经 dispose 释放（视图 onBeforeUnmount 调用）。
  */
 import { nextTick, ref } from 'vue';
-import { getSpineLib } from '../../spine/runtime';
-import { createScenePipeline } from '../../spine/scene';
-import type { SpineScenePipelineController } from '../../spine/types';
+import { getSpineLib } from '../spine/runtime';
+import { createScenePipeline } from '../spine/scene';
+import type { SpineScenePipelineController } from '../spine/types';
 import type { LayerEntryRef } from './use-single-layers';
 
 export function useMergedPipeline() {

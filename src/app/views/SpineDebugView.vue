@@ -5,7 +5,7 @@
  * spine-manifest.json 后，在本页验收其能否正常渲染：
  * - 「一键验收」顺序加载全部场景：逐层加载状态 + 单画布合并渲染（复用生产管线 createScenePipeline，
  *   验收基线 = 生产渲染由代码结构保证）+ 黑块自动检测（近黑不透明像素占比），生成可导出的 PASS/FAIL 报告；
- *   判定引擎在 app/debug/kv-acceptance.ts，验收编排在 app/debug/use-kv-acceptance.ts。
+ *   判定引擎在 src/debug/kv-acceptance.ts，验收编排在 src/debug/use-kv-acceptance.ts。
  * - 单层模式为逐层状态视图：每层独立画布 + 加载状态/耗时/错误，供定位「哪一层异常」；
  *   画布带不透明深色衬底（LAYER_BG），混合 slot 的 dst 非透明 → 无透明退化黑块。
  * 渲染参数与生产完全一致：同一固定 viewport + pad 0 + rawDataURIs 纹理重映射。
@@ -17,11 +17,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { loadSpineSceneKeys, resolveSpine } from '../../services/api';
 import { SPINE_RUNTIME_VERSION } from '../../spine/constants';
 import { getSpineCtor, loadSpineRuntime } from '../../spine/runtime';
-import { nearBlackClass as blackClass } from '../debug/kv-acceptance';
-import { copyText, downloadCanvas, downloadJson } from '../debug/report';
-import { useKvAcceptance, type AcceptBridge } from '../debug/use-kv-acceptance';
-import { useMergedPipeline } from '../debug/use-merged-pipeline';
-import { type LayerState, useSingleLayers } from '../debug/use-single-layers';
+import { nearBlackClass as blackClass } from '../../debug/kv-acceptance';
+import { copyText, downloadCanvas, downloadJson } from '../../debug/report';
+import { useKvAcceptance, type AcceptBridge } from '../../debug/use-kv-acceptance';
+import { useMergedPipeline } from '../../debug/use-merged-pipeline';
+import { type LayerState, useSingleLayers } from '../../debug/use-single-layers';
 import { useAppStore } from '../stores/app';
 /** 浏览器活跃 WebGL 上下文上限约 16，达到此值预警 */
 const GL_WARN_AT = 12;

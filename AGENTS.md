@@ -95,6 +95,14 @@ src/
 │   ├── scene.ts         → 单画布多骨架场景渲染器（固定舞台 cover 适配 + 渲染管线插桩）
 │   ├── registry.ts      → 按 key 精确释放注册表 + WebGL 上下文计数预警
 │   └── constants.ts     → 运行时版本 + CDN 列表（引擎自包含）
+├── debug/               → 诊断支撑层（仅 /debug/* 路由可达，动态 import 打包隔离；
+│                           依赖方向仅限 services 数据层 + spine 引擎层，严禁被业务代码引用）
+│   ├── spine-audit.ts   → 审核引擎（L0 静态 / L1 解析 / L2 渲染三级检查）
+│   ├── kv-acceptance.ts → KV 场景验收判定引擎（黑块检测 + PASS/FAIL 报告）
+│   ├── use-kv-acceptance.ts → 一键验收编排 composable（可独立单测）
+│   ├── use-merged-pipeline.ts / use-single-layers.ts → 合并/单层渲染编排
+│   ├── pixels.ts / report.ts → 像素分析 / 报告导出
+│   └── SpineAuditDetail.vue → 审核详情（含预览生命周期）
 └── styles/              → 全局仅 tokens.css（设计令牌）+ catalog.css（目录引擎）；
                            页面专属 CSS（character / lightcone / relic / currency-* /
                            skill-card）随各自路由 chunk 懒加载
