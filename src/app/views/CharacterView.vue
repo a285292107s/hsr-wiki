@@ -16,7 +16,7 @@ import SkillsPanel from '../character/SkillsPanel.vue';
 import EidolonsPanel from '../character/EidolonsPanel.vue';
 import BuildsPanel from '../character/BuildsPanel.vue';
 import { loadSkillAnimations } from '../../services/api';
-import { stripAllTags } from '../../lib/format';
+import { gameTagsToHtml } from '../../lib/format';
 import type { CharacterData, SkillAnimationsDb } from '../../services/types';
 // 角色详情页专属样式（随本路由 chunk 懒加载；技能卡片原语与光锥页共享）
 import '../../styles/skill-card.css';
@@ -37,9 +37,8 @@ const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 watch(() => char.data, (data) => {
   if (data) document.title = `${data.name} - 咸鱼百科`;
 });
-/** 渲染数据：加强模式 → 加强视图 + 重映射旧视图；原始模式 → oldD=null */
-const d = computed<CharacterData | null>(() => char.renderData.d);
-const oldD = computed<CharacterData | null>(() => char.renderData.oldD);
+/** 渲染数据：强化模式 → 强化视图；原始模式 → 原数据 */
+const d = computed<CharacterData | null>(() => char.renderData);
 
 /** 技能动画映射（可选增强，失败静默） */
 const animDb = ref<SkillAnimationsDb | null>(null);
@@ -69,13 +68,25 @@ watch(
 
 /* ═══════════ 强化模式 ═══════════ */
 
-/** 加强摘要横幅（剥离 <color> 标签） */
+/** 强化摘要（保留官方 <color> 强调词，gameTagsToHtml 渲染） */
 const enhNotes = computed<string[]>(() => {
   if (!char.enhKey || !char.data) return [];
   const enh = char.data.enhanced && char.data.enhanced[char.enhKey];
   const descs = enh && (enh.descs as string[] | undefined);
   if (!descs || !descs.length) return [];
-  return descs.map((t) => stripAllTags(t));
+  return descs.map((t) => gameTagsToHtml(t));
+});
+
+/** 强化角标：当前强化键下被强化的技能/星魂 ID 集合（原始模式为 null） */
+const enhMark = computed<{ skillIds: Set<number>; rankIds: Set<number> } | null>(() => {
+  const key = char.enhKey;
+  if (!key || !d.value) return null;
+  const enh = d.value.enhanced && d.value.enhanced[key];
+  if (!enh) return null;
+  return {
+    skillIds: new Set(enh.skill_ids || []),
+    rankIds: new Set(enh.rank_ids || []),
+  };
 });
 
 /* ═══════════ 区块导航（平铺长页：吸顶索引条 + 当前位置高亮 + 阅读进度 + 返回顶部） ═══════════ */
@@ -240,29 +251,9 @@ onBeforeUnmount(() => {
 
     <!-- ─── 正文 ─── -->
     <template v-else-if="d">
-      <!-- 吸顶工具条：强化模式切换（可选）+ 区块导航 + 阅读进度线 -->
+      <!-- 吸顶工具条：区块导航 + 阅读进度线（强化模式切换已下沉至 skills 模块上方） -->
       <div ref="enhBarRef" class="nk-enh-bar">
         <div class="nk-enh-bar__inner">
-          <template v-if="char.enhKeys.length">
-            <span class="nk-enh-toggle__label">强化模式</span>
-            <button
-              :class="['nk-enh-toggle__btn', { 'nk-enh-toggle__btn--active': !char.enhKey }]"
-              type="button"
-              @click="char.setEnhKey(null)"
-            >
-              原始
-            </button>
-            <button
-              v-for="k in char.enhKeys"
-              :key="k"
-              :class="['nk-enh-toggle__btn', { 'nk-enh-toggle__btn--active': char.enhKey === k }]"
-              type="button"
-              @click="char.setEnhKey(k)"
-            >
-              强化 V{{ k }}
-            </button>
-            <span class="nk-enh-bar__divider" aria-hidden="true"></span>
-          </template>
           <nav class="nk-secnav" aria-label="内容区块导航">
             <button
               v-for="(s, i) in sectionDefs"
@@ -292,32 +283,59 @@ onBeforeUnmount(() => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
 
-      <!-- 加强摘要横幅 -->
-      <div class="nk-enh-notes">
-        <div v-if="enhNotes.length" class="nk-enh-notes__banner">
-          <span class="nk-enh-notes__title">强化内容</span>
-          <ul class="nk-enh-notes__list">
-            <li v-for="(n, i) in enhNotes" :key="i">{{ n }}</li>
-          </ul>
-        </div>
-      </div>
-
       <!-- 内容平铺：头图 + 各区块按序排列（技能 → 附加能力 → 星魂 → 属性加成 → 光锥/配队 → 遗器 → 角色档案 → 配音） -->
       <div class="nk-panels">
         <div class="nk-panel nk-panel--overview nk-panel--flat" data-panel="hero">
-          <CharHero :d="d" :old-d="oldD" :char-id="char.charId" />
+          <CharHero :d="d" :char-id="char.charId" />
         </div>
+
+        <!-- 强化模式（skills 模块上方）：模块标题 + 选项卡切换 + 强化摘要 -->
+        <div v-if="char.enhKeys.length" class="nk-panel nk-panel--flat nk-enh-module">
+          <div class="nk-enh-module__head">
+            <span class="nk-enh-module__idx">00</span>
+            <span>强化模式</span>
+          </div>
+          <div class="nk-enh-tabs" role="group" aria-label="强化模式切换">
+            <button
+              :class="['nk-enh-tab', { 'nk-enh-tab--active': !char.enhKey }]"
+              type="button"
+              :aria-pressed="!char.enhKey"
+              @click="char.setEnhKey(null)"
+            >
+              原始
+            </button>
+            <button
+              v-for="k in char.enhKeys"
+              :key="k"
+              :class="['nk-enh-tab', { 'nk-enh-tab--active': char.enhKey === k }]"
+              type="button"
+              :aria-pressed="char.enhKey === k"
+              @click="char.setEnhKey(k)"
+            >
+              <span class="nk-enh-tab__idx">V{{ k }}</span>强化
+            </button>
+          </div>
+          <div class="nk-enh-notes">
+            <div v-if="enhNotes.length" class="nk-enh-notes__banner">
+              <span class="nk-enh-notes__title">强化内容</span>
+              <ul class="nk-enh-notes__list">
+                <li v-for="(n, i) in enhNotes" :key="i" v-html="n"></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div class="nk-panel nk-panel--flat" data-panel="skills">
-          <SkillsPanel :d="d" :old-d="oldD" :char-id="char.charId" :enh-key="char.enhKey" :anim-db="animDb" />
+          <SkillsPanel :d="d" :char-id="char.charId" :enh-key="char.enhKey" :anim-db="animDb" :enh-mark="enhMark" />
         </div>
         <div class="nk-panel nk-panel--flat" data-panel="talents">
-          <OverviewPanel :d="d" :old-d="oldD" :sections="['talents']" />
+          <OverviewPanel :d="d" :sections="['talents']" />
         </div>
         <div class="nk-panel nk-panel--flat" data-panel="eidolons">
-          <EidolonsPanel :d="d" :old-d="oldD" :char-id="char.charId" />
+          <EidolonsPanel :d="d" :char-id="char.charId" :enh-mark="enhMark" />
         </div>
         <div class="nk-panel nk-panel--flat" data-panel="bonuses">
-          <OverviewPanel :d="d" :old-d="oldD" :sections="['bonuses']" />
+          <OverviewPanel :d="d" :sections="['bonuses']" />
         </div>
         <div class="nk-panel nk-panel--flat" data-panel="cones">
           <BuildsPanel
@@ -350,10 +368,10 @@ onBeforeUnmount(() => {
           />
         </div>
         <div class="nk-panel nk-panel--flat" data-panel="stories">
-          <OverviewPanel :d="d" :old-d="oldD" :sections="['stories']" />
+          <OverviewPanel :d="d" :sections="['stories']" />
         </div>
         <div class="nk-panel nk-panel--flat" data-panel="profile">
-          <OverviewPanel :d="d" :old-d="oldD" :sections="['profile']" />
+          <OverviewPanel :d="d" :sections="['profile']" />
         </div>
       </div>
     </template>

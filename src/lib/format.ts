@@ -1,8 +1,7 @@
 /**
- * 纯函数工具（barrel）：数值格式化 / 加强模式视图构建 / 数据校验。
+ * 纯函数工具（barrel）：数值格式化 / 强化模式视图构建 / 数据校验。
  * 已拆分子模块并在此 re-export 保持旧导入路径兼容：
  * - ./html  ：转义与富文本标签（escHtml / gameTagsToHtml / stripTags / stripAllTags）
- * - ./diff  ：参数对比与 word-level LCS（fmtDescDiff / wordDiff / hasParamDiff…）
  * - ./icons ：图标 URL 构造器（iconUrl / skillIconUrl / itemName…）
  */
 import { gameTagsToHtml } from './html';
@@ -11,7 +10,6 @@ import { NkError } from './errors';
 import type { CharacterData, CharStats, Skill } from '../services/types';
 
 export * from './html';
-export * from './diff';
 export * from './icons';
 
 /* ─── 数值格式化 ─── */
@@ -30,25 +28,20 @@ export function fmtVal(v: number | null | undefined, tag: string, isPct: boolean
 
 /**
  * 渲染技能描述：替换 #N[tag]% 占位符为参数值。
- * oldParams 提供时对变化值做新旧对比（旧值红删除线 nk-d-c + 新值绿 nk-d-n）。
  */
 export function fmtDesc(
   desc: string | null | undefined,
   params?: number[] | null,
-  oldParams?: number[] | null,
 ): string {
   if (!desc) return '';
   let s = gameTagsToHtml(desc);
-  const rep = (i: string, t: string, pct: string, oldP?: number | null): string => {
+  const rep = (i: string, t: string, pct: string): string => {
     const n = fmtVal(params && params[parseInt(i) - 1], t, pct === '%');
-    if (oldP === undefined || oldP === null) return `<span class="hl">${n}${pct}</span>`;
-    const o = fmtVal(oldP, t, pct === '%');
-    if (o === n) return `<span class="hl">${n}${pct}</span>`;
-    return `<span class="hl nk-d-c">${o}${pct}</span><span class="hl nk-d-n">${n}</span>`;
+    return `<span class="hl">${n}${pct}</span>`;
   };
   s = s.replace(/#(\d+)\[([^\]]*)\](%?)/g, (_, i: string, t: string, pct: string) =>
-    rep(i, t, pct, oldParams && oldParams[parseInt(i) - 1]));
-  s = s.replace(/#(\d+)/g, (_, i: string) => rep(i, '', '', oldParams && oldParams[parseInt(i) - 1]));
+    rep(i, t, pct));
+  s = s.replace(/#(\d+)/g, (_, i: string) => rep(i, '', ''));
   s = s.replace(/\\n|\n/g, '<br>');
   return s;
 }
@@ -131,7 +124,7 @@ export function getEnhancedKeys(d: CharacterData | null | undefined): string[] {
   return Object.keys((d && d.enhanced) || {});
 }
 
-/** 构建"加强后"视图：base 副本上覆盖 enhanced[enhKey] 的 skills/ranks/skill_trees */
+/** 构建"强化后"视图：base 副本上覆盖 enhanced[enhKey] 的 skills/ranks/skill_trees/sp_need */
 export function buildEnhancedView(d: CharacterData, enhKey: string): CharacterData {
   const enh = d.enhanced && d.enhanced[enhKey];
   if (!enh) return d;
@@ -139,35 +132,19 @@ export function buildEnhancedView(d: CharacterData, enhKey: string): CharacterDa
   if (enh.skills) view.skills = deepClone(enh.skills);
   if (enh.ranks) view.ranks = deepClone(enh.ranks);
   if (enh.skill_trees) view.skill_trees = deepClone(enh.skill_trees);
+  if (enh.sp_need != null) view.sp_need = enh.sp_need;
   return view;
 }
 
-/**
- * 构建用于 diff 的"加强前"视图：将 base 技能 ID 重映射为加强 ID 以便按 ID 匹配。
- * 加强技能 ID = 加强键 + 基础技能 ID（100502 → 1100502）；星魂按序号、行迹按 point_name 匹配，不受影响。
- */
-export function buildEnhancedOld(d: CharacterData, enhKey: string): CharacterData {
-  const old = deepClone(d);
-  if (old.skills) {
-    const remapped: Record<string, Skill> = {};
-    Object.values(old.skills).forEach((sk) => {
-      if (sk.id != null) sk.id = Number(enhKey + sk.id);
-      remapped[sk.id] = sk;
-    });
-    old.skills = remapped;
-  }
-  return old;
-}
-
-/** 依据当前加强模式返回渲染数据：{ d, oldD }（原始模式 oldD=null） */
+/** 依据当前强化模式返回渲染数据（原始模式直接返回 base；无强化包时同样返回 base） */
 export function getRenderData(
   base: CharacterData | null,
   enhKey: string | null,
-): { d: CharacterData | null; oldD: CharacterData | null } {
+): CharacterData | null {
   if (enhKey && base && base.enhanced && base.enhanced[enhKey]) {
-    return { d: buildEnhancedView(base, enhKey), oldD: buildEnhancedOld(base, enhKey) };
+    return buildEnhancedView(base, enhKey);
   }
-  return { d: base, oldD: null };
+  return base;
 }
 
 /* ─── 数据校验 ─── */

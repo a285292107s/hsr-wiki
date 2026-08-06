@@ -2,13 +2,13 @@
 /**
  * 技能卡片（移植自原 character.js 的 renderSkillCard + bindPanels）
  * 原实现滑条交互依赖 data-tpl/data-lvs 属性 + DOM 重渲染，此处改为 Vue 响应式：
- *   lv 变化 → descHtml / 数据表激活行自动重算（加强 diff 模式下用新旧参数重渲染描述）
+ *   lv 变化 → descHtml / 数据表激活行自动重算
  * 子技能通过文件名自引用递归渲染（原结构：子卡片嵌套在父卡片 .nk-skill 内）
  */
 import { computed, ref } from 'vue';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
 import {
-  fmtDesc, fmtDescDiff, fmtToughness, hasParamDiff, hasTextDiff, paramEqual, skillIconUrl,
+  fmtDesc, fmtToughness, skillIconUrl,
 } from '../../lib/format';
 import { ELEM, TYPE } from '../../lib/constants';
 
@@ -16,17 +16,14 @@ const props = defineProps<{
   sk: Skill;
   charId: string;
   charData: CharacterData | null;
-  /** 加强 diff 对比用的旧版技能（按重映射后的技能 ID 匹配） */
-  oldSk?: Skill | null;
-  /** 子技能的旧版映射表（透传给递归子卡片） */
-  childOldById?: Record<string, Skill> | null;
-  isDiffMode?: boolean;
   isChild?: boolean;
   childSkills?: Skill[];
   /** 父卡片的当前等级（子技能共用父级滑条） */
   parentLv?: number;
   /** 技能动画列表（米游社 Wiki 数据，仅父卡片传入） */
   animEntries?: SkillAnimEntry[] | null;
+  /** 强化角标（强化模式下被强化技能 ID 集合；原始模式为 null） */
+  enhMark?: { skillIds: Set<number>; rankIds: Set<number> } | null;
 }>();
 
 /* ─── 技能等级滑条（响应式替代原 data-tpl/data-lvs 方案） ─── */
@@ -48,71 +45,46 @@ const effLv = computed(() =>
   props.isChild ? Math.min(props.parentLv ?? 1, maxLv.value) : lv.value,
 );
 
-/* ─── 描述渲染（当前等级参数；diff 模式下新旧对比；空 desc 显示 "-" 占位，对齐原站） ─── */
+/* ─── 描述渲染（当前等级参数；空 desc 显示 "-" 占位，对齐原站） ─── */
 const descHtml = computed(() => {
   if (!props.sk.desc) return '-';
   const lvData = props.sk.level ? props.sk.level[String(effLv.value)] : null;
   const params = lvData ? lvData.param_list : [];
-  const old = props.oldSk || null;
-  if (props.isDiffMode && old) {
-    const oldLvData = old.level ? old.level[String(effLv.value)] : null;
-    const oldParams = oldLvData ? oldLvData.param_list : [];
-    return fmtDescDiff(props.sk.desc, params, old.desc, oldParams);
-  }
   return fmtDesc(props.sk.desc, params);
 });
-
-/* ─── 数值对比：旧值红删除线 + 新值绿 ─── */
-function diffValHtml(
-  nv: number | string,
-  ov: number | string | null | undefined,
-  transform?: (v: number | string) => string,
-): string {
-  const n = transform ? transform(nv) : String(nv);
-  if (ov === undefined || ov === null) return n;
-  const o = transform ? transform(ov) : String(ov);
-  if (o === n) return n;
-  return `<span class="nk-d-c">${o}</span><span class="nk-d-n">${n}</span>`;
-}
 
 interface Metric {
   label: string;
   html: string;
 }
 const metrics = computed<Metric[]>(() => {
-  const old = props.oldSk || null;
   const met: Metric[] = [];
   if (props.sk.sp_base != null) {
-    met.push({ label: '能量', html: diffValHtml(props.sk.sp_base, old ? old.sp_base : null) });
+    met.push({ label: '能量', html: String(props.sk.sp_base) });
   }
   // 技能级能量需求（终结技/忆灵终结技；与 sp_base 的回复量互补，2026-08-03 审计新增）
   if (props.sk.sp_need != null) {
-    met.push({ label: '能量需求', html: diffValHtml(props.sk.sp_need, old ? old.sp_need : null) });
+    met.push({ label: '能量需求', html: String(props.sk.sp_need) });
   }
   // 削韧：优先官方直出字段（属性 + 显示值），缺失时回退 show_stance_list 换算
   const stType = props.sk.stance_damage_type;
   const stDisp = props.sk.stance_damage_display;
   if (stType && stDisp != null) {
-    const oldT = old && old.stance_damage_type;
-    const oldD = old && old.stance_damage_display;
-    const fmt = (t: string, d: number | null | undefined) =>
-      `${ELEM[t] || t} ${d ?? ''}`.trim();
     met.push({
       label: '削韧',
-      html: diffValHtml(fmt(stType, stDisp), oldT === stType ? fmt(oldT, oldD) : null),
+      html: `${ELEM[stType] || stType} ${stDisp ?? ''}`.trim(),
     });
   } else {
     const tough = fmtToughness(props.sk);
     if (tough) {
-      met.push({ label: '韧性', html: diffValHtml(tough, old ? fmtToughness(old) : null) });
+      met.push({ label: '韧性', html: tough });
     }
   }
   if (props.sk.bp_need != null) {
     const sp = -props.sk.bp_need;
-    const oldSp = old && old.bp_need != null ? -old.bp_need : null;
     met.push({
       label: '战技点',
-      html: diffValHtml(sp, oldSp, (v) => (Number(v) > 0 ? '+' + String(v) : String(v))),
+      html: (sp > 0 ? '+' : '') + String(sp),
     });
   }
   return met;
@@ -131,6 +103,8 @@ interface RatedLink {
   kind: 'rank' | 'tree';
   num: string;
   name: string;
+  /** 强化描述 HTML（fmtDesc 渲染，含参数高亮） */
+  descHtml: string;
 }
 const ratedLinks = computed<RatedLink[]>(() => {
   const links: RatedLink[] = [];
@@ -141,46 +115,51 @@ const ratedLinks = computed<RatedLink[]>(() => {
   if (rankIds.length && data.ranks) {
     for (const [num, rk] of Object.entries(data.ranks)) {
       if (rankIds.includes(rk.id)) {
-        links.push({ kind: 'rank', num: 'E' + num, name: rk.name });
+        links.push({
+          kind: 'rank', num: 'E' + num, name: rk.name,
+          descHtml: fmtDesc(rk.desc, rk.param_list),
+        });
       }
     }
   }
-  // 行迹：point_id → point_name 反查；上游数据旧角色缺前缀（如 1005101 vs point_id 11005101），补位容错
+  // 行迹：point_id → point_name/point_desc 反查；上游数据旧角色缺前缀（如 1005101 vs point_id 11005101），补位容错
   const treeIds = props.sk.rated_skill_tree_id || [];
   if (treeIds.length && data.skill_trees) {
-    const byId = new Map<number, string>();
+    const byId = new Map<number, { name: string; desc: string; params: number[] }>();
     for (const tree of Object.values(data.skill_trees)) {
       for (const node of Object.values(tree)) {
-        if (node.point_id && node.point_name) byId.set(node.point_id, node.point_name);
+        if (node.point_id && node.point_name) {
+          byId.set(node.point_id, {
+            name: node.point_name,
+            desc: node.point_desc || '',
+            params: node.param_list || [],
+          });
+        }
       }
     }
     for (const pid of treeIds) {
-      const name = byId.get(pid) ?? byId.get(Number('1' + String(pid)));
-      if (name) links.push({ kind: 'tree', num: String(pid), name });
+      const hit = byId.get(pid) ?? byId.get(Number('1' + String(pid)));
+      if (hit) {
+        links.push({
+          kind: 'tree', num: String(pid), name: hit.name,
+          descHtml: fmtDesc(hit.desc, hit.params),
+        });
+      }
     }
   }
   return links;
 });
 
+/* ─── 强化折叠状态（默认收纳，点击展开全部条目，随卡片重建重置） ─── */
+const linksOpen = ref(false);
+
+/* ─── 强化角标（强化模式下标记被强化技能） ─── */
+const isEnhanced = computed(() =>
+  !!(props.enhMark && props.enhMark.skillIds.has(props.sk.id)),
+);
+
 /* ─── 官方技能最高等级（max_level；缺失时回退 level 表长度） ─── */
 const officialMaxLv = computed(() => props.sk.max_level ?? maxLv.value);
-
-/* ─── 内联 diff 状态（CHANGED / NEW） ─── */
-const status = computed<'changed' | 'added' | null>(() => {
-  if (!props.isDiffMode) return null;
-  const old = props.oldSk || null;
-  if (!old) return 'added';
-  const lvData = props.sk.level ? props.sk.level[String(defaultLv.value)] : null;
-  const params = lvData ? lvData.param_list : [];
-  const oldLvData = old.level ? old.level[String(defaultLv.value)] : null;
-  const oldParams = oldLvData ? oldLvData.param_list : [];
-  const numChanged =
-    hasParamDiff(params, oldParams) ||
-    !paramEqual(props.sk.sp_base, old.sp_base) ||
-    !paramEqual(props.sk.bp_need, old.bp_need);
-  const textChanged = hasTextDiff(props.sk.desc, old.desc);
-  return numChanged || textChanged ? 'changed' : null;
-});
 
 /* ─── 头部信息 ─── */
 const typeName = computed(() => props.sk.type_name || TYPE[props.sk.type ?? ''] || '');
@@ -202,15 +181,10 @@ const terms = computed(() => {
   });
 });
 
-/* ─── 可折叠技能数据表（A/B/C 参数列 + diff 单元格） ─── */
-interface TableCell {
-  diff: 'changed' | 'old-only' | null;
-  ov: number | string | null;
-  nv: number | string;
-}
+/* ─── 可折叠技能数据表（A/B/C 参数列） ─── */
 interface TableRow {
   lv: number;
-  cells: TableCell[];
+  cells: (number | string)[];
 }
 const table = computed<{ cols: string[]; rows: TableRow[] } | null>(() => {
   const lvl = props.sk.level;
@@ -220,21 +194,9 @@ const table = computed<{ cols: string[]; rows: TableRow[] } | null>(() => {
   const maxParams = Math.max(...levels.map((l) => (lvl[l].param_list || []).length));
   if (maxParams === 0) return null;
   const cols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.slice(0, maxParams).split('');
-  const old = props.oldSk || null;
-  const oldLevels = old && old.level ? old.level : null;
   const rows = levels.map((l) => {
     const pl = lvl[l].param_list || [];
-    const opl = oldLevels && oldLevels[l] ? oldLevels[l].param_list || [] : null;
-    const cells = cols.map((_, i) => {
-      const nv = pl[i] != null ? pl[i] : '';
-      if (opl && opl[i] != null && String(opl[i]) !== String(nv)) {
-        return nv === ''
-          ? { diff: 'old-only' as const, ov: opl[i], nv: '' }
-          : { diff: 'changed' as const, ov: opl[i], nv };
-      }
-      return { diff: null, ov: null, nv };
-    });
-    return { lv: l, cells };
+    return { lv: l, cells: cols.map((_, i) => (pl[i] != null ? pl[i] : '')) };
   });
   return { cols, rows };
 });
@@ -265,13 +227,19 @@ const myAnims = computed<SkillAnimEntry[]>(() => {
   return hasChildren ? entries.slice(0, 1) : entries;
 });
 
-/** 按索引分发动画给子技能：child[ci] → anim[ci + 1] */
-function animForChild(ci: number): SkillAnimEntry[] | null {
+/** 按索引分发动画给子技能：child[ci] → anim[ci + 1]
+ * computed 缓存：避免每次父级渲染产生新数组引用导致子卡无谓更新 */
+const childAnimMap = computed<Record<number, SkillAnimEntry[] | null>>(() => {
   const entries = props.animEntries;
-  if (!entries) return null;
-  const a = entries[ci + 1];
-  return a ? [a] : null;
-}
+  const children = props.childSkills;
+  if (!entries || !children?.length) return {};
+  const map: Record<number, SkillAnimEntry[] | null> = {};
+  children.forEach((_, ci) => {
+    const a = entries[ci + 1];
+    if (a) map[ci] = [a];
+  });
+  return map;
+});
 
 const curAnim = computed(() =>
   myAnims.value[animIdx.value] ? animSrc(myAnims.value[animIdx.value]) : '',
@@ -292,11 +260,8 @@ function onImgLoad(): void { imgDone.value = true; }
   <div
     :class="isChild ? 'nk-skill nk-skill--child' : 'nk-skill'"
     :data-type="typeKey"
-    :data-status="status || undefined"
   >
-    <span v-if="status" :class="`nk-diff-badge nk-diff-badge--${status}`">
-      {{ status === 'changed' ? 'CHANGED' : 'NEW' }}
-    </span>
+    <span v-if="isEnhanced" class="nk-skill__enh-badge">强化</span>
     <div v-if="!isChild" class="nk-skill__head">
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">
@@ -322,20 +287,34 @@ function onImgLoad(): void { imgDone.value = true; }
         <span class="nk-skill__need-val" v-html="needHtml"></span>
       </div>
       <div v-if="metrics.length" class="nk-skill__metrics">
-        <span v-for="m in metrics" :key="m.label" class="nk-skill__metric">
+        <dl v-for="m in metrics" :key="m.label" class="nk-skill__metric">
           <dt>{{ m.label }}</dt><dd v-html="m.html"></dd>
-        </span>
+        </dl>
       </div>
-      <!-- 强化关联：受哪些星魂 / 行迹加成 -->
+      <!-- 强化关联：受哪些星魂 / 行迹加成（折叠式，默认收纳，展开全部展示） -->
       <div v-if="ratedLinks.length" class="nk-skill__links">
-        <span class="nk-skill__links-label">强化</span>
-        <span
-          v-for="l in ratedLinks"
-          :key="l.kind + l.num"
-          class="nk-skill__link"
-          :class="`nk-skill__link--${l.kind}`"
-          :title="l.name"
-        >{{ l.kind === 'rank' ? l.num : l.name }}</span>
+        <button
+          class="nk-skill__links-btn"
+          :class="{ open: linksOpen }"
+          :aria-expanded="linksOpen"
+          type="button"
+          @click="linksOpen = !linksOpen"
+        >
+          <span class="arrow">▶</span> {{ linksOpen ? '收起强化' : '强化' }}
+        </button>
+        <div class="nk-links-clip" :class="{ open: linksOpen }">
+          <div class="nk-links-inner">
+            <div
+              v-for="l in ratedLinks"
+              :key="l.kind + l.num"
+              class="nk-skill__link-item"
+              :class="`nk-skill__link-item--${l.kind}`"
+            >
+              <span class="nk-skill__link-item-name">{{ l.name }}</span>
+              <div class="nk-skill__link-item-desc" v-html="l.descHtml"></div>
+            </div>
+          </div>
+        </div>
       </div>
       <div v-if="terms.length" class="nk-skill__terms">
         <div v-for="t in terms" :key="t.name" class="nk-term">
@@ -347,6 +326,7 @@ function onImgLoad(): void { imgDone.value = true; }
         <button
           class="nk-skill__anim-toggle"
           :class="{ open: animOpen }"
+          :aria-expanded="animOpen"
           type="button"
           @click="toggleAnim"
         >
@@ -383,6 +363,7 @@ function onImgLoad(): void { imgDone.value = true; }
       <button
         class="nk-skill__table-btn"
         :class="{ open: tableOpen }"
+        :aria-expanded="tableOpen"
         type="button"
         @click="tableOpen = !tableOpen"
       >
@@ -405,15 +386,7 @@ function onImgLoad(): void { imgDone.value = true; }
                 :data-lv="row.lv"
               >
                 <td>Lv.{{ row.lv }}</td>
-                <td v-for="(cell, i) in row.cells" :key="i">
-                  <template v-if="cell.diff === 'changed'">
-                    <span class="nk-d-c">{{ cell.ov }}</span><span class="nk-d-n">{{ cell.nv }}</span>
-                  </template>
-                  <template v-else-if="cell.diff === 'old-only'">
-                    <span class="nk-d-c">{{ cell.ov }}</span>
-                  </template>
-                  <template v-else>{{ cell.nv }}</template>
-                </td>
+                <td v-for="(cell, i) in row.cells" :key="i">{{ cell }}</td>
               </tr>
             </tbody>
           </table>
@@ -427,12 +400,10 @@ function onImgLoad(): void { imgDone.value = true; }
       :sk="c"
       :is-child="true"
       :parent-lv="lv"
-      :old-sk="(childOldById && childOldById[String(c.id)]) || null"
-      :child-old-by-id="childOldById"
-      :is-diff-mode="isDiffMode"
       :char-id="charId"
       :char-data="charData"
-      :anim-entries="animForChild(ci)"
+      :enh-mark="enhMark"
+      :anim-entries="childAnimMap[ci] || null"
     />
   </div>
 </template>

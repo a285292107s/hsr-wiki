@@ -12,8 +12,6 @@ import type { CharacterData } from '../../services/types';
 
 const props = defineProps<{
   d: CharacterData;
-  /** 加强前视图（diff 用；原始模式为 null） */
-  oldD: CharacterData | null;
   charId: string;
 }>();
 
@@ -24,26 +22,25 @@ const stars = computed(() =>
   '★'.repeat(parseInt(props.d.rarity.replace(/\D/g, ''), 10) || 5),
 );
 
-interface HeroStat { v: number | string; l: string; ov: number | string | null; icon: string; raw: number }
+interface HeroStat { v: number | string; l: string; icon: string }
 /** 全部 8 项展示属性：HP/ATK/DEF/SPD + 暴击率/暴击伤害/嘲讽/能量消耗（参考官方 Wiki 头部） */
 const heroStats = computed<HeroStat[]>(() => {
   const dd = props.d;
   const s = maxLevelStat(dd.stats);
   if (!s) return [];
-  const o = props.oldD ? maxLevelStat(props.oldD.stats) : null;
   const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
-  const mk = (v: number | string, l: string, ov: number | string | null, icon: string, raw: number): HeroStat => ({
-    v, l, ov, icon, raw,
+  const mk = (v: number | string, l: string, icon: string): HeroStat => ({
+    v, l, icon,
   });
   return [
-    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), 'HP', o ? Math.round(maxLevelValue(o.hp_base, o.hp_add)) : null, 'hp', 0),
-    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), 'ATK', o ? Math.round(maxLevelValue(o.attack_base, o.attack_add)) : null, 'atk', 1),
-    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), 'DEF', o ? Math.round(maxLevelValue(o.defence_base, o.defence_add)) : null, 'def', 2),
-    mk(s.speed_base, 'SPD', o ? o.speed_base : null, 'spd', 3),
-    mk(fmtPct(s.critical_chance), '暴击率', o && o.critical_chance !== s.critical_chance ? fmtPct(o.critical_chance) : null, 'crit-rate', 4),
-    mk(fmtPct(s.critical_damage), '暴击伤害', o && o.critical_damage !== s.critical_damage ? fmtPct(o.critical_damage) : null, 'crit-dmg', 5),
-    mk(s.base_aggro ?? 0, '嘲讽值', o ? (o.base_aggro ?? 0) : null, 'taunt', 6),
-    mk(dd.sp_need ?? 0, '能量消耗', props.oldD ? (props.oldD.sp_need ?? null) : null, 'energy', 7),
+    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), 'HP', 'hp'),
+    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), 'ATK', 'atk'),
+    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), 'DEF', 'def'),
+    mk(s.speed_base, 'SPD', 'spd'),
+    mk(fmtPct(s.critical_chance), '暴击率', 'crit-rate'),
+    mk(fmtPct(s.critical_damage), '暴击伤害', 'crit-dmg'),
+    mk(s.base_aggro ?? 0, '嘲讽值', 'taunt'),
+    mk(dd.sp_need ?? 0, '能量消耗', 'energy'),
   ];
 });
 
@@ -161,12 +158,7 @@ onBeforeUnmount(() => {
           <div v-for="st in heroStats" :key="st.l" class="nk-hero__stat">
             <span class="nk-hero__stat-icon" :data-icon="st.icon" aria-hidden="true"></span>
             <span class="nk-hero__stat-label">{{ st.l }}</span>
-            <span class="nk-hero__stat-val">
-              <template v-if="st.ov !== null">
-                <span class="nk-d-c">{{ st.ov }}</span><span class="nk-d-n">{{ st.v }}</span>
-              </template>
-              <template v-else>{{ st.v }}</template>
-            </span>
+            <span class="nk-hero__stat-val">{{ st.v }}</span>
           </div>
         </div>
         <div class="nk-hero__level">

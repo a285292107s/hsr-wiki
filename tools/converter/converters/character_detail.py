@@ -252,14 +252,19 @@ def _normalize_tree_icon(icon: str, avatar_id: int) -> str:
     return f"icon/skill/Avatar/{avatar_id}/{filename}"
 
 
-def _build_skill_trees(tree_data: list[dict], avatar_id: int) -> dict[str, dict[str, dict]]:
+def _build_skill_trees(tree_data: list[dict], avatar_id: int, enhanced_id: int | None = None) -> dict[str, dict[str, dict]]:
     """从 AvatarSkillTreeConfig 构建 skill_trees。
     输出格式：{ anchor_key: { level_str: node } }
+
+    enhanced_id 参数：源表同时含基础（EnhancedID 缺失/None）与加强（EnhancedID=1）
+    两套行迹，按 EnhancedID 分流——基础行迹默认输出，加强行迹供 enhanced 包构建。
     """
     # 按 anchor → level 分组
     by_anchor: dict[str, list[dict]] = defaultdict(list)
     for item in tree_data:
         if item.get("AvatarID") != avatar_id:
+            continue
+        if item.get("EnhancedID") != enhanced_id:
             continue
         anchor = item.get("AnchorType") or item.get("PointTriggerKey") or ""
         if not anchor:
@@ -375,6 +380,59 @@ def _build_teams(records: list[dict]) -> list[dict]:
     return teams
 
 
+def _enhanced_descs(hint_data: list[dict], avatar_id: int, enh_key: int) -> list[str]:
+    """从 AvatarEnhancedHintConfig 提取强化摘要（EnhancedDesc1..N）。
+
+    保留原始标签（clean=False），前端以 gameTagsToHtml 渲染官方 <color> 强调词。
+    """
+    for h in hint_data:
+        if h.get("AvatarID") != avatar_id or h.get("EnhancedID") != enh_key:
+            continue
+        n = h.get("EnhancedDescNum", 0) or 0
+        return [
+            resolve_text(h.get(f"EnhancedDesc{i}", {}), clean=False)
+            for i in range(1, n + 1)
+            if resolve_text(h.get(f"EnhancedDesc{i}", {}), clean=False)
+        ]
+    return []
+
+
+def _build_enhanced(
+    enhanced_config: list[dict],
+    hint_data: list[dict],
+    skill_config: list[dict],
+    rank_config: list[dict],
+    tree_config: list[dict],
+    avatar_id: int,
+) -> dict[str, dict] | None:
+    """从 AvatarConfigEnhanced 构建 enhanced 包（加强键 → EnhancedBundle）。
+
+    加强技能/星魂与基础同表（AvatarSkillConfig / AvatarRankConfig，ID 为 1xxx 前缀）；
+    加强行迹按 EnhancedID 从 AvatarSkillTreeConfig 分流。
+    输出：{ skills, ranks, skill_trees, descs, sp_need, skill_ids, rank_ids }
+    （skill_ids / rank_ids 供前端渲染「强化角标」）
+    """
+    result: dict[str, dict] = {}
+    for e in enhanced_config:
+        if e.get("AvatarID") != avatar_id:
+            continue
+        enh_key = e.get("EnhancedID", 0) or 0
+        if not enh_key:
+            continue
+        skill_ids = e.get("SkillList", [])
+        rank_ids = e.get("RankIDList", [])
+        result[str(enh_key)] = {
+            "skills": _build_skills(skill_config, skill_ids),
+            "ranks": _build_ranks(rank_config, rank_ids),
+            "skill_trees": _build_skill_trees(tree_config, avatar_id, enhanced_id=enh_key),
+            "descs": _enhanced_descs(hint_data, avatar_id, enh_key),
+            "sp_need": unwrap_value(e.get("SPNeed")),
+            "skill_ids": skill_ids,
+            "rank_ids": rank_ids,
+        }
+    return result or None
+
+
 def convert() -> None:
     """拼装完整 CharacterData 并输出到 characters/{id}.json。"""
     # 加载所有源表
@@ -415,9 +473,9 @@ def convert() -> None:
     relic_rec = relic_rec + relic_rec_ld
     # 配队推荐（TeamBuildConfig：AvatarID 一条记录 = 一个推荐队伍）
     team_build = _maybe_load("TeamBuildConfig.json")
-    # 加强：暂第一期不做，后续补充
-    # enhanced_skill = _maybe_load("AvatarEnhancedSkill.json")
-    # enhanced_tree = _maybe_load("AvatarEnhancedSkillTree.json")
+    # 角色强化（「砺烁新辉」系统）：注册表 + 强化摘要
+    enhanced_config = _maybe_load("AvatarConfigEnhanced.json")
+    enhanced_hint = _maybe_load("AvatarEnhancedHintConfig.json")
     servant_config = _maybe_load("AvatarServantConfig.json")
     servant_skill = _maybe_load("AvatarServantSkillConfig.json")
 
@@ -509,8 +567,13 @@ def convert() -> None:
         # ranks
         ranks = _build_ranks(rank_config, rank_ids)
 
-        # skill_trees
+        # skill_trees（基础行迹；加强行迹随 enhanced 包输出）
         skill_trees = _build_skill_trees(tree_config, avatar_id)
+
+        # enhanced（角色强化包；无强化数据时 None）
+        enhanced = _build_enhanced(
+            enhanced_config, enhanced_hint, skill_config, rank_config, tree_config, avatar_id,
+        )
 
         # stats
         stats = _build_stats(promo_config, avatar_id)
@@ -534,7 +597,7 @@ def convert() -> None:
             "ranks": ranks,
             "skills": skills,
             "skill_trees": skill_trees,
-            "enhanced": None,
+            "enhanced": enhanced,
             "memosprite": _build_memosprite(servant_config, servant_skill, avatar_id),
             "unique": {},
             "stats": stats,

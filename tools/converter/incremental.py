@@ -38,6 +38,7 @@ MODULE_SOURCES: dict[str, list[str]] = {
         "AvatarRelicRecommend.json", "AvatarRelicRecommendLD.json",
         "AvatarServantConfig.json", "AvatarServantSkillConfig.json",
         "TeamBuildConfig.json",
+        "AvatarConfigEnhanced.json", "AvatarEnhancedHintConfig.json",
     ],
     "light_cones": ["EquipmentConfig.json", "EquipmentSkillConfig.json"],
     "light_cone_detail": ["EquipmentConfig.json", "EquipmentSkillConfig.json",

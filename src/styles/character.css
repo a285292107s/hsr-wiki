@@ -130,8 +130,6 @@
   color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.nk-char-page .nk-hero__stat-val .nk-d-c { font-size: 0.8rem; }
-.nk-char-page .nk-hero__stat-val .nk-d-n { font-size: 0.85rem; }
 
 /* 等级条：更细的墨色轨道 */
 .nk-char-page .nk-hero__level { display: flex; align-items: center; gap: 14px; }
@@ -230,26 +228,37 @@
 }
 .nk-char-page .nk-skill__need-val { color: var(--text2); }
 .nk-char-page .nk-skill__need-val .hl { color: var(--highlight); font-weight: 700; }
-/* 强化关联（受哪些星魂 / 行迹加成） */
-.nk-char-page .nk-skill__links {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  margin-top: 12px;
+/* 强化关联（受哪些星魂 / 行迹加成）：折叠式，默认收纳，展开全部展示（交互对齐技能数据表） */
+.nk-char-page .nk-skill__links { margin-top: 14px; }
+.nk-char-page .nk-skill__links-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.625rem; font-weight: 500; color: var(--text3);
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+  transition: color 0.2s; letter-spacing: 0.02em;
+  position: relative;
 }
-.nk-char-page .nk-skill__links-label {
-  font-size: 0.6875rem; font-weight: 600; color: var(--text3);
-  letter-spacing: 0.05em; font-family: var(--font-hud);
+.nk-char-page .nk-skill__links-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
+.nk-char-page .nk-skill__links-btn:hover { color: var(--primary); }
+.nk-char-page .nk-skill__links-btn .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
+.nk-char-page .nk-skill__links-btn.open .arrow { transform: rotate(90deg); }
+.nk-char-page .nk-links-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-char-page .nk-links-clip.open { grid-template-rows: 1fr; }
+.nk-char-page .nk-links-inner { overflow: hidden; min-height: 0; }
+/* 强化条目：名称 + 描述（展开时全部列出；间距用 margin 以免撑开收起轨道） */
+.nk-char-page .nk-skill__link-item {
+  margin-top: 10px; padding: 10px 14px; border-radius: 8px;
+  background: rgba(8,8,20,0.4); border: 1px solid var(--line-1);
 }
-.nk-char-page .nk-skill__link {
-  display: inline-flex; align-items: center;
-  font-size: 0.625rem; font-weight: 700; letter-spacing: 0.03em;
-  padding: 2px 9px; border-radius: 999px;
-  border: 1px solid var(--line-1);
-  cursor: default;
+.nk-char-page .nk-skill__link-item + .nk-skill__link-item { margin-top: 8px; }
+.nk-char-page .nk-skill__link-item-name {
+  display: block; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 4px;
 }
-.nk-char-page .nk-skill__link--rank { color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); }
-.nk-char-page .nk-skill__link--tree { color: var(--sk-accent); background: color-mix(in srgb, var(--sk-accent) 8%, transparent); }
+.nk-char-page .nk-skill__link-item--rank .nk-skill__link-item-name { color: var(--primary); }
+.nk-char-page .nk-skill__link-item--tree .nk-skill__link-item-name { color: var(--sk-accent); }
+.nk-char-page .nk-skill__link-item-desc { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
+.nk-char-page .nk-skill__link-item-desc .hl { color: var(--highlight); font-weight: 700; }
 .nk-char-page .nk-skill__metrics { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 12px; }
-.nk-char-page .nk-skill__metric { display: inline-flex; align-items: baseline; gap: 6px; font-size: 0.75rem; }
+.nk-char-page .nk-skill__metric { display: inline-flex; align-items: baseline; gap: 6px; font-size: 0.75rem; margin: 0; }
 .nk-char-page .nk-skill__metric + .nk-skill__metric::before { content: '·'; margin: 0 10px; color: var(--text3); opacity: 0.4; }
 .nk-char-page .nk-skill__metric dt { display: inline; margin: 0; font-size: 0.6875rem; color: var(--text3); }
 .nk-char-page .nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); }
@@ -410,7 +419,6 @@
   font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em;
 }
 .nk-char-page .nk-bonus__val { order: 2; font-size: 0.85rem; }
-.nk-char-page .nk-bonus__val .nk-d-c, .nk-char-page .nk-bonus__val .nk-d-n { font-size: 0.75rem; }
 
 /* ═══════════ 配装区块 ═══════════ */
 .nk-char-page .nk-build__cones { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 14px; margin-bottom: 20px; }
@@ -552,45 +560,49 @@
   display: flex; align-items: center; gap: 8px;
   max-width: var(--nk-detail-max); margin: 0 auto; padding: 8px 16px; min-height: 44px;
 }
-.nk-char-page .nk-enh-toggle { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
-.nk-char-page .nk-enh-toggle__label {
-  font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text3); white-space: nowrap;
-  opacity: 0.7; margin-right: 2px;
+/* ─── 强化模式模块（hero 与 skills 之间，随内容滚动）─── */
+.nk-char-page .nk-enh-module { padding-bottom: 8px; }
+/* 模块标题：编号 00（金色，不参与章节计数）+ 延伸线，与章节标题同构 */
+.nk-char-page .nk-enh-module__head {
+  display: flex; align-items: baseline; gap: 12px;
+  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--text2); margin-bottom: 16px;
 }
-.nk-char-page .nk-enh-toggle__btn {
-  padding: 4px 12px; border-radius: 5px;
-  border: 1px solid var(--line-1);
-  background: rgba(255,255,255,0.02);
-  color: var(--text3); font-size: 0.68rem; cursor: pointer;
-  transition: all 0.15s; font-family: var(--font-body); white-space: nowrap;
-  position: relative;
+.nk-char-page .nk-enh-module__idx {
+  font-size: 0.6rem; letter-spacing: 0; color: var(--gold-300); opacity: 0.95;
+  padding-right: 10px; border-right: 1px solid var(--line-2);
+}
+.nk-char-page .nk-enh-module__head::after {
+  content: ''; flex: 1; height: 1px; align-self: center;
+  background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
+}
+/* 切换选项卡：底部细线 + 激活下划线（与吸顶区块导航同语言） */
+.nk-char-page .nk-enh-tabs {
+  display: flex; align-items: center; gap: 2px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-char-page .nk-enh-tab {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 8px 12px; border: none; background: transparent;
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--text3); cursor: pointer; white-space: nowrap;
+  transition: color 0.15s; position: relative;
 }
 /* 触控热区垂直扩展至 ≥44px */
-.nk-char-page .nk-enh-toggle__btn::before {
+.nk-char-page .nk-enh-tab::before {
   content: ''; position: absolute; left: 0; right: 0; top: -9px; bottom: -9px;
 }
-.nk-char-page .nk-enh-toggle__btn:hover {
-  border-color: var(--line-2); background: rgba(255,255,255,0.04); color: var(--text2);
+.nk-char-page .nk-enh-tab:hover { color: var(--text2); }
+.nk-char-page .nk-enh-tab--active { color: var(--primary); }
+.nk-char-page .nk-enh-tab--active::after {
+  content: ''; position: absolute; left: 12px; right: 12px; bottom: -1px;
+  height: 2px; border-radius: 1px; background: var(--primary);
 }
-.nk-char-page .nk-enh-toggle__btn--active {
-  background: color-mix(in srgb, var(--primary) 16%, transparent);
-  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
-  color: var(--text-bright); font-weight: 700;
-  box-shadow: none;
+.nk-char-page .nk-enh-tab__idx {
+  font-family: var(--font-hud); font-size: 0.55rem; opacity: 0.7;
 }
-.nk-char-page .nk-enh-toggle__btn--active:hover {
-  background: color-mix(in srgb, var(--primary) 20%, transparent);
-  border-color: color-mix(in srgb, var(--primary) 50%, transparent);
-  color: var(--text-bright);
-}
-/* 强化切换与区块导航的分隔线 */
-.nk-char-page .nk-enh-bar__divider {
-  flex-shrink: 0; width: 1px; height: 18px;
-  background: linear-gradient(180deg, transparent, var(--line-2) 30%, var(--line-2) 70%, transparent);
-  opacity: 0.7; margin: 0 2px;
-}
-/* 分区导航（横向可滚） */
+.nk-char-page .nk-enh-tab--active .nk-enh-tab__idx { opacity: 1; }
 .nk-char-page .nk-secnav {
   display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0;
   overflow-x: auto; scrollbar-width: none;
@@ -640,49 +652,60 @@
   .nk-char-page .nk-top-btn { right: 28px; bottom: 28px; }
 }
 
-/* ═══════════ 加强摘要横幅 ═══════════ */
-.nk-char-page .nk-enh-notes { padding: 0 20px; }
+/* ═══════════ 强化摘要（模块内，随内容滚动） ═══════════ */
+.nk-char-page .nk-enh-notes { padding: 0; margin-top: 14px; }
 .nk-char-page .nk-enh-notes:empty { display: none; }
+/* 摘要卡片：中性细线（与卡片体系统一，无左竖条） */
 .nk-char-page .nk-enh-notes__banner {
-  display: flex; align-items: flex-start; gap: 12px;
-  margin: 0 auto 4px; padding: 12px 16px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--line-1); border-left: 2px solid var(--primary);
-  border-radius: 8px;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.016);
+  border: 1px solid var(--line-1); border-radius: 10px;
 }
 .nk-char-page .nk-enh-notes__title {
   font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--primary); font-weight: 700;
-  white-space: nowrap; padding-top: 2px;
+  text-transform: uppercase; color: var(--gold-300); font-weight: 700;
 }
-.nk-char-page .nk-enh-notes__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.nk-char-page .nk-enh-notes__list li { font-size: 0.75rem; line-height: 1.6; color: var(--text2); position: relative; padding-left: 14px; }
-.nk-char-page .nk-enh-notes__list li::before { content: '▸'; position: absolute; left: 0; color: var(--primary); }
+.nk-char-page .nk-enh-notes__list {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 6px;
+  counter-reset: nk-enh;
+}
+.nk-char-page .nk-enh-notes__list li {
+  counter-increment: nk-enh;
+  font-size: 0.75rem; line-height: 1.6; color: var(--text2);
+  position: relative; padding-left: 30px;
+}
+/* 条目金色编号徽章（01/02…）：与 E 编号徽章同语言 */
+.nk-char-page .nk-enh-notes__list li::before {
+  content: counter(nk-enh, decimal-leading-zero);
+  position: absolute; left: 0; top: 1px;
+  font-family: var(--font-hud); font-size: 0.45rem; font-weight: 700;
+  color: var(--gold-300); padding: 1px 5px; border-radius: 3px;
+  background: color-mix(in srgb, var(--gold-300) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold-300) 28%, transparent);
+}
+/* 强化摘要（官方 <color> 强调词） */
+.nk-char-page .nk-enh-notes__list li span[style*="color"] {
+  color: var(--gold-300); font-weight: 700;
+}
 
-/* ═══════════ diff 状态标记 ═══════════ */
-.nk-char-page .nk-inline-diff { position: relative; }
-.nk-char-page .nk-inline-diff[data-status="changed"] { border-color: color-mix(in srgb, var(--gold-300) 30%, transparent) !important; background: color-mix(in srgb, var(--gold-300) 4%, transparent) !important; }
-.nk-char-page .nk-inline-diff[data-status="added"]   { border-color: color-mix(in srgb, var(--diff-add-soft) 30%, transparent) !important; background: color-mix(in srgb, var(--diff-add-soft) 4%, transparent) !important; }
-.nk-char-page .nk-inline-diff[data-status="removed"] { border-color: color-mix(in srgb, var(--diff-del-soft) 30%, transparent) !important; background: color-mix(in srgb, var(--diff-del-soft) 4%, transparent) !important; opacity: 0.75; }
-/* 状态角标 */
-.nk-char-page .nk-diff-badge {
+/* ═══════════ 强化状态标记（ADR 0010：官方模式，无 diff 对比） ═══════════ */
+/* 强化角标：标记被强化的技能/星魂卡片 */
+.nk-char-page .nk-skill__enh-badge,
+.nk-char-page .nk-eidolon__enh-badge {
   position: absolute; top: 10px; right: 10px;
+  display: inline-flex; align-items: center; gap: 4px;
   font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.08em;
-  text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
+  padding: 2px 7px; border-radius: 3px;
   font-weight: 700; z-index: 2; pointer-events: none;
+  background: color-mix(in srgb, var(--gold-300) 15%, transparent);
+  color: var(--gold-300); border: 1px solid color-mix(in srgb, var(--gold-300) 30%, transparent);
 }
-.nk-char-page .nk-diff-badge--changed { background: color-mix(in srgb, var(--gold-300) 15%, transparent); color: var(--gold-300); border: 1px solid color-mix(in srgb, var(--gold-300) 30%, transparent); }
-.nk-char-page .nk-diff-badge--added   { background: color-mix(in srgb, var(--diff-add-soft) 15%, transparent); color: var(--diff-add-soft); border: 1px solid color-mix(in srgb, var(--diff-add-soft) 30%, transparent); }
-.nk-char-page .nk-diff-badge--removed { background: color-mix(in srgb, var(--diff-del-soft) 15%, transparent); color: var(--diff-del-soft); border: 1px solid color-mix(in srgb, var(--diff-del-soft) 30%, transparent); }
-/* word-level diff 文本标记 */
-.nk-char-page .diff-added   { background: color-mix(in srgb, var(--diff-add) 18%, transparent); color: var(--diff-text-add); padding: 0 2px; border-radius: 2px; }
-.nk-char-page .diff-removed { background: color-mix(in srgb, var(--diff-del) 16%, transparent); color: var(--diff-text-del); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 50%, transparent); padding: 0 2px; border-radius: 2px; }
-/* 版本对比高亮：旧值红删除线 + 新值绿 */
-.nk-char-page .nk-d-c { margin-right: 4px; opacity: 0.85; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--diff-del) 60%, transparent); color: var(--diff-del); }
-.nk-char-page .nk-d-n { color: var(--diff-add) !important; font-weight: 700; }
-.nk-char-page .nk-bonus__val .nk-d-c, .nk-char-page .nk-bonus__val .nk-d-n { font-size: 0.75rem; }
-.nk-char-page .nk-skill__metric dd .nk-d-c, .nk-char-page .nk-skill__metric dd .nk-d-n { font-size: 0.625rem; font-weight: 700; }
-.nk-char-page .nk-table td .nk-d-c, .nk-char-page .nk-table td .nk-d-n { font-size: 0.6875rem; }
+.nk-char-page .nk-skill__enh-badge::before,
+.nk-char-page .nk-eidolon__enh-badge::before {
+  content: '✦'; font-size: 0.5rem;
+}
 
 /* ═══════════ 阅读层收束（可读行宽） ═══════════ */
 .nk-char-page .nk-panel .nk-title,
@@ -709,7 +732,6 @@
   .nk-char-page .nk-hero__stats { gap: 0 40px; }
   .nk-char-page .nk-hero__stat { padding: 8px 0; }
   .nk-char-page .nk-hero__stat-val { font-size: 0.92rem; }
-  .nk-char-page .nk-hero__stat-val .nk-d-n { font-size: 0.92rem; }
   .nk-char-page .nk-panel--flat { padding-bottom: 32px; }
 }
 /* 桌面 ≥1024px：左右结构，视觉区 44% + 档案面板 56%，面板透明 */
@@ -742,7 +764,6 @@
   .nk-char-page .nk-hero__stat { padding: 6px 0; gap: 8px; grid-template-columns: 14px 1fr auto; }
   .nk-char-page .nk-hero__stat-label { font-size: 0.68rem; }
   .nk-char-page .nk-hero__stat-val { font-size: 0.8rem; }
-  .nk-char-page .nk-hero__stat-val .nk-d-n { font-size: 0.8rem; }
   .nk-char-page .nk-hero__badge { padding: 5px 9px 5px 7px; }
   .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
   .nk-char-page .nk-hero__archive {
@@ -757,7 +778,7 @@
 .nk-char-page .nk-story__head:focus-visible,
 .nk-char-page .nk-skill__anim-toggle:focus-visible,
 .nk-char-page .nk-skill__table-btn:focus-visible,
-.nk-char-page .nk-enh-toggle__btn:focus-visible,
+.nk-char-page .nk-enh-tab:focus-visible,
 .nk-char-page .nk-secnav__btn:focus-visible,
 .nk-char-page .nk-hero__toggle:focus-visible,
 .nk-char-page .nk-top-btn:focus-visible {
@@ -794,8 +815,8 @@
   .nk-char-page .nk-story__head:hover { background: none; }
   .nk-char-page .nk-skill__table-btn:hover { color: var(--text3); }
   .nk-char-page .nk-skill__anim-toggle:hover { color: var(--text3); }
-  .nk-char-page .nk-enh-toggle__btn:hover { border-color: var(--line-1); background: rgba(255,255,255,0.02); color: var(--text3); }
-  .nk-char-page .nk-enh-toggle__btn--active:hover { background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: color-mix(in srgb, var(--primary) 45%, transparent); color: var(--text-bright); }
+  .nk-char-page .nk-enh-tab:hover { color: var(--text3); }
+  .nk-char-page .nk-enh-tab--active:hover { color: var(--primary); }
   .nk-char-page .nk-build__team-slot img:hover { transform: none; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
   .nk-char-page .nk-skill:hover,
   .nk-char-page .nk-eidolon:hover,

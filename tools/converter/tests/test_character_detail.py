@@ -254,3 +254,95 @@ class TestBuildMemosprite:
     def test_wrong_owner_returns_none(self):
         data = [{"ServantID": 11001, "ServantName": {}, "SkillIDList": []}]
         assert cd._build_memosprite(data, [], 1002) is None
+
+
+# ─── _build_skill_trees（EnhancedID 分流） ──────────────────────
+
+class TestBuildSkillTreesEnhancedFilter:
+    def test_base_only_by_default(self):
+        # 同 anchor 同 level 的基础（EnhancedID 缺失）与加强（EnhancedID=1）并存时，
+        # 默认只输出基础行迹（修复历史覆盖 bug：加强行迹曾顶掉基础行迹）
+        data = [
+            {"AvatarID": 1005, "AnchorType": "Point01", "Level": 1,
+             "PointID": 1005001, "PointName": {}, "ParamList": []},
+            {"AvatarID": 1005, "AnchorType": "Point01", "Level": 1,
+             "PointID": 11005001, "PointName": {}, "ParamList": [], "EnhancedID": 1},
+        ]
+        result = cd._build_skill_trees(data, 1005)
+        node = result["Point01"]["1"]
+        assert node["point_id"] == 1005001
+
+    def test_enhanced_id_isolates_enhanced_rows(self):
+        data = [
+            {"AvatarID": 1005, "AnchorType": "Point01", "Level": 1,
+             "PointID": 1005001, "PointName": {}, "ParamList": []},
+            {"AvatarID": 1005, "AnchorType": "Point01", "Level": 1,
+             "PointID": 11005001, "PointName": {}, "ParamList": [], "EnhancedID": 1},
+        ]
+        result = cd._build_skill_trees(data, 1005, enhanced_id=1)
+        node = result["Point01"]["1"]
+        assert node["point_id"] == 11005001
+
+    def test_other_avatar_ignored(self):
+        data = [{"AvatarID": 1006, "AnchorType": "Point01", "Level": 1,
+                 "PointID": 1006001, "PointName": {}, "ParamList": []}]
+        assert cd._build_skill_trees(data, 1005) == {}
+
+
+# ─── _build_enhanced（角色强化包） ───────────────────────────────
+
+class TestBuildEnhanced:
+    def _config(self):
+        enhanced_config = [{
+            "AvatarID": 1005, "EnhancedID": 1, "SPNeed": {"Value": 120},
+            "SkillList": [1100501], "RankIDList": [1100501],
+        }]
+        hint_data = [{
+            "AvatarID": 1005, "EnhancedID": 1, "EnhancedDescNum": 2,
+            "EnhancedDesc1": {"Hash": 5001}, "EnhancedDesc2": {"Hash": 5002},
+        }]
+        skill_config = [{"SkillID": 1100501, "Level": 1, "AttackType": "Normal",
+                         "ParamList": [], "SkillName": {}}]
+        rank_config = [{"RankID": 1100501, "Rank": 1, "Name": "", "Param": []}]
+        tree_config = [{"AvatarID": 1005, "AnchorType": "Point01", "Level": 1,
+                        "PointID": 11005101, "PointName": {}, "ParamList": [],
+                        "EnhancedID": 1}]
+        return enhanced_config, hint_data, skill_config, rank_config, tree_config
+
+    def test_bundle_shape_and_fields(self):
+        import textmap
+        textmap._text_map["5001"] = "战技可以使<color=#f29e38>所有攻击目标</color>的持续伤害立即额外触发1次伤害"
+        textmap._text_map["5002"] = "追加攻击的可触发次数增加"
+        cfg = self._config()
+        result = cd._build_enhanced(*cfg, 1005)
+        assert result is not None
+        bundle = result["1"]
+        assert "1100501" in bundle["skills"]
+        assert "1" in bundle["ranks"]          # 星魂按 Rank 序号键控
+        assert bundle["skill_trees"]["Point01"]["1"]["point_id"] == 11005101
+        assert bundle["descs"] == [
+            "战技可以使<color=#f29e38>所有攻击目标</color>的持续伤害立即额外触发1次伤害",
+            "追加攻击的可触发次数增加",
+        ]
+        assert bundle["sp_need"] == 120
+        assert bundle["skill_ids"] == [1100501]
+        assert bundle["rank_ids"] == [1100501]
+
+    def test_no_enhancement_returns_none(self):
+        assert cd._build_enhanced([], [], [], [], [], 1005) is None
+
+    def test_other_avatar_skipped(self):
+        cfg = self._config()
+        assert cd._build_enhanced(*cfg, 1006) is None
+
+    def test_desc_missing_entries_skipped(self):
+        import textmap
+        textmap._text_map["5001"] = "有效描述"
+        enhanced_config = [{
+            "AvatarID": 1005, "EnhancedID": 1, "SPNeed": {"Value": 120},
+            "SkillList": [], "RankIDList": [],
+        }]
+        hint_data = [{"AvatarID": 1005, "EnhancedID": 1, "EnhancedDescNum": 2,
+                      "EnhancedDesc1": {"Hash": 5001}, "EnhancedDesc2": {"Hash": 9999}}]
+        result = cd._build_enhanced(enhanced_config, hint_data, [], [], [], 1005)
+        assert result["1"]["descs"] == ["有效描述"]

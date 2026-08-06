@@ -7,7 +7,7 @@
  */
 import { computed, ref } from 'vue';
 import { extraTerms } from './utils';
-import { escHtml, fmtDesc, fmtDescDiff, hasParamDiff, hasTextDiff, iconUrl } from '../../lib/format';
+import { escHtml, fmtDesc, iconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PROP_ICON, PROP_NAMES } from '../../lib/constants';
 import type { CharacterData, SkillExtra, SkillTree } from '../../services/types';
@@ -17,8 +17,6 @@ type OverviewSection = 'profile' | 'bonuses' | 'talents' | 'stories';
 const props = withDefaults(
   defineProps<{
     d: CharacterData;
-    /** 加强前视图（diff 用；原始模式为 null） */
-    oldD: CharacterData | null;
     /** 渲染区块子集（平铺拆分布局用；默认全部） */
     sections?: OverviewSection[];
   }>(),
@@ -65,7 +63,7 @@ function toggleStory(key: string): void {
 
 /* ─── 总属性加成（行迹树聚合） ─── */
 
-interface AttrBonus { name: string; v: string; ov: string | null; icon: string }
+interface AttrBonus { name: string; v: string; icon: string }
 
 /** 聚合行迹树全部节点的 status_add_list（同 property 求和） */
 function aggregateBonuses(
@@ -92,18 +90,15 @@ function fmtBonus(type: string, sum: number): string {
   return `+${Math.round(sum * 1000) / 10}%`;
 }
 
-/** 总属性加成：行迹树属性节点汇总（加强模式随 renderData 联动，支持与旧版 diff） */
+/** 总属性加成：行迹树属性节点汇总 */
 const attrBonuses = computed<AttrBonus[]>(() => {
   const agg = aggregateBonuses(props.d.skill_trees);
-  const oldAgg = props.oldD ? aggregateBonuses(props.oldD.skill_trees) : null;
   return [...agg.entries()].map(([type, b]) => {
-    const v = fmtBonus(type, b.sum);
-    const ob = oldAgg && oldAgg.get(type);
-    const ov = ob && fmtBonus(type, ob.sum) !== v ? fmtBonus(type, ob.sum) : null;
     const key = PROP_ICON[type];
     return {
       name: PROP_NAMES[type] || (b.name && b.name !== '{}' ? b.name : type),
-      v, ov, icon: key ? cdnUri('trace', `Icon${key}.webp`) : '',
+      v: fmtBonus(type, b.sum),
+      icon: key ? cdnUri('trace', `Icon${key}.webp`) : '',
     };
   });
 });
@@ -111,10 +106,11 @@ const attrBonuses = computed<AttrBonus[]>(() => {
 /* ─── TALENTS 附加能力 ─── */
 
 interface Ability {
+  /** 行迹点 ID（唯一标识：作渲染 key；缺失时回退 name） */
+  pointId: number | null;
   name: string;
   icon: string;
   descHtml: string;
-  status: '' | 'changed' | 'added';
   idx: number;
   terms: SkillExtra[];
 }
@@ -126,30 +122,12 @@ const abilities = computed<Ability[]>(() => {
     const n = tree['1'] || tree[Object.keys(tree)[0]];
     if (n && n.point_name && n.point_desc) list.push(n);
   });
-  const oldMap: Record<string, SkillTree> = {};
-  if (props.oldD && props.oldD.skill_trees) {
-    Object.values(props.oldD.skill_trees).forEach((tree) => {
-      const n = tree['1'] || tree[Object.keys(tree)[0]];
-      if (n && n.point_name) oldMap[n.point_name] = n;
-    });
-  }
   return list.map((ab, idx) => {
-    const oldAb = oldMap[ab.point_name as string] || null;
-    const descHtml = props.oldD
-      ? fmtDescDiff(ab.point_desc, ab.param_list || [], oldAb ? oldAb.point_desc : null, oldAb ? oldAb.param_list || [] : null)
-      : fmtDesc(ab.point_desc, ab.param_list || []);
-    const status: '' | 'changed' | 'added' = props.oldD
-      ? oldAb
-        ? hasParamDiff(ab.param_list || [], oldAb.param_list || []) || hasTextDiff(ab.point_desc, oldAb.point_desc)
-          ? 'changed'
-          : ''
-        : 'added'
-      : '';
     return {
+      pointId: ab.point_id ?? null,
       name: ab.point_name as string,
       icon: ab.icon ? iconUrl(ab.icon) : '',
-      descHtml,
-      status,
+      descHtml: fmtDesc(ab.point_desc, ab.param_list || []),
       idx,
       terms: extraTerms(ab),
     };
@@ -172,12 +150,7 @@ const abilities = computed<Ability[]>(() => {
     <div class="nk-bonus-grid">
       <div v-for="b in attrBonuses" :key="b.name" class="nk-bonus">
         <img v-if="b.icon" class="nk-bonus__icon" :src="b.icon" loading="lazy">
-        <span class="nk-bonus__val">
-          <template v-if="b.ov !== null">
-            <span class="nk-d-c">{{ b.ov }}</span><span class="nk-d-n">{{ b.v }}</span>
-          </template>
-          <template v-else>{{ b.v }}</template>
-        </span>
+        <span class="nk-bonus__val">{{ b.v }}</span>
         <span class="nk-bonus__name">{{ b.name }}</span>
       </div>
     </div>
@@ -186,13 +159,9 @@ const abilities = computed<Ability[]>(() => {
     <div class="nk-title">TALENTS</div>
     <div
       v-for="ab in abilities"
-      :key="ab.name"
-      :class="['nk-ability', { 'nk-inline-diff': !!ab.status }]"
-      :data-status="ab.status || undefined"
+      :key="ab.pointId ?? ab.name"
+      class="nk-ability"
     >
-      <span v-if="ab.status" :class="`nk-diff-badge nk-diff-badge--${ab.status}`">
-        {{ ab.status === 'changed' ? 'CHANGED' : 'NEW' }}
-      </span>
       <div class="nk-skill__title-row">
         <img v-if="ab.icon" class="nk-skill__icon" :src="ab.icon">
         <div class="nk-skill__title">

@@ -7,8 +7,7 @@ import { CDN } from '../constants';
 import { NkError } from '../errors';
 import {
   escHtml, gameTagsToHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtToughness,
-  paramEqual, hasParamDiff, hasTextDiff, wordDiff, renderWordDiffHtml, fmtDescDiff,
-  deepClone, getEnhancedKeys, buildEnhancedView, buildEnhancedOld, getRenderData,
+  deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
   avatarDrawCardUrl, itemName, itemIconUrl, validateCharData,
 } from '../format';
@@ -150,15 +149,6 @@ describe('fmtDesc', () => {
   it('替换裸 #N 占位符', () => {
     expect(fmtDesc('获得 #1 层', [3])).toBe('获得 <span class="hl">3</span> 层');
   });
-  it('oldParams 不同 → 旧值 nk-d-c（带%）+ 新值 nk-d-n', () => {
-    expect(fmtDesc('#1[i]%', [0.6], [0.5])).toBe('<span class="hl nk-d-c">50%</span><span class="hl nk-d-n">60</span>');
-  });
-  it('oldParams 相同 → 不高亮 diff', () => {
-    expect(fmtDesc('#1[i]%', [0.5], [0.5])).toBe('<span class="hl">50%</span>');
-  });
-  it('oldParams 缺失对应项 → 普通渲染', () => {
-    expect(fmtDesc('#1[i]%', [0.5], [])).toBe('<span class="hl">50%</span>');
-  });
   it('换行符转 <br>', () => {
     expect(fmtDesc('第一行\n第二行')).toBe('第一行<br>第二行');
   });
@@ -188,87 +178,7 @@ describe('fmtToughness', () => {
   });
 });
 
-/* ─── Diff 工具 ─── */
-
-describe('paramEqual / hasParamDiff', () => {
-  it('浮点误差容忍 1e-9', () => {
-    expect(paramEqual(0.1 + 0.2, 0.3)).toBe(true);
-    expect(paramEqual(0.1, 0.2)).toBe(false);
-  });
-  it('null 处理', () => {
-    expect(paramEqual(null, null)).toBe(true);
-    expect(paramEqual(null, 1)).toBe(false);
-    expect(paramEqual(1, null)).toBe(false);
-  });
-  it('长度不同视为有差异', () => {
-    expect(hasParamDiff([1], [1, 2])).toBe(true);
-    expect(hasParamDiff([1, 2], [1, 2])).toBe(false);
-    expect(hasParamDiff([1, 3], [1, 2])).toBe(true);
-  });
-});
-
-describe('hasTextDiff', () => {
-  it('空白归一化后相同 → 无差异', () => {
-    expect(hasTextDiff('a  b', 'a b')).toBe(false);
-  });
-  it('剥离被移除类标签后比较', () => {
-    expect(hasTextDiff('<b>a</b>', 'a')).toBe(false);
-    expect(hasTextDiff('a', 'b')).toBe(true);
-  });
-});
-
-describe('wordDiff / renderWordDiffHtml', () => {
-  it('英文按词 diff', () => {
-    const ops = wordDiff('AB', 'AC');
-    expect(ops).toEqual([
-      { type: 'remove', text: 'AB' },
-      { type: 'add', text: 'AC' },
-    ]);
-  });
-  it('中文按字符 diff', () => {
-    const ops = wordDiff('你好世界', '你好中国');
-    const cat = (t: string) => ops.filter((o) => o.type === t).map((o) => o.text).join('');
-    expect(cat('equal')).toBe('你好');
-    expect(cat('remove')).toBe('世界');
-    expect(cat('add')).toBe('中国');
-  });
-  it('空输入', () => {
-    expect(wordDiff('', '')).toEqual([]);
-    expect(wordDiff('', 'a b')).toEqual([
-      { type: 'add', text: 'a' },
-      { type: 'add', text: 'b' },
-    ]);
-  });
-  it('渲染 HTML：equal 原样 / add / remove', () => {
-    expect(renderWordDiffHtml([
-      { type: 'equal', text: '保持' },
-      { type: 'remove', text: '旧' },
-      { type: 'add', text: '新' },
-    ])).toBe('保持<span class="diff-removed">旧</span><span class="diff-added">新</span>');
-  });
-});
-
-describe('fmtDescDiff', () => {
-  it('仅参数变化、模板相同 → 参数级高亮', () => {
-    const html = fmtDescDiff('造成 #1[i]% 伤害', [0.6], '造成 #1[i]% 伤害', [0.5]);
-    expect(html).toContain('nk-d-c">50%');
-    expect(html).toContain('nk-d-n">60');
-  });
-  it('模板文本变化 → 词级 diff', () => {
-    const html = fmtDescDiff('攻击提高 #1[i]%', [0.5], '防御提高 #1[i]%', [0.5]);
-    expect(html).toContain('diff-added">攻');
-    expect(html).toContain('diff-removed">防');
-    expect(html).toContain('提高 50%');
-  });
-  it('无旧数据 → 普通渲染', () => {
-    expect(fmtDescDiff('造成 #1[i]% 伤害', [0.5], null, null)).toBe('造成 <span class="hl">50%</span> 伤害');
-  });
-  it('空描述返回空串', () => {
-    expect(fmtDescDiff('', [1], 'x', [1])).toBe('');
-  });
-});
-
-/* ─── 加强模式视图构建 ─── */
+/* ─── 强化模式视图构建 ─── */
 
 describe('deepClone / getEnhancedKeys', () => {
   it('深拷贝互不影响', () => {
@@ -288,8 +198,8 @@ describe('deepClone / getEnhancedKeys', () => {
   });
 });
 
-describe('buildEnhancedView / buildEnhancedOld / getRenderData', () => {
-  it('加强视图覆盖 skills，未提供字段保留 base', () => {
+describe('buildEnhancedView / getRenderData', () => {
+  it('强化视图覆盖 skills，未提供字段保留 base', () => {
     const d = baseChar();
     const enhSkill = sk({ id: 1100501, name: '强化普攻', desc: '加强后 #1[i]%' });
     d.enhanced = { '1': { skills: { '1100501': enhSkill } } };
@@ -301,31 +211,25 @@ describe('buildEnhancedView / buildEnhancedOld / getRenderData', () => {
     view.skills['1100501'].name = '改';
     expect(d.enhanced!['1'].skills!['1100501'].name).toBe('强化普攻');
   });
-  it('无对应加强键 → 原样返回', () => {
+  it('无对应强化键 → 原样返回', () => {
     const d = baseChar();
     expect(buildEnhancedView(d, '9')).toBe(d);
   });
-  it('加强前视图重映射技能 ID（enhKey + baseId）', () => {
+  it('sp_need 覆盖（非 null 时）', () => {
     const d = baseChar();
-    const old = buildEnhancedOld(d, '1');
-    expect(old.skills['1100501']).toBeDefined();
-    expect(old.skills['1100501'].id).toBe(1100501);
-    expect(old.skills['100501']).toBeUndefined();
-    // 原对象不被修改
-    expect(d.skills['100501'].id).toBe(100501);
+    d.enhanced = { '1': { sp_need: 140 } };
+    expect(buildEnhancedView(d, '1').sp_need).toBe(140);
+    d.enhanced = { '1': { sp_need: null } };
+    expect(buildEnhancedView(d, '1').sp_need).toBe(d.sp_need);
   });
-  it('getRenderData：加强模式返回 d + oldD；原始模式 oldD=null', () => {
+  it('getRenderData：强化模式返回强化视图；原始/无效键返回 base', () => {
     const d = baseChar();
     d.enhanced = { '1': { skills: { '1100501': sk({ id: 1100501 }) } } };
     const r1 = getRenderData(d, '1');
-    expect(r1.d!.skills['1100501']).toBeDefined();
-    expect(r1.oldD!.skills['1100501'].desc).toBe(d.skills['100501'].desc);
-    const r2 = getRenderData(d, null);
-    expect(r2.d).toBe(d);
-    expect(r2.oldD).toBeNull();
-    const r3 = getRenderData(d, '9'); // 不存在的键
-    expect(r3.d).toBe(d);
-    expect(r3.oldD).toBeNull();
+    expect(r1!.skills['1100501']).toBeDefined();
+    expect(getRenderData(d, null)).toBe(d);
+    expect(getRenderData(d, '9')).toBe(d); // 不存在的键
+    expect(getRenderData(null, '1')).toBeNull();
   });
 });
 

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 /**
- * 星魂面板：E1-6 卡片 diff + 旧版删除星魂卡片。
+ * 星魂面板：E1-6 卡片。
  */
 import { computed } from 'vue';
 import { extraTerms } from './utils';
-import { eidolonIconUrl, fmtDesc, fmtDescDiff, hasParamDiff, hasTextDiff } from '../../lib/format';
+import { eidolonIconUrl, fmtDesc } from '../../lib/format';
 import type { CharacterData, SkillExtra } from '../../services/types';
 
 const props = defineProps<{
   d: CharacterData;
-  /** 加强前视图（diff 用；原始模式为 null） */
-  oldD: CharacterData | null;
   charId: string;
+  /** 强化角标（强化模式下被强化星魂 ID 集合；原始模式为 null） */
+  enhMark: { skillIds: Set<number>; rankIds: Set<number> } | null;
 }>();
 
 interface EidolonCard {
@@ -19,45 +19,20 @@ interface EidolonCard {
   name: string;
   img: string;
   descHtml: string;
-  status: '' | 'changed' | 'added';
+  /** 强化模式下被强化的星魂 */
+  enhanced: boolean;
   terms: SkillExtra[];
 }
 const eidolons = computed<EidolonCard[]>(() => {
   const dd = props.d;
-  const oldRanks = props.oldD && props.oldD.ranks ? props.oldD.ranks : null;
-  return Object.entries(dd.ranks || {}).map(([num, rk]) => {
-    const oldRk = oldRanks ? oldRanks[num] || null : null;
-    const changed = !!(oldRk &&
-      (hasParamDiff(rk.param_list || [], oldRk.param_list || []) || hasTextDiff(rk.desc, oldRk.desc)));
-    const status: '' | 'changed' | 'added' = changed ? 'changed' : !oldRk && !!props.oldD ? 'added' : '';
-    const descHtml = props.oldD && oldRk
-      ? fmtDescDiff(rk.desc, rk.param_list || [], oldRk.desc, oldRk.param_list || [])
-      : fmtDesc(rk.desc, rk.param_list || []);
-    return {
-      num,
-      name: rk.name,
-      img: eidolonIconUrl(props.charId, num),
-      descHtml,
-      status,
-      terms: extraTerms(rk),
-    };
-  });
-});
-
-/** 旧版中删除的星魂 */
-const removedEidolons = computed(() => {
-  const dd = props.d;
-  const od = props.oldD;
-  if (!od || !od.ranks) return [];
-  const newIds = new Set(Object.keys(dd.ranks || {}));
-  return Object.entries(od.ranks)
-    .filter(([num]) => !newIds.has(num))
-    .map(([num, rk]) => ({
-      num,
-      name: rk.name,
-      img: eidolonIconUrl(props.charId, num),
-      descHtml: fmtDesc(rk.desc, rk.param_list || []),
-    }));
+  return Object.entries(dd.ranks || {}).map(([num, rk]) => ({
+    num,
+    name: rk.name,
+    img: eidolonIconUrl(props.charId, num),
+    descHtml: fmtDesc(rk.desc, rk.param_list || []),
+    enhanced: !!(props.enhMark && props.enhMark.rankIds.has(rk.id)),
+    terms: extraTerms(rk),
+  }));
 });
 </script>
 
@@ -66,12 +41,9 @@ const removedEidolons = computed(() => {
   <div
     v-for="e in eidolons"
     :key="e.num"
-    :class="['nk-eidolon', { 'nk-inline-diff': !!e.status }]"
-    :data-status="e.status || undefined"
+    class="nk-eidolon"
   >
-    <span v-if="e.status" :class="`nk-diff-badge nk-diff-badge--${e.status}`">
-      {{ e.status === 'changed' ? 'CHANGED' : 'NEW' }}
-    </span>
+    <span v-if="e.enhanced" class="nk-eidolon__enh-badge">强化</span>
     <div class="nk-eidolon__head">
       <span class="nk-eidolon__num">E{{ e.num }}</span>
       <img class="nk-skill__icon" :src="e.img" loading="lazy">
@@ -85,21 +57,5 @@ const removedEidolons = computed(() => {
         <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
       </div>
     </div>
-  </div>
-  <div
-    v-for="re in removedEidolons"
-    :key="`rm-${re.num}`"
-    class="nk-eidolon nk-inline-diff"
-    data-status="removed"
-  >
-    <span class="nk-diff-badge nk-diff-badge--removed">REMOVED</span>
-    <div class="nk-skill__title-row">
-      <img class="nk-skill__icon" :src="re.img" loading="lazy">
-      <div class="nk-skill__title">
-        <span class="nk-skill__name">{{ re.name }}</span>
-        <span class="nk-skill__tag">E{{ re.num }}</span>
-      </div>
-    </div>
-    <div class="nk-skill__desc" v-html="re.descHtml"></div>
   </div>
 </template>

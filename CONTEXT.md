@@ -85,6 +85,24 @@ _Avoid_: 货币战争栏目、CW 页面
 一个模式的着陆页与身份页。「交换」的落地目标。常规模式枢纽页为 `/`（HomeView），货币战争模式枢纽页为 `/currency`（CurrencyHubView）。
 _Avoid_: 首页、入口页
 
+## 角色强化
+
+### 角色强化（Character Enhancement）
+官方「砺烁新辉」系统（3.4+）对老角色的机制增强。注册于源数据 `AvatarConfigEnhanced.json`（当前 10 个角色），强化后技能、行迹、星魂效果变化。常规模式角色详情页可切换原始/强化状态，默认显示强化（与游戏内默认开启一致）。
+_Avoid_: 角色加强、进阶、Advanced
+
+### 强化形态（Enhanced Form）
+开启角色强化后的数据形态：技能/行迹/星魂/`sp_need` 全部为加强版数值，由 `enhanced` 包整体覆盖渲染。
+_Avoid_: 加强版、强化版
+
+### 强化摘要（Enhancement Summary）
+`AvatarEnhancedHintConfig.json` 的 `EnhancedDesc1-3` 要点文本，页面展示为吸顶工具条下方的「强化内容」横幅，保留官方 `<color>` 橙色强调词。
+_Avoid_: 加强概述、强化内容描述
+
+### 强化角标（Enhancement Badge）
+强化模式下标记「被强化」技能卡/星魂卡的金色角标，由 `AvatarConfigEnhanced.json` 的 `SkillList`/`RankIDList` 驱动，随 `enhanced` 包输出。
+_Avoid_: 强化标记、强化徽章
+
 ## 图片资源
 
 ### 图片 CDN

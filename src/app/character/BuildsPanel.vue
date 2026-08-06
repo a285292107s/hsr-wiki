@@ -3,7 +3,7 @@
  * 配装面板：推荐光锥 / 推荐队伍 / 遗器主副词条 + 套装（描述异步加载）。
  * 套装描述加载 watch baseData（base 数据）而非渲染视图 d —— 加强切换不重复请求。
  */
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { loadLocalLightCones, loadLocalRelicSet } from '../../services/api';
 import { fmtDesc, itemName, pathIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
@@ -110,27 +110,42 @@ const buildsEmpty = computed(() =>
   !cones.value.length && !teams.value.length && !hasRelicSection.value,
 );
 
-/* ─── 遗器套装描述异步加载（base data 变化时触发；加强切换不重复） ─── */
+/* ─── 遗器套装描述异步加载（base data 变化时触发；加强切换不重复） ───
+ * 代际保护：角色快速切换时，迟到的旧套装响应直接丢弃，避免混入/覆盖新角色数据。 */
 const relicSets = ref<Record<string, RelicSetData | null>>({});
+let relicGen = 0;
 watch(
   () => props.baseData,
   (data) => {
     // 平铺拆分布局下本实例可能不渲染遗器块（如 cones+teams 实例）：跳过加载
     if (!props.sections.includes('relics')) return;
+    const gen = ++relicGen;
     relicSets.value = {};
     const r = data && data.relics;
     if (!r) return;
     const ids: { id: number; pc: number }[] = [];
     (r.set4_id_list || []).forEach((id) => ids.push({ id, pc: 4 }));
     (r.set2_id_list || []).forEach((id) => ids.push({ id, pc: 2 }));
-    ids.forEach((s) => {
-      void loadLocalRelicSet(s.id).then((rs) => {
-        relicSets.value = { ...relicSets.value, [String(s.id)]: rs };
-      });
+    void Promise.all(
+      ids.map(async (s) => {
+        try {
+          return [String(s.id), await loadLocalRelicSet(s.id)] as const;
+        } catch {
+          // 加载失败静默：名称回退 itemName，描述留空，不阻塞页面
+          return [String(s.id), null] as const;
+        }
+      }),
+    ).then((entries) => {
+      if (gen !== relicGen) return; // 已被更新的加载取代
+      relicSets.value = Object.fromEntries(entries);
     });
   },
   { immediate: true }, // 面板在数据就绪后才挂载，需立即执行一次
 );
+// 卸载后飞行中的响应一律过期（写入已销毁组件的 ref 无意义）
+onBeforeUnmount(() => {
+  relicGen++;
+});
 
 function setIcon(data: RelicSetData | null | undefined): string {
   if (data && data.icon) {

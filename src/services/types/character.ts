@@ -143,11 +143,19 @@ export interface Memosprite {
   [k: string]: unknown;
 }
 
-/** 加强版本数据包：覆盖 base 的 skills/ranks/skill_trees */
+/** 加强版本数据包：覆盖 base 的 skills/ranks/skill_trees（「砺烁新辉」角色强化，见 ADR 0010） */
 export interface EnhancedBundle {
   skills?: Record<string, Skill>;
   ranks?: Record<string, Rank>;
   skill_trees?: Record<string, Record<string, SkillTree>>;
+  /** 强化摘要（EnhancedDesc1..N，保留官方 <color> 标签，前端 gameTagsToHtml 渲染） */
+  descs?: string[] | null;
+  /** 强化后终结技能量需求（与基础不同时输出，前端覆盖 hero 展示） */
+  sp_need?: number | null;
+  /** 被强化技能 ID 列表（驱动强化角标） */
+  skill_ids?: number[];
+  /** 被强化星魂 ID 列表（驱动强化角标） */
+  rank_ids?: number[];
   [k: string]: unknown;
 }
 

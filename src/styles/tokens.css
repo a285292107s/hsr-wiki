@@ -57,9 +57,6 @@
   --skill-bp: #60A5FA;
   --skill-passive: #2DD4BF;
   --skill-servant-passive: #67E8F9;
-  /* diff 状态（主色 --diff-add/--diff-del；软变体用于内联标记） */
-  --diff-add-soft: #6EE7B7;
-  --diff-del-soft: #FDA4AF;
   /* 遗器套装类型 */
   --relic-planar: #7DD3FC;
   --relic-planar-deep: #38BDF8;
@@ -85,14 +82,10 @@
   --highlight: #f29e38;
   /* 高亮数值/激活态文字 = Purple Heart 300 */
   --metric-val: var(--ph-300);
-  /* diff 状态（主色 --diff-add/--diff-del；软变体/文字色用于内联标记） */
+  /* 终局/错误状态色（--season-live/--season-upcoming/toast 错误引用；勿删） */
   --diff-add: #34D399;
   --diff-del: #F87171;
   --diff-text: #60A5FA;
-  --diff-add-soft: #6EE7B7;
-  --diff-del-soft: #FDA4AF;
-  --diff-text-add: #ECFDF5;
-  --diff-text-del: #FEE2E2;
   /* 终局赛季状态（live 与 diff-add 同绿、upcoming 与 diff-text 同蓝，引用保持同步） */
   --season-live: var(--diff-add);
   --season-upcoming: var(--diff-text);
@@ -465,8 +458,6 @@ background-position: center 15%;
 
 .nk-hero__stat-label { font-size: 0.78rem; color: var(--text2); letter-spacing: 0.02em; }
 .nk-hero__stat-val { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap; }
-.nk-hero__stat-val .nk-d-c { font-size: 0.82rem; }
-.nk-hero__stat-val .nk-d-n { font-size: 0.85rem; }
 
 /* ─── Tab 导航（吸顶全宽外壳 + 内容条约束到面板同宽并居中） ─── */
 .nk-tabs { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
@@ -656,7 +647,6 @@ background-position: center 15%;
   .nk-hero__stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 12px; }
   .nk-hero__stat { padding: 8px 12px; }
   .nk-hero__stat-val { font-size: 0.95rem; }
-  .nk-hero__stat-val .nk-d-n { font-size: 0.95rem; }
   .nk-tabs__bar { padding: 0 24px; overflow-x: visible; }
   .nk-tab { padding: 14px 24px; font-size: 0.8125rem; white-space: normal; }
   .nk-panel { padding: 28px 24px 60px; }
