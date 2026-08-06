@@ -1,18 +1,13 @@
 <script setup lang="ts">
 /**
- * 终局内容布局：Tab 栏 + 内嵌 RouterView
+ * 终局内容布局：模式 Tab 导航 + 内嵌 RouterView
  * 子路由（maze/story/boss/peak）共享此布局实例，Tab 切换不触发 App 级过渡。
+ * 星际档案样式（子导航 + v-html 卡片）随本视图懒加载：../styles/endgame.css
  */
 import { RouterLink, RouterView, useRoute } from 'vue-router';
-
+import { ENDGAME_MODES } from '../catalog/pages/endgame';
+import '../../styles/endgame.css';
 const route = useRoute();
-
-const TABS = [
-  { label: '忘却之庭', en: 'FORGOTTEN HALL', path: '/endgame/maze' },
-  { label: '虚构叙事', en: 'PURE FICTION', path: '/endgame/story' },
-  { label: '末日幻影', en: 'APOCALYPSE', path: '/endgame/boss' },
-  { label: '异相仲裁', en: 'ANOMALY', path: '/endgame/peak' },
-] as const;
 
 function isActive(path: string): boolean {
   return route.path === path || route.path.startsWith(path + '/');
@@ -21,19 +16,27 @@ function isActive(path: string): boolean {
 
 <template>
   <div class="nk-endgame">
-    <nav class="nk-cat-subnav" aria-label="终局内容分类">
+    <nav class="nk-eg-subnav" aria-label="终局内容分类">
       <RouterLink
-        v-for="tab in TABS"
-        :key="tab.path"
-        :to="tab.path"
-        class="nk-cat-subnav__item"
-        :class="{ active: isActive(tab.path) }"
+        v-for="m in ENDGAME_MODES"
+        :key="m.key"
+        :to="m.path"
+        class="nk-eg-subnav__item"
+        :class="{ active: isActive(m.path) }"
+        :data-mode="m.key"
       >
-        <span class="nk-cat-subnav__name">{{ tab.label }}</span>
-        <span class="nk-cat-subnav__en">{{ tab.en }}</span>
+        <span class="nk-eg-subnav__emblem" v-html="m.emblem"></span>
+        <span class="nk-eg-subnav__text">
+          <span class="nk-eg-subnav__name">{{ m.label }}</span>
+          <span class="nk-eg-subnav__en">{{ m.en }}</span>
+        </span>
       </RouterLink>
     </nav>
-    <RouterView />
+    <!-- 滚动区容器：CatalogPage 根节点为 absolute inset:0，需相对定位约束其只覆盖 Tab 栏下方，
+         否则目录页会覆盖整个 .nk-endgame，导致吸顶工具条遮蔽 4 个 Tab 选项 -->
+    <div class="nk-endgame__body">
+      <RouterView />
+    </div>
   </div>
 </template>
 
@@ -45,19 +48,6 @@ function isActive(path: string): boolean {
   flex-direction: column;
 }
 
-/* ─── 终局内容 Tab 导航（原 catalog.css .nk-cat-subnav 迁入：组件专属样式，CatalogPage 已不再使用该命名空间） ─── */
-.nk-cat-subnav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 16px 0 4px; }
-.nk-cat-subnav__item { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 16%, transparent); border-radius: 10px; text-decoration: none; cursor: pointer; transition: all 0.25s var(--ease); overflow: hidden; }
-.nk-cat-subnav__item::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 6%, transparent) 0%, transparent 60%); opacity: 0; transition: opacity 0.25s; }
-.nk-cat-subnav__item:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 12px color-mix(in srgb, var(--primary) 10%, transparent); }
-.nk-cat-subnav__item:hover::before { opacity: 1; }
-.nk-cat-subnav__item.active { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); box-shadow: 0 0 16px color-mix(in srgb, var(--primary) 15%, transparent), inset 0 0 20px color-mix(in srgb, var(--primary) 5%, transparent); }
-.nk-cat-subnav__item.active::before { opacity: 1; }
-.nk-cat-subnav__name { font-size: 0.88rem; font-weight: 700; color: var(--text-bright); }
-.nk-cat-subnav__en { font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.12em; color: var(--text3); }
-.nk-cat-subnav__item:not(.active) .nk-cat-subnav__name { color: var(--text2); }
-.nk-cat-subnav__item:not(.active):hover .nk-cat-subnav__name { color: var(--text-bright); }
-@media (max-width: 767px) { .nk-cat-subnav { grid-template-columns: repeat(2, 1fr); gap: 8px; } .nk-cat-subnav__item { padding: 10px 12px; } }
-@media (max-width: 374px) { .nk-cat-subnav { grid-template-columns: 1fr; } }
-@media (min-width: 1600px) { .nk-cat-subnav { max-width: var(--nk-content-max); margin-left: auto; margin-right: auto; } }
+/* 滚动区容器：目录页（absolute inset:0）的相对定位参照，使 Tab 栏固定于顶部、吸顶工具条吸附其下 */
+.nk-endgame__body { position: relative; flex: 1; min-height: 0; }
 </style>

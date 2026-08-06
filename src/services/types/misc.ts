@@ -108,6 +108,14 @@ export interface MazeListEntry {
   zh?: string;
   ja?: string;
   ko?: string;
+  /** 赛季弱点属性（全层合并去重；异相仲裁为单层属性） */
+  damage_types?: string[];
+  /** 赛季最大层数 */
+  floors?: number;
+  /** 阶段数 */
+  stage_num?: number;
+  /** 回合上限 */
+  countdown?: number;
 }
 export type MazeListDb = Record<string, MazeListEntry>;
 

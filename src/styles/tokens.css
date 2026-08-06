@@ -29,6 +29,13 @@
   --gold-500: #D4AF37;
   --gold-600: #A8862E;
   --gold-700: #7A6220;
+  /* 黑阶（中性纯黑，无色相；全站深色表面唯一事实来源——ADR 0011）
+     深色端 4 级：950 纯黑 / 900 近黑 / 850 / 800 渐亮；
+     主题色相由语义层经 color-mix 注入（3~8%），黑阶本身不写色相 */
+  --blk-950: #000000;
+  --blk-900: #0A0A0B;
+  --blk-850: #121214;
+  --blk-800: #1A1A1C;
 
   /* ═══ 领域层 Domain：数据语义色（不随主题切换，仅被引用不内联） ═══ */
   /* 稀有度 */
@@ -63,18 +70,55 @@
   /* 遗器套装类型 */
   --relic-planar: #7DD3FC;
   --relic-planar-deep: #38BDF8;
-  /* 首页 Hero 兜底渐变（Spine 加载失败时的深紫底色） */
-  --hero-bg-deep: #161233;
-  --hero-bg-tint: rgba(32,22,72,0.55);
+  /* 首页 Hero 兜底渐变（Spine 加载失败时的深紫底色；收编为黑阶 + 主色注入——ADR 0011） */
+  --hero-bg-deep: color-mix(in srgb, var(--blk-900) 86%, var(--ph-400) 14%);
+  --hero-bg-tint: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 70%, var(--ph-400) 30%) 55%, transparent);
+  /* 货币战争势力标签（领域色豁免：数据语义，不随主题——ADR 0011/0012）
+     core = 背景/边框基色，同名令牌 = 文字亮端 */
+  --cw-faction-core: #A78BFA;
+  --cw-faction: #C4B5FD;
+  --cw-combat-core: #38BDF8;
+  --cw-combat: #7DD3FC;
+  --cw-special-core: #FB923C;
+  --cw-special: #FDBA74;
+  /* 货币战争稀有度（CW 专属色系，与常规 --rarity-* 不同源） */
+  --cw-rarity-5: #FFD966;
+  --cw-rarity-5-core: #FFD700;
+  --cw-rarity-4: #C084FC;
+  --cw-rarity-3: #60A5FA;
+  --cw-rarity-2: #4ADE80;
+  --cw-rarity-1: #94A3B8;
+  /* 货币战争羁绊标签（chip 语义色） */
+  --crole-chip-fb: #9CCBFF;
+  --crole-chip-fb-core: #50A0FF;
+  --crole-chip-heal: #9FE6B4;
+  --crole-chip-heal-core: #78DC96;
+  --crole-chip-charge: #FFD98A;
+  --crole-chip-charge-core: #FFC85A;
+  --crole-chip-exp: #FF9EC0;
+  --crole-chip-exp-core: #FF78A0;
+  --crole-chip-season: #CBD5E1;
+  /* 货币战争强化步骤 / 增益 / 特质层品质 / 标签粉（领域色豁免） */
+  --crole-step-rose: #F43F5E;
+  --crole-step-amber: #F59E0B;
+  --crole-buff: #5EEAB5;
+  --ctrait-base: #A09678;
+  --ctrait-multicolor: #E879F9;
+  --crole-pink: #D9899F;
+  /* 货币战争前后台槽位（阵型图标语义色：暖金=前台 / 冷靖蓝=后台） */
+  --cw-fb-front: var(--gold-400);
+  --cw-fb-back: #818CF8;
 
-  /* ═══ 语义层 Semantic：主题映射（:root 常规紫调，[data-theme="cw"] 暗金覆盖） ═══ */
-  --bg: #0F0F23;
-  --surface: rgba(15,15,35,0.85);
-  --card: rgba(20,20,45,0.7);
+  /* ═══ 语义层 Semantic：主题映射（:root 常规黑紫，[data-theme="cw"] 暗金覆盖） ═══ */
+  /* 表面统一走黑阶派生 + 主色注入（结构：黑阶染主色 → 调透明度），领域层豁免不动 */
+  --bg: var(--blk-950);
+  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 85%, transparent);
+  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-850) 94%, var(--primary) 6%) 70%, transparent);
   /* 主色 = Purple Heart 500（较原 violet-600 更饱和、更品红）；派生色一律 color-mix 表达 */
   --primary: var(--ph-500);
   --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
-  --accent: #F43F5E;
+  /* 主色梯度端（ADR 0011 收编：原玫红 #F43F5E → 主色族成员 ph-400，第三色相消失） */
+  --accent: var(--ph-400);
   --gold: var(--gold-400);
   /* 语义金（强化/文本高亮等语义强调）：随主题——常规亮金，CW 降阶暗铜（§13.2 主题金与语义金永不重叠） */
   --gold-sem: var(--gold-300);
@@ -96,6 +140,12 @@
   --season-live: var(--diff-add);
   --season-upcoming: var(--diff-text);
   --season-ended: #64748B;
+  /* 终局内容四模式专属色（领域层：不随主题，供 endgame.css 引用）
+     忘却之庭=记忆靛蓝 / 虚构叙事=文墨青 / 末日幻影=灾厄赤 / 异相仲裁=裁决金 */
+  --eg-maze: #818CF8;
+  --eg-story: #2DD4BF;
+  --eg-boss: #FB7185;
+  --eg-peak: #FBBF24;
   --badge-test: #F59E0B;
   --font-hud: 'Orbitron', monospace;
   --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
@@ -117,19 +167,19 @@
   /* 表面阴影：扩散式染色阴影（取代霓虹 glow，营造墨色分层质感） */
   --nk-shadow-lift: 0 2px 6px rgba(0,0,0,0.28), 0 10px 24px -8px rgba(0,0,0,0.5);
   --nk-shadow-card: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px -10px rgba(0,0,0,0.45);
-  /* ─── 外壳语义变量（侧栏/抽屉/目录头/卡片边框）：color-mix 派生自主色，
+  /* ─── 外壳语义变量（侧栏/抽屉/目录头/卡片边框）：黑阶派生 + 主色注入，
        主题切换自动跟随；CW 在 [data-theme="cw"] 显式覆盖为暗金 ─── */
-  --nk-shell-bg: rgba(12,12,30,0.95);
+  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 97%, var(--primary) 3%) 95%, transparent);
   --nk-shell-hover: color-mix(in srgb, var(--primary) 10%, transparent);
   --nk-shell-press: color-mix(in srgb, var(--primary) 18%, transparent);
   --nk-shell-active-bg: color-mix(in srgb, var(--primary) 22%, transparent);
   --nk-shell-active-border: color-mix(in srgb, var(--primary) 40%, transparent);
   --nk-shell-glow: color-mix(in srgb, var(--primary) 18%, transparent);
-  --nk-sheet-bg: rgba(16,14,36,0.94);
+  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 94%, transparent);
   --nk-sheet-border: color-mix(in srgb, var(--primary) 35%, transparent);
   --nk-sheet-item-bg: color-mix(in srgb, var(--primary) 5%, transparent);
   --nk-sheet-item-border: color-mix(in srgb, var(--primary) 14%, transparent);
-  --nk-header-bg: rgba(15,15,35,0.92);
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 92%, transparent);
   --nk-header-border: color-mix(in srgb, var(--primary) 12%, transparent);
   --nk-input-bg: color-mix(in srgb, var(--primary) 6%, transparent);
   --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
@@ -140,49 +190,54 @@
   --line-2: rgba(255,255,255,0.13);
 }
 
-/* ═══ 货币战争模式：全壳暗金主题（黑底 + 金点缀） ═══
+/* ═══ 货币战争模式：全壳黑金主题（黑底 + 金属金主色） ═══
    由 App.vue 根据 route.meta.cw 挂载 <html data-theme="cw">。
+   ADR 0011：主色 = gold-500 金属金（唯一发光位），文字强调位 = gold-300 亮金，
+   语义金 = gold-600 暗铜哑光；底色与常规共享同一中性黑阶 + 金注入。
    硬约束：导航小字（≤0.75rem）用高亮度暖白，对比度 ≥4.5:1 */
 [data-theme="cw"] {
-  --bg: #0A0906;
-  --surface: rgba(16,14,9,0.88);
-  --card: rgba(24,21,13,0.72);
-  /* 主色 = 金色阶 500（原始层 --gold-500）；以下暗金值均为历史沉淀，与 --gold-* 色阶同源 */
-  --primary: var(--gold-300);
+  --bg: var(--blk-950);
+  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--gold-500) 5%) 88%, transparent);
+  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-850) 94%, var(--gold-500) 6%) 72%, transparent);
+  /* 主色 = 金属金 gold-500（ADR 0011 从 gold-300 换阶；文字强调位 gold-300 承接明度） */
+  --primary: var(--gold-500);
   --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
-  --accent: #C98A2D;
+  /* 主色梯度端：暗金（主色族成员） */
+  --accent: var(--gold-600);
   --gold: var(--gold-600);
   --gold-sem: var(--gold-600);
-  --text: rgba(255,248,230,0.92);
-  --text2: rgba(242,232,207,0.7);
-  --text-bright: #FFF8E6;
-  --text3: rgba(232,222,197,0.52);
+  /* 暖白文本：白 + 金微注入（黑与金的金注入文本，替代原 rgba 暖白） */
+  --text: color-mix(in srgb, var(--text-bright) 94%, var(--gold-300) 6%);
+  --text2: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--gold-300) 20%) 70%, transparent);
+  --text-bright: color-mix(in srgb, white 94%, var(--gold-300) 6%);
+  --text3: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--gold-300) 20%) 52%, transparent);
   --border: color-mix(in srgb, var(--gold-500) 18%, transparent);
   --border2: color-mix(in srgb, var(--gold-500) 40%, transparent);
   --highlight: var(--gold-300);
+  /* 文字/细线强调位：亮金（ADR 0011 主色位金属金 + 文字位亮金） */
   --metric-val: var(--gold-300);
-  /* 稀有度 5 星 = 语义金家族：CW 降阶暗铜（§13.2 恒等式执行特例，领域色不随主题的声明例外） */
+  /* 稀有度 5 星 = 语义金家族：CW 降阶暗铜（ADR 0011 恒等式执行特例，领域色不随主题的声明例外） */
   --rarity-5: var(--gold-600);
-  /* 外壳：暗金侧栏/底部栏 */
-  --nk-shell-bg: rgba(12,10,5,0.96);
+  /* 外壳：黑阶 + 金注入（暗金侧栏/底部栏） */
+  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 97%, var(--gold-500) 3%) 96%, transparent);
   --nk-shell-hover: color-mix(in srgb, var(--gold-500) 10%, transparent);
   --nk-shell-press: color-mix(in srgb, var(--gold-500) 16%, transparent);
   --nk-shell-active-bg: color-mix(in srgb, var(--gold-500) 16%, transparent);
   --nk-shell-active-border: color-mix(in srgb, var(--gold-500) 45%, transparent);
   --nk-shell-glow: color-mix(in srgb, var(--gold-500) 20%, transparent);
-  --nk-sheet-bg: rgba(20,17,9,0.95);
+  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--gold-500) 5%) 95%, transparent);
   --nk-sheet-border: color-mix(in srgb, var(--gold-500) 35%, transparent);
   --nk-sheet-item-bg: color-mix(in srgb, var(--gold-500) 6%, transparent);
   --nk-sheet-item-border: color-mix(in srgb, var(--gold-500) 16%, transparent);
-  --nk-header-bg: rgba(14,12,7,0.94);
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--gold-500) 5%) 94%, transparent);
   --nk-header-border: color-mix(in srgb, var(--gold-500) 14%, transparent);
   --nk-input-bg: color-mix(in srgb, var(--gold-500) 6%, transparent);
   --nk-input-border: color-mix(in srgb, var(--gold-500) 20%, transparent);
   --nk-page-tint: color-mix(in srgb, var(--gold-500) 4%, transparent);
   --nk-card-border: color-mix(in srgb, var(--gold-500) 28%, transparent);
-  /* CW 主题：暖白细线 */
-  --line-1: rgba(255,248,230,0.08);
-  --line-2: rgba(255,248,230,0.15);
+  /* CW 主题：暖白细线（白 + 金微注入） */
+  --line-1: color-mix(in srgb, var(--text-bright) 8%, transparent);
+  --line-2: color-mix(in srgb, var(--text-bright) 15%, transparent);
 }
 
 /* 主题切换瞬间的渐变过渡（App.vue 临时挂载 ~450ms 后移除，
@@ -271,7 +326,7 @@
   bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   z-index: 99990;
   display: flex; align-items: flex-end;
-  background: rgba(8,8,20,0.55);
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
 }
 .ui-more__sheet {
   width: 100%;
@@ -359,8 +414,8 @@ background-position: center 15%;
 /* 边缘柔化：横向线性渐变（专攻左右边缘）+ 内阴影（兼顾四角） */
 .nk-hero__visual {
   box-shadow:
-    inset 0 0 120px 30px rgba(15,15,35,0.85),
-    inset 0 0 50px 10px rgba(15,15,35,0.5);
+    inset 0 0 120px 30px color-mix(in srgb, var(--blk-900) 85%, transparent),
+    inset 0 0 50px 10px color-mix(in srgb, var(--blk-900) 50%, transparent);
 }
 .nk-hero__visual::before {
   content: '';
@@ -376,7 +431,7 @@ background-position: center 15%;
   pointer-events: none;
 }
 .nk-hero__scrim { display: none; }
-.nk-hero__toggle { position: absolute; top: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 16px; background: rgba(15,15,35,0.6); border: 1px solid var(--border); backdrop-filter: blur(8px); cursor: pointer; font-size: 0.625rem; color: var(--text2); transition: all 0.2s; user-select: none; }
+.nk-hero__toggle { position: absolute; top: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 16px; background: color-mix(in srgb, var(--blk-900) 60%, transparent); border: 1px solid var(--border); backdrop-filter: blur(8px); cursor: pointer; font-size: 0.625rem; color: var(--text2); transition: all 0.2s; user-select: none; }
 /* 触控热区扩展至 ≥44px（视觉尺寸不变） */
 .nk-hero__toggle::before { content: ''; position: absolute; inset: -9px; }
 .nk-hero__toggle:hover { border-color: var(--border2); color: var(--text); }
@@ -392,7 +447,7 @@ background-position: center 15%;
   flex-direction: column;
   gap: 16px;
   padding: var(--nk-hero-panel-pad);
-  background: linear-gradient(90deg, transparent 0%, rgba(15,15,35,0.6) 30%, rgba(15,15,35,0.92) 100%);
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--blk-900) 60%, transparent) 30%, color-mix(in srgb, var(--blk-900) 92%, transparent) 100%);
   border-top: 1px solid var(--border);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -402,9 +457,9 @@ background-position: center 15%;
 .nk-hero__camp {
   display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
-  letter-spacing: 0.18em; color: rgba(230,224,250,0.92);
+  letter-spacing: 0.18em; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 90%, var(--ph-300) 10%) 92%, transparent);
 }
-.nk-hero__camp::before { content: ''; width: 14px; height: 1px; background: rgba(167,139,250,0.85); }
+.nk-hero__camp::before { content: ''; width: 14px; height: 1px; background: color-mix(in srgb, var(--ph-400) 85%, transparent); }
 .nk-hero__name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text-bright); text-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 20%, transparent); line-height: 1.15; }
 .nk-hero__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .nk-hero__stars { color: var(--gold); font-size: 1.05rem; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 8px color-mix(in srgb, var(--rarity-5) 22%, transparent); }
@@ -467,7 +522,7 @@ background-position: center 15%;
 .nk-tab { display: inline-flex; align-items: center; min-height: 44px; padding: 12px 16px; font-size: 0.75rem; font-weight: 600; color: var(--text3); cursor: pointer; border: none; background: none; position: relative; transition: color 0.2s; letter-spacing: 0.02em; white-space: nowrap; }
 .nk-tab:first-child { padding-left: 0; }
 .nk-tab:hover { color: var(--text2); }
-.nk-tab--active { color: var(--primary); }
+.nk-tab--active { color: var(--metric-val); }
 .nk-tab--active::after { content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); border-radius: 1px; }
 
 /* ─── Tab 内容区 ─── */
@@ -500,7 +555,7 @@ background-position: center 15%;
 }
 /* 章节编号元素（01-09，编号 = 身份；数据缺失保留缺口） */
 .nk-title__idx {
-  flex: none; font-size: 0.6rem; letter-spacing: 0; color: var(--primary); opacity: 0.95;
+  flex: none; font-size: 0.6rem; letter-spacing: 0; color: var(--metric-val); opacity: 0.95;
   padding-right: 10px;
   border-right: 1px solid var(--line-2);
 }
@@ -537,7 +592,7 @@ background-position: center 15%;
    Toast 通知（Vue TransitionGroup）
 ═══════════════════════════════════════════ */
 .nk-toast-container { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; background: rgba(15,15,35,0.95); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: 0.78rem; color: var(--text); pointer-events: auto; cursor: pointer; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
+.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; background: color-mix(in srgb, var(--blk-900) 95%, transparent); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: 0.78rem; color: var(--text); pointer-events: auto; cursor: pointer; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
 .nk-toast-enter-from, .nk-toast-leave-to { transform: translateX(120%); opacity: 0; }
 .nk-toast-leave-active { transition: transform 0.25s ease-in, opacity 0.25s ease-in; }
 .nk-toast-move { transition: transform var(--nk-dur-normal) var(--nk-ease-out); }
@@ -584,10 +639,10 @@ background-position: center 15%;
   margin-bottom: 0;
   max-width: 100%;
   margin-left: auto; margin-right: auto;
-  background: linear-gradient(to top, rgba(15,15,35,0.8) 0%, rgba(15,15,35,0.2) 50%, transparent 100%);
+  background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 80%, transparent) 0%, color-mix(in srgb, var(--blk-900) 20%, transparent) 50%, transparent 100%);
 }
 .nk-skeleton__hero-visual { position: relative; width: 100%; aspect-ratio: 16 / 9; }
-.nk-skeleton__hero-panel { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, rgba(20,20,45,0.92), rgba(15,15,35,0.92)); border-top: 1px solid var(--border); }
+.nk-skeleton__hero-panel { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, color-mix(in srgb, var(--blk-850) 92%, transparent), color-mix(in srgb, var(--blk-900) 92%, transparent)); border-top: 1px solid var(--border); }
 .nk-skeleton__body { padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
 .nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
@@ -600,8 +655,8 @@ background-position: center 15%;
 .nk-relic-grid .nk-skeleton__card-img,
 .nk-item-grid .nk-skeleton__card-img,
 .nk-mob-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
-/* 时间线赛季：横向占位条，匹配真实卡片形态 */
-.nk-season-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 64px; border-radius: 12px; }
+/* 终局星际档案卡：横向占位条，匹配真实卡片形态 */
+.nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 12px; }
 @media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
 
 /* ═══════════════════════════════════════════

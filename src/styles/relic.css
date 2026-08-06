@@ -162,7 +162,7 @@
   text-align: left; min-width: 72px;
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
   color: var(--text3); letter-spacing: 0.08em;
-  background: rgba(20,20,45,0.95);
+  background: color-mix(in srgb, var(--blk-850) 95%, transparent);
   backdrop-filter: blur(8px);
 }
 .nk-relic-affix-table__slot-h {
@@ -182,7 +182,7 @@
   position: sticky; left: 0; z-index: 1;
   padding: 8px 10px;
   font-size: 0.72rem; font-weight: 600; color: var(--text2);
-  background: rgba(20,20,45,0.85);
+  background: color-mix(in srgb, var(--blk-850) 85%, transparent);
   backdrop-filter: blur(4px);
   border-right: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
   white-space: nowrap;

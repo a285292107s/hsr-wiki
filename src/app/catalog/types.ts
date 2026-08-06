@@ -35,9 +35,18 @@ export interface CatalogContext {
   version: string;
 }
 
+/** 目录页子导航 Tab（终局内容 4 页共享；渲染于吸顶工具条下方、内容区之前） */
+export interface CatalogTab {
+  label: string;
+  en: string;
+  path: string;
+}
+
 export interface CatalogPageConfig {
   id: string;
   title: string;
+  /** 子导航 Tab（吸顶工具条下方）；仅需子导航的目录页提供 */
+  tabs?: CatalogTab[];
   /** 数据获取：角色走本地转换数据；其余目录走 CDN */
   fetchData?: (ctx: CatalogContext) => Promise<CatalogItem[]>;
   /** 数据就绪后后台预热兄弟页数据（终局 4 页互取，保证 Tab 切换即时命中 L1） */

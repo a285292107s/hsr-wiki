@@ -28,9 +28,9 @@
 /* 视觉区：右侧宽幅暗化（立绘融底，消除色块边界）+ 底部渐融面板 */
 .nk-char-page .nk-hero__visual {
   box-shadow:
-    inset 0 0 90px 24px rgba(15,15,35,0.72),
-    inset -150px 0 110px -40px rgba(15,15,35,0.92),
-    inset 0 -56px 64px -24px rgba(15,15,35,0.92);
+    inset 0 0 90px 24px color-mix(in srgb, var(--blk-900) 72%, transparent),
+    inset -150px 0 110px -40px color-mix(in srgb, var(--blk-900) 92%, transparent),
+    inset 0 -56px 64px -24px color-mix(in srgb, var(--blk-900) 92%, transparent);
 }
 /* 档案编号角标（左下） */
 .nk-char-page .nk-hero__archive {
@@ -38,13 +38,13 @@
   font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700;
   letter-spacing: 0.3em; color: rgba(255,255,255,0.5);
   padding: 6px 12px; border-radius: 6px;
-  background: rgba(8,8,20,0.5); border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 50%, transparent); border: 1px solid var(--line-1);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   pointer-events: none; user-select: none;
 }
 /* 动画开关：中性化 */
 .nk-char-page .nk-hero__toggle {
-  border-color: var(--line-1); background: rgba(8,8,20,0.5); color: var(--text3);
+  border-color: var(--line-1); background: color-mix(in srgb, var(--blk-900) 50%, transparent); color: var(--text3);
 }
 .nk-char-page .nk-hero__toggle:hover { border-color: var(--line-2); color: var(--text2); }
 
@@ -223,7 +223,7 @@
 /* 强化条目：名称 + 描述（展开时全部列出；间距用 margin 以免撑开收起轨道） */
 .nk-char-page .nk-skill__link-item {
   margin-top: 10px; padding: 10px 14px; border-radius: 8px;
-  background: rgba(8,8,20,0.4); border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 40%, transparent); border: 1px solid var(--line-1);
 }
 .nk-char-page .nk-skill__link-item + .nk-skill__link-item { margin-top: 8px; }
 .nk-char-page .nk-skill__link-item-name {
@@ -240,7 +240,7 @@
 .nk-char-page .nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); }
 .nk-char-page .nk-skill__terms {
   margin-top: 14px; padding: 12px 16px; border-radius: 8px;
-  background: rgba(8,8,20,0.4); border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 40%, transparent); border: 1px solid var(--line-1);
 }
 .nk-char-page .nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
 .nk-char-page .nk-term__name { color: var(--highlight); font-weight: 600; }
@@ -385,7 +385,7 @@
 .nk-char-page .nk-bonus {
   display: flex; flex-direction: row; align-items: center; gap: 10px;
   padding: 13px 16px; border-radius: 0; border: none;
-  background: rgba(15,15,35,0.9);
+  background: color-mix(in srgb, var(--blk-900) 90%, transparent);
   transition: background 0.2s;
 }
 .nk-char-page .nk-bonus:hover { background: rgba(255,255,255,0.03); transform: none; }
@@ -407,7 +407,7 @@
   position: absolute; left: 10px; top: 10px; z-index: 3;
   font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em;
   color: var(--text-bright); padding: 2px 7px; border-radius: 4px;
-  background: rgba(15,15,35,0.72); border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 72%, transparent); border: 1px solid var(--line-1);
   backdrop-filter: blur(4px);
   pointer-events: none;
 }
@@ -522,7 +522,7 @@
    背景近实底（0.97）：避免内容滚过时透出立绘亮色形成断裂感 */
 .nk-char-page .nk-enh-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-  background: rgba(9,9,22,0.97);
+  background: color-mix(in srgb, var(--blk-900) 97%, transparent);
   backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
   border-bottom: 1px solid var(--line-1);
 }
@@ -619,7 +619,7 @@
   position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   z-index: 30; width: 40px; height: 40px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(10,10,24,0.8); border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 80%, transparent); border: 1px solid var(--line-1);
   color: var(--text3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   box-shadow: 0 4px 16px rgba(0,0,0,0.45);
@@ -708,8 +708,8 @@
 /* 注：.nk-hero__desc 不在此收束——一句话介绍有意收窄至 560px（本文件上方声明，勿再覆盖） */
 
 /* ═══════════ 骨架屏 ═══════════ */
-.nk-char-page .nk-skeleton__hero { background: linear-gradient(to top, rgba(15,15,35,0.85) 0%, rgba(15,15,35,0.3) 50%, transparent 100%); }
-.nk-char-page .nk-skeleton__hero-panel { background: linear-gradient(180deg, rgba(15,15,35,0.5), var(--bg)); }
+.nk-char-page .nk-skeleton__hero { background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 85%, transparent) 0%, color-mix(in srgb, var(--blk-900) 30%, transparent) 50%, transparent 100%); }
+.nk-char-page .nk-skeleton__hero-panel { background: linear-gradient(180deg, color-mix(in srgb, var(--blk-900) 50%, transparent), var(--bg)); }
 /* 骨架属性区：行式（对齐规格表形态） */
 .nk-char-page .nk-skeleton__stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0 36px; }
 .nk-char-page .nk-sk--stat { height: 20px; border-radius: 4px; }

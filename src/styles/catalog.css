@@ -97,16 +97,16 @@
 .nk-cat-card[data-element="imaginary"] { --elem-color: color-mix(in srgb, var(--elem-imaginary) 70%, transparent); }
 .nk-cat-card[data-element="physical"] { --elem-color: color-mix(in srgb, var(--elem-physical) 70%, transparent); }
 /* 头像区 */
-.nk-cat-card__img { position: relative; aspect-ratio: 3/4; overflow: hidden; background: rgba(10,10,30,0.5); }
+.nk-cat-card__img { position: relative; aspect-ratio: 3/4; overflow: hidden; background: color-mix(in srgb, var(--blk-900) 50%, transparent); }
 /* 全息扫光：与首页/光锥卡片统一的白核高光扫过（screen 混合），在头像材质层内移动，信息与图标始终位于高光之上。 */
 .nk-cat-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); transform-origin: center; backface-visibility: hidden; }
 .nk-cat-card:hover .nk-cat-card__img::before, .nk-cat-card:focus-visible .nk-cat-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
 @keyframes nk-card-sheen { 0%, 6% { opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); } 24% { opacity: 0.5; } 52% { opacity: 0.68; } 80% { opacity: 0.48; } 100% { opacity: 0; transform: translate3d(430%,0,0) rotate(-22deg); } }
 .nk-cat-card__img img.avatar { width: 100%; height: 100%; object-fit: contain; padding: 8px; transition: transform 0.4s var(--ease); }
 .nk-cat-card:hover .nk-cat-card__img img.avatar { transform: scale(1.06); }
-.nk-cat-card__img::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 45%; background: linear-gradient(to top, rgba(20,20,45,0.85), transparent); pointer-events: none; }
+.nk-cat-card__img::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 45%; background: linear-gradient(to top, color-mix(in srgb, var(--blk-850) 85%, transparent), transparent); pointer-events: none; }
 .nk-cat-card__icons { position: absolute; top: 6px; right: 6px; display: flex; gap: 4px; z-index: 2; }
-.nk-cat-card__elem, .nk-cat-card__path { width: 22px; height: 22px; border-radius: 50%; background: rgba(15,15,35,0.75); border: 1px solid var(--border); padding: 2px; transition: transform 0.3s, box-shadow 0.3s; }
+.nk-cat-card__elem, .nk-cat-card__path { width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--blk-900) 75%, transparent); border: 1px solid var(--border); padding: 2px; transition: transform 0.3s, box-shadow 0.3s; }
 .nk-cat-card:hover .nk-cat-card__elem, .nk-cat-card:hover .nk-cat-card__path { transform: scale(1.15); box-shadow: 0 0 10px var(--primary-glow); }
 /* 信息区（左下角叠加） */
 .nk-cat-card__info { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 8px 10px; }
@@ -117,7 +117,7 @@
   .nk-cat-card:hover .nk-cat-card__img::before, .nk-cat-card:focus-visible .nk-cat-card__img::before { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); will-change: auto; }
   .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: none; opacity: 0.12; transform: translate3d(215%,0,0); will-change: auto; }
   /* 禁用所有卡片入场动画 */
-  .nk-cat-card, .nk-lc-card, .nk-relic-card, .nk-item-card, .nk-season-card, .nk-mob-card { animation: none; }
+  .nk-cat-card, .nk-lc-card, .nk-relic-card, .nk-item-card, .nk-mob-card { animation: none; }
   .nk-virtual-cell .nk-item-card, .nk-virtual-cell .nk-cat-card, .nk-virtual-cell .nk-lc-card { opacity: 1; transform: none; }
   .nk-virtual-cell.nk-revealed .nk-item-card, .nk-virtual-cell.nk-revealed .nk-cat-card, .nk-virtual-cell.nk-revealed .nk-lc-card { animation: none; }
 }
@@ -197,7 +197,7 @@
 .nk-relic-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
 .nk-relic-card { position: relative; isolation: isolate; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
 .nk-relic-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: var(--border2); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 15%, transparent); }
-.nk-relic-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.nk-relic-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 70%); display: flex; align-items: center; justify-content: center; padding: 12px; }
 .nk-relic-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ph-400) 6%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--ph-400) 6%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
 .nk-relic-card:hover .nk-relic-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; }
 .nk-relic-card__img img { width: 72%; height: 72%; object-fit: contain; transition: transform 0.4s var(--ease); filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
@@ -227,82 +227,12 @@
 .nk-item-card__pic:not(.is-broken) ~ .nk-item-card__noimg { display: none; }
 
 /* ═══════════════════════════════════════════
-   终局内容赛季列表（时间线卡片设计）
-═══════════════════════════════════════════ */
-.nk-season-grid { grid-template-columns: 1fr; gap: 0; padding-left: 20px; position: relative; }
-/* 时间线纵轴 */
-.nk-season-grid::before { content: ''; position: absolute; left: 5px; top: 12px; bottom: 12px; width: 2px; background: linear-gradient(180deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 25%, transparent) 40%, color-mix(in srgb, var(--primary) 8%, transparent) 100%); border-radius: 1px; }
-
-.nk-season-card { --st-color: var(--text3); position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 20px 18px 28px; margin-bottom: 10px; background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 4%, var(--card)) 0%, var(--card) 55%); border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent); border-radius: var(--nk-radius-card); cursor: pointer; text-decoration: none; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s, background 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 30ms), 600ms); overflow: visible; }
-/* 左侧状态色条 */
-.nk-season-card::after { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--st-color), color-mix(in srgb, var(--st-color) 30%, transparent)); opacity: 0.7; transition: opacity 0.25s, box-shadow 0.25s; }
-/* 时间线节点（左侧圆点） */
-.nk-season-card__node { position: absolute; left: -20px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--st-color); box-shadow: 0 0 0 3px rgba(15,15,35,0.9); transition: border-color 0.25s, box-shadow 0.25s, background 0.25s; flex-shrink: 0; z-index: 1; }
-/* 赛季序号水印 */
-.nk-season-card__num { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-family: var(--font-hud); font-size: 2.6rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--st-color) 22%, transparent); pointer-events: none; user-select: none; transition: transform 0.3s var(--ease), -webkit-text-stroke-color 0.3s, text-shadow 0.3s; z-index: 0; }
-.nk-season-card__num--long { font-size: 1.9rem; }
-.nk-season-card:hover { transform: translateX(5px); border-color: color-mix(in srgb, var(--st-color) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 8%, var(--card)) 0%, color-mix(in srgb, var(--primary) 5%, transparent) 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 16px color-mix(in srgb, var(--st-color) 12%, transparent); }
-.nk-season-card:hover::after { opacity: 1; box-shadow: 0 0 8px color-mix(in srgb, var(--st-color) 40%, transparent); }
-.nk-season-card:hover .nk-season-card__node { background: var(--st-color); box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 10px color-mix(in srgb, var(--st-color) 50%, transparent); }
-.nk-season-card:hover .nk-season-card__num { transform: translateY(-50%) translateX(-26px); -webkit-text-stroke-color: color-mix(in srgb, var(--st-color) 45%, transparent); text-shadow: 0 0 24px color-mix(in srgb, var(--st-color) 15%, transparent); }
-
-/* 卡片内容区 */
-.nk-season-card__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; position: relative; z-index: 1; padding-right: 36px; }
-.nk-season-card__top { display: flex; align-items: center; gap: 12px; }
-.nk-season-card__name { font-size: 0.92rem; font-weight: 700; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
-.nk-season-card:hover .nk-season-card__name { color: #fff; text-shadow: 0 0 12px color-mix(in srgb, var(--st-color) 30%, transparent); }
-.nk-season-card__meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.nk-season-card__ver { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--text-bright); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; padding: 3px 10px; background: color-mix(in srgb, var(--primary) 22%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent); border-radius: 6px; text-shadow: 0 0 8px color-mix(in srgb, var(--primary) 40%, transparent); }
-.nk-season-card__ver--unknown { color: var(--text3); font-weight: 500; background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.16); text-shadow: none; }
-.nk-season-card__date { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.02em; opacity: 0.8; }
-
-/* 状态徽章 */
-.nk-season-card__status { margin-left: auto; flex-shrink: 0; font-size: 0.58rem; font-weight: 600; padding: 3px 12px; border-radius: 12px; letter-spacing: 0.04em; white-space: nowrap; border: 1px solid; transition: all 0.25s; }
-
-/* 箭头指示 */
-.nk-season-card__arrow { width: 15px; height: 15px; flex-shrink: 0; color: var(--text3); opacity: 0; transform: translateX(-4px); transition: opacity 0.25s, transform 0.25s, color 0.25s; position: relative; z-index: 1; }
-.nk-season-card:hover .nk-season-card__arrow { opacity: 1; transform: translateX(0); color: var(--st-color); }
-
-/* ── 状态色彩体系（领域层 --season-*） ── */
-.nk-season-card--live { --st-color: var(--season-live); }
-.nk-season-card--live .nk-season-card__status { color: var(--season-live); background: color-mix(in srgb, var(--season-live) 10%, transparent); border-color: color-mix(in srgb, var(--season-live) 30%, transparent); }
-.nk-season-card--live .nk-season-card__node { border-color: var(--season-live); animation: nk-season-pulse 2s ease-in-out infinite; }
-
-.nk-season-card--ended { --st-color: var(--season-ended); }
-.nk-season-card--ended .nk-season-card__status { color: var(--text2); background: color-mix(in srgb, var(--season-ended) 10%, transparent); border-color: color-mix(in srgb, var(--season-ended) 25%, transparent); }
-.nk-season-card--ended { opacity: 0.72; }
-.nk-season-card--ended:hover { opacity: 1; }
-
-.nk-season-card--upcoming { --st-color: var(--season-upcoming); }
-.nk-season-card--upcoming .nk-season-card__status { color: var(--season-upcoming); background: color-mix(in srgb, var(--season-upcoming) 10%, transparent); border-color: color-mix(in srgb, var(--season-upcoming) 30%, transparent); }
-
-.nk-season-card--unknown { --st-color: var(--gold-400); }
-
-@keyframes nk-season-pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 6px color-mix(in srgb, var(--season-live) 40%, transparent); } 50% { box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 14px color-mix(in srgb, var(--season-live) 70%, transparent); } }
-
-@media (max-width: 767px) {
-  .nk-season-grid { padding-left: 16px; }
-  .nk-season-grid::before { left: 3px; }
-  .nk-season-card { padding: 14px 14px 14px 20px; gap: 10px; }
-  .nk-season-card__node { left: -16px; width: 10px; height: 10px; }
-  .nk-season-card__top { flex-wrap: wrap; gap: 6px; }
-  .nk-season-card__status { margin-left: 0; }
-  .nk-season-card__arrow { display: none; }
-  .nk-season-card__num { font-size: 2rem; right: 10px; }
-  .nk-season-card__body { padding-right: 28px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .nk-season-card { animation: none; }
-  .nk-season-card--live .nk-season-card__node { animation: none; }
-}
-
-/* ═══════════════════════════════════════════
    敌对物种列表页
 ═══════════════════════════════════════════ */
 .nk-mob-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
 .nk-mob-card { position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); transform-style: preserve-3d; }
 .nk-mob-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: color-mix(in srgb, var(--accent) 40%, transparent); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--accent) 12%, transparent); }
-.nk-mob-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 10px; }
+.nk-mob-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 70%); display: flex; align-items: center; justify-content: center; padding: 10px; }
 .nk-mob-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--accent) 5%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.26) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--accent) 5%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
 .nk-mob-card:hover .nk-mob-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; }
 .nk-mob-card__img img { width: 75%; height: 75%; object-fit: contain; transition: transform 0.4s var(--ease); filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
@@ -325,26 +255,26 @@
 /* ── Hero：官网 KV 场景（Spine 10 层）为主角，标题退居左下 HUD 构图 ── */
 /* 背景渐变 = Spine 加载失败/全部层失败时的视觉兜底（主背景层不透明，正常渲染时被完全遮盖）
    内边距移入 __content：内容与导航区共用 1440 居中网格，宽屏下左右对齐不错位 */
-.nk-home-hero { position: relative; height: 100vh; height: 100dvh; min-height: 520px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding: 0 0 108px 0; background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, #0a0a1c 100%); }
+.nk-home-hero { position: relative; height: 100vh; height: 100dvh; min-height: 520px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding: 0 0 108px 0; background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--ph-500) 12%) 100%); }
 
 /* Hero 背景 Spine（官网背景动画 home-bg：主背景 + 角色群像，全不透明呈现） */
 .nk-home-hero__spine { position: absolute; inset: 0; opacity: 0; transition: opacity 1.6s ease; pointer-events: none; overflow: hidden; }
 .nk-home-hero__spine.nk-on { opacity: 1; }
 /* 压暗层：左下文字安全区 + 底部融入页面底色（不遮挡右上方场景主体） */
-.nk-home-hero__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 85% at 0% 108%, rgba(8,8,20,0.82) 0%, rgba(8,8,20,0.5) 34%, transparent 62%), linear-gradient(to bottom, rgba(15,15,35,0.28) 0%, transparent 22%, transparent 62%, rgba(15,15,35,0.55) 88%, var(--bg) 100%); }
+.nk-home-hero__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 85% at 0% 108%, color-mix(in srgb, var(--blk-900) 82%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 34%, transparent 62%), linear-gradient(to bottom, color-mix(in srgb, var(--blk-900) 28%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in srgb, var(--blk-900) 55%, transparent) 88%, var(--bg) 100%); }
 /* 内容与导航区同网格：max-width 1440 居中 + 左侧 128px 侧栏间隙（断点下收窄），保证 Hero 标题与下方板块区左对齐 */
 .nk-home-hero__content { position: relative; z-index: 2; text-align: left; width: 100%; max-width: var(--nk-content-max); margin: 0 auto; padding: 0 48px 0 128px; }
 /* HUD 引题行：短线 + 中文品牌附标（中文为主体的混合串，正文承载避免 Orbitron 回退等宽体） */
 .nk-home-hero__kicker { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; animation: nk-home-fade-up 0.6s var(--ease) 0.25s backwards; }
 .nk-home-hero__kicker-line { width: 40px; height: 2px; background: linear-gradient(90deg, var(--primary), transparent); }
-.nk-home-hero__kicker-text { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em; color: rgba(238,240,255,0.92); text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
+.nk-home-hero__kicker-text { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 94%, var(--ph-300) 6%) 92%, transparent); text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
 /* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文会回退等宽体，观感差）；
    clamp 下限 2.4rem + 上限 4.5rem：4 字短标题放大上限增强品牌冲击力，窄屏仍单行安全 */
 /* 墨色分层：移除 40/80px 弥漫紫光，仅保留黑投影 + ≤14px 边缘微光（与详情页规范一致） */
 .nk-home-hero__title { font-family: var(--font-body); font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: 0.08em; line-height: 1.1; color: var(--text-bright); perspective: 600px; text-shadow: 0 2px 6px rgba(0,0,0,0.75), 0 0 14px color-mix(in srgb, var(--primary) 18%, transparent), 0 4px 24px rgba(0,0,0,0.5); }
 .nk-home-hero__title span { display: inline-block; animation: nk-home-char-in 0.5s var(--ease) backwards; }
 /* 定位副标题：内容清单，与主标题拉开层级 */
-.nk-home-hero__tagline { margin-top: 20px; font-size: 0.88rem; color: rgba(200,212,236,0.88); letter-spacing: 0.16em; text-shadow: 0 1px 6px rgba(0,0,0,0.85); animation: nk-home-fade-up 0.6s var(--ease) 1.15s backwards; }
+.nk-home-hero__tagline { margin-top: 20px; font-size: 0.88rem; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 85%, var(--ph-300) 15%) 88%, transparent); letter-spacing: 0.16em; text-shadow: 0 1px 6px rgba(0,0,0,0.85); animation: nk-home-fade-up 0.6s var(--ease) 1.15s backwards; }
 /* 滚动指示器（右下，让位左下标题） */
 .nk-home-hero__scroll { position: absolute; bottom: 26px; right: 40px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; animation: nk-home-fade-up 0.6s var(--ease) 1.5s backwards; border: none; background: none; padding: 8px; }
 .nk-home-hero__scroll:hover { opacity: 1; }
@@ -385,13 +315,13 @@
 .nk-home-card:hover .nk-home-card__arrow { transform: translateX(4px); color: var(--primary); }
 
 /* ── 货币战争网关卡片：金色描边/暗金底纹，从紫色系中跳出（第二入口） ── */
-.nk-home-card--gateway { --holo-color: color-mix(in srgb, var(--gold-300) 75%, transparent); border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, rgba(20,16,8,0.4) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); }
-.nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-300) 75%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 20%, transparent) 0%, rgba(28,22,10,0.5) 55%, color-mix(in srgb, var(--gold-500) 10%, transparent) 100%), var(--card); box-shadow: 0 0 14px color-mix(in srgb, var(--gold-500) 16%, transparent); }
+.nk-home-card--gateway { --holo-color: color-mix(in srgb, var(--gold-300) 75%, transparent); border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, color-mix(in srgb, var(--blk-900) 60%, transparent) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); }
+.nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-300) 75%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 20%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 55%, color-mix(in srgb, var(--gold-500) 10%, transparent) 100%), var(--card); box-shadow: 0 0 14px color-mix(in srgb, var(--gold-500) 16%, transparent); }
 .nk-home-card--gateway .nk-home-card__icon { background: color-mix(in srgb, var(--gold-500) 14%, transparent); border-color: color-mix(in srgb, var(--gold-500) 40%, transparent); color: var(--gold-300); }
 .nk-home-card--gateway:hover .nk-home-card__icon { background: color-mix(in srgb, var(--gold-500) 22%, transparent); border-color: color-mix(in srgb, var(--gold-300) 70%, transparent); color: var(--gold-200); }
 .nk-home-card--gateway .nk-home-card__cn { color: var(--gold-350); }
 .nk-home-card--gateway .nk-home-card__en { color: color-mix(in srgb, var(--gold-500) 75%, transparent); }
-.nk-home-card--gateway .nk-home-card__desc { color: rgba(242,232,207,0.72); }
+.nk-home-card--gateway .nk-home-card__desc { color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 82%, var(--gold-300) 18%) 72%, transparent); }
 .nk-home-card--gateway:hover .nk-home-card__arrow { color: var(--gold-300); }
 /* 网关徽章：行内金色标签，明确“独立模式”入口语义（仅网关卡片显示；紧随描述尾部，窄卡不重叠） */
 .nk-home-card__badge { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 4px; font-family: var(--font-hud); font-size: 0.44rem; font-weight: 700; letter-spacing: 0.12em; line-height: 1.25; vertical-align: 1px; white-space: nowrap; color: var(--gold-350); background: color-mix(in srgb, var(--gold-500) 12%, transparent); border: 1px solid color-mix(in srgb, var(--gold-500) 35%, transparent); transition: all 0.3s; }
@@ -434,7 +364,7 @@
 /* 触屏设备（hover: none）：重置粘滞 hover 态（点击后不残留浮起/微光） */
 @media (hover: none) {
   .nk-home-card:hover { transform: none; border-color: color-mix(in srgb, var(--primary) 22%, transparent); background: var(--card); box-shadow: none; }
-  .nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, rgba(20,16,8,0.4) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); box-shadow: none; }
+  .nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, color-mix(in srgb, var(--blk-900) 60%, transparent) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); box-shadow: none; }
   .nk-home-card--gateway:hover .nk-home-card__badge { background: color-mix(in srgb, var(--gold-500) 12%, transparent); border-color: color-mix(in srgb, var(--gold-500) 35%, transparent); color: var(--gold-350); }
   /* 角色卡片：触屏重置（浮起/光斑/头像缩放/图标微光/扫光全部回退，边框回稀有度原值） */
   .nk-cat-card:hover { transform: none; border-color: var(--nk-card-border); box-shadow: none; }
@@ -491,7 +421,7 @@
 /* ═══════════════════════════════════════════
    图片懒加载占位色（基于稀有度）
 ═══════════════════════════════════════════ */
-.nk-cat-card__img img, .nk-relic-card__img img, .nk-item-card__img img, .nk-mob-card__img img { background: rgba(20,20,45,0.6); }
-.nk-cat-card[data-rarity="5"] .nk-cat-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), rgba(20,20,45,0.6)); }
-.nk-cat-card[data-rarity="4"] .nk-cat-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), rgba(20,20,45,0.6)); }
-.nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), rgba(20,20,45,0.6)); }
+.nk-cat-card__img img, .nk-relic-card__img img, .nk-item-card__img img, .nk-mob-card__img img { background: color-mix(in srgb, var(--blk-850) 60%, transparent); }
+.nk-cat-card[data-rarity="5"] .nk-cat-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
+.nk-cat-card[data-rarity="4"] .nk-cat-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
+.nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }

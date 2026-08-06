@@ -21,9 +21,9 @@ const TRAIT_CAT_LABEL: Record<TraitCat, string> = {
 /* 前后台 SVG 图标（自绘，无网络依赖）
    设计语言：「阵型槽位」——横向胶囊条 = 行位，实心亮色 = 占据，半透明幽灵描边 = 空槽。
    暖金 = 前台，冷靖蓝 = 后台；三图标共享同一几何，仅填充状态不同。 */
-const FB_SVG_FRONT = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" fill="#FBBF24"/><rect x="3" y="13" width="18" height="8" rx="3" fill="#FBBF24" fill-opacity=".15" stroke="#FBBF24" stroke-opacity=".62" stroke-width="1.5"/></svg>`;
-const FB_SVG_BACK = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" fill="#818CF8" fill-opacity=".15" stroke="#818CF8" stroke-opacity=".62" stroke-width="1.5"/><rect x="3" y="13" width="18" height="8" rx="3" fill="#818CF8"/></svg>`;
-const FB_SVG_BOTH = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" fill="#FBBF24"/><rect x="3" y="13" width="18" height="8" rx="3" fill="#818CF8"/></svg>`;
+const FB_SVG_FRONT = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-front);fill-opacity:.15;stroke:var(--cw-fb-front);stroke-opacity:.62" stroke-width="1.5"/></svg>`;
+const FB_SVG_BACK = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-back);fill-opacity:.15;stroke:var(--cw-fb-back);stroke-opacity:.62" stroke-width="1.5"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
+const FB_SVG_BOTH = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
 
 
 function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {

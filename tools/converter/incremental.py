@@ -48,7 +48,8 @@ MODULE_SOURCES: dict[str, list[str]] = {
     "relic_affixes": ["RelicMainAffixConfig.json", "RelicSubAffixConfig.json"],
     "monsters": ["MonsterTemplateConfig.json"],
     "endgame": ["ChallengeMazeConfig.json", "ChallengeStoryMazeConfig.json",
-                 "ChallengeBossMazeConfig.json", "ChallengePeakConfig.json"],
+                 "ChallengeBossMazeConfig.json", "ChallengePeakConfig.json",
+                 "ScheduleDataChallengeMaze.json"],
     "currency": [
         "GridFightRoleBasicInfo.json", "AvatarConfig.json", "AvatarConfigLD.json",
         "GridFightRolePropertyConfig.json", "GridFightTraitBasicInfo.json", "GridFightRoleStar.json",

@@ -110,15 +110,15 @@
   border: 1px solid var(--border);
   white-space: nowrap;
 }
-.nk-cw-tag--faction { background: rgba(167,139,250,0.14); color: #c4b5fd; border-color: rgba(167,139,250,0.3); }
-.nk-cw-tag--combat  { background: rgba(56,189,248,0.14);  color: #7dd3fc; border-color: rgba(56,189,248,0.3); }
-.nk-cw-tag--special { background: rgba(251,146,60,0.14);  color: #fdba74; border-color: rgba(251,146,60,0.3); }
-.nk-cw-tag--silver  { background: rgba(148,163,184,0.14); color: #cbd5e1; border-color: rgba(148,163,184,0.3); }
+.nk-cw-tag--faction { background: color-mix(in srgb, var(--cw-faction-core) 14%, transparent); color: var(--cw-faction); border-color: color-mix(in srgb, var(--cw-faction-core) 30%, transparent); }
+.nk-cw-tag--combat  { background: color-mix(in srgb, var(--cw-combat-core) 14%, transparent);  color: var(--cw-combat); border-color: color-mix(in srgb, var(--cw-combat-core) 30%, transparent); }
+.nk-cw-tag--special { background: color-mix(in srgb, var(--cw-special-core) 14%, transparent);  color: var(--cw-special); border-color: color-mix(in srgb, var(--cw-special-core) 30%, transparent); }
+.nk-cw-tag--silver  { background: color-mix(in srgb, var(--cw-rarity-1) 14%, transparent); color: var(--crole-chip-season); border-color: color-mix(in srgb, var(--cw-rarity-1) 30%, transparent); }
 .nk-cw-tag--gold    { background: color-mix(in srgb, var(--gold) 14%, transparent);  color: var(--gold); border-color: color-mix(in srgb, var(--gold) 30%, transparent); }
 .nk-cw-tag--prismatic {
-  background: linear-gradient(135deg, rgba(244,114,182,0.16), rgba(129,140,248,0.16), rgba(45,212,191,0.16));
-  color: #f0abfc;
-  border-color: rgba(232,121,249,0.4);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--prop-hp) 16%, transparent), color-mix(in srgb, var(--eg-maze) 16%, transparent), color-mix(in srgb, var(--skill-passive) 16%, transparent));
+  color: var(--ctrait-multicolor);
+  border-color: color-mix(in srgb, var(--ctrait-multicolor) 40%, transparent);
 }
 
 /* ═══ 羁绊卡片专用样式（垂直信息密集型布局，参考游戏内羁绊详情面板） ═══ */
@@ -216,9 +216,9 @@
 }
 
 /* 分类色彩左边线 */
-.nk-cw-trait-card[data-cat="faction"] { border-left: 3px solid rgba(167,139,250,0.5); }
-.nk-cw-trait-card[data-cat="combat"]  { border-left: 3px solid rgba(56,189,248,0.5); }
-.nk-cw-trait-card[data-cat="special"] { border-left: 3px solid rgba(251,146,60,0.5); }
+.nk-cw-trait-card[data-cat="faction"] { border-left: 3px solid color-mix(in srgb, var(--cw-faction-core) 50%, transparent); }
+.nk-cw-trait-card[data-cat="combat"]  { border-left: 3px solid color-mix(in srgb, var(--cw-combat-core) 50%, transparent); }
+.nk-cw-trait-card[data-cat="special"] { border-left: 3px solid color-mix(in srgb, var(--cw-special-core) 50%, transparent); }
 
 /* 手机端适配 */
 @media (max-width: 767px) {
@@ -380,7 +380,6 @@
 .nk-no-reveal .nk-relic-card,
 .nk-no-reveal .nk-item-card,
 .nk-no-reveal .nk-mob-card,
-.nk-no-reveal .nk-season-card,
 .nk-no-reveal .nk-crole-card,
 .nk-no-reveal .nk-cw-card {
   animation: none;

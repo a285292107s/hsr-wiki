@@ -73,18 +73,18 @@
   inset: 0;
   background:
     radial-gradient(ellipse 50% 70% at 25% 30%, color-mix(in srgb, var(--gold-300) 7%, transparent), transparent 65%),
-    radial-gradient(ellipse 80% 40% at 70% 90%, rgba(212,175,55,0.04), transparent 60%);
+    radial-gradient(ellipse 80% 40% at 70% 90%, color-mix(in srgb, var(--gold-500) 4%, transparent), transparent 60%);
   pointer-events: none;
 }
 .nk-ctrait-hero[data-cat="faction"] .nk-ctrait-hero__glow {
   background:
-    radial-gradient(ellipse 50% 70% at 25% 30%, rgba(167,139,250,0.09), transparent 65%),
-    radial-gradient(ellipse 80% 40% at 70% 90%, rgba(167,139,250,0.04), transparent 60%);
+    radial-gradient(ellipse 50% 70% at 25% 30%, color-mix(in srgb, var(--cw-faction-core) 9%, transparent), transparent 65%),
+    radial-gradient(ellipse 80% 40% at 70% 90%, color-mix(in srgb, var(--cw-faction-core) 4%, transparent), transparent 60%);
 }
 .nk-ctrait-hero[data-cat="combat"] .nk-ctrait-hero__glow {
   background:
-    radial-gradient(ellipse 50% 70% at 25% 30%, rgba(56,189,248,0.09), transparent 65%),
-    radial-gradient(ellipse 80% 40% at 70% 90%, rgba(56,189,248,0.04), transparent 60%);
+    radial-gradient(ellipse 50% 70% at 25% 30%, color-mix(in srgb, var(--cw-combat-core) 9%, transparent), transparent 65%),
+    radial-gradient(ellipse 80% 40% at 70% 90%, color-mix(in srgb, var(--cw-combat-core) 4%, transparent), transparent 60%);
 }
 /* 装饰性 HUD 网格线 */
 .nk-ctrait-hero::before {
@@ -163,9 +163,9 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.nk-ctrait-hero__cat--faction { background: rgba(167,139,250,0.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.35); box-shadow: 0 0 8px rgba(167,139,250,0.15); }
-.nk-ctrait-hero__cat--combat  { background: rgba(56,189,248,0.12); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.35); box-shadow: 0 0 8px rgba(56,189,248,0.12); }
-.nk-ctrait-hero__cat--special { background: rgba(251,146,60,0.12); color: #fdba74; border: 1px solid rgba(251,146,60,0.35); box-shadow: 0 0 8px rgba(251,146,60,0.12); }
+.nk-ctrait-hero__cat--faction { background: color-mix(in srgb, var(--cw-faction-core) 15%, transparent); color: var(--cw-faction); border: 1px solid color-mix(in srgb, var(--cw-faction-core) 35%, transparent); box-shadow: 0 0 8px color-mix(in srgb, var(--cw-faction-core) 15%, transparent); }
+.nk-ctrait-hero__cat--combat  { background: color-mix(in srgb, var(--cw-combat-core) 12%, transparent); color: var(--cw-combat); border: 1px solid color-mix(in srgb, var(--cw-combat-core) 35%, transparent); box-shadow: 0 0 8px color-mix(in srgb, var(--cw-combat-core) 12%, transparent); }
+.nk-ctrait-hero__cat--special { background: color-mix(in srgb, var(--cw-special-core) 12%, transparent); color: var(--cw-special); border: 1px solid color-mix(in srgb, var(--cw-special-core) 35%, transparent); box-shadow: 0 0 8px color-mix(in srgb, var(--cw-special-core) 12%, transparent); }
 .nk-ctrait-hero__act {
   font-size: 0.68rem;
   color: var(--text2);
@@ -417,17 +417,17 @@
 }
 
 /* 品质色 → 菱形节点 */
-.nk-ctrait-layer--base .nk-ctrait-layer__node { border-color: rgba(160,150,120,0.35); }
-.nk-ctrait-layer--silver .nk-ctrait-layer__node { border-color: rgba(148,163,184,0.55); }
+.nk-ctrait-layer--base .nk-ctrait-layer__node { border-color: color-mix(in srgb, var(--ctrait-base) 35%, transparent); }
+.nk-ctrait-layer--silver .nk-ctrait-layer__node { border-color: color-mix(in srgb, var(--cw-rarity-1) 55%, transparent); }
 .nk-ctrait-layer--gold .nk-ctrait-layer__node { border-color: color-mix(in srgb, var(--gold) 65%, transparent); box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 8px color-mix(in srgb, var(--gold) 12%, transparent); }
-.nk-ctrait-layer--multicolor .nk-ctrait-layer__node { border-color: rgba(232,121,249,0.6); box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 8px rgba(232,121,249,0.1); }
-.nk-ctrait-layer--unique .nk-ctrait-layer__node { border-color: rgba(251,146,60,0.6); box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 8px rgba(251,146,60,0.1); }
+.nk-ctrait-layer--multicolor .nk-ctrait-layer__node { border-color: color-mix(in srgb, var(--ctrait-multicolor) 60%, transparent); box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 8px color-mix(in srgb, var(--ctrait-multicolor) 10%, transparent); }
+.nk-ctrait-layer--unique .nk-ctrait-layer__node { border-color: color-mix(in srgb, var(--cw-special-core) 60%, transparent); box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 8px color-mix(in srgb, var(--cw-special-core) 10%, transparent); }
 .nk-ctrait-layer--gold:hover .nk-ctrait-layer__node { box-shadow: 0 2px 16px rgba(0,0,0,0.5), 0 0 16px color-mix(in srgb, var(--gold) 30%, transparent); }
-.nk-ctrait-layer--multicolor:hover .nk-ctrait-layer__node { box-shadow: 0 2px 16px rgba(0,0,0,0.5), 0 0 16px rgba(232,121,249,0.3); }
-.nk-ctrait-layer--unique:hover .nk-ctrait-layer__node { box-shadow: 0 2px 16px rgba(0,0,0,0.5), 0 0 16px rgba(251,146,60,0.3); }
+.nk-ctrait-layer--multicolor:hover .nk-ctrait-layer__node { box-shadow: 0 2px 16px rgba(0,0,0,0.5), 0 0 16px color-mix(in srgb, var(--ctrait-multicolor) 30%, transparent); }
+.nk-ctrait-layer--unique:hover .nk-ctrait-layer__node { box-shadow: 0 2px 16px rgba(0,0,0,0.5), 0 0 16px color-mix(in srgb, var(--cw-special-core) 30%, transparent); }
 .nk-ctrait-layer--gold .nk-ctrait-layer__num { color: var(--gold); }
-.nk-ctrait-layer--multicolor .nk-ctrait-layer__num { color: #f0abfc; }
-.nk-ctrait-layer--unique .nk-ctrait-layer__num { color: #fdba74; }
+.nk-ctrait-layer--multicolor .nk-ctrait-layer__num { color: var(--ctrait-multicolor); }
+.nk-ctrait-layer--unique .nk-ctrait-layer__num { color: var(--cw-special); }
 
 /* ── 右列：内容面板（开放式：品质脊线 + 渐隐底色，不做四边封闭卡片） ── */
 .nk-ctrait-layer__body {
@@ -445,11 +445,11 @@
   transform: translateX(3px);
 }
 /* 品质色左边线 */
-.nk-ctrait-layer--base .nk-ctrait-layer__body { border-left: 3px solid rgba(160,150,120,0.3); }
-.nk-ctrait-layer--silver .nk-ctrait-layer__body { border-left: 3px solid rgba(148,163,184,0.4); }
+.nk-ctrait-layer--base .nk-ctrait-layer__body { border-left: 3px solid color-mix(in srgb, var(--ctrait-base) 30%, transparent); }
+.nk-ctrait-layer--silver .nk-ctrait-layer__body { border-left: 3px solid color-mix(in srgb, var(--cw-rarity-1) 40%, transparent); }
 .nk-ctrait-layer--gold .nk-ctrait-layer__body { border-left: 3px solid color-mix(in srgb, var(--gold) 50%, transparent); }
-.nk-ctrait-layer--multicolor .nk-ctrait-layer__body { border-left: 3px solid rgba(232,121,249,0.5); }
-.nk-ctrait-layer--unique .nk-ctrait-layer__body { border-left: 3px solid rgba(251,146,60,0.5); }
+.nk-ctrait-layer--multicolor .nk-ctrait-layer__body { border-left: 3px solid color-mix(in srgb, var(--ctrait-multicolor) 50%, transparent); }
+.nk-ctrait-layer--unique .nk-ctrait-layer__body { border-left: 3px solid color-mix(in srgb, var(--cw-special-core) 50%, transparent); }
 
 /* 面板头部：品质 + 激活条件 */
 .nk-ctrait-layer__head {
@@ -476,11 +476,11 @@
   box-shadow: 0 0 5px currentColor;
 }
 /* 品质徽章配色 */
-.nk-ctrait-layer--base .nk-ctrait-layer__quality { background: rgba(160,150,120,0.08); color: rgba(232,222,197,0.6); border: 1px solid rgba(160,150,120,0.22); }
-.nk-ctrait-layer--silver .nk-ctrait-layer__quality { background: rgba(148,163,184,0.1); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.25); }
+.nk-ctrait-layer--base .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--ctrait-base) 8%, transparent); color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--gold-300) 20%) 60%, transparent); border: 1px solid color-mix(in srgb, var(--ctrait-base) 22%, transparent); }
+.nk-ctrait-layer--silver .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--cw-rarity-1) 10%, transparent); color: var(--crole-chip-season); border: 1px solid color-mix(in srgb, var(--cw-rarity-1) 25%, transparent); }
 .nk-ctrait-layer--gold .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--gold) 8%, transparent); color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent); }
-.nk-ctrait-layer--multicolor .nk-ctrait-layer__quality { background: rgba(232,121,249,0.08); color: #f0abfc; border: 1px solid rgba(232,121,249,0.25); }
-.nk-ctrait-layer--unique .nk-ctrait-layer__quality { background: rgba(251,146,60,0.08); color: #fdba74; border: 1px solid rgba(251,146,60,0.25); }
+.nk-ctrait-layer--multicolor .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--ctrait-multicolor) 8%, transparent); color: var(--ctrait-multicolor); border: 1px solid color-mix(in srgb, var(--ctrait-multicolor) 25%, transparent); }
+.nk-ctrait-layer--unique .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--cw-special-core) 8%, transparent); color: var(--cw-special); border: 1px solid color-mix(in srgb, var(--cw-special-core) 25%, transparent); }
 /* 激活人数标签 */
 .nk-ctrait-layer__act {
   font-family: var(--font-hud);
@@ -555,23 +555,23 @@
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
-  background: rgba(56,189,248,0.1);
-  color: #7dd3fc;
+  background: color-mix(in srgb, var(--cw-combat-core) 10%, transparent);
+  color: var(--cw-combat)
   letter-spacing: 0.03em;
 }
 .nk-ctrait-prop__scope--all {
-  background: rgba(252,211,77,0.1);
-  color: #fcd34d;
+  background: color-mix(in srgb, var(--gold-300) 10%, transparent);
+  color: var(--gold-300)
 }
 .nk-ctrait-prop__name {
   color: var(--text2);
 }
 .nk-ctrait-prop__val {
-  color: #4ade80;
+  color: var(--cw-rarity-2)
   font-weight: 700;
   font-family: var(--font-hud);
   font-size: 0.72rem;
-  text-shadow: 0 0 6px rgba(74,222,128,0.2);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--cw-rarity-2) 20%, transparent);
 }
 
 /* ═══ 响应式 ═══ */

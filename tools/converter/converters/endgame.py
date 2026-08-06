@@ -8,16 +8,20 @@
 
 说明：
 - 名称经 TextMap 解析（仅中文；en/ja/ko 源数据未提供，留空）。
-- 源数据中不存在"赛季 → 游戏版本"的时间线表，版本分组无法从源可靠重建，
-  因此本转换器不生成 *-version.json；前端对四季统一按 ID 降序展示
-  （与原站 story/boss 行为一致），季节标签显示为"未知"。
-- 样本的 begin/end/live_* 本就为空（赛季状态恒为"未知"）；本转换器同样留空，
-  避免源中占位未来日期（如 2033）误导赛季"未开始/进行中"状态。
+- 排期：ScheduleDataChallengeMaze 提供赛季 BeginTime/EndTime。该表无显式外键，
+  经 ID 结构推断映射：ScheduleID = 200000 + 赛季 GroupID（200101↔101 …
+  201034↔1034），覆盖 maze.json 55 组中的 53 组。
+  占位过滤：整段早于公测上线（2023-04-26，beta/测试占位）或起点年份 ≥2030
+  （未来占位）的排期丢弃，避免误导赛季"未开始/进行中"状态。
+  虚构叙事 / 末日幻影 / 异相仲裁无对应排期段，live_* 留空。
+- 赛季统计：由组内全部层记录聚合（最大层数 / 阶段数 / 回合上限 / 弱点属性
+  全层合并去重）；异相仲裁结构不同，仅提供弱点属性。
 - param 字段前端未消费，置空数组以贴合结构。
 """
 
 import logging
 from collections import defaultdict
+from datetime import datetime
 
 from config import EXCEL_DIR, OUTPUT_DIR
 from textmap import resolve_text
@@ -25,8 +29,55 @@ from utils import load_json, save_json
 
 logger = logging.getLogger("converter")
 
+# 公测上线时间：整段早于此时段的排期视为 beta/测试占位
+_LAUNCH_TS = datetime(2023, 4, 26, 0, 0, 0)
 
-def _group_seasons(filename: str, name_field: str) -> dict:
+
+def _load_schedules() -> dict[str, tuple[str, str]]:
+    """读取赛季排期并按 GroupID 映射（ScheduleID - 200000 = GroupID）。
+
+    过滤占位排期：整段早于公测上线（beta 占位）或起点年份 ≥2030（未来占位）。
+    无排期的赛季（组 100 / 900 等）不进入结果。
+    """
+    data = load_json(EXCEL_DIR / "ScheduleDataChallengeMaze.json")
+    out: dict[str, tuple[str, str]] = {}
+    for rec in data:
+        sid = rec.get("ID")
+        begin = rec.get("BeginTime", "")
+        end = rec.get("EndTime", "")
+        if not sid or not begin or not end:
+            continue
+        try:
+            bt = datetime.fromisoformat(begin.replace(" ", "T"))
+            et = datetime.fromisoformat(end.replace(" ", "T"))
+        except ValueError:
+            continue
+        if et < _LAUNCH_TS or bt.year >= 2030:
+            continue
+        out[str(sid - 200000)] = (begin, end)
+    return out
+
+
+def _season_stats(recs: list[dict]) -> dict:
+    """聚合赛季统计：最大层数 / 阶段数 / 回合上限 / 弱点属性（全层合并去重）。"""
+    floors = stage = countdown = 0
+    damage: set[str] = set()
+    for r in recs:
+        floors = max(floors, r.get("Floor", 0) or 0)
+        stage = max(stage, r.get("StageNum", 0) or 0)
+        countdown = max(countdown, r.get("ChallengeCountDown", 0) or 0)
+        for key in ("DamageType1", "DamageType2"):
+            for d in r.get(key, []) or []:
+                damage.add(d)
+    return {
+        "damage_types": sorted(damage),
+        "floors": floors,
+        "stage_num": stage,
+        "countdown": countdown,
+    }
+
+
+def _group_seasons(filename: str, name_field: str, schedules: dict[str, tuple[str, str]]) -> dict:
     """读取挑战配置，按 GroupID 聚合为赛季条目（取首层代表记录）。"""
     data = load_json(EXCEL_DIR / filename)
     groups: dict[int, list] = defaultdict(list)
@@ -39,7 +90,8 @@ def _group_seasons(filename: str, name_field: str) -> dict:
     result: dict[str, dict] = {}
     for gid, recs in groups.items():
         rep = min(recs, key=lambda r: r.get("ID", 0))
-        result[str(gid)] = {
+        live_begin, live_end = schedules.get(str(gid), ("", ""))
+        entry = {
             "id": str(gid),
             "zh": resolve_text(rep.get(name_field, {})),
             "en": "",
@@ -48,14 +100,16 @@ def _group_seasons(filename: str, name_field: str) -> dict:
             "param": [],
             "begin": "",
             "end": "",
-            "live_begin": "",
-            "live_end": "",
+            "live_begin": live_begin,
+            "live_end": live_end,
         }
+        entry.update(_season_stats(recs))
+        result[str(gid)] = entry
     return result
 
 
 def _peak_seasons() -> dict:
-    """异相仲裁：按 ID 分组（源用 Title 而非 Name）。"""
+    """异相仲裁：按 ID 分组（源用 Title 而非 Name），仅弱点属性可聚合。"""
     data = load_json(EXCEL_DIR / "ChallengePeakConfig.json")
     result: dict[str, dict] = {}
     for rec in data:
@@ -73,21 +127,23 @@ def _peak_seasons() -> dict:
             "end": "",
             "live_begin": "",
             "live_end": "",
+            "damage_types": sorted(rec.get("DamageType", []) or []),
         }
     return result
 
 
 def convert() -> None:
+    schedules = _load_schedules()
     # 忘却之庭
-    maze = _group_seasons("ChallengeMazeConfig.json", "Name")
+    maze = _group_seasons("ChallengeMazeConfig.json", "Name", schedules)
     save_json(maze, OUTPUT_DIR / "maze.json")
 
     # 虚构叙事
-    story = _group_seasons("ChallengeStoryMazeConfig.json", "Name")
+    story = _group_seasons("ChallengeStoryMazeConfig.json", "Name", schedules)
     save_json(story, OUTPUT_DIR / "maze_extra.json")
 
     # 末日幻影
-    boss = _group_seasons("ChallengeBossMazeConfig.json", "Name")
+    boss = _group_seasons("ChallengeBossMazeConfig.json", "Name", schedules)
     save_json(boss, OUTPUT_DIR / "maze_boss.json")
 
     # 异相仲裁

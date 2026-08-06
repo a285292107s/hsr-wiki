@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════
+   终局内容 · 星际档案（Endgame Archive）
+   由 EndgameView.vue 随路由懒加载导入。
+   - 卡片以 v-html 模板字符串渲染（CatalogPage 网格），必须使用全局选择器
+   - 四模式身份：--eg-color 经 data-mode 映射（领域层 --eg-* 令牌）
+   - 覆盖：目录卡片入场动画 / 返回恢复时的 no-reveal 抑制
+═══════════════════════════════════════════ */
+
+/* ─── 模式身份映射（卡片 + 子导航共用） ─── */
+.nk-eg-card[data-mode="maze"],
+.nk-eg-subnav__item[data-mode="maze"] { --eg-color: var(--eg-maze); }
+.nk-eg-card[data-mode="story"],
+.nk-eg-subnav__item[data-mode="story"] { --eg-color: var(--eg-story); }
+.nk-eg-card[data-mode="boss"],
+.nk-eg-subnav__item[data-mode="boss"] { --eg-color: var(--eg-boss); }
+.nk-eg-card[data-mode="peak"],
+.nk-eg-subnav__item[data-mode="peak"] { --eg-color: var(--eg-peak); }
+
+/* ═══════════════════════════════════════════
+   终局内容子导航（模式身份 Tab）
+═══════════════════════════════════════════ */
+.nk-eg-subnav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 16px 24px 4px 88px; }
+.nk-eg-subnav__item { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: 10px; text-decoration: none; cursor: pointer; overflow: hidden; transition: border-color 0.25s var(--ease), background 0.25s var(--ease), box-shadow 0.25s var(--ease), transform 0.25s var(--ease); }
+/* 模式色墨迹：静止 6% 隐现，hover/active 加深（与档案卡同源材质） */
+.nk-eg-subnav__item::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 120% 130% at 0% 0%, color-mix(in srgb, var(--eg-color) 14%, transparent) 0%, transparent 65%); opacity: 0.45; transition: opacity 0.25s; pointer-events: none; }
+.nk-eg-subnav__item::after { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--eg-color), color-mix(in srgb, var(--eg-color) 30%, transparent)); opacity: 0; transition: opacity 0.25s; }
+.nk-eg-subnav__emblem { position: relative; z-index: 1; width: 30px; height: 30px; flex-shrink: 0; color: var(--text3); transition: color 0.25s, filter 0.25s, transform 0.3s var(--ease); }
+.nk-eg-subnav__emblem svg { width: 100%; height: 100%; }
+.nk-eg-subnav__text { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.nk-eg-subnav__name { font-size: 0.88rem; font-weight: 700; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.25s; }
+.nk-eg-subnav__en { font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.12em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nk-eg-subnav__item:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--eg-color) 45%, transparent); box-shadow: 0 6px 20px rgba(0,0,0,0.35), 0 0 14px color-mix(in srgb, var(--eg-color) 12%, transparent); }
+.nk-eg-subnav__item:hover::before { opacity: 0.8; }
+.nk-eg-subnav__item:hover .nk-eg-subnav__emblem { color: var(--eg-color); transform: scale(1.08); }
+.nk-eg-subnav__item:hover .nk-eg-subnav__name { color: var(--text-bright); }
+.nk-eg-subnav__item.active { border-color: color-mix(in srgb, var(--eg-color) 60%, transparent); background: color-mix(in srgb, var(--eg-color) 9%, var(--card)); box-shadow: 0 0 18px color-mix(in srgb, var(--eg-color) 16%, transparent), inset 0 0 24px color-mix(in srgb, var(--eg-color) 5%, transparent); }
+.nk-eg-subnav__item.active::before { opacity: 1; }
+.nk-eg-subnav__item.active::after { opacity: 1; }
+.nk-eg-subnav__item.active .nk-eg-subnav__emblem { color: var(--eg-color); filter: drop-shadow(0 0 8px color-mix(in srgb, var(--eg-color) 55%, transparent)); }
+.nk-eg-subnav__item.active .nk-eg-subnav__name { color: var(--text-bright); text-shadow: 0 0 10px color-mix(in srgb, var(--eg-color) 35%, transparent); }
+.nk-eg-subnav__item.active .nk-eg-subnav__en { color: color-mix(in srgb, var(--eg-color) 70%, var(--text3)); }
+.nk-eg-subnav__item:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--eg-color) 55%, transparent); }
+
+/* ═══════════════════════════════════════════
+   星际档案网格 + 档案卡
+═══════════════════════════════════════════ */
+.nk-eg-grid { --nk-grid-min: 340px; --nk-grid-gap: 14px; }
+.nk-eg-card { --eg-color: var(--primary); position: relative; display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: var(--nk-radius-card); cursor: pointer; text-decoration: none; transition: transform 0.28s var(--ease), border-color 0.28s, box-shadow 0.28s, background 0.28s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 18ms), 600ms); }
+/* 档案氛围层：模式色天光 + 细扫描线（档案纸张质感） */
+.nk-eg-card::before { content: ''; position: absolute; inset: 0; background:
+  radial-gradient(ellipse 90% 130% at 12% 0%, color-mix(in srgb, var(--eg-color) 9%, transparent) 0%, transparent 62%),
+  repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,0.016) 3px 4px);
+  pointer-events: none; }
+/* 档案装帧角标（右上） */
+.nk-eg-card::after { content: ''; position: absolute; top: 9px; right: 9px; width: 13px; height: 13px; border-top: 1px solid color-mix(in srgb, var(--eg-color) 40%, transparent); border-right: 1px solid color-mix(in srgb, var(--eg-color) 40%, transparent); opacity: 0.55; transition: opacity 0.25s, border-color 0.25s; pointer-events: none; }
+
+/* 编号铭牌：模式徽记 + 档案序号（星际档案的记忆点） */
+.nk-eg-card__plate { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; width: 84px; height: 96px; flex-shrink: 0; background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 13%, color-mix(in srgb, var(--blk-900) 62%, transparent)) 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 100%); border: 1px solid color-mix(in srgb, var(--eg-color) 32%, transparent); border-radius: 8px; transition: border-color 0.28s, background 0.28s, box-shadow 0.28s; }
+.nk-eg-card__plate::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 7px; height: 1px; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--eg-color) 45%, transparent) 50%, transparent 100%); opacity: 0.6; }
+.nk-eg-card__emblem { width: 22px; height: 22px; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); transition: color 0.28s, filter 0.28s; }
+.nk-eg-card__emblem svg { width: 100%; height: 100%; }
+.nk-eg-card__num { font-family: var(--font-hud); font-size: 1.32rem; font-weight: 800; line-height: 1; letter-spacing: 0.02em; color: var(--text-bright); text-shadow: 0 0 14px color-mix(in srgb, var(--eg-color) 42%, transparent); transition: color 0.28s, text-shadow 0.28s; }
+.nk-eg-card__num--long { font-size: 1.02rem; }
+
+/* 内容区 */
+.nk-eg-card__body { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; padding: 2px 0 2px 2px; }
+.nk-eg-card__name { font-size: 0.95rem; font-weight: 700; line-height: 1.4; color: var(--text-bright); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color 0.2s, text-shadow 0.2s; }
+.nk-eg-card__meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 22px; }
+
+/* 版本胶囊（模式色）+ 日期 */
+.nk-eg-card__ver { font-family: var(--font-hud); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; white-space: nowrap; padding: 3px 9px; color: color-mix(in srgb, var(--eg-color) 82%, #fff); background: color-mix(in srgb, var(--eg-color) 14%, transparent); border: 1px solid color-mix(in srgb, var(--eg-color) 34%, transparent); border-radius: 6px; }
+.nk-eg-card__date { font-size: 0.6rem; letter-spacing: 0.02em; color: var(--text3); white-space: nowrap; }
+
+/* 弱点属性图标（CDN 元素图标，与角色卡同源视觉） */
+.nk-eg-card__elems { display: inline-flex; align-items: center; gap: 5px; }
+.nk-eg-card__elem { width: 18px; height: 18px; border-radius: 50%; background: color-mix(in srgb, var(--blk-900) 75%, transparent); border: 1px solid var(--border); padding: 2px; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease); }
+.nk-eg-card__elem:hover { transform: scale(1.15); box-shadow: 0 0 8px var(--primary-glow); }
+/* 层数/回合 HUD 统计 */
+.nk-eg-card__stat { font-family: var(--font-hud); font-size: 0.56rem; letter-spacing: 0.06em; color: var(--text3); white-space: nowrap; }
+
+/* 状态徽章：仅数据含日期时出现（live/ended/upcoming） */
+.nk-eg-card__status { margin-left: auto; flex-shrink: 0; font-size: 0.56rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.06em; white-space: nowrap; border: 1px solid; transition: all 0.25s; }
+.nk-eg-card--live .nk-eg-card__status { color: var(--season-live); background: color-mix(in srgb, var(--season-live) 10%, transparent); border-color: color-mix(in srgb, var(--season-live) 32%, transparent); }
+.nk-eg-card--ended .nk-eg-card__status { color: var(--text2); background: color-mix(in srgb, var(--season-ended) 10%, transparent); border-color: color-mix(in srgb, var(--season-ended) 26%, transparent); }
+.nk-eg-card--upcoming .nk-eg-card__status { color: var(--season-upcoming); background: color-mix(in srgb, var(--season-upcoming) 10%, transparent); border-color: color-mix(in srgb, var(--season-upcoming) 32%, transparent); }
+
+/* 箭头指示 */
+.nk-eg-card__arrow { position: relative; z-index: 1; width: 16px; height: 16px; flex-shrink: 0; color: var(--text3); opacity: 0; transform: translateX(-4px); transition: opacity 0.25s, transform 0.25s, color 0.25s; }
+.nk-eg-card__arrow svg { width: 100%; height: 100%; }
+
+/* ── 状态修饰 ── */
+.nk-eg-card--ended { opacity: 0.78; }
+.nk-eg-card--ended:hover { opacity: 1; }
+/* 进行中：铭牌呼吸辉光 */
+.nk-eg-card--live .nk-eg-card__plate { animation: nk-eg-live 2.4s ease-in-out infinite; }
+
+/* ── hover（仅精细指针设备；translateY 抬升，不引入 3D 旋转，文本卡更稳） ── */
+@media (hover: hover) and (pointer: fine) {
+  .nk-eg-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--eg-color) 48%, transparent); box-shadow: 0 12px 30px rgba(0,0,0,0.42), 0 0 18px color-mix(in srgb, var(--eg-color) 13%, transparent); }
+  .nk-eg-card:hover::after { opacity: 1; border-color: color-mix(in srgb, var(--eg-color) 78%, transparent); }
+  .nk-eg-card:hover .nk-eg-card__plate { border-color: color-mix(in srgb, var(--eg-color) 62%, transparent); background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 20%, color-mix(in srgb, var(--blk-900) 62%, transparent)) 0%, color-mix(in srgb, var(--blk-900) 86%, transparent) 100%); }
+  .nk-eg-card:hover .nk-eg-card__emblem { color: var(--eg-color); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--eg-color) 55%, transparent)); }
+  .nk-eg-card:hover .nk-eg-card__num { color: #fff; text-shadow: 0 0 18px color-mix(in srgb, var(--eg-color) 62%, transparent); }
+  .nk-eg-card:hover .nk-eg-card__name { color: #fff; text-shadow: 0 0 12px color-mix(in srgb, var(--eg-color) 28%, transparent); }
+  .nk-eg-card:hover .nk-eg-card__arrow { opacity: 1; transform: translateX(0); color: var(--eg-color); }
+}
+.nk-eg-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
+
+@keyframes nk-eg-live { 0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--season-live) 0%, transparent); } 50% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--season-live) 38%, transparent), 0 0 16px color-mix(in srgb, var(--season-live) 16%, transparent); } }
+
+/* 返回目录页滚动恢复时抑制入场动画（no-reveal 由 CatalogPage 注入） */
+.nk-no-reveal .nk-eg-card { animation: none; }
+
+/* ── 响应式 ── */
+@media (max-width: 767px) {
+  .nk-eg-subnav { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px 16px 4px; }
+  .nk-eg-subnav__item { padding: 10px 12px; gap: 8px; }
+  .nk-eg-subnav__emblem { width: 26px; height: 26px; }
+  .nk-eg-grid { grid-template-columns: 1fr; }
+  .nk-eg-card { padding: 14px; gap: 12px; }
+  .nk-eg-card__plate { width: 72px; height: 88px; }
+  .nk-eg-card__num { font-size: 1.18rem; }
+  .nk-eg-card__num--long { font-size: 0.95rem; }
+  .nk-eg-card__name { font-size: 0.9rem; }
+  .nk-eg-card__status { margin-left: 0; }
+}
+@media (max-width: 374px) { .nk-eg-subnav { grid-template-columns: 1fr; } }
+@media (min-width: 1600px) { .nk-eg-subnav { max-width: var(--nk-content-max); margin-left: auto; margin-right: auto; padding: 16px 0 4px; } }
+
+/* ── 减弱动效 ── */
+@media (prefers-reduced-motion: reduce) {
+  .nk-eg-card { animation: none; }
+  .nk-eg-card--live .nk-eg-card__plate { animation: none; }
+  .nk-eg-card:hover, .nk-eg-subnav__item:hover { transform: none; }
+}

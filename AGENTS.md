@@ -60,7 +60,7 @@ src/
 │   ├── App.vue          → 外壳：SidebarNav + 方向过渡 RouterView + ToastHost
 │   ├── router/index.ts  → History 路由；meta.depth 驱动导航方向动画；
 │   │                        终局 /endgame/* 为嵌套路由，Tab 切换由 EndgameView 布局组件处理；
-│   │                        meta.cw 触发 data-theme="cw"（货币战争暗金主题）；
+│   │                        meta.cw 触发 data-theme="cw"（货币战争黑金主题）；
 │   │                        CW 目录路由经 cwCatalogView / cwRoleCatalogView 并行加载目录专属 CSS
 │   ├── router/chunks.ts → 路由 chunk 预加载函数（侧栏 hover / 首页 idle）
 │   ├── stores/          → Pinia 状态仓库（app、character、lightcone、relic）
@@ -117,7 +117,7 @@ src/
 
 3. **本地优先数据**：全部目录/详情数据为预转换 JSON，存放于 `public/data/cn/`。仅图片与 Spine 动画在运行时从 CDN 加载。CDN 基址定义于 `src/lib/constants.ts → CDN`。
 
-4. **双模式主题**：常规模式（紫色调）vs 货币战争模式（暗金色）。路由 `meta.cw` 切换 `<html data-theme="cw">`，附带 450ms 过渡动画类。CW 路由位于 `/currency/*` 下。
+4. **双模式主题**：常规模式（黑与紫双色）vs 货币战争模式（黑与金双色，见 ADR 0011 双色约束）。路由 `meta.cw` 切换 `<html data-theme="cw">`，附带 450ms 过渡动画类。CW 路由位于 `/currency/*` 下。
 
 5. **方向性页面过渡**：Router `beforeEach` 比较 from/to 路由的 `meta.depth` 计算 `navDir`（1=前进、-1=返回、0=平级）。App.vue 据此选择过渡动画名。手机端（<768px）统一使用简单淡入淡出。
 
