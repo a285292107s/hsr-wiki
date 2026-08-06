@@ -177,7 +177,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
     </div>
   </template>
   <template v-if="props.sections.includes('teams') && teams.length">
-    <div class="nk-title nk-title--no-num">TEAMS</div>
+    <div class="nk-title">TEAMS</div>
     <div class="nk-build__teams">
       <div v-for="t in teams" :key="t.teamId" class="nk-build__team">
         <div class="nk-build__team-slot nk-build__team-slot--main">

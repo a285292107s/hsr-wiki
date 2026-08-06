@@ -178,9 +178,7 @@
   background:
     linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
 }
-/* 不计号标题（如 TEAMS 子区块） */
-.nk-char-page .nk-title--no-num { counter-increment: none; }
-.nk-char-page .nk-title--no-num::before { content: none; }
+/* TEAMS 已独立为区块，正常递增编号（05 光锥 → 06 队伍 → 07 遗器） */
 
 /* ═══════════ 卡片体系 · 中性细线克制卡 ═══════════
    背景微亮（非紫卡），hover 仅提升边框亮度与背景，无位移无阴影 */

@@ -87,6 +87,7 @@ const sectionDefs = [
   { id: 'eidolons', label: '星魂' },
   { id: 'bonuses', label: '属性' },
   { id: 'cones', label: '光锥' },
+  { id: 'teams', label: '队伍' },
   { id: 'relics', label: '遗器' },
   { id: 'stories', label: '档案' },
   { id: 'profile', label: '配音' },
@@ -325,7 +326,17 @@ onBeforeUnmount(() => {
             :char-id="char.charId"
             :name-cache="app.nameCache"
             :item-db="app.itemDb"
-            :sections="['cones', 'teams']"
+            :sections="['cones']"
+          />
+        </div>
+        <div v-if="d.teams && d.teams.length" class="nk-panel nk-panel--flat" data-panel="teams">
+          <BuildsPanel
+            :d="d"
+            :base-data="char.data"
+            :char-id="char.charId"
+            :name-cache="app.nameCache"
+            :item-db="app.itemDb"
+            :sections="['teams']"
           />
         </div>
         <div class="nk-panel nk-panel--flat" data-panel="relics">
