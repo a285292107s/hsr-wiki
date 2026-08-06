@@ -13,7 +13,7 @@
   overflow-x: hidden;
   padding: 0 0 64px 80px;
   background:
-    radial-gradient(ellipse 120% 60% at 50% -8%, rgba(212,175,55,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 120% 60% at 50% -8%, color-mix(in srgb, var(--gold-500) 10%, transparent) 0%, transparent 55%),
     radial-gradient(ellipse 80% 50% at 100% 100%, rgba(201,138,45,0.06) 0%, transparent 60%),
     var(--bg);
 }
@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(90deg, rgba(212,175,55,0.08), rgba(212,175,55,0.02) 50%, rgba(212,175,55,0.08));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold-500) 8%, transparent), color-mix(in srgb, var(--gold-500) 2%, transparent) 50%, color-mix(in srgb, var(--gold-500) 8%, transparent));
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
@@ -85,8 +85,8 @@
   flex: 1 1 0;
   min-width: 3px;
   border-radius: 2px 2px 0 0;
-  background: linear-gradient(to top, rgba(212,175,55,0.55), rgba(212,175,55,0.06));
-  box-shadow: 0 0 8px rgba(212,175,55,0.12);
+  background: linear-gradient(to top, color-mix(in srgb, var(--gold-500) 55%, transparent), color-mix(in srgb, var(--gold-500) 6%, transparent));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--gold-500) 12%, transparent);
   transform-origin: bottom;
   animation: nk-cwhub-candle-pulse 4.2s ease-in-out infinite;
 }
@@ -98,8 +98,8 @@
 .nk-cwhub-particle {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, #FCD34D 0%, rgba(252,211,77,0) 70%);
-  box-shadow: 0 0 10px rgba(252,211,77,0.6);
+  background: radial-gradient(circle, var(--gold-300) 0%, color-mix(in srgb, var(--gold-300) 0%, transparent) 70%);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--gold-300) 60%, transparent);
   opacity: 0;
   animation: nk-cwhub-float ease-in-out infinite;
 }
@@ -115,7 +115,7 @@
   top: 50%; left: 50%;
   width: 720px; height: 420px;
   transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse, rgba(212,175,55,0.16) 0%, transparent 68%);
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--gold-500) 16%, transparent) 0%, transparent 68%);
   pointer-events: none;
   filter: blur(6px);
 }
@@ -127,7 +127,7 @@
   font-size: 0.62rem;
   letter-spacing: 0.28em;
   color: var(--gold);
-  text-shadow: 0 0 16px rgba(252,211,77,0.4);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--gold-300) 40%, transparent);
   animation: nk-cwhub-fade-up 0.6s var(--ease) 0.05s backwards;
 }
 .nk-cwhub-hero__title {
@@ -137,7 +137,7 @@
   line-height: 1.02;
   letter-spacing: 0.06em;
   color: var(--text-bright);
-  text-shadow: 0 2px 8px rgba(0,0,0,0.7), 0 0 36px rgba(212,175,55,0.35);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7), 0 0 36px color-mix(in srgb, var(--gold-500) 35%, transparent);
   animation: nk-cwhub-fade-up 0.7s var(--ease) 0.15s backwards;
 }
 .nk-cwhub-hero__en {
@@ -147,7 +147,7 @@
   font-weight: 700;
   letter-spacing: 0.5em;
   color: var(--primary);
-  text-shadow: 0 0 24px rgba(212,175,55,0.4);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--gold-500) 40%, transparent);
   animation: nk-cwhub-fade-up 0.7s var(--ease) 0.28s backwards;
 }
 .nk-cwhub-hero__tagline {
@@ -174,7 +174,7 @@
   border-radius: 14px;
   overflow: hidden;
   background: var(--border);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(252,211,77,0.08);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 color-mix(in srgb, var(--gold-300) 8%, transparent);
   animation: nk-cwhub-fade-up 0.7s var(--ease) 0.52s backwards;
 }
 .nk-cwhub-stat {
@@ -194,7 +194,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(252,211,77,0.6), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold-300) 60%, transparent), transparent);
   opacity: 0.3;
   transition: opacity 0.25s var(--ease);
 }
@@ -219,11 +219,11 @@
   font-weight: 700;
   line-height: 1;
   color: var(--metric-val);
-  text-shadow: 0 0 18px rgba(212,175,55,0.35);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--gold-500) 35%, transparent);
   font-variant-numeric: tabular-nums;
   transition: text-shadow 0.25s var(--ease);
 }
-.nk-cwhub-stat:hover .nk-cwhub-stat__val { text-shadow: 0 0 24px rgba(252,211,77,0.6); }
+.nk-cwhub-stat:hover .nk-cwhub-stat__val { text-shadow: 0 0 24px color-mix(in srgb, var(--gold-300) 60%, transparent); }
 .nk-cwhub-stat__label {
   font-size: 0.64rem;
   letter-spacing: 0.14em;
@@ -247,7 +247,7 @@
 
 /* 板块卡片：暗金渐变 + 金边 + hover 辉光 + sheen 扫光 */
 .nk-cwhub-card {
-  --holo-color: rgba(252,211,77,0.75);
+  --holo-color: color-mix(in srgb, var(--gold-300) 75%, transparent);
   position: relative;
   isolation: isolate;
   display: flex;
@@ -262,7 +262,7 @@
   overflow: hidden;
   cursor: pointer;
   background:
-    linear-gradient(150deg, rgba(212,175,55,0.10) 0%, rgba(20,17,9,0.5) 48%, rgba(212,175,55,0.04) 100%),
+    linear-gradient(150deg, color-mix(in srgb, var(--gold-500) 10%, transparent) 0%, rgba(20,17,9,0.5) 48%, color-mix(in srgb, var(--gold-500) 4%, transparent) 100%),
     var(--card);
   transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s, background 0.3s;
   animation: nk-cwhub-card-in 0.5s var(--ease) backwards;
@@ -271,17 +271,17 @@
 @keyframes nk-cwhub-card-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 .nk-cwhub-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(252,211,77,0.7);
-  box-shadow: 0 16px 44px rgba(0,0,0,0.5), 0 0 26px rgba(212,175,55,0.28);
+  border-color: color-mix(in srgb, var(--gold-300) 70%, transparent);
+  box-shadow: 0 16px 44px rgba(0,0,0,0.5), 0 0 26px color-mix(in srgb, var(--gold-500) 28%, transparent);
 }
 /* 已上线板块（featured）：占 2×2，强调金色 */
 .nk-cwhub-card--featured {
   grid-column: span 2;
   grid-row: span 2;
-  border-color: rgba(212,175,55,0.5);
+  border-color: color-mix(in srgb, var(--gold-500) 50%, transparent);
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(212,175,55,0.18) 0%, transparent 55%),
-    linear-gradient(150deg, rgba(212,175,55,0.12) 0%, rgba(24,20,10,0.6) 55%, rgba(212,175,55,0.05) 100%),
+    radial-gradient(120% 120% at 0% 0%, color-mix(in srgb, var(--gold-500) 18%, transparent) 0%, transparent 55%),
+    linear-gradient(150deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, rgba(24,20,10,0.6) 55%, color-mix(in srgb, var(--gold-500) 5%, transparent) 100%),
     var(--card);
 }
 .nk-cwhub-card--featured .nk-cwhub-card__cn { font-size: 1.5rem; }
@@ -296,7 +296,7 @@
   top: -45%; left: -65%;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent 0%, rgba(252,211,77,0.06) 30%, rgba(255,255,255,0.16) 50%, rgba(252,211,77,0.06) 70%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--gold-300) 6%, transparent) 30%, rgba(255,255,255,0.16) 50%, color-mix(in srgb, var(--gold-300) 6%, transparent) 70%, transparent 100%);
   mix-blend-mode: screen;
   filter: blur(1.4px);
   opacity: 0;
@@ -318,20 +318,20 @@
   border-radius: 999px;
   border: 1px solid;
 }
-.nk-cwhub-card__badge.is-live { color: #0A0906; background: var(--gold); border-color: var(--gold); box-shadow: 0 0 14px rgba(252,211,77,0.5); }
-.nk-cwhub-card__badge.is-soon { color: var(--text3); background: rgba(212,175,55,0.06); border-color: var(--border); }
+.nk-cwhub-card__badge.is-live { color: #0A0906; background: var(--gold); border-color: var(--gold); box-shadow: 0 0 14px color-mix(in srgb, var(--gold-300) 50%, transparent); }
+.nk-cwhub-card__badge.is-soon { color: var(--text3); background: color-mix(in srgb, var(--gold-500) 6%, transparent); border-color: var(--border); }
 
 .nk-cwhub-card__icon {
   width: 42px; height: 42px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 11px;
-  background: rgba(212,175,55,0.12);
+  background: color-mix(in srgb, var(--gold-500) 12%, transparent);
   border: 1px solid var(--border);
   color: var(--gold);
   transition: all 0.3s;
 }
 .nk-cwhub-card__icon svg { width: 22px; height: 22px; }
-.nk-cwhub-card:hover .nk-cwhub-card__icon { background: rgba(212,175,55,0.2); border-color: rgba(252,211,77,0.6); box-shadow: 0 0 16px rgba(212,175,55,0.35); color: #FDE68A; }
+.nk-cwhub-card:hover .nk-cwhub-card__icon { background: color-mix(in srgb, var(--gold-500) 20%, transparent); border-color: color-mix(in srgb, var(--gold-300) 60%, transparent); box-shadow: 0 0 16px color-mix(in srgb, var(--gold-500) 35%, transparent); color: var(--gold-200); }
 
 .nk-cwhub-card__body { position: relative; z-index: 2; min-width: 0; }
 .nk-cwhub-card__cn { font-size: 1rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
@@ -358,10 +358,10 @@
   border-radius: 16px;
   overflow: hidden;
   background:
-    radial-gradient(120% 120% at 100% 0%, rgba(212,175,55,0.14) 0%, transparent 55%),
-    linear-gradient(150deg, rgba(212,175,55,0.10) 0%, rgba(20,17,9,0.5) 50%, rgba(212,175,55,0.04) 100%),
+    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--gold-500) 14%, transparent) 0%, transparent 55%),
+    linear-gradient(150deg, color-mix(in srgb, var(--gold-500) 10%, transparent) 0%, rgba(20,17,9,0.5) 50%, color-mix(in srgb, var(--gold-500) 4%, transparent) 100%),
     var(--card);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(252,211,77,0.08);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 color-mix(in srgb, var(--gold-300) 8%, transparent);
   animation: nk-cwhub-card-in 0.5s var(--ease) 0.1s backwards;
 }
 .nk-cwhub-season__card::before {
@@ -369,8 +369,8 @@
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 3px;
-  background: linear-gradient(180deg, var(--gold), rgba(212,175,55,0.1));
-  box-shadow: 0 0 16px rgba(212,175,55,0.4);
+  background: linear-gradient(180deg, var(--gold), color-mix(in srgb, var(--gold-500) 10%, transparent));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--gold-500) 40%, transparent);
 }
 .nk-cwhub-season__tag {
   display: inline-block;
@@ -382,7 +382,7 @@
   border-radius: 999px;
   color: #0A0906;
   background: var(--gold);
-  box-shadow: 0 0 14px rgba(252,211,77,0.5);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--gold-300) 50%, transparent);
 }
 .nk-cwhub-season__title {
   margin: 16px 0 18px;
@@ -391,7 +391,7 @@
   line-height: 1.3;
   letter-spacing: 0.02em;
   color: var(--text-bright);
-  text-shadow: 0 0 28px rgba(212,175,55,0.3);
+  text-shadow: 0 0 28px color-mix(in srgb, var(--gold-500) 30%, transparent);
 }
 .nk-cwhub-season__body {
   display: flex;
@@ -423,13 +423,13 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background:
-    linear-gradient(160deg, rgba(212,175,55,0.10) 0%, rgba(16,14,8,0.55) 55%, rgba(212,175,55,0.03) 100%);
-  box-shadow: inset 0 1px 0 rgba(252,211,77,0.08), 0 8px 28px rgba(0,0,0,0.3);
+    linear-gradient(160deg, color-mix(in srgb, var(--gold-500) 10%, transparent) 0%, rgba(16,14,8,0.55) 55%, color-mix(in srgb, var(--gold-500) 3%, transparent) 100%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--gold-300) 8%, transparent), 0 8px 28px rgba(0,0,0,0.3);
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 .nk-cwhub-season__overview:hover {
-  border-color: rgba(252,211,77,0.45);
-  box-shadow: inset 0 1px 0 rgba(252,211,77,0.12), 0 10px 34px rgba(0,0,0,0.4), 0 0 22px rgba(212,175,55,0.16);
+  border-color: color-mix(in srgb, var(--gold-300) 45%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--gold-300) 12%, transparent), 0 10px 34px rgba(0,0,0,0.4), 0 0 22px color-mix(in srgb, var(--gold-500) 16%, transparent);
 }
 /* 顶部金色发丝线：呼应卡片左侧竖条 */
 .nk-cwhub-season__overview::before {
@@ -438,23 +438,23 @@
   left: 14px; right: 14px; top: 0;
   height: 2px;
   border-radius: 0 0 2px 2px;
-  background: linear-gradient(90deg, transparent, rgba(252,211,77,0.7) 30%, rgba(252,211,77,0.7) 70%, transparent);
-  box-shadow: 0 0 12px rgba(252,211,77,0.4);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold-300) 70%, transparent) 30%, color-mix(in srgb, var(--gold-300) 70%, transparent) 70%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--gold-300) 40%, transparent);
 }
 .nk-cwhub-season__ov-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .nk-cwhub-season__ov-bar {
   flex-shrink: 0;
   width: 4px; height: 16px;
   border-radius: 1px;
-  background: linear-gradient(180deg, var(--gold), rgba(212,175,55,0.15));
-  box-shadow: 0 0 10px rgba(252,211,77,0.55);
+  background: linear-gradient(180deg, var(--gold), color-mix(in srgb, var(--gold-500) 15%, transparent));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--gold-300) 55%, transparent);
 }
 .nk-cwhub-season__ov-title {
   font-size: 0.92rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   color: var(--text-bright);
-  text-shadow: 0 0 18px rgba(212,175,55,0.3);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--gold-500) 30%, transparent);
 }
 .nk-cwhub-season__ov-en {
   margin-left: auto;
@@ -477,16 +477,16 @@
   animation: nk-cwhub-fade-up 0.5s var(--ease) backwards;
   animation-delay: calc(0.25s + var(--i, 0) * 55ms);
 }
-.nk-cwhub-season__ov-item:hover { background: rgba(212,175,55,0.09); transform: translateX(3px); }
+.nk-cwhub-season__ov-item:hover { background: color-mix(in srgb, var(--gold-500) 9%, transparent); transform: translateX(3px); }
 .nk-cwhub-season__ov-dot {
   flex-shrink: 0;
   font-size: 0.5rem;
   line-height: 2.1;
   color: var(--gold);
-  text-shadow: 0 0 8px rgba(252,211,77,0.6);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--gold-300) 60%, transparent);
   transition: transform 0.25s var(--ease), text-shadow 0.25s;
 }
-.nk-cwhub-season__ov-item:hover .nk-cwhub-season__ov-dot { transform: scale(1.4); text-shadow: 0 0 12px rgba(252,211,77,0.95); }
+.nk-cwhub-season__ov-item:hover .nk-cwhub-season__ov-dot { transform: scale(1.4); text-shadow: 0 0 12px color-mix(in srgb, var(--gold-300) 95%, transparent); }
 .nk-cwhub-season__ov-text {
   min-width: 0;
   font-size: 0.8rem;

@@ -114,7 +114,7 @@
 .nk-cw-tag--combat  { background: rgba(56,189,248,0.14);  color: #7dd3fc; border-color: rgba(56,189,248,0.3); }
 .nk-cw-tag--special { background: rgba(251,146,60,0.14);  color: #fdba74; border-color: rgba(251,146,60,0.3); }
 .nk-cw-tag--silver  { background: rgba(148,163,184,0.14); color: #cbd5e1; border-color: rgba(148,163,184,0.3); }
-.nk-cw-tag--gold    { background: rgba(252,211,77,0.14);  color: #fcd34d; border-color: rgba(252,211,77,0.3); }
+.nk-cw-tag--gold    { background: color-mix(in srgb, var(--gold) 14%, transparent);  color: var(--gold); border-color: color-mix(in srgb, var(--gold) 30%, transparent); }
 .nk-cw-tag--prismatic {
   background: linear-gradient(135deg, rgba(244,114,182,0.16), rgba(129,140,248,0.16), rgba(45,212,191,0.16));
   color: #f0abfc;

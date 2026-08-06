@@ -13,9 +13,9 @@
 .nk-char-page.nk-page--detail { padding-top: 45px; }
 /* 概览面板：头图无缝嵌入（顶部贴齐、左右突破面板内边距与面板同宽，下方内容保持面板内边距） */
 .nk-char-page .nk-panel--overview { padding-top: 0; }
-.nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-wide-max); margin: 0 -16px 0; }
+.nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-max); margin: 0 -16px 0; }
 @media (min-width: 768px) {
-  .nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 48px); max-width: var(--nk-detail-wide-max); margin: 0 -24px 0; }
+  .nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 48px); max-width: var(--nk-detail-max); margin: 0 -24px 0; }
 }
 .nk-char-page .nk-panel--flat { display: block; padding-bottom: 28px; }
 @media (min-width: 768px) {
@@ -70,7 +70,7 @@
 }
 .nk-char-page .nk-hero__camp::before { width: 18px; height: 1px; background: var(--line-2); }
 .nk-char-page .nk-hero__stars {
-  font-size: 0.8rem; letter-spacing: 0.14em; color: var(--gold-400);
+  font-size: 0.8rem; letter-spacing: 0.14em; color: var(--gold);
   text-shadow: none;
 }
 .nk-char-page .nk-hero__name {
@@ -90,7 +90,8 @@
 .nk-char-page .nk-hero__badge:hover { border-color: var(--line-2); background: rgba(255,255,255,0.05); }
 .nk-char-page .nk-hero__badge img { width: 20px; height: 20px; }
 
-/* 一句话介绍：纯文本（去左边线），可读行宽 */
+/* 一句话介绍：纯文本（去左边线），可读行宽（有意收窄至 560px：短句行宽，
+   勿被下方 §13.9 收束规则覆盖） */
 .nk-char-page .nk-hero__desc {
   border-left: none; padding: 0;
   font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
@@ -149,34 +150,9 @@
   transition: width 0.6s var(--nk-ease-out);
 }
 
-/* ═══════════ 章节标题 · 自动编号 + 延伸线 ═══════════ */
-.nk-char-page { counter-reset: nk-sec; }
-.nk-char-page .nk-title {
-  counter-increment: nk-sec;
-  display: flex; align-items: baseline; gap: 12px;
-  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.24em; text-transform: uppercase;
-  color: var(--text2);
-  margin-bottom: 20px; padding-bottom: 0;
-  border-bottom: none;
-}
-/* 编号（01 02 03…，与吸顶导航同序）；重置 tokens 渐变竖条的尺寸约束 */
-.nk-char-page .nk-title::before {
-  content: counter(nk-sec, decimal-leading-zero);
-  flex: none; width: auto; height: auto; border-radius: 0;
-  background: none;
-  font-size: 0.6rem; letter-spacing: 0; color: var(--primary); opacity: 0.95;
-  /* 编号与标题间的细分隔线（编辑式目录排版） */
-  padding-right: 10px;
-  border-right: 1px solid var(--line-2);
-}
-/* 标题延伸线：双段——实线收束后渐隐 */
-.nk-char-page .nk-title::after {
-  content: ''; flex: 1; height: 1px; align-self: center;
-  background:
-    linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
-}
-/* TEAMS 已独立为区块，正常递增编号（05 光锥 → 06 队伍 → 07 遗器） */
+/* ═══════════ 章节标题 ═══════════
+   编辑式基线（含 .nk-title__idx 编号元素）已全局化至 tokens.css（§13.1/§13.3）；
+   区块编号为固定身份（01-09，见 sections.ts），数据缺失时标题不渲染、导航同步隐藏（编号缺口保留） */
 
 /* ═══════════ 卡片体系 · 中性细线克制卡 ═══════════
    背景微亮（非紫卡），hover 仅提升边框亮度与背景，无位移无阴影 */
@@ -237,7 +213,7 @@
   transition: color 0.2s; letter-spacing: 0.02em;
   position: relative;
 }
-.nk-char-page .nk-skill__links-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
+.nk-char-page .nk-skill__links-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -12px; bottom: -12px; } /* 热区 ≥44px（全局化 §13.7） */
 .nk-char-page .nk-skill__links-btn:hover { color: var(--primary); }
 .nk-char-page .nk-skill__links-btn .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
 .nk-char-page .nk-skill__links-btn.open .arrow { transform: rotate(90deg); }
@@ -277,7 +253,7 @@
   transition: color 0.2s; letter-spacing: 0.02em;
   position: relative;
 }
-.nk-char-page .nk-skill__anim-toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
+.nk-char-page .nk-skill__anim-toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -12px; bottom: -12px; } /* 热区 ≥44px（全局化 §13.7） */
 .nk-char-page .nk-skill__anim-toggle:hover { color: var(--primary); }
 .nk-char-page .nk-skill__anim-toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
 .nk-char-page .nk-skill__anim-toggle.open .arrow { transform: rotate(90deg); }
@@ -327,7 +303,7 @@
   transition: color 0.2s; letter-spacing: 0.02em;
   position: relative;
 }
-.nk-char-page .nk-skill__table-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px; }
+.nk-char-page .nk-skill__table-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -12px; bottom: -12px; } /* 热区 ≥44px（全局化 §13.7） */
 .nk-char-page .nk-skill__table-btn:hover { color: var(--primary); }
 .nk-char-page .nk-skill__table-btn .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
 .nk-char-page .nk-skill__table-btn.open .arrow { transform: rotate(90deg); }
@@ -398,13 +374,13 @@
 /* ═══════════ 附加能力 ═══════════ */
 .nk-char-page .nk-ability { padding: 20px 24px 18px; }
 
-/* ═══════════ 属性加成 · 数据表格（1px 网格线） ═══════════ */
+/* ═══════════ 属性加成 · 数据表格（1px 网格线，外框随统一 952px 模块线） ═══════════ */
 .nk-char-page .nk-bonus-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1px; padding: 0;
   background: var(--line-1);
   border: 1px solid var(--line-1); border-radius: 10px; overflow: hidden;
-  margin: 0 auto 24px; max-width: var(--nk-prose-max);
+  margin: 0 auto 24px; max-width: var(--nk-struct-max);
 }
 .nk-char-page .nk-bonus {
   display: flex; flex-direction: row; align-items: center; gap: 10px;
@@ -418,7 +394,8 @@
   order: 1; flex: 1; min-width: 0;
   font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em;
 }
-.nk-char-page .nk-bonus__val { order: 2; font-size: 0.85rem; }
+/* 数值 = 语义金（全局化 §13.4 裁决：属性加成数值属数值语义族，与星级/强化同族） */
+.nk-char-page .nk-bonus__val { order: 2; font-size: 0.85rem; font-weight: 700; color: var(--gold-sem); }
 
 /* ═══════════ 配装区块 ═══════════ */
 .nk-char-page .nk-build__cones { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 14px; margin-bottom: 20px; }
@@ -500,7 +477,7 @@
 /* ═══════════ 档案与故事 ═══════════ */
 .nk-char-page .nk-profile {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
-  margin: 0 auto 24px; max-width: var(--nk-prose-max);
+  margin: 0 auto 24px; max-width: var(--nk-struct-max);
 }
 .nk-char-page .nk-profile__item {
   display: flex; flex-direction: column; gap: 4px;
@@ -511,8 +488,8 @@
 .nk-char-page .nk-profile__item:hover { border-color: var(--line-2); background: rgba(255,255,255,0.03); transform: none; }
 .nk-char-page .nk-profile__label { font-size: 0.625rem; font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
 .nk-char-page .nk-profile__val { font-size: 0.8125rem; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
-/* 角色故事（折叠手风琴） */
-.nk-char-page .nk-stories { display: flex; flex-direction: column; gap: 8px; max-width: var(--nk-prose-max); margin: 0 auto; }
+/* 角色故事（折叠手风琴，外框 952px；正文行宽在 __text 内收束） */
+.nk-char-page .nk-stories { display: flex; flex-direction: column; gap: 8px; max-width: var(--nk-struct-max); margin: 0 auto; }
 .nk-char-page .nk-story { overflow: hidden; border-radius: 10px; }
 .nk-char-page .nk-story__head {
   display: flex; align-items: center; gap: 12px; width: 100%;
@@ -537,7 +514,7 @@
 .nk-char-page .nk-story__text {
   font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
   border-top: 1px dashed var(--line-1);
-  padding: 14px 20px 18px;
+  padding: 14px 20px 18px; max-width: var(--nk-prose-max);
 }
 
 /* ═══════════ 吸顶工具条 ═══════════ */
@@ -558,10 +535,14 @@
 }
 .nk-char-page .nk-enh-bar__inner {
   display: flex; align-items: center; gap: 8px;
-  max-width: var(--nk-detail-max); margin: 0 auto; padding: 8px 16px; min-height: 44px;
+  max-width: var(--nk-detail-max); margin: 0 auto; padding: 6px 16px; min-height: 44px;
 }
 /* ─── 强化模式模块（hero 与 skills 之间，随内容滚动）─── */
-.nk-char-page .nk-enh-module { padding-bottom: 8px; }
+/* 统一 952px 模块外框：标题/选项卡/摘要与全页模块对齐（全局化 §13.9） */
+.nk-char-page .nk-enh-module {
+  padding-bottom: 8px;
+  max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto;
+}
 /* 模块标题：编号 00（金色，不参与章节计数）+ 延伸线，与章节标题同构 */
 .nk-char-page .nk-enh-module__head {
   display: flex; align-items: baseline; gap: 12px;
@@ -570,7 +551,7 @@
   color: var(--text2); margin-bottom: 16px;
 }
 .nk-char-page .nk-enh-module__idx {
-  font-size: 0.6rem; letter-spacing: 0; color: var(--gold-300); opacity: 0.95;
+  font-size: 0.6rem; letter-spacing: 0; color: var(--gold-sem); opacity: 0.95;
   padding-right: 10px; border-right: 1px solid var(--line-2);
 }
 .nk-char-page .nk-enh-module__head::after {
@@ -610,22 +591,22 @@
 .nk-char-page .nk-secnav::-webkit-scrollbar { display: none; }
 .nk-char-page .nk-secnav__btn {
   display: inline-flex; align-items: baseline; gap: 5px;
-  padding: 5px 9px; border-radius: 4px; border: none; background: transparent;
-  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.04em;
+  padding: 6px 11px; border-radius: 4px; border: none; background: transparent;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; /* 与 tokens .nk-tab 标准字号对齐 */
   color: var(--text3); cursor: pointer; white-space: nowrap;
   transition: color 0.15s, background 0.15s; position: relative; flex-shrink: 0;
 }
-/* 触控热区垂直扩展至 ≥44px */
+/* 触控热区垂直扩展至 ≥44px（按钮 30px 高 + 上下各 7px） */
 .nk-char-page .nk-secnav__btn::before {
-  content: ''; position: absolute; left: 0; right: 0; top: -10px; bottom: -10px;
+  content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px; /* 热区 ≥44px（全局化 §13.7） */
 }
 .nk-char-page .nk-secnav__btn:hover { color: var(--text2); background: transparent; }
 .nk-char-page .nk-secnav__btn--active { color: var(--primary); background: transparent; }
 .nk-char-page .nk-secnav__btn--active::after {
-  content: ''; position: absolute; left: 9px; right: 9px; bottom: -9px;
+  content: ''; position: absolute; left: 11px; right: 11px; bottom: -7px;
   height: 2px; border-radius: 1px; background: var(--primary); box-shadow: none;
 }
-.nk-char-page .nk-secnav__idx { font-family: var(--font-hud); font-size: 0.5rem; opacity: 0.65; }
+.nk-char-page .nk-secnav__idx { font-family: var(--font-hud); font-size: 0.625rem; opacity: 0.7; }
 .nk-char-page .nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
 /* 阅读进度线（工具条底部） */
 .nk-char-page .nk-enh-bar__progress {
@@ -664,7 +645,7 @@
 }
 .nk-char-page .nk-enh-notes__title {
   font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--gold-300); font-weight: 700;
+  text-transform: uppercase; color: var(--gold-sem); font-weight: 700;
 }
 .nk-char-page .nk-enh-notes__list {
   margin: 0; padding: 0; list-style: none;
@@ -681,13 +662,13 @@
   content: counter(nk-enh, decimal-leading-zero);
   position: absolute; left: 0; top: 1px;
   font-family: var(--font-hud); font-size: 0.45rem; font-weight: 700;
-  color: var(--gold-300); padding: 1px 5px; border-radius: 3px;
-  background: color-mix(in srgb, var(--gold-300) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--gold-300) 28%, transparent);
+  color: var(--gold-sem); padding: 1px 5px; border-radius: 3px;
+  background: color-mix(in srgb, var(--gold-sem) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold-sem) 28%, transparent);
 }
 /* 强化摘要（官方 <color> 强调词） */
 .nk-char-page .nk-enh-notes__list li span[style*="color"] {
-  color: var(--gold-300); font-weight: 700;
+  color: var(--gold-sem); font-weight: 700;
 }
 
 /* ═══════════ 强化状态标记（ADR 0010：官方模式，无 diff 对比） ═══════════ */
@@ -699,23 +680,32 @@
   font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.08em;
   padding: 2px 7px; border-radius: 3px;
   font-weight: 700; z-index: 2; pointer-events: none;
-  background: color-mix(in srgb, var(--gold-300) 15%, transparent);
-  color: var(--gold-300); border: 1px solid color-mix(in srgb, var(--gold-300) 30%, transparent);
+  background: color-mix(in srgb, var(--gold-sem) 15%, transparent);
+  color: var(--gold-sem); border: 1px solid color-mix(in srgb, var(--gold-sem) 30%, transparent);
 }
 .nk-char-page .nk-skill__enh-badge::before,
 .nk-char-page .nk-eidolon__enh-badge::before {
   content: '✦'; font-size: 0.5rem;
 }
 
-/* ═══════════ 阅读层收束（可读行宽） ═══════════ */
+/* ═══════════ 模块宽度统一（三层宽度，全局化 §13.9） ═══════════ */
+/* L2 统一外框 952px：全部模块（标题/技能/星魂/附加/属性/故事/配音/强化/网格）一条线对齐；
+   文本阅读行宽下沉到卡片内部（__desc/__text/__terms 收束 800px） */
 .nk-char-page .nk-panel .nk-title,
 .nk-char-page .nk-panel .nk-skill,
 .nk-char-page .nk-panel .nk-eidolon,
 .nk-char-page .nk-panel .nk-ability,
+.nk-char-page .nk-panel .nk-bonus-grid,
+.nk-char-page .nk-panel .nk-stories,
+.nk-char-page .nk-panel .nk-profile,
+.nk-char-page .nk-enh-module { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }
+/* 网格模块（光锥/配队/遗器）：同 952px 外框 */
 .nk-char-page .nk-panel .nk-build__cones,
 .nk-char-page .nk-panel .nk-build__teams,
-.nk-char-page .nk-panel .nk-build__relics { max-width: var(--nk-prose-max); margin-left: auto; margin-right: auto; }
-.nk-char-page .nk-hero__desc, .nk-char-page .nk-skill__terms { max-width: var(--nk-prose-max); }
+.nk-char-page .nk-panel .nk-build__relics { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }
+/* 文本行宽（卡片内部 800px）：技能/星魂/附加 desc 走 skill-card.css 全局规则；故事/词条在此补充 */
+.nk-char-page .nk-story__text, .nk-char-page .nk-skill__terms { max-width: var(--nk-prose-max); }
+/* 注：.nk-hero__desc 不在此收束——一句话介绍有意收窄至 560px（本文件上方声明，勿再覆盖） */
 
 /* ═══════════ 骨架屏 ═══════════ */
 .nk-char-page .nk-skeleton__hero { background: linear-gradient(to top, rgba(15,15,35,0.85) 0%, rgba(15,15,35,0.3) 50%, transparent 100%); }

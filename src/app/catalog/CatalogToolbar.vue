@@ -42,6 +42,9 @@ const emit = defineEmits<{
       :class="{ active: filtersOpen }"
       :disabled="disabled"
       @click="emit('toggleFilters')"
-    ><span class="arrow">▼</span> 筛选</button>
+    >
+      <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      筛选
+    </button>
   </div>
 </template>

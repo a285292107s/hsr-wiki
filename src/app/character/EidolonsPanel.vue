@@ -5,6 +5,7 @@
 import { computed } from 'vue';
 import { extraTerms } from './utils';
 import { eidolonIconUrl, fmtDesc } from '../../lib/format';
+import { SECTION_IDX } from './sections';
 import type { CharacterData, SkillExtra } from '../../services/types';
 
 const props = defineProps<{
@@ -37,7 +38,7 @@ const eidolons = computed<EidolonCard[]>(() => {
 </script>
 
 <template>
-  <div class="nk-title">EIDOLONS</div>
+  <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS</div>
   <div
     v-for="e in eidolons"
     :key="e.num"

@@ -20,12 +20,15 @@
   --ph-800: #4f1271;
   --ph-900: #2f0845;
   --ph-950: #1e032e;
-  /* 金色阶（CW 主题 / 星级 / 网关入口；gold-350 为项目自有高亮暖金） */
+  /* 金色阶（CW 主题 / 星级 / 网关入口；gold-350 为项目自有高亮暖金；
+     gold-600/700 为暗铜阶——CW 语义金降阶位（全局化 §13.2 金阶拆族） */
   --gold-200: #FDE68A;
   --gold-300: #FCD34D;
   --gold-350: #F5D67B;
   --gold-400: #FBBF24;
   --gold-500: #D4AF37;
+  --gold-600: #A8862E;
+  --gold-700: #7A6220;
 
   /* ═══ 领域层 Domain：数据语义色（不随主题切换，仅被引用不内联） ═══ */
   /* 稀有度 */
@@ -35,7 +38,7 @@
   --rarity-4: var(--ph-400);
   --rarity-4-deep: #A855F7;
   --rarity-5: var(--gold-400);
-  /* 属性图标（Hero 属性 8 项） */
+  /* 属性领域色（Hero 面板图标已切换为 trace 图片，令牌供 skill-card 等强调色引用与后续复用） */
   --prop-hp: #F472B6;
   --prop-atk: #FCA5A5;
   --prop-def: #93C5FD;
@@ -73,13 +76,16 @@
   --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
   --accent: #F43F5E;
   --gold: var(--gold-400);
+  /* 语义金（强化/文本高亮等语义强调）：随主题——常规亮金，CW 降阶暗铜（§13.2 主题金与语义金永不重叠） */
+  --gold-sem: var(--gold-300);
   --text: #E2E8F0;
   --text2: #94A3B8;
   --text-bright: #FFFFFF;
   --text3: #7C8DA6;
   --border: color-mix(in srgb, var(--primary) 20%, transparent);
   --border2: color-mix(in srgb, var(--primary) 40%, transparent);
-  --highlight: #f29e38;
+  /* 文本高亮语义位：并入 gold 族（全局化 §13.4 裁决，消除游离橙 #f29e38） */
+  --highlight: var(--gold-300);
   /* 高亮数值/激活态文字 = Purple Heart 300 */
   --metric-val: var(--ph-300);
   /* 终局/错误状态色（--season-live/--season-upcoming/toast 错误引用；勿删） */
@@ -94,9 +100,11 @@
   --font-hud: 'Orbitron', monospace;
   --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   --ease: cubic-bezier(0.16,1,0.3,1);
-  /* 布局宽度令牌：页面内容统一边界 / 正文可读行宽 */
+  /* 布局宽度令牌：页面内容统一边界 / 正文可读行宽
+     三层宽度系列（全局化 §13.9/§13.10）：detail 展示层 1000 / struct 结构层 952 / prose 阅读层 800 */
   --nk-content-max: 1440px;
   --nk-detail-max: 1000px;
+  --nk-struct-max: 952px;
   --nk-prose-max: 800px;
   /* 动画时序令牌 */
   --nk-dur-fast: 150ms;
@@ -105,7 +113,7 @@
   --nk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --nk-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --nk-stagger: 40ms;
-  --nk-radius-card: 12px;
+  --nk-radius-card: 10px;
   /* 表面阴影：扩散式染色阴影（取代霓虹 glow，营造墨色分层质感） */
   --nk-shadow-lift: 0 2px 6px rgba(0,0,0,0.28), 0 10px 24px -8px rgba(0,0,0,0.5);
   --nk-shadow-card: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px -10px rgba(0,0,0,0.45);
@@ -140,10 +148,11 @@
   --surface: rgba(16,14,9,0.88);
   --card: rgba(24,21,13,0.72);
   /* 主色 = 金色阶 500（原始层 --gold-500）；以下暗金值均为历史沉淀，与 --gold-* 色阶同源 */
-  --primary: var(--gold-500);
+  --primary: var(--gold-300);
   --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
   --accent: #C98A2D;
-  --gold: var(--gold-300);
+  --gold: var(--gold-600);
+  --gold-sem: var(--gold-600);
   --text: rgba(255,248,230,0.92);
   --text2: rgba(242,232,207,0.7);
   --text-bright: #FFF8E6;
@@ -151,7 +160,9 @@
   --border: color-mix(in srgb, var(--gold-500) 18%, transparent);
   --border2: color-mix(in srgb, var(--gold-500) 40%, transparent);
   --highlight: var(--gold-300);
-  --metric-val: var(--gold-350);
+  --metric-val: var(--gold-300);
+  /* 稀有度 5 星 = 语义金家族：CW 降阶暗铜（§13.2 恒等式执行特例，领域色不随主题的声明例外） */
+  --rarity-5: var(--gold-600);
   /* 外壳：暗金侧栏/底部栏 */
   --nk-shell-bg: rgba(12,10,5,0.96);
   --nk-shell-hover: color-mix(in srgb, var(--gold-500) 10%, transparent);
@@ -320,7 +331,7 @@
 @property --spine-inner { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @property --spine-outer { syntax: '<percentage>'; inherits: false; initial-value: 1%; }
 /* 设计令牌 */
-:root { --nk-detail-wide-max: 1000px; --nk-hero-panel-pad: 20px 16px; }
+:root { --nk-hero-panel-pad: 20px 16px; }
 .nk-hero {
   position: relative;
   display: flex;
@@ -441,20 +452,10 @@ background-position: center 15%;
 .nk-hero__stat:hover { background: color-mix(in srgb, var(--primary) 5%, transparent); }
 .nk-hero__stat-icon {
   display: inline-block; width: 16px; height: 16px;
-  background: var(--primary); opacity: 0.85;
-  -webkit-mask-size: contain; mask-size: contain;
-  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-  -webkit-mask-position: center; mask-position: center;
+  object-fit: contain;
+  vertical-align: middle;
 }
-/* 各属性图标（mask-image SVG，颜色继承 currentColor 通过 mask 通道） */
-.nk-hero__stat-icon[data-icon="hp"]      { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 21s-7-4.5-9.5-9.5C.84 8.5 3 5 6.5 5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.5 0 5.67 3.5 4 6.5C19 16.5 12 21 12 21z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 21s-7-4.5-9.5-9.5C.84 8.5 3 5 6.5 5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.5 0 5.67 3.5 4 6.5C19 16.5 12 21 12 21z'/></svg>"); background: var(--prop-hp); }
-.nk-hero__stat-icon[data-icon="atk"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M14 3l7 7-4 4-7-7 4-4zm-3 6l-7 7v5h5l7-7-5-5z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M14 3l7 7-4 4-7-7 4-4zm-3 6l-7 7v5h5l7-7-5-5z'/></svg>"); background: var(--prop-atk); }
-.nk-hero__stat-icon[data-icon="def"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2L4 6v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V6l-8-4z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2L4 6v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V6l-8-4z'/></svg>"); background: var(--prop-def); }
-.nk-hero__stat-icon[data-icon="spd"]     { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); background: var(--prop-spd); }
-.nk-hero__stat-icon[data-icon="crit-rate"] { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/><circle cx='12' cy='12' r='3' fill='black'/><path stroke='black' stroke-width='2' d='M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/><circle cx='12' cy='12' r='3' fill='black'/><path stroke='black' stroke-width='2' d='M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1'/></svg>"); background: var(--prop-crit-rate); }
-.nk-hero__stat-icon[data-icon="crit-dmg"]  { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2l2.5 7.5H22l-6 4.5 2.5 8L12 17l-6.5 5 2.5-8-6-4.5h7.5z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2l2.5 7.5H22l-6 4.5 2.5 8L12 17l-6.5 5 2.5-8-6-4.5h7.5z'/></svg>"); background: var(--prop-crit-dmg); }
-.nk-hero__stat-icon[data-icon="taunt"]   { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2a8 8 0 00-8 8c0 1.5.3 2.9.9 4.2L2 22l8-3 1.5-2a8 8 0 008-7 8 8 0 00-7.5-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2a8 8 0 00-8 8c0 1.5.3 2.9.9 4.2L2 22l8-3 1.5-2a8 8 0 008-7 8 8 0 00-7.5-8z'/></svg>"); background: var(--prop-taunt); }
-.nk-hero__stat-icon[data-icon="energy"]  { -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>"); background: var(--prop-energy); }
+/* 图标源：官方 trace 图片（IconMaxHP 等）+ 缺失项的白色线性 SVG 顶替（CharHero 内联 data URI） */
 
 .nk-hero__stat-label { font-size: 0.78rem; color: var(--text2); letter-spacing: 0.02em; }
 .nk-hero__stat-val { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap; }
@@ -478,13 +479,31 @@ background-position: center 15%;
 @keyframes nk-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ─── 通用组件 ─── */
-.nk-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; transition: border-color 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
-.nk-card:hover { border-color: var(--border2); box-shadow: var(--nk-shadow-card); }
-.nk-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 4%, transparent), transparent); transition: left 0.5s; }
-.nk-card:hover::before { left: 150%; }
-.nk-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-hud); font-size: 0.6875rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-/* 章节标题装饰：左侧渐变竖条（与 Hero 属性标题同语言） */
-.nk-title::before { content: ''; flex-shrink: 0; width: 3px; height: 15px; border-radius: 2px; background: linear-gradient(180deg, var(--primary), var(--accent)); }
+/* 通用卡片（阅读族基底，全局化 §13.6）：中性细线、无浮起、hover 仅边框/背景亮度变化；
+   浏览族卡片（图鉴/目录，保留位移与光效）见 catalog.css 各卡类 */
+.nk-card { background: rgba(255,255,255,0.016); border: 1px solid var(--line-1); border-radius: var(--nk-radius-card); padding: 20px; margin-bottom: 16px; transition: border-color 0.25s ease, background 0.25s ease; position: relative; }
+.nk-card:hover { border-color: var(--line-2); background: rgba(255,255,255,0.03); }
+/* 章节标题（编辑式基线，全局化 §13.1/§13.3）：HUD 大写 + 细线延伸线；
+   编号元素 .nk-title__idx 由使用方提供（角色页由 sections.ts 配置表注入固定编号） */
+.nk-title {
+  display: flex; align-items: baseline; gap: 12px;
+  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 20px; padding-bottom: 0;
+  border-bottom: none;
+}
+/* 标题延伸线：双段——实线收束后渐隐 */
+.nk-title::after {
+  content: ''; flex: 1; height: 1px; align-self: center;
+  background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
+}
+/* 章节编号元素（01-09，编号 = 身份；数据缺失保留缺口） */
+.nk-title__idx {
+  flex: none; font-size: 0.6rem; letter-spacing: 0; color: var(--primary); opacity: 0.95;
+  padding-right: 10px;
+  border-right: 1px solid var(--line-2);
+}
 
 /* ═══════════════════════════════════════════
    页面切换过渡（Vue Transition 类名，方向由 navDir 决定）
@@ -661,7 +680,7 @@ background-position: center 15%;
   .nk-page--detail { left: 88px; }
   .nk-hero {
     flex-direction: row;
-    max-width: var(--nk-detail-wide-max);
+    max-width: var(--nk-detail-max);
     border-radius: 0 0 12px 12px;
     min-height: 480px;
   }
@@ -677,7 +696,7 @@ background-position: center 15%;
   }
   .nk-hero__name { font-size: 2.25rem; }
   .nk-hero__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
-  .nk-skeleton__hero { flex-direction: row; max-width: var(--nk-detail-wide-max); min-height: 480px; }
+  .nk-skeleton__hero { flex-direction: row; max-width: var(--nk-detail-max); min-height: 480px; }
   .nk-skeleton__hero-visual { flex: 0 0 40%; height: auto; min-height: 480px; aspect-ratio: auto; }
   .nk-skeleton__hero-panel {
     flex: 1 1 auto;
@@ -705,4 +724,62 @@ background-position: center 15%;
   .nk-tab--active:hover { color: var(--primary); }
   .nk-hero__stat:hover { background: transparent; }
   .nk-hero__toggle:hover { border-color: var(--border); color: var(--text2); }
+}
+
+/* ═══════════════════════════════════════════
+   全局交互默认（全局化 §13.7）：focus-visible / reduced-motion / hover:none
+   三件套升级为 tokens 全局原语；页面级细化规则可在各自 CSS 追加覆盖
+   · 选择器均用 :where 保持零特异性，保证页面级规则永远可以覆盖
+═══════════════════════════════════════════ */
+/* 焦点环：交互元素统一 2px 主色焦点环 */
+:where(#app) button:focus-visible,
+:where(#app) a:focus-visible,
+:where(#app) [tabindex]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+/* 减弱动态：全站禁用位移/过渡/动画（页面级可细化覆盖，如目录卡 reduced-motion 静止态） */
+@media (prefers-reduced-motion: reduce) {
+  :where(#app) *,
+  :where(#app) *::before,
+  :where(#app) *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+/* 触屏设备：基础粘滞 hover 重置（位移类反馈不保留）；页面级细化追加即可 */
+@media (hover: none) {
+  :where(#app) a:hover,
+  :where(#app) button:hover { transform: none; }
+}
+
+/* ═══════════════════════════════════════════
+   全局交互默认（全局化 §13.7）：focus-visible / reduced-motion / hover:none
+   三件套升级为 tokens 全局原语；页面级细化规则可在各自 CSS 追加覆盖
+   · 选择器均用 :where 保持零特异性，保证页面级规则永远可以覆盖
+═══════════════════════════════════════════ */
+/* 焦点环：交互元素统一 2px 主色焦点环 */
+:where(#app) button:focus-visible,
+:where(#app) a:focus-visible,
+:where(#app) [tabindex]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+/* 减弱动态：全站禁用位移/过渡/动画（页面级可细化覆盖，如目录卡 reduced-motion 静止态） */
+@media (prefers-reduced-motion: reduce) {
+  :where(#app) *,
+  :where(#app) *::before,
+  :where(#app) *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+/* 触屏设备：基础粘滞 hover 重置（位移类反馈不保留）；页面级细化追加即可 */
+@media (hover: none) {
+  :where(#app) a:hover,
+  :where(#app) button:hover { transform: none; }
 }

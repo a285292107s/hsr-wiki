@@ -47,26 +47,26 @@
   --crole-scrim-40: rgba(10, 9, 6, 0.4);
   --crole-portrait-ring: rgba(10, 9, 6, 0.6);
   /* 作用域徽章 → 金/琥珀 */
-  --crole-scope-bg: rgba(212, 175, 55, 0.16);
-  --crole-scope-text: #F5D67B;
-  --crole-scope-all-bg: rgba(245, 158, 11, 0.14);
-  --crole-scope-all-text: #FBBF24;
+  --crole-scope-bg: color-mix(in srgb, var(--gold-500) 16%, transparent);
+  --crole-scope-text: var(--gold-350);
+  --crole-scope-all-bg: color-mix(in srgb, var(--gold-400) 14%, transparent);
+  --crole-scope-all-text: var(--gold-400);
   /* 数值高亮 → 亮金 + 更强辉光 */
-  --crole-num: #FCD34D;
-  --crole-num-glow: rgba(252, 211, 77, 0.4);
+  --crole-num: var(--gold-300);
+  --crole-num-glow: color-mix(in srgb, var(--gold-300) 40%, transparent);
   /* 正向加成 → 翡翠保留（交易「涨」语义）但调暖 */
   --crole-buff: #5EEAB5;
   --crole-buff-soft: rgba(94, 234, 181, 0.07);
   --crole-buff-border: rgba(94, 234, 181, 0.22);
   --crole-buff-glow: rgba(94, 234, 181, 0.35);
   /* 面板底色 → 暖金微光 */
-  --crole-panel-tint: rgba(212, 175, 55, 0.07);
+  --crole-panel-tint: color-mix(in srgb, var(--gold-500) 7%, transparent);
   --crole-panel-deep: rgba(24, 21, 13, 0.7);
-  --crole-extra-bg: rgba(212, 175, 55, 0.05);
-  --crole-extra-border: rgba(212, 175, 55, 0.14);
+  --crole-extra-bg: color-mix(in srgb, var(--gold-500) 5%, transparent);
+  --crole-extra-border: color-mix(in srgb, var(--gold-500) 14%, transparent);
   /* 星级 Tab 激活态 → 金色渐变 + 深金文字（对比度 ≥4.5:1） */
-  --crole-tab-active-bg: linear-gradient(135deg, #FCD34D, #D4AF37);
-  --crole-tab-active-shadow: rgba(212, 175, 55, 0.35);
+  --crole-tab-active-bg: linear-gradient(135deg, var(--gold-300), var(--gold-500));
+  --crole-tab-active-shadow: color-mix(in srgb, var(--gold-500) 35%, transparent);
   /* 星魂步骤徽章 → 琥珀 */
   --crole-step-bg: rgba(245, 158, 11, 0.12);
   /* 稀有度光晕默认值（未匹配 rarity 时回退金色而非紫色） */
@@ -460,7 +460,7 @@
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.45);
 }
-.nk-crole-hero__stars { color: var(--crole-num); font-size: 15px; letter-spacing: 2px; text-shadow: 0 0 12px var(--crole-num-glow); }
+.nk-crole-hero__stars { color: var(--gold); font-size: 15px; letter-spacing: 2px; text-shadow: 0 0 12px var(--crole-num-glow); } /* 星级 = 语义金（§13.2：CW 下降阶暗铜） */
 .nk-crole-hero__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-crole-hero__traits {
   display: flex;
@@ -905,7 +905,7 @@
 [data-theme="cw"] .nk-crole-gm-pill.is-active { color: #1a1406; }
 
 .nk-crole-gm {
-  border-radius: 12px;
+  border-radius: var(--nk-radius-card);
   border: 1px solid var(--nk-card-border);
   background: var(--card);
   overflow-x: auto;
@@ -936,6 +936,9 @@
 }
 .nk-crole-gm__table thead th:hover { background: color-mix(in srgb, var(--crole-num) 12%, transparent); }
 .nk-crole-gm__corner { text-align: left; cursor: default !important; color: var(--text2) !important; }
+/* 星级列 = 语义金（§13.2：CW 下降阶暗铜）；激活态为主题强调位保持亮金 */
+.nk-crole-gm__table th.nk-crole-gm__star { color: var(--gold); }
+.nk-crole-gm__table th.nk-crole-gm__star.is-active { color: var(--crole-num); }
 .nk-crole-gm__star.is-active {
   background: color-mix(in srgb, var(--crole-num) 16%, transparent);
   box-shadow: inset 0 -2px 0 var(--crole-num);

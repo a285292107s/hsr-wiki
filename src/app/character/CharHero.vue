@@ -8,6 +8,7 @@ import { useParallax } from '../composables/use-parallax';
 import { initSpineViewer } from './spine';
 import { avatarDrawCardUrl, escHtml, maxLevelStat, maxLevelValue } from '../../lib/format';
 import { CDN, ELEM, MAX_CHAR_LEVEL, PATH } from '../../lib/constants';
+import { cdnUri } from '../../services/cdn';
 import type { CharacterData } from '../../services/types';
 
 const props = defineProps<{
@@ -23,6 +24,18 @@ const stars = computed(() =>
 );
 
 interface HeroStat { v: number | string; l: string; icon: string }
+
+/**
+ * 嘲讽 / 能量消耗暂无 CDN trace 图标（IconAggro / IconEnergy 缺失），
+ * 以白色线性风格 SVG 顶替（与官方 trace 图标观感一致）；待 CDN 收录后可直接替换为图片 URL。
+ */
+const TRACE_TAUNT_SVG =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 19.5 6v5.5c0 4.6-3.2 7.8-7.5 9.5-4.3-1.7-7.5-4.9-7.5-9.5V6z' fill='none' stroke='#fff' stroke-width='1.8' stroke-linejoin='round'/><path d='M12 8.5v6.5M9.5 10.5 12 8l2.5 2.5' fill='none' stroke='#fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+const TRACE_ENERGY_SVG =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='3.5' y='8' width='13' height='8' rx='1.8' fill='none' stroke='#fff' stroke-width='1.8'/><path d='M18.2 10.8v2.4' stroke='#fff' stroke-width='1.8' stroke-linecap='round'/><path d='M6.5 10.9v2.2M9.2 10.9v2.2M11.9 10.9v2.2' stroke='#fff' stroke-width='1.8' stroke-linecap='round'/></svg>");
+
 /** 全部 8 项展示属性：HP/ATK/DEF/SPD + 暴击率/暴击伤害/嘲讽/能量消耗（参考官方 Wiki 头部） */
 const heroStats = computed<HeroStat[]>(() => {
   const dd = props.d;
@@ -33,14 +46,14 @@ const heroStats = computed<HeroStat[]>(() => {
     v, l, icon,
   });
   return [
-    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), 'HP', 'hp'),
-    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), 'ATK', 'atk'),
-    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), 'DEF', 'def'),
-    mk(s.speed_base, 'SPD', 'spd'),
-    mk(fmtPct(s.critical_chance), '暴击率', 'crit-rate'),
-    mk(fmtPct(s.critical_damage), '暴击伤害', 'crit-dmg'),
-    mk(s.base_aggro ?? 0, '嘲讽值', 'taunt'),
-    mk(dd.sp_need ?? 0, '能量消耗', 'energy'),
+    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), 'HP', cdnUri('trace', 'IconMaxHP.webp')),
+    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), 'ATK', cdnUri('trace', 'IconAttack.webp')),
+    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), 'DEF', cdnUri('trace', 'IconDefence.webp')),
+    mk(s.speed_base, 'SPD', cdnUri('trace', 'IconSpeed.webp')),
+    mk(fmtPct(s.critical_chance), '暴击率', cdnUri('trace', 'IconCriticalChance.webp')),
+    mk(fmtPct(s.critical_damage), '暴击伤害', cdnUri('trace', 'IconCriticalDamage.webp')),
+    mk(s.base_aggro ?? 0, '嘲讽值', TRACE_TAUNT_SVG),
+    mk(dd.sp_need ?? 0, '能量消耗', TRACE_ENERGY_SVG),
   ];
 });
 
@@ -156,7 +169,7 @@ onBeforeUnmount(() => {
         </div>
         <div class="nk-hero__stats">
           <div v-for="st in heroStats" :key="st.l" class="nk-hero__stat">
-            <span class="nk-hero__stat-icon" :data-icon="st.icon" aria-hidden="true"></span>
+            <img class="nk-hero__stat-icon" :src="st.icon" alt="" aria-hidden="true">
             <span class="nk-hero__stat-label">{{ st.l }}</span>
             <span class="nk-hero__stat-val">{{ st.v }}</span>
           </div>

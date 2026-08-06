@@ -13,18 +13,22 @@
 
 /* 顶部栏 */
 .nk-cat-header { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 14px; padding: 14px 0; background: var(--nk-header-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--nk-header-border); margin: 0 -24px 0 -88px; padding-left: 88px; padding-right: 24px; }
-.nk-cat-title { font-family: var(--font-hud); font-size: 1rem; font-weight: 700; color: var(--primary); text-shadow: 0 0 20px var(--primary-glow); letter-spacing: 0.12em; text-transform: uppercase; flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
-.nk-cat-title::after { content: ''; width: 32px; height: 1px; background: linear-gradient(90deg, var(--primary), transparent); box-shadow: 0 0 6px var(--primary-glow); }
-.nk-cat-search { flex: 1; min-width: 120px; max-width: 280px; display: flex; align-items: center; gap: 8px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 20px; padding: 7px 14px; transition: all 0.2s; }
-.nk-cat-search:focus-within { border-color: var(--primary); background: var(--nk-shell-hover); box-shadow: 0 0 0 3px var(--nk-page-tint), 0 0 16px var(--nk-shell-glow); }
+.nk-cat-title { font-family: var(--font-hud); font-size: 1rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.12em; text-transform: uppercase; flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
+/* 标题延伸线：主色端点（无霓虹 glow，墨色分层） */
+.nk-cat-title::after { content: ''; width: 32px; height: 1px; background: linear-gradient(90deg, var(--primary), transparent); }
+.nk-cat-search { flex: 1; min-width: 120px; max-width: 280px; display: flex; align-items: center; gap: 8px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 10px; padding: 7px 14px; transition: all 0.2s; }
+.nk-cat-search:focus-within { border-color: var(--primary); background: var(--nk-shell-hover); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
 .nk-cat-search svg { width: 14px; height: 14px; color: var(--text3); flex-shrink: 0; }
 .nk-cat-search input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 0.8rem; font-family: var(--font-body); }
 .nk-cat-search input::placeholder { color: var(--text3); }
 .nk-cat-count { font-family: var(--font-hud); font-size: 0.6rem; color: var(--text3); letter-spacing: 0.1em; flex-shrink: 0; }
-.nk-cat-filter-btn { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; background: var(--nk-shell-hover); border: 1px solid var(--nk-input-border); color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+.nk-cat-filter-btn { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 10px; background: var(--nk-shell-hover); border: 1px solid var(--nk-input-border); color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0; position: relative; }
+/* 触控热区垂直扩展至 ≥44px（视觉 ≈28px + 上下各 8px） */
+.nk-cat-filter-btn::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
 .nk-cat-filter-btn:hover { background: var(--nk-shell-press); border-color: var(--primary); color: var(--text-bright); }
-.nk-cat-filter-btn .arrow { display: inline-block; transition: transform 0.2s; font-size: 0.5rem; }
-.nk-cat-filter-btn.active { background: var(--primary); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 14px var(--nk-shell-glow); }
+.nk-cat-filter-btn .arrow { width: 12px; height: 12px; transition: transform 0.2s; flex-shrink: 0; }
+/* 选中态：与筛选 chip 同语言——primary-glow 淡底 + 主色边框 + 克制光晕（克制用色，禁实底填充） */
+.nk-cat-filter-btn.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 10px color-mix(in srgb, var(--primary) 20%, transparent); }
 .nk-cat-filter-btn.active .arrow { transform: rotate(180deg); }
 .nk-cat-filter-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -36,7 +40,9 @@
 .nk-cat-filter-group { display: flex; align-items: baseline; gap: 10px; margin-bottom: 7px; }
 .nk-cat-filter-label { font-family: var(--font-hud); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; color: var(--text2); flex-shrink: 0; min-width: 3.2em; }
 .nk-cat-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.nk-cat-chip { padding: 4px 12px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); background: transparent; color: var(--text2); font-size: 0.72rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); display: inline-flex; align-items: center; gap: 4px; }
+.nk-cat-chip { padding: 6px 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); background: transparent; color: var(--text2); font-size: 0.72rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); display: inline-flex; align-items: center; gap: 4px; position: relative; }
+/* 触控热区垂直扩展至 ≥44px（视觉 ≈29px + 上下各 8px） */
+.nk-cat-chip::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
 .nk-cat-chip__icon { width: 16px; height: 16px; border-radius: 50%; object-fit: contain; flex-shrink: 0; }
 .nk-cat-chip__star { width: 12px; height: 12px; color: var(--gold); flex-shrink: 0; }
 .nk-cat-chip:hover { border-color: var(--border2); color: var(--text); }
@@ -70,17 +76,19 @@
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-lc-card { animation: nk-card-fade 0.25s ease backwards; }
 
 /* 卡片 */
-.nk-cat-card { --elem-color: color-mix(in srgb, var(--primary) 60%, transparent); --holo-color: color-mix(in srgb, var(--ph-400) 70%, transparent); position: relative; isolation: isolate; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
+.nk-cat-card { --elem-color: color-mix(in srgb, var(--primary) 60%, transparent); --holo-color: color-mix(in srgb, var(--ph-400) 70%, transparent); position: relative; isolation: isolate; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: var(--nk-radius-card); overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
 /* 星级差异化边框（须在 :hover 规则之前，保证 hover 时元素色边框可覆盖） */
 .nk-cat-card[data-rarity="5"] { --holo-color: color-mix(in srgb, var(--rarity-5) 60%, transparent); border-color: color-mix(in srgb, var(--rarity-5) 25%, transparent); }
 .nk-cat-card[data-rarity="4"] { --holo-color: color-mix(in srgb, var(--rarity-4) 60%, transparent); border-color: color-mix(in srgb, var(--rarity-4) 20%, transparent); }
-.nk-cat-card:hover { transform: perspective(900px) translateY(-6px) rotateX(calc(var(--ry, 0) * 7deg)) rotateY(calc(var(--rx, 0) * 7deg)); border-color: color-mix(in srgb, var(--elem-color) 60%, transparent); box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 20px color-mix(in srgb, var(--elem-color) 22%, transparent), 0 0 50px color-mix(in srgb, var(--elem-color) 9%, transparent); }
+/* :focus-visible 键盘态：3px 紫色 focus ring（无障碍 §1 规范，与光锥卡一致） */
+.nk-cat-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
+.nk-cat-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 7deg)) rotateY(calc(var(--rx, 0) * 7deg)); border-color: color-mix(in srgb, var(--elem-color) 60%, transparent); box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 20px color-mix(in srgb, var(--elem-color) 22%, transparent), 0 0 50px color-mix(in srgb, var(--elem-color) 9%, transparent); }
 .nk-cat-card[data-rarity="5"]:hover { box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 20px color-mix(in srgb, var(--elem-color) 22%, transparent), 0 0 50px color-mix(in srgb, var(--elem-color) 9%, transparent), 0 0 14px color-mix(in srgb, var(--rarity-5) 10%, transparent); }
 @keyframes nk-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes nk-card-fade { from { opacity: 0; } to { opacity: 1; } }
-/* 属性色顶部光斑（椭圆顶光，如舞台灯光洒落） */
-.nk-cat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 34%; background: radial-gradient(ellipse 75% 100% at 50% 0%, var(--elem-color) 0%, color-mix(in srgb, var(--elem-color) 55%, transparent) 30%, color-mix(in srgb, var(--elem-color) 20%, transparent) 55%, transparent 78%); z-index: 2; opacity: 0.4; transition: opacity 0.3s; pointer-events: none; }
-.nk-cat-card:hover::before, .nk-cat-card:focus-visible::before { opacity: 0.48; }
+/* 属性色顶部光斑（椭圆顶光，如舞台灯光洒落）；墨色分层：常驻 18% 克制浓度，hover 增强 */
+.nk-cat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 34%; background: radial-gradient(ellipse 75% 100% at 50% 0%, var(--elem-color) 0%, color-mix(in srgb, var(--elem-color) 55%, transparent) 30%, color-mix(in srgb, var(--elem-color) 20%, transparent) 55%, transparent 78%); z-index: 2; opacity: 0.18; transition: opacity 0.3s; pointer-events: none; }
+.nk-cat-card:hover::before, .nk-cat-card:focus-visible::before { opacity: 0.32; }
 .nk-cat-card[data-element="fire"] { --elem-color: color-mix(in srgb, var(--elem-fire) 70%, transparent); }
 .nk-cat-card[data-element="ice"] { --elem-color: color-mix(in srgb, var(--elem-ice) 70%, transparent); }
 .nk-cat-card[data-element="thunder"] { --elem-color: color-mix(in srgb, var(--elem-thunder) 70%, transparent); }
@@ -131,15 +139,17 @@
 .nk-lc-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
 /* Hover：仅 hover 精细设备生效。用 filter:drop-shadow() 替代 box-shadow → 阴影/光晕基于图片 alpha 轮廓（倾斜+切角形状）投影，而不是矩形 DOM 盒 → 光晕形状与图片相框完全同心同方向同切角，不会构成矩形"第二个画框" */
 @media (hover: hover) and (pointer: fine) {
-  /* drop-shadow 四层：投影+贴近轮廓高浓度贴边辉光+中层色晕+远距离柔光。贴边层 22% 浓度确保"边框发光"感，不构成矩形外框 */
-  .nk-lc-card:hover { transform: translateY(-5px) scale(1.025); filter: drop-shadow(0 14px 22px rgba(0,0,0,0.68)) drop-shadow(0 0 14px color-mix(in srgb, var(--holo-color, transparent) 32%, transparent)) drop-shadow(0 0 36px color-mix(in srgb, var(--holo-color, transparent) 22%, transparent)) drop-shadow(0 0 64px color-mix(in srgb, var(--holo-color, transparent) 10%, transparent)); }
+  /* 定向景深辉光（墨色分层）：单一顶部光源 → 光不对称 ——
+     ① 黑色物理投影（更低更远，浮起感）
+     ② 落地色染（偏移 9px 偏下：光从上方来，环境反射集中于卡面下方）
+     ③ 贴边微光（≤10px、浓度 ≤24%：轮廓 rim light，亮度优先于色相）
+     删除原 36/64px 远距离同心色雾层（霓虹灯管廉价感来源） */
+  .nk-lc-card:hover { transform: translateY(-5px) scale(1.025); filter: drop-shadow(0 18px 22px rgba(0,0,0,0.55)) drop-shadow(0 9px 18px var(--holo-tint)) drop-shadow(0 0 9px var(--holo-core)); }
   .nk-lc-card:hover .nk-lc-card__img img.lc-avatar { transform: scale(1.16); }
   .nk-lc-card:hover .nk-lc-card__badge img { transform: scale(1.1); }
 }
-/* 稀有度配色：浓度从 0.6→0.85，颜色更饱和更实，drop-shadow 光晕投射后更清晰可见；3 星默认值从透明 rgba 改为实紫红色，不再缺失 hover 光晕 */
-.nk-lc-card { --holo-color: color-mix(in srgb, var(--ph-400) 85%, transparent); }
-.nk-lc-card[data-rarity="5"] { --holo-color: color-mix(in srgb, var(--rarity-5) 92%, transparent); }
-.nk-lc-card[data-rarity="4"] { --holo-color: color-mix(in srgb, var(--rarity-4-deep) 92%, transparent); }
+/* 辉光统一：所有星级共用同一中性紫色辉光（稀有度差异由星标等语义渠道表达，辉光不参与分级） */
+.nk-lc-card { --holo-core: color-mix(in srgb, var(--ph-400) 22%, transparent); --holo-tint: color-mix(in srgb, var(--ph-700) 38%, transparent); }
 /* 图片区背景透明。isolation:isolate 保持 sheen-wrap::before 的 mix-blend-mode:screen 与下层隔离；overflow:visible 保证外层卡片 drop-shadow 不受裁剪（filter 在 .nk-lc-card hover 上） */
 .nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: visible; isolation: isolate; }
 /* 加载骨架：图片未就绪时显示 shimmer，加载完成后（img.loaded）淡出；不引入矩形底，避免双层相框 */
@@ -169,7 +179,7 @@
    - 宽度 46% × 高度 180%：与角色卡片扫光带宽度一致（光带厚度统一）；高度 180% 仍覆盖倾斜容器的完整对角线（≈ 220px）
    - 入场 left:-70%：从相框左上切角外侧进入
    - 动画终点 translate3d(430%…）：从相框右下切角外侧离开 */
-.nk-lc-card__sheen-wrap::before { content: ""; position: absolute; width: 46%; height: 180%; top: -40%; left: -70%; z-index: 1; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color, var(--ph-400)) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color, var(--ph-400)) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; backface-visibility: hidden; transform: translate3d(0,0,0); }
+.nk-lc-card__sheen-wrap::before { content: ""; position: absolute; width: 46%; height: 180%; top: -40%; left: -70%; z-index: 1; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-core, var(--ph-400)) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-core, var(--ph-400)) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; backface-visibility: hidden; transform: translate3d(0,0,0); }
 @media (hover: hover) and (pointer: fine) {
   .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
 }
@@ -185,7 +195,7 @@
    遗器列表页
 ═══════════════════════════════════════════ */
 .nk-relic-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-.nk-relic-card { position: relative; isolation: isolate; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
+.nk-relic-card { position: relative; isolation: isolate; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
 .nk-relic-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: var(--border2); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 15%, transparent); }
 .nk-relic-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 12px; }
 .nk-relic-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ph-400) 6%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--ph-400) 6%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
@@ -199,7 +209,7 @@
    物品列表页
 ═══════════════════════════════════════════ */
 .nk-item-grid { --nk-grid-min: 110px; --nk-grid-gap: 10px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); }
-.nk-item-card { --rarity-color: var(--rarity-1); position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 12ms), 600ms); cursor: default; }
+.nk-item-card { --rarity-color: var(--rarity-1); position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 12ms), 600ms); cursor: default; }
 .nk-item-card:hover { transform: translateY(-4px) scale(1.03); border-color: color-mix(in srgb, var(--rarity-color) 40%, transparent); box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px color-mix(in srgb, var(--rarity-color) 15%, transparent); }
 .nk-item-card__img { position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; padding: 6px; }
 .nk-item-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.03) 70%, transparent 100%); mix-blend-mode: screen; opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
@@ -223,7 +233,7 @@
 /* 时间线纵轴 */
 .nk-season-grid::before { content: ''; position: absolute; left: 5px; top: 12px; bottom: 12px; width: 2px; background: linear-gradient(180deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 25%, transparent) 40%, color-mix(in srgb, var(--primary) 8%, transparent) 100%); border-radius: 1px; }
 
-.nk-season-card { --st-color: var(--text3); position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 20px 18px 28px; margin-bottom: 10px; background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 4%, var(--card)) 0%, var(--card) 55%); border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent); border-radius: 12px; cursor: pointer; text-decoration: none; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s, background 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 30ms), 600ms); overflow: visible; }
+.nk-season-card { --st-color: var(--text3); position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 20px 18px 28px; margin-bottom: 10px; background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 4%, var(--card)) 0%, var(--card) 55%); border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent); border-radius: var(--nk-radius-card); cursor: pointer; text-decoration: none; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s, background 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 30ms), 600ms); overflow: visible; }
 /* 左侧状态色条 */
 .nk-season-card::after { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--st-color), color-mix(in srgb, var(--st-color) 30%, transparent)); opacity: 0.7; transition: opacity 0.25s, box-shadow 0.25s; }
 /* 时间线节点（左侧圆点） */
@@ -231,7 +241,7 @@
 /* 赛季序号水印 */
 .nk-season-card__num { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-family: var(--font-hud); font-size: 2.6rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--st-color) 22%, transparent); pointer-events: none; user-select: none; transition: transform 0.3s var(--ease), -webkit-text-stroke-color 0.3s, text-shadow 0.3s; z-index: 0; }
 .nk-season-card__num--long { font-size: 1.9rem; }
-.nk-season-card:hover { transform: translateX(6px); border-color: color-mix(in srgb, var(--st-color) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 8%, var(--card)) 0%, color-mix(in srgb, var(--primary) 5%, transparent) 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 16px color-mix(in srgb, var(--st-color) 12%, transparent); }
+.nk-season-card:hover { transform: translateX(5px); border-color: color-mix(in srgb, var(--st-color) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--st-color) 8%, var(--card)) 0%, color-mix(in srgb, var(--primary) 5%, transparent) 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 16px color-mix(in srgb, var(--st-color) 12%, transparent); }
 .nk-season-card:hover::after { opacity: 1; box-shadow: 0 0 8px color-mix(in srgb, var(--st-color) 40%, transparent); }
 .nk-season-card:hover .nk-season-card__node { background: var(--st-color); box-shadow: 0 0 0 3px rgba(15,15,35,0.9), 0 0 10px color-mix(in srgb, var(--st-color) 50%, transparent); }
 .nk-season-card:hover .nk-season-card__num { transform: translateY(-50%) translateX(-26px); -webkit-text-stroke-color: color-mix(in srgb, var(--st-color) 45%, transparent); text-shadow: 0 0 24px color-mix(in srgb, var(--st-color) 15%, transparent); }
@@ -290,7 +300,7 @@
    敌对物种列表页
 ═══════════════════════════════════════════ */
 .nk-mob-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-.nk-mob-card { position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); transform-style: preserve-3d; }
+.nk-mob-card { position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); transform-style: preserve-3d; }
 .nk-mob-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: color-mix(in srgb, var(--accent) 40%, transparent); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--accent) 12%, transparent); }
 .nk-mob-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, rgba(10,10,30,0.5) 70%); display: flex; align-items: center; justify-content: center; padding: 10px; }
 .nk-mob-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--accent) 5%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.26) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--accent) 5%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
@@ -426,6 +436,14 @@
   .nk-home-card:hover { transform: none; border-color: color-mix(in srgb, var(--primary) 22%, transparent); background: var(--card); box-shadow: none; }
   .nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, rgba(20,16,8,0.4) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); box-shadow: none; }
   .nk-home-card--gateway:hover .nk-home-card__badge { background: color-mix(in srgb, var(--gold-500) 12%, transparent); border-color: color-mix(in srgb, var(--gold-500) 35%, transparent); color: var(--gold-350); }
+  /* 角色卡片：触屏重置（浮起/光斑/头像缩放/图标微光/扫光全部回退，边框回稀有度原值） */
+  .nk-cat-card:hover { transform: none; border-color: var(--nk-card-border); box-shadow: none; }
+  .nk-cat-card[data-rarity="5"]:hover { border-color: color-mix(in srgb, var(--rarity-5) 25%, transparent); }
+  .nk-cat-card[data-rarity="4"]:hover { border-color: color-mix(in srgb, var(--rarity-4) 20%, transparent); }
+  .nk-cat-card:hover::before { opacity: 0.18; }
+  .nk-cat-card:hover .nk-cat-card__img img.avatar { transform: none; }
+  .nk-cat-card:hover .nk-cat-card__elem, .nk-cat-card:hover .nk-cat-card__path { transform: none; box-shadow: none; }
+  .nk-cat-card:hover .nk-cat-card__img::before { animation: none; opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

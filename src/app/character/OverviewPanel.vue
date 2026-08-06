@@ -10,6 +10,7 @@ import { extraTerms } from './utils';
 import { escHtml, fmtDesc, iconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PROP_ICON, PROP_NAMES } from '../../lib/constants';
+import { SECTION_IDX } from './sections';
 import type { CharacterData, SkillExtra, SkillTree } from '../../services/types';
 
 type OverviewSection = 'profile' | 'bonuses' | 'talents' | 'stories';
@@ -137,7 +138,7 @@ const abilities = computed<Ability[]>(() => {
 
 <template>
   <template v-if="props.sections.includes('profile') && profileRows.length">
-    <div class="nk-title">PROFILE</div>
+    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.profile }}</span>PROFILE</div>
     <div class="nk-profile">
       <div v-for="p in profileRows" :key="p.label" class="nk-profile__item">
         <span class="nk-profile__label">{{ p.label }}</span>
@@ -146,7 +147,7 @@ const abilities = computed<Ability[]>(() => {
     </div>
   </template>
   <template v-if="props.sections.includes('bonuses') && attrBonuses.length">
-    <div class="nk-title">STAT BONUSES</div>
+    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.bonuses }}</span>STAT BONUSES</div>
     <div class="nk-bonus-grid">
       <div v-for="b in attrBonuses" :key="b.name" class="nk-bonus">
         <img v-if="b.icon" class="nk-bonus__icon" :src="b.icon" loading="lazy">
@@ -156,7 +157,7 @@ const abilities = computed<Ability[]>(() => {
     </div>
   </template>
   <template v-if="props.sections.includes('talents') && abilities.length">
-    <div class="nk-title">TALENTS</div>
+    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.talents }}</span>TALENTS</div>
     <div
       v-for="ab in abilities"
       :key="ab.pointId ?? ab.name"
@@ -178,7 +179,7 @@ const abilities = computed<Ability[]>(() => {
     </div>
   </template>
   <template v-if="props.sections.includes('stories') && storyEntries.length">
-    <div class="nk-title">STORIES</div>
+    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.stories }}</span>STORIES</div>
     <div class="nk-stories">
       <div
         v-for="s in storyEntries"

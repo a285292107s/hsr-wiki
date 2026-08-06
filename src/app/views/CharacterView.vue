@@ -15,6 +15,7 @@ import OverviewPanel from '../character/OverviewPanel.vue';
 import SkillsPanel from '../character/SkillsPanel.vue';
 import EidolonsPanel from '../character/EidolonsPanel.vue';
 import BuildsPanel from '../character/BuildsPanel.vue';
+import { visibleSections, SECTION_IDX } from '../character/sections';
 import { loadSkillAnimations } from '../../services/api';
 import { gameTagsToHtml } from '../../lib/format';
 import type { CharacterData, SkillAnimationsDb } from '../../services/types';
@@ -103,6 +104,14 @@ const sectionDefs = [
   { id: 'stories', label: '档案' },
   { id: 'profile', label: '配音' },
 ] as const;
+
+/** 导航区块：按实际渲染过滤（缺数据区块同步隐藏，编号缺口保留；全局化 §13.3） */
+const navSections = computed(() => {
+  const dd = d.value;
+  if (!dd) return [];
+  const vis = new Set(visibleSections(dd));
+  return sectionDefs.filter((s) => vis.has(s.id));
+});
 
 const pageRef = ref<HTMLElement | null>(null);
 const enhBarRef = ref<HTMLElement | null>(null);
@@ -256,7 +265,7 @@ onBeforeUnmount(() => {
         <div class="nk-enh-bar__inner">
           <nav class="nk-secnav" aria-label="内容区块导航">
             <button
-              v-for="(s, i) in sectionDefs"
+              v-for="s in navSections"
               :key="s.id"
               type="button"
               class="nk-secnav__btn"
@@ -264,7 +273,7 @@ onBeforeUnmount(() => {
               :aria-current="activeSection === s.id ? 'true' : undefined"
               @click="jumpTo(s.id)"
             >
-              <span class="nk-secnav__idx">{{ String(i + 1).padStart(2, '0') }}</span>
+              <span class="nk-secnav__idx">{{ SECTION_IDX[s.id] }}</span>
               {{ s.label }}
             </button>
           </nav>

@@ -6,6 +6,7 @@
 import { computed } from 'vue';
 import SkillCard from './SkillCard.vue';
 import { SKILL_ORDER } from '../../lib/constants';
+import { SECTION_IDX } from './sections';
 import type { CharacterData, Skill, SkillAnimEntry, SkillAnimationsDb } from '../../services/types';
 
 const props = defineProps<{
@@ -73,7 +74,7 @@ const memoSkills = computed<Skill[]>(() =>
 </script>
 
 <template>
-  <div class="nk-title">SKILLS</div>
+  <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS</div>
   <SkillCard
     v-for="g in skillGroups"
     :key="`${enhKey}|${g.main.id}`"
