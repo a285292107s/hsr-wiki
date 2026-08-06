@@ -7,6 +7,10 @@
 ═══════════════════════════════════════════ */
 
 /* ─── 概览区块 ─── */
+/* 页面结构：顶部吸顶工具条（fixed 全屏横贯）+ 下方左右分（左导航条 / 右滚动容器）
+   · 滚动容器保留 tokens 的 left 避让（平板 72 / 桌面 88），导航条不遮挡内容
+   · 容器顶部 padding 占位吸顶条高度（44 + 1 边框），hero 贴齐吸顶条下沿 */
+.nk-char-page.nk-page--detail { padding-top: 45px; }
 /* 概览面板：头图无缝嵌入（顶部贴齐、左右突破面板内边距与面板同宽，下方内容保持面板内边距） */
 .nk-char-page .nk-panel--overview { padding-top: 0; }
 .nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-wide-max); margin: 0 -16px 0; }
@@ -21,10 +25,11 @@
 /* ═══════════ Hero · 档案陈列 ═══════════ */
 .nk-char-page .nk-hero { background: transparent; }
 
-/* 视觉区：边缘柔化改为深墨渐入（无紫雾），底部渐融面板 */
+/* 视觉区：右侧宽幅暗化（立绘融底，消除色块边界）+ 底部渐融面板 */
 .nk-char-page .nk-hero__visual {
   box-shadow:
     inset 0 0 90px 24px rgba(15,15,35,0.72),
+    inset -150px 0 110px -40px rgba(15,15,35,0.92),
     inset 0 -56px 64px -24px rgba(15,15,35,0.92);
 }
 /* 档案编号角标（左下） */
@@ -43,11 +48,16 @@
 }
 .nk-char-page .nk-hero__toggle:hover { border-color: var(--line-2); color: var(--text2); }
 
-/* 信息面板：无毛玻璃、无渐变光带；仅底部细微渐入，让内容直接落在页面底色上 */
+/* 信息面板：完全透明，内容直接落在页面底色上，与背景无缝融合 */
 .nk-char-page .nk-hero__panel {
-  background: linear-gradient(180deg, transparent, rgba(15,15,35,0.55) 60%);
+  background: none;
   border-top: 1px solid var(--line-1);
   backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+/* 文本选中色：主色半透明底 */
+.nk-char-page ::selection {
+  background: color-mix(in srgb, var(--primary) 32%, transparent);
+  color: var(--text-bright);
 }
 
 /* 头部：meta 行（阵营 + 星级）→ 大名字；右侧横排徽章 */
@@ -109,13 +119,16 @@
   padding: 7px 0; border-bottom: 1px solid var(--line-1);
   transition: background 0.2s;
 }
-.nk-char-page .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* 每列末行去底线：表格收束，不悬空 */
+.nk-char-page .nk-hero__stat:nth-child(4n) { border-bottom: none; }
+.nk-char-page .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; border-bottom: none; }
 .nk-char-page .nk-hero__stat:hover { background: rgba(255,255,255,0.02); }
 .nk-char-page .nk-hero__stat-icon { width: 15px; height: 15px; opacity: 0.9; }
 .nk-char-page .nk-hero__stat-label { font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em; }
 .nk-char-page .nk-hero__stat-val {
   font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700;
   color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .nk-char-page .nk-hero__stat-val .nk-d-c { font-size: 0.8rem; }
 .nk-char-page .nk-hero__stat-val .nk-d-n { font-size: 0.85rem; }
@@ -125,6 +138,7 @@
 .nk-char-page .nk-hero__level-label {
   font-family: var(--font-hud); font-size: 0.68rem; font-weight: 600;
   letter-spacing: 0.08em; color: var(--text3); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .nk-char-page .nk-hero__level-track {
   flex: 1; height: 3px; border-radius: 2px; overflow: hidden;
@@ -154,11 +168,15 @@
   flex: none; width: auto; height: auto; border-radius: 0;
   background: none;
   font-size: 0.6rem; letter-spacing: 0; color: var(--primary); opacity: 0.95;
+  /* 编号与标题间的细分隔线（编辑式目录排版） */
+  padding-right: 10px;
+  border-right: 1px solid var(--line-2);
 }
-/* 标题延伸线：从线色渐隐 */
+/* 标题延伸线：双段——实线收束后渐隐 */
 .nk-char-page .nk-title::after {
   content: ''; flex: 1; height: 1px; align-self: center;
-  background: linear-gradient(90deg, var(--line-2), transparent);
+  background:
+    linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
 }
 /* 不计号标题（如 TEAMS 子区块） */
 .nk-char-page .nk-title--no-num { counter-increment: none; }
@@ -313,13 +331,20 @@
 .nk-char-page .nk-table {
   width: 100%; border-collapse: collapse; margin-top: 10px;
   font-family: var(--font-hud); font-size: 0.75rem; text-align: center;
+  font-variant-numeric: tabular-nums;
 }
-.nk-char-page .nk-table th { padding: 7px 10px; color: var(--text3); border-bottom: 1px solid var(--line-1); font-weight: 400; letter-spacing: 0.06em; white-space: nowrap; }
+.nk-char-page .nk-table th {
+  padding: 7px 10px; color: var(--text3); border-bottom: 1px solid var(--line-1);
+  font-weight: 400; letter-spacing: 0.1em; white-space: nowrap;
+}
 .nk-char-page .nk-table td { padding: 6px 10px; color: var(--text2); border-bottom: 1px solid var(--line-1); white-space: nowrap; }
+/* 首列等级：弱化为表头同级的次要信息 */
+.nk-char-page .nk-table td:first-child { color: var(--text3); letter-spacing: 0.04em; }
 .nk-char-page .nk-table tr.nk-table--active td {
   color: var(--primary); font-weight: 700;
   background: color-mix(in srgb, var(--primary) 7%, transparent);
 }
+.nk-char-page .nk-table tr.nk-table--active td:first-child { color: var(--primary); }
 /* 子技能：父卡片内虚线分区 */
 .nk-char-page .nk-skill--child {
   margin: 18px 0 0 22px; padding: 16px 0 0;
@@ -331,10 +356,20 @@
 .nk-char-page .nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
 .nk-char-page .nk-skill--child .nk-skill__metrics { margin-top: 10px; }
 .nk-char-page .nk-skill__head { border-bottom-color: var(--line-1); }
+/* 类型标识：竖条（与星魂 E 编号的细分隔线呼应，档案标签感） */
+.nk-char-page .nk-skill__type-dot {
+  width: 3px; height: 16px; border-radius: 1.5px;
+  background: var(--sk-accent); opacity: 0.9;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14);
+}
+/* 图标：卡片 hover 时微浮（层级呼应，无位移卡片本身） */
 .nk-char-page .nk-skill__icon {
   border-color: var(--line-2); border-radius: 8px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -6px 12px rgba(0,0,0,0.3);
+  transition: transform 0.25s var(--nk-ease-out), border-color 0.2s;
 }
+.nk-char-page .nk-skill:hover .nk-skill__icon { transform: translateY(-1px); border-color: var(--line-2); }
+.nk-char-page .nk-skill--child:hover .nk-skill__icon { transform: none; }
 .nk-char-page .nk-skill__type {
   color: var(--sk-accent); background: color-mix(in srgb, var(--sk-accent) 10%, transparent);
 }
@@ -348,7 +383,10 @@
   color: var(--primary); letter-spacing: 0.02em;
   padding-right: 16px; border-right: 1px solid var(--line-2);
   min-width: 56px;
+  opacity: 0.85; transition: opacity 0.2s;
 }
+/* 卡片 hover：E 编号提亮（区块签名响应） */
+.nk-char-page .nk-eidolon:hover .nk-eidolon__num { opacity: 1; }
 
 /* ═══════════ 附加能力 ═══════════ */
 .nk-char-page .nk-ability { padding: 20px 24px 18px; }
@@ -483,9 +521,10 @@
 .nk-char-page .nk-story__arrow {
   width: 7px; height: 7px; flex-shrink: 0;
   border-right: 1.5px solid var(--text3); border-bottom: 1.5px solid var(--text3);
-  transform: rotate(-45deg); transition: transform 0.25s var(--nk-ease-out);
+  transform: rotate(-45deg); transition: transform 0.25s var(--nk-ease-out), border-color 0.2s;
 }
-.nk-char-page .nk-story--open .nk-story__arrow { transform: rotate(45deg); }
+.nk-char-page .nk-story__head:hover .nk-story__arrow { border-color: var(--text2); }
+.nk-char-page .nk-story--open .nk-story__arrow { transform: rotate(45deg); border-color: var(--primary); }
 .nk-char-page .nk-story__clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
 .nk-char-page .nk-story--open .nk-story__clip { grid-template-rows: 1fr; }
 .nk-char-page .nk-story__inner { overflow: hidden; min-height: 0; }
@@ -496,12 +535,20 @@
 }
 
 /* ═══════════ 吸顶工具条 ═══════════ */
-/* 基础：sticky 定位 + 内部结构（原 character.css 保留） */
+/* 基础：fixed 提升至视口级——全屏横贯、不随滚动容器位移；
+   背景近实底（0.97）：避免内容滚过时透出立绘亮色形成断裂感 */
 .nk-char-page .nk-enh-bar {
-  position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0;
-  background: rgba(10,10,24,0.82);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  background: rgba(9,9,22,0.97);
   backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
   border-bottom: 1px solid var(--line-1);
+}
+/* 内容区避让侧栏：在（视口 - 侧栏宽）区域内居中，与滚动容器内容对齐 */
+@media (min-width: 768px) {
+  .nk-char-page .nk-enh-bar { padding-left: 72px; }
+}
+@media (min-width: 1024px) {
+  .nk-char-page .nk-enh-bar { padding-left: 88px; }
 }
 .nk-char-page .nk-enh-bar__inner {
   display: flex; align-items: center; gap: 8px;
@@ -573,7 +620,7 @@
 /* 阅读进度线（工具条底部） */
 .nk-char-page .nk-enh-bar__progress {
   height: 2px; width: 0;
-  background: linear-gradient(90deg, var(--primary), var(--ph-400));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 55%, transparent) 0%, var(--primary) 35%, var(--ph-400) 100%);
 }
 
 /* ═══════════ 返回顶部 ═══════════ */
@@ -586,10 +633,11 @@
   cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   box-shadow: 0 4px 16px rgba(0,0,0,0.45);
 }
-.nk-char-page .nk-top-btn svg { width: 18px; height: 18px; }
+.nk-char-page .nk-top-btn svg { width: 18px; height: 18px; transition: transform 0.2s var(--nk-ease-out); }
 .nk-char-page .nk-top-btn:hover {
   color: var(--text-bright); border-color: var(--primary); box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
+.nk-char-page .nk-top-btn:hover svg { transform: translateY(-1.5px); }
 @media (min-width: 768px) {
   .nk-char-page .nk-top-btn { right: 28px; bottom: 28px; }
 }
@@ -651,6 +699,9 @@
 /* ═══════════ 骨架屏 ═══════════ */
 .nk-char-page .nk-skeleton__hero { background: linear-gradient(to top, rgba(15,15,35,0.85) 0%, rgba(15,15,35,0.3) 50%, transparent 100%); }
 .nk-char-page .nk-skeleton__hero-panel { background: linear-gradient(180deg, rgba(15,15,35,0.5), var(--bg)); }
+/* 骨架属性区：行式（对齐规格表形态） */
+.nk-char-page .nk-skeleton__stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0 36px; }
+.nk-char-page .nk-sk--stat { height: 20px; border-radius: 4px; }
 
 /* ═══════════ 响应式 ═══════════ */
 /* 平板 ≥768px */
@@ -667,9 +718,15 @@
 @media (min-width: 1024px) {
   .nk-char-page .nk-hero { flex-direction: row; min-height: 540px; }
   .nk-char-page .nk-hero__visual { flex: 0 0 44%; aspect-ratio: auto; min-height: 540px; }
+  /* 视觉区遮罩：左缘 10% 渐入防贴边；右缘 18% 宽幅渐入页面底色——
+     立绘在面板边界前自然融底，消除色块拼接 */
+  .nk-char-page .nk-hero__visual::before {
+    background:
+      linear-gradient(to right, var(--bg) 0%, transparent 10%),
+      linear-gradient(to left, var(--bg) 0%, transparent 18%);
+  }
   .nk-char-page .nk-hero__panel {
     flex: 1 1 auto; border-top: none;
-    background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
     padding: 42px 46px; gap: 24px; justify-content: center;
   }
   .nk-char-page .nk-hero__name { font-size: 2.75rem; }
@@ -683,13 +740,17 @@
 }
 /* 手机紧凑 */
 @media (max-width: 767px) {
-  .nk-char-page .nk-hero__stats { gap: 0 20px; }
+  .nk-char-page .nk-hero__stats { gap: 0 16px; }
   .nk-char-page .nk-hero__stat { padding: 6px 0; gap: 8px; grid-template-columns: 14px 1fr auto; }
   .nk-char-page .nk-hero__stat-label { font-size: 0.68rem; }
   .nk-char-page .nk-hero__stat-val { font-size: 0.8rem; }
   .nk-char-page .nk-hero__stat-val .nk-d-n { font-size: 0.8rem; }
   .nk-char-page .nk-hero__badge { padding: 5px 9px 5px 7px; }
   .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
+  .nk-char-page .nk-hero__archive {
+    left: 12px; bottom: 12px;
+    font-size: 0.45rem; letter-spacing: 0.24em; padding: 5px 10px;
+  }
   .nk-char-page .nk-skill--child { margin-left: 10px; padding-top: 12px; }
   .nk-char-page .nk-eidolon__num { font-size: 1.25rem; min-width: 44px; padding-right: 12px; }
 }
@@ -710,10 +771,14 @@
 /* ═══════════ 减弱动态 ═══════════ */
 @media (prefers-reduced-motion: reduce) {
   .nk-char-page .nk-top-btn { transition: none; }
+  .nk-char-page .nk-top-btn svg { transition: none; }
+  .nk-char-page .nk-top-btn:hover svg { transform: none; }
   .nk-char-page .nk-enh-bar__progress { transition: none; }
   .nk-char-page .nk-hero__bg { transition: none; }
   .nk-char-page .nk-hero__spine { transition: none; }
   .nk-char-page .nk-panel { animation: none; }
+  .nk-char-page .nk-skill:hover .nk-skill__icon { transform: none; }
+  .nk-char-page .nk-story__arrow { transition: none; }
   .nk-char-page .nk-skill:hover,
   .nk-char-page .nk-eidolon:hover,
   .nk-char-page .nk-ability:hover,
@@ -744,6 +809,9 @@
   .nk-char-page .nk-build__team:hover,
   .nk-char-page .nk-relic-slot:hover,
   .nk-char-page .nk-relic-sub:hover { border-color: var(--line-1); background: rgba(255,255,255,0.016); transform: none; box-shadow: none; }
+  .nk-char-page .nk-skill:hover .nk-skill__icon { transform: none; }
+  .nk-char-page .nk-eidolon:hover .nk-eidolon__num { opacity: 0.85; }
+  .nk-char-page .nk-story__head:hover .nk-story__arrow { border-color: var(--text3); }
   .nk-char-page .nk-secnav__btn:hover { color: var(--text3); background: transparent; }
   .nk-char-page .nk-secnav__btn--active:hover { color: var(--primary); background: transparent; }
   .nk-char-page .nk-hero__stat:hover { background: transparent; }
