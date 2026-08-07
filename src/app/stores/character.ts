@@ -38,7 +38,8 @@ export const useCharacterStore = defineStore('character', () => {
     try {
       charId.value = id;
       data.value = null;
-      await app.initManifest();
+      // manifest 并行：角色数据为本地 JSON（不依赖 manifest 版本），失败静默不阻塞
+      void app.initManifest();
       if (!loadGen.isCurrent(gen)) return; // 已被更新的加载取代
       const d = await loadLocalCharacter(id);
       if (!loadGen.isCurrent(gen)) return; // 已被更新的加载取代

@@ -63,11 +63,14 @@ export function applyQualityFixes(p: SpinePlayerInstance): void {
  * 创建并注册 spine-player（生产角色页渲染入口）：
  * - 默认渲染参数基线：透明底（alpha + 00000000）/ 无预乘 / 隐藏控件与加载屏
  * - 成功：应用质量修复 + 播放首选动画 + 注册到 registry（key 粒度释放）
- * - 失败（error 回调 / 构造异常）：自动释放已创建实例并返回 null
+ * - 失败（error 回调 / 构造异常 / 整体超时）：自动释放已创建实例并返回 null
+ *   整体超时兜底：CDN 连接黑洞时 success/error 回调可能永不触发，20s 后按失败结算
  * @param key 注册表 key（如 `player:1001`），同 key 覆盖先释放旧实例
  * @param runtimeVersion 运行时版本分派：skel（nanoka 4.1 二进制）→ '4.1'；official JSON/场景 → '4.2'
  *   调用方须先 loadSpineRuntime(runtimeVersion) 就绪（4.1 无 fit 支持，内部自动剥离）
  */
+const PLAYER_SETTLE_TIMEOUT_MS = 20_000;
+
 export function createSpinePlayer(
   container: HTMLElement,
   key: string,
@@ -79,6 +82,14 @@ export function createSpinePlayer(
     if (!Ctor) return resolve(null);
     try {
       let created: SpinePlayerInstance | null = null;
+      let settled = false;
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const settle = (p: SpinePlayerInstance | null): void => {
+        if (settled) return;
+        settled = true;
+        if (timer !== null) clearTimeout(timer);
+        resolve(p);
+      };
       // 4.1 运行时无 fit 概念：显式剥离（其余字段两版本均支持）
       const finalCfg = { ...cfg };
       if (runtimeVersion === '4.1') delete finalCfg.fit;
@@ -94,15 +105,21 @@ export function createSpinePlayer(
           // spine-player 默认不播放任何动画（setEmptyAnimation），需手动选择并播放
           playFirstAnimation(p);
           registerSpineEntry(key, { dispose: () => disposePlayer(p), gl: p.context?.gl ?? null });
-          resolve(p);
+          settle(p);
         },
         error(_p, msg) {
           console.warn('[nk-wiki] spine-player 渲染失败:', msg);
           if (created) disposePlayer(created); // 失败实例仍可能持有 WebGL 上下文，主动释放
-          resolve(null);
+          settle(null);
         },
       });
       created = player;
+      // 整体超时：资源加载挂起（CDN 黑洞）时 success/error 均不触发，按失败结算并释放
+      timer = setTimeout(() => {
+        console.warn('[nk-wiki] spine-player 渲染超时，已按失败结算');
+        if (created) disposePlayer(created);
+        settle(null);
+      }, PLAYER_SETTLE_TIMEOUT_MS);
     } catch (e) {
       console.warn('[nk-wiki] spine 渲染创建失败:', e);
       resolve(null);

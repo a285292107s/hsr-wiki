@@ -101,13 +101,23 @@ export function createScenePipeline(opts: SpineScenePipelineOptions): SpineScene
   let teardownGl: (() => void) | null = null;
   let paused = false;
   let stepDelta: number | null = null;
+  let loadTimer: ReturnType<typeof setTimeout> | null = null;
+  /** 资源加载超时（CDN 连接黑洞时 loadAll 可能永不结算）：缺省 20s */
+  const loadTimeoutMs = opts.loadTimeoutMs ?? 20_000;
 
-  /* settled 必定结算一次：加载失败 / 全部层缺失 / 构建异常路径均 resolve（空 items） */
+  /* settled 必定结算一次：加载失败 / 全部层缺失 / 构建异常 / 加载超时路径均 resolve（空 items） */
   let settle: (r: { items: SceneItem[]; missing: string[] }) => void;
   const settled = new Promise<{ items: SceneItem[]; missing: string[] }>((resolve) => {
     settle = resolve;
   });
+  let settledOnce = false;
   const settleOnce = (r: { items: SceneItem[]; missing: string[] }): void => {
+    if (settledOnce) return; // 幂等闸门：超时与后续结算并发时只结算一次
+    settledOnce = true;
+    if (loadTimer !== null) {
+      clearTimeout(loadTimer);
+      loadTimer = null;
+    }
     settle(r);
     opts.onSettled?.(r);
   };
@@ -126,9 +136,13 @@ export function createScenePipeline(opts: SpineScenePipelineOptions): SpineScene
     teardown,
   };
 
-  /** 释放当前场景：渲染循环 + WebGL 资源 + 舞台 DOM + 尺寸监听 */
+  /** 释放当前场景：渲染循环 + WebGL 资源 + 舞台 DOM + 尺寸监听 + 加载超时定时器 */
   function teardown(): void {
     cancelled = true;
+    if (loadTimer !== null) {
+      clearTimeout(loadTimer);
+      loadTimer = null;
+    }
     if (teardownGl) {
       teardownGl();
       teardownGl = null;
@@ -228,7 +242,8 @@ export function createScenePipeline(opts: SpineScenePipelineOptions): SpineScene
     .loadAll()
     .catch(() => undefined)
     .then(() => {
-      if (cancelled || !container.isConnected) return;
+      if (cancelled || settledOnce) return; // 已卸载或已超时结算：不再构建/渲染（防超时后悬挂渲染）
+      if (!container.isConnected) return;
       try {
         // 统一骨架构建：缺失层跳过（局部降级；生产与验收台共用同一实现保持同一语义）
         const { items, missing } = buildSceneItems(lib, manager, layers);
@@ -278,6 +293,14 @@ export function createScenePipeline(opts: SpineScenePipelineOptions): SpineScene
       settleOnce({ items: [], missing: [] });
       opts.onError?.(String(e));
     });
+
+  // 资源加载超时兜底：连接黑洞时 loadAll 永不结算 → 按全部层缺失结算并释放本管线（防悬挂）
+  loadTimer = setTimeout(() => {
+    console.warn(`[nk-wiki] spine 场景资源加载超时（${Math.round(loadTimeoutMs / 1000)}s），按全部层缺失结算`);
+    settleOnce({ items: [], missing: layers.map((l) => l.atlas) });
+    opts.onError?.(`场景资源加载超时（${Math.round(loadTimeoutMs / 1000)}s）`);
+    teardown();
+  }, loadTimeoutMs);
 
   return ctrl;
 }

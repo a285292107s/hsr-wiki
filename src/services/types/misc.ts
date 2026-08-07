@@ -140,6 +140,11 @@ export interface MazeMonsterInfo {
   skills?: { name: string; tag?: string }[];
   /** 韧性值（MonsterTemplateConfig.StanceBase.Value，如 360） */
   stance?: number;
+  /** 速度（MonsterTemplateConfig.SpeedBase.Value，如 144；模板缺失时不输出） */
+  speed?: number;
+  /** 模板 ID（仅实例别名 MonsterID≠MonsterTemplateID 时输出，如 501211002 → 5012110；
+   *  详情页跳转 /monster/:tpl 用；无别名时 id 即模板 ID） */
+  tpl?: string;
   /** 战斗波次序号（StageConfig.MonsterList 波次展开，1 起；层级/peak 敌方带此字段，星启无） */
   wave?: number;
 }
@@ -233,6 +238,9 @@ export interface MazeTierceInfo {
   /** 3 节点敌方：节点 1/2 = 常规最高难度关上下半场（DLCKKJFMJOB → EventIDList1/2），
    *  节点 3 = 星启附加关（HFIAAGAKFMD → StageConfig 波次） */
   nodes?: { idx: number; monsters: MazeMonsterInfo[] }[];
+  /** 星启通关奖励（仅虚构叙事：EGEEJLHBALB ItemID/ItemNum 列表，每期固定；
+   *  与 score 通关分数线对应，官网“关卡奖励”板块数据源） */
+  rewards?: { id: number; num?: number }[];
 }
 
 /** maze.json 条目（键 = 赛季 ID） */
@@ -261,6 +269,9 @@ export interface MazeListEntry {
   arts?: { background?: string; tab?: string };
   /** 赛季增益（名称 + 效果描述） */
   buffs?: MazeBuffInfo[];
+  /** 战意赛季主题机制（虚构叙事 Fever 赛季 SubMazeBuffList：机制 + 战熄潮平/战意汹涌；
+   *  普通赛季缺省） */
+  sub_buffs?: MazeBuffInfo[];
   /** 赛季敌方（按层序收集去重；icon 为 MonsterMiddleIcon basename） */
   monsters?: MazeMonsterInfo[];
   /** 挑战目标描述（text 为 clean_text 清洗后文本，param 为 #N[i] 占位符参数） */

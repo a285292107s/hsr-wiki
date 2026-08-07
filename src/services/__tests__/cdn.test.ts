@@ -3,10 +3,11 @@
  * - nanokaUrl / cdnUri / cdnRawUrl：URL 构造契约
  * - resolveCdnUri：双源解析 + 官方源守卫（OFFICIAL_BASE 为空 → 全部走 nanoka）
  * - cdnFallbackFromPrimary / cdnImgFallbackAttr：v-html 卡片回退属性生成
- * - installCdnImgFallback：全局图片回退事件委托（捕获 error 事件，仅回退一次）
+ * - installCdnImgFallback：全局图片回退事件委托（双源回退一次 → 最终降级 data-cdn-down →
+ *   CDN down 短路 / 恢复重载；仅回退一次防循环）
  * - 官方分支：vi.doMock 注入非空 OFFICIAL_BASE 验证官方优先 + nanoka 回退
  */
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CDN } from '../../lib/constants';
 import {
   CDN_CATEGORIES,
@@ -17,7 +18,9 @@ import {
   cdnUri,
   installCdnImgFallback,
   nanokaUrl,
+  resetCdnHealthForTest,
   resolveCdnUri,
+  startCdnHealthProbe,
 } from '../cdn';
 
 const BASE = `${CDN}${NANOKA_HUD}`;
@@ -88,6 +91,15 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
 });
 
 describe('installCdnImgFallback（DOM 副作用）', () => {
+  beforeEach(() => {
+    resetCdnHealthForTest();
+  });
+  afterEach(() => {
+    resetCdnHealthForTest();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
   it('捕获 <img> 的 error 事件并替换为回退源，仅回退一次', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
@@ -107,13 +119,94 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     }
   });
 
-  it('无 data-cdn-fallback 的 img 不受影响', () => {
+  it('无回退属性且首选源（nanoka）失败 → 标记 data-cdn-down（src 不变，CSS 隐藏破图）', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
     img.src = 'https://primary.example/x.webp';
     document.body.appendChild(img);
     try {
       img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.src).toBe('https://primary.example/x.webp');
+      expect(img.dataset.cdnDown).toBe('1');
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('回退源再失败 → 标记 data-cdn-down', () => {
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.setAttribute('data-cdn-fallback', 'https://fb.example/x.webp');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    try {
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.src).toBe('https://fb.example/x.webp');
+      expect(img.dataset.cdnDown).toBe('1');
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('非 http(s) src（data URI / 相对路径）不受委托影响', () => {
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.src = 'data:image/svg+xml;utf8,<svg/>';
+    document.body.appendChild(img);
+    try {
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.hasAttribute('data-cdn-down')).toBe(false);
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('CDN 判定不可用时短路：直接标记降级，不做回退替换', async () => {
+    vi.useFakeTimers();
+    // 健康探测失败 → down
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('network down'); }));
+    startCdnHealthProbe();
+    await vi.advanceTimersByTimeAsync(0);
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.setAttribute('data-cdn-fallback', 'https://fb.example/x.webp');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    try {
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.src).toBe('https://primary.example/x.webp'); // 未替换
+      expect(img.dataset.cdnDown).toBe('1');
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('CDN 恢复时重载全部已降级图片（移除标记 + 重设 src）', async () => {
+    vi.useFakeTimers();
+    let ok = false;
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      if (!ok) throw new Error('network down');
+      return { ok: true, status: 200 };
+    }));
+    startCdnHealthProbe();
+    await vi.advanceTimersByTimeAsync(0);
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    img.dispatchEvent(new Event('error', { bubbles: true }));
+    expect(img.dataset.cdnDown).toBe('1');
+    try {
+      // 恢复：重探周期后探测成功 → 订阅触发重载
+      ok = true;
+      await vi.advanceTimersByTimeAsync(30000);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(img.hasAttribute('data-cdn-down')).toBe(false);
       expect(img.src).toBe('https://primary.example/x.webp');
     } finally {
       off();

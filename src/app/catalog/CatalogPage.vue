@@ -112,9 +112,8 @@ async function load(): Promise<void> {
   const gen = loadGen.begin();
   phase.value = 'loading';
   errorMsg.value = '';
-  try {
-    await app.initManifest();
-  } catch { /* 版本为空 → fetchData 将报错 */ }
+  // manifest 并行：目录数据均为本地 JSON（fetchData 不依赖版本），失败静默不阻塞
+  void app.initManifest();
   try {
     if (!props.config.fetchData) throw new Error('配置缺少 fetchData');
     items.value = await props.config.fetchData({ version: app.version });

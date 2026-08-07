@@ -19,7 +19,8 @@
   全层合并去重 + 逐层弱点 floor_damage）；异相仲裁结构不同，仅提供弱点属性。
 - 赛季增益 buffs：忘却之庭取分组表 MazeBuffID（ChallengeGroupConfig）；虚构叙事 /
   末日幻影取主题表 BuffList（ChallengeStoryGroupExtra / ChallengeBossGroupExtra 前两阶段），
-  名称经 MazeBuff 解析。
+  名称经 MazeBuff 解析。虚构叙事战意（Fever）赛季另取 SubMazeBuffList 为主题机制
+  sub_buffs（机制 + 战熄潮平/战意汹涌效果，Normal 赛季为空）。
 - 赛季敌方 monsters：各层 StageConfig 波次（EventIDList1/2 → StageConfig.MonsterList，
   每波为 {Monster0..N} 字典）按层序收集 → MonsterTemplateConfig
   名称 + 头像图标（ManikinImagePath 取 basename，前端经 monstermiddleicon CDN 加载），
@@ -49,7 +50,9 @@
   ChallengeBossMazeTierce）提供星启关卡配置（弱点 / 回合 / 目标 / Boss）。
   关联规则：Tierce 记录 DLCKKJFMJOB = 常规模式最后一关 ID，查关卡表得 GroupID。
   目标描述按模式走对应目标表（maze→ChallengeTargetConfig / story→ChallengeStoryTargetConfig /
-  boss→ChallengeBossTargetConfig），score 仅虚构叙事提供（IDBJENCBJHM）。
+  boss→ChallengeBossTargetConfig），score 仅虚构叙事提供（IDBJENCBJHM），
+  满分档目标（GNGENMHNLAH，虚构叙事 99000）并入 targets 末尾；通关奖励取
+  EGEEJLHBALB（ItemID/ItemNum 列表，虚构叙事每期固定）输出为 rewards。
   混淆字段名（解包变量名）含义：PHFMCACHFIJ=星启关 ID / LOJCIDLKPKG=弱点 /
   GNOOAGPBNLD=回合 / OGEOMCGNNMP=目标 ID 组 / JEBMBCLBIOI=敌方 ID。
 - 虚构叙事回合上限：ChallengeStoryMazeExtra.TurnLimit（按层记录 ID 匹配）覆盖 countdown。
@@ -125,18 +128,27 @@ def _load_maze_buffs() -> dict[int, dict]:
 
 
 def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dict:
-    """敌方输出对象：{id, name, icon, weak, resist, rank, camp, stance}。
+    """敌方输出对象：{id, name, icon, weak, resist, rank, camp, stance, speed}。
 
     full=True 追加 intro/skills（星启信息卡消费；层级/赛季波次全量为轻量字段，
     避免图鉴介绍与技能在大量重复引用中膨胀体积）。skills 仅取名称 + 标签
     （技能全量字段由 monster_detail 转换器输出）。调用方需自行保证 mid 已注册
     （未注册返回空 dict，勿直接使用）。
+    实例别名（MonsterID≠MonsterTemplateID）附 tpl=模板 ID，前端跳转怪物详情用
+    （详情文件按模板 ID 命名）；stats 仅提升 speed（模板 SpeedBase，与韧性同源）。
     """
     info = monsters.get(mid) or {}
     out = {"id": str(mid)}
+    tpl = info.get("_tpl")
+    if tpl:
+        out["tpl"] = str(tpl)
     for k, v in info.items():
-        if k in ("stats", "figure"):
-            continue  # 详情页专属字段（共享聚合表）不泄漏进赛季输出
+        if k in ("figure", "_tpl"):
+            continue  # 详情页专属字段（共享聚合表带来的字段）不泄漏进赛季输出
+        if k == "stats":
+            if v.get("speed"):
+                out["speed"] = v["speed"]
+            continue
         if not full and k in ("intro", "skills"):
             continue
         if k == "skills":
@@ -208,6 +220,27 @@ def _group_extra_buff(filename: str, keys: tuple[str, ...]) -> dict[int, list[in
             for bid in rec.get(key, []) or []:
                 if bid and bid not in ids:
                     ids.append(bid)
+        if ids:
+            out[gid] = ids
+    return out
+
+
+def _group_extra_sub_buffs(filename: str = "ChallengeStoryGroupExtra.json") -> dict[int, list[int]]:
+    """虚构叙事战意赛季主题机制 → {GroupID: [BuffID...]}（SubMazeBuffList，去重保序）。
+
+    StoryType=Fever（战意）赛季专属：机制（追加攻击积累战意值）+ 效果
+    （战熄潮平 / 战意汹涌 两阶段），Normal 赛季为空。
+    """
+    data = load_json(EXCEL_DIR / filename)
+    out: dict[int, list[int]] = {}
+    for rec in data:
+        gid = rec.get("GroupID")
+        if gid is None:
+            continue
+        ids: list[int] = []
+        for bid in rec.get("SubMazeBuffList", []) or []:
+            if bid and bid not in ids:
+                ids.append(bid)
         if ids:
             out[gid] = ids
     return out
@@ -426,6 +459,18 @@ def _load_tierce(
                         (prev_rec or {}).get(evkey, []) or [], stages, monsters, full=True),
                 })
             nodes.append({"idx": 3, "monsters": node3})
+            # 目标档位：OGEOMCGNNMP（60000/75000/90000）+ GNGENMHNLAH（99000 满分档，
+            # 官网关卡奖励表五档中的最高档，追加保持分数升序）
+            tids = list(rec.get("OGEOMCGNNMP", []) or [])
+            full_tid = rec.get("GNGENMHNLAH")
+            if full_tid and full_tid not in tids:
+                tids.append(full_tid)
+            # 通关奖励（EGEEJLHBALB 全量含数量；OGALGHMIIAH 仅为展示顺序，取前者）；
+            # 仅虚构叙事提供（每期固定），其他模式缺省不输出
+            rewards = [
+                {"id": r.get("ItemID"), "num": r.get("ItemNum", 0)}
+                for r in (rec.get("EGEEJLHBALB", []) or []) if r.get("ItemID")
+            ]
             entry = {
                 "id": rec.get("PHFMCACHFIJ"),
                 "damage_types": sorted(rec.get("LOJCIDLKPKG", []) or []),
@@ -433,11 +478,13 @@ def _load_tierce(
                 "score": rec.get("IDBJENCBJHM"),
                 "targets": [
                     {"text": targets[t]["text"], "param": targets[t]["param"]}
-                    for t in (rec.get("OGEOMCGNNMP", []) or []) if t in targets
+                    for t in tids if t in targets
                 ],
                 "monsters": node3,
                 "nodes": nodes,
             }
+            if rewards:
+                entry["rewards"] = rewards
             s_eid = (rec.get("HFIAAGAKFMD", []) or [None])[0]
             s_lv = stages[s_eid]["level"] if s_eid in stages else None
             if s_lv:
@@ -626,6 +673,7 @@ def _group_seasons(
     arts: dict[int, dict] | None = None,
     full_monsters: bool = False,
     phases: dict[int, list[int]] | None = None,
+    sub_buffs: dict[int, list[int]] | None = None,
 ) -> dict:
     """读取挑战配置，按 GroupID 聚合为赛季条目。
 
@@ -680,6 +728,12 @@ def _group_seasons(
             {"id": bid, **buffs[bid]}
             for bid in buff_map.get(gid, []) if bid in buffs
         ]
+        # 战意赛季主题机制（SubMazeBuffList：机制 + 战熄潮平/战意汹涌；仅 Fever 赛季）
+        if sub_buffs:
+            entry["sub_buffs"] = [
+                {"id": bid, **buffs[bid]}
+                for bid in sub_buffs.get(gid, []) if bid in buffs
+            ]
         entry["monsters"] = _season_monsters(recs, monsters, stages)
         entry["targets"] = _season_targets(recs, targets)
         # 虚构叙事回合上限：ChallengeStoryMazeExtra.TurnLimit 覆盖 countdown
@@ -879,6 +933,7 @@ def convert() -> None:
     )
     story_turns = _load_story_turns()
     story_scores = _load_story_scores()
+    story_sub_buffs = _group_extra_sub_buffs()
 
     # 三模式目标表合并（ID 不冲突：maze 6xx / story 4xxx / boss 5xxx）
     targets_all = {
@@ -917,6 +972,7 @@ def convert() -> None:
         scores=story_scores,
         group_names=_load_group_names("ChallengeStoryGroupConfig.json"),
         arts=_load_group_arts("ChallengeStoryGroupConfig.json"),
+        sub_buffs=story_sub_buffs,
     )
     for k in story:
         if k in tierce:

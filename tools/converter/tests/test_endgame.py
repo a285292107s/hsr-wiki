@@ -95,12 +95,13 @@ class TestAuxTables:
 
     def test_monster_out_trim(self):
         """敌方输出裁剪：轻量模式去掉 intro/skills；full 模式 skills 仅取名称 + 标签，
-        且不含详情页专属字段（stats/figure，共享聚合表带来的字段不泄漏进赛季输出）。"""
+        且不含详情页专属字段（stats/figure，共享聚合表带来的字段不泄漏进赛季输出）；
+        stats 仅提升 speed（模板 SpeedBase）；实例别名附 tpl=模板 ID。"""
         info = {
             "name": "名1", "icon": "Monster_1", "figure": "Monster_1",
             "weak": ["Ice"], "resist": {"Fire": 0.2}, "rank": "Elite",
             "camp": "名20", "intro": "名10", "stance": 240,
-            "stats": {"hp": 1, "atk": 2, "def": 3, "speed": 4},
+            "stats": {"hp": 1, "atk": 2, "def": 3, "speed": 144},
             "skills": [{"id": 1, "name": "名30", "tag": "名31",
                          "type_desc": "技能", "desc": "描述",
                          "param_list": [3]}],
@@ -110,6 +111,7 @@ class TestAuxTables:
             "id": "8013010", "name": "名1", "icon": "Monster_1",
             "weak": ["Ice"], "resist": {"Fire": 0.2},
             "rank": "Elite", "camp": "名20", "stance": 240,
+            "speed": 144,
         }
         full = eg._monster_out(8013010, {8013010: info}, full=True)
         assert full["intro"] == "名10"
@@ -118,6 +120,19 @@ class TestAuxTables:
         assert "figure" not in full
         # 未注册 mid → 仅输出 id（调用方需自行保证 mid 已注册）
         assert eg._monster_out(9999, {}) == {"id": "9999"}
+
+    def test_monster_out_tpl_alias(self):
+        """实例别名（MonsterID≠MonsterTemplateID）：输出 tpl=模板 ID 供前端跳转；
+        内部字段 _tpl 不外泄。"""
+        info = {"name": "名1", "icon": "Monster_1", "_tpl": 2004010,
+                "weak": [], "resist": {}, "rank": "", "camp": "",
+                "stance": 300, "stats": {"hp": 1, "atk": 2, "def": 3, "speed": 0}}
+        out = eg._monster_out(200401014, {200401014: info})
+        assert out == {"id": "200401014", "tpl": "2004010", "name": "名1",
+                       "icon": "Monster_1", "weak": [], "resist": {},
+                       "rank": "", "camp": "", "stance": 300}
+        # speed=0（模板缺失）→ 不输出 speed
+        assert "speed" not in out
 
     def test_load_targets_clean(self, monkeypatch):
         monkeypatch.setattr(eg, "load_json", lambda _p: [
@@ -167,6 +182,17 @@ class TestGroupAux:
         out = eg._group_extra_buff("x.json", ("BuffList1", "BuffList2"))
         assert out == {3020: [3111008, 3111010, 3111012]}
 
+    def test_group_extra_sub_buffs_fever(self, monkeypatch):
+        """战意赛季主题机制：SubMazeBuffList 去重保序；Normal 赛季（空列表）不入表。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"GroupID": 2025, "SubMazeBuffList": [3031232, 3031233, 3031234, 3031232]},
+            {"GroupID": 2001, "SubMazeBuffList": []},  # Normal 赛季 → 不入表
+            {"GroupID": 0},
+        ])
+        out = eg._group_extra_sub_buffs()
+        assert out == {2025: [3031232, 3031233, 3031234]}
+        assert 2001 not in out
+
     def test_load_story_turns(self, monkeypatch):
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"ID": 20011, "TurnLimit": 5},
@@ -199,7 +225,11 @@ class TestTierce:
             if name.endswith("ChallengeStoryMazeTierce.json"):
                 return [{"PHFMCACHFIJ": 20245, "DLCKKJFMJOB": 20244,
                          "LOJCIDLKPKG": ["Physical"], "GNOOAGPBNLD": 0,
-                         "IDBJENCBJHM": 45000, "OGEOMCGNNMP": [4001]}]  # 无 HFIAAGAKFMD → 回退 Boss 代表
+                         "IDBJENCBJHM": 45000, "OGEOMCGNNMP": [4001],
+                         "GNGENMHNLAH": 4000,  # 满分档（99000）并入 targets
+                         "EGEEJLHBALB": [{"ItemID": 122002},
+                                          {"ItemID": 213, "ItemNum": 24},
+                                          {"ItemID": 2, "ItemNum": 380000}]}]  # 无 HFIAAGAKFMD → 回退 Boss 代表
             if name.endswith("ChallengeStoryMazeConfig.json"):
                 return [{"ID": 20244, "GroupID": 2024}]
             if name.endswith("StageConfig.json"):
@@ -216,6 +246,7 @@ class TestTierce:
             601: {"text": "剩余#1[i]轮", "param": 15},
             602: {"text": "剩余#1[i]轮", "param": 30},
             4001: {"text": "获得#1[i]分", "param": 60000},
+            4000: {"text": "获得#1[i]分", "param": 99000},
         }
         monsters = {5013040: {"name": "先锋", "icon": "Monster_5013040",
                                "weak": [], "resist": {}, "rank": "Elite"},
@@ -264,6 +295,16 @@ class TestTierce:
         # 虚构叙事：score 输出；无 Stage 配置 → 回退 Boss 代表（无波次）；组 1034 无星启 → 不入表
         assert out["2024"]["score"] == 45000
         assert out["2024"]["monsters"] == []
+        # 满分档目标（GNGENMHNLAH=4000，99000 分）并入 targets 末尾；通关奖励输出 id+num
+        assert out["2024"]["targets"] == [
+            {"text": "获得#1[i]分", "param": 60000},
+            {"text": "获得#1[i]分", "param": 99000},
+        ]
+        assert out["2024"]["rewards"] == [
+            {"id": 122002, "num": 0},
+            {"id": 213, "num": 24},
+            {"id": 2, "num": 380000},
+        ]
         assert "1034" not in out
 
 
@@ -434,10 +475,12 @@ class TestGroupSeasons:
             "ChallengeMazeConfig.json", "Name",
             {"1001": ("2023-09-04 04:00:00", "2023-09-18 04:00:00")},
             buff_map={1001: [3030146]},
-            buffs={3030146: {"name": "记忆紊流", "desc": "伤害提高 #1[i]%", "param_list": [0.3]}},
+            buffs={3030146: {"name": "记忆紊流", "desc": "伤害提高 #1[i]%", "param_list": [0.3]},
+                   3030147: {"name": "追加攻击", "desc": "积累 #1[i] 点战意值", "param_list": [8]}},
             monsters={1003010: {"name": "虚卒", "icon": "Monster_1003010",
                                  "weak": ["Physical"], "resist": {}, "rank": "Elite"}},
             targets={251: {"text": "剩余#1[i]轮以上", "param": 10}},
+            sub_buffs={1001: [3030147]},
         )
         entry = out["1001"]
         assert entry["zh"] == "名2"  # 代表记录 = 最小 ID（2001 有 Name {Hash:2}）
@@ -448,6 +491,8 @@ class TestGroupSeasons:
         assert entry["damage_types"] == ["Fire"]
         assert entry["floor_damage"] == [{"floor": 2, "stage1": ["Fire"], "stage2": []}]
         assert entry["buffs"] == [{"id": 3030146, "name": "记忆紊流", "desc": "伤害提高 #1[i]%", "param_list": [0.3]}]
+        # 战意赛季主题机制（SubMazeBuffList）独立输出
+        assert entry["sub_buffs"] == [{"id": 3030147, "name": "追加攻击", "desc": "积累 #1[i] 点战意值", "param_list": [8]}]
         assert entry["monsters"] == [{"id": "1003010", "name": "虚卒", "icon": "Monster_1003010",
                                        "weak": ["Physical"], "resist": {}, "rank": "Elite"}]
         assert entry["targets"] == [{"text": "剩余#1[i]轮以上", "param": 10}]

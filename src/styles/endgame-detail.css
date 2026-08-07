@@ -59,7 +59,7 @@
   background: linear-gradient(90deg, color-mix(in srgb, var(--eg-color) 45%, transparent) 0%, var(--eg-color) 55%, color-mix(in srgb, var(--eg-color) 75%, #fff) 100%);
 }
 /* 锚点滚动补偿（吸顶条高度 44 + 进度线 2 + 余量） */
-#egd-buffs, #egd-tierce, #egd-floors, #egd-levels { scroll-margin-top: 56px; }
+#egd-buffs, #egd-tierce, #egd-floors, #egd-levels, #egd-sub-buffs { scroll-margin-top: 56px; }
 
 /* ═══════════════════════════════════════════
    Hero：档案铭牌 + 赛季信息
@@ -316,6 +316,25 @@
   color: var(--text2);
   max-width: var(--nk-prose-max);
 }
+
+/* ═══════════════════════════════════════════
+   战意机制（虚构叙事 Fever 赛季主题：机制 + 战熄潮平/战意汹涌两阶段效果）
+   SubMazeBuffList：机制 1 条 + 效果 2 条；小节标签与层级阶段标签同语言
+═══════════════════════════════════════════ */
+.nk-egd-fury { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
+.nk-egd-fury__mech, .nk-egd-fury__eff { display: flex; flex-direction: column; gap: 8px; }
+.nk-egd-fury__label {
+  align-self: flex-start;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 8%, transparent);
+  white-space: nowrap;
+}
 .nk-egd-buff__desc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-buff__desc .nowrap { white-space: nowrap; }
 
@@ -526,6 +545,16 @@
 .nk-egd-floor__mon:hover {
   border-color: color-mix(in srgb, var(--eg-color) 55%, transparent);
   transform: translateY(-1px);
+}
+/* 敌方小图详情链接（/monster/:模板 ID；悬浮提示上移，链接承接 hover） */
+.nk-egd-floor__monlink {
+  display: inline-block;
+  line-height: 0;
+  border-radius: 50%;
+}
+.nk-egd-floor__monlink .nk-egd-floor__mon {
+  display: block;
+  transform-origin: center;
 }
 /* 可用增益（层级 MazeBuff，如记忆紊流；内嵌深底，无左竖条） */
 .nk-egd-floor__buff {
@@ -750,6 +779,20 @@
 }
 .nk-egd-mon:hover .nk-egd-mon__img {
   border-color: color-mix(in srgb, var(--eg-color) 55%, transparent);
+}
+/* 敌方立绘详情链接（保持圆形头像视觉，hover 轻微上浮提示可点） */
+.nk-egd-mon__figlink {
+  display: inline-block;
+  line-height: 0;
+  border-radius: 50%;
+}
+.nk-egd-mon__figlink .nk-egd-mon__img {
+  display: block;
+  transition: border-color 0.22s ease, transform 0.22s var(--ease);
+}
+.nk-egd-mon__figlink:hover .nk-egd-mon__img {
+  border-color: color-mix(in srgb, var(--eg-color) 70%, transparent);
+  transform: translateY(-1px);
 }
 .nk-egd-mon__meta {
   display: flex;
@@ -1012,6 +1055,85 @@
   font-size: 0.58rem;
   letter-spacing: 0.08em;
   color: var(--text3);
+}
+
+/* ═══════════════════════════════════════════
+   星启通关奖励（虚构叙事 EGEEJLHBALB：物品行 + 通关目标分数）
+═══════════════════════════════════════════ */
+.nk-egd-reward {
+  margin-top: 18px;
+  padding: 14px 16px 15px;
+  background: color-mix(in srgb, var(--blk-900) 26%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.nk-egd-reward__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nk-egd-reward__label {
+  align-self: flex-start;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 8%, transparent);
+  white-space: nowrap;
+}
+.nk-egd-reward__goal {
+  font-size: 0.72rem;
+  color: var(--text2);
+}
+.nk-egd-reward__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.nk-egd-reward__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 6px;
+  background: color-mix(in srgb, var(--blk-900) 42%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+.nk-egd-reward__item:hover { border-color: var(--line-2); }
+.nk-egd-reward__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--blk-900) 60%, transparent);
+}
+.nk-egd-reward__icon--void {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-hud);
+  font-size: 0.6rem;
+  color: var(--text3);
+}
+.nk-egd-reward__name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+.nk-egd-reward__num {
+  font-family: var(--font-hud);
+  font-size: 0.66rem;
+  color: color-mix(in srgb, var(--eg-color) 80%, var(--text2));
+  white-space: nowrap;
 }
 
 /* ─── 相邻赛季导航（阅读族中性细线） ─── */

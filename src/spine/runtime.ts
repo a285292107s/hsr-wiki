@@ -14,7 +14,11 @@
  * （审核台「重新加载」按钮依赖此语义）。生产渲染与调试验收台共用。
  */
 import { SPINE_RUNTIME_41_CDNS, SPINE_RUNTIME_CDNS } from './constants';
+import { isCdnDown } from '../services/cdn/health';
 import type { SpineLib, SpinePlayerCtor, SpineRuntimeVersion } from './types';
+
+/** 单源注入超时：连接黑洞（DNS/握手挂起）时 onerror 可能永不触发，超时按失败结算进入下一源 */
+const SCRIPT_TIMEOUT_MS = 8000;
 
 /** 各版本 CDN 列表（4.1=备用 / 4.2=主） */
 const VERSION_CDNS: Record<SpineRuntimeVersion, string[]> = {
@@ -81,16 +85,31 @@ function captureFallback(version: SpineRuntimeVersion): boolean {
   }
 }
 
-/** 注入单个版本 CDN script（串行化：前一个下载+执行结算后才注入下一个） */
+/** 注入单个版本 CDN script（串行化：前一个下载+执行结算后才注入下一个；单源 8s 超时兜底） */
 function injectScript(url: string, version: SpineRuntimeVersion): Promise<boolean> {
   const run = injectChain.then(
     () =>
       new Promise<boolean>((resolve) => {
+        let settled = false;
+        let timer: ReturnType<typeof setTimeout> | null = null;
+        const settle = (ok: boolean): void => {
+          if (settled) return;
+          settled = true;
+          if (timer !== null) clearTimeout(timer);
+          s.onload = null;
+          s.onerror = null;
+          resolve(ok);
+        };
         loadingVersion = version; // IIFE 同步执行瞬间走 setter → 按版本捕获
         const s = document.createElement('script');
         s.src = url;
-        s.onload = () => resolve(proxyInstalled ? getSpineCtor(version) !== null : captureFallback(version));
-        s.onerror = () => resolve(false);
+        s.onload = () => settle(proxyInstalled ? getSpineCtor(version) !== null : captureFallback(version));
+        s.onerror = () => settle(false);
+        // 超时：移除 script（避免残留网络请求），按失败结算
+        timer = setTimeout(() => {
+          s.remove();
+          settle(false);
+        }, SCRIPT_TIMEOUT_MS);
         document.head.appendChild(s);
       }),
   );
@@ -109,9 +128,11 @@ export function getSpineLib(version: SpineRuntimeVersion = '4.2'): SpineLib | nu
   return libs.get(version) ?? null;
 }
 
-/** 动态加载指定版本 spine-player 运行时（CDN IIFE；全部 CDN 失败时返回 false 并允许下次重试） */
+/** 动态加载指定版本 spine-player 运行时（CDN IIFE；全部 CDN 失败时返回 false 并允许下次重试；
+ *  CDN 健康探测判定不可用时直接返回 false，不做注入等待） */
 export function loadSpineRuntime(version: SpineRuntimeVersion = '4.2'): Promise<boolean> {
   if (getSpineCtor(version)) return Promise.resolve(true);
+  if (isCdnDown()) return Promise.resolve(false); // CDN 整体不可用：跳过注入，允许恢复后重试
   const pending = _runtimeLoads.get(version);
   if (pending) return pending;
   const promise = (async (): Promise<boolean> => {

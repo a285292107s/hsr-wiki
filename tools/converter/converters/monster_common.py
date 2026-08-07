@@ -88,9 +88,10 @@ def load_monsters() -> dict[int, dict]:
             },
         }
     # 实例别名：MonsterConfig.MonsterID（战斗波次引用实例 ID，如 200401009）→
-    # 同模板信息（MonsterTemplateID 已注册时），使 _monster_out 直接命中
+    # 同模板信息（MonsterTemplateID 已注册时），使波次引用直接命中；
+    # 附加内部字段 _tpl 记录模板 ID（供赛季输出 tpl，前端跳转怪物详情用模板 ID）
     for rec in configs:
         mid, tpl = rec.get("MonsterID"), rec.get("MonsterTemplateID")
         if mid is not None and tpl is not None and mid != tpl and tpl in out:
-            out.setdefault(mid, out[tpl])
+            out.setdefault(mid, {**out[tpl], "_tpl": tpl})
     return out

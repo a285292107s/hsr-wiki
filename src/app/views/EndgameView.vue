@@ -10,7 +10,9 @@ import { useRoute } from 'vue-router';
 import { ENDGAME_MODES, mazeStatus, mazeDateRange } from '../catalog/pages/endgame';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
+  loadLocalItems,
 } from '../../services/api';
+import type { LocalItemEntry } from '../../services/types';
 import { fmtDesc, escHtml, elementIconUrl, itemIconUrl } from '../../lib/format';
 import { ELEM, MON_RANK } from '../../lib/constants';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
@@ -38,6 +40,19 @@ const data = ref<MazeListEntry | null>(null);
 /** 当前赛季在列表中的位置（供"上一赛季 / 下一赛季"导航） */
 const seasonIndex = ref(-1);
 const seasonKeys = ref<string[]>([]);
+
+/** 物品库 id → {name, icon}（星启通关奖励名称/图标映射；items.json 四级缓存兜底） */
+const itemMap = ref<Map<number, Pick<LocalItemEntry, 'name' | 'icon'>>>(new Map());
+/** 物品库模块级单例（加载失败降级空表，不阻塞赛季正文） */
+let itemsPromise: Promise<Map<number, Pick<LocalItemEntry, 'name' | 'icon'>>> | null = null;
+function loadItemMap(): Promise<Map<number, Pick<LocalItemEntry, 'name' | 'icon'>>> {
+  if (!itemsPromise) {
+    itemsPromise = loadLocalItems()
+      .then((list) => new Map(list.map((it) => [it.id, { name: it.name, icon: it.icon }])))
+      .catch(() => new Map());
+  }
+  return itemsPromise;
+}
 
 /** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
 const showSkeleton = ref(false);
@@ -75,6 +90,8 @@ async function load(mode: string, id: string): Promise<void> {
     data.value = entry;
     seasonIndex.value = keys.indexOf(id);
     document.title = `${entry.zh} - 咸鱼百科`;
+    // 物品库并行预热（奖励名称/图标；失败静默，不影响赛季正文）
+    void loadItemMap().then((m) => { itemMap.value = m; });
     // 下一帧再切换 ready，避免 loading 骨架闪烁；随后 nextTick 等正文 DOM 就绪，
     // 重置滚动、初始化折叠与激活态判定
     requestAnimationFrame(() => {
@@ -131,6 +148,16 @@ const tierceTargets = computed(() => data.value?.tierce?.targets || []);
 const tierceMonsters = computed(() => data.value?.tierce?.monsters || []);
 /** 星启 3 节点敌方（节点 1/2 = 常规最高难度关上下半场；节点 3 = 星启附加关） */
 const tierceNodes = computed(() => data.value?.tierce?.nodes || []);
+/** 星启通关奖励（EGEEJLHBALB：物品 id + 数量，经 items.json 映射名称/图标） */
+const tierceRewards = computed(() => {
+  const rs = data.value?.tierce?.rewards || [];
+  if (!rs.length) return [];
+  const map = itemMap.value;
+  return rs.map((r) => ({ id: r.id, num: r.num, ...(map.get(r.id) || { name: `#${r.id}`, icon: '' }) }));
+});
+/** 战意赛季主题机制（SubMazeBuffList：机制 1 条 + 效果 2 条，仅 Fever 赛季） */
+const subBuffsMech = computed<MazeBuffInfo | null>(() => data.value?.sub_buffs?.[0] || null);
+const subBuffsEffects = computed<MazeBuffInfo[]>(() => data.value?.sub_buffs?.slice(1) || []);
 
 /** 相邻赛季导航（排期开始降序；与目录页同序） */
 const prevSeason = computed(() => {
@@ -198,6 +225,7 @@ function monTitle(m: MazeMonsterInfo): string {
   if (r) parts.push(r);
   if (m.camp) parts.push(m.camp);
   if (m.stance) parts.push(`韧性 ${m.stance}`);
+  if (m.speed) parts.push(`速度 ${m.speed}`);
   if (m.weak?.length) parts.push(`弱点：${m.weak.map((d) => ELEM[d] || d).join(' / ')}`);
   const es = Object.entries(m.resist || {});
   if (es.length) parts.push(`抗性：${es.map(([d, v]) => `${ELEM[d] || d} ${Math.round(v * 100)}%`).join(' / ')}`);
@@ -268,17 +296,29 @@ function onScroll(): void {
 function scrollTop(): void {
   pageRef.value?.scrollTo({ top: 0, behavior: 'smooth' });
 }
-/** 章节导航（吸顶条）：编号与 .nk-title 同源（赛季增益 01 / 星启 02 / 层级 03；peak 关卡组成 01） */
+/** 章节导航（吸顶条）：编号与 .nk-title 同源（战意机制 01 / 赛季增益 02 / 星启 03 / 层级 04；
+ *  peak 关卡组成 01）；编号随板块存在性动态顺延 */
 const navSections = computed(() => {
   const s: { id: string; idx: string; label: string }[] = [];
   if (modeKey.value === 'peak') {
     if (peakLevels.value.length) s.push({ id: 'levels', idx: '01', label: '关卡组成' });
   } else {
-    if (data.value?.buffs?.length) s.push({ id: 'buffs', idx: '01', label: '赛季增益' });
-    if (data.value?.tierce) s.push({ id: 'tierce', idx: '02', label: '星启模式' });
-    if (floorSections.value.length) s.push({ id: 'floors', idx: '03', label: '关卡层级' });
+    let idx = 1;
+    const push = (id: string, label: string) => {
+      s.push({ id, idx: String(idx++).padStart(2, '0'), label });
+    };
+    if (subBuffsMech.value) push('sub-buffs', '战意机制');
+    if (data.value?.buffs?.length) push('buffs', '赛季增益');
+    if (data.value?.tierce) push('tierce', '星启模式');
+    if (floorSections.value.length) push('floors', '关卡层级');
   }
   return s;
+});
+/** 板块编号映射（模板 .nk-title__idx 与吸顶条导航同源） */
+const sectionIdx = computed(() => {
+  const m: Record<string, string> = {};
+  for (const s of navSections.value) m[s.id] = s.idx;
+  return m;
 });
 const activeSection = ref('');
 /** 激活态滚动判定：最后一个板块标题顶部越过吸顶条（64px）即激活；未滚动时取首板块 */
@@ -412,10 +452,47 @@ onBeforeUnmount(() => {
       <!-- 内容面板 -->
       <div class="nk-panels nk-egd-body">
         <div class="nk-panel nk-panel--active">
+          <!-- 战意机制：战意（Fever）赛季主题机制 + 两阶段效果（官网“战意机制 / 战意效果”
+               对应 SubMazeBuffList：机制 1 条 + 效果 2 条，仅虚构叙事 Fever 赛季） -->
+          <template v-if="modeKey === 'story' && subBuffsMech">
+            <div id="egd-sub-buffs" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['sub-buffs'] }}</span>战意机制 FURY</div>
+            <div class="nk-egd-fury">
+              <div class="nk-egd-fury__mech">
+                <span class="nk-egd-fury__label">战意机制</span>
+                <article class="nk-egd-buff">
+                  <div class="nk-egd-buff__head">
+                    <span class="nk-egd-buff__idx">01</span>
+                    <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" :src="buffIconUrl(subBuffsMech)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
+                    <h2 class="nk-egd-buff__name">{{ subBuffsMech.name }}</h2>
+                  </div>
+                  <p v-if="subBuffsMech.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(subBuffsMech)"></p>
+                </article>
+              </div>
+              <div v-if="subBuffsEffects.length" class="nk-egd-fury__eff">
+                <span class="nk-egd-fury__label">战意效果</span>
+                <div class="nk-egd-buffs">
+                  <article
+                    v-for="(b, i) in subBuffsEffects"
+                    :key="b.id"
+                    class="nk-egd-buff"
+                    :style="{ '--i': i + 1 }"
+                  >
+                    <div class="nk-egd-buff__head">
+                      <span class="nk-egd-buff__idx">{{ String(i + 2).padStart(2, '0') }}</span>
+                      <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
+                      <h2 class="nk-egd-buff__name">{{ b.name }}</h2>
+                    </div>
+                    <p v-if="b.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(b)"></p>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </template>
+
           <!-- 赛季增益：当期环境效果（记忆紊流/战意/坚防守备），作用于全赛季挑战（星启同样生效）
-               独立模块（01）——与层级内 buff（关卡级）区分；peak 的王棋增益在王棋章节内展示，不在此处 -->
+               独立模块——与层级内 buff（关卡级）区分；peak 的王棋增益在王棋章节内展示，不在此处 -->
           <template v-if="modeKey !== 'peak' && data.buffs?.length">
-            <div id="egd-buffs" class="nk-title"><span class="nk-title__idx">01</span>赛季增益 BUFFS</div>
+            <div id="egd-buffs" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>赛季增益 BUFFS</div>
             <div class="nk-egd-buffs">
               <article
                 v-for="(b, i) in data.buffs"
@@ -472,16 +549,22 @@ onBeforeUnmount(() => {
                       <span v-for="(g, gi) in monWaveGroups(l.monsters)" :key="gi" class="nk-egd-floor__wave">
                         <span v-if="monWaveGroups(l.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
                         <span class="nk-egd-floor__mons">
-                          <img
+                          <router-link
                             v-for="m in g.items"
                             :key="`${m.id}-${gi}`"
-                            class="nk-egd-floor__mon"
-                            :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                            :alt="m.name"
+                            class="nk-egd-floor__monlink"
+                            :to="`/monster/${m.tpl || m.id}`"
                             :title="monTitle(m)"
-                            loading="lazy"
-                            @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                            :aria-label="`查看 ${m.name} 详情`"
                           >
+                            <img
+                              class="nk-egd-floor__mon"
+                              :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                              :alt="m.name"
+                              loading="lazy"
+                              @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                            >
+                          </router-link>
                         </span>
                       </span>
                     </span>
@@ -528,16 +611,22 @@ onBeforeUnmount(() => {
                       <span v-for="(g, gi) in monWaveGroups(l.hard.monsters)" :key="gi" class="nk-egd-floor__wave">
                         <span v-if="monWaveGroups(l.hard.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
                         <span class="nk-egd-floor__mons">
-                          <img
+                          <router-link
                             v-for="m in g.items"
                             :key="`${m.id}-${gi}`"
-                            class="nk-egd-floor__mon"
-                            :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                            :alt="m.name"
+                            class="nk-egd-floor__monlink"
+                            :to="`/monster/${m.tpl || m.id}`"
                             :title="monTitle(m)"
-                            loading="lazy"
-                            @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                            :aria-label="`查看 ${m.name} 详情`"
                           >
+                            <img
+                              class="nk-egd-floor__mon"
+                              :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                              :alt="m.name"
+                              loading="lazy"
+                              @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                            >
+                          </router-link>
                         </span>
                       </span>
                     </span>
@@ -559,7 +648,7 @@ onBeforeUnmount(() => {
 
           <!-- 星启模式（独立进阶关卡：星启弱点 / 目标 / Boss；当期赛季增益见上方独立模块） -->
           <template v-if="data.tierce">
-            <div id="egd-tierce" class="nk-title"><span class="nk-title__idx">02</span>星启模式 STARLIT</div>
+            <div id="egd-tierce" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['tierce'] }}</span>星启模式 STARLIT</div>
             <div class="nk-egd-tierce">
               <!-- 星启节点指标：推荐属性 / 等级 / 回合 / 分数 -->
               <div v-if="tierceDamage.length || tierceLevel || tierceCountdown || tierceScore != null" class="nk-egd-tierce__stats">
@@ -605,6 +694,21 @@ onBeforeUnmount(() => {
               <div v-else-if="tierceMonsters.length" class="nk-egd-mons">
                 <EnemyCard v-for="m in tierceMonsters" :key="m.id" :monster="m" />
               </div>
+              <!-- 通关奖励（仅虚构叙事：EGEEJLHBALB 每期固定，与 score 通关分数线对应） -->
+              <div v-if="tierceRewards.length" class="nk-egd-reward">
+                <div class="nk-egd-reward__head">
+                  <span class="nk-egd-reward__label">通关奖励</span>
+                  <span v-if="tierceScore" class="nk-egd-reward__goal">通关目标：获得 {{ tierceScore.toLocaleString() }} 分</span>
+                </div>
+                <div class="nk-egd-reward__items">
+                  <span v-for="r in tierceRewards" :key="r.id" class="nk-egd-reward__item">
+                    <img v-if="r.icon" class="nk-egd-reward__icon" :src="itemIconUrl(r.icon)" :alt="r.name" :title="r.name" loading="lazy" @error="($event.target as HTMLImageElement).classList.add('nk-img-error')">
+                    <span v-else class="nk-egd-reward__icon nk-egd-reward__icon--void">{{ String(r.id).slice(0, 2) }}</span>
+                    <span class="nk-egd-reward__name">{{ r.name }}</span>
+                    <span v-if="r.num" class="nk-egd-reward__num">×{{ r.num.toLocaleString() }}</span>
+                  </span>
+                </div>
+              </div>
             </div>
           </template>
 
@@ -614,7 +718,7 @@ onBeforeUnmount(() => {
           <!-- 关卡层级：以层级为章节（倒序：最高层在前），模块内展示推荐属性 / 敌方配置 / 可用增益 / 挑战目标；
                层级默认折叠（>6 层），层头即索引 -->
           <template v-if="floorSections.length">
-            <div id="egd-floors" class="nk-title"><span class="nk-title__idx">03</span>关卡层级 LEVELS</div>
+            <div id="egd-floors" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['floors'] }}</span>关卡层级 LEVELS</div>
             <div class="nk-egd-floors">
               <section
                 v-for="(f, i) in floorSections"
@@ -689,16 +793,22 @@ onBeforeUnmount(() => {
                             <EnemyCard v-for="m in g.items" :key="`${m.id}-${gi}`" :monster="m" />
                           </span>
                           <span v-else class="nk-egd-floor__mons">
-                            <img
+                            <router-link
                               v-for="m in g.items"
                               :key="`${m.id}-${gi}`"
-                              class="nk-egd-floor__mon"
-                              :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                              :alt="m.name"
+                              class="nk-egd-floor__monlink"
+                              :to="`/monster/${m.tpl || m.id}`"
                               :title="monTitle(m)"
-                              loading="lazy"
-                              @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                              :aria-label="`查看 ${m.name} 详情`"
                             >
+                              <img
+                                class="nk-egd-floor__mon"
+                                :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                                :alt="m.name"
+                                loading="lazy"
+                                @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                              >
+                            </router-link>
                           </span>
                         </span>
                       </span>
@@ -724,16 +834,22 @@ onBeforeUnmount(() => {
                             <EnemyCard v-for="m in g.items" :key="`${m.id}-${gi}`" :monster="m" />
                           </span>
                           <span v-else class="nk-egd-floor__mons">
-                            <img
+                            <router-link
                               v-for="m in g.items"
                               :key="`${m.id}-${gi}`"
-                              class="nk-egd-floor__mon"
-                              :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                              :alt="m.name"
+                              class="nk-egd-floor__monlink"
+                              :to="`/monster/${m.tpl || m.id}`"
                               :title="monTitle(m)"
-                              loading="lazy"
-                              @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                              :aria-label="`查看 ${m.name} 详情`"
                             >
+                              <img
+                                class="nk-egd-floor__mon"
+                                :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                                :alt="m.name"
+                                loading="lazy"
+                                @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                              >
+                            </router-link>
                           </span>
                         </span>
                       </span>

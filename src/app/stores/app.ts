@@ -4,6 +4,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { loadManifest, loadLocalVersion, resolveVersion, loadLocalItemDb } from '../../services/api';
+import { isCdnDown } from '../../services/cdn/health';
 import type { ItemDb, NameCache } from '../../services/types';
 
 export type ToastType = 'error' | 'warn' | 'info' | 'success';
@@ -28,16 +29,22 @@ export const useAppStore = defineStore('app', () => {
   const nameCache = ref<NameCache>({});
   const toasts = ref<ToastItem[]>([]);
   let toastSeq = 0;
+  /** manifest 最近失败时刻（冷却期：CDN 不可用时避免每次进页都等 15s 超时） */
+  let manifestFailedAt = 0;
+  const MANIFEST_COOLDOWN_MS = 60_000;
 
   /** 加载 manifest 并设置版本（幂等：SPA 生命周期内只请求一次；CDN 不可用时静默回退） */
   async function initManifest(): Promise<void> {
     if (latestVersion.value) return;
+    // CDN 不可用（健康探测判定 / 最近失败冷却期内）：立即返回，不发 15s 超时请求
+    if (isCdnDown() || Date.now() - manifestFailedAt < MANIFEST_COOLDOWN_MS) return;
     try {
       const m = await loadManifest();
       versions.value = m.hsr?.available || [];
       version.value = resolveVersion(m);
       latestVersion.value = version.value;
     } catch {
+      manifestFailedAt = Date.now();
       // CDN 不可用：静默回退，不阻塞页面加载
     }
   }

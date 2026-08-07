@@ -711,6 +711,10 @@ background-position: center 15%;
 .nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 12px; }
 @media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
 
+/* CDN 图片最终降级：全局委托（installCdnImgFallback）在 nanoka 也失败时标记 data-cdn-down，
+   隐藏破图图标（布局占位保留，由卡片渐变底承接）；恢复重载时由委托移除标记 */
+img[data-cdn-down] { visibility: hidden; }
+
 /* ═══════════════════════════════════════════
    错误态 / 空状态
 ═══════════════════════════════════════════ */

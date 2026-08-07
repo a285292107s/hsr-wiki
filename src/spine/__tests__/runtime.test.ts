@@ -5,7 +5,8 @@
  * （window.spine = fakeLib，走代理 setter 按 loadingVersion 捕获）后触发 onload/onerror。
  * 模块级状态（libs/代理/单例/注入链）由 vi.resetModules + 动态 import 隔离。
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SPINE_RUNTIME_CDNS } from '../constants';
 import type { SpineLib, SpineRuntimeVersion } from '../types';
 
 type RuntimeModule = typeof import('../runtime');
@@ -52,6 +53,15 @@ function mockAppend(fakeByUrl: (url: string) => SpineLib | null, failAll = false
   }) as typeof document.head.appendChild);
 }
 
+/** mock script 注入（挂起）：appendChild 不触发 onload/onerror，模拟连接黑洞 */
+function mockAppendHang(): void {
+  injected = [];
+  vi.spyOn(document.head, 'appendChild').mockImplementation(((node: Node) => {
+    injected.push(node as HTMLScriptElement);
+    return node;
+  }) as typeof document.head.appendChild);
+}
+
 /** 读取 window.spine（getter）的版本标签 */
 function globalTag(): string | undefined {
   return (window as unknown as { spine?: { SpinePlayer?: { __tag?: string } } }).spine?.SpinePlayer?.__tag;
@@ -61,6 +71,11 @@ beforeEach(() => {
   vi.restoreAllMocks();
   // 清理上个模块实例安装的访问器（configurable: true 可删）
   delete (window as unknown as { spine?: unknown }).spine;
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
 });
 
 /** 获取全新模块实例（隔离模块级状态） */
@@ -139,5 +154,34 @@ describe('spine runtime 双版本加载与 window.spine 代理', () => {
     const before = injected.length;
     await expect(rt.loadSpineRuntime('4.2')).resolves.toBe(true);
     expect(injected.length).toBe(before);
+  });
+
+  it('script 注入超时（连接黑洞）：单源 8s 按失败结算，全部源超时返回 false', async () => {
+    vi.useFakeTimers();
+    const rt = await freshRuntime();
+    mockAppendHang();
+    const p = rt.loadSpineRuntime('4.2');
+    // 逐源推进：先 flush 微任务（executor 注册超时 timer），再推进 8s 触发该源超时
+    for (let i = 0; i < SPINE_RUNTIME_CDNS.length; i++) {
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(8000);
+    }
+    await expect(p).resolves.toBe(false);
+    expect(rt.getSpineCtor('4.2')).toBeNull();
+  });
+
+  it('CDN 健康探测判定不可用时直接返回 false，不注入 script', async () => {
+    vi.useFakeTimers();
+    vi.resetModules();
+    // 先置 CDN down（探测失败），再加载 runtime（共享同一 health 模块实例）
+    const health = await import('../../services/cdn/health');
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('network down'); }));
+    health.startCdnHealthProbe();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(health.isCdnDown()).toBe(true);
+    mockAppendHang();
+    const rt = await import('../runtime');
+    await expect(rt.loadSpineRuntime('4.2')).resolves.toBe(false);
+    expect(injected.length).toBe(0); // 未注入任何 script
   });
 });

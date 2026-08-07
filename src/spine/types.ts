@@ -204,6 +204,8 @@ export interface SpineScenePipelineOptions {
   onSettled?: (result: { items: SceneItem[]; missing: string[] }) => void;
   /** 管线级错误（WebGL 不可用 / 资源加载失败 / 构建异常） */
   onError?: (message: string) => void;
+  /** 资源加载超时（ms）：CDN 连接黑洞时 AssetManager loadAll 可能永不结算，超时按全部层缺失结算；缺省 20s */
+  loadTimeoutMs?: number;
 }
 
 /** 场景管线控制器：生产/调试共用的可插桩渲染管线句柄 */
