@@ -10,6 +10,8 @@ import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
 import { prefetchHighPriority } from '../router/chunks';
 import { initSpineSceneViewer } from '../character/spine';
 import { useCardTilt } from '../composables/use-card-tilt';
+import { loadLocalCharacterList } from '../../services/api';
+import { avatarDrawCardUrl } from '../../lib/format';
 
 const app = useAppStore();
 const loading = ref(true);
@@ -17,7 +19,9 @@ const loading = ref(true);
 /* ─── 导航卡片：常规 7 板块 + 货币战争网关卡片（金色第二入口） ─── */
 const navCards = [...NORMAL_NAV_ITEMS, CW_GATEWAY];
 
-/* ─── Hero 背景 Spine 场景（官网背景节点 home-bg：主背景 + 9 层角色，固定视口叠加对齐） ─── */
+/* ─── Hero 背景：桌面 = 官网 KV Spine 场景；手机（<768px）= 随机单角色立绘 ───
+   KV 场景（主背景 + 9 层角色群像）窄屏下缩成小画面难以看清，且仅剩主背景层降级体验差；
+   手机断点改为随机抽取一张角色立绘（五星优先，与 KV 场景主角皆为五星的观感对齐）cover 铺满。 */
 
 const spineRef = ref<HTMLElement | null>(null);
 const spineReady = ref(false);
@@ -29,6 +33,41 @@ function mountHeroSpine(): void {
   disposeSpine = initSpineSceneViewer(el, 'home-bg', () => {
     spineReady.value = true;
   });
+}
+
+/* 手机断点：Hero 背景立绘（URL 为空时保留原生渐变兑底背景） */
+
+const isMobile = ref(false);
+const heroArt = ref('');
+let mq: MediaQueryList | null = null;
+
+/** 随机抽取一张角色立绘（五星优先；失败静默回退渐变背景） */
+async function pickHeroArt(): Promise<void> {
+  try {
+    const list = await loadLocalCharacterList();
+    const fives = list.filter((c) => c.rarity === 5);
+    const pool = fives.length > 0 ? fives : list;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    heroArt.value = pick ? avatarDrawCardUrl(pick.id) : '';
+  } catch {
+    heroArt.value = '';
+  }
+}
+
+/** 断点切换：手机 ↔ 桌面 重建 Hero 背景（Spine 场景每次全新挂载，无状态残留） */
+function onBreakpointChange(): void {
+  const mobile = mq ? !mq.matches : false;
+  isMobile.value = mobile;
+  if (mobile) {
+    if (disposeSpine) {
+      disposeSpine();
+      disposeSpine = null;
+    }
+    spineReady.value = false;
+    void pickHeroArt();
+  } else {
+    void nextTick().then(mountHeroSpine);
+  }
 }
 
 /* ─── 卡片 3D 倾斜（grid 级事件委托 + rAF 节流，与目录页共用 useCardTilt） ─── */
@@ -56,10 +95,20 @@ onMounted(() => {
   // 游戏版本后台加载（本地 version.json；未生成时静默降级为 —）
   void app.initVersion().catch(() => { /* 降级：游戏版本显示 — */ });
   loading.value = false;
-  void nextTick().then(mountHeroSpine); // v-if 解锁后 Hero 才入 DOM，再挂载背景 Spine
+  // 断点判定（与 spine 场景窄屏降级断点一致）：手机 → 随机立绘；桌面 → KV Spine 场景
+  mq = window.matchMedia('(min-width: 768px)');
+  mq.addEventListener('change', onBreakpointChange);
+  isMobile.value = !mq.matches;
+  if (isMobile.value) {
+    void pickHeroArt();
+  } else {
+    void nextTick().then(mountHeroSpine); // v-if 解锁后 Hero 才入 DOM，再挂载背景 Spine
+  }
 });
 
 onBeforeUnmount(() => {
+  if (mq) mq.removeEventListener('change', onBreakpointChange);
+  mq = null;
   if (disposeSpine) disposeSpine();
   // tilt 的 rAF 清理由 useCardTilt 的 onScopeDispose 接管
 });
@@ -70,7 +119,8 @@ onBeforeUnmount(() => {
     <div v-if="loading" class="nk-loading">LOADING</div>
     <template v-else>
       <section class="nk-home-hero">
-        <div ref="spineRef" class="nk-home-hero__spine" :class="{ 'nk-on': spineReady }"></div>
+        <div v-if="!isMobile" ref="spineRef" class="nk-home-hero__spine" :class="{ 'nk-on': spineReady }"></div>
+        <div v-else-if="heroArt" class="nk-home-hero__art" :style="{ backgroundImage: `url(${heroArt})` }"></div>
         <div class="nk-home-hero__scrim"></div>
         <div class="nk-home-hero__content">
           <div class="nk-home-hero__kicker">

@@ -14,7 +14,7 @@ export { loadManifest, resolveVersion } from './manifest';
 export { loadLocalVersion } from './version';
 export {
   RARITY_NUM_TO_KEY, loadLocalItems, loadLocalItemDb,
-  loadLocalMonsterList, loadLocalLightCones, loadLocalLightConeDetail,
+  loadLocalMonsterList, loadLocalMonsterDetail, loadLocalLightCones, loadLocalLightConeDetail,
 } from './items';
 export {
   loadLocalCharacterList, loadLocalCharacter, loadSkillAnimations, loadLocalBuildNames,
@@ -25,8 +25,8 @@ export {
 } from './relics';
 export {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
-  prefetchEndgameAll,
 } from './endgame';
+export { loadLocalAchievements, loadLocalAchievementSeries } from './achievements';
 export {
   loadLocalCurrencyRoles, loadLocalCurrencyRole, loadLocalCurrencySeasons,
   loadLocalCurrencyEquipment, loadLocalCurrencyPortals, loadLocalCurrencyAugments,

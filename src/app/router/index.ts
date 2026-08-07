@@ -1,7 +1,7 @@
 /**
  * 路由表 + 方向过渡
  * 深度差决定页面过渡方向（navDir：1=前进深入，-1=返回，0=平级）。
- * 终局内容使用嵌套路由（/endgame/*），Tab 切换由 EndgameView 布局组件处理。
+ * 终局内容合并单页（/endgame）：四模式身份为筛选选项，endgame.css 随路由并行加载。
  * meta.cw：货币战争模式路由——驱动全壳暗金主题（data-theme="cw"）与 CW 导航配置。
  * History 模式（Vercel SPA fallback）。
  */
@@ -10,6 +10,10 @@ import { ref } from 'vue';
 
 /** 导航方向（驱动 nk-enter-fwd / nk-enter-back 过渡动画） */
 export const navDir = ref<1 | -1 | 0>(0);
+
+/** 终局内容单页：CatalogView + endgame.css 并行加载（样式先于渲染到达） */
+const endgameCatalogView = (): Promise<typeof import('../views/CatalogView.vue').default> =>
+  Promise.all([import('../views/CatalogView.vue'), import('../../styles/endgame.css')]).then(([m]) => m.default);
 
 /**
  * CW 目录视图：组件 chunk 与 currency-catalog.css 并行加载。
@@ -25,6 +29,10 @@ const cwRoleCatalogView = (): Promise<typeof import('../views/CatalogView.vue').
     import('../../styles/currency-catalog.css'),
     import('../../styles/currency-role.css'),
   ]).then(([m]) => m.default);
+
+/** 成就目录视图：.nk-ach-card 卡片样式定义于 achievement.css，随路由并行加载 */
+const achievementCatalogView = (): Promise<typeof import('../views/CatalogView.vue').default> =>
+  Promise.all([import('../views/CatalogView.vue'), import('../../styles/achievement.css')]).then(([m]) => m.default);
 
 const routes: RouteRecordRaw[] = [
   {
@@ -82,22 +90,34 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, catalog: 'monster', title: '敌对物种' },
   },
   {
-    path: '/endgame',
-    component: () => import('../views/EndgameView.vue'),
-    meta: { depth: 2 },
-    children: [
-      { path: '', redirect: '/endgame/maze' },
-      { path: 'maze', name: 'catalog-maze', component: () => import('../views/CatalogView.vue'), meta: { depth: 2, catalog: 'maze', title: '终局内容 · 忘却之庭' } },
-      { path: 'story', name: 'catalog-story', component: () => import('../views/CatalogView.vue'), meta: { depth: 2, catalog: 'story', title: '终局内容 · 虚构叙事' } },
-      { path: 'boss', name: 'catalog-boss', component: () => import('../views/CatalogView.vue'), meta: { depth: 2, catalog: 'boss', title: '终局内容 · 末日幻影' } },
-      { path: 'peak', name: 'catalog-peak', component: () => import('../views/CatalogView.vue'), meta: { depth: 2, catalog: 'peak', title: '终局内容 · 异相仲裁' } },
-    ],
+    path: '/monster/:id(\\d+)',
+    name: 'monster',
+    component: () => import('../views/MonsterDetailView.vue'),
+    meta: { depth: 3 },
   },
+  {
+    path: '/endgame',
+    name: 'catalog-endgame',
+    component: endgameCatalogView,
+    meta: { depth: 2, catalog: 'endgame', title: '终局内容' },
+  },
+  {
+    /* 赛季详情页：/endgame/:mode/:id（mode ∈ maze/story/boss/peak，与目录卡片 href 一致） */
+    path: '/endgame/:mode/:id(\\d+)',
+    name: 'endgame-season',
+    component: () => import('../views/EndgameView.vue'),
+    meta: { depth: 3, title: '赛季详情' },
+  },
+  /* 终局旧子路径（四模式 Tab 时代）兼容重定向 */
+  { path: '/endgame/maze', redirect: '/endgame' },
+  { path: '/endgame/story', redirect: '/endgame' },
+  { path: '/endgame/boss', redirect: '/endgame' },
+  { path: '/endgame/peak', redirect: '/endgame' },
   /* 旧路径兼容重定向 */
-  { path: '/maze', redirect: '/endgame/maze' },
-  { path: '/story', redirect: '/endgame/story' },
-  { path: '/boss', redirect: '/endgame/boss' },
-  { path: '/peak', redirect: '/endgame/peak' },
+  { path: '/maze', redirect: '/endgame' },
+  { path: '/story', redirect: '/endgame' },
+  { path: '/boss', redirect: '/endgame' },
+  { path: '/peak', redirect: '/endgame' },
   /* ─── 货币战争模式（独立路由树，meta.cw 驱动全壳暗金主题与 CW 导航） ─── */
   {
     path: '/currency',
@@ -148,11 +168,11 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, cw: true },
   },
   {
-    // 成就页为尚未实现的扩展模块，第二期重构；第一期展示占位页。
+    // 成就页：第二期落地为 CatalogView 目录（1869 条虚拟网格），卡片样式随路由并行加载。
     path: '/achievement',
-    name: 'achievement',
-    component: () => import('../views/PlaceholderView.vue'),
-    meta: { depth: 1, title: '成就' },
+    name: 'catalog-achievement',
+    component: achievementCatalogView,
+    meta: { depth: 1, catalog: 'achievement', title: '成就' },
   },
   /* Debug 调试中心入口：汇总各诊断子页面入口（/debug） */
   {

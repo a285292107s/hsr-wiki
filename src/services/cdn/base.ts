@@ -19,12 +19,15 @@ export type CdnCategory =
   | 'pathicon'
   | 'lightconemediumicon'
   | 'monstermiddleicon'
+  | 'monsterfigure'
   | 'relicfigures'
   | 'rank'
   | 'trace'
   | 'avatarroundicon'
   | 'gridfight-equipment'
-  | 'gridfight-icon';
+  | 'gridfight-icon'
+  | 'achievement'
+  | 'bufficon';
 
 export interface CdnCategorySpec {
   /** nanoka 子路径（相对 /assets/hsr/） */
@@ -51,10 +54,13 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   pathicon: { nanoka: 'pathicon' },
   lightconemediumicon: { nanoka: 'lightconemediumicon' },
   monstermiddleicon: { nanoka: 'monstermiddleicon' },
+  monsterfigure: { nanoka: 'monsterfigure' },
   relicfigures: { nanoka: 'relicfigures' },
   rank: { nanoka: 'rank/_dependencies/textures' },
   trace: { nanoka: 'trace' },
   avatarroundicon: { nanoka: 'avatarroundicon' },
   'gridfight-equipment': { nanoka: 'gridfight/equipment' },
   'gridfight-icon': { nanoka: 'gridfight/icon' },
+  achievement: { nanoka: 'achievement' },
+  bufficon: { nanoka: 'bufficon' },
 };

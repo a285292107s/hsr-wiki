@@ -108,6 +108,13 @@
   /* 货币战争前后台槽位（阵型图标语义色：暖金=前台 / 冷靖蓝=后台） */
   --cw-fb-front: var(--gold-400);
   --cw-fb-back: #818CF8;
+  /* 成就稀有度（游戏内徽章：Low=铜 / Mid=银 / High=金；core=徽章底色，text=亮端文字） */
+  --ach-rarity-low: var(--gold-700);
+  --ach-rarity-low-text: var(--gold-350);
+  --ach-rarity-mid: #8B93A1;
+  --ach-rarity-mid-text: #D9DEE8;
+  --ach-rarity-high: var(--gold-600);
+  --ach-rarity-high-text: var(--gold-300);
 
   /* ═══ 语义层 Semantic：主题映射（:root 常规黑紫，[data-theme="cw"] 暗金覆盖） ═══ */
   /* 表面统一走黑阶派生 + 主色注入（结构：黑阶染主色 → 调透明度），领域层豁免不动 */
@@ -525,6 +532,33 @@ background-position: center 15%;
 .nk-tab--active { color: var(--metric-val); }
 .nk-tab--active::after { content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); border-radius: 1px; }
 
+/* ─── 区块导航（吸顶工具条内，全局化 §13.1：别处也会用到 → 全局语法） ───
+   激活态默认主色（主题层）；身份页面可在页内覆盖为领域色 */
+.nk-secnav {
+  display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nk-secnav::-webkit-scrollbar { display: none; }
+.nk-secnav__btn {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 6px 11px; border-radius: 4px; border: none; background: transparent;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; /* 与 tokens .nk-tab 标准字号对齐 */
+  color: var(--text3); cursor: pointer; white-space: nowrap;
+  transition: color 0.15s, background 0.15s; position: relative; flex-shrink: 0;
+}
+/* 触控热区垂直扩展至 ≥44px（按钮 30px 高 + 上下各 7px） */
+.nk-secnav__btn::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px; /* 热区 ≥44px（全局化 §13.7） */
+}
+.nk-secnav__btn:hover { color: var(--text2); background: transparent; }
+.nk-secnav__btn--active { color: var(--primary); background: transparent; }
+.nk-secnav__btn--active::after {
+  content: ''; position: absolute; left: 11px; right: 11px; bottom: -7px;
+  height: 2px; border-radius: 1px; background: var(--primary); box-shadow: none;
+}
+.nk-secnav__idx { font-family: var(--font-hud); font-size: 0.625rem; opacity: 0.7; }
+.nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
+
 /* ─── Tab 内容区 ─── */
 .nk-panels { flex: 1; overflow: visible; }
 .nk-panels::-webkit-scrollbar { width: 4px; }
@@ -538,6 +572,24 @@ background-position: center 15%;
    浏览族卡片（图鉴/目录，保留位移与光效）见 catalog.css 各卡类 */
 .nk-card { background: rgba(255,255,255,0.016); border: 1px solid var(--line-1); border-radius: var(--nk-radius-card); padding: 20px; margin-bottom: 16px; transition: border-color 0.25s ease, background 0.25s ease; position: relative; }
 .nk-card:hover { border-color: var(--line-2); background: rgba(255,255,255,0.03); }
+/* 返回顶部（全局原语，全局化 §13.1：长页通用） */
+.nk-top-btn {
+  position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  z-index: 30; width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--blk-900) 80%, transparent); border: 1px solid var(--line-1);
+  color: var(--text3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+}
+.nk-top-btn svg { width: 18px; height: 18px; transition: transform 0.2s var(--nk-ease-out); }
+.nk-top-btn:hover {
+  color: var(--text-bright); border-color: var(--primary); box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+.nk-top-btn:hover svg { transform: translateY(-1.5px); }
+@media (min-width: 768px) {
+  .nk-top-btn { right: 28px; bottom: 28px; }
+}
 /* 章节标题（编辑式基线，全局化 §13.1/§13.3）：HUD 大写 + 细线延伸线；
    编号元素 .nk-title__idx 由使用方提供（角色页由 sections.ts 配置表注入固定编号） */
 .nk-title {

@@ -8,12 +8,13 @@ import { lightconePage } from './pages/lightcone';
 import { relicPage } from './pages/relic';
 import { itemPage } from './pages/item';
 import { monsterPage } from './pages/monster';
-import { mazePage, storyPage, bossPage, peakPage } from './pages/endgame';
+import { endgamePage } from './pages/endgame';
 import { currencyRolePage } from './pages/currency-role';
 import { currencyEquipmentPage } from './pages/currency-equipment';
 import { currencyPortalPage } from './pages/currency-portal';
 import { currencyAugmentPage } from './pages/currency-augment';
 import { currencyTraitPage } from './pages/currency-trait';
+import { achievementPage } from './pages/achievement';
 
 export const CATALOG_PAGES: Record<string, CatalogPageConfig> = {
   character: characterPage,
@@ -21,13 +22,11 @@ export const CATALOG_PAGES: Record<string, CatalogPageConfig> = {
   relic: relicPage,
   item: itemPage,
   monster: monsterPage,
-  maze: mazePage,
-  story: storyPage,
-  boss: bossPage,
-  peak: peakPage,
+  endgame: endgamePage,
   'currency-role': currencyRolePage,
   'currency-equipment': currencyEquipmentPage,
   'currency-portal': currencyPortalPage,
   'currency-augment': currencyAugmentPage,
   'currency-trait': currencyTraitPage,
+  achievement: achievementPage,
 };

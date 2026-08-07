@@ -25,6 +25,12 @@ export const ELEM: Record<string, string> = {
   Quantum: '量子', Imaginary: '虚数', Physical: '物理',
 };
 
+/** 敌方分类（MonsterTemplateConfig.Rank → 中文；未知分类不渲染） */
+export const MON_RANK: Record<string, string> = {
+  Minion: '普通', MinionLv2: '普通',
+  Elite: '精英', LittleBoss: '准首领', BigBoss: '首领',
+};
+
 /** 技能类型 */
 export const TYPE: Record<string, string> = {
   Normal: '普攻', BPSkill: '战技', Ultra: '终结技', Passive: '天赋',

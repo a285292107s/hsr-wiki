@@ -59,6 +59,8 @@ export interface CatalogPageConfig {
   virtualMinColW?: number;
   /** 虚拟网格图片宽高比 */
   virtualImgRatio?: number;
+  /** 虚拟网格信息区高度（虚拟行高 = colW * imgRatio + infoH + 12 + gap；缺省 36） */
+  virtualInfoH?: number;
   /** 静态筛选组 */
   filters?: CatalogFilter[];
   /** 依据数据动态构建筛选组（优先于 filters） */

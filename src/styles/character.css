@@ -584,30 +584,6 @@
   font-family: var(--font-hud); font-size: 0.55rem; opacity: 0.7;
 }
 .nk-char-page .nk-enh-tab--active .nk-enh-tab__idx { opacity: 1; }
-.nk-char-page .nk-secnav {
-  display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0;
-  overflow-x: auto; scrollbar-width: none;
-}
-.nk-char-page .nk-secnav::-webkit-scrollbar { display: none; }
-.nk-char-page .nk-secnav__btn {
-  display: inline-flex; align-items: baseline; gap: 5px;
-  padding: 6px 11px; border-radius: 4px; border: none; background: transparent;
-  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; /* 与 tokens .nk-tab 标准字号对齐 */
-  color: var(--text3); cursor: pointer; white-space: nowrap;
-  transition: color 0.15s, background 0.15s; position: relative; flex-shrink: 0;
-}
-/* 触控热区垂直扩展至 ≥44px（按钮 30px 高 + 上下各 7px） */
-.nk-char-page .nk-secnav__btn::before {
-  content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px; /* 热区 ≥44px（全局化 §13.7） */
-}
-.nk-char-page .nk-secnav__btn:hover { color: var(--text2); background: transparent; }
-.nk-char-page .nk-secnav__btn--active { color: var(--primary); background: transparent; }
-.nk-char-page .nk-secnav__btn--active::after {
-  content: ''; position: absolute; left: 11px; right: 11px; bottom: -7px;
-  height: 2px; border-radius: 1px; background: var(--primary); box-shadow: none;
-}
-.nk-char-page .nk-secnav__idx { font-family: var(--font-hud); font-size: 0.625rem; opacity: 0.7; }
-.nk-char-page .nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
 /* 阅读进度线（工具条底部） */
 .nk-char-page .nk-enh-bar__progress {
   height: 2px; width: 0;
@@ -615,23 +591,7 @@
 }
 
 /* ═══════════ 返回顶部 ═══════════ */
-.nk-char-page .nk-top-btn {
-  position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-  z-index: 30; width: 40px; height: 40px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: color-mix(in srgb, var(--blk-900) 80%, transparent); border: 1px solid var(--line-1);
-  color: var(--text3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
-}
-.nk-char-page .nk-top-btn svg { width: 18px; height: 18px; transition: transform 0.2s var(--nk-ease-out); }
-.nk-char-page .nk-top-btn:hover {
-  color: var(--text-bright); border-color: var(--primary); box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-}
-.nk-char-page .nk-top-btn:hover svg { transform: translateY(-1.5px); }
-@media (min-width: 768px) {
-  .nk-char-page .nk-top-btn { right: 28px; bottom: 28px; }
-}
+/* 返回顶部按钮为 tokens 全局原语（.nk-top-btn），角色页沿用 */
 
 /* ═══════════ 强化摘要（模块内，随内容滚动） ═══════════ */
 .nk-char-page .nk-enh-notes { padding: 0; margin-top: 14px; }

@@ -1,16 +1,15 @@
-/** 终局内容目录页配置（4 页共享星际档案卡片工厂） */
-import { ELEM } from '../../../lib/constants';
-import { escHtml, stripAllTags, elementIconUrl } from '../../../lib/format';
-import { cdnImgFallbackAttr } from '../../../services/cdn';
+/** 终局内容目录页配置（四模式合并单页：模式身份为筛选选项，卡片徽记同源） */
+import { ELEM, MON_RANK } from '../../../lib/constants';
+import { escHtml, stripAllTags } from '../../../lib/format';
+import { cdnUri, cdnImgFallbackAttr } from '../../../services/cdn';
 import {
-  loadLocalMazeList, loadLocalStoryList, loadLocalBossList,
-  loadLocalPeakList, prefetchEndgameAll,
+  loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
 } from '../../../services/api';
-import type { CatalogItem, CatalogPageConfig } from '../types';
-import type { MazeListDb, MazeListEntry, MazeVersionMap } from '../../../services/types';
+import type { CatalogFilter, CatalogItem, CatalogPageConfig } from '../types';
+import type { MazeListDb, MazeListEntry, MazeBuffInfo, MazeMonsterInfo } from '../../../services/types';
 
 /** 赛季状态：依据 begin/end 日期推导；无日期信息时返回"未知"（与原站一致） */
-function mazeStatus(info: MazeListEntry): string {
+export function mazeStatus(info: MazeListEntry): string {
   const parse = (s: string | undefined): number | null => {
     if (!s) return null;
     const t = new Date(s).getTime();
@@ -26,7 +25,7 @@ function mazeStatus(info: MazeListEntry): string {
 }
 
 /** 格式化日期区间（YYYY.MM.DD – MM.DD） */
-function mazeDateRange(info: MazeListEntry): string {
+export function mazeDateRange(info: MazeListEntry): string {
   const fmt = (s: string | undefined): string | null => {
     if (!s) return null;
     const d = new Date(s);
@@ -48,13 +47,6 @@ const MAZE_STATUS_CLASS: Record<string, string> = {
   '未知': 'unknown',
 };
 
-/** 版本标签：数字版本原样输出；特殊键（unknown/static）转为中文 */
-function verLabel(ver: string, idx: number): string {
-  if (ver === 'unknown') return '未知';
-  if (ver === 'static') return '常驻';
-  return `${ver} v${idx + 1}`;
-}
-
 /** 模式徽记（24×24 线性图标，与四模式领域色配套使用） */
 const EMBLEMS: Record<string, string> = {
   // 忘却之庭 · 记忆之环（同心环 + 中心点，如记忆的回响）
@@ -67,141 +59,206 @@ const EMBLEMS: Record<string, string> = {
   peak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v17"/><path d="M8.5 20.5h7"/><path d="M4.5 6h15"/><path d="M6.4 6l-2.2 4a2.6 2.6 0 0 0 4.6 0L6.6 6"/><path d="M17.6 6l-2.2 4a2.6 2.6 0 0 0 4.6 0l-2.4-4"/></svg>',
 };
 
-/** 终局模式元信息（EndgameView 子导航 + 卡片徽记共用，单一事实来源） */
+/** 终局模式元信息（模式筛选选项 + 卡片徽记共用，单一事实来源） */
 export interface EndgameMode {
-  /** 对应目录页 id（data-mode） */
+  /** 模式键（data-mode / 筛选值） */
   key: string;
   label: string;
   en: string;
-  path: string;
   /** 模式徽记（内联 SVG） */
   emblem: string;
 }
 
 export const ENDGAME_MODES: EndgameMode[] = [
-  { key: 'maze', label: '忘却之庭', en: 'FORGOTTEN HALL', path: '/endgame/maze', emblem: EMBLEMS.maze },
-  { key: 'story', label: '虚构叙事', en: 'PURE FICTION', path: '/endgame/story', emblem: EMBLEMS.story },
-  { key: 'boss', label: '末日幻影', en: 'APOCALYPSE', path: '/endgame/boss', emblem: EMBLEMS.boss },
-  { key: 'peak', label: '异相仲裁', en: 'ANOMALY', path: '/endgame/peak', emblem: EMBLEMS.peak },
+  { key: 'maze', label: '忘却之庭', en: 'FORGOTTEN HALL', emblem: EMBLEMS.maze },
+  { key: 'story', label: '虚构叙事', en: 'PURE FICTION', emblem: EMBLEMS.story },
+  { key: 'boss', label: '末日幻影', en: 'APOCALYPSE', emblem: EMBLEMS.boss },
+  { key: 'peak', label: '异相仲裁', en: 'ANOMALY', emblem: EMBLEMS.peak },
 ];
 
-interface EndgamePageOpts {
-  id: string;
-  title: string;
-  /** 本页路由（用于卡片详情链接前缀） */
-  href: string;
-  loadList: (ver: string) => Promise<MazeListDb>;
-  /** 可选版本映射；无则按 ID 降序直接输出（story/boss） */
-  loadVersions?: (ver: string) => Promise<MazeVersionMap>;
+/** 赛季排序：排期开始时间降序（最新赛季在前）；无排期按 ID 降序垫底 */
+function bySeasonDesc(a: CatalogItem, b: CatalogItem): number {
+  const ta = String(a.liveBegin || '');
+  const tb = String(b.liveBegin || '');
+  if (ta && tb && ta !== tb) return ta < tb ? 1 : -1;
+  if (ta) return -1;
+  if (tb) return 1;
+  return Number(String(b.id).replace(/\D/g, '')) - Number(String(a.id).replace(/\D/g, ''));
 }
 
 /**
- * 终局内容页工厂：4 页共享星际档案卡片与状态筛选。
- * Tab 导航由 EndgameView 布局组件承载（嵌套路由）。
+ * 终局内容单页：四模式数据合并，模式身份经筛选面板切换（原 Tab 子导航移除）。
+ * 卡片共享星际档案布局，--eg-color 经 data-mode 映射（领域层 --eg-* 令牌）。
  */
-function makeEndgamePage(o: EndgamePageOpts): CatalogPageConfig {
-  const mode = ENDGAME_MODES.find((m) => m.key === o.id);
-  return {
-    id: o.id,
-    title: o.title,
-    prefetch: (ctx) => prefetchEndgameAll(ctx.version),
-    searchPlaceholder: '搜索赛季...',
-    gridClass: 'nk-cat-grid nk-eg-grid',
-    cardClass: '.nk-eg-card',
-    async fetchData(ctx) {
-      const db = await o.loadList(ctx.version);
-      const items: CatalogItem[] = [];
-      /** 赛季条目公共字段（排期日期 + 弱点/层数等聚合统计） */
-      const toItem = (info: MazeListEntry, key: string, version: string): CatalogItem => ({
-        id: `ID ${key}`,
-        name: stripAllTags(info.zh),
-        href: `${o.href}/${key}`,
-        version,
-        status: mazeStatus(info),
-        dateRange: mazeDateRange(info),
-        damageTypes: info.damage_types,
-        floors: info.floors,
-        stageNum: info.stage_num,
-        countdown: info.countdown,
+export const endgamePage: CatalogPageConfig = {
+  id: 'endgame',
+  title: '终局内容',
+  searchPlaceholder: '搜索赛季...',
+  gridClass: 'nk-cat-grid nk-eg-grid',
+  cardClass: '.nk-eg-card',
+  async fetchData() {
+    const [maze, story, boss, peak] = await Promise.all([
+      loadLocalMazeList(), loadLocalStoryList(), loadLocalBossList(), loadLocalPeakList(),
+    ]);
+    const items: CatalogItem[] = [];
+    /** 赛季条目公共字段（模式身份 + 排期日期 + 弱点/层数统计 + 增益/敌方/逐层弱点） */
+    const collect = (mode: EndgameMode, db: MazeListDb): void => {
+      for (const [key, info] of Object.entries(db)) {
+        if (!info || !info.zh) continue;
+        items.push({
+          id: `ID ${key}`,
+          mode: mode.key,
+          name: stripAllTags(info.zh),
+          /** 搜索面：模式名并入（如搜"虚构"命中虚构叙事赛季） */
+          searchText: mode.label,
+          href: `/endgame/${mode.key}/${key}`,
+          liveBegin: info.live_begin,
+          status: mazeStatus(info),
+          dateRange: mazeDateRange(info),
+          damageTypes: info.damage_types,
+          floors: info.floors,
+          stageNum: info.stage_num,
+          countdown: info.countdown,
+          buffs: info.buffs || [],
+          monsters: info.monsters || [],
+          floorDamage: info.floor_damage || [],
+          tierce: info.tierce,
+          levels: info.levels,
+        });
+      }
+    };
+    for (const m of ENDGAME_MODES) {
+      const db = m.key === 'maze' ? maze : m.key === 'story' ? story : m.key === 'boss' ? boss : peak;
+      collect(m, db);
+    }
+    items.sort(bySeasonDesc);
+    return items;
+  },
+  buildFilters(data) {
+    const filters: CatalogFilter[] = [];
+    // 模式（单选）：四模式身份 + 全部
+    filters.push({
+      key: 'mode',
+      label: '模式',
+      options: [
+        { val: '', label: '全部' },
+        ...ENDGAME_MODES.map((m) => ({ val: m.key, label: m.label })),
+      ],
+    });
+    // 状态筛选：仅含日期数据的赛季才有状态值
+    const statusSet = [...new Set(data.map((d) => String(d.status || '')).filter(Boolean))];
+    if (statusSet.length) {
+      filters.push({
+        key: 'status',
+        label: '状态',
+        options: [
+          { val: '', label: '全部' },
+          ...statusSet.map((s) => ({ val: s, label: s })),
+        ],
       });
-      if (o.loadVersions) {
-        // 有 version.json：按版本映射输出（maze/peak），同赛季取最近归属版本
-        const verMap = await o.loadVersions(ctx.version);
-        const seen = new Set<string>();
-        for (const [ver, ids] of Object.entries(verMap)) {
-          (ids || []).forEach((mid, idx) => {
-            const key = String(mid);
-            if (seen.has(key)) return;
-            seen.add(key);
-            const info = db[key];
-            if (!info || !info.zh) return;
-            items.push(toItem(info, key, verLabel(ver, idx)));
-          });
+    }
+    // 推荐属性筛选：基于逐层数据（上下半场合并；缺失时回退全赛季去重属性）
+    const dmgSet = new Set<string>();
+    for (const d of data) {
+      const fd = (d.floorDamage as { stage1?: string[]; stage2?: string[] }[] | undefined) || [];
+      if (fd.length) {
+        for (const f of fd) {
+          for (const t of [...(f.stage1 || []), ...(f.stage2 || [])]) dmgSet.add(t);
         }
       } else {
-        // 无 version.json：直接按 ID 降序输出（story/boss，对齐原站 2026→2001 / 3020→3001）
-        for (const [key, info] of Object.entries(db)) {
-          if (!info || !info.zh) continue;
-          items.push(toItem(info, key, ''));
-        }
-        items.sort((a, b) => Number(String(b.id).replace(/\D/g, '')) - Number(String(a.id).replace(/\D/g, '')));
+        for (const t of (d.damageTypes as string[] | undefined) || []) dmgSet.add(t);
       }
-      return items;
-    },
-    renderCard(item, i) {
-      const st = String(item.status || '未知');
-      const stCls = MAZE_STATUS_CLASS[st] || 'unknown';
-      const num = String(item.id).replace(/\D/g, '');
-      const numCls = num.length >= 4 ? ' nk-eg-card__num--long' : '';
-      // 元数据仅在实际存在时渲染：无日期/版本/统计时整体隐藏，避免"未知"噪音
-      const ver = item.version && String(item.version) !== '未知'
-        ? `<span class="nk-eg-card__ver">${escHtml(String(item.version))}</span>` : '';
-      const date = item.dateRange ? `<span class="nk-eg-card__date">${escHtml(String(item.dateRange))}</span>` : '';
-      const badge = st !== '未知' ? `<span class="nk-eg-card__status">${escHtml(st)}</span>` : '';
-      // 弱点属性：CDN 元素图标（无则省略）；层数/回合上限聚合为 HUD 统计文本
-      const dmg = Array.isArray(item.damageTypes) ? item.damageTypes as string[] : [];
-      const elems = dmg.length
-        ? `<span class="nk-eg-card__elems">${dmg.map((d) => {
-            const src = elementIconUrl(d);
-            return src
-              ? `<img class="nk-eg-card__elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(ELEM[d] || d)}" title="${escHtml(ELEM[d] || d)}" loading="lazy">`
-              : '';
-          }).join('')}</span>`
-        : '';
-      const floors = Number(item.floors) || 0;
-      const countdown = Number(item.countdown) || 0;
-      const stat = floors ? `${floors} 层${countdown ? ` · ${countdown} 回合` : ''}` : '';
-      return `<a class="nk-eg-card nk-eg-card--${stCls}" href="${escHtml(item.href)}" data-mode="${escHtml(o.id)}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
+    }
+    if (dmgSet.size) {
+      filters.push({
+        key: 'damageTypes',
+        label: '推荐属性',
+        options: [
+          { val: '', label: '全部' },
+          ...[...dmgSet].map((d) => ({ val: d, label: ELEM[d] || d })),
+        ],
+      });
+    }
+    return filters;
+  },
+  renderCard(item, i) {
+    const st = String(item.status || '未知');
+    const stCls = MAZE_STATUS_CLASS[st] || 'unknown';
+    const mode = ENDGAME_MODES.find((m) => m.key === item.mode);
+    const date = item.dateRange ? `<span class="nk-eg-card__date">${escHtml(String(item.dateRange))}</span>` : '';
+    const badge = st !== '未知' ? `<span class="nk-eg-card__status">${escHtml(st)}</span>` : '';
+
+    // 铭牌徽标：星启模式赛季 / 最终层标识 / 异相仲裁关卡组成（弱点已移除，卡片聚焦文字信息）
+    const fd = (item.floorDamage as { floor: number }[]) || [];
+    const tierce = item.tierce as { damage_types?: string[]; countdown?: number } | undefined;
+    const levels = item.levels as { kind?: string }[] | undefined;
+    let badgeHtml = '';
+    if (tierce) {
+      badgeHtml = '<span class="nk-eg-card__tier">✦ 星启</span>';
+    } else if (levels?.length) {
+      // 异相仲裁：每期 3 骑士试炼 + 1 王棋最终关（官方术语）
+      const knights = levels.filter((l) => l.kind === 'knight').length;
+      const hasKing = levels.some((l) => l.kind === 'king');
+      badgeHtml = `<span class="nk-eg-card__tier">✦ 骑士×${knights}${hasKing ? ' · 王棋' : ''}</span>`;
+    } else if (fd.length) {
+      badgeHtml = `<span class="nk-eg-card__final">FINAL · 第 ${fd[fd.length - 1].floor} 层</span>`;
+    }
+    const plateBadge = badgeHtml
+      ? `<span class="nk-eg-card__plate-badge">${badgeHtml}</span>` : '';
+
+    // HUD 统计：层数 / 阶段数 / 回合上限 / 异相仲裁关卡数（仅实际存在时渲染）
+    const floors = Number(item.floors) || 0;
+    const countdown = Number(item.countdown) || 0;
+    const stageNum = Number(item.stageNum) || 0;
+    const levelCount = (item.levels as unknown[] | undefined)?.length || 0;
+    const stat = [
+      floors ? `${floors} 层` : '',
+      levelCount ? `${levelCount} 关` : '',
+      stageNum ? `${stageNum} 阶段` : '',
+      countdown ? `${countdown} 回合` : '',
+    ].filter(Boolean).join(' · ');
+    const statHtml = stat ? `<span class="nk-eg-card__stat">${escHtml(stat)}</span>` : '';
+    const metaHtml = statHtml ? `<div class="nk-eg-card__meta">${statHtml}</div>` : '';
+
+    // 赛季增益（文本胶囊，最多 3 个）
+    const buffs = Array.isArray(item.buffs)
+      ? (item.buffs as MazeBuffInfo[]).slice(0, 3) : [];
+    const buffHtml = buffs.length
+      ? `<div class="nk-eg-card__row"><span class="nk-eg-card__label">增益</span>`
+        + `<span class="nk-eg-card__buffs">${buffs.map((b) => `<span class="nk-eg-card__buff">${escHtml(b.name)}</span>`).join('')}</span></div>`
+      : '';
+
+    // 敌方：MonsterMiddleIcon CDN 头像（最多 4 个 + 溢出计数；title 附分类与弱点）
+    const mons = Array.isArray(item.monsters) ? (item.monsters as MazeMonsterInfo[]) : [];
+    const monHtml = mons.length
+      ? `<div class="nk-eg-card__row"><span class="nk-eg-card__label">敌方</span>`
+        + `<span class="nk-eg-card__monsters">${mons.slice(0, 4).map((m) => {
+            const src = m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : '';
+            if (!src) return '';
+            const rank = m.rank ? (MON_RANK[m.rank] || '') : '';
+            const weak = m.weak?.length ? `弱点：${m.weak.map((d) => ELEM[d] || d).join(' / ')}` : '';
+            const resist = m.resist && Object.keys(m.resist).length
+              ? `抗性：${Object.entries(m.resist).map(([d, v]) => `${ELEM[d] || d} ${Math.round(v * 100)}%`).join(' / ')}` : '';
+            const title = [m.name, rank, m.camp, weak, resist].filter(Boolean).join(' · ');
+            return `<img class="nk-eg-card__mon" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(m.name)}" title="${escHtml(title)}" loading="lazy">`;
+          }).join('')}${mons.length > 4 ? `<span class="nk-eg-card__more">+${mons.length - 4}</span>` : ''}</span></div>`
+      : '';
+
+    return `<a class="nk-eg-card nk-eg-card--${stCls}" href="${escHtml(item.href)}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
       <div class="nk-eg-card__plate">
         <span class="nk-eg-card__emblem">${mode?.emblem || ''}</span>
-        <span class="nk-eg-card__num${numCls}">${escHtml(num)}</span>
+        ${plateBadge}
       </div>
       <div class="nk-eg-card__body">
-        <span class="nk-eg-card__name">${escHtml(item.name) || '未命名赛季'}</span>
-        <div class="nk-eg-card__meta">${elems}${stat ? `<span class="nk-eg-card__stat">${escHtml(stat)}</span>` : ''}${ver}${date}${badge}</div>
+        <div class="nk-eg-card__head">
+          <span class="nk-eg-card__name">${escHtml(item.name) || '未命名赛季'}</span>
+          ${badge}
+        </div>
+        ${metaHtml}
+        ${date ? `<div class="nk-eg-card__daterow">${date}</div>` : ''}
+        ${buffHtml}
+        ${monHtml}
       </div>
-      <svg class="nk-eg-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </a>`;
-    },
-  };
-}
-
-export const mazePage = makeEndgamePage({
-  id: 'maze', title: '终局内容 · 忘却之庭', href: '/endgame/maze',
-  loadList: loadLocalMazeList,
-});
-
-export const storyPage = makeEndgamePage({
-  id: 'story', title: '终局内容 · 虚构叙事', href: '/endgame/story',
-  loadList: loadLocalStoryList,
-});
-
-export const bossPage = makeEndgamePage({
-  id: 'boss', title: '终局内容 · 末日幻影', href: '/endgame/boss',
-  loadList: loadLocalBossList,
-});
-
-export const peakPage = makeEndgamePage({
-  id: 'peak', title: '终局内容 · 异相仲裁', href: '/endgame/peak',
-  loadList: loadLocalPeakList,
-});
+  },
+};

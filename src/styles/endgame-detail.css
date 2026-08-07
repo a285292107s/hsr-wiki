@@ -1,0 +1,1105 @@
+/* ═══════════════════════════════════════════
+   终局赛季详情页（Endgame Season Detail）· 深空档案编辑式排版
+   由路由 /endgame/:mode/:id 懒加载（EndgameView）。
+   - 模式身份：--eg-color 经 data-mode 映射（领域层 --eg-* 令牌，与目录页同源）
+   - 设计语言（docs/设计语言-深空档案-编辑式排版.md）：
+     编辑式章节标题 / 中性细线阅读族卡片 / 规格表数据 / 克制用色
+     · 模式色仅存于身份锚点：层序号 hover、章节徽标、指标数值、元素边框、导航目标
+     · 卡片 hover 仅边框/背景亮度变化，无位移无 glow；强调词走语义金 --highlight
+   - 覆盖：Hero / 增益卡 / 关卡层级 / 敌方网格 / 星启模式 / 相邻赛季导航
+═══════════════════════════════════════════ */
+
+/* ─── 模式身份映射 ─── */
+.nk-egd[data-mode="maze"] { --eg-color: var(--eg-maze); }
+.nk-egd[data-mode="story"] { --eg-color: var(--eg-story); }
+.nk-egd[data-mode="boss"] { --eg-color: var(--eg-boss); }
+.nk-egd[data-mode="peak"] { --eg-color: var(--eg-peak); }
+
+/* ═══════════════════════════════════════════
+   吸顶工具条：章节导航 + 层级折叠控制 + 阅读进度线
+   （fixed 视口级全宽横贯；近实底 0.97 + blur，内容避让侧栏与滚动容器对齐）
+═══════════════════════════════════════════ */
+.nk-egd.nk-page--detail { padding-top: 46px; } /* 吸顶条占位（44 + 2 进度线） */
+.nk-egd-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  background: color-mix(in srgb, var(--blk-900) 97%, transparent);
+  backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  border-bottom: 1px solid var(--line-1);
+}
+/* 内容区避让侧栏：在（视口 - 侧栏宽）区域内居中，与滚动容器内容对齐 */
+@media (min-width: 768px) {
+  .nk-egd-bar { padding-left: 72px; }
+}
+@media (min-width: 1024px) {
+  .nk-egd-bar { padding-left: 88px; }
+}
+.nk-egd-bar__inner {
+  display: flex; align-items: center; gap: 12px;
+  max-width: var(--nk-detail-max); margin: 0 auto; padding: 6px 16px; min-height: 44px;
+}
+/* 区块导航：激活态用模式色（身份锚点，覆盖 tokens 默认主色） */
+.nk-egd-secnav .nk-secnav__btn--active { color: var(--eg-color); }
+.nk-egd-secnav .nk-secnav__btn--active::after { background: var(--eg-color); }
+/* 折叠控制：文本链接式披露控件（无容器，44px 热区） */
+.nk-egd-bar__tools { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.nk-egd-bar__tool {
+  position: relative;
+  padding: 6px 4px; border: none; background: transparent;
+  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.08em;
+  color: var(--text3); cursor: pointer; white-space: nowrap;
+  transition: color 0.15s;
+}
+.nk-egd-bar__tool::before {
+  content: ''; position: absolute; left: -6px; right: -6px; top: -10px; bottom: -10px; /* 热区 ≥44px */
+}
+.nk-egd-bar__tool:hover { color: var(--eg-color); }
+/* 阅读进度线（模式色渐变，与 Hero 身份线同语言） */
+.nk-egd-bar__progress {
+  height: 2px; width: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--eg-color) 45%, transparent) 0%, var(--eg-color) 55%, color-mix(in srgb, var(--eg-color) 75%, #fff) 100%);
+}
+/* 锚点滚动补偿（吸顶条高度 44 + 进度线 2 + 余量） */
+#egd-buffs, #egd-tierce, #egd-floors, #egd-levels { scroll-margin-top: 56px; }
+
+/* ═══════════════════════════════════════════
+   Hero：档案铭牌 + 赛季信息
+   （透明底——§13.8 默认无材质；顶部模式色细线为身份线，底部渐隐衔接内容）
+═══════════════════════════════════════════ */
+.nk-egd-hero {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  width: 100%;
+  max-width: var(--nk-detail-max);
+  margin: 0 auto;
+  padding: 34px 20px 28px;
+  flex-shrink: 0;
+  background: transparent;
+}
+/* 顶部模式色细线（档案扉页身份线，克制无 glow） */
+.nk-egd-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--eg-color) 60%, transparent) 22%,
+    color-mix(in srgb, var(--eg-color) 60%, transparent) 78%,
+    transparent 100%);
+  opacity: 0.6;
+}
+/* 底部渐隐（与内容面板衔接，功能材质） */
+.nk-egd-hero::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 4%, var(--line-2) 50%, transparent 96%);
+}
+
+/* 铭牌：模式徽记 + 赛季编号（档案角标；深底细线，无渐变无 glow） */
+.nk-egd-hero__plate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 128px;
+  min-height: 148px;
+  flex-shrink: 0;
+  align-self: center;
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 10px;
+}
+.nk-egd-hero__plate::after {
+  content: '';
+  position: absolute;
+  left: 10px; right: 10px; bottom: 9px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--line-2) 50%, transparent 100%);
+  opacity: 0.7;
+}
+.nk-egd-hero__emblem {
+  width: 34px;
+  height: 34px;
+  color: color-mix(in srgb, var(--eg-color) 70%, var(--text2));
+}
+.nk-egd-hero__emblem svg { width: 100%; height: 100%; }
+.nk-egd-hero__num {
+  font-family: var(--font-hud);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: var(--text-bright);
+  text-shadow: none;
+  font-variant-numeric: tabular-nums;
+}
+.nk-egd-hero__num--long { font-size: 1.5rem; }
+
+/* 信息面板 */
+.nk-egd-hero__panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+.nk-egd-hero__camp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-hud);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--eg-color) 70%, var(--text2));
+}
+.nk-egd-hero__camp::before {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: var(--line-2);
+}
+.nk-egd-hero__name {
+  font-size: 1.7rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+  color: var(--text-bright);
+  text-shadow: none;
+}
+.nk-egd-hero__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+/* 状态徽章（与目录卡同色系，语义色） */
+.nk-egd-hero__status {
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  border: 1px solid;
+}
+.nk-egd-hero__status--live { color: var(--season-live); background: color-mix(in srgb, var(--season-live) 10%, transparent); border-color: color-mix(in srgb, var(--season-live) 32%, transparent); }
+.nk-egd-hero__status--ended { color: var(--text2); background: color-mix(in srgb, var(--season-ended) 10%, transparent); border-color: color-mix(in srgb, var(--season-ended) 26%, transparent); }
+.nk-egd-hero__status--upcoming { color: var(--season-upcoming); background: color-mix(in srgb, var(--season-upcoming) 10%, transparent); border-color: color-mix(in srgb, var(--season-upcoming) 32%, transparent); }
+.nk-egd-hero__status--unknown { color: var(--text3); background: color-mix(in srgb, var(--blk-900) 45%, transparent); border-color: var(--border); }
+.nk-egd-hero__date {
+  font-family: var(--font-hud);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+}
+
+/* 指标条：层数 / 阶段 / 回合（行式规格表——反等权网格；行间中性细线，末行去底线） */
+.nk-egd-hero__stats {
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+  border: 1px solid var(--line-1);
+  border-radius: 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--blk-900) 30%, transparent);
+}
+.nk-egd-hero__stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-width: 0;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-egd-hero__stat:last-child { border-bottom: none; }
+.nk-egd-hero__stat-label {
+  order: 1;
+  font-family: var(--font-hud);
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.nk-egd-hero__stat-val {
+  order: 2;
+  font-family: var(--font-hud);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--eg-color);
+  text-shadow: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.nk-egd-elem {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--blk-900) 75%, transparent);
+  border: 1px solid var(--border);
+  padding: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   内容区 · 宽度体系（§13.9）：面板 L1 1000，模块 L2 952，文本 L3 800
+═══════════════════════════════════════════ */
+.nk-egd-body .nk-panel { max-width: var(--nk-detail-max); }
+.nk-egd-body .nk-title,
+.nk-egd-body .nk-egd-buffs,
+.nk-egd-body .nk-egd-floors,
+.nk-egd-body .nk-egd-tierce,
+.nk-egd-body .nk-egd-nav { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }
+
+/* ─── 赛季增益卡（阅读族：中性细线，无左竖条，hover 仅亮度变化） ─── */
+.nk-egd-buffs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 8px; }
+.nk-egd-buff {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 15px;
+  background: rgba(255,255,255,0.016);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  transition: border-color 0.25s ease, background 0.25s ease;
+  animation: nk-card-in 0.4s var(--ease) backwards;
+  animation-delay: min(calc(var(--i, 0) * 70ms), 420ms);
+}
+.nk-egd-buff:hover {
+  border-color: var(--line-2);
+  background: rgba(255,255,255,0.03);
+}
+.nk-egd-buff__head { display: flex; align-items: baseline; gap: 10px; }
+/* 增益图标（bufficon CDN；未就绪时 SVG 占位）：卡片头部垂直居中 */
+.nk-egd-buff__head { align-items: center; }
+.nk-egd-buff__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--eg-color) 22%, transparent);
+  flex-shrink: 0;
+}
+.nk-egd-buff__icon--sm {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+}
+.nk-egd-buff__idx {
+  font-family: var(--font-hud);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--text3);
+  transition: color 0.2s;
+}
+.nk-egd-buff:hover .nk-egd-buff__idx { color: var(--eg-color); }
+.nk-egd-buff__name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: 0.02em;
+}
+.nk-egd-buff__desc {
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: var(--text2);
+  max-width: var(--nk-prose-max);
+}
+.nk-egd-buff__desc .hl { color: var(--highlight); font-weight: 700; }
+.nk-egd-buff__desc .nowrap { white-space: nowrap; }
+
+/* ═══════════════════════════════════════════
+   关卡层级章节（以层级为章节名的完整内容）
+═══════════════════════════════════════════ */
+.nk-egd-floors {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.nk-egd-floor {
+  position: relative;
+  padding: 18px 18px 16px;
+  background: rgba(255,255,255,0.016);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  transition: border-color 0.25s ease, background 0.25s ease;
+  animation: nk-card-in 0.4s var(--ease) backwards;
+  animation-delay: min(calc(var(--i, 0) * 60ms), 480ms);
+}
+.nk-egd-floor:hover {
+  border-color: var(--line-2);
+  background: rgba(255,255,255,0.03);
+}
+/* 章节头（层头 button：点击切换折叠；折叠态即层级索引） */
+.nk-egd-floor__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+/* 展开箭头（微动级：旋转 90°；hover 仅颜色变化） */
+.nk-egd-floor__arrow {
+  flex-shrink: 0;
+  width: 13px; height: 13px;
+  color: var(--text3);
+  transition: transform 0.22s var(--ease), color 0.2s;
+}
+.nk-egd-floor--open .nk-egd-floor__arrow { transform: rotate(90deg); }
+.nk-egd-floor:hover .nk-egd-floor__arrow { color: var(--eg-color); }
+/* 折叠态摘要：推荐属性索引行（浅底细线，与层级目标同材质） */
+.nk-egd-floor__summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -4px 0 12px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--blk-900) 22%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 8px;
+  min-width: 0;
+}
+.nk-egd-floor__summarylabel {
+  flex-shrink: 0;
+  min-width: 3.6em;
+  font-size: 0.56rem;
+  letter-spacing: 0.06em;
+  color: var(--text3);
+}
+.nk-egd-floor__summary .nk-egd-floor__elems { gap: 5px; }
+.nk-egd-floor__summary .nk-egd-elem { width: 18px; height: 18px; }
+/* 展开体（grid-rows 0fr→1fr 折叠动画，设计语言披露控件同款） */
+.nk-egd-floor__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s var(--ease);
+}
+.nk-egd-floor--open .nk-egd-floor__body { grid-template-rows: 1fr; }
+.nk-egd-floor__body-inner { overflow: hidden; min-height: 0; }
+.nk-egd-floor__idx {
+  font-family: var(--font-hud);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  transition: color 0.2s;
+}
+.nk-egd-floor:hover .nk-egd-floor__idx { color: var(--eg-color); }
+.nk-egd-floor__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+.nk-egd-floor__name {
+  font-size: 0.8rem;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nk-egd-floor__countdown {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-hud);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  white-space: nowrap;
+}
+/* 上下半场双列 */
+.nk-egd-floor__stages {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.nk-egd-floor__stage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--blk-900) 24%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 10px;
+}
+.nk-egd-floor__stagelabel {
+  align-self: flex-start;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 8%, transparent);
+  white-space: nowrap;
+}
+.nk-egd-floor__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.nk-egd-floor__label {
+  flex-shrink: 0;
+  min-width: 3.6em;
+  font-size: 0.56rem;
+  letter-spacing: 0.06em;
+  color: var(--text3);
+}
+.nk-egd-floor__elems { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.nk-egd-floor__elems .nk-egd-elem { width: 22px; height: 22px; }
+/* 敌方头像行（小尺寸；hover 微浮 1px，无 glow） */
+.nk-egd-floor__monswrap {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+/* 单波次组：标签 + 头像行 */
+.nk-egd-floor__wave {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nk-egd-floor__wavelabel {
+  flex-shrink: 0;
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  color: var(--text3);
+}
+/* 波数·敌数徽标（如“3 波 · 9 敌”，HUD 风格） */
+.nk-egd-floor__moncount {
+  flex-shrink: 0;
+  font-family: var(--font-hud);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--eg-color) 76%, #fff);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 7%, transparent);
+  white-space: nowrap;
+}
+.nk-egd-floor__mons {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.nk-egd-floor__mon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--blk-900) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--eg-color) 22%, transparent);
+  object-fit: cover;
+  transition: border-color 0.22s ease, transform 0.22s var(--ease);
+}
+.nk-egd-floor__mon:hover {
+  border-color: color-mix(in srgb, var(--eg-color) 55%, transparent);
+  transform: translateY(-1px);
+}
+/* 可用增益（层级 MazeBuff，如记忆紊流；内嵌深底，无左竖条） */
+.nk-egd-floor__buff {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--blk-900) 26%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 8px;
+}
+.nk-egd-floor__buffhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.nk-egd-floor__bufflabel {
+  font-family: var(--font-hud);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.nk-egd-floor__buffname {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+.nk-egd-floor__buffdesc {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.75;
+  color: var(--text2);
+  max-width: var(--nk-prose-max);
+}
+.nk-egd-floor__buffdesc .hl { color: var(--highlight); font-weight: 700; }
+.nk-egd-floor__buffdesc .nowrap { white-space: nowrap; }
+/* 层级挑战目标 */
+.nk-egd-floor__targets {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: var(--nk-prose-max);
+}
+.nk-egd-floor__target {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--blk-900) 22%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 8px;
+}
+.nk-egd-floor__targetidx {
+  flex-shrink: 0;
+  font-family: var(--font-hud);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  padding-top: 3px;
+}
+.nk-egd-floor__targettext {
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text2);
+}
+.nk-egd-floor__targettext .hl { color: var(--highlight); font-weight: 700; }
+
+/* ─── 异相仲裁关卡（骑士/王棋徽标 + 机制标签 + 绝境变体） ─── */
+.nk-egd-peak__kind {
+  flex-shrink: 0;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: color-mix(in srgb, var(--eg-color) 82%, #fff);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 38%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 9%, transparent);
+  white-space: nowrap;
+}
+/* 王棋：实心强化（领域金语义） */
+.nk-egd-peak__kind--king {
+  color: var(--blk-900);
+  border-color: color-mix(in srgb, var(--eg-color) 70%, transparent);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 82%, #fff) 0%, var(--eg-color) 100%);
+}
+/* 绝境：红系描边警示（--diff-del 领域层） */
+.nk-egd-peak__kind--hard {
+  color: color-mix(in srgb, var(--diff-del) 78%, #fff);
+  border-color: color-mix(in srgb, var(--diff-del) 55%, transparent);
+  background: color-mix(in srgb, var(--diff-del) 11%, transparent);
+}
+/* 机制标签行（标签对齐其它行 label） */
+.nk-egd-floor__tagsrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.nk-egd-floor__tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.nk-egd-peak__tag {
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--text2);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 28%, transparent);
+  background: color-mix(in srgb, var(--blk-900) 52%, transparent);
+  white-space: nowrap;
+}
+/* 段位徽章行（当期青铜/白银/黄金/彩钻勋章，ChallengeBadgeConfig） */
+.nk-egd-peak__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+.nk-egd-peak__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent);
+  background: color-mix(in srgb, var(--blk-900) 46%, transparent);
+  font-size: 0.74rem;
+  color: var(--text1);
+  white-space: nowrap;
+}
+.nk-egd-peak__badge img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--blk-800);
+}
+/* 王棋增益容器（多个 buff 叠放，覆盖单个 buff 的上间距） */
+.nk-egd-floor__buffs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nk-egd-floor__buffs .nk-egd-floor__buff { margin-top: 0; }
+/* 绝境变体子卡 */
+.nk-egd-floor__hard {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--blk-900) 44%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--diff-del) 34%, transparent);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nk-egd-floor__hardhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nk-egd-floor__hardname {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+.nk-egd-floor__hard .nk-egd-floor__row { margin: 0; }
+.nk-egd-floor__hard .nk-egd-floor__targets { margin-top: 0; }
+
+/* ─── 敌方阵容网格（hover 仅边框/背景变化，无位移无 glow） ─── */
+.nk-egd-mons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+/* 敌方信息卡（行式：头像 + 名称/标签；弱点/抗性行；图鉴介绍；技能胶囊） */
+.nk-egd-mon {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--blk-900) 30%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 10px;
+  cursor: default;
+  transition: border-color 0.22s ease, background 0.22s ease;
+}
+.nk-egd-mon:hover {
+  border-color: var(--line-2);
+  background: color-mix(in srgb, var(--blk-900) 42%, transparent);
+}
+.nk-egd-mon__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nk-egd-mon__figure {
+  position: relative;
+  flex-shrink: 0;
+}
+.nk-egd-mon__img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--blk-900) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent);
+  object-fit: cover;
+  transition: border-color 0.22s ease;
+}
+.nk-egd-mon:hover .nk-egd-mon__img {
+  border-color: color-mix(in srgb, var(--eg-color) 55%, transparent);
+}
+.nk-egd-mon__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.nk-egd-mon__name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text1);
+}
+.nk-egd-mon__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.nk-egd-mon__tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.58rem;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: var(--text2);
+  background: color-mix(in srgb, var(--blk-900) 70%, transparent);
+  border: 1px solid var(--line-1);
+}
+/* 敌方分类徽章（头像左上角；非普通怪；中性胶囊，文字区分） */
+.nk-egd-mon__rank {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  z-index: 1;
+  font-size: 0.5rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  padding: 2.5px 6px;
+  border-radius: 999px;
+  color: var(--text2);
+  background: color-mix(in srgb, var(--blk-900) 88%, transparent);
+  border: 1px solid var(--line-1);
+}
+/* 弱点/抗性行（细线分隔 + 小元素图标） */
+.nk-egd-mon__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-egd-mon__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nk-egd-mon__label {
+  flex-shrink: 0;
+  min-width: 28px;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  color: var(--text3);
+}
+.nk-egd-mon__weak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nk-egd-mon__weak .nk-egd-elem { width: 16px; height: 16px; }
+/* 抗性行：属性图标 + 百分比（与弱点行同款元素图标） */
+.nk-egd-mon__resist {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.nk-egd-mon__resitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.nk-egd-mon__resitem .nk-egd-elem { width: 16px; height: 16px; }
+.nk-egd-mon__resval {
+  font-size: 0.62rem;
+  line-height: 1;
+  color: var(--text2);
+}
+/* 图鉴介绍（pre-line 保留换行；缩 3 行，hover 展开全文） */
+.nk-egd-mon__intro {
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.6;
+  color: var(--text3);
+  white-space: pre-line;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nk-egd-mon:hover .nk-egd-mon__intro {
+  -webkit-line-clamp: unset;
+}
+/* 技能胶囊（名称 + hover 标签） */
+.nk-egd-mon__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-egd-mon__skill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.58rem;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--text2);
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  border: 1px solid var(--line-1);
+  transition: border-color 0.22s ease, color 0.22s ease;
+}
+.nk-egd-mon__skill:hover {
+  border-color: var(--line-2);
+  color: var(--text1);
+}
+
+/* 精简模式空态（maze/story/boss 无星启内容时） */
+.nk-egd-empty {
+  padding: 18px;
+  margin-bottom: 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--text3);
+  background: color-mix(in srgb, var(--blk-900) 24%, transparent);
+  border: 1px dashed var(--line-2);
+  border-radius: var(--nk-radius-card);
+}
+
+/* ─── 星启模式板块（独立进阶关卡；阅读族中性细线，无天光材质） ─── */
+.nk-egd-tierce {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 18px 18px;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.016);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+}
+/* 星启关卡指标：弱点 / 回合 / 分数 */
+.nk-egd-tierce__stats { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+.nk-egd-tierce__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 11px 18px;
+  min-width: 108px;
+  background: color-mix(in srgb, var(--blk-900) 38%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 10px;
+}
+.nk-egd-tierce__val {
+  font-family: var(--font-hud);
+  font-size: 1.18rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--eg-color);
+  text-shadow: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.nk-egd-tierce__val--elems { display: inline-flex; align-items: center; gap: 6px; }
+.nk-egd-tierce__val--elems .nk-egd-elem { width: 22px; height: 22px; }
+.nk-egd-tierce__label {
+  font-family: var(--font-hud);
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+/* 星启节点（3 节点目标；条目编号灰色弱化，无左竖条） */
+.nk-egd-tierce__nodes { display: flex; flex-direction: column; gap: 8px; }
+.nk-egd-node {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--blk-900) 40%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: 8px;
+  transition: border-color 0.22s ease, background 0.22s ease;
+}
+.nk-egd-node:hover {
+  border-color: var(--line-2);
+  background: color-mix(in srgb, var(--blk-900) 52%, transparent);
+}
+.nk-egd-node__idx {
+  flex-shrink: 0;
+  font-family: var(--font-hud);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 8%, transparent);
+  white-space: nowrap;
+}
+.nk-egd-node__text {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--text2);
+}
+.nk-egd-node__text .hl { color: var(--highlight); font-weight: 700; }
+.nk-egd-tierce__mons { margin-bottom: 0; }
+/* 星启敌方波次分组（波前精英 + 终幕 Boss；HUD 小标签 + 卡片网格） */
+.nk-egd-tierce__waves {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+/* 星启敌方节点分组（节点 = 第二级分组，与“上半场/下半场”同级）：节点间 14px / 波内 8px 的层级节奏 */
+.nk-egd-tierce__node {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nk-egd-tierce__wave {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* 节点标签：模式色胶囊（身份锚点，与 stagelabel 同配方）——区别于次级灰色波次标签 */
+.nk-egd-tierce__nodelabel {
+  align-self: flex-start;
+  font-family: var(--font-hud);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 8%, transparent);
+  white-space: nowrap;
+}
+/* 波次标签：第三级分组，灰色小字弱化 */
+.nk-egd-tierce__wavelabel {
+  font-family: var(--font-hud);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+}
+
+/* ─── 相邻赛季导航（阅读族中性细线） ─── */
+.nk-egd-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 28px;
+}
+.nk-egd-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-1);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.016);
+  transition: border-color 0.22s ease, background 0.22s ease;
+}
+.nk-egd-nav__item--next { justify-content: flex-end; text-align: right; }
+.nk-egd-nav__item--void { visibility: hidden; }
+.nk-egd-nav__item:hover {
+  border-color: var(--line-2);
+  background: rgba(255,255,255,0.03);
+}
+.nk-egd-nav__dir {
+  font-size: 0.66rem;
+  color: var(--text3);
+}
+.nk-egd-nav__id {
+  font-family: var(--font-hud);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--eg-color);
+}
+
+/* ─── 骨架屏 ─── */
+.nk-skeleton--egd .nk-egd-sk {
+  width: 100%;
+  max-width: var(--nk-detail-max);
+  margin: 0 auto;
+  height: 210px;
+  border-radius: 0;
+}
+
+/* ── 响应式 ── */
+@media (max-width: 767px) {
+  .nk-egd-hero {
+    flex-direction: column;
+    gap: 14px;
+    padding: 26px 16px 22px;
+  }
+  .nk-egd-hero__plate {
+    width: 96px;
+    min-height: 108px;
+    gap: 7px;
+    align-self: flex-start;
+  }
+  .nk-egd-hero__emblem { width: 27px; height: 27px; }
+  .nk-egd-hero__num { font-size: 1.55rem; }
+  .nk-egd-hero__num--long { font-size: 1.2rem; }
+  .nk-egd-hero__name { font-size: 1.35rem; }
+  .nk-egd-hero__stat { padding: 8px 12px; }
+  .nk-egd-floor__stages { grid-template-columns: 1fr; }
+  .nk-egd-floor__head { flex-wrap: wrap; }
+  .nk-egd-floor__countdown { margin-left: 0; }
+  .nk-egd-nav { grid-template-columns: 1fr; }
+  .nk-egd-nav__item--next { justify-content: flex-start; text-align: left; }
+}
+
+/* ── 减弱动效 ── */
+@media (prefers-reduced-motion: reduce) {
+  .nk-egd-buff, .nk-egd-floor { animation: none; }
+  .nk-egd-floor__body { transition: none; }
+  .nk-egd-floor__mon:hover { transform: none; }
+}
+
+/* ── 触屏设备：重置粘滞 hover ── */
+@media (hover: none) {
+  .nk-egd-buff:hover,
+  .nk-egd-floor:hover,
+  .nk-egd-nav__item:hover { border-color: var(--line-1); background: rgba(255,255,255,0.016); }
+  .nk-egd-mon:hover,
+  .nk-egd-node:hover { border-color: var(--line-1); background: color-mix(in srgb, var(--blk-900) 30%, transparent); }
+  .nk-egd-floor__mon:hover { transform: none; }
+  .nk-egd-buff:hover .nk-egd-buff__idx,
+  .nk-egd-floor:hover .nk-egd-floor__idx,
+  .nk-egd-floor:hover .nk-egd-floor__arrow { color: var(--text3); }
+  .nk-egd-bar__tool:hover { color: var(--text3); }
+}

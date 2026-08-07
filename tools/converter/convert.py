@@ -29,6 +29,8 @@ from converters import paths, elements, items, properties
 from converters import characters, character_detail
 from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame
 from converters import currency, season, currency_catalog  # noqa: E402 – 本地数据，无需网络
+from converters import achievements
+from converters import monster_detail
 from converters import version  # noqa: E402 – 子模块 git 提交信息
 
 logging.basicConfig(
@@ -51,9 +53,11 @@ MODULES: dict[str, list] = {
     "relics": [relics.convert, relics.convert_stories],
     "relic_affixes": [relic_affixes.convert],
     "monsters": [monsters.convert],
+    "monster_detail": [monster_detail.convert],
     "endgame": [endgame.convert],
     "currency": [currency.convert],
     "currency_catalog": [currency_catalog.convert],
+    "achievements": [achievements.convert],
     "season": [season.convert],
     "version": [version.convert],
 }

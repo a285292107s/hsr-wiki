@@ -59,7 +59,7 @@ src/
 │   ├── bootstrap.ts     → createApp + Pinia + Router + 全局 CSS 导入（仅 tokens + catalog）
 │   ├── App.vue          → 外壳：SidebarNav + 方向过渡 RouterView + ToastHost
 │   ├── router/index.ts  → History 路由；meta.depth 驱动导航方向动画；
-│   │                        终局 /endgame/* 为嵌套路由，Tab 切换由 EndgameView 布局组件处理；
+│   │                        终局合并单页 /endgame（四模式身份为筛选选项，endgame.css 随路由并行加载）；
 │   │                        meta.cw 触发 data-theme="cw"（货币战争黑金主题）；
 │   │                        CW 目录路由经 cwCatalogView / cwRoleCatalogView 并行加载目录专属 CSS
 │   ├── router/chunks.ts → 路由 chunk 预加载函数（侧栏 hover / 首页 idle）
@@ -111,7 +111,7 @@ src/
 
 ### 核心架构模式
 
-1. **配置驱动目录页**：所有列表页均在 `src/app/catalog/pages/` 子模块中定义（character.ts / lightcone.ts / relic.ts / item.ts / monster.ts / endgame.ts（导出 maze/story/boss/peak 四页配置）/ currency-role.ts / currency-equipment.ts / currency-portal.ts / currency-augment.ts / currency-trait.ts，shared.ts 提供共享常量），由 `pages.ts` 统一注册为 `CatalogPageConfig`（共 14 个目录）。单一 `CatalogView.vue` 根据 `route.meta.catalog` 匹配配置渲染任意目录。新增目录 = 新增子模块 + 注册 + 路由。
+1. **配置驱动目录页**：所有列表页均在 `src/app/catalog/pages/` 子模块中定义（character.ts / lightcone.ts / relic.ts / item.ts / monster.ts / endgame.ts（四模式合并单页，模式为筛选选项）/ currency-role.ts / currency-equipment.ts / currency-portal.ts / currency-augment.ts / currency-trait.ts，shared.ts 提供共享常量），由 `pages.ts` 统一注册为 `CatalogPageConfig`（共 13 个目录）。单一 `CatalogView.vue` 根据 `route.meta.catalog` 匹配配置渲染任意目录。新增目录 = 新增子模块 + 注册 + 路由。
 
 2. **数据流向**：`Pinia store` → 调用 `services/api/` 纯函数 → 从 `public/data/cn/`（随站部署）获取本地 JSON 或从 CDN 获取图片。Store 编排加载、缓存与错误处理；API 函数本身不持有状态（单例 Promise 除外）。
 
@@ -189,8 +189,9 @@ src/
 - Vite `base` 为 `/`——Vercel 部署于域名根路径
 - 目录卡片 HTML 以模板字符串渲染（非 Vue 组件），服务于虚拟滚动性能
 - CSS 采用 BEM 风格命名，统一 `nk-` 前缀（如 `nk-cat-card__img`）
-- 样式分层：tokens.css = 设计令牌 + 跨页共享原语（nk-tabs / nk-panel 等）；catalog.css = 目录引擎专属（含 v-html 卡片，scoped 无法命中）；页面 css = 页面专属（随路由懒加载）。页面间复用样式先查原语，禁止在页面 css 复制粘贴；组件专属样式（如 EndgameView 的 Tab 导航）用 SFC scoped style，不污染全局命名空间
+- 样式分层：tokens.css = 设计令牌 + 跨页共享原语（nk-tabs / nk-panel 等）；catalog.css = 目录引擎专属（含 v-html 卡片，scoped 无法命中）；页面 css = 页面专属（随路由懒加载）。页面间复用样式先查原语，禁止在页面 css 复制粘贴；组件专属样式（如货币战争 Hub 的导航）用 SFC scoped style，不污染全局命名空间
 - 全局设计令牌位于 `src/styles/tokens.css`；不使用 CSS 预处理器
+- 先确认模型有没有识图功能，如果模型没有识图功能，不要截图，直接用 DOM 与计算样式取证
 
 ## 强制规则（MUST）
 

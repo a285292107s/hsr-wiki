@@ -260,6 +260,11 @@
 /* Hero 背景 Spine（官网背景动画 home-bg：主背景 + 角色群像，全不透明呈现） */
 .nk-home-hero__spine { position: absolute; inset: 0; opacity: 0; transition: opacity 1.6s ease; pointer-events: none; overflow: hidden; }
 .nk-home-hero__spine.nk-on { opacity: 1; }
+/* 手机断点立绘（KV 场景窄屏难以展示 → 随机单角色立绘 cover 铺满）：
+   锚点 center 20% 裁剪顶部空余使角色主体居中（同角色详情页背景规范）；
+   加载失败/进行中时 hero 原生渐变兑底直接承接（元素未渲染） */
+.nk-home-hero__art { position: absolute; inset: 0; background-size: cover; background-position: center 20%; background-repeat: no-repeat; opacity: 0; animation: nk-home-art-in 1.2s var(--ease) forwards; }
+@keyframes nk-home-art-in { from { opacity: 0; } to { opacity: 1; } }
 /* 压暗层：左下文字安全区 + 底部融入页面底色（不遮挡右上方场景主体） */
 .nk-home-hero__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 85% at 0% 108%, color-mix(in srgb, var(--blk-900) 82%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 34%, transparent 62%), linear-gradient(to bottom, color-mix(in srgb, var(--blk-900) 28%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in srgb, var(--blk-900) 55%, transparent) 88%, var(--bg) 100%); }
 /* 内容与导航区同网格：max-width 1440 居中 + 左侧 128px 侧栏间隙（断点下收窄），保证 Hero 标题与下方板块区左对齐 */
@@ -378,6 +383,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .nk-home-hero__spine { transition: none; }
+  .nk-home-hero__art { animation: none; opacity: 1; }
   .nk-home-hero__title span, .nk-home-hero__tagline, .nk-home-hero__scroll, .nk-home-hero__kicker, .nk-home-card { animation: none; }
   .nk-home-card:hover .nk-home-card__sheen { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); will-change: auto; }
   .nk-home-hero__scroll-line::after { animation: none; }

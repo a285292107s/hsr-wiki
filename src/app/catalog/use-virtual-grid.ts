@@ -95,7 +95,7 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     cols = Math.max(2, Math.floor((gridWidth + GAP) / (minColW + GAP)));
     const colW = (gridWidth - (cols - 1) * GAP) / cols;
     const imgRatio = cfg().virtualImgRatio || 1;
-    const infoH = 36;
+    const infoH = cfg().virtualInfoH ?? 36;
     rowH = colW * imgRatio + infoH + 12 + GAP;
   }
 

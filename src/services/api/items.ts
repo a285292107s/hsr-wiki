@@ -1,6 +1,6 @@
 /** 物品 / 光锥 / 敌对物种加载器 */
 import { fetchJSON } from '../cache';
-import type { ItemDb, LocalItemList, LocalLightConeList, LocalMonsterList, LightConeDetail } from '../types';
+import type { ItemDb, LocalItemList, LocalLightConeList, LocalMonsterList, LightConeDetail, MonsterDetail } from '../types';
 import { LOCAL_DATA_BASE } from './base';
 import { singletonLoad } from './singleton';
 
@@ -31,6 +31,11 @@ export async function loadLocalItemDb(): Promise<ItemDb> {
 
 export function loadLocalMonsterList(): Promise<LocalMonsterList> {
   return fetchJSON<LocalMonsterList>(`${LOCAL_DATA_BASE}/monsters.json`);
+}
+
+/** 敌对物种详情（monsters/{id}.json，按 ID 按需加载不走单例） */
+export function loadLocalMonsterDetail(id: string): Promise<MonsterDetail> {
+  return fetchJSON<MonsterDetail>(`${LOCAL_DATA_BASE}/monsters/${id}.json`);
 }
 
 /** 光锥列表（共享单例：只请求一次，失败自动重置允许重试） */

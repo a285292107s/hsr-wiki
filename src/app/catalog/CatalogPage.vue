@@ -74,7 +74,11 @@ const filtered = computed<CatalogItem[]>(() => {
   const q = query.value.trim().toLowerCase();
   const af = activeFilters.value;
   return items.value.filter((item) => {
-    if (q && !(item.name || '').toLowerCase().includes(q)) return false;
+    if (q) {
+      /* searchText 增强：目录页可提供额外搜索面（如成就描述），与标题同源匹配 */
+      const haystack = `${item.name || ''}\n${item.searchText || ''}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
     for (const key of Object.keys(af)) {
       const want = af[key];
       if (!want) continue;

@@ -88,6 +88,21 @@ describe('数据加载', () => {
     expect(db['1001'].rarity).toBe('Rare');
     expect(db['23013'].item_figure_icon_path).toBe('');
   });
+
+  it('loadLocalMonsterDetail 按 ID 加载详情 JSON', async () => {
+    const api = await freshApi();
+    const fixture = {
+      id: 8013010, name: '虚卒·践踏者', icon: 'Monster_8013010',
+      figure: 'Monster_8013010', rank: 'Elite', camp: '反物质军团',
+      stance: 300, weak: ['Physical'], resist: { Fire: 0.2 },
+      intro: '介绍', stats: { hp: 1, atk: 2, def: 3, speed: 4 },
+      skills: [{ id: 801301001, name: '践踏', tag: '单攻' }],
+    };
+    const fetchMock = routeFetch({ 'monsters/8013010.json': fixture });
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(api.loadLocalMonsterDetail('8013010')).resolves.toEqual(fixture);
+    expect(String(fetchMock.mock.calls[0][0])).toContain('/monsters/8013010.json');
+  });
 });
 
 /* ─── Spine 双清单解析（official 优先，缺失/失效回退 nanoka） ─── */

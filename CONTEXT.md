@@ -137,6 +137,40 @@ _Avoid_: 强化标记、强化徽章
 ### 图片路径映射
 源数据图片路径（如 `SpriteOutput/AvatarIcon/Avatar/1001.png`）到目标相对路径（如 `icon/character/1001.png`）的映射规则，在转换工具中硬编码。
 
+## 终局内容
+
+### 终局内容（Endgame）
+四个高难玩法合集：忘却之庭、虚构叙事、末日幻影、异相仲裁。数据由 converter 的 `endgame.py` 从挑战配置表（ChallengeMazeConfig / ChallengeStoryMazeConfig / ChallengeBossMazeConfig / ChallengePeakConfig）转换，单页目录（模式为筛选选项） + 赛季详情页。
+_Avoid_: 深渊、挑战内容
+
+### 忘却之庭（Forgotten Hall）
+含「永屹之城遗秘」常驻 15 关（早期关单阶段、无 Floor 字段按 ID 升序取序号）与「混沌回忆」周期赛季（10 层，每层上下半场各 1-3 波）。赛季增益取分组表 MazeBuffID，层名如"赛季名其一"。
+_Avoid_: 混沌回忆（仅指周期赛季部分）
+
+### 虚构叙事（Pure Fiction）
+分数制玩法：每层有回合上限（TurnLimit）与通关分数线（ClearScore，当前统一 30000）；层级目标按分数档位（40000/50000/60000 分）。挑战目标走 ChallengeStoryTargetConfig 表。
+_Avoid_: 虚构叙事赛季增益名
+
+### 末日幻影（Apocalypse）
+**阶段制战斗**：每层 1-3 阶段，各阶段一个 Boss 形态（ChallengeBossMazeExtra 的 MonsterID1/2/3），非上下半场结构；部分层含 StageConfig 波次缺失的第 3 阶段。层级无官方层名（源数据 Name 为空），挑战目标走 ChallengeBossTargetConfig。
+_Avoid_: 上下半场（该词仅用于忘却之庭/虚构叙事）
+
+### 异相仲裁（Anomaly）
+每期 3 骑士试炼 + 1 王棋最终关（含「绝境」困难变体）；挑战目标走 BattleTargetConfig（Type=ChallengeTarget）。段位徽章系统（ChallengeBadgeConfig）：青铜/白银/黄金/彩钻四段，按期分组（期 4 起收录）。
+_Avoid_: 徽章奖励、段位
+
+### 星启模式（Starlit）
+三模式的独立进阶关卡：Tierce 表（ChallengeMazeTierce 等）记录常规最高难度关 ID（DLCKKJFMJOB）+ 星启附加关（HFIAAGAKFMD），3 节点敌方（节点 1/2 = 常规最高难度关上下半场，节点 3 = 星启附加关）。
+_Avoid_: 星启、进阶模式
+
+### 挑战目标（Challenge Target）
+赛季/层级的星数条件（如"获得40000分"），按模式分三张目标表（maze 6xx / story 2xxx / boss 3xxx 系列 ID 不冲突）；文本含 #N[i] 参数占位，param 经 fmtDesc 渲染。
+_Avoid_: 挑战任务、目标条件
+
+### 波次（Wave）
+StageConfig.MonsterList 的出场序列：每波为 {Monster0..N} 字典，波内可含重复敌人；EventIDList 多事件为顺序波次（候选事件拼接，wave 序号跨事件连续递增）。层级/peak 敌方带 wave 字段，前端按波分组展示"第 N 波"。
+_Avoid_: 回合、阶段（波次 ≠ 阶段）
+
 ## 动画资源
 
 ### Spine 动画源（Spine Source）

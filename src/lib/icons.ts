@@ -82,6 +82,13 @@ export function monsterIconUrl(iconPath: string | null | undefined): string {
   return base ? cdnUri('monstermiddleicon', `${base}.webp`) : '';
 }
 
+/** 敌对全身立绘：monsterfigure/{basename}.webp（ImagePath 末段；无立绘返回空串） */
+export function monsterFigureUrl(iconPath: string | null | undefined): string {
+  if (!iconPath) return '';
+  const base = iconPath.split('/').pop()?.replace(/\.png$/i, '') || '';
+  return base ? cdnUri('monsterfigure', `${base}.webp`) : '';
+}
+
 /** 货币战争 GridFight 图标：SpriteOutput/GridFight/Equipment/350101.png → CDN webp */
 export function gridFightIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
