@@ -9,7 +9,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》游戏数据 Wiki，
 ## 常用命令
 
 ```bash
-# 安装依赖（需 Node 22+；本地 packageManager 为 pnpm 11，CI 固定 pnpm 9）
+# 安装依赖（需 Node 22+；本地与 CI 均使用 packageManager 指定的 pnpm 11）
 pnpm install
 
 # 本地开发 → http://localhost:5173/
