@@ -142,12 +142,14 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
         if (idx >= items.length) break;
         const delay = calcRevealDelay(r, c, startRow, endRow, buffer, baseRow, rowDelay, direction);
         const left = c * colW;
+        /* 固定单元格高度 = 行高：卡片 height:100% 等高填充（如成就卡），
+           无 height:100% 的卡片（物品/怪物）保持内容高度、视觉不变 */
         out.push({
           key: idx,
           html: cfg().renderCard(items[idx], idx),
           style:
             `position:absolute;top:${r * rowH}px;left:${left.toFixed(2)}%;width:${colW.toFixed(2)}%;` +
-            `padding:0 ${GAP / 2}px ${GAP}px ${GAP / 2}px;box-sizing:border-box;--reveal-delay:${delay}ms;`,
+            `height:${rowH.toFixed(1)}px;padding:0 ${GAP / 2}px ${GAP}px ${GAP / 2}px;box-sizing:border-box;--reveal-delay:${delay}ms;`,
         });
       }
     }

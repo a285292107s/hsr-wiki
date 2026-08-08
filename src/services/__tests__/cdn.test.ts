@@ -11,6 +11,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CDN } from '../../lib/constants';
 import {
   CDN_CATEGORIES,
+  CDN_STALL_TIMEOUT_MS,
+  JS_DELIVR_BASE,
   NANOKA_HUD,
   cdnFallbackFromPrimary,
   cdnImgFallbackAttr,
@@ -34,7 +36,7 @@ describe('nanokaUrl / cdnUri / cdnRawUrl', () => {
   });
 
   it('cdnUri 返回首选源（当前全部走 nanoka）', () => {
-    expect(cdnUri('avatarshopicon', '1001.webp')).toBe(`${BASE}/avatarshopicon/1001.webp`);
+    expect(cdnUri('bufficon', 'IconBuffAttackUp.webp')).toBe(`${BASE}/bufficon/IconBuffAttackUp.webp`);
   });
 
   it('cdnRawUrl 拼接任意原始子路径（分类子路径不固定的场景）', () => {
@@ -43,18 +45,49 @@ describe('nanokaUrl / cdnUri / cdnRawUrl', () => {
 });
 
 describe('resolveCdnUri 双源解析', () => {
-  it('未声明 official 的分类：仅 nanoka 首选，无回退', () => {
-    const r = resolveCdnUri('skillicons', 'abc.webp');
-    expect(r.primary).toBe(`${BASE}/skillicons/abc.webp`);
+  it('jsDelivr 注册分类：jsDelivr 首选 + nanoka 回退', () => {
+    const r = resolveCdnUri('lightconemediumicon', '23000.webp');
+    expect(r.primary).toBe(`${JS_DELIVR_BASE}/lightconemediumicon/23000.png`);
+    expect(r.fallback).toBe(`${BASE}/lightconemediumicon/23000.webp`);
+    expect(r.source).toBe('official');
+  });
+
+  it('jsDelivr 映射分类：element 大小写转换', () => {
+    expect(resolveCdnUri('element', 'fire.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/icondamagetype/IconDamageTypeFire.png`);
+  });
+
+  it('jsDelivr 映射分类：pathicon 官方拼写差异（Priest→Pirest）', () => {
+    expect(resolveCdnUri('pathicon', 'priest.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/professioniconmiddle/IconProfessionPirestMiddle.png`);
+    expect(resolveCdnUri('pathicon', 'elation.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/professioniconmiddle/IconProfessionJoyMiddle.png`);
+  });
+
+  it('jsDelivr 映射分类：skillicons 按角色 id 分目录', () => {
+    expect(resolveCdnUri('skillicons', 'SkillIcon_1001_Normal.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1001/SkillIcon_1001_Normal.png`);
+  });
+
+  it('jsDelivr 同构直迁分类：monstermiddleicon / relicfigures', () => {
+    expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/monstermiddleicon/Monster_1002011.png`);
+    expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/relicfigures/IconRelic_101_1.png`);
+  });
+
+  it('未注册 jsDelivr 的分类：仅 nanoka 首选，无回退', () => {
+    const r = resolveCdnUri('bufficon', 'IconBuffAttackUp.webp');
+    expect(r.primary).toBe(`${BASE}/bufficon/IconBuffAttackUp.webp`);
     expect(r.fallback).toBe('');
     expect(r.source).toBe('nanoka');
   });
 
   it('声明 official 但 OFFICIAL_BASE 为空 → 仍走 nanoka（守卫：官方源未启用）', () => {
-    const spec = { nanoka: 'skillicons', official: 'skillicon' };
-    const r = resolveCdnUri('skillicons', 'abc.webp', spec);
+    const spec = { nanoka: 'bufficon', official: 'bufficon' };
+    const r = resolveCdnUri('bufficon', 'IconBuffAttackUp.webp', spec);
     expect(r.source).toBe('nanoka');
-    expect(r.primary).toBe(`${BASE}/skillicons/abc.webp`);
+    expect(r.primary).toBe(`${BASE}/bufficon/IconBuffAttackUp.webp`);
     expect(r.fallback).toBe('');
   });
 
@@ -67,15 +100,31 @@ describe('resolveCdnUri 双源解析', () => {
     });
     vi.resetModules();
     const { resolveCdnUri: resolveWithOfficial } = await import('../cdn/resolve');
-    const spec = { nanoka: 'skillicons', official: 'skillicons' };
-    const r = resolveWithOfficial('skillicons', 'abc.webp', spec);
+    const spec = { nanoka: 'bufficon', official: 'bufficon' };
+    const r = resolveWithOfficial('bufficon', 'IconBuffAttackUp.webp', spec);
     expect(r.source).toBe('official');
-    expect(r.primary).toBe(`${OFF_BASE}/skillicons/abc.webp`);
-    expect(r.fallback).toBe(`${BASE}/skillicons/abc.webp`);
+    expect(r.primary).toBe(`${OFF_BASE}/bufficon/IconBuffAttackUp.webp`);
+    expect(r.fallback).toBe(`${BASE}/bufficon/IconBuffAttackUp.webp`);
   });
 });
 
 describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () => {
+  it('jsDelivr 主源反查 nanoka 回退（lightconemediumicon）', () => {
+    const src = `${JS_DELIVR_BASE}/lightconemediumicon/23000.png`;
+    expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/lightconemediumicon/23000.webp`);
+    expect(cdnImgFallbackAttr(src)).toBe(` data-cdn-fallback="${BASE}/lightconemediumicon/23000.webp"`);
+  });
+
+  it('jsDelivr 主源反查 nanoka 回退（element 大小写还原）', () => {
+    const src = `${JS_DELIVR_BASE}/icondamagetype/IconDamageTypeFire.png`;
+    expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/element/fire.webp`);
+  });
+
+  it('jsDelivr 主源反查 nanoka 回退（pathicon 拼写还原）', () => {
+    const src = `${JS_DELIVR_BASE}/professioniconmiddle/IconProfessionPirestMiddle.png`;
+    expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/pathicon/priest.webp`);
+  });
+
   it('nanoka 主源无回退', () => {
     expect(cdnFallbackFromPrimary(`${BASE}/skillicons/abc.webp`)).toBe('');
   });
@@ -223,6 +272,38 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     off();
     img.dispatchEvent(new Event('error', { bubbles: true }));
     expect(img.src).toBe('https://primary.example/x.webp');
+    img.remove();
+  });
+
+  it('挂起超时：img 长时间未 complete → 走同一回退链（替换 fallback）', async () => {
+    vi.useFakeTimers();
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    // happy-dom 的 img.complete 恒为 true，用 defineProperty 模拟真实浏览器的挂起态
+    Object.defineProperty(img, 'complete', { configurable: true, value: false });
+    img.setAttribute('data-cdn-fallback', 'https://fb.example/x.webp');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS + 100);
+    expect(img.src).toBe('https://fb.example/x.webp');
+    expect(img.hasAttribute('data-cdn-fallback')).toBe(false);
+    off();
+    img.remove();
+  });
+
+  it('挂起超时：无回退属性的首选源 img → 标记 data-cdn-down 降级', async () => {
+    vi.useFakeTimers();
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    Object.defineProperty(img, 'complete', { configurable: true, value: false });
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS + 100);
+    expect(img.dataset.cdnDown).toBe('1');
+    // 慢响应自愈：最终 load 成功 → 清除降级标记恢复显示
+    img.dispatchEvent(new Event('load'));
+    expect(img.hasAttribute('data-cdn-down')).toBe(false);
+    off();
     img.remove();
   });
 });

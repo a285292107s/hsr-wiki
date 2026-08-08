@@ -160,17 +160,20 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
 
 
 def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dict]:
-    """目标表 → {ID: {text, param}}（挑战目标描述 + 参数，三模式通用）。
+    """目标表 → {ID: {text, param, type}}（挑战目标描述 + 参数 + 类型，三模式通用）。
 
     text 经 clean_text 清洗富文本标签，保留 #N[i] 占位符（参数另行输出，
-    前端 fmtDesc 替换渲染）；param 取 ChallengeTargetParam1（缺省 None）。
+    前端 fmtDesc 替换渲染）；param 取 ChallengeTargetParam1（缺省 None）；
+    type 为 ChallengeTargetType（TOTAL_SCORE 分数档位 / ROUNDS_LEFT 剩余轮数 /
+    DEAD_AVATAR 减员限制，前端按类型展示徽标——星启目标是整场挑战的评价条件，
+    与 3 个节点（敌方配置）正交，非节点级条件）。
     上游个别目标缺 param（如 163 系列），按同文本 Hash 的其他记录参数补全。
     """
     data = load_json(EXCEL_DIR / filename)
     out: dict[int, dict] = {}
     # 文本 Hash → 首个非 None 参数（供缺失记录补全）
     hash_params: dict[int, int] = {}
-    raw: list[tuple[int, str, int | None, int | None]] = []
+    raw: list[tuple[int, str, int | None, int | None, str]] = []
     for rec in data:
         tid = rec.get("ID")
         if tid is None:
@@ -181,13 +184,17 @@ def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dic
         name_ref = rec.get("ChallengeTargetName", {}) or {}
         h = name_ref.get("Hash") if isinstance(name_ref, dict) else None
         p = rec.get("ChallengeTargetParam1")
-        raw.append((tid, desc, h, p))
+        t = rec.get("ChallengeTargetType", "") or ""
+        raw.append((tid, desc, h, p, t))
         if p is not None and h is not None and h not in hash_params:
             hash_params[h] = p
-    for tid, desc, h, p in raw:
+    for tid, desc, h, p, t in raw:
         if p is None and h is not None and h in hash_params:
             p = hash_params[h]
-        out[tid] = {"text": desc, "param": p}
+        entry: dict = {"text": desc, "param": p}
+        if t:
+            entry["type"] = t
+        out[tid] = entry
     return out
 
 
@@ -477,7 +484,7 @@ def _load_tierce(
                 "countdown": rec.get("GNOOAGPBNLD", 0) or 0,
                 "score": rec.get("IDBJENCBJHM"),
                 "targets": [
-                    {"text": targets[t]["text"], "param": targets[t]["param"]}
+                    {k: v for k, v in targets[t].items() if k in ("text", "param", "type")}
                     for t in tids if t in targets
                 ],
                 "monsters": node3,
@@ -560,6 +567,35 @@ def _season_monsters(
     return out
 
 
+# 敌方模板分类权重（BigBoss > LittleBoss > Elite > MinionLv2 > Minion）
+_RANK_ORDER = {
+    "BigBoss": 5, "LittleBoss": 4, "Elite": 3, "MinionLv2": 2, "Minion": 1,
+}
+
+
+def _final_monsters(pool: list[dict], fallback: list[dict], n: int = 4) -> list[dict]:
+    """卡片代表阵容：敌方池按 rank 优先级去重取前 n。
+
+    目录卡片展示赛季终点挑战的真实阵容（Boss + 精英护卫，如「星核猎手」卡芙卡 / 可可利亚），
+    而非第 1 层先出现的小怪；池为空（无层级数据）时按全赛季 fallback 回退。
+    输出与 _season_monsters 同构（轻量字段，无 wave）。
+    """
+    pool = pool or fallback
+    seen: set[str] = set()
+    out: list[dict] = []
+    for m in sorted(
+        pool, key=lambda x: _RANK_ORDER.get(str(x.get("rank", "")), 0), reverse=True
+    ):
+        key = str(m.get("tpl") or m.get("id"))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({k: v for k, v in m.items() if k != "wave"})
+        if len(out) >= n:
+            break
+    return out
+
+
 def _load_boss_phases() -> dict[int, list[int]]:
     """ChallengeBossMazeExtra → {层记录 ID: [阶段敌人 MonsterID 列表]}（阶段制）。
 
@@ -635,7 +671,7 @@ def _season_floors(
         tids = r.get("ChallengeTargetID", []) or []
         if tids:
             node["targets"] = [
-                {"text": targets[t]["text"], "param": targets[t]["param"]}
+                {k: v for k, v in targets[t].items() if k in ("text", "param", "type")}
                 for t in tids if t in targets
             ]
         out.append(node)
@@ -735,6 +771,15 @@ def _group_seasons(
                 for bid in sub_buffs.get(gid, []) if bid in buffs
             ]
         entry["monsters"] = _season_monsters(recs, monsters, stages)
+        # 卡片代表阵容：最终层（最高层）上下半场敌方按 rank 去重取前 4
+        # （目录卡片展示赛季终点真实阵容——Boss + 精英护卫，而非第 1 层先出现的小怪）
+        floors = entry.get("floor_details") or []
+        final_pool: list[dict] = []
+        if floors:
+            s1 = (floors[-1].get("stage1") or {}).get("monsters") or []
+            s2 = (floors[-1].get("stage2") or {}).get("monsters") or []
+            final_pool = list(s1) + list(s2)
+        entry["final_monsters"] = _final_monsters(final_pool, entry["monsters"])
         entry["targets"] = _season_targets(recs, targets)
         # 虚构叙事回合上限：ChallengeStoryMazeExtra.TurnLimit 覆盖 countdown
         if turns and str(gid) in turns:
@@ -897,6 +942,9 @@ def _peak_seasons() -> dict:
                 if int(m["id"]) not in seen:
                     seen.add(int(m["id"]))
                     all_mons.append({k: v for k, v in m.items() if k != "wave"})
+        # 卡片代表阵容：王棋最终关（无则最后一关）敌方按 rank 去重取前 4
+        king = next((l for l in levels if l.get("kind") == "king"), None)
+        final_pool = ((king or levels[-1]).get("monsters") or []) if levels else []
         result[str(gid)] = {
             "id": str(gid),
             "zh": resolve_text(g.get("Title", {})),
@@ -911,6 +959,7 @@ def _peak_seasons() -> dict:
             "damage_types": sorted(dmg),
             "levels": levels,
             "monsters": all_mons,
+            "final_monsters": _final_monsters(final_pool, all_mons),
             "buffs": all_buffs,
         }
         # 段位徽章：ChallengeBadgeConfig 按期分组（Bronze/Silver/Gold/Ultra）

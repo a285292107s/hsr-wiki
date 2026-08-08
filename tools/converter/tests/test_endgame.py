@@ -135,18 +135,20 @@ class TestAuxTables:
         assert "speed" not in out
 
     def test_load_targets_clean(self, monkeypatch):
+        """目标表：文本清洗 + 参数补全 + 类型输出（ChallengeTargetType）。"""
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"ID": 251, "ChallengeTargetName": {"Hash": 1},
-             "ChallengeTargetParam1": 20},
-            {"ID": 252, "ChallengeTargetName": {"Hash": 2}},  # 无参数 → param None
-            {"ID": 253, "ChallengeTargetName": {"Hash": 1}},  # 同 Hash 缺参数 → 补全 20
+             "ChallengeTargetParam1": 20, "ChallengeTargetType": "ROUNDS_LEFT"},
+            {"ID": 252, "ChallengeTargetName": {"Hash": 2}},  # 无参数 → param None；无类型 → 不输出
+            {"ID": 253, "ChallengeTargetName": {"Hash": 1},
+             "ChallengeTargetType": "ROUNDS_LEFT"},  # 同 Hash 缺参数 → 补全 20
             {"ID": 0},  # 无名称 → 跳过
         ])
         monkeypatch.setattr(eg, "clean_text", lambda s: f"cleaned:{s}" if s else "")
         out = eg._load_targets()
-        assert out[251] == {"text": "cleaned:名1", "param": 20}
+        assert out[251] == {"text": "cleaned:名1", "param": 20, "type": "ROUNDS_LEFT"}
         assert out[252] == {"text": "cleaned:名2", "param": None}
-        assert out[253] == {"text": "cleaned:名1", "param": 20}  # 同 Hash 补全
+        assert out[253] == {"text": "cleaned:名1", "param": 20, "type": "ROUNDS_LEFT"}  # 同 Hash 补全
         assert 0 not in out
 
     def test_load_group_names(self, monkeypatch):
@@ -243,10 +245,10 @@ class TestTierce:
             return []
         monkeypatch.setattr(eg, "load_json", fake_load)
         targets = {
-            601: {"text": "剩余#1[i]轮", "param": 15},
-            602: {"text": "剩余#1[i]轮", "param": 30},
-            4001: {"text": "获得#1[i]分", "param": 60000},
-            4000: {"text": "获得#1[i]分", "param": 99000},
+            601: {"text": "剩余#1[i]轮", "param": 15, "type": "ROUNDS_LEFT"},
+            602: {"text": "剩余#1[i]轮", "param": 30, "type": "ROUNDS_LEFT"},
+            4001: {"text": "获得#1[i]分", "param": 60000, "type": "TOTAL_SCORE"},
+            4000: {"text": "获得#1[i]分", "param": 99000, "type": "TOTAL_SCORE"},
         }
         monsters = {5013040: {"name": "先锋", "icon": "Monster_5013040",
                                "weak": [], "resist": {}, "rank": "Elite"},
@@ -263,8 +265,8 @@ class TestTierce:
             "countdown": 45,
             "score": None,
             "level": 95,  # 星启 Boss 战等级（StageConfig.Level）
-            "targets": [{"text": "剩余#1[i]轮", "param": 15},
-                         {"text": "剩余#1[i]轮", "param": 30}],
+            "targets": [{"text": "剩余#1[i]轮", "param": 15, "type": "ROUNDS_LEFT"},
+                         {"text": "剩余#1[i]轮", "param": 30, "type": "ROUNDS_LEFT"}],
             # StageConfig 波次：波 1 双怪 + 波 2 Boss（wave 序号）
             "monsters": [
                 {"id": "5013040", "name": "先锋", "icon": "Monster_5013040",
@@ -297,8 +299,8 @@ class TestTierce:
         assert out["2024"]["monsters"] == []
         # 满分档目标（GNGENMHNLAH=4000，99000 分）并入 targets 末尾；通关奖励输出 id+num
         assert out["2024"]["targets"] == [
-            {"text": "获得#1[i]分", "param": 60000},
-            {"text": "获得#1[i]分", "param": 99000},
+            {"text": "获得#1[i]分", "param": 60000, "type": "TOTAL_SCORE"},
+            {"text": "获得#1[i]分", "param": 99000, "type": "TOTAL_SCORE"},
         ]
         assert out["2024"]["rewards"] == [
             {"id": 122002, "num": 0},
@@ -479,7 +481,7 @@ class TestGroupSeasons:
                    3030147: {"name": "追加攻击", "desc": "积累 #1[i] 点战意值", "param_list": [8]}},
             monsters={1003010: {"name": "虚卒", "icon": "Monster_1003010",
                                  "weak": ["Physical"], "resist": {}, "rank": "Elite"}},
-            targets={251: {"text": "剩余#1[i]轮以上", "param": 10}},
+            targets={251: {"text": "剩余#1[i]轮以上", "param": 10, "type": "ROUNDS_LEFT"}},
             sub_buffs={1001: [3030147]},
         )
         entry = out["1001"]
@@ -495,7 +497,12 @@ class TestGroupSeasons:
         assert entry["sub_buffs"] == [{"id": 3030147, "name": "追加攻击", "desc": "积累 #1[i] 点战意值", "param_list": [8]}]
         assert entry["monsters"] == [{"id": "1003010", "name": "虚卒", "icon": "Monster_1003010",
                                        "weak": ["Physical"], "resist": {}, "rank": "Elite"}]
-        assert entry["targets"] == [{"text": "剩余#1[i]轮以上", "param": 10}]
+        # 卡片代表阵容：最终层（最高层）敌方按 rank 去重取前 4（去 wave，与 monsters 同构）
+        assert entry["final_monsters"] == [{"id": "1003010", "name": "虚卒",
+                                             "icon": "Monster_1003010",
+                                             "weak": ["Physical"], "resist": {},
+                                             "rank": "Elite"}]
+        assert entry["targets"] == [{"text": "剩余#1[i]轮以上", "param": 10, "type": "ROUNDS_LEFT"}]
         # 逐层详情：按 ID 升序，层级增益/目标/波次敌方随层输出
         assert entry["floor_details"] == [
             {"floor": 1, "name": "名2", "countdown": 40,
@@ -507,7 +514,7 @@ class TestGroupSeasons:
                  {"id": "1003010", "name": "虚卒", "icon": "Monster_1003010",
                   "weak": ["Physical"], "resist": {}, "rank": "Elite", "wave": 1}]},
              "stage2": {"damage": [], "monsters": []},
-             "targets": [{"text": "剩余#1[i]轮以上", "param": 10}]},
+             "targets": [{"text": "剩余#1[i]轮以上", "param": 10, "type": "ROUNDS_LEFT"}]},
         ]
 
     def test_story_turn_limit_overrides_countdown(self, monkeypatch):
@@ -532,6 +539,7 @@ class TestGroupSeasons:
         assert entry["damage_types"] == []
         assert entry["buffs"] == []
         assert entry["monsters"] == []
+        assert entry["final_monsters"] == []
         assert entry["targets"] == []
 
     def test_group_name_priority(self, monkeypatch):
@@ -710,6 +718,12 @@ class TestPeakSeasons:
             {"id": "1003010", "name": "名30", "icon": "Monster_1003010",
              "weak": ["Physical"], "resist": {"Fire": 0.2}, "rank": "Elite",
              "camp": "名40", "stance": 240},
+            {"id": "2002010", "name": "名31", "icon": "",
+             "weak": [], "resist": {}, "rank": "MinionLv2",
+             "camp": "", "stance": 0},
+        ]
+        # 卡片代表阵容：王棋最终关敌方（2002010 MinionLv2）按 rank 取前 4
+        assert entry["final_monsters"] == [
             {"id": "2002010", "name": "名31", "icon": "",
              "weak": [], "resist": {}, "rank": "MinionLv2",
              "camp": "", "stance": 0},

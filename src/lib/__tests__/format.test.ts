@@ -4,6 +4,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { CDN } from '../constants';
+import { JS_DELIVR_BASE } from '../../services/cdn';
 import { NkError } from '../errors';
 import {
   escHtml, gameTagsToHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtToughness,
@@ -266,42 +267,45 @@ describe('URL 构建', () => {
     expect(memospriteId('1005', null)).toBe('11005');
   });
   it('skillIconUrl：按类型键拼接；Servant 用忆灵 ID；缺失类型回退映射', () => {
-    expect(skillIconUrl(sk({ type: 'Normal' }), '1005', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1005_Normal.webp`);
-    expect(skillIconUrl(sk({ type: 'BPSkill' }), '1005', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1005_BP.webp`);
+    const jd = (id: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/SkillIcon_${id}_${key}.png`;
+    expect(skillIconUrl(sk({ type: 'Normal' }), '1005', null)).toBe(jd('1005', 'Normal'));
+    expect(skillIconUrl(sk({ type: 'BPSkill' }), '1005', null)).toBe(jd('1005', 'BP'));
     const d = baseChar();
     d.memosprite = { icon: 'SpriteOutput/ServantIconTeam/11415B.png' };
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11415_Servant.webp`);
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d)).toBe(jd('11415', 'Servant'));
     // Assist CDN 无独立图标资产，回退终结技图标
-    expect(skillIconUrl(sk({ type: 'Assist', type_name: '助战技' }), '1005', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1005_Ultra.webp`);
+    expect(skillIconUrl(sk({ type: 'Assist', type_name: '助战技' }), '1005', null)).toBe(jd('1005', 'Ultra'));
     // MazeNormal（秘技普攻）与普攻共用图标
-    expect(skillIconUrl(sk({ type: 'MazeNormal', type_name: '' }), '1508', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1508_Normal.webp`);
+    expect(skillIconUrl(sk({ type: 'MazeNormal', type_name: '' }), '1508', null)).toBe(jd('1508', 'Normal'));
     // ElationDamage（欢愉技）对应 CDN 键名 Elation
-    expect(skillIconUrl(sk({ type: 'ElationDamage', type_name: '欢愉技' }), '1501', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1501_Elation.webp`);
+    expect(skillIconUrl(sk({ type: 'ElationDamage', type_name: '欢愉技' }), '1501', null)).toBe(jd('1501', 'Elation'));
     // type 为 null 的天赋技能回退 type_name 反查
-    expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_1508_Passive.webp`);
+    expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(jd('1508', 'Passive'));
   });
   it('skillIconUrl：忆灵技图标后缀按 ID 映射（CDN 命名不统一）', () => {
+    const jd = (id: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/SkillIcon_${id}_${key}.png`;
     const mk = (icon: string) => { const d = baseChar(); d.memosprite = { icon }; return d; };
     // 11402 → Servant01
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11402_Servant01.webp`);
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(jd('11402', 'Servant01'));
     // 11413 → Servant03
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11413_Servant03.webp`);
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(jd('11413', 'Servant03'));
     // 11415 → 无后缀（默认）
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', mk('SpriteOutput/ServantIconTeam/11415B.png'))).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11415_Servant.webp`);
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', mk('SpriteOutput/ServantIconTeam/11415B.png'))).toBe(jd('11415', 'Servant'));
     // ServantPassive 不受后缀映射影响
-    expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_11413_ServantPassive.webp`);
+    expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(jd('11413', 'ServantPassive'));
   });
   it('skillIconUrl：开拓者偶数变体回退奇数 ID 图标', () => {
-    expect(skillIconUrl(sk({ type: 'Normal' }), '8002', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8001_Normal.webp`);
-    expect(skillIconUrl(sk({ type: 'BPSkill' }), '8004', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8003_BP.webp`);
-    expect(skillIconUrl(sk({ type: 'Ultra' }), '8006', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8005_Ultra.webp`);
-    expect(skillIconUrl(sk({ type: 'Maze' }), '8008', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8007_Maze.webp`);
+    const jd = (id: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/SkillIcon_${id}_${key}.png`;
+    expect(skillIconUrl(sk({ type: 'Normal' }), '8002', null)).toBe(jd('8001', 'Normal'));
+    expect(skillIconUrl(sk({ type: 'BPSkill' }), '8004', null)).toBe(jd('8003', 'BP'));
+    expect(skillIconUrl(sk({ type: 'Ultra' }), '8006', null)).toBe(jd('8005', 'Ultra'));
+    expect(skillIconUrl(sk({ type: 'Maze' }), '8008', null)).toBe(jd('8007', 'Maze'));
     // 奇数 ID 不受影响
-    expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(`${CDN}/assets/hsr/skillicons/SkillIcon_8001_Normal.webp`);
+    expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(jd('8001', 'Normal'));
   });
   it('eidolonIconUrl / avatarDrawCardUrl', () => {
     expect(eidolonIconUrl('1005', 1)).toBe(`${CDN}/assets/hsr/rank/_dependencies/textures/1005/1005_Rank_1.webp`);
-    expect(avatarDrawCardUrl('1005')).toBe(`${CDN}/assets/hsr/avatardrawcard/1005.webp`);
+    expect(avatarDrawCardUrl('1005')).toBe(`${JS_DELIVR_BASE}/avatardrawcard/1005.png`);
   });
 });
 
@@ -314,7 +318,7 @@ describe('itemName / itemIconUrl', () => {
     expect(itemName(999, nameCache, itemDb)).toBe('#999');
   });
   it('itemIconUrl：解析末尾数字 png', () => {
-    expect(itemIconUrl('ItemIcon/12345.png')).toBe(`${CDN}/assets/hsr/itemfigures/12345.webp`);
+    expect(itemIconUrl('ItemIcon/12345.png')).toBe(`${JS_DELIVR_BASE}/itemfigures/12345.png`);
     expect(itemIconUrl('abc.png')).toBe('');
     expect(itemIconUrl(null)).toBe('');
   });

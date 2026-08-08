@@ -17,38 +17,46 @@
 ═══════════════════════════════════════════ */
 .nk-eg-grid { --nk-grid-min: 340px; --nk-grid-gap: 14px; }
 .nk-eg-card { --eg-color: var(--primary); position: relative; display: flex; align-items: stretch; gap: 16px; padding: 16px; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: var(--nk-radius-card); cursor: pointer; text-decoration: none; transition: transform 0.28s var(--ease), border-color 0.28s, box-shadow 0.28s, background 0.28s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 18ms), 600ms); }
-/* 档案氛围层：模式色天光 + 细扫描线（档案纸张质感） */
+/* 档案氛围层：模式色天光（弱化至 6%，四模式混排不喧宾）+ 细扫描线 */
 .nk-eg-card::before { content: ''; position: absolute; inset: 0; background:
-  radial-gradient(ellipse 90% 130% at 12% 0%, color-mix(in srgb, var(--eg-color) 9%, transparent) 0%, transparent 62%),
+  radial-gradient(ellipse 90% 130% at 12% 0%, color-mix(in srgb, var(--eg-color) 6%, transparent) 0%, transparent 62%),
   repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,0.016) 3px 4px);
   pointer-events: none; }
-/* 档案装帧角标（右上） */
-.nk-eg-card::after { content: ''; position: absolute; top: 9px; right: 9px; width: 13px; height: 13px; border-top: 1px solid color-mix(in srgb, var(--eg-color) 40%, transparent); border-right: 1px solid color-mix(in srgb, var(--eg-color) 40%, transparent); opacity: 0.55; transition: opacity 0.25s, border-color 0.25s; pointer-events: none; }
+/* 档案装帧角标（右上；弱化至 26%） */
+.nk-eg-card::after { content: ''; position: absolute; top: 9px; right: 9px; width: 13px; height: 13px; border-top: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); border-right: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); opacity: 0.5; transition: opacity 0.25s, border-color 0.25s; pointer-events: none; }
 
 /* 铭牌：模式徽记 + 星启/最终层标识（弱点已移除） */
-.nk-eg-card__plate { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 88px; min-height: 96px; flex-shrink: 0; background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 13%, color-mix(in srgb, var(--blk-900) 62%, transparent)) 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 100%); border: 1px solid color-mix(in srgb, var(--eg-color) 32%, transparent); border-radius: 8px; transition: border-color 0.28s, background 0.28s, box-shadow 0.28s; }
-.nk-eg-card__plate::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 7px; height: 1px; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--eg-color) 45%, transparent) 50%, transparent 100%); opacity: 0.6; }
-.nk-eg-card__emblem { width: 28px; height: 28px; color: color-mix(in srgb, var(--eg-color) 74%, var(--text2)); filter: drop-shadow(0 0 7px color-mix(in srgb, var(--eg-color) 30%, transparent)); transition: color 0.28s, filter 0.28s; }
+/* 铭牌：模式色身份锚点（静态弱化，hover 时身份浮现） */
+.nk-eg-card__plate { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 88px; min-height: 96px; flex-shrink: 0; background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 8%, color-mix(in srgb, var(--blk-900) 62%, transparent)) 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 100%); border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent); border-radius: 8px; transition: border-color 0.28s, background 0.28s, box-shadow 0.28s; }
+.nk-eg-card__plate::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 7px; height: 1px; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--eg-color) 30%, transparent) 50%, transparent 100%); opacity: 0.6; }
+.nk-eg-card__emblem { width: 28px; height: 28px; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); transition: color 0.28s, filter 0.28s; }
 .nk-eg-card__emblem svg { width: 100%; height: 100%; }
+/* 赛季页签图标（TabIcon）：absolute 覆盖 SVG 徽记，不透明深色底板遮挡下层；加载失败隐藏后露出徽记 */
+.nk-eg-card__art {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  background: var(--blk-800);
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
 /* 铭牌底部徽标：星启模式 / 最终层标识 */
 .nk-eg-card__plate-badge { display: flex; align-items: center; justify-content: center; min-height: 14px; }
+/* 铭牌徽标（星启 / 骑士·王棋）：与详情页 stagelabel 同配方，模式色收敛至铭牌内 */
 .nk-eg-card__tier {
   font-family: var(--font-hud);
   font-size: 0.5rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: var(--eg-color);
+  color: color-mix(in srgb, var(--eg-color) 78%, #fff);
   padding: 1px 7px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--eg-color) 46%, transparent);
-  background: color-mix(in srgb, var(--eg-color) 12%, transparent);
-  white-space: nowrap;
-}
-.nk-eg-card__final {
-  font-family: var(--font-hud);
-  font-size: 0.46rem;
-  letter-spacing: 0.1em;
-  color: var(--text3);
+  border: 1px solid color-mix(in srgb, var(--eg-color) 32%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 8%, transparent);
   white-space: nowrap;
 }
 
@@ -57,11 +65,6 @@
 /* 头部：名称 + 状态徽章 */
 .nk-eg-card__head { display: flex; align-items: flex-start; gap: 10px; }
 .nk-eg-card__name { flex: 1; min-width: 0; font-size: 0.95rem; font-weight: 700; line-height: 1.4; color: var(--text-bright); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color 0.2s; }
-/* 弱点 + HUD 统计行（弱点已上移至铭牌，本行仅统计） */
-.nk-eg-card__meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 22px; }
-/* 层数/阶段/回合 HUD 统计 */
-.nk-eg-card__stat { margin-left: auto; font-family: var(--font-hud); font-size: 0.56rem; letter-spacing: 0.06em; color: var(--text3); white-space: nowrap; }
-
 /* 日期行（无日期时整行隐藏） */
 .nk-eg-card__daterow { display: flex; align-items: center; }
 .nk-eg-card__date { font-size: 0.6rem; letter-spacing: 0.02em; color: var(--text3); white-space: nowrap; }
@@ -69,13 +72,13 @@
 /* 数据行：标签 + 内容（增益 / 敌方） */
 .nk-eg-card__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .nk-eg-card__label { flex-shrink: 0; font-size: 0.55rem; font-weight: 600; letter-spacing: 0.14em; color: var(--text3); padding: 2px 6px; border-radius: 4px; background: color-mix(in srgb, var(--blk-900) 55%, transparent); border: 1px solid var(--border); }
-/* 增益胶囊（模式色描边） */
+/* 增益胶囊：内容区数据回归中性（模式色仅存铭牌身份锚点） */
 .nk-eg-card__buffs { display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; min-width: 0; }
-.nk-eg-card__buff { font-size: 0.58rem; line-height: 1.5; padding: 1px 8px; border-radius: 999px; color: color-mix(in srgb, var(--eg-color) 80%, #fff); background: color-mix(in srgb, var(--eg-color) 10%, transparent); border: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.nk-eg-card__buff { font-size: 0.58rem; line-height: 1.5; padding: 1px 8px; border-radius: 999px; color: var(--text2); background: color-mix(in srgb, var(--blk-900) 46%, transparent); border: 1px solid var(--line-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
 /* 敌方头像行 */
 .nk-eg-card__monsters { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-.nk-eg-card__mon { width: 26px; height: 26px; border-radius: 50%; background: color-mix(in srgb, var(--blk-900) 72%, transparent); border: 1px solid color-mix(in srgb, var(--eg-color) 28%, transparent); object-fit: cover; transition: transform 0.25s var(--ease), border-color 0.25s; }
-.nk-eg-card__mon:hover { transform: scale(1.12); border-color: color-mix(in srgb, var(--eg-color) 62%, transparent); z-index: 2; }
+.nk-eg-card__mon { width: 26px; height: 26px; border-radius: 50%; background: color-mix(in srgb, var(--blk-900) 72%, transparent); border: 1px solid var(--border); object-fit: cover; transition: transform 0.25s var(--ease), border-color 0.25s; }
+.nk-eg-card__mon:hover { transform: scale(1.12); border-color: color-mix(in srgb, var(--eg-color) 48%, transparent); z-index: 2; }
 .nk-eg-card__more { font-family: var(--font-hud); font-size: 0.52rem; letter-spacing: 0.06em; color: var(--text3); white-space: nowrap; }
 
 /* 状态徽章（头部右侧） */
@@ -92,12 +95,12 @@
 
 /* ── hover（仅精细指针设备；translateY 抬升，不引入 3D 旋转，文本卡更稳） ── */
 @media (hover: hover) and (pointer: fine) {
-  .nk-eg-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--eg-color) 48%, transparent); box-shadow: 0 12px 30px rgba(0,0,0,0.42), 0 0 18px color-mix(in srgb, var(--eg-color) 13%, transparent); }
-  .nk-eg-card:hover::after { opacity: 1; border-color: color-mix(in srgb, var(--eg-color) 78%, transparent); }
-  .nk-eg-card:hover .nk-eg-card__plate { border-color: color-mix(in srgb, var(--eg-color) 62%, transparent); background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 20%, color-mix(in srgb, var(--blk-900) 62%, transparent)) 0%, color-mix(in srgb, var(--blk-900) 86%, transparent) 100%); }
-  .nk-eg-card:hover .nk-eg-card__emblem { color: var(--eg-color); filter: drop-shadow(0 0 8px color-mix(in srgb, var(--eg-color) 60%, transparent)); }
+  /* hover 为模式色身份浮现时刻（边框/铭牌/图标提亮，光晕收敛至 10%） */
+  .nk-eg-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--eg-color) 40%, transparent); box-shadow: 0 12px 30px rgba(0,0,0,0.42), 0 0 18px color-mix(in srgb, var(--eg-color) 10%, transparent); }
+  .nk-eg-card:hover::after { opacity: 1; border-color: color-mix(in srgb, var(--eg-color) 56%, transparent); }
+  .nk-eg-card:hover .nk-eg-card__plate { border-color: color-mix(in srgb, var(--eg-color) 46%, transparent); background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 14%, color-mix(in srgb, var(--blk-900) 62%, transparent)) 0%, color-mix(in srgb, var(--blk-900) 86%, transparent) 100%); }
+  .nk-eg-card:hover .nk-eg-card__emblem { color: var(--eg-color); filter: drop-shadow(0 0 8px color-mix(in srgb, var(--eg-color) 35%, transparent)); }
   .nk-eg-card:hover .nk-eg-card__name { color: #fff; }
-  .nk-eg-card:hover .nk-eg-card__stat { color: color-mix(in srgb, var(--eg-color) 65%, var(--text2)); }
 }
 .nk-eg-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
 
@@ -110,6 +113,7 @@
   .nk-eg-card { padding: 14px; gap: 12px; }
   .nk-eg-card__plate { width: 76px; min-height: 84px; gap: 8px; }
   .nk-eg-card__emblem { width: 24px; height: 24px; }
+  .nk-eg-card__art { width: 38px; height: 38px; top: 6px; }
   .nk-eg-card__name { font-size: 0.9rem; }
   .nk-eg-card__status { margin-left: 8px; }
 }

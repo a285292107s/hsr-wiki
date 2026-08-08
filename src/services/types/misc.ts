@@ -157,6 +157,15 @@ export interface MazeStageDetail {
   monsters?: MazeMonsterInfo[];
 }
 
+/** 挑战目标（converter 输出：text 为 clean_text 清洗后文本，param 为 #N[i] 占位符参数，
+ *  type 为 ChallengeTargetType——TOTAL_SCORE 分数档位 / ROUNDS_LEFT 剩余轮数 /
+ *  DEAD_AVATAR 减员限制。星启目标是整场挑战的评价条件，与节点（敌方配置）正交） */
+export interface MazeTargetInfo {
+  text: string;
+  param?: number;
+  type?: string;
+}
+
 /** 逐层详情（converter 输出：详情页以关卡层级为章节的完整内容） */
 export interface MazeFloorDetail {
   /** 层序号（永屹之城遗秘无 Floor 字段 → 按 ID 升序序号） */
@@ -176,7 +185,7 @@ export interface MazeFloorDetail {
   /** 末日幻影阶段制 Boss 清单（ChallengeBossMazeExtra 的 MonsterID1/2/3，全字段含第 3 阶段） */
   phases?: MazeMonsterInfo[];
   /** 该层挑战目标（text + param，fmtDesc 渲染） */
-  targets?: { text: string; param?: number }[];
+  targets?: MazeTargetInfo[];
 }
 
 /** 异相仲裁段位徽章（ChallengeBadgeConfig：Bronze/Silver/Gold/Ultra 四段） */
@@ -204,7 +213,7 @@ export interface PeakLevelInfo {
   /** 敌方配置（StageConfig.MonsterList 波次扁平化） */
   monsters?: MazeMonsterInfo[];
   /** 挑战目标（BattleTargetConfig，text + param） */
-  targets?: { text: string; param?: number }[];
+  targets?: MazeTargetInfo[];
   /** 机制标签（MazeBuff 名称，如韧甲/反相/吸能） */
   tags?: string[];
   /** 王棋增益（仅 king：出奇制胜/步骑协同/锤砧战术） */
@@ -214,7 +223,7 @@ export interface PeakLevelInfo {
     name?: string;
     level?: number;
     monsters?: MazeMonsterInfo[];
-    targets?: { text: string; param?: number }[];
+    targets?: MazeTargetInfo[];
     tags?: string[];
   };
 }
@@ -231,8 +240,8 @@ export interface MazeTierceInfo {
   score?: number;
   /** 星启 Boss 战等级（StageConfig.Level，如末日幻影 90） */
   level?: number;
-  /** 挑战目标（text + param，fmtDesc 渲染） */
-  targets?: { text: string; param?: number }[];
+  /** 挑战目标（text + param，fmtDesc 渲染；星启目标是整场挑战的评价条件，非节点级） */
+  targets?: MazeTargetInfo[];
   /** 星启敌方（节点 3 = 星启附加关，完整信息卡消费） */
   monsters?: MazeMonsterInfo[];
   /** 3 节点敌方：节点 1/2 = 常规最高难度关上下半场（DLCKKJFMJOB → EventIDList1/2），
@@ -274,8 +283,10 @@ export interface MazeListEntry {
   sub_buffs?: MazeBuffInfo[];
   /** 赛季敌方（按层序收集去重；icon 为 MonsterMiddleIcon basename） */
   monsters?: MazeMonsterInfo[];
+  /** 卡片代表阵容（最终层/王棋关敌方按 rank 去重取前 4——Boss + 精英护卫，非第 1 层小怪） */
+  final_monsters?: MazeMonsterInfo[];
   /** 挑战目标描述（text 为 clean_text 清洗后文本，param 为 #N[i] 占位符参数） */
-  targets?: { text: string; param?: number }[];
+  targets?: MazeTargetInfo[];
   /** 逐层推荐属性（按上下半场拆分） */
   floor_damage?: FloorDamageInfo[];
   /** 逐层详情（关卡层级章节：推荐属性 / 敌方配置 / 可用增益 / 挑战目标） */

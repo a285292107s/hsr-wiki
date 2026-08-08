@@ -129,6 +129,19 @@
   color: color-mix(in srgb, var(--eg-color) 70%, var(--text2));
 }
 .nk-egd-hero__emblem svg { width: 100%; height: 100%; }
+/* 赛季页签图标（TabIcon）：absolute 覆盖 SVG 徽记，不透明深色底板遮挡下层；加载失败隐藏后露出徽记 */
+.nk-egd-hero__art {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: var(--blk-800);
+  object-fit: cover;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
 .nk-egd-hero__num {
   font-family: var(--font-hud);
   font-size: 2rem;
@@ -201,46 +214,8 @@
   color: var(--text3);
 }
 
-/* 指标条：层数 / 阶段 / 回合（行式规格表——反等权网格；行间中性细线，末行去底线） */
-.nk-egd-hero__stats {
-  display: flex;
-  flex-direction: column;
-  margin-top: 4px;
-  border: 1px solid var(--line-1);
-  border-radius: 10px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--blk-900) 30%, transparent);
-}
-.nk-egd-hero__stat {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  min-width: 0;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--line-1);
-}
-.nk-egd-hero__stat:last-child { border-bottom: none; }
-.nk-egd-hero__stat-label {
-  order: 1;
-  font-family: var(--font-hud);
-  font-size: 0.52rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  color: var(--text3);
-  white-space: nowrap;
-}
-.nk-egd-hero__stat-val {
-  order: 2;
-  font-family: var(--font-hud);
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--eg-color);
-  text-shadow: none;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
+/* 指标条已移除（层数/阶段/回合为恒值或低价值冗余，2026-08 决策） */
+
 .nk-egd-elem {
   width: 20px;
   height: 20px;
@@ -255,9 +230,11 @@
 ═══════════════════════════════════════════ */
 .nk-egd-body .nk-panel { max-width: var(--nk-detail-max); }
 .nk-egd-body .nk-title,
+.nk-egd-body .nk-egd-fury,
 .nk-egd-body .nk-egd-buffs,
 .nk-egd-body .nk-egd-floors,
 .nk-egd-body .nk-egd-tierce,
+.nk-egd-body .nk-egd-empty,
 .nk-egd-body .nk-egd-nav { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }
 
 /* ─── 赛季增益卡（阅读族：中性细线，无左竖条，hover 仅亮度变化） ─── */
@@ -296,11 +273,16 @@
   height: 20px;
   border-radius: 5px;
 }
+/* 条目编号：与 .nk-title__idx 同语言（编号右侧细分隔线，编辑式目录） */
 .nk-egd-buff__idx {
+  flex-shrink: 0;
   font-family: var(--font-hud);
-  font-size: 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--text3);
+  padding-right: 10px;
+  border-right: 1px solid var(--line-2);
   transition: color 0.2s;
 }
 .nk-egd-buff:hover .nk-egd-buff__idx { color: var(--eg-color); }
@@ -323,6 +305,13 @@
 ═══════════════════════════════════════════ */
 .nk-egd-fury { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
 .nk-egd-fury__mech, .nk-egd-fury__eff { display: flex; flex-direction: column; gap: 8px; }
+/* 战意效果容器：作为 flex item 时共享规则的 margin:auto 会收缩不拉伸（838px 缩窄居中），
+   覆写为全宽拉伸，与战意机制卡 / 赛季增益卡对齐（952px） */
+.nk-egd-fury__eff .nk-egd-buffs {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
 .nk-egd-fury__label {
   align-self: flex-start;
   font-size: 0.6rem;
@@ -406,6 +395,20 @@
 }
 .nk-egd-floor__summary .nk-egd-floor__elems { gap: 5px; }
 .nk-egd-floor__summary .nk-egd-elem { width: 18px; height: 18px; }
+/* 折叠摘要右侧数据（波数·敌数汇总，与 moncount 徽标同语言） */
+.nk-egd-floor__summarydata {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-hud);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--eg-color) 76%, #fff);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 7%, transparent);
+  white-space: nowrap;
+}
 /* 展开体（grid-rows 0fr→1fr 折叠动画，设计语言披露控件同款） */
 .nk-egd-floor__body {
   display: grid;
@@ -415,11 +418,14 @@
 .nk-egd-floor--open .nk-egd-floor__body { grid-template-rows: 1fr; }
 .nk-egd-floor__body-inner { overflow: hidden; min-height: 0; }
 .nk-egd-floor__idx {
+  flex-shrink: 0;
   font-family: var(--font-hud);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   color: var(--text3);
+  padding-right: 10px;
+  border-right: 1px solid var(--line-2);
   transition: color 0.2s;
 }
 .nk-egd-floor:hover .nk-egd-floor__idx { color: var(--eg-color); }
@@ -437,18 +443,40 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.nk-egd-floor__countdown {
+/* 层头数据组（等级/回合/分数线：规格表式 label+value 列，替代原等宽胶囊） */
+.nk-egd-floor__data {
   margin-left: auto;
   flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+.nk-egd-floor__dataitem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding: 2px 14px;
+  border-left: 1px solid var(--line-1);
+}
+.nk-egd-floor__dataitem:first-child { border-left: none; }
+.nk-egd-floor__dataval {
   font-family: var(--font-hud);
-  font-size: 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.nk-egd-floor__datalabel {
+  font-family: var(--font-hud);
+  font-size: 0.46rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--text2);
-  padding: 2px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--line-1);
-  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  letter-spacing: 0.14em;
+  color: var(--text3);
   white-space: nowrap;
 }
 /* 上下半场双列 */
@@ -457,6 +485,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+/* 单阶段层：唯一阶段卡占满两列，避免右侧留空 */
+.nk-egd-floor__stages > .nk-egd-floor__stage:only-child { grid-column: 1 / -1; }
 .nk-egd-floor__stage {
   display: flex;
   flex-direction: column;
@@ -467,9 +497,18 @@
   border: 1px solid var(--line-1);
   border-radius: 10px;
 }
+/* 阶段卡头：模式色胶囊 + 右置波数/敌数汇总，底部分隔线独立卡头（与层头同语言） */
+.nk-egd-floor__stagehead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-egd-floor__stagehead .nk-egd-floor__moncount { margin-left: auto; }
 .nk-egd-floor__stagelabel {
   align-self: flex-start;
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
@@ -479,12 +518,31 @@
   background: color-mix(in srgb, var(--eg-color) 8%, transparent);
   white-space: nowrap;
 }
+/* 规格表行：行间 1px 分隔线（末行去线，表格收束不悬空） */
 .nk-egd-floor__row {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
   flex-wrap: wrap;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-egd-floor__row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+/* 敌方配置行：内容区可能被波次组撑高，label 顶对齐首行而非垂直居中悬空 */
+.nk-egd-floor__row--mons { align-items: flex-start; }
+.nk-egd-floor__row--mons .nk-egd-floor__label { padding-top: 2px; }
+/* Boss 信息卡直挂行内：窄卡（452px）下换行会导致 label 悬空，禁止换行并让卡片占剩余宽度 */
+.nk-egd-floor__stage .nk-egd-floor__row--mons { flex-wrap: nowrap; }
+.nk-egd-floor__row--mons > .nk-egd-mons { flex: 1 1 auto; min-width: 0; }
+/* 绝境变体子卡：dashed 边框已标识层级，内部不再细分隔线 */
+.nk-egd-floor__hard .nk-egd-floor__row {
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 .nk-egd-floor__label {
   flex-shrink: 0;
@@ -505,12 +563,13 @@
 /* 单波次组：标签 + 头像行 */
 .nk-egd-floor__wave {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 }
 .nk-egd-floor__wavelabel {
   flex-shrink: 0;
-  font-size: 0.55rem;
+  min-width: 3.2em;
+  font-size: 0.58rem;
   letter-spacing: 0.05em;
   color: var(--text3);
 }
@@ -593,31 +652,31 @@
 .nk-egd-floor__buffdesc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-floor__buffdesc .nowrap { white-space: nowrap; }
 /* 层级挑战目标 */
+/* 挑战目标：规格表行（编号列 + 文本，行间 1px 分隔线，末行去线） */
 .nk-egd-floor__targets {
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
   max-width: var(--nk-prose-max);
 }
 .nk-egd-floor__target {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 8px 12px;
-  background: color-mix(in srgb, var(--blk-900) 22%, transparent);
-  border: 1px solid var(--line-1);
-  border-radius: 8px;
+  padding: 7px 2px;
+  border-bottom: 1px solid var(--line-1);
 }
+.nk-egd-floor__target:last-child { border-bottom: none; }
 .nk-egd-floor__targetidx {
   flex-shrink: 0;
   font-family: var(--font-hud);
-  font-size: 0.58rem;
+  font-size: 0.66rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--text3);
-  padding-top: 3px;
+  padding-top: 2px;
 }
 .nk-egd-floor__targettext {
   font-size: 0.78rem;
@@ -858,6 +917,12 @@
   letter-spacing: 0.05em;
   color: var(--text3);
 }
+/* 无弱点/无抗性占位（源数据空 = 游戏内无弱点/全 0% 抗性，如蕉研组本体等召唤型机制怪） */
+.nk-egd-mon__none {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--text3);
+}
 .nk-egd-mon__weak {
   display: inline-flex;
   align-items: center;
@@ -954,16 +1019,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 11px 18px;
-  min-width: 108px;
+  gap: 6px;
+  padding: 13px 20px;
+  min-width: 120px;
   background: color-mix(in srgb, var(--blk-900) 38%, transparent);
   border: 1px solid var(--line-1);
   border-radius: 10px;
 }
 .nk-egd-tierce__val {
   font-family: var(--font-hud);
-  font-size: 1.18rem;
+  font-size: 1.4rem;
   font-weight: 800;
   line-height: 1;
   color: var(--eg-color);
@@ -975,14 +1040,23 @@
 .nk-egd-tierce__val--elems .nk-egd-elem { width: 22px; height: 22px; }
 .nk-egd-tierce__label {
   font-family: var(--font-hud);
-  font-size: 0.52rem;
+  font-size: 0.55rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: var(--text3);
   white-space: nowrap;
 }
-/* 星启节点（3 节点目标；条目编号灰色弱化，无左竖条） */
-.nk-egd-tierce__nodes { display: flex; flex-direction: column; gap: 8px; }
+/* 指标副注：把内部计数翻译成玩家语义（当期最高难度 / 总预算与档位换算 / 通关分数线） */
+.nk-egd-tierce__hint {
+  font-size: 0.58rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--text3);
+  text-align: center;
+  max-width: 150px;
+}
+/* 星启目标（整场挑战评价条件：分数档/剩余轮数/减员限制，与节点敌方正交） */
+.nk-egd-tierce__targets { display: flex; flex-direction: column; gap: 8px; }
 .nk-egd-node {
   display: flex;
   align-items: center;
@@ -1008,6 +1082,19 @@
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
   background: color-mix(in srgb, var(--eg-color) 8%, transparent);
+  white-space: nowrap;
+}
+/* 目标类型徽标（分数/回合/减员）：次级灰色胶囊，不抢模式色 idx 与正文 */
+.nk-egd-node__type {
+  flex-shrink: 0;
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 30%, transparent);
   white-space: nowrap;
 }
 .nk-egd-node__text {
@@ -1194,13 +1281,13 @@
     align-self: flex-start;
   }
   .nk-egd-hero__emblem { width: 27px; height: 27px; }
+  .nk-egd-hero__art { width: 44px; height: 44px; top: 7px; }
   .nk-egd-hero__num { font-size: 1.55rem; }
   .nk-egd-hero__num--long { font-size: 1.2rem; }
   .nk-egd-hero__name { font-size: 1.35rem; }
-  .nk-egd-hero__stat { padding: 8px 12px; }
   .nk-egd-floor__stages { grid-template-columns: 1fr; }
   .nk-egd-floor__head { flex-wrap: wrap; }
-  .nk-egd-floor__countdown { margin-left: 0; }
+  .nk-egd-floor__data { margin-left: 0; }
   .nk-egd-nav { grid-template-columns: 1fr; }
   .nk-egd-nav__item--next { justify-content: flex-start; text-align: left; }
 }

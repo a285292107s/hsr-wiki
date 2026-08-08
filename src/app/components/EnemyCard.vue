@@ -96,14 +96,24 @@ function monTitle(m: MazeMonsterInfo): string {
         </span>
       </div>
     </div>
-    <div v-if="monster.weak?.length || resistText(monster)" class="nk-egd-mon__rows">
+    <!-- 弱点/抗性行：有数据展示图标，无数据显式占位“无”（源数据空 = 游戏内无弱点/全 0% 抗性，
+         如蕉研组本体等召唤型机制怪；避免误读为数据缺失） -->
+    <div v-if="monster.name" class="nk-egd-mon__rows">
       <div v-if="monster.weak?.length" class="nk-egd-mon__row">
         <span class="nk-egd-mon__label">弱点</span>
         <span class="nk-egd-mon__weak" v-html="elemRow(monster.weak)"></span>
       </div>
+      <div v-else class="nk-egd-mon__row">
+        <span class="nk-egd-mon__label">弱点</span>
+        <span class="nk-egd-mon__none">无</span>
+      </div>
       <div v-if="resistText(monster)" class="nk-egd-mon__row">
         <span class="nk-egd-mon__label">抗性</span>
         <span class="nk-egd-mon__resist" v-html="resistRowHtml(monster)"></span>
+      </div>
+      <div v-else class="nk-egd-mon__row">
+        <span class="nk-egd-mon__label">抗性</span>
+        <span class="nk-egd-mon__none">无</span>
       </div>
     </div>
     <p v-if="monster.intro" class="nk-egd-mon__intro" v-html="introHtml(monster)"></p>

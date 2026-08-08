@@ -7,7 +7,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { ENDGAME_MODES, mazeStatus, mazeDateRange } from '../catalog/pages/endgame';
+import { ENDGAME_MODES, mazeStatus, mazeDateRange, tabIconUrl } from '../catalog/pages/endgame';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
   loadLocalItems,
@@ -16,7 +16,7 @@ import type { LocalItemEntry } from '../../services/types';
 import { fmtDesc, escHtml, elementIconUrl, itemIconUrl } from '../../lib/format';
 import { ELEM, MON_RANK } from '../../lib/constants';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
-import type { MazeBuffInfo, MazeListDb, MazeListEntry, MazeMonsterInfo, MazeStageDetail, MazeFloorDetail, PeakLevelInfo } from '../../services/types';
+import type { MazeBuffInfo, MazeListDb, MazeListEntry, MazeMonsterInfo, MazeStageDetail, MazeFloorDetail, MazeTargetInfo, PeakLevelInfo } from '../../services/types';
 // 敌方完整信息卡（星启 / 末日幻影纯 Boss 战共用）
 import EnemyCard from '../components/EnemyCard.vue';
 // 终局详情页专属样式（随本路由 chunk 懒加载）
@@ -93,15 +93,21 @@ async function load(mode: string, id: string): Promise<void> {
     // 物品库并行预热（奖励名称/图标；失败静默，不影响赛季正文）
     void loadItemMap().then((m) => { itemMap.value = m; });
     // 下一帧再切换 ready，避免 loading 骨架闪烁；随后 nextTick 等正文 DOM 就绪，
-    // 重置滚动、初始化折叠与激活态判定
-    requestAnimationFrame(() => {
+    // 重置滚动、初始化折叠与激活态判定。
+    // 后台标签页 rAF 会被浏览器暂停导致永久骨架屏：visibility hidden 时用 setTimeout 兜底推进
+    const settleReady = (): void => {
       phase.value = 'ready';
       pageRef.value?.scrollTo({ top: 0 });
       void nextTick(() => {
         initExpanded();
         updateActiveSection();
       });
-    });
+    };
+    if (document.visibilityState === 'hidden') {
+      setTimeout(settleReady, 0);
+    } else {
+      requestAnimationFrame(settleReady);
+    }
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e);
     phase.value = 'error';
@@ -130,20 +136,32 @@ const modeInfo = computed(() => ENDGAME_MODES.find((m) => m.key === modeKey.valu
 const status = computed(() => (data.value ? mazeStatus(data.value) : ''));
 const dateRange = computed(() => (data.value ? mazeDateRange(data.value) : ''));
 const seasonId = computed(() => String(route.params.id || ''));
+/** 赛季页签图标（TabIcon；jsDelivr 临时源，方案 B 验证；无图/路径不匹配时空串不渲染） */
+const seasonArt = computed(() => tabIconUrl(data.value?.arts));
 
 /** 逐层章节（以关卡层级为章节名的完整内容；倒序：最高层在前）
  *  全模式全量展示（重构后不再“仅最后一层”回退），配合折叠交互控制页面长度 */
 const floorSections = computed(() => [...(data.value?.floor_details || [])].reverse());
 /** 异相仲裁关卡组成（3 骑士试炼 + 1 王棋最终关，含绝境变体） */
 const peakLevels = computed<PeakLevelInfo[]>(() => data.value?.levels || []);
-/** Hero 层数统计：永屹之城遗秘无 Floor 字段（floors=0），取逐层详情长度 */
-const heroFloorCount = computed(() => floorSections.value.length || data.value?.floors || 0);
 
 /** 星启模式板块数据 */
 const tierceDamage = computed<string[]>(() => data.value?.tierce?.damage_types || []);
 const tierceCountdown = computed<number>(() => data.value?.tierce?.countdown || 0);
 const tierceScore = computed<number | null>(() => data.value?.tierce?.score ?? null);
 const tierceLevel = computed<number>(() => data.value?.tierce?.level || 0);
+/** 回合预算换算：总回合（如 45）− 各档“剩余轮数”目标 = 各档需完成轮数（仅回合制星启，
+ *  如“剩余≥15轮” = 45−15 = 30 轮内完成；把内部计数翻译成玩家可行动的档位门槛） */
+const tierceRoundHint = computed(() => {
+  const total = tierceCountdown.value;
+  if (!total) return '';
+  const bands = tierceTargets.value
+    .filter((t) => t.type === 'ROUNDS_LEFT' && t.param != null && t.param < total)
+    .map((t) => total - (t.param as number));
+  return bands.length
+    ? `总预算 ${total} 轮 · 目标档位需 ≤${bands.join(' / ≤')} 轮`
+    : `总回合预算（三场共用）`;
+});
 const tierceTargets = computed(() => data.value?.tierce?.targets || []);
 const tierceMonsters = computed(() => data.value?.tierce?.monsters || []);
 /** 星启 3 节点敌方（节点 1/2 = 常规最高难度关上下半场；节点 3 = 星启附加关） */
@@ -202,8 +220,16 @@ function peakTagsHtml(tags: string[]): string {
   return tags.map((t) => `<span class="nk-egd-peak__tag">${escHtml(t)}</span>`).join('');
 }
 
+/** 挑战目标类型徽标（ChallengeTargetType → 中文短标；星启目标是整场挑战的评价条件，
+ *  与 3 个节点（敌方配置）正交——TOTAL_SCORE 分数档 / ROUNDS_LEFT 剩余轮数 / DEAD_AVATAR 减员 */
+const TARGET_TYPE_LABEL: Record<string, string> = {
+  TOTAL_SCORE: '分数',
+  ROUNDS_LEFT: '回合',
+  DEAD_AVATAR: '减员',
+};
+
 /** 挑战目标渲染：#N[i] 参数替换（param 缺省时剥离占位符，避免残留） */
-function targetHtml(t: { text: string; param?: number }): string {
+function targetHtml(t: MazeTargetInfo): string {
   if (t.param != null) return fmtDesc(t.text, [t.param]);
   return t.text.replace(/#\d+\[[^\]]*\]%?/g, '').replace(/#\d+/g, '');
 }
@@ -258,6 +284,12 @@ function monCountLabel(mons: MazeMonsterInfo[] | undefined): string {
 function stageDamageSummary(f: MazeFloorDetail): string {
   const uniq = [...new Set([...(f.stage1?.damage || []), ...(f.stage2?.damage || [])])];
   return uniq.length ? elemRow(uniq) : '';
+}
+
+/** 层级上下半场合并敌数汇总（折叠摘要右侧数据；空配置返回空串） */
+function mergedMonCount(f: MazeFloorDetail): string {
+  const mons = [...(f.stage1?.monsters || []), ...(f.stage2?.monsters || [])];
+  return mons.length ? monCountLabel(mons) : '';
 }
 
 /* ═══════════ 层级折叠状态机 ═══════════ */
@@ -415,10 +447,11 @@ onBeforeUnmount(() => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
 
-      <!-- Hero：模式铭牌 + 赛季信息 + HUD 指标条 -->
+      <!-- Hero：模式铭牌 + 赛季信息 -->
       <header class="nk-egd-hero">
         <div class="nk-egd-hero__plate">
           <span class="nk-egd-hero__emblem" v-html="modeInfo?.emblem || ''"></span>
+          <img v-if="seasonArt" class="nk-egd-hero__art" :src="seasonArt" alt="" @error="($event.target as HTMLImageElement).style.display='none'">
           <span class="nk-egd-hero__num" :class="{ 'nk-egd-hero__num--long': seasonId.length >= 4 }">{{ seasonId }}</span>
         </div>
         <div class="nk-egd-hero__panel">
@@ -430,21 +463,6 @@ onBeforeUnmount(() => {
               :class="`nk-egd-hero__status--${status === '进行中' ? 'live' : status === '已结束' ? 'ended' : status === '未开始' ? 'upcoming' : 'unknown'}`"
             >{{ status }}</span>
             <span v-if="dateRange" class="nk-egd-hero__date">{{ dateRange }}</span>
-          </div>
-          <!-- HUD 指标条：层数 / 阶段 / 回合上限（仅实际存在时渲染） -->
-          <div v-if="heroFloorCount || data.stage_num || data.countdown" class="nk-egd-hero__stats">
-            <div v-if="heroFloorCount" class="nk-egd-hero__stat">
-              <span class="nk-egd-hero__stat-val">{{ heroFloorCount }}</span>
-              <span class="nk-egd-hero__stat-label">层数 FLOORS</span>
-            </div>
-            <div v-if="data.stage_num" class="nk-egd-hero__stat">
-              <span class="nk-egd-hero__stat-val">{{ data.stage_num }}</span>
-              <span class="nk-egd-hero__stat-label">阶段 STAGES</span>
-            </div>
-            <div v-if="data.countdown" class="nk-egd-hero__stat">
-              <span class="nk-egd-hero__stat-val">{{ data.countdown }}</span>
-              <span class="nk-egd-hero__stat-label">回合 CYCLES</span>
-            </div>
           </div>
         </div>
       </header>
@@ -533,7 +551,12 @@ onBeforeUnmount(() => {
                     {{ l.kind === 'king' ? '王棋' : '骑士' }}
                   </span>
                   <h2 class="nk-egd-floor__title">{{ l.name }}</h2>
-                  <span v-if="l.level" class="nk-egd-floor__countdown">等级 {{ l.level }}</span>
+                  <span v-if="l.level" class="nk-egd-floor__data">
+                    <span class="nk-egd-floor__dataitem">
+                      <span class="nk-egd-floor__dataval">{{ l.level }}</span>
+                      <span class="nk-egd-floor__datalabel">等级</span>
+                    </span>
+                  </span>
                 </header>
 
                 <!-- 推荐属性 + 敌方配置 -->
@@ -602,7 +625,12 @@ onBeforeUnmount(() => {
                   <div class="nk-egd-floor__hardhead">
                     <span class="nk-egd-peak__kind nk-egd-peak__kind--hard">绝境</span>
                     <span class="nk-egd-floor__hardname">{{ l.hard.name }}</span>
-                    <span v-if="l.hard.level" class="nk-egd-floor__countdown">等级 {{ l.hard.level }}</span>
+                    <span v-if="l.hard.level" class="nk-egd-floor__data">
+                      <span class="nk-egd-floor__dataitem">
+                        <span class="nk-egd-floor__dataval">{{ l.hard.level }}</span>
+                        <span class="nk-egd-floor__datalabel">等级</span>
+                      </span>
+                    </span>
                   </div>
                   <div v-if="l.hard.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
                     <span class="nk-egd-floor__label">敌方配置</span>
@@ -650,29 +678,35 @@ onBeforeUnmount(() => {
           <template v-if="data.tierce">
             <div id="egd-tierce" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['tierce'] }}</span>星启模式 STARLIT</div>
             <div class="nk-egd-tierce">
-              <!-- 星启节点指标：推荐属性 / 等级 / 回合 / 分数 -->
+              <!-- 星启节点指标：推荐属性 / 等级 / 回合 / 分数（副注把内部计数翻译成玩家语义） -->
               <div v-if="tierceDamage.length || tierceLevel || tierceCountdown || tierceScore != null" class="nk-egd-tierce__stats">
                 <div v-if="tierceDamage.length" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val nk-egd-tierce__val--elems" v-html="elemRow(tierceDamage)"></span>
                   <span class="nk-egd-tierce__label">推荐属性 RECOMMENDED</span>
+                  <span class="nk-egd-tierce__hint">关卡推荐弱点</span>
                 </div>
                 <div v-if="tierceLevel" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val">{{ tierceLevel }}</span>
-                  <span class="nk-egd-tierce__label">等级 LEVEL</span>
+                  <span class="nk-egd-tierce__label">敌人等级 ENEMY LV</span>
+                  <span class="nk-egd-tierce__hint">当期最高难度</span>
                 </div>
                 <div v-if="tierceCountdown" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val">{{ tierceCountdown }}</span>
                   <span class="nk-egd-tierce__label">回合 CYCLES</span>
+                  <span class="nk-egd-tierce__hint">{{ tierceRoundHint }}</span>
                 </div>
                 <div v-if="tierceScore != null" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val">{{ tierceScore.toLocaleString() }}</span>
                   <span class="nk-egd-tierce__label">分数 SCORE</span>
+                  <span class="nk-egd-tierce__hint">通关分数线</span>
                 </div>
               </div>
-              <!-- 星启节点（3 节点 = 3 组挑战目标） -->
-              <div v-if="tierceTargets.length" class="nk-egd-tierce__nodes">
+              <!-- 星启目标：整场星启挑战的评价条件（分数档/剩余轮数/减员限制），
+                   与 3 个节点（敌方配置）正交，非节点级条件 -->
+              <div v-if="tierceTargets.length" class="nk-egd-tierce__targets">
                 <div v-for="(t, i) in tierceTargets" :key="i" class="nk-egd-node">
-                  <span class="nk-egd-node__idx">节点 {{ String(i + 1).padStart(2, '0') }}</span>
+                  <span class="nk-egd-node__idx">目标 {{ String(i + 1).padStart(2, '0') }}</span>
+                  <span v-if="t.type && TARGET_TYPE_LABEL[t.type]" class="nk-egd-node__type">{{ TARGET_TYPE_LABEL[t.type] }}</span>
                   <span class="nk-egd-node__text" v-html="targetHtml(t)"></span>
                 </div>
               </div>
@@ -739,9 +773,23 @@ onBeforeUnmount(() => {
                   <span class="nk-egd-floor__idx">{{ String(f.floor).padStart(2, '0') }}</span>
                   <span class="nk-egd-floor__title">第 {{ f.floor }} 层</span>
                   <span v-if="f.name" class="nk-egd-floor__name">{{ f.name }}</span>
-                  <span v-if="f.level" class="nk-egd-floor__countdown">等级 {{ f.level }}</span>
-                  <span v-if="f.countdown" class="nk-egd-floor__countdown">回合 {{ f.countdown }}</span>
-                  <span v-if="modeKey === 'story' && data.clear_score" class="nk-egd-floor__countdown">分数线 {{ data.clear_score.toLocaleString() }}</span>
+                  <span
+                    v-if="f.level || f.countdown || (modeKey === 'story' && data.clear_score)"
+                    class="nk-egd-floor__data"
+                  >
+                    <span v-if="f.level" class="nk-egd-floor__dataitem">
+                      <span class="nk-egd-floor__dataval">{{ f.level }}</span>
+                      <span class="nk-egd-floor__datalabel">等级</span>
+                    </span>
+                    <span v-if="f.countdown" class="nk-egd-floor__dataitem">
+                      <span class="nk-egd-floor__dataval">{{ f.countdown }}</span>
+                      <span class="nk-egd-floor__datalabel">回合</span>
+                    </span>
+                    <span v-if="modeKey === 'story' && data.clear_score" class="nk-egd-floor__dataitem">
+                      <span class="nk-egd-floor__dataval">{{ data.clear_score.toLocaleString() }}</span>
+                      <span class="nk-egd-floor__datalabel">分数线</span>
+                    </span>
+                  </span>
                 </button>
                 <!-- 折叠态摘要：推荐属性（上下半场合并去重） -->
                 <div v-if="!isExpanded(f.floor)" class="nk-egd-floor__summary">
@@ -749,6 +797,7 @@ onBeforeUnmount(() => {
                     <span class="nk-egd-floor__summarylabel">推荐属性</span>
                     <span class="nk-egd-floor__elems" v-html="stageDamageSummary(f)"></span>
                   </template>
+                  <span v-if="mergedMonCount(f)" class="nk-egd-floor__summarydata">{{ mergedMonCount(f) }}</span>
                 </div>
                 <!-- 展开体（grid-rows 折叠动画） -->
                 <div :id="`egd-floor-${f.floor}`" class="nk-egd-floor__body">
@@ -777,6 +826,7 @@ onBeforeUnmount(() => {
                   <div v-if="stageHasContent(f.stage1)" class="nk-egd-floor__stage">
                     <div class="nk-egd-floor__stagehead">
                       <span class="nk-egd-floor__stagelabel">上半场</span>
+                      <span v-if="monCountLabel(f.stage1?.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(f.stage1?.monsters) }}</span>
                     </div>
                     <div v-if="f.stage1?.damage?.length" class="nk-egd-floor__row">
                       <span class="nk-egd-floor__label">推荐属性</span>
@@ -784,7 +834,6 @@ onBeforeUnmount(() => {
                     </div>
                     <div v-if="f.stage1?.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
                       <span class="nk-egd-floor__label">敌方配置</span>
-                      <span v-if="monCountLabel(f.stage1.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(f.stage1.monsters) }}</span>
                       <span class="nk-egd-floor__monswrap">
                         <span v-for="(g, gi) in monWaveGroups(f.stage1.monsters)" :key="gi" class="nk-egd-floor__wave">
                           <span v-if="monWaveGroups(f.stage1.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
@@ -818,6 +867,7 @@ onBeforeUnmount(() => {
                   <div v-if="stageHasContent(f.stage2)" class="nk-egd-floor__stage">
                     <div class="nk-egd-floor__stagehead">
                       <span class="nk-egd-floor__stagelabel">下半场</span>
+                      <span v-if="monCountLabel(f.stage2?.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(f.stage2?.monsters) }}</span>
                     </div>
                     <div v-if="f.stage2?.damage?.length" class="nk-egd-floor__row">
                       <span class="nk-egd-floor__label">推荐属性</span>
@@ -825,7 +875,6 @@ onBeforeUnmount(() => {
                     </div>
                     <div v-if="f.stage2?.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
                       <span class="nk-egd-floor__label">敌方配置</span>
-                      <span v-if="monCountLabel(f.stage2.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(f.stage2.monsters) }}</span>
                       <span class="nk-egd-floor__monswrap">
                         <span v-for="(g, gi) in monWaveGroups(f.stage2.monsters)" :key="gi" class="nk-egd-floor__wave">
                           <span v-if="monWaveGroups(f.stage2.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>

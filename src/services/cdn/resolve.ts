@@ -5,6 +5,7 @@
 import { CDN } from '../../lib/constants';
 import { escHtml } from '../../lib/html';
 import { CDN_CATEGORIES, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
+import { JS_DELIVR_BASE, JS_DELIVR_RULES, jsdelivrToNanokaFile } from './jsdelivr';
 
 /** 双源解析结果 */
 export interface CdnUri {
@@ -20,12 +21,22 @@ export function nanokaUrl(category: CdnCategory, file: string, spec = CDN_CATEGO
   return `${CDN}${NANOKA_HUD}/${spec.nanoka}/${file}`;
 }
 
-/** 双源解析：分类声明 official 且 OFFICIAL_BASE 非空时官方优先，否则仅 nanoka */
+/** 双源解析：jsDelivr（StarRailTextures 镜像，注册了规则的分类）> 官方源 > nanoka */
 export function resolveCdnUri(
   category: CdnCategory,
   file: string,
   spec: CdnCategorySpec = CDN_CATEGORIES[category],
 ): CdnUri {
+  // jsDelivr 首选（核对脚本验证全命中的分类）：nanoka 保留回退；规则不适用（返回 null）时回退 nanoka
+  const jdRule = JS_DELIVR_RULES[category];
+  const jdPath = jdRule ? jdRule(file) : null;
+  if (jdPath) {
+    return {
+      primary: `${JS_DELIVR_BASE}/${jdPath}`,
+      fallback: nanokaUrl(category, file, spec),
+      source: 'official',
+    };
+  }
   if (spec.official && OFFICIAL_BASE) {
     return {
       primary: `${OFFICIAL_BASE}/${spec.official}/${file}`,
@@ -46,9 +57,20 @@ export function cdnRawUrl(subpath: string): string {
   return `${CDN}${NANOKA_HUD}/${subpath}`;
 }
 
-/** 依据主 URL 反查回退源（v-html 卡片用）：主源为官方且分类注册了官方源时返回 nanoka 等价 URL；否则 '' */
+/** 依据主 URL 反查回退源（v-html 卡片用）：jsDelivr 源反查 nanoka；主源为官方时返回 nanoka 等价 URL；否则 '' */
 export function cdnFallbackFromPrimary(primary: string): string {
-  if (!primary || !OFFICIAL_BASE || primary.startsWith(CDN)) return '';
+  if (!primary) return '';
+  // jsDelivr 首选源 → nanoka 等价 URL（按分类规则反查文件名并验证路径一致性）
+  if (primary.startsWith(JS_DELIVR_BASE)) {
+    for (const [cat, rule] of Object.entries(JS_DELIVR_RULES) as [CdnCategory, (f: string) => string][]) {
+      const file = jsdelivrToNanokaFile(cat, primary);
+      if (file && `${JS_DELIVR_BASE}/${rule(file)}` === primary) {
+        return nanokaUrl(cat, file, CDN_CATEGORIES[cat]);
+      }
+    }
+    return '';
+  }
+  if (!OFFICIAL_BASE || primary.startsWith(CDN)) return '';
   for (const [cat, spec] of Object.entries(CDN_CATEGORIES) as [CdnCategory, CdnCategorySpec][]) {
     if (!spec.official) continue;
     const marker = `${spec.official}/`;

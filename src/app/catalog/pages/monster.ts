@@ -27,7 +27,7 @@ export const monsterPage: CatalogPageConfig = {
   renderCard(item, i) {
     return `<a class="nk-mob-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" style="--i:${i}">
       <div class="nk-mob-card__img">
-        <img src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
+        <img src="${escHtml(item.img)}" alt="${escHtml(item.name)}">
       </div>
       <div class="nk-mob-card__info">
         <span class="nk-mob-card__name">${escHtml(item.name)}</span>

@@ -29,7 +29,7 @@ function renderAchievementCard(item: CatalogItem, index = 0): string {
   const descTip = descText.replace(/\n+/g, ' ');
   return `<div class="nk-ach-card nk-ach-card--${rarity.toLowerCase() || 'none'}${hidden ? ' nk-ach-card--hidden' : ''}" data-id="${escHtml(String(item.id))}" data-name="${escHtml(item.name)}" data-rarity="${escHtml(rarity)}" data-series="${escHtml(String(item.series_id || ''))}" data-show-type="${escHtml(String(item.show_type || ''))}" style="--i:${index}">
       <div class="nk-ach-card__head">
-        ${img ? `<img class="nk-ach-card__icon" loading="lazy" src="${escHtml(img)}" alt="${escHtml(series)}">` : ''}
+        ${img ? `<img class="nk-ach-card__icon" src="${escHtml(img)}" alt="${escHtml(series)}">` : ''}
         <div class="nk-ach-card__title">${escHtml(item.name)}</div>
         ${badge}
       </div>
@@ -51,10 +51,12 @@ export const achievementPage: CatalogPageConfig = {
   cardClass: '.nk-ach-card',
   /* 1869 条 > 400 阈值 → 虚拟网格；
      列宽 200（桌面 6 列，避免 8 列小卡密集）；头部条高度 = colW*0.26（桌面约 56px 匹配图标 40px），
-     信息区 126px 容纳 5 行描述（字号 0.78rem）+ 元信息，行高估算保持 ≥ 卡片实际最大高度 */
+     信息区 140px 容纳 5 行描述（字号 0.78rem）+ 元信息：
+     单元格高度已固定为行高（use-virtual-grid），卡片 height:100% 等高填充，
+     行高估算须 ≥ 卡片实际最大高度（head 57 + 5 行描述 97 + 元信息 27 ≈ 181px，桌面安全余量 23px） */
   virtualMinColW: 200,
   virtualImgRatio: 0.26,
-  virtualInfoH: 126,
+  virtualInfoH: 140,
   async fetchData() {
     const [achievements, series] = await Promise.all([
       loadLocalAchievements(),

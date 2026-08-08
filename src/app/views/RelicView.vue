@@ -358,7 +358,7 @@ onBeforeUnmount(() => {
                 :title="SLOT_NAMES[p.type] || p.type"
               >
                 <div class="nk-relic-hero-piece__img">
-                  <img :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" loading="lazy" @error="onPieceImgError($event, p)">
+                  <img :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" @error="onPieceImgError($event, p)">
                 </div>
                 <span class="nk-relic-hero-piece__slot">{{ SLOT_NAMES[p.type] || p.type }}</span>
               </div>
@@ -420,7 +420,7 @@ onBeforeUnmount(() => {
                       :key="p.id"
                       class="nk-relic-affix-table__slot-h"
                     >
-                      <img class="nk-relic-affix-table__icon" :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" loading="lazy" @error="onPieceImgError($event, p)">
+                      <img class="nk-relic-affix-table__icon" :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" @error="onPieceImgError($event, p)">
                       <span class="nk-relic-affix-table__slot-name">{{ SLOT_NAMES[p.type] || p.type }}</span>
                     </th>
                   </tr>
