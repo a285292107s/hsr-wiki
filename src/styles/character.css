@@ -220,14 +220,22 @@
 .nk-char-page .nk-links-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
 .nk-char-page .nk-links-clip.open { grid-template-rows: 1fr; }
 .nk-char-page .nk-links-inner { overflow: hidden; min-height: 0; }
-/* 强化条目：名称 + 描述（展开时全部列出；间距用 margin 以免撑开收起轨道） */
+/* 强化条目：图标 + 名称 + 描述（展开时全部列出；间距用 margin 以免撑开收起轨道） */
 .nk-char-page .nk-skill__link-item {
   margin-top: 10px; padding: 10px 14px; border-radius: 8px;
   background: color-mix(in srgb, var(--blk-900) 40%, transparent); border: 1px solid var(--line-1);
 }
 .nk-char-page .nk-skill__link-item + .nk-skill__link-item { margin-top: 8px; }
+.nk-char-page .nk-skill__link-item-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.nk-char-page .nk-skill__link-item-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: color-mix(in srgb, var(--blk-800) 80%, transparent);
+  flex-shrink: 0; object-fit: contain;
+}
 .nk-char-page .nk-skill__link-item-name {
-  display: block; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 4px;
+  display: block; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em;
 }
 .nk-char-page .nk-skill__link-item--rank .nk-skill__link-item-name { color: var(--primary); }
 .nk-char-page .nk-skill__link-item--tree .nk-skill__link-item-name { color: var(--sk-accent); }

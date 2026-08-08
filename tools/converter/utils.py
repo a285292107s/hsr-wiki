@@ -5,20 +5,29 @@ import logging
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
-from config import ICON_PATH_MAP
+from config import ICON_PATH_MAP, OFFICIAL_ICON_RULES
 
 logger = logging.getLogger("converter")
 
 # 全局输出模式：True=紧凑（生产），False=缩进（调试）
 COMPACT_OUTPUT = True
 
+# 全局图标路径格式：False=旧短路径 icon/xxx（默认），True=官方 StarRailTextures 相对路径
+_USE_OFFICIAL_PATHS = False
+
 
 def set_pretty(enabled: bool) -> None:
     """设置输出模式（由 CLI --pretty 控制）。enabled=True 时缩进输出。"""
     global COMPACT_OUTPUT
     COMPACT_OUTPUT = not enabled
+
+
+def set_official_paths(enabled: bool) -> None:
+    """设置图标路径输出格式（由 CLI --official-icon-paths 控制）。"""
+    global _USE_OFFICIAL_PATHS
+    _USE_OFFICIAL_PATHS = enabled
 
 
 # 源文件加载缓存：同一进程内多个模块重复加载同一源文件（如 AvatarConfig 被
@@ -60,10 +69,35 @@ def unwrap_value(obj: Any) -> Any:
     return obj
 
 
+def _try_official_path(source_path: str) -> Optional[str]:
+    """尝试用 OFFICIAL_ICON_RULES 映射官方相对路径。失败返回 None。"""
+    if not source_path:
+        return None
+    for src_prefix, rule_fn in OFFICIAL_ICON_RULES.items():
+        if source_path.startswith(src_prefix):
+            filename = source_path[len(src_prefix):]
+            result = rule_fn(filename)
+            if result is not None:
+                return result
+            break  # 前缀命中但规则返回 None（如 skillicons 抓不到 ID）→ 不再继续匹配其他前缀
+    return None
+
+
 def map_icon_path(source_path: str) -> str:
-    """将源数据图片路径映射为 CDN 相对路径。"""
+    """将源数据图片路径映射为 CDN 相对路径。
+
+    根据全局 _USE_OFFICIAL_PATHS 开关选择：
+      - False（默认）：旧短路径 icon/character/1001.png
+      - True：官方 StarRailTextures 仓库相对路径 avatarshopicon/avatar/1001.png
+        （某前缀未注册/规则返回 None 时自动回退旧格式，保证兼容性）
+    """
     if not source_path:
         return ""
+    if _USE_OFFICIAL_PATHS:
+        official = _try_official_path(source_path)
+        if official is not None:
+            return official
+        # 回退：官方规则不覆盖，走旧短路径
     for src_prefix, dst_prefix in ICON_PATH_MAP.items():
         if source_path.startswith(src_prefix):
             return dst_prefix + source_path[len(src_prefix):]

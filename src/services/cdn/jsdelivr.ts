@@ -16,10 +16,11 @@
  * 并重跑 node tools/check-sr-textures.mjs 复核命中率（commit 与脚本内常量同步）。
  */
 import type { CdnCategory } from './base';
+import { USE_OFFICIAL_PATHS, JS_DELIVR_COMMIT, OFFICIAL_ICON_BASE } from '../../lib/constants';
 
-/** 固定 commit（仓库 4.3 快照；升级时同步改此处，与 tools/check-sr-textures.mjs 一致） */
-export const JS_DELIVR_COMMIT = '2a4b9a7eb7ac9db7f48d627fa5cdfd3822c902ce';
-export const JS_DELIVR_BASE = `https://cdn.jsdelivr.net/gh/umaichanuwu/StarRailTextures@${JS_DELIVR_COMMIT}/assets/asbres/spriteoutput`;
+/** 固定 commit 与仓库基址（已统一收口到 lib/constants.ts，此处 re-export 保持路径兼容） */
+export { USE_OFFICIAL_PATHS, JS_DELIVR_COMMIT };
+export const JS_DELIVR_BASE = OFFICIAL_ICON_BASE;
 
 /** 官方拼写差异（AvatarBaseType 数据源验证：Priest 官方写作 Pirest，Elation 官方写作 Joy）；键为项目传入的小写 baseType */
 const PROFESSION_MAP: Record<string, string> = { priest: 'Pirest', elation: 'Joy' };

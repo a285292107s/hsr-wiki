@@ -2,6 +2,27 @@
 
 export const CDN = 'https://static.nanoka.cc';
 
+/**
+ * Step 2: 切生产。converter 已用 --official-icon-paths 全量重跑 public/data/cn，
+ *   非 Spine 图片 icon 字段均为官方 StarRailTextures 仓库相对路径，直接拼 OFFICIAL_ICON_BASE。
+ *   保留 isLegacyIconPath('icon/...') 判断兜底：icon_mini / icon_cutin / rank(星魂) / gridfight-*
+ *   暂未纳入 StarRailTextures 覆盖范围，继续走 nanoka（cdnUri legacy 分支）。
+ * Step 3（后续可选）：给 converter OFFICIAL_ICON_RULES 补上 icon_mini/icon_cutin 等规则后，
+ *   可删除 icons.ts 中全部 USE_OFFICIAL_PATHS=false 分支与 isLegacyIconPath 判断，简化代码。
+ */
+export let USE_OFFICIAL_PATHS = true;
+
+/** 测试/调试专用：运行时切换 USE_OFFICIAL_PATHS（ESM 导入绑定只读，必须通过 setter 修改源模块变量）。 */
+export function setUseOfficialPaths(v: boolean): void {
+  USE_OFFICIAL_PATHS = v;
+}
+
+/** 官方 jsDelivr StarRailTextures 镜像固定 commit（与 tools/check-sr-textures.mjs 一致）。 */
+export const JS_DELIVR_COMMIT = '2a4b9a7eb7ac9db7f48d627fa5cdfd3822c902ce';
+
+/** 官方图片 CDN 基址（USE_OFFICIAL_PATHS=true 时图标直接在此后拼仓库相对路径）。 */
+export const OFFICIAL_ICON_BASE = `https://cdn.jsdelivr.net/gh/umaichanuwu/StarRailTextures@${JS_DELIVR_COMMIT}/assets/asbres/spriteoutput`;
+
 // spine-manifest 版本（缓存键后缀：spine_manifest_official_v{N} / spine_manifest_nanoka_v{N}）。
 // 必须与 public/data/cn/spine-manifest-official.json 与 spine-manifest-nanoka.json 两文件的
 // 顶层 version 字段一致，一致性由 src/services/__tests__/spine-manifest.test.ts 强制校验。

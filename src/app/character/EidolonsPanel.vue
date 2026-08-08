@@ -4,7 +4,7 @@
  */
 import { computed } from 'vue';
 import { extraTerms } from './utils';
-import { eidolonIconUrl, fmtDesc } from '../../lib/format';
+import { iconUrl, fmtDesc } from '../../lib/format';
 import { SECTION_IDX } from './sections';
 import type { CharacterData, SkillExtra } from '../../services/types';
 
@@ -29,7 +29,7 @@ const eidolons = computed<EidolonCard[]>(() => {
   return Object.entries(dd.ranks || {}).map(([num, rk]) => ({
     num,
     name: rk.name,
-    img: eidolonIconUrl(props.charId, num),
+    img: iconUrl(rk.icon),
     descHtml: fmtDesc(rk.desc, rk.param_list || []),
     enhanced: !!(props.enhMark && props.enhMark.rankIds.has(rk.id)),
     terms: extraTerms(rk),

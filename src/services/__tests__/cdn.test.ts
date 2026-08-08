@@ -7,8 +7,8 @@
  *   CDN down 短路 / 恢复重载；仅回退一次防循环）
  * - 官方分支：vi.doMock 注入非空 OFFICIAL_BASE 验证官方优先 + nanoka 回退
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { CDN } from '../../lib/constants';
+import { afterEach, beforeEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { CDN, setUseOfficialPaths } from '../../lib/constants';
 import {
   CDN_CATEGORIES,
   CDN_STALL_TIMEOUT_MS,
@@ -24,6 +24,12 @@ import {
   resolveCdnUri,
   startCdnHealthProbe,
 } from '../cdn';
+
+// 本文件验证 cdn 模块的双源解析与 nanoka fallback 机制（legacy 模式）。
+// 官方路径模式下，icons.ts 直接拼 OFFICIAL_ICON_BASE，不经过 cdn 解析层。
+beforeAll(() => {
+  setUseOfficialPaths(false);
+});
 
 const BASE = `${CDN}${NANOKA_HUD}`;
 

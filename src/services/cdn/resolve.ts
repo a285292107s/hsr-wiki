@@ -2,7 +2,7 @@
  * CDN URL 解析（纯函数）：按分类解析双源 URL + v-html 卡片回退属性。
  * 统一收口：所有图片 URL 构造（icons.ts 及视图内联）最终经此解析。
  */
-import { CDN } from '../../lib/constants';
+import { CDN, USE_OFFICIAL_PATHS } from '../../lib/constants';
 import { escHtml } from '../../lib/html';
 import { CDN_CATEGORIES, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
 import { JS_DELIVR_BASE, JS_DELIVR_RULES, jsdelivrToNanokaFile } from './jsdelivr';
@@ -82,8 +82,12 @@ export function cdnFallbackFromPrimary(primary: string): string {
   return '';
 }
 
-/** 生成 v-html 卡片 <img> 的 data-cdn-fallback 属性（无回退源时返回空串） */
+/** 生成 v-html 卡片 <img> 的 data-cdn-fallback 属性（无回退源时返回空串）
+ *  Step 2: USE_OFFICIAL_PATHS=true → 非 Spine 图片不再使用 nanoka fallback，直接空串。
+ *  T1 回退在 dom.ts 中读到空 fallback 时跳过 primary→nanoka 切换；仍保留 stall→CSS 占位降级。
+ */
 export function cdnImgFallbackAttr(src: string): string {
+  if (USE_OFFICIAL_PATHS) return '';
   const fb = cdnFallbackFromPrimary(src);
   return fb ? ` data-cdn-fallback="${escHtml(fb)}"` : '';
 }

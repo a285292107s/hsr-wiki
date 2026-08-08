@@ -8,7 +8,7 @@
 import { computed, ref } from 'vue';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
 import {
-  fmtDesc, fmtToughness, skillIconUrl,
+  fmtDesc, fmtToughness, skillIconUrl, iconUrl,
 } from '../../lib/format';
 import { ELEM, TYPE } from '../../lib/constants';
 
@@ -103,6 +103,7 @@ interface RatedLink {
   kind: 'rank' | 'tree';
   num: string;
   name: string;
+  icon: string;
   /** 强化描述 HTML（fmtDesc 渲染，含参数高亮） */
   descHtml: string;
 }
@@ -117,6 +118,7 @@ const ratedLinks = computed<RatedLink[]>(() => {
       if (rankIds.includes(rk.id)) {
         links.push({
           kind: 'rank', num: 'E' + num, name: rk.name,
+          icon: rk.icon,
           descHtml: fmtDesc(rk.desc, rk.param_list),
         });
       }
@@ -125,7 +127,7 @@ const ratedLinks = computed<RatedLink[]>(() => {
   // 行迹：point_id → point_name/point_desc 反查；上游数据旧角色缺前缀（如 1005101 vs point_id 11005101），补位容错
   const treeIds = props.sk.rated_skill_tree_id || [];
   if (treeIds.length && data.skill_trees) {
-    const byId = new Map<number, { name: string; desc: string; params: number[] }>();
+    const byId = new Map<number, { name: string; desc: string; params: number[]; icon: string }>();
     for (const tree of Object.values(data.skill_trees)) {
       for (const node of Object.values(tree)) {
         if (node.point_id && node.point_name) {
@@ -133,6 +135,7 @@ const ratedLinks = computed<RatedLink[]>(() => {
             name: node.point_name,
             desc: node.point_desc || '',
             params: node.param_list || [],
+            icon: node.icon || '',
           });
         }
       }
@@ -142,6 +145,7 @@ const ratedLinks = computed<RatedLink[]>(() => {
       if (hit) {
         links.push({
           kind: 'tree', num: String(pid), name: hit.name,
+          icon: hit.icon,
           descHtml: fmtDesc(hit.desc, hit.params),
         });
       }
@@ -310,7 +314,14 @@ function onImgLoad(): void { imgDone.value = true; }
               class="nk-skill__link-item"
               :class="`nk-skill__link-item--${l.kind}`"
             >
-              <span class="nk-skill__link-item-name">{{ l.name }}</span>
+              <div class="nk-skill__link-item-head">
+                <img
+                  class="nk-skill__link-item-icon"
+                  :src="iconUrl(l.icon)"
+                  :alt="l.name"
+                >
+                <span class="nk-skill__link-item-name">{{ l.name }}</span>
+              </div>
               <div class="nk-skill__link-item-desc" v-html="l.descHtml"></div>
             </div>
           </div>

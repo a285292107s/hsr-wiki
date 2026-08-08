@@ -1,13 +1,38 @@
 /**
- * 图标 / 图片 URL 构造器（无状态纯函数，统一经 services/cdn 解析双源）。
- * 属性类 URL（maxLevelStat / maxLevelValue）留在 format.ts。
+ * 图标 / 图片 URL 构造器（无状态纯函数）。
+ * Step 1: USE_OFFICIAL_PATHS=false（默认）→ 统一经 services/cdn 解析双源（jsDelivr + nanoka fallback）。
+ * Step 2: USE_OFFICIAL_PATHS=true → converter 输出官方 StarRailTextures 相对路径时，
+ *   非 GridFight/Rank 等特殊分类直接拼 OFFICIAL_ICON_BASE，删除 nanoka 中转站（仅保留 stall→CSS 占位降级）。
  */
 import { cdnUri, cdnRawUrl } from '../services/cdn';
-import { SERVANT_ICON_KEY, SKILL_ICON_KEY, SKILL_ICON_KEY_BY_NAME, TRAILBLAZER_ICON_FALLBACK } from './constants';
+import {
+  USE_OFFICIAL_PATHS,
+  OFFICIAL_ICON_BASE,
+  SERVANT_ICON_KEY,
+  SKILL_ICON_KEY,
+  SKILL_ICON_KEY_BY_NAME,
+  TRAILBLAZER_ICON_FALLBACK,
+} from './constants';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../services/types';
+
+/** 命途官方仓库拼写修正（Priest→Pirest / Elation→Joy，与 converter OFFICIAL_ICON_RULES 中一致） */
+const PATH_SPELLING: Record<string, string> = { priest: 'Pirest', elation: 'Joy' };
+
+/** USE_OFFICIAL_PATHS=true 时拼接官方基址 + 相对路径；相对路径为空串时返回 '' */
+function official(pathRel: string): string {
+  return pathRel ? `${OFFICIAL_ICON_BASE}/${pathRel}` : '';
+}
+
+/** 判断 iconPath 是否为"旧短路径"格式（icon/ 开头）；新格式直接以官方分类名开头（avatarshopicon/…） */
+function isLegacyIconPath(p: string): boolean {
+  return p.startsWith('icon/');
+}
 
 export function iconUrl(i: string | null | undefined): string {
   if (!i) return '';
+  if (USE_OFFICIAL_PATHS && !isLegacyIconPath(i)) {
+    return official(i);
+  }
   // 从完整路径中提取文件名（兼容 converter 输出的相对路径和 CDN 原始格式）
   const name = i.includes('/') ? i.split('/').pop()! : i;
   return cdnUri('skillicons', name.replace('.png', '.webp'));
@@ -32,22 +57,34 @@ export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | nu
   const iconKey = key === 'Servant' ? (SERVANT_ICON_KEY[id] || key) : key;
   // 开拓者偶数变体无图标资产，回退配对奇数 ID
   id = TRAILBLAZER_ICON_FALLBACK[id] || id;
+  if (USE_OFFICIAL_PATHS) {
+    return official(`skillicons/avatar/${id}/SkillIcon_${id}_${iconKey}.png`);
+  }
   return cdnUri('skillicons', `SkillIcon_${id}_${iconKey}.webp`);
 }
 
-/** 星魂图标：rank/_dependencies/textures/{charId}/{charId}_Rank_{num}.webp */
+/** 星魂图标：StarRailTextures 已收录于 skillicons/avatar/{charId}/SkillIcon_{charId}_Rank{num}.png。 */
 export function eidolonIconUrl(charId: string, rankNum: number | string): string {
+  if (USE_OFFICIAL_PATHS && charId) {
+    return official(`skillicons/avatar/${charId}/SkillIcon_${charId}_Rank${rankNum}.png`);
+  }
   return cdnUri('rank', `${charId}/${charId}_Rank_${rankNum}.webp`);
 }
 
 /** 角色立绘（全身像）：avatardrawcard/{charId}.webp */
 export function avatarDrawCardUrl(charId: string | number): string {
+  if (USE_OFFICIAL_PATHS && charId) {
+    return official(`avatardrawcard/${charId}.png`);
+  }
   return cdnUri('avatardrawcard', `${charId}.webp`);
 }
 
 /** 物品图标：itemfigures/{数字}.webp（从 item_figure_icon_path 解析） */
 export function itemIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
+  if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
+    return official(iconPath);
+  }
   const m = iconPath.match(/(\d+)\.png$/);
   if (!m) return '';
   return cdnUri('itemfigures', `${m[1]}.webp`);
@@ -57,27 +94,45 @@ export function itemIconUrl(iconPath: string | null | undefined): string {
 
 /** 角色头像：avatarshopicon/{charId}.webp */
 export function avatarShopIconUrl(charId: string | number): string {
+  if (USE_OFFICIAL_PATHS && charId) {
+    return official(`avatarshopicon/avatar/${charId}.png`);
+  }
   return charId ? cdnUri('avatarshopicon', `${charId}.webp`) : '';
 }
 
-/** 属性图标：element/{damageType 小写}.webp */
+/** 属性图标：icondamagetype/IconDamageType{damageType 首字母大写 + 尾小写}.png */
 export function elementIconUrl(damageType: string | null | undefined): string {
+  if (USE_OFFICIAL_PATHS && damageType) {
+    const cap = damageType[0].toUpperCase() + damageType.slice(1).toLowerCase();
+    return official(`icondamagetype/IconDamageType${cap}.png`);
+  }
   return damageType ? cdnUri('element', `${damageType.toLowerCase()}.webp`) : '';
 }
 
 /** 命途图标：pathicon/{baseType 小写}.webp */
 export function pathIconUrl(baseType: string | null | undefined): string {
+  if (USE_OFFICIAL_PATHS && baseType) {
+    const k = baseType.toLowerCase();
+    const mapped = PATH_SPELLING[k] || `${k[0].toUpperCase()}${k.slice(1)}`;
+    return official(`professioniconmiddle/IconProfession${mapped}Middle.png`);
+  }
   return baseType ? cdnUri('pathicon', `${baseType.toLowerCase()}.webp`) : '';
 }
 
-/** 光锥立绘：lightconemediumicon/{id}.webp */
+/** 光锥立绘：lightconemediumicon/{id}.png */
 export function lightconeIconUrl(id: string | number): string {
+  if (USE_OFFICIAL_PATHS && id) {
+    return official(`lightconemediumicon/${id}.png`);
+  }
   return id ? cdnUri('lightconemediumicon', `${id}.webp`) : '';
 }
 
 /** 敌对图像：monstermiddleicon/{basename}.webp（从 SpriteOutput/MonsterFigure/Monster_xxx.png 取末段去扩展名） */
 export function monsterIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
+  if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
+    return official(iconPath);
+  }
   const base = iconPath.split('/').pop()?.replace(/\.png$/i, '') || '';
   return base ? cdnUri('monstermiddleicon', `${base}.webp`) : '';
 }
@@ -85,6 +140,9 @@ export function monsterIconUrl(iconPath: string | null | undefined): string {
 /** 敌对全身立绘：monsterfigure/{basename}.webp（ImagePath 末段；无立绘返回空串） */
 export function monsterFigureUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
+  if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
+    return official(iconPath);
+  }
   const base = iconPath.split('/').pop()?.replace(/\.png$/i, '') || '';
   return base ? cdnUri('monsterfigure', `${base}.webp`) : '';
 }

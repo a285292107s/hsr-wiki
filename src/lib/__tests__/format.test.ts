@@ -2,8 +2,8 @@
  * format.ts 纯函数单元测试
  * 内联 fixture 参照本地转换数据真实结构手工构造（测试不读取数据文件，运行时更不依赖）。
  */
-import { describe, it, expect } from 'vitest';
-import { CDN } from '../constants';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { CDN, setUseOfficialPaths } from '../constants';
 import { JS_DELIVR_BASE } from '../../services/cdn';
 import { NkError } from '../errors';
 import {
@@ -13,6 +13,12 @@ import {
   avatarDrawCardUrl, itemName, itemIconUrl, validateCharData,
 } from '../format';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
+
+// 本文件验证 legacy 模式（USE_OFFICIAL_PATHS=false）下的图标 URL 构造与 nanoka CDN 路径。
+// 官方 StarRailTextures 路径模式的断言另起测试文件（或在本文件新开 describe 切换开关）。
+beforeAll(() => {
+  setUseOfficialPaths(false);
+});
 
 /* ─── fixture（最小化 CharacterData，结构对齐本地转换数据角色 JSON） ─── */
 

@@ -23,7 +23,7 @@ if sys.platform == "win32":
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from textmap import load_textmap
-from utils import set_pretty
+from utils import set_pretty, set_official_paths
 from incremental import load_state, save_state, should_skip, update_state
 from converters import paths, elements, items, properties
 from converters import characters, character_detail
@@ -81,6 +81,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="强制全量重跑，忽略增量缓存",
     )
+    parser.add_argument(
+        "--official-icon-paths",
+        action="store_true",
+        help="图标路径输出官方 StarRailTextures 仓库相对路径（默认旧短路径 icon/xxx/yyy.png 格式）",
+    )
     return parser.parse_args()
 
 
@@ -91,6 +96,8 @@ def main() -> None:
     # 输出模式
     if args.pretty:
         set_pretty(True)
+    if args.official_icon_paths:
+        set_official_paths(True)
 
     # 确定要运行的模块
     if args.only:

@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest
-from utils import unwrap_value, map_icon_path, sort_by_id
+from utils import unwrap_value, map_icon_path, sort_by_id, set_official_paths
 
 
 # ─── unwrap_value ───────────────────────────────────────────────
@@ -159,3 +159,110 @@ class TestResolveText:
         import textmap
         textmap._text_map["999"] = "<color=#FFF>原文</color>"
         assert resolve_text({"Hash": 999}, clean=False) == "<color=#FFF>原文</color>"
+
+
+# ─── map_icon_path (官方路径模式：--official-icon-paths) ─────────
+
+class TestMapIconPathOfficial:
+    """OFFICIAL_ICON_RULES 映射：SpriteOutput 前缀 → StarRailTextures 仓库相对路径。"""
+
+    @pytest.fixture(autouse=True)
+    def toggle_official_mode(self):
+        set_official_paths(True)
+        yield
+        set_official_paths(False)  # 恢复，避免影响 TestMapIconPath
+
+    # ── 角色头像（avatarshopicon/avatar/{id}.png）──
+    def test_avatarshopicon(self):
+        src = "SpriteOutput/AvatarIcon/Avatar/1001.png"
+        assert map_icon_path(src) == "avatarshopicon/avatar/1001.png"
+
+    def test_avatarroundicon(self):
+        src = "SpriteOutput/AvatarRoundIcon/Avatar/1308.png"
+        assert map_icon_path(src) == "avatarroundicon/avatar/1308.png"
+
+    # ── 立绘（avatardrawcard/{id}.png）──
+    def test_avatardrawcard(self):
+        src = "SpriteOutput/AvatarDrawCard/1001.png"
+        assert map_icon_path(src) == "avatardrawcard/1001.png"
+
+    # ── 光锥（lightconemediumicon/{id}.png）──
+    def test_lightconemediumicon(self):
+        src = "SpriteOutput/LightConeMediumIcon/23001.png"
+        assert map_icon_path(src) == "lightconemediumicon/23001.png"
+
+    # ── 物品（小图标 + 大图都走 itemfigures/{stem}.png）──
+    def test_itemicon_small(self):
+        src = "SpriteOutput/ItemIcon/350101.png"
+        assert map_icon_path(src) == "itemfigures/350101.png"
+
+    def test_itemfigures_large(self):
+        src = "SpriteOutput/ItemFigures/350101.png"
+        assert map_icon_path(src) == "itemfigures/350101.png"
+
+    # ── 元素：源文件名带 IconDamageType 前缀，需要去掉前缀后规范化（首字母大写 + 尾部小写）──
+    def test_element_fire(self):
+        src = "SpriteOutput/IconDamageType/IconDamageTypeFire.png"
+        assert map_icon_path(src) == "icondamagetype/IconDamageTypeFire.png"
+
+    def test_element_ice_lowercase(self):
+        """官方元素名首字母大写，尾部小写规范化。"""
+        src = "SpriteOutput/IconDamageType/IconDamageTypeice.png"
+        assert map_icon_path(src) == "icondamagetype/IconDamageTypeIce.png"
+
+    # ── 命途：源文件名 IconProfession{P}Middle.png；Priest→Pirest，Elation→Joy（官方拼写错误修正）──
+    def test_pathicon_priest_spelling_fix(self):
+        src = "SpriteOutput/ProfessionIconMiddle/IconProfessionPriestMiddle.png"
+        assert map_icon_path(src) == "professioniconmiddle/IconProfessionPirestMiddle.png"
+
+    def test_pathicon_elation_spelling_fix(self):
+        src = "SpriteOutput/ProfessionIconMiddle/IconProfessionElationMiddle.png"
+        assert map_icon_path(src) == "professioniconmiddle/IconProfessionJoyMiddle.png"
+
+    def test_pathicon_normal(self):
+        """无拼写修正的命途（Warrior/Rogue 等）直接保留。"""
+        src = "SpriteOutput/ProfessionIconMiddle/IconProfessionWarriorMiddle.png"
+        assert map_icon_path(src) == "professioniconmiddle/IconProfessionWarriorMiddle.png"
+
+    # ── 技能图标：真实路径 SpriteOutput/SkillIcons/Avatar/{id}/SkillIcon_{id}_{Type}.png ──
+    def test_skillicons_with_id(self):
+        src = "SpriteOutput/SkillIcons/Avatar/1001/SkillIcon_1001_Ultra.png"
+        assert map_icon_path(src) == "skillicons/avatar/1001/SkillIcon_1001_Ultra.png"
+
+    def test_skillicons_rank_eidolon(self):
+        """星魂（Rank）图标同目录 SkillIcon_{id}_RankN.png → skillicons/avatar/{id}/ 下。"""
+        src = "SpriteOutput/SkillIcons/Avatar/1001/SkillIcon_1001_Rank6.png"
+        assert map_icon_path(src) == "skillicons/avatar/1001/SkillIcon_1001_Rank6.png"
+
+    def test_skillicons_no_id_fallback_legacy(self):
+        """不在 Avatar/ 子目录下的 SkillIcons 路径：OFFICIAL 规则未注册 → 走 ICON_PATH_MAP 回退。"""
+        src = "SpriteOutput/SkillIcons/skill_common.png"
+        assert map_icon_path(src) == "icon/skill/skill_common.png"
+
+    # ── 怪物（中图标 + 大图）──
+    def test_monstermiddleicon(self):
+        src = "SpriteOutput/MonsterIcon/Monster_Avatar_01.png"
+        assert map_icon_path(src) == "monstermiddleicon/Monster_Avatar_01.png"
+
+    def test_monsterfigure(self):
+        src = "SpriteOutput/MonsterFigure/Manticore.png"
+        assert map_icon_path(src) == "monsterfigure/Manticore.png"
+
+    # ── 未注册前缀：回退旧短路径（渐进兼容）──
+    def test_unregistered_prefix_fallback_legacy(self):
+        """SpriteOutput/AvatarMiniIcon 不在 OFFICIAL_ICON_RULES 中 → 走 ICON_PATH_MAP。"""
+        src = "SpriteOutput/AvatarMiniIcon/9001.png"
+        assert map_icon_path(src) == "icon/character_mini/9001.png"
+
+    def test_element_color_fallback_legacy(self):
+        """IconNatureColor 在旧 ICON_PATH_MAP 中但 OFFICIAL 未注册 → 回退。"""
+        src = "SpriteOutput/UI/Nature/IconNatureColor/Fire.png"
+        assert map_icon_path(src) == "icon/element_color/Fire.png"
+
+    def test_empty_string(self):
+        assert map_icon_path("") == ""
+
+    def test_unknown_path_returns_original(self):
+        src = "Unknown/Path/icon.png"
+        assert map_icon_path(src) == src
+
