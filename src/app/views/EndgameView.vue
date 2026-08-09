@@ -161,18 +161,6 @@ const tierceDamage = computed<string[]>(() => data.value?.tierce?.damage_types |
 const tierceCountdown = computed<number>(() => data.value?.tierce?.countdown || 0);
 const tierceScore = computed<number | null>(() => data.value?.tierce?.score ?? null);
 const tierceLevel = computed<number>(() => data.value?.tierce?.level || 0);
-/** 回合预算换算：总回合（如 45）− 各档“剩余轮数”目标 = 各档需完成轮数（仅回合制星启，
- *  如“剩余≥15轮” = 45−15 = 30 轮内完成；把内部计数翻译成玩家可行动的档位门槛） */
-const tierceRoundHint = computed(() => {
-  const total = tierceCountdown.value;
-  if (!total) return '';
-  const bands = tierceTargets.value
-    .filter((t) => t.type === 'ROUNDS_LEFT' && t.param != null && t.param < total)
-    .map((t) => total - (t.param as number));
-  return bands.length
-    ? `总预算 ${total} 轮 · 目标档位需 ≤${bands.join(' / ≤')} 轮`
-    : `总回合预算（三场共用）`;
-});
 const tierceTargets = computed(() => data.value?.tierce?.targets || []);
 const tierceMonsters = computed(() => data.value?.tierce?.monsters || []);
 /** 星启 3 节点敌方（节点 1/2 = 常规最高难度关上下半场；节点 3 = 星启附加关） */
@@ -489,7 +477,6 @@ onBeforeUnmount(() => {
         <div class="nk-egd-hero__plate">
           <span class="nk-egd-hero__emblem" v-html="modeInfo?.emblem || ''"></span>
           <img v-if="seasonArt" class="nk-egd-hero__art" :src="seasonArt" alt="" aria-hidden="true" @error="hideOnError">
-          <span class="nk-egd-hero__num" :class="{ 'nk-egd-hero__num--long': seasonId.length >= 4 }">{{ seasonId }}</span>
         </div>
         <div class="nk-egd-hero__panel">
           <div class="nk-egd-hero__camp">{{ modeInfo?.label || modeKey }} · {{ modeInfo?.en || '' }}</div>
@@ -500,6 +487,7 @@ onBeforeUnmount(() => {
               :class="`nk-egd-hero__status--${status === '进行中' ? 'live' : status === '已结束' ? 'ended' : status === '未开始' ? 'upcoming' : 'unknown'}`"
             >{{ status }}</span>
             <span v-if="dateRange" class="nk-egd-hero__date">{{ dateRange }}</span>
+            <span class="nk-egd-hero__sid" :title="`赛季编号 ${seasonId}`">No.{{ seasonId }}</span>
           </div>
         </div>
       </header>
@@ -516,7 +504,6 @@ onBeforeUnmount(() => {
                 <span class="nk-egd-fury__label">战意机制</span>
                 <article class="nk-egd-buff">
                   <div class="nk-egd-buff__head">
-                    <span class="nk-egd-buff__idx">01</span>
                     <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" :src="buffIconUrl(subBuffsMech)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
                     <h2 class="nk-egd-buff__name">{{ subBuffsMech.name }}</h2>
                   </div>
@@ -533,7 +520,6 @@ onBeforeUnmount(() => {
                     :style="{ '--i': i + 1 }"
                   >
                     <div class="nk-egd-buff__head">
-                      <span class="nk-egd-buff__idx">{{ String(i + 2).padStart(2, '0') }}</span>
                       <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
                       <h2 class="nk-egd-buff__name">{{ b.name }}</h2>
                     </div>
@@ -566,7 +552,6 @@ onBeforeUnmount(() => {
                 :style="{ '--i': i }"
               >
                 <div class="nk-egd-buff__head">
-                  <span class="nk-egd-buff__idx">{{ String(i + 1).padStart(2, '0') }}</span>
                   <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
                   <h2 class="nk-egd-buff__name">{{ b.name }}</h2>
                 </div>
@@ -730,17 +715,14 @@ onBeforeUnmount(() => {
                 <div v-if="tierceDamage.length" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val nk-egd-tierce__val--elems" v-html="elemRow(tierceDamage)"></span>
                   <span class="nk-egd-tierce__label">推荐属性 RECOMMENDED</span>
-                  <span class="nk-egd-tierce__hint">关卡推荐弱点</span>
                 </div>
                 <div v-if="tierceLevel" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val">{{ tierceLevel }}</span>
                   <span class="nk-egd-tierce__label">敌人等级 ENEMY LV</span>
-                  <span class="nk-egd-tierce__hint">当期最高难度</span>
                 </div>
                 <div v-if="tierceCountdown" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val">{{ tierceCountdown }}</span>
-                  <span class="nk-egd-tierce__label">回合 CYCLES</span>
-                  <span class="nk-egd-tierce__hint">{{ tierceRoundHint }}</span>
+                  <span class="nk-egd-tierce__label">回合限制 CYCLES</span>
                 </div>
                 <div v-if="tierceScore != null" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val">{{ tierceScore.toLocaleString() }}</span>
@@ -817,7 +799,6 @@ onBeforeUnmount(() => {
                   @click="toggleFloor(f.floor)"
                 >
                   <svg class="nk-egd-floor__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-                  <span class="nk-egd-floor__idx">{{ String(f.floor).padStart(2, '0') }}</span>
                   <span class="nk-egd-floor__title">第 {{ f.floor }} 层</span>
                   <span v-if="f.name" class="nk-egd-floor__name">{{ f.name }}</span>
                   <span

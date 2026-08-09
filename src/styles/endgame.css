@@ -25,31 +25,31 @@
 /* 档案装帧角标（右上；弱化至 26%） */
 .nk-eg-card::after { content: ''; position: absolute; top: 9px; right: 9px; width: 13px; height: 13px; border-top: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); border-right: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); opacity: 0.5; transition: opacity 0.25s, border-color 0.25s; pointer-events: none; }
 
-/* 铭牌：模式徽记 + 星启/最终层标识（弱点已移除） */
+/* 铭牌：模式徽记 + 赛季图标（最大化显示，徽章已移至 body/head） */
 /* 铭牌：模式色身份锚点（静态弱化，hover 时身份浮现） */
-.nk-eg-card__plate { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 88px; min-height: 96px; flex-shrink: 0; background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 8%, color-mix(in srgb, var(--blk-900) 62%, transparent)) 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 100%); border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent); border-radius: 8px; transition: border-color 0.28s, background 0.28s, box-shadow 0.28s; }
-.nk-eg-card__plate::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 7px; height: 1px; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--eg-color) 30%, transparent) 50%, transparent 100%); opacity: 0.6; }
-.nk-eg-card__emblem { width: 28px; height: 28px; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); transition: color 0.28s, filter 0.28s; }
+.nk-eg-card__plate { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100px; min-height: 100px; flex-shrink: 0; padding: 10px 8px; box-sizing: border-box; background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 8%, color-mix(in srgb, var(--blk-900) 62%, transparent)) 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 100%); border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent); border-radius: 8px; transition: border-color 0.28s, background 0.28s, box-shadow 0.28s; }
+.nk-eg-card__plate::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: 8px; height: 1px; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--eg-color) 30%, transparent) 50%, transparent 100%); opacity: 0.6; }
+.nk-eg-card__emblem { width: 40px; height: 40px; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); transition: color 0.28s, filter 0.28s; }
 .nk-eg-card__emblem svg { width: 100%; height: 100%; }
-/* 赛季页签图标（TabIcon）：absolute 置顶于铭牌。有图标时隐藏默认 SVG 徽记
-   （--has-art；visibility 隐藏保留占位维持布局），图标加载失败经 onerror 隐藏自身
-   并移除 --has-art 类，露出徽记兜底 */
+/* 赛季页签图标（TabIcon）：absolute 居中于铭牌，最大化占据空间（移除底部徽章后可放大）；
+   有图标时隐藏默认 SVG 徽记（--has-art；visibility 隐藏保留占位维持布局），
+   图标加载失败经 onerror 隐藏自身并移除 --has-art 类，露出徽记兜底 */
 .nk-eg-card--has-art .nk-eg-card__emblem { visibility: hidden; }
 .nk-eg-card__art {
   position: absolute;
-  top: 8px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
   background: var(--blk-800);
   object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
-/* 铭牌底部徽标：星启模式 / 最终层标识 */
-.nk-eg-card__plate-badge { display: flex; align-items: center; justify-content: center; min-height: 14px; }
-/* 铭牌徽标（星启 / 骑士·王棋）：与详情页 stagelabel 同配方，模式色收敛至铭牌内 */
+/* 模式徽章（星启 / 骑士·王棋）：移至 body/head 行，在名称与状态徽章之间；
+   详情页 stagelabel 同配方，模式色收敛，与 name 间距较小，与 status 间距较大 */
+.nk-eg-card__head > .nk-eg-card__tier { margin: 1px 0 0 -2px; flex-shrink: 0; }
 .nk-eg-card__tier {
   font-family: var(--font-hud);
   font-size: 0.5rem;
@@ -114,9 +114,9 @@
 @media (max-width: 767px) {
   .nk-eg-grid { grid-template-columns: 1fr; }
   .nk-eg-card { padding: 14px; gap: 12px; }
-  .nk-eg-card__plate { width: 76px; min-height: 84px; gap: 8px; }
-  .nk-eg-card__emblem { width: 24px; height: 24px; }
-  .nk-eg-card__art { width: 38px; height: 38px; top: 6px; }
+  .nk-eg-card__plate { width: 84px; min-height: 84px; gap: 8px; padding: 8px 6px; }
+  .nk-eg-card__emblem { width: 34px; height: 34px; }
+  .nk-eg-card__art { width: 56px; height: 56px; }
   .nk-eg-card__name { font-size: 0.9rem; }
   .nk-eg-card__status { margin-left: 8px; }
 }

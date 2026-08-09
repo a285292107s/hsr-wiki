@@ -278,17 +278,15 @@ export const endgamePage: CatalogPageConfig = {
 
     const tierce = item.tierce as { damage_types?: string[]; countdown?: number } | undefined;
     const levels = item.levels as { kind?: string }[] | undefined;
-    let badgeHtml = '';
+    let tierHtml = '';
     if (tierce) {
-      badgeHtml = '<span class="nk-eg-card__tier">✦ 星启</span>';
+      tierHtml = '<span class="nk-eg-card__tier">✦ 星启</span>';
     } else if (levels?.length) {
       // 异相仲裁：每期 3 骑士试炼 + 1 王棋最终关（官方术语）
       const knights = levels.filter((l) => l.kind === 'knight').length;
       const hasKing = levels.some((l) => l.kind === 'king');
-      badgeHtml = `<span class="nk-eg-card__tier">✦ 骑士×${knights}${hasKing ? ' · 王棋' : ''}</span>`;
+      tierHtml = `<span class="nk-eg-card__tier">✦ 骑士×${knights}${hasKing ? ' · 王棋' : ''}</span>`;
     }
-    const plateBadge = badgeHtml
-      ? `<span class="nk-eg-card__plate-badge">${badgeHtml}</span>` : '';
 
     // 赛季增益（文本胶囊，最多 3 个）
     const buffs = Array.isArray(item.buffs)
@@ -322,11 +320,11 @@ export const endgamePage: CatalogPageConfig = {
       <div class="nk-eg-card__plate">
         <span class="nk-eg-card__emblem">${mode?.emblem || ''}</span>
         ${artHtml}
-        ${plateBadge}
       </div>
       <div class="nk-eg-card__body">
         <div class="nk-eg-card__head">
           <span class="nk-eg-card__name">${escHtml(item.name) || '未命名赛季'}</span>
+          ${tierHtml}
           ${badge}
         </div>
         ${date ? `<div class="nk-eg-card__daterow">${date}</div>` : ''}
