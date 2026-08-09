@@ -112,8 +112,8 @@ export function mazeDateRange(info: MazeListEntry): string {
   return '';
 }
 
-/** 状态 → CSS 修饰类 */
-const MAZE_STATUS_CLASS: Record<string, string> = {
+/** 状态 → CSS 修饰类（目录页卡片与详情页 Hero 共用） */
+export const MAZE_STATUS_CLASS: Record<string, string> = {
   '进行中': 'live',
   '已结束': 'ended',
   '未开始': 'upcoming',

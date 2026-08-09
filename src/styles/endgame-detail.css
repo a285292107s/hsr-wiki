@@ -288,7 +288,9 @@
 /* ═══════════════════════════════════════════
    内容区 · 宽度体系（§13.9）：面板 L1 1000，模块 L2 952，文本 L3 800
 ═══════════════════════════════════════════ */
-.nk-egd-body .nk-panel { max-width: var(--nk-detail-max); }
+/* 终局面板：独立于 tab 面板原语（tokens.css .nk-panel 默认 display:none 供多 Tab 激活切换；
+   详情页唯一面板直接显示，沿用居中宽度与 nk-fade 入场） */
+.nk-egd-body .nk-egd-panel { display: block; max-width: var(--nk-detail-max); margin: 0 auto; padding: 24px 16px 60px; animation: nk-fade 0.3s var(--ease); }
 .nk-egd-body .nk-title,
 .nk-egd-body .nk-egd-fury,
 .nk-egd-body .nk-egd-buffs,
@@ -1092,17 +1094,8 @@
   color: var(--text3);
   white-space: nowrap;
 }
-/* 指标副注：把内部计数翻译成玩家语义（当期最高难度 / 总预算与档位换算 / 通关分数线） */
-.nk-egd-tierce__hint {
-  font-size: 0.58rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  color: var(--text3);
-  text-align: center;
-  max-width: 150px;
-}
 /* 星启目标（整场挑战评价条件：分数档/剩余轮数/减员限制，与节点敌方正交） */
-.nk-egd-tierce__targets { display: flex; flex-direction: column; gap: 8px; }
+.nk-egd-tierce__targets { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .nk-egd-node {
   display: flex;
   align-items: center;
@@ -1152,10 +1145,12 @@
 .nk-egd-tierce__mons { margin-bottom: 0; }
 /* 星启敌方波次分组（波前精英 + 终幕 Boss；HUD 小标签 + 卡片网格） */
 .nk-egd-tierce__waves {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-bottom: 8px;
 }
 /* 星启敌方节点分组（节点 = 第二级分组，与“上半场/下半场”同级）：节点间 14px / 波内 8px 的层级节奏 */
 .nk-egd-tierce__node {

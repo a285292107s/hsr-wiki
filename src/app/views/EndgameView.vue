@@ -7,7 +7,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { ENDGAME_MODES, mazeStatus, mazeDateRange, seasonArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../catalog/pages/endgame';
+import { ENDGAME_MODES, MAZE_STATUS_CLASS, mazeStatus, mazeDateRange, seasonArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../catalog/pages/endgame';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
   loadLocalItems,
@@ -137,6 +137,8 @@ watch(
 const modeKey = computed(() => String(route.params.mode || ''));
 const modeInfo = computed(() => ENDGAME_MODES.find((m) => m.key === modeKey.value));
 const status = computed(() => (data.value ? mazeStatus(data.value) : ''));
+/** 赛季状态 → CSS 修饰类（与目录页同源，单一事实来源） */
+const statusClass = computed(() => MAZE_STATUS_CLASS[status.value] || 'unknown');
 const dateRange = computed(() => (data.value ? mazeDateRange(data.value) : ''));
 const seasonId = computed(() => String(route.params.id || ''));
 /** 赛季图标（seasonArtUrl：赛季专属优先，玩法级默认兜底；无图/路径不匹配时空串不渲染） */
@@ -259,8 +261,12 @@ function monTitle(m: MazeMonsterInfo): string {
   return parts.join(' · ');
 }
 
-/** 波次分组：带 wave 的敌方 → [{wave, items}]（按出场序；无 wave 视为单波） */
+/** 波次分组：带 wave 的敌方 → [{wave, items}]（按出场序；无 wave 视为单波）。
+ *  模板中 v-for 与 v-if 对同一数组引用各调用一次，WeakMap 按引用缓存避免重复分组 */
+const waveGroupsCache = new WeakMap<MazeMonsterInfo[], { wave: number; items: MazeMonsterInfo[] }[]>();
 function monWaveGroups(mons: MazeMonsterInfo[]): { wave: number; items: MazeMonsterInfo[] }[] {
+  const cached = waveGroupsCache.get(mons);
+  if (cached) return cached;
   const groups: { wave: number; items: MazeMonsterInfo[] }[] = [];
   for (const m of mons) {
     const w = m.wave || 1;
@@ -271,6 +277,7 @@ function monWaveGroups(mons: MazeMonsterInfo[]): { wave: number; items: MazeMons
       last.items.push(m);
     }
   }
+  waveGroupsCache.set(mons, groups);
   return groups;
 }
 
@@ -484,7 +491,7 @@ onBeforeUnmount(() => {
           <div class="nk-egd-hero__meta">
             <span
               class="nk-egd-hero__status"
-              :class="`nk-egd-hero__status--${status === '进行中' ? 'live' : status === '已结束' ? 'ended' : status === '未开始' ? 'upcoming' : 'unknown'}`"
+              :class="`nk-egd-hero__status--${statusClass}`"
             >{{ status }}</span>
             <span v-if="dateRange" class="nk-egd-hero__date">{{ dateRange }}</span>
             <span class="nk-egd-hero__sid" :title="`赛季编号 ${seasonId}`">No.{{ seasonId }}</span>
@@ -494,18 +501,18 @@ onBeforeUnmount(() => {
 
       <!-- 内容面板 -->
       <div class="nk-panels nk-egd-body">
-        <div class="nk-panel nk-panel--active">
+        <div class="nk-egd-panel">
           <!-- 战意机制：战意（Fever）赛季主题机制 + 两阶段效果（官网“战意机制 / 战意效果”
                对应 SubMazeBuffList：机制 1 条 + 效果 2 条，仅虚构叙事 Fever 赛季） -->
           <template v-if="modeKey === 'story' && subBuffsMech">
-            <div id="egd-sub-buffs" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['sub-buffs'] }}</span>战意机制 FURY</div>
+            <h2 id="egd-sub-buffs" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['sub-buffs'] }}</span>战意机制 FURY</h2>
             <div class="nk-egd-fury">
               <div class="nk-egd-fury__mech">
                 <span class="nk-egd-fury__label">战意机制</span>
                 <article class="nk-egd-buff">
                   <div class="nk-egd-buff__head">
                     <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" :src="buffIconUrl(subBuffsMech)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-                    <h2 class="nk-egd-buff__name">{{ subBuffsMech.name }}</h2>
+                    <h3 class="nk-egd-buff__name">{{ subBuffsMech.name }}</h3>
                   </div>
                   <p v-if="subBuffsMech.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(subBuffsMech)"></p>
                 </article>
@@ -521,7 +528,7 @@ onBeforeUnmount(() => {
                   >
                     <div class="nk-egd-buff__head">
                       <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-                      <h2 class="nk-egd-buff__name">{{ b.name }}</h2>
+                      <h3 class="nk-egd-buff__name">{{ b.name }}</h3>
                     </div>
                     <p v-if="b.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(b)"></p>
                   </article>
@@ -533,7 +540,7 @@ onBeforeUnmount(() => {
           <!-- 赛季增益：当期环境效果（记忆紊流/战意/坚防守备），作用于全赛季挑战（星启同样生效）
                独立模块——与层级内 buff（关卡级）区分；peak 的王棋增益在王棋章节内展示，不在此处 -->
           <template v-if="modeKey !== 'peak' && data.buffs?.length">
-            <div id="egd-buffs" class="nk-title">
+            <h2 id="egd-buffs" class="nk-title">
               <img
                 v-if="seasonThemeIcon"
                 class="nk-egd-title-icon"
@@ -543,7 +550,7 @@ onBeforeUnmount(() => {
                 @error="($event.target as HTMLImageElement).style.display='none'"
               >
               <span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>赛季增益 BUFFS
-            </div>
+            </h2>
             <div class="nk-egd-buffs">
               <article
                 v-for="(b, i) in data.buffs"
@@ -553,7 +560,7 @@ onBeforeUnmount(() => {
               >
                 <div class="nk-egd-buff__head">
                   <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-                  <h2 class="nk-egd-buff__name">{{ b.name }}</h2>
+                  <h3 class="nk-egd-buff__name">{{ b.name }}</h3>
                 </div>
                 <p v-if="b.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(b)"></p>
               </article>
@@ -562,7 +569,7 @@ onBeforeUnmount(() => {
 
           <!-- 异相仲裁关卡组成（3 骑士试炼 + 1 王棋最终关，含绝境变体） -->
           <template v-if="modeKey === 'peak' && peakLevels.length">
-            <div id="egd-levels" class="nk-title"><span class="nk-title__idx">01</span>关卡组成 LEVELS</div>
+            <h2 id="egd-levels" class="nk-title"><span class="nk-title__idx">01</span>关卡组成 LEVELS</h2>
             <!-- 段位徽章：当期青铜/白银/黄金/彩钻勋章（ChallengeBadgeConfig） -->
             <div v-if="data.badges?.length" class="nk-egd-peak__badges">
               <div v-for="b in data.badges" :key="b.level" class="nk-egd-peak__badge" :title="b.desc || b.name">
@@ -582,7 +589,7 @@ onBeforeUnmount(() => {
                   <span class="nk-egd-peak__kind" :class="`nk-egd-peak__kind--${l.kind}`">
                     {{ l.kind === 'king' ? '王棋' : '骑士' }}
                   </span>
-                  <h2 class="nk-egd-floor__title">{{ l.name }}</h2>
+                  <h3 class="nk-egd-floor__title">{{ l.name }}</h3>
                   <span v-if="l.level" class="nk-egd-floor__data">
                     <span class="nk-egd-floor__dataitem">
                       <span class="nk-egd-floor__dataval">{{ l.level }}</span>
@@ -708,7 +715,7 @@ onBeforeUnmount(() => {
 
           <!-- 星启模式（独立进阶关卡：星启弱点 / 目标 / Boss；当期赛季增益见上方独立模块） -->
           <template v-if="data.tierce">
-            <div id="egd-tierce" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['tierce'] }}</span>星启模式 STARLIT</div>
+            <h2 id="egd-tierce" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['tierce'] }}</span>星启模式 STARLIT</h2>
             <div class="nk-egd-tierce">
               <!-- 星启节点指标：推荐属性 / 等级 / 回合 / 分数（副注把内部计数翻译成玩家语义） -->
               <div v-if="tierceDamage.length || tierceLevel || tierceCountdown || tierceScore != null" class="nk-egd-tierce__stats">
@@ -726,33 +733,32 @@ onBeforeUnmount(() => {
                 </div>
                 <div v-if="tierceScore != null" class="nk-egd-tierce__stat">
                   <span class="nk-egd-tierce__val">{{ tierceScore.toLocaleString() }}</span>
-                  <span class="nk-egd-tierce__label">分数 SCORE</span>
-                  <span class="nk-egd-tierce__hint">通关分数线</span>
+                  <span class="nk-egd-tierce__label">分数限制 SCORE</span>
                 </div>
               </div>
               <!-- 星启目标：整场星启挑战的评价条件（分数档/剩余轮数/减员限制），
                    与 3 个节点（敌方配置）正交，非节点级条件 -->
-              <div v-if="tierceTargets.length" class="nk-egd-tierce__targets">
-                <div v-for="(t, i) in tierceTargets" :key="i" class="nk-egd-node">
+              <ol v-if="tierceTargets.length" class="nk-egd-tierce__targets">
+                <li v-for="(t, i) in tierceTargets" :key="i" class="nk-egd-node">
                   <span class="nk-egd-node__idx">目标 {{ String(i + 1).padStart(2, '0') }}</span>
                   <span v-if="t.type && TARGET_TYPE_LABEL[t.type]" class="nk-egd-node__type">{{ TARGET_TYPE_LABEL[t.type] }}</span>
                   <span class="nk-egd-node__text" v-html="targetHtml(t)"></span>
-                </div>
-              </div>
+                </li>
+              </ol>
               <!-- 星启敌方：3 节点各自挑战（节点 1/2 = 常规最高难度关上下半场；节点 3 = 星启附加关），
                    节点内按波次分组的完整信息卡
                    分组层级视觉：节点 = 模式色胶囊（与“上半场/下半场”同级），波 = 灰色小字（次级） -->
-              <div v-if="tierceNodes.length" class="nk-egd-tierce__waves">
-                <div v-for="(nd, ni) in tierceNodes" :key="ni" class="nk-egd-tierce__node">
-                  <span class="nk-egd-tierce__nodelabel">节点 {{ String(nd.idx).padStart(2, '0') }}</span>
+              <ul v-if="tierceNodes.length" class="nk-egd-tierce__waves">
+                <li v-for="(nd, ni) in tierceNodes" :key="ni" class="nk-egd-tierce__node">
+                  <h3 class="nk-egd-tierce__nodelabel">节点 {{ String(nd.idx).padStart(2, '0') }}</h3>
                   <div v-for="(g, gi) in monWaveGroups(nd.monsters)" :key="gi" class="nk-egd-tierce__wave">
                     <span v-if="monWaveGroups(nd.monsters).length > 1" class="nk-egd-tierce__wavelabel">第 {{ g.wave }} 波</span>
                     <div class="nk-egd-mons">
                       <EnemyCard v-for="m in g.items" :key="`${m.id}-${ni}-${gi}`" :monster="m" />
                     </div>
                   </div>
-                </div>
-              </div>
+                </li>
+              </ul>
               <!-- 兼容：无 nodes 时回退 tierceMonsters 直接渲染 -->
               <div v-else-if="tierceMonsters.length" class="nk-egd-mons">
                 <EnemyCard v-for="m in tierceMonsters" :key="m.id" :monster="m" />
@@ -781,7 +787,7 @@ onBeforeUnmount(() => {
           <!-- 关卡层级：以层级为章节（倒序：最高层在前），模块内展示推荐属性 / 敌方配置 / 可用增益 / 挑战目标；
                层级默认折叠（>6 层），层头即索引 -->
           <template v-if="floorSections.length">
-            <div id="egd-floors" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['floors'] }}</span>关卡层级 LEVELS</div>
+            <h2 id="egd-floors" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['floors'] }}</span>关卡层级 LEVELS</h2>
             <div class="nk-egd-floors">
               <section
                 v-for="(f, i) in floorSections"
@@ -789,6 +795,7 @@ onBeforeUnmount(() => {
                 class="nk-egd-floor"
                 :class="{ 'nk-egd-floor--open': isExpanded(f.floor) }"
                 :style="{ '--i': i }"
+                :aria-labelledby="`floor-title-${f.floor}`"
               >
                 <!-- 层头（button：点击切换折叠；折叠态即层级索引） -->
                 <button
@@ -799,7 +806,7 @@ onBeforeUnmount(() => {
                   @click="toggleFloor(f.floor)"
                 >
                   <svg class="nk-egd-floor__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-                  <span class="nk-egd-floor__title">第 {{ f.floor }} 层</span>
+                  <span :id="`floor-title-${f.floor}`" class="nk-egd-floor__title">第 {{ f.floor }} 层</span>
                   <span v-if="f.name" class="nk-egd-floor__name">{{ f.name }}</span>
                   <span
                     v-if="f.level || f.countdown || (modeKey === 'story' && data.clear_score)"
@@ -844,94 +851,94 @@ onBeforeUnmount(() => {
                       </div>
                       <div class="nk-egd-floor__row nk-egd-floor__row--mons">
                         <span class="nk-egd-floor__label">敌方配置</span>
-                        <span class="nk-egd-mons">
+                        <div class="nk-egd-mons">
                           <EnemyCard :monster="p" />
-                        </span>
+                        </div>
                       </div>
                     </div>
                   </template>
                   <template v-else>
-                  <div v-if="stageHasContent(f.stage1)" class="nk-egd-floor__stage">
-                    <div class="nk-egd-floor__stagehead">
-                      <span class="nk-egd-floor__stagelabel">上半场</span>
-                      <span v-if="monCountLabel(f.stage1?.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(f.stage1?.monsters) }}</span>
-                    </div>
-                    <div v-if="f.stage1?.damage?.length" class="nk-egd-floor__row">
-                      <span class="nk-egd-floor__label">推荐属性</span>
-                      <span class="nk-egd-floor__elems" v-html="elemRow(f.stage1.damage)"></span>
-                    </div>
-                    <div v-if="f.stage1?.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
-                      <span class="nk-egd-floor__label">敌方配置</span>
-                      <span class="nk-egd-floor__monswrap">
-                        <span v-for="(g, gi) in monWaveGroups(f.stage1.monsters)" :key="gi" class="nk-egd-floor__wave">
-                          <span v-if="monWaveGroups(f.stage1.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
-                          <!-- 末日幻影纯 Boss 战：完整信息卡；其余模式：小图行 -->
-                          <span v-if="modeKey === 'boss'" class="nk-egd-mons">
-                            <EnemyCard v-for="m in g.items" :key="`${m.id}-${gi}`" :monster="m" />
-                          </span>
-                          <span v-else class="nk-egd-floor__mons">
-                            <router-link
-                              v-for="m in g.items"
-                              :key="`${m.id}-${gi}`"
-                              class="nk-egd-floor__monlink"
-                              :to="`/monster/${m.tpl || m.id}`"
-                              :title="monTitle(m)"
-                              :aria-label="`查看 ${m.name} 详情`"
-                            >
-                              <img
-                                class="nk-egd-floor__mon"
-                                :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                                :alt="m.name"
-                                loading="lazy"
-                                @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                    <div v-if="stageHasContent(f.stage1)" class="nk-egd-floor__stage">
+                      <div class="nk-egd-floor__stagehead">
+                        <span class="nk-egd-floor__stagelabel">上半场</span>
+                        <span v-if="monCountLabel(f.stage1?.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(f.stage1?.monsters) }}</span>
+                      </div>
+                      <div v-if="f.stage1?.damage?.length" class="nk-egd-floor__row">
+                        <span class="nk-egd-floor__label">推荐属性</span>
+                        <span class="nk-egd-floor__elems" v-html="elemRow(f.stage1.damage)"></span>
+                      </div>
+                      <div v-if="f.stage1?.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
+                        <span class="nk-egd-floor__label">敌方配置</span>
+                        <span class="nk-egd-floor__monswrap">
+                          <span v-for="(g, gi) in monWaveGroups(f.stage1.monsters)" :key="gi" class="nk-egd-floor__wave">
+                            <span v-if="monWaveGroups(f.stage1.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
+                            <!-- 末日幻影纯 Boss 战：完整信息卡；其余模式：小图行 -->
+                            <div v-if="modeKey === 'boss'" class="nk-egd-mons">
+                              <EnemyCard v-for="m in g.items" :key="`${m.id}-${gi}`" :monster="m" />
+                            </div>
+                            <span v-else class="nk-egd-floor__mons">
+                              <router-link
+                                v-for="m in g.items"
+                                :key="`${m.id}-${gi}`"
+                                class="nk-egd-floor__monlink"
+                                :to="`/monster/${m.tpl || m.id}`"
+                                :title="monTitle(m)"
+                                :aria-label="`查看 ${m.name} 详情`"
                               >
-                            </router-link>
+                                <img
+                                  class="nk-egd-floor__mon"
+                                  :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                                  :alt="m.name"
+                                  loading="lazy"
+                                  @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                                >
+                              </router-link>
+                            </span>
                           </span>
                         </span>
-                      </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div v-if="stageHasContent(f.stage2)" class="nk-egd-floor__stage">
-                    <div class="nk-egd-floor__stagehead">
-                      <span class="nk-egd-floor__stagelabel">下半场</span>
-                      <span v-if="monCountLabel(f.stage2?.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(f.stage2?.monsters) }}</span>
-                    </div>
-                    <div v-if="f.stage2?.damage?.length" class="nk-egd-floor__row">
-                      <span class="nk-egd-floor__label">推荐属性</span>
-                      <span class="nk-egd-floor__elems" v-html="elemRow(f.stage2.damage)"></span>
-                    </div>
-                    <div v-if="f.stage2?.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
-                      <span class="nk-egd-floor__label">敌方配置</span>
-                      <span class="nk-egd-floor__monswrap">
-                        <span v-for="(g, gi) in monWaveGroups(f.stage2.monsters)" :key="gi" class="nk-egd-floor__wave">
-                          <span v-if="monWaveGroups(f.stage2.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
-                          <!-- 末日幻影纯 Boss 战：完整信息卡；其余模式：小图行 -->
-                          <span v-if="modeKey === 'boss'" class="nk-egd-mons">
-                            <EnemyCard v-for="m in g.items" :key="`${m.id}-${gi}`" :monster="m" />
-                          </span>
-                          <span v-else class="nk-egd-floor__mons">
-                            <router-link
-                              v-for="m in g.items"
-                              :key="`${m.id}-${gi}`"
-                              class="nk-egd-floor__monlink"
-                              :to="`/monster/${m.tpl || m.id}`"
-                              :title="monTitle(m)"
-                              :aria-label="`查看 ${m.name} 详情`"
-                            >
-                              <img
-                                class="nk-egd-floor__mon"
-                                :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                                :alt="m.name"
-                                loading="lazy"
-                                @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                    <div v-if="stageHasContent(f.stage2)" class="nk-egd-floor__stage">
+                      <div class="nk-egd-floor__stagehead">
+                        <span class="nk-egd-floor__stagelabel">下半场</span>
+                        <span v-if="monCountLabel(f.stage2?.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(f.stage2?.monsters) }}</span>
+                      </div>
+                      <div v-if="f.stage2?.damage?.length" class="nk-egd-floor__row">
+                        <span class="nk-egd-floor__label">推荐属性</span>
+                        <span class="nk-egd-floor__elems" v-html="elemRow(f.stage2.damage)"></span>
+                      </div>
+                      <div v-if="f.stage2?.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
+                        <span class="nk-egd-floor__label">敌方配置</span>
+                        <span class="nk-egd-floor__monswrap">
+                          <span v-for="(g, gi) in monWaveGroups(f.stage2.monsters)" :key="gi" class="nk-egd-floor__wave">
+                            <span v-if="monWaveGroups(f.stage2.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
+                            <!-- 末日幻影纯 Boss 战：完整信息卡；其余模式：小图行 -->
+                            <div v-if="modeKey === 'boss'" class="nk-egd-mons">
+                              <EnemyCard v-for="m in g.items" :key="`${m.id}-${gi}`" :monster="m" />
+                            </div>
+                            <span v-else class="nk-egd-floor__mons">
+                              <router-link
+                                v-for="m in g.items"
+                                :key="`${m.id}-${gi}`"
+                                class="nk-egd-floor__monlink"
+                                :to="`/monster/${m.tpl || m.id}`"
+                                :title="monTitle(m)"
+                                :aria-label="`查看 ${m.name} 详情`"
                               >
-                            </router-link>
+                                <img
+                                  class="nk-egd-floor__mon"
+                                  :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                                  :alt="m.name"
+                                  loading="lazy"
+                                  @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                                >
+                              </router-link>
+                            </span>
                           </span>
                         </span>
-                      </span>
+                      </div>
                     </div>
-                  </div>
                   </template>
                 </div>
 
