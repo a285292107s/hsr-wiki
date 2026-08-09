@@ -270,8 +270,9 @@ def _load_group_names(filename: str) -> dict[int, str]:
 def _load_group_arts(filename: str) -> dict[int, dict]:
     """分组表 → {GroupID: {background, tab}}（赛季海报/标签图路径）。
 
-    BackGroundPath（如 SpriteOutput/Abyss/UI3D_SceneBg/xxx.png）与 TabPicPath 原样保留；
-    CDN 暂无对应资源，前端暂不渲染，数据层先行待资源就绪。
+    TabPicPath（每赛季专属：虚构 ChallengeThemeTabIcon / 末日 ChallengeBossTabIcon）
+    供前端 seasonArtUrl 优先解析；BackGroundPath（3D 场景背景）与忘却之庭共用的
+    AbyssSwitch 开关图不在前端白名单内，数据层原样保留备用。
     """
     data = load_json(EXCEL_DIR / filename)
     out: dict[int, dict] = {}
@@ -287,6 +288,32 @@ def _load_group_arts(filename: str) -> dict[int, dict]:
         if arts:
             out[gid] = arts
     return out
+
+
+def _load_mode_default_icons() -> dict[str, str]:
+    """ChallengeGeneralConfig → {玩法键: 玩法级默认图标路径}。
+
+    TabImgPath 为各玩法入口默认图（Memory/Story/Boss → UI/ChallengeBoss/
+    ChallengeBossQuestTabImg{1,2,3}.png）；异相仲裁（Peak）无记录，缺省。
+    供无赛季专属图标时兜底（前端 seasonArtUrl 回退消费）。
+    """
+    data = load_json(EXCEL_DIR / "ChallengeGeneralConfig.json")
+    key_map = {"Memory": "maze", "Story": "story", "Boss": "boss"}
+    out: dict[str, str] = {}
+    for rec in data:
+        gtype = rec.get("ChallengeGroupType")
+        path = rec.get("TabImgPath")
+        if gtype in key_map and path:
+            out[key_map[gtype]] = path
+    return out
+
+
+def _attach_default_icon(entries: dict, default_path: str | None) -> None:
+    """玩法级默认图标兜底：并入各赛季 arts.default（无赛季专属图标时前端使用）。"""
+    if not default_path:
+        return
+    for entry in entries.values():
+        entry.setdefault("arts", {})["default"] = default_path
 
 
 def _load_battle_targets() -> dict[int, dict]:
@@ -965,6 +992,11 @@ def _peak_seasons() -> dict:
         # 段位徽章：ChallengeBadgeConfig 按期分组（Bronze/Silver/Gold/Ultra）
         if gid in badges_map:
             result[str(gid)]["badges"] = badges_map[gid]
+        # 赛季主题图标：ChallengePeakGroupConfig.ThemeIconPicPath → arts.tab
+        # （每赛季专属 ChallengePeakIcon_4xxx；前端 seasonArtUrl 优先解析）
+        icon_path = g.get("ThemeIconPicPath") or ""
+        if icon_path:
+            result[str(gid)].setdefault("arts", {})["tab"] = icon_path
     return result
 
 
@@ -983,6 +1015,7 @@ def convert() -> None:
     story_turns = _load_story_turns()
     story_scores = _load_story_scores()
     story_sub_buffs = _group_extra_sub_buffs()
+    mode_default_icons = _load_mode_default_icons()
 
     # 三模式目标表合并（ID 不冲突：maze 6xx / story 4xxx / boss 5xxx）
     targets_all = {
@@ -1010,6 +1043,7 @@ def convert() -> None:
     for k in maze:
         if k in tierce:
             maze[k]["tierce"] = tierce[k]
+    _attach_default_icon(maze, mode_default_icons.get("maze"))
     save_json(maze, OUTPUT_DIR / "maze.json")
 
     # 虚构叙事（挑战目标走 ChallengeStoryTargetConfig，勿传 maze 目标表）
@@ -1026,6 +1060,7 @@ def convert() -> None:
     for k in story:
         if k in tierce:
             story[k]["tierce"] = tierce[k]
+    _attach_default_icon(story, mode_default_icons.get("story"))
     save_json(story, OUTPUT_DIR / "maze_extra.json")
 
     # 末日幻影（挑战目标走 ChallengeBossTargetConfig，勿传 maze 目标表；
@@ -1042,6 +1077,7 @@ def convert() -> None:
     for k in boss:
         if k in tierce:
             boss[k]["tierce"] = tierce[k]
+    _attach_default_icon(boss, mode_default_icons.get("boss"))
     save_json(boss, OUTPUT_DIR / "maze_boss.json")
 
     # 异相仲裁

@@ -4,21 +4,32 @@ import { escHtml, stripAllTags } from '../../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../../services/cdn';
 
 /**
- * 赛季页签图标 URL（方案 B 临时验证：jsDelivr 加速 GitHub 源，固定 commit 防漂移）。
- * 仅解析 TabIcon 类官方路径（SpriteOutput/TabIcon/** → spriteoutput/tabicon/**，目录段小写）；
- * 其余子路径（如忘却之庭 AbyssSwitch 开关图）站内结构不匹配，返回空串不渲染。
+ * 赛季/玩法图标 URL（jsDelivr 加速 GitHub 源，固定 commit 防漂移）。
+ * 白名单前缀（官方路径 → 目录段小写、文件名保留）：
+ * - SpriteOutput/TabIcon/**        → tabicon/**（虚构/末日每赛季 TabIcon）
+ * - SpriteOutput/ChallengePeak/**  → challengepeak/**（异相仲裁每赛季 ThemeIcon）
+ * - SpriteOutput/UI/ChallengeBoss/** → ui/challengeboss/**（玩法级默认 QuestTabImg）
+ * 未列入的（如忘却之庭 AbyssSwitch 共用开关图）返回空串不渲染。
  * 方案 A 转存 nanoka 后，将本函数替换为 cdnUri('tabicon', ...) 即可，消费方无需改动。
  */
 const JSDELIVR_SR_TEXTURES = 'https://cdn.jsdelivr.net/gh/umaichanuwu/StarRailTextures@2a4b9a7eb7ac9db7f48d627fa5cdfd3822c902ce/assets/asbres/spriteoutput';
+/** 可解析的官方图标路径前缀（目录段小写映射规则见 tabIconUrl） */
+const TAB_ICON_RE = /^SpriteOutput\/(TabIcon|ChallengePeak|UI\/ChallengeBoss)\/(.+)$/;
 
 export function tabIconUrl(arts?: { tab?: string } | null): string {
   const tab = arts?.tab || '';
-  const m = /^SpriteOutput\/TabIcon\/(.+)$/.exec(tab);
+  const m = TAB_ICON_RE.exec(tab);
   if (!m) return '';
-  // 目录段小写（Abyss → abyss），文件名保持原大小写（GitHub/jsDelivr 大小写敏感）
-  const segs = m[1].split('/');
+  const [, prefix, rest] = m;
+  const segs = rest.split('/');
   const dirs = segs.slice(0, -1).map((s) => s.toLowerCase());
-  return `${JSDELIVR_SR_TEXTURES}/tabicon/${[...dirs, segs[segs.length - 1]].join('/')}`;
+  return `${JSDELIVR_SR_TEXTURES}/${prefix.toLowerCase()}/${[...dirs, segs[segs.length - 1]].join('/')}`;
+}
+
+/** 赛季图标 URL：优先赛季专属图标（arts.tab），缺失时回退玩法级默认图标
+ *  （arts.default，converter 自 ChallengeGeneralConfig 注入；空串由调用方降级徽记） */
+export function seasonArtUrl(arts?: { tab?: string; default?: string } | null): string {
+  return tabIconUrl(arts) || tabIconUrl({ tab: arts?.default || '' });
 }
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
@@ -144,7 +155,7 @@ export const endgamePage: CatalogPageConfig = {
           floorDamage: info.floor_damage || [],
           tierce: info.tierce,
           levels: info.levels,
-          /** 赛季海报/页签图（TabIcon 类路径经 tabIconUrl 解析；其余模式缺省） */
+          /** 赛季海报/页签图（tab = 赛季专属、default = 玩法级默认，经 seasonArtUrl 依次解析） */
           arts: info.arts,
         });
       }
@@ -212,10 +223,13 @@ export const endgamePage: CatalogPageConfig = {
 
     // 铭牌徽标：星启模式赛季 / 异相仲裁关卡组成
     // （FINAL 最终层标识已移除：层数统计为模式内恒值冗余——maze 10/12 层、story 4 层、boss 4 层，可由模式推断）
-    // 赛季页签图标（TabIcon；absolute 覆盖 SVG 徽记，不透明底板遮挡；加载失败隐藏后露出徽记）
-    const artSrc = tabIconUrl(item.arts as { tab?: string } | undefined);
-    const artHtml = artSrc
-      ? `<img class="nk-eg-card__art" src="${escHtml(artSrc)}" alt="" onerror="this.style.display='none'">`
+    // 赛季图标（seasonArtUrl：赛季专属优先，玩法级默认兜底；有可用图标时经 --has-art
+    // 隐藏默认 SVG 徽记——保留占位维持布局，不透明底板遮挡加载间隙；加载失败经
+    // onerror 隐藏自身并移除修饰类，露出徽记兜底）
+    const artSrc = seasonArtUrl(item.arts as { tab?: string; default?: string } | undefined);
+    const hasArt = Boolean(artSrc);
+    const artHtml = hasArt
+      ? `<img class="nk-eg-card__art" src="${escHtml(artSrc)}" alt="" onerror="this.style.display='none';this.closest('.nk-eg-card').classList.remove('nk-eg-card--has-art')">`
       : '';
 
     const tierce = item.tierce as { damage_types?: string[]; countdown?: number } | undefined;
@@ -260,7 +274,7 @@ export const endgamePage: CatalogPageConfig = {
           }).join('')}${mons.length > 4 ? `<span class="nk-eg-card__more">+${mons.length - 4}</span>` : ''}</span></div>`
       : '';
 
-    return `<a class="nk-eg-card nk-eg-card--${stCls}" href="${escHtml(item.href)}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
+    return `<a class="nk-eg-card nk-eg-card--${stCls}${hasArt ? ' nk-eg-card--has-art' : ''}" href="${escHtml(item.href)}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
       <div class="nk-eg-card__plate">
         <span class="nk-eg-card__emblem">${mode?.emblem || ''}</span>
         ${artHtml}

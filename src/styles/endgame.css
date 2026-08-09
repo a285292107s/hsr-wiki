@@ -31,7 +31,10 @@
 .nk-eg-card__plate::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 7px; height: 1px; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--eg-color) 30%, transparent) 50%, transparent 100%); opacity: 0.6; }
 .nk-eg-card__emblem { width: 28px; height: 28px; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); transition: color 0.28s, filter 0.28s; }
 .nk-eg-card__emblem svg { width: 100%; height: 100%; }
-/* 赛季页签图标（TabIcon）：absolute 覆盖 SVG 徽记，不透明深色底板遮挡下层；加载失败隐藏后露出徽记 */
+/* 赛季页签图标（TabIcon）：absolute 置顶于铭牌。有图标时隐藏默认 SVG 徽记
+   （--has-art；visibility 隐藏保留占位维持布局），图标加载失败经 onerror 隐藏自身
+   并移除 --has-art 类，露出徽记兜底 */
+.nk-eg-card--has-art .nk-eg-card__emblem { visibility: hidden; }
 .nk-eg-card__art {
   position: absolute;
   top: 8px;

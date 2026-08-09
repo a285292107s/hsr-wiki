@@ -7,7 +7,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { ENDGAME_MODES, mazeStatus, mazeDateRange, tabIconUrl } from '../catalog/pages/endgame';
+import { ENDGAME_MODES, mazeStatus, mazeDateRange, seasonArtUrl } from '../catalog/pages/endgame';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
   loadLocalItems,
@@ -136,8 +136,8 @@ const modeInfo = computed(() => ENDGAME_MODES.find((m) => m.key === modeKey.valu
 const status = computed(() => (data.value ? mazeStatus(data.value) : ''));
 const dateRange = computed(() => (data.value ? mazeDateRange(data.value) : ''));
 const seasonId = computed(() => String(route.params.id || ''));
-/** 赛季页签图标（TabIcon；jsDelivr 临时源，方案 B 验证；无图/路径不匹配时空串不渲染） */
-const seasonArt = computed(() => tabIconUrl(data.value?.arts));
+/** 赛季图标（seasonArtUrl：赛季专属优先，玩法级默认兜底；无图/路径不匹配时空串不渲染） */
+const seasonArt = computed(() => seasonArtUrl(data.value?.arts));
 
 /** 逐层章节（以关卡层级为章节名的完整内容；倒序：最高层在前）
  *  全模式全量展示（重构后不再“仅最后一层”回退），配合折叠交互控制页面长度 */

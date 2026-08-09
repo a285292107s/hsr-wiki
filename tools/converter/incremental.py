@@ -65,7 +65,7 @@ MODULE_SOURCES: dict[str, list[str]] = {
                  "ChallengePeakBossConfig.json", "BattleTargetConfig.json",
                  "StageConfig.json", "MonsterConfig.json", "MonsterCamp.json",
                  "MonsterSkillConfig.json", "ChallengeBadgeConfig.json",
-                 "ChallengeBossMazeExtra.json"],
+                 "ChallengeBossMazeExtra.json", "ChallengeGeneralConfig.json"],
     "currency": [
         "GridFightRoleBasicInfo.json", "AvatarConfig.json", "AvatarConfigLD.json",
         "GridFightRolePropertyConfig.json", "GridFightTraitBasicInfo.json", "GridFightRoleStar.json",

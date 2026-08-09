@@ -598,7 +598,9 @@ class TestPeakSeasons:
             name = str(path)
             if name.endswith("ChallengePeakGroupConfig.json"):
                 return [{"ID": 1, "Title": {"Hash": 1},
-                         "PreLevelIDList": [101, 102, 103], "BossLevelID": 104}]
+                         "PreLevelIDList": [101, 102, 103], "BossLevelID": 104,
+                         "ThemeIconPicPath":
+                         "SpriteOutput/ChallengePeak/ChallengePeakIcon_4001.png"}]
             if name.endswith("ChallengePeakConfig.json"):
                 return [
                     {"ID": 101, "Title": {"Hash": 10}, "DamageType": ["Fire"],
@@ -730,3 +732,41 @@ class TestPeakSeasons:
         ]
         assert entry["buffs"] == [{"id": 3033006, "name": "名22",
                                     "desc": "", "param_list": [], "icon": ""}]
+        # 赛季主题图标：ChallengePeakGroupConfig.ThemeIconPicPath → arts.tab
+        assert entry["arts"] == {
+            "tab": "SpriteOutput/ChallengePeak/ChallengePeakIcon_4001.png"}
+
+
+# ─── 玩法级默认图标 ────────────────────────────────────────────
+
+class TestModeDefaultIcons:
+    def test_load_mode_default_icons_maps_three_modes(self, monkeypatch):
+        """ChallengeGeneralConfig：Memory/Story/Boss → maze/story/boss；Peak 无记录。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"ChallengeGroupType": "Memory",
+             "TabImgPath": "SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png"},
+            {"ChallengeGroupType": "Story",
+             "TabImgPath": "SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png"},
+            {"ChallengeGroupType": "Boss",
+             "TabImgPath": "SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg3.png"},
+            {"ChallengeGroupType": "Peak", "TabImgPath": ""},  # 无记录或缺路径 → 跳过
+            {"ChallengeGroupType": "Unknown"},                # 未知玩法 → 跳过
+        ])
+        out = eg._load_mode_default_icons()
+        assert out == {
+            "maze": "SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png",
+            "story": "SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png",
+            "boss": "SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg3.png",
+        }
+
+    def test_attach_default_icon_merges_and_skips(self):
+        """_attach_default_icon：无默认路径跳过；有则并入各条 arts.default（缺失 arts 时新建）。"""
+        entries = {
+            "1": {"zh": "A", "arts": {"tab": "x"}},
+            "2": {"zh": "B"},  # 无 arts → setdefault 新建
+        }
+        eg._attach_default_icon(entries, None)
+        assert "default" not in entries["1"]["arts"]
+        eg._attach_default_icon(entries, "SpriteOutput/UI/ChallengeBoss/Img1.png")
+        assert entries["1"]["arts"]["default"] == "SpriteOutput/UI/ChallengeBoss/Img1.png"
+        assert entries["2"]["arts"] == {"default": "SpriteOutput/UI/ChallengeBoss/Img1.png"}

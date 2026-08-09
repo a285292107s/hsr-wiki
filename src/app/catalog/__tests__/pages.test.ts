@@ -8,6 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
+import { tabIconUrl, seasonArtUrl } from '../pages/endgame';
 
 const entries = Object.entries(CATALOG_PAGES);
 
@@ -96,5 +97,37 @@ describe('filters validity', () => {
         assertFiltersValid(result, `${key}.buildFilters()`);
       }
     }
+  });
+});
+
+describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
+  const BASE = 'https://cdn.jsdelivr.net/gh/umaichanuwu/StarRailTextures@2a4b9a7eb7ac9db7f48d627fa5cdfd3822c902ce/assets/asbres/spriteoutput';
+
+  it('tabIconUrl 解析白名单前缀（目录段小写、文件名保留）', () => {
+    expect(tabIconUrl({ tab: 'SpriteOutput/TabIcon/Abyss/ChallengeBossTabIcon_3001.png' }))
+      .toBe(`${BASE}/tabicon/abyss/ChallengeBossTabIcon_3001.png`);
+    expect(tabIconUrl({ tab: 'SpriteOutput/ChallengePeak/ChallengePeakIcon_4001.png' }))
+      .toBe(`${BASE}/challengepeak/ChallengePeakIcon_4001.png`);
+    expect(tabIconUrl({ tab: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png' }))
+      .toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg1.png`);
+  });
+
+  it('tabIconUrl 拒绝白名单外路径（忘却之庭 AbyssSwitch 共用开关图）', () => {
+    expect(tabIconUrl({ tab: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png' })).toBe('');
+    expect(tabIconUrl(null)).toBe('');
+    expect(tabIconUrl({})).toBe('');
+  });
+
+  it('seasonArtUrl 优先赛季专属，缺失回退玩法级默认', () => {
+    const dflt = 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png';
+    // 有赛季专属 → 用专属
+    expect(seasonArtUrl({ tab: 'SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2001.png', default: dflt }))
+      .toBe(`${BASE}/tabicon/abyss/ChallengeThemeTabIcon_2001.png`);
+    // 专属不匹配白名单 → 回退玩法级默认
+    expect(seasonArtUrl({ tab: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png', default: dflt }))
+      .toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg2.png`);
+    // 两者皆无 → 空串
+    expect(seasonArtUrl(null)).toBe('');
+    expect(seasonArtUrl({})).toBe('');
   });
 });

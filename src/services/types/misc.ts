@@ -274,8 +274,9 @@ export interface MazeListEntry {
   countdown?: number;
   /** 虚构叙事通关分数线（ChallengeStoryMazeExtra.ClearScore，如 30000） */
   clear_score?: number;
-  /** 赛季海报/标签图（BackGroundPath/TabPicPath 原样保留；CDN 未就绪，前端暂不渲染） */
-  arts?: { background?: string; tab?: string };
+  /** 赛季海报/标签图（BackGroundPath/TabPicPath 原样保留；tab = 赛季专属图标，
+   *  default = 玩法级默认图标兜底，前端 seasonArtUrl 依次解析） */
+  arts?: { background?: string; tab?: string; default?: string };
   /** 赛季增益（名称 + 效果描述） */
   buffs?: MazeBuffInfo[];
   /** 战意赛季主题机制（虚构叙事 Fever 赛季 SubMazeBuffList：机制 + 战熄潮平/战意汹涌；
