@@ -54,7 +54,7 @@
 ```json
 {
   "RelicMainValueType": 1111200,
-  "MainValue": "[{\"FODBMMCKAEN\": \"HPDelta\", \"MNDFOPKBHKP..."
+  "MainValue": "<list[6]>"
 }
 ```
 
@@ -89,8 +89,8 @@
   "LevelGraphPath": "Config/Level/StageCommonTemplate.json",
   "StageAbilityConfig": [],
   "SubLevelGraphs": [],
-  "StageConfigData": "[{\"BFLIFKBEOPJ\": \"_Wave\", \"MNDFOPKBHKP\":...",
-  "MonsterList": "[{\"Monster0\": 1022020, \"Monster1\": 10230...",
+  "StageConfigData": "<list[2]>",
+  "MonsterList": "<list[1]>",
   "LevelLoseCondition": [],
   "LevelWinCondition": [],
   "ForbidAutoBattle": true,
@@ -144,7 +144,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 30}, {\"Value\": 0}, {\"Value\": ...",
+  "ShowStanceList": "<list[3]>",
   "ShowDamageList": [],
   "ShowHealList": [],
   "InitCoolDown": -1,
@@ -214,7 +214,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 0}, {\"Value\": 0}, {\"Value\": 0...",
+  "ShowStanceList": "<list[3]>",
   "ShowDamageList": [],
   "ShowHealList": [],
   "InitCoolDown": -1,
@@ -225,8 +225,8 @@
   "DelayRatio": {
     "Value": 1
   },
-  "ParamList": "[{\"Value\": 1.5}, {\"Value\": 1}, {\"Value\":...",
-  "SimpleParamList": "[{\"Value\": 1.5}, {\"Value\": 1}, {\"Value\":...",
+  "ParamList": "<list[6]>",
+  "SimpleParamList": "<list[6]>",
   "SkillEffect": "Impair"
 }
 ```
@@ -272,7 +272,7 @@
 ```json
 {
   "RelicPropertyType": 310100,
-  "RelicIDList": "[{\"JENCANJIFHE\": 31011}, {\"JENCANJIFHE\":...",
+  "RelicIDList": "<list[4]>",
   "Comment2": "过客"
 }
 ```
@@ -314,8 +314,8 @@
     "Fire",
     "Thunder"
   ],
-  "DamageTypeResistance": "[{\"DamageType\": \"Physical\", \"Value\": {\"V...",
-  "DebuffResist": "[{\"Key\": \"STAT_CTRL_Frozen\", \"Value\": {\"...",
+  "DamageTypeResistance": "<list[5]>",
+  "DebuffResist": "<list[1]>",
   "CustomValueTags": [
     "W1_Ice"
   ],
@@ -378,7 +378,7 @@
   "RelicPropertyType": 411202,
   "RelicMainValue": 4404302,
   "RelicSubValue": 302,
-  "AbilityNameList": "[\"TrialPlayer_1021213_DanHengIL_Ability\"...",
+  "AbilityNameList": "<list[2]>",
   "PlayerJsonPath": "",
   "JsonPath": "Config/ConfigCharacter/SpecialAvatar/Spe..."
 }
@@ -412,7 +412,7 @@
 ```json
 {
   "RelicSubValueType": 1,
-  "SubValue": "[{\"FODBMMCKAEN\": \"HPDelta\"}, {\"FODBMMCKA..."
+  "SubValue": "<list[21]>"
 }
 ```
 
@@ -572,7 +572,7 @@
 ```json
 {
   "InfiniteMonsterGroupID": 1201,
-  "MonsterList": "[800101007, 800101007, 800102009, 800102...",
+  "MonsterList": "<list[20]>",
   "EliteGroup": 85
 }
 ```
@@ -706,7 +706,7 @@
 {
   "PerformanceID": 100010104,
   "Skippable": true,
-  "ActorList": "[\"TalkSentenceName_Kafka\", \"TalkSentence..."
+  "ActorList": "<list[2]>"
 }
 ```
 
@@ -790,7 +790,7 @@
   "DamageTypeList": [],
   "MiniMapStateIcons": [],
   "JsonPath": "Config/Props/Common/Prop_Common_AreaIden...",
-  "PropStateList": "[\"Closed\", \"Open\", \"Locked\", \"TriggerDis...",
+  "PropStateList": "<list[5]>",
   "PerformanceType": "D"
 }
 ```
@@ -876,7 +876,7 @@
 {
   "MonsterTemplateID": 1002011,
   "AvatarExpReward": 36,
-  "DisplayItemList": "[{\"ItemID\": 2}, {\"ItemID\": 112001}, {\"It..."
+  "DisplayItemList": "<list[3]>"
 }
 ```
 
@@ -986,7 +986,7 @@
   "FloorType": "Default",
   "OptionalLoadBlocksConfig": "Config/ConfigOptionalLoadBlocks/Train.js...",
   "MunicipalConfigPath": "",
-  "MapLayerNameList": "[{\"Hash\": 5769206023853488854}, {\"Hash\":...",
+  "MapLayerNameList": "<list[3]>",
   "CombatBGMLow": "State_Spacetrain_Combat",
   "CombatBGMHigh": "State_Spacetrain_Combat"
 }
@@ -1000,7 +1000,7 @@
 ```json
 {
   "EquipmentID": 20000,
-  "PromotionCostList": "[{\"ItemID\": 2, \"ItemNum\": 3000}, {\"ItemI...",
+  "PromotionCostList": "<list[2]>",
   "PlayerLevelRequire": 15,
   "MaxLevel": 20,
   "BaseHP": {
@@ -1069,8 +1069,8 @@
   "LevelGraphPath": "Config/Level/StageCommonTemplate.json",
   "StageAbilityConfig": [],
   "SubLevelGraphs": [],
-  "StageConfigData": "[{\"BFLIFKBEOPJ\": \"_Wave\", \"MNDFOPKBHKP\":...",
-  "MonsterList": "[{\"Monster0\": 8001010, \"Monster1\": 10220...",
+  "StageConfigData": "<list[2]>",
+  "MonsterList": "<list[1]>",
   "LevelLoseCondition": [],
   "LevelWinCondition": [],
   "ForbidExitBattle": true,
@@ -1100,7 +1100,7 @@
     8001010,
     8001020
   ],
-  "DisplayItemList": "[{\"ItemID\": 22, \"ItemNum\": 50}, {\"ItemID..."
+  "DisplayItemList": "<list[10]>"
 }
 ```
 
@@ -1131,7 +1131,7 @@
   "SimpleSkillDesc": {
     "Hash": 10011909412818046902
   },
-  "ShowStanceList": "[{\"Value\": 0}, {\"Value\": 0}, {\"Value\": 0...",
+  "ShowStanceList": "<list[3]>",
   "SPMultipleRatio": {
     "Value": 0.5
   },
@@ -1141,8 +1141,8 @@
   "DelayRatio": {
     "Value": 1
   },
-  "ParamList": "[{\"Value\": 2}, {\"Value\": 0.81}, {\"Value\"...",
-  "SimpleParamList": "[{\"Value\": 2}, {\"Value\": 0.81}, {\"Value\"...",
+  "ParamList": "<list[7]>",
+  "SimpleParamList": "<list[7]>",
   "StanceDamageType": "Quantum",
   "AttackType": "BPSkill",
   "SkillEffect": "Defence",
@@ -1182,7 +1182,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 30}, {\"Value\": 0}, {\"Value\": ...",
+  "ShowStanceList": "<list[3]>",
   "StanceDamageDisplay": 10,
   "SPBase": {
     "Value": 10
@@ -1196,8 +1196,8 @@
   "DelayRatio": {
     "Value": 1
   },
-  "ParamList": "[{\"Value\": 0.55}, {\"Value\": 0.33}, {\"Val...",
-  "SimpleParamList": "[{\"Value\": 0.55}, {\"Value\": 0.33}, {\"Val...",
+  "ParamList": "<list[3]>",
+  "SimpleParamList": "<list[3]>",
   "StanceDamageType": "Thunder",
   "AttackType": "Servant",
   "SkillEffect": "Blast"
@@ -1337,7 +1337,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 30}, {\"Value\": 0}, {\"Value\": ...",
+  "ShowStanceList": "<list[3]>",
   "ShowDamageList": [],
   "ShowHealList": [],
   "InitCoolDown": -1,
@@ -1485,7 +1485,7 @@
 ```json
 {
   "AvatarID": 1001,
-  "PromotionCostList": "[{\"ItemID\": 2, \"ItemNum\": 3200}, {\"ItemI...",
+  "PromotionCostList": "<list[2]>",
   "MaxLevel": 20,
   "PlayerLevelRequire": 15,
   "AttackBase": {
@@ -1554,7 +1554,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 30}, {\"Value\": 0}, {\"Value\": ...",
+  "ShowStanceList": "<list[3]>",
   "ShowDamageList": [],
   "ShowHealList": [],
   "InitCoolDown": -1,
@@ -1601,8 +1601,8 @@
   "TutorialID": 1001,
   "Priority": 10,
   "TutorialJsonPath": "Config/Level/Tutorial/Tutorial_1001.json",
-  "TriggerParams": "[{\"TriggerType\": \"EnterBattle\", \"Trigger...",
-  "FinishTriggerParams": "[{\"TriggerType\": \"FinishMainMission\", \"T..."
+  "TriggerParams": "<list[1]>",
+  "FinishTriggerParams": "<list[1]>"
 }
 ```
 
@@ -1657,7 +1657,7 @@
   "BackParamList": [],
   "JsonOverrideConfig": "Config/ConfigCharacter/GridFight/3.5/Ava...",
   "AIPath": "Config/ConfigAI/ComplexSkillAIGlobalGrou...",
-  "GeneralPropertyModifyList": "[{\"PropertyType\": \"ExtraAllDamageTypeAdd...",
+  "GeneralPropertyModifyList": "<list[4]>",
   "ShowStanceList": [],
   "FrontPowerBase": {
     "Value": 200
@@ -1706,7 +1706,7 @@
   "ModifierName": "ADV_StageAbility_3150001",
   "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
   "InBattleBindingKey": "Activity_Fate_LancerBE_Base_Ability",
-  "ParamList": "[{\"Value\": 1}, {\"Value\": 0.3}, {\"Value\":...",
+  "ParamList": "<list[4]>",
   "BuffIcon": "SpriteOutput/BuffIcon/Inlevel/IconBuffFu...",
   "BuffName": {
     "Hash": 11087312986692773275
@@ -1765,7 +1765,7 @@
   "StanceRatio": {
     "Value": 1
   },
-  "CombatPowerList": "[{\"Value\": 1}, {\"Value\": 0}, {\"Value\": 0..."
+  "CombatPowerList": "<list[4]>"
 }
 ```
 
@@ -1893,7 +1893,7 @@
   "ModifierName": "ADV_StageAbility_MazeCommon_Empty",
   "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
   "InBattleBindingKey": "StageAbility_VS_Weapon_S2_001",
-  "ParamList": "[{\"Value\": 0}, {\"Value\": 100}, {\"Value\":...",
+  "ParamList": "<list[20]>",
   "BuffIcon": "SpriteOutput/BuffIcon/Inlevel/IconBuffAt...",
   "BuffName": {
     "Hash": 17262933300562868619
@@ -1939,7 +1939,7 @@
 {
   "ID": 10101601,
   "WorldID": 201,
-  "ChestType": "[\"CHEST_WORLD_ONE\", \"CHEST_TREASURE_NORM..."
+  "ChestType": "<list[3]>"
 }
 ```
 
@@ -2014,8 +2014,8 @@
   "CanReview": true,
   "TutorialShowType": "Hide",
   "Order": 199,
-  "TriggerParams": "[{\"TriggerType\": \"EnterBattle\", \"Trigger...",
-  "FinishTriggerParams": "[{\"TriggerType\": \"FinishMainMission\", \"T...",
+  "TriggerParams": "<list[1]>",
+  "FinishTriggerParams": "<list[1]>",
   "MessageText": {
     "Hash": 560005623724621359
   },
@@ -2064,8 +2064,8 @@
   "EventSubType": "ChallengerEvent",
   "BattleEventName": "BattleEventName_1",
   "HeadIcon": "SpriteOutput/AvatarIconTeam/999.png",
-  "AbilityList": "[\"BattleEventAbility_TargetAttack\", \"Bat...",
-  "OverrideProperty": "[{\"PropertyType\": \"BaseAttack\", \"Value\":...",
+  "AbilityList": "<list[4]>",
+  "OverrideProperty": "<list[1]>",
   "Speed": {
     "Value": 100
   },
@@ -2089,7 +2089,7 @@
   "RoleID": 1001,
   "Rank": 1,
   "Star": 1,
-  "GeneralPropertyModifyList": "[{\"PropertyType\": \"ExtraAllDamageTypeAdd..."
+  "GeneralPropertyModifyList": "<list[1]>"
 }
 ```
 
@@ -2181,7 +2181,7 @@
   "LvMax": 8,
   "ModifierName": "ADV_StageAbility_MazeCommon_Empty",
   "InBattleBindingKey": "StageAbility_VS_Weapon_001",
-  "ParamList": "[{\"Value\": 0}, {\"Value\": 1}, {\"Value\": 1...",
+  "ParamList": "<list[20]>",
   "BuffIcon": "SpriteOutput/BuffIcon/Inlevel/IconBuffAt...",
   "BuffName": {
     "Hash": 10759209296645104090
@@ -2259,11 +2259,11 @@
   "ConditionDesc": {
     "Hash": 11085778083433463291
   },
-  "ParamList": "[{\"Value\": 2}, {\"Value\": 0.81}, {\"Value\"...",
+  "ParamList": "<list[7]>",
   "ConditionSimpleDesc": {
     "Hash": 10307392774845083218
   },
-  "SimpleParamList": "[{\"Value\": 2}, {\"Value\": 0.81}, {\"Value\"...",
+  "SimpleParamList": "<list[7]>",
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": []
 }
@@ -2394,7 +2394,7 @@
     1022030
   ],
   "ParamList": [],
-  "DropList": "[1000849, 1000339, 1001002, 1001022, 730...",
+  "DropList": "<list[9]>",
   "StaminaCost": 10,
   "MaxChallengeCnt": 24,
   "OpenDate": [],
@@ -2433,8 +2433,8 @@
   "ExpGroup": 1,
   "MaxPromotion": 6,
   "MaxRank": 6,
-  "RankIDList": "[100101, 100102, 100103, 100104, 100105,...",
-  "SkillList": "[100101, 100102, 100103, 100104, 100106,...",
+  "RankIDList": "<list[6]>",
+  "SkillList": "<list[6]>",
   "AvatarBaseType": "Knight",
   "DefaultAvatarModelPath": "Characters/CharacterPrefabs/Avatar/Mar_7...",
   "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIcon/Avatar/1001.png",
@@ -2457,7 +2457,7 @@
   "AvatarCutinIntroText": {
     "Hash": 7663786577497784004
   },
-  "AvatarDropOffset": "[31, 29, 0.59, 31, 29, 0.59, 31, 29, 0.5...",
+  "AvatarDropOffset": "<list[9]>",
   "AvatarTrialOffset": [],
   "PlayerCardOffset": [
     82,
@@ -2538,7 +2538,7 @@
   "SkillIcon": "SpriteOutput/SkillIcons/BattleEvent/Skil...",
   "UltraSkillIcon": "SpriteOutput/SkillIcons/BattleEvent/Skil...",
   "CutinPath": "",
-  "ShowStanceList": "[{\"Value\": 0}, {\"Value\": 0}, {\"Value\": 0...",
+  "ShowStanceList": "<list[3]>",
   "SPMultipleRatio": {
     "Value": 0.5
   },
@@ -2739,7 +2739,7 @@
   "MiracleDesc": {
     "Hash": 8768956841205858049
   },
-  "ParamList": "[{\"Value\": 1}, {\"Value\": 1}, {\"Value\": 2..."
+  "ParamList": "<list[3]>"
 }
 ```
 
@@ -2884,7 +2884,7 @@
   ],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 15}, {\"Value\": 30}, {\"Value\":...",
+  "ShowStanceList": "<list[3]>",
   "StanceDamageDisplay": 15,
   "SPBase": {
     "Value": 10
@@ -2895,8 +2895,8 @@
   "DelayRatio": {
     "Value": 1
   },
-  "ParamList": "[{\"Value\": 3}, {\"Value\": 4}, {\"Value\": 4...",
-  "SimpleParamList": "[{\"Value\": 3}, {\"Value\": 4}, {\"Value\": 4...",
+  "ParamList": "<list[7]>",
+  "SimpleParamList": "<list[7]>",
   "StanceDamageType": "Ice",
   "AttackType": "Servant",
   "SkillEffect": "AoEAttack"
@@ -2986,7 +2986,7 @@
   "MiracleDesc": {
     "Hash": 1851219478774962691
   },
-  "DescParamList": "[{\"Value\": 1}, {\"Value\": 1}, {\"Value\": 2...",
+  "DescParamList": "<list[3]>",
   "ExtraEffect": []
 }
 ```
@@ -3127,7 +3127,7 @@
   "Trigger": {
     "Hash": 2089636447
   },
-  "OwnerGeneralPropertyList": "[{\"PropertyType\": \"SpeedAddedRatio\", \"Va...",
+  "OwnerGeneralPropertyList": "<list[1]>",
   "AllMemberGeneralPropertyList": [],
   "ModifySkillList": [],
   "RankAbility": [],
@@ -3150,7 +3150,7 @@
   "RogueRoomType": 1,
   "MapEntrance": 8000101,
   "GroupID": 10,
-  "GroupWithContent": "{\"10\": 1006, \"3\": 1001, \"4\": 1002, \"5\": ...",
+  "GroupWithContent": "<dict[6]>",
   "RogueRoomSections": [
     0
   ]
@@ -3208,7 +3208,7 @@
   "ImgPath": "SpriteOutput/StoryReview/100010100.png",
   "ImgPath_F": "SpriteOutput/StoryReview/100010100.png",
   "ImgHeightSize": 287,
-  "UnlockCondition": "[{\"Type\": \"FinishMainMission\", \"Param\": ...",
+  "UnlockCondition": "<list[1]>",
   "PerformanceID": 100010100,
   "isVideo": true,
   "ImgPathWall": "",
@@ -3316,7 +3316,7 @@
       "Value": 0.05
     }
   ],
-  "GeneralPropertyList": "[{\"PropertyType\": \"ExtraSpeedAddedRatio1...",
+  "GeneralPropertyList": "<list[1]>",
   "EquipmentTagList": [
     6
   ],
@@ -3374,7 +3374,7 @@
 {
   "PerformanceID": 100010101,
   "Skippable": true,
-  "ActorList": "[\"TalkSentenceName_Silwolf\", \"TalkSenten..."
+  "ActorList": "<list[2]>"
 }
 ```
 
@@ -3683,7 +3683,7 @@
 ```json
 {
   "MapID": 1001,
-  "MapInfo": "[92, 93, 91, 300, 2, 93, 0, 13, 92, 300,..."
+  "MapInfo": "<list[25]>"
 }
 ```
 
@@ -3796,7 +3796,7 @@
   "GermanyKeyMouseImagePath": "",
   "XboxImagePath": "",
   "PsImagePath": "",
-  "ActionListForOr": "[\"Menu_UnchangeLeftBumper\", \"Menu_Unchan...",
+  "ActionListForOr": "<list[2]>",
   "ActionListForAnd": []
 }
 ```
@@ -4152,9 +4152,9 @@
     100104,
     100105
   ],
-  "Attack": "{\"PEDFLGGDHDP\": {\"Value\": 245}, \"OEELKOM...",
-  "Defence": "{\"PEDFLGGDHDP\": {\"Value\": 76}, \"OEELKOMP...",
-  "HP": "{\"PEDFLGGDHDP\": {\"Value\": 3200}, \"OEELKO...",
+  "Attack": "<dict[4]>",
+  "Defence": "<dict[4]>",
+  "HP": "<dict[4]>",
   "MoveSpeed": {
     "Value": 5
   },
@@ -4331,7 +4331,7 @@
   "SimpleSkillDesc": {
     "Hash": 11381020486967881462
   },
-  "ShowStanceList": "[{\"Value\": 0}, {\"Value\": 0}, {\"Value\": 0...",
+  "ShowStanceList": "<list[3]>",
   "SPNeed": {
     "Value": 100
   },
@@ -4405,7 +4405,7 @@
     310,
     317
   ],
-  "PropertyList3": "[\"DefenceAddedRatio\", \"StatusProbability...",
+  "PropertyList3": "<list[2]>",
   "PropertyList4": [
     "SpeedDelta",
     "DefenceAddedRatio"
@@ -4416,8 +4416,8 @@
   "PropertyList6": [
     "DefenceAddedRatio"
   ],
-  "PropertyList": "[{\"RelicType\": \"BODY\", \"PropertyType\": \"...",
-  "SubAffixPropertyList": "[\"DefenceAddedRatio\", \"SpeedDelta\", \"Sta...",
+  "PropertyList": "<list[4]>",
+  "SubAffixPropertyList": "<list[4]>",
   "ScoreRankList": [
     279,
     216
@@ -4724,7 +4724,7 @@
   ],
   "ParamFormat": "[i]%",
   "AllMemberGeneralPropertyList": [],
-  "OwnerGeneralPropertyList": "[{\"PropertyType\": \"ExtraAllDamageTypeAdd..."
+  "OwnerGeneralPropertyList": "<list[1]>"
 }
 ```
 
@@ -4884,8 +4884,8 @@
   "EventSubType": "GridFightCountDownWarningEvent",
   "BattleEventName": "BattleEventName_62200",
   "HeadIcon": "SpriteOutput/AvatarIconTeam/999.png",
-  "AbilityList": "[\"BattleEventAbility_SummonMonsterInfini...",
-  "OverrideProperty": "[{\"PropertyType\": \"BaseHP\", \"Value\": {\"V...",
+  "AbilityList": "<list[2]>",
+  "OverrideProperty": "<list[1]>",
   "Speed": {
     "Value": 100
   },
@@ -5008,7 +5008,7 @@
   "SkillTriggerKey": "Skill01",
   "SkillNameKey": "Skill01",
   "AttackType": "Normal",
-  "ParamList": "[{\"PEDFLGGDHDP\": {\"Value\": 0.8}, \"NKAACM..."
+  "ParamList": "<list[1]>"
 }
 ```
 
@@ -5045,12 +5045,12 @@
     "Imaginary"
   ],
   "RecommendLevel": 45,
-  "DisplayMonsterMap": "[{\"DBLDCKODNEN\": 1004022, \"NCKAICABJIK\":...",
+  "DisplayMonsterMap": "<list[1]>",
   "NpcMonsterID": 1004021,
   "WorldLevel": 1,
   "EventID": 80300031,
-  "DisplayItemList": "[{\"ItemID\": 22, \"ItemNum\": 200}, {\"ItemI...",
-  "DropList": "[1000919, 1000410, 713012, 713012, 71301...",
+  "DisplayItemList": "<list[8]>",
+  "DropList": "<list[11]>",
   "StaminaCost": 40,
   "RogueKeyCost": 1,
   "MaxChallengeCnt": 6
@@ -5080,7 +5080,7 @@
 ```json
 {
   "RogueBuffGroupID": 1000001,
-  "RogueBuffDrop": "[1505001, 1505101, 1505201, 1505301, 150..."
+  "RogueBuffDrop": "<list[8]>"
 }
 ```
 
@@ -5116,7 +5116,7 @@
   "PhaseList": [
     1
   ],
-  "ParamList": "[{\"Value\": 3.5}, {\"Value\": 0.5}, {\"Value...",
+  "ParamList": "<list[4]>",
   "ModifierList": [],
   "ExtraEffectIDList": []
 }
@@ -5208,7 +5208,7 @@
 ```json
 {
   "ScriptID": 10001,
-  "TotalEmoInfoList": "[{\"POAIHJCEKCF\": 1001}, {\"BNFEAFPEOIE\": ...",
+  "TotalEmoInfoList": "<list[3]>",
   "StepList": [
     "Missing",
     "Full",
@@ -5243,7 +5243,7 @@
     1001,
     2010
   ],
-  "BackendRankList": "[100101, 100102, 100103, 100104, 100105,...",
+  "BackendRankList": "<list[6]>",
   "SpecialAvatarID": 3701001
 }
 ```
@@ -5526,7 +5526,7 @@
 {
   "ID": 80111,
   "TriggerID": 5,
-  "ChatList": "[8011101, 8011102, 8011103, 8011104, 801...",
+  "ChatList": "<list[12]>",
   "Interval": 1,
   "FlySpeed": 1,
   "IsExclusive": true,
@@ -5613,7 +5613,7 @@
 ```json
 {
   "AvatarID": 8901,
-  "PromotionCostList": "[{\"ItemID\": 2, \"ItemNum\": 3200}, {\"ItemI...",
+  "PromotionCostList": "<list[2]>",
   "MaxLevel": 20,
   "AttackBase": {
     "Value": 84.48
@@ -5767,7 +5767,7 @@
   "TipContent": {
     "Hash": 7533112957357412991
   },
-  "GameModeList": "[\"Town\", \"Maze\", \"Challenge\", \"RogueExpl...",
+  "GameModeList": "<list[10]>",
   "PlayerLevel": [
     1,
     99
@@ -5839,7 +5839,7 @@
   "KJGJGNLACKF": {
     "Hash": 13023016003766530778
   },
-  "LIDHGBEAJMA": "[101001, 101002, 101003, 101004, 101005,..."
+  "LIDHGBEAJMA": "<list[11]>"
 }
 ```
 
@@ -5893,7 +5893,7 @@
 ```json
 {
   "GMLOGNJAIGI": 12000,
-  "HECJCAMDGNO": "[1203001, 1203101, 1203201, 1204001, 120..."
+  "HECJCAMDGNO": "<list[18]>"
 }
 ```
 
@@ -6009,7 +6009,7 @@
   "SurfaceDesc": {
     "Hash": 3876252306278908249
   },
-  "BranchLimitaion": "[101, 102, 103, 201, 202, 203, 301, 302,..."
+  "BranchLimitaion": "<list[12]>"
 }
 ```
 
@@ -6044,12 +6044,12 @@
   "HardLevelGroup": 4401,
   "Level": 10,
   "LevelGraphPath": "Config/Level/StageCommonTemplate.json",
-  "StageAbilityConfig": "[\"Activity_FateRin_Stage_Ability_Setup\",...",
-  "SubLevelGraphs": "[{\"BFLIFKBEOPJ\": \"_DefaultSubStage\", \"KA...",
-  "StageConfigData": "[{\"BFLIFKBEOPJ\": \"_Wave\", \"MNDFOPKBHKP\":...",
-  "MonsterList": "[{\"Monster0\": 501202001, \"Monster1\": 501...",
+  "StageAbilityConfig": "<list[4]>",
+  "SubLevelGraphs": "<list[1]>",
+  "StageConfigData": "<list[3]>",
+  "MonsterList": "<list[3]>",
   "LevelLoseCondition": [],
-  "LevelWinCondition": "[\"[CDT_WaitCustomString:Level_SpecialWin...",
+  "LevelWinCondition": "<list[1]>",
   "ForbidAutoBattle": true,
   "ForbidExitBattle": true,
   "MonsterWarningRatio": 1,
@@ -6089,7 +6089,7 @@
   "CoolDown": {
     "Value": 4
   },
-  "ParamList": "[{\"Value\": 0.4}, {\"Value\": 0}, {\"Value\":..."
+  "ParamList": "<list[4]>"
 }
 ```
 
@@ -6263,7 +6263,7 @@
 ```json
 {
   "ID": 101,
-  "ChatList": "[300101002, 300101003, 300101004, 300101...",
+  "ChatList": "<list[15]>",
   "Interval": 2,
   "FlySpeed": 1
 }
@@ -6291,7 +6291,7 @@
   "HeliobusPostContent": {
     "Hash": 12441124696554909331
   },
-  "Likes": "[{\"DOHOMJBJLLG\": 553}, {\"GNIFLCBGAAA\": 1...",
+  "Likes": "<list[15]>",
   "PlayerCommentIDList": [
     10100
   ],
@@ -6299,7 +6299,7 @@
   "PostFansPreview": {
     "Hash": 6624939037943933109
   },
-  "PostFansReward": "{\"0\": 10800, \"1\": 600, \"2\": 240, \"3\": 12...",
+  "PostFansReward": "<dict[10]>",
   "IsClosePanel": true
 }
 ```
@@ -6359,8 +6359,8 @@
 {
   "ID": 30101,
   "PerformanceJsonConfigPath": "Config/Gameplays/Hipplen/Incident/Activi...",
-  "EffectList": "[{\"LIPDNKKCKNN\": 1, \"NNACKOBKFGE\": \"3010...",
-  "ExpectedBasicList": "[30101111, 30101112, 30101113, 30101114,...",
+  "EffectList": "<list[1]>",
+  "ExpectedBasicList": "<list[5]>",
   "ExpectedRatioProbability": []
 }
 ```
@@ -6496,7 +6496,7 @@
     99,
     99
   ],
-  "WeaknessList": "[{\"GIBLLBPOJHN\": \"Fire\", \"NBPFHHJJBFG\": ...",
+  "WeaknessList": "<list[7]>",
   "PeriodScore": 30000,
   "EmotionList": [
     0,
@@ -6612,7 +6612,7 @@
     0,
     5
   ],
-  "WeaknessList": "[{\"GIBLLBPOJHN\": \"Fire\", \"NBPFHHJJBFG\": ...",
+  "WeaknessList": "<list[7]>",
   "PeriodScore": 30000,
   "EmotionList": [
     0,
@@ -6788,7 +6788,7 @@
 ```json
 {
   "EventHandbookID": 5,
-  "UnlockNPCProgressIDList": "[{\"FDOELDMEBPE\": 410301}, {\"FDOELDMEBPE\"...",
+  "UnlockNPCProgressIDList": "<list[3]>",
   "EventTitle": {
     "Hash": 7000029817862836798
   },
@@ -7091,7 +7091,7 @@
   "StanceCount": 1,
   "StanceType": "Physical",
   "AIPath": "Config/ConfigAI/Monster_Common_SequenceT...",
-  "AISkillSequence": "[{\"MNAHFIGOHML\": 700101001}, {\"MNAHFIGOH...",
+  "AISkillSequence": "<list[4]>",
   "NatureID": 1,
   "MinimumFatigueRatio": {
     "Value": 0.2
@@ -7395,7 +7395,7 @@
   ],
   "IsInPool": true,
   "IsInBook": true,
-  "BackendRankList": "[100101, 100102, 100103, 100104, 100105,...",
+  "BackendRankList": "<list[6]>",
   "SpecialAvatarID": 3701001,
   "SeasonID": 1,
   "RoleSavedValueList": [
@@ -7516,7 +7516,7 @@
 {
   "PanelID": 50003,
   "SortWeight": 6012,
-  "FinishConditions": "[{\"Type\": \"FinishQuest\", \"Param\": \"60131...",
+  "FinishConditions": "<list[1]>",
   "PanelDesc": {
     "Hash": 9458567706652469545
   },
@@ -7524,7 +7524,7 @@
     "Hash": 13375576847739960114
   },
   "EntranceImg": "SpriteOutput/Quest/TabIcon/PermanentActi...",
-  "DisplayItemList": "[{\"ItemID\": 22}, {\"ItemID\": 241}, {\"Item...",
+  "DisplayItemList": "<list[9]>",
   "DisplayItemManualSort": true,
   "ExpectTime": {
     "Value": 2
@@ -7545,7 +7545,7 @@
   "QuestTabName": {
     "Hash": 164194306843482777
   },
-  "QuestList": "[6017201, 6017202, 6017209, 6017210, 601...",
+  "QuestList": "<list[7]>",
   "ActivityModuleID": 5000701
 }
 ```
@@ -7736,7 +7736,7 @@
   "StanceModifyRatio": {
     "Value": 1
   },
-  "StanceWeakList": "[\"Physical\", \"Fire\", \"Ice\", \"Thunder\", \"...",
+  "StanceWeakList": "<list[7]>",
   "DamageTypeResistance": [],
   "DebuffResist": [],
   "CustomValueTags": [],
@@ -7906,7 +7906,7 @@
 ```json
 {
   "ID": 10101,
-  "EffectList": "[{\"NNACKOBKFGE\": \"1010111;1010112;101011..."
+  "EffectList": "<list[3]>"
 }
 ```
 
@@ -7949,7 +7949,7 @@
 {
   "ID": 1,
   "Actionid": 1026,
-  "Params": "{\"ArrayValue\": [{\"StringValue\": \"PID\"}, ..."
+  "Params": "<dict[1]>"
 }
 ```
 
@@ -8036,8 +8036,8 @@
 ```json
 {
   "MazebuffID": 35100101,
-  "ShowStanceList": "[{\"Value\": 0}, {\"Value\": 0}, {\"Value\": 0...",
-  "BEParamList": "[{\"Value\": 0}, {\"Value\": 0.2}, {\"Value\":..."
+  "ShowStanceList": "<list[3]>",
+  "BEParamList": "<list[5]>"
 }
 ```
 
@@ -8066,7 +8066,7 @@
 {
   "ScepterID": 2001,
   "ScepterLevel": 1,
-  "LockMagicUnit": "[{\"GDDPJLJKGEO\": 4001, \"LPCBFACBGAE\": 1}...",
+  "LockMagicUnit": "<list[1]>",
   "TrenchCount": {
     "Active": 1,
     "Attach": 1,
@@ -8107,7 +8107,7 @@
   "ConditionParamList": [
     1205
   ],
-  "TraitRemarkParamList": "[{\"Value\": 4}, {\"Value\": 4}, {\"Value\": 5...",
+  "TraitRemarkParamList": "<list[13]>",
   "IsInBook": true
 }
 ```
@@ -8127,8 +8127,8 @@
     304010
   ],
   "Weight": 9999,
-  "MonsterIDList": "[1002040, 1002050, 1003010, 1002030, 101...",
-  "DisplayEventIDList": "[304002, 304003, 304008, 304027, 304024,...",
+  "MonsterIDList": "<list[20]>",
+  "DisplayEventIDList": "<list[17]>",
   "DisplayIndexList": [
     9,
     5,
@@ -8249,7 +8249,7 @@
 {
   "PanelID": 30006,
   "PreConditions": [],
-  "GuideConditions": "[{\"Type\": \"FinishMainMission\", \"Param\": ..."
+  "GuideConditions": "<list[1]>"
 }
 ```
 
@@ -8401,7 +8401,7 @@
   "SetID": 101,
   "RequireNum": 2,
   "SkillDesc": "RelicDesc_1012",
-  "PropertyList": "[{\"FODBMMCKAEN\": \"HealRatioBase\", \"MNDFO...",
+  "PropertyList": "<list[1]>",
   "AbilityName": "",
   "AbilityParamList": [
     {
@@ -8442,7 +8442,7 @@
   "FinishDescText": {
     "Hash": 5177779949803579851
   },
-  "ProgressGPList": "[\"LG_110001__59_PressureSwitchState_Auto...",
+  "ProgressGPList": "<list[3]>",
   "ProgressLimit": 3,
   "RelatedMissionIDList": []
 }
@@ -8577,14 +8577,14 @@
   "NextID": 2,
   "ScheduleDataID": 1000001,
   "BattlePassWeekID": 1,
-  "WeekQuestList": "[2000101, 2000104, 2000105, 2000106, 200...",
+  "WeekQuestList": "<list[6]>",
   "WeekOrder1": [
     2000102,
     2000103
   ],
   "WeekOrder2": [],
   "WeekChainQuestList": [],
-  "VersionQuestList": "[2000201, 2000202, 2000203, 2000207, 200...",
+  "VersionQuestList": "<list[6]>",
   "LevelUpShow": [],
   "BillboardShow": [],
   "EquipmentShow": []
@@ -8624,7 +8624,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 30}, {\"Value\": 0}, {\"Value\": ...",
+  "ShowStanceList": "<list[3]>",
   "ShowDamageList": [],
   "ShowHealList": [],
   "InitCoolDown": -1,
@@ -8661,9 +8661,9 @@
     6,
     300002
   ],
-  "CoinPropID": "[{\"LLDCHLHNADA\": 7, \"GACEMBBAGMP\": 30000...",
+  "CoinPropID": "<list[3]>",
   "ColliderPath": "Stages/OriginalResPos/Chapter04/Prefab/C...",
-  "ControllerListID": "[{\"LLDCHLHNADA\": 2, \"GACEMBBAGMP\": 30000...",
+  "ControllerListID": "<list[1]>",
   "ChestID": []
 }
 ```
@@ -8728,7 +8728,7 @@
   "JFKADAONNOD": {
     "Hash": 2626323646513519044
   },
-  "PBLPLDJKPEI": "[{\"Value\": 0.25}, {\"Value\": 0.05}, {\"Val...",
+  "PBLPLDJKPEI": "<list[4]>",
   "NHALJPDONCP": "Base",
   "FCGFFAJIBKA": "Additional",
   "ENJOALLODBG": 3,
@@ -8806,7 +8806,7 @@
     100102
   ],
   "FLBGELFEBCK": 998,
-  "JMDGIBDPMJF": "[{\"TriggerType\": \"ShowUIPage\", \"TriggerP...",
+  "JMDGIBDPMJF": "<list[1]>",
   "JNDOMOJHOEF": [],
   "HNLJKFJOACC": {
     "Hash": 18212868757188547349
@@ -8911,8 +8911,8 @@
 ```json
 {
   "StoryLineID": 1031101,
-  "BeginCondition": "{\"Type\": \"SubMissionTaken\", \"Param\": \"10...",
-  "EndCondition": "{\"Type\": \"FinishSubMission\", \"Param\": \"1...",
+  "BeginCondition": "<dict[2]>",
+  "EndCondition": "<dict[2]>",
   "ShowCondition": "[BetweenSubMission:103110108,103110151]|...",
   "InitEntranceID": 2031101,
   "InitGroupID": 634,
@@ -8956,7 +8956,7 @@
     264018
   ],
   "BFJDEHGEDFB": 1,
-  "LCNHHDJNHPF": "[{\"BFLIFKBEOPJ\": 42001, \"MNDFOPKBHKP\": 2...",
+  "LCNHHDJNHPF": "<list[24]>",
   "KKKDCNECFDG": "UI/UI3D/DiceCombat/V2/_dependencies/Text...",
   "AJJDAJLFNBP": "UI/UI3D/DiceCombat/V2/_dependencies/Text...",
   "EKMLKINHNOJ": []
@@ -9171,7 +9171,7 @@
 ```json
 {
   "AvatarID": 7205,
-  "PromotionCostList": "[{\"ItemID\": 2, \"ItemNum\": 4000}, {\"ItemI...",
+  "PromotionCostList": "<list[2]>",
   "MaxLevel": 20,
   "PlayerLevelRequire": 15,
   "AttackBase": {
@@ -9468,7 +9468,7 @@
   "SoundReRoll": "Ev_sfx_rogue_dice01_reroll",
   "SoundSuspensionStart": "Ev_sfx_rogue_dice01_idle",
   "SoundSuspensionStop": "Ev_sfx_rogue_dice01_idle_stop",
-  "RecommendSurfaceList": "[2001, 2007, 2014, 2018, 2022, 2025, 204..."
+  "RecommendSurfaceList": "<list[10]>"
 }
 ```
 
@@ -9664,7 +9664,7 @@
   "IconPath": "SpriteOutput/GridFight/AttributeIcon/Whi...",
   "JsonPath": "Config/Level/GridFight/SeasonTalent/Seas...",
   "IsOCEffective": 1,
-  "EffectParamList": "[{\"Value\": 1}, {\"Value\": 1}, {\"Value\": 4...",
+  "EffectParamList": "<list[3]>",
   "EffectTag": {
     "Hash": 15097219401480747513
   },
@@ -9685,7 +9685,7 @@
 ```json
 {
   "ConstValueName": "GridFight_AvatarRarity",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 1}, {\"IntVa..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -9726,7 +9726,7 @@
 ```json
 {
   "RogueMiracleGroupID": 1000,
-  "MiracleWeight": "{\"102\": 1, \"2001\": 1, \"2004\": 1, \"64\": 1..."
+  "MiracleWeight": "<dict[5]>"
 }
 ```
 
@@ -9925,7 +9925,7 @@
   ],
   "PDMDDELEAAG": 1014,
   "BEOGEKDEPLO": [],
-  "CCBONMNIPPL": "[\"SpriteOutput/Collaboration/Fate/FateTr...",
+  "CCBONMNIPPL": "<list[6]>",
   "ELNGIJIGJOO": "SpriteOutput/Collaboration/Fate/FateTrai...",
   "FBFCPNADPKB": "Clazz",
   "AJLLAEEDBJL": "",
@@ -10228,7 +10228,7 @@
   "WalkingEffectAdditiveScale": 1,
   "OptionalLoadBlocksConfig": "",
   "MunicipalConfigPath": "Config/ConfigMunicipal/Chap03_Town_Munic...",
-  "MapLayerNameList": "[{\"Hash\": 5769206023853488854}, {\"Hash\":...",
+  "MapLayerNameList": "<list[3]>",
   "CombatBGMLow": "State_Penocony_Combat_P03_InDoor_Low",
   "CombatBGMHigh": "State_Penocony_Combat_P03_InDoor_High"
 }
@@ -10345,8 +10345,8 @@
 ```json
 {
   "ID": 1001,
-  "HideHudUINodeList": "[\"Phone\", \"Mission\", \"Message\", \"Guide\",...",
-  "LockGotoTypeList": "[\"AreaSwitch\", \"Mission\", \"PhoneNotice\",...",
+  "HideHudUINodeList": "<list[10]>",
+  "LockGotoTypeList": "<list[16]>",
   "LockInputActionName": [
     "Maze_Walk"
   ],
@@ -10400,7 +10400,7 @@
   "ActionImage": "SpriteOutput/Quest/SwordTraining/PlanImg...",
   "ActionIcon": "SpriteOutput/Quest/SwordTraining/SwordTr...",
   "ActionPlanImage": "SpriteOutput/Quest/SwordTraining/PlanImg...",
-  "ActionPerformPrefab": "[\"UI/Quest/SwordTraining/ComicAct/SwordT..."
+  "ActionPerformPrefab": "<list[4]>"
 }
 ```
 
@@ -10504,7 +10504,7 @@
   "FinishType": "Rank",
   "Param": 1,
   "ParamMap": {},
-  "FixedScoreMap": "{\"1\": 1000, \"2\": 1000, \"3\": 1000, \"4\": 1..."
+  "FixedScoreMap": "<dict[5]>"
 }
 ```
 
@@ -10516,7 +10516,7 @@
 ```json
 {
   "AvatarID": 1014,
-  "PromotionCostList": "[{\"ItemID\": 2, \"ItemNum\": 4000}, {\"ItemI...",
+  "PromotionCostList": "<list[2]>",
   "MaxLevel": 20,
   "PlayerLevelRequire": 15,
   "AttackBase": {
@@ -10790,7 +10790,7 @@
     610102,
     610103
   ],
-  "Likes": "[{\"DOHOMJBJLLG\": 698}, {\"GNIFLCBGAAA\": 1..."
+  "Likes": "<list[15]>"
 }
 ```
 
@@ -11068,7 +11068,7 @@
   "CabinetType": "Normal",
   "UnlockCabinetID": [],
   "QuestID": 6013201,
-  "FinishAeonDimensionPointList": "[{\"DimensionID\": 1, \"Increments\": 1}, {\"...",
+  "FinishAeonDimensionPointList": "<list[2]>",
   "CabinetIcon": "SpriteOutput/Rogue/DLC/Dice/MissionTree/...",
   "CabinetName": {
     "Hash": 12580168975159807047
@@ -11240,7 +11240,7 @@
 {
   "ID": 111001,
   "MapEntranceID": 2010101,
-  "NPCMonsterMarkList": "[2010101, 2010102, 2010103, 2010104, 201...",
+  "NPCMonsterMarkList": "<list[6]>",
   "SortID": 4
 }
 ```
@@ -11300,8 +11300,8 @@
   "LMDEHNMJHDJ": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
   "PFKLDBGEGAO": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
   "GEKGGMKGIPE": [],
-  "EECIBIDGPEI": "[20100, 20101, 20102, 20103, 20104, 2010...",
-  "LIDHGBEAJMA": "[201001, 201002, 201003, 201004, 201005,...",
+  "EECIBIDGPEI": "<list[68]>",
+  "LIDHGBEAJMA": "<list[10]>",
   "KMIBDJKKGDE": 16032
 }
 ```
@@ -11606,7 +11606,7 @@
 {
   "FesLevel": 1,
   "ID": 1,
-  "Exhibition": "[{\"ACCJKGEKHKP\": 8, \"OPJDGJNAKFF\": 20}, ...",
+  "Exhibition": "<list[2]>",
   "Business": [
     {
       "ACCJKGEKHKP": 6,
@@ -11928,7 +11928,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 0}, {\"Value\": 0}, {\"Value\": 0...",
+  "ShowStanceList": "<list[3]>",
   "ShowDamageList": [],
   "ShowHealList": [],
   "InitCoolDown": -1,
@@ -11983,7 +11983,7 @@
   },
   "LvMax": 8,
   "ItemIcon": "SpriteOutput/Quest/EvolveBuild/EvoLveBui...",
-  "ElementList": "[\"Ice\", \"Fire\", \"Wind\", \"Thunder\", \"Quan...",
+  "ElementList": "<list[7]>",
   "TagList": [
     1,
     2
@@ -12069,7 +12069,7 @@
     20,
     25
   ],
-  "JPOEFHLLNIK": "[1, 2, 3, 4, 5, 5, 10, 10, 10, 15, 15, 2...",
+  "JPOEFHLLNIK": "<list[12]>",
   "AANFAMJILOB": [
     40,
     40,
@@ -12094,7 +12094,7 @@
     3,
     2
   ],
-  "NOIDIGCCPEJ": "[20, 15, 15, 10, 10, 10, 5, 5, 4, 3, 2, ..."
+  "NOIDIGCCPEJ": "<list[12]>"
 }
 ```
 
@@ -12248,11 +12248,11 @@
     0,
     1000
   ],
-  "StatGrade": "[{\"GMPGDEINODK\": \"SSS\", \"NNACKOBKFGE\": 1...",
+  "StatGrade": "<list[9]>",
   "ForwardTrialSubMissionID": 803610103,
   "ForwardTrialClosePage": true,
   "BackwardTrialClosePage": true,
-  "UnlockAutoTrialConditions": "[{\"GMPGDEINODK\": \"StatValue\", \"NNACKOBKF...",
+  "UnlockAutoTrialConditions": "<list[1]>",
   "TrialGameID": 1000001,
   "TrailTargetDesc": {
     "Hash": 1561504926771401536
@@ -12573,7 +12573,7 @@
   "AreaNameID": {
     "Hash": 3399626268318166388
   },
-  "WorldLevel2DisplayMonster": "[{\"DBLDCKODNEN\": 2004011, \"NCKAICABJIK\":...",
+  "WorldLevel2DisplayMonster": "<list[7]>",
   "CustomStageDisplayIcon": ""
 }
 ```
@@ -12692,7 +12692,7 @@
   "ID": 3113805,
   "Season": "SecondChapter",
   "MazeBuffID": 3113805,
-  "PriceList": "[{\"KDKPDJNMMCM\": 100, \"MDBPDAJJLMG\": 1},...",
+  "PriceList": "<list[5]>",
   "LvMax": 5,
   "TotalBuff": {
     "Hash": 7625177546586225778
@@ -12811,7 +12811,7 @@
 ```json
 {
   "RogueMiracleGroupID": 50002,
-  "MiracleWeight": "{\"7302\": 1, \"7304\": 1, \"7305\": 1, \"7306\"..."
+  "MiracleWeight": "<dict[9]>"
 }
 ```
 
@@ -12844,7 +12844,7 @@
   "SimpleSkillDesc": {
     "Hash": 12968048256951062608
   },
-  "ShowStanceList": "[{\"Value\": 0}, {\"Value\": 0}, {\"Value\": 0...",
+  "ShowStanceList": "<list[3]>",
   "SPMultipleRatio": {
     "Value": 0.5
   },
@@ -13002,8 +13002,8 @@
   "CheckPoint": {
     "Hash": 1246869436751600127
   },
-  "CheckWinTextList": "[{\"Hash\": 14414119763666348395}, {\"Hash\"...",
-  "CheckFailTextList": "[{\"Hash\": 7963475979374232765}, {\"Hash\":..."
+  "CheckWinTextList": "<list[5]>",
+  "CheckFailTextList": "<list[6]>"
 }
 ```
 
@@ -13125,7 +13125,7 @@
     50,
     60
   ],
-  "TargetTextList": "[{\"Hash\": 12423621184827415367}, {\"Hash\"...",
+  "TargetTextList": "<list[2]>",
   "PreTelevisionList": [],
   "MazeBuffID": 3105004,
   "BuffShowLevelList": [
@@ -13142,10 +13142,10 @@
     2024014,
     1004011
   ],
-  "AllMonsterList": "[3002051, 2013010, 1003010, 8003010, 800...",
+  "AllMonsterList": "<list[9]>",
   "ExtraInfoMonsterIDList": [],
   "MonsterPic": "SpriteOutput/Quest/Television/Television...",
-  "SpecialAvatarList": "[3021006, 3021303, 3021003, 3021110, 302...",
+  "SpecialAvatarList": "<list[5]>",
   "UIEnterBattleAreaID": 2031102,
   "RecommadNature": [
     "Quantum"
@@ -13208,7 +13208,7 @@
   "CampName": {
     "Hash": 9407187405023584149
   },
-  "MonsterList": "[100203025, 100204030, 100205028, 100301...",
+  "MonsterList": "<list[10]>",
   "BattleAreaList": [
     2011101,
     2013201
@@ -13389,7 +13389,7 @@
   "AvatarCutinIntroText": {
     "Hash": 13648649189742784530
   },
-  "AvatarDropOffset": "[134, 2, 0.64, 134, 2, 0.64, 134, 2, 0.6...",
+  "AvatarDropOffset": "<list[9]>",
   "AvatarTrialOffset": [],
   "PlayerCardOffset": [
     82,
@@ -13639,7 +13639,7 @@
   "ID": 3106801,
   "Season": "EarlyAccess",
   "MazeBuffID": 3106801,
-  "PriceList": "[{\"KDKPDJNMMCM\": 100, \"MDBPDAJJLMG\": 1},...",
+  "PriceList": "<list[5]>",
   "LvMax": 5,
   "TotalBuff": {
     "Hash": 7625177546586225778
@@ -13780,7 +13780,7 @@
     615041,
     615046
   ],
-  "RogueFormulaList": "[140102, 130103, 130104, 120107, 1230601...",
+  "RogueFormulaList": "<list[8]>",
   "KeywordExtraEffect": 60000001,
   "ExtraEffect": 61000200,
   "KeywordBuffType": 120
@@ -13871,8 +13871,8 @@
   },
   "UnlockPicPath": "SpriteOutput/Quest/PhotoExhibition/Photo...",
   "TaskOption": [],
-  "MalePicPath": "[\"SpriteOutput/Quest/PhotoExhibition/Pho...",
-  "FemalePicPath": "[\"SpriteOutput/Quest/PhotoExhibition/Pho..."
+  "MalePicPath": "<list[1]>",
+  "FemalePicPath": "<list[1]>"
 }
 ```
 
@@ -13891,7 +13891,7 @@
     "Hash": 15389038157159599577
   },
   "AbilityName": "RtBattle_Equip_WindArrow",
-  "ParamList": "[{\"Value\": 0.04}, {\"Value\": 2}, {\"Value\"..."
+  "ParamList": "<list[5]>"
 }
 ```
 
@@ -13940,8 +13940,8 @@
   "ExpGroup": 1,
   "MaxPromotion": 6,
   "MaxRank": 6,
-  "RankIDList": "[720501, 720502, 720503, 720504, 720505,...",
-  "SkillList": "[720501, 720502, 720503, 720504, 720506,...",
+  "RankIDList": "<list[6]>",
+  "SkillList": "<list[7]>",
   "AvatarBaseType": "Warrior",
   "DefaultAvatarModelPath": "Characters/CharacterPrefabs/Avatar/Ren_0...",
   "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIcon/Avatar/1205.png",
@@ -13964,7 +13964,7 @@
   "AvatarCutinIntroText": {
     "Hash": 16617459917855698582
   },
-  "AvatarDropOffset": "[0, -91, 0.52, 0, -91, 0.52, 0, -91, 0.5...",
+  "AvatarDropOffset": "<list[9]>",
   "AvatarTrialOffset": [],
   "PlayerCardOffset": [
     75,
@@ -14435,7 +14435,7 @@
     "Hash": 16861308019325214808
   },
   "ExitMainPage": true,
-  "RuleGroupMapList": "[{\"LJHECKCGJCJ\": 2, \"PDOJDPDCJOH\": 90012..."
+  "RuleGroupMapList": "<list[4]>"
 }
 ```
 
@@ -14447,21 +14447,21 @@
 ```json
 {
   "ID": 1,
-  "FuncEntranceIDList": "[6, 8, 31, 30, 41, 28, 29, 33, 23, 4, 15...",
+  "FuncEntranceIDList": "<list[27]>",
   "BottomFuncEntranceIDList": [
     9,
     10,
     11,
     32
   ],
-  "HudFuncEntranceIDList": "[52001, 52002, 6, 8, 33, 23, 15, 5, 3, 4...",
+  "HudFuncEntranceIDList": "<list[10]>",
   "LeftHudFuncEntranceIDList": [
     1,
     3,
     4,
     16
   ],
-  "UnlockGotoTypeList": "[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14,...",
+  "UnlockGotoTypeList": "<list[71]>",
   "WheelSupport": true
 }
 ```
@@ -14650,9 +14650,9 @@
   "StagePeriod3": [],
   "StagePeriod4": [],
   "FirstWinQuest": [],
-  "RankList": "[{\"OENAMINOLLF\": \"C\"}, {\"OENAMINOLLF\": \"...",
+  "RankList": "<list[5]>",
   "InitialWeapon": [],
-  "TrialAvatar": "[3231406, 1048001, 1048002, 3231306, 323...",
+  "TrialAvatar": "<list[5]>",
   "RecommendList": [],
   "GearRecommendList": []
 }
@@ -14722,7 +14722,7 @@
   "AbilityList": [
     "BattleEventAbility_620101_Camera"
   ],
-  "OverrideProperty": "[{\"PropertyType\": \"BaseHP\", \"Value\": {\"V...",
+  "OverrideProperty": "<list[1]>",
   "Speed": {
     "Value": 100
   },
@@ -14794,7 +14794,7 @@
   "Desc": {
     "Hash": 4425778821286498051
   },
-  "TeamMember": "[{\"ACCJKGEKHKP\": 8001, \"APAKCBFMCAB\": 5}...",
+  "TeamMember": "<list[26]>",
   "DisplayCondition": "4"
 }
 ```
@@ -15007,8 +15007,8 @@
     "Thunder",
     "Quantum"
   ],
-  "DebuffResist": "[{\"Key\": \"STAT_CTRL\", \"Value\": {\"Value\":...",
-  "DamageTypeResistance": "[{\"DamageType\": \"Physical\", \"Value\": {\"V...",
+  "DebuffResist": "<list[1]>",
+  "DamageTypeResistance": "<list[4]>",
   "CustomValueTags": [],
   "ManikinPrefabPath": "Characters/CharacterPrefabs/Manikin/Mons...",
   "ManikinConfigPath": "Config/ConfigCharacter/Manikin/Monster/M..."
@@ -15122,7 +15122,7 @@
   "EffectDesc": {
     "Hash": 5260649366817668065
   },
-  "DescParams": "[{\"GMPGDEINODK\": \"Number\", \"EJHODPJIFIN\"..."
+  "DescParams": "<list[3]>"
 }
 ```
 
@@ -15185,8 +15185,8 @@
   "SimpleSkillDesc": {
     "Hash": 3634788196948440532
   },
-  "SkillParmList": "[{\"Value\": 1}, {\"Value\": 5}, {\"Value\": 5...",
-  "SimpleSkillParmList": "[{\"Value\": 1}, {\"Value\": 5}, {\"Value\": 5...",
+  "SkillParmList": "<list[4]>",
+  "SimpleSkillParmList": "<list[4]>",
   "SkillIconPath": "SpriteOutput/SkillIcons/Avatar/8001/Skil..."
 }
 ```
@@ -15337,7 +15337,7 @@
 {
   "ID": 101,
   "DiaryGroupID": 101,
-  "Conditions": "[{\"Type\": \"FinishSubMission\", \"Param\": \"...",
+  "Conditions": "<list[1]>",
   "Type": "Intro",
   "DirectoryName": {
     "Hash": 7207941608492344885
@@ -15413,7 +15413,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 0}, {\"Value\": 0}, {\"Value\": 0...",
+  "ShowStanceList": "<list[3]>",
   "ShowDamageList": [],
   "ShowHealList": [],
   "InitCoolDown": -1,
@@ -15548,7 +15548,7 @@
 {
   "PNPJBPCMINL": 1,
   "PIKLFGGHKGD": 1001,
-  "MGNHKOHFLPO": "[{\"PHFMCACHFIJ\": 1001}, {\"PHFMCACHFIJ\": ..."
+  "MGNHKOHFLPO": "<list[8]>"
 }
 ```
 
@@ -15560,7 +15560,7 @@
 ```json
 {
   "ConstValueName": "Activity_Planet_Fes_Initial_Item_Map",
-  "Value": "{\"MapValue\": {\"IntValue\": {\"IntValue\": 1..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -15738,7 +15738,7 @@
 {
   "SpecialOrderID": 101,
   "SpecialOrderShip": 1,
-  "SpecialOrderGoods": "[{\"GoodsID\": 101, \"GoodsCnt\": 4}, {\"Good...",
+  "SpecialOrderGoods": "<list[4]>",
   "SpecialOrderReward": 8002002,
   "SpecialOrderContent": [
     10101
@@ -15772,7 +15772,7 @@
   "HighLightDesc": {
     "Hash": 8033752862372714977
   },
-  "PreviewMonsterList": "[201302010, 800304014, 200203105, 200201...",
+  "PreviewMonsterList": "<list[5]>",
   "RecommadNature": [
     "Thunder",
     "Physical"
@@ -15840,8 +15840,8 @@
   "ExpGroup": 1,
   "MaxPromotion": 6,
   "MaxRank": 6,
-  "RankIDList": "[101401, 101402, 101403, 101404, 101405,...",
-  "SkillList": "[101401, 101402, 101403, 101404, 101406,...",
+  "RankIDList": "<list[6]>",
+  "SkillList": "<list[7]>",
   "AvatarBaseType": "Warrior",
   "DefaultAvatarModelPath": "Characters/CharacterPrefabs/Avatar/Saber...",
   "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIcon/Avatar/1014.png",
@@ -15864,7 +15864,7 @@
   "AvatarCutinIntroText": {
     "Hash": 4799067612581879871
   },
-  "AvatarDropOffset": "[134, 2, 0.64, 134, 2, 0.64, 134, 2, 0.6...",
+  "AvatarDropOffset": "<list[9]>",
   "AvatarTrialOffset": [],
   "PlayerCardOffset": [
     82,
@@ -15897,7 +15897,7 @@
 ```json
 {
   "ChimeraGroupID": 40000,
-  "ChimeraIDList": "[101, 102, 103, 104, 105, 106, 107, 108,..."
+  "ChimeraIDList": "<list[53]>"
 }
 ```
 
@@ -16194,7 +16194,7 @@
   "Title": {
     "Hash": 808850406999250189
   },
-  "StartConditionList": "[{\"Type\": \"TakeSubmission\", \"Param\": \"10...",
+  "StartConditionList": "<list[1]>",
   "FinishConditionList": [],
   "JsonPath": "Config/Level/TarotBook/TarotBookInteract..."
 }
@@ -16477,8 +16477,8 @@
   "FBOICELIKNJ": {
     "Hash": 589803160953193191
   },
-  "PBLPLDJKPEI": "[{\"Value\": 45}, {\"Value\": 3}, {\"Value\": ...",
-  "JEHDKAKMCGC": "[1005, 1005, 1006, 1007, 1007, 1008, 100...",
+  "PBLPLDJKPEI": "<list[4]>",
+  "JEHDKAKMCGC": "<list[14]>",
   "GIFCDPFAKKP": true,
   "PILOLAAEAHB": 1
 }
@@ -16598,7 +16598,7 @@
     1004
   ],
   "MonsterEventID": 96103,
-  "MonsterSkillDescList": "[{\"Hash\": 15225379244613558208}, {\"Hash\"...",
+  "MonsterSkillDescList": "<list[2]>",
   "OriginalStageName": {
     "Hash": 14817410839684929265
   },
@@ -16615,9 +16615,9 @@
   "MappingInfo": 2431,
   "EntranceID": 1010111,
   "SubMissionID": 802420201,
-  "BackgroundTrashImageList": "[\"SpriteOutput/UI/Quest/TrashCanSummon/S...",
+  "BackgroundTrashImageList": "<list[4]>",
   "MonsterMiddleIcon": "SpriteOutput/UI/Quest/TrashCanSummon/Sum...",
-  "MasterImagePath": "[\"SpriteOutput/AvatarShopIcon/Avatar/800...",
+  "MasterImagePath": "<list[2]>",
   "MonsterImagePath": "SpriteOutput/UI/Quest/TrashCanSummon/Pos...",
   "OriginalImagePath": "SpriteOutput/UI/Quest/TrashCanSummon/Sum...",
   "ImagePath": "SpriteOutput/UI/Quest/TrashCanSummon/Sum...",
@@ -16635,7 +16635,7 @@
 ```json
 {
   "AvatarID": 8001,
-  "VoiceIDList": "[1, 2, 3, 4, 6, 10, 11, 14, 15, 16, 17, ...",
+  "VoiceIDList": "<list[59]>",
   "StoryIDList": [
     11,
     12,
@@ -16772,7 +16772,7 @@
   "ID": 2,
   "GotoID": 200,
   "UnlockID": 200,
-  "OverrideGotoID": "[{\"BFLIFKBEOPJ\": 17, \"MNDFOPKBHKP\": 5800...",
+  "OverrideGotoID": "<list[5]>",
   "OverrideUnlockID": []
 }
 ```
@@ -16810,7 +16810,7 @@
   ],
   "StagePeriod4": [],
   "FirstWinQuest": [],
-  "RankList": "[{\"OENAMINOLLF\": \"C\"}, {\"OENAMINOLLF\": \"...",
+  "RankList": "<list[5]>",
   "InitialWeapon": [
     3106002
   ],
@@ -16819,7 +16819,7 @@
     1031013,
     3231110
   ],
-  "RecommendList": "[{\"BOKJJKFCFME\": 3106807, \"AAGKEBFHLMC\":...",
+  "RecommendList": "<list[3]>",
   "GearRecommendList": [
     3106013,
     3106011,
@@ -17170,9 +17170,9 @@
   "FieldEffectWeight": [],
   "FieldUnlockConditionList": [],
   "FieldBetCost": 10000,
-  "FieldSectionWeight": "[{\"BFLIFKBEOPJ\": 1, \"MNDFOPKBHKP\": 15}, ...",
+  "FieldSectionWeight": "<list[6]>",
   "FieldSectionNum": 3,
-  "FieldCatWeight": "[{\"BFLIFKBEOPJ\": 4, \"MNDFOPKBHKP\": 10}, ...",
+  "FieldCatWeight": "<list[5]>",
   "FieldCatNum": 5
 }
 ```
@@ -17283,7 +17283,7 @@
   "ThemePosterTabPicPath": "SpriteOutput/Quest/TabIcon/BtnChallengeP...",
   "ThemeIconPicPath": "SpriteOutput/ChallengePeak/ChallengePeak...",
   "HandBookPanelBannerPath": "SpriteOutput/DailyMission/Banner/Challen...",
-  "RankIconPathList": "[\"SpriteOutput/ChallengePeak/MedallionIc..."
+  "RankIconPathList": "<list[4]>"
 }
 ```
 
@@ -17329,8 +17329,8 @@
     "Thunder",
     "Quantum"
   ],
-  "DebuffResist": "[{\"Key\": \"STAT_CTRL\", \"Value\": {\"Value\":...",
-  "DamageTypeResistance": "[{\"DamageType\": \"Physical\", \"Value\": {\"V...",
+  "DebuffResist": "<list[1]>",
+  "DamageTypeResistance": "<list[4]>",
   "ManikinPrefabPath": "Characters/CharacterPrefabs/Manikin/Mons...",
   "ManikinConfigPath": "Config/ConfigCharacter/Manikin/Monster/M..."
 }
@@ -17671,7 +17671,7 @@
 ```json
 {
   "RogueAreaID": 10100,
-  "ScoreMap": "{\"1\": 50, \"2\": 100, \"3\": 150, \"4\": 200, ...",
+  "ScoreMap": "<dict[7]>",
   "RecommendLevel": 30
 }
 ```
@@ -17756,7 +17756,7 @@
   "ID": 1,
   "ActivityModuleID": 3000501,
   "ParamList": [],
-  "MaterialList": "[{\"ItemID\": 111011, \"ItemNum\": 1}, {\"Ite...",
+  "MaterialList": "<list[3]>",
   "MissionID": 8000170,
   "RewardID": 3100301
 }
@@ -18100,7 +18100,7 @@
 ```json
 {
   "ConstValueName": "ChimeraDuel_ChimeraExp_List",
-  "Value": "{\"MapValue\": {\"IntValue\": {\"IntValue\": 3..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -18485,9 +18485,9 @@
 ```json
 {
   "ID": 701,
-  "HpParam": "{\"LIOIAIIHLON\": {\"Value\": 1500}, \"CONAIK...",
-  "AttackParam": "{\"LIOIAIIHLON\": {\"Value\": 30}, \"CONAIKKD...",
-  "DefenceParam": "{\"LIOIAIIHLON\": {\"Value\": 27}, \"CONAIKKD...",
+  "HpParam": "<dict[4]>",
+  "AttackParam": "<dict[4]>",
+  "DefenceParam": "<dict[4]>",
   "Name": {
     "Hash": 13895689034350914730
   },
@@ -18691,7 +18691,7 @@
     5001804
   ],
   "BattleAreaID": 2042104,
-  "TrialAvatarList": "[3231402, 3231403, 3231302, 3238007, 323...",
+  "TrialAvatarList": "<list[6]>",
   "ManikinPrefabPath": "UI/UI3D/LocalLegend/Monster/LocalLegend_...",
   "ManikinConfigPath": "Config/ConfigCharacter/Manikin/Monster/M..."
 }
@@ -18841,13 +18841,13 @@
     2,
     300001
   ],
-  "Section1LoadEntityList": "[{\"LLDCHLHNADA\": 3, \"GDBJDAOOCOH\": 30000...",
-  "Section2LoadEntityList": "[{\"LLDCHLHNADA\": 3, \"GDBJDAOOCOH\": 30000...",
+  "Section1LoadEntityList": "<list[2]>",
+  "Section2LoadEntityList": "<list[10]>",
   "Section3LoadEntityList": [
     {}
   ],
   "ColliderPath": "Stages/OriginalResPos/Chapter04/Prefab/C...",
-  "CoinPropID": "[{\"LLDCHLHNADA\": 2, \"GDBJDAOOCOH\": 30000...",
+  "CoinPropID": "<list[3]>",
   "ControllerBlackHoleID": [
     2,
     300001
@@ -18884,7 +18884,7 @@
     "Value": 0.1
   },
   "OffsetQuantizeCount": 5,
-  "RandomFactorList": "[{\"Value\": 0.98}, {\"Value\": 0.99}, {\"Val..."
+  "RandomFactorList": "<list[5]>"
 }
 ```
 
@@ -19055,7 +19055,7 @@
 ```json
 {
   "UnlockID": 70001,
-  "Conditions": "[{\"Type\": \"FinishMainMission\", \"Param\": ...",
+  "Conditions": "<list[1]>",
   "ShowCondition": []
 }
 ```
@@ -19110,7 +19110,7 @@
 ```json
 {
   "ConstValueName": "GridFight_CardWeight_Lv1",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 100}, {\"Int..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -19202,7 +19202,7 @@
     1003,
     1013
   ],
-  "DisplayMonsterList": "[800205001, 100204020, 100205016, 800101...",
+  "DisplayMonsterList": "<list[6]>",
   "SpecialAvatarIDList": [
     3061003,
     3061013
@@ -19326,7 +19326,7 @@
 {
   "ExpeditionID": 1001,
   "RewardID": 115601,
-  "UnlockCondition": "[{\"Type\": \"FinishMainMission\", \"Param\": ...",
+  "UnlockCondition": "<list[1]>",
   "Name": {
     "Hash": 14909458032570007003
   },
@@ -19503,7 +19503,7 @@
   "InitialInterval": 3,
   "Interval": 5,
   "AbilityName": "Heliobus_Action_Ability",
-  "ParamList": "[{\"Value\": 61001}, {\"Value\": 2}, {\"Value..."
+  "ParamList": "<list[5]>"
 }
 ```
 
@@ -19640,9 +19640,9 @@
   "LevelAbilityParamList": [],
   "TotalWeek": 3,
   "WeekStarCount": 3,
-  "RequiredScoreList": "[350, 700, 1050, 2100, 4200, 6300, 7000,...",
-  "ItemRuleGroupID": "[111, 112, 113, 114, 121, 122, 123, 124,...",
-  "VisitorRuleGroupID": "[10001, 10001, 10001, 10001, 10001, 1000...",
+  "RequiredScoreList": "<list[9]>",
+  "ItemRuleGroupID": "<list[12]>",
+  "VisitorRuleGroupID": "<list[12]>",
   "LevelDayDuration": [
     2,
     3,
@@ -19720,7 +19720,7 @@
   "EmojiIDList": [
     2011
   ],
-  "MessageIDList": "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, ..."
+  "MessageIDList": "<list[16]>"
 }
 ```
 
@@ -19878,8 +19878,8 @@
   "MainPageDesc": {
     "Hash": 8660796981155528944
   },
-  "MainFgPathList": "[\"SpriteOutput/Quest/FightFest/News/Figh...",
-  "MainBgPathList": "[\"SpriteOutput/Quest/FightFest/News/Figh...",
+  "MainFgPathList": "<list[2]>",
+  "MainBgPathList": "<list[2]>",
   "InterviewFgPath": "SpriteOutput/Quest/FightFest/News/FightF...",
   "InterviewBgPath": "SpriteOutput/Quest/FightFest/News/FightF...",
   "CollectionFgPath": "SpriteOutput/Quest/FightFest/News/FightF...",
@@ -20021,7 +20021,7 @@
 ```json
 {
   "ConstValueName": "Chimera_PlayerTeam_Icon",
-  "Value": "{\"StringValue\": \"SpriteOutput/AvatarRoun..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -20084,7 +20084,7 @@
     0,
     500
   ],
-  "LevelPool": "[100, 101, 102, 103, 104, 105, 106, 107,...",
+  "LevelPool": "<list[10]>",
   "SmallIconPath": "SpriteOutput/Quest/ActivityMarble/Player...",
   "IconPath": "SpriteOutput/Quest/ActivityMarble/Player...",
   "BigIconPath": "SpriteOutput/Quest/ActivityMarble/Player...",
@@ -20186,7 +20186,7 @@
   "EffectDesc3": {
     "Hash": 16936054459392242721
   },
-  "DescParam": "[{\"Value\": 2}, {\"Value\": 0.04}, {\"Value\"...",
+  "DescParam": "<list[3]>",
   "RogueBuffType": 120,
   "BattleEventBuffGroup": 12004,
   "BattleEventEnhanceBuffGroup": 12005,
@@ -20340,7 +20340,7 @@
   "P3MazeBuffID": [
     3107201
   ],
-  "SpecialAvatarList": "[3021308, 3021307, 3041005, 3021301, 302...",
+  "SpecialAvatarList": "<list[5]>",
   "ImagePath": "SpriteOutput/UI/Quest/FeverTime/Buff/Ico...",
   "StageName": {
     "Hash": 1636215138976477220
@@ -20353,9 +20353,9 @@
     300301001,
     302402002
   ],
-  "WaveMonsterList_1": "[801301018, 800205044, 801201028, 201201...",
-  "WaveMonsterList_2": "[300301001, 800205044, 300203005, 300101...",
-  "WaveMonsterList_3": "[302402002, 800205044, 300204001, 300203...",
+  "WaveMonsterList_1": "<list[4]>",
+  "WaveMonsterList_2": "<list[5]>",
+  "WaveMonsterList_3": "<list[5]>",
   "QuestGroupID": 3,
   "RecommadNature": [
     "Thunder",
@@ -20778,7 +20778,7 @@
     2008
   ],
   "DisplayMapID": 10001,
-  "DisplayMonster": "{\"1013020\": 3, \"1023010\": 3, \"8013010\": ...",
+  "DisplayMonster": "<dict[4]>",
   "DisplayMonster2": {
     "1004022": 7
   },
@@ -20867,7 +20867,7 @@
   "RatedRankID": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "[{\"Value\": 30}, {\"Value\": 0}, {\"Value\": ...",
+  "ShowStanceList": "<list[3]>",
   "ShowDamageList": [],
   "ShowHealList": [],
   "InitCoolDown": -1,
@@ -20898,7 +20898,7 @@
 ```json
 {
   "OEJJLDOAICN": 1,
-  "MGNHKOHFLPO": "[{\"PHFMCACHFIJ\": 11001}, {\"PHFMCACHFIJ\":..."
+  "MGNHKOHFLPO": "<list[13]>"
 }
 ```
 
@@ -20926,7 +20926,7 @@
   "ActivityStudioScriptID": 1,
   "ActivityModuleID": 5001202,
   "ScriptType": "Normal",
-  "ScriptUnlockCondition": "[{\"Type\": \"FinishSubMission\", \"Param\": \"...",
+  "ScriptUnlockCondition": "<list[1]>",
   "ScriptUnlockCost": {},
   "StartChapterID": 101,
   "TalentCanBeUsed": [],
@@ -21006,7 +21006,7 @@
   "DivisionID": 1,
   "ChapterID": 1,
   "SectionID": 1,
-  "FunctionList": "[\"Trait\", \"Strategy\", \"Interest\", \"Guide..."
+  "FunctionList": "<list[8]>"
 }
 ```
 
@@ -21183,7 +21183,7 @@
   "To": {
     "Hash": 17541190453610790690
   },
-  "MailSentenceIDList": "[1001, 1002, 1003, 1004, 1005, 1006, 100..."
+  "MailSentenceIDList": "<list[28]>"
 }
 ```
 
@@ -21219,7 +21219,7 @@
 {
   "TraitID": 2012,
   "TraitLayer": 3,
-  "OverrideBEProperty": "[{\"PropertyType\": \"ExtraFrontPowerAddedR...",
+  "OverrideBEProperty": "<list[8]>",
   "OverrideSkillIDList": [
     20120101,
     20120201,
@@ -21443,7 +21443,7 @@
 ```json
 {
   "ItemGroupID": 60000,
-  "ItemIDList": "[1101, 1102, 1201, 1202, 1301, 1302, 140..."
+  "ItemIDList": "<list[17]>"
 }
 ```
 
@@ -21479,8 +21479,8 @@
   "MLNNCPNNDOO": [
     "Common"
   ],
-  "JAKDNHOHINO": "[{\"Value\": 0.6}, {\"Value\": 0.4}, {\"Value...",
-  "LKJNMGCBCAK": "[{\"Value\": 0.589}, {\"Value\": 0.4}, {\"Val..."
+  "JAKDNHOHINO": "<list[4]>",
+  "LKJNMGCBCAK": "<list[4]>"
 }
 ```
 
@@ -21554,8 +21554,8 @@
   "SPNeed": {
     "Value": 140
   },
-  "RankIDList": "[1121201, 1121202, 1121203, 1121204, 112...",
-  "SkillList": "[1121201, 1121202, 1121203, 1121204, 112..."
+  "RankIDList": "<list[6]>",
+  "SkillList": "<list[7]>"
 }
 ```
 
@@ -21848,7 +21848,7 @@
     "Hash": 7276791121849754233
   },
   "TitleIconPath": "SpriteOutput/Quest/TabIcon/PermanentActi...",
-  "DisplayItemList": "[{\"ItemID\": 101}, {\"ItemID\": 24005}, {\"I...",
+  "DisplayItemList": "<list[8]>",
   "IntroGuideImg": "SpriteOutput/Quest/PermanentActivity/Det...",
   "IntroID": 12,
   "ActivityTagList": [
@@ -21952,7 +21952,7 @@
   },
   "IconImagePath": "SpriteOutput/TabIcon/Inventory/Inventory...",
   "DisplayInventoryType": "Normal",
-  "DisplayItemSubType": "[\"Virtual\", \"Material\", \"AvatarExp\", \"Av...",
+  "DisplayItemSubType": "<list[10]>",
   "InventoryDisplayTag": 1,
   "TabSortWeight": 10,
   "ItemSortTypeList": [
@@ -22523,7 +22523,7 @@
   "TipsDesc": {
     "Hash": 14927483021586036889
   },
-  "Condition": "[{\"GMPGDEINODK\": \"LevelMode\", \"NNACKOBKF...",
+  "Condition": "<list[1]>",
   "Weight": 100
 }
 ```
@@ -22549,7 +22549,7 @@
 ```json
 {
   "QuestTimeLimitGroupID": 1,
-  "QuestList": "[6000601, 6000602, 6000603, 6000604, 600...",
+  "QuestList": "<list[5]>",
   "Name": {
     "Hash": 17406201981466799149
   },
@@ -22974,7 +22974,7 @@
 ```json
 {
   "ConstValueName": "DrinkMaker_CustomDrink_IconPath",
-  "Value": "{\"StringValue\": \"SpriteOutput/Quest/Drin..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -23010,7 +23010,7 @@
     1,
     2
   ],
-  "CakeRequirementList": "[{\"PHFMCACHFIJ\": 7, \"HCDEOKNIGKG\": 1}, {...",
+  "CakeRequirementList": "<list[2]>",
   "TypeList": [
     "Shelf",
     "Ground"
@@ -23115,7 +23115,7 @@
   "MaxFaithReward": 210110,
   "FinishSubMissionID": 802112103,
   "FinishQuestID": 6018115,
-  "EmotionProblemList": "[{\"Hash\": 6462287894102293646}, {\"Hash\":..."
+  "EmotionProblemList": "<list[3]>"
 }
 ```
 
@@ -23146,7 +23146,7 @@
   "TriggerType": "EnterOpenDay",
   "TalkType": "EnterOpenDayDefault",
   "TalkTypeParameter": "",
-  "TextIDList": "[{\"Hash\": 3181678734706622919}, {\"Hash\":...",
+  "TextIDList": "<list[4]>",
   "Priority": 100,
   "CustomString": "MuseumDeskTalk_101"
 }
@@ -23225,7 +23225,7 @@
     306,
     301
   ],
-  "PropertyList3": "[\"CriticalChanceBase\", \"CriticalDamageBa...",
+  "PropertyList3": "<list[2]>",
   "PropertyList4": [
     "AttackAddedRatio",
     "SpeedDelta"
@@ -23238,8 +23238,8 @@
     "AttackAddedRatio",
     "SPRatioBase"
   ],
-  "PropertyList": "[{\"RelicType\": \"BODY\", \"PropertyType\": \"...",
-  "SubAffixPropertyList": "[\"CriticalChanceBase\", \"CriticalDamageBa...",
+  "PropertyList": "<list[4]>",
+  "SubAffixPropertyList": "<list[4]>",
   "ScoreRankList": [
     336,
     281
@@ -23321,7 +23321,7 @@
 ```json
 {
   "MissionPack": 1034101,
-  "MainMissionIdList": "[1033808, 1034101, 1034103, 1034104, 103..."
+  "MainMissionIdList": "<list[8]>"
 }
 ```
 
@@ -23353,7 +23353,7 @@
     103,
     203
   ],
-  "CardList": "[101, 102, 103, 202, 203, 204, 205, 207,...",
+  "CardList": "<list[19]>",
   "InitialEffectList": [
     601
   ],
@@ -23457,7 +23457,7 @@
 ```json
 {
   "ConstValueName": "RogueNous_BoardPage_FuncEntranceIDList",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 51003}, {\"I..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -23469,7 +23469,7 @@
 ```json
 {
   "AreaID": 101,
-  "NodeIDList": "[10101, 10102, 10103, 10104, 10105, 1010..."
+  "NodeIDList": "<list[6]>"
 }
 ```
 
@@ -23481,7 +23481,7 @@
 ```json
 {
   "ID": 1002,
-  "RewardList": "[3000001, 3000002, 3000003, 3000004, 300...",
+  "RewardList": "<list[7]>",
   "ActivityModuleID": 1001402
 }
 ```
@@ -23647,7 +23647,7 @@
   },
   "Sort": 2,
   "RequireAreaID": 12,
-  "ProgressBonusList": "[{\"Progress\": 20, \"AddStar\": 1}, {\"Progr...",
+  "ProgressBonusList": "<list[5]>",
   "IconPath": "SpriteOutput/Quest/TrainParty/BuildAreaI...",
   "HiddenBlockList": [],
   "ShowBlockList": [
@@ -23679,7 +23679,7 @@
 ```json
 {
   "TriggerType": "Idle",
-  "AnimGroupPool": "[{\"KCDMPPMHGHD\": 0.6, \"BOJGKMOFMCJ\": 1},..."
+  "AnimGroupPool": "<list[3]>"
 }
 ```
 
@@ -23747,7 +23747,7 @@
     301002,
     301003
   ],
-  "TextmapIDList": "[{\"Hash\": 4033818508597533780}, {\"Hash\":..."
+  "TextmapIDList": "<list[3]>"
 }
 ```
 
@@ -23759,7 +23759,7 @@
 ```json
 {
   "ConstValueName": "CakeRace_Score_Rank_Ratio_List",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 150}, {\"Int..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -23829,7 +23829,7 @@
   "HFIAAGAKFMD": [
     420464
   ],
-  "LOJCIDLKPKG": "[\"Physical\", \"Ice\", \"Thunder\", \"Quantum\"...",
+  "LOJCIDLKPKG": "<list[4]>",
   "OGEOMCGNNMP": [
     5001,
     5002,
@@ -23837,8 +23837,8 @@
   ],
   "GNGENMHNLAH": 5000,
   "IMCMJHAMMKK": 101713,
-  "EGEEJLHBALB": "[{\"ItemID\": 122003}, {\"ItemID\": 1, \"Item...",
-  "OGALGHMIIAH": "[{\"ItemID\": 122003}, {\"ItemID\": 1}, {\"It..."
+  "EGEEJLHBALB": "<list[8]>",
+  "OGALGHMIIAH": "<list[8]>"
 }
 ```
 
@@ -24062,7 +24062,7 @@
   "LevelUpExp": 2,
   "AvatarMaxNumber": 1,
   "Rarity1Weight": 100,
-  "GeneralPropertyList": "[{\"PropertyType\": \"AttackDelta\"}, {\"Prop..."
+  "GeneralPropertyList": "<list[2]>"
 }
 ```
 
@@ -24151,7 +24151,7 @@
   "LevelUpExp": 2,
   "AvatarMaxNumber": 1,
   "Rarity1Weight": 100,
-  "GeneralPropertyList": "[{\"PropertyType\": \"AttackDelta\"}, {\"Prop..."
+  "GeneralPropertyList": "<list[2]>"
 }
 ```
 
@@ -24412,7 +24412,7 @@
     20,
     25
   ],
-  "JPOEFHLLNIK": "[1, 2, 3, 4, 5, 5, 10, 10, 10, 15, 15, 2...",
+  "JPOEFHLLNIK": "<list[12]>",
   "JAABDPEPHBF": [
     10,
     10,
@@ -24437,7 +24437,7 @@
     20,
     25
   ],
-  "MIECBNMEDGL": "[1, 2, 3, 4, 5, 5, 10, 10, 10, 15, 15, 2...",
+  "MIECBNMEDGL": "<list[12]>",
   "OGEBAEGKHNO": [
     40,
     40,
@@ -24462,7 +24462,7 @@
     3,
     2
   ],
-  "APDKGPIBHCP": "[20, 15, 15, 10, 10, 10, 5, 5, 4, 3, 2, ..."
+  "APDKGPIBHCP": "<list[12]>"
 }
 ```
 
@@ -24674,7 +24674,7 @@
 ```json
 {
   "PNPJBPCMINL": 1,
-  "MGNHKOHFLPO": "[{\"PHFMCACHFIJ\": 1001}, {\"PHFMCACHFIJ\": ..."
+  "MGNHKOHFLPO": "<list[77]>"
 }
 ```
 
@@ -24856,7 +24856,7 @@
 ```json
 {
   "ConstValueName": "AetherDivide_SpiritTypeAllIconPath",
-  "Value": "{\"StringValue\": \"SpriteOutput/TabIcon/Co..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -25013,7 +25013,7 @@
 ```json
 {
   "ConstValueName": "RogueTourn_Workbench_EnhancementIcon",
-  "Value": "{\"StringValue\": \"SpriteOutput/Rogue/Rogu..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -25145,7 +25145,7 @@
 ```json
 {
   "OrderID": 2001,
-  "OrderContent": "[{\"GoodsID\": 102, \"GoodsCnt\": 3}, {\"Good...",
+  "OrderContent": "<list[3]>",
   "OrderGoodList": [
     102,
     501,
@@ -25314,7 +25314,7 @@
 ```json
 {
   "GroupID": 101,
-  "AvatarIDList": "[1409, 1414, 1222, 1304, 1217, 1208, 120..."
+  "AvatarIDList": "<list[13]>"
 }
 ```
 
@@ -25500,7 +25500,7 @@
   "CrystalProbability": {
     "Value": 0.8
   },
-  "StarProbabilityList": "[{\"Value\": 0.2}, {\"Value\": 0}, {\"Value\":...",
+  "StarProbabilityList": "<list[6]>",
   "WorldTagList": [
     1
   ],
@@ -25631,7 +25631,7 @@
 {
   "ID": 101,
   "ChoiceIDList": [],
-  "TextIDList": "[10101, 10102, 10103, 10104, 10105, 1010...",
+  "TextIDList": "<list[6]>",
   "DiaryDescription": {
     "Hash": 2014329979317590681
   }
@@ -25714,7 +25714,7 @@
 ```json
 {
   "ShopID": 101,
-  "ShopGoods": "[{\"GoodsID\": 101, \"Num\": 1}, {\"GoodsID\":...",
+  "ShopGoods": "<list[3]>",
   "ShopBox": 3,
   "ShopEnergy": 30,
   "EnergyColor": [
@@ -25806,7 +25806,7 @@
   "TrainerQuest": 6023602,
   "UnlockID": 100001,
   "BadgeUnlockID": 100006,
-  "DisplayMonsterMap": "{\"7003030\": 1, \"7003010\": 1, \"7002070\": ..."
+  "DisplayMonsterMap": "<dict[5]>"
 }
 ```
 
@@ -25937,7 +25937,7 @@
   },
   "IconPath": "SpriteOutput/Quest/DiceCombat/RankIcon/D...",
   "IconSmallPath": "SpriteOutput/Quest/DiceCombat/RankIcon/D...",
-  "RuleGroupMapList": "[{\"LJHECKCGJCJ\": 2, \"PDOJDPDCJOH\": 11012..."
+  "RuleGroupMapList": "<list[4]>"
 }
 ```
 
@@ -26071,7 +26071,7 @@
   "ActivityID": 50114,
   "ActivityModuleID": 5011401,
   "GuideVideoID": 5011412,
-  "CompleteCondition": "[{\"Type\": \"FinishMainMission\", \"Param\": ...",
+  "CompleteCondition": "<list[1]>",
   "CurrentModuleID": 5011401,
   "DisplayModuleID": 5011402,
   "ProgramGroupID": 3006,
@@ -26317,8 +26317,8 @@
   "ForbiddenBattleFail": 1,
   "ForbiddenSellRoleBeforeChapterId": 1,
   "ForbiddenSellRoleBeforeSectionId": 7,
-  "ForbiddenSellRoleList": "[{\"GAJICDKPHPA\": 1220, \"BDCOFIOCJFO\": 1}...",
-  "ForbiddenAutoOpenShopNodeList": "[{\"EEBLMLAEFHO\": 1, \"IMDPJFEGIDF\": 1}, {..."
+  "ForbiddenSellRoleList": "<list[8]>",
+  "ForbiddenAutoOpenShopNodeList": "<list[7]>"
 }
 ```
 
@@ -26364,7 +26364,7 @@
   "PartnerName": {
     "Hash": 9717664300024737687
   },
-  "PartnerAbilityIDList": "[1101, 1102, 1103, 1104, 1105, 1106, 110...",
+  "PartnerAbilityIDList": "<list[16]>",
   "PartnerImage": "SpriteOutput/AvatarShopIcon/Avatar/1217....",
   "AvatarID": 1217
 }
@@ -26496,7 +26496,7 @@
 ```json
 {
   "AvatarID": 1001,
-  "ExtractionAbilityList": "[\"Avatar_Mar_7th_00_PassiveSkill01_Inser..."
+  "ExtractionAbilityList": "<list[1]>"
 }
 ```
 
@@ -26844,8 +26844,8 @@
     4002
   ],
   "IMCMJHAMMKK": 102113,
-  "EGEEJLHBALB": "[{\"ItemID\": 122002}, {\"ItemID\": 1, \"Item...",
-  "OGALGHMIIAH": "[{\"ItemID\": 122002}, {\"ItemID\": 1}, {\"It..."
+  "EGEEJLHBALB": "<list[8]>",
+  "OGALGHMIIAH": "<list[8]>"
 }
 ```
 
@@ -27008,7 +27008,7 @@
 ```json
 {
   "ConstValueName": "FateRin_Normal_Reward_QuestList",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 6088001}, {..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -27044,7 +27044,7 @@
 {
   "PhaseID": 101,
   "NextPhase": 102,
-  "QuestList": "[1001711, 1001712, 1001713, 1001714, 100...",
+  "QuestList": "<list[5]>",
   "PanelTitle": {
     "Hash": 2968996071244643990
   },
@@ -27132,8 +27132,8 @@
   ],
   "GNGENMHNLAH": 600,
   "IMCMJHAMMKK": 101913,
-  "EGEEJLHBALB": "[{\"ItemID\": 122001}, {\"ItemID\": 1, \"Item...",
-  "OGALGHMIIAH": "[{\"ItemID\": 122001}, {\"ItemID\": 1}, {\"It..."
+  "EGEEJLHBALB": "<list[8]>",
+  "OGALGHMIIAH": "<list[8]>"
 }
 ```
 
@@ -27367,7 +27367,7 @@
 ```json
 {
   "ArcadeID": 1,
-  "PicPathList": "[\"SpriteOutput/Rogue/Tourn/Arcade/RogueA...",
+  "PicPathList": "<list[1]>",
   "BriefName": {
     "Hash": 14865721950124009911
   },
@@ -27439,7 +27439,7 @@
     "Hash": 5784996678433989964
   },
   "RewardID": 240011,
-  "TurnIDList": "[101, 102, 103, 104, 105, 106, 107, 108,..."
+  "TurnIDList": "<list[15]>"
 }
 ```
 
@@ -27651,7 +27651,7 @@
 ```json
 {
   "UnlockID": 101,
-  "Conditions": "[{\"Type\": \"FinishSubMission\", \"Param\": \"...",
+  "Conditions": "<list[1]>",
   "ShowCondition": []
 }
 ```
@@ -27811,7 +27811,7 @@
     4033020,
     8003020
   ],
-  "BKABFEJOAKM": "[4012010, 4012020, 4012030, 4012040, 800..."
+  "BKABFEJOAKM": "<list[5]>"
 }
 ```
 
@@ -27886,7 +27886,7 @@
 {
   "ID": 311000,
   "GroupID": 1,
-  "RewardList": "[1201001, 1201002, 1201003, 1201004, 120...",
+  "RewardList": "<list[7]>",
   "GroupDesc": {
     "Hash": 7509559092966294882
   }
@@ -27915,7 +27915,7 @@
 ```json
 {
   "ConstValueName": "RogueDLC_BoardPage_FuncEntranceIDList",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 51003}, {\"I..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -27954,7 +27954,7 @@
 ```json
 {
   "RailBallID": 5,
-  "LevelBestRecordList": "[{\"MLDLOJJBIJD\": 10, \"GAFENHHEBPG\": 8132...",
+  "LevelBestRecordList": "<list[3]>",
   "NPCName": {
     "Hash": 10089855168639591785
   },
@@ -27970,7 +27970,7 @@
 ```json
 {
   "ConstValueName": "RogueDLC_Recover_ItemCost",
-  "Value": "{\"MapValue\": {\"IntValue\": {\"IntValue\": 8..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -28526,7 +28526,7 @@
 {
   "MapID": 3,
   "CellID": 9,
-  "MoveParam": "[\"MapArea/Ground/WorldContainer/WorldMap..."
+  "MoveParam": "<list[4]>"
 }
 ```
 
@@ -28676,7 +28676,7 @@
     1003,
     1004
   ],
-  "NJBEMAEAEIL": "[6013, 6015, 6019, 6008, 6016, 6005, 602..."
+  "NJBEMAEAEIL": "<list[13]>"
 }
 ```
 
@@ -28745,7 +28745,7 @@
   "DescText": {
     "Hash": 5428064629844130967
   },
-  "DescParamList": "[{\"Value\": 0.32}, {\"Value\": 2}, {\"Value\"..."
+  "DescParamList": "<list[3]>"
 }
 ```
 
@@ -28880,8 +28880,8 @@
 ```json
 {
   "GroupID": 104,
-  "QuestList": "[3001, 3002, 3003, 3004, 3005, 3006, 300...",
-  "RewardIDList": "[13001, 13002, 13003, 13004, 13005, 1300..."
+  "QuestList": "<list[10]>",
+  "RewardIDList": "<list[7]>"
 }
 ```
 
@@ -28978,8 +28978,8 @@
   },
   "IconPath": "",
   "TabIconPath": "",
-  "UnlockConditions": "[{\"Type\": \"PlayerLevel\", \"Param\": \"21\"},...",
-  "OpenConditions": "[{\"Type\": \"FinishSubMission\", \"Param\": \"...",
+  "UnlockConditions": "<list[2]>",
+  "OpenConditions": "<list[1]>",
   "TabID": 1001
 }
 ```
@@ -28992,7 +28992,7 @@
 ```json
 {
   "ConstValueName": "TeamTowers_SilverWolfIcon",
-  "Value": "{\"StringValue\": \"SpriteOutput/Quest/Team..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -29098,7 +29098,7 @@
 ```json
 {
   "ID": 1,
-  "ItemIDList": "[3113001, 3113002, 3113003, 3113114, 311..."
+  "ItemIDList": "<list[10]>"
 }
 ```
 
@@ -29322,7 +29322,7 @@
     100
   ],
   "RandomNumber": 10,
-  "LoadingRandomParam": "{\"NormalIP\": 10, \"NormalRule\": 4, \"World..."
+  "LoadingRandomParam": "<dict[3]>"
 }
 ```
 
@@ -29670,7 +29670,7 @@
   "WinCon": 5,
   "CoinNum": 1,
   "GameType": "PVP",
-  "RoundIDList": "[1001, 1002, 1003, 1004, 1005, 1006, 100...",
+  "RoundIDList": "<list[12]>",
   "ChimeraNumLimitList": []
 }
 ```
@@ -29808,7 +29808,7 @@
 ```json
 {
   "ConstValueName": "BoxingClubResonance_UnlockMissionList",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 2010720}, {..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -30179,7 +30179,7 @@
 ```json
 {
   "KeywordID": 1615010,
-  "ParamList": "[{\"Value\": 1.8}, {\"Value\": 0.35}, {\"Valu..."
+  "ParamList": "<list[3]>"
 }
 ```
 
@@ -30192,7 +30192,7 @@
 {
   "ID": 1,
   "CoreID": 301,
-  "EquipList": "[3101, 3102, 3103, 3104, 3105, 3106, 360...",
+  "EquipList": "<list[8]>",
   "Title": {
     "Hash": 3185185266711017959
   },
@@ -30284,7 +30284,7 @@
   "LMFDBGIAPFC": {
     "Hash": 6594948133766771045
   },
-  "ECCJCKCCPBP": "[9021014, 3321313, 3231303, 3231217, 902...",
+  "ECCJCKCCPBP": "<list[8]>",
   "FAEHFMIFPBG": 3151101,
   "ANKBAKDHDJD": "Guide"
 }
@@ -30438,7 +30438,7 @@
   "DifficultyDesc": {
     "Hash": 16020208869497004996
   },
-  "ParamList": "[{\"Value\": 1}, {\"Value\": 5}, {\"Value\": 1..."
+  "ParamList": "<list[3]>"
 }
 ```
 
@@ -30450,7 +30450,7 @@
 ```json
 {
   "PNPJBPCMINL": 1,
-  "MGNHKOHFLPO": "[{\"PHFMCACHFIJ\": 1001}, {\"PHFMCACHFIJ\": ..."
+  "MGNHKOHFLPO": "<list[33]>"
 }
 ```
 
@@ -30512,7 +30512,7 @@
     "Hash": 14536884776425909639
   },
   "TypeGroupID": 1,
-  "QuestList": "[6032101, 6032102, 6032103, 6032209, 603...",
+  "QuestList": "<list[7]>",
   "ActivityModuleID": 5000606
 }
 ```
@@ -30701,7 +30701,7 @@
   "HNEIIAGADGO": 2051102,
   "JFDHFPIIGCC": 5014020,
   "BFMNOLGCCKH": "SpriteOutput/Collaboration/FateRin/FateR...",
-  "FOHHOOKJPIM": "[3232001, 3232002, 3232003, 3232004, 323...",
+  "FOHHOOKJPIM": "<list[5]>",
   "OENAMINOLLF": {
     "Hash": 11169810328513533655
   }
@@ -30939,7 +30939,7 @@
 ```json
 {
   "ConstValueName": "train_party_need_break_move_grid_type_li...",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 11}, {\"IntV..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -31210,7 +31210,7 @@
   "ModifierName": "ADV_StageAbility_35610001",
   "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
   "InBattleBindingKey": "StageAbility_GridFight_Projection_Gilgam...",
-  "ParamList": "[{\"Value\": 0.02}, {\"Value\": 6}, {\"Value\"...",
+  "ParamList": "<list[3]>",
   "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
   "BuffName": {
     "Hash": 14668333444873254312
@@ -31265,7 +31265,7 @@
   "SubTypeTitle": {
     "Hash": 2527403513851859277
   },
-  "RewardList": "[1, 236, 241, 101, 235, 213, 233, 300041...",
+  "RewardList": "<list[9]>",
   "ButtonPath": "UI/Rogue/Widget/RoguePlanetDlcSelect1.pr...",
   "PatternBgPath": "UI/Rogue/Widget/RogueDlcPatternBg1.prefa...",
   "SwitchBannerImgPath": "SpriteOutput/Rogue/Planet/Dlc/IconRogueS..."
@@ -31318,7 +31318,7 @@
   "ProjectionDesc": {
     "Hash": 15904450975080006017
   },
-  "ParamList": "[{\"Value\": 0.02}, {\"Value\": 6}, {\"Value\"...",
+  "ParamList": "<list[3]>",
   "ProjectionName": {
     "Hash": 4623922265512348344
   },
@@ -31327,7 +31327,7 @@
   "ActivationTraitLayerList": [],
   "MazebuffID": 35610001,
   "Rarity": 2,
-  "AllMemberGeneralPropertyList": "[{\"PropertyType\": \"ExtraAllDamageTypeAdd...",
+  "AllMemberGeneralPropertyList": "<list[1]>",
   "TraitListMemberGeneralPropertyList": []
 }
 ```
@@ -31444,7 +31444,7 @@
   "IconPath": "SpriteOutput/TabIcon/Activity/AccordIcon...",
   "ExploreFigurePath": "SpriteOutput/UI/Quest/Graffit/GraffitAct...",
   "RaidFigurePath": "SpriteOutput/UI/Quest/Graffit/GraffitAct...",
-  "Conditions": "[{\"Type\": \"FinishMainMission\", \"Param\": ...",
+  "Conditions": "<list[1]>",
   "ActivityModuleID": 5000102
 }
 ```
@@ -31729,7 +31729,7 @@
 ```json
 {
   "DiceShopID": 1,
-  "GoodsList": "[1101, 1102, 1103, 1104, 1105, 1106, 110...",
+  "GoodsList": "<list[15]>",
   "IMGPath": "SpriteOutput/Quest/DiceCombat/DiceCombat...",
   "ShopSortID": 1,
   "Name": {
@@ -31746,7 +31746,7 @@
 ```json
 {
   "ConstValueName": "RogueTournPersona_FixedCompList",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 1}, {\"IntVa..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -31878,7 +31878,7 @@
   "GotoID": 218,
   "TabImgPath": "SpriteOutput/UI/ChallengeBoss/ChallengeB...",
   "PreConditions": [],
-  "GuideConditions": "[{\"Type\": \"FinishMainMission\", \"Param\": ..."
+  "GuideConditions": "<list[1]>"
 }
 ```
 
@@ -32074,7 +32074,7 @@
     "Hash": 8483086226905415731
   },
   "UnlockChapter": 1,
-  "QuestList": "[8061501, 8061502, 8061503, 8061511, 806..."
+  "QuestList": "<list[7]>"
 }
 ```
 
@@ -32166,7 +32166,7 @@
 ```json
 {
   "ThemeID": 201,
-  "CardIDList": "[20101, 20102, 20103, 20104, 20105, 2010...",
+  "CardIDList": "<list[10]>",
   "Name": {
     "Hash": 7200521242610986890
   },
@@ -32290,7 +32290,7 @@
 ```json
 {
   "PNPJBPCMINL": 1,
-  "MGNHKOHFLPO": "[{\"BNCKFPAGOMF\": 1001}, {\"BNCKFPAGOMF\": ..."
+  "MGNHKOHFLPO": "<list[25]>"
 }
 ```
 
@@ -32447,7 +32447,7 @@
 {
   "RaccoonState": "Bad",
   "Season": "SecondChapter",
-  "TextmapList": "[{\"Hash\": 5241237556957842895}, {\"Hash\":...",
+  "TextmapList": "<list[2]>",
   "RaccoonPicPath": "SpriteOutput/Quest/EvolveBuild/RaccoonIc..."
 }
 ```
@@ -32574,7 +32574,7 @@
 {
   "RaccoonState": "Bad",
   "Season": "EarlyAccess",
-  "TextmapList": "[{\"Hash\": 17849680565487846117}, {\"Hash\"...",
+  "TextmapList": "<list[2]>",
   "RaccoonPicPath": "SpriteOutput/Quest/EvolveBuild/RaccoonIc..."
 }
 ```
@@ -32826,7 +32826,7 @@
     "Hash": 8013962817586461325
   },
   "TitleIconPath": "SpriteOutput/Quest/TabIcon/PermanentActi...",
-  "DisplayItemList": "[{\"ItemID\": 1}, {\"ItemID\": 238}, {\"ItemI...",
+  "DisplayItemList": "<list[13]>",
   "IntroGuideImg": "SpriteOutput/Quest/PermanentActivity/Det...",
   "ActivityTagList": [
     3
@@ -33858,8 +33858,8 @@
   "LastStageQuest": 306,
   "FirstMainMissionID": 8030300,
   "LevelMessageSubmission": 803030505,
-  "BuffLevelIconPathList": "[\"SpriteOutput/Quest/Television/Season2/...",
-  "BuffLevelBackgroundPathList": "[\"SpriteOutput/Quest/Television/Season2/...",
+  "BuffLevelIconPathList": "<list[4]>",
+  "BuffLevelBackgroundPathList": "<list[4]>",
   "BuffLevelDefaultBackgroundPath": "SpriteOutput/Quest/Television/Season2/TV..."
 }
 ```
@@ -33979,8 +33979,8 @@
 ```json
 {
   "RandomPoolID": 1,
-  "ElitePool": "[1013020, 1023010, 2013020, 2023020, 202...",
-  "MinionPool": "[1012020, 1002040, 1002030, 1012010, 200..."
+  "ElitePool": "<list[11]>",
+  "MinionPool": "<list[16]>"
 }
 ```
 
@@ -34160,7 +34160,7 @@
 ```json
 {
   "ConstValueName": "Avatar_Background_Path",
-  "Value": "{\"StringValue\": \"SpriteOutput/TrialRole/..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -34709,7 +34709,7 @@
   "QuestTabName": {
     "Hash": 13119286508734114980
   },
-  "QuestList": "[6017201, 6017202, 6017209, 6017210, 601..."
+  "QuestList": "<list[7]>"
 }
 ```
 
@@ -34799,6 +34799,20 @@
 }
 ```
 
+### ILBattleSkillTriggerKey.json (0.00 MB, 8 条)
+
+**字段** (2): `Name, SkillTriggerKey`
+
+**首条记录摘要**:
+```json
+{
+  "SkillTriggerKey": "Skill01",
+  "Name": {
+    "Hash": 17463272543800423219
+  }
+}
+```
+
 ### IdleLiveEvent.json (0.00 MB, 5 条)
 
 **字段** (4): `AvatarList, ChangeTeam, FigurePath, ID`
@@ -34812,20 +34826,6 @@
   ],
   "FigurePath": "SpriteOutput/Quest/TrainParty/EventBg/Ca...",
   "ChangeTeam": true
-}
-```
-
-### ILBattleSkillTriggerKey.json (0.00 MB, 8 条)
-
-**字段** (2): `Name, SkillTriggerKey`
-
-**首条记录摘要**:
-```json
-{
-  "SkillTriggerKey": "Skill01",
-  "Name": {
-    "Hash": 17463272543800423219
-  }
 }
 ```
 
@@ -34882,7 +34882,7 @@
 {
   "ID": 10544000,
   "Type": "Text",
-  "Contents": "[105440000, 105440001, 105440002, 105440...",
+  "Contents": "<list[10]>",
   "FlySpeed": 1,
   "Interval": 2,
   "RepeatTimesTillEnd": 1
@@ -35109,7 +35109,7 @@
 {
   "ChapterID": 1,
   "ChapterAimQuest": 7300001,
-  "QuestList": "[7300002, 7300003, 7300004, 7300005, 730..."
+  "QuestList": "<list[5]>"
 }
 ```
 
@@ -35145,7 +35145,7 @@
   "TabTitle": {
     "Hash": 1466611023929028975
   },
-  "QuestList": "[6014217, 6014218, 6014219, 6014220, 601...",
+  "QuestList": "<list[12]>",
   "QuestID": 6014338,
   "UnlockID": 1001007
 }
@@ -35480,7 +35480,7 @@
   "Name": {
     "Hash": 14529803407538114927
   },
-  "QuestList": "[6021101, 6021102, 6021103, 6021104, 602..."
+  "QuestList": "<list[5]>"
 }
 ```
 
@@ -35498,7 +35498,7 @@
   "MJOOFPBABEA": {
     "Hash": 1370576421128545346
   },
-  "LDCCBCIIIEC": "[{\"Hash\": 10621946112088347260}, {\"Hash\"..."
+  "LDCCBCIIIEC": "<list[5]>"
 }
 ```
 
@@ -35528,7 +35528,7 @@
 ```json
 {
   "StoryLineNum": 1,
-  "EffectDescList": "[{\"Hash\": 720852388048058045}, {\"Hash\": ..."
+  "EffectDescList": "<list[3]>"
 }
 ```
 
@@ -35730,7 +35730,7 @@
   "ID": 1,
   "Type": "SecondAnniversary",
   "ActivityModuleID": 5003801,
-  "BenefitIDList": "[1001, 1002, 1003, 1004, 1005, 1006, 100..."
+  "BenefitIDList": "<list[8]>"
 }
 ```
 
@@ -36137,7 +36137,7 @@
     1005,
     1006
   ],
-  "GiftShowList": "[{\"ItemID\": 235, \"ItemNum\": 20}, {\"ItemI..."
+  "GiftShowList": "<list[5]>"
 }
 ```
 
@@ -36419,7 +36419,7 @@
     5,
     6
   ],
-  "BuffIDList": "[1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13,...",
+  "BuffIDList": "<list[23]>",
   "BuffSlotIDList": [
     1,
     2,
@@ -36469,7 +36469,7 @@
 **首条记录摘要**:
 ```json
 {
-  "ELJPCBHPKJK": "[6088001, 6088002, 6088003, 6088004, 608..."
+  "ELJPCBHPKJK": "<list[5]>"
 }
 ```
 
@@ -36671,7 +36671,7 @@
 ```json
 {
   "PackID": 803410110,
-  "PackList": "[{\"DNGFHOEACBI\": \"D\", \"HNPDLANHONH\": 803..."
+  "PackList": "<list[3]>"
 }
 ```
 
@@ -37236,8 +37236,8 @@
 ```json
 {
   "ActivityID": 10012,
-  "ChallengeList": "[5001, 5002, 5003, 5004, 5006, 5007, 500...",
-  "ActivityRewardList": "[10012001, 10012002, 10012003, 10012004,...",
+  "ChallengeList": "<list[7]>",
+  "ActivityRewardList": "<list[11]>",
   "MarkScoreList": [
     1,
     5000,
@@ -37273,7 +37273,7 @@
 ```json
 {
   "GroupID": 1,
-  "ExpeditionIdList": "[100301, 100302, 100303, 100304, 100305,...",
+  "ExpeditionIdList": "<list[24]>",
   "ActivityModuleID": 5006201
 }
 ```
@@ -37438,7 +37438,7 @@
 ```json
 {
   "AvatarID": 8007,
-  "ChangeConditions": "[{\"Type\": \"FinishSubMission\", \"Param\": \"...",
+  "ChangeConditions": "<list[1]>",
   "AvatarImgPath": "SpriteOutput/AvatarDrawCard/8007_02.png"
 }
 ```
@@ -37648,7 +37648,7 @@
 ```json
 {
   "GameModeGroupID": 1001,
-  "GamemodeList": "[\"Town\", \"Maze\", \"Train\", \"Challenge\", \"..."
+  "GamemodeList": "<list[10]>"
 }
 ```
 
@@ -38214,7 +38214,7 @@
 ```json
 {
   "ConstValueName": "ChallengeBoss_Special_MonsterTemplateID",
-  "Value": "{\"ArrayValue\": [{\"IntValue\": 8015012}, {..."
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -38226,7 +38226,7 @@
 ```json
 {
   "HandBookType": "HandBookAugment",
-  "QuestList": "[7301301, 7301302, 7301303, 7301304, 730..."
+  "QuestList": "<list[6]>"
 }
 ```
 
@@ -39159,7 +39159,7 @@
   "GachaType": "Normal",
   "CeilingType": "Option",
   "CeilingNum": 300,
-  "CeilingItemList": "[1003, 1004, 1101, 1104, 1107, 1209, 121..."
+  "CeilingItemList": "<list[7]>"
 }
 ```
 
@@ -39259,7 +39259,7 @@
 ```json
 {
   "PHFMCACHFIJ": 1,
-  "FBJNOBODCLF": "[5008401, 5008402, 5008403, 5008404, 500...",
+  "FBJNOBODCLF": "<list[5]>",
   "LABFIMHODHC": 101,
   "JJCIOIKKJEM": 102
 }
@@ -39458,7 +39458,7 @@
 ```json
 {
   "ItemID": 237,
-  "TransferList": "[{\"CMNOEFFFNPE\": 236, \"JJFIGIJBIJI\": 1, ..."
+  "TransferList": "<list[1]>"
 }
 ```
 
@@ -40028,15 +40028,13 @@
 
 ### ConstValueCommonTest.json (0.00 MB, 0 条)
 
-### EnergyBarConfig.json (0.00 MB, 0 条)
-
 ### ENpcA07.json (0.00 MB, 0 条)
+
+### EnergyBarConfig.json (0.00 MB, 0 条)
 
 ### FinishTypeConfigLD.json (0.00 MB, 0 条)
 
 ### FreeStyleCharacterInfoLD.json (0.00 MB, 0 条)
-
-### GiftDanmuContent.json (0.00 MB, 0 条)
 
 ### GMAccountConfig.json (0.00 MB, 0 条)
 
@@ -40045,6 +40043,8 @@
 ### GMAccountItemConfig.json (0.00 MB, 0 条)
 
 ### GMAccountRelicConfig.json (0.00 MB, 0 条)
+
+### GiftDanmuContent.json (0.00 MB, 0 条)
 
 ### GridFightAugmentExpired.json (0.00 MB, 0 条)
 
