@@ -739,6 +739,48 @@ class TestPeakSeasons:
 
 # ─── 玩法级默认图标 ────────────────────────────────────────────
 
+class TestGroupArts:
+    def test_load_group_arts_maps_all_fields(self, monkeypatch):
+        """_load_group_arts：按 _GROUP_ART_FIELDS 映射全部图标字段，缺失字段自动跳过。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"GroupID": 2001,
+             "TabPicPath": "SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2001.png",
+             "TabPicSelectPath": "SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2001.png",
+             "ThemePicPath": "SpriteOutput/DailyMission/Banner/ChallengeThemeBanner_2001.png",
+             "ThemeToastPicPath": "SpriteOutput/ChallengeTheme/ThemePic/ChallengeThemePic_2001.png",
+             "ThemeIconPicPath": "SpriteOutput/ChallengeTheme/ThemeIcon/ChallengeThemeIcon_2001.png",
+             "ThemePosterBgPicPath": "SpriteOutput/ChallengeTheme/ThemeBg/ChallengeThemeBg_2001.png",
+             "ThemePosterTabPicPath": "SpriteOutput/Quest/TabIcon/BtnChallengeStoryAlternation_2001.png",
+             "HandBookPanelBannerPath": "SpriteOutput/DailyMission/Banner/ChallengePeakPanelBanner_4002.png"},
+            {"GroupID": 2002, "TabPicPath": "SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2002.png"},
+        ])
+        out = eg._load_group_arts("ChallengeStoryGroupExtra.json")
+        assert out[2001] == {
+            "tab": "SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2001.png",
+            "tab_select": "SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2001.png",
+            "theme_banner": "SpriteOutput/DailyMission/Banner/ChallengeThemeBanner_2001.png",
+            "theme_toast": "SpriteOutput/ChallengeTheme/ThemePic/ChallengeThemePic_2001.png",
+            "theme_icon": "SpriteOutput/ChallengeTheme/ThemeIcon/ChallengeThemeIcon_2001.png",
+            "theme_bg": "SpriteOutput/ChallengeTheme/ThemeBg/ChallengeThemeBg_2001.png",
+            "poster_tab": "SpriteOutput/Quest/TabIcon/BtnChallengeStoryAlternation_2001.png",
+            "handbook_banner": "SpriteOutput/DailyMission/Banner/ChallengePeakPanelBanner_4002.png",
+        }
+        # 缺失字段不输出
+        assert out[2002] == {
+            "tab": "SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2002.png"}
+
+    def test_merge_arts_complements_same_group(self):
+        """_merge_arts：同 GroupID 的字段互补合并，不互相覆盖。"""
+        merged = eg._merge_arts(
+            {2001: {"tab": "A.png"}, 2002: {"tab": "B.png"}},
+            {2001: {"theme_icon": "C.png"}},
+        )
+        assert merged == {
+            2001: {"tab": "A.png", "theme_icon": "C.png"},
+            2002: {"tab": "B.png"},
+        }
+
+
 class TestModeDefaultIcons:
     def test_load_mode_default_icons_maps_three_modes(self, monkeypatch):
         """ChallengeGeneralConfig：Memory/Story/Boss → maze/story/boss；Peak 无记录。"""

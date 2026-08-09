@@ -64,6 +64,16 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
   },
 };
 
+/** 通用转换规则：官方 SpriteOutput 完整路径 → 仓库相对路径（目录段小写、文件名保留）。
+ * 与 converter config.py _rule_dir_lower / tools/check-sr-textures.mjs 规则对齐；
+ * 供输入为完整 SpriteOutput 路径、未注册 JS_DELIVR_RULES 分类的场景复用（如终局赛季页签图）。
+ */
+export function spriteOutputToRel(path: string): string {
+  const rel = path.replace(/^SpriteOutput\//i, '');
+  const parts = rel.split('/');
+  return [...parts.slice(0, -1).map((s) => s.toLowerCase()), parts[parts.length - 1]].join('/');
+}
+
 /** jsDelivr URL → nanoka 等价文件名（cdnFallbackFromPrimary 反查用；未命中返回空串） */
 export function jsdelivrToNanokaFile(category: CdnCategory, url: string): string {
   const name = url.split('/').pop()?.replace(/\.png$/i, '') ?? '';

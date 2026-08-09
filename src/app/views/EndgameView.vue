@@ -7,7 +7,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { ENDGAME_MODES, mazeStatus, mazeDateRange, seasonArtUrl } from '../catalog/pages/endgame';
+import { ENDGAME_MODES, mazeStatus, mazeDateRange, seasonArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl } from '../catalog/pages/endgame';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
   loadLocalItems,
@@ -37,6 +37,8 @@ const MODE_LOADERS: Record<string, () => Promise<MazeListDb>> = {
 const phase = ref<'loading' | 'error' | 'ready'>('loading');
 const error = ref<string | null>(null);
 const data = ref<MazeListEntry | null>(null);
+/** 当前模式赛季列表（相邻导航取相邻赛季 arts.poster_tab 缩略图） */
+const listDb = ref<MazeListDb | null>(null);
 /** 当前赛季在列表中的位置（供"上一赛季 / 下一赛季"导航） */
 const seasonIndex = ref(-1);
 const seasonKeys = ref<string[]>([]);
@@ -81,6 +83,7 @@ async function load(mode: string, id: string): Promise<void> {
     const db = await loader();
     const keys = Object.keys(db);
     seasonKeys.value = keys;
+    listDb.value = db;
     const entry = db[id];
     if (!entry || !entry.zh) {
       phase.value = 'error';
@@ -138,6 +141,10 @@ const dateRange = computed(() => (data.value ? mazeDateRange(data.value) : ''));
 const seasonId = computed(() => String(route.params.id || ''));
 /** 赛季图标（seasonArtUrl：赛季专属优先，玩法级默认兜底；无图/路径不匹配时空串不渲染） */
 const seasonArt = computed(() => seasonArtUrl(data.value?.arts));
+/** 赛季横幅（theme_banner：虚构/末日/忘却之庭宣传 BANNER，Hero 右侧装饰；无字段不渲染） */
+const seasonBanner = computed(() => seasonBannerUrl(data.value?.arts));
+/** 赛季主题图标（theme_icon：虚构/末日每赛季主题图，赛季增益模块标题装饰） */
+const seasonThemeIcon = computed(() => seasonThemeIconUrl(data.value?.arts));
 
 /** 逐层章节（以关卡层级为章节名的完整内容；倒序：最高层在前）
  *  全模式全量展示（重构后不再“仅最后一层”回退），配合折叠交互控制页面长度 */
@@ -177,18 +184,20 @@ const tierceRewards = computed(() => {
 const subBuffsMech = computed<MazeBuffInfo | null>(() => data.value?.sub_buffs?.[0] || null);
 const subBuffsEffects = computed<MazeBuffInfo[]>(() => data.value?.sub_buffs?.slice(1) || []);
 
-/** 相邻赛季导航（排期开始降序；与目录页同序） */
+/** 相邻赛季导航（排期开始降序；与目录页同序；posterTab 为相邻赛季海报页签缩略图） */
 const prevSeason = computed(() => {
   const i = seasonIndex.value;
-  if (i <= 0) return null;
+  if (i <= 0 || !listDb.value) return null;
   const key = seasonKeys.value[i - 1];
-  return key ? { key, href: `/endgame/${modeKey.value}/${key}` } : null;
+  if (!key) return null;
+  return { key, href: `/endgame/${modeKey.value}/${key}`, posterTab: listDb.value[key]?.arts?.poster_tab };
 });
 const nextSeason = computed(() => {
   const i = seasonIndex.value;
-  if (i < 0 || i >= seasonKeys.value.length - 1) return null;
+  if (i < 0 || i >= seasonKeys.value.length - 1 || !listDb.value) return null;
   const key = seasonKeys.value[i + 1];
-  return key ? { key, href: `/endgame/${modeKey.value}/${key}` } : null;
+  if (!key) return null;
+  return { key, href: `/endgame/${modeKey.value}/${key}`, posterTab: listDb.value[key]?.arts?.poster_tab };
 });
 
 /** 增益描述渲染（#N[i] 参数替换 + 富文本标签） */
@@ -449,6 +458,14 @@ onBeforeUnmount(() => {
 
       <!-- Hero：模式铭牌 + 赛季信息 -->
       <header class="nk-egd-hero">
+        <img
+          v-if="seasonBanner"
+          class="nk-egd-hero__banner"
+          :src="seasonBanner"
+          alt=""
+          loading="lazy"
+          @error="($event.target as HTMLImageElement).style.display='none'"
+        >
         <div class="nk-egd-hero__plate">
           <span class="nk-egd-hero__emblem" v-html="modeInfo?.emblem || ''"></span>
           <img v-if="seasonArt" class="nk-egd-hero__art" :src="seasonArt" alt="" @error="($event.target as HTMLImageElement).style.display='none'">
@@ -510,7 +527,17 @@ onBeforeUnmount(() => {
           <!-- 赛季增益：当期环境效果（记忆紊流/战意/坚防守备），作用于全赛季挑战（星启同样生效）
                独立模块——与层级内 buff（关卡级）区分；peak 的王棋增益在王棋章节内展示，不在此处 -->
           <template v-if="modeKey !== 'peak' && data.buffs?.length">
-            <div id="egd-buffs" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>赛季增益 BUFFS</div>
+            <div id="egd-buffs" class="nk-title">
+              <img
+                v-if="seasonThemeIcon"
+                class="nk-egd-title-icon"
+                :src="seasonThemeIcon"
+                alt=""
+                loading="lazy"
+                @error="($event.target as HTMLImageElement).style.display='none'"
+              >
+              <span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>赛季增益 BUFFS
+            </div>
             <div class="nk-egd-buffs">
               <article
                 v-for="(b, i) in data.buffs"
@@ -930,15 +957,25 @@ onBeforeUnmount(() => {
             </div>
           </template>
 
-          <!-- 相邻赛季导航 -->
+          <!-- 相邻赛季导航（含海报页签缩略图 poster_tab：虚构/末日/仲裁有，忘却之庭无则不渲染） -->
           <nav v-if="prevSeason || nextSeason" class="nk-egd-nav" aria-label="相邻赛季">
             <router-link
               v-if="prevSeason"
               class="nk-egd-nav__item nk-egd-nav__item--prev"
               :to="prevSeason.href"
             >
-              <span class="nk-egd-nav__dir">← 上一赛季</span>
-              <span class="nk-egd-nav__id">{{ prevSeason.key }}</span>
+              <img
+                v-if="prevSeason.posterTab"
+                class="nk-egd-nav__thumb"
+                :src="seasonPosterTabUrl({ poster_tab: prevSeason.posterTab })"
+                alt=""
+                loading="lazy"
+                @error="($event.target as HTMLImageElement).style.display='none'"
+              >
+              <span class="nk-egd-nav__body">
+                <span class="nk-egd-nav__dir">← 上一赛季</span>
+                <span class="nk-egd-nav__id">{{ prevSeason.key }}</span>
+              </span>
             </router-link>
             <span v-else class="nk-egd-nav__item nk-egd-nav__item--void"></span>
             <router-link
@@ -946,8 +983,18 @@ onBeforeUnmount(() => {
               class="nk-egd-nav__item nk-egd-nav__item--next"
               :to="nextSeason.href"
             >
-              <span class="nk-egd-nav__dir">下一赛季 →</span>
-              <span class="nk-egd-nav__id">{{ nextSeason.key }}</span>
+              <span class="nk-egd-nav__body">
+                <span class="nk-egd-nav__dir">下一赛季 →</span>
+                <span class="nk-egd-nav__id">{{ nextSeason.key }}</span>
+              </span>
+              <img
+                v-if="nextSeason.posterTab"
+                class="nk-egd-nav__thumb"
+                :src="seasonPosterTabUrl({ poster_tab: nextSeason.posterTab })"
+                alt=""
+                loading="lazy"
+                @error="($event.target as HTMLImageElement).style.display='none'"
+              >
             </router-link>
           </nav>
         </div>

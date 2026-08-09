@@ -274,9 +274,29 @@ export interface MazeListEntry {
   countdown?: number;
   /** 虚构叙事通关分数线（ChallengeStoryMazeExtra.ClearScore，如 30000） */
   clear_score?: number;
-  /** 赛季海报/标签图（BackGroundPath/TabPicPath 原样保留；tab = 赛季专属图标，
-   *  default = 玩法级默认图标兜底，前端 seasonArtUrl 依次解析） */
-  arts?: { background?: string; tab?: string; default?: string };
+  /** 赛季海报/标签图（BackGroundPath/TabPicPath 等源字段原样保留；tab = 赛季专属图标，
+   *  default = 玩法级默认图标兜底，前端 seasonArtUrl 依次解析；
+   *  tab_select/theme_banner/theme_icon/theme_bg/poster_tab/handbook_banner 为 2026-08 补转字段，
+   *  经 endgameArtUrl 白名单消费） */
+  arts?: {
+    background?: string;
+    tab?: string;
+    default?: string;
+    /** 开关图 On 态（忘却之庭 AbyssSwitch，与 tab 同资源） */
+    tab_select?: string;
+    /** 赛季横幅（宣传 BANNER：ChallengeThemeBanner_20xx / ChallengeBossBanner_30xx） */
+    theme_banner?: string;
+    /** 主题小图（虚构叙事 ChallengeThemePic_20xx） */
+    theme_toast?: string;
+    /** 主题图标（虚构 ChallengeThemeIcon_20xx / 末日 ChallengeBossIcon_30xx） */
+    theme_icon?: string;
+    /** 海报背景（虚构叙事 ChallengeThemeBg_20xx） */
+    theme_bg?: string;
+    /** 海报页签按钮图（虚构/末日/仲裁 Btn* 扁长按钮 260×92，完整比例展示不裁切） */
+    poster_tab?: string;
+    /** 图鉴横幅（异相仲裁 ChallengePeakPanelBanner*） */
+    handbook_banner?: string;
+  };
   /** 赛季增益（名称 + 效果描述） */
   buffs?: MazeBuffInfo[];
   /** 战意赛季主题机制（虚构叙事 Fever 赛季 SubMazeBuffList：机制 + 战熄潮平/战意汹涌；

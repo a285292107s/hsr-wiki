@@ -8,7 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
-import { tabIconUrl, seasonArtUrl } from '../pages/endgame';
+import { tabIconUrl, seasonArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl } from '../pages/endgame';
 
 const entries = Object.entries(CATALOG_PAGES);
 
@@ -129,5 +129,27 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
     // 两者皆无 → 空串
     expect(seasonArtUrl(null)).toBe('');
     expect(seasonArtUrl({})).toBe('');
+  });
+
+  it('seasonBannerUrl 解析横幅（DailyMission/Banner），白名单外返回空串', () => {
+    expect(seasonBannerUrl({ theme_banner: 'SpriteOutput/DailyMission/Banner/ChallengeThemeBanner_2001.png' }))
+      .toBe(`${BASE}/dailymission/banner/ChallengeThemeBanner_2001.png`);
+    expect(seasonBannerUrl({ theme_banner: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png' })).toBe('');
+    expect(seasonBannerUrl(null)).toBe('');
+  });
+
+  it('seasonThemeIconUrl 解析主题图标（ChallengeTheme / ChallengeBoss）', () => {
+    expect(seasonThemeIconUrl({ theme_icon: 'SpriteOutput/ChallengeTheme/ThemeIcon/ChallengeThemeIcon_2001.png' }))
+      .toBe(`${BASE}/challengetheme/themeicon/ChallengeThemeIcon_2001.png`);
+    expect(seasonThemeIconUrl({ theme_icon: 'SpriteOutput/ChallengeBoss/ChallengeBossIcon_3001.png' }))
+      .toBe(`${BASE}/challengeboss/ChallengeBossIcon_3001.png`);
+    expect(seasonThemeIconUrl({})).toBe('');
+  });
+
+  it('seasonPosterTabUrl 解析海报页签（Quest/TabIcon）', () => {
+    expect(seasonPosterTabUrl({ poster_tab: 'SpriteOutput/Quest/TabIcon/BtnChallengePeak_4001.png' }))
+      .toBe(`${BASE}/quest/tabicon/BtnChallengePeak_4001.png`);
+    expect(seasonPosterTabUrl({ poster_tab: 'SpriteOutput/Abyss/UI3D_SceneBg/AbyssSenceBg_01.png' })).toBe('');
+    expect(seasonPosterTabUrl(null)).toBe('');
   });
 });

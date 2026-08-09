@@ -267,12 +267,27 @@ def _load_group_names(filename: str) -> dict[int, str]:
     return out
 
 
-def _load_group_arts(filename: str) -> dict[int, dict]:
-    """分组表 → {GroupID: {background, tab}}（赛季海报/标签图路径）。
+# 分组表 → arts 字段映射（源字段名 → 输出键；仅收录语义适合展示的路径，
+# 排除 AbyssSwitch 开关图等 UI 控件——前端白名单另有语义闸门双重把关）
+_GROUP_ART_FIELDS: dict[str, str] = {
+    "BackGroundPath": "background",             # 3D 场景背景（仅忘却之庭）
+    "TabPicPath": "tab",                        # 赛季专属页签图
+    "TabPicSelectPath": "tab_select",           # 开关图 On 态（与 tab 同资源）
+    "ThemePicPath": "theme_banner",             # 赛季横幅（宣传 BANNER）
+    "ThemeToastPicPath": "theme_toast",         # 主题小图（虚构叙事）
+    "ThemeIconPicPath": "theme_icon",           # 主题图标（虚构叙事/末日幻影）
+    "ThemePosterBgPicPath": "theme_bg",         # 海报背景（虚构叙事）
+    "ThemePosterTabPicPath": "poster_tab",      # 海报页签（虚构/末日/仲裁）
+    "HandBookPanelBannerPath": "handbook_banner",  # 图鉴横幅（异相仲裁）
+}
 
-    TabPicPath（每赛季专属：虚构 ChallengeThemeTabIcon / 末日 ChallengeBossTabIcon）
-    供前端 seasonArtUrl 优先解析；BackGroundPath（3D 场景背景）与忘却之庭共用的
-    AbyssSwitch 开关图不在前端白名单内，数据层原样保留备用。
+
+def _load_group_arts(filename: str) -> dict[int, dict]:
+    """分组表 → {GroupID: {background, tab, ...}}（赛季海报/标签图路径）。
+
+    按 _GROUP_ART_FIELDS 映射全部图标字段（源表缺失的字段自动跳过）；
+    多表合并（分组表 + 主题 extra 表）由 _merge_arts 逐键互补完成。
+    前端经 endgameArtUrl 白名单 + 目录段小写规则消费，未收录前缀不渲染。
     """
     data = load_json(EXCEL_DIR / filename)
     out: dict[int, dict] = {}
@@ -281,12 +296,21 @@ def _load_group_arts(filename: str) -> dict[int, dict]:
         if gid is None:
             continue
         arts: dict = {}
-        if rec.get("BackGroundPath"):
-            arts["background"] = rec["BackGroundPath"]
-        if rec.get("TabPicPath"):
-            arts["tab"] = rec["TabPicPath"]
+        for src_key, out_key in _GROUP_ART_FIELDS.items():
+            val = rec.get(src_key)
+            if val:
+                arts[out_key] = val
         if arts:
             out[gid] = arts
+    return out
+
+
+def _merge_arts(*arts_maps: dict[int, dict]) -> dict[int, dict]:
+    """多表 arts 逐键合并（同 GroupID 的字段互补，不互相覆盖）。"""
+    out: dict[int, dict] = {}
+    for m in arts_maps:
+        for gid, arts in m.items():
+            out.setdefault(gid, {}).update(arts)
     return out
 
 
@@ -997,6 +1021,13 @@ def _peak_seasons() -> dict:
         icon_path = g.get("ThemeIconPicPath") or ""
         if icon_path:
             result[str(gid)].setdefault("arts", {})["tab"] = icon_path
+        # 海报页签 / 图鉴横幅（BtnChallengePeak_4xxx / ChallengePeakPanelBanner*）
+        poster_path = g.get("ThemePosterTabPicPath") or ""
+        if poster_path:
+            result[str(gid)].setdefault("arts", {})["poster_tab"] = poster_path
+        banner_path = g.get("HandBookPanelBannerPath") or ""
+        if banner_path:
+            result[str(gid)].setdefault("arts", {})["handbook_banner"] = banner_path
     return result
 
 
@@ -1054,7 +1085,10 @@ def convert() -> None:
         turns=story_turns,
         scores=story_scores,
         group_names=_load_group_names("ChallengeStoryGroupConfig.json"),
-        arts=_load_group_arts("ChallengeStoryGroupConfig.json"),
+        arts=_merge_arts(
+            _load_group_arts("ChallengeStoryGroupConfig.json"),
+            _load_group_arts("ChallengeStoryGroupExtra.json"),
+        ),
         sub_buffs=story_sub_buffs,
     )
     for k in story:
@@ -1072,7 +1106,10 @@ def convert() -> None:
         group_names=_load_group_names("ChallengeBossGroupConfig.json"),
         full_monsters=True,  # 末日幻影纯 Boss 战：层级敌方输出全字段供信息卡展示
         phases=_load_boss_phases(),
-        arts=_load_group_arts("ChallengeBossGroupConfig.json"),
+        arts=_merge_arts(
+            _load_group_arts("ChallengeBossGroupConfig.json"),
+            _load_group_arts("ChallengeBossGroupExtra.json"),
+        ),
     )
     for k in boss:
         if k in tierce:

@@ -1,29 +1,60 @@
 /** 终局内容目录页配置（四模式合并单页：模式身份为筛选选项，卡片徽记同源） */
 import { ELEM, MON_RANK } from '../../../lib/constants';
+import { OFFICIAL_ICON_BASE } from '../../../lib/constants';
 import { escHtml, stripAllTags } from '../../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../../services/cdn';
+import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
 
 /**
- * 赛季/玩法图标 URL（jsDelivr 加速 GitHub 源，固定 commit 防漂移）。
- * 白名单前缀（官方路径 → 目录段小写、文件名保留）：
- * - SpriteOutput/TabIcon/**        → tabicon/**（虚构/末日每赛季 TabIcon）
- * - SpriteOutput/ChallengePeak/**  → challengepeak/**（异相仲裁每赛季 ThemeIcon）
- * - SpriteOutput/UI/ChallengeBoss/** → ui/challengeboss/**（玩法级默认 QuestTabImg）
- * 未列入的（如忘却之庭 AbyssSwitch 共用开关图）返回空串不渲染。
- * 方案 A 转存 nanoka 后，将本函数替换为 cdnUri('tabicon', ...) 即可，消费方无需改动。
+ * 终局官方素材 URL（jsDelivr 加速 GitHub 源，基址统一收口 OFFICIAL_ICON_BASE，固定 commit 防漂移）。
+ * 白名单 = 语义闸门：仅放行「赛季主题/页签/横幅类」路径，排除开关图/场景背景等 UI 素材；
+ * 全部前缀经 tools/check-endgame-icons.mjs 实测在 StarRailTextures 仓库可命中：
+ * - TabIcon/**            → tabicon/**（虚构 ChallengeThemeTabIcon / 末日 ChallengeBossTabIcon）
+ * - ChallengePeak/**      → challengepeak/**（异相仲裁每期 ThemeIconPicPath）
+ * - UI/ChallengeBoss/**   → ui/challengeboss/**（玩法级默认 QuestTabImg）
+ * - DailyMission/Banner/** → dailymission/banner/**（赛季横幅 ChallengeThemeBanner/BossBanner/PeakPanelBanner）
+ * - ChallengeTheme/**     → challengetheme/**（虚构主题素材 ThemeIcon/ThemePic/ThemeBg）
+ * - ChallengeBoss/**      → challengeboss/**（末日主题图标 ChallengeBossIcon_30xx）
+ * - Quest/TabIcon/**      → quest/tabicon/**（海报页签 BtnChallengeStoryAlternation/BtnChallengeBoss/BtnChallengePeak）
+ * 未列入的（如忘却之庭 AbyssSwitch 共用开关图 / Abyss/UI3D_SceneBg 场景背景）返回空串不渲染；
+ * 路径映射复用 cdn 层通用规则 spriteOutputToRel（目录段小写、文件名保留）。
+ * 方案 A 转存 nanoka 后，将函数替换为 cdnUri('tabicon', ...) 即可，消费方无需改动。
  */
-const JSDELIVR_SR_TEXTURES = 'https://cdn.jsdelivr.net/gh/umaichanuwu/StarRailTextures@2a4b9a7eb7ac9db7f48d627fa5cdfd3822c902ce/assets/asbres/spriteoutput';
-/** 可解析的官方图标路径前缀（目录段小写映射规则见 tabIconUrl） */
-const TAB_ICON_RE = /^SpriteOutput\/(TabIcon|ChallengePeak|UI\/ChallengeBoss)\/(.+)$/;
+const ART_PREFIXES = [
+  'TabIcon',
+  'ChallengePeak',
+  'UI/ChallengeBoss',
+  'DailyMission/Banner',
+  'ChallengeTheme',
+  'ChallengeBoss',
+  'Quest/TabIcon',
+] as const;
 
+/** 终局官方素材 URL（白名单语义闸门 + 目录段小写通用规则；白名单外返回空串不渲染） */
+function endgameArtUrl(path: string | undefined): string {
+  if (!path) return '';
+  if (!ART_PREFIXES.some((p) => path.startsWith(`SpriteOutput/${p}/`))) return '';
+  return `${OFFICIAL_ICON_BASE}/${spriteOutputToRel(path)}`;
+}
+
+/** 赛季/玩法图标 URL（tab = 赛季专属图标；default 兜底由 seasonArtUrl 处理） */
 export function tabIconUrl(arts?: { tab?: string } | null): string {
-  const tab = arts?.tab || '';
-  const m = TAB_ICON_RE.exec(tab);
-  if (!m) return '';
-  const [, prefix, rest] = m;
-  const segs = rest.split('/');
-  const dirs = segs.slice(0, -1).map((s) => s.toLowerCase());
-  return `${JSDELIVR_SR_TEXTURES}/${prefix.toLowerCase()}/${[...dirs, segs[segs.length - 1]].join('/')}`;
+  return endgameArtUrl(arts?.tab);
+}
+
+/** 赛季横幅 URL（arts.theme_banner：虚构/末日/忘却之庭每赛季宣传 BANNER，Hero 装饰） */
+export function seasonBannerUrl(arts?: { theme_banner?: string } | null): string {
+  return endgameArtUrl(arts?.theme_banner);
+}
+
+/** 赛季主题图标 URL（arts.theme_icon：虚构 ThemeIcon_20xx / 末日 ChallengeBossIcon_30xx） */
+export function seasonThemeIconUrl(arts?: { theme_icon?: string } | null): string {
+  return endgameArtUrl(arts?.theme_icon);
+}
+
+/** 海报页签按钮图 URL（arts.poster_tab：虚构/末日/仲裁 Btn* 扁长按钮 260×92，相邻赛季导航完整比例展示） */
+export function seasonPosterTabUrl(arts?: { poster_tab?: string } | null): string {
+  return endgameArtUrl(arts?.poster_tab);
 }
 
 /** 赛季图标 URL：优先赛季专属图标（arts.tab），缺失时回退玩法级默认图标

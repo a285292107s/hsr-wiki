@@ -99,6 +99,24 @@
   background: linear-gradient(90deg, transparent 4%, var(--line-2) 50%, transparent 96%);
 }
 
+/* 赛季横幅（theme_banner：宣传 BANNER）——Hero 右侧装饰底图，左侧渐隐与内容衔接，
+   低于铭牌/信息面板（z-index 0），加载失败隐藏后不占位 */
+.nk-egd-hero__banner {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: min(46%, 430px);
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  opacity: 0.4;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 34%, #000 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 34%, #000 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* 铭牌：模式徽记 + 赛季编号（档案角标；深底细线，无渐变无 glow） */
 .nk-egd-hero__plate {
   position: relative;
@@ -156,6 +174,8 @@
 
 /* 信息面板 */
 .nk-egd-hero__panel {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-width: 0;
   display: flex;
@@ -239,6 +259,17 @@
 
 /* ─── 赛季增益卡（阅读族：中性细线，无左竖条，hover 仅亮度变化） ─── */
 .nk-egd-buffs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 8px; }
+/* 赛季主题图标（theme_icon：虚构/末日每赛季主题图，标题装饰；基线对齐兼容 nk-title） */
+.nk-egd-title-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: cover;
+  align-self: center;
+  background: var(--blk-800);
+  border: 1px solid var(--line-1);
+  flex-shrink: 0;
+}
 .nk-egd-buff {
   position: relative;
   display: flex;
@@ -1233,7 +1264,7 @@
 .nk-egd-nav__item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 12px 14px;
   border: 1px solid var(--line-1);
   border-radius: 10px;
@@ -1245,6 +1276,24 @@
 .nk-egd-nav__item:hover {
   border-color: var(--line-2);
   background: rgba(255,255,255,0.03);
+}
+/* 海报页签缩略图（poster_tab：虚构/末日/仲裁 Btn* 扁长按钮图 260×92，纵横比 2.83，
+   完整比例展示不裁切——方形 cover 会切掉左右内容；next 项镜像到右侧） */
+.nk-egd-nav__thumb {
+  width: 96px;
+  height: auto;
+  aspect-ratio: 260 / 92;
+  border-radius: 6px;
+  object-fit: contain;
+  flex-shrink: 0;
+  background: transparent;
+}
+.nk-egd-nav__item--next .nk-egd-nav__thumb { order: 2; }
+.nk-egd-nav__body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
 }
 .nk-egd-nav__dir {
   font-size: 0.66rem;
@@ -1282,6 +1331,7 @@
   }
   .nk-egd-hero__emblem { width: 27px; height: 27px; }
   .nk-egd-hero__art { width: 44px; height: 44px; top: 7px; }
+  .nk-egd-hero__banner { display: none; } /* 移动端隐藏横幅，避免遮挡信息面板 */
   .nk-egd-hero__num { font-size: 1.55rem; }
   .nk-egd-hero__num--long { font-size: 1.2rem; }
   .nk-egd-hero__name { font-size: 1.35rem; }
