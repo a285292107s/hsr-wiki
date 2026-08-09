@@ -60,7 +60,11 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
   skillicons: (f) => {
     const base = f.replace(/\.webp$/i, '');
     const id = base.match(/\d+/)?.[0];
-    return id ? `skillicons/avatar/${id}/${base}.png` : null;
+    if (!id) return null;
+    // 忆灵技能文件名以忆灵 ID 为前缀（SkillIcon_11402_Servant*），仓库目录却按角色 ID 组织
+    // （skillicons/avatar/1402/）；忆灵 ID = 角色 ID + 10000（18007 → 8007 开拓者特例）
+    const dir = /_Servant/.test(base) && Number(id) > 10000 ? String(Number(id) - 10000) : id;
+    return `skillicons/avatar/${dir}/${base}.png`;
   },
 };
 

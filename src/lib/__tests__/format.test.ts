@@ -278,7 +278,9 @@ describe('URL 构建', () => {
     expect(skillIconUrl(sk({ type: 'BPSkill' }), '1005', null)).toBe(jd('1005', 'BP'));
     const d = baseChar();
     d.memosprite = { icon: 'SpriteOutput/ServantIconTeam/11415B.png' };
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d)).toBe(jd('11415', 'Servant'));
+    // 忆灵技能：文件名用忆灵 ID（11415），仓库目录用角色 ID（1415 = 忆灵 ID - 10000）
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d))
+      .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1415/SkillIcon_11415_Servant.png`);
     // Assist CDN 无独立图标资产，回退终结技图标
     expect(skillIconUrl(sk({ type: 'Assist', type_name: '助战技' }), '1005', null)).toBe(jd('1005', 'Ultra'));
     // MazeNormal（秘技普攻）与普攻共用图标
@@ -289,16 +291,17 @@ describe('URL 构建', () => {
     expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(jd('1508', 'Passive'));
   });
   it('skillIconUrl：忆灵技图标后缀按 ID 映射（CDN 命名不统一）', () => {
-    const jd = (id: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/SkillIcon_${id}_${key}.png`;
+    // 目录统一按角色 ID（忆灵 ID - 10000），文件名保留忆灵 ID
+    const jd = (dir: string, fileId: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${dir}/SkillIcon_${fileId}_${key}.png`;
     const mk = (icon: string) => { const d = baseChar(); d.memosprite = { icon }; return d; };
     // 11402 → Servant01
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(jd('11402', 'Servant01'));
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(jd('1402', '11402', 'Servant01'));
     // 11413 → Servant03
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(jd('11413', 'Servant03'));
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(jd('1413', '11413', 'Servant03'));
     // 11415 → 无后缀（默认）
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', mk('SpriteOutput/ServantIconTeam/11415B.png'))).toBe(jd('11415', 'Servant'));
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', mk('SpriteOutput/ServantIconTeam/11415B.png'))).toBe(jd('1415', '11415', 'Servant'));
     // ServantPassive 不受后缀映射影响
-    expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(jd('11413', 'ServantPassive'));
+    expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(jd('1413', '11413', 'ServantPassive'));
   });
   it('skillIconUrl：开拓者偶数变体回退奇数 ID 图标', () => {
     const jd = (id: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/SkillIcon_${id}_${key}.png`;
@@ -308,6 +311,26 @@ describe('URL 构建', () => {
     expect(skillIconUrl(sk({ type: 'Maze' }), '8008', null)).toBe(jd('8007', 'Maze'));
     // 奇数 ID 不受影响
     expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(jd('8001', 'Normal'));
+  });
+  it('skillIconUrl（官方路径模式）：忆灵技能目录按角色 ID（忆灵 ID - 10000）', () => {
+    setUseOfficialPaths(true);
+    try {
+      const mk = (icon: string) => { const d = baseChar(); d.memosprite = { icon }; return d; };
+      // 忆灵技：文件名忆灵 ID + 后缀映射，目录角色 ID
+      expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png')))
+        .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1402/SkillIcon_11402_Servant01.png`);
+      // 忆灵天赋
+      expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png')))
+        .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1413/SkillIcon_11413_ServantPassive.png`);
+      // 开拓者特例：18007 → 8007
+      expect(skillIconUrl(sk({ type: 'Servant' }), '8007', mk('SpriteOutput/ServantIconTeam/18007B.png')))
+        .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/8007/SkillIcon_18007_Servant01.png`);
+      // 普通角色不受影响
+      expect(skillIconUrl(sk({ type: 'Normal' }), '1005', null))
+        .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1005/SkillIcon_1005_Normal.png`);
+    } finally {
+      setUseOfficialPaths(false);
+    }
   });
   it('eidolonIconUrl / avatarDrawCardUrl', () => {
     expect(eidolonIconUrl('1005', 1)).toBe(`${CDN}/assets/hsr/rank/_dependencies/textures/1005/1005_Rank_1.webp`);

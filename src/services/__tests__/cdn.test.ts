@@ -75,6 +75,17 @@ describe('resolveCdnUri 双源解析', () => {
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1001/SkillIcon_1001_Normal.png`);
   });
 
+  it('jsDelivr 映射分类：skillicons 忆灵技能目录按角色 id（文件名忆灵 id - 10000）', () => {
+    // 忆灵图标文件名以忆灵 ID 为前缀，仓库目录按角色 ID 组织（11402 → 1402）
+    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_Servant01.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1402/SkillIcon_11402_Servant01.png`);
+    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_ServantPassive.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1402/SkillIcon_11402_ServantPassive.png`);
+    // 开拓者特例：18007 → 8007
+    expect(resolveCdnUri('skillicons', 'SkillIcon_18007_Servant01.webp').primary)
+      .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/8007/SkillIcon_18007_Servant01.png`);
+  });
+
   it('jsDelivr 同构直迁分类：monstermiddleicon / relicfigures', () => {
     expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp').primary)
       .toBe(`${JS_DELIVR_BASE}/monstermiddleicon/Monster_1002011.png`);

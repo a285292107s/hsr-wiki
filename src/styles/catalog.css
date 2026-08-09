@@ -395,7 +395,21 @@
 @media (max-width: 767px) {
   /* ── mobile：侧边栏降级为底部 Tab Bar，释放竖栏预留的 88px 左内边距 ── */
   #nk-catalog-app { padding-left: 16px; padding-right: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
-  .nk-cat-header { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  /* 吸顶工具条两行布局：第一行 标题+筛选按钮，第二行 搜索框+计数。
+     grid 双列固定区域：长标题（CW 目录）不再把筛选按钮挤到第二行，
+     搜索框始终独占第二行左列全宽（计数缩在右列不挤压输入框） */
+  .nk-cat-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'title btn' 'search count';
+    gap: 6px 14px;
+    margin: 0 -16px; padding: 8px 16px;
+  }
+  .nk-cat-title { grid-area: title; }
+  .nk-cat-count { grid-area: count; }
+  .nk-cat-filter-btn { grid-area: btn; margin-left: 0; }
+  .nk-cat-search { grid-area: search; max-width: none; min-width: 0; }
+  .nk-cat-search input { min-width: 0; }
   .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
   /* 网格列宽覆盖：仅改 --nk-grid-min，骨架屏与真实网格共用变量保持一致 */
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
@@ -404,7 +418,6 @@
   .nk-item-grid { --nk-grid-min: 90px; --nk-grid-gap: 8px; }
   .nk-mob-grid { --nk-grid-min: 100px; }
   .nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-  .nk-cat-search { max-width: none; min-width: 0; }
   .nk-cat-filter-group { flex-direction: column; gap: 6px; }
   .nk-home-nav__grid { grid-template-columns: 1fr; }
 }

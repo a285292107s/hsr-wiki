@@ -46,7 +46,11 @@ const SAMPLES = {
     ...asList(loadJson('relics.json') || []).flatMap((r) => [1, 2, 3, 4, 5, 6].map((n) => `IconRelic_${r.id}_${n}`)),
     'IconRelicBody', 'IconRelicFoot', 'IconRelicNeck', 'IconRelicGoods',
   ],
-  skillicons: charIds.flatMap((id) => ['Normal', 'BP', 'Ultra', 'Passive', 'Maze'].map((k) => `SkillIcon_${id}_${k}`)),
+  skillicons: [
+    ...charIds.flatMap((id) => ['Normal', 'BP', 'Ultra', 'Passive', 'Maze'].map((k) => `SkillIcon_${id}_${k}`)),
+    // 忆灵技能：文件名按忆灵 ID、目录按角色 ID（忆灵 ID - 10000；18007 → 8007 开拓者特例）
+    ...['11402', '11407', '11413', '11415', '18007'].flatMap((id) => [`SkillIcon_${id}_ServantPassive`, `SkillIcon_${id}_Servant01`]),
+  ],
   rank: charIds.flatMap((id) => [1, 2, 3, 4, 5, 6].map((n) => `SkillIcon_${id}_Rank${n}`)),
   trace: ['Attack', 'MaxHP', 'Defence', 'Speed', 'CriticalChance', 'CriticalDamage', 'BreakUp',
     'StatusProbability', 'StatusResistance', 'Joy', 'PhysicalAddedRatio', 'FireAddedRatio',
@@ -76,7 +80,12 @@ const RULES = {
   monstermiddleicon: (f) => `monstermiddleicon/${f}.png`,
   monsterfigure: (f) => `monsterfigure/${f}.png`,
   relicfigures: (f) => `relicfigures/${f}.png`,
-  skillicons: (f) => `skillicons/avatar/${f.match(/\d+/)[0]}/${f}.png`,
+  skillicons: (f) => {
+    const id = f.match(/\d+/)[0];
+    // 忆灵技能文件名以忆灵 ID 为前缀（SkillIcon_11402_Servant*），仓库目录按角色 ID 组织（忆灵 ID - 10000）
+    const dir = /_Servant/.test(f) && Number(id) > 10000 ? String(Number(id) - 10000) : id;
+    return `skillicons/avatar/${dir}/${f}.png`;
+  },
   rank: (f) => { const [, id, n] = f.match(/^SkillIcon_(\d+)_Rank(\d)$/); return `skillicons/avatar/${id}/SkillIcon_${id}_Rank${n}.png`; },
   trace: (f) => `ui/avatar/icon/Icon${f}.png`,
   element: (f) => `icondamagetype/IconDamageType${f[0].toUpperCase()}${f.slice(1).toLowerCase()}.png`,

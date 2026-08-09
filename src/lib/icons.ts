@@ -58,7 +58,11 @@ export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | nu
   // 开拓者偶数变体无图标资产，回退配对奇数 ID
   id = TRAILBLAZER_ICON_FALLBACK[id] || id;
   if (USE_OFFICIAL_PATHS) {
-    return official(`skillicons/avatar/${id}/SkillIcon_${id}_${iconKey}.png`);
+    // 忆灵技能文件名按忆灵 ID（SkillIcon_11402_Servant*），仓库目录按角色 ID 组织
+    // （skillicons/avatar/1402/；忆灵 ID = 角色 ID + 10000，18007 → 8007 开拓者特例）
+    const isServant = key === 'Servant' || key === 'ServantPassive';
+    const dir = isServant && Number(id) > 10000 ? String(Number(id) - 10000) : id;
+    return official(`skillicons/avatar/${dir}/SkillIcon_${id}_${iconKey}.png`);
   }
   return cdnUri('skillicons', `SkillIcon_${id}_${iconKey}.webp`);
 }

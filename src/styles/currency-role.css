@@ -1119,6 +1119,11 @@
 }
 
 /* ═══ 响应式 ═══ */
+/* 手机断点：180px 最小列宽在 ≤767px 下只能排 1 列，降至 150px 保证 ≥2 列
+   （≤374px 超窄屏由 catalog.css 的 repeat(2, 1fr) 强制双列兜底） */
+@media (max-width: 767px) {
+  .nk-crole-grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
+}
 @media (min-width: 768px) {
   .nk-crole {
     max-width: calc(980px + 88px);

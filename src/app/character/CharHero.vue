@@ -26,17 +26,16 @@ const stars = computed(() =>
 interface HeroStat { v: number | string; l: string; icon: string }
 
 /**
- * 嘲讽 / 能量消耗暂无 CDN trace 图标（IconAggro / IconEnergy 缺失），
- * 以白色线性风格 SVG 顶替（与官方 trace 图标观感一致）；待 CDN 收录后可直接替换为图片 URL。
+ * 嘲讽无官方图标资产（已核实：AvatarPropertyConfig 无 Aggro 条目、IconPath 全量扫描无引用；
+ * StarRailTextures 仓库 ui/avatar/icon/IconAggro.png 404），以白色线性风格 SVG 顶替。
  */
 const TRACE_TAUNT_SVG =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 19.5 6v5.5c0 4.6-3.2 7.8-7.5 9.5-4.3-1.7-7.5-4.9-7.5-9.5V6z' fill='none' stroke='#fff' stroke-width='1.8' stroke-linejoin='round'/><path d='M12 8.5v6.5M9.5 10.5 12 8l2.5 2.5' fill='none' stroke='#fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-const TRACE_ENERGY_SVG =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='3.5' y='8' width='13' height='8' rx='1.8' fill='none' stroke='#fff' stroke-width='1.8'/><path d='M18.2 10.8v2.4' stroke='#fff' stroke-width='1.8' stroke-linecap='round'/><path d='M6.5 10.9v2.2M9.2 10.9v2.2M11.9 10.9v2.2' stroke='#fff' stroke-width='1.8' stroke-linecap='round'/></svg>");
 
-/** 全部 8 项展示属性：HP/ATK/DEF/SPD + 暴击率/暴击伤害/嘲讽/能量消耗（参考官方 Wiki 头部） */
+/** 全部 8 项展示属性（术语与图标均出自子仓库 AvatarPropertyConfig：
+ * PropertyName → TextMap 官方名称；IconPath → SpriteOutput/UI/Avatar/Icon/Icon*.png，
+ * 经 cdnUri trace 分类解析为 jsDelivr 路径；嘲讽无官方资产用 SVG 顶替） */
 const heroStats = computed<HeroStat[]>(() => {
   const dd = props.d;
   const s = maxLevelStat(dd.stats);
@@ -46,14 +45,14 @@ const heroStats = computed<HeroStat[]>(() => {
     v, l, icon,
   });
   return [
-    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), 'HP', cdnUri('trace', 'IconMaxHP.webp')),
-    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), 'ATK', cdnUri('trace', 'IconAttack.webp')),
-    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), 'DEF', cdnUri('trace', 'IconDefence.webp')),
-    mk(s.speed_base, 'SPD', cdnUri('trace', 'IconSpeed.webp')),
+    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), '生命值', cdnUri('trace', 'IconMaxHP.webp')),
+    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), '攻击力', cdnUri('trace', 'IconAttack.webp')),
+    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), '防御力', cdnUri('trace', 'IconDefence.webp')),
+    mk(s.speed_base, '速度', cdnUri('trace', 'IconSpeed.webp')),
     mk(fmtPct(s.critical_chance), '暴击率', cdnUri('trace', 'IconCriticalChance.webp')),
     mk(fmtPct(s.critical_damage), '暴击伤害', cdnUri('trace', 'IconCriticalDamage.webp')),
-    mk(s.base_aggro ?? 0, '嘲讽值', TRACE_TAUNT_SVG),
-    mk(dd.sp_need ?? 0, '能量消耗', TRACE_ENERGY_SVG),
+    mk(s.base_aggro ?? 0, '嘲讽', TRACE_TAUNT_SVG),
+    mk(dd.sp_need ?? 0, '能量上限', cdnUri('trace', 'IconEnergyLimit.webp')),
   ];
 });
 
