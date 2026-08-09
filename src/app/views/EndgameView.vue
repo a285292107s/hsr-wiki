@@ -231,6 +231,21 @@ const TARGET_TYPE_LABEL: Record<string, string> = {
   DEAD_AVATAR: '减员',
 };
 
+/** 挑战目标类型语义 SVG（子仓库解包无对应图标，自制语义化内联图标） */
+const TARGET_TYPE_SVG: Record<string, string> = {
+  TOTAL_SCORE: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.8-4.3 4.1 1 5.8L12 16.4l-5.2 2.6 1-5.8L3.5 9.1l5.9-.8z"/></svg>`,
+  ROUNDS_LEFT: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M12 2v2M12 20v2M5 6h14v3a7 7 0 11-14 0z"/></svg>`,
+  DEAD_AVATAR: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.3-3.5 4.6-5.5 7.5-5.5s6.2 2 7.5 5.5"/><path d="M4 4l16 16"/></svg>`,
+};
+
+/** 星启目标类型图标内容（仅 innerHTML：SVG + 文字，由模板外层 span 负责胶囊样式） */
+function targetTypeIconHtml(type: string): string {
+  const label = TARGET_TYPE_LABEL[type];
+  const svg = TARGET_TYPE_SVG[type];
+  if (!label || !svg) return '';
+  return `<span class="nk-egd-node__typeicon">${svg}</span><span>${label}</span>`;
+}
+
 /** 挑战目标渲染：#N[i] 参数替换（param 缺省时剥离占位符，避免残留） */
 function targetHtml(t: MazeTargetInfo): string {
   if (t.param != null) return fmtDesc(t.text, [t.param]);
@@ -324,6 +339,33 @@ function collapseAll(): void { expanded.value = new Set(); }
 const allExpanded = computed(() => floorSections.value.length > 0 && expanded.value.size === floorSections.value.length);
 const noneExpanded = computed(() => expanded.value.size === 0);
 function isExpanded(id: number): boolean { return expanded.value.has(id); }
+
+/* ═══════════ 星启节点 / 波次折叠状态机 ═══════════
+ * 默认全部展开；仅记录「已折叠」的条目，未命中视为展开（无需初始化键集）。 */
+const collapsedNodes = ref<Set<string>>(new Set());
+const collapsedWaves = ref<Set<string>>(new Set());
+function nodeKey(ni: number): string { return `n${ni}`; }
+function waveKey(ni: number, wi: number): string { return `n${ni}-w${wi}`; }
+function isNodeExpanded(ni: number): boolean { return !collapsedNodes.value.has(nodeKey(ni)); }
+function isWaveExpanded(ni: number, wi: number): boolean { return !collapsedWaves.value.has(waveKey(ni, wi)); }
+function toggleNode(ni: number): void {
+  const s = new Set(collapsedNodes.value);
+  const k = nodeKey(ni);
+  if (s.has(k)) s.delete(k); else s.add(k);
+  collapsedNodes.value = s;
+}
+function toggleWave(ni: number, wi: number): void {
+  const s = new Set(collapsedWaves.value);
+  const k = waveKey(ni, wi);
+  if (s.has(k)) s.delete(k); else s.add(k);
+  collapsedWaves.value = s;
+}
+/** 节点摘要：总波数 · 总敌数（用于节点头折叠态/常态摘要） */
+function nodeSummary(nd: { idx: number; monsters: MazeMonsterInfo[] }): string {
+  const groups = monWaveGroups(nd.monsters);
+  const total = groups.reduce((acc, g) => acc + g.items.length, 0);
+  return `${groups.length} 波 · ${total} 敌`;
+}
 
 /* ═══════════ 吸顶工具条（章节导航 + 阅读进度线 + 返回顶部） ═══════════ */
 
@@ -441,10 +483,6 @@ onBeforeUnmount(() => {
               {{ s.label }}
             </button>
           </nav>
-          <div v-if="floorSections.length > 1" class="nk-egd-bar__tools" role="group" aria-label="层级展开控制">
-            <button v-if="!allExpanded" type="button" class="nk-egd-bar__tool" @click="expandAll">全部展开</button>
-            <button v-if="!noneExpanded" type="button" class="nk-egd-bar__tool" @click="collapseAll">全部折叠</button>
-          </div>
         </div>
         <div class="nk-egd-bar__progress" :style="{ width: `${progressPct}%` }"></div>
       </div>
@@ -740,21 +778,79 @@ onBeforeUnmount(() => {
                    与 3 个节点（敌方配置）正交，非节点级条件 -->
               <ol v-if="tierceTargets.length" class="nk-egd-tierce__targets">
                 <li v-for="(t, i) in tierceTargets" :key="i" class="nk-egd-node">
-                  <span class="nk-egd-node__idx">目标 {{ String(i + 1).padStart(2, '0') }}</span>
-                  <span v-if="t.type && TARGET_TYPE_LABEL[t.type]" class="nk-egd-node__type">{{ TARGET_TYPE_LABEL[t.type] }}</span>
+                  <span
+                    v-if="t.type && TARGET_TYPE_LABEL[t.type]"
+                    class="nk-egd-node__type"
+                    :title="TARGET_TYPE_LABEL[t.type]"
+                    v-html="targetTypeIconHtml(t.type)"
+                  ></span>
                   <span class="nk-egd-node__text" v-html="targetHtml(t)"></span>
                 </li>
               </ol>
               <!-- 星启敌方：3 节点各自挑战（节点 1/2 = 常规最高难度关上下半场；节点 3 = 星启附加关），
                    节点内按波次分组的完整信息卡
-                   分组层级视觉：节点 = 模式色胶囊（与“上半场/下半场”同级），波 = 灰色小字（次级） -->
-              <ul v-if="tierceNodes.length" class="nk-egd-tierce__waves">
-                <li v-for="(nd, ni) in tierceNodes" :key="ni" class="nk-egd-tierce__node">
-                  <h3 class="nk-egd-tierce__nodelabel">节点 {{ String(nd.idx).padStart(2, '0') }}</h3>
-                  <div v-for="(g, gi) in monWaveGroups(nd.monsters)" :key="gi" class="nk-egd-tierce__wave">
-                    <span v-if="monWaveGroups(nd.monsters).length > 1" class="nk-egd-tierce__wavelabel">第 {{ g.wave }} 波</span>
-                    <div class="nk-egd-mons">
-                      <EnemyCard v-for="m in g.items" :key="`${m.id}-${ni}-${gi}`" :monster="m" />
+                   分组层级：节点 = 外层章节卡（左模式色竖条 + HUD 角标 + 整头可折叠）；波 = 中层分组容器（L 刻度线 + 级联色条 + 头可折叠）；敌 = 内层内容卡 -->
+              <ul v-if="tierceNodes.length" class="nk-egd-tierce__waves" aria-label="星启节点列表">
+                <li
+                  v-for="(nd, ni) in tierceNodes"
+                  :key="ni"
+                  class="nk-egd-tierce__node"
+                  :class="{ 'nk-egd-tierce__node--collapsed': !isNodeExpanded(ni) }"
+                >
+                  <!-- 节点卡片头（按钮：点击切换整个节点折叠） -->
+                  <button
+                    type="button"
+                    class="nk-egd-tierce__nodehead"
+                    :aria-expanded="isNodeExpanded(ni)"
+                    :aria-controls="`egd-node-${ni}-body`"
+                    :aria-label="`节点 ${nd.idx}，${nodeSummary(nd)}，点击${isNodeExpanded(ni) ? '折叠' : '展开'}`"
+                    @click="toggleNode(ni)"
+                  >
+                    <span class="nk-egd-tierce__nodelabel"><span class="nk-egd-tierce__nodezh">节点</span>NODE-{{ String(nd.idx).padStart(2, '0') }}</span>
+                    <span class="nk-egd-tierce__nodesummary" :title="nodeSummary(nd)">{{ nodeSummary(nd) }}</span>
+                    <svg class="nk-egd-tierce__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                  <!-- 节点卡片体（waves 容器，grid-rows 折叠过渡） -->
+                  <div
+                    class="nk-egd-tierce__nodebody"
+                    :id="`egd-node-${ni}-body`"
+                    role="region"
+                    :class="{ 'nk-egd-tierce__nodebody--collapsed': !isNodeExpanded(ni) }"
+                  >
+                    <div class="nk-egd-tierce__nodebody-inner">
+                      <div
+                        v-for="(g, gi) in monWaveGroups(nd.monsters)"
+                        :key="gi"
+                        class="nk-egd-tierce__wave"
+                        :class="{ 'nk-egd-tierce__wave--collapsed': !isWaveExpanded(ni, gi) }"
+                      >
+                        <!-- 波次头部（永远可见：分组标签 + 敌数摘要；多波时显示，单波时仍展示精简版标签用于层级一致） -->
+                        <button
+                          type="button"
+                          class="nk-egd-tierce__wavehead"
+                          :aria-expanded="isWaveExpanded(ni, gi)"
+                          :aria-controls="`egd-wave-${ni}-${gi}-body`"
+                          :aria-label="`节点 ${nd.idx} 第 ${g.wave} 波，${g.items.length} 敌，点击${isWaveExpanded(ni, gi) ? '折叠' : '展开'}`"
+                          @click="toggleWave(ni, gi)"
+                        >
+                          <span class="nk-egd-tierce__wavename">第 {{ g.wave }} 波</span>
+                          <span class="nk-egd-tierce__wavesummary" :title="`${g.items.length} 敌`">× {{ g.items.length }} 敌</span>
+                          <svg class="nk-egd-tierce__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                        <!-- 波次体：敌方卡片网格（折叠过渡） -->
+                        <div
+                          class="nk-egd-tierce__wavebody"
+                          :id="`egd-wave-${ni}-${gi}-body`"
+                          role="group"
+                          :class="{ 'nk-egd-tierce__wavebody--collapsed': !isWaveExpanded(ni, gi) }"
+                        >
+                          <div class="nk-egd-tierce__wavebody-inner">
+                            <div class="nk-egd-mons">
+                              <EnemyCard v-for="m in g.items" :key="`${m.id}-${ni}-${gi}`" :monster="m" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -787,7 +883,14 @@ onBeforeUnmount(() => {
           <!-- 关卡层级：以层级为章节（倒序：最高层在前），模块内展示推荐属性 / 敌方配置 / 可用增益 / 挑战目标；
                层级默认折叠（>6 层），层头即索引 -->
           <template v-if="floorSections.length">
-            <h2 id="egd-floors" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['floors'] }}</span>关卡层级 LEVELS</h2>
+            <h2 id="egd-floors" class="nk-title">
+              <span class="nk-title__idx">{{ sectionIdx['floors'] }}</span>关卡层级 LEVELS
+              <!-- 章节工具行：层级批量展开/折叠（仅多层级时出现；随章节同屏，不再占用吸顶条） -->
+              <span v-if="floorSections.length > 1" class="nk-egd-title-tools" role="group" aria-label="层级展开控制">
+                <button v-if="!allExpanded" type="button" class="nk-egd-title-tool" @click="expandAll">全部展开</button>
+                <button v-if="!noneExpanded" type="button" class="nk-egd-title-tool" @click="collapseAll">全部折叠</button>
+              </span>
+            </h2>
             <div class="nk-egd-floors">
               <section
                 v-for="(f, i) in floorSections"
