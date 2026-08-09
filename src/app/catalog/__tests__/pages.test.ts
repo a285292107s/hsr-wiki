@@ -8,7 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
-import { tabIconUrl, seasonArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl } from '../pages/endgame';
+import { tabIconUrl, seasonArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../pages/endgame';
 
 const entries = Object.entries(CATALOG_PAGES);
 
@@ -149,7 +149,27 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
   it('seasonPosterTabUrl 解析海报页签（Quest/TabIcon）', () => {
     expect(seasonPosterTabUrl({ poster_tab: 'SpriteOutput/Quest/TabIcon/BtnChallengePeak_4001.png' }))
       .toBe(`${BASE}/quest/tabicon/BtnChallengePeak_4001.png`);
-    expect(seasonPosterTabUrl({ poster_tab: 'SpriteOutput/Abyss/UI3D_SceneBg/AbyssSenceBg_01.png' })).toBe('');
+    // UI/Abyss 开关图不在白名单（Abyss 前缀仅限场景背景 Abyss/UI3D_SceneBg）
+    expect(seasonPosterTabUrl({ poster_tab: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png' })).toBe('');
     expect(seasonPosterTabUrl(null)).toBe('');
+  });
+
+  it('seasonHeroBgUrl 按模式取唯一大图（background/theme_bg/handbook_banner），白名单外返回空串', () => {
+    // maze：场景背景
+    expect(seasonHeroBgUrl({ background: 'SpriteOutput/Abyss/UI3D_SceneBg/AbyssSenceBg_01.png' }))
+      .toBe(`${BASE}/abyss/ui3d_scenebg/AbyssSenceBg_01.png`);
+    // story：海报背景
+    expect(seasonHeroBgUrl({ theme_bg: 'SpriteOutput/ChallengeTheme/ThemeBg/ChallengeThemeBg_2001.png' }))
+      .toBe(`${BASE}/challengetheme/themebg/ChallengeThemeBg_2001.png`);
+    // peak：图鉴横幅
+    expect(seasonHeroBgUrl({ handbook_banner: 'SpriteOutput/DailyMission/Banner/ChallengePeakPanelBanner_4002.png' }))
+      .toBe(`${BASE}/dailymission/banner/ChallengePeakPanelBanner_4002.png`);
+    // 多字段并存时按 background → theme_bg → handbook_banner 优先级
+    expect(seasonHeroBgUrl({ theme_bg: 'SpriteOutput/ChallengeTheme/ThemeBg/A.png', handbook_banner: 'SpriteOutput/DailyMission/Banner/B.png' }))
+      .toBe(`${BASE}/challengetheme/themebg/A.png`);
+    // boss 无大图 / 白名单外 → 空串
+    expect(seasonHeroBgUrl({})).toBe('');
+    expect(seasonHeroBgUrl({ background: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_On.png' })).toBe('');
+    expect(seasonHeroBgUrl(null)).toBe('');
   });
 });

@@ -63,7 +63,7 @@
 
 /* ═══════════════════════════════════════════
    Hero：档案铭牌 + 赛季信息
-   （透明底——§13.8 默认无材质；顶部模式色细线为身份线，底部渐隐衔接内容）
+   （本体透明底；沉浸式背景 __bg 经 mask 渐隐铺底，顶部模式色细线为身份线，底部渐隐衔接内容）
 ═══════════════════════════════════════════ */
 .nk-egd-hero {
   position: relative;
@@ -89,6 +89,7 @@
     color-mix(in srgb, var(--eg-color) 60%, transparent) 78%,
     transparent 100%);
   opacity: 0.6;
+  z-index: 1;
 }
 /* 底部渐隐（与内容面板衔接，功能材质） */
 .nk-egd-hero::after {
@@ -97,10 +98,29 @@
   left: 0; right: 0; bottom: -1px;
   height: 1px;
   background: linear-gradient(90deg, transparent 4%, var(--line-2) 50%, transparent 96%);
+  z-index: 1;
+}
+/* 沉浸式背景（maze 场景背景 / story 海报背景 / peak 图鉴横幅）：低透明度铺底，
+   左侧文字区渐隐保护对比度（plate 深底 + 名称区无背景干扰），右侧保留视觉焦点；
+   z-index 0 低于铭牌/信息面板/身份线，加载失败隐藏后不占位 */
+.nk-egd-hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  opacity: 0.3;
+  filter: saturate(0.8) brightness(0.92);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 32%, #000 68%, #000 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, transparent 32%, #000 68%, #000 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* 赛季横幅（theme_banner：宣传 BANNER）——Hero 右侧装饰底图，左侧渐隐与内容衔接，
-   低于铭牌/信息面板（z-index 0），加载失败隐藏后不占位 */
+   低于铭牌/信息面板（z-index 0）；与 __bg 互斥（模板 showBanner 控制，有 bg 时不渲染），
+   仅 boss（无大图 bg）等模式显示，避免同区域双图叠加重影 */
 .nk-egd-hero__banner {
   position: absolute;
   top: 50%;
@@ -120,6 +140,7 @@
 /* 铭牌：模式徽记 + 赛季编号（档案角标；深底细线，无渐变无 glow） */
 .nk-egd-hero__plate {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1331,6 +1352,7 @@
   }
   .nk-egd-hero__emblem { width: 27px; height: 27px; }
   .nk-egd-hero__art { width: 44px; height: 44px; top: 7px; }
+  .nk-egd-hero__bg { display: none; } /* 移动端隐藏背景，保持简洁 */
   .nk-egd-hero__banner { display: none; } /* 移动端隐藏横幅，避免遮挡信息面板 */
   .nk-egd-hero__num { font-size: 1.55rem; }
   .nk-egd-hero__num--long { font-size: 1.2rem; }

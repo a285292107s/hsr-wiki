@@ -16,7 +16,8 @@ import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
  * - ChallengeTheme/**     → challengetheme/**（虚构主题素材 ThemeIcon/ThemePic/ThemeBg）
  * - ChallengeBoss/**      → challengeboss/**（末日主题图标 ChallengeBossIcon_30xx）
  * - Quest/TabIcon/**      → quest/tabicon/**（海报页签 BtnChallengeStoryAlternation/BtnChallengeBoss/BtnChallengePeak）
- * 未列入的（如忘却之庭 AbyssSwitch 共用开关图 / Abyss/UI3D_SceneBg 场景背景）返回空串不渲染；
+ * - Abyss/**              → abyss/**（忘却之庭场景背景 Abyss/UI3D_SceneBg，仅 Hero 背景用）
+ * 未列入的（如忘却之庭 AbyssSwitch 共用开关图 / Quest 其他素材）返回空串不渲染；
  * 路径映射复用 cdn 层通用规则 spriteOutputToRel（目录段小写、文件名保留）。
  * 方案 A 转存 nanoka 后，将函数替换为 cdnUri('tabicon', ...) 即可，消费方无需改动。
  */
@@ -28,6 +29,7 @@ const ART_PREFIXES = [
   'ChallengeTheme',
   'ChallengeBoss',
   'Quest/TabIcon',
+  'Abyss',
 ] as const;
 
 /** 终局官方素材 URL（白名单语义闸门 + 目录段小写通用规则；白名单外返回空串不渲染） */
@@ -55,6 +57,17 @@ export function seasonThemeIconUrl(arts?: { theme_icon?: string } | null): strin
 /** 海报页签按钮图 URL（arts.poster_tab：虚构/末日/仲裁 Btn* 扁长按钮 260×92，相邻赛季导航完整比例展示） */
 export function seasonPosterTabUrl(arts?: { poster_tab?: string } | null): string {
   return endgameArtUrl(arts?.poster_tab);
+}
+
+/**
+ * 赛季 Hero 背景 URL（按模式取唯一大图：maze=background 场景背景 2048×1024 /
+ * story=theme_bg 海报背景 2048×1152 / peak=handbook_banner 图鉴横幅 1103×737；
+ * boss 无大图字段返回空串保持透明底）。低透明度铺底，保证文字对比度。
+ */
+export function seasonHeroBgUrl(arts?: { background?: string; theme_bg?: string; handbook_banner?: string } | null): string {
+  return endgameArtUrl(arts?.background)
+    || endgameArtUrl(arts?.theme_bg)
+    || endgameArtUrl(arts?.handbook_banner);
 }
 
 /** 赛季图标 URL：优先赛季专属图标（arts.tab），缺失时回退玩法级默认图标
