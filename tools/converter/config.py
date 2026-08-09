@@ -168,6 +168,22 @@ def _rule_strip_png(subdir: str, extra_dir: str = "") -> Callable[[str], str]:
     return lambda f: f"{subdir}/{_stem(f)}.png"
 
 
+def _rule_dir_lower(cat: str) -> Callable[[str], Optional[str]]:
+    """通用规则：SpriteOutput/{Cat}/{SubDir}/... → {cat}/{subdir 全小写}/...，文件名保持大小写。
+
+    事实源：官方 StarRailTextures 仓库目录段统一小写（如 Quest/Museum/MuseumItemIcon →
+    quest/museum/museumitemicon），文件名保持原样。用于未注册分类（Quest / TravelBrochure /
+    DailyMission 等）的完整路径映射。
+    """
+    def rule(f: str) -> Optional[str]:
+        if not f:
+            return None
+        parts = f.split("/")
+        dirs = [d.lower() for d in parts[:-1]]
+        return "/".join([cat, *dirs, parts[-1]])
+    return rule
+
+
 def _rule_element(f: str) -> Optional[str]:
     # 输入：SpriteOutput/IconDamageType/IconDamageTypeIce.png → IconDamageTypeIce.png
     stem = _stem(f)  # IconDamageTypeIce
@@ -239,7 +255,17 @@ OFFICIAL_ICON_RULES: dict[str, Callable[[str], Optional[str]]] = {
     # 元素：IconDamageType 前缀对应 element 分类
     "SpriteOutput/IconDamageType/":           _rule_element,
     # 行迹图标（AvatarSkillTree 不在旧 ICON_PATH_MAP 中，未来如有新增前缀可在此注册）
-    # 怪物：中图标 + 大图
+    # 物品专属分类：ItemIcon/ItemFigures 之外的完整路径（官方仓库目录段全小写）
+    "SpriteOutput/Quest/":                _rule_dir_lower("quest"),
+    "SpriteOutput/TravelBrochure/":       _rule_dir_lower("travelbrochure"),
+    "SpriteOutput/DailyMission/":         _rule_dir_lower("dailymission"),
+    "SpriteOutput/AvatarShopIcon/Avatar/": _rule_strip_png("avatarshopicon", extra_dir="avatar"),
+    "SpriteOutput/AvatarShopIcon/NPC/":   _rule_strip_png("avatarshopicon", extra_dir="npc"),
+    "SpriteOutput/AvatarIcon/NPC/":       _rule_strip_png("avataricon", extra_dir="npc"),
+    "SpriteOutput/Rogue/Tourn/":          _rule_dir_lower("rogue/tourn"),
+    # 怪物：中图标 + 大图（源数据 IconPath 为官方错拼 MosterIcon，与 StarRailRes 一致；
+    # 同时注册正确拼写变体，防御未来数据修正）
+    "SpriteOutput/MosterIcon/":               _rule_strip_png("monstermiddleicon"),
     "SpriteOutput/MonsterIcon/":              _rule_strip_png("monstermiddleicon"),
     "SpriteOutput/MonsterFigure/":            _rule_strip_png("monsterfigure"),
     # 遗器图标

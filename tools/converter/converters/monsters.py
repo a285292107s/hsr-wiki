@@ -1,14 +1,15 @@
 """Monster catalog → public/data/cn/monsters.json
 
 从 MonsterTemplateConfig 提取唯一敌对物种（按模板去重，每个模板对应一个可视怪物），
-解析中文名并保留图标路径与类型。图标路径为原始 SpriteOutput 路径，前端 monsterIconUrl
-从路径中提取数字拼接到 CDN monstermiddleicon，无需在此处转换。
+解析中文名并保留图标路径与类型。图标经 map_icon_path 转换为官方 StarRailTextures
+相对路径（monstermiddleicon/{stem}.png，--official-icon-paths 模式），
+前端 monsterIconUrl 直接拼 OFFICIAL_ICON_BASE 加载。
 """
 import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR
 from textmap import resolve_text
-from utils import load_json, save_json, sort_by_id
+from utils import load_json, map_icon_path, save_json, sort_by_id
 
 logger = logging.getLogger("converter")
 
@@ -28,7 +29,7 @@ def convert() -> None:
     result = []
     for t in templates:
         name = resolve_text(t.get("MonsterName", {}))
-        icon = t.get("IconPath", "")
+        icon = map_icon_path(t.get("IconPath", ""))
         if not name or not icon:
             continue
         result.append(

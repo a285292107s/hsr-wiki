@@ -83,7 +83,13 @@ export function avatarDrawCardUrl(charId: string | number): string {
 export function itemIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
   if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
-    return official(iconPath);
+    // 未转换的 SpriteOutput 完整路径（converter 遗漏）：官方仓库目录段全小写、文件名保持
+    let rel = iconPath.replace(/^SpriteOutput\//i, '');
+    if (iconPath.startsWith('SpriteOutput/') && rel.includes('/')) {
+      const parts = rel.split('/');
+      rel = [...parts.slice(0, -1).map((s) => s.toLowerCase()), parts[parts.length - 1]].join('/');
+    }
+    return official(rel.replace(/\.png$/i, '') + '.png');
   }
   const m = iconPath.match(/(\d+)\.png$/);
   if (!m) return '';
@@ -127,24 +133,34 @@ export function lightconeIconUrl(id: string | number): string {
   return id ? cdnUri('lightconemediumicon', `${id}.webp`) : '';
 }
 
-/** 敌对图像：monstermiddleicon/{basename}.webp（从 SpriteOutput/MonsterFigure/Monster_xxx.png 取末段去扩展名） */
-export function monsterIconUrl(iconPath: string | null | undefined): string {
-  if (!iconPath) return '';
+/**
+ * 怪物图标官方路径统一构造。
+ * 输入兼容三种形态：
+ * - 官方相对路径（monstermiddleicon/Monster_xxx.png，converter --official-icon-paths 输出）→ 直接拼基址
+ * - 完整 SpriteOutput 路径（converter 遗漏转换的旧数据，含官方错拼 MosterIcon）→ 剥前缀 + 归类目录
+ * - basename（monster_common 详情页输出的 ManikinImagePath / ImagePath 末段）→ 补官方分类目录
+ * USE_OFFICIAL_PATHS=false 时统一走 CDN basename 分支（降级/测试场景）。
+ */
+function monsterOfficialUrl(iconPath: string, cat: 'monstermiddleicon' | 'monsterfigure'): string {
   if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
-    return official(iconPath);
+    let rel = iconPath.replace(/^SpriteOutput\//i, '');
+    if (!rel.includes('/')) rel = `${cat}/${rel}`;
+    // 官方仓库怪物图标目录为 monstermiddleicon（源数据错拼 Moster/MonsterIcon）
+    rel = rel.replace(/^(Moster|Monster)Icon\//, 'monstermiddleicon/');
+    return official(rel.replace(/\.png$/i, '') + '.png');
   }
   const base = iconPath.split('/').pop()?.replace(/\.png$/i, '') || '';
-  return base ? cdnUri('monstermiddleicon', `${base}.webp`) : '';
+  return base ? cdnUri(cat, `${base}.webp`) : '';
 }
 
-/** 敌对全身立绘：monsterfigure/{basename}.webp（ImagePath 末段；无立绘返回空串） */
+/** 敌对图像：monstermiddleicon/{basename}.webp */
+export function monsterIconUrl(iconPath: string | null | undefined): string {
+  return iconPath ? monsterOfficialUrl(iconPath, 'monstermiddleicon') : '';
+}
+
+/** 敌对全身立绘：monsterfigure/{basename}.webp（无立绘返回空串） */
 export function monsterFigureUrl(iconPath: string | null | undefined): string {
-  if (!iconPath) return '';
-  if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
-    return official(iconPath);
-  }
-  const base = iconPath.split('/').pop()?.replace(/\.png$/i, '') || '';
-  return base ? cdnUri('monsterfigure', `${base}.webp`) : '';
+  return iconPath ? monsterOfficialUrl(iconPath, 'monsterfigure') : '';
 }
 
 /** 货币战争 GridFight 图标：SpriteOutput/GridFight/Equipment/350101.png → CDN webp */
