@@ -8,7 +8,7 @@ import { loadLocalLightCones, loadLocalRelicSet } from '../../services/api';
 import { fmtDesc, itemName, pathIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PROP_NAMES, SLOT_ICONS, SLOT_NAMES } from '../../lib/constants';
-import { SECTION_IDX } from './sections';
+import { SECTION_IDX, hasRelics } from './sections';
 import type { CharacterData, ItemDb, NameCache, RelicSetData } from '../../services/types';
 
 type BuildSection = 'cones' | 'teams' | 'relics';
@@ -106,11 +106,8 @@ const setIdList = computed<{ id: number; pc: number }[]>(() => {
   }
   return arr;
 });
-const hasRelicSection = computed(() =>
-  relicMainStats.value.length > 0 || relicSubs.value.length > 0 || setIdList.value.length > 0,
-);
 const buildsEmpty = computed(() =>
-  !cones.value.length && !teams.value.length && !hasRelicSection.value,
+  !cones.value.length && !teams.value.length && !hasRelics(props.d),
 );
 
 /* ─── 遗器套装描述异步加载（base data 变化时触发；加强切换不重复） ───
@@ -222,7 +219,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
       </div>
     </div>
   </template>
-  <template v-if="props.sections.includes('relics') && hasRelicSection">
+  <template v-if="props.sections.includes('relics') && hasRelics(props.d)">
     <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.relics }}</span>RELICS</div>
     <div class="nk-build__relics">
       <!-- 主词条槽位卡片 -->

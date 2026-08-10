@@ -2,8 +2,9 @@
  * 角色详情页区块配置（全局化 §13.3 编号单一事实源）。
  * - SECTION_ORDER：页面视觉顺序（即吸顶导航顺序）
  * - SECTION_IDX：固定编号（01-09，编号 = 身份不随数据漂移；数据缺失保留缺口）
- * - visibleSections：区块可见性纯函数（与各面板组件内部 v-if 判断同构，驱动导航同步隐藏）
- * 注意：修改可见性判断时须同步 SkillsPanel / OverviewPanel / BuildsPanel / EidolonsPanel 内部条件。
+ * - visibleSections：区块可见性纯函数（驱动导航同步隐藏 + CharacterView 面板挂载门控）
+ * - has* 谓词：区块内容判定的单一事实源。导航（visibleSections）与 OverviewPanel /
+ *   BuildsPanel 的 v-if 均消费同一实现——禁止在面板内复制同构判定，杜绝双份逻辑漂移。
  */
 import type { CharacterData } from '../../services/types';
 
@@ -37,8 +38,8 @@ export const SECTION_IDX: Record<SectionId, string> = Object.fromEntries(
   SECTION_ORDER.map((id, i) => [id, String(i + 1).padStart(2, '0')]),
 ) as Record<SectionId, string>;
 
-/** 行迹树是否存在附加能力节点（与 OverviewPanel abilities 判断同构） */
-function hasTalentNodes(d: CharacterData): boolean {
+/** 行迹树是否存在附加能力节点（面板 TALENTS 区块共用） */
+export function hasTalentNodes(d: CharacterData): boolean {
   if (!d.skill_trees) return false;
   return Object.values(d.skill_trees).some((tree) => {
     const n = tree['1'] || tree[Object.keys(tree)[0]];
@@ -46,28 +47,28 @@ function hasTalentNodes(d: CharacterData): boolean {
   });
 }
 
-/** 行迹树是否存在属性加成节点（与 OverviewPanel attrBonuses 判断同构） */
-function hasBonusNodes(d: CharacterData): boolean {
+/** 行迹树是否存在属性加成节点（面板 STAT BONUSES 区块共用） */
+export function hasBonusNodes(d: CharacterData): boolean {
   if (!d.skill_trees) return false;
   return Object.values(d.skill_trees).some((tree) =>
     Object.values(tree).some((n) => n.status_add_list && n.status_add_list.length),
   );
 }
 
-/** 是否含角色故事（与 OverviewPanel storyEntries 判断同构） */
-function hasStories(d: CharacterData): boolean {
+/** 是否含角色故事（面板 STORIES 区块共用） */
+export function hasStories(d: CharacterData): boolean {
   const st = d.chara_info && d.chara_info.stories;
   return !!st && Object.values(st).some((v) => !!v);
 }
 
-/** 是否含配音信息（与 OverviewPanel profileRows 判断同构） */
-function hasProfile(d: CharacterData): boolean {
+/** 是否含配音信息（面板 PROFILE 区块共用） */
+export function hasProfile(d: CharacterData): boolean {
   const va = d.chara_info && d.chara_info.va;
   return !!(va && (va.chinese || va.japanese || va.korean || va.english));
 }
 
-/** 是否含遗器推荐（与 BuildsPanel hasRelicSection 判断同构） */
-function hasRelics(d: CharacterData): boolean {
+/** 是否含遗器推荐（面板 RELICS 区块共用） */
+export function hasRelics(d: CharacterData): boolean {
   const r = d.relics;
   if (!r) return false;
   return !!(
@@ -78,8 +79,9 @@ function hasRelics(d: CharacterData): boolean {
   );
 }
 
-/** 当前数据下可见区块（按页面视觉顺序）；skills / eidolons 恒显 */
-export function visibleSections(d: CharacterData): SectionId[] {
+/** 当前数据下可见区块（按页面视觉顺序）；skills / eidolons 恒显。数据未就绪（null）返回空集 */
+export function visibleSections(d: CharacterData | null): SectionId[] {
+  if (!d) return [];
   const vis: SectionId[] = ['skills', 'eidolons'];
   if (hasTalentNodes(d)) vis.push('talents');
   if (hasBonusNodes(d)) vis.push('bonuses');

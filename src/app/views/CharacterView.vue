@@ -113,6 +113,8 @@ const navSections = computed(() => {
   return sectionDefs.filter((s) => vis.has(s.id));
 });
 
+/** 内容区块可见性（与导航同源：visibleSections 单一事实源，驱动面板挂载门控；数据未就绪为空集） */
+const vis = computed(() => new Set(visibleSections(d.value)));
 const pageRef = ref<HTMLElement | null>(null);
 const enhBarRef = ref<HTMLElement | null>(null);
 /** 当前阅读区块（滚动位置计算；顶部概览区时为空不高亮） */
@@ -294,12 +296,14 @@ onBeforeUnmount(() => {
 
       <!-- 内容平铺：头图 + 各区块按序排列（技能 → 附加能力 → 星魂 → 属性加成 → 光锥/配队 → 遗器 → 角色档案 → 配音） -->
       <div class="nk-panels">
+        <!-- 数据区块挂载门控与吸顶导航同源（visibleSections）：缺数据区块整体不挂载，杜绝「导航有、正文空」漂移。
+             hero 概览区恒显（含 spine/属性总览），不参与门控 -->
         <div class="nk-panel nk-panel--overview nk-panel--flat" data-panel="hero">
           <CharHero :d="d" :char-id="char.charId" />
         </div>
 
         <!-- 强化模式（skills 模块上方）：模块标题 + 选项卡切换 + 强化摘要 -->
-        <div v-if="char.enhKeys.length" class="nk-panel nk-panel--flat nk-enh-module">
+        <div v-if="vis.has('skills') && char.enhKeys.length" class="nk-panel nk-panel--flat nk-enh-module">
           <div class="nk-enh-module__head">
             <span class="nk-enh-module__idx">00</span>
             <span>强化模式</span>
@@ -334,19 +338,19 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="nk-panel nk-panel--flat" data-panel="skills">
+        <div v-if="vis.has('skills')" class="nk-panel nk-panel--flat" data-panel="skills">
           <SkillsPanel :d="d" :char-id="char.charId" :enh-key="char.enhKey" :anim-db="animDb" :enh-mark="enhMark" />
         </div>
-        <div class="nk-panel nk-panel--flat" data-panel="talents">
+        <div v-if="vis.has('talents')" class="nk-panel nk-panel--flat" data-panel="talents">
           <OverviewPanel :d="d" :sections="['talents']" />
         </div>
-        <div class="nk-panel nk-panel--flat" data-panel="eidolons">
+        <div v-if="vis.has('eidolons')" class="nk-panel nk-panel--flat" data-panel="eidolons">
           <EidolonsPanel :d="d" :char-id="char.charId" :enh-mark="enhMark" />
         </div>
-        <div class="nk-panel nk-panel--flat" data-panel="bonuses">
+        <div v-if="vis.has('bonuses')" class="nk-panel nk-panel--flat" data-panel="bonuses">
           <OverviewPanel :d="d" :sections="['bonuses']" />
         </div>
-        <div class="nk-panel nk-panel--flat" data-panel="cones">
+        <div v-if="vis.has('cones')" class="nk-panel nk-panel--flat" data-panel="cones">
           <BuildsPanel
             :d="d"
             :base-data="char.data"
@@ -356,7 +360,7 @@ onBeforeUnmount(() => {
             :sections="['cones']"
           />
         </div>
-        <div v-if="d.teams && d.teams.length" class="nk-panel nk-panel--flat" data-panel="teams">
+        <div v-if="vis.has('teams')" class="nk-panel nk-panel--flat" data-panel="teams">
           <BuildsPanel
             :d="d"
             :base-data="char.data"
@@ -366,7 +370,7 @@ onBeforeUnmount(() => {
             :sections="['teams']"
           />
         </div>
-        <div class="nk-panel nk-panel--flat" data-panel="relics">
+        <div v-if="vis.has('relics')" class="nk-panel nk-panel--flat" data-panel="relics">
           <BuildsPanel
             :d="d"
             :base-data="char.data"
@@ -376,10 +380,10 @@ onBeforeUnmount(() => {
             :sections="['relics']"
           />
         </div>
-        <div class="nk-panel nk-panel--flat" data-panel="stories">
+        <div v-if="vis.has('stories')" class="nk-panel nk-panel--flat" data-panel="stories">
           <OverviewPanel :d="d" :sections="['stories']" />
         </div>
-        <div class="nk-panel nk-panel--flat" data-panel="profile">
+        <div v-if="vis.has('profile')" class="nk-panel nk-panel--flat" data-panel="profile">
           <OverviewPanel :d="d" :sections="['profile']" />
         </div>
       </div>

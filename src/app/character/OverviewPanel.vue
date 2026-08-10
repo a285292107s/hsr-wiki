@@ -10,7 +10,7 @@ import { extraTerms } from './utils';
 import { escHtml, fmtDesc, iconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PROP_ICON, PROP_NAMES } from '../../lib/constants';
-import { SECTION_IDX } from './sections';
+import { SECTION_IDX, hasBonusNodes, hasProfile, hasStories, hasTalentNodes } from './sections';
 import type { CharacterData, SkillExtra, SkillTree } from '../../services/types';
 
 type OverviewSection = 'profile' | 'bonuses' | 'talents' | 'stories';
@@ -137,7 +137,7 @@ const abilities = computed<Ability[]>(() => {
 </script>
 
 <template>
-  <template v-if="props.sections.includes('profile') && profileRows.length">
+  <template v-if="props.sections.includes('profile') && hasProfile(props.d)">
     <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.profile }}</span>PROFILE</div>
     <div class="nk-profile">
       <div v-for="p in profileRows" :key="p.label" class="nk-profile__item">
@@ -146,7 +146,7 @@ const abilities = computed<Ability[]>(() => {
       </div>
     </div>
   </template>
-  <template v-if="props.sections.includes('bonuses') && attrBonuses.length">
+  <template v-if="props.sections.includes('bonuses') && hasBonusNodes(props.d)">
     <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.bonuses }}</span>STAT BONUSES</div>
     <div class="nk-bonus-grid">
       <div v-for="b in attrBonuses" :key="b.name" class="nk-bonus">
@@ -156,7 +156,7 @@ const abilities = computed<Ability[]>(() => {
       </div>
     </div>
   </template>
-  <template v-if="props.sections.includes('talents') && abilities.length">
+  <template v-if="props.sections.includes('talents') && hasTalentNodes(props.d)">
     <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.talents }}</span>TALENTS</div>
     <div
       v-for="ab in abilities"
@@ -178,7 +178,7 @@ const abilities = computed<Ability[]>(() => {
       </div>
     </div>
   </template>
-  <template v-if="props.sections.includes('stories') && storyEntries.length">
+  <template v-if="props.sections.includes('stories') && hasStories(props.d)">
     <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.stories }}</span>STORIES</div>
     <div class="nk-stories">
       <div
