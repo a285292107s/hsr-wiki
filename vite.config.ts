@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [vue()],
   base: '/',
   server: {
+    // 固定端口 + 严格失败：被占用时明确报错，避免静默递增导致端口堆积
+    port: 5173,
+    strictPort: true,
     watch: {
       ignored: ['**/vendor/**', '**/tools/**'],
     },
