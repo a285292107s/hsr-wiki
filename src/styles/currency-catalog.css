@@ -123,9 +123,9 @@
 
 /* ═══ 羁绊卡片专用样式（垂直信息密集型布局，参考游戏内羁绊详情面板） ═══ */
 
-/* 羁绊目录网格：mobile 双列，tablet 三列，desktop 四列 */
+/* 羁绊目录网格：mobile 单列，tablet 三列，desktop 四列 */
 .nk-cw-trait-grid {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
   gap: 10px;
 }
 @media (min-width: 768px) {
