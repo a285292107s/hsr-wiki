@@ -2,6 +2,7 @@
 import { escHtml, gridFightTraitIconUrl } from '../../../lib/format';
 import { loadLocalCurrencyTraits } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
+import { loadCwCatalogCss } from './shared';
 
 type TraitCat = 'faction' | 'combat' | 'special';
 const CAT_LABEL: Record<TraitCat, string> = {
@@ -35,6 +36,8 @@ export const currencyTraitPage: CatalogPageConfig = {
   searchPlaceholder: '搜索羁绊…',
   gridClass: 'nk-cat-grid nk-cw-trait-grid',
   cardClass: '.nk-cw-trait-card',
+  /* CW 卡片共享样式（nk-cw-trait-card 专属类位于 currency-catalog.css） */
+  styles: [loadCwCatalogCss],
   async fetchData() {
     const { traits } = await loadLocalCurrencyTraits();
     return traits.map((t) => ({

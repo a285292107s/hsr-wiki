@@ -2,6 +2,7 @@
 import { escHtml, gridFightIconUrl, fmtDesc } from '../../../lib/format';
 import { loadLocalCurrencyAugments } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
+import { loadCwCatalogCss } from './shared';
 
 const QUALITY_LABEL: Record<string, string> = {
   Silver: '银色', Gold: '金色', Prismatic: '棱彩',
@@ -30,6 +31,8 @@ export const currencyAugmentPage: CatalogPageConfig = {
   searchPlaceholder: '搜索投资策略…',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',
+  /* CW 卡片共享样式（nk-cw-card） */
+  styles: [loadCwCatalogCss],
   async fetchData() {
     const { augments } = await loadLocalCurrencyAugments();
     return augments.map((a) => ({

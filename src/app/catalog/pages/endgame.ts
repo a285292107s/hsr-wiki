@@ -169,6 +169,8 @@ export const endgamePage: CatalogPageConfig = {
   searchPlaceholder: '搜索赛季...',
   gridClass: 'nk-cat-grid nk-eg-grid',
   cardClass: '.nk-eg-card',
+  /* 终局目录专属样式（nk-eg-card 等），随路由并行加载 */
+  styles: [() => import('../../../../src/styles/endgame.css')],
   async fetchData() {
     const [maze, story, boss, peak] = await Promise.all([
       loadLocalMazeList(), loadLocalStoryList(), loadLocalBossList(), loadLocalPeakList(),

@@ -11,28 +11,23 @@ import { ref } from 'vue';
 /** 导航方向（驱动 nk-enter-fwd / nk-enter-back 过渡动画） */
 export const navDir = ref<1 | -1 | 0>(0);
 
-/** 终局内容单页：CatalogView + endgame.css 并行加载（样式先于渲染到达） */
-const endgameCatalogView = (): Promise<typeof import('../views/CatalogView.vue').default> =>
-  Promise.all([import('../views/CatalogView.vue'), import('../../styles/endgame.css')]).then(([m]) => m.default);
-
 /**
- * CW 目录视图：组件 chunk 与 currency-catalog.css 并行加载。
- * 样式随导航异步依赖在路由渲染前到达，不影响 400ms 主题过渡。
+ * 通用目录视图：CatalogView chunk 与目录专属样式并行加载（样式先于渲染到达）。
+ * 样式依赖声明于 CatalogPageConfig.styles（单一事实源），路由层统一消费——
+ * 新增带专属样式的目录只需在配置中声明，无需为本目录手写路由工厂。
+ * 注册表经动态导入（与 CatalogView 共享同一 chunk）：避免把 13 个目录配置
+ * （含 renderCard 模板与内联 SVG）静态拉进首屏主包。未配置 styles 的目录
+ * （依赖全局 catalog.css）仅加载组件 chunk。
  */
-const cwCatalogView = (): Promise<typeof import('../views/CatalogView.vue').default> =>
-  Promise.all([import('../views/CatalogView.vue'), import('../../styles/currency-catalog.css')]).then(([m]) => m.default);
-
-/** 角色图鉴目录：.nk-crole-card 卡片样式定义于 currency-role.css（详情页同源），需一并加载 */
-const cwRoleCatalogView = (): Promise<typeof import('../views/CatalogView.vue').default> =>
-  Promise.all([
-    import('../views/CatalogView.vue'),
-    import('../../styles/currency-catalog.css'),
-    import('../../styles/currency-role.css'),
-  ]).then(([m]) => m.default);
-
-/** 成就目录视图：.nk-ach-card 卡片样式定义于 achievement.css，随路由并行加载 */
-const achievementCatalogView = (): Promise<typeof import('../views/CatalogView.vue').default> =>
-  Promise.all([import('../views/CatalogView.vue'), import('../../styles/achievement.css')]).then(([m]) => m.default);
+const catalogView = (catalogId: string): (() => Promise<typeof import('../views/CatalogView.vue').default>) =>
+  () => {
+    const view = import('../views/CatalogView.vue');
+    const styles = import('../catalog/pages').then(({ CATALOG_PAGES }) => CATALOG_PAGES[catalogId]?.styles || []);
+    return Promise.all([view, styles]).then(async ([m, loaders]) => {
+      if (loaders.length) await Promise.all(loaders.map((l) => l()));
+      return m.default;
+    });
+  };
 
 const routes: RouteRecordRaw[] = [
   {
@@ -98,7 +93,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/endgame',
     name: 'catalog-endgame',
-    component: endgameCatalogView,
+    component: catalogView('endgame'),
     meta: { depth: 2, catalog: 'endgame', title: '终局内容' },
   },
   {
@@ -128,7 +123,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/currency/role',
     name: 'catalog-currency-role',
-    component: cwRoleCatalogView,
+    component: catalogView('currency-role'),
     meta: { depth: 1, catalog: 'currency-role', cw: true, title: '货币战争 · 角色图鉴' },
   },
   {
@@ -140,25 +135,25 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/currency/item',
     name: 'catalog-currency-equipment',
-    component: cwCatalogView,
+    component: catalogView('currency-equipment'),
     meta: { depth: 1, catalog: 'currency-equipment', cw: true, title: '货币战争 · 装备图鉴' },
   },
   {
     path: '/currency/buff',
     name: 'catalog-currency-portal',
-    component: cwCatalogView,
+    component: catalogView('currency-portal'),
     meta: { depth: 1, catalog: 'currency-portal', cw: true, title: '货币战争 · 投资环境' },
   },
   {
     path: '/currency/augment',
     name: 'catalog-currency-augment',
-    component: cwCatalogView,
+    component: catalogView('currency-augment'),
     meta: { depth: 1, catalog: 'currency-augment', cw: true, title: '货币战争 · 投资策略' },
   },
   {
     path: '/currency/trait',
     name: 'catalog-currency-trait',
-    component: cwCatalogView,
+    component: catalogView('currency-trait'),
     meta: { depth: 1, catalog: 'currency-trait', cw: true, title: '货币战争 · 羁绊图鉴' },
   },
   {
@@ -171,7 +166,7 @@ const routes: RouteRecordRaw[] = [
     // 成就页：第二期落地为 CatalogView 目录（1869 条虚拟网格），卡片样式随路由并行加载。
     path: '/achievement',
     name: 'catalog-achievement',
-    component: achievementCatalogView,
+    component: catalogView('achievement'),
     meta: { depth: 1, catalog: 'achievement', title: '成就' },
   },
   /* Debug 调试中心入口：汇总各诊断子页面入口（/debug） */

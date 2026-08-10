@@ -65,6 +65,12 @@ export interface CatalogPageConfig {
   filters?: CatalogFilter[];
   /** 依据数据动态构建筛选组（优先于 filters） */
   buildFilters?: (data: CatalogItem[]) => CatalogFilter[];
+  /**
+   * 目录专属样式 loader（静态 import 闭包，随路由并行加载，样式先于渲染到达）。
+   * CSS 依赖的单一事实源：路由层统一消费，无需为每个带样式目录手写路由工厂。
+   * 缺省无（character/lightcone/relic/item/monster 等目录仅依赖全局 catalog.css）。
+   */
+  styles?: Array<() => Promise<unknown>>;
   /** 卡片 HTML（v-html 渲染，--i 为入场序号） */
   renderCard: (item: CatalogItem, index: number) => string;
 }

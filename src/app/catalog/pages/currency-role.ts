@@ -3,6 +3,7 @@ import { cdnUri } from '../../../services/cdn';
 import { escHtml, avatarShopIconUrl } from '../../../lib/format';
 import { loadLocalCurrencyRoles } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
+import { loadCwCatalogCss } from './shared';
 
 const FB_LABEL: Record<string, string> = {
   Front: '前台', Back: '后台', Both: '前后台',
@@ -69,6 +70,8 @@ export const currencyRolePage: CatalogPageConfig = {
   searchPlaceholder: '搜索角色…',
   gridClass: 'nk-cat-grid nk-crole-grid',
   cardClass: '.nk-crole-card',
+  /* CW 卡片共享样式 + 角色卡片专属（nk-crole-card） */
+  styles: [loadCwCatalogCss, () => import('../../../../src/styles/currency-role.css')],
   async fetchData() {
     const { roles } = await loadLocalCurrencyRoles();
     return roles.map((r) => {

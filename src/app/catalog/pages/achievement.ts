@@ -49,6 +49,8 @@ export const achievementPage: CatalogPageConfig = {
   searchPlaceholder: '搜索成就标题或描述…',
   gridClass: 'nk-cat-grid nk-ach-grid',
   cardClass: '.nk-ach-card',
+  /* 成就目录专属样式（nk-ach-card 等），随路由并行加载 */
+  styles: [() => import('../../../../src/styles/achievement.css')],
   /* 1869 条 > 400 阈值 → 虚拟网格；
      列宽 200（桌面 6 列，避免 8 列小卡密集）；头部条高度 = colW*0.26（桌面约 56px 匹配图标 40px），
      信息区 140px 容纳 5 行描述（字号 0.78rem）+ 元信息：

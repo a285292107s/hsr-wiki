@@ -2,6 +2,7 @@
 import { escHtml, gridFightIconUrl, fmtDesc } from '../../../lib/format';
 import { loadLocalCurrencyPortals } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
+import { loadCwCatalogCss } from './shared';
 
 function renderPortalCard(item: CatalogItem, index = 0): string {
   const icon = gridFightIconUrl(item.icon as string);
@@ -21,6 +22,8 @@ export const currencyPortalPage: CatalogPageConfig = {
   searchPlaceholder: '搜索投资环境…',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',
+  /* CW 卡片共享样式（nk-cw-card） */
+  styles: [loadCwCatalogCss],
   async fetchData() {
     const { portals } = await loadLocalCurrencyPortals();
     return portals
