@@ -6,7 +6,7 @@ import { cdnUri, cdnImgFallbackAttr } from '../../../services/cdn';
 import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
 
 /**
- * 终局官方素材 URL（jsDelivr 加速 GitHub 源，基址统一收口 OFFICIAL_ICON_BASE，固定 commit 防漂移）。
+ * 终局官方素材 URL（jsDelivr 加速自建 fork GitHub 源，基址统一收口 OFFICIAL_ICON_BASE，跟 main 分支最新）。
  * 白名单 = 语义闸门：仅放行「赛季主题/页签/横幅类」路径，排除开关图/场景背景等 UI 素材；
  * 全部前缀经 tools/check-endgame-icons.mjs 实测在 StarRailTextures 仓库可命中：
  * - TabIcon/**            → tabicon/**（虚构 ChallengeThemeTabIcon / 末日 ChallengeBossTabIcon）

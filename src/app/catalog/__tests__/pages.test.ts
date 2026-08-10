@@ -101,7 +101,7 @@ describe('filters validity', () => {
 });
 
 describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
-  const BASE = 'https://cdn.jsdelivr.net/gh/umaichanuwu/StarRailTextures@2a4b9a7eb7ac9db7f48d627fa5cdfd3822c902ce/assets/asbres/spriteoutput';
+  const BASE = 'https://cdn.jsdelivr.net/gh/a285292107s/StarRailTextures@main/assets/asbres/spriteoutput';
 
   it('tabIconUrl 解析白名单前缀（目录段小写、文件名保留）', () => {
     expect(tabIconUrl({ tab: 'SpriteOutput/TabIcon/Abyss/ChallengeBossTabIcon_3001.png' }))

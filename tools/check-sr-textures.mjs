@@ -20,8 +20,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'public/data/cn');
 const LIMIT = Number(process.argv.find((a) => a.startsWith('--limit='))?.split('=')[1] ?? 120);
-// jsDelivr 固定 commit（StarRailTextures 仓库 4.3 快照；升级时同步改此处 + purge）
-const GH = 'https://cdn.jsdelivr.net/gh/umaichanuwu/StarRailTextures@2a4b9a7eb7ac9db7f48d627fa5cdfd3822c902ce/assets/asbres/spriteoutput';
+// jsDelivr 分支（自建 fork a285292107s/StarRailTextures，跟 main 最新获取 4.4+ 数据；与 lib/constants.ts 同步）
+const GH = 'https://cdn.jsdelivr.net/gh/a285292107s/StarRailTextures@main/assets/asbres/spriteoutput';
 
 /* ─── 数据读取 ─── */
 function loadJson(f) {

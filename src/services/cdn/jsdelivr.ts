@@ -1,9 +1,9 @@
 /**
- * jsDelivr 加速源（StarRailTextures 仓库镜像，固定 commit 防漂移）
+ * jsDelivr 加速源（自建 fork StarRailTextures 仓库镜像，跟 main 分支最新）
  *
  * 作为图片资源的首选源（primary），nanoka 保留回退（fallback）：
  * - jsDelivr 200（核对脚本全命中分类）→ nanoka 永不触发
- * - jsDelivr 404（上游未收录，如 4.4 新内容 / 星魂 3/5 官方无文件）→ 自动回退 nanoka
+ * - jsDelivr 404（上游未收录，如仓库未更新的新内容 / 星魂 3/5 官方无文件）→ 自动回退 nanoka
  *   （nanoka 同样缺失时由 img error 事件兜底降级）
  *
  * 路径规则（数据源官方路径 → 仓库结构，经 tools/check-sr-textures.mjs 实测）：
@@ -12,14 +12,14 @@
  *   element 在 icondamagetype/（IconDamageType 前缀）；pathicon 在 professioniconmiddle/
  *   （Priest→Pirest、Elation→Joy 官方拼写差异）
  *
- * 升级流程：上游 StarRailTextures 更新后，改 JS_DELIVR_COMMIT + purge.jsdelivr.net 清缓存，
- * 并重跑 node tools/check-sr-textures.mjs 复核命中率（commit 与脚本内常量同步）。
+ * 升级流程：自建 fork 同步上游后无需改码；jsDelivr 有边缘缓存，新数据可能延迟生效，
+ * 必要时 purge.jsdelivr.net 清缓存，并重跑 node tools/check-sr-textures.mjs 复核命中率。
  */
 import type { CdnCategory } from './base';
-import { USE_OFFICIAL_PATHS, JS_DELIVR_COMMIT, OFFICIAL_ICON_BASE } from '../../lib/constants';
+import { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH, OFFICIAL_ICON_BASE } from '../../lib/constants';
 
-/** 固定 commit 与仓库基址（已统一收口到 lib/constants.ts，此处 re-export 保持路径兼容） */
-export { USE_OFFICIAL_PATHS, JS_DELIVR_COMMIT };
+/** 分支与仓库基址（已统一收口到 lib/constants.ts，此处 re-export 保持路径兼容） */
+export { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH };
 export const JS_DELIVR_BASE = OFFICIAL_ICON_BASE;
 
 /** 官方拼写差异（AvatarBaseType 数据源验证：Priest 官方写作 Pirest，Elation 官方写作 Joy）；键为项目传入的小写 baseType */

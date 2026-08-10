@@ -17,11 +17,11 @@ export function setUseOfficialPaths(v: boolean): void {
   USE_OFFICIAL_PATHS = v;
 }
 
-/** 官方 jsDelivr StarRailTextures 镜像固定 commit（与 tools/check-sr-textures.mjs 一致）。 */
-export const JS_DELIVR_COMMIT = '2a4b9a7eb7ac9db7f48d627fa5cdfd3822c902ce';
+/** 官方 jsDelivr StarRailTextures 镜像分支（自建 fork a285292107s，跟 main 最新以获取新版本数据；与 tools/check-sr-textures.mjs 一致）。 */
+export const JS_DELIVR_BRANCH = 'main';
 
 /** 官方图片 CDN 基址（USE_OFFICIAL_PATHS=true 时图标直接在此后拼仓库相对路径）。 */
-export const OFFICIAL_ICON_BASE = `https://cdn.jsdelivr.net/gh/umaichanuwu/StarRailTextures@${JS_DELIVR_COMMIT}/assets/asbres/spriteoutput`;
+export const OFFICIAL_ICON_BASE = `https://cdn.jsdelivr.net/gh/a285292107s/StarRailTextures@${JS_DELIVR_BRANCH}/assets/asbres/spriteoutput`;
 
 // spine-manifest 版本（缓存键后缀：spine_manifest_official_v{N} / spine_manifest_nanoka_v{N}）。
 // 必须与 public/data/cn/spine-manifest-official.json 与 spine-manifest-nanoka.json 两文件的
