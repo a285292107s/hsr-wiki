@@ -99,6 +99,30 @@ def _load_schedules(filename: str) -> dict[str, tuple[str, str]]:
     return out
 
 
+def _load_test_periods(filename: str = "ScheduleDataChallengeMaze.json") -> set[int]:
+    """测试期分组：排期整段早于公测上线的 beta/CBT 测试期数。
+
+    测试期（如忘却之庭 101-107/116 的"琥珀恩赐/霜痕旧梦/永冬试炼"轮换试炼）
+    与未来占位（起点 ≥2030）均被 _load_schedules 过滤（无 live_*）；本函数仅
+    识别测试期，供前端打"测试期"徽章与正式赛季区分。
+    """
+    data = load_json(EXCEL_DIR / filename)
+    out: set[int] = set()
+    for rec in data:
+        sid = rec.get("ID")
+        begin = rec.get("BeginTime", "")
+        end = rec.get("EndTime", "")
+        if not sid or not begin or not end:
+            continue
+        try:
+            et = datetime.fromisoformat(end.replace(" ", "T"))
+        except ValueError:
+            continue
+        if et < _LAUNCH_TS:
+            out.add(sid - 200000)
+    return out
+
+
 def _load_maze_buffs() -> dict[int, dict]:
     """MazeBuff.json → {ID: {name, desc, param_list, icon}}（赛季增益名称 + 效果描述）。
 
@@ -265,6 +289,17 @@ def _load_group_names(filename: str) -> dict[int, str]:
         if name:
             out[gid] = name
     return out
+
+
+def _load_permanent_groups(filename: str = "ChallengeGroupConfig.json") -> set[int]:
+    """常驻关卡分组：ScheduleDataID 为空的长期关卡（无赛季轮回）。
+
+    忘却之庭 永屹之城遗秘(100) / 天艟求仙迷航录(900) 为长期关卡，
+    官方以 ScheduleDataID 空标识无排期关联；其余赛季组均有排期 ID。
+    """
+    data = load_json(EXCEL_DIR / filename)
+    return {r.get("GroupID") for r in data if r.get("GroupID") is not None
+            and not r.get("ScheduleDataID")}
 
 
 # 分组表 → arts 字段映射（源字段名 → 输出键；仅收录语义适合展示的路径，
@@ -761,13 +796,17 @@ def _group_seasons(
     full_monsters: bool = False,
     phases: dict[int, list[int]] | None = None,
     sub_buffs: dict[int, list[int]] | None = None,
+    permanent: set[int] | None = None,
+    test_period: set[int] | None = None,
 ) -> dict:
     """读取挑战配置，按 GroupID 聚合为赛季条目。
 
     赛季名取分组表 GroupName（如"琥珀恩赐"），缺失时回退首层关卡 Name
     （如"琥珀恩赐其一"）——第一关名带期数后缀，不作卡片标题。
     full_monsters=True（末日幻影）时层级敌方输出 intro/skills 全字段；
-    phases 传入时（末日幻影）层级敌方追加阶段制清单（ChallengeBossMazeExtra）。
+    phases 传入时（末日幻影）层级敌方追加阶段制清单（ChallengeBossMazeExtra）；
+    permanent 传入时（忘却之庭常驻关卡 100/900）条目输出 permanent 标记；
+    test_period 传入时（beta/CBT 测试期）条目输出 test 标记。
     """
     data = load_json(EXCEL_DIR / filename)
     groups: dict[int, list] = defaultdict(list)
@@ -806,6 +845,12 @@ def _group_seasons(
             "live_begin": live_begin,
             "live_end": live_end,
         }
+        # 常驻关卡（无赛季轮回的长期关卡；如忘却之庭 100/900）
+        if permanent and gid in permanent:
+            entry["permanent"] = True
+        # 测试期（beta/CBT 排期整段早于公测的试炼翻版；如忘却之庭 101-107/116）
+        if test_period and gid in test_period:
+            entry["test"] = True
         entry.update(_season_stats(recs))
         # 逐层详情：关卡层级章节（推荐属性 / 敌方配置（波次） / 可用增益 / 挑战目标）
         entry["floor_details"] = _season_floors(
@@ -1069,7 +1114,14 @@ def convert() -> None:
         "ChallengeMazeConfig.json", "Name", schedules_maze,
         buff_map=maze_buff_map, buffs=buffs, monsters=monsters, targets=targets,
         group_names=_load_group_names("ChallengeGroupConfig.json"),
-        arts=_load_group_arts("ChallengeGroupConfig.json"),
+        # 分组表 + 主题 extra 表合并（ThemePosterBgPicPath → theme_bg 2D 场景背景，
+        # 与虚构叙事/末日幻影同构——勿漏 GroupExtra）
+        arts=_merge_arts(
+            _load_group_arts("ChallengeGroupConfig.json"),
+            _load_group_arts("ChallengeMazeGroupExtra.json"),
+        ),
+        permanent=_load_permanent_groups(),
+        test_period=_load_test_periods(),
     )
     for k in maze:
         if k in tierce:

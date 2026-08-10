@@ -125,8 +125,8 @@
 }
 
 /* 赛季横幅（theme_banner：宣传 BANNER）——Hero 右侧装饰底图，左侧渐隐与内容衔接，
-   低于铭牌/信息面板（z-index 0）；与 __bg 互斥（模板 showBanner 控制，有 bg 时不渲染），
-   仅 boss（无大图 bg）等模式显示，避免同区域双图叠加重影 */
+   低于铭牌/信息面板（z-index 0）；与 __bg 互斥（模板 showHeroBg 控制，横幅优先），
+   虚构/末日统一横幅语言，避免同区域双图叠加重影 */
 .nk-egd-hero__banner {
   position: absolute;
   top: 50%;
@@ -907,7 +907,8 @@
 /* ─── 敌方阵容网格（hover 仅边框/背景变化，无位移无 glow） ─── */
 .nk-egd-mons {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* min(300px, 100%)：320px 窄视口（内容区 288px）下最小列收敛到容器宽，防横向溢出 */
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 12px;
   margin-bottom: 8px;
 }
@@ -1646,9 +1647,16 @@
   /* 单列后移除阶段间细分隔线（列式分界仅在双列时成立） */
   .nk-egd-floor__stage + .nk-egd-floor__stage { border-left: none; padding-left: 0; }
   .nk-egd-floor__head { flex-wrap: wrap; }
-  .nk-egd-floor__data { margin-left: 0; }
+  /* 层头数据保持右置（规格表数据右置语言；wrap 时独占一行右侧而非孤悬左缘） */
+  .nk-egd-floor__data { margin-left: auto; }
+  /* boss 敌卡行：单列后 label+网格同行 nowrap 放不下（内容 335 - label 49 - gap 14 = 272
+     < 网格最小列 300），允许换行——label 首行、敌卡网格次行撑满全宽 */
+  .nk-egd-floor__stage .nk-egd-floor__row--mons { flex-wrap: wrap; }
   .nk-egd-nav { grid-template-columns: 1fr; }
   .nk-egd-nav__item--next { justify-content: flex-start; text-align: left; }
+  /* 吸顶章节导航：4 按钮全部可见（story 四板块 344px > 343px 需滚动）；
+     触控热区由 ::before 扩展，padding 收窄不影响 ≥44px */
+  .nk-egd-secnav .nk-secnav__btn { padding: 6px 6px; }
 }
 
 /* ── 减弱动效 ── */

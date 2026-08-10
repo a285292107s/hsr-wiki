@@ -75,6 +75,21 @@ class TestLoadSchedules:
         assert story["2001"][0] == "2024-01-08 04:00:00"
         assert boss["3001"][1] == "2024-08-05 04:00:00"
 
+    def test_load_test_periods(self, monkeypatch):
+        """测试期：EndTime 早于公测上线的 beta/CBT 组；未来占位/正式期不标。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            # 测试期（公测前整段）→ 101/102
+            {"ID": 200101, "BeginTime": "2023-02-06 04:00:00", "EndTime": "2023-03-06 04:00:00"},
+            {"ID": 200102, "BeginTime": "2022-11-14 04:00:00", "EndTime": "2022-11-28 04:00:00"},
+            # 跨公测（EndTime 在公测后）→ 不标（如 117）
+            {"ID": 200117, "BeginTime": "2023-04-17 04:00:00", "EndTime": "2023-05-15 04:00:00"},
+            # 未来占位（2033）→ 不标
+            {"ID": 200108, "BeginTime": "2033-02-06 04:00:00", "EndTime": "2033-02-20 04:00:00"},
+            # 缺字段 → 跳过
+            {"ID": 201001, "BeginTime": "", "EndTime": "2023-09-18 04:00:00"},
+        ])
+        assert eg._load_test_periods() == {101, 102}
+
 
 # ─── 辅助表解析 ─────────────────────────────────────────────────
 
@@ -157,6 +172,15 @@ class TestAuxTables:
             {"GroupID": 100},  # 无名称 → 跳过
         ])
         assert eg._load_group_names("x.json") == {3020: "名1"}
+
+    def test_load_permanent_groups(self, monkeypatch):
+        """常驻关卡：ScheduleDataID 为空的长期关卡分组（无赛季轮回）。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"GroupID": 100},  # 永屹之城遗秘：无排期关联 → 常驻
+            {"GroupID": 900},  # 天艟求仙迷航录：无排期关联 → 常驻
+            {"GroupID": 1001, "ScheduleDataID": 201001},  # 赛季组 → 排除
+        ])
+        assert eg._load_permanent_groups() == {100, 900}
 
 
 # ─── 组级增益 / 回合上限 ────────────────────────────────────────
@@ -559,6 +583,34 @@ class TestGroupSeasons:
         out = eg._group_seasons("ChallengeMazeConfig.json", "Name", {})
         assert out["900"]["zh"] == "名1"
 
+    def test_permanent_flag(self, monkeypatch):
+        """常驻关卡（permanent 命中）输出 permanent 标记，赛季组不输出。"""
+        recs = [
+            {"GroupID": 100, "ID": 1, "Name": {"Hash": 1}},
+            {"GroupID": 1001, "ID": 2, "Name": {"Hash": 2}},
+        ]
+        monkeypatch.setattr(eg, "load_json", lambda _p: recs)
+        out = eg._group_seasons(
+            "ChallengeMazeConfig.json", "Name", {},
+            permanent={100},
+        )
+        assert out["100"].get("permanent") is True
+        assert "permanent" not in out["1001"]
+
+    def test_test_period_flag(self, monkeypatch):
+        """测试期（test_period 命中）输出 test 标记，正式赛季不输出。"""
+        recs = [
+            {"GroupID": 101, "ID": 1, "Name": {"Hash": 1}},
+            {"GroupID": 110, "ID": 2, "Name": {"Hash": 2}},
+        ]
+        monkeypatch.setattr(eg, "load_json", lambda _p: recs)
+        out = eg._group_seasons(
+            "ChallengeMazeConfig.json", "Name", {},
+            test_period={101},
+        )
+        assert out["101"].get("test") is True
+        assert "test" not in out["110"]
+
 
 # ─── 异相仲裁 peak ────────────────────────────────────────────
 
@@ -778,6 +830,34 @@ class TestGroupArts:
         assert merged == {
             2001: {"tab": "A.png", "theme_icon": "C.png"},
             2002: {"tab": "B.png"},
+        }
+
+    def test_load_group_arts_maze_extra_theme_bg(self, monkeypatch):
+        """ChallengeMazeGroupExtra：ThemePosterBgPicPath → theme_bg（2D 场景背景）。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"GroupID": 100,
+             "ThemePosterBgPicPath": "SpriteOutput/Abyss/2D_SceneBg/AbyssSenceBg_01.png"},
+            {"GroupID": 900, "ThemePosterBgPicPath": ""},  # 空路径 → 不输出
+        ])
+        out = eg._load_group_arts("ChallengeMazeGroupExtra.json")
+        assert out[100] == {"theme_bg": "SpriteOutput/Abyss/2D_SceneBg/AbyssSenceBg_01.png"}
+        assert 900 not in out
+
+    def test_maze_arts_merges_group_extra(self, monkeypatch):
+        """maze 转换 arts 合并分组表 + GroupExtra（与 story/boss 同构，勿漏）。"""
+        def fake_load(path):
+            if "GroupExtra" in str(path):
+                return [{"GroupID": 100,
+                         "ThemePosterBgPicPath": "SpriteOutput/Abyss/2D_SceneBg/AbyssSenceBg_01.png"}]
+            return [{"GroupID": 100, "TabPicPath": "SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png"}]
+        monkeypatch.setattr(eg, "load_json", fake_load)
+        merged = eg._merge_arts(
+            eg._load_group_arts("ChallengeGroupConfig.json"),
+            eg._load_group_arts("ChallengeMazeGroupExtra.json"),
+        )
+        assert merged[100] == {
+            "tab": "SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png",
+            "theme_bg": "SpriteOutput/Abyss/2D_SceneBg/AbyssSenceBg_01.png",
         }
 
 

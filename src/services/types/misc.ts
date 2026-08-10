@@ -260,6 +260,12 @@ export interface MazeListEntry {
   end?: string;
   live_begin?: string;
   live_end?: string;
+  /** 常驻关卡（无赛季轮回的长期关卡：忘却之庭 永屹之城遗秘 100 / 天艟求仙迷航录 900；
+   *  converter 依据源表 ScheduleDataID 为空判定） */
+  permanent?: boolean;
+  /** 测试期（beta/CBT 试炼翻版，排期整段早于公测 2023-04-26：忘却之庭 101-107/116；
+   *  无 live_* 排期，与正式赛季区分） */
+  test?: boolean;
   en?: string;
   zh?: string;
   ja?: string;

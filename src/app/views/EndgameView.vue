@@ -155,8 +155,10 @@ const seasonBanner = computed(() => seasonBannerUrl(data.value?.arts));
 const seasonThemeIcon = computed(() => seasonThemeIconUrl(data.value?.arts));
 /** 赛季 Hero 背景（maze=场景背景 / story=海报背景 / peak=图鉴横幅；boss 无大图不渲染） */
 const seasonHeroBg = computed(() => seasonHeroBgUrl(data.value?.arts));
-/** 赛季横幅：与 Hero 背景互斥（同区域双图叠加会重影；有 bg 时隐藏 banner，boss 无 bg 时显示） */
-const showBanner = computed(() => !!seasonBanner.value && !seasonHeroBg.value);
+/** 赛季横幅：统一横幅语言——虚构/末日同规格 1024×240 宣传 BANNER（story/boss 一致呈现） */
+const showBanner = computed(() => !!seasonBanner.value);
+/** Hero 背景：仅当无横幅时回退使用（同区域双图叠加会重影，横幅优先避免 cover 裁切破构） */
+const showHeroBg = computed(() => !!seasonHeroBg.value && !showBanner.value);
 
 /** 逐层章节（以关卡层级为章节名的完整内容；倒序：最高层在前）
  *  全模式全量展示（重构后不再“仅最后一层”回退），配合折叠交互控制页面长度 */
@@ -372,11 +374,11 @@ onBeforeUnmount(() => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
 
-      <!-- Hero：模式铭牌 + 赛季信息；背景图（maze 场景背景 / story 海报背景 / peak 图鉴横幅）与
-           横幅装饰（theme_banner）互斥——同一区域只保留一张主题大图，避免双图叠加重影 -->
+      <!-- Hero：模式铭牌 + 赛季信息；横幅（theme_banner：虚构/末日统一横幅语言）优先，
+           无横幅时回退背景图（maze 场景背景 / peak 图鉴横幅）——同一区域只保留一张主题大图 -->
       <header class="nk-egd-hero">
         <img
-          v-if="seasonHeroBg"
+          v-if="showHeroBg"
           class="nk-egd-hero__bg"
           :src="seasonHeroBg"
           alt=""

@@ -31,32 +31,39 @@ const ART_PREFIXES = [
   'Quest/TabIcon',
   'Abyss',
 ] as const;
+/** 页签/入口图标白名单（tabIconUrl 专用）：在 ART_PREFIXES 基础上放行忘却之庭
+ *  专属/通用开关图 UI/Abyss/Process/TypeIcon（常驻关卡 W01/W02、赛季 Loop）——
+ *  装饰素材函数（banner/poster/hero bg）保持原白名单不放行开关图 */
+const TAB_ART_PREFIXES = [
+  ...ART_PREFIXES,
+  'UI/Abyss',
+] as const;
 
 /** 终局官方素材 URL（白名单语义闸门 + 目录段小写通用规则；白名单外返回空串不渲染） */
-function endgameArtUrl(path: string | undefined): string {
+function endgameArtUrl(path: string | undefined, prefixes: readonly string[]): string {
   if (!path) return '';
-  if (!ART_PREFIXES.some((p) => path.startsWith(`SpriteOutput/${p}/`))) return '';
+  if (!prefixes.some((p) => path.startsWith(`SpriteOutput/${p}/`))) return '';
   return `${OFFICIAL_ICON_BASE}/${spriteOutputToRel(path)}`;
 }
 
 /** 赛季/玩法图标 URL（tab = 赛季专属图标；default 兜底由 seasonArtUrl 处理） */
 export function tabIconUrl(arts?: { tab?: string } | null): string {
-  return endgameArtUrl(arts?.tab);
+  return endgameArtUrl(arts?.tab, TAB_ART_PREFIXES);
 }
 
 /** 赛季横幅 URL（arts.theme_banner：虚构/末日/忘却之庭每赛季宣传 BANNER，Hero 装饰） */
 export function seasonBannerUrl(arts?: { theme_banner?: string } | null): string {
-  return endgameArtUrl(arts?.theme_banner);
+  return endgameArtUrl(arts?.theme_banner, ART_PREFIXES);
 }
 
 /** 赛季主题图标 URL（arts.theme_icon：虚构 ThemeIcon_20xx / 末日 ChallengeBossIcon_30xx） */
 export function seasonThemeIconUrl(arts?: { theme_icon?: string } | null): string {
-  return endgameArtUrl(arts?.theme_icon);
+  return endgameArtUrl(arts?.theme_icon, ART_PREFIXES);
 }
 
 /** 海报页签按钮图 URL（arts.poster_tab：虚构/末日/仲裁 Btn* 扁长按钮 260×92，相邻赛季导航完整比例展示） */
 export function seasonPosterTabUrl(arts?: { poster_tab?: string } | null): string {
-  return endgameArtUrl(arts?.poster_tab);
+  return endgameArtUrl(arts?.poster_tab, ART_PREFIXES);
 }
 
 /**
@@ -65,9 +72,9 @@ export function seasonPosterTabUrl(arts?: { poster_tab?: string } | null): strin
  * boss 无大图字段返回空串保持透明底）。低透明度铺底，保证文字对比度。
  */
 export function seasonHeroBgUrl(arts?: { background?: string; theme_bg?: string; handbook_banner?: string } | null): string {
-  return endgameArtUrl(arts?.background)
-    || endgameArtUrl(arts?.theme_bg)
-    || endgameArtUrl(arts?.handbook_banner);
+  return endgameArtUrl(arts?.background, ART_PREFIXES)
+    || endgameArtUrl(arts?.theme_bg, ART_PREFIXES)
+    || endgameArtUrl(arts?.handbook_banner, ART_PREFIXES);
 }
 
 /** 赛季图标 URL：优先赛季专属图标（arts.tab），缺失时回退玩法级默认图标
@@ -140,13 +147,16 @@ export interface EndgameMode {
   en: string;
   /** 模式徽记（内联 SVG） */
   emblem: string;
+  /** 玩法入口图（SpriteOutput 路径：ChallangeGeneralConfig TabImgPath 三模 + 仲裁人工延展
+   *  Img4；筛选选项 icon 消费，经 endgameArtUrl + UI/ChallengeBoss 白名单解析） */
+  icon?: string;
 }
 
 export const ENDGAME_MODES: EndgameMode[] = [
-  { key: 'maze', label: '忘却之庭', en: 'FORGOTTEN HALL', emblem: EMBLEMS.maze },
-  { key: 'story', label: '虚构叙事', en: 'PURE FICTION', emblem: EMBLEMS.story },
-  { key: 'boss', label: '末日幻影', en: 'APOCALYPSE', emblem: EMBLEMS.boss },
-  { key: 'peak', label: '异相仲裁', en: 'ANOMALY', emblem: EMBLEMS.peak },
+  { key: 'maze', label: '忘却之庭', en: 'FORGOTTEN HALL', emblem: EMBLEMS.maze, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png' },
+  { key: 'story', label: '虚构叙事', en: 'PURE FICTION', emblem: EMBLEMS.story, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png' },
+  { key: 'boss', label: '末日幻影', en: 'APOCALYPSE', emblem: EMBLEMS.boss, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg3.png' },
+  { key: 'peak', label: '异相仲裁', en: 'ANOMALY', emblem: EMBLEMS.peak, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg4.png' },
 ];
 
 /** 赛季排序：排期开始时间降序（最新赛季在前）；无排期按 ID 降序垫底 */
@@ -190,6 +200,10 @@ export const endgamePage: CatalogPageConfig = {
           liveBegin: info.live_begin,
           status: mazeStatus(info),
           dateRange: mazeDateRange(info),
+          /** 常驻关卡（无赛季轮回的长期关卡：永屹之城遗秘 / 天艟求仙迷航录） */
+          permanent: info.permanent,
+          /** 测试期（beta/CBT 试炼翻版：琥珀恩赐/霜痕旧梦/永冬试炼轮换） */
+          test: info.test,
           damageTypes: info.damage_types,
           floors: info.floors,
           stageNum: info.stage_num,
@@ -221,7 +235,11 @@ export const endgamePage: CatalogPageConfig = {
       label: '模式',
       options: [
         { val: '', label: '全部' },
-        ...ENDGAME_MODES.map((m) => ({ val: m.key, label: m.label })),
+        ...ENDGAME_MODES.map((m) => ({
+          val: m.key,
+          label: m.label,
+          icon: m.icon ? endgameArtUrl(m.icon, TAB_ART_PREFIXES) : undefined,
+        })),
       ],
     });
     // 状态筛选：仅含日期数据的赛季才有状态值
@@ -289,6 +307,10 @@ export const endgamePage: CatalogPageConfig = {
       const hasKing = levels.some((l) => l.kind === 'king');
       tierHtml = `<span class="nk-eg-card__tier">✦ 骑士×${knights}${hasKing ? ' · 王棋' : ''}</span>`;
     }
+    // 常驻关卡标识（无赛季轮回的长期关卡，与模式色 tier 徽章区分——金色语义胶囊）
+    const permHtml = item.permanent ? '<span class="nk-eg-card__perm">常驻</span>' : '';
+    // 测试期标识（beta/CBT 试炼翻版，中性灰低调区分）
+    const testHtml = item.test ? '<span class="nk-eg-card__test">测试期</span>' : '';
 
     // 赛季增益（文本胶囊，最多 3 个）
     const buffs = Array.isArray(item.buffs)
@@ -326,6 +348,8 @@ export const endgamePage: CatalogPageConfig = {
       <div class="nk-eg-card__body">
         <div class="nk-eg-card__head">
           <span class="nk-eg-card__name">${escHtml(item.name) || '未命名赛季'}</span>
+          ${permHtml}
+          ${testHtml}
           ${tierHtml}
           ${badge}
         </div>

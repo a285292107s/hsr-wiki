@@ -62,6 +62,38 @@
   background: color-mix(in srgb, var(--eg-color) 8%, transparent);
   white-space: nowrap;
 }
+/* 常驻关卡标识（无赛季轮回的长期关卡：永屹之城遗秘 / 天艟求仙迷航录；
+   金色语义与模式色 tier 徽章区分，卡头对齐微调同 tier） */
+.nk-eg-card__perm {
+  margin: 1px 0 0 -2px;
+  flex-shrink: 0;
+  font-family: var(--font-hud);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--highlight);
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--highlight) 36%, transparent);
+  background: color-mix(in srgb, var(--highlight) 8%, transparent);
+  white-space: nowrap;
+}
+/* 测试期标识（beta/CBT 试炼翻版：琥珀恩赐/霜痕旧梦/永冬试炼轮换；
+   中性灰低调区分，弱于常驻金与模式色 tier） */
+.nk-eg-card__test {
+  margin: 1px 0 0 -2px;
+  flex-shrink: 0;
+  font-family: var(--font-hud);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--blk-900) 46%, transparent);
+  white-space: nowrap;
+}
 
 /* 内容区 */
 .nk-eg-card__body { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; padding: 2px 0; }
