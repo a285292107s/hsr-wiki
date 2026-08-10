@@ -77,7 +77,7 @@ def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None =
 # 装备图鉴
 # ─────────────────────────────────────────────
 
-def _convert_equipment(out_dir: Path) -> int:
+def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) -> int:
     items_raw = _load_excel("GridFightItems.json")
     equip_raw = _load_excel("GridFightEquipment.json")
     cat_raw = _load_excel("GridFightEquipCategoryInfo.json")
@@ -115,7 +115,7 @@ def _convert_equipment(out_dir: Path) -> int:
             if cat_info:
                 category_name = resolve_text(cat_info.get("CategoryName", {}))
             ability_name = equip.get("AbilityName", "") or ""
-            props = _flatten_property_mods(equip.get("GeneralPropertyList"))
+            props = _flatten_property_mods(equip.get("GeneralPropertyList"), prop_names)
             for tag_id in (equip.get("EquipmentTagList") or []):
                 tag_info = tag_index.get(tag_id)
                 if tag_info:
@@ -419,7 +419,7 @@ def convert() -> None:
     # 官方属性名索引（TextMap，GridFightRolePropertyConfig.PropertyName）
     prop_names = _build_prop_names(_load_excel("GridFightRolePropertyConfig.json"))
 
-    n_equip = _convert_equipment(out_dir)
+    n_equip = _convert_equipment(out_dir, prop_names)
     logger.info("  装备图鉴: %d 条", n_equip)
 
     n_portal = _convert_portals(out_dir)

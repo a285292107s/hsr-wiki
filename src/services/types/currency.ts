@@ -218,6 +218,8 @@ export interface CurrencyEquipProp {
   name: string;
   property_type: string;
   value: number;
+  /** 官方名（GridFightRolePropertyConfig.PropertyName，官方改称呼重跑转换即同步） */
+  prop_name?: string;
 }
 
 export interface CurrencyEquipEntry {

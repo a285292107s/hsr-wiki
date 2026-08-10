@@ -48,6 +48,7 @@ export const PROP_LABEL: Record<string, string> = {
   ExtraCriticalDamageBase: '暴击伤害增幅',
   StanceBreakAddedRatio: '击破效率',
   ExtraBreakDamageAddedRatio: '击破特攻',
+  BreakDamageAddedRatioBase: '击破特攻',
   ExtraHealBase: '基础治疗强度',
   ExtraHealRatioBase: '治疗强度',
   ExtraHealAddedRatio: '治疗强度',
