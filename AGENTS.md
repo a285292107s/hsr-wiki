@@ -12,7 +12,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》游戏数据 Wiki，
 # 安装依赖（需 Node 22+；本地与 CI 均使用 packageManager 指定的 pnpm 11）
 pnpm install
 
-# 本地开发 → http://localhost:5173/
+# 本地开发 → http://localhost:5173/（strictPort：端口被占用时明确报错，先探测 5173 复用已有实例，无实例才新起）
 pnpm dev
 
 # 类型检查 + 生产构建 → dist/

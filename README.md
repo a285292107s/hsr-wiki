@@ -56,7 +56,7 @@ hsr wiki/
 # 安装依赖
 pnpm install
 
-# 本地开发（访问 http://localhost:5173/）
+# 本地开发（访问 http://localhost:5173/；strictPort 固定端口，被占用时报错而非静默换端口）
 pnpm dev
 
 # 类型检查 + 生产构建
