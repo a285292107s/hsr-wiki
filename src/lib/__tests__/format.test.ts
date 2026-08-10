@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { CDN, setUseOfficialPaths } from '../constants';
-import { JS_DELIVR_BASE } from '../../services/cdn';
+import { JS_DELIVR_BASE, JS_DELIVR_UI3D_BASE } from '../../services/cdn';
 import { NkError } from '../errors';
 import {
   escHtml, gameTagsToHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtToughness,
@@ -312,6 +312,32 @@ describe('URL 构建', () => {
     // 奇数 ID 不受影响
     expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(jd('8001', 'Normal'));
   });
+  it('skillIconUrl：sk.icon 字段优先（源数据事实源，覆盖变体图标命名）', () => {
+    const jd = (id: string, file: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/${file}.png`;
+    // 官方相对路径（converter --official-icon-paths 输出）→ 直拼分类路径
+    expect(skillIconUrl(sk({ type: 'Ultra', icon: 'skillicons/avatar/1510/SkillIcon_1510_Normal02.png' }), '1510', null))
+      .toBe(jd('1510', 'SkillIcon_1510_Normal02'));
+    // 旧短路径（icon/ 开头）→ 提取文件名走分类规则
+    expect(skillIconUrl(sk({ type: 'Assist', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_AssisSkill01.png' }), '1510', null))
+      .toBe(jd('1510', 'SkillIcon_1510_AssisSkill01'));
+    // 大世界攻击（type=Maze）源图标复用普攻图标
+    expect(skillIconUrl(sk({ type: 'Maze', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_Normal.png' }), '1510', null))
+      .toBe(jd('1510', 'SkillIcon_1510_Normal'));
+    // 空串回退 type 推断
+    expect(skillIconUrl(sk({ type: 'Ultra', icon: '' }), '1510', null)).toBe(jd('1510', 'SkillIcon_1510_Ultra'));
+  });
+  it('skillIconUrl（官方路径模式）：sk.icon 官方相对路径直拼，旧短路径回退文件名提取', () => {
+    setUseOfficialPaths(true);
+    try {
+      expect(skillIconUrl(sk({ type: 'Ultra', icon: 'skillicons/avatar/1510/SkillIcon_1510_BP02.png' }), '1510', null))
+        .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1510/SkillIcon_1510_BP02.png`);
+      // 旧短路径（icon/ 开头）→ 提取文件名走分类规则（jsDelivr 首选）
+      expect(skillIconUrl(sk({ type: 'Assist', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_AssisSkill02.png' }), '1510', null))
+        .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1510/SkillIcon_1510_AssisSkill02.png`);
+    } finally {
+      setUseOfficialPaths(false);
+    }
+  });
   it('skillIconUrl（官方路径模式）：忆灵技能目录按角色 ID（忆灵 ID - 10000）', () => {
     setUseOfficialPaths(true);
     try {
@@ -333,7 +359,8 @@ describe('URL 构建', () => {
     }
   });
   it('eidolonIconUrl / avatarDrawCardUrl', () => {
-    expect(eidolonIconUrl('1005', 1)).toBe(`${CDN}/assets/hsr/rank/_dependencies/textures/1005/1005_Rank_1.webp`);
+    // rank 分类已注册 jsDelivr 规则：官方 ui/ui3d/rank 源首选 + nanoka 回退（E1-6 全量）
+    expect(eidolonIconUrl('1005', 1)).toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1005/1005_Rank_1.png`);
     expect(avatarDrawCardUrl('1005')).toBe(`${JS_DELIVR_BASE}/avatardrawcard/1005.png`);
   });
 });

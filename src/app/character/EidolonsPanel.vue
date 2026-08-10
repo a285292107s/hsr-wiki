@@ -4,7 +4,7 @@
  */
 import { computed } from 'vue';
 import { extraTerms } from './utils';
-import { iconUrl, fmtDesc } from '../../lib/format';
+import { eidolonIconUrl, fmtDesc } from '../../lib/format';
 import { SECTION_IDX } from './sections';
 import type { CharacterData, SkillExtra } from '../../services/types';
 
@@ -29,7 +29,9 @@ const eidolons = computed<EidolonCard[]>(() => {
   return Object.entries(dd.ranks || {}).map(([num, rk]) => ({
     num,
     name: rk.name,
-    img: iconUrl(rk.icon),
+    // 本体展示图标：Rank{num} 专属文件（nanoka rank 分类 E1-6 全量）；
+    // 与 rk.icon（源数据 IconPath，buff 栏用图标，E3/E5 复用技能图标）不同源
+    img: eidolonIconUrl(props.charId, num),
     descHtml: fmtDesc(rk.desc, rk.param_list || []),
     enhanced: !!(props.enhMark && props.enhMark.rankIds.has(rk.id)),
     terms: extraTerms(rk),

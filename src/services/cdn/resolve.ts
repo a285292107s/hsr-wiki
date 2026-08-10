@@ -5,7 +5,7 @@
 import { CDN, USE_OFFICIAL_PATHS } from '../../lib/constants';
 import { escHtml } from '../../lib/html';
 import { CDN_CATEGORIES, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
-import { JS_DELIVR_BASE, JS_DELIVR_RULES, jsdelivrToNanokaFile } from './jsdelivr';
+import { JS_DELIVR_BASE, JS_DELIVR_RULES, JS_DELIVR_UI3D_BASE, jsdelivrToNanokaFile } from './jsdelivr';
 
 /** 双源解析结果 */
 export interface CdnUri {
@@ -31,8 +31,10 @@ export function resolveCdnUri(
   const jdRule = JS_DELIVR_RULES[category];
   const jdPath = jdRule ? jdRule(file) : null;
   if (jdPath) {
+    // rank（星魂图标）官方源与 spriteoutput/ 平级（assets/asbres/ui/ui3d/...），用独立基址拼接
+    const jdBase = category === 'rank' ? JS_DELIVR_UI3D_BASE : JS_DELIVR_BASE;
     return {
-      primary: `${JS_DELIVR_BASE}/${jdPath}`,
+      primary: `${jdBase}/${jdPath}`,
       fallback: nanokaUrl(category, file, spec),
       source: 'official',
     };
@@ -60,6 +62,11 @@ export function cdnRawUrl(subpath: string): string {
 /** 依据主 URL 反查回退源（v-html 卡片用）：jsDelivr 源反查 nanoka；主源为官方时返回 nanoka 等价 URL；否则 '' */
 export function cdnFallbackFromPrimary(primary: string): string {
   if (!primary) return '';
+  // 星魂图标官方源（ui/ui3d/rank，与 spriteoutput/ 平级）：按 rank 规则反查 nanoka 等价文件
+  if (primary.startsWith(JS_DELIVR_UI3D_BASE) && primary.includes('ui/ui3d/rank/')) {
+    const file = jsdelivrToNanokaFile('rank', primary);
+    return file ? nanokaUrl('rank', file, CDN_CATEGORIES['rank']) : '';
+  }
   // jsDelivr 首选源 → nanoka 等价 URL（按分类规则反查文件名并验证路径一致性）
   if (primary.startsWith(JS_DELIVR_BASE)) {
     for (const [cat, rule] of Object.entries(JS_DELIVR_RULES) as [CdnCategory, (f: string) => string][]) {

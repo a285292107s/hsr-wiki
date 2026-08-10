@@ -49,6 +49,9 @@ export function memospriteId(charId: string, data: CharacterData | null): string
 }
 
 export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | null): string {
+  // 源数据 SkillIcon 字段优先（converter 输出，事实源）：覆盖大世界攻击复用普攻图标、
+  // Normal02/BP02/AssisSkill01-03 等 type 无法推断的变体命名；空串回退 type 推断
+  if (sk.icon) return iconUrl(sk.icon);
   const key = SKILL_ICON_KEY[sk.type ?? ''] || (sk.type_name && SKILL_ICON_KEY_BY_NAME[sk.type_name]) || '';
   if (!key || !charId) return '';
   let id = (key === 'Servant' || key === 'ServantPassive') ? memospriteId(charId, data) : charId;
@@ -67,12 +70,13 @@ export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | nu
   return cdnUri('skillicons', `SkillIcon_${id}_${iconKey}.webp`);
 }
 
-/** 星魂图标：StarRailTextures 已收录于 skillicons/avatar/{charId}/SkillIcon_{charId}_Rank{num}.png。 */
+/** 星魂本体展示图标：经 rank 分类双源解析（jsDelivr 官方源首选 + nanoka 回退，E1-6 全量）。
+ * 官方仓库位于 ui/ui3d/rank/_dependencies/textures/{charId}/{charId}_Rank_{num}.png，
+ * 收录 E1-6 全套（含 skillicons/avatar/ 目录缺失的 Rank3/5——AvatarRankConfig.IconPath
+ * 对 E3/E5 指向所加成技能图标，buff 栏用图标；本体展示仍须用 Rank{num} 文件）。
+ * buff 栏图标（技能卡片强化一栏）使用 ranks[].icon（源数据 IconPath），与此不同源。 */
 export function eidolonIconUrl(charId: string, rankNum: number | string): string {
-  if (USE_OFFICIAL_PATHS && charId) {
-    return official(`skillicons/avatar/${charId}/SkillIcon_${charId}_Rank${rankNum}.png`);
-  }
-  return cdnUri('rank', `${charId}/${charId}_Rank_${rankNum}.webp`);
+  return charId ? cdnUri('rank', `${charId}/${charId}_Rank_${rankNum}.webp`) : '';
 }
 
 /** 角色立绘（全身像）：avatardrawcard/{charId}.webp */

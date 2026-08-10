@@ -22,6 +22,10 @@ import { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH, OFFICIAL_ICON_BASE } from '../../
 export { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH };
 export const JS_DELIVR_BASE = OFFICIAL_ICON_BASE;
 
+/** 星魂图标官方源基址：ui/ui3d/rank/ 位于 assets/asbres/ 下，与 spriteoutput/ 平级
+ * （JS_DELIVR_BASE 含 /spriteoutput 后缀，故独立收口；供 resolve 层 rank 分类特判）。 */
+export const JS_DELIVR_UI3D_BASE = JS_DELIVR_BASE.replace(/\/spriteoutput$/, '');
+
 /** 官方拼写差异（AvatarBaseType 数据源验证：Priest 官方写作 Pirest，Elation 官方写作 Joy）；键为项目传入的小写 baseType */
 const PROFESSION_MAP: Record<string, string> = { priest: 'Pirest', elation: 'Joy' };
 const PROFESSION_MAP_REV: Record<string, string> = Object.fromEntries(
@@ -66,6 +70,10 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
     const dir = /_Servant/.test(base) && Number(id) > 10000 ? String(Number(id) - 10000) : id;
     return `skillicons/avatar/${dir}/${base}.png`;
   },
+  // 星魂本体展示图标：官方仓库位于 ui/ui3d/rank/_dependencies/textures/{charId}/{charId}_Rank_{num}.png
+  // （与 nanoka rank 分类同构，官方 E1-6 全量收录，含 skillicons 目录缺失的 Rank3/5）
+  // 注意：该目录与 spriteoutput/ 平级（assets/asbres/ui/...），resolve 层用 JS_DELIVR_UI3D_BASE 拼接
+  rank: (f) => `ui/ui3d/rank/_dependencies/textures/${f.replace(/\.webp$/i, '')}.png`,
 };
 
 /** 通用转换规则：官方 SpriteOutput 完整路径 → 仓库相对路径（目录段小写、文件名保留）。
@@ -89,6 +97,11 @@ export function jsdelivrToNanokaFile(category: CdnCategory, url: string): string
       const k = name.replace(/^IconProfession/, '').replace(/Middle$/, '');
       const orig = PROFESSION_MAP_REV[k] || k;
       return `${orig.toLowerCase()}.webp`;
+    }
+    case 'rank': {
+      // 官方路径 {charId}/{charId}_Rank_{num}.png → nanoka 等价文件（保留 charId 子目录）
+      const m = url.match(/(\d+)\/(\d+_Rank_\d+)\.png$/i);
+      return m ? `${m[1]}/${m[2]}.webp` : `${name}.webp`;
     }
     default:
       return `${name}.webp`;

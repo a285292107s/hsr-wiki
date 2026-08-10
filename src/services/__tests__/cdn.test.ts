@@ -13,6 +13,7 @@ import {
   CDN_CATEGORIES,
   CDN_STALL_TIMEOUT_MS,
   JS_DELIVR_BASE,
+  JS_DELIVR_UI3D_BASE,
   NANOKA_HUD,
   cdnFallbackFromPrimary,
   cdnImgFallbackAttr,
@@ -86,6 +87,17 @@ describe('resolveCdnUri 双源解析', () => {
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/8007/SkillIcon_18007_Servant01.png`);
   });
 
+  it('jsDelivr 映射分类：rank 星魂图标官方源（ui/ui3d/rank，含 Rank3/5 全套）', () => {
+    const r = resolveCdnUri('rank', '1403/1403_Rank_3.webp');
+    // 官方源与 spriteoutput/ 平级 → 用 JS_DELIVR_UI3D_BASE（无 /spriteoutput 段）
+    expect(r.primary).toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1403/1403_Rank_3.png`);
+    expect(r.fallback).toBe(`${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`);
+    expect(r.source).toBe('official');
+    // E6 同规则
+    expect(resolveCdnUri('rank', '1510/1510_Rank_6.webp').primary)
+      .toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1510/1510_Rank_6.png`);
+  });
+
   it('jsDelivr 同构直迁分类：monstermiddleicon / relicfigures', () => {
     expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp').primary)
       .toBe(`${JS_DELIVR_BASE}/monstermiddleicon/Monster_1002011.png`);
@@ -140,6 +152,11 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
   it('jsDelivr 主源反查 nanoka 回退（pathicon 拼写还原）', () => {
     const src = `${JS_DELIVR_BASE}/professioniconmiddle/IconProfessionPirestMiddle.png`;
     expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/pathicon/priest.webp`);
+  });
+
+  it('jsDelivr 主源反查 nanoka 回退（rank 保留 charId 子目录）', () => {
+    const src = `${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1403/1403_Rank_3.png`;
+    expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`);
   });
 
   it('nanoka 主源无回退', () => {

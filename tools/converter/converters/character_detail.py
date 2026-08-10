@@ -92,6 +92,9 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
             "type": skill_type,
             "type_name": type_desc,
             "tag": tag,
+            # 源数据 SkillIcon（事实源）：前端 skillIconUrl 优先取此字段直拼，
+            # 覆盖大世界攻击复用普攻图标、Normal02/BP02/AssisSkill01-03 等 type 无法推断的变体命名
+            "icon": map_icon_path(first.get("SkillIcon", "")),
             "sp_base": unwrap_value(first.get("SPBase", None)),
             "sp_need": unwrap_value(first.get("SPNeed", None)),
             "bp_need": unwrap_value(first.get("BPNeed", None)),
@@ -155,6 +158,7 @@ def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int]) 
             "type": skill_type,
             "type_name": type_desc,
             "tag": tag,
+            "icon": map_icon_path(first.get("SkillIcon", "")),
             "sp_base": unwrap_value(first.get("SPBase", None)),
             "sp_need": unwrap_value(first.get("SPNeed", None)),
             "bp_need": unwrap_value(first.get("BPNeed", None)),

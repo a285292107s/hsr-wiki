@@ -133,6 +133,18 @@ class TestBuildSkills:
         assert s["rated_rank_id"] is None
         assert s["rated_skill_tree_id"] is None
 
+    def test_skill_icon_mapped(self):
+        # 源数据 SkillIcon（事实源）→ map_icon_path 输出旧短路径（默认模式）
+        data = [{"SkillID": 30, "Level": 1, "AttackType": "Normal",
+                 "SkillIcon": "SpriteOutput/SkillIcons/Avatar/30/SkillIcon_30_Normal02.png"}]
+        result = cd._build_skills(data, [30])
+        assert result["30"]["icon"] == "icon/skill/Avatar/30/SkillIcon_30_Normal02.png"
+
+    def test_skill_icon_empty_when_source_missing(self):
+        data = [{"SkillID": 31, "Level": 1, "AttackType": "Normal"}]
+        result = cd._build_skills(data, [31])
+        assert result["31"]["icon"] == ""
+
 
 # ─── _build_servant_skills ──────────────────────────────────────
 
@@ -161,6 +173,12 @@ class TestBuildServantSkills:
         data = [{"SkillID": 13, "Level": 1, "AttackType": "Servant", "SkillTag": {"Hash": 200001}}]
         result = cd._build_servant_skills(data, [13])
         assert result["13"]["tag"] == "群攻"
+
+    def test_skill_icon_mapped(self):
+        data = [{"SkillID": 14, "Level": 1, "AttackType": "Servant",
+                 "SkillIcon": "SpriteOutput/SkillIcons/Avatar/11414/SkillIcon_11414_Servant.png"}]
+        result = cd._build_servant_skills(data, [14])
+        assert result["14"]["icon"] == "icon/skill/Avatar/11414/SkillIcon_11414_Servant.png"
 
     def test_audit_fields_same_structure(self):
         # 忆灵技能与角色技能保持同结构（审计字段缺失输出 None，契约一致性）

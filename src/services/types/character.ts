@@ -26,6 +26,9 @@ export interface Skill {
   simple_desc?: string;
   type: SkillType;
   type_name: string;
+  /** 技能图标（源数据 SkillIcon 映射路径，事实源）：覆盖大世界攻击复用普攻图标、
+   * Normal02/BP02/AssisSkill01-03 等 type 无法推断的变体命名；空串回退 type 推断 */
+  icon?: string;
   /** 技能标签：官方 SkillTag 中文文本（如「单攻」「召唤」），空则无标签 */
   tag?: string | null;
   sp_base?: number | null;
