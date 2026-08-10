@@ -292,9 +292,9 @@ export const endgamePage: CatalogPageConfig = {
     // onerror 隐藏自身并移除修饰类，露出徽记兜底）
     const artSrc = seasonArtUrl(item.arts as { tab?: string; default?: string } | undefined);
     const hasArt = Boolean(artSrc);
-    const artHtml = hasArt
-      ? `<img class="nk-eg-card__art" src="${escHtml(artSrc)}" alt="" onerror="this.style.display='none';this.closest('.nk-eg-card').classList.remove('nk-eg-card--has-art')">`
-      : '';
+    // 加载失败降级由目录引擎事件委托统一处理（error 不冒泡，引擎层以 capture 捕获；
+    // 失败时隐藏自身并移除 --has-art，露出 SVG 徽记占位——避免 v-html 内联事件脚本的 CSP 隐患）
+    const artHtml = hasArt ? `<img class="nk-eg-card__art" src="${escHtml(artSrc)}" alt="">` : '';
 
     const tierce = item.tierce as { damage_types?: string[]; countdown?: number } | undefined;
     const levels = item.levels as { kind?: string }[] | undefined;

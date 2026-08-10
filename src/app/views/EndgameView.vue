@@ -686,11 +686,12 @@ onBeforeUnmount(() => {
                     <span class="nk-egd-tierce__nodesummary" :title="nodeSummary(nd)">{{ nodeSummary(nd) }}</span>
                     <svg class="nk-egd-tierce__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                   </button>
-                  <!-- 节点卡片体（waves 容器，grid-rows 折叠过渡） -->
+                  <!-- 节点卡片体（waves 容器，grid-rows 折叠过渡）；折叠时 inert 移出焦点序 -->
                   <div
                     class="nk-egd-tierce__nodebody"
                     :id="`egd-node-${ni}-body`"
                     role="region"
+                    :inert="!isNodeExpanded(ni)"
                     :class="{ 'nk-egd-tierce__nodebody--collapsed': !isNodeExpanded(ni) }"
                   >
                     <div class="nk-egd-tierce__nodebody-inner">
@@ -713,11 +714,12 @@ onBeforeUnmount(() => {
                           <span class="nk-egd-tierce__wavesummary" :title="`${g.items.length} 敌`">× {{ g.items.length }} 敌</span>
                           <svg class="nk-egd-tierce__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                         </button>
-                        <!-- 波次体：敌方卡片网格（折叠过渡） -->
+                        <!-- 波次体：敌方卡片网格（折叠过渡）；折叠时 inert 移出焦点序 -->
                         <div
                           class="nk-egd-tierce__wavebody"
                           :id="`egd-wave-${ni}-${gi}-body`"
                           role="group"
+                          :inert="!isWaveExpanded(ni, gi)"
                           :class="{ 'nk-egd-tierce__wavebody--collapsed': !isWaveExpanded(ni, gi) }"
                         >
                           <div class="nk-egd-tierce__wavebody-inner">
@@ -785,7 +787,8 @@ onBeforeUnmount(() => {
                   @click="toggleFloor(f.floor)"
                 >
                   <svg class="nk-egd-floor__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-                  <span :id="`floor-title-${f.floor}`" class="nk-egd-floor__title">第 {{ f.floor }} 层</span>
+                  <!-- 按钮内不能直接嵌套 h3（内容模型仅 phrasing）；role=heading 补标题语义，与 peak 关卡组成的 h3 大纲对齐 -->
+                  <span :id="`floor-title-${f.floor}`" class="nk-egd-floor__title" role="heading" aria-level="3">第 {{ f.floor }} 层</span>
                   <span v-if="f.name" class="nk-egd-floor__name">{{ f.name }}</span>
                   <span
                     v-if="f.level || f.countdown || (modeKey === 'story' && data.clear_score)"
@@ -813,28 +816,25 @@ onBeforeUnmount(() => {
                   </template>
                   <span v-if="mergedMonCount(f)" class="nk-egd-floor__summarydata">{{ mergedMonCount(f) }}</span>
                 </div>
-                <!-- 展开体（grid-rows 折叠动画） -->
-                <div :id="`egd-floor-${f.floor}`" class="nk-egd-floor__body">
+                <!-- 展开体（grid-rows 折叠动画）；折叠时 inert 整体移出焦点序与可访达范围 -->
+                <div
+                  :id="`egd-floor-${f.floor}`"
+                  class="nk-egd-floor__body"
+                  :inert="!isExpanded(f.floor)"
+                >
                   <div class="nk-egd-floor__body-inner">
 
-                <!-- 上下半场模块（单阶段层仅上半场）；末日幻影为阶段制，优先渲染阶段清单（含第 3 阶段） -->
+                <!-- 上下半场模块（单阶段层仅上半场）；末日幻影为阶段制，优先渲染阶段清单（含第 3 阶段）。
+                 阶段制与上下半场均经 StageContent 统一渲染（阶段构造 MazeStageDetail），保证同语义 DOM 结构一致 -->
                 <div class="nk-egd-floor__stages">
                   <template v-if="modeKey === 'boss' && f.phases?.length">
-                    <div v-for="(p, pi) in f.phases" :key="p.id" class="nk-egd-floor__stage">
-                      <div class="nk-egd-floor__stagehead">
-                        <span class="nk-egd-floor__stagelabel">阶段 {{ pi + 1 }}</span>
-                      </div>
-                      <div v-if="phaseDamage(f, pi)?.length" class="nk-egd-floor__row">
-                        <span class="nk-egd-floor__label">推荐属性</span>
-                        <span class="nk-egd-floor__elems" v-html="elemRow(phaseDamage(f, pi) || [])"></span>
-                      </div>
-                      <div class="nk-egd-floor__row nk-egd-floor__row--mons">
-                        <span class="nk-egd-floor__label">敌方配置</span>
-                        <div class="nk-egd-mons">
-                          <EnemyCard :monster="p" />
-                        </div>
-                      </div>
-                    </div>
+                    <StageContent
+                      v-for="(p, pi) in f.phases"
+                      :key="p.id"
+                      :label="`阶段 ${pi + 1}`"
+                      :stage="{ damage: phaseDamage(f, pi), monsters: [p] }"
+                      :is-boss="true"
+                    />
                   </template>
                   <template v-else>
                     <StageContent label="上半场" :stage="f.stage1" :is-boss="modeKey === 'boss'" />

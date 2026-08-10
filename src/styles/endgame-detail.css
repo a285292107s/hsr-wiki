@@ -563,8 +563,13 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
 }
-/* 单阶段层：唯一阶段占满两列，避免右侧留空 */
+/* 单阶段层：唯一阶段占满两列，避免右侧留空；三阶段层第 3 阶段全宽（末日幻影 3 阶段制） */
 .nk-egd-floor__stages > .nk-egd-floor__stage:only-child { grid-column: 1 / -1; }
+.nk-egd-floor__stages > .nk-egd-floor__stage:nth-child(3) {
+  grid-column: 1 / -1;
+  border-left: none;
+  padding-left: 0;
+}
 /* 第二列以细分隔线收束，替代整卡边框 */
 .nk-egd-floor__stage + .nk-egd-floor__stage {
   border-left: 1px solid var(--line-1);
@@ -616,9 +621,12 @@
 /* 敌方配置行：内容区可能被波次组撑高，label 顶对齐首行而非垂直居中悬空 */
 .nk-egd-floor__row--mons { align-items: flex-start; }
 .nk-egd-floor__row--mons .nk-egd-floor__label { padding-top: 3px; }
-/* Boss 信息卡直挂行内：窄卡（452px）下换行会导致 label 悬空，禁止换行并让卡片占剩余宽度 */
+/* Boss 信息卡直挂行内：窄卡（452px）下换行会导致 label 悬空，禁止换行并让卡片占剩余宽度
+   （阶段制与上下半场统一经 StageContent 渲染，Boss 卡在 wave 内 .nk-egd-mons 撑满剩余空间） */
 .nk-egd-floor__stage .nk-egd-floor__row--mons { flex-wrap: nowrap; }
-.nk-egd-floor__row--mons > .nk-egd-mons { flex: 1 1 auto; min-width: 0; }
+/* 逐级撑满：monswrap 占 row 剩余、wave 内 boss 卡 grid 占 wave 剩余（label 不悬空） */
+.nk-egd-floor__row--mons > .nk-egd-floor__monswrap { flex: 1 1 auto; min-width: 0; }
+.nk-egd-floor__wave > .nk-egd-mons { flex: 1 1 auto; min-width: 0; }
 /* 绝境变体子卡：dashed 边框已标识层级，内部不再细分隔线 */
 .nk-egd-floor__hard .nk-egd-floor__row {
   margin: 0;

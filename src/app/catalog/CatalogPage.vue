@@ -255,6 +255,19 @@ function onContentClick(e: MouseEvent): void {
   void router.push(href);
 }
 
+/**
+ * 卡片装饰图加载失败降级（v-html 模板字符串无法绑定组件事件，统一收口到引擎层）：
+ * 命中 .nk-eg-card__art（如终局赛季图标）时隐藏自身并移除 --has-art 修饰类，
+ * 露出预留的 SVG 徽记占位。error 事件不冒泡，故用 capture 在容器捕获阶段拦截；
+ * 虚拟网格（nk-virtual-cell）同样位于容器内，委托覆盖生效。
+ */
+function onCardImgError(e: Event): void {
+  const img = e.target as HTMLImageElement;
+  if (!img.classList.contains('nk-eg-card__art')) return;
+  img.style.display = 'none';
+  img.closest('.nk-eg-card')?.classList.remove('nk-eg-card--has-art');
+}
+
 function onGridMove(e: MouseEvent): void {
   tilt.onMove(e);
 }
@@ -288,6 +301,7 @@ onBeforeUnmount(() => {
     ref="scrollerRef"
     :aria-busy="phase === 'loading'"
     @click="onContentClick"
+    @error.capture="onCardImgError"
   >
     <!-- 错误态 -->
     <div v-if="phase === 'error'" class="nk-error-state">
