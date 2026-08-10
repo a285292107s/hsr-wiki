@@ -215,3 +215,24 @@ src/
 - **文本数据来源**：所有展示文本必须来自现有数据源（converter 输出 JSON / TextMap），禁止在代码中写死或自建数据源。
 - **色彩三层令牌**：所有颜色必须落入 tokens.css 三层令牌体系——原始层（`--ph-*` / `--gold-*` 色阶事实）、语义层（`--primary` 等主题映射，派生色用 `color-mix(in srgb, var(--primary) X%, transparent)` 表达）、领域层（`--rarity-*` / `--prop-*` / `--elem-*` / `--skill-*` / `--diff-*` 数据语义色，不随主题）。禁止在页面 CSS/组件内联裸色值（豁免：中性灰阶/黑/白/深底色、`var()` fallback；CW 专属 `currency-*` 文件与 debug 分析色待迁移）。新增颜色先查令牌，缺失则落入对应层。可用 `node tools/check-colors.mjs --strict` 扫描未收口色值。
 - **构建守卫**：每次变更必须通过 `pnpm build`（含 vue-tsc 类型检查）+ `pnpm test` 全绿后方可提交。
+
+### 验证流程
+
+> 分级收敛：改动前先定**可断言的验收标准 + 终止条件**（如「icon 160px、无边框、无溢出」而非「布局正常」），按级别验证，达标即停；
+> **验证成本与风险敞口成正比**：能静态审查确认的（字面量数值、简单算术、断点区间、选择器覆盖范围）不启动浏览器；CSS 语法错误由 dev server 编译即时暴露。
+> 模型无识图能力时一律走 DOM 与计算样式取证（见项目约定），禁止截图路径。
+
+| 级别 | 任务类型 | 验证内容 | 预算 |
+|---|---|---|---|
+| T0 | 数据层 / 纯函数 / API | `pnpm test` + `pnpm build` 即止 | — |
+| T1a | 纯 CSS 数值微调（尺寸/间距/颜色，无选择器结构变化） | 守卫 + RunPreview 肉眼确认；**不启动 headless 取证** | ≤5 min |
+| T1b | CSS 布局/结构变化（选择器、flex/grid、断点区间） | 守卫 + L2 计算样式一次取证 + L3 溢出检测（**仅取有疑问的断点**）；审美项 RunPreview | ≤10 min |
+| T2 | 模板结构 / v-if / v-for / 数据流 | 守卫 + **L1 dump-dom 断言**（产物数量/文本/alt），L2/L3 按需 | ≤15 min |
+| T3 | Spine / Canvas / 动画 / 异步编排 | 守卫 + 取证金字塔 L1-L4 按需；先探测 `visibilityState` 与 rAF（后台标签页挂起陷阱） | ≤30 min |
+
+执行纪律（超预算即降级）：
+- **环境问题先排除**：headless 内 CDN/网络加载失败先判定环境性（`curl` 验证 URL 可达），不当代码缺陷深究
+- **探针脚本一次成型**：CDP 连接 + 设视口 + 单 evaluate（只含断言）+ 阶段日志，总超时 30s；禁止图片等待长循环、禁止 base64 大注入（可卡死渲染进程）；含正则/引号的脚本一律 Write 文件执行（`.mjs`），禁止内联（PowerShell 转义）
+- **headless 首选 Chrome**（本机 Edge 的 CDP evaluate 通道不可用，dump-dom 正常）；必须 `--disable-extensions` + 独立 `--user-data-dir`，启动后验 `/json` 隔离（出现未知标签页立即 kill 重启）
+- **失败快速降级**：CDP evaluate 无响应 15s 内 kill 重启一次，仍失败降级 `--dump-dom`（L1），禁止在卡死页面上重试
+- **临时文件**：验证确认后单独 Remove-Item 清理
