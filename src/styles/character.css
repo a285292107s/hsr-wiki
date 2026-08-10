@@ -366,18 +366,45 @@
 }
 .nk-char-page .nk-skill__tag { background: rgba(255,255,255,0.04); color: var(--text3); }
 
-/* ═══════════ 星魂 · E 编号徽章 ═══════════ */
+/* ═══════════ 卡片垂直间距 · 呼吸感 ═══════════
+   同区块内卡片之间 14px（星魂 E1-6 / 技能列表 / 附加能力 / 故事）；
+   子技能为父卡内虚线分区不参与；区块间由 nk-panel--flat padding-bottom 提供 */
+.nk-char-page .nk-panel .nk-skill + .nk-skill:not(.nk-skill--child),
+.nk-char-page .nk-panel .nk-ability + .nk-ability,
+.nk-char-page .nk-panel .nk-eidolon + .nk-eidolon,
+.nk-char-page .nk-panel .nk-story + .nk-story { margin-top: 14px; }
+
+/* ═══════════ 星魂 · 展品式大图 + E 编号徽章 ═══════════ */
 .nk-char-page .nk-eidolon { padding: 20px 24px 18px; }
-.nk-char-page .nk-eidolon__head { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+/* 头部：左大图（官方 ui/ui3d/rank 3D 渲染源，2048² 正方形）+ 右信息列；
+   星魂图为展品，描述沉入右侧列（行宽自动收束至阅读宽度内） */
+.nk-char-page .nk-eidolon__head { display: flex; align-items: flex-start; gap: 22px; }
+.nk-char-page .nk-eidolon__icon {
+  width: 160px; height: 160px; flex-shrink: 0; object-fit: contain;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--blk-900) 45%, transparent);
+  transition: transform 0.25s var(--nk-ease-out);
+}
+.nk-char-page .nk-eidolon__info { flex: 1; min-width: 0; }
+/* meta 行：E 编号（区块签名）+ 名称，细线分隔，档案铭牌感 */
+.nk-char-page .nk-eidolon__meta {
+  display: flex; align-items: baseline; gap: 14px;
+  margin-bottom: 10px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-1);
+}
 .nk-char-page .nk-eidolon__num {
   font-family: var(--font-hud); font-size: 1.5rem; font-weight: 700; line-height: 1;
   color: var(--primary); letter-spacing: 0.02em;
-  padding-right: 16px; border-right: 1px solid var(--line-2);
-  min-width: 56px;
+  padding-right: 14px; border-right: 1px solid var(--line-2);
   opacity: 0.85; transition: opacity 0.2s;
 }
-/* 卡片 hover：E 编号提亮（区块签名响应） */
+.nk-char-page .nk-eidolon__name {
+  font-weight: 600; font-size: 1rem; letter-spacing: 0.01em;
+  color: var(--text-bright); line-height: 1.3;
+}
+/* 卡片 hover：E 编号提亮 + 星魂图微浮（微动级，与技能图标同语言） */
 .nk-char-page .nk-eidolon:hover .nk-eidolon__num { opacity: 1; }
+.nk-char-page .nk-eidolon:hover .nk-eidolon__icon { transform: translateY(-1px); }
 
 /* ═══════════ 附加能力 ═══════════ */
 .nk-char-page .nk-ability { padding: 20px 24px 18px; }
@@ -692,6 +719,10 @@
   .nk-char-page .nk-hero__stat-val { font-size: 0.92rem; }
   .nk-char-page .nk-panel--flat { padding-bottom: 32px; }
 }
+/* 平板 768-1023：图片适度收缩，保持文字列可读 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-char-page .nk-eidolon__icon { width: 132px; height: 132px; }
+}
 /* 桌面 ≥1024px：左右结构，视觉区 44% + 档案面板 56%，面板透明 */
 @media (min-width: 1024px) {
   .nk-char-page .nk-hero { flex-direction: row; min-height: 540px; }
@@ -729,7 +760,10 @@
     font-size: 0.45rem; letter-spacing: 0.24em; padding: 5px 10px;
   }
   .nk-char-page .nk-skill--child { margin-left: 10px; padding-top: 12px; }
-  .nk-char-page .nk-eidolon__num { font-size: 1.25rem; min-width: 44px; padding-right: 12px; }
+  .nk-char-page .nk-eidolon__head { gap: 14px; }
+  .nk-char-page .nk-eidolon__icon { width: 104px; height: 104px; }
+  .nk-char-page .nk-eidolon__meta { gap: 10px; padding-bottom: 8px; }
+  .nk-char-page .nk-eidolon__num { font-size: 1.25rem; padding-right: 10px; }
 }
 
 /* ═══════════ 焦点环 ═══════════ */
@@ -755,6 +789,7 @@
   .nk-char-page .nk-hero__spine { transition: none; }
   .nk-char-page .nk-panel { animation: none; }
   .nk-char-page .nk-skill:hover .nk-skill__icon { transform: none; }
+  .nk-char-page .nk-eidolon:hover .nk-eidolon__icon { transform: none; }
   .nk-char-page .nk-story__arrow { transition: none; }
   .nk-char-page .nk-skill:hover,
   .nk-char-page .nk-eidolon:hover,
@@ -787,6 +822,7 @@
   .nk-char-page .nk-relic-slot:hover,
   .nk-char-page .nk-relic-sub:hover { border-color: var(--line-1); background: rgba(255,255,255,0.016); transform: none; box-shadow: none; }
   .nk-char-page .nk-skill:hover .nk-skill__icon { transform: none; }
+  .nk-char-page .nk-eidolon:hover .nk-eidolon__icon { transform: none; }
   .nk-char-page .nk-eidolon:hover .nk-eidolon__num { opacity: 0.85; }
   .nk-char-page .nk-story__head:hover .nk-story__arrow { border-color: var(--text3); }
   .nk-char-page .nk-secnav__btn:hover { color: var(--text3); background: transparent; }

@@ -48,16 +48,19 @@ const eidolons = computed<EidolonCard[]>(() => {
   >
     <span v-if="e.enhanced" class="nk-eidolon__enh-badge">强化</span>
     <div class="nk-eidolon__head">
-      <span class="nk-eidolon__num">E{{ e.num }}</span>
-      <img class="nk-skill__icon" :src="e.img" loading="lazy">
-      <div class="nk-skill__title">
-        <span class="nk-skill__name">{{ e.name }}</span>
-      </div>
-    </div>
-    <div class="nk-skill__desc" v-html="e.descHtml"></div>
-    <div v-if="e.terms.length" class="nk-skill__terms">
-      <div v-for="t in e.terms" :key="t.name" class="nk-term">
-        <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
+      <!-- 星魂大图：官方 ui/ui3d/rank 3D 渲染源（2048² 正方形），展品式陈列 -->
+      <img class="nk-eidolon__icon" :src="e.img" :alt="e.name" loading="lazy">
+      <div class="nk-eidolon__info">
+        <div class="nk-eidolon__meta">
+          <span class="nk-eidolon__num">E{{ e.num }}</span>
+          <span class="nk-eidolon__name">{{ e.name }}</span>
+        </div>
+        <div class="nk-skill__desc" v-html="e.descHtml"></div>
+        <div v-if="e.terms.length" class="nk-skill__terms">
+          <div v-for="t in e.terms" :key="t.name" class="nk-term">
+            <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
