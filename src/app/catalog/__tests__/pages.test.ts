@@ -4,13 +4,55 @@
  * - id 唯一且与注册 key 一致
  * - renderCard 函数存在且返回字符串
  * - filters / buildFilters 字段结构合法
+ * - （数据驱动）filter.key 与 option.val 在真实转换数据上可命中（stringly-typed 契约锁）
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
 import { tabIconUrl, seasonArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../pages/endgame';
 
+/* ─── node 内建类型 shim（app tsconfig 无 @types/node；测试运行时由 vitest/node 提供） ─── */
+declare const process: { cwd(): string };
+
 const entries = Object.entries(CATALOG_PAGES);
+
+/* ─── 数据驱动筛选契约工具（真实转换数据） ───
+ * fetch 经全局 stub 落到 public/data/cn 本地文件（happy-dom FileReader 读取），不触发网络。 */
+
+/** 读取本地文件为文本（fs/promises 经变量传递规避静态模块解析；happy-dom FileReader 解码） */
+async function readLocalText(filePath: string): Promise<string> {
+  const fsp = (await import('node:fs/promises' as string)) as { readFile(p: string): Promise<Uint8Array> };
+  const data = await fsp.readFile(filePath);
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    // Uint8Array 可能带 ArrayBufferLike 泛型，Blob 构造仅接受 ArrayBuffer 视图 → 显式收窄
+    reader.readAsText(new Blob([data as unknown as BlobPart]));
+  });
+}
+
+/** 数据 URL → 本地文件绝对路径（Vite 静态根为 public/：URL /data/... 对应 public/data/...；
+ *  正斜杠拼接即可，Node fs 在 Windows 亦兼容） */
+function urlToFsPath(url: string): string {
+  let pathname = url;
+  try {
+    pathname = new URL(url).pathname;
+  } catch {
+    /* 相对路径原样处理 */
+  }
+  const p = decodeURIComponent(pathname).replace(/^\/+/, '').replace(/\\/g, '/');
+  const rel = p.startsWith('data/') ? `public/${p}` : p;
+  return `${process.cwd()}/${rel}`;
+}
+
+/** 复刻 CatalogPage 的筛选匹配语义：item[key] 为数组按元素匹配，否则字符串严格相等 */
+function matchesFilter(item: Record<string, unknown>, key: string, val: string): boolean {
+  const cur = item[key];
+  if (cur == null) return false;
+  if (Array.isArray(cur)) return cur.map(String).includes(val);
+  return String(cur) === val;
+}
 
 describe('CATALOG_PAGES registry', () => {
   it('should register at least one page', () => {
@@ -98,6 +140,68 @@ describe('filters validity', () => {
       }
     }
   });
+});
+
+describe('data-driven filter contract (real data)', () => {
+  /* 读入真实转换数据（public/data/cn）跑 fetchData，把「filter.key 能命中字段」的
+   * stringly-typed 契约固化为回归闸门：目录配置与数据演化（如新增/改名字段）一旦漂移即报错。 */
+  beforeAll(() => {
+    vi.stubGlobal('fetch', async (input: unknown) => {
+      const url = input instanceof URL ? input.href : String(input);
+      const text = await readLocalText(urlToFsPath(url));
+      return { ok: true, status: 200, text: async () => text };
+    });
+  });
+
+  afterAll(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('every filter.key resolves on real fetchData items', async () => {
+    for (const [key, cfg] of entries) {
+      if (!cfg.fetchData) continue;
+      const items = await cfg.fetchData({ version: '' });
+      expect(items.length, `${key} 应产出非空数据`).toBeGreaterThan(0);
+      const filters = cfg.buildFilters ? cfg.buildFilters(items) : (cfg.filters || []);
+      for (const f of filters) {
+        const hits = items.filter((it) => it[f.key] !== undefined && it[f.key] !== null);
+        expect(hits.length, `${key}.${f.key} 应在真实数据上命中字段`).toBeGreaterThan(0);
+      }
+    }
+  }, 30000);
+
+  it('every non-empty option.val matches at least one item', async () => {
+    for (const [key, cfg] of entries) {
+      if (!cfg.fetchData) continue;
+      const items = await cfg.fetchData({ version: '' });
+      const filters = cfg.buildFilters ? cfg.buildFilters(items) : (cfg.filters || []);
+      for (const f of filters) {
+        for (const opt of f.options) {
+          if (!opt.val) continue;
+          const hits = items.filter((it) => matchesFilter(it as unknown as Record<string, unknown>, f.key, opt.val));
+          expect(hits.length, `${key}.${f.key} 选项 "${opt.label}"(${opt.val}) 应至少命中一条数据`)
+            .toBeGreaterThan(0);
+        }
+      }
+    }
+  }, 30000);
+
+  it('endgame damageTypes options must exist in item top-level damageTypes', async () => {
+    // buildFilters 的选项集来自逐层 floorDamage（缺失回退顶层 damageTypes），
+    // 而 CatalogPage 过滤读取 item.damageTypes（顶层）——锁死该不对称：选项值必须命中顶层字段。
+    const { endgamePage } = await import('../pages/endgame');
+    const fetchData = endgamePage.fetchData!;
+    const buildFilters = endgamePage.buildFilters!;
+    const items = await fetchData({ version: '' });
+    const filters = buildFilters(items);
+    const dmg = filters.find((f) => f.key === 'damageTypes');
+    expect(dmg, 'endgame 应有 damageTypes 筛选').toBeDefined();
+    for (const opt of dmg!.options) {
+      if (!opt.val) continue;
+      const hits = items.filter((it) => (it as { damageTypes?: string[] }).damageTypes?.includes(opt.val));
+      expect(hits.length, `damageTypes 选项 "${opt.val}" 应存在于某条赛季顶层 damage_types`).toBeGreaterThan(0);
+    }
+  }, 30000);
 });
 
 describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
