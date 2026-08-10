@@ -66,6 +66,8 @@ interface TeamSlot {
   img: string;
   backups: { id: number; name: string; img: string }[];
 }
+/** 主槽「当前角色」名（手机端行内展示；直接取渲染数据 name 字段——nameCache 不含 charId 自身） */
+const mainName = computed(() => props.d.name || '');
 const teams = computed<{ teamId: number; members: TeamSlot[] }[]>(() => {
   const dd = props.d;
   if (!dd.teams || !dd.teams.length) return [];
@@ -199,6 +201,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
         <div class="nk-build__team-slot nk-build__team-slot--main">
           <RouterLink :to="`/character/${charId}`" class="nk-build__team-link" title="当前角色">
             <img :src="cdnUri('avatarroundicon', `${charId}.webp`)" alt="当前角色">
+            <span class="nk-build__team-name">{{ mainName }}</span>
           </RouterLink>
         </div>
         <span class="nk-build__team-plus">+</span>
@@ -206,6 +209,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
           <div class="nk-build__team-slot">
             <RouterLink :to="`/character/${m.mid}`" class="nk-build__team-link" :title="m.name">
               <img :src="m.img" :alt="m.name">
+              <span class="nk-build__team-name">{{ m.name }}</span>
             </RouterLink>
             <div v-if="m.backups.length" class="nk-build__team-alt">
               <RouterLink v-for="b in m.backups" :key="b.id" :to="`/character/${b.id}`" class="nk-build__team-link" :title="b.name">

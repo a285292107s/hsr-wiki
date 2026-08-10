@@ -450,6 +450,8 @@
 .nk-char-page .nk-build__team { display: flex; align-items: center; padding: 18px 22px; border-radius: 10px; }
 .nk-char-page .nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
 .nk-char-page .nk-build__team-link { display: flex; }
+/* 角色名：仅手机端行内展示（两栏式排版），桌面端隐藏 */
+.nk-char-page .nk-build__team-name { display: none; }
 .nk-char-page .nk-build__team-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 50%; }
 .nk-char-page .nk-build__team-slot img {
   width: 48px; height: 48px; border-radius: 50%;
@@ -764,6 +766,58 @@
   .nk-char-page .nk-eidolon__icon { width: 104px; height: 104px; }
   .nk-char-page .nk-eidolon__meta { gap: 10px; padding-bottom: 8px; }
   .nk-char-page .nk-eidolon__num { font-size: 1.25rem; padding-right: 10px; }
+  /* 队伍推荐（移动端竖向）：4 行（主槽 + 3 成员），每行 = 默认推荐角色（左 44px+名字）
+     + 备用推荐角色（右 28px 组，右对齐）；两栏式规格表排版：左栏起点统一、右栏终点统一、
+     行间分隔细线；触控热区全部 ≥44px；名字超宽 ellipsis 收缩防 320px 溢出；+ 号隐藏 */
+  .nk-char-page .nk-build__team {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;   /* 覆盖桌面 row 的 align-items:center（column 下会变水平居中） */
+    gap: 12px;
+    padding: 16px 12px;
+  }
+  .nk-char-page .nk-build__team-slot {
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    width: 100%;        /* 行占满卡片内容宽，备选 margin-left:auto 右对齐才有参照 */
+    max-width: 100%;   /* 限制内容宽，超宽时由行内 flex 收缩（名字 ellipsis / 备选 wrap） */
+  }
+  /* 行间分隔细线（首行除外）：编辑式规格表语言（slot 间有 + 号占位，用 ~ 通用兄弟） */
+  .nk-char-page .nk-build__team-slot ~ .nk-build__team-slot {
+    border-top: 1px solid var(--line-1);
+    padding-top: 12px;
+  }
+  .nk-char-page .nk-build__team-slot img { width: 44px; height: 44px; }
+  .nk-char-page .nk-build__team-slot--main img { width: 50px; height: 50px; }
+  .nk-char-page .nk-build__team-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .nk-char-page .nk-build__team-name {
+    display: inline;
+    font-size: 0.7rem; font-weight: 600; color: var(--text2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 72px; min-width: 0; flex-shrink: 1;
+  }
+  /* 主槽行：当前角色名主色强调（关键身份） */
+  .nk-char-page .nk-build__team-slot--main .nk-build__team-name { color: var(--primary); }
+  /* 备用组：右栏右对齐（终点统一），左栏默认角色起点统一 */
+  .nk-char-page .nk-build__team-alt { margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+  .nk-char-page .nk-build__team-alt img { width: 28px; height: 28px; }
+  .nk-char-page .nk-build__team-alt .nk-build__team-link { padding: 8px; margin: -8px; }
+  .nk-char-page .nk-build__team-plus { display: none; }
+  /* 主槽「当前」微标签：HUD 字体小标，头像正上方（主色关键强调） */
+  .nk-char-page .nk-build__team-slot--main .nk-build__team-link { position: relative; }
+  .nk-char-page .nk-build__team-slot--main .nk-build__team-link::after {
+    content: '当前';
+    position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
+    font-family: var(--font-hud); font-size: 0.45rem; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--primary); white-space: nowrap;
+  }
 }
 
 /* ═══════════ 焦点环 ═══════════ */
