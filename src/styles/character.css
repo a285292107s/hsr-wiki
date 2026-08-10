@@ -204,7 +204,7 @@
 }
 .nk-char-page .nk-skill__need-val { color: var(--text2); }
 .nk-char-page .nk-skill__need-val .hl { color: var(--highlight); font-weight: 700; }
-/* 强化关联（受哪些星魂 / 行迹加成）：折叠式，默认收纳，展开全部展示（交互对齐技能数据表） */
+/* 强化来源（受哪些星魂 / 行迹加成）：折叠式，默认收纳，展开全部展示（交互对齐技能数据） */
 .nk-char-page .nk-skill__links { margin-top: 14px; }
 .nk-char-page .nk-skill__links-btn {
   display: inline-flex; align-items: center; gap: 5px;

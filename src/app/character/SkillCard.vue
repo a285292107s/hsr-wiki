@@ -99,6 +99,7 @@ const needHtml = computed(() => {
 });
 
 /* ─── 强化关联（rated_rank_id → 星魂 E 编号；rated_skill_tree_id → 行迹名；2026-08-03 审计新增） ─── */
+/* 用户可见文案「强化来源」，与强化模式角标「强化」区分（前者=被什么强化，后者=处于加强形态） */
 interface RatedLink {
   kind: 'rank' | 'tree';
   num: string;
@@ -154,7 +155,7 @@ const ratedLinks = computed<RatedLink[]>(() => {
   return links;
 });
 
-/* ─── 强化折叠状态（默认收纳，点击展开全部条目，随卡片重建重置） ─── */
+/* ─── 强化来源折叠状态（默认收纳，点击展开全部条目，随卡片重建重置） ─── */
 const linksOpen = ref(false);
 
 /* ─── 强化角标（强化模式下标记被强化技能） ─── */
@@ -185,7 +186,7 @@ const terms = computed(() => {
   });
 });
 
-/* ─── 可折叠技能数据表（A/B/C 参数列） ─── */
+/* ─── 可折叠技能数据（A/B/C 参数列） ─── */
 interface TableRow {
   lv: number;
   cells: (number | string)[];
@@ -295,7 +296,7 @@ function onImgLoad(): void { imgDone.value = true; }
           <dt>{{ m.label }}</dt><dd v-html="m.html"></dd>
         </dl>
       </div>
-      <!-- 强化关联：受哪些星魂 / 行迹加成（折叠式，默认收纳，展开全部展示） -->
+      <!-- 强化来源：受哪些星魂 / 行迹加成（折叠式，默认收纳，展开全部展示） -->
       <div v-if="ratedLinks.length" class="nk-skill__links">
         <button
           class="nk-skill__links-btn"
@@ -304,7 +305,7 @@ function onImgLoad(): void { imgDone.value = true; }
           type="button"
           @click="linksOpen = !linksOpen"
         >
-          <span class="arrow">▶</span> {{ linksOpen ? '收起强化' : '强化' }}
+          <span class="arrow">▶</span> {{ linksOpen ? '收起强化来源' : '强化来源' }}
         </button>
         <div class="nk-links-clip" :class="{ open: linksOpen }">
           <div class="nk-links-inner">
@@ -378,7 +379,7 @@ function onImgLoad(): void { imgDone.value = true; }
         type="button"
         @click="tableOpen = !tableOpen"
       >
-        <span class="arrow">▶</span> {{ tableOpen ? '收起数据表' : '技能数据表' }}
+        <span class="arrow">▶</span> {{ tableOpen ? '收起数据' : '技能数据' }}
       </button>
       <div class="nk-table-clip" :class="{ open: tableOpen }">
         <div class="nk-table-inner">
