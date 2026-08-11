@@ -62,6 +62,12 @@ temp/
 /*.heic
 /*.heif
 
-# Qoder
+# AI
 .qoder
 .trae
+.reasonix
+# Playwright
+playwright-report
+blob-report
+playwright/.cache
+test-results
