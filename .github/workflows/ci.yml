@@ -46,3 +46,24 @@ jobs:
         run: |
           cd tools/converter
           python -m pytest tests/ -q
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E tests (T1b/T2 布局 + L4 像素基线 + a11y，发布门禁)
+        run: pnpm test:e2e

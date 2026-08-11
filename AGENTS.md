@@ -27,6 +27,12 @@ pnpm vitest run src/services/__tests__/api.test.ts
 # 监听模式
 pnpm test:watch
 
+# e2e 布局验收 / a11y 扫描 / 像素基线（Playwright，自动起 dev server）
+pnpm test:e2e
+pnpm test:e2e:update   # 刷新像素基线（确认改动是预期后）
+pnpm exec playwright test e2e/visual.spec.ts --grep 首页   # 仅首页像素基线（改动只影响首页时用，避免全量 ~90s）
+pnpm exec playwright test e2e/layout.spec.ts e2e/visual.spec.ts --grep 首页   # 常规快速回归：布局 + 首页基线
+
 # 数据转换工具（Python，需 vendor/TurnBasedGameData 子模块）
 cd tools/converter
 pip install -r requirements.txt
@@ -175,11 +181,35 @@ src/
 - 范围：仅数据层（纯函数、缓存逻辑、API 契约）——不测组件
 - IndexedDB 在测试中通过 mock 提供
 
+**前端（Playwright e2e / 布局验收层）：**
+- 框架：`@playwright/test` + `@axe-core/playwright`，单 Chromium（`playwright.config.ts`，webServer 自动起 dev server，复用已有 5173 实例）
+- 位置：`e2e/`（layout.spec.ts 布局验收 / accessibility.spec.ts WCAG 扫描 / visual.spec.ts 像素基线）
+- 运行：`pnpm test:e2e`；基线刷新 `pnpm test:e2e:update`（`-u`）；基线截图提交 git（`e2e/snapshots/`）；CI（ci.yml e2e job）在 push main 与 PR 时全量运行（发布门禁）；mobile-chromium project（Pixel 7）仅跑 layout（溢出/结构/console 守卫），不跑像素基线
+- 把 AGENTS.md「验证流程」T1b/T2/L3/L4 从一次性 CDP 取证固化为可重复断言：`toHaveCSS`/`toHaveText`（T1b/T2）、溢出检测 helper（L3）、`toHaveScreenshot`（L4，本地 Percy）、axe-core（a11y 维度）、console/pageerror 守卫（CDN 404 / JS 异常）
+- 已知 a11y 缺陷登记在 `e2e/accessibility.spec.ts` 的 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败）——修复需人工裁决后从清单移除
+- 首页 Hero：≥1024px 渲染 KV Spine 场景（WebGL 动画，CSS animations 禁用无效），像素基线中隐藏 `.nk-home-hero__spine`（其渲染验收归 `debug/spine-audit` 引擎）；<1024px 为随机五星立绘轮播（不涉及 WebGL，像素基线不覆盖该路径）
+
 **Converter（pytest）：**
 - 位置：`tools/converter/tests/`
 - 范围：工具函数（unwrap_value / map_icon_path / sort_by_id / resolve_text）、clean_text 标签清洗全分支、增量依赖 AST 一致性、character_detail / currency 纯函数契约、gen_catalog 索引生成、query / textmap_db TextMap 缓存查询；合成数据 + mock TextMap，不依赖真实源数据
 - 运行：`cd tools/converter && python -m pytest tests/ -v`
 - CI：已接入 `.github/workflows/ci.yml`（push/PR）与 `data-sync.yml`（数据同步时）
+
+## 任务交付流程
+
+用户抛出任务后的执行契约（2026-08-11 敲定）。核心原则：**数据可自动沉淀 · 契约（清单/基线/流程规则）须用户签发**。
+
+1. **定级**：按「设计自由度 × 影响面」分 L1/L2/L3，任务开场一句话声明级别，用户可否决。
+   - L1 微任务：明确映射、可回滚、机器可验（改文案/调数值/加字段）→ 直接做，无清单无确认
+   - L2 常规任务：起草 3-5 条可验证清单 → 用户一次确认 → 执行 → 验证 → 交付
+   - L3 大型任务：完整清单 + 里程碑拆解（清单超 8 条自动拆）+ 各里程碑 check-in + 分段目检
+2. **清单**：AI 起草「可验证清单」，每条 = 客观检查项，标注判据类型（机器可验 / 人工目检）。机器可验项从下方「验证流程」的 T0-T3 级别中选取；目检项（视觉/动效/Spine/内容创作）列出供用户签发。
+3. **确认**：有设计自由度才请求确认；「明确映射 + 机器可验 + 可回滚」直接做，不打断。
+4. **执行**：进度类 check-in 异步简报；决策类（偏离 spec / 缺信息 / 更优方案）必须停下等确认，**不乐观执行**。spec 是用户签发的契约，AI 无权单方面修改。
+5. **验证**：按 AI 声明的影响域选择「验证流程」级别（T0/T1a/T1b/T2/T3）；改动命中公共模块（shared 组件 / 共享样式 / services 核心）自动升级验证范围。遵循下方预算与降级纪律；**验证耗时与执行同量级，超预算即降级**；交付循环禁跑全量 e2e / 像素基线全量（全量仅发布前合入时执行，兜底漏测）。
+6. **返工**：失败层级决定重跑深度（低层失败不触发全量重跑）；失败信息结构化回传（哪层/哪项/证据）；同任务返工满 3 轮停止自动循环，转人工决策。
+7. **签发**：基线 / 目检项 / 验收标准的变更必须用户确认，AI 只出示证据（diff 表 / 截图对比）；未签发条目按「未完成」处理，不得自行移动验收标准。
+8. **复盘**：异常信号（返工 ≥1 轮 / 验证超预算 / 用户纠正清单或定级 / 发布全量抓到漏测）触发；数据层自动写入 `.workbuddy/memory/` 日志；流程规则改进需用户确认后生效。
 
 ## 项目约定
 
@@ -192,6 +222,7 @@ src/
 - 样式分层：tokens.css = 设计令牌 + 跨页共享原语（nk-tabs / nk-panel 等）；catalog.css = 目录引擎专属（含 v-html 卡片，scoped 无法命中）；页面 css = 页面专属（随路由懒加载）。页面间复用样式先查原语，禁止在页面 css 复制粘贴；组件专属样式（如货币战争 Hub 的导航）用 SFC scoped style，不污染全局命名空间
 - 全局设计令牌位于 `src/styles/tokens.css`；不使用 CSS 预处理器
 - 先确认模型有没有识图功能，如果模型没有识图功能，不要截图，直接用 DOM 与计算样式取证
+- 首页 Hero 断点策略：桌面（≥1024px）渲染官网 KV Spine 场景（home-bg 全量层）；平板（768-1023px）与手机（<768px）不渲染 Spine，改为随机五星立绘轮播（6s 交叉淡入淡出，`prefers-reduced-motion` 停播，后台标签页停播）。布局改动须保持该策略（策略与实现见 HomeView.vue 注释）
 
 ## 强制规则（MUST）
 
@@ -226,13 +257,17 @@ src/
 |---|---|---|---|
 | T0 | 数据层 / 纯函数 / API | `pnpm test` + `pnpm build` 即止 | — |
 | T1a | 纯 CSS 数值微调（尺寸/间距/颜色，无选择器结构变化） | 守卫 + RunPreview 肉眼确认；**不启动 headless 取证** | ≤5 min |
-| T1b | CSS 布局/结构变化（选择器、flex/grid、断点区间） | 守卫 + L2 计算样式一次取证 + L3 溢出检测（**仅取有疑问的断点**）；审美项 RunPreview | ≤10 min |
-| T2 | 模板结构 / v-if / v-for / 数据流 | 守卫 + **L1 dump-dom 断言**（产物数量/文本/alt），L2/L3 按需 | ≤15 min |
+| T1b | CSS 布局/结构变化（选择器、flex/grid、断点区间） | 守卫 + `pnpm test:e2e`（toHaveCSS / 溢出检测 / 像素基线，仅取有疑问的断点）；审美项 RunPreview | ≤10 min |
+| T2 | 模板结构 / v-if / v-for / 数据流 | 守卫 + `pnpm test:e2e`（toHaveText / toHaveCount / a11y 扫描）；L2/L3 按需 | ≤15 min |
 | T3 | Spine / Canvas / 动画 / 异步编排 | 守卫 + 取证金字塔 L1-L4 按需；先探测 `visibilityState` 与 rAF（后台标签页挂起陷阱） | ≤30 min |
 
 执行纪律（超预算即降级）：
+- **降级必须记录**：任何「超预算降级」「跳过某级验证」「豁免项」必须在交付记录/回复中写明（原级别、降级原因）；禁止静默降级——降级即覆盖缩减，未记录视为漏测，且作为「任务交付流程」第 8 条的复盘信号
+- **验证耗时控制**：`visual.spec` 全量禁止——只跑改动实际影响的用例（`--grep 首页` 等），与改动无关的 character/endgame/currency 用例直接跳过；同一会话内全量 e2e 最多执行一次；T1a/T1b 纯 CSS 改动用守卫 + 单探针计算样式断言 + `layout.spec`（约 20s）即可，不跑像素基线
 - **环境问题先排除**：headless 内 CDN/网络加载失败先判定环境性（`curl` 验证 URL 可达），不当代码缺陷深究
-- **探针脚本一次成型**：CDP 连接 + 设视口 + 单 evaluate（只含断言）+ 阶段日志，总超时 30s；禁止图片等待长循环、禁止 base64 大注入（可卡死渲染进程）；含正则/引号的脚本一律 Write 文件执行（`.mjs`），禁止内联（PowerShell 转义）
+- **探针脚本一次成型**：CDP 连接 + 设视口 + 单 evaluate（只含断言）+ 阶段日志，总超时 30s；禁止图片等待长循环、禁止 base64 大注入（可卡死渲染进程）；含正则/引号/`$` 的脚本一律 Write 文件执行（`.mjs`/`.ps1`），禁止内联（PowerShell 转义 + Bash 沙箱会预展开 `$var`）
+- **探针输出与等待**：结果用 node 内 `writeFileSync(path, data, 'utf8')` 写文件，禁止 shell 重定向 `>`（中文 Windows PowerShell 会损坏 UTF-8，导致 JSON 乱码引发重跑）；条件等待用 `page.waitForFunction` / `expect.poll` 精确条件，禁止固定 sleep 与长轮询；不等待与断言目标无关的就绪状态（如只查 padding 就不等 spine 渲染）
+- **PowerShell 编码**：本机 pwsh 7 的 `[Console]::OutputEncoding` 默认 gb2312（OEMCP/ACP 936），解码外部程序（node）的 UTF-8 stdout 会双重乱码（写侧已是 UTF-8，仅读侧不平）；必须管道/重定向外部输出时前缀 `[Console]::OutputEncoding = [Text.UTF8Encoding]::new()`；读文件显式 `-Encoding UTF8`
 - **headless 首选 Chrome**（本机 Edge 的 CDP evaluate 通道不可用，dump-dom 正常）；必须 `--disable-extensions` + 独立 `--user-data-dir`，启动后验 `/json` 隔离（出现未知标签页立即 kill 重启）
 - **失败快速降级**：CDP evaluate 无响应 15s 内 kill 重启一次，仍失败降级 `--dump-dom`（L1），禁止在卡死页面上重试
 - **临时文件**：验证确认后单独 Remove-Item 清理
