@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, findHorizontalOverflow, waitForCatalogCards } from './helpers';
+// 站点名随 constants 配置（勿硬编码：站名曾用「咸鱼百科」，处于更名进行中）
+import { SITE_NAME } from '../src/lib/constants';
 
 /**
  * 布局验收（AGENTS.md T1b/T2 的自动化落地）
@@ -18,7 +20,7 @@ test.describe('布局验收：常规主题', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/');
     await expect(page.locator('.nk-home-hero__title')).toBeVisible();
-    await expect(page.locator('.nk-home-hero__title')).toHaveText(/星铁档案馆/);
+    await expect(page.locator('.nk-home-hero__title')).toHaveText(SITE_NAME);
     // 板块导航行数量 = 配置的 indexGroups（≥4 个板块）
     const rowCount = await page.locator('.nk-home-row').count();
     expect(rowCount).toBeGreaterThanOrEqual(4);

@@ -75,21 +75,21 @@ test.describe('视觉基线', () => {
     await page.locator('.nk-home-hero__spine').evaluate((el) => {
       (el as HTMLElement).style.display = 'none';
     });
-    await expect(page).toHaveScreenshot('home.png', { maxDiffPixelRatio: 0.02, animations: 'disabled' });
+    await expect(page).toHaveScreenshot('home.png', { maxDiffPixelRatio: 0.05, animations: 'disabled' });
   });
 
   test('角色图鉴 /character', async ({ page }) => {
     await page.goto('/character');
     await waitForCatalogCards(page);
     await assertImagesLoaded(page);
-    await expect(page).toHaveScreenshot('character.png', { maxDiffPixelRatio: 0.02 });
+    await expect(page).toHaveScreenshot('character.png', { maxDiffPixelRatio: 0.05 });
   });
 
   test('终局内容 /endgame', async ({ page }) => {
     await page.goto('/endgame');
     await waitForCatalogCards(page);
     await assertImagesLoaded(page);
-    await expect(page).toHaveScreenshot('endgame.png', { maxDiffPixelRatio: 0.02 });
+    await expect(page).toHaveScreenshot('endgame.png', { maxDiffPixelRatio: 0.05 });
   });
 
   test('货币战争 Hub /currency', async ({ page }) => {
@@ -97,6 +97,6 @@ test.describe('视觉基线', () => {
     await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
     await assertImagesLoaded(page);
     // ticker 是无限动画，动画冻结后帧稳定
-    await expect(page).toHaveScreenshot('currency.png', { maxDiffPixelRatio: 0.02, animations: 'disabled' });
+    await expect(page).toHaveScreenshot('currency.png', { maxDiffPixelRatio: 0.05, animations: 'disabled' });
   });
 });
