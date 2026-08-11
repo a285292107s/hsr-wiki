@@ -39,7 +39,8 @@
 /* ═══ CW 暗金覆盖：交易所暖金色调 ═══
    设计意图：黑金底色 + 琥珀/黄铜层次 + 翡翠仅留给「增值」语义 */
 [data-theme="cw"] .nk-crole,
-[data-theme="cw"] .nk-crole-hero {
+[data-theme="cw"] .nk-crole-hero,
+[data-theme="cw"] .nk-crole-card {
   --crole-scrim: var(--blk-900);
   --crole-scrim-60: color-mix(in srgb, var(--blk-900) 60%, transparent);
   --crole-scrim-25: color-mix(in srgb, var(--blk-900) 25%, transparent);

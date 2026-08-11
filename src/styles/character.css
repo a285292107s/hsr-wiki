@@ -25,10 +25,11 @@
 /* ═══════════ Hero · 档案陈列 ═══════════ */
 .nk-char-page .nk-hero { background: transparent; }
 
-/* 视觉区：右侧宽幅暗化（立绘融底，消除色块边界）+ 底部渐融面板 */
+/* 视觉区：左缘窄幅渐入（防贴边）+ 右侧宽幅暗化（立绘融底，消除色块边界）+ 底部渐融面板 */
 .nk-char-page .nk-hero__visual {
   box-shadow:
     inset 0 0 90px 24px color-mix(in srgb, var(--blk-900) 72%, transparent),
+    inset 48px 0 40px -16px color-mix(in srgb, var(--blk-900) 90%, transparent),
     inset -150px 0 110px -40px color-mix(in srgb, var(--blk-900) 92%, transparent),
     inset 0 -56px 64px -24px color-mix(in srgb, var(--blk-900) 92%, transparent);
 }
@@ -105,10 +106,10 @@
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
   letter-spacing: 0.22em; color: var(--text3); text-transform: uppercase;
 }
-/* 标题装饰：短横线（取代渐变竖条） */
+/* 标题装饰：短横线（与章节延伸线同语言；迭代 §14 主色三锚点——非身份锚点降级中性） */
 .nk-char-page .nk-hero__section-bar {
   width: 20px; height: 1px; border-radius: 0;
-  background: linear-gradient(90deg, var(--primary), transparent);
+  background: linear-gradient(90deg, var(--line-2), transparent);
 }
 /* 规格表：行式数据（图标 + 标签 + 右对齐等宽数值），行间中性细线 */
 .nk-char-page .nk-hero__stats {
@@ -560,7 +561,7 @@
 .nk-char-page .nk-enh-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 10;
   background: color-mix(in srgb, var(--blk-900) 97%, transparent);
-  backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  backdrop-filter: blur(12px) saturate(1.1); -webkit-backdrop-filter: blur(12px) saturate(1.1);
   border-bottom: 1px solid var(--line-1);
 }
 /* 内容区避让侧栏：在（视口 - 侧栏宽）区域内居中，与滚动容器内容对齐 */
@@ -568,7 +569,7 @@
   .nk-char-page .nk-enh-bar { padding-left: 72px; }
 }
 @media (min-width: 1024px) {
-  .nk-char-page .nk-enh-bar { padding-left: 88px; }
+  .nk-char-page .nk-enh-bar { padding-left: 88px; backdrop-filter: none; -webkit-backdrop-filter: none; } /* blur 分层（迭代 §14）：0.97 近实底下桌面去 blur 降合成成本 */
 }
 .nk-char-page .nk-enh-bar__inner {
   display: flex; align-items: center; gap: 8px;
@@ -641,7 +642,7 @@
   border: 1px solid var(--line-1); border-radius: 10px;
 }
 .nk-char-page .nk-enh-notes__title {
-  font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.1em;
+  font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.1em; /* 字号下界（迭代 §14） */
   text-transform: uppercase; color: var(--gold-sem); font-weight: 700;
 }
 .nk-char-page .nk-enh-notes__list {
@@ -674,7 +675,7 @@
 .nk-char-page .nk-eidolon__enh-badge {
   position: absolute; top: 10px; right: 10px;
   display: inline-flex; align-items: center; gap: 4px;
-  font-family: var(--font-hud); font-size: 0.45rem; letter-spacing: 0.08em;
+  font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.08em; /* 字号下界（迭代 §14） */
   padding: 2px 7px; border-radius: 3px;
   font-weight: 700; z-index: 2; pointer-events: none;
   background: color-mix(in srgb, var(--gold-sem) 15%, transparent);
@@ -815,7 +816,7 @@
   .nk-char-page .nk-build__team-slot--main .nk-build__team-link::after {
     content: '当前';
     position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
-    font-family: var(--font-hud); font-size: 0.45rem; font-weight: 700;
+    font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700; /* 字号下界（迭代 §14） */
     letter-spacing: 0.12em; color: var(--primary); white-space: nowrap;
   }
 }

@@ -40,6 +40,8 @@
 /* 区块导航：激活态用模式色（身份锚点，覆盖 tokens 默认主色） */
 .nk-egd-secnav .nk-secnav__btn--active { color: var(--eg-color); }
 .nk-egd-secnav .nk-secnav__btn--active::after { background: var(--eg-color); }
+/* 触控热区补足 44px（§13.7 硬标准：tokens 全局 ::before 上下 -7px，实测 28px 视觉合计 42px，此处补 1px） */
+.nk-egd-secnav .nk-secnav__btn::before { top: -8px; bottom: -8px; }
 /* 章节工具行：层级批量展开/折叠（位于"关卡层级 LEVELS"标题行内，随章节同屏；
    按钮紧跟标题文字，延伸线保持完整收束；::before 扩展 44px 热区） */
 .nk-egd-title-tools {
@@ -188,19 +190,6 @@
   height: 100px;
   object-fit: contain;
 }
-/* （兼容保留：编号类已废弃，模板不再使用，移至 __sid 弱化展示） */
-.nk-egd-hero__num {
-  font-family: var(--font-hud);
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.03em;
-  color: var(--text-bright);
-  text-shadow: none;
-  font-variant-numeric: tabular-nums;
-}
-.nk-egd-hero__num--long { font-size: 1.5rem; }
-
 /* 信息面板 */
 .nk-egd-hero__panel {
   position: relative;
@@ -426,6 +415,7 @@
 .nk-egd-floor:first-child { border-top: none; padding-top: 6px; }
 /* 章节头（层头 button：点击切换折叠；折叠态即层级索引；去卡后行 hover 承载反馈） */
 .nk-egd-floor__head {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -440,6 +430,12 @@
   color: inherit;
   cursor: pointer;
   transition: background 0.2s var(--ease);
+}
+/* 触控热区扩展至 ≥44px（§13.7 硬标准：视觉高度近 44px，上下各补 4px 余量） */
+.nk-egd-floor__head::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
 }
 .nk-egd-floor__head:hover {
   background: color-mix(in srgb, var(--eg-color) 5%, transparent);
@@ -1258,6 +1254,7 @@
    无容器化背景，hover 仅模式色 6% 微亮（与波次头同语言）。 */
 .nk-egd-tierce__nodehead {
   all: unset;
+  position: relative;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1266,6 +1263,12 @@
   border-radius: 6px;
   transition: background 0.2s var(--ease);
   user-select: none;
+}
+/* 触控热区扩展至 ≥44px（§13.7 硬标准：视觉约 28px 高，上下各扩 10px） */
+.nk-egd-tierce__nodehead::before {
+  content: '';
+  position: absolute;
+  inset: -10px 0;
 }
 .nk-egd-tierce__nodehead:hover {
   background: color-mix(in srgb, var(--eg-color) 6%, transparent);
@@ -1358,6 +1361,7 @@
 /* ── 波次头部（分组标签栏：点击整栏切换波次折叠） ── */
 .nk-egd-tierce__wavehead {
   all: unset;
+  position: relative;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1366,6 +1370,12 @@
   transition: background 0.2s var(--ease);
   user-select: none;
   border-radius: 6px;
+}
+/* 触控热区扩展至 ≥44px（§13.7 硬标准：视觉约 33px 高，上下各扩 7px） */
+.nk-egd-tierce__wavehead::before {
+  content: '';
+  position: absolute;
+  inset: -7px 0;
 }
 .nk-egd-tierce__wavehead:hover {
   background: color-mix(in srgb, var(--eg-color) 6%, transparent);
@@ -1430,24 +1440,6 @@
   gap: 10px;
   margin-bottom: 0;
 }
-/* 兼容：旧 wavelabel 类名兜底，使其视觉退化。 */
-.nk-egd-tierce__wavelabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-hud);
-  font-size: 0.66rem;
-  letter-spacing: 0.1em;
-  color: var(--text3);
-}
-.nk-egd-tierce__wavelabel::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--line-2);
-  flex-shrink: 0;
-}
 
 /* ═══════════════════════════════════════════
    星启通关奖励（虚构叙事 EGEEJLHBALB：物品行 + 通关目标分数）
@@ -1494,7 +1486,7 @@
   padding: 6px 12px 6px 6px;
   background: color-mix(in srgb, var(--blk-900) 14%, transparent);
   border: 1px solid var(--line-1);
-  border-radius: 10px;
+  border-radius: var(--nk-radius-card);
   transition: border-color 0.2s;
 }
 .nk-egd-reward__item:hover { border-color: var(--line-2); }
@@ -1539,7 +1531,7 @@
   gap: 12px;
   padding: 14px 16px;
   border: 1px solid var(--line-1);
-  border-radius: 12px;
+  border-radius: var(--nk-radius-card);
   background: color-mix(in srgb, var(--blk-900) 14%, transparent);
   transition: border-color 0.22s ease, background 0.22s ease;
 }
@@ -1609,17 +1601,11 @@
   .nk-egd-hero__name { font-size: 1.35rem; }
   .nk-egd-hero__sid { font-size: 0.66rem; padding: 2px 8px; }
   /* 桌面端标签基线一致，移动端不降档，避免 <10px */
-  .nk-egd-bar__collapse-text { font-size: 0.72rem; }
   .nk-egd-hero__status { font-size: 0.7rem; padding: 5px 11px; }
   .nk-egd-peak__kind { font-size: 0.7rem; }
   .nk-egd-floor__targetidx { font-size: 0.78rem; }
   .nk-egd-floor__stagelabel { font-size: 0.7rem; }
   .nk-egd-floor__wavelabel { font-size: 0.7rem; }
-  .nk-egd-floor__waveidx { font-size: 0.66rem; }
-  .nk-egd-floor__mon-tag,
-  .nk-egd-floor__mon-stats-item { font-size: 0.7rem; }
-  .nk-egd-floor__data-label,
-  .nk-egd-floor__mon-stat-label { font-size: 0.66rem; }
   .nk-egd-mon__tag { font-size: 0.7rem; }
   .nk-egd-mon__rank { font-size: 0.64rem; }
   .nk-egd-mon__label { font-size: 0.68rem; }

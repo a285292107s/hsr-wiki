@@ -171,7 +171,7 @@ function bySeasonDesc(a: CatalogItem, b: CatalogItem): number {
 
 /**
  * 终局内容单页：四模式数据合并，模式身份经筛选面板切换（原 Tab 子导航移除）。
- * 卡片共享星际档案布局，--eg-color 经 data-mode 映射（领域层 --eg-* 令牌）。
+ * 卡片共享星际档案布局，统一主色（--primary），模式身份由筛选面板与赛季图标承载。
  */
 export const endgamePage: CatalogPageConfig = {
   id: 'endgame',
@@ -283,8 +283,12 @@ export const endgamePage: CatalogPageConfig = {
     const stCls = MAZE_STATUS_CLASS[st] || 'unknown';
     const mode = ENDGAME_MODES.find((m) => m.key === item.mode);
     const date = item.dateRange ? `<span class="nk-eg-card__date">${escHtml(String(item.dateRange))}</span>` : '';
-    const badge = st !== '未知' ? `<span class="nk-eg-card__status">${escHtml(st)}</span>` : '';
-
+    // 档案编号（编号=身份，编辑式锚点）：catalog id 为 "ID 3020"，取纯数字段展示 № 编号；
+    // 位于印记区图标底部（meta 行不再承载）
+    const no = String(item.id).replace(/^ID\s*/i, '');
+    const noHtml = no ? `<span class="nk-eg-card__no">№ ${escHtml(no)}</span>` : '';
+    // 状态徽标：色点 + 文字（不单靠颜色传达，§13.7 无障碍）——色点经 --st-color 映射
+    const badge = st !== '未知' ? `<span class="nk-eg-card__status"><span class="nk-eg-card__dot"></span>${escHtml(st)}</span>` : '';
     // 铭牌徽标：星启模式赛季 / 异相仲裁关卡组成
     // （FINAL 最终层标识已移除：层数统计为模式内恒值冗余——maze 10/12 层、story 4 层、boss 4 层，可由模式推断）
     // 赛季图标（seasonArtUrl：赛季专属优先，玩法级默认兜底；有可用图标时经 --has-art
@@ -340,22 +344,29 @@ export const endgamePage: CatalogPageConfig = {
           }).join('')}${mons.length > 4 ? `<span class="nk-eg-card__more">+${mons.length - 4}</span>` : ''}</span></div>`
       : '';
 
+    // 数据行存在时，会话与档案体之间插入 1px 编辑式分隔线（模板驱动，比 :first-child 选择器稳健）
+    const rowsHtml = buffHtml + monHtml;
+    const dividerHtml = rowsHtml ? '<div class="nk-eg-card__divider"></div>' : '';
+
     return `<a class="nk-eg-card nk-eg-card--${stCls}${hasArt ? ' nk-eg-card--has-art' : ''}" href="${escHtml(item.href)}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
-      <div class="nk-eg-card__plate">
+      <div class="nk-eg-card__seal">
         <span class="nk-eg-card__emblem">${mode?.emblem || ''}</span>
         ${artHtml}
+        ${noHtml}
       </div>
       <div class="nk-eg-card__body">
+        <div class="nk-eg-card__meta">
+          ${badge}
+        </div>
         <div class="nk-eg-card__head">
           <span class="nk-eg-card__name">${escHtml(item.name) || '未命名赛季'}</span>
           ${permHtml}
           ${testHtml}
           ${tierHtml}
-          ${badge}
         </div>
         ${date ? `<div class="nk-eg-card__daterow">${date}</div>` : ''}
-        ${buffHtml}
-        ${monHtml}
+        ${dividerHtml}
+        ${rowsHtml}
       </div>
     </a>`;
   },
