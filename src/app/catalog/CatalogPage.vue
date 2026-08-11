@@ -320,6 +320,7 @@ onBeforeUnmount(() => {
     <template v-else>
       <CatalogToolbar
         :title="config.title"
+        :subtitle="config.subtitle"
         :placeholder="config.searchPlaceholder"
         :query="query"
         :count-text="phase === 'loading' ? '—' : `${filtered.length} / ${items.length}`"

@@ -10,7 +10,7 @@ import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';
 import { fmtDesc, lightconeIconUrl, itemName } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
-import { PATH } from '../../lib/constants';
+import { PATH, SITE_NAME } from '../../lib/constants';
 import type { LightConeStats } from '../../services/types';
 // 光锥详情页专属样式（随本路由 chunk 懒加载；技能卡片原语与角色页共享）
 import '../../styles/skill-card.css';
@@ -41,7 +41,7 @@ watch(phase, (p) => {
 const d = computed(() => lc.data);
 /** 动态页面标题 */
 watch(d, (data) => {
-  if (data) document.title = `${data.name} - 咸鱼百科`;
+  if (data) document.title = `${data.name} - ${SITE_NAME}`;
 });
 
 async function load(id: string): Promise<void> {

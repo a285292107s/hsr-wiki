@@ -371,7 +371,7 @@ onBeforeUnmount(() => {
   .nk-spine-audit { margin-left: 72px; }
 }
 @media (min-width: 1024px) {
-  .nk-spine-audit { margin-left: 88px; }
+  .nk-spine-audit { margin-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
 }
 
 /* ─── 头部 ─── */
@@ -444,8 +444,7 @@ onBeforeUnmount(() => {
 .nk-spine-audit__progress-bar {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--primary), var(--ph-400));
-  box-shadow: 0 0 8px var(--primary-glow);
+  background: linear-gradient(90deg, var(--primary), var(--th-400));
   transition: width 0.3s;
 }
 .nk-spine-audit__error {
@@ -641,7 +640,7 @@ onBeforeUnmount(() => {
   font-weight: 600;
   box-shadow: 0 0 14px var(--primary-glow);
 }
-.nk-spine-audit__btn.is-primary:hover:not(:disabled) { border-color: var(--ph-400); box-shadow: 0 0 20px var(--primary-glow); }
+.nk-spine-audit__btn.is-primary:hover:not(:disabled) { border-color: var(--th-400); box-shadow: 0 0 20px var(--primary-glow); }
 
 @media (max-width: 560px) {
   .nk-spine-audit { padding: 16px 12px; }

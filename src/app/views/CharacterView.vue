@@ -16,6 +16,7 @@ import SkillsPanel from '../character/SkillsPanel.vue';
 import EidolonsPanel from '../character/EidolonsPanel.vue';
 import BuildsPanel from '../character/BuildsPanel.vue';
 import { visibleSections, SECTION_IDX } from '../character/sections';
+import { SITE_NAME } from '../../lib/constants';
 import { loadSkillAnimations } from '../../services/api';
 import { gameTagsToHtml } from '../../lib/format';
 import type { CharacterData, SkillAnimationsDb } from '../../services/types';
@@ -36,7 +37,7 @@ const phase = computed<'loading' | 'error' | 'ready'>(() =>
 const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 /** 动态页面标题 */
 watch(() => char.data, (data) => {
-  if (data) document.title = `${data.name} - 咸鱼百科`;
+  if (data) document.title = `${data.name} - ${SITE_NAME}`;
 });
 /** 渲染数据：强化模式 → 强化视图；原始模式 → 原数据 */
 const d = computed<CharacterData | null>(() => char.renderData);

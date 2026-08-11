@@ -4,12 +4,15 @@ import App from './App.vue';
 import { createNkRouter } from './router';
 import { installCdnImgFallback, startCdnHealthProbe, subscribeCdnHealth } from '../services/cdn';
 import { useAppStore } from './stores/app';
+import { initAccent } from '../lib/theme';
 // 全局样式仅保留设计令牌与共享目录引擎；页面专属样式随路由 chunk 懒加载
 // （character/lightcone/relic/currency-* 各自视图内 import）
 import '../styles/tokens.css';
 import '../styles/catalog.css';
 
 export async function bootstrap(): Promise<void> {
+  // 在挂载前写入持久化主题强调色（避免首帧主题闪烁）
+  initAccent();
   const app = createApp(App);
   const router = createNkRouter();
   app.use(createPinia());

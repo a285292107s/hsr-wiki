@@ -21,7 +21,7 @@
   font-weight: 700; letter-spacing: 0.04em;
 }
 .nk-relic-type-badge--cavern {
-  color: var(--ph-300); background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  color: var(--th-300); background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: color-mix(in srgb, var(--primary) 40%, transparent);
 }
 .nk-relic-type-badge--planar {
   color: var(--relic-planar); background: color-mix(in srgb, var(--relic-planar-deep) 12%, transparent); border-color: color-mix(in srgb, var(--relic-planar-deep) 35%, transparent);

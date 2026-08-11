@@ -10,7 +10,7 @@ import { useAppStore } from '../stores/app';
 import { useRelicStore } from '../stores/relic';
 import { fmtDesc, itemIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
-import { PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES } from '../../lib/constants';
+import { PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES, SITE_NAME } from '../../lib/constants';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
 // 遗器详情页专属样式（随本路由 chunk 懒加载）
 import '../../styles/relic.css';
@@ -40,7 +40,7 @@ watch(phase, (p) => {
 const d = computed(() => relic.data);
 /** 动态页面标题 */
 watch(d, (data) => {
-  if (data) document.title = `${data.name} - 咸鱼百科`;
+  if (data) document.title = `${data.name} - ${SITE_NAME}`;
 });
 
 async function load(id: string): Promise<void> {

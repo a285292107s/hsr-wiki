@@ -6,29 +6,38 @@
 /* ═══════════════════════════════════════════
    角色列表页（完全重构）
 ═══════════════════════════════════════════ */
-#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px 88px; background: radial-gradient(ellipse at 50% 0%, var(--nk-page-tint) 0%, transparent 60%); }
+#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px 88px; background: radial-gradient(ellipse at 50% 0%, var(--nk-page-tint) 0%, transparent 60%); --cat-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; --cat-max: 1440px; }
+/* 页头英文副标（档案元信息）：等宽小字 + 竖线分隔，无装饰元素 */
+#nk-catalog-app .nk-cat-subtitle { display: inline-block; font-family: var(--cat-mono); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text3); border-left: 1px solid var(--line-2); padding-left: 10px; margin-left: 2px; flex-shrink: 0; }
 #nk-catalog-app::-webkit-scrollbar { width: 6px; }
 #nk-catalog-app::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 #nk-catalog-app::-webkit-scrollbar-track { background: transparent; }
 
-/* 顶部栏 */
-.nk-cat-header { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 14px; padding: 14px 0; background: var(--nk-header-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--nk-header-border); margin: 0 -24px 0 -88px; padding-left: 88px; padding-right: 24px; }
-.nk-cat-title { font-family: var(--font-hud); font-size: 1rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.12em; text-transform: uppercase; flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
-/* 标题延伸线：主色端点（无霓虹 glow，墨色分层） */
-.nk-cat-title::after { content: ''; width: 32px; height: 1px; background: linear-gradient(90deg, var(--primary), transparent); }
-.nk-cat-search { flex: 1; min-width: 120px; max-width: 280px; display: flex; align-items: center; gap: 8px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 10px; padding: 7px 14px; transition: all 0.2s; }
+/* ═══ 页头（档案式 masthead）+ 吸顶工具条 ═══
+   关系：masthead 非吸顶（页面仪式入口，随内容滚动离开）；toolbar 吸顶（轻量工具：搜索 + 筛选）。
+   两者均从内容区左边缘开始（88px 避让后），与左侧导航胶囊形成干净的 L 型并行，
+   不再横贯到导航下方产生 z 重叠。 */
+.nk-cat-masthead { display: flex; align-items: baseline; gap: 16px; padding: 26px 0 16px; }
+/* 标题：正文粗体承载中文（Orbitron 无中文字形，HUD 感由字号/字重/字距承担），
+   发丝线 flex 占满标题与元信息中缝 */
+.nk-cat-title { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 12px; font-family: var(--font-body); font-size: 1.3rem; font-weight: 900; letter-spacing: 0.04em; color: var(--text-bright); white-space: nowrap; overflow: hidden; }
+.nk-cat-title::after { content: ''; flex: 1; height: 1px; align-self: center; background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 55%, transparent 100%); }
+/* 计数元信息：等宽小字，右对齐（档案数据头） */
+.nk-cat-count { flex-shrink: 0; font-family: var(--cat-mono); font-size: 0.62rem; letter-spacing: 0.18em; color: var(--text3); white-space: nowrap; }
+/* 吸顶工具条：轻量层，仅搜索 + 筛选；滚动后钉在容器顶部（内容区内，不与侧栏重叠） */
+.nk-cat-toolbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 12px; padding: 8px 0; background: var(--nk-header-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--nk-header-border); }
+.nk-cat-search { flex: 1; min-width: 120px; max-width: 320px; display: flex; align-items: center; gap: 8px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 10px; padding: 7px 14px; transition: all 0.2s; }
 .nk-cat-search:focus-within { border-color: var(--primary); background: var(--nk-shell-hover); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
 .nk-cat-search svg { width: 14px; height: 14px; color: var(--text3); flex-shrink: 0; }
 .nk-cat-search input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 0.8rem; font-family: var(--font-body); }
 .nk-cat-search input::placeholder { color: var(--text3); }
-.nk-cat-count { font-family: var(--font-hud); font-size: 0.6rem; color: var(--text3); letter-spacing: 0.1em; flex-shrink: 0; }
 .nk-cat-filter-btn { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 10px; background: var(--nk-shell-hover); border: 1px solid var(--nk-input-border); color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0; position: relative; }
 /* 触控热区垂直扩展至 ≥44px（视觉 ≈28px + 上下各 8px） */
 .nk-cat-filter-btn::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
 .nk-cat-filter-btn:hover { background: var(--nk-shell-press); border-color: var(--primary); color: var(--text-bright); }
 .nk-cat-filter-btn .arrow { width: 12px; height: 12px; transition: transform 0.2s; flex-shrink: 0; }
 /* 选中态：与筛选 chip 同语言——primary-glow 淡底 + 主色边框 + 克制光晕（克制用色，禁实底填充） */
-.nk-cat-filter-btn.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 10px color-mix(in srgb, var(--primary) 20%, transparent); }
+.nk-cat-filter-btn.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); }
 .nk-cat-filter-btn.active .arrow { transform: rotate(180deg); }
 .nk-cat-filter-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -46,7 +55,7 @@
 .nk-cat-chip__icon { width: 16px; height: 16px; border-radius: 50%; object-fit: contain; flex-shrink: 0; }
 .nk-cat-chip__star { width: 12px; height: 12px; color: var(--gold); flex-shrink: 0; }
 .nk-cat-chip:hover { border-color: var(--border2); color: var(--text); }
-.nk-cat-chip.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); box-shadow: 0 0 10px color-mix(in srgb, var(--primary) 20%, transparent); }
+.nk-cat-chip.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); }
 
 /* 网格
    列宽抽变量：骨架屏与真实网格共用同一 minmax，避免切换时列数突变导致 CLS */
@@ -56,76 +65,157 @@
 .nk-virtual-grid { display: block; position: relative; }
 /* 虚拟网格卡片：Observer 驱动的入场动画 */
 .nk-virtual-cell .nk-item-card,
-.nk-virtual-cell .nk-cat-card,
+.nk-virtual-cell .nk-idx-card,
 .nk-virtual-cell .nk-lc-card { opacity: 0; transform: translateY(16px); }
 .nk-virtual-cell.nk-revealed .nk-item-card,
-.nk-virtual-cell.nk-revealed .nk-cat-card,
+.nk-virtual-cell.nk-revealed .nk-idx-card,
 .nk-virtual-cell.nk-revealed .nk-lc-card { opacity: 1; transform: none; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: var(--reveal-delay, 0ms); }
 .nk-virtual-grid .nk-item-card__img img,
-.nk-virtual-grid .nk-cat-card__img img,
+.nk-virtual-grid .nk-idx-card__portrait img,
 .nk-virtual-grid .nk-lc-card__img img { opacity: 0; transition: opacity 0.25s ease; }
 .nk-virtual-grid .nk-item-card__img img.loaded,
-.nk-virtual-grid .nk-cat-card__img img.loaded,
+.nk-virtual-grid .nk-idx-card__portrait img.loaded,
 .nk-virtual-grid .nk-lc-card__img img.loaded { opacity: 1; }
 /* 快速跳跃降级：纯淡入，无 translateY，减少视觉噪音 */
 .nk-fast-jump .nk-virtual-cell .nk-item-card,
-.nk-fast-jump .nk-virtual-cell .nk-cat-card,
+.nk-fast-jump .nk-virtual-cell .nk-idx-card,
 .nk-fast-jump .nk-virtual-cell .nk-lc-card { transform: none; }
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-item-card,
-.nk-fast-jump .nk-virtual-cell.nk-revealed .nk-cat-card,
+.nk-fast-jump .nk-virtual-cell.nk-revealed .nk-idx-card,
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-lc-card { animation: nk-card-fade 0.25s ease backwards; }
 
-/* 卡片 */
-.nk-cat-card { --elem-color: color-mix(in srgb, var(--primary) 60%, transparent); --holo-color: color-mix(in srgb, var(--ph-400) 70%, transparent); position: relative; isolation: isolate; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: var(--nk-radius-card); overflow: hidden; cursor: pointer; text-decoration: none; display: block; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
-/* 星级差异化边框（须在 :hover 规则之前，保证 hover 时元素色边框可覆盖） */
-.nk-cat-card[data-rarity="5"] { --holo-color: color-mix(in srgb, var(--rarity-5) 60%, transparent); border-color: color-mix(in srgb, var(--rarity-5) 25%, transparent); }
-.nk-cat-card[data-rarity="4"] { --holo-color: color-mix(in srgb, var(--rarity-4) 60%, transparent); border-color: color-mix(in srgb, var(--rarity-4) 20%, transparent); }
-/* :focus-visible 键盘态：3px 紫色 focus ring（无障碍 §1 规范，与光锥卡一致） */
-.nk-cat-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
-.nk-cat-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 7deg)) rotateY(calc(var(--rx, 0) * 7deg)); border-color: color-mix(in srgb, var(--elem-color) 60%, transparent); box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 20px color-mix(in srgb, var(--elem-color) 22%, transparent), 0 0 50px color-mix(in srgb, var(--elem-color) 9%, transparent); }
-.nk-cat-card[data-rarity="5"]:hover { box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 20px color-mix(in srgb, var(--elem-color) 22%, transparent), 0 0 50px color-mix(in srgb, var(--elem-color) 9%, transparent), 0 0 14px color-mix(in srgb, var(--rarity-5) 10%, transparent); }
+/* 角色名录网格（星穹档案 · 编辑式名录，替代霓虹卡片墙）
+   列宽抽变量：骨架屏与真实网格共用同一 minmax，避免切换时列数突变导致 CLS；
+   分档断点见下方「名录网格分档」：随视口放大格子，约束列数，抑制超宽屏拥挤 */
+.nk-idx-grid {
+  --nk-grid-min: 240px;
+  --nk-grid-gap: 8px 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr));
+  gap: var(--nk-grid-gap);
+  padding-top: 20px;
+}
+/* 名录格：左立绘头图窗 + 右文字主从结构。无边框盒、无浮起、无霓虹，
+   hover 仅左侧主色档案竖条 + 名字变色 + 背景微亮（与首页深空档案语言统一） */
+.nk-idx-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  overflow: hidden;
+  transition: background 0.22s var(--nk-ease-out), border-color 0.22s var(--nk-ease-out);
+  animation: nk-idx-in 0.4s var(--nk-ease-out) backwards;
+  animation-delay: min(calc(var(--i, 0) * 16ms), 480ms);
+}
+/* 左侧档案竖条：hover / 键盘聚焦时自中段展开（编辑式索引高亮，无 glow） */
+.nk-idx-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 2px; height: 0;
+  transform: translateY(-50%);
+  border-radius: 1px;
+  background: var(--primary);
+  opacity: 0;
+  transition: height 0.22s var(--nk-ease-out), opacity 0.22s;
+  pointer-events: none;
+}
+.nk-idx-card:hover, .nk-idx-card:focus-visible {
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+  border-color: var(--line-1);
+}
+.nk-idx-card:hover::before, .nk-idx-card:focus-visible::before { height: 62%; opacity: 1; }
+/* 立绘头图窗：cover 裁切至人物头部（立绘头部约在画面上部），档案头像感 */
+.nk-idx-card__portrait {
+  flex: none;
+  width: 50px;
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  border: 1px solid var(--line-1);
+}
+.nk-idx-card__portrait img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  transition: transform 0.35s var(--nk-ease-out);
+}
+.nk-idx-card:hover .nk-idx-card__portrait img { transform: scale(1.05); }
+/* 文字主从：名字行（名字 + 星级同行） + 属性/命途元信息行 */
+.nk-idx-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.nk-idx-card__name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.nk-idx-card__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+.nk-idx-card:hover .nk-idx-card__name { color: var(--metric-val); }
+/* 星级：稀有度语义色（5 金 / 4 紫），无发光无阴影 */
+.nk-idx-card__stars {
+  flex: none;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--rarity-5);
+}
+.nk-idx-card[data-rarity="4"] .nk-idx-card__stars { color: var(--rarity-4); }
+/* 元信息行：属性/命途图标 + 中文名，· 分隔 */
+.nk-idx-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.68rem;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.nk-idx-card__icon { width: 13px; height: 13px; border-radius: 50%; flex: none; }
+.nk-idx-card__sep { color: var(--text3); opacity: 0.5; margin: 0 2px; }
+@keyframes nk-idx-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes nk-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes nk-card-fade { from { opacity: 0; } to { opacity: 1; } }
-/* 属性色顶部光斑（椭圆顶光，如舞台灯光洒落）；墨色分层：常驻 18% 克制浓度，hover 增强 */
-.nk-cat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 34%; background: radial-gradient(ellipse 75% 100% at 50% 0%, var(--elem-color) 0%, color-mix(in srgb, var(--elem-color) 55%, transparent) 30%, color-mix(in srgb, var(--elem-color) 20%, transparent) 55%, transparent 78%); z-index: 2; opacity: 0.18; transition: opacity 0.3s; pointer-events: none; }
-.nk-cat-card:hover::before, .nk-cat-card:focus-visible::before { opacity: 0.32; }
-.nk-cat-card[data-element="fire"] { --elem-color: color-mix(in srgb, var(--elem-fire) 70%, transparent); }
-.nk-cat-card[data-element="ice"] { --elem-color: color-mix(in srgb, var(--elem-ice) 70%, transparent); }
-.nk-cat-card[data-element="thunder"] { --elem-color: color-mix(in srgb, var(--elem-thunder) 70%, transparent); }
-.nk-cat-card[data-element="wind"] { --elem-color: color-mix(in srgb, var(--elem-wind) 70%, transparent); }
-.nk-cat-card[data-element="quantum"] { --elem-color: color-mix(in srgb, var(--elem-quantum) 70%, transparent); }
-.nk-cat-card[data-element="imaginary"] { --elem-color: color-mix(in srgb, var(--elem-imaginary) 70%, transparent); }
-.nk-cat-card[data-element="physical"] { --elem-color: color-mix(in srgb, var(--elem-physical) 70%, transparent); }
-/* 头像区 */
-.nk-cat-card__img { position: relative; aspect-ratio: 3/4; overflow: hidden; background: color-mix(in srgb, var(--blk-900) 50%, transparent); }
-/* 全息扫光：与首页/光锥卡片统一的白核高光扫过（screen 混合），在头像材质层内移动，信息与图标始终位于高光之上。 */
-.nk-cat-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); transform-origin: center; backface-visibility: hidden; }
-.nk-cat-card:hover .nk-cat-card__img::before, .nk-cat-card:focus-visible .nk-cat-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
+/* 全息扫光 keyframes（光锥/遗器/物品/怪物卡片共用，勿删） */
 @keyframes nk-card-sheen { 0%, 6% { opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); } 24% { opacity: 0.5; } 52% { opacity: 0.68; } 80% { opacity: 0.48; } 100% { opacity: 0; transform: translate3d(430%,0,0) rotate(-22deg); } }
-.nk-cat-card__img img.avatar { width: 100%; height: 100%; object-fit: contain; padding: 8px; transition: transform 0.4s var(--ease); }
-.nk-cat-card:hover .nk-cat-card__img img.avatar { transform: scale(1.06); }
-.nk-cat-card__img::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 45%; background: linear-gradient(to top, color-mix(in srgb, var(--blk-850) 85%, transparent), transparent); pointer-events: none; }
-.nk-cat-card__icons { position: absolute; top: 6px; right: 6px; display: flex; gap: 4px; z-index: 2; }
-.nk-cat-card__elem, .nk-cat-card__path { width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--blk-900) 75%, transparent); border: 1px solid var(--border); padding: 2px; transition: transform 0.3s, box-shadow 0.3s; }
-.nk-cat-card:hover .nk-cat-card__elem, .nk-cat-card:hover .nk-cat-card__path { transform: scale(1.15); box-shadow: 0 0 10px var(--primary-glow); }
-/* 信息区（左下角叠加） */
-.nk-cat-card__info { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 8px 10px; }
-.nk-cat-card__stars { font-size: 0.6rem; letter-spacing: 1.5px; color: var(--gold); text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-5) 50%, transparent); line-height: 1; }
-.nk-cat-card__name { font-size: 0.78rem; font-weight: 700; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
 
 @media (prefers-reduced-motion: reduce) {
-  .nk-cat-card:hover .nk-cat-card__img::before, .nk-cat-card:focus-visible .nk-cat-card__img::before { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); will-change: auto; }
   .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: none; opacity: 0.12; transform: translate3d(215%,0,0); will-change: auto; }
   /* 禁用所有卡片入场动画 */
-  .nk-cat-card, .nk-lc-card, .nk-relic-card, .nk-item-card, .nk-mob-card { animation: none; }
-  .nk-virtual-cell .nk-item-card, .nk-virtual-cell .nk-cat-card, .nk-virtual-cell .nk-lc-card { opacity: 1; transform: none; }
-  .nk-virtual-cell.nk-revealed .nk-item-card, .nk-virtual-cell.nk-revealed .nk-cat-card, .nk-virtual-cell.nk-revealed .nk-lc-card { animation: none; }
+  .nk-idx-card, .nk-lc-card, .nk-relic-card, .nk-item-card, .nk-mob-card { animation: none; }
+  .nk-idx-card:hover::before { height: 0; opacity: 0; }
+  .nk-virtual-cell .nk-item-card, .nk-virtual-cell .nk-idx-card, .nk-virtual-cell .nk-lc-card { opacity: 1; transform: none; }
+  .nk-virtual-cell.nk-revealed .nk-item-card, .nk-virtual-cell.nk-revealed .nk-idx-card, .nk-virtual-cell.nk-revealed .nk-lc-card { animation: none; }
 }
 
 /* 空结果状态 */
 .nk-cat-empty { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 72px 0; text-align: center; }
 .nk-cat-empty.show { display: flex; animation: nk-home-fade-up 0.35s var(--ease); }
-.nk-cat-empty__icon { font-family: var(--font-hud); font-size: 1.3rem; font-weight: 900; letter-spacing: 0.1em; color: color-mix(in srgb, var(--primary) 40%, transparent); text-shadow: 0 0 24px var(--primary-glow); }
+.nk-cat-empty__icon { font-family: var(--font-hud); font-size: 1.3rem; font-weight: 900; letter-spacing: 0.1em; color: color-mix(in srgb, var(--primary) 40%, transparent); }
 .nk-cat-empty__text { font-family: var(--font-hud); font-size: 0.62rem; letter-spacing: 0.22em; color: var(--text3); }
 .nk-cat-empty__sub { font-size: 0.72rem; color: var(--text3); opacity: 0.7; }
 
@@ -148,8 +238,8 @@
   .nk-lc-card:hover .nk-lc-card__img img.lc-avatar { transform: scale(1.16); }
   .nk-lc-card:hover .nk-lc-card__badge img { transform: scale(1.1); }
 }
-/* 辉光统一：所有星级共用同一中性紫色辉光（稀有度差异由星标等语义渠道表达，辉光不参与分级） */
-.nk-lc-card { --holo-core: color-mix(in srgb, var(--ph-400) 22%, transparent); --holo-tint: color-mix(in srgb, var(--ph-700) 38%, transparent); }
+/* 辉光统一：所有星级共用同一中性暖砖红辉光（稀有度差异由星标等语义渠道表达，辉光不参与分级） */
+.nk-lc-card { --holo-core: color-mix(in srgb, var(--th-400) 22%, transparent); --holo-tint: color-mix(in srgb, var(--th-700) 38%, transparent); }
 /* 图片区背景透明。isolation:isolate 保持 sheen-wrap::before 的 mix-blend-mode:screen 与下层隔离；overflow:visible 保证外层卡片 drop-shadow 不受裁剪（filter 在 .nk-lc-card hover 上） */
 .nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: visible; isolation: isolate; }
 /* 加载骨架：图片未就绪时显示 shimmer，加载完成后（img.loaded）淡出；不引入矩形底，避免双层相框 */
@@ -179,7 +269,7 @@
    - 宽度 46% × 高度 180%：与角色卡片扫光带宽度一致（光带厚度统一）；高度 180% 仍覆盖倾斜容器的完整对角线（≈ 220px）
    - 入场 left:-70%：从相框左上切角外侧进入
    - 动画终点 translate3d(430%…）：从相框右下切角外侧离开 */
-.nk-lc-card__sheen-wrap::before { content: ""; position: absolute; width: 46%; height: 180%; top: -40%; left: -70%; z-index: 1; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-core, var(--ph-400)) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-core, var(--ph-400)) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; backface-visibility: hidden; transform: translate3d(0,0,0); }
+.nk-lc-card__sheen-wrap::before { content: ""; position: absolute; width: 46%; height: 180%; top: -40%; left: -70%; z-index: 1; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-core, var(--th-400)) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-core, var(--th-400)) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; backface-visibility: hidden; transform: translate3d(0,0,0); }
 @media (hover: hover) and (pointer: fine) {
   .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
 }
@@ -192,18 +282,90 @@
 .nk-lc-card__name { font-size: 0.82rem; font-weight: 700; line-height: 1.25; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
 
 /* ═══════════════════════════════════════════
-   遗器列表页
+   遗器列表页 · 典藏图鉴（Artifact Vault）
+   反霓虹语言：无扫光、无 3D 倾斜、无辉光投影。
+   材质 = 稀有度金调色板 + 中性深底 + 发丝线；hover 仅发丝线转金 + 板面 2px 抬升 + 名字转金。
+   套装件数（4件套·隧洞 / 2件套·位面）为遗器独有语义，以 mono 胶囊标签承载。
 ═══════════════════════════════════════════ */
-.nk-relic-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-.nk-relic-card { position: relative; isolation: isolate; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); transform-style: preserve-3d; }
-.nk-relic-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: var(--border2); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 15%, transparent); }
-.nk-relic-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 70%); display: flex; align-items: center; justify-content: center; padding: 12px; }
-.nk-relic-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ph-400) 6%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--ph-400) 6%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
-.nk-relic-card:hover .nk-relic-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; }
-.nk-relic-card__img img { width: 72%; height: 72%; object-fit: contain; transition: transform 0.4s var(--ease); filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
-.nk-relic-card:hover .nk-relic-card__img img { transform: scale(1.1) rotate(2deg); }
-.nk-relic-card__info { padding: 8px 10px 10px; text-align: center; }
-.nk-relic-card__name { font-size: 0.72rem; font-weight: 600; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+.nk-relic-grid { --nk-grid-min: 150px; --nk-grid-gap: 16px; }
+/* 典藏板：卡片自身无框无底，唯一视觉边界是图板发丝线 + 稀有度金调内光 */
+.nk-relic-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  animation: nk-card-in 0.4s var(--ease) backwards;
+  animation-delay: min(calc(var(--i, 0) * 18ms), 540ms);
+}
+/* 图板 */
+.nk-relic-card__plate {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--nk-radius-card);
+  border: 1px solid var(--line-1);
+  background: radial-gradient(circle at 50% 36%,
+    color-mix(in srgb, var(--rarity-5) 9%, transparent) 0%,
+    color-mix(in srgb, var(--blk-900) 42%, transparent) 62%,
+    color-mix(in srgb, var(--blk-900) 64%, transparent) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  overflow: hidden;
+  transition: border-color 0.28s var(--ease), transform 0.28s var(--ease), box-shadow 0.28s var(--ease);
+}
+/* 遗器图标：PNG 透明底，靠板面渐变作占位，自身不设底色 */
+.nk-relic-card__img {
+  width: 66%; height: 66%;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.45));
+  transition: transform 0.32s var(--ease);
+}
+/* 件数标签：眼部 mono + 发丝线胶囊，金调文本（遗器独有语义） */
+.nk-relic-card__tag {
+  position: absolute;
+  top: 9px; left: 9px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  font-family: var(--font-hud);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--rarity-5);
+  line-height: 1;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+/* 信息 */
+.nk-relic-card__info { text-align: center; padding: 0 2px; }
+.nk-relic-card__name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  transition: color 0.24s var(--ease);
+}
+/* hover / 键盘聚焦：无霓虹，仅发丝线转金 + 板面微抬 + 名字转金 */
+.nk-relic-card:hover .nk-relic-card__plate,
+.nk-relic-card:focus-visible .nk-relic-card__plate {
+  border-color: color-mix(in srgb, var(--rarity-5) 42%, transparent);
+  transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 14px 26px rgba(0,0,0,0.38);
+}
+.nk-relic-card:hover .nk-relic-card__img,
+.nk-relic-card:focus-visible .nk-relic-card__img { transform: scale(1.07); }
+.nk-relic-card:hover .nk-relic-card__name,
+.nk-relic-card:focus-visible .nk-relic-card__name { color: var(--metric-val); }
+/* 键盘态：无障碍 focus ring（在发丝线外，不与图板叠加） */
+.nk-relic-card:focus-visible { outline: none; }
+.nk-relic-card:focus-visible .nk-relic-card__plate { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 45%, transparent); }
 
 /* ═══════════════════════════════════════════
    物品列表页
@@ -246,147 +408,174 @@
 .nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 
 /* ═══════════════════════════════════════════
-   首页：沉浸式品牌门户（完全重渲染）
+   首页：深空档案品牌门户（taste-skill 重设计）
+   全屏官网 KV 场景为唯一视觉主角，标题退居左下档案构图；
+   板块入口为编辑式索引（战斗 / 情报 / 独立模式分组）。
+   移除原 HUD 电玩元素：逐字标题动画 / SCROLL 指示 / 3D 倾斜 / 全息扫光 / 漫射发光。
 ═══════════════════════════════════════════ */
-#nk-home-app { position: absolute; inset: 0; left: 0; font-family: var(--font-body); color: var(--text); background: var(--bg); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+#nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); background: var(--bg); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
-#nk-home-app h1, #nk-home-app p { margin: 0; padding: 0; }
+#nk-home-app h1, #nk-home-app h2, #nk-home-app p { margin: 0; padding: 0; }
+/* 首页专属等宽族（编辑式元信息）：替代 Orbitron 的 HUD 味，系统字体零加载 */
+#nk-home-app { --home-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; }
 
-/* ── Hero：官网 KV 场景（Spine 10 层）为主角，标题退居左下 HUD 构图 ── */
+/* ── Hero：全屏官网 KV 场景（Spine 10 层），标题区退居左下 ── */
 /* 背景渐变 = Spine 加载失败/全部层失败时的视觉兜底（主背景层不透明，正常渲染时被完全遮盖）
    内边距移入 __content：内容与导航区共用 1440 居中网格，宽屏下左右对齐不错位 */
-.nk-home-hero { position: relative; height: 100vh; height: 100dvh; min-height: 520px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding: 0 0 108px 0; background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--ph-500) 12%) 100%); }
+.nk-home-hero { position: relative; min-height: 100vh; min-height: 100dvh; overflow: hidden; display: flex; align-items: flex-end; background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--th-500) 12%) 100%); }
 
 /* Hero 背景 Spine（官网背景动画 home-bg：主背景 + 角色群像，全不透明呈现） */
 .nk-home-hero__spine { position: absolute; inset: 0; opacity: 0; transition: opacity 1.6s ease; pointer-events: none; overflow: hidden; }
 .nk-home-hero__spine.nk-on { opacity: 1; }
-/* 手机断点立绘（KV 场景窄屏难以展示 → 随机单角色立绘 cover 铺满）：
-   锚点 center 20% 裁剪顶部空余使角色主体居中（同角色详情页背景规范）；
-   加载失败/进行中时 hero 原生渐变兑底直接承接（元素未渲染） */
-.nk-home-hero__art { position: absolute; inset: 0; background-size: cover; background-position: center 20%; background-repeat: no-repeat; opacity: 0; animation: nk-home-art-in 1.2s var(--ease) forwards; }
+/* 非桌面断点（<1024px）立绘轮播：KV 场景窄屏降级仅主背景层、宽幅 frieze 被裁大半，改为
+   随机五星立绘 cover 铺满；最多两层交叉淡入淡出（旧层 nk-on 移除 → opacity 过渡淡出，
+   新层 nk-on 挂载 → 入场动画淡入）。锚点 center 25% 裁剪顶部空余使角色主体居中（同角色详情页背景规范）；
+   加载失败/进行中时 hero 原生渐变兑底直接承接 */
+.nk-home-hero__arts { position: absolute; inset: 0; }
+.nk-home-hero__art {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center 25%; background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1.2s var(--nk-ease-out);
+}
+.nk-home-hero__art.nk-on { opacity: 1; animation: nk-home-art-in 1.2s var(--ease) forwards; }
 @keyframes nk-home-art-in { from { opacity: 0; } to { opacity: 1; } }
-/* 压暗层：左下文字安全区 + 底部融入页面底色（不遮挡右上方场景主体） */
+/* 压暗层：左下文字安全区 + 底部融入页面底色（不遮挡右上场景主体） */
 .nk-home-hero__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 85% at 0% 108%, color-mix(in srgb, var(--blk-900) 82%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 34%, transparent 62%), linear-gradient(to bottom, color-mix(in srgb, var(--blk-900) 28%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in srgb, var(--blk-900) 55%, transparent) 88%, var(--bg) 100%); }
-/* 内容与导航区同网格：max-width 1440 居中 + 左侧 128px 侧栏间隙（断点下收窄），保证 Hero 标题与下方板块区左对齐 */
-.nk-home-hero__content { position: relative; z-index: 2; text-align: left; width: 100%; max-width: var(--nk-content-max); margin: 0 auto; padding: 0 48px 0 128px; }
-/* HUD 引题行：短线 + 中文品牌附标（中文为主体的混合串，正文承载避免 Orbitron 回退等宽体） */
-.nk-home-hero__kicker { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; animation: nk-home-fade-up 0.6s var(--ease) 0.25s backwards; }
-.nk-home-hero__kicker-line { width: 40px; height: 2px; background: linear-gradient(90deg, var(--primary), transparent); }
-.nk-home-hero__kicker-text { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 94%, var(--ph-300) 6%) 92%, transparent); text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
-/* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文会回退等宽体，观感差）；
-   clamp 下限 2.4rem + 上限 4.5rem：4 字短标题放大上限增强品牌冲击力，窄屏仍单行安全 */
-/* 墨色分层：移除 40/80px 弥漫紫光，仅保留黑投影 + ≤14px 边缘微光（与详情页规范一致） */
-.nk-home-hero__title { font-family: var(--font-body); font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: 0.08em; line-height: 1.1; color: var(--text-bright); perspective: 600px; text-shadow: 0 2px 6px rgba(0,0,0,0.75), 0 0 14px color-mix(in srgb, var(--primary) 18%, transparent), 0 4px 24px rgba(0,0,0,0.5); }
-.nk-home-hero__title span { display: inline-block; animation: nk-home-char-in 0.5s var(--ease) backwards; }
-/* 定位副标题：内容清单，与主标题拉开层级 */
-.nk-home-hero__tagline { margin-top: 20px; font-size: 0.88rem; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 85%, var(--ph-300) 15%) 88%, transparent); letter-spacing: 0.16em; text-shadow: 0 1px 6px rgba(0,0,0,0.85); animation: nk-home-fade-up 0.6s var(--ease) 1.15s backwards; }
-/* 滚动指示器（右下，让位左下标题） */
-.nk-home-hero__scroll { position: absolute; bottom: 26px; right: 40px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; animation: nk-home-fade-up 0.6s var(--ease) 1.5s backwards; border: none; background: none; padding: 8px; }
-.nk-home-hero__scroll:hover { opacity: 1; }
-.nk-home-hero__scroll:focus-visible { opacity: 1; outline: 1px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
-.nk-home-hero__scroll span { font-family: var(--font-hud); font-size: 0.55rem; letter-spacing: 0.25em; color: var(--text3); }
-.nk-home-hero__scroll-line { width: 1px; height: 36px; position: relative; overflow: hidden; background: linear-gradient(to bottom, var(--border2), transparent); }
-.nk-home-hero__scroll-line::after { content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent, var(--text-bright), transparent); animation: nk-home-scroll-drop 1.8s ease-in-out infinite; }
+/* 标题区与导航区同网格：max-width 1440 居中 + 左侧 128px 侧栏间隙（断点下收窄） */
+.nk-home-hero__content { position: relative; z-index: 2; width: 100%; max-width: var(--nk-content-max); margin: 0 auto; padding: 0 48px max(44px, 8vh) 128px; }
+@media (min-width: 1024px) {
+  /* 桌面文字侧栏避让：首页内容左缘 128px → 148px */
+  .nk-home-hero__content { padding-left: 148px; }
+}
+/* 英文副标（品牌行）：系统等宽小字 + 发丝线，克制不发光 */
+.nk-home-hero__supra { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; font-family: var(--home-mono); font-size: 0.68rem; letter-spacing: 0.22em; color: var(--text2); animation: nk-home-fade-up 0.7s var(--ease) 0.2s backwards; }
+.nk-home-hero__supra::before { content: ''; width: 44px; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
+/* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文回退等宽体，观感差）；
+   收窄字距 + 单档黑投影，无发光无透视——层级由字重与字号控制 */
+.nk-home-hero__title { font-family: var(--font-body); font-size: clamp(2.6rem, 7vw, 6rem); font-weight: 900; letter-spacing: 0.02em; line-height: 1.08; color: var(--text-bright); text-shadow: 0 2px 24px rgba(0,0,0,0.55); animation: nk-home-fade-up 0.7s var(--ease) 0.35s backwards; }
+/* 定位副标题：一行内容清单（单中点分隔），与主标题拉开层级 */
+.nk-home-hero__tagline { margin-top: 22px; font-size: 0.86rem; letter-spacing: 0.1em; color: var(--text2); text-shadow: 0 1px 8px rgba(0,0,0,0.6); animation: nk-home-fade-up 0.7s var(--ease) 0.5s backwards; }
 
-/* ── 导航网格 ── */
-.nk-home-nav { max-width: var(--nk-content-max); margin: 0 auto; padding: 84px 40px 48px 128px; }
-/* 分区标题：中文主标题（语义）+ 英文 HUD 标签（装饰），两者构成清晰区域语义 */
-.nk-home-nav__head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 32px; }
-.nk-home-nav__title { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.06em; color: var(--text-bright); }
-.nk-home-nav__label { font-family: var(--font-hud); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em; color: var(--text3); }
-.nk-home-nav__line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
-.nk-home-nav__count { font-family: var(--font-hud); font-size: 0.6rem; letter-spacing: 0.15em; color: var(--text3); }
-/* 数据版本（HUD 元信息）：与计数并列行尾，左分隔线断开与计数的粘连 */
-.nk-home-nav__version { font-family: var(--font-hud); font-size: 0.58rem; letter-spacing: 0.18em; color: var(--text2); padding-left: 14px; margin-left: 2px; border-left: 1px solid var(--border2); white-space: nowrap; }
-.nk-home-nav__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+/* ── 板块索引（编辑式列表，替代卡片网格：无卡片、无发光、无 3D） ── */
+.nk-home-nav { max-width: var(--nk-content-max); margin: 0 auto; padding: 96px 40px 64px 128px; }
+@media (min-width: 1024px) {
+  .nk-home-nav { padding-left: 148px; }
+}
+/* 分区头：中文主标题 + 发丝线 + 数据元信息（真实元数据，非装饰） */
+.nk-home-nav__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 40px; }
+.nk-home-nav__title { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.04em; color: var(--text-bright); }
+.nk-home-nav__rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line-2), transparent); }
+.nk-home-nav__meta { font-family: var(--home-mono); font-size: 0.6rem; letter-spacing: 0.18em; color: var(--text3); white-space: nowrap; }
 
-.nk-home-card { --holo-color: color-mix(in srgb, var(--ph-400) 70%, transparent); position: relative; isolation: isolate; display: flex; align-items: center; gap: 14px; padding: 22px 20px; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent); border-radius: 12px; text-decoration: none; color: var(--text); overflow: hidden; cursor: pointer; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s, background 0.3s; animation: nk-card-in 0.45s var(--ease) backwards; animation-delay: calc(0.3s + var(--i, 0) * 60ms); transform-style: preserve-3d; }
-/* 墨色分层：浮起收窄为 -1px，移除重阴影与弥漫光晕，仅留 ≤14px 边缘微光 */
-.nk-home-card:hover { transform: perspective(900px) translateY(-1px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: color-mix(in srgb, var(--primary) 50%, transparent); background: color-mix(in srgb, var(--primary) 7%, transparent); box-shadow: 0 0 14px color-mix(in srgb, var(--primary) 12%, transparent); }
-/* 触觉按压：:active 回位微缩，模拟物理按键反馈 */
-.nk-home-card:active { transform: perspective(900px) translateY(0) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)) scale(0.98); }
-/* 全息扫光（复用 nk-card-sheen 关键帧与渐变结构） */
-.nk-home-card__sheen { position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-color) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-color) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); transform-origin: center; backface-visibility: hidden; }
-.nk-home-card:hover .nk-home-card__sheen { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
-.nk-home-card__icon { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: color-mix(in srgb, var(--primary) 10%, transparent); border: 1px solid var(--border); color: var(--primary); transition: all 0.3s; }
-.nk-home-card__icon svg { width: 20px; height: 20px; }
-.nk-home-card:hover .nk-home-card__icon { background: var(--primary-glow); border-color: var(--border2); color: var(--text-bright); }
-.nk-home-card__body { flex: 1; min-width: 0; position: relative; z-index: 2; }
-.nk-home-card__title { font-size: 0.95rem; font-weight: 800; color: var(--text-bright); display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
-.nk-home-card__cn { flex-shrink: 0; }
-.nk-home-card__en { font-family: var(--font-hud); font-size: 0.52rem; font-weight: 500; letter-spacing: 0.12em; color: var(--text3); min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.nk-home-card__desc { font-size: 0.72rem; color: var(--text2); margin-top: 6px; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nk-home-card__arrow { width: 16px; height: 16px; flex-shrink: 0; color: var(--text3); position: relative; z-index: 2; transition: transform 0.25s var(--ease), color 0.25s; }
-.nk-home-card:hover .nk-home-card__arrow { transform: translateX(4px); color: var(--primary); }
+/* 分组：组间大留白 + 组首顶线（稀疏分隔，非每行边框） */
+.nk-home-index__group { display: flex; flex-direction: column; }
+.nk-home-index__group + .nk-home-index__group { margin-top: 64px; }
+.nk-home-index__group:not(:first-child) .nk-home-row:first-child { border-top: 1px solid var(--line-1); padding-top: 26px; }
 
-/* ── 货币战争网关卡片：金色描边/暗金底纹，从紫色系中跳出（第二入口） ── */
-.nk-home-card--gateway { --holo-color: color-mix(in srgb, var(--gold-300) 75%, transparent); border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, color-mix(in srgb, var(--blk-900) 60%, transparent) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); }
-.nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-300) 75%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 20%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 55%, color-mix(in srgb, var(--gold-500) 10%, transparent) 100%), var(--card); box-shadow: 0 0 14px color-mix(in srgb, var(--gold-500) 16%, transparent); }
-.nk-home-card--gateway .nk-home-card__icon { background: color-mix(in srgb, var(--gold-500) 14%, transparent); border-color: color-mix(in srgb, var(--gold-500) 40%, transparent); color: var(--gold-300); }
-.nk-home-card--gateway:hover .nk-home-card__icon { background: color-mix(in srgb, var(--gold-500) 22%, transparent); border-color: color-mix(in srgb, var(--gold-300) 70%, transparent); color: var(--gold-200); }
-.nk-home-card--gateway .nk-home-card__cn { color: var(--gold-350); }
-.nk-home-card--gateway .nk-home-card__en { color: color-mix(in srgb, var(--gold-500) 75%, transparent); }
-.nk-home-card--gateway .nk-home-card__desc { color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 82%, var(--gold-300) 18%) 72%, transparent); }
-.nk-home-card--gateway:hover .nk-home-card__arrow { color: var(--gold-300); }
-/* 网关徽章：行内金色标签，明确“独立模式”入口语义（仅网关卡片显示；紧随描述尾部，窄卡不重叠） */
-.nk-home-card__badge { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 4px; font-family: var(--font-hud); font-size: 0.44rem; font-weight: 700; letter-spacing: 0.12em; line-height: 1.25; vertical-align: 1px; white-space: nowrap; color: var(--gold-350); background: color-mix(in srgb, var(--gold-500) 12%, transparent); border: 1px solid color-mix(in srgb, var(--gold-500) 35%, transparent); transition: all 0.3s; }
-.nk-home-card--gateway:hover .nk-home-card__badge { background: color-mix(in srgb, var(--gold-500) 22%, transparent); border-color: color-mix(in srgb, var(--gold-300) 70%, transparent); color: var(--gold-200); }
+.nk-home-row { display: flex; align-items: center; gap: 18px; padding: 24px 8px; margin: 0; color: var(--text); text-decoration: none; transition: color 0.25s var(--nk-ease-out), background 0.25s; }
+.nk-home-row__icon { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: color-mix(in srgb, var(--primary) 7%, transparent); border: 1px solid var(--line-1); color: var(--text3); transition: color 0.25s, border-color 0.25s, background 0.25s; }
+.nk-home-row__icon svg { width: 18px; height: 18px; }
+.nk-home-row__name { font-size: clamp(1.15rem, 2vw, 2rem); font-weight: 800; letter-spacing: 0.03em; color: var(--text-bright); white-space: nowrap; transition: color 0.25s; }
+.nk-home-row__en { font-family: var(--home-mono); font-size: 0.6rem; letter-spacing: 0.16em; color: var(--text3); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nk-home-row__desc { margin-left: auto; font-size: 0.8rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.25s; }
+.nk-home-row__arrow { width: 18px; height: 18px; flex-shrink: 0; color: var(--text3); transition: transform 0.25s var(--nk-ease-out), color 0.25s; }
+/* hover：名称转高亮紫、图标点亮、箭头位移（仅反馈，无浮起无发光） */
+.nk-home-row:hover .nk-home-row__name { color: var(--metric-val); }
+.nk-home-row:hover .nk-home-row__icon { color: var(--primary); border-color: var(--border2); background: color-mix(in srgb, var(--primary) 12%, transparent); }
+.nk-home-row:hover .nk-home-row__desc { color: var(--text); }
+.nk-home-row:hover .nk-home-row__arrow { transform: translateX(4px); color: var(--primary); }
+/* 触觉按压：名称即时加深 */
+.nk-home-row:active .nk-home-row__name { color: var(--primary); }
 
-/* ── 页脚：品牌标语 + 拉丁格言 ── */
-.nk-home-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 56px 40px 44px 112px; text-align: center; }
-.nk-home-footer__orn { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 0 0 24px; }
-.nk-home-footer__rule { width: 72px; height: 1px; background: linear-gradient(90deg, transparent, var(--border2)); }
-.nk-home-footer__rule:last-child { background: linear-gradient(90deg, var(--border2), transparent); }
-.nk-home-footer__star { font-size: 0.9rem; color: var(--primary); }
-.nk-home-footer__motto { margin: 0; padding-left: 0.3em; font-family: var(--font-body); font-size: clamp(1.15rem, 2.4vw, 1.5rem); font-weight: 700; letter-spacing: 0.28em; color: var(--text-bright); text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-.nk-home-footer__latin { margin: 14px 0 0; font-family: var(--font-hud); font-size: 0.72rem; letter-spacing: 0.3em; color: var(--text2); opacity: 0.9; }
+/* ── 货币战争网关行：金色文字/描边，从紫色系中跳出（独立模式第二入口） ── */
+.nk-home-row--gateway .nk-home-row__icon { color: var(--gold-350); border-color: color-mix(in srgb, var(--gold-500) 30%, transparent); background: color-mix(in srgb, var(--gold-500) 9%, transparent); }
+.nk-home-row--gateway .nk-home-row__name { color: var(--gold-350); }
+.nk-home-row--gateway .nk-home-row__en { color: color-mix(in srgb, var(--gold-500) 70%, transparent); }
+.nk-home-row--gateway .nk-home-row__desc { color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 82%, var(--gold-300) 18%) 72%, transparent); }
+.nk-home-row--gateway:hover .nk-home-row__icon { color: var(--gold-200); border-color: color-mix(in srgb, var(--gold-300) 60%, transparent); background: color-mix(in srgb, var(--gold-500) 16%, transparent); }
+.nk-home-row--gateway:hover .nk-home-row__name { color: var(--gold-300); }
+.nk-home-row--gateway:hover .nk-home-row__desc { color: color-mix(in srgb, var(--text-bright) 82%, var(--gold-300) 18%); }
+.nk-home-row--gateway:hover .nk-home-row__arrow { color: var(--gold-300); }
 
-/* ── 首页动画 ── */
-@keyframes nk-home-char-in { from { opacity: 0; transform: translateY(18px) rotateX(40deg); } to { opacity: 1; transform: translateY(0) rotateX(0); } }
-@keyframes nk-home-fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes nk-home-scroll-drop { 0% { top: -100%; } 60%, 100% { top: 100%; } }
+/* 桌面悬停：整行微亮背景（hover 可用设备专属；触屏回退见 hover:none） */
+@media (hover: hover) and (pointer: fine) {
+  .nk-home-row:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
+  .nk-home-row--gateway:hover { background: color-mix(in srgb, var(--gold-500) 5%, transparent); }
+}
+
+/* ── 页脚：品牌标语 + 拉丁格言（无装饰元素，纯排版） ── */
+.nk-home-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 48px 112px; text-align: center; }
+@media (min-width: 1024px) {
+  .nk-home-footer { padding-left: 148px; }
+}
+.nk-home-footer__motto { font-family: var(--font-body); font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.24em; color: var(--text-bright); }
+.nk-home-footer__latin { margin: 16px 0 0; font-family: var(--home-mono); font-size: 0.66rem; letter-spacing: 0.3em; color: var(--text3); }
+
+/* ── 首页动画（仅入场一次 + 背景淡入；无无限循环） ── */
+@keyframes nk-home-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ── 响应式 ── */
-@media (max-width: 1023px) {
-  .nk-home-nav__grid { grid-template-columns: repeat(2, 1fr); }
-  /* 平板：Hero 内容与导航区同步收窄左间隙（侧栏 56px + 32px 对齐），两侧保持一致 */
-  .nk-home-hero { padding: 0 0 96px 0; }
-  .nk-home-hero__content { padding: 0 32px; }
-  .nk-home-nav { padding-left: 32px; padding-right: 32px; }
+/* 平板（768-1023px）：中等密度（行距/组距介于手机紧凑与桌面舒展之间）+
+   左侧避让 56px 图标侧栏（88px = 侧栏 56 + 边距 32，与目录页对齐；
+   手机无左侧栏，底部避让由下方 max-width:767px 块单独处理） */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-home-row { padding: 20px 8px; }
+  .nk-home-index__group + .nk-home-index__group { margin-top: 56px; }
+  .nk-home-hero__content { padding: 0 32px max(40px, 6vh) 88px; }
+  .nk-home-nav { padding: 72px 32px 48px 88px; }
+  .nk-home-footer { padding: 56px 32px 40px 88px; }
 }
 @media (max-width: 767px) {
-  .nk-home-nav__grid { grid-template-columns: 1fr; }
-  /* 修正：左 92px 为桌面侧栏残留（移动端应左右对称）；底部需避开 56px 底部导航条 + safe-area，防止末张导航卡被遮挡 */
+  /* 移动端：左右对称 + 底部避开 56px 底部导航条 + safe-area */
   .nk-home-nav { padding: 56px 20px calc(88px + env(safe-area-inset-bottom, 0px)); }
-  /* 移动端：标题保持左下构图，收窄内边距；滚动指示器隐藏（左下标题已占据视觉锚点） */
-  .nk-home-hero { padding: 0 0 calc(88px + env(safe-area-inset-bottom, 0px)) 0; }
-  .nk-home-hero__content { padding: 0 20px; }
-  .nk-home-hero__scroll { display: none; }
-  /* 页脚：左侧 112px 为桌面侧栏残留，移动端左右对称 */
-  .nk-home-footer { padding: 48px 20px calc(40px + env(safe-area-inset-bottom, 0px)); }
+  .nk-home-hero__content { padding: 0 20px max(88px, calc(44px + env(safe-area-inset-bottom, 0px))); }
+  /* 页脚底部预留 72px（56px 导航条 + 16px 呼吸），避免末行文案被底部导航遮挡 */
+  .nk-home-footer { padding: 48px 20px calc(72px + env(safe-area-inset-bottom, 0px)); }
+  /* 分区头单行：隐藏发丝线，元信息右推，字号微缩（窄屏防挤压） */
+  .nk-home-nav__head { gap: 12px; margin-bottom: 32px; }
+  .nk-home-nav__rule { display: none; }
+  .nk-home-nav__meta { margin-left: auto; font-size: 0.55rem; }
+  /* 品牌行微缩：确保 supra 总宽不超过下方标题宽度（等宽长串窄屏易喧宾夺主） */
+  .nk-home-hero__supra { font-size: 0.55rem; letter-spacing: 0.18em; gap: 10px; margin-bottom: 18px; }
+  .nk-home-hero__supra::before { width: 28px; }
+  /* 分组间距收窄，降低滚动成本 */
+  .nk-home-index__group + .nk-home-index__group { margin-top: 40px; }
+  /* 行式索引换行：desc 落第二行，与名称左对齐 */
+  .nk-home-row { flex-wrap: wrap; row-gap: 8px; column-gap: 14px; padding: 16px 4px; margin: 0; }
+  .nk-home-row__desc { order: 2; width: 100%; margin-left: 50px; white-space: normal; }
+  .nk-home-row__arrow { margin-left: auto; }
+  /* 触觉按压：图标同步加深（无 hover 时按压反馈） */
+  .nk-home-row:active .nk-home-row__icon { background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: var(--border2); color: var(--primary); }
+}
+@media (max-width: 374px) {
+  .nk-home-row__en { display: none; }
 }
 
-/* 触屏设备（hover: none）：重置粘滞 hover 态（点击后不残留浮起/微光） */
+/* 触屏设备（hover: none）：重置粘滞 hover 态 */
 @media (hover: none) {
-  .nk-home-card:hover { transform: none; border-color: color-mix(in srgb, var(--primary) 22%, transparent); background: var(--card); box-shadow: none; }
-  .nk-home-card--gateway:hover { border-color: color-mix(in srgb, var(--gold-500) 42%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--gold-500) 12%, transparent) 0%, color-mix(in srgb, var(--blk-900) 60%, transparent) 55%, color-mix(in srgb, var(--gold-500) 6%, transparent) 100%), var(--card); box-shadow: none; }
-  .nk-home-card--gateway:hover .nk-home-card__badge { background: color-mix(in srgb, var(--gold-500) 12%, transparent); border-color: color-mix(in srgb, var(--gold-500) 35%, transparent); color: var(--gold-350); }
-  /* 角色卡片：触屏重置（浮起/光斑/头像缩放/图标微光/扫光全部回退，边框回稀有度原值） */
-  .nk-cat-card:hover { transform: none; border-color: var(--nk-card-border); box-shadow: none; }
-  .nk-cat-card[data-rarity="5"]:hover { border-color: color-mix(in srgb, var(--rarity-5) 25%, transparent); }
-  .nk-cat-card[data-rarity="4"]:hover { border-color: color-mix(in srgb, var(--rarity-4) 20%, transparent); }
-  .nk-cat-card:hover::before { opacity: 0.18; }
-  .nk-cat-card:hover .nk-cat-card__img img.avatar { transform: none; }
-  .nk-cat-card:hover .nk-cat-card__elem, .nk-cat-card:hover .nk-cat-card__path { transform: none; box-shadow: none; }
-  .nk-cat-card:hover .nk-cat-card__img::before { animation: none; opacity: 0; }
+  /* 行背景重置（桌面触屏设备防 hover 残留微亮） */
+  .nk-home-row:hover { background: transparent; }
+  .nk-home-row:hover .nk-home-row__name { color: var(--text-bright); }
+  .nk-home-row:hover .nk-home-row__icon { color: var(--text3); border-color: var(--line-1); background: color-mix(in srgb, var(--primary) 7%, transparent); }
+  .nk-home-row:hover .nk-home-row__desc { color: var(--text2); }
+  .nk-home-row:hover .nk-home-row__arrow { transform: none; color: var(--text3); }
+  .nk-home-row--gateway:hover .nk-home-row__icon { color: var(--gold-350); border-color: color-mix(in srgb, var(--gold-500) 30%, transparent); background: color-mix(in srgb, var(--gold-500) 9%, transparent); }
+  .nk-home-row--gateway:hover .nk-home-row__name { color: var(--gold-350); }
+  .nk-home-row--gateway:hover .nk-home-row__desc { color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 82%, var(--gold-300) 18%) 72%, transparent); }
+  .nk-home-row--gateway:hover .nk-home-row__arrow { color: var(--text3); }
+  /* 角色名录：触屏重置（背景/竖条/名字变色/立绘缩放全部回退） */
+  .nk-idx-card:hover { background: transparent; border-color: transparent; }
+  .nk-idx-card:hover::before { height: 0; opacity: 0; }
+  .nk-idx-card:hover .nk-idx-card__name { color: var(--text-bright); }
+  .nk-idx-card:hover .nk-idx-card__portrait img { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nk-home-hero__spine { transition: none; }
-  .nk-home-hero__art { animation: none; opacity: 1; }
-  .nk-home-hero__title span, .nk-home-hero__tagline, .nk-home-hero__scroll, .nk-home-hero__kicker, .nk-home-card { animation: none; }
-  .nk-home-card:hover .nk-home-card__sheen { animation: none; opacity: 0.12; transform: translate3d(215%,0,0) rotate(-22deg); will-change: auto; }
-  .nk-home-hero__scroll-line::after { animation: none; }
+  .nk-home-hero__art { transition: none; animation: none; }
+  .nk-home-hero__art.nk-on { opacity: 1; }
+  .nk-home-hero__supra, .nk-home-hero__title, .nk-home-hero__tagline { animation: none; }
 }
 
 /* ═══════════════════════════════════════════
@@ -395,31 +584,38 @@
 @media (max-width: 767px) {
   /* ── mobile：侧边栏降级为底部 Tab Bar，释放竖栏预留的 88px 左内边距 ── */
   #nk-catalog-app { padding-left: 16px; padding-right: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
-  /* 吸顶工具条两行布局：第一行 标题+筛选按钮，第二行 搜索框+计数。
-     grid 双列固定区域：长标题（CW 目录）不再把筛选按钮挤到第二行，
-     搜索框始终独占第二行左列全宽（计数缩在右列不挤压输入框） */
-  .nk-cat-header {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'title btn' 'search count';
-    gap: 6px 14px;
-    margin: 0 -16px; padding: 8px 16px;
-  }
-  .nk-cat-title { grid-area: title; }
-  .nk-cat-count { grid-area: count; }
-  .nk-cat-filter-btn { grid-area: btn; margin-left: 0; }
-  .nk-cat-search { grid-area: search; max-width: none; min-width: 0; }
+  /* 页头 + 工具条手机布局：masthead 单行（标题 + 计数），toolbar 单行（搜索 + 筛选） */
+  .nk-cat-masthead { padding: 18px 0 12px; gap: 10px; }
+  .nk-cat-title { font-size: 1.05rem; letter-spacing: 0.06em; }
+  .nk-cat-count { font-size: 0.55rem; letter-spacing: 0.14em; }
+  .nk-cat-toolbar { gap: 8px; padding: 6px 0; }
+  .nk-cat-search { max-width: none; min-width: 0; }
   .nk-cat-search input { min-width: 0; }
+  .nk-cat-filter-btn { margin-left: 0; }
   .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
   /* 网格列宽覆盖：仅改 --nk-grid-min，骨架屏与真实网格共用变量保持一致 */
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
   .nk-lc-grid { --nk-grid-min: 150px; }
-  .nk-relic-grid { --nk-grid-min: 100px; }
+  /* 角色名录：手机固定 2 列（名录格含文字较宽，1 列滚动过长）；
+     立绘/字号整体收敛，保证 4 字名 + 满星同行不挤压 */
+  .nk-idx-grid { grid-template-columns: repeat(2, 1fr); gap: 6px 10px; }
+  .nk-idx-card { gap: 10px; padding: 8px 10px; }
+  .nk-idx-card__portrait { width: 40px; }
+  .nk-idx-card__name { font-size: 0.8rem; }
+  .nk-idx-card__stars { font-size: 0.5rem; letter-spacing: 0; }
+  .nk-idx-card__meta { font-size: 0.6rem; gap: 3px; }
+  .nk-idx-card__icon { width: 12px; height: 12px; }
+  /* 页头副标：手机隐藏（标题行空间有限） */
+  #nk-catalog-app .nk-cat-subtitle { display: none; }
+  .nk-relic-grid { --nk-grid-min: 106px; --nk-grid-gap: 10px; }
+  .nk-relic-card { gap: 6px; }
+  .nk-relic-card__plate { padding: 10px; }
+  .nk-relic-card__tag { top: 6px; left: 6px; padding: 1.5px 6px; font-size: 0.5rem; }
+  .nk-relic-card__name { font-size: 0.7rem; }
   .nk-item-grid { --nk-grid-min: 90px; --nk-grid-gap: 8px; }
   .nk-mob-grid { --nk-grid-min: 100px; }
   .nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   .nk-cat-filter-group { flex-direction: column; gap: 6px; }
-  .nk-home-nav__grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 374px) {
   .nk-cat-grid, .nk-skeleton__grid { grid-template-columns: repeat(2, 1fr); --nk-grid-gap: 8px; }
@@ -430,17 +626,51 @@
    宽屏内容收束：头部/筛选/网格统一限宽居中，
    保证三者左右对齐；覆盖头部的负边距与补偿内边距
 ═══════════════════════════════════════════ */
+/* ── 名录网格分档：随视口放大格子（scale-aware），列数约束 3-5，
+     超宽屏保留两侧留白（放宽内容区但不铺满，抑制满屏卡片拥挤） ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* 平板：继承基础 min 240（2→3 列自然过渡，与桌面段 min 280 衔接，避免跨断点列数跳变）；
+     宽格下放大立绘与字号，保持左图右文比例 */
+  .nk-idx-grid { --nk-grid-gap: 8px 18px; }
+  .nk-idx-card__portrait { width: 64px; }
+  .nk-idx-card__name { font-size: 1rem; }
+  .nk-idx-card__stars { font-size: 0.62rem; }
+  .nk-idx-card__meta { font-size: 0.72rem; }
+  .nk-idx-card__icon { width: 14px; height: 14px; }
+}
+@media (min-width: 1024px) {
+  /* 桌面：min 280 → 1024-1279 三列 / 1280+ 四列自然过渡 */
+  .nk-idx-grid { --nk-grid-min: 280px; --nk-grid-gap: 10px 18px; }
+}
+@media (min-width: 1440px) {
+  /* 中大桌面：四列 × 318px，取代原 5 列 × 252px 的局促 */
+  .nk-idx-grid { --nk-grid-min: 300px; --nk-grid-gap: 10px 20px; }
+}
+@media (min-width: 1024px) {
+  /* 桌面文字侧栏（140px）避让：目录页内容区左缘从 88px 加宽至 148px */
+  #nk-catalog-app { padding-left: 148px; }
+}
 @media (min-width: 1600px) {
-  .nk-cat-header { max-width: var(--nk-content-max); margin: 0 auto; padding-left: 0; padding-right: 0; }
+  #nk-catalog-app { --cat-max: 1680px; }
+  .nk-cat-masthead,
+  .nk-cat-toolbar { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
+  .nk-idx-grid,
   .nk-cat-grid,
   .nk-cat-filters,
-  .nk-cat-empty { max-width: var(--nk-content-max); margin-left: auto; margin-right: auto; }
+  .nk-cat-empty { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
+  /* 大屏：格子 320px+，行距拉开，缓解 5 列 × 275px 的局促 */
+  .nk-idx-grid { --nk-grid-min: 320px; --nk-grid-gap: 12px 20px; }
+}
+@media (min-width: 2560px) {
+  /* 超宽屏（2K/4K）：内容区放宽至 1920（两侧保留留白），格子随内容放大 */
+  #nk-catalog-app { --cat-max: 1920px; }
+  .nk-idx-grid { --nk-grid-min: 340px; }
 }
 
 /* ═══════════════════════════════════════════
    图片懒加载占位色（基于稀有度）
 ═══════════════════════════════════════════ */
-.nk-cat-card__img img, .nk-relic-card__img img, .nk-item-card__img img, .nk-mob-card__img img { background: color-mix(in srgb, var(--blk-850) 60%, transparent); }
-.nk-cat-card[data-rarity="5"] .nk-cat-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
-.nk-cat-card[data-rarity="4"] .nk-cat-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
+.nk-idx-card__portrait img, .nk-item-card__img img, .nk-mob-card__img img { background: color-mix(in srgb, var(--blk-850) 60%, transparent); }
+.nk-idx-card[data-rarity="5"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
+.nk-idx-card[data-rarity="4"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
 .nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }

@@ -7,6 +7,7 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { fmtDesc, fmtDescMerged, avatarShopIconUrl, avatarDrawCardUrl, iconUrl, gridFightEquipIconWithFallback, gridFightTraitIconById } from '../../lib/format';
+import { SITE_NAME } from '../../lib/constants';
 import {
   FB_LABEL, CHARGE_LABEL, propLabel, propValue,
   mergeSkillGroups, buildGrowthMatrix, matrixUp,
@@ -100,7 +101,7 @@ const servantAttrs = computed(() => buildServantAttrs(star.value?.servant, charD
 
 watch(
   data,
-  (d) => { if (d) document.title = `${d.name} - 咸鱼百科`; },
+  (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; },
   { immediate: true },
 );
 

@@ -6,17 +6,17 @@
  * 本文件只保留业务编排：
  * - 清单解析与源回退（resolveSpine 官方优先 → 渲染失败强制回退 nanoka）
  * - 单角色查看器（initSpineViewer）：按 `player:{spineKey}` 精确释放
- * - 多层场景（initSpineSceneViewer）：窄屏降级（仅主背景层）+ 断点变化重建
+ * - 多层场景（initSpineSceneViewer）：全量层挂载；断点切换由视图层 v-if + dispose 重建
  * 资源路径：skel 为 static.nanoka.cc/assets/hsr/spine/{charId}/{name}.skel|.atlas
  */
 import { resolveSpine } from '../../services/api';
-import type { SpineResolved, SpineResolvedSceneLayer, SpineSceneEntry } from '../../services/types';
+import type { SpineResolved } from '../../services/types';
 import { buildOfficialConfig } from '../../spine/config';
 import { createSpinePlayer } from '../../spine/player';
 import { disposeSpineEntry } from '../../spine/registry';
 import { getSpineLib, loadSpineRuntime } from '../../spine/runtime';
 import { mountSpineScene } from '../../spine/scene';
-import type { SpineLib, SpineRuntimeVersion } from '../../spine/types';
+import type { SpineRuntimeVersion } from '../../spine/types';
 
 /** 播放器注册 key 命名空间（registry 按 key 精确释放，与场景互不干扰） */
 const PLAYER_KEY = (spineKey: string): string => `player:${spineKey}`;
@@ -46,7 +46,8 @@ export function initSpineViewer(
 /**
  * 初始化多层场景 Spine（official-scene 条目，如枢纽页背景）。
  * 场景渲染细节见 spine/scene.ts（单画布多骨架 + 固定舞台 cover 适配）；
- * 本层负责：清单解析 → 运行时就绪 → 窄屏降级（<768px 仅主背景层）→ 断点变化重建。
+ * 本层负责：清单解析 → 运行时就绪 → 全量层场景挂载。
+ * 断点切换不在此处理：视图层以 v-if 卸载 + 本函数返回的清理函数释放后重新挂载。
  * @param container 场景挂载容器（内部自建舞台 + 单画布）
  * @param sceneKey 清单条目键（如 home-bg）
  * @param onReady 场景就绪回调（视图层据此点亮切换按钮 / 压暗背景）
@@ -57,44 +58,18 @@ export function initSpineSceneViewer(
   sceneKey: string,
   onReady: () => void,
 ): () => void {
-  let cancelled = false; // 清理后终止一切异步行为（加载完成 / 断点重建）
-  let mq: MediaQueryList | null = null;
-  let rebuild: (() => void) | null = null;
+  let cancelled = false; // 清理后终止一切异步行为（加载完成 / 挂载）
   let ctrl: { teardown(): void } | null = null;
-
-  /** 释放当前挂载的场景（断点重建 / 组件卸载共用） */
-  const teardownScene = (): void => {
-    if (ctrl) {
-      ctrl.teardown();
-      ctrl = null;
-    }
-  };
-
-  /** 挂载新场景（每次全新构建，无状态残留） */
-  const mount = (layers: SpineResolvedSceneLayer[], vp: SpineSceneEntry['viewport'], lib: SpineLib): void => {
-    ctrl = mountSpineScene({ container, layers, viewport: vp, lib, onReady });
-  };
 
   void (async () => {
     try {
       const entry = await resolveSpine(sceneKey);
       if (!entry || entry.kind !== 'official-scene') return;
       const ok = await loadSpineRuntime();
-      if (!ok || !container.isConnected) return;
+      if (!ok || cancelled || !container.isConnected) return;
       const lib = getSpineLib();
       if (!lib) return;
-      // 窄屏降级：仅主背景层（全量层 WebGL 开销过高）；跨断点变化时重建场景
-      const mql = window.matchMedia('(min-width: 768px)');
-      mq = mql;
-      const pickLayers = (): SpineResolvedSceneLayer[] =>
-        mql.matches ? entry.layers : entry.layers.slice(0, 1);
-      rebuild = (): void => {
-        if (cancelled) return;
-        teardownScene();
-        mount(pickLayers(), entry.viewport, lib);
-      };
-      mql.addEventListener('change', rebuild);
-      rebuild();
+      ctrl = mountSpineScene({ container, layers: entry.layers, viewport: entry.viewport, lib, onReady });
     } catch (e) {
       console.warn('[nk-wiki] spine 场景渲染失败:', e);
     }
@@ -102,10 +77,10 @@ export function initSpineSceneViewer(
 
   return () => {
     cancelled = true;
-    if (mq && rebuild) mq.removeEventListener('change', rebuild);
-    mq = null;
-    rebuild = null;
-    teardownScene();
+    if (ctrl) {
+      ctrl.teardown();
+      ctrl = null;
+    }
   };
 }
 

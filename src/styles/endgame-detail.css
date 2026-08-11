@@ -31,7 +31,7 @@
   .nk-egd-bar { padding-left: 72px; }
 }
 @media (min-width: 1024px) {
-  .nk-egd-bar { padding-left: 88px; }
+  .nk-egd-bar { padding-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
 }
 .nk-egd-bar__inner {
   display: flex; align-items: center; gap: 12px;

@@ -59,7 +59,7 @@ import { RouterLink } from 'vue-router';
 }
 
 .nk-notfound__btn:hover {
-  border-color: var(--accent, var(--ph-400));
-  background: color-mix(in srgb, var(--accent, var(--ph-400)) 8%, transparent);
+  border-color: var(--accent, var(--th-400));
+  background: color-mix(in srgb, var(--accent, var(--th-400)) 8%, transparent);
 }
 </style>

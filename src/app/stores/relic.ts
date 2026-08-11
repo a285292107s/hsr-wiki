@@ -8,6 +8,7 @@ import {
   loadLocalRelicDetail, loadLocalRelicMainAffixes, loadLocalRelicSubAffixes, loadLocalRelicStories,
 } from '../../services/api';
 import { useLoadGeneration } from '../composables/use-load-generation';
+import { SITE_NAME } from '../../lib/constants';
 import type {
   LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
 } from '../../services/types';
@@ -60,7 +61,7 @@ export const useRelicStore = defineStore('relic', () => {
       mainAffixes.value = main;
       subAffixes.value = sub;
       stories.value = storyMap;
-      document.title = `${d.name} - 咸鱼百科`;
+      document.title = `${d.name} - ${SITE_NAME}`;
     } catch (e) {
       if (!loadGen.isCurrent(gen)) return;
       error.value = e instanceof Error ? e.message : String(e);

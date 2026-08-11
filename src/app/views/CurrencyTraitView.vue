@@ -7,6 +7,7 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../lib/format';
+import { SITE_NAME } from '../../lib/constants';
 import { propLabel } from '../../lib/currency-role';
 import { useLoadGeneration } from '../composables/use-load-generation';
 import { loadLocalCurrencyTraits, loadLocalCurrencyRoles } from '../../services/api';
@@ -74,7 +75,7 @@ async function load() {
   }
 }
 watch(traitId, load, { immediate: true });
-watch(data, (d) => { if (d) document.title = `${d.name} - 咸鱼百科`; }, { immediate: true });
+watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { immediate: true });
 </script>
 
 <template>

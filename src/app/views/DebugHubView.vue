@@ -70,7 +70,7 @@ function go(path: string) {
   .nk-debug-hub { margin-left: 72px; }
 }
 @media (min-width: 1024px) {
-  .nk-debug-hub { margin-left: 88px; }
+  .nk-debug-hub { margin-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
 }
 
 /* ─── 头部 ─── */

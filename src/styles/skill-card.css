@@ -15,7 +15,7 @@
 .nk-skill[data-type="Ultra"]    { --sk-accent: var(--gold-400); }
 .nk-skill[data-type="Passive"]  { --sk-accent: var(--skill-passive); }
 .nk-skill[data-type="Maze"]     { --sk-accent: var(--prop-hp); }
-.nk-skill[data-type="Servant"]  { --sk-accent: var(--ph-400); }
+.nk-skill[data-type="Servant"]  { --sk-accent: var(--th-400); }
 .nk-skill[data-type="ServantPassive"] { --sk-accent: var(--skill-servant-passive); }
 .nk-skill:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: var(--nk-shadow-card); }
 .nk-skill:active { transform: translateY(0); }

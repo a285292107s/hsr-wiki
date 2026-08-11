@@ -22,8 +22,8 @@ const SRC = fileURLToPath(new URL('../src', import.meta.url));
 const EXT = new Set(['.css', '.vue', '.ts']);
 const strict = process.argv.includes('--strict');
 
-/** 跳过整个文件（debug 诊断色 / 测试数据） */
-const SKIP_FILE = /(^|[\\/])(SpineAudit|SpineDebug|__tests__)/;
+/** 跳过整个文件（debug 诊断色 / 测试数据 / 主题预览数据） */
+const SKIP_FILE = /(^|[\\/])(SpineAudit|SpineDebug|__tests__|theme\.ts)/;
 
 /* ═══ 豁免登记（ADR 0012 §3 三分类；变更须同步 ADR 引用） ═══
  * 1. 中性豁免：三分量差 ≤4 的灰阶/黑/白（含 SVG data URI 内联白——物理限制无法 var()）

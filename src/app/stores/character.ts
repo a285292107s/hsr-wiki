@@ -8,6 +8,7 @@ import { defineStore } from 'pinia';
 import { computed, ref, toRaw } from 'vue';
 import { loadLocalCharacter, loadLocalBuildNames } from '../../services/api';
 import { getEnhancedKeys, getRenderData, validateCharData } from '../../lib/format';
+import { SITE_NAME } from '../../lib/constants';
 import { useLoadGeneration } from '../composables/use-load-generation';
 import { useAppStore } from './app';
 import type { CharacterData } from '../../services/types';
@@ -46,7 +47,7 @@ export const useCharacterStore = defineStore('character', () => {
       validateCharData(d);
       data.value = d;
       // 原实现行为：更新页面标题
-      document.title = `${d.name} - 咸鱼百科`;
+      document.title = `${d.name} - ${SITE_NAME}`;
       // 默认选最后一个加强版本（原实现行为）
       const keys = getEnhancedKeys(d);
       enhKey.value = keys.length ? keys[keys.length - 1] : null;

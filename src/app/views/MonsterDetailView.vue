@@ -7,7 +7,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
-import { ELEM, MON_RANK } from '../../lib/constants';
+import { ELEM, MON_RANK, SITE_NAME } from '../../lib/constants';
 import {
   elementIconUrl, escHtml, fmtDesc, monsterFigureUrl, monsterIconUrl,
 } from '../../lib/format';
@@ -67,7 +67,7 @@ watch(
 const d = computed(() => data.value);
 /** 动态页标题 */
 watch(d, (data) => {
-  if (data) document.title = `${data.name} - 咸鱼百科`;
+  if (data) document.title = `${data.name} - ${SITE_NAME}`;
 });
 /** Hero 立绘：全身立绘优先，无立绘回退中图标 */
 const figureUrl = computed(() => {

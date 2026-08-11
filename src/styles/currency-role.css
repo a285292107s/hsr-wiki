@@ -25,13 +25,13 @@
   --crole-buff-border: color-mix(in srgb, var(--crole-buff) 25%, transparent);
   --crole-buff-glow: color-mix(in srgb, var(--crole-buff) 40%, transparent);
   /* 面板/卡片底色 */
-  --crole-panel-tint: color-mix(in srgb, var(--ph-500) 8%, transparent);
+  --crole-panel-tint: color-mix(in srgb, var(--tc-500) 8%, transparent);
   --crole-panel-deep: color-mix(in srgb, var(--blk-850) 70%, transparent);
-  --crole-extra-bg: color-mix(in srgb, var(--ph-500) 5%, transparent);
-  --crole-extra-border: color-mix(in srgb, var(--ph-500) 12%, transparent);
+  --crole-extra-bg: color-mix(in srgb, var(--tc-500) 5%, transparent);
+  --crole-extra-border: color-mix(in srgb, var(--tc-500) 12%, transparent);
   /* 星级 Tab 激活态 */
   --crole-tab-active-bg: linear-gradient(135deg, var(--primary), var(--accent));
-  --crole-tab-active-shadow: color-mix(in srgb, var(--ph-500) 30%, transparent);
+  --crole-tab-active-shadow: color-mix(in srgb, var(--tc-500) 30%, transparent);
   /* 星魂步骤徽章 */
   --crole-step-bg: color-mix(in srgb, var(--crole-step-rose) 10%, transparent);
 }
@@ -75,7 +75,7 @@
 /* 列表卡片：交易卡牌语言——头像出血 + scrim 叠名 + 菱形费用 + 磨砂角标 */
 .nk-crole-grid { --col-w: 200px; --nk-grid-min: 180px; --nk-grid-gap: 14px; }
 .nk-crole-card {
-  --holo-color: color-mix(in srgb, var(--ph-500) 55%, transparent);
+  --holo-color: color-mix(in srgb, var(--tc-500) 55%, transparent);
   --cost-c: var(--cw-rarity-4);
   position: relative;
   isolation: isolate;
@@ -372,7 +372,7 @@
 
 /* ═══ 沉浸式 Hero ═══ */
 .nk-crole-hero {
-  --holo-color: color-mix(in srgb, var(--ph-500) 45%, transparent);
+  --holo-color: color-mix(in srgb, var(--tc-500) 45%, transparent);
   position: relative;
   overflow: hidden;
   min-height: 280px;
@@ -1141,7 +1141,7 @@
   .nk-crole__skeleton-portrait { width: 140px; height: 140px; }
 }
 @media (min-width: 1024px) {
-  .nk-crole { max-width: calc(1040px + 88px); }
+  .nk-crole { max-width: calc(1040px + 148px); padding-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
   .nk-crole-hero { min-height: 380px; }
   .nk-crole-hero__content { padding: 40px; }
   .nk-crole-hero__portrait { width: 160px; height: 160px; }

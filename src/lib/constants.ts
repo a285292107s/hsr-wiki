@@ -2,6 +2,9 @@
 
 export const CDN = 'https://static.nanoka.cc';
 
+/** 站点名（浏览器标题 / 首页品牌主标题；曾用名“咸鱼百科”见页脚彩蛋） */
+export const SITE_NAME = '星铁档案馆';
+
 /**
  * Step 2: 切生产。converter 已用 --official-icon-paths 全量重跑 public/data/cn，
  *   非 Spine 图片 icon 字段均为官方 StarRailTextures 仓库相对路径，直接拼 OFFICIAL_ICON_BASE。

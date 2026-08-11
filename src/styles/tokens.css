@@ -20,6 +20,55 @@
   --ph-800: #4f1271;
   --ph-900: #2f0845;
   --ph-950: #1e032e;
+  /* Terracotta 色阶（Kigen.design 赤陶族；反 AI 味主色——暖砖红、低饱和、无霓虹；
+     主题强调色唯一来源，领域语义色不得引用本阶） */
+  --tc-50: #FBF2EC;
+  --tc-100: #F5E0D2;
+  --tc-200: #EAC0A4;
+  --tc-300: #DE9A74;
+  --tc-400: #CC7648;
+  --tc-500: #B85C33;
+  --tc-600: #9C4928;
+  --tc-700: #7C3920;
+  --tc-800: #5B2A18;
+  --tc-900: #3B1C10;
+  --tc-950: #271209;
+  /* Olive 橄榄青色阶（低饱和军绿/苔藓；主题强调色可选源之一，领域色不得引用） */
+  --ol-50: #F4F6EF;
+  --ol-100: #E4E9D8;
+  --ol-200: #C9D3B4;
+  --ol-300: #A8B88C;
+  --ol-400: #8A9B6A;
+  --ol-500: #6F7F4E;
+  --ol-600: #57653C;
+  --ol-700: #414C2C;
+  --ol-800: #2E371F;
+  --ol-900: #1F2516;
+  --ol-950: #141812;
+  /* Slate 雾霭蓝灰（低饱和雾蓝/石板；主题强调色可选源之一，领域色不得引用） */
+  --sl-50: #F2F5F7;
+  --sl-100: #E0E7EB;
+  --sl-200: #C2CDD4;
+  --sl-300: #9FAFB9;
+  --sl-400: #7E919D;
+  --sl-500: #63767F;
+  --sl-600: #4E5E66;
+  --sl-700: #3C484E;
+  --sl-800: #2B3439;
+  --sl-900: #1E2529;
+  --sl-950: #14181B;
+  /* Sand 暖沙棕色阶（温暖大地色；主题强调色可选源之一，领域色不得引用） */
+  --sd-50: #F7F3EC;
+  --sd-100: #EDE3D3;
+  --sd-200: #DCC9AC;
+  --sd-300: #C6AC82;
+  --sd-400: #AD8E5F;
+  --sd-500: #937447;
+  --sd-600: #775C37;
+  --sd-700: #5A4529;
+  --sd-800: #40301C;
+  --sd-900: #2B1F12;
+  --sd-950: #1C150B;
   /* 金色阶（CW 主题 / 星级 / 网关入口；gold-350 为项目自有高亮暖金；
      gold-600/700 为暗铜阶——CW 语义金降阶位（全局化 §13.2 金阶拆族） */
   --gold-200: #FDE68A;
@@ -70,9 +119,9 @@
   /* 遗器套装类型 */
   --relic-planar: #7DD3FC;
   --relic-planar-deep: #38BDF8;
-  /* 首页 Hero 兜底渐变（Spine 加载失败时的深紫底色；收编为黑阶 + 主色注入——ADR 0011） */
-  --hero-bg-deep: color-mix(in srgb, var(--blk-900) 86%, var(--ph-400) 14%);
-  --hero-bg-tint: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 70%, var(--ph-400) 30%) 55%, transparent);
+  /* 首页 Hero 兜底渐变（Spine 加载失败时的暖砖红底色；收编为黑阶 + 主色注入——ADR 0011） */
+  --hero-bg-deep: color-mix(in srgb, var(--blk-900) 86%, var(--th-400) 14%);
+  --hero-bg-tint: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 70%, var(--th-400) 30%) 55%, transparent);
   /* 货币战争势力标签（领域色豁免：数据语义，不随主题——ADR 0011/0012）
      core = 背景/边框基色，同名令牌 = 文字亮端 */
   --cw-faction-core: #A78BFA;
@@ -116,16 +165,26 @@
   --ach-rarity-high: var(--gold-600);
   --ach-rarity-high-text: var(--gold-300);
 
-  /* ═══ 语义层 Semantic：主题映射（:root 常规黑紫，[data-theme="cw"] 暗金覆盖） ═══ */
+  /* ═══ 主题色阶别名层 Theme Accent：当前强调色阶（默认 Terracotta，可经 data-accent 切换） ═══
+     语义层仅引用 --th-*（当前主题色阶），不直接绑定具体色族；
+     原始色阶（tc/ol/sl/sd）为可选源，设置页经 <html data-accent> 切换。CW 经 [data-theme="cw"] 覆盖为金。 */
+  --th-300: var(--tc-300);
+  --th-400: var(--tc-400);
+  --th-500: var(--tc-500);
+  --th-600: var(--tc-600);
+  --th-700: var(--tc-700);
+
+  /* ═══ 语义层 Semantic：主题映射（:root 常规暖砖红，[data-theme="cw"] 暗金覆盖） ═══ */
   /* 表面统一走黑阶派生 + 主色注入（结构：黑阶染主色 → 调透明度），领域层豁免不动 */
   --bg: var(--blk-950);
   --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 85%, transparent);
   --card: color-mix(in srgb, color-mix(in srgb, var(--blk-850) 94%, var(--primary) 6%) 70%, transparent);
-  /* 主色 = Purple Heart 500（较原 violet-600 更饱和、更品红）；派生色一律 color-mix 表达 */
-  --primary: var(--ph-500);
-  --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
-  /* 主色梯度端（ADR 0011 收编：原玫红 #F43F5E → 主色族成员 ph-400，第三色相消失） */
-  --accent: var(--ph-400);
+  /* 主色 = 当前主题色阶 500（默认 Terracotta 暖砖红、低饱和、反 AI 味）；派生色一律 color-mix 表达 */
+  --primary: var(--th-500);
+  /* 反 AI 味：弱化霓虹光晕（25%→10%），仅保留隐约材质感；CW 暗金模式见 [data-theme="cw"] */
+  --primary-glow: color-mix(in srgb, var(--primary) 10%, transparent);
+  /* 主色梯度端（ADR 0011 收编：原玫红 #F43F5E → 主色族成员 th-400，第三色相消失） */
+  --accent: var(--th-400);
   --gold: var(--gold-400);
   /* 语义金（强化/文本高亮等语义强调）：随主题——常规亮金，CW 降阶暗铜（§13.2 主题金与语义金永不重叠） */
   --gold-sem: var(--gold-300);
@@ -137,8 +196,8 @@
   --border2: color-mix(in srgb, var(--primary) 40%, transparent);
   /* 文本高亮语义位：并入 gold 族（全局化 §13.4 裁决，消除游离橙 #f29e38） */
   --highlight: var(--gold-300);
-  /* 高亮数值/激活态文字 = Purple Heart 300 */
-  --metric-val: var(--ph-300);
+  /* 高亮数值/激活态文字 = 当前主题色阶 300 */
+  --metric-val: var(--th-300);
   /* 终局/错误状态色（--season-live/--season-upcoming/toast 错误引用；勿删） */
   --diff-add: #34D399;
   --diff-del: #F87171;
@@ -211,6 +270,12 @@
   --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
   /* 主色梯度端：暗金（主色族成员） */
   --accent: var(--gold-600);
+  /* 主题色阶别名同步为金：跨模式共享样式（catalog 等）若直接引用 --th-* 时保持黑金一致 */
+  --th-300: var(--gold-300);
+  --th-400: var(--gold-600);
+  --th-500: var(--gold-500);
+  --th-600: var(--gold-700);
+  --th-700: var(--gold-700);
   --gold: var(--gold-600);
   --gold-sem: var(--gold-600);
   /* 暖白文本：白 + 金微注入（黑与金的金注入文本，替代原 rgba 暖白） */
@@ -245,6 +310,39 @@
   /* CW 主题：暖白细线（白 + 金微注入） */
   --line-1: color-mix(in srgb, var(--text-bright) 8%, transparent);
   --line-2: color-mix(in srgb, var(--text-bright) 15%, transparent);
+}
+
+/* ═══ 主题强调色切换：设置页经 <html data-accent="..."> 选择常规模式强调色阶 ═══
+   仅重映射 --th-*（当前主题色阶别名），语义层/领域层通过它自动跟随；
+   CW（[data-theme="cw"]）不受影响，始终黑金。缺省（无 data-accent）= Terracotta。 */
+[data-accent="olive"] {
+  --th-300: var(--ol-300);
+  --th-400: var(--ol-400);
+  --th-500: var(--ol-500);
+  --th-600: var(--ol-600);
+  --th-700: var(--ol-700);
+}
+[data-accent="slate"] {
+  --th-300: var(--sl-300);
+  --th-400: var(--sl-400);
+  --th-500: var(--sl-500);
+  --th-600: var(--sl-600);
+  --th-700: var(--sl-700);
+}
+[data-accent="sand"] {
+  --th-300: var(--sd-300);
+  --th-400: var(--sd-400);
+  --th-500: var(--sd-500);
+  --th-600: var(--sd-600);
+  --th-700: var(--sd-700);
+}
+/* Terracotta 为默认（无 data-accent 即命中 :root），显式值保证幂等 */
+[data-accent="terracotta"] {
+  --th-300: var(--tc-300);
+  --th-400: var(--tc-400);
+  --th-500: var(--tc-500);
+  --th-600: var(--tc-600);
+  --th-700: var(--tc-700);
 }
 
 /* 主题切换瞬间的渐变过渡（App.vue 临时挂载 ~450ms 后移除，
@@ -291,9 +389,13 @@
   color: var(--text2); opacity: 0.72;
   transition: color 0.2s, opacity 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  position: relative;
 }
 .ui-sidebar-link__icon { display: flex; transition: transform 0.18s var(--nk-ease-out); }
 .ui-sidebar-link__icon svg { width: 20px; height: 20px; transition: transform 0.35s var(--nk-ease-out); }
+/* 文字块（中文 + 英文 mono 小字）：默认隐藏，桌面文字侧栏（≥1024px）显示 */
+.ui-sidebar-link__text { display: none; }
+.ui-sidebar-link__cn, .ui-sidebar-link__en { display: block; }
 /* 按压触觉反馈：图标即时收缩（80-150ms 内响应），不位移槽位布局 */
 .ui-sidebar-link:active .ui-sidebar-link__icon { transform: scale(0.82); }
 /* 交换按钮悬停：双箭头旋转暗示“切换”语义，与普通导航项区分 */
@@ -302,7 +404,11 @@
 .ui-sidebar-link:hover { opacity: 1; background: var(--nk-shell-hover); }
 .ui-sidebar-link:active { opacity: 1; background: var(--nk-shell-press); }
 .ui-sidebar-link:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-.ui-sidebar-link--active { opacity: 1; color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); box-shadow: 0 0 12px var(--nk-shell-glow); }
+/* 激活项：淡底 + 主色文字 + 细边框；霓虹 glow 已去除（收敛为纯物理阴影） */
+.ui-sidebar-link--active { opacity: 1; color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); }
+/* 设置入口：手机底部栏作为末槽位平铺（与其他按钮垂直居中对齐，无需额外 margin）；
+   置底由平板断点内的 .ui-sidebar-settings 应用（见下） */
+.ui-sidebar-settings { margin-top: 0; }
 
 /* ─── 模式切换「重凝」动画：导航板块从模糊中凝聚，交换按钮与分隔线保持不动 ─── */
 .ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) {
@@ -464,9 +570,9 @@ background-position: center 15%;
 .nk-hero__camp {
   display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
-  letter-spacing: 0.18em; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 90%, var(--ph-300) 10%) 92%, transparent);
+  letter-spacing: 0.18em; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 90%, var(--th-300) 10%) 92%, transparent);
 }
-.nk-hero__camp::before { content: ''; width: 14px; height: 1px; background: color-mix(in srgb, var(--ph-400) 85%, transparent); }
+.nk-hero__camp::before { content: ''; width: 14px; height: 1px; background: color-mix(in srgb, var(--th-400) 85%, transparent); }
 .nk-hero__name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text-bright); text-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 20%, transparent); line-height: 1.15; }
 .nk-hero__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .nk-hero__stars { color: var(--gold); font-size: 1.05rem; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 8px color-mix(in srgb, var(--rarity-5) 22%, transparent); }
@@ -503,7 +609,7 @@ background-position: center 15%;
 }
 .nk-hero__level-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--ph-400));
+  background: linear-gradient(90deg, var(--primary), var(--th-400));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
   transition: width 0.6s var(--nk-ease-out);
 }
@@ -679,7 +785,7 @@ background-position: center 15%;
 .nk-sk--bar-lg { width: 180px; }
 .nk-sk--fill { position: absolute; inset: 0; border-radius: 0; }
 .nk-sk--bar-line { width: 100%; height: 6px; border-radius: 3px; }
-.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--primary) 8%, transparent) 35%, color-mix(in srgb, var(--ph-400) 18%, transparent) 50%, color-mix(in srgb, var(--primary) 8%, transparent) 65%, transparent 100%); animation: nk-shimmer 1.4s linear infinite; }
+.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--primary) 8%, transparent) 35%, color-mix(in srgb, var(--th-400) 18%, transparent) 50%, color-mix(in srgb, var(--primary) 8%, transparent) 65%, transparent 100%); animation: nk-shimmer 1.4s linear infinite; }
 @keyframes nk-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 .nk-skeleton { padding: 0; }
 .nk-skeleton--char { max-width: 100%; }
@@ -699,6 +805,10 @@ background-position: center 15%;
 .nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
 .nk-skeleton--catalog { padding: 0 24px 80px 88px; }
+@media (min-width: 1024px) {
+  /* 桌面文字侧栏避让同步：骨架屏与真实网格保持同一左内边距 */
+  .nk-skeleton--catalog { padding-left: 148px; }
+}
 .nk-skeleton__header { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .nk-skeleton__filters { padding: 12px 0; }
 .nk-skeleton__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min, 150px), 1fr)); gap: var(--nk-grid-gap, 14px); padding-top: 16px; }
@@ -709,6 +819,8 @@ background-position: center 15%;
 .nk-mob-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
 /* 终局星际档案卡：横向占位条，匹配真实卡片形态 */
 .nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 12px; }
+/* 角色名录：横向条占位，匹配名录格形态 */
+.nk-idx-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 52px; border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
 
 /* CDN 图片最终降级：全局委托（installCdnImgFallback）在 nanoka 也失败时标记 data-cdn-down，
@@ -742,18 +854,18 @@ img[data-cdn-down] { visibility: hidden; }
 ═══════════════════════════════════════════ */
 /* ── 平板（≥768px）增强 ── */
 @media (min-width: 768px) {
+  /* 书脊式全高侧栏：背景色带延伸至视口全高，仅右侧发丝线与内容区分隔；
+     去圆角/去全框/去投影（档案书脊隐喻），导航项顶部对齐 */
   .ui-sidebar {
     position: fixed;
     display: flex; flex-direction: column; align-items: center; gap: 6px;
-    width: 56px; padding: 12px 6px; border-radius: 18px;
-    background: var(--nk-sheet-bg); backdrop-filter: blur(20px) saturate(1.4);
-    border: 1px solid var(--nk-sheet-border);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.55);
-    /* 顶部锚定（取代垂直居中）：偏移量 = 常规模式 10 项 pill 总高(483px)的一半，
-       使默认常规模式恰好垂直居中；CW 模式共享同一顶锚点 →
-       交换按钮位置恒定，且 pill 内无需占位槽、无空白玻璃 */
-    top: max(16px, calc(50% - 242px)); bottom: auto; left: 8px; right: auto; transform: none;
-    height: fit-content; z-index: 10000;
+    width: 56px; padding: 20px 8px 16px; border-radius: 0;
+    background: var(--nk-sheet-bg);
+    border: none; border-right: 1px solid var(--line-1);
+    box-shadow: none;
+    backdrop-filter: none; -webkit-backdrop-filter: none; /* 清除手机底部栏继承的 blur：书脊色带用高不透明底 */
+    top: 0; bottom: 0; left: 0; right: auto; transform: none;
+    height: auto; z-index: 10000;
   }
   /* 平板/桌面：图标式竖排，隐藏文字标签；触控目标提升至 44px（iPad 触屏标准） */
   .ui-sidebar-link { flex: none; width: 44px; height: 44px; }
@@ -769,6 +881,8 @@ img[data-cdn-down] { visibility: hidden; }
   .ui-sidebar-more { display: none; }
   .ui-sidebar-link--in-more { display: flex; }
   .ui-more { display: none; }
+  /* 竖排侧栏：设置入口推至栏底部（手机底部栏已平铺，无需此规则） */
+  .ui-sidebar-settings { margin-top: auto; }
   .nk-page--detail { left: 72px; bottom: 0; }
   .nk-hero__panel { padding: 28px 36px; gap: 22px; }
   .nk-hero__name { font-size: 1.85rem; }
@@ -785,10 +899,45 @@ img[data-cdn-down] { visibility: hidden; }
   .nk-skeleton__hero-visual { aspect-ratio: 21 / 9; }
   .nk-skeleton__body { padding: 28px 24px 60px; }
 }
-/* ── 桌面（≥1024px）：Hero 左右结构，视觉区 ≈ 40% + 信息面板 ≈ 60% ── */
+/* ── 桌面（≥1024px）：文字侧栏（档案目录册）──
+   图标 + 中文 + 英文 mono 小字竖排，发丝线边框、直角、无投影；
+   激活项 = 淡底 + 主色文字 + 左侧档案竖条（与名录格 hover 语言同源）。
+   内容区避让同步加宽至 148px（侧栏 140 + 左缘 8）。 */
 @media (min-width: 1024px) {
-  .ui-sidebar { width: 72px; padding: 14px 8px; border-radius: 22px; box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px var(--nk-shell-glow); }
-  .nk-page--detail { left: 88px; }
+  .ui-sidebar {
+    width: 140px; padding: 24px 8px 16px; border-radius: 0;
+    align-items: stretch; gap: 2px;
+    background: var(--nk-sheet-bg);
+    border: none; border-right: 1px solid var(--line-1);
+    box-shadow: none;
+  }
+  .ui-sidebar-link {
+    flex: none; width: auto; height: auto;
+    flex-direction: row; align-items: center; justify-content: flex-start;
+    gap: 10px; padding: 7px 10px; border-radius: 8px;
+    opacity: 1; color: var(--text2);
+  }
+  .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
+  .ui-sidebar-link__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .ui-sidebar-link__cn { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; transition: color 0.2s; }
+  .ui-sidebar-link__en { font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; font-size: 0.5rem; letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ui-sidebar-link:hover { background: var(--nk-shell-hover); }
+  .ui-sidebar-link:hover .ui-sidebar-link__cn { color: var(--text-bright); }
+  .ui-sidebar-link--active { background: var(--nk-shell-active-bg); }
+  .ui-sidebar-link--active .ui-sidebar-link__cn { color: var(--metric-val); }
+  .ui-sidebar-link--active .ui-sidebar-link__en { color: color-mix(in srgb, var(--metric-val) 55%, transparent); }
+  /* 激活档案竖条：左侧主色短竖线 */
+  .ui-sidebar-link--active::before {
+    content: '';
+    position: absolute;
+    left: -1px; top: 50%;
+    transform: translateY(-50%);
+    width: 2px; height: 62%;
+    border-radius: 1px;
+    background: var(--primary);
+  }
+  .ui-sidebar-divider { margin: 4px 8px; }
+  .nk-page--detail { left: 148px; }
   .nk-hero {
     flex-direction: row;
     max-width: var(--nk-detail-max);
@@ -823,8 +972,10 @@ img[data-cdn-down] { visibility: hidden; }
   .nk-skeleton__hero-visual { aspect-ratio: auto; height: 38vh; height: 38dvh; }
 }
 /* ── 矮视口 + 平板布局（手机横屏触发 ≥768px 断点）：压缩侧边栏避免纵向裁切导致中间项不可达 ── */
-@media (min-width: 768px) and (max-height: 500px) {
-  .ui-sidebar { gap: 3px; padding: 8px 6px; }
+/* ── 矮视口 + 平板（手机横屏触发 ≥768px 断点）：压缩图标侧栏避免纵向裁切导致中间项不可达；
+   桌面文字侧栏（≥1024px）不参与压缩 */
+@media (min-width: 768px) and (max-width: 1023px) and (max-height: 500px) {
+  .ui-sidebar { gap: 3px; padding: 12px 6px; }
   .ui-sidebar-link { width: 36px; height: 36px; }
   .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
 }

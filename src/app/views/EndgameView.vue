@@ -13,6 +13,7 @@ import {
   loadLocalItems,
 } from '../../services/api';
 import { itemIconUrl } from '../../lib/format';
+import { SITE_NAME } from '../../lib/constants';
 import { cdnUri } from '../../services/cdn';
 import type { LocalItemEntry, MazeBuffInfo, MazeListDb, MazeListEntry, PeakLevelInfo } from '../../services/types';
 // 敌方完整信息卡（星启 / 末日幻影纯 Boss 战共用）
@@ -98,7 +99,7 @@ async function load(mode: string, id: string): Promise<void> {
     }
     data.value = entry;
     seasonIndex.value = keys.indexOf(id);
-    document.title = `${entry.zh} - 咸鱼百科`;
+    document.title = `${entry.zh} - ${SITE_NAME}`;
     // 物品库并行预热（奖励名称/图标；失败静默，不影响赛季正文）
     void loadItemMap().then((m) => { itemMap.value = m; });
     // 下一帧再切换 ready，避免 loading 骨架闪烁；随后 nextTick 等正文 DOM 就绪，

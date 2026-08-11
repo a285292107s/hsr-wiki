@@ -15,9 +15,9 @@ const ELEM_NAMES: Record<string, string> = {
 export const characterPage: CatalogPageConfig = {
   id: 'character',
   title: '角色图鉴',
+  subtitle: 'CHARACTER INDEX',
   searchPlaceholder: '搜索角色...',
-  gridClass: 'nk-cat-grid',
-  cardClass: '.nk-cat-card',
+  gridClass: 'nk-idx-grid',
   async fetchData() {
     const list = await loadLocalCharacterList();
     const items: CatalogItem[] = [];
@@ -84,18 +84,23 @@ export const characterPage: CatalogPageConfig = {
     const stars = '★'.repeat(Number(item.rarity) || 5);
     const element = String(item.element || '');
     const path = String(item.path || '');
-    return `<a class="nk-cat-card" href="${escHtml(item.href)}" data-element="${escHtml(element)}" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-path="${escHtml(path)}" style="--i:${i}">
-    <div class="nk-cat-card__img">
-      <img class="avatar" src="${escHtml(item.avatar)}"${cdnImgFallbackAttr(String(item.avatar || ''))} alt="${escHtml(item.name)}" loading="lazy">
-      <div class="nk-cat-card__icons">
-        ${item.elemImg ? `<img class="nk-cat-card__elem" src="${escHtml(item.elemImg)}" alt="${ELEM_NAMES[element] || element}">` : ''}
-        ${item.pathImg ? `<img class="nk-cat-card__path" src="${escHtml(item.pathImg)}" alt="${PATH[path] || path}">` : ''}
-      </div>
-      <div class="nk-cat-card__info">
-        <span class="nk-cat-card__stars">${stars}</span>
-        <span class="nk-cat-card__name">${escHtml(item.name)}</span>
-      </div>
-    </div>
+    return `<a class="nk-idx-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" style="--i:${i}">
+    <span class="nk-idx-card__portrait">
+      <img src="${escHtml(item.avatar)}"${cdnImgFallbackAttr(String(item.avatar || ''))} alt="${escHtml(item.name)}" loading="lazy">
+    </span>
+    <span class="nk-idx-card__body">
+      <span class="nk-idx-card__name-row">
+        <span class="nk-idx-card__name">${escHtml(item.name)}</span>
+        <span class="nk-idx-card__stars" aria-hidden="true">${stars}</span>
+      </span>
+      <span class="nk-idx-card__meta">
+        ${item.elemImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.elemImg)}" alt="">` : ''}
+        <span>${ELEM_NAMES[element] || element}</span>
+        <span class="nk-idx-card__sep">·</span>
+        ${item.pathImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.pathImg)}" alt="">` : ''}
+        <span>${PATH[path] || path}</span>
+      </span>
+    </span>
   </a>`;
   },
 };

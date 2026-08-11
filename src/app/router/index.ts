@@ -7,6 +7,7 @@
  */
 import { createRouter, createWebHistory, type RouteRecordRaw, type Router } from 'vue-router';
 import { ref } from 'vue';
+import { SITE_NAME } from '../../lib/constants';
 
 /** 导航方向（驱动 nk-enter-fwd / nk-enter-back 过渡动画） */
 export const navDir = ref<1 | -1 | 0>(0);
@@ -176,6 +177,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/DebugHubView.vue'),
     meta: { depth: 0, title: '调试中心' },
   },
+  /* 设置页：主题强调色选择（常规模式；CW 黑金独立不受影响） */
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('../views/SettingsView.vue'),
+    meta: { depth: 0, title: '设置' },
+  },
   /* KV 场景验收台：每版本官网重新抓取的 official-scene 在此验收渲染（一键验收 + 单层状态排查，/debug/spine?scene=home-bg） */
   {
     path: '/debug/spine',
@@ -219,7 +227,7 @@ export function createNkRouter(): Router {
 
   router.afterEach((to) => {
     const t = to.meta.title as string | undefined;
-    document.title = t ? `${t} - 咸鱼百科` : '咸鱼百科';
+    document.title = t ? `${t} - ${SITE_NAME}` : SITE_NAME;
   });
 
   return router;

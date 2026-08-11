@@ -52,6 +52,8 @@ export interface CatalogPageConfig {
   /** 数据就绪后后台预热兄弟页数据（终局 4 页互取，保证 Tab 切换即时命中 L1） */
   prefetch?: (ctx: CatalogContext) => void;
   searchPlaceholder: string;
+  /** 页头标题旁的英文副标（档案感元信息，等宽小字；可选） */
+  subtitle?: string;
   gridClass?: string;
   /** 卡片倾斜效果选择器（非虚拟模式） */
   cardClass?: string;

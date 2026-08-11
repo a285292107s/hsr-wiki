@@ -5,6 +5,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { loadLocalLightConeDetail } from '../../services/api';
+import { SITE_NAME } from '../../lib/constants';
 import { useLoadGeneration } from '../composables/use-load-generation';
 import type { LightConeDetail } from '../../services/types';
 
@@ -31,7 +32,7 @@ export const useLightconeStore = defineStore('lightcone', () => {
       if (!d || !d.name || !d.skill) throw new Error('光锥数据不完整');
       data.value = d;
       rank.value = 1;
-      document.title = `${d.name} - 咸鱼百科`;
+      document.title = `${d.name} - ${SITE_NAME}`;
     } catch (e) {
       if (!loadGen.isCurrent(gen)) return;
       error.value = e instanceof Error ? e.message : String(e);

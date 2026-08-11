@@ -5,6 +5,8 @@
  */
 defineProps<{
   title: string;
+  /** 标题旁的英文副标（如 CHARACTER INDEX） */
+  subtitle?: string;
   placeholder: string;
   query: string;
   /** 计数文本（如 `12 / 89`；加载中传 `—`） */
@@ -22,8 +24,15 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="nk-cat-header">
-    <span class="nk-cat-title">{{ title }}</span>
+  <!-- 页头（档案式 masthead，非吸顶）：标题 + 等宽副标 + 发丝线延伸 + 计数元信息，
+       随内容滚动离开；吸顶工具条（toolbar）为轻量工具层，与其分离 -->
+  <div class="nk-cat-masthead">
+    <span class="nk-cat-title">
+      {{ title }}<span v-if="subtitle" class="nk-cat-subtitle">{{ subtitle }}</span>
+    </span>
+    <span class="nk-cat-count">{{ countText }}</span>
+  </div>
+  <div class="nk-cat-toolbar">
     <div class="nk-cat-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4" stroke-linecap="round"/>
@@ -35,7 +44,6 @@ const emit = defineEmits<{
         @input="(e) => emit('search', (e.target as HTMLInputElement).value)"
       >
     </div>
-    <span class="nk-cat-count">{{ countText }}</span>
     <button
       v-if="hasFilters"
       class="nk-cat-filter-btn"

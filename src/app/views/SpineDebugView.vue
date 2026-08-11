@@ -359,7 +359,7 @@ onBeforeUnmount(() => {
   .nk-spine-debug { margin-left: 72px; }
 }
 @media (min-width: 1024px) {
-  .nk-spine-debug { margin-left: 88px; }
+  .nk-spine-debug { margin-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
 }
 
 /* ─── 头部：HUD 引导行 + 标题 + 说明 + 工具栏 ─── */
