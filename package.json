@@ -16,6 +16,7 @@
     "test:lab": "vitest run -c spine-lab/vitest.config.ts"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^2.0.0",
     "pinia": "^4.0.2",
     "vue": "^3.5.34",
     "vue-router": "^4.6.4"

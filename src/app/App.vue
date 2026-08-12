@@ -5,10 +5,11 @@
  * 方向由 router beforeEach 计算的 navDir 驱动。
  * 手机断点（<768px）统一使用快速纯淡入淡出，避免方向滑移造成闪烁。
  * 模式主题：route.meta.cw 驱动 <html data-theme="cw">（货币战争全壳暗金），
- * 切换瞬间挂载 .theme-transitioning 实现 400ms 世界“褪色重染”。
+ * 切换瞬间挂载 .theme-transitioning 实现 400ms 世界"褪色重染"。
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
+import { SpeedInsights } from '@vercel/speed-insights/vue';
 import { navDir } from './router';
 import SidebarNav from './components/SidebarNav.vue';
 import ToastHost from './components/ToastHost.vue';
@@ -62,4 +63,5 @@ onBeforeUnmount(() => { if (themeTimer !== null) clearTimeout(themeTimer); });
     </Transition>
   </RouterView>
   <ToastHost />
+  <SpeedInsights />
 </template>
