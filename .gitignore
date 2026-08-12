@@ -71,3 +71,9 @@ playwright-report
 blob-report
 playwright/.cache
 test-results
+
+# AI workspace memory
+.workbuddy/
+
+# Python cache (explicit)
+.pytest_cache/
