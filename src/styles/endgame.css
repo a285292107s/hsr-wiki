@@ -1,32 +1,71 @@
 /* ═══════════════════════════════════════════
-   终局内容 · 星际档案（Endgame Archive）
+   终局内容 · 档案索引（Endgame Index）
    由路由 /endgame 并行加载（endgameCatalogView）。
    - 四模式合并单页：模式身份为筛选选项，卡片以 v-html 模板字符串渲染
+   - V4 索引行（2026-08）：去盒框卡片墙 → 无盒框档案索引行——
+     发丝线分隔 / 编号轨 + 模式英文标签身份锚点 / 四模式领域色 --eg-* 回归
+     （与详情页 endgame-detail.css 同源：--eg-color 经 data-mode 映射）
    - 设计语言（docs/设计语言-深空档案-编辑式排版.md）：
      № 编号身份锚点 / 无框展品图标（hairline 单线）/
      规格表行式统计（细线分隔）/ 增益为文本点分隔（去药丸胶囊）/
-     状态为文字徽标（去发光点）/ 卡片统一主色，内容区数据回归中性
-   - 反 AI 味：无装帧角标、无发光状态点、无药丸胶囊、无 glow
-   - 演进 V3（统一）：移除卡片顶部身份线（::before）与模式英文标签（FORGOTTEN HALL 等），
-     卡片 --eg-color 固定主色（--primary），模式身份仅由筛选面板与赛季/玩法图标承载
+     状态为文字徽标（去发光点）/ 模式色仅存于身份锚点
+   - 反 AI 味：无装帧角标、无发光状态点、无药丸胶囊、无 glow、无盒框堆叠
    - 覆盖：目录卡片入场动画 / 返回恢复时的 no-reveal 抑制
 ═══════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════
-   星际档案网格 + 档案卡（编辑式卷宗）
+   档案索引网格 + 索引行（编辑式卷宗）
 ═══════════════════════════════════════════ */
-.nk-eg-grid { --nk-grid-min: 340px; --nk-grid-gap: 14px; }
-.nk-eg-card { --eg-color: var(--primary); --st-color: var(--text3); position: relative; display: flex; align-items: stretch; gap: 16px; padding: 18px; background: var(--card); border: 1px solid var(--nk-card-border); border-radius: var(--nk-radius-card); cursor: pointer; text-decoration: none; transition: transform 0.28s var(--ease), border-color 0.28s, box-shadow 0.28s, background 0.28s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 18ms), 600ms); }
-/* 装帧角标已移除（装饰性 AI 味元素，详见文件头注释） */
+.nk-eg-grid { --nk-grid-min: 430px; --nk-grid-gap: 14px; }
+/* 索引行：无盒框（无背景/无圆角/无边框），行间发丝线分隔；
+   左缘模式色竖条 hover 浮现（身份锚点克制呈现，常态零装饰） */
+.nk-eg-card {
+  --eg-color: var(--primary);
+  --st-color: var(--text3);
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  padding: 14px 10px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--line-1);
+  border-radius: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.28s, border-color 0.28s;
+  animation: nk-card-in 0.4s var(--ease) backwards;
+  animation-delay: min(calc(var(--i, 0) * 18ms), 600ms);
+}
+/* 左缘模式色竖条（hover 浮现，尺度 60% 行高） */
+.nk-eg-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 2px;
+  height: 60%;
+  border-radius: 1px;
+  background: var(--eg-color);
+  transition: transform 0.28s var(--ease);
+}
+/* 模式身份映射（领域层 --eg-*，与详情页同源；数据语义色不随主题） */
+.nk-eg-card[data-mode="maze"] { --eg-color: var(--eg-maze); }
+.nk-eg-card[data-mode="story"] { --eg-color: var(--eg-story); }
+.nk-eg-card[data-mode="boss"] { --eg-color: var(--eg-boss); }
+.nk-eg-card[data-mode="peak"] { --eg-color: var(--eg-peak); }
+/* 首行去线：索引首条无顶部分隔（与详情页楼层章节同源） */
+.nk-eg-grid > .nk-eg-card:first-child { border-top: none; }
 
 /* 印记区：赛季图标展品（无外框——去戳记双线框的框中框堆叠）。
-   图标自身 hairline 单线 + 圆角 4px，悬停在卡片上；模式身份由图标承载，
-   无图时主色徽记绝对定位居中兜底；№ 档案编号贴图标底部（身份锚点） */
+   图标自身 hairline 单线 + 圆角 4px，悬停在卡片上；模式身份由图标 + 身份行承载，
+   无图时主色徽记绝对定位居中兜底 */
 .nk-eg-card__seal {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 76px;
+  width: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,7 +74,7 @@
   padding: 0;
   transition: background 0.25s;
 }
-.nk-eg-card__emblem { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -58%); width: 40px; height: 40px; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); transition: color 0.28s; }
+.nk-eg-card__emblem { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -58%); width: 32px; height: 32px; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); transition: color 0.28s; }
 .nk-eg-card__emblem svg { width: 100%; height: 100%; }
 /* 赛季页签图标（TabIcon）：位于印记区内（图标自身 hairline 单线）——
    有图标时隐藏默认 SVG 徽记（--has-art；visibility 隐藏保留占位维持布局），
@@ -43,8 +82,8 @@
 .nk-eg-card--has-art .nk-eg-card__emblem { visibility: hidden; }
 .nk-eg-card__art {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 52px;
+  height: 52px;
   border: 1px solid var(--line-1);
   border-radius: 4px;
   background: var(--blk-800);
@@ -52,26 +91,24 @@
   transition: border-color 0.25s;
 }
 /* 内容区（档案体） */
-.nk-eg-card__body { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 2px 0 0; }
-/* meta 行（档案头）：状态徽标（右，编辑式文字徽标）——№ 编号已下移至印记区 */
-.nk-eg-card__meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
-/* 档案编号（身份锚点）：位于印记区底部——有图标时紧贴图标下方（紧凑组），
-   无图标（徽记兜底）时贴 seal 底部，避免与居中徽记重叠 */
-.nk-eg-card__no { margin-top: auto; font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; line-height: 1; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); font-variant-numeric: tabular-nums; white-space: nowrap; transition: color 0.28s; }
-.nk-eg-card__seal:has(.nk-eg-card__art) .nk-eg-card__no { margin-top: 0; }
+.nk-eg-card__body { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding: 1px 0 0; }
+/* 身份行（档案头）：№ 编号 + 模式英文标签——模式色承载身份锚点（克制小字） */
+.nk-eg-card__idline { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.nk-eg-card__no { font-family: var(--font-hud); font-size: 0.52rem; font-weight: 700; letter-spacing: 0.14em; line-height: 1; color: color-mix(in srgb, var(--eg-color) 78%, var(--text2)); font-variant-numeric: tabular-nums; white-space: nowrap; transition: color 0.28s; }
+.nk-eg-card__moden { font-family: var(--font-hud); font-size: 0.52rem; font-weight: 600; letter-spacing: 0.18em; color: color-mix(in srgb, var(--eg-color) 62%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.28s; }
 /* 模式徽章（✦ 星启 / 骑士·王棋 / 常驻 / 测试期）：hairline 文本标记，
    去药丸胶囊化——克制、不抢信息层级 */
 .nk-eg-card__head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 9px; }
-.nk-eg-card__name { flex: 1 1 auto; min-width: 0; font-size: 0.95rem; font-weight: 700; line-height: 1.35; color: var(--text-bright); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color 0.2s; }
+.nk-eg-card__name { flex: 1 1 auto; min-width: 0; font-size: 1.02rem; font-weight: 800; line-height: 1.35; color: var(--text-bright); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color 0.2s; }
 .nk-eg-card__tier,
 .nk-eg-card__perm,
 .nk-eg-card__test { flex-shrink: 0; font-family: var(--font-hud); font-size: 0.5rem; font-weight: 600; letter-spacing: 0.1em; white-space: nowrap; }
 .nk-eg-card__tier { color: var(--highlight); }
 .nk-eg-card__perm { color: var(--highlight); opacity: 0.88; }
 .nk-eg-card__test { color: var(--text3); }
-/* 日期行（无日期时整行隐藏） */
-.nk-eg-card__daterow { display: flex; align-items: center; }
-.nk-eg-card__date { font-family: var(--font-hud); font-size: 0.56rem; letter-spacing: 0.05em; color: var(--text3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* meta 行：状态徽标（左）+ 日期（右，规格表数据右置语言） */
+.nk-eg-card__meta { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.nk-eg-card__date { margin-left: auto; font-family: var(--font-hud); font-size: 0.56rem; letter-spacing: 0.05em; color: var(--text3); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 /* 数据行：标签 + 内容（增益 / 敌方）——规格表行式：标签固定宽左对齐，内容弹性；
    行间 1px 细线分隔（编辑式），会话与档案体的分隔由 __divider 承担 */
@@ -89,9 +126,9 @@
 .nk-eg-card__mon:hover { transform: scale(1.1); border-color: color-mix(in srgb, var(--eg-color) 48%, transparent); z-index: 2; }
 .nk-eg-card__more { font-family: var(--font-hud); font-size: 0.52rem; letter-spacing: 0.06em; color: var(--text3); white-space: nowrap; }
 
-/* 状态徽标（meta 行右侧）：色点 + 文字，不单靠颜色传达（§13.7 无障碍）；
+/* 状态徽标（meta 行左侧）：色点 + 文字，不单靠颜色传达（§13.7 无障碍）；
    文字式徽标——无胶囊底、无发光（去 AI 味） */
-.nk-eg-card__status { margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; color: var(--st-color); transition: color 0.25s; }
+.nk-eg-card__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; color: var(--st-color); transition: color 0.25s; }
 .nk-eg-card__dot { width: 5px; height: 5px; border-radius: 50%; background: var(--st-color); flex-shrink: 0; }
 .nk-eg-card--live { --st-color: var(--season-live); }
 .nk-eg-card--ended { --st-color: var(--season-ended); }
@@ -102,44 +139,48 @@
 .nk-eg-card--ended:hover { opacity: 1; }
 /* 进行中：状态徽标已承载（§13.7 禁止无限循环动画，live 由语义色徽标表达） */
 
-/* ── hover（仅精细指针设备；translateY 抬升 ≤2px 克制，身份锚点在 hover 时提亮） ── */
+/* ── hover（仅精细指针设备；行背景模式色 5% 微亮 + 左缘竖条浮现，
+       身份锚点（编号/英文标签/图标描边）提亮） ── */
 @media (hover: hover) and (pointer: fine) {
-  .nk-eg-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--eg-color) 38%, transparent); box-shadow: var(--nk-shadow-lift); background: color-mix(in srgb, color-mix(in srgb, var(--blk-850) 94%, var(--eg-color) 6%) 78%, transparent); }
-  .nk-eg-card:hover .nk-eg-card__art { border-color: color-mix(in srgb, var(--eg-color) 40%, transparent); }
+  .nk-eg-card:hover { background: color-mix(in srgb, var(--eg-color) 5%, transparent); }
+  .nk-eg-card:hover::before { transform: translateY(-50%) scaleY(1); }
+  .nk-eg-card:hover .nk-eg-card__art { border-color: color-mix(in srgb, var(--eg-color) 55%, transparent); }
   .nk-eg-card:hover .nk-eg-card__emblem { color: var(--eg-color); }
   .nk-eg-card:hover .nk-eg-card__no { color: var(--eg-color); }
-  .nk-eg-card:hover .nk-eg-card__name { color: #fff; }
+  .nk-eg-card:hover .nk-eg-card__moden { color: color-mix(in srgb, var(--eg-color) 85%, var(--text2)); }
+  .nk-eg-card:hover .nk-eg-card__name { color: var(--text-bright); }
 }
-.nk-eg-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
+.nk-eg-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--eg-color) 50%, transparent); }
 
 /* 返回目录页滚动恢复时抑制入场动画（no-reveal 由 CatalogPage 注入） */
 .nk-no-reveal .nk-eg-card { animation: none; }
 
-/* 骨架屏占位条：匹配新卡片纵向形态（印记区 + 档案体 ≈ 180px） */
-.nk-eg-grid .nk-skeleton__card-img { height: 180px; border-radius: var(--nk-radius-card); }
+/* 骨架屏占位条：匹配新索引行纵向形态（印记区 52px + 行内 padding ≈ 132px） */
+.nk-eg-grid .nk-skeleton__card-img { height: 132px; border-radius: 0; border-top: 1px solid var(--line-1); }
 
 /* ── 响应式 ── */
 @media (max-width: 767px) {
   .nk-eg-grid { grid-template-columns: 1fr; }
-  .nk-eg-card { padding: 14px; gap: 12px; }
-  .nk-eg-card__seal { width: 64px; }
-  .nk-eg-card__emblem { width: 34px; height: 34px; }
-  .nk-eg-card__art { width: 58px; height: 58px; }
-  .nk-eg-card__name { font-size: 0.9rem; }
-  .nk-eg-card__status { margin-left: 8px; }
+  .nk-eg-card { padding: 12px 8px; gap: 12px; }
+  .nk-eg-card__seal { width: 44px; }
+  .nk-eg-card__emblem { width: 28px; height: 28px; }
+  .nk-eg-card__art { width: 44px; height: 44px; }
+  .nk-eg-card__name { font-size: 0.92rem; }
 }
 
 /* ── 减弱动效 ── */
 @media (prefers-reduced-motion: reduce) {
   .nk-eg-card { animation: none; }
-  .nk-eg-card:hover { transform: none; }
+  .nk-eg-card::before { transition: none; }
 }
 
 /* ── 触屏设备：重置粘滞 hover（三件套全局，§13.7） ── */
 @media (hover: none) {
-  .nk-eg-card:hover { transform: none; box-shadow: none; border-color: var(--nk-card-border); background: var(--card); }
+  .nk-eg-card:hover { background: transparent; }
+  .nk-eg-card:hover::before { transform: translateY(-50%) scaleY(0); }
   .nk-eg-card:hover .nk-eg-card__art { border-color: var(--line-1); }
   .nk-eg-card:hover .nk-eg-card__name { color: var(--text-bright); }
-  .nk-eg-card:hover .nk-eg-card__no { color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); }
+  .nk-eg-card:hover .nk-eg-card__no { color: color-mix(in srgb, var(--eg-color) 78%, var(--text2)); }
+  .nk-eg-card:hover .nk-eg-card__moden { color: color-mix(in srgb, var(--eg-color) 62%, var(--text3)); }
   .nk-eg-card__mon:hover { transform: none; }
 }

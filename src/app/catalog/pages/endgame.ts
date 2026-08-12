@@ -284,9 +284,13 @@ export const endgamePage: CatalogPageConfig = {
     const mode = ENDGAME_MODES.find((m) => m.key === item.mode);
     const date = item.dateRange ? `<span class="nk-eg-card__date">${escHtml(String(item.dateRange))}</span>` : '';
     // 档案编号（编号=身份，编辑式锚点）：catalog id 为 "ID 3020"，取纯数字段展示 № 编号；
-    // 位于印记区图标底部（meta 行不再承载）
+    // 与模式英文标签同置身份行（V4 索引行：模式色承载身份锚点）
     const no = String(item.id).replace(/^ID\s*/i, '');
-    const noHtml = no ? `<span class="nk-eg-card__no">№ ${escHtml(no)}</span>` : '';
+    const noHtml = no && mode ? `<span class="nk-eg-card__no">№ ${escHtml(no)}</span>` : '';
+    // 身份行：编号 + 模式英文标签（FORGOTTEN HALL 等，模式色小字；mode.en 为常量无需转义）
+    const idlineHtml = mode
+      ? `<span class="nk-eg-card__idline">${noHtml}<span class="nk-eg-card__moden">${mode.en}</span></span>`
+      : (noHtml ? `<span class="nk-eg-card__idline">${noHtml}</span>` : '');
     // 状态徽标：色点 + 文字（不单靠颜色传达，§13.7 无障碍）——色点经 --st-color 映射
     const badge = st !== '未知' ? `<span class="nk-eg-card__status"><span class="nk-eg-card__dot"></span>${escHtml(st)}</span>` : '';
     // 铭牌徽标：星启模式赛季 / 异相仲裁关卡组成
@@ -349,25 +353,25 @@ export const endgamePage: CatalogPageConfig = {
     const dividerHtml = rowsHtml ? '<div class="nk-eg-card__divider"></div>' : '';
 
     return `<a class="nk-eg-card nk-eg-card--${stCls}${hasArt ? ' nk-eg-card--has-art' : ''}" href="${escHtml(item.href)}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
-      <div class="nk-eg-card__seal">
+      <span class="nk-eg-card__seal">
         <span class="nk-eg-card__emblem">${mode?.emblem || ''}</span>
         ${artHtml}
-        ${noHtml}
-      </div>
-      <div class="nk-eg-card__body">
-        <div class="nk-eg-card__meta">
-          ${badge}
-        </div>
-        <div class="nk-eg-card__head">
+      </span>
+      <span class="nk-eg-card__body">
+        ${idlineHtml}
+        <span class="nk-eg-card__head">
           <span class="nk-eg-card__name">${escHtml(item.name) || '未命名赛季'}</span>
           ${permHtml}
           ${testHtml}
           ${tierHtml}
-        </div>
-        ${date ? `<div class="nk-eg-card__daterow">${date}</div>` : ''}
+        </span>
+        <span class="nk-eg-card__meta">
+          ${badge}
+          ${date}
+        </span>
         ${dividerHtml}
         ${rowsHtml}
-      </div>
+      </span>
     </a>`;
   },
 };
