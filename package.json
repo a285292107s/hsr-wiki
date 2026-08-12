@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:update": "playwright test --update-snapshots=all",
     "dev:lab": "vite -c spine-lab/vite.config.ts",
     "build:lab": "vue-tsc --noEmit -p spine-lab/tsconfig.json && vite build -c spine-lab/vite.config.ts",
     "test:lab": "vitest run -c spine-lab/vitest.config.ts"
