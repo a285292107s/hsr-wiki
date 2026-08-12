@@ -4,7 +4,7 @@
  * 结构：Hero（全身立绘 + 名称/分类/阵营/韧性徽章）→ 图鉴介绍 / 弱点抗性 / 基础属性 / 技能
  * 数据：converter 输出 monsters/{id}.json（按 ID 按需加载，不走单例）
  */
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { ELEM, MON_RANK, SITE_NAME } from '../../lib/constants';
@@ -13,52 +13,27 @@ import {
 } from '../../lib/format';
 import { loadLocalMonsterDetail } from '../../services/api';
 import type { MonsterDetail, MonsterSkillDetail } from '../../services/types';
+import { usePageData } from '../composables/use-page-data';
 import '../../styles/monster-detail.css';
 
 const route = useRoute();
 const app = useAppStore();
 
-const data = ref<MonsterDetail | null>(null);
-const error = ref('');
-const loading = ref(true);
-/** 延迟显示骨架：加载超 150ms 才展示，避免快速切换时闪烁 */
-const showSkeleton = ref(false);
-const SKELETON_DELAY = 150;
-let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
-watch(loading, (l) => {
-  if (l) {
-    if (skeletonTimer !== null) clearTimeout(skeletonTimer);
-    skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
-  } else {
-    if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
-    showSkeleton.value = false;
-  }
-}, { immediate: true });
-
-async function load(id: string): Promise<void> {
-  loading.value = true;
-  error.value = '';
-  try {
-    data.value = await loadLocalMonsterDetail(id);
-  } catch (e) {
-    data.value = null;
-    error.value = e instanceof Error ? e.message : '未知错误';
-    app.toast('error', `加载失败: ${error.value}`);
-  } finally {
-    loading.value = false;
-  }
-}
-function retry(): void {
-  void load(String(route.params.id || ''));
-}
-
+/** 页面级加载编排：loading/error + 加载代竞态 + 延迟骨架屏（失败 toast 由视图补充） */
+const { data, error, showSkeleton, run: load, retry } = usePageData<MonsterDetail>(() =>
+  loadLocalMonsterDetail(String(route.params.id)),
+);
+/** 失败 toast（与 usePageData 解耦：错误写入 error 后触发，重试成功自动清空不重复弹） */
+watch(error, (e) => {
+  if (e) app.toast('error', `加载失败: ${e}`);
+});
 onMounted(() => {
-  void load(String(route.params.id || ''));
+  void load();
 });
 watch(
   () => route.params.id,
   (id) => {
-    if (id) void load(String(id));
+    if (id && String(id) !== String(data.value?.id)) void load();
   },
 );
 

@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   sync-data:
@@ -56,14 +57,41 @@ jobs:
           cd tools/converter
           python gen_catalog.py
 
-      - name: Commit if changed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 死链审计（数据驱动，复用前端真实 URL 构造函数）：明确 404 才失败，
+      # 网络错误 / 429 / 403 等环境性信号仅警告（CI 数据中心 IP 对 CDN 探测不可靠的历史教训）。
+      # 缓存跨 job 持久化（run_id key + restore 最近）：converter 输出确定性 → 内容未变零网络复用。
+      - name: Cache dead-links audit cache
+        uses: actions/cache@v4
+        with:
+          path: temp/dead-links-cache.json
+          key: dead-links-cache-${{ github.run_id }}
+          restore-keys: dead-links-cache-
+
+      - name: Dead link audit
+        run: pnpm vitest run --config tools/dead-links.vitest.config.ts
+
+      # main 有 branch protection（required checks：build-and-test + e2e），直接 push 会被拒——
+      # 改为 PR 流程：commit 去 [skip ci]（让数据变更真实触发 CI 全量），gh pr create + auto-merge
+      # （checks 通过后自动合并）。auto-merge 需仓库 allow_auto_merge=true（已 gh api 开启）。
+      - name: Commit and open PR
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add vendor/TurnBasedGameData public/data/cn/ tools/converter/DATA_CATALOG.md
           if git diff --cached --quiet; then
             echo "No changes to commit."
-          else
-            git commit -m "chore: sync data from submodule update [skip ci]"
-            git push
+            exit 0
           fi
+          BRANCH="auto/data-sync-${{ github.run_id }}"
+          git commit -m "chore: sync data from submodule update"
+          git push origin HEAD:"$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: sync data from submodule update" --body "TurnBasedGameData 子模块数据自动同步。CI 门禁（build-and-test + e2e）通过后自动合并。"
+          gh pr merge --squash --auto

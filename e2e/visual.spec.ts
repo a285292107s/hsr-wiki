@@ -19,7 +19,7 @@ test.setTimeout(120_000);
  * 截图前等待图片加载（截图稳定，不断言）。
  *
  * 死链检查已从 e2e 移除（2026-08-12 重构）：死链是静态事实（URL 404），每次测试
- * 验证低性价比，改为独立低频审计 tools/check-dead-links.mjs（数据变更时触发）。
+ * 验证低性价比，改为独立低频审计 tools/dead-links.test.ts（data-sync.yml 数据变更时触发）。
  * 此处仅保留等待逻辑：像素基线负责渲染完整性兜底。
  */
 async function waitImages(page: Page) {
@@ -29,7 +29,10 @@ async function waitImages(page: Page) {
       const imgs = [...document.images];
       return imgs.length > 0 && imgs.every((i) => i.complete && i.naturalWidth > 0);
     }, undefined, { timeout: 20_000 })
-    .catch(() => {});
+    .catch(() => {
+      // 超时不失败（环境性），但显式留下记录——基线可能包含未加载图片，人工可见
+      console.warn('[visual] 图片加载超时（20s），像素基线可能包含未就绪图片');
+    });
   await page.waitForTimeout(500);
 }
 

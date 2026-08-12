@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# 同分支连续 push 串行化，新 run 取消旧 run（省重复 CI 分钟数）
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -21,14 +26,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type-check & build
+      - name: Build (vue-tsc + 色彩令牌/Spine 清单静态守卫，ADR 0012)
         run: pnpm build
-
-      - name: Spine manifest validation
-        run: node tools/check-spine-manifest.mjs
-
-      - name: Color token check (ADR 0012)
-        run: node tools/check-colors.mjs --strict
 
       - name: Unit tests
         run: pnpm test
@@ -62,8 +61,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Playwright 浏览器二进制缓存（版本由 lockfile 锁定；命中后 install 秒级跳过）
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright chromium
         run: pnpm exec playwright install --with-deps chromium
 
       - name: E2E tests (T1b/T2 布局 + L4 像素基线 + a11y，发布门禁)
         run: pnpm test:e2e
+
+      # e2e 失败时上传 HTML report + trace/截图（outputDir 在系统临时目录），供 PR 调试取证
+      - name: Upload e2e artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report/
+            /tmp/hsr-wiki-e2e-results/
+          retention-days: 7

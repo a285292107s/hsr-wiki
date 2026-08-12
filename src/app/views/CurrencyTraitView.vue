@@ -9,7 +9,7 @@ import { useRoute } from 'vue-router';
 import { fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../lib/format';
 import { SITE_NAME } from '../../lib/constants';
 import { propLabel } from '../../lib/currency-role';
-import { useLoadGeneration } from '../composables/use-load-generation';
+import { usePageData } from '../composables/use-page-data';
 import { loadLocalCurrencyTraits, loadLocalCurrencyRoles } from '../../services/api';
 import type { CurrencyTraitEntry, CurrencyRoleEntry } from '../../services/types';
 // 货币战争模式专属样式（随本路由 chunk 懒加载）
@@ -17,10 +17,7 @@ import '../../styles/currency-trait-detail.css';
 
 const route = useRoute();
 const traitId = computed(() => String(route.params.id));
-const data = ref<CurrencyTraitEntry | null>(null);
 const members = ref<CurrencyRoleEntry[]>([]);
-const loading = ref(true);
-const error = ref('');
 
 const CAT_LABEL: Record<string, string> = {
   faction: '阵营', combat: '流派', special: '特殊',
@@ -49,32 +46,22 @@ const catLabel = computed(() => CAT_LABEL[cat.value] || cat.value);
 const actLabel = computed(() => ACT_LABEL[data.value?.activation_type || ''] || '');
 
 
-/** 加载代：羁绊间快速导航时防止旧数据覆盖新数据（统一 useLoadGeneration 模式） */
-const loadGen = useLoadGeneration();
-
-async function load() {
-  const gen = loadGen.begin();
-  loading.value = true;
-  error.value = '';
-  try {
-    const [{ traits }, { roles }] = await Promise.all([
-      loadLocalCurrencyTraits(),
-      loadLocalCurrencyRoles(),
-    ]);
-    if (!loadGen.isCurrent(gen)) return;
-    const found = traits.find((t) => String(t.id) === traitId.value);
-    if (!found) { error.value = '未找到该羁绊'; return; }
-    data.value = found;
-    const tid = Number(traitId.value);
-    members.value = roles.filter((r) => r.trait_list.includes(tid));
-  } catch (e) {
-    if (!loadGen.isCurrent(gen)) return;
-    error.value = (e as Error).message || '加载失败';
-  } finally {
-    if (loadGen.isCurrent(gen)) loading.value = false;
-  }
-}
-watch(traitId, load, { immediate: true });
+/** 页面级加载编排：双 loader 并行 + 加载代竞态；members（羁绊成员）在 loader 内一并解析 */
+const { data, error, loading, run, retry } = usePageData<CurrencyTraitEntry>(async () => {
+  const [{ traits }, { roles }] = await Promise.all([
+    loadLocalCurrencyTraits(),
+    loadLocalCurrencyRoles(),
+  ]);
+  const found = traits.find((t) => String(t.id) === traitId.value);
+  if (!found) throw new Error('未找到该羁绊');
+  members.value = roles.filter((r) => r.trait_list.includes(Number(traitId.value)));
+  return found;
+});
+watch(
+  traitId,
+  () => void run(),
+  { immediate: true },
+);
 watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { immediate: true });
 </script>
 
@@ -92,7 +79,7 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
     <div v-else-if="error" class="nk-ctrait__state nk-ctrait__state--err">
       <span class="nk-ctrait__state-icon">⚠</span>
       <p>{{ error }}</p>
-      <button class="nk-ctrait__retry" @click="load">重试</button>
+      <button class="nk-ctrait__retry" @click="retry">重试</button>
     </div>
 
     <template v-else-if="data">
