@@ -14,7 +14,7 @@ import {
   resolveRecommend, buildRecommendRows, groupTraits,
   buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceText,
 } from '../../lib/currency-role';
-import { useLoadGeneration } from '../composables/use-load-generation';
+import { usePageData } from '../composables/use-page-data';
 import { loadLocalCurrencyRole, loadLocalCharacter } from '../../services/api';
 import type {
   CurrencyRoleDetail, CurrencyRoleStar,
@@ -25,9 +25,11 @@ import '../../styles/currency-role.css';
 
 const route = useRoute();
 const roleId = computed(() => String(route.params.id));
-const data = ref<CurrencyRoleDetail | null>(null);
-const loading = ref(true);
-const error = ref('');
+
+/** 页面级加载编排：loading/error + 加载代竞态（角色间快速导航防旧数据覆盖） */
+const { data, error, loading, run: load } = usePageData<CurrencyRoleDetail>(() =>
+  loadLocalCurrencyRole(roleId.value),
+);
 
 const starKeys = computed(() =>
   data.value ? Object.keys(data.value.stars).sort((a, b) => Number(a) - Number(b)) : [],
@@ -58,25 +60,15 @@ const growthMatrix = computed(() => buildGrowthMatrix(data.value?.stars));
 const charData = ref<CharacterData | null>(null);
 const charDataFailed = ref(false);
 
-/** 加载代：角色间快速导航时防止旧数据覆盖新数据（统一 useLoadGeneration 模式） */
-const loadGen = useLoadGeneration();
-
-async function load() {
-  const gen = loadGen.begin();
-  loading.value = true;
-  error.value = '';
-  charData.value = null;
-  charDataFailed.value = false;
-  try {
-    data.value = await loadLocalCurrencyRole(roleId.value);
-  } catch (e) {
-    if (!loadGen.isCurrent(gen)) return;
-    error.value = (e as Error).message || '加载失败';
-  } finally {
-    if (loadGen.isCurrent(gen)) loading.value = false;
-  }
-}
-watch(roleId, load, { immediate: true });
+watch(
+  roleId,
+  () => {
+    charData.value = null;
+    charDataFailed.value = false;
+    void load();
+  },
+  { immediate: true },
+);
 
 /** 选中星级存在随从且含 #N 引用时，懒加载常规模式角色技能数据 */
 watch(

@@ -103,6 +103,38 @@ describe('数据加载', () => {
     await expect(api.loadLocalMonsterDetail('8013010')).resolves.toEqual(fixture);
     expect(String(fetchMock.mock.calls[0][0])).toContain('/monsters/8013010.json');
   });
+
+  it('详情加载器走四级缓存：同会话二次调用不重复请求（角色/光锥/怪物）', async () => {
+    const api = await freshApi();
+    const charFixture = { id: 1001, name: '阿姬' };
+    const lcFixture = { id: 23003, name: '拂晓之前' };
+    const monFixture = { id: 3011010, name: '虚卒' };
+    const fetchMock = routeFetch({
+      'characters/1001.json': charFixture,
+      'light_cones/23003.json': lcFixture,
+      'monsters/3011010.json': monFixture,
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(api.loadLocalCharacter('1001')).resolves.toEqual(charFixture);
+    await expect(api.loadLocalCharacter('1001')).resolves.toEqual(charFixture);
+    await expect(api.loadLocalLightConeDetail('23003')).resolves.toEqual(lcFixture);
+    await expect(api.loadLocalMonsterDetail('3011010')).resolves.toEqual(monFixture);
+    expect(fetchMock).toHaveBeenCalledTimes(3); // 每个 cacheKey 仅一次网络请求
+  });
+
+  it('共享列表走单例：同会话二次调用不重复请求（items/monsters）', async () => {
+    const api = await freshApi();
+    const fetchMock = routeFetch({
+      'items.json': [{ id: 23013, name: '星琼' }],
+      'monsters.json': [{ id: 3011010, name: '虚卒' }],
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    await api.loadLocalItems();
+    await api.loadLocalItems();
+    await api.loadLocalMonsterList();
+    await api.loadLocalMonsterList();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });
 
 /* ─── Spine 双清单解析（official 优先，缺失/失效回退 nanoka） ─── */

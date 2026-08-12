@@ -1,5 +1,4 @@
 /** 遗器套装 / 词条 / 来历加载器 */
-import { fetchJSON } from '../cache';
 import { NkError } from '../../lib/errors';
 import type {
   LocalRelicList, LocalRelicEntry, RelicSetData,
@@ -19,20 +18,14 @@ export async function loadLocalRelicDetail(id: string): Promise<LocalRelicEntry>
   return item;
 }
 
-/** 遗器主词条表（relic_main_affixes.json） */
-export function loadLocalRelicMainAffixes(): Promise<RelicMainAffixList> {
-  return fetchJSON<RelicMainAffixList>(`${LOCAL_DATA_BASE}/relic_main_affixes.json`);
-}
+/** 遗器主词条表（relic_main_affixes.json；共享单例） */
+export const loadLocalRelicMainAffixes = singletonLoad<RelicMainAffixList>(`${LOCAL_DATA_BASE}/relic_main_affixes.json`);
 
-/** 遗器副词条表（relic_sub_affixes.json） */
-export function loadLocalRelicSubAffixes(): Promise<RelicSubAffixList> {
-  return fetchJSON<RelicSubAffixList>(`${LOCAL_DATA_BASE}/relic_sub_affixes.json`);
-}
+/** 遗器副词条表（relic_sub_affixes.json；共享单例） */
+export const loadLocalRelicSubAffixes = singletonLoad<RelicSubAffixList>(`${LOCAL_DATA_BASE}/relic_sub_affixes.json`);
 
-/** 遗器来历表（relic_stories.json，set_id → 部位类型 → 故事） */
-export function loadLocalRelicStories(): Promise<RelicStoriesMap> {
-  return fetchJSON<RelicStoriesMap>(`${LOCAL_DATA_BASE}/relic_stories.json`);
-}
+/** 遗器来历表（relic_stories.json，set_id → 部位类型 → 故事；共享单例） */
+export const loadLocalRelicStories = singletonLoad<RelicStoriesMap>(`${LOCAL_DATA_BASE}/relic_stories.json`);
 
 /**
  * 从本地 relics.json 加载遗器套装信息，返回与 CDN RelicSetData 兼容的结构。

@@ -75,8 +75,9 @@ export const PROP_LABEL: Record<string, string> = {
 };
 
 /** 属性名解析：优先 converter 落地的 prop_name（TextMap 官方名，官方改称呼自动同步）；
- *  缺失时查映射表，再回退去前缀（Extra/AddedRatio 噪声）。 */
-export function propLabel(m: Record<string, unknown>): string {
+ *  缺失时查映射表，再回退去前缀（Extra/AddedRatio 噪声）。
+ *  参数为结构化类型（非 Record）：调用方传 CurrencyPropMod / CurrencyEquipProp 等 interface 无需索引签名。 */
+export function propLabel(m: { prop_name?: unknown; property_type?: unknown; name?: unknown }): string {
   const official = m.prop_name;
   if (typeof official === 'string' && official) return official;
   const key = String(m.property_type || m.name || '');

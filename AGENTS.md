@@ -4,7 +4,7 @@ This file provides guidance to Lingma (lingma.aliyun.com) when working with code
 
 ## 项目概述
 
-HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》游戏数据 Wiki，Gaming HUD 视觉风格。数据源为本地 JSON（由 Python 工具从官方解包数据转换而来），图片与 Spine 动画走 `https://static.nanoka.cc` CDN。
+HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki。数据源为本地 JSON（由 Python 工具从官方解包数据转换而来），图片与 Spine 动画走 `https://static.nanoka.cc` CDN。
 
 ## 常用命令
 
@@ -53,6 +53,11 @@ python gen_catalog.py                    # 重新生成 DATA_CATALOG.md 索引
 ```
 
 部署：推送到 `main` 分支 → Vercel 自动构建部署（SPA 路由重写见 `vercel.json`）。
+
+> 门禁语义（2026-08-12 配置）：GitHub main 分支已配置 branch protection——`build-and-test` 与
+> `e2e` 两个 CI job 为 required status checks（strict，enforce_admins=true），CI 红则 push 被拦截，
+> 发布门禁为硬门禁；Vercel 构建（`pnpm build` 含 vue-tsc + 色彩/清单守卫）为第二道硬门禁。
+> 注意：直接 push main 需 CI 全绿（本地推送前先跑 `pnpm build` + `pnpm test` 或走 PR）。
 
 ## 架构
 
@@ -209,7 +214,7 @@ src/
 5. **验证**：按 AI 声明的影响域选择「验证流程」级别（T0/T1a/T1b/T2/T3）；改动命中公共模块（shared 组件 / 共享样式 / services 核心）自动升级验证范围。遵循下方预算与降级纪律；**验证耗时与执行同量级，超预算即降级**；交付循环禁跑全量 e2e / 像素基线全量（全量仅发布前合入时执行，兜底漏测）。
 6. **返工**：失败层级决定重跑深度（低层失败不触发全量重跑）；失败信息结构化回传（哪层/哪项/证据）；同任务返工满 3 轮停止自动循环，转人工决策。
 7. **签发**：基线 / 目检项 / 验收标准的变更必须用户确认，AI 只出示证据（diff 表 / 截图对比）；未签发条目按「未完成」处理，不得自行移动验收标准。
-8. **复盘**：异常信号（返工 ≥1 轮 / 验证超预算 / 用户纠正清单或定级 / 发布全量抓到漏测）触发；数据层自动写入 `.workbuddy/memory/` 日志；流程规则改进需用户确认后生效。
+8. **复盘**：异常信号（返工 ≥1 轮 / 验证超预算 / 用户纠正清单或定级 / 发布全量抓到漏测）触发；数据层自动写入 `docs/memory/` 日志；流程规则改进需用户确认后生效。
 
 ## 项目约定
 

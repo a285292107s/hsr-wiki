@@ -10,6 +10,7 @@ import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useCharacterStore } from '../stores/character';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
+import { useScrollSpy } from '../composables/use-scroll-spy';
 import CharHero from '../character/CharHero.vue';
 import OverviewPanel from '../character/OverviewPanel.vue';
 import SkillsPanel from '../character/SkillsPanel.vue';
@@ -118,18 +119,9 @@ const navSections = computed(() => {
 const vis = computed(() => new Set(visibleSections(d.value)));
 const pageRef = ref<HTMLElement | null>(null);
 const enhBarRef = ref<HTMLElement | null>(null);
-/** 当前阅读区块（滚动位置计算；顶部概览区时为空不高亮） */
-const activeSection = ref<string>('');
-/** 页面阅读进度（0-100，驱动吸顶条底部进度线） */
-const progressPct = ref(0);
-/** 滚动超过阈值后显示返回顶部 */
-const showTop = ref(false);
-/** 系统减弱动态偏好：跳转/回顶改为瞬时滚动 */
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /** 面板 DOM 引用（d 就绪后收集一次；角色切换时重新收集） */
 let panels: HTMLElement[] = [];
-let rafId = 0;
 
 function collectPanels(): void {
   panels = Array.from(
@@ -137,53 +129,15 @@ function collectPanels(): void {
   );
 }
 
-function onScroll(): void {
-  if (rafId) return; // rAF 节流：滚动事件高频触发，逐帧仅计算一次
-  rafId = requestAnimationFrame(() => {
-    rafId = 0;
-    const c = pageRef.value;
-    if (!c) return;
-    // 阅读进度
-    const max = c.scrollHeight - c.clientHeight;
-    progressPct.value = max > 0 ? Math.min((c.scrollTop / max) * 100, 100) : 0;
-    // 返回顶部阈值
-    showTop.value = c.scrollTop > 480;
-    // 当前区块：最后一个顶部越过工具条下沿的面板
-    if (!panels.length) return;
-    const cTop = c.getBoundingClientRect().top;
-    const offset = enhBarRef.value?.offsetHeight || 0;
-    let cur = '';
-    for (const p of panels) {
-      if (p.getBoundingClientRect().top - cTop <= offset + 12) {
-        const id = p.dataset.panel || '';
-        if (id) cur = id;
-      } else break;
-    }
-    activeSection.value = cur;
-  });
-}
-
-function jumpTo(id: string): void {
-  const c = pageRef.value;
-  if (!c) return;
-  const el = c.querySelector<HTMLElement>(`.nk-panel[data-panel="${id}"]`);
-  if (!el) return;
-  // 目标 = 面板在容器中的偏移 - 吸顶工具条高度（内容不被遮挡）
-  const offset = enhBarRef.value?.offsetHeight || 0;
-  const top = el.getBoundingClientRect().top - c.getBoundingClientRect().top + c.scrollTop - offset;
-  c.scrollTo({ top: Math.max(top, 0), behavior: reducedMotion ? 'auto' : 'smooth' });
-  activeSection.value = id;
-}
-
-function scrollTop(): void {
-  pageRef.value?.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
-}
+/** 滚动追踪：区块导航激活态 + 阅读进度 + 返回顶部（原 onScroll/jumpTo/scrollTop 收敛于此） */
+const { activeId, progress, showTop, jumpTo, scrollTop } = useScrollSpy(
+  pageRef,
+  () => navSections.value.map((s) => s.id),
+  (id) => panels.find((p) => p.dataset.panel === id) || null,
+  { offset: () => (enhBarRef.value?.offsetHeight || 0) + 12 },
+);
 
 /* ═══════════ 卸载清理 ═══════════ */
-
-onMounted(() => {
-  pageRef.value?.addEventListener('scroll', onScroll, { passive: true });
-});
 
 // 数据就绪后收集面板引用（模板 v-else-if 渲染，需等下一帧 DOM 稳定）
 watch(d, async (val) => {
@@ -194,8 +148,6 @@ watch(d, async (val) => {
 });
 
 onBeforeUnmount(() => {
-  pageRef.value?.removeEventListener('scroll', onScroll);
-  if (rafId) cancelAnimationFrame(rafId);
   char.reset();
 });
 </script>
@@ -272,8 +224,8 @@ onBeforeUnmount(() => {
               :key="s.id"
               type="button"
               class="nk-secnav__btn"
-              :class="{ 'nk-secnav__btn--active': activeSection === s.id }"
-              :aria-current="activeSection === s.id ? 'true' : undefined"
+              :class="{ 'nk-secnav__btn--active': activeId === s.id }"
+              :aria-current="activeId === s.id ? 'true' : undefined"
               @click="jumpTo(s.id)"
             >
               <span class="nk-secnav__idx">{{ SECTION_IDX[s.id] }}</span>
@@ -281,7 +233,7 @@ onBeforeUnmount(() => {
             </button>
           </nav>
         </div>
-        <div class="nk-enh-bar__progress" :style="{ width: `${progressPct}%` }"></div>
+        <div class="nk-enh-bar__progress" :style="{ width: `${progress}%` }"></div>
       </div>
 
       <!-- 返回顶部（滚动超过阈值出现） -->
