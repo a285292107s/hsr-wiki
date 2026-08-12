@@ -12,6 +12,7 @@ import { RouterView, useRoute } from 'vue-router';
 import { navDir } from './router';
 import SidebarNav from './components/SidebarNav.vue';
 import ToastHost from './components/ToastHost.vue';
+import { Analytics } from '@vercel/analytics/vue';
 
 const route = useRoute();
 
@@ -62,4 +63,5 @@ onBeforeUnmount(() => { if (themeTimer !== null) clearTimeout(themeTimer); });
     </Transition>
   </RouterView>
   <ToastHost />
+  <Analytics />
 </template>
