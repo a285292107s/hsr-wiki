@@ -1,12 +1,8 @@
 name: Data Sync
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'vendor/TurnBasedGameData'
   schedule:
-    - cron: '0 4 * * *'   # 每天 04:00 UTC 主动拉取子模块最新
+    - cron: '0 4 * * *'   # 每天 04:00 UTC 主动拉取上游最新
   workflow_dispatch:        # 允许 GitHub UI 手动触发
 
 permissions:
@@ -18,19 +14,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
           fetch-depth: 1
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update submodule to latest (schedule/dispatch only)
-        if: github.event_name != 'push'
-        run: |
-          git submodule update --remote --merge vendor/TurnBasedGameData
-          # 子模块无新提交时直接退出，避免空跑转换与提交
-          if git diff --quiet vendor/TurnBasedGameData; then
-            echo "Submodule unchanged, nothing to sync."
-            exit 0
-          fi
+      # 上游数据（2026-08-12 起非 git 子模块）：浅克隆保留 .git，
+      # version 模块依赖 HEAD 提交标题（OSPRODWin 版本号）；每次全新环境直接 clone，
+      # 上游无新提交时转换产物无 diff，由提交步骤的 diff 判断兜底退出
+      - name: Fetch upstream data (shallow clone)
+        run: git clone --depth 1 https://github.com/DimbreathBot/TurnBasedGameData.git vendor/TurnBasedGameData
 
       - uses: actions/setup-python@v5
         with:
@@ -85,12 +75,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add vendor/TurnBasedGameData public/data/cn/ tools/converter/DATA_CATALOG.md
+          git add public/data/cn/ tools/converter/DATA_CATALOG.md
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "chore: sync data from submodule update"
+          git commit -m "chore: sync data from upstream update"
           git push origin HEAD:main || {
             echo "Non-fast-forward, rebasing onto latest main..."
             git fetch origin main
