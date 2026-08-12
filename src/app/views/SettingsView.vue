@@ -49,7 +49,7 @@ function choose(key: AccentKey): void {
 </template>
 
 <style scoped>
-/* ─── 页面骨架：左侧避让导航条（与 DebugHubView 同语言） ─── */
+/* ─── 页面骨架：左侧避让导航条（与 Spine Lab 研究线同语言） ─── */
 .nk-settings {
   padding: 24px;
   font-family: var(--font-body);

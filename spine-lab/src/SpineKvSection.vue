@@ -1,36 +1,34 @@
 <script setup lang="ts">
 /**
- * KV 场景验收台（长期保留，路由 /debug/spine?scene=home-bg）：
+ * KV 场景验收面板（SpineDebugView 的 Tab 之一）：
  * 游戏每个版本的 KV 场景（official-scene，主背景 + 多层角色群像）资源从官网重新抓取写入
- * spine-manifest.json 后，在本页验收其能否正常渲染：
+ * spine-manifest.json 后，在本面板验收其能否正常渲染：
  * - 「一键验收」顺序加载全部场景：逐层加载状态 + 单画布合并渲染（复用生产管线 createScenePipeline，
  *   验收基线 = 生产渲染由代码结构保证）+ 黑块自动检测（近黑不透明像素占比），生成可导出的 PASS/FAIL 报告；
  *   判定引擎在 src/debug/kv-acceptance.ts，验收编排在 src/debug/use-kv-acceptance.ts。
  * - 单层模式为逐层状态视图：每层独立画布 + 加载状态/耗时/错误，供定位「哪一层异常」；
  *   画布带不透明深色衬底（LAYER_BG），混合 slot 的 dst 非透明 → 无透明退化黑块。
  * 渲染参数与生产完全一致：同一固定 viewport + pad 0 + rawDataURIs 纹理重映射。
- * 逻辑拆分：单层 player 管理在 debug/use-single-layers.ts，合并管线在 debug/use-merged-pipeline.ts；
- * 本文件仅承担场景加载编排、跨模式播放控制、PNG 导出装配与视图组装。
+ * 逻辑拆分：渲染编排在 debug/use-scene-pipeline.ts；本文件仅承担场景加载编排、
+ * 跨模式播放控制、PNG 导出装配与视图组装。
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { loadSpineSceneKeys, resolveSpine } from '../../services/api';
-import { SPINE_RUNTIME_VERSION } from '../../spine/constants';
-import { getSpineCtor, loadSpineRuntime } from '../../spine/runtime';
-import { nearBlackClass as blackClass } from '../../debug/kv-acceptance';
-import { copyText, downloadCanvas, downloadJson } from '../../debug/report';
-import { useKvAcceptance, type AcceptBridge } from '../../debug/use-kv-acceptance';
-import { useMergedPipeline } from '../../debug/use-merged-pipeline';
-import { type LayerState, useSingleLayers } from '../../debug/use-single-layers';
-import { useAppStore } from '../stores/app';
+import { getQueryParam, setQueryParam, subscribeQueryChange } from './lib/query-state';
+import { loadSpineSceneKeys, resolveSpine } from '../../src/services/api';
+import { SPINE_RUNTIME_VERSION } from '../../src/spine/constants';
+import { getSpineCtor, loadSpineRuntime } from '../../src/spine/runtime';
+import { nearBlackClass as blackClass } from './kv-acceptance';
+import { copyText, downloadCanvas, downloadJson } from './report';
+import { useKvAcceptance, type AcceptBridge } from './use-kv-acceptance';
+import { useMergedPipeline, useSingleLayers, type LayerState } from './use-scene-pipeline';
+import { toast } from './lib/toast';
 /** 浏览器活跃 WebGL 上下文上限约 16，达到此值预警 */
 const GL_WARN_AT = 12;
 
-const route = useRoute();
-const router = useRouter();
-const app = useAppStore();
+/** 面板是否处于激活 Tab（激活时才加载场景，直达 ?tab=audit 不浪费资源） */
+const props = defineProps<{ active: boolean }>();
 
-/* ─── 渲染子系统：单层 player / 合并管线（debug/* composable） ─── */
+/* ─── 渲染子系统：单层 player / 合并管线（lab/* composable） ─── */
 
 const layersApi = useSingleLayers();
 const merged = useMergedPipeline();
@@ -43,7 +41,7 @@ const mergedError = merged.error;
 const mergedRef = merged.registerEl;
 const setLayerEl = layersApi.registerEl;
 
-const sceneKey = ref(typeof route.query.scene === 'string' && route.query.scene ? route.query.scene : 'home-bg');
+const sceneKey = ref(getQueryParam('scene') ?? 'home-bg');
 const sceneKeys = ref<string[]>([]);
 const viewportText = ref('');
 const loadError = ref('');
@@ -111,7 +109,7 @@ async function loadScene(key: string): Promise<void> {
 function selectScene(key: string): void {
   if (!key || key === sceneKey.value) return;
   sceneKey.value = key;
-  void router.replace({ query: { ...route.query, scene: key } });
+  setQueryParam('scene', key);
   void loadScene(key);
 }
 
@@ -149,7 +147,7 @@ const bridge: AcceptBridge = {
   getKey: () => sceneKey.value,
   setSceneKey(key) {
     sceneKey.value = key;
-    void router.replace({ query: { ...route.query, scene: key } });
+    setQueryParam('scene', key);
   },
   loadScene: (key) => loadScene(key),
   epoch: () => sceneEpoch,
@@ -193,8 +191,8 @@ const reacceptScene = accept.reaccept;
 
 async function copyReport(): Promise<void> {
   const ok = await copyText(accept.reportText());
-  if (ok) app.toast('success', '验收报告已复制');
-  else app.toast('error', '报告复制失败');
+  if (ok) toast('success', '验收报告已复制');
+  else toast('error', '报告复制失败');
 }
 
 function downloadReportJson(): void {
@@ -203,10 +201,10 @@ function downloadReportJson(): void {
       accept.reportJsonPayload(),
       `kv-acceptance-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`,
     );
-    app.toast('success', '验收报告 JSON 已下载');
+    toast('success', '验收报告 JSON 已下载');
   } catch (e) {
     console.warn('[debug-spine] 报告下载失败:', e);
-    app.toast('error', '报告下载失败');
+    toast('error', '报告下载失败');
   }
 }
 
@@ -216,21 +214,27 @@ function setMerged(on: boolean): void {
 }
 
 onMounted(async () => {
-  // 场景键列表（下拉选择用；失败不影响当前场景渲染）
+  // 场景键列表（下拉选择用；失败不影响当前场景渲染）——轻量加载,不依赖面板激活
   void bridge.loadKeys().catch(() => undefined);
-  await loadScene(sceneKey.value);
 });
 
-// 响应地址栏 / 外部导航的 ?scene= 变化（同一路由复用 / 手改 URL 均生效；验收期间场景被抢占时由 epoch 令牌中止轮询）
+// 激活 Tab 时加载当前场景（直达 ?tab=audit 不触发渲染；切回 KV 时补加载）
 watch(
-  () => route.query.scene,
-  (v) => {
-    const k = typeof v === 'string' && v ? v : 'home-bg';
-    if (k !== sceneKey.value) selectScene(k);
+  () => props.active,
+  (on) => {
+    if (on) void loadScene(sceneKey.value);
   },
+  { immediate: true },
 );
 
+// 响应地址栏 / 外部导航的 ?scene= 变化（手改 URL / 前进后退均生效；验收期间场景被抢占时由 epoch 令牌中止轮询）
+const unsubscribeQuery = subscribeQueryChange(() => {
+  const k = getQueryParam('scene') ?? 'home-bg';
+  if (k !== sceneKey.value) selectScene(k);
+});
+
 onBeforeUnmount(() => {
+  unsubscribeQuery();
   accept.markDisposed(); // 验收轮询检测到卸载即中止，避免旧循环在组件销毁后继续跑
   merged.dispose(); // 合并渲染的 rAF 循环与 WebGL 上下文必须在此释放（否则离开页面后持续泄漏）
   layersApi.disposeAll();
@@ -239,49 +243,42 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="nk-spine-debug">
-    <header class="nk-spine-debug__head">
-      <p class="nk-spine-debug__kicker">KV SCENE ACCEPTANCE // {{ sceneKey.toUpperCase() }}</p>
-      <h1>KV 场景验收台</h1>
-      <p class="nk-spine-debug__desc">
-        每版本官网抓取的 KV 场景在此验收：一键验收全部场景（逐层加载 + 单画布合并渲染 + 黑块检测）→ 导出 PASS/FAIL 报告；单层模式供逐层排查。
-      </p>
-      <!-- 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 -->
-      <div class="nk-spine-debug__statusbar">
-        <span class="nk-spine-debug__chip" :class="summary.startsWith('READY') ? 'is-ok' : summary.startsWith('FAIL') ? 'is-fail' : 'is-loading'">{{ summary }}</span>
-        <span class="nk-spine-debug__chip">{{ viewportText || 'viewport —' }}</span>
-        <span class="nk-spine-debug__chip" :class="glTotal >= GL_WARN_AT ? 'is-fail' : ''" title="活跃 WebGL 上下文数（浏览器上限约 16）">GL {{ glTotal }}/16</span>
-        <span class="nk-spine-debug__chip" :class="mergedOn ? 'is-ok' : ''">模式 {{ mergedOn ? '合并' : '单层' }}</span>
+    <!-- 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 -->
+    <div class="nk-spine-debug__statusbar">
+      <span class="nk-spine-debug__chip" :class="summary.startsWith('READY') ? 'is-ok' : summary.startsWith('FAIL') ? 'is-fail' : 'is-loading'">{{ summary }}</span>
+      <span class="nk-spine-debug__chip">{{ viewportText || 'viewport —' }}</span>
+      <span class="nk-spine-debug__chip" :class="glTotal >= GL_WARN_AT ? 'is-fail' : ''" title="活跃 WebGL 上下文数（浏览器上限约 16）">GL {{ glTotal }}/16</span>
+      <span class="nk-spine-debug__chip" :class="mergedOn ? 'is-ok' : ''">模式 {{ mergedOn ? '合并' : '单层' }}</span>
+    </div>
+    <!-- 工具条：按功能分组（场景 / 渲染 / 验收），主任务「一键验收」独立于实验性操作 -->
+    <div class="nk-spine-debug__toolbar">
+      <div class="nk-spine-debug__group">
+        <span class="nk-spine-debug__group-label">场景</span>
+        <select class="nk-spine-debug__select" :value="sceneKey" aria-label="选择场景" :disabled="accepting" @change="selectScene(($event.target as HTMLSelectElement).value)">
+          <option v-for="key in (sceneKeys.includes(sceneKey) ? sceneKeys : [sceneKey, ...sceneKeys])" :key="key" :value="key">{{ key }}</option>
+        </select>
+        <button type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="loadScene(sceneKey)">重新加载</button>
       </div>
-      <!-- 工具条：按功能分组（场景 / 渲染 / 验收），主任务「一键验收」独立于实验性操作 -->
-      <div class="nk-spine-debug__toolbar">
-        <div class="nk-spine-debug__group">
-          <span class="nk-spine-debug__group-label">场景</span>
-          <select class="nk-spine-debug__select" :value="sceneKey" aria-label="选择场景" :disabled="accepting" @change="selectScene(($event.target as HTMLSelectElement).value)">
-            <option v-for="key in (sceneKeys.includes(sceneKey) ? sceneKeys : [sceneKey, ...sceneKeys])" :key="key" :value="key">{{ key }}</option>
-          </select>
-          <button type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="loadScene(sceneKey)">重新加载</button>
+      <div class="nk-spine-debug__group">
+        <span class="nk-spine-debug__group-label">渲染</span>
+        <div class="nk-spine-debug__seg" role="radiogroup" aria-label="渲染模式">
+          <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="mergedOn" :class="{ 'is-active': mergedOn }" :disabled="accepting" @click="setMerged(true)">合并渲染</button>
+          <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!mergedOn" :class="{ 'is-active': !mergedOn }" :disabled="accepting" @click="setMerged(false)">单层模式</button>
         </div>
-        <div class="nk-spine-debug__group">
-          <span class="nk-spine-debug__group-label">渲染</span>
-          <div class="nk-spine-debug__seg" role="radiogroup" aria-label="渲染模式">
-            <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="mergedOn" :class="{ 'is-active': mergedOn }" :disabled="accepting" @click="setMerged(true)">合并渲染</button>
-            <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!mergedOn" :class="{ 'is-active': !mergedOn }" :disabled="accepting" @click="setMerged(false)">单层模式</button>
-          </div>
-          <button v-if="mergedOn" type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="exportPng">导出 PNG</button>
-          <div class="nk-spine-debug__seg" role="radiogroup" aria-label="播放状态">
-            <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!paused" :class="{ 'is-active': !paused }" :disabled="accepting" @click="setPaused(false)">播放</button>
-            <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="paused" :class="{ 'is-active': paused }" :disabled="accepting" @click="setPaused(true)">暂停</button>
-          </div>
-        </div>
-        <div class="nk-spine-debug__group is-accept">
-          <span class="nk-spine-debug__group-label">验收</span>
-          <button type="button" class="nk-spine-debug__btn is-primary" :disabled="accepting" @click="runAcceptance">一键验收</button>
-          <span v-if="accepting" class="nk-spine-debug__chip is-loading">{{ acceptProgress || '验收中…' }}</span>
-          <button v-if="accepting" type="button" class="nk-spine-debug__btn is-danger" @click="cancelAcceptance">中止</button>
+        <button v-if="mergedOn" type="button" class="nk-spine-debug__btn" :disabled="accepting" @click="exportPng">导出 PNG</button>
+        <div class="nk-spine-debug__seg" role="radiogroup" aria-label="播放状态">
+          <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="!paused" :class="{ 'is-active': !paused }" :disabled="accepting" @click="setPaused(false)">播放</button>
+          <button type="button" class="nk-spine-debug__seg-btn" role="radio" :aria-checked="paused" :class="{ 'is-active': paused }" :disabled="accepting" @click="setPaused(true)">暂停</button>
         </div>
       </div>
-      <p v-if="loadError" class="nk-spine-debug__error" role="alert">{{ loadError }}</p>
-    </header>
+      <div class="nk-spine-debug__group is-accept">
+        <span class="nk-spine-debug__group-label">验收</span>
+        <button type="button" class="nk-spine-debug__btn is-primary" :disabled="accepting" @click="runAcceptance">一键验收</button>
+        <span v-if="accepting" class="nk-spine-debug__chip is-loading">{{ acceptProgress || '验收中…' }}</span>
+        <button v-if="accepting" type="button" class="nk-spine-debug__btn is-danger" @click="cancelAcceptance">中止</button>
+      </div>
+    </div>
+    <p v-if="loadError" class="nk-spine-debug__error" role="alert">{{ loadError }}</p>
 
     <!-- 验收报告：一键验收完成后展示，可复制文本 / 下载 JSON -->
     <section v-if="acceptReport.length > 0 || acceptError" class="nk-spine-debug__report">
@@ -348,45 +345,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* ─── 页面骨架：OLED 深色控制台风格，左侧避让导航条（平板 72 / 桌面 88） ─── */
-.nk-spine-debug {
-  padding: 24px;
-  font-family: var(--font-body);
-  color: var(--text);
-  overflow-x: auto;
-}
-@media (min-width: 768px) {
-  .nk-spine-debug { margin-left: 72px; }
-}
-@media (min-width: 1024px) {
-  .nk-spine-debug { margin-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
-}
-
-/* ─── 头部：HUD 引导行 + 标题 + 说明 + 工具栏 ─── */
-.nk-spine-debug__head { max-width: 1480px; margin-bottom: 20px; }
-.nk-spine-debug__kicker {
-  margin: 0 0 6px;
-  font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  color: var(--primary);
-  text-transform: uppercase;
-}
-.nk-spine-debug__head h1 {
-  margin: 0 0 6px;
-  font-family: var(--font-hud);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-.nk-spine-debug__desc {
-  margin: 0 0 14px;
-  font-size: 13px;
-  line-height: 1.7;
-  opacity: 0.72;
-}
-/* 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 */
+/* ─── 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 ─── */
 .nk-spine-debug__statusbar {
   display: flex;
   flex-wrap: wrap;
@@ -669,7 +628,6 @@ onBeforeUnmount(() => {
 
 /* ─── 移动端：单列 + 舞台按比例缩放（16:9，实例化前尺寸即确定，不触发 buffer 比例错位） ─── */
 @media (max-width: 560px) {
-  .nk-spine-debug { padding: 16px 12px; }
   .nk-spine-debug__grid { grid-template-columns: 1fr; }
   .nk-spine-debug__stage { width: 100%; height: auto; aspect-ratio: 16 / 9; }
   .nk-spine-debug__report { overflow-x: auto; }

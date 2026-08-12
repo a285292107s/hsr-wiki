@@ -33,6 +33,11 @@ pnpm test:e2e:update   # 刷新像素基线（确认改动是预期后）
 pnpm exec playwright test e2e/visual.spec.ts --grep 首页   # 仅首页像素基线（改动只影响首页时用，避免全量 ~90s）
 pnpm exec playwright test e2e/layout.spec.ts e2e/visual.spec.ts --grep 首页   # 常规快速回归：布局 + 首页基线
 
+# 研究线（Spine Lab，独立子应用 → http://localhost:5174/）
+pnpm dev:lab        # 研究线 dev（独立端口 5174，与主项目 5173 互不抢占）
+pnpm build:lab      # 研究线构建（vue-tsc 独立 tsconfig + vite build）
+pnpm test:lab       # 研究线单测（43 用例，不进主项目 pnpm test）
+
 # 数据转换工具（Python，需 vendor/TurnBasedGameData 子模块）
 cd tools/converter
 pip install -r requirements.txt
@@ -108,18 +113,22 @@ src/
 │   ├── scene.ts         → 单画布多骨架场景渲染器（固定舞台 cover 适配 + 渲染管线插桩）
 │   ├── registry.ts      → 按 key 精确释放注册表 + WebGL 上下文计数预警
 │   └── constants.ts     → 运行时版本 + CDN 列表（引擎自包含）
-├── debug/               → 诊断支撑层（仅 /debug/* 路由可达，动态 import 打包隔离；
-│                           依赖方向仅限 services 数据层 + spine 引擎层，严禁被业务代码引用）
-│   ├── spine-audit.ts   → 审核引擎（L0 静态 / L1 解析 / L2 渲染三级检查）
-│   ├── kv-acceptance.ts → KV 场景验收判定引擎（黑块检测 + PASS/FAIL 报告）
-│   ├── use-kv-acceptance.ts → 一键验收编排 composable（可独立单测）
-│   ├── use-merged-pipeline.ts / use-single-layers.ts → 合并/单层渲染编排
-│   ├── pixels.ts / report.ts → 像素分析 / 报告导出
-│   └── SpineAuditDetail.vue → 审核详情（含预览生命周期）
 └── styles/              → 全局仅 tokens.css（设计令牌）+ catalog.css（目录引擎）；
                            页面专属 CSS（character / lightcone / relic / currency-* /
                            skill-card）随各自路由 chunk 懒加载
 ```
+
+### 研究线（Spine Lab，独立产品线）
+
+`spine-lab/` 为独立 Vite 子应用（`pnpm dev:lab` → 5174），与主项目双向隔离：
+
+- 入口自建（index.html / main.ts），无 vue-router / Pinia；tab 与 scene 状态经 URL query 同步
+- 共享只读依赖：spine 引擎层（`src/spine/`）+ services 数据层（`src/services/`）+ lib 常量；
+  严禁反向引用主项目 `src/app/` 任何模块
+- 审核/验收引擎（spine-audit / kv-acceptance / 像素分析）与全部调试面板迁移自原 `src/debug/`；
+  主项目构建、路由、测试均不含研究线代码
+- 独立命令：`pnpm dev:lab` / `pnpm build:lab`（含 vue-tsc 独立 tsconfig）/ `pnpm test:lab`（43 用例）
+- 研究文档在 `spine-lab/docs/`，研究脚本在 `spine-lab/tools/`；不进 CI、不部署线上
 
 ### 核心架构模式
 
@@ -193,7 +202,7 @@ src/
 - 运行：`pnpm test:e2e`；基线刷新 `pnpm test:e2e:update`（`-u`）；基线截图提交 git（`e2e/snapshots/`）；CI（ci.yml e2e job）在 push main 与 PR 时全量运行（发布门禁）；mobile-chromium project（Pixel 7）仅跑 layout（溢出/结构/console 守卫），不跑像素基线
 - 把 AGENTS.md「验证流程」T1b/T2/L3/L4 从一次性 CDP 取证固化为可重复断言：`toHaveCSS`/`toHaveText`（T1b/T2）、溢出检测 helper（L3）、`toHaveScreenshot`（L4，本地 Percy）、axe-core（a11y 维度）、console/pageerror 守卫（CDN 404 / JS 异常）
 - 已知 a11y 缺陷登记在 `e2e/accessibility.spec.ts` 的 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败）——修复需人工裁决后从清单移除
-- 首页 Hero：≥1024px 渲染 KV Spine 场景（WebGL 动画，CSS animations 禁用无效），像素基线中隐藏 `.nk-home-hero__spine`（其渲染验收归 `debug/spine-audit` 引擎）；<1024px 为随机五星立绘轮播（不涉及 WebGL，像素基线不覆盖该路径）
+- 首页 Hero：≥1024px 渲染 KV Spine 场景（WebGL 动画，CSS animations 禁用无效），像素基线中隐藏 `.nk-home-hero__spine`（其渲染验收归 `spine-lab` 研究线）；<1024px 为随机五星立绘轮播（不涉及 WebGL，像素基线不覆盖该路径）
 
 **Converter（pytest）：**
 - 位置：`tools/converter/tests/`
@@ -229,6 +238,7 @@ src/
 - 全局设计令牌位于 `src/styles/tokens.css`；不使用 CSS 预处理器
 - 先确认模型有没有识图功能，如果模型没有识图功能，不要截图，直接用 DOM 与计算样式取证
 - 首页 Hero 断点策略：桌面（≥1024px）渲染官网 KV Spine 场景（home-bg 全量层）；平板（768-1023px）与手机（<768px）不渲染 Spine，改为随机五星立绘轮播（6s 交叉淡入淡出，`prefers-reduced-motion` 停播，后台标签页停播）。布局改动须保持该策略（策略与实现见 HomeView.vue 注释）
+- ADR 门槛（2026-08-12 精简）：ADR 仅用于「不可逆 / 跨模块架构决策」；单文件配置、数值调整、流程细节类决策写入 `docs/memory/` 复盘日志或 commit message，不再新增 ADR
 
 ## 强制规则（MUST）
 
@@ -250,7 +260,7 @@ src/
 ### 通用
 
 - **文本数据来源**：所有展示文本必须来自现有数据源（converter 输出 JSON / TextMap），禁止在代码中写死或自建数据源。
-- **色彩三层令牌**：所有颜色必须落入 tokens.css 三层令牌体系——原始层（`--ph-*` / `--gold-*` 色阶事实）、语义层（`--primary` 等主题映射，派生色用 `color-mix(in srgb, var(--primary) X%, transparent)` 表达）、领域层（`--rarity-*` / `--prop-*` / `--elem-*` / `--skill-*` / `--diff-*` 数据语义色，不随主题）。禁止在页面 CSS/组件内联裸色值（豁免：中性灰阶/黑/白/深底色、`var()` fallback；CW 专属 `currency-*` 文件与 debug 分析色待迁移）。新增颜色先查令牌，缺失则落入对应层。可用 `node tools/check-colors.mjs --strict` 扫描未收口色值。
+- **色彩三层令牌**：所有颜色必须落入 tokens.css 三层令牌体系——原始层（`--ph-*` / `--gold-*` 色阶事实）、语义层（`--primary` 等主题映射，派生色用 `color-mix(in srgb, var(--primary) X%, transparent)` 表达）、领域层（`--rarity-*` / `--prop-*` / `--elem-*` / `--skill-*` / `--diff-*` 数据语义色，不随主题）。禁止在页面 CSS/组件内联裸色值（豁免：中性灰阶/黑/白/深底色、`var()` fallback；CW 专属 `currency-*` 文件待迁移）。新增颜色先查令牌，缺失则落入对应层。可用 `node tools/check-colors.mjs --strict` 扫描未收口色值。
 - **构建守卫**：每次变更必须通过 `pnpm build`（含 vue-tsc 类型检查）+ `pnpm test` 全绿后方可提交。
 
 ### 验证流程

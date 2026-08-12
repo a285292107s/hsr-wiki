@@ -170,33 +170,12 @@ const routes: RouteRecordRaw[] = [
     component: catalogView('achievement'),
     meta: { depth: 1, catalog: 'achievement', title: '成就' },
   },
-  /* Debug 调试中心入口：汇总各诊断子页面入口（/debug） */
-  {
-    path: '/debug',
-    name: 'debug-hub',
-    component: () => import('../views/DebugHubView.vue'),
-    meta: { depth: 0, title: '调试中心' },
-  },
   /* 设置页：主题强调色选择（常规模式；CW 黑金独立不受影响） */
   {
     path: '/settings',
     name: 'settings',
     component: () => import('../views/SettingsView.vue'),
     meta: { depth: 0, title: '设置' },
-  },
-  /* KV 场景验收台：每版本官网重新抓取的 official-scene 在此验收渲染（一键验收 + 单层状态排查，/debug/spine?scene=home-bg） */
-  {
-    path: '/debug/spine',
-    name: 'debug-spine',
-    component: () => import('../views/SpineDebugView.vue'),
-    meta: { depth: 0, title: 'KV 场景验收' },
-  },
-  /* Spine 审核台：全量 manifest 条目批量体检（/debug/spine-audit） */
-  {
-    path: '/debug/spine-audit',
-    name: 'debug-spine-audit',
-    component: () => import('../views/SpineAuditView.vue'),
-    meta: { depth: 0, title: 'Spine 审核' },
   },
   {
     path: '/:pathMatch(.*)*',

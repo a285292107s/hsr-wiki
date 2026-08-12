@@ -1,5 +1,5 @@
 /** 角色列表 / 详情 / 技能动画 / 配装名称加载器 */
-import { CACHE_TTL, cachedFetch } from '../cache';
+import { cachedFetch } from '../cache';
 import type { CharacterData, LocalCharList, NameCache, SkillAnimationsDb } from '../types';
 import { LOCAL_DATA_BASE } from './base';
 import { loadLocalLightCones } from './items';
@@ -10,8 +10,8 @@ import { singletonLoad } from './singleton';
 export const loadLocalCharacterList = singletonLoad<LocalCharList>(`${LOCAL_DATA_BASE}/characters.json`);
 
 export function loadLocalCharacter(charId: string): Promise<CharacterData> {
-  // 详情走四级缓存（内存 → IDB → in-flight 去重 → 网络）：二次进入免网络往返
-  return cachedFetch<CharacterData>(`${LOCAL_DATA_BASE}/characters/${charId}.json`, `char_${charId}`, CACHE_TTL.data);
+  // 详情走请求缓存（内存 → in-flight 去重 → 网络）：二次进入免网络往返
+  return cachedFetch<CharacterData>(`${LOCAL_DATA_BASE}/characters/${charId}.json`, `char_${charId}`);
 }
 
 /** 技能动画（米游社 Wiki 抓取数据；共享单例） */

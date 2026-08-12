@@ -1,0 +1,215 @@
+# 官网角色 Spine 动画抓取流程
+
+> 目标：从米哈游官网（sr.mihoyo.com）抓取角色 Spine 动画资源（atlas / json 骨架 / 纹理图），
+> 写入本地 `public/data/cn/spine-manifest.json`，供 wiki 角色详情页 Hero 区播放。
+> 本流程已实测验证并覆盖 3.4 ~ 4.4 全部版本（13 个角色，含千冶•刃、远坂凛、吉尔伽美什、姬子•启行）。
+
+## 适用范围
+
+- **当前版本官网**：当期版本展示的角色（首页轮播 + 版本专题），如 4.4 的远坂凛等
+- **历史版本官网**：通过 Wayback Machine 快照回溯（如 4.3 的 SP 刃）
+- 老角色（三月七、丹恒等 29 个无动画角色）**官网没有** spine，抓不到是正常的
+- **已覆盖版本**：3.4（2025-05，风堇/赛飞儿）起每个版本官网首页均有角色 spine；
+  3.2/3.3 时代官网为旧 Nuxt 架构（无 PUZZLE spine），4.2 版本无 Wayback 快照，均无法获取
+
+## 核心原理
+
+官网是 SPA，页面加载时全局挂载 `PUZZLE_CONFIG_{publish_key}` 配置对象（含全部资源清单）。
+Spine 角色动画位于 `pc.nodes` 的 `@puzzle/spine-player` 节点 → `options.spineList[]`，
+每项 `manifest` 含 `atlas`（图集描述）、`json`（骨架，Spine 4.2.43）、`img[]`（纹理，逻辑名 → hash URL）。
+
+- 官网资源 URL 模式：`https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_{publish_key}/resource/puzzle/{日期}/{hash}.atlas|.json|.png`
+- publish_key 随版本变化：4.3 = `pz_Z1nD6naN3q`、4.4 = `pz_Devp46QZiu`
+
+## 流程 A：当前版本（浏览器 + 控制台）
+
+1. **打开官网**：浏览器访问 `https://sr.mihoyo.com/`（务必等页面完整加载，含首页轮播）
+2. **提取配置**：控制台执行（publish_key 从 `Object.keys(window).filter(k => k.startsWith('PUZZLE_CONFIG'))` 获取）
+   ```js
+   const cfg = window.PUZZLE_CONFIG_pz_Devp46QZiu; // 替换为实际 key
+   // 列出全部 spine 节点
+   cfg.pc.nodes.filter(n => n.name === '@puzzle/spine-player')
+     .map(n => ({ id: n.id, count: n.options.spineList.length }));
+   ```
+3. **定位角色节点**：角色展示通常挂在内层容器（如「第二屏」container 的 children 中），
+   递归查找：`JSON.stringify(node).includes('.atlas')` 定位
+4. **提取资源组**：
+   ```js
+   const s = 角色的 spineList 项;
+   s.manifest.atlas;            // atlas URL
+   s.manifest.json;             // 骨架 URL
+   s.manifest.img.map(i => ({ logical: i.id, url: i.src }));  // 纹理（逻辑名 + 实际 URL）
+   ```
+5. **交叉验证**：打开 atlas URL 确认 page 名（第 1 行）与 `img[].id` 对应（注意 atlas 名**带扩展名**）
+6. **验证可访问性**（CORS 反射 + HTTP 200）：
+   ```bash
+   curl -sI -H "Origin: https://hsr.wiki" "<atlas|json|png URL>" | Select-String "HTTP|access-control"
+   # 期望：HTTP 200 + Access-Control-Allow-Origin 反射请求 Origin
+   ```
+7. **写入 manifest**：按下方规范追加条目
+8. **页面验证**：`pnpm dev` 打开 `/character/{id}`，确认「动画」按钮点亮、动画循环播放
+
+## 流程 B：历史版本（Wayback Machine）
+
+1. **定位快照**：浏览器访问 `https://web.archive.org/web/{yyyymmdd}000000/https://sr.mihoyo.com/`
+   （如 4.3 时期 `20260608`），自动重定向到最近快照；注意 CDX API 易限流（498），优先用浏览器
+2. **等待快照渲染**：快照会执行页面 JS，等待数秒后 `PUZZLE_CONFIG_{publish_key}` 即存在
+   （标题可确认版本，如「4.3全新版本「沉于生者的忘川」正式上线」）
+3. **提取配置**：同流程 A 步骤 2-4，publish_key 为历史版本 key
+4. **还原原始 URL**：配置中的 URL 带 Wayback 代理前缀 `https://web.archive.org/web/{ts}/`，**剥离前缀**即原始 CDN 地址
+5. **验证 + 写入**：同流程 A 步骤 5-8（历史资源通常仍存活，但无 SLA，验证失败则放弃该角色）
+
+> 注意：部分时期快照是不完整捕获（只有 Wayback 工具条壳，正文为空，如 2025-06~07），
+> 或老架构页面（Nuxt SSR，无 PUZZLE 配置，如 2025-05）。此类快照直接转流程 C 直取 config.js。
+
+## 流程 C：历史版本 config.js 直取法（推荐，已实测）
+
+历史版本官网的完整资源**仍存活在米哈游服务器上**（config.js / setups.js / vendor.js / atlas / json / png 全部 200），
+不必依赖慢速的 Wayback 渲染：
+
+1. **拿 publish_key + config hash**：从任一 Wayback 快照页 DOM 提取
+   `document.querySelectorAll('script[src]')` 中形如
+   `https://act.mihoyo.com/puzzle/hkrpg/{publish_key}/config.{hash}.js` 的引用
+   （老快照渲染失败时，改用 curl 抓快照 HTML 正则提取 `config\.[a-f0-9]{8}\.js`；
+   快照缺失时用 CDX 查收录推断 publish_key：
+   `curl "https://web.archive.org/cdx/search/cdx?url=act.mihoyo.com/puzzle/hkrpg/*&from={yyyymmdd}&to={yyyymmdd}&output=json&filter=statuscode:200&collapse=urlkey"`，
+   从 `config.{hash}.js` 行提取 publish_key）
+2. **本地解析配置**：`curl -o config.js <URL>` 后 node vm 执行（配置为 JS 字面量含 `!1`/`!0` 简写，
+   不能 JSON.parse；`vm.runInNewContext(src, { window: {} })` 后读 `window.PUZZLE_RENDER_CONFIG`）。
+   **按节点 ID 定位角色**：角色 spine 节点 ID 跨版本稳定为 `pz-gRE3yO7OWw`
+   （背景动画节点为 `pz-ugmWxhsCCJ`），递归遍历 `pc.nodes` 找 `id === 'pz-gRE3yO7OWw'` 即可——
+   不要依赖 container 索引（3.4/3.5 在 `nodes[9]`，3.6+ 在 `nodes[8]`，会漂移）
+3. **验证 + 写入**：同流程 A 步骤 5-8（无需任何 Wayback 请求，全部直连原始 CDN）
+
+> 已知各版本 publish_key 与角色：
+>
+> | 版本 | publish_key | 角色（manifest ID） |
+> |---|---|---|
+> | 3.4 | `pz_127WXww3Uc` | 赛飞儿 1406、风堇 1409 |
+> | 3.5 | `pz_2Mmoz7kMdq` | 海瑟音 1410、刻律德菈 1412 |
+> | 3.6 | `pz_acyOXI3piV` | 长夜月 1413、丹恒•腾荒 1414 |
+> | 3.7 | `pz_5Pho3vPZz4` | 昔涟 1415 |
+> | 3.8 | `pz_Hse3Q5Sb8j` | 大丽花 1321 |
+> | 4.1 | `pz_m_gHUEqYs4` | 不死途 1504 |
+> | 4.3 | `pz_Z1nD6naN3q` | 千冶•刃 1507 |
+> | 4.4 | `pz_Devp46QZiu` | 远坂凛 1508、吉尔伽美什 1509、姬子•启行 1510 |
+> | 4.2 | （无 Wayback 快照，无法获取） | — |
+
+## manifest 写入规范（双清单：spine-manifest-official.json + spine-manifest-nanoka.json）
+
+清单于 2026-08 拆分为**双文件**，官方源优先、nanoka 源回退：
+
+- `spine-manifest-official.json`：官网源（`kind: official` / `official-scene`），**优先使用**。
+  折叠格式：顶层 `base` 为官网 CDN 公共前缀，条目的 `dir`（publish_key + 资源目录）+ 文件名拼接为完整 URL；
+- `spine-manifest-nanoka.json`：nanoka 源（仅 `kind: skel`），官方缺失/失效时的**回退源**，无 base（CDN 基址在 constants.ts）
+- 两文件顶层 `version` 必须一致，并与 `src/lib/constants.ts` 的 `SPINE_MANIFEST_VERSION` 同步
+  （不一致时 `pnpm test` / CI 的 `node tools/check-spine-manifest.mjs` 直接 FAIL）
+- 回退语义：`resolveSpine(key)` 官方优先；官方缺失 → nanoka；官方条目存在但**渲染失败**（404/解析失败）
+  → 渲染层自动用 `resolveSpine(key, 'nanoka')` 再渲染一次（`src/app/character/spine.ts`）
+- 两清单键重叠策略：**默认保留重复键**（官方角色在 nanoka 侧保留回退条目）；
+  当前 15 个官方角色中 12 个有 nanoka 回退（1508/1509/1510 为 4.4 新角色，nanoka 源未收录 → 无回退，官方失效时回退立绘）
+
+```jsonc
+// spine-manifest-official.json
+{
+  "version": 15,
+  "base": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/",
+  "entries": {
+    // 官网源（.json 骨架，Spine 4.2.43；atlas/json/textures 均为 dir 下相对文件名）
+    "1508": {
+      "kind": "official",
+      "version": "4.4",       // 对应游戏版本（诊断/回溯用）
+      "source": "home",        // home=首页轮播 / character=角色页 / wayback=历史快照
+      "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/29/",
+      "atlas": "d6219db1db381ca7deaed7868ba7eaa7_3205060559394643680.atlas",
+      "json": "25786df602b5a5fbf32f185f40676d73_1852508389443353702.json",
+      "textures": {
+        // 键 = atlas 实际 page 名（含扩展名！），值 = 相对文件名（不带 OSS 参数！）
+        "TohsakaRin.png": "7eeeaa4d89f3ce6234b877102ed22486_800838663379293561.png"
+      }
+    }
+  }
+}
+
+// spine-manifest-nanoka.json
+{
+  "version": 15,
+  "entries": {
+    // nanoka 源（.skel 二进制，Spine 4.1.23；name 与 CDN 目录逐字一致，勿规范大小写）
+    "1005": { "kind": "skel", "name": "kafuka" }
+  }
+}
+```
+
+**同 ID 唯一（重要）**：每个清单内「条目键 → 单条目」映射，无多条目并存；两清单之间**允许重复键**（官方优先，nanoka 侧成为失效回退路径，为预期行为）。
+nanoka 清单以 `static.nanoka.cc/assets/hsr/spine/manifest.json`（nanoka 站点官方清单）为基准同步，
+新角色接入官方源时在**官方清单新增 official 条目**，nanoka 侧**保留** skel 条目作为回退
+（官方源为精确角色模型，优先级更高；3.4+ 的 15 个角色中 12 个已由 skel 替换为 official 且保留 nanoka 回退，
+另含 3.1 角色页两例：缇宝 1403（tibao1 单只）+ 万敌 1404（WanDi_web，2025-02，
+该页另含 bg/tibao2/tibao3/tibaoqj 前景/star 等 KV 场景层，未接入）；
+3.0 首页轮播含乱破/丹恒饮月/黄泉/砂金单角色骨架，活动页系统自 3.0 起存在，均未接入）。
+
+**非角色条目（场景背景）**：条目键可为场景标识而非角色 ID，如 `home-bg`（常规枢纽页 Hero 背景）。
+背景动画位于官网背景节点 `pz-ugmWxhsCCJ` 的 `spineList`（10 层：01_bg_pc 主背景 + 9 层角色），
+完整场景用 `kind: official-scene` 条目（viewport + layers 数组，底→顶顺序）。
+
+**层序陷阱（实测 4.4）**：layers 必须按官网 `spineList` 每项的 `renderOrder` **升序**排列，
+renderOrder 相同时保持 spineList 数组顺序——切勿按数组顺序直写。4.4 版第 10 层 `10_qianjign_pc`
+是**全屏黑色底衬层**（1 根骨头 + slot `hei` 全屏 mesh + 空动画，材质为黑/暗色 + multiply 压暗条），
+其 renderOrder=0 与主背景同层，应紧贴 01_bg_pc 之后、置于所有角色层之下；若被排到最顶，
+全屏黑 mesh 会盖住全部角色（枢纽页黑屏/异常的直接根因）。
+
+**多层场景对齐原理（实测）**：官网各层 posX/posY 均为 0 = 各层骨架共享统一世界坐标系，
+叠加对齐只需让所有 SpinePlayer 实例使用同一固定 `viewport: {x,y,width,height}`（pad* 设 0）；
+**viewport 恒为官网设计画布 1920×1080（中心原点，即 x=-960, y=-540, width=1920, height=1080）**：
+官网 PzSpinePlayer（Three.js 正交相机，见 lib.pc/727 chunk 源码 onResize）的相机世界范围 = 节点尺寸
+（boxStyle 19.2rem×10.8rem = 1920×1080 设计值），世界坐标与像素 1:1，各层按骨架世界坐标直接入画，
+出血部分自然裁剪。**切勿按角色层联合边界外扩推导 viewport**——旧版 2192.89×1233.5 联合边界会令画面
+整体缩小 14%，且主背景/出血角色（如姬子 y 超出画布）的取景与官网不一致。
+前端每层一个 SpinePlayer 叠放（`initSpineSceneViewer`），窄屏（<768px）降级仅主背景层。
+
+**多纹理命名规律**：atlas 多 page 时纹理键为 `name.png` / `name_2.png` / `name_3.png`…
+（与 `img[].id` 的 `name` / `name_2` / `name_3` 一一对应），如 xilian×3、tenghuang×3、jizi×3。
+
+**写入后必须 bump 缓存版本**：
+
+1. 两清单（official / nanoka）顶层 `version` 同步 +1（同时 `SPINE_MANIFEST_VERSION` 常量必须同步 +1，
+   不一致时 `pnpm test` / CI 的 `node tools/check-spine-manifest.mjs` 会直接 FAIL）
+2. 运行 `node tools/check-spine-manifest.mjs`（可加 `--fetch` 做全部官方资源 HEAD 可达性检查）
+3. 缓存键 `spine_manifest_official_v{N}` / `spine_manifest_nanoka_v{N}` 随版本自动派生（`src/services/api.ts`），无需手改
+
+> 覆盖说明：official 条目覆盖 3.4（2025-05）至 4.4（2026-06）各版本官网首页角色动画；
+> 3.2/3.3 时代官网首页为旧 Nuxt 架构无 spine，4.2 版本无 Wayback 快照，均不可得。
+> home-bg 场景 = 常规枢纽页 Hero 背景（官网背景动画节点 pz-ugmWxhsCCJ 全部 10 层：
+> 01_bg_pc 主背景 + 9 层角色；各层共享统一骨架坐标系，渲染时同一固定 viewport 叠加对齐；
+> 窄屏仅主背景层）。skel 条目 name 多段以 `|` 分隔（如 "bg|tibao1"），解析时跳过 bg 段。
+
+## 关键陷阱（全部实测踩过）
+
+| # | 陷阱 | 后果 | 规避 |
+|---|---|---|---|
+| 1 | atlas 纹理名是逻辑名（`TohsakaRin.png`），实际文件是 hash 名 | 纹理 404 | manifest 存 `atlas目录 + 逻辑名` → 实际 URL 映射，前端用 `rawDataURIs` |
+| 2 | manifest 纹理键用官网配置的 img.id（无扩展名） | 映射 miss → 404 | 键必须与 atlas page 名完全一致（**含扩展名**） |
+| 3 | 纹理 URL 带 `?x-oss-process=...` 参数 | Image 加载卡死，success 永不触发 | 纹理 URL 用**原始 png**，去掉 OSS 参数 |
+| 4 | atlas 改写为含 `:` 的绝对 URL | Spine 4.2 解析器当属性行吞掉，region 误判为 page | atlas 原样加载，映射走 `rawDataURIs` |
+| 5 | CDX API 超时/限流（498） | 无法查快照 | 直接用浏览器访问 `web.archive.org/web/{ts}000000/...` |
+| 6 | spine-player 依赖 rAF 循环 | 标签页 hidden 时 success 不触发（非缺陷） | 在可见标签页验证 |
+| 7 | `cachedFetch` 的 IndexedDB 缓存 | manifest 修改后不生效 | 改 cacheKey 版本号 |
+| 8 | 在 Wayback 页面内 fetch 纹理返回 404 | 误判资源已删 | 是 Wayback 上下文 Referer 触发防盗链，
+    用 curl（无 Referer）或 wiki 页面直连验证；act-webstatic 为 Origin 反射策略，任意 Origin 均可 |
+
+## 验收清单
+
+- [ ] 资源三件套（atlas/json/纹理）HTTP 200 + CORS 反射通过
+- [ ] manifest 纹理键与 atlas page 名逐字一致（含扩展名）
+- [ ] 纹理 URL 无 `x-oss-process` 参数
+- [ ] `pnpm test` + `pnpm build` 全绿
+- [ ] 可见浏览器中 `/character/{id}` 动画按钮点亮（类名含 `has-anim`）、循环播放、构图适配
+- [ ] 控制台无错误；`performance.getEntriesByType('resource')` 可见该角色的 atlas/json/全部纹理请求成功
+- [ ] 回归：现有 nanoka 角色（如 1005）动画无退化
+
+## 相关
+
+- 实现：`src/app/character/spine.ts`（official 渲染路径）、`src/services/api.ts`（resolveSpine）
+- 决策：`docs/adr/0009-官网spine动画增量接入.md`
+- 历史抓取样本：`cdn/spine/official-home-spine-4.4.json`

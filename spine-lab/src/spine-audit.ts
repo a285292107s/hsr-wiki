@@ -8,15 +8,15 @@
  *     - official 条目：逐动画像素采样（每动画播满 N 帧后 readPixels 统计可见像素）
  *     - official-scene 条目：逐层串行渲染成功 + 元数据 + 每层默认动画采样
  */
-import { fetchResourceStatus, fetchText } from '../services/cache';
-import type { SpineResolved, SpineSource } from '../services/types';
+import { fetchResourceStatus, fetchText } from '../../src/services/cache';
+import type { SpineResolved, SpineSource } from '../../src/services/types';
 import {
   BLEND_NAMES,
   type SpinePlayerCtor, type SpinePlayerInstance, type SpinePlayerConfig, type SpineRuntimeVersion,
-} from '../spine/types';
-import { buildOfficialConfig } from '../spine/config';
-import { disposePlayer, pickAnimName, spawnPlayer } from '../spine/player';
-import { getSpineCtor, loadSpineRuntime } from '../spine/runtime';
+} from '../../src/spine/types';
+import { buildOfficialConfig } from '../../src/spine/config';
+import { disposePlayer, pickAnimName, spawnPlayer } from '../../src/spine/player';
+import { getSpineCtor, loadSpineRuntime } from '../../src/spine/runtime';
 // 像素分析统一收口在 debug/pixels.ts（验收台共用），此处 re-export 保持既有导入路径兼容
 export { analyzePixels, type PixelAnalysis } from './pixels';
 import { analyzePixels } from './pixels';

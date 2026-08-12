@@ -1,13 +1,10 @@
 /** manifest 加载与版本解析 */
 import { CDN } from '../../lib/constants';
-import { CACHE_TTL, cachedFetch, purgeStaleVersions } from '../cache';
+import { cachedFetch } from '../cache';
 import type { Manifest } from '../types';
 
 export async function loadManifest(): Promise<Manifest> {
-  const m = await cachedFetch<Manifest>(`${CDN}/manifest.json`, 'manifest', CACHE_TTL.manifest);
-  // 火并忘：清理旧版本条目，不阻塞返回
-  void purgeStaleVersions(m.hsr?.latest || '');
-  return m;
+  return cachedFetch<Manifest>(`${CDN}/manifest.json`, 'manifest');
 }
 
 /** 从 manifest 解析当前数据版本 */

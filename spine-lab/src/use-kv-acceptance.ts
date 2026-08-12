@@ -6,7 +6,7 @@
  * 本模块不依赖 Vue 视图 / 路由 / 渲染实现，轮询、中止、超时逻辑可独立单测。
  */
 import { ref } from 'vue';
-import { SPINE_RUNTIME_VERSION } from '../spine/constants';
+import { SPINE_RUNTIME_VERSION } from '../../src/spine/constants';
 import {
   type AcceptItem, type AcceptSceneSnapshot, buildAcceptReportText, judgeAccept,
 } from './kv-acceptance';

@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node tools/check-colors.mjs --strict && node tools/check-spine-manifest.mjs && node tools/check-contrast.mjs --strict && vue-tsc -b && vite build",
+    "build": "node tools/check-guards.mjs && vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:update": "playwright test --update-snapshots"
+    "test:e2e:update": "playwright test --update-snapshots",
+    "dev:lab": "vite -c spine-lab/vite.config.ts",
+    "build:lab": "vue-tsc --noEmit -p spine-lab/tsconfig.json && vite build -c spine-lab/vite.config.ts",
+    "test:lab": "vitest run -c spine-lab/vitest.config.ts"
   },
   "dependencies": {
     "pinia": "^4.0.2",

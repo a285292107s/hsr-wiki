@@ -1,0 +1,37 @@
+/**
+ * Spine Lab 基础样式（研究线独立设计令牌，取自主项目 tokens.css 对应值保持视觉一致）：
+ * - 不引入主项目完整设计系统（研究线不需要主题切换 / CW 双主题）
+ * - 仅覆盖研究线组件实际使用的变量（--text/--bg/--primary 等）
+ */
+:root {
+  /* 原始层值（与主项目 tokens.css 一致） */
+  --blk-950: #000000;
+  --tc-400: #cc7648;
+  --tc-500: #b85c33;
+
+  /* 语义映射（常规主题，研究线固定） */
+  --bg: var(--blk-950);
+  --primary: var(--tc-500);
+  --th-400: var(--tc-400);
+  --primary-glow: color-mix(in srgb, var(--primary) 10%, transparent);
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #7c8da6;
+  --text-bright: #ffffff;
+
+  --font-hud: 'Orbitron', monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}

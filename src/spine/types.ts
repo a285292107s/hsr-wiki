@@ -3,7 +3,7 @@
  *
  * spine-player / spine-webgl 为 CDN IIFE 运行时（注入全局 window.spine），无本地类型声明。
  * 本文件维护其松散实例/配置/场景 API 类型的唯一来源：
- * - 生产编排（app/character/spine.ts）与调试验收台（SpineDebugView / SpineAuditView）共用
+ * - 生产编排（app/character/spine.ts）与研究线验收台（Spine Lab）共用
  * - 升级运行时（4.2.x → 新版本）时只需回归本文件契约 + 审核台 L2 渲染检查
  * 字段按运行时实际暴露按需探测，可空字段以 `?` 标注。
  *

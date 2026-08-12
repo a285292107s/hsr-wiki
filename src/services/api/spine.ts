@@ -3,7 +3,7 @@
  * + spine-manifest-nanoka.json 回退源，随站部署）
  */
 import { CDN, SPINE_MANIFEST_VERSION } from '../../lib/constants';
-import { CACHE_TTL, cachedFetch } from '../cache';
+import { cachedFetch } from '../cache';
 import type { SpineOfficialManifest, SpineNanokaManifest, SpineResolved, SpineSource } from '../types';
 import { LOCAL_DATA_BASE } from './base';
 
@@ -19,20 +19,12 @@ export function expandSpineUrl(base: string, dir: string, file: string): string 
 
 /** 官方源全量清单（审核台条目清单用；与 resolveSpine 同一缓存键） */
 export function loadSpineOfficialManifest(): Promise<SpineOfficialManifest> {
-  return cachedFetch<SpineOfficialManifest>(
-    `${LOCAL_DATA_BASE}/spine-manifest-official.json`,
-    SPINE_OFFICIAL_KEY,
-    CACHE_TTL.data,
-  );
+  return cachedFetch<SpineOfficialManifest>(`${LOCAL_DATA_BASE}/spine-manifest-official.json`, SPINE_OFFICIAL_KEY);
 }
 
 /** nanoka 源全量清单（回退源；与 resolveSpine 同一缓存键） */
 export function loadSpineNanokaManifest(): Promise<SpineNanokaManifest> {
-  return cachedFetch<SpineNanokaManifest>(
-    `${LOCAL_DATA_BASE}/spine-manifest-nanoka.json`,
-    SPINE_NANOKA_KEY,
-    CACHE_TTL.data,
-  );
+  return cachedFetch<SpineNanokaManifest>(`${LOCAL_DATA_BASE}/spine-manifest-nanoka.json`, SPINE_NANOKA_KEY);
 }
 
 /** 双清单聚合（审核台专用）：单个源失败返回 null（可部分加载，容错展示） */
@@ -84,11 +76,7 @@ export async function resolveSpineSource(spineKey: string): Promise<SpineSource 
 
 /** 官方源解析（spine-manifest-official.json） */
 async function resolveOfficial(spineKey: string): Promise<SpineResolved | null> {
-  const manifest = await cachedFetch<SpineOfficialManifest>(
-    `${LOCAL_DATA_BASE}/spine-manifest-official.json`,
-    SPINE_OFFICIAL_KEY,
-    CACHE_TTL.data,
-  );
+  const manifest = await cachedFetch<SpineOfficialManifest>(`${LOCAL_DATA_BASE}/spine-manifest-official.json`, SPINE_OFFICIAL_KEY);
   const entry = manifest && manifest.entries && manifest.entries[spineKey];
   if (!entry) return null;
   if (entry.kind === 'official-scene') {
@@ -108,11 +96,7 @@ async function resolveOfficial(spineKey: string): Promise<SpineResolved | null> 
 
 /** nanoka 源解析（spine-manifest-nanoka.json）：多段资源（如 "bg|tibao1|tibao2"）优先跳过背景层 bg */
 async function resolveNanoka(spineKey: string): Promise<SpineResolved | null> {
-  const manifest = await cachedFetch<SpineNanokaManifest>(
-    `${LOCAL_DATA_BASE}/spine-manifest-nanoka.json`,
-    SPINE_NANOKA_KEY,
-    CACHE_TTL.data,
-  );
+  const manifest = await cachedFetch<SpineNanokaManifest>(`${LOCAL_DATA_BASE}/spine-manifest-nanoka.json`, SPINE_NANOKA_KEY);
   const entry = manifest && manifest.entries && manifest.entries[spineKey];
   if (!entry || entry.kind !== 'skel') return null;
   const parts = String(entry.name).split('|').filter(Boolean);
@@ -142,11 +126,7 @@ function expandTextures(base: string, dir: string, textures: Record<string, stri
 /** 列出官方清单中全部 official-scene 场景键（调试页场景选择用；场景仅存于官方源） */
 export async function loadSpineSceneKeys(): Promise<string[]> {
   try {
-    const manifest = await cachedFetch<SpineOfficialManifest>(
-      `${LOCAL_DATA_BASE}/spine-manifest-official.json`,
-      SPINE_OFFICIAL_KEY,
-      CACHE_TTL.data,
-    );
+    const manifest = await cachedFetch<SpineOfficialManifest>(`${LOCAL_DATA_BASE}/spine-manifest-official.json`, SPINE_OFFICIAL_KEY);
     if (!manifest || !manifest.entries) return [];
     return Object.entries(manifest.entries)
       .filter(([, v]) => v.kind === 'official-scene')

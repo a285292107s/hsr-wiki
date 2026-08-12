@@ -1,5 +1,5 @@
 /** 物品 / 光锥 / 敌对物种加载器 */
-import { CACHE_TTL, cachedFetch } from '../cache';
+import { cachedFetch } from '../cache';
 import type { ItemDb, LocalItemList, LocalLightConeList, LocalMonsterList, LightConeDetail, MonsterDetail } from '../types';
 import { LOCAL_DATA_BASE } from './base';
 import { singletonLoad } from './singleton';
@@ -31,15 +31,15 @@ export async function loadLocalItemDb(): Promise<ItemDb> {
 /** 敌对物种列表（共享单例：只请求一次，失败自动重置允许重试） */
 export const loadLocalMonsterList = singletonLoad<LocalMonsterList>(`${LOCAL_DATA_BASE}/monsters.json`);
 
-/** 敌对物种详情（monsters/{id}.json，按 ID 按需加载，走四级缓存） */
+/** 敌对物种详情（monsters/{id}.json，按 ID 按需加载，走请求缓存） */
 export function loadLocalMonsterDetail(id: string): Promise<MonsterDetail> {
-  return cachedFetch<MonsterDetail>(`${LOCAL_DATA_BASE}/monsters/${id}.json`, `monster_${id}`, CACHE_TTL.data);
+  return cachedFetch<MonsterDetail>(`${LOCAL_DATA_BASE}/monsters/${id}.json`, `monster_${id}`);
 }
 
 /** 光锥列表（共享单例：只请求一次，失败自动重置允许重试） */
 export const loadLocalLightCones = singletonLoad<LocalLightConeList>(`${LOCAL_DATA_BASE}/light_cones.json`);
 
 export function loadLocalLightConeDetail(id: string): Promise<LightConeDetail> {
-  // 详情走四级缓存：二次进入免网络往返
-  return cachedFetch<LightConeDetail>(`${LOCAL_DATA_BASE}/light_cones/${id}.json`, `lightcone_${id}`, CACHE_TTL.data);
+  // 详情走请求缓存：二次进入免网络往返
+  return cachedFetch<LightConeDetail>(`${LOCAL_DATA_BASE}/light_cones/${id}.json`, `lightcone_${id}`);
 }

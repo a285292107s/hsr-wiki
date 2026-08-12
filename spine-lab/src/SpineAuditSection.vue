@@ -1,26 +1,24 @@
 <script setup lang="ts">
 /**
- * Spine 导入审核台（长期保留的诊断页，路由 /debug/spine-audit）：
+ * Spine 导入审核面板（SpineDebugView 的 Tab 之一）：
  * 全量 spine-manifest 条目批量体检（skel / official / official-scene），三级自动诊断：
  *   L0 静态：URL 可达性 + atlas 纹理映射对照（零 WebGL）
  *   L1 解析：骨架元数据提取（动画/皮肤/slot/附件/混合模式）
  *   L2 渲染：串行单实例渲染检查 + 像素采样（official 逐动画；skel/场景降级仅默认动画）
  * 人工只需浏览异常项 → 展开详情看资源表/纹理对照/元数据/采样 → 预览动画确认 → 按诊断建议修复。
- * 本文件仅承担队列编排与页面框架；审核引擎在 src/debug/spine-audit.ts，
+ * 本文件仅承担队列编排与面板框架；审核引擎在 src/debug/spine-audit.ts，
  * 展开详情（含预览生命周期）在 src/debug/SpineAuditDetail.vue。
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { loadSpineManifests, resolveSpine } from '../../services/api';
-import type { SpineResolved } from '../../services/types';
-import { useAppStore } from '../stores/app';
-import SpineAuditDetail from '../../debug/SpineAuditDetail.vue';
-import { copyText, downloadJson } from '../../debug/report';
+import { loadSpineManifests, resolveSpine } from '../../src/services/api';
+import type { SpineResolved } from '../../src/services/types';
+import { toast } from './lib/toast';
+import SpineAuditDetail from './SpineAuditDetail.vue';
+import { copyText, downloadJson } from './report';
 import {
   AuditEntry, AuditKind, buildDiagnosis, classifyStatus,
   createAuditEntry, resetAuditEntry, auditRender, auditStaticResources,
-} from '../../debug/spine-audit';
-
-const app = useAppStore();
+} from './spine-audit';
 
 /* ─── 常量与状态 ─── */
 
@@ -241,11 +239,11 @@ async function exportReport(): Promise<void> {
   };
   const text = JSON.stringify(report, null, 2);
   if (await copyText(text)) {
-    app.toast('success', '审核报告已复制到剪贴板');
+    toast('success', '审核报告已复制到剪贴板');
   } else {
     // 剪贴板不可用时下载文件兜底
     downloadJson(report, `spine-audit-${Date.now()}.json`);
-    app.toast('success', '剪贴板不可用，报告已下载为 JSON');
+    toast('success', '剪贴板不可用，报告已下载为 JSON');
   }
 }
 
@@ -266,42 +264,34 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="nk-spine-audit">
-    <header class="nk-spine-audit__head">
-      <p class="nk-spine-audit__kicker">SPINE AUDIT // 导入体检</p>
-      <h1>Spine 审核台</h1>
-      <p class="nk-spine-audit__desc">
-        全量 manifest 三级诊断：L0 资源可达性 → L1 骨架解析 → L2 真实渲染 + 像素采样（official 逐动画，skel/场景降级）。异常项展开详情查看资源表 / 诊断建议，并可预览动画确认。
-      </p>
-
-      <div class="nk-spine-audit__toolbar">
-        <div class="nk-spine-audit__chips">
-          <span class="nk-spine-audit__chip is-ok" title="通过条目数">PASS {{ summary.pass }}</span>
-          <span class="nk-spine-audit__chip is-fail" title="失败条目数 — 需人工处理">FAIL {{ summary.fail }}</span>
-          <span class="nk-spine-audit__chip is-warn" title="警告条目数 — 建议核查">WARN {{ summary.warn }}</span>
-          <span
-            class="nk-spine-audit__chip nk-spine-audit__chip--gl"
-            :class="glAlive >= GL_WARN_AT ? 'is-fail' : ''"
-            title="活跃 WebGL 上下文数（浏览器上限约 16，队列 1 + 预览 1）"
-          >GL {{ glAlive }}/16</span>
-        </div>
-        <div class="nk-spine-audit__bulk">
-          <template v-if="running">
-            <span class="nk-spine-audit__progress-text" aria-live="polite">{{ summary.done }}/{{ summary.total }}</span>
-            <button type="button" class="nk-spine-audit__btn" @click="togglePause">{{ paused ? '继续' : '暂停' }}</button>
-            <button type="button" class="nk-spine-audit__btn is-danger" @click="stopAudit">停止</button>
-          </template>
-          <template v-else>
-            <button type="button" class="nk-spine-audit__btn is-primary" @click="startAudit">开始审核</button>
-            <button type="button" class="nk-spine-audit__btn" :disabled="summary.fail + summary.warn === 0" @click="rerunIssues">仅异常重跑</button>
-            <button type="button" class="nk-spine-audit__btn" :disabled="summary.done === 0" @click="exportReport">导出报告</button>
-          </template>
-        </div>
+    <div class="nk-spine-audit__toolbar">
+      <div class="nk-spine-audit__chips">
+        <span class="nk-spine-audit__chip is-ok" title="通过条目数">PASS {{ summary.pass }}</span>
+        <span class="nk-spine-audit__chip is-fail" title="失败条目数 — 需人工处理">FAIL {{ summary.fail }}</span>
+        <span class="nk-spine-audit__chip is-warn" title="警告条目数 — 建议核查">WARN {{ summary.warn }}</span>
+        <span
+          class="nk-spine-audit__chip nk-spine-audit__chip--gl"
+          :class="glAlive >= GL_WARN_AT ? 'is-fail' : ''"
+          title="活跃 WebGL 上下文数（浏览器上限约 16，队列 1 + 预览 1）"
+        >GL {{ glAlive }}/16</span>
       </div>
-      <div class="nk-spine-audit__progress" aria-hidden="true">
-        <div class="nk-spine-audit__progress-bar" :style="{ width: `${summary.total ? (summary.done / summary.total) * 100 : 0}%` }"></div>
+      <div class="nk-spine-audit__bulk">
+        <template v-if="running">
+          <span class="nk-spine-audit__progress-text" aria-live="polite">{{ summary.done }}/{{ summary.total }}</span>
+          <button type="button" class="nk-spine-audit__btn" @click="togglePause">{{ paused ? '继续' : '暂停' }}</button>
+          <button type="button" class="nk-spine-audit__btn is-danger" @click="stopAudit">停止</button>
+        </template>
+        <template v-else>
+          <button type="button" class="nk-spine-audit__btn is-primary" @click="startAudit">开始审核</button>
+          <button type="button" class="nk-spine-audit__btn" :disabled="summary.fail + summary.warn === 0" @click="rerunIssues">仅异常重跑</button>
+          <button type="button" class="nk-spine-audit__btn" :disabled="summary.done === 0" @click="exportReport">导出报告</button>
+        </template>
       </div>
-      <p v-if="loadError" class="nk-spine-audit__error" role="alert">{{ loadError }}</p>
-    </header>
+    </div>
+    <div class="nk-spine-audit__progress" aria-hidden="true">
+      <div class="nk-spine-audit__progress-bar" :style="{ width: `${summary.total ? (summary.done / summary.total) * 100 : 0}%` }"></div>
+    </div>
+    <p v-if="loadError" class="nk-spine-audit__error" role="alert">{{ loadError }}</p>
 
     <div class="nk-spine-audit__filters">
       <select class="nk-spine-audit__select" v-model="filterKind" aria-label="按来源筛选">
@@ -360,44 +350,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* ─── 页面骨架：OLED 深色控制台，左侧避让导航条（与 SpineDebugView 同语言） ─── */
-.nk-spine-audit {
-  padding: 24px;
-  font-family: var(--font-body);
-  color: var(--text);
-  overflow-x: auto;
-}
-@media (min-width: 768px) {
-  .nk-spine-audit { margin-left: 72px; }
-}
-@media (min-width: 1024px) {
-  .nk-spine-audit { margin-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
-}
-
-/* ─── 头部 ─── */
-.nk-spine-audit__head { max-width: 1480px; margin-bottom: 16px; }
-.nk-spine-audit__kicker {
-  margin: 0 0 6px;
-  font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  color: var(--primary);
-  text-transform: uppercase;
-}
-.nk-spine-audit__head h1 {
-  margin: 0 0 6px;
-  font-family: var(--font-hud);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-.nk-spine-audit__desc {
-  margin: 0 0 14px;
-  font-size: 13px;
-  line-height: 1.7;
-  opacity: 0.72;
-}
+/* ─── 头部工具栏 ─── */
 .nk-spine-audit__toolbar {
   display: flex;
   align-items: center;
@@ -643,7 +596,6 @@ onBeforeUnmount(() => {
 .nk-spine-audit__btn.is-primary:hover:not(:disabled) { border-color: var(--th-400); box-shadow: 0 0 20px var(--primary-glow); }
 
 @media (max-width: 560px) {
-  .nk-spine-audit { padding: 16px 12px; }
   /* 移动端行内仅保留身份 + 徽章：错误摘要与耗时折叠进详情 */
   .nk-spine-audit__err { display: none; }
   .nk-spine-audit__ms { display: none; }

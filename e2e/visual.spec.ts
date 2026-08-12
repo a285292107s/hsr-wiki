@@ -41,7 +41,7 @@ test.describe('视觉基线', () => {
     await page.goto('/');
     await expect(page.locator('.nk-home-hero__title')).toBeVisible();
     await waitImages(page);
-    // Spine 为 WebGL rAF 动画（CSS animations 禁用无效），且已有 debug/spine-audit 专用引擎
+    // Spine 为 WebGL rAF 动画（CSS animations 禁用无效），且已有 spine-lab 专用验收引擎
     // 负责其渲染验收——像素基线将其隐藏，避免动画帧导致基线不稳定
     await page.locator('.nk-home-hero__spine').evaluate((el) => {
       (el as HTMLElement).style.display = 'none';

@@ -7,7 +7,7 @@
  * 全部层共享同一固定世界视口保证对齐（官网背景节点同款方案：各层骨架共享统一坐标系）。
  *
  * 架构：createScenePipeline 为唯一渲染管线实现，生产 mountSpineScene 与调试验收台
- * （SpineDebugView 合并渲染）共用——「验收基线 = 生产渲染」由代码结构保证而非注释承诺；
+ * （Spine Lab 合并渲染）共用——「验收基线 = 生产渲染」由代码结构保证而非注释承诺；
  * 调试侧仅通过管线控制器的插桩点（items / canvas / setPaused / stepOnce）做诊断。
  *
  * 渲染方案：

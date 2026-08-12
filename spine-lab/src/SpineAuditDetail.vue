@@ -6,9 +6,9 @@
  * 模板 ref 不再落入 v-for → 无需「取数组末项」兜底。
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import type { SpineResolved } from '../services/types';
-import type { SpinePlayerInstance } from '../spine/types';
-import { disposePlayer, pickAnimName } from '../spine/player';
+import type { SpineResolved } from '../../src/services/types';
+import type { SpinePlayerInstance } from '../../src/spine/types';
+import { disposePlayer, pickAnimName } from '../../src/spine/player';
 import {
   type AuditEntry,
   buildAuditPlayerConfig, buildDiagnosis, ensureSpineCtor, runtimeVersionFor,
