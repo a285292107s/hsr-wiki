@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   sync-data:
@@ -57,6 +56,8 @@ jobs:
           cd tools/converter
           python gen_catalog.py
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -78,10 +79,9 @@ jobs:
       - name: Dead link audit
         run: pnpm vitest run --config tools/dead-links.vitest.config.ts
 
-      # main 有 branch protection（required checks：build-and-test + e2e），直接 push 会被拒——
-      # 改为 PR 流程：commit 去 [skip ci]（让数据变更真实触发 CI 全量），gh pr create + auto-merge
-      # （checks 通过后自动合并）。auto-merge 需仓库 allow_auto_merge=true（已 gh api 开启）。
-      - name: Commit and open PR
+      # 软门禁（2026-08-12 迭代）：main 无 required checks，直接 push 即达；
+      # push 触发 CI 全量（build-and-test + e2e）与 Vercel 构建守卫，失败可回滚。
+      - name: Commit and push to main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -90,8 +90,10 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          BRANCH="auto/data-sync-${{ github.run_id }}"
           git commit -m "chore: sync data from submodule update"
-          git push origin HEAD:"$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title "chore: sync data from submodule update" --body "TurnBasedGameData 子模块数据自动同步。CI 门禁（build-and-test + e2e）通过后自动合并。"
-          gh pr merge --squash --auto
+          git push origin HEAD:main || {
+            echo "Non-fast-forward, rebasing onto latest main..."
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          }
