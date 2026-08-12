@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This file provides guidance to Lingma (lingma.aliyun.com) when working with code in this repository.
+This file provides guidance to AI coding assistants when working with code in this repository.
 
 ## 项目概述
 
-HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki。数据源为本地 JSON（由 Python 工具从官方解包数据转换而来），图片与 Spine 动画走 `https://static.nanoka.cc` CDN。
+HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki。数据源为本地 JSON（由 Python 工具从官方解包数据转换而来），图片走 jsDelivr 官方镜像与 nanoka 双源回退，Spine 动画走 `https://static.nanoka.cc` CDN。
 
 ## 常用命令
 
@@ -15,8 +15,11 @@ pnpm install
 # 本地开发 → http://localhost:5173/（strictPort：端口被占用时明确报错，先探测 5173 复用已有实例，无实例才新起）
 pnpm dev
 
-# 类型检查 + 生产构建 → dist/
+# 类型检查 + 生产构建 → dist/（前置 check-guards 三守卫：色彩收口 / Spine 清单 / 对比度）
 pnpm build
+
+# 预览构建产物
+pnpm preview
 
 # 运行全部测试
 pnpm test
@@ -62,7 +65,7 @@ python gen_catalog.py                    # 重新生成 DATA_CATALOG.md 索引
 > 门禁语义（软门禁，2026-08-12 迭代）：main 分支 protection 仅保留防 force push 与防删除
 > （required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过，推送后
 > CI（`build-and-test` + `e2e`）自动运行，失败由 GitHub 通知；Vercel 生产构建（`pnpm build`
-> 含 vue-tsc + 色彩/清单守卫）为上线前最后一道守卫，构建失败不部署、可一键回滚。
+> 含 vue-tsc + 色彩/清单/对比度三守卫）为上线前最后一道守卫，构建失败不部署、可一键回滚。
 > 注意：本地推送前仍建议先跑 `pnpm build` + `pnpm test` 自检（CI 红不会拦 push，但会留失败记录）。
 
 ## 架构
@@ -94,7 +97,8 @@ src/
 │   ├── api/             → 按域拆分的加载器（characters / relics / items / endgame /
 │   │                        currency / spine / manifest；index.ts 为 barrel；
 │   │                        singleton.ts 提供 singletonLoad 工厂；base.ts 提供数据基址）
-│   ├── cache.ts         → 四级缓存 + 唯一底层请求函数 fetchJSON（15s 超时 + NkError）
+│   ├── cache.ts         → 三级缓存（内存 → in-flight 去重 → 网络）+ 唯一底层请求函数 fetchJSON（15s 超时 + NkError）
+│   ├── cdn/             → 图片 URL 双源解析（官方 jsDelivr 镜像优先 + nanoka 回退 + 请求失败 CSS 占位降级）
 │   └── types/           → 按域拆分的共享接口（character / relic / spine / currency /
 │                           misc；index.ts 为 barrel）
 ├── lib/                 → 纯工具函数
@@ -132,9 +136,9 @@ src/
 
 ### 核心架构模式
 
-1. **配置驱动目录页**：所有列表页均在 `src/app/catalog/pages/` 子模块中定义（character.ts / lightcone.ts / relic.ts / item.ts / monster.ts / endgame.ts（四模式合并单页，模式为筛选选项）/ currency-role.ts / currency-equipment.ts / currency-portal.ts / currency-augment.ts / currency-trait.ts，shared.ts 提供共享常量），由 `pages.ts` 统一注册为 `CatalogPageConfig`（共 13 个目录）。单一 `CatalogView.vue` 根据 `route.meta.catalog` 匹配配置渲染任意目录。新增目录 = 新增子模块 + 注册 + 路由。
+1. **配置驱动目录页**：所有列表页均在 `src/app/catalog/pages/` 子模块中定义（character.ts / lightcone.ts / relic.ts / item.ts / monster.ts / endgame.ts（四模式合并单页，模式为筛选选项）/ currency-role.ts / currency-equipment.ts / currency-portal.ts / currency-augment.ts / currency-trait.ts / achievement.ts，shared.ts 提供共享常量），由 `pages.ts` 统一注册为 `CatalogPageConfig`（共 12 个目录）。单一 `CatalogView.vue` 根据 `route.meta.catalog` 匹配配置渲染任意目录。新增目录 = 新增子模块 + 注册 + 路由。
 
-2. **数据流向**：`Pinia store` → 调用 `services/api/` 纯函数 → 从 `public/data/cn/`（随站部署）获取本地 JSON 或从 CDN 获取图片。Store 编排加载、缓存与错误处理；API 函数本身不持有状态（单例 Promise 除外）。
+2. **数据流向**：`Pinia store` → 调用 `services/api/` 纯函数 → 从 `public/data/cn/`（随站部署）获取本地 JSON；图片 URL 经 `services/cdn/` 纯函数解析（官方镜像优先 + nanoka 回退）。Store 编排加载、缓存与错误处理；API 函数本身不持有状态（单例 Promise 除外）。
 
 3. **本地优先数据**：全部目录/详情数据为预转换 JSON，存放于 `public/data/cn/`。仅图片与 Spine 动画在运行时从 CDN 加载。CDN 基址定义于 `src/lib/constants.ts → CDN`。
 
@@ -193,13 +197,13 @@ src/
 **前端（Vitest）：**
 - 框架：Vitest + happy-dom
 - 位置：`src/**/__tests__/*.test.ts`
-- 范围：仅数据层（纯函数、缓存逻辑、API 契约）——不测组件
-- IndexedDB 在测试中通过 mock 提供
+- 范围：仅数据层（纯函数、三级缓存逻辑、API 契约）——不测组件
+- 跨刷新持久化由 HTTP 缓存承担（2026-08 已移除 IndexedDB 层，测试无需 mock IndexedDB）
 
 **前端（Playwright e2e / 布局验收层）：**
 - 框架：`@playwright/test` + `@axe-core/playwright`，单 Chromium（`playwright.config.ts`，webServer 自动起 dev server，复用已有 5173 实例）
 - 位置：`e2e/`（layout.spec.ts 布局验收 / accessibility.spec.ts WCAG 扫描 / visual.spec.ts 像素基线）
-- 运行：`pnpm test:e2e`；基线刷新 `pnpm test:e2e:update`（`-u`）；基线截图提交 git（`e2e/snapshots/`）；CI（ci.yml e2e job）在 push main 与 PR 时全量运行（发布门禁）；mobile-chromium project（Pixel 7）仅跑 layout（溢出/结构/console 守卫），不跑像素基线
+- 运行：`pnpm test:e2e`；基线刷新 `pnpm test:e2e:update`（`-u`）；基线截图提交 git（`e2e/snapshots/`）；CI（ci.yml e2e job）在 push main 与 PR 时自动运行（软门禁：失败仅通知不拦 push）；mobile-chromium project（Pixel 7）仅跑 layout（溢出/结构/console 守卫），不跑像素基线
 - 把 AGENTS.md「验证流程」T1b/T2/L3/L4 从一次性 CDP 取证固化为可重复断言：`toHaveCSS`/`toHaveText`（T1b/T2）、溢出检测 helper（L3）、`toHaveScreenshot`（L4，本地 Percy）、axe-core（a11y 维度）、console/pageerror 守卫（CDN 404 / JS 异常）
 - 已知 a11y 缺陷登记在 `e2e/accessibility.spec.ts` 的 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败）——修复需人工裁决后从清单移除
 - 首页 Hero：≥1024px 渲染 KV Spine 场景（WebGL 动画，CSS animations 禁用无效），像素基线中隐藏 `.nk-home-hero__spine`（其渲染验收归 `spine-lab` 研究线）；<1024px 为随机五星立绘轮播（不涉及 WebGL，像素基线不覆盖该路径）
