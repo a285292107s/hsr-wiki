@@ -54,10 +54,11 @@ python gen_catalog.py                    # 重新生成 DATA_CATALOG.md 索引
 
 部署：推送到 `main` 分支 → Vercel 自动构建部署（SPA 路由重写见 `vercel.json`）。
 
-> 门禁语义（2026-08-12 配置）：GitHub main 分支已配置 branch protection——`build-and-test` 与
-> `e2e` 两个 CI job 为 required status checks（strict，enforce_admins=true），CI 红则 push 被拦截，
-> 发布门禁为硬门禁；Vercel 构建（`pnpm build` 含 vue-tsc + 色彩/清单守卫）为第二道硬门禁。
-> 注意：直接 push main 需 CI 全绿（本地推送前先跑 `pnpm build` + `pnpm test` 或走 PR）。
+> 门禁语义（软门禁，2026-08-12 迭代）：main 分支 protection 仅保留防 force push 与防删除
+> （required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过，推送后
+> CI（`build-and-test` + `e2e`）自动运行，失败由 GitHub 通知；Vercel 生产构建（`pnpm build`
+> 含 vue-tsc + 色彩/清单守卫）为上线前最后一道守卫，构建失败不部署、可一键回滚。
+> 注意：本地推送前仍建议先跑 `pnpm build` + `pnpm test` 自检（CI 红不会拦 push，但会留失败记录）。
 
 ## 架构
 
