@@ -41,7 +41,7 @@ pnpm dev:lab        # 研究线 dev（独立端口 5174，与主项目 5173 互�
 pnpm build:lab      # 研究线构建（vue-tsc 独立 tsconfig + vite build）
 pnpm test:lab       # 研究线单测（43 用例，不进主项目 pnpm test）
 
-# 数据转换工具（Python，需 vendor/TurnBasedGameData 子模块）
+# 数据转换工具（Python，需 vendor/TurnBasedGameData 本地目录，见 .gitignore 注释）
 cd tools/converter
 pip install -r requirements.txt
 python convert.py                        # 全量转换（增量跳过未变更）
@@ -49,7 +49,7 @@ python convert.py --only characters      # 仅重跑指定模块
 python convert.py --force --pretty       # 强制全量 + 缩进输出
 python -m pytest tests/ -v               # converter 单元测试
 
-# 子模块数据探索工具（无需全量加载 GB 级原始文件）
+# 本地数据探索工具（无需全量加载 GB 级原始文件）
 python query.py --list Avatar            # 搜索文件名
 python query.py AvatarConfig --schema    # 查看文件 schema
 python query.py AvatarConfig --id 1001   # 按 ID 查单条记录
@@ -150,7 +150,7 @@ src/
 
 ### 数据转换管线（Python）
 
-`tools/converter/` 将 `vendor/TurnBasedGameData/`（git 子模块：ExcelOutput + TextMap）转换为 `public/data/cn/` 下的 JSON。
+`tools/converter/` 将 `vendor/TurnBasedGameData/`（本地数据目录，非 git 子模块：ExcelOutput + TextMap；2026-08-12 移除子模块以加速 Vercel 构建，克隆方式见 .gitignore 注释）转换为 `public/data/cn/` 下的 JSON。
 
 - 入口：`convert.py` → 模块注册表驱动，支持 `--only` / `--force` / `--pretty` CLI 参数
 - 增量转换：`incremental.py` 基于源文件 mtime+size 签名，未变更模块自动跳过（状态存于 `.converter-state.json`，已 gitignore）；依赖声明由 `tests/test_incremental.py` AST 校验锁住，防止声明与实际读取漂移
@@ -162,13 +162,13 @@ src/
 - 转换摘要：每次运行结束输出各模块耗时统计
 - 输出确定性：上游解包数据更新后重跑即可，前端无需改动
 
-### 子模块数据探索（AI 专用）
+### 本地数据探索（AI 专用）
 
-`vendor/TurnBasedGameData` 子模块含 2140+ 个 JSON 文件（~250 MB）+ TextMap（~830 MB），**禁止直接读取原始文件**。使用以下工具：
+`vendor/TurnBasedGameData` 本地数据目录含 2140+ 个 JSON 文件（~250 MB）+ TextMap（~830 MB），**禁止直接读取原始文件**。使用以下工具：
 
 - **`DATA_CATALOG.md`**：自动生成的轻量索引，含每个文件的 schema、记录数、首条样例。查结构先读此文件。
 - **`query.py`**：精确查询 CLI，支持 `--id` / `--where` / `--fields` / `--grep` / `--schema` / `--resolve` / `--search` / `--rebuild-textmap`。TextMap 查询（`--resolve` / `--search`）走本地 SQLite 缓存（`textmap_db.py`），首次自动建库，后续 <1ms 响应。
-- **`gen_catalog.py`**：子模块更新后重跑 `python gen_catalog.py` 刷新索引。
+- **`gen_catalog.py`**：本地数据更新后重跑 `python gen_catalog.py` 刷新索引。
 
 ### Converter 模块 → 源文件映射
 

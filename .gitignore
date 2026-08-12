@@ -37,6 +37,11 @@ coverage
 __pycache__
 *.pyc
 
+# Local upstream data (converter source, cloned from DimbreathBot/TurnBasedGameData)
+# 2026-08-12: removed from git submodule to keep Vercel builds fast (~13MB repo);
+# clone manually: git clone https://github.com/DimbreathBot/TurnBasedGameData.git vendor/TurnBasedGameData
+vendor/TurnBasedGameData/
+
 # Converter incremental state
 tools/converter/.converter-state.json
 
