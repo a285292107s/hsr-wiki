@@ -2,49 +2,39 @@
 /**
  * 货币战争模式枢纽页（/currency）
  * 「交换」的落地目标，与 HomeView 对等的"模式之家"。
- * 开场即身份：交易所行情滚动条 + K 线纹理背景 + 金色光斑粒子 + 数据概览条。
+ *
+ * 反 AI 味重构约束（后续 AI 必须遵守）：
+ * - 禁止霓虹 glow（text-shadow 0 0 / box-shadow 0 0）、禁止 div 合成装饰（K 线/粒子/扫光），
+ *   视觉资产 = 真实官方货币图标（items.json 驱动 + CDN 双源，itemIconUrl 唯一入口）
+ * - 禁止装饰字符（◆ / // 斜杠）、禁止编号型 eyebrow（SECTION 01 类）、禁止 em-dash（—）
+ * - 行情涨跌幅原为编造数据，已随重构移除；禁止在本页新增任何伪造数字
  */
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { CW_NAV_ITEMS } from '../components/nav-items';
-import { loadLocalCurrencyRoles, loadLocalCurrencySeasons, loadLocalCurrencyEquipment, loadLocalCurrencyPortals, loadLocalCurrencyAugments, loadLocalCurrencyTraits } from '../../services/api';
-import type { CurrencySeason } from '../../services/types';
+import { itemIconUrl } from '../../lib/format';
+import {
+  loadLocalItems, loadLocalCurrencyRoles, loadLocalCurrencySeasons, loadLocalCurrencyEquipment,
+  loadLocalCurrencyPortals, loadLocalCurrencyAugments, loadLocalCurrencyTraits,
+} from '../../services/api';
+import type { CurrencySeason, LocalItemEntry } from '../../services/types';
 // 货币战争模式专属样式（随本路由 chunk 懒加载）
 import '../../styles/currency-hub.css';
 
-/* ─── 行情滚动条（装饰性：游戏内货币的交易所行情） ─── */
-const TICKER = [
-  { name: '信用点', pair: 'CREDIT/FRAG', chg: '+2.41%', up: true },
-  { name: '宇宙碎片', pair: 'FRAG/AMBER', chg: '-0.83%', up: false },
-  { name: '灵感', pair: 'IDEA/CREDIT', chg: '+5.12%', up: true },
-  { name: '幸运硬币', pair: 'LUCK/FRAG', chg: '+1.07%', up: true },
-  { name: '琥珀王币', pair: 'AMBER/CREDIT', chg: '-1.96%', up: false },
-  { name: '星琼', pair: 'JADE/AMBER', chg: '+0.64%', up: true },
-  { name: '黑塔币', pair: 'HERTA/FRAG', chg: '+3.35%', up: true },
-  { name: '冬城盾', pair: 'SHIELD/CREDIT', chg: '-0.42%', up: false },
-];
-/** 复制一份实现无缝循环（track 位移 -50%） */
-const tickerLoop = [...TICKER, ...TICKER];
+/* ─── 铸币档案：官方货币白名单（items.json 实测 ID，缺失自动剔除；禁伪造替代） ───
+   9 枚 3×3 金库陈列：星琼/信用点/古老梦华/宇宙碎片/灵感/黑塔币/冬城盾/巡镝/金表钞 */
+const COIN_IDS = [1, 2, 3, 31, 281018, 120000, 120001, 120002, 120003];
 
-/* ─── K 线纹理（确定性伪随机高度，纯装饰） ─── */
-const CANDLES = Array.from({ length: 56 }, (_, i) => {
-  const h = 16 + Math.abs(Math.sin(i * 1.71) * 58 + Math.sin(i * 0.53) * 30);
-  return { h: Math.min(Math.round(h), 92), up: Math.sin(i * 2.3 + 1) > -0.25 };
-});
+interface CoinEntry { id: number; name: string; icon: string; }
 
-/* ─── 金色光斑粒子 ─── */
-const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
-  left: (i * 7.9 + 4) % 96,
-  top: 10 + ((i * 19) % 62),
-  size: i % 4 === 0 ? 5 : 3,
-  delay: +((i * 0.63) % 4).toFixed(2),
-  dur: 3.6 + (i % 4) * 0.9,
-}));
+const coins = ref<CoinEntry[]>([]);
+/** 铸币名录滚动条：与铸币墙同源（数据驱动，无编造行情） */
+const tickerLoop = computed(() => [...coins.value, ...coins.value]);
 
 /* ─── 数据概览（驱动自转换产物，随版本自动更新） ─── */
 const stats = ref({ roles: 0, equip: 0, portals: 0, augments: 0, traits: 0 });
 
-/** 数据行配置：交易所行情板式，逐项渲染 + 交错入场 */
+/** 数据行配置：结算单式排版，逐项渲染 + 交错入场 */
 const STAT_DEFS: ReadonlyArray<{ key: keyof typeof stats.value; code: string; label: string }> = [
   { key: 'roles', code: 'ROLE', label: '角色' },
   { key: 'equip', code: 'EQUIP', label: '装备' },
@@ -56,7 +46,7 @@ const STAT_DEFS: ReadonlyArray<{ key: keyof typeof stats.value; code: string; la
 /* ─── 赛季扩充说明（驱动自 season 转换器产物） ─── */
 const seasons = ref<CurrencySeason[]>([]);
 
-/** 数字滚动（rAF · 900ms ease-out） */
+/** 数字滚动（rAF · 900ms ease-out；数据反馈动效，有动机允许保留） */
 type StatKey = keyof typeof stats.value;
 function countUp(key: StatKey, target: number): void {
   const t0 = performance.now();
@@ -70,6 +60,16 @@ function countUp(key: StatKey, target: number): void {
 }
 
 onMounted(async () => {
+  try {
+    const items = await loadLocalItems();
+    coins.value = COIN_IDS
+      .map((id) => items.find((it: LocalItemEntry) => it.id === id))
+      .filter((it): it is LocalItemEntry => Boolean(it))
+      .map((it) => ({ id: it.id, name: it.name, icon: itemIconUrl(it.icon) }));
+  } catch {
+    /* 离线降级：铸币墙与滚动条不展示，页面结构仍完整 */
+  }
+
   try {
     const [rolesData, equipData, portalsData, augmentsData, traitsData] = await Promise.all([
       loadLocalCurrencyRoles(),
@@ -131,51 +131,37 @@ const seasonViews = computed(() =>
 
 <template>
   <div id="nk-cwhub-app">
-    <!-- ═══ 行情滚动条：交易所式开场 ═══ -->
-    <div class="nk-cwhub-ticker" aria-hidden="true">
+    <!-- ═══ 铸币名录滚动条：与铸币墙同源的官方货币带（纯文字，禁图标 - 与铸币墙 9 张并发会触发 jsDelivr gh 限流挂起） ═══ -->
+    <div v-if="coins.length" class="nk-cwhub-ticker" aria-hidden="true">
       <div class="nk-cwhub-ticker__track">
-        <span
-          v-for="(t, i) in tickerLoop"
-          :key="i"
-          class="nk-cwhub-ticker__item"
-          :class="t.up ? 'is-up' : 'is-down'"
-        ><b>{{ t.name }}</b>&nbsp;{{ t.pair }}&nbsp;<i>{{ t.chg }}</i><em>◆</em></span>
+        <span v-for="(c, i) in tickerLoop" :key="i" class="nk-cwhub-ticker__item">
+          <b>{{ c.name }}</b>
+        </span>
       </div>
     </div>
 
-    <!-- ═══ 主视觉区：K 线纹理 + 金色光斑 + 标题 + 数据概览 ═══ -->
+    <!-- ═══ 主视觉区：标题 + 金库铸币墙 + 结算单数据 ═══ -->
     <header class="nk-cwhub-hero">
-      <div class="nk-cwhub-hero__candles" aria-hidden="true">
-        <span
-          v-for="(c, i) in CANDLES"
-          :key="i"
-          class="nk-cwhub-candle"
-          :class="{ 'is-up': c.up }"
-          :style="{ height: c.h + 'px', animationDelay: ((i * 0.13) % 3.2).toFixed(2) + 's' }"
-        ></span>
-      </div>
-      <div class="nk-cwhub-hero__particles" aria-hidden="true">
-        <span
-          v-for="(p, i) in PARTICLES"
-          :key="i"
-          class="nk-cwhub-particle"
-          :style="{
-            left: p.left + '%', top: p.top + '%',
-            width: p.size + 'px', height: p.size + 'px',
-            animationDelay: p.delay + 's', animationDuration: p.dur + 's',
-          }"
-        ></span>
-      </div>
-      <div class="nk-cwhub-hero__glow" aria-hidden="true"></div>
-
       <div class="nk-cwhub-hero__content">
-        <div class="nk-cwhub-hero__kicker">GRIDFIGHT // 模拟宇宙 · 黄金与机械</div>
+        <div class="nk-cwhub-hero__kicker">模拟宇宙 · 黄金与机械</div>
         <h1 class="nk-cwhub-hero__title">货币战争</h1>
-        <div class="nk-cwhub-hero__en">CURRENCY&nbsp;WAR</div>
+        <div class="nk-cwhub-hero__en">CURRENCY WAR</div>
         <p class="nk-cwhub-hero__tagline">
-          以琥珀王之名，让财富流动——信用点、灵感与运气的终极博弈场。
-          收录星际和平公司认证的全部参赛者档案与投资策略。
+          以琥珀王之名，让财富流动。收录星际和平公司认证的全部参赛者档案与投资策略。
         </p>
+      </div>
+
+      <div v-if="coins.length" class="nk-cwhub-vault" aria-label="货币档案">
+        <div
+          v-for="(c, i) in coins"
+          :key="c.id"
+          class="nk-cwhub-coin"
+          :style="{ '--i': i }"
+        >
+          <div class="nk-cwhub-coin__plate"><img :src="c.icon" :alt="c.name" loading="lazy"></div>
+          <div class="nk-cwhub-coin__id">{{ c.id }}</div>
+          <div class="nk-cwhub-coin__name">{{ c.name }}</div>
+        </div>
       </div>
 
       <div class="nk-cwhub-stats" role="group" aria-label="数据概览">
@@ -194,11 +180,7 @@ const seasonViews = computed(() =>
 
     <!-- ═══ 五大板块入口 ═══ -->
     <nav class="nk-cwhub-sections" aria-label="货币战争板块">
-      <div class="nk-cwhub-sections__head">
-        <span class="nk-cwhub-sections__label">SECTORS</span>
-        <span class="nk-cwhub-sections__line"></span>
-        <span class="nk-cwhub-sections__count">0{{ sections.length }}</span>
-      </div>
+      <div class="nk-cwhub-sections__bar" aria-hidden="true"></div>
       <div class="nk-cwhub-sections__grid">
         <RouterLink
           v-for="(s, i) in sections"
@@ -208,7 +190,6 @@ const seasonViews = computed(() =>
           :class="{ 'nk-cwhub-card--featured': s.live }"
           :style="{ '--i': i }"
         >
-          <div class="nk-cwhub-card__sheen"></div>
           <span class="nk-cwhub-card__badge" :class="s.live ? 'is-live' : 'is-soon'">
             {{ s.live ? 'LIVE' : 'SOON' }}
           </span>
@@ -227,19 +208,14 @@ const seasonViews = computed(() =>
       </div>
     </nav>
 
-    <!-- ═══ 赛季扩充说明（正文 + 扩充内容概览补充） ═══ -->
+    <!-- ═══ 赛季扩充说明（正文 + 扩充内容概览） ═══ -->
     <section v-if="seasonViews.length" class="nk-cwhub-season" aria-label="赛季扩充说明">
-      <div class="nk-cwhub-season__head">
-        <span class="nk-cwhub-season__label">SEASON&nbsp;INTEL</span>
-        <span class="nk-cwhub-season__line"></span>
-        <span class="nk-cwhub-season__count">{{ seasonViews.length }}</span>
-      </div>
+      <div class="nk-cwhub-season__bar" aria-hidden="true"></div>
       <article
         v-for="s in seasonViews"
         :key="s.id"
         class="nk-cwhub-season__card"
       >
-        <span class="nk-cwhub-season__tag">赛季扩充说明</span>
         <h2 class="nk-cwhub-season__title">{{ s.title }}</h2>
         <div class="nk-cwhub-season__cols">
           <div class="nk-cwhub-season__body">
@@ -251,9 +227,7 @@ const seasonViews = computed(() =>
             aria-label="扩充内容概览"
           >
             <div class="nk-cwhub-season__ov-head">
-              <span class="nk-cwhub-season__ov-bar" aria-hidden="true"></span>
               <span class="nk-cwhub-season__ov-title">{{ s.overview.heading }}</span>
-              <span class="nk-cwhub-season__ov-en">EXPANSION&nbsp;OVERVIEW</span>
             </div>
             <ul class="nk-cwhub-season__ov-list">
               <li
@@ -262,7 +236,6 @@ const seasonViews = computed(() =>
                 class="nk-cwhub-season__ov-item"
                 :style="{ '--i': i }"
               >
-                <span class="nk-cwhub-season__ov-dot" aria-hidden="true">◆</span>
                 <span class="nk-cwhub-season__ov-text">{{ it }}</span>
               </li>
             </ul>
@@ -271,6 +244,6 @@ const seasonViews = computed(() =>
       </article>
     </section>
 
-    <footer class="nk-cwhub-footer">DATA SOURCE — TurnBasedGameData · GRIDFIGHT</footer>
+    <footer class="nk-cwhub-footer">DATA SOURCE · TurnBasedGameData GRIDFIGHT</footer>
   </div>
 </template>

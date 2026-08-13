@@ -2,6 +2,10 @@
    货币战争 · 图鉴目录页通用卡片（装备/环境/策略/羁绊）
    BEM 前缀：nk-cw-*
    暗金主题下自动适配（继承 [data-theme="cw"] 令牌）
+   反 AI 味约束：禁止霓虹 glow 阴影（0 0 Npx）、禁止渐变填充徽章；
+   卡片 hover 仅发丝边框提亮 + 墨色分层阴影（--nk-shadow-*）。
+   圆角三档规则：卡片 = var(--nk-radius-card)（10px）/
+   内嵌图标 = calc(卡片 - 2px)/ 标签·徽章 = 999px。
    ═══════════════════════════════════════════ */
 
 /* ── 网格布局 ── */
@@ -26,7 +30,7 @@
 }
 .nk-cw-card:hover {
   border-color: var(--border2);
-  box-shadow: 0 0 12px var(--primary-glow);
+  box-shadow: var(--nk-shadow-card);
   transform: translateY(-2px);
 }
 
@@ -39,9 +43,9 @@
 .nk-cw-card__icon {
   width: 64px;
   height: 64px;
-  border-radius: 8px;
+  border-radius: calc(var(--nk-radius-card) - 2px);
   overflow: hidden;
-  background: rgba(255,255,255,0.04);
+  background: var(--line-1);
   flex-shrink: 0;
 }
 .nk-cw-card__icon img {
@@ -103,23 +107,20 @@
 .nk-cw-tag {
   display: inline-block;
   font-size: 0.62rem;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: var(--primary-glow);
-  color: var(--primary);
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gold);
   border: 1px solid var(--border);
   white-space: nowrap;
 }
-.nk-cw-tag--faction { background: color-mix(in srgb, var(--cw-faction-core) 14%, transparent); color: var(--cw-faction); border-color: color-mix(in srgb, var(--cw-faction-core) 30%, transparent); }
-.nk-cw-tag--combat  { background: color-mix(in srgb, var(--cw-combat-core) 14%, transparent);  color: var(--cw-combat); border-color: color-mix(in srgb, var(--cw-combat-core) 30%, transparent); }
-.nk-cw-tag--special { background: color-mix(in srgb, var(--cw-special-core) 14%, transparent);  color: var(--cw-special); border-color: color-mix(in srgb, var(--cw-special-core) 30%, transparent); }
-.nk-cw-tag--silver  { background: color-mix(in srgb, var(--cw-rarity-1) 14%, transparent); color: var(--crole-chip-season); border-color: color-mix(in srgb, var(--cw-rarity-1) 30%, transparent); }
-.nk-cw-tag--gold    { background: color-mix(in srgb, var(--gold) 14%, transparent);  color: var(--gold); border-color: color-mix(in srgb, var(--gold) 30%, transparent); }
-.nk-cw-tag--prismatic {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--prop-hp) 16%, transparent), color-mix(in srgb, var(--eg-maze) 16%, transparent), color-mix(in srgb, var(--skill-passive) 16%, transparent));
-  color: var(--ctrait-multicolor);
-  border-color: color-mix(in srgb, var(--ctrait-multicolor) 40%, transparent);
-}
+/* 分类/品质语义色：仅文字 + 发丝边框表达，无填充底色 */
+.nk-cw-tag--faction { color: var(--cw-faction); border-color: color-mix(in srgb, var(--cw-faction-core) 45%, transparent); }
+.nk-cw-tag--combat  { color: var(--cw-combat);  border-color: color-mix(in srgb, var(--cw-combat-core) 45%, transparent); }
+.nk-cw-tag--special { color: var(--cw-special); border-color: color-mix(in srgb, var(--cw-special-core) 45%, transparent); }
+.nk-cw-tag--silver  { color: var(--cw-rarity-1); border-color: color-mix(in srgb, var(--cw-rarity-1) 45%, transparent); }
+.nk-cw-tag--gold    { color: var(--gold);        border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
+.nk-cw-tag--prismatic { color: var(--ctrait-multicolor); border-color: color-mix(in srgb, var(--ctrait-multicolor) 55%, transparent); }
 
 /* ═══ 羁绊卡片专用样式（垂直信息密集型布局，参考游戏内羁绊详情面板） ═══ */
 
@@ -151,24 +152,22 @@
   animation-delay: min(calc(var(--i, 0) * 30ms), 600ms);
 }
 .nk-cw-trait-card:hover {
-  border-top-color: var(--border2);
-  border-right-color: var(--border2);
-  border-bottom-color: var(--border2);
-  box-shadow: 0 0 14px var(--primary-glow);
+  border-color: var(--border2);
+  box-shadow: var(--nk-shadow-card);
   transform: translateY(-2px);
 }
 
-/* 菱形图标 */
+/* 菱形图标（羁绊面板意象：旋转 45deg 呈现；圆角仍走内嵌档） */
 .nk-cw-trait-card__icon {
   width: 38px;
   height: 38px;
   flex-shrink: 0;
   transform: rotate(45deg);
-  border-radius: 5px;
+  border-radius: calc(var(--nk-radius-card) - 2px);
   overflow: hidden;
   border: 1.5px solid var(--border2);
-  background: rgba(255,255,255,0.04);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  background: var(--line-1);
+  box-shadow: var(--nk-shadow-card);
 }
 .nk-cw-trait-card__icon img {
   width: 100%;
@@ -215,10 +214,10 @@
   overflow: hidden;
 }
 
-/* 分类色彩左边线 */
-.nk-cw-trait-card[data-cat="faction"] { border-left: 3px solid color-mix(in srgb, var(--cw-faction-core) 50%, transparent); }
-.nk-cw-trait-card[data-cat="combat"]  { border-left: 3px solid color-mix(in srgb, var(--cw-combat-core) 50%, transparent); }
-.nk-cw-trait-card[data-cat="special"] { border-left: 3px solid color-mix(in srgb, var(--cw-special-core) 50%, transparent); }
+/* 分类语义左边线（发丝级色带） */
+.nk-cw-trait-card[data-cat="faction"] { border-left: 2px solid color-mix(in srgb, var(--cw-faction-core) 50%, transparent); }
+.nk-cw-trait-card[data-cat="combat"]  { border-left: 2px solid color-mix(in srgb, var(--cw-combat-core) 50%, transparent); }
+.nk-cw-trait-card[data-cat="special"] { border-left: 2px solid color-mix(in srgb, var(--cw-special-core) 50%, transparent); }
 
 /* 手机端适配 */
 @media (max-width: 767px) {
@@ -269,12 +268,12 @@
 .nk-cw-equip-icon {
   width: 56px;
   height: 56px;
-  border-radius: 8px;
+  border-radius: calc(var(--nk-radius-card) - 2px);
   overflow: hidden;
-  background: rgba(255,255,255,0.04);
+  background: var(--line-1);
   flex-shrink: 0;
   border: 2px solid var(--border2);
-  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  box-shadow: var(--nk-shadow-card);
 }
 .nk-cw-equip-icon img {
   width: 100%;
@@ -333,7 +332,6 @@
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 4px currentColor;
 }
 .nk-cw-equip-stat__name {
   flex: 1;
