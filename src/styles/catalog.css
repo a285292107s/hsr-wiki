@@ -84,78 +84,64 @@
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-idx-card,
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-lc-card { animation: nk-card-fade 0.25s ease backwards; }
 
-/* 角色名录网格（星穹档案 · 编辑式名录，替代霓虹卡片墙）
+/* 角色画廊墙（沉浸画廊式：全身立绘为主角，信息压缩为底部细条）
    列宽抽变量：骨架屏与真实网格共用同一 minmax，避免切换时列数突变导致 CLS；
-   分档断点见下方「名录网格分档」：随视口放大格子，约束列数，抑制超宽屏拥挤 */
+   hover 仅立绘轻微放大 + 名字变色，无边框浮现、无浮起位移（画廊纯净） */
 .nk-idx-grid {
-  --nk-grid-min: 240px;
-  --nk-grid-gap: 8px 16px;
+  --nk-grid-min: 160px;
+  --nk-grid-gap: 12px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr));
   gap: var(--nk-grid-gap);
   padding-top: 20px;
 }
-/* 名录格：左立绘头图窗 + 右文字主从结构。无边框盒、无浮起、无霓虹，
-   hover 仅左侧主色档案竖条 + 名字变色 + 背景微亮（与首页深空档案语言统一） */
+/* 画廊卡：立绘窗 3:4 竖版 + 底部渐变信息条；无边框盒（发丝线 opacity 0 hover 不浮现，
+   区别于 lc 卡——立绘本身是唯一主体，边框存在感归零） */
 .nk-idx-card {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 12px;
+  display: block;
   border-radius: 8px;
-  border: 1px solid transparent;
+  overflow: hidden;
   background: transparent;
   cursor: pointer;
   text-decoration: none;
-  overflow: hidden;
-  transition: background 0.22s var(--nk-ease-out), border-color 0.22s var(--nk-ease-out);
+  transition: transform 0.28s var(--nk-ease-out);
   animation: nk-idx-in 0.4s var(--nk-ease-out) backwards;
   animation-delay: min(calc(var(--i, 0) * 16ms), 480ms);
 }
-/* 左侧档案竖条：hover / 键盘聚焦时自中段展开（编辑式索引高亮，无 glow） */
-.nk-idx-card::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 50%;
-  width: 2px; height: 0;
-  transform: translateY(-50%);
-  border-radius: 1px;
-  background: var(--primary);
-  opacity: 0;
-  transition: height 0.22s var(--nk-ease-out), opacity 0.22s;
-  pointer-events: none;
+/* :focus-visible 键盘态：3px 主色 focus ring（无障碍 §1 规范） */
+.nk-idx-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
+/* hover：仅立绘轻微放大 + 名字变色，克制无位移（沉浸画廊语言） */
+@media (hover: hover) and (pointer: fine) {
+  .nk-idx-card:hover .nk-idx-card__portrait img { transform: scale(1.04); }
 }
-.nk-idx-card:hover, .nk-idx-card:focus-visible {
-  background: color-mix(in srgb, var(--primary) 5%, transparent);
-  border-color: var(--line-1);
-}
-.nk-idx-card:hover::before, .nk-idx-card:focus-visible::before { height: 62%; opacity: 1; }
-/* 立绘头图窗：cover 裁切至人物头部（立绘头部约在画面上部），档案头像感 */
+/* 立绘窗：3:4 cover 裁切（avatarshopicon 376×512 竖版半身像，天然 3:4 近满布） */
 .nk-idx-card__portrait {
-  flex: none;
-  width: 50px;
+  display: block;
   aspect-ratio: 3 / 4;
-  border-radius: 6px;
   overflow: hidden;
   background: color-mix(in srgb, var(--blk-900) 55%, transparent);
-  border: 1px solid var(--line-1);
 }
 .nk-idx-card__portrait img {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: center 18%;
   transition: transform 0.35s var(--nk-ease-out);
 }
-.nk-idx-card:hover .nk-idx-card__portrait img { transform: scale(1.05); }
-/* 文字主从：名字行（名字 + 星级同行） + 属性/命途元信息行 */
+/* 底部渐变信息条：黑阶渐隐承接文字可读性，无需边框分隔（与 lc 卡底部渐变同语言） */
 .nk-idx-card__body {
-  flex: 1;
-  min-width: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 3px;
+  padding: 30px 12px 10px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 94%, transparent) 0%, color-mix(in srgb, var(--blk-900) 55%, transparent) 55%, transparent 100%);
 }
+/* 文字主从：名字行（名字 + 星级同行） + 属性/命途元信息行 */
 .nk-idx-card__name-row {
   display: flex;
   align-items: baseline;
@@ -165,10 +151,11 @@
 .nk-idx-card__name {
   flex: 1;
   min-width: 0;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text-bright);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -178,10 +165,11 @@
 /* 星级：稀有度语义色（5 金 / 4 紫），无发光无阴影 */
 .nk-idx-card__stars {
   flex: none;
-  font-size: 0.58rem;
+  font-size: 0.56rem;
   letter-spacing: 0.06em;
   line-height: 1;
   color: var(--rarity-5);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
 .nk-idx-card[data-rarity="4"] .nk-idx-card__stars { color: var(--rarity-4); }
 /* 元信息行：属性/命途图标 + 中文名，· 分隔 */
@@ -190,12 +178,13 @@
   align-items: center;
   gap: 4px;
   min-width: 0;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: var(--text3);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
   white-space: nowrap;
   overflow: hidden;
 }
-.nk-idx-card__icon { width: 13px; height: 13px; border-radius: 50%; flex: none; }
+.nk-idx-card__icon { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 .nk-idx-card__sep { color: var(--text3); opacity: 0.5; margin: 0 2px; }
 @keyframes nk-idx-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes nk-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
@@ -206,7 +195,7 @@
 @media (prefers-reduced-motion: reduce) {
   /* 禁用所有卡片入场动画 */
   .nk-idx-card, .nk-lc-card, .nk-relic-card, .nk-item-card, .nk-mob-card { animation: none; }
-  .nk-idx-card:hover::before { height: 0; opacity: 0; }
+  .nk-idx-card:hover .nk-idx-card__portrait img { transform: none; }
   .nk-virtual-cell .nk-item-card, .nk-virtual-cell .nk-idx-card, .nk-virtual-cell .nk-lc-card { opacity: 1; transform: none; }
   .nk-virtual-cell.nk-revealed .nk-item-card, .nk-virtual-cell.nk-revealed .nk-idx-card, .nk-virtual-cell.nk-revealed .nk-lc-card { animation: none; }
 }
@@ -595,11 +584,9 @@
   /* 网格列宽覆盖：仅改 --nk-grid-min，骨架屏与真实网格共用变量保持一致 */
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
   .nk-lc-grid { --nk-grid-min: 150px; }
-  /* 角色名录：手机固定 2 列（名录格含文字较宽，1 列滚动过长）；
-     立绘/字号整体收敛，保证 4 字名 + 满星同行不挤压 */
-  .nk-idx-grid { grid-template-columns: repeat(2, 1fr); gap: 6px 10px; }
-  .nk-idx-card { gap: 10px; padding: 8px 10px; }
-  .nk-idx-card__portrait { width: 40px; }
+  /* 角色画廊墙：手机 2 列大卡（画廊 3:4 立绘，图片即主体；
+     字号收敛适配窄卡，无旧名录的 width 覆盖——立绘窗 3:4 由 aspect-ratio 撑满 */
+  .nk-idx-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .nk-idx-card__name { font-size: 0.8rem; }
   .nk-idx-card__stars { font-size: 0.5rem; letter-spacing: 0; }
   .nk-idx-card__meta { font-size: 0.6rem; gap: 3px; }
@@ -625,25 +612,19 @@
    宽屏内容收束：头部/筛选/网格统一限宽居中，
    保证三者左右对齐；覆盖头部的负边距与补偿内边距
 ═══════════════════════════════════════════ */
-/* ── 名录网格分档：随视口放大格子（scale-aware），列数约束 3-5，
-     超宽屏保留两侧留白（放宽内容区但不铺满，抑制满屏卡片拥挤） ── */
+/* ── 画廊墙分档：随视口放大格子（scale-aware），列数约束 4-8，
+     超宽屏保留两侧留白（放宽内容区但不铺满，抑制满屏卡片拥挤） —— */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* 平板：继承基础 min 240（2→3 列自然过渡，与桌面段 min 280 衔接，避免跨断点列数跳变）；
-     宽格下放大立绘与字号，保持左图右文比例 */
-  .nk-idx-grid { --nk-grid-gap: 8px 18px; }
-  .nk-idx-card__portrait { width: 64px; }
-  .nk-idx-card__name { font-size: 1rem; }
-  .nk-idx-card__stars { font-size: 0.62rem; }
-  .nk-idx-card__meta { font-size: 0.72rem; }
-  .nk-idx-card__icon { width: 14px; height: 14px; }
+  /* 平板：min 150 → 3-4 列自然过渡（衬底与桌面 min 190 衔接，避免跨断点列数跳变） */
+  .nk-idx-grid { --nk-grid-min: 150px; }
 }
 @media (min-width: 1024px) {
-  /* 桌面：min 280 → 1024-1279 三列 / 1280+ 四列自然过渡 */
-  .nk-idx-grid { --nk-grid-min: 280px; --nk-grid-gap: 10px 18px; }
+  /* 桌面：min 190 → 1024-1279 五列 / 1280+ 六列自然过渡 */
+  .nk-idx-grid { --nk-grid-min: 190px; }
 }
 @media (min-width: 1440px) {
-  /* 中大桌面：四列 × 318px，取代原 5 列 × 252px 的局促 */
-  .nk-idx-grid { --nk-grid-min: 300px; --nk-grid-gap: 10px 20px; }
+  /* 中大桌面：七列 × 196px，延续画廊墙大图呼吸感 */
+  .nk-idx-grid { --nk-grid-min: 196px; }
 }
 @media (min-width: 1024px) {
   /* 桌面文字侧栏（140px）避让：目录页内容区左缘从 88px 加宽至 148px */
@@ -657,13 +638,13 @@
   .nk-cat-grid,
   .nk-cat-filters,
   .nk-cat-empty { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
-  /* 大屏：格子 320px+，行距拉开，缓解 5 列 × 275px 的局促 */
-  .nk-idx-grid { --nk-grid-min: 320px; --nk-grid-gap: 12px 20px; }
+  /* 大屏：格子 200px+，八列呼吸感（画廊墙主体为大图） */
+  .nk-idx-grid { --nk-grid-min: 200px; }
 }
 @media (min-width: 2560px) {
   /* 超宽屏（2K/4K）：内容区放宽至 1920（两侧保留留白），格子随内容放大 */
   #nk-catalog-app { --cat-max: 1920px; }
-  .nk-idx-grid { --nk-grid-min: 340px; }
+  .nk-idx-grid { --nk-grid-min: 220px; }
 }
 
 /* ═══════════════════════════════════════════

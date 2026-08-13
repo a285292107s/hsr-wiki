@@ -70,7 +70,7 @@
   --sd-900: #2B1F12;
   --sd-950: #1C150B;
   /* 金色阶（CW 主题 / 星级 / 网关入口；gold-350 为项目自有高亮暖金；
-     gold-600/700 为暗铜阶——CW 语义金降阶位（全局化 §13.2 金阶拆族） */
+     gold-600/700 为暗铜阶——CW 语义金降阶位（金阶拆族） */
   --gold-200: #FDE68A;
   --gold-300: #FCD34D;
   --gold-350: #F5D67B;
@@ -186,7 +186,7 @@
   /* 主色梯度端（ADR 0011 收编：原玫红 #F43F5E → 主色族成员 th-400，第三色相消失） */
   --accent: var(--th-400);
   --gold: var(--gold-400);
-  /* 语义金（强化/文本高亮等语义强调）：随主题——常规亮金，CW 降阶暗铜（§13.2 主题金与语义金永不重叠） */
+  /* 语义金（强化/文本高亮等语义强调）：随主题——常规亮金，CW 降阶暗铜（主题金与语义金永不重叠） */
   --gold-sem: var(--gold-300);
   --text: #E2E8F0;
   --text2: #94A3B8;
@@ -194,7 +194,7 @@
   --text3: #7C8DA6;
   --border: color-mix(in srgb, var(--primary) 20%, transparent);
   --border2: color-mix(in srgb, var(--primary) 40%, transparent);
-  /* 文本高亮语义位：并入 gold 族（全局化 §13.4 裁决，消除游离橙 #f29e38） */
+  /* 文本高亮语义位：并入 gold 族（消除游离橙 #f29e38） */
   --highlight: var(--gold-300);
   /* 高亮数值/激活态文字 = 当前主题色阶 300 */
   --metric-val: var(--th-300);
@@ -217,7 +217,7 @@
   --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   --ease: cubic-bezier(0.16,1,0.3,1);
   /* 布局宽度令牌：页面内容统一边界 / 正文可读行宽
-     三层宽度系列（全局化 §13.9/§13.10）：detail 展示层 1000 / struct 结构层 952 / prose 阅读层 800 */
+     三层宽度系列：detail 展示层 1000 / struct 结构层 952 / prose 阅读层 800 */
   --nk-content-max: 1440px;
   --nk-detail-max: 1000px;
   --nk-struct-max: 952px;
@@ -638,7 +638,7 @@ background-position: center 15%;
 .nk-tab--active { color: var(--metric-val); }
 .nk-tab--active::after { content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); border-radius: 1px; }
 
-/* ─── 区块导航（吸顶工具条内，全局化 §13.1：别处也会用到 → 全局语法） ───
+/* ─── 区块导航（吸顶工具条内；别处也会用到 → 全局语法） ───
    激活态默认主色（主题层）；身份页面可在页内覆盖为领域色 */
 .nk-secnav {
   display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0;
@@ -654,7 +654,7 @@ background-position: center 15%;
 }
 /* 触控热区垂直扩展至 ≥44px（按钮 30px 高 + 上下各 7px） */
 .nk-secnav__btn::before {
-  content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px; /* 热区 ≥44px（全局化 §13.7） */
+  content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px; /* 热区 ≥44px（无障碍硬标准） */
 }
 .nk-secnav__btn:hover { color: var(--text2); background: transparent; }
 .nk-secnav__btn--active { color: var(--primary); background: transparent; }
@@ -674,11 +674,11 @@ background-position: center 15%;
 @keyframes nk-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ─── 通用组件 ─── */
-/* 通用卡片（阅读族基底，全局化 §13.6）：中性细线、无浮起、hover 仅边框/背景亮度变化；
+/* 通用卡片（阅读族基底）：中性细线、无浮起、hover 仅边框/背景亮度变化；
    浏览族卡片（图鉴/目录，保留位移与光效）见 catalog.css 各卡类 */
 .nk-card { background: rgba(255,255,255,0.016); border: 1px solid var(--line-1); border-radius: var(--nk-radius-card); padding: 20px; margin-bottom: 16px; transition: border-color 0.25s ease, background 0.25s ease; position: relative; }
 .nk-card:hover { border-color: var(--line-2); background: rgba(255,255,255,0.03); }
-/* 返回顶部（全局原语，全局化 §13.1：长页通用） */
+/* 返回顶部（全局原语：长页通用） */
 .nk-top-btn {
   position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   z-index: 30; width: 40px; height: 40px; border-radius: 50%;
@@ -696,7 +696,7 @@ background-position: center 15%;
 @media (min-width: 768px) {
   .nk-top-btn { right: 28px; bottom: 28px; }
 }
-/* 章节标题（编辑式基线，全局化 §13.1/§13.3）：HUD 大写 + 细线延伸线；
+/* 章节标题（编辑式基线）：HUD 大写 + 细线延伸线；
    编号元素 .nk-title__idx 由使用方提供（角色页由 sections.ts 配置表注入固定编号） */
 .nk-title {
   display: flex; align-items: baseline; gap: 12px;
@@ -819,8 +819,8 @@ background-position: center 15%;
 .nk-mob-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
 /* 终局星际档案卡：横向占位条，匹配真实卡片形态 */
 .nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 12px; }
-/* 角色名录：横向条占位，匹配名录格形态 */
-.nk-idx-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 52px; border-radius: 8px; }
+/* 角色画廊墙：3:4 竖版占位（与真实卡片立绘窗同比例，防切换 CLS） */
+.nk-idx-grid .nk-skeleton__card-img { aspect-ratio: 3 / 4; border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
 
 /* CDN 图片最终降级：全局委托（installCdnImgFallback）在 nanoka 也失败时标记 data-cdn-down，
@@ -989,7 +989,7 @@ img[data-cdn-down] { visibility: hidden; }
 }
 
 /* ═══════════════════════════════════════════
-   全局交互默认（全局化 §13.7）：focus-visible / reduced-motion / hover:none
+   全局交互默认（无障碍硬标准）：focus-visible / reduced-motion / hover:none
    三件套升级为 tokens 全局原语；页面级细化规则可在各自 CSS 追加覆盖
    · 选择器均用 :where 保持零特异性，保证页面级规则永远可以覆盖
 ═══════════════════════════════════════════ */
@@ -1018,7 +1018,7 @@ img[data-cdn-down] { visibility: hidden; }
 }
 
 /* ═══════════════════════════════════════════
-   全局交互默认（全局化 §13.7）：focus-visible / reduced-motion / hover:none
+   全局交互默认（无障碍硬标准）：focus-visible / reduced-motion / hover:none
    三件套升级为 tokens 全局原语；页面级细化规则可在各自 CSS 追加覆盖
    · 选择器均用 :where 保持零特异性，保证页面级规则永远可以覆盖
 ═══════════════════════════════════════════ */
