@@ -56,10 +56,7 @@ function choose(key: AccentKey): void {
   color: var(--text);
 }
 @media (min-width: 768px) {
-  .nk-settings { margin-left: 72px; }
-}
-@media (min-width: 1024px) {
-  .nk-settings { margin-left: 148px; }
+  .nk-settings { margin-left: var(--nk-content-offset); }
 }
 
 /* ─── 头部 ─── */

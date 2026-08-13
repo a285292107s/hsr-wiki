@@ -26,12 +26,9 @@
   backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
   border-bottom: 1px solid var(--line-1);
 }
-/* 内容区避让侧栏：在（视口 - 侧栏宽）区域内居中，与滚动容器内容对齐 */
+/* 内容区避让侧栏：在（视口 - 侧栏宽）区域内居中，与滚动容器内容对齐（令牌断点接管平板 88 / 桌面 148） */
 @media (min-width: 768px) {
-  .nk-egd-bar { padding-left: 72px; }
-}
-@media (min-width: 1024px) {
-  .nk-egd-bar { padding-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
+  .nk-egd-bar { padding-left: var(--nk-content-offset); }
 }
 .nk-egd-bar__inner {
   display: flex; align-items: center; gap: 12px;

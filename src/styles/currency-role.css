@@ -1127,8 +1127,8 @@
 }
 @media (min-width: 768px) {
   .nk-crole {
-    max-width: calc(980px + 88px);
-    padding-left: 88px;
+    max-width: calc(980px + var(--nk-content-offset));
+    padding-left: var(--nk-content-offset);
   }
   .nk-crole-hero { min-height: 340px; }
   .nk-crole-hero__bg { background-position: center; }
@@ -1141,7 +1141,7 @@
   .nk-crole__skeleton-portrait { width: 140px; height: 140px; }
 }
 @media (min-width: 1024px) {
-  .nk-crole { max-width: calc(1040px + 148px); padding-left: 148px; } /* 随文字侧栏（140px）避让加宽 */
+  .nk-crole { max-width: calc(1040px + var(--nk-content-offset)); padding-left: var(--nk-content-offset); } /* 随文字侧栏（140px）避让加宽（令牌断点接管） */
   .nk-crole-hero { min-height: 380px; }
   .nk-crole-hero__content { padding: 40px; }
   .nk-crole-hero__portrait { width: 160px; height: 160px; }

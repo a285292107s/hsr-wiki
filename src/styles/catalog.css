@@ -6,7 +6,7 @@
 /* ═══════════════════════════════════════════
    角色列表页（完全重构）
 ═══════════════════════════════════════════ */
-#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px 88px; background: radial-gradient(ellipse at 50% 0%, var(--nk-page-tint) 0%, transparent 60%); --cat-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; --cat-max: 1440px; }
+#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px var(--nk-content-offset); background: radial-gradient(ellipse at 50% 0%, var(--nk-page-tint) 0%, transparent 60%); --cat-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; --cat-max: 1440px; }
 /* 页头英文副标（档案元信息）：等宽小字 + 竖线分隔，无装饰元素 */
 #nk-catalog-app .nk-cat-subtitle { display: inline-block; font-family: var(--cat-mono); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text3); border-left: 1px solid var(--line-2); padding-left: 10px; margin-left: 2px; flex-shrink: 0; }
 #nk-catalog-app::-webkit-scrollbar { width: 6px; }
@@ -15,7 +15,7 @@
 
 /* ═══ 页头（档案式 masthead）+ 吸顶工具条 ═══
    关系：masthead 非吸顶（页面仪式入口，随内容滚动离开）；toolbar 吸顶（轻量工具：搜索 + 筛选）。
-   两者均从内容区左边缘开始（88px 避让后），与左侧导航胶囊形成干净的 L 型并行，
+   两者均从内容区左边缘开始（--nk-content-offset 避让后），与左侧导航胶囊形成干净的 L 型并行，
    不再横贯到导航下方产生 z 重叠。 */
 .nk-cat-masthead { display: flex; align-items: baseline; gap: 16px; padding: 26px 0 16px; }
 /* 标题：正文粗体承载中文（Orbitron 无中文字形，HUD 感由字号/字重/字距承担），
@@ -430,12 +430,8 @@
 @keyframes nk-home-art-in { from { opacity: 0; } to { opacity: 1; } }
 /* 压暗层：左下文字安全区 + 底部融入页面底色（不遮挡右上场景主体） */
 .nk-home-hero__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 85% at 0% 108%, color-mix(in srgb, var(--blk-900) 82%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 34%, transparent 62%), linear-gradient(to bottom, color-mix(in srgb, var(--blk-900) 28%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in srgb, var(--blk-900) 55%, transparent) 88%, var(--bg) 100%); }
-/* 标题区与导航区同网格：max-width 1440 居中 + 左侧 128px 侧栏间隙（断点下收窄） */
-.nk-home-hero__content { position: relative; z-index: 2; width: 100%; max-width: var(--nk-content-max); margin: 0 auto; padding: 0 48px max(44px, 8vh) 128px; }
-@media (min-width: 1024px) {
-  /* 桌面文字侧栏避让：首页内容左缘 128px → 148px */
-  .nk-home-hero__content { padding-left: 148px; }
-}
+/* 标题区与导航区同网格：max-width 1440 居中 + 左侧 --nk-content-offset 侧栏间隙（断点由令牌接管） */
+.nk-home-hero__content { position: relative; z-index: 2; width: 100%; max-width: var(--nk-content-max); margin: 0 auto; padding: 0 48px max(44px, 8vh) var(--nk-content-offset); }
 /* 英文副标（品牌行）：系统等宽小字 + 发丝线，克制不发光 */
 .nk-home-hero__supra { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; font-family: var(--home-mono); font-size: 0.68rem; letter-spacing: 0.22em; color: var(--text2); animation: nk-home-fade-up 0.7s var(--ease) 0.2s backwards; }
 .nk-home-hero__supra::before { content: ''; width: 44px; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
@@ -446,10 +442,7 @@
 .nk-home-hero__tagline { margin-top: 22px; font-size: 0.86rem; letter-spacing: 0.1em; color: var(--text2); text-shadow: 0 1px 8px rgba(0,0,0,0.6); animation: nk-home-fade-up 0.7s var(--ease) 0.5s backwards; }
 
 /* ── 板块索引（编辑式列表，替代卡片网格：无卡片、无发光、无 3D） ── */
-.nk-home-nav { max-width: var(--nk-content-max); margin: 0 auto; padding: 96px 40px 64px 128px; }
-@media (min-width: 1024px) {
-  .nk-home-nav { padding-left: 148px; }
-}
+.nk-home-nav { max-width: var(--nk-content-max); margin: 0 auto; padding: 96px 40px 64px var(--nk-content-offset); }
 /* 分区头：中文主标题 + 发丝线 + 数据元信息（真实元数据，非装饰） */
 .nk-home-nav__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 40px; }
 .nk-home-nav__title { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.04em; color: var(--text-bright); }
@@ -493,10 +486,7 @@
 }
 
 /* ── 页脚：品牌标语 + 拉丁格言（无装饰元素，纯排版） ── */
-.nk-home-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 48px 112px; text-align: center; }
-@media (min-width: 1024px) {
-  .nk-home-footer { padding-left: 148px; }
-}
+.nk-home-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 48px var(--nk-content-offset); text-align: center; }
 .nk-home-footer__motto { font-family: var(--font-body); font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.24em; color: var(--text-bright); }
 .nk-home-footer__latin { margin: 16px 0 0; font-family: var(--home-mono); font-size: 0.66rem; letter-spacing: 0.3em; color: var(--text3); }
 
@@ -504,15 +494,15 @@
 @keyframes nk-home-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ── 响应式 ── */
-/* 平板（768-1023px）：中等密度（行距/组距介于手机紧凑与桌面舒展之间）+
-   左侧避让 56px 图标侧栏（88px = 侧栏 56 + 边距 32，与目录页对齐；
+/* 平板（768-1023px）：中等密度（行距/组距介于手机紧凑与桌面舒展之间）；
+   左侧避让由 --nk-content-offset 令牌断点接管（88px = 侧栏 56 + 边距 32，全视图统一；
    手机无左侧栏，底部避让由下方 max-width:767px 块单独处理） */
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-home-row { padding: 20px 8px; }
   .nk-home-index__group + .nk-home-index__group { margin-top: 56px; }
-  .nk-home-hero__content { padding: 0 32px max(40px, 6vh) 88px; }
-  .nk-home-nav { padding: 72px 32px 48px 88px; }
-  .nk-home-footer { padding: 56px 32px 40px 88px; }
+  .nk-home-hero__content { padding-left: var(--nk-content-offset); padding-right: 32px; }
+  .nk-home-nav { padding: 72px 32px 48px var(--nk-content-offset); }
+  .nk-home-footer { padding: 56px 32px 40px var(--nk-content-offset); }
 }
 @media (max-width: 767px) {
   /* 移动端：左右对称 + 底部避开 56px 底部导航条 + safe-area */
@@ -627,8 +617,7 @@
   .nk-idx-grid { --nk-grid-min: 196px; }
 }
 @media (min-width: 1024px) {
-  /* 桌面文字侧栏（140px）避让：目录页内容区左缘从 88px 加宽至 148px */
-  #nk-catalog-app { padding-left: 148px; }
+  /* 桌面文字侧栏（140px）避让已由 --nk-content-offset 令牌接管（148px），此处仅保留其它桌面规则 */
 }
 @media (min-width: 1600px) {
   #nk-catalog-app { --cat-max: 1680px; }

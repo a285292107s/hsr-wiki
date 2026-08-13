@@ -574,10 +574,11 @@
 }
 /* 内容区避让侧栏：在（视口 - 侧栏宽）区域内居中，与滚动容器内容对齐 */
 @media (min-width: 768px) {
-  .nk-char-page .nk-enh-bar { padding-left: 72px; }
+  .nk-char-page .nk-enh-bar { padding-left: var(--nk-content-offset); }
 }
 @media (min-width: 1024px) {
-  .nk-char-page .nk-enh-bar { padding-left: 148px; backdrop-filter: none; -webkit-backdrop-filter: none; } /* blur 分层（迭代 §14）：0.97 近实底下桌面去 blur 降合成成本；padding 随文字侧栏（140px）避让加宽 */
+  /* blur 分层（迭代 §14）：0.97 近实底下桌面去 blur 降合成成本；padding 由令牌断点接管 */
+  .nk-char-page .nk-enh-bar { backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
 .nk-char-page .nk-enh-bar__inner {
   display: flex; align-items: center; gap: 8px;

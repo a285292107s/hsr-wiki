@@ -219,6 +219,11 @@
   /* 布局宽度令牌：页面内容统一边界 / 正文可读行宽
      三层宽度系列：detail 展示层 1000 / struct 结构层 952 / prose 阅读层 800 */
   --nk-content-max: 1440px;
+  /* 内容区侧栏避让（单一事实源，禁止视图写死数字）：
+     0（手机，侧栏为底部栏）/ 88（= 平板侧栏 56 + 缘距 32）/ 148（= 桌面文字侧栏 140 + 缘距 8）。
+     视图容器统一以 padding-left / left / margin-left = var(--nk-content-offset) 引用，
+     侧栏宽度变更只改本变量（ADR 0003 fixed 侧栏 + 手动避让架构的收口，防遗漏漂移）。 */
+  --nk-content-offset: 0;
   --nk-detail-max: 1000px;
   --nk-struct-max: 952px;
   --nk-prose-max: 800px;
@@ -254,6 +259,14 @@
   /* 中性细线（档案/规格表排版：克制的半透明白线，不随主题色；卡片/分割线用） */
   --line-1: rgba(255,255,255,0.07);
   --line-2: rgba(255,255,255,0.13);
+}
+
+/* 内容区侧栏避让断点重映射：768 = 平板 56px 书脊侧栏 + 32 缘距；1024 = 桌面 140px 文字侧栏 + 8 缘距 */
+@media (min-width: 768px) {
+  :root { --nk-content-offset: 88px; }
+}
+@media (min-width: 1024px) {
+  :root { --nk-content-offset: 148px; }
 }
 
 /* ═══ 货币战争模式：全壳黑金主题（黑底 + 金属金主色） ═══
@@ -804,11 +817,7 @@ background-position: center 15%;
 .nk-skeleton__body { padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
 .nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
-.nk-skeleton--catalog { padding: 0 24px 80px 88px; }
-@media (min-width: 1024px) {
-  /* 桌面文字侧栏避让同步：骨架屏与真实网格保持同一左内边距 */
-  .nk-skeleton--catalog { padding-left: 148px; }
-}
+.nk-skeleton--catalog { padding: 0 24px 80px var(--nk-content-offset); }
 .nk-skeleton__header { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .nk-skeleton__filters { padding: 12px 0; }
 .nk-skeleton__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min, 150px), 1fr)); gap: var(--nk-grid-gap, 14px); padding-top: 16px; }
@@ -883,7 +892,7 @@ img[data-cdn-down] { visibility: hidden; }
   .ui-more { display: none; }
   /* 竖排侧栏：设置入口推至栏底部（手机底部栏已平铺，无需此规则） */
   .ui-sidebar-settings { margin-top: auto; }
-  .nk-page--detail { left: 72px; bottom: 0; }
+  .nk-page--detail { left: var(--nk-content-offset); bottom: 0; }
   .nk-hero__panel { padding: 28px 36px; gap: 22px; }
   .nk-hero__name { font-size: 1.85rem; }
   /* 平板：视觉区降为 21:9，减少首屏占比；属性网格自适应列数 */
@@ -937,7 +946,6 @@ img[data-cdn-down] { visibility: hidden; }
     background: var(--primary);
   }
   .ui-sidebar-divider { margin: 4px 8px; }
-  .nk-page--detail { left: 148px; }
   .nk-hero {
     flex-direction: row;
     max-width: var(--nk-detail-max);
