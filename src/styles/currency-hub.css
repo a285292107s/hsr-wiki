@@ -1,11 +1,17 @@
 /* ═══════════════════════════════════════════
-   货币战争枢纽页（/currency）· 星际和平交易所「金库」调性
-   暗金主题：黑底 + 金属金点缀。仅在 data-theme="cw" 下呈现，
-   色值全部经令牌（--primary 金 / --gold 亮金 / --blk 黑阶 / --line 发丝），
-   禁止裸彩色；装饰仅允许发丝线（--line-*）与墨色分层阴影（--nk-shadow-*）。
+   货币战争枢纽页（/currency）· V3「冷峻档案馆」调性
+   暗金主题：黑底 + 金属金点缀。仅在 data-theme="cw" 下呈现。
+   叙事定位：档案编目（自走棋构筑的 4 前台 + 6 后台 = 阵容档案表）——铸币墙/行情式
+   视觉已两次废弃（行情为编造数据 + 货币非玩法重点），禁止回归；视觉资产 = 真实
+   官方素材（角色头像/羁绊·装备·环境·策略图标）。高级感来自静态精确：近乎零入场
+   动画（唯一入场序列 = 档案表槽位错峰一次），hover 只做色温变化不做位移。
+   色值全部经令牌（--blk 黑阶 / --gold-* + --primary 金系 / --line 发丝 /
+   --cw-fb-* 前后台 / --cw-rarity-* 费用），禁止裸彩色。
+   字体 --font-hud(Orbitron) 仅限数字/编号/REC·COST 标签位，正文禁大写追踪小字。
    BEM 前缀：nk-cwhub-*
-   反 AI 味硬约束：禁止霓虹 glow（0 0 阴影/发光 text-shadow）、禁止装饰字符、
-   div 合成装饰（K 线/粒子/扫光）已废弃 - 视觉资产 = 真实官方货币图标。
+   硬约束：禁止霓虹 glow(0 0 阴影/发光 text-shadow)、div 合成装饰（K 线/粒子/扫光）、
+   装饰字符、em-dash、装饰性 eyebrow；序号/收录数字 = 档案编号（数据锚点）允许使用。
+   圆角三档：卡片 = var(--nk-radius-card) / 内嵌 = calc(卡片 - 2px) / 标签·徽章 = 999px。
    ═══════════════════════════════════════════ */
 
 /* ── 容器：仿 catalog 布局，左侧避让侧栏（--nk-content-offset 令牌断点接管：
@@ -22,344 +28,447 @@
 #nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
 #nk-cwhub-app::-webkit-scrollbar-track { background: transparent; }
 
-/* ═══ 铸币名录滚动条：真实官方货币带（与铸币墙同源，唯一 marquee） ═══ */
-.nk-cwhub-ticker {
-  position: relative;
-  overflow: hidden;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--line-1);
-  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
-}
-.nk-cwhub-ticker__track {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  will-change: transform;
-  animation: nk-cwhub-ticker-scroll 46s linear infinite;
-}
-.nk-cwhub-ticker:hover .nk-cwhub-ticker__track { animation-play-state: paused; }
-.nk-cwhub-ticker__item {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 20px;
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  color: var(--text2);
-}
-.nk-cwhub-ticker__item + .nk-cwhub-ticker__item { border-left: 1px solid var(--line-1); }
-.nk-cwhub-ticker__item b { font-weight: 600; }
-@keyframes nk-cwhub-ticker-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
-
-/* ═══ 主视觉区：左文右「金库铸币墙」，底部结算单 ═══ */
+/* ═══ 档案头部：左超大排版（唯一 REC 标签）+ 右阵容档案表，全部静态直出 ═══ */
 .nk-cwhub-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
-  grid-template-rows: 1fr auto;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 460px);
   column-gap: 64px;
-  align-items: center;
+  align-items: start;
   min-height: 540px;
-  padding: 72px 48px 56px;
+  padding: 88px 48px 64px;
   border-bottom: 1px solid var(--line-1);
-}
-/* 顶部微金注入层（哑光，非霓虹；3% 封顶） */
-.nk-cwhub-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--gold-500) 3%, transparent) 0%, transparent 60%);
 }
 
 .nk-cwhub-hero__content { position: relative; z-index: 1; min-width: 0; }
-.nk-cwhub-hero__kicker {
+.nk-cwhub-hero__rec {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   font-family: var(--font-hud);
-  font-size: 0.62rem;
-  letter-spacing: 0.28em;
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
   color: var(--gold);
-  animation: nk-cwhub-fade-up 0.6s var(--ease) 0.05s backwards;
 }
-.nk-cwhub-hero__kicker::before {
+.nk-cwhub-hero__rec::before {
   content: '';
-  width: 18px;
+  width: 22px;
   height: 1px;
-  background: color-mix(in srgb, var(--primary) 60%, transparent);
+  background: color-mix(in srgb, var(--primary) 55%, transparent);
 }
 .nk-cwhub-hero__title {
-  margin: 16px 0 0;
-  font-size: clamp(2.6rem, 7vw, 4.6rem);
-  font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: 0.06em;
+  margin: 24px 0 0;
+  font-size: clamp(3rem, 8vw, 5.6rem);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: 0.04em;
   color: var(--text-bright);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  animation: nk-cwhub-fade-up 0.7s var(--ease) 0.15s backwards;
-}
-.nk-cwhub-hero__en {
-  margin-top: 10px;
-  font-family: var(--font-hud);
-  font-size: clamp(0.9rem, 2.4vw, 1.4rem);
-  font-weight: 700;
-  letter-spacing: 0.5em;
-  color: var(--primary);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  animation: nk-cwhub-fade-up 0.7s var(--ease) 0.28s backwards;
 }
 .nk-cwhub-hero__tagline {
-  margin: 22px 0 0;
-  max-width: 480px;
-  font-size: 0.86rem;
-  line-height: 1.85;
+  margin: 26px 0 0;
+  max-width: 440px;
+  font-size: 0.88rem;
+  line-height: 1.9;
   color: var(--text2);
-  animation: nk-cwhub-fade-up 0.7s var(--ease) 0.4s backwards;
 }
-@keyframes nk-cwhub-fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ── 金库铸币墙：3×3 官方货币铭牌 ── */
-.nk-cwhub-vault {
+/* ── 阵容档案表：4 前台（暖金带）+ 6 后台（冷蓝带），档案编号 01-10 ── */
+.nk-cwhub-ledger {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  padding: 22px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--nk-radius-card);
-  background: var(--card);
-  box-shadow: var(--nk-shadow-card), inset 0 1px 0 color-mix(in srgb, var(--text-bright) 6%, transparent);
+  justify-self: end;
+  width: 100%;
+  max-width: 460px;
+  margin-top: 30px;
+  padding: 20px 20px 16px;
+  border: 1px solid var(--line-1);
+  background: var(--surface);
 }
-.nk-cwhub-coin {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-  min-width: 0;
-  animation: nk-cwhub-fade-up 0.55s var(--ease) backwards;
-  animation-delay: calc(0.15s + var(--i, 0) * 40ms);
-}
-.nk-cwhub-coin__plate {
-  position: relative;
-  width: 74px;
-  height: 74px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: calc(var(--nk-radius-card) - 2px);
-  border: 1px solid var(--line-2);
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--blk-850) 90%, var(--gold-500) 3%),
-    color-mix(in srgb, var(--blk-900) 93%, var(--gold-500) 2%)
-  );
-  transition: transform 0.25s var(--ease), border-color 0.25s var(--ease);
-}
-/* 顶部发丝高光（内发光条，非霓虹外发光） */
-.nk-cwhub-coin__plate::before {
+/* 顶部发丝高光：全页唯一主金位（页面级高光，非霓虹外发光） */
+.nk-cwhub-ledger::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-bright) 24%, transparent) 50%, transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold-500) 45%, transparent) 50%, transparent);
 }
-.nk-cwhub-coin__plate img { width: 54px; height: 54px; object-fit: contain; display: block; }
-.nk-cwhub-coin:hover .nk-cwhub-coin__plate {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--text-bright) 28%, transparent);
+
+.nk-cwhub-ledger__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
 }
-.nk-cwhub-coin__id {
+.nk-cwhub-ledger__title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--text-bright);
+}
+.nk-cwhub-ledger__meta {
+  font-family: var(--font-hud);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+
+/* 带区列头（编号 / 单位 / 费用）：字段名示意，与槽位内部三焦点同位 */
+.nk-cwhub-ledger__zone + .nk-cwhub-ledger__zone { margin-top: 16px; }
+.nk-cwhub-ledger__cols {
+  display: grid;
+  grid-template-columns: 34px 1fr 24px;
+  gap: 8px;
+  padding: 0 4px 6px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-cwhub-ledger__col {
+  font-family: var(--font-hud);
+  font-size: 0.48rem;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+}
+.nk-cwhub-ledger__col--unit { text-align: center; }
+.nk-cwhub-ledger__col--cost { text-align: right; }
+
+/* 前后台槽位语义色（令牌事实：暖金 = 前台 / 冷靖蓝 = 后台，tokens.css 单一事实源） */
+.nk-cwhub-ledger__zone--front .nk-cwhub-ledger__cols { border-bottom-color: color-mix(in srgb, var(--cw-fb-front) 20%, transparent); }
+.nk-cwhub-ledger__zone--back .nk-cwhub-ledger__cols { border-bottom-color: color-mix(in srgb, var(--cw-fb-back) 16%, transparent); }
+
+.nk-cwhub-ledger__row {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  min-width: 0;
+}
+.nk-cwhub-ledger__zone--front .nk-cwhub-ledger__row { gap: 10px; }
+
+/* 账面式槽位：档案编号左上 + 费用徽章右上，hover 仅底色 wash（无上浮无发光） */
+.nk-cwhub-ledger__slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  flex: 1;
+  padding: 12px 4px 8px;
+  border: 1px solid var(--line-1);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.25s ease, border-color 0.25s ease;
+  animation: nk-cwhub-ledger-in 0.5s var(--ease) backwards;
+  animation-delay: calc(0.05s + var(--i, 0) * 45ms);
+}
+.nk-cwhub-ledger__zone--front .nk-cwhub-ledger__slot { border-color: color-mix(in srgb, var(--cw-fb-front) 26%, transparent); }
+.nk-cwhub-ledger__zone--back .nk-cwhub-ledger__slot { border-color: color-mix(in srgb, var(--cw-fb-back) 22%, transparent); }
+.nk-cwhub-ledger__slot:hover {
+  background: color-mix(in srgb, var(--text-bright) 4%, transparent);
+  border-color: color-mix(in srgb, var(--text-bright) 26%, transparent);
+}
+.nk-cwhub-ledger__slot:active { transform: scale(0.99); }
+@keyframes nk-cwhub-ledger-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.nk-cwhub-ledger__no {
+  position: absolute;
+  top: 5px;
+  left: 7px;
   font-family: var(--font-hud);
   font-size: 0.5rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.05em;
   color: var(--text3);
   font-variant-numeric: tabular-nums;
+  transition: color 0.25s;
 }
-.nk-cwhub-coin__name {
-  font-size: 0.7rem;
+.nk-cwhub-ledger__slot:hover .nk-cwhub-ledger__no { color: var(--gold); }
+
+.nk-cwhub-ledger__avatar {
+  width: 44px;
+  height: 44px;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--line-1);
+}
+.nk-cwhub-ledger__name {
+  max-width: 100%;
+  font-size: 0.56rem;
   color: var(--text2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
   transition: color 0.25s;
 }
-.nk-cwhub-coin:hover .nk-cwhub-coin__name { color: var(--text-bright); }
+.nk-cwhub-ledger__slot:hover .nk-cwhub-ledger__name { color: var(--text-bright); }
 
-/* ── 数据概览条：结算单式 5 列报价单元格（静态，无 hover 点亮） ── */
-.nk-cwhub-stats {
-  position: relative;
-  z-index: 1;
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1px;
-  margin-top: 56px;
-  border: 1px solid var(--line-1);
-  /* 顶部实金发丝：结算单栏头，唯一主高光位 */
-  border-top: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
-  border-radius: var(--nk-radius-card);
-  overflow: hidden;
-  background: var(--line-1);
-  box-shadow: var(--nk-shadow-card);
-  animation: nk-cwhub-fade-up 0.7s var(--ease) 0.52s backwards;
-}
-.nk-cwhub-stat {
+/* 费用徽章：招募费用（1-5 金币），单色底（--cw-rarity-*，禁渐变填充）——货币语义落点 */
+.nk-cwhub-ledger__cost {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 3px;
   display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 15px 18px 14px;
-  background: var(--surface);
-  animation: nk-cwhub-stat-in 0.55s var(--ease) calc(0.55s + var(--i) * 0.07s) backwards;
-}
-.nk-cwhub-stat__code {
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
   font-family: var(--font-hud);
-  font-size: 0.5rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  color: var(--text3);
-}
-.nk-cwhub-stat__val {
-  font-family: var(--font-hud);
-  font-size: 1.6rem;
+  font-size: 0.55rem;
   font-weight: 700;
-  line-height: 1;
-  color: var(--metric-val);
+  color: var(--blk-900);
+  border: 1px solid color-mix(in srgb, var(--blk-900) 60%, transparent);
+  box-sizing: content-box;
   font-variant-numeric: tabular-nums;
 }
-.nk-cwhub-stat__label {
-  font-size: 0.64rem;
-  letter-spacing: 0.14em;
-  color: var(--text3);
-}
-@keyframes nk-cwhub-stat-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.nk-cwhub-ledger__cost.is-1 { background: var(--cw-rarity-1); }
+.nk-cwhub-ledger__cost.is-2 { background: var(--cw-rarity-2); }
+.nk-cwhub-ledger__cost.is-3 { background: var(--cw-rarity-3); }
+.nk-cwhub-ledger__cost.is-4 { background: var(--cw-rarity-4); }
+.nk-cwhub-ledger__cost.is-5 { background: var(--cw-rarity-5); }
 
-/* ═══ 五大板块入口：不对称网格（左大卡 2 行 + 右侧 2×2 小卡），无 eyebrow ═══ */
-.nk-cwhub-sections { max-width: var(--nk-content-max); margin: 0 auto; padding: 56px 48px 0; }
-.nk-cwhub-sections__bar {
-  height: 1px;
-  margin-bottom: 32px;
-  background: linear-gradient(90deg, var(--line-2), transparent 70%);
-}
-.nk-cwhub-sections__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 148px;
-  gap: 14px;
-}
-
-/* 板块卡片：墨色分层阴影 + 发丝边框，hover 仅边框提亮 + 箭头右滑 */
-.nk-cwhub-card {
-  position: relative;
-  isolation: isolate;
+/* 费用注脚：白绿蓝紫金（招募费用语义，本页货币语义辅助落点） */
+.nk-cwhub-ledger__legend {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 18px;
-  border: 1px solid var(--line-1);
-  border-radius: var(--nk-radius-card);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-cwhub-ledger__legend-cap {
+  font-family: var(--font-hud);
+  font-size: 0.46rem;
+  letter-spacing: 0.24em;
+  color: var(--text3);
+  margin-right: 2px;
+}
+.nk-cwhub-ledger__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-hud);
+  font-size: 0.54rem;
+  letter-spacing: 0.04em;
+  color: var(--text3);
+  font-variant-numeric: tabular-nums;
+}
+.nk-cwhub-ledger__dot {
+  width: 6px;
+  height: 6px;
+  display: block;
+  border-radius: 50%;
+}
+.nk-cwhub-ledger__dot.is-1 { background: var(--cw-rarity-1); }
+.nk-cwhub-ledger__dot.is-2 { background: var(--cw-rarity-2); }
+.nk-cwhub-ledger__dot.is-3 { background: var(--cw-rarity-3); }
+.nk-cwhub-ledger__dot.is-4 { background: var(--cw-rarity-4); }
+.nk-cwhub-ledger__dot.is-5 { background: var(--cw-rarity-5); }
+
+/* ═══ 板块索引：目录行 01-05，发丝间隔，收录计数并入行尾（无独立统计条） ═══ */
+.nk-cwhub-index { max-width: var(--nk-content-max); margin: 0 auto; padding: 60px 48px 0; }
+
+.nk-cwhub-index__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 76px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--line-1);
   text-decoration: none;
   color: var(--text);
-  overflow: hidden;
-  cursor: pointer;
-  background: var(--card);
-  box-shadow: var(--nk-shadow-card);
-  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
-  animation: nk-cwhub-card-in 0.5s var(--ease) backwards;
-  animation-delay: calc(0.1s + var(--i, 0) * 70ms);
+  transition: background 0.25s ease;
 }
-@keyframes nk-cwhub-card-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-.nk-cwhub-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--text-bright) 22%, transparent);
-  box-shadow: var(--nk-shadow-lift);
-}
-/* 已上线板块（featured）：左侧大卡占 2 行，金色边框为该位置唯一高亮 */
-.nk-cwhub-card--featured {
-  grid-row: span 2;
-  border-color: color-mix(in srgb, var(--gold-500) 40%, transparent);
-}
-.nk-cwhub-card--featured .nk-cwhub-card__cn { font-size: 1.4rem; }
-.nk-cwhub-card--featured .nk-cwhub-card__icon { width: 56px; height: 56px; }
-.nk-cwhub-card--featured .nk-cwhub-card__icon svg { width: 28px; height: 28px; }
-.nk-cwhub-card--featured .nk-cwhub-card__desc { -webkit-line-clamp: 3; white-space: normal; }
+.nk-cwhub-index__row:last-child { border-bottom: 1px solid var(--line-1); }
+.nk-cwhub-index__row:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
+.nk-cwhub-index__row:active { transform: scale(0.995); }
 
-/* LIVE / SOON 角标：实语义状态（板块上线与否），无外发光 */
-.nk-cwhub-card__badge {
-  position: absolute;
-  top: 14px; right: 14px;
-  z-index: 3;
+/* 主目录行（角色图鉴）：加高 + 左侧金刻条（档案首条目的层级位，唯一金线） */
+.nk-cwhub-index__row--lead {
+  min-height: 118px;
+  border-top-color: color-mix(in srgb, var(--gold-500) 45%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--gold-500) 55%, transparent);
+}
+
+.nk-cwhub-index__no {
   font-family: var(--font-hud);
-  font-size: 0.5rem;
+  font-size: 0.84rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid;
+  color: var(--text3);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.25s;
 }
-.nk-cwhub-card__badge.is-live { color: var(--blk-900); background: var(--gold); border-color: var(--gold); }
-.nk-cwhub-card__badge.is-soon { color: var(--text3); background: transparent; border-color: var(--line-2); }
+.nk-cwhub-index__row:hover .nk-cwhub-index__no { color: var(--gold); }
 
-.nk-cwhub-card__icon {
-  width: 44px;
-  height: 44px;
+.nk-cwhub-index__icon {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: calc(var(--nk-radius-card) - 2px);
-  background: var(--surface);
   border: 1px solid var(--line-2);
+  background: var(--surface);
   color: var(--gold);
 }
-.nk-cwhub-card__icon svg { width: 22px; height: 22px; }
+.nk-cwhub-index__icon svg { width: 20px; height: 20px; }
+.nk-cwhub-index__row--lead .nk-cwhub-index__icon { width: 48px; height: 48px; }
+.nk-cwhub-index__row--lead .nk-cwhub-index__icon svg { width: 24px; height: 24px; }
 
-.nk-cwhub-card__body { position: relative; z-index: 2; min-width: 0; }
-.nk-cwhub-card__cn { font-size: 1rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
-.nk-cwhub-card__en { font-family: var(--font-hud); font-size: 0.52rem; font-weight: 500; letter-spacing: 0.16em; color: var(--primary); margin-top: 3px; }
-.nk-cwhub-card__desc { font-size: 0.7rem; line-height: 1.5; color: var(--text3); margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.nk-cwhub-card__arrow {
-  width: 18px;
-  height: 18px;
-  align-self: flex-end;
+.nk-cwhub-index__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.nk-cwhub-index__cn {
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
+}
+.nk-cwhub-index__row--lead .nk-cwhub-index__cn { font-size: 1.3rem; }
+.nk-cwhub-index__en {
+  font-family: var(--font-hud);
+  font-size: 0.5rem;
+  letter-spacing: 0.18em;
+  color: var(--primary);
+}
+.nk-cwhub-index__desc {
+  margin-top: 3px;
+  font-size: 0.7rem;
   color: var(--text3);
-  position: relative;
-  z-index: 2;
-  transition: transform 0.25s var(--ease), color 0.25s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.nk-cwhub-card:hover .nk-cwhub-card__arrow { transform: translateX(4px); color: var(--gold); }
+.nk-cwhub-index__row--lead .nk-cwhub-index__desc {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
-/* ═══ 赛季扩充说明：纯排版，无金条/胶囊/装饰点 ═══ */
-.nk-cwhub-season { max-width: var(--nk-content-max); margin: 0 auto; padding: 64px 48px 0; }
-.nk-cwhub-season__bar {
-  height: 1px;
-  margin-bottom: 32px;
-  background: linear-gradient(90deg, var(--line-2), transparent 70%);
+.nk-cwhub-index__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-family: var(--font-hud);
+  white-space: nowrap;
 }
-.nk-cwhub-season__card {
-  padding: 30px 32px 32px;
-  border: 1px solid var(--line-1);
-  border-radius: var(--nk-radius-card);
+.nk-cwhub-index__count {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--metric-val);
+  font-variant-numeric: tabular-nums;
+}
+.nk-cwhub-index__meta-label {
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+}
+
+/* ═══ 玩法机制导览：横向泳道（真实分布徽章取前 2 项 + 省略号，竖发丝分隔） ═══ */
+.nk-cwhub-rail { max-width: var(--nk-content-max); margin: 0 auto; padding: 64px 48px 0; }
+.nk-cwhub-rail__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-top: 1px solid var(--line-1);
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-cwhub-rail__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 156px;
+  padding: 18px 16px;
+  border-right: 1px solid var(--line-1);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.25s ease;
+}
+.nk-cwhub-rail__cell:first-child { border-left: 1px solid var(--line-1); }
+.nk-cwhub-rail__cell:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
+.nk-cwhub-rail__cell:active { transform: scale(0.99); }
+
+.nk-cwhub-rail__icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  padding: 3px;
+  object-fit: contain;
+  border-radius: calc(var(--nk-radius-card) - 2px);
+  border: 1px solid var(--line-2);
   background: var(--surface);
-  box-shadow: var(--nk-shadow-card);
-  animation: nk-cwhub-card-in 0.5s var(--ease) 0.1s backwards;
 }
-.nk-cwhub-season__card + .nk-cwhub-season__card { margin-top: 14px; }
+.nk-cwhub-rail__body { display: flex; flex-direction: column; min-width: 0; }
+.nk-cwhub-rail__label {
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
+}
+.nk-cwhub-rail__desc {
+  margin-top: 3px;
+  font-size: 0.66rem;
+  line-height: 1.55;
+  color: var(--text3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nk-cwhub-rail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+.nk-cwhub-rail__badge {
+  font-family: var(--font-hud);
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.nk-cwhub-rail__badge--more { color: var(--text3); }
+
+/* ═══ 赛季扩充说明：发丝分组纯排版（无卡片容器），标题下金发丝为页面次高光 ═══ */
+.nk-cwhub-season { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 48px 0; }
+.nk-cwhub-season__card { padding: 8px 0 10px; }
+.nk-cwhub-season__card + .nk-cwhub-season__card {
+  margin-top: 52px;
+  padding-top: 48px;
+  border-top: 1px solid var(--line-1);
+}
 .nk-cwhub-season__title {
-  margin: 0 0 20px;
-  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  margin: 0 0 26px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--gold-500) 30%, transparent);
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
   font-weight: 800;
   line-height: 1.3;
   letter-spacing: 0.02em;
   color: var(--text-bright);
+}
+
+/* 双栏：左侧正文散文 + 右侧「扩充内容概览」（发丝左线分区） */
+.nk-cwhub-season__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 40px;
+  align-items: start;
 }
 .nk-cwhub-season__body {
   display: flex;
@@ -369,17 +478,9 @@
 }
 .nk-cwhub-season__body p {
   margin: 0;
-  font-size: clamp(0.82rem, 1.6vw, 0.94rem);
-  line-height: 1.95;
+  font-size: clamp(0.83rem, 1.6vw, 0.95rem);
+  line-height: 2;
   color: var(--text2);
-}
-
-/* ── 双栏：左侧正文散文 + 右侧「扩充内容概览」（发丝左线分区） ── */
-.nk-cwhub-season__cols {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: 36px;
-  align-items: start;
 }
 .nk-cwhub-season__overview {
   min-width: 0;
@@ -393,15 +494,20 @@
   letter-spacing: 0.05em;
   color: var(--text-bright);
 }
-.nk-cwhub-season__ov-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.nk-cwhub-season__ov-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .nk-cwhub-season__ov-item {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  animation: nk-cwhub-fade-up 0.5s var(--ease) backwards;
-  animation-delay: calc(0.25s + var(--i, 0) * 55ms);
 }
-/* 行首金色刻条（2×10 刻度，非圆形装饰点） */
+/* 行首金色刻条（2×10 刻度，档案 tick 非圆形装饰点） */
 .nk-cwhub-season__ov-item::before {
   content: '';
   flex-shrink: 0;
@@ -420,7 +526,7 @@
 /* ── 页脚 ── */
 .nk-cwhub-footer {
   max-width: var(--nk-content-max);
-  margin: 64px auto 0;
+  margin: 72px auto 0;
   padding: 20px 48px;
   text-align: center;
   font-family: var(--font-hud);
@@ -434,52 +540,84 @@
 @media (max-width: 1023px) {
   .nk-cwhub-hero {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
     row-gap: 40px;
-    padding: 56px 40px 44px;
+    padding: 64px 40px 48px;
+    min-height: 0;
   }
-  .nk-cwhub-vault { justify-self: center; min-width: 0; width: min(400px, 100%); }
-  .nk-cwhub-stats { margin-top: 0; }
-  .nk-cwhub-sections__grid { grid-template-columns: repeat(2, 1fr); }
-  .nk-cwhub-card--featured { grid-column: span 2; grid-row: span 1; }
-  .nk-cwhub-season__cols { grid-template-columns: 1fr; gap: 24px; }
+  .nk-cwhub-ledger { justify-self: start; max-width: 480px; margin-top: 0; }
+  .nk-cwhub-index { padding: 48px 40px 0; }
+  .nk-cwhub-rail { padding: 52px 40px 0; }
+  .nk-cwhub-rail__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .nk-cwhub-rail__cell:nth-child(3n) { border-right: none; }
+  /* 每行首格带左边线（含第二行首格），与首格外框线同位 */
+  .nk-cwhub-rail__cell:nth-child(3n + 1) { border-left: 1px solid var(--line-1); }
+  .nk-cwhub-season { padding: 56px 40px 0; }
+  .nk-cwhub-season__cols { grid-template-columns: 1fr; gap: 26px; }
   .nk-cwhub-season__overview { padding-left: 0; padding-top: 20px; border-left: none; border-top: 1px solid var(--line-2); }
 }
 @media (max-width: 767px) {
   /* 移动端：侧栏降级为底部 Tab Bar，释放左侧预留，底部避开导航条 */
   #nk-cwhub-app { padding: 0 0 calc(80px + env(safe-area-inset-bottom, 0px)) 0; }
-  .nk-cwhub-hero { min-height: 0; padding: 40px 20px 32px; row-gap: 32px; }
-  .nk-cwhub-vault { padding: 14px; gap: 10px; width: min(360px, 100%); }
-  .nk-cwhub-coin__plate { width: 60px; height: 60px; }
-  .nk-cwhub-coin__plate img { width: 44px; height: 44px; }
-  .nk-cwhub-coin__name { font-size: 0.62rem; }
-  .nk-cwhub-stats { grid-template-columns: repeat(5, 1fr); }
-  .nk-cwhub-stat { padding: 12px 8px 11px; gap: 5px; }
-  .nk-cwhub-stat__code { display: none; }
-  .nk-cwhub-stat__val { font-size: 1.05rem; }
-  .nk-cwhub-stat__label { font-size: 0.52rem; letter-spacing: 0.08em; }
-  .nk-cwhub-ticker { height: 30px; }
-  .nk-cwhub-ticker__item { padding: 0 14px; font-size: 0.6rem; }
-  .nk-cwhub-sections { padding: 40px 20px 0; }
-  .nk-cwhub-sections__grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
-  .nk-cwhub-card { min-height: 132px; }
-  .nk-cwhub-card--featured { grid-column: span 1; }
-  .nk-cwhub-card__desc { white-space: normal; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
-  .nk-cwhub-season { padding: 44px 20px 0; }
-  .nk-cwhub-season__card { padding: 22px 18px 24px; }
-  .nk-cwhub-footer { margin-top: 48px; padding: 18px 20px; }
+  .nk-cwhub-hero { padding: 44px 20px 36px; row-gap: 34px; }
+  .nk-cwhub-hero__title { font-size: clamp(2.6rem, 13vw, 3.6rem); }
+  .nk-cwhub-hero__tagline { font-size: 0.84rem; }
+
+  .nk-cwhub-ledger { padding: 16px 14px 14px; }
+  .nk-cwhub-ledger__cols { grid-template-columns: 30px 1fr 20px; }
+  .nk-cwhub-ledger__row { gap: 6px; }
+  .nk-cwhub-ledger__zone--front .nk-cwhub-ledger__row { gap: 8px; }
+  .nk-cwhub-ledger__slot { padding: 10px 2px 7px; }
+  .nk-cwhub-ledger__avatar { width: 38px; height: 38px; }
+  .nk-cwhub-ledger__name { font-size: 0.5rem; }
+  .nk-cwhub-ledger__meta { display: none; }
+
+  .nk-cwhub-index { padding: 40px 20px 0; }
+  .nk-cwhub-index__row {
+    grid-template-columns: 32px 40px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px 14px;
+    min-height: 72px;
+  }
+  .nk-cwhub-index__row--lead { min-height: 108px; }
+  .nk-cwhub-index__no { font-size: 0.74rem; }
+  .nk-cwhub-index__icon { width: 36px; height: 36px; }
+  .nk-cwhub-index__icon svg { width: 18px; height: 18px; }
+  .nk-cwhub-index__row--lead .nk-cwhub-index__icon { width: 42px; height: 42px; }
+  .nk-cwhub-index__row--lead .nk-cwhub-index__icon svg { width: 22px; height: 22px; }
+  .nk-cwhub-index__cn { font-size: 0.94rem; }
+  .nk-cwhub-index__row--lead .nk-cwhub-index__cn { font-size: 1.16rem; }
+  .nk-cwhub-index__desc { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .nk-cwhub-index__count { font-size: 0.95rem; }
+  .nk-cwhub-index__meta-label { display: none; }
+
+  /* 泳道移动端降级为横向滚动条（snap 逐格吸附，2 组半屏滑动） */
+  .nk-cwhub-rail { padding: 44px 0 0; overflow: hidden; }
+  .nk-cwhub-rail__grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    border-top: 1px solid var(--line-1);
+    border-bottom: 1px solid var(--line-1);
+  }
+  .nk-cwhub-rail__grid::-webkit-scrollbar { display: none; }
+  .nk-cwhub-rail__cell {
+    flex: 0 0 148px;
+    min-height: 148px;
+    scroll-snap-align: start;
+    border-left: 1px solid var(--line-1);
+    border-right: none;
+  }
+  .nk-cwhub-rail__cell:first-child { border-left: 1px solid var(--line-1); }
+
+  .nk-cwhub-season { padding: 48px 20px 0; }
+  .nk-cwhub-season__card + .nk-cwhub-season__card { margin-top: 40px; padding-top: 36px; }
+  .nk-cwhub-season__title { padding-bottom: 12px; margin-bottom: 20px; }
+  .nk-cwhub-footer { margin-top: 52px; padding: 18px 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nk-cwhub-ticker__track,
-  .nk-cwhub-hero__kicker,
-  .nk-cwhub-hero__title,
-  .nk-cwhub-hero__en,
-  .nk-cwhub-hero__tagline,
-  .nk-cwhub-coin,
-  .nk-cwhub-stats,
-  .nk-cwhub-stat,
-  .nk-cwhub-card,
-  .nk-cwhub-season__card,
-  .nk-cwhub-season__ov-item { animation: none; }
+  .nk-cwhub-ledger__slot { animation: none; }
+  .nk-cwhub-index__row,
+  .nk-cwhub-rail__cell,
+  .nk-cwhub-ledger__slot { transition: none; }
 }

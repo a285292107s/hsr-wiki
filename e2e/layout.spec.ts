@@ -61,10 +61,10 @@ test.describe('布局验收：货币战争主题', () => {
     await page.goto('/currency');
     // meta.cw → <html data-theme="cw">
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'cw');
-    // CW Hub 导航（SECTORS 板块卡）
+    // CW Hub 导航（索引目录行，5 板块全部上线）
     await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
-    const sectionCards = await page.locator('.nk-cwhub-card').count();
-    expect(sectionCards).toBeGreaterThanOrEqual(3);
+    const sectionCards = await page.locator('.nk-cwhub-index__row').count();
+    expect(sectionCards).toBeGreaterThanOrEqual(5);
     expect(await findHorizontalOverflow(page)).toEqual([]);
     assertNoErrors();
   });

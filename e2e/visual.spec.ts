@@ -76,7 +76,7 @@ test.describe('视觉基线', () => {
     await page.goto('/currency');
     await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
     await waitImages(page);
-    // ticker 是无限动画，动画冻结后帧稳定
+    // 战术棋盘槽位/统计数字滚动为入场动画，动画冻结后帧稳定
     await expect(page).toHaveScreenshot('currency.png', { maxDiffPixelRatio: 0.05, animations: 'disabled' });
   });
 });
