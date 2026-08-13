@@ -204,7 +204,6 @@
 @keyframes nk-card-sheen { 0%, 6% { opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); } 24% { opacity: 0.5; } 52% { opacity: 0.68; } 80% { opacity: 0.48; } 100% { opacity: 0; transform: translate3d(430%,0,0) rotate(-22deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: none; opacity: 0.12; transform: translate3d(215%,0,0); will-change: auto; }
   /* 禁用所有卡片入场动画 */
   .nk-idx-card, .nk-lc-card, .nk-relic-card, .nk-item-card, .nk-mob-card { animation: none; }
   .nk-idx-card:hover::before { height: 0; opacity: 0; }
@@ -220,66 +219,47 @@
 .nk-cat-empty__sub { font-size: 0.72rem; color: var(--text3); opacity: 0.7; }
 
 /* ═══════════════════════════════════════════
-   光锥列表页
+   光锥列表页 · 典藏画架（Curator Rack）
+   反霓虹语言：无扫光、无辉光投影、无倾斜放大。
+   与遗器页同族：稀有度色相微染 + 发丝线画框 + hover 克制抬升与名字转色。
+   立绘完整呈现（官方相框白边是画面的一部分），画框发丝线叠加其外缘作为唯一描边。
 ═══════════════════════════════════════════ */
-.nk-lc-grid { --nk-grid-min: 150px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-/* 静止态：完全无框。仅图片自身的倾斜玻璃相框是唯一视觉边界。overflow:visible 让 drop-shadow（基于图片 alpha 轮廓投影）不被裁剪 */
-.nk-lc-card { position: relative; background: transparent; border: 1px solid transparent; overflow: visible; cursor: pointer; text-decoration: none; display: block; transition: transform 0.25s var(--ease), filter 0.25s var(--ease), box-shadow 0.25s var(--ease); animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 20ms), 600ms); }
-/* :focus-visible 键盘态：仅 3px 紫色 focus ring（无障碍 §1 规范），不加抬升/柔光，避免与图片框叠加 */
-.nk-lc-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
-/* Hover：仅 hover 精细设备生效。用 filter:drop-shadow() 替代 box-shadow → 阴影/光晕基于图片 alpha 轮廓（倾斜+切角形状）投影，而不是矩形 DOM 盒 → 光晕形状与图片相框完全同心同方向同切角，不会构成矩形"第二个画框" */
+.nk-lc-grid { --nk-grid-min: 160px; --nk-grid-gap: 16px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
+/* 稀有度色相：单一来源（--lc-r），供画框/名签/底部微染共享；随 data-rarity 驱动 */
+.nk-lc-card[data-rarity='3'] { --lc-r: var(--rarity-3); }
+.nk-lc-card[data-rarity='4'] { --lc-r: var(--rarity-4); }
+.nk-lc-card[data-rarity='5'] { --lc-r: var(--rarity-5); }
+/* 静止态：完全无框无底，立绘是唯一视觉主体；仅 hover 浮现画框发丝线（无辉光） */
+.nk-lc-card { position: relative; background: transparent; border: none; overflow: visible; cursor: pointer; text-decoration: none; display: block; transition: transform 0.28s var(--ease); animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 18ms), 540ms); }
+/* :focus-visible 键盘态：3px 紫色 focus ring（无障碍 §1 规范），不加抬升/柔光 */
+.nk-lc-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); border-radius: 6px; }
+/* hover：仅 hover 精细设备生效。克制抬升 + 画框发丝线转稀有度色 + 立绘 4% 缓动 + 名字转色 */
 @media (hover: hover) and (pointer: fine) {
-  /* 定向景深辉光（墨色分层）：单一顶部光源 → 光不对称 ——
-     ① 黑色物理投影（更低更远，浮起感）
-     ② 落地色染（偏移 9px 偏下：光从上方来，环境反射集中于卡面下方）
-     ③ 贴边微光（≤10px、浓度 ≤24%：轮廓 rim light，亮度优先于色相）
-     删除原 36/64px 远距离同心色雾层（霓虹灯管廉价感来源） */
-  .nk-lc-card:hover { transform: translateY(-5px) scale(1.025); filter: drop-shadow(0 18px 22px rgba(0,0,0,0.55)) drop-shadow(0 9px 18px var(--holo-tint)) drop-shadow(0 0 9px var(--holo-core)); }
-  .nk-lc-card:hover .nk-lc-card__img img.lc-avatar { transform: scale(1.16); }
-  .nk-lc-card:hover .nk-lc-card__badge img { transform: scale(1.1); }
+  .nk-lc-card:hover { transform: translateY(-3px); }
+  .nk-lc-card:hover .nk-lc-card__img::after { border-color: color-mix(in srgb, var(--lc-r, var(--rarity-5)) 70%, transparent); }
+  .nk-lc-card:hover .nk-lc-card__img img.lc-avatar { transform: scale(1.04); }
+  .nk-lc-card:hover .nk-lc-card__name { color: var(--lc-r, var(--rarity-5)); }
+  .nk-lc-card:hover .nk-lc-card__badge img { transform: scale(1.08); }
 }
-/* 辉光统一：所有星级共用同一中性暖砖红辉光（稀有度差异由星标等语义渠道表达，辉光不参与分级） */
-.nk-lc-card { --holo-core: color-mix(in srgb, var(--th-400) 22%, transparent); --holo-tint: color-mix(in srgb, var(--th-700) 38%, transparent); }
-/* 图片区背景透明。isolation:isolate 保持 sheen-wrap::before 的 mix-blend-mode:screen 与下层隔离；overflow:visible 保证外层卡片 drop-shadow 不受裁剪（filter 在 .nk-lc-card hover 上） */
+/* 图片区：3:4 画芯，立绘含官方相框以 contain 呈现；padding 为相框留呼吸（无裁切无放大） */
 .nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: visible; isolation: isolate; }
-/* 加载骨架：图片未就绪时显示 shimmer，加载完成后（img.loaded）淡出；不引入矩形底，避免双层相框 */
-.nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 5; border-radius: 0; transition: opacity 0.35s ease; }
+/* 画框发丝线：位于画芯外缘，静态与透明立绘背景融为一体，hover 时转稀有度色 */
+.nk-lc-card__img::after { content: ''; position: absolute; inset: 0; z-index: 3; border: 1px solid var(--line-1); border-radius: 6px; pointer-events: none; transition: border-color 0.28s var(--ease); }
+/* 加载骨架：图片未就绪时显示 shimmer，加载完成后（img.loaded）淡出；无矩形底，避免双层画框 */
+.nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 5; border-radius: 6px; transition: opacity 0.35s ease; }
 .nk-lc-card__img img.loaded ~ .nk-lc-card__shimmer { opacity: 0; pointer-events: none; }
-/* 光锥图片 z-index:1 作为最底层，扫光（z-index:2）在图片上方掠过 → 玻璃反光效果 */
-.nk-lc-card__img img.lc-avatar { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; padding: 6px; transform: scale(1.12); transform-origin: center center; transition: transform 0.3s var(--ease); }
-/* sheen-wrap：与光锥 PNG 相框倾斜角度/大小/位置一致的倾斜裁剪容器
-   - 光锥 PNG：3:4 画布，相框白底是四角 45° 切角的倾斜矩形（占图 92-93%），内艺术图再 11° 顺时针倾斜
-   - 旋转角度：rotate(11deg) 与相框内艺术图的倾斜同向
-   - 缩放：transform 追加 scale(1.12)，与图片 img 的 scale(1.12) 同步，使容器随放大后的画面外扩、始终贴合相框边缘
-   - 尺寸与位置：inset:9% 9.5% 为缩放前的设计内收值（缩放前约占内容盒 81% 宽 / 82% 高）；overflow:hidden 负责把超出相框的扫光立刻裁掉
-   - pointer-events:none：不拦截点击
-   - z-index:2：扫光在图片(z=1)上方（玻璃反光），在徽章/信息/骨架(z=3/4)下方 */
-.nk-lc-card__sheen-wrap { position: absolute; inset: 9% 9.5%; z-index: 2; overflow: hidden; pointer-events: none; transform: rotate(11deg) scale(1.12); transform-origin: center center;
-  /* 羽化裁切边缘：扫光带沿相框矩形边被 overflow 硬裁后会在边缘形成生硬分割线；
-     用四周渐隐的 mask（两方向渐变相交）让光带在接近边线时平滑消隐，消除硬边 */
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
-  mask-composite: intersect; }
-/* sheen-wrap::before（扫光）：扫光相对倾斜容器水平滑入滑出（不再 rotate），容器本身 rotate(11°) = 视觉上扫光沿相框倾斜长边方向滑行
-   - 宽度 46% × 高度 180%：与角色卡片扫光带宽度一致（光带厚度统一）；高度 180% 仍覆盖倾斜容器的完整对角线（≈ 220px）
-   - 入场 left:-70%：从相框左上切角外侧进入
-   - 动画终点 translate3d(430%…）：从相框右下切角外侧离开 */
-.nk-lc-card__sheen-wrap::before { content: ""; position: absolute; width: 46%; height: 180%; top: -40%; left: -70%; z-index: 1; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--holo-core, var(--th-400)) 8%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--holo-core, var(--th-400)) 8%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px) saturate(1.08); opacity: 0; backface-visibility: hidden; transform: translate3d(0,0,0); }
-@media (hover: hover) and (pointer: fine) {
-  .nk-lc-card:hover .nk-lc-card__sheen-wrap::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; will-change: transform, opacity; }
-}
-/* 命途徽章 z-index:4 → 不被扫光遮挡 */
+/* 立绘：无放大无倾斜；hover 由父级驱动 scale(1.04) */
+.nk-lc-card__img img.lc-avatar { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; padding: 4px; transform: none; transform-origin: center center; transition: transform 0.3s var(--ease); }
+/* 命途徽章 z-index:4 → 不被发丝线遮挡 */
 .nk-lc-card__badge { position: absolute; top: 8px; right: 8px; z-index: 4; }
-/* 徽章：背景透明无边框（hairline 0.08 在深色背景下仍能被感知成"小圆画框"），仅保留阴影确保图标在亮色区域上仍清晰 */
+/* 徽章：背景透明无边框，仅保留阴影确保图标在亮色区域上仍清晰 */
 .nk-lc-card__badge img { width: 22px; height: 22px; border-radius: 50%; background: transparent; border: none; padding: 2px; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); box-shadow: 0 1px 5px rgba(0,0,0,0.35); }
-.nk-lc-card__info { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 12px 11px; }
+/* 名签：底部稀有度色相微染 + 黑色渐隐承接文字可读性（渐变即分隔，不画横线以免横切卡面） */
+.nk-lc-card__info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 13px 12px 11px; background: linear-gradient(to top, color-mix(in srgb, var(--lc-r, var(--rarity-5)) 16%, transparent) 0%, color-mix(in srgb, var(--blk-900) 72%, transparent) 22%, transparent 64%); }
 .nk-lc-card__stars { font-size: 0.66rem; letter-spacing: 2px; color: var(--gold); text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-5) 50%, transparent); line-height: 1; }
-.nk-lc-card__name { font-size: 0.82rem; font-weight: 700; line-height: 1.25; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
+.nk-lc-card__name { font-size: 0.82rem; font-weight: 700; line-height: 1.25; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); transition: color 0.28s var(--ease); }
+/* 技能名小字（HUD 字体、低对比档案感；数据源 skill_name） */
+.nk-lc-card__skill { font-family: var(--font-hud); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.08em; color: var(--text3); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 /* ═══════════════════════════════════════════
    遗器列表页 · 典藏图鉴（Artifact Vault）

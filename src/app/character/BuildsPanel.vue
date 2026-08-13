@@ -182,7 +182,6 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
           <div v-if="c.pathImg" class="nk-lc-card__badge">
             <img :src="c.pathImg" :alt="c.path">
           </div>
-          <div class="nk-lc-card__sheen-wrap" aria-hidden="true"></div>
           <div class="nk-lc-card__info">
             <span class="nk-lc-card__stars">{{ c.stars }}</span>
             <span class="nk-lc-card__name">{{ c.name }}</span>

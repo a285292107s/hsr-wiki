@@ -200,7 +200,7 @@ onBeforeUnmount(() => {
     <template v-else-if="d">
       <!-- Hero -->
       <div class="nk-hero nk-hero--lc">
-        <div class="nk-hero__visual">
+        <div class="nk-hero__visual" :data-rarity="d.rarity">
           <div
             class="nk-hero__bg nk-hero__bg--lc"
             :style="{ backgroundImage: `url(${figureUrl})` }"
@@ -304,41 +304,42 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- 晋阶属性 -->
+          <!-- 晋阶属性：阶段卡片网格（每阶段一张典藏卡：等级上限大字 + 三属 + 突破材料） -->
           <template v-if="statRows.length">
             <div class="nk-title">ASCENSION</div>
-            <div class="nk-lc-asc-table-wrap">
-              <table class="nk-lc-asc-table">
-                <thead>
-                  <tr>
-                    <th>突破</th>
-                    <th>等级上限</th>
-                    <th>HP</th>
-                    <th>ATK</th>
-                    <th>DEF</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="row in statRows" :key="row.phase">
-                    <td class="nk-lc-asc-table__phase">{{ row.phase }}</td>
-                    <td>Lv. {{ row.maxLevel }}</td>
-                    <td>{{ row.hp }}</td>
-                    <td>{{ row.atk }}</td>
-                    <td>{{ row.def }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <!-- 晋阶材料 -->
-            <div class="nk-lc-costs">
+            <div class="nk-lc-asc-grid">
               <div
-                v-for="row in statRows.filter(r => r.cost.length)"
-                :key="`cost-${row.phase}`"
-                class="nk-lc-cost"
+                v-for="row in statRows"
+                :key="row.phase"
+                class="nk-lc-phase"
+                :class="{ 'nk-lc-phase--max': row.phase === statRows[statRows.length - 1].phase }"
+                :data-rarity="d.rarity"
               >
-                <span class="nk-lc-cost__phase">突破 {{ row.phase }}</span>
-                <div class="nk-lc-cost__items">
-                  <span v-for="c in row.cost" :key="c.id" class="nk-lc-cost__item" :title="c.name">
+                <div class="nk-lc-phase__head">
+                  <span class="nk-lc-phase__idx">突破 {{ row.phase }}</span>
+                  <span class="nk-lc-phase__lv">Lv. {{ row.maxLevel }}</span>
+                </div>
+                <div class="nk-lc-phase__stats">
+                  <div class="nk-lc-phase__stat">
+                    <span class="nk-lc-phase__stat-label">HP</span>
+                    <span class="nk-lc-phase__stat-val">{{ row.hp.toLocaleString() }}</span>
+                  </div>
+                  <div class="nk-lc-phase__stat">
+                    <span class="nk-lc-phase__stat-label">ATK</span>
+                    <span class="nk-lc-phase__stat-val">{{ row.atk.toLocaleString() }}</span>
+                  </div>
+                  <div class="nk-lc-phase__stat">
+                    <span class="nk-lc-phase__stat-label">DEF</span>
+                    <span class="nk-lc-phase__stat-val">{{ row.def.toLocaleString() }}</span>
+                  </div>
+                </div>
+                <div v-if="row.cost.length" class="nk-lc-phase__cost">
+                  <span
+                    v-for="c in row.cost"
+                    :key="c.id"
+                    class="nk-lc-phase__cost-item"
+                    :title="c.name"
+                  >
                     <img
                       v-if="c.id !== 2"
                       :src="cdnUri('itemfigures', `${c.id}.webp`)"
@@ -346,10 +347,11 @@ onBeforeUnmount(() => {
                       loading="lazy"
                       @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
                     >
-                    <span v-else class="nk-lc-cost__credit">¤</span>
-                    <span class="nk-lc-cost__num">×{{ c.num.toLocaleString() }}</span>
+                    <span v-else class="nk-lc-phase__credit">¤</span>
+                    <span class="nk-lc-phase__cost-num">×{{ c.num.toLocaleString() }}</span>
                   </span>
                 </div>
+                <div v-else class="nk-lc-phase__cost nk-lc-phase__cost--none">无突破材料</div>
               </div>
             </div>
           </template>
