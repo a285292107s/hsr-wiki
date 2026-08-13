@@ -1,6 +1,8 @@
-/* ═══ 敌对物种详情页（随 /monster/:id 路由 chunk 懒加载） ═══ */
+/* ═══ 敌对物种详情页（档案式，随 /monster/:id 路由 chunk 懒加载） ═══
+   语言：与首页/角色目录 taste-skill 重设计一致——编辑式元信息（等宽小字）、
+   发丝线分隔、克制单主色；无发光、无 scroll 装饰、无动效堆砌。 */
 
-/* ─── Hero：全身立绘 + 信息 ─── */
+/* ─── Hero：全身立绘 + 档案信息区 ─── */
 
 .nk-mob-hero {
   display: flex;
@@ -8,104 +10,138 @@
   max-width: var(--nk-detail-max);
   margin: 0 auto;
   background:
-    radial-gradient(ellipse at 18% 32%, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 62%),
-    linear-gradient(180deg, color-mix(in srgb, var(--blk-900) 45%, transparent) 0%, transparent 100%);
-  border-bottom: 1px solid var(--border);
+    radial-gradient(ellipse at 15% 42%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--blk-900) 42%, transparent) 0%, transparent 100%);
+  border-bottom: 1px solid var(--line-1);
 }
 
+/* 立绘图窗：透明底全身像居中悬浮（无光晕无发光） */
 .nk-mob-hero__figure {
-  flex: 0 0 34%;
-  min-height: 260px;
+  flex: 0 0 40%;
+  min-height: 300px;
   position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 20px;
   overflow: hidden;
 }
 
-/* 立绘底部光晕（呼应目录卡片 accent 弱光） */
+/* 底光（弱）：透明立绘的低层环境光，让主体在深底上"站住"，替代原 16px blur 光晕 */
 .nk-mob-hero__figure::after {
   content: '';
   position: absolute;
   left: 50%;
   bottom: 0;
   transform: translateX(-50%);
-  width: 72%;
-  height: 16%;
-  background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 24%, transparent) 0%, transparent 70%);
-  filter: blur(16px);
+  width: 60%;
+  height: 14%;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 68%);
   pointer-events: none;
 }
 
 .nk-mob-hero__figure img {
   position: relative;
   z-index: 1;
-  max-width: 86%;
+  max-width: 88%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.42));
 }
 
 .nk-mob-hero__info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 28px 24px;
+  padding: 32px 28px;
+}
+
+/* meta 行：等宽档案元信息（分类/阵营/韧性/编号），斜杠分隔 */
+.nk-mob-hero__meta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin-bottom: 16px;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--text2);
+}
+
+.nk-mob-hero__meta > span + span::before {
+  content: '/';
+  margin: 0 9px;
+  color: var(--line-2);
+}
+
+/* 条目编号右推（真实数据：怪物模板 ID，供对照检索） */
+.nk-mob-hero__no {
+  margin-left: auto;
+  color: var(--text3);
 }
 
 .nk-mob-hero__name {
-  font-size: 1.55rem;
-  font-weight: 700;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  font-weight: 900;
   letter-spacing: 0.02em;
-  margin-bottom: 14px;
+  line-height: 1.15;
+  color: var(--text-bright);
 }
 
-.nk-mob-hero__meta {
+/* ─── 档案区块（标题 + 等宽标注 + 发丝线，与首页分区头同构） ─── */
+
+.nk-mob-sec {
+  padding: 26px 0 6px;
+}
+
+.nk-mob-sec + .nk-mob-sec {
+  border-top: 1px solid var(--line-1);
+  margin-top: 24px;
+}
+
+.nk-mob-sec__head {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-/* ─── 徽章 ─── */
+.nk-mob-sec__title {
+  font-size: 0.98rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text-bright);
+}
 
-.nk-mob-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--text2);
-  background: color-mix(in srgb, var(--blk-850) 55%, transparent);
-  border: 1px solid var(--border);
+.nk-mob-sec__en {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  color: var(--text3);
   white-space: nowrap;
 }
 
-.nk-mob-chip img {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
+.nk-mob-sec__rule {
+  flex: 1;
+  height: 1px;
+  align-self: center;
+  background: linear-gradient(90deg, var(--line-2), transparent);
 }
 
-.nk-mob-chip--rank {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-}
-
-.nk-mob-chip--stance {
-  color: var(--text);
+.nk-mob-sec__body {
+  margin: 0;
 }
 
 /* ─── 图鉴介绍 ─── */
 
 .nk-mob-intro {
   font-size: 0.88rem;
-  line-height: 1.9;
+  line-height: 2;
   color: var(--text2);
+  max-width: 72ch;
 }
 
 .nk-mob-empty {
@@ -114,60 +150,78 @@
   line-height: 1.6;
 }
 
-/* ─── 弱点 / 抗性 ─── */
+/* ─── 弱点 / 抗性（flat 元素标签，无 pill 底无边框） ─── */
 
 .nk-mob-resist__row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 10px 0;
+  gap: 16px;
+  padding: 12px 0;
 }
 
 .nk-mob-resist__row + .nk-mob-resist__row {
-  border-top: 1px dashed var(--border);
+  border-top: 1px dashed var(--line-1);
 }
 
 .nk-mob-resist__label {
-  flex: 0 0 74px;
-  font-size: 0.78rem;
-  color: var(--text2);
-  padding-top: 5px;
+  flex: 0 0 80px;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  padding-top: 6px;
 }
 
-.nk-mob-resist__chips {
+.nk-mob-resist__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 8px 18px;
 }
 
-/* ─── 基础属性 ─── */
+.nk-mob-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.nk-mob-tag img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* ─── 基础数值（四列大数字，无卡底，顶部发丝线） ─── */
 
 .nk-mob-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 0;
+  margin: 0;
 }
 
 .nk-mob-stat {
-  text-align: center;
-  padding: 14px 8px;
-  border-radius: var(--nk-radius-card);
-  background: color-mix(in srgb, var(--blk-850) 45%, transparent);
-  border: 1px solid var(--line-1);
+  border-top: 1px solid var(--line-1);
+  padding: 16px 12px 10px 0;
 }
 
 .nk-mob-stat__label {
   display: block;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  margin: 0 0 8px;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
   color: var(--text3);
-  margin-bottom: 6px;
 }
 
 .nk-mob-stat__val {
-  font-size: 1.25rem;
-  font-weight: 700;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
 }
 
 .nk-mob-stat__val[data-prop="hp"] { color: var(--prop-hp); }
@@ -183,58 +237,78 @@
   color: var(--accent);
 }
 
-/* ─── 技能 ─── */
+/* ─── 技能（编辑式列表：组间发丝线，非逐行边框） ─── */
+
+.nk-mob-skill {
+  padding: 18px 0 4px;
+}
+
+.nk-mob-skill + .nk-mob-skill {
+  border-top: 1px solid var(--line-1);
+  margin-top: 18px;
+  padding-top: 20px;
+}
 
 .nk-mob-skill__head {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
 .nk-mob-skill__name {
-  font-size: 0.98rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
 }
 
-.nk-mob-chip--tag {
-  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-  color: var(--text);
+/* 技能标签（单攻/扩散/锁定…）：等宽弱化处理，不喧宾夺主 */
+.nk-mob-skill__tag {
+  flex: none;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
 }
 
 .nk-mob-skill__meta {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 8px;
-  font-size: 0.76rem;
-  color: var(--text2);
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: var(--text3);
 }
 
 .nk-mob-skill__elem {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  color: var(--text2);
 }
 
 .nk-mob-skill__elem img {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
 }
 
 .nk-mob-skill__type {
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--blk-850) 60%, transparent);
-  border: 1px solid var(--line-1);
+  color: var(--text2);
+}
+
+.nk-mob-skill__sep {
+  color: var(--line-2);
 }
 
 .nk-mob-skill__desc {
   font-size: 0.85rem;
-  line-height: 1.75;
+  line-height: 1.8;
   color: var(--text2);
 }
 
@@ -247,12 +321,11 @@
 
 .nk-mob-skeleton__hero {
   height: 240px;
-  border-radius: 0 0 var(--nk-radius-card) var(--nk-radius-card);
   background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-850) 80%, transparent) 50%, transparent 70%);
   background-color: color-mix(in srgb, var(--blk-850) 45%, transparent);
   background-size: 200% 100%;
   animation: nk-mob-shimmer 1.4s ease infinite;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line-1);
 }
 
 .nk-mob-skeleton__body {
@@ -261,7 +334,6 @@
 
 .nk-mob-skeleton__line {
   height: 14px;
-  border-radius: 7px;
   margin-bottom: 12px;
   background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-850) 80%, transparent) 50%, transparent 70%);
   background-color: color-mix(in srgb, var(--blk-850) 45%, transparent);
@@ -327,12 +399,16 @@
   }
 
   .nk-mob-hero__info {
-    padding: 18px 16px 22px;
+    padding: 18px 16px 24px;
   }
 
   .nk-mob-hero__name {
-    font-size: 1.3rem;
-    margin-bottom: 10px;
+    font-size: 1.35rem;
+  }
+
+  /* meta 编号在窄屏换行后右推会错位，改回普通流 */
+  .nk-mob-hero__no {
+    margin-left: 0;
   }
 
   .nk-mob-stats {

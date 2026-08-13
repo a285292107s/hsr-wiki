@@ -391,16 +391,35 @@
 /* ═══════════════════════════════════════════
    敌对物种列表页
 ═══════════════════════════════════════════ */
-.nk-mob-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-.nk-mob-card { position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); transform-style: preserve-3d; }
-.nk-mob-card:hover { transform: perspective(900px) translateY(-5px) rotateX(calc(var(--ry, 0) * 6deg)) rotateY(calc(var(--rx, 0) * 6deg)); border-color: color-mix(in srgb, var(--accent) 40%, transparent); box-shadow: 0 10px 32px rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--accent) 12%, transparent); }
-.nk-mob-card__img { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 70%); display: flex; align-items: center; justify-content: center; padding: 10px; }
-.nk-mob-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--accent) 5%, transparent) 18%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.14) 42%, rgba(255,255,255,0.26) 50%, rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.04) 70%, color-mix(in srgb, var(--accent) 5%, transparent) 82%, transparent 100%); mix-blend-mode: screen; filter: blur(1.4px); opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
-.nk-mob-card:hover .nk-mob-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; }
-.nk-mob-card__img img { width: 75%; height: 75%; object-fit: contain; transition: transform 0.4s var(--ease); filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
-.nk-mob-card:hover .nk-mob-card__img img { transform: scale(1.08); }
-.nk-mob-card__info { padding: 8px 10px 10px; text-align: center; }
-.nk-mob-card__name { font-size: 0.72rem; font-weight: 600; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+/* ─── 敌对物种卡片（档案式：深底大头照图窗 + 左对齐双行信息条，无边框无发光无 3D） ─── */
+/* 图窗 4:5 纵深比营造档案陈列感（区别于角色横排卡）；hover 仅立绘微缩 + 名称强调 + 左侧指示条 */
+.nk-mob-grid { --nk-grid-min: 140px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
+.nk-mob-card { position: relative; display: block; text-decoration: none; cursor: pointer; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); }
+/* hover/focus 左侧指示条（与角色目录同语言） */
+.nk-mob-card::before { content: ''; position: absolute; left: -6px; top: 34%; width: 2px; height: 0; transform: translateY(-50%); border-radius: 1px; background: var(--primary); opacity: 0; transition: height 0.22s var(--nk-ease-out), opacity 0.22s; pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .nk-mob-card:hover::before, .nk-mob-card:focus-visible::before { height: 46%; opacity: 1; }
+  .nk-mob-card:hover .nk-mob-card__fig::after { box-shadow: inset 0 0 0 1px var(--line-2); }
+  .nk-mob-card:hover .nk-mob-card__fig img { transform: scale(1.05); }
+  .nk-mob-card:hover .nk-mob-card__name { color: var(--metric-val); }
+}
+.nk-mob-card:focus-visible { outline: none; }
+.nk-mob-card:focus-visible .nk-mob-card__fig { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
+/* 图窗：深色底板承接怪物深底大头照（cover 填满），发丝内描边替代边框 */
+.nk-mob-card__fig { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 50% 28%, color-mix(in srgb, var(--blk-850) 55%, transparent) 0%, var(--blk-950) 80%); }
+.nk-mob-card__fig::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px var(--line-1); transition: box-shadow 0.25s; }
+.nk-mob-card__fig img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s var(--ease); }
+/* 信息条：左对齐档案排版（名称 + 等宽分类元信息），顶部留白与图窗分离 */
+.nk-mob-card__info { display: flex; flex-direction: column; gap: 5px; padding: 12px 4px 4px; }
+.nk-mob-card__name { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
+.nk-mob-card__type { font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 分类层级：首领 accent、精英次级、喽啰弱化（真实战力语义，非装饰色） */
+.nk-mob-card[data-type="BOSS"] .nk-mob-card__type { color: var(--accent); }
+.nk-mob-card[data-type="ELITE"] .nk-mob-card__type { color: var(--text2); }
+/* 注：reduce 覆盖必须置于本区块之后（同特异性级联生效），禁用入场动画 */
+@media (prefers-reduced-motion: reduce) {
+  .nk-mob-card { animation: none; }
+}
 
 /* ═══════════════════════════════════════════
    货币战争列表页（图鉴入口，复用遗器卡片布局）
@@ -670,7 +689,7 @@
 /* ═══════════════════════════════════════════
    图片懒加载占位色（基于稀有度）
 ═══════════════════════════════════════════ */
-.nk-idx-card__portrait img, .nk-item-card__img img, .nk-mob-card__img img { background: color-mix(in srgb, var(--blk-850) 60%, transparent); }
+.nk-idx-card__portrait img, .nk-item-card__img img { background: color-mix(in srgb, var(--blk-850) 60%, transparent); }
 .nk-idx-card[data-rarity="5"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
 .nk-idx-card[data-rarity="4"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
 .nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }

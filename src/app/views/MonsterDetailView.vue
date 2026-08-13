@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * 敌对物种详情页
- * 结构：Hero（全身立绘 + 名称/分类/阵营/韧性徽章）→ 图鉴介绍 / 弱点抗性 / 基础属性 / 技能
+ * 敌对物种详情页（档案式：立绘 Hero + 编辑式档案区块）
+ * 结构：Hero（全身立绘 + 名称/分类/阵营/韧性/编号）→ 图鉴记录 / 弱点与抗性 / 基础数值 / 技能
  * 数据：converter 输出 monsters/{id}.json（按 ID 按需加载，不走单例）
  */
 import { computed, onMounted, watch } from 'vue';
@@ -49,22 +49,20 @@ const figureUrl = computed(() => {
   if (!d.value) return '';
   return monsterFigureUrl(d.value.figure) || monsterIconUrl(d.value.icon);
 });
-/** 分类徽章（Rank → 中文，未知分类不渲染） */
+/** 分类中文（Rank → 中文，未知分类不渲染） */
 const rankLabel = computed(() => (d.value ? MON_RANK[d.value.rank] || '' : ''));
 
-/** 韧性弱点 chips（元素图标 + 名称） */
-function weakChip(elem: string): string {
+/** 元素弱点标签（flat 图标 + 名称） */
+function elemTag(elem: string): string {
   const name = ELEM[elem] || elem;
-  return `<span class="nk-mob-chip nk-mob-chip--elem"><img src="${escHtml(elementIconUrl(elem))}" alt="" loading="lazy">${escHtml(name)}</span>`;
+  return `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(elem))}" alt="" loading="lazy">${escHtml(name)}</span>`;
 }
-/** 伤害抗性 chips（元素图标 + 名称 + 抗性百分比） */
-function resistChip(elem: string, v: number): string {
-  const name = ELEM[elem] || elem;
-  return `<span class="nk-mob-chip nk-mob-chip--elem"><img src="${escHtml(elementIconUrl(elem))}" alt="" loading="lazy">${escHtml(name)} ${Math.round(v * 100)}%</span>`;
-}
-const weakHtml = computed(() => (d.value?.weak ?? []).map(weakChip).join(''));
+const weakHtml = computed(() => (d.value?.weak ?? []).map(elemTag).join(''));
+/** 伤害抗性标签（元素 + 抗性百分比） */
 const resistHtml = computed(() =>
-  Object.entries(d.value?.resist ?? {}).map(([k, v]) => resistChip(k, v)).join(''));
+  Object.entries(d.value?.resist ?? {})
+    .map(([k, v]) => `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(ELEM[k] || k)} ${Math.round(v * 100)}%</span>`)
+    .join(''));
 /** 图鉴介绍：富文本 + 换行渲染（fmtDesc 处理 \n → <br>） */
 const introHtml = computed(() => {
   if (!d.value) return '';
@@ -75,7 +73,7 @@ const introHtml = computed(() => {
 function skillHtml(s: MonsterSkillDetail): string {
   return fmtDesc(s.desc, s.param_list);
 }
-/** 技能元信息：元素徽章 + 类型描述（v-html 拼接） */
+/** 技能元信息行：元素 + 类型 + 攻击类型（v-html 拼接，等宽档案元信息） */
 function skillMeta(s: MonsterSkillDetail): string {
   const parts: string[] = [];
   if (s.damage_type) {
@@ -87,7 +85,7 @@ function skillMeta(s: MonsterSkillDetail): string {
   if (s.type_desc) {
     parts.push(`<span class="nk-mob-skill__type">${escHtml(s.type_desc)}</span>`);
   }
-  return parts.join('');
+  return parts.join('<span class="nk-mob-skill__sep">/</span>');
 }
 </script>
 
@@ -109,82 +107,105 @@ function skillMeta(s: MonsterSkillDetail): string {
     </div>
 
     <template v-else-if="d">
-      <!-- Hero -->
+      <!-- Hero：立绘 + 档案信息区 -->
       <div class="nk-mob-hero">
         <div class="nk-mob-hero__figure">
           <img :src="figureUrl" :alt="d.name" loading="eager">
         </div>
         <div class="nk-mob-hero__info">
-          <h1 class="nk-mob-hero__name">{{ d.name }}</h1>
           <div class="nk-mob-hero__meta">
-            <span v-if="rankLabel" class="nk-mob-chip nk-mob-chip--rank">{{ rankLabel }}</span>
-            <span v-if="d.camp" class="nk-mob-chip">{{ d.camp }}</span>
-            <span v-if="d.stance" class="nk-mob-chip nk-mob-chip--stance">韧性 {{ d.stance }}</span>
+            <span v-if="rankLabel">{{ rankLabel }}</span>
+            <span v-if="d.camp">{{ d.camp }}</span>
+            <span v-if="d.stance">韧性 {{ d.stance }}</span>
+            <span class="nk-mob-hero__no">{{ d.id }}</span>
           </div>
+          <h1 class="nk-mob-hero__name">{{ d.name }}</h1>
         </div>
       </div>
 
-      <!-- 内容面板 -->
+      <!-- 档案内容区 -->
       <div class="nk-panels">
         <div class="nk-panel nk-panel--active">
-          <!-- 图鉴介绍 -->
-          <div class="nk-title">OVERVIEW</div>
-          <div class="nk-card nk-mob-intro" v-html="introHtml"></div>
+          <!-- 图鉴记录 -->
+          <section class="nk-mob-sec">
+            <header class="nk-mob-sec__head">
+              <h2 class="nk-mob-sec__title">图鉴记录</h2>
+              <span class="nk-mob-sec__en">DOSSIER</span>
+              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+            </header>
+            <p class="nk-mob-sec__body nk-mob-intro" v-html="introHtml"></p>
+          </section>
 
-          <!-- 弱点 / 抗性 -->
-          <div class="nk-title">WEAKNESS</div>
-          <div class="nk-card nk-mob-resist">
-            <div class="nk-mob-resist__row">
-              <span class="nk-mob-resist__label">韧性弱点</span>
-              <span v-if="weakHtml" class="nk-mob-resist__chips" v-html="weakHtml"></span>
-              <span v-else class="nk-mob-empty">无弱点信息</span>
-            </div>
-            <div class="nk-mob-resist__row">
-              <span class="nk-mob-resist__label">伤害抗性</span>
-              <span v-if="resistHtml" class="nk-mob-resist__chips" v-html="resistHtml"></span>
-              <span v-else class="nk-mob-empty">无抗性信息</span>
-            </div>
-          </div>
-
-          <!-- 基础属性 -->
-          <div class="nk-title">STATS</div>
-          <div class="nk-card nk-mob-stats">
-            <div class="nk-mob-stat">
-              <span class="nk-mob-stat__label">HP</span>
-              <span class="nk-mob-stat__val" data-prop="hp">{{ d.stats.hp }}</span>
-            </div>
-            <div class="nk-mob-stat">
-              <span class="nk-mob-stat__label">ATK</span>
-              <span class="nk-mob-stat__val" data-prop="atk">{{ d.stats.atk }}</span>
-            </div>
-            <div class="nk-mob-stat">
-              <span class="nk-mob-stat__label">DEF</span>
-              <span class="nk-mob-stat__val" data-prop="def">{{ d.stats.def }}</span>
-            </div>
-            <div class="nk-mob-stat">
-              <span class="nk-mob-stat__label">SPD</span>
-              <span class="nk-mob-stat__val" data-prop="spd">{{ d.stats.speed }}</span>
-            </div>
-            <div v-if="d.stance" class="nk-mob-stat nk-mob-stat--stance">
-              <span class="nk-mob-stat__label">韧性</span>
-              <span class="nk-mob-stat__val">{{ d.stance }}</span>
-            </div>
-          </div>
-
-          <!-- 技能 -->
-          <template v-if="d.skills.length">
-            <div class="nk-title">SKILLS</div>
-            <div class="nk-mob-skills">
-              <div v-for="s in d.skills" :key="s.id" class="nk-card nk-mob-skill">
-                <div class="nk-mob-skill__head">
-                  <span class="nk-mob-skill__name">{{ s.name }}</span>
-                  <span v-if="s.tag" class="nk-mob-chip nk-mob-chip--tag">{{ s.tag }}</span>
-                </div>
-                <div v-if="skillMeta(s)" class="nk-mob-skill__meta" v-html="skillMeta(s)"></div>
-                <div v-if="skillHtml(s)" class="nk-mob-skill__desc" v-html="skillHtml(s)"></div>
+          <!-- 弱点与抗性 -->
+          <section class="nk-mob-sec">
+            <header class="nk-mob-sec__head">
+              <h2 class="nk-mob-sec__title">弱点与抗性</h2>
+              <span class="nk-mob-sec__en">VULNERABILITY</span>
+              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+            </header>
+            <div class="nk-mob-resist">
+              <div class="nk-mob-resist__row">
+                <span class="nk-mob-resist__label">韧性弱点</span>
+                <span v-if="weakHtml" class="nk-mob-resist__tags" v-html="weakHtml"></span>
+                <span v-else class="nk-mob-empty">无弱点信息</span>
+              </div>
+              <div class="nk-mob-resist__row">
+                <span class="nk-mob-resist__label">伤害抗性</span>
+                <span v-if="resistHtml" class="nk-mob-resist__tags" v-html="resistHtml"></span>
+                <span v-else class="nk-mob-empty">无抗性信息</span>
               </div>
             </div>
-          </template>
+          </section>
+
+          <!-- 基础数值 -->
+          <section class="nk-mob-sec">
+            <header class="nk-mob-sec__head">
+              <h2 class="nk-mob-sec__title">基础数值</h2>
+              <span class="nk-mob-sec__en">STATS</span>
+              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+            </header>
+            <dl class="nk-mob-stats">
+              <div class="nk-mob-stat">
+                <dt class="nk-mob-stat__label">HP 生命</dt>
+                <dd class="nk-mob-stat__val" data-prop="hp">{{ d.stats.hp }}</dd>
+              </div>
+              <div class="nk-mob-stat">
+                <dt class="nk-mob-stat__label">ATK 攻击</dt>
+                <dd class="nk-mob-stat__val" data-prop="atk">{{ d.stats.atk }}</dd>
+              </div>
+              <div class="nk-mob-stat">
+                <dt class="nk-mob-stat__label">DEF 防御</dt>
+                <dd class="nk-mob-stat__val" data-prop="def">{{ d.stats.def }}</dd>
+              </div>
+              <div class="nk-mob-stat">
+                <dt class="nk-mob-stat__label">SPD 速度</dt>
+                <dd class="nk-mob-stat__val" data-prop="spd">{{ d.stats.speed }}</dd>
+              </div>
+              <div v-if="d.stance" class="nk-mob-stat nk-mob-stat--stance">
+                <dt class="nk-mob-stat__label">韧性</dt>
+                <dd class="nk-mob-stat__val">{{ d.stance }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <!-- 技能 -->
+          <section v-if="d.skills.length" class="nk-mob-sec">
+            <header class="nk-mob-sec__head">
+              <h2 class="nk-mob-sec__title">技能</h2>
+              <span class="nk-mob-sec__en">SKILLS</span>
+              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+            </header>
+            <div class="nk-mob-skills">
+              <article v-for="s in d.skills" :key="s.id" class="nk-mob-skill">
+                <header class="nk-mob-skill__head">
+                  <span class="nk-mob-skill__name">{{ s.name }}</span>
+                  <span v-if="s.tag" class="nk-mob-skill__tag">{{ s.tag }}</span>
+                </header>
+                <div v-if="skillMeta(s)" class="nk-mob-skill__meta" v-html="skillMeta(s)"></div>
+                <div v-if="skillHtml(s)" class="nk-mob-skill__desc" v-html="skillHtml(s)"></div>
+              </article>
+            </div>
+          </section>
         </div>
       </div>
     </template>
