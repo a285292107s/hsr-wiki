@@ -16,6 +16,7 @@ import OverviewPanel from '../character/OverviewPanel.vue';
 import SkillsPanel from '../character/SkillsPanel.vue';
 import EidolonsPanel from '../character/EidolonsPanel.vue';
 import BuildsPanel from '../character/BuildsPanel.vue';
+import ComparePanel from '../character/ComparePanel.vue';
 import { visibleSections, SECTION_IDX } from '../character/sections';
 import { SITE_NAME } from '../../lib/constants';
 import { loadSkillAnimations } from '../../services/api';
@@ -80,8 +81,9 @@ const enhNotes = computed<string[]>(() => {
   return descs.map((t) => gameTagsToHtml(t));
 });
 
-/** 强化角标：当前强化键下被强化的技能/星魂 ID 集合（原始模式为 null） */
+/** 强化角标：当前强化键下被强化的技能/星魂 ID 集合（原始/对比模式为 null——对比态无需角标） */
 const enhMark = computed<{ skillIds: Set<number>; rankIds: Set<number> } | null>(() => {
+  if (char.compareOn) return null;
   const key = char.enhKey;
   if (!key || !d.value) return null;
   const enh = d.value.enhanced && d.value.enhanced[key];
@@ -107,10 +109,14 @@ const sectionDefs = [
   { id: 'profile', label: '配音' },
 ] as const;
 
-/** 导航区块：按实际渲染过滤（缺数据区块同步隐藏，编号缺口保留） */
+/** 导航区块：按实际渲染过滤（缺数据区块同步隐藏，编号缺口保留）；
+ *  对比模式页面级收敛——仅保留变化三区块（技能/附加/星魂），其余模块整体隐藏 */
 const navSections = computed(() => {
   const dd = d.value;
   if (!dd) return [];
+  if (char.compareOn) {
+    return sectionDefs.filter((s) => s.id === 'skills' || s.id === 'talents' || s.id === 'eidolons');
+  }
   const vis = new Set(visibleSections(dd));
   return sectionDefs.filter((s) => vis.has(s.id));
 });
@@ -139,8 +145,8 @@ const { activeId, progress, showTop, jumpTo, scrollTop } = useScrollSpy(
 
 /* ═══════════ 卸载清理 ═══════════ */
 
-// 数据就绪后收集面板引用（模板 v-else-if 渲染，需等下一帧 DOM 稳定）
-watch(d, async (val) => {
+// 数据就绪/对比模式切换后收集面板引用（模板条件渲染，需等下一帧 DOM 稳定）
+watch([d, () => char.compareOn], async (val) => {
   if (val) {
     await nextTick();
     collectPanels();
@@ -250,7 +256,7 @@ onBeforeUnmount(() => {
       <!-- 内容平铺：头图 + 各区块按序排列（技能 → 附加能力 → 星魂 → 属性加成 → 光锥/配队 → 遗器 → 角色档案 → 配音） -->
       <div class="nk-panels">
         <!-- 数据区块挂载门控与吸顶导航同源（visibleSections）：缺数据区块整体不挂载，杜绝「导航有、正文空」漂移。
-             hero 概览区恒显（含 spine/属性总览），不参与门控 -->
+             hero 概览区恒显（含 spine/属性总览），不参与门控，对比模式下同样保留（上下文锚点） -->
         <div class="nk-panel nk-panel--overview nk-panel--flat" data-panel="hero">
           <CharHero :d="d" :char-id="char.charId" />
         </div>
@@ -280,6 +286,14 @@ onBeforeUnmount(() => {
             >
               <span class="nk-enh-tab__idx">V{{ k }}</span>强化
             </button>
+            <button
+              :class="['nk-enh-tab', { 'nk-enh-tab--active': char.compareOn }]"
+              type="button"
+              :aria-pressed="char.compareOn"
+              @click="char.setCompareOn(true)"
+            >
+              对比
+            </button>
           </div>
           <div class="nk-enh-notes">
             <div v-if="enhNotes.length" class="nk-enh-notes__banner">
@@ -292,18 +306,40 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="vis.has('skills')" class="nk-panel nk-panel--flat" data-panel="skills">
-          <SkillsPanel :d="d" :char-id="char.charId" :enh-key="char.enhKey" :anim-db="animDb" :enh-mark="enhMark" />
+          <!-- 对比模式：只渲染实际变化的技能卡（ComparePanel 内部过滤） -->
+          <ComparePanel
+            v-if="char.compareOn"
+            :base="char.data"
+            :enh-key="char.enhKey"
+            :char-id="char.charId"
+            :sections="['skills']"
+          />
+          <SkillsPanel v-else :d="d" :char-id="char.charId" :enh-key="char.enhKey" :anim-db="animDb" :enh-mark="enhMark" />
         </div>
         <div v-if="vis.has('talents')" class="nk-panel nk-panel--flat" data-panel="talents">
-          <OverviewPanel :d="d" :sections="['talents']" />
+          <ComparePanel
+            v-if="char.compareOn"
+            :base="char.data"
+            :enh-key="char.enhKey"
+            :char-id="char.charId"
+            :sections="['talents']"
+          />
+          <OverviewPanel v-else :d="d" :sections="['talents']" />
         </div>
         <div v-if="vis.has('eidolons')" class="nk-panel nk-panel--flat" data-panel="eidolons">
-          <EidolonsPanel :d="d" :char-id="char.charId" :enh-mark="enhMark" />
+          <ComparePanel
+            v-if="char.compareOn"
+            :base="char.data"
+            :enh-key="char.enhKey"
+            :char-id="char.charId"
+            :sections="['eidolons']"
+          />
+          <EidolonsPanel v-else :d="d" :char-id="char.charId" :enh-mark="enhMark" />
         </div>
-        <div v-if="vis.has('bonuses')" class="nk-panel nk-panel--flat" data-panel="bonuses">
+        <div v-if="vis.has('bonuses') && !char.compareOn" class="nk-panel nk-panel--flat" data-panel="bonuses">
           <OverviewPanel :d="d" :sections="['bonuses']" />
         </div>
-        <div v-if="vis.has('cones')" class="nk-panel nk-panel--flat" data-panel="cones">
+        <div v-if="vis.has('cones') && !char.compareOn" class="nk-panel nk-panel--flat" data-panel="cones">
           <BuildsPanel
             :d="d"
             :base-data="char.data"
@@ -313,7 +349,7 @@ onBeforeUnmount(() => {
             :sections="['cones']"
           />
         </div>
-        <div v-if="vis.has('teams')" class="nk-panel nk-panel--flat" data-panel="teams">
+        <div v-if="vis.has('teams') && !char.compareOn" class="nk-panel nk-panel--flat" data-panel="teams">
           <BuildsPanel
             :d="d"
             :base-data="char.data"
@@ -323,7 +359,7 @@ onBeforeUnmount(() => {
             :sections="['teams']"
           />
         </div>
-        <div v-if="vis.has('relics')" class="nk-panel nk-panel--flat" data-panel="relics">
+        <div v-if="vis.has('relics') && !char.compareOn" class="nk-panel nk-panel--flat" data-panel="relics">
           <BuildsPanel
             :d="d"
             :base-data="char.data"
@@ -333,10 +369,10 @@ onBeforeUnmount(() => {
             :sections="['relics']"
           />
         </div>
-        <div v-if="vis.has('stories')" class="nk-panel nk-panel--flat" data-panel="stories">
+        <div v-if="vis.has('stories') && !char.compareOn" class="nk-panel nk-panel--flat" data-panel="stories">
           <OverviewPanel :d="d" :sections="['stories']" />
         </div>
-        <div v-if="vis.has('profile')" class="nk-panel nk-panel--flat" data-panel="profile">
+        <div v-if="vis.has('profile') && !char.compareOn" class="nk-panel nk-panel--flat" data-panel="profile">
           <OverviewPanel :d="d" :sections="['profile']" />
         </div>
       </div>

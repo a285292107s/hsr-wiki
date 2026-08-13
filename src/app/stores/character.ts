@@ -18,6 +18,8 @@ export const useCharacterStore = defineStore('character', () => {
   const data = ref<CharacterData | null>(null);
   /** 当前强化版本键（null = 原始模式） */
   const enhKey = ref<string | null>(null);
+  /** 对比模式开关（true = 对比当前强化键与原始数据；见 CONTEXT.md「对比模式」术语） */
+  const compareOn = ref(false);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -69,6 +71,17 @@ export const useCharacterStore = defineStore('character', () => {
 
   function setEnhKey(k: string | null): void {
     enhKey.value = k;
+    // 切原始/强化时退出对比态（三态互斥：原始/强化/对比）
+    compareOn.value = false;
+  }
+
+  /** 对比模式开关：开启时防御性确保已有强化键（默认最后一个），关闭仅复位 */
+  function setCompareOn(v: boolean): void {
+    if (v && enhKey.value == null) {
+      const keys = getEnhancedKeys(data.value);
+      if (keys.length) enhKey.value = keys[keys.length - 1];
+    }
+    compareOn.value = v;
   }
 
   /** 路由离开角色页时重置（避免旧数据闪现） */
@@ -76,13 +89,14 @@ export const useCharacterStore = defineStore('character', () => {
     charId.value = '';
     data.value = null;
     enhKey.value = null;
+    compareOn.value = false;
     loading.value = false;
     error.value = null;
   }
 
   return {
     charId, data, enhKey, loading, error,
-    enhKeys, renderData,
-    load, setEnhKey, reset,
+    enhKeys, renderData, compareOn,
+    load, setEnhKey, setCompareOn, reset,
   };
 });
