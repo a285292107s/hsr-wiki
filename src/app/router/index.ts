@@ -16,7 +16,7 @@ export const navDir = ref<1 | -1 | 0>(0);
  * 通用目录视图：CatalogView chunk 与目录专属样式并行加载（样式先于渲染到达）。
  * 样式依赖声明于 CatalogPageConfig.styles（单一事实源），路由层统一消费——
  * 新增带专属样式的目录只需在配置中声明，无需为本目录手写路由工厂。
- * 注册表经动态导入（与 CatalogView 共享同一 chunk）：避免把 13 个目录配置
+ * 注册表经动态导入（与 CatalogView 共享同一 chunk）：避免把 12 个目录配置
  * （含 renderCard 模板与内联 SVG）静态拉进首屏主包。未配置 styles 的目录
  * （依赖全局 catalog.css）仅加载组件 chunk。
  */
