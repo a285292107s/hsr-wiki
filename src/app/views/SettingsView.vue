@@ -1,18 +1,36 @@
 <script setup lang="ts">
 /**
- * 设置页（路由 /settings）：预设主题强调色选择。
- * 选择经 setAccent 持久化（localStorage）并写入 <html data-accent>，
+ * 设置页（路由 /settings）：预设主题强调色选择 + 开拓者形态选择。
+ * 主题：选择经 setAccent 持久化（localStorage）并写入 <html data-accent>，
  * tokens.css 的 [data-accent] 规则重映射 --th-* 色阶，全站主题自动跟随；
  * 货币战争（CW）黑金模式独立，不受影响。
+ * 开拓者形态：默认女性；常规模式角色列表按性别过滤，CW 列表仅切立绘（female_avatar_id）。
  */
 import { ref } from 'vue';
 import { ACCENTS, DEFAULT_ACCENT, getSavedAccent, setAccent, type AccentKey } from '../../lib/theme';
+import {
+  DEFAULT_TRAILBLAZER_GENDER, getSavedTrailblazerGender, setTrailblazerGender,
+  type TrailblazerGender,
+} from '../../lib/trailblazer';
 
 const current = ref<AccentKey>(getSavedAccent());
 
 function choose(key: AccentKey): void {
   setAccent(key);
   current.value = key;
+}
+
+/** 开拓者形态选项（性别符号 + 名称；默认女性） */
+const GENDER_OPTIONS: ReadonlyArray<{ key: TrailblazerGender; label: string; icon: string }> = [
+  { key: 'female', label: '女性开拓者', icon: '♀' },
+  { key: 'male', label: '男性开拓者', icon: '♂' },
+];
+
+const currentGender = ref<TrailblazerGender>(getSavedTrailblazerGender());
+
+function chooseGender(gender: TrailblazerGender): void {
+  setTrailblazerGender(gender);
+  currentGender.value = gender;
 }
 </script>
 
@@ -44,6 +62,28 @@ function choose(key: AccentKey): void {
         </button>
       </div>
       <p v-if="current === DEFAULT_ACCENT" class="nk-settings__hint">当前为默认主题 · 赤陶</p>
+    </section>
+
+    <section class="nk-settings__section" aria-labelledby="trailblazer-title">
+      <h2 id="trailblazer-title" class="nk-settings__section-title">开拓者形态</h2>
+      <div class="nk-settings__grid nk-settings__grid--fits" role="listbox" aria-label="开拓者性别">
+        <button
+          v-for="g in GENDER_OPTIONS"
+          :key="g.key"
+          type="button"
+          class="nk-settings__card"
+          :class="{ 'nk-settings__card--active': currentGender === g.key }"
+          :aria-pressed="currentGender === g.key"
+          @click="chooseGender(g.key)"
+        >
+          <span class="nk-settings__gender-icon" aria-hidden="true">{{ g.icon }}</span>
+          <span class="nk-settings__meta">
+            <span class="nk-settings__name">{{ g.label }}</span>
+            <span class="nk-settings__state">{{ currentGender === g.key ? '使用中' : '选择' }}</span>
+          </span>
+        </button>
+      </div>
+      <p class="nk-settings__hint">常规模式角色列表按性别收录对应形态；货币战争列表仅切换开拓者立绘。<template v-if="currentGender === DEFAULT_TRAILBLAZER_GENDER">当前为默认形态 · 女性</template></p>
     </section>
   </div>
 </template>
@@ -147,5 +187,13 @@ function choose(key: AccentKey): void {
   margin: 12px 0 0;
   font-size: 12px;
   color: var(--text3);
+}
+.nk-settings__grid--fits {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+.nk-settings__gender-icon {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--primary);
 }
 </style>

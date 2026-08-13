@@ -2,6 +2,7 @@
 import { cdnUri } from '../../../services/cdn';
 import { escHtml, avatarShopIconUrl } from '../../../lib/format';
 import { loadLocalCurrencyRoles } from '../../../services/api';
+import { getSavedTrailblazerGender, shouldUseFemaleAvatar } from '../../../lib/trailblazer';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 import { loadCwCatalogCss } from './shared';
 
@@ -74,13 +75,16 @@ export const currencyRolePage: CatalogPageConfig = {
   styles: [loadCwCatalogCss, () => import('../../../../src/styles/currency-role.css')],
   async fetchData() {
     const { roles } = await loadLocalCurrencyRoles();
+    // 开拓者：设置选女性时头像用 female_avatar_id（GridFightGenderOverride 映射，仅立绘切换）
+    const gender = getSavedTrailblazerGender();
     return roles.map((r) => {
       const traits = r.traits || [];
+      const avatarId = shouldUseFemaleAvatar(gender, r.female_avatar_id) ? r.female_avatar_id : r.avatar_id;
       return {
         id: String(r.id),
         name: r.name,
         href: `/currency/role/${r.id}`,
-        avatar: avatarShopIconUrl(r.avatar_id || r.id),
+        avatar: avatarShopIconUrl(avatarId || r.id),
         rarity: r.rarity,
         front_back_type: r.front_back_type ?? 'Both',
         charge_type: r.charge_type,

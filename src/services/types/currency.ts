@@ -126,6 +126,8 @@ export interface CurrencyRoleDetail {
   special_avatar_id: number | null;
   /** 所属赛季（SeasonIDList 优先，空则回退 [SeasonID]） */
   season_ids: number[];
+  /** 女性形态 AvatarID（GridFightGenderOverride；仅开拓者有值，其余为 null） */
+  female_avatar_id: number | null;
 }
 
 /** 后台角色星魂（GridFightBackRoleRank） */
@@ -183,6 +185,8 @@ export interface CurrencyRoleEntry {
   special_avatar_id: number | null;
   /** 所属赛季（SeasonIDList 优先，空则回退 [SeasonID]） */
   season_ids: number[];
+  /** 女性形态 AvatarID（GridFightGenderOverride；仅开拓者有值，其余为 null） */
+  female_avatar_id: number | null;
 }
 
 export interface CurrencyRoleList {

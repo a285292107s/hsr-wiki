@@ -56,6 +56,22 @@ def _season_ids(role: dict) -> list[int]:
     return ids
 
 
+def _index_gender_override(data: list[dict]) -> dict[int, int]:
+    """GridFightGenderOverride.json → RoleID → 女性形态 AvatarID。
+
+    货币战争开拓者仅收录男形 RoleID（8007/8009），女性形态（8008/8010）由该表
+    运行时覆盖（JsonOverridePath 指向 PlayerGirl 配置）；每个 RoleID 有 Star 1-3
+    三行且 AvatarID 相同，取首行即可。
+    """
+    out: dict[int, int] = {}
+    for entry in data:
+        rid = entry.get("RoleID")
+        aid = entry.get("AvatarID")
+        if rid is not None and aid is not None and rid not in out:
+            out[rid] = aid
+    return out
+
+
 # ---------- 加载 ExcelOutput 源数据 ----------
 
 def _load_excel(name: str) -> list[dict]:
@@ -255,6 +271,7 @@ def convert() -> None:
     back_skills = _build_index(_load_excel("GridFightBackBESkillConfig.json"), "SkillID")
 
     # 新增数据源
+    gender_override = _index_gender_override(_load_excel("GridFightGenderOverride.json"))
     prop_names = _build_prop_names(_load_excel("GridFightRolePropertyConfig.json"))
     trait_mazebuff_index = _build_index(_load_excel("GridFightTraitMazebuff.json"), "ID")
     trait_layers = _index_trait_layers(_load_excel("GridFightTraitLayer.json"), trait_mazebuff_index, prop_names)
@@ -330,6 +347,7 @@ def convert() -> None:
             "equipment_id": role_raw.get("EquipmentID"),
             "special_avatar_id": role_raw.get("SpecialAvatarID"),
             "season_ids": _season_ids(role_raw),
+            "female_avatar_id": gender_override.get(rid),
         }
 
         roles_out.append(base)
@@ -482,6 +500,7 @@ def convert() -> None:
             "equipment": equipment_out,
             "special_avatar_id": base["special_avatar_id"],
             "season_ids": base["season_ids"],
+            "female_avatar_id": base["female_avatar_id"],
         }
 
         save_json(detail, detail_dir / f"{rid}.json")

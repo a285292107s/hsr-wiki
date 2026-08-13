@@ -16,6 +16,7 @@ import {
 } from '../../lib/currency-role';
 import { usePageData } from '../composables/use-page-data';
 import { loadLocalCurrencyRole, loadLocalCharacter } from '../../services/api';
+import { getSavedTrailblazerGender, shouldUseFemaleAvatar } from '../../lib/trailblazer';
 import type {
   CurrencyRoleDetail, CurrencyRoleStar,
   CurrencyRoleRank, CharacterData,
@@ -43,6 +44,14 @@ watch(
 const star = computed<CurrencyRoleStar | null>(() =>
   data.value ? (data.value.stars[selectedStar.value] || null) : null,
 );
+
+/** 展示用 AvatarID：选女性开拓者时切 female_avatar_id（仅立绘；随从 #N 解析仍走数据 avatar_id） */
+const displayAvatarId = computed(() => {
+  const d = data.value;
+  if (!d) return 0;
+  const gender = getSavedTrailblazerGender();
+  return shouldUseFemaleAvatar(gender, d.female_avatar_id) ? d.female_avatar_id! : (d.avatar_id || d.id);
+});
 
 /** 跨星级合并技能：同名技能在各星级的参数集合并（构建逻辑见 lib/currency-role.ts） */
 const mergedSkillGroups = computed(() => mergeSkillGroups(data.value?.stars));
@@ -160,11 +169,11 @@ const traitGroups = computed(() => groupTraits(data.value?.traits));
     <template v-else-if="data">
       <!-- ═══ 沉浸式 Hero ═══ -->
       <header class="nk-crole-hero" :data-rarity="data.rarity">
-        <div class="nk-crole-hero__bg" :style="{ backgroundImage: `url(${avatarDrawCardUrl(data.avatar_id || data.id)})` }"></div>
+        <div class="nk-crole-hero__bg" :style="{ backgroundImage: `url(${avatarDrawCardUrl(displayAvatarId)})` }"></div>
         <div class="nk-crole-hero__scrim"></div>
         <div class="nk-crole-hero__content">
           <div class="nk-crole-hero__portrait" :data-rarity="data.rarity">
-            <img :src="avatarShopIconUrl(data.avatar_id || data.id)" :alt="data.name" loading="eager" @error="hideOnError" />
+            <img :src="avatarShopIconUrl(displayAvatarId)" :alt="data.name" loading="eager" @error="hideOnError" />
           </div>
           <div class="nk-crole-hero__info">
             <span class="nk-crole-hero__hud">GRID FIGHT · 货币战争</span>

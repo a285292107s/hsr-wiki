@@ -74,7 +74,7 @@ MODULE_SOURCES: dict[str, list[str]] = {
         "GridFightBackRoleRank.json", "GridFightBackEquipment.json",
         "GridFightItems.json", "GridFightRoleRecommendEquip.json",
         "GridFightServantStar.json", "GridFightServantSkill.json",
-        "GridFightBackSkillExtraDesc.json",
+        "GridFightBackSkillExtraDesc.json", "GridFightGenderOverride.json",
     ],
     "currency_catalog": ["GridFightItems.json", "GridFightEquipment.json",
                           "GridFightEquipCategoryInfo.json", "GridFightEquipTag.json",

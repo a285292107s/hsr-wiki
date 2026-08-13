@@ -86,3 +86,32 @@ class TestFlattenPropertyMods:
         result = cur._flatten_property_mods(data)
         assert [r["property_type"] for r in result] == ["A", "B"]
         assert result[1]["value"] == 2
+
+
+# ─── _index_gender_override ──────────────────────────────────────
+
+class TestIndexGenderOverride:
+    def test_maps_role_to_female_avatar(self):
+        data = [
+            {"RoleID": 8007, "AvatarID": 8008, "Star": 1},
+            {"RoleID": 8007, "AvatarID": 8008, "Star": 2},
+            {"RoleID": 8009, "AvatarID": 8010, "Star": 1},
+        ]
+        result = cur._index_gender_override(data)
+        assert result == {8007: 8008, 8009: 8010}
+
+    def test_first_row_wins_for_same_role(self):
+        data = [
+            {"RoleID": 8007, "AvatarID": 8008, "Star": 1},
+            {"RoleID": 8007, "AvatarID": 9999, "Star": 2},
+        ]
+        result = cur._index_gender_override(data)
+        assert result[8007] == 8008
+
+    def test_missing_fields_skipped(self):
+        data = [
+            {"RoleID": 1001, "Star": 1},
+            {"AvatarID": 8008, "Star": 2},
+            {},
+        ]
+        assert cur._index_gender_override(data) == {}

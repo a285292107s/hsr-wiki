@@ -3,6 +3,7 @@ import { PATH } from '../../../lib/constants';
 import { escHtml, avatarShopIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalCharacterList } from '../../../services/api';
+import { getSavedTrailblazerGender, isTrailblazerId, trailblazerGenderOfId } from '../../../lib/trailblazer';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import { STAR_SVG } from './shared';
 
@@ -20,9 +21,12 @@ export const characterPage: CatalogPageConfig = {
   gridClass: 'nk-idx-grid',
   async fetchData() {
     const list = await loadLocalCharacterList();
+    // 开拓者按设置形态过滤（8xxx 奇数=男、偶数=女），仅展示对应性别
+    const gender = getSavedTrailblazerGender();
     const items: CatalogItem[] = [];
     for (const info of list) {
       if (!info.name) continue;
+      if (isTrailblazerId(info.id) && trailblazerGenderOfId(info.id) !== gender) continue;
       const element = info.element.toLowerCase();
       const path = info.path.toLowerCase();
       const id = String(info.id);
