@@ -9,7 +9,17 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     watch: {
-      ignored: ['**/vendor/**', '**/tools/**'],
+      // 坑位（2026-08-13 实证）：rolldown-vite 8（Vite 8.1.5）Windows 下原生文件事件偶发丢失，
+      // 且 transform 缓存无 mtime 兜底——事件丢失后该文件 transform 结果永久陈旧（改 CSS 不生效）。
+      // 轮询模式不依赖系统事件，必配；删除后复发概率大。
+      usePolling: true,
+      interval: 300,
+      ignored: [
+        '**/vendor/**',
+        '**/tools/**',
+        // public/data 2953 文件走静态服务不经 transform 缓存，无需监听；排除防轮询开销
+        '**/public/data/**',
+      ],
     },
   },
   build: {
