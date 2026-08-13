@@ -295,13 +295,12 @@ onBeforeUnmount(() => {
               对比
             </button>
           </div>
-          <div class="nk-enh-notes">
-            <div v-if="enhNotes.length" class="nk-enh-notes__banner">
-              <span class="nk-enh-notes__title">强化内容</span>
-              <ul class="nk-enh-notes__list">
-                <li v-for="(n, i) in enhNotes" :key="i" v-html="n"></li>
-              </ul>
-            </div>
+          <!-- 强化摘要（v-if 门控：无摘要不渲染，无冗余包裹层） -->
+          <div v-if="enhNotes.length" class="nk-enh-notes__banner">
+            <span class="nk-enh-notes__title">强化内容</span>
+            <ul class="nk-enh-notes__list">
+              <li v-for="(n, i) in enhNotes" :key="i" v-html="n"></li>
+            </ul>
           </div>
         </div>
 

@@ -644,11 +644,10 @@
 /* 返回顶部按钮为 tokens 全局原语（.nk-top-btn），角色页沿用 */
 
 /* ═══════════ 强化摘要（模块内，随内容滚动） ═══════════ */
-.nk-char-page .nk-enh-notes { padding: 0; margin-top: 14px; }
-.nk-char-page .nk-enh-notes:empty { display: none; }
-/* 摘要卡片：中性细线（与卡片体系统一，无左竖条） */
+/* banner 直接挂载于强化模块（无 nk-enh-notes 包裹层），margin-top 平衡与选项卡间距 */
 .nk-char-page .nk-enh-notes__banner {
   display: flex; flex-direction: column; gap: 10px;
+  margin-top: 14px;
   padding: 14px 16px;
   background: rgba(255,255,255,0.016);
   border: 1px solid var(--line-1); border-radius: 10px;

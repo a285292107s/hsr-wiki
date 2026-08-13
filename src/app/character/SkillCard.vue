@@ -156,7 +156,13 @@ const ratedLinks = computed<RatedLink[]>(() => {
 });
 
 /* ─── 强化来源折叠状态（默认收纳，点击展开全部条目，随卡片重建重置） ─── */
+/* 惰性渲染：内容在首次展开后才挂载并常驻（DOM 瘦身——折叠态不渲染内部条目） */
 const linksOpen = ref(false);
+const linksEverOpened = ref(false);
+function toggleLinks(): void {
+  linksOpen.value = !linksOpen.value;
+  if (linksOpen.value) linksEverOpened.value = true;
+}
 
 /* ─── 强化角标（强化模式下标记被强化技能） ─── */
 const isEnhanced = computed(() =>
@@ -206,10 +212,18 @@ const table = computed<{ cols: string[]; rows: TableRow[] } | null>(() => {
   return { cols, rows };
 });
 const tableOpen = ref(false);
+/* 惰性渲染：表格内容首次展开后才挂载并常驻（DOM 瘦身——折叠态不渲染 15 行数据表） */
+const tableEverOpened = ref(false);
+function toggleTable(): void {
+  tableOpen.value = !tableOpen.value;
+  if (tableOpen.value) tableEverOpened.value = true;
+}
 
 /* ─── 技能预览（米游社 Wiki animated webp/gif，默认收纳、点开加载） ─── */
+/* clip 整体惰性挂载：首次展开后才渲染并常驻（避免折叠态下残留空轨道容器）；
+ * everOpened 同时驱动 img 挂载（避免重复解码大体积动画） */
 const animOpen = ref(false);   // 折叠状态（默认收纳）
-const everOpened = ref(false); // 一旦展开即保留 img（避免重复解码大体积动画）
+const everOpened = ref(false); // 首次展开即挂载 clip + img，此后收起/展开不再卸载
 const animIdx = ref(0);
 const imgDone = ref(false);
 
@@ -303,12 +317,13 @@ function onImgLoad(): void { imgDone.value = true; }
           :class="{ open: linksOpen }"
           :aria-expanded="linksOpen"
           type="button"
-          @click="linksOpen = !linksOpen"
+          @click="toggleLinks"
         >
           <span class="arrow">▶</span> {{ linksOpen ? '收起强化来源' : '强化来源' }}
         </button>
+        <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
         <div class="nk-links-clip" :class="{ open: linksOpen }">
-          <div class="nk-links-inner">
+          <div v-if="linksEverOpened" class="nk-links-inner">
             <div
               v-for="l in ratedLinks"
               :key="l.kind + l.num"
@@ -333,7 +348,7 @@ function onImgLoad(): void { imgDone.value = true; }
           <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
         </div>
       </div>
-      <!-- 技能预览（默认收纳，点开加载动画） -->
+      <!-- 技能预览（默认收纳，点开加载动画；clip 惰性挂载，参见 script 注释） -->
       <div v-if="myAnims.length" class="nk-skill__anim">
         <button
           class="nk-skill__anim-toggle"
@@ -344,8 +359,9 @@ function onImgLoad(): void { imgDone.value = true; }
         >
           <span class="arrow">▶</span> 技能预览
         </button>
+        <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
         <div class="nk-skill__anim-clip" :class="{ open: animOpen }">
-          <div class="nk-skill__anim-inner">
+          <div v-if="everOpened" class="nk-skill__anim-inner">
             <div v-if="myAnims.length > 1" class="nk-skill__anim-tabs">
               <button
                 v-for="(a, i) in myAnims"
@@ -358,7 +374,7 @@ function onImgLoad(): void { imgDone.value = true; }
             </div>
             <div class="nk-skill__anim-stage" :class="{ loaded: imgDone }">
               <img
-                v-if="everOpened && curAnim"
+                v-if="curAnim"
                 class="nk-skill__anim-img"
                 :src="curAnim"
                 :alt="`${sk.name} 技能预览`"
@@ -377,12 +393,13 @@ function onImgLoad(): void { imgDone.value = true; }
         :class="{ open: tableOpen }"
         :aria-expanded="tableOpen"
         type="button"
-        @click="tableOpen = !tableOpen"
+        @click="toggleTable"
       >
         <span class="arrow">▶</span> {{ tableOpen ? '收起数据' : '技能数据' }}
       </button>
+      <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），表格内容首次展开后才挂载 -->
       <div class="nk-table-clip" :class="{ open: tableOpen }">
-        <div class="nk-table-inner">
+        <div v-if="tableEverOpened" class="nk-table-inner">
           <table class="nk-table">
             <thead>
               <tr>
