@@ -87,3 +87,15 @@ src/
 1. **数据侧（Python）**：`tools/converter/converters/<name>.py` 实现 `convert()`（读 ExcelOutput 源表 → `save_json` 到 `public/data/cn/`），在 `convert.py` 的 `MODULES` 注册表登记模块名（增量跳过 / `--only` 均以注册表为准）；补 `tools/converter/tests/` 纯函数契约测试（参照 character_detail / currency 现有模式）；本地刷新用 `python convert.py --only <name>` + `python gen_catalog.py` 重建 `DATA_CATALOG.md`
 2. **目录侧（TS）**：`src/app/catalog/pages/<id>.ts` 定义 `CatalogPageConfig`（卡片用模板字符串渲染 + 用户可见文本 `escHtml()`）→ `pages.ts` 注册进 `CATALOG_PAGES` → `src/app/router/index.ts` 添加路由，`meta.catalog` 指向目录 ID——CatalogView 自动渲染无需新视图；带专属样式的目录在配置 `styles` 字段声明，自动随路由并行加载
 3. **验证**：converter pytest + `pnpm test` + `pnpm build`（前置三守卫）；页面效果按主文件「验证流程」级别验收——新增目录属「例外确认」类改动，按主文件「任务交付流程」第 2 条列验收标准
+
+## 已知环境坑位（排障必查：CDN 图片加载类问题先读本节，禁止绕路重复排障）
+
+### jsDelivr burst 限流（2026-08-11 / 08-13 三次实证，处置路径已固化）
+
+- **现象**：页面同时加载大量 CDN 图（角色页 301 张 / 铸币墙 9 张并发）时，部分 img 立即失败或长期挂起（`complete=false`），**浏览器不自动重试**（等 40s 仍不恢复）；curl 或 `new Image()` 独立连接同 URL 却成功。本机 Clash 系统代理不影响（Playwright 显式配 proxy 实测无改善——非代理问题）。
+- **窗口特征**：同出口 IP 突发请求触发 GitHub 源 429 burst；9 张级并发窗口约 1-2 分钟恢复，301 张级窗口更长。窗口内每轮恰放行 1-2 张。
+- **正确处置三步（禁止自由发挥）**：
+  1. curl 独立连接探测 URL（单/少量并发 200 即 URL 有效——环境问题，非代码缺陷）；
+  2. 渲染态断言用 `waitForFunction` 轮询等窗口恢复（最长 60s），或改用独立连接 HTTP 探测（`page.request.head`）；
+  3. 判定环境限流后**禁止改代码规避**（真实用户网络正常）；新增页面控制单页并发图数可减轻症状。
+- **静态死链（真 404）审计归属**：`tools/dead-links`（data-sync 数据变更时触发），不放进 e2e（重构决策，见 visual.spec.ts 注释）——排障时勿在 e2e 重做死链检测。

@@ -29,9 +29,18 @@ async function waitImages(page: Page) {
       const imgs = [...document.images];
       return imgs.length > 0 && imgs.every((i) => i.complete && i.naturalWidth > 0);
     }, undefined, { timeout: 20_000 })
-    .catch(() => {
-      // 超时不失败（环境性），但显式留下记录——基线可能包含未加载图片，人工可见
-      console.warn('[visual] 图片加载超时（20s），像素基线可能包含未就绪图片');
+    .catch(async () => {
+      // 超时不失败（环境性），但显式留下记录——基线可能包含未加载图片，人工可见。
+      // 诊断信息：列出未就绪图片，一眼区分 jsDelivr burst 限流（与 curl 独立连接对比，
+      // 处置见 docs/agents/architecture.md「已知环境坑位」）与真死链（归 tools/dead-links 审计）。
+      const pending = await page.evaluate(() =>
+        [...document.images]
+          .filter((i) => !i.complete || i.naturalWidth === 0)
+          .map((i) => i.currentSrc || i.src),
+      );
+      console.warn(
+        `[visual] 图片加载超时（20s），${pending.length} 张未就绪（疑似 jsDelivr burst 限流）；前 5 张：${pending.slice(0, 5).join(' , ')}`,
+      );
     });
   await page.waitForTimeout(500);
 }
