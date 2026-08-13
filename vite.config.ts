@@ -11,7 +11,8 @@ export default defineConfig({
     watch: {
       // 坑位（2026-08-13 实证）：rolldown-vite 8（Vite 8.1.5）Windows 下原生文件事件偶发丢失，
       // 且 transform 缓存无 mtime 兜底——事件丢失后该文件 transform 结果永久陈旧（改 CSS 不生效）。
-      // 轮询模式不依赖系统事件，必配；删除后复发概率大。
+      // 轮询模式降低丢失率。注意：曾尝试「周期内容触碰」自动修复（见 docs/memory/2026-08-13.md），
+      // 已因并发写入破坏源文件废弃（多实例/多进程时 append+覆盖竞争），勿再引入自动改源文件的方案。
       usePolling: true,
       interval: 300,
       ignored: [
