@@ -14,7 +14,14 @@ import type { CharacterData } from '../../services/types';
 const props = defineProps<{
   d: CharacterData;
   charId: string;
+  /** 强化版本键列表（空 = 无强化；非空时 head 右侧显示「强化形态」入口徽章） */
+  enhKeys?: string[];
 }>();
+
+const emit = defineEmits<{ 'go-enh': [] }>();
+
+/** 是否有强化数据（驱动入口徽章挂载） */
+const enhanceable = computed(() => props.enhKeys && props.enhKeys.length > 0);
 
 /* ─── 基础展示 ─── */
 
@@ -156,6 +163,16 @@ onBeforeUnmount(() => {
             <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`" alt="">
             <span>{{ PATH[d.base_type] || d.base_type }}</span>
           </span>
+          <!-- 强化形态入口：仅强化角色显示；金色强调（数据语义色），点击滚动至强化模块 -->
+          <button
+            v-if="enhanceable"
+            class="nk-hero__badge nk-hero__badge--enh"
+            type="button"
+            @click="emit('go-enh')"
+          >
+            <span class="nk-hero__badge-mark" aria-hidden="true"></span>
+            <span>强化形态</span>
+          </button>
         </div>
       </header>
 

@@ -99,6 +99,25 @@
 .nk-char-page .nk-hero__badge:hover { border-color: var(--line-2); background: rgba(255,255,255,0.05); }
 .nk-char-page .nk-hero__badge img { width: 20px; height: 20px; }
 
+/* 强化形态入口（仅强化角色）：金色强调（数据语义色），hover 提亮；热区扩展 ≥44px */
+.nk-char-page .nk-hero__badge--enh {
+  color: var(--gold-sem);
+  border-color: color-mix(in srgb, var(--gold-sem) 32%, transparent);
+  background: color-mix(in srgb, var(--gold-sem) 7%, transparent);
+  position: relative;
+}
+.nk-char-page .nk-hero__badge--enh:hover {
+  border-color: color-mix(in srgb, var(--gold-sem) 55%, transparent);
+  background: color-mix(in srgb, var(--gold-sem) 11%, transparent);
+  color: var(--gold-sem);
+}
+.nk-char-page .nk-hero__badge--enh::after { content: ''; position: absolute; left: -6px; right: -6px; top: -8px; bottom: -8px; } /* 热区 ≥44px（无障碍硬标准） */
+/* 金标记（方形，与档案体系直角语言一致；语义：该角色存在强化形态） */
+.nk-char-page .nk-hero__badge-mark {
+  width: 4px; height: 4px; flex-shrink: 0;
+  background: var(--gold-sem); opacity: 0.85;
+}
+
 /* 一句话介绍：纯文本（去左边线），可读行宽（有意收窄至 560px：短句行宽，
    勿被下方宽度收束规则覆盖） */
 .nk-char-page .nk-hero__desc {
@@ -592,21 +611,25 @@
 .nk-char-page .nk-enh-module {
   padding-bottom: 8px;
   max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto;
+  /* Hero 徽章锚点跳转时抵消吸顶工具条（44 + 进度线）遮挡 */
+  scroll-margin-top: 60px;
 }
-/* 模块标题：编号 00（金色，不参与章节计数）+ 延伸线，与章节标题同构 */
+/* 模块头：状态行（金标 + 名称 + 当前形态）而非伪章节标题——
+   强化形态是模式控件，不与 01-09 章节计数混排（无编号、无 uppercase 延伸线） */
 .nk-char-page .nk-enh-module__head {
-  display: flex; align-items: baseline; gap: 12px;
-  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.24em; text-transform: uppercase;
-  color: var(--text2); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.02em;
+  color: var(--text-bright); margin-bottom: 14px;
 }
-.nk-char-page .nk-enh-module__idx {
-  font-size: 0.6rem; letter-spacing: 0; color: var(--gold-sem); opacity: 0.95;
-  padding-right: 10px; border-right: 1px solid var(--line-2);
+.nk-char-page .nk-enh-module__mark {
+  width: 4px; height: 14px; border-radius: 1px; flex-shrink: 0;
+  background: var(--gold-sem); opacity: 0.9;
 }
-.nk-char-page .nk-enh-module__head::after {
-  content: ''; flex: 1; height: 1px; align-self: center;
-  background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
+/* 当前形态状态（与 tabs 激活态同源文案）：HUD 金文，字前细分隔线 */
+.nk-char-page .nk-enh-module__state {
+  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
+  letter-spacing: 0.14em; color: var(--gold-sem);
+  padding-left: 10px; border-left: 1px solid var(--line-2);
 }
 /* 切换选项卡：底部细线 + 激活下划线（与吸顶区块导航同语言） */
 .nk-char-page .nk-enh-tabs {
@@ -630,6 +653,16 @@
   content: ''; position: absolute; left: 12px; right: 12px; bottom: -1px;
   height: 2px; border-radius: 1px; background: var(--primary);
 }
+/* 对比为旁路视图（并列查看器，非互斥形态）：竖线分隔 + 弱化文字；激活态仍走主色下划线 */
+.nk-char-page .nk-enh-tabs__sep {
+  width: 1px; height: 14px; margin: 0 10px;
+  background: var(--line-1); flex-shrink: 0;
+}
+.nk-char-page .nk-enh-tab--cmp {
+  color: var(--text3); font-weight: 500; letter-spacing: 0.04em;
+}
+.nk-char-page .nk-enh-tab--cmp:hover { color: var(--text2); }
+.nk-char-page .nk-enh-tab--active.nk-enh-tab--cmp:hover { color: var(--primary); }
 .nk-char-page .nk-enh-tab__idx {
   font-family: var(--font-hud); font-size: 0.55rem; opacity: 0.7;
 }
@@ -643,37 +676,25 @@
 /* ═══════════ 返回顶部 ═══════════ */
 /* 返回顶部按钮为 tokens 全局原语（.nk-top-btn），角色页沿用 */
 
-/* ═══════════ 强化摘要（模块内，随内容滚动） ═══════════ */
-/* banner 直接挂载于强化模块（无 nk-enh-notes 包裹层），margin-top 平衡与选项卡间距 */
-.nk-char-page .nk-enh-notes__banner {
-  display: flex; flex-direction: column; gap: 10px;
-  margin-top: 14px;
-  padding: 14px 16px;
-  background: rgba(255,255,255,0.016);
-  border: 1px solid var(--line-1); border-radius: 10px;
+/* ═══════════ 强化摘要 · 档案注记（模块内，随内容滚动） ═══════════ */
+/* 金色左竖线 callout —— 编辑式批注语言（无底无框，区别于表单/banner）：
+   直接挂载于强化模块（无 nk-enh-notes 包裹层），margin-top 平衡与选项卡间距 */
+.nk-char-page .nk-enh-notes {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 16px;
+  padding: 2px 0 2px 16px;
+  border-left: 2px solid color-mix(in srgb, var(--gold-sem) 50%, transparent);
 }
 .nk-char-page .nk-enh-notes__title {
-  font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.1em; /* 字号下界（迭代 §14） */
+  font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.12em; /* 字号下界（迭代 §14） */
   text-transform: uppercase; color: var(--gold-sem); font-weight: 700;
 }
 .nk-char-page .nk-enh-notes__list {
   margin: 0; padding: 0; list-style: none;
-  display: flex; flex-direction: column; gap: 6px;
-  counter-reset: nk-enh;
+  display: flex; flex-direction: column; gap: 5px;
 }
 .nk-char-page .nk-enh-notes__list li {
-  counter-increment: nk-enh;
-  font-size: 0.75rem; line-height: 1.6; color: var(--text2);
-  position: relative; padding-left: 30px;
-}
-/* 条目金色编号徽章（01/02…）：与 E 编号徽章同语言 */
-.nk-char-page .nk-enh-notes__list li::before {
-  content: counter(nk-enh, decimal-leading-zero);
-  position: absolute; left: 0; top: 1px;
-  font-family: var(--font-hud); font-size: 0.45rem; font-weight: 700;
-  color: var(--gold-sem); padding: 1px 5px; border-radius: 3px;
-  background: color-mix(in srgb, var(--gold-sem) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--gold-sem) 28%, transparent);
+  font-size: 0.75rem; line-height: 1.7; color: var(--text2);
 }
 /* 强化摘要（官方 <color> 强调词） */
 .nk-char-page .nk-enh-notes__list li span[style*="color"] {
@@ -681,20 +702,17 @@
 }
 
 /* ═══════════ 强化状态标记（ADR 0010：官方模式，无词级红绿 diff；对比模式见下段） ═══════════ */
-/* 强化角标：标记被强化的技能/星魂卡片 */
+/* 强化版本角标（V1…）：标记被强化的技能/星魂卡片。
+   版本号为信息增量——全卡强化时「强化」字样冗余（卡芙卡 6 技能 6 星魂全强），仅保留版本金章 */
 .nk-char-page .nk-skill__enh-badge,
 .nk-char-page .nk-eidolon__enh-badge {
   position: absolute; top: 10px; right: 10px;
-  display: inline-flex; align-items: center; gap: 4px;
+  display: inline-flex; align-items: center;
   font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.08em; /* 字号下界（迭代 §14） */
-  padding: 2px 7px; border-radius: 3px;
+  padding: 1px 6px; border-radius: 3px;
   font-weight: 700; z-index: 2; pointer-events: none;
-  background: color-mix(in srgb, var(--gold-sem) 15%, transparent);
-  color: var(--gold-sem); border: 1px solid color-mix(in srgb, var(--gold-sem) 30%, transparent);
-}
-.nk-char-page .nk-skill__enh-badge::before,
-.nk-char-page .nk-eidolon__enh-badge::before {
-  content: '✦'; font-size: 0.5rem;
+  background: color-mix(in srgb, var(--gold-sem) 12%, transparent);
+  color: var(--gold-sem); border: 1px solid color-mix(in srgb, var(--gold-sem) 26%, transparent);
 }
 
 /* ═══════════ 对比模式（Comparison Mode，见 ADR 0010 Update 章节） ═══════════ */
@@ -987,4 +1005,5 @@
   .nk-char-page .nk-secnav__btn--active:hover { color: var(--primary); background: transparent; }
   .nk-char-page .nk-hero__stat:hover { background: transparent; }
   .nk-char-page .nk-hero__badge:hover { border-color: var(--line-1); background: rgba(255,255,255,0.03); }
+  .nk-char-page .nk-hero__badge--enh:hover { border-color: color-mix(in srgb, var(--gold-sem) 32%, transparent); background: color-mix(in srgb, var(--gold-sem) 7%, transparent); }
 }

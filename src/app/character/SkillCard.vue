@@ -24,6 +24,8 @@ const props = defineProps<{
   animEntries?: SkillAnimEntry[] | null;
   /** 强化角标（强化模式下被强化技能 ID 集合；原始模式为 null） */
   enhMark?: { skillIds: Set<number>; rankIds: Set<number> } | null;
+  /** 强化角标文本（版本金章 V1…；仅强化模式非空） */
+  enhLabel?: string;
 }>();
 
 /* ─── 技能等级滑条（响应式替代原 data-tpl/data-lvs 方案） ─── */
@@ -280,7 +282,7 @@ function onImgLoad(): void { imgDone.value = true; }
     :class="isChild ? 'nk-skill nk-skill--child' : 'nk-skill'"
     :data-type="typeKey"
   >
-    <span v-if="isEnhanced" class="nk-skill__enh-badge">强化</span>
+    <span v-if="isEnhanced" class="nk-skill__enh-badge">{{ enhLabel }}</span>
     <div v-if="!isChild" class="nk-skill__head">
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">

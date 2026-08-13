@@ -13,6 +13,8 @@ const props = defineProps<{
   charId: string;
   /** 强化角标（强化模式下被强化星魂 ID 集合；原始模式为 null） */
   enhMark: { skillIds: Set<number>; rankIds: Set<number> } | null;
+  /** 强化角标文本（版本金章 V1…；仅强化模式非空） */
+  enhLabel?: string;
 }>();
 
 interface EidolonCard {
@@ -46,7 +48,7 @@ const eidolons = computed<EidolonCard[]>(() => {
     :key="e.num"
     class="nk-eidolon"
   >
-    <span v-if="e.enhanced" class="nk-eidolon__enh-badge">强化</span>
+    <span v-if="e.enhanced" class="nk-eidolon__enh-badge">{{ enhLabel }}</span>
     <div class="nk-eidolon__head">
       <!-- 星魂大图：官方 ui/ui3d/rank 3D 渲染源（2048² 正方形），展品式陈列 -->
       <img class="nk-eidolon__icon" :src="e.img" :alt="e.name" loading="lazy">

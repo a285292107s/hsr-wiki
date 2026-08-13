@@ -83,6 +83,7 @@ const memoSkills = computed<Skill[]>(() =>
     :char-id="charId"
     :char-data="d"
     :enh-mark="enhMark"
+    :enh-label="enhKey ? `V${enhKey}` : ''"
     :anim-entries="animFor(g.main)"
   />
   <SkillCard
@@ -92,5 +93,6 @@ const memoSkills = computed<Skill[]>(() =>
     :char-id="charId"
     :char-data="d"
     :enh-mark="enhMark"
+    :enh-label="enhKey ? `V${enhKey}` : ''"
   />
 </template>

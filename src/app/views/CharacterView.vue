@@ -94,6 +94,15 @@ const enhMark = computed<{ skillIds: Set<number>; rankIds: Set<number> } | null>
   };
 });
 
+/** 强化角标文本：版本金章（V1…）；enhMark 非空时 enhKey 必有值，绝无空文本 */
+const enhLabel = computed<string>(() => (char.enhKey ? `V${char.enhKey}` : ''));
+
+/** 强化模块头部当前状态文案（与 tabs 激活态同源） */
+const enhStateLabel = computed<string>(() => {
+  if (char.compareOn) return '对比';
+  return char.enhKey ? `V${char.enhKey} 强化` : '原始';
+});
+
 /* ═══════════ 区块导航（平铺长页：吸顶索引条 + 当前位置高亮 + 阅读进度 + 返回顶部） ═══════════ */
 
 /** 区块定义：id 对应面板 data-panel，顺序即页面视觉顺序（hero 概览区在顶部，无需跳转） */
@@ -128,6 +137,12 @@ const enhBarRef = ref<HTMLElement | null>(null);
 
 /** 面板 DOM 引用（d 就绪后收集一次；角色切换时重新收集） */
 let panels: HTMLElement[] = [];
+const enhModuleRef = ref<HTMLElement | null>(null);
+
+/** Hero 强化徽章点击：滚动到强化模块（scroll-margin-top 抵消吸顶工具条遮挡） */
+function scrollToEnh(): void {
+  enhModuleRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 function collectPanels(): void {
   panels = Array.from(
@@ -258,20 +273,21 @@ onBeforeUnmount(() => {
         <!-- 数据区块挂载门控与吸顶导航同源（visibleSections）：缺数据区块整体不挂载，杜绝「导航有、正文空」漂移。
              hero 概览区恒显（含 spine/属性总览），不参与门控，对比模式下同样保留（上下文锚点） -->
         <div class="nk-panel nk-panel--overview nk-panel--flat" data-panel="hero">
-          <CharHero :d="d" :char-id="char.charId" />
+          <CharHero :d="d" :char-id="char.charId" :enh-keys="char.enhKeys" @go-enh="scrollToEnh" />
         </div>
 
-        <!-- 强化模式（skills 模块上方）：模块标题 + 选项卡切换 + 强化摘要 -->
-        <div v-if="vis.has('skills') && char.enhKeys.length" class="nk-panel nk-panel--flat nk-enh-module">
+        <!-- 强化模式（skills 模块上方）：状态头 + 分段切换（对比为旁路视图，竖线分隔）+ 档案注记摘要 -->
+        <div v-if="vis.has('skills') && char.enhKeys.length" ref="enhModuleRef" class="nk-panel nk-panel--flat nk-enh-module">
           <div class="nk-enh-module__head">
-            <span class="nk-enh-module__idx">00</span>
-            <span>强化模式</span>
+            <span class="nk-enh-module__mark" aria-hidden="true"></span>
+            <span>强化形态</span>
+            <span class="nk-enh-module__state">{{ enhStateLabel }}</span>
           </div>
           <div class="nk-enh-tabs" role="group" aria-label="强化模式切换">
             <button
-              :class="['nk-enh-tab', { 'nk-enh-tab--active': !char.enhKey }]"
+              :class="['nk-enh-tab', { 'nk-enh-tab--active': !char.enhKey && !char.compareOn }]"
               type="button"
-              :aria-pressed="!char.enhKey"
+              :aria-pressed="!char.enhKey && !char.compareOn"
               @click="char.setEnhKey(null)"
             >
               原始
@@ -279,15 +295,16 @@ onBeforeUnmount(() => {
             <button
               v-for="k in char.enhKeys"
               :key="k"
-              :class="['nk-enh-tab', { 'nk-enh-tab--active': char.enhKey === k }]"
+              :class="['nk-enh-tab', { 'nk-enh-tab--active': char.enhKey === k && !char.compareOn }]"
               type="button"
-              :aria-pressed="char.enhKey === k"
+              :aria-pressed="char.enhKey === k && !char.compareOn"
               @click="char.setEnhKey(k)"
             >
               <span class="nk-enh-tab__idx">V{{ k }}</span>强化
             </button>
+            <span class="nk-enh-tabs__sep" aria-hidden="true"></span>
             <button
-              :class="['nk-enh-tab', { 'nk-enh-tab--active': char.compareOn }]"
+              :class="['nk-enh-tab nk-enh-tab--cmp', { 'nk-enh-tab--active': char.compareOn }]"
               type="button"
               :aria-pressed="char.compareOn"
               @click="char.setCompareOn(true)"
@@ -295,8 +312,8 @@ onBeforeUnmount(() => {
               对比
             </button>
           </div>
-          <!-- 强化摘要（v-if 门控：无摘要不渲染，无冗余包裹层） -->
-          <div v-if="enhNotes.length" class="nk-enh-notes__banner">
+          <!-- 档案注记（v-if 门控：无摘要不渲染，无冗余包裹层） -->
+          <div v-if="enhNotes.length" class="nk-enh-notes">
             <span class="nk-enh-notes__title">强化内容</span>
             <ul class="nk-enh-notes__list">
               <li v-for="(n, i) in enhNotes" :key="i" v-html="n"></li>
@@ -333,7 +350,7 @@ onBeforeUnmount(() => {
             :char-id="char.charId"
             :sections="['eidolons']"
           />
-          <EidolonsPanel v-else :d="d" :char-id="char.charId" :enh-mark="enhMark" />
+          <EidolonsPanel v-else :d="d" :char-id="char.charId" :enh-mark="enhMark" :enh-label="enhLabel" />
         </div>
         <div v-if="vis.has('bonuses') && !char.compareOn" class="nk-panel nk-panel--flat" data-panel="bonuses">
           <OverviewPanel :d="d" :sections="['bonuses']" />
