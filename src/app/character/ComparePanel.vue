@@ -91,7 +91,7 @@ const spNote = computed<string | null>(() => {
 <template>
   <!-- 技能变化 -->
   <template v-if="sections.includes('skills')">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS<span class="nk-cmp-count">变化 {{ cmp.skills.length }} 项</span></div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS<span class="nk-cmp-count">变化 {{ cmp.skills.length }} 项</span></h2>
     <div v-if="spNote" class="nk-cmp-spnote">终结技能量需求：{{ spNote }}</div>
     <template v-if="cmp.skills.length">
       <CompareSkillCard
@@ -107,7 +107,7 @@ const spNote = computed<string | null>(() => {
 
   <!-- 星魂变化 -->
   <template v-if="sections.includes('eidolons')">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS<span class="nk-cmp-count">变化 {{ cmp.ranks.length }} 项</span></div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS<span class="nk-cmp-count">变化 {{ cmp.ranks.length }} 项</span></h2>
     <template v-if="rankCards.length">
       <div
         v-for="c in rankCards"
@@ -146,9 +146,10 @@ const spNote = computed<string | null>(() => {
 
   <!-- 行迹变化 -->
   <template v-if="sections.includes('talents')">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.talents }}</span>TALENTS<span class="nk-cmp-count">变化 {{ cmp.trees.length }} 项</span></div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.talents }}</span>TALENTS<span class="nk-cmp-count">变化 {{ cmp.trees.length }} 项</span></h2>
     <template v-if="treeCards.length">
-        <div v-for="c in treeCards"
+      <div
+        v-for="c in treeCards"
         :key="c.diff.anchor + '|' + c.diff.level"
         class="nk-cmp-tree"
       >

@@ -74,7 +74,7 @@ const memoSkills = computed<Skill[]>(() =>
 </script>
 
 <template>
-  <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS</div>
+  <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS</h2>
   <SkillCard
     v-for="g in skillGroups"
     :key="`${enhKey}|${g.main.id}`"

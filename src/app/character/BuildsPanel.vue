@@ -165,7 +165,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
 
 <template>
   <template v-if="props.sections.includes('cones') && cones.length">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.cones }}</span>LIGHT CONES</div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.cones }}</span>LIGHT CONES</h2>
     <!-- 推荐光锥卡片：复用图鉴 nk-lc-card 视觉（3:4 相框立绘 + 星级光晕 + 命途徽章 + 扫光），另加 REC. 序号徽章 -->
     <div class="nk-build__cones">
       <a
@@ -191,7 +191,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
     </div>
   </template>
   <template v-if="props.sections.includes('teams') && teams.length">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.teams }}</span>TEAMS</div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.teams }}</span>TEAMS</h2>
     <div class="nk-build__teams">
       <div v-for="t in teams" :key="t.teamId" class="nk-build__team">
         <div class="nk-build__team-slot nk-build__team-slot--main">
@@ -219,7 +219,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
     </div>
   </template>
   <template v-if="props.sections.includes('relics') && hasRelics(props.d)">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.relics }}</span>RELICS</div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.relics }}</span>RELICS</h2>
     <div class="nk-build__relics">
       <!-- 主词条槽位卡片 -->
       <div v-if="relicMainStats.length" class="nk-relic-slots">

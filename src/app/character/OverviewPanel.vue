@@ -138,7 +138,7 @@ const abilities = computed<Ability[]>(() => {
 
 <template>
   <template v-if="props.sections.includes('profile') && hasProfile(props.d)">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.profile }}</span>PROFILE</div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.profile }}</span>PROFILE</h2>
     <div class="nk-profile">
       <div v-for="p in profileRows" :key="p.label" class="nk-profile__item">
         <span class="nk-profile__label">{{ p.label }}</span>
@@ -147,7 +147,7 @@ const abilities = computed<Ability[]>(() => {
     </div>
   </template>
   <template v-if="props.sections.includes('bonuses') && hasBonusNodes(props.d)">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.bonuses }}</span>STAT BONUSES</div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.bonuses }}</span>STAT BONUSES</h2>
     <div class="nk-bonus-grid">
       <div v-for="b in attrBonuses" :key="b.name" class="nk-bonus">
         <img v-if="b.icon" class="nk-bonus__icon" :src="b.icon" loading="lazy">
@@ -157,7 +157,7 @@ const abilities = computed<Ability[]>(() => {
     </div>
   </template>
   <template v-if="props.sections.includes('talents') && hasTalentNodes(props.d)">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.talents }}</span>TALENTS</div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.talents }}</span>TALENTS</h2>
     <div
       v-for="ab in abilities"
       :key="ab.pointId ?? ab.name"
@@ -179,7 +179,7 @@ const abilities = computed<Ability[]>(() => {
     </div>
   </template>
   <template v-if="props.sections.includes('stories') && hasStories(props.d)">
-    <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.stories }}</span>STORIES</div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.stories }}</span>STORIES</h2>
     <div class="nk-stories">
       <div
         v-for="s in storyEntries"

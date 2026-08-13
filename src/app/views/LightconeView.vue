@@ -251,7 +251,7 @@ onBeforeUnmount(() => {
       <div class="nk-panels">
         <div class="nk-panel nk-panel--active">
           <!-- 技能 -->
-          <div class="nk-title">SKILL</div>
+          <h2 class="nk-title">SKILL</h2>
           <div class="nk-skill nk-lc-skill">
             <div class="nk-skill__head">
               <span class="nk-skill__type-dot" style="--sk-accent: var(--primary);"></span>
@@ -306,7 +306,7 @@ onBeforeUnmount(() => {
 
           <!-- 晋阶属性：阶段卡片网格（每阶段一张典藏卡：等级上限大字 + 三属 + 突破材料） -->
           <template v-if="statRows.length">
-            <div class="nk-title">ASCENSION</div>
+            <h2 class="nk-title">ASCENSION</h2>
             <div class="nk-lc-asc-grid">
               <div
                 v-for="row in statRows"
@@ -358,7 +358,7 @@ onBeforeUnmount(() => {
 
           <!-- 故事：卡面描述 -->
           <template v-if="storyHtml">
-            <div class="nk-title">STORY</div>
+            <h2 class="nk-title">STORY</h2>
             <div class="nk-lc-story" v-html="storyHtml"></div>
           </template>
         </div>

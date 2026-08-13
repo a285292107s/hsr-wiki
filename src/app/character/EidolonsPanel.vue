@@ -40,7 +40,7 @@ const eidolons = computed<EidolonCard[]>(() => {
 </script>
 
 <template>
-  <div class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS</div>
+  <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS</h2>
   <div
     v-for="e in eidolons"
     :key="e.num"
