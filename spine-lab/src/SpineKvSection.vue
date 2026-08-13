@@ -5,7 +5,7 @@
  * spine-manifest.json 后，在本面板验收其能否正常渲染：
  * - 「一键验收」顺序加载全部场景：逐层加载状态 + 单画布合并渲染（复用生产管线 createScenePipeline，
  *   验收基线 = 生产渲染由代码结构保证）+ 黑块自动检测（近黑不透明像素占比），生成可导出的 PASS/FAIL 报告；
- *   判定引擎在 src/debug/kv-acceptance.ts，验收编排在 src/debug/use-kv-acceptance.ts。
+ *   判定引擎在 spine-lab/src/kv-acceptance.ts，验收编排在 spine-lab/src/use-kv-acceptance.ts。
  * - 单层模式为逐层状态视图：每层独立画布 + 加载状态/耗时/错误，供定位「哪一层异常」；
  *   画布带不透明深色衬底（LAYER_BG），混合 slot 的 dst 非透明 → 无透明退化黑块。
  * 渲染参数与生产完全一致：同一固定 viewport + pad 0 + rawDataURIs 纹理重映射。

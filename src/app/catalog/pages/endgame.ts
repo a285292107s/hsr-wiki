@@ -8,7 +8,7 @@ import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
 /**
  * 终局官方素材 URL（jsDelivr 加速自建 fork GitHub 源，基址统一收口 OFFICIAL_ICON_BASE，跟 main 分支最新）。
  * 白名单 = 语义闸门：仅放行「赛季主题/页签/横幅类」路径，排除开关图/场景背景等 UI 素材；
- * 全部前缀经 tools/check-endgame-icons.mjs 实测在 StarRailTextures 仓库可命中：
+ * 全部前缀均实测在 StarRailTextures 仓库可命中：
  * - TabIcon/**            → tabicon/**（虚构 ChallengeThemeTabIcon / 末日 ChallengeBossTabIcon）
  * - ChallengePeak/**      → challengepeak/**（异相仲裁每期 ThemeIconPicPath）
  * - UI/ChallengeBoss/**   → ui/challengeboss/**（玩法级默认 QuestTabImg）
@@ -291,7 +291,7 @@ export const endgamePage: CatalogPageConfig = {
     const idlineHtml = mode
       ? `<span class="nk-eg-card__idline">${noHtml}<span class="nk-eg-card__moden">${mode.en}</span></span>`
       : (noHtml ? `<span class="nk-eg-card__idline">${noHtml}</span>` : '');
-    // 状态徽标：色点 + 文字（不单靠颜色传达，§13.7 无障碍）——色点经 --st-color 映射
+    // 状态徽标：色点 + 文字（不单靠颜色传达，无障碍硬标准）——色点经 --st-color 映射
     const badge = st !== '未知' ? `<span class="nk-eg-card__status"><span class="nk-eg-card__dot"></span>${escHtml(st)}</span>` : '';
     // 铭牌徽标：星启模式赛季 / 异相仲裁关卡组成
     // （FINAL 最终层标识已移除：层数统计为模式内恒值冗余——maze 10/12 层、story 4 层、boss 4 层，可由模式推断）

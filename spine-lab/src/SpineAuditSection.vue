@@ -6,8 +6,8 @@
  *   L1 解析：骨架元数据提取（动画/皮肤/slot/附件/混合模式）
  *   L2 渲染：串行单实例渲染检查 + 像素采样（official 逐动画；skel/场景降级仅默认动画）
  * 人工只需浏览异常项 → 展开详情看资源表/纹理对照/元数据/采样 → 预览动画确认 → 按诊断建议修复。
- * 本文件仅承担队列编排与面板框架；审核引擎在 src/debug/spine-audit.ts，
- * 展开详情（含预览生命周期）在 src/debug/SpineAuditDetail.vue。
+ * 本文件仅承担队列编排与面板框架；审核引擎在 spine-lab/src/spine-audit.ts，
+ * 展开详情（含预览生命周期）在 spine-lab/src/SpineAuditDetail.vue。
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { loadSpineManifests, resolveSpine } from '../../src/services/api';

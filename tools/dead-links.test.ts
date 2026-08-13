@@ -1,17 +1,17 @@
 /**
  * 死链低频审计（数据变更时触发；CI 由 data-sync.yml 挂接）
  *
- * 背景（2026-08-12 重构决策，替代 e2e 渲染态死链检查）：
+ * 背景（重构决策，替代 e2e 渲染态死链检查）：
  * - 死链是静态事实（URL 404），每次 e2e 验证低性价比 → 改为数据驱动 + HTTP 探测
  * - URL 构造复用前端真实构造函数（src/lib/icons.ts / services/cdn），零维护漂移
  * - 死链判定：明确 HTTP 404（HEAD + Range GET 双重确认）才 FAIL；其余环境性信号仅 WARN
  *
- * jsDelivr 正确使用（2026-08-12 联网核实 + 实测）：
+ * jsDelivr 正确使用（联网核实 + 实测）：
  * - AUP：本项目为图标包类资源（官方明确 icons packs 不算滥用），合规
  * - 404 响应带 `Cache-Control: no-cache, no-store` —— jsDelivr 不缓存 404，每次探测
  *   都会回源 GitHub 验证 → 已知死链必须本地缓存，禁止反复探测制造无效回源流量
  * - 首次探测可能触发回源（冷文件无缓存），HEAD 请求无 body 是最低开销方式（已实测支持）
- * - jsDelivr 对突发高并发敏感（429；2026-08-11 实证 301 图 burst 限流）→ 并发压低 + 退避重试
+ * - jsDelivr 对突发高并发敏感（429；实测 301 图 burst 限流）→ 并发压低 + 退避重试
  * - API 文档建议 User-Agent 标识工具 → 审计请求携带回源可追溯的 UA
  * - 403 多为数据中心 IP 拒用（CI 历史教训），退避重试一次后判 env 不失败
  *
@@ -85,7 +85,7 @@ function add(map: Urls, url: string | undefined | null, source: string): void {
   if (url && !map.has(url)) map.set(url, source);
 }
 
-/** 收集数据中全部渲染 URL（调用点与 src/app 各视图/目录页一致，2026-08-12 核对） */
+/** 收集数据中全部渲染 URL（调用点与 src/app 各视图/目录页一致） */
 function collectUrls(): Urls {
   const urls: Urls = new Map();
 
@@ -267,7 +267,7 @@ async function singleRequest(url: string, range: boolean): Promise<'ok' | 'dead'
     if (r.status === 301 || r.status === 302 || r.status === 303 || r.status === 307 || r.status === 308) return 'ok';
     if (r.status === 404) return 'dead';
     if (r.status === 429 || r.status === 503) return 'throttled';
-    // 403 数据中心 IP 拒用是持续信号（2026-08-11 实证），退避重试无意义 → 直接判 env
+    // 403 数据中心 IP 拒用是持续信号（历史已实证），退避重试无意义 → 直接判 env
     if (r.status === 403) return 'env';
     return 'env'; // 其余 4xx/5xx 视为环境性
   } catch {

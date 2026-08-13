@@ -32,23 +32,23 @@ export interface Skill {
   /** 技能标签：官方 SkillTag 中文文本（如「单攻」「召唤」），空则无标签 */
   tag?: string | null;
   sp_base?: number | null;
-  /** 技能级能量需求（忆灵终结技独有 + 双段能量角色，2026-08-03 审计收录） */
+  /** 技能级能量需求（忆灵终结技独有 + 双段能量角色） */
   sp_need?: number | null;
   bp_need?: number | null;
   bp_add?: number | null;
   /** 韧性消耗 [单攻, 群攻, 扩散] */
   show_stance_list?: number[] | null;
-  /** 削韧属性（7 种元素枚举，2026-08-03 审计收录） */
+  /** 削韧属性（7 种元素枚举） */
   stance_damage_type?: string | null;
-  /** 削韧显示值（2026-08-03 审计收录） */
+  /** 削韧显示值 */
   stance_damage_display?: number | null;
-  /** 技能资源消耗描述（如「#5点【新蕊】」，2026-08-03 审计收录） */
+  /** 技能资源消耗描述（如「#5点【新蕊】」） */
   skill_need?: string | null;
-  /** 技能最高等级（10/15，2026-08-03 审计收录） */
+  /** 技能最高等级（10/15） */
   max_level?: number | null;
-  /** 技能→星魂关联（被哪些星魂强化，2026-08-03 审计收录） */
+  /** 技能→星魂关联（被哪些星魂强化） */
   rated_rank_id?: number[] | null;
-  /** 技能→行迹点关联（2026-08-03 审计收录） */
+  /** 技能→行迹点关联 */
   rated_skill_tree_id?: number[] | null;
   skill_combo_value_delta?: unknown;
   extra?: Record<string, SkillExtra>;

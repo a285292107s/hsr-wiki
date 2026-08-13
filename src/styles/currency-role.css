@@ -459,7 +459,7 @@
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.45);
 }
-.nk-crole-hero__stars { color: var(--gold); font-size: 15px; letter-spacing: 2px; text-shadow: 0 0 12px var(--crole-num-glow); } /* 星级 = 语义金（§13.2：CW 下降阶暗铜） */
+.nk-crole-hero__stars { color: var(--gold); font-size: 15px; letter-spacing: 2px; text-shadow: 0 0 12px var(--crole-num-glow); } /* 星级 = 语义金（CW 下降阶暗铜） */
 .nk-crole-hero__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-crole-hero__traits {
   display: flex;
@@ -935,7 +935,7 @@
 }
 .nk-crole-gm__table thead th:hover { background: color-mix(in srgb, var(--crole-num) 12%, transparent); }
 .nk-crole-gm__corner { text-align: left; cursor: default !important; color: var(--text2) !important; }
-/* 星级列 = 语义金（§13.2：CW 下降阶暗铜）；激活态为主题强调位保持亮金 */
+/* 星级列 = 语义金（CW 下降阶暗铜）；激活态为主题强调位保持亮金 */
 .nk-crole-gm__table th.nk-crole-gm__star { color: var(--gold); }
 .nk-crole-gm__table th.nk-crole-gm__star.is-active { color: var(--crole-num); }
 .nk-crole-gm__star.is-active {

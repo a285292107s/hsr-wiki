@@ -282,7 +282,7 @@ export interface MazeListEntry {
   clear_score?: number;
   /** 赛季海报/标签图（BackGroundPath/TabPicPath 等源字段原样保留；tab = 赛季专属图标，
    *  default = 玩法级默认图标兜底，前端 seasonArtUrl 依次解析；
-   *  tab_select/theme_banner/theme_icon/theme_bg/poster_tab/handbook_banner 为 2026-08 补转字段，
+   *  tab_select/theme_banner/theme_icon/theme_bg/poster_tab/handbook_banner 为补转字段，
    *  经 endgameArtUrl 白名单消费） */
   arts?: {
     background?: string;

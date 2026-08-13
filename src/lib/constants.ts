@@ -20,7 +20,7 @@ export function setUseOfficialPaths(v: boolean): void {
   USE_OFFICIAL_PATHS = v;
 }
 
-/** 官方 jsDelivr StarRailTextures 镜像分支（自建 fork a285292107s，跟 main 最新以获取新版本数据；与 tools/check-sr-textures.mjs 一致）。 */
+/** 官方 jsDelivr StarRailTextures 镜像分支（自建 fork a285292107s，跟 main 最新以获取新版本数据）。 */
 export const JS_DELIVR_BRANCH = 'main';
 
 /** 官方图片 CDN 基址（USE_OFFICIAL_PATHS=true 时图标直接在此后拼仓库相对路径）。 */

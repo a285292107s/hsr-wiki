@@ -62,7 +62,7 @@ const metrics = computed<Metric[]>(() => {
   if (props.sk.sp_base != null) {
     met.push({ label: '能量', html: String(props.sk.sp_base) });
   }
-  // 技能级能量需求（终结技/忆灵终结技；与 sp_base 的回复量互补，2026-08-03 审计新增）
+  // 技能级能量需求（终结技/忆灵终结技；与 sp_base 的回复量互补）
   if (props.sk.sp_need != null) {
     met.push({ label: '能量需求', html: String(props.sk.sp_need) });
   }
@@ -90,7 +90,7 @@ const metrics = computed<Metric[]>(() => {
   return met;
 });
 
-/* ─── 技能资源消耗条件（SkillNeed，随当前等级参数渲染；2026-08-03 审计新增） ─── */
+/* ─── 技能资源消耗条件（SkillNeed，随当前等级参数渲染） ─── */
 const needHtml = computed(() => {
   const raw = props.sk.skill_need;
   if (!raw) return '';
@@ -98,7 +98,7 @@ const needHtml = computed(() => {
   return fmtDesc(raw, (lvData && lvData.param_list) || []);
 });
 
-/* ─── 强化关联（rated_rank_id → 星魂 E 编号；rated_skill_tree_id → 行迹名；2026-08-03 审计新增） ─── */
+/* ─── 强化关联（rated_rank_id → 星魂 E 编号；rated_skill_tree_id → 行迹名） ─── */
 /* 用户可见文案「强化来源」，与强化模式角标「强化」区分（前者=被什么强化，后者=处于加强形态） */
 interface RatedLink {
   kind: 'rank' | 'tree';

@@ -40,7 +40,7 @@
 /* 区块导航：激活态用模式色（身份锚点，覆盖 tokens 默认主色） */
 .nk-egd-secnav .nk-secnav__btn--active { color: var(--eg-color); }
 .nk-egd-secnav .nk-secnav__btn--active::after { background: var(--eg-color); }
-/* 触控热区补足 44px（§13.7 硬标准：tokens 全局 ::before 上下 -7px，实测 28px 视觉合计 42px，此处补 1px） */
+/* 触控热区补足 44px（硬标准：tokens 全局 ::before 上下 -7px，实测 28px 视觉合计 42px，此处补 1px） */
 .nk-egd-secnav .nk-secnav__btn::before { top: -8px; bottom: -8px; }
 /* 章节工具行：层级批量展开/折叠（位于"关卡层级 LEVELS"标题行内，随章节同屏；
    按钮紧跟标题文字，延伸线保持完整收束；::before 扩展 44px 热区） */
@@ -276,7 +276,7 @@
   white-space: nowrap;
 }
 
-/* 指标条已移除（层数/阶段/回合为恒值或低价值冗余，2026-08 决策） */
+/* 指标条已移除（层数/阶段/回合为恒值或低价值冗余） */
 
 .nk-egd-elem {
   width: 20px;
@@ -288,7 +288,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   内容区 · 宽度体系（§13.9）：面板 L1 1000，模块 L2 952，文本 L3 800
+   内容区 · 宽度体系：面板 L1 1000，模块 L2 952，文本 L3 800
 ═══════════════════════════════════════════ */
 /* 终局面板：独立于 tab 面板原语（tokens.css .nk-panel 默认 display:none 供多 Tab 激活切换；
    详情页唯一面板直接显示，沿用居中宽度与 nk-fade 入场） */
@@ -431,7 +431,7 @@
   cursor: pointer;
   transition: background 0.2s var(--ease);
 }
-/* 触控热区扩展至 ≥44px（§13.7 硬标准：视觉高度近 44px，上下各补 4px 余量） */
+/* 触控热区扩展至 ≥44px（硬标准：视觉高度近 44px，上下各补 4px 余量） */
 .nk-egd-floor__head::before {
   content: '';
   position: absolute;
@@ -1264,7 +1264,7 @@
   transition: background 0.2s var(--ease);
   user-select: none;
 }
-/* 触控热区扩展至 ≥44px（§13.7 硬标准：视觉约 28px 高，上下各扩 10px） */
+/* 触控热区扩展至 ≥44px（硬标准：视觉约 28px 高，上下各扩 10px） */
 .nk-egd-tierce__nodehead::before {
   content: '';
   position: absolute;
@@ -1371,7 +1371,7 @@
   user-select: none;
   border-radius: 6px;
 }
-/* 触控热区扩展至 ≥44px（§13.7 硬标准：视觉约 33px 高，上下各扩 7px） */
+/* 触控热区扩展至 ≥44px（硬标准：视觉约 33px 高，上下各扩 7px） */
 .nk-egd-tierce__wavehead::before {
   content: '';
   position: absolute;

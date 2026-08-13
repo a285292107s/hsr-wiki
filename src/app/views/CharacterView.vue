@@ -107,7 +107,7 @@ const sectionDefs = [
   { id: 'profile', label: '配音' },
 ] as const;
 
-/** 导航区块：按实际渲染过滤（缺数据区块同步隐藏，编号缺口保留；全局化 §13.3） */
+/** 导航区块：按实际渲染过滤（缺数据区块同步隐藏，编号缺口保留） */
 const navSections = computed(() => {
   const dd = d.value;
   if (!dd) return [];

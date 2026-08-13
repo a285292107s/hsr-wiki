@@ -2,10 +2,10 @@
    终局内容 · 档案索引（Endgame Index）
    由路由 /endgame 并行加载（endgameCatalogView）。
    - 四模式合并单页：模式身份为筛选选项，卡片以 v-html 模板字符串渲染
-   - V4 索引行（2026-08）：去盒框卡片墙 → 无盒框档案索引行——
+   - V4 索引行：去盒框卡片墙 → 无盒框档案索引行——
      发丝线分隔 / 编号轨 + 模式英文标签身份锚点 / 四模式领域色 --eg-* 回归
      （与详情页 endgame-detail.css 同源：--eg-color 经 data-mode 映射）
-   - 设计语言（docs/设计语言-深空档案-编辑式排版.md）：
+   - 设计语言：
      № 编号身份锚点 / 无框展品图标（hairline 单线）/
      规格表行式统计（细线分隔）/ 增益为文本点分隔（去药丸胶囊）/
      状态为文字徽标（去发光点）/ 模式色仅存于身份锚点
@@ -126,7 +126,7 @@
 .nk-eg-card__mon:hover { transform: scale(1.1); border-color: color-mix(in srgb, var(--eg-color) 48%, transparent); z-index: 2; }
 .nk-eg-card__more { font-family: var(--font-hud); font-size: 0.52rem; letter-spacing: 0.06em; color: var(--text3); white-space: nowrap; }
 
-/* 状态徽标（meta 行左侧）：色点 + 文字，不单靠颜色传达（§13.7 无障碍）；
+/* 状态徽标（meta 行左侧）：色点 + 文字，不单靠颜色传达（无障碍硬标准）；
    文字式徽标——无胶囊底、无发光（去 AI 味） */
 .nk-eg-card__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; color: var(--st-color); transition: color 0.25s; }
 .nk-eg-card__dot { width: 5px; height: 5px; border-radius: 50%; background: var(--st-color); flex-shrink: 0; }
@@ -137,7 +137,7 @@
 /* ── 状态修饰 ── */
 .nk-eg-card--ended { opacity: 0.82; }
 .nk-eg-card--ended:hover { opacity: 1; }
-/* 进行中：状态徽标已承载（§13.7 禁止无限循环动画，live 由语义色徽标表达） */
+/* 进行中：状态徽标已承载（禁止无限循环动画，live 由语义色徽标表达） */
 
 /* ── hover（仅精细指针设备；行背景模式色 5% 微亮 + 左缘竖条浮现，
        身份锚点（编号/英文标签/图标描边）提亮） ── */
@@ -174,7 +174,7 @@
   .nk-eg-card::before { transition: none; }
 }
 
-/* ── 触屏设备：重置粘滞 hover（三件套全局，§13.7） ── */
+/* ── 触屏设备：重置粘滞 hover（三件套全局，无障碍硬标准） ── */
 @media (hover: none) {
   .nk-eg-card:hover { background: transparent; }
   .nk-eg-card:hover::before { transform: translateY(-50%) scaleY(0); }

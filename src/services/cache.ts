@@ -6,7 +6,7 @@
  *   L3 网络（15s 超时）
  *
  * 数据均为同域静态 JSON（Vercel CDN 托管），跨刷新持久化由 HTTP 缓存承担，
- * 无需 IndexedDB 持久层（2026-08 精简，原 L2 IDB + TTL + 版本清理已移除）。
+ * 无需 IndexedDB 持久层（已精简：原 L2 IDB + TTL + 版本清理已移除）。
  */
 import { NkError } from '../lib/errors';
 

@@ -6,14 +6,14 @@
  * - jsDelivr 404（上游未收录，如仓库未更新的新内容 / 星魂 3/5 官方无文件）→ 自动回退 nanoka
  *   （nanoka 同样缺失时由 img error 事件兜底降级）
  *
- * 路径规则（数据源官方路径 → 仓库结构，经 tools/check-sr-textures.mjs 实测）：
+ * 路径规则（数据源官方路径 → 仓库结构，实测验证）：
  * - 官方 SpriteOutput/{SubDir}/... → spriteoutput/{subdir}/...（目录段小写，文件名保原大小写）
  * - 分类映射差异：skillicons 按角色 id 分目录（avatar/{id}/）；trace 在 ui/avatar/icon/；
  *   element 在 icondamagetype/（IconDamageType 前缀）；pathicon 在 professioniconmiddle/
  *   （Priest→Pirest、Elation→Joy 官方拼写差异）
  *
  * 升级流程：自建 fork 同步上游后无需改码；jsDelivr 有边缘缓存，新数据可能延迟生效，
- * 必要时 purge.jsdelivr.net 清缓存，并重跑 node tools/check-sr-textures.mjs 复核命中率。
+ * 必要时 purge.jsdelivr.net 清缓存，并实测算复核命中率。
  */
 import type { CdnCategory } from './base';
 import { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH, OFFICIAL_ICON_BASE } from '../../lib/constants';
@@ -77,7 +77,7 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
 };
 
 /** 通用转换规则：官方 SpriteOutput 完整路径 → 仓库相对路径（目录段小写、文件名保留）。
- * 与 converter config.py _rule_dir_lower / tools/check-sr-textures.mjs 规则对齐；
+ * 与 converter config.py _rule_dir_lower 规则对齐；
  * 供输入为完整 SpriteOutput 路径、未注册 JS_DELIVR_RULES 分类的场景复用（如终局赛季页签图）。
  */
 export function spriteOutputToRel(path: string): string {
