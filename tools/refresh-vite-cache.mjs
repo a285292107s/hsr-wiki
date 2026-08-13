@@ -5,14 +5,16 @@
  * 用法：node tools/refresh-vite-cache.mjs <文件或目录...>
  * 例：  node tools/refresh-vite-cache.mjs src/styles/character.css src/app/views
  *
- * 背景坑位（详见 docs/memory/）：Vite 8.1.5（rolldown 内核）在 Windows 下，
- * 「文件被整写（O_TRUNC 重写，如工具保存/脚本改写）之后的紧邻变更事件」会被 watcher
- * 吞掉；而 transform 缓存无 mtime 兜底——事件丢失 = 该文件 transform 结果永久陈旧
- * （改 CSS/TS 后 dev 页面不更新，重启才恢复）。
+ * 背景坑位（详见 docs/memory/2026-08-13.md）：Vite 8.1.5（rolldown 内核）在 Windows 下，
+ * 「文件被整写（O_TRUNC 重写，如工具保存/脚本改写）之后的紧邻变更事件」会被软失效吸收——
+ * 事件到达 vite（page reload 日志可见）但 rolldown rust 缓存未刷新，transform 重跑仍输出旧内容，
+ * 且无 mtime 兜底——文件永久陈旧（改 CSS/TS 后 dev 页面不更新，重启才恢复）。
+ * JS 侧 invalidateAll / watcher.emit / utimes 均无法打通 rust 缓存（已逐一实测），仅真实内容写入有效。
  *
- * 自愈原理：对被吞文件的后续写入事件会被 watcher 正常捕获。本工具把目标文件
- * 「读回 → 写回」两次（间隔 400ms），第二次写回必触发捕获 → invalidate 模块 →
- * 重新 transform 时读到磁盘最新内容（内容本身未变，纯事件触发）。
+ * 自愈原理：对目标文件「读回 → 写回」两次（间隔 400ms），第二次写回必被 watcher 捕获为
+ * 真实写入 → rust 缓存失效 → 重新 transform 读到磁盘最新内容（内容本身未变，纯事件触发）。
+ * 注意：勿将此原理自动化为 dev 插件定时改写源文件——多进程并发写入会破坏源文件（已实测事故，
+ * 见 docs/memory/2026-08-13.md），只能手动按需使用。
  *
  * 注意：仅供「文件已是最新但 dev server 返回旧内容」时使用；运行前先保存全部编辑，
  * 本工具不会改动文件内容（写回 = 原样）。

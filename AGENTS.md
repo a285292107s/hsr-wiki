@@ -17,6 +17,12 @@ pnpm install
 # 本地开发 → http://localhost:5173/（strictPort：端口被占用时明确报错，先探测 5173 复用已有实例，无实例才新起）
 pnpm dev
 
+# dev 缓存自愈（rolldown-vite 8 Windows 坑位，排查见 docs/memory/2026-08-13.md）
+# 症状：改 CSS/TS 后 dev 永远返回旧内容（事件被软失效吸收，无 mtime 兜底），重启才恢复
+# 用法：仅当「文件已最新但 dev 响应旧」时执行——node tools/refresh-vite-cache.mjs <文件/目录...>
+# 纪律：先诊断（curl 对比磁盘特征串）→ 自愈 → 才允许重启；禁止引入自动改源文件的失效方案（已废弃）
+node tools/refresh-vite-cache.mjs
+
 # 类型检查 + 生产构建 → dist/（前置 check-guards 三守卫：色彩收口 / Spine 清单 / 对比度）
 pnpm build
 
@@ -121,6 +127,7 @@ python -m pytest tests/ -v               # converter 单元测试
 - **降级必须记录**：任何「超预算降级」「跳过某级验证」「豁免项」必须在交付记录/回复中写明（原级别、降级原因）；禁止静默降级——降级即覆盖缩减，未记录视为漏测，且作为「任务交付流程」第 5 条的沉淀信号
 - **验证耗时控制**：`visual.spec` 全量禁止——只跑改动实际影响的用例（`--grep 首页` 等），与改动无关的 character/endgame/currency 用例直接跳过；同一会话内全量 e2e 最多执行一次；T1a/T1b 纯 CSS 改动用守卫 + 单探针计算样式断言 + `layout.spec`（约 20s）即可，不跑像素基线
 - **环境问题先排除**：headless 内 CDN/网络加载失败先判定环境性（`curl` 验证 URL 可达），不当代码缺陷深究
+- **dev 缓存陈旧先自愈**：dev 下怀疑「改了不生效」时禁止直接重启分析——先 `curl` 对比 dev 响应与磁盘特征串定位，再 `node tools/refresh-vite-cache.mjs` 自愈（详见常用命令区注释与 docs/memory/2026-08-13.md）；该问题根因是 rolldown-vite 8 事件软失效吸收，`usePolling` 已配置但不根除
 - **CDP / headless 取证（兜底，仅 Playwright 覆盖不到时启用）**：首选 Chrome（`--disable-extensions` + 独立 `--user-data-dir`，启动后验 `/json` 隔离，出现未知标签页立即 kill）；探针脚本单 evaluate 一次成型、总超时 30s，含正则/引号/`$` 的脚本一律 Write 成 `.mjs`/`.ps1` 执行、禁止内联（PowerShell 转义 + Bash 预展开 `$var` 陷阱）；结果用 node `writeFileSync` 落盘、禁止 shell 重定向 `>`（中文 Windows PowerShell 损坏 UTF-8）；evaluate 无响应 15s 内 kill 重启一次，仍失败降级 `--dump-dom`（L1），禁止在卡死页面上重试
 - **PowerShell 编码**：pwsh 7 `[Console]::OutputEncoding` 默认 gb2312，解码外部程序（node）的 UTF-8 stdout 会乱码；管道外部输出前前缀 `[Console]::OutputEncoding = [Text.UTF8Encoding]::new()`；读文件显式 `-Encoding UTF8`
 - **条件等待与清理**：用 `page.waitForFunction` / `expect.poll` 精确条件，禁止固定 sleep 与长轮询；不等待与断言目标无关的就绪状态（如只查 padding 就不等 spine 渲染）；验证确认后单独 Remove-Item 清理临时文件
