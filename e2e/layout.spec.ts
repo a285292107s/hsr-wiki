@@ -41,6 +41,35 @@ test.describe('布局验收：常规主题', () => {
     expect(await findHorizontalOverflow(page)).toEqual([]);
     assertNoErrors();
   });
+
+  test('角色图鉴 /character：手机断点行式卡（圆头像、单列、无溢出）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/character');
+    await waitForCatalogCards(page);
+    const cards = page.locator('.nk-idx-grid a.nk-idx-card');
+    await expect(cards.first()).toBeVisible();
+    // 单列：第二张卡 top ＞ 第一张（行式堆叠，而非并排）
+    const tops = await cards.evaluateAll((els) =>
+      els.slice(0, 3).map((el) => Math.round(el.getBoundingClientRect().top)),
+    );
+    expect(tops[1]).toBeGreaterThan(tops[0]);
+    // picture 双源命中：手机断点 currentSrc 为 127px 圆头像（非半身立绘）
+    const src = await cards.first().locator('img').first().evaluate(
+      (el) => (el as HTMLImageElement).currentSrc,
+    );
+    expect(src).toContain('avatarroundicon');
+    // 行卡：44px 圆头像 + 总高 ≤ 80px（半身立绘大卡让位）
+    const size = await cards.first().locator('.nk-idx-card__portrait').evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { w: Math.round(r.width), h: Math.round(r.height) };
+    });
+    expect(size).toEqual({ w: 44, h: 44 });
+    const cardH = await cards.first().evaluate((el) => Math.round(el.getBoundingClientRect().height));
+    expect(cardH).toBeLessThanOrEqual(80);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
 });
 
 test.describe('布局验收：终局合并单页', () => {

@@ -611,13 +611,65 @@
   /* 网格列宽覆盖：仅改 --nk-grid-min，骨架屏与真实网格共用变量保持一致 */
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
   .nk-lc-grid { --nk-grid-min: 150px; }
-  /* 角色画廊墙：手机 2 列大卡（画廊 3:4 立绘，图片即主体；
-     字号收敛适配窄卡，无旧名录的 width 覆盖——立绘窗 3:4 由 aspect-ratio 撑满 */
-  .nk-idx-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .nk-idx-card__name { font-size: 0.8rem; }
-  .nk-idx-card__stars { font-size: 0.5rem; letter-spacing: 0; }
-  .nk-idx-card__meta { font-size: 0.6rem; gap: 3px; }
-  .nk-idx-card__icon { width: 12px; height: 12px; }
+  /* 角色画廊墙 → 行式信息卡：半身立绘让位 127px 圆头像（picture 双源已按断点切换），
+     单列发丝线分隔，最大化信息效率（同族语言：首页索引行——发丝线 + 克制按压反馈）。
+     稀有度色相：--idx-r 驱动头像 ring/衬底（仿光锥卡 --lc-r 单一来源模式，勿新增色值） */
+  .nk-idx-card[data-rarity='5'] { --idx-r: var(--rarity-5); }
+  .nk-idx-card[data-rarity='4'] { --idx-r: var(--rarity-4); }
+  .nk-idx-grid { grid-template-columns: 1fr; gap: 1px; }
+  .nk-idx-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 63px;
+    padding: 8px 4px;
+    border-radius: 0;
+    border-bottom: 1px solid var(--line-1);
+    transition: background 0.15s;
+  }
+  /* 行式头像：44px 圆形；ring = 稀有度色发丝（1px），衬底微染承接未加载占位 */
+  .nk-idx-card__portrait {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    aspect-ratio: auto;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--idx-r, var(--text3)) 7%, transparent);
+    position: relative;
+  }
+  .nk-idx-card__portrait::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--idx-r, var(--text3)) 42%, transparent);
+    pointer-events: none;
+  }
+  .nk-idx-card__portrait img {
+    border-radius: 50%;
+    background: transparent;
+  }
+  /* 提权覆盖懒加载占位渐变（677 行区块的 5/4 rarity 渐变背景，特异性 (0,2,2) 高于裸 img 规则）——
+     行式头像是 44px 小圆，由 portrait 衬底（--idx-r 7%）承接占位，不再需要大卡渐变 */
+  .nk-idx-grid .nk-idx-card[data-rarity] .nk-idx-card__portrait img { background: transparent; }
+  /* 信息列：撤掉立绘叠加的 absolute 渐变条，改为普通流内两行 */
+  .nk-idx-card__body {
+    position: static;
+    flex: 1;
+    min-width: 0;
+    gap: 4px;
+    padding: 0;
+    background: none;
+  }
+  .nk-idx-card__name { font-size: 0.9rem; text-shadow: none; }
+  .nk-idx-card__stars { font-size: 0.55rem; text-shadow: none; }
+  .nk-idx-card__meta { font-size: 0.68rem; gap: 4px; text-shadow: none; }
+  .nk-idx-card__icon { width: 13px; height: 13px; }
+  /* 行式卡非沉浸画廊：hover 头像缩放反馈让位列表按压反馈 */
+  .nk-idx-card:hover .nk-idx-card__portrait img { transform: none; }
+  .nk-idx-card:active { background: color-mix(in srgb, var(--primary) 9%, transparent); }
+  /* 行式骨架条：与真实卡同高（63px + gap 1px 模拟发丝线），防切换 CLS */
+  .nk-idx-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 63px; border-radius: 8px; }
   /* 页头副标：手机隐藏（标题行空间有限） */
   #nk-catalog-app .nk-cat-subtitle { display: none; }
   .nk-relic-grid { --nk-grid-min: 106px; --nk-grid-gap: 10px; }

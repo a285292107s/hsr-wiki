@@ -1,6 +1,6 @@
 /** 角色目录页配置 */
 import { PATH } from '../../../lib/constants';
-import { escHtml, avatarShopIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
+import { escHtml, avatarShopIconUrl, avatarRoundIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalCharacterList } from '../../../services/api';
 import { getSavedTrailblazerGender, isTrailblazerId, trailblazerGenderOfId } from '../../../lib/trailblazer';
@@ -88,9 +88,16 @@ export const characterPage: CatalogPageConfig = {
     const stars = '★'.repeat(Number(item.rarity) || 5);
     const element = String(item.element || '');
     const path = String(item.path || '');
+    /* 双源 picture：手机（≤767px，与 catalog.css 手机断点一致）用 127px 圆头像压缩体积，
+       桌面保持 avatarshopicon 半身立绘；浏览器仅加载匹配 media 的 source，无双下载 */
+    const avatarItem = String(item.avatar || '');
+    const roundSrc = avatarRoundIconUrl(String(item.id));
+    const avatar = roundSrc
+      ? `<picture><source media="(max-width: 767px)" srcset="${escHtml(roundSrc)}"><img src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy"></picture>`
+      : `<img src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy">`;
     return `<a class="nk-idx-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" style="--i:${i}">
     <span class="nk-idx-card__portrait">
-      <img src="${escHtml(item.avatar)}"${cdnImgFallbackAttr(String(item.avatar || ''))} alt="${escHtml(item.name)}" loading="lazy">
+      ${avatar}
     </span>
     <span class="nk-idx-card__body">
       <span class="nk-idx-card__name-row">

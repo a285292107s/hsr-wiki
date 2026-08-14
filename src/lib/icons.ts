@@ -114,6 +114,14 @@ export function avatarShopIconUrl(charId: string | number): string {
   return charId ? cdnUri('avatarshopicon', `${charId}.webp`) : '';
 }
 
+/** 角色圆头像（游戏内角色列表头像）：avatarroundicon/{charId}.webp（127×127 透明圆像） */
+export function avatarRoundIconUrl(charId: string | number): string {
+  if (USE_OFFICIAL_PATHS && charId) {
+    return official(`avatarroundicon/avatar/${charId}.png`);
+  }
+  return charId ? cdnUri('avatarroundicon', `${charId}.webp`) : '';
+}
+
 /** 属性图标：icondamagetype/IconDamageType{damageType 首字母大写 + 尾小写}.png */
 export function elementIconUrl(damageType: string | null | undefined): string {
   if (USE_OFFICIAL_PATHS && damageType) {
