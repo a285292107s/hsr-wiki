@@ -64,8 +64,9 @@ python -m pytest tests/ -v               # converter 单元测试
 
 > 门禁语义（软门禁）：main 分支 protection 仅保留防 force push 与防删除
 > （required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过，推送后
-> CI（`build-and-test` + `e2e`）自动运行，失败由 GitHub 通知；Vercel 生产构建（`pnpm build`
-> 含 vue-tsc + 色彩/清单/对比度三守卫）为上线前最后一道守卫，构建失败不部署、可一键回滚。
+> CI（`unit-tests` + `e2e`）自动运行，失败由 GitHub 通知；Vercel 生产构建（`pnpm build`
+> 含 vue-tsc + 色彩/清单/对比度三守卫）为上线前最后一道守卫（CI 不再重复跑 build，见 ci.yml
+> 注释），构建失败不部署、可一键回滚。
 > 注意：本地推送前仍建议先跑 `pnpm build` + `pnpm test` 自检（CI 红不会拦 push，但会留失败记录）。
 
 ## 架构

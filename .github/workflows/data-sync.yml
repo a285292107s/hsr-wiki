@@ -12,7 +12,7 @@ jobs:
   sync-data:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -22,7 +22,7 @@ jobs:
       - name: Fetch upstream data (shallow clone)
         run: git clone --depth 1 https://github.com/DimbreathBot/TurnBasedGameData.git vendor/TurnBasedGameData
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
@@ -31,11 +31,8 @@ jobs:
       - name: Install converter dependencies
         run: pip install -r tools/converter/requirements.txt
 
-      - name: Run converter tests
-        run: |
-          cd tools/converter
-          python -m pytest tests/ -q
-
+      # 无 converter 单测步骤（2026-08-14）：converter 代码未变时每天重复跑同一测试；
+      # 回归由本步骤 Run converter 兜底——转换失败即 job 失败、commit 步骤 diff 判空退出不推送坏数据
       - name: Run converter
         run: |
           cd tools/converter
@@ -46,31 +43,11 @@ jobs:
           cd tools/converter
           python gen_catalog.py
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # 死链审计（数据驱动，复用前端真实 URL 构造函数）：明确 404 才失败，
-      # 网络错误 / 429 / 403 等环境性信号仅警告（CI 数据中心 IP 对 CDN 探测不可靠的历史教训）。
-      # 缓存跨 job 持久化（run_id key + restore 最近）：converter 输出确定性 → 内容未变零网络复用。
-      - name: Cache dead-links audit cache
-        uses: actions/cache@v4
-        with:
-          path: temp/dead-links-cache.json
-          key: dead-links-cache-${{ github.run_id }}
-          restore-keys: dead-links-cache-
-
-      - name: Dead link audit
-        run: pnpm vitest run --config tools/dead-links.vitest.config.ts
-
       # 软门禁（2026-08-12 迭代）：main 无 required checks，直接 push 即达；
-      # push 触发 CI 全量（build-and-test + e2e）与 Vercel 构建守卫，失败可回滚。
+      # push 触发 CI（unit-tests + e2e）与 Vercel 构建守卫，失败可回滚。
+      # 死链审计（tools/dead-links.test.ts）已从 CI 移除（2026-08-14）：CI 数据中心 IP
+      # 对 jsDelivr 403 → 全部判 env → 真死链发现不了且 env 缓存 1 天导致每天重测空转；
+      # 死链是静态事实，本机（真实网络）按需跑即可（数据变更后 / 发现破图时）。
       - name: Commit and push to main
         run: |
           git config user.name "github-actions[bot]"

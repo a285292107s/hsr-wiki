@@ -1,10 +1,12 @@
 /**
- * 死链低频审计（数据变更时触发；CI 由 data-sync.yml 挂接）
+ * 死链低频审计（数据变更后本机按需执行；不在 CI 跑——2026-08-14 起，原因见 data-sync.yml）
  *
  * 背景（重构决策，替代 e2e 渲染态死链检查）：
  * - 死链是静态事实（URL 404），每次 e2e 验证低性价比 → 改为数据驱动 + HTTP 探测
  * - URL 构造复用前端真实构造函数（src/lib/icons.ts / services/cdn），零维护漂移
  * - 死链判定：明确 HTTP 404（HEAD + Range GET 双重确认）才 FAIL；其余环境性信号仅 WARN
+ * - 必须本机（真实网络）跑：CI 数据中心 IP 对 jsDelivr 403（历史实证）→ 全部判 env，
+ *   真死链发现不了且 env 缓存 1 天导致每天重测空转；本机判定可靠（抽样实证 99/100 ok）
  *
  * jsDelivr 正确使用（联网核实 + 实测）：
  * - AUP：本项目为图标包类资源（官方明确 icons packs 不算滥用），合规
@@ -19,17 +21,23 @@
  * - 失效依据 = URL 来源文件的**内容 sha1**（converter 输出确定性：全量重写但内容未变 → hash 未变 → 零网络复用）；
  *   只有上游数据真正变化（内容变）的模块才重测对应 URL
  * - ok / dead 缓存 7 天；env（环境性）缓存 1 天
- * - 缓存文件 temp/dead-links-cache.json（temp/ 已 gitignore；CI 经 actions/cache 跨 job 持久化）
+ * - 缓存文件 temp/dead-links-cache.json（temp/ 已 gitignore）
  *
  * 用法：
  *   pnpm vitest run --config tools/dead-links.vitest.config.ts   # 增量（默认）
  *   DEAD_LINKS_FORCE=1 pnpm ...                                  # 强制全量重测
  *   DEAD_LINKS_LIMIT=50 pnpm ...                                 # 抽样调试
+ *   DEAD_LINKS_BUDGET_MS=840000 pnpm ...                         # 增量预算（防超时，见下方说明）
+ *
+ * 增量预算模式（DEAD_LINKS_BUDGET_MS）：
+ * 冷缓存全量探测需 40-50min（2026-08-12 实测估算）> 20min 测试超时，预算耗尽即停并落盘
+ * 进度，未覆盖 URL 不判失败（仅确认死链 FAIL）；配合 LIMIT 分块或多次运行推进至全覆盖，
+ * 此后仅内容变化的数据重测对应 URL（零网络）。
  */
 import { describe, expect, test } from 'vitest';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import {
   avatarDrawCardUrl,
   avatarShopIconUrl,
@@ -55,6 +63,8 @@ const DATA = join(import.meta.dirname, '..', 'public', 'data', 'cn');
 const CACHE_FILE = join(import.meta.dirname, '..', 'temp', 'dead-links-cache.json');
 const LIMIT = Number(process.env.DEAD_LINKS_LIMIT || 0);
 const FORCE = process.env.DEAD_LINKS_FORCE === '1';
+/** 增量预算（ms）：探测累计超过预算即停并落盘进度，未覆盖 URL 不判失败（本机分块推进） */
+const BUDGET_MS = Number(process.env.DEAD_LINKS_BUDGET_MS || 0);
 
 /** jsDelivr 对 burst 敏感（实证），并发压到 3；nanoka 同样保守 */
 const CONCURRENCY = 3;
@@ -97,8 +107,10 @@ function collectUrls(): Urls {
     add(urls, pathIconUrl(c.path), `characters.json#${c.id}.path`);
   }
   // 角色详情：技能图标（skillIconUrl 内部优先 sk.icon）+ 星魂 + 附加能力
-  for (const d of loadDir('characters')) {
-    const id = String(d.id);
+  // id 取自文件名：详情文件无顶层 id 字段，前端按路由 charId 加载 characters/{id}.json
+  for (const f of walkJson(join(DATA, 'characters'))) {
+    const d = JSON.parse(readFileSync(f, 'utf8'));
+    const id = basename(f, '.json');
     for (const sk of Object.values(d.skills || {})) {
       add(urls, skillIconUrl(sk as never, id, d), `characters/${id}.json#skill.${(sk as { type: string }).type}`);
     }
@@ -329,9 +341,16 @@ test('数据全量图标 URL 可达（死链为 0）', async () => {
   const env = new Set<string>();
   let okCount = 0;
   let idx = 0;
+  let probedCount = 0;
+  let budgetExhausted = false;
 
   const worker = async (): Promise<void> => {
-    while (idx < toProbe.length) {
+    while (idx < toProbe.length && !budgetExhausted) {
+      // 预算耗尽即停：进度由下方 saveCache 落盘，多次运行间续推，分块推进全量
+      if (BUDGET_MS > 0 && Date.now() - now >= BUDGET_MS) {
+        budgetExhausted = true;
+        break;
+      }
       const url = toProbe[idx++];
       const source = urls.get(url)!;
       const st = await probe(url);
@@ -339,12 +358,15 @@ test('数据全量图标 URL 可达（死链为 0）', async () => {
       if (st === 'dead') dead.push([url, source]);
       else if (st === 'env') env.add(url);
       else okCount++;
+      probedCount++;
     }
   };
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
 
-  // 落盘缓存（抽样模式也写：支持 LIMIT 分块推进全量，避免单次超时）
+  // 落盘缓存（抽样/预算模式也写：支持分块推进全量，避免单次超时）
   saveCache(sourceHashes, results);
+  // 预算模式未覆盖全部待测 → 非失败：进度已缓存下轮继续；确认死链仍 FAIL
+  const incomplete = BUDGET_MS > 0 && probedCount < toProbe.length;
 
   // 分域统计
   const byDomain = (arr: string[]) =>
@@ -358,6 +380,9 @@ test('数据全量图标 URL 可达（死链为 0）', async () => {
   console.log(`死链审计：${limited.length} URL（${LIMIT ? `抽样 ${LIMIT}` : '全量'}）`);
   console.log(`  缓存复用: ${limited.length - toProbe.length}（来源文件内容签名一致）`);
   console.log(`  本次探测: ${toProbe.length}（并发 ${CONCURRENCY}，UA 已标识）`);
+  if (incomplete) {
+    console.log(`  增量预算: ${(BUDGET_MS / 1000).toFixed(0)}s 内完成 ${probedCount}/${toProbe.length}，剩余已缓存进度（下轮继续）`);
+  }
   console.log(`  ok: ${okCount} / dead: ${dead.length} / 环境性(不判失败): ${env.size}`);
   console.log(`  ok 分域: ${JSON.stringify(byDomain(limited.filter((u) => results[u]?.status === 'ok')))}`);
   if (env.size) {
