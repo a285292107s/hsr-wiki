@@ -92,6 +92,14 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     const g = grid.value;
     const gridWidth = (g && g.clientWidth) || 800;
     const minColW = cfg().virtualMinColW || 150;
+    /* 手机单列行式（config.virtualMobileRowH 配置后启用，断点与 catalog.css max-width:767px 对齐）：
+       列数固定 1，行高由配置直接给定（含 cell 底部 GAP）；未配置时永远走下方多列网格 */
+    const mobileRowH = cfg().virtualMobileRowH;
+    if (mobileRowH != null && window.innerWidth <= 767) {
+      cols = 1;
+      rowH = mobileRowH;
+      return;
+    }
     cols = Math.max(2, Math.floor((gridWidth + GAP) / (minColW + GAP)));
     const colW = (gridWidth - (cols - 1) * GAP) / cols;
     /* ?? 而非 ||：virtualImgRatio=0 是合法显式值（行高与列宽解耦，成就页用），|| 会误兑底为默认 1 */

@@ -65,6 +65,9 @@ export interface CatalogPageConfig {
   virtualImgRatio?: number;
   /** 虚拟网格信息区高度（虚拟行高 = colW * imgRatio + infoH + 12 + gap；缺省 36） */
   virtualInfoH?: number;
+  /** 虚拟网格手机单列行式行高（px）：配置后 ≤767px 断点网格转单列，行高 = 该值
+      （须 ≥ 行式卡实际高度 + cell 底部 GAP；怪物行式列表用 73 = 63 + 10）；缺省保持多列网格 */
+  virtualMobileRowH?: number;
   /** 静态筛选组 */
   filters?: CatalogFilter[];
   /** 依据数据动态构建筛选组（优先于 filters） */

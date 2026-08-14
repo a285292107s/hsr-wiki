@@ -18,10 +18,15 @@ export const monsterPage: CatalogPageConfig = {
   cardClass: '',
   /** 图窗比例 4:5（纵深档案感）；引擎 virtualImgRatio 为高宽比，与 CSS aspect-ratio 4:5 的高宽比语义相反 */
   virtualImgRatio: 5 / 4,
-  /** 列宽与 .nk-mob-grid 的 --nk-grid-min: 140px 对齐（放宽至 140 增加留白呼吸） */
-  virtualMinColW: 140,
+  /** 列宽与 .nk-mob-grid 的 --nk-grid-min 对齐（130 紧凑档，骨架屏列数同源防 CLS）
+      委约：130 是 1024 断点（侧栏 88→148 使内容区窄 60px）保持 6 列的最低门槛，
+      高于此值 1023 六列 / 1024 回退五列；改装需验算 1024: floor(852+10)/(min+10) ≥ 6 */
+  virtualMinColW: 130,
   /** 信息条两行（名称 + 分类元信息）+ 顶部留白 */
   virtualInfoH: 48,
+  /** 手机断点单列行式（与 catalog.css max-width:767px 行式列表对齐）：
+     行高 = 行式卡实际高度 63px + cell 底部 GAP 10px = 73 */
+  virtualMobileRowH: 73,
   async fetchData() {
     const list = await loadLocalMonsterList();
     const items: CatalogItem[] = [];

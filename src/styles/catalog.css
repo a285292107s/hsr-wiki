@@ -396,7 +396,7 @@
 ═══════════════════════════════════════════ */
 /* ─── 敌对物种卡片（档案式：深底大头照图窗 + 左对齐双行信息条，无边框无发光无 3D） ─── */
 /* 图窗 4:5 纵深比营造档案陈列感（区别于角色横排卡）；hover 仅立绘微缩 + 名称强调 + 左侧指示条 */
-.nk-mob-grid { --nk-grid-min: 140px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
+.nk-mob-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
 .nk-mob-card { position: relative; display: block; text-decoration: none; cursor: pointer; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); }
 /* hover/focus 左侧指示条（与角色目录同语言） */
 .nk-mob-card::before { content: ''; position: absolute; left: -6px; top: 34%; width: 2px; height: 0; transform: translateY(-50%); border-radius: 1px; background: var(--primary); opacity: 0; transition: height 0.22s var(--nk-ease-out), opacity 0.22s; pointer-events: none; }
@@ -610,7 +610,12 @@
   .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
   /* 网格列宽覆盖：仅改 --nk-grid-min，骨架屏与真实网格共用变量保持一致 */
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
-  .nk-lc-grid { --nk-grid-min: 150px; }
+  /* 光锥 3 列竖卡墙：固定 3 列（375px 内容宽 ~343px → 列宽 ~108px；gap 10px 由上方共享覆盖）；
+     ≤374px 被下方 .nk-cat-grid 2 列规则覆盖（小屏 3 列过挤）；骨架屏同 class 自动对齐 */
+  .nk-lc-grid { grid-template-columns: repeat(3, 1fr); }
+  /* 窄卡 (108px) 信息可读性：名签内边距收窄、名字 0.82→0.78rem 防 7 字名截断 */
+  .nk-lc-card__info { padding: 10px 8px 8px; }
+  .nk-lc-card__name { font-size: 0.78rem; }
   /* 角色画廊墙 → 行式信息卡：半身立绘让位 127px 圆头像（picture 双源已按断点切换），
      单列发丝线分隔，最大化信息效率（同族语言：首页索引行——发丝线 + 克制按压反馈）。
      稀有度色相：--idx-r 驱动头像 ring/衬底（仿光锥卡 --lc-r 单一来源模式，勿新增色值） */
@@ -670,6 +675,27 @@
   .nk-idx-card:active { background: color-mix(in srgb, var(--primary) 9%, transparent); }
   /* 行式骨架条：与真实卡同高（63px + gap 1px 模拟发丝线），防切换 CLS */
   .nk-idx-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 63px; border-radius: 8px; }
+  /* ── 敌对物种 → 行式信息卡（与角色行式同族语言）：44px 圆头像 + 名称/分类，
+       分类语义色（首领 accent / 精英 / 喽啰）保留；虚拟网格须配 virtualMobileRowH=73（63 卡高 + cell 底部 GAP 10） ── */
+  .nk-mob-grid { grid-template-columns: 1fr; gap: 1px; }
+  .nk-mob-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 63px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--line-1);
+  }
+  .nk-mob-card:active { background: color-mix(in srgb, var(--primary) 9%, transparent); }
+  /* 虚拟 cell 固定左右内边距（5px）用负 margin 抵消，发丝线与按压背景整宽到底 */
+  .nk-virtual-grid .nk-mob-card { margin: 0 -5px; padding: 0 5px; }
+  .nk-mob-card__fig { flex: none; width: 44px; height: 44px; aspect-ratio: auto; border-radius: 50%; }
+  .nk-mob-card__fig img { border-radius: 50%; }
+  .nk-mob-card__info { flex: 1; min-width: 0; gap: 4px; padding: 0; }
+  .nk-mob-card__name { font-size: 0.9rem; }
+  .nk-mob-card__type { font-size: 0.68rem; letter-spacing: 0.1em; }
+  .nk-mob-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 72px; border-radius: 8px; }
+  /* 72px = 虚拟网格行高 73 - 发丝线 1px：骨架→真实切换首行不上下跳（63px 曾差 9px） */
   /* 页头副标：手机隐藏（标题行空间有限） */
   #nk-catalog-app .nk-cat-subtitle { display: none; }
   .nk-relic-grid { --nk-grid-min: 106px; --nk-grid-gap: 10px; }
@@ -693,16 +719,22 @@
 /* ── 画廊墙分档：随视口放大格子（scale-aware），列数约束 4-8，
      超宽屏保留两侧留白（放宽内容区但不铺满，抑制满屏卡片拥挤） —— */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* 平板：min 150 → 3-4 列自然过渡（衬底与桌面 min 190 衔接，避免跨断点列数跳变） */
+  /* 平板：min 150 → 角色 4-5 列自然过渡（衬底与桌面过渡档 min 160 衔接，避免跨断点列数回跳） */
   .nk-idx-grid { --nk-grid-min: 150px; }
+  /* 光锥同节奏分档：min 170 → 平板 3 列起步、1023 升 4 列，与桌面过渡档 min 160 无缝衔接（不跨断点回跳） */
+  .nk-lc-grid { --nk-grid-min: 170px; }
 }
 @media (min-width: 1024px) {
-  /* 桌面：min 190 → 1024-1279 五列 / 1280+ 六列自然过渡 */
-  .nk-idx-grid { --nk-grid-min: 190px; }
+  /* 桌面过渡档：min 160 → 角色 5-6 列 / 光锥 4-6 列（1023→1024 跨断点不回跳
+     —— 侧栏避让 88→148 使内容区窄 60px，min 若维持 190 会把平板 5 列打回 4 列） */
+  .nk-idx-grid,
+  .nk-lc-grid { --nk-grid-min: 160px; }
 }
-@media (min-width: 1440px) {
-  /* 中大桌面：七列 × 196px，延续画廊墙大图呼吸感 */
-  .nk-idx-grid { --nk-grid-min: 196px; }
+/* 光锥/角色桌面 8 列墙：固定 repeat(8,1fr)（1280 起；2560 角色/光锥内容区限宽 1920 → 卡宽 ~220px 不失控），
+   minmax 分档在重复列下不参与计算，故 1440/1600/2560 的角色与光锥 --nk-grid-min 覆盖均无需保留 */
+@media (min-width: 1280px) {
+  .nk-idx-grid,
+  .nk-lc-grid { grid-template-columns: repeat(8, 1fr); }
 }
 @media (min-width: 1024px) {
   /* 桌面文字侧栏（140px）避让已由 --nk-content-offset 令牌接管（148px），此处仅保留其它桌面规则 */
@@ -714,13 +746,11 @@
   .nk-idx-grid,
   .nk-cat-grid,
   .nk-cat-empty { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
-  /* 大屏：格子 200px+，八列呼吸感（画廊墙主体为大图） */
-  .nk-idx-grid { --nk-grid-min: 200px; }
+  /* 大屏：仅内容收束（1680），角色/光锥列数已由 1280 固定 8 列接管 */
 }
 @media (min-width: 2560px) {
-  /* 超宽屏（2K/4K）：内容区放宽至 1920（两侧保留留白），格子随内容放大 */
+  /* 超宽屏（2K/4K）：内容区放宽至 1920（两侧保留留白）；格子由 1280 固定 8 列接管 */
   #nk-catalog-app { --cat-max: 1920px; }
-  .nk-idx-grid { --nk-grid-min: 220px; }
 }
 
 /* ═══════════════════════════════════════════

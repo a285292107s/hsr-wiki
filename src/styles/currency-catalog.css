@@ -10,7 +10,10 @@
 
 /* ── 网格布局 ── */
 .nk-cw-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-.nk-cw-grid--wide { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+/* wide 网格 min 委约：260px 保持 1024 断点（侧栏 88→148 使内容区窄 60px）3 列——
+   数学临界 276px（floor(852+12)/(min+12) ≥ 3），取 260 留 16px 裕量防样式漂移；
+   容器内滚动条 6px 使网格实宽 846，仍成立（floor(858)/(272)=3.15）；高于 276 则 1023 三列 / 1024 回退两列 */
+.nk-cw-grid--wide { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 
 /* ── 通用卡片 ── */
 .nk-cw-card {
