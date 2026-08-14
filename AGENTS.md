@@ -135,6 +135,8 @@ python -m pytest tests/ -v               # converter 单元测试
 
 ## 强制规则（MUST）
 
+> **双视图同步**：本节与 `.opencodereview/rule.json` 是同一约束的双视图（本节 = 生成期约束，AI 写码时遵守；rule.json = 评审期视图，OCR 检查时加载）。修改本节任一已映射条目（请求层 2 条 / 类型定义归属 / 目录页 2 条 / 文本数据来源 / 色彩三层令牌）必须同步 rule.json 对应条目，反之亦然；「共享列表单例」与「构建守卫」为流程/CI 约束，不进 rule.json。
+
 ### 请求层
 
 - **禁止裸 `fetch`**：所有 HTTP 请求必须走 `services/cache.ts` 导出的 `fetchJSON<T>(url)`。它提供 15s 超时、NkError 包装、AbortController 中断。绝不允许在 api.ts 或视图层直接调用 `fetch()`。
