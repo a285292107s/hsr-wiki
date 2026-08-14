@@ -79,3 +79,4 @@ test-results
 
 # Python cache (explicit)
 .pytest_cache/
+.bitfun/

@@ -250,8 +250,10 @@
   --nk-sheet-border: color-mix(in srgb, var(--primary) 35%, transparent);
   --nk-sheet-item-bg: color-mix(in srgb, var(--primary) 5%, transparent);
   --nk-sheet-item-border: color-mix(in srgb, var(--primary) 14%, transparent);
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 92%, transparent);
-  --nk-header-border: color-mix(in srgb, var(--primary) 12%, transparent);
+  /* 吸顶条材质（仅 .nk-cat-toolbar 使用）：常规模式亚光玻璃 82%（内容穿过时保留透视层次，
+     移动端在 catalog.css 降级为 92% 实底；CW 层保持 94% 不随常规改动） */
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 94%, var(--primary) 6%) 82%, transparent);
+  --nk-header-border: color-mix(in srgb, var(--primary) 16%, transparent);
   --nk-input-bg: color-mix(in srgb, var(--primary) 6%, transparent);
   --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
   --nk-page-tint: color-mix(in srgb, var(--primary) 5%, transparent);

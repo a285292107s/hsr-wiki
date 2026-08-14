@@ -7,9 +7,12 @@ import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 /** 稀有度 → 徽章文案（Rarity 值域：Low=铜 / Mid=银 / High=金） */
 const RARITY_LABEL: Record<string, string> = { Low: '铜', Mid: '银', High: '金' };
 
-/** 显示状态 → 筛选文案（ShowType 值域：None 常显 / ShowAfterFinish / HiddenDesc） */
+/** 显示状态 → 筛选文案（ShowType 值域：None 常显 / ShowAfterFinish / HiddenDesc）。
+ *  注意：converter 将 None 归一为空串产出（见 tools/converter/converters/achievements.py 专测），
+ *  而 CatalogPage 过滤把空 val 视为「不筛」（与「全部」同 val），故前端在 fetchData/buildFilters
+ *  统一把空值归一为哨兵 'None'——否则「常显」与「全部」撞 val 双高亮且永远筛不出常显成就 */
 const SHOW_LABEL: Record<string, string> = {
-  '': '常显',
+  None: '常显',
   ShowAfterFinish: '完成后显示',
   HiddenDesc: '隐藏描述',
 };
@@ -95,7 +98,7 @@ export const achievementPage: CatalogPageConfig = {
           : s?.icon
             ? cdnUri('achievement', `${s.icon}.webp`)
             : '',
-        show_type: a.show_type,
+        show_type: a.show_type || 'None',
       };
     });
   },
@@ -132,8 +135,8 @@ export const achievementPage: CatalogPageConfig = {
       });
     }
 
-    // 显示状态（常显 / 完成后显示 / 隐藏描述）
-    const shows = [...new Set(items.map((it) => String(it.show_type || '')))];
+    // 显示状态（常显 / 完成后显示 / 隐藏描述）；空值已归一为哨兵 'None'（见 SHOW_LABEL 注释）
+    const shows = [...new Set(items.map((it) => String(it.show_type || 'None')))];
     if (shows.length) {
       filters.push({
         key: 'show_type',

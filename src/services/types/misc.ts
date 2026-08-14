@@ -20,6 +20,8 @@ export interface Manifest {
 export interface ItemInfo {
   item_name: string;
   item_sub_type: string;
+  /** 主类型（converter 输出：Material / Virtual / Usable / Mission；目录页类型筛选分组依据） */
+  main_type?: string;
   purpose_type?: number;
   /** SuperRare / VeryRare / Rare / NotNormal / Normal */
   rarity: string;

@@ -5,6 +5,8 @@
  * 转换器：tools/converter/converters/achievements.py
  * - rarity：Low（铜）/ Mid（银）/ High（金）——游戏内稀有度徽章
  * - show_type：''（常显）/ ShowAfterFinish（完成后显示）/ HiddenDesc（隐藏描述）
+ *   注意：JSON 中常显的确为空串（converter 刻意归一）；目录页筛选在 fetchData
+ *   再次归一为哨兵 'None'（与「全部」的 val '' 隔离，见 pages/achievement.ts）
  * - desc：已展开 {TEXTJOIN#id} 与 #n[i] 参数，字面 \n 已转真实换行（前端 pre-line 渲染）
  */
 export interface AchievementItem {

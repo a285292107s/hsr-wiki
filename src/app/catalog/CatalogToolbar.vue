@@ -1,8 +1,11 @@
 <script setup lang="ts">
 /**
- * 目录页工具条：标题 + 搜索框 + 计数 + 筛选面板开关按钮。
- * 纯展示组件；搜索输入与筛选开合由父组件处理（含节流/网格刷新）。
+ * 目录页工具条：标题 + 搜索框 + 计数 + 筛选下拉组（每组一个下拉，直接内嵌工具条）。
+ * 纯展示组件；搜索输入与筛选选择由父组件处理（含节流/网格刷新）。
  */
+import CatalogFilterSelect from './CatalogFilterSelect.vue';
+import type { CatalogFilter } from './types';
+
 defineProps<{
   title: string;
   /** 标题旁的英文副标（如 CHARACTER INDEX） */
@@ -11,15 +14,17 @@ defineProps<{
   query: string;
   /** 计数文本（如 `12 / 89`；加载中传 `—`） */
   countText: string;
-  hasFilters: boolean;
-  filtersOpen: boolean;
-  /** 加载中禁用筛选按钮 */
+  /** 筛选组（渲染为工具条内下拉） */
+  filters: CatalogFilter[];
+  /** 当前筛选状态（filterKey → val） */
+  activeFilters: Record<string, string>;
+  /** 加载中禁用筛选下拉 */
   disabled: boolean;
 }>();
 
 const emit = defineEmits<{
   search: [value: string];
-  toggleFilters: [];
+  select: [key: string, val: string];
 }>();
 </script>
 
@@ -44,15 +49,17 @@ const emit = defineEmits<{
         @input="(e) => emit('search', (e.target as HTMLInputElement).value)"
       >
     </div>
-    <button
-      v-if="hasFilters"
-      class="nk-cat-filter-btn"
-      :class="{ active: filtersOpen }"
-      :disabled="disabled"
-      @click="emit('toggleFilters')"
-    >
-      <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      筛选
-    </button>
+    <!-- 筛选下拉组：每组一个下拉；移动端整区横向滚动（filters-bar CSS 接管） -->
+    <div v-if="filters.length" class="nk-cat-filters-bar">
+      <CatalogFilterSelect
+        v-for="f in filters"
+        :key="f.key"
+        :label="f.label"
+        :options="f.options"
+        :model-value="activeFilters[f.key] || ''"
+        :disabled="disabled"
+        @change="(v: string) => emit('select', f.key, v)"
+      />
+    </div>
   </div>
 </template>

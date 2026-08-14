@@ -1,5 +1,6 @@
 /** 终局内容目录页配置（四模式合并单页：模式身份为筛选选项，卡片徽记同源） */
 import { ELEM, MON_RANK } from '../../../lib/constants';
+import { elementIconUrl } from '../../../lib/icons';
 import { OFFICIAL_ICON_BASE } from '../../../lib/constants';
 import { escHtml, stripAllTags } from '../../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../../services/cdn';
@@ -272,7 +273,9 @@ export const endgamePage: CatalogPageConfig = {
         label: '推荐属性',
         options: [
           { val: '', label: '全部' },
-          ...[...dmgSet].map((d) => ({ val: d, label: ELEM[d] || d })),
+          /* 图标与详情页推荐属性行同源（lib/icons elementIconUrl，双源 CDN）——
+             角色页「属性」筛选同款 icon 交互；不另建映射，防双事实源漂移 */
+          ...[...dmgSet].map((d) => ({ val: d, label: ELEM[d] || d, icon: elementIconUrl(d) })),
         ],
       });
     }

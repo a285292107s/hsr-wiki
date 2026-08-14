@@ -36,8 +36,8 @@ test.describe('布局验收：常规主题', () => {
     await waitForCatalogCards(page);
     const cardCount = await page.locator('[class$="-grid"] a').count();
     expect(cardCount).toBeGreaterThan(0);
-    // 工具条存在（搜索/筛选）
-    await expect(page.locator('.nk-catalog-toolbar, .nk-cat-filters').first()).toBeVisible();
+    // 工具条存在（搜索 + 筛选下拉）
+    await expect(page.locator('.nk-cat-toolbar').first()).toBeVisible();
     expect(await findHorizontalOverflow(page)).toEqual([]);
     assertNoErrors();
   });

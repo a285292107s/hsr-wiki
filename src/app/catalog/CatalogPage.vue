@@ -41,13 +41,10 @@ const activeFilters = ref<Record<string, string>>((() => {
   }
   return init;
 })());
-const filtersOpen = ref(true);
-
 const cancelled = { value: false };
 /** 加载代：过期加载（Tab 已切走）的结果静默丢弃 */
 const loadGen = useLoadGeneration();
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
-let panelTimer: ReturnType<typeof setTimeout> | null = null;
 
 const scrollerRef = ref<HTMLElement | null>(null);
 const gridRef = ref<HTMLElement | null>(null);
@@ -203,17 +200,9 @@ watch(gridHtml, async () => {
 
 /* ─── 筛选 / 搜索 ─── */
 
-function toggleFilters(): void {
-  filtersOpen.value = !filtersOpen.value;
-  if (useVirtual.value) {
-    // 面板折叠动画（0.35s）结束后重算网格位置
-    if (panelTimer !== null) clearTimeout(panelTimer);
-    panelTimer = setTimeout(() => refresh(), 380);
-  }
-}
-
-function onChipClick(filterKey: string, val: string): void {
+function onFilterSelect(filterKey: string, val: string): void {
   activeFilters.value = { ...activeFilters.value, [filterKey]: val };
+  // 虚拟网格由筛选/搜索变化 → 节流重建窗口
   if (useVirtual.value) refresh();
 }
 
@@ -290,7 +279,6 @@ onBeforeUnmount(() => {
   cancelled.value = true;
   stop();
   if (searchTimer !== null) clearTimeout(searchTimer);
-  if (panelTimer !== null) clearTimeout(panelTimer);
   if (urlSyncTimer !== null) clearTimeout(urlSyncTimer);
 });
 </script>
@@ -324,11 +312,11 @@ onBeforeUnmount(() => {
         :placeholder="config.searchPlaceholder"
         :query="query"
         :count-text="phase === 'loading' ? '—' : `${filtered.length} / ${items.length}`"
-        :has-filters="filters.length > 0"
-        :filters-open="filtersOpen"
+        :filters="filters"
+        :active-filters="activeFilters"
         :disabled="phase === 'loading'"
         @search="onSearch"
-        @toggle-filters="toggleFilters"
+        @select="onFilterSelect"
       />
 
       <!-- 骨架屏：延迟显示，仅占据网格区（头部保持稳定，避免切换闪烁）
@@ -347,28 +335,8 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- 数据主体：筛选 + 网格 + 空态 -->
+      <!-- 数据主体：网格 + 空态（筛选下拉已在吸顶工具条内） -->
       <template v-else-if="phase === 'ready'">
-      <div v-if="filters.length" class="nk-cat-filters" :class="{ open: filtersOpen }">
-        <div class="nk-cat-filters__inner"><div class="nk-cat-filters__body">
-          <div v-for="f in filters" :key="f.key" class="nk-cat-filter-group">
-            <div class="nk-cat-filter-label">{{ f.label }}</div>
-            <div class="nk-cat-chips">
-              <button
-                v-for="opt in f.options"
-                :key="opt.val"
-                class="nk-cat-chip"
-                :class="{ active: (activeFilters[f.key] || '') === opt.val }"
-                @click="onChipClick(f.key, opt.val)"
-              >
-                <img v-if="opt.icon" class="nk-cat-chip__icon" :src="opt.icon" alt="">
-                <span v-html="opt.label"></span>
-              </button>
-            </div>
-          </div>
-        </div></div>
-      </div>
-
       <!-- 虚拟网格 -->
       <div
         v-if="useVirtual"

@@ -24,38 +24,72 @@
 .nk-cat-title::after { content: ''; flex: 1; height: 1px; align-self: center; background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 55%, transparent 100%); }
 /* 计数元信息：等宽小字，右对齐（档案数据头） */
 .nk-cat-count { flex-shrink: 0; font-family: var(--cat-mono); font-size: 0.62rem; letter-spacing: 0.18em; color: var(--text3); white-space: nowrap; }
-/* 吸顶工具条：轻量层，仅搜索 + 筛选；滚动后钉在容器顶部（内容区内，不与侧栏重叠） */
-.nk-cat-toolbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 12px; padding: 8px 0; background: var(--nk-header-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--nk-header-border); }
-.nk-cat-search { flex: 1; min-width: 120px; max-width: 320px; display: flex; align-items: center; gap: 8px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 10px; padding: 7px 14px; transition: all 0.2s; }
-.nk-cat-search:focus-within { border-color: var(--primary); background: var(--nk-shell-hover); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
+/* 吸顶工具条：亚光玻璃层（常规 82% 透明 + blur；反 AI 味：不做全透白描边苹果玻璃，
+   保留档案亚光遮蔽感，saturate 提物质感）。底部边界 = 渐变发丝线（与 masthead 标题
+   ::after 同语汇，非 1px 实线全横贯）+ 主色染影（禁止纯黑大阴影） */
+.nk-cat-toolbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 12px; padding: 8px 0; background: var(--nk-header-bg); backdrop-filter: blur(18px) saturate(1.15); -webkit-backdrop-filter: blur(18px) saturate(1.15); box-shadow: 0 10px 28px -16px color-mix(in srgb, color-mix(in srgb, var(--blk-950) 70%, var(--primary) 30%) 55%, transparent); }
+/* 渐变发丝线：两端溶入背景（.nk-cat-title::after 同语言） */
+.nk-cat-toolbar::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, transparent 0%, var(--nk-header-border) 10%, var(--nk-header-border) 90%, transparent 100%); }
+/* 减弱透明度偏好：实底兜底（glassmorphism solid fallback） */
+@media (prefers-reduced-transparency: reduce) {
+  .nk-cat-toolbar { background: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 97%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+.nk-cat-search { flex: 1; min-width: 120px; max-width: 320px; display: flex; align-items: center; gap: 8px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 10px; padding: 7px 14px; transition: all 0.2s; box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent); }
+.nk-cat-search:hover:not(:focus-within) { border-color: color-mix(in srgb, var(--primary) 34%, transparent); }
+.nk-cat-search:focus-within { border-color: var(--primary); background: var(--nk-shell-hover); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent), 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
 .nk-cat-search svg { width: 14px; height: 14px; color: var(--text3); flex-shrink: 0; }
 .nk-cat-search input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 0.8rem; font-family: var(--font-body); }
 .nk-cat-search input::placeholder { color: var(--text3); }
-.nk-cat-filter-btn { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 10px; background: var(--nk-shell-hover); border: 1px solid var(--nk-input-border); color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0; position: relative; }
+/* 筛选下拉组（并入吸顶工具条；替代旧“筛选按钮 + 展开 chip 面板”）。
+   横向滚动（隐藏滚动条）：货币战争角色页 8 组下拉，桌面/移动均可能超过工具条宽度；
+   溢出滚动不换行，避免工具条变高挤压首屏 */
+.nk-cat-filters-bar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; justify-content: flex-end; overflow-x: auto; scrollbar-width: none; }
+.nk-cat-filters-bar::-webkit-scrollbar { display: none; }
+/* 下拉按钮：与旧 chip 同语言——--nk-shell-hover 底 + 输入框边框；选中态 primary-glow 淡底 + 主色边框 + 克制光晕 */
+.nk-cat-select { flex-shrink: 0; position: relative; }
+.nk-cat-select__btn { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; background: var(--nk-shell-hover); border: 1px solid var(--nk-input-border); color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
 /* 触控热区垂直扩展至 ≥44px（视觉 ≈28px + 上下各 8px） */
-.nk-cat-filter-btn::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
-.nk-cat-filter-btn:hover { background: var(--nk-shell-press); border-color: var(--primary); color: var(--text-bright); }
-.nk-cat-filter-btn .arrow { width: 12px; height: 12px; transition: transform 0.2s; flex-shrink: 0; }
-/* 选中态：与筛选 chip 同语言——primary-glow 淡底 + 主色边框 + 克制光晕（克制用色，禁实底填充） */
-.nk-cat-filter-btn.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); }
-.nk-cat-filter-btn.active .arrow { transform: rotate(180deg); }
-.nk-cat-filter-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* 筛选面板（grid 行高动画折叠） */
-.nk-cat-filters { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.35s var(--ease), opacity 0.28s ease; }
-.nk-cat-filters.open { grid-template-rows: 1fr; opacity: 1; }
-.nk-cat-filters__inner { overflow: hidden; min-height: 0; }
-.nk-cat-filters__body { padding: 12px 0 4px; }
-.nk-cat-filter-group { display: flex; align-items: baseline; gap: 10px; margin-bottom: 7px; }
-.nk-cat-filter-label { font-family: var(--font-hud); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; color: var(--text2); flex-shrink: 0; min-width: 3.2em; }
-.nk-cat-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.nk-cat-chip { padding: 6px 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); background: transparent; color: var(--text2); font-size: 0.72rem; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); display: inline-flex; align-items: center; gap: 4px; position: relative; }
-/* 触控热区垂直扩展至 ≥44px（视觉 ≈29px + 上下各 8px） */
-.nk-cat-chip::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
-.nk-cat-chip__icon { width: 16px; height: 16px; border-radius: 50%; object-fit: contain; flex-shrink: 0; }
-.nk-cat-chip__star { width: 12px; height: 12px; color: var(--gold); flex-shrink: 0; }
-.nk-cat-chip:hover { border-color: var(--border2); color: var(--text); }
-.nk-cat-chip.active { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); }
+.nk-cat-select__btn::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
+.nk-cat-select__btn:hover { background: var(--nk-shell-press); border-color: var(--primary); color: var(--text-bright); }
+.nk-cat-select__btn .arrow { width: 12px; height: 12px; transition: transform 0.2s; flex-shrink: 0; color: var(--text3); }
+.nk-cat-select.open .nk-cat-select__btn { background: var(--nk-shell-press); border-color: var(--primary); }
+.nk-cat-select.open .nk-cat-select__btn .arrow { transform: rotate(180deg); }
+.nk-cat-select.is-active .nk-cat-select__btn { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); }
+.nk-cat-select__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.nk-cat-select__icon { width: 16px; height: 16px; border-radius: 50%; object-fit: contain; flex-shrink: 0; }
+.nk-cat-select__label { white-space: nowrap; }
+/* 当前选中值：等宽徽记感，长系列名截断防按钮撑宽 */
+.nk-cat-select__val { display: inline-flex; align-items: center; gap: 2px; max-width: 132px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nk-cat-select__val svg { width: 12px; height: 12px; color: var(--gold); flex-shrink: 0; }
+/* 菜单 Teleport 到 body 后 fixed 定位（坐标由组件内联 style 给定）：
+   父级工具条 backdrop-filter 会篡改 fixed containing block，且滚动容器会裁剪 absolute，
+   Teleport + fixed 同时规避两者 */
+.nk-cat-select__menu { position: fixed; z-index: 300; box-sizing: border-box; min-width: 160px; max-width: 320px; padding: 6px; border-radius: 12px; background: var(--nk-shell-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--nk-input-border); box-shadow: 0 18px 40px rgba(0,0,0,0.45); overflow-y: auto; scrollbar-width: none; }
+.nk-cat-select__menu::-webkit-scrollbar { display: none; }
+/* 滚动功能保留（滚轮/触摸板/键盘），仅视觉隐藏滚动条（与 .nk-cat-filters-bar 同模式） */
+/* 无 .nk-cat-select__head：菜单标题已随按钮 label 删除（role=menu 仅允许 menuitem* 直接子节点） */
+/* 分组头（物品类型等大选项集按组浏览）：首组无上分隔线，后续组以细分隔线 + 组名计数区分 */
+.nk-cat-select__group {
+  padding: 8px 10px 3px;
+  font-family: var(--font-hud);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+.nk-cat-select__group + .nk-cat-select__group { padding-top: 9px; }
+.nk-cat-select__group:not(:first-child)::before {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 0 2px 8px;
+  background: linear-gradient(90deg, transparent, var(--line-1) 15%, var(--line-1) 85%, transparent);
+}
+.nk-cat-select__opt { display: flex; align-items: center; gap: 6px; width: 100%; padding: 7px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); cursor: pointer; text-align: left; transition: background 0.15s, color 0.15s; }
+.nk-cat-select__opt:hover { background: var(--nk-shell-hover); color: var(--text); }
+.nk-cat-select__opt.is-active { background: var(--primary-glow); color: var(--text-bright); }
+.nk-cat-select__opt .nk-cat-select__icon { width: 18px; height: 18px; }
+.nk-cat-select__opt .nk-cat-select__star { width: 12px; height: 12px; color: var(--gold); flex-shrink: 0; }
 
 /* 网格
    列宽抽变量：骨架屏与真实网格共用同一 minmax，避免切换时列数突变导致 CLS */
@@ -566,10 +600,13 @@
   .nk-cat-masthead { padding: 18px 0 12px; gap: 10px; }
   .nk-cat-title { font-size: 1.05rem; letter-spacing: 0.06em; }
   .nk-cat-count { font-size: 0.55rem; letter-spacing: 0.14em; }
-  .nk-cat-toolbar { gap: 8px; padding: 6px 0; }
+  .nk-cat-toolbar { gap: 8px; padding: 6px 0; background: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 92%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
   .nk-cat-search { max-width: none; min-width: 0; }
   .nk-cat-search input { min-width: 0; }
-  .nk-cat-filter-btn { margin-left: 0; }
+  /* 移动端筛选下拉行：左对齐横向滚动（不换行不挤压搜索框） */
+  .nk-cat-filters-bar { justify-content: flex-start; }
+  .nk-cat-filters-bar .nk-cat-select { flex-shrink: 0; }
+  .nk-cat-select__btn { padding: 6px 8px; }
   .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
   /* 网格列宽覆盖：仅改 --nk-grid-min，骨架屏与真实网格共用变量保持一致 */
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
@@ -591,7 +628,6 @@
   .nk-item-grid { --nk-grid-min: 90px; --nk-grid-gap: 8px; }
   .nk-mob-grid { --nk-grid-min: 100px; }
   .nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-  .nk-cat-filter-group { flex-direction: column; gap: 6px; }
 }
 @media (max-width: 374px) {
   .nk-cat-grid, .nk-skeleton__grid { grid-template-columns: repeat(2, 1fr); --nk-grid-gap: 8px; }
@@ -625,7 +661,6 @@
   .nk-cat-toolbar { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
   .nk-idx-grid,
   .nk-cat-grid,
-  .nk-cat-filters,
   .nk-cat-empty { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
   /* 大屏：格子 200px+，八列呼吸感（画廊墙主体为大图） */
   .nk-idx-grid { --nk-grid-min: 200px; }

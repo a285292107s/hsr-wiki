@@ -7,6 +7,8 @@ export interface CatalogFilterOption {
   /** 支持内嵌 SVG 标记（渲染走 v-html，仅引擎内部静态字符串） */
   label: string;
   icon?: string;
+  /** 菜单分组头（如物品类型按 main_type 分组）；连续同组选项之间渲染一次分隔头，缺省不平铺即可无头 */
+  group?: string;
 }
 
 export interface CatalogFilter {

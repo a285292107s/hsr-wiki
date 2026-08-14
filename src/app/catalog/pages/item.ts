@@ -59,6 +59,13 @@ const ITEM_TYPE_PREFERRED = [
   'AvatarExp', 'EquipmentExp', 'RelicExp', 'Formula',
 ];
 
+/** sub_type 所属主类型 → 组序（main_type 值域 4 类固定，组序与 ITEM_TYPE_NAMES 分类同形） */
+const MAIN_TYPE_ORDER = ['Material', 'Virtual', 'Usable', 'Mission'];
+/** 主类型 → 组名（未知值回退英文原值，不造文案） */
+const MAIN_TYPE_NAMES: Record<string, string> = {
+  Material: '材料', Virtual: '货币', Usable: '可用', Mission: '任务',
+};
+
 /** 物品无图标时的占位图形（立方体/物资标识） */
 const ITEM_NO_ICON_SVG =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
@@ -83,6 +90,7 @@ export const itemPage: CatalogPageConfig = {
         id: String(info.id),
         name: info.name,
         subType: info.sub_type || '',
+        mainType: info.main_type || '',
         rarity: RARITY_NUM_TO_KEY[info.rarity] || 'Normal',
         icon: itemIconUrl(info.figure_icon),
       });
@@ -112,9 +120,46 @@ export const itemPage: CatalogPageConfig = {
       }
       return a.localeCompare(b);
     });
+    /* 按 main_type 分组（组序固定）：subType → mainType 一次构建，排序/计数共用；
+       连续同组选项由 CatalogFilterSelect 渲染一个分组头（组名 + 组内类型数） */
+    const mainOf = new Map<string, string>();
+    for (const it of data) {
+      const st = String(it.subType || '');
+      if (st && !mainOf.has(st)) mainOf.set(st, String(it.mainType || ''));
+    }
+    const groupOrder = (t: string) => {
+      const i = MAIN_TYPE_ORDER.indexOf(mainOf.get(t) ?? '');
+      return i === -1 ? MAIN_TYPE_ORDER.length : i;
+    };
+    const grouped = [...subTypes];
+    grouped.sort((a, b) => {
+      const ga = groupOrder(a);
+      const gb = groupOrder(b);
+      if (ga !== gb) return ga - gb;
+      const ia = ITEM_TYPE_PREFERRED.indexOf(a);
+      const ib = ITEM_TYPE_PREFERRED.indexOf(b);
+      if (ia !== -1 || ib !== -1) {
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      }
+      return a.localeCompare(b);
+    });
+    const groupCount = new Map<string, number>();
+    for (const st of grouped) {
+      const mt = mainOf.get(st) ?? '';
+      groupCount.set(mt, (groupCount.get(mt) || 0) + 1);
+    }
     const subTypeOptions = [
       { val: '', label: '全部' },
-      ...subTypes.map((st) => ({ val: st, label: ITEM_TYPE_NAMES[st] || st })),
+      ...grouped.map((st) => {
+        const mt = mainOf.get(st) ?? '';
+        return {
+          val: st,
+          label: ITEM_TYPE_NAMES[st] || st,
+          group: `${MAIN_TYPE_NAMES[mt] || mt} · ${groupCount.get(mt)}`,
+        };
+      }),
     ];
     return [
       {
