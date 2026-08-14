@@ -8,7 +8,7 @@
 `DimbreathBot/TurnBasedGameData` 仓库的原始解包 JSON，位于 `vendor/TurnBasedGameData/` 的 `ExcelOutput/`、`TextMap/`、`Config/` 目录。结构复杂、字段冗余，无法直接供网站消费。
 
 ### 目标格式（Target Format）
-`Mar-7th/StarRailRes` 仓库定义的索引 JSON 格式，按 `public/data/[lang]/` 组织，结构扁平、字段精简。是本工具的输出格式标准。
+converter 输出到 `public/data/[lang]/` 的 JSON 数据格式：列表索引（`characters.json` 等）+ 详情子目录（`characters/{id}.json` 等），结构扁平、字段精简。早期以 Mar-7th/StarRailRes 仓库索引 JSON 为格式标准（见 ADR 0006），输出结构已演进；StarRailRes 现在仅作「字段基线」参照（见数据筛选节）。
 
 ### 转换工具（Converter）
 将源数据转换为目标格式的 Python 脚本，位于 `tools/converter/`。读源数据 → 输出纯净 JSON。
@@ -30,10 +30,10 @@
 ## 数据分类
 
 ### 索引级数据（Index Data）
-第一期产出的基础索引数据，满足列表页和基础展示需求。不含详细数值表。
+列表索引 JSON（`characters.json` / `light_cones.json` / `relics.json` 等），驱动目录页与卡片展示，不含详细数值表。
 
 ### 详情级数据（Detail Data）
-第二期产出的详细数值数据，包括角色晋阶属性、行迹树、技能等级数值等。第一期跳过。
+详情 JSON（`characters/{id}.json` / `light_cones/{id}.json` / `monsters/{id}.json` 等），含晋阶属性、行迹树、技能等级数值等，由对应 detail 模块输出。
 
 ## 枚举规范
 
@@ -65,7 +65,7 @@ _Avoid_: 技能效果、SkillEffect 标签
 判断「字段是否值得收录」的参照格式，来源为 Mar-7th/StarRailRes 仓库的索引 JSON（如 `character_skills.json`）。「基线有、本地无」的字段自动升级为 ⚪ 待定，除非有明确的有意排除理由（如引用 ADR）。
 
 ### 引用站（Reference Site）
-用于「对玩家有价值」语义校准的外部站点。**权威基准为米游社官方 wiki（bbs.mihoyo.com/sr/wiki）**——官方展示的内容即官方认定的玩家可见且有价值数据；hsr.nanoka.cc 等民间站仅作补充。米游社 wiki 为 JS 动态渲染，WebFetch 无法读取内容，必须用浏览器工具（browser-use）抓取渲染后页面。图片资源存在性（CDN 不可枚举）以引用站实际请求过的路径为准，禁止猜测路径。
+用于「对玩家有价值」语义校准的外部站点。**权威基准为米游社官方 wiki（bbs.mihoyo.com/sr/wiki）**——官方展示的内容即官方认定的玩家可见且有价值数据；hsr.nanoka.cc 等民间站仅作补充。米游社 wiki 为 JS 动态渲染，WebFetch 无法读取内容，必须用浏览器自动化（Playwright）抓取渲染后页面。图片资源存在性（CDN 不可枚举）以引用站实际请求过的路径为准，禁止猜测路径。
 
 ## 导航与模式
 
@@ -136,10 +136,10 @@ _Avoid_: 对比视图、diff 模式、变化视图（避免与旧版已下线词
 ## 图片资源
 
 ### 图片 CDN
-现有 `https://static.nanoka.cc` 的图片资源，转换工具不改动 CDN，只输出相对路径，前端拼接 CDN 前缀。
+图片资源运行期走双源 CDN：jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退，URL 解析统一收口于 `services/cdn/`（见 ADR 0013）。converter 不改动 CDN，只输出相对路径。
 
 ### 图片路径映射
-源数据图片路径（如 `SpriteOutput/AvatarIcon/Avatar/1001.png`）到目标相对路径（如 `icon/character/1001.png`）的映射规则，在转换工具中硬编码。
+源数据图片路径（`SpriteOutput/...`）到 CDN 相对路径的映射规则。converter 在 `config.py` 硬编码两套规则：legacy 短路径（`icon/character/1001.png`）与官方 StarRailTextures 仓库相对路径（`avatarshopicon/avatar/1001.png`，`--official-icon-paths` 输出）；前端 `services/cdn/` 再按分类解析为 jsDelivr / nanoka 实际 URL。
 
 ## 终局内容
 
@@ -160,7 +160,7 @@ _Avoid_: 虚构叙事赛季增益名
 _Avoid_: 上下半场（该词仅用于忘却之庭/虚构叙事）
 
 ### 异相仲裁（Anomaly）
-每期 3 骑士试炼 + 1 王棋最终关（含「绝境」困难变体）；挑战目标走 BattleTargetConfig（Type=ChallengeTarget）。段位徽章系统（ChallengeBadgeConfig）：青铜/白银/黄金/彩钻四段，按期分组（期 4 起收录）。
+每期 3 骑士试炼 + 1 王棋最终关（含「绝境」困难变体）；挑战目标走 BattleTargetConfig（Type=ChallengeTarget）。段位徽章系统（ChallengeBadgeConfig）：青铜/白银/黄金/彩钻四段，按期分组（部分期缺省）。
 _Avoid_: 徽章奖励、段位
 
 ### 星启模式（Starlit）
@@ -178,11 +178,11 @@ _Avoid_: 回合、阶段（波次 ≠ 阶段）
 ## 动画资源
 
 ### Spine 动画源（Spine Source）
-角色骨骼动画的资源提供方，共两类：**nanoka 源**（`static.nanoka.cc`，`.skel` 二进制骨架，Spine 4.1.23）与**官网源**（`act-webstatic.mihoyo.com`，`.json` JSON 骨架，Spine 4.2.43）。详情页 Hero 区动画由 Spine 清单按角色分发到对应源。
+角色骨骼动画的资源提供方，共两类：**nanoka 源**（`static.nanoka.cc`，`.skel` 二进制骨架，Spine 4.1.23）与**官网源**（`act-webstatic.mihoyo.com`，`.json` JSON 骨架，Spine 4.2.43）。首页/详情页 Hero 区动画由 Spine 清单按角色分发到对应源。
 _Avoid_: CDN、动画资源源
 
 ### 官网源（Official Source）
-米哈游官网随版本发布的活动站资源，URL 含版本 publish_key（如 4.4 为 `pz_Devp46QZiu`，4.3 为 `pz_Z1nD6naN3q`）。仅当期版本展示的角色有动画（老角色在官网无资源），旧版本资源无长期保留 SLA。
+米哈游官网随版本发布的活动站资源，URL 含版本 publish_key（如 3.8 为 `pz_Hse3Q5Sb8j`）。收录范围由 `spine-manifest-official.json` 决定（跨版本积累，非仅当期展示角色），旧版本资源无长期保留 SLA。
 _Avoid_: 官网 CDN、mihoyo 源
 
 ### Atlas 纹理重映射（Atlas Texture Remap）
@@ -190,9 +190,9 @@ _Avoid_: 官网 CDN、mihoyo 源
 _Avoid_: 纹理替换、atlas 改写
 
 ### Spine 清单（Spine Manifest）
-角色 ID → 动画资源描述的映射文件，本地随站部署（`public/data/cn/spine-manifest.json`），条目以 `kind` 区分两类源（`skel` = nanoka 二进制 / `official` = 官网 JSON 骨架）。
+角色 ID → 动画资源描述的映射文件，本地随站部署，按源拆为双文件：`spine-manifest-nanoka.json`（`skel` 条目 = nanoka 二进制）与 `spine-manifest-official.json`（`official` 条目 = 官网 JSON 骨架，含版本/source 元数据）。两文件顶层 `version` 必须与 `constants.ts` 的 `SPINE_MANIFEST_VERSION` 一致（测试强制校验）。
 _Avoid_: manifest、动画清单
 
 ### Spine 运行时（Spine Runtime）
-spine-player 播放库（当前 4.2.x），版本须与骨架数据格式兼容：向后兼容（4.2 可读 4.1 数据）、向前不兼容（4.1 读不了 4.2 数据），升级需回归验证现有动画。
+spine-player 播放库，**双运行时分源加载**（见「Spine 动画源」）：官方 JSON 骨架走 4.2.43，nanoka `.skel` 二进制走 4.1.23（位域级不兼容，不可合并）。版本须与骨架数据格式兼容：向后兼容（4.2 可读 4.1 JSON 数据）、向前不兼容（4.1 读不了 4.2 数据），升级需回归验证现有动画。
 _Avoid_: 播放器、运行时库

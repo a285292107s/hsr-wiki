@@ -127,4 +127,4 @@
 **下一步（按审计边界优先级）**：
 1. 常规模式剩余源表审计：AvatarRankConfig → AvatarSkillTreeConfig → AvatarPromotionConfig → 其余 10 个模块；
 2. 🟡 可选字段（存疑表 #5⑦-⑫）由前端 UI 设计决策后立项补全；
-3. CW 模式（GridFight 系列表）后置，基线 = 米游社官方 wiki（browser-use 抓取）。
+3. CW 模式（GridFight 系列表）后置，基线 = 米游社官方 wiki（Playwright 抓取渲染后页面）。
