@@ -7,17 +7,21 @@
 import { onBeforeUnmount, ref } from 'vue';
 import SpineKvSection from './SpineKvSection.vue';
 import SpineAuditSection from './SpineAuditSection.vue';
+import DeadLinksSection from './DeadLinksSection.vue';
 import { getQueryParam, setQueryParam, subscribeQueryChange } from './lib/query-state';
 import { useToasts } from './lib/toast';
 
-type TabId = 'kv' | 'audit';
+type TabId = 'kv' | 'audit' | 'deadlinks';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'kv', label: 'KV 场景验收' },
   { id: 'audit', label: '清单审核' },
+  { id: 'deadlinks', label: '死链审核' },
 ];
 
-const tab = ref<TabId>(getQueryParam('tab') === 'audit' ? 'audit' : 'kv');
+const tab = ref<TabId>(
+  getQueryParam('tab') === 'audit' ? 'audit' : getQueryParam('tab') === 'deadlinks' ? 'deadlinks' : 'kv',
+);
 
 function selectTab(id: TabId): void {
   if (tab.value === id) return;
@@ -27,7 +31,7 @@ function selectTab(id: TabId): void {
 
 // 响应地址栏 / 外部导航的 ?tab= 变化(replaceState 写入与前进后退均触发)
 const unsubscribe = subscribeQueryChange(() => {
-  const t: TabId = getQueryParam('tab') === 'audit' ? 'audit' : 'kv';
+  const t: TabId = getQueryParam('tab') === 'audit' ? 'audit' : getQueryParam('tab') === 'deadlinks' ? 'deadlinks' : 'kv';
   if (t !== tab.value) tab.value = t;
 });
 onBeforeUnmount(unsubscribe);
@@ -43,7 +47,7 @@ const toasts = useToasts();
       <p class="nk-spine-debug__kicker">SPINE LAB // 研究线</p>
       <h1>Spine 调试台</h1>
       <p class="nk-spine-debug__desc">
-        KV 场景验收：每版本官网抓取的场景一键验收（逐层加载 + 合并渲染 + 黑块检测）→ 导出 PASS/FAIL 报告；清单审核：全量 manifest 条目三级诊断（L0 资源 → L1 解析 → L2 渲染）。
+        KV 场景验收：每版本官网抓取的场景一键验收（逐层加载 + 合并渲染 + 黑块检测）→ 导出 PASS/FAIL 报告；清单审核：全量 manifest 条目三级诊断（L0 资源 → L1 解析 → L2 渲染）；死链审核：浏览器端数据驱动 URL 可达性审计（并发 ≤3 限流，结果本地缓存复用）。
       </p>
       <div class="nk-spine-debug__tabs" role="tablist" aria-label="调试功能">
         <button
@@ -64,6 +68,9 @@ const toasts = useToasts();
     </div>
     <div v-show="tab === 'audit'">
       <SpineAuditSection />
+    </div>
+    <div v-show="tab === 'deadlinks'">
+      <DeadLinksSection />
     </div>
 
     <!-- 轻量 toast 宿主 -->
