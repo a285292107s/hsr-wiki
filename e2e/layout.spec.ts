@@ -111,4 +111,22 @@ test.describe('布局验收：角色详情页', () => {
     expect(await findHorizontalOverflow(page)).toEqual([]);
     assertNoErrors();
   });
+
+  test('/character/1001 手机断点：配队标头渲染、队间距 16px、无溢出', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/character/1001'); // 1001 有 2 队（多队才渲染标头）
+    const heads = page.locator('.nk-build__team-head');
+    await expect(heads).toHaveCount(2);
+    await expect(heads.first()).toContainText('配队 01');
+    await expect(heads.last()).toContainText('配队 02');
+    await expect(heads.last()).toContainText('/ 02');
+    // 队间 gap = 16px（手机断点覆盖全局 12px）
+    const gap = await page.locator('.nk-build__teams').evaluate(
+      (el) => parseFloat(getComputedStyle(el).rowGap),
+    );
+    expect(gap).toBe(16);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
 });

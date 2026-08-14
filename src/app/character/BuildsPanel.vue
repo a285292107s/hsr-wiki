@@ -194,6 +194,11 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
     <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.teams }}</span>TEAMS</h2>
     <div class="nk-build__teams">
       <div v-for="t in teams" :key="t.teamId" class="nk-build__team">
+        <!-- 配队标头：多队角色显示编号锚点（编号取数据 team_id，非数组下标）；桌面隐藏，手机断点启用 -->
+        <div v-if="teams.length > 1" class="nk-build__team-head">
+          配队 <span class="nk-build__team-head__num">{{ String(t.teamId).padStart(2, '0') }}</span>
+          <span class="nk-build__team-head__total">/ {{ String(teams.length).padStart(2, '0') }}</span>
+        </div>
         <div class="nk-build__team-slot nk-build__team-slot--main">
           <RouterLink :to="`/character/${charId}`" class="nk-build__team-link" title="当前角色">
             <img :src="cdnUri('avatarroundicon', `${charId}.webp`)" alt="当前角色">

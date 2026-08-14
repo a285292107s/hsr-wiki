@@ -479,6 +479,8 @@
 }
 .nk-char-page .nk-build__teams { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
 .nk-char-page .nk-build__team { display: flex; align-items: center; padding: 18px 22px; border-radius: 10px; }
+/* 配队标头：默认隐藏（桌面每队单行横排，编号无必要）；手机断点内启用为区块边界锚点 */
+.nk-char-page .nk-build__team-head { display: none; }
 .nk-char-page .nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
 .nk-char-page .nk-build__team-link { display: flex; }
 /* 角色名：仅手机端行内展示（两栏式排版），桌面端隐藏 */
@@ -888,6 +890,17 @@
   /* 队伍推荐（移动端竖向）：4 行（主槽 + 3 成员），每行 = 默认推荐角色（左 44px+名字）
      + 备用推荐角色（右 28px 组，右对齐）；两栏式规格表排版：左栏起点统一、右栏终点统一、
      行间分隔细线；触控热区全部 ≥44px；名字超宽 ellipsis 收缩防 320px 溢出；+ 号隐藏 */
+  /* 队间分隔强化：gap 12→16px（覆盖全局 12px），与队内行距拉开权重差 */
+  .nk-char-page .nk-build__teams { gap: 16px; }
+  /* 配队标头行：区块标识层，位于规格表之上；HUD 数字锚点 + 总数计数，
+     纯文字不占底色，不与主槽行 8% 淡底「表头」争权重，不破坏左栏起点统一 */
+  .nk-char-page .nk-build__team-head {
+    display: flex; align-items: baseline; gap: 6px;
+    font-family: var(--font-hud); font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--text3);
+  }
+  .nk-char-page .nk-build__team-head__num { color: var(--primary); font-size: 0.85rem; }
+  .nk-char-page .nk-build__team-head__total { color: var(--text3); opacity: 0.75; font-weight: 500; }
   .nk-char-page .nk-build__team {
     display: flex;
     flex-direction: column;
@@ -910,12 +923,21 @@
   }
   .nk-char-page .nk-build__team-slot img { width: 44px; height: 44px; }
   .nk-char-page .nk-build__team-slot--main img { width: 50px; height: 50px; }
+  /* 主槽行 = 规格表表头：terracotta 8% 淡底 + 圆角，与成员行分隔线区分层级；
+     无水平 padding——头像起点与成员行对齐，保住左栏起点统一 */
+  .nk-char-page .nk-build__team-slot--main {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    border-radius: 8px;
+    padding: 6px 0;
+  }
   .nk-char-page .nk-build__team-link {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
   }
+  /* 触觉反馈：链接按压时头像轻缩（移动端无 hover，只有 active） */
+  .nk-char-page .nk-build__team-link:active img { transform: scale(0.94); }
   .nk-char-page .nk-build__team-name {
     display: inline;
     font-size: 0.7rem; font-weight: 600; color: var(--text2);
@@ -924,19 +946,19 @@
   }
   /* 主槽行：当前角色名主色强调（关键身份） */
   .nk-char-page .nk-build__team-slot--main .nk-build__team-name { color: var(--primary); }
-  /* 备用组：右栏右对齐（终点统一），左栏默认角色起点统一 */
-  .nk-char-page .nk-build__team-alt { margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-  .nk-char-page .nk-build__team-alt img { width: 28px; height: 28px; }
-  .nk-char-page .nk-build__team-alt .nk-build__team-link { padding: 8px; margin: -8px; }
-  .nk-char-page .nk-build__team-plus { display: none; }
-  /* 主槽「当前」微标签：HUD 字体小标，头像正上方（主色关键强调） */
-  .nk-char-page .nk-build__team-slot--main .nk-build__team-link { position: relative; }
-  .nk-char-page .nk-build__team-slot--main .nk-build__team-link::after {
-    content: '当前';
-    position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
-    font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700; /* 字号下界（迭代 §14） */
-    letter-spacing: 0.12em; color: var(--primary); white-space: nowrap;
+  /* 备用组：右栏右对齐（终点统一），左栏默认角色起点统一；
+     细线胶囊框 = 「可替换」组语义（与左栏主位区分）— 垂直 padding 12px 含 margin -8 抵消后
+     视觉留白 4px（不足 12 则头像戳破边框），链接仍保持热区 ≥44px，视觉间距由 gap 8px 维持 */
+  .nk-char-page .nk-build__team-alt {
+    margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
+    border: 1px solid var(--line-2); border-radius: 999px;
+    padding: 12px 10px;
   }
+  .nk-char-page .nk-build__team-alt img { width: 30px; height: 30px; }
+  .nk-char-page .nk-build__team-alt .nk-build__team-link { padding: 8px; margin: -8px; opacity: 0.8; }
+  .nk-char-page .nk-build__team-alt .nk-build__team-link:hover,
+  .nk-char-page .nk-build__team-alt .nk-build__team-link:active { opacity: 1; }
+  .nk-char-page .nk-build__team-plus { display: none; }
 }
 
 /* ═══════════ 焦点环 ═══════════ */
