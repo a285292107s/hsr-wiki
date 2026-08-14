@@ -95,8 +95,9 @@
 @media (max-width: 767px) {
   .nk-skill { padding: 18px 16px 16px; }
   .nk-skill__icon { width: 44px; height: 44px; }
-  .nk-skill__head { flex-wrap: wrap; }
-  .nk-skill__slider { flex-basis: 100%; }
+  /* 类型点 + 等级/叠影滑条保持同一行（头部件宽余量充足：类型点仅数像素，
+     滑条 flex:1 自适应；旧 flex-wrap 换行属历史遗留，导致等级条被挤到下一行） */
+  .nk-skill__head { flex-wrap: nowrap; }
 }
 /* ── 触屏设备（hover: none）：重置点击后粘滞的 hover 态 ── */
 @media (hover: none) {
