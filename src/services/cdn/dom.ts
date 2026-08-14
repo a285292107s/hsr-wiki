@@ -73,6 +73,13 @@ function handleFailure(img: HTMLImageElement): void {
 /** 对受管 img 启动挂起定时器（已 complete 或已有定时器则跳过） */
 function watchStall(img: HTMLImageElement): void {
   if (img.complete || stallTimers.has(img)) return;
+  // lazy 图片进入视口前浏览器不会发起加载（complete 恒 false）——此时把「未加载」当作
+  // 「请求挂起」会误标 data-cdn-down 隐藏（屏外卡片全量中招）。仅在浏览器真正开始拉取
+  // 资源（loadstart）后再启动定时器；未开始的 lazy 图挂起监听，开始加载时经 watchStall 重入。
+  if (img.loading === 'lazy' && !img.currentSrc) {
+    img.addEventListener('loadstart', () => watchStall(img), { once: true });
+    return;
+  }
   const t = setTimeout(() => {
     stallTimers.delete(img);
     // 定时器触发时仍未完成 → 挂起；若此间已因 error 回退替换则跳过

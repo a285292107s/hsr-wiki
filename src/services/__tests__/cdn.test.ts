@@ -340,6 +340,43 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     off();
     img.remove();
   });
+
+  it('挂起检测跳过未开始加载的 lazy 图（屏外不启动定时器，不误标降级）', async () => {
+    vi.useFakeTimers();
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    Object.defineProperty(img, 'complete', { configurable: true, value: false });
+    Object.defineProperty(img, 'loading', { configurable: true, value: 'lazy' });
+    Object.defineProperty(img, 'currentSrc', { configurable: true, value: '' });
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    // 远超挂起阈值：未开始加载的 lazy 图不是请求挂起 → 不降级、src 不变
+    await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS * 2);
+    expect(img.hasAttribute('data-cdn-down')).toBe(false);
+    expect(img.src).toBe('https://primary.example/x.webp');
+    off();
+    img.remove();
+  });
+
+  it('lazy 图开始加载（loadstart）后才启动挂起定时器，真挂起仍走降级链', async () => {
+    vi.useFakeTimers();
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    Object.defineProperty(img, 'complete', { configurable: true, value: false });
+    Object.defineProperty(img, 'loading', { configurable: true, value: 'lazy' });
+    Object.defineProperty(img, 'currentSrc', { configurable: true, value: '' });
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS * 2);
+    expect(img.hasAttribute('data-cdn-down')).toBe(false);
+    // 进入视口开始加载：loadstart 触发 → watchStall 重入启动定时器
+    Object.defineProperty(img, 'currentSrc', { configurable: true, value: 'https://primary.example/x.webp' });
+    img.dispatchEvent(new Event('loadstart'));
+    await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS + 100);
+    expect(img.dataset.cdnDown).toBe('1');
+    off();
+    img.remove();
+  });
 });
 
 describe('CDN_CATEGORIES 注册表完整性', () => {

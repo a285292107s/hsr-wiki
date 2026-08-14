@@ -23,23 +23,33 @@ test.setTimeout(120_000);
  * 此处仅保留等待逻辑：像素基线负责渲染完整性兜底。
  */
 async function waitImages(page: Page) {
-  // 等待所有 img 完成加载（网络慢时给足时间，超时静默——不因 CDN 时序抖动误报）
+  // 只等视口内图片加载完成：toHaveScreenshot 截视口，屏外 loading="lazy" 图不会触发加载，
+  // 全量等待（imgs.every）必 20s 超时并把 80 张屏外图误报为「jsDelivr burst 限流」（环境噪声）。
+  // 口径与截图范围一致——视口内图加载完毕即截图稳定（诊断：catch 分支只列视口内未就绪图）。
   await page
     .waitForFunction(() => {
-      const imgs = [...document.images];
-      return imgs.length > 0 && imgs.every((i) => i.complete && i.naturalWidth > 0);
+      const inView = (el: HTMLImageElement): boolean => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth;
+      };
+      const imgs = [...document.images].filter(inView);
+      return imgs.every((i) => i.complete && i.naturalWidth > 0);
     }, undefined, { timeout: 20_000 })
     .catch(async () => {
       // 超时不失败（环境性），但显式留下记录——基线可能包含未加载图片，人工可见。
-      // 诊断信息：列出未就绪图片，一眼区分 jsDelivr burst 限流（与 curl 独立连接对比，
+      // 诊断信息：列出视口内未就绪图片，一眼区分 jsDelivr burst 限流（与 curl 独立连接对比，
       // 处置见 docs/agents/architecture.md「已知环境坑位」）与真死链（归 tools/dead-links 审计）。
-      const pending = await page.evaluate(() =>
-        [...document.images]
-          .filter((i) => !i.complete || i.naturalWidth === 0)
-          .map((i) => i.currentSrc || i.src),
-      );
+      const pending = await page.evaluate(() => {
+        const inView = (el: HTMLImageElement): boolean => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0 && r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth;
+        };
+        return [...document.images]
+          .filter((i) => inView(i) && (!i.complete || i.naturalWidth === 0))
+          .map((i) => i.currentSrc || i.src);
+      });
       console.warn(
-        `[visual] 图片加载超时（20s），${pending.length} 张未就绪（疑似 jsDelivr burst 限流）；前 5 张：${pending.slice(0, 5).join(' , ')}`,
+        `[visual] 视口内图片加载超时（20s），${pending.length} 张未就绪（疑似 jsDelivr burst 限流）；前 5 张：${pending.slice(0, 5).join(' , ')}`,
       );
     });
   await page.waitForTimeout(500);
