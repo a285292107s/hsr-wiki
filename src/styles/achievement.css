@@ -1,156 +1,216 @@
 /* ═══════════════════════════════════════════
-   成就目录页（常规模式）
-   卡片 = 条目式：头部条（系列图标 + 标题 + 稀有度徽章）
-           + 正文（达成要求完整展示，最高 5 行）+ 底部元信息（系列 · ID）
-   阅读优化：列宽 200（桌面 6 列）、字号整体上调一档、头部图标 40px
-   1869 条 > 400 阈值 → 虚拟网格；单元格高度固定 = 行高（use-virtual-grid），
-   卡片 height:100% 等高填充，行距统一为 gap：短描述的空隙收敛到信息区弹性留白，
-   行高 = colW*0.26 + virtualInfoH(140) + 12 + gap，须 ≥ 卡片实际最大高度
-   稀有度徽章色走领域令牌 --ach-rarity-*（数据语义，不随主题）
+   成就目录页（常规模式）——档案书册横条条目
+   卡片 = 侧栏（系列图标 40px 暗底 + 竖发丝线）
+           + 信息区（编号行 = 等宽 7 位编号 + 稀有度菱形徽记 / 标题 / 达成要求 / 底部系列名）
+   形态绑定断点：≥768 横条（side 64px 列）；<768 竖卡（side 隐藏，系列图标回 meta，描述 4 行）
+   反 AI 味硬约束（不可回退，理由见下）：
+   - 禁止 head 渐变、禁止 box-shadow 发光（glow）、禁止 backdrop-filter 徽章（玻璃胶囊）、
+     禁止虚线分隔（hairline 取代）——渐变头/霓虹光/胶囊徽章是页面黑客审美
+   - hover 只允许边框提亮 + --nk-shadow-card 墨色扩散阴影，禁止位移/scale 跳动
+     （虚拟滚动滚动中重渲染单元格，位移类 hover 会抖动）
+   稀有度表达：左缘 2px 色条（::before，数据语义色 --ach-rarity-* 不随主题）+ 右上菱形徽记
+   行高预算（rowH = colW*virtualImgRatio + virtualInfoH + 22，须 ≥ 卡片实际最大高度）：
+   长条卡（≥768）：side 64 + main（head 17 + title 17 + desc 3 行 ×17.8 + meta 21 + pad 24）≈ 150px
+   手机竖卡（<768）：head 23 + title 2 行 ×17 + desc 4 行 ×17.8 + gap 6 + meta 21 + pad 10 ≈ 169px
+   virtualImgRatio=0 → 行高与列宽解耦，恒 = 174 + 22 = 196；
+   桌面 colW 352-405 → 横卡 352-405 × 182（2:1 长条）✓；手机 colW ≈ 185 → 竖卡 ≈ 169 ✓ 余 13
+   desc 限行与断点绑定：≥768 为 3 行、以下 4 行（改字号/行高须同步重算本预算与 achievement.ts 配置）
 ═══════════════════════════════════════════ */
 
-/* 网格：列宽抽变量与骨架屏共用（catalog.css 定义），此处仅定列宽 */
-.nk-ach-grid { --nk-grid-min: 200px; }
+/* 网格：列宽抽变量与骨架屏共用（catalog.css 定义）；桌面 min 与 achievement.ts virtualMinColW 同源，
+   手机覆盖为 2 列紧凑列宽 */
+.nk-ach-grid { --nk-grid-min: 320px; }
 
-/* 卡片：虚拟网格填满单元格高度（head 横条 + info 正文 flex 撑满） */
+/* 骨架屏占位：横条形态（与终局星际档案卡同语言：横向条，非 3:4 竖块） */
+.nk-ach-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 10px; }
+
+/* 卡片：虚拟网格填满单元格高度（≥768 横条 row；<768 竖卡 column），无位移类动画 */
 .nk-ach-card {
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100%;
   background: var(--card);
-  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent);
   border-radius: var(--nk-radius-card);
   overflow: hidden;
   cursor: default;
-  transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s;
+  transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
   animation: nk-card-in 0.4s var(--ease) backwards;
   animation-delay: min(calc(var(--i, 0) * 16ms), 600ms);
 }
 
-/* 头部条：系列小图标 + 标题横排，稀有度徽章右上角 */
-.nk-ach-card__head {
-  position: relative;
-  width: 100%;
+/* 左缘稀有度色条（金/银/铜，2px，圆角贴合卡片左上；与菱形徽记同族双表达） */
+.nk-ach-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: var(--nk-radius-card) 0 0 var(--nk-radius-card);
+  pointer-events: none;
+  z-index: 1;
+}
+.nk-ach-card--high::before { background: color-mix(in srgb, var(--ach-rarity-high) 55%, transparent); }
+.nk-ach-card--mid::before  { background: color-mix(in srgb, var(--ach-rarity-mid) 45%, transparent); }
+.nk-ach-card--low::before  { background: color-mix(in srgb, var(--ach-rarity-low) 45%, transparent); }
+
+/* 侧栏：系列图标暗底徽记 + 右侧竖发丝线；卡片整体撑满，侧栏纵向贯通 */
+.nk-ach-card__side {
+  flex-shrink: 0;
+  width: 64px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 100%);
-  border-bottom: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
+  justify-content: center;
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  border-right: 1px solid var(--line-1);
 }
 .nk-ach-card__icon {
-  flex-shrink: 0;
   width: 40px;
   height: 40px;
   object-fit: contain;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--blk-900) 62%, transparent);
-  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
-  padding: 4px;
-  transition: transform 0.3s var(--ease), filter 0.3s var(--ease);
+  opacity: 0.9;
 }
-.nk-ach-card__title {
+
+/* 信息区：纵向铺满（head 顶 / desc flex 吸收余量 / meta 沉底） */
+.nk-ach-card__main {
   flex: 1;
   min-width: 0;
-  font-size: 0.85rem;
-  font-weight: 700;
-  line-height: 1.4;
-  color: var(--text-bright);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  padding-right: 30px; /* 为右上角徽章让位 */
-}
-
-/* 稀有度徽章（头部右上角，数据语义色 --ach-rarity-*：Low=铜 / Mid=银 / High=金） */
-.nk-ach-card__badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  line-height: 1;
-  padding: 4px 8px 4px 9px;
-  border-radius: 6px;
-  border: 1px solid;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-.nk-ach-card--high .nk-ach-card__badge { color: var(--ach-rarity-high-text); background: color-mix(in srgb, var(--ach-rarity-high) 30%, transparent); border-color: color-mix(in srgb, var(--ach-rarity-high) 60%, transparent); box-shadow: 0 0 10px color-mix(in srgb, var(--ach-rarity-high) 22%, transparent); }
-.nk-ach-card--mid .nk-ach-card__badge { color: var(--ach-rarity-mid-text); background: color-mix(in srgb, var(--ach-rarity-mid) 26%, transparent); border-color: color-mix(in srgb, var(--ach-rarity-mid) 52%, transparent); }
-.nk-ach-card--low .nk-ach-card__badge { color: var(--ach-rarity-low-text); background: color-mix(in srgb, var(--ach-rarity-low) 30%, transparent); border-color: color-mix(in srgb, var(--ach-rarity-low) 58%, transparent); }
-
-/* 隐藏描述成就（ShowType=HiddenDesc）：图标降饱和 + 描述斜体虚色，标识「未解之谜」 */
-.nk-ach-card--hidden .nk-ach-card__icon { filter: grayscale(0.55) brightness(0.75) contrast(0.92); }
-.nk-ach-card--hidden .nk-ach-card__desc { font-style: italic; color: var(--text3); }
-
-/* 正文区：达成要求（最高 5 行，含换行 pre-line）+ 底部元信息 */
-.nk-ach-card__info {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 10px 12px;
+  padding: 12px 14px 10px;
 }
-.nk-ach-card__desc {
-  flex: 1;
-  min-height: 0;
-  font-size: 0.78rem;
-  line-height: 1.55;
-  color: var(--text2);
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  white-space: pre-line;
-}
-.nk-ach-card__meta {
+
+/* 档案编号行：等宽 7 位编号（tabular 对齐，档案身份锚点）+ 右上稀有度菱形徽记 */
+.nk-ach-card__head {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding-top: 6px;
-  border-top: 1px dashed color-mix(in srgb, var(--primary) 14%, transparent);
+}
+.nk-ach-card__no {
+  font-family: var(--cat-mono);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  color: var(--text3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: color 0.25s var(--ease);
+}
+/* 稀有度菱形徽记：旋转 45° 的细边方块，金/银/铜低饱和色（禁 glow/禁玻璃）；语义由 title/aria-label 承载 */
+.nk-ach-card__gem {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  border-radius: 2px;
+  margin-top: 1px;
+  transition: filter 0.25s var(--ease);
+}
+.nk-ach-card--high .nk-ach-card__gem { background: color-mix(in srgb, var(--ach-rarity-high) 55%, transparent); border: 1px solid color-mix(in srgb, var(--ach-rarity-high) 85%, transparent); }
+.nk-ach-card--mid .nk-ach-card__gem  { background: color-mix(in srgb, var(--ach-rarity-mid) 50%, transparent); border: 1px solid color-mix(in srgb, var(--ach-rarity-mid) 80%, transparent); }
+.nk-ach-card--low .nk-ach-card__gem  { background: color-mix(in srgb, var(--ach-rarity-low) 55%, transparent); border: 1px solid color-mix(in srgb, var(--ach-rarity-low) 85%, transparent); }
+
+/* 标题：横条内单行聚焦（clamp 1）；手机竖卡恢复 2 行 */
+.nk-ach-card__title {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-bright);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 达成要求：横条 3 行（flex 吸收余量），含换行 pre-line */
+.nk-ach-card__desc {
+  flex: 1;
+  min-height: 0;
+  margin-top: 6px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--text2);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-line;
+}
+
+/* 隐藏描述成就（ShowType=HiddenDesc）：描述区渲染为墨色涂抹条（文档打码质感），
+   内部「？？？」文字透明保留 → 屏幕阅读器与视觉语义一致；悬停 title 揭示原文 */
+.nk-ach-card__redact {
+  display: block;
+  height: 1.15em;
+  width: 62%;
+  max-width: 18em;
+  margin-top: 0.3em;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--blk-900) 62%, transparent);
+  color: transparent;
+  user-select: none;
+}
+/* 涂抹条走普通流，脱离 line-clamp 盒（-webkit-box 内 block 子元素截断行为不稳定） */
+.nk-ach-card--hidden .nk-ach-card__desc { display: block; }
+
+/* 底部系列名：发丝线分隔；side 已承载 40px 图标 → 桌面 meta 无图标，
+   手机 side 隐藏后由 meta 的 14px 小图标承接系列识别 */
+.nk-ach-card__meta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 7px;
+  border-top: 1px solid var(--line-1);
+  min-height: 24px;
+}
+.nk-ach-card__series-icon {
+  display: none;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  opacity: 0.85;
 }
 .nk-ach-card__series {
-  font-family: var(--font-hud);
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
+  font-family: var(--cat-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.06em;
   color: var(--text3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.nk-ach-card__id {
-  font-family: var(--font-hud);
-  font-size: 0.6rem;
-  letter-spacing: 0.06em;
-  color: color-mix(in srgb, var(--primary) 55%, transparent);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
 
-/* hover 抬升（仅精细指针设备；触屏无 hover，避免悬置态） */
+/* 隐藏成就：系列图标降饱和 */
+.nk-ach-card--hidden .nk-ach-card__series-icon,
+.nk-ach-card--hidden .nk-ach-card__icon { filter: grayscale(0.55) brightness(0.75) contrast(0.92); }
+
+/* hover 微响应（仅精细指针）：边框提亮 + 墨色扩散阴影 + 编号/菱形微提（同色族加深，无位移缩放） */
 @media (hover: hover) and (pointer: fine) {
   .nk-ach-card:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--primary) 42%, transparent);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.4), 0 0 14px var(--primary-glow);
+    border-color: color-mix(in srgb, var(--primary) 38%, transparent);
+    box-shadow: var(--nk-shadow-card);
   }
-  .nk-ach-card:hover .nk-ach-card__icon { transform: scale(1.08); }
+  .nk-ach-card:hover .nk-ach-card__no { color: color-mix(in srgb, var(--primary) 75%, transparent); }
+  .nk-ach-card:hover .nk-ach-card__gem { filter: brightness(1.2); }
 }
 
 /* ─── 虚拟网格集成（与 .nk-cat-card 同源：reveal 入场 / 图标 loaded 淡入 / 快速跳跃降级） ─── */
 .nk-virtual-cell .nk-ach-card { opacity: 0; transform: translateY(16px); }
 .nk-virtual-cell.nk-revealed .nk-ach-card { opacity: 1; transform: none; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: var(--reveal-delay, 0ms); }
-.nk-virtual-grid .nk-ach-card__icon { opacity: 0; transition: opacity 0.25s ease; }
-.nk-virtual-grid .nk-ach-card__icon.loaded { opacity: 1; }
+.nk-virtual-grid .nk-ach-card__icon,
+.nk-virtual-grid .nk-ach-card__series-icon { opacity: 0; transition: opacity 0.25s ease; }
+.nk-virtual-grid .nk-ach-card__icon.loaded { opacity: 0.9; }
+.nk-virtual-grid .nk-ach-card__series-icon.loaded { opacity: 0.85; }
 .nk-fast-jump .nk-virtual-cell .nk-ach-card { transform: none; }
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-ach-card { animation: nk-card-fade 0.25s ease backwards; }
 .nk-no-reveal .nk-virtual-cell .nk-ach-card { opacity: 1; transform: none; animation: none; }
@@ -162,18 +222,18 @@
   .nk-virtual-cell.nk-revealed .nk-ach-card { animation: none; }
 }
 
-/* ─── 响应式（与 catalog.css 断点对齐） ───
-   窄屏（<1200）头部图标回缩 34px + 描述限 4 行，保证虚拟行高估算安全：
-   rowH = colW*0.26 + 140 + 22 须 ≥ 卡片实际最大高度（head + 描述行数 + 元信息）
-   手机端列宽 140 → 375 宽 2 列（每卡约 182px），告别小卡密集 */
-@media (max-width: 1199.98px) {
-  .nk-ach-card__head { padding: 7px 9px; }
-  .nk-ach-card__icon { width: 34px; height: 34px; border-radius: 7px; padding: 3px; }
-  .nk-ach-card__desc { -webkit-line-clamp: 4; }
-}
+/* ─── 响应式：<768 竖卡形态（2 列紧凑，手机惯例）───
+   竖卡 = head 行（编号 + 菱形）+ 标题 2 行 + 描述 4 行 + meta（系列图标 + 系列名） */
 @media (max-width: 767.98px) {
   .nk-ach-grid { --nk-grid-min: 140px; }
-  .nk-ach-card__info { padding: 8px 10px; }
+  .nk-ach-card { flex-direction: column; }
+  .nk-ach-card__side { display: none; }
+  .nk-ach-card__main { padding: 0 10px 8px; }
+  .nk-ach-card__head { padding: 8px 0 3px; }
+  .nk-ach-card__title { -webkit-line-clamp: 2; margin-top: 4px; }
+  .nk-ach-card__desc { -webkit-line-clamp: 4; margin-top: 4px; }
+  .nk-ach-card__meta { margin-top: 4px; }
+  .nk-ach-card__series-icon { display: block; }
 }
 @media (max-width: 374px) {
   .nk-ach-grid { --nk-grid-min: 128px; }

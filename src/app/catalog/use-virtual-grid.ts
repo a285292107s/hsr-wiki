@@ -94,7 +94,8 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     const minColW = cfg().virtualMinColW || 150;
     cols = Math.max(2, Math.floor((gridWidth + GAP) / (minColW + GAP)));
     const colW = (gridWidth - (cols - 1) * GAP) / cols;
-    const imgRatio = cfg().virtualImgRatio || 1;
+    /* ?? 而非 ||：virtualImgRatio=0 是合法显式值（行高与列宽解耦，成就页用），|| 会误兑底为默认 1 */
+    const imgRatio = cfg().virtualImgRatio ?? 1;
     const infoH = cfg().virtualInfoH ?? 36;
     rowH = colW * imgRatio + infoH + 12 + GAP;
   }

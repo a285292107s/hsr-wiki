@@ -19,25 +19,33 @@ function renderAchievementCard(item: CatalogItem, index = 0): string {
   const series = (item.series_name as string) || '';
   const img = (item.series_icon as string) || '';
   const hidden = item.show_type === 'HiddenDesc';
-  /* 稀有度徽章（金/银/铜，数据语义色 --ach-rarity-*） */
-  const badge = rarity
-    ? `<span class="nk-ach-card__badge" title="${RARITY_LABEL[rarity]}稀有度">${RARITY_LABEL[rarity]}</span>`
+  /* 稀有度菱形徽记（graphical 徽章，title/aria-label 承载语义；左缘色条由 CSS ::before 呈现，同族双表达） */
+  const gemTitle = rarity ? `${RARITY_LABEL[rarity]}稀有度` : '';
+  const gem = rarity
+    ? `<span class="nk-ach-card__gem" role="img" aria-label="${gemTitle}" title="${gemTitle}"></span>`
     : '';
-  /* 隐藏描述成就：游戏内描述以「？？？」呈现，卡片同源标识 */
+  /* 隐藏描述成就：描述区渲染为墨色涂抹条（视觉打码），悬停 title 揭示原文；
+     涂抹条内保留「？？？」文本 → 屏幕阅读器与视觉语义一致，原文不泄入可访问性树 */
   const descText = hidden ? '？？？' : String(item.desc || '');
   /* 描述截断时 hover 提示全文（换行转空格，避免 title 换行渲染异常） */
   const descTip = descText.replace(/\n+/g, ' ');
+  const descHtml = hidden
+    ? `<span class="nk-ach-card__redact">${escHtml(descText)}</span>`
+    : escHtml(descText);
   return `<div class="nk-ach-card nk-ach-card--${rarity.toLowerCase() || 'none'}${hidden ? ' nk-ach-card--hidden' : ''}" data-id="${escHtml(String(item.id))}" data-name="${escHtml(item.name)}" data-rarity="${escHtml(rarity)}" data-series="${escHtml(String(item.series_id || ''))}" data-show-type="${escHtml(String(item.show_type || ''))}" style="--i:${index}">
-      <div class="nk-ach-card__head">
-        ${img ? `<img class="nk-ach-card__icon" src="${escHtml(img)}" alt="${escHtml(series)}">` : ''}
-        <div class="nk-ach-card__title">${escHtml(item.name)}</div>
-        ${badge}
+      <div class="nk-ach-card__side">
+        ${img ? `<img class="nk-ach-card__icon" src="${escHtml(img)}" alt="" loading="lazy">` : ''}
       </div>
-      <div class="nk-ach-card__info">
-        <div class="nk-ach-card__desc" title="${escHtml(descTip)}">${escHtml(descText)}</div>
+      <div class="nk-ach-card__main">
+        <div class="nk-ach-card__head">
+          <span class="nk-ach-card__no">${escHtml(String(item.id))}</span>
+          ${gem}
+        </div>
+        <div class="nk-ach-card__title">${escHtml(item.name)}</div>
+        <div class="nk-ach-card__desc" title="${escHtml(descTip)}">${descHtml}</div>
         <div class="nk-ach-card__meta">
+          ${img ? `<img class="nk-ach-card__series-icon" src="${escHtml(img)}" alt="" loading="lazy">` : ''}
           <span class="nk-ach-card__series">${escHtml(series) || '未知系列'}</span>
-          <span class="nk-ach-card__id">#${escHtml(String(item.id))}</span>
         </div>
       </div>
     </div>`;
@@ -46,19 +54,23 @@ function renderAchievementCard(item: CatalogItem, index = 0): string {
 export const achievementPage: CatalogPageConfig = {
   id: 'achievement',
   title: '成就',
+  /* 档案式 masthead 副标（CatalogToolbar 复用；与角色页 CHARACTER INDEX 同语言） */
+  subtitle: 'ACHIEVEMENT INDEX',
   searchPlaceholder: '搜索成就标题或描述…',
   gridClass: 'nk-cat-grid nk-ach-grid',
   cardClass: '.nk-ach-card',
   /* 成就目录专属样式（nk-ach-card 等），随路由并行加载 */
   styles: [() => import('../../../../src/styles/achievement.css')],
   /* 1869 条 > 400 阈值 → 虚拟网格；
-     列宽 200（桌面 6 列，避免 8 列小卡密集）；头部条高度 = colW*0.26（桌面约 56px 匹配图标 40px），
-     信息区 140px 容纳 5 行描述（字号 0.78rem）+ 元信息：
-     单元格高度已固定为行高（use-virtual-grid），卡片 height:100% 等高填充，
-     行高估算须 ≥ 卡片实际最大高度（head 57 + 5 行描述 97 + 元信息 27 ≈ 181px，桌面安全余量 23px） */
-  virtualMinColW: 200,
-  virtualImgRatio: 0.26,
-  virtualInfoH: 140,
+     行高预算（rowH = colW*virtualImgRatio + virtualInfoH + 22，须 ≥ 卡片实际最大高度）：
+     长条卡（≥768）：side 64 + main（head 17 + title 17 + desc 3 行 ×17.8 + meta 21 + pad 24）≈ 150px
+     手机竖卡（<768）：head 23 + title 2 行 ×17 + desc 4 行 ×17.8 + gap 6 + meta 21 + pad 10 ≈ 169px
+     virtualImgRatio=0 → 行高与列宽解耦，恒 = 174 + 22 = 196；
+     桌面 colW 352-405 → 横卡 352-405 × 182（2:1 长条）✓；手机 colW ≈ 185 → 竖卡 ≈ 169 ✓ 余 13
+     desc 限行与断点绑定：≥768 为 3 行、以下 4 行（改字号/行高须同步重算本预算） */
+  virtualMinColW: 320,
+  virtualImgRatio: 0,
+  virtualInfoH: 174,
   async fetchData() {
     const [achievements, series] = await Promise.all([
       loadLocalAchievements(),
@@ -77,7 +89,12 @@ export const achievementPage: CatalogPageConfig = {
         rarity: a.rarity,
         series_id: a.series_id,
         series_name: s?.name ?? '',
-        series_icon: s?.icon ? cdnUri('achievement', `${s.icon}.webp`) : '',
+        /* 底部小图标优先 icon_s（小尺寸专用），缺失回退 icon */
+        series_icon: s?.icon_s
+          ? cdnUri('achievement', `${s.icon_s}.webp`)
+          : s?.icon
+            ? cdnUri('achievement', `${s.icon}.webp`)
+            : '',
         show_type: a.show_type,
       };
     });
