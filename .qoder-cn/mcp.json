@@ -2,7 +2,7 @@
 	"mcpServers": {
 		"fastctx": {
 			"type": "stdio",
-			"command": "C:\\Users\\28529\\AppData\\Roaming\\npm\\node_modules\\fastctx\\node_modules\\@fastctx\\win32-x64\\bin\\fastctx.exe",
+			"command": "fastctx",
 			"args": [
 				"serve"
 			]
