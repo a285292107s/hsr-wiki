@@ -39,17 +39,52 @@ const inCw = computed(() => !!route.meta.cw);
 
 const current = ref<AccentKey>(getSavedAccent());
 
-function choose(key: AccentKey): void {
-  setAccent(key);
-  current.value = key;
-}
-
 const cwCurrent = ref<CwAccentKey>(getSavedCwAccent());
 
-function chooseCw(key: CwAccentKey): void {
-  setCwAccent(key);
-  cwCurrent.value = key;
+function choose(key: SwatchKey): void {
+  setAccent(key as AccentKey);
+  current.value = key as AccentKey;
 }
+
+function chooseCw(key: SwatchKey): void {
+  setCwAccent(key as CwAccentKey);
+  cwCurrent.value = key as CwAccentKey;
+}
+
+/** 主题色选择区配置（01 常规 / 02 CW 数据驱动渲染，消除双区同构模板）：
+ *  onChoose 依赖「items 与回调同型」配对约束，键值断言由该约束保证——
+ *  禁止把某区 items 与另一区回调混配 */
+type SwatchKey = AccentKey | CwAccentKey;
+interface SwatchSection {
+  id: string;
+  idx: string;
+  title: string;
+  listboxLabel: string;
+  items: ReadonlyArray<{ key: SwatchKey; label: string; swatch: readonly [string, string, string] }>;
+  /** 读取当前键（ref 闭包，模板渲染时求值保持响应式） */
+  currentValue: () => SwatchKey;
+  onChoose: (key: SwatchKey) => void;
+  /** 缺省键与缺省提示（仅当前键 === 缺省键时展示） */
+  defaultKey: SwatchKey;
+  defaultHintText: string;
+}
+
+const accentSections: SwatchSection[] = [
+  {
+    id: 'accent-title', idx: '01', title: '常规模式主题色', listboxLabel: '主题强调色',
+    items: ACCENTS,
+    currentValue: () => current.value,
+    onChoose: choose,
+    defaultKey: DEFAULT_ACCENT, defaultHintText: '当前使用默认主题 · 赤陶',
+  },
+  {
+    id: 'cw-accent-title', idx: '02', title: '货币战争主题色', listboxLabel: '货币战争主题强调色',
+    items: CW_ACCENTS,
+    currentValue: () => cwCurrent.value,
+    onChoose: chooseCw,
+    defaultKey: DEFAULT_CW_ACCENT, defaultHintText: '当前使用默认主题 · 香槟金',
+  },
+];
 
 /** 开拓者形态选项（性别符号 + 名称；默认女性） */
 const GENDER_OPTIONS: ReadonlyArray<{ key: TrailblazerGender; label: string; icon: string }> = [
@@ -76,9 +111,7 @@ const headDesc = computed(() => (inCw.value
   ? '调整货币战争模式的主色调。只对本模式生效，普通模式配色保持不变。'
   : '调整全站主色调与开拓者形象。选择即时生效并自动保存，与货币战争模式各有独立配色，互不影响。'));
 
-/** 区块编号固定：01 = 常规模式主题色，02 = 货币战争主题色（不随语境交换，防玩家混淆）；CW 语境仅视觉置前 */
-
-/** 对勾徽章路径（stroke-dashoffset 入画动画，见 CSS） */
+/** 对勾徽章路径（stroke-dasharray 入画动画，见 CSS） */
 const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 </script>
 
@@ -100,69 +133,41 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
       </div>
     </header>
 
-    <div class="nk-settings__sections">
-      <section class="nk-settings__section" aria-labelledby="accent-title">
-        <h2 id="accent-title" class="nk-title">
-          <span class="nk-title__idx">01</span>
-          常规模式主题色
-        </h2>
-        <div class="nk-settings__grid" role="listbox" aria-label="主题强调色">
-          <button
-            v-for="a in ACCENTS"
-            :key="a.key"
-            type="button"
-            class="nk-swatch"
-            :class="{ 'nk-swatch--on': current === a.key }"
-            :aria-pressed="current === a.key"
-            @click="choose(a.key)"
-          >
-            <span class="nk-swatch__plate" :style="{ '--sw-a': a.swatch[0], '--sw-b': a.swatch[1], '--sw-c': a.swatch[2] }" aria-hidden="true">
-              <span class="nk-swatch__badge">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path :d="CHECK_PATH" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
+    <section
+      v-for="sec in accentSections"
+      :key="sec.id"
+      class="nk-settings__section"
+      :aria-labelledby="sec.id"
+    >
+      <h2 :id="sec.id" class="nk-title">
+        <span class="nk-title__idx">{{ sec.idx }}</span>
+        {{ sec.title }}
+      </h2>
+      <div class="nk-settings__grid" role="listbox" :aria-label="sec.listboxLabel">
+        <button
+          v-for="a in sec.items"
+          :key="a.key"
+          type="button"
+          class="nk-swatch"
+          :class="{ 'nk-swatch--on': sec.currentValue() === a.key }"
+          :aria-pressed="sec.currentValue() === a.key"
+          @click="sec.onChoose(a.key)"
+        >
+          <span class="nk-swatch__plate" :style="{ '--sw-a': a.swatch[0], '--sw-b': a.swatch[1], '--sw-c': a.swatch[2] }" aria-hidden="true">
+            <span class="nk-swatch__badge">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path :d="CHECK_PATH" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
             </span>
-            <span class="nk-swatch__meta">
-              <span class="nk-swatch__name">{{ a.label }}</span>
-              <span class="nk-swatch__hex">{{ a.swatch[1] }}</span>
-            </span>
-          </button>
-        </div>
-        <p v-if="current === DEFAULT_ACCENT" class="nk-settings__hint">当前使用默认主题 · 赤陶</p>
-      </section>
-
-      <section class="nk-settings__section" aria-labelledby="cw-accent-title">
-        <h2 id="cw-accent-title" class="nk-title">
-          <span class="nk-title__idx">02</span>
-          货币战争主题色
-        </h2>
-        <div class="nk-settings__grid" role="listbox" aria-label="货币战争主题强调色">
-          <button
-            v-for="a in CW_ACCENTS"
-            :key="a.key"
-            type="button"
-            class="nk-swatch"
-            :class="{ 'nk-swatch--on': cwCurrent === a.key }"
-            :aria-pressed="cwCurrent === a.key"
-            @click="chooseCw(a.key)"
-          >
-            <span class="nk-swatch__plate" :style="{ '--sw-a': a.swatch[0], '--sw-b': a.swatch[1], '--sw-c': a.swatch[2] }" aria-hidden="true">
-              <span class="nk-swatch__badge">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path :d="CHECK_PATH" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-            </span>
-            <span class="nk-swatch__meta">
-              <span class="nk-swatch__name">{{ a.label }}</span>
-              <span class="nk-swatch__hex">{{ a.swatch[1] }}</span>
-            </span>
-          </button>
-        </div>
-        <p v-if="cwCurrent === DEFAULT_CW_ACCENT" class="nk-settings__hint">当前使用默认主题 · 香槟金</p>
-      </section>
-    </div>
+          </span>
+          <span class="nk-swatch__meta">
+            <span class="nk-swatch__name">{{ a.label }}</span>
+            <span class="nk-swatch__hex">{{ a.swatch[1] }}</span>
+          </span>
+        </button>
+      </div>
+      <p v-if="sec.currentValue() === sec.defaultKey" class="nk-settings__hint">{{ sec.defaultHintText }}</p>
+    </section>
 
     <section class="nk-settings__section" aria-labelledby="trailblazer-title">
       <h2 id="trailblazer-title" class="nk-title">
@@ -187,7 +192,7 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
           <span class="nk-seg__mark" aria-hidden="true"></span>
         </button>
       </div>
-      <p class="nk-settings__hint">常规模式角色列表展示所选性别的开拓者；货币战争模式仅切换立绘形象。<template v-if="currentGender === DEFAULT_TRAILBLAZER_GENDER">当前使用默认形态 · 女性</template></p>
+      <p class="nk-settings__hint">角色列表仅显示选中的开拓者形态。<template v-if="currentGender === DEFAULT_TRAILBLAZER_GENDER">当前使用默认形态 · 女性</template></p>
     </section>
   </div>
 </template>
@@ -255,7 +260,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   background: var(--nk-sheet-item-bg);
   border: 1px solid var(--nk-sheet-item-border);
   border-radius: var(--nk-radius-card);
-  transition: border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
 }
 .nk-settings__tag-label {
   font-family: var(--font-hud);
@@ -288,13 +292,7 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   color: var(--text3);
 }
 
-/* ─── 主题区排序容器（区块顺序固定：01 常规 → 02 CW → 03 形态，不随语境变化） ─── */
-.nk-settings__sections {
-  display: flex;
-  flex-direction: column;
-}
-
-/* ─── 区块 ─── */
+/* ─── 区块：三区块直列同父（相邻兄弟选择器统一管理间距；顺序固定不随语境变化） ─── */
 .nk-settings__section { max-width: 1480px; }
 .nk-settings__section + .nk-settings__section { margin-top: 34px; }
 /* 标题行复用全局 .nk-title 原语（HUD 大写 + 编号 + 延伸线），仅收口底部距 */
