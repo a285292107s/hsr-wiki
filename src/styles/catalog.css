@@ -89,7 +89,11 @@
 .nk-cat-select__opt:hover { background: var(--nk-shell-hover); color: var(--text); }
 .nk-cat-select__opt.is-active { background: var(--primary-glow); color: var(--text-bright); }
 .nk-cat-select__opt .nk-cat-select__icon { width: 18px; height: 18px; }
-.nk-cat-select__opt .nk-cat-select__star { width: 12px; height: 12px; color: var(--gold); flex-shrink: 0; }
+.nk-cat-select__opt .nk-cat-select__star { width: 12px; height: 12px; color: var(--gold); flex-shrink: 0; vertical-align: middle; }
+/* 位置筛选阵型槽位图标（内嵌 SVG label 走 span v-html，svg 与文本 inline 混排：
+   默认 baseline 对齐会使 18px 图标底边贴文本基线而向上浮起，须 middle 对齐；
+   选中值内 .nk-cat-select__val 为 inline-flex 天然居中，不受影响） */
+.nk-cat-select__opt .nk-cat-select__fb { width: 18px; height: 18px; vertical-align: middle; }
 
 /* 网格
    列宽抽变量：骨架屏与真实网格共用同一 minmax，避免切换时列数突变导致 CLS */

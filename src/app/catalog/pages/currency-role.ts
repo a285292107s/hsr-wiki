@@ -1,17 +1,17 @@
 /** 货币战争 · 角色图鉴目录页配置 */
 import { cdnUri } from '../../../services/cdn';
-import { escHtml, avatarShopIconUrl } from '../../../lib/format';
+import { escHtml, avatarShopIconUrl, gridFightTraitIconById } from '../../../lib/format';
 import { loadLocalCurrencyRoles } from '../../../services/api';
 import { getSavedTrailblazerGender, shouldUseFemaleAvatar } from '../../../lib/trailblazer';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
-import { loadCwCatalogCss } from './shared';
+import { loadCwCatalogCss, STAR_SVG } from './shared';
 
 const FB_LABEL: Record<string, string> = {
   Front: '前台', Back: '后台', Both: '前后台',
 };
 
 const CHARGE_LABEL: Record<string, string> = {
-  Speed: '速度', EnergyBar: '充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点',
+  Speed: '速度', EnergyBar: '特殊充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点',
 };
 
 /* ─── 特质分类（与 converter _trait_cat 对齐） ─── */
@@ -20,12 +20,17 @@ const TRAIT_CAT_LABEL: Record<TraitCat, string> = {
   faction: '阵营', combat: '流派', special: '特殊',
 };
 
-/* 前后台 SVG 图标（自绘，无网络依赖）
+/* 前后台 SVG 图标（自绘，无网络依赖；nk-cat-select__fb 为筛选菜单选项宽度类，卡片角标不受影响）
    设计语言：「阵型槽位」——横向胶囊条 = 行位，实心亮色 = 占据，半透明幽灵描边 = 空槽。
    暖金 = 前台，冷靖蓝 = 后台；三图标共享同一几何，仅填充状态不同。 */
-const FB_SVG_FRONT = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-front);fill-opacity:.15;stroke:var(--cw-fb-front);stroke-opacity:.62" stroke-width="1.5"/></svg>`;
-const FB_SVG_BACK = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-back);fill-opacity:.15;stroke:var(--cw-fb-back);stroke-opacity:.62" stroke-width="1.5"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
-const FB_SVG_BOTH = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
+const FB_SVG_FRONT = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-front);fill-opacity:.15;stroke:var(--cw-fb-front);stroke-opacity:.62" stroke-width="1.5"/></svg>`;
+const FB_SVG_BACK = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-back);fill-opacity:.15;stroke:var(--cw-fb-back);stroke-opacity:.62" stroke-width="1.5"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
+const FB_SVG_BOTH = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
+
+/* 位置筛选选项图标（与卡片角标同源；前/后/前后台三态） */
+const FB_OPTION_SVG: Record<string, string> = {
+  Front: FB_SVG_FRONT, Back: FB_SVG_BACK, Both: FB_SVG_BOTH,
+};
 
 
 function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
@@ -109,7 +114,7 @@ export const currencyRolePage: CatalogPageConfig = {
         label: '稀有度',
         options: [
           { val: '', label: '全部' },
-          ...rarities.map((v) => ({ val: String(v), label: `${v}费` })),
+          ...rarities.map((v) => ({ val: String(v), label: `${STAR_SVG}${v}费` })),
         ],
       });
     }
@@ -134,7 +139,8 @@ export const currencyRolePage: CatalogPageConfig = {
         label: TRAIT_CAT_LABEL[cat],
         options: [
           { val: '', label: '全部' },
-          ...entries.map(([id, name]) => ({ val: String(id), label: name })),
+          /* 图标与详情页羁绊图标同源（gridFightTraitIconById），防双事实源漂移 */
+          ...entries.map(([id, name]) => ({ val: String(id), label: name, icon: gridFightTraitIconById(id) })),
         ],
       });
     }
@@ -149,7 +155,7 @@ export const currencyRolePage: CatalogPageConfig = {
         options: [
           { val: '', label: '全部' },
           ...positions.sort((a, b) => (POS_ORDER[a] ?? 99) - (POS_ORDER[b] ?? 99))
-            .map((v) => ({ val: v, label: FB_LABEL[v] ?? v })),
+            .map((v) => ({ val: v, label: `${FB_OPTION_SVG[v] ?? ''}${FB_LABEL[v] ?? v}` })),
         ],
       });
     }
@@ -160,7 +166,7 @@ export const currencyRolePage: CatalogPageConfig = {
     if (charge.size) {
       filters.push({
         key: 'charge_type',
-        label: '充能',
+        label: '充能类型',
         options: [
           { val: '', label: '全部' },
           ...[...charge].sort().map((v) => ({ val: v, label: CHARGE_LABEL[v] ?? v })),
@@ -184,7 +190,7 @@ export const currencyRolePage: CatalogPageConfig = {
       label: '光锥',
       options: [
         { val: '', label: '全部' },
-        { val: 'true', label: '有预设光锥' },
+        { val: 'true', label: '有后台光锥' },
       ],
     });
 

@@ -105,7 +105,7 @@ describe('propLabel / propValue', () => {
 
   it('exposes front/back and charge labels', () => {
     expect(FB_LABEL.Front).toBe('前台');
-    expect(CHARGE_LABEL.EnergyBar).toBe('充能');
+    expect(CHARGE_LABEL.EnergyBar).toBe('特殊充能');
     expect(CHARGE_LABEL.MaxSP).toBe('终结技能量');
   });
 });

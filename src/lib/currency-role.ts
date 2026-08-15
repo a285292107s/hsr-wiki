@@ -19,9 +19,9 @@ import type {
 /** 前后台定位标签 */
 export const FB_LABEL: Record<string, string> = { Front: '前台', Back: '后台', Both: '前后台' };
 
-/** 充能类型标签（用词依据 TextMap 官方文本：EnergyBar→「充能」（技能描述「获得充能/充能达到N点」），MaxSP→「终结技能量」（「初始终结技能量/恢复N终结技能量」）） */
+/** 充能类型标签（用词依据 TextMap 官方文本：EnergyBar→「特殊充能」（技能描述「获得充能/充能达到N点」）,MaxSP→「终结技能量」（「初始终结技能量/恢复N终结技能量」）） */
 export const CHARGE_LABEL: Record<string, string> = {
-  Speed: '速度', EnergyBar: '充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点',
+  Speed: '速度', EnergyBar: '特殊充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点',
 };
 
 /** 技能分组标签 */
