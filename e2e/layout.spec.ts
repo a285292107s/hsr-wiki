@@ -9,7 +9,8 @@ import { collectConsoleIssues, findHorizontalOverflow, waitForCatalogCards } fro
  * - /          常规首页（hero + 导航行）
  * - /character 目录页（虚拟滚动网格，卡片模板字符串渲染）
  * - /endgame   终局合并单页
- * - /currency  货币战争 Hub（meta.cw → <html data-theme="cw"> 黑金主题）
+ * - /currency  货币战争 Hub（meta.cw → <html data-theme="cw"> 主题）
+ * - /currency/settings  货币战争设置（CW 主题色选择 → <html data-cw-accent>）
  *
  * 每页统一断言：无未捕获 JS 异常 + 无横向溢出 + 关键结构存在。
  */
@@ -95,6 +96,27 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
     const sectionCards = await page.locator('.nk-cwhub-index__row').count();
     expect(sectionCards).toBeGreaterThanOrEqual(5);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('/currency/settings：CW 主题色选择（黑金语境、区块顺序固定、data-cw-accent 写入）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/currency/settings');
+    // meta.cw → <html data-theme="cw">；缺省无 data-cw-accent（默认香槟金不挂属性）
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'cw');
+    await expect(page.locator('html')).not.toHaveAttribute('data-cw-accent');
+    // CW 主题色区：5 个预置色板；区块顺序固定（01 常规模式主题色在 02 货币战争主题色上方，不随语境置前/交换）
+    const cwTitle = page.locator('#cw-accent-title');
+    const normalTitle = page.locator('#accent-title');
+    await expect(cwTitle).toBeVisible();
+    await expect(page.getByRole('listbox', { name: '货币战争主题强调色' }).locator('button')).toHaveCount(5);
+    const cwY = await cwTitle.evaluate((el) => el.getBoundingClientRect().top);
+    const normalY = await normalTitle.evaluate((el) => el.getBoundingClientRect().top);
+    expect(normalY).toBeLessThan(cwY);
+    // 选择玫瑰金 → <html data-cw-accent="rose">（tokens [data-theme="cw"][data-cw-accent] 规则生效）
+    await page.getByRole('button', { name: /玫瑰金/ }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-cw-accent', 'rose');
     expect(await findHorizontalOverflow(page)).toEqual([]);
     assertNoErrors();
   });

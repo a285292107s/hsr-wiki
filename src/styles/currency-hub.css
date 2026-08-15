@@ -155,15 +155,15 @@
 .nk-cwhub-season::-webkit-scrollbar { width: 6px; }
 .nk-cwhub-season::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
 .nk-cwhub-season::-webkit-scrollbar-track { background: transparent; }
-/* 键盘聚焦可见性：滚动容器 tabindex="0" 后需给出 focus-visible 焦点环（黑金主题发丝金框） */
+/* 键盘聚焦可见性：滚动容器 tabindex="0" 后需给出 focus-visible 焦点环（主题色发丝环） */
 .nk-cwhub-season:focus-visible {
-  outline: 1px solid color-mix(in srgb, var(--gold-500) 70%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--cwth-500) 70%, transparent);
   outline-offset: 2px;
 }
 .nk-cwhub-season__title {
   margin: 0 0 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--gold-500) 30%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--cwth-500) 30%, transparent);
   font-size: 1.05rem;
   font-weight: 800;
   line-height: 1.35;
@@ -320,7 +320,7 @@
 
 /* 桌面悬停：整行微亮背景（hover 可用设备专属；触屏回退见 hover:none） */
 @media (hover: hover) and (pointer: fine) {
-  .nk-cwhub-index__row:hover { background: color-mix(in srgb, var(--gold-500) 5%, transparent); }
+  .nk-cwhub-index__row:hover { background: color-mix(in srgb, var(--cwth-500) 5%, transparent); }
 }
 
 /* ── 页脚：复用首页 nk-home-footer 范式（类定义于全局 catalog.css，含全断点响应式） ── */

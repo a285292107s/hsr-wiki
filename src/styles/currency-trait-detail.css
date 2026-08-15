@@ -67,13 +67,13 @@
   overflow: hidden;
   border-bottom: 1px solid var(--border);
 }
-/* 多层光晕：主辉光 + 底部反射 */
+/* 多层光晕：主主题色辉光 + 底部反射 */
 .nk-ctrait-hero__glow {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 50% 70% at 25% 30%, color-mix(in srgb, var(--gold-300) 7%, transparent), transparent 65%),
-    radial-gradient(ellipse 80% 40% at 70% 90%, color-mix(in srgb, var(--gold-500) 4%, transparent), transparent 60%);
+    radial-gradient(ellipse 50% 70% at 25% 30%, color-mix(in srgb, var(--cwth-300) 7%, transparent), transparent 65%),
+    radial-gradient(ellipse 80% 40% at 70% 90%, color-mix(in srgb, var(--cwth-500) 4%, transparent), transparent 60%);
   pointer-events: none;
 }
 .nk-ctrait-hero[data-cat="faction"] .nk-ctrait-hero__glow {
@@ -197,7 +197,7 @@
   color: var(--text-bright);
   margin: 0 0 14px;
   padding-left: 12px;
-  border-left: 3px solid var(--primary, var(--gold-300));
+  border-left: 3px solid var(--primary, var(--cwth-300));
   line-height: 1.4;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -236,13 +236,13 @@
   left: 16px;
   right: 60%;
   height: 1px;
-  background: linear-gradient(90deg, var(--primary, var(--gold-300)), transparent);
+  background: linear-gradient(90deg, var(--primary, var(--cwth-300)), transparent);
   opacity: 0.4;
 }
 .nk-ctrait-desc :where(.hl) {
-  color: var(--highlight, var(--gold-300));
+  color: var(--highlight, var(--cwth-300));
   font-weight: 600;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--gold-300) 20%, transparent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--cwth-300) 20%, transparent);
 }
 
 /* ═══ 备注机制 ═══ */
@@ -271,9 +271,9 @@
   line-height: 1.75;
 }
 .nk-ctrait-remark__text :where(.hl) {
-  color: var(--highlight, var(--gold-300));
+  color: var(--highlight, var(--cwth-300));
   font-weight: 600;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--gold-300) 15%, transparent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--cwth-300) 15%, transparent);
 }
 
 /* 标题后括号注释（激活条件等） */
@@ -319,7 +319,7 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .nk-ctrait-member:hover .nk-ctrait-member__avatar {
-  border-color: var(--primary, var(--gold-300));
+  border-color: var(--primary, var(--cwth-300));
   box-shadow: 0 0 12px var(--primary-glow);
 }
 .nk-ctrait-member__name {
@@ -337,11 +337,11 @@
   font-size: 0.6rem;
   font-weight: 700;
   font-family: var(--font-hud);
-  color: var(--primary, var(--gold-300));
+  color: var(--primary, var(--cwth-300));
   padding: 1px 6px;
   border-radius: 3px;
-  background: color-mix(in srgb, var(--gold-300) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--gold-300) 20%, transparent);
+  background: color-mix(in srgb, var(--cwth-300) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cwth-300) 20%, transparent);
 }
 
 /* ═══ 层级效果 · 菱形阶梯进度轨 ═══ */
@@ -478,7 +478,7 @@
   box-shadow: 0 0 5px currentColor;
 }
 /* 品质徽章配色 */
-.nk-ctrait-layer--base .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--ctrait-base) 8%, transparent); color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--gold-300) 20%) 60%, transparent); border: 1px solid color-mix(in srgb, var(--ctrait-base) 22%, transparent); }
+.nk-ctrait-layer--base .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--ctrait-base) 8%, transparent); color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 60%, transparent); border: 1px solid color-mix(in srgb, var(--ctrait-base) 22%, transparent); }
 .nk-ctrait-layer--silver .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--cw-rarity-1) 10%, transparent); color: var(--crole-chip-season); border: 1px solid color-mix(in srgb, var(--cw-rarity-1) 25%, transparent); }
 .nk-ctrait-layer--gold .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--gold) 8%, transparent); color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent); }
 .nk-ctrait-layer--multicolor .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--ctrait-multicolor) 8%, transparent); color: var(--ctrait-multicolor); border: 1px solid color-mix(in srgb, var(--ctrait-multicolor) 25%, transparent); }
@@ -502,9 +502,9 @@
 }
 .nk-ctrait-layer__desc:last-child { margin-bottom: 0; }
 .nk-ctrait-layer__desc :where(.hl) {
-  color: var(--highlight, var(--gold-300));
+  color: var(--highlight, var(--cwth-300));
   font-weight: 600;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--gold-300) 15%, transparent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--cwth-300) 15%, transparent);
 }
 /* Mazebuff 补充机制描述——伪元素画线，文本零偏移与 desc 左对齐 */
 .nk-ctrait-layer__buff {
@@ -523,11 +523,11 @@
   top: 0.15em;
   bottom: 0.15em;
   width: 2px;
-  background: color-mix(in srgb, var(--gold-300) 28%, transparent);
+  background: color-mix(in srgb, var(--cwth-300) 28%, transparent);
   border-radius: 1px;
 }
 .nk-ctrait-layer__buff :where(.hl) {
-  color: var(--highlight, var(--gold-300));
+  color: var(--highlight, var(--cwth-300));
   font-weight: 600;
 }
 
@@ -562,8 +562,8 @@
   letter-spacing: 0.03em;
 }
 .nk-ctrait-prop__scope--all {
-  background: color-mix(in srgb, var(--gold-300) 10%, transparent);
-  color: var(--gold-300)
+  background: color-mix(in srgb, var(--cwth-300) 10%, transparent);
+  color: var(--cwth-300)
 }
 .nk-ctrait-prop__name {
   color: var(--text2);

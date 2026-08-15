@@ -164,13 +164,21 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, cw: true },
   },
   {
+    // 设置页（CW 语境）：与常规 /settings 共用 SettingsView，meta.cw 驱动黑金主题语境；
+    // 两语境区块顺序一致（01 常规 → 02 CW → 03 形态），不随语境置前/交换（防玩家混淆）。
+    path: '/currency/settings',
+    name: 'settings-cw',
+    component: () => import('../views/SettingsView.vue'),
+    meta: { depth: 0, cw: true, title: '设置' },
+  },
+  {
     // 成就页：第二期落地为 CatalogView 目录（1869 条虚拟网格），卡片样式随路由并行加载。
     path: '/achievement',
     name: 'catalog-achievement',
     component: catalogView('achievement'),
     meta: { depth: 1, catalog: 'achievement', title: '成就' },
   },
-  /* 设置页：主题强调色选择（常规模式；CW 黑金独立不受影响） */
+  /* 设置页：主题强调色选择（常规模式 /settings；货币战争 /currency/settings，meta.cw 驱动黑金语境） */
   {
     path: '/settings',
     name: 'settings',

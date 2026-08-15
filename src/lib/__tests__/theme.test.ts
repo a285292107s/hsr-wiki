@@ -21,8 +21,8 @@ describe('theme accents', () => {
     document.documentElement.removeAttribute('data-accent');
   });
 
-  it('ACCENTS 覆盖四个预置主题且互为唯一键', () => {
-    expect(ACCENTS.map((a) => a.key)).toEqual(['terracotta', 'olive', 'slate', 'sand']);
+  it('ACCENTS 覆盖五个预置主题且互为唯一键', () => {
+    expect(ACCENTS.map((a) => a.key)).toEqual(['terracotta', 'olive', 'slate', 'sand', 'iris']);
     expect(new Set(ACCENTS.map((a) => a.key)).size).toBe(ACCENTS.length);
     // 每个主题色板提供 300/400/500 三点
     for (const a of ACCENTS) {

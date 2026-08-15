@@ -15,8 +15,8 @@
   --crole-scrim-70: color-mix(in srgb, var(--blk-900) 70%, transparent);
   --crole-scrim-40: color-mix(in srgb, var(--blk-900) 40%, transparent);
   --crole-scrim-15: color-mix(in srgb, var(--blk-900) 15%, transparent);
-  /* 档案金（数字/强调文字位，无光） */
-  --crole-num: var(--gold-350);
+  /* 档案金（数字/强调文字位，无光）：随 CW 主题色（可经 data-cw-accent 切换） */
+  --crole-num: var(--cwth-350);
   /* 作用域徽章：成员 / 全员 */
   --crole-scope-bg: color-mix(in srgb, var(--cw-faction-core) 14%, transparent);
   --crole-scope-text: var(--cw-faction);
@@ -25,33 +25,33 @@
   /* 正向属性加成 → 翡翠（交易「涨」语义，小面积使用） */
   --crole-buff-soft: color-mix(in srgb, var(--crole-buff) 8%, transparent);
   --crole-buff-border: color-mix(in srgb, var(--crole-buff) 25%, transparent);
-  /* 账目表激活列（星级对比列）：极淡金底 3% + 列顶金线） */
-  --crole-col-active: color-mix(in srgb, var(--gold-400) 3%, transparent);
-  /* 方形分段控件（星级切换）激活态：亮金底 + 黑字 */
-  --crole-seg-bg: var(--gold-300);
+  /* 账目表激活列（星级对比列）：极淡主题色底 3% + 列顶线） */
+  --crole-col-active: color-mix(in srgb, var(--cwth-400) 3%, transparent);
+  /* 方形分段控件（星级切换）激活态：亮端底 + 黑字 */
+  --crole-seg-bg: var(--cwth-300);
   --crole-seg-text: var(--blk-900);
   /* 星魂步骤徽章 */
   --crole-step-bg: color-mix(in srgb, var(--crole-step-rose) 8%, transparent);
   --crole-step-text: var(--crole-step-rose);
 }
 
-/* ═══ CW 暗金覆盖：交易所暖金色调 ═══
-   设计意图：黑金底色 + 琥珀/黄铜层次 + 翡翠仅留给「增值」语义；同样无 glow。 */
+/* ═══ CW 覆盖：交易所暖色主题（主题色阶经 --cwth-* 随 data-cw-accent 切换） ═══
+   设计意图：黑底 + 主题色层次 + 翡翠仅留给「增值」语义；同样无 glow。 */
 [data-theme="cw"] .nk-crole,
 [data-theme="cw"] .nk-crole-hero,
 [data-theme="cw"] .nk-crole-card {
-  /* 作用域徽章 → 金/琥珀 */
-  --crole-scope-bg: color-mix(in srgb, var(--gold-500) 14%, transparent);
-  --crole-scope-text: var(--gold-350);
-  --crole-scope-all-bg: color-mix(in srgb, var(--gold-400) 12%, transparent);
-  --crole-scope-all-text: var(--gold-300);
-  /* 数值高亮 → 亮金 */
-  --crole-num: var(--gold-300);
+  /* 作用域徽章 → 主题色 */
+  --crole-scope-bg: color-mix(in srgb, var(--cwth-500) 14%, transparent);
+  --crole-scope-text: var(--cwth-350);
+  --crole-scope-all-bg: color-mix(in srgb, var(--cwth-400) 12%, transparent);
+  --crole-scope-all-text: var(--cwth-300);
+  /* 数值高亮 → 主题色亮端 */
+  --crole-num: var(--cwth-300);
   /* 正向加成 → 翡翠保留（交易「涨」语义）但调暖 */
   --crole-buff-soft: color-mix(in srgb, var(--crole-buff) 7%, transparent);
   --crole-buff-border: color-mix(in srgb, var(--crole-buff) 22%, transparent);
-  /* 账目表激活列 → 金底 3% */
-  --crole-col-active: color-mix(in srgb, var(--gold-400) 3%, transparent);
+  /* 账目表激活列 → 主题色底 3% */
+  --crole-col-active: color-mix(in srgb, var(--cwth-400) 3%, transparent);
   /* 星魂步骤徽章 → 琥珀 */
   --crole-step-bg: color-mix(in srgb, var(--crole-step-amber) 11%, transparent);
   --crole-step-text: var(--crole-step-amber);
@@ -354,20 +354,20 @@
   padding: 6px 16px;
   min-height: 44px;
 }
-/* 阅读进度线：CW 主题下金色渐变（单向，无光晕） */
+/* 阅读进度线：CW 主题下主题色渐变（单向，无光晕） */
 .nk-crole-bar__progress {
   height: 2px;
   background: linear-gradient(90deg, var(--primary), var(--accent));
   transition: width 0.2s linear;
 }
 [data-theme="cw"] .nk-crole-bar__progress {
-  background: linear-gradient(90deg, var(--gold-300), var(--gold-500));
+  background: linear-gradient(90deg, var(--cwth-300), var(--cwth-500));
 }
-/* 导航激活态：常规紫 / CW 亮金（导航小字对比度 ≥4.5:1，ADR 0011） */
+/* 导航激活态：常规紫 / CW 主题色亮端（导航小字对比度 ≥4.5:1，ADR 0011） */
 .nk-crole-bar .nk-secnav__btn--active { color: var(--primary); }
 .nk-crole-bar .nk-secnav__btn--active::after { background: var(--primary); }
-[data-theme="cw"] .nk-crole-bar .nk-secnav__btn--active { color: var(--gold-300); }
-[data-theme="cw"] .nk-crole-bar .nk-secnav__btn--active::after { background: var(--gold-300); }
+[data-theme="cw"] .nk-crole-bar .nk-secnav__btn--active { color: var(--cwth-300); }
+[data-theme="cw"] .nk-crole-bar .nk-secnav__btn--active::after { background: var(--cwth-300); }
 
 /* 状态：错误态 */
 .nk-crole__state { padding: 60px 20px; text-align: center; color: var(--text2); display: flex; flex-direction: column; align-items: center; gap: 12px; }
@@ -594,7 +594,7 @@
   color: #fff;
 }
 
-/* 钢印肖像章：直角 + 双层细金线（外 border + inset 内线，padding 留距） */
+/* 钢印肖像章：直角 + 双层细主题色线（外 border + inset 内线，padding 留距） */
 .nk-crole-hero__portrait {
   width: 96px;
   height: 96px;
@@ -602,9 +602,9 @@
   border-radius: 0;
   overflow: hidden;
   padding: 3px;
-  border: 1px solid color-mix(in srgb, var(--gold-500) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cwth-500) 60%, transparent);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--gold-500) 16%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--cwth-500) 16%, transparent),
     0 10px 30px rgba(0, 0, 0, 0.45);
   background: color-mix(in srgb, var(--blk-950) 72%, transparent);
 }
@@ -905,6 +905,7 @@
   font-size: 11px;
 }
 .nk-crole-cone__rarity {
+  /* 装备品质语义色：数据位，不随主题色切换 */
   color: var(--gold-400);
   letter-spacing: 0.08em;
 }

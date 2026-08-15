@@ -69,6 +69,19 @@
   --sd-800: #40301C;
   --sd-900: #2B1F12;
   --sd-950: #1C150B;
+  /* Iris 暮山紫色阶（低饱和灰蓝紫——冷色补位，与领域层 --ph-* 泛品红紫不同源；
+     主题强调色可选源之一，领域色不得引用） */
+  --ir-50: #F4F2FA;
+  --ir-100: #E7E4F4;
+  --ir-200: #CFC9E6;
+  --ir-300: #B0A6D4;
+  --ir-400: #9184BE;
+  --ir-500: #786BA8;
+  --ir-600: #5F5490;
+  --ir-700: #474071;
+  --ir-800: #332D52;
+  --ir-900: #211D37;
+  --ir-950: #161325;
   /* 金色阶（CW 主题 / 星级 / 网关入口；gold-350 为项目自有高亮暖金；
      gold-600/700 为暗铜阶——CW 语义金降阶位（金阶拆族） */
   --gold-200: #FDE68A;
@@ -78,6 +91,42 @@
   --gold-500: #D4AF37;
   --gold-600: #A8862E;
   --gold-700: #7A6220;
+  /* CW 主题候选色阶（原始层事实：贵金属/珠宝调性，供 [data-cw-accent]
+     切换为 CW 主题主色；仅经 --cwth-* 别名引用，领域语义色不得直接引用）
+     每套 7 位：200 近白亮端 / 300 文字强调位（黑底对比度 ≥4.5:1 硬约束）/
+     350 高亮暖位 / 400-500 主色位 / 600-700 降阶暗位 */
+  /* Rose 玫瑰金（暖粉金属） */
+  --rs-200: #F8DDD6;
+  --rs-300: #F1C4BA;
+  --rs-350: #E9B0A4;
+  --rs-400: #DB8D7D;
+  --rs-500: #C67360;
+  --rs-600: #9C5444;
+  --rs-700: #723C30;
+  /* Silver 铂银（冷白金属） */
+  --sv-200: #E9EDF1;
+  --sv-300: #D9E0E6;
+  --sv-350: #C8D2DA;
+  --sv-400: #AAB7C2;
+  --sv-500: #8C9AA7;
+  --sv-600: #687682;
+  --sv-700: #4A5660;
+  /* Emerald 翡翠（深绿金属，钱庄/玉器） */
+  --em-200: #D3E9DA;
+  --em-300: #A9D3B9;
+  --em-350: #91C4A4;
+  --em-400: #6EAC81;
+  --em-500: #539260;
+  --em-600: #3C6E48;
+  --em-700: #2A4F34;
+  /* Copper 赤铜（暖橙铜） */
+  --cp-200: #F6DFCD;
+  --cp-300: #ECC09B;
+  --cp-350: #E2AC7F;
+  --cp-400: #D4905E;
+  --cp-500: #BC7345;
+  --cp-600: #93562E;
+  --cp-700: #6A3C20;
   /* 黑阶（中性纯黑，无色相；全站深色表面唯一事实来源——ADR 0011）
      深色端 4 级：950 纯黑 / 900 近黑 / 850 / 800 渐亮；
      主题色相由语义层经 color-mix 注入（3~8%），黑阶本身不写色相 */
@@ -167,12 +216,24 @@
 
   /* ═══ 主题色阶别名层 Theme Accent：当前强调色阶（默认 Terracotta，可经 data-accent 切换） ═══
      语义层仅引用 --th-*（当前主题色阶），不直接绑定具体色族；
-     原始色阶（tc/ol/sl/sd）为可选源，设置页经 <html data-accent> 切换。CW 经 [data-theme="cw"] 覆盖为金。 */
+     原始色阶（tc/ol/sl/sd/ir）为可选源，设置页经 <html data-accent> 切换。CW 经 [data-theme="cw"] 覆盖为金。 */
   --th-300: var(--tc-300);
   --th-400: var(--tc-400);
   --th-500: var(--tc-500);
   --th-600: var(--tc-600);
   --th-700: var(--tc-700);
+
+  /* ═══ CW 主题色阶别名层 CW Theme Accent：货币战争主题主色阶（缺省 = 香槟金 gold） ═══
+     定义于 :root 保证任意上下文（含非 CW 页面加载 CW 样式模块）引用安全；
+     设置页经 <html data-cw-accent="..."> 切换（见下方 [data-cw-accent] 规则），
+     仅 [data-theme="cw"] 语境消费；领域语义色（星级/成就徽章/势力系）不得引用。 */
+  --cwth-200: var(--gold-200);
+  --cwth-300: var(--gold-300);
+  --cwth-350: var(--gold-350);
+  --cwth-400: var(--gold-400);
+  --cwth-500: var(--gold-500);
+  --cwth-600: var(--gold-600);
+  --cwth-700: var(--gold-700);
 
   /* ═══ 语义层 Semantic：主题映射（:root 常规暖砖红，[data-theme="cw"] 暗金覆盖） ═══ */
   /* 表面统一走黑阶派生 + 主色注入（结构：黑阶染主色 → 调透明度），领域层豁免不动 */
@@ -271,65 +332,108 @@
   :root { --nk-content-offset: 148px; }
 }
 
-/* ═══ 货币战争模式：全壳黑金主题（黑底 + 金属金主色） ═══
+/* ═══ 货币战争模式：全壳主题（黑底 + 主题主色；缺省香槟金，可经 data-cw-accent 切换） ═══
    由 App.vue 根据 route.meta.cw 挂载 <html data-theme="cw">。
-   ADR 0011：主色 = gold-500 金属金（唯一发光位），文字强调位 = gold-300 亮金，
-   语义金 = gold-600 暗铜哑光；底色与常规共享同一中性黑阶 + 金注入。
+   ADR 0011：主色 = 当前 CW 主题色阶 500（缺省 gold-500 金属金，唯一发光位），
+   文字强调位 = 主题色阶 300 亮端（缺省 gold-300 亮金），
+   语义金 = 主题色阶 600 暗铜哑光（缺省 gold-600）；底色与常规共享同一中性黑阶 + 主题色注入。
    硬约束：导航小字（≤0.75rem）用高亮度暖白，对比度 ≥4.5:1 */
 [data-theme="cw"] {
   --bg: var(--blk-950);
-  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--gold-500) 5%) 88%, transparent);
-  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-850) 94%, var(--gold-500) 6%) 72%, transparent);
-  /* 主色 = 金属金 gold-500（ADR 0011 从 gold-300 换阶；文字强调位 gold-300 承接明度） */
-  --primary: var(--gold-500);
+  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--cwth-500) 5%) 88%, transparent);
+  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-850) 94%, var(--cwth-500) 6%) 72%, transparent);
+  /* 主色 = 当前 CW 主题色阶 500（缺省 gold-500 金属金；文字强调位 300 承接明度） */
+  --primary: var(--cwth-500);
   --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
-  /* 主色梯度端：暗金（主色族成员） */
-  --accent: var(--gold-600);
-  /* 主题色阶别名同步为金：跨模式共享样式（catalog 等）若直接引用 --th-* 时保持黑金一致 */
-  --th-300: var(--gold-300);
-  --th-400: var(--gold-600);
-  --th-500: var(--gold-500);
-  --th-600: var(--gold-700);
-  --th-700: var(--gold-700);
-  --gold: var(--gold-600);
-  --gold-sem: var(--gold-600);
-  /* 暖白文本：白 + 金微注入（黑与金的金注入文本，替代原 rgba 暖白） */
-  --text: color-mix(in srgb, var(--text-bright) 94%, var(--gold-300) 6%);
-  --text2: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--gold-300) 20%) 70%, transparent);
-  --text-bright: color-mix(in srgb, white 94%, var(--gold-300) 6%);
-  --text3: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--gold-300) 20%) 52%, transparent);
-  --border: color-mix(in srgb, var(--gold-500) 18%, transparent);
-  --border2: color-mix(in srgb, var(--gold-500) 40%, transparent);
-  --highlight: var(--gold-300);
-  /* 文字/细线强调位：亮金（ADR 0011 主色位金属金 + 文字位亮金） */
-  --metric-val: var(--gold-300);
-  /* 稀有度 5 星 = 语义金家族：CW 降阶暗铜（ADR 0011 恒等式执行特例，领域色不随主题的声明例外） */
+  /* 主色梯度端：暗铜（主题色阶 600） */
+  --accent: var(--cwth-600);
+  /* 主题色阶别名同步为当前 CW 主题色：跨模式共享样式（catalog 等）若直接引用 --th-* 时保持主题一致 */
+  --th-300: var(--cwth-300);
+  --th-400: var(--cwth-600);
+  --th-500: var(--cwth-500);
+  --th-600: var(--cwth-700);
+  --th-700: var(--cwth-700);
+  --gold: var(--cwth-600);
+  --gold-sem: var(--cwth-600);
+  /* 暖白文本：白 + 主题色微注入（与黑底、主题色成暖白金属文本） */
+  --text: color-mix(in srgb, var(--text-bright) 94%, var(--cwth-300) 6%);
+  --text2: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 70%, transparent);
+  --text-bright: color-mix(in srgb, white 94%, var(--cwth-300) 6%);
+  --text3: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 52%, transparent);
+  --border: color-mix(in srgb, var(--cwth-500) 18%, transparent);
+  --border2: color-mix(in srgb, var(--cwth-500) 40%, transparent);
+  --highlight: var(--cwth-300);
+  /* 文字/细线强调位：主题色阶 300 亮端（缺省亮金） */
+  --metric-val: var(--cwth-300);
+  /* 稀有度 5 星 = 语义金家族：CW 降阶暗铜（领域色不随主题——ADR 0011 恒等式执行特例，保持原金阶） */
   --rarity-5: var(--gold-600);
-  /* 外壳：黑阶 + 金注入（暗金侧栏/底部栏） */
-  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 97%, var(--gold-500) 3%) 96%, transparent);
-  --nk-shell-hover: color-mix(in srgb, var(--gold-500) 10%, transparent);
-  --nk-shell-press: color-mix(in srgb, var(--gold-500) 16%, transparent);
-  --nk-shell-active-bg: color-mix(in srgb, var(--gold-500) 16%, transparent);
-  --nk-shell-active-border: color-mix(in srgb, var(--gold-500) 45%, transparent);
-  --nk-shell-glow: color-mix(in srgb, var(--gold-500) 20%, transparent);
-  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--gold-500) 5%) 95%, transparent);
-  --nk-sheet-border: color-mix(in srgb, var(--gold-500) 35%, transparent);
-  --nk-sheet-item-bg: color-mix(in srgb, var(--gold-500) 6%, transparent);
-  --nk-sheet-item-border: color-mix(in srgb, var(--gold-500) 16%, transparent);
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--gold-500) 5%) 94%, transparent);
-  --nk-header-border: color-mix(in srgb, var(--gold-500) 14%, transparent);
-  --nk-input-bg: color-mix(in srgb, var(--gold-500) 6%, transparent);
-  --nk-input-border: color-mix(in srgb, var(--gold-500) 20%, transparent);
-  --nk-page-tint: color-mix(in srgb, var(--gold-500) 4%, transparent);
-  --nk-card-border: color-mix(in srgb, var(--gold-500) 28%, transparent);
-  /* CW 主题：暖白细线（白 + 金微注入） */
+  /* 外壳：黑阶 + 主题色注入 */
+  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 97%, var(--cwth-500) 3%) 96%, transparent);
+  --nk-shell-hover: color-mix(in srgb, var(--cwth-500) 10%, transparent);
+  --nk-shell-press: color-mix(in srgb, var(--cwth-500) 16%, transparent);
+  --nk-shell-active-bg: color-mix(in srgb, var(--cwth-500) 16%, transparent);
+  --nk-shell-active-border: color-mix(in srgb, var(--cwth-500) 45%, transparent);
+  --nk-shell-glow: color-mix(in srgb, var(--cwth-500) 20%, transparent);
+  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--cwth-500) 5%) 95%, transparent);
+  --nk-sheet-border: color-mix(in srgb, var(--cwth-500) 35%, transparent);
+  --nk-sheet-item-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
+  --nk-sheet-item-border: color-mix(in srgb, var(--cwth-500) 16%, transparent);
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--cwth-500) 5%) 94%, transparent);
+  --nk-header-border: color-mix(in srgb, var(--cwth-500) 14%, transparent);
+  --nk-input-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
+  --nk-input-border: color-mix(in srgb, var(--cwth-500) 20%, transparent);
+  --nk-page-tint: color-mix(in srgb, var(--cwth-500) 4%, transparent);
+  --nk-card-border: color-mix(in srgb, var(--cwth-500) 28%, transparent);
+  /* CW 主题：暖白细线（白 + 主题色微注入） */
   --line-1: color-mix(in srgb, var(--text-bright) 8%, transparent);
   --line-2: color-mix(in srgb, var(--text-bright) 15%, transparent);
 }
 
+/* ═══ 货币战争主题色切换：设置页经 <html data-cw-accent="..."> 选择 CW 模式主题色阶 ═══
+   仅重映射 --cwth-*（CW 主题色阶别名层），[data-theme="cw"] 语义层经它自动跟随；
+   常规模式（无 data-theme="cw"）不受影响。缺省（无 data-cw-accent）= 香槟金 gold。
+   领域语义色（星级 / 成就徽章 / 势力系 / 技能类型）不随切换，保持原金阶。 */
+[data-theme="cw"][data-cw-accent="rose"] {
+  --cwth-200: var(--rs-200);
+  --cwth-300: var(--rs-300);
+  --cwth-350: var(--rs-350);
+  --cwth-400: var(--rs-400);
+  --cwth-500: var(--rs-500);
+  --cwth-600: var(--rs-600);
+  --cwth-700: var(--rs-700);
+}
+[data-theme="cw"][data-cw-accent="silver"] {
+  --cwth-200: var(--sv-200);
+  --cwth-300: var(--sv-300);
+  --cwth-350: var(--sv-350);
+  --cwth-400: var(--sv-400);
+  --cwth-500: var(--sv-500);
+  --cwth-600: var(--sv-600);
+  --cwth-700: var(--sv-700);
+}
+[data-theme="cw"][data-cw-accent="emerald"] {
+  --cwth-200: var(--em-200);
+  --cwth-300: var(--em-300);
+  --cwth-350: var(--em-350);
+  --cwth-400: var(--em-400);
+  --cwth-500: var(--em-500);
+  --cwth-600: var(--em-600);
+  --cwth-700: var(--em-700);
+}
+[data-theme="cw"][data-cw-accent="copper"] {
+  --cwth-200: var(--cp-200);
+  --cwth-300: var(--cp-300);
+  --cwth-350: var(--cp-350);
+  --cwth-400: var(--cp-400);
+  --cwth-500: var(--cp-500);
+  --cwth-600: var(--cp-600);
+  --cwth-700: var(--cp-700);
+}
+/* gold 为缺省（无 data-cw-accent 即命中 :root 缺省映射），显式键不设规则保证幂等 */
+
 /* ═══ 主题强调色切换：设置页经 <html data-accent="..."> 选择常规模式强调色阶 ═══
    仅重映射 --th-*（当前主题色阶别名），语义层/领域层通过它自动跟随；
-   CW（[data-theme="cw"]）不受影响，始终黑金。缺省（无 data-accent）= Terracotta。 */
+   CW（[data-theme="cw"]）不受本组规则影响（其主题色经 data-cw-accent 独立切换）。缺省（无 data-accent）= Terracotta。 */
 [data-accent="olive"] {
   --th-300: var(--ol-300);
   --th-400: var(--ol-400);
@@ -350,6 +454,13 @@
   --th-500: var(--sd-500);
   --th-600: var(--sd-600);
   --th-700: var(--sd-700);
+}
+[data-accent="iris"] {
+  --th-300: var(--ir-300);
+  --th-400: var(--ir-400);
+  --th-500: var(--ir-500);
+  --th-600: var(--ir-600);
+  --th-700: var(--ir-700);
 }
 /* Terracotta 为默认（无 data-accent 即命中 :root），显式值保证幂等 */
 [data-accent="terracotta"] {

@@ -1,12 +1,12 @@
 /**
  * 主题强调色（Accent）选择
- * 常规模式主色可经设置页在预置色阶间切换；CW（货币战争）黑金模式独立，不受影响。
+ * 常规模式主色可经设置页在预置色阶间切换；CW（货币战争）模式经 cw-theme.ts（data-cw-accent）独立切换，互不影响。
  * 实现：<html data-accent="..."> 驱动 tokens.css 的 [data-accent] 规则重映射 --th-* 色阶，
  * 语义层（--primary/--accent/--metric-val 等）经它自动跟随。缺省为 Terracotta。
  * 选择持久化于 localStorage（HSR_WIKI_ACCENT）。
  */
 
-export type AccentKey = 'terracotta' | 'olive' | 'slate' | 'sand';
+export type AccentKey = 'terracotta' | 'olive' | 'slate' | 'sand' | 'iris';
 
 export interface AccentOption {
   /** localStorage 持久化键值 & <html data-accent> 值 */
@@ -27,6 +27,7 @@ export const ACCENTS: AccentOption[] = [
   { key: 'olive', label: '橄榄青', swatch: ['#A8B88C', '#8A9B6A', '#6F7F4E'] },
   { key: 'slate', label: '雾霭蓝灰', swatch: ['#9FAFB9', '#7E919D', '#63767F'] },
   { key: 'sand', label: '暖沙棕', swatch: ['#C6AC82', '#AD8E5F', '#937447'] },
+  { key: 'iris', label: '暮山紫', swatch: ['#B0A6D4', '#9184BE', '#786BA8'] },
 ];
 
 function isAccentKey(v: unknown): v is AccentKey {

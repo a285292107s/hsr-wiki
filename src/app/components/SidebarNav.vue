@@ -82,7 +82,8 @@ onBeforeUnmount(() => {
 /** "更多"入口图标（横三点，与其他图标同族） */
 const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>';
 
-/** 设置入口（齿轮图标，与导航板块同族） */
+/** 设置入口（齿轮图标，与导航板块同族；跳转当前模式的设置页） */
+const settingsPath = computed(() => (isCw.value ? '/currency/settings' : '/settings'));
 const SETTINGS_ITEM = {
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
 } as const;
@@ -149,12 +150,12 @@ const SETTINGS_ITEM = {
       <span class="ui-sidebar-link__label">更多</span>
     </button>
 
-    <!-- 设置入口：始终置底（常规/CW 模式均展示，跳转共享设置页） -->
+    <!-- 设置入口：始终置底（常规/CW 模式均展示，跳转当前模式的设置页） -->
     <RouterLink
-      to="/settings"
+      :to="settingsPath"
       title="设置 · SETTINGS"
       class="ui-sidebar-link ui-sidebar-settings"
-      :class="{ 'ui-sidebar-link--active': route.path === '/settings' }"
+      :class="{ 'ui-sidebar-link--active': route.path === settingsPath }"
     >
       <span class="ui-sidebar-link__icon" v-html="SETTINGS_ITEM.icon" />
       <span class="ui-sidebar-link__text">

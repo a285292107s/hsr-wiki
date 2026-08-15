@@ -5,14 +5,16 @@ import { createNkRouter } from './router';
 import { installCdnImgFallback, startCdnHealthProbe, subscribeCdnHealth } from '../services/cdn';
 import { useAppStore } from './stores/app';
 import { initAccent } from '../lib/theme';
+import { initCwAccent } from '../lib/cw-theme';
 // 全局样式仅保留设计令牌与共享目录引擎；页面专属样式随路由 chunk 懒加载
 // （character/lightcone/relic/currency-* 各自视图内 import）
 import '../styles/tokens.css';
 import '../styles/catalog.css';
 
 export async function bootstrap(): Promise<void> {
-  // 在挂载前写入持久化主题强调色（避免首帧主题闪烁）
+  // 在挂载前写入持久化主题强调色（常规 data-accent + CW data-cw-accent，避免首帧主题闪烁）
   initAccent();
+  initCwAccent();
   const app = createApp(App);
   const router = createNkRouter();
   app.use(createPinia());
