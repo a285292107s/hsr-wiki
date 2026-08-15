@@ -23,6 +23,8 @@ import {
   gridFightEquipIconUrl,
   gridFightEquipIconWithFallback,
   gridFightIconUrl,
+  gridFightPropIconUrl,
+  gridFightSkillIconSrc,
   gridFightTraitIconById,
   gridFightTraitIconUrl,
   iconUrl,
@@ -34,7 +36,7 @@ import {
   skillIconUrl,
 } from '../../src/lib/icons';
 import { SLOT_ICONS, SLOT_INDEX } from '../../src/lib/constants';
-import { cdnUri } from '../../src/services/cdn';
+import { cdnUri, resolveCdnUri } from '../../src/services/cdn';
 
 export type ProbeStatus = 'ok' | 'dead' | 'env';
 
@@ -232,14 +234,32 @@ export function collectUrls(data: DataMap): UrlMap {
   for (const it of (data['currency/traits.json'] as { traits?: Array<{ icon?: string; id?: unknown }> } | null)?.traits || []) {
     add(gridFightTraitIconUrl(it.icon), `currency/traits.json#${it.id}`);
   }
+  // 属性图标映射全量（矩阵行/星魂/光锥属性共用，jsDelivr 唯一源）
+  for (const [pt, icon] of Object.entries((data['currency/prop_icons.json'] as Record<string, string> | undefined) || {})) {
+    add(gridFightPropIconUrl(icon), `currency/prop_icons.json#${pt}`);
+  }
   for (const [rel, raw] of dirFiles('currency/role')) {
-    const d = raw as { avatar_id?: unknown; id?: unknown; rank?: Array<{ icon?: string; rank?: unknown }>; equipment?: Array<{ icon?: string; equipment_id?: unknown; id?: unknown }>; traits?: Array<{ icon?: string; id?: unknown }> } | null;
+    const d = raw as { avatar_id?: unknown; id?: unknown; stars?: Record<string, { front_show_skill?: Array<{ icon?: string; id?: unknown }>; back_show_skill?: Array<{ icon?: string; id?: unknown }>; servant_show_skill?: Array<{ icon?: string; id?: unknown }> }>; rank?: Array<{ icon?: string; rank?: unknown }>; equipment?: Array<{ icon?: string; equipment_id?: unknown; id?: unknown }>; traits?: Array<{ icon?: string; id?: unknown }> } | null;
     if (!d || typeof d !== 'object') continue;
     const id = String(d.avatar_id ?? d.id ?? detailId(rel, 'currency/role'));
     add(avatarShopIconUrl(id), `${rel}#avatar`);
     add(avatarDrawCardUrl(id), `${rel}#drawcard`);
+    // 技能图标：jsDelivr 首选 + nanoka 兜底双源都入审计（gridFightSkillIconSrc）
+    for (const s of Object.values(d.stars || {})) {
+      for (const g of ['front_show_skill', 'back_show_skill', 'servant_show_skill'] as const) {
+        for (const sk of s[g] || []) {
+          const { src, fb } = gridFightSkillIconSrc(sk.icon);
+          add(src, `${rel}#skill.${sk.id}`);
+          add(fb, `${rel}#skill.${sk.id}.nanoka`);
+        }
+      }
+    }
+    // 星魂展示图（常规模式同源 ui/ui3d/rank 官方全量；jsDelivr 首选 + nanoka 兜底双源审计）
     for (const rk of d.rank || []) {
-      add(iconUrl(rk.icon), `${rel}#rank${rk.rank}`);
+      const file = `${id}/${id}_Rank_${rk.rank}.webp`;
+      const { primary, fallback } = resolveCdnUri('rank', file);
+      add(primary, `${rel}#rank${rk.rank}`);
+      add(fallback, `${rel}#rank${rk.rank}.nanoka`);
     }
     for (const eq of d.equipment || []) {
       const eqId = eq.equipment_id ?? eq.id;
