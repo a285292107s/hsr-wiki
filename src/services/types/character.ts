@@ -34,7 +34,9 @@ export interface Skill {
   sp_base?: number | null;
   /** 技能级能量需求（忆灵终结技独有 + 双段能量角色） */
   sp_need?: number | null;
+  /** 战技点消耗（BPNeed：正值 = 消耗 N，如战技 1/饮月强化普攻 1-3；-1 = 不消耗哨兵，非产出） */
   bp_need?: number | null;
+  /** 战技点获得（BPAdd，有值恒 1 = 施放后获得 1 战技点，普攻） */
   bp_add?: number | null;
   /** 韧性消耗 [单攻, 群攻, 扩散] */
   show_stance_list?: number[] | null;

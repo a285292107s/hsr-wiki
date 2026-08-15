@@ -82,12 +82,12 @@ const metrics = computed<Metric[]>(() => {
       met.push({ label: '韧性', html: tough });
     }
   }
-  if (props.sk.bp_need != null) {
-    const sp = -props.sk.bp_need;
-    met.push({
-      label: '战技点',
-      html: (sp > 0 ? '+' : '') + String(sp),
-    });
+  // 战技点：正值 = 消耗 N（战技 1/饮月强化普攻 1-3），-1 = 不消耗哨兵（不显示，非产出）；获得在 bp_add（普攻 +1）
+  if (props.sk.bp_need != null && props.sk.bp_need > 0) {
+    met.push({ label: '战技点', html: '-' + String(props.sk.bp_need) });
+  }
+  if (props.sk.bp_add != null && props.sk.bp_add > 0) {
+    met.push({ label: '战技点', html: '+' + String(props.sk.bp_add) });
   }
   return met;
 });

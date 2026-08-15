@@ -22,7 +22,7 @@ import {
   CHARGE_LABEL, propLabel, propValue,
   mergeSkillGroups, buildGrowthMatrix, matrixUp,
   resolveRecommend, buildRecommendRows, groupTraits,
-  buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceText,
+  buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceLine,
 } from '../../lib/currency-role';
 import type { MergedSkill } from '../../lib/currency-role';
 import { usePageData } from '../composables/use-page-data';
@@ -429,15 +429,16 @@ function hideOnError(e: Event) {
                       >{{ n }}★</button>
                     </span>
                   </div>
-                  <div class="nk-crole-skill__cost" v-if="sk.sp_base != null || sk.sp_need != null || (sk.bp_need != null && sk.bp_need > 0)">
-                    <span v-if="sk.sp_base != null">SP <b>{{ sk.sp_base }}</b></span>
-                    <span v-if="sk.sp_need != null">能量 <b>{{ sk.sp_need }}</b></span>
-                    <span v-if="sk.bp_need != null && sk.bp_need > 0">BP <b>{{ sk.bp_need }}</b><template v-if="sk.bp_add != null"> (+<b>{{ sk.bp_add }}</b>)</template></span>
+                  <div class="nk-crole-skill__cost" v-if="sk.sp_base != null || sk.sp_need != null || (sk.bp_need != null && sk.bp_need > 0) || (sk.bp_add != null && sk.bp_add > 0) || stanceLine(sk)">
+                    <span v-if="sk.sp_base != null">获得能量 <b>{{ sk.sp_base }}</b></span>
+                    <span v-if="sk.sp_need != null">消耗能量 <b>{{ sk.sp_need }}</b></span>
+                    <span v-if="sk.bp_need != null && sk.bp_need > 0">战技点 <b>-{{ sk.bp_need }}</b></span>
+                    <span v-if="sk.bp_add != null && sk.bp_add > 0">战技点 <b>+{{ sk.bp_add }}</b></span>
+                    <span v-if="stanceLine(sk)">削韧 <b>{{ stanceLine(sk) }}</b></span>
                   </div>
                   <div v-if="skillStarIdx(sk) >= 0">
-                    <p class="nk-crole-skill__simple">{{ sk.simple_desc }}</p>
+                    <p class="nk-crole-skill__simple" v-html="fmtDescStar(sk.simple_desc, sk.paramSets, skillStarIdx(sk))"></p>
                     <div class="nk-crole-skill__desc" v-html="fmtDescStar(sk.desc, sk.paramSets, skillStarIdx(sk))"></div>
-                    <div v-if="stanceText(sk.show_stance_list)" class="nk-crole-skill__stance">韧性 {{ stanceText(sk.show_stance_list) }}</div>
                     <ul v-if="sk.extraSets.length" class="nk-crole-skill__extra">
                       <li v-for="(ex, ek) in sk.extraSets" :key="ek">
                         <b>{{ ex.name }}：</b><span v-html="fmtDescStar(ex.desc, ex.paramSets, skillStarIdx(sk))"></span>

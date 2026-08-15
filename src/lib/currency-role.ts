@@ -9,6 +9,7 @@
  * 视图层只保留编排（加载 / Tab / 选中态）与模板渲染，本模块可独立单测。
  */
 import { fmtDesc } from './format';
+import { ELEM } from './constants';
 import type {
   CharacterData, CurrencyRoleRank, CurrencyRoleRecommend, CurrencyRoleRecommendItem,
   CurrencyRoleSkill, CurrencyRoleStar, CurrencyRoleTrait,
@@ -106,6 +107,10 @@ export interface MergedSkill {
   bp_need: number | null;
   bp_add: number | null;
   show_stance_list: number[] | null;
+  /** 削韧属性（官方展示值配套，ELEM 映射中文） */
+  stance_damage_type: string | null;
+  /** 削韧显示值（官方 UI 展示值；show_stance_list 为引擎参数，两者无对应关系） */
+  stance_damage_display: number | null;
   /** 该技能存在的星级（与 paramSets 一一对应，升序；技能可能仅在部分星级出现） */
   stars: number[];
   paramSets: number[][];
@@ -167,6 +172,8 @@ export function mergeSkillGroups(
         bp_need: first.bp_need,
         bp_add: first.bp_add,
         show_stance_list: first.show_stance_list,
+        stance_damage_type: first.stance_damage_type,
+        stance_damage_display: first.stance_damage_display,
         stars,
         paramSets,
         extraSets,
@@ -463,4 +470,16 @@ export function rankDesc(rk: CurrencyRoleRank): string {
 export function stanceText(list: number[] | null): string {
   if (!list || list.every((v) => !v)) return '';
   return list.join(' / ');
+}
+
+/** 削韧展示文本：官方展示值（属性 + 显示值，如「虚数 10」）优先，缺失时回退 show_stance_list 引擎值 */
+export function stanceLine(sk: {
+  stance_damage_type: string | null;
+  stance_damage_display: number | null;
+  show_stance_list: number[] | null;
+}): string {
+  const t = sk.stance_damage_type;
+  const d = sk.stance_damage_display;
+  if (t && d != null) return `${ELEM[t] || t} ${d}`.trim();
+  return stanceText(sk.show_stance_list);
 }

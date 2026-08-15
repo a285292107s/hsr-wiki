@@ -68,7 +68,12 @@ const metricDiffs = computed<MetricDiff[]>(() => {
   if (has('stance_damage_display') || has('show_stance_list')) {
     out.push({ label: '削韧', base: fmtTough(b), enh: fmtTough(e) });
   }
-  if (has('bp_need')) out.push({ label: '战技点', base: fmt(b.bp_need), enh: fmt(e.bp_need) });
+  // 战技点对比：正值 = 消耗 N（-N），-1 = 不消耗哨兵（非产出，2026-08-15 勘正）
+  const fmtBP = (v: number | null | undefined): string => {
+    if (v == null) return '—';
+    return v === -1 ? '不消耗' : '-' + String(v);
+  };
+  if (has('bp_need')) out.push({ label: '战技点', base: fmtBP(b.bp_need), enh: fmtBP(e.bp_need) });
   return out;
 });
 </script>

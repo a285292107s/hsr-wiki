@@ -57,9 +57,15 @@ export interface CurrencyRoleSkill {
   sp_base: number | null;
   /** 终结技能量需求（仅终结技有值） */
   sp_need: number | null;
+  /** 战技点消耗（BPNeed：正值 = 消耗 N 点，如战技 1/Archer 战技 2；-1 = 不消耗哨兵，非产出） */
   bp_need: number | null;
+  /** 战技点获得（BPAdd，有值恒 1 = 施放后获得 1 战技点；仅 Saber/加拉赫/爻光/吉尔伽美什普攻带值） */
   bp_add: number | null;
   show_stance_list: number[] | null;
+  /** 削韧属性（官方展示值配套：Imaginary/Thunder…，ELEM 映射中文） */
+  stance_damage_type: string | null;
+  /** 削韧显示值（官方 UI 展示值；show_stance_list 是引擎参数，两者无对应关系） */
+  stance_damage_display: number | null;
   extra: Record<string, { name: string; desc: string; param: number[] }> | null;
   level: Record<string, { level: number; param_list: number[] }> | null;
 }

@@ -1261,9 +1261,10 @@
 }
 .nk-crole-skill__cost b { color: var(--crole-num); font-weight: 600; }
 .nk-crole-skill__simple { font-size: 13px; color: var(--text); margin: 8px 0; line-height: 1.55; }
+/* simple_desc 富文本（fmtDescStar 渲染，含 #N 参数与 \\n 换行）参数高亮与 desc 同款 */
+.nk-crole-skill__simple span { color: var(--crole-num); font-weight: 600; }
 .nk-crole-skill__desc { font-size: 13px; color: var(--text2); line-height: 1.7; }
 .nk-crole-skill__desc span { color: var(--crole-num); font-weight: 600; }
-.nk-crole-skill__stance { margin-top: 8px; font-size: 12px; color: var(--text2); }
 /* 附加条件：单线分隔 + 极淡底（无彩色 tint 盒） */
 .nk-crole-skill__extra {
   margin-top: 10px;

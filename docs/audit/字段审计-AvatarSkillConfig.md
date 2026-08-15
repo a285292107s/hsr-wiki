@@ -39,7 +39,7 @@
 | SkillTriggerKey | 100% | 槽位标识（Skill01/02/03/P01/31-34/Maze） | 已输出（type 映射来源） | 高 | 必收 |
 | ShowStanceList | 100% | 削韧相关展示参数 | 已输出(show_stance_list) | 高 | 必收 |
 | ParamList | 100% | 技能数值参数（按等级） | 已输出(param_list) | 高 | 必收 |
-| BPNeed | 99.3% | 战技点消耗（-1=产出，1=消耗） | 已输出(bp_need) | 高 | 必收 |
+| BPNeed | 99.3% | 战技点消耗（正值 = 消耗 N，如战技 1/饮月强化普攻 1-3；-1 = 不消耗哨兵——普攻/终结技/天赋全为 -1，非「产出」；产出语义在 BPAdd，2026-08-15 勘正） | 已输出(bp_need) | 高 | 必收 |
 | SimpleSkillDesc | 97.9% | 技能简版描述 | 已输出(simple_desc) | 高 | 必收 |
 | SkillDesc | 95.7% | 技能完整描述（含 #x 参数引用） | 已输出(desc) | 高 | 必收 |
 | AttackType | 77.5% | 攻击类型枚举（Normal/Ultra/Servant/Assist） | 已输出（type 兜底） | 高 | 必收 |

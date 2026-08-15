@@ -550,7 +550,8 @@ def _build_skill(
         return {"id": sid, "name": "", "desc": "", "simple_desc": "", "tag": None,
                 "icon": "",
                 "type": None, "sp_base": None, "bp_need": None, "bp_add": None,
-                "show_stance_list": [], "extra": {}, "level": {}}
+                "show_stance_list": [], "stance_damage_type": None, "stance_damage_display": None,
+                "extra": {}, "level": {}}
 
     name = resolve_text(sk.get("SkillName", {}))
     tag = resolve_text(sk.get("SkillTag", {}))
@@ -565,7 +566,16 @@ def _build_skill(
     sp_need = _unwrap(sk.get("SPNeed"), None)
     bp_need = _unwrap(sk.get("BPNeed"))
     bp_add = _unwrap(sk.get("BPAdd"))
+    # BPNeed 语义（与大世界 AvatarSkillConfig 同构，2026-08-15 修正）：-1 = 不消耗战技点（哨兵，
+    # 普攻/终结技/天赋等绝大多数技能；非「产出」——大世界终结技 1830 条全为 -1 可证）；
+    # 正值 = 消耗 N 战技点（战技 1 / Archer 战技 2）。产出语义在 BPAdd：1 = 施放后获得 1 战技点
+    # （大世界普攻 1130 条全为 1；货币战争仅 Saber/加拉赫/爻光/吉尔伽美什普攻带值）。
     stance_list = _flatten_stance_list(sk.get("ShowStanceList"))
+    # 削韧官方展示值（StanceDamageType 直接字符串 / StanceDamageDisplay 直接 int，均非 ValueWrap）：
+    # 游戏内技能卡削韧显示（如「虚数 10」），与 ShowStanceList 引擎参数（[30,0,0]）无对应关系；
+    # 常规模式 character_detail 同字段先例（SkillCard 优先展示），货币战争此前漏输出致前端退回引擎值。
+    stance_damage_type = sk.get("StanceDamageType") or None
+    stance_damage_display = _unwrap(sk.get("StanceDamageDisplay"), None)
     pl = [_unwrap(p, 0) for p in (sk.get("ParamList") or [])]
 
     # 附加条件描述（GridFightBackSkillExtraDesc）
@@ -597,6 +607,8 @@ def _build_skill(
         "bp_need": bp_need,
         "bp_add": bp_add,
         "show_stance_list": stance_list,
+        "stance_damage_type": stance_damage_type,
+        "stance_damage_display": stance_damage_display,
         "skill_combo_value_delta": None,
         "extra": extra,
         "level": {

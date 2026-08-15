@@ -29,6 +29,8 @@ const skill = (over: Partial<CurrencyRoleSkill> = {}): CurrencyRoleSkill => ({
   bp_need: null,
   bp_add: null,
   show_stance_list: null,
+  stance_damage_type: null,
+  stance_damage_display: null,
   extra: null,
   level: null,
   ...over,
