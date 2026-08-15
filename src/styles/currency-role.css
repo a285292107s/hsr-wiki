@@ -440,7 +440,9 @@
 /* CW 模式：HUD 标签染金 */
 [data-theme="cw"] .nk-crole-hero__hud { color: color-mix(in srgb, var(--gold-300) 62%, transparent); text-shadow: 0 0 12px color-mix(in srgb, var(--gold-300) 25%, transparent); }
 .nk-crole-hero__name {
-  font-size: 28px;
+  /* 流式字号：clamp 曲线（768px→34px，系数 4.43vw；≤587 下限 26px，≥857 上限 38px）——
+     替代原 22/28/34/38px 四段阶梯（跨断点硬切跳变，2026-08-15 审计修复） */
+  font-size: clamp(26px, 4.43vw, 38px);
   font-weight: 900;
   letter-spacing: -0.01em;
   margin: 0;
@@ -1134,7 +1136,6 @@
   .nk-crole-hero__bg { background-position: center; }
   .nk-crole-hero__content { padding: 32px; gap: 24px; }
   .nk-crole-hero__portrait { width: 140px; height: 140px; }
-  .nk-crole-hero__name { font-size: 34px; }
   .nk-crole-section { padding: 32px 24px 0; }
   .nk-crole-nav { padding: 12px 24px; }
   .nk-crole__skeleton { padding: 24px; }
@@ -1145,12 +1146,10 @@
   .nk-crole-hero { min-height: 380px; }
   .nk-crole-hero__content { padding: 40px; }
   .nk-crole-hero__portrait { width: 160px; height: 160px; }
-  .nk-crole-hero__name { font-size: 38px; }
 }
 /* 超窄屏（≤374px） */
 @media (max-width: 374px) {
   .nk-crole-hero__content { padding: 16px 14px; gap: 14px; }
   .nk-crole-hero__portrait { width: 88px; height: 88px; }
-  .nk-crole-hero__name { font-size: 22px; }
   .nk-crole-section { padding: 20px 12px 0; }
 }

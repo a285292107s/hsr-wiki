@@ -172,7 +172,9 @@
   font-family: var(--font-hud);
 }
 .nk-ctrait-hero__name {
-  font-size: 1.6rem;
+  /* 流式字号：clamp 曲线（手机恒 1.3rem，768px 处达 1.6rem 与桌面连续；
+     替代原 1.3/1.6rem 两段阶梯硬切，2026-08-15 审计修复） */
+  font-size: clamp(1.3rem, 3.33vw, 1.6rem);
   font-weight: 900;
   color: var(--text-bright);
   line-height: 1.2;
@@ -579,8 +581,8 @@
   .nk-ctrait { padding: 0 12px 48px; }
   .nk-ctrait-hero { padding: 40px 18px 28px; margin: 0 -12px 24px; }
   .nk-ctrait-hero__icon { width: 60px; height: 60px; }
-  .nk-ctrait-hero__name { font-size: 1.3rem; }
-  .nk-ctrait-desc { padding: 14px; font-size: 0.84rem; }
+  /* name/desc 字号已统一为 clamp/单一值（2026-08-15 审计去阶梯），不再断点覆盖 */
+  .nk-ctrait-desc { padding: 14px; }
   .nk-ctrait-layer { grid-template-columns: 38px 1fr; gap: 0 10px; }
   .nk-ctrait-layer__node { width: 28px; height: 28px; border-radius: 6px; }
   .nk-ctrait-layer__num { font-size: 0.72rem; }
