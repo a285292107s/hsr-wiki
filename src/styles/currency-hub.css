@@ -31,6 +31,9 @@
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
+/* --home-mono 须与首页同栈（catalog.css 将其限定在 #nk-home-app 作用域）：
+   页脚复用 .nk-home-footer__latin 依赖此令牌，缺失会回退默认字体导致与首页视觉不一致 */
+#nk-cwhub-app { --home-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; }
 #nk-cwhub-app * { box-sizing: border-box; }
 #nk-cwhub-app h1, #nk-cwhub-app h2, #nk-cwhub-app p { margin: 0; padding: 0; }
 #nk-cwhub-app::-webkit-scrollbar { width: 6px; }
@@ -320,17 +323,7 @@
   .nk-cwhub-index__row:hover { background: color-mix(in srgb, var(--gold-500) 5%, transparent); }
 }
 
-/* ── 页脚：数据来源注记（无装饰元素，纯排版） ── */
-.nk-cwhub-footer {
-  max-width: var(--nk-content-max);
-  margin: 0 auto;
-  padding: 72px 40px 48px var(--nk-content-offset);
-  font-family: var(--font-hud);
-  font-size: 0.62rem;
-  letter-spacing: 0.24em;
-  color: var(--text3);
-  text-align: center;
-}
+/* ── 页脚：复用首页 nk-home-footer 范式（类定义于全局 catalog.css，含全断点响应式） ── */
 
 /* 非桌面断点（<1024px）：空间有限，隐藏赛季卡（用户裁定；数据仍加载，成本可忽略） */
 @media (max-width: 1023px) {
@@ -365,11 +358,10 @@
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-cwhub-index { padding: 72px 32px 0 var(--nk-content-offset); }
   .nk-cwhub-index__row { padding: 20px 8px; }
-  .nk-cwhub-footer { padding: 56px 32px 40px var(--nk-content-offset); }
 }
-/* 手机（<768px）：紧凑排版，底部避开导航条（safe-area） */
+/* 手机（<768px）：紧凑排版，底部避开导航条（safe-area）——
+   内容避让由复用页脚 .nk-home-footer 自带 72px padding 承担（与首页一致），容器不再额外留白 */
 @media (max-width: 767px) {
-  #nk-cwhub-app { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
   /* 手机标题：上限 3.36rem（= 768px 处桌面 7vw 的值 53.76px）——
      与桌面曲线无缝衔接（曾 3.6rem 导致 767/768 处 57.6→53.76 跳变，已修复） */
   .nk-cwhub-hero__title { font-size: clamp(2.6rem, 13vw, 3.36rem); }
@@ -381,5 +373,4 @@
   }
   .nk-cwhub-index__icon { width: 36px; height: 36px; }
   .nk-cwhub-index__icon svg { width: 18px; height: 18px; }
-  .nk-cwhub-footer { padding: 48px 20px 32px var(--nk-content-offset); }
 }

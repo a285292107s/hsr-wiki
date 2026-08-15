@@ -201,6 +201,10 @@ onBeforeUnmount(() => {
       </RouterLink>
     </nav>
 
-    <footer class="nk-cwhub-footer">DATA SOURCE · TurnBasedGameData GRIDFIGHT</footer>
+    <!-- 页脚：复用首页品牌 footer 范式（类定义在全局 catalog.css，令牌补齐见 currency-hub.css #nk-cwhub-app） -->
+    <footer class="nk-home-footer">
+      <p class="nk-home-footer__motto">愿此行，终抵群星</p>
+      <p class="nk-home-footer__latin">PER ASPERA AD ASTRA</p>
+    </footer>
   </div>
 </template>
