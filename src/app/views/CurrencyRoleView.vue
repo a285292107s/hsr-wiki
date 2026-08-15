@@ -29,6 +29,8 @@ import { usePageData } from '../composables/use-page-data';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import { loadLocalCurrencyRole, loadLocalCharacter, loadLocalCurrencyPropIcons, loadLocalLightCones } from '../../services/api';
 import { getSavedTrailblazerGender, shouldUseFemaleAvatar } from '../../lib/trailblazer';
+import { getSavedCwSkillDescMode, setCwSkillDescMode } from '../../lib/cw-skill-desc';
+import type { CwSkillDescMode } from '../../lib/cw-skill-desc';
 import type {
   CurrencyRoleDetail, CurrencyRoleStar,
   CurrencyRoleRank, CharacterData, CurrencyPropIconMap, LocalLightConeEntry,
@@ -38,6 +40,13 @@ import '../../styles/currency-role.css';
 
 const route = useRoute();
 const roleId = computed(() => String(route.params.id));
+
+/** 技能描述模式：详细 desc / 简略 simple_desc 二选一展示（持久化于 localStorage，跨角色页面保持） */
+const descMode = ref<CwSkillDescMode>(getSavedCwSkillDescMode());
+function setDescMode(mode: CwSkillDescMode): void {
+  descMode.value = mode;
+  setCwSkillDescMode(mode);
+}
 
 /** 页面级加载编排：loading/error + 加载代竞态（角色间快速导航防旧数据覆盖） */
 const { data, error, loading, run: load } = usePageData<CurrencyRoleDetail>(() =>
@@ -398,7 +407,26 @@ function hideOnError(e: Event) {
         <!-- 02 技能详情：跨星级合并技能（描述数值跟随当前选中星级，星级徽章组可快速切换；与成长总览共享 selectedStar） -->
         <div class="nk-panel" data-panel="skills">
           <template v-if="mergedSkillGroups.length">
-            <h2 class="nk-crole-section__title">技能详情</h2>
+            <!-- 标题行：描述模式切换（简略 simple_desc / 详细 desc 二选一，状态持久化） -->
+            <div class="nk-crole-skills-head">
+              <h2 class="nk-crole-section__title">技能详情</h2>
+              <div class="nk-crole-desc-toggle" role="group" aria-label="技能描述模式">
+                <button
+                  type="button"
+                  class="nk-crole-desc-seg"
+                  :class="{ 'is-active': descMode === 'simple' }"
+                  :aria-pressed="descMode === 'simple'"
+                  @click="setDescMode('simple')"
+                >简略</button>
+                <button
+                  type="button"
+                  class="nk-crole-desc-seg"
+                  :class="{ 'is-active': descMode === 'full' }"
+                  :aria-pressed="descMode === 'full'"
+                  @click="setDescMode('full')"
+                >详细</button>
+              </div>
+            </div>
             <!-- 随从属性（独立区块，不依赖随从技能组存在性） -->
             <div v-if="servantAttrs.length" class="nk-crole-servantattrs">
               <span v-for="a in servantAttrs" :key="a.label" class="nk-crole-servantattrs__item"><b>{{ a.label }}</b>{{ a.value }}</span>
@@ -433,13 +461,17 @@ function hideOnError(e: Event) {
                     <span v-if="stanceLine(sk)">削韧 <b>{{ stanceLine(sk) }}</b></span>
                   </div>
                   <div v-if="skillStarIdx(sk) >= 0">
-                    <p class="nk-crole-skill__simple" v-html="fmtDescStar(sk.simple_desc, sk.paramSets, skillStarIdx(sk))"></p>
-                    <div class="nk-crole-skill__desc" v-html="fmtDescStar(sk.desc, sk.paramSets, skillStarIdx(sk))"></div>
-                    <ul v-if="sk.extraSets.length" class="nk-crole-skill__extra">
-                      <li v-for="(ex, ek) in sk.extraSets" :key="ek">
-                        <b>{{ ex.name }}：</b><span v-html="fmtDescStar(ex.desc, ex.paramSets, skillStarIdx(sk))"></span>
-                      </li>
-                    </ul>
+                    <!-- 简略模式：仅官方简略描述（simple_desc 为空的占位技能渲染为空，与详细模式行为一致） -->
+                    <p v-if="descMode === 'simple'" class="nk-crole-skill__simple" v-html="fmtDescStar(sk.simple_desc, sk.paramSets, skillStarIdx(sk))"></p>
+                    <!-- 详细模式：完整描述 + 附加条件（触发条件等机制信息属详细语境，简略模式不展示） -->
+                    <template v-else>
+                      <div class="nk-crole-skill__desc" v-html="fmtDescStar(sk.desc, sk.paramSets, skillStarIdx(sk))"></div>
+                      <ul v-if="sk.extraSets.length" class="nk-crole-skill__extra">
+                        <li v-for="(ex, ek) in sk.extraSets" :key="ek">
+                          <b>{{ ex.name }}：</b><span v-html="fmtDescStar(ex.desc, ex.paramSets, skillStarIdx(sk))"></span>
+                        </li>
+                      </ul>
+                    </template>
                   </div>
                   <!-- 选中星级未解锁该技能时的占位提示 -->
                   <div v-else class="nk-crole-skill__unlock">该技能于 <b>{{ sk.stars.join(' / ') }}★</b> 解锁</div>

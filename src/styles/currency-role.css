@@ -987,7 +987,8 @@
 .nk-crole-equip__desc span { color: var(--crole-num); font-weight: 600; }
 
 /* ═══ 成长矩阵（结算单：星级为列、属性为科目；无逐行 hairline——AI 规格表味） ═══ */
-.nk-crole-gm-head {
+.nk-crole-gm-head,
+.nk-crole-skills-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -995,10 +996,14 @@
   flex-wrap: wrap;
   margin-bottom: 10px;
 }
-.nk-crole-gm-head .nk-crole-section__title { margin: 0; }
+.nk-crole-gm-head .nk-crole-section__title,
+.nk-crole-skills-head .nk-crole-section__title { margin: 0; }
 .nk-crole-gm-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-/* 方形分段控件（星级切换）：激活 = 亮金底黑字，无 pill、无 glow */
-.nk-crole-gm-pill {
+.nk-crole-desc-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* 方形分段控件（星级切换 / 技能描述模式共用）：激活 = 亮金底黑字，无 pill、无 glow */
+.nk-crole-gm-pill,
+.nk-crole-desc-seg {
   min-width: 40px;
   min-height: 30px;
   padding: 4px 11px;
@@ -1013,15 +1018,20 @@
   letter-spacing: 0.04em;
   transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s var(--ease);
 }
-.nk-crole-gm-pill:hover { color: var(--text-bright); border-color: var(--line-2); }
-.nk-crole-gm-pill:active { transform: scale(0.96); }
-.nk-crole-gm-pill:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.nk-crole-gm-pill.is-active {
+.nk-crole-gm-pill:hover,
+.nk-crole-desc-seg:hover { color: var(--text-bright); border-color: var(--line-2); }
+.nk-crole-gm-pill:active,
+.nk-crole-desc-seg:active { transform: scale(0.96); }
+.nk-crole-gm-pill:focus-visible,
+.nk-crole-desc-seg:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.nk-crole-gm-pill.is-active,
+.nk-crole-desc-seg.is-active {
   background: var(--crole-seg-bg);
   color: var(--crole-seg-text);
   border-color: transparent;
 }
-[data-theme="cw"] .nk-crole-gm-pill.is-active { color: var(--blk-900); }
+[data-theme="cw"] .nk-crole-gm-pill.is-active,
+[data-theme="cw"] .nk-crole-desc-seg.is-active { color: var(--blk-900); }
 
 .nk-crole-gm {
   border-radius: 0;
@@ -1310,6 +1320,7 @@
 /* 尊重「减少动态效果」偏好 */
 @media (prefers-reduced-motion: reduce) {
   .nk-crole-gm-pill,
+  .nk-crole-desc-seg,
   .nk-crole-skill__star { transition: border-color 0.2s, color 0.2s, background 0.2s; }
 }
 
