@@ -99,7 +99,7 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency/role/1001：档案 Hero、星级切换、无溢出', async ({ page }) => {
+  test('/currency/role/1001：名册扉页 Hero、星级切换、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     // 绕开 dev public 索引缓存（rolldown-vite 8 运行期新增文件未入索引，本机 5173 旧实例）：
     // prop_icons.json 直接注入磁盘内容，CI 新起实例无此问题，本拦截对两者均无害
@@ -107,13 +107,13 @@ test.describe('布局验收：货币战争主题', () => {
       route.fulfill({ contentType: 'application/json', body: readFileSync('public/data/cn/currency/prop_icons.json', 'utf8') }),
     );
     await page.goto('/currency/role/1001');
-    // 档案 Hero：名字 + 编号行（v4 重构后结构签名；品牌 HUD 标签已移除）
+    // 名册扉页 Hero：名字 + 编号行（v5 名册重构后结构签名；品牌 HUD 标签已移除）
     await expect(page.locator('.nk-crole-hero__name')).toHaveText('三月七');
     await expect(page.locator('.nk-crole-hero__id')).toHaveText('NO.1001');
-    // 吸顶导航：五区块固定常驻（无内容区块显示空态提示，不隐藏；防旧标签回归）
+    // 吸顶导航：五区块固定常驻（无内容区块显示空态提示，不隐藏；v5 去 01-05 编号前缀）
     const labels = await page.locator('.nk-crole-bar .nk-secnav__btn').allTextContents();
-    expect(labels.map((t) => t.replace(/\s+/g, ''))).toEqual(['01成长总览', '02技能详情', '03后台星魂', '04专属光锥', '05推荐装备']);
-    // 方形档案章（去圆形光环）：border-radius 10px 且宽高相等
+    expect(labels.map((t) => t.replace(/\s+/g, ''))).toEqual(['成长总览', '技能详情', '后台星魂', '专属光锥', '推荐装备']);
+    // 钢印肖像章：直角（radius 0）+ 宽高相等
     const portrait = await page.locator('.nk-crole-hero__portrait').evaluate((el) => {
       const r = el.getBoundingClientRect();
       return {
@@ -123,15 +123,15 @@ test.describe('布局验收：货币战争主题', () => {
       };
     });
     expect(portrait.w).toBe(portrait.h);
-    expect(portrait.radius).toBe('10px');
-    // 星级分段控件激活态：亮金底 + 黑字（无渐变/无 glow 的方形控件）
+    expect(portrait.radius).toBe('0px');
+    // 星级分段控件激活态：亮金底 + 黑字（无渐变/无 glow 的方形控件，4px 直角系）
     const pill = await page.locator('.nk-crole-gm-pill.is-active').first().evaluate((el) => {
       const cs = getComputedStyle(el);
       return { bg: cs.backgroundColor, color: cs.color, radius: cs.borderRadius };
     });
     expect(pill.bg).toBe('rgb(252, 211, 77)'); // gold-300
     expect(pill.color).toBe('rgb(10, 10, 11)'); // blk-900 近黑（禁纯黑）
-    expect(pill.radius).toBe('6px');
+    expect(pill.radius).toBe('4px');
     // 成长矩阵（结算单）与技能条款卡渲染
     await expect(page.locator('.nk-crole-gm__table')).toBeVisible();
     await expect(page.locator('.nk-crole-skill').first()).toBeVisible();
@@ -179,8 +179,10 @@ test.describe('布局验收：货币战争主题', () => {
     await page.goto('/currency/role/1001');
     await expect(page.locator('.nk-crole-hero__name')).toBeVisible();
     // 定位描述在档案 Hero（面板 01 无 oneliner），且不随星级切换变化（跨星级一致的数据事实）
+    // v5.1：定位状态由行首方章承担（双字「后台」+ 描述），无「前台/后台」文字前缀
+    await expect(page.locator('.nk-crole-hero__role .nk-crole-slot--role').first()).toHaveText('后台');
     const roleText = await page.locator('.nk-crole-hero__role').innerText();
-    expect(roleText).toContain('后台');
+    expect(roleText.trim()).toMatch(/^后台/);
     await expect(page.locator('[data-panel="stars"] .nk-crole-hero__role, [data-panel="stars"] .nk-crole-oneliner')).toHaveCount(0);
     // 方形分段控件：激活项 6px 圆角（非 999px pill）
     const star = await page.locator('.nk-crole-skill__star.is-on').first().evaluate((el) =>

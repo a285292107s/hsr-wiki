@@ -40,6 +40,8 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const fbType = (item.front_back_type as string) ?? 'Both';
   const charge = (item.charge_type || []).map((c) => CHARGE_LABEL[c] ?? c).join(' · ');
   const expert = item.is_expert ? '<span class="nk-crole-card__exp">专家</span>' : '';
+  /* 充能类型：跟随角色名后方（由卡片底部 meta 迁移至此，弱色小字） */
+  const chargeEl = charge ? `<span class="nk-crole-card__charge">${escHtml(charge)}</span>` : '';
   /* 前后台角标（SVG 图标 + 磨砂底座，头像左上角） */
   const fbIcon = fbType === 'Both' ? FB_SVG_BOTH
     : fbType === 'Front' ? FB_SVG_FRONT
@@ -59,13 +61,10 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
         <img loading="lazy" src="${escHtml(avatar)}" alt="${escHtml(item.name)}">
         ${fbBadge}
         ${costBadge}
-        <span class="nk-crole-card__name">${escHtml(item.name)}${expert}</span>
+        <span class="nk-crole-card__name">${escHtml(item.name)}${expert}${chargeEl}</span>
       </div>
       <div class="nk-crole-card__body">
         ${traitChips ? `<div class="nk-crole-card__traits">${traitChips}</div>` : ''}
-        <div class="nk-crole-card__meta">
-          ${charge ? `<span class="nk-crole-card__meta-item nk-crole-card__meta-item--charge">${escHtml(charge)}</span>` : ''}
-        </div>
       </div>
     </a>`;
 }

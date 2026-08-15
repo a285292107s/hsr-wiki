@@ -34,6 +34,18 @@ export const SKILL_GROUP_LABEL: Record<string, string> = {
 
 /** 属性名称映射：对齐 GridFightRolePropertyConfig.PropertyName（TextMap 官方名称） */
 export const PROP_LABEL: Record<string, string> = {
+  /* 无前缀键 = 常规模式属性体系（GridFightRolePropertyConfig 未收录 → 数据无 prop_name，兜底表补齐官方术语）；
+     术语事实来源：tools/converter/config.py PROPERTY_MAP（自建官方映射）+ TextMap 官方描述句式（全量审计 2026-08-15） */
+  CriticalChanceBase: '暴击率',
+  CriticalDamageBase: '暴击伤害',
+  HealRatioBase: '治疗量',
+  StatusResistanceBase: '效果抵抗',
+  SPRatioBase: '能量恢复效率',
+  AllDamageTypeAddedRatio: '全属性伤害',
+  AllDamageTypePenetrate: '全属性抗性穿透',
+  IcePenetrate: '冰属性抗性穿透',
+  ElationDamageAddedRatioBase: '欢愉伤害',
+  BreakDamageExtraAddedRatio: '击破伤害',
   ExtraAllDamageTypeAddedRatio4: '伤害增幅',
   ExtraAllDamageTypeAddedRatio1: '伤害增幅',
   ExtraAllDamageTypeAddedRatio5: '伤害增幅',

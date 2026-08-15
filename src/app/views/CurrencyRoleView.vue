@@ -1,11 +1,11 @@
 <script setup lang="ts">
 /**
- * 货币战争 · 角色详情页（v4 重构：金融结算档案风格）
- * 结构：档案 Hero（立绘衬底 + 方形档案章 + 结算信息行）→ 吸顶区块导航（01 成长总览 / 02 技能详情 / 03 后台星魂 / 04 专属光锥 / 05 推荐装备）
+ * 货币战争 · 角色详情页（v5 重构：典藏名册风格）
+ * 结构：名册扉页 Hero（编号行 + 超大角色名 + 钢印肖像章）→ 吸顶区块导航（成长总览 / 技能详情 / 后台星魂 / 专属光锥 / 推荐装备）
  *   + 阅读进度 + 返回顶部 → 内容平铺滚动（对齐常规模式详情页体系）
  * 星级切换为「成长总览 / 技能详情」两区块共享的局部状态：联动成长矩阵列高亮 + 技能描述参数
  *   （fmtDescStar 单星级渲染——技能卡展示当前选中星级数值，星级徽章组指示存在范围）
- * 样式纪律（反 AI 味，见 currency-role.css 顶部）：禁霓虹 glow / 禁 135° 对角渐变 / 禁 pill 泛滥；
+ * 样式纪律（反 AI 味，见 currency-role.css 顶部）：禁霓虹 glow / 禁 135° 对角渐变 / 禁 pill 泛滥 / 直角系（0 = 版面容器，4px = 内容元素）；
  *   阴影仅物理黑投影，强调色仅以纯色/淡底/发丝线承载。新样式必须延续该纪律。
  * 数据：本地转换数据（public/data/cn/currency/role/<id>.json，由 converter 落地）
  */
@@ -79,11 +79,9 @@ const roleLines = computed(() => {
   return lines;
 });
 
-/** 前后台定位双槽（Front/Back/Both 驱动槽位亮灭） */
-const fbSlots = computed(() => {
-  const t = data.value?.front_back_type || '';
-  return { front: t === 'Front' || t === 'Both', back: t === 'Back' || t === 'Both' };
-});
+/** 前后台定位双槽（Front/Back/Both 驱动槽位亮灭）
+ *   v5.1：双槽已移除——定位状态由摘要行行首章承担（有描述才渲染该行），本计算属性不再被引用。 */
+/* （原 fbSlots 随双槽移除删除，2026-08-15；如需恢复双槽指示参照此注释重建） */
 
 /** 跨星级合并技能：同名技能在各星级的参数集合并（构建逻辑见 lib/currency-role.ts） */
 const mergedSkillGroups = computed(() => mergeSkillGroups(data.value?.stars));
@@ -189,13 +187,13 @@ function skillIconAttrs(sk: MergedSkill): Record<string, string | undefined> {
 
 /* ─── 吸顶区块导航（对齐常规模式详情页体系：useScrollSpy + 平铺面板） ─── */
 /** 区块定义：id 对应面板 data-panel。五区块固定常驻（无内容时面板内显示空态提示，不隐藏区块）；
-   导航标签与面板标题一一对应：01 成长总览 / 02 技能详情 / 03 后台星魂 / 04 专属光锥 / 05 推荐装备。 */
+   导航标签与面板标题一一对应（v5 名册重构去除 01-05 编号前缀——编号为 AI 套路装饰，区块语义由位置承担）。 */
 const SECTIONS = [
-  { id: 'stars', idx: '01', label: '成长总览' },
-  { id: 'skills', idx: '02', label: '技能详情' },
-  { id: 'ranks', idx: '03', label: '后台星魂' },
-  { id: 'cones', idx: '04', label: '专属光锥' },
-  { id: 'equips', idx: '05', label: '推荐装备' },
+  { id: 'stars', label: '成长总览' },
+  { id: 'skills', label: '技能详情' },
+  { id: 'ranks', label: '后台星魂' },
+  { id: 'cones', label: '专属光锥' },
+  { id: 'equips', label: '推荐装备' },
 ] as const;
 
 const pageRef = ref<HTMLElement | null>(null);
@@ -257,30 +255,25 @@ function hideOnError(e: Event) {
     </div>
 
     <template v-else-if="data">
-      <!-- ═══ 档案 Hero（结算单头部：立绘衬底 + 方形档案章 + 结算信息行） ═══ -->
+      <!-- ═══ 名册扉页 Hero（编号行 + 超大角色名 + 钢印肖像章；立绘衬底右侧透出主体） ═══ -->
       <header class="nk-crole-hero" :data-rarity="data.rarity">
         <div class="nk-crole-hero__bg" aria-hidden="true" :style="{ backgroundImage: `url(${avatarDrawCardUrl(displayAvatarId)})` }"></div>
         <div class="nk-crole-hero__scrim" aria-hidden="true"></div>
         <div class="nk-crole-hero__content">
-          <div class="nk-crole-hero__portrait" :data-rarity="data.rarity">
-            <img :src="avatarShopIconUrl(displayAvatarId)" :alt="data.name" loading="eager" @error="hideOnError" />
-          </div>
           <div class="nk-crole-hero__info">
-            <span class="nk-crole-hero__id">NO.{{ data.id }}</span>
-            <h1 class="nk-crole-hero__name">{{ data.name }}</h1>
-            <div class="nk-crole-hero__meta">
-              <!-- 前后台定位双槽：亮 = 该定位可用，暗 = 不可用 -->
-              <div class="nk-crole-hero__slots" role="group" aria-label="前后台定位">
-                <span class="nk-crole-slot" :class="{ 'is-on': fbSlots.front }">前</span>
-                <span class="nk-crole-slot" :class="{ 'is-on': fbSlots.back }">后</span>
-              </div>
-              <span v-if="data.rarity >= 1" class="nk-crole-hero__fee">{{ data.rarity }}费</span>
+            <!-- 扉页编号行：NO. + 赛季 + 费用（HUD 小字，发丝分隔） -->
+            <div class="nk-crole-hero__line">
+              <span class="nk-crole-hero__id">NO.{{ data.id }}</span>
               <span v-if="data.season_ids && data.season_ids.length" class="nk-crole-hero__season">赛季 {{ data.season_ids.join(' / ') }}</span>
+              <span v-if="data.rarity >= 1" class="nk-crole-hero__fee">{{ data.rarity }}费</span>
             </div>
-            <!-- 定位摘要（档案头：前台/后台一句话，各展示非空项；跨星级一致，不随星级切换） -->
+            <h1 class="nk-crole-hero__name">{{ data.name }}</h1>
+            <!-- 定位摘要（扉页副题：定位章 + 一句话描述，各展示非空项；跨星级一致，不随星级切换）。
+                 定位章替代原编号行双槽——「前台/后台」状态与描述行一一对应，消除双槽与「前台/后台」前缀的重复表达 -->
             <div v-if="roleLines.length" class="nk-crole-hero__role">
               <p v-for="ln in roleLines" :key="ln.pos">
-                <span class="nk-crole-hero__role-pos">{{ ln.pos }}</span>{{ ln.text }}
+                <span class="nk-crole-slot nk-crole-slot--role is-on" aria-hidden="true">{{ ln.pos }}</span>
+                {{ ln.text }}
               </p>
             </div>
             <div class="nk-crole-hero__tags">
@@ -304,6 +297,10 @@ function hideOnError(e: Event) {
               </div>
             </div>
           </div>
+          <!-- 钢印肖像章：直角 + 双层细金线（档案基因，v5 起直角化） -->
+          <div class="nk-crole-hero__portrait" :data-rarity="data.rarity">
+            <img :src="avatarShopIconUrl(displayAvatarId)" :alt="data.name" loading="eager" @error="hideOnError" />
+          </div>
         </div>
       </header>
 
@@ -320,7 +317,6 @@ function hideOnError(e: Event) {
               :aria-current="activeId === s.id ? 'true' : undefined"
               @click="jumpTo(s.id)"
             >
-              <span class="nk-secnav__idx">{{ s.idx }}</span>
               {{ s.label }}
             </button>
           </nav>
