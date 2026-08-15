@@ -61,6 +61,10 @@ python convert.py --force --pretty       # 强制全量 + 缩进输出
 python -m pytest tests/ -v               # converter 单元测试
 
 # 本地数据探索工具（query.py / gen_catalog.py）用法见 docs/agents/data-pipeline.md
+
+# fastctx（MCP 仓库工具，已注册于 .qoder-cn/mcp.json；文件工具 4 个已生效，Bash 工具默认未启用，见「项目约定」）
+fastctx status        # 检查配置/二进制/MCP 握手状态（[PASS]/[INFO]/[FAIL]）
+fastctx jobs          # 列出所有会话的后台任务（Bash 工具启用后才有内容）
 ```
 
 部署：推送到 `main` 分支 → Vercel 自动构建部署（SPA 路由重写见 `vercel.json`）；回滚 = Vercel Dashboard → Deployments → 选中上一个构建 Rollback。
@@ -112,6 +116,7 @@ python -m pytest tests/ -v               # converter 单元测试
 - 项目不配置 ESLint / Prettier：代码风格靠 vue-tsc 类型检查 + 本文件约定 + 代码审查保证，禁止擅自引入 lint 工具链
 - **注释第一读者是后续接手的 AI**：注释本质是传递给未来 AI 代理的行为约束与领域知识，写成可执行指令形态（「禁止…」「必须…」「X 是唯一收口/单一事实源」）——AI 会字面执行注释内容。只写可验证事实（数据映射规则、路径特例、架构委约、坑位），无代码/数据证据不写「为什么」（防 AI 编造决策过程）；禁止复述实现（不解释代码在做什么）；禁止过期断言（日期、版本号、「已修复」——历史职能归 docs/memory/）
 - **注释落位分层**：文件内局部约束就近注释在真相发生处；跨文件/跨会话约束进本文件或 docs/memory/；不可逆架构决策进 docs/adr/；术语进 CONTEXT.md。排查出的坑位（数据特例/时序陷阱/环境问题）必须当场注释——后续 AI 未被告知必重复踩坑
+- **fastctx 工具边界**：fastctx MCP 已注册生效，提供 4 个文件工具——inspect_local_file（支持批量 1-32 文件/翻页/GBK 编码）、grep（尊重 .gitignore）、glob、replace（dry_run 预览 + 原子写入 + 保留原编码/BOM/换行）；Bash 工具（run/run_background/job_output/job_kill/job_list）默认未启用，禁止假设其可用（启用由用户在 fastctx 控制终端 Config 操作）。批量机械替换（符号重命名/导入重写/配置键迁移）优先走 replace 的 `dry_run` 预览，规避 PowerShell 转义与 UTF-8 陷阱；replace 同样受「数据边界」约束，禁止写入 vendor/TurnBasedGameData
 
 ## 验证流程
 
