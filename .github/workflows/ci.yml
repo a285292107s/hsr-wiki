@@ -15,6 +15,9 @@ concurrency:
 #   失败不部署可回滚；CI 重复跑同命令零增量。push 后类型/构建反馈由 Vercel 承担。
 # - 无 converter 测试：converter 代码变更低频，每次 push 重复跑纯浪费；回归由 data-sync 的 Run converter
 #   兜底（转换失败即失败、diff 判空不推送坏数据）+ 本机 pytest（converter 变更时按 AGENTS.md 流程）。
+# - e2e 分层（2026-08-15 决策）：CI 仅跑 layout + a11y（test:e2e:ci，零外部依赖、环境无关）；
+#   visual 像素基线回本机（判定依赖环境——CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异，
+#   本地跑同样能拦住基线过期，见 docs/memory/2026-08-15）。禁止把 visual.spec 加回 CI e2e job。
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
@@ -59,8 +62,8 @@ jobs:
       - name: Install Playwright chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: E2E tests (T1b/T2 布局 + L4 像素基线 + a11y，发布门禁)
-        run: pnpm test:e2e
+      - name: E2E tests（T1b/T2 布局 + a11y，环境无关守卫；visual 像素基线已回本机，勿加回）
+        run: pnpm test:e2e:ci
 
       # e2e 失败时上传 HTML report + trace/截图（outputDir 在系统临时目录），供 PR 调试取证
       - name: Upload e2e artifacts

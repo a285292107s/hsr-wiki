@@ -145,7 +145,8 @@ onBeforeUnmount(() => {
         </p>
 
         <!-- ═══ 赛季扩充说明（真实数据，标题下方空间） ═══ -->
-        <section v-if="seasonViews.length" class="nk-cwhub-season" aria-label="赛季扩充说明">
+        <!-- tabindex="0"：内部滚动容器需键盘可达（axe scrollable-region-focusable） -->
+        <section v-if="seasonViews.length" class="nk-cwhub-season" aria-label="赛季扩充说明" tabindex="0">
           <article
             v-for="s in seasonViews"
             :key="s.id"

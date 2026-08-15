@@ -38,7 +38,10 @@ pnpm vitest run src/services/__tests__/api.test.ts
 # 监听模式
 pnpm test:watch
 
-# e2e 布局验收 / a11y 扫描 / 像素基线（Playwright，自动起 dev server）
+# e2e 分层（Playwright，自动起 dev server；2026-08-15 决策：视觉基线回本机，详见 ci.yml 注释）
+#   CI 层（layout + a11y，零外部依赖、环境无关）：
+pnpm test:e2e:ci
+#   本机层（含像素基线，基线在本地 Windows 刷新；CI 不跑 visual）
 pnpm test:e2e
 pnpm test:e2e:update   # 刷新像素基线（确认改动是预期后；必须显式 =all——默认 changed 模式更新已有基线会静默不写）
 pnpm exec playwright test e2e/visual.spec.ts --grep 首页   # 仅首页像素基线（改动只影响首页时用，避免全量 ~90s）
@@ -64,7 +67,7 @@ python -m pytest tests/ -v               # converter 单元测试
 
 > 门禁语义（软门禁）：main 分支 protection 仅保留防 force push 与防删除
 > （required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过，推送后
-> CI（`unit-tests` + `e2e`）自动运行，失败由 GitHub 通知；Vercel 生产构建（`pnpm build`
+> CI（`unit-tests` + `e2e`＝layout+a11y）自动运行，失败由 GitHub 通知；Vercel 生产构建（`pnpm build`
 > 含 vue-tsc + 色彩/清单/对比度三守卫）为上线前最后一道守卫（CI 不再重复跑 build，见 ci.yml
 > 注释），构建失败不部署、可一键回滚。
 > 注意：本地推送前仍建议先跑 `pnpm build` + `pnpm test` 自检（CI 红不会拦 push，但会留失败记录）。

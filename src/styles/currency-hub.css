@@ -152,6 +152,11 @@
 .nk-cwhub-season::-webkit-scrollbar { width: 6px; }
 .nk-cwhub-season::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
 .nk-cwhub-season::-webkit-scrollbar-track { background: transparent; }
+/* 键盘聚焦可见性：滚动容器 tabindex="0" 后需给出 focus-visible 焦点环（黑金主题发丝金框） */
+.nk-cwhub-season:focus-visible {
+  outline: 1px solid color-mix(in srgb, var(--gold-500) 70%, transparent);
+  outline-offset: 2px;
+}
 .nk-cwhub-season__title {
   margin: 0 0 16px;
   padding-bottom: 12px;
