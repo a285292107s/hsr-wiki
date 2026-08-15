@@ -84,3 +84,5 @@ test-results
 # Python cache (explicit)
 .pytest_cache/
 .bitfun/
+
+.pnpm-store/
