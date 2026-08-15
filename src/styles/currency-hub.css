@@ -1,495 +1,189 @@
 /* ═══════════════════════════════════════════
-   货币战争枢纽页（/currency）· V3「冷峻档案馆」调性
+   货币战争枢纽页（/currency）· V4「官方背景视频」调性
    暗金主题：黑底 + 金属金点缀。仅在 data-theme="cw" 下呈现。
-   叙事定位：档案编目（自走棋构筑的 4 前台 + 6 后台 = 阵容档案表）——铸币墙/行情式
-   视觉已两次废弃（行情为编造数据 + 货币非玩法重点），禁止回归；视觉资产 = 真实
-   官方素材（角色头像/羁绊·装备·环境·策略图标）。高级感来自静态精确：近乎零入场
-   动画（唯一入场序列 = 档案表槽位错峰一次），hover 只做色温变化不做位移。
+   视觉基调（双段式禁令，与 CurrencyHubView.vue 头部注释同源）：
+   ① 素材豁免：Hero 背景 = 官方活动页背景视频（2500×1080 宽幅循环，直引
+      act-webstatic）——行情/展览式视觉存在于官方素材本身，属豁免。
+   ② 文字克制：视频层之上禁止新增行情式装饰（霓虹 glow / 金币雨 / 行情板 /
+      div 合成装饰 / 装饰字符 / em-dash / 装饰性 eyebrow）；档案编号（序号
+      01-05）与真实数据徽章 = 数据锚点，允许使用。
+   视频降级纪律：加载失败/慢网/prefers-reduced-motion → 静态 poster 帧
+   （本地抽帧资产）+ 黑金渐变兜底，禁止以装饰动画替代视频。
+   样式独立实现（不抽 tokens 共享原语）：Hero 视频层与首页 Spine 场景的媒体
+   来源/断点语义不同，共享仅能覆盖 scrim/content 骨架，抽原语需连带改造首页
+   （回归风险大于收益），故判定为不共享（决策见 CurrencyHubView.vue 注释）。
    色值全部经令牌（--blk 黑阶 / --gold-* + --primary 金系 / --line 发丝 /
-   --cw-fb-* 前后台 / --cw-rarity-* 费用），禁止裸彩色。
-   字体 --font-hud(Orbitron) 仅限数字/编号/REC·COST 标签位，正文禁大写追踪小字。
+   --hero-bg-* 主题兜底），禁止裸彩色。
+   圆角三档：卡片 = var(--nk-radius-card) / 内嵌 = calc(卡片 - 2px) / 标签 = 999px。
    BEM 前缀：nk-cwhub-*
-   硬约束：禁止霓虹 glow(0 0 阴影/发光 text-shadow)、div 合成装饰（K 线/粒子/扫光）、
-   装饰字符、em-dash、装饰性 eyebrow；序号/收录数字 = 档案编号（数据锚点）允许使用。
-   圆角三档：卡片 = var(--nk-radius-card) / 内嵌 = calc(卡片 - 2px) / 标签·徽章 = 999px。
    ═══════════════════════════════════════════ */
 
-/* ── 容器：仿 catalog 布局，左侧避让侧栏（--nk-content-offset 令牌断点接管：
-   平板 88 / 桌面 148，禁止写死数字——历史遗漏 80px 导致文字被遮，见 tokens.css 变量注释） ── */
+/* ── 容器：镜像首页（app 无左侧内边距，Hero 全屏铺满视图区；
+   内容留白由 __content / 索引区各自用 --nk-content-offset 令牌断点接管：
+   平板 88 / 桌面 148，禁止写死数字——历史遗漏 80px 导致文字被遮） ── */
 #nk-cwhub-app {
   position: absolute;
   inset: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 0 64px var(--nk-content-offset);
   background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
+#nk-cwhub-app * { box-sizing: border-box; }
+#nk-cwhub-app h1, #nk-cwhub-app h2, #nk-cwhub-app p { margin: 0; padding: 0; }
 #nk-cwhub-app::-webkit-scrollbar { width: 6px; }
 #nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
 #nk-cwhub-app::-webkit-scrollbar-track { background: transparent; }
 
-/* ═══ 档案头部：左超大排版（唯一 REC 标签）+ 右阵容档案表，全部静态直出 ═══ */
+/* ═══ Hero：全屏官方背景视频（右上标题范式——视频主体居左，标题置右上平衡构图） ═══ */
 .nk-cwhub-hero {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 460px);
-  column-gap: 64px;
-  align-items: start;
-  min-height: 540px;
-  padding: 88px 48px 64px;
-  border-bottom: 1px solid var(--line-1);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
 }
-
-.nk-cwhub-hero__content { position: relative; z-index: 1; min-width: 0; }
-.nk-cwhub-hero__rec {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--font-hud);
-  font-size: 0.58rem;
-  letter-spacing: 0.22em;
-  color: var(--gold);
+/* 渐变兜底层：video/poster 均不可用时的最终底（黑金主题注入，始终垫底） */
+.nk-cwhub-hero__fallback {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%),
+    linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--th-500) 12%) 100%);
 }
-.nk-cwhub-hero__rec::before {
-  content: '';
-  width: 22px;
-  height: 1px;
-  background: color-mix(in srgb, var(--primary) 55%, transparent);
-}
-.nk-cwhub-hero__title {
-  margin: 24px 0 0;
-  font-size: clamp(3rem, 8vw, 5.6rem);
-  font-weight: 900;
-  line-height: 0.98;
-  letter-spacing: 0.04em;
-  color: var(--text-bright);
-}
-.nk-cwhub-hero__tagline {
-  margin: 26px 0 0;
-  max-width: 440px;
-  font-size: 0.88rem;
-  line-height: 1.9;
-  color: var(--text2);
-}
-
-/* ── 阵容档案表：4 前台（暖金带）+ 6 后台（冷蓝带），档案编号 01-10 ── */
-.nk-cwhub-ledger {
-  position: relative;
-  z-index: 1;
-  justify-self: end;
+/* poster 帧（本地抽帧资产）：video 就绪前常驻（video opacity 0 隐藏），失败/慢网时兜底 */
+.nk-cwhub-hero__poster {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-width: 460px;
-  margin-top: 30px;
-  padding: 20px 20px 16px;
-  border: 1px solid var(--line-1);
-  background: var(--surface);
-}
-/* 顶部发丝高光：全页唯一主金位（页面级高光，非霓虹外发光） */
-.nk-cwhub-ledger::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold-500) 45%, transparent) 50%, transparent);
-}
-
-.nk-cwhub-ledger__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.nk-cwhub-ledger__title {
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: var(--text-bright);
-}
-.nk-cwhub-ledger__meta {
-  font-family: var(--font-hud);
-  font-size: 0.52rem;
-  letter-spacing: 0.14em;
-  color: var(--text3);
-  white-space: nowrap;
-}
-
-/* 带区列头（编号 / 单位 / 费用）：字段名示意，与槽位内部三焦点同位 */
-.nk-cwhub-ledger__zone + .nk-cwhub-ledger__zone { margin-top: 16px; }
-.nk-cwhub-ledger__cols {
-  display: grid;
-  grid-template-columns: 34px 1fr 24px;
-  gap: 8px;
-  padding: 0 4px 6px;
-  border-bottom: 1px solid var(--line-1);
-}
-.nk-cwhub-ledger__col {
-  font-family: var(--font-hud);
-  font-size: 0.48rem;
-  letter-spacing: 0.2em;
-  color: var(--text3);
-}
-.nk-cwhub-ledger__col--unit { text-align: center; }
-.nk-cwhub-ledger__col--cost { text-align: right; }
-
-/* 前后台槽位语义色（令牌事实：暖金 = 前台 / 冷靖蓝 = 后台，tokens.css 单一事实源） */
-.nk-cwhub-ledger__zone--front .nk-cwhub-ledger__cols { border-bottom-color: color-mix(in srgb, var(--cw-fb-front) 20%, transparent); }
-.nk-cwhub-ledger__zone--back .nk-cwhub-ledger__cols { border-bottom-color: color-mix(in srgb, var(--cw-fb-back) 16%, transparent); }
-
-.nk-cwhub-ledger__row {
-  display: flex;
-  gap: 8px;
-  padding-top: 8px;
-  min-width: 0;
-}
-.nk-cwhub-ledger__zone--front .nk-cwhub-ledger__row { gap: 10px; }
-
-/* 账面式槽位：档案编号左上 + 费用徽章右上，hover 仅底色 wash（无上浮无发光） */
-.nk-cwhub-ledger__slot {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-width: 0;
-  flex: 1;
-  padding: 12px 4px 8px;
-  border: 1px solid var(--line-1);
-  text-decoration: none;
-  color: inherit;
-  transition: background 0.25s ease, border-color 0.25s ease;
-  animation: nk-cwhub-ledger-in 0.5s var(--ease) backwards;
-  animation-delay: calc(0.05s + var(--i, 0) * 45ms);
-}
-.nk-cwhub-ledger__zone--front .nk-cwhub-ledger__slot { border-color: color-mix(in srgb, var(--cw-fb-front) 26%, transparent); }
-.nk-cwhub-ledger__zone--back .nk-cwhub-ledger__slot { border-color: color-mix(in srgb, var(--cw-fb-back) 22%, transparent); }
-.nk-cwhub-ledger__slot:hover {
-  background: color-mix(in srgb, var(--text-bright) 4%, transparent);
-  border-color: color-mix(in srgb, var(--text-bright) 26%, transparent);
-}
-.nk-cwhub-ledger__slot:active { transform: scale(0.99); }
-@keyframes nk-cwhub-ledger-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-.nk-cwhub-ledger__no {
-  position: absolute;
-  top: 5px;
-  left: 7px;
-  font-family: var(--font-hud);
-  font-size: 0.5rem;
-  letter-spacing: 0.05em;
-  color: var(--text3);
-  font-variant-numeric: tabular-nums;
-  transition: color 0.25s;
-}
-.nk-cwhub-ledger__slot:hover .nk-cwhub-ledger__no { color: var(--gold); }
-
-.nk-cwhub-ledger__avatar {
-  width: 44px;
-  height: 44px;
-  display: block;
-  border-radius: 50%;
+  height: 100%;
   object-fit: cover;
-  background: var(--line-1);
+  object-position: 33% 50%;
+  pointer-events: none;
 }
-.nk-cwhub-ledger__name {
-  max-width: 100%;
-  font-size: 0.56rem;
-  color: var(--text2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: color 0.25s;
-}
-.nk-cwhub-ledger__slot:hover .nk-cwhub-ledger__name { color: var(--text-bright); }
-
-/* 费用徽章：招募费用（1-5 金币），单色底（--cw-rarity-*，禁渐变填充）——货币语义落点 */
-.nk-cwhub-ledger__cost {
+/* 视频层：就绪后淡入盖住 poster；失败时保持 opacity 0（poster 兜底常驻） */
+.nk-cwhub-hero__video {
   position: absolute;
-  top: 3px;
-  right: 5px;
-  min-width: 17px;
-  height: 17px;
-  padding: 0 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  font-family: var(--font-hud);
-  font-size: 0.55rem;
-  font-weight: 700;
-  color: var(--blk-900);
-  border: 1px solid color-mix(in srgb, var(--blk-900) 60%, transparent);
-  box-sizing: content-box;
-  font-variant-numeric: tabular-nums;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 33% 50%;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
 }
-.nk-cwhub-ledger__cost.is-1 { background: var(--cw-rarity-1); }
-.nk-cwhub-ledger__cost.is-2 { background: var(--cw-rarity-2); }
-.nk-cwhub-ledger__cost.is-3 { background: var(--cw-rarity-3); }
-.nk-cwhub-ledger__cost.is-4 { background: var(--cw-rarity-4); }
-.nk-cwhub-ledger__cost.is-5 { background: var(--cw-rarity-5); }
-
-/* 费用注脚：白绿蓝紫金（招募费用语义，本页货币语义辅助落点） */
-.nk-cwhub-ledger__legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 14px;
-  margin-top: 16px;
-  padding-top: 10px;
-  border-top: 1px solid var(--line-1);
+.nk-cwhub-hero__video.nk-on { opacity: 1; }
+/* 锚点统一为 33% 50%（用户裁定）：全断点一致，无断点差异化裁切——
+   避免引入 object-position 断点差异（曾因 1024px 断点切左锚导致跳变，已废弃） */
+/* 压暗层：右上文字安全区 + 底部融入页面底色（radial 重心随标题移到右上，主题令牌自动黑金） */
+.nk-cwhub-hero__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 85% at 100% 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 34%, transparent 62%),
+    linear-gradient(to bottom, color-mix(in srgb, var(--blk-900) 28%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in srgb, var(--blk-900) 55%, transparent) 88%, var(--bg) 100%);
 }
-.nk-cwhub-ledger__legend-cap {
-  font-family: var(--font-hud);
-  font-size: 0.46rem;
-  letter-spacing: 0.24em;
-  color: var(--text3);
-  margin-right: 2px;
-}
-.nk-cwhub-ledger__legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-hud);
-  font-size: 0.54rem;
-  letter-spacing: 0.04em;
-  color: var(--text3);
-  font-variant-numeric: tabular-nums;
-}
-.nk-cwhub-ledger__dot {
-  width: 6px;
-  height: 6px;
-  display: block;
-  border-radius: 50%;
-}
-.nk-cwhub-ledger__dot.is-1 { background: var(--cw-rarity-1); }
-.nk-cwhub-ledger__dot.is-2 { background: var(--cw-rarity-2); }
-.nk-cwhub-ledger__dot.is-3 { background: var(--cw-rarity-3); }
-.nk-cwhub-ledger__dot.is-4 { background: var(--cw-rarity-4); }
-.nk-cwhub-ledger__dot.is-5 { background: var(--cw-rarity-5); }
-
-/* ═══ 板块索引：目录行 01-05，发丝间隔，收录计数并入行尾（无独立统计条） ═══ */
-.nk-cwhub-index { max-width: var(--nk-content-max); margin: 0 auto; padding: 60px 48px 0; }
-
-.nk-cwhub-index__row {
+/* 标题区：右上角（hero flex 右推 + 顶部对齐；宽度收缩到内容，右侧 48px 呼吸边距） */
+.nk-cwhub-hero__content {
   position: relative;
-  display: grid;
-  grid-template-columns: 44px 56px minmax(0, 1fr) auto;
+  z-index: 2;
+  width: auto;
+  max-width: min(640px, 100%);
+  margin-left: auto;
+  padding: max(44px, 8vh) 48px 0 0;
+}
+/* 英文副标：克制小字 + 发丝线（金色族，无发光） */
+.nk-cwhub-hero__supra {
+  display: flex;
   align-items: center;
-  gap: 16px;
-  min-height: 76px;
-  padding: 14px 18px;
-  border-top: 1px solid var(--line-1);
-  text-decoration: none;
-  color: var(--text);
-  transition: background 0.25s ease;
-}
-.nk-cwhub-index__row:last-child { border-bottom: 1px solid var(--line-1); }
-.nk-cwhub-index__row:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
-.nk-cwhub-index__row:active { transform: scale(0.995); }
-
-/* 主目录行（角色图鉴）：加高 + 左侧金刻条（档案首条目的层级位，唯一金线） */
-.nk-cwhub-index__row--lead {
-  min-height: 118px;
-  border-top-color: color-mix(in srgb, var(--gold-500) 45%, transparent);
-  border-left: 2px solid color-mix(in srgb, var(--gold-500) 55%, transparent);
-}
-
-.nk-cwhub-index__no {
+  gap: 14px;
+  margin-bottom: 22px;
   font-family: var(--font-hud);
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: var(--text3);
-  font-variant-numeric: tabular-nums;
-  transition: color 0.25s;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  color: var(--gold-sem);
 }
-.nk-cwhub-index__row:hover .nk-cwhub-index__no { color: var(--gold); }
-
-.nk-cwhub-index__icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: calc(var(--nk-radius-card) - 2px);
-  border: 1px solid var(--line-2);
-  background: var(--surface);
-  color: var(--gold);
+.nk-cwhub-hero__supra::before {
+  content: '';
+  width: 44px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent);
 }
-.nk-cwhub-index__icon svg { width: 20px; height: 20px; }
-.nk-cwhub-index__row--lead .nk-cwhub-index__icon { width: 48px; height: 48px; }
-.nk-cwhub-index__row--lead .nk-cwhub-index__icon svg { width: 24px; height: 24px; }
-
-.nk-cwhub-index__body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.nk-cwhub-index__cn {
-  font-size: 1.02rem;
-  font-weight: 800;
+/* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文回退），单档黑投影无发光 */
+.nk-cwhub-hero__title {
+  font-family: var(--font-body);
+  font-size: clamp(2.6rem, 7vw, 6rem);
+  font-weight: 900;
   letter-spacing: 0.02em;
+  line-height: 1.08;
   color: var(--text-bright);
+  text-shadow: 0 2px 24px rgba(0,0,0,0.55);
 }
-.nk-cwhub-index__row--lead .nk-cwhub-index__cn { font-size: 1.3rem; }
-.nk-cwhub-index__en {
-  font-family: var(--font-hud);
-  font-size: 0.5rem;
-  letter-spacing: 0.18em;
-  color: var(--primary);
-}
-.nk-cwhub-index__desc {
-  margin-top: 3px;
-  font-size: 0.7rem;
-  color: var(--text3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.nk-cwhub-index__row--lead .nk-cwhub-index__desc {
-  white-space: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.nk-cwhub-index__meta {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-  font-family: var(--font-hud);
-  white-space: nowrap;
-}
-.nk-cwhub-index__count {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--metric-val);
-  font-variant-numeric: tabular-nums;
-}
-.nk-cwhub-index__meta-label {
-  font-size: 0.5rem;
-  letter-spacing: 0.2em;
-  color: var(--text3);
-}
-
-/* ═══ 玩法机制导览：横向泳道（真实分布徽章取前 2 项 + 省略号，竖发丝分隔） ═══ */
-.nk-cwhub-rail { max-width: var(--nk-content-max); margin: 0 auto; padding: 64px 48px 0; }
-.nk-cwhub-rail__grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  border-top: 1px solid var(--line-1);
-  border-bottom: 1px solid var(--line-1);
-}
-.nk-cwhub-rail__cell {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 156px;
-  padding: 18px 16px;
-  border-right: 1px solid var(--line-1);
-  text-decoration: none;
-  color: var(--text);
-  transition: background 0.25s ease;
-}
-.nk-cwhub-rail__cell:first-child { border-left: 1px solid var(--line-1); }
-.nk-cwhub-rail__cell:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
-.nk-cwhub-rail__cell:active { transform: scale(0.99); }
-
-.nk-cwhub-rail__icon {
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  padding: 3px;
-  object-fit: contain;
-  border-radius: calc(var(--nk-radius-card) - 2px);
-  border: 1px solid var(--line-2);
-  background: var(--surface);
-}
-.nk-cwhub-rail__body { display: flex; flex-direction: column; min-width: 0; }
-.nk-cwhub-rail__label {
+/* 定位副标题：一行内容清单，与主标题拉开层级 */
+.nk-cwhub-hero__tagline {
+  margin-top: 22px;
   font-size: 0.86rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--text-bright);
-}
-.nk-cwhub-rail__desc {
-  margin-top: 3px;
-  font-size: 0.66rem;
-  line-height: 1.55;
-  color: var(--text3);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.nk-cwhub-rail__badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: auto;
-  padding-top: 10px;
-}
-.nk-cwhub-rail__badge {
-  font-family: var(--font-hud);
-  font-size: 0.5rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   color: var(--text2);
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--line-2);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
 }
-.nk-cwhub-rail__badge--more { color: var(--text3); }
 
-/* ═══ 赛季扩充说明：发丝分组纯排版（无卡片容器），标题下金发丝为页面次高光 ═══ */
-.nk-cwhub-season { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 48px 0; }
-.nk-cwhub-season__card { padding: 8px 0 10px; }
-.nk-cwhub-season__card + .nk-cwhub-season__card {
-  margin-top: 52px;
-  padding-top: 48px;
-  border-top: 1px solid var(--line-1);
+/* ═══ 赛季扩充说明（标题下方空间）：半透明表面承接视频对比度，单栏窄列排版 ═══
+   长内容限高内部滚动（滚动条发丝化同 app 壳）：max-height 视口比例 + 像素上限，
+   剩余内容滚动查看，不撑破 Hero 版式 */
+.nk-cwhub-season {
+  margin-top: 36px;
+  padding: 20px 22px 22px;
+  border-radius: var(--nk-radius-card);
+  border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-900) 72%, transparent);
+  backdrop-filter: blur(6px);
+  max-height: min(52vh, 460px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
 }
+.nk-cwhub-season::-webkit-scrollbar { width: 6px; }
+.nk-cwhub-season::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
+.nk-cwhub-season::-webkit-scrollbar-track { background: transparent; }
 .nk-cwhub-season__title {
-  margin: 0 0 26px;
-  padding-bottom: 16px;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid color-mix(in srgb, var(--gold-500) 30%, transparent);
-  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-size: 1.05rem;
   font-weight: 800;
-  line-height: 1.3;
+  line-height: 1.35;
   letter-spacing: 0.02em;
   color: var(--text-bright);
 }
-
-/* 双栏：左侧正文散文 + 右侧「扩充内容概览」（发丝左线分区） */
-.nk-cwhub-season__cols {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: 40px;
-  align-items: start;
-}
+/* 正文段落：散文体，段间距拉开 */
 .nk-cwhub-season__body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
 .nk-cwhub-season__body p {
   margin: 0;
-  font-size: clamp(0.83rem, 1.6vw, 0.95rem);
-  line-height: 2;
+  font-size: 0.82rem;
+  line-height: 1.9;
   color: var(--text2);
 }
+/* 概览：发丝顶线分区，金色刻条列表（数据 tick 非装饰点） */
 .nk-cwhub-season__overview {
-  min-width: 0;
-  padding-left: 22px;
-  border-left: 1px solid var(--line-2);
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-2);
 }
-.nk-cwhub-season__ov-head { margin-bottom: 14px; }
+.nk-cwhub-season__ov-head { margin-bottom: 12px; }
 .nk-cwhub-season__ov-title {
-  font-size: 0.92rem;
+  font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   color: var(--text-bright);
@@ -500,7 +194,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
 }
 .nk-cwhub-season__ov-item {
   display: flex;
@@ -513,111 +207,174 @@
   flex-shrink: 0;
   width: 2px;
   height: 10px;
-  margin-top: 8px;
+  margin-top: 7px;
   background: color-mix(in srgb, var(--primary) 70%, transparent);
 }
 .nk-cwhub-season__ov-text {
   min-width: 0;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   line-height: 1.75;
   color: var(--text2);
 }
-
-/* ── 页脚 ── */
-.nk-cwhub-footer {
-  max-width: var(--nk-content-max);
-  margin: 72px auto 0;
-  padding: 20px 48px;
-  text-align: center;
-  font-family: var(--font-hud);
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
-  color: var(--text3);
+/* 多赛季分隔（当前数据仅 1 条，预留结构） */
+.nk-cwhub-season__card + .nk-cwhub-season__card {
+  margin-top: 28px;
+  padding-top: 20px;
   border-top: 1px solid var(--line-1);
 }
 
-/* ═══ 响应式 ═══ */
+/* ═══ 板块索引：编辑式索引行（镜像首页行范式，icon + 标题 + 箭头；
+   无收录计数——Hub 与数据层解耦，计数在各自目录页展示。
+   行首仅导航图标单一符号（曾与 01-05 档案编号并存，双符号视觉冗杂，已去编号） ═══ */
+.nk-cwhub-index {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--nk-content-max);
+  margin: 0 auto;
+  padding: 88px 40px 0 var(--nk-content-offset);
+}
+.nk-cwhub-index__row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 8px;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-1);
+  transition: color 0.25s var(--nk-ease-out), background 0.25s;
+}
+/* 首行顶线（行间发丝线闭合） */
+.nk-cwhub-index__row:first-child { border-top: 1px solid var(--line-1); }
+.nk-cwhub-index__icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+  border: 1px solid var(--line-1);
+  color: var(--text3);
+  transition: color 0.25s, border-color 0.25s, background 0.25s;
+}
+.nk-cwhub-index__icon svg { width: 19px; height: 19px; }
+.nk-cwhub-index__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.nk-cwhub-index__cn {
+  font-size: clamp(1.15rem, 2vw, 2rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--text-bright);
+  white-space: nowrap;
+  transition: color 0.25s;
+}
+.nk-cwhub-index__en {
+  font-family: var(--font-hud);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nk-cwhub-index__desc {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.25s;
+}
+.nk-cwhub-index__arrow {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--text3);
+  transition: transform 0.25s var(--nk-ease-out), color 0.25s;
+}
+/* hover：名称转亮金、图标点亮、箭头位移（仅反馈，无浮起无发光） */
+.nk-cwhub-index__row:hover .nk-cwhub-index__cn { color: var(--metric-val); }
+.nk-cwhub-index__row:hover .nk-cwhub-index__icon {
+  color: var(--primary);
+  border-color: var(--border2);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.nk-cwhub-index__row:hover .nk-cwhub-index__desc { color: var(--text); }
+.nk-cwhub-index__row:hover .nk-cwhub-index__arrow { transform: translateX(4px); color: var(--primary); }
+/* 触觉按压：名称即时加深 */
+.nk-cwhub-index__row:active .nk-cwhub-index__cn { color: var(--primary); }
+
+/* 桌面悬停：整行微亮背景（hover 可用设备专属；触屏回退见 hover:none） */
+@media (hover: hover) and (pointer: fine) {
+  .nk-cwhub-index__row:hover { background: color-mix(in srgb, var(--gold-500) 5%, transparent); }
+}
+
+/* ── 页脚：数据来源注记（无装饰元素，纯排版） ── */
+.nk-cwhub-footer {
+  max-width: var(--nk-content-max);
+  margin: 0 auto;
+  padding: 72px 40px 48px var(--nk-content-offset);
+  font-family: var(--font-hud);
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  color: var(--text3);
+  text-align: center;
+}
+
+/* 非桌面断点（<1024px）：空间有限，隐藏赛季卡（用户裁定；数据仍加载，成本可忽略） */
+@media (max-width: 1023px) {
+  .nk-cwhub-season { display: none; }
+}
+
+/* 非桌面断点（<1024px）：标题改顶部居中（用户裁定；桌面保留右上角）——
+   hero 顶对齐居中、标题区全宽居中、scrim 压暗重心随之移到顶部中央 */
 @media (max-width: 1023px) {
   .nk-cwhub-hero {
-    grid-template-columns: 1fr;
-    row-gap: 40px;
-    padding: 64px 40px 48px;
-    min-height: 0;
+    justify-content: center;
+    align-items: flex-start;
   }
-  .nk-cwhub-ledger { justify-self: start; max-width: 480px; margin-top: 0; }
-  .nk-cwhub-index { padding: 48px 40px 0; }
-  .nk-cwhub-rail { padding: 52px 40px 0; }
-  .nk-cwhub-rail__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .nk-cwhub-rail__cell:nth-child(3n) { border-right: none; }
-  /* 每行首格带左边线（含第二行首格），与首格外框线同位 */
-  .nk-cwhub-rail__cell:nth-child(3n + 1) { border-left: 1px solid var(--line-1); }
-  .nk-cwhub-season { padding: 56px 40px 0; }
-  .nk-cwhub-season__cols { grid-template-columns: 1fr; gap: 26px; }
-  .nk-cwhub-season__overview { padding-left: 0; padding-top: 20px; border-left: none; border-top: 1px solid var(--line-2); }
+  .nk-cwhub-hero__content {
+    width: 100%;
+    max-width: min(640px, 100%);
+    margin: 0 auto;
+    padding: max(28px, 5vh) 24px 0;
+    text-align: center;
+  }
+  .nk-cwhub-hero__supra { justify-content: center; }
+  /* 居中时发丝线横向拉长整行 → 非桌面隐藏（用户裁定） */
+  .nk-cwhub-hero__supra::before { display: none; }
+  .nk-cwhub-hero__scrim {
+    background: radial-gradient(ellipse 70% 85% at 50% 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 34%, transparent 62%),
+      linear-gradient(to bottom, color-mix(in srgb, var(--blk-900) 28%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in srgb, var(--blk-900) 55%, transparent) 88%, var(--bg) 100%);
+  }
 }
+
+/* 响应式 ── */
+/* 平板（768-1023px）：中等密度；左侧避让由 --nk-content-offset 令牌断点接管 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-cwhub-index { padding: 72px 32px 0 var(--nk-content-offset); }
+  .nk-cwhub-index__row { padding: 20px 8px; }
+  .nk-cwhub-footer { padding: 56px 32px 40px var(--nk-content-offset); }
+}
+/* 手机（<768px）：紧凑排版，底部避开导航条（safe-area） */
 @media (max-width: 767px) {
-  /* 移动端：侧栏降级为底部 Tab Bar，释放左侧预留，底部避开导航条 */
-  #nk-cwhub-app { padding: 0 0 calc(80px + env(safe-area-inset-bottom, 0px)) 0; }
-  .nk-cwhub-hero { padding: 44px 20px 36px; row-gap: 34px; }
-  .nk-cwhub-hero__title { font-size: clamp(2.6rem, 13vw, 3.6rem); }
-  .nk-cwhub-hero__tagline { font-size: 0.84rem; }
-
-  .nk-cwhub-ledger { padding: 16px 14px 14px; }
-  .nk-cwhub-ledger__cols { grid-template-columns: 30px 1fr 20px; }
-  .nk-cwhub-ledger__row { gap: 6px; }
-  .nk-cwhub-ledger__zone--front .nk-cwhub-ledger__row { gap: 8px; }
-  .nk-cwhub-ledger__slot { padding: 10px 2px 7px; }
-  .nk-cwhub-ledger__avatar { width: 38px; height: 38px; }
-  .nk-cwhub-ledger__name { font-size: 0.5rem; }
-  .nk-cwhub-ledger__meta { display: none; }
-
-  .nk-cwhub-index { padding: 40px 20px 0; }
+  #nk-cwhub-app { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  /* 手机标题：上限 3.36rem（= 768px 处桌面 7vw 的值 53.76px）——
+     与桌面曲线无缝衔接（曾 3.6rem 导致 767/768 处 57.6→53.76 跳变，已修复） */
+  .nk-cwhub-hero__title { font-size: clamp(2.6rem, 13vw, 3.36rem); }
+  .nk-cwhub-index { padding: 40px 20px 0 var(--nk-content-offset); }
   .nk-cwhub-index__row {
-    grid-template-columns: 32px 40px minmax(0, 1fr) auto;
     gap: 10px;
     padding: 12px 14px;
     min-height: 72px;
   }
-  .nk-cwhub-index__row--lead { min-height: 108px; }
-  .nk-cwhub-index__no { font-size: 0.74rem; }
   .nk-cwhub-index__icon { width: 36px; height: 36px; }
   .nk-cwhub-index__icon svg { width: 18px; height: 18px; }
-  .nk-cwhub-index__row--lead .nk-cwhub-index__icon { width: 42px; height: 42px; }
-  .nk-cwhub-index__row--lead .nk-cwhub-index__icon svg { width: 22px; height: 22px; }
-  .nk-cwhub-index__cn { font-size: 0.94rem; }
-  .nk-cwhub-index__row--lead .nk-cwhub-index__cn { font-size: 1.16rem; }
-  .nk-cwhub-index__desc { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .nk-cwhub-index__count { font-size: 0.95rem; }
-  .nk-cwhub-index__meta-label { display: none; }
-
-  /* 泳道移动端降级为横向滚动条（snap 逐格吸附，2 组半屏滑动） */
-  .nk-cwhub-rail { padding: 44px 0 0; overflow: hidden; }
-  .nk-cwhub-rail__grid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    border-top: 1px solid var(--line-1);
-    border-bottom: 1px solid var(--line-1);
-  }
-  .nk-cwhub-rail__grid::-webkit-scrollbar { display: none; }
-  .nk-cwhub-rail__cell {
-    flex: 0 0 148px;
-    min-height: 148px;
-    scroll-snap-align: start;
-    border-left: 1px solid var(--line-1);
-    border-right: none;
-  }
-  .nk-cwhub-rail__cell:first-child { border-left: 1px solid var(--line-1); }
-
-  .nk-cwhub-season { padding: 48px 20px 0; }
-  .nk-cwhub-season__card + .nk-cwhub-season__card { margin-top: 40px; padding-top: 36px; }
-  .nk-cwhub-season__title { padding-bottom: 12px; margin-bottom: 20px; }
-  .nk-cwhub-footer { margin-top: 52px; padding: 18px 20px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nk-cwhub-ledger__slot { animation: none; }
-  .nk-cwhub-index__row,
-  .nk-cwhub-rail__cell,
-  .nk-cwhub-ledger__slot { transition: none; }
+  .nk-cwhub-footer { padding: 48px 20px 32px var(--nk-content-offset); }
 }

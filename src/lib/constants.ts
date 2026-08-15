@@ -2,6 +2,12 @@
 
 export const CDN = 'https://static.nanoka.cc';
 
+/** 货币战争枢纽页 Hero 背景视频（官方活动页素材，直引 act-webstatic；poster 兜底见 CurrencyHubView） */
+export const CW_HERO_VIDEO = 'https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_RlVztEGUpN/resource/puzzle/2025/10/17/07654cf744350d181dae4ba6eaae3c3c_6514780583197970810.mp4';
+
+/** 货币战争枢纽页 Hero 静态兜底帧（本地抽帧资产，视频失败/慢网时展示） */
+export const CW_HERO_POSTER = '/data/cn/assets/cw-hero-poster.jpg';
+
 /** 站点名（浏览器标题 / 首页品牌主标题；曾用名“咸鱼百科”见页脚彩蛋） */
 export const SITE_NAME = '星铁档案馆';
 

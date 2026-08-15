@@ -86,7 +86,11 @@ test.describe('视觉基线', () => {
     await page.goto('/currency');
     await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
     await waitImages(page);
-    // 战术棋盘槽位/统计数字滚动为入场动画，动画冻结后帧稳定
+    // 背景视频为媒体帧动画（CSS animations 禁用无效），基线将其隐藏——
+    // poster 兜底帧（本地抽帧资产）即视觉效果下限，视频就绪后渲染更强，不作为断言对象
+    await page.locator('.nk-cwhub-hero__video').evaluate((el) => {
+      (el as HTMLElement).style.display = 'none';
+    });
     await expect(page).toHaveScreenshot('currency.png', { maxDiffPixelRatio: 0.05, animations: 'disabled' });
   });
 });
