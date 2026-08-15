@@ -95,6 +95,8 @@ export function propValue(v: number): string {
 export interface MergedSkill {
   key: string;
   name: string;
+  /** 技能图标源路径（透传首星级；gridFightSkillIconSrc 解析双源） */
+  icon: string;
   type: string | null;
   tag: string | null;
   desc: string;
@@ -104,6 +106,8 @@ export interface MergedSkill {
   bp_need: number | null;
   bp_add: number | null;
   show_stance_list: number[] | null;
+  /** 该技能存在的星级（与 paramSets 一一对应，升序；技能可能仅在部分星级出现） */
+  stars: number[];
   paramSets: number[][];
   extraSets: Array<{ name: string; desc: string; paramSets: number[][] }>;
 }
@@ -119,29 +123,30 @@ export function mergeSkillGroups(
   if (!cols.length) return [];
   const out: Array<{ key: string; label: string; skills: MergedSkill[] }> = [];
   for (const g of SKILL_GROUPS) {
-    // 以名称为键收集各星级的同名技能（按星级顺序）
-    const byName = new Map<string, CurrencyRoleSkill[]>();
+    // 以名称为键收集各星级的同名技能（附带星级号：技能可能在部分星级缺失，下标不能等价星级）
+    const byName = new Map<string, Array<{ sk: CurrencyRoleSkill; star: number }>>();
     for (const c of cols) {
       for (const sk of (stars[c]?.[g] || [])) {
         const k = sk.name || `#${sk.id}`;
         if (!byName.has(k)) byName.set(k, []);
-        byName.get(k)!.push(sk);
+        byName.get(k)!.push({ sk, star: Number(c) });
       }
     }
     if (!byName.size) continue;
     const skills: MergedSkill[] = [];
     for (const [name, list] of byName) {
-      const first = list[0];
-      const paramSets = list.map((sk) => {
+      const first = list[0].sk;
+      const paramSets = list.map(({ sk }) => {
         const lv = sk.level && sk.level['1'];
         return lv ? lv.param_list : [];
       });
+      const stars = list.map((x) => x.star);
       // 附加条件（触发条件）同样跨星级合并
       const extraSets: MergedSkill['extraSets'] = [];
       const exKeys = new Set<string>();
-      list.forEach((sk) => Object.keys(sk.extra || {}).forEach((ek) => exKeys.add(ek)));
+      list.forEach(({ sk }) => Object.keys(sk.extra || {}).forEach((ek) => exKeys.add(ek)));
       for (const ek of exKeys) {
-        const exList = list.map((sk) => (sk.extra || {})[ek]).filter(Boolean);
+        const exList = list.map(({ sk }) => (sk.extra || {})[ek]).filter(Boolean);
         if (!exList.length) continue;
         extraSets.push({
           name: exList[0].name,
@@ -152,6 +157,7 @@ export function mergeSkillGroups(
       skills.push({
         key: `${g}-${name}`,
         name,
+        icon: first.icon || '',
         type: first.type,
         tag: first.tag,
         desc: first.desc,
@@ -161,6 +167,7 @@ export function mergeSkillGroups(
         bp_need: first.bp_need,
         bp_add: first.bp_add,
         show_stance_list: first.show_stance_list,
+        stars,
         paramSets,
         extraSets,
       });
@@ -191,6 +198,10 @@ export const PROP_GROUP: Record<string, string> = {
   ExtraElationDamageAddedRatio1: '伤害', ExtraDamageAddedRatio1: '伤害',
   ExtraInitSP: '机制', ExtraEnergyBar: '机制',
   ExtraLuckChance: '机制', ExtraLuckDamage: '机制',
+  /* 后台机制值（独立字段，非 PropertyType；充能条体系与终结技能量体系互斥出现） */
+  BackEnergyBar: '机制', BackInitialEnergyBar: '机制',
+  BackMaxSP: '机制', BackInitialSP: '机制',
+  BackSpeedRewrite: '速度', BackSpeedAddedRatio: '速度',
 };
 
 /** 分组展示顺序 */
@@ -201,6 +212,8 @@ export interface MatrixRow {
   key: string;
   label: string;
   values: Array<{ text: string; raw: number | null }>;
+  /** 属性图标源路径（prop mod 自带或 propIcons 查表；空 = 无图标不渲染） */
+  icon?: string;
 }
 
 /** 成长矩阵分组 */
@@ -212,35 +225,54 @@ export interface MatrixGroup {
 /**
  * 成长矩阵：跨星级全属性聚合（合并原「成长总览」表 + 「星级属性」分组）。
  * 属性按语义分组（PROP_GROUP），强度分组额外注入 front/back_power_base 行。
+ * propIcons：PropertyType → 图标源路径（converter 落地 currency/prop_icons.json）；
+ * 独立字段（幸运一击/治疗强度等）与 power 行靠它补图标，prop mod 自带 icon 优先。
  */
-export function buildGrowthMatrix(stars: Record<string, CurrencyRoleStar> | null | undefined): MatrixGroup[] {
+export function buildGrowthMatrix(
+  stars: Record<string, CurrencyRoleStar> | null | undefined,
+  propIcons?: Record<string, string> | null,
+): MatrixGroup[] {
   if (!stars) return [];
   const cols = Object.keys(stars).sort((a, b) => Number(a) - Number(b));
   if (!cols.length) return [];
   /** 提取单星级全属性（GeneralPropertyModifyList + 独立字段），保持源序 */
-  const extract = (s: CurrencyRoleStar | undefined): Array<{ key: string; label: string; raw: number }> => {
+  const extract = (s: CurrencyRoleStar | undefined): Array<{ key: string; label: string; raw: number; icon?: string }> => {
     if (!s) return [];
-    const items: Array<{ key: string; label: string; raw: number }> = [];
+    const items: Array<{ key: string; label: string; raw: number; icon?: string }> = [];
     const list = s.general_property_modify_list;
     if (Array.isArray(list)) {
       for (const m of list) {
         if (!m || typeof m !== 'object') continue;
         const key = String((m as Record<string, unknown>).property_type || '');
-        items.push({ key, label: propLabel(m as Record<string, unknown>), raw: Number((m as Record<string, unknown>).value) });
+        items.push({
+          key,
+          label: propLabel(m as Record<string, unknown>),
+          raw: Number((m as Record<string, unknown>).value),
+          icon: String((m as Record<string, unknown>).icon || ''),
+        });
       }
     }
-    if (s.luck_chance != null) items.push({ key: 'ExtraLuckChance', label: '幸运一击率', raw: s.luck_chance });
-    if (s.luck_damage != null) items.push({ key: 'ExtraLuckDamage', label: '幸运一击伤害', raw: s.luck_damage });
-    if (s.extra_heal_base != null) items.push({ key: 'ExtraHealBase', label: '基础治疗强度', raw: s.extra_heal_base });
-    if (s.extra_shield_base != null) items.push({ key: 'ExtraShieldBase', label: '基础护盾强度', raw: s.extra_shield_base });
+    if (s.luck_chance != null) items.push({ key: 'ExtraLuckChance', label: '幸运一击率', raw: s.luck_chance, icon: propIcons?.['ExtraLuckChance'] });
+    if (s.luck_damage != null) items.push({ key: 'ExtraLuckDamage', label: '幸运一击伤害', raw: s.luck_damage, icon: propIcons?.['ExtraLuckDamage'] });
+    if (s.extra_heal_base != null) items.push({ key: 'ExtraHealBase', label: '基础治疗强度', raw: s.extra_heal_base, icon: propIcons?.['ExtraHealBase'] });
+    if (s.extra_shield_base != null) items.push({ key: 'ExtraShieldBase', label: '基础护盾强度', raw: s.extra_shield_base, icon: propIcons?.['ExtraShieldBase'] });
+    /* 后台机制值（数据存在才入矩阵；back_speed_* 为预留字段，当前全量 null 自动跳过） */
+    if (s.back_energy_bar != null) items.push({ key: 'BackEnergyBar', label: '后台充能条', raw: s.back_energy_bar, icon: propIcons?.['ExtraEnergyBar'] });
+    if (s.back_initial_energy_bar != null) items.push({ key: 'BackInitialEnergyBar', label: '后台初始充能', raw: s.back_initial_energy_bar, icon: propIcons?.['ExtraEnergyBar'] });
+    if (s.back_max_sp != null) items.push({ key: 'BackMaxSP', label: '后台最大能量', raw: s.back_max_sp, icon: propIcons?.['ExtraInitSP'] });
+    if (s.back_initial_sp != null) items.push({ key: 'BackInitialSP', label: '后台初始能量', raw: s.back_initial_sp, icon: propIcons?.['ExtraInitSP'] });
+    if (s.back_speed_rewrite != null) items.push({ key: 'BackSpeedRewrite', label: '后台速度重写', raw: s.back_speed_rewrite, icon: propIcons?.['ExtraSpeedAddedRatio1'] });
+    if (s.back_speed_added_ratio != null) items.push({ key: 'BackSpeedAddedRatio', label: '后台速度提升', raw: s.back_speed_added_ratio, icon: propIcons?.['ExtraSpeedAddedRatio1'] });
     return items;
   };
   // 以首现顺序收集全部属性 key
   const keyOrder: string[] = [];
   const keyLabel = new Map<string, string>();
+  const keyIcon = new Map<string, string>();
   for (const c of cols) {
     for (const item of extract(stars[c])) {
       if (!keyLabel.has(item.key)) { keyOrder.push(item.key); keyLabel.set(item.key, item.label); }
+      if (!keyIcon.has(item.key) && item.icon) keyIcon.set(item.key, item.icon);
     }
   }
   // 每星级 key → raw 索引
@@ -261,6 +293,7 @@ export function buildGrowthMatrix(stars: Record<string, CurrencyRoleStar> | null
         const raw = m.get(key) ?? null;
         return { text: raw != null ? (key === 'ExtraLuckDamage' ? `${raw}×` : propValue(raw)) : '—', raw };
       }),
+      icon: keyIcon.get(key),
     });
   }
   // 强度行：front/back_power_base 注入「强度」分组首位
@@ -268,10 +301,10 @@ export function buildGrowthMatrix(stars: Record<string, CurrencyRoleStar> | null
   const powOf = (field: 'front_power_base' | 'back_power_base') =>
     cols.map((c) => { const raw = stars[c]?.[field] ?? null; return { text: raw != null ? String(raw) : '—', raw }; });
   if (cols.some((c) => stars[c]?.front_power_base != null)) {
-    powerRows.push({ key: '__front_power', label: '基础前台强度', values: powOf('front_power_base') });
+    powerRows.push({ key: '__front_power', label: '基础前台强度', values: powOf('front_power_base'), icon: propIcons?.['ExtraFrontPowerBase'] });
   }
   if (cols.some((c) => stars[c]?.back_power_base != null)) {
-    powerRows.push({ key: '__back_power', label: '基础后台强度', values: powOf('back_power_base') });
+    powerRows.push({ key: '__back_power', label: '基础后台强度', values: powOf('back_power_base'), icon: propIcons?.['ExtraBackPowerBase'] });
   }
   const out: MatrixGroup[] = [];
   if (powerRows.length) out.push({ group: '强度', rows: [...powerRows, ...(groupMap.get('强度') || [])] });

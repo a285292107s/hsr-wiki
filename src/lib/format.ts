@@ -23,7 +23,31 @@ export function fmtVal(v: number | null | undefined, tag: string, isPct: boolean
     const f = 10 ** Number(tag.slice(1));
     return String(Math.round(n * f) / f);
   }
-  return String(Math.round(n));
+  /* 裸 #N 占位符（无 tag 无 %）：参数原样显示，不四舍五入——
+     整数参数 String 与 round 结果一致，常规模式不受影响。
+     货币战争光锥描述走 fmtDescWithFormat（ParamFormat 标注 [i]%），不经过此分支。 */
+  return String(n);
+}
+
+/**
+ * 按 ParamFormat 模板渲染描述（货币战争专属光锥：desc 为裸 #N + ParamFormat "[i]%"）。
+ * 将裸 #N 注入模板 tag/百分号后复用 fmtDesc（0.12 → "12%"）；无模板时回退 fmtDesc 原样。
+ * 全量验证（2026-08-15）：GridFightBackEquipment.ParamFormat 165/165 为 "[i]%"。
+ */
+export function fmtDescWithFormat(
+  desc: string | null | undefined,
+  params: number[] | null | undefined,
+  format: string | null | undefined,
+): string {
+  if (!desc) return '';
+  if (!format) return fmtDesc(desc, params);
+  const m = format.match(/^\[([^\]]*)\](%?)$/);
+  if (!m) return fmtDesc(desc, params);
+  const tag = m[1] || 'i';
+  const pct = m[2] || '';
+  // 裸 #N（未带 [tag] 的）统一注入模板：如 #1 → #1[i]%（已带 tag 的保持原样，防双写）
+  const s = desc.replace(/#(\d+)(?!\[)/g, `#$1[${tag}]${pct}`);
+  return fmtDesc(s, params);
 }
 
 /**
@@ -64,6 +88,32 @@ export function fmtDescMerged(
     const vals = sets.map((p) => fmtVal(p[idx], t, pct === '%'));
     const allSame = vals.every((v) => v === vals[0]);
     const text = allSame ? `${vals[0]}${pct}` : vals.join('/') + pct;
+    return `<span class="hl">${text}</span>`;
+  };
+  s = s.replace(/#(\d+)\[([^\]]*)\](%?)/g, (_, i: string, t: string, pct: string) => rep(i, t, pct));
+  s = s.replace(/#(\d+)/g, (_, i: string) => rep(i, '', ''));
+  s = s.replace(/\\n|\n/g, '<br>');
+  return s;
+}
+
+/**
+ * 技能描述按星级参数渲染（CW 技能卡星级联动：只替换第 starIdx 套参数）。
+ * 与 fmtDescMerged 同构，paramSets 维度从「跨星级并置」降为「单星级取值」；
+ * 下标越界 / 参数缺失回退 '?' 占位，行为与合并版一致。
+ */
+export function fmtDescStar(
+  desc: string | null | undefined,
+  paramSets: Array<number[] | null | undefined>,
+  starIdx: number,
+): string {
+  if (!desc) return '';
+  let s = gameTagsToHtml(desc);
+  const set = paramSets[starIdx];
+  const rep = (i: string, t: string, pct: string): string => {
+    const idx = parseInt(i) - 1;
+    if (!set) return `<span class="hl">?${pct}</span>`;
+    const v = set[idx];
+    const text = v == null ? `?${pct}` : `${fmtVal(v, t, pct === '%')}${pct}`;
     return `<span class="hl">${text}</span>`;
   };
   s = s.replace(/#(\d+)\[([^\]]*)\](%?)/g, (_, i: string, t: string, pct: string) => rep(i, t, pct));

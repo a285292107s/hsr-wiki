@@ -30,7 +30,7 @@ export { loadLocalAchievements, loadLocalAchievementSeries } from './achievement
 export {
   loadLocalCurrencyRoles, loadLocalCurrencyRole, loadLocalCurrencySeasons,
   loadLocalCurrencyEquipment, loadLocalCurrencyPortals, loadLocalCurrencyAugments,
-  loadLocalCurrencyTraits,
+  loadLocalCurrencyTraits, loadLocalCurrencyPropIcons,
 } from './currency';
 export {
   expandSpineUrl, loadSpineOfficialManifest, loadSpineNanokaManifest, loadSpineManifests,

@@ -4,7 +4,7 @@
  * Step 2: USE_OFFICIAL_PATHS=true → converter 输出官方 StarRailTextures 相对路径时，
  *   非 GridFight/Rank 等特殊分类直接拼 OFFICIAL_ICON_BASE，删除 nanoka 中转站（仅保留 stall→CSS 占位降级）。
  */
-import { cdnUri, cdnRawUrl } from '../services/cdn';
+import { cdnUri, cdnRawUrl, resolveCdnUri } from '../services/cdn';
 import {
   USE_OFFICIAL_PATHS,
   OFFICIAL_ICON_BASE,
@@ -226,6 +226,35 @@ export function gridFightEquipIconWithFallback(icon: string | null | undefined, 
 /** 货币战争角色详情页羁绊图标：按羁绊 ID 直接构造（与列表页按 icon 路径解析不同） */
 export function gridFightTraitIconById(id: number): string {
   return cdnUri('gridfight-icon', `${id}.webp`);
+}
+
+/**
+ * 货币战争技能图标双源：jsDelivr 官方镜像优先 + nanoka 平铺兜底（复用 skillicons 分类的
+ * JS_DELIVR_RULES 规则：avatar/{id}/ 目录 + 忆灵 ID 特例，与常规技能图标同一套）。
+ * 返回 { src, fb }：fb 空串 = 无兜底（jsDelivr 规则不适用时仅 nanoka）。
+ * 消费方 img 须同时绑定 :data-cdn-fallback="fb || undefined"，由全局委托完成回退与最终隐藏
+ * （禁止再绑 hideOnError——会抢在回退前隐藏 img）。
+ */
+export function gridFightSkillIconSrc(icon: string | null | undefined): { src: string; fb: string } {
+  if (!icon) return { src: '', fb: '' };
+  const name = icon.split('/').pop()?.replace(/\.png$/i, '') || '';
+  if (!name) return { src: '', fb: '' };
+  const { primary, fallback } = resolveCdnUri('skillicons', `${name}.webp`);
+  return { src: primary, fb: fallback };
+}
+
+/**
+ * 货币战争属性图标：jsDelivr 官方镜像唯一源（nanoka 无 GridFight/AttributeIcon 资源）。
+ * 官方库规则：目录段全小写 + 文件名保留大小写（SpriteOutput/{Rel}/X.png →
+ * spriteoutput/{rel 小写}/X.png）。加载失败由视图 hideOnError 隐藏（无兜底源）。
+ */
+export function gridFightPropIconUrl(icon: string | null | undefined): string {
+  if (!icon) return '';
+  const m = icon.match(/SpriteOutput\/(.+)\.png$/i);
+  if (!m) return '';
+  const parts = m[1].split('/');
+  const name = parts.pop()!;
+  return official(`${parts.join('/').toLowerCase()}/${name}.png`);
 }
 
 /** 物品名称解析：nameCache → itemDb（item_name 字段）→ '#id' 回退 */

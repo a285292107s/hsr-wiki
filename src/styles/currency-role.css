@@ -2,74 +2,56 @@
 
 /* ═══ 语义色彩变量层 ═══
    详情页全部色彩通过语义变量引用，CW 暗金主题在 [data-theme="cw"] 下覆盖。
-   常规模式回退全站紫调令牌，保证两种模式视觉自洽。 */
+   常规模式回退全站紫调令牌，保证两种模式视觉自洽。
+   反 AI 味纪律：本层不设任何 glow 变量（无外发光/无光晕投影），
+   阴影一律物理黑投影（rgba(0,0,0,…)），强调色仅以纯色/淡底/发丝线承载。 */
 .nk-crole,
 .nk-crole-hero {
-  /* Hero 遮罩底色（scrim 渐变锚点） */
+  /* Hero 遮罩（黑阶线性 scrim，无彩光 radial） */
   --crole-scrim: var(--blk-900);
-  --crole-scrim-60: color-mix(in srgb, var(--blk-900) 60%, transparent);
-  --crole-scrim-25: color-mix(in srgb, var(--blk-900) 25%, transparent);
+  --crole-scrim-70: color-mix(in srgb, var(--blk-900) 70%, transparent);
   --crole-scrim-40: color-mix(in srgb, var(--blk-900) 40%, transparent);
-  /* 头像环外圈 */
-  --crole-portrait-ring: color-mix(in srgb, var(--blk-900) 60%, transparent);
+  --crole-scrim-15: color-mix(in srgb, var(--blk-900) 15%, transparent);
+  /* 档案金（数字/强调文字位，无光） */
+  --crole-num: var(--gold-350);
   /* 作用域徽章：成员 / 全员 */
   --crole-scope-bg: color-mix(in srgb, var(--cw-faction-core) 14%, transparent);
   --crole-scope-text: var(--cw-faction);
   --crole-scope-all-bg: color-mix(in srgb, var(--cw-combat-core) 14%, transparent);
   --crole-scope-all-text: var(--cw-combat);
-  /* 数值高亮（描述内参数 / 属性值） */
-  --crole-num: var(--gold-350);
-  --crole-num-glow: color-mix(in srgb, var(--gold-400) 35%, transparent);
-  /* 正向属性加成 */
+  /* 正向属性加成 → 翡翠（交易「涨」语义，小面积使用） */
   --crole-buff-soft: color-mix(in srgb, var(--crole-buff) 8%, transparent);
   --crole-buff-border: color-mix(in srgb, var(--crole-buff) 25%, transparent);
-  --crole-buff-glow: color-mix(in srgb, var(--crole-buff) 40%, transparent);
-  /* 面板/卡片底色 */
-  --crole-panel-tint: color-mix(in srgb, var(--tc-500) 8%, transparent);
-  --crole-panel-deep: color-mix(in srgb, var(--blk-850) 70%, transparent);
-  --crole-extra-bg: color-mix(in srgb, var(--tc-500) 5%, transparent);
-  --crole-extra-border: color-mix(in srgb, var(--tc-500) 12%, transparent);
-  /* 星级 Tab 激活态 */
-  --crole-tab-active-bg: linear-gradient(135deg, var(--primary), var(--accent));
-  --crole-tab-active-shadow: color-mix(in srgb, var(--tc-500) 30%, transparent);
+  /* 记录表激活列（星级对比列）：极淡金底 + 顶线） */
+  --crole-col-active: color-mix(in srgb, var(--gold-400) 5%, transparent);
+  /* 方形分段控件（星级切换）激活态：亮金底 + 黑字 */
+  --crole-seg-bg: var(--gold-300);
+  --crole-seg-text: var(--blk-900);
   /* 星魂步骤徽章 */
-  --crole-step-bg: color-mix(in srgb, var(--crole-step-rose) 10%, transparent);
+  --crole-step-bg: color-mix(in srgb, var(--crole-step-rose) 8%, transparent);
+  --crole-step-text: var(--crole-step-rose);
 }
 
 /* ═══ CW 暗金覆盖：交易所暖金色调 ═══
-   设计意图：黑金底色 + 琥珀/黄铜层次 + 翡翠仅留给「增值」语义 */
+   设计意图：黑金底色 + 琥珀/黄铜层次 + 翡翠仅留给「增值」语义；同样无 glow。 */
 [data-theme="cw"] .nk-crole,
 [data-theme="cw"] .nk-crole-hero,
 [data-theme="cw"] .nk-crole-card {
-  --crole-scrim: var(--blk-900);
-  --crole-scrim-60: color-mix(in srgb, var(--blk-900) 60%, transparent);
-  --crole-scrim-25: color-mix(in srgb, var(--blk-900) 25%, transparent);
-  --crole-scrim-40: color-mix(in srgb, var(--blk-900) 40%, transparent);
-  --crole-portrait-ring: color-mix(in srgb, var(--blk-900) 60%, transparent);
   /* 作用域徽章 → 金/琥珀 */
-  --crole-scope-bg: color-mix(in srgb, var(--gold-500) 16%, transparent);
+  --crole-scope-bg: color-mix(in srgb, var(--gold-500) 14%, transparent);
   --crole-scope-text: var(--gold-350);
-  --crole-scope-all-bg: color-mix(in srgb, var(--gold-400) 14%, transparent);
-  --crole-scope-all-text: var(--gold-400);
-  /* 数值高亮 → 亮金 + 更强辉光 */
+  --crole-scope-all-bg: color-mix(in srgb, var(--gold-400) 12%, transparent);
+  --crole-scope-all-text: var(--gold-300);
+  /* 数值高亮 → 亮金 */
   --crole-num: var(--gold-300);
-  --crole-num-glow: color-mix(in srgb, var(--gold-300) 40%, transparent);
   /* 正向加成 → 翡翠保留（交易「涨」语义）但调暖 */
   --crole-buff-soft: color-mix(in srgb, var(--crole-buff) 7%, transparent);
   --crole-buff-border: color-mix(in srgb, var(--crole-buff) 22%, transparent);
-  --crole-buff-glow: color-mix(in srgb, var(--crole-buff) 35%, transparent);
-  /* 面板底色 → 暖金微光 */
-  --crole-panel-tint: color-mix(in srgb, var(--gold-500) 7%, transparent);
-  --crole-panel-deep: color-mix(in srgb, var(--blk-850) 70%, transparent);
-  --crole-extra-bg: color-mix(in srgb, var(--gold-500) 5%, transparent);
-  --crole-extra-border: color-mix(in srgb, var(--gold-500) 14%, transparent);
-  /* 星级 Tab 激活态 → 金色渐变 + 深金文字（对比度 ≥4.5:1） */
-  --crole-tab-active-bg: linear-gradient(135deg, var(--gold-300), var(--gold-500));
-  --crole-tab-active-shadow: color-mix(in srgb, var(--gold-500) 35%, transparent);
+  /* 记录表激活列 → 金底 */
+  --crole-col-active: color-mix(in srgb, var(--gold-400) 6%, transparent);
   /* 星魂步骤徽章 → 琥珀 */
-  --crole-step-bg: color-mix(in srgb, var(--crole-step-amber) 12%, transparent);
-  /* 稀有度光晕默认值（未匹配 rarity 时回退金色而非紫色） */
-  --holo-color: color-mix(in srgb, var(--gold-500) 50%, transparent);
+  --crole-step-bg: color-mix(in srgb, var(--crole-step-amber) 11%, transparent);
+  --crole-step-text: var(--crole-step-amber);
 }
 
 /* 列表卡片：交易卡牌语言——头像出血 + scrim 叠名 + 菱形费用 + 磨砂角标 */
@@ -347,57 +329,105 @@
   margin: 0 auto;
   padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
 }
+/* 隐藏滚动条（仅本页；保留滚动能力——overflow 不动，仅视觉隐藏）
+   scrollbar-width 作用于滚动容器自身，webkit 伪元素覆盖 tokens 的细滚动条样式 */
+.nk-crole {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nk-crole::-webkit-scrollbar { display: none; }
+
+/* ═══ 平铺长页：tokens 的 .nk-panel 默认 display:none（Tab 语义），平铺下覆盖为块级 ═══ */
+.nk-crole .nk-panel {
+  display: block;
+  padding: 24px 16px 44px;
+}
+
+/* ═══ 吸顶区块导航（对齐常规模式详情页体系：fixed + 进度线 + secnav 原语） ═══ */
+.nk-crole-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--blk-900) 97%, transparent);
+  backdrop-filter: blur(12px) saturate(1.1); -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border-bottom: 1px solid var(--line-1);
+}
+/* 内容区避让侧栏：与滚动容器内容对齐（令牌断点接管 padding） */
+@media (min-width: 768px) {
+  .nk-crole-bar { padding-left: var(--nk-content-offset); }
+}
+@media (min-width: 1024px) {
+  /* 近实底下桌面去 blur 降合成成本（同角色页策略） */
+  .nk-crole-bar { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+.nk-crole-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: var(--nk-detail-max);
+  margin: 0 auto;
+  padding: 6px 16px;
+  min-height: 44px;
+}
+/* 阅读进度线：CW 主题下金色渐变（单向，无光晕） */
+.nk-crole-bar__progress {
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transition: width 0.2s linear;
+}
+[data-theme="cw"] .nk-crole-bar__progress {
+  background: linear-gradient(90deg, var(--gold-300), var(--gold-500));
+}
+/* 导航激活态：常规紫 / CW 亮金（导航小字对比度 ≥4.5:1，ADR 0011） */
+.nk-crole-bar .nk-secnav__btn--active { color: var(--primary); }
+.nk-crole-bar .nk-secnav__btn--active::after { background: var(--primary); }
+[data-theme="cw"] .nk-crole-bar .nk-secnav__btn--active { color: var(--gold-300); }
+[data-theme="cw"] .nk-crole-bar .nk-secnav__btn--active::after { background: var(--gold-300); }
 
 /* 状态：错误态 */
 .nk-crole__state { padding: 60px 20px; text-align: center; color: var(--text2); display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .nk-crole__state--err { color: var(--diff-del); }
-.nk-crole__state-icon { font-size: 36px; line-height: 1; }
+.nk-crole__state-icon { width: 40px; height: 40px; opacity: 0.85; }
 .nk-crole__state p { margin: 0; }
 .nk-crole__retry {
-  margin-top: 4px; padding: 10px 24px; border-radius: 999px;
-  background: var(--primary); border: none; color: #fff;
+  margin-top: 4px; padding: 9px 22px; border-radius: 6px;
+  background: var(--primary); border: none; color: var(--text-bright);
   font-family: var(--font-hud); font-size: 12px; font-weight: 700; letter-spacing: 0.12em;
-  cursor: pointer; transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer; transition: transform 0.15s var(--ease), background 0.2s;
 }
-.nk-crole__retry:hover { box-shadow: 0 0 18px var(--primary-glow); transform: translateY(-1px); }
+.nk-crole__retry:hover { background: var(--th-400); }
+.nk-crole__retry:active { transform: scale(0.97); }
 .nk-crole__retry:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
 
-/* 骨架屏 */
+/* 骨架屏（方形块镜像档案 Hero） */
 .nk-crole__skeleton { display: flex; flex-direction: column; gap: 20px; padding: 16px; }
-.nk-crole__skeleton-hero { display: flex; gap: 16px; padding: 18px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); }
-.nk-crole__skeleton-portrait { width: 100px; height: 100px; flex: none; border-radius: 50%; }
+.nk-crole__skeleton-hero { display: flex; gap: 16px; padding: 18px 16px; border-bottom: 1px solid var(--line-1); }
+.nk-crole__skeleton-portrait { width: 100px; height: 100px; flex: none; border-radius: 10px; }
 .nk-crole__skeleton-info { flex: 1; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
 .nk-crole__skeleton-tabs { display: flex; gap: 8px; }
 .nk-crole__skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 
-/* ═══ 沉浸式 Hero ═══ */
+/* ═══ 档案 Hero（结算单头部：立绘衬底 + 方形档案章 + 结算信息行） ═══ */
 .nk-crole-hero {
-  --holo-color: color-mix(in srgb, var(--tc-500) 45%, transparent);
   position: relative;
   overflow: hidden;
   min-height: 280px;
   display: flex;
   align-items: flex-end;
 }
-.nk-crole-hero[data-rarity="5"] { --holo-color: color-mix(in srgb, var(--cw-rarity-5-core) 50%, transparent); }
-.nk-crole-hero[data-rarity="4"] { --holo-color: color-mix(in srgb, var(--cw-rarity-4) 50%, transparent); }
-.nk-crole-hero[data-rarity="3"] { --holo-color: color-mix(in srgb, var(--cw-rarity-3) 45%, transparent); }
-.nk-crole-hero[data-rarity="2"] { --holo-color: color-mix(in srgb, var(--cw-rarity-2) 40%, transparent); }
-.nk-crole-hero[data-rarity="1"] { --holo-color: color-mix(in srgb, var(--cw-rarity-1) 35%, transparent); }
+/* 背景立绘：降饱和压暗，无彩色 radial 光晕（scrim 纯黑阶线性） */
 .nk-crole-hero__bg {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: saturate(1.15) brightness(0.85);
-  transform: scale(1.02);
+  filter: saturate(0.9) brightness(0.72);
 }
 .nk-crole-hero__scrim {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(0deg, var(--crole-scrim) 0%, var(--crole-scrim-60) 40%, var(--crole-scrim-25) 70%, var(--crole-scrim-40) 100%),
-    radial-gradient(ellipse 80% 60% at 30% 80%, var(--holo-color) 0%, transparent 60%);
+    linear-gradient(0deg, var(--crole-scrim) 0%, var(--crole-scrim-70) 36%, var(--crole-scrim-40) 68%, var(--crole-scrim-15) 100%);
 }
 .nk-crole-hero__content {
   position: relative;
@@ -408,17 +438,15 @@
   width: 100%;
   padding: 24px 20px;
 }
+/* 方形档案章：金发丝边框 + 深色衬底，无圆环、无光晕 */
 .nk-crole-hero__portrait {
-  width: 110px;
-  height: 110px;
+  width: 104px;
+  height: 104px;
   flex: none;
-  border-radius: 50%;
+  border-radius: 10px;
   overflow: hidden;
-  border: 3px solid color-mix(in srgb, var(--holo-color) 70%, transparent);
-  box-shadow:
-    0 0 0 6px var(--crole-portrait-ring),
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 24px color-mix(in srgb, var(--holo-color) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold-500) 42%, transparent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   background: var(--surface);
 }
 .nk-crole-hero__portrait img { width: 100%; height: 100%; object-fit: cover; }
@@ -429,86 +457,137 @@
   min-width: 0;
   padding-bottom: 4px;
 }
-.nk-crole-hero__hud {
+/* 档案编号行（Hero 信息首行：NO.{id}） */
+.nk-crole-hero__id {
   font-family: var(--font-hud);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: color-mix(in srgb, var(--gold-300) 55%, transparent);
 }
-/* CW 模式：HUD 标签染金 */
-[data-theme="cw"] .nk-crole-hero__hud { color: color-mix(in srgb, var(--gold-300) 62%, transparent); text-shadow: 0 0 12px color-mix(in srgb, var(--gold-300) 25%, transparent); }
 .nk-crole-hero__name {
-  /* 流式字号：clamp 曲线（768px→34px，系数 4.43vw；≤587 下限 26px，≥857 上限 38px）——
-     替代原 22/28/34/38px 四段阶梯（跨断点硬切跳变，2026-08-15 审计修复） */
   font-size: clamp(26px, 4.43vw, 38px);
   font-weight: 900;
   letter-spacing: -0.01em;
   margin: 0;
-  color: #fff;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6), 0 0 32px color-mix(in srgb, var(--holo-color) 50%, transparent);
+  color: var(--text-bright);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
   line-height: 1.1;
 }
 .nk-crole-hero__meta {
   display: flex;
   align-items: center;
-  gap: 12px;
 }
-.nk-crole-hero__id {
+/* 结算条目：槽位/费用/赛季依次以发丝线分隔 */
+.nk-crole-hero__meta > * + * {
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+/* 前后台定位双槽：亮 = 该定位可用（主色实底），暗 = 灰暗禁用；无光晕 */
+.nk-crole-hero__slots {
+  display: inline-flex;
+  gap: 6px;
+}
+.nk-crole-slot {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   font-family: var(--font-hud);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
-.nk-crole-hero__stars { color: var(--gold); font-size: 15px; letter-spacing: 2px; text-shadow: 0 0 12px var(--crole-num-glow); } /* 星级 = 语义金（CW 下降阶暗铜） */
+.nk-crole-slot.is-on {
+  color: var(--text-bright);
+  background: var(--primary);
+  border-color: transparent;
+}
+/* CW 主题：亮槽深底金字（黑金对比） */
+[data-theme="cw"] .nk-crole-slot.is-on { color: var(--blk-900); }
+
+.nk-crole-hero__fee,
+.nk-crole-hero__season {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+}
+.nk-crole-hero__season { color: rgba(255, 255, 255, 0.4); }
+/* 定位摘要（档案头副文：前台/后台一句话，发丝上分隔 + HUD 前缀；跨星级一致不随星级切换） */
+.nk-crole-hero__role {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 520px;
+}
+.nk-crole-hero__role p { margin: 0; }
+.nk-crole-hero__role-pos {
+  display: inline-block;
+  min-width: 34px;
+  margin-right: 8px;
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--crole-num);
+}
 .nk-crole-hero__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-crole-hero__traits {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 14px;
+  margin-top: 10px;
 }
 .nk-crole-traitgrp {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 
-/* 头图羁绊图标按钮：菱形图标 + 名称，点击跳转羁绊详情页 */
+/* 头图羁绊图章：方形图标 + 1px 分类色描边（无旋转、无光晕） */
 .nk-crole-herotrait {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   text-decoration: none;
   outline: none;
 }
 .nk-crole-herotrait__icon {
   position: relative;
   display: block;
-  width: 38px;
-  height: 38px;
-  transform: rotate(45deg);
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.38);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  transition: transform 0.22s var(--nk-ease-out), border-color 0.22s, box-shadow 0.22s;
+  transition: border-color 0.22s, transform 0.22s var(--nk-ease-out);
 }
 .nk-crole-herotrait__icon img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transform: rotate(-45deg) scale(1.35);
 }
 .nk-crole-herotrait__name {
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.62);
   letter-spacing: 0.02em;
   max-width: 56px;
   overflow: hidden;
@@ -517,29 +596,26 @@
   text-align: center;
   transition: color 0.22s;
 }
-/* 分类色边框 */
-.nk-crole-herotrait--faction .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-faction-core) 45%, transparent); }
-.nk-crole-herotrait--combat  .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-combat-core) 45%, transparent); }
-.nk-crole-herotrait--special .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-special-core) 45%, transparent); }
-/* hover / focus 发光 */
+/* 分类色描边（不发光） */
+.nk-crole-herotrait--faction .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-faction-core) 58%, transparent); }
+.nk-crole-herotrait--combat  .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-combat-core) 58%, transparent); }
+.nk-crole-herotrait--special .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-special-core) 58%, transparent); }
+/* hover / focus 仅微缩放大描边加亮 */
 .nk-crole-herotrait:hover .nk-crole-herotrait__icon,
 .nk-crole-herotrait:focus-visible .nk-crole-herotrait__icon {
-  transform: rotate(45deg) scale(1.12);
+  transform: scale(1.07);
 }
 .nk-crole-herotrait--faction:hover .nk-crole-herotrait__icon,
 .nk-crole-herotrait--faction:focus-visible .nk-crole-herotrait__icon {
-  border-color: color-mix(in srgb, var(--cw-faction-core) 85%, transparent);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 14px color-mix(in srgb, var(--cw-faction-core) 35%, transparent);
+  border-color: color-mix(in srgb, var(--cw-faction-core) 92%, transparent);
 }
 .nk-crole-herotrait--combat:hover .nk-crole-herotrait__icon,
 .nk-crole-herotrait--combat:focus-visible .nk-crole-herotrait__icon {
-  border-color: color-mix(in srgb, var(--cw-combat-core) 85%, transparent);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 14px color-mix(in srgb, var(--cw-combat-core) 35%, transparent);
+  border-color: color-mix(in srgb, var(--cw-combat-core) 92%, transparent);
 }
 .nk-crole-herotrait--special:hover .nk-crole-herotrait__icon,
 .nk-crole-herotrait--special:focus-visible .nk-crole-herotrait__icon {
-  border-color: color-mix(in srgb, var(--cw-special-core) 85%, transparent);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 14px color-mix(in srgb, var(--cw-special-core) 35%, transparent);
+  border-color: color-mix(in srgb, var(--cw-special-core) 92%, transparent);
 }
 .nk-crole-herotrait:hover .nk-crole-herotrait__name,
 .nk-crole-herotrait:focus-visible .nk-crole-herotrait__name {
@@ -547,37 +623,34 @@
 }
 
 .nk-crole-chip {
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  backdrop-filter: blur(4px);
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  border: 1px solid transparent;
 }
-.nk-crole-chip--fb { background: color-mix(in srgb, var(--crole-chip-fb-core) 20%, transparent); color: var(--crole-chip-fb); }
-.nk-crole-chip--heal { background: color-mix(in srgb, var(--crole-chip-heal-core) 20%, transparent); color: var(--crole-chip-heal); }
-.nk-crole-chip--charge { background: color-mix(in srgb, var(--crole-chip-charge-core) 20%, transparent); color: var(--crole-chip-charge); }
-.nk-crole-chip--exp { background: color-mix(in srgb, var(--crole-chip-exp-core) 22%, transparent); color: var(--crole-chip-exp); }
-.nk-crole-chip--season { background: color-mix(in srgb, var(--cw-rarity-1) 18%, transparent); color: var(--crole-chip-season); }
+.nk-crole-chip--charge { background: color-mix(in srgb, var(--crole-chip-charge-core) 14%, transparent); color: var(--crole-chip-charge); border-color: color-mix(in srgb, var(--crole-chip-charge-core) 28%, transparent); }
+.nk-crole-chip--exp { background: color-mix(in srgb, var(--crole-chip-exp-core) 14%, transparent); color: var(--crole-chip-exp); border-color: color-mix(in srgb, var(--crole-chip-exp-core) 28%, transparent); }
 
 /* ═══ 通用段落 ═══ */
+/* 档案章节标题：HUD 字 + 尾部发丝延伸线（去渐变竖条/去 glow；与 tokens .nk-title 语汇同源） */
 .nk-crole-section__title {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: baseline;
+  gap: 12px;
   font-family: var(--font-hud);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   margin: 0 0 18px;
   color: var(--text-bright);
 }
-.nk-crole-section__title::before {
+.nk-crole-section__title::after {
   content: '';
-  flex: none;
-  width: 4px; height: 18px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, var(--primary), var(--accent));
-  box-shadow: 0 0 8px var(--primary-glow);
+  flex: 1;
+  align-self: center;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 46%, transparent 100%);
 }
 .nk-crole-section__hint {
   margin: -4px 0 12px;
@@ -627,16 +700,24 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   padding: 0 5px;
-  border-radius: 4px;
+  border-radius: 3px;
   background: var(--crole-scope-bg);
   color: var(--crole-scope-text);
   line-height: 1.6;
 }
 .nk-crole-layer__scope--all { background: var(--crole-scope-all-bg); color: var(--crole-scope-all-text); }
 .nk-crole-layer__pname { color: var(--text2); }
+/* 属性图标（14px 语义小图，jsDelivr 唯一源，失败隐藏） */
+.nk-crole-layer__icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  vertical-align: -2px;
+  opacity: 0.85;
+}
 .nk-crole-layer__pval { color: var(--crole-buff); font-weight: 700; font-size: 12px; }
 
-/* ═══ 后台星魂（时间线） ═══ */
+/* ═══ 后台星魂（决议条款时间线：方形图标 + 1px 发丝轨） ═══ */
 .nk-crole-timeline {
   display: flex;
   flex-direction: column;
@@ -654,25 +735,24 @@
   width: 48px;
 }
 .nk-crole-timeline__icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
   overflow: hidden;
   background: var(--surface);
-  border: 2px solid var(--border2);
+  border: 1px solid var(--line-2);
   display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
   z-index: 1;
-  box-shadow: 0 0 12px var(--primary-glow);
 }
 .nk-crole-timeline__icon img { width: 100%; height: 100%; object-fit: contain; }
-.nk-crole-timeline__num { font-family: var(--font-hud); font-size: 16px; font-weight: 800; color: var(--accent); }
+.nk-crole-timeline__num { font-family: var(--font-hud); font-size: 15px; font-weight: 800; color: var(--crole-num); }
 .nk-crole-timeline__line {
   flex: 1;
-  width: 2px;
-  background: linear-gradient(180deg, var(--border2), var(--border));
+  width: 1px;
+  background: linear-gradient(180deg, var(--line-2), var(--line-1));
   min-height: 16px;
 }
 .nk-crole-timeline__item:last-child .nk-crole-timeline__line { display: none; }
@@ -680,27 +760,27 @@
   flex: 1;
   min-width: 0;
   padding: 14px 16px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 14px;
+  border-radius: var(--nk-radius-card);
+  background: rgba(255, 255, 255, 0.014);
+  border: 1px solid var(--line-1);
+  transition: border-color 0.2s, background 0.2s;
 }
-.nk-crole-timeline__card:hover { border-color: var(--border2); box-shadow: 0 6px 22px rgba(0,0,0,0.3); }
-.nk-crole-timeline__head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.nk-crole-timeline__card:hover { border-color: var(--line-2); background: rgba(255, 255, 255, 0.024); }
+.nk-crole-timeline__head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
 .nk-crole-timeline__step {
   font-family: var(--font-hud);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--accent);
+  letter-spacing: 0.1em;
+  color: var(--crole-step-text);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: 3px;
   background: var(--crole-step-bg);
 }
 .nk-crole-timeline__name { font-weight: 600; font-size: 14px; color: var(--text-bright); }
-.nk-crole-timeline__desc { font-size: 13px; color: var(--text2); line-height: 1.55; margin: 0; }
-.nk-crole-timeline__desc span { color: var(--crole-num); }
+.nk-crole-timeline__desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0; }
+.nk-crole-timeline__desc span { color: var(--crole-num); font-weight: 600; }
 .nk-crole-timeline__mech {
   margin-top: 8px;
   font-size: 12px;
@@ -708,7 +788,7 @@
   line-height: 1.5;
 }
 
-/* ═══ 推荐装备（前后台 × 优先级） ═══ */
+/* ═══ 推荐装备（投资组合：前后台 × 优先级，发丝边框无浮起） ═══ */
 .nk-crole-recs {
   display: flex;
   flex-direction: column;
@@ -717,32 +797,33 @@
 }
 .nk-crole-rec {
   position: relative;
-  padding: 14px 14px 12px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 1px solid var(--nk-card-border);
-  overflow: hidden;
-  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s var(--ease);
-}
-.nk-crole-rec::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 2px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--crole-num) 70%, transparent), transparent 70%);
-  opacity: 0.6;
+  padding: 16px 16px 14px;
+  border-radius: var(--nk-radius-card);
+  background: rgba(255, 255, 255, 0.014);
+  border: 1px solid var(--line-1);
+  transition: border-color 0.25s, background 0.25s;
 }
 .nk-crole-rec:hover {
-  border-color: color-mix(in srgb, var(--crole-num) 35%, transparent);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-  transform: translateY(-2px);
+  border-color: var(--line-2);
+  background: rgba(255, 255, 255, 0.024);
 }
-.nk-crole-rec__head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.nk-crole-rec__head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .nk-crole-rec__pos {
-  font-size: 12px;
+  font-family: var(--font-hud);
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.16em;
   color: var(--text2);
-  letter-spacing: 0.05em;
+}
+/* 定位 HUD 后缀发丝线 */
+.nk-crole-rec__pos::after {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin-left: 10px;
+  vertical-align: middle;
+  background: linear-gradient(90deg, var(--line-2), transparent);
 }
 .nk-crole-rec__row {
   display: flex;
@@ -754,37 +835,38 @@
   align-items: flex-start;
   gap: 10px;
 }
-.nk-crole-rec__grp .nk-crole-rec__prio { margin-top: 8px; }
+.nk-crole-rec__grp .nk-crole-rec__prio { margin-top: 9px; }
 .nk-crole-rec__prio {
+  font-family: var(--font-hud);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 2px 8px;
-  border-radius: 999px;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 3px;
   border: 1px solid;
 }
-.nk-crole-rec__prio.is-first { color: var(--crole-num); border-color: color-mix(in srgb, var(--crole-num) 40%, transparent); background: color-mix(in srgb, var(--crole-num) 8%, transparent); }
-.nk-crole-rec__prio.is-second { color: var(--text3); border-color: var(--border); background: rgba(255, 255, 255, 0.03); }
+.nk-crole-rec__prio.is-first { color: var(--crole-num); border-color: color-mix(in srgb, var(--crole-num) 42%, transparent); background: color-mix(in srgb, var(--crole-num) 7%, transparent); }
+.nk-crole-rec__prio.is-second { color: var(--text3); border-color: var(--line-1); background: transparent; }
 .nk-crole-rec__items { display: flex; flex-wrap: wrap; gap: 8px; }
 .nk-crole-recitem {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 6px 8px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid var(--line-1);
   transition: border-color 0.2s, background 0.2s;
 }
-.nk-crole-recitem:hover { border-color: var(--border); background: rgba(255, 255, 255, 0.045); }
+.nk-crole-recitem:hover { border-color: var(--line-2); background: rgba(255, 255, 255, 0.03); }
 .nk-crole-recitem__icon {
   flex: none;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  background: color-mix(in srgb, var(--crole-num) 6%, transparent);
-  border: 1px solid color-mix(in srgb, var(--crole-num) 18%, transparent);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line-1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -798,11 +880,62 @@
   text-align: center;
   font-size: 13px;
   color: var(--text3);
-  border: 1px dashed var(--border);
-  border-radius: 12px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--nk-radius-card);
 }
 
-/* ═══ 专属装备（等级递进） ═══ */
+/* ═══ 专属装备（等级递进：1px 发丝轨 + 方形节点） ═══ */
+/* 光锥本体卡（EquipmentID → 常规光锥；方形图标 + 名字 + 稀有度/命途/编号） */
+.nk-crole-cone {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: var(--nk-radius-card);
+  background: rgba(255, 255, 255, 0.014);
+  border: 1px solid var(--line-1);
+}
+.nk-crole-cone__icon {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  border: 1px solid var(--line-1);
+  background: rgba(255, 255, 255, 0.02);
+  object-fit: cover;
+}
+.nk-crole-cone__body { min-width: 0; }
+.nk-crole-cone__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-bright);
+  line-height: 1.4;
+}
+.nk-crole-cone__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 3px;
+  font-size: 11px;
+}
+.nk-crole-cone__rarity {
+  color: var(--gold-400);
+  letter-spacing: 0.08em;
+}
+.nk-crole-cone__path {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text2);
+}
+.nk-crole-cone__id {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+
 .nk-crole-equips {
   display: flex;
   flex-direction: column;
@@ -813,11 +946,11 @@
 .nk-crole-equips::before {
   content: '';
   position: absolute;
-  left: 11px;
+  left: 12px;
   top: 20px;
   bottom: 20px;
-  width: 2px;
-  background: linear-gradient(180deg, var(--crole-buff), color-mix(in srgb, var(--crole-buff) 20%, transparent));
+  width: 1px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--crole-buff) 55%, transparent), color-mix(in srgb, var(--crole-buff) 14%, transparent));
 }
 .nk-crole-equip {
   display: flex;
@@ -829,14 +962,13 @@
 .nk-crole-equip::before {
   content: '';
   position: absolute;
-  left: -18px;
-  top: 20px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  left: -19px;
+  top: 21px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
   background: var(--crole-buff);
-  border: 2px solid var(--bg);
-  box-shadow: 0 0 8px var(--crole-buff-glow);
+  border: 1px solid var(--bg);
 }
 .nk-crole-equip__lv {
   display: flex;
@@ -845,7 +977,7 @@
   flex: none;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--crole-buff-soft);
   border: 1px solid var(--crole-buff-border);
   justify-content: center;
@@ -865,10 +997,10 @@
   text-transform: uppercase;
 }
 .nk-crole-equip__body { flex: 1; min-width: 0; }
-.nk-crole-equip__desc { font-size: 13px; color: var(--text2); line-height: 1.55; margin: 0; }
-.nk-crole-equip__desc span { color: var(--crole-num); }
+.nk-crole-equip__desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0; }
+.nk-crole-equip__desc span { color: var(--crole-num); font-weight: 600; }
 
-/* ═══ 成长矩阵（原「成长总览」+「星级属性」合并区块） ═══ */
+/* ═══ 成长矩阵（结算单：星级为列、属性为科目；无逐行 hairline——AI 规格表味） ═══ */
 .nk-crole-gm-head {
   display: flex;
   align-items: center;
@@ -879,13 +1011,14 @@
 }
 .nk-crole-gm-head .nk-crole-section__title { margin: 0; }
 .nk-crole-gm-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+/* 方形分段控件（星级切换）：激活 = 亮金底黑字，无 pill、无 glow */
 .nk-crole-gm-pill {
   min-width: 40px;
   min-height: 30px;
   padding: 4px 11px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--card);
+  border-radius: 6px;
+  border: 1px solid var(--line-1);
+  background: transparent;
   color: var(--text2);
   cursor: pointer;
   font-family: var(--font-hud);
@@ -894,68 +1027,82 @@
   letter-spacing: 0.04em;
   transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s var(--ease);
 }
-.nk-crole-gm-pill:hover { color: var(--text-bright); border-color: var(--border2); }
+.nk-crole-gm-pill:hover { color: var(--text-bright); border-color: var(--line-2); }
 .nk-crole-gm-pill:active { transform: scale(0.96); }
 .nk-crole-gm-pill:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-crole-gm-pill.is-active {
-  background: var(--crole-tab-active-bg);
-  color: #fff;
+  background: var(--crole-seg-bg);
+  color: var(--crole-seg-text);
   border-color: transparent;
-  box-shadow: 0 4px 16px var(--crole-tab-active-shadow), 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 [data-theme="cw"] .nk-crole-gm-pill.is-active { color: var(--blk-900); }
 
 .nk-crole-gm {
   border-radius: var(--nk-radius-card);
-  border: 1px solid var(--nk-card-border);
-  background: var(--card);
+  border: 1px solid var(--line-1);
+  background: rgba(255, 255, 255, 0.012);
   overflow-x: auto;
 }
 .nk-crole-gm__table {
+  /* fixed 布局：列宽由表头/显式宽度决定，切星时选中列 ▲ 增量标记/文本长度变化不再挤压整表列宽（2026-08-15 排版跳动修复） */
+  table-layout: fixed;
   width: 100%;
-  min-width: 420px;
+  min-width: 440px;
   border-collapse: collapse;
   font-size: 13px;
 }
 .nk-crole-gm__table th,
 .nk-crole-gm__table td {
-  padding: 5px 12px;
+  padding: 6px 10px;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
 }
+/* 标签列（属性科目名）固定宽度；星级列不设宽度 → fixed 布局等分剩余空间 */
+.nk-crole-gm__label,
+.nk-crole-gm__table thead th:first-child {
+  width: 118px;
+}
+.nk-crole-gm__table th.nk-crole-gm__star { min-width: 64px; }
 .nk-crole-gm__table thead th {
   font-family: var(--font-hud);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: var(--crole-num);
-  background: color-mix(in srgb, var(--crole-num) 6%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--crole-num) 18%, transparent);
+  color: var(--text2);
+  border-bottom: 1px solid var(--line-1);
+  padding-top: 9px;
+  padding-bottom: 9px;
   cursor: pointer;
   user-select: none;
   transition: background 0.2s, color 0.2s;
 }
-.nk-crole-gm__table thead th:hover { background: color-mix(in srgb, var(--crole-num) 12%, transparent); }
-.nk-crole-gm__corner { text-align: left; cursor: default !important; color: var(--text2) !important; }
-/* 星级列 = 语义金（CW 下降阶暗铜）；激活态为主题强调位保持亮金 */
-.nk-crole-gm__table th.nk-crole-gm__star { color: var(--gold); }
-.nk-crole-gm__table th.nk-crole-gm__star.is-active { color: var(--crole-num); }
-.nk-crole-gm__star.is-active {
-  background: color-mix(in srgb, var(--crole-num) 16%, transparent);
-  box-shadow: inset 0 -2px 0 var(--crole-num);
+.nk-crole-gm__table thead th:hover { background: rgba(255, 255, 255, 0.03); }
+.nk-crole-gm__corner { text-align: left; cursor: default !important; color: var(--text3) !important; }
+/* 星级列 = 亮金（激活列升为档案金 + 淡金底 + 顶线） */
+.nk-crole-gm__table th.nk-crole-gm__star { color: var(--crole-num); font-weight: 600; }
+/* 数值行固定行高：切星后 ▲ 增量标记出现/消失不再造成 1px 行盒跳动（配合 fixed 列宽，切星排版完全稳定） */
+.nk-crole-gm__table tbody th,
+.nk-crole-gm__table tbody td {
+  line-height: 18px;
 }
-/* 分组横条 */
+.nk-crole-gm__star.is-active {
+  background: var(--crole-col-active);
+  color: var(--crole-num);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--crole-num) 70%, transparent);
+}
+/* 分组横条：双线夹持的章节分隔（组语义，非逐行） */
 .nk-crole-gm__grp td {
   text-align: left;
   font-family: var(--font-hud);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text2);
-  padding: 3px 12px;
-  background: color-mix(in srgb, var(--crole-num) 4%, transparent);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text3);
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.018);
+  border-top: 1px solid var(--line-1);
+  border-bottom: 1px solid var(--line-1);
 }
 .nk-crole-gm__label {
   text-align: left;
@@ -964,6 +1111,15 @@
   color: var(--text2);
   white-space: nowrap;
 }
+/* 属性行图标（14px 语义小图，jsDelivr 唯一源，失败隐藏） */
+.nk-crole-gm__icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  vertical-align: -2px;
+  margin-right: 6px;
+  opacity: 0.85;
+}
 .nk-crole-gm__val {
   font-family: var(--font-hud);
   font-weight: 600;
@@ -971,67 +1127,38 @@
   transition: background 0.2s;
 }
 .nk-crole-gm__val.is-active {
-  background: color-mix(in srgb, var(--crole-num) 7%, transparent);
+  background: var(--crole-col-active);
   color: var(--crole-num);
 }
 .nk-crole-gm__up {
+  /* 零尺寸 inline-block：width/height 均为 0（line-height: 0），内容溢出可见但 margin box 为零——
+     不与行盒交互，切星时 ▲ 出现/消失绝不撑高行盒（2026-08-15 排版跳动修复；基线对齐防越界） */
+  display: inline-block;
+  width: 0;
+  line-height: 0;
+  overflow: visible;
   font-size: 9px;
-  margin-left: 4px;
-  vertical-align: super;
+  margin-left: 3px;
   color: var(--crole-buff);
-  text-shadow: 0 0 8px var(--crole-buff-glow);
 }
 .nk-crole-gm__table tbody tr:last-child th,
 .nk-crole-gm__table tbody tr:last-child td { border-bottom: none; }
-.nk-crole-gm__hint {
-  margin: 8px 0 0;
-  text-align: right;
-  font-size: 11px;
-  color: var(--text2);
-  opacity: 0.8;
-}
 
-/* 一句话描述 + 基础强度 */
-.nk-crole-oneliner {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 9px 14px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--primary);
-  font-size: 12px;
-  color: var(--text);
-  line-height: 1.5;
-}
-.nk-crole-oneliner p { margin: 0; }
-.nk-crole-oneliner b {
-  display: inline-block;
-  min-width: 40px;
-  font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-  margin-right: 8px;
-}
-
-/* 技能 */
-.nk-crole-skillgroup { margin-top: 18px; }
+/* 技能（条款卡：发丝边框、无阴影、hover 仅亮边框） */
+.nk-crole-skillgroup { margin-top: 20px; }
+/* 技能组标题：HUD 字 + 尾部发丝线（与章节标题同语汇，次级） */
 .nk-crole-skillgroup__title {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: baseline; gap: 10px;
   font-family: var(--font-hud);
-  font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--metric-val); margin: 0 0 10px;
 }
-.nk-crole-skillgroup__title::before {
-  content: ''; flex: none; width: 3px; height: 12px; border-radius: 2px;
-  background: linear-gradient(180deg, var(--primary), var(--accent));
+.nk-crole-skillgroup__title::after {
+  content: ''; flex: 1; align-self: center; height: 1px;
+  background: linear-gradient(90deg, var(--line-1), transparent);
 }
-/* 随从属性行（#N 引用解析后的 HP/速度） */
+/* 随从属性行（#N 引用解析后的 HP/速度）：方角小 chip */
 .nk-crole-servantattrs {
   display: flex;
   flex-wrap: wrap;
@@ -1045,9 +1172,9 @@
   font-size: 12px;
   color: var(--text2);
   padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.016);
+  border: 1px solid var(--line-1);
 }
 .nk-crole-servantattrs__item b { color: var(--metric-val); font-weight: 600; }
 .nk-crole-skills {
@@ -1056,69 +1183,122 @@
   gap: 12px;
 }
 .nk-crole-skill {
-  padding: 16px;
-  border-radius: 14px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 15px 16px;
+  border-radius: var(--nk-radius-card);
+  background: rgba(255, 255, 255, 0.014);
+  border: 1px solid var(--line-1);
+  transition: border-color 0.2s, background 0.2s;
 }
-.nk-crole-skill:hover { border-color: var(--border2); box-shadow: 0 6px 22px rgba(0,0,0,0.3); }
+.nk-crole-skill:hover { border-color: var(--line-2); background: rgba(255, 255, 255, 0.022); }
 .nk-crole-skill__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+/* 技能图标（档案章风格：方形 + 发丝边框；双源回退由全局 CDN 委托处理，破图自动隐藏） */
+.nk-crole-skill__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line-1);
+  background: rgba(255, 255, 255, 0.02);
+  object-fit: cover;
+  flex: none;
+}
 .nk-crole-skill__name { font-weight: 700; font-size: 15px; color: var(--text-bright); }
 .nk-crole-skill__tag,
 .nk-crole-skill__type {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--text2);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: transparent;
+  border: 1px solid var(--line-1);
+  color: var(--text3);
 }
+/* 星级徽章组：方形小块（与矩阵分段控件同语汇） */
+.nk-crole-skill__stars {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.nk-crole-skill__star {
+  min-width: 28px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid var(--line-1);
+  background: transparent;
+  color: var(--text3);
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.nk-crole-skill__star:hover { color: var(--text-bright); border-color: var(--line-2); }
+.nk-crole-skill__star:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.nk-crole-skill__star.is-on {
+  background: var(--crole-seg-bg);
+  color: var(--crole-seg-text);
+  border-color: transparent;
+}
+[data-theme="cw"] .nk-crole-skill__star.is-on { color: var(--blk-900); }
+/* 选中星级未解锁该技能：占位提示（技能仅在部分星级出现） */
+.nk-crole-skill__unlock {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.nk-crole-skill__unlock b { color: var(--crole-num); font-weight: 600; }
+/* 消耗行：等宽数值金、标签灰，下发丝线分隔 */
 .nk-crole-skill__cost {
   display: flex;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--text2);
-  margin: 6px 0;
+  gap: 14px;
+  font-family: var(--font-hud);
+  font-size: 11px;
+  color: var(--text3);
+  margin: 9px 0 8px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--line-1);
 }
-.nk-crole-skill__simple { font-size: 13px; color: var(--text); margin: 8px 0; line-height: 1.5; }
-.nk-crole-skill__desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
-.nk-crole-skill__desc span { color: var(--crole-num); }
+.nk-crole-skill__cost b { color: var(--crole-num); font-weight: 600; }
+.nk-crole-skill__simple { font-size: 13px; color: var(--text); margin: 8px 0; line-height: 1.55; }
+.nk-crole-skill__desc { font-size: 13px; color: var(--text2); line-height: 1.7; }
+.nk-crole-skill__desc span { color: var(--crole-num); font-weight: 600; }
 .nk-crole-skill__stance { margin-top: 8px; font-size: 12px; color: var(--text2); }
+/* 附加条件：单线分隔 + 极淡底（无彩色 tint 盒） */
 .nk-crole-skill__extra {
   margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--crole-extra-bg);
-  border: 1px solid var(--crole-extra-border);
+  padding: 10px 12px 2px;
+  border-top: 1px solid var(--line-1);
   list-style: none;
   font-size: 12px;
   color: var(--text2);
 }
-.nk-crole-skill__extra li { margin: 4px 0; }
+.nk-crole-skill__extra li { margin: 0 0 8px; }
 .nk-crole-skill__extra b { color: var(--metric-val); }
-.nk-crole-skill__extra span { color: var(--crole-num); }
+.nk-crole-skill__extra span { color: var(--crole-num); font-weight: 600; }
 
-/* 星级内容切换淡入 */
-.nk-crole-star--in { animation: nk-crole-fade 0.3s var(--ease); }
-@keyframes nk-crole-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+/* 星级内容切换淡入：技能/矩阵变更跟随模板 :key 重渲染（定位描述已迁出面板，不再有专用动画类） */
+/* （原 .nk-crole-star--in / nk-crole-fade 随 oneliner 迁移删除，2026-08-15） */
 
 /* 触屏设备：重置粘滞 hover */
 @media (hover: none) {
   .nk-crole-skill:hover,
-  .nk-crole-timeline__card:hover {
-    box-shadow: none; border-color: var(--border);
+  .nk-crole-timeline__card:hover,
+  .nk-crole-rec:hover {
+    background: rgba(255, 255, 255, 0.014);
+    border-color: var(--line-1);
   }
-  .nk-crole-herotrait:hover .nk-crole-herotrait__icon { transform: rotate(45deg); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
-  .nk-crole-herotrait--faction:hover .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-faction-core) 45%, transparent); }
-  .nk-crole-herotrait--combat:hover .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-combat-core) 45%, transparent); }
-  .nk-crole-herotrait--special:hover .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-special-core) 45%, transparent); }
-  .nk-crole-herotrait:hover .nk-crole-herotrait__name { color: rgba(255, 255, 255, 0.72); }
+  .nk-crole-herotrait:hover .nk-crole-herotrait__icon { transform: none; }
+  .nk-crole-herotrait--faction:hover .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-faction-core) 58%, transparent); }
+  .nk-crole-herotrait--combat:hover .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-combat-core) 58%, transparent); }
+  .nk-crole-herotrait--special:hover .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-special-core) 58%, transparent); }
+  .nk-crole-herotrait:hover .nk-crole-herotrait__name { color: rgba(255, 255, 255, 0.62); }
 }
 
 /* 尊重「减少动态效果」偏好 */
 @media (prefers-reduced-motion: reduce) {
-  .nk-crole-star--in { animation: none; }
-  .nk-crole-gm-pill { transition: border-color 0.2s, color 0.2s, background 0.2s; }
+  .nk-crole-gm-pill,
+  .nk-crole-skill__star { transition: border-color 0.2s, color 0.2s, background 0.2s; }
 }
 
 /* ═══ 响应式 ═══ */
@@ -1136,8 +1316,6 @@
   .nk-crole-hero__bg { background-position: center; }
   .nk-crole-hero__content { padding: 32px; gap: 24px; }
   .nk-crole-hero__portrait { width: 140px; height: 140px; }
-  .nk-crole-section { padding: 32px 24px 0; }
-  .nk-crole-nav { padding: 12px 24px; }
   .nk-crole__skeleton { padding: 24px; }
   .nk-crole__skeleton-portrait { width: 140px; height: 140px; }
 }
@@ -1151,5 +1329,4 @@
 @media (max-width: 374px) {
   .nk-crole-hero__content { padding: 16px 14px; gap: 14px; }
   .nk-crole-hero__portrait { width: 88px; height: 88px; }
-  .nk-crole-section { padding: 20px 12px 0; }
 }

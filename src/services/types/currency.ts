@@ -9,6 +9,8 @@ export interface CurrencyPropMod {
   value: number;
   /** 官方名（GridFightRolePropertyConfig.PropertyName，官方改称呼重跑转换即同步） */
   prop_name?: string;
+  /** 图标源路径（GridFightRolePropertyConfig.IconPath；属性表未收录的类型无此字段） */
+  icon?: string;
 }
 
 /** 羁绊层级效果（GridFightTraitLayer） */
@@ -48,6 +50,8 @@ export interface CurrencyRoleSkill {
   name: string;
   desc: string;
   simple_desc: string;
+  /** 技能图标（源路径 SpriteOutput/SkillIcons/Avatar/{id}/{file}.png，前端 gridFightSkillIconSrc 解析双源） */
+  icon: string;
   type: string | null;
   tag: string | null;
   sp_base: number | null;
@@ -154,6 +158,8 @@ export interface CurrencyRoleEquipment {
   level: number;
   desc: string;
   param_list: number[];
+  /** 参数格式模板（GridFightBackEquipment.ParamFormat，如 "[i]%"：desc 裸 #N 按此渲染，全量验证 165/165 为 "[i]%"） */
+  param_format?: string;
   owner_props: CurrencyPropMod[];
   all_props: CurrencyPropMod[];
 }
@@ -191,6 +197,11 @@ export interface CurrencyRoleEntry {
 
 export interface CurrencyRoleList {
   roles: CurrencyRoleEntry[];
+}
+
+/** 属性图标映射（converter 落地 currency/prop_icons.json）：PropertyType → IconPath 源路径 */
+export interface CurrencyPropIconMap {
+  [propertyType: string]: string;
 }
 
 /* ─── 赛季扩充说明 ─── */

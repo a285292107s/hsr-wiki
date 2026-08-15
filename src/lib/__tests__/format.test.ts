@@ -7,7 +7,7 @@ import { CDN, setUseOfficialPaths } from '../constants';
 import { JS_DELIVR_BASE, JS_DELIVR_UI3D_BASE } from '../../services/cdn';
 import { NkError } from '../errors';
 import {
-  escHtml, gameTagsToHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtToughness,
+  escHtml, gameTagsToHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtDescWithFormat, fmtDescMerged, fmtDescStar, fmtToughness,
   deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
   avatarDrawCardUrl, itemName, itemIconUrl, validateCharData,
@@ -144,6 +144,10 @@ describe('fmtVal', () => {
     expect(fmtVal(null, 'i', false)).toBe('?');
     expect(fmtVal(undefined, 'f1', false)).toBe('?');
   });
+  it('裸参数（无 tag 无 %）原样显示，不四舍五入', () => {
+    expect(fmtVal(0.12, '', false)).toBe('0.12');
+    expect(fmtVal(3, '', false)).toBe('3');
+  });
 });
 
 describe('fmtDesc', () => {
@@ -155,6 +159,18 @@ describe('fmtDesc', () => {
   });
   it('替换裸 #N 占位符', () => {
     expect(fmtDesc('获得 #1 层', [3])).toBe('获得 <span class="hl">3</span> 层');
+  });
+  it('裸 #N 占位符：比率参数原样显示（货币战争光锥描述，防 round 错显 0）', () => {
+    expect(fmtDesc('独立伤害增幅提高#1。', [0.12])).toBe('独立伤害增幅提高<span class="hl">0.12</span>。');
+  });
+  it('fmtDescWithFormat：ParamFormat [i]% 注入裸 #N（0.12 → 12%）', () => {
+    expect(fmtDescWithFormat('独立伤害增幅提高#1。', [0.12], '[i]%'))
+      .toBe('独立伤害增幅提高<span class="hl">12%</span>。');
+    // 已带 tag 的占位符不双写
+    expect(fmtDescWithFormat('持续 #2[f1] 回合，伤害 #1[i]%', [0.5, 0.123], '[i]%'))
+      .toBe('持续 <span class="hl">0.1</span> 回合，伤害 <span class="hl">50%</span>');
+    // 无模板回退 fmtDesc 原样
+    expect(fmtDescWithFormat('获得 #1 层', [3], '')).toBe('获得 <span class="hl">3</span> 层');
   });
   it('换行符转 <br>', () => {
     expect(fmtDesc('第一行\n第二行')).toBe('第一行<br>第二行');
@@ -377,6 +393,28 @@ describe('itemName / itemIconUrl', () => {
     expect(itemIconUrl('ItemIcon/12345.png')).toBe(`${JS_DELIVR_BASE}/itemfigures/12345.png`);
     expect(itemIconUrl('abc.png')).toBe('');
     expect(itemIconUrl(null)).toBe('');
+  });
+});
+
+/* ─── CW 技能描述：跨星级合并 / 单星级取值 ─── */
+
+describe('fmtDescMerged / fmtDescStar', () => {
+  const desc = '造成 #1[i]% 伤害，并回复 #2[i] 点能量';
+  // 真实语义：有 % 尾缀的参数为比率（0.2 → 20%），无尾缀为绝对值
+  const sets = [[0.2, 30], [0.4, 60], [0.4, 90]];
+  it('fmtDescMerged：各星级值斜杠分隔，全相同仅单值', () => {
+    expect(fmtDescMerged(desc, sets)).toContain('20/40/40%');
+    expect(fmtDescMerged(desc, sets)).toContain('30/60/90');
+    expect(fmtDescMerged(desc, [[0.5], [0.5]])).toContain('50%');
+  });
+  it('fmtDescStar：只替换指定星级参数', () => {
+    expect(fmtDescStar(desc, sets, 0)).toBe('造成 <span class="hl">20%</span> 伤害，并回复 <span class="hl">30</span> 点能量');
+    expect(fmtDescStar(desc, sets, 2)).toContain('40%');
+  });
+  it('fmtDescStar：下标越界 / 参数缺失回退 ? 占位', () => {
+    expect(fmtDescStar(desc, sets, 9)).toContain('?%');
+    expect(fmtDescStar(desc, [], 0)).toContain('?%');
+    expect(fmtDescStar(null, sets, 0)).toBe('');
   });
 });
 

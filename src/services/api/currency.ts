@@ -3,6 +3,7 @@ import { cachedFetch } from '../cache';
 import type {
   CurrencyRoleList, CurrencyRoleDetail, CurrencySeasonList,
   CurrencyEquipList, CurrencyPortalList, CurrencyAugmentList, CurrencyTraitList,
+  CurrencyPropIconMap,
 } from '../types';
 import { LOCAL_DATA_BASE } from './base';
 import { singletonLoad } from './singleton';
@@ -14,6 +15,8 @@ export const loadLocalCurrencyEquipment = singletonLoad<CurrencyEquipList>(`${LO
 export const loadLocalCurrencyPortals = singletonLoad<CurrencyPortalList>(`${LOCAL_DATA_BASE}/currency/portals.json`);
 export const loadLocalCurrencyAugments = singletonLoad<CurrencyAugmentList>(`${LOCAL_DATA_BASE}/currency/augments.json`);
 export const loadLocalCurrencyTraits = singletonLoad<CurrencyTraitList>(`${LOCAL_DATA_BASE}/currency/traits.json`);
+/** 属性图标映射（共享单例；矩阵独立字段行/星魂属性图标查表用） */
+export const loadLocalCurrencyPropIcons = singletonLoad<CurrencyPropIconMap>(`${LOCAL_DATA_BASE}/currency/prop_icons.json`);
 
 /** 角色详情（按 ID 按需加载，走请求缓存） */
 export function loadLocalCurrencyRole(id: string): Promise<CurrencyRoleDetail> {

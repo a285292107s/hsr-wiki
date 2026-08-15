@@ -21,6 +21,7 @@ const skill = (over: Partial<CurrencyRoleSkill> = {}): CurrencyRoleSkill => ({
   name: '测试技能',
   desc: '造成 #1[i]% 伤害',
   simple_desc: '单体攻击',
+  icon: '',
   type: 'Normal',
   tag: null,
   sp_base: null,
@@ -139,6 +140,18 @@ describe('mergeSkillGroups', () => {
     expect(groups[0].skills[0].paramSets).toEqual([[100], [150]]);
   });
 
+  it('records star numbers per skill (skills may exist only in some stars)', () => {
+    const stars = {
+      '1': star({ front_show_skill: [] }),
+      '2': star({ front_show_skill: [skill({ id: 201, name: '蓄力' })] }),
+      '3': star({ front_show_skill: [] }),
+      '4': star({ front_show_skill: [skill({ id: 401, name: '蓄力' })] }),
+    };
+    const groups = mergeSkillGroups(stars);
+    expect(groups[0].skills[0].stars).toEqual([2, 4]);
+    expect(groups[0].skills[0].paramSets).toHaveLength(2);
+  });
+
   it('keeps distinct-named skills as separate entries and falls back to #id key', () => {
     const stars = {
       '1': star({
@@ -222,6 +235,21 @@ describe('buildGrowthMatrix', () => {
     expect(luck.values[0].text).toBe('1.5×');
   });
 
+  it('includes back-end mechanism fields with null entries skipped', () => {
+    const stars = {
+      '1': star({ back_energy_bar: 3, back_initial_energy_bar: 1, back_max_sp: 120, back_initial_sp: 60 }),
+      '2': star({ back_energy_bar: 4, back_initial_energy_bar: 2, back_max_sp: 120, back_initial_sp: 60 }),
+    };
+    const matrix = buildGrowthMatrix(stars);
+    const mech = matrix.find((g) => g.group === '机制')!;
+    expect(mech.rows.map((r) => r.key)).toEqual(['BackEnergyBar', 'BackInitialEnergyBar', 'BackMaxSP', 'BackInitialSP']);
+    expect(mech.rows[0].label).toBe('后台充能条');
+    expect(mech.rows[0].values.map((v) => v.text)).toEqual(['3', '4']);
+    // 全 null 字段不出行（预留字段 back_speed_* 当前无数据）
+    const none = buildGrowthMatrix({ '1': star() });
+    expect(none.some((g) => g.rows.some((r) => r.key === 'BackEnergyBar'))).toBe(false);
+  });
+
   it('appends unknown groups after ordered ones', () => {
     const stars = {
       '1': star({
@@ -231,6 +259,42 @@ describe('buildGrowthMatrix', () => {
     const matrix = buildGrowthMatrix(stars);
     expect(matrix).toHaveLength(1);
     expect(matrix[0].group).toBe('其它');
+  });
+
+  it('fills row icons from prop mod and propIcons lookup', () => {
+    const stars = {
+      '1': star({
+        front_power_base: 100,
+        back_power_base: 90,
+        luck_damage: 1.5,
+        extra_heal_base: 60,
+        general_property_modify_list: [
+          { property_type: 'ExtraHPAddedRatio1', value: 0.05, icon: 'SpriteOutput/BuffIcon/Inlevel/IconBuffHPBoost.png' },
+          { property_type: 'SpeedAddedRatio', value: 0.1 },
+        ],
+      }),
+    };
+    const propIcons = {
+      ExtraFrontPowerBase: 'SpriteOutput/GridFight/AttributeIcon/NormalIcon/IconFrontRow.png',
+      ExtraBackPowerBase: 'SpriteOutput/GridFight/AttributeIcon/NormalIcon/IconBackRow.png',
+      ExtraLuckDamage: 'SpriteOutput/GridFight/AttributeIcon/NormalIcon/IconLuckyHit.png',
+      ExtraHealBase: 'SpriteOutput/GridFight/AttributeIcon/NormalIcon/IconTreatmentIntensity.png',
+    };
+    const matrix = buildGrowthMatrix(stars, propIcons);
+    const byKey = (g: string, k: string) => matrix.find((x) => x.group === g)!.rows.find((r) => r.key === k)!;
+    // power 行：propIcons 查表补图标
+    expect(byKey('强度', '__front_power').icon).toBe(propIcons.ExtraFrontPowerBase);
+    expect(byKey('强度', '__back_power').icon).toBe(propIcons.ExtraBackPowerBase);
+    // prop mod 自带 icon 优先（不查表）
+    expect(byKey('生存', 'ExtraHPAddedRatio1').icon).toBe('SpriteOutput/BuffIcon/Inlevel/IconBuffHPBoost.png');
+    // 独立字段：propIcons 查表补图标
+    expect(byKey('机制', 'ExtraLuckDamage').icon).toBe(propIcons.ExtraLuckDamage);
+    expect(byKey('生存', 'ExtraHealBase').icon).toBe(propIcons.ExtraHealBase);
+    // 查表缺失：无 icon 字段
+    expect(byKey('速度', 'SpeedAddedRatio').icon).toBeUndefined();
+    // 不传 propIcons：power 行无图标
+    const noIcons = buildGrowthMatrix(stars);
+    expect(noIcons[0].rows[0].icon).toBeUndefined();
   });
 });
 
