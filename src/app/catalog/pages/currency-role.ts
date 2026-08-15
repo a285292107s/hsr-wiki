@@ -11,7 +11,7 @@ const FB_LABEL: Record<string, string> = {
 };
 
 const CHARGE_LABEL: Record<string, string> = {
-  Speed: '速度', EnergyBar: '充能点数', MaxSP: '终结技充能', MaxHP: '生命上限', SP: '战技点',
+  Speed: '速度', EnergyBar: '充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点',
 };
 
 /* ─── 特质分类（与 converter _trait_cat 对齐） ─── */
