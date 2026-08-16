@@ -8,19 +8,23 @@ import { onBeforeUnmount, ref } from 'vue';
 import SpineKvSection from './SpineKvSection.vue';
 import SpineAuditSection from './SpineAuditSection.vue';
 import DeadLinksSection from './DeadLinksSection.vue';
+import SystemMapSection from './SystemMapSection.vue';
 import { getQueryParam, setQueryParam, subscribeQueryChange } from './lib/query-state';
 import { useToasts } from './lib/toast';
 
-type TabId = 'kv' | 'audit' | 'deadlinks';
+type TabId = 'kv' | 'audit' | 'deadlinks' | 'map';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'kv', label: 'KV 场景验收' },
   { id: 'audit', label: '清单审核' },
   { id: 'deadlinks', label: '死链审核' },
+  { id: 'map', label: '系统地图' },
 ];
 
 const tab = ref<TabId>(
-  getQueryParam('tab') === 'audit' ? 'audit' : getQueryParam('tab') === 'deadlinks' ? 'deadlinks' : 'kv',
+  getQueryParam('tab') === 'audit' ? 'audit'
+    : getQueryParam('tab') === 'deadlinks' ? 'deadlinks'
+      : getQueryParam('tab') === 'map' ? 'map' : 'kv',
 );
 
 function selectTab(id: TabId): void {
@@ -31,7 +35,9 @@ function selectTab(id: TabId): void {
 
 // 响应地址栏 / 外部导航的 ?tab= 变化(replaceState 写入与前进后退均触发)
 const unsubscribe = subscribeQueryChange(() => {
-  const t: TabId = getQueryParam('tab') === 'audit' ? 'audit' : getQueryParam('tab') === 'deadlinks' ? 'deadlinks' : 'kv';
+  const t: TabId = getQueryParam('tab') === 'audit' ? 'audit'
+    : getQueryParam('tab') === 'deadlinks' ? 'deadlinks'
+      : getQueryParam('tab') === 'map' ? 'map' : 'kv';
   if (t !== tab.value) tab.value = t;
 });
 onBeforeUnmount(unsubscribe);
@@ -71,6 +77,9 @@ const toasts = useToasts();
     </div>
     <div v-show="tab === 'deadlinks'">
       <DeadLinksSection />
+    </div>
+    <div v-show="tab === 'map'">
+      <SystemMapSection :active="tab === 'map'" />
     </div>
 
     <!-- 轻量 toast 宿主 -->
