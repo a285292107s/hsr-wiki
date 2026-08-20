@@ -49,7 +49,7 @@ function setDescMode(mode: CwSkillDescMode): void {
 }
 
 /** 页面级加载编排：loading/error + 加载代竞态（角色间快速导航防旧数据覆盖） */
-const { data, error, loading, run: load } = usePageData<CurrencyRoleDetail>(() =>
+const { data, error, loading, showSkeleton, run: load } = usePageData<CurrencyRoleDetail>(() =>
   loadLocalCurrencyRole(roleId.value),
 );
 
@@ -238,7 +238,7 @@ function hideOnError(e: Event) {
   <div ref="pageRef" class="nk-page--detail nk-crole" :aria-busy="loading">
 
     <!-- 加载骨架屏（镜像档案 Hero 形态：方形肖像块 + 结算行） -->
-    <div v-if="loading" class="nk-crole__skeleton" role="status" aria-live="polite" aria-label="角色详情加载中">
+    <div v-if="showSkeleton" class="nk-crole__skeleton" role="status" aria-live="polite" aria-label="角色详情加载中">
       <div class="nk-crole__skeleton-hero">
         <div class="nk-crole__skeleton-portrait nk-sk nk-sk--shimmer"></div>
         <div class="nk-crole__skeleton-info">

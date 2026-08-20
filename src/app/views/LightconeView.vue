@@ -4,10 +4,11 @@
  * 结构：Hero（光锥立绘 + 基础信息）/ 技能（叠影等级滑条）/ 属性（晋阶阶段）/ 故事
  * 交互：叠影 1-5 切换实时重渲染技能数值
  */
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';
+import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { fmtDesc, lightconeIconUrl, itemName } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PATH, SITE_NAME } from '../../lib/constants';
@@ -25,19 +26,8 @@ const lc = useLightconeStore();
 const phase = computed<'loading' | 'error' | 'ready'>(() =>
   lc.error ? 'error' : lc.data ? 'ready' : 'loading',
 );
-/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
-const showSkeleton = ref(false);
-const SKELETON_DELAY = 150;
-let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
-watch(phase, (p) => {
-  if (p === 'loading') {
-    if (skeletonTimer !== null) clearTimeout(skeletonTimer);
-    skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
-  } else {
-    if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
-    showSkeleton.value = false;
-  }
-}, { immediate: true });
+/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏（useDelayedSkeleton 统一接管 timer 与生命周期清理） */
+const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 const d = computed(() => lc.data);
 /** 动态页面标题 */
 watch(d, (data) => {
@@ -146,7 +136,6 @@ const storyHtml = computed(() =>
 /* ═══════════ 卸载清理 ═══════════ */
 
 onBeforeUnmount(() => {
-  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
   lc.reset();
 });
 </script>

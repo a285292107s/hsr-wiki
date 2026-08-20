@@ -2,7 +2,7 @@
 /**
  * 对比技能卡：单条技能的前后变化视图（原始灰 → 强化金，双段）。
  * 等级滑条范围取 base/enh 最大值；层级参数各自代入渲染；
- * 头部骨架沿用 nk-skill 全局原语（与技能卡视觉一致），对比样式为本组件 scoped。
+ * 头部结构沿用 nk-skill 全局原语（与技能卡视觉一致），对比样式为本组件 scoped。
  */
 import { computed, ref } from 'vue';
 import { fmtDesc, skillIconUrl, fmtToughness } from '../../lib/format';

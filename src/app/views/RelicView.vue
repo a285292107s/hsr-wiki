@@ -12,6 +12,7 @@ import { fmtDesc, itemIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES, SITE_NAME } from '../../lib/constants';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
+import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 // 遗器详情页专属样式（随本路由 chunk 懒加载）
 import '../../styles/relic.css';
 
@@ -24,19 +25,8 @@ const relic = useRelicStore();
 const phase = computed<'loading' | 'error' | 'ready'>(() =>
   relic.error ? 'error' : relic.data ? 'ready' : 'loading',
 );
-/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
-const showSkeleton = ref(false);
-const SKELETON_DELAY = 150;
-let skeletonTimer: ReturnType<typeof setTimeout> | null = null;
-watch(phase, (p) => {
-  if (p === 'loading') {
-    if (skeletonTimer !== null) clearTimeout(skeletonTimer);
-    skeletonTimer = setTimeout(() => { showSkeleton.value = true; }, SKELETON_DELAY);
-  } else {
-    if (skeletonTimer !== null) { clearTimeout(skeletonTimer); skeletonTimer = null; }
-    showSkeleton.value = false;
-  }
-}, { immediate: true });
+/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏（useDelayedSkeleton 统一接管 timer 与生命周期清理） */
+const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 const d = computed(() => relic.data);
 /** 动态页面标题 */
 watch(d, (data) => {
@@ -272,7 +262,6 @@ watch(
 /* ═══════════ 卸载清理 ═══════════ */
 
 onBeforeUnmount(() => {
-  if (skeletonTimer !== null) clearTimeout(skeletonTimer);
   if (affixRo) { affixRo.disconnect(); affixRo = null; }
   relic.reset();
 });

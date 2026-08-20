@@ -47,7 +47,7 @@ const actLabel = computed(() => ACT_LABEL[data.value?.activation_type || ''] || 
 
 
 /** 页面级加载编排：双 loader 并行 + 加载代竞态；members（羁绊成员）在 loader 内一并解析 */
-const { data, error, loading, run, retry } = usePageData<CurrencyTraitEntry>(async () => {
+const { data, error, showSkeleton, run, retry } = usePageData<CurrencyTraitEntry>(async () => {
   const [{ traits }, { roles }] = await Promise.all([
     loadLocalCurrencyTraits(),
     loadLocalCurrencyRoles(),
@@ -67,12 +67,15 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
 
 <template>
   <div class="nk-ctrait">
-    <!-- 加载骨架 -->
-    <div v-if="loading" class="nk-ctrait__skeleton">
+    <!-- 加载骨架（延迟显示，缓存命中不闪屏；镜像真实首屏 = Hero 段 + 首节 section 段） -->
+    <div v-if="showSkeleton" class="nk-ctrait__skeleton" role="status" aria-live="polite" aria-label="羁绊详情加载中">
       <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-icon"></div>
       <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-title" style="width:40%"></div>
-      <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-line" style="width:80%"></div>
-      <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-line" style="width:60%"></div>
+      <div class="nk-ctrait__skeleton-body">
+        <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-line" style="width:30%"></div>
+        <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-line" style="width:80%"></div>
+        <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-line" style="width:60%"></div>
+      </div>
     </div>
 
     <!-- 错误 -->

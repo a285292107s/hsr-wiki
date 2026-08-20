@@ -35,6 +35,15 @@
 .nk-ctrait__sk-icon { width: 64px; height: 64px; border-radius: 8px; transform: rotate(45deg); }
 .nk-ctrait__sk-title { height: 28px; border-radius: 6px; }
 .nk-ctrait__sk-line { height: 16px; border-radius: 4px; }
+/* 第二段（镜像真实首节 section）：分隔线 + 流式行，贴近 .nk-ctrait-section 间距 */
+.nk-ctrait__skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line-1);
+}
 
 /* ── 错误/空状态 ── */
 .nk-ctrait__state {
