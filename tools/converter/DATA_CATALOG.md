@@ -4,25 +4,25 @@
 > AI 可通过本索引快速定位目标数据文件，再用 `query.py` 精确查询具体记录。
 > `fields` 为全部记录字段的并集（官方数据中可选字段可能仅出现在部分记录）。
 
-**文件总数**: 2140
-**总大小**: 246.9 MB
+**文件总数**: 2185
+**总大小**: 253.1 MB
 **解析失败**: 0
 
 ## TextMap
 
 | 文件 | 大小 | 条目数 |
 |------|------|--------|
-| TextMapCHS.json | 47.0 MB | 449,615 |
-| TextMapCHT.json | 47.2 MB | 跳过 |
-| TextMapDE.json | 59.2 MB | 跳过 |
-| TextMapEN.json | 53.0 MB | 跳过 |
-| TextMapES.json | 56.1 MB | 跳过 |
-| TextMapFR.json | 60.4 MB | 跳过 |
-| TextMapID.json | 55.8 MB | 跳过 |
-| TextMapJP.json | 62.1 MB | 跳过 |
-| TextMapKR_0.json | 36.8 MB | 跳过 |
-| TextMapKR_1.json | 39.7 MB | 跳过 |
-| TextMapMainCHS.json | 0.1 MB | 1,116 |
+| TextMapCHS.json | 48.7 MB | 465,910 |
+| TextMapCHT.json | 48.9 MB | 跳过 |
+| TextMapDE.json | 61.4 MB | 跳过 |
+| TextMapEN.json | 54.9 MB | 跳过 |
+| TextMapES.json | 58.2 MB | 跳过 |
+| TextMapFR.json | 62.6 MB | 跳过 |
+| TextMapID.json | 57.8 MB | 跳过 |
+| TextMapJP.json | 64.4 MB | 跳过 |
+| TextMapKR_0.json | 38.3 MB | 跳过 |
+| TextMapKR_1.json | 41.0 MB | 跳过 |
+| TextMapMainCHS.json | 0.1 MB | 1,118 |
 | TextMapMainCHT.json | 0.1 MB | 跳过 |
 | TextMapMainDE.json | 0.1 MB | 跳过 |
 | TextMapMainEN.json | 0.1 MB | 跳过 |
@@ -35,12 +35,12 @@
 | TextMapMainRU.json | 0.1 MB | 跳过 |
 | TextMapMainTH.json | 0.1 MB | 跳过 |
 | TextMapMainVI.json | 0.1 MB | 跳过 |
-| TextMapPT.json | 56.6 MB | 跳过 |
-| TextMapRU_0.json | 38.6 MB | 跳过 |
-| TextMapRU_1.json | 41.4 MB | 跳过 |
-| TextMapTH_0.json | 53.6 MB | 跳过 |
-| TextMapTH_1.json | 56.9 MB | 跳过 |
-| TextMapVI.json | 66.2 MB | 跳过 |
+| TextMapPT.json | 58.7 MB | 跳过 |
+| TextMapRU_0.json | 40.2 MB | 跳过 |
+| TextMapRU_1.json | 42.8 MB | 跳过 |
+| TextMapTH_0.json | 55.9 MB | 跳过 |
+| TextMapTH_1.json | 58.7 MB | 跳过 |
+| TextMapVI.json | 68.6 MB | 跳过 |
 
 ## ExcelOutput 文件列表
 
@@ -58,7 +58,7 @@
 }
 ```
 
-### TalkSentenceConfig.json (37.68 MB, 231,687 条)
+### TalkSentenceConfig.json (39.09 MB, 240,489 条)
 
 **字段** (4): `TalkSentenceID, TalkSentenceText, TextmapTalkSentenceName, VoiceID`
 
@@ -72,7 +72,7 @@
 }
 ```
 
-### StageConfig.json (24.00 MB, 28,832 条)
+### StageConfig.json (24.41 MB, 29,303 条)
 
 **字段** (21): `BattleScoringGroup, EliteGroup, ForbidAutoBattle, ForbidExitBattle, ForbidViewMode, HardLevelGroup, Level, LevelGraphPath, LevelLoseCondition, LevelWinCondition, MonsterList, MonsterWarningRatio, Release, ResetBattleSpeed, StageAbilityConfig, StageConfigData, StageID, StageName, StageType, SubLevelGraphs, TrialAvatarList`
 
@@ -101,7 +101,7 @@
 }
 ```
 
-### PlaneEvent.json (10.78 MB, 76,461 条)
+### PlaneEvent.json (11.01 MB, 77,959 条)
 
 **字段** (7): `DisplayItemList, DropList, EventID, IsUseMonsterDrop, Reward, StageID, WorldLevel`
 
@@ -114,7 +114,7 @@
 }
 ```
 
-### AvatarSkillConfig.json (9.97 MB, 6,804 条)
+### AvatarSkillConfig.json (10.19 MB, 6,948 条)
 
 **字段** (36): `AttackType, BPAdd, BPNeed, CoolDown, DelayRatio, ExtraEffectIDList, HideInUI, InitCoolDown, Level, LevelUpCostList, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, SPBase, SPMultipleRatio, SPNeed, ShowDamageList, ShowHealList, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SimpleSkillDesc, SkillComboValueDelta, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillNeed, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
 
@@ -167,7 +167,7 @@
 }
 ```
 
-### VoiceConfig.json (7.89 MB, 85,598 条)
+### VoiceConfig.json (8.23 MB, 88,685 条)
 
 **字段** (4): `IsPlayerInvolved, VoiceID, VoicePath, VoiceType`
 
@@ -231,7 +231,7 @@
 }
 ```
 
-### AvatarSkillTreeConfig.json (4.04 MB, 5,196 条)
+### AvatarSkillTreeConfig.json (4.14 MB, 5,318 条)
 
 **字段** (24): `AbilityName, AnchorType, AvatarID, AvatarLevelLimit, AvatarPromotionLimit, DefaultUnlock, EnhancedID, ExtraEffectIDList, IconPath, Level, LevelUpSkillID, MaterialList, MaxLevel, ParamList, PointDesc, PointID, PointName, PointTriggerKey, PointType, PrePoint, RecommendPriority, SimpleExtraEffectIDList, SimplePointDesc, StatusAddList`
 
@@ -277,7 +277,7 @@
 }
 ```
 
-### MonsterConfig.json (3.90 MB, 2,591 条)
+### MonsterConfig.json (3.99 MB, 2,649 条)
 
 **字段** (26): `AbilityNameList, AttackModifyRatio, CustomValueTags, CustomValues, DamageTypeResistance, DebuffResist, DefenceModifyRatio, DynamicValues, EliteGroup, HPModifyRatio, HardLevelGroup, MonsterID, MonsterIntroduction, MonsterName, MonsterStrategy, MonsterTemplateID, OverrideAIPath, OverrideAISkillSequence, OverrideSkillParams, SkillList, SpeedModifyRatio, SpeedModifyValue, StanceModifyRatio, StanceModifyValue, StanceWeakList, SummonIDList`
 
@@ -332,7 +332,7 @@
 }
 ```
 
-### FreeStyleMotion.json (3.44 MB, 7,548 条)
+### FreeStyleMotion.json (3.58 MB, 7,860 条)
 
 **字段** (7): `FreeStyleCharacterID, ID, LoopMotionPath, LoopMotionRibbonPath, StartMotion, StartMotionPath, StartMotionRibbonPath`
 
@@ -349,7 +349,7 @@
 }
 ```
 
-### SpecialAvatar.json (3.10 MB, 4,748 条)
+### SpecialAvatar.json (3.17 MB, 4,856 条)
 
 **字段** (33): `AbilityNameList, AnchorName, AvatarID, CustomSkillTreeKey, EnhancedID, EquipmentID, EquipmentLevel, EquipmentPromotion, EquipmentRank, HasJoinHint, HasLeaveHint, HaveActionDelay, IsAutoBattle, IsProtected, IsUseWorldLevel, JsonPath, Level, LevelAreaPrefab, LockBattleInfo, LockMazeSkill, OverrideProperty, PlayerID, PlayerJsonPath, Promotion, Rank, RelicMainValue, RelicPropertyType, RelicPropertyTypeExtra, RelicSubValue, SkillTreeTemplate, SpecialAvatarID, Type, WorldLevel`
 
@@ -384,7 +384,7 @@
 }
 ```
 
-### MessageItemConfig.json (2.98 MB, 13,253 条)
+### MessageItemConfig.json (3.08 MB, 13,664 条)
 
 **字段** (9): `ContactsID, ID, ItemContentID, ItemType, MainText, NextItemIDList, OptionText, SectionID, Sender`
 
@@ -404,7 +404,7 @@
 }
 ```
 
-### SpecialAvatarRelicSubValue.json (2.94 MB, 1,674 条)
+### SpecialAvatarRelicSubValue.json (2.97 MB, 1,688 条)
 
 **字段** (2): `RelicSubValueType, SubValue`
 
@@ -416,7 +416,7 @@
 }
 ```
 
-### PerformanceE.json (2.52 MB, 12,267 条)
+### PerformanceE.json (2.57 MB, 12,496 条)
 
 **字段** (11): `ChangePlayerType, EndBlack, EndWithCrack, FloorID, IsIntroDialogue, IsSkip, PerformanceCharacter, PerformanceID, PerformancePath, PlaneID, StartBlack`
 
@@ -429,7 +429,7 @@
 }
 ```
 
-### MonsterSkillConfig.json (2.41 MB, 3,462 条)
+### MonsterSkillConfig.json (2.47 MB, 3,548 条)
 
 **字段** (19): `AI_CD, AI_ICD, AttackType, DamageType, DelayRatio, ExtraEffectIDList, IconPath, IsThreat, ModifierList, ParamList, PhaseList, SPHitBase, SkillDesc, SkillID, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, SortOrder`
 
@@ -474,7 +474,7 @@
 }
 ```
 
-### ItemConfig.json (1.76 MB, 2,890 条)
+### ItemConfig.json (1.77 MB, 2,910 条)
 
 **字段** (21): `CustomDataList, ID, InventoryDisplayTag, IsShowRedDot, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemGroup, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, PurposeType, Rarity, ReturnItemIDList, SellType, UseMethod, isVisible`
 
@@ -503,7 +503,7 @@
 }
 ```
 
-### SubMission.json (1.65 MB, 14,584 条)
+### SubMission.json (1.68 MB, 14,796 条)
 
 **字段** (3): `DescrptionText, SubMissionID, TargetText`
 
@@ -520,7 +520,7 @@
 }
 ```
 
-### PerformanceSkipFlagE.json (1.41 MB, 12,134 条)
+### PerformanceSkipFlagE.json (1.43 MB, 12,324 条)
 
 **字段** (4): `ActorList, ContainImportBranch, PerformanceID, Skippable`
 
@@ -532,7 +532,7 @@
 }
 ```
 
-### MazeBuff.json (1.35 MB, 1,947 条)
+### MazeBuff.json (1.38 MB, 1,986 条)
 
 **字段** (20): `BuffDesc, BuffDescBattle, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, BuffSimpleDesc, DisplayType, ID, InBattleBindingKey, InBattleBindingType, IsDisplayEnvInLevel, Lv, LvMax, MazeBuffIconType, MazeBuffPool, MazeBuffType, ModifierName, ParamList`
 
@@ -564,7 +564,7 @@
 }
 ```
 
-### StageInfiniteMonsterGroup.json (1.33 MB, 1,608 条)
+### StageInfiniteMonsterGroup.json (1.35 MB, 1,675 条)
 
 **字段** (3): `EliteGroup, InfiniteMonsterGroupID, MonsterList`
 
@@ -577,7 +577,7 @@
 }
 ```
 
-### VoiceAtlas.json (1.30 MB, 5,236 条)
+### VoiceAtlas.json (1.34 MB, 5,354 条)
 
 **字段** (10): `AudioEvent, AudioID, AvatarID, IsBattleVoice, ReplaceID, SortID, Unlock, VoiceID, VoiceTitle, Voice_M`
 
@@ -595,11 +595,11 @@
   "AudioID": 78001001,
   "AudioEvent": "",
   "Unlock": 70006,
-  "SortID": 1
+  "SortID": 100
 }
 ```
 
-### FinishWay.json (1.21 MB, 5,567 条)
+### FinishWay.json (1.24 MB, 5,689 条)
 
 **字段** (13): `FinishType, ID, IsBackTrack, MazeFloorID, MazePlaneID, ParamInt1, ParamInt2, ParamInt3, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
 
@@ -617,7 +617,25 @@
 }
 ```
 
-### RogueMazeBuff.json (1.19 MB, 1,825 条)
+### PerformanceDS.json (1.22 MB, 4,954 条)
+
+**字段** (10): `EndBlack, EndWithCrack, FloorID, GroupID, IsSkip, PerformanceCharacter, PerformanceID, PerformancePath, PlaneID, StartBlack`
+
+**首条记录摘要**:
+```json
+{
+  "PerformanceID": 103010102,
+  "PerformancePath": "Story/Discussion/Mission/1030101/DS10301...",
+  "IsSkip": "AfterSeen",
+  "PerformanceCharacter": "",
+  "StartBlack": "Full",
+  "EndBlack": "Full",
+  "PlaneID": 10000,
+  "FloorID": 10000000
+}
+```
+
+### RogueMazeBuff.json (1.20 MB, 1,851 条)
 
 **字段** (17): `BuffDesc, BuffDescBattle, BuffDescParamByAvatarSkillID, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, BuffSimpleDesc, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
 
@@ -658,7 +676,7 @@
 }
 ```
 
-### QuestData.json (1.17 MB, 5,552 条)
+### QuestData.json (1.20 MB, 5,674 条)
 
 **字段** (10): `FinishWayID, GotoID, ImagePath, QuestDisplay, QuestID, QuestTitle, QuestType, RewardID, UnlockParamList, UnlockType`
 
@@ -679,25 +697,19 @@
 }
 ```
 
-### PerformanceDS.json (1.16 MB, 4,733 条)
+### PerformanceShiftBlockCfg.json (1.13 MB, 17,373 条)
 
-**字段** (10): `EndBlack, EndWithCrack, FloorID, GroupID, IsSkip, PerformanceCharacter, PerformanceID, PerformancePath, PlaneID, StartBlack`
+**字段** (2): `PerformanceID, PerformanceType`
 
 **首条记录摘要**:
 ```json
 {
-  "PerformanceID": 103010102,
-  "PerformancePath": "Story/Discussion/Mission/1030101/DS10301...",
-  "IsSkip": "AfterSeen",
-  "PerformanceCharacter": "",
-  "StartBlack": "Full",
-  "EndBlack": "Full",
-  "PlaneID": 10000,
-  "FloorID": 10000000
+  "PerformanceType": "C",
+  "PerformanceID": 100010101
 }
 ```
 
-### PerformanceSkipFlagD.json (1.07 MB, 6,569 条)
+### PerformanceSkipFlagD.json (1.11 MB, 6,775 条)
 
 **字段** (4): `ActorList, ContainImportBranch, PerformanceID, Skippable`
 
@@ -710,7 +722,7 @@
 }
 ```
 
-### StatusConfig.json (1.06 MB, 2,333 条)
+### StatusConfig.json (1.10 MB, 2,428 条)
 
 **字段** (11): `CanDispel, ModifierName, ReadParamList, StatusDesc, StatusEffect, StatusID, StatusIconPath, StatusIconPathHighSize, StatusName, StatusType, TagList`
 
@@ -736,7 +748,7 @@
 }
 ```
 
-### MainMission.json (1.04 MB, 2,131 条)
+### MainMission.json (1.05 MB, 2,166 条)
 
 **字段** (21): `BeginOperation, BeginParam, ChapterID, DisplayPriority, DisplayRewardID, IsInRaid, MainMissionID, MissionAdvance, MissionPack, MissionStoryEvent, Name, NextMainMissionList, NextTrackMainMission, RewardID, SubRewardList, SubType, TakeOperation, TakeParam, TrackWeight, Type, WorldID`
 
@@ -772,7 +784,7 @@
 }
 ```
 
-### MazeProp.json (1.01 MB, 1,760 条)
+### MazeProp.json (1.03 MB, 1,811 条)
 
 **字段** (15): `BoardShowList, ConfigEntityPath, DamageTypeList, HasRendererComponent, ID, IsMapContent, JsonPath, LodPriority, MiniMapIconType, MiniMapStateIcons, PerformanceType, PropIconPath, PropName, PropStateList, PropType`
 
@@ -795,7 +807,7 @@
 }
 ```
 
-### RewardData.json (0.97 MB, 9,234 条)
+### RewardData.json (0.99 MB, 9,393 条)
 
 **字段** (27): `Count_1, Count_2, Count_3, Count_4, Count_5, Count_6, Hcoin, IsSpecial, ItemID_1, ItemID_2, ItemID_3, ItemID_4, ItemID_5, ItemID_6, Level_1, Level_2, Level_3, Level_4, Level_5, Level_6, Rank_1, Rank_2, Rank_3, Rank_4, Rank_5, Rank_6, RewardID`
 
@@ -806,7 +818,20 @@
 }
 ```
 
-### MonsterTemplateConfig.json (0.88 MB, 613 条)
+### MonsterDrop.json (0.90 MB, 4,410 条)
+
+**字段** (4): `AvatarExpReward, DisplayItemList, MonsterTemplateID, WorldLevel`
+
+**首条记录摘要**:
+```json
+{
+  "MonsterTemplateID": 1002011,
+  "AvatarExpReward": 36,
+  "DisplayItemList": "<list[3]>"
+}
+```
+
+### MonsterTemplateConfig.json (0.90 MB, 628 条)
 
 **字段** (32): `AIPath, AISkillSequence, AtlasSortID, AttackBase, CriticalDamageBase, DefenceBase, HPBase, IconPath, ImagePath, InitialDelayRatio, JsonConfig, ManikinConfigPath, ManikinImagePath, ManikinPrefabPath, MinimumFatigueRatio, MonsterCampID, MonsterName, MonsterStrategy, MonsterTemplateID, NPCMonsterList, NatureID, PrefabPath, Rank, RoundIconPath, SpeedBase, SpeedModifyValue, StanceBase, StanceCount, StanceModifyValue, StanceType, StatusResistanceBase, TemplateGroupID`
 
@@ -867,19 +892,6 @@
 }
 ```
 
-### MonsterDrop.json (0.87 MB, 4,305 条)
-
-**字段** (4): `AvatarExpReward, DisplayItemList, MonsterTemplateID, WorldLevel`
-
-**首条记录摘要**:
-```json
-{
-  "MonsterTemplateID": 1002011,
-  "AvatarExpReward": 36,
-  "DisplayItemList": "<list[3]>"
-}
-```
-
 ### FunNumMultiplier.json (0.75 MB, 10,000 条)
 
 **字段** (2): `FunNum, Multiplier`
@@ -893,7 +905,7 @@
 }
 ```
 
-### AchievementData.json (0.68 MB, 1,869 条)
+### AchievementData.json (0.70 MB, 1,921 条)
 
 **字段** (16): `AchievementDesc, AchievementDescPS, AchievementID, AchievementTitle, AchievementTitlePS, HideAchievementDesc, LinearQuestID, PSTrophyID, ParamList, Priority, QuestID, Rarity, RecordText, RecordType, SeriesID, ShowType`
 
@@ -936,7 +948,7 @@
 }
 ```
 
-### CycleQuest.json (0.65 MB, 2,611 条)
+### CycleQuest.json (0.67 MB, 2,675 条)
 
 **字段** (10): `ActivityModuleID, CycleID, Cycledays, FinishedTimes, IsNonPeriodic, MaxLevel, MinLevel, QuestList, ScheduleDataID, WeekDayList`
 
@@ -963,36 +975,7 @@
 }
 ```
 
-### MazeFloor.json (0.63 MB, 679 条)
-
-**字段** (18): `BGMWorldState, BaseFloorID, CombatBGMHigh, CombatBGMLow, EnterAudioEvent, ExitAudioEvent, FloorBGMBusyStateName, FloorBGMGroupName, FloorBGMNormalStateName, FloorDefaultEmotion, FloorID, FloorName, FloorTag, FloorType, MapLayerNameList, MunicipalConfigPath, OptionalLoadBlocksConfig, WalkingEffectAdditiveScale`
-
-**首条记录摘要**:
-```json
-{
-  "FloorID": 10000000,
-  "FloorName": "FloorName_10000000",
-  "BaseFloorID": 10000000,
-  "FloorTag": [],
-  "BGMWorldState": "State_Spaceship",
-  "FloorBGMGroupName": "StateGroup_Spaceship",
-  "FloorBGMNormalStateName": "State_Spaceship_Default",
-  "FloorDefaultEmotion": "State_Hollowing",
-  "FloorBGMBusyStateName": "",
-  "EnterAudioEvent": [
-    "Ev_amb_city_starrail"
-  ],
-  "ExitAudioEvent": [],
-  "FloorType": "Default",
-  "OptionalLoadBlocksConfig": "Config/ConfigOptionalLoadBlocks/Train.js...",
-  "MunicipalConfigPath": "",
-  "MapLayerNameList": "<list[3]>",
-  "CombatBGMLow": "State_Spacetrain_Combat",
-  "CombatBGMHigh": "State_Spacetrain_Combat"
-}
-```
-
-### EquipmentPromotionConfig.json (0.63 MB, 1,155 条)
+### EquipmentPromotionConfig.json (0.65 MB, 1,183 条)
 
 **字段** (12): `BaseAttack, BaseAttackAdd, BaseDefence, BaseDefenceAdd, BaseHP, BaseHPAdd, EquipmentID, MaxLevel, PlayerLevelRequire, Promotion, PromotionCostList, WorldLevelRequire`
 
@@ -1024,7 +1007,36 @@
 }
 ```
 
-### PerformanceSkipOverride.json (0.61 MB, 3,894 条)
+### MazeFloor.json (0.64 MB, 692 条)
+
+**字段** (18): `BGMWorldState, BaseFloorID, CombatBGMHigh, CombatBGMLow, EnterAudioEvent, ExitAudioEvent, FloorBGMBusyStateName, FloorBGMGroupName, FloorBGMNormalStateName, FloorDefaultEmotion, FloorID, FloorName, FloorTag, FloorType, MapLayerNameList, MunicipalConfigPath, OptionalLoadBlocksConfig, WalkingEffectAdditiveScale`
+
+**首条记录摘要**:
+```json
+{
+  "FloorID": 10000000,
+  "FloorName": "FloorName_10000000",
+  "BaseFloorID": 10000000,
+  "FloorTag": [],
+  "BGMWorldState": "State_Spaceship",
+  "FloorBGMGroupName": "StateGroup_Spaceship",
+  "FloorBGMNormalStateName": "State_Spaceship_Default",
+  "FloorDefaultEmotion": "State_Hollowing",
+  "FloorBGMBusyStateName": "",
+  "EnterAudioEvent": [
+    "Ev_amb_city_starrail"
+  ],
+  "ExitAudioEvent": [],
+  "FloorType": "Default",
+  "OptionalLoadBlocksConfig": "Config/ConfigOptionalLoadBlocks/Train.js...",
+  "MunicipalConfigPath": "",
+  "MapLayerNameList": "<list[3]>",
+  "CombatBGMLow": "State_Spacetrain_Combat",
+  "CombatBGMHigh": "State_Spacetrain_Combat"
+}
+```
+
+### PerformanceSkipOverride.json (0.63 MB, 4,047 条)
 
 **字段** (9): `Desc, IsConfirmRequiredToSkipFlag, IsOverrideCharacter, IsOverrideImportantFlag, OverrideCharacterList, OverrideImportantFlag, PackID, PerformanceID, PerformanceType`
 
@@ -1052,105 +1064,7 @@
 }
 ```
 
-### StageTestConfig.json (0.58 MB, 824 条)
-
-**字段** (19): `BattleScoringGroup, EliteGroup, ForbidAutoBattle, ForbidExitBattle, HardLevelGroup, Level, LevelGraphPath, LevelLoseCondition, LevelWinCondition, MonsterList, MonsterWarningRatio, Release, StageAbilityConfig, StageConfigData, StageID, StageName, StageType, SubLevelGraphs, TrialAvatarList`
-
-**首条记录摘要**:
-```json
-{
-  "StageID": 47,
-  "StageType": "Mainline",
-  "StageName": {
-    "Hash": 10247983769183018110
-  },
-  "HardLevelGroup": 1,
-  "Level": 40,
-  "LevelGraphPath": "Config/Level/StageCommonTemplate.json",
-  "StageAbilityConfig": [],
-  "SubLevelGraphs": [],
-  "StageConfigData": "<list[2]>",
-  "MonsterList": "<list[1]>",
-  "LevelLoseCondition": [],
-  "LevelWinCondition": [],
-  "ForbidExitBattle": true,
-  "MonsterWarningRatio": 1,
-  "TrialAvatarList": []
-}
-```
-
-### MappingInfo.json (0.56 MB, 1,669 条)
-
-**字段** (9): `Desc, DisplayItemList, FarmType, ID, IsShowInFog, Name, ShowMonsterList, Type, WorldLevel`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "Type": "FARM_ENTRANCE",
-  "FarmType": "COCOON",
-  "IsShowInFog": true,
-  "Name": {
-    "Hash": 7403741912309641086
-  },
-  "Desc": {
-    "Hash": 17997180657769776512
-  },
-  "ShowMonsterList": [
-    8001010,
-    8001020
-  ],
-  "DisplayItemList": "<list[10]>"
-}
-```
-
-### GridFightBackBESkillConfig.json (0.55 MB, 446 条)
-
-**字段** (24): `AttackType, BPAdd, BPNeed, CutinPath, DelayRatio, ParamList, SPBase, SPMultipleRatio, SPNeed, ShowStanceList, SimpleParamList, SimpleSkillDesc, SkillButtonEffType, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
-
-**首条记录摘要**:
-```json
-{
-  "SkillID": 10010201,
-  "SkillName": {
-    "Hash": 2653531561220764323
-  },
-  "SkillTag": {
-    "Hash": 9917237756149299580
-  },
-  "SkillTypeDesc": {
-    "Hash": 16911956374043616971
-  },
-  "SkillTriggerKey": "Skill02",
-  "SkillIcon": "SpriteOutput/SkillIcons/Avatar/1001/Skil...",
-  "UltraSkillIcon": "",
-  "CutinPath": "",
-  "SkillDesc": {
-    "Hash": 10372959612166531171
-  },
-  "SimpleSkillDesc": {
-    "Hash": 10011909412818046902
-  },
-  "ShowStanceList": "<list[3]>",
-  "SPMultipleRatio": {
-    "Value": 0.5
-  },
-  "BPNeed": {
-    "Value": -1
-  },
-  "DelayRatio": {
-    "Value": 1
-  },
-  "ParamList": "<list[7]>",
-  "SimpleParamList": "<list[7]>",
-  "StanceDamageType": "Quantum",
-  "AttackType": "BPSkill",
-  "SkillEffect": "Defence",
-  "SkillButtonEffType": ""
-}
-```
-
-### AvatarServantSkillConfig.json (0.54 MB, 440 条)
+### AvatarServantSkillConfig.json (0.59 MB, 480 条)
 
 **字段** (28): `AttackType, BPNeed, DelayRatio, ExtraEffectIDList, HideInUI, Level, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, SPBase, SPMultipleRatio, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SimpleSkillDesc, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillNeed, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
 
@@ -1204,7 +1118,59 @@
 }
 ```
 
-### NPCData.json (0.53 MB, 1,882 条)
+### StageTestConfig.json (0.59 MB, 828 条)
+
+**字段** (19): `BattleScoringGroup, EliteGroup, ForbidAutoBattle, ForbidExitBattle, HardLevelGroup, Level, LevelGraphPath, LevelLoseCondition, LevelWinCondition, MonsterList, MonsterWarningRatio, Release, StageAbilityConfig, StageConfigData, StageID, StageName, StageType, SubLevelGraphs, TrialAvatarList`
+
+**首条记录摘要**:
+```json
+{
+  "StageID": 47,
+  "StageType": "Mainline",
+  "StageName": {
+    "Hash": 10247983769183018110
+  },
+  "HardLevelGroup": 1,
+  "Level": 40,
+  "LevelGraphPath": "Config/Level/StageCommonTemplate.json",
+  "StageAbilityConfig": [],
+  "SubLevelGraphs": [],
+  "StageConfigData": "<list[2]>",
+  "MonsterList": "<list[1]>",
+  "LevelLoseCondition": [],
+  "LevelWinCondition": [],
+  "ForbidExitBattle": true,
+  "MonsterWarningRatio": 1,
+  "TrialAvatarList": []
+}
+```
+
+### MappingInfo.json (0.57 MB, 1,702 条)
+
+**字段** (9): `Desc, DisplayItemList, FarmType, ID, IsShowInFog, Name, ShowMonsterList, Type, WorldLevel`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "Type": "FARM_ENTRANCE",
+  "FarmType": "COCOON",
+  "IsShowInFog": true,
+  "Name": {
+    "Hash": 7403741912309641086
+  },
+  "Desc": {
+    "Hash": 17997180657769776512
+  },
+  "ShowMonsterList": [
+    8001010,
+    8001020
+  ],
+  "DisplayItemList": "<list[10]>"
+}
+```
+
+### NPCData.json (0.56 MB, 1,983 条)
 
 **字段** (7): `ConfigEntityPath, DefaultNPCName, DefaultNPCTitle, ID, JsonPath, SeriesID, SubType`
 
@@ -1218,7 +1184,72 @@
 }
 ```
 
-### ChallengeMazeConfig.json (0.51 MB, 603 条)
+### GridFightBackBESkillConfig.json (0.55 MB, 446 条)
+
+**字段** (24): `AttackType, BPAdd, BPNeed, CutinPath, DelayRatio, ParamList, SPBase, SPMultipleRatio, SPNeed, ShowStanceList, SimpleParamList, SimpleSkillDesc, SkillButtonEffType, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 10010201,
+  "SkillName": {
+    "Hash": 2653531561220764323
+  },
+  "SkillTag": {
+    "Hash": 9917237756149299580
+  },
+  "SkillTypeDesc": {
+    "Hash": 16911956374043616971
+  },
+  "SkillTriggerKey": "Skill02",
+  "SkillIcon": "SpriteOutput/SkillIcons/Avatar/1001/Skil...",
+  "UltraSkillIcon": "",
+  "CutinPath": "",
+  "SkillDesc": {
+    "Hash": 10372959612166531171
+  },
+  "SimpleSkillDesc": {
+    "Hash": 10011909412818046902
+  },
+  "ShowStanceList": "<list[3]>",
+  "SPMultipleRatio": {
+    "Value": 0.5
+  },
+  "BPNeed": {
+    "Value": -1
+  },
+  "DelayRatio": {
+    "Value": 1
+  },
+  "ParamList": "<list[7]>",
+  "SimpleParamList": "<list[7]>",
+  "AttackType": "BPSkill",
+  "SkillEffect": "Defence",
+  "SkillButtonEffType": ""
+}
+```
+
+### StageInfiniteWaveConfig.json (0.52 MB, 1,739 条)
+
+**字段** (7): `Ability, ClearPreviousAbility, InfiniteWaveID, MaxMonsterCount, MaxTeammateCount, MonsterGroupIDList, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "InfiniteWaveID": 10101,
+  "MonsterGroupIDList": [
+    1201,
+    1202
+  ],
+  "MaxMonsterCount": 31,
+  "MaxTeammateCount": 5,
+  "Ability": "",
+  "ParamList": [],
+  "ClearPreviousAbility": true
+}
+```
+
+### ChallengeMazeConfig.json (0.52 MB, 615 条)
 
 **字段** (25): `ChallengeCountDown, ChallengeTargetID, ConfigList1, ConfigList2, DamageType1, DamageType2, EventIDList1, EventIDList2, Floor, GroupID, ID, MapEntranceID, MapEntranceID2, MazeBuffID, MazeGroupID1, MazeGroupID2, MonsterID1, MonsterID2, Name, NpcMonsterIDList1, NpcMonsterIDList2, PreChallengeMazeID, PreLevel, RewardID, StageNum`
 
@@ -1268,26 +1299,6 @@
 }
 ```
 
-### StageInfiniteWaveConfig.json (0.51 MB, 1,672 条)
-
-**字段** (7): `Ability, ClearPreviousAbility, InfiniteWaveID, MaxMonsterCount, MaxTeammateCount, MonsterGroupIDList, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "InfiniteWaveID": 10101,
-  "MonsterGroupIDList": [
-    1201,
-    1202
-  ],
-  "MaxMonsterCount": 31,
-  "MaxTeammateCount": 5,
-  "Ability": "",
-  "ParamList": [],
-  "ClearPreviousAbility": true
-}
-```
-
 ### DialogueNPC.json (0.50 MB, 1,725 条)
 
 **字段** (7): `ActPath, ConditionIDs, GroupID, GroupType, IconType, InteractTitle, Priority`
@@ -1307,6 +1318,40 @@
     "Value": 10
   },
   "ActPath": "Config/Level/Test/Dialogue/90001.json"
+}
+```
+
+### ItemConfigBook.json (0.49 MB, 744 条)
+
+**字段** (18): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, PurposeType, Rarity, ReturnItemIDList, UseMethod, isVisible`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 190420,
+  "ItemMainType": "Usable",
+  "ItemSubType": "Book",
+  "InventoryDisplayTag": 1,
+  "Rarity": "Normal",
+  "PurposeType": 21,
+  "isVisible": true,
+  "ItemName": {
+    "Hash": 3376216980212468034
+  },
+  "ItemDesc": {
+    "Hash": 7567250262231580424
+  },
+  "ItemBGDesc": {
+    "Hash": 14022552176919748575
+  },
+  "ItemIconPath": "SpriteOutput/ItemIcon/190007.png",
+  "ItemFigureIconPath": "SpriteOutput/ItemFigures/190007.png",
+  "ItemCurrencyIconPath": "SpriteOutput/ItemIcon/190007.png",
+  "ItemAvatarIconPath": "",
+  "PileLimit": 99999,
+  "UseMethod": "AutoConversionItem",
+  "CustomDataList": [],
+  "ReturnItemIDList": []
 }
 ```
 
@@ -1412,72 +1457,7 @@
 }
 ```
 
-### ItemConfigBook.json (0.46 MB, 692 条)
-
-**字段** (18): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, PurposeType, Rarity, ReturnItemIDList, UseMethod, isVisible`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 190420,
-  "ItemMainType": "Usable",
-  "ItemSubType": "Book",
-  "InventoryDisplayTag": 1,
-  "Rarity": "Normal",
-  "PurposeType": 21,
-  "isVisible": true,
-  "ItemName": {
-    "Hash": 3376216980212468034
-  },
-  "ItemDesc": {
-    "Hash": 7567250262231580424
-  },
-  "ItemBGDesc": {
-    "Hash": 14022552176919748575
-  },
-  "ItemIconPath": "SpriteOutput/ItemIcon/190007.png",
-  "ItemFigureIconPath": "SpriteOutput/ItemFigures/190007.png",
-  "ItemCurrencyIconPath": "SpriteOutput/ItemIcon/190007.png",
-  "ItemAvatarIconPath": "",
-  "PileLimit": 99999,
-  "UseMethod": "AutoConversionItem",
-  "CustomDataList": [],
-  "ReturnItemIDList": []
-}
-```
-
-### ClockParkCardAction.json (0.46 MB, 738 条)
-
-**字段** (10): `CardActionID, CardDesc, DiceList, EffectList, ForeImgPath, ImgPath, ImgPath1, ImgPath2, ImgPath3, SuccessEffectList`
-
-**首条记录摘要**:
-```json
-{
-  "CardActionID": 100101,
-  "DiceList": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6
-  ],
-  "EffectList": [
-    1
-  ],
-  "SuccessEffectList": [],
-  "CardDesc": {
-    "Hash": 10973806532575788973
-  },
-  "ForeImgPath": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
-  "ImgPath": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
-  "ImgPath1": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
-  "ImgPath2": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
-  "ImgPath3": "SpriteOutput/Quest/ClockPark/GamePlayPag..."
-}
-```
-
-### AvatarPromotionConfig.json (0.45 MB, 637 条)
+### AvatarPromotionConfig.json (0.46 MB, 651 条)
 
 **字段** (16): `AttackAdd, AttackBase, AvatarID, BaseAggro, CriticalChance, CriticalDamage, DefenceAdd, DefenceBase, HPAdd, HPBase, MaxLevel, PlayerLevelRequire, Promotion, PromotionCostList, SpeedBase, WorldLevelRequire`
 
@@ -1518,6 +1498,52 @@
   "BaseAggro": {
     "Value": 150
   }
+}
+```
+
+### ClockParkCardAction.json (0.46 MB, 738 条)
+
+**字段** (10): `CardActionID, CardDesc, DiceList, EffectList, ForeImgPath, ImgPath, ImgPath1, ImgPath2, ImgPath3, SuccessEffectList`
+
+**首条记录摘要**:
+```json
+{
+  "CardActionID": 100101,
+  "DiceList": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "EffectList": [
+    1
+  ],
+  "SuccessEffectList": [],
+  "CardDesc": {
+    "Hash": 10973806532575788973
+  },
+  "ForeImgPath": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
+  "ImgPath": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
+  "ImgPath1": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
+  "ImgPath2": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
+  "ImgPath3": "SpriteOutput/Quest/ClockPark/GamePlayPag..."
+}
+```
+
+### TutorialData.json (0.45 MB, 1,267 条)
+
+**字段** (7): `CanInterrupt, FinishTriggerParams, Priority, RestoreType, TriggerParams, TutorialID, TutorialJsonPath`
+
+**首条记录摘要**:
+```json
+{
+  "TutorialID": 1001,
+  "Priority": 10,
+  "TutorialJsonPath": "Config/Level/Tutorial/Tutorial_1001.json",
+  "TriggerParams": "<list[1]>",
+  "FinishTriggerParams": "<list[1]>"
 }
 ```
 
@@ -1588,21 +1614,6 @@
   "StanceDamageType": "Wind",
   "AttackType": "Normal",
   "SkillEffect": "SingleAttack"
-}
-```
-
-### TutorialData.json (0.44 MB, 1,222 条)
-
-**字段** (7): `CanInterrupt, FinishTriggerParams, Priority, RestoreType, TriggerParams, TutorialID, TutorialJsonPath`
-
-**首条记录摘要**:
-```json
-{
-  "TutorialID": 1001,
-  "Priority": 10,
-  "TutorialJsonPath": "Config/Level/Tutorial/Tutorial_1001.json",
-  "TriggerParams": "<list[1]>",
-  "FinishTriggerParams": "<list[1]>"
 }
 ```
 
@@ -1679,7 +1690,7 @@
 }
 ```
 
-### TutorialGuideTalkData.json (0.40 MB, 2,619 条)
+### TutorialGuideTalkData.json (0.41 MB, 2,708 条)
 
 **字段** (3): `AvatarHeadIcon, ID, TalkDataText`
 
@@ -1721,7 +1732,21 @@
 }
 ```
 
-### ItemComefrom.json (0.37 MB, 2,300 条)
+### StoryCharacter.json (0.38 MB, 1,671 条)
+
+**字段** (5): `CharacterID, ConfigEntityPath, JsonPath, StoryCharacterID, SubType`
+
+**首条记录摘要**:
+```json
+{
+  "StoryCharacterID": "NPC_Avatar_Boy_Arlan_00",
+  "SubType": "Avatar",
+  "ConfigEntityPath": "Config/ConfigEntity/NPC/Avatar/NPC_Avata...",
+  "JsonPath": "Config/ConfigCharacter/NPC/Avatar/NPC_Av..."
+}
+```
+
+### ItemComefrom.json (0.37 MB, 2,316 条)
 
 **字段** (7): `ComefromID, Desc, GotoID, GotoParam, ID, NPCMonsterTrackID, Sort`
 
@@ -1741,35 +1766,7 @@
 }
 ```
 
-### HardLevelGroup.json (0.37 MB, 741 条)
-
-**字段** (10): `AttackRatio, CombatPowerList, DefenceRatio, HPRatio, HardLevelGroup, Level, SpeedRatio, StanceRatio, StatusProbability, StatusResistance`
-
-**首条记录摘要**:
-```json
-{
-  "HardLevelGroup": 1,
-  "Level": 1,
-  "AttackRatio": {
-    "Value": 0.64
-  },
-  "DefenceRatio": {
-    "Value": 1
-  },
-  "HPRatio": {
-    "Value": 0.8
-  },
-  "SpeedRatio": {
-    "Value": 1
-  },
-  "StanceRatio": {
-    "Value": 1
-  },
-  "CombatPowerList": "<list[4]>"
-}
-```
-
-### EquipmentSkillConfig.json (0.36 MB, 825 条)
+### EquipmentSkillConfig.json (0.37 MB, 845 条)
 
 **字段** (7): `AbilityName, AbilityProperty, Level, ParamList, SkillDesc, SkillID, SkillName`
 
@@ -1797,61 +1794,35 @@
 }
 ```
 
-### StoryCharacter.json (0.35 MB, 1,580 条)
+### HardLevelGroup.json (0.37 MB, 745 条)
 
-**字段** (5): `CharacterID, ConfigEntityPath, JsonPath, StoryCharacterID, SubType`
-
-**首条记录摘要**:
-```json
-{
-  "StoryCharacterID": "NPC_Avatar_Boy_Arlan_00",
-  "SubType": "Avatar",
-  "ConfigEntityPath": "Config/ConfigEntity/NPC/Avatar/NPC_Avata...",
-  "JsonPath": "Config/ConfigCharacter/NPC/Avatar/NPC_Av..."
-}
-```
-
-### IdleLiveChatContent.json (0.35 MB, 4,209 条)
-
-**字段** (2): `Content, ID`
+**字段** (10): `AttackRatio, CombatPowerList, DefenceRatio, HPRatio, HardLevelGroup, Level, SpeedRatio, StanceRatio, StatusProbability, StatusResistance`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 8011101,
-  "Content": {
-    "Hash": 516133481596018267
-  }
-}
-```
-
-### EliteGroup.json (0.34 MB, 1,394 条)
-
-**字段** (6): `AttackRatio, DefenceRatio, EliteGroup, HPRatio, SpeedRatio, StanceRatio`
-
-**首条记录摘要**:
-```json
-{
-  "EliteGroup": 1,
+  "HardLevelGroup": 1,
+  "Level": 1,
   "AttackRatio": {
-    "Value": 1
+    "Value": 0.64
   },
   "DefenceRatio": {
     "Value": 1
   },
   "HPRatio": {
-    "Value": 1
+    "Value": 0.8
   },
   "SpeedRatio": {
     "Value": 1
   },
   "StanceRatio": {
     "Value": 1
-  }
+  },
+  "CombatPowerList": "<list[4]>"
 }
 ```
 
-### AvatarStatusConfig.json (0.34 MB, 736 条)
+### AvatarStatusConfig.json (0.36 MB, 765 条)
 
 **字段** (11): `CanDispel, ModifierName, ReadParamList, StatusDesc, StatusEffect, StatusID, StatusIconPath, StatusIconPathHighSize, StatusName, StatusType, TagList`
 
@@ -1875,6 +1846,63 @@
   "CanDispel": true,
   "ReadParamList": [],
   "TagList": []
+}
+```
+
+### IdleLiveChatContent.json (0.35 MB, 4,209 条)
+
+**字段** (2): `Content, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 8011101,
+  "Content": {
+    "Hash": 516133481596018267
+  }
+}
+```
+
+### RogueDialogueOptionDisplay.json (0.35 MB, 2,302 条)
+
+**字段** (3): `OptionDesc, OptionDisplayID, OptionTitle`
+
+**首条记录摘要**:
+```json
+{
+  "OptionDisplayID": 10001,
+  "OptionTitle": {
+    "Hash": 8663764787473980736
+  },
+  "OptionDesc": {
+    "Hash": 13686242179302134078
+  }
+}
+```
+
+### EliteGroup.json (0.35 MB, 1,406 条)
+
+**字段** (6): `AttackRatio, DefenceRatio, EliteGroup, HPRatio, SpeedRatio, StanceRatio`
+
+**首条记录摘要**:
+```json
+{
+  "EliteGroup": 1,
+  "AttackRatio": {
+    "Value": 1
+  },
+  "DefenceRatio": {
+    "Value": 1
+  },
+  "HPRatio": {
+    "Value": 1
+  },
+  "SpeedRatio": {
+    "Value": 1
+  },
+  "StanceRatio": {
+    "Value": 1
+  }
 }
 ```
 
@@ -1913,24 +1941,7 @@
 }
 ```
 
-### RogueDialogueOptionDisplay.json (0.34 MB, 2,260 条)
-
-**字段** (3): `OptionDesc, OptionDisplayID, OptionTitle`
-
-**首条记录摘要**:
-```json
-{
-  "OptionDisplayID": 10001,
-  "OptionTitle": {
-    "Hash": 8663764787473980736
-  },
-  "OptionDesc": {
-    "Hash": 13686242179302134078
-  }
-}
-```
-
-### MazeChest.json (0.33 MB, 1,998 条)
+### MazeChest.json (0.34 MB, 2,074 条)
 
 **字段** (3): `ChestType, ID, WorldID`
 
@@ -1943,21 +1954,7 @@
 }
 ```
 
-### ActivityHipplenEffect.json (0.32 MB, 2,781 条)
-
-**字段** (4): `AAIAEKDKMMK, EJHODPJIFIN, GMPGDEINODK, PHFMCACHFIJ`
-
-**首条记录摘要**:
-```json
-{
-  "PHFMCACHFIJ": 30101111,
-  "GMPGDEINODK": "StatChange",
-  "EJHODPJIFIN": "1,0",
-  "AAIAEKDKMMK": []
-}
-```
-
-### ShopGoodsConfig.json (0.31 MB, 847 条)
+### ShopGoodsConfig.json (0.33 MB, 891 条)
 
 **字段** (27): `ActivityModuleID, CurrencyCostList, CurrencyList, CycleDays, GoodsID, GoodsSortID, IsLimitedTimePurchase, IsNew, IsOnSale, ItemCount, ItemGroupID, ItemID, Level, LimitTimes, LimitType1, LimitValue1List, LimitValue2List, OnShelfType1, OnShelfType2, OnShelfValue1List, OnShelfValue2List, Rank, RefreshType, ScheduleDataID, ShopID, TagParam, TagType`
 
@@ -1983,47 +1980,7 @@
 }
 ```
 
-### LinearQuest.json (0.31 MB, 2,888 条)
-
-**字段** (4): `LinearID, MaxLevel, MinLevel, QuestList`
-
-**首条记录摘要**:
-```json
-{
-  "LinearID": 1001711,
-  "QuestList": [
-    1001711
-  ],
-  "MinLevel": 1,
-  "MaxLevel": 999
-}
-```
-
-### TutorialGuideGroup.json (0.31 MB, 855 条)
-
-**字段** (10): `CanReview, FinishTriggerParams, GroupID, MessageText, Order, RewardID, TriggerParams, TutorialGuideIDList, TutorialShowType, TutorialType`
-
-**首条记录摘要**:
-```json
-{
-  "GroupID": 1101,
-  "TutorialGuideIDList": [
-    110101
-  ],
-  "TutorialType": 1,
-  "CanReview": true,
-  "TutorialShowType": "Hide",
-  "Order": 199,
-  "TriggerParams": "<list[1]>",
-  "FinishTriggerParams": "<list[1]>",
-  "MessageText": {
-    "Hash": 560005623724621359
-  },
-  "RewardID": 201
-}
-```
-
-### MonsterStatusConfig.json (0.31 MB, 668 条)
+### MonsterStatusConfig.json (0.32 MB, 691 条)
 
 **字段** (11): `CanDispel, ModifierName, ReadParamList, StatusDesc, StatusEffect, StatusID, StatusIconPath, StatusIconPathHighSize, StatusName, StatusType, TagList`
 
@@ -2052,7 +2009,61 @@
 }
 ```
 
-### BattleEventConfig.json (0.30 MB, 459 条)
+### LinearQuest.json (0.32 MB, 2,946 条)
+
+**字段** (4): `LinearID, MaxLevel, MinLevel, QuestList`
+
+**首条记录摘要**:
+```json
+{
+  "LinearID": 1001711,
+  "QuestList": [
+    1001711
+  ],
+  "MinLevel": 1,
+  "MaxLevel": 999
+}
+```
+
+### ActivityHipplenEffect.json (0.32 MB, 2,781 条)
+
+**字段** (4): `AAIAEKDKMMK, EJHODPJIFIN, GMPGDEINODK, PHFMCACHFIJ`
+
+**首条记录摘要**:
+```json
+{
+  "PHFMCACHFIJ": 30101111,
+  "GMPGDEINODK": "StatChange",
+  "EJHODPJIFIN": "1,0",
+  "AAIAEKDKMMK": []
+}
+```
+
+### TutorialGuideGroup.json (0.31 MB, 860 条)
+
+**字段** (10): `CanReview, FinishTriggerParams, GroupID, MessageText, Order, RewardID, TriggerParams, TutorialGuideIDList, TutorialShowType, TutorialType`
+
+**首条记录摘要**:
+```json
+{
+  "GroupID": 1101,
+  "TutorialGuideIDList": [
+    110101
+  ],
+  "TutorialType": 1,
+  "CanReview": true,
+  "TutorialShowType": "Hide",
+  "Order": 199,
+  "TriggerParams": "<list[1]>",
+  "FinishTriggerParams": "<list[1]>",
+  "MessageText": {
+    "Hash": 560005623724621359
+  },
+  "RewardID": 201
+}
+```
+
+### BattleEventConfig.json (0.31 MB, 486 条)
 
 **字段** (16): `AbilityList, ActionBarDescrptionText, AssetPackName, BEActionBarType, BattleEventButtonType, BattleEventID, BattleEventName, DescrptionText, EliteGroup, EventSubType, HardLevel, HeadIcon, OverrideProperty, ParamList, Speed, Team`
 
@@ -2079,21 +2090,7 @@
 }
 ```
 
-### GridFightRankAttachment.json (0.30 MB, 1,596 条)
-
-**字段** (4): `GeneralPropertyModifyList, Rank, RoleID, Star`
-
-**首条记录摘要**:
-```json
-{
-  "RoleID": 1001,
-  "Rank": 1,
-  "Star": 1,
-  "GeneralPropertyModifyList": "<list[1]>"
-}
-```
-
-### AvatarRankConfig.json (0.29 MB, 606 条)
+### AvatarRankConfig.json (0.30 MB, 618 条)
 
 **字段** (11): `Desc, ExtraEffectIDList, IconPath, Name, Param, Rank, RankAbility, RankID, SkillAddLevelList, Trigger, UnlockCost`
 
@@ -2125,45 +2122,77 @@
 }
 ```
 
-### GridFightAugment.json (0.28 MB, 334 条)
+### GridFightRankAttachment.json (0.30 MB, 1,596 条)
 
-**字段** (16): `AugmentGameRefScore, AugmentGameRefTrait, AugmentSavedValueList, AugmentSearchKey, CategoryID, ChapterLimitList, DescParamList, EffectParamList, HexDesc, HexName, ID, IconPath, IsOCEffective, JsonPath, MiniIconPath, Quality`
+**字段** (4): `GeneralPropertyModifyList, Rank, RoleID, Star`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 100101,
-  "CategoryID": 1,
-  "Quality": "Silver",
-  "HexName": {
-    "Hash": 1806895644678960298
+  "RoleID": 1001,
+  "Rank": 1,
+  "Star": 1,
+  "GeneralPropertyModifyList": "<list[1]>"
+}
+```
+
+### BattleEventSkillConfig.json (0.29 MB, 322 条)
+
+**字段** (26): `AttackType, BPNeed, CutinPath, DelayRatio, ParamList, SPAdd, SPBase, SPMultipleRatio, SPNeed, ShowStanceList, SimpleParamList, SimpleSkillDesc, SkillButtonEffType, SkillComboValueDelta, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillNeed, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 2001801,
+  "SkillName": {
+    "Hash": 9406363350117198765
   },
-  "HexDesc": {
-    "Hash": 10523607790638753906
+  "SkillTag": {
+    "Hash": 12601813654230214900
   },
-  "DescParamList": [
-    {
-      "Value": 7
-    }
-  ],
-  "IconPath": "SpriteOutput/GridFight/AugmentBig/100101...",
-  "AugmentSearchKey": "Augment_100101",
-  "MiniIconPath": "SpriteOutput/GridFight/Augment/100101.pn...",
-  "ChapterLimitList": [
-    1
-  ],
-  "IsOCEffective": 1,
-  "JsonPath": "Config/Level/GridFight/Augment/GridFight...",
-  "EffectParamList": [
-    {
-      "Value": 7
-    }
-  ],
-  "AugmentSavedValueList": [
-    "Augment100101_SavedValue01"
-  ],
-  "AugmentGameRefTrait": [],
-  "AugmentGameRefScore": []
+  "SkillTypeDesc": {
+    "Hash": 4243237131156021087
+  },
+  "SkillTriggerKey": "Skill03",
+  "SkillIcon": "SpriteOutput/SkillIcons/BattleEvent/Skil...",
+  "UltraSkillIcon": "SpriteOutput/SkillIcons/BattleEvent/Skil...",
+  "CutinPath": "",
+  "ShowStanceList": "<list[3]>",
+  "SPMultipleRatio": {
+    "Value": 0.5
+  },
+  "BPNeed": {
+    "Value": -1
+  },
+  "DelayRatio": {
+    "Value": 1
+  },
+  "ParamList": [],
+  "SimpleParamList": [],
+  "AttackType": "Ultra",
+  "SkillEffect": "Support",
+  "SkillButtonEffType": ""
+}
+```
+
+### LocalbookConfig.json (0.28 MB, 1,103 条)
+
+**字段** (7): `BookContent, BookDisplayType, BookID, BookInsideName, BookSeriesID, BookSeriesInsideID, LocalBookImagePath`
+
+**首条记录摘要**:
+```json
+{
+  "BookID": 190101,
+  "BookSeriesID": 1,
+  "BookSeriesInsideID": 1,
+  "BookInsideName": {
+    "Hash": 2534899127637171729
+  },
+  "BookContent": {
+    "Hash": 12541941129514264389
+  },
+  "BookDisplayType": 1,
+  "LocalBookImagePath": []
 }
 ```
 
@@ -2198,27 +2227,6 @@
   "BuffEffect": "",
   "MazeBuffType": "Level",
   "MazeBuffIconType": "Other"
-}
-```
-
-### LocalbookConfig.json (0.27 MB, 1,051 条)
-
-**字段** (7): `BookContent, BookDisplayType, BookID, BookInsideName, BookSeriesID, BookSeriesInsideID, LocalBookImagePath`
-
-**首条记录摘要**:
-```json
-{
-  "BookID": 190101,
-  "BookSeriesID": 1,
-  "BookSeriesInsideID": 1,
-  "BookInsideName": {
-    "Hash": 2534899127637171729
-  },
-  "BookContent": {
-    "Hash": 12541941129514264389
-  },
-  "BookDisplayType": 1,
-  "LocalBookImagePath": []
 }
 ```
 
@@ -2269,6 +2277,43 @@
 }
 ```
 
+### GridFightAugment.json (0.24 MB, 334 条)
+
+**字段** (15): `AugmentGameRefScore, AugmentGameRefTrait, AugmentSavedValueList, AugmentSearchKey, CategoryID, ChapterLimitList, EffectParamList, HexDesc, HexName, ID, IconPath, IsOCEffective, JsonPath, MiniIconPath, Quality`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 100101,
+  "CategoryID": 1,
+  "Quality": "Silver",
+  "HexName": {
+    "Hash": 1806895644678960298
+  },
+  "HexDesc": {
+    "Hash": 10523607790638753906
+  },
+  "IconPath": "SpriteOutput/GridFight/AugmentBig/100101...",
+  "AugmentSearchKey": "Augment_100101",
+  "MiniIconPath": "SpriteOutput/GridFight/Augment/100101.pn...",
+  "ChapterLimitList": [
+    1
+  ],
+  "IsOCEffective": 1,
+  "JsonPath": "Config/Level/GridFight/Augment/GridFight...",
+  "EffectParamList": [
+    {
+      "Value": 7
+    }
+  ],
+  "AugmentSavedValueList": [
+    "Augment100101_SavedValue01"
+  ],
+  "AugmentGameRefTrait": [],
+  "AugmentGameRefScore": []
+}
+```
+
 ### RogueMagicMazeBuff.json (0.24 MB, 387 条)
 
 **字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
@@ -2304,7 +2349,7 @@
 }
 ```
 
-### RaidConfig.json (0.23 MB, 316 条)
+### RaidConfig.json (0.23 MB, 321 条)
 
 **字段** (35): `AutoObtainDamageType, BuffDesc, BuffParamList, DamageType, DifficultyAdjustmentType, DisplayEventID, EnterType, EntrancePageBGImagePath, FinishEntranceID, HardLevel, IsEntryByProp, IsHiddenAreaMap, LimitIDList, LockCaptain, LockCaptainAvatarID, MainMissionIDAfter, MainMissionIDBefore, MainMissionIDList, MappingInfoID, MonsterHideList, MonsterList, RaidDesc, RaidID, RaidName, RaidTagList, RaidTargetID, RecoverType, RewardList, SkipJoinLineup, SkipRewardOnFinish, TeamLimitIDList, TeamType, TrialAvatarList, Type, UnlockWorldLevel`
 
@@ -2361,7 +2406,7 @@
 }
 ```
 
-### TutorialGuideData.json (0.23 MB, 1,530 条)
+### TutorialGuideData.json (0.23 MB, 1,538 条)
 
 **字段** (4): `DescText, ID, ImagePath, PlatformType`
 
@@ -2376,39 +2421,22 @@
 }
 ```
 
-### CocoonConfig.json (0.22 MB, 420 条)
+### LimaoNewsComment.json (0.22 MB, 1,650 条)
 
-**字段** (16): `AutoObtainDamageType, BuffDesc, CocoonType, DamageType, DropList, FarmType, ID, MappingInfoID, MaxChallengeCnt, OpenDate, ParamList, PropID, StageID, StageIDList, StaminaCost, WorldLevel`
+**字段** (4): `AHCGOKDLKHM, DNJCIDFBHPC, HFFBGDNDBHC, JAKLCIIEDON`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1001,
-  "PropID": 808,
-  "CocoonType": "TYPE_NORMAL",
-  "MappingInfoID": 1001,
-  "StageID": 1022010,
-  "StageIDList": [
-    1022010,
-    1022020,
-    1022030
-  ],
-  "ParamList": [],
-  "DropList": "<list[9]>",
-  "StaminaCost": 10,
-  "MaxChallengeCnt": 24,
-  "OpenDate": [],
-  "DamageType": [
-    "Physical",
-    "Ice",
-    "Fire",
-    "Wind"
-  ],
-  "FarmType": "COCOON_AVATAR_EXP"
+  "HFFBGDNDBHC": 101001,
+  "JAKLCIIEDON": 1033,
+  "DNJCIDFBHPC": {
+    "Hash": 5224510114687973413
+  }
 }
 ```
 
-### AvatarConfig.json (0.22 MB, 91 条)
+### AvatarConfig.json (0.22 MB, 93 条)
 
 **字段** (40): `AIPath, ActionAvatarHeadIconPath, AdventurePlayerID, AssistBgOffset, AssistOffset, AvatarBaseType, AvatarCutinBgImgPath, AvatarCutinFrontImgPath, AvatarCutinImgPath, AvatarCutinIntroText, AvatarDropOffset, AvatarFullName, AvatarGachaResultImgPath, AvatarID, AvatarMiniIconPath, AvatarName, AvatarSelfShowOffset, AvatarSideIconPath, AvatarTrialOffset, AvatarVOTag, DamageType, DamageTypeResistance, DefaultAvatarHeadIconPath, DefaultAvatarModelPath, ExpGroup, JsonPath, ManikinJsonPath, MaxPromotion, MaxRank, PlayerCardOffset, RankIDList, Rarity, Release, SPNeed, SideAvatarHeadIconPath, SkillList, SkilltreePrefabPath, UIAvatarModelPath, UltraSkillCutInPrefabPath, WaitingAvatarHeadIconPath`
 
@@ -2482,6 +2510,59 @@
 }
 ```
 
+### CocoonConfig.json (0.22 MB, 420 条)
+
+**字段** (16): `AutoObtainDamageType, BuffDesc, CocoonType, DamageType, DropList, FarmType, ID, MappingInfoID, MaxChallengeCnt, OpenDate, ParamList, PropID, StageID, StageIDList, StaminaCost, WorldLevel`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "PropID": 808,
+  "CocoonType": "TYPE_NORMAL",
+  "MappingInfoID": 1001,
+  "StageID": 1022010,
+  "StageIDList": [
+    1022010,
+    1022020,
+    1022030
+  ],
+  "ParamList": [],
+  "DropList": "<list[9]>",
+  "StaminaCost": 10,
+  "MaxChallengeCnt": 24,
+  "OpenDate": [],
+  "DamageType": [
+    "Physical",
+    "Ice",
+    "Fire",
+    "Wind"
+  ],
+  "FarmType": "COCOON_AVATAR_EXP"
+}
+```
+
+### LimaoNewsMessageItem.json (0.21 MB, 866 条)
+
+**字段** (11): `BGOCHGHFOLJ, BHNIBPKLDKO, FBKAMIHGLFK, GEFCMECLLIJ, HMGLFJABIII, IJBDLNLOJKK, JAKLCIIEDON, JGMIOKAJMFB, LDLDCLEIFML, LINLNNHIBAK, NJFABJDCPNC`
+
+**首条记录摘要**:
+```json
+{
+  "IJBDLNLOJKK": 100000100,
+  "JAKLCIIEDON": 1,
+  "GEFCMECLLIJ": "Limao",
+  "LINLNNHIBAK": "Text",
+  "JGMIOKAJMFB": {
+    "Hash": 16545384359784665760
+  },
+  "FBKAMIHGLFK": "",
+  "BHNIBPKLDKO": [
+    100000101
+  ]
+}
+```
+
 ### MonopolyEventOption.json (0.20 MB, 608 条)
 
 **字段** (10): `DiceScoreRequirement, EffectContentText, EffectIDList, EventOptionID, IsHideEffect, NextOptionList, OptionBubbleTalk, OptionContent, OptionType, TextDisplayParam1`
@@ -2517,46 +2598,7 @@
 }
 ```
 
-### BattleEventSkillConfig.json (0.20 MB, 218 条)
-
-**字段** (26): `AttackType, BPNeed, CutinPath, DelayRatio, ParamList, SPAdd, SPBase, SPMultipleRatio, SPNeed, ShowStanceList, SimpleParamList, SimpleSkillDesc, SkillButtonEffType, SkillComboValueDelta, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillNeed, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
-
-**首条记录摘要**:
-```json
-{
-  "SkillID": 2001801,
-  "SkillName": {
-    "Hash": 9406363350117198765
-  },
-  "SkillTag": {
-    "Hash": 12601813654230214900
-  },
-  "SkillTypeDesc": {
-    "Hash": 4243237131156021087
-  },
-  "SkillTriggerKey": "Skill03",
-  "SkillIcon": "SpriteOutput/SkillIcons/BattleEvent/Skil...",
-  "UltraSkillIcon": "SpriteOutput/SkillIcons/BattleEvent/Skil...",
-  "CutinPath": "",
-  "ShowStanceList": "<list[3]>",
-  "SPMultipleRatio": {
-    "Value": 0.5
-  },
-  "BPNeed": {
-    "Value": -1
-  },
-  "DelayRatio": {
-    "Value": 1
-  },
-  "ParamList": [],
-  "SimpleParamList": [],
-  "AttackType": "Ultra",
-  "SkillEffect": "Support",
-  "SkillButtonEffType": ""
-}
-```
-
-### ActivityPanel.json (0.19 MB, 255 条)
+### ActivityPanel.json (0.20 MB, 262 条)
 
 **字段** (20): `ActivityTagList, ActivityThemeID, DailyHint, DisplayItemList, DisplayItemManualSort, FinishConditions, FinishType, IntroDesc, IsSkipSwitchStoryLine, IsSocialShow, PanelBrief, PanelDesc, PanelID, SortWeight, TabIcon, TabName, TagDesc, TitleName, UIPrefab, UnlockConditions`
 
@@ -2586,21 +2628,7 @@
 }
 ```
 
-### MenuItemName.json (0.19 MB, 2,357 条)
-
-**字段** (2): `ID, TextID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 90001,
-  "TextID": {
-    "Hash": 17148349206267042326
-  }
-}
-```
-
-### ItemComposeConfig.json (0.19 MB, 339 条)
+### ItemComposeConfig.json (0.19 MB, 341 条)
 
 **字段** (20): `CoinCost, FormulaRequire, FormulaType, FuncType, ID, IsCanAcceleratedCompose, IsShowHoldNumber, ItemComposeTag, ItemID, LimitType, LimitTypeParam, LimitValue, MaterialCost, MaxCount, Order, RelicList, SpecialMaterialCost, SpecialMaterialCostNumber, Type, WorldLevelRequire`
 
@@ -2633,7 +2661,21 @@
 }
 ```
 
-### RogueMonster.json (0.19 MB, 1,979 条)
+### MenuItemName.json (0.19 MB, 2,357 条)
+
+**字段** (2): `ID, TextID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 90001,
+  "TextID": {
+    "Hash": 17148349206267042326
+  }
+}
+```
+
+### RogueMonster.json (0.19 MB, 1,998 条)
 
 **字段** (4): `EventID, MonsterDropType, NpcMonsterID, RogueMonsterID`
 
@@ -2643,6 +2685,70 @@
   "RogueMonsterID": 9001,
   "NpcMonsterID": 1003010,
   "EventID": 89999001
+}
+```
+
+### LoadingDesc.json (0.19 MB, 416 条)
+
+**字段** (14): `DescTextmapID, ForceParam, ForceParamForOr, Group, ID, ImageID, LockParam, LockParamForOr, MaxLevel, MinLevel, TitleTextmapID, UnlockParam, UnlockParamForOr, Weight`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10001,
+  "MinLevel": 1,
+  "MaxLevel": 80,
+  "Group": "NormalIP",
+  "LockParam": [],
+  "LockParamForOr": [],
+  "UnlockParam": [],
+  "UnlockParamForOr": [],
+  "ForceParam": [],
+  "ForceParamForOr": [],
+  "Weight": 20,
+  "TitleTextmapID": {
+    "Hash": 3542554784376528797
+  },
+  "DescTextmapID": {
+    "Hash": 4472936415286069643
+  },
+  "ImageID": 10008
+}
+```
+
+### MapEntrance.json (0.19 MB, 915 条)
+
+**字段** (9): `BeginMainMissionList, EntranceType, FinishMainMissionList, FinishSubMissionList, FloorID, ID, PlaneID, StartAnchorID, StartGroupID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1000001,
+  "EntranceType": "Town",
+  "PlaneID": 10000,
+  "FloorID": 10000000,
+  "BeginMainMissionList": [],
+  "FinishMainMissionList": [
+    1000501
+  ],
+  "FinishSubMissionList": [
+    100050102
+  ]
+}
+```
+
+### RogueMiracleEffect.json (0.19 MB, 1,038 条)
+
+**字段** (4): `MiracleDesc, MiracleDynamicHint, MiracleEffectID, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "MiracleEffectID": 1,
+  "MiracleDesc": {
+    "Hash": 8768956841205858049
+  },
+  "ParamList": "<list[3]>"
 }
 ```
 
@@ -2679,67 +2785,18 @@
 }
 ```
 
-### MapEntrance.json (0.19 MB, 896 条)
+### UIRedDot.json (0.18 MB, 1,216 条)
 
-**字段** (9): `BeginMainMissionList, EntranceType, FinishMainMissionList, FinishSubMissionList, FloorID, ID, PlaneID, StartAnchorID, StartGroupID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1000001,
-  "EntranceType": "Town",
-  "PlaneID": 10000,
-  "FloorID": 10000000,
-  "BeginMainMissionList": [],
-  "FinishMainMissionList": [
-    1000501
-  ],
-  "FinishSubMissionList": [
-    100050102
-  ]
-}
-```
-
-### LoadingDesc.json (0.19 MB, 403 条)
-
-**字段** (14): `DescTextmapID, ForceParam, ForceParamForOr, Group, ID, ImageID, LockParam, LockParamForOr, MaxLevel, MinLevel, TitleTextmapID, UnlockParam, UnlockParamForOr, Weight`
+**字段** (6): `RedDot, RedDotChildren, RedDotID, Type, UnlockID, Weight`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 10001,
-  "MinLevel": 1,
-  "MaxLevel": 80,
-  "Group": "NormalIP",
-  "LockParam": [],
-  "LockParamForOr": [],
-  "UnlockParam": [],
-  "UnlockParamForOr": [],
-  "ForceParam": [],
-  "ForceParamForOr": [],
-  "Weight": 20,
-  "TitleTextmapID": {
-    "Hash": 3542554784376528797
-  },
-  "DescTextmapID": {
-    "Hash": 4472936415286069643
-  },
-  "ImageID": 10008
-}
-```
-
-### RogueMiracleEffect.json (0.18 MB, 1,014 条)
-
-**字段** (4): `MiracleDesc, MiracleDynamicHint, MiracleEffectID, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "MiracleEffectID": 1,
-  "MiracleDesc": {
-    "Hash": 8768956841205858049
-  },
-  "ParamList": "<list[3]>"
+  "RedDot": "ItemIcon",
+  "RedDotID": 1,
+  "RedDotChildren": [],
+  "Type": 3,
+  "Weight": []
 }
 ```
 
@@ -2764,18 +2821,23 @@
 }
 ```
 
-### UIRedDot.json (0.18 MB, 1,199 条)
+### BookSeriesConfig.json (0.18 MB, 811 条)
 
-**字段** (6): `RedDot, RedDotChildren, RedDotID, Type, UnlockID, Weight`
+**字段** (6): `BookSeries, BookSeriesComments, BookSeriesID, BookSeriesNum, BookSeriesWorld, IsShowInBookshelf`
 
 **首条记录摘要**:
 ```json
 {
-  "RedDot": "ItemIcon",
-  "RedDotID": 1,
-  "RedDotChildren": [],
-  "Type": 3,
-  "Weight": []
+  "BookSeriesID": 1,
+  "BookSeries": {
+    "Hash": 458864378374624357
+  },
+  "BookSeriesComments": {
+    "Hash": 12740325635257467646
+  },
+  "BookSeriesNum": 1,
+  "BookSeriesWorld": 2,
+  "IsShowInBookshelf": true
 }
 ```
 
@@ -2829,17 +2891,32 @@
 }
 ```
 
-### LimaoNewsComment.json (0.17 MB, 1,302 条)
+### GachaBasicInfo.json (0.17 MB, 286 条)
 
-**字段** (4): `AHCGOKDLKHM, DNJCIDFBHPC, HFFBGDNDBHC, JAKLCIIEDON`
+**字段** (12): `EndTime, GachaID, GachaType, PoolDesc, PoolDescFTC, PoolLabelIcon, PoolLabelIconSelected, PoolName, PrefabPath, SortID, StartTime, TypeTitle`
 
 **首条记录摘要**:
 ```json
 {
-  "HFFBGDNDBHC": 101001,
-  "JAKLCIIEDON": 1033,
-  "DNJCIDFBHPC": {
-    "Hash": 5224510114687973413
+  "GachaID": 1001,
+  "GachaType": "Normal",
+  "SortID": 99,
+  "StartTime": "",
+  "EndTime": "",
+  "PrefabPath": "UI/Drawcard/GachaPanel/StandardGacha_100...",
+  "PoolName": {
+    "Hash": 12642828881931173103
+  },
+  "PoolDesc": {
+    "Hash": 1121704090967857799
+  },
+  "PoolDescFTC": {
+    "Hash": 6970163302865048869
+  },
+  "PoolLabelIcon": "SpriteOutput/DrawCardPic/GachaTabIcon/Ta...",
+  "PoolLabelIconSelected": "SpriteOutput/DrawCardPic/GachaTabIcon/Ta...",
+  "TypeTitle": {
+    "Hash": 10012362747660649297
   }
 }
 ```
@@ -2903,53 +2980,17 @@
 }
 ```
 
-### BookSeriesConfig.json (0.17 MB, 761 条)
+### LimaoNewsCommentState.json (0.17 MB, 1,659 条)
 
-**字段** (6): `BookSeries, BookSeriesComments, BookSeriesID, BookSeriesNum, BookSeriesWorld, IsShowInBookshelf`
-
-**首条记录摘要**:
-```json
-{
-  "BookSeriesID": 1,
-  "BookSeries": {
-    "Hash": 458864378374624357
-  },
-  "BookSeriesComments": {
-    "Hash": 12740325635257467646
-  },
-  "BookSeriesNum": 1,
-  "BookSeriesWorld": 2,
-  "IsShowInBookshelf": true
-}
-```
-
-### GachaBasicInfo.json (0.17 MB, 278 条)
-
-**字段** (12): `EndTime, GachaID, GachaType, PoolDesc, PoolDescFTC, PoolLabelIcon, PoolLabelIconSelected, PoolName, PrefabPath, SortID, StartTime, TypeTitle`
+**字段** (5): `AEDOBNFDODI, GLBIANIMBII, GNDCCBNILML, HFFBGDNDBHC, KIFJECNOHDG`
 
 **首条记录摘要**:
 ```json
 {
-  "GachaID": 1001,
-  "GachaType": "Normal",
-  "SortID": 99,
-  "StartTime": "",
-  "EndTime": "",
-  "PrefabPath": "UI/Drawcard/GachaPanel/StandardGacha_100...",
-  "PoolName": {
-    "Hash": 12642828881931173103
-  },
-  "PoolDesc": {
-    "Hash": 1121704090967857799
-  },
-  "PoolDescFTC": {
-    "Hash": 6970163302865048869
-  },
-  "PoolLabelIcon": "SpriteOutput/DrawCardPic/GachaTabIcon/Ta...",
-  "PoolLabelIconSelected": "SpriteOutput/DrawCardPic/GachaTabIcon/Ta...",
-  "TypeTitle": {
-    "Hash": 10012362747660649297
-  }
+  "HFFBGDNDBHC": 101001,
+  "AEDOBNFDODI": 1,
+  "GLBIANIMBII": [],
+  "GNDCCBNILML": true
 }
 ```
 
@@ -2975,41 +3016,7 @@
 }
 ```
 
-### RogueMiracleEffectDisplay.json (0.16 MB, 769 条)
-
-**字段** (5): `DescParamList, ExtraEffect, MiracleDesc, MiracleEffectDisplayID, MiracleSimpleDesc`
-
-**首条记录摘要**:
-```json
-{
-  "MiracleEffectDisplayID": 1,
-  "MiracleDesc": {
-    "Hash": 1851219478774962691
-  },
-  "DescParamList": "<list[3]>",
-  "ExtraEffect": []
-}
-```
-
-### PhotoGraphEmotionConfig.json (0.16 MB, 486 条)
-
-**字段** (7): `BrowClipName, EmotionClipPath, EmotionID, EmotionIconPath, EmotionName, EyeClipName, MouthClipName`
-
-**首条记录摘要**:
-```json
-{
-  "EmotionName": {
-    "Hash": 11485770122095695563
-  },
-  "EmotionIconPath": "SpriteOutput/CameraIcon/CameraPic/Camera...",
-  "EmotionClipPath": "",
-  "BrowClipName": "",
-  "EyeClipName": "",
-  "MouthClipName": ""
-}
-```
-
-### ItemConfigDisk.json (0.16 MB, 255 条)
+### ItemConfigDisk.json (0.17 MB, 266 条)
 
 **字段** (17): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, PurposeType, Rarity, ReturnItemIDList, isVisible`
 
@@ -3042,7 +3049,40 @@
 }
 ```
 
-### PerformanceC.json (0.16 MB, 724 条)
+### LimaoNewsInterviewContent.json (0.17 MB, 1,004 条)
+
+**字段** (5): `ANECPHCPLPP, DFFLADLLADD, EEIEODMEMFI, MMNJODIJPOE, ODLDEEANNCM`
+
+**首条记录摘要**:
+```json
+{
+  "DFFLADLLADD": 20100,
+  "MMNJODIJPOE": "Text",
+  "ODLDEEANNCM": "",
+  "EEIEODMEMFI": "",
+  "ANECPHCPLPP": {
+    "Hash": 8759638413218193220
+  }
+}
+```
+
+### RogueMiracleEffectDisplay.json (0.16 MB, 769 条)
+
+**字段** (5): `DescParamList, ExtraEffect, MiracleDesc, MiracleEffectDisplayID, MiracleSimpleDesc`
+
+**首条记录摘要**:
+```json
+{
+  "MiracleEffectDisplayID": 1,
+  "MiracleDesc": {
+    "Hash": 1851219478774962691
+  },
+  "DescParamList": "<list[3]>",
+  "ExtraEffect": []
+}
+```
+
+### PerformanceC.json (0.16 MB, 739 条)
 
 **字段** (8): `EndBlack, EndWithCrack, FloorID, IsSkip, PerformanceID, PerformancePath, PlaneID, StartBlack`
 
@@ -3056,6 +3096,24 @@
   "EndBlack": "Full",
   "PlaneID": 20001,
   "FloorID": 20001001
+}
+```
+
+### PhotoGraphEmotionConfig.json (0.16 MB, 486 条)
+
+**字段** (7): `BrowClipName, EmotionClipPath, EmotionID, EmotionIconPath, EmotionName, EyeClipName, MouthClipName`
+
+**首条记录摘要**:
+```json
+{
+  "EmotionName": {
+    "Hash": 11485770122095695563
+  },
+  "EmotionIconPath": "SpriteOutput/CameraIcon/CameraPic/Camera...",
+  "EmotionClipPath": "",
+  "BrowClipName": "",
+  "EyeClipName": "",
+  "MouthClipName": ""
 }
 ```
 
@@ -3157,43 +3215,7 @@
 }
 ```
 
-### RogueTournRoom.json (0.15 MB, 1,338 条)
-
-**字段** (4): `RogueRoomID, RogueRoomType, TournMode, VariantType`
-
-**首条记录摘要**:
-```json
-{
-  "RogueRoomID": 11098080,
-  "TournMode": "Tourn1",
-  "RogueRoomType": "Adventure"
-}
-```
-
-### ClockParkCard.json (0.14 MB, 348 条)
-
-**字段** (11): `CardActionList, CardConflictTagList, CardDesc, CardDiceNum, CardID, CardTips, CardTipsParam, CardType, ForeImgPath, ImgPath, Priority`
-
-**首条记录摘要**:
-```json
-{
-  "CardID": 1001,
-  "CardType": "AttributeChange",
-  "CardConflictTagList": [],
-  "CardDiceNum": 1,
-  "CardActionList": [
-    100101
-  ],
-  "Priority": 1,
-  "CardDesc": {
-    "Hash": 2263067653856074052
-  },
-  "ForeImgPath": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
-  "ImgPath": "SpriteOutput/Quest/ClockPark/GamePlayPag..."
-}
-```
-
-### PerformanceRecallData.json (0.14 MB, 282 条)
+### PerformanceRecallData.json (0.15 MB, 291 条)
 
 **字段** (13): `CategoryID, ID, ImgHeightSize, ImgPath, ImgPathWall, ImgPathWall_F, ImgPath_F, Name, PerformanceID, ShowInPlayerRoom, UnlockCondition, WorldID, isVideo`
 
@@ -3217,7 +3239,20 @@
 }
 ```
 
-### MazePuzzleOrigami.json (0.14 MB, 590 条)
+### RogueTournRoom.json (0.15 MB, 1,338 条)
+
+**字段** (4): `RogueRoomID, RogueRoomType, TournMode, VariantType`
+
+**首条记录摘要**:
+```json
+{
+  "RogueRoomID": 11098080,
+  "TournMode": "Tourn1",
+  "RogueRoomType": "Adventure"
+}
+```
+
+### MazePuzzleOrigami.json (0.15 MB, 620 条)
 
 **字段** (11): `ColonyID, CreateNpcPropState, FloorID, GroupID, MainPropID, MainPropStateList, MirrorGroupID, MirrorMainPropID, NpcGroupID, NpcInstanceID, SubPropID`
 
@@ -3235,6 +3270,29 @@
   "NpcGroupID": 159,
   "NpcInstanceID": 400002,
   "CreateNpcPropState": "EventOpen"
+}
+```
+
+### ClockParkCard.json (0.14 MB, 348 条)
+
+**字段** (11): `CardActionList, CardConflictTagList, CardDesc, CardDiceNum, CardID, CardTips, CardTipsParam, CardType, ForeImgPath, ImgPath, Priority`
+
+**首条记录摘要**:
+```json
+{
+  "CardID": 1001,
+  "CardType": "AttributeChange",
+  "CardConflictTagList": [],
+  "CardDiceNum": 1,
+  "CardActionList": [
+    100101
+  ],
+  "Priority": 1,
+  "CardDesc": {
+    "Hash": 2263067653856074052
+  },
+  "ForeImgPath": "SpriteOutput/Quest/ClockPark/GamePlayPag...",
+  "ImgPath": "SpriteOutput/Quest/ClockPark/GamePlayPag..."
 }
 ```
 
@@ -3284,6 +3342,28 @@
 }
 ```
 
+### NPCMonsterData.json (0.14 MB, 296 条)
+
+**字段** (10): `ConfigEntityPath, DefaultAIPath, ID, IsMazeLink, JsonPath, MappingInfoID, MiniMapIconType, NPCName, PrototypeID, Rank`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1002020,
+  "NPCName": {
+    "Hash": 4666833257090447360
+  },
+  "ConfigEntityPath": "Config/ConfigEntity/NPCMonster/NPCMonste...",
+  "JsonPath": "Config/ConfigCharacter/NPCMonster/NPCMon...",
+  "DefaultAIPath": "Config/ConfigAI/Adventure/NPCMonster/ST_...",
+  "MiniMapIconType": 5,
+  "Rank": "MinionLv2",
+  "IsMazeLink": true,
+  "PrototypeID": 1002020,
+  "MappingInfoID": 3008
+}
+```
+
 ### RogueNousRoom.json (0.14 MB, 1,224 条)
 
 **字段** (3): `RogueRoomID, RogueRoomSections, RogueSubMode`
@@ -3296,6 +3376,19 @@
   "RogueRoomSections": [
     0
   ]
+}
+```
+
+### PerformanceSkipFlagC.json (0.13 MB, 739 条)
+
+**字段** (4): `ActorList, ContainImportBranch, PerformanceID, Skippable`
+
+**首条记录摘要**:
+```json
+{
+  "PerformanceID": 100010101,
+  "Skippable": true,
+  "ActorList": "<list[2]>"
 }
 ```
 
@@ -3329,52 +3422,51 @@
 }
 ```
 
-### NPCMonsterData.json (0.13 MB, 287 条)
+### MiniMapIcon.json (0.13 MB, 419 条)
 
-**字段** (10): `ConfigEntityPath, DefaultAIPath, ID, IsMazeLink, JsonPath, MappingInfoID, MiniMapIconType, NPCName, PrototypeID, Rank`
+**字段** (17): `BillboardIcon, CircleRange, ConnectID, FiveDimBillboardIDList, ID, IconName, IconOrientetionSwitch, IconPath, IsCrossLayer, IsFollowMapScale, IsFollowPropScale, IsShowCornerArrow, IsShowInBillboard, MissionIconPath, ModelIcon, Priority, isShowinMap`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1002020,
-  "NPCName": {
-    "Hash": 4666833257090447360
+  "ID": 1,
+  "IconPath": "SpriteOutput/MapPics/NaviIcons/IconMapPl...",
+  "IconName": "MazeText_Empty",
+  "FiveDimBillboardIDList": [],
+  "MissionIconPath": "SpriteOutput/MapPics/Billboard/IconBillb...",
+  "isShowinMap": true,
+  "IsShowCornerArrow": true,
+  "Priority": 99
+}
+```
+
+### RoguePersonaStyleGift.json (0.13 MB, 337 条)
+
+**字段** (10): `DEGHFCJNECP, FMDMDDCBPAM, HILFNIOLPHN, KGOEAGHJFKD, MJOOFPBABEA, NIKKAPEIDJO, NMAHGFAPENI, OLOIFNNLKJP, PBLPLDJKPEI, PMIEAEGJNMJ`
+
+**首条记录摘要**:
+```json
+{
+  "FMDMDDCBPAM": 101,
+  "MJOOFPBABEA": {
+    "Hash": 16987609856870313279
   },
-  "ConfigEntityPath": "Config/ConfigEntity/NPCMonster/NPCMonste...",
-  "JsonPath": "Config/ConfigCharacter/NPCMonster/NPCMon...",
-  "DefaultAIPath": "Config/ConfigAI/Adventure/NPCMonster/ST_...",
-  "MiniMapIconType": 5,
-  "Rank": "MinionLv2",
-  "IsMazeLink": true,
-  "PrototypeID": 1002020,
-  "MappingInfoID": 3008
-}
-```
-
-### LimaoNewsCommentState.json (0.13 MB, 1,311 条)
-
-**字段** (5): `AEDOBNFDODI, GLBIANIMBII, GNDCCBNILML, HFFBGDNDBHC, KIFJECNOHDG`
-
-**首条记录摘要**:
-```json
-{
-  "HFFBGDNDBHC": 101001,
-  "AEDOBNFDODI": 1,
-  "GLBIANIMBII": [],
-  "GNDCCBNILML": true
-}
-```
-
-### PerformanceSkipFlagC.json (0.13 MB, 724 条)
-
-**字段** (4): `ActorList, ContainImportBranch, PerformanceID, Skippable`
-
-**首条记录摘要**:
-```json
-{
-  "PerformanceID": 100010101,
-  "Skippable": true,
-  "ActorList": "<list[2]>"
+  "OLOIFNNLKJP": "SpriteOutput/Rogue/Tourn/Persona/Persona...",
+  "NMAHGFAPENI": {
+    "Hash": 1606445963322294786
+  },
+  "PBLPLDJKPEI": [
+    {
+      "Value": 2
+    }
+  ],
+  "PMIEAEGJNMJ": "Common",
+  "NIKKAPEIDJO": [
+    104,
+    107,
+    103,
+    110
+  ]
 }
 ```
 
@@ -3406,41 +3498,6 @@
 }
 ```
 
-### MiniMapIcon.json (0.13 MB, 409 条)
-
-**字段** (17): `BillboardIcon, CircleRange, ConnectID, FiveDimBillboardIDList, ID, IconName, IconOrientetionSwitch, IconPath, IsCrossLayer, IsFollowMapScale, IsFollowPropScale, IsShowCornerArrow, IsShowInBillboard, MissionIconPath, ModelIcon, Priority, isShowinMap`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "IconPath": "SpriteOutput/MapPics/NaviIcons/IconMapPl...",
-  "IconName": "MazeText_Empty",
-  "FiveDimBillboardIDList": [],
-  "MissionIconPath": "SpriteOutput/MapPics/Billboard/IconBillb...",
-  "isShowinMap": true,
-  "IsShowCornerArrow": true,
-  "Priority": 99
-}
-```
-
-### LimaoNewsInterviewContent.json (0.13 MB, 771 条)
-
-**字段** (5): `ANECPHCPLPP, DFFLADLLADD, EEIEODMEMFI, MMNJODIJPOE, ODLDEEANNCM`
-
-**首条记录摘要**:
-```json
-{
-  "DFFLADLLADD": 20100,
-  "MMNJODIJPOE": "Text",
-  "ODLDEEANNCM": "",
-  "EEIEODMEMFI": "",
-  "ANECPHCPLPP": {
-    "Hash": 8759638413218193220
-  }
-}
-```
-
 ### HeartDialTalk.json (0.13 MB, 956 条)
 
 **字段** (5): `FloorIDList, ID, IsKaomoji, SDFText, VoiceID`
@@ -3459,7 +3516,7 @@
 }
 ```
 
-### RogueTournArea.json (0.12 MB, 268 条)
+### RogueTournArea.json (0.12 MB, 270 条)
 
 **字段** (15): `BEOFPCAACEP, DOKMKLJDCEK, EODCEHDOAEB, FOMEIPIEGII, GLNDIILFKBN, GNIFODGCPAA, GOEDJMNFALN, HILINOJPLGA, ILPNADCAIBL, IMNLCDOMMOG, JJKLIJNFIBB, NKLFPMKHELN, PCBLHKODOMG, PIKODOAKLGE, PJGJLMIODBD`
 
@@ -3483,6 +3540,20 @@
   "IMNLCDOMMOG": 110600,
   "PIKODOAKLGE": {
     "Hash": 7942183719110286571
+  }
+}
+```
+
+### RogueMonsterGroup.json (0.12 MB, 852 条)
+
+**字段** (2): `RogueMonsterGroupID, RogueMonsterListAndWeight`
+
+**首条记录摘要**:
+```json
+{
+  "RogueMonsterGroupID": 11,
+  "RogueMonsterListAndWeight": {
+    "111": 1
   }
 }
 ```
@@ -3517,21 +3588,7 @@
 }
 ```
 
-### RogueMonsterGroup.json (0.12 MB, 849 条)
-
-**字段** (2): `RogueMonsterGroupID, RogueMonsterListAndWeight`
-
-**首条记录摘要**:
-```json
-{
-  "RogueMonsterGroupID": 11,
-  "RogueMonsterListAndWeight": {
-    "111": 1
-  }
-}
-```
-
-### EquipmentConfig.json (0.12 MB, 165 条)
+### EquipmentConfig.json (0.12 MB, 169 条)
 
 **字段** (18): `AvatarBaseType, AvatarDetailOffset, BattleDialogOffset, CoinCost, EquipmentID, EquipmentName, ExpProvide, ExpType, GachaResultOffset, ImagePath, ItemRightPanelOffset, MaxPromotion, MaxRank, RankUpCostList, Rarity, Release, SkillID, ThumbnailPath`
 
@@ -3577,25 +3634,7 @@
 }
 ```
 
-### ActivityHipplenWork.json (0.11 MB, 292 条)
-
-**字段** (8): `Cost, ID, Param, Type, WorkDesc, WorkIcon, WorkSmallIcon, WorkTitle`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "WorkTitle": {
-    "Hash": 9792963974635494762
-  },
-  "Type": "Performance",
-  "Param": 1001,
-  "WorkIcon": "",
-  "WorkSmallIcon": ""
-}
-```
-
-### RogueDialogueOption.json (0.11 MB, 1,120 条)
+### RogueDialogueOption.json (0.12 MB, 1,162 条)
 
 **字段** (3): `OptionDisplayID, OptionID, ParamList`
 
@@ -3615,21 +3654,7 @@
 }
 ```
 
-### DialogueCondition.json (0.11 MB, 1,081 条)
-
-**字段** (4): `ID, Param1, Param2, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 200045,
-  "Type": "submission_state_equal",
-  "Param1": 404018901,
-  "Param2": 1
-}
-```
-
-### RogueTournMiracle.json (0.11 MB, 674 条)
+### RogueTournMiracle.json (0.12 MB, 699 条)
 
 **字段** (6): `HandbookMiracleID, MiracleCategory, MiracleDisplayID, MiracleEffectID, MiracleID, TournMode`
 
@@ -3645,71 +3670,39 @@
 }
 ```
 
-### RoguePersonaStyleGift.json (0.11 MB, 287 条)
+### ActivityHipplenWork.json (0.11 MB, 292 条)
 
-**字段** (10): `DEGHFCJNECP, FMDMDDCBPAM, HILFNIOLPHN, KGOEAGHJFKD, MJOOFPBABEA, NIKKAPEIDJO, NMAHGFAPENI, OLOIFNNLKJP, PBLPLDJKPEI, PMIEAEGJNMJ`
-
-**首条记录摘要**:
-```json
-{
-  "FMDMDDCBPAM": 101,
-  "MJOOFPBABEA": {
-    "Hash": 16987609856870313279
-  },
-  "OLOIFNNLKJP": "SpriteOutput/Rogue/Tourn/Persona/Persona...",
-  "NMAHGFAPENI": {
-    "Hash": 1606445963322294786
-  },
-  "PBLPLDJKPEI": [
-    {
-      "Value": 2
-    }
-  ],
-  "PMIEAEGJNMJ": "Common",
-  "NIKKAPEIDJO": [
-    104,
-    107,
-    103,
-    110
-  ]
-}
-```
-
-### TreasureDungeonMap.json (0.11 MB, 400 条)
-
-**字段** (2): `MapID, MapInfo`
+**字段** (8): `Cost, ID, Param, Type, WorkDesc, WorkIcon, WorkSmallIcon, WorkTitle`
 
 **首条记录摘要**:
 ```json
 {
-  "MapID": 1001,
-  "MapInfo": "<list[25]>"
+  "ID": 1001,
+  "WorkTitle": {
+    "Hash": 9792963974635494762
+  },
+  "Type": "Performance",
+  "Param": 1001,
+  "WorkIcon": "",
+  "WorkSmallIcon": ""
 }
 ```
 
-### DialogueProp.json (0.11 MB, 378 条)
+### DialogueCondition.json (0.11 MB, 1,081 条)
 
-**字段** (7): `ActPath, ConditionIDs, GroupID, GroupType, IconType, InteractTitle, Priority`
+**字段** (4): `ID, Param1, Param2, Type`
 
 **首条记录摘要**:
 ```json
 {
-  "GroupID": 100010117,
-  "GroupType": "Simple",
-  "InteractTitle": "PropInteractTitle_1",
-  "ConditionIDs": [
-    100010117
-  ],
-  "Priority": 1,
-  "IconType": {
-    "EnumIndex": 20,
-    "Value": 10
-  },
-  "ActPath": "Config/Level/Mission/1000101/Talk/Talk_1..."
+  "ID": 200045,
+  "Type": "submission_state_equal",
+  "Param1": 404018901,
+  "Param2": 1
 }
 ```
 
-### ItemConfigEquipment.json (0.11 MB, 165 条)
+### ItemConfigEquipment.json (0.11 MB, 169 条)
 
 **字段** (17): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, SellType, isVisible`
 
@@ -3747,6 +3740,40 @@
 }
 ```
 
+### TreasureDungeonMap.json (0.11 MB, 400 条)
+
+**字段** (2): `MapID, MapInfo`
+
+**首条记录摘要**:
+```json
+{
+  "MapID": 1001,
+  "MapInfo": "<list[25]>"
+}
+```
+
+### DialogueProp.json (0.11 MB, 378 条)
+
+**字段** (7): `ActPath, ConditionIDs, GroupID, GroupType, IconType, InteractTitle, Priority`
+
+**首条记录摘要**:
+```json
+{
+  "GroupID": 100010117,
+  "GroupType": "Simple",
+  "InteractTitle": "PropInteractTitle_1",
+  "ConditionIDs": [
+    100010117
+  ],
+  "Priority": 1,
+  "IconType": {
+    "EnumIndex": 20,
+    "Value": 10
+  },
+  "ActPath": "Config/Level/Mission/1000101/Talk/Talk_1..."
+}
+```
+
 ### GridFightTraitMazebuff.json (0.10 MB, 158 条)
 
 **字段** (15): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, BuffSimpleDesc, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
@@ -3779,7 +3806,7 @@
 }
 ```
 
-### ActionGroup.json (0.10 MB, 265 条)
+### ActionGroup.json (0.10 MB, 266 条)
 
 **字段** (10): `ActionGroupName, ActionGroupTextmapID, ActionListForAnd, ActionListForOr, ActionName, FranceKeyMouseImagePath, GermanyKeyMouseImagePath, KeyMouseImagePath, PsImagePath, XboxImagePath`
 
@@ -3801,6 +3828,37 @@
 }
 ```
 
+### TalkSentenceMultiVoice.json (0.10 MB, 1,035 条)
+
+**字段** (2): `TalkSentenceID, VoiceIDList`
+
+**首条记录摘要**:
+```json
+{
+  "TalkSentenceID": 599000101,
+  "VoiceIDList": [
+    502000001,
+    502000002
+  ]
+}
+```
+
+### GotoConfig.json (0.10 MB, 752 条)
+
+**字段** (6): `GotoType, ID, ParamIntList, ParamStringList, UnlockID, UnlockMainMission`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 200,
+  "GotoType": 2,
+  "ParamIntList": [],
+  "ParamStringList": [],
+  "UnlockMainMission": 1010301,
+  "UnlockID": 200
+}
+```
+
 ### GridFightBasicBonusPoolV2.json (0.10 MB, 811 条)
 
 **字段** (5): `BonusID, BonusType, BonusTypeParam, BonusTypeParamList, Value`
@@ -3815,19 +3873,33 @@
 }
 ```
 
-### GotoConfig.json (0.10 MB, 737 条)
+### BattleEventData.json (0.10 MB, 446 条)
 
-**字段** (6): `GotoType, ID, ParamIntList, ParamStringList, UnlockID, UnlockMainMission`
+**字段** (8): `BEActionBarPrefab, BasePoint, BattleEventID, Config, IsSPReserved, LevelAreaPrefab, Prefab, SkillIDList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 200,
-  "GotoType": 2,
-  "ParamIntList": [],
-  "ParamStringList": [],
-  "UnlockMainMission": 1010301,
-  "UnlockID": 200
+  "BattleEventID": 11203,
+  "Config": "",
+  "Prefab": "",
+  "LevelAreaPrefab": "",
+  "BEActionBarPrefab": "",
+  "BasePoint": "",
+  "SkillIDList": []
+}
+```
+
+### ScheduleDataShop.json (0.10 MB, 981 条)
+
+**字段** (3): `BeginTime, EndTime, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 300101,
+  "BeginTime": "2021-05-28 04:00:00",
+  "EndTime": "2099-12-30 04:00:00"
 }
 ```
 
@@ -3848,22 +3920,7 @@
 }
 ```
 
-### TalkSentenceMultiVoice.json (0.10 MB, 999 条)
-
-**字段** (2): `TalkSentenceID, VoiceIDList`
-
-**首条记录摘要**:
-```json
-{
-  "TalkSentenceID": 599000101,
-  "VoiceIDList": [
-    502000001,
-    502000002
-  ]
-}
-```
-
-### EmojiConfig.json (0.10 MB, 471 条)
+### EmojiConfig.json (0.10 MB, 479 条)
 
 **字段** (8): `EmojiGroupID, EmojiID, EmojiPath, Gender, GenderLink, IsTrainMembers, KeyWords, SameGroupOrder`
 
@@ -3882,32 +3939,7 @@
 }
 ```
 
-### RogueMagicRoom.json (0.09 MB, 1,518 条)
-
-**字段** (2): `RogueRoomID, RogueRoomType`
-
-**首条记录摘要**:
-```json
-{
-  "RogueRoomID": 11001,
-  "RogueRoomType": "Adventure"
-}
-```
-
-### ScheduleDataShop.json (0.09 MB, 933 条)
-
-**字段** (3): `BeginTime, EndTime, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 300101,
-  "BeginTime": "2021-05-28 04:00:00",
-  "EndTime": "2099-12-30 04:00:00"
-}
-```
-
-### InControlActionMap.json (0.09 MB, 328 条)
+### InControlActionMap.json (0.09 MB, 331 条)
 
 **字段** (7): `FuncGotoIDList, actionName, actionTextmapID, actionTypeList, defaultInControlTypes, defaultKey, defaultMouseType`
 
@@ -3928,7 +3960,38 @@
 }
 ```
 
-### AvatarMazeBuff.json (0.09 MB, 144 条)
+### RogueMagicRoom.json (0.09 MB, 1,518 条)
+
+**字段** (2): `RogueRoomID, RogueRoomType`
+
+**首条记录摘要**:
+```json
+{
+  "RogueRoomID": 11001,
+  "RogueRoomType": "Adventure"
+}
+```
+
+### RogueTournFormula.json (0.09 MB, 328 条)
+
+**字段** (11): `FormulaCategory, FormulaDisplayID, FormulaID, FormulaStoryJson, IsInHandbook, MainBuffNum, MainBuffTypeID, MazeBuffID, SubBuffNum, SubBuffTypeID, TournMode`
+
+**首条记录摘要**:
+```json
+{
+  "FormulaID": 100001,
+  "MainBuffTypeID": 126,
+  "MainBuffNum": 3,
+  "SubBuffTypeID": 128,
+  "SubBuffNum": 2,
+  "FormulaCategory": "Rare",
+  "MazeBuffID": 675680,
+  "FormulaDisplayID": 2102019,
+  "FormulaStoryJson": ""
+}
+```
+
+### AvatarMazeBuff.json (0.09 MB, 146 条)
 
 **字段** (21): `BuffDesc, BuffDescBattle, BuffDescParamByAvatarSkillID, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, DisplayType, ID, InBattleBindingKey, InBattleBindingType, IsDisplayEnvInLevel, Lv, LvMax, MazeBuffIconType, MazeBuffPool, MazeBuffType, ModifierName, ParamList, UseType`
 
@@ -3961,39 +4024,26 @@
 }
 ```
 
-### BattleEventData.json (0.09 MB, 419 条)
+### RogueTalkNameConfig.json (0.09 MB, 524 条)
 
-**字段** (8): `BEActionBarPrefab, BasePoint, BattleEventID, Config, IsSPReserved, LevelAreaPrefab, Prefab, SkillIDList`
-
-**首条记录摘要**:
-```json
-{
-  "BattleEventID": 11203,
-  "Config": "",
-  "Prefab": "",
-  "LevelAreaPrefab": "",
-  "BEActionBarPrefab": "",
-  "BasePoint": "",
-  "SkillIDList": []
-}
-```
-
-### RogueDLCRoom.json (0.09 MB, 861 条)
-
-**字段** (3): `RogueRoomID, RogueRoomSections, RogueSubMode`
+**字段** (5): `IconPath, ImageID, Name, SubName, TalkNameID`
 
 **首条记录摘要**:
 ```json
 {
-  "RogueRoomID": 2111141,
-  "RogueSubMode": "ChessRogue",
-  "RogueRoomSections": [
-    0
-  ]
+  "TalkNameID": 1,
+  "Name": {
+    "Hash": 6128047544831472841
+  },
+  "SubName": {
+    "Hash": 548192794296363567
+  },
+  "IconPath": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "ImageID": 201
 }
 ```
 
-### MazePlane.json (0.09 MB, 362 条)
+### MazePlane.json (0.09 MB, 373 条)
 
 **字段** (8): `FloorIDList, MazePoolType, PlaneID, PlaneName, PlaneType, StartFloorID, SubType, WorldID`
 
@@ -4017,22 +4067,18 @@
 }
 ```
 
-### RogueTalkNameConfig.json (0.09 MB, 508 条)
+### RogueDLCRoom.json (0.09 MB, 861 条)
 
-**字段** (5): `IconPath, ImageID, Name, SubName, TalkNameID`
+**字段** (3): `RogueRoomID, RogueRoomSections, RogueSubMode`
 
 **首条记录摘要**:
 ```json
 {
-  "TalkNameID": 1,
-  "Name": {
-    "Hash": 6128047544831472841
-  },
-  "SubName": {
-    "Hash": 548192794296363567
-  },
-  "IconPath": "SpriteOutput/AvatarProfessionTattoo/Prof...",
-  "ImageID": 201
+  "RogueRoomID": 2111141,
+  "RogueSubMode": "ChessRogue",
+  "RogueRoomSections": [
+    0
+  ]
 }
 ```
 
@@ -4045,14 +4091,51 @@
 {
   "ExtraEffectID": 10000000,
   "ExtraEffectName": {
-    "Hash": 17770103784896915777
+    "Hash": 7512346344860791758
   },
   "ExtraEffectDesc": {
-    "Hash": 13494037450049286295
+    "Hash": 10083305102969301560
   },
   "DescParamList": [],
   "ExtraEffectIconPath": "SpriteOutput/BuffIcon/Inlevel/IconBuffCo...",
   "ExtraEffectType": 2
+}
+```
+
+### AvatarDemoConfig.json (0.09 MB, 139 条)
+
+**字段** (21): `AvatarDemoGuide, AvatarID, ConfigList1, EnableMazeSkillEffect, EnableSwitchAvatar, EventIDList1, GuideGroupID, MapEntranceID, MazeGroupID1, NormalWaveNotShowDetail, NpcMonsterIDList1, OperationRecordPath, OverrideDisplaySkillTriggerKeyList, RaidID, RandomSeed, RewardID, SPList, ScoringGroupID, StageID, StageType, TrialAvatarList`
+
+**首条记录摘要**:
+```json
+{
+  "StageID": 310130,
+  "StageType": "TrialActivity",
+  "AvatarID": 1013,
+  "TrialAvatarList": [
+    2000021,
+    2000022
+  ],
+  "SPList": [
+    0,
+    0
+  ],
+  "RewardID": 100,
+  "OperationRecordPath": "",
+  "OverrideDisplaySkillTriggerKeyList": [],
+  "MapEntranceID": 30527001,
+  "MazeGroupID1": 6,
+  "ConfigList1": [
+    200001
+  ],
+  "NpcMonsterIDList1": [
+    1002040
+  ],
+  "EventIDList1": [
+    310130
+  ],
+  "EnableMazeSkillEffect": true,
+  "EnableSwitchAvatar": true
 }
 ```
 
@@ -4116,6 +4199,25 @@
   "RecommendDiceIDList": [],
   "FinalAttackVoice": "",
   "AttackJson": "Config/Gameplays/LittleGame/DiceCombat/D..."
+}
+```
+
+### RogueMiracleDisplay.json (0.09 MB, 314 条)
+
+**字段** (5): `MiracleBGDesc, MiracleDisplayID, MiracleFigureIconPath, MiracleIconPath, MiracleName`
+
+**首条记录摘要**:
+```json
+{
+  "MiracleDisplayID": 1,
+  "MiracleName": {
+    "Hash": 16215705090798908027
+  },
+  "MiracleBGDesc": {
+    "Hash": 2054227000900414224
+  },
+  "MiracleIconPath": "SpriteOutput/Rogue/MiracleIcon/1001.png",
+  "MiracleFigureIconPath": "SpriteOutput/Rogue/MiracleFigureIcon/100..."
 }
 ```
 
@@ -4189,40 +4291,49 @@
 }
 ```
 
-### AvatarDemoConfig.json (0.09 MB, 135 条)
+### PossessionConfig.json (0.09 MB, 239 条)
 
-**字段** (21): `AvatarDemoGuide, AvatarID, ConfigList1, EnableMazeSkillEffect, EnableSwitchAvatar, EventIDList1, GuideGroupID, MapEntranceID, MazeGroupID1, NormalWaveNotShowDetail, NpcMonsterIDList1, OperationRecordPath, OverrideDisplaySkillTriggerKeyList, RaidID, RandomSeed, RewardID, SPList, ScoringGroupID, StageID, StageType, TrialAvatarList`
+**字段** (7): `AttachPoint, IsEffect, LocalPosition, LocalRotation, LocalScale, PossessionName, PossessionPrefabPath`
 
 **首条记录摘要**:
 ```json
 {
-  "StageID": 310130,
-  "StageType": "TrialActivity",
-  "AvatarID": 1013,
-  "TrialAvatarList": [
-    2000021,
-    2000022
+  "PossessionName": "Decoration_GhostLight_A",
+  "PossessionPrefabPath": "Characters/CharacterPrefabs/NPC/Possessi...",
+  "AttachPoint": "Prop",
+  "LocalPosition": [
+    0.425,
+    0.291,
+    0
   ],
-  "SPList": [
+  "LocalRotation": [
+    0,
     0,
     0
   ],
-  "RewardID": 100,
-  "OperationRecordPath": "",
-  "OverrideDisplaySkillTriggerKeyList": [],
-  "MapEntranceID": 30527001,
-  "MazeGroupID1": 6,
-  "ConfigList1": [
-    200001
-  ],
-  "NpcMonsterIDList1": [
-    1002040
-  ],
-  "EventIDList1": [
-    310130
-  ],
-  "EnableMazeSkillEffect": true,
-  "EnableSwitchAvatar": true
+  "LocalScale": [
+    1,
+    1,
+    1
+  ]
+}
+```
+
+### ProgramGroupConfig.json (0.09 MB, 339 条)
+
+**字段** (8): `Asset, Duration, ID, IfAnAsset, Order, PlayType, ProgramGroupID, SoundEvent`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "ProgramGroupID": 99,
+  "Order": 1,
+  "PlayType": 2,
+  "Asset": "Chap01_Eff_Dual_A_01.usm",
+  "IfAnAsset": "SpriteOutput/PicTalkCG/Common/PicChap01_...",
+  "Duration": 2,
+  "SoundEvent": ""
 }
 ```
 
@@ -4245,22 +4356,41 @@
 }
 ```
 
-### RogueTournFormula.json (0.09 MB, 304 条)
+### AvatarRelicRecommend.json (0.09 MB, 93 条)
 
-**字段** (11): `FormulaCategory, FormulaDisplayID, FormulaID, FormulaStoryJson, IsInHandbook, MainBuffNum, MainBuffTypeID, MazeBuffID, SubBuffNum, SubBuffTypeID, TournMode`
+**字段** (11): `AvatarID, LocalCriticalChance, PropertyList, PropertyList3, PropertyList4, PropertyList5, PropertyList6, ScoreRankList, Set2IDList, Set4IDList, SubAffixPropertyList`
 
 **首条记录摘要**:
 ```json
 {
-  "FormulaID": 100001,
-  "MainBuffTypeID": 126,
-  "MainBuffNum": 3,
-  "SubBuffTypeID": 128,
-  "SubBuffNum": 2,
-  "FormulaCategory": "Rare",
-  "MazeBuffID": 675680,
-  "FormulaDisplayID": 2102019,
-  "FormulaStoryJson": ""
+  "AvatarID": 1001,
+  "Set4IDList": [
+    103,
+    128,
+    106
+  ],
+  "Set2IDList": [
+    304,
+    310,
+    317
+  ],
+  "PropertyList3": "<list[2]>",
+  "PropertyList4": [
+    "SpeedDelta",
+    "DefenceAddedRatio"
+  ],
+  "PropertyList5": [
+    "DefenceAddedRatio"
+  ],
+  "PropertyList6": [
+    "DefenceAddedRatio"
+  ],
+  "PropertyList": "<list[4]>",
+  "SubAffixPropertyList": "<list[4]>",
+  "ScoreRankList": [
+    279,
+    216
+  ]
 }
 ```
 
@@ -4387,44 +4517,6 @@
 }
 ```
 
-### AvatarRelicRecommend.json (0.09 MB, 91 条)
-
-**字段** (11): `AvatarID, LocalCriticalChance, PropertyList, PropertyList3, PropertyList4, PropertyList5, PropertyList6, ScoreRankList, Set2IDList, Set4IDList, SubAffixPropertyList`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1001,
-  "Set4IDList": [
-    103,
-    128,
-    106
-  ],
-  "Set2IDList": [
-    304,
-    310,
-    317
-  ],
-  "PropertyList3": "<list[2]>",
-  "PropertyList4": [
-    "SpeedDelta",
-    "DefenceAddedRatio"
-  ],
-  "PropertyList5": [
-    "DefenceAddedRatio"
-  ],
-  "PropertyList6": [
-    "DefenceAddedRatio"
-  ],
-  "PropertyList": "<list[4]>",
-  "SubAffixPropertyList": "<list[4]>",
-  "ScoreRankList": [
-    279,
-    216
-  ]
-}
-```
-
 ### SwordTrainingEffect.json (0.08 MB, 547 条)
 
 **字段** (6): `Condition, Count, EffectType, EnhanceActionList, ID, ParamList`
@@ -4458,44 +4550,38 @@
 }
 ```
 
-### RogueMiracleDisplay.json (0.08 MB, 294 条)
+### LimaoNewsUser.json (0.08 MB, 495 条)
 
-**字段** (5): `MiracleBGDesc, MiracleDisplayID, MiracleFigureIconPath, MiracleIconPath, MiracleName`
-
-**首条记录摘要**:
-```json
-{
-  "MiracleDisplayID": 1,
-  "MiracleName": {
-    "Hash": 16215705090798908027
-  },
-  "MiracleBGDesc": {
-    "Hash": 2054227000900414224
-  },
-  "MiracleIconPath": "SpriteOutput/Rogue/MiracleIcon/1001.png",
-  "MiracleFigureIconPath": "SpriteOutput/Rogue/MiracleFigureIcon/100..."
-}
-```
-
-### ProgramGroupConfig.json (0.08 MB, 320 条)
-
-**字段** (8): `Asset, Duration, ID, IfAnAsset, Order, PlayType, ProgramGroupID, SoundEvent`
+**字段** (4): `DKCPEGMOAHB, JAKLCIIEDON, JEJNHIBLJNM, NJPLKACOMMM`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1,
-  "ProgramGroupID": 99,
-  "Order": 1,
-  "PlayType": 2,
-  "Asset": "Chap01_Eff_Dual_A_01.usm",
-  "IfAnAsset": "SpriteOutput/PicTalkCG/Common/PicChap01_...",
-  "Duration": 2,
-  "SoundEvent": ""
+  "JAKLCIIEDON": 1,
+  "NJPLKACOMMM": {
+    "Hash": 2541523136256793332
+  },
+  "DKCPEGMOAHB": "SpriteOutput/AvatarRoundIcon/WebIcon/Web...",
+  "JEJNHIBLJNM": "Official"
 }
 ```
 
-### FuncUnlockData.json (0.08 MB, 481 条)
+### StoryProp.json (0.08 MB, 363 条)
+
+**字段** (6): `ConfigEntityPath, JsonPath, PropID, StoryCharacterID, StoryCharacterModelPath, StoryCharacterUniqueName`
+
+**首条记录摘要**:
+```json
+{
+  "StoryCharacterID": "Prop_W2_Luocha_Coffin_01",
+  "StoryCharacterUniqueName": "W2_Luocha_Coffin_01",
+  "StoryCharacterModelPath": "Props/Outputs/Chap02/Chap02_Prop_Luocha_...",
+  "ConfigEntityPath": "",
+  "JsonPath": ""
+}
+```
+
+### FuncUnlockData.json (0.08 MB, 484 条)
 
 **字段** (3): `Conditions, ShowCondition, UnlockID`
 
@@ -4513,87 +4599,7 @@
 }
 ```
 
-### PossessionConfig.json (0.08 MB, 220 条)
-
-**字段** (7): `AttachPoint, IsEffect, LocalPosition, LocalRotation, LocalScale, PossessionName, PossessionPrefabPath`
-
-**首条记录摘要**:
-```json
-{
-  "PossessionName": "Decoration_GhostLight_A",
-  "PossessionPrefabPath": "Characters/CharacterPrefabs/NPC/Possessi...",
-  "AttachPoint": "Prop",
-  "LocalPosition": [
-    0.425,
-    0.291,
-    0
-  ],
-  "LocalRotation": [
-    0,
-    0,
-    0
-  ],
-  "LocalScale": [
-    1,
-    1,
-    1
-  ]
-}
-```
-
-### InclinationText.json (0.08 MB, 686 条)
-
-**字段** (3): `InclinationAddValueList, InclinationTypeList, TalkSentenceID`
-
-**首条记录摘要**:
-```json
-{
-  "TalkSentenceID": 100000417,
-  "InclinationTypeList": [
-    1003
-  ],
-  "InclinationAddValueList": []
-}
-```
-
-### StoryProp.json (0.08 MB, 347 条)
-
-**字段** (6): `ConfigEntityPath, JsonPath, PropID, StoryCharacterID, StoryCharacterModelPath, StoryCharacterUniqueName`
-
-**首条记录摘要**:
-```json
-{
-  "StoryCharacterID": "Prop_W2_Luocha_Coffin_01",
-  "StoryCharacterUniqueName": "W2_Luocha_Coffin_01",
-  "StoryCharacterModelPath": "Props/Outputs/Chap02/Chap02_Prop_Luocha_...",
-  "ConfigEntityPath": "",
-  "JsonPath": ""
-}
-```
-
-### IdleLiveGift.json (0.08 MB, 299 条)
-
-**字段** (13): `Count, DonateValue, FlySpeed, ID, Icon, MainText, ProtectTime, RarityType, RewardID, SenderID, SourceID, SourceType, TriggerID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "MainText": {
-    "Hash": 4928310697490933968
-  },
-  "RewardID": 8017117,
-  "Icon": "",
-  "TriggerID": 5,
-  "SenderID": 36,
-  "RarityType": 1,
-  "FlySpeed": 0.8,
-  "SourceType": "Unlock",
-  "SourceID": 1
-}
-```
-
-### ChallengeStoryMazeConfig.json (0.08 MB, 100 条)
+### ChallengeStoryMazeConfig.json (0.08 MB, 104 条)
 
 **字段** (23): `ChallengeTargetID, ConfigList1, ConfigList2, DamageType1, DamageType2, EventIDList1, EventIDList2, Floor, GroupID, ID, MapEntranceID, MapEntranceID2, MazeBuffID, MazeGroupID1, MazeGroupID2, MonsterID1, MonsterID2, Name, NpcMonsterIDList1, NpcMonsterIDList2, PreChallengeMazeID, RewardID, StageNum`
 
@@ -4649,38 +4655,22 @@
 }
 ```
 
-### MessageGroupConfig.json (0.08 MB, 739 条)
+### InclinationText.json (0.08 MB, 686 条)
 
-**字段** (4): `ActivityModuleID, ID, MessageContactsID, MessageSectionIDList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 10000,
-  "MessageContactsID": 1002,
-  "MessageSectionIDList": [
-    1000000
-  ]
-}
-```
-
-### MatchThreeTemplateApplyRule.json (0.08 MB, 426 条)
-
-**字段** (6): `ID, Mode, PR, Round, TemplatePath, Type`
+**字段** (3): `InclinationAddValueList, InclinationTypeList, TalkSentenceID`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1,
-  "Mode": "PVP",
-  "Round": 1,
-  "TemplatePath": "Config/Gameplays/Match3/ChessboardTempla...",
-  "Type": "Fire",
-  "PR": 7
+  "TalkSentenceID": 100000417,
+  "InclinationTypeList": [
+    1003
+  ],
+  "InclinationAddValueList": []
 }
 ```
 
-### VisitorBehaviorConfig.json (0.08 MB, 252 条)
+### VisitorBehaviorConfig.json (0.08 MB, 264 条)
 
 **字段** (11): `AnchorID, BehaviorID, DefaultIdleFreeStyleMotionID, DefaultPerformanceID, NPCGroupID, NPCID, NPCRotationYInfo, NpcBubbleTalkSentenceID, PerformanceID, RewardID, VisitorID`
 
@@ -4698,6 +4688,59 @@
   "PerformanceID": 500100101,
   "DefaultPerformanceID": 500100201,
   "NpcBubbleTalkSentenceID": 500100115
+}
+```
+
+### MessageGroupConfig.json (0.08 MB, 767 条)
+
+**字段** (4): `ActivityModuleID, ID, MessageContactsID, MessageSectionIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10000,
+  "MessageContactsID": 1002,
+  "MessageSectionIDList": [
+    1000000
+  ]
+}
+```
+
+### IdleLiveGift.json (0.08 MB, 299 条)
+
+**字段** (13): `Count, DonateValue, FlySpeed, ID, Icon, MainText, ProtectTime, RarityType, RewardID, SenderID, SourceID, SourceType, TriggerID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "MainText": {
+    "Hash": 4928310697490933968
+  },
+  "RewardID": 8017117,
+  "Icon": "",
+  "TriggerID": 5,
+  "SenderID": 36,
+  "RarityType": 1,
+  "FlySpeed": 0.8,
+  "SourceType": "Unlock",
+  "SourceID": 1
+}
+```
+
+### MatchThreeTemplateApplyRule.json (0.08 MB, 426 条)
+
+**字段** (6): `ID, Mode, PR, Round, TemplatePath, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Mode": "PVP",
+  "Round": 1,
+  "TemplatePath": "Config/Gameplays/Match3/ChessboardTempla...",
+  "Type": "Fire",
+  "PR": 7
 }
 ```
 
@@ -4759,6 +4802,70 @@
 }
 ```
 
+### PerformanceVideo.json (0.07 MB, 328 条)
+
+**字段** (8): `EndBlack, EndWithCrack, FloorID, IsSkip, PerformanceID, PerformancePath, PlaneID, StartBlack`
+
+**首条记录摘要**:
+```json
+{
+  "PerformanceID": 100010100,
+  "PerformancePath": "Config/Level/Mission/1000101/Act/Act1000...",
+  "IsSkip": "AfterSeen",
+  "StartBlack": "NoPre",
+  "EndBlack": "NoPrePost",
+  "PlaneID": 20001,
+  "FloorID": 20001001
+}
+```
+
+### ItemPlayerCard.json (0.07 MB, 115 条)
+
+**字段** (17): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, UseMethod, isVisible`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 200001,
+  "ItemMainType": "Usable",
+  "ItemSubType": "HeadIcon",
+  "InventoryDisplayTag": 1,
+  "Rarity": "VeryRare",
+  "isVisible": true,
+  "ItemName": {
+    "Hash": 216656405702675284
+  },
+  "ItemIconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
+  "ItemFigureIconPath": "",
+  "ItemCurrencyIconPath": "",
+  "ItemAvatarIconPath": "",
+  "PileLimit": 1,
+  "UseMethod": "AutoConversionItem",
+  "CustomDataList": [],
+  "ReturnItemIDList": []
+}
+```
+
+### MessageContactsConfig.json (0.07 MB, 305 条)
+
+**字段** (6): `ContactsCamp, ContactsType, ID, IconPath, Name, SignatureText`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1000,
+  "Name": {
+    "Hash": 7756966884920887303
+  },
+  "IconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
+  "SignatureText": {
+    "Hash": 8614338816010844770
+  },
+  "ContactsType": 1,
+  "ContactsCamp": 1
+}
+```
+
 ### RogueMap.json (0.07 MB, 615 条)
 
 **字段** (6): `IsStart, NextSiteIDList, PosX, PosY, RogueMapID, SiteID`
@@ -4798,6 +4905,21 @@
     35030101,
     35030101,
     35030101
+  ]
+}
+```
+
+### ActivityConfig.json (0.07 MB, 504 条)
+
+**字段** (5): `ActivityID, ActivityModuleIDList, ActivityPanelID, EarlyAccessContentID, ResidentModuleList`
+
+**首条记录摘要**:
+```json
+{
+  "ActivityID": 10012,
+  "ResidentModuleList": [],
+  "ActivityModuleIDList": [
+    1001201
   ]
 }
 ```
@@ -4900,86 +5022,22 @@
 }
 ```
 
-### ItemPlayerCard.json (0.07 MB, 112 条)
+### MessageSectionConfig.json (0.07 MB, 779 条)
 
-**字段** (17): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, UseMethod, isVisible`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 200001,
-  "ItemMainType": "Usable",
-  "ItemSubType": "HeadIcon",
-  "InventoryDisplayTag": 1,
-  "Rarity": "VeryRare",
-  "isVisible": true,
-  "ItemName": {
-    "Hash": 216656405702675284
-  },
-  "ItemIconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
-  "ItemFigureIconPath": "",
-  "ItemCurrencyIconPath": "",
-  "ItemAvatarIconPath": "",
-  "PileLimit": 1,
-  "UseMethod": "AutoConversionItem",
-  "CustomDataList": [],
-  "ReturnItemIDList": []
-}
-```
-
-### MessageContactsConfig.json (0.07 MB, 295 条)
-
-**字段** (6): `ContactsCamp, ContactsType, ID, IconPath, Name, SignatureText`
+**字段** (4): `ID, IsPerformMessage, MainMissionLink, StartMessageItemIDList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1000,
-  "Name": {
-    "Hash": 7756966884920887303
-  },
-  "IconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
-  "SignatureText": {
-    "Hash": 8614338816010844770
-  },
-  "ContactsType": 1,
-  "ContactsCamp": 1
+  "ID": 1150300,
+  "StartMessageItemIDList": [
+    115030004
+  ],
+  "IsPerformMessage": true
 }
 ```
 
-### PerformanceVideo.json (0.07 MB, 317 条)
-
-**字段** (8): `EndBlack, EndWithCrack, FloorID, IsSkip, PerformanceID, PerformancePath, PlaneID, StartBlack`
-
-**首条记录摘要**:
-```json
-{
-  "PerformanceID": 100010100,
-  "PerformancePath": "Config/Level/Mission/1000101/Act/Act1000...",
-  "IsSkip": "AfterSeen",
-  "StartBlack": "NoPre",
-  "EndBlack": "NoPrePost",
-  "PlaneID": 20001,
-  "FloorID": 20001001
-}
-```
-
-### ActivityConfig.json (0.07 MB, 487 条)
-
-**字段** (5): `ActivityID, ActivityModuleIDList, ActivityPanelID, EarlyAccessContentID, ResidentModuleList`
-
-**首条记录摘要**:
-```json
-{
-  "ActivityID": 10012,
-  "ResidentModuleList": [],
-  "ActivityModuleIDList": [
-    1001201
-  ]
-}
-```
-
-### ConstValueClient.json (0.07 MB, 436 条)
+### ConstValueClient.json (0.07 MB, 439 条)
 
 **字段** (2): `ConstValueName, Value`
 
@@ -5057,22 +5115,50 @@
 }
 ```
 
-### MessageSectionConfig.json (0.07 MB, 751 条)
+### ActivityAvatarPromotion.json (0.07 MB, 126 条)
 
-**字段** (4): `ID, IsPerformMessage, MainMissionLink, StartMessageItemIDList`
+**字段** (14): `AttackAdd, AttackBase, AvatarID, BaseAggro, CriticalChance, CriticalDamage, DefenceAdd, DefenceBase, HPAdd, HPBase, MaxLevel, Promotion, PromotionCostList, SpeedBase`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1150300,
-  "StartMessageItemIDList": [
-    115030004
-  ],
-  "IsPerformMessage": true
+  "AvatarID": 8901,
+  "PromotionCostList": "<list[2]>",
+  "MaxLevel": 20,
+  "AttackBase": {
+    "Value": 84.48
+  },
+  "AttackAdd": {
+    "Value": 4.224
+  },
+  "DefenceBase": {
+    "Value": 62.7
+  },
+  "DefenceAdd": {
+    "Value": 3.135
+  },
+  "HPBase": {
+    "Value": 163.68
+  },
+  "HPAdd": {
+    "Value": 8.184
+  },
+  "SpeedBase": {
+    "Value": 100
+  },
+  "CriticalChance": {
+    "Value": 0.05
+  },
+  "CriticalDamage": {
+    "Value": 0.5
+  },
+  "BaseAggro": {
+    "Value": 125
+  }
 }
 ```
 
-### RogueTournBuffGroup.json (0.07 MB, 453 条)
+### RogueTournBuffGroup.json (0.07 MB, 456 条)
 
 **字段** (3): `RogueBuffDrop, RogueBuffGroupID, TournMode`
 
@@ -5122,24 +5208,64 @@
 }
 ```
 
-### PlanetFesAvatarEventOption.json (0.07 MB, 288 条)
+### RogueTournHandbookMiracle.json (0.07 MB, 544 条)
 
-**字段** (6): `ActivityRewardID, EventContent, EventOptionID, NextOptionList, OptionBubbleTalk, RewardPoolID`
+**字段** (5): `HandbookMiracleID, MiracleCategory, MiracleDisplayID, MiracleEffectID, UnlockDesc`
 
 **首条记录摘要**:
 ```json
 {
-  "EventOptionID": 1011,
-  "NextOptionList": [
-    10111,
-    10112
+  "HandbookMiracleID": 6101,
+  "MiracleDisplayID": 6101,
+  "MiracleCategory": "Common",
+  "UnlockDesc": 806
+}
+```
+
+### LimaoNewsPost.json (0.07 MB, 96 条)
+
+**字段** (17): `AEONKNDCDKN, BDACPPLKLGL, BDEBECLIHMD, BDKECJFBAJJ, DGLJLJEHNNB, DPFCAIKMBEP, EEIEODMEMFI, EFFFIJHJHMA, GAPKKIEIEHE, HIHLLBFEONI, JFBDBCKPPEI, KHIALKEMEGH, KJGJGNLACKF, LIDHGBEAJMA, MHLNDBFHHLF, NEPKPFOBEIO, ODLDEEANNCM`
+
+**首条记录摘要**:
+```json
+{
+  "DGLJLJEHNNB": 101,
+  "NEPKPFOBEIO": [
+    2
   ],
-  "EventContent": {
-    "Hash": 10394835662176167975
+  "GAPKKIEIEHE": "Auto",
+  "BDKECJFBAJJ": [
+    2400073
+  ],
+  "MHLNDBFHHLF": [],
+  "HIHLLBFEONI": 3,
+  "EFFFIJHJHMA": "Picture",
+  "ODLDEEANNCM": "SpriteOutput/UI/LimaoNews/PostPic/post_1...",
+  "EEIEODMEMFI": "",
+  "BDEBECLIHMD": "",
+  "BDACPPLKLGL": "",
+  "DPFCAIKMBEP": {
+    "Hash": 7745117516287334929
   },
-  "OptionBubbleTalk": {
-    "Hash": 4458770637833778801
-  }
+  "KJGJGNLACKF": {
+    "Hash": 13023016003766530778
+  },
+  "LIDHGBEAJMA": "<list[11]>"
+}
+```
+
+### RogueTournWeeklyDisplay.json (0.07 MB, 283 条)
+
+**字段** (3): `DescParams, WeeklyDisplayContent, WeeklyDisplayID`
+
+**首条记录摘要**:
+```json
+{
+  "WeeklyDisplayID": 1001,
+  "WeeklyDisplayContent": {
+    "Hash": 16523463738176474651
+  },
+  "DescParams": []
 }
 ```
 
@@ -5197,6 +5323,27 @@
     420111
   ],
   "MazeBuffID": 3110001
+}
+```
+
+### PlanetFesAvatarEventOption.json (0.07 MB, 288 条)
+
+**字段** (6): `ActivityRewardID, EventContent, EventOptionID, NextOptionList, OptionBubbleTalk, RewardPoolID`
+
+**首条记录摘要**:
+```json
+{
+  "EventOptionID": 1011,
+  "NextOptionList": [
+    10111,
+    10112
+  ],
+  "EventContent": {
+    "Hash": 10394835662176167975
+  },
+  "OptionBubbleTalk": {
+    "Hash": 4458770637833778801
+  }
 }
 ```
 
@@ -5285,7 +5432,7 @@
 }
 ```
 
-### RetCodeError.json (0.07 MB, 805 条)
+### RetCodeError.json (0.07 MB, 806 条)
 
 **字段** (3): `ErrorID, IsPileToastCenter, Text`
 
@@ -5295,20 +5442,6 @@
   "Text": {
     "Hash": 18396014689023842325
   }
-}
-```
-
-### RogueTournHandbookMiracle.json (0.07 MB, 524 条)
-
-**字段** (5): `HandbookMiracleID, MiracleCategory, MiracleDisplayID, MiracleEffectID, UnlockDesc`
-
-**首条记录摘要**:
-```json
-{
-  "HandbookMiracleID": 6101,
-  "MiracleDisplayID": 6101,
-  "MiracleCategory": "Common",
-  "UnlockDesc": 806
 }
 ```
 
@@ -5342,34 +5475,29 @@
 }
 ```
 
-### RogueTournWeeklyDisplay.json (0.06 MB, 275 条)
+### ItemUseBuffData.json (0.06 MB, 215 条)
 
-**字段** (3): `DescParams, WeeklyDisplayContent, WeeklyDisplayID`
-
-**首条记录摘要**:
-```json
-{
-  "WeeklyDisplayID": 1001,
-  "WeeklyDisplayContent": {
-    "Hash": 16523463738176474651
-  },
-  "DescParams": []
-}
-```
-
-### LimaoNewsUser.json (0.06 MB, 377 条)
-
-**字段** (4): `DKCPEGMOAHB, JAKLCIIEDON, JEJNHIBLJNM, NJPLKACOMMM`
+**字段** (17): `ActivityCount, ConsumeTag, ConsumeType, IsCheckHP, IsShowItemDesc, MazeBuffID, MazeBuffID2, MazeBuffParam, MazeBuffParam2, PreviewHPRecoveryPercent, PreviewHPRecoveryValue, PreviewPowerPercent, PreviewSkillPoint, UseDataID, UseEffect, UseMultipleMax, UseTargetType`
 
 **首条记录摘要**:
 ```json
 {
-  "JAKLCIIEDON": 1,
-  "NJPLKACOMMM": {
-    "Hash": 2541523136256793332
-  },
-  "DKCPEGMOAHB": "SpriteOutput/AvatarRoundIcon/WebIcon/Web...",
-  "JEJNHIBLJNM": "Official"
+  "UseDataID": 400004,
+  "ConsumeType": 4,
+  "ConsumeTag": [
+    "HP"
+  ],
+  "UseTargetType": "Alive",
+  "MazeBuffID": 400004,
+  "MazeBuffParam": [],
+  "MazeBuffParam2": [],
+  "UseMultipleMax": 1,
+  "IsCheckHP": true,
+  "UseEffect": "AvatarItemIcon_Eff_Heal",
+  "PreviewHPRecoveryPercent": 0.15,
+  "PreviewHPRecoveryValue": 150,
+  "IsShowItemDesc": true,
+  "ActivityCount": 1
 }
 ```
 
@@ -5400,6 +5528,24 @@
   "ItemBGDesc": "ItemBGDesc_31011",
   "BGStoryTitle": "RelicStoryTitle_31011",
   "BGStoryContent": "RelicStoryContent_31011"
+}
+```
+
+### StageInfiniteGroup.json (0.06 MB, 605 条)
+
+**字段** (2): `WaveGroupID, WaveIDList`
+
+**首条记录摘要**:
+```json
+{
+  "WaveGroupID": 101,
+  "WaveIDList": [
+    10101,
+    10102,
+    10103,
+    10104,
+    10105
+  ]
 }
 ```
 
@@ -5442,32 +5588,6 @@
 }
 ```
 
-### ItemUseBuffData.json (0.06 MB, 205 条)
-
-**字段** (17): `ActivityCount, ConsumeTag, ConsumeType, IsCheckHP, IsShowItemDesc, MazeBuffID, MazeBuffID2, MazeBuffParam, MazeBuffParam2, PreviewHPRecoveryPercent, PreviewHPRecoveryValue, PreviewPowerPercent, PreviewSkillPoint, UseDataID, UseEffect, UseMultipleMax, UseTargetType`
-
-**首条记录摘要**:
-```json
-{
-  "UseDataID": 400004,
-  "ConsumeType": 4,
-  "ConsumeTag": [
-    "HP"
-  ],
-  "UseTargetType": "Alive",
-  "MazeBuffID": 400004,
-  "MazeBuffParam": [],
-  "MazeBuffParam2": [],
-  "UseMultipleMax": 1,
-  "IsCheckHP": true,
-  "UseEffect": "AvatarItemIcon_Eff_Heal",
-  "PreviewHPRecoveryPercent": 0.15,
-  "PreviewHPRecoveryValue": 150,
-  "IsShowItemDesc": true,
-  "ActivityCount": 1
-}
-```
-
 ### ActivityConfigPunkLord.json (0.06 MB, 98 条)
 
 **字段** (17): `AssistPoint, ExistTime, GroupType, ID, KillPoint, ManikinConfig, MonsterBuff, MonsterHP, MonsterLevel, MonsterPic, MonsterRare, PluralHP, RaidID, ShowMonster, SummonPoint, TurnLimit, WorldLevel`
@@ -5493,27 +5613,6 @@
   "KillPoint": 1500,
   "SummonPoint": 1500,
   "AssistPoint": 180
-}
-```
-
-### LimaoNewsMessageItem.json (0.06 MB, 254 条)
-
-**字段** (9): `BHNIBPKLDKO, FBKAMIHGLFK, GEFCMECLLIJ, HMGLFJABIII, IJBDLNLOJKK, JAKLCIIEDON, JGMIOKAJMFB, LINLNNHIBAK, NJFABJDCPNC`
-
-**首条记录摘要**:
-```json
-{
-  "IJBDLNLOJKK": 100000100,
-  "JAKLCIIEDON": 1,
-  "GEFCMECLLIJ": "Limao",
-  "LINLNNHIBAK": "Text",
-  "JGMIOKAJMFB": {
-    "Hash": 16545384359784665760
-  },
-  "FBKAMIHGLFK": "",
-  "BHNIBPKLDKO": [
-    100000101
-  ]
 }
 ```
 
@@ -5555,24 +5654,6 @@
 }
 ```
 
-### StageInfiniteGroup.json (0.06 MB, 575 条)
-
-**字段** (2): `WaveGroupID, WaveIDList`
-
-**首条记录摘要**:
-```json
-{
-  "WaveGroupID": 101,
-  "WaveIDList": [
-    10101,
-    10102,
-    10103,
-    10104,
-    10105
-  ]
-}
-```
-
 ### TrainPartyCardConfig.json (0.06 MB, 174 条)
 
 **字段** (7): `CardActJson, CardEffectJson, CardID, CardImage, CardName, PassengerID, Rarity`
@@ -5591,86 +5672,7 @@
 }
 ```
 
-### BattleAchievement.json (0.06 MB, 477 条)
-
-**字段** (5): `AbilityName, BattleAchievementID, ExcludeTagList, GameModeGroup, NeedTagList`
-
-**首条记录摘要**:
-```json
-{
-  "BattleAchievementID": 20001,
-  "AbilityName": "StageAbility_Scoring_20001",
-  "NeedTagList": [],
-  "ExcludeTagList": []
-}
-```
-
-### ActivityAvatarPromotion.json (0.06 MB, 84 条)
-
-**字段** (14): `AttackAdd, AttackBase, AvatarID, BaseAggro, CriticalChance, CriticalDamage, DefenceAdd, DefenceBase, HPAdd, HPBase, MaxLevel, Promotion, PromotionCostList, SpeedBase`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 8901,
-  "PromotionCostList": "<list[2]>",
-  "MaxLevel": 20,
-  "AttackBase": {
-    "Value": 84.48
-  },
-  "AttackAdd": {
-    "Value": 4.224
-  },
-  "DefenceBase": {
-    "Value": 62.7
-  },
-  "DefenceAdd": {
-    "Value": 3.135
-  },
-  "HPBase": {
-    "Value": 163.68
-  },
-  "HPAdd": {
-    "Value": 8.184
-  },
-  "SpeedBase": {
-    "Value": 100
-  },
-  "CriticalChance": {
-    "Value": 0.05
-  },
-  "CriticalDamage": {
-    "Value": 0.5
-  },
-  "BaseAggro": {
-    "Value": 125
-  }
-}
-```
-
-### BackGroundMusic.json (0.06 MB, 265 条)
-
-**字段** (6): `BGMDesc, GroupID, ID, MusicName, Unlock, UnlockDesc`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 210000,
-  "GroupID": 1,
-  "MusicName": {
-    "Hash": 13461049653840041895
-  },
-  "UnlockDesc": {
-    "Hash": 4163372770562334535
-  },
-  "BGMDesc": {
-    "Hash": 9271587731720215217
-  },
-  "Unlock": true
-}
-```
-
-### TeamBuildConfig.json (0.06 MB, 126 条)
+### TeamBuildConfig.json (0.06 MB, 132 条)
 
 **字段** (10): `AvatarID, BackupGroupList1, BackupGroupList2, BackupGroupList3, BackupList1, BackupList2, BackupList3, MemberList, Position, TeamID`
 
@@ -5707,6 +5709,90 @@
   "BackupGroupList3": [
     101
   ]
+}
+```
+
+### BackGroundMusic.json (0.06 MB, 276 条)
+
+**字段** (6): `BGMDesc, GroupID, ID, MusicName, Unlock, UnlockDesc`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 210000,
+  "GroupID": 1,
+  "MusicName": {
+    "Hash": 13461049653840041895
+  },
+  "UnlockDesc": {
+    "Hash": 4163372770562334535
+  },
+  "BGMDesc": {
+    "Hash": 9271587731720215217
+  },
+  "Unlock": true
+}
+```
+
+### BattleAchievement.json (0.06 MB, 482 条)
+
+**字段** (5): `AbilityName, BattleAchievementID, ExcludeTagList, GameModeGroup, NeedTagList`
+
+**首条记录摘要**:
+```json
+{
+  "BattleAchievementID": 20001,
+  "AbilityName": "StageAbility_Scoring_20001",
+  "NeedTagList": [],
+  "ExcludeTagList": []
+}
+```
+
+### ChestGroupProperty.json (0.06 MB, 311 条)
+
+**字段** (7): `ChestID, FloorID, GPValue, GroupID, GroupProperty, InstanceID, LittleGameEntityID`
+
+**首条记录摘要**:
+```json
+{
+  "ChestID": 10501631,
+  "FloorID": 10501001,
+  "GroupID": 252,
+  "InstanceID": 110001,
+  "LittleGameEntityID": 40,
+  "GroupProperty": "LG_110001__40_ChestStateS_Auto",
+  "GPValue": 2
+}
+```
+
+### TeleportConfig.json (0.06 MB, 475 条)
+
+**字段** (6): `ConfigID, FloorID, GroupID, ID, InitialEnable, PlaneID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "PlaneID": 20101,
+  "FloorID": 20101001,
+  "GroupID": 56,
+  "ConfigID": 300001
+}
+```
+
+### RogueTournFormulaDisplay.json (0.06 MB, 324 条)
+
+**字段** (4): `ExtraEffect, FormulaDisplayID, FormulaStory, HandbookUnlockDisplayID`
+
+**首条记录摘要**:
+```json
+{
+  "FormulaDisplayID": 10114000,
+  "FormulaStory": {
+    "Hash": 5706619527573856621
+  },
+  "ExtraEffect": [],
+  "HandbookUnlockDisplayID": 808
 }
 ```
 
@@ -5811,68 +5897,7 @@
 }
 ```
 
-### LimaoNewsPost.json (0.05 MB, 79 条)
-
-**字段** (17): `AEONKNDCDKN, BDACPPLKLGL, BDEBECLIHMD, BDKECJFBAJJ, DGLJLJEHNNB, DPFCAIKMBEP, EEIEODMEMFI, EFFFIJHJHMA, GAPKKIEIEHE, HIHLLBFEONI, JFBDBCKPPEI, KHIALKEMEGH, KJGJGNLACKF, LIDHGBEAJMA, MHLNDBFHHLF, NEPKPFOBEIO, ODLDEEANNCM`
-
-**首条记录摘要**:
-```json
-{
-  "DGLJLJEHNNB": 101,
-  "NEPKPFOBEIO": [
-    2
-  ],
-  "GAPKKIEIEHE": "Auto",
-  "BDKECJFBAJJ": [
-    2400073
-  ],
-  "MHLNDBFHHLF": [],
-  "HIHLLBFEONI": 3,
-  "EFFFIJHJHMA": "Picture",
-  "ODLDEEANNCM": "SpriteOutput/UI/LimaoNews/PostPic/post_1...",
-  "EEIEODMEMFI": "",
-  "BDEBECLIHMD": "",
-  "BDACPPLKLGL": "",
-  "DPFCAIKMBEP": {
-    "Hash": 7745117516287334929
-  },
-  "KJGJGNLACKF": {
-    "Hash": 13023016003766530778
-  },
-  "LIDHGBEAJMA": "<list[11]>"
-}
-```
-
-### TeleportConfig.json (0.05 MB, 462 条)
-
-**字段** (6): `ConfigID, FloorID, GroupID, ID, InitialEnable, PlaneID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "PlaneID": 20101,
-  "FloorID": 20101001,
-  "GroupID": 56,
-  "ConfigID": 300001
-}
-```
-
-### ActivityDiceModifier.json (0.05 MB, 286 条)
-
-**字段** (9): `BOKJJKFCFME, LKOIJINLBBK, NHALJPDONCP, NIDFIGFJJLL, NMAHGFAPENI, OBDINDDLCIO, OENAMINOLLF, OLOIFNNLKJP, PNEIDAGEBOC`
-
-**首条记录摘要**:
-```json
-{
-  "LKOIJINLBBK": 26400001,
-  "PNEIDAGEBOC": 1,
-  "OLOIFNNLKJP": "",
-  "BOKJJKFCFME": 264000
-}
-```
-
-### NPCMonsterMark.json (0.05 MB, 773 条)
+### NPCMonsterMark.json (0.05 MB, 791 条)
 
 **字段** (3): `GroupID, ID, InstanceID`
 
@@ -5885,19 +5910,7 @@
 }
 ```
 
-### RogueBuffGroup.json (0.05 MB, 546 条)
-
-**字段** (2): `GMLOGNJAIGI, HECJCAMDGNO`
-
-**首条记录摘要**:
-```json
-{
-  "GMLOGNJAIGI": 12000,
-  "HECJCAMDGNO": "<list[18]>"
-}
-```
-
-### ItemConfigAvatar.json (0.05 MB, 96 条)
+### ItemConfigAvatar.json (0.05 MB, 98 条)
 
 **字段** (14): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
 
@@ -5922,6 +5935,67 @@
   "PileLimit": 1,
   "CustomDataList": [],
   "ReturnItemIDList": []
+}
+```
+
+### LimaoNewsFinishway.json (0.05 MB, 237 条)
+
+**字段** (10): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2499999,
+  "FinishType": "SubMissionFinishCnt",
+  "ParamType": "ListContain",
+  "ParamStr1": "",
+  "ParamIntList": [
+    804010118
+  ],
+  "ParamItemList": [],
+  "Progress": 1
+}
+```
+
+### ActivityDiceModifier.json (0.05 MB, 286 条)
+
+**字段** (9): `BOKJJKFCFME, LKOIJINLBBK, NHALJPDONCP, NIDFIGFJJLL, NMAHGFAPENI, OBDINDDLCIO, OENAMINOLLF, OLOIFNNLKJP, PNEIDAGEBOC`
+
+**首条记录摘要**:
+```json
+{
+  "LKOIJINLBBK": 26400001,
+  "PNEIDAGEBOC": 1,
+  "OLOIFNNLKJP": "",
+  "BOKJJKFCFME": 264000
+}
+```
+
+### StoryAtlas.json (0.05 MB, 456 条)
+
+**字段** (6): `AvatarID, ReplaceID, SortID, Story, StoryID, Unlock`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 8001,
+  "StoryID": 11,
+  "Story": {
+    "Hash": 6823950950020371399
+  },
+  "Unlock": 70006
+}
+```
+
+### RogueBuffGroup.json (0.05 MB, 546 条)
+
+**字段** (2): `GMLOGNJAIGI, HECJCAMDGNO`
+
+**首条记录摘要**:
+```json
+{
+  "GMLOGNJAIGI": 12000,
+  "HECJCAMDGNO": "<list[18]>"
 }
 ```
 
@@ -6013,19 +6087,23 @@
 }
 ```
 
-### StoryAtlas.json (0.05 MB, 446 条)
+### MazeSkill.json (0.05 MB, 206 条)
 
-**字段** (6): `AvatarID, ReplaceID, SortID, Story, StoryID, Unlock`
+**字段** (7): `MPCost, MazeSkillDesc, MazeSkillId, MazeSkillName, MazeSkilltype, RelatedAvatarSkill, SkillTriggerKey`
 
 **首条记录摘要**:
 ```json
 {
-  "AvatarID": 8001,
-  "StoryID": 11,
-  "Story": {
-    "Hash": 6823950950020371399
+  "MazeSkillId": 100101,
+  "MazeSkillName": {
+    "Hash": 7167396225780900216
   },
-  "Unlock": 70006
+  "MazeSkilltype": 1,
+  "MazeSkillDesc": {
+    "Hash": 6612596470888090439
+  },
+  "RelatedAvatarSkill": 100106,
+  "SkillTriggerKey": "NormalAtk"
 }
 ```
 
@@ -6057,22 +6135,6 @@
 }
 ```
 
-### RogueTournFormulaDisplay.json (0.05 MB, 300 条)
-
-**字段** (4): `ExtraEffect, FormulaDisplayID, FormulaStory, HandbookUnlockDisplayID`
-
-**首条记录摘要**:
-```json
-{
-  "FormulaDisplayID": 10114000,
-  "FormulaStory": {
-    "Hash": 5706619527573856621
-  },
-  "ExtraEffect": [],
-  "HandbookUnlockDisplayID": 808
-}
-```
-
 ### ILBattleMonsterSkill.json (0.05 MB, 165 条)
 
 **字段** (6): `AttackType, CoolDown, ID, InitialCD, ParamList, SkillTriggerKey`
@@ -6090,6 +6152,51 @@
     "Value": 4
   },
   "ParamList": "<list[4]>"
+}
+```
+
+### VideoConfig.json (0.05 MB, 356 条)
+
+**字段** (4): `CaptionPath, IsPlayerInvolved, VideoID, VideoPath`
+
+**首条记录摘要**:
+```json
+{
+  "VideoID": 1,
+  "VideoPath": "CS_Chap01_Act010.usm",
+  "IsPlayerInvolved": true,
+  "CaptionPath": "Config/CutSceneCaption/CS_Chap01_Act010_..."
+}
+```
+
+### ShopConfig.json (0.05 MB, 106 条)
+
+**字段** (17): `ActivityModuleID, HideRemainTime, IsOpen, LimitType1, LimitValue1List, LimitValue2List, ScheduleDataID, ServerVerification, ShopBar, ShopDesc, ShopGroupID, ShopID, ShopIconPath, ShopMainType, ShopName, ShopSortID, ShopType`
+
+**首条记录摘要**:
+```json
+{
+  "ShopID": 101,
+  "ShopGroupID": 1,
+  "ShopMainType": "Main",
+  "ShopType": 1,
+  "ShopName": {
+    "Hash": 16829471444158351973
+  },
+  "ShopDesc": {
+    "Hash": 5242659586514105497
+  },
+  "ShopIconPath": "SpriteOutput/TabIcon/Shop/ShopDrawcardIc...",
+  "ShopBar": "Shop101Page",
+  "ShopSortID": 2,
+  "LimitType1": "Level",
+  "LimitValue1List": [
+    1
+  ],
+  "LimitValue2List": [],
+  "IsOpen": true,
+  "ScheduleDataID": 300101,
+  "HideRemainTime": true
 }
 ```
 
@@ -6132,30 +6239,46 @@
   "DisplayMonsterMap2": {},
   "MapDisplayItemList": [],
   "ChestDisplayItemList": [],
-  "ScoreMap": {
-    "3": 3600
-  },
+  "ScoreMap": {},
   "AreaTipsIcon": "SpriteOutput/Rogue/Planet/IconRoguePlane..."
 }
 ```
 
-### MazeSkill.json (0.05 MB, 202 条)
+### RogueTournWeeklyChallenge.json (0.05 MB, 108 条)
 
-**字段** (7): `MPCost, MazeSkillDesc, MazeSkillId, MazeSkillName, MazeSkilltype, RelatedAvatarSkill, SkillTriggerKey`
+**字段** (9): `ChallengeID, DisplayFinalMonsterGroups, DisplayMonsterGroups1, DisplayMonsterGroups2, DisplayMonsterGroups3, RewardID, WeeklyContentDetailList, WeeklyContentList, WeeklyName`
 
 **首条记录摘要**:
 ```json
 {
-  "MazeSkillId": 100101,
-  "MazeSkillName": {
-    "Hash": 7167396225780900216
+  "ChallengeID": 1,
+  "WeeklyName": {
+    "Hash": 16713295253780243020
   },
-  "MazeSkilltype": 1,
-  "MazeSkillDesc": {
-    "Hash": 6612596470888090439
+  "WeeklyContentList": [
+    1011,
+    1012,
+    1003
+  ],
+  "WeeklyContentDetailList": [
+    1001,
+    1002
+  ],
+  "RewardID": 110701,
+  "DisplayFinalMonsterGroups": {
+    "0": 300402
   },
-  "RelatedAvatarSkill": 100106,
-  "SkillTriggerKey": "NormalAtk"
+  "DisplayMonsterGroups1": {
+    "0": 300202,
+    "3": 300601
+  },
+  "DisplayMonsterGroups2": {
+    "0": 300302,
+    "3": 300701
+  },
+  "DisplayMonsterGroups3": {
+    "0": 300402
+  }
 }
 ```
 
@@ -6188,20 +6311,6 @@
   "CustomDataList": [],
   "ReturnItemIDList": [],
   "ItemGroup": 1001
-}
-```
-
-### VideoConfig.json (0.05 MB, 349 条)
-
-**字段** (4): `CaptionPath, IsPlayerInvolved, VideoID, VideoPath`
-
-**首条记录摘要**:
-```json
-{
-  "VideoID": 1,
-  "VideoPath": "CS_Chap01_Act010.usm",
-  "IsPlayerInvolved": true,
-  "CaptionPath": "Config/CutSceneCaption/CS_Chap01_Act010_..."
 }
 ```
 
@@ -6333,89 +6442,7 @@
 }
 ```
 
-### ChestGroupProperty.json (0.05 MB, 271 条)
-
-**字段** (7): `ChestID, FloorID, GPValue, GroupID, GroupProperty, InstanceID, LittleGameEntityID`
-
-**首条记录摘要**:
-```json
-{
-  "ChestID": 10501631,
-  "FloorID": 10501001,
-  "GroupID": 252,
-  "InstanceID": 110001,
-  "LittleGameEntityID": 40,
-  "GroupProperty": "LG_110001__40_ChestStateS_Auto",
-  "GPValue": 2
-}
-```
-
-### ActivityHipplenIncident.json (0.05 MB, 103 条)
-
-**字段** (6): `EffectList, ExpectedBasicList, ExpectedRatioProbability, ID, PerformanceJsonConfigPath, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 30101,
-  "PerformanceJsonConfigPath": "Config/Gameplays/Hipplen/Incident/Activi...",
-  "EffectList": "<list[1]>",
-  "ExpectedBasicList": "<list[5]>",
-  "ExpectedRatioProbability": []
-}
-```
-
-### RogueTournWeeklyChallenge.json (0.05 MB, 103 条)
-
-**字段** (9): `ChallengeID, DisplayFinalMonsterGroups, DisplayMonsterGroups1, DisplayMonsterGroups2, DisplayMonsterGroups3, RewardID, WeeklyContentDetailList, WeeklyContentList, WeeklyName`
-
-**首条记录摘要**:
-```json
-{
-  "ChallengeID": 1,
-  "WeeklyName": {
-    "Hash": 16713295253780243020
-  },
-  "WeeklyContentList": [
-    1011,
-    1012,
-    1003
-  ],
-  "WeeklyContentDetailList": [
-    1001,
-    1002
-  ],
-  "RewardID": 110701,
-  "DisplayFinalMonsterGroups": {
-    "0": 300402
-  },
-  "DisplayMonsterGroups1": {
-    "0": 300202,
-    "3": 300601
-  },
-  "DisplayMonsterGroups2": {
-    "0": 300302,
-    "3": 300701
-  },
-  "DisplayMonsterGroups3": {
-    "0": 300402
-  }
-}
-```
-
-### ChimeraDuelChimeraPreset.json (0.05 MB, 550 条)
-
-**字段** (7): `ChimeraID, ChimeraPresetID, DeltaAttack, DeltaHP, EquipmentID, ExpGained, SpecialParam`
-
-**首条记录摘要**:
-```json
-{
-  "ChimeraPresetID": 1011,
-  "ChimeraID": 108
-}
-```
-
-### ItemConfigAvatarRank.json (0.05 MB, 91 条)
+### ItemConfigAvatarRank.json (0.05 MB, 93 条)
 
 **字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
 
@@ -6443,6 +6470,72 @@
   "PileLimit": 999,
   "CustomDataList": [],
   "ReturnItemIDList": []
+}
+```
+
+### PerformanceReplayLOverride.json (0.05 MB, 172 条)
+
+**字段** (19): `IsOverrideBranchFlag, IsOverrideDeactiveGroupFlag, IsOverrideEndBlackTypeFlag, IsOverrideMissionAudioStateFlag, IsOverrideMissionLGDisableFlag, IsOverridePerformancePriorityFlag, IsOverridePropStateFlag, OverrideActiveGroup, OverrideDeactiveGroup, OverrideEndBlackType, OverrideIntent, OverrideIsBranch, OverrideMissionAudioState, OverrideMissionLGDisable, OverridePerformancePriority, OverridePropState, PatchLevelGraph, PerformanceID, PerformanceType`
+
+**首条记录摘要**:
+```json
+{
+  "PerformanceType": "PlayVideo",
+  "PerformanceID": 103080104,
+  "IsOverrideBranchFlag": 1,
+  "OverrideIntent": 1,
+  "OverrideActiveGroup": [],
+  "OverrideDeactiveGroup": [],
+  "OverridePropState": [],
+  "OverrideMissionAudioState": "",
+  "PatchLevelGraph": ""
+}
+```
+
+### ActivityHipplenIncident.json (0.05 MB, 103 条)
+
+**字段** (6): `EffectList, ExpectedBasicList, ExpectedRatioProbability, ID, PerformanceJsonConfigPath, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 30101,
+  "PerformanceJsonConfigPath": "Config/Gameplays/Hipplen/Incident/Activi...",
+  "EffectList": "<list[1]>",
+  "ExpectedBasicList": "<list[5]>",
+  "ExpectedRatioProbability": []
+}
+```
+
+### ChimeraDuelChimeraPreset.json (0.05 MB, 550 条)
+
+**字段** (7): `ChimeraID, ChimeraPresetID, DeltaAttack, DeltaHP, EquipmentID, ExpGained, SpecialParam`
+
+**首条记录摘要**:
+```json
+{
+  "ChimeraPresetID": 1011,
+  "ChimeraID": 108
+}
+```
+
+### RogueTournHandBookEvent.json (0.05 MB, 128 条)
+
+**字段** (8): `EventHandbookID, EventTitle, ImageID, IsUsed, Priority, TypeDisplayID, UnlockDisplayID, UnlockNPCProgressIDList`
+
+**首条记录摘要**:
+```json
+{
+  "EventHandbookID": 5,
+  "UnlockNPCProgressIDList": "<list[3]>",
+  "EventTitle": {
+    "Hash": 7000029817862836798
+  },
+  "TypeDisplayID": 801,
+  "UnlockDisplayID": 804,
+  "Priority": 5,
+  "IsUsed": true,
+  "ImageID": 101
 }
 ```
 
@@ -6559,34 +6652,17 @@
 }
 ```
 
-### ShopConfig.json (0.05 MB, 98 条)
+### OfferingLevelConfig.json (0.05 MB, 568 条)
 
-**字段** (17): `ActivityModuleID, HideRemainTime, IsOpen, LimitType1, LimitValue1List, LimitValue2List, ScheduleDataID, ServerVerification, ShopBar, ShopDesc, ShopGroupID, ShopID, ShopIconPath, ShopMainType, ShopName, ShopSortID, ShopType`
+**字段** (6): `ItemCost, Level, RewardID, Type, TypeID, UnlockID`
 
 **首条记录摘要**:
 ```json
 {
-  "ShopID": 101,
-  "ShopGroupID": 1,
-  "ShopMainType": "Main",
-  "ShopType": 1,
-  "ShopName": {
-    "Hash": 16829471444158351973
-  },
-  "ShopDesc": {
-    "Hash": 5242659586514105497
-  },
-  "ShopIconPath": "SpriteOutput/TabIcon/Shop/ShopDrawcardIc...",
-  "ShopBar": "Shop101Page",
-  "ShopSortID": 2,
-  "LimitType1": "Level",
-  "LimitValue1List": [
-    1
-  ],
-  "LimitValue2List": [],
-  "IsOpen": true,
-  "ScheduleDataID": 300101,
-  "HideRemainTime": true
+  "TypeID": 1,
+  "Level": 1,
+  "RewardID": 119001,
+  "ItemCost": 300
 }
 ```
 
@@ -6651,36 +6727,17 @@
 }
 ```
 
-### PerformanceReplayLOverride.json (0.05 MB, 163 条)
+### TextJoinItem.json (0.05 MB, 527 条)
 
-**字段** (19): `IsOverrideBranchFlag, IsOverrideDeactiveGroupFlag, IsOverrideEndBlackTypeFlag, IsOverrideMissionAudioStateFlag, IsOverrideMissionLGDisableFlag, IsOverridePerformancePriorityFlag, IsOverridePropStateFlag, OverrideActiveGroup, OverrideDeactiveGroup, OverrideEndBlackType, OverrideIntent, OverrideIsBranch, OverrideMissionAudioState, OverrideMissionLGDisable, OverridePerformancePriority, OverridePropState, PatchLevelGraph, PerformanceID, PerformanceType`
-
-**首条记录摘要**:
-```json
-{
-  "PerformanceType": "PlayVideo",
-  "PerformanceID": 103080104,
-  "IsOverrideBranchFlag": 1,
-  "OverrideIntent": 1,
-  "OverrideActiveGroup": [],
-  "OverrideDeactiveGroup": [],
-  "OverridePropState": [],
-  "OverrideMissionAudioState": "",
-  "PatchLevelGraph": ""
-}
-```
-
-### OfferingLevelConfig.json (0.05 MB, 552 条)
-
-**字段** (6): `ItemCost, Level, RewardID, Type, TypeID, UnlockID`
+**字段** (2): `TextJoinItemID, TextJoinText`
 
 **首条记录摘要**:
 ```json
 {
-  "TypeID": 1,
-  "Level": 1,
-  "RewardID": 119001,
-  "ItemCost": 300
+  "TextJoinItemID": 180,
+  "TextJoinText": {
+    "Hash": 16160812477419508579
+  }
 }
 ```
 
@@ -6729,25 +6786,6 @@
 }
 ```
 
-### LimaoNewsFinishway.json (0.05 MB, 200 条)
-
-**字段** (10): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 2499999,
-  "FinishType": "SubMissionFinishCnt",
-  "ParamType": "ListContain",
-  "ParamStr1": "",
-  "ParamIntList": [
-    804010118
-  ],
-  "ParamItemList": [],
-  "Progress": 1
-}
-```
-
 ### MonopolyEventConfig.json (0.05 MB, 201 条)
 
 **字段** (10): `AutoTriggerEffectIDList, DiceNum, EventContent, EventID, EventName, EventOptionIDList, IsDataReport, IsSpecial, PicPath, Type`
@@ -6780,37 +6818,16 @@
 }
 ```
 
-### RogueTournHandBookEvent.json (0.04 MB, 118 条)
+### LoopCGConfig.json (0.05 MB, 459 条)
 
-**字段** (8): `EventHandbookID, EventTitle, ImageID, IsUsed, Priority, TypeDisplayID, UnlockDisplayID, UnlockNPCProgressIDList`
-
-**首条记录摘要**:
-```json
-{
-  "EventHandbookID": 5,
-  "UnlockNPCProgressIDList": "<list[3]>",
-  "EventTitle": {
-    "Hash": 7000029817862836798
-  },
-  "TypeDisplayID": 801,
-  "UnlockDisplayID": 804,
-  "Priority": 5,
-  "IsUsed": true,
-  "ImageID": 101
-}
-```
-
-### TextJoinItem.json (0.04 MB, 508 条)
-
-**字段** (2): `TextJoinItemID, TextJoinText`
+**字段** (4): `CaptionPath, IsPlayerInvolved, VideoID, VideoPath`
 
 **首条记录摘要**:
 ```json
 {
-  "TextJoinItemID": 180,
-  "TextJoinText": {
-    "Hash": 16160812477419508579
-  }
+  "VideoID": 101,
+  "VideoPath": "CS_ChapLoop01_Act0010.usm",
+  "CaptionPath": ""
 }
 ```
 
@@ -6843,6 +6860,88 @@
   "ParamIntList": [],
   "ParamItemList": [],
   "Progress": 1
+}
+```
+
+### ItemConfigAvatarPlayerIcon.json (0.04 MB, 93 条)
+
+**字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, UseMethod, isVisible`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 201001,
+  "ItemMainType": "Usable",
+  "ItemSubType": "HeadIcon",
+  "InventoryDisplayTag": 1,
+  "Rarity": "VeryRare",
+  "isVisible": true,
+  "ItemName": {
+    "Hash": 3109440993392776578
+  },
+  "ItemIconPath": "SpriteOutput/AvatarRoundIcon/Avatar/1001...",
+  "ItemFigureIconPath": "",
+  "ItemCurrencyIconPath": "",
+  "ItemAvatarIconPath": "",
+  "PileLimit": 1,
+  "UseMethod": "AutoConversionItem",
+  "CustomDataList": [],
+  "ReturnItemIDList": []
+}
+```
+
+### ActivityAvatarSkillConfig.json (0.04 MB, 33 条)
+
+**字段** (34): `AttackType, BPAdd, BPNeed, CoolDown, DelayRatio, ExtraEffectIDList, InitCoolDown, Level, LevelUpCostList, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, SPBase, SPMultipleRatio, SPNeed, ShowDamageList, ShowHealList, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SimpleSkillDesc, SkillComboValueDelta, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 890106,
+  "SkillName": {
+    "Hash": 9802521681134028062
+  },
+  "SkillTag": {
+    "Hash": 16752756560315677817
+  },
+  "SkillTypeDesc": {
+    "Hash": 3601902557209832706
+  },
+  "Level": 1,
+  "MaxLevel": 1,
+  "SkillTriggerKey": "",
+  "SkillIcon": "SpriteOutput/Quest/AetherDivide/SkillIco...",
+  "UltraSkillIcon": "",
+  "LevelUpCostList": [],
+  "SkillDesc": {
+    "Hash": 7589439724132350591
+  },
+  "SimpleSkillDesc": {
+    "Hash": 18290573128538525496
+  },
+  "RatedSkillTreeID": [],
+  "RatedRankID": [],
+  "ExtraEffectIDList": [],
+  "SimpleExtraEffectIDList": [],
+  "ShowStanceList": "<list[3]>",
+  "ShowDamageList": [],
+  "ShowHealList": [],
+  "InitCoolDown": -1,
+  "CoolDown": -1,
+  "StanceDamageDisplay": 10,
+  "SPMultipleRatio": {
+    "Value": 0.5
+  },
+  "BPNeed": {
+    "Value": -1
+  },
+  "DelayRatio": {
+    "Value": 1
+  },
+  "ParamList": [],
+  "SimpleParamList": [],
+  "AttackType": "MazeNormal",
+  "SkillEffect": "MazeAttack"
 }
 ```
 
@@ -6910,43 +7009,17 @@
 }
 ```
 
-### LoopCGConfig.json (0.04 MB, 441 条)
+### ChronicleConclusion.json (0.04 MB, 443 条)
 
-**字段** (4): `CaptionPath, IsPlayerInvolved, VideoID, VideoPath`
-
-**首条记录摘要**:
-```json
-{
-  "VideoID": 101,
-  "VideoPath": "CS_ChapLoop01_Act0010.usm",
-  "CaptionPath": ""
-}
-```
-
-### ItemConfigAvatarPlayerIcon.json (0.04 MB, 91 条)
-
-**字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, UseMethod, isVisible`
+**字段** (2): `MissionConclusion, MissionID`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 201001,
-  "ItemMainType": "Usable",
-  "ItemSubType": "HeadIcon",
-  "InventoryDisplayTag": 1,
-  "Rarity": "VeryRare",
-  "isVisible": true,
-  "ItemName": {
-    "Hash": 3109440993392776578
-  },
-  "ItemIconPath": "SpriteOutput/AvatarRoundIcon/Avatar/1001...",
-  "ItemFigureIconPath": "",
-  "ItemCurrencyIconPath": "",
-  "ItemAvatarIconPath": "",
-  "PileLimit": 1,
-  "UseMethod": "AutoConversionItem",
-  "CustomDataList": [],
-  "ReturnItemIDList": []
+  "MissionID": 1000101,
+  "MissionConclusion": {
+    "Hash": 6221540891368254044
+  }
 }
 ```
 
@@ -7023,20 +7096,6 @@
 }
 ```
 
-### ChronicleConclusion.json (0.04 MB, 428 条)
-
-**字段** (2): `MissionConclusion, MissionID`
-
-**首条记录摘要**:
-```json
-{
-  "MissionID": 1000101,
-  "MissionConclusion": {
-    "Hash": 6221540891368254044
-  }
-}
-```
-
 ### MatchThreeScoreCurve.json (0.04 MB, 444 条)
 
 **字段** (6): `AddCurveRatio, AddHigh, AddLow, CurveID, DelayTime, PlayerStep`
@@ -7099,6 +7158,25 @@
 }
 ```
 
+### MissionChapterConfig.json (0.04 MB, 77 条)
+
+**字段** (12): `ChapterDesc, ChapterDisplayPriority, ChapterFigureIconPath, ChapterIconPath, ChapterName, ChapterSequence, ChapterType, FinalMainMission, ID, LinkChapterList, OriginMainMission, StageName`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 999001,
+  "ChapterName": "",
+  "StageName": "",
+  "ChapterDesc": "",
+  "ChapterType": "Normal",
+  "LinkChapterList": [],
+  "ChapterDisplayPriority": 100,
+  "ChapterIconPath": "SpriteOutput/Mission/ChapterIcon/Chapter...",
+  "ChapterFigureIconPath": "SpriteOutput/Mission/ChapterIconBig/Chap..."
+}
+```
+
 ### RogueDLCChessBoard.json (0.04 MB, 216 条)
 
 **字段** (4): `BlockCreatGroupID, ChessBoardConfiguration, ChessBoardEventList, ChessBoardID`
@@ -7152,7 +7230,7 @@
 }
 ```
 
-### MainMissionSchedule.json (0.04 MB, 457 条)
+### MainMissionSchedule.json (0.04 MB, 459 条)
 
 **字段** (5): `ActivityModuleID, HideRemainTime, IsNotDelete, MainMissionID, ScheduleDataID`
 
@@ -7164,22 +7242,7 @@
 }
 ```
 
-### TreasureDungeonGrid.json (0.04 MB, 118 条)
-
-**字段** (13): `EffectType, GridID, GridSubType, GridType, IconPath, IconPath2D, Name, OpenBuff, ParamInt, ReplaceGridID, TutorialTriggerString, TutorialTriggerType, TypeParam`
-
-**首条记录摘要**:
-```json
-{
-  "GridType": "Normal",
-  "TypeParam": [],
-  "IconPath": "",
-  "IconPath2D": "",
-  "TutorialTriggerString": ""
-}
-```
-
-### IntroData.json (0.04 MB, 215 条)
+### IntroData.json (0.04 MB, 216 条)
 
 **字段** (4): `Desc, Desc_Os, ID, Title`
 
@@ -7196,6 +7259,21 @@
   "Desc_Os": {
     "Hash": 10994966869424268828
   }
+}
+```
+
+### TreasureDungeonGrid.json (0.04 MB, 118 条)
+
+**字段** (13): `EffectType, GridID, GridSubType, GridType, IconPath, IconPath2D, Name, OpenBuff, ParamInt, ReplaceGridID, TutorialTriggerString, TutorialTriggerType, TypeParam`
+
+**首条记录摘要**:
+```json
+{
+  "GridType": "Normal",
+  "TypeParam": [],
+  "IconPath": "",
+  "IconPath2D": "",
+  "TutorialTriggerString": ""
 }
 ```
 
@@ -7294,6 +7372,44 @@
 }
 ```
 
+### ActivityQuestRewardData.json (0.04 MB, 182 条)
+
+**字段** (4): `ActivityModuleID, QuestList, QuestTabID, QuestTabName`
+
+**首条记录摘要**:
+```json
+{
+  "QuestTabID": 10001,
+  "QuestTabName": {
+    "Hash": 164194306843482777
+  },
+  "QuestList": "<list[7]>",
+  "ActivityModuleID": 5000701
+}
+```
+
+### AdventurePlayer.json (0.04 MB, 93 条)
+
+**字段** (7): `AvatarID, DefaultAvatarHeadIconPath, ID, MazeSkillIdList, PlayerJsonPath, PlayerName, PlayerPrefabPath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "AvatarID": 1001,
+  "PlayerName": {
+    "Hash": 6186714091647966180
+  },
+  "PlayerPrefabPath": "Characters/CharacterPrefabs/Player/Mar_7...",
+  "PlayerJsonPath": "Config/ConfigCharacter/LocalPlayer/Local...",
+  "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/1001.png",
+  "MazeSkillIdList": [
+    100101,
+    100102
+  ]
+}
+```
+
 ### GridFightItems.json (0.04 MB, 165 条)
 
 **字段** (5): `ID, IconPath, ItemName, ItemPriority, SmallIconPath`
@@ -7328,22 +7444,106 @@
 }
 ```
 
-### MissionChapterConfig.json (0.04 MB, 74 条)
+### PerformanceReplayOverride.json (0.04 MB, 309 条)
 
-**字段** (12): `ChapterDesc, ChapterDisplayPriority, ChapterFigureIconPath, ChapterIconPath, ChapterName, ChapterSequence, ChapterType, FinalMainMission, ID, LinkChapterList, OriginMainMission, StageName`
+**字段** (3): `Desc, PerformanceID, PerformanceType`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 999001,
-  "ChapterName": "",
-  "StageName": "",
-  "ChapterDesc": "",
-  "ChapterType": "Normal",
-  "LinkChapterList": [],
-  "ChapterDisplayPriority": 100,
-  "ChapterIconPath": "SpriteOutput/Mission/ChapterIcon/Chapter...",
-  "ChapterFigureIconPath": "SpriteOutput/Mission/ChapterIconBig/Chap..."
+  "PerformanceType": "PlayVideo",
+  "PerformanceID": 100010100,
+  "Desc": {
+    "Hash": 6584996130495776715
+  }
+}
+```
+
+### ActivityResidentPanel.json (0.04 MB, 36 条)
+
+**字段** (11): `DisplayItemList, DisplayItemManualSort, EntranceImg, ExpectTime, FinishConditions, IntroDesc, IntroGuideImg, IntroGuideVideoID, PanelDesc, PanelID, SortWeight`
+
+**首条记录摘要**:
+```json
+{
+  "PanelID": 50003,
+  "SortWeight": 6012,
+  "FinishConditions": "<list[1]>",
+  "PanelDesc": {
+    "Hash": 9458567706652469545
+  },
+  "IntroDesc": {
+    "Hash": 13375576847739960114
+  },
+  "EntranceImg": "SpriteOutput/Quest/TabIcon/PermanentActi...",
+  "DisplayItemList": "<list[9]>",
+  "DisplayItemManualSort": true,
+  "ExpectTime": {
+    "Value": 2
+  },
+  "IntroGuideVideoID": 50003,
+  "IntroGuideImg": ""
+}
+```
+
+### ActivityAvatarConfig.json (0.04 MB, 18 条)
+
+**字段** (39): `AIPath, ActionAvatarHeadIconPath, AdventurePlayerID, AssistBgOffset, AssistOffset, AvatarBaseType, AvatarCutinBgImgPath, AvatarCutinFrontImgPath, AvatarCutinImgPath, AvatarCutinIntroText, AvatarDropOffset, AvatarFullName, AvatarGachaResultImgPath, AvatarID, AvatarMiniIconPath, AvatarName, AvatarSelfShowOffset, AvatarSideIconPath, AvatarTrialOffset, AvatarVOTag, DamageType, DamageTypeResistance, DefaultAvatarHeadIconPath, DefaultAvatarModelPath, ExpGroup, JsonPath, ManikinJsonPath, MaxPromotion, PlayerCardOffset, RankIDList, Rarity, Release, SPNeed, SideAvatarHeadIconPath, SkillList, SkilltreePrefabPath, UIAvatarModelPath, UltraSkillCutInPrefabPath, WaitingAvatarHeadIconPath`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 6023,
+  "AvatarName": {
+    "Hash": 3935327619204177027
+  },
+  "AvatarFullName": {
+    "Hash": 10074817416191240931
+  },
+  "AdventurePlayerID": 1001,
+  "AvatarVOTag": "test",
+  "Rarity": "CombatPowerAvatarRarityType4",
+  "JsonPath": "Config/ConfigCharacter/Activity/Avatar/A...",
+  "DamageType": "Physical",
+  "SPNeed": {
+    "Value": 100
+  },
+  "ExpGroup": 1,
+  "MaxPromotion": 6,
+  "RankIDList": [
+    6023
+  ],
+  "SkillList": [
+    602301,
+    602302,
+    602303,
+    602304
+  ],
+  "AvatarBaseType": "Warrior",
+  "DefaultAvatarModelPath": "Characters/CharacterPrefabs/Activity/Ava...",
+  "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIcon/Avatar/999.png",
+  "AvatarSideIconPath": "SpriteOutput/AvatarRoundIcon/Avatar/999....",
+  "AvatarMiniIconPath": "SpriteOutput/AvatarDrawCard/999.png",
+  "AvatarGachaResultImgPath": "SpriteOutput/AvatarDrawCardResult/999.pn...",
+  "ActionAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/6023B.png",
+  "UltraSkillCutInPrefabPath": "UI/Battle/UltraSkillCutIn/Avatar/UltraSk...",
+  "UIAvatarModelPath": "Characters/CharacterPrefabs/Manikin/Avat...",
+  "ManikinJsonPath": "Config/ConfigCharacter/Manikin/Avatar/Ma...",
+  "AIPath": "Config/ConfigAI/Avatar_ComplexSkilll_Aut...",
+  "SkilltreePrefabPath": "UI/Avatar/Widget/WarriorSkillTreeGroup.p...",
+  "DamageTypeResistance": [],
+  "Release": true,
+  "SideAvatarHeadIconPath": "SpriteOutput/MosterIcon/Monster_8033010....",
+  "WaitingAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/6023.png",
+  "AvatarCutinImgPath": "SpriteOutput/AvatarCutinFigures/999.png",
+  "AvatarCutinBgImgPath": "SpriteOutput/AvatarCutinBg/999.png",
+  "AvatarCutinFrontImgPath": "SpriteOutput/AvatarDrawCard/999.png",
+  "AvatarDropOffset": [],
+  "AvatarTrialOffset": [],
+  "PlayerCardOffset": [],
+  "AssistOffset": [],
+  "AssistBgOffset": [],
+  "AvatarSelfShowOffset": []
 }
 ```
 
@@ -7400,28 +7600,6 @@
   "SeasonID": 1,
   "RoleSavedValueList": [
     "GP_Avatar_Mar_7th_01"
-  ]
-}
-```
-
-### AdventurePlayer.json (0.04 MB, 91 条)
-
-**字段** (7): `AvatarID, DefaultAvatarHeadIconPath, ID, MazeSkillIdList, PlayerJsonPath, PlayerName, PlayerPrefabPath`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "AvatarID": 1001,
-  "PlayerName": {
-    "Hash": 6186714091647966180
-  },
-  "PlayerPrefabPath": "Characters/CharacterPrefabs/Player/Mar_7...",
-  "PlayerJsonPath": "Config/ConfigCharacter/LocalPlayer/Local...",
-  "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/1001.png",
-  "MazeSkillIdList": [
-    100101,
-    100102
   ]
 }
 ```
@@ -7504,64 +7682,6 @@
   "Level": 1,
   "FreeReward": 120001,
   "PremiumFixedReward1": 120101
-}
-```
-
-### ActivityResidentPanel.json (0.04 MB, 35 条)
-
-**字段** (11): `DisplayItemList, DisplayItemManualSort, EntranceImg, ExpectTime, FinishConditions, IntroDesc, IntroGuideImg, IntroGuideVideoID, PanelDesc, PanelID, SortWeight`
-
-**首条记录摘要**:
-```json
-{
-  "PanelID": 50003,
-  "SortWeight": 6012,
-  "FinishConditions": "<list[1]>",
-  "PanelDesc": {
-    "Hash": 9458567706652469545
-  },
-  "IntroDesc": {
-    "Hash": 13375576847739960114
-  },
-  "EntranceImg": "SpriteOutput/Quest/TabIcon/PermanentActi...",
-  "DisplayItemList": "<list[9]>",
-  "DisplayItemManualSort": true,
-  "ExpectTime": {
-    "Value": 2
-  },
-  "IntroGuideVideoID": 50003,
-  "IntroGuideImg": ""
-}
-```
-
-### ActivityQuestRewardData.json (0.04 MB, 174 条)
-
-**字段** (4): `ActivityModuleID, QuestList, QuestTabID, QuestTabName`
-
-**首条记录摘要**:
-```json
-{
-  "QuestTabID": 10001,
-  "QuestTabName": {
-    "Hash": 164194306843482777
-  },
-  "QuestList": "<list[7]>",
-  "ActivityModuleID": 5000701
-}
-```
-
-### PerformanceReplayOverride.json (0.04 MB, 298 条)
-
-**字段** (3): `Desc, PerformanceID, PerformanceType`
-
-**首条记录摘要**:
-```json
-{
-  "PerformanceType": "PlayVideo",
-  "PerformanceID": 100010100,
-  "Desc": {
-    "Hash": 6584996130495776715
-  }
 }
 ```
 
@@ -7688,6 +7808,18 @@
 }
 ```
 
+### AvatarLinkConfig.json (0.04 MB, 689 条)
+
+**字段** (2): `AvatarID, LinkAvatar`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1001,
+  "LinkAvatar": 8001
+}
+```
+
 ### IdleLiveCLTrigger.json (0.04 MB, 342 条)
 
 **字段** (3): `ParamList, TriggerID, Type`
@@ -7755,15 +7887,50 @@
 }
 ```
 
-### AvatarLinkConfig.json (0.03 MB, 672 条)
+### RogueTournNPC.json (0.03 MB, 316 条)
 
-**字段** (2): `AvatarID, LinkAvatar`
+**字段** (2): `NPCJsonPath, RogueNPCID`
 
 **首条记录摘要**:
 ```json
 {
-  "AvatarID": 1001,
-  "LinkAvatar": 8001
+  "RogueNPCID": 410001,
+  "NPCJsonPath": "Config/Level/Rogue/RogueNPC/RogueNPC_230..."
+}
+```
+
+### GridFightAugmentMazebuff.json (0.03 MB, 58 条)
+
+**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 35401001,
+  "BuffSeries": 1,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 3,
+  "ModifierName": "ADV_StageAbility_35401001",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "StageAbility_GridFight_MonsterTag_1001",
+  "ParamList": [
+    {
+      "Value": 0.3
+    },
+    {
+      "Value": 0.3
+    }
+  ],
+  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "BuffName": {
+    "Hash": 18118184519004368802
+  },
+  "BuffDesc": {
+    "Hash": 2068835060799850456
+  },
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
 }
 ```
 
@@ -7794,6 +7961,43 @@
   "TagList": [],
   "EffectItemTypeList": [],
   "IconPath": "Gameplays/ChenLingFes/Prefab/ScreenShots..."
+}
+```
+
+### BackGroundMusicNormal.json (0.03 MB, 263 条)
+
+**字段** (4): `FCHEGBOMJHB, KILDBPGFAPG, PHFMCACHFIJ, PNOPJBELEDM`
+
+**首条记录摘要**:
+```json
+{
+  "PHFMCACHFIJ": 210000,
+  "KILDBPGFAPG": "BGM_Spacetrain",
+  "PNOPJBELEDM": 112,
+  "FCHEGBOMJHB": "TYPE_EASY"
+}
+```
+
+### GuideChallengeData.json (0.03 MB, 99 条)
+
+**字段** (8): `ID, IconPath, MapEntranceID, Name, RelatedID, TabID, TabIconPath, UnlockConditions`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 9999,
+  "Name": {
+    "Hash": 6410641494565517684
+  },
+  "IconPath": "",
+  "TabIconPath": "",
+  "UnlockConditions": [
+    {
+      "Type": "PlayerLevel",
+      "Param": "21"
+    }
+  ],
+  "TabID": 1001
 }
 ```
 
@@ -7829,50 +8033,17 @@
 }
 ```
 
-### GridFightAugmentMazebuff.json (0.03 MB, 57 条)
+### AvatarDemoGuide.json (0.03 MB, 316 条)
 
-**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 35401001,
-  "BuffSeries": 1,
-  "BuffRarity": 1,
-  "Lv": 1,
-  "LvMax": 3,
-  "ModifierName": "ADV_StageAbility_35401001",
-  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
-  "InBattleBindingKey": "StageAbility_GridFight_MonsterTag_1001",
-  "ParamList": [
-    {
-      "Value": 0.3
-    },
-    {
-      "Value": 0.3
-    }
-  ],
-  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
-  "BuffName": {
-    "Hash": 18118184519004368802
-  },
-  "BuffDesc": {
-    "Hash": 2068835060799850456
-  },
-  "BuffEffect": "",
-  "MazeBuffType": "Level"
-}
-```
-
-### RogueTournNPC.json (0.03 MB, 309 条)
-
-**字段** (2): `NPCJsonPath, RogueNPCID`
+**字段** (4): `AvatarDemoIntroduction, Index, StageID, Type`
 
 **首条记录摘要**:
 ```json
 {
-  "RogueNPCID": 410001,
-  "NPCJsonPath": "Config/Level/Rogue/RogueNPC/RogueNPC_230..."
+  "StageID": 311020,
+  "AvatarDemoIntroduction": {
+    "Hash": 11551778507788622741
+  }
 }
 ```
 
@@ -7926,20 +8097,6 @@
 }
 ```
 
-### AvatarDemoGuide.json (0.03 MB, 310 条)
-
-**字段** (4): `AvatarDemoIntroduction, Index, StageID, Type`
-
-**首条记录摘要**:
-```json
-{
-  "StageID": 311020,
-  "AvatarDemoIntroduction": {
-    "Hash": 11551778507788622741
-  }
-}
-```
-
 ### ClientLogConfig.json (0.03 MB, 153 条)
 
 **字段** (4): `Actionid, ID, IsWhiteMode, Params`
@@ -7969,43 +8126,6 @@
       "Value": 0.05
     }
   ]
-}
-```
-
-### GuideChallengeData.json (0.03 MB, 96 条)
-
-**字段** (8): `ID, IconPath, MapEntranceID, Name, RelatedID, TabID, TabIconPath, UnlockConditions`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 9999,
-  "Name": {
-    "Hash": 6410641494565517684
-  },
-  "IconPath": "",
-  "TabIconPath": "",
-  "UnlockConditions": [
-    {
-      "Type": "PlayerLevel",
-      "Param": "21"
-    }
-  ],
-  "TabID": 1001
-}
-```
-
-### BackGroundMusicNormal.json (0.03 MB, 252 条)
-
-**字段** (4): `FCHEGBOMJHB, KILDBPGFAPG, PHFMCACHFIJ, PNOPJBELEDM`
-
-**首条记录摘要**:
-```json
-{
-  "PHFMCACHFIJ": 210000,
-  "KILDBPGFAPG": "BGM_Spacetrain",
-  "PNOPJBELEDM": 112,
-  "FCHEGBOMJHB": "TYPE_EASY"
 }
 ```
 
@@ -8112,6 +8232,60 @@
 }
 ```
 
+### ExpeditionBattleDisplay.json (0.03 MB, 97 条)
+
+**字段** (6): `AvatarID, BattleEmojiPath, CommonTalk, EmojiPath, StartTalk, VictoryTalk`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1001,
+  "EmojiPath": "SpriteOutput/Emoji/101002.png",
+  "BattleEmojiPath": "SpriteOutput/UI/Quest/ExpeditionBattle/A...",
+  "VictoryTalk": {
+    "Hash": 16114976940113416221
+  },
+  "CommonTalk": {
+    "Hash": 4569316468101330838
+  },
+  "StartTalk": {
+    "Hash": 16119197816245095298
+  }
+}
+```
+
+### StroyLineUIData.json (0.03 MB, 67 条)
+
+**字段** (9): `ChronicleIconPath, Color, FigurePath, Gender, IconPath, LargeImgPath, MediumImgPath, Name, StoryLineID`
+
+**首条记录摘要**:
+```json
+{
+  "Gender": "GENDER_MAN",
+  "Name": {
+    "Hash": 4453270059291636354
+  },
+  "IconPath": "SpriteOutput/AvatarIcon/Avatar/8001.png",
+  "ChronicleIconPath": "SpriteOutput/AvatarRoundIcon/Avatar/8001...",
+  "MediumImgPath": "SpriteOutput/StoryLine/StoryLineChapterI...",
+  "LargeImgPath": "SpriteOutput/StoryLine/StoryLineChapterI...",
+  "FigurePath": "SpriteOutput/StoryLine/StoryLineChapterI...",
+  "Color": "#dbc291"
+}
+```
+
+### PerformanceSkipCharacter.json (0.03 MB, 257 条)
+
+**字段** (2): `IconPath, TalkSentenceName`
+
+**首条记录摘要**:
+```json
+{
+  "TalkSentenceName": "TalkSentenceName_Mar_7th",
+  "IconPath": "SpriteOutput/AvatarRoundIcon/Avatar/1001..."
+}
+```
+
 ### BoxingClubStageGroup.json (0.03 MB, 43 条)
 
 **字段** (6): `DisplayEventIDList, DisplayIndexList, EventIDList, MonsterIDList, StageGroupID, Weight`
@@ -8138,39 +8312,44 @@
 }
 ```
 
-### PerformanceSkipCharacter.json (0.03 MB, 256 条)
+### FiveDimPuzzleChallenge.json (0.03 MB, 47 条)
 
-**字段** (2): `IconPath, TalkSentenceName`
-
-**首条记录摘要**:
-```json
-{
-  "TalkSentenceName": "TalkSentenceName_Mar_7th",
-  "IconPath": "SpriteOutput/AvatarRoundIcon/Avatar/1001..."
-}
-```
-
-### StroyLineUIData.json (0.03 MB, 66 条)
-
-**字段** (9): `ChronicleIconPath, Color, FigurePath, Gender, IconPath, LargeImgPath, MediumImgPath, Name, StoryLineID`
+**字段** (15): `ActiveDescText, ActiveNameText, DescText, FinishDescText, FinishNameText, FloorID, GroupID, InstanceID, NameText, ProgressGPList, ProgressLimit, PuzzleID, PuzzleStateGP, RelatedMissionIDList, UIActiveGP`
 
 **首条记录摘要**:
 ```json
 {
-  "Gender": "GENDER_MAN",
-  "Name": {
-    "Hash": 4453270059291636354
+  "PuzzleID": 1050101,
+  "FloorID": 10501001,
+  "GroupID": 53,
+  "InstanceID": 110001,
+  "PuzzleStateGP": "LG_110001__63_ChestStateS_Auto",
+  "UIActiveGP": "LG_110001_LittleGameUIActive",
+  "NameText": {
+    "Hash": 15465075350105141510
   },
-  "IconPath": "SpriteOutput/AvatarIcon/Avatar/8001.png",
-  "ChronicleIconPath": "SpriteOutput/AvatarRoundIcon/Avatar/8001...",
-  "MediumImgPath": "SpriteOutput/StoryLine/StoryLineChapterI...",
-  "LargeImgPath": "SpriteOutput/StoryLine/StoryLineChapterI...",
-  "FigurePath": "SpriteOutput/StoryLine/StoryLineChapterI...",
-  "Color": "#dbc291"
+  "DescText": {
+    "Hash": 2189671480971208087
+  },
+  "ActiveNameText": {
+    "Hash": 15465075350105141510
+  },
+  "ActiveDescText": {
+    "Hash": 2189671480971208087
+  },
+  "FinishNameText": {
+    "Hash": 2012001348524219443
+  },
+  "FinishDescText": {
+    "Hash": 5177779949803579851
+  },
+  "ProgressGPList": "<list[3]>",
+  "ProgressLimit": 3,
+  "RelatedMissionIDList": []
 }
 ```
 
-### FreeStyleCharacterInfo.json (0.03 MB, 292 条)
+### FreeStyleCharacterInfo.json (0.03 MB, 299 条)
 
 **字段** (3): `AvatarBodyID, AvatarFlagID, FreeStyleCharacterID`
 
@@ -8180,6 +8359,42 @@
   "FreeStyleCharacterID": "NPC_Male",
   "AvatarFlagID": 1,
   "AvatarBodyID": 1
+}
+```
+
+### ActivityPanelCondition.json (0.03 MB, 98 条)
+
+**字段** (9): `ActivityGoto, ActivityGotoStoryLineRestore, ActivityOpenActivityModule, GuideConditions, GuideGoto, GuideTakeMission, PanelID, PreConditions, ShopOnlyActivityModule`
+
+**首条记录摘要**:
+```json
+{
+  "PanelID": 30006,
+  "PreConditions": [],
+  "GuideConditions": "<list[1]>"
+}
+```
+
+### B51RacingTR.json (0.03 MB, 99 条)
+
+**字段** (10): `AvatarIconPath, DriverID, ID, MaxCount, Priority, TRContent, TRName, Type, TypeCD, VoiceID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 101,
+  "Type": "RaceStart",
+  "Priority": 100,
+  "MaxCount": 1,
+  "TypeCD": 999,
+  "TRName": {
+    "Hash": 523944838451989252
+  },
+  "TRContent": {
+    "Hash": 13485609647660094837
+  },
+  "AvatarIconPath": "SpriteOutput/UI/Quest/B51Racing/HUD/B51R...",
+  "VoiceID": 841110001
 }
 ```
 
@@ -8240,20 +8455,31 @@
 }
 ```
 
-### ActivityPanelCondition.json (0.03 MB, 94 条)
+### ChallengeGroupConfig.json (0.03 MB, 56 条)
 
-**字段** (9): `ActivityGoto, ActivityGotoStoryLineRestore, ActivityOpenActivityModule, GuideConditions, GuideGoto, GuideTakeMission, PanelID, PreConditions, ShopOnlyActivityModule`
+**字段** (15): `BackGroundPath, ChallengeGroupType, GroupID, GroupName, MapEntranceID, MappingInfoID, MazeBuffID, PreMissionID, RewardLineGroupID, ScheduleDataID, TabPicPath, TabPicSelectPath, ThemePicPath, TierceID, WorldID`
 
 **首条记录摘要**:
 ```json
 {
-  "PanelID": 30006,
-  "PreConditions": [],
-  "GuideConditions": "<list[1]>"
+  "GroupID": 100,
+  "GroupName": {
+    "Hash": 13535919676396601281
+  },
+  "RewardLineGroupID": 1,
+  "PreMissionID": 4010134,
+  "MapEntranceID": 1010201,
+  "MappingInfoID": 1206,
+  "WorldID": 201,
+  "BackGroundPath": "SpriteOutput/Abyss/UI3D_SceneBg/AbyssSen...",
+  "TabPicPath": "SpriteOutput/UI/Abyss/Process/TypeIcon/A...",
+  "TabPicSelectPath": "SpriteOutput/UI/Abyss/Process/TypeIcon/A...",
+  "ChallengeGroupType": "Memory",
+  "ThemePicPath": ""
 }
 ```
 
-### ConstValueCommon.json (0.03 MB, 274 条)
+### ConstValueCommon.json (0.03 MB, 275 条)
 
 **字段** (2): `ConstValueName, Value`
 
@@ -8264,6 +8490,42 @@
   "Value": {
     "IntValue": 80
   }
+}
+```
+
+### MonsterGuideConfig.json (0.03 MB, 84 条)
+
+**字段** (7): `Difficulty, DifficultyGuideList, DifficultyList, MonsterID, PhaseList, TagList, TextGuideList`
+
+**首条记录摘要**:
+```json
+{
+  "MonsterID": 100401401,
+  "Difficulty": 1,
+  "DifficultyList": [
+    1,
+    1,
+    3,
+    4
+  ],
+  "TagList": [
+    100101,
+    100102,
+    100103,
+    100104
+  ],
+  "PhaseList": [
+    10011,
+    10012
+  ],
+  "DifficultyGuideList": [
+    10010,
+    10011
+  ],
+  "TextGuideList": [
+    10060,
+    10011
+  ]
 }
 ```
 
@@ -8290,30 +8552,6 @@
   },
   "Exp": 1,
   "SpecialSkillList": []
-}
-```
-
-### ChallengeGroupConfig.json (0.03 MB, 55 条)
-
-**字段** (15): `BackGroundPath, ChallengeGroupType, GroupID, GroupName, MapEntranceID, MappingInfoID, MazeBuffID, PreMissionID, RewardLineGroupID, ScheduleDataID, TabPicPath, TabPicSelectPath, ThemePicPath, TierceID, WorldID`
-
-**首条记录摘要**:
-```json
-{
-  "GroupID": 100,
-  "GroupName": {
-    "Hash": 13535919676396601281
-  },
-  "RewardLineGroupID": 1,
-  "PreMissionID": 4010134,
-  "MapEntranceID": 1010201,
-  "MappingInfoID": 1206,
-  "WorldID": 201,
-  "BackGroundPath": "SpriteOutput/Abyss/UI3D_SceneBg/AbyssSen...",
-  "TabPicPath": "SpriteOutput/UI/Abyss/Process/TypeIcon/A...",
-  "TabPicSelectPath": "SpriteOutput/UI/Abyss/Process/TypeIcon/A...",
-  "ChallengeGroupType": "Memory",
-  "ThemePicPath": ""
 }
 ```
 
@@ -8369,6 +8607,55 @@
 }
 ```
 
+### TutorialSubGuideGroup.json (0.03 MB, 83 条)
+
+**字段** (9): `BHHPLHIGOHE, FLBGELFEBCK, HNLJKFJOACC, JMDGIBDPMJF, JMLNPBDIHDG, JNDOMOJHOEF, LLDCHLHNADA, LPBKPCCKFJG, ODEKADIBFAO`
+
+**首条记录摘要**:
+```json
+{
+  "LLDCHLHNADA": 1001,
+  "LPBKPCCKFJG": true,
+  "BHHPLHIGOHE": [
+    100101,
+    100102
+  ],
+  "FLBGELFEBCK": 998,
+  "JMDGIBDPMJF": "<list[1]>",
+  "JNDOMOJHOEF": [],
+  "HNLJKFJOACC": {
+    "Hash": 18212868757188547349
+  },
+  "ODEKADIBFAO": 90006
+}
+```
+
+### BattlePassConfig.json (0.03 MB, 30 条)
+
+**字段** (16): `BattlePassWeekID, BillboardShow, EquipmentShow, GroupID, ID, LevelUpShow, NextID, Purchase128, Purchase68, RefreshBeginWeek, ScheduleDataID, VersionQuestList, WeekChainQuestList, WeekOrder1, WeekOrder2, WeekQuestList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "GroupID": 1,
+  "NextID": 2,
+  "ScheduleDataID": 1000001,
+  "BattlePassWeekID": 1,
+  "WeekQuestList": "<list[6]>",
+  "WeekOrder1": [
+    2000102,
+    2000103
+  ],
+  "WeekOrder2": [],
+  "WeekChainQuestList": [],
+  "VersionQuestList": "<list[6]>",
+  "LevelUpShow": [],
+  "BillboardShow": [],
+  "EquipmentShow": []
+}
+```
+
 ### ItemConfigLD.json (0.03 MB, 69 条)
 
 **字段** (12): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
@@ -8411,79 +8698,6 @@
 }
 ```
 
-### FiveDimPuzzleChallenge.json (0.03 MB, 42 条)
-
-**字段** (15): `ActiveDescText, ActiveNameText, DescText, FinishDescText, FinishNameText, FloorID, GroupID, InstanceID, NameText, ProgressGPList, ProgressLimit, PuzzleID, PuzzleStateGP, RelatedMissionIDList, UIActiveGP`
-
-**首条记录摘要**:
-```json
-{
-  "PuzzleID": 1050101,
-  "FloorID": 10501001,
-  "GroupID": 53,
-  "InstanceID": 110001,
-  "PuzzleStateGP": "LG_110001__63_ChestStateS_Auto",
-  "UIActiveGP": "LG_110001_LittleGameUIActive",
-  "NameText": {
-    "Hash": 15465075350105141510
-  },
-  "DescText": {
-    "Hash": 2189671480971208087
-  },
-  "ActiveNameText": {
-    "Hash": 15465075350105141510
-  },
-  "ActiveDescText": {
-    "Hash": 2189671480971208087
-  },
-  "FinishNameText": {
-    "Hash": 2012001348524219443
-  },
-  "FinishDescText": {
-    "Hash": 5177779949803579851
-  },
-  "ProgressGPList": "<list[3]>",
-  "ProgressLimit": 3,
-  "RelatedMissionIDList": []
-}
-```
-
-### MonsterGuideConfig.json (0.03 MB, 80 条)
-
-**字段** (7): `Difficulty, DifficultyGuideList, DifficultyList, MonsterID, PhaseList, TagList, TextGuideList`
-
-**首条记录摘要**:
-```json
-{
-  "MonsterID": 100401401,
-  "Difficulty": 1,
-  "DifficultyList": [
-    1,
-    1,
-    3,
-    4
-  ],
-  "TagList": [
-    100101,
-    100102,
-    100103,
-    100104
-  ],
-  "PhaseList": [
-    10011,
-    10012
-  ],
-  "DifficultyGuideList": [
-    10010,
-    10011
-  ],
-  "TextGuideList": [
-    10060,
-    10011
-  ]
-}
-```
-
 ### RaidTargetConfig.json (0.03 MB, 67 条)
 
 **字段** (12): `AbilityName, HintStep, ID, IsInBattle, IsShowProgress, ParamList, ParamType, RewardID, TargetName, TargetNameSimple, TargetParam1, TargetType`
@@ -8509,6 +8723,19 @@
   "TargetName": {
     "Hash": 10577267953868263011
   }
+}
+```
+
+### ScheduleDataQuest.json (0.03 MB, 282 条)
+
+**字段** (3): `BeginTime, EndTime, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 21001801,
+  "BeginTime": "2022-04-25 04:00:00",
+  "EndTime": "2022-06-21 04:00:00"
 }
 ```
 
@@ -8565,87 +8792,6 @@
 }
 ```
 
-### BattlePassConfig.json (0.03 MB, 29 条)
-
-**字段** (16): `BattlePassWeekID, BillboardShow, EquipmentShow, GroupID, ID, LevelUpShow, NextID, Purchase128, Purchase68, RefreshBeginWeek, ScheduleDataID, VersionQuestList, WeekChainQuestList, WeekOrder1, WeekOrder2, WeekQuestList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "GroupID": 1,
-  "NextID": 2,
-  "ScheduleDataID": 1000001,
-  "BattlePassWeekID": 1,
-  "WeekQuestList": "<list[6]>",
-  "WeekOrder1": [
-    2000102,
-    2000103
-  ],
-  "WeekOrder2": [],
-  "WeekChainQuestList": [],
-  "VersionQuestList": "<list[6]>",
-  "LevelUpShow": [],
-  "BillboardShow": [],
-  "EquipmentShow": []
-}
-```
-
-### ActivityAvatarSkillConfig.json (0.03 MB, 21 条)
-
-**字段** (34): `AttackType, BPAdd, BPNeed, CoolDown, DelayRatio, ExtraEffectIDList, InitCoolDown, Level, LevelUpCostList, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, SPBase, SPMultipleRatio, SPNeed, ShowDamageList, ShowHealList, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SimpleSkillDesc, SkillComboValueDelta, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
-
-**首条记录摘要**:
-```json
-{
-  "SkillID": 890106,
-  "SkillName": {
-    "Hash": 9802521681134028062
-  },
-  "SkillTag": {
-    "Hash": 16752756560315677817
-  },
-  "SkillTypeDesc": {
-    "Hash": 3601902557209832706
-  },
-  "Level": 1,
-  "MaxLevel": 1,
-  "SkillTriggerKey": "",
-  "SkillIcon": "SpriteOutput/Quest/AetherDivide/SkillIco...",
-  "UltraSkillIcon": "",
-  "LevelUpCostList": [],
-  "SkillDesc": {
-    "Hash": 7589439724132350591
-  },
-  "SimpleSkillDesc": {
-    "Hash": 18290573128538525496
-  },
-  "RatedSkillTreeID": [],
-  "RatedRankID": [],
-  "ExtraEffectIDList": [],
-  "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "<list[3]>",
-  "ShowDamageList": [],
-  "ShowHealList": [],
-  "InitCoolDown": -1,
-  "CoolDown": -1,
-  "StanceDamageDisplay": 10,
-  "SPMultipleRatio": {
-    "Value": 0.5
-  },
-  "BPNeed": {
-    "Value": -1
-  },
-  "DelayRatio": {
-    "Value": 1
-  },
-  "ParamList": [],
-  "SimpleParamList": [],
-  "AttackType": "MazeNormal",
-  "SkillEffect": "MazeAttack"
-}
-```
-
 ### MazePuzzleSwitchHand.json (0.03 MB, 32 条)
 
 **字段** (11): `BanRocketPunch, ChestID, CoinPropID, ColliderPath, ControllerListID, FloorID, GroupIDList, IsRaid, PlaneID, SwitchHandID, SwitchID`
@@ -8665,19 +8811,6 @@
   "ColliderPath": "Stages/OriginalResPos/Chapter04/Prefab/C...",
   "ControllerListID": "<list[1]>",
   "ChestID": []
-}
-```
-
-### ScheduleDataQuest.json (0.03 MB, 277 条)
-
-**字段** (3): `BeginTime, EndTime, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 21001801,
-  "BeginTime": "2022-04-25 04:00:00",
-  "EndTime": "2022-06-21 04:00:00"
 }
 ```
 
@@ -8792,29 +8925,6 @@
 }
 ```
 
-### TutorialSubGuideGroup.json (0.03 MB, 76 条)
-
-**字段** (9): `BHHPLHIGOHE, FLBGELFEBCK, HNLJKFJOACC, JMDGIBDPMJF, JMLNPBDIHDG, JNDOMOJHOEF, LLDCHLHNADA, LPBKPCCKFJG, ODEKADIBFAO`
-
-**首条记录摘要**:
-```json
-{
-  "LLDCHLHNADA": 1001,
-  "LPBKPCCKFJG": true,
-  "BHHPLHIGOHE": [
-    100101,
-    100102
-  ],
-  "FLBGELFEBCK": 998,
-  "JMDGIBDPMJF": "<list[1]>",
-  "JNDOMOJHOEF": [],
-  "HNLJKFJOACC": {
-    "Hash": 18212868757188547349
-  },
-  "ODEKADIBFAO": 90006
-}
-```
-
 ### BoxingClubStage.json (0.03 MB, 97 条)
 
 **字段** (7): `BubbleTalkEnemy, BubbleTalkPlayer, BuffID, BuffOptionalList, EventID, MonsterWaveIndex, Name`
@@ -8834,6 +8944,19 @@
   "BubbleTalkEnemy": {
     "Hash": 2892712590094533198
   }
+}
+```
+
+### BillboardIconConfig.json (0.03 MB, 213 条)
+
+**字段** (3): `BillboardIconPath, ID, Priority`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Priority": 1,
+  "BillboardIconPath": "SpriteOutput/MapPics/Billboard/IconBillb..."
 }
 ```
 
@@ -8858,16 +8981,21 @@
 }
 ```
 
-### BillboardIconConfig.json (0.03 MB, 212 条)
+### StoryLine.json (0.03 MB, 65 条)
 
-**字段** (3): `BillboardIconPath, ID, Priority`
+**字段** (9): `BeginCondition, EarlyAccessContentID, EndCondition, InitAnchorID, InitEntranceID, InitGroupID, PerformanceStoryAvatar, ShowCondition, StoryLineID`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1,
-  "Priority": 1,
-  "BillboardIconPath": "SpriteOutput/MapPics/Billboard/IconBillb..."
+  "StoryLineID": 1031101,
+  "BeginCondition": "<dict[2]>",
+  "EndCondition": "<dict[2]>",
+  "ShowCondition": "[BetweenSubMission:103110108,103110151]|...",
+  "InitEntranceID": 2031101,
+  "InitGroupID": 634,
+  "InitAnchorID": 1,
+  "PerformanceStoryAvatar": "NPC_Avatar_Lad_Aventurine_00"
 }
 ```
 
@@ -8887,6 +9015,25 @@
 }
 ```
 
+### AvatarUseMaterialData.json (0.03 MB, 93 条)
+
+**字段** (9): `AvatarID, BossMaterial, PromotionMaterial, SkillMaterialLarge, SkillMaterialMedium, SkillMaterialSmall, WorldMaterialLarge, WorldMaterialMedium, WorldMaterialSmall`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1001,
+  "PromotionMaterial": 110403,
+  "BossMaterial": 110501,
+  "SkillMaterialSmall": 110141,
+  "SkillMaterialMedium": 110142,
+  "SkillMaterialLarge": 110143,
+  "WorldMaterialSmall": 111011,
+  "WorldMaterialMedium": 111012,
+  "WorldMaterialLarge": 111013
+}
+```
+
 ### PlanetFesBuff.json (0.03 MB, 220 条)
 
 **字段** (5): `Duration, ID, SourceID, Type, TypeParam`
@@ -8900,24 +9047,6 @@
   "TypeParam": [
     0
   ]
-}
-```
-
-### StoryLine.json (0.03 MB, 64 条)
-
-**字段** (9): `BeginCondition, EarlyAccessContentID, EndCondition, InitAnchorID, InitEntranceID, InitGroupID, PerformanceStoryAvatar, ShowCondition, StoryLineID`
-
-**首条记录摘要**:
-```json
-{
-  "StoryLineID": 1031101,
-  "BeginCondition": "<dict[2]>",
-  "EndCondition": "<dict[2]>",
-  "ShowCondition": "[BetweenSubMission:103110108,103110151]|...",
-  "InitEntranceID": 2031101,
-  "InitGroupID": 634,
-  "InitAnchorID": 1,
-  "PerformanceStoryAvatar": "NPC_Avatar_Lad_Aventurine_00"
 }
 ```
 
@@ -8963,25 +9092,6 @@
 }
 ```
 
-### AvatarUseMaterialData.json (0.03 MB, 91 条)
-
-**字段** (9): `AvatarID, BossMaterial, PromotionMaterial, SkillMaterialLarge, SkillMaterialMedium, SkillMaterialSmall, WorldMaterialLarge, WorldMaterialMedium, WorldMaterialSmall`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1001,
-  "PromotionMaterial": 110403,
-  "BossMaterial": 110501,
-  "SkillMaterialSmall": 110141,
-  "SkillMaterialMedium": 110142,
-  "SkillMaterialLarge": 110143,
-  "WorldMaterialSmall": 111011,
-  "WorldMaterialMedium": 111012,
-  "WorldMaterialLarge": 111013
-}
-```
-
 ### RogueDLCChessBoardEvent.json (0.03 MB, 150 条)
 
 **字段** (3): `ChessBoardEventDesc, ChessBoardEventID, ChessBoardEventName`
@@ -8996,6 +9106,20 @@
   "ChessBoardEventDesc": {
     "Hash": 18084152724274937062
   }
+}
+```
+
+### RogueTournExpReward.json (0.03 MB, 300 条)
+
+**字段** (4): `Exp, Level, MainTournID, RewardID`
+
+**首条记录摘要**:
+```json
+{
+  "MainTournID": 1,
+  "Level": 1,
+  "Exp": 800,
+  "RewardID": 110901
 }
 ```
 
@@ -9102,64 +9226,28 @@
 }
 ```
 
-### ActivityAvatarConfig.json (0.02 MB, 12 条)
+### AvatarAtlas.json (0.03 MB, 88 条)
 
-**字段** (39): `AIPath, ActionAvatarHeadIconPath, AdventurePlayerID, AssistBgOffset, AssistOffset, AvatarBaseType, AvatarCutinBgImgPath, AvatarCutinFrontImgPath, AvatarCutinImgPath, AvatarCutinIntroText, AvatarDropOffset, AvatarFullName, AvatarGachaResultImgPath, AvatarID, AvatarMiniIconPath, AvatarName, AvatarSelfShowOffset, AvatarSideIconPath, AvatarTrialOffset, AvatarVOTag, DamageType, DamageTypeResistance, DefaultAvatarHeadIconPath, DefaultAvatarModelPath, ExpGroup, JsonPath, ManikinJsonPath, MaxPromotion, PlayerCardOffset, RankIDList, Rarity, Release, SPNeed, SideAvatarHeadIconPath, SkillList, SkilltreePrefabPath, UIAvatarModelPath, UltraSkillCutInPrefabPath, WaitingAvatarHeadIconPath`
+**字段** (7): `AvatarID, CV_CN, CV_EN, CV_JP, CV_KR, CampID, DefaultUnlock`
 
 **首条记录摘要**:
 ```json
 {
-  "AvatarID": 6023,
-  "AvatarName": {
-    "Hash": 3935327619204177027
+  "AvatarID": 8001,
+  "DefaultUnlock": true,
+  "CV_CN": {
+    "Hash": 7802620064838336067
   },
-  "AvatarFullName": {
-    "Hash": 10074817416191240931
+  "CV_JP": {
+    "Hash": 1063823762930993958
   },
-  "AdventurePlayerID": 1001,
-  "AvatarVOTag": "test",
-  "Rarity": "CombatPowerAvatarRarityType4",
-  "JsonPath": "Config/ConfigCharacter/Activity/Avatar/A...",
-  "DamageType": "Physical",
-  "SPNeed": {
-    "Value": 100
+  "CV_KR": {
+    "Hash": 4192964690940311577
   },
-  "ExpGroup": 1,
-  "MaxPromotion": 6,
-  "RankIDList": [
-    6023
-  ],
-  "SkillList": [
-    602301,
-    602302,
-    602303,
-    602304
-  ],
-  "AvatarBaseType": "Warrior",
-  "DefaultAvatarModelPath": "Characters/CharacterPrefabs/Activity/Ava...",
-  "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIcon/Avatar/999.png",
-  "AvatarSideIconPath": "SpriteOutput/AvatarRoundIcon/Avatar/999....",
-  "AvatarMiniIconPath": "SpriteOutput/AvatarDrawCard/999.png",
-  "AvatarGachaResultImgPath": "SpriteOutput/AvatarDrawCardResult/999.pn...",
-  "ActionAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/6023B.png",
-  "UltraSkillCutInPrefabPath": "UI/Battle/UltraSkillCutIn/Avatar/UltraSk...",
-  "UIAvatarModelPath": "Characters/CharacterPrefabs/Manikin/Avat...",
-  "ManikinJsonPath": "Config/ConfigCharacter/Manikin/Avatar/Ma...",
-  "AIPath": "Config/ConfigAI/Avatar_ComplexSkilll_Aut...",
-  "SkilltreePrefabPath": "UI/Avatar/Widget/WarriorSkillTreeGroup.p...",
-  "DamageTypeResistance": [],
-  "Release": true,
-  "SideAvatarHeadIconPath": "SpriteOutput/MosterIcon/Monster_8033010....",
-  "WaitingAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/6023.png",
-  "AvatarCutinImgPath": "SpriteOutput/AvatarCutinFigures/999.png",
-  "AvatarCutinBgImgPath": "SpriteOutput/AvatarCutinBg/999.png",
-  "AvatarCutinFrontImgPath": "SpriteOutput/AvatarDrawCard/999.png",
-  "AvatarDropOffset": [],
-  "AvatarTrialOffset": [],
-  "PlayerCardOffset": [],
-  "AssistOffset": [],
-  "AssistBgOffset": [],
-  "AvatarSelfShowOffset": []
+  "CV_EN": {
+    "Hash": 382378936445878100
+  },
+  "CampID": 100
 }
 ```
 
@@ -9274,31 +9362,6 @@
 }
 ```
 
-### AvatarAtlas.json (0.02 MB, 86 条)
-
-**字段** (7): `AvatarID, CV_CN, CV_EN, CV_JP, CV_KR, CampID, DefaultUnlock`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 8001,
-  "DefaultUnlock": true,
-  "CV_CN": {
-    "Hash": 7802620064838336067
-  },
-  "CV_JP": {
-    "Hash": 1063823762930993958
-  },
-  "CV_KR": {
-    "Hash": 4192964690940311577
-  },
-  "CV_EN": {
-    "Hash": 382378936445878100
-  },
-  "CampID": 100
-}
-```
-
 ### RogueTournGambleGroup.json (0.02 MB, 126 条)
 
 **字段** (5): `GambleGroupID, GambleGroupIcon, GambleGroupLevel, GambleGroupType, GroupName`
@@ -9358,6 +9421,22 @@
   "isBattleDisplay": true,
   "Order": 1,
   "IconPath": "SpriteOutput/UI/Avatar/Icon/IconMaxHP.pn..."
+}
+```
+
+### RogueTournExhibition.json (0.02 MB, 70 条)
+
+**字段** (6): `ExhibitionID, ExhibitionType, IconPath, ImagePath, ProgramGroupID, SlotIconPath`
+
+**首条记录摘要**:
+```json
+{
+  "ExhibitionID": 101,
+  "ExhibitionType": "Wide",
+  "IconPath": "SpriteOutput/Rogue/Tourn/Collection/Item...",
+  "SlotIconPath": "SpriteOutput/Rogue/Tourn/Collection/Slot...",
+  "ImagePath": "SpriteOutput/Rogue/RandomEvent/Horizon/R...",
+  "ProgramGroupID": 501
 }
 ```
 
@@ -9472,20 +9551,6 @@
 }
 ```
 
-### RogueTournExpReward.json (0.02 MB, 280 条)
-
-**字段** (4): `Exp, Level, MainTournID, RewardID`
-
-**首条记录摘要**:
-```json
-{
-  "MainTournID": 1,
-  "Level": 1,
-  "Exp": 800,
-  "RewardID": 110901
-}
-```
-
 ### PlanetFesAvatarBuff.json (0.02 MB, 190 条)
 
 **字段** (4): `ID, SourceID, Type, TypeParam`
@@ -9597,19 +9662,26 @@
 }
 ```
 
-### RogueTournExhibition.json (0.02 MB, 68 条)
+### LimaoNewsInterview.json (0.02 MB, 18 条)
 
-**字段** (6): `ExhibitionID, ExhibitionType, IconPath, ImagePath, ProgramGroupID, SlotIconPath`
+**字段** (9): `DKPOHCDMHBF, EECIBIDGPEI, GEKGGMKGIPE, HMFGANHKHIM, KMIBDJKKGDE, LIDHGBEAJMA, LMDEHNMJHDJ, LNHLPKEHJBA, PFKLDBGEGAO`
 
 **首条记录摘要**:
 ```json
 {
-  "ExhibitionID": 101,
-  "ExhibitionType": "Wide",
-  "IconPath": "SpriteOutput/Rogue/Tourn/Collection/Item...",
-  "SlotIconPath": "SpriteOutput/Rogue/Tourn/Collection/Slot...",
-  "ImagePath": "SpriteOutput/Rogue/RandomEvent/Horizon/R...",
-  "ProgramGroupID": 501
+  "DKPOHCDMHBF": 201,
+  "LNHLPKEHJBA": {
+    "Hash": 1513001872307035594
+  },
+  "HMFGANHKHIM": {
+    "Hash": 5169119345462893113
+  },
+  "LMDEHNMJHDJ": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
+  "PFKLDBGEGAO": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
+  "GEKGGMKGIPE": [],
+  "EECIBIDGPEI": "<list[68]>",
+  "LIDHGBEAJMA": "<list[10]>",
+  "KMIBDJKKGDE": 16032
 }
 ```
 
@@ -9677,18 +9749,6 @@
 }
 ```
 
-### GridFightConstCommon.json (0.02 MB, 142 条)
-
-**字段** (2): `ConstValueName, Value`
-
-**首条记录摘要**:
-```json
-{
-  "ConstValueName": "GridFight_AvatarRarity",
-  "Value": "<dict[1]>"
-}
-```
-
 ### TreasureDungeonFloor.json (0.02 MB, 74 条)
 
 **字段** (8): `AddExploreValue, DungeonBuffID, DungeonID, EliteGroup2, FloorID, HardLevelGroupID, HardLevelList, MapID`
@@ -9718,6 +9778,23 @@
 }
 ```
 
+### TextJoinConfig.json (0.02 MB, 185 条)
+
+**字段** (5): `DefaultItem, IsOverride, TextJoinID, TextJoinItemList, Type`
+
+**首条记录摘要**:
+```json
+{
+  "TextJoinID": 18,
+  "DefaultItem": 180,
+  "TextJoinItemList": [
+    180,
+    181,
+    182
+  ]
+}
+```
+
 ### RogueMiracleGroup.json (0.02 MB, 100 条)
 
 **字段** (2): `MiracleWeight, RogueMiracleGroupID`
@@ -9727,6 +9804,29 @@
 {
   "RogueMiracleGroupID": 1000,
   "MiracleWeight": "<dict[5]>"
+}
+```
+
+### GridFightConstCommon.json (0.02 MB, 141 条)
+
+**字段** (2): `ConstValueName, Value`
+
+**首条记录摘要**:
+```json
+{
+  "ConstValueName": "GridFight_AvatarRarity",
+  "Value": "<dict[1]>"
+}
+```
+
+### EnterPageConfig.json (0.02 MB, 497 条)
+
+**字段** (1): `Key`
+
+**首条记录摘要**:
+```json
+{
+  "Key": "AchievementPage"
 }
 ```
 
@@ -9759,17 +9859,6 @@
   "Value": {
     "IntValue": 9001
   }
-}
-```
-
-### EnterPageConfig.json (0.02 MB, 492 条)
-
-**字段** (1): `Key`
-
-**首条记录摘要**:
-```json
-{
-  "Key": "AchievementPage"
 }
 ```
 
@@ -9836,23 +9925,6 @@
     {
       "Value": 0.12
     }
-  ]
-}
-```
-
-### TextJoinConfig.json (0.02 MB, 181 条)
-
-**字段** (5): `DefaultItem, IsOverride, TextJoinID, TextJoinItemList, Type`
-
-**首条记录摘要**:
-```json
-{
-  "TextJoinID": 18,
-  "DefaultItem": 180,
-  "TextJoinItemList": [
-    180,
-    181,
-    182
   ]
 }
 ```
@@ -9943,6 +10015,42 @@
 }
 ```
 
+### NounAtlas.json (0.02 MB, 100 条)
+
+**字段** (8): `ID, IsIntroPage, NounDesc, NounTitle, RelatedTerms, SortID, Type, Unlock`
+
+**首条记录摘要**:
+```json
+{
+  "Type": 1,
+  "NounTitle": {
+    "Hash": 2702432903392642343
+  },
+  "NounDesc": {
+    "Hash": 2336704873428742309
+  },
+  "RelatedTerms": [],
+  "IsIntroPage": true
+}
+```
+
+### ChestMonster.json (0.02 MB, 131 条)
+
+**字段** (8): `ConfigID, EventID, FloorID, GroupID, ID, MainMissionID, MonsterType, PlaneID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "PlaneID": 20001,
+  "FloorID": 20001001,
+  "GroupID": 28,
+  "ConfigID": 200001,
+  "EventID": 20001111,
+  "MonsterType": "Chest"
+}
+```
+
 ### PlanetFesAvatar.json (0.02 MB, 25 条)
 
 **字段** (18): `AnimConfig, Body, CD, CargoIcon, Description, GachaUnlockIDList, HeadIcon, ID, IncomeParam, ItemID, LandType, MidIcon, MiniIcon, Name, PlanetType, Rarity, Skill1List, Skill2List`
@@ -9996,25 +10104,6 @@
   "ParamIntList": [],
   "ParamItemList": [],
   "Progress": 1
-}
-```
-
-### NounAtlas.json (0.02 MB, 99 条)
-
-**字段** (8): `ID, IsIntroPage, NounDesc, NounTitle, RelatedTerms, SortID, Type, Unlock`
-
-**首条记录摘要**:
-```json
-{
-  "Type": 1,
-  "NounTitle": {
-    "Hash": 2702432903392642343
-  },
-  "NounDesc": {
-    "Hash": 2336704873428742309
-  },
-  "RelatedTerms": [],
-  "IsIntroPage": true
 }
 ```
 
@@ -10305,6 +10394,55 @@
 }
 ```
 
+### ContentPackageConfig.json (0.02 MB, 46 条)
+
+**字段** (9): `ActivityModuleID, AfterGuideEntranceID, ContentID, EarlyAccessCondition, GuideConditions, InitEntranceID, IsHaveResidentPart, MainMissionIDList, ReleaseCondition`
+
+**首条记录摘要**:
+```json
+{
+  "ContentID": 200001,
+  "MainMissionIDList": [
+    8023301
+  ],
+  "EarlyAccessCondition": "[PlayerLevel:21]&((![FinishMainMission:1...",
+  "ReleaseCondition": "[FinishMainMission:1032501]",
+  "InitEntranceID": 1030403,
+  "GuideConditions": "[FinishSubMission:802330102]",
+  "AfterGuideEntranceID": 1030402
+}
+```
+
+### LoopCGEncryptionConfig.json (0.02 MB, 459 条)
+
+**字段** (3): `Encryption, EncryptionMethod, VideoID`
+
+**首条记录摘要**:
+```json
+{
+  "VideoID": 101
+}
+```
+
+### AvatarVO.json (0.02 MB, 94 条)
+
+**字段** (9): `ActionBegin, ActionBeginAdvantage, ActionBeginHighThreat, LightHit, ReceiveHealing, Revived, StandBy, UltraReady, VOTag`
+
+**首条记录摘要**:
+```json
+{
+  "VOTag": "mar7th",
+  "ActionBegin": 100,
+  "ActionBeginAdvantage": 100,
+  "ActionBeginHighThreat": 100,
+  "ReceiveHealing": 100,
+  "Revived": 100,
+  "UltraReady": 100,
+  "LightHit": 100,
+  "StandBy": 100
+}
+```
+
 ### TrainPartyMTRank.json (0.02 MB, 104 条)
 
 **字段** (5): `Rank, RankName, RankNum, RankPrefabPath, RankScore`
@@ -10317,23 +10455,6 @@
   "RankName": {
     "Hash": 10291089486624136460
   }
-}
-```
-
-### ChestMonster.json (0.02 MB, 125 条)
-
-**字段** (8): `ConfigID, EventID, FloorID, GroupID, ID, MainMissionID, MonsterType, PlaneID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "PlaneID": 20001,
-  "FloorID": 20001001,
-  "GroupID": 28,
-  "ConfigID": 200001,
-  "EventID": 20001111,
-  "MonsterType": "Chest"
 }
 ```
 
@@ -10404,22 +10525,40 @@
 }
 ```
 
-### AvatarVO.json (0.02 MB, 92 条)
+### PlayerIcon.json (0.02 MB, 115 条)
 
-**字段** (9): `ActionBegin, ActionBeginAdvantage, ActionBeginHighThreat, LightHit, ReceiveHealing, Revived, StandBy, UltraReady, VOTag`
+**字段** (6): `ID, ImagePath, IsVisible, Sort, SortType, Type`
 
 **首条记录摘要**:
 ```json
 {
-  "VOTag": "mar7th",
-  "ActionBegin": 100,
-  "ActionBeginAdvantage": 100,
-  "ActionBeginHighThreat": 100,
-  "ReceiveHealing": 100,
-  "Revived": 100,
-  "UltraReady": 100,
-  "LightHit": 100,
-  "StandBy": 100
+  "ID": 200001,
+  "ImagePath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
+  "IsVisible": true,
+  "Type": "Default",
+  "SortType": 1,
+  "Sort": 71
+}
+```
+
+### RelicMainAffixAvatarValue.json (0.02 MB, 97 条)
+
+**字段** (12): `Attack, AvatarID, BreakDamage, CriticalChance, CriticalDamage, DamageAddedRatio, Defence, HP, HealRatio, SPRatio, Speed, StatusProbability`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1001,
+  "Attack": 0.1,
+  "HP": 0.1,
+  "Defence": 1,
+  "Speed": 1,
+  "CriticalChance": 0.1,
+  "CriticalDamage": 0.1,
+  "StatusProbability": 0.8,
+  "BreakDamage": 0.1,
+  "DamageAddedRatio": 0.1,
+  "SPRatio": 0.8
 }
 ```
 
@@ -10434,6 +10573,24 @@
   "ActorModelPath": "Characters/CharacterPrefabs/Actor/Actor_...",
   "ResidentEffectKey": "",
   "ResidentPossessionKey": ""
+}
+```
+
+### MazePuzzleOrigamiFD.json (0.02 MB, 96 条)
+
+**字段** (8): `ColonyID, FDContainerID, FDEntityID, FDSGP, FDSGPValue, FloorID, GroupID, MainPropID`
+
+**首条记录摘要**:
+```json
+{
+  "FloorID": 20502001,
+  "GroupID": 73,
+  "MainPropID": 300010,
+  "ColonyID": 33,
+  "FDSGP": "LG_110001__154_MapIconState_Auto",
+  "FDSGPValue": 2,
+  "FDContainerID": 110001,
+  "FDEntityID": 154
 }
 ```
 
@@ -10453,6 +10610,24 @@
   "LevelAdd": {
     "Value": 15.80544
   }
+}
+```
+
+### ItemCureInfoData.json (0.02 MB, 104 条)
+
+**字段** (4): `CureInfoDesc, CureInfoTitle, ID, ImgPath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 140066,
+  "CureInfoTitle": {
+    "Hash": 8473171996317953795
+  },
+  "CureInfoDesc": {
+    "Hash": 9562581932070426903
+  },
+  "ImgPath": "SpriteOutput/UI/TempSprite/SubMissionTes..."
 }
 ```
 
@@ -10549,43 +10724,6 @@
   "BaseAggro": {
     "Value": 125
   }
-}
-```
-
-### RelicMainAffixAvatarValue.json (0.02 MB, 95 条)
-
-**字段** (12): `Attack, AvatarID, BreakDamage, CriticalChance, CriticalDamage, DamageAddedRatio, Defence, HP, HealRatio, SPRatio, Speed, StatusProbability`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1001,
-  "Attack": 0.1,
-  "HP": 0.1,
-  "Defence": 1,
-  "Speed": 1,
-  "CriticalChance": 0.1,
-  "CriticalDamage": 0.1,
-  "StatusProbability": 0.8,
-  "BreakDamage": 0.1,
-  "DamageAddedRatio": 0.1,
-  "SPRatio": 0.8
-}
-```
-
-### PlayerIcon.json (0.02 MB, 112 条)
-
-**字段** (6): `ID, ImagePath, IsVisible, Sort, SortType, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 200001,
-  "ImagePath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
-  "IsVisible": true,
-  "Type": "Default",
-  "SortType": 1,
-  "Sort": 71
 }
 ```
 
@@ -10696,40 +10834,50 @@
 }
 ```
 
-### ItemCureInfoData.json (0.02 MB, 101 条)
+### PlayerReturnConfig.json (0.02 MB, 28 条)
 
-**字段** (4): `CureInfoDesc, CureInfoTitle, ID, ImgPath`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 140066,
-  "CureInfoTitle": {
-    "Hash": 8473171996317953795
-  },
-  "CureInfoDesc": {
-    "Hash": 9562581932070426903
-  },
-  "ImgPath": "SpriteOutput/UI/TempSprite/SubMissionTes..."
-}
-```
-
-### ContentPackageConfig.json (0.02 MB, 43 条)
-
-**字段** (9): `ActivityModuleID, AfterGuideEntranceID, ContentID, EarlyAccessCondition, GuideConditions, InitEntranceID, IsHaveResidentPart, MainMissionIDList, ReleaseCondition`
+**字段** (20): `ActivityModuleID, AssistGroupID, BpExpExtraRatio, DailyDoubleTime, DispatchLink, ExtraHcoinConfigID, ExtraHcoinTime, ExtraMultipleDropList, FarmMultipleDropID, KeyPointID, LimitTime, LoginReward, PlayerReturnID, QuestGroupID, RecommendActivity, RecommendAvatar, RecommendMission, ReturnRewardIDList, TotalDoubleTime, ValidityPeriod`
 
 **首条记录摘要**:
 ```json
 {
-  "ContentID": 200001,
-  "MainMissionIDList": [
-    8023301
+  "PlayerReturnID": 1,
+  "DispatchLink": "return_questionnaire_a_url",
+  "FarmMultipleDropID": 20001,
+  "LimitTime": 40,
+  "QuestGroupID": [
+    1,
+    2,
+    3,
+    4
   ],
-  "EarlyAccessCondition": "[PlayerLevel:21]&((![FinishMainMission:1...",
-  "ReleaseCondition": "[FinishMainMission:1032501]",
-  "InitEntranceID": 1030403,
-  "GuideConditions": "[FinishSubMission:802330102]",
-  "AfterGuideEntranceID": 1030402
+  "ReturnRewardIDList": [
+    160001
+  ],
+  "KeyPointID": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "LoginReward": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "ValidityPeriod": 14,
+  "DailyDoubleTime": 6,
+  "TotalDoubleTime": 42,
+  "ExtraMultipleDropList": [],
+  "RecommendAvatar": [],
+  "RecommendMission": [],
+  "RecommendActivity": [],
+  "AssistGroupID": []
 }
 ```
 
@@ -10791,17 +10939,6 @@
     610103
   ],
   "Likes": "<list[15]>"
-}
-```
-
-### LoopCGEncryptionConfig.json (0.02 MB, 441 条)
-
-**字段** (3): `Encryption, EncryptionMethod, VideoID`
-
-**首条记录摘要**:
-```json
-{
-  "VideoID": 101
 }
 ```
 
@@ -10945,53 +11082,6 @@
 }
 ```
 
-### PlayerReturnConfig.json (0.02 MB, 27 条)
-
-**字段** (20): `ActivityModuleID, AssistGroupID, BpExpExtraRatio, DailyDoubleTime, DispatchLink, ExtraHcoinConfigID, ExtraHcoinTime, ExtraMultipleDropList, FarmMultipleDropID, KeyPointID, LimitTime, LoginReward, PlayerReturnID, QuestGroupID, RecommendActivity, RecommendAvatar, RecommendMission, ReturnRewardIDList, TotalDoubleTime, ValidityPeriod`
-
-**首条记录摘要**:
-```json
-{
-  "PlayerReturnID": 1,
-  "DispatchLink": "return_questionnaire_a_url",
-  "FarmMultipleDropID": 20001,
-  "LimitTime": 40,
-  "QuestGroupID": [
-    1,
-    2,
-    3,
-    4
-  ],
-  "ReturnRewardIDList": [
-    160001
-  ],
-  "KeyPointID": [
-    1,
-    2,
-    3,
-    4,
-    5
-  ],
-  "LoginReward": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7
-  ],
-  "ValidityPeriod": 14,
-  "DailyDoubleTime": 6,
-  "TotalDoubleTime": 42,
-  "ExtraMultipleDropList": [],
-  "RecommendAvatar": [],
-  "RecommendMission": [],
-  "RecommendActivity": [],
-  "AssistGroupID": []
-}
-```
-
 ### AetherDividePassiveSkill.json (0.02 MB, 32 条)
 
 **字段** (11): `AbilityName, ExtraEffectIDList, ItemDescription, ItemID, ParamList, PassiveSkillDescription, PassiveSkillName, PassiveSkillType, Rarity, SimpleExtraEffectIDList, SimpleParamList`
@@ -11018,6 +11108,38 @@
       "Value": 0.5
     }
   ]
+}
+```
+
+### RelicSubAffixAvatarValue.json (0.02 MB, 97 条)
+
+**字段** (10): `Attack, AvatarID, BreakDamage, CriticalChance, CriticalDamage, Defence, HP, Speed, StatusProbability, StatusResistance`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1001,
+  "Attack": 0.1,
+  "HP": 0.1,
+  "Defence": 1,
+  "Speed": 1,
+  "CriticalChance": 0.1,
+  "CriticalDamage": 0.1,
+  "StatusProbability": 0.8,
+  "StatusResistance": 0.8,
+  "BreakDamage": 0.1
+}
+```
+
+### VideoEncryptionConfig.json (0.02 MB, 356 条)
+
+**字段** (3): `Encryption, EncryptionMethod, VideoID`
+
+**首条记录摘要**:
+```json
+{
+  "VideoID": 1,
+  "Encryption": true
 }
 ```
 
@@ -11054,6 +11176,23 @@
   "Range": {
     "Value": 0.5
   }
+}
+```
+
+### LimaoNewsContent.json (0.02 MB, 115 条)
+
+**字段** (6): `ANECPHCPLPP, DFFLADLLADD, DGLJLJEHNNB, EEIEODMEMFI, MMNJODIJPOE, ODLDEEANNCM`
+
+**首条记录摘要**:
+```json
+{
+  "DFFLADLLADD": 40200101,
+  "MMNJODIJPOE": "Text",
+  "ANECPHCPLPP": {
+    "Hash": 10558367673738183344
+  },
+  "ODLDEEANNCM": "",
+  "EEIEODMEMFI": ""
 }
 ```
 
@@ -11172,26 +11311,6 @@
 }
 ```
 
-### RelicSubAffixAvatarValue.json (0.02 MB, 95 条)
-
-**字段** (10): `Attack, AvatarID, BreakDamage, CriticalChance, CriticalDamage, Defence, HP, Speed, StatusProbability, StatusResistance`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1001,
-  "Attack": 0.1,
-  "HP": 0.1,
-  "Defence": 1,
-  "Speed": 1,
-  "CriticalChance": 0.1,
-  "CriticalDamage": 0.1,
-  "StatusProbability": 0.8,
-  "StatusResistance": 0.8,
-  "BreakDamage": 0.1
-}
-```
-
 ### ScheduleDataActivityPanel.json (0.02 MB, 183 条)
 
 **字段** (3): `BeginTime, EndTime, ID`
@@ -11283,29 +11402,6 @@
 }
 ```
 
-### LimaoNewsInterview.json (0.02 MB, 15 条)
-
-**字段** (9): `DKPOHCDMHBF, EECIBIDGPEI, GEKGGMKGIPE, HMFGANHKHIM, KMIBDJKKGDE, LIDHGBEAJMA, LMDEHNMJHDJ, LNHLPKEHJBA, PFKLDBGEGAO`
-
-**首条记录摘要**:
-```json
-{
-  "DKPOHCDMHBF": 201,
-  "LNHLPKEHJBA": {
-    "Hash": 1513001872307035594
-  },
-  "HMFGANHKHIM": {
-    "Hash": 5169119345462893113
-  },
-  "LMDEHNMJHDJ": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
-  "PFKLDBGEGAO": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
-  "GEKGGMKGIPE": [],
-  "EECIBIDGPEI": "<list[68]>",
-  "LIDHGBEAJMA": "<list[10]>",
-  "KMIBDJKKGDE": 16032
-}
-```
-
 ### FateAffix.json (0.02 MB, 71 条)
 
 **字段** (9): `BELHHHIHCEF, BEOGEKDEPLO, EFAIIOHKFGD, HEDNBIABAKP, IDABEFMAPFE, KBNHPKIOGLH, LBLJLNPBDPB, MDEBFIFOKHH, PMIEAEGJNMJ`
@@ -11362,18 +11458,6 @@
     "Hash": 6247385609997241073
   },
   "EffectDescParamList": []
-}
-```
-
-### VideoEncryptionConfig.json (0.02 MB, 349 条)
-
-**字段** (3): `Encryption, EncryptionMethod, VideoID`
-
-**首条记录摘要**:
-```json
-{
-  "VideoID": 1,
-  "Encryption": true
 }
 ```
 
@@ -11478,6 +11562,71 @@
 }
 ```
 
+### LimaoNewsOfficeSurvey.json (0.02 MB, 33 条)
+
+**字段** (15): `AAPEGNAHMJB, ADJDGJOFEJF, ANPKNOHCPDK, DCCHGAPFMJI, EEIEODMEMFI, HIHLLBFEONI, IODMEPHIMDB, JBJJIOFBBCN, KHIALKEMEGH, MGAANANONJP, ODLDEEANNCM, OFMBPNHDBBE, OGICJALDJHP, OMLFNLJDHKG, OOBCHJJPIAC`
+
+**首条记录摘要**:
+```json
+{
+  "KHIALKEMEGH": 402001,
+  "AAPEGNAHMJB": "Branch",
+  "JBJJIOFBBCN": [
+    10
+  ],
+  "HIHLLBFEONI": 1,
+  "OMLFNLJDHKG": [
+    2400004
+  ],
+  "IODMEPHIMDB": [
+    2400015
+  ],
+  "ANPKNOHCPDK": [
+    2400006
+  ],
+  "ADJDGJOFEJF": 8015005,
+  "DCCHGAPFMJI": [
+    2054000
+  ],
+  "OGICJALDJHP": [],
+  "OOBCHJJPIAC": [
+    40200101,
+    40200102
+  ],
+  "MGAANANONJP": [],
+  "ODLDEEANNCM": "SpriteOutput/UI/LimaoNews/PostPic/post_1...",
+  "EEIEODMEMFI": ""
+}
+```
+
+### ChallengeBadgeConfig.json (0.02 MB, 27 条)
+
+**字段** (12): `BadgeID, ChallengePeakGroupID, ChallengePeakLevel, ComeFromGoto, ComeFromText, Desc, IconFigurePath, IconItemPath, IconMiddlePath, Name, Prefab, Type`
+
+**首条记录摘要**:
+```json
+{
+  "BadgeID": 295520,
+  "Type": "Peak",
+  "ChallengePeakGroupID": 4,
+  "ChallengePeakLevel": "Bronze",
+  "Name": {
+    "Hash": 9832126497013102949
+  },
+  "Prefab": "Stages/OriginalResPos/InteractiveProp/Ch...",
+  "IconMiddlePath": "SpriteOutput/ItemIcon/FurnitureIconNoBox...",
+  "IconItemPath": "SpriteOutput/ItemIcon/FurnitureIcon/2955...",
+  "IconFigurePath": "SpriteOutput/ItemFigures/FurnitureIcon/2...",
+  "ComeFromText": {
+    "Hash": 15511089575408139317
+  },
+  "ComeFromGoto": 6281,
+  "Desc": {
+    "Hash": 1447986700011264002
+  }
+}
+```
+
 ### ActivityDiceSkill.json (0.02 MB, 62 条)
 
 **字段** (6): `CDNGHDNMMAG, NJJEIJGIENP, NMAHGFAPENI, PBLPLDJKPEI, PGAMJHMNLLN, PMKEDGGOLKD`
@@ -11503,6 +11652,30 @@
 }
 ```
 
+### ChallengeStoryGroupExtra.json (0.02 MB, 26 条)
+
+**字段** (10): `BuffList, GroupID, StoryType, SubMazeBuffList, ThemeID, ThemeIconPicPath, ThemePosterBgPicPath, ThemePosterEffectPrefabPath, ThemePosterTabPicPath, ThemeToastPicPath`
+
+**首条记录摘要**:
+```json
+{
+  "GroupID": 2001,
+  "ThemeToastPicPath": "SpriteOutput/ChallengeTheme/ThemePic/Cha...",
+  "ThemeIconPicPath": "SpriteOutput/ChallengeTheme/ThemeIcon/Ch...",
+  "ThemePosterEffectPrefabPath": "UI/Abyss/ChallengeStoryPosterEffThemePan...",
+  "ThemePosterBgPicPath": "SpriteOutput/ChallengeTheme/ThemeBg/Chal...",
+  "ThemePosterTabPicPath": "SpriteOutput/Quest/TabIcon/BtnChallengeS...",
+  "ThemeID": 1,
+  "SubMazeBuffList": [],
+  "StoryType": "Normal",
+  "BuffList": [
+    3031301,
+    3031302,
+    3031303
+  ]
+}
+```
+
 ### GridFightBackServant.json (0.02 MB, 265 条)
 
 **字段** (4): `BESkillIDList, RoleID, ServantBEID, Star`
@@ -11513,6 +11686,40 @@
   "RoleID": 1001,
   "Star": 1,
   "BESkillIDList": []
+}
+```
+
+### RoguePersonaStyle.json (0.02 MB, 15 条)
+
+**字段** (15): `BCGJNNDCIFH, DDGDJCKKHPH, DOKOMKFGOOC, FBOICELIKNJ, GIFCDPFAKKP, JEHDKAKMCGC, JJKLIJNFIBB, KLOEJIMMPJM, LCNLDGGAOBH, MJOOFPBABEA, NMAHGFAPENI, OHBMLDNKGMD, PBLPLDJKPEI, PILOLAAEAHB, PJNNPOKJEFD`
+
+**首条记录摘要**:
+```json
+{
+  "KLOEJIMMPJM": 101,
+  "BCGJNNDCIFH": "SpriteOutput/Rogue/Tourn/Persona/Persona...",
+  "LCNLDGGAOBH": "SpriteOutput/Rogue/Tourn/Persona/Persona...",
+  "DOKOMKFGOOC": "SpriteOutput/Rogue/Tourn/Persona/Persona...",
+  "OHBMLDNKGMD": "SpriteOutput/Rogue/Tourn/Persona/Persona...",
+  "MJOOFPBABEA": {
+    "Hash": 13548995702470921752
+  },
+  "DDGDJCKKHPH": {
+    "Hash": 13668289307753628803
+  },
+  "NMAHGFAPENI": {
+    "Hash": 3229452050505925461
+  },
+  "PJNNPOKJEFD": {
+    "Hash": 6434289307571048648
+  },
+  "FBOICELIKNJ": {
+    "Hash": 589803160953193191
+  },
+  "PBLPLDJKPEI": "<list[4]>",
+  "JEHDKAKMCGC": "<list[14]>",
+  "GIFCDPFAKKP": true,
+  "PILOLAAEAHB": 1
 }
 ```
 
@@ -11563,24 +11770,6 @@
 }
 ```
 
-### MazePuzzleOrigamiFD.json (0.02 MB, 83 条)
-
-**字段** (8): `ColonyID, FDContainerID, FDEntityID, FDSGP, FDSGPValue, FloorID, GroupID, MainPropID`
-
-**首条记录摘要**:
-```json
-{
-  "FloorID": 20502001,
-  "GroupID": 73,
-  "MainPropID": 300010,
-  "ColonyID": 33,
-  "FDSGP": "LG_110001__154_MapIconState_Auto",
-  "FDSGPValue": 2,
-  "FDContainerID": 110001,
-  "FDEntityID": 154
-}
-```
-
 ### SKillNavigationConfig.json (0.02 MB, 166 条)
 
 **字段** (6): `AvatarBaseType, Down, Left, PointID, Right, Up`
@@ -11594,6 +11783,21 @@
   "Down": 6,
   "Left": 11,
   "Right": 3
+}
+```
+
+### TutorialSubGuideData.json (0.02 MB, 125 条)
+
+**字段** (4): `FBKAMIHGLFK, FLEADHOPGGN, PHFMCACHFIJ, PJHMJKEIGOA`
+
+**首条记录摘要**:
+```json
+{
+  "PHFMCACHFIJ": 100101,
+  "FBKAMIHGLFK": "",
+  "PJHMJKEIGOA": {
+    "Hash": 6636153336510038151
+  }
 }
 ```
 
@@ -11679,30 +11883,6 @@
 }
 ```
 
-### ChallengeStoryGroupExtra.json (0.02 MB, 25 条)
-
-**字段** (10): `BuffList, GroupID, StoryType, SubMazeBuffList, ThemeID, ThemeIconPicPath, ThemePosterBgPicPath, ThemePosterEffectPrefabPath, ThemePosterTabPicPath, ThemeToastPicPath`
-
-**首条记录摘要**:
-```json
-{
-  "GroupID": 2001,
-  "ThemeToastPicPath": "SpriteOutput/ChallengeTheme/ThemePic/Cha...",
-  "ThemeIconPicPath": "SpriteOutput/ChallengeTheme/ThemeIcon/Ch...",
-  "ThemePosterEffectPrefabPath": "UI/Abyss/ChallengeStoryPosterEffThemePan...",
-  "ThemePosterBgPicPath": "SpriteOutput/ChallengeTheme/ThemeBg/Chal...",
-  "ThemePosterTabPicPath": "SpriteOutput/Quest/TabIcon/BtnChallengeS...",
-  "ThemeID": 1,
-  "SubMazeBuffList": [],
-  "StoryType": "Normal",
-  "BuffList": [
-    3031301,
-    3031302,
-    3031303
-  ]
-}
-```
-
 ### DailyMissionData.json (0.02 MB, 88 条)
 
 **字段** (6): `DailyMissionType, GroupID, ID, IconPath, QuestID, UnlockMainMission`
@@ -11776,6 +11956,18 @@
 }
 ```
 
+### TextSpriteConfig.json (0.02 MB, 126 条)
+
+**字段** (2): `SpriteName, SpritePath`
+
+**首条记录摘要**:
+```json
+{
+  "SpriteName": "ActivityChimeraATK",
+  "SpritePath": "SpriteOutput/UI/Quest/Chimera/ChimeraTex..."
+}
+```
+
 ### FunctionHud.json (0.02 MB, 74 条)
 
 **字段** (7): `FunctionID, ID, IconPath, Name, OverrideHudIconPath, RedDot, RedDotHud`
@@ -11812,32 +12004,15 @@
 }
 ```
 
-### LimaoNewsContent.json (0.02 MB, 102 条)
+### BattleBGM.json (0.02 MB, 191 条)
 
-**字段** (6): `ANECPHCPLPP, DFFLADLLADD, DGLJLJEHNNB, EEIEODMEMFI, MMNJODIJPOE, ODLDEEANNCM`
-
-**首条记录摘要**:
-```json
-{
-  "DFFLADLLADD": 40200101,
-  "MMNJODIJPOE": "Text",
-  "ANECPHCPLPP": {
-    "Hash": 10558367673738183344
-  },
-  "ODLDEEANNCM": "",
-  "EEIEODMEMFI": ""
-}
-```
-
-### TextSpriteConfig.json (0.02 MB, 124 条)
-
-**字段** (2): `SpriteName, SpritePath`
+**字段** (3): `BGMName, Priority, StageType`
 
 **首条记录摘要**:
 ```json
 {
-  "SpriteName": "ActivityChimeraATK",
-  "SpritePath": "SpriteOutput/UI/Quest/Chimera/ChimeraTex..."
+  "BGMName": "State_Combat_Silence",
+  "Priority": 100
 }
 ```
 
@@ -11866,18 +12041,6 @@
   "IconPath": "SpriteOutput/Quest/MatchThree/ImgBirdMid...",
   "IsShow": true,
   "GuideID": 8131
-}
-```
-
-### BattleBGM.json (0.02 MB, 188 条)
-
-**字段** (3): `BGMName, Priority, StageType`
-
-**首条记录摘要**:
-```json
-{
-  "BGMName": "State_Combat_Silence",
-  "Priority": 100
 }
 ```
 
@@ -12098,18 +12261,46 @@
 }
 ```
 
-### TutorialSubGuideData.json (0.02 MB, 115 条)
+### ChallengePeakConfig.json (0.02 MB, 36 条)
 
-**字段** (4): `FBKAMIHGLFK, FLEADHOPGGN, PHFMCACHFIJ, PJHMJKEIGOA`
+**字段** (8): `DamageType, EventIDList, HPProgressValueList, ID, NormalTargetList, ProgressValueList, TagList, Title`
 
 **首条记录摘要**:
 ```json
 {
-  "PHFMCACHFIJ": 100101,
-  "FBKAMIHGLFK": "",
-  "PJHMJKEIGOA": {
-    "Hash": 6636153336510038151
-  }
+  "ID": 101,
+  "Title": {
+    "Hash": 9016368862888813841
+  },
+  "NormalTargetList": [
+    3001,
+    3002,
+    3000
+  ],
+  "DamageType": [
+    "Fire",
+    "Imaginary"
+  ],
+  "EventIDList": [
+    30501011
+  ],
+  "TagList": [
+    3033001
+  ],
+  "ProgressValueList": [
+    3,
+    5,
+    0,
+    0,
+    0
+  ],
+  "HPProgressValueList": [
+    0,
+    0,
+    20,
+    60,
+    60
+  ]
 }
 ```
 
@@ -12197,6 +12388,20 @@
 }
 ```
 
+### OverrideFloorConfig.json (0.02 MB, 135 条)
+
+**字段** (5): `ContentID, DimensionID, EnableCondition, FloorID, IsHideInNavMapSubTab`
+
+**首条记录摘要**:
+```json
+{
+  "ContentID": 200001,
+  "FloorID": 10304001,
+  "DimensionID": 1001,
+  "EnableCondition": ""
+}
+```
+
 ### PixAirEnemyConfig.json (0.02 MB, 60 条)
 
 **字段** (6): `CoinLoot, DisplayID, EnemyID, EquipsID, EquipsLevel, HP`
@@ -12266,6 +12471,26 @@
 }
 ```
 
+### AvatarComefrom.json (0.02 MB, 93 条)
+
+**字段** (6): `ComefromID, Desc, GotoID, GotoParam, ID, Sort`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "ComefromID": 99,
+  "Sort": 1,
+  "Desc": {
+    "Hash": 6368553998257230895
+  },
+  "GotoID": 2300,
+  "GotoParam": [
+    1001
+  ]
+}
+```
+
 ### IdleLiveSpineAnimGroup.json (0.02 MB, 71 条)
 
 **字段** (4): `AnimGroupID, BubbleText, FemaleStateList, MaleStateList`
@@ -12325,6 +12550,22 @@
 }
 ```
 
+### AvatarPlayerIcon.json (0.02 MB, 93 条)
+
+**字段** (6): `AvatarID, ID, ImagePath, Sort, SortType, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 201001,
+  "ImagePath": "SpriteOutput/AvatarRoundIcon/Avatar/1001...",
+  "AvatarID": 1001,
+  "Type": "Avatar",
+  "SortType": 3,
+  "Sort": 61
+}
+```
+
 ### GridFightPrayQuestFinishWay.json (0.02 MB, 73 条)
 
 **字段** (11): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamInt3, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
@@ -12364,23 +12605,27 @@
 }
 ```
 
-### AvatarComefrom.json (0.02 MB, 91 条)
+### MonsterGuideTag.json (0.02 MB, 68 条)
 
-**字段** (6): `ComefromID, Desc, GotoID, GotoParam, ID, Sort`
+**字段** (6): `EffectID, ParameterList, SkillID, TagBriefDescription, TagID, TagName`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1001,
-  "ComefromID": 99,
-  "Sort": 1,
-  "Desc": {
-    "Hash": 6368553998257230895
+  "TagID": 100101,
+  "TagName": {
+    "Hash": 7045240788021610782
   },
-  "GotoID": 2300,
-  "GotoParam": [
-    1001
-  ]
+  "TagBriefDescription": {
+    "Hash": 6300875263989191075
+  },
+  "ParameterList": [
+    0.6,
+    1.25,
+    1
+  ],
+  "SkillID": 100401410,
+  "EffectID": []
 }
 ```
 
@@ -12446,50 +12691,6 @@
 }
 ```
 
-### ChallengeBadgeConfig.json (0.01 MB, 23 条)
-
-**字段** (12): `BadgeID, ChallengePeakGroupID, ChallengePeakLevel, ComeFromGoto, ComeFromText, Desc, IconFigurePath, IconItemPath, IconMiddlePath, Name, Prefab, Type`
-
-**首条记录摘要**:
-```json
-{
-  "BadgeID": 295520,
-  "Type": "Peak",
-  "ChallengePeakGroupID": 4,
-  "ChallengePeakLevel": "Bronze",
-  "Name": {
-    "Hash": 9832126497013102949
-  },
-  "Prefab": "Stages/OriginalResPos/InteractiveProp/Ch...",
-  "IconMiddlePath": "SpriteOutput/ItemIcon/FurnitureIconNoBox...",
-  "IconItemPath": "SpriteOutput/ItemIcon/FurnitureIcon/2955...",
-  "IconFigurePath": "SpriteOutput/ItemFigures/FurnitureIcon/2...",
-  "ComeFromText": {
-    "Hash": 15511089575408139317
-  },
-  "ComeFromGoto": 6281,
-  "Desc": {
-    "Hash": 1447986700011264002
-  }
-}
-```
-
-### AvatarPlayerIcon.json (0.01 MB, 91 条)
-
-**字段** (6): `AvatarID, ID, ImagePath, Sort, SortType, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 201001,
-  "ImagePath": "SpriteOutput/AvatarRoundIcon/Avatar/1001...",
-  "AvatarID": 1001,
-  "Type": "Avatar",
-  "SortType": 3,
-  "Sort": 61
-}
-```
-
 ### MatchThreeOpponent.json (0.01 MB, 46 条)
 
 **字段** (8): `AIConfig, AILevel, IconPath, ImagePath, Level, MapImagePath, Nickname, OpponentID`
@@ -12533,21 +12734,6 @@
   "OrderTipsTime": [
     600,
     5
-  ]
-}
-```
-
-### ResourceOverallConfig.json (0.01 MB, 178 条)
-
-**字段** (3): `CurrencyIDList, IsDetailButton, PageKey`
-
-**首条记录摘要**:
-```json
-{
-  "PageKey": "InventoryPage",
-  "CurrencyIDList": [
-    2,
-    1
   ]
 }
 ```
@@ -12766,40 +12952,18 @@
 }
 ```
 
-### LimaoNewsOfficeSurvey.json (0.01 MB, 27 条)
+### ResourceOverallConfig.json (0.01 MB, 176 条)
 
-**字段** (15): `AAPEGNAHMJB, ADJDGJOFEJF, ANPKNOHCPDK, DCCHGAPFMJI, EEIEODMEMFI, HIHLLBFEONI, IODMEPHIMDB, JBJJIOFBBCN, KHIALKEMEGH, MGAANANONJP, ODLDEEANNCM, OFMBPNHDBBE, OGICJALDJHP, OMLFNLJDHKG, OOBCHJJPIAC`
+**字段** (3): `CurrencyIDList, IsDetailButton, PageKey`
 
 **首条记录摘要**:
 ```json
 {
-  "KHIALKEMEGH": 402001,
-  "AAPEGNAHMJB": "Branch",
-  "JBJJIOFBBCN": [
-    10
-  ],
-  "HIHLLBFEONI": 1,
-  "OMLFNLJDHKG": [
-    2400004
-  ],
-  "IODMEPHIMDB": [
-    2400015
-  ],
-  "ANPKNOHCPDK": [
-    2400006
-  ],
-  "ADJDGJOFEJF": 8015005,
-  "DCCHGAPFMJI": [
-    2054000
-  ],
-  "OGICJALDJHP": [],
-  "OOBCHJJPIAC": [
-    40200101,
-    40200102
-  ],
-  "MGAANANONJP": [],
-  "ODLDEEANNCM": "SpriteOutput/UI/LimaoNews/PostPic/post_1...",
-  "EEIEODMEMFI": ""
+  "PageKey": "InventoryPage",
+  "CurrencyIDList": [
+    2,
+    1
+  ]
 }
 ```
 
@@ -12880,6 +13044,47 @@
 }
 ```
 
+### RoguePersonaTalent.json (0.01 MB, 24 条)
+
+**字段** (12): `AAGKEBFHLMC, DBALOLNOLGL, DPCMGDIIAKN, HGHFCLHKJNJ, MJOOFPBABEA, MOEDOCHOCPJ, NMAHGFAPENI, OICGFNGNLOE, OLOIFNNLKJP, OMKFHNLHBBB, PBLPLDJKPEI, PHFMCACHFIJ`
+
+**首条记录摘要**:
+```json
+{
+  "PHFMCACHFIJ": 12001,
+  "DBALOLNOLGL": 120,
+  "AAGKEBFHLMC": 1,
+  "OICGFNGNLOE": [
+    {
+      "ItemID": 281030,
+      "ItemNum": 100
+    }
+  ],
+  "MJOOFPBABEA": {
+    "Hash": 13309801192421790411
+  },
+  "NMAHGFAPENI": {
+    "Hash": 2619781658438091214
+  },
+  "PBLPLDJKPEI": [
+    {
+      "Value": 30
+    },
+    {
+      "Value": 2
+    }
+  ],
+  "OLOIFNNLKJP": "SpriteOutput/BuffIcon/ActivityFantasticS...",
+  "MOEDOCHOCPJ": {
+    "Hash": 17699056949045957896
+  },
+  "OMKFHNLHBBB": "Config/Level/RogueDialogue/RogueNpcDialo...",
+  "HGHFCLHKJNJ": {
+    "Hash": 8736134095247300154
+  }
+}
+```
+
 ### DrinkMakerRequestData.json (0.01 MB, 59 条)
 
 **字段** (8): `BanModeEntrance, FailTip, Mode, ParamList, RequestDesc, RequestID, RequestShortDesc, SuccessTip`
@@ -12896,30 +13101,6 @@
     1
   ],
   "BanModeEntrance": "BanTagMode"
-}
-```
-
-### MonsterGuideTag.json (0.01 MB, 64 条)
-
-**字段** (6): `EffectID, ParameterList, SkillID, TagBriefDescription, TagID, TagName`
-
-**首条记录摘要**:
-```json
-{
-  "TagID": 100101,
-  "TagName": {
-    "Hash": 7045240788021610782
-  },
-  "TagBriefDescription": {
-    "Hash": 6300875263989191075
-  },
-  "ParameterList": [
-    0.6,
-    1.25,
-    1
-  ],
-  "SkillID": 100401410,
-  "EffectID": []
 }
 ```
 
@@ -13030,63 +13211,6 @@
   "ObstacleScore": -30,
   "LocalPlayerScore": -70,
   "AIPlayerScore": -10
-}
-```
-
-### OverrideFloorConfig.json (0.01 MB, 122 条)
-
-**字段** (5): `ContentID, DimensionID, EnableCondition, FloorID, IsHideInNavMapSubTab`
-
-**首条记录摘要**:
-```json
-{
-  "ContentID": 200001,
-  "FloorID": 10304001,
-  "DimensionID": 1001,
-  "EnableCondition": ""
-}
-```
-
-### ChallengePeakConfig.json (0.01 MB, 32 条)
-
-**字段** (8): `DamageType, EventIDList, HPProgressValueList, ID, NormalTargetList, ProgressValueList, TagList, Title`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 101,
-  "Title": {
-    "Hash": 9016368862888813841
-  },
-  "NormalTargetList": [
-    3001,
-    3002,
-    3000
-  ],
-  "DamageType": [
-    "Fire",
-    "Imaginary"
-  ],
-  "EventIDList": [
-    30501011
-  ],
-  "TagList": [
-    3033001
-  ],
-  "ProgressValueList": [
-    3,
-    5,
-    0,
-    0,
-    0
-  ],
-  "HPProgressValueList": [
-    0,
-    0,
-    20,
-    60,
-    60
-  ]
 }
 ```
 
@@ -13336,81 +13460,22 @@
 }
 ```
 
-### ActivityAvatarConfigLD.json (0.01 MB, 6 条)
+### ChenLingGameBoyRankingsNPC.json (0.01 MB, 52 条)
 
-**字段** (39): `AIPath, ActionAvatarHeadIconPath, AdventurePlayerID, AssistBgOffset, AssistOffset, AvatarBaseType, AvatarCutinBgImgPath, AvatarCutinFrontImgPath, AvatarCutinImgPath, AvatarCutinIntroText, AvatarDropOffset, AvatarFullName, AvatarGachaResultImgPath, AvatarID, AvatarMiniIconPath, AvatarName, AvatarSelfShowOffset, AvatarSideIconPath, AvatarTrialOffset, AvatarVOTag, DamageType, DamageTypeResistance, DefaultAvatarHeadIconPath, DefaultAvatarModelPath, ExpGroup, JsonPath, ManikinJsonPath, MaxPromotion, PlayerCardOffset, RankIDList, Rarity, Release, SPNeed, SideAvatarHeadIconPath, SkillList, SkilltreePrefabPath, UIAvatarModelPath, UltraSkillCutInPrefabPath, WaitingAvatarHeadIconPath`
+**字段** (5): `GameBoyRankingsNPCID, NPCIconPath, NPCNameID, NPCScore, NPCSignature`
 
 **首条记录摘要**:
 ```json
 {
-  "AvatarID": 6036,
-  "AvatarName": {
-    "Hash": 16008017046237451018
+  "GameBoyRankingsNPCID": 1,
+  "NPCNameID": {
+    "Hash": 13404786005867661949
   },
-  "AvatarFullName": {
-    "Hash": 3714411688930055020
+  "NPCIconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
+  "NPCSignature": {
+    "Hash": 2941117082371005839
   },
-  "AdventurePlayerID": 1014,
-  "AvatarVOTag": "saber",
-  "Rarity": "CombatPowerAvatarRarityType5",
-  "JsonPath": "Config/ConfigCharacter/Activity/FateRin/...",
-  "DamageType": "Wind",
-  "SPNeed": {
-    "Value": 200
-  },
-  "ExpGroup": 1,
-  "MaxPromotion": 6,
-  "RankIDList": [
-    6036
-  ],
-  "SkillList": [
-    603603,
-    603604
-  ],
-  "AvatarBaseType": "Warrior",
-  "DefaultAvatarModelPath": "Characters/CharacterPrefabs/Avatar/Saber...",
-  "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIcon/Avatar/1014.png",
-  "AvatarSideIconPath": "SpriteOutput/AvatarRoundIcon/Avatar/1014...",
-  "AvatarMiniIconPath": "SpriteOutput/AvatarMiniIcon/1014.png",
-  "AvatarGachaResultImgPath": "SpriteOutput/AvatarDrawCardResult/1014.p...",
-  "ActionAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/1014B.png",
-  "UltraSkillCutInPrefabPath": "UI/Battle/UltraSkillCutIn/Avatar/UltraSk...",
-  "UIAvatarModelPath": "Characters/CharacterPrefabs/Manikin/Avat...",
-  "ManikinJsonPath": "Config/ConfigCharacter/Manikin/Avatar/Ma...",
-  "AIPath": "Config/ConfigAI/Avatar_ComplexSkilll_Aut...",
-  "SkilltreePrefabPath": "UI/Avatar/Widget/WarriorSkillTreeGroup.p...",
-  "DamageTypeResistance": [],
-  "Release": true,
-  "SideAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/1014.png",
-  "WaitingAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/1014.png",
-  "AvatarCutinImgPath": "SpriteOutput/AvatarCutinFigures/1014.png",
-  "AvatarCutinBgImgPath": "SpriteOutput/AvatarCutinBg/1014.png",
-  "AvatarCutinFrontImgPath": "SpriteOutput/AvatarDrawCard/1014.png",
-  "AvatarCutinIntroText": {
-    "Hash": 13648649189742784530
-  },
-  "AvatarDropOffset": "<list[9]>",
-  "AvatarTrialOffset": [],
-  "PlayerCardOffset": [
-    82,
-    -84,
-    0.77
-  ],
-  "AssistOffset": [
-    70,
-    -72,
-    1.1
-  ],
-  "AssistBgOffset": [
-    108,
-    -300,
-    1
-  ],
-  "AvatarSelfShowOffset": [
-    0,
-    -100,
-    5
-  ]
+  "NPCScore": 34420
 }
 ```
 
@@ -13459,6 +13524,20 @@
   "MixRate": 2,
   "UnlockType": "PlayerLevel",
   "UnlockParam": 1
+}
+```
+
+### StoryLineFloorData.json (0.01 MB, 88 条)
+
+**字段** (4): `ConditionExpression, DimensionID, FloorID, StoryLineID`
+
+**首条记录摘要**:
+```json
+{
+  "FloorID": 20322001,
+  "StoryLineID": 1031101,
+  "ConditionExpression": "[BetweenSubMission:103110108,103110163]",
+  "DimensionID": 2
 }
 ```
 
@@ -13520,20 +13599,6 @@
     10104,
     10105
   ]
-}
-```
-
-### StoryLineFloorData.json (0.01 MB, 87 条)
-
-**字段** (4): `ConditionExpression, DimensionID, FloorID, StoryLineID`
-
-**首条记录摘要**:
-```json
-{
-  "FloorID": 20322001,
-  "StoryLineID": 1031101,
-  "ConditionExpression": "[BetweenSubMission:103110108,103110163]",
-  "DimensionID": 2
 }
 ```
 
@@ -13602,6 +13667,20 @@
 }
 ```
 
+### NavMapSubTab.json (0.01 MB, 81 条)
+
+**字段** (4): `FloorID, MenuSortID, NavMapTabID, UnlockConditionExpression`
+
+**首条记录摘要**:
+```json
+{
+  "FloorID": 10000000,
+  "MenuSortID": 2,
+  "UnlockConditionExpression": "[RealFinishMainMission:1000501]|[RealFin...",
+  "NavMapTabID": 10000000
+}
+```
+
 ### PlanetFesCard.json (0.01 MB, 40 条)
 
 **字段** (7): `BuffIDList, CardID, Description, Name, PicPath, PieceItemList, Rarity`
@@ -13664,6 +13743,53 @@
       "Value": 0.5
     }
   ]
+}
+```
+
+### ChallengeStoryGroupConfig.json (0.01 MB, 26 条)
+
+**字段** (12): `BackGroundPath, ChallengeGroupType, GroupID, GroupName, MazeBuffID, PreMissionID, RewardLineGroupID, ScheduleDataID, TabPicPath, TabPicSelectPath, ThemePicPath, TierceID`
+
+**首条记录摘要**:
+```json
+{
+  "GroupID": 2001,
+  "GroupName": {
+    "Hash": 16470015507639752765
+  },
+  "RewardLineGroupID": 2000,
+  "PreMissionID": 4020103,
+  "ScheduleDataID": 202001,
+  "MazeBuffID": 3031001,
+  "BackGroundPath": "",
+  "TabPicPath": "SpriteOutput/TabIcon/Abyss/ChallengeThem...",
+  "TabPicSelectPath": "SpriteOutput/TabIcon/Abyss/ChallengeThem...",
+  "ChallengeGroupType": "Story",
+  "ThemePicPath": "SpriteOutput/DailyMission/Banner/Challen..."
+}
+```
+
+### RogueTournKeyword.json (0.01 MB, 25 条)
+
+**字段** (8): `ExtraEffect, KeywordBuffType, KeywordExtraEffect, KeywordID, KeywordIcon, MazeBuffID, MazeBuffList, RogueFormulaList`
+
+**首条记录摘要**:
+```json
+{
+  "KeywordID": 1615010,
+  "MazeBuffID": 615010,
+  "KeywordIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "MazeBuffList": [
+    615030,
+    615031,
+    615040,
+    615041,
+    615046
+  ],
+  "RogueFormulaList": "<list[8]>",
+  "KeywordExtraEffect": 60000001,
+  "ExtraEffect": 61000200,
+  "KeywordBuffType": 120
 }
 ```
 
@@ -13730,6 +13856,19 @@
 }
 ```
 
+### LimaoNewsEmployeeOption.json (0.01 MB, 145 条)
+
+**字段** (4): `AKHHKMDFGKC, JDLPMOKEBPD, JPGBOENKPLK, KILKOKMKNML`
+
+**首条记录摘要**:
+```json
+{
+  "KILKOKMKNML": 1001,
+  "AKHHKMDFGKC": [],
+  "JDLPMOKEBPD": 427025004
+}
+```
+
 ### RogueMagicStory.json (0.01 MB, 39 条)
 
 **字段** (7): `IsHide, LevelGraphPath, StoryCategory, StoryID, StoryImage, StoryName, UnLockDisplay`
@@ -13749,41 +13888,16 @@
 }
 ```
 
-### NavMapSubTab.json (0.01 MB, 77 条)
+### GuideVideoConfig.json (0.01 MB, 121 条)
 
-**字段** (4): `FloorID, MenuSortID, NavMapTabID, UnlockConditionExpression`
-
-**首条记录摘要**:
-```json
-{
-  "FloorID": 10000000,
-  "MenuSortID": 2,
-  "UnlockConditionExpression": "[RealFinishMainMission:1000501]|[RealFin...",
-  "NavMapTabID": 10000000
-}
-```
-
-### RogueTournKeyword.json (0.01 MB, 25 条)
-
-**字段** (8): `ExtraEffect, KeywordBuffType, KeywordExtraEffect, KeywordID, KeywordIcon, MazeBuffID, MazeBuffList, RogueFormulaList`
+**字段** (3): `SizeType, VideoID, VideoPath`
 
 **首条记录摘要**:
 ```json
 {
-  "KeywordID": 1615010,
-  "MazeBuffID": 615010,
-  "KeywordIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
-  "MazeBuffList": [
-    615030,
-    615031,
-    615040,
-    615041,
-    615046
-  ],
-  "RogueFormulaList": "<list[8]>",
-  "KeywordExtraEffect": 60000001,
-  "ExtraEffect": 61000200,
-  "KeywordBuffType": 120
+  "VideoID": 11001,
+  "VideoPath": "Activity_Parkour_Guide_Bomb.usm",
+  "SizeType": "Small"
 }
 ```
 
@@ -13824,29 +13938,6 @@
 }
 ```
 
-### ChallengeStoryGroupConfig.json (0.01 MB, 25 条)
-
-**字段** (12): `BackGroundPath, ChallengeGroupType, GroupID, GroupName, MazeBuffID, PreMissionID, RewardLineGroupID, ScheduleDataID, TabPicPath, TabPicSelectPath, ThemePicPath, TierceID`
-
-**首条记录摘要**:
-```json
-{
-  "GroupID": 2001,
-  "GroupName": {
-    "Hash": 16470015507639752765
-  },
-  "RewardLineGroupID": 2000,
-  "PreMissionID": 4020103,
-  "ScheduleDataID": 202001,
-  "MazeBuffID": 3031001,
-  "BackGroundPath": "",
-  "TabPicPath": "SpriteOutput/TabIcon/Abyss/ChallengeThem...",
-  "TabPicSelectPath": "SpriteOutput/TabIcon/Abyss/ChallengeThem...",
-  "ChallengeGroupType": "Story",
-  "ThemePicPath": "SpriteOutput/DailyMission/Banner/Challen..."
-}
-```
-
 ### PhotoExhibitionDetail.json (0.01 MB, 19 条)
 
 **字段** (13): `AuthorName, FemalePicPath, FinishSubMissionID, GroupphotoDesc, ID, MalePicPath, MissionID, Name, RuikeReply, ShowRuikeName, TaskOption, Unlock, UnlockPicPath`
@@ -13873,6 +13964,23 @@
   "TaskOption": [],
   "MalePicPath": "<list[1]>",
   "FemalePicPath": "<list[1]>"
+}
+```
+
+### ChallengeStoryMazeExtra.json (0.01 MB, 104 条)
+
+**字段** (4): `BattleTargetID, ClearScore, ID, TurnLimit`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 20011,
+  "TurnLimit": 5,
+  "BattleTargetID": [
+    2001,
+    2002
+  ],
+  "ClearScore": 30000
 }
 ```
 
@@ -14048,6 +14156,28 @@
 }
 ```
 
+### ActivityModuleDemo.json (0.01 MB, 136 条)
+
+**字段** (4): `ActivityModuleID, AvatarDemoStageID, AvatarDemoType, Sort`
+
+**首条记录摘要**:
+```json
+{
+  "ActivityModuleID": 2000101,
+  "AvatarDemoStageID": 311020,
+  "Sort": 1
+}
+```
+
+### FinishTypeConfig.json (0.01 MB, 205 条)
+
+**字段** (2): `FinishType, NeedVerseParam`
+
+**首条记录摘要**:
+```json
+{}
+```
+
 ### RestaurantAbilityConfig.json (0.01 MB, 52 条)
 
 **字段** (7): `AbilityID, BuffList, Detail, DynamicValues, Name, TargetType, Type`
@@ -14194,45 +14324,6 @@
 }
 ```
 
-### FinishTypeConfig.json (0.01 MB, 200 条)
-
-**字段** (2): `FinishType, NeedVerseParam`
-
-**首条记录摘要**:
-```json
-{}
-```
-
-### ActivityModuleDemo.json (0.01 MB, 133 条)
-
-**字段** (4): `ActivityModuleID, AvatarDemoStageID, AvatarDemoType, Sort`
-
-**首条记录摘要**:
-```json
-{
-  "ActivityModuleID": 2000101,
-  "AvatarDemoStageID": 311020,
-  "Sort": 1
-}
-```
-
-### ChallengeStoryMazeExtra.json (0.01 MB, 100 条)
-
-**字段** (4): `BattleTargetID, ClearScore, ID, TurnLimit`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 20011,
-  "TurnLimit": 5,
-  "BattleTargetID": [
-    2001,
-    2002
-  ],
-  "ClearScore": 30000
-}
-```
-
 ### AvatarRankConfigLD.json (0.01 MB, 24 条)
 
 **字段** (11): `Desc, ExtraEffectIDList, IconPath, Name, Param, Rank, RankAbility, RankID, SkillAddLevelList, Trigger, UnlockCost`
@@ -14322,19 +14413,6 @@
 }
 ```
 
-### GuideVideoConfig.json (0.01 MB, 113 条)
-
-**字段** (3): `SizeType, VideoID, VideoPath`
-
-**首条记录摘要**:
-```json
-{
-  "VideoID": 11001,
-  "VideoPath": "Activity_Parkour_Guide_Bomb.usm",
-  "SizeType": "Small"
-}
-```
-
 ### PhotoGraphAvatarConfig.json (0.01 MB, 96 条)
 
 **字段** (2): `AvatarID, EmotionConfigList`
@@ -14350,54 +14428,6 @@
     10013,
     10014
   ]
-}
-```
-
-### AvatarSkin.json (0.01 MB, 6 条)
-
-**字段** (35): `ActionAvatarHeadIconPath, ActivityIntroDataID, ActivitySkinName, AdventureCharacterConfigOverrideJsonPath, AdventureDefaultAvatarHeadIconPath, AssistOffset, AudioEventTag, AvatarCutinBgImgPath, AvatarCutinFrontImgPath, AvatarCutinImgPath, AvatarDropOffset, AvatarID, AvatarMiniIconPath, AvatarSelfShowOffset, AvatarSideIconPath, AvatarSkinSynopsis, DefaultAvatarHeadIconPath, DefaultAvatarModelPath, DressIconPath, FreeStyleCharacterID, GachaResultImgPath, ID, IntroDataID, PlayerCardID, PlayerPrefabPath, ShopBgPath, ShopRecommendTabBgPath, ShowType, SideAvatarHeadIconPath, SkinConfigPath, Type, UIAvatarModelPath, UltraSkillCutInPrefabPath, VideoID, WaitingAvatarHeadIconPath`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1100101,
-  "AvatarID": 1001,
-  "Type": "Normal",
-  "PlayerCardID": 202029,
-  "AvatarSkinSynopsis": {
-    "Hash": 1478179930850312670
-  },
-  "FreeStyleCharacterID": "NPC_Avatar_Maid_Mar_7th_01",
-  "AvatarCutinFrontImgPath": "SpriteOutput/AvatarDrawCard/AvatarSkin/1...",
-  "AssistOffset": [],
-  "PlayerPrefabPath": "Characters/CharacterPrefabs/Player/Mar_7...",
-  "DefaultAvatarModelPath": "Characters/CharacterPrefabs/Avatar/Mar_7...",
-  "UIAvatarModelPath": "Characters/CharacterPrefabs/Manikin/Avat...",
-  "UltraSkillCutInPrefabPath": "UI/Battle/UltraSkillCutIn/Avatar/AvatarS...",
-  "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIcon/AvatarSkin/11001...",
-  "AdventureDefaultAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/AvatarSkin/1...",
-  "WaitingAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/AvatarSkin/1...",
-  "ActionAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/AvatarSkin/1...",
-  "SideAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/AvatarSkin/1...",
-  "AvatarSideIconPath": "SpriteOutput/AvatarRoundIcon/AvatarSkin/...",
-  "AvatarCutinImgPath": "SpriteOutput/AvatarCutinFigures/AvatarSk...",
-  "AvatarCutinBgImgPath": "SpriteOutput/AvatarCutinBg/AvatarSkin/11...",
-  "AvatarMiniIconPath": "SpriteOutput/AvatarMiniIcon/AvatarSkin/1...",
-  "AvatarDropOffset": [
-    -100,
-    20,
-    0.38
-  ],
-  "AvatarSelfShowOffset": [],
-  "ShowType": "Always",
-  "IntroDataID": 126,
-  "ShopRecommendTabBgPath": "",
-  "ShopBgPath": "UI/Shop/AvatarSkinPanel/AvatarSkinShop_1...",
-  "GachaResultImgPath": "SpriteOutput/AvatarDrawCardResult/Avatar...",
-  "SkinConfigPath": "Config/ConfigSkin/Avatar/AvatarSkin_Mar_...",
-  "AdventureCharacterConfigOverrideJsonPath": "",
-  "AudioEventTag": "",
-  "DressIconPath": ""
 }
 ```
 
@@ -14494,6 +14524,17 @@
 }
 ```
 
+### RogueTournMiracleGroup.json (0.01 MB, 288 条)
+
+**字段** (1): `RogueMiracleGroupID`
+
+**首条记录摘要**:
+```json
+{
+  "RogueMiracleGroupID": 40000
+}
+```
+
 ### ActivityExpedition.json (0.01 MB, 24 条)
 
 **字段** (13): `AssignDesc, AssignerName, AvatarNumMax, AvatarNumMin, BonusBaseTypeList, Duration, ExpeditionID, ExpeditionRank, Grade1ExtraRewardID, Grade2ExtraRewardID, Grade3ExtraRewardID, Name, RewardID`
@@ -14522,17 +14563,6 @@
   "Grade1ExtraRewardID": 3152002,
   "Grade2ExtraRewardID": 3152003,
   "Grade3ExtraRewardID": 3152004
-}
-```
-
-### RogueTournMiracleGroup.json (0.01 MB, 286 条)
-
-**字段** (1): `RogueMiracleGroupID`
-
-**首条记录摘要**:
-```json
-{
-  "RogueMiracleGroupID": 40000
 }
 ```
 
@@ -14567,25 +14597,6 @@
 }
 ```
 
-### ChenLingGameBoyRankingsNPC.json (0.01 MB, 44 条)
-
-**字段** (5): `GameBoyRankingsNPCID, NPCIconPath, NPCNameID, NPCScore, NPCSignature`
-
-**首条记录摘要**:
-```json
-{
-  "GameBoyRankingsNPCID": 1,
-  "NPCNameID": {
-    "Hash": 13404786005867661949
-  },
-  "NPCIconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
-  "NPCSignature": {
-    "Hash": 2941117082371005839
-  },
-  "NPCScore": 34420
-}
-```
-
 ### ClockParkChapterConfig.json (0.01 MB, 28 条)
 
 **字段** (12): `ChapterAutoUnlock, ChapterGamePlayRoundRandomList, ChapterID, ChapterRoundIDList, ChapterStoryIDList, ChapterTitle, ChapterType, CheckPointList, NextChapterID, RewardID, RewardProgress, SuccessToRoundID`
@@ -14614,6 +14625,85 @@
     111
   ],
   "SuccessToRoundID": 10107
+}
+```
+
+### AvatarSkin.json (0.01 MB, 6 条)
+
+**字段** (34): `ActionAvatarHeadIconPath, ActivityIntroDataID, ActivitySkinName, AdventureCharacterConfigOverrideJsonPath, AdventureDefaultAvatarHeadIconPath, AssistOffset, AudioEventTag, AvatarCutinBgImgPath, AvatarCutinFrontImgPath, AvatarCutinImgPath, AvatarDropOffset, AvatarID, AvatarMiniIconPath, AvatarSelfShowOffset, AvatarSideIconPath, AvatarSkinSynopsis, DefaultAvatarHeadIconPath, DefaultAvatarModelPath, DressIconPath, FreeStyleCharacterID, GachaResultImgPath, ID, IntroDataID, PlayerCardID, PlayerPrefabPath, ShopBgPath, ShowType, SideAvatarHeadIconPath, SkinConfigPath, Type, UIAvatarModelPath, UltraSkillCutInPrefabPath, VideoID, WaitingAvatarHeadIconPath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1100101,
+  "AvatarID": 1001,
+  "Type": "Normal",
+  "PlayerCardID": 202029,
+  "AvatarSkinSynopsis": {
+    "Hash": 1478179930850312670
+  },
+  "FreeStyleCharacterID": "NPC_Avatar_Maid_Mar_7th_01",
+  "AvatarCutinFrontImgPath": "SpriteOutput/AvatarDrawCard/AvatarSkin/1...",
+  "AssistOffset": [],
+  "PlayerPrefabPath": "Characters/CharacterPrefabs/Player/Mar_7...",
+  "DefaultAvatarModelPath": "Characters/CharacterPrefabs/Avatar/Mar_7...",
+  "UIAvatarModelPath": "Characters/CharacterPrefabs/Manikin/Avat...",
+  "UltraSkillCutInPrefabPath": "UI/Battle/UltraSkillCutIn/Avatar/AvatarS...",
+  "DefaultAvatarHeadIconPath": "SpriteOutput/AvatarIcon/AvatarSkin/11001...",
+  "AdventureDefaultAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/AvatarSkin/1...",
+  "WaitingAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/AvatarSkin/1...",
+  "ActionAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/AvatarSkin/1...",
+  "SideAvatarHeadIconPath": "SpriteOutput/AvatarIconTeam/AvatarSkin/1...",
+  "AvatarSideIconPath": "SpriteOutput/AvatarRoundIcon/AvatarSkin/...",
+  "AvatarCutinImgPath": "SpriteOutput/AvatarCutinFigures/AvatarSk...",
+  "AvatarCutinBgImgPath": "SpriteOutput/AvatarCutinBg/AvatarSkin/11...",
+  "AvatarMiniIconPath": "SpriteOutput/AvatarMiniIcon/AvatarSkin/1...",
+  "AvatarDropOffset": [
+    -100,
+    20,
+    0.38
+  ],
+  "AvatarSelfShowOffset": [],
+  "ShowType": "Always",
+  "IntroDataID": 126,
+  "ShopBgPath": "UI/Shop/AvatarSkinPanel/AvatarSkinShop_1...",
+  "GachaResultImgPath": "SpriteOutput/AvatarDrawCardResult/Avatar...",
+  "SkinConfigPath": "Config/ConfigSkin/Avatar/AvatarSkin_Mar_...",
+  "AdventureCharacterConfigOverrideJsonPath": "",
+  "AudioEventTag": "",
+  "DressIconPath": ""
+}
+```
+
+### StroyLineTrialAvatarData.json (0.01 MB, 65 条)
+
+**字段** (5): `CaptainAvatarID, InitTrialAvatarList, SkipJoinLineup, StoryLineID, TrialAvatarList`
+
+**首条记录摘要**:
+```json
+{
+  "StoryLineID": 1031101,
+  "TrialAvatarList": [
+    1021304
+  ],
+  "InitTrialAvatarList": [
+    1021304
+  ],
+  "CaptainAvatarID": 1021304
+}
+```
+
+### RogueHint.json (0.01 MB, 137 条)
+
+**字段** (2): `HintID, HintText`
+
+**首条记录摘要**:
+```json
+{
+  "HintID": 1,
+  "HintText": {
+    "Hash": 2434173039158367342
+  }
 }
 ```
 
@@ -14674,6 +14764,18 @@
 }
 ```
 
+### MazeFloorUnlock.json (0.01 MB, 99 条)
+
+**字段** (2): `FloorID, UnlockConditionExpression`
+
+**首条记录摘要**:
+```json
+{
+  "FloorID": 10000000,
+  "UnlockConditionExpression": "[RealFinishMainMission:1000501]|[RealFin..."
+}
+```
+
 ### TrainPartySkillConfig.json (0.01 MB, 32 条)
 
 **字段** (6): `IsRare, SKillID, SkillDescription, SkillFigurePath, SkillIconPath, SkillName`
@@ -14704,6 +14806,26 @@
   "Value": {
     "IntValue": 1
   }
+}
+```
+
+### NavMapTab.json (0.01 MB, 79 条)
+
+**字段** (7): `Desc, ID, MapSpaceType, MenuIconID, Name, SortID, WorldID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10000000,
+  "WorldID": 100,
+  "Name": {
+    "Hash": 18144084950729133413
+  },
+  "Desc": {
+    "Hash": 10635602258988564180
+  },
+  "SortID": 1,
+  "MenuIconID": 1
 }
 ```
 
@@ -14762,24 +14884,6 @@
 }
 ```
 
-### StroyLineTrialAvatarData.json (0.01 MB, 64 条)
-
-**字段** (5): `CaptainAvatarID, InitTrialAvatarList, SkipJoinLineup, StoryLineID, TrialAvatarList`
-
-**首条记录摘要**:
-```json
-{
-  "StoryLineID": 1031101,
-  "TrialAvatarList": [
-    1021304
-  ],
-  "InitTrialAvatarList": [
-    1021304
-  ],
-  "CaptainAvatarID": 1021304
-}
-```
-
 ### IdleLiveTeamRecommend.json (0.01 MB, 6 条)
 
 **字段** (5): `Desc, DisplayCondition, ID, TeamMember, Title`
@@ -14835,20 +14939,6 @@
 }
 ```
 
-### RogueHint.json (0.01 MB, 134 条)
-
-**字段** (2): `HintID, HintText`
-
-**首条记录摘要**:
-```json
-{
-  "HintID": 1,
-  "HintText": {
-    "Hash": 2434173039158367342
-  }
-}
-```
-
 ### AvatarEnhancedSkill.json (0.01 MB, 32 条)
 
 **字段** (10): `AvatarID, Comment01, Comment02, CommentIndex, DescAfter, DescBefore, SimpleDescAfter, SimpleDescBefore, SkillID, SkillTreeID`
@@ -14874,7 +14964,7 @@
 }
 ```
 
-### PerformanceReplayExclude.json (0.01 MB, 167 条)
+### PerformanceReplayExclude.json (0.01 MB, 168 条)
 
 **字段** (2): `PerformanceID, PerformanceType`
 
@@ -15030,18 +15120,6 @@
 }
 ```
 
-### MazeFloorUnlock.json (0.01 MB, 95 条)
-
-**字段** (2): `FloorID, UnlockConditionExpression`
-
-**首条记录摘要**:
-```json
-{
-  "FloorID": 10000000,
-  "UnlockConditionExpression": "[RealFinishMainMission:1000501]|[RealFin..."
-}
-```
-
 ### TalkReward.json (0.01 MB, 66 条)
 
 **字段** (8): `FloorID, GroupID, ID, NPCConfigID, PlaneID, PropConfigID, RewardID, VerificationID`
@@ -15056,26 +15134,6 @@
   "NPCConfigID": 400002,
   "RewardID": 2000047,
   "VerificationID": 1
-}
-```
-
-### NavMapTab.json (0.01 MB, 75 条)
-
-**字段** (7): `Desc, ID, MapSpaceType, MenuIconID, Name, SortID, WorldID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 10000000,
-  "WorldID": 100,
-  "Name": {
-    "Hash": 18144084950729133413
-  },
-  "Desc": {
-    "Hash": 10635602258988564180
-  },
-  "SortID": 1,
-  "MenuIconID": 1
 }
 ```
 
@@ -15204,6 +15262,22 @@
   "PEPOHJHNFHF": {
     "Hash": 17787639020707603433
   }
+}
+```
+
+### BattleArea.json (0.01 MB, 97 条)
+
+**字段** (9): `BattleAreaGroupID, BattleAreaID, FloorBattleAreaID, FloorID, ID, IsLegacy, IsUseUnifiedConfig, PlaneID, UnifiedConfigID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1000001,
+  "PlaneID": 10000,
+  "FloorID": 10000000,
+  "IsLegacy": true,
+  "BattleAreaGroupID": 2,
+  "BattleAreaID": 1
 }
 ```
 
@@ -15351,22 +15425,6 @@
 }
 ```
 
-### BattleArea.json (0.01 MB, 96 条)
-
-**字段** (9): `BattleAreaGroupID, BattleAreaID, FloorBattleAreaID, FloorID, ID, IsLegacy, IsUseUnifiedConfig, PlaneID, UnifiedConfigID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1000001,
-  "PlaneID": 10000,
-  "FloorID": 10000000,
-  "IsLegacy": true,
-  "BattleAreaGroupID": 2,
-  "BattleAreaID": 1
-}
-```
-
 ### MonopolyContentDisplay.json (0.01 MB, 137 条)
 
 **字段** (3): `CellContentID, CellType, DisplayID`
@@ -15460,47 +15518,6 @@
   "SilhouetteIconPath": "SpriteOutput/Quest/GuessTheSilhouette/Gu...",
   "KeyIconPath": "SpriteOutput/Quest/GuessTheSilhouette/Gu...",
   "KeyIconPath2": ""
-}
-```
-
-### RoguePersonaTalent.json (0.01 MB, 18 条)
-
-**字段** (12): `AAGKEBFHLMC, DBALOLNOLGL, DPCMGDIIAKN, HGHFCLHKJNJ, MJOOFPBABEA, MOEDOCHOCPJ, NMAHGFAPENI, OICGFNGNLOE, OLOIFNNLKJP, OMKFHNLHBBB, PBLPLDJKPEI, PHFMCACHFIJ`
-
-**首条记录摘要**:
-```json
-{
-  "PHFMCACHFIJ": 12001,
-  "DBALOLNOLGL": 120,
-  "AAGKEBFHLMC": 1,
-  "OICGFNGNLOE": [
-    {
-      "ItemID": 281030,
-      "ItemNum": 100
-    }
-  ],
-  "MJOOFPBABEA": {
-    "Hash": 13309801192421790411
-  },
-  "NMAHGFAPENI": {
-    "Hash": 2619781658438091214
-  },
-  "PBLPLDJKPEI": [
-    {
-      "Value": 30
-    },
-    {
-      "Value": 2
-    }
-  ],
-  "OLOIFNNLKJP": "SpriteOutput/BuffIcon/ActivityFantasticS...",
-  "MOEDOCHOCPJ": {
-    "Hash": 17699056949045957896
-  },
-  "OMKFHNLHBBB": "Config/Level/RogueDialogue/RogueNpcDialo...",
-  "HGHFCLHKJNJ": {
-    "Hash": 8736134095247300154
-  }
 }
 ```
 
@@ -15815,6 +15832,34 @@
 }
 ```
 
+### ActivityItemConfigAvatar.json (0.01 MB, 18 条)
+
+**字段** (14): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 8901,
+  "ItemMainType": "AvatarCard",
+  "ItemSubType": "AvatarCard",
+  "InventoryDisplayTag": 1,
+  "Rarity": "SuperRare",
+  "ItemName": {
+    "Hash": 1976568521562450739
+  },
+  "ItemBGDesc": {
+    "Hash": 8623253761789416013
+  },
+  "ItemIconPath": "SpriteOutput/AvatarIcon/Avatar/8001.png",
+  "ItemFigureIconPath": "SpriteOutput/AvatarIcon/Avatar/8001.png",
+  "ItemCurrencyIconPath": "",
+  "ItemAvatarIconPath": "SpriteOutput/AvatarShopIcon/Avatar/8001....",
+  "PileLimit": 1,
+  "CustomDataList": [],
+  "ReturnItemIDList": []
+}
+```
+
 ### AvatarConfigLD.json (0.01 MB, 4 条)
 
 **字段** (40): `AIPath, ActionAvatarHeadIconPath, AdventurePlayerID, AssistBgOffset, AssistOffset, AvatarBaseType, AvatarCutinBgImgPath, AvatarCutinFrontImgPath, AvatarCutinImgPath, AvatarCutinIntroText, AvatarDropOffset, AvatarFullName, AvatarGachaResultImgPath, AvatarID, AvatarMiniIconPath, AvatarName, AvatarSelfShowOffset, AvatarSideIconPath, AvatarTrialOffset, AvatarVOTag, DamageType, DamageTypeResistance, DefaultAvatarHeadIconPath, DefaultAvatarModelPath, ExpGroup, JsonPath, ManikinJsonPath, MaxPromotion, MaxRank, PlayerCardOffset, RankIDList, Rarity, Release, SPNeed, SideAvatarHeadIconPath, SkillList, SkilltreePrefabPath, UIAvatarModelPath, UltraSkillCutInPrefabPath, WaitingAvatarHeadIconPath`
@@ -16060,6 +16105,25 @@
 }
 ```
 
+### MonsterGuideSkill.json (0.01 MB, 57 条)
+
+**字段** (5): `Difficulty, SkillID, SkillName, SkillTextIDList, Type`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 100111,
+  "Difficulty": 1,
+  "Type": "Normal",
+  "SkillName": {
+    "Hash": 17315960548241071615
+  },
+  "SkillTextIDList": [
+    1001111
+  ]
+}
+```
+
 ### PlanetFesSkillTree.json (0.01 MB, 22 条)
 
 **字段** (10): `Icon, IsImportant, LevelCostList, LevelSkillList, MaxLevel, Name, NextSkillIDList, Phase, SkillID, UnlockIDList`
@@ -16115,22 +16179,29 @@
 }
 ```
 
-### GachaGroupData.json (0.01 MB, 30 条)
+### LimaoNewsPostState.json (0.01 MB, 98 条)
 
-**字段** (5): `GachaIDList, GroupID, GroupType, PoolLabelIcon, PoolLabelIconSelected`
+**字段** (5): `AEDOBNFDODI, CNCKNJMHDIL, DGLJLJEHNNB, KIFJECNOHDG, KMIBDJKKGDE`
 
 **首条记录摘要**:
 ```json
 {
-  "GroupID": 1,
-  "GachaIDList": [
-    2042,
-    2043,
-    2044
-  ],
-  "GroupType": "MultiAvatarUp",
-  "PoolLabelIcon": "SpriteOutput/DrawCardPic/GachaTabIconLim...",
-  "PoolLabelIconSelected": "SpriteOutput/DrawCardPic/GachaTabIconLim..."
+  "DGLJLJEHNNB": 101,
+  "AEDOBNFDODI": 1,
+  "CNCKNJMHDIL": [],
+  "KMIBDJKKGDE": 3258
+}
+```
+
+### EquipmentAtlas.json (0.01 MB, 169 条)
+
+**字段** (2): `DefaultUnlock, EquipmentID`
+
+**首条记录摘要**:
+```json
+{
+  "EquipmentID": 20000,
+  "DefaultUnlock": true
 }
 ```
 
@@ -16212,6 +16283,35 @@
 }
 ```
 
+### ChallengePeakGroupConfig.json (0.01 MB, 9 条)
+
+**字段** (14): `ActivityModule, BossLevelID, BossUI3DAnimatorPath, BossUI3DPrefabPath, HandBookPanelBannerPath, HintGoodsID, ID, PreLevelIDList, RankIconPathList, RecommendID, RewardGroupID, ThemeIconPicPath, ThemePosterTabPicPath, Title`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Title": {
+    "Hash": 3550232802813737810
+  },
+  "RecommendID": 1,
+  "ActivityModule": 2100101,
+  "PreLevelIDList": [
+    101,
+    102,
+    103
+  ],
+  "BossLevelID": 104,
+  "RewardGroupID": 1,
+  "BossUI3DPrefabPath": "UI/UI3D/ChallengePeak/_dependencies/Pref...",
+  "BossUI3DAnimatorPath": "UI/UI3D/ChallengePeak/_dependencies/Anim...",
+  "ThemePosterTabPicPath": "SpriteOutput/Quest/TabIcon/BtnChallengeP...",
+  "ThemeIconPicPath": "SpriteOutput/ChallengePeak/ChallengePeak...",
+  "HandBookPanelBannerPath": "SpriteOutput/DailyMission/Banner/Challen...",
+  "RankIconPathList": "<list[4]>"
+}
+```
+
 ### FateRinHouguMapFight.json (0.01 MB, 15 条)
 
 **字段** (18): `BMOKJDHHJBH, BNGEMNHEMAK, EHAFJKIKKMC, HGNACOAJMIJ, HNEIIAGADGO, HPJHKACDIMB, JAJPGCBAIJA, JFDHFPIIGCC, JKCHLJNLLNA, KAHNDIPJGHI, KPJMHEPOOBL, MMEGCIGMALC, NCHLCBICBGO, NHAINGEIMJA, OBJEJHKENKF, OHFGNODANEP, PHFMCACHFIJ, PKLFLANJCDG`
@@ -16284,15 +16384,22 @@
 }
 ```
 
-### EquipmentAtlas.json (0.01 MB, 165 条)
+### MonsterGuideSkillText.json (0.01 MB, 57 条)
 
-**字段** (2): `DefaultUnlock, EquipmentID`
+**字段** (5): `Difficulty, EffectIDList, ParameterList, SkillDescription, SkillTextID`
 
 **首条记录摘要**:
 ```json
 {
-  "EquipmentID": 20000,
-  "DefaultUnlock": true
+  "SkillTextID": 1001111,
+  "Difficulty": 1,
+  "SkillDescription": {
+    "Hash": 15210234913514481605
+  },
+  "ParameterList": [],
+  "EffectIDList": [
+    70000301
+  ]
 }
 ```
 
@@ -16308,6 +16415,37 @@
   "FigurePath": "SpriteOutput/Quest/ActivityQuestTimeLimi...",
   "WorldID": 401,
   "GuideImgPath": ""
+}
+```
+
+### GachaGroupData.json (0.01 MB, 29 条)
+
+**字段** (5): `GachaIDList, GroupID, GroupType, PoolLabelIcon, PoolLabelIconSelected`
+
+**首条记录摘要**:
+```json
+{
+  "GroupID": 1,
+  "GachaIDList": [
+    2042,
+    2043,
+    2044
+  ],
+  "GroupType": "MultiAvatarUp",
+  "PoolLabelIcon": "SpriteOutput/DrawCardPic/GachaTabIconLim...",
+  "PoolLabelIconSelected": "SpriteOutput/DrawCardPic/GachaTabIconLim..."
+}
+```
+
+### ModelIconConfig.json (0.01 MB, 73 条)
+
+**字段** (2): `ID, PrefabPath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "PrefabPath": "Stages/OriginalResPos/Chapter03/Prefab/3..."
 }
 ```
 
@@ -16452,35 +16590,19 @@
 }
 ```
 
-### RoguePersonaStyle.json (0.01 MB, 10 条)
+### AvatarDemoGuideGroup.json (0.01 MB, 97 条)
 
-**字段** (13): `BCGJNNDCIFH, DDGDJCKKHPH, DOKOMKFGOOC, FBOICELIKNJ, GIFCDPFAKKP, JEHDKAKMCGC, JJKLIJNFIBB, KLOEJIMMPJM, MJOOFPBABEA, NMAHGFAPENI, PBLPLDJKPEI, PILOLAAEAHB, PJNNPOKJEFD`
+**字段** (3): `AvatarID, IndexList, StageID`
 
 **首条记录摘要**:
 ```json
 {
-  "KLOEJIMMPJM": 101,
-  "BCGJNNDCIFH": "SpriteOutput/Rogue/Tourn/Persona/Persona...",
-  "DOKOMKFGOOC": "SpriteOutput/Rogue/Tourn/Persona/Persona...",
-  "MJOOFPBABEA": {
-    "Hash": 13548995702470921752
-  },
-  "DDGDJCKKHPH": {
-    "Hash": 13668289307753628803
-  },
-  "NMAHGFAPENI": {
-    "Hash": 3229452050505925461
-  },
-  "PJNNPOKJEFD": {
-    "Hash": 6434289307571048648
-  },
-  "FBOICELIKNJ": {
-    "Hash": 589803160953193191
-  },
-  "PBLPLDJKPEI": "<list[4]>",
-  "JEHDKAKMCGC": "<list[14]>",
-  "GIFCDPFAKKP": true,
-  "PILOLAAEAHB": 1
+  "AvatarID": 1013,
+  "StageID": 310130,
+  "IndexList": [
+    0,
+    1
+  ]
 }
 ```
 
@@ -16555,25 +16677,6 @@
 }
 ```
 
-### MonsterGuideSkill.json (0.01 MB, 54 条)
-
-**字段** (5): `Difficulty, SkillID, SkillName, SkillTextIDList, Type`
-
-**首条记录摘要**:
-```json
-{
-  "SkillID": 100111,
-  "Difficulty": 1,
-  "Type": "Normal",
-  "SkillName": {
-    "Hash": 17315960548241071615
-  },
-  "SkillTextIDList": [
-    1001111
-  ]
-}
-```
-
 ### ActivitySummonGroup.json (0.01 MB, 5 条)
 
 **字段** (25): `ActivityModuleID, AvatarSkillList, BackgroundTrashImageList, Desc, EntranceID, GotoID, GroupID, ImagePath, MappingInfo, MasterImagePath, MazeBuffID, MiniImagePath, MonsterDesc, MonsterEventID, MonsterImagePath, MonsterMiddleIcon, MonsterName, MonsterSkillDescList, MonsterSkillList, OriginalDesc, OriginalImagePath, OriginalMiniImagePath, OriginalStageName, StageName, SubMissionID`
@@ -16624,6 +16727,32 @@
   "OriginalMiniImagePath": "SpriteOutput/UI/Quest/TrashCanSummon/Sum...",
   "MiniImagePath": "SpriteOutput/UI/Quest/TrashCanSummon/Sum...",
   "MazeBuffID": 3200029
+}
+```
+
+### B51RacingMatch.json (0.01 MB, 29 条)
+
+**字段** (7): `EnemyCarIDList, ID, IsTutorial, LockDriverID, Name, TeamRankList, TrackIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Name": {
+    "Hash": 12321308079432408117
+  },
+  "EnemyCarIDList": "<list[10]>",
+  "TrackIDList": [
+    3
+  ],
+  "TeamRankList": [
+    10,
+    1,
+    2,
+    3,
+    4,
+    5
+  ]
 }
 ```
 
@@ -16707,22 +16836,6 @@
     "Value": 1.693502
   },
   "StepNum": 2
-}
-```
-
-### AvatarDemoGuideGroup.json (0.01 MB, 95 条)
-
-**字段** (3): `AvatarID, IndexList, StageID`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1013,
-  "StageID": 310130,
-  "IndexList": [
-    0,
-    1
-  ]
 }
 ```
 
@@ -16842,22 +16955,43 @@
 }
 ```
 
-### MonsterGuideSkillText.json (0.01 MB, 54 条)
+### AvatarServantConfig.json (0.01 MB, 7 条)
 
-**字段** (5): `Difficulty, EffectIDList, ParameterList, SkillDescription, SkillTextID`
+**字段** (21): `AIPath, ActionServantHeadIconPath, Aggro, Config, HPBase, HPInherit, HPSkill, HeadIcon, ManikinJsonPath, Prefab, ServantID, ServantMiniIconPath, ServantName, ServantSideIconPath, SkillIDList, SpeedBase, SpeedInherit, SpeedSkill, UIServantModelPath, UnCreateHeadIconPath, WaitingServantHeadIconPath`
 
 **首条记录摘要**:
 ```json
 {
-  "SkillTextID": 1001111,
-  "Difficulty": 1,
-  "SkillDescription": {
-    "Hash": 15210234913514481605
+  "ServantID": 11402,
+  "ServantName": {
+    "Hash": 977300310163143285
   },
-  "ParameterList": [],
-  "EffectIDList": [
-    70000301
-  ]
+  "HeadIcon": "SpriteOutput/ServantRoundIcon/11402.png",
+  "UnCreateHeadIconPath": "SpriteOutput/ServantIconTeam/11402E.png",
+  "WaitingServantHeadIconPath": "SpriteOutput/ServantIconTeam/11402.png",
+  "ActionServantHeadIconPath": "SpriteOutput/ServantIconTeam/11402B.png",
+  "ServantSideIconPath": "SpriteOutput/ServantIconTeam/11402.png",
+  "ServantMiniIconPath": "SpriteOutput/ServantMiniIcon/11402.png",
+  "Config": "Config/ConfigCharacter/Servant/Servant_A...",
+  "AIPath": "Config/ConfigAI/ComplexSkillAIGlobalGrou...",
+  "Prefab": "Characters/CharacterPrefabs/Servant/Agla...",
+  "ManikinJsonPath": "Config/ConfigCharacter/Manikin/Servant/M...",
+  "UIServantModelPath": "Characters/CharacterPrefabs/Manikin/Serv...",
+  "SkillIDList": [
+    1140201,
+    1140203,
+    1140205,
+    1140206
+  ],
+  "HPBase": "#6",
+  "HPInherit": "#5",
+  "HPSkill": 140204,
+  "SpeedBase": "0",
+  "SpeedInherit": "#4",
+  "SpeedSkill": 140204,
+  "Aggro": {
+    "Value": 125
+  }
 }
 ```
 
@@ -16899,6 +17033,50 @@
   "AJGGLOMPFOJ": "",
   "HPLHMBBGAOO": 201160285,
   "GHOCDNJOCBH": 12
+}
+```
+
+### RoguePersonaRoomCompType.json (0.01 MB, 19 条)
+
+**字段** (11): `BAAOGIMCALN, CILPGJAFCOK, ENFPMJCLEON, HCBADDHNIDG, JPLIONFJGCL, LHLKJIDFLIN, LJPBJNANBLB, LLICIMBCNPF, LOBGFEKCOHM, NMAHGFAPENI, OLOIFNNLKJP`
+
+**首条记录摘要**:
+```json
+{
+  "LLICIMBCNPF": 1,
+  "HCBADDHNIDG": 1,
+  "LHLKJIDFLIN": "Boss",
+  "JPLIONFJGCL": "Red",
+  "BAAOGIMCALN": {
+    "Hash": 1451107305156829947
+  },
+  "NMAHGFAPENI": {
+    "Hash": 12538922076328420828
+  },
+  "LJPBJNANBLB": {
+    "Hash": 12380651845040323157
+  },
+  "OLOIFNNLKJP": "SpriteOutput/Rogue/SceneNavi/SceneNaviRo...",
+  "CILPGJAFCOK": "SpriteOutput/Rogue/Map/RogueBossIcon.png",
+  "ENFPMJCLEON": [
+    "Level",
+    "Attribute"
+  ]
+}
+```
+
+### ServerInteractVerification.json (0.01 MB, 101 条)
+
+**字段** (3): `ID, InteractType, InteractTypeConfig`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "InteractType": "Shop",
+  "InteractTypeConfig": [
+    2
+  ]
 }
 ```
 
@@ -16947,6 +17125,22 @@
 }
 ```
 
+### LimaoNewsEmployeeState.json (0.01 MB, 65 条)
+
+**字段** (4): `BKEMOJMOLBB, CNHDBLLCFFB, EJJIJCCPJHP, LPNBEANGIGE`
+
+**首条记录摘要**:
+```json
+{
+  "CNHDBLLCFFB": 101,
+  "LPNBEANGIGE": 1,
+  "BKEMOJMOLBB": "OnDuty",
+  "EJJIJCCPJHP": {
+    "Hash": 12704444268193855218
+  }
+}
+```
+
 ### AllowedTextLanguage.json (0.01 MB, 13 条)
 
 **字段** (19): `CondensedFont, CondensedFontName, Ellipsis, Font, FontGrowSize, FontName, LanguageCultureCode, LanguageType, LogoImgPath, NoLeading, NoWrap, PSFont, PSFontName, ReplaceSpaceWithNBSPInRuby, RubyStrRatio, SDKkey, ShowString, TextLanguageKey, TextureScale`
@@ -16974,6 +17168,19 @@
   "FontGrowSize": 256,
   "TextureScale": 1.5,
   "RubyStrRatio": 0.65
+}
+```
+
+### MessageItemImage.json (0.01 MB, 70 条)
+
+**字段** (3): `FemaleImagePath, ID, ImagePath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10001,
+  "ImagePath": "SpriteOutput/PhoneMessagePic/PhoneMessag...",
+  "FemaleImagePath": ""
 }
 ```
 
@@ -17011,6 +17218,26 @@
   "RogueTitanTalentIcon": "SpriteOutput/Rogue/Tourn/Titan/TitanIcon...",
   "RogueTitanAvatarRoundIconSmall": "SpriteOutput/Rogue/Tourn/Titan/AvatarRou...",
   "RogueTitanAvatarRoundIconMid": "SpriteOutput/Rogue/Tourn/Titan/AvatarRou..."
+}
+```
+
+### MazePuzzleOrigamiColony.json (0.01 MB, 42 条)
+
+**字段** (6): `FinishQuestID, FloorID, MaterialCost, MirrorFloorID, OrigamiColonyID, TalkSentenceID`
+
+**首条记录摘要**:
+```json
+{
+  "OrigamiColonyID": 1,
+  "FloorID": 20311001,
+  "MaterialCost": [
+    {
+      "ItemID": 122000,
+      "ItemNum": 1
+    }
+  ],
+  "TalkSentenceID": 414030589,
+  "FinishQuestID": 2200011
 }
 ```
 
@@ -17109,6 +17336,74 @@
 {
   "RogueUnlockID": 3000201,
   "UnlockFinishWay": 3000201
+}
+```
+
+### ChenLingGameBoyCase.json (0.01 MB, 13 条)
+
+**字段** (16): `ChallengeTimeLimit, CheatCodeList, CheatQuestID, CheatSettlementTitleID, CoverImagePath, FDCheatEntityID, FDCheatInstanceID, FDGroupID, FDHardEntityID, FDHardInstanceID, GameBoyCaseID, GameBoyChallengeIDList, GameBoyNameID, GameBoyThemeID, RankingsNPCList, SettlementTitleID`
+
+**首条记录摘要**:
+```json
+{
+  "GameBoyCaseID": 1,
+  "FDGroupID": 28,
+  "FDHardInstanceID": 110001,
+  "FDHardEntityID": 17,
+  "FDCheatInstanceID": 110002,
+  "FDCheatEntityID": 17,
+  "CheatCodeList": "WWDDASDW",
+  "CoverImagePath": "SpriteOutput/AvatarDrawCardResult/1212.p...",
+  "GameBoyChallengeIDList": [
+    7,
+    5,
+    6
+  ],
+  "ChallengeTimeLimit": 60,
+  "GameBoyNameID": {
+    "Hash": 17804661510867958164
+  },
+  "GameBoyThemeID": "01",
+  "CheatQuestID": 2200641,
+  "RankingsNPCList": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "SettlementTitleID": {
+    "Hash": 13186066336154128023
+  },
+  "CheatSettlementTitleID": {
+    "Hash": 5790321781566483320
+  }
+}
+```
+
+### MonsterGuidePhase.json (0.01 MB, 29 条)
+
+**字段** (7): `Difficulty, PhaseAnswer, PhaseDescription, PhaseID, PhaseName, PhasePic, SkillList`
+
+**首条记录摘要**:
+```json
+{
+  "PhaseID": 10011,
+  "Difficulty": 1,
+  "PhasePic": "",
+  "PhaseName": {
+    "Hash": 8795189296306663420
+  },
+  "PhaseAnswer": {
+    "Hash": 9796150480090223892
+  },
+  "PhaseDescription": {
+    "Hash": 17152208794596079138
+  },
+  "SkillList": [
+    100111,
+    100112,
+    100113
+  ]
 }
 ```
 
@@ -17220,16 +17515,20 @@
 }
 ```
 
-### MessageItemImage.json (0.01 MB, 68 条)
+### ActivityAvatarDemo.json (0.01 MB, 71 条)
 
-**字段** (3): `FemaleImagePath, ID, ImagePath`
+**字段** (2): `ActivityID, TypeParam`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 10001,
-  "ImagePath": "SpriteOutput/PhoneMessagePic/PhoneMessag...",
-  "FemaleImagePath": ""
+  "ActivityID": 20001,
+  "TypeParam": [
+    311020,
+    311060,
+    311090,
+    311050
+  ]
 }
 ```
 
@@ -17258,35 +17557,6 @@
 }
 ```
 
-### ChallengePeakGroupConfig.json (0.01 MB, 8 条)
-
-**字段** (14): `ActivityModule, BossLevelID, BossUI3DAnimatorPath, BossUI3DPrefabPath, HandBookPanelBannerPath, HintGoodsID, ID, PreLevelIDList, RankIconPathList, RecommendID, RewardGroupID, ThemeIconPicPath, ThemePosterTabPicPath, Title`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "Title": {
-    "Hash": 3550232802813737810
-  },
-  "RecommendID": 1,
-  "ActivityModule": 2100101,
-  "PreLevelIDList": [
-    101,
-    102,
-    103
-  ],
-  "BossLevelID": 104,
-  "RewardGroupID": 1,
-  "BossUI3DPrefabPath": "UI/UI3D/ChallengePeak/_dependencies/Pref...",
-  "BossUI3DAnimatorPath": "UI/UI3D/ChallengePeak/_dependencies/Anim...",
-  "ThemePosterTabPicPath": "SpriteOutput/Quest/TabIcon/BtnChallengeP...",
-  "ThemeIconPicPath": "SpriteOutput/ChallengePeak/ChallengePeak...",
-  "HandBookPanelBannerPath": "SpriteOutput/DailyMission/Banner/Challen...",
-  "RankIconPathList": "<list[4]>"
-}
-```
-
 ### MatchThreeV2AvatarCutin.json (0.01 MB, 44 条)
 
 **字段** (4): `CutinID, ImagePath, MaxTriggerNum, TalkText`
@@ -17300,18 +17570,6 @@
     "Hash": 6617548240040557714
   },
   "MaxTriggerNum": 1
-}
-```
-
-### ModelIconConfig.json (0.01 MB, 66 条)
-
-**字段** (2): `ID, PrefabPath`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "PrefabPath": "Stages/OriginalResPos/Chapter03/Prefab/3..."
 }
 ```
 
@@ -17378,6 +17636,21 @@
     126
   ],
   "FigureScale": 1.3
+}
+```
+
+### AvatarDefaultMazeBuff.json (0.01 MB, 93 条)
+
+**字段** (3): `DefaultMazeBuffIDList, ID, SkillIndex`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "SkillIndex": 2,
+  "DefaultMazeBuffIDList": [
+    100101
+  ]
 }
 ```
 
@@ -17452,40 +17725,19 @@
 }
 ```
 
-### ActivityAvatarDemo.json (0.01 MB, 69 条)
+### AvatarEquipRecommend.json (0.01 MB, 93 条)
 
-**字段** (2): `ActivityID, TypeParam`
+**字段** (2): `AvatarID, EquipmentList`
 
 **首条记录摘要**:
 ```json
 {
-  "ActivityID": 20001,
-  "TypeParam": [
-    311020,
-    311060,
-    311090,
-    311050
+  "AvatarID": 1001,
+  "EquipmentList": [
+    21002,
+    23005,
+    24002
   ]
-}
-```
-
-### MazePuzzleOrigamiColony.json (0.01 MB, 40 条)
-
-**字段** (6): `FinishQuestID, FloorID, MaterialCost, MirrorFloorID, OrigamiColonyID, TalkSentenceID`
-
-**首条记录摘要**:
-```json
-{
-  "OrigamiColonyID": 1,
-  "FloorID": 20311001,
-  "MaterialCost": [
-    {
-      "ItemID": 122000,
-      "ItemNum": 1
-    }
-  ],
-  "TalkSentenceID": 414030589,
-  "FinishQuestID": 2200011
 }
 ```
 
@@ -17543,21 +17795,6 @@
 }
 ```
 
-### AvatarDefaultMazeBuff.json (0.01 MB, 91 条)
-
-**字段** (3): `DefaultMazeBuffIDList, ID, SkillIndex`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "SkillIndex": 2,
-  "DefaultMazeBuffIDList": [
-    100101
-  ]
-}
-```
-
 ### ActivityDiceSkillCutin.json (0.01 MB, 33 条)
 
 **字段** (4): `BDACPPLKLGL, KJCGGEPHCMC, OENAMINOLLF, OLOIFNNLKJP`
@@ -17571,21 +17808,6 @@
   "OENAMINOLLF": {
     "Hash": 14310684675150578273
   }
-}
-```
-
-### ServerInteractVerification.json (0.01 MB, 93 条)
-
-**字段** (3): `ID, InteractType, InteractTypeConfig`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "InteractType": "Shop",
-  "InteractTypeConfig": [
-    2
-  ]
 }
 ```
 
@@ -17673,22 +17895,6 @@
   "RogueAreaID": 10100,
   "ScoreMap": "<dict[7]>",
   "RecommendLevel": 30
-}
-```
-
-### AvatarEquipRecommend.json (0.01 MB, 91 条)
-
-**字段** (2): `AvatarID, EquipmentList`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1001,
-  "EquipmentList": [
-    21002,
-    23005,
-    24002
-  ]
 }
 ```
 
@@ -17840,47 +18046,6 @@
 }
 ```
 
-### LimaoNewsPostState.json (0.01 MB, 81 条)
-
-**字段** (5): `AEDOBNFDODI, CNCKNJMHDIL, DGLJLJEHNNB, KIFJECNOHDG, KMIBDJKKGDE`
-
-**首条记录摘要**:
-```json
-{
-  "DGLJLJEHNNB": 101,
-  "AEDOBNFDODI": 1,
-  "CNCKNJMHDIL": [],
-  "KMIBDJKKGDE": 3258
-}
-```
-
-### MonsterGuidePhase.json (0.01 MB, 27 条)
-
-**字段** (7): `Difficulty, PhaseAnswer, PhaseDescription, PhaseID, PhaseName, PhasePic, SkillList`
-
-**首条记录摘要**:
-```json
-{
-  "PhaseID": 10011,
-  "Difficulty": 1,
-  "PhasePic": "",
-  "PhaseName": {
-    "Hash": 8795189296306663420
-  },
-  "PhaseAnswer": {
-    "Hash": 9796150480090223892
-  },
-  "PhaseDescription": {
-    "Hash": 17152208794596079138
-  },
-  "SkillList": [
-    100111,
-    100112,
-    100113
-  ]
-}
-```
-
 ### ParkourTriggerEventContent.json (0.01 MB, 63 条)
 
 **字段** (4): `ID, SpritePath, TextContent, TriggerShowType`
@@ -17974,6 +18139,24 @@
 }
 ```
 
+### ActivityQuestRewardTab.json (0.01 MB, 46 条)
+
+**字段** (3): `QuestTabGroupID, QuestTabGroupName, QuestTabList`
+
+**首条记录摘要**:
+```json
+{
+  "QuestTabGroupID": 5000701,
+  "QuestTabGroupName": {
+    "Hash": 13747580877814280336
+  },
+  "QuestTabList": [
+    10001,
+    10002
+  ]
+}
+```
+
 ### ChenLingSoldier.json (0.01 MB, 12 条)
 
 **字段** (13): `AtkSkillIDList, ID, InitialMaxLevel, ModelPath, Name, Position, PromotionConditionList, PromotionEffectID, PromotionSkillDesc, SkillDesc, SkillIDList, SmallIconOutlinePath, SmallIconPath`
@@ -18032,6 +18215,49 @@
 }
 ```
 
+### MonsterDifficultyGuide.json (0.01 MB, 51 条)
+
+**字段** (4): `DifficultyGuideDescription, DifficultyGuideID, ParameterList, SkillID`
+
+**首条记录摘要**:
+```json
+{
+  "DifficultyGuideID": 10010,
+  "DifficultyGuideDescription": {
+    "Hash": 1916644733650887747
+  },
+  "SkillID": 100401410,
+  "ParameterList": [
+    0.6,
+    1.25,
+    1
+  ]
+}
+```
+
+### B51RacingTrack.json (0.01 MB, 15 条)
+
+**字段** (9): `ID, LittleGameConfig, MinimapPath, MinimapPath_Dark, Name, RecordDriverIconPath, RecordDriverName, RecordTime, TotalLap`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Name": {
+    "Hash": 15221624973236559137
+  },
+  "LittleGameConfig": "Config/Gameplays/LittleGame/RoadRash/Roa...",
+  "MinimapPath": "SpriteOutput/Quest/B51Racing/Map/TrackMa...",
+  "MinimapPath_Dark": "SpriteOutput/Quest/B51Racing/Map_Dark/Tr...",
+  "TotalLap": 3,
+  "RecordDriverName": {
+    "Hash": 12552245710429879754
+  },
+  "RecordDriverIconPath": "SpriteOutput/AvatarRoundIcon/WebIcon/Web...",
+  "RecordTime": 101.32
+}
+```
+
 ### MapShortCutConfig.json (0.01 MB, 29 条)
 
 **字段** (8): `EntranceID, ID, IconPath, MappingInfoID, Name, Params, Type, UnlockID`
@@ -18049,46 +18275,6 @@
   "UnlockID": 9909,
   "EntranceID": 1000001,
   "MappingInfoID": 2463
-}
-```
-
-### AvatarServantConfig.json (0.01 MB, 6 条)
-
-**字段** (21): `AIPath, ActionServantHeadIconPath, Aggro, Config, HPBase, HPInherit, HPSkill, HeadIcon, ManikinJsonPath, Prefab, ServantID, ServantMiniIconPath, ServantName, ServantSideIconPath, SkillIDList, SpeedBase, SpeedInherit, SpeedSkill, UIServantModelPath, UnCreateHeadIconPath, WaitingServantHeadIconPath`
-
-**首条记录摘要**:
-```json
-{
-  "ServantID": 11402,
-  "ServantName": {
-    "Hash": 977300310163143285
-  },
-  "HeadIcon": "SpriteOutput/ServantRoundIcon/11402.png",
-  "UnCreateHeadIconPath": "SpriteOutput/ServantIconTeam/11402E.png",
-  "WaitingServantHeadIconPath": "SpriteOutput/ServantIconTeam/11402.png",
-  "ActionServantHeadIconPath": "SpriteOutput/ServantIconTeam/11402B.png",
-  "ServantSideIconPath": "SpriteOutput/ServantIconTeam/11402.png",
-  "ServantMiniIconPath": "SpriteOutput/ServantMiniIcon/11402.png",
-  "Config": "Config/ConfigCharacter/Servant/Servant_A...",
-  "AIPath": "Config/ConfigAI/ComplexSkillAIGlobalGrou...",
-  "Prefab": "Characters/CharacterPrefabs/Servant/Agla...",
-  "ManikinJsonPath": "Config/ConfigCharacter/Manikin/Servant/M...",
-  "UIServantModelPath": "Characters/CharacterPrefabs/Manikin/Serv...",
-  "SkillIDList": [
-    1140201,
-    1140203,
-    1140205,
-    1140206
-  ],
-  "HPBase": "#6",
-  "HPInherit": "#5",
-  "HPSkill": 140204,
-  "SpeedBase": "0",
-  "SpeedInherit": "#4",
-  "SpeedSkill": 140204,
-  "Aggro": {
-    "Value": 125
-  }
 }
 ```
 
@@ -18152,6 +18338,34 @@
   "BreakBaseDamage": {
     "Value": 54
   }
+}
+```
+
+### RoguePersonaRoomComposition.json (0.01 MB, 153 条)
+
+**字段** (2): `AAGKEBFHLMC, LLICIMBCNPF`
+
+**首条记录摘要**:
+```json
+{
+  "LLICIMBCNPF": 1,
+  "AAGKEBFHLMC": 1
+}
+```
+
+### SummonUnitData.json (0.01 MB, 40 条)
+
+**字段** (9): `DestroyOnEnterBattle, ID, IsClient, IsTeamSummon, JsonPath, MaxSummonCount, RemoveMazeBuffOnDestroy, SummonerType, UniqueGroup`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10031,
+  "JsonPath": "Config/ConfigSummonUnit/SummonUnit_Himek...",
+  "DestroyOnEnterBattle": true,
+  "RemoveMazeBuffOnDestroy": true,
+  "MaxSummonCount": 1,
+  "UniqueGroup": "TeamField"
 }
 ```
 
@@ -18258,20 +18472,16 @@
 }
 ```
 
-### ActivityQuestRewardTab.json (0.01 MB, 44 条)
+### SpecialMappingInfo.json (0.01 MB, 112 条)
 
-**字段** (3): `QuestTabGroupID, QuestTabGroupName, QuestTabList`
+**字段** (2): `ID, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "QuestTabGroupID": 5000701,
-  "QuestTabGroupName": {
-    "Hash": 13747580877814280336
-  },
-  "QuestTabList": [
-    10001,
-    10002
+  "ID": 2223,
+  "ParamList": [
+    402
   ]
 }
 ```
@@ -18335,6 +18545,19 @@
 }
 ```
 
+### PerformanceSubMissionLink.json (0.01 MB, 80 条)
+
+**字段** (3): `PerformanceID, PerformanceType, SubMissionID`
+
+**首条记录摘要**:
+```json
+{
+  "PerformanceType": "D",
+  "PerformanceID": 201160107,
+  "SubMissionID": 201160107
+}
+```
+
 ### RogueNousSubStory.json (0.01 MB, 20 条)
 
 **字段** (11): `DisplayID, Layer, LevelGraphPath, MaxNousValue, MinNousValue, NextIDList, QuestID, RequireArea, StoryID, TalkNameID, TriggerCondition`
@@ -18380,22 +18603,6 @@
   "SkillParamList": [
     2
   ]
-}
-```
-
-### SummonUnitData.json (0.01 MB, 39 条)
-
-**字段** (8): `DestroyOnEnterBattle, ID, IsClient, IsTeamSummon, JsonPath, MaxSummonCount, RemoveMazeBuffOnDestroy, UniqueGroup`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 10031,
-  "JsonPath": "Config/ConfigSummonUnit/SummonUnit_Himek...",
-  "DestroyOnEnterBattle": true,
-  "RemoveMazeBuffOnDestroy": true,
-  "MaxSummonCount": 1,
-  "UniqueGroup": "TeamField"
 }
 ```
 
@@ -18464,16 +18671,30 @@
 }
 ```
 
-### PerformanceSubMissionLink.json (0.01 MB, 79 条)
+### ExpeditionBattleRoute.json (0.01 MB, 16 条)
 
-**字段** (3): `PerformanceID, PerformanceType, SubMissionID`
+**字段** (8): `BuffID, ID, LevelIDList, MainMonster, MazeBuffID, MonsterFigurePath, MonsterWeakPoint, SpecialAvatarIDList`
 
 **首条记录摘要**:
 ```json
 {
-  "PerformanceType": "D",
-  "PerformanceID": 201160107,
-  "SubMissionID": 201160107
+  "ID": 10101,
+  "LevelIDList": [
+    101011,
+    101012,
+    101013,
+    101014
+  ],
+  "BuffID": 60101,
+  "SpecialAvatarIDList": "<list[6]>",
+  "MainMonster": 5014010,
+  "MazeBuffID": 3220001,
+  "MonsterFigurePath": "SpriteOutput/UI/Quest/ExpeditionBattle/M...",
+  "MonsterWeakPoint": [
+    "Fire",
+    "Quantum",
+    "Imaginary"
+  ]
 }
 ```
 
@@ -18492,50 +18713,6 @@
     "Hash": 13895689034350914730
   },
   "IconPath": "SpriteOutput/Quest/EvolveBuild/EvoLveBui..."
-}
-```
-
-### RoguePersonaRoomCompType.json (0.01 MB, 18 条)
-
-**字段** (9): `BAAOGIMCALN, CILPGJAFCOK, JPLIONFJGCL, LHLKJIDFLIN, LJPBJNANBLB, LLICIMBCNPF, LOBGFEKCOHM, NMAHGFAPENI, OLOIFNNLKJP`
-
-**首条记录摘要**:
-```json
-{
-  "LLICIMBCNPF": 1,
-  "LHLKJIDFLIN": "Boss",
-  "JPLIONFJGCL": "Red",
-  "BAAOGIMCALN": {
-    "Hash": 1451107305156829947
-  },
-  "NMAHGFAPENI": {
-    "Hash": 12538922076328420828
-  },
-  "LJPBJNANBLB": {
-    "Hash": 12380651845040323157
-  },
-  "OLOIFNNLKJP": "SpriteOutput/Rogue/SceneNavi/SceneNaviRo...",
-  "CILPGJAFCOK": "SpriteOutput/Rogue/Map/RogueBossIcon.png"
-}
-```
-
-### MonsterDifficultyGuide.json (0.01 MB, 48 条)
-
-**字段** (4): `DifficultyGuideDescription, DifficultyGuideID, ParameterList, SkillID`
-
-**首条记录摘要**:
-```json
-{
-  "DifficultyGuideID": 10010,
-  "DifficultyGuideDescription": {
-    "Hash": 1916644733650887747
-  },
-  "SkillID": 100401410,
-  "ParameterList": [
-    0.6,
-    1.25,
-    1
-  ]
 }
 ```
 
@@ -18559,17 +18736,16 @@
 }
 ```
 
-### SpecialMappingInfo.json (0.01 MB, 109 条)
+### AtlasUnlockData.json (0.01 MB, 48 条)
 
-**字段** (2): `ID, ParamList`
+**字段** (3): `Conditions, ShowCondition, UnlockID`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 2223,
-  "ParamList": [
-    402
-  ]
+  "UnlockID": 70001,
+  "Conditions": "<list[1]>",
+  "ShowCondition": []
 }
 ```
 
@@ -18622,6 +18798,29 @@
 }
 ```
 
+### FiveDimFluteConfig.json (0.01 MB, 25 条)
+
+**字段** (13): `AutoPlayChangeGPFailTextmapKey, Code, ContainerID, EntranceID, FiveDimAnchorID, GPName, GPValue, GroupID, ID, KeepContentIDList, TeleAnchorID, TeleAreaName, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1050001,
+  "Type": "Teleport",
+  "Code": "89681231",
+  "EntranceID": 1050101,
+  "GroupID": 570,
+  "TeleAnchorID": 1,
+  "ContainerID": 110001,
+  "FiveDimAnchorID": 17,
+  "GPName": "",
+  "TeleAreaName": {
+    "Hash": 13088770917174101698
+  },
+  "KeepContentIDList": []
+}
+```
+
 ### CakeRaceConstValueClient.json (0.01 MB, 50 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -18632,47 +18831,6 @@
   "ConstValueName": "CakeRace_Runnerup_Coin_Reward_Ratio",
   "Value": {
     "DoubleValue": 0.8
-  }
-}
-```
-
-### ChenLingGameBoyCase.json (0.01 MB, 11 条)
-
-**字段** (16): `ChallengeTimeLimit, CheatCodeList, CheatQuestID, CheatSettlementTitleID, CoverImagePath, FDCheatEntityID, FDCheatInstanceID, FDGroupID, FDHardEntityID, FDHardInstanceID, GameBoyCaseID, GameBoyChallengeIDList, GameBoyNameID, GameBoyThemeID, RankingsNPCList, SettlementTitleID`
-
-**首条记录摘要**:
-```json
-{
-  "GameBoyCaseID": 1,
-  "FDGroupID": 28,
-  "FDHardInstanceID": 110001,
-  "FDHardEntityID": 17,
-  "FDCheatInstanceID": 110002,
-  "FDCheatEntityID": 17,
-  "CheatCodeList": "WWDDASDW",
-  "CoverImagePath": "SpriteOutput/AvatarDrawCardResult/1212.p...",
-  "GameBoyChallengeIDList": [
-    7,
-    5,
-    6
-  ],
-  "ChallengeTimeLimit": 60,
-  "GameBoyNameID": {
-    "Hash": 17804661510867958164
-  },
-  "GameBoyThemeID": "01",
-  "CheatQuestID": 2200641,
-  "RankingsNPCList": [
-    1,
-    2,
-    3,
-    4
-  ],
-  "SettlementTitleID": {
-    "Hash": 13186066336154128023
-  },
-  "CheatSettlementTitleID": {
-    "Hash": 5790321781566483320
   }
 }
 ```
@@ -18720,6 +18878,20 @@
   "ScenePropID": 300008,
   "DisplayOrder": 4,
   "CollectedReward": 26000107
+}
+```
+
+### BattlePassReward.json (0.01 MB, 100 条)
+
+**字段** (4): `ID, NumShow, RewardIcon, RewardItem`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "RewardItem": 300011,
+  "RewardIcon": "",
+  "NumShow": true
 }
 ```
 
@@ -18807,6 +18979,32 @@
   "Icon": "SpriteOutput/AvatarIcon/NPC/3015.png",
   "RoundIcon": "SpriteOutput/AvatarRoundIcon/3015.png",
   "PositionRegion": "Back"
+}
+```
+
+### LimaoNewsWorkPhase.json (0.01 MB, 26 条)
+
+**字段** (8): `CBCAAENONPB, DCDCCOBHCAP, EPDCFPAADJF, FAHDNMHFOKD, FMMELPPDMKI, GABPGBDNDEH, GGKPLJJMBBA, KOAGHJCOOGA`
+
+**首条记录摘要**:
+```json
+{
+  "GGKPLJJMBBA": 1,
+  "GABPGBDNDEH": 101,
+  "KOAGHJCOOGA": [
+    3
+  ],
+  "EPDCFPAADJF": 1001201,
+  "FMMELPPDMKI": [
+    102,
+    103
+  ],
+  "DCDCCOBHCAP": {
+    "Hash": 3142781706416429922
+  },
+  "FAHDNMHFOKD": {
+    "Hash": 2576500603186312792
+  }
 }
 ```
 
@@ -18940,20 +19138,6 @@
 }
 ```
 
-### BattlePassReward.json (0.01 MB, 98 条)
-
-**字段** (4): `ID, NumShow, RewardIcon, RewardItem`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "RewardItem": 300011,
-  "RewardIcon": "",
-  "NumShow": true
-}
-```
-
 ### InControlControlTypeInfo.json (0.01 MB, 35 条)
 
 **字段** (5): `controlType, iconForSony, iconForSwitch, iconForXBox, isSettingControlType`
@@ -19044,19 +19228,6 @@
   "AeonImage": "SpriteOutput/HoshinoKami/HoshinoKami_001...",
   "AeonIcon": "SpriteOutput/ProfessionIconSmall/IconPro...",
   "AeonFigure": "SpriteOutput/AvatarProfessionTattoo/Prof..."
-}
-```
-
-### AtlasUnlockData.json (0.01 MB, 46 条)
-
-**字段** (3): `Conditions, ShowCondition, UnlockID`
-
-**首条记录摘要**:
-```json
-{
-  "UnlockID": 70001,
-  "Conditions": "<list[1]>",
-  "ShowCondition": []
 }
 ```
 
@@ -19163,6 +19334,19 @@
 }
 ```
 
+### PlayerOutfitDetail.json (0.01 MB, 46 条)
+
+**字段** (3): `JsonPath, OutfitID, TargetGenderType`
+
+**首条记录摘要**:
+```json
+{
+  "OutfitID": 1000,
+  "TargetGenderType": "TARGET_GENDER_MAN",
+  "JsonPath": "Config/ConfigPlayerOutfit/PlayerBoy_Char..."
+}
+```
+
 ### FantasticStoryBattleID.json (0.01 MB, 6 条)
 
 **字段** (25): `ActivityModuleID, AvailableBuffSlotID, BattleAreaGroupID, BattleAreaID, BattleID, BookContext, BookContextChange, BookTitle, DisplayMonsterList, EnvironmentBuffID, EventID, FigurePath, FinishQuest, FloorID, Name, PlaneID, PreBattleID, QuestList, RecommendAvatar, RecommendNature, SpecialAvatarIDList, TextJoinIDList, TextJoinIDListChange, TurnLimit, UnlockChapterID`
@@ -19237,6 +19421,34 @@
 ```json
 {
   "AreaID": 101
+}
+```
+
+### WorldDataConfig.json (0.01 MB, 9 条)
+
+**字段** (17): `CameraHeight, CameraWidth, ChapterIconBigPath, ChronicleWorldBgPath, ChronicleWorldPredictPath, ChronicleWorldProcessingPath, ChronicleWorldSubBgPath, ID, IsRealWorld, IsShow, MapSpaceTypeList, SimpleWorldDesc, SmallWorldIconPath, TrainSpaceType, WorldDesc, WorldLanguageName, WorldName`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 100,
+  "WorldName": {
+    "Hash": 6725144922804506895
+  },
+  "WorldLanguageName": {
+    "Hash": 4974142298582977146
+  },
+  "MapSpaceTypeList": [
+    "Unknow"
+  ],
+  "ChapterIconBigPath": "SpriteOutput/Mission/ChapterIconBig/Chap...",
+  "ChronicleWorldBgPath": "",
+  "ChronicleWorldSubBgPath": "",
+  "ChronicleWorldPredictPath": "",
+  "ChronicleWorldProcessingPath": "",
+  "CameraWidth": 30,
+  "CameraHeight": 33,
+  "SmallWorldIconPath": ""
 }
 ```
 
@@ -19385,19 +19597,6 @@
   "RewardID": 140011,
   "TutorialID": 7501,
   "SortID": 1
-}
-```
-
-### PlayerOutfitDetail.json (0.01 MB, 44 条)
-
-**字段** (3): `JsonPath, OutfitID, TargetGenderType`
-
-**首条记录摘要**:
-```json
-{
-  "OutfitID": 1000,
-  "TargetGenderType": "TARGET_GENDER_MAN",
-  "JsonPath": "Config/ConfigPlayerOutfit/PlayerBoy_Char..."
 }
 ```
 
@@ -19561,34 +19760,6 @@
 }
 ```
 
-### ActivityItemConfigAvatar.json (0.01 MB, 12 条)
-
-**字段** (14): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 8901,
-  "ItemMainType": "AvatarCard",
-  "ItemSubType": "AvatarCard",
-  "InventoryDisplayTag": 1,
-  "Rarity": "SuperRare",
-  "ItemName": {
-    "Hash": 1976568521562450739
-  },
-  "ItemBGDesc": {
-    "Hash": 8623253761789416013
-  },
-  "ItemIconPath": "SpriteOutput/AvatarIcon/Avatar/8001.png",
-  "ItemFigureIconPath": "SpriteOutput/AvatarIcon/Avatar/8001.png",
-  "ItemCurrencyIconPath": "",
-  "ItemAvatarIconPath": "SpriteOutput/AvatarShopIcon/Avatar/8001....",
-  "PileLimit": 1,
-  "CustomDataList": [],
-  "ReturnItemIDList": []
-}
-```
-
 ### ChimeraArrangementPreset.json (0.01 MB, 40 条)
 
 **字段** (3): `CommonChimeras, Description, PresetID`
@@ -19607,6 +19778,18 @@
     0,
     0
   ]
+}
+```
+
+### MapDefaultEntrance.json (0.01 MB, 115 条)
+
+**字段** (2): `EntranceID, FloorID`
+
+**首条记录摘要**:
+```json
+{
+  "FloorID": 10000000,
+  "EntranceID": 1000001
 }
 ```
 
@@ -19949,18 +20132,6 @@
 }
 ```
 
-### MapDefaultEntrance.json (0.01 MB, 111 条)
-
-**字段** (2): `EntranceID, FloorID`
-
-**首条记录摘要**:
-```json
-{
-  "FloorID": 10000000,
-  "EntranceID": 1000001
-}
-```
-
 ### IdleLiveChapter.json (0.01 MB, 20 条)
 
 **字段** (11): `BackgroundState, BossID, ChapterIndex, FSVList, FinalAct, FinalActChatPhase, IconPath, IsHardMode, Name, Number, ReturntoMaze`
@@ -20093,6 +20264,18 @@
 }
 ```
 
+### B51RacingConstValueCommon.json (0.01 MB, 34 条)
+
+**字段** (2): `ConstValueName, Value`
+
+**首条记录摘要**:
+```json
+{
+  "ConstValueName": "Activity_B51Racing_RankScoreList",
+  "Value": "<dict[1]>"
+}
+```
+
 ### FightFestAvatarInfo.json (0.01 MB, 15 条)
 
 **字段** (7): `AvatarID, AvatarName, FigureOffset, FullFigurePath, HalfFigurePath, IconPath, VSImgPath`
@@ -20214,6 +20397,18 @@
     61000018,
     61000019
   ]
+}
+```
+
+### BattlePassQuest.json (0.01 MB, 132 条)
+
+**字段** (2): `ID, ShowTime`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2000204,
+  "ShowTime": true
 }
 ```
 
@@ -20447,18 +20642,6 @@
 }
 ```
 
-### BattlePassQuest.json (0.01 MB, 129 条)
-
-**字段** (2): `ID, ShowTime`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 2000204,
-  "ShowTime": true
-}
-```
-
 ### GridFightTraitBonus.json (0.01 MB, 32 条)
 
 **字段** (5): `BonusParamList, BonusThreshold, BonusType, ID, TraitBonusParamList`
@@ -20477,6 +20660,22 @@
   "BonusParamList": [
     23031
   ]
+}
+```
+
+### ActivityQuestRewardConfig.json (0.01 MB, 43 条)
+
+**字段** (4): `ActivityModule, ActivityRewardID, FinalRewardQuest, QuestTabGroupList`
+
+**首条记录摘要**:
+```json
+{
+  "ActivityRewardID": 50007,
+  "QuestTabGroupList": [
+    5000701
+  ],
+  "FinalRewardQuest": 6017102,
+  "ActivityModule": 5000701
 }
 ```
 
@@ -20545,31 +20744,29 @@
 }
 ```
 
-### WorldDataConfig.json (0.01 MB, 8 条)
+### B51RacingSkill.json (0.01 MB, 18 条)
 
-**字段** (17): `CameraHeight, CameraWidth, ChapterIconBigPath, ChronicleWorldBgPath, ChronicleWorldPredictPath, ChronicleWorldProcessingPath, ChronicleWorldSubBgPath, ID, IsRealWorld, IsShow, MapSpaceTypeList, SimpleWorldDesc, SmallWorldIconPath, TrainSpaceType, WorldDesc, WorldLanguageName, WorldName`
+**字段** (11): `Desc, Desc_Back, Desc_Front, ID, IconPath, IconPath_128, Level, Name, PassiveList, PassiveParamList, Type`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 100,
-  "WorldName": {
-    "Hash": 6725144922804506895
+  "ID": 101,
+  "Level": 1,
+  "Type": "Active",
+  "Name": {
+    "Hash": 2408116791410147221
   },
-  "WorldLanguageName": {
-    "Hash": 4974142298582977146
+  "Desc": {
+    "Hash": 4248271908080126951
   },
-  "MapSpaceTypeList": [
-    "Unknow"
-  ],
-  "ChapterIconBigPath": "SpriteOutput/Mission/ChapterIconBig/Chap...",
-  "ChronicleWorldBgPath": "",
-  "ChronicleWorldSubBgPath": "",
-  "ChronicleWorldPredictPath": "",
-  "ChronicleWorldProcessingPath": "",
-  "CameraWidth": 30,
-  "CameraHeight": 33,
-  "SmallWorldIconPath": ""
+  "Desc_Front": {
+    "Hash": 5068569701852599187
+  },
+  "IconPath": "SpriteOutput/Quest/B51Racing/SkillIcon/B...",
+  "IconPath_128": "SpriteOutput/Quest/B51Racing/SkillIcon/B...",
+  "PassiveList": [],
+  "PassiveParamList": []
 }
 ```
 
@@ -20961,22 +21158,6 @@
 }
 ```
 
-### ActivityQuestRewardConfig.json (0.01 MB, 41 条)
-
-**字段** (4): `ActivityModule, ActivityRewardID, FinalRewardQuest, QuestTabGroupList`
-
-**首条记录摘要**:
-```json
-{
-  "ActivityRewardID": 50007,
-  "QuestTabGroupList": [
-    5000701
-  ],
-  "FinalRewardQuest": 6017102,
-  "ActivityModule": 5000701
-}
-```
-
 ### RestaurantOpEffectConfig.json (0.01 MB, 36 条)
 
 **字段** (6): `EventRewardID, ID, OptionText, Param, ResultText, Type`
@@ -21020,6 +21201,22 @@
   "RoleID": 1001,
   "SeasonID": 1,
   "RoleInGameRefScore": 3
+}
+```
+
+### TrainVisitorConfig.json (0.01 MB, 38 条)
+
+**字段** (8): `AvatarID, LockMissionID, MessageCome, MessageLeave, MessageResident, MissionID, ToastFinishMainMission, VisitorID`
+
+**首条记录摘要**:
+```json
+{
+  "VisitorID": 1009001,
+  "MissionID": 2000202,
+  "AvatarID": 1009,
+  "MessageCome": {
+    "Hash": 17444278683495156719
+  }
 }
 ```
 
@@ -21365,6 +21562,20 @@
 }
 ```
 
+### RogueTournConstCommon.json (0.01 MB, 35 条)
+
+**字段** (2): `ConstValueName, Value`
+
+**首条记录摘要**:
+```json
+{
+  "ConstValueName": "RogueTourn_Talent_TalentCoinItemID",
+  "Value": {
+    "IntValue": 281018
+  }
+}
+```
+
 ### PixAirPlaneConfig.json (0.01 MB, 8 条)
 
 **字段** (16): `AvatarName, BaseHP, BaseLife, EquipID, EquipIDList, GrantBySubmissionID, IconPath, IsSelectable, LargePlaneIconPath, ModelPath, Name, PlaneID, PlaneIconPath, RecommendTagList, UnlockScore, desc`
@@ -21394,6 +21605,19 @@
     "Hash": 10612815521686981484
   },
   "IsSelectable": true
+}
+```
+
+### ScheduleDataChallengeMaze.json (0.01 MB, 54 条)
+
+**字段** (3): `BeginTime, EndTime, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 200101,
+  "BeginTime": "2023-02-06 04:00:00",
+  "EndTime": "2023-03-06 04:00:00"
 }
 ```
 
@@ -21447,22 +21671,6 @@
 }
 ```
 
-### TrainVisitorConfig.json (0.01 MB, 36 条)
-
-**字段** (8): `AvatarID, LockMissionID, MessageCome, MessageLeave, MessageResident, MissionID, ToastFinishMainMission, VisitorID`
-
-**首条记录摘要**:
-```json
-{
-  "VisitorID": 1009001,
-  "MissionID": 2000202,
-  "AvatarID": 1009,
-  "MessageCome": {
-    "Hash": 17444278683495156719
-  }
-}
-```
-
 ### FatePhase.json (0.01 MB, 10 条)
 
 **字段** (9): `AENCLGAIGMD, COPIFAPBMJH, HFGNHCDNPHL, JAKDNHOHINO, LKJNMGCBCAK, LOEPLBPFMEN, MKPCBHODIFB, MLNNCPNNDOO, POCKPDCKPMA`
@@ -21484,30 +21692,54 @@
 }
 ```
 
-### RogueTournConstCommon.json (0.01 MB, 34 条)
+### LimaoNewsInteractEntity.json (0.01 MB, 57 条)
 
-**字段** (2): `ConstValueName, Value`
+**字段** (4): `FLLFLEEHCJI, KFAGIEFOAGN, LPDDNLPNGJG, MMDDLJCIJLE`
 
 **首条记录摘要**:
 ```json
 {
-  "ConstValueName": "RogueTourn_Talent_TalentCoinItemID",
-  "Value": {
-    "IntValue": 281018
-  }
+  "KFAGIEFOAGN": 40300201,
+  "LPDDNLPNGJG": 2540,
+  "MMDDLJCIJLE": 434051102,
+  "FLLFLEEHCJI": 434051107
 }
 ```
 
-### ScheduleDataChallengeMaze.json (0.01 MB, 53 条)
+### B51RacingPart.json (0.01 MB, 15 条)
 
-**字段** (3): `BeginTime, EndTime, ID`
+**字段** (8): `AddStatTierMap, AssetPath, ID, IconPath, IsDefault, Name, SkillID, Type`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 200101,
-  "BeginTime": "2023-02-06 04:00:00",
-  "EndTime": "2023-03-06 04:00:00"
+  "ID": 1,
+  "Name": {
+    "Hash": 7141042211714784218
+  },
+  "Type": "RearWing",
+  "AddStatTierMap": {
+    "Acceleration": 1,
+    "Drift": 1
+  },
+  "SkillID": 301,
+  "AssetPath": "Stages/ActivityProp/ActivityProp_Racer_P...",
+  "IconPath": "SpriteOutput/Quest/B51Racing/CarpartIcon..."
+}
+```
+
+### MonsterTextGuide.json (0.01 MB, 42 条)
+
+**字段** (3): `ParameterList, TextGuideDescription, TextGuideID`
+
+**首条记录摘要**:
+```json
+{
+  "TextGuideID": 10010,
+  "TextGuideDescription": {
+    "Hash": 3311593509976790101
+  },
+  "ParameterList": []
 }
 ```
 
@@ -21556,6 +21788,25 @@
   },
   "RankIDList": "<list[6]>",
   "SkillList": "<list[7]>"
+}
+```
+
+### RogueTournHex.json (0.01 MB, 26 条)
+
+**字段** (7): `AvatarDamageType, AvatarType, DisplayID, ExtraEffect, HexID, MazeBuffID, TournMode`
+
+**首条记录摘要**:
+```json
+{
+  "HexID": 1001,
+  "TournMode": "Tourn3",
+  "AvatarDamageType": [],
+  "AvatarType": [
+    "Rogue"
+  ],
+  "DisplayID": 1014,
+  "MazeBuffID": 633401,
+  "ExtraEffect": []
 }
 ```
 
@@ -21777,6 +22028,29 @@
 }
 ```
 
+### B51RacingCar.json (0.00 MB, 15 条)
+
+**字段** (9): `AIRole, CarNumber, ID, InitHexColor, PartIDList, SkillIDList, StatValueMap, TeamID, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Type": "Player",
+  "TeamID": 10,
+  "StatValueMap": "<dict[5]>",
+  "SkillIDList": [
+    101
+  ],
+  "PartIDList": [
+    21,
+    22,
+    23
+  ],
+  "InitHexColor": "#C7CAD0"
+}
+```
+
 ### ActivityDiceRuleGroup.json (0.00 MB, 68 条)
 
 **字段** (2): `ID, RuleList`
@@ -21811,21 +22085,6 @@
   "ShowInUI": true,
   "TriggerCustomString": "WolfGunPlay_Lv1",
   "TargetScore": 6000
-}
-```
-
-### MonsterTextGuide.json (0.00 MB, 39 条)
-
-**字段** (3): `ParameterList, TextGuideDescription, TextGuideID`
-
-**首条记录摘要**:
-```json
-{
-  "TextGuideID": 10010,
-  "TextGuideDescription": {
-    "Hash": 3311593509976790101
-  },
-  "ParameterList": []
 }
 ```
 
@@ -21884,6 +22143,18 @@
 {
   "QuestID": 8061501,
   "QuestRoundIconPath": "SpriteOutput/Quest/IdleLive/RewardFuctio..."
+}
+```
+
+### RogueTournRole.json (0.00 MB, 97 条)
+
+**字段** (2): `AvatarID, BuffID`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1001,
+  "BuffID": 661001
 }
 ```
 
@@ -22041,6 +22312,18 @@
 }
 ```
 
+### ChallengeMazeGroupExtra.json (0.00 MB, 56 条)
+
+**字段** (2): `GroupID, ThemePosterBgPicPath`
+
+**首条记录摘要**:
+```json
+{
+  "GroupID": 100,
+  "ThemePosterBgPicPath": "SpriteOutput/Abyss/2D_SceneBg/AbyssSence..."
+}
+```
+
 ### MatchThreeConstValueClient.json (0.00 MB, 29 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -22055,6 +22338,35 @@
 }
 ```
 
+### RogueTournAvatar.json (0.00 MB, 80 条)
+
+**字段** (2): `AvatarID, SpecialAvatarID`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1002,
+  "SpecialAvatarID": 3711002
+}
+```
+
+### SpecialChestFindData.json (0.00 MB, 27 条)
+
+**字段** (7): `FloorID, GroupID, InstanceID, IsUseSpecialMappinginfo, ReplaceGroupID, ReplaceInstanceID, ReplaceType`
+
+**首条记录摘要**:
+```json
+{
+  "FloorID": 20223001,
+  "GroupID": 21,
+  "InstanceID": 300013,
+  "ReplaceGroupID": 13,
+  "ReplaceInstanceID": 300001,
+  "IsUseSpecialMappinginfo": true,
+  "ReplaceType": "Always"
+}
+```
+
 ### TarotBookConstValue.json (0.00 MB, 30 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -22066,18 +22378,6 @@
   "Value": {
     "IntValue": 0
   }
-}
-```
-
-### RogueTournRole.json (0.00 MB, 95 条)
-
-**字段** (2): `AvatarID, BuffID`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1001,
-  "BuffID": 661001
 }
 ```
 
@@ -22134,28 +22434,6 @@
 }
 ```
 
-### FiveDimFluteConfig.json (0.00 MB, 17 条)
-
-**字段** (12): `AutoPlayChangeGPFailTextmapKey, Code, ContainerID, EntranceID, FiveDimAnchorID, GPName, GPValue, GroupID, ID, TeleAnchorID, TeleAreaName, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1050001,
-  "Type": "Teleport",
-  "Code": "89681231",
-  "EntranceID": 1050101,
-  "GroupID": 570,
-  "TeleAnchorID": 1,
-  "ContainerID": 110001,
-  "FiveDimAnchorID": 17,
-  "GPName": "",
-  "TeleAreaName": {
-    "Hash": 13088770917174101698
-  }
-}
-```
-
 ### FantasticStoryBuffID.json (0.00 MB, 23 条)
 
 **字段** (7): `ActivityModuleID, AvailableBattleID, BuffID, BuffSlot, ClientShowAvailableTips, MazebuffID, UnlockChapterID`
@@ -22173,18 +22451,6 @@
   "ClientShowAvailableTips": true,
   "ActivityModuleID": 4000208,
   "MazebuffID": 3102107
-}
-```
-
-### RogueTournAvatar.json (0.00 MB, 79 条)
-
-**字段** (2): `AvatarID, SpecialAvatarID`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1002,
-  "SpecialAvatarID": 3711002
 }
 ```
 
@@ -22237,18 +22503,6 @@
   "Value": {
     "IntValue": 3
   }
-}
-```
-
-### ChallengeMazeGroupExtra.json (0.00 MB, 55 条)
-
-**字段** (2): `GroupID, ThemePosterBgPicPath`
-
-**首条记录摘要**:
-```json
-{
-  "GroupID": 100,
-  "ThemePosterBgPicPath": "SpriteOutput/Abyss/2D_SceneBg/AbyssSence..."
 }
 ```
 
@@ -22472,20 +22726,21 @@
 }
 ```
 
-### SpecialChestFindData.json (0.00 MB, 26 条)
+### RogueTournDivision.json (0.00 MB, 10 条)
 
-**字段** (7): `FloorID, GroupID, InstanceID, IsUseSpecialMappinginfo, ReplaceGroupID, ReplaceInstanceID, ReplaceType`
+**字段** (7): `DivisionHintDesc, DivisionIconPath, DivisionIconPrefabPath, DivisionLevel, DivisionName, DivisionProgress, DivisionSmallIconPath`
 
 **首条记录摘要**:
 ```json
 {
-  "FloorID": 20223001,
-  "GroupID": 21,
-  "InstanceID": 300013,
-  "ReplaceGroupID": 13,
-  "ReplaceInstanceID": 300001,
-  "IsUseSpecialMappinginfo": true,
-  "ReplaceType": "Always"
+  "DivisionLevel": 1,
+  "DivisionProgress": 1,
+  "DivisionName": {
+    "Hash": 11944719438675247831
+  },
+  "DivisionIconPath": "SpriteOutput/Rogue/Tourn/Titan/RankIcon/...",
+  "DivisionIconPrefabPath": "UI/Rogue/Tourn/Titan/Widget/RankIcon/Rog...",
+  "DivisionSmallIconPath": "SpriteOutput/Rogue/Tourn/Titan/RankIcon/..."
 }
 ```
 
@@ -22617,20 +22872,6 @@
   },
   "ConditionJson": "Config/Gameplays/Chimera/Evalution/Chime...",
   "GroupID": 4
-}
-```
-
-### LimaoNewsInteractEntity.json (0.00 MB, 47 条)
-
-**字段** (4): `FLLFLEEHCJI, KFAGIEFOAGN, LPDDNLPNGJG, MMDDLJCIJLE`
-
-**首条记录摘要**:
-```json
-{
-  "KFAGIEFOAGN": 40300201,
-  "LPDDNLPNGJG": 2540,
-  "MMDDLJCIJLE": 434051102,
-  "FLLFLEEHCJI": 434051107
 }
 ```
 
@@ -22821,6 +23062,20 @@
 }
 ```
 
+### AtlasUnlockTextmap.json (0.00 MB, 48 条)
+
+**字段** (2): `UnlockDesc, UnlockID`
+
+**首条记录摘要**:
+```json
+{
+  "UnlockID": 70001,
+  "UnlockDesc": {
+    "Hash": 6465342970467533940
+  }
+}
+```
+
 ### TreasureDungeonEnemyConfig.json (0.00 MB, 29 条)
 
 **字段** (4): `EnemyID, EnemyLevel, SpecialMonsterID, StageEventList`
@@ -22948,24 +23203,6 @@
 }
 ```
 
-### RogueTournDivision.json (0.00 MB, 9 条)
-
-**字段** (7): `DivisionHintDesc, DivisionIconPath, DivisionIconPrefabPath, DivisionLevel, DivisionName, DivisionProgress, DivisionSmallIconPath`
-
-**首条记录摘要**:
-```json
-{
-  "DivisionLevel": 1,
-  "DivisionProgress": 1,
-  "DivisionName": {
-    "Hash": 11944719438675247831
-  },
-  "DivisionIconPath": "SpriteOutput/Rogue/Tourn/Titan/RankIcon/...",
-  "DivisionIconPrefabPath": "UI/Rogue/Tourn/Titan/Widget/RankIcon/Rog...",
-  "DivisionSmallIconPath": "SpriteOutput/Rogue/Tourn/Titan/RankIcon/..."
-}
-```
-
 ### DrinkMakerConstValueClient.json (0.00 MB, 29 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -22975,6 +23212,17 @@
 {
   "ConstValueName": "DrinkMaker_CustomDrink_IconPath",
   "Value": "<dict[1]>"
+}
+```
+
+### RogueTournFormulaRandom.json (0.00 MB, 139 条)
+
+**字段** (1): `RandomID`
+
+**首条记录摘要**:
+```json
+{
+  "RandomID": 1001
 }
 ```
 
@@ -23043,20 +23291,6 @@
   "EventType": "CleanTable",
   "BuffName": "",
   "DynamicValues": []
-}
-```
-
-### AtlasUnlockTextmap.json (0.00 MB, 46 条)
-
-**字段** (2): `UnlockDesc, UnlockID`
-
-**首条记录摘要**:
-```json
-{
-  "UnlockID": 70001,
-  "UnlockDesc": {
-    "Hash": 6465342970467533940
-  }
 }
 ```
 
@@ -23193,17 +23427,6 @@
 {
   "EmojiID": 111,
   "ImagePath": "SpriteOutput/Emoji/30007.png"
-}
-```
-
-### RogueTournFormulaRandom.json (0.00 MB, 136 条)
-
-**字段** (1): `RandomID`
-
-**首条记录摘要**:
-```json
-{
-  "RandomID": 1001
 }
 ```
 
@@ -23514,6 +23737,48 @@
 }
 ```
 
+### ChallengeStoryMazeTierce.json (0.00 MB, 3 条)
+
+**字段** (16): `DLCKKJFMJOB, EGEEJLHBALB, EMNJGCPDIFF, GNGENMHNLAH, HFIAAGAKFMD, IDBJENCBJHM, IMCMJHAMMKK, JEBMBCLBIOI, LCHKKJDBLGM, LDKPJPCMMAE, LOJCIDLKPKG, MLMEGBLDFKE, OGALGHMIIAH, OGEOMCGNNMP, PHFMCACHFIJ, PHOIICMCGIH`
+
+**首条记录摘要**:
+```json
+{
+  "PHFMCACHFIJ": 20245,
+  "DLCKKJFMJOB": 20244,
+  "EMNJGCPDIFF": 3000301,
+  "LCHKKJDBLGM": [],
+  "PHOIICMCGIH": 9,
+  "MLMEGBLDFKE": [
+    200001
+  ],
+  "JEBMBCLBIOI": [
+    2004010
+  ],
+  "HFIAAGAKFMD": [
+    30322043
+  ],
+  "LOJCIDLKPKG": [
+    "Physical",
+    "Imaginary"
+  ],
+  "OGEOMCGNNMP": [
+    4001,
+    4002,
+    4003
+  ],
+  "GNGENMHNLAH": 4000,
+  "IDBJENCBJHM": 45000,
+  "LDKPJPCMMAE": [
+    4001,
+    4002
+  ],
+  "IMCMJHAMMKK": 102113,
+  "EGEEJLHBALB": "<list[8]>",
+  "OGALGHMIIAH": "<list[8]>"
+}
+```
+
 ### PamAction.json (0.00 MB, 14 条)
 
 **字段** (12): `AnimGroupName, AnyDirection, MaxMoodPoint, MaxStrengthPoint, MinMoodPoint, MinStrengthPoint, PamAction, PamMood, PerformanceID, Settle, Weight, WithoutAnchor`
@@ -23789,25 +24054,6 @@
 }
 ```
 
-### MonopolyQuizTaskConfig.json (0.00 MB, 24 条)
-
-**字段** (3): `PriorityPlayerIDList, QuizTaskID, TaskDesc`
-
-**首条记录摘要**:
-```json
-{
-  "QuizTaskID": 1011,
-  "PriorityPlayerIDList": [
-    1001,
-    1002,
-    1211
-  ],
-  "TaskDesc": {
-    "Hash": 4493223943375539433
-  }
-}
-```
-
 ### ChallengeBossMazeTierce.json (0.00 MB, 3 条)
 
 **字段** (14): `DLCKKJFMJOB, EGEEJLHBALB, EMNJGCPDIFF, GNGENMHNLAH, HFIAAGAKFMD, IMCMJHAMMKK, JEBMBCLBIOI, LCHKKJDBLGM, LOJCIDLKPKG, MLMEGBLDFKE, OGALGHMIIAH, OGEOMCGNNMP, PHFMCACHFIJ, PHOIICMCGIH`
@@ -23839,6 +24085,50 @@
   "IMCMJHAMMKK": 101713,
   "EGEEJLHBALB": "<list[8]>",
   "OGALGHMIIAH": "<list[8]>"
+}
+```
+
+### MonopolyQuizTaskConfig.json (0.00 MB, 24 条)
+
+**字段** (3): `PriorityPlayerIDList, QuizTaskID, TaskDesc`
+
+**首条记录摘要**:
+```json
+{
+  "QuizTaskID": 1011,
+  "PriorityPlayerIDList": [
+    1001,
+    1002,
+    1211
+  ],
+  "TaskDesc": {
+    "Hash": 4493223943375539433
+  }
+}
+```
+
+### LimaoNewsPlanPhase.json (0.00 MB, 8 条)
+
+**字段** (9): `ABPCHBOBLNB, AIFCBBLPHHI, CCHLHJCMFGM, FBKAMIHGLFK, JEJGIFKGBCO, NFIKDONNJMD, OJBEKHJBIHL, OOKONGHCFBP, OPOPKLGBNKB`
+
+**首条记录摘要**:
+```json
+{
+  "OPOPKLGBNKB": 101,
+  "ABPCHBOBLNB": "Start",
+  "NFIKDONNJMD": 402070302,
+  "JEJGIFKGBCO": {
+    "Hash": 12995951425044401064
+  },
+  "CCHLHJCMFGM": {
+    "Hash": 18273563577507831110
+  },
+  "AIFCBBLPHHI": {
+    "Hash": 7857490487807842557
+  },
+  "OJBEKHJBIHL": "<list[3]>",
+  "OOKONGHCFBP": "Config/StandalonePerformance/StandaloneP...",
+  "FBKAMIHGLFK": "SpriteOutput/UI/LimaoNews/PlanPic/LimaoN..."
 }
 ```
 
@@ -23959,6 +24249,44 @@
   "FloorID": 20111001,
   "BattleAreaGroupID": 2,
   "BattleAreaID": 1
+}
+```
+
+### ChallengeMazeTierce.json (0.00 MB, 3 条)
+
+**字段** (15): `DLCKKJFMJOB, EGEEJLHBALB, EMNJGCPDIFF, GNGENMHNLAH, GNOOAGPBNLD, HFIAAGAKFMD, IMCMJHAMMKK, JEBMBCLBIOI, LCHKKJDBLGM, LOJCIDLKPKG, MLMEGBLDFKE, OGALGHMIIAH, OGEOMCGNNMP, PHFMCACHFIJ, PHOIICMCGIH`
+
+**首条记录摘要**:
+```json
+{
+  "PHFMCACHFIJ": 5213,
+  "DLCKKJFMJOB": 5212,
+  "EMNJGCPDIFF": 3014002,
+  "LCHKKJDBLGM": [],
+  "PHOIICMCGIH": 11,
+  "MLMEGBLDFKE": [
+    200001
+  ],
+  "JEBMBCLBIOI": [
+    5014010
+  ],
+  "HFIAAGAKFMD": [
+    30123123
+  ],
+  "LOJCIDLKPKG": [
+    "Fire",
+    "Imaginary"
+  ],
+  "GNOOAGPBNLD": 45,
+  "OGEOMCGNNMP": [
+    601,
+    602,
+    603
+  ],
+  "GNGENMHNLAH": 600,
+  "IMCMJHAMMKK": 101913,
+  "EGEEJLHBALB": "<list[8]>",
+  "OGALGHMIIAH": "<list[8]>"
 }
 ```
 
@@ -24155,38 +24483,6 @@
 }
 ```
 
-### GridFightEquipMazebuff.json (0.00 MB, 6 条)
-
-**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 3570352302,
-  "BuffSeries": 1,
-  "BuffRarity": 1,
-  "Lv": 1,
-  "LvMax": 1,
-  "ModifierName": "ADV_StageAbility_3570352302",
-  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
-  "InBattleBindingKey": "GridFight_Equipment_SilverWolf999_352302",
-  "ParamList": [
-    {
-      "Value": 0.35
-    }
-  ],
-  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
-  "BuffName": {
-    "Hash": 817162084146098338
-  },
-  "BuffDesc": {
-    "Hash": 5343609481178583837
-  },
-  "BuffEffect": "",
-  "MazeBuffType": "Level"
-}
-```
-
 ### AvatarEnhancedRank.json (0.00 MB, 20 条)
 
 **字段** (6): `AvatarID, Comment01, CommentIndex, RankDescAfter, RankDescBefore, RankID`
@@ -24327,6 +24623,38 @@
     "Hash": 10207309115142039176
   },
   "Conditions": "[FinishMainMission:1043710]"
+}
+```
+
+### GridFightEquipMazebuff.json (0.00 MB, 6 条)
+
+**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 3570352302,
+  "BuffSeries": 1,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 1,
+  "ModifierName": "ADV_StageAbility_3570352302",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "GridFight_Equipment_SilverWolf999_352302",
+  "ParamList": [
+    {
+      "Value": 0.35
+    }
+  ],
+  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "BuffName": {
+    "Hash": 817162084146098338
+  },
+  "BuffDesc": {
+    "Hash": 5343609481178583837
+  },
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
 }
 ```
 
@@ -24478,6 +24806,17 @@
   "Level": 1,
   "DailyActivePoint": 100,
   "DailyActiveReward": 103101
+}
+```
+
+### StageInvasionMaterialWhite.json (0.00 MB, 107 条)
+
+**字段** (1): `MonsterID`
+
+**首条记录摘要**:
+```json
+{
+  "MonsterID": 1002020
 }
 ```
 
@@ -24678,22 +25017,17 @@
 }
 ```
 
-### RogueTournHex.json (0.00 MB, 17 条)
+### RoguePersonaRoomPreset.json (0.00 MB, 35 条)
 
-**字段** (7): `AvatarDamageType, AvatarType, DisplayID, ExtraEffect, HexID, MazeBuffID, TournMode`
+**字段** (4): `AAGKEBFHLMC, FJIKMHCJMKH, LIIPLGLNPGB, LLICIMBCNPF`
 
 **首条记录摘要**:
 ```json
 {
-  "HexID": 1001,
-  "TournMode": "Tourn3",
-  "AvatarDamageType": [],
-  "AvatarType": [
-    "Rogue"
-  ],
-  "DisplayID": 1014,
-  "MazeBuffID": 633401,
-  "ExtraEffect": []
+  "LIIPLGLNPGB": 1001,
+  "LLICIMBCNPF": 3,
+  "AAGKEBFHLMC": 3,
+  "FJIKMHCJMKH": []
 }
 ```
 
@@ -24991,20 +25325,6 @@
 }
 ```
 
-### RoguePersonaRoomPreset.json (0.00 MB, 34 条)
-
-**字段** (4): `AAGKEBFHLMC, FJIKMHCJMKH, LIIPLGLNPGB, LLICIMBCNPF`
-
-**首条记录摘要**:
-```json
-{
-  "LIIPLGLNPGB": 1001,
-  "LLICIMBCNPF": 3,
-  "AAGKEBFHLMC": 3,
-  "FJIKMHCJMKH": []
-}
-```
-
 ### RogueTournConstClient.json (0.00 MB, 21 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -25052,6 +25372,18 @@
   "Parameter3": {
     "IntValue": 0
   }
+}
+```
+
+### LimaoNewsMessage.json (0.00 MB, 49 条)
+
+**字段** (3): `IIAJADPLGLH, JNFGLIOMLEJ, JOPENKFKBOH`
+
+**首条记录摘要**:
+```json
+{
+  "IIAJADPLGLH": 1000001,
+  "JNFGLIOMLEJ": 100000100
 }
 ```
 
@@ -25256,6 +25588,18 @@
 }
 ```
 
+### TeamBuildGroupConfig.json (0.00 MB, 29 条)
+
+**字段** (2): `AvatarIDList, GroupID`
+
+**首条记录摘要**:
+```json
+{
+  "GroupID": 101,
+  "AvatarIDList": "<list[13]>"
+}
+```
+
 ### RndOptionsData.json (0.00 MB, 13 条)
 
 **字段** (7): `DialogShowOrder, GroupID, ID, JsonPath, MenuItemID, MenuItemType, Weight`
@@ -25303,18 +25647,6 @@
   "SupportPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
   "ChatPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
   "ShowType": "Always"
-}
-```
-
-### TeamBuildGroupConfig.json (0.00 MB, 29 条)
-
-**字段** (2): `AvatarIDList, GroupID`
-
-**首条记录摘要**:
-```json
-{
-  "GroupID": 101,
-  "AvatarIDList": "<list[13]>"
 }
 ```
 
@@ -25669,6 +26001,23 @@
 }
 ```
 
+### B51RacingDevelopmentAction.json (0.00 MB, 20 条)
+
+**字段** (3): `AddStatValueMap, ID, Name`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Name": {
+    "Hash": 12060979892729805379
+  },
+  "AddStatValueMap": {
+    "Speed": 14
+  }
+}
+```
+
 ### DrinkMakerCheersGroup.json (0.00 MB, 6 条)
 
 **字段** (11): `AvatarName, AvatarRequestHeadIcon, GroupID, GroupName, HeadbookHeadIcon, HidingDrinkID, IngredientList, NextGroupID, PrimaryDrinkID, RoleRequirement, TutorialGuideGroupID`
@@ -25689,6 +26038,18 @@
   "AvatarRequestHeadIcon": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
   "HeadbookHeadIcon": "",
   "TutorialGuideGroupID": 10000
+}
+```
+
+### ExpeditionBattleLevel.json (0.00 MB, 64 条)
+
+**字段** (2): `ID, StageID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 101011,
+  "StageID": 428001
 }
 ```
 
@@ -25907,6 +26268,21 @@
 }
 ```
 
+### LimaoNewsWorkRecord.json (0.00 MB, 23 条)
+
+**字段** (5): `GKENNBPKDDA, MMFOONHFAEB, MNLAMKJIAOC, OGLGIADFFML, OOCPKIGPEHP`
+
+**首条记录摘要**:
+```json
+{
+  "OGLGIADFFML": 101,
+  "MNLAMKJIAOC": "GoalText",
+  "MMFOONHFAEB": {
+    "Hash": 3301907277356787984
+  }
+}
+```
+
 ### PerformanceCG.json (0.00 MB, 13 条)
 
 **字段** (8): `EndBlack, FloorID, IsSkip, PerformanceCharacter, PerformanceID, PerformancePath, PlaneID, StartBlack`
@@ -25920,6 +26296,25 @@
   "PerformanceCharacter": "",
   "PlaneID": 10101,
   "FloorID": 10101002
+}
+```
+
+### ExpeditionBattleFunTitle.json (0.00 MB, 13 条)
+
+**字段** (6): `ConditionParam, ConditionParamType, FunTitleDesc, FunTitleName, ID, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 8001,
+  "Type": "Dps",
+  "ConditionParamType": "GreaterEqual",
+  "FunTitleName": {
+    "Hash": 4499678920084074977
+  },
+  "FunTitleDesc": {
+    "Hash": 1548234941186645741
+  }
 }
 ```
 
@@ -26197,6 +26592,34 @@
 }
 ```
 
+### FindChestFuncData.json (0.00 MB, 8 条)
+
+**字段** (10): `ChestTypeList, FindNum, FuncID, GameModeList, MapIconID, MappingInfoID, SpecialMappinginfo, TriggerParamList, TriggerType, WorldIDList`
+
+**首条记录摘要**:
+```json
+{
+  "FuncID": 101,
+  "GameModeList": [
+    "Town",
+    "Maze",
+    "TownRoom"
+  ],
+  "FindNum": 3,
+  "ChestTypeList": [
+    "CHEST_TREASURE_NORMAl"
+  ],
+  "WorldIDList": [],
+  "TriggerType": "Avatar",
+  "TriggerParamList": [
+    1401
+  ],
+  "MapIconID": 284,
+  "MappingInfoID": 2104,
+  "SpecialMappinginfo": 2110
+}
+```
+
 ### ScheduleDataBattlePass.json (0.00 MB, 28 条)
 
 **字段** (3): `BeginTime, EndTime, ID`
@@ -26207,18 +26630,6 @@
   "ID": 1000001,
   "BeginTime": "2023-04-17 04:00:00",
   "EndTime": "2023-06-05 03:59:59"
-}
-```
-
-### CurrencyDisplayConfig.json (0.00 MB, 85 条)
-
-**字段** (3): `CurrencyID, GotoID, UnlockID`
-
-**首条记录摘要**:
-```json
-{
-  "CurrencyID": 1,
-  "GotoID": 3800
 }
 ```
 
@@ -26241,6 +26652,26 @@
   "FloorIDList": [
     40445001
   ]
+}
+```
+
+### FiveDimSkillPanelConfig.json (0.00 MB, 6 条)
+
+**字段** (12): `Desc1, Desc2, ID, IconPath, IconPath2, IpDesc, IpDesc2, Name, SkillName, Type, UI3DPath, UnlockID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "SkillName": {
+    "Hash": 249873488852560307
+  },
+  "Desc1": {
+    "Hash": 6698802320971982561
+  },
+  "IconPath": "SpriteOutput/SkillIcons/Com/SkillIcon_Fi...",
+  "IconPath2": "",
+  "UI3DPath": ""
 }
 ```
 
@@ -26271,6 +26702,20 @@
 {
   "JGFADOCKGOO": 1,
   "MCCIHOMFKFK": "SpriteOutput/Quest/TeamTower/BrickType/T..."
+}
+```
+
+### OfferingUIPageConfig.json (0.00 MB, 14 条)
+
+**字段** (8): `CostTitle, ID, LevelTitle, LongTailDesc, LongTailTitle, MaxTip, Name, SubmitBtnName`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Name": {
+    "Hash": 7000775562918729249
+  }
 }
 ```
 
@@ -26488,6 +26933,18 @@
 }
 ```
 
+### CurrencyDisplayConfig.json (0.00 MB, 82 条)
+
+**字段** (3): `CurrencyID, GotoID, UnlockID`
+
+**首条记录摘要**:
+```json
+{
+  "CurrencyID": 1,
+  "GotoID": 3800
+}
+```
+
 ### AvatarAbilityStatistics.json (0.00 MB, 24 条)
 
 **字段** (2): `AvatarID, ExtractionAbilityList`
@@ -26514,15 +26971,32 @@
 }
 ```
 
-### RoguePersonaRoomComposition.json (0.00 MB, 54 条)
+### ChallengePeakBossConfig.json (0.00 MB, 9 条)
 
-**字段** (2): `AAGKEBFHLMC, LLICIMBCNPF`
+**字段** (7): `BuffList, ColorMedalTarget, HardEventIDList, HardTagList, HardTarget, HardTitle, ID`
 
 **首条记录摘要**:
 ```json
 {
-  "LLICIMBCNPF": 1,
-  "AAGKEBFHLMC": 1
+  "ID": 104,
+  "HardTitle": {
+    "Hash": 7760170859122248016
+  },
+  "BuffList": [
+    3033006,
+    3033007,
+    3033008
+  ],
+  "ColorMedalTarget": 6,
+  "HardTarget": 3007,
+  "HardEventIDList": [
+    30501022
+  ],
+  "HardTagList": [
+    3033010,
+    3033013,
+    3033019
+  ]
 }
 ```
 
@@ -26585,20 +27059,6 @@
 ```
 
 ### MonsterTestStatusConfig.json (0.00 MB, 347 条)
-
-### OfferingUIPageConfig.json (0.00 MB, 14 条)
-
-**字段** (8): `CostTitle, ID, LevelTitle, LongTailDesc, LongTailTitle, MaxTip, Name, SubmitBtnName`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "Name": {
-    "Hash": 7000775562918729249
-  }
-}
-```
 
 ### MarbleRoundCustomBuff.json (0.00 MB, 27 条)
 
@@ -26807,45 +27267,16 @@
 }
 ```
 
-### ChallengeStoryMazeTierce.json (0.00 MB, 2 条)
+### ScheduleDataChallengeStory.json (0.00 MB, 26 条)
 
-**字段** (16): `DLCKKJFMJOB, EGEEJLHBALB, EMNJGCPDIFF, GNGENMHNLAH, HFIAAGAKFMD, IDBJENCBJHM, IMCMJHAMMKK, JEBMBCLBIOI, LCHKKJDBLGM, LDKPJPCMMAE, LOJCIDLKPKG, MLMEGBLDFKE, OGALGHMIIAH, OGEOMCGNNMP, PHFMCACHFIJ, PHOIICMCGIH`
+**字段** (3): `BeginTime, EndTime, ID`
 
 **首条记录摘要**:
 ```json
 {
-  "PHFMCACHFIJ": 20245,
-  "DLCKKJFMJOB": 20244,
-  "EMNJGCPDIFF": 3000301,
-  "LCHKKJDBLGM": [],
-  "PHOIICMCGIH": 9,
-  "MLMEGBLDFKE": [
-    200001
-  ],
-  "JEBMBCLBIOI": [
-    2004010
-  ],
-  "HFIAAGAKFMD": [
-    30322043
-  ],
-  "LOJCIDLKPKG": [
-    "Physical",
-    "Imaginary"
-  ],
-  "OGEOMCGNNMP": [
-    4001,
-    4002,
-    4003
-  ],
-  "GNGENMHNLAH": 4000,
-  "IDBJENCBJHM": 45000,
-  "LDKPJPCMMAE": [
-    4001,
-    4002
-  ],
-  "IMCMJHAMMKK": 102113,
-  "EGEEJLHBALB": "<list[8]>",
-  "OGALGHMIIAH": "<list[8]>"
+  "ID": 202001,
+  "BeginTime": "2024-01-08 04:00:00",
+  "EndTime": "2024-02-19 04:00:00"
 }
 ```
 
@@ -26977,6 +27408,23 @@
 }
 ```
 
+### ExpeditionBattleBuff.json (0.00 MB, 16 条)
+
+**字段** (5): `BuffDataDesc, BuffDataIsPercentage, BuffRank, ID, MazeBuffID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 60101,
+  "MazeBuffID": 3220001,
+  "BuffRank": 60,
+  "BuffDataDesc": {
+    "Hash": 9397042811744567852
+  },
+  "BuffDataIsPercentage": true
+}
+```
+
 ### GridFightForge.json (0.00 MB, 10 条)
 
 **字段** (7): `EquipCategory, EquipNum, ForgeDesc, ForgeTypeDesc, FuncType, ID, ParamList`
@@ -27055,19 +27503,6 @@
 }
 ```
 
-### ScheduleDataChallengeStory.json (0.00 MB, 25 条)
-
-**字段** (3): `BeginTime, EndTime, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 202001,
-  "BeginTime": "2024-01-08 04:00:00",
-  "EndTime": "2024-02-19 04:00:00"
-}
-```
-
 ### TreasureDungeonGroupConfig.json (0.00 MB, 5 条)
 
 **字段** (14): `ATKExchangeIconPath, ATKExchangeName, ATKExchangeRatio, ATKMazeBuffID, ActivityModuleID, DEFMazeBuffID, DungeonIDList, GroupID, HpConversionRate, HpConversionRate2, ImgPath, MaxATK, MaxDEF, Name`
@@ -27099,44 +27534,6 @@
 }
 ```
 
-### ChallengeMazeTierce.json (0.00 MB, 2 条)
-
-**字段** (15): `DLCKKJFMJOB, EGEEJLHBALB, EMNJGCPDIFF, GNGENMHNLAH, GNOOAGPBNLD, HFIAAGAKFMD, IMCMJHAMMKK, JEBMBCLBIOI, LCHKKJDBLGM, LOJCIDLKPKG, MLMEGBLDFKE, OGALGHMIIAH, OGEOMCGNNMP, PHFMCACHFIJ, PHOIICMCGIH`
-
-**首条记录摘要**:
-```json
-{
-  "PHFMCACHFIJ": 5213,
-  "DLCKKJFMJOB": 5212,
-  "EMNJGCPDIFF": 3014002,
-  "LCHKKJDBLGM": [],
-  "PHOIICMCGIH": 11,
-  "MLMEGBLDFKE": [
-    200001
-  ],
-  "JEBMBCLBIOI": [
-    5014010
-  ],
-  "HFIAAGAKFMD": [
-    30123123
-  ],
-  "LOJCIDLKPKG": [
-    "Fire",
-    "Imaginary"
-  ],
-  "GNOOAGPBNLD": 45,
-  "OGEOMCGNNMP": [
-    601,
-    602,
-    603
-  ],
-  "GNGENMHNLAH": 600,
-  "IMCMJHAMMKK": 101913,
-  "EGEEJLHBALB": "<list[8]>",
-  "OGALGHMIIAH": "<list[8]>"
-}
-```
-
 ### MatchThreePiece.json (0.00 MB, 14 条)
 
 **字段** (4): `ImagePath, PieceID, RowBombPath, SquareBombPath`
@@ -27163,34 +27560,6 @@
   "Desc01": "SpecialMode_Desc01_1017",
   "Desc02": "",
   "Desc03": ""
-}
-```
-
-### FindChestFuncData.json (0.00 MB, 7 条)
-
-**字段** (10): `ChestTypeList, FindNum, FuncID, GameModeList, MapIconID, MappingInfoID, SpecialMappinginfo, TriggerParamList, TriggerType, WorldIDList`
-
-**首条记录摘要**:
-```json
-{
-  "FuncID": 101,
-  "GameModeList": [
-    "Town",
-    "Maze",
-    "TownRoom"
-  ],
-  "FindNum": 3,
-  "ChestTypeList": [
-    "CHEST_TREASURE_NORMAl"
-  ],
-  "WorldIDList": [],
-  "TriggerType": "Avatar",
-  "TriggerParamList": [
-    1401
-  ],
-  "MapIconID": 284,
-  "MappingInfoID": 2104,
-  "SpecialMappinginfo": 2110
 }
 ```
 
@@ -27359,6 +27728,18 @@
 }
 ```
 
+### MappingInfoEntranceConfig.json (0.00 MB, 49 条)
+
+**字段** (2): `EntranceID, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2101,
+  "EntranceID": 102020107
+}
+```
+
 ### RogueArcadeType.json (0.00 MB, 7 条)
 
 **字段** (6): `ArcadeID, BriefName, Desc, DetailedName, ExitDesc, PicPathList`
@@ -27457,6 +27838,26 @@
 }
 ```
 
+### LimaoNewsEmployee.json (0.00 MB, 8 条)
+
+**字段** (8): `EDFFEFOCCBN, EGCJJGJJLOE, EKJGBBEIHMD, ELGNMHLEEEH, JBJJIOFBBCN, KNFOBJPKBPN, LPNBEANGIGE, PBAOJGFDKDG`
+
+**首条记录摘要**:
+```json
+{
+  "LPNBEANGIGE": 1,
+  "KNFOBJPKBPN": {
+    "Hash": 13307977752797949490
+  },
+  "ELGNMHLEEEH": 1,
+  "EGCJJGJJLOE": "SpriteOutput/UI/LimaoNews/LimaoIcon/Lima...",
+  "JBJJIOFBBCN": [
+    1
+  ],
+  "EDFFEFOCCBN": "Config/Level/LINews/LimaoCheck01.json"
+}
+```
+
 ### ActivityLocalLegendGroup.json (0.00 MB, 5 条)
 
 **字段** (9): `ActivityModuleID, ChallengeStrategy, GroupID, GroupPicPath, GroupTitle, StageMechanism, StageMechanismTitle, TeamBuildTip, TutorialGuideID`
@@ -27514,35 +27915,6 @@
   },
   "NodeIcon": "SpriteOutput/MonsterRoundIcon/Monster_80...",
   "ImagePath": "SpriteOutput/MonsterFigure/Monster_80250..."
-}
-```
-
-### ChallengePeakBossConfig.json (0.00 MB, 8 条)
-
-**字段** (7): `BuffList, ColorMedalTarget, HardEventIDList, HardTagList, HardTarget, HardTitle, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 104,
-  "HardTitle": {
-    "Hash": 7760170859122248016
-  },
-  "BuffList": [
-    3033006,
-    3033007,
-    3033008
-  ],
-  "ColorMedalTarget": 6,
-  "HardTarget": 3007,
-  "HardEventIDList": [
-    30501022
-  ],
-  "HardTagList": [
-    3033010,
-    3033013,
-    3033019
-  ]
 }
 ```
 
@@ -27614,18 +27986,6 @@
 }
 ```
 
-### MappingInfoEntranceConfig.json (0.00 MB, 48 条)
-
-**字段** (2): `EntranceID, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 2101,
-  "EntranceID": 102020107
-}
-```
-
 ### ChallengeStoryTheme.json (0.00 MB, 7 条)
 
 **字段** (7): `ThemeBgPrefabPath, ThemeEffColor, ThemeID, ThemeMainColor, ThemePanelPrefabPath, ThemeSubColor1, ThemeSubColor2`
@@ -27670,6 +28030,22 @@
     10001
   ],
   "DefaultScriptID": 10001
+}
+```
+
+### AssistantTipsConfig.json (0.00 MB, 16 条)
+
+**字段** (4): `Content, ParamList, TipsID, TipsRule`
+
+**首条记录摘要**:
+```json
+{
+  "TipsID": 101,
+  "TipsRule": "ElfRestaurantTargetRecipe",
+  "Content": {
+    "Hash": 8322360841397471378
+  },
+  "ParamList": []
 }
 ```
 
@@ -27741,6 +28117,20 @@
     "Hash": 16482589459533608618
   },
   "GameJson": "Config/Gameplays/Hipplen/MiniGame/Hipple..."
+}
+```
+
+### VersionReviewMission.json (0.00 MB, 16 条)
+
+**字段** (4): `PreMainMissionID, ReviewMainMissionID, StoryPerformanceID, StoryStartEntranceID`
+
+**首条记录摘要**:
+```json
+{
+  "ReviewMainMissionID": 1036001,
+  "PreMainMissionID": 1034109,
+  "StoryPerformanceID": 103600151,
+  "StoryStartEntranceID": 1000003
 }
 ```
 
@@ -27934,6 +28324,21 @@
 }
 ```
 
+### RogueTournDivisionEffect.json (0.00 MB, 9 条)
+
+**字段** (3): `DescParamList, DescText, DivisionLevel`
+
+**首条记录摘要**:
+```json
+{
+  "DivisionLevel": 1,
+  "DescText": {
+    "Hash": 5428064629844130967
+  },
+  "DescParamList": "<list[3]>"
+}
+```
+
 ### LittleWheelFuncConfig.json (0.00 MB, 20 条)
 
 **字段** (3): `IconPath, LittleWheelFuncID, Type`
@@ -28081,26 +28486,6 @@
 }
 ```
 
-### FiveDimSkillPanelConfig.json (0.00 MB, 5 条)
-
-**字段** (12): `Desc1, Desc2, ID, IconPath, IconPath2, IpDesc, IpDesc2, Name, SkillName, Type, UI3DPath, UnlockID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "SkillName": {
-    "Hash": 249873488852560307
-  },
-  "Desc1": {
-    "Hash": 6698802320971982561
-  },
-  "IconPath": "SpriteOutput/SkillIcons/Com/SkillIcon_Fi...",
-  "IconPath2": "",
-  "UI3DPath": ""
-}
-```
-
 ### GameModeFuncEntrance.json (0.00 MB, 21 条)
 
 **字段** (3): `BranchLineFuncEntranceListID, GameModeType, MainLineFuncEntranceListID`
@@ -28146,20 +28531,6 @@
   "IconPath": "",
   "IconPathInBattle": "SpriteOutput/Quest/ActivityChenLing/Chen...",
   "LockDeckID": 5
-}
-```
-
-### VersionReviewMission.json (0.00 MB, 15 条)
-
-**字段** (4): `PreMainMissionID, ReviewMainMissionID, StoryPerformanceID, StoryStartEntranceID`
-
-**首条记录摘要**:
-```json
-{
-  "ReviewMainMissionID": 1036001,
-  "PreMainMissionID": 1034109,
-  "StoryPerformanceID": 103600151,
-  "StoryStartEntranceID": 1000003
 }
 ```
 
@@ -28626,6 +28997,23 @@
 }
 ```
 
+### LoadingFuncConfig.json (0.00 MB, 9 条)
+
+**字段** (5): `LoadingFuncID, LoadingFuncType, LoadingFuncTypeParam, LoadingRandomParam, RandomNumber`
+
+**首条记录摘要**:
+```json
+{
+  "LoadingFuncID": 101,
+  "LoadingFuncType": "WorldTele",
+  "LoadingFuncTypeParam": [
+    100
+  ],
+  "RandomNumber": 10,
+  "LoadingRandomParam": "<dict[3]>"
+}
+```
+
 ### SwordTrainingStatus.json (0.00 MB, 7 条)
 
 **字段** (6): `InitialValue, MaximumValue, StatusID, StatusIcon, StatusName, StatusOutLineIcon`
@@ -28641,6 +29029,20 @@
   },
   "StatusIcon": "SpriteOutput/Quest/SwordTraining/SwordTr...",
   "StatusOutLineIcon": "SpriteOutput/Quest/SwordTraining/SwordTr..."
+}
+```
+
+### PlayerOutfitBase.json (0.00 MB, 23 条)
+
+**字段** (3): `ItemID, OutfitID, SlotTypeList`
+
+**首条记录摘要**:
+```json
+{
+  "OutfitID": 1000,
+  "SlotTypeList": [
+    "HeadDecor"
+  ]
 }
 ```
 
@@ -28680,6 +29082,34 @@
 }
 ```
 
+### LimaoNewsWork.json (0.00 MB, 6 条)
+
+**字段** (8): `AEONKNDCDKN, GDEOCHKAEMO, GGKPLJJMBBA, KOAGHJCOOGA, KPNIGDPANOC, LHCNEHAHKHM, LLLJACLJAEP, ONDPOGOJIID`
+
+**首条记录摘要**:
+```json
+{
+  "GGKPLJJMBBA": 1,
+  "KOAGHJCOOGA": [
+    1,
+    3,
+    4
+  ],
+  "AEONKNDCDKN": 8015001,
+  "GDEOCHKAEMO": 1377,
+  "LLLJACLJAEP": {
+    "Hash": 16436133568019783941
+  },
+  "LHCNEHAHKHM": 1000901,
+  "ONDPOGOJIID": "Config/Level/LINews/Work/LimaoWork01Star...",
+  "KPNIGDPANOC": [
+    101,
+    104,
+    105
+  ]
+}
+```
+
 ### RogueNousAeonCross.json (0.00 MB, 18 条)
 
 **字段** (5): `BuffGroup, MainAeonID, MainAeonNum, SubAeonID, SubAeonNum`
@@ -28692,6 +29122,18 @@
   "MainAeonNum": 3,
   "SubAeonNum": 3,
   "BuffGroup": 12023
+}
+```
+
+### ElationSkill.json (0.00 MB, 32 条)
+
+**字段** (2): `ElationSkillID, PriorityValue`
+
+**首条记录摘要**:
+```json
+{
+  "ElationSkillID": 150120,
+  "PriorityValue": 144
 }
 ```
 
@@ -28734,18 +29176,15 @@
 }
 ```
 
-### RogueTournDivisionEffect.json (0.00 MB, 8 条)
+### RoguePersonaConstCommon.json (0.00 MB, 6 条)
 
-**字段** (3): `DescParamList, DescText, DivisionLevel`
+**字段** (2): `ConstValueName, Value`
 
 **首条记录摘要**:
 ```json
 {
-  "DivisionLevel": 1,
-  "DescText": {
-    "Hash": 5428064629844130967
-  },
-  "DescParamList": "<list[3]>"
+  "ConstValueName": "RogueTournPersona_FixedCompList",
+  "Value": "<dict[1]>"
 }
 ```
 
@@ -28951,20 +29390,6 @@
 }
 ```
 
-### PlayerOutfitBase.json (0.00 MB, 22 条)
-
-**字段** (3): `ItemID, OutfitID, SlotTypeList`
-
-**首条记录摘要**:
-```json
-{
-  "OutfitID": 1000,
-  "SlotTypeList": [
-    "HeadDecor"
-  ]
-}
-```
-
 ### GuideRogueData.json (0.00 MB, 6 条)
 
 **字段** (9): `ID, IconPath, Name, OpenConditions, Priority, RelatedID, TabID, TabIconPath, UnlockConditions`
@@ -28981,6 +29406,24 @@
   "UnlockConditions": "<list[2]>",
   "OpenConditions": "<list[1]>",
   "TabID": 1001
+}
+```
+
+### RogueTournWorkbenchFunc.json (0.00 MB, 10 条)
+
+**字段** (5): `DisableFuncDesc, FuncDesc, FuncID, FuncName, FuncType`
+
+**首条记录摘要**:
+```json
+{
+  "FuncID": 1,
+  "FuncType": "BuffEnhance",
+  "FuncName": {
+    "Hash": 14270682151257424115
+  },
+  "FuncDesc": {
+    "Hash": 14227153442758834295
+  }
 }
 ```
 
@@ -29102,6 +29545,19 @@
 }
 ```
 
+### B51RacingAgenda.json (0.00 MB, 28 条)
+
+**字段** (3): `ContentType, CycleID, Day`
+
+**首条记录摘要**:
+```json
+{
+  "CycleID": 1,
+  "Day": 1,
+  "ContentType": "Mission"
+}
+```
+
 ### EvolveBuildForgeMaterial.json (0.00 MB, 13 条)
 
 **字段** (3): `CostGearList, ForgeGearID, MaterialGearList`
@@ -29117,18 +29573,6 @@
   "CostGearList": [
     3106001
   ]
-}
-```
-
-### ElationSkill.json (0.00 MB, 30 条)
-
-**字段** (2): `ElationSkillID, PriorityValue`
-
-**首条记录摘要**:
-```json
-{
-  "ElationSkillID": 150120,
-  "PriorityValue": 144
 }
 ```
 
@@ -29309,23 +29753,6 @@
 }
 ```
 
-### LoadingFuncConfig.json (0.00 MB, 8 条)
-
-**字段** (5): `LoadingFuncID, LoadingFuncType, LoadingFuncTypeParam, LoadingRandomParam, RandomNumber`
-
-**首条记录摘要**:
-```json
-{
-  "LoadingFuncID": 101,
-  "LoadingFuncType": "WorldTele",
-  "LoadingFuncTypeParam": [
-    100
-  ],
-  "RandomNumber": 10,
-  "LoadingRandomParam": "<dict[3]>"
-}
-```
-
 ### MonopolyCellResource.json (0.00 MB, 13 条)
 
 **字段** (3): `IconPath, ResourceID, Type`
@@ -29357,6 +29784,30 @@
 }
 ```
 
+### ExpeditionBattleMap.json (0.00 MB, 4 条)
+
+**字段** (7): `ActivityModuleID, ExpeditionBGM, ExpeditionBackgroundPrefabPath, ID, MapIconPath, MapName, RouteIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 101,
+  "ActivityModuleID": 5010601,
+  "RouteIDList": [
+    10201,
+    10202,
+    10203,
+    10204
+  ],
+  "MapName": {
+    "Hash": 14969595882551478116
+  },
+  "MapIconPath": "SpriteOutput/UI/Quest/ExpeditionBattle/S...",
+  "ExpeditionBackgroundPrefabPath": "SpriteOutput/UI/Quest/ExpeditionBattle/E...",
+  "ExpeditionBGM": "State_Menu_Season_Planarcadia_Combat_ADV..."
+}
+```
+
 ### ActivityHipplenClientConst.json (0.00 MB, 12 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -29368,6 +29819,18 @@
   "Value": {
     "IntValue": 40
   }
+}
+```
+
+### MapSpaceTypeConfig.json (0.00 MB, 10 条)
+
+**字段** (4): `Icon, MapSpaceType, Name, SortID`
+
+**首条记录摘要**:
+```json
+{
+  "Icon": "",
+  "SortID": 1
 }
 ```
 
@@ -29585,6 +30048,35 @@
   "LayerID": "Low",
   "MapScore": 15,
   "RewardID": 8002002
+}
+```
+
+### LimaoNewsSpecial.json (0.00 MB, 6 条)
+
+**字段** (7): `AEONKNDCDKN, BDKECJFBAJJ, CFKKNEHABHH, IHALCLABNOJ, LIDHGBEAJMA, OMLFNLJDHKG, OOKJNEGICEI`
+
+**首条记录摘要**:
+```json
+{
+  "IHALCLABNOJ": 1,
+  "OOKJNEGICEI": [
+    201,
+    202,
+    203
+  ],
+  "OMLFNLJDHKG": [
+    2400030
+  ],
+  "BDKECJFBAJJ": [
+    2400004
+  ],
+  "AEONKNDCDKN": 8015010,
+  "LIDHGBEAJMA": [
+    201001,
+    202003,
+    201010
+  ],
+  "CFKKNEHABHH": "PressConference"
 }
 ```
 
@@ -29812,6 +30304,29 @@
 }
 ```
 
+### FiveDimFluteTalkConfig.json (0.00 MB, 4 条)
+
+**字段** (7): `EnterTipsTextID, ErrorTIpsTextID, FluteID, IconPath, IconPathErrorTIps, IconPathInputTips, InputTipsTextID`
+
+**首条记录摘要**:
+```json
+{
+  "FluteID": 1052101,
+  "IconPath": "SpriteOutput/AvatarShopIcon/Avatar/1502....",
+  "IconPathInputTips": "SpriteOutput/AvatarShopIcon/Avatar/1505....",
+  "IconPathErrorTIps": "SpriteOutput/AvatarShopIcon/Avatar/1502....",
+  "EnterTipsTextID": {
+    "Hash": 6942614650430467242
+  },
+  "InputTipsTextID": {
+    "Hash": 4890749676782546261
+  },
+  "ErrorTIpsTextID": {
+    "Hash": 14729659591316585031
+  }
+}
+```
+
 ### IdleLiveChestRank.json (0.00 MB, 12 条)
 
 **字段** (3): `Rank, RarityList, RequiredLevel`
@@ -29987,18 +30502,6 @@
 }
 ```
 
-### MapSpaceTypeConfig.json (0.00 MB, 9 条)
-
-**字段** (4): `Icon, MapSpaceType, Name, SortID`
-
-**首条记录摘要**:
-```json
-{
-  "Icon": "",
-  "SortID": 1
-}
-```
-
 ### RogueMagicLayer.json (0.00 MB, 32 条)
 
 **字段** (2): `LayerID, LayerNumID`
@@ -30045,6 +30548,19 @@
 }
 ```
 
+### LimaoNewsLocation.json (0.00 MB, 18 条)
+
+**字段** (2): `HIHLLBFEONI, JFKMCIFGHLK`
+
+**首条记录摘要**:
+```json
+{
+  "JFKMCIFGHLK": {
+    "Hash": 1652022200471624107
+  }
+}
+```
+
 ### HeartDialBillboard.json (0.00 MB, 24 条)
 
 **字段** (3): `EmoType, MapIconID, StepType`
@@ -30053,6 +30569,32 @@
 ```json
 {
   "MapIconID": 136
+}
+```
+
+### B51RacingStat.json (0.00 MB, 5 条)
+
+**字段** (6): `Desc, ExtraRatio, ID, IconPath, Name, TierRequireValueList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": "Speed",
+  "TierRequireValueList": [
+    20,
+    40,
+    60,
+    80,
+    100
+  ],
+  "ExtraRatio": 0.3,
+  "Name": {
+    "Hash": 15986395408019492545
+  },
+  "Desc": {
+    "Hash": 2499249998271908000
+  },
+  "IconPath": "SpriteOutput/Rogue/Skill/Mid/IconRogueMa..."
 }
 ```
 
@@ -30102,6 +30644,19 @@
   "LOGJBKBLNEM": {
     "Hash": 730154098405166495
   }
+}
+```
+
+### StageInvasionConfig.json (0.00 MB, 5 条)
+
+**字段** (3): `InvasionID, MonsterInvasionList, StageID`
+
+**首条记录摘要**:
+```json
+{
+  "StageID": 30509012,
+  "InvasionID": 2,
+  "MonsterInvasionList": "<list[2]>"
 }
 ```
 
@@ -30470,6 +31025,63 @@
 }
 ```
 
+### AvatarGlobalBuffConfig.json (0.00 MB, 2 条)
+
+**字段** (16): `AvatarID, Desc, ExtraEffectIDList, GameModeBlackList, MazeBuffID, Name, ParamList, SimpleDesc, SimpleExtraEffectIDList, SimpleParamList, SkillID, SkillTag, StageTypeBlackList, TeamBlackList, TeamStageTypeBlackList, TrialBagStageTypeWhiteList`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1407,
+  "SkillID": 140704,
+  "Name": {
+    "Hash": 3729928132145580437
+  },
+  "SkillTag": {
+    "Hash": 12601813654230214900
+  },
+  "Desc": {
+    "Hash": 16078873302292030459
+  },
+  "SimpleDesc": {
+    "Hash": 16866159443345519704
+  },
+  "ParamList": [
+    {
+      "Value": 0.1
+    }
+  ],
+  "SimpleParamList": [],
+  "ExtraEffectIDList": [
+    10000007
+  ],
+  "SimpleExtraEffectIDList": [],
+  "MazeBuffID": 140703,
+  "GameModeBlackList": [
+    14,
+    15
+  ],
+  "StageTypeBlackList": [
+    17,
+    19,
+    37,
+    39
+  ],
+  "TeamStageTypeBlackList": [
+    17,
+    19,
+    37,
+    39
+  ],
+  "TeamBlackList": [
+    15
+  ],
+  "TrialBagStageTypeWhiteList": [
+    1
+  ]
+}
+```
+
 ### PlanetFesSummary.json (0.00 MB, 9 条)
 
 **字段** (4): `Description, ID, Name, TargetNum`
@@ -30630,6 +31242,25 @@
 }
 ```
 
+### MainStoryActView.json (0.00 MB, 6 条)
+
+**字段** (6): `BannerPicPath, ChronicleChapterName, ID, IsCompletionOverride, Name, SortID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 101,
+  "Name": {
+    "Hash": 12797381317990825304
+  },
+  "ChronicleChapterName": {
+    "Hash": 17098130525213388215
+  },
+  "SortID": 9,
+  "BannerPicPath": "SpriteOutput/DailyMission/Banner/MainSto..."
+}
+```
+
 ### RecordRefresh.json (0.00 MB, 14 条)
 
 **字段** (3): `RefreshID, RefreshTime, RefreshType`
@@ -30657,35 +31288,6 @@
   "KEGANNHEKHA": {
     "Hash": 15504529651900913142
   }
-}
-```
-
-### LimaoNewsSpecial.json (0.00 MB, 5 条)
-
-**字段** (7): `AEONKNDCDKN, BDKECJFBAJJ, CFKKNEHABHH, IHALCLABNOJ, LIDHGBEAJMA, OMLFNLJDHKG, OOKJNEGICEI`
-
-**首条记录摘要**:
-```json
-{
-  "IHALCLABNOJ": 1,
-  "OOKJNEGICEI": [
-    201,
-    202,
-    203
-  ],
-  "OMLFNLJDHKG": [
-    2400030
-  ],
-  "BDKECJFBAJJ": [
-    2400004
-  ],
-  "AEONKNDCDKN": 8015010,
-  "LIDHGBEAJMA": [
-    201001,
-    202003,
-    201010
-  ],
-  "CFKKNEHABHH": "PressConference"
 }
 ```
 
@@ -30724,58 +31326,14 @@
 }
 ```
 
-### AvatarGlobalBuffConfig.json (0.00 MB, 2 条)
+### BattleAreaUnifiedConfig.json (0.00 MB, 56 条)
 
-**字段** (16): `AvatarID, Desc, ExtraEffectIDList, GameModeBlackList, MazeBuffID, Name, ParamList, SimpleDesc, SimpleExtraEffectIDList, SimpleParamList, SkillID, SkillTag, StageTypeBlackList, TeamBlackList, TeamStageTypeBlackList, TrialBagStageTypeWhiteList`
+**字段** (1): `ID`
 
 **首条记录摘要**:
 ```json
 {
-  "AvatarID": 1407,
-  "SkillID": 140704,
-  "Name": {
-    "Hash": 3729928132145580437
-  },
-  "SkillTag": {
-    "Hash": 12601813654230214900
-  },
-  "Desc": {
-    "Hash": 16078873302292030459
-  },
-  "SimpleDesc": {
-    "Hash": 16866159443345519704
-  },
-  "ParamList": [
-    {
-      "Value": 0.1
-    }
-  ],
-  "SimpleParamList": [],
-  "ExtraEffectIDList": [
-    10000007
-  ],
-  "SimpleExtraEffectIDList": [],
-  "MazeBuffID": 140703,
-  "GameModeBlackList": [
-    14,
-    15
-  ],
-  "StageTypeBlackList": [
-    17,
-    19,
-    37
-  ],
-  "TeamStageTypeBlackList": [
-    17,
-    19,
-    37
-  ],
-  "TeamBlackList": [
-    15
-  ],
-  "TrialBagStageTypeWhiteList": [
-    1
-  ]
+  "ID": 1001
 }
 ```
 
@@ -30796,6 +31354,19 @@
     102,
     103
   ]
+}
+```
+
+### ActivityVersionBanner.json (0.00 MB, 19 条)
+
+**字段** (3): `ActivityID, ChapterID, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ActivityID": 80012,
+  "Type": "Gap",
+  "ChapterID": 103005
 }
 ```
 
@@ -30863,17 +31434,6 @@
 }
 ```
 
-### BattleAreaUnifiedConfig.json (0.00 MB, 55 条)
-
-**字段** (1): `ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001
-}
-```
-
 ### PlanetFesGameRewardPool.json (0.00 MB, 8 条)
 
 **字段** (4): `Order, RewardParam, RewardPoolID, Type`
@@ -30918,19 +31478,6 @@
 }
 ```
 
-### LimaoNewsLocation.json (0.00 MB, 16 条)
-
-**字段** (2): `HIHLLBFEONI, JFKMCIFGHLK`
-
-**首条记录摘要**:
-```json
-{
-  "JFKMCIFGHLK": {
-    "Hash": 1652022200471624107
-  }
-}
-```
-
 ### TrainPartyConstValueCommon.json (0.00 MB, 8 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -30955,6 +31502,18 @@
     "Hash": 12540321204931201235
   },
   "GradeIcon": "SpriteOutput/Quest/Hipplen/HipplenRankIc..."
+}
+```
+
+### FiveDimBillboardConfig.json (0.00 MB, 8 条)
+
+**字段** (2): `BillboardPath, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "BillboardPath": "Stages/OriginalResPos/InteractiveProp/Ch..."
 }
 ```
 
@@ -31100,6 +31659,36 @@
   "BuyPos": {
     "ShopID": 1000,
     "ShopGoodID": 1000001
+  }
+}
+```
+
+### ActivityEquipMaterialQuest.json (0.00 MB, 12 条)
+
+**字段** (4): `GotoID, ProgressText, QuestID, RealProgress`
+
+**首条记录摘要**:
+```json
+{
+  "QuestID": 6070393,
+  "ProgressText": {
+    "Hash": 12028054528996864007
+  },
+  "RealProgress": 1,
+  "GotoID": 6280
+}
+```
+
+### ExpeditionBattleConstCommon.json (0.00 MB, 10 条)
+
+**字段** (2): `ConstValueName, Value`
+
+**首条记录摘要**:
+```json
+{
+  "ConstValueName": "ExpeditionBattle_RouteCountPerMap",
+  "Value": {
+    "IntValue": 4
   }
 }
 ```
@@ -31376,6 +31965,20 @@
 }
 ```
 
+### OfferingTypeConfig.json (0.00 MB, 15 条)
+
+**字段** (7): `ActivityModuleID, ID, IsAutoOffer, ItemID, LongTailLimit, MaxLevel, UnlockID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "ItemID": 120003,
+  "MaxLevel": 50,
+  "UnlockID": 9937
+}
+```
+
 ### ItemComposeTag.json (0.00 MB, 12 条)
 
 **字段** (3): `BelongTypeID, ItemComposeTagID, TagTextmapID`
@@ -31386,6 +31989,19 @@
   "ItemComposeTagID": 1,
   "BelongTypeID": 2,
   "TagTextmapID": "ItemComposeTag_TagTextmapID_1"
+}
+```
+
+### LoadingWorldImage.json (0.00 MB, 8 条)
+
+**字段** (4): `EffectContainer, ImagePath, PamuPrefabName, WorldID`
+
+**首条记录摘要**:
+```json
+{
+  "ImagePath": "SpriteOutput/LoadingPic/LoadingBg/BgLoad...",
+  "EffectContainer": "",
+  "PamuPrefabName": "Pamu_Walk"
 }
 ```
 
@@ -31499,33 +32115,6 @@
 }
 ```
 
-### OfferingTypeConfig.json (0.00 MB, 15 条)
-
-**字段** (7): `ActivityModuleID, ID, IsAutoOffer, ItemID, LongTailLimit, MaxLevel, UnlockID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "ItemID": 120003,
-  "MaxLevel": 50,
-  "UnlockID": 9937
-}
-```
-
-### ActivityVersionBanner.json (0.00 MB, 17 条)
-
-**字段** (3): `ActivityID, ChapterID, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ActivityID": 80012,
-  "Type": "Gap",
-  "ChapterID": 103005
-}
-```
-
 ### TalkSentenceImage.json (0.00 MB, 10 条)
 
 **字段** (3): `Comment, ImagePath, Speaker`
@@ -31633,6 +32222,24 @@
 }
 ```
 
+### WorldUnlockConfig.json (0.00 MB, 4 条)
+
+**字段** (8): `DirectUnlockCondition, ID, InitMainMissionList, NewWorldHintDialogActivityID, NewWorldHintDialogPrefab, PreWorldID, WorldPreUnlockEndMission, WorldPreUnlockStartMission`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 501,
+  "InitMainMissionList": [
+    1040101
+  ],
+  "DirectUnlockCondition": "![RealFinishMainMission:1036106] |![SubM...",
+  "WorldPreUnlockStartMission": 1040101,
+  "WorldPreUnlockEndMission": 1040101,
+  "NewWorldHintDialogPrefab": ""
+}
+```
+
 ### SwordTrainingMood.json (0.00 MB, 4 条)
 
 **字段** (8): `EffectDesc, EffectIDList, EffectNumDesc, MaximumValue, MinimumValue, MoodIcon, MoodLevel, MoodStatus`
@@ -31735,18 +32342,6 @@
   "Name": {
     "Hash": 8312944906758085024
   }
-}
-```
-
-### RoguePersonaConstCommon.json (0.00 MB, 4 条)
-
-**字段** (2): `ConstValueName, Value`
-
-**首条记录摘要**:
-```json
-{
-  "ConstValueName": "RogueTournPersona_FixedCompList",
-  "Value": "<dict[1]>"
 }
 ```
 
@@ -31957,6 +32552,22 @@
 }
 ```
 
+### B51RacingTeam.json (0.00 MB, 7 条)
+
+**字段** (4): `ID, IconPath, InitialPoint, Name`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Name": {
+    "Hash": 3734991569412985893
+  },
+  "IconPath": "SpriteOutput/Quest/B51Racing/Logo/B51Rac...",
+  "InitialPoint": 26
+}
+```
+
 ### RogueArcade.json (0.00 MB, 10 条)
 
 **字段** (4): `AdventureType, ArcadeID, ArcadeRoomID, ParamGroupID`
@@ -32001,22 +32612,6 @@
     2400069
   ],
   "IsTriggerEvent": true
-}
-```
-
-### AssistantTipsConfig.json (0.00 MB, 8 条)
-
-**字段** (4): `Content, ParamList, TipsID, TipsRule`
-
-**首条记录摘要**:
-```json
-{
-  "TipsID": 101,
-  "TipsRule": "ElfRestaurantTargetRecipe",
-  "Content": {
-    "Hash": 8322360841397471378
-  },
-  "ParamList": []
 }
 ```
 
@@ -32190,6 +32785,21 @@
 }
 ```
 
+### LimaoNewsLimao.json (0.00 MB, 9 条)
+
+**字段** (5): `BGOLMOKHCGD, CPCMBMBFBAI, EDFKEENLOFF, FPDNFOLDFOB, JAKLCIIEDON`
+
+**首条记录摘要**:
+```json
+{
+  "CPCMBMBFBAI": 1,
+  "BGOLMOKHCGD": 2501,
+  "JAKLCIIEDON": 1,
+  "FPDNFOLDFOB": true,
+  "EDFKEENLOFF": []
+}
+```
+
 ### TarotBookEnergy.json (0.00 MB, 12 条)
 
 **字段** (4): `IsRepetitive, IsSilence, SubmissionID, Toast`
@@ -32201,6 +32811,28 @@
   "IsSilence": true,
   "Toast": {
     "Hash": 8023939880902216691
+  }
+}
+```
+
+### B51RacingDriver.json (0.00 MB, 4 条)
+
+**字段** (5): `AddStatMap, AvatarIconPath, Desc, ID, Name`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Name": {
+    "Hash": 5522242657658569279
+  },
+  "Desc": {
+    "Hash": 13915176787150994345
+  },
+  "AvatarIconPath": "SpriteOutput/Quest/B51Racing/DriverAvata...",
+  "AddStatMap": {
+    "Acceleration": 10,
+    "Charge": 10
   }
 }
 ```
@@ -32236,6 +32868,25 @@
   "PresetName": {
     "Hash": 13679938612936039877
   }
+}
+```
+
+### LimaoNewsWorkResult.json (0.00 MB, 6 条)
+
+**字段** (4): `CNHMEJDOMAK, JLCMIFIDGNF, OCOBPNMHGIO, PHKHAFCBGMH`
+
+**首条记录摘要**:
+```json
+{
+  "PHKHAFCBGMH": 1001,
+  "OCOBPNMHGIO": "Config/Level/LINews/Work/LimaoWork01Back...",
+  "CNHMEJDOMAK": 1001501,
+  "JLCMIFIDGNF": [
+    102,
+    101,
+    103,
+    104
+  ]
 }
 ```
 
@@ -32407,19 +33058,6 @@
   ],
   "ScoringGroupID": 5001,
   "IconPath": ""
-}
-```
-
-### LoadingWorldImage.json (0.00 MB, 7 条)
-
-**字段** (4): `EffectContainer, ImagePath, PamuPrefabName, WorldID`
-
-**首条记录摘要**:
-```json
-{
-  "ImagePath": "SpriteOutput/LoadingPic/LoadingBg/BgLoad...",
-  "EffectContainer": "",
-  "PamuPrefabName": "Pamu_Walk"
 }
 ```
 
@@ -32671,6 +33309,21 @@
 }
 ```
 
+### ScheduleDataGlobal.json (0.00 MB, 7 条)
+
+**字段** (5): `BeginTime, EndTime, GlobalBeginTime, GlobalEndTime, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 291008,
+  "BeginTime": "2023-12-11 04:00:00",
+  "GlobalBeginTime": "",
+  "EndTime": "2023-12-25 04:00:00",
+  "GlobalEndTime": "2023-12-27 06:00:00"
+}
+```
+
 ### MatchThreeAvatarSkillDialog.json (0.00 MB, 10 条)
 
 **字段** (3): `AvatarPic, EnvironmentID, ID`
@@ -32794,18 +33447,6 @@
 }
 ```
 
-### FiveDimBillboardConfig.json (0.00 MB, 6 条)
-
-**字段** (2): `BillboardPath, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "BillboardPath": "Stages/OriginalResPos/InteractiveProp/Ch..."
-}
-```
-
 ### GFActivityResidentConfig.json (0.00 MB, 1 条)
 
 **字段** (11): `ActivityID, ActivityModuleID, ActivityTagList, DisplayItemList, IntroGuideImg, RelatedActivityPanelID, ResidentBrief, ResidentDesc, ResidentName, SortWeight, TitleIconPath`
@@ -32831,7 +33472,7 @@
   "ActivityTagList": [
     3
   ],
-  "SortWeight": 6040
+  "SortWeight": 6036
 }
 ```
 
@@ -32946,22 +33587,6 @@
 }
 ```
 
-### MainStoryActView.json (0.00 MB, 6 条)
-
-**字段** (5): `BannerPicPath, ID, IsCompletionOverride, Name, SortID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 101,
-  "Name": {
-    "Hash": 12797381317990825304
-  },
-  "SortID": 9,
-  "BannerPicPath": "SpriteOutput/DailyMission/Banner/MainSto..."
-}
-```
-
 ### BackGroundMusicGroup.json (0.00 MB, 7 条)
 
 **字段** (4): `GroupIcon, GroupName, ID, Type`
@@ -33006,6 +33631,35 @@
   "Name": {
     "Hash": 5485505503116308815
   }
+}
+```
+
+### TrainExteriorConfig.json (0.00 MB, 10 条)
+
+**字段** (4): `Conditions, DynamicOptionalBlock, ID, Priority`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 100,
+  "Priority": 1,
+  "Conditions": [],
+  "DynamicOptionalBlock": "100"
+}
+```
+
+### RogueTournWorkbench.json (0.00 MB, 14 条)
+
+**字段** (2): `FuncList, WorkbenchID`
+
+**首条记录摘要**:
+```json
+{
+  "WorkbenchID": 101,
+  "FuncList": [
+    2,
+    1
+  ]
 }
 ```
 
@@ -33071,24 +33725,6 @@
 }
 ```
 
-### RogueTournWorkbenchFunc.json (0.00 MB, 6 条)
-
-**字段** (4): `FuncDesc, FuncID, FuncName, FuncType`
-
-**首条记录摘要**:
-```json
-{
-  "FuncID": 1,
-  "FuncType": "BuffEnhance",
-  "FuncName": {
-    "Hash": 14270682151257424115
-  },
-  "FuncDesc": {
-    "Hash": 14227153442758834295
-  }
-}
-```
-
 ### TreasureDungeoActivityQuest.json (0.00 MB, 6 条)
 
 **字段** (4): `DungeonGroupID, ID, Name, QuestList`
@@ -33149,6 +33785,18 @@
 }
 ```
 
+### AvatarSourceConfig.json (0.00 MB, 18 条)
+
+**字段** (2): `AvatarID, SourceAvatarID`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 8901,
+  "SourceAvatarID": 8001
+}
+```
+
 ### ParkourLevelGroup.json (0.00 MB, 5 条)
 
 **字段** (4): `ID, LevelIDList, Name, ResPath`
@@ -33182,6 +33830,20 @@
   },
   "BackGroundImagePath": "SpriteOutput/DailyMission/TeachCompleteI...",
   "TabIconPath": "SpriteOutput/TabIcon/Teach/BattleTeachBa..."
+}
+```
+
+### PhotoGraphConfig.json (0.00 MB, 6 条)
+
+**字段** (3): `EmotionID, EmotionIconPath, EmotionName`
+
+**首条记录摘要**:
+```json
+{
+  "EmotionName": {
+    "Hash": 11485770122095695563
+  },
+  "EmotionIconPath": "SpriteOutput/CameraIcon/CameraPic/Camera..."
 }
 ```
 
@@ -33454,24 +34116,6 @@
 }
 ```
 
-### ActivityHot.json (0.00 MB, 4 条)
-
-**字段** (8): `ActivityID, ActivityName, DesName, ImgPath, ItemDes, RewardReceived, RewardShow, SortWeight`
-
-**首条记录摘要**:
-```json
-{
-  "ActivityID": 10172,
-  "DesName": {
-    "Hash": 633537383099069310
-  },
-  "ImgPath": "",
-  "SortWeight": 6004,
-  "RewardShow": [],
-  "RewardReceived": []
-}
-```
-
 ### PSTrophyGroup.json (0.00 MB, 10 条)
 
 **字段** (2): `PSTrophyGroup, TrophyGroup`
@@ -33542,20 +34186,6 @@
   "TagName": {
     "Hash": 7535031826393913187
   }
-}
-```
-
-### TrainExteriorConfig.json (0.00 MB, 9 条)
-
-**字段** (4): `Conditions, DynamicOptionalBlock, ID, Priority`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 100,
-  "Priority": 1,
-  "Conditions": [],
-  "DynamicOptionalBlock": "100"
 }
 ```
 
@@ -34112,20 +34742,6 @@
 }
 ```
 
-### LimaoNewsLimao.json (0.00 MB, 9 条)
-
-**字段** (4): `BGOLMOKHCGD, CPCMBMBFBAI, FPDNFOLDFOB, JAKLCIIEDON`
-
-**首条记录摘要**:
-```json
-{
-  "CPCMBMBFBAI": 1,
-  "BGOLMOKHCGD": 2501,
-  "JAKLCIIEDON": 1,
-  "FPDNFOLDFOB": true
-}
-```
-
 ### RogueTournExhibitionConfig.json (0.00 MB, 12 条)
 
 **字段** (3): `Floor, PaintingID, Type`
@@ -34281,29 +34897,6 @@
 }
 ```
 
-### FiveDimFluteTalkConfig.json (0.00 MB, 2 条)
-
-**字段** (7): `EnterTipsTextID, ErrorTIpsTextID, FluteID, IconPath, IconPathErrorTIps, IconPathInputTips, InputTipsTextID`
-
-**首条记录摘要**:
-```json
-{
-  "FluteID": 1052101,
-  "IconPath": "SpriteOutput/AvatarShopIcon/Avatar/1502....",
-  "IconPathInputTips": "SpriteOutput/AvatarShopIcon/Avatar/1505....",
-  "IconPathErrorTIps": "SpriteOutput/AvatarShopIcon/Avatar/1502....",
-  "EnterTipsTextID": {
-    "Hash": 6942614650430467242
-  },
-  "InputTipsTextID": {
-    "Hash": 4890749676782546261
-  },
-  "ErrorTIpsTextID": {
-    "Hash": 14729659591316585031
-  }
-}
-```
-
 ### AvatarSkillPropertyOverride.json (0.00 MB, 6 条)
 
 **字段** (5): `DisableIconColorHint, IsSecretSkillNeed, OverrideAttackType, ReplacePointIconPrefab, SkillID`
@@ -34314,25 +34907,6 @@
   "SkillID": 140703,
   "IsSecretSkillNeed": true,
   "ReplacePointIconPrefab": ""
-}
-```
-
-### WorldUnlockConfig.json (0.00 MB, 3 条)
-
-**字段** (6): `DirectUnlockCondition, ID, InitMainMissionList, MainMissionIDList, NewWorldHintDialogActivityID, NewWorldHintDialogPrefab`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 501,
-  "InitMainMissionList": [
-    1040101
-  ],
-  "DirectUnlockCondition": "![RealFinishMainMission:1036106] |![SubM...",
-  "MainMissionIDList": [
-    1040101
-  ],
-  "NewWorldHintDialogPrefab": ""
 }
 ```
 
@@ -34458,34 +35032,6 @@
 }
 ```
 
-### ActivityEquipMaterialQuest.json (0.00 MB, 8 条)
-
-**字段** (4): `GotoID, ProgressText, QuestID, RealProgress`
-
-**首条记录摘要**:
-```json
-{
-  "QuestID": 6070393,
-  "ProgressText": {
-    "Hash": 12028054528996864007
-  },
-  "RealProgress": 1,
-  "GotoID": 6280
-}
-```
-
-### LimaoNewsMessage.json (0.00 MB, 11 条)
-
-**字段** (3): `IIAJADPLGLH, JNFGLIOMLEJ, JOPENKFKBOH`
-
-**首条记录摘要**:
-```json
-{
-  "IIAJADPLGLH": 1000001,
-  "JNFGLIOMLEJ": 100000100
-}
-```
-
 ### ActivityBonusRewardPunkLord.json (0.00 MB, 8 条)
 
 **字段** (4): `BonusID, BonusType, DisplayItemID, DropList`
@@ -34498,21 +35044,6 @@
   "DisplayItemID": 2,
   "DropList": [
     3200000
-  ]
-}
-```
-
-### RogueTournWorkbench.json (0.00 MB, 11 条)
-
-**字段** (2): `FuncList, WorkbenchID`
-
-**首条记录摘要**:
-```json
-{
-  "WorkbenchID": 101,
-  "FuncList": [
-    2,
-    1
   ]
 }
 ```
@@ -34605,18 +35136,24 @@
 }
 ```
 
-### ScheduleDataGlobal.json (0.00 MB, 5 条)
+### LimaoNewsMainPage.json (0.00 MB, 4 条)
 
-**字段** (5): `BeginTime, EndTime, GlobalBeginTime, GlobalEndTime, ID`
+**字段** (5): `BGGDPGOLLEM, GKPHGMMADOJ, GOKGDDNGGPI, HFGNHCDNPHL, IDCGINLDIAD`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 291008,
-  "BeginTime": "2023-12-11 04:00:00",
-  "GlobalBeginTime": "",
-  "EndTime": "2023-12-25 04:00:00",
-  "GlobalEndTime": "2023-12-27 06:00:00"
+  "HFGNHCDNPHL": 1,
+  "GOKGDDNGGPI": "DuomensionCity",
+  "GKPHGMMADOJ": [
+    1
+  ],
+  "BGGDPGOLLEM": [
+    1,
+    2,
+    3
+  ],
+  "IDCGINLDIAD": []
 }
 ```
 
@@ -34695,6 +35232,27 @@
     "Hash": 4083090006468002294
   },
   "LevelSkipStarUpDetail": 5
+}
+```
+
+### ActivityEquipmentReward.json (0.00 MB, 3 条)
+
+**字段** (6): `ActivityModuleID, EquipmentRewardQuestGotoID, EquipmentRewardQuestID, ID, MainMissionID, MaterialRewardQuestIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 50042,
+  "MainMissionID": 8035101,
+  "EquipmentRewardQuestID": 6070397,
+  "EquipmentRewardQuestGotoID": 6282,
+  "MaterialRewardQuestIDList": [
+    6070393,
+    6070394,
+    6070395,
+    6070396
+  ],
+  "ActivityModuleID": 5004201
 }
 ```
 
@@ -34996,6 +35554,19 @@
 }
 ```
 
+### RogueTournModule.json (0.00 MB, 9 条)
+
+**字段** (3): `ActivityModuleID, MainTournID, SubTournID`
+
+**首条记录摘要**:
+```json
+{
+  "MainTournID": 1,
+  "SubTournID": 1,
+  "ActivityModuleID": 6001101
+}
+```
+
 ### DrinkMakerCheersPerformance.json (0.00 MB, 10 条)
 
 **字段** (3): `GroupID, ID, PerformanceID`
@@ -35193,18 +35764,6 @@
 }
 ```
 
-### AvatarSourceConfig.json (0.00 MB, 12 条)
-
-**字段** (2): `AvatarID, SourceAvatarID`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 8901,
-  "SourceAvatarID": 8001
-}
-```
-
 ### CycleScoreReward.json (0.00 MB, 10 条)
 
 **字段** (3): `Reward, Score, ScoreRank`
@@ -35367,19 +35926,6 @@
   "PBLPLDJKPEI": [
     5
   ]
-}
-```
-
-### RogueTournModule.json (0.00 MB, 8 条)
-
-**字段** (3): `ActivityModuleID, MainTournID, SubTournID`
-
-**首条记录摘要**:
-```json
-{
-  "MainTournID": 1,
-  "SubTournID": 1,
-  "ActivityModuleID": 6001101
 }
 ```
 
@@ -35861,6 +36407,44 @@
 }
 ```
 
+### B51RacingCycle.json (0.00 MB, 2 条)
+
+**字段** (6): `CarIDList, DriverIDList, ID, PaintIDList, PartIDList, TeamIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "DriverIDList": [
+    1,
+    2
+  ],
+  "CarIDList": [
+    1
+  ],
+  "PaintIDList": [
+    1,
+    2
+  ],
+  "PartIDList": [
+    1,
+    2,
+    5,
+    6,
+    9,
+    10
+  ],
+  "TeamIDList": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    10
+  ]
+}
+```
+
 ### ParkourBGMConfig.json (0.00 MB, 4 条)
 
 **字段** (3): `FastEventName, ID, NormalEventName`
@@ -35928,6 +36512,18 @@
 }
 ```
 
+### World3DMapEntranceConfig.json (0.00 MB, 9 条)
+
+**字段** (6): `Anchor, ConditionParamInt, ConditionType, FormID, ID, Priority`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 101,
+  "Anchor": "W0"
+}
+```
+
 ### FateRinHouguTag.json (0.00 MB, 5 条)
 
 **字段** (3): `NHALJPDONCP, OCBFMPOCBIK, PHFMCACHFIJ`
@@ -35940,6 +36536,20 @@
     "Hash": 3682576761072467301
   },
   "OCBFMPOCBIK": "type1"
+}
+```
+
+### LimaoNewsConstValueClient.json (0.00 MB, 6 条)
+
+**字段** (2): `ConstValueName, Value`
+
+**首条记录摘要**:
+```json
+{
+  "ConstValueName": "Limao_News_Ban",
+  "Value": {
+    "IntValue": 0
+  }
 }
 ```
 
@@ -36091,6 +36701,19 @@
 }
 ```
 
+### MessageContactsCondition.json (0.00 MB, 7 条)
+
+**字段** (3): `FakeContactID, ID, TruthMissionCondition`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 36,
+  "TruthMissionCondition": 2020302,
+  "FakeContactID": 57
+}
+```
+
 ### ConstValueChallengeClient.json (0.00 MB, 5 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -36153,6 +36776,21 @@
 }
 ```
 
+### RecommendDisplay.json (0.00 MB, 3 条)
+
+**字段** (5): `EnvironmentProfilePath, ID, IntroID, UI3DPrefab, UIPrefab`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10,
+  "UIPrefab": "",
+  "UI3DPrefab": "UI/UI3D/ShopActivity/UI3D_ShopGiftPack2_...",
+  "EnvironmentProfilePath": "",
+  "IntroID": 204
+}
+```
+
 ### RecommendConstValueCommon.json (0.00 MB, 4 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -36199,6 +36837,24 @@
     "Hash": 9367552517932764181
   },
   "MissionID": 8001241
+}
+```
+
+### ActivityHot.json (0.00 MB, 3 条)
+
+**字段** (6): `ActivityID, DesName, ImgPath, RewardReceived, RewardShow, SortWeight`
+
+**首条记录摘要**:
+```json
+{
+  "ActivityID": 10178,
+  "DesName": {
+    "Hash": 17017265072005159103
+  },
+  "ImgPath": "",
+  "SortWeight": 6003,
+  "RewardShow": [],
+  "RewardReceived": []
 }
 ```
 
@@ -36312,27 +36968,6 @@
   "RoleRemark": {
     "Hash": 14344086811640825811
   }
-}
-```
-
-### ActivityEquipmentReward.json (0.00 MB, 2 条)
-
-**字段** (6): `ActivityModuleID, EquipmentRewardQuestGotoID, EquipmentRewardQuestID, ID, MainMissionID, MaterialRewardQuestIDList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 50042,
-  "MainMissionID": 8035101,
-  "EquipmentRewardQuestID": 6070397,
-  "EquipmentRewardQuestGotoID": 6282,
-  "MaterialRewardQuestIDList": [
-    6070393,
-    6070394,
-    6070395,
-    6070396
-  ],
-  "ActivityModuleID": 5004201
 }
 ```
 
@@ -36551,26 +37186,6 @@
 }
 ```
 
-### LimaoNewsMainPage.json (0.00 MB, 3 条)
-
-**字段** (4): `BGGDPGOLLEM, GKPHGMMADOJ, HFGNHCDNPHL, IDCGINLDIAD`
-
-**首条记录摘要**:
-```json
-{
-  "HFGNHCDNPHL": 1,
-  "GKPHGMMADOJ": [
-    1
-  ],
-  "BGGDPGOLLEM": [
-    1,
-    2,
-    3
-  ],
-  "IDCGINLDIAD": []
-}
-```
-
 ### MatchThreeVersion.json (0.00 MB, 3 条)
 
 **字段** (4): `ActivityID, ActivityVersion, BirdIDList, PVPModuleID`
@@ -36675,6 +37290,22 @@
 }
 ```
 
+### B51RacingLivery.json (0.00 MB, 4 条)
+
+**字段** (4): `AssetPath, ID, IconPath, Name`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Name": {
+    "Hash": 10480788566298478056
+  },
+  "AssetPath": "_G_Paint",
+  "IconPath": ""
+}
+```
+
 ### IdleLiveTeamSlotLevelLimit.json (0.00 MB, 10 条)
 
 **字段** (2): `LevelLimit, UnlockID`
@@ -36771,36 +37402,6 @@
 }
 ```
 
-### PreAvatarTextmapConfig.json (0.00 MB, 5 条)
-
-**字段** (2): `PreAvatarID, PreAvatarName`
-
-**首条记录摘要**:
-```json
-{
-  "PreAvatarID": 1510,
-  "PreAvatarName": {
-    "Hash": 8203254166742420857
-  }
-}
-```
-
-### ItemComefromLimit.json (0.00 MB, 4 条)
-
-**字段** (4): `ComefromID, ID, OpenParaList, OpenType`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 281,
-  "ComefromID": 2,
-  "OpenType": "FinishQuest",
-  "OpenParaList": [
-    2200502
-  ]
-}
-```
-
 ### IdleLiveMessage.json (0.00 MB, 5 条)
 
 **字段** (5): `MessageID, RewardID, StartContentID, TriggerID, UnlockID`
@@ -36831,19 +37432,6 @@
 }
 ```
 
-### MessageContactsCondition.json (0.00 MB, 6 条)
-
-**字段** (3): `FakeContactID, ID, TruthMissionCondition`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 36,
-  "TruthMissionCondition": 2020302,
-  "FakeContactID": 57
-}
-```
-
 ### MarbleBuffHint.json (0.00 MB, 6 条)
 
 **字段** (2): `HintText, ID`
@@ -36855,6 +37443,18 @@
   "HintText": {
     "Hash": 2163855309307223733
   }
+}
+```
+
+### StageMonsterInvasionParam.json (0.00 MB, 2 条)
+
+**字段** (2): `InvasionID, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "InvasionID": 1,
+  "ParamList": "<list[5]>"
 }
 ```
 
@@ -37132,6 +37732,19 @@
 }
 ```
 
+### RaidPerformance.json (0.00 MB, 5 条)
+
+**字段** (3): `PerformanceID, PerformanceType, RaidID`
+
+**首条记录摘要**:
+```json
+{
+  "RaidID": 40233001,
+  "PerformanceID": 102150109,
+  "PerformanceType": "A"
+}
+```
+
 ### SpecialRestartBattle.json (0.00 MB, 7 条)
 
 **字段** (2): `EventID, TowardEventID`
@@ -37166,6 +37779,24 @@
 ```json
 {
   "LevelLimit": 1
+}
+```
+
+### AssistantTipsShowCase.json (0.00 MB, 3 条)
+
+**字段** (3): `ID, ShowCase, TipsIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "ShowCase": "ElfRestaurantEditRecipe",
+  "TipsIDList": [
+    102,
+    108,
+    103,
+    104
+  ]
 }
 ```
 
@@ -37318,6 +37949,22 @@
 }
 ```
 
+### StageInvasionNPCMonster.json (0.00 MB, 3 条)
+
+**字段** (6): `FloorID, GroupID, ID, InstanceID, InvasionID, PlaneID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2054131,
+  "InvasionID": 2,
+  "PlaneID": 20541,
+  "FloorID": 20541001,
+  "GroupID": 261,
+  "InstanceID": 200001
+}
+```
+
 ### TeamTowersDepartment.json (0.00 MB, 3 条)
 
 **字段** (3): `NOIDBOIGBFM, OENAMINOLLF, PHFMCACHFIJ`
@@ -37333,6 +37980,20 @@
     1,
     2
   ]
+}
+```
+
+### AtlasAvatarChangeInfo.json (0.00 MB, 4 条)
+
+**字段** (4): `ACCJKGEKHKP, ADGKGGIBBEC, ELDCAFJBIPN, JJKLIJNFIBB`
+
+**首条记录摘要**:
+```json
+{
+  "ELDCAFJBIPN": 1,
+  "JJKLIJNFIBB": 70015,
+  "ACCJKGEKHKP": 1308,
+  "ADGKGGIBBEC": 112
 }
 ```
 
@@ -37792,6 +38453,19 @@
 }
 ```
 
+### StageInvasionMaterial.json (0.00 MB, 3 条)
+
+**字段** (3): `FarmTypeList, InvasionID, MaterialType`
+
+**首条记录摘要**:
+```json
+{
+  "MaterialType": 1,
+  "FarmTypeList": "<list[4]>",
+  "InvasionID": 1
+}
+```
+
 ### ActivityConstantFindTrotter.json (0.00 MB, 4 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -37863,16 +38537,34 @@
 }
 ```
 
-### RaidPerformance.json (0.00 MB, 4 条)
+### LimaoNewsPlan.json (0.00 MB, 1 条)
 
-**字段** (3): `PerformanceID, PerformanceType, RaidID`
+**字段** (6): `AEONKNDCDKN, BBOHFMDPCJP, KCJAICDOHPN, KFCJIAKLCFD, LIIBNDIFNDO, OIHMMHAJHHB`
 
 **首条记录摘要**:
 ```json
 {
-  "RaidID": 40233001,
-  "PerformanceID": 102150109,
-  "PerformanceType": "A"
+  "LIIBNDIFNDO": 1,
+  "KCJAICDOHPN": [
+    101,
+    104,
+    106,
+    102,
+    107,
+    105,
+    108,
+    103
+  ],
+  "AEONKNDCDKN": 8015003,
+  "KFCJIAKLCFD": {
+    "Hash": 4829158079586745055
+  },
+  "BBOHFMDPCJP": {
+    "Hash": 11692972633243211498
+  },
+  "OIHMMHAJHHB": {
+    "Hash": 13908234661158266129
+  }
 }
 ```
 
@@ -37951,18 +38643,6 @@
 {
   "PagePrefab": "BattleLineupUI",
   "BGMEvent": "Ev_bgm_menu_ui_play"
-}
-```
-
-### AvatarSourceConfigLD.json (0.00 MB, 6 条)
-
-**字段** (2): `AvatarID, SourceAvatarID`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 6036,
-  "SourceAvatarID": 1014
 }
 ```
 
@@ -38206,6 +38886,22 @@
 }
 ```
 
+### CumulativeScoreBoardConfig.json (0.00 MB, 2 条)
+
+**字段** (6): `ConfigID, IconPath, IsDecrease, MaxDigit, TargetValue, ZeroFillLength`
+
+**首条记录摘要**:
+```json
+{
+  "ConfigID": 1,
+  "IconPath": "SpriteOutput/ItemIcon/2.png",
+  "TargetValue": "20000000000",
+  "MaxDigit": 11,
+  "ZeroFillLength": 4,
+  "IsDecrease": true
+}
+```
+
 ### ChallengeBossConstValue.json (0.00 MB, 1 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -38215,6 +38911,20 @@
 {
   "ConstValueName": "ChallengeBoss_Special_MonsterTemplateID",
   "Value": "<dict[1]>"
+}
+```
+
+### LimaoNewsConstValueCommon.json (0.00 MB, 3 条)
+
+**字段** (2): `ConstValueName, Value`
+
+**首条记录摘要**:
+```json
+{
+  "ConstValueName": "Limao_News_TAPD_Show_Survey_Num",
+  "Value": {
+    "IntValue": 4
+  }
 }
 ```
 
@@ -38298,20 +39008,6 @@
   "Value": {
     "IntValue": 101
   }
-}
-```
-
-### AtlasAvatarChangeInfo.json (0.00 MB, 3 条)
-
-**字段** (4): `ACCJKGEKHKP, ADGKGGIBBEC, ELDCAFJBIPN, JJKLIJNFIBB`
-
-**首条记录摘要**:
-```json
-{
-  "ELDCAFJBIPN": 1,
-  "JJKLIJNFIBB": 70015,
-  "ACCJKGEKHKP": 1308,
-  "ADGKGGIBBEC": 112
 }
 ```
 
@@ -38500,6 +39196,20 @@
 }
 ```
 
+### PreAvatarTextmapConfig.json (0.00 MB, 3 条)
+
+**字段** (2): `PreAvatarID, PreAvatarName`
+
+**首条记录摘要**:
+```json
+{
+  "PreAvatarID": 1512,
+  "PreAvatarName": {
+    "Hash": 13029886768877355296
+  }
+}
+```
+
 ### RogueGuideActivityPanelData.json (0.00 MB, 4 条)
 
 **字段** (3): `ActivityID, AvatarID, RogueAreaID`
@@ -38596,20 +39306,6 @@
 }
 ```
 
-### LimaoNewsConstValueClient.json (0.00 MB, 3 条)
-
-**字段** (2): `ConstValueName, Value`
-
-**首条记录摘要**:
-```json
-{
-  "ConstValueName": "Limao_News_Ban",
-  "Value": {
-    "IntValue": 0
-  }
-}
-```
-
 ### PixAirNodeTypeConfig.json (0.00 MB, 3 条)
 
 **字段** (2): `NodeName, NodeType`
@@ -38648,6 +39344,19 @@
   "IFAGMAOMHCL": 1,
   "AEDOBNFDODI": 1,
   "GNDCCBNILML": true
+}
+```
+
+### BattlePassWeekConfig.json (0.00 MB, 4 条)
+
+**字段** (3): `BPLevelExp, BPWeekMaxExp, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "BPLevelExp": 800,
+  "BPWeekMaxExp": 8000
 }
 ```
 
@@ -38705,24 +39414,6 @@
     {
       "Value": 4
     }
-  ]
-}
-```
-
-### AssistantTipsShowCase.json (0.00 MB, 2 条)
-
-**字段** (3): `ID, ShowCase, TipsIDList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "ShowCase": "ElfRestaurantEditRecipe",
-  "TipsIDList": [
-    102,
-    108,
-    103,
-    104
   ]
 }
 ```
@@ -38859,6 +39550,22 @@
 }
 ```
 
+### ItemComefromLimit.json (0.00 MB, 2 条)
+
+**字段** (4): `ComefromID, ID, OpenParaList, OpenType`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 281,
+  "ComefromID": 2,
+  "OpenType": "FinishQuest",
+  "OpenParaList": [
+    2200502
+  ]
+}
+```
+
 ### AvatarSkinSpecialAction.json (0.00 MB, 1 条)
 
 **字段** (4): `ID, SkinID, SkinSpecialActionPrefabPath, SpecialActionPrefabPath`
@@ -38910,6 +39617,21 @@
 {
   "GachaID": 5001,
   "ActivityModule": 1011001
+}
+```
+
+### StageInvasionBuff.json (0.00 MB, 2 条)
+
+**字段** (3): `InvasionDesc, InvasionID, MazeBuffID`
+
+**首条记录摘要**:
+```json
+{
+  "InvasionID": 1,
+  "MazeBuffID": 3034001,
+  "InvasionDesc": {
+    "Hash": 16261953196955435628
+  }
 }
 ```
 
@@ -39093,19 +39815,6 @@
 }
 ```
 
-### BattlePassWeekConfig.json (0.00 MB, 3 条)
-
-**字段** (3): `BPLevelExp, BPWeekMaxExp, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "BPLevelExp": 800,
-  "BPWeekMaxExp": 8000
-}
-```
-
 ### HPShowRule.json (0.00 MB, 3 条)
 
 **字段** (4): `Color, ID, IsDanger, Max`
@@ -39117,6 +39826,25 @@
   "Max": 0.3,
   "Color": "#e23977ff",
   "IsDanger": true
+}
+```
+
+### B51RacingChallengeCar.json (0.00 MB, 2 条)
+
+**字段** (2): `ID, PartIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 3,
+  "PartIDList": [
+    1,
+    2,
+    5,
+    6,
+    9,
+    10
+  ]
 }
 ```
 
@@ -39626,6 +40354,37 @@
 }
 ```
 
+### StateBroadcastPermission.json (0.00 MB, 1 条)
+
+**字段** (2): `InfoList, PackageName`
+
+**首条记录摘要**:
+```json
+{
+  "PackageName": "com.vivo.gamewatch",
+  "InfoList": [
+    4101,
+    4102,
+    5001,
+    5003
+  ]
+}
+```
+
+### ExpeditionBattleConstClient.json (0.00 MB, 1 条)
+
+**字段** (2): `ConstValueName, Value`
+
+**首条记录摘要**:
+```json
+{
+  "ConstValueName": "ExpeditionBattle_Quest_ActivityRewardID",
+  "Value": {
+    "IntValue": 50106
+  }
+}
+```
+
 ### ILBattleAvatarGender.json (0.00 MB, 2 条)
 
 **字段** (2): `BoyAvatarID, GirlAvatarID`
@@ -39920,8 +40679,8 @@
 **首条记录摘要**:
 ```json
 {
-  "ID": 440,
-  "VersionFinalMainMissionID": 1054417
+  "ID": 450,
+  "VersionFinalMainMissionID": 1054506
 }
 ```
 
@@ -39986,6 +40745,8 @@
 }
 ```
 
+### ActivityAvatarConfigLD.json (0.00 MB, 0 条)
+
 ### ActivityRaidSpecialOrder.json (0.00 MB, 0 条)
 
 ### ActivityRelicBoxClientConst.json (0.00 MB, 0 条)
@@ -40009,6 +40770,8 @@
 ### Anniversary2NDTabConfig.json (0.00 MB, 0 条)
 
 ### AvatarLevelSkillConfig.json (0.00 MB, 0 条)
+
+### AvatarSourceConfigLD.json (0.00 MB, 0 条)
 
 ### AvatarTeamBuff.json (0.00 MB, 0 条)
 
@@ -40108,6 +40871,8 @@
 
 ### MonopolyReportStats.json (0.00 MB, 0 条)
 
+### MonsterBlackListConfig.json (0.00 MB, 0 条)
+
 ### MonsterDropTest.json (0.00 MB, 0 条)
 
 ### MonsterTemplateTestConfig.json (0.00 MB, 0 条)
@@ -40141,8 +40906,6 @@
 ### RogueTournMiracleGroupTest.json (0.00 MB, 0 条)
 
 ### RogueTournMiracleTest.json (0.00 MB, 0 条)
-
-### StateBroadcastPermission.json (0.00 MB, 0 条)
 
 ### StoryCharacterLD.json (0.00 MB, 0 条)
 
