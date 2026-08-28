@@ -4,7 +4,7 @@
  */
 import { CDN, USE_OFFICIAL_PATHS } from '../../lib/constants';
 import { escHtml } from '../../lib/html';
-import { CDN_CATEGORIES, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
+import { CDN_CATEGORIES, LOCAL_ICONS_BASE, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
 import { JS_DELIVR_BASE, JS_DELIVR_RULES, JS_DELIVR_UI3D_BASE, jsdelivrToNanokaFile } from './jsdelivr';
 
 /** 双源解析结果 */
@@ -21,8 +21,8 @@ export function nanokaUrl(category: CdnCategory, file: string, spec = CDN_CATEGO
   return `${CDN}${NANOKA_HUD}/${spec.nanoka}/${file}`;
 }
 
-/** 双源解析：jsDelivr（StarRailTextures 镜像，注册了规则的分类）> 官方源 > nanoka */
-export function resolveCdnUri(
+/** 远端双源解析：jsDelivr（StarRailTextures 镜像，注册了规则的分类）> 官方源 > nanoka */
+function remoteCdnUri(
   category: CdnCategory,
   file: string,
   spec: CdnCategorySpec = CDN_CATEGORIES[category],
@@ -49,6 +49,24 @@ export function resolveCdnUri(
   return { primary: nanokaUrl(category, file, spec), fallback: '', source: 'nanoka' };
 }
 
+/** 三级解析：本地图标（local-first）> jsDelivr 镜像 > 官方源 > nanoka。
+ *  本地主源缺失（新版本新增图标未入库）时 fallback = 远端最优源
+ *  （jsDelivr 规则命中 → jsDelivr，否则 nanoka），由 dom 委托在 img 失败时现场切换。 */
+export function resolveCdnUri(
+  category: CdnCategory,
+  file: string,
+  spec: CdnCategorySpec = CDN_CATEGORIES[category],
+): CdnUri {
+  if (spec.local && (!spec.localFiles || spec.localFiles.test(file))) {
+    return {
+      primary: `${LOCAL_ICONS_BASE}/${spec.local}/${file}`,
+      fallback: remoteCdnUri(category, file, spec).primary,
+      source: 'local',
+    };
+  }
+  return remoteCdnUri(category, file, spec);
+}
+
 /** 首选源 URL（现有纯函数返回单个字符串的快捷方式） */
 export function cdnUri(category: CdnCategory, file: string): string {
   return resolveCdnUri(category, file).primary;
@@ -59,9 +77,29 @@ export function cdnRawUrl(subpath: string): string {
   return `${CDN}${NANOKA_HUD}/${subpath}`;
 }
 
-/** 依据主 URL 反查回退源（v-html 卡片用）：jsDelivr 源反查 nanoka；主源为官方时返回 nanoka 等价 URL；否则 '' */
+/** 本地主源 URL 反查远端最优回退（dom 委托在本地 img 失败时现场调用）；非本地图标返回 '' */
+export function localFallbackFromPrimary(primary: string): string {
+  if (!primary.startsWith(`${LOCAL_ICONS_BASE}/`)) return '';
+  const rest = primary.slice(LOCAL_ICONS_BASE.length + 1);
+  const slash = rest.indexOf('/');
+  if (slash <= 0) return '';
+  const dir = rest.slice(0, slash);
+  const file = rest.slice(slash + 1);
+  for (const [cat, spec] of Object.entries(CDN_CATEGORIES) as [CdnCategory, CdnCategorySpec][]) {
+    if (spec.local !== dir) continue;
+    if (spec.localFiles && !spec.localFiles.test(file)) continue;
+    return remoteCdnUri(cat, file, spec).primary;
+  }
+  return '';
+}
+
+/** 依据主 URL 反查回退源（v-html 卡片用）：本地图标反查远端最优源；jsDelivr 源反查 nanoka；
+ *  主源为官方时返回 nanoka 等价 URL；否则 '' */
 export function cdnFallbackFromPrimary(primary: string): string {
   if (!primary) return '';
+  // 本地主源 → 远端最优源（jsDelivr 规则命中 → jsDelivr，否则 nanoka）
+  const localFb = localFallbackFromPrimary(primary);
+  if (localFb) return localFb;
   // 星魂图标官方源（ui/ui3d/rank，与 spriteoutput/ 平级）：按 rank 规则反查 nanoka 等价文件
   if (primary.startsWith(JS_DELIVR_UI3D_BASE) && primary.includes('ui/ui3d/rank/')) {
     const file = jsdelivrToNanokaFile('rank', primary);

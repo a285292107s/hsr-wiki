@@ -10,17 +10,17 @@
  * 对 `var spine=` / `window.spine=` / `globalThis.spine=` 三种挂载形式均生效：
  * var 声明遇已有同名属性跳过声明、赋值走 setter。
  *
- * 单例 Promise 按版本独立共享：全部 CDN 失败自动置空允许重试
+ * 单例 Promise 按版本独立共享：本地主源与全部 CDN 兜底失败自动置空允许重试
  * （审核台「重新加载」按钮依赖此语义）。生产渲染与调试验收台共用。
  */
-import { SPINE_RUNTIME_41_CDNS, SPINE_RUNTIME_CDNS } from './constants';
+import { SPINE_RUNTIME_41_CDNS, SPINE_RUNTIME_CDNS, SPINE_RUNTIME_LOCAL } from './constants';
 import { isCdnDown } from '../services/cdn/health';
 import type { SpineLib, SpinePlayerCtor, SpineRuntimeVersion } from './types';
 
 /** 单源注入超时：连接黑洞（DNS/握手挂起）时 onerror 可能永不触发，超时按失败结算进入下一源 */
 const SCRIPT_TIMEOUT_MS = 8000;
 
-/** 各版本 CDN 列表（4.1=备用 / 4.2=主） */
+/** 各版本 CDN 兜底列表（4.1=备用 / 4.2=主；本地主源失败后才尝试） */
 const VERSION_CDNS: Record<SpineRuntimeVersion, string[]> = {
   '4.1': SPINE_RUNTIME_41_CDNS,
   '4.2': SPINE_RUNTIME_CDNS,
@@ -128,15 +128,19 @@ export function getSpineLib(version: SpineRuntimeVersion = '4.2'): SpineLib | nu
   return libs.get(version) ?? null;
 }
 
-/** 动态加载指定版本 spine-player 运行时（CDN IIFE；全部 CDN 失败时返回 false 并允许下次重试；
- *  CDN 健康探测判定不可用时直接返回 false，不做注入等待） */
+/** 动态加载指定版本 spine-player 运行时：本地主源（public/vendor/spine，同源静态资源）→
+ *  CDN 兜底（仅健康探测正常时尝试）；全部失败返回 false 并清空单例允许重试
+ *  （审核台「重新加载」按钮依赖此语义） */
 export function loadSpineRuntime(version: SpineRuntimeVersion = '4.2'): Promise<boolean> {
   if (getSpineCtor(version)) return Promise.resolve(true);
-  if (isCdnDown()) return Promise.resolve(false); // CDN 整体不可用：跳过注入，允许恢复后重试
   const pending = _runtimeLoads.get(version);
   if (pending) return pending;
   const promise = (async (): Promise<boolean> => {
     installSpineProxy();
+    // 本地主源：同源加载，不受 CDN 健康状态影响（CDN down 时动画功能仍可用）
+    if (await injectScript(SPINE_RUNTIME_LOCAL[version], version)) return true;
+    // 本地失败才会走到 CDN 兜底：CDN 整体不可用时跳过注入，允许恢复后重试
+    if (isCdnDown()) return false;
     for (const url of VERSION_CDNS[version]) {
       const ok = await injectScript(url, version);
       if (ok) return true;

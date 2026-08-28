@@ -136,7 +136,7 @@ _Avoid_: 对比视图、diff 模式、变化视图（避免与旧版已下线词
 ## 图片资源
 
 ### 图片 CDN
-图片资源运行期走双源 CDN：jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退，URL 解析统一收口于 `services/cdn/`（见 ADR 0013）。converter 不改动 CDN，只输出相对路径。
+图片资源解析统一收口于 `services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / 遗器通用部位图标，根 `LOCAL_ICONS_BASE` = `public/data/cn/assets/icons/`）local-first，未入库的新图标自动回退远端；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）。
 
 ### 图片路径映射
 源数据图片路径（`SpriteOutput/...`）到 CDN 相对路径的映射规则。converter 在 `config.py` 硬编码两套规则：legacy 短路径（`icon/character/1001.png`）与官方 StarRailTextures 仓库相对路径（`avatarshopicon/avatar/1001.png`，`--official-icon-paths` 输出）；前端 `services/cdn/` 再按分类解析为 jsDelivr / nanoka 实际 URL。
@@ -194,5 +194,5 @@ _Avoid_: 纹理替换、atlas 改写
 _Avoid_: manifest、动画清单
 
 ### Spine 运行时（Spine Runtime）
-spine-player 播放库，**双运行时分源加载**（见「Spine 动画源」）：官方 JSON 骨架走 4.2.43，nanoka `.skel` 二进制走 4.1.23（位域级不兼容，不可合并）。版本须与骨架数据格式兼容：向后兼容（4.2 可读 4.1 JSON 数据）、向前不兼容（4.1 读不了 4.2 数据），升级需回归验证现有动画。
+spine-player 播放库，**双运行时分源加载**（见「Spine 动画源」）：官方 JSON 骨架走 4.2.43，nanoka `.skel` 二进制走 4.1.23（位域级不兼容，不可合并）。两个版本的 player 脚本（npm dist 原样，禁改动）随站本地分发（`public/vendor/spine/`，`SPINE_RUNTIME_LOCAL`），CDN 列表降级为兜底。版本须与骨架数据格式兼容：向后兼容（4.2 可读 4.1 JSON 数据）、向前不兼容（4.1 读不了 4.2 数据），升级需回归验证现有动画并同步更新本地 vendor 文件。
 _Avoid_: 播放器、运行时库

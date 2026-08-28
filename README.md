@@ -8,7 +8,7 @@
 ## ✨ 功能特性
 
 - **角色详情**：技能表（等级数值 / 附加能力）、行迹树、星魂、晋阶属性、推荐装备，支持「砺烁新辉」强化形态切换（默认强化，与游戏内一致）
-- **Spine 角色动画**：详情页 Hero 区渲染骨骼动画，双源 manifest 分发（nanoka `.skel` / 官网 `.json`），官方优先、多 CDN 兜底
+- **Spine 角色动画**：详情页 Hero 区渲染骨骼动画，双源 manifest 分发（nanoka `.skel` / 官网 `.json`），官方优先、多 CDN 兜底；spine-player 运行时随站本地分发（`public/vendor/spine/`），CDN 仅兜底
 - **终局内容四模式**：忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁，赛季详情页 + 模式筛选目录
 - **双模式主题**：常规模式（黑紫）× 货币战争模式（黑金，`/currency/*` 独立路由树），全局色彩走三层令牌体系
 - **虚拟滚动目录**：目录卡片以模板字符串渲染，长列表虚拟滚动保持流畅
@@ -18,7 +18,7 @@
 
 - **配置驱动目录引擎**：12 个目录页全部由 `CatalogPageConfig` 配置渲染，新增目录 = 新增 `pages/<id>.ts` 子模块 + 注册 + 路由
 - **三级缓存**：L1 内存 Map（80 条上限）→ L2 in-flight 去重 → L3 网络（15s 超时 + 可中断），唯一底层请求函数 `fetchJSON<T>()`（跨刷新持久化由 HTTP 缓存承担，2026-08 已移除 IndexedDB 层）
-- **CDN 双源回退**：图片优先走官方 StarRailTextures 镜像（jsDelivr），nanoka 保留回退；URL 构造统一经 `services/cdn/` 纯函数解析
+- **资源三级解析**：公共小图标随站本地（local-first）→ 官方 StarRailTextures 镜像（jsDelivr）→ nanoka 回退；URL 构造统一经 `services/cdn/` 纯函数解析
 - **构建守卫**：`pnpm build` 前置 `check-guards.mjs` 统一入口——色彩收口（`check-colors.mjs --strict`）、Spine 清单一致性、对比度校验，之后才进行 vue-tsc 类型检查与产物构建
 - **a11y 持续扫描**：Playwright + axe-core 全路由扫描，已知违规登记于 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败）
 - **研究线（Spine Lab）**：Spine 审核 / KV 验收独立为 `spine-lab/` 子应用（端口 5174），与主项目双向隔离，共享 `src/spine/` 引擎层
@@ -110,7 +110,7 @@ hsr wiki/
 - **角色 / 光锥 / 遗器 / 物品 / 敌对**：列表数据由 `tools/converter/` 从 `vendor/TurnBasedGameData` 产出（`characters.json`、`light_cones.json`、`relics.json`、`items.json`、`monsters.json`）；详情页数据为 `characters/<id>.json`、`light_cones/<id>.json`、`monsters/<id>.json`。
 - **终局内容**：忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁，由转换器的 endgame 模块从挑战配置表产出（`maze*.json`），四模式合并为单目录页，模式以筛选选项切换。
 - **货币战争模式**：`currency/` 下角色 / 装备 / 传送门 / 强化 / 词条数据（含跨星级合并、`#N` 引用解析），路由位于 `/currency/*` 并切换黑金主题。
-- **图片资源**：非 Spine 图标优先走 **jsDelivr 官方 StarRailTextures 镜像**（`src/lib/constants.ts` 的 `OFFICIAL_ICON_BASE`），nanoka 保留回退；Spine `.skel`/`.atlas` 与未收录分类走 `https://static.nanoka.cc`。全部图片 URL 构造统一经 `src/services/cdn/` 纯函数解析（双源 + 回退属性 + 请求失败 CSS 占位降级）。
+- **图片资源**：公共小图标（element / pathicon / trace / 遗器通用部位）与 spine-player 运行时、货币战争 Hero 视频随站本地分发（`public/data/cn/assets/`、`public/vendor/spine/`）；其余非 Spine 图标优先走 **jsDelivr 官方 StarRailTextures 镜像**（`src/lib/constants.ts` 的 `OFFICIAL_ICON_BASE`），nanoka 保留回退；Spine `.skel`/`.atlas` 与未收录分类走 `https://static.nanoka.cc`。全部图片 URL 构造统一经 `src/services/cdn/` 纯函数解析（本地优先 + 双源回退 + 请求失败 CSS 占位降级）。
 
 > 全部本地数据由 `tools/converter/convert.py` 从 `vendor/TurnBasedGameData` 真实产出，严禁以任何外部样本作为数据源读取或随站部署。上游解包更新后重跑 `convert.py` 即可，前端无需改动。
 

@@ -4,7 +4,7 @@ This file provides guidance to AI coding assistants when working with code in th
 
 ## 项目概述
 
-HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki。数据源为本地 JSON（由 Python 工具从官方解包数据转换而来），图片走 jsDelivr 官方镜像与 nanoka 双源回退，Spine 动画走 `https://static.nanoka.cc` CDN。
+HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki。数据源为本地 JSON（由 Python 工具从官方解包数据转换而来），公共小图标 / spine-player 运行时 / 货币战争 Hero 视频随站本地分发，其余图片走 jsDelivr 官方镜像与 nanoka 双源回退，Spine 骨架动画走官网源与 `https://static.nanoka.cc` 双源回退。
 
 > 术语与规范速查：领域术语与 `_Avoid_` 禁用词以 `CONTEXT.md`（术语表）为准；架构决策记录见 `docs/adr/`（0002-0014，按需读取）；字段审计裁决文档见 `docs/audit/`。
 

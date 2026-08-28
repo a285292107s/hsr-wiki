@@ -93,10 +93,12 @@ describe('spine runtime 双版本加载与 window.spine 代理', () => {
     expect(rt.getSpineLib('4.1')).toBeNull();
   });
 
-  it('加载 4.2：捕获进 Map，window.spine 读取为主版本', async () => {
+  it('加载 4.2：本地主源首先注入，捕获进 Map，window.spine 读取为主版本', async () => {
     const rt = await freshRuntime();
     mockAppend((url) => (url.includes('4.2.43') ? fakeLib('42') : null));
     await expect(rt.loadSpineRuntime('4.2')).resolves.toBe(true);
+    expect(injected.length).toBe(1); // 本地主源一次命中，CDN 兜底未注入
+    expect(injected[0].src).toContain('/vendor/spine/spine-player-4.2.43');
     expect((rt.getSpineCtor('4.2') as unknown as { __tag?: string }).__tag).toBe('42');
     expect(rt.getSpineCtor('4.1')).toBeNull();
     expect(globalTag()).toBe('42');
@@ -156,13 +158,14 @@ describe('spine runtime 双版本加载与 window.spine 代理', () => {
     expect(injected.length).toBe(before);
   });
 
-  it('script 注入超时（连接黑洞）：单源 8s 按失败结算，全部源超时返回 false', async () => {
+  it('script 注入超时（连接黑洞）：单源 8s 按失败结算，本地主源 + 全部 CDN 兜底超时返回 false', async () => {
     vi.useFakeTimers();
     const rt = await freshRuntime();
     mockAppendHang();
     const p = rt.loadSpineRuntime('4.2');
     // 逐源推进：先 flush 微任务（executor 注册超时 timer），再推进 8s 触发该源超时
-    for (let i = 0; i < SPINE_RUNTIME_CDNS.length; i++) {
+    // 源数 = 本地主源 1 + SPINE_RUNTIME_CDNS 兜底 3
+    for (let i = 0; i < SPINE_RUNTIME_CDNS.length + 1; i++) {
       await vi.advanceTimersByTimeAsync(0);
       await vi.advanceTimersByTimeAsync(8000);
     }
@@ -170,7 +173,7 @@ describe('spine runtime 双版本加载与 window.spine 代理', () => {
     expect(rt.getSpineCtor('4.2')).toBeNull();
   });
 
-  it('CDN 健康探测判定不可用时直接返回 false，不注入 script', async () => {
+  it('CDN 健康探测判定不可用时：本地主源仍注入（不受 down 短路影响），CDN 兜底跳过', async () => {
     vi.useFakeTimers();
     vi.resetModules();
     // 先置 CDN down（探测失败），再加载 runtime（共享同一 health 模块实例）
@@ -181,7 +184,11 @@ describe('spine runtime 双版本加载与 window.spine 代理', () => {
     expect(health.isCdnDown()).toBe(true);
     mockAppendHang();
     const rt = await import('../runtime');
-    await expect(rt.loadSpineRuntime('4.2')).resolves.toBe(false);
-    expect(injected.length).toBe(0); // 未注入任何 script
+    const p = rt.loadSpineRuntime('4.2');
+    // 本地主源挂起 → 8s 超时按失败结算；isCdnDown() → 跳过全部 CDN 兜底，直接结算 false
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(8000);
+    await expect(p).resolves.toBe(false);
+    expect(injected.length).toBe(1); // 仅本地主源，CDN 兜底零注入
   });
 });

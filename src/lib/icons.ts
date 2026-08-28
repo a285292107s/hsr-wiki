@@ -4,7 +4,7 @@
  * Step 2: USE_OFFICIAL_PATHS=true → converter 输出官方 StarRailTextures 相对路径时，
  *   非 GridFight/Rank 等特殊分类直接拼 OFFICIAL_ICON_BASE，删除 nanoka 中转站（仅保留 stall→CSS 占位降级）。
  */
-import { cdnUri, cdnRawUrl, resolveCdnUri } from '../services/cdn';
+import { cdnUri, cdnRawUrl, nanokaUrl, resolveCdnUri } from '../services/cdn';
 import {
   USE_OFFICIAL_PATHS,
   OFFICIAL_ICON_BASE,
@@ -14,9 +14,6 @@ import {
   TRAILBLAZER_ICON_FALLBACK,
 } from './constants';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../services/types';
-
-/** 命途官方仓库拼写修正（Priest→Pirest / Elation→Joy，与 converter OFFICIAL_ICON_RULES 中一致） */
-const PATH_SPELLING: Record<string, string> = { priest: 'Pirest', elation: 'Joy' };
 
 /** USE_OFFICIAL_PATHS=true 时拼接官方基址 + 相对路径；相对路径为空串时返回 '' */
 function official(pathRel: string): string {
@@ -87,6 +84,16 @@ export function avatarDrawCardUrl(charId: string | number): string {
   return cdnUri('avatardrawcard', `${charId}.webp`);
 }
 
+/** 移动端 Hero 立绘（轻量 webp，nanoka 唯一源）。
+ *  官方仓库仅提供 2048×2048 PNG（实测 2.9~4.9MB），同分辨率 webp 仅 ~1/4；
+ *  该体积差直接决定弱网下立绘首现速度，故首页 Hero（<1024px 断点）专用此源，
+ *  桌面角色详情页背景仍走 avatarDrawCardUrl（官方 PNG，不降级）。
+ *  消费方必须保留回退链：webp 加载失败 → avatarDrawCardUrl 的官方 PNG（HomeView preload 链）。
+ *  禁止改用 cdnUri('avatardrawcard', ...) —— jsDelivr 规则会把 .webp 重写回 .png（jsdelivr.ts）。 */
+export function avatarDrawCardWebpUrl(charId: string | number): string {
+  return charId ? nanokaUrl('avatardrawcard', `${charId}.webp`) : '';
+}
+
 /** 物品图标：itemfigures/{数字}.webp（从 item_figure_icon_path 解析） */
 export function itemIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
@@ -122,22 +129,14 @@ export function avatarRoundIconUrl(charId: string | number): string {
   return charId ? cdnUri('avatarroundicon', `${charId}.webp`) : '';
 }
 
-/** 属性图标：icondamagetype/IconDamageType{damageType 首字母大写 + 尾小写}.png */
+/** 属性图标：本地随站（resolve 层 local-first，见 services/cdn/base.ts LOCAL_ICONS_BASE）；
+ *  未入库的新属性自动回退远端最优源（jsDelivr → nanoka） */
 export function elementIconUrl(damageType: string | null | undefined): string {
-  if (USE_OFFICIAL_PATHS && damageType) {
-    const cap = damageType[0].toUpperCase() + damageType.slice(1).toLowerCase();
-    return official(`icondamagetype/IconDamageType${cap}.png`);
-  }
   return damageType ? cdnUri('element', `${damageType.toLowerCase()}.webp`) : '';
 }
 
-/** 命途图标：pathicon/{baseType 小写}.webp */
+/** 命途图标：本地随站（同 elementIconUrl）；新命途未入库时自动回退远端 */
 export function pathIconUrl(baseType: string | null | undefined): string {
-  if (USE_OFFICIAL_PATHS && baseType) {
-    const k = baseType.toLowerCase();
-    const mapped = PATH_SPELLING[k] || `${k[0].toUpperCase()}${k.slice(1)}`;
-    return official(`professioniconmiddle/IconProfession${mapped}Middle.png`);
-  }
   return baseType ? cdnUri('pathicon', `${baseType.toLowerCase()}.webp`) : '';
 }
 

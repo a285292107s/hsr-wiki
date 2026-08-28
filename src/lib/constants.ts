@@ -2,8 +2,10 @@
 
 export const CDN = 'https://static.nanoka.cc';
 
-/** 货币战争枢纽页 Hero 背景视频（官方活动页素材，直引 act-webstatic；poster 兜底见 CurrencyHubView） */
-export const CW_HERO_VIDEO = 'https://act-webstatic.mihoyo.com/puzzle/hkrpg/pz_RlVztEGUpN/resource/puzzle/2025/10/17/07654cf744350d181dae4ba6eaae3c3c_6514780583197970810.mp4';
+/** 货币战争枢纽页 Hero 背景视频：本地随站（public/data/cn/assets/cw-hero.mp4，官方活动页素材一次性入库）。
+ *  原直引 act-webstatic——活动页素材无长期保留 SLA（同 ADR 0009 官网 Spine 结论），下线即失效，故本地化；
+ *  poster 兜底见 CurrencyHubView（视频解码失败/慢网/prefers-reduced-motion 场景） */
+export const CW_HERO_VIDEO = '/data/cn/assets/cw-hero.mp4';
 
 /** 货币战争枢纽页 Hero 静态兜底帧（本地抽帧资产，视频失败/慢网时展示） */
 export const CW_HERO_POSTER = '/data/cn/assets/cw-hero-poster.jpg';

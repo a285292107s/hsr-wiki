@@ -1,11 +1,13 @@
 /**
  * 全局 CDN 图片回退（DOM 副作用，仅 bootstrap 注册一次）。
  *
- * 三级兜底（事件委托捕获 <img> 加载失败，error 事件走捕获传播到 document）：
- * 1. 双源回退：带 data-cdn-fallback 的 img 替换 src 并清除属性，保证仅回退一次
+ * 兜底链（事件委托捕获 <img> 加载失败，error 事件走捕获传播到 document）：
+ * 1. 本地主源（/data/cn/assets/icons/...）：失败时现场反查远端最优源（localFallbackFromPrimary，
+ *    不依赖 data-cdn-fallback 属性与 CDN 健康状态）；远端再失败走最终降级
+ * 2. 双源回退：带 data-cdn-fallback 的 img 替换 src 并清除属性，保证仅回退一次
  *    （覆盖 v-html 卡片中无法使用 Vue 指令/组合式函数的图片，CatalogView 卡片）
- * 2. CDN down 短路：健康探测判定 CDN 不可用后，不再逐图尝试，直接标记降级
- * 3. 最终降级：回退源/首选源（nanoka）失败 → 标记 data-cdn-down（CSS 隐藏破图，
+ * 3. CDN down 短路：健康探测判定 CDN 不可用后，不再逐图尝试，直接标记降级
+ * 4. 最终降级：回退源/首选源（nanoka）失败 → 标记 data-cdn-down（CSS 隐藏破图，
  *    由卡片渐变底承接占位）；CDN 恢复时重载全部已降级图片
  *
  * 挂起兜底（STALL_TIMEOUT_MS）：jsDelivr 大仓库偶发请求挂起时 img 不触发 error 事件，
@@ -13,6 +15,8 @@
  * 超时仍未 complete 视为失败，走同一回退链。
  */
 import { isCdnDown, subscribeCdnHealth } from './health';
+import { LOCAL_ICONS_BASE } from './base';
+import { localFallbackFromPrimary } from './resolve';
 
 /** 挂起超时：jsDelivr 冷回源/网络偶发挂起的兜底阈值（远大于正常加载耗时） */
 export const CDN_STALL_TIMEOUT_MS = 10_000;
@@ -54,6 +58,16 @@ function clearStallTimer(img: HTMLImageElement): void {
 /** 失败处理（error 事件与挂起超时共用同一回退链） */
 function handleFailure(img: HTMLImageElement): void {
   const src = img.getAttribute('src') || '';
+  // 本地主源：不依赖 CDN 健康状态，失败时现场反查远端最优源（仅一次，再失败走通用降级）
+  if (src.startsWith(`${LOCAL_ICONS_BASE}/`)) {
+    const remote = localFallbackFromPrimary(src);
+    if (remote) {
+      img.src = remote;
+      return;
+    }
+    markDown(img);
+    return;
+  }
   if (!isCdnImage(src)) return;
   // CDN 整体不可用：跳过回退尝试，直接降级（省去逐图失败等待）
   if (isCdnDown()) {

@@ -30,7 +30,7 @@ src/
 │   │                        currency / spine / manifest；index.ts 为 barrel；
 │   │                        singleton.ts 提供 singletonLoad 工厂；base.ts 提供数据基址）
 │   ├── cache.ts         → 三级缓存（内存 → in-flight 去重 → 网络）+ 唯一底层请求函数 fetchJSON（15s 超时 + NkError）
-│   ├── cdn/             → 图片 URL 双源解析（官方 jsDelivr 镜像优先 + nanoka 回退 + 请求失败 CSS 占位降级）
+│   ├── cdn/             → 图片 URL 三级解析（本地图标 local-first + jsDelivr 镜像 + nanoka 回退 + 请求失败 CSS 占位降级）
 │   └── types/           → 按域拆分的共享接口（character / relic / spine / currency /
 │                           misc；index.ts 为 barrel）
 ├── lib/                 → 纯工具函数
