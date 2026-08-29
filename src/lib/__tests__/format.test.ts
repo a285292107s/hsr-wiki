@@ -4,18 +4,19 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { CDN, setUseOfficialPaths } from '../constants';
-import { JS_DELIVR_BASE, JS_DELIVR_UI3D_BASE } from '../../services/cdn';
+import { JS_DELIVR_BASE, NANOKA_HUD } from '../../services/cdn';
 import { NkError } from '../errors';
 import {
   escHtml, gameTagsToHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtDescWithFormat, fmtDescMerged, fmtDescStar, fmtToughness,
   deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
-  avatarDrawCardUrl, itemName, itemIconUrl, validateCharData,
+  avatarDrawCardUrl, avatarDrawCardJdUrl, itemName, itemIconUrl, validateCharData,
 } from '../format';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
 
-// 本文件验证 legacy 模式（USE_OFFICIAL_PATHS=false）下的图标 URL 构造与 nanoka CDN 路径。
-// 官方 StarRailTextures 路径模式的断言另起测试文件（或在本文件新开 describe 切换开关）。
+// 本文件验证默认模式（USE_OFFICIAL_PATHS=false）下的图标 URL 构造：
+// nanoka 主源（持续更新）+ jsDelivr 旧档回退（fork 停更，见 services/cdn/resolve.ts）。
+const NANOKA_BASE = `${CDN}${NANOKA_HUD}`;
 beforeAll(() => {
   setUseOfficialPaths(false);
 });
@@ -289,67 +290,66 @@ describe('URL 构建', () => {
     expect(memospriteId('1005', null)).toBe('11005');
   });
   it('skillIconUrl：按类型键拼接；Servant 用忆灵 ID；缺失类型回退映射', () => {
-    const jd = (id: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/SkillIcon_${id}_${key}.png`;
-    expect(skillIconUrl(sk({ type: 'Normal' }), '1005', null)).toBe(jd('1005', 'Normal'));
-    expect(skillIconUrl(sk({ type: 'BPSkill' }), '1005', null)).toBe(jd('1005', 'BP'));
+    const nk = (id: string, key: string) => `${NANOKA_BASE}/skillicons/SkillIcon_${id}_${key}.webp`;
+    expect(skillIconUrl(sk({ type: 'Normal' }), '1005', null)).toBe(nk('1005', 'Normal'));
+    expect(skillIconUrl(sk({ type: 'BPSkill' }), '1005', null)).toBe(nk('1005', 'BP'));
     const d = baseChar();
     d.memosprite = { icon: 'SpriteOutput/ServantIconTeam/11415B.png' };
-    // 忆灵技能：文件名用忆灵 ID（11415），仓库目录用角色 ID（1415 = 忆灵 ID - 10000）
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d))
-      .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1415/SkillIcon_11415_Servant.png`);
+    // 忆灵技能：文件名用忆灵 ID（11415）
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d)).toBe(nk('11415', 'Servant'));
     // Assist CDN 无独立图标资产，回退终结技图标
-    expect(skillIconUrl(sk({ type: 'Assist', type_name: '助战技' }), '1005', null)).toBe(jd('1005', 'Ultra'));
+    expect(skillIconUrl(sk({ type: 'Assist', type_name: '助战技' }), '1005', null)).toBe(nk('1005', 'Ultra'));
     // MazeNormal（秘技普攻）与普攻共用图标
-    expect(skillIconUrl(sk({ type: 'MazeNormal', type_name: '' }), '1508', null)).toBe(jd('1508', 'Normal'));
+    expect(skillIconUrl(sk({ type: 'MazeNormal', type_name: '' }), '1508', null)).toBe(nk('1508', 'Normal'));
     // ElationDamage（欢愉技）对应 CDN 键名 Elation
-    expect(skillIconUrl(sk({ type: 'ElationDamage', type_name: '欢愉技' }), '1501', null)).toBe(jd('1501', 'Elation'));
+    expect(skillIconUrl(sk({ type: 'ElationDamage', type_name: '欢愉技' }), '1501', null)).toBe(nk('1501', 'Elation'));
     // type 为 null 的天赋技能回退 type_name 反查
-    expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(jd('1508', 'Passive'));
+    expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(nk('1508', 'Passive'));
   });
   it('skillIconUrl：忆灵技图标后缀按 ID 映射（CDN 命名不统一）', () => {
-    // 目录统一按角色 ID（忆灵 ID - 10000），文件名保留忆灵 ID
-    const jd = (dir: string, fileId: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${dir}/SkillIcon_${fileId}_${key}.png`;
+    // 文件名保留忆灵 ID（nanoka 平铺主源；jsDelivr 回退才按角色 ID 分目录，见 cdn.test.ts）
+    const nk = (fileId: string, key: string) => `${NANOKA_BASE}/skillicons/SkillIcon_${fileId}_${key}.webp`;
     const mk = (icon: string) => { const d = baseChar(); d.memosprite = { icon }; return d; };
     // 11402 → Servant01
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(jd('1402', '11402', 'Servant01'));
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(nk('11402', 'Servant01'));
     // 11413 → Servant03
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(jd('1413', '11413', 'Servant03'));
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(nk('11413', 'Servant03'));
     // 11415 → 无后缀（默认）
-    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', mk('SpriteOutput/ServantIconTeam/11415B.png'))).toBe(jd('1415', '11415', 'Servant'));
+    expect(skillIconUrl(sk({ type: 'Servant' }), '1415', mk('SpriteOutput/ServantIconTeam/11415B.png'))).toBe(nk('11415', 'Servant'));
     // ServantPassive 不受后缀映射影响
-    expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(jd('1413', '11413', 'ServantPassive'));
+    expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(nk('11413', 'ServantPassive'));
   });
   it('skillIconUrl：开拓者偶数变体回退奇数 ID 图标', () => {
-    const jd = (id: string, key: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/SkillIcon_${id}_${key}.png`;
-    expect(skillIconUrl(sk({ type: 'Normal' }), '8002', null)).toBe(jd('8001', 'Normal'));
-    expect(skillIconUrl(sk({ type: 'BPSkill' }), '8004', null)).toBe(jd('8003', 'BP'));
-    expect(skillIconUrl(sk({ type: 'Ultra' }), '8006', null)).toBe(jd('8005', 'Ultra'));
-    expect(skillIconUrl(sk({ type: 'Maze' }), '8008', null)).toBe(jd('8007', 'Maze'));
+    const nk = (id: string, key: string) => `${NANOKA_BASE}/skillicons/SkillIcon_${id}_${key}.webp`;
+    expect(skillIconUrl(sk({ type: 'Normal' }), '8002', null)).toBe(nk('8001', 'Normal'));
+    expect(skillIconUrl(sk({ type: 'BPSkill' }), '8004', null)).toBe(nk('8003', 'BP'));
+    expect(skillIconUrl(sk({ type: 'Ultra' }), '8006', null)).toBe(nk('8005', 'Ultra'));
+    expect(skillIconUrl(sk({ type: 'Maze' }), '8008', null)).toBe(nk('8007', 'Maze'));
     // 奇数 ID 不受影响
-    expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(jd('8001', 'Normal'));
+    expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(nk('8001', 'Normal'));
   });
   it('skillIconUrl：sk.icon 字段优先（源数据事实源，覆盖变体图标命名）', () => {
-    const jd = (id: string, file: string) => `${JS_DELIVR_BASE}/skillicons/avatar/${id}/${file}.png`;
-    // 官方相对路径（converter --official-icon-paths 输出）→ 直拼分类路径
+    const nk = (file: string) => `${NANOKA_BASE}/skillicons/${file}.webp`;
+    // 官方相对路径（converter --official-icon-paths 输出）→ 提取文件名走分类规则（nanoka 平铺）
     expect(skillIconUrl(sk({ type: 'Ultra', icon: 'skillicons/avatar/1510/SkillIcon_1510_Normal02.png' }), '1510', null))
-      .toBe(jd('1510', 'SkillIcon_1510_Normal02'));
-    // 旧短路径（icon/ 开头）→ 提取文件名走分类规则
+      .toBe(nk('SkillIcon_1510_Normal02'));
+    // 旧短路径（icon/ 开头）→ 同样提取文件名
     expect(skillIconUrl(sk({ type: 'Assist', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_AssisSkill01.png' }), '1510', null))
-      .toBe(jd('1510', 'SkillIcon_1510_AssisSkill01'));
+      .toBe(nk('SkillIcon_1510_AssisSkill01'));
     // 大世界攻击（type=Maze）源图标复用普攻图标
     expect(skillIconUrl(sk({ type: 'Maze', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_Normal.png' }), '1510', null))
-      .toBe(jd('1510', 'SkillIcon_1510_Normal'));
+      .toBe(nk('SkillIcon_1510_Normal'));
     // 空串回退 type 推断
-    expect(skillIconUrl(sk({ type: 'Ultra', icon: '' }), '1510', null)).toBe(jd('1510', 'SkillIcon_1510_Ultra'));
+    expect(skillIconUrl(sk({ type: 'Ultra', icon: '' }), '1510', null)).toBe(nk('SkillIcon_1510_Ultra'));
   });
   it('skillIconUrl（官方路径模式）：sk.icon 官方相对路径直拼，旧短路径回退文件名提取', () => {
     setUseOfficialPaths(true);
     try {
       expect(skillIconUrl(sk({ type: 'Ultra', icon: 'skillicons/avatar/1510/SkillIcon_1510_BP02.png' }), '1510', null))
         .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1510/SkillIcon_1510_BP02.png`);
-      // 旧短路径（icon/ 开头）→ 提取文件名走分类规则（jsDelivr 首选）
+      // 旧短路径（icon/ 开头）仍经 cdnUri 双源解析（开关只影响非 legacy 直拼分支），主源 nanoka
       expect(skillIconUrl(sk({ type: 'Assist', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_AssisSkill02.png' }), '1510', null))
-        .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1510/SkillIcon_1510_AssisSkill02.png`);
+        .toBe(`${NANOKA_BASE}/skillicons/SkillIcon_1510_AssisSkill02.webp`);
     } finally {
       setUseOfficialPaths(false);
     }
@@ -374,10 +374,12 @@ describe('URL 构建', () => {
       setUseOfficialPaths(false);
     }
   });
-  it('eidolonIconUrl / avatarDrawCardUrl', () => {
-    // rank 分类已注册 jsDelivr 规则：官方 ui/ui3d/rank 源首选 + nanoka 回退（E1-6 全量）
-    expect(eidolonIconUrl('1005', 1)).toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1005/1005_Rank_1.png`);
-    expect(avatarDrawCardUrl('1005')).toBe(`${JS_DELIVR_BASE}/avatardrawcard/1005.png`);
+  it('eidolonIconUrl / avatarDrawCardUrl / avatarDrawCardJdUrl', () => {
+    // rank 分类：nanoka 主源 + jsDelivr ui/ui3d/rank 旧档回退（E1-6 全量）
+    expect(eidolonIconUrl('1005', 1)).toBe(`${NANOKA_BASE}/rank/_dependencies/textures/1005/1005_Rank_1.webp`);
+    // 立绘：nanoka webp 主源（双源解析）；jsDelivr PNG 直链仅供 HomeView 预载链第二源
+    expect(avatarDrawCardUrl('1005')).toBe(`${NANOKA_BASE}/avatardrawcard/1005.webp`);
+    expect(avatarDrawCardJdUrl('1005')).toBe(`${JS_DELIVR_BASE}/avatardrawcard/1005.png`);
   });
 });
 
@@ -390,7 +392,7 @@ describe('itemName / itemIconUrl', () => {
     expect(itemName(999, nameCache, itemDb)).toBe('#999');
   });
   it('itemIconUrl：解析末尾数字 png', () => {
-    expect(itemIconUrl('ItemIcon/12345.png')).toBe(`${JS_DELIVR_BASE}/itemfigures/12345.png`);
+    expect(itemIconUrl('ItemIcon/12345.png')).toBe(`${NANOKA_BASE}/itemfigures/12345.webp`);
     expect(itemIconUrl('abc.png')).toBe('');
     expect(itemIconUrl(null)).toBe('');
   });

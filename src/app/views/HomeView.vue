@@ -12,7 +12,7 @@ import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
 import { prefetchHighPriority } from '../router/chunks';
 import { initSpineSceneViewer } from '../character/spine';
 import { loadLocalCharacterList } from '../../services/api';
-import { avatarDrawCardUrl, avatarDrawCardWebpUrl } from '../../lib/format';
+import { avatarDrawCardJdUrl, avatarDrawCardWebpUrl } from '../../lib/format';
 import { SITE_NAME } from '../../lib/constants';
 
 const app = useAppStore();
@@ -48,7 +48,8 @@ let mq: MediaQueryList | null = null;
 
 /* ─── 立绘展示：静态单层（+ 上次立绘垫底），预加载完成才替换；上次展示 ID 持久化，刷新时排除换新 ───
    立绘源策略（2026-08-28 优化）：主源 = nanoka webp（avatarDrawCardWebpUrl，同分辨率体积仅官方 PNG ~1/4，
-   弱网首现的 4× 差异），失败回退 = 官方 jsDelivr PNG（avatarDrawCardUrl）；预加载 fetchpriority=high，
+   弱网首现的 4× 差异），失败回退 = 官方 jsDelivr PNG（avatarDrawCardJdUrl 直链，fork 停更仅覆盖旧角色，
+   两源皆 404 时渐变底承接）；预加载 fetchpriority=high，
    且 <1024px 不预载 Spine 运行时（chunks.ts 断点门控）让带宽给 LCP 立绘。
    垫底：上次展示立绘的 URL 存 localStorage，刷新时先入栈（大概率缓存命中即时显示），
    新抽立绘就绪后交叉淡入替换——消除预加载期空白渐变。 */
@@ -129,7 +130,7 @@ async function pickHeroArt(): Promise<HeroArt | null> {
     ];
     if (!pick) return null;
     saveLastArtId(pick.id);
-    return { key: ++artSeq, id: pick.id, url: avatarDrawCardWebpUrl(pick.id), fbUrl: avatarDrawCardUrl(pick.id) };
+    return { key: ++artSeq, id: pick.id, url: avatarDrawCardWebpUrl(pick.id), fbUrl: avatarDrawCardJdUrl(pick.id) };
   } catch {
     return null;
   }

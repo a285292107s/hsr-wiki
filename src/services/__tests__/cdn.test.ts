@@ -28,8 +28,8 @@ import {
   startCdnHealthProbe,
 } from '../cdn';
 
-// 本文件验证 cdn 模块的双源解析与 nanoka fallback 机制（legacy 模式）。
-// 官方路径模式下，icons.ts 直接拼 OFFICIAL_ICON_BASE，不经过 cdn 解析层。
+// 本文件验证 cdn 模块的双源解析与回退机制（nanoka 主源 + jsDelivr 旧档回退，trace 经
+// spec.jdPrimary 例外保持 jsDelivr 主源）。USE_OFFICIAL_PATHS=true 直拼模式不经 cdn 解析层。
 beforeAll(() => {
   setUseOfficialPaths(false);
 });
@@ -54,24 +54,22 @@ describe('nanokaUrl / cdnUri / cdnRawUrl', () => {
 });
 
 describe('resolveCdnUri 双源解析', () => {
-  it('jsDelivr 注册分类：jsDelivr 首选 + nanoka 回退', () => {
+  it('jsDelivr 注册分类：nanoka 主源 + jsDelivr 旧档回退', () => {
     const r = resolveCdnUri('lightconemediumicon', '23000.webp');
-    expect(r.primary).toBe(`${JS_DELIVR_BASE}/lightconemediumicon/23000.png`);
-    expect(r.fallback).toBe(`${BASE}/lightconemediumicon/23000.webp`);
-    expect(r.source).toBe('official');
+    expect(r.primary).toBe(`${BASE}/lightconemediumicon/23000.webp`);
+    expect(r.fallback).toBe(`${JS_DELIVR_BASE}/lightconemediumicon/23000.png`);
+    expect(r.source).toBe('nanoka');
   });
 
-  it('本地图标分类：element / pathicon local-first，回退远端最优源（jsDelivr）', () => {
+  it('本地图标分类：element / pathicon local-first，本地缺失回退远端主源（nanoka，新增内容仅此源有）', () => {
     expect(resolveCdnUri('element', 'fire.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/element/fire.webp`,
-      fallback: `${JS_DELIVR_BASE}/icondamagetype/IconDamageTypeFire.png`,
+      fallback: `${BASE}/element/fire.webp`,
       source: 'local',
     });
-    expect(resolveCdnUri('pathicon', 'priest.webp').fallback)
-      .toBe(`${JS_DELIVR_BASE}/professioniconmiddle/IconProfessionPirestMiddle.png`);
-    expect(resolveCdnUri('pathicon', 'elation.webp').fallback)
-      .toBe(`${JS_DELIVR_BASE}/professioniconmiddle/IconProfessionJoyMiddle.png`);
-    // trace：nanoka 源为占位图，本地缺失必须回退 jsDelivr（真源），禁改回 nanoka
+    expect(resolveCdnUri('pathicon', 'priest.webp').fallback).toBe(`${BASE}/pathicon/priest.webp`);
+    expect(resolveCdnUri('pathicon', 'elation.webp').fallback).toBe(`${BASE}/pathicon/elation.webp`);
+    // trace：nanoka 源为占位图，jdPrimary 保持 jsDelivr 主源（真源），本地缺失必须回退 jsDelivr，禁改回 nanoka
     expect(resolveCdnUri('trace', 'IconAttack.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/trace/IconAttack.webp`,
       fallback: `${JS_DELIVR_BASE}/ui/avatar/icon/IconAttack.png`,
@@ -79,41 +77,42 @@ describe('resolveCdnUri 双源解析', () => {
     });
   });
 
-  it('jsDelivr 映射分类：skillicons 按角色 id 分目录', () => {
-    expect(resolveCdnUri('skillicons', 'SkillIcon_1001_Normal.webp').primary)
-      .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1001/SkillIcon_1001_Normal.png`);
+  it('jsDelivr 映射分类：skillicons 主源 nanoka 平铺，回退按角色 id 分目录', () => {
+    const r = resolveCdnUri('skillicons', 'SkillIcon_1001_Normal.webp');
+    expect(r.primary).toBe(`${BASE}/skillicons/SkillIcon_1001_Normal.webp`);
+    expect(r.fallback).toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1001/SkillIcon_1001_Normal.png`);
   });
 
-  it('jsDelivr 映射分类：skillicons 忆灵技能目录按角色 id（文件名忆灵 id - 10000）', () => {
-    // 忆灵图标文件名以忆灵 ID 为前缀，仓库目录按角色 ID 组织（11402 → 1402）
-    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_Servant01.webp').primary)
+  it('jsDelivr 映射分类：skillicons 回退目录按角色 id（忆灵文件名 id - 10000）', () => {
+    // 忆灵图标文件名以忆灵 ID 为前缀，回退仓库目录按角色 ID 组织（11402 → 1402）
+    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_Servant01.webp').fallback)
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1402/SkillIcon_11402_Servant01.png`);
-    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_ServantPassive.webp').primary)
+    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_ServantPassive.webp').fallback)
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1402/SkillIcon_11402_ServantPassive.png`);
     // 开拓者特例：18007 → 8007
-    expect(resolveCdnUri('skillicons', 'SkillIcon_18007_Servant01.webp').primary)
+    expect(resolveCdnUri('skillicons', 'SkillIcon_18007_Servant01.webp').fallback)
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/8007/SkillIcon_18007_Servant01.png`);
   });
 
-  it('jsDelivr 映射分类：rank 星魂图标官方源（ui/ui3d/rank，含 Rank3/5 全套）', () => {
+  it('jsDelivr 映射分类：rank 星魂图标 nanoka 主源，回退官方 ui/ui3d/rank（含 Rank3/5 全套）', () => {
     const r = resolveCdnUri('rank', '1403/1403_Rank_3.webp');
-    // 官方源与 spriteoutput/ 平级 → 用 JS_DELIVR_UI3D_BASE（无 /spriteoutput 段）
-    expect(r.primary).toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1403/1403_Rank_3.png`);
-    expect(r.fallback).toBe(`${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`);
-    expect(r.source).toBe('official');
+    expect(r.primary).toBe(`${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`);
+    // 回退官方源与 spriteoutput/ 平级 → 用 JS_DELIVR_UI3D_BASE（无 /spriteoutput 段）
+    expect(r.fallback).toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1403/1403_Rank_3.png`);
+    expect(r.source).toBe('nanoka');
     // E6 同规则
-    expect(resolveCdnUri('rank', '1510/1510_Rank_6.webp').primary)
+    expect(resolveCdnUri('rank', '1510/1510_Rank_6.webp').fallback)
       .toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1510/1510_Rank_6.png`);
   });
 
-  it('jsDelivr 同构直迁分类：monstermiddleicon / relicfigures（套装件不受本地化影响）', () => {
+  it('jsDelivr 映射分类：monstermiddleicon / relicfigures（套装件不受本地化影响）', () => {
     expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp').primary)
-      .toBe(`${JS_DELIVR_BASE}/monstermiddleicon/Monster_1002011.png`);
-    expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').primary)
+      .toBe(`${BASE}/monstermiddleicon/Monster_1002011.webp`);
+    expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').fallback)
       .toBe(`${JS_DELIVR_BASE}/relicfigures/IconRelic_101_1.png`);
-    // relicfigures 仅通用部位图标本地化（白名单），套装件仍 jsDelivr
+    // relicfigures 仅通用部位图标本地化（白名单），套装件走远端
     expect(resolveCdnUri('relicfigures', 'IconRelicBody.webp').source).toBe('local');
-    expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').source).toBe('official');
+    expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').source).toBe('nanoka');
   });
 
   it('未注册 jsDelivr 的分类：仅 nanoka 首选，无回退', () => {
@@ -170,7 +169,21 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
     expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`);
   });
 
-  it('nanoka 主源无回退', () => {
+  it('nanoka 主源反查 jsDelivr 旧档回退（主源反转后的主路径）', () => {
+    expect(cdnFallbackFromPrimary(`${BASE}/lightconemediumicon/23000.webp`))
+      .toBe(`${JS_DELIVR_BASE}/lightconemediumicon/23000.png`);
+    expect(cdnImgFallbackAttr(`${BASE}/lightconemediumicon/23000.webp`))
+      .toBe(` data-cdn-fallback="${JS_DELIVR_BASE}/lightconemediumicon/23000.png"`);
+    // rank 保留 charId 子目录，回退用 ui3d 基址
+    expect(cdnFallbackFromPrimary(`${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`))
+      .toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1403/1403_Rank_3.png`);
+  });
+
+  it('nanoka 主源无 jsDelivr 规则的分类不产生回退', () => {
+    expect(cdnFallbackFromPrimary(`${BASE}/bufficon/IconBuffAttackUp.webp`)).toBe('');
+  });
+
+  it('nanoka 主源规则不适用（skillicons 文件名无数字）时不产生回退', () => {
     expect(cdnFallbackFromPrimary(`${BASE}/skillicons/abc.webp`)).toBe('');
   });
 
@@ -179,24 +192,26 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
     expect(cdnFallbackFromPrimary('https://example.com/x.webp')).toBe('');
   });
 
-  it('本地主源反查远端最优回退（localFallbackFromPrimary）', () => {
-    // jsDelivr 规则命中 → jsDelivr；relic 部位图标规则不适用 → nanoka；非本地路径 → ''
+  it('本地主源反查远端回退（localFallbackFromPrimary，回退 = 远端主源 nanoka）', () => {
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/element/fire.webp`))
-      .toBe(`${JS_DELIVR_BASE}/icondamagetype/IconDamageTypeFire.png`);
+      .toBe(`${BASE}/element/fire.webp`);
+    // relic 部位图标规则不适用 → nanoka；非本地路径 → ''
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelicBody.webp`))
       .toBe(`${BASE}/relicfigures/IconRelicBody.webp`);
     // 白名单外文件（套装件在本地目录无对应物）不反查
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`)).toBe('');
     expect(localFallbackFromPrimary('https://example.com/x.webp')).toBe('');
-    // cdnFallbackFromPrimary 对本地主源同样生效（legacy 模式 v-html 属性路径）
+    // cdnFallbackFromPrimary 对本地主源同样生效（v-html 属性路径）
     expect(cdnFallbackFromPrimary(`${LOCAL_ICONS_BASE}/element/fire.webp`))
-      .toBe(`${JS_DELIVR_BASE}/icondamagetype/IconDamageTypeFire.png`);
+      .toBe(`${BASE}/element/fire.webp`);
     expect(cdnImgFallbackAttr(`${LOCAL_ICONS_BASE}/element/fire.webp`))
-      .toBe(` data-cdn-fallback="${JS_DELIVR_BASE}/icondamagetype/IconDamageTypeFire.png"`);
+      .toBe(` data-cdn-fallback="${BASE}/element/fire.webp"`);
   });
 
-  it('OFFICIAL_BASE 为空时不产生回退属性', () => {
-    expect(cdnImgFallbackAttr(`${BASE}/skillicons/abc.webp`)).toBe('');
+  it('trace（jdPrimary）jsDelivr 主源反查 nanoka 回退属性', () => {
+    const src = `${JS_DELIVR_BASE}/ui/avatar/icon/IconAttack.png`;
+    expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/trace/IconAttack.webp`);
+    expect(cdnImgFallbackAttr(src)).toBe(` data-cdn-fallback="${BASE}/trace/IconAttack.webp"`);
   });
 });
 
@@ -261,14 +276,14 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     }
   });
 
-  it('本地主源 img 失败：现场反查远端最优源回退（不依赖 data-cdn-fallback 属性），远端再失败最终降级', () => {
+  it('本地主源 img 失败：现场反查远端主源回退（不依赖 data-cdn-fallback 属性），远端再失败最终降级', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
     img.src = `${LOCAL_ICONS_BASE}/element/fire.webp`;
     document.body.appendChild(img);
     try {
       img.dispatchEvent(new Event('error', { bubbles: true }));
-      expect(img.src).toBe(`${JS_DELIVR_BASE}/icondamagetype/IconDamageTypeFire.png`);
+      expect(img.src).toBe(`${BASE}/element/fire.webp`);
       // 远端再失败：src 已是 http(s)，无回退属性 → data-cdn-down
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.dataset.cdnDown).toBe('1');

@@ -1,8 +1,9 @@
 /**
  * 图标 / 图片 URL 构造器（无状态纯函数）。
- * Step 1: USE_OFFICIAL_PATHS=false（默认）→ 统一经 services/cdn 解析双源（jsDelivr + nanoka fallback）。
- * Step 2: USE_OFFICIAL_PATHS=true → converter 输出官方 StarRailTextures 相对路径时，
- *   非 GridFight/Rank 等特殊分类直接拼 OFFICIAL_ICON_BASE，删除 nanoka 中转站（仅保留 stall→CSS 占位降级）。
+ * USE_OFFICIAL_PATHS=false（当前默认）→ 统一经 services/cdn 解析：nanoka 主源 + jsDelivr 旧档回退。
+ * USE_OFFICIAL_PATHS=true → 官方仓库相对路径直拼 OFFICIAL_ICON_BASE（无任何回退；仅 fork 恢复
+ * 同步后允许切回，见 constants.ts 注释）。gridFightPropIconUrl 等无 nanoka 等价源的构造器
+ * 不受开关影响，恒直拼 jsDelivr。
  */
 import { cdnUri, cdnRawUrl, nanokaUrl, resolveCdnUri } from '../services/cdn';
 import {
@@ -76,7 +77,8 @@ export function eidolonIconUrl(charId: string, rankNum: number | string): string
   return charId ? cdnUri('rank', `${charId}/${charId}_Rank_${rankNum}.webp`) : '';
 }
 
-/** 角色立绘（全身像）：avatardrawcard/{charId}.webp */
+/** 角色立绘（全身像）：双源解析——nanoka webp 主源（同分辨率体积约官方 PNG 1/4）+ jsDelivr PNG 回退。
+ *  角色详情页背景（CSS background-image 无 error 事件，主源必须直出）与货币战争角色页共用。 */
 export function avatarDrawCardUrl(charId: string | number): string {
   if (USE_OFFICIAL_PATHS && charId) {
     return official(`avatardrawcard/${charId}.png`);
@@ -84,11 +86,17 @@ export function avatarDrawCardUrl(charId: string | number): string {
   return cdnUri('avatardrawcard', `${charId}.webp`);
 }
 
+/** 角色立绘 jsDelivr PNG 直链（不经开关，恒直拼）：仅供首页 Hero 预载链作第二源——
+ *  fork 停更后仅覆盖冻结前角色，新角色两源皆 404 时由调用方渐变底承接。 */
+export function avatarDrawCardJdUrl(charId: string | number): string {
+  return charId ? official(`avatardrawcard/${charId}.png`) : '';
+}
+
 /** 移动端 Hero 立绘（轻量 webp，nanoka 唯一源）。
  *  官方仓库仅提供 2048×2048 PNG（实测 2.9~4.9MB），同分辨率 webp 仅 ~1/4；
  *  该体积差直接决定弱网下立绘首现速度，故首页 Hero（<1024px 断点）专用此源，
- *  桌面角色详情页背景仍走 avatarDrawCardUrl（官方 PNG，不降级）。
- *  消费方必须保留回退链：webp 加载失败 → avatarDrawCardUrl 的官方 PNG（HomeView preload 链）。
+ *  桌面角色详情页背景走 avatarDrawCardUrl（同为 nanoka webp 主源 + jsDelivr 回退）。
+ *  消费方必须保留回退链：webp 加载失败 → avatarDrawCardJdUrl 的官方 PNG（HomeView preload 链）。
  *  禁止改用 cdnUri('avatardrawcard', ...) —— jsDelivr 规则会把 .webp 重写回 .png（jsdelivr.ts）。 */
 export function avatarDrawCardWebpUrl(charId: string | number): string {
   return charId ? nanokaUrl('avatardrawcard', `${charId}.webp`) : '';
@@ -228,7 +236,7 @@ export function gridFightTraitIconById(id: number): string {
 }
 
 /**
- * 货币战争技能图标双源：jsDelivr 官方镜像优先 + nanoka 平铺兜底（复用 skillicons 分类的
+ * 货币战争技能图标双源：nanoka 平铺主源 + jsDelivr 旧档兜底（复用 skillicons 分类的
  * JS_DELIVR_RULES 规则：avatar/{id}/ 目录 + 忆灵 ID 特例，与常规技能图标同一套）。
  * 返回 { src, fb }：fb 空串 = 无兜底（jsDelivr 规则不适用时仅 nanoka）。
  * 消费方 img 须同时绑定 :data-cdn-fallback="fb || undefined"，由全局委托完成回退与最终隐藏

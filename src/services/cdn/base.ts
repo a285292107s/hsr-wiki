@@ -1,13 +1,13 @@
 /**
  * CDN 资源源与分类注册表（单一事实来源）。
  *
- * 外部图片资源统一经此解析：本地图标优先（spec.local 声明的分类），官方源次之（存在时），
- * nanoka 兜底（复刻 Spine 双源语义）。
+ * 外部图片资源统一经此解析：本地图标优先（spec.local 声明的分类），
+ * 其余 nanoka 主源（持续更新）+ jsDelivr 回退（旧档补全；见 resolve.ts remoteCdnUri）。
  * 经实测（bbs 黑盒 wiki / 官网）确认：游戏数据图标（avatarshopicon / skillicons 等）
  * 均无官方可热链 CDN，故当前各分类仅注册 nanoka 子路径；官方源留插槽（spec.official），
  * 待确认后填入即可，消费方无需改动。
  */
-/** 资源源：local=随站本地图标（首选），official=官方 CDN（优先），nanoka=nanoka CDN（官方缺失/失效时回退） */
+/** 资源源：local=随站本地图标（首选），official=jsDelivr 官方镜像（jdPrimary 例外分类主源），nanoka=nanoka CDN（主源） */
 export type CdnSource = 'official' | 'nanoka' | 'local';
 
 /** CDN 分类：命名对应 nanoka 下 /assets/hsr/{nanoka 子路径} 的目录结构 */
@@ -42,6 +42,10 @@ export interface CdnCategorySpec {
   /** 本地化文件名白名单（与 local 同用；缺省 = 该分类全量文件本地化）。
    *  relicfigures 分类整体为套装件图（量大走 jsDelivr），仅 4 个通用部位图标入库 */
   localFiles?: RegExp;
+  /** 保持 jsDelivr 为该分类主源（nanoka 退居回退）。
+   *  唯一使用场景：trace 的 nanoka 源为占位图（真源是 jsDelivr ui/avatar/icon/），
+   *  本地缺失回退必须落到 jsDelivr；其余分类禁止设置（fork 停更后 jsDelivr 仅作旧档补全源） */
+  jdPrimary?: boolean;
 }
 
 /** nanoka 资源挂载点（/assets/hsr/...） */
@@ -62,10 +66,10 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   avatardrawcard: { nanoka: 'avatardrawcard' },
   itemfigures: { nanoka: 'itemfigures' },
   // 本地化三分类：全站公共小图标（KB 级、高频复用、永不更新）；trace 的 nanoka 源为占位图，
-  // 真源是 jsDelivr（ui/avatar/icon/Icon{key}.png），故本地缺失时回退 jsDelivr 而非 nanoka
+  // 真源是 jsDelivr（ui/avatar/icon/Icon{key}.png），故以 jdPrimary 保持 jsDelivr 主源
   element: { nanoka: 'element', local: 'element' },
   pathicon: { nanoka: 'pathicon', local: 'pathicon' },
-  trace: { nanoka: 'trace', local: 'trace' },
+  trace: { nanoka: 'trace', local: 'trace', jdPrimary: true },
   lightconemediumicon: { nanoka: 'lightconemediumicon' },
   monstermiddleicon: { nanoka: 'monstermiddleicon' },
   monsterfigure: { nanoka: 'monsterfigure' },

@@ -20,7 +20,7 @@ export async function bootstrap(): Promise<void> {
   app.use(createPinia());
   app.use(router);
   app.mount('#app');
-  // 全局 CDN 图片回退委托：覆盖 v-html 卡片（data-cdn-fallback）的官方源失效回退 + 最终降级标记
+  // 全局 CDN 图片回退委托：覆盖 v-html 卡片（data-cdn-fallback）的主源失效回退 + 最终降级标记
   installCdnImgFallback();
   // CDN 健康探测（fire-and-forget）：down 短路 / 恢复重载的信号源
   startCdnHealthProbe();

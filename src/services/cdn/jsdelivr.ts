@@ -1,18 +1,17 @@
 /**
- * jsDelivr 加速源（自建 fork StarRailTextures 仓库镜像，跟 main 分支最新）
+ * jsDelivr 源（自建 fork StarRailTextures 仓库镜像）
  *
- * 作为图片资源的首选源（primary），nanoka 保留回退（fallback）：
- * - jsDelivr 200（核对脚本全命中分类）→ nanoka 永不触发
- * - jsDelivr 404（上游未收录，如仓库未更新的新内容 / 星魂 3/5 官方无文件）→ 自动回退 nanoka
- *   （nanoka 同样缺失时由 img error 事件兜底降级）
- *
- * 路径规则（数据源官方路径 → 仓库结构，实测验证）：
+ * 当前角色：回退源（fallback），仅补 nanoka 缺失的旧档资产——
+ * fork 已停止跟随上游更新，仅含冻结时点前的资产；冻结后的新内容在本仓库不存在，
+ * 主源必须是 nanoka（持续更新），禁止把 jsDelivr 重新设为任何分类的首选源
+ * （唯一例外：trace 分类 nanoka 源为占位图，经 base.ts spec.jdPrimary 保持 jsDelivr 主源）。
+ * 路径规则仍然有效（反向映射 + trace 主源 + 未来恢复同步后复用）：
  * - 官方 SpriteOutput/{SubDir}/... → spriteoutput/{subdir}/...（目录段小写，文件名保原大小写）
  * - 分类映射差异：skillicons 按角色 id 分目录（avatar/{id}/）；trace 在 ui/avatar/icon/；
  *   element 在 icondamagetype/（IconDamageType 前缀）；pathicon 在 professioniconmiddle/
  *   （Priest→Pirest、Elation→Joy 官方拼写差异）
  *
- * 升级流程：自建 fork 同步上游后无需改码；jsDelivr 有边缘缓存，新数据可能延迟生效，
+ * 若 fork 恢复同步：同步上游后无需改码；jsDelivr 有边缘缓存，新数据可能延迟生效，
  * 必要时 purge.jsdelivr.net 清缓存，并实测算复核命中率。
  */
 import type { CdnCategory } from './base';

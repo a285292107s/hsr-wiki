@@ -1,8 +1,10 @@
 /**
  * CDN URL 解析（纯函数）：按分类解析双源 URL + v-html 卡片回退属性。
+ * 源优先级：本地图标（local-first）> nanoka 主源（持续更新）> jsDelivr 回退（旧档补全，
+ * fork 停更后不再跟版本）；trace 例外保持 jsDelivr 主源（spec.jdPrimary，nanoka 源为占位图）。
  * 统一收口：所有图片 URL 构造（icons.ts 及视图内联）最终经此解析。
  */
-import { CDN, USE_OFFICIAL_PATHS } from '../../lib/constants';
+import { CDN } from '../../lib/constants';
 import { escHtml } from '../../lib/html';
 import { CDN_CATEGORIES, LOCAL_ICONS_BASE, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
 import { JS_DELIVR_BASE, JS_DELIVR_RULES, JS_DELIVR_UI3D_BASE, jsdelivrToNanokaFile } from './jsdelivr';
@@ -21,32 +23,34 @@ export function nanokaUrl(category: CdnCategory, file: string, spec = CDN_CATEGO
   return `${CDN}${NANOKA_HUD}/${spec.nanoka}/${file}`;
 }
 
-/** 远端双源解析：jsDelivr（StarRailTextures 镜像，注册了规则的分类）> 官方源 > nanoka */
+/** 远端双源解析：nanoka 主源（持续更新）+ jsDelivr 回退（旧档补全；fork 已停止跟随上游，
+ *  冻结后新增内容仅 nanoka 有，直拼 jsDelivr 必 404——禁止反转回旧优先级，除非 fork 恢复同步）。
+ *  例外：spec.jdPrimary 分类（trace，nanoka 源为占位图）保持 jsDelivr 主源；
+ *  spec.official 且 OFFICIAL_BASE 非空时官方源优先（预留插槽，当前 OFFICIAL_BASE 为空不生效）。 */
 function remoteCdnUri(
   category: CdnCategory,
   file: string,
   spec: CdnCategorySpec = CDN_CATEGORIES[category],
 ): CdnUri {
-  // jsDelivr 首选（核对脚本验证全命中的分类）：nanoka 保留回退；规则不适用（返回 null）时回退 nanoka
+  const nanoka = nanokaUrl(category, file, spec);
+  // jsDelivr 回退：规则命中（核对脚本验证过的分类）才有等价 URL；规则不适用（返回 null）时无回退
   const jdRule = JS_DELIVR_RULES[category];
   const jdPath = jdRule ? jdRule(file) : null;
-  if (jdPath) {
-    // rank（星魂图标）官方源与 spriteoutput/ 平级（assets/asbres/ui/ui3d/...），用独立基址拼接
-    const jdBase = category === 'rank' ? JS_DELIVR_UI3D_BASE : JS_DELIVR_BASE;
-    return {
-      primary: `${jdBase}/${jdPath}`,
-      fallback: nanokaUrl(category, file, spec),
-      source: 'official',
-    };
+  const jdUrl = jdPath
+    ? // rank（星魂图标）官方源与 spriteoutput/ 平级（assets/asbres/ui/ui3d/...），用独立基址拼接
+      `${category === 'rank' ? JS_DELIVR_UI3D_BASE : JS_DELIVR_BASE}/${jdPath}`
+    : '';
+  if (jdUrl && spec.jdPrimary) {
+    return { primary: jdUrl, fallback: nanoka, source: 'official' };
   }
-  if (spec.official && OFFICIAL_BASE) {
+  if (!jdUrl && spec.official && OFFICIAL_BASE) {
     return {
       primary: `${OFFICIAL_BASE}/${spec.official}/${file}`,
-      fallback: nanokaUrl(category, file, spec),
+      fallback: nanoka,
       source: 'official',
     };
   }
-  return { primary: nanokaUrl(category, file, spec), fallback: '', source: 'nanoka' };
+  return { primary: nanoka, fallback: jdUrl, source: 'nanoka' };
 }
 
 /** 三级解析：本地图标（local-first）> jsDelivr 镜像 > 官方源 > nanoka。
@@ -93,8 +97,8 @@ export function localFallbackFromPrimary(primary: string): string {
   return '';
 }
 
-/** 依据主 URL 反查回退源（v-html 卡片用）：本地图标反查远端最优源；jsDelivr 源反查 nanoka；
- *  主源为官方时返回 nanoka 等价 URL；否则 '' */
+/** 依据主 URL 反查回退源（v-html 卡片用）：本地图标反查远端最优源；nanoka 主源反查 jsDelivr 旧档
+ *  （主源反转后的主路径）；jsDelivr 源反查 nanoka（jdPrimary 分类主源用）；否则 '' */
 export function cdnFallbackFromPrimary(primary: string): string {
   if (!primary) return '';
   // 本地主源 → 远端最优源（jsDelivr 规则命中 → jsDelivr，否则 nanoka）
@@ -105,13 +109,26 @@ export function cdnFallbackFromPrimary(primary: string): string {
     const file = jsdelivrToNanokaFile('rank', primary);
     return file ? nanokaUrl('rank', file, CDN_CATEGORIES['rank']) : '';
   }
-  // jsDelivr 首选源 → nanoka 等价 URL（按分类规则反查文件名并验证路径一致性）
+  // jsDelivr 源 → nanoka 等价 URL（按分类规则反查文件名并验证路径一致性）
   if (primary.startsWith(JS_DELIVR_BASE)) {
     for (const [cat, rule] of Object.entries(JS_DELIVR_RULES) as [CdnCategory, (f: string) => string][]) {
       const file = jsdelivrToNanokaFile(cat, primary);
       if (file && `${JS_DELIVR_BASE}/${rule(file)}` === primary) {
         return nanokaUrl(cat, file, CDN_CATEGORIES[cat]);
       }
+    }
+    return '';
+  }
+  // nanoka 主源 → jsDelivr 旧档等价 URL（按分类注册子路径定位文件后走正向规则；未注册规则的分类无回退）
+  const nanokaPrefix = `${CDN}${NANOKA_HUD}/`;
+  if (primary.startsWith(nanokaPrefix)) {
+    const rest = primary.slice(nanokaPrefix.length);
+    for (const [cat, spec] of Object.entries(CDN_CATEGORIES) as [CdnCategory, CdnCategorySpec][]) {
+      const marker = `${spec.nanoka}/`;
+      if (!rest.startsWith(marker)) continue;
+      const rule = JS_DELIVR_RULES[cat];
+      const path = rule ? rule(rest.slice(marker.length)) : null;
+      return path ? `${cat === 'rank' ? JS_DELIVR_UI3D_BASE : JS_DELIVR_BASE}/${path}` : '';
     }
     return '';
   }
@@ -127,12 +144,11 @@ export function cdnFallbackFromPrimary(primary: string): string {
   return '';
 }
 
-/** 生成 v-html 卡片 <img> 的 data-cdn-fallback 属性（无回退源时返回空串）
- *  Step 2: USE_OFFICIAL_PATHS=true → 非 Spine 图片不再使用 nanoka fallback，直接空串。
- *  T1 回退在 dom.ts 中读到空 fallback 时跳过 primary→nanoka 切换；仍保留 stall→CSS 占位降级。
- */
+/** 生成 v-html 卡片 <img> 的 data-cdn-fallback 属性（无回退源时返回空串）。
+ *  主源失效切换由 dom.ts 委托执行（读到空 fallback 时跳过切换，保留 stall→CSS 占位降级）；
+ *  禁止恢复「USE_OFFICIAL_PATHS=true 时返回空串」的短路——该模式下主源 404 无任何回退，
+ *  是 jsDelivr fork 停更期间新内容破图的直接原因。 */
 export function cdnImgFallbackAttr(src: string): string {
-  if (USE_OFFICIAL_PATHS) return '';
   const fb = cdnFallbackFromPrimary(src);
   return fb ? ` data-cdn-fallback="${escHtml(fb)}"` : '';
 }

@@ -14,14 +14,16 @@ export const CW_HERO_POSTER = '/data/cn/assets/cw-hero-poster.jpg';
 export const SITE_NAME = '星铁档案馆';
 
 /**
- * Step 2: 切生产。converter 已用 --official-icon-paths 全量重跑 public/data/cn，
- *   非 Spine 图片 icon 字段均为官方 StarRailTextures 仓库相对路径，直接拼 OFFICIAL_ICON_BASE。
- *   保留 isLegacyIconPath('icon/...') 判断兜底：icon_mini / icon_cutin / rank(星魂) / gridfight-*
- *   暂未纳入 StarRailTextures 覆盖范围，继续走 nanoka（cdnUri legacy 分支）。
- * Step 3（后续可选）：给 converter OFFICIAL_ICON_RULES 补上 icon_mini/icon_cutin 等规则后，
- *   可删除 icons.ts 中全部 USE_OFFICIAL_PATHS=false 分支与 isLegacyIconPath 判断，简化代码。
+ * 图片源模式开关（当前 false = 双源解析模式）：
+ * - false：全部图标经 services/cdn 解析——nanoka 主源（持续更新）+ jsDelivr 回退（旧档补全）。
+ *   背景：jsDelivr 镜像仓库（自建 fork StarRailTextures）已停止跟随上游，仅含冻结时点前的资产；
+ *   新版本内容（冻结后新增角色/物品等）在 jsDelivr 上不存在，直拼 jsDelivr 必 404，故主源必须是 nanoka。
+ *   保留 isLegacyIconPath('icon/...') 判断分支与 official() 直拼分支（true 模式）仅为保留切换能力，
+ *   禁止在 true 模式下上线——该模式无任何回退，jsDelivr 404 即破图。
+ * - true：converter 输出的官方仓库相对路径直拼 OFFICIAL_ICON_BASE，跳过 cdn 解析层。
+ *   仅当 fork 恢复跟随上游同步后，经验证命中率再允许切回。
  */
-export let USE_OFFICIAL_PATHS = true;
+export let USE_OFFICIAL_PATHS = false;
 
 /** 测试/调试专用：运行时切换 USE_OFFICIAL_PATHS（ESM 导入绑定只读，必须通过 setter 修改源模块变量）。 */
 export function setUseOfficialPaths(v: boolean): void {
