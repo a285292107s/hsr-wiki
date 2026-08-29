@@ -61,6 +61,11 @@ export const NORMAL_NAV_ITEMS: NavItem[] = [
     icon: '<svg viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M5.12 2 6.42 4.25 8.49 4.84 6.03 6.14 5.38 8.04 3.82 5.67 2 5.08 4.47 3.78 5.12 2.12Z M8.88 2.24 11.22 2.47 12.26 3.42 12.65 4.96 10.44 7.44 5.51 11.11 3.69 13.95 4.08 16.44 6.68 18.57 7.45 19.99 4.86 19.51 3.43 18.45 2.13 15.96 2 13.72 3.82 10.4 10.57 5.31 10.83 4.49 10.44 4.01 8.49 3.78 7.58 4.13 7.06 3.66 7.32 2.83 9.01 2.24Z M16.94 6.85 19.79 7.33 21.48 8.63 22 11.94 21.35 14.07 20.05 12.41 20.05 10.28 19.01 8.98 18.23 8.63 13.56 8.86 15.25 7.33 17.06 6.85Z M12.78 10.05 15.25 10.17 18.1 11.59 19.4 13.12 20.18 15.61 19.92 17.74 18.88 19.63 17.19 21.05 14.34 22 11.22 21.64 9.27 20.58 7.71 18.8 7.06 17.03 7.06 14.9 8.36 12.3 10.31 10.76 12.91 10.05Z M15.77 12.77 17.06 13.24 17.45 14.66 16.42 15.73 14.86 15.49 14.21 14.54 14.34 13.72 14.99 13.01 15.9 12.89Z"/></svg>',
   },
   {
+    title: '深渊', en: 'ENDGAME', desc: '赛季记录 · 四模式合并', path: '/endgame',
+    activePaths: ['/endgame'],
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><circle cx="12" cy="12" r="1"/></svg>',
+  },
+  {
     title: '物品', en: 'ITEMS', desc: '材料 · 消耗品 · 货币', path: '/item', primary: true,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>',
   },
@@ -71,11 +76,6 @@ export const NORMAL_NAV_ITEMS: NavItem[] = [
   {
     title: '敌人', en: 'ENEMIES', desc: '敌方单位与弱点', path: '/monster',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/></svg>',
-  },
-  {
-    title: '深渊', en: 'ENDGAME', desc: '赛季记录 · 四模式合并', path: '/endgame',
-    activePaths: ['/endgame'],
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><circle cx="12" cy="12" r="1"/></svg>',
   },
 ];
 
