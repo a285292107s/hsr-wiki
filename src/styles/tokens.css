@@ -612,6 +612,27 @@
 :where(#app) img { display: inline-block; vertical-align: middle; }
 :where(#app) a { color: inherit; text-decoration: none; }
 
+/* ─── 全局纸质噪点（缓解纯色底视觉疲劳）：唯一收口于本规则，禁止页面级复制/调参 ───
+   双层白 alpha 噪声（feColorMatrix 去色留 alpha，无色相 → 双主题通用，中性豁免不触发色彩守卫）：
+   ① 细纤维 160px 瓦片（baseFrequency 0.8）——纸面颗粒；
+   ② 云斑 600px 瓦片（baseFrequency 0.012）——大尺度纸面明度不匀，专攻大面积纯平区域
+     （endgame 索引等无盒框纯黑区）；低频 stitchTiles 在 160px 瓦距上会以 160px 周期
+     重复成网格，云斑必须独立大瓦片，禁止并回 160px。
+   白颗粒只在暗部显形（亮图/白底上自动隐形），不会在图片与文字上显脏。
+   · fixed + pointer-events:none：纯视觉覆层，不拦截交互、不参与布局；
+     #app 无 transform，包含块为视口，不被 #app overflow:clip 裁切
+   · z-index 高于侧栏(100000)/Toast(99999)：全表面统一纸感（弹层同颗粒，不出现局部哑光）
+   · 强度唯一调参位 = --grain-opacity，同时作用于两层 */
+:root { --grain-opacity: 0.12; }
+#app::after {
+  content: '';
+  position: fixed; inset: 0;
+  z-index: 100001;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='nk-grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.7 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23nk-grain)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='nk-grain-cloud'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23nk-grain-cloud)'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+}
+
 /* ─── 角色详情页滚动容器（CharacterView 根元素） ─── */
 .nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 .nk-page--detail::-webkit-scrollbar { width: 6px; }
