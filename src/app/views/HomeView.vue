@@ -27,8 +27,8 @@ const indexGroups = [
 const sectionCount = NORMAL_NAV_ITEMS.length + 1;
 
 /* ─── Hero 背景：桌面（≥1024px）= 官网 KV Spine 场景；平板与手机（<1024px）= 随机五星立绘 ───
-   KV 场景（主背景 + 9 层角色群像）在窄屏下降级仅剩主背景层、群像丢失，且宽幅 frieze 被 cover
-   裁剪大半，显示效果差；故 <1024px 统一改为随机五星角色立绘（与 KV 群像皆为五星的观感对齐）。
+   KV 场景（主背景 + 角色多层群像）为 16:9 宽幅设计，窄屏被 cover 裁剪大半且构图错位，
+   显示效果差；故 <1024px 统一改为随机五星角色立绘（与 KV 群像的五星观感对齐）。
    立绘仅在页面刷新（F5/重载）时更换：上次展示 ID 存 localStorage，下次加载时排除，保证刷新必换。 */
 
 const spineRef = ref<HTMLElement | null>(null);

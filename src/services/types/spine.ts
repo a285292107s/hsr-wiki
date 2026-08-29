@@ -13,7 +13,7 @@ export interface SpineSkelEntry {
   name: string;
 }
 
-/** 官网源条目（折叠格式）：Spine 4.2.43 JSON 骨架 + atlas + 纹理映射。
+/** 官网源条目（折叠格式）：官网 JSON 骨架（导出版本随素材而异，4.2 运行时向下兼容）+ atlas + 纹理映射。
  *  atlas/json/textures 均为 base+dir 下的相对文件名（hash 名），由 api 层展开为完整 URL；
  *  textures 键为 atlas 逻辑纹理名（含 .png 扩展名，必须与 atlas page 行逐字一致） */
 export interface SpineOfficialEntry {

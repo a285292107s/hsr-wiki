@@ -445,7 +445,7 @@
 /* 首页专属等宽族（编辑式元信息）：替代 Orbitron 的 HUD 味，系统字体零加载 */
 #nk-home-app { --home-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; }
 
-/* ── Hero：全屏官网 KV 场景（Spine 10 层），标题区退居左下 ── */
+/* ── Hero：全屏官网 KV 场景（Spine 多层，层数以 spine-manifest-official.json 的 home-bg 为准），标题区退居左下 ── */
 /* 背景渐变 = Spine 加载失败/全部层失败时的视觉兜底（主背景层不透明，正常渲染时被完全遮盖）
    内边距移入 __content：内容与导航区共用 1440 居中网格，宽屏下左右对齐不错位 */
 .nk-home-hero { position: relative; min-height: 100vh; min-height: 100dvh; overflow: hidden; display: flex; align-items: flex-end; background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--th-500) 12%) 100%); }
