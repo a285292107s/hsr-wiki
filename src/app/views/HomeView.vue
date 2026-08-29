@@ -12,7 +12,7 @@ import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
 import { prefetchHighPriority } from '../router/chunks';
 import { initSpineSceneViewer } from '../character/spine';
 import { loadLocalCharacterList } from '../../services/api';
-import { avatarDrawCardUrl } from '../../lib/format';
+import { avatarDrawCardUrl, avatarDrawCardWebpUrl } from '../../lib/format';
 import { SITE_NAME } from '../../lib/constants';
 
 const app = useAppStore();
@@ -46,22 +46,38 @@ function mountHeroSpine(): void {
 const isSpine = ref(false);
 let mq: MediaQueryList | null = null;
 
-/* ─── 立绘展示：静态单层，预加载完成才入栈；上次展示 ID 持久化，刷新时排除换新 ─── */
-interface HeroArt { key: number; id: number; url: string }
+/* ─── 立绘展示：静态单层（+ 上次立绘垫底），预加载完成才替换；上次展示 ID 持久化，刷新时排除换新 ───
+   立绘源策略（2026-08-28 优化）：主源 = nanoka webp（avatarDrawCardWebpUrl，同分辨率体积仅官方 PNG ~1/4，
+   弱网首现的 4× 差异），失败回退 = 官方 jsDelivr PNG（avatarDrawCardUrl）；预加载 fetchpriority=high，
+   且 <1024px 不预载 Spine 运行时（chunks.ts 断点门控）让带宽给 LCP 立绘。
+   垫底：上次展示立绘的 URL 存 localStorage，刷新时先入栈（大概率缓存命中即时显示），
+   新抽立绘就绪后交叉淡入替换——消除预加载期空白渐变。 */
+interface HeroArt { key: number; id: number; url: string; fbUrl: string }
 const heroArts = ref<HeroArt[]>([]);
 const activeArtKey = ref(0);
 let artSeq = 0;
 let artEpoch = 0; // 代际令牌：断点切换/卸载后丢弃过期异步结果
-const LAST_ART_KEY = 'nk-home-last-art'; // localStorage：上次展示的角色 ID
+const LAST_ART_KEY = 'nk-home-last-art'; // localStorage：上次展示的角色 ID（刷新排除）
+const LAST_ART_URL_KEY = 'nk-home-last-art-url'; // localStorage：上次展示立绘 {id,url}（垫底预显）
 
-/** 预加载图片（失败静默，调用方以渐变背景直接承接） */
-function preloadImage(url: string): Promise<void> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
-    img.src = url;
-  });
+/** 依次预加载图片（fetchpriority=high，优先于其余资源调度），返回首个成功的 URL；全部失败返回 null。
+ *  失败静默，调用方以渐变背景直接承接。 */
+function preloadFirstImage(urls: string[]): Promise<string | null> {
+  const load = (url: string): Promise<string | null> =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.fetchPriority = 'high';
+      img.onload = () => resolve(url);
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  return (async () => {
+    for (const url of urls) {
+      const ok = await load(url);
+      if (ok) return ok;
+    }
+    return null;
+  })();
 }
 
 /** 读取上次展示的角色 ID（localStorage 读取失败视为无记录） */
@@ -81,7 +97,26 @@ function saveLastArtId(id: number): void {
   } catch { /* 忽略：仅失去去重能力 */ }
 }
 
-/** 随机抽取一张角色立绘（五星优先；排除上次刷新展示过的，保证每次刷新换人） */
+/** 读取上次展示立绘 URL（垫底预显用；结构不符/读取失败视为无记录） */
+function loadLastArtUrl(): { id: number; url: string } | null {
+  try {
+    const raw = localStorage.getItem(LAST_ART_URL_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as { id?: unknown; url?: unknown };
+    return typeof p.id === 'number' && typeof p.url === 'string' ? { id: p.id, url: p.url } : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 记录本次实际展示的立绘 URL（必须是预加载成功的 URL，失效 URL 不得入垫底池） */
+function saveLastArtUrl(art: { id: number; url: string }): void {
+  try {
+    localStorage.setItem(LAST_ART_URL_KEY, JSON.stringify(art));
+  } catch { /* 忽略：仅失去垫底能力 */ }
+}
+
+/** 随机抽取一张角色立绘（五星优先；排除上次刷新展示过的，保证每次刷新换人；webp 主源 + PNG 回退） */
 async function pickHeroArt(): Promise<HeroArt | null> {
   try {
     const list = await loadLocalCharacterList();
@@ -94,23 +129,35 @@ async function pickHeroArt(): Promise<HeroArt | null> {
     ];
     if (!pick) return null;
     saveLastArtId(pick.id);
-    return { key: ++artSeq, id: pick.id, url: avatarDrawCardUrl(pick.id) };
+    return { key: ++artSeq, id: pick.id, url: avatarDrawCardWebpUrl(pick.id), fbUrl: avatarDrawCardUrl(pick.id) };
   } catch {
     return null;
   }
 }
 
-/** 启动立绘展示：刷新后随机抽一张（排除上次展示），静态展示不轮播 */
+/** 启动立绘展示：上次立绘（URL 垫底，缓存命中即即时显示）→ 新抽立绘预加载成功后交叉淡入替换 */
 function startHeroArt(): void {
   stopHeroArt();
   const epoch = ++artEpoch;
+  const last = loadLastArtUrl();
+  const placeholder: HeroArt | null = last
+    ? { key: ++artSeq, id: last.id, url: last.url, fbUrl: '' }
+    : null;
   heroArts.value = [];
   void (async () => {
+    // 垫底层先行入栈（上次立绘，大概率缓存命中）：消除等待期空白渐变
+    if (placeholder && epoch === artEpoch) {
+      heroArts.value = [placeholder];
+      activeArtKey.value = placeholder.key;
+    }
     const first = await pickHeroArt();
     if (!first || epoch !== artEpoch) return;
-    await preloadImage(first.url);
-    if (epoch !== artEpoch) return;
-    heroArts.value = [first];
+    const effective = await preloadFirstImage([first.url, first.fbUrl]);
+    if (!effective || epoch !== artEpoch) return;
+    first.url = effective; // 实际生效源：webp 优先，回退官方 PNG
+    saveLastArtUrl({ id: first.id, url: effective });
+    // 双栈并置：垫底层失去 nk-on 淡出 + 新层 nk-on 入场（复用轮播交替 CSS），无垫底时直接单层
+    heroArts.value = placeholder ? [placeholder, first] : [first];
     activeArtKey.value = first.key;
   })();
 }
