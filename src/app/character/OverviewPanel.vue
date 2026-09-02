@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 概览面板：角色档案（CV）+ 总属性加成 diff + TALENTS 附加能力 diff + 角色故事手风琴。
- * 一句话介绍已上移至 Hero 属性模块下方（CharHero）。
+ * 一句话介绍位于 Hero 面板头部下方（CharHero）；基础属性已迁出至 00 属性区块（StatsPanel）。
  * 平铺布局下通过 sections 渲染区块子集（各区块可独立排列在页面序列中）。
  * openStory 状态由面板内部持有（加载期父模板整体卸载，切换角色自动重置）。
  */

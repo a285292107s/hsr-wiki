@@ -12,6 +12,7 @@ import { useCharacterStore } from '../stores/character';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import CharHero from '../character/CharHero.vue';
+import StatsPanel from '../character/StatsPanel.vue';
 import OverviewPanel from '../character/OverviewPanel.vue';
 import SkillsPanel from '../character/SkillsPanel.vue';
 import EidolonsPanel from '../character/EidolonsPanel.vue';
@@ -105,12 +106,13 @@ const enhStateLabel = computed<string>(() => {
 
 /* ═══════════ 区块导航（平铺长页：吸顶索引条 + 当前位置高亮 + 阅读进度 + 返回顶部） ═══════════ */
 
-/** 区块定义：id 对应面板 data-panel，顺序即页面视觉顺序（hero 概览区在顶部，无需跳转） */
+/** 区块定义：id 对应面板 data-panel，顺序即页面视觉顺序（hero 概览区在顶部，无需跳转；00 属性紧随其后） */
 const sectionDefs = [
+  { id: 'stats', label: '属性' },
   { id: 'skills', label: '技能' },
   { id: 'talents', label: '附加' },
   { id: 'eidolons', label: '星魂' },
-  { id: 'bonuses', label: '属性' },
+  { id: 'bonuses', label: '加成' },
   { id: 'cones', label: '光锥' },
   { id: 'teams', label: '队伍' },
   { id: 'relics', label: '遗器' },
@@ -197,14 +199,15 @@ onBeforeUnmount(() => {
             <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:70px;"></div>
           </div>
           <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--block" style="margin-top:14px;"></div>
-          <div class="nk-sk nk-sk--shimmer nk-sk--bar-line"></div>
-          <div class="nk-skeleton__stat-grid" style="margin-top:12px;">
-            <div v-for="i in 8" :key="i" class="nk-sk nk-sk--shimmer nk-sk--stat"></div>
-          </div>
         </div>
       </div>
       <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-sm"></div>
+        <!-- 00 基础属性（原 Hero 属性区段迁出） -->
+        <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:120px;"></div>
+        <div class="nk-skeleton__stat-grid">
+          <div v-for="i in 8" :key="i" class="nk-sk nk-sk--shimmer nk-sk--stat"></div>
+        </div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--block-sm" style="margin-top:24px;"></div>
         <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:100px;"></div>
         <div class="nk-skeleton__stat-grid">
           <div v-for="i in 6" :key="i" class="nk-sk nk-sk--shimmer nk-sk--block" style="height:56px;"></div>
@@ -268,12 +271,17 @@ onBeforeUnmount(() => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
 
-      <!-- 内容平铺：头图 + 各区块按序排列（技能 → 附加能力 → 星魂 → 属性加成 → 光锥/配队 → 遗器 → 角色档案 → 配音） -->
+      <!-- 内容平铺：头图 + 各区块按序排列（00 属性 → 技能 → 附加能力 → 星魂 → 属性加成 → 光锥/配队 → 遗器 → 角色档案 → 配音） -->
       <div class="nk-panels">
         <!-- 数据区块挂载门控与吸顶导航同源（visibleSections）：缺数据区块整体不挂载，杜绝「导航有、正文空」漂移。
-             hero 概览区恒显（含 spine/属性总览），不参与门控，对比模式下同样保留（上下文锚点） -->
+             hero 概览区恒显（以立绘展示为主），不参与门控，对比模式下同样保留（上下文锚点） -->
         <div class="nk-panel nk-panel--overview nk-panel--flat" data-panel="hero">
           <CharHero :d="d" :char-id="char.charId" :enh-keys="char.enhKeys" @go-enh="scrollToEnh" />
+        </div>
+
+        <!-- 00 基础属性（原 Hero 属性区段迁出；对比模式下同样保留——面板属性与强化形态无关） -->
+        <div v-if="vis.has('stats')" class="nk-panel nk-panel--flat" data-panel="stats">
+          <StatsPanel :d="d" />
         </div>
 
         <!-- 强化模式（skills 模块上方）：状态头 + 分段切换（对比为旁路视图，竖线分隔）+ 档案注记摘要 -->

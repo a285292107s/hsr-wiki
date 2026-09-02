@@ -612,24 +612,24 @@
 :where(#app) img { display: inline-block; vertical-align: middle; }
 :where(#app) a { color: inherit; text-decoration: none; }
 
-/* ─── 全局纸质噪点（缓解纯色底视觉疲劳）：唯一收口于本规则，禁止页面级复制/调参 ───
-   双层白 alpha 噪声（feColorMatrix 去色留 alpha，无色相 → 双主题通用，中性豁免不触发色彩守卫）：
-   ① 细纤维 160px 瓦片（baseFrequency 0.8）——纸面颗粒；
-   ② 云斑 600px 瓦片（baseFrequency 0.012）——大尺度纸面明度不匀，专攻大面积纯平区域
-     （endgame 索引等无盒框纯黑区）；低频 stitchTiles 在 160px 瓦距上会以 160px 周期
-     重复成网格，云斑必须独立大瓦片，禁止并回 160px。
-   白颗粒只在暗部显形（亮图/白底上自动隐形），不会在图片与文字上显脏。
+/* ─── 全局纸感细颗粒（化开纯平死黑，缓解纯色底视觉疲劳）：唯一收口于本规则，禁止页面级复制/调参 ───
+   单层极简白 alpha 细颗粒（feColorMatrix 去色留 alpha，无色相 → 双主题通用，中性豁免不触发色彩守卫）：
+   · 超高基频 0.9 各向同性细颗粒——无方向性/无结构，扫一眼无感、细看才有一层纸屑呼吸；
+     不叠纤维/云斑（会生成可被眼锁定的条纹与脏 blob = 机器感/ AI 味来源，禁回）。
+   · 360px 大瓦片平铺：瓦距周期在超高基频下不可辨，防 160px 级别可见网格。
+   · 强度近阈值 0.07：仅在纯平暗底上能微微感知，不脏到文字与图片上。
+   · 白颗粒只在暗部显形（亮图/白底上自动隐形）。
    · fixed + pointer-events:none：纯视觉覆层，不拦截交互、不参与布局；
      #app 无 transform，包含块为视口，不被 #app overflow:clip 裁切
    · z-index 高于侧栏(100000)/Toast(99999)：全表面统一纸感（弹层同颗粒，不出现局部哑光）
-   · 强度唯一调参位 = --grain-opacity，同时作用于两层 */
-:root { --grain-opacity: 0.12; }
+   · 强度唯一调参位 = --grain-opacity */
+:root { --grain-opacity: 0.07; }
 #app::after {
   content: '';
   position: fixed; inset: 0;
   z-index: 100001;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='nk-grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.7 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23nk-grain)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='nk-grain-cloud'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23nk-grain-cloud)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='nk-grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0%200%200%200%201%200%200%200%200%201%200%200%200%200%201%200%200%200%200.6%200'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23nk-grain)'/%3E%3C/svg%3E");
   opacity: var(--grain-opacity);
 }
 
@@ -858,7 +858,7 @@ background-position: center 15%;
   content: ''; flex: 1; height: 1px; align-self: center;
   background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
 }
-/* 章节编号元素（01-09，编号 = 身份；数据缺失保留缺口） */
+/* 章节编号元素（00-09，编号 = 身份；数据缺失保留缺口） */
 .nk-title__idx {
   flex: none; font-size: 0.6rem; letter-spacing: 0; color: var(--metric-val); opacity: 0.95;
   padding-right: 10px;

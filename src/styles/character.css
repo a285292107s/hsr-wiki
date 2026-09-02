@@ -3,6 +3,7 @@
    设计语言：编辑式排版 —— 自动编号章节标题 / 规格表属性 / 中性细线克制卡片
    · 主色仅用于：编号、激活态、进度条、E 徽章等关键强调
    · 卡片全部中性细线（--line-1/--line-2），无浮起位移、无霓虹 glow
+   · Hero = 展品画廊：全身立绘作展品（contain 完整呈现），信息为悬浮铭牌（见 Hero 段注释）
    · 所有选择器以 .nk-char-page 限定作用域，避免污染光锥/遗器页
 ═══════════════════════════════════════════ */
 
@@ -22,22 +23,29 @@
   .nk-char-page .nk-panel--flat { padding-bottom: 32px; }
 }
 
-/* ═══════════ Hero · 沉浸画廊 ═══════════ */
+/* ═══════════ Hero · 展品画廊（立绘为重心） ═══════════
+   全身立绘作展品：contain 完整呈现（不裁剪），信息为悬浮铭牌；桌面 = 全幅画布 + 左下铭牌，
+   平板/手机 = 堆叠（画布 + 下方信息流）。 */
 .nk-char-page .nk-hero { background: transparent; }
-/* 沉浸画廊：视觉区拉高（手机 4:3、平板 16:10，立绘更占屏；桌面 1024+ 左右结构见响应式段） */
-.nk-char-page .nk-hero__visual { aspect-ratio: 4 / 3; }
+/* 展品画布比例：手机 4:5（窄屏竖画布，立绘显大）、平板 3:2；桌面全幅（见响应式段 min-height 钳制） */
+.nk-char-page .nk-hero__visual { aspect-ratio: 4 / 5; }
 @media (min-width: 768px) {
-  .nk-char-page .nk-hero__visual { aspect-ratio: 16 / 10; }
+  .nk-char-page .nk-hero__visual { aspect-ratio: 3 / 2; }
 }
-
-/* 视觉区：压暗收敛——仅保留左缘窄幅渐入（防贴边）+ 右侧宽幅暗化（立绘融底）
-   + 底部渐融，浓度自 72-92% 降至 58-66%，立绘主体回归清晰（画廊展台感） */
+/* 展品完整呈现：contain + 居中略高——全身立绘不再被 cover 裁切（立绘为重心） */
+.nk-char-page .nk-hero__bg {
+  background-size: contain;
+  background-position: center 40%;
+}
+/* 画布与页面底色融合（contain 留白边带）：左右渐变淡化 + 轻内影打光（画廊照明，非霓虹 glow） */
+.nk-char-page .nk-hero__visual::before {
+  background:
+    linear-gradient(to right, var(--bg) 0%, transparent 10%),
+    linear-gradient(to left, var(--bg) 0%, transparent 14%);
+}
 .nk-char-page .nk-hero__visual {
   box-shadow:
-    inset 0 0 64px 16px color-mix(in srgb, var(--blk-900) 58%, transparent),
-    inset 40px 0 32px -14px color-mix(in srgb, var(--blk-900) 66%, transparent),
-    inset -110px 0 80px -32px color-mix(in srgb, var(--blk-900) 62%, transparent),
-    inset 0 -44px 48px -18px color-mix(in srgb, var(--blk-900) 62%, transparent);
+    inset 0 0 90px 24px color-mix(in srgb, var(--blk-900) 46%, transparent);
 }
 /* 档案编号角标（左下） */
 .nk-char-page .nk-hero__archive {
@@ -69,15 +77,19 @@
   color: var(--text-bright);
 }
 
-/* 头部：meta 行（阵营 + 星级）→ 大名字；右侧横排徽章 */
-.nk-char-page .nk-hero__head { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 18px; }
+/* 头部：meta 行（阵营 + 星级 + 元素/命途徽章）→ 大名字 */
+.nk-char-page .nk-hero__head { flex-direction: column; align-items: flex-start; gap: 12px; }
 .nk-char-page .nk-hero__head-left { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.nk-char-page .nk-hero__meta-row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+/* meta 行：身份（阵营 + 星级）与类型徽章分组；徽章组前留更大间距（身份 → 类型递进） */
+.nk-char-page .nk-hero__meta-row { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+/* 徽章组与身份分组：星级后首个徽章额外留白（身份 → 类型递进） */
+.nk-char-page .nk-hero__stars + .nk-hero__badge { margin-left: 14px; }
 .nk-char-page .nk-hero__camp {
-  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.24em;
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.18em;
   color: var(--text3); white-space: nowrap;
 }
-.nk-char-page .nk-hero__camp::before { width: 18px; height: 1px; background: var(--line-2); }
+/* 去分隔线：铭牌以阵营文字干净起行（避免「工程化」硬线感） */
+.nk-char-page .nk-hero__camp::before { display: none; }
 .nk-char-page .nk-hero__stars {
   font-size: 0.8rem; letter-spacing: 0.14em; color: var(--gold);
   text-shadow: none;
@@ -86,24 +98,24 @@
   font-size: 1.75rem; font-weight: 900; letter-spacing: 0.01em;
   color: var(--text-bright); text-shadow: none; line-height: 1.12;
 }
-/* 横排徽章（元素/命途）：方形细线，图标 + 文字 */
-.nk-char-page .nk-hero__head-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+/* 类型徽章（元素/命途）：去框化——图标 + 文字直排，无胶囊边框（展品铭牌语言，去僵硬） */
 .nk-char-page .nk-hero__badge {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 6px 12px 6px 8px; border-radius: 7px;
-  background: rgba(255,255,255,0.03); border: 1px solid var(--line-1);
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0;
+  border: none; background: none;
   font-size: 0.72rem; font-weight: 600; color: var(--text2);
-  letter-spacing: 0.05em; white-space: nowrap;
-  transition: border-color 0.2s, background 0.2s;
+  letter-spacing: 0.04em; white-space: nowrap;
+  transition: color 0.2s;
 }
-.nk-char-page .nk-hero__badge:hover { border-color: var(--line-2); background: rgba(255,255,255,0.05); }
-.nk-char-page .nk-hero__badge img { width: 20px; height: 20px; }
+.nk-char-page .nk-hero__badge:hover { color: var(--text-bright); }
+.nk-char-page .nk-hero__badge img { width: 18px; height: 18px; }
 
 /* 强化形态入口（仅强化角色）：金色强调（数据语义色），hover 提亮；热区扩展 ≥44px */
 .nk-char-page .nk-hero__badge--enh {
-  color: var(--gold-sem);
-  border-color: color-mix(in srgb, var(--gold-sem) 32%, transparent);
+  padding: 5px 10px 5px 7px; border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--gold-sem) 32%, transparent);
   background: color-mix(in srgb, var(--gold-sem) 7%, transparent);
+  color: var(--gold-sem);
   position: relative;
 }
 .nk-char-page .nk-hero__badge--enh:hover {
@@ -126,52 +138,47 @@
   max-width: 560px;
 }
 
-/* 属性区段 */
-.nk-char-page .nk-hero__section { display: flex; flex-direction: column; gap: 12px; }
-.nk-char-page .nk-hero__section-title {
-  display: flex; align-items: center; gap: 10px;
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
-  letter-spacing: 0.22em; color: var(--text3); text-transform: uppercase;
-}
-/* 标题装饰：短横线（与章节延伸线同语言；迭代 §14 主色三锚点——非身份锚点降级中性） */
-.nk-char-page .nk-hero__section-bar {
-  width: 20px; height: 1px; border-radius: 0;
-  background: linear-gradient(90deg, var(--line-2), transparent);
+/* ═══════════ 00 基础属性 · 规格表（原 Hero 属性区段迁出；面板宽度统一 952px） ═══════════
+   注意：容器必须 display:block——flex 会让 .nk-title 变 flex item（margin:auto 收缩为内容宽并居中，
+   与 01+ 区块的全宽延伸线标题不一致）。block 下标题填满 952、左对齐、带延伸线，与其他区块一致。 */
+.nk-char-page .nk-stats {
+  display: block;
+  max-width: var(--nk-struct-max); margin: 0 auto;
 }
 /* 规格表：行式数据（图标 + 标签 + 右对齐等宽数值），行间中性细线 */
-.nk-char-page .nk-hero__stats {
+.nk-char-page .nk-stats__grid {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 36px;
 }
-.nk-char-page .nk-hero__stat {
+.nk-char-page .nk-stats__stat {
   display: grid; grid-template-columns: 15px 1fr auto; align-items: center; gap: 10px;
   padding: 7px 0; border-bottom: 1px solid var(--line-1);
   transition: background 0.2s;
 }
 /* 每列末行去底线：表格收束，不悬空 */
-.nk-char-page .nk-hero__stat:nth-child(4n) { border-bottom: none; }
-.nk-char-page .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; border-bottom: none; }
-.nk-char-page .nk-hero__stat:hover { background: rgba(255,255,255,0.02); }
-.nk-char-page .nk-hero__stat-icon { width: 15px; height: 15px; opacity: 0.9; }
-.nk-char-page .nk-hero__stat-label { font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em; }
-.nk-char-page .nk-hero__stat-val {
+.nk-char-page .nk-stats__stat:nth-child(4n) { border-bottom: none; }
+.nk-char-page .nk-stats__stat:last-child:nth-child(odd) { grid-column: 1 / -1; border-bottom: none; }
+.nk-char-page .nk-stats__stat:hover { background: rgba(255,255,255,0.02); }
+.nk-char-page .nk-stats__icon { width: 15px; height: 15px; opacity: 0.9; }
+.nk-char-page .nk-stats__label { font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em; }
+.nk-char-page .nk-stats__val {
   font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700;
   color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
-/* 等级条：更细的墨色轨道 */
-.nk-char-page .nk-hero__level { display: flex; align-items: center; gap: 14px; }
-.nk-char-page .nk-hero__level-label {
+/* 等级条：更细的墨色轨道（block 布局下用 margin-top 分隔） */
+.nk-char-page .nk-stats__level { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+.nk-char-page .nk-stats__level-label {
   font-family: var(--font-hud); font-size: 0.68rem; font-weight: 600;
   letter-spacing: 0.08em; color: var(--text3); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.nk-char-page .nk-hero__level-track {
+.nk-char-page .nk-stats__level-track {
   flex: 1; height: 3px; border-radius: 2px; overflow: hidden;
   background: rgba(255,255,255,0.06); box-shadow: none;
 }
-.nk-char-page .nk-hero__level-fill {
+.nk-char-page .nk-stats__level-fill {
   height: 100%; border-radius: 2px;
   background: linear-gradient(90deg, var(--primary), var(--th-400));
   box-shadow: none;
@@ -180,7 +187,7 @@
 
 /* ═══════════ 章节标题 ═══════════
    编辑式基线（含 .nk-title__idx 编号元素）已全局化至 tokens.css；
-   区块编号为固定身份（01-09，见 sections.ts），数据缺失时标题不渲染、导航同步隐藏（编号缺口保留） */
+   区块编号为固定身份（00-09，见 sections.ts），数据缺失时标题不渲染、导航同步隐藏（编号缺口保留） */
 
 /* ═══════════ 卡片体系 · 去框化微底卡（沉浸画廊） ═══════════
    去除细线边框，仅保留黑阶微底色 + 12px 圆角；hover 以底色微亮代替边框提亮（画廊无框语言） */
@@ -822,10 +829,10 @@
 /* ═══════════ 骨架屏 ═══════════ */
 .nk-char-page .nk-skeleton__hero { background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 85%, transparent) 0%, color-mix(in srgb, var(--blk-900) 30%, transparent) 50%, transparent 100%); }
 .nk-char-page .nk-skeleton__hero-panel { background: linear-gradient(180deg, color-mix(in srgb, var(--blk-900) 50%, transparent), var(--bg)); }
-/* 骨架视觉区与真实 Hero 同比例（4:3 手机 / 16:10 平板），防切换 CLS */
-.nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 4 / 3; }
+/* 骨架视觉区与真实 Hero 同比例（4:5 手机 / 3:2 平板），防切换 CLS */
+.nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 4 / 5; }
 @media (min-width: 768px) {
-  .nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 16 / 10; }
+  .nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 3 / 2; }
 }
 /* 骨架属性区：行式（对齐规格表形态） */
 .nk-char-page .nk-skeleton__stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0 36px; }
@@ -836,33 +843,59 @@
 @media (min-width: 768px) {
   .nk-char-page .nk-hero__panel { padding: 28px 32px; gap: 18px; }
   .nk-char-page .nk-hero__name { font-size: 2rem; }
-  .nk-char-page .nk-hero__stats { gap: 0 40px; }
-  .nk-char-page .nk-hero__stat { padding: 8px 0; }
-  .nk-char-page .nk-hero__stat-val { font-size: 0.92rem; }
+  .nk-char-page .nk-stats__grid { gap: 0 40px; }
+  .nk-char-page .nk-stats__stat { padding: 8px 0; }
+  .nk-char-page .nk-stats__val { font-size: 0.92rem; }
   .nk-char-page .nk-panel--flat { padding-bottom: 32px; }
 }
 /* 平板 768-1023：图片适度收缩，保持文字列可读 */
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-char-page .nk-eidolon__icon { width: 132px; height: 132px; }
 }
-/* 桌面 ≥1024px：左右结构，视觉区 44% + 档案面板 56%，面板透明
-   画廊沉浸：视觉区 min-height 540 → 600px（立绘更高，Hero 首屏占比更大） */
+/* 桌面 ≥1024px：全幅展品画布 + 左下悬浮铭牌（立绘为重心，属性面板已迁出至 00 区块）
+   画布高度 = 视口 76%（560-820px 钳制，防短视口铭牌溢出）
+   铭牌 = 纯透明悬浮文本，可读性靠多层文字阴影（禁止卡片/毛玻璃/大范围遮罩层遮挡立绘） */
 @media (min-width: 1024px) {
-  .nk-char-page .nk-hero { flex-direction: row; min-height: 600px; }
-  .nk-char-page .nk-hero__visual { flex: 0 0 44%; aspect-ratio: auto; min-height: 600px; }
-  /* 视觉区遮罩：左缘 10% 渐入防贴边；右缘 18% 宽幅渐入页面底色——
-     立绘在面板边界前自然融底，消除色块拼接 */
-  .nk-char-page .nk-hero__visual::before {
-    background:
-      linear-gradient(to right, var(--bg) 0%, transparent 10%),
-      linear-gradient(to left, var(--bg) 0%, transparent 18%);
-  }
+  .nk-char-page .nk-hero { min-height: clamp(560px, 76vh, 820px); }
+  .nk-char-page .nk-hero__visual { position: absolute; inset: 0; aspect-ratio: auto; }
+  /* 悬浮铭牌：无框无底，文本直接浮于画布上；阴影在铭牌区域形成可读性光晕 */
   .nk-char-page .nk-hero__panel {
-    flex: 1 1 auto; border-top: none;
-    padding: 42px 46px; gap: 24px; justify-content: center;
+    position: absolute; left: 24px; bottom: 24px; z-index: 5;
+    width: min(520px, 58%);
+    padding: 0;
+    gap: 22px; /* 名字 → 介绍：拉开，让展示字级呼吸 */
+    background: none;
+    border: none;
+    backdrop-filter: none; -webkit-backdrop-filter: none;
   }
-  .nk-char-page .nk-hero__name { font-size: 2.75rem; }
-  .nk-char-page .nk-hero__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; }
+  /* meta 行 → 名字：14px，身份锚点紧贴展示字级（比名字→介绍更近，层级递进） */
+  .nk-char-page .nk-hero__head-left { gap: 14px; }
+  /* 展示字级：CJK 用 1.1 行高防折行拥挤、0.01em 字距微开；text-wrap: balance 让多行名字平衡 */
+  .nk-char-page .nk-hero__name {
+    font-size: clamp(2.4rem, 4.2vw, 3.4rem);
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    text-wrap: balance;
+    /* 多层黑影光晕：近实底 1px 描边 + 中距柔影 + 大距弥散，立绘亮部亦保持可读 */
+    text-shadow:
+      0 1px 0 rgba(0,0,0,0.5),
+      0 2px 6px rgba(0,0,0,0.6),
+      0 0 18px rgba(0,0,0,0.5),
+      0 0 44px rgba(0,0,0,0.4);
+  }
+  .nk-char-page .nk-hero__camp { text-shadow: 0 1px 3px rgba(0,0,0,0.85); }
+  .nk-char-page .nk-hero__stars { text-shadow: 0 1px 3px rgba(0,0,0,0.85); }
+  /* 介绍：0.875rem + 1.7 行高（短句），阴影收紧防小字糊影 */
+  .nk-char-page .nk-hero__desc {
+    font-size: 0.875rem;
+    line-height: 1.7;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.65);
+  }
+  .nk-char-page .nk-hero__badge { text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+  /* 档案角标 / 动画开关：右下/右上（与左下铭牌对角平衡） */
+  .nk-char-page .nk-hero__archive { left: auto; right: 20px; bottom: 18px; }
+  .nk-char-page .nk-hero__toggle { top: 18px; right: 18px; }
+  .nk-char-page .nk-stats__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; }
   .nk-char-page .nk-skill { padding: 24px 28px 22px; }
   .nk-char-page .nk-eidolon, .nk-char-page .nk-ability { padding: 22px 28px 20px; }
 }
@@ -872,12 +905,14 @@
 }
 /* 手机紧凑 */
 @media (max-width: 767px) {
-  .nk-char-page .nk-hero__stats { gap: 0 16px; }
-  .nk-char-page .nk-hero__stat { padding: 6px 0; gap: 8px; grid-template-columns: 14px 1fr auto; }
-  .nk-char-page .nk-hero__stat-label { font-size: 0.68rem; }
-  .nk-char-page .nk-hero__stat-val { font-size: 0.8rem; }
-  .nk-char-page .nk-hero__badge { padding: 5px 9px 5px 7px; }
+  .nk-char-page .nk-stats__grid { gap: 0 16px; }
+  .nk-char-page .nk-stats__stat { padding: 6px 0; gap: 8px; grid-template-columns: 14px 1fr auto; }
+  .nk-char-page .nk-stats__label { font-size: 0.68rem; }
+  .nk-char-page .nk-stats__val { font-size: 0.8rem; }
+  .nk-char-page .nk-hero__badge { padding: 0; }
   .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
+  /* 移动端强化形态入口保持胶囊（交互按钮，需保留边框热区语义） */
+  .nk-char-page .nk-hero__badge--enh { padding: 5px 9px 5px 7px; }
   .nk-char-page .nk-hero__archive {
     left: 12px; bottom: 12px;
     font-size: 0.45rem; letter-spacing: 0.24em; padding: 5px 10px;
@@ -1025,7 +1060,8 @@
   .nk-char-page .nk-story__head:hover .nk-story__arrow { border-color: var(--text3); }
   .nk-char-page .nk-secnav__btn:hover { color: var(--text3); background: transparent; }
   .nk-char-page .nk-secnav__btn--active:hover { color: var(--primary); background: transparent; }
-  .nk-char-page .nk-hero__stat:hover { background: transparent; }
-  .nk-char-page .nk-hero__badge:hover { border-color: var(--line-1); background: rgba(255,255,255,0.03); }
+  .nk-char-page .nk-stats__stat:hover { background: transparent; }
+  /* 去框化徽章触屏重置 hover：仅回退文字色（无边框/背景可重置） */
+  .nk-char-page .nk-hero__badge:hover { color: var(--text2); }
   .nk-char-page .nk-hero__badge--enh:hover { border-color: color-mix(in srgb, var(--gold-sem) 32%, transparent); background: color-mix(in srgb, var(--gold-sem) 7%, transparent); }
 }

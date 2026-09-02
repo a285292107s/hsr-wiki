@@ -1,7 +1,8 @@
 /**
  * 角色详情页区块配置（区块编号的单一事实源）。
  * - SECTION_ORDER：页面视觉顺序（即吸顶导航顺序）
- * - SECTION_IDX：固定编号（01-09，编号 = 身份不随数据漂移；数据缺失保留缺口）
+ * - SECTION_IDX：固定编号（00-09，编号 = 身份不随数据漂移；数据缺失保留缺口）
+ *   · stats = 00：基础属性面板（Hero 属性区段迁出后的独立区块）
  * - visibleSections：区块可见性纯函数（驱动导航同步隐藏 + CharacterView 面板挂载门控）
  * - has* 谓词：区块内容判定的单一事实源。导航（visibleSections）与 OverviewPanel /
  *   BuildsPanel 的 v-if 均消费同一实现——禁止在面板内复制同构判定，杜绝双份逻辑漂移。
@@ -10,6 +11,7 @@ import type { CharacterData } from '../../services/types';
 
 /** 区块 id（对应面板 data-panel 值） */
 export type SectionId =
+  | 'stats'
   | 'skills'
   | 'talents'
   | 'eidolons'
@@ -20,8 +22,9 @@ export type SectionId =
   | 'stories'
   | 'profile';
 
-/** 页面视觉顺序（吸顶导航同序）；编号 = 下标 + 1 */
+/** 页面视觉顺序（吸顶导航同序）；编号 = 下标（00 起） */
 export const SECTION_ORDER: SectionId[] = [
+  'stats',
   'skills',
   'talents',
   'eidolons',
@@ -33,10 +36,15 @@ export const SECTION_ORDER: SectionId[] = [
   'profile',
 ];
 
-/** 区块固定编号（两位，01-09）：标题与导航共用的唯一编号源 */
+/** 区块固定编号（两位，00-09）：标题与导航共用的唯一编号源 */
 export const SECTION_IDX: Record<SectionId, string> = Object.fromEntries(
-  SECTION_ORDER.map((id, i) => [id, String(i + 1).padStart(2, '0')]),
+  SECTION_ORDER.map((id, i) => [id, String(i).padStart(2, '0')]),
 ) as Record<SectionId, string>;
+
+/** 是否含基础属性面板（stats 表非空；00 属性区块共用） */
+export function hasStats(d: CharacterData): boolean {
+  return !!d.stats && Object.keys(d.stats).length > 0;
+}
 
 /** 行迹树是否存在附加能力节点（面板 TALENTS 区块共用） */
 export function hasTalentNodes(d: CharacterData): boolean {
@@ -79,10 +87,12 @@ export function hasRelics(d: CharacterData): boolean {
   );
 }
 
-/** 当前数据下可见区块（按页面视觉顺序）；skills / eidolons 恒显。数据未就绪（null）返回空集 */
+/** 当前数据下可见区块（按页面视觉顺序）；stats / skills / eidolons 恒显。数据未就绪（null）返回空集 */
 export function visibleSections(d: CharacterData | null): SectionId[] {
   if (!d) return [];
-  const vis: SectionId[] = ['skills', 'eidolons'];
+  const vis: SectionId[] = [];
+  if (hasStats(d)) vis.push('stats');
+  vis.push('skills', 'eidolons');
   if (hasTalentNodes(d)) vis.push('talents');
   if (hasBonusNodes(d)) vis.push('bonuses');
   if (d.lightcones && d.lightcones.length) vis.push('cones');
