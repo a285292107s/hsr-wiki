@@ -157,20 +157,20 @@ test.describe('布局验收：货币战争主题', () => {
     // 成长矩阵（结算单）与技能条款卡渲染
     await expect(page.locator('.nk-crole-gm__table')).toBeVisible();
     await expect(page.locator('.nk-crole-skill').first()).toBeVisible();
-    // 技能图标：jsDelivr 官方镜像优先 + nanoka 兜底属性（v4 数据链路签名）
+    // 技能图标：nanoka 主源 + jsDelivr 回退属性（98daff3 反转后主源 = nanoka，jsDelivr 退居旧档补全）
     const icon = page.locator('.nk-crole-skill__icon').first();
     await expect(icon).toBeVisible();
-    await expect(icon).toHaveAttribute('src', /cdn\.jsdelivr\.net\/gh\/a285292107s\/StarRailTextures@main\/assets\/asbres\/spriteoutput\/skillicons\/avatar\/1001\/SkillIcon_1001_BP\.png/);
-    await expect(icon).toHaveAttribute('data-cdn-fallback', /static\.nanoka\.cc\/assets\/hsr\/skillicons\/SkillIcon_1001_BP\.webp/);
+    await expect(icon).toHaveAttribute('src', /static\.nanoka\.cc\/assets\/hsr\/skillicons\/SkillIcon_1001_BP\.webp/);
+    await expect(icon).toHaveAttribute('data-cdn-fallback', /cdn\.jsdelivr\.net\/gh\/a285292107s\/StarRailTextures@main\/assets\/asbres\/spriteoutput\/skillicons\/avatar\/1001\/SkillIcon_1001_BP\.png/);
     // 属性图标：矩阵行（基础前台强度 → IconFrontRow，jsDelivr 目录小写规则）
     const gmIcon = page.locator('.nk-crole-gm__label', { hasText: '基础前台强度' }).first().locator('.nk-crole-gm__icon');
     await expect(gmIcon).toBeVisible();
     await expect(gmIcon).toHaveAttribute('src', /spriteoutput\/gridfight\/attributeicon\/normalicon\/IconFrontRow\.png/);
-    // 星魂展示图：常规模式同源 ui/ui3d/rank（jsDelivr 优先 + nanoka 兜底属性）
+    // 星魂展示图：常规模式同源 ui/ui3d/rank（nanoka 主源 + jsDelivr 回退属性）
     const rankIcon = page.locator('.nk-crole-timeline__icon img').first();
     await expect(rankIcon).toBeVisible();
-    await expect(rankIcon).toHaveAttribute('src', /ui\/ui3d\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.png/);
-    await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /static\.nanoka\.cc\/assets\/hsr\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.webp/);
+    await expect(rankIcon).toHaveAttribute('src', /static\.nanoka\.cc\/assets\/hsr\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.webp/);
+    await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /cdn\.jsdelivr\.net\/gh\/a285292107s\/StarRailTextures@main\/assets\/asbres\/ui\/ui3d\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.png/);
     // 无内容区块：1001 无专属光锥 → 面板常驻 + 空态提示
     await expect(page.locator('[data-panel="cones"] .nk-crole-empty')).toHaveText('该角色没有专属光锥数据');
     expect(await findHorizontalOverflow(page)).toEqual([]);
@@ -188,7 +188,7 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(cone.locator('.nk-crole-cone__name')).toHaveText('银河铁道之夜');
     await expect(cone.locator('.nk-crole-cone__rarity')).toHaveText('★★★★★');
     await expect(cone.locator('.nk-crole-cone__path')).toHaveText('智识');
-    await expect(cone.locator('.nk-crole-cone__icon')).toHaveAttribute('src', /lightconemediumicon\/23000\.png/);
+    await expect(cone.locator('.nk-crole-cone__icon')).toHaveAttribute('src', /static\.nanoka\.cc\/assets\/hsr\/lightconemediumicon\/23000\.webp/);
     // 等级递进列表保留（5 级）
     await expect(page.locator('[data-panel="cones"] .nk-crole-equip')).toHaveCount(5);
     expect(await findHorizontalOverflow(page)).toEqual([]);
