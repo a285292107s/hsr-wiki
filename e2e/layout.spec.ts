@@ -74,6 +74,55 @@ test.describe('布局验收：常规主题', () => {
   });
 });
 
+test.describe('布局验收：导航动态溢出折叠', () => {
+  /** 收集底部栏导航锚点（排除 设置/交换/更多按钮）；返回 DOM 序（= 规范序）下的可见性 */
+  async function collectNavAnchors(page: import('@playwright/test').Page) {
+    return page.locator('a.ui-sidebar-link:not(.ui-sidebar-settings)').evaluateAll((els) =>
+      els.map((el) => ({
+        href: el.getAttribute('href'),
+        visible: (el as HTMLElement).offsetParent !== null,
+      })),
+    );
+  }
+
+  test('窄视口：可见项恒为规范序前缀，尾部折叠进"更多"抽屉', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 320, height: 700 });
+    await page.goto('/');
+    // 320px 常规模式 8 导航项放不下 → 至少折叠出"更多"入口
+    await expect(page.locator('.ui-sidebar-more')).toBeVisible();
+    const anchors = await collectNavAnchors(page);
+    expect(anchors.length).toBeGreaterThan(1);
+    // 前缀性质：可见锚点在 DOM 序中恒为前 k 个（不放乱序/交错）
+    const visIdx = anchors.map((a, i) => (a.visible ? i : -1)).filter((i) => i >= 0);
+    expect(visIdx).toEqual(Array.from({ length: visIdx.length }, (_, i) => i));
+    // 有折叠（可见项 < 全量）→ 抽屉内容 = 隐藏尾部，顺序一致
+    const foldedHrefs = anchors.filter((a) => !a.visible).map((a) => a.href);
+    expect(foldedHrefs.length).toBeGreaterThan(0);
+    await page.locator('.ui-sidebar-more').click();
+    const drawerHrefs = await page.locator('.ui-more__item').evaluateAll((els) =>
+      els.map((el) => el.getAttribute('href')),
+    );
+    expect(drawerHrefs).toEqual(foldedHrefs);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('宽视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/');
+    await expect(page.locator('.ui-sidebar-more')).toBeHidden();
+    // 无折叠项渲染；全部导航锚点可见
+    await expect(page.locator('a.ui-sidebar-link--in-more')).toHaveCount(0);
+    const anchors = await collectNavAnchors(page);
+    expect(anchors.length).toBeGreaterThan(1);
+    expect(anchors.every((a) => a.visible)).toBe(true);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+});
+
 test.describe('布局验收：终局合并单页', () => {
   test('/endgame：四模式筛选、卡片渲染、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);

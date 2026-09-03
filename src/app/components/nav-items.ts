@@ -4,8 +4,8 @@
  *
  * 「交换」（SWAP_ITEM）为导航首项：点击跳转对方模式的枢纽页（/ ↔ /currency）。
  * 每个模式各有一个枢纽页 Tab（NORMAL_HUB_ITEM / CW_HUB_ITEM），指向本模式枢纽页。
- * 手机底部栏统一 7 槽位：常规 = 交换 + 首页 + 4 主项 + 更多；CW = 交换 + 枢纽 + 5 板块。
- * 槽位数一致保证模式切换时按钮位置不偏移。
+ * 手机底部栏按规范顺序展示板块，放不下的尾部由 SidebarNav 动态折叠进"更多"抽屉
+ * （判据：每槽 ≥44px 触摸宽），不依赖固定主项标记；平板/桌面全部平铺。
  */
 export interface NavItem {
   title: string;
@@ -17,10 +17,7 @@ export interface NavItem {
   activePaths?: string[];
   /** 仅精确匹配路径时高亮（不延伸至子路径）；枢纽项专用，避免与板块项同时高亮 */
   exact?: boolean;
-  /** 主项：手机底部栏始终展示；未标记者收纳进"更多"抽屉（平板/桌面不受影响，均展示）。
-   *  常规模式需恰好 4 个主项（+ 首页枢纽），与 CW 的枢纽 + 5 板块 + 交换凑成统一 7 槽位 */
-  primary?: boolean;
-  /** 手机底部栏两字短标签（CW 模式 7 槽位平铺时使用）；缺省回退 title */
+  /** 手机底部栏两字短标签（空间不足时展示）；缺省回退 title */
   short?: string;
   /** 内联 SVG（静态可信内容，v-html 渲染） */
   icon: string;
@@ -35,7 +32,7 @@ export const SWAP_ITEM = {
 
 /** 常规模式枢纽页 Tab：指向首页（/），导航板块首项 */
 export const NORMAL_HUB_ITEM: NavItem = {
-  title: '首页', en: 'HOME', desc: '常规模式枢纽 · 全站板块入口', path: '/', primary: true, exact: true,
+  title: '首页', en: 'HOME', desc: '常规模式枢纽 · 全站板块入口', path: '/', exact: true,
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>',
 };
 
@@ -49,15 +46,15 @@ export const CW_HUB_ITEM: NavItem = {
 /** 常规模式导航（7 板块；货币战争已升级为独立模式，由此移除） */
 export const NORMAL_NAV_ITEMS: NavItem[] = [
   {
-    title: '角色', en: 'CHARACTERS', desc: '角色数值 · 行迹 · 配装', path: '/character', primary: true,
+    title: '角色', en: 'CHARACTERS', desc: '角色数值 · 行迹 · 配装', path: '/character',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-5 8-5s8 1.7 8 5"/></svg>',
   },
   {
-    title: '光锥', en: 'LIGHT CONES', desc: '光锥数值与效果图鉴', path: '/lightcone', primary: true,
+    title: '光锥', en: 'LIGHT CONES', desc: '光锥数值与效果图鉴', path: '/lightcone',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 10-7 10L5 12z"/><path d="M12 2v20"/></svg>',
   },
   {
-    title: '遗器', en: 'RELICS', desc: '遗器套装与词条', path: '/relic', primary: true,
+    title: '遗器', en: 'RELICS', desc: '遗器套装与词条', path: '/relic',
     icon: '<svg viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M5.12 2 6.42 4.25 8.49 4.84 6.03 6.14 5.38 8.04 3.82 5.67 2 5.08 4.47 3.78 5.12 2.12Z M8.88 2.24 11.22 2.47 12.26 3.42 12.65 4.96 10.44 7.44 5.51 11.11 3.69 13.95 4.08 16.44 6.68 18.57 7.45 19.99 4.86 19.51 3.43 18.45 2.13 15.96 2 13.72 3.82 10.4 10.57 5.31 10.83 4.49 10.44 4.01 8.49 3.78 7.58 4.13 7.06 3.66 7.32 2.83 9.01 2.24Z M16.94 6.85 19.79 7.33 21.48 8.63 22 11.94 21.35 14.07 20.05 12.41 20.05 10.28 19.01 8.98 18.23 8.63 13.56 8.86 15.25 7.33 17.06 6.85Z M12.78 10.05 15.25 10.17 18.1 11.59 19.4 13.12 20.18 15.61 19.92 17.74 18.88 19.63 17.19 21.05 14.34 22 11.22 21.64 9.27 20.58 7.71 18.8 7.06 17.03 7.06 14.9 8.36 12.3 10.31 10.76 12.91 10.05Z M15.77 12.77 17.06 13.24 17.45 14.66 16.42 15.73 14.86 15.49 14.21 14.54 14.34 13.72 14.99 13.01 15.9 12.89Z"/></svg>',
   },
   {
@@ -66,7 +63,7 @@ export const NORMAL_NAV_ITEMS: NavItem[] = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><circle cx="12" cy="12" r="1"/></svg>',
   },
   {
-    title: '物品', en: 'ITEMS', desc: '材料 · 消耗品 · 货币', path: '/item', primary: true,
+    title: '物品', en: 'ITEMS', desc: '材料 · 消耗品 · 货币', path: '/item',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>',
   },
   {

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 /**
- * 自建侧边栏（双模式导航，手机底部栏统一 7 槽位，切换时按钮位置不偏移）
+ * 自建侧边栏（双模式导航，手机底部栏动态溢出折叠，切换时按钮位置不偏移）
+ * 单一规范顺序 = navItems（交换 → 枢纽 → 板块 → 设置），所有断点共用，仅展示形式不同：
+ * 手机（<768px）底部栏每槽 ≥44px（触控下限），按规范顺序从前往后展示，放不下的尾部折叠
+ * 进"更多"抽屉（按钮按规范顺序位于折叠边界，ResizeObserver 随宽度变化实时重算）；
+ * 平板/桌面竖排侧栏全部平铺（"更多"恒隐藏）。
  * 首项为「交换」按钮：跳转对方模式枢纽页（/ ↔ /currency）。
  * 分隔线后首项为本模式枢纽页 Tab（常规=首页 /；CW=枢纽 /currency）。
- * 常规模式：枢纽+7 板块；手机（<768px）底部栏 = 交换 + 首页 + 4 主项 + "更多"抽屉。
- * CW 模式：枢纽+5 板块；手机底部栏 = 交换 + 枢纽 + 5 板块平铺（短标签），无抽屉。
- * 平板/桌面：竖排图标侧栏，当前模式全部板块展示 + 顶部 brand 标识。
+ * 常规模式：枢纽+7 板块；CW 模式：枢纽+5 板块（短标签）。
  */
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM, SWAP_ITEM, type NavItem } from './nav-items';
 import { prefetchByPath } from '../router/chunks';
@@ -46,17 +48,72 @@ function isActive(item: NavItem): boolean {
   return paths.some((ap) => p === ap || (!item.exact && p.startsWith(ap + '/')));
 }
 
-/* ─── 手机"更多"聚合（仅常规模式） ─── */
-const moreItems = NORMAL_NAV_ITEMS.filter((n) => !n.primary);
+/* ─── 手机"更多"聚合（动态溢出折叠，仅 <768px 生效；平板/桌面全部平铺） ─── */
+const sidebarRef = ref<HTMLElement | null>(null);
 const moreOpen = ref(false);
 const moreBtnRef = ref<HTMLElement | null>(null);
 const sheetRef = ref<HTMLElement | null>(null);
+
+/** 可见导航板块数（规范顺序前缀）；放不下的尾部折叠进"更多"抽屉 */
+const visibleCount = ref(navItems.value.length);
+const visibleItems = computed(() => navItems.value.slice(0, visibleCount.value));
+const foldedItems = computed(() => navItems.value.slice(visibleCount.value));
 /** 任一项命中当前路由时"更多"高亮 */
-const moreActive = computed(() => moreItems.some(isActive));
+const moreActive = computed(() => foldedItems.value.some(isActive));
+
+/* 折叠判定：底部栏每槽 ≥44px（触控下限），按规范顺序从前往后塞入导航板块，
+   尾部放不下的折叠进"更多"。--measure 态同一帧同步读各槽位宽度（无可见闪烁）；
+   ≥768px 平板/桌面不折叠（全部平铺）。 */
+function recomputeFold(): void {
+  const el = sidebarRef.value;
+  if (!el) return;
+  if (window.matchMedia('(min-width: 768px)').matches) {
+    visibleCount.value = navItems.value.length;
+    return;
+  }
+  el.classList.add('ui-sidebar--measure');
+  try {
+    const cs = getComputedStyle(el);
+    const avail = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const q = (sel: string): number => {
+      const n = el.querySelector<HTMLElement>(sel);
+      if (!n) return 0;
+      const cs = getComputedStyle(n);
+      /* offsetWidth 不含外边距：分隔线有 margin: 0 3px（左右共 6px 水平占用），漏计会高估可用空间导致多塞一槽溢出 */
+      return n.offsetWidth + parseFloat(cs.marginLeft) + parseFloat(cs.marginRight);
+    };
+    const fixed = q('.ui-sidebar-swap') + q('.ui-sidebar-divider') + q('.ui-sidebar-settings');
+    const moreW = q('.ui-sidebar-more');
+    const navW = Array.from(el.querySelectorAll<HTMLElement>('a.ui-sidebar-link:not(.ui-sidebar-settings)')).map(
+      (n) => n.offsetWidth,
+    );
+    const total = navW.reduce((a, b) => a + b, 0);
+    let k = navW.length;
+    if (fixed + total > avail) {
+      /* 全部放不下：为"更多"按钮留位，再从前往后塞入导航项 */
+      let used = fixed + moreW;
+      k = 0;
+      while (k < navW.length && used + navW[k] <= avail) {
+        used += navW[k];
+        k++;
+      }
+    }
+    visibleCount.value = k;
+  } finally {
+    el.classList.remove('ui-sidebar--measure');
+  }
+}
+
+let foldObserver: ResizeObserver | null = null;
 
 /** 路由变化后自动收起抽屉（含切走时重置） */
 watch(() => route.path, () => { moreOpen.value = false; });
 watch(isCw, (cw) => { if (cw) moreOpen.value = false; });
+/* 模式/宽度变化时重算折叠；折叠数达全量（无折叠）时自动收起抽屉 */
+watch(navItems, () => { void nextTick(recomputeFold); });
+watch(visibleCount, () => {
+  if (visibleCount.value >= navItems.value.length) moreOpen.value = false;
+});
 
 /** Escape 关闭 */
 function onKeydown(e: KeyboardEvent): void {
@@ -74,9 +131,19 @@ watch(moreOpen, async (open) => {
     moreBtnRef.value?.focus();
   }
 });
+/* 挂载后立即收敛折叠 + 监听宽度变化（旋转/分屏/窗口缩放）实时重算 */
+onMounted(() => {
+  recomputeFold();
+  if (sidebarRef.value) {
+    foldObserver = new ResizeObserver(recomputeFold);
+    foldObserver.observe(sidebarRef.value);
+  }
+});
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown);
   if (swapTimer !== null) clearTimeout(swapTimer);
+  foldObserver?.disconnect();
+  foldObserver = null;
 });
 
 /** "更多"入口图标（横三点，与其他图标同族） */
@@ -90,7 +157,7 @@ const SETTINGS_ITEM = {
 </script>
 
 <template>
-  <nav class="ui-sidebar" :class="{ 'ui-sidebar--cw': isCw, 'ui-sidebar--swap-anim': swapping }" aria-label="主导航">
+  <nav ref="sidebarRef" class="ui-sidebar" :class="{ 'ui-sidebar--cw': isCw, 'ui-sidebar--swap-anim': swapping }" aria-label="主导航">
     <!-- 交换按钮：模式切换入口（与下方导航板块以分隔线区隔） -->
     <button
       type="button"
@@ -110,20 +177,15 @@ const SETTINGS_ITEM = {
     <!-- 分隔线：交换（模式切换）与导航板块的视觉分界 -->
     <span class="ui-sidebar-divider" aria-hidden="true"></span>
 
-    <!-- 当前模式的导航板块 -->
+    <!-- 当前模式的导航板块（单一规范顺序渲染：可见前缀 + "更多"按钮 + 折叠尾部。
+         手机端放不下的尾部折叠进"更多"抽屉，平板/桌面全部平铺、按钮隐藏） -->
     <RouterLink
-      v-for="item in navItems"
+      v-for="item in visibleItems"
       :key="item.path"
       :to="item.path"
       :title="`${item.title} · ${item.en}`"
       :aria-current="isActive(item) ? 'page' : undefined"
-      :class="[
-        'ui-sidebar-link',
-        {
-          'ui-sidebar-link--active': isActive(item),
-          'ui-sidebar-link--in-more': !isCw && !item.primary,
-        },
-      ]"
+      :class="['ui-sidebar-link', { 'ui-sidebar-link--active': isActive(item) }]"
       @pointerenter="prefetchByPath(item.path)"
     >
       <span class="ui-sidebar-link__icon" v-html="item.icon" />
@@ -134,14 +196,16 @@ const SETTINGS_ITEM = {
       <span class="ui-sidebar-link__label">{{ item.short || item.title }}</span>
     </RouterLink>
 
-    <!-- 手机："更多"聚合入口（仅常规模式；CW 模式枢纽+5 板块平铺无需收纳） -->
+    <!-- 手机："更多"聚合入口（按规范顺序位于折叠边界；无折叠或平板/桌面时隐藏） -->
     <button
-      v-if="!isCw"
       ref="moreBtnRef"
       type="button"
       title="更多 · MORE"
       class="ui-sidebar-link ui-sidebar-more"
-      :class="{ 'ui-sidebar-link--active': moreActive || moreOpen }"
+      :class="{
+        'ui-sidebar-link--active': moreActive || moreOpen,
+        'ui-sidebar-more--hidden': foldedItems.length === 0,
+      }"
       :aria-expanded="moreOpen"
       aria-controls="ui-more-sheet"
       @click="moreOpen = !moreOpen"
@@ -149,6 +213,24 @@ const SETTINGS_ITEM = {
       <span class="ui-sidebar-link__icon" v-html="MORE_ICON" />
       <span class="ui-sidebar-link__label">更多</span>
     </button>
+
+    <!-- 折叠进"更多"的尾部（手机隐藏；平板/桌面由 CSS 恢复平铺） -->
+    <RouterLink
+      v-for="item in foldedItems"
+      :key="item.path"
+      :to="item.path"
+      :title="`${item.title} · ${item.en}`"
+      :aria-current="isActive(item) ? 'page' : undefined"
+      :class="['ui-sidebar-link', 'ui-sidebar-link--in-more', { 'ui-sidebar-link--active': isActive(item) }]"
+      @pointerenter="prefetchByPath(item.path)"
+    >
+      <span class="ui-sidebar-link__icon" v-html="item.icon" />
+      <span class="ui-sidebar-link__text">
+        <span class="ui-sidebar-link__cn">{{ item.title }}</span>
+        <span class="ui-sidebar-link__en">{{ item.en }}</span>
+      </span>
+      <span class="ui-sidebar-link__label">{{ item.short || item.title }}</span>
+    </RouterLink>
 
     <!-- 设置入口：始终置底（常规/CW 模式均展示，跳转当前模式的设置页） -->
     <RouterLink
@@ -168,10 +250,10 @@ const SETTINGS_ITEM = {
 
   <!-- 手机："更多"抽屉（点遮罩关闭；导航后由 route watcher 自动收起） -->
   <Transition name="ui-more">
-    <div v-if="moreOpen && !isCw" class="ui-more" @click.self="moreOpen = false">
+    <div v-if="moreOpen" class="ui-more" @click.self="moreOpen = false">
       <div id="ui-more-sheet" ref="sheetRef" class="ui-more__sheet" role="dialog" aria-label="更多导航">
         <RouterLink
-          v-for="item in moreItems"
+          v-for="item in foldedItems"
           :key="item.path"
           :to="item.path"
           :class="['ui-more__item', { 'ui-more__item--active': isActive(item) }]"

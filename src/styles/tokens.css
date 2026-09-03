@@ -503,11 +503,11 @@
   background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
   opacity: 0.8;
 }
-/* 全槽位触控目标：双模式统一 7 槽位（flex:1 填满整行消除死区），
-   高度由 align-items: stretch 撑满 56px 栏高（≥ 44px 标准），
-   槽位数一致保证模式切换时按钮位置不偏移 */
+/* 全槽位触控目标：flex:1 1 auto + min-width:44px —— 有富余时均分填满整行消除死区，
+   放不下时不压缩（44px 为触控下限），由 SidebarNav 按规范顺序将尾部折叠进"更多"；
+   高度由 align-items: stretch 撑满 56px 栏高（≥ 44px 标准） */
 .ui-sidebar-link {
-  flex: 1 1 0; min-width: 0;
+  flex: 1 1 auto; min-width: 44px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   /* background/padding 显式重置：<button>（“更多”）否则继承 UA 默认 buttonface 灰底，在深色栏中看似高亮 */
   background: transparent; padding: 0;
@@ -556,9 +556,16 @@
   .ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) { animation: none; }
 }
 
-/* ─── 手机"更多"聚合：底部栏留 首页 + 4 主项 + 更多按钮（与 CW 7 槽位对齐），其余 3 项收入上拉抽屉 ─── */
-/* 收纳项在底部栏隐藏（平板/桌面恢复显示） */
+/* ─── 手机"更多"聚合：按实际空间折叠放不下的板块尾部，其余收入上拉抽屉 ─── */
+/* 折叠项在底部栏隐藏（平板/桌面无折叠项，全部平铺） */
 .ui-sidebar-link--in-more { display: none; }
+/* 无折叠时隐藏"更多"按钮（有折叠时正常展示） */
+.ui-sidebar-more--hidden { display: none; }
+/* 折叠测量态：SidebarNav 在同一帧内强制全部槽位自然宽度且全部可见（含折叠项与隐藏的
+   "更多"按钮），读宽后立即复原——用于计算实际放得下几槽，无可见闪烁 */
+.ui-sidebar--measure .ui-sidebar-link { flex: none !important; width: auto !important; }
+.ui-sidebar--measure .ui-sidebar-link--in-more { display: flex !important; }
+.ui-sidebar--measure .ui-sidebar-more--hidden { display: flex !important; }
 /* 抽屉遮罩：位于底部栏上方（z 低于栏，保证栏始终可点），点遮罩关闭 */
 .ui-more {
   position: fixed; left: 0; right: 0; top: 0;
