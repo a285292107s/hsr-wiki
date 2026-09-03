@@ -246,38 +246,42 @@ const DEBUG_ITEM = {
       <span class="ui-sidebar-link__label">{{ item.short || item.title }}</span>
     </RouterLink>
 
-    <!-- 研究线调试台入口（dev-only：IS_DEV 同文件常量，生产编译为 false 整块摇树；
-         手机隐藏由 CSS .ui-sidebar-debug 处理，不参与折叠测量） -->
-    <RouterLink
-      v-if="IS_DEV"
-      :to="DEBUG_PATH"
-      title="调试台 · DEBUG"
-      class="ui-sidebar-link ui-sidebar-debug"
-      :class="{ 'ui-sidebar-link--active': route.path === DEBUG_PATH }"
-      @pointerenter="prefetchByPath(DEBUG_PATH)"
-    >
-      <span class="ui-sidebar-link__icon" v-html="DEBUG_ITEM.icon" />
-      <span class="ui-sidebar-link__text">
-        <span class="ui-sidebar-link__cn">调试台</span>
-        <span class="ui-sidebar-link__en">DEBUG</span>
-      </span>
-      <span class="ui-sidebar-link__label">调试台</span>
-    </RouterLink>
+    <!-- 底部工具组（调试台 + 设置）：成组整体置底——调试台位于设置上方，与上方导航板块区隔。
+         手机底部栏内容器 display:contents 不产生盒子，成员仍直接参与均分（见 tokens.css） -->
+    <div class="ui-sidebar-tools">
+      <!-- 研究线调试台入口（dev-only：IS_DEV 同文件常量，生产编译为 false 整块摇树；
+           手机隐藏由 CSS .ui-sidebar-debug 处理，不参与折叠测量） -->
+      <RouterLink
+        v-if="IS_DEV"
+        :to="DEBUG_PATH"
+        title="调试台 · DEBUG"
+        class="ui-sidebar-link ui-sidebar-debug"
+        :class="{ 'ui-sidebar-link--active': route.path === DEBUG_PATH }"
+        @pointerenter="prefetchByPath(DEBUG_PATH)"
+      >
+        <span class="ui-sidebar-link__icon" v-html="DEBUG_ITEM.icon" />
+        <span class="ui-sidebar-link__text">
+          <span class="ui-sidebar-link__cn">调试台</span>
+          <span class="ui-sidebar-link__en">DEBUG</span>
+        </span>
+        <span class="ui-sidebar-link__label">调试台</span>
+      </RouterLink>
 
-    <!-- 设置入口：始终置底（常规/CW 模式均展示，跳转当前模式的设置页） -->
-    <RouterLink
-      :to="settingsPath"
-      title="设置 · SETTINGS"
-      class="ui-sidebar-link ui-sidebar-settings"
-      :class="{ 'ui-sidebar-link--active': route.path === settingsPath }"
-    >
-      <span class="ui-sidebar-link__icon" v-html="SETTINGS_ITEM.icon" />
-      <span class="ui-sidebar-link__text">
-        <span class="ui-sidebar-link__cn">设置</span>
-        <span class="ui-sidebar-link__en">SETTINGS</span>
-      </span>
-      <span class="ui-sidebar-link__label">设置</span>
-    </RouterLink>
+      <!-- 设置入口：工具组末位（常规/CW 模式均展示，跳转当前模式的设置页） -->
+      <RouterLink
+        :to="settingsPath"
+        title="设置 · SETTINGS"
+        class="ui-sidebar-link ui-sidebar-settings"
+        :class="{ 'ui-sidebar-link--active': route.path === settingsPath }"
+      >
+        <span class="ui-sidebar-link__icon" v-html="SETTINGS_ITEM.icon" />
+        <span class="ui-sidebar-link__text">
+          <span class="ui-sidebar-link__cn">设置</span>
+          <span class="ui-sidebar-link__en">SETTINGS</span>
+        </span>
+        <span class="ui-sidebar-link__label">设置</span>
+      </RouterLink>
+    </div>
   </nav>
 
   <!-- 手机："更多"抽屉（点遮罩关闭；导航后由 route watcher 自动收起） -->

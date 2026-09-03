@@ -532,8 +532,11 @@
 .ui-sidebar-link:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
 /* 激活项：淡底 + 主色文字 + 细边框；霓虹 glow 已去除（收敛为纯物理阴影） */
 .ui-sidebar-link--active { opacity: 1; color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); }
-/* 设置入口：手机底部栏作为末槽位平铺（与其他按钮垂直居中对齐，无需额外 margin）；
-   置底由平板断点内的 .ui-sidebar-settings 应用（见下） */
+/* 底部工具组（调试台 + 设置）：手机底部栏内 display:contents——成员不额外占槽位，
+   直接参与均分（debug 手机隐藏后仅设置一枚，与改动前布局一致）；
+   成组置底由平板断点内的 .ui-sidebar-tools 应用（见下） */
+.ui-sidebar-tools { display: contents; }
+/* 设置入口：手机底部栏作为末槽位平铺（与其他按钮垂直居中对齐，无需额外 margin） */
 .ui-sidebar-settings { margin-top: 0; }
 /* 研究线调试台入口（dev-only）：仅平板/桌面竖排侧栏显示（设置按钮上方）；
    手机底部栏无空间、且不参与动态折叠划分，一律隐藏（SidebarNav 测量亦已显式排除） */
@@ -1036,8 +1039,15 @@ img[data-cdn-down] { visibility: hidden; }
   .ui-sidebar-more { display: none; }
   .ui-sidebar-link--in-more { display: flex; }
   .ui-more { display: none; }
-  /* 竖排侧栏：设置入口推至栏底部（手机底部栏已平铺，无需此规则） */
-  .ui-sidebar-settings { margin-top: auto; }
+  /* 竖排侧栏：底部工具组（调试台+设置）整体推至栏底部（成员不再各自置底；
+     手机底部栏内 display:contents 无此规则生效） */
+  .ui-sidebar-tools {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    margin-top: auto;
+  }
   .nk-page--detail { left: var(--nk-content-offset); bottom: 0; }
   .nk-hero__panel { padding: 28px 36px; gap: 22px; }
   .nk-hero__name { font-size: 1.85rem; }
