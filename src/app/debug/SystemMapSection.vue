@@ -2,8 +2,8 @@
 /**
  * 系统地图（研究线 Tab）：交互式等轴测架构地图
  *
- * 研究线（spine-lab）为独立附属子应用（5174），本面板不进入主项目（数据展示型 wiki）。
- * 数据全部来自 spine-lab/src/system-map/map-data.ts（单一事实源）——建筑 = 模块，
+ * 研究线调试台为主站 dev-only 路由 /debug（import.meta.env.DEV 注册，生产构建摇树），本面板仅存在于开发环境。
+ * 数据全部来自 src/app/debug/system-map/map-data.ts（单一事实源）——建筑 = 模块，
  * 连线 = 真实控制/数据路径；文件路径、加载链均为仓库内事实，禁止在视图层编造。
  * 渲染：2:1 等轴测投影（菱形网格 S=88，基座 BW=0.48S），CSS 3D 风格 cuboid（三面 + 屋顶装饰），
  * 建筑按 painter 序（gx+gy 升序）绘制；hover/选中建筑 → 高亮关联路径 + 解释面板。

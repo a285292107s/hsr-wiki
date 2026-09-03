@@ -77,9 +77,9 @@ export const LAYERS: MapLayer[] = [
   { id: 'lib',       name: '工具函数',     en: 'LIB',     color: '--sd-300', desc: '纯函数：constants/format/icons/html/errors' },
   { id: 'styles',    name: '样式令牌',     en: 'STYLES',  color: '--ir-300', desc: 'tokens.css 三层令牌 + catalog.css 目录引擎全局样式' },
   { id: 'comp',      name: '组合式函数',   en: 'COMP',    color: '--tc-300', desc: 'composables：加载代竞态/延迟骨架屏/滚动恢复' },
-  { id: 'lab',       name: '研究线',       en: 'LAB',     color: '--em-400', desc: 'Spine Lab 独立子应用（5174，共享只读依赖，不进 CI/线上）' },
+  { id: 'lab',       name: '研究线',       en: 'LAB',     color: '--em-400', desc: 'Spine Lab 调试台：主站 dev-only 路由 /debug（import.meta.env.DEV 注册，生产构建摇树）' },
   { id: 'converter', name: '数据转换',     en: 'CONV',    color: '--sd-500', desc: 'Python converter：官方解包 → public/data/cn（增量跳过）' },
-  { id: 'data',      name: '本地数据',     en: 'DATA',    color: '--sd-600', desc: 'public/data/cn：2954 个预转换 JSON（随站部署）' },
+  { id: 'data',      name: '本地数据',     en: 'DATA',    color: '--sd-600', desc: 'public/data/cn：3018 个预转换 JSON（随站部署）' },
   { id: 'ext',       name: '外部云端',     en: 'CLOUD',   color: '--sl-600', desc: 'nanoka / jsDelivr 镜像 / 官网源 / Vercel' },
 ];
 
@@ -138,7 +138,7 @@ export const NODES: MapNode[] = [
   { id: 'comp', name: '组合式函数', en: 'COMPOSABLES', layer: 'comp', gx: 3, gy: 4, shape: 'flat', h: 1,
     files: ['src/app/composables/use-load-generation.ts', 'src/app/composables/use-delayed-skeleton.ts', 'src/app/composables/use-scroll-restore.ts'], desc: '加载代竞态保护 / 延迟骨架屏 / 滚动恢复 / 视差' },
   { id: 'lab', name: '研究线', en: 'SPINE LAB', layer: 'lab', gx: 4, gy: 4, shape: 'dome', h: 2,
-    files: ['spine-lab/src/App.vue', 'spine-lab/vite.config.ts'], desc: 'Spine Lab 独立子应用（5174）：审核/验收/死链审计；共享只读依赖主项目引擎层' },
+    files: ['src/app/debug/DebugConsoleView.vue', 'src/app/debug/index.ts', 'src/app/debug/dead-links.ts'], desc: '主站 dev-only 路由 /debug：KV 场景验收 / 清单审核 / 死链审核 / 系统地图（生产构建摇树）' },
   /* ─── gy=5 数据矿区 ─── */
   { id: 'converter', name: '数据转换工厂', en: 'CONVERTER', layer: 'converter', gx: 0, gy: 5, shape: 'factory', h: 2,
     files: ['tools/converter/convert.py', 'tools/converter/converters/characters.py', 'tools/converter/query.py'], desc: 'Python 工具：官方解包 ExcelOutput → public/data/cn（增量跳过未变更）' },
@@ -203,7 +203,7 @@ export const EDGES: MapEdge[] = [
   { id: 'spine-cdn', from: 'spine', to: 'nanoka', kind: 'cdn', label: '运行时 + 资源加载',
     files: ['src/spine/runtime.ts', 'src/spine/scene.ts', 'src/spine/player.ts'] },
   { id: 'lab-cdn', from: 'lab', to: 'nanoka', kind: 'cdn', label: '资源可达性审计',
-    files: ['spine-lab/src/dead-links.ts'] },
+    files: ['src/app/debug/dead-links.ts'] },
   /* 主题传导 */
   { id: 'theme-shell', from: 'shell', to: 'theme', kind: 'theme', label: 'meta.cw 主题切换',
     files: ['src/app/App.vue', 'src/lib/theme.ts', 'src/lib/cw-theme.ts'] },
@@ -224,6 +224,8 @@ export const EDGES: MapEdge[] = [
     files: ['src/app/router/index.ts', 'src/app/views/CurrencyHubView.vue'] },
   { id: 'router-settings', from: 'router', to: 'settings', kind: 'control', label: '/settings 注册',
     files: ['src/app/router/index.ts'] },
+  { id: 'router-lab', from: 'router', to: 'lab', kind: 'control', label: 'dev 路由注册（/debug）',
+    files: ['src/app/router/index.ts', 'src/app/debug/index.ts'] },
   { id: 'cdn-lib', from: 'cdn', to: 'lib', kind: 'control', label: 'CDN 基址/常量依赖',
     files: ['src/services/cdn/resolve.ts', 'src/lib/constants.ts'] },
   { id: 'store-comp', from: 'stores', to: 'comp', kind: 'control', label: '加载代竞态保护',

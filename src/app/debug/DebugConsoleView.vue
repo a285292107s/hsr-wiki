@@ -50,7 +50,10 @@ onBeforeUnmount(unsubscribe);
       <p class="nk-spine-debug__kicker">SPINE LAB // 研究线</p>
       <h1>Spine 调试台</h1>
       <p class="nk-spine-debug__desc">
-        KV 场景验收：每版本官网抓取的场景一键验收（逐层加载 + 合并渲染 + 黑块检测）→ 导出 PASS/FAIL 报告；清单审核：全量 manifest 条目三级诊断（L0 资源 → L1 解析 → L2 渲染）；死链审核：浏览器端数据驱动 URL 可达性审计（并发 ≤3 限流，结果本地缓存复用）。
+        KV 一键验收：逐层加载 · 合并渲染 · 黑块检测 → PASS/FAIL 报告<br />
+        清单三级诊断：L0 资源 → L1 解析 → L2 渲染<br />
+        死链可达性审计：限流并发 · 结果缓存复用<br />
+        系统地图：加载链路可视化
       </p>
       <div class="nk-spine-debug__tabs" role="tablist" aria-label="调试功能">
         <button
