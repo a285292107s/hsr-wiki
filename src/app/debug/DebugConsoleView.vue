@@ -82,64 +82,95 @@ onBeforeUnmount(unsubscribe);
 </template>
 
 <style scoped>
-/* ─── 页面骨架：OLED 深色控制台风格；主站文档流页面，≥768 内容区左避让侧栏 ─── */
+/* ─── 页面骨架：墨色控制台（研究级仪表）。主站文档流页面，≥768 内容区左避让侧栏 ───
+   底色非纯平黑：顶部主色微注入的弱径向晕营造纵深，替代霓虹发光的反 AI 味基调 ─── */
 .nk-spine-debug {
-  padding: 24px;
+  padding: 28px;
   font-family: var(--font-body);
   color: var(--text);
   overflow-x: auto;
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--primary) 7%, transparent), transparent 70%),
+    var(--bg);
+  min-height: 100%;
 }
 @media (min-width: 768px) {
   .nk-spine-debug { margin-left: var(--nk-content-offset); }
 }
 
-/* ─── 头部：HUD 引导行 + 标题 + 说明 + Tab ─── */
-.nk-spine-debug__head { max-width: 1480px; margin-bottom: 20px; }
+/* ─── 头部：HUD 引导行 + 标题 + 说明 + 仪表 Tab ─── */
+.nk-spine-debug__head { max-width: 1480px; margin-bottom: 24px; }
 .nk-spine-debug__kicker {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-hud);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   color: var(--primary);
   text-transform: uppercase;
 }
+/* 引导行收尾一枚主色「原点」，把纯文字转为仪器刻度感 */
+.nk-spine-debug__kicker::after {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent);
+}
 .nk-spine-debug__head h1 {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-family: var(--font-hud);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
+  color: var(--text-bright);
 }
 .nk-spine-debug__desc {
-  margin: 0 0 14px;
+  margin: 0 0 20px;
+  max-width: 74ch;
   font-size: 13px;
-  line-height: 1.7;
-  opacity: 0.72;
+  line-height: 1.8;
+  color: var(--text2);
 }
-/* Tab 切换：分段控件风格，激活态主色强化 */
+
+/* 仪表 Tab：胶囊条承载，激活态=主色暖板 + 字重强化；摒弃生硬的分段盒 */
 .nk-spine-debug__tabs {
   display: inline-flex;
-  border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
-  border-radius: 8px;
-  overflow: hidden;
+  gap: 4px;
+  padding: 5px;
+  background: var(--nk-sheet-bg);
+  border: 1px solid var(--nk-sheet-border);
+  border-radius: 999px;
+  box-shadow: var(--nk-shadow-card);
 }
 .nk-spine-debug__tab {
-  padding: 6px 16px;
+  padding: 7px 18px;
   font-size: 12px;
   font-family: inherit;
+  letter-spacing: 0.02em;
   color: var(--text2);
   background: transparent;
   border: none;
+  border-radius: 999px;
   cursor: pointer;
-  transition: background 0.18s, color 0.18s;
+  white-space: nowrap;
+  transition: background 0.2s var(--nk-ease-out), color 0.2s var(--nk-ease-out);
 }
-.nk-spine-debug__tab + .nk-spine-debug__tab { border-left: 1px solid color-mix(in srgb, var(--text) 22%, transparent); }
 .nk-spine-debug__tab:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
-.nk-spine-debug__tab.is-active { color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); }
-.nk-spine-debug__tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.nk-spine-debug__tab.is-active {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  font-weight: 600;
+}
+.nk-spine-debug__tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 @media (max-width: 560px) {
-  .nk-spine-debug { padding: 16px 12px; }
+  .nk-spine-debug { padding: 20px 14px; }
+  .nk-spine-debug__tabs { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 </style>

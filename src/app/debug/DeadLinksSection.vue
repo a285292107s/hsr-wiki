@@ -307,7 +307,7 @@ onBeforeUnmount(() => {
     </div>
 
     <section v-for="dom in DOMAIN_ORDER" :key="dom" class="nk-deadlinks__group">
-      <template v-if="grouped[dom].length">
+      <div v-if="grouped[dom].length" class="nk-deadlinks__panel">
         <header class="nk-deadlinks__group-head">
           <span class="nk-deadlinks__group-name">{{ DOMAIN_LABEL[dom] }}</span>
           <span class="nk-deadlinks__group-count">{{ grouped[dom].length }}</span>
@@ -325,7 +325,7 @@ onBeforeUnmount(() => {
           <span class="nk-deadlinks__src" :title="row.source">{{ row.source }}</span>
           <span class="nk-deadlinks__badge" :class="`is-${row.status}`">{{ badgeText(row.status) }}</span>
         </div>
-      </template>
+      </div>
     </section>
 
     <p v-if="urls.size === 0 && phase === 'idle'" class="nk-deadlinks__empty">
@@ -349,7 +349,7 @@ onBeforeUnmount(() => {
 }
 .nk-deadlinks__banner strong { color: #ffd9a3; font-weight: 700; }
 
-/* ─── 工具栏 ─── */
+/* ─── 工具栏：抬升墨色 sheet ─── */
 .nk-deadlinks__toolbar {
   display: flex;
   align-items: center;
@@ -357,9 +357,10 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
   gap: 10px 16px;
   padding: 10px 14px;
-  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  border: 1px solid var(--nk-sheet-border);
+  border-radius: var(--nk-radius-card);
+  background: var(--nk-sheet-bg);
+  box-shadow: var(--nk-shadow-card);
 }
 .nk-deadlinks__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .nk-deadlinks__chip {
@@ -413,8 +414,8 @@ onBeforeUnmount(() => {
 .nk-deadlinks__progress-bar {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--primary), var(--th-400));
-  transition: width 0.3s;
+  background: var(--primary);
+  transition: width 0.3s var(--nk-ease-out);
 }
 .nk-deadlinks__hint-line {
   max-width: 1480px;
@@ -443,9 +444,9 @@ onBeforeUnmount(() => {
 }
 .nk-deadlinks__btn.is-toggle.is-on {
   border-color: var(--primary);
-  color: var(--text-bright);
-  background: color-mix(in srgb, var(--primary) 22%, transparent);
-  box-shadow: 0 0 12px var(--primary-glow);
+  color: var(--primary);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
 }
 .nk-deadlinks__cache-note {
   font-family: ui-monospace, monospace;
@@ -453,15 +454,22 @@ onBeforeUnmount(() => {
   color: var(--text3);
 }
 
-/* ─── 分组 ─── */
+/* ─── 分组面板：整组抬升为墨色 sheet，头部 + 条目行同板 ─── */
 .nk-deadlinks__group { max-width: 1480px; margin-bottom: 18px; }
+.nk-deadlinks__panel {
+  border: 1px solid var(--nk-sheet-border);
+  border-radius: var(--nk-radius-card);
+  background: var(--nk-sheet-bg);
+  box-shadow: var(--nk-shadow-card);
+  overflow: hidden;
+}
 .nk-deadlinks__group-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 2px 8px;
-  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  padding: 10px 12px 7px;
 }
+.nk-deadlinks__group-head + .nk-deadlinks__row { border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
 .nk-deadlinks__group-name {
   font-family: var(--font-hud);
   font-size: 12px;
@@ -494,8 +502,8 @@ onBeforeUnmount(() => {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
+  gap: 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
 }
 .nk-deadlinks__bar {
@@ -506,9 +514,9 @@ onBeforeUnmount(() => {
   background: transparent;
 }
 .nk-deadlinks__row.is-dead { background: rgba(229, 72, 77, 0.07); }
-.nk-deadlinks__row.is-dead .nk-deadlinks__bar { background: #e5484d; box-shadow: 0 0 8px rgba(229, 72, 77, 0.6); }
+.nk-deadlinks__row.is-dead .nk-deadlinks__bar { background: #e5484d; }
 .nk-deadlinks__row.is-env { background: rgba(245, 166, 35, 0.05); }
-.nk-deadlinks__row.is-env .nk-deadlinks__bar { background: #f5a623; box-shadow: 0 0 8px rgba(245, 166, 35, 0.5); }
+.nk-deadlinks__row.is-env .nk-deadlinks__bar { background: #f5a623; }
 .nk-deadlinks__row.is-ok { opacity: 0.72; }
 .nk-deadlinks__row.is-ok .nk-deadlinks__bar { background: rgba(127, 224, 138, 0.55); }
 .nk-deadlinks__url {
@@ -540,7 +548,7 @@ onBeforeUnmount(() => {
   flex: none;
 }
 .nk-deadlinks__badge.is-ok { color: #b7f2bd; background: rgba(127, 224, 138, 0.14); border: 1px solid rgba(127, 224, 138, 0.4); }
-.nk-deadlinks__badge.is-dead { color: #ffb3b3; background: rgba(229, 72, 77, 0.16); border: 1px solid rgba(229, 72, 77, 0.5); box-shadow: 0 0 8px rgba(229, 72, 77, 0.25); }
+.nk-deadlinks__badge.is-dead { color: #ffb3b3; background: rgba(229, 72, 77, 0.16); border: 1px solid rgba(229, 72, 77, 0.5); }
 .nk-deadlinks__badge.is-env { color: #ffd9a3; background: rgba(245, 166, 35, 0.1); border: 1px solid rgba(245, 166, 35, 0.45); }
 .nk-deadlinks__badge.is-pending { color: var(--text3); background: color-mix(in srgb, var(--text) 10%, transparent); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); }
 
@@ -572,24 +580,29 @@ onBeforeUnmount(() => {
   color: var(--text);
   background: color-mix(in srgb, var(--bg) 80%, transparent);
   border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
-  border-radius: 6px;
+  border-radius: 7px;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.18s var(--nk-ease-out);
 }
 .nk-deadlinks__btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--text) 55%, transparent); }
-.nk-deadlinks__btn:active:not(:disabled) { background: color-mix(in srgb, var(--text) 14%, transparent); }
+.nk-deadlinks__btn:active:not(:disabled) { background: color-mix(in srgb, var(--text) 14%, transparent); transform: translateY(0); }
 .nk-deadlinks__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-.nk-deadlinks__btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.nk-deadlinks__btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 .nk-deadlinks__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
 .nk-deadlinks__btn.is-danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.12); }
+/* 主操作按钮：暖板 CTA（无霓虹、无渐变）。hover 深一档暖板 + 墨色浮起 */
 .nk-deadlinks__btn.is-primary {
   border-color: var(--primary);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 85%, #fff 8%), var(--primary));
-  color: var(--text-bright);
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  color: var(--primary);
   font-weight: 600;
-  box-shadow: 0 0 14px var(--primary-glow);
 }
-.nk-deadlinks__btn.is-primary:hover:not(:disabled) { border-color: var(--th-400); box-shadow: 0 0 20px var(--primary-glow); }
+.nk-deadlinks__btn.is-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  border-color: var(--th-400);
+  box-shadow: var(--nk-shadow-card);
+  transform: translateY(-1px);
+}
 
 @media (max-width: 560px) {
   .nk-deadlinks__src { display: none; }

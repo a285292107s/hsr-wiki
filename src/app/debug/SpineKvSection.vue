@@ -242,7 +242,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="nk-spine-debug">
+  <!-- 根类必须与页面外层包装（DebugConsoleView .nk-spine-debug）区分开：
+       Vue scoped 会把父级样式级联到子组件唯一根元素，若沿用同名会把外层 padding/背景再套一层 → 左侧凭空多出 28px。
+       本文件内部子样式全部用 .nk-spine-debug__* 前缀，不受根类名影响。 -->
+  <div class="nk-spine-kv">
     <!-- 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 -->
     <div class="nk-spine-debug__statusbar">
       <span class="nk-spine-debug__chip" :class="summary.startsWith('READY') ? 'is-ok' : summary.startsWith('FAIL') ? 'is-fail' : 'is-loading'">{{ summary }}</span>
@@ -351,6 +354,7 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  max-width: 1480px;
   margin-bottom: 8px;
   padding: 0 2px;
 }
@@ -359,30 +363,33 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: flex-start;
   flex-wrap: wrap;
-  gap: 10px 0;
-  padding: 10px 14px;
-  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  /* 行距用 column-gap 承载分组间隔：换行到下一行的分组顶部不残留悬空竖线 */
+  gap: 10px 16px;
+  max-width: 1480px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  /* 抬升为墨色 sheet：与环境光分离的独立面板层 */
+  border: 1px solid var(--nk-sheet-border);
+  border-radius: var(--nk-radius-card);
+  background: var(--nk-sheet-bg);
+  box-shadow: var(--nk-shadow-card);
 }
-/* 工具条分组：场景 / 渲染 / 验收（组间分隔线建立视觉层级） */
+/* 工具条分组：场景 / 渲染 / 验收（以列距 + 组长标签建立层级，避免包裹时悬空分隔线） */
 .nk-spine-debug__group {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 0 14px;
-  border-left: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  gap: 8px 10px;
 }
-.nk-spine-debug__group:first-child { padding-left: 0; border-left: none; }
 .nk-spine-debug__group.is-accept { margin-left: auto; }
 .nk-spine-debug__group-label {
   font-family: var(--font-hud);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: var(--text3);
   text-transform: uppercase;
+  margin-right: 2px;
 }
 .nk-spine-debug__chip {
   padding: 3px 10px;
@@ -397,40 +404,40 @@ onBeforeUnmount(() => {
 .nk-spine-debug__chip.is-fail { color: #ffb3b3; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.14); }
 .nk-spine-debug__chip.is-loading { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
 .nk-spine-debug__bulk { display: flex; flex-wrap: wrap; gap: 8px; }
-/* 渲染模式单选组（分段控件）：合并渲染 / 单层模式互斥选中 */
+/* 渲染模式单选组（分段控件）：合并渲染 / 单层模式互斥选中；内凹承载 + 激活暖板 */
 .nk-spine-debug__seg {
   display: inline-flex;
-  border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
-  border-radius: 6px;
-  overflow: hidden;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
 }
 .nk-spine-debug__seg-btn {
-  padding: 4px 12px;
+  padding: 3px 12px;
   font-size: 12px;
   font-family: inherit;
   color: var(--text2);
   background: transparent;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.18s, color 0.18s;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
-.nk-spine-debug__seg-btn + .nk-spine-debug__seg-btn { border-left: 1px solid color-mix(in srgb, var(--text) 22%, transparent); }
 .nk-spine-debug__seg-btn:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
-.nk-spine-debug__seg-btn.is-active { color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.nk-spine-debug__seg-btn.is-active { color: var(--primary); background: color-mix(in srgb, var(--primary) 18%, transparent); box-shadow: var(--nk-shadow-card); }
 .nk-spine-debug__seg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .nk-spine-debug__seg-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-.nk-spine-debug__btn.is-primary { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 18%, transparent); color: var(--primary); font-weight: 600; }
-.nk-spine-debug__btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.nk-spine-debug__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
 
-/* ─── 验收报告：头部汇总 + 明细表（等宽代码风） ─── */
+/* ─── 验收报告：头部汇总 + 明细表（等宽代码风）；整体为抬升墨色 sheet ─── */
 .nk-spine-debug__report {
   max-width: 1480px;
   margin-bottom: 20px;
-  border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
-  border-radius: 10px;
+  border: 1px solid var(--nk-sheet-border);
+  border-radius: var(--nk-radius-card);
   overflow: hidden;
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  background: var(--nk-sheet-bg);
+  box-shadow: var(--nk-shadow-card);
 }
 .nk-spine-debug__report-head {
   display: flex;
@@ -439,7 +446,7 @@ onBeforeUnmount(() => {
   gap: 10px;
   padding: 8px 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-  background: color-mix(in srgb, var(--text) 5%, transparent);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
 }
 .nk-spine-debug__report-head .nk-spine-debug__label { flex: 1; }
 .nk-spine-debug__report-table {
@@ -494,10 +501,11 @@ onBeforeUnmount(() => {
 
 /* ─── 合并渲染区（单画布多骨架） ─── */
 .nk-spine-debug__merged {
-  border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
-  border-radius: 10px;
+  border: 1px solid var(--nk-sheet-border);
+  border-radius: var(--nk-radius-card);
   overflow: hidden;
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  background: var(--nk-sheet-bg);
+  box-shadow: var(--nk-shadow-card);
   max-width: 1000px;
 }
 .nk-spine-debug__merged-head {
@@ -507,7 +515,7 @@ onBeforeUnmount(() => {
   gap: 10px;
   padding: 8px 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-  background: color-mix(in srgb, var(--text) 5%, transparent);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
 }
 .nk-spine-debug__merged-stage {
   width: 100%;
@@ -516,21 +524,27 @@ onBeforeUnmount(() => {
     repeating-conic-gradient(#151d33 0% 25%, #0d1326 0% 50%) 0 0 / 24px 24px;
 }
 
-/* ─── 层卡片网格 ─── */
+/* ─── 层卡片网格；max-width 与其余板块同宽对齐 ─── */
 .nk-spine-debug__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
   gap: 16px;
+  max-width: 1480px;
   padding-top: 4px;
 }
 .nk-spine-debug__card {
-  border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
-  border-radius: 10px;
+  border: 1px solid var(--nk-sheet-border);
+  border-radius: var(--nk-radius-card);
   overflow: hidden;
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--nk-sheet-bg);
+  box-shadow: var(--nk-shadow-card);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--nk-ease-out);
 }
-.nk-spine-debug__card:hover { border-color: color-mix(in srgb, var(--text) 28%, transparent); }
+.nk-spine-debug__card:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  box-shadow: var(--nk-shadow-lift);
+  transform: translateY(-2px);
+}
 .nk-spine-debug__card.is-fail { border-color: rgba(229, 72, 77, 0.45); }
 
 .nk-spine-debug__card-head {
@@ -539,7 +553,7 @@ onBeforeUnmount(() => {
   gap: 10px;
   padding: 8px 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-  background: color-mix(in srgb, var(--text) 5%, transparent);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
 }
 .nk-spine-debug__num {
   padding: 1px 7px;
@@ -618,13 +632,29 @@ onBeforeUnmount(() => {
   color: var(--text);
   background: color-mix(in srgb, var(--bg) 80%, transparent);
   border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
-  border-radius: 6px;
+  border-radius: 7px;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.18s var(--nk-ease-out);
 }
 .nk-spine-debug__btn:hover { border-color: color-mix(in srgb, var(--text) 55%, transparent); }
-.nk-spine-debug__btn:active { background: color-mix(in srgb, var(--text) 14%, transparent); }
+.nk-spine-debug__btn:active { background: color-mix(in srgb, var(--text) 14%, transparent); transform: translateY(0); }
 .nk-spine-debug__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+/* 主操作：暖板 CTA（无霓虹、无渐变）。hover 深一档暖板 + 墨色浮起 */
+.nk-spine-debug__btn.is-primary {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  color: var(--primary);
+  font-weight: 600;
+}
+.nk-spine-debug__btn.is-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  border-color: var(--th-400);
+  box-shadow: var(--nk-shadow-card);
+  transform: translateY(-1px);
+}
+.nk-spine-debug__btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.nk-spine-debug__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
+.nk-spine-debug__btn.is-danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.12); }
 
 /* ─── 移动端：单列 + 舞台按比例缩放（16:9，实例化前尺寸即确定，不触发 buffer 比例错位） ─── */
 @media (max-width: 560px) {

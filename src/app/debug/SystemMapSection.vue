@@ -461,17 +461,19 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   --nk-edge-cdn: var(--gold-400);
   --nk-edge-theme: var(--tc-400);
   --nk-edge-build: var(--sl-500);
-  padding-left: var(--nk-content-offset);
   color: var(--text);
 }
 
-/* ─── 三栏布局：≥1536 三列；768-1535 图例折叠为顶栏、地图+说明两列；<768 单列 + 底栏 ─── */
+/* ─── 三栏布局：≥1536 三列；768-1535 图例折叠为顶栏、地图+说明两列；<768 单列 + 底栏 ───
+   max-width:1480 与其余板块同宽对齐；左应交由父容器（.nk-spine-debug）统一提供 ─── */
 .nk-sysmap__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   grid-template-areas: 'legend legend' 'stage info';
   gap: 14px;
+  margin: 0;
   padding: 14px;
+  max-width: 1480px;
   align-items: start;
 }
 .nk-sysmap__legend { grid-area: legend; }
