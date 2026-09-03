@@ -1,4 +1,8 @@
 /** Spine 动画清单相关数据类型（双清单：官网源优先 + nanoka 回退源） */
+import type { SpineRuntimeVersion } from '../../spine/types';
+
+/** 运行时版本联合（来自 spine 引擎层 types；services 侧统一从本模块取用） */
+export type { SpineRuntimeVersion };
 
 /** 官网资源抓取来源（诊断/回溯用；wayback 条目需先剥离 web.archive.org 前缀） */
 export type SpineFetchSource = 'home' | 'character' | 'wayback';
@@ -13,7 +17,7 @@ export interface SpineSkelEntry {
   name: string;
 }
 
-/** 官网源条目（折叠格式）：官网 JSON 骨架（导出版本随素材而异，4.2 运行时向下兼容）+ atlas + 纹理映射。
+/** 官网源条目（折叠格式）：官网 JSON 骨架（导出版本随素材而异）+ atlas + 纹理映射。
  *  atlas/json/textures 均为 base+dir 下的相对文件名（hash 名），由 api 层展开为完整 URL；
  *  textures 键为 atlas 逻辑纹理名（含 .png 扩展名，必须与 atlas page 行逐字一致） */
 export interface SpineOfficialEntry {
@@ -22,6 +26,11 @@ export interface SpineOfficialEntry {
   version?: string;
   /** 抓取来源（官网首页轮播 / 角色页 / Wayback 快照） */
   source?: SpineFetchSource;
+  /** 骨架 JSON 的导出格式要求的运行时版本（4.0 格式导出必须标 "4.1"）：
+   *  官方 spine-ts 4.2 解析器只读 4.1+ 的 inherit 字段、丢弃 4.0 格式的 transform 字段
+   *  （noRotationOrReflection 等继承模式失效 → 骨架扭转变形）；4.1.23 运行时使用旧
+   *  transformMode 体系、兼容该字段。默认缺省 = 4.2 格式导出，走主运行时 */
+  runtime?: SpineRuntimeVersion;
   /** publish_key + 资源目录路径段（拼接于 manifest.base 之后） */
   dir: string;
   atlas: string;
@@ -71,7 +80,7 @@ export interface SpineNanokaManifest {
 /** 解析后的 spine 资源描述（渲染层消费；official/scene 的 URL 已由 api 层展开为完整地址） */
 export type SpineResolved =
   | { kind: 'skel'; base: string }
-  | { kind: 'official'; atlas: string; json: string; textures: Record<string, string> }
+  | { kind: 'official'; atlas: string; json: string; textures: Record<string, string>; runtime?: SpineRuntimeVersion }
   | { kind: 'official-scene'; viewport: SpineSceneEntry['viewport']; layers: SpineResolvedSceneLayer[] };
 
 /** 展开后的场景层（渲染层消费，不含折叠字段 dir） */

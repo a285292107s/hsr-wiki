@@ -34,5 +34,5 @@ export {
 } from './currency';
 export {
   expandSpineUrl, loadSpineOfficialManifest, loadSpineNanokaManifest, loadSpineManifests,
-  resolveSpine, resolveSpineSource, loadSpineSceneKeys, spineBaseUrl,
+  resolveSpine, resolveSpineSource, loadSpineSceneKeys, spineBaseUrl, spineRuntimeFor,
 } from './spine';

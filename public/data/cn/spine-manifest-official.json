@@ -1,5 +1,5 @@
 {
-  "version": 17,
+  "version": 18,
   "base": "https://act-webstatic.mihoyo.com/puzzle/hkrpg/",
   "entries": {
     "1321": {
@@ -169,6 +169,7 @@
       "kind": "official",
       "version": "4.4",
       "source": "home",
+      "runtime": "4.1",
       "dir": "pz_Devp46QZiu/resource/puzzle/2026/06/29/",
       "atlas": "e3d2af170a05678591440c7b0c7c6908_1074190156988094212.atlas",
       "json": "86a40e460a5f3e79869ca37ded0317b9_285814412607347001.json",
@@ -182,6 +183,7 @@
       "kind": "official",
       "version": "4.5",
       "source": "home",
+      "runtime": "4.1",
       "dir": "pz_0gxSMfsWEq/resource/puzzle/2026/08/07/",
       "atlas": "e6753c17fe069ea9e75bbecf1b2630db_3890040482287282028.atlas",
       "json": "5be3da7e073bbf20df772ed428833c5b_6840364053032454559.json",
@@ -195,6 +197,7 @@
       "kind": "official",
       "version": "4.5",
       "source": "home",
+      "runtime": "4.1",
       "dir": "pz_0gxSMfsWEq/resource/puzzle/2026/08/07/",
       "atlas": "42cae3175bd83610cbcaa8aa07cddb74_3778804739774348548.atlas",
       "json": "b5bb3184495ebe24eed61c71f649849b_2923896387097808007.json",

@@ -9,10 +9,12 @@
 
 import type { SpineRuntimeVersion } from './types';
 
-/** spine-player 主运行时版本（服务官方源 official JSON / official-scene 场景；nanoka skel 走 41 系列） */
+/** spine-player 主运行时版本（服务 4.2 格式导出的 official JSON / official-scene 场景）。
+ *  官方条目的运行时分派由 services/api/spine.ts 的 spineRuntimeFor 收口：4.0 格式导出的
+ *  official JSON 必须走 4.1 备用运行时（4.2 解析器丢弃旧 transform 继承字段 → 骨架扭转） */
 export const SPINE_RUNTIME_VERSION = '4.2.43';
 
-/** spine-player 备用运行时版本（4.1.x：仅 nanoka skel 源使用）。
+/** spine-player 备用运行时版本（4.1.x：nanoka skel 二进制与 4.0 格式导出的 official JSON 使用）。
  *  4.1→4.2 二进制格式为位域级重构（IK/Transform/Path 约束 flags 化），必须按源分派版本加载 */
 export const SPINE_RUNTIME_41_VERSION = '4.1.23';
 

@@ -9,6 +9,7 @@
  *     - official-scene 条目：逐层串行渲染成功 + 元数据 + 每层默认动画采样
  */
 import { fetchResourceStatus, fetchText } from '../../src/services/cache';
+import { spineRuntimeFor } from '../../src/services/api';
 import type { SpineResolved, SpineSource } from '../../src/services/types';
 import {
   BLEND_NAMES,
@@ -118,14 +119,14 @@ export function resetAuditEntry(entry: AuditEntry): void {
 
 /* ─── 双运行时分派与 player 配置（审核队列与详情预览共用，收口唯一实现） ─── */
 
-/** 双运行时分派：skel（nanoka 4.1 二进制）→ 4.1 备用运行时；official/official-scene → 4.2 主运行时 */
-export function runtimeVersionFor(kind: AuditKind): SpineRuntimeVersion {
-  return kind === 'skel' ? '4.1' : '4.2';
+/** 运行时版本分派（委托 services 层 spineRuntimeFor 收口；本函数仅为审核台侧的既有导入路径兼容） */
+export function runtimeVersionFor(resolved: SpineResolved): SpineRuntimeVersion {
+  return spineRuntimeFor(resolved);
 }
 
 /** 确保对应版本运行时的构造器已加载（全部 CDN 不可达时返回 null） */
-export async function ensureSpineCtor(kind: AuditKind): Promise<SpinePlayerCtor | null> {
-  const version = runtimeVersionFor(kind);
+export async function ensureSpineCtor(resolved: SpineResolved): Promise<SpinePlayerCtor | null> {
+  const version = runtimeVersionFor(resolved);
   if (!getSpineCtor(version)) {
     const ok = await loadSpineRuntime(version);
     if (!ok) return null;
@@ -279,9 +280,9 @@ export async function auditRender(entry: AuditEntry, opts: AuditRenderOptions): 
   const t0 = performance.now();
   try {
     const resolved = opts.resolved;
-    const Ctor = await ensureSpineCtor(resolved.kind);
+    const Ctor = await ensureSpineCtor(resolved);
     if (!Ctor) {
-      entry.errors.push(`spine-player ${runtimeVersionFor(resolved.kind)} 运行时加载失败（全部 CDN 不可达）`);
+      entry.errors.push(`spine-player ${runtimeVersionFor(resolved)} 运行时加载失败（全部 CDN 不可达）`);
       return;
     }
     if (resolved.kind === 'official-scene') {

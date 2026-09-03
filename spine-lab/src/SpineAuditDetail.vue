@@ -67,9 +67,9 @@ async function mountPreview(): Promise<void> {
     previewError.value = '条目不可解析';
     return;
   }
-  const Ctor = await ensureSpineCtor(resolved.kind);
+  const Ctor = await ensureSpineCtor(resolved);
   if (!Ctor) {
-    previewError.value = `spine-player ${runtimeVersionFor(resolved.kind)} 运行时加载失败`;
+    previewError.value = `spine-player ${runtimeVersionFor(resolved)} 运行时加载失败`;
     return;
   }
   const host = stageRef.value;

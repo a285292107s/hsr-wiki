@@ -4,7 +4,7 @@
  */
 import { CDN, SPINE_MANIFEST_VERSION } from '../../lib/constants';
 import { cachedFetch } from '../cache';
-import type { SpineOfficialManifest, SpineNanokaManifest, SpineResolved, SpineSource } from '../types';
+import type { SpineOfficialManifest, SpineNanokaManifest, SpineResolved, SpineRuntimeVersion, SpineSource } from '../types';
 import { LOCAL_DATA_BASE } from './base';
 
 /** 缓存键后缀随 manifest.version 联动（v{SPINE_MANIFEST_VERSION}）；
@@ -91,6 +91,7 @@ async function resolveOfficial(spineKey: string): Promise<SpineResolved | null> 
     atlas: expandSpineUrl(manifest.base, entry.dir, entry.atlas),
     json: expandSpineUrl(manifest.base, entry.dir, entry.json),
     textures: expandTextures(manifest.base, entry.dir, entry.textures),
+    ...(entry.runtime ? { runtime: entry.runtime } : {}),
   };
 }
 
@@ -134,6 +135,16 @@ export async function loadSpineSceneKeys(): Promise<string[]> {
   } catch {
     return [];
   }
+}
+
+/** 运行时版本分派（全站唯一实现，渲染层与审核台共用）：
+ *  - skel（nanoka 4.1 二进制，位域格式 4.2 不兼容）→ '4.1'
+ *  - official 条目按 manifest 的 runtime 标记（4.0 格式导出标 '4.1'，缺省 '4.2'）
+ *  - official-scene（官网场景，均为 4.2 格式导出）→ '4.2' */
+export function spineRuntimeFor(entry: SpineResolved): SpineRuntimeVersion {
+  if (entry.kind === 'skel') return '4.1';
+  if (entry.kind === 'official') return entry.runtime ?? '4.2';
+  return '4.2';
 }
 
 /** Spine 资源基地址（.skel / .atlas 后缀由调用方拼接） */

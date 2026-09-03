@@ -80,6 +80,8 @@ describe('spine-manifest 双清单一致性', () => {
       // 元数据：version 格式与 source 枚举
       if (v.version !== undefined) expect(v.version).toMatch(/^\d+\.\d+$/);
       if (v.source !== undefined) expect(['home', 'character', 'wayback']).toContain(v.source);
+      // runtime 标记（4.0 格式导出分派 4.1 运行时）：值必须为引擎支持的运行时版本
+      if (v.runtime !== undefined) expect(['4.1', '4.2']).toContain(v.runtime);
     }
   });
 

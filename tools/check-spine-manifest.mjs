@@ -6,7 +6,8 @@
  *   1. 两个清单（spine-manifest-official.json / spine-manifest-nanoka.json）JSON 可解析 + 顶层结构
  *   2. version 均与 src/lib/constants.ts 的 SPINE_MANIFEST_VERSION 一致（缓存键防漏 bump）
  *   3. entries 键排序（数字 ID 升序，场景键在后）且无 $ 元信息键；两清单无重复键
- *   4. official 清单：official 条目与场景层为折叠格式（dir + 相对文件名，无完整 URL、无 '/'）
+ *   4. official 清单：official 条目与场景层为折叠格式（dir + 相对文件名，无完整 URL、无 '/'）；
+ *      runtime 标记（如有）值合法（4.1/4.2）
  *   5. textures 键含 .png 扩展名（与 atlas page 行逐字一致的硬约束）
  *   6. nanoka 清单：全部为 skel 条目
  *   7. --fetch：展开官方清单全部 URL 后 HEAD 可达性（只取响应头）
@@ -106,6 +107,8 @@ for (const [key, v] of Object.entries(official.entries)) {
   const layers = v.kind === 'official-scene' ? v.layers : [{ dir: v.dir, atlas: v.atlas, json: v.json, textures: v.textures }];
   if (v.kind === 'official-scene') {
     if (typeof v.viewport?.x !== 'number' || typeof v.viewport?.width !== 'number') fail(`${key}: viewport 不完整`);
+  } else if (v.runtime !== undefined && !['4.1', '4.2'].includes(v.runtime)) {
+    fail(`${key}: runtime 应为 "4.1" 或 "4.2"（4.0 格式导出的骨架标 "4.1"），实际: ${v.runtime}`);
   }
   for (let i = 0; i < layers.length; i++) {
     const l = layers[i];

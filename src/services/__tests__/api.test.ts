@@ -197,6 +197,38 @@ describe('resolveSpine', () => {
     });
   });
 
+  it('official 条目 runtime 标记透传（4.0 格式导出分派 4.1 运行时）+ spineRuntimeFor 分派', async () => {
+    const api = await freshApi();
+    const manifestWithHint = {
+      ...officialManifest,
+      entries: {
+        ...officialManifest.entries,
+        '1512': {
+          kind: 'official',
+          runtime: '4.1',
+          dir: 'pz_0gxSMfsWEq/resource/puzzle/2026/08/07/',
+          atlas: 'a.atlas',
+          json: 'b.json',
+          textures: { 'x.png': 'x1.png' },
+        },
+      },
+    };
+    vi.stubGlobal('fetch', route({ 'spine-manifest-official.json': manifestWithHint }));
+    const resolved = await api.resolveSpine('1512');
+    expect(resolved).toEqual({
+      kind: 'official',
+      runtime: '4.1',
+      atlas: `${BASE}pz_0gxSMfsWEq/resource/puzzle/2026/08/07/a.atlas`,
+      json: `${BASE}pz_0gxSMfsWEq/resource/puzzle/2026/08/07/b.json`,
+      textures: { 'x.png': `${BASE}pz_0gxSMfsWEq/resource/puzzle/2026/08/07/x1.png` },
+    });
+    // 分派收口：无标记 official → 4.2；带标记 → 4.1；skel → 4.1；场景 → 4.2
+    expect(api.spineRuntimeFor(resolved!)).toBe('4.1');
+    expect(api.spineRuntimeFor((await api.resolveSpine('1508'))!)).toBe('4.2');
+    expect(api.spineRuntimeFor((await api.resolveSpine('1005'))!)).toBe('4.1');
+    expect(api.spineRuntimeFor((await api.resolveSpine('home-bg'))!)).toBe('4.2');
+  });
+
   it('官方源命中时不请求 nanoka 清单', async () => {
     const api = await freshApi();
     const fetchMock = route();

@@ -66,7 +66,8 @@ export function applyQualityFixes(p: SpinePlayerInstance): void {
  * - 失败（error 回调 / 构造异常 / 整体超时）：自动释放已创建实例并返回 null
  *   整体超时兜底：CDN 连接黑洞时 success/error 回调可能永不触发，20s 后按失败结算
  * @param key 注册表 key（如 `player:1001`），同 key 覆盖先释放旧实例
- * @param runtimeVersion 运行时版本分派：skel（nanoka 4.1 二进制）→ '4.1'；official JSON/场景 → '4.2'
+ * @param runtimeVersion 运行时版本分派（services/api/spine.ts spineRuntimeFor 收口）：
+ *   skel（nanoka 4.1 二进制）与 4.0 格式导出的 official JSON → '4.1'；其余 → '4.2'
  *   调用方须先 loadSpineRuntime(runtimeVersion) 就绪（4.1 无 fit 支持，内部自动剥离）
  */
 const PLAYER_SETTLE_TIMEOUT_MS = 20_000;

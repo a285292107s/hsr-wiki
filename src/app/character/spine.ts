@@ -9,7 +9,7 @@
  * - 多层场景（initSpineSceneViewer）：全量层挂载；断点切换由视图层 v-if + dispose 重建
  * 资源路径：skel 为 static.nanoka.cc/assets/hsr/spine/{charId}/{name}.skel|.atlas
  */
-import { resolveSpine } from '../../services/api';
+import { resolveSpine, spineRuntimeFor } from '../../services/api';
 import type { SpineResolved } from '../../services/types';
 import { buildOfficialConfig } from '../../spine/config';
 import { createSpinePlayer } from '../../spine/player';
@@ -98,8 +98,9 @@ async function renderPlayer(
       ? buildOfficialConfig(entry)
       : null;
   if (!urls) return false;
-  // 双运行时分派：skel（nanoka 4.1.23 二进制）→ 4.1 备用运行时；official（官网 JSON）→ 4.2 主运行时
-  const runtimeVersion: SpineRuntimeVersion = entry.kind === 'skel' ? '4.1' : '4.2';
+  // 运行时分派（spineRuntimeFor 收口）：skel（nanoka 4.1 二进制）→ 4.1 备用运行时；
+  // official 官网 JSON 按条目 runtime 标记（4.0 格式导出 → 4.1，缺省 4.2 格式 → 主运行时）
+  const runtimeVersion: SpineRuntimeVersion = spineRuntimeFor(entry);
   const ok = await loadSpineRuntime(runtimeVersion);
   if (!ok) return false;
   const player = await createSpinePlayer(
