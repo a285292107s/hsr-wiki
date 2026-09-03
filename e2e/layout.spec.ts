@@ -74,16 +74,17 @@ test.describe('布局验收：常规主题', () => {
   });
 });
 
+/** 收集侧栏导航锚点（排除 设置/交换/更多/调试台入口——仅统计 navItems 板块）；返回 DOM 序（= 规范序）下的可见性 */
+async function collectNavAnchors(page: import('@playwright/test').Page) {
+  return page.locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)').evaluateAll((els) =>
+    els.map((el) => ({
+      href: el.getAttribute('href'),
+      visible: (el as HTMLElement).offsetParent !== null,
+    })),
+  );
+}
+
 test.describe('布局验收：导航动态溢出折叠', () => {
-  /** 收集底部栏导航锚点（排除 设置/交换/更多按钮）；返回 DOM 序（= 规范序）下的可见性 */
-  async function collectNavAnchors(page: import('@playwright/test').Page) {
-    return page.locator('a.ui-sidebar-link:not(.ui-sidebar-settings)').evaluateAll((els) =>
-      els.map((el) => ({
-        href: el.getAttribute('href'),
-        visible: (el as HTMLElement).offsetParent !== null,
-      })),
-    );
-  }
 
   test('窄视口：可见项恒为规范序前缀，尾部折叠进"更多"抽屉', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
@@ -119,6 +120,55 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     expect(anchors.length).toBeGreaterThan(1);
     expect(anchors.every((a) => a.visible)).toBe(true);
     expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+});
+
+test.describe('布局验收：研究线调试台 dev 入口', () => {
+  /** e2e 全程 dev server（import.meta.env.DEV=true）：调试台入口应渲染。
+   *  手机隐藏由 CSS 承担；平板/桌面竖排侧栏显示于设置按钮上方。 */
+  test('平板/桌面（≥768px）：调试台入口可见且位于设置上方', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/');
+    const debugLink = page.locator('.ui-sidebar-debug');
+    await expect(debugLink).toBeVisible();
+    await expect(debugLink).toHaveAttribute('href', '/debug');
+    // 位置：设置按钮上方（DOM 序中紧随其后，且 top 更小）
+    const settingsLink = page.locator('.ui-sidebar-settings');
+    await expect(settingsLink).toBeVisible();
+    const debugY = await debugLink.evaluate((el) => el.getBoundingClientRect().top);
+    const settingsY = await settingsLink.evaluate((el) => el.getBoundingClientRect().top);
+    expect(debugY).toBeLessThan(settingsY);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('平板窄栏（≥768px 图标侧栏）：调试台入口可见', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 900 });
+    await page.goto('/');
+    await expect(page.locator('.ui-sidebar-debug')).toBeVisible();
+  });
+
+  test('手机（<768px）：调试台入口隐藏，导航折叠不受影响', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await expect(page.locator('.ui-sidebar-debug')).toBeHidden();
+    const anchors = await collectNavAnchors(page);
+    expect(anchors.length).toBeGreaterThan(1);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('/debug 可达：调试台页挂载、四 Tab 渲染（dev-only 路由）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/debug');
+    // 调试台 HUD + 四功能 Tab 静态结构（面板数据经 CDN 异步加载，不作断言）
+    await expect(page.locator('.nk-spine-debug__head h1')).toHaveText('Spine 调试台');
+    const tabs = page.locator('.nk-spine-debug__tab');
+    await expect(tabs).toHaveCount(4);
+    await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
     assertNoErrors();
   });
 });
@@ -172,7 +222,7 @@ test.describe('布局验收：货币战争主题', () => {
 
   test('/currency/role/1001：名册扉页 Hero、星级切换、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
-    // 绕开 dev public 索引缓存（rolldown-vite 8 运行期新增文件未入索引，本机 5173 旧实例）：
+    // 绕开 dev public 索引缓存（rolldown-vite 8 运行期新增文件未入索引，本机复用中的旧 dev 实例）：
     // prop_icons.json 直接注入磁盘内容，CI 新起实例无此问题，本拦截对两者均无害
     await page.route('**/data/cn/currency/prop_icons.json', (route) =>
       route.fulfill({ contentType: 'application/json', body: readFileSync('public/data/cn/currency/prop_icons.json', 'utf8') }),

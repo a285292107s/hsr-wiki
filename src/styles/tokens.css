@@ -535,6 +535,11 @@
 /* 设置入口：手机底部栏作为末槽位平铺（与其他按钮垂直居中对齐，无需额外 margin）；
    置底由平板断点内的 .ui-sidebar-settings 应用（见下） */
 .ui-sidebar-settings { margin-top: 0; }
+/* 研究线调试台入口（dev-only）：仅平板/桌面竖排侧栏显示（设置按钮上方）；
+   手机底部栏无空间、且不参与动态折叠划分，一律隐藏（SidebarNav 测量亦已显式排除） */
+@media (max-width: 767px) {
+  .ui-sidebar-debug { display: none; }
+}
 
 /* ─── 模式切换「重凝」动画：导航板块从模糊中凝聚，交换按钮与分隔线保持不动 ─── */
 .ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) {

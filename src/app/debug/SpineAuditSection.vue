@@ -10,8 +10,8 @@
  * 展开详情（含预览生命周期）在 spine-lab/src/SpineAuditDetail.vue。
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { loadSpineManifests, resolveSpine } from '../../src/services/api';
-import type { SpineResolved } from '../../src/services/types';
+import { loadSpineManifests, resolveSpine } from '../../services/api';
+import type { SpineResolved } from '../../services/types';
 import { toast } from './lib/toast';
 import SpineAuditDetail from './SpineAuditDetail.vue';
 import { copyText, downloadJson } from './report';

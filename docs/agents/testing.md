@@ -11,7 +11,7 @@
 
 ## 前端（Playwright e2e / 布局验收层）
 
-- 框架：`@playwright/test` + `@axe-core/playwright`，单 Chromium（`playwright.config.ts`，webServer 自动起 dev server，复用已有 5173 实例）
+- 框架：`@playwright/test` + `@axe-core/playwright`，单 Chromium（`playwright.config.ts`，webServer 自动起 dev server，复用已有 6188 实例）
 - 位置：`e2e/`（layout.spec.ts 布局验收 / accessibility.spec.ts WCAG 扫描 / visual.spec.ts 像素基线）
 - 运行：`pnpm test:e2e`（全量，本机）；CI 层 `pnpm test:e2e:ci`（仅 layout + accessibility——视觉基线回本机，判定依赖环境：CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异，2026-08-15 决策，见 ci.yml 注释）；基线刷新 `pnpm test:e2e:update`（必须显式 `=all` 全覆盖模式——Playwright 默认 `--update-snapshots` 为 changed，更新已有基线时静默 pass 不落盘）；基线截图提交 git（`e2e/snapshots/`）；CI（ci.yml e2e job）在 push main 与 PR 时自动运行（软门禁：失败仅通知不拦 push）；mobile-chromium project（Pixel 7）仅跑 layout（溢出/结构/console 守卫），不跑像素基线
 - e2e 层已固化「验证流程」各级别的可重复断言：`toHaveCSS`/`toHaveText`（T1b/T2）、溢出检测 helper（L3）、`toHaveScreenshot`（L4，像素基线）、axe-core（a11y）、console/pageerror 守卫（CDN 404 / JS 异常）

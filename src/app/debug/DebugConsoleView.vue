@@ -1,8 +1,10 @@
 <script setup lang="ts">
 /**
- * Spine Lab 外壳(研究线入口页):
+ * 研究线调试台（dev-only 路由 /debug，Spine Lab 迁入主站的入口页）：
  * 双 Tab 面板常驻(v-show)以保留各自运行状态——审核队列中途切 Tab 不丢结果;
- * KV 面板仅在激活 Tab 时加载场景。tab 状态经 query 参数同步(替代原 vue-router 用法)。
+ * KV 面板仅在激活 Tab 时加载场景。tab 状态经 URL query 同步（沿用研究线
+ * query-state 自包含实现，不依赖 vue-router——见 lib/query-state.ts 头注释）。
+ * 生产构建不注册本路由（router/index.ts DEV 分支），视图 chunk 随摇树移除。
  */
 import { onBeforeUnmount, ref } from 'vue';
 import SpineKvSection from './SpineKvSection.vue';
@@ -10,7 +12,6 @@ import SpineAuditSection from './SpineAuditSection.vue';
 import DeadLinksSection from './DeadLinksSection.vue';
 import SystemMapSection from './SystemMapSection.vue';
 import { getQueryParam, setQueryParam, subscribeQueryChange } from './lib/query-state';
-import { useToasts } from './lib/toast';
 
 type TabId = 'kv' | 'audit' | 'deadlinks' | 'map';
 
@@ -41,10 +42,6 @@ const unsubscribe = subscribeQueryChange(() => {
   if (t !== tab.value) tab.value = t;
 });
 onBeforeUnmount(unsubscribe);
-
-/* ─── 轻量 toast(替代主项目 useAppStore().toast) ─── */
-
-const toasts = useToasts();
 </script>
 
 <template>
@@ -81,26 +78,19 @@ const toasts = useToasts();
     <div v-show="tab === 'map'">
       <SystemMapSection :active="tab === 'map'" />
     </div>
-
-    <!-- 轻量 toast 宿主 -->
-    <div class="lab-toast-host" aria-live="polite">
-      <div
-        v-for="t in toasts"
-        :key="t.id"
-        class="lab-toast"
-        :class="`is-${t.type}`"
-      >{{ t.message }}</div>
-    </div>
   </div>
 </template>
 
 <style scoped>
-/* ─── 页面骨架：OLED 深色控制台风格（研究线无侧栏，全宽布局） ─── */
+/* ─── 页面骨架：OLED 深色控制台风格；主站文档流页面，≥768 内容区左避让侧栏 ─── */
 .nk-spine-debug {
   padding: 24px;
   font-family: var(--font-body);
   color: var(--text);
   overflow-x: auto;
+}
+@media (min-width: 768px) {
+  .nk-spine-debug { margin-left: var(--nk-content-offset); }
 }
 
 /* ─── 头部：HUD 引导行 + 标题 + 说明 + Tab ─── */
@@ -148,27 +138,6 @@ const toasts = useToasts();
 .nk-spine-debug__tab:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
 .nk-spine-debug__tab.is-active { color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); }
 .nk-spine-debug__tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-
-/* ─── toast 宿主：右下角堆叠 ─── */
-.lab-toast-host {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 100;
-}
-.lab-toast {
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 12px;
-  border: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
-}
-.lab-toast.is-success { color: #b7f2bd; border-color: rgba(127, 224, 138, 0.45); }
-.lab-toast.is-error { color: #ffb3b3; border-color: rgba(229, 72, 77, 0.5); }
 
 @media (max-width: 560px) {
   .nk-spine-debug { padding: 16px 12px; }

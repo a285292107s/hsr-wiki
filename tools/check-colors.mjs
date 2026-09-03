@@ -22,8 +22,10 @@ const SRC = fileURLToPath(new URL('../src', import.meta.url));
 const EXT = new Set(['.css', '.vue', '.ts']);
 const strict = process.argv.includes('--strict');
 
-/** 跳过整个文件（debug 诊断色 / 测试数据 / 主题预览数据；视图合并后含 Spine*Section 面板） */
-const SKIP_FILE = /(^|[\\/])(SpineKvSection|SpineAuditSection|SpineAuditDetail|SpineDebug|SpineAudit|__tests__|theme\.ts|cw-theme\.ts)/;
+/** 跳过整个文件（debug 诊断色 / 测试数据 / 主题预览数据）：
+ *  src/app/debug/ = 研究线调试台（Spine Lab 迁入，dev-only 路由，生产构建摇树不打包）——
+ *  诊断面板状态色板（ok/fail/warn）为研究工具语义，非产品 UI 令牌，目录级豁免（ADR 0012 §3） */
+const SKIP_FILE = /(^|[\\/])(__tests__|theme\.ts|cw-theme\.ts)|(^|[\\/])debug([\\/]|$)/;
 
 /* ═══ 豁免登记（ADR 0012 §3 三分类；变更须同步 ADR 引用） ═══
  * 1. 中性豁免：三分量差 ≤4 的灰阶/黑/白（含 SVG data URI 内联白——物理限制无法 var()）

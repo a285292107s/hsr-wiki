@@ -33,9 +33,9 @@ import {
   monsterIconUrl,
   pathIconUrl,
   skillIconUrl,
-} from '../../../src/lib/icons';
-import { SLOT_INDEX } from '../../../src/lib/constants';
-import { cdnUri } from '../../../src/services/cdn';
+} from '../../../lib/icons';
+import { SLOT_INDEX } from '../../../lib/constants';
+import { cdnUri } from '../../../services/cdn';
 
 /** mock 数据覆盖 collectUrls 全部来源分支（字段结构与 converter 输出对齐） */
 function mockData(): DataMap {

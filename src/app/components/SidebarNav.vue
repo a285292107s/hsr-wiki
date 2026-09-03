@@ -13,6 +13,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM, SWAP_ITEM, type NavItem } from './nav-items';
 import { prefetchByPath } from '../router/chunks';
+import { DEBUG_PATH } from '../debug';
 
 const route = useRoute();
 const router = useRouter();
@@ -82,11 +83,16 @@ function recomputeFold(): void {
       /* offsetWidth 不含外边距：分隔线有 margin: 0 3px（左右共 6px 水平占用），漏计会高估可用空间导致多塞一槽溢出 */
       return n.offsetWidth + parseFloat(cs.marginLeft) + parseFloat(cs.marginRight);
     };
+    /* 设置/交换入口与分隔线（恒显示，固定占用）；
+       "更多"按钮 display:none 由 .ui-sidebar--measure 恢复后可测。
+       导航槽位宽仅取 navItems 对应的锚点——.ui-sidebar-debug（dev-only 入口）不在
+       navItems 内，手机端 display:none 且不参与折叠划分，须显式排除保持 navW 与
+       navItems 对齐（否则多出第 n+1 项错位折叠计数） */
     const fixed = q('.ui-sidebar-swap') + q('.ui-sidebar-divider') + q('.ui-sidebar-settings');
     const moreW = q('.ui-sidebar-more');
-    const navW = Array.from(el.querySelectorAll<HTMLElement>('a.ui-sidebar-link:not(.ui-sidebar-settings)')).map(
-      (n) => n.offsetWidth,
-    );
+    const navW = Array.from(
+      el.querySelectorAll<HTMLElement>('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)'),
+    ).map((n) => n.offsetWidth);
     const total = navW.reduce((a, b) => a + b, 0);
     let k = navW.length;
     if (fixed + total > avail) {
@@ -153,6 +159,14 @@ const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><c
 const settingsPath = computed(() => (isCw.value ? '/currency/settings' : '/settings'));
 const SETTINGS_ITEM = {
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+} as const;
+
+/* ─── 研究线调试台入口（dev-only；≥768px 平板/桌面显示，手机隐藏） ─── */
+/** 本文件内常量：生产构建下 vite 模块内常量替换为 false，模板 v-if 分支 + 懒加载整块摇树移除 */
+const IS_DEV = import.meta.env.DEV;
+/** 调试台入口图标（扳手族，与导航图标同族） */
+const DEBUG_ITEM = {
+  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18v3h3l5.7-5.7a4.5 4.5 0 0 0 6-6L14 13l-3-3z"/><path d="M21 3l-6.3 6.3"/></svg>',
 } as const;
 </script>
 
@@ -230,6 +244,24 @@ const SETTINGS_ITEM = {
         <span class="ui-sidebar-link__en">{{ item.en }}</span>
       </span>
       <span class="ui-sidebar-link__label">{{ item.short || item.title }}</span>
+    </RouterLink>
+
+    <!-- 研究线调试台入口（dev-only：IS_DEV 同文件常量，生产编译为 false 整块摇树；
+         手机隐藏由 CSS .ui-sidebar-debug 处理，不参与折叠测量） -->
+    <RouterLink
+      v-if="IS_DEV"
+      :to="DEBUG_PATH"
+      title="调试台 · DEBUG"
+      class="ui-sidebar-link ui-sidebar-debug"
+      :class="{ 'ui-sidebar-link--active': route.path === DEBUG_PATH }"
+      @pointerenter="prefetchByPath(DEBUG_PATH)"
+    >
+      <span class="ui-sidebar-link__icon" v-html="DEBUG_ITEM.icon" />
+      <span class="ui-sidebar-link__text">
+        <span class="ui-sidebar-link__cn">调试台</span>
+        <span class="ui-sidebar-link__en">DEBUG</span>
+      </span>
+      <span class="ui-sidebar-link__label">调试台</span>
     </RouterLink>
 
     <!-- 设置入口：始终置底（常规/CW 模式均展示，跳转当前模式的设置页） -->

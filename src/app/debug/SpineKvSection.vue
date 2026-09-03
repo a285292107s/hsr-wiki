@@ -14,9 +14,9 @@
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { getQueryParam, setQueryParam, subscribeQueryChange } from './lib/query-state';
-import { loadSpineSceneKeys, resolveSpine } from '../../src/services/api';
-import { SPINE_RUNTIME_VERSION } from '../../src/spine/constants';
-import { getSpineCtor, loadSpineRuntime } from '../../src/spine/runtime';
+import { loadSpineSceneKeys, resolveSpine } from '../../services/api';
+import { SPINE_RUNTIME_VERSION } from '../../spine/constants';
+import { getSpineCtor, loadSpineRuntime } from '../../spine/runtime';
 import { nearBlackClass as blackClass } from './kv-acceptance';
 import { copyText, downloadCanvas, downloadJson } from './report';
 import { useKvAcceptance, type AcceptBridge } from './use-kv-acceptance';

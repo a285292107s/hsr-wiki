@@ -217,5 +217,19 @@ export function createNkRouter(): Router {
     document.title = t ? `${t} - ${SITE_NAME}` : SITE_NAME;
   });
 
+  /* 研究线调试台（Spine Lab 迁入主站，dev-only 注册）：
+     仅开发环境 addRoute——生产构建下 import.meta.env.DEV 被编译为 false，
+     本块连同调试台视图的懒加载 chunk 一并被摇树移除（与 zzz wiki devRoutes
+     同模式，实测：跨模块常量 + 数组展开分支无法消除 dynamic import，必须
+     本文件内 if(DEV) 注册）。prod 无 /debug 路由：深链直接落 404、零打包。 */
+  if (import.meta.env.DEV) {
+    router.addRoute({
+      path: '/debug',
+      name: 'debug-console',
+      component: () => import('../debug/DebugConsoleView.vue'),
+      meta: { depth: 0, title: '调试台' },
+    });
+  }
+
   return router;
 }

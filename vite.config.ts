@@ -1,12 +1,56 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { readdirSync, statSync } from 'node:fs';
+import { join, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/**
+ * data-file-index dev 中间件（原 spine-lab 独立子应用插件并入）：
+ * 研究线调试台「死链审核」面板在浏览器端拉取 /data/cn/data-file-index.json
+ * （public/data/cn 全量 JSON 相对路径清单）做 URL 收集——浏览器无目录遍历 API，
+ * dev 下由本中间件实时扫描磁盘（文件增删即时生效）。
+ * 生产构建不含 /debug（import.meta.env.DEV 摇树），本清单仅 dev 需要，无需 build 产物。
+ */
+const PUBLIC_DIR = fileURLToPath(new URL('./public', import.meta.url));
+const DATA_CN_DIR = join(PUBLIC_DIR, 'data', 'cn');
+const DATA_INDEX_PATH = '/data/cn/data-file-index.json';
+
+function walkJson(dir: string, out: string[] = []): string[] {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) walkJson(p, out);
+    else if (name.endsWith('.json')) out.push(p);
+  }
+  return out;
+}
+
+/** 全量 JSON 相对路径（正斜杠），相对 public/data/cn/ */
+function buildIndex(): string[] {
+  return walkJson(DATA_CN_DIR)
+    .map((f) => f.slice(DATA_CN_DIR.length + 1).split(sep).join('/'))
+    .sort();
+}
+
+function dataFileIndexDevPlugin(): Plugin {
+  return {
+    name: 'data-file-index',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url !== DATA_INDEX_PATH) return next();
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(JSON.stringify(buildIndex()));
+      });
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), dataFileIndexDevPlugin()],
   base: '/',
   server: {
-    // 固定端口 + 严格失败：被占用时明确报错，避免静默递增导致端口堆积
-    port: 5173,
+    // 固定端口 + 严格失败：被占用时明确报错，避免静默递增导致端口堆积。
+    // 6188：冷门端口（避开 Vite 默认 5173 等常用段，防与他项目 dev server 撞端口）
+    port: 6188,
     strictPort: true,
     watch: {
       // 坑位（2026-08-13 实证）：rolldown-vite 8（Vite 8.1.5）Windows 下原生文件事件偶发丢失，

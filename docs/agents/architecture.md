@@ -54,17 +54,16 @@ src/
                            skill-card）随各自路由 chunk 懒加载
 ```
 
-## 研究线（Spine Lab，独立产品线）
+## 研究线（Spine Lab 调试台，主站 dev-only 路由）
 
-`spine-lab/` 为独立 Vite 子应用（`pnpm dev:lab` → 5174），与主项目双向隔离：
+研究线调试台（Spine Lab）已从独立 5174 子应用**迁入主站**，为 **dev-only 路由 `/debug`**（2026-09-03 迁移，详见 docs/adr/0015 + docs/memory/2026-09-03.md）：
 
-- 入口自建（index.html / main.ts），无 vue-router / Pinia；tab 与 scene 状态经 URL query 同步
-- 共享只读依赖：spine 引擎层（`src/spine/`）+ services 数据层（`src/services/`）+ lib 常量；
-  严禁反向引用主项目 `src/app/` 任何模块
-- 审核/验收引擎（spine-audit / kv-acceptance / 像素分析）与全部调试面板迁移自原 `src/debug/`；
-  主项目构建、路由、测试均不含研究线代码
-- 独立命令：`pnpm dev:lab` / `pnpm build:lab`（含 vue-tsc 独立 tsconfig）/ `pnpm test:lab`（独立 vitest 配置）
-- 研究文档在 `spine-lab/docs/`，研究脚本在 `spine-lab/tools/`；不进 CI、不部署线上
+- 视图与引擎位于 `src/app/debug/`（KV 场景验收 / 清单审核 / 死链审核 / 系统地图 四 Tab + 共享渲染管线）
+- 路由与入口 **构建级排除**：`import.meta.env.DEV` 本文件内联（router/index.ts addRoute 分支 + SidebarNav 同文件常量），生产构建摇树——prod 无 `/debug` 路由、零研究线代码打包、深链落 404
+- 侧栏「调试台」入口：≥768px 平板/桌面竖排侧栏显示（设置按钮上方）；手机（<768px）隐藏（`.ui-sidebar-debug`，不参与底部栏动态折叠）
+- 共享只读依赖同迁移前：spine 引擎层（`src/spine/`）+ services 数据层 + lib 常量；调试台**禁止反向引用** `src/app/` 业务模块（SidebarNav / 各目录视图等）
+- 调试台测试并入主 `pnpm test`（`src/app/debug/**/__tests__`）；dev 中间件 `/data/cn/data-file-index.json` 在 vite.config（data-file-index 插件）——死链审核浏览器端用，生产不需要（/debug 不打包）
+- 研究文档在 `spine-lab/docs/`，研究脚本在 `spine-lab/tools/`（非应用资产，保留在仓库、不进 CI、不部署线上）
 
 ## 核心架构模式
 

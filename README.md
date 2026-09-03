@@ -21,13 +21,13 @@
 - **资源三级解析**：公共小图标随站本地（local-first）→ 官方 StarRailTextures 镜像（jsDelivr）→ nanoka 回退；URL 构造统一经 `services/cdn/` 纯函数解析
 - **构建守卫**：`pnpm build` 前置 `check-guards.mjs` 统一入口——色彩收口（`check-colors.mjs --strict`）、Spine 清单一致性、对比度校验，之后才进行 vue-tsc 类型检查与产物构建
 - **a11y 持续扫描**：Playwright + axe-core 全路由扫描，已知违规登记于 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败）
-- **研究线（Spine Lab）**：Spine 审核 / KV 验收独立为 `spine-lab/` 子应用（端口 5174），与主项目双向隔离，共享 `src/spine/` 引擎层
+- **研究线（Spine Lab）**：Spine 审核 / KV 验收调试台为主站 **dev-only 路由 `/debug`**（`src/app/debug/`），共享 `src/spine/` 引擎层；生产构建不含（详见「研究线」节）
 
 ## 🗺 页面地图
 
 - **常规模式**（7 板块）：角色 / 光锥 / 遗器 / 物品 / 成就 / 敌对物种 / 终局内容，枢纽页 `/`
 - **货币战争模式**（5 板块）：角色图鉴 / 装备图鉴 / 投资环境 / 投资策略 / 羁绊图鉴，枢纽页 `/currency`
-- **研究线（Spine Lab）**：`spine-lab/` 独立子应用（`pnpm dev:lab` → 5174），Spine 清单审核 / KV 场景验收台，不随主站部署（详见下文「研究线」）
+- **调试台（研究线 / dev-only）**：侧栏「调试台」入口（≥768px，设置上方）→ `/debug`，Spine 清单审核 / KV 场景验收台；生产构建不含该路由（详见下文「研究线」）
 
 ## 技术栈
 
@@ -50,7 +50,7 @@
 # 安装依赖
 pnpm install
 
-# 本地开发（http://localhost:5173/；strictPort 固定端口，被占用时报错而非静默换端口）
+# 本地开发（http://localhost:6188/；6188 冷门固定端口避免与他项目撞 5173，strictPort 被占用时报错而非静默换端口）
 pnpm dev
 
 # 类型检查 + 生产构建（含色彩 / Spine 清单 / 对比度三守卫）
@@ -75,10 +75,9 @@ pnpm test:e2e:update
 # 常规快速回归（只跑改动实际影响的用例，如首页；visual 全量约 90s 禁止）
 pnpm exec playwright test e2e/layout.spec.ts e2e/visual.spec.ts --grep 首页
 
-# 研究线（Spine Lab，独立端口 5174）
-pnpm dev:lab
-pnpm build:lab
-pnpm test:lab
+# 研究线（Spine Lab 调试台，主站 dev-only 路由 /debug）
+# dev server 内直达 http://localhost:6188/debug；侧栏「调试台」入口（≥768px）亦可进
+# 调试台单测已并入 pnpm test；研究文档/脚本在 spine-lab/docs 与 spine-lab/tools
 ```
 
 ## 目录结构
@@ -133,17 +132,15 @@ python -m pytest tests/ -v          # 转换工具单元测试
 
 ## 🔬 研究线（Spine Lab）
 
-Spine 机制研究独立为一条产品线（`spine-lab/`），与主项目双向隔离——主项目构建、路由、测试均不含研究线代码，研究线也不反向引用主项目 `src/app/` 任何模块：
+Spine 机制研究调试台已迁入主站，为主站 **dev-only 路由 `/debug`**（2026-09-03 迁移，见 `docs/adr/0015`）——开发时随主 dev server 提供，生产构建经 `import.meta.env.DEV` 摇树移除、不随主站部署：
 
-- **独立 Vite 子应用**（端口 5174）：入口 / 组件 / 独立 tsconfig / 测试 / 构建完全自洽，不随主站部署
-- **共享只读依赖**：`src/spine/` 引擎层 + `src/services/` 数据层 + `src/lib/` 常量（引擎修复两边同时受益）
-- **收录原 `/debug/*` 全部能力**：全量 manifest 三级审核（L0 资源 / L1 解析 / L2 渲染）+ KV 场景一键验收（黑块检测 + PASS/FAIL 报告）
-- **研究资产随迁**：文档在 `spine-lab/docs/`（官网动画播放机制分析 / 抓取流程 / 单层模式黑块成因与衬底方案），抓取与审计脚本在 `spine-lab/tools/`
+- **调试台视图**：`src/app/debug/`（KV 场景验收 / 清单审核 / 死链审核 / 系统地图 四 Tab），路由仅在 dev 注册（`router/index.ts` DEV 分支）；侧栏「调试台」入口 ≥768px 显示于设置按钮上方
+- **共享只读依赖**：`src/spine/` 引擎层 + `src/services/` 数据层 + `src/lib/` 常量（调试台不反向引用 `src/app/` 业务模块）
+- **调试台测试并入主套件**：`pnpm test`（`src/app/debug/**/__tests__`）
+- **研究资产**：文档在 `spine-lab/docs/`（官网动画播放机制分析 / 抓取流程 / 单层模式黑块成因与衬底方案），抓取与审计脚本在 `spine-lab/tools/`（非应用资产，不进 CI / 部署）
 
 ```bash
-pnpm dev:lab      # http://localhost:5174/
-pnpm build:lab    # 构建（含独立 vue-tsc 类型检查）
-pnpm test:lab     # 研究线单测（43 用例）
+pnpm dev        # 起 dev server 后访问 http://localhost:6188/debug（或点侧栏「调试台」）
 ```
 
 ## 测试

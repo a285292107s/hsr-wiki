@@ -34,9 +34,9 @@ import {
   monsterIconUrl,
   pathIconUrl,
   skillIconUrl,
-} from '../../src/lib/icons';
-import { SLOT_ICONS, SLOT_INDEX } from '../../src/lib/constants';
-import { cdnUri, resolveCdnUri } from '../../src/services/cdn';
+} from '../../lib/icons';
+import { SLOT_ICONS, SLOT_INDEX } from '../../lib/constants';
+import { cdnUri, resolveCdnUri } from '../../services/cdn';
 
 export type ProbeStatus = 'ok' | 'dead' | 'env';
 

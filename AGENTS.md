@@ -14,7 +14,8 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 # 安装依赖（需 Node 22+；本地与 CI 均使用 packageManager 指定的 pnpm 11）
 pnpm install
 
-# 本地开发 → http://localhost:5173/（strictPort：端口被占用时明确报错，先探测 5173 复用已有实例，无实例才新起）
+# 本地开发 → http://localhost:6188/（端口 6188：冷门固定端口，strictPort 被占用时明确报错；
+# 先探测 6188 复用已有实例，无实例才新起；禁止改回 Vite 默认 5173——与他项目撞端口）
 pnpm dev
 
 # dev 缓存自愈（rolldown-vite 8 Windows 坑位，排查见 docs/memory/2026-08-13.md）
@@ -47,10 +48,10 @@ pnpm test:e2e:update   # 刷新像素基线（确认改动是预期后；必须�
 pnpm exec playwright test e2e/visual.spec.ts --grep 首页   # 仅首页像素基线（改动只影响首页时用，避免全量 ~90s）
 pnpm exec playwright test e2e/layout.spec.ts e2e/visual.spec.ts --grep 首页   # 常规快速回归：布局 + 首页基线
 
-# 研究线（Spine Lab，独立子应用 → http://localhost:5174/）
-pnpm dev:lab        # 研究线 dev（独立端口 5174，与主项目 5173 互不抢占）
-pnpm build:lab      # 研究线构建（vue-tsc 独立 tsconfig + vite build）
-pnpm test:lab       # 研究线单测（独立 vitest 配置，不进主项目 pnpm test）
+# 研究线（Spine Lab 调试台，主站 dev-only 路由 /debug → dev server 内 http://localhost:6188/debug）
+# 生产构建不含 /debug（import.meta.env.DEV 摇树，见 router/index.ts DEV 分支注释）；
+# 侧栏「调试台」入口 ≥768px 显示。调试台单测已并入主 pnpm test（src/app/debug/**/__tests__）。
+# 研究文档在 spine-lab/docs/、研究脚本在 spine-lab/tools/（非应用资产，不进 CI / 部署）。
 
 # 数据转换工具（Python，需 vendor/TurnBasedGameData 本地目录，见 .gitignore 注释）
 cd tools/converter

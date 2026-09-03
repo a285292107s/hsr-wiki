@@ -28,7 +28,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:6188',
     viewport: { width: 1280, height: 720 },
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
@@ -47,9 +47,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // 复用已有 5173 实例（AGENTS.md：先探测端口复用），无实例才新起
+    // 复用已有 6188 实例（AGENTS.md：先探测端口复用），无实例才新起
     command: 'pnpm dev',
-    url: 'http://localhost:5173',
+    url: 'http://localhost:6188',
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
   },

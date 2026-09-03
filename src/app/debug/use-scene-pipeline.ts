@@ -8,12 +8,12 @@
  * 关键约束：rAF 循环与 WebGL 上下文必须经 dispose / disposeAll 释放（视图 onBeforeUnmount 调用）。
  */
 import { nextTick, ref } from 'vue';
-import type { SpineResolvedSceneLayer, SpineSceneEntry } from '../../src/services/types';
-import { buildOfficialConfig } from '../../src/spine/config';
-import { disposePlayer, pickAnimName } from '../../src/spine/player';
-import { getSpineLib } from '../../src/spine/runtime';
-import { createScenePipeline } from '../../src/spine/scene';
-import type { SpinePlayerCtor, SpinePlayerInstance, SpineScenePipelineController } from '../../src/spine/types';
+import type { SpineResolvedSceneLayer, SpineSceneEntry } from '../../services/types';
+import { buildOfficialConfig } from '../../spine/config';
+import { disposePlayer, pickAnimName } from '../../spine/player';
+import { getSpineLib } from '../../spine/runtime';
+import { createScenePipeline } from '../../spine/scene';
+import type { SpinePlayerCtor, SpinePlayerInstance, SpineScenePipelineController } from '../../spine/types';
 
 /** 单层画布衬底色（不透明深蓝，与舞台底纹同色系）：
  *  使混合 slot（screen/additive）的 dst 非透明 → 消除「对透明 dst 退化」产生的黑块。
