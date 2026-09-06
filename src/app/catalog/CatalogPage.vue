@@ -91,9 +91,12 @@ const filtered = computed<CatalogItem[]>(() => {
   });
 });
 
-/** 非虚拟网格：筛选/搜索变化 → 重新拼接卡片 HTML（--i 重新编号） */
+/** 非虚拟网格：筛选/搜索变化 → 重新拼接卡片 HTML（--i 重新编号）。
+ *  配置了 renderColumns（列分组渲染）时按分组列结构输出（如终局按玩法分 4 列）。 */
 const gridHtml = computed(() =>
-  filtered.value.map((item, i) => props.config.renderCard(item, i)).join(''),
+  props.config.renderColumns
+    ? props.config.renderColumns(filtered.value, (item, i) => props.config.renderCard(item, i))
+    : filtered.value.map((item, i) => props.config.renderCard(item, i)).join(''),
 );
 
 const { cells, gridMinHeight, fastJump, start, stop, refresh } = useVirtualGrid({

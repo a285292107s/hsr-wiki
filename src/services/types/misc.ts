@@ -282,8 +282,9 @@ export interface MazeListEntry {
   countdown?: number;
   /** 虚构叙事通关分数线（ChallengeStoryMazeExtra.ClearScore，如 30000） */
   clear_score?: number;
-  /** 赛季海报/标签图（BackGroundPath/TabPicPath 等源字段原样保留；tab = 赛季专属图标，
-   *  default = 玩法级默认图标兜底，前端 seasonArtUrl 依次解析；
+  /** 赛季海报/标签图（BackGroundPath/TabPicPath 等源字段原样保留；tab = 赛季专属图标、
+   *  default = 玩法级默认图标——二者已弃用于图标位：目录卡/详情 Hero 图标统一用玩法级
+   *  默认图标（ENDGAME_MODES.icon，前端 modeDefaultArtUrl），规避每季页签图漂移；
    *  tab_select/theme_banner/theme_icon/theme_bg/poster_tab/handbook_banner 为补转字段，
    *  经 endgameArtUrl 白名单消费） */
   arts?: {
@@ -328,6 +329,35 @@ export interface MazeListEntry {
   badges?: MazeBadgeInfo[];
 }
 export type MazeListDb = Record<string, MazeListEntry>;
+
+/**
+ * 终局目录卡轻量条目（maze*.catalog.json：converter endgame_catalog 派生自全量）。
+ * 仅含目录卡渲染与筛选所需字段，剥离 floor_details / floor_damage / sub_buffs /
+ * targets / clear_score / badges / 完整 buff 描述 / 敌方重型字段 / 星启与仲裁重字段 / arts。
+ */
+export interface MazeCatalogEntry {
+  id: string;
+  /** 赛季名（zh，卡片标题） */
+  zh: string;
+  live_begin?: string;
+  live_end?: string;
+  /** 常驻关卡标记 */
+  permanent?: boolean;
+  /** 测试期标记 */
+  test?: boolean;
+  /** 目录卡增益（仅 id+name，卡片胶囊用；剥离 desc/icon 等详情字段） */
+  buffs?: { id: number; name: string }[];
+  /** 目录卡敌方（轻量：id/name/icon/weak/resist/rank/camp） */
+  monsters?: MazeMonsterInfo[];
+  final_monsters?: MazeMonsterInfo[];
+  /** 星启：目录卡仅需存在性（★ 徽章）；剥离重型节点/技能/奖励 */
+  tierce?: Pick<MazeTierceInfo, 'id' | 'damage_types' | 'countdown'>;
+  /** 异相仲裁：目录卡仅需关卡组成 kind 计数（骑士×N · 王棋） */
+  levels?: { kind: 'knight' | 'king' }[];
+}
+
+/** 目录卡轻量赛季表（键 = 赛季 ID） */
+export type MazeCatalogDb = Record<string, MazeCatalogEntry>;
 
 /** zh/maze/version.json：版本 → 赛季 ID 列表（键按版本降序） */
 export type MazeVersionMap = Record<string, (number | string)[]>;

@@ -73,6 +73,12 @@ export interface CatalogPageConfig {
   /** 依据数据动态构建筛选组（优先于 filters） */
   buildFilters?: (data: CatalogItem[]) => CatalogFilter[];
   /**
+   * 目录列分组渲染（如终局按玩法分 4 列）。可选；缺省平铺网格。
+   * 仅在非虚拟网格下生效（>400 条的目录不带此钩子）。
+   * items 为已筛选条目（含搜索/筛选后的结果），renderCard 需按实际显示顺序传 index。
+   */
+  renderColumns?: (items: CatalogItem[], renderCard: (item: CatalogItem, i: number) => string) => string;
+  /**
    * 目录专属样式 loader（静态 import 闭包，随路由并行加载，样式先于渲染到达）。
    * CSS 依赖的单一事实源：路由层统一消费，无需为每个带样式目录手写路由工厂。
    * 缺省无（character/lightcone/relic/item/monster 等目录仅依赖全局 catalog.css）。

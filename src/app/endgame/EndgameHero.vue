@@ -7,7 +7,7 @@
 import { computed } from 'vue';
 import {
   ENDGAME_MODES, MAZE_STATUS_CLASS, mazeStatus, mazeDateRange,
-  seasonArtUrl, seasonBannerUrl, seasonHeroBgUrl,
+  modeDefaultArtUrl, seasonBannerUrl, seasonHeroBgUrl,
 } from '../catalog/pages/endgame';
 import { hideOnError } from './renders';
 import type { MazeListEntry } from '../../services/types';
@@ -21,8 +21,9 @@ const modeInfo = computed(() => ENDGAME_MODES.find((m) => m.key === props.modeKe
 const status = computed(() => mazeStatus(props.data));
 const statusClass = computed(() => MAZE_STATUS_CLASS[status.value] || 'unknown');
 const dateRange = computed(() => mazeDateRange(props.data));
-/** 赛季图标（seasonArtUrl：赛季专属优先，玩法级默认兜底；无图/路径不匹配时空串不渲染） */
-const seasonArt = computed(() => seasonArtUrl(props.data.arts));
+/** 玩法级默认图标（modeDefaultArtUrl：统一用玩法入口默认图，抛弃每季 arts.tab 页签图——
+ *  4 类玩法图标恒定不随新赛季漂移，规避 jsDelivr fork 冻结后的新赛季破图残留；空串不渲染） */
+const seasonArt = computed(() => modeDefaultArtUrl(props.modeKey));
 /** 赛季横幅（theme_banner：虚构/末日/忘却之庭宣传 BANNER，Hero 右侧装饰；无字段不渲染） */
 const seasonBanner = computed(() => seasonBannerUrl(props.data.arts));
 /** 赛季 Hero 背景（maze=场景背景 / story=海报背景 / peak=图鉴横幅；boss 无大图不渲染） */

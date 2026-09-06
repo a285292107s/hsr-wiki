@@ -25,6 +25,7 @@ export {
 } from './relics';
 export {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
+  loadLocalMazeCatalog, loadLocalStoryCatalog, loadLocalBossCatalog, loadLocalPeakCatalog,
 } from './endgame';
 export { loadLocalAchievements, loadLocalAchievementSeries } from './achievements';
 export {

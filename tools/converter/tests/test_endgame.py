@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pytest  # noqa: E402
 
 from converters import endgame as eg  # noqa: E402
+from converters import endgame_catalog as egc  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
@@ -892,3 +893,46 @@ class TestModeDefaultIcons:
         eg._attach_default_icon(entries, "SpriteOutput/UI/ChallengeBoss/Img1.png")
         assert entries["1"]["arts"]["default"] == "SpriteOutput/UI/ChallengeBoss/Img1.png"
         assert entries["2"]["arts"] == {"default": "SpriteOutput/UI/ChallengeBoss/Img1.png"}
+
+
+# ─── 目录卡轻量输出（endgame_catalog）────────────────────────────
+
+class TestCatalogLight:
+    """endgame_catalog：目录卡轻量条目派生（剥离重型字段）。"""
+
+    def test_season_catalog_strips_heavy_fields(self):
+        """轻量条目剥离 floor_details / 敌方重型字段 / 星启节点 / 完整 buff / 顶层 damage_types。"""
+        entry = {
+            "id": "2001", "zh": "游辞漫说",
+            "live_begin": "2023-11-20 04:00:00", "live_end": "2023-12-11 04:00:00",
+            "permanent": True, "test": True,
+            # 顶层 damage_types 为全层并集字段，目录卡不需要（前端已无推荐属性筛选）
+            "damage_types": ["Fire", "Ice", "Thunder", "Wind", "Quantum", "Physical", "Imaginary"],
+            "floor_details": [{"floor": 1, "stage1": {"damage": ["Fire", "Fire"]},
+                               "stage2": {"damage": ["Ice"]}}],
+            "buffs": [{"id": 1, "name": "增益", "desc": "长描述", "param_list": [1], "icon": "x"}],
+            "monsters": [{"id": "1", "name": "怪", "icon": "M", "weak": [], "resist": {},
+                          "rank": "Elite", "camp": "c", "intro": "介绍", "skills": []}],
+            "final_monsters": [{"id": "1", "name": "怪", "icon": "M", "weak": [], "resist": {},
+                                "rank": "Elite", "camp": "c", "intro": "介绍", "skills": []}],
+            "tierce": {"id": 9, "damage_types": ["Wind"], "countdown": 30,
+                       "targets": [], "monsters": [], "nodes": []},
+            "levels": [{"kind": "knight", "name": "x", "damage": [], "monsters": []},
+                        {"kind": "king", "name": "y"}],
+        }
+        out = egc._season_catalog(entry)
+        assert out["id"] == "2001" and out["zh"] == "游辞漫说"
+        assert out["permanent"] is True and out["test"] is True
+        # 顶层 damage_types（全层并集）不进目录卡
+        assert "damage_types" not in out
+        assert "floor_details" not in out
+        # buff 剥离 desc/param_list/icon；敌方剥离 intro/skills
+        assert out["buffs"] == [{"id": 1, "name": "增益"}]
+        assert out["monsters"][0] == {"id": "1", "name": "怪", "icon": "M", "weak": [],
+                                       "resist": {}, "rank": "Elite", "camp": "c"}
+        assert "intro" not in out["final_monsters"][0] and "skills" not in out["final_monsters"][0]
+        # 星启仅保留存在性字段（id/damage_types/countdown），剥离 nodes/monsters/targets
+        assert out["tierce"] == {"id": 9, "damage_types": ["Wind"], "countdown": 30}
+        assert "nodes" not in out["tierce"]
+        # 关卡组成仅 kind
+        assert out["levels"] == [{"kind": "knight"}, {"kind": "king"}]

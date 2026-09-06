@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from config import EXCEL_DIR, SOURCE_DIR, TEXTMAP_FILE
+from config import EXCEL_DIR, SOURCE_DIR, TEXTMAP_FILE, OUTPUT_DIR
 
 logger = logging.getLogger("converter")
 
@@ -66,6 +66,13 @@ MODULE_SOURCES: dict[str, list[str]] = {
                  "StageConfig.json", "MonsterConfig.json", "MonsterCamp.json",
                  "MonsterSkillConfig.json", "ChallengeBadgeConfig.json",
                  "ChallengeBossMazeExtra.json", "ChallengeGeneralConfig.json"],
+    # 目录卡轻量文件：由全量 maze*.json（OUTPUT_DIR）派生，全量文件变更即重跑
+    "endgame_catalog": [
+        str(OUTPUT_DIR / "maze.json"),
+        str(OUTPUT_DIR / "maze_extra.json"),
+        str(OUTPUT_DIR / "maze_boss.json"),
+        str(OUTPUT_DIR / "maze_peak.json"),
+    ],
     "currency": [
         "GridFightRoleBasicInfo.json", "AvatarConfig.json", "AvatarConfigLD.json",
         "GridFightRolePropertyConfig.json", "GridFightTraitBasicInfo.json", "GridFightRoleStar.json",

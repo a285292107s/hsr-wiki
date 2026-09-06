@@ -27,7 +27,7 @@ from utils import set_pretty, set_official_paths
 from incremental import load_state, save_state, should_skip, update_state
 from converters import paths, elements, items, properties
 from converters import characters, character_detail
-from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame
+from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame, endgame_catalog
 from converters import currency, season, currency_catalog  # noqa: E402 – 本地数据，无需网络
 from converters import achievements
 from converters import monster_detail
@@ -55,6 +55,7 @@ MODULES: dict[str, list] = {
     "monsters": [monsters.convert],
     "monster_detail": [monster_detail.convert],
     "endgame": [endgame.convert],
+    "endgame_catalog": [endgame_catalog.convert_catalog],
     "currency": [currency.convert],
     "currency_catalog": [currency_catalog.convert],
     "achievements": [achievements.convert],

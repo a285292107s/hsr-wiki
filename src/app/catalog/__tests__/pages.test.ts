@@ -9,7 +9,7 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
-import { tabIconUrl, seasonArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../pages/endgame';
+import { modeDefaultArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../pages/endgame';
 
 /* ─── node 内建类型 shim（app tsconfig 无 @types/node；测试运行时由 vitest/node 提供） ─── */
 declare const process: { cwd(): string };
@@ -95,24 +95,42 @@ describe('renderCard', () => {
     }
   });
 
-  it('endgame renderCard 常驻关卡输出徽章，赛季组不输出', () => {
+  it('endgame renderCard 输出紧凑赛季行（玩法图标+编号+名称+状态+日期），不含完整档案行徽章', () => {
     const egPage = CATALOG_PAGES.endgame;
-    const base = { name: '永屹之城遗秘', href: '/endgame/maze/100', mode: 'maze' };
-    const permHtml = egPage.renderCard({ ...base, permanent: true }, 0);
-    const seasonHtml = egPage.renderCard({ ...base, id: 'ID 1009' }, 0);
-    expect(permHtml).toContain('nk-eg-card__perm');
-    expect(permHtml).toContain('常驻');
-    expect(seasonHtml).not.toContain('nk-eg-card__perm');
+    const item = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: '进行中', dateRange: '2023.01.01 – 01.15' };
+    const html = egPage.renderCard(item, 0);
+    expect(html).toContain('nk-eg-lrow');
+    // 玩法级默认图标（modeDefaultArtUrl＝模式筛选项同款 Img1-4）
+    expect(html).toContain('nk-eg-lrow__icon');
+    expect(html).toContain('ChallengeBossQuestTabImg1.png');
+    expect(html).toContain('№ 101');
+    expect(html).toContain('琥珀恩赐');
+    expect(html).toContain('进行中');
+    expect(html).toContain('2023.01.01 – 01.15');
+    // 紧凑行去掉完整档案行的徽章/增益/敌方，仅图标+编号+名称+状态+日期
+    expect(html).not.toContain('nk-eg-card__perm');
+    expect(html).not.toContain('nk-eg-card__test');
+    expect(html).not.toContain('nk-eg-card__tier');
   });
 
-  it('endgame renderCard 测试期输出徽章，正式赛季不输出', () => {
+  it('endgame renderColumns 按玩法分列（每列一玩法，列头含徽记/名称/英文/数量，列内次序保持）', () => {
     const egPage = CATALOG_PAGES.endgame;
-    const base = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze' };
-    const testHtml = egPage.renderCard({ ...base, test: true }, 0);
-    const seasonHtml = egPage.renderCard({ ...base, id: 'ID 110' }, 0);
-    expect(testHtml).toContain('nk-eg-card__test');
-    expect(testHtml).toContain('测试期');
-    expect(seasonHtml).not.toContain('nk-eg-card__test');
+    const items = [
+      { name: '永屹之城遗秘', href: '/endgame/maze/100', mode: 'maze', id: 'ID 100', status: '进行中' },
+      { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: '测试期' },
+      { name: '游辞漫说', href: '/endgame/story/2001', mode: 'story', id: 'ID 2001' },
+    ];
+    const colHtml = egPage.renderColumns!(items, (it, i) => egPage.renderCard(it, i));
+    // 两列（maze/story），各带列头中文名 + 英文名 + 数量
+    expect(colHtml).toContain('nk-eg-col');
+    expect(colHtml).toContain('忘却之庭');
+    expect(colHtml).toContain('FORGOTTEN HALL');
+    expect(colHtml).toContain('2');
+    expect(colHtml).toContain('虚构叙事');
+    expect(colHtml).toContain('PURE FICTION');
+    expect(colHtml).toContain('1');
+    // 列内保持传入次序（最新在前由 fetchData 排序保证）
+    expect(colHtml.indexOf('琥珀恩赐')).toBeGreaterThan(colHtml.indexOf('永屹之城遗秘'));
   });
 });
 
@@ -205,73 +223,22 @@ describe('data-driven filter contract (real data)', () => {
       }
     }
   }, 30000);
-
-  it('endgame damageTypes options must exist in item top-level damageTypes', async () => {
-    // buildFilters 的选项集来自逐层 floorDamage（缺失回退顶层 damageTypes），
-    // 而 CatalogPage 过滤读取 item.damageTypes（顶层）——锁死该不对称：选项值必须命中顶层字段。
-    const { endgamePage } = await import('../pages/endgame');
-    const fetchData = endgamePage.fetchData!;
-    const buildFilters = endgamePage.buildFilters!;
-    const items = await fetchData({ version: '' });
-    const filters = buildFilters(items);
-    const dmg = filters.find((f) => f.key === 'damageTypes');
-    expect(dmg, 'endgame 应有 damageTypes 筛选').toBeDefined();
-    for (const opt of dmg!.options) {
-      if (!opt.val) continue;
-      const hits = items.filter((it) => (it as { damageTypes?: string[] }).damageTypes?.includes(opt.val));
-      expect(hits.length, `damageTypes 选项 "${opt.val}" 应存在于某条赛季顶层 damage_types`).toBeGreaterThan(0);
-    }
-  }, 30000);
-
-  it('endgame mode 筛选选项带玩法入口图 icon（Img1-4）', async () => {
-    const { endgamePage } = await import('../pages/endgame');
-    const items = await endgamePage.fetchData!({ version: '' });
-    const filters = endgamePage.buildFilters!(items);
-    const mode = filters.find((f) => f.key === 'mode')!;
-    const icons = new Map(mode.options.filter((o) => o.val).map((o) => [o.val, o.icon]));
-    expect(icons.get('maze')).toContain('ChallengeBossQuestTabImg1.png');
-    expect(icons.get('story')).toContain('ChallengeBossQuestTabImg2.png');
-    expect(icons.get('boss')).toContain('ChallengeBossQuestTabImg3.png');
-    expect(icons.get('peak')).toContain('ChallengeBossQuestTabImg4.png');
-  }, 30000);
 });
 
 describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
   const BASE = 'https://cdn.jsdelivr.net/gh/a285292107s/StarRailTextures@main/assets/asbres/spriteoutput';
 
-  it('tabIconUrl 解析白名单前缀（目录段小写、文件名保留）', () => {
-    expect(tabIconUrl({ tab: 'SpriteOutput/TabIcon/Abyss/ChallengeBossTabIcon_3001.png' }))
-      .toBe(`${BASE}/tabicon/abyss/ChallengeBossTabIcon_3001.png`);
-    expect(tabIconUrl({ tab: 'SpriteOutput/ChallengePeak/ChallengePeakIcon_4001.png' }))
-      .toBe(`${BASE}/challengepeak/ChallengePeakIcon_4001.png`);
-    expect(tabIconUrl({ tab: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png' }))
-      .toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg1.png`);
-    // 忘却之庭专属/通用开关图（常驻关卡 W01/W02、赛季 Loop）→ tab 白名单放行
-    expect(tabIconUrl({ tab: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png' }))
-      .toBe(`${BASE}/ui/abyss/process/typeicon/AbyssSwitchW01_Off.png`);
-    expect(tabIconUrl({ tab: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchLoop_Off.png' }))
-      .toBe(`${BASE}/ui/abyss/process/typeicon/AbyssSwitchLoop_Off.png`);
+  it('modeDefaultArtUrl 四模式统一用玩法级默认图标（Img1-4，抛弃每季页签图）', () => {
+    expect(modeDefaultArtUrl('maze')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg1.png`);
+    expect(modeDefaultArtUrl('story')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg2.png`);
+    expect(modeDefaultArtUrl('boss')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg3.png`);
+    // 异相仲裁有人工延展 Img4（ChallengeGeneralConfig 无 Peak 记录，ENDGAME_MODES 兜底）
+    expect(modeDefaultArtUrl('peak')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg4.png`);
   });
 
-  it('tabIconUrl 拒绝白名单外路径', () => {
-    expect(tabIconUrl({ tab: 'SpriteOutput/Quest/Other/xxx.png' })).toBe('');
-    expect(tabIconUrl(null)).toBe('');
-    expect(tabIconUrl({})).toBe('');
-  });
-
-  it('seasonArtUrl 优先赛季专属，缺失回退玩法级默认', () => {
-    const dflt = 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png';
-    // 有赛季专属 → 用专属（含忘却之庭开关图）
-    expect(seasonArtUrl({ tab: 'SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2001.png', default: dflt }))
-      .toBe(`${BASE}/tabicon/abyss/ChallengeThemeTabIcon_2001.png`);
-    expect(seasonArtUrl({ tab: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png', default: dflt }))
-      .toBe(`${BASE}/ui/abyss/process/typeicon/AbyssSwitchW01_Off.png`);
-    // 专属不匹配白名单 → 回退玩法级默认
-    expect(seasonArtUrl({ tab: 'SpriteOutput/Quest/Other/xxx.png', default: dflt }))
-      .toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg2.png`);
-    // 两者皆无 → 空串
-    expect(seasonArtUrl(null)).toBe('');
-    expect(seasonArtUrl({})).toBe('');
+  it('modeDefaultArtUrl 未知/空模式回退空串', () => {
+    expect(modeDefaultArtUrl('unknown')).toBe('');
+    expect(modeDefaultArtUrl('')).toBe('');
   });
 
   it('seasonBannerUrl 解析横幅（DailyMission/Banner），白名单外返回空串', () => {

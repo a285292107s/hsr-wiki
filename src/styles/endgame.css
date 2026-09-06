@@ -1,22 +1,95 @@
 /* ═══════════════════════════════════════════
-   终局内容 · 档案索引（Endgame Index）
+   终局内容 · 玩法列索引（Endgame Index）
    由路由 /endgame 并行加载（endgameCatalogView）。
-   - 四模式合并单页：模式身份为筛选选项，卡片以 v-html 模板字符串渲染
-   - V4 索引行：去盒框卡片墙 → 无盒框档案索引行——
-     发丝线分隔 / 编号轨 + 模式英文标签身份锚点 / 四模式领域色 --eg-* 回归
-     （与详情页 endgame-detail.css 同源：--eg-color 经 data-mode 映射）
-   - 设计语言：
-     № 编号身份锚点 / 无框展品图标（hairline 单线）/
-     规格表行式统计（细线分隔）/ 增益为文本点分隔（去药丸胶囊）/
-     状态为文字徽标（去发光点）/ 模式色仅存于身份锚点
-   - 反 AI 味：无装帧角标、无发光状态点、无药丸胶囊、无 glow、无盒框堆叠
+   - 目录默认 4 列按玩法分组（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）：
+     每列一个玩法，列内最新上活动在前（排期降序）；列头 = 中文名 + 英文名 + 数量（徽记已移除）
+   - 卡片为紧凑赛季行：№ 编号 + 名称 / 状态 + 日期（两行式，装下完整日期区间）——
+     去掉完整档案行的增益 / 敌方 / 图标位（详情页仍全量）
+   - 模式身份由列头与行内 --eg-color（data-mode 映射）承载，列头为第一身份锚点
+   - 设计语言：编辑式细线 / 无盒框 / 状态为色点 + 文字（不单靠颜色）/
+     模式色仅存于身份锚点 / 反 AI 味（无发光点、无药丸胶囊、无 box-shadow 堆叠）
    - 覆盖：目录卡片入场动画 / 返回恢复时的 no-reveal 抑制
-═══════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════
-   档案索引网格 + 索引行（编辑式卷宗）
-═══════════════════════════════════════════ */
+   玩法列网格（:has(.nk-eg-col)＝renderColumns 列分组生效时触发，
+   骨架屏无 .nk-eg-col 不命中，保持默认网格）
+   ── 桌面 4 列 / 平板 2 列 / 手机 1 列；每列 = 一个玩法，列内紧凑赛季行堆叠
+   ═══════════════════════════════════════════ */
 .nk-eg-grid { --nk-grid-min: 410px; --nk-grid-gap: 14px; }
+/* 列分组覆写：关闭 minmax 自动填充，改显式列数（媒体查询分档） */
+.nk-eg-grid:has(> .nk-eg-col) { --nk-grid-min: 0px; display: grid; grid-template-columns: 1fr; gap: 22px; }
+@media (min-width: 768px) { .nk-eg-grid:has(> .nk-eg-col) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .nk-eg-grid:has(> .nk-eg-col) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* 列：模式色身份映射（与详情页 endgame-detail.css 同源 --eg-*） */
+.nk-eg-col { min-width: 0; }
+.nk-eg-col[data-mode="maze"] { --eg-color: var(--eg-maze); }
+.nk-eg-col[data-mode="story"] { --eg-color: var(--eg-story); }
+.nk-eg-col[data-mode="boss"] { --eg-color: var(--eg-boss); }
+.nk-eg-col[data-mode="peak"] { --eg-color: var(--eg-peak); }
+/* 列头：徽记 + 中文名 + 英文名 + 数量（细线收束，编辑式） */
+.nk-eg-col__head { display: flex; align-items: baseline; gap: 9px; padding: 6px 8px 13px; border-bottom: 1px solid var(--line-2); }
+.nk-eg-col__name { font-size: 1.0rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright); white-space: nowrap; }
+.nk-eg-col__en { font-family: var(--font-hud); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, var(--eg-color) 66%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nk-eg-col__count { margin-left: auto; font-family: var(--font-hud); font-size: 0.6rem; letter-spacing: 0.06em; color: var(--text3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nk-eg-col__list { display: flex; flex-direction: column; }
+
+/* ── 紧凑赛季行（无盒框，行间发丝线分隔）── */
+.nk-eg-lrow {
+  --eg-color: var(--primary);
+  --st-color: var(--text3);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 8px;
+  border-top: 1px solid var(--line-1);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.25s;
+  animation: nk-card-in 0.4s var(--ease) backwards;
+  animation-delay: min(calc(var(--i, 0) * 22ms), 600ms);
+}
+.nk-eg-col__list > .nk-eg-lrow:first-child { border-top: none; }
+.nk-eg-lrow[data-mode="maze"] { --eg-color: var(--eg-maze); }
+.nk-eg-lrow[data-mode="story"] { --eg-color: var(--eg-story); }
+.nk-eg-lrow[data-mode="boss"] { --eg-color: var(--eg-boss); }
+.nk-eg-lrow[data-mode="peak"] { --eg-color: var(--eg-peak); }
+/* 玩法级默认图标（modeDefaultArtUrl＝模式筛选项同款 Img1-4）：制式方图，hairline 细线 + 圆角，
+   hover 模式色描边提亮；图片加载失败由全局 CDN 委托 markDown（隐藏自身，行内不空置） */
+.nk-eg-lrow__fig { flex-shrink: 0; align-self: center; }
+.nk-eg-lrow__icon { display: block; width: 30px; height: 30px; border-radius: 7px; object-fit: cover; background: color-mix(in srgb, var(--blk-900) 70%, transparent); border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent); transition: border-color 0.22s, transform 0.22s var(--ease); }
+.nk-eg-lrow__head { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.nk-eg-lrow__no { flex-shrink: 0; font-family: var(--font-hud); font-size: 0.54rem; font-weight: 700; letter-spacing: 0.1em; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); white-space: nowrap; font-variant-numeric: tabular-nums; transition: color 0.2s; }
+.nk-eg-lrow__main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.nk-eg-lrow__name { font-size: 0.86rem; font-weight: 600; line-height: 1.35; color: var(--text1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s; }
+.nk-eg-lrow__meta { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.nk-eg-lrow__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; color: var(--st-color); }
+.nk-eg-lrow__dot { width: 4px; height: 4px; border-radius: 50%; background: var(--st-color); flex-shrink: 0; }
+.nk-eg-lrow__date { flex-shrink: 0; min-width: 0; font-family: var(--font-hud); font-size: 0.54rem; letter-spacing: 0.04em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.nk-eg-lrow--live { --st-color: var(--season-live); }
+.nk-eg-lrow--ended { --st-color: var(--season-ended); }
+.nk-eg-lrow--upcoming { --st-color: var(--season-upcoming); }
+.nk-eg-lrow--ended { opacity: 0.82; }
+.nk-eg-lrow--ended:hover { opacity: 1; }
+@media (hover: hover) and (pointer: fine) {
+  .nk-eg-lrow:hover { background: color-mix(in srgb, var(--eg-color) 5%, transparent); }
+  .nk-eg-lrow:hover .nk-eg-lrow__no { color: var(--eg-color); }
+  .nk-eg-lrow:hover .nk-eg-lrow__icon { border-color: color-mix(in srgb, var(--eg-color) 58%, transparent); }
+  .nk-eg-lrow:hover .nk-eg-lrow__name { color: var(--text-bright); }
+}
+.nk-eg-lrow:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--eg-color) 50%, transparent); }
+@media (hover: none) {
+  .nk-eg-lrow:hover { background: transparent; }
+  .nk-eg-lrow:hover .nk-eg-lrow__no { color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); }
+  .nk-eg-lrow:hover .nk-eg-lrow__name { color: var(--text1); }
+}
+/* 返回目录页滚动恢复时抑制入场动画（no-reveal 由 CatalogPage 注入） */
+.nk-no-reveal .nk-eg-lrow { animation: none; }
+/* 减弱动效 */
+@media (prefers-reduced-motion: reduce) {
+  .nk-eg-lrow { animation: none; }
+}
+
 /* 网格 min 值委约：410px 保持 1024 断点（侧栏 88→148 使内容区窄 60px）2 列——
    数学临界 419px（floor(852+14)/(min+14) ≥ 2），取 410 留 9px 裕量防样式漂移；
    容器内滚动条 6px 使网格实宽 846，仍成立（floor(860)/(424)=2.02）；高于 419 则 1023 两列 / 1024 回退单列 */

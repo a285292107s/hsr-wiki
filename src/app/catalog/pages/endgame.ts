@@ -1,9 +1,6 @@
-/** 终局内容目录页配置（四模式合并单页：模式身份为筛选选项，卡片徽记同源） */
-import { ELEM, MON_RANK } from '../../../lib/constants';
-import { elementIconUrl } from '../../../lib/icons';
+/** 终局内容目录页配置（四模式合并，目录默认按玩法分 4 列：紧凑赛季行 + 列头） */
 import { OFFICIAL_ICON_BASE } from '../../../lib/constants';
 import { escHtml, stripAllTags } from '../../../lib/format';
-import { cdnUri, cdnImgFallbackAttr } from '../../../services/cdn';
 import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
 
 /**
@@ -32,8 +29,8 @@ const ART_PREFIXES = [
   'Quest/TabIcon',
   'Abyss',
 ] as const;
-/** 页签/入口图标白名单（tabIconUrl 专用）：在 ART_PREFIXES 基础上放行忘却之庭
- *  专属/通用开关图 UI/Abyss/Process/TypeIcon（常驻关卡 W01/W02、赛季 Loop）——
+/** 玩法级默认图标白名单（modeDefaultArtUrl / 模式筛选选项 icon 专用）：在 ART_PREFIXES 基础上
+ *  放行忘却之庭专属/通用开关图 UI/Abyss/Process/TypeIcon（常驻关卡 W01/W02、赛季 Loop）——
  *  装饰素材函数（banner/poster/hero bg）保持原白名单不放行开关图 */
 const TAB_ART_PREFIXES = [
   ...ART_PREFIXES,
@@ -45,11 +42,6 @@ function endgameArtUrl(path: string | undefined, prefixes: readonly string[]): s
   if (!path) return '';
   if (!prefixes.some((p) => path.startsWith(`SpriteOutput/${p}/`))) return '';
   return `${OFFICIAL_ICON_BASE}/${spriteOutputToRel(path)}`;
-}
-
-/** 赛季/玩法图标 URL（tab = 赛季专属图标；default 兜底由 seasonArtUrl 处理） */
-export function tabIconUrl(arts?: { tab?: string } | null): string {
-  return endgameArtUrl(arts?.tab, TAB_ART_PREFIXES);
 }
 
 /** 赛季横幅 URL（arts.theme_banner：虚构/末日/忘却之庭每赛季宣传 BANNER，Hero 装饰） */
@@ -77,17 +69,11 @@ export function seasonHeroBgUrl(arts?: { background?: string; theme_bg?: string;
     || endgameArtUrl(arts?.theme_bg, ART_PREFIXES)
     || endgameArtUrl(arts?.handbook_banner, ART_PREFIXES);
 }
-
-/** 赛季图标 URL：优先赛季专属图标（arts.tab），缺失时回退玩法级默认图标
- *  （arts.default，converter 自 ChallengeGeneralConfig 注入；空串由调用方降级徽记） */
-export function seasonArtUrl(arts?: { tab?: string; default?: string } | null): string {
-  return tabIconUrl(arts) || tabIconUrl({ tab: arts?.default || '' });
-}
 import {
-  loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
+  loadLocalMazeCatalog, loadLocalStoryCatalog, loadLocalBossCatalog, loadLocalPeakCatalog,
 } from '../../../services/api';
-import type { CatalogFilter, CatalogItem, CatalogPageConfig } from '../types';
-import type { MazeListDb, MazeListEntry, MazeBuffInfo, MazeMonsterInfo } from '../../../services/types';
+import type { CatalogItem, CatalogPageConfig } from '../types';
+import type { MazeCatalogDb, MazeListEntry } from '../../../services/types';
 
 /** 赛季状态：依据 begin/end 日期推导；无日期信息时返回"未知"（与原站一致） */
 export function mazeStatus(info: MazeListEntry): string {
@@ -160,6 +146,16 @@ export const ENDGAME_MODES: EndgameMode[] = [
   { key: 'peak', label: '异相仲裁', en: 'ANOMALY', emblem: EMBLEMS.peak, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg4.png' },
 ];
 
+/** 玩法级默认图标 URL（模式统一用玩法入口默认图：抛弃每季 `arts.tab` 页签图——
+ *  4 类玩法图标恒定，不随新赛季迭代而漂移，规避 jsDelivr fork 冻结后的新赛季破图残留）。
+ *  数据源 = ENDGAME_MODES[].icon（模式筛选选项 icon 同源，单一事实来源；peak 为人工延展 Img4）。
+ *  经 endgameArtUrl + TAB_ART_PREFIXES 白名单解析；空串由调用方降级徽记。
+ *  目录卡（renderCard 赛季图标）与详情页 Hero 铭牌共用。 */
+export function modeDefaultArtUrl(modeKey: string): string {
+  const mode = ENDGAME_MODES.find((m) => m.key === modeKey);
+  return mode?.icon ? endgameArtUrl(mode.icon, TAB_ART_PREFIXES) : '';
+}
+
 /** 赛季排序：排期开始时间降序（最新赛季在前）；无排期按 ID 降序垫底 */
 function bySeasonDesc(a: CatalogItem, b: CatalogItem): number {
   const ta = String(a.liveBegin || '');
@@ -184,11 +180,12 @@ export const endgamePage: CatalogPageConfig = {
   styles: [() => import('../../../../src/styles/endgame.css')],
   async fetchData() {
     const [maze, story, boss, peak] = await Promise.all([
-      loadLocalMazeList(), loadLocalStoryList(), loadLocalBossList(), loadLocalPeakList(),
+      loadLocalMazeCatalog(), loadLocalStoryCatalog(), loadLocalBossCatalog(), loadLocalPeakCatalog(),
     ]);
     const items: CatalogItem[] = [];
-    /** 赛季条目公共字段（模式身份 + 排期日期 + 弱点/层数统计 + 增益/敌方/逐层弱点） */
-    const collect = (mode: EndgameMode, db: MazeListDb): void => {
+    /** 赛季条目公共字段（模式身份 + 排期日期 + 主力弱点 + 增益/敌方/星启/关卡组成）。
+     *  数据源为 *.catalog.json 轻量条目：仅含目录卡字段，大幅削减目录首载体积（详情页仍走全量）。 */
+    const collect = (mode: EndgameMode, db: MazeCatalogDb): void => {
       for (const [key, info] of Object.entries(db)) {
         if (!info || !info.zh) continue;
         items.push({
@@ -205,19 +202,12 @@ export const endgamePage: CatalogPageConfig = {
           permanent: info.permanent,
           /** 测试期（beta/CBT 试炼翻版：琥珀恩赐/霜痕旧梦/永冬试炼轮换） */
           test: info.test,
-          damageTypes: info.damage_types,
-          floors: info.floors,
-          stageNum: info.stage_num,
-          countdown: info.countdown,
           buffs: info.buffs || [],
           monsters: info.monsters || [],
           /** 卡片敌方：最终层（最高层）代表阵容优先，回退全赛季（converter final_monsters） */
           finalMonsters: info.final_monsters || [],
-          floorDamage: info.floor_damage || [],
           tierce: info.tierce,
           levels: info.levels,
-          /** 赛季海报/页签图（tab = 赛季专属、default = 玩法级默认，经 seasonArtUrl 依次解析） */
-          arts: info.arts,
         });
       }
     };
@@ -228,153 +218,50 @@ export const endgamePage: CatalogPageConfig = {
     items.sort(bySeasonDesc);
     return items;
   },
-  buildFilters(data) {
-    const filters: CatalogFilter[] = [];
-    // 模式（单选）：四模式身份 + 全部
-    filters.push({
-      key: 'mode',
-      label: '模式',
-      options: [
-        { val: '', label: '全部' },
-        ...ENDGAME_MODES.map((m) => ({
-          val: m.key,
-          label: m.label,
-          icon: m.icon ? endgameArtUrl(m.icon, TAB_ART_PREFIXES) : undefined,
-        })),
-      ],
-    });
-    // 状态筛选：仅含日期数据的赛季才有状态值
-    const statusSet = [...new Set(data.map((d) => String(d.status || '')).filter(Boolean))];
-    if (statusSet.length) {
-      filters.push({
-        key: 'status',
-        label: '状态',
-        options: [
-          { val: '', label: '全部' },
-          ...statusSet.map((s) => ({ val: s, label: s })),
-        ],
-      });
-    }
-    // 推荐属性筛选：基于逐层数据（上下半场合并；缺失时回退全赛季去重属性）
-    const dmgSet = new Set<string>();
-    for (const d of data) {
-      const fd = (d.floorDamage as { stage1?: string[]; stage2?: string[] }[] | undefined) || [];
-      if (fd.length) {
-        for (const f of fd) {
-          for (const t of [...(f.stage1 || []), ...(f.stage2 || [])]) dmgSet.add(t);
-        }
-      } else {
-        for (const t of (d.damageTypes as string[] | undefined) || []) dmgSet.add(t);
-      }
-    }
-    if (dmgSet.size) {
-      filters.push({
-        key: 'damageTypes',
-        label: '推荐属性',
-        options: [
-          { val: '', label: '全部' },
-          /* 图标与详情页推荐属性行同源（lib/icons elementIconUrl，双源 CDN）——
-             角色页「属性」筛选同款 icon 交互；不另建映射，防双事实源漂移 */
-          ...[...dmgSet].map((d) => ({ val: d, label: ELEM[d] || d, icon: elementIconUrl(d) })),
-        ],
-      });
-    }
-    return filters;
-  },
+  /* 终局目录：4 列按玩法分组 + 紧凑赛季行（图标 + 编号/名称/状态/日期）。
+   * 每行图标 = 玩法级默认图标（modeDefaultArtUrl＝模式筛选项同款 ChallengeBossQuestTabImg1-4，
+   * 唯一玩法级图标源 ChallengeGeneralConfig.TabImgPath），列内同玩法共用一枚。
+   * 渲染为轻量 img（v-html 无法绑 @error，失败由全局 CDN 委托 data-cdn-down 隐藏）。 */
   renderCard(item, i) {
     const st = String(item.status || '未知');
     const stCls = MAZE_STATUS_CLASS[st] || 'unknown';
-    const mode = ENDGAME_MODES.find((m) => m.key === item.mode);
-    const date = item.dateRange ? `<span class="nk-eg-card__date">${escHtml(String(item.dateRange))}</span>` : '';
-    // 档案编号（编号=身份，编辑式锚点）：catalog id 为 "ID 3020"，取纯数字段展示 № 编号；
-    // 与模式英文标签同置身份行（V4 索引行：模式色承载身份锚点）
-    const no = String(item.id).replace(/^ID\s*/i, '');
-    const noHtml = no && mode ? `<span class="nk-eg-card__no">№ ${escHtml(no)}</span>` : '';
-    // 身份行：编号 + 模式英文标签（FORGOTTEN HALL 等，模式色小字；mode.en 为常量无需转义）
-    const idlineHtml = mode
-      ? `<span class="nk-eg-card__idline">${noHtml}<span class="nk-eg-card__moden">${mode.en}</span></span>`
-      : (noHtml ? `<span class="nk-eg-card__idline">${noHtml}</span>` : '');
+    const no = String(item.id || '').replace(/^ID\s*/i, '');
+    const noHtml = no ? `<span class="nk-eg-lrow__no">№ ${escHtml(no)}</span>` : '';
+    const date = item.dateRange ? `<span class="nk-eg-lrow__date">${escHtml(String(item.dateRange))}</span>` : '';
     // 状态徽标：色点 + 文字（不单靠颜色传达，无障碍硬标准）——色点经 --st-color 映射
-    const badge = st !== '未知' ? `<span class="nk-eg-card__status"><span class="nk-eg-card__dot"></span>${escHtml(st)}</span>` : '';
-    // 铭牌徽标：星启模式赛季 / 异相仲裁关卡组成
-    // （FINAL 最终层标识已移除：层数统计为模式内恒值冗余——maze 10/12 层、story 4 层、boss 4 层，可由模式推断）
-    // 赛季图标（seasonArtUrl：赛季专属优先，玩法级默认兜底；有可用图标时经 --has-art
-    // 隐藏默认 SVG 徽记——保留占位维持布局，不透明底板遮挡加载间隙；加载失败经
-    // onerror 隐藏自身并移除修饰类，露出徽记兜底）
-    const artSrc = seasonArtUrl(item.arts as { tab?: string; default?: string } | undefined);
-    const hasArt = Boolean(artSrc);
-    // 加载失败降级由目录引擎事件委托统一处理（error 不冒泡，引擎层以 capture 捕获；
-    // 失败时隐藏自身并移除 --has-art，露出 SVG 徽记占位——避免 v-html 内联事件脚本的 CSP 隐患）
-    const artHtml = hasArt ? `<img class="nk-eg-card__art" src="${escHtml(artSrc)}" alt="">` : '';
-
-    const tierce = item.tierce as { damage_types?: string[]; countdown?: number } | undefined;
-    const levels = item.levels as { kind?: string }[] | undefined;
-    let tierHtml = '';
-    if (tierce) {
-      tierHtml = '<span class="nk-eg-card__tier">✦ 星启</span>';
-    } else if (levels?.length) {
-      // 异相仲裁：每期 3 骑士试炼 + 1 王棋最终关（官方术语）
-      const knights = levels.filter((l) => l.kind === 'knight').length;
-      const hasKing = levels.some((l) => l.kind === 'king');
-      tierHtml = `<span class="nk-eg-card__tier">✦ 骑士×${knights}${hasKing ? ' · 王棋' : ''}</span>`;
-    }
-    // 常驻关卡标识（无赛季轮回的长期关卡，与模式色 tier 徽章区分——金色语义胶囊）
-    const permHtml = item.permanent ? '<span class="nk-eg-card__perm">常驻</span>' : '';
-    // 测试期标识（beta/CBT 试炼翻版，中性灰低调区分）
-    const testHtml = item.test ? '<span class="nk-eg-card__test">测试期</span>' : '';
-
-    // 赛季增益（文本胶囊，最多 3 个）
-    const buffs = Array.isArray(item.buffs)
-      ? (item.buffs as MazeBuffInfo[]).slice(0, 3) : [];
-    const buffHtml = buffs.length
-      ? `<div class="nk-eg-card__row"><span class="nk-eg-card__label">增益</span>`
-        + `<span class="nk-eg-card__buffs">${buffs.map((b) => `<span class="nk-eg-card__buff">${escHtml(b.name)}</span>`).join('')}</span></div>`
-      : '';
-
-    // 敌方：MonsterMiddleIcon CDN 头像（最多 4 个 + 溢出计数；title 附分类与弱点）。
-    // 优先展示最终层代表阵容（Boss + 精英护卫），数据缺失时回退全赛季收集
-    const rawMons = Array.isArray(item.finalMonsters) && (item.finalMonsters as MazeMonsterInfo[]).length
-      ? (item.finalMonsters as MazeMonsterInfo[])
-      : Array.isArray(item.monsters) ? (item.monsters as MazeMonsterInfo[]) : [];
-    const mons = rawMons;
-    const monHtml = mons.length
-      ? `<div class="nk-eg-card__row"><span class="nk-eg-card__label">敌方</span>`
-        + `<span class="nk-eg-card__monsters">${mons.slice(0, 4).map((m) => {
-            const src = m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : '';
-            if (!src) return '';
-            const rank = m.rank ? (MON_RANK[m.rank] || '') : '';
-            const weak = m.weak?.length ? `弱点：${m.weak.map((d) => ELEM[d] || d).join(' / ')}` : '';
-            const resist = m.resist && Object.keys(m.resist).length
-              ? `抗性：${Object.entries(m.resist).map(([d, v]) => `${ELEM[d] || d} ${Math.round(v * 100)}%`).join(' / ')}` : '';
-            const title = [m.name, rank, m.camp, weak, resist].filter(Boolean).join(' · ');
-            return `<img class="nk-eg-card__mon" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(m.name)}" title="${escHtml(title)}" loading="lazy">`;
-          }).join('')}${mons.length > 4 ? `<span class="nk-eg-card__more">+${mons.length - 4}</span>` : ''}</span></div>`
-      : '';
-
-    // 数据行存在时，会话与档案体之间插入 1px 编辑式分隔线（模板驱动，比 :first-child 选择器稳健）
-    const rowsHtml = buffHtml + monHtml;
-    const dividerHtml = rowsHtml ? '<div class="nk-eg-card__divider"></div>' : '';
-
-    return `<a class="nk-eg-card nk-eg-card--${stCls}${hasArt ? ' nk-eg-card--has-art' : ''}" href="${escHtml(item.href)}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(item.name)} ${escHtml(item.id)}" data-status="${escHtml(st)}" style="--i:${i}">
-      <span class="nk-eg-card__seal">
-        <span class="nk-eg-card__emblem">${mode?.emblem || ''}</span>
-        ${artHtml}
-      </span>
-      <span class="nk-eg-card__body">
-        ${idlineHtml}
-        <span class="nk-eg-card__head">
-          <span class="nk-eg-card__name">${escHtml(item.name) || '未命名赛季'}</span>
-          ${permHtml}
-          ${testHtml}
-          ${tierHtml}
-        </span>
-        <span class="nk-eg-card__meta">
-          ${badge}
-          ${date}
-        </span>
-        ${dividerHtml}
-        ${rowsHtml}
+    const badge = st !== '未知'
+      ? `<span class="nk-eg-lrow__status"><span class="nk-eg-lrow__dot"></span>${escHtml(st)}</span>` : '';
+    const name = String(item.name || '未命名赛季');
+    const idStr = String(item.id || '');
+    const meta = (badge || date) ? `<span class="nk-eg-lrow__meta">${badge}${date}</span>` : '';
+    const iconSrc = modeDefaultArtUrl(String(item.mode || ''));
+    const iconHtml = iconSrc
+      ? `<span class="nk-eg-lrow__fig"><img class="nk-eg-lrow__icon" src="${escHtml(iconSrc)}" alt="" loading="lazy"></span>` : '';
+    return `<a class="nk-eg-lrow nk-eg-lrow--${stCls}" href="${escHtml(String(item.href || ''))}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(name)} ${escHtml(idStr)}" data-status="${escHtml(st)}" style="--i:${i}">
+      ${iconHtml}
+      <span class="nk-eg-lrow__main">
+        <span class="nk-eg-lrow__head">${noHtml}<span class="nk-eg-lrow__name">${escHtml(name)}</span></span>
+        ${meta}
       </span>
     </a>`;
+  },
+  /* 4 列按玩法分组：每列一个玩法（ENDGAME_MODES 顺序），列内最新上活动在前（fetchData 已按排期降序）。
+   * 列头：中文名 + 英文名 + 赛季数量（玩法徽记已移除，身份由行内图标 + 模式色承载）；
+   * 列体为紧凑赛季行列表。始终生效（搜索后仍按玩法分组）。 */
+  renderColumns(items, renderCard) {
+    let html = '';
+    for (const m of ENDGAME_MODES) {
+      const col = items.filter((it) => it.mode === m.key);
+      if (!col.length) continue;
+      html += `<section class="nk-eg-col" data-mode="${m.key}">
+        <h2 class="nk-eg-col__head">
+          <span class="nk-eg-col__name">${escHtml(m.label)}</span>
+          <span class="nk-eg-col__en">${escHtml(m.en)}</span>
+          <span class="nk-eg-col__count">${col.length}</span>
+        </h2>
+        <div class="nk-eg-col__list">${col.map((it, ci) => renderCard(it, ci)).join('')}</div>
+      </section>`;
+    }
+    return html;
   },
 };
