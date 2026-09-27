@@ -3,7 +3,7 @@
  * 死链审核台（研究线 Tab 之一）：
  * 浏览器端数据驱动死链审计（替代 tools/dead-links.test.ts 的 Node 版本机运行）——
  * 复用同一批 URL 构造函数收集全量渲染 URL，HEAD 探测可达性，明确 404 才判 DEAD。
- * 引擎与限流纪律（并发 ≤3、404 本地缓存、内容签名零网络）见 spine-lab/src/dead-links.ts。
+ * 引擎与限流纪律（并发 ≤3、404 本地缓存、内容签名零网络）见 src/app/debug/dead-links.ts。
  * 本文件仅承担队列编排与面板框架，不承载审核逻辑。
  */
 import { computed, onBeforeUnmount, reactive, ref } from 'vue';

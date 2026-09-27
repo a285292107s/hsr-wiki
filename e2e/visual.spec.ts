@@ -38,7 +38,7 @@ async function waitImages(page: Page) {
     .catch(async () => {
       // 超时不失败（环境性），但显式留下记录——基线可能包含未加载图片，人工可见。
       // 诊断信息：列出视口内未就绪图片，一眼区分 jsDelivr burst 限流（与 curl 独立连接对比，
-      // 处置见 docs/agents/architecture.md「已知环境坑位」）与真死链（归 tools/dead-links 审计）。
+      // 处置见 docs/agents/architecture.md「已知环境坑位」）与真死链（归 tools/dead-links.test.ts 与调试台「死链审核」面板审计）。
       const pending = await page.evaluate(() => {
         const inView = (el: HTMLImageElement): boolean => {
           const r = el.getBoundingClientRect();

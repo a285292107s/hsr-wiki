@@ -217,7 +217,7 @@ export const EDGES: MapEdge[] = [
   { id: 'vercel-deploy', from: 'vercel', to: 'entry', kind: 'build', label: '构建产物部署',
     files: ['vercel.json', 'package.json'] },
   { id: 'lab-share', from: 'lab', to: 'spine', kind: 'build', label: '共享只读依赖',
-    files: ['spine-lab/vite.config.ts', 'spine-lab/src/main.ts'] },
+    files: ['vite.config.ts', 'src/main.ts'] },
   { id: 'spine-actweb', from: 'spine', to: 'actweb', kind: 'cdn', label: '官网场景源 (ADR 0009)',
     files: ['src/spine/config.ts', 'src/spine/scene.ts'] },
   { id: 'router-cw', from: 'router', to: 'cw', kind: 'control', label: '/currency/* 独立路由树',

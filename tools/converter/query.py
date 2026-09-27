@@ -133,7 +133,7 @@ def cmd_schema(data: JSONValue, filename: str) -> None:
 
     历史教训：旧实现只基于 data[0] 推断字段，可选字段（如
     AvatarSkillConfig 的 SPBase/HideInUI）会被漏报，导致审计误判
-    （见 docs/字段审计-AvatarSkillConfig.md F1）。现改为全量扫描：
+    （见 docs/audit/字段审计-AvatarSkillConfig.md F1）。现改为全量扫描：
     统计每个字段的出现率，并按出现率降序输出。
     """
     if isinstance(data, list):

@@ -17,7 +17,7 @@ import type { SpinePlayerCtor, SpinePlayerInstance, SpineScenePipelineController
 
 /** 单层画布衬底色（不透明深蓝，与舞台底纹同色系）：
  *  使混合 slot（screen/additive）的 dst 非透明 → 消除「对透明 dst 退化」产生的黑块。
- *  黑块成因已定论（见 docs/单层模式透明画布黑块成因与衬底方案.md），衬底固定启用；
+ *  黑块成因已定论（见 docs/spine/单层模式透明画布黑块成因与衬底方案.md），衬底固定启用；
  *  逐层「透明对照」不再保留——验收与人工确认以合并渲染（生产基线）为准。 */
 export const LAYER_BG = '0d1326';
 

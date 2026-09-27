@@ -3,6 +3,7 @@
 > 来源：`Dimbreath/turnbasedgamedata`（TextMapCHS.json + ExcelOutput）
 > 整理日期：2026-08-07（全量扫描修订）
 > 统计口径：全量扫描 `TextMapCHS.json`（449,615 条文本）+ 引用字段溯源（ExcelOutput 全表），非抽样。
+> 口径提示：出现次数是**扫描时点**的计数，vendor 更新后会变；当前 TextMap 条目总量以 `tools/converter/DATA_CATALOG.md` 的 TextMap 节为准，标签结论（有/无、格式、处理方式）不受影响。
 > 状态：**已确认标签**均附全量出现次数；**确认未出现**标签基于全量扫描结论。
 > 新增标签 / 修订本文档的流程见**第九节**。
 
@@ -189,7 +190,8 @@ BCI<unbreak>-34</unbreak>型灰质      <!-- 编号与中文文本不拆开 -->
 - **⚠️ 解析机制（易误解）**：`id` **不是** TextMap Hash，而是 `TextJoinConfig.json → TextJoinID` 配置键。解析链：
   `{TEXTJOIN#id}` → `TextJoinConfig.DefaultItem` → `TextJoinItem.json`（`TextJoinItemID`）→ `TextJoinText`（**该字段才是 TextMap Hash**）→ TextMap 文本
 - `TextJoinItemList` 含性别/命名等多形态变体，默认取 `DefaultItem`
-- **本仓库处理**：`achievements.py → _expand_textjoin()` 构建期展开（输出数据已无残留，验证 0 处）；无对应配置时保留原占位符
+- **本仓库处理**：`converters/achievements.py → _expand_textjoin()` 构建期展开（**achievements 输出已无残留**）；无对应配置时保留原占位符
+- **残留范围（实测）**：`public/data/cn/items.json` 仍有 42 处 `{TEXTJOIN#NN}`——items 模块未接入展开（TextJoin 名称会作为物品名/描述出现，前端 `gameTagsToHtml()` 剥离为纯文本保内容）；characters / currency 输出为 0 处
 
 ### `{SPACE}` — 空格
 **状态**：⚠️ 中文 TextMap 未出现（0 次）；其他语言 TextMap（DE/EN 等）共 2,920 行使用
@@ -292,12 +294,12 @@ BCI<unbreak>-34</unbreak>型灰质      <!-- 编号与中文文本不拆开 -->
 ExcelOutput + TextMap + Params[] → converter（Python）→ public/data/cn/*.json → 前端渲染（TypeScript）→ HTML
 ```
 
-### 构建期（converter，`tools/converter/`）
+### 构建期（converter，`tools/converter/`；模块在 `tools/converter/converters/`）
 
-1. `{TEXTJOIN#id}` 展开——`achievements.py → _expand_textjoin()`（TextJoinConfig 链，仅 achievements 模块）
-2. `<gridfightinfo>` 实体名替换——`currency_catalog.py → _resolve_gridfightinfo()`（**先于 clean_text**，仅 Augment）
-3. `clean_text()`（`textmap.py`）：`{NICKNAME}`→开拓者、`{SPACE}`→空格、`{RUBY_*}`→移除、`<property>`→友好名（`_PROPERTY_LABEL` + `_process_adjacent_properties`）、`<color>`/`<unbreak>` 剥离保留内容、其余未知标签剥离
-4. 角色/光锥/遗器技能 desc 走 `clean=False`（`character_detail` 等）：保留 `<unbreak>`/`<u>`/`<color>`/`#n`，交给前端渲染
+1. `{TEXTJOIN#id}` 展开——`converters/achievements.py → _expand_textjoin()`（TextJoinConfig 链；**仅 achievements 模块**，items 等模块输出仍残留占位符）
+2. `<gridfightinfo>` 实体名替换——`converters/currency_catalog.py → _resolve_gridfightinfo()`（**先于 clean_text**，仅 Augment）
+3. `clean_text()`（`tools/converter/textmap.py`）：`{NICKNAME}`→开拓者、`{SPACE}`→空格、`{RUBY_*}`→移除、`<property>`→友好名（`_PROPERTY_LABEL` + `_process_adjacent_properties`）、`<color>`/`<unbreak>` 剥离保留内容、其余未知标签剥离
+4. 角色/光锥/遗器技能 desc 走 `clean=False`（`tools/converter/converters/character_detail.py` 等）：保留 `<unbreak>`/`<u>`/`<color>`/`#n`，交给前端渲染
 
 ### 渲染期（前端，`src/lib/`）
 
@@ -341,7 +343,7 @@ ExcelOutput + TextMap + Params[] → converter（Python）→ public/data/cn/*.j
 
 ### 触发场景
 
-- `vendor/TurnBasedGameData` 子模块更新（新版本数据）后，可能出现新标签/新占位符格式
+- `vendor/TurnBasedGameData`（本地副本，非 git 子模块）更新（新版本数据）后，可能出现新标签/新占位符格式
 - 渲染异常：页面出现未转换的 `<...>` 文本、或标签被剥离后内容残缺（如 `<icon>` 图标丢失）
 - 发现本文档描述与数据/代码行为不符
 

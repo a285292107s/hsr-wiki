@@ -4,7 +4,7 @@
  * 与 tools/dead-links.test.ts（Node 版，本机 vitest）同一设计意图：
  * - URL 构造复用前端真实构造函数（src/lib/icons.ts / services/cdn）→ 零维护漂移
  * - 死链判定：明确 HTTP 404（HEAD）才 dead；429/503 退避重试；403/网络/CORS/超时 → env
- * - 数据加载改为浏览器 fetch：文件清单由 spine-lab/vite.config.ts 插件动态生成
+ * - 数据加载改为浏览器 fetch：文件清单由 vite.config.ts 的 dataFileIndexDevPlugin 动态生成
  *   （/data/cn/data-file-index.json，与磁盘全量一致），替代 Node 版 walkJson 目录遍历
  *
  * jsDelivr 限流纪律（Node 版联网核实 + 实测，禁止违反）：

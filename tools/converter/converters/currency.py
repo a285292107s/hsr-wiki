@@ -1,4 +1,4 @@
-"""货币战争 · 角色图鉴转换器（从本地子模块读取）
+"""货币战争 · 角色图鉴转换器（从本地 vendor 副本读取）
 
 数据来源（全部来自 vendor/TurnBasedGameData/ExcelOutput/）：
   - AvatarConfig.json                   → 角色名（Hash → TextMap → 中文）

@@ -1,6 +1,6 @@
 """游戏版本信息转换器
 
-数据来源：vendor/TurnBasedGameData 子模块的 git 提交信息。
+数据来源：vendor/TurnBasedGameData 本地副本的 git 提交信息（CI 为浅克隆，禁止写「子模块」）。
 提交标题携带官方客户端版本标识（如 OSPRODWin4.4.0_D15909703_A15802547_L15874300），
 是数据源中唯一权威的全局版本号（ExcelOutput / TextMap 均无集中版本表；
 RelicSetConfig.ReleaseVersion 仅覆盖遗器且无子版本号）。

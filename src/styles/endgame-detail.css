@@ -2,7 +2,7 @@
    终局赛季详情页（Endgame Season Detail）· 深空档案编辑式排版
    由路由 /endgame/:mode/:id 懒加载（EndgameView）。
    - 模式身份：--eg-color 经 data-mode 映射（领域层 --eg-* 令牌，与目录页同源）
-   - 设计语言（docs/设计语言-深空档案-编辑式排版.md）：
+   - 设计语言：
      编辑式章节标题 / 中性细线阅读族卡片 / 规格表数据 / 克制用色
      · 模式色仅存于身份锚点：层序号 hover、章节徽标、指标数值、元素边框、导航目标
      · 卡片 hover 仅边框/背景亮度变化，无位移无 glow；强调词走语义金 --highlight

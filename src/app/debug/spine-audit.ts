@@ -184,7 +184,7 @@ export function buildDiagnosis(entry: AuditEntry): string[] {
   const advice: string[] = [];
   const all = [...entry.errors, ...entry.warnings];
   if (all.some((t) => t.includes('404'))) {
-    advice.push('资源 404：官网 publish_key 换代或 CDN 缺文件 → 重新抓取并更新 spine-manifest（docs/官网Spine动画抓取流程.md）');
+    advice.push('资源 404：官网 publish_key 换代或 CDN 缺文件 → 重新抓取并更新 spine-manifest（docs/spine/官网Spine动画抓取流程.md）');
   }
   if (all.some((t) => t.includes('401') || t.includes('403'))) {
     advice.push('鉴权/防盗链拒绝 → curl 不带 Referer 验证真实状态码');
@@ -212,7 +212,7 @@ export function buildDiagnosis(entry: AuditEntry): string[] {
     advice.push('骨架缺少动画 → 检查导出文件');
   }
   if (all.some((t) => t.includes('占比过高'))) {
-    advice.push('混合 slot 占比高 → additive/screen 打光层有黑块风险；生产已用单画布合并渲染根治（成因与方案见 docs/单层模式透明画布黑块成因与衬底方案.md）');
+    advice.push('混合 slot 占比高 → additive/screen 打光层有黑块风险；生产已用单画布合并渲染根治（成因与方案见 docs/spine/单层模式透明画布黑块成因与衬底方案.md）');
   }
   return advice;
 }

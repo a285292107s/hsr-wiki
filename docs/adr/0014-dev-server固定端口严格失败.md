@@ -1,6 +1,6 @@
 # Dev Server 固定端口与严格失败策略
 
-## Status: accepted（2026-09-03 端口号更新为 6188，strictPort 策略不变）
+**Status**: Accepted（固定端口 6188 + `strictPort: true`，与 `vite.config.ts` 现况一致；2026-09-03 由 5173 换为 6188）
 
 ## Context
 
@@ -41,4 +41,4 @@ server: {
 - 开发流程固定为：探测 6188 → 有实例则复用（curl 验证可用性）→ 无实例才后台新起。
 - 本地开发 / dev 内研究线调试台 = `http://localhost:6188/` 与 `http://localhost:6188/debug`（侧栏「调试台」入口同样可达）。
 - Playwright webServer / baseURL 同步指向 6188（`playwright.config.ts`），e2e 自动探测复用该端口实例。
-- 已实测验证（2026-08-10，端口 5173 时代）：有占用 → 立即报错退出；无占用 → 正常监听。端口号更新后 strictPort 行为不变。
+- 已实测（strictPort 行为）：有占用 → 立即报错退出；无占用 → 正常监听。端口号变更不影响该行为。

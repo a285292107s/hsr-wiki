@@ -5,7 +5,7 @@
  * 用法：node tools/refresh-vite-cache.mjs <文件或目录...>
  * 例：  node tools/refresh-vite-cache.mjs src/styles/character.css src/app/views
  *
- * 背景坑位（详见 docs/memory/2026-08-13.md）：Vite 8.1.5（rolldown 内核）在 Windows 下，
+ * 背景坑位（详见 docs/memory/2026-08.md）：Vite 8.1.5（rolldown 内核）在 Windows 下，
  * 「文件被整写（O_TRUNC 重写，如工具保存/脚本改写）之后的紧邻变更事件」会被软失效吸收——
  * 事件到达 vite（page reload 日志可见）但 rolldown rust 缓存未刷新，transform 重跑仍输出旧内容，
  * 且无 mtime 兜底——文件永久陈旧（改 CSS/TS 后 dev 页面不更新，重启才恢复）。

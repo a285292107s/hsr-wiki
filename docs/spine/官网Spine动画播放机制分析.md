@@ -231,7 +231,7 @@ initSpineData(spineId) {
 | 官网机制 | wiki 现状 | 可借鉴点 |
 |---|---|---|
 | 单场景多 SkeletonMesh（单 canvas） | `initSpineSceneViewer` 每层一个 SpinePlayer 叠放（多 canvas） | 单 canvas 方案 GPU 上下文更省、天然同步；但 spine-player 组件多实例方案实现成本低 |
-| renderOrder 层序 | manifest layers 按 renderOrder 升序（`kind: official-scene`） | 已落地（含黑色底衬层陷阱，见 `./官网Spine动画抓取流程.md`） |
+| renderOrder 层序 | manifest layers 按 renderOrder 升序（`kind: official-scene`） | 已落地（含黑色底衬层陷阱，见 `docs/spine/官网Spine动画抓取流程.md`） |
 | 1920×1080 世界坐标 + 统一 viewport | viewport 恒为 `{x:-960, y:-540, w:1920, h:1080}` | 已落地 |
 | 同场景切 visible 的单播轮播 | 角色页单角色播放（has-anim） | 如需首页多角色轮播可复刻此模式（资源常驻、零切换延迟） |
 | maxVert 顶点预算 | 未实现 | 极端骨架可设上限防顶点缓冲爆内存 |
@@ -241,4 +241,4 @@ initSpineData(spineId) {
 
 - 配置：`https://act.mihoyo.com/puzzle/hkrpg/pz_Devp46QZiu/config.95eb3990.js`（`window.PUZZLE_RENDER_CONFIG`）
 - 运行时：`setups.3910bb19.js`（webpack chunk 映射）、`727.1b863ea6.js`（渲染引擎：PzSpinePlayer / fastsceneSpinePlayer / THREEPlayer / spine-threejs）、`lib.pc.0091c309.js`（组件注册表）
-- 相关文档：`./官网Spine动画抓取流程.md`、主项目 `docs/adr/0009-官网spine动画增量接入.md`
+- 相关文档：`docs/spine/官网Spine动画抓取流程.md`、`docs/spine/单层模式透明画布黑块成因与衬底方案.md`、`docs/adr/0009-官网spine动画增量接入.md`

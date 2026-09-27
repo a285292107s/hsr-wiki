@@ -33,8 +33,8 @@ const SKIP_FILE = /(^|[\\/])(__tests__|theme\.ts|cw-theme\.ts)|(^|[\\/])debug([\
  *    （--rarity-* / --prop-* / --elem-* / --skill-* / --eg-* / --diff-* / --season-* /
  *      --cw-* / --crole-* / --ctrait-*），页面只允许 var() 引用，
  *    裸色值在 tokens.css 领域层唯一定义——本清单无裸色条目
- * 3. 导航语义豁免：首页网关入口卡（.nk-home-card--gateway）与交换按钮双色状态点——
- *    "金色=CW 模式"导航标识，实现已全部 var(--gold-*) 引用，此处登记设计意图防误修
+ * 3. 导航语义豁免：首页网关入口行（.nk-home-row--gateway，"金色=CW 模式"导航标识）——
+ *    实现已全部 var(--gold-*) 引用，此处登记设计意图防误修
  * 若未来确有无法令牌化的裸色值，必须在此登记（带理由 + ADR 引用），禁止静默豁免 */
 const DOMAIN_EXEMPT = [];
 

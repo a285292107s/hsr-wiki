@@ -1,14 +1,12 @@
 # Spine 动画仅自主渲染，放弃宿主 Canvas 快路径
 
-## 状态
+**Status**: Accepted（2026-09 复核成立；「运行时版本必须与 CDN .skel 严格匹配」条项已演进为双运行时，见下）
 
-已接受
+旧版双通道策略：优先抢走宿主已渲染的 WebGL canvas（零开销），2s 宽限期后才启动自主渲染。Vue 迁移时砍掉快路径，仅保留自主渲染。
 
-旧版采用双通道策略：优先抢走宿主已渲染的 WebGL canvas（零开销），2s 宽限期后才启动自主渲染。Vue 迁移时砍掉快路径，仅保留自主渲染（从 CDN 加载 spine-player 4.1.23 运行时 + .skel/.atlas 资源）。
+**结论**：独立站无宿主 canvas 可抢，快路径无存在基础——Spine 一律由本站自建 player 渲染，不依赖宿主任何资源。
 
-**Considered Options**:
-- 保留双通道：性能最优（复用宿主渲染成果），但违背「不依赖宿主资源」的核心架构原则；需要 MutationObserver + 轮询 + 竞态防护 ~90 行复杂逻辑；宿主改版 canvas 选择器即失效，是不可控的隐患；跨树 appendChild 移动 canvas 属于 hack。
-- 仅自主渲染（采纳）：运行时 ~500KB 仅首次加载（单例 + HTTP 缓存），实际体验差异 <1s；代码量减半，在 Vue 中收敛为干净的 composable（onMounted 初始化 / onUnmounted 释放）。
-
-**Consequences**:
-每个角色页独占一个 WebGL 上下文（宿主不再渲染 Spine，无上下文数量冲突）。spine-player 版本必须与 CDN .skel 格式严格匹配（当前 4.1.x），升级需同步验证。
+**现状指针**：
+- 引擎层 `src/spine/`（runtime / player / scene / types）；运行时版本常量 `src/spine/constants.ts`；运行时随站本地分发 `public/vendor/spine/`，CDN 仅兜底。
+- 运行时为**双版本并存**：`4.2.43`（官网 JSON 骨架 / 场景）+ `4.1.23`（nanoka `.skel` 二进制）；按清单条目分派，禁止合并为单版本——nanoka skel 为自定义封装格式，4.2 运行时无法加载（探针取证见 docs/memory/2026-08.md）。
+- 每个角色页独占一个 WebGL 上下文（宿主不再渲染 Spine，无上下文数量冲突）。

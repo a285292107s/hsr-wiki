@@ -6,6 +6,7 @@
 
 ### 源数据（Source Data）
 `DimbreathBot/TurnBasedGameData` 仓库的原始解包 JSON，位于 `vendor/TurnBasedGameData/` 的 `ExcelOutput/`、`TextMap/`、`Config/` 目录。结构复杂、字段冗余，无法直接供网站消费。
+**术语纪律**：该目录是本地副本（CI 每日 `git clone --depth 1`），**禁止称其为「git 子模块」**（仓库无 `.gitmodules`）。
 
 ### 目标格式（Target Format）
 converter 输出到 `public/data/[lang]/` 的 JSON 数据格式：列表索引（`characters.json` 等）+ 详情子目录（`characters/{id}.json` 等），结构扁平、字段精简。早期以 Mar-7th/StarRailRes 仓库索引 JSON 为格式标准（见 ADR 0006），输出结构已演进；StarRailRes 现在仅作「字段基线」参照（见数据筛选节）。
@@ -70,15 +71,15 @@ _Avoid_: 技能效果、SkillEffect 标签
 ## 导航与模式
 
 ### 交换（Swap）
-导航首项按钮，用于在常规模式与货币战争模式之间切换。点击后跳转至对方模式的枢纽页。标签固定为"交换"，附双色状态点指示当前所在模式（紫=常规，金=货币战争）。
+导航首项按钮，用于在常规模式与货币战争模式之间切换。点击后跳转至对方模式的枢纽页。标签固定为"交换"。
 _Avoid_: 切换、模式开关
 
 ### 常规模式（Normal Mode）
-站点默认模式。**黑与紫双色主题**（黑色基底 + 紫色主色强调，见「双色约束」），导航为 7 个内容板块（角色、光锥、遗器、物品、成就、敌对物种、终局内容），枢纽页为 `/`。
+站点默认模式。**黑底 + 可切换强调色主题**（黑色基底 + 当前强调色阶，缺省赤陶 Terracotta 暖砖红，见「双色约束」「强调色」），导航为 7 个内容板块（角色、光锥、遗器、物品、成就、敌对物种、终局内容），枢纽页为 `/`。
 _Avoid_: 主模式、普通模式
 
 ### 货币战争模式（Currency War Mode / CW 模式）
-独立路由树（`/currency/*`）下的沉浸式模式。**黑与金双色主题**（黑色基底 + 金属金主色强调，见「双色约束」），导航为 5 个子板块（角色图鉴、装备图鉴、投资环境、投资策略、羁绊图鉴），枢纽页为 `/currency`。
+独立路由树（`/currency/*`）下的沉浸式模式。**黑底 + 可切换金属强调色主题**（黑色基底 + 当前金属色阶，缺省香槟金，见「双色约束」「强调色」），导航为 5 个子板块（角色图鉴、装备图鉴、投资环境、投资策略、羁绊图鉴），枢纽页为 `/currency`。
 _Avoid_: 货币战争栏目、CW 页面
 
 ### 调试台（Debug Console）
@@ -96,19 +97,23 @@ _Avoid_: 首页、入口页
 _Avoid_: 黑色系、深色阶
 
 ### 双色约束（Two-Tone Constraint）
-主题层的色彩纯度规则：每个模式的主题色相恰好一个——常规模式=黑与紫（紫色主色），货币战争模式=黑与金（金色主色）。主题内所有强调色（主色、梯度端、激活态、焦点环）必须落入该模式的**主色族**，禁止第三色相。
+主题层的色彩纯度规则：每个模式**同一时刻**的主题强调色相恰好一个——常规模式缺省赤陶（暖砖红），货币战争模式缺省香槟金；两者均可经设置页在预置色阶间切换，但任一时刻只允许一个色相。主题内所有强调色（主色、梯度端、激活态、焦点环）必须落入当前**主色族**，禁止第三色相。
 _Avoid_: 双色主题、色彩收敛
 
+### 强调色（Accent）
+一个模式下可切换的**主题色阶**（常规模式：赤陶 / 橄榄青 / 雾霭蓝灰 / 暖沙棕 / 暮山紫；货币战争模式：香槟金 / 玫瑰金 / 铂银 / 翡翠 / 赤铜）。两个模式的强调色互相独立、互不影响；切换只重映射主题色阶层，领域色与数据语义不变。
+_Avoid_: 主题色、配色方案
+
 ### 主色族（Primary Family）
-一个模式的完整强调色集：主色 + 同色族成员（常规模式 = Purple Heart 阶，货币战争 = 金阶）。`--accent` 是"主色的梯度端"（渐变端点），属主色族成员而非独立色。文字/细线强调位用族内亮端，大面积标识用族内基准位。
-_Avoid_: 强调色、辅助色
+一个模式下当前强调色阶的完整色集：主色 + 同色族成员（常规模式 = 当前强调色阶，货币战争 = 当前金属色阶）。`--accent` 是"主色的梯度端"（渐变端点），属主色族成员而非独立色。文字/细线强调位用族内亮端，大面积标识用族内基准位。
+_Avoid_: 辅助色
 
 ### 领域色豁免（Domain Color Exemption）
 数据语义色（稀有度星级、属性数值、元素、技能类型、强化角标、文本高亮）不参与双色约束：它们代表游戏内约定（5 星必为金色），不随主题切换。双色约束只作用于主题层（背景/表面/强调），不作用于领域层；货币战争模式下领域金按金阶降阶（暗铜哑光）处理。
 _Avoid_: 数据色豁免、领域色例外
 
 ### 导航语义豁免（Navigation Semantic Exemption）
-双色约束的导航例外："金色=CW 模式"的导航标识——首页网关入口卡、交换按钮双色状态点。这些元素用对方主题色做标识（金色指代货币战争模式），不视为第三色相违规。豁免登记于 check-colors.mjs 清单（带理由，引 ADR 0012）。
+双色约束的导航例外：**"金色=CW 模式"的导航标识**——首页网关入口行用金色指代货币战争模式，不视为第三色相违规。豁免登记于 check-colors.mjs 清单（带理由，引 ADR 0012）。
 _Avoid_: 导航金、主题外标识
 
 ### 数据承载色（Data-Borne Color）
@@ -118,7 +123,7 @@ _Avoid_: 内联色、富文本色
 ## 角色强化
 
 ### 角色强化（Character Enhancement）
-官方「砺烁新辉」系统（3.4+）对老角色的机制增强。注册于源数据 `AvatarConfigEnhanced.json`（当前 10 个角色），强化后技能、行迹、星魂效果变化。常规模式角色详情页可切换原始/强化状态，默认显示强化（与游戏内默认开启一致）。
+官方「砺烁新辉」系统（3.4+）对老角色的机制增强。注册于源数据 `AvatarConfigEnhanced.json`（角色数随版本增长，禁止在此写死数量），强化后技能、行迹、星魂效果变化。常规模式角色详情页可切换原始/强化状态，默认显示强化（与游戏内默认开启一致）。
 _Avoid_: 角色加强、进阶、Advanced
 
 ### 强化形态（Enhanced Form）
@@ -140,10 +145,10 @@ _Avoid_: 对比视图、diff 模式、变化视图（避免与旧版已下线词
 ## 图片资源
 
 ### 图片 CDN
-图片资源解析统一收口于 `services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / 遗器通用部位图标，根 `LOCAL_ICONS_BASE` = `public/data/cn/assets/icons/`）local-first，未入库的新图标自动回退远端；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）。
+图片资源解析统一收口于 `src/services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / 遗器通用部位图标，根 = `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`，物理目录 `public/data/cn/assets/icons/`）local-first，未入库的新图标自动回退远端；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）。
 
 ### 图片路径映射
-源数据图片路径（`SpriteOutput/...`）到 CDN 相对路径的映射规则。converter 在 `config.py` 硬编码两套规则：legacy 短路径（`icon/character/1001.png`）与官方 StarRailTextures 仓库相对路径（`avatarshopicon/avatar/1001.png`，`--official-icon-paths` 输出）；前端 `services/cdn/` 再按分类解析为 jsDelivr / nanoka 实际 URL。
+源数据图片路径（`SpriteOutput/...`）到 CDN 相对路径的映射规则。converter 在 `config.py` 硬编码两套规则：legacy 短路径（`icon/character/1001.png`）与官方 StarRailTextures 仓库相对路径（`avatarshopicon/avatar/1001.png`，`--official-icon-paths` 输出）；前端 `src/services/cdn/` 再按分类解析为 jsDelivr / nanoka 实际 URL。
 
 ## 终局内容
 

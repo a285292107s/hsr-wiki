@@ -14,7 +14,7 @@ export function escHtml(s: unknown): string {
 
 /**
  * 将 HSR 游戏富文本标签转换为可渲染 HTML。
- * 参照 docs/hsr-rich-text-tags.md：
+ * 参照 docs/data/hsr-rich-text-tags.md：
  * - <color=#hex> → span style color（仅接受合法 #RRGGBB[AA]）
  * - <unbreak> → span.nowrap
  * - <u> 保留

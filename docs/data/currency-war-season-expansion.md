@@ -2,6 +2,7 @@
 
 > 数据源：`vendor/TurnBasedGameData/TextMap/TextMapCHS.json` 及 `ExcelOutput/GridFight*.json`
 > 检索范围：所有含「货币战争 / 零和博弈 / 赛季扩充」的条目，以及与赛季扩充直接相关的角色、羁绊、专家顾问、奖励、玩法系统文本与配置。
+> 定位：赛季文案与配置**出处档案**（Hash ↔ 内容）；转换器侧的货币战争字段实现见 `docs/audit/角色转换模块字段分析.md` 的货币战争一节。
 > 说明：游戏内"赛季扩充说明"实际由**两条文本**构成——官方简介（较短）与**扩充内容概览**（详细 8 条）。后者才是信息量最大的部分。
 
 ---
@@ -149,19 +150,19 @@
 
 ## 九、新增玩法内容（结构化配置指向）
 
-本赛季"新增了大量投资环境、投资策略、竞争对手、敌人词缀"，对应 `ExcelOutput` 中的结构化数据（尚未被当前 wiki 转换器解析，可作为后续扩充方向）：
+本赛季"新增了大量投资环境、投资策略、竞争对手、敌人词缀"，对应 `ExcelOutput` 中的结构化数据（**接入状态见末列**）：
 
-| 玩法内容 | 配置文件 |
-| --- | --- |
-| 投资环境 | `GridFightPortalBuff.json` / `GridFightPortalMazebuff.json` / `GridFightPortalRemark.json` |
-| 投资策略 | `GridFightAugment.json` / `GridFightAugmentMazebuff.json` / `GridFightAugmentRemark.json` |
-| 竞争对手阵营 | `GridFightCamp.json` |
-| 敌人词缀 | `GridFightAffixConfig.json` / `GridFightAffixMazebuff.json` |
-| 职级/最高难度 | `GridFightDivisionStage.json` / `GridFightDivisionInfo.json` / `GridFightDivisionLevelShow.json` |
-| 晋升等级 | `GridFightPlayerLevel.json` |
-| 赛季角色池 | `GridFightRoleConfig_Index_SeasonID.json`（SeasonID=1，约 100 名角色） |
-| 赛季-特质索引 | `GridFightRoleConfig_Index_SeasonAndTrait.json` |
-| 专家顾问 | `GridFightRoleBasicInfo.json` / `GridFightExpertRestrict.json` |
+| 玩法内容 | 配置文件 | 转换器接入状态 |
+| --- | --- | --- |
+| 投资环境 | `GridFightPortalBuff.json` / `GridFightPortalMazebuff.json` / `GridFightPortalRemark.json` | 已落地：`currency_catalog.py → _convert_portals()` → `currency/portals.json` |
+| 投资策略 | `GridFightAugment.json` / `GridFightAugmentMazebuff.json` / `GridFightAugmentRemark.json` | 已落地：`currency_catalog.py → _convert_augments()` → `currency/augments.json` |
+| 竞争对手阵营 | `GridFightCamp.json` | 未接入 |
+| 敌人词缀 | `GridFightAffixConfig.json` / `GridFightAffixMazebuff.json` | 未接入 |
+| 职级/最高难度 | `GridFightDivisionStage.json` / `GridFightDivisionInfo.json` / `GridFightDivisionLevelShow.json` | 未接入 |
+| 晋升等级 | `GridFightPlayerLevel.json` | 未接入 |
+| 赛季角色池 | `GridFightRoleConfig_Index_SeasonID.json`（SeasonID=1） | 未接入 |
+| 赛季-特质索引 | `GridFightRoleConfig_Index_SeasonAndTrait.json` | 未接入 |
+| 专家顾问 | `GridFightRoleBasicInfo.json` / `GridFightExpertRestrict.json` | 部分：角色侧见 `currency/role.json`（`is_expert`） |
 
 ---
 
@@ -180,4 +181,4 @@ TextMap（`TextMapCHS.json`）关键 Key：
 - 风味文案：`11295755837079066201`
 - 通用玩法总说明（参考）：`7693488975416237801`
 
-> 说明：以上条目均来自本地子模块 `vendor/TurnBasedGameData`，未依赖联网。当前 `tools/converter/converters/season.py` 仅落地了"标题 + 正文"；如需在 wiki 展示更完整的赛季内容，可将本表中"扩充内容概览"及相关条目一并纳入转换器输出。
+> 说明：以上条目均来自本地 vendor 副本 `vendor/TurnBasedGameData`（非 git 子模块），未依赖联网。`tools/converter/converters/season.py` 已按 `SEASON_TEXTMAP` 注册「标题 Hash → 正文 + 概览」并输出 `currency/season.json`（初期仅标题+正文，**概览已落地**）；如需在 wiki 展示更完整的赛季内容，按本文第三节与第九节扩充注册项即可。
