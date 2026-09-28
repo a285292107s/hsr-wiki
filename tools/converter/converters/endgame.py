@@ -1,62 +1,12 @@
 """终局内容（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）转换器。
 
-数据全部源自 vendor/TurnBasedGameData（与 CDN 同源，但走本地转换）：
-- 忘却之庭：ChallengeMazeConfig（按 GroupID 分组，100+）
-- 虚构叙事：ChallengeStoryMazeConfig（按 GroupID 分组，2001+）
-- 末日幻影：ChallengeBossMazeConfig（按 GroupID 分组，3001+）
-- 异相仲裁：ChallengePeakConfig（按 ID 分组，101+）
-
-说明：
-- 名称经 TextMap 解析（仅中文；en/ja/ko 源数据未提供，留空）。
-- 排期：三张排期表（ScheduleDataChallengeMaze / ChallengeDataChallengeStory /
-  ScheduleDataChallengeBoss）提供各模式赛季 BeginTime/EndTime。表无显式外键，
-  经 ID 结构推断映射：ScheduleID - 200000 = 赛季 GroupID（200101↔101、
-  202001↔2001、203001↔3001）。覆盖 maze 55 组中的 53 组 / story 25 组 / boss 20 组。
-  占位过滤：整段早于公测上线（2023-04-26，beta/测试占位）或起点年份 ≥2030
-  （未来占位）的排期丢弃，避免误导赛季"未开始/进行中"状态。
-  异相仲裁无对应排期段，live_* 留空。
-- 赛季统计：由组内全部层记录聚合（最大层数 / 阶段数 / 回合上限 / 弱点属性
-  全层合并去重 + 逐层弱点 floor_damage）；异相仲裁结构不同，仅提供弱点属性。
-- 赛季增益 buffs：忘却之庭取分组表 MazeBuffID（ChallengeGroupConfig）；虚构叙事 /
-  末日幻影取主题表 BuffList（ChallengeStoryGroupExtra / ChallengeBossGroupExtra 前两阶段），
-  名称经 MazeBuff 解析。虚构叙事战意（Fever）赛季另取 SubMazeBuffList 为主题机制
-  sub_buffs（机制 + 战熄潮平/战意汹涌效果，Normal 赛季为空）。
-- 赛季敌方 monsters：各层 StageConfig 波次（EventIDList1/2 → StageConfig.MonsterList，
-  每波为 {Monster0..N} 字典）按层序收集 → MonsterTemplateConfig
-  名称 + 头像图标（ManikinImagePath 取 basename，前端经 monstermiddleicon CDN 加载），
-  并附 MonsterConfig 韧性弱点（StanceWeakList）/ 伤害抗性（DamageTypeResistance）/ 图鉴
-  介绍（MonsterIntroduction）与模板分类 Rank（MinionLv2/Elite/LittleBoss/BigBoss →
-  普通/精英/准首领/首领，前端映射）；阵营（MonsterCampID → MonsterCamp 名称）与韧性值
-  （StanceBase）取模板表；技能（SkillList → MonsterSkillConfig）输出名称 + 标签。
-  层级/赛季敌方为轻量字段（intro/skills 仅星启 full 输出，控制波次全量体积）。
-  注：关卡表 NpcMonsterIDList 仅为代表怪（唯 61 个，缺失约 2/3），波次才是完整配置
-  （唯 176 个，单阶段 1-3 波）。
-- 逐层详情 floor_details：详情页以关卡层级为章节的完整内容（层序号 / 官方层名 Name /
-  回合上限 / 上下半场推荐属性与敌方配置 / 层级增益 MazeBuffID / 层级挑战目标
-  ChallengeTargetID）。永屹之城遗秘（组 100）无 Floor 字段，按 ID 升序取序号。
-  （floors 键仍为赛季最大层数统计，勿混。）
-- 挑战目标 targets：组内 ChallengeTargetID 全收集 → ChallengeTargetConfig 描述
-  （clean_text 清洗后）+ ChallengeTargetParam1 参数，供详情页渲染。
-- 异相仲裁 peak：每期由 3 个「骑士」试炼关卡 + 1 个「王棋」最终关卡组成（官方
-  术语）。ChallengePeakGroupConfig（期表）给出 PreLevelIDList（骑士）/ BossLevelID
-  （王棋）；ChallengePeakConfig（关卡表）给出关卡名 / 弱点 / Stage 事件 / 目标 /
-  机制标签；ChallengePeakBossConfig（王棋扩展）给出王棋增益 BuffList 与「绝境」
-  变体（HardTitle 如“将杀王棋•绝境” / HardEventIDList / HardTarget / HardTagList）；
-  StageConfig（按 EventID 查）提供敌人配置 MonsterList（波次扁平化）与关卡等级；
-  BattleTargetConfig（3000 系列 ChallengeTarget）提供目标文本；TagList / BuffList /
-  HardTagList 均解析为 MazeBuff 名称。输出 levels 数组 + 全关卡合并 damage_types /
-  monsters / buffs（供目录卡片）。
-- 星启模式 tierce：三张 Tierce 表（ChallengeMazeTierce / ChallengeStoryMazeTierce /
-  ChallengeBossMazeTierce）提供星启关卡配置（弱点 / 回合 / 目标 / Boss）。
-  关联规则：Tierce 记录 DLCKKJFMJOB = 常规模式最后一关 ID，查关卡表得 GroupID。
-  目标描述按模式走对应目标表（maze→ChallengeTargetConfig / story→ChallengeStoryTargetConfig /
-  boss→ChallengeBossTargetConfig），score 仅虚构叙事提供（IDBJENCBJHM），
-  满分档目标（GNGENMHNLAH，虚构叙事 99000）并入 targets 末尾；通关奖励取
-  EGEEJLHBALB（ItemID/ItemNum 列表，虚构叙事每期固定）输出为 rewards。
-  混淆字段名（解包变量名）含义：PHFMCACHFIJ=星启关 ID / LOJCIDLKPKG=弱点 /
-  GNOOAGPBNLD=回合 / OGEOMCGNNMP=目标 ID 组 / JEBMBCLBIOI=敌方 ID。
-- 虚构叙事回合上限：ChallengeStoryMazeExtra.TurnLimit（按层记录 ID 匹配）覆盖 countdown。
-- param 字段前端未消费，置空数组以贴合结构。
+完整表→字段→输出映射见 docs/data/转换器字段映射.md（endgame 段），本文件只留硬约束：
+- 排期 ID 结构：ScheduleID - 200000 = 赛季 GroupID；早于公测(2023-04-26)或 ≥2030 的占位排期丢弃。
+- 敌方以 StageConfig 波次为准（非关卡表 NpcMonsterIDList 代表怪，仅 61 个、缺 2/3）。
+- floors 键 = 赛季最大层数统计；永屹之城遗秘(组100)无 Floor 字段，按 ID 升序取序号。
+- 混淆解包字段：PHFMCACHFIJ=星启关ID / LOJCIDLKPKG=弱点 / GNOOAGPBNLD=回合 /
+  OGEOMCGNNMP=目标ID组 / JEBMBCLBIOI=敌方ID（详见映射表）。
+- param 字段前端未消费，置空数组贴合结构。
 """
 
 import logging
