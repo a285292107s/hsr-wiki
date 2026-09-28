@@ -1,27 +1,11 @@
 #!/usr/bin/env node
 /**
- * 文档链接与引用一致性检查器（文档梳理 / CI 门禁）
- *
- * 扫描受管 markdown，校验其中的相对链接与仓库路径引用是否落在真实文件上，
- * 并报告内容重复（同 hash / 高度雷同）的文档，防「合并后残留副本」回流。
- *
- * 受管范围：
- *   README.md / AGENTS.md / CONTEXT.md、docs/**、tools/converter/README.md、spine-lab/**\/*.md
- * 排除：node_modules / dist / temp / vendor / .agents / public / playwright-report / 各类缓存
- *      以及自动生成的 tools/converter/DATA_CATALOG.md（3.4 万行，禁止人工维护链接）
- *
- * 检查项：
- *   1. 断链：markdown 链接 [text](path)、图片 ![](path)、反引号路径 `docs/x/y.md` 均校验存在性
- *      （目录链接视为有效；http(s)/mailto/纯锚点跳过；#锚点与 ?query 剥离后再判）
- *   2. 已删除/已移动引用：目标在 git HEAD 中存在但工作区已无 → 判定「误删引用」；
- *      若同名文件已迁到其它目录 → 给出建议新路径
- *   3. 重复文件：内容完全相同的 sha256；或规范化行集合 Jaccard 相似度 ≥ 0.8（≥30 行）的高度雷同
- *
- * 用法：
- *   node tools/check-doc-links.mjs            # 断链/误删引用存在即退出码 1（CI 用）
- *   node tools/check-doc-links.mjs --verbose  # 打印全部低置信条目（默认截断 12 条）
- *   node tools/check-doc-links.mjs --report   # 只报告，退出码恒 0
- *   node tools/check-doc-links.mjs --strict   # 低置信引用与重复文档也计为失败（退出码 1）
+ * 文档链接与引用一致性检查器（CI 门禁；断链/误删引用即退出 1）。
+ * 扫描 README/AGENTS/CONTEXT.md、docs/**、tools/converter/README.md、spine-lab/**/*.md；
+ * 排除 node_modules/dist/temp/vendor/.agents/public/缓存 与自动生成的 DATA_CATALOG.md(3.4万行)。
+ * 检查项：① 断链([text](path)/图片/反引号路径，目录/http(s)/mailto/锚点跳过)；
+ * ② 误删引用(HEAD 有、工作区无→报错，同名迁移给建议路径)；③ 重复(sha256 全等或 Jaccard≥0.8)。
+ * 用法：node tools/check-doc-links.mjs [--verbose|--report|--strict]。
  */
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, extname, relative, sep, dirname, resolve, basename, posix } from 'node:path';

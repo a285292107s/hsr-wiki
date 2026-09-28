@@ -1,18 +1,9 @@
 /**
- * 色彩令牌收口检查器（ADR 0012 规则豁免模式）
- *
- * 扫描 src 下样式/视图/配置代码中的裸色值（hex / rgb / rgba），输出未收口清单。
- * 配合三层令牌体系使用（tokens.css：原始层 --ph-* / --gold-* / --blk-*、语义层 --primary 等、
- * 领域层 --rarity-* / --prop-* / --cw-* 等）。
- *
- * 规则（ADR 0012）：
- * - 严格中性：三分量差 ≤4 才算中性（纯黑/白/灰阶）；假中性（如 rgba(15,15,35) 差 20）暴露
- * - var() fallback：fallback 内色值纳入检查（必须为中性或令牌引用，禁止裸彩色 fallback）
- * - SKIP_FILE 仅豁免 debug 诊断文件与测试（currency-* 已收编，不再豁免）
- *
- * 用法：
- *   node tools/check-colors.mjs            # 报告模式（退出码恒 0）
- *   node tools/check-colors.mjs --strict   # 有裸色值时退出码 1（CI 用）
+ * 色彩令牌收口检查器（ADR 0012 规则豁免模式）：扫描 src 下裸色值(hex/rgb/rgba)输出未收口清单。
+ * 配合四层令牌(tokens.css 原始 --ph- / --gold- / --blk- 层 → 语义 --primary* → 领域 --rarity- / --cw- 层)。
+ * 规则：严格中性(三分量差≤4)；var() fallback 内色值纳入检查(禁裸彩色 fallback)；
+ * SKIP_FILE 仅豁免 debug 诊断与测试(currency-* 已收编)。
+ * 用法：node tools/check-colors.mjs [--strict]（strict 有裸色值即退出 1）。
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, relative, sep } from 'node:path';
