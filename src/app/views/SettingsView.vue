@@ -1,25 +1,9 @@
 <script setup lang="ts">
 /**
- * 设置页（路由 /settings 与 /currency/settings，按 meta.cw 切换常规/CW 语境）：
- * 常规主题强调色选择 + 货币战争主题色选择 + 开拓者形态选择。
- * 常规主题：选择经 setAccent 持久化（localStorage）并写入 <html data-accent>，
- * tokens.css 的 [data-accent] 规则重映射 --th-* 色阶，全站主题自动跟随。
- * CW 主题：选择经 setCwAccent 持久化并写入 <html data-cw-accent>，
- * 仅 [data-theme="cw"]（货币战争模式）语境生效，与常规主题互不影响。
- * 开拓者形态：默认女性；常规模式角色列表按性别过滤，CW 列表仅切立绘（female_avatar_id）。
- *
- * 布局家族（v2 反模板化重构）：
- * - 头部右侧「当前主题档案签」：展示激活主题名 + 色阶三点 + 中位 hex
- *   （数据全部来自 theme.ts / cw-theme.ts 的 swatch，禁止写死，防双事实源漂移）
- * - 主题色两区 = 大色板卡（渐变板 + 对勾徽章 + hex 标注）
- * - 开拓者形态 = 名录横条（与全局侧栏激活语言同源：档案竖条 + 淡底）
- * 区块编号与视觉顺序固定：01 = 常规模式主题色，02 = 货币战争主题色，03 = 开拓者形态
- * （两种语境下顺序一致，编号与位置均不随语境交换——防玩家混淆，禁止改回语境置前/交换）
- *
- * 文案分级守则（可见文案只写玩家可感知语义，架构黑话禁止进文案）：
- * - 可写：影响范围（哪些模式生效/互不影响）、缺省值、即时生效并自动保存、形态对内容的影响
- * - 禁止进文案：data-accent/data-cw-accent、语境（meta.cw）、主题档案、黑金外壳、localStorage
- * - hex 标注为 swatch 真实色值（查证型数据，非机制），属粉丝向细节，允许保留
+ * 设置页(/settings 与 /currency/settings，按 meta.cw 切常规/CW 语境)：
+ * 常规强调色(setAccent→<html data-accent>，tokens.css [data-accent] 重映射 --th-*)、CW 主题色(setCwAccent→data-cw-accent，仅 data-theme="cw" 生效)、开拓者形态(默认女，CW 切立绘)。
+ * 布局家族(v2 反模板化)：头部「当前主题档案签」(名+色阶三点+中位hex，来自 theme.ts/cw-theme.ts swatch 禁止写死)；区块编号固定 01 常规/02 CW/03 形态(禁止语境交换)。
+ * 文案分级：可写=生效范围/缺省值/即时保存/形态对内容影响；禁止进文案=data-accent/data-cw-accent/语境(meta.cw)/主题档案/黑金外壳/localStorage；hex 标注为 swatch 真实值允许。
  */
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';

@@ -1,19 +1,9 @@
 /**
- * 死链审核引擎（研究线浏览器版）
- *
- * 与 tools/dead-links.test.ts（Node 版，本机 vitest）同一设计意图：
- * - URL 构造复用前端真实构造函数（src/lib/icons.ts / services/cdn）→ 零维护漂移
- * - 死链判定：明确 HTTP 404（HEAD）才 dead；429/503 退避重试；403/网络/CORS/超时 → env
- * - 数据加载改为浏览器 fetch：文件清单由 vite.config.ts 的 dataFileIndexDevPlugin 动态生成
- *   （/data/cn/data-file-index.json，与磁盘全量一致），替代 Node 版 walkJson 目录遍历
- *
- * jsDelivr 限流纪律（Node 版联网核实 + 实测，禁止违反）：
- * - 404 响应带 Cache-Control: no-cache,no-store → jsDelivr 不缓存 404，每次探测都回源 GitHub
- *   → 已知结果必须本地缓存（localStorage）+ 来源文件内容 sha1 签名，内容未变零网络
- * - 突发高并发敏感（实测 301 图 burst 限流）→ 并发硬上限 DEFAULT_CONCURRENCY=3，禁止调高
- * - 浏览器禁止自定义 User-Agent（Forbidden header）→ 无法携带 Node 版 UA 标识；jsDelivr 仅建议
- * - 重定向：浏览器网络栈自动跟随（raw.githubusercontent.com 支持 CORS），跟随后 2xx 即 ok
- * - HEAD 404 直接判 dead，不做 GET 二次确认（fetch HEAD 与 GET 状态一致；省一半请求 = 少回源）
+ * 死链审核引擎（研究线浏览器版）；与 tools/dead-links.test.ts(Node 版)同一设计意图：
+ * URL 构造复用前端真实构造函数(src/lib/icons.ts / services/cdn)→零维护漂移；死链判定=明确 404(HEAD)才 dead，
+ * 429/503 退避重试，403/网络/CORS/超时→env；数据加载改浏览器 fetch(清单由 dataFileIndexDevPlugin 动态生成)。
+ * jsDelivr 限流纪律(禁止违反)：404 带 no-cache,no-store→不缓存，每次探测回源 GitHub，已知结果本地缓存(localStorage)+源文件 sha1；
+ * 并发硬上限 DEFAULT_CONCURRENCY=3，禁止调高；浏览器禁自定义 UA；重定向自动跟随，HEAD 404 直接判 dead(省一半请求)。
  */
 import {
   avatarDrawCardUrl,
