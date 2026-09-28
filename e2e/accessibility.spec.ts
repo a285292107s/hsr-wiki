@@ -9,11 +9,11 @@ import { waitForCatalogCards } from './helpers';
  * - 命中 KNOWN_VIOLATIONS（已裁决的既有缺陷）→ 降级为 warning，仅打印不失败
  * - 新增 serious/critical 违规 → 失败（守住回归防线）
  *
- * 已知缺陷裁决记录：
- * - color-contrast @ 首页侧边栏激活链接英文小字：tokens.css:824 用
- *   color-mix(in srgb, var(--metric-val) 55%, transparent) 半透明紫渲染 8px 英文，
- *   对比度不足 4.5:1（暗色背景上实测 ~3.2:1）。属设计令牌问题，修复需人工裁决
- *   （提高不透明度或换用 --metric-val 实色），故先登记放行。
+ * KNOWN_VIOLATIONS 为空是**实测结论**，不是遗漏：曾登记一条 color-contrast @
+ * 侧边栏激活链接英文小字（ui-sidebar-link__en，半透明主色 ~3.2:1）。核对发现
+ * 该违规的 axe impact 为 moderate，被下方 critical||serious 过滤挡在断言之外——
+ * 即该豁免从未真正豁免任何东西，且超期提醒也永不触发（whitewash 条目）。
+ * 因此移除；若日后确实出现 serious 级 color-contrast 违规，再按实测 target 重新登记。
  *
  * 注意：对比度规则对暗色游戏主题存在误报风险，新增 color-contrast 违规时
  * 先人工复核目标元素再决定 disable 或修复。
@@ -31,15 +31,7 @@ interface KnownViolation {
 /** 已知缺陷超过该天数未复查，运行 a11y 扫描时打印超期提醒 */
 const KNOWN_VIOLATION_REVIEW_DAYS = 30;
 
-const KNOWN_VIOLATIONS: KnownViolation[] = [
-  {
-    id: 'color-contrast',
-    targetContains: 'ui-sidebar-link__en',
-    note: '侧边栏激活链接英文小字半透明紫，对比度不足（tokens.css:824）',
-    // 登记时间早于机制启用，自机制启用日起计时
-    since: '2026-08-11',
-  },
-];
+const KNOWN_VIOLATIONS: KnownViolation[] = [];
 
 const PAGES = [
   { path: '/', label: '首页', wait: null },

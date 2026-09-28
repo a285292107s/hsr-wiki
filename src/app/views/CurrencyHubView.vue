@@ -1,7 +1,9 @@
 <script setup lang="ts">
 /**
  * 货币战争模式枢纽页（/currency）
- * 「交换」的落地目标，与 HomeView 对等的"模式之家"。
+ * 模式身份页与选路页，与 HomeView 对等。
+ * **不是「交换」的落点**：侧栏「交换」跳对方模式图签页（见 ADR 0016 决策 1）。
+ * 本页的到达方式 = CW 枢纽 Tab / `/` 的 CW_GATEWAY 网关行 / 枢纽滚轮上滚（≥1024px，Hero 内）。
  *
  * 视觉基调（V4 重构：官方背景视频 + 首页同构范式，双段式禁令）：
  * 第一段（素材豁免）：Hero 背景 = 官方货币战争活动页背景视频（2500×1080 宽幅循环，
@@ -15,21 +17,33 @@
  *
  * 页面结构镜像 HomeView：全屏视频 Hero（**右上标题范式**——视频主体居左侧，
  * 标题置右上平衡构图，scrim/标题位置调整见 currency-hub.css 注释）→ 板块索引行 → 页脚。
- * 赛季扩充说明（真实数据，season 转换器产物）置于 Hero 标题下方空间——
- * V4 重构曾移除（三轮对齐），2026-08-15 用户裁定恢复（唯一保留的 converter 数据源）。
  * 破坏性重构（三轮对齐裁定）：阵容档案表 / 机制泳道已移除，页面与其余数据源解耦。
- * 样式独立实现于 currency-hub.css（随路由懒加载），不抽 tokens 共享原语：
- * Hero 视频层与首页 Spine 场景的媒体来源/断点语义不同，共享仅能覆盖 scrim/content
- * 骨架，抽原语需连带改造首页（回归风险大于收益），故判定为不共享。
+ * 页内「枢纽切换按钮」（HubToggle）与「赛季扩充说明」均已移除（前者职责由侧栏「交换」
+ * 与枢纽滚轮上滚覆盖，后者为内容克制裁定），索引区新增末行「枢纽返回行」；
+ * 禁止再补赛季说明或页内模式切换按钮——决策见 ADR 0016。
+ * 样式独立实现于 currency-hub.css（随路由懒加载）：Hero 媒体层与首页 Spine 场景的来源/断点
+ * 语义不同，共享仅能覆盖 scrim/content 骨架，抽原语需连带改造首页（回归风险大于收益），
+ * 故 **Hero 媒体层不共享**；页脚骨架不在此列——`.nk-hub-footer` 是两页共用原语（声明于 tokens.css）。
  */
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 import { CW_NAV_ITEMS } from '../components/nav-items';
+import { useHubWheel } from '../composables/use-hub-wheel';
 import { CW_HERO_VIDEO, CW_HERO_POSTER } from '../../lib/constants';
-import { loadLocalCurrencySeasons } from '../../services/api';
-import type { CurrencySeason } from '../../services/types';
 // 货币战争模式专属样式（随本路由 chunk 懒加载）
 import '../../styles/currency-hub.css';
+
+/* ─── 枢纽滚轮（ADR 0016）：Hero 区内下滚 → 图签页 /currency/role；上滚 → 常规枢纽页 / ───
+   Hero 的 <section> 是独立 ref。本页 Hero **无 v-if 门控**（始终渲染），
+   故 composable 在 onMounted 即可完成绑定，无需额外 start()。
+   内容可达性：滚轮仅绑在本 Hero 上，鼠标移到下方板块索引行即恢复正常滚动。 */
+const heroRef = ref<HTMLElement | null>(null);
+useHubWheel({
+  router: useRouter(),
+  hero: heroRef,
+  downPath: '/currency/role',
+  upPath: '/',
+});
 
 /* ─── 板块入口：5 板块全部上线（路由与目录页配置均已注册，无占位） ─── */
 const sections = CW_NAV_ITEMS;
@@ -62,45 +76,8 @@ function onVisibilityChange(): void {
   }
 }
 
-/* ─── 赛季扩充说明（唯一 converter 数据源，标题下方空间展示） ─── */
-const seasons = ref<CurrencySeason[]>([]);
-
-/** 正文 → 段落数组（数据管线约定：字面 \n 分隔段落，此处按 (?:\n)+ 切分合并连续换行） */
-function bodyParas(s: CurrencySeason): string[] {
-  return s.body.split(/(?:\\n)+/).map((p) => p.trim()).filter(Boolean);
-}
-
-/** 概览 → { heading, items }（▌标题行 + ● 条目行；缺失返回 null） */
-function overviewOf(s: CurrencySeason): { heading: string; items: string[] } | null {
-  if (!s.overview) return null;
-  const lines = s.overview.split(/(?:\\n)+/).map((l) => l.trim()).filter(Boolean);
-  let heading = '';
-  const items: string[] = [];
-  for (const l of lines) {
-    if (l.startsWith('▌')) { heading = l.replace(/^▌\s*/, ''); continue; }
-    items.push(l.replace(/^●\s*/, ''));
-  }
-  return { heading: heading || '扩充内容概览', items };
-}
-
-/** 预解析赛季 → 段落 + 概览，避免模板内重复计算 */
-const seasonViews = computed(() =>
-  seasons.value.map((s) => ({
-    id: s.id,
-    title: s.title,
-    paras: bodyParas(s),
-    overview: overviewOf(s),
-  })),
-);
-
-onMounted(async () => {
+onMounted(() => {
   document.addEventListener('visibilitychange', onVisibilityChange);
-  try {
-    const sData = await loadLocalCurrencySeasons();
-    seasons.value = sData.seasons ?? [];
-  } catch {
-    /* 离线降级：赛季说明不展示，不影响页面其余部分 */
-  }
 });
 
 onBeforeUnmount(() => {
@@ -111,7 +88,7 @@ onBeforeUnmount(() => {
 <template>
   <div id="nk-cwhub-app">
     <!-- ═══ Hero：全屏官方背景视频（左下标题范式，镜像首页布局） ═══ -->
-    <section class="nk-cwhub-hero" aria-label="货币战争">
+    <section ref="heroRef" class="nk-cwhub-hero" aria-label="货币战争">
       <div class="nk-cwhub-hero__fallback" aria-hidden="true"></div>
       <img
         v-if="!REDUCE_MOTION"
@@ -144,43 +121,14 @@ onBeforeUnmount(() => {
         <p class="nk-cwhub-hero__tagline">
           赢者通吃的零和博弈。招募、羁绊、站位、策略，构筑你的最强阵容。
         </p>
-
-        <!-- ═══ 赛季扩充说明（真实数据，标题下方空间） ═══ -->
-        <!-- tabindex="0"：内部滚动容器需键盘可达（axe scrollable-region-focusable） -->
-        <section v-if="seasonViews.length" class="nk-cwhub-season" aria-label="赛季扩充说明" tabindex="0">
-          <article
-            v-for="s in seasonViews"
-            :key="s.id"
-            class="nk-cwhub-season__card"
-          >
-            <h2 class="nk-cwhub-season__title">{{ s.title }}</h2>
-            <div class="nk-cwhub-season__body">
-              <p v-for="(p, i) in s.paras" :key="i">{{ p }}</p>
-            </div>
-            <aside
-              v-if="s.overview"
-              class="nk-cwhub-season__overview"
-              aria-label="扩充内容概览"
-            >
-              <div class="nk-cwhub-season__ov-head">
-                <span class="nk-cwhub-season__ov-title">{{ s.overview.heading }}</span>
-              </div>
-              <ul class="nk-cwhub-season__ov-list">
-                <li
-                  v-for="(it, i) in s.overview.items"
-                  :key="i"
-                  class="nk-cwhub-season__ov-item"
-                >
-                  <span class="nk-cwhub-season__ov-text">{{ it }}</span>
-                </li>
-              </ul>
-            </aside>
-          </article>
-        </section>
       </div>
     </section>
 
-    <!-- ═══ 板块索引：编辑式索引行（镜像首页行范式，icon + 标题 + 箭头；无收录计数） ═══ -->
+    <!-- ═══ 板块索引：编辑式索引行（镜像首页行范式，icon + 标题 + 箭头；无收录计数） ═══
+         禁止在此补「设置 / 交换」工具组：桌面态（≥768px）本页不渲染侧栏是用户裁定的
+         无侧栏枢纽形态，工具组留在侧栏单一居所（见 CONTEXT.md「无侧栏枢纽」）。
+         末行「枢纽返回行」是该禁令的唯一例外（ADR 0016 决策 3），常规枢纽页 `/` **不得**
+         对称补行——`/` 的跨模式入口已由既有 CW_GATEWAY 网关行承担，对称补齐属重复入口。 -->
     <nav class="nk-cwhub-index" aria-label="货币战争板块">
       <RouterLink
         v-for="s in sections"
@@ -200,12 +148,36 @@ onBeforeUnmount(() => {
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
         ><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
       </RouterLink>
+
+      <!-- ═══ 枢纽返回行（ADR 0016 决策 3）：/currency → 常规模式首页 `/` ═══
+           必须复用 .nk-cwhub-index__row 原语（含 hover/active/焦点样式），禁止为此行新增 CSS。
+           不设 __desc：desc 承载板块收录描述，返回行无板块语义，补描述属伪造内容。
+           图标 = 房屋 SVG，与 nav-items.ts 的 CW_HUB_ITEM / NORMAL_HUB_ITEM 同族（枢纽 Tab 图标）。
+           它是桌面态（bareNav 不渲染侧栏）从深链 /currency 回到常规模式的唯一页内通路；
+           `/` 不设对应行（跨模式入口由 CW_GATEWAY 承担），禁止顺手对称补齐。 -->
+      <RouterLink to="/" class="nk-cwhub-index__row">
+        <span class="nk-cwhub-index__icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"
+          ><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>
+        </span>
+        <span class="nk-cwhub-index__body">
+          <span class="nk-cwhub-index__cn">返回常规模式</span>
+          <span class="nk-cwhub-index__en">BACK TO NORMAL</span>
+        </span>
+        <svg
+          class="nk-cwhub-index__arrow"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+        ><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </RouterLink>
     </nav>
 
-    <!-- 页脚：复用首页品牌 footer 范式（类定义在全局 catalog.css，令牌补齐见 currency-hub.css #nk-cwhub-app） -->
-    <footer class="nk-home-footer">
-      <p class="nk-home-footer__motto">愿此行，终抵群星</p>
-      <p class="nk-home-footer__latin">PER ASPERA AD ASTRA</p>
+    <!-- 页脚：跨页共享原语 .nk-hub-footer（声明于 tokens.css，与常规枢纽页共用同一份骨架） -->
+    <footer class="nk-hub-footer">
+      <p class="nk-hub-footer__motto">愿此行，终抵群星</p>
+      <p class="nk-hub-footer__latin">PER ASPERA AD ASTRA</p>
     </footer>
   </div>
 </template>

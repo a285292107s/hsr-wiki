@@ -65,7 +65,7 @@
   flex-wrap: wrap;
   gap: 4px 0;
   margin-bottom: 16px;
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.66rem;
   letter-spacing: 0.14em;
   color: var(--text2);
@@ -117,7 +117,7 @@
 }
 
 .nk-mob-sec__en {
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.58rem;
   letter-spacing: 0.18em;
   color: var(--text3);
@@ -165,7 +165,7 @@
 
 .nk-mob-resist__label {
   flex: 0 0 80px;
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.64rem;
   letter-spacing: 0.1em;
   color: var(--text3);
@@ -210,7 +210,7 @@
 .nk-mob-stat__label {
   display: block;
   margin: 0 0 8px;
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.6rem;
   letter-spacing: 0.14em;
   color: var(--text3);
@@ -267,7 +267,7 @@
 /* 技能标签（单攻/扩散/锁定…）：等宽弱化处理，不喧宾夺主 */
 .nk-mob-skill__tag {
   flex: none;
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.6rem;
   letter-spacing: 0.12em;
   color: var(--accent);
@@ -279,7 +279,7 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.64rem;
   letter-spacing: 0.1em;
   color: var(--text3);

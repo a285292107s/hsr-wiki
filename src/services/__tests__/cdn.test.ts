@@ -10,7 +10,6 @@
 import { afterEach, beforeEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { CDN, setUseOfficialPaths } from '../../lib/constants';
 import {
-  CDN_CATEGORIES,
   CDN_STALL_TIMEOUT_MS,
   JS_DELIVR_BASE,
   JS_DELIVR_UI3D_BASE,
@@ -450,14 +449,5 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     expect(img.dataset.cdnDown).toBe('1');
     off();
     img.remove();
-  });
-});
-
-describe('CDN_CATEGORIES 注册表完整性', () => {
-  it('全部分类均注册 nanoka 子路径且非空', () => {
-    for (const [cat, spec] of Object.entries(CDN_CATEGORIES)) {
-      expect(spec.nanoka.length, `${cat} nanoka 子路径为空`).toBeGreaterThan(0);
-      expect(spec.nanoka.endsWith('/'), `${cat} 子路径不应以 / 结尾`).toBe(false);
-    }
   });
 });

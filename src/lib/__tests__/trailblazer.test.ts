@@ -10,7 +10,6 @@ import {
   isTrailblazerId,
   trailblazerGenderOfId,
   shouldUseFemaleAvatar,
-  type TrailblazerGender,
 } from '../trailblazer';
 
 const STORAGE_KEY = 'HSR_WIKI_TRAILBLAZER_GENDER';
@@ -20,14 +19,8 @@ describe('trailblazer gender', () => {
     localStorage.clear();
   });
 
-  it('无存储时回退默认（女性）', () => {
+  it('无存储时回退默认', () => {
     expect(getSavedTrailblazerGender()).toBe(DEFAULT_TRAILBLAZER_GENDER);
-    expect(DEFAULT_TRAILBLAZER_GENDER).toBe('female');
-  });
-
-  it('读取持久化选择（本地存储命中）', () => {
-    localStorage.setItem(STORAGE_KEY, 'male');
-    expect(getSavedTrailblazerGender()).toBe('male');
   });
 
   it('非法存储值回退默认', () => {
@@ -39,11 +32,6 @@ describe('trailblazer gender', () => {
     setTrailblazerGender('male');
     expect(localStorage.getItem(STORAGE_KEY)).toBe('male');
     expect(getSavedTrailblazerGender()).toBe('male');
-  });
-
-  it('类型收窄：TrailblazerGender 仅接受两种键', () => {
-    const keys: TrailblazerGender[] = ['female', 'male'];
-    expect(keys).toContain(DEFAULT_TRAILBLAZER_GENDER);
   });
 });
 

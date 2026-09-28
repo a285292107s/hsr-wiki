@@ -6,13 +6,14 @@ import { collectConsoleIssues, findHorizontalOverflow, waitForCatalogCards } fro
  * 布局验收（AGENTS.md T1b/T2 的自动化落地）
  *
  * 覆盖四类关键页面：
- * - /          常规首页（hero + 导航行）
+ * - /          常规枢纽页（hero + 导航行；meta.bareNav → 全断点无导航条）
  * - /character 目录页（虚拟滚动网格，卡片模板字符串渲染）
  * - /endgame   终局合并单页
- * - /currency  货币战争 Hub（meta.cw → <html data-theme="cw"> 主题）
+ * - /currency  货币战争枢纽页（meta.cw → <html data-theme="cw"> 主题，同 meta.bareNav）
  * - /currency/settings  货币战争设置（CW 主题色选择 → <html data-cw-accent>）
  *
  * 每页统一断言：无未捕获 JS 异常 + 无横向溢出 + 关键结构存在。
+ * 侧栏结构用例（折叠 / 调试台入口）一律落在非枢纽页——枢纽页按设计全断点不渲染导航条。
  */
 
 test.describe('布局验收：常规主题', () => {
@@ -89,7 +90,7 @@ test.describe('布局验收：导航动态溢出折叠', () => {
   test('窄视口：可见项恒为规范序前缀，尾部折叠进"更多"抽屉', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 320, height: 700 });
-    await page.goto('/');
+    await page.goto('/settings');
     // 320px 常规模式 8 导航项放不下 → 至少折叠出"更多"入口
     await expect(page.locator('.ui-sidebar-more')).toBeVisible();
     const anchors = await collectNavAnchors(page);
@@ -112,7 +113,7 @@ test.describe('布局验收：导航动态溢出折叠', () => {
   test('宽视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto('/');
+    await page.goto('/settings');
     await expect(page.locator('.ui-sidebar-more')).toBeHidden();
     // 无折叠项渲染；全部导航锚点可见
     await expect(page.locator('a.ui-sidebar-link--in-more')).toHaveCount(0);
@@ -124,13 +125,135 @@ test.describe('布局验收：导航动态溢出折叠', () => {
   });
 });
 
+/** 读取 <html> 上的内容区避让令牌（断言 --nk-content-offset 的实际落值，单位 px）。
+ *  注意：自定义属性按原样返回（手机断点声明为无单位 `0`），故必须 parseFloat 归一化。 */
+async function readContentOffset(page: import('@playwright/test').Page): Promise<number> {
+  return page.locator('html').evaluate((el) =>
+    parseFloat(getComputedStyle(el).getPropertyValue('--nk-content-offset')) || 0,
+  );
+}
+
+test.describe('布局验收：枢纽页无侧栏', () => {
+  test('桌面（1280px）：/ 与 /currency 不渲染侧栏，避让回退为 48px 页面留白', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    await page.goto('/');
+    await expect(page.locator('.nk-home-hero__title')).toBeVisible();
+    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
+    await expect(page.locator('html')).toHaveAttribute('data-nav', 'bare');
+    expect(await readContentOffset(page)).toBe(48);
+    // 令牌真实生效：Hero 标题区左缘 = 页面留白，与自身右缘（48px）对称
+    await expect(page.locator('.nk-home-hero__content')).toHaveCSS('padding-left', '48px');
+
+    await page.goto('/currency');
+    await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
+    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
+    await expect(page.locator('html')).toHaveAttribute('data-nav', 'bare');
+    expect(await readContentOffset(page)).toBe(48);
+    await expect(page.locator('.nk-cwhub-index')).toHaveCSS('padding-left', '48px');
+
+    // 客户端路由切换（非整页加载）的主流程：从枢纽页进入板块后侧栏回归、data-nav 撤下
+    // （App.vue 的 v-if 与 bareNav watcher 生效，令牌回到 148px 侧栏避让）
+    await page.locator('.nk-cwhub-index__row').first().click();
+    await expect(page.locator('.ui-sidebar')).toBeVisible();
+    await expect(page.locator('html')).not.toHaveAttribute('data-nav', 'bare');
+    expect(await readContentOffset(page)).toBe(148);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('平板（800px）：/ 无侧栏，避让回退为 32px 页面留白', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 800, height: 900 });
+    await page.goto('/');
+    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
+    expect(await readContentOffset(page)).toBe(32);
+    await expect(page.locator('.nk-home-nav')).toHaveCSS('padding-left', '32px');
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('手机（390px）：枢纽页不渲染导航条（全断点无导航），无左侧避让', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/currency');
+    // data-nav 恒挂（断点无关）；手机底部栏同样隐藏——枢纽页身份是「选路」，页内索引即导航
+    await expect(page.locator('html')).toHaveAttribute('data-nav', 'bare');
+    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
+    expect(await readContentOffset(page)).toBe(0);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('非枢纽页（/character）：侧栏与 148px 避让照常，无 data-nav', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/character');
+    await waitForCatalogCards(page);
+    await expect(page.locator('.ui-sidebar')).toBeVisible();
+    await expect(page.locator('html')).not.toHaveAttribute('data-nav', 'bare');
+    expect(await readContentOffset(page)).toBe(148);
+    assertNoErrors();
+  });
+});
+
+test.describe('布局验收：枢纽页共享页脚原语', () => {
+  test('/ 与 /currency 共用 .nk-hub-footer（声明于 tokens.css），全断点留白正确', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    for (const path of ['/', '/currency'] as const) {
+      await page.goto(path);
+      const footer = page.locator('.nk-hub-footer');
+      await expect(footer).toHaveCount(1);
+      // 旧首页命名类必须已消失（跨页原语中性化的回归防线）
+      await expect(page.locator('.nk-home-footer')).toHaveCount(0);
+      // 桌面：右缘 40 + 枢纽页无侧栏回退的 48 左缘留白
+      await expect(footer).toHaveCSS('padding-left', '48px');
+      await expect(footer).toHaveCSS('padding-right', '40px');
+      // 拉丁格言消费全站等宽令牌 --font-mono（令牌缺失会回退默认字体，视觉不易察觉）
+      const font = await footer.locator('.nk-hub-footer__latin').evaluate(
+        (el) => getComputedStyle(el).fontFamily,
+      );
+      expect(font).toContain('ui-monospace');
+    }
+    // 手机：枢纽页无导航条（全断点），页脚不再为旧底部栏预留 56px——
+    // 仅 24px 呼吸 + safe-area（headless 无 safe-area，故恰好为 24）
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
+    const padBottom = await page.locator('.nk-hub-footer').evaluate(
+      (el) => parseFloat(getComputedStyle(el).paddingBottom),
+    );
+    expect(padBottom).toBeGreaterThanOrEqual(16);
+    expect(padBottom).toBeLessThan(56);
+    expect(await findHorizontalOverflow(page)).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('全站等宽令牌 --font-mono：单点声明 + 目录页消费（裸字面量回归防线）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/character');
+    await waitForCatalogCards(page);
+    // 令牌缺失时 var(--font-mono) 会静默继承父级字体（视觉不易察觉），故同时锁声明点与一个消费方；
+    // 全站裸字面量已收口为 0 处（收口裁定见 docs/memory/2026-09.md）
+    const token = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--font-mono'),
+    );
+    expect(token).toContain('ui-monospace');
+    await expect(page.locator('.nk-cat-count').first()).toHaveCSS('font-family', /ui-monospace/);
+    assertNoErrors();
+  });
+});
+
 test.describe('布局验收：研究线调试台 dev 入口', () => {
   /** e2e 全程 dev server（import.meta.env.DEV=true）：调试台入口应渲染。
    *  手机隐藏由 CSS 承担；平板/桌面竖排侧栏显示于设置按钮上方。 */
   test('平板/桌面（≥768px）：调试台入口可见且位于设置上方', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto('/');
+    await page.goto('/settings');
     const debugLink = page.locator('.ui-sidebar-debug');
     await expect(debugLink).toBeVisible();
     await expect(debugLink).toHaveAttribute('href', '/debug');
@@ -144,16 +267,12 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
     assertNoErrors();
   });
 
-  test('平板窄栏（≥768px 图标侧栏）：调试台入口可见', async ({ page }) => {
-    await page.setViewportSize({ width: 800, height: 900 });
-    await page.goto('/');
-    await expect(page.locator('.ui-sidebar-debug')).toBeVisible();
-  });
-
   test('手机（<768px）：调试台入口隐藏，导航折叠不受影响', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/');
+    // 必须落在非枢纽页：枢纽页（meta.bareNav）全断点不渲染导航条，折叠断言会退化为空断言
+    await page.goto('/character');
+    await waitForCatalogCards(page);
     await expect(page.locator('.ui-sidebar-debug')).toBeHidden();
     const anchors = await collectNavAnchors(page);
     expect(anchors.length).toBeGreaterThan(1);

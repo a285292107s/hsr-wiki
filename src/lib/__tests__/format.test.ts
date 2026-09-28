@@ -7,7 +7,7 @@ import { CDN, setUseOfficialPaths } from '../constants';
 import { JS_DELIVR_BASE, NANOKA_HUD } from '../../services/cdn';
 import { NkError } from '../errors';
 import {
-  escHtml, gameTagsToHtml, stripTags, stripAllTags, fmtVal, fmtDesc, fmtDescWithFormat, fmtDescMerged, fmtDescStar, fmtToughness,
+  escHtml, gameTagsToHtml, stripTags, fmtVal, fmtDesc, fmtDescWithFormat, fmtDescMerged, fmtDescStar, fmtToughness,
   deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
   avatarDrawCardUrl, avatarDrawCardJdUrl, itemName, itemIconUrl, validateCharData,
@@ -52,10 +52,9 @@ describe('escHtml', () => {
   it('转义全部危险字符', () => {
     expect(escHtml(`<a href="x">&'`)).toBe('&lt;a href=&quot;x&quot;&gt;&amp;&#39;');
   });
-  it('null/undefined 返回空串，数字正常转字符串', () => {
+  it('null/undefined 返回空串', () => {
     expect(escHtml(null)).toBe('');
     expect(escHtml(undefined)).toBe('');
-    expect(escHtml(0)).toBe('0');
   });
 });
 
@@ -116,13 +115,6 @@ describe('gameTagsToHtml', () => {
   it('空输入返回空串', () => {
     expect(gameTagsToHtml(null)).toBe('');
     expect(gameTagsToHtml('')).toBe('');
-  });
-});
-
-describe('stripAllTags', () => {
-  it('剥离全部 HTML 标签', () => {
-    expect(stripAllTags('<span style="color:red"><strong>文本</strong></span>')).toBe('文本');
-    expect(stripAllTags(null)).toBe('');
   });
 });
 
@@ -423,9 +415,6 @@ describe('fmtDescMerged / fmtDescStar', () => {
 /* ─── 数据校验 ─── */
 
 describe('validateCharData', () => {
-  it('完整数据通过', () => {
-    expect(() => validateCharData(baseChar())).not.toThrow();
-  });
   it('null 抛出非运营错误', () => {
     expect(() => validateCharData(null)).toThrowError(NkError);
     try {

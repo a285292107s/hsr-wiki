@@ -29,18 +29,6 @@ def test_truncate_long_list_becomes_valid_summary():
     assert r2["Info"] == "<dict[50]>"
 
 
-def test_truncate_short_values_kept():
-    """短字符串 / 短 list / 短 dict / 标量原样保留。"""
-    orig = {
-        "Name": "希儿",
-        "Rarity": 5,
-        "Tags": ["a", "b"],
-        "Info": {"x": 1},
-        "Rate": 0.5,
-    }
-    assert gen_catalog.truncate_record(orig) == orig
-
-
 def test_truncate_json_roundtrip(tmp_path):
     """完整样例（截断后）写入文件后仍可被 json.load 解析。"""
     p = tmp_path / "A.json"

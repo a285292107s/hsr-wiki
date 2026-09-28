@@ -276,6 +276,12 @@
   --badge-test: #F59E0B;
   --font-hud: 'Orbitron', monospace;
   --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  /* 全站唯一等宽族声明点（编辑式元信息小字：枢纽页元信息 / 目录页头 / 怪物卡分类 / 侧栏英文）。
+     所有等宽栈必须引用本令牌，禁止在页面 CSS 或 SFC scoped 里重复字面量。
+     研究线调试台（/debug）另用两条栈（ui-monospace, monospace；SystemMapSection 的
+     ui-monospace, 'SF Mono', Consolas, monospace），属研究线专用、不并入本令牌
+     （用户裁定：dev-only 面板不属产品面视觉体系），收口时禁止一并改掉。 */
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
   --ease: cubic-bezier(0.16,1,0.3,1);
   /* 布局宽度令牌：页面内容统一边界 / 正文可读行宽
      三层宽度系列：detail 展示层 1000 / struct 结构层 952 / prose 阅读层 800 */
@@ -283,7 +289,8 @@
   /* 内容区侧栏避让（单一事实源，禁止视图写死数字）：
      0（手机，侧栏为底部栏）/ 88（= 平板侧栏 56 + 缘距 32）/ 148（= 桌面文字侧栏 140 + 缘距 8）。
      视图容器统一以 padding-left / left / margin-left = var(--nk-content-offset) 引用，
-     侧栏宽度变更只改本变量（ADR 0003 fixed 侧栏 + 手动避让架构的收口，防遗漏漂移）。 */
+     侧栏宽度变更只改本变量（ADR 0003 fixed 侧栏 + 手动避让架构的收口，防遗漏漂移）。
+     枢纽页（App.vue 挂 data-nav="bare"）隐藏侧栏后避让失去对象，由下方断点重映射覆写为页面留白。 */
   --nk-content-offset: 0;
   --nk-detail-max: 1000px;
   --nk-struct-max: 952px;
@@ -330,6 +337,15 @@
 }
 @media (min-width: 1024px) {
   :root { --nk-content-offset: 148px; }
+}
+/* 枢纽页（/ 与 /currency）无侧栏：避让失去对象，回退为与页面右缘留白对称的页面留白
+   （平板 32 = 页内导航右缘 32；桌面 48 = 首页 Hero 标题区右缘 48）。
+   特异性 (0,2,0) 高于上方 :root (0,1,0)，不依赖书写顺序、也不受断点块顺序影响。 */
+@media (min-width: 768px) {
+  :root[data-nav="bare"] { --nk-content-offset: 32px; }
+}
+@media (min-width: 1024px) {
+  :root[data-nav="bare"] { --nk-content-offset: 48px; }
 }
 
 /* ═══ 货币战争模式：全壳主题（黑底 + 主题主色；缺省香槟金，可经 data-cw-accent 切换） ═══
@@ -472,9 +488,24 @@
 }
 
 /* 主题切换瞬间的渐变过渡（App.vue 临时挂载 ~450ms 后移除，
-   避免常驻 transition 干扰日常 hover 响应速度） */
+   避免常驻 transition 干扰日常 hover 响应速度）。
+
+   本条必须【排除路由视图根】：本规则是 `!important` 的 shorthand，而 shorthand 会一次性
+   把 `transition-property` 设成「仅四个颜色属性」，从而**整体覆盖**视图通道在
+   `.nk-view-*-enter/leave-active` 里声明的 `opacity`/`transform` → 浏览器不插值 →
+   主题翻转的那次导航（唯一翻转 meta.cw 的导航就是 `/` ↔ `/currency`）会**一帧硬切**，
+   本轮的模式置换过渡（nk-view-swap）永不渲染。故第 2 个选择器必须保留
+   `:not([class*="nk-view-"])`：视图根自身要跑 opacity/transform，其**后代会继续被本规则
+   命中**（后代不带该前缀），主题「褪色重染」观感不受影响。
+
+   **禁止**删掉第 2 个选择器里的 `:not([class*="nk-view-"])`（删掉即视图过渡被吃掉）。
+   **禁止**改回 `transition-property: <四个颜色> !important`：它同样把 `transition-property`
+   限定为仅颜色，视图的 opacity/transform 依旧被排除，**实测中间帧为 0，不成立**。
+   **禁止**改成 `transition: all`（会让位移/透明度以外的一切属性参与过渡并放大开销）。
+   可验证锚点：主题过渡期间视图根 computed `transition-property` 必须为 `opacity, transform`
+   且存在中间帧；普通元素仍为四色 / 0.4s。 */
 .theme-transitioning,
-.theme-transitioning *,
+.theme-transitioning *:not([class*="nk-view-"]),
 .theme-transitioning *::before,
 .theme-transitioning *::after {
   transition: background-color 400ms var(--nk-ease-out),
@@ -882,6 +913,45 @@ background-position: center 15%;
 
 /* ═══════════════════════════════════════════
    页面切换过渡（Vue Transition 类名，方向由 navDir 决定）
+
+   ▍形态：交叉过渡（术语见 CONTEXT.md「页面过渡」）——离场段与进场段时间上重叠，
+     不留「空窗」。本段历史上是串行转场（Vue `mode="out-in"`，旧页走光新页才进），
+     已废弃；禁止恢复 `mode="out-in"`（改在 App.vue 的 <Transition>，改回即空窗回归）。
+
+   ▍叠层方向：离场视图必须在上层（进场视图在下层）。
+     两页**都脱离文档流**：目录页/首页的根元素自身就是 `position: absolute`
+     （catalog.css `#nk-catalog-app` / `#nk-home-app`），离场页另由下方
+     leave-active 规则补 `position: absolute` —— 故**禁止**在任何地方断言
+     「进场视图在文档流内」，该前提不成立，会导出「DOM 顺序足以定层」的错误结论。
+     实测 DOM 顺序是 [旧页, 新页]（新页在后），**不加干预时是「进场页在上」，与目标相反**
+     ——故**必须**给离场页 `z-index: 1` 强制「旧页在上」；禁止删除该 z-index
+     （删掉即叠层方向反转，离场页被压在进场页下，位移与淡出看不见）。
+     两页均脱离文档流 + 均非 static，DOM 顺序成为唯一决定因素 → 只能靠 z-index 强制，
+     **禁止**「顺手删掉 z-index，以为 DOM 顺序能保证叠层方向」。
+     证据锚点：elementFromPoint 命中测试实测 + Vue patcher 的 anchor 语义（新节点插在旧节点之后）。
+     `1` 是刻意选的最小安全值：`#app` 无层叠上下文，侧栏 100000 / Toast 99999 / 颗粒层 100001
+     远高于 1，不会被盖住；**禁止**把它升到 9999+ 这类值去抢层。
+
+   ▍错峰：离场段立即起步且较长（0.26s），进场段延后 60ms 起步且略短（0.22s）。
+     两者是四段式 Transition 下的时长对称安排，禁止改回等长同时长（叠影发灰）。
+     注意 `transition-delay` 会同时作用于 opacity 与 transform，这是预期行为。
+
+   ▍第四通道「模式置换过渡」（nk-view-swap）：两个枢纽页互切（`/` ↔ `/currency`）
+      专属，判定在 App.vue（两页 `meta.bareNav` 皆为真）——本段只负责样式。
+      存在理由：该切换同时翻转整个外壳主题（常规 ↔ 货币战争黑金）与侧栏，是全站视觉
+      变化最大的一次，却由滚轮手势高频驱动（ADR 0016）；落在 fade（±8px、0.22s）上时
+      最强的视觉变化配了最弱的动效，即用户反馈的「生硬」。故位移放大到 ±40px（大于
+      fwd/back 的 ±24px，为全段最强）、时长加长、错峰拉到 80ms。
+      方向是单向「替换」：新世界自右推入（enter-from `+40px`）、旧世界向左退出
+      （leave-to `-40px`），不区分前进/返回——枢纽之间无层级深浅，那两页的 navDir 恒为 0。
+      **禁止**把 swap 并入 fade 或 fwd/back，也**禁止**让枢纽互切回落到 fade：
+      三者位移/时长语义不同（swap 单向替换 vs fwd/back 双向层级 vs fade 无层级淡出）。
+      swap 的定位规则必须留在下方合并选择器组内（`position: absolute` + `z-index: 1`），
+      **禁止**删除其 `z-index: 1`（删掉即叠层方向反转，替换位移被进场页盖住而看不见）。
+      手机（<768px）**不出现** swap：App.vue 的 `transitionName` 在手机恒返回
+      `nk-view-fade`，故下方手机块无需（也不得）声明 swap 类名。
+      `prefers-reduced-motion: reduce` 下 swap 仍然出现（桌面减弱动效用户会走到该通道），
+      故 reduce 块**必须**覆盖 swap 并把 transform 置 `none`。
 ═══════════════════════════════════════════ */
 .nk-view-fwd-enter-from { opacity: 0; transform: translateX(24px); }
 .nk-view-fwd-leave-to { opacity: 0; transform: translateX(-24px); }
@@ -889,23 +959,52 @@ background-position: center 15%;
 .nk-view-back-leave-to { opacity: 0; transform: translateX(24px); }
 .nk-view-fade-enter-from { opacity: 0; transform: translateY(8px); }
 .nk-view-fade-leave-to { opacity: 0; transform: translateY(-8px); }
-.nk-view-fwd-enter-active, .nk-view-fwd-leave-active,
-.nk-view-back-enter-active, .nk-view-back-leave-active,
-.nk-view-fade-enter-active, .nk-view-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
-/* 离屏页面退出文档流，避免过渡期间出现双滚动条 */
-.nk-view-fwd-leave-active, .nk-view-back-leave-active, .nk-view-fade-leave-active { position: absolute; inset: 0; }
-/* 手机断点：纯淡入淡出、无位移、更快速，消除底部导航切换闪烁 */
+/* 模式置换位移目标：±40px，单向「替换」（见段首「第四通道」）。禁止缩小到 fwd/back 的 24px */
+.nk-view-swap-enter-from { opacity: 0; transform: translateX(40px); }
+.nk-view-swap-leave-to { opacity: 0; transform: translateX(-40px); }
+
+/* 离场段：立即起步、无 transition-delay */
+.nk-view-fwd-leave-active,
+.nk-view-back-leave-active,
+.nk-view-fade-leave-active { transition: opacity 0.26s var(--nk-ease-out), transform 0.26s var(--nk-ease-out); }
+/* 进场段：错峰延后 60ms 起步、时长 0.22s */
+.nk-view-fwd-enter-active,
+.nk-view-back-enter-active,
+.nk-view-fade-enter-active { transition: opacity 0.22s var(--nk-ease-out), transform 0.22s var(--nk-ease-out); transition-delay: 60ms; }
+/* 模式置换的错峰比常规分支更长，匹配更大的位移：leave 0.34s 立即起步、enter 0.30s 延后 80ms */
+.nk-view-swap-leave-active { transition: opacity 0.34s var(--nk-ease-out), transform 0.34s var(--nk-ease-out); }
+.nk-view-swap-enter-active { transition: opacity 0.30s var(--nk-ease-out), transform 0.30s var(--nk-ease-out); transition-delay: 80ms; }
+
+/* 离场页脱离文档流 + 强制「旧页在上」（见段首「叠层方向」）：
+   `position: absolute` 让离场页不再参与文档流（与已 absolute 的目录页/首页根元素一致）；
+   `z-index: 1` 抵消实测的 [旧页, 新页] 顺序（不加则为进场页在上）。禁止删除任一条。
+   本规则同时也是手机/reduced-motion 两块的叠层来源：那两块只覆写 transition，
+   不重复声明 position/z-index，**禁止**在那里加 `position: static` 之类的覆写。 */
+.nk-view-fwd-leave-active, .nk-view-back-leave-active, .nk-view-fade-leave-active, .nk-view-swap-leave-active { position: absolute; inset: 0; z-index: 1; }
+
+/* 手机断点：纯淡入淡出、无位移、更快速，消除底部导航切换闪烁。
+   降级必须同时满足「交叉 + 错峰 + 无位移」：leave 0.14s / enter 0.12s + 60ms 延迟。 */
 @media (max-width: 767px) {
   .nk-view-fade-enter-from, .nk-view-fade-leave-to { opacity: 0; transform: none; }
-  .nk-view-fade-enter-active, .nk-view-fade-leave-active { transition: opacity 0.12s ease; }
+  .nk-view-fade-leave-active { transition: opacity 0.14s var(--nk-ease-out); }
+  .nk-view-fade-enter-active { transition: opacity 0.12s var(--nk-ease-out); transition-delay: 60ms; }
 }
+
+/* 减弱动效偏好：只留淡入淡出、无位移，但保留错峰节奏（禁止改为串行或加长时长） */
 @media (prefers-reduced-motion: reduce) {
   .nk-view-fwd-enter-from, .nk-view-fwd-leave-to,
   .nk-view-back-enter-from, .nk-view-back-leave-to,
-  .nk-view-fade-enter-from, .nk-view-fade-leave-to { opacity: 0; transform: none; }
-  .nk-view-fwd-enter-active, .nk-view-fwd-leave-active,
-  .nk-view-back-enter-active, .nk-view-back-leave-active,
-  .nk-view-fade-enter-active, .nk-view-fade-leave-active { transition: opacity 0.2s ease; }
+  .nk-view-fade-enter-from, .nk-view-fade-leave-to,
+  .nk-view-swap-enter-from, .nk-view-swap-leave-to { opacity: 0; transform: none; }
+  /* 本块不重复 `position/z-index`：绝对值继承自段内主规则，此处只改时长 */
+  .nk-view-fwd-leave-active,
+  .nk-view-back-leave-active,
+  .nk-view-fade-leave-active,
+  .nk-view-swap-leave-active { transition: opacity 0.14s var(--nk-ease-out); }
+  .nk-view-fwd-enter-active,
+  .nk-view-back-enter-active,
+  .nk-view-fade-enter-active,
+  .nk-view-swap-enter-active { transition: opacity 0.12s var(--nk-ease-out); transition-delay: 60ms; }
 }
 
 /* ═══════════════════════════════════════════
@@ -1005,6 +1104,25 @@ img[data-cdn-down] { visibility: hidden; }
 .nk-error-state__retry:hover { box-shadow: 0 0 20px var(--primary-glow); transform: translateY(-1px); }
 
 /* ═══════════════════════════════════════════
+   枢纽页共享原语：页脚（品牌标语 + 拉丁格言）
+   两个模式的枢纽页（`/` 与 `/currency`）共用同一段页脚骨架，故声明在全局原语层而非任一页面 CSS；
+   断点随原语就近（桌面基准 → 平板 → 手机），避让值统一取 --nk-content-offset。
+   消费方：HomeView.vue / CurrencyHubView.vue；登记于 docs/agents/ui-design.md §1。
+═══════════════════════════════════════════ */
+.nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 48px var(--nk-content-offset); text-align: center; }
+.nk-hub-footer__motto { font-family: var(--font-body); font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.24em; color: var(--text-bright); }
+.nk-hub-footer__latin { margin: 16px 0 0; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.3em; color: var(--text3); }
+/* 平板（768-1023px）：中等密度 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-hub-footer { padding: 56px 32px 40px var(--nk-content-offset); }
+}
+/* 手机（<768px）：枢纽页全断点无导航条（App.vue bareNav），底部不再预留 56px 导航高度，
+   只留 24px 呼吸 + safe-area，以免手机手势条压住末行文案 */
+@media (max-width: 767px) {
+  .nk-hub-footer { padding: 48px 20px calc(24px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ═══════════════════════════════════════════
    响应式断点
    手机  : max-width  767px
    平板  : min-width  768px
@@ -1085,7 +1203,7 @@ img[data-cdn-down] { visibility: hidden; }
   .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
   .ui-sidebar-link__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
   .ui-sidebar-link__cn { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; transition: color 0.2s; }
-  .ui-sidebar-link__en { font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; font-size: 0.5rem; letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ui-sidebar-link__en { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ui-sidebar-link:hover { background: var(--nk-shell-hover); }
   .ui-sidebar-link:hover .ui-sidebar-link__cn { color: var(--text-bright); }
   .ui-sidebar-link--active { background: var(--nk-shell-active-bg); }

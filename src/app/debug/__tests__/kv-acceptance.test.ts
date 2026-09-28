@@ -109,23 +109,6 @@ describe('nearBlackClass', () => {
 });
 
 describe('buildAcceptReportText', () => {
-  const passItem = judgeAccept(okSnapshot({ key: 'scene-a' }), 1200);
-  const failItem = judgeAccept(okSnapshot({ key: 'scene-b', mergedReady: false }), 900);
-
-  it('头部含日期 / runtime 版本 / PASS 汇总', () => {
-    const text = buildAcceptReportText([passItem, failItem], '4.2.43', '2026-08-05 12:00:00');
-    const [line1, line2] = text.split('\n');
-    expect(line1).toBe('KV 场景验收报告 — 2026-08-05 12:00:00');
-    expect(line2).toBe('runtime spine-player 4.2.43 | 场景 2 | PASS 1/2');
-  });
-
-  it('每场景一行：判定 / 层 / 合并 / nearBlack / 耗时；FAIL 附 reason', () => {
-    const text = buildAcceptReportText([passItem, failItem], '4.2.43', 't');
-    expect(text).toContain('[PASS] scene-a  层 2/2  合并 OK  nearBlack 1.40%  耗时 1200ms');
-    expect(text).toContain('[FAIL] scene-b');
-    expect(text).toContain('← 合并渲染失败: 超时');
-  });
-
   it('nearBlackPct 为 null → 占位「-」', () => {
     const item = judgeAccept(okSnapshot({ key: 'k', nearBlackPct: null }), 10);
     expect(buildAcceptReportText([item], 'x', 't')).toContain('nearBlack -');

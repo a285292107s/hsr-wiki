@@ -5,10 +5,11 @@
  * 板块入口由卡片网格改为编辑式索引（战斗 / 情报 / 独立模式分组）。
  * 移除原 HUD 电玩元素：逐字标题动画 / SCROLL 指示 / 3D 倾斜 / 全息扫光 / 漫射发光。
  */
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
+import { useHubWheel } from '../composables/use-hub-wheel';
 import { prefetchHighPriority } from '../router/chunks';
 import { initSpineSceneViewer } from '../character/spine';
 import { loadLocalCharacterList } from '../../services/api';
@@ -185,6 +186,24 @@ function onBreakpointChange(): void {
   }
 }
 
+/* ─── 枢纽滚轮（ADR 0016）：Hero 区内下滚 → 图签页 /character；上滚 → CW 枢纽页 /currency ───
+   Hero 的 <section> 是独立 ref（禁止复用 spineRef：后者挂在 Hero 内的背景层上，两者生命周期不同）。
+   绑定时机：Hero 位于 `v-else`（loading 门控）内，**onMounted 时尚未入 DOM**——
+   composable 在 onMounted 快照 hero.value，若此时为 null 则永不绑定。故必须用 watch 等它真正挂载，
+   且 watch 只在 null → 元素 时执行一次（flushing 默认 pre，元素入 DOM 后触发，无需额外 nextTick）。 */
+const heroRef = ref<HTMLElement | null>(null);
+const router = useRouter();
+const hubWheel = useHubWheel({
+  router,
+  hero: heroRef,
+  downPath: '/character',
+  upPath: '/currency',
+});
+watch(heroRef, (el) => {
+  // Hero 一旦挂载即绑定滚轮；卸载由 composable 的 onBeforeUnmount 兜底
+  if (el) hubWheel.start();
+}, { once: true });
+
 onMounted(() => {
   prefetchHighPriority();
   // 游戏版本后台加载（本地 version.json；未生成时静默降级为 —）
@@ -213,7 +232,7 @@ onBeforeUnmount(() => {
   <div id="nk-home-app">
     <div v-if="loading" class="nk-loading">LOADING</div>
     <template v-else>
-      <section class="nk-home-hero">
+      <section ref="heroRef" class="nk-home-hero">
         <div v-if="isSpine" ref="spineRef" class="nk-home-hero__spine" :class="{ 'nk-on': spineReady }"></div>
         <div v-else class="nk-home-hero__arts" aria-hidden="true">
           <div
@@ -261,9 +280,10 @@ onBeforeUnmount(() => {
         </div>
       </nav>
 
-      <footer class="nk-home-footer">
-        <p class="nk-home-footer__motto">愿此行，终抵群星</p>
-        <p class="nk-home-footer__latin">PER ASPERA AD ASTRA</p>
+      <!-- 页脚：跨页共享原语，与 CW 枢纽页共用（声明于 tokens.css，禁止在两页各写一份） -->
+      <footer class="nk-hub-footer">
+        <p class="nk-hub-footer__motto">愿此行，终抵群星</p>
+        <p class="nk-hub-footer__latin">PER ASPERA AD ASTRA</p>
       </footer>
     </template>
   </div>

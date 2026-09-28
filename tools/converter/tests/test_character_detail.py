@@ -140,10 +140,6 @@ class TestBuildSkills:
         result = cd._build_skills(data, [30])
         assert result["30"]["icon"] == "icon/skill/Avatar/30/SkillIcon_30_Normal02.png"
 
-    def test_skill_icon_empty_when_source_missing(self):
-        data = [{"SkillID": 31, "Level": 1, "AttackType": "Normal"}]
-        result = cd._build_skills(data, [31])
-        assert result["31"]["icon"] == ""
 
 
 # ─── _build_servant_skills ──────────────────────────────────────

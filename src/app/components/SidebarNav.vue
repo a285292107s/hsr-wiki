@@ -5,7 +5,8 @@
  * 手机（<768px）底部栏每槽 ≥44px（触控下限），按规范顺序从前往后展示，放不下的尾部折叠
  * 进"更多"抽屉（按钮按规范顺序位于折叠边界，ResizeObserver 随宽度变化实时重算）；
  * 平板/桌面竖排侧栏全部平铺（"更多"恒隐藏）。
- * 首项为「交换」按钮：跳转对方模式枢纽页（/ ↔ /currency）。
+ * 首项为「交换」按钮：跳转对方模式的图签页（/ → /currency/role，/currency → /character）。
+ * 落点与「枢纽滚轮」上滚刻意不同（上滚仍指对方枢纽页）——禁止"顺手统一"，见 ADR 0016。
  * 分隔线后首项为本模式枢纽页 Tab（常规=首页 /；CW=枢纽 /currency）。
  * 常规模式：枢纽+7 板块；CW 模式：枢纽+5 板块（短标签）。
  */
@@ -26,9 +27,10 @@ const navItems = computed<NavItem[]>(() =>
   isCw.value ? [CW_HUB_ITEM, ...CW_NAV_ITEMS] : [NORMAL_HUB_ITEM, ...NORMAL_NAV_ITEMS],
 );
 
-/** 「交换」：跳转对方模式的枢纽页 */
+/** 「交换」：跳转对方模式的图签页（ADR 0016 决策 1）。
+ *  禁止改为对方枢纽页——该落点已由「枢纽滚轮」上滚承担，两者刻意分工不同。 */
 function onSwap(): void {
-  void router.push(isCw.value ? '/' : '/currency');
+  void router.push(isCw.value ? '/character' : '/currency/role');
 }
 
 /* ─── 模式切换过渡：导航板块「重凝」动画（交换按钮与分隔线保持不动） ─── */
@@ -176,8 +178,8 @@ const DEBUG_ITEM = {
     <button
       type="button"
       class="ui-sidebar-link ui-sidebar-swap"
-      :title="isCw ? '交换 · 返回常规模式' : '交换 · 进入货币战争'"
-      :aria-label="isCw ? '切换到常规模式' : '切换到货币战争模式'"
+      :title="isCw ? '前往常规模式' : '前往货币战争'"
+      :aria-label="isCw ? '前往常规模式' : '前往货币战争'"
       @click="onSwap"
     >
       <span class="ui-sidebar-link__icon" v-html="SWAP_ITEM.icon" />

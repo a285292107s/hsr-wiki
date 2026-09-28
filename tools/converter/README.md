@@ -43,7 +43,6 @@ python convert.py --official-icon-paths    # 图标路径输出官方仓库相�
 | `currency` | `currency/role.json`、`currency/role/{id}.json`、`currency/prop_icons.json` |
 | `currency_catalog` | `currency/equipment.json`、`currency/portals.json`、`currency/augments.json`、`currency/traits.json` |
 | `achievements` | `achievements.json`、`achievement_series.json` |
-| `season` | `currency/season.json` |
 | `version` | `version.json` |
 
 增量机制：按源文件 `mtime_ns:size` 签名跳过未变更模块，状态存 `.converter-state.json`（已 gitignore）；`incremental.py` 的 `MODULE_SOURCES` 声明各模块源文件依赖（`monster_common.py` 是共享助手，不在 `MODULES` 中），`tests/test_incremental.py` 用 AST 扫描校验「加载调用 ⊆ 声明」与 `MODULES` 全覆盖。

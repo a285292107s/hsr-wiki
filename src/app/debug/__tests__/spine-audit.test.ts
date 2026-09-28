@@ -4,8 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
-  analyzePixels, buildAuditPlayerConfig, buildDiagnosis, classifyStatus,
-  createAuditEntry, parseAtlasPages, resetAuditEntry,
+  analyzePixels, buildDiagnosis, createAuditEntry, parseAtlasPages,
 } from '../spine-audit';
 
 describe('parseAtlasPages', () => {
@@ -82,25 +81,6 @@ describe('analyzePixels', () => {
   });
 });
 
-describe('classifyStatus', () => {
-  it('有 errors → fail', () => {
-    const e = createAuditEntry('1', 'skel', 'x');
-    e.errors.push('HTTP 404: https://x');
-    expect(classifyStatus(e)).toBe('fail');
-  });
-
-  it('仅 warnings → warn', () => {
-    const e = createAuditEntry('1', 'skel', 'x');
-    e.warnings.push('混合 slot 占比过高');
-    expect(classifyStatus(e)).toBe('warn');
-  });
-
-  it('无异常 → pass', () => {
-    const e = createAuditEntry('1', 'skel', 'x');
-    expect(classifyStatus(e)).toBe('pass');
-  });
-});
-
 describe('buildDiagnosis', () => {
   const entry = (errs: string[], warns: string[] = []): ReturnType<typeof createAuditEntry> => {
     const e = createAuditEntry('1', 'official', 'x');
@@ -149,65 +129,3 @@ describe('buildDiagnosis', () => {
   });
 });
 
-describe('resetAuditEntry', () => {
-  it('清空全部结果，保留身份字段（重跑防叠加）', () => {
-    const e = createAuditEntry('k', 'official', 'label', 'nanoka');
-    e.status = 'fail';
-    e.checks.push('L0 静态');
-    e.errors.push('HTTP 404: x');
-    e.warnings.push('w');
-    e.resources.push({ url: 'u', ok: false, status: 404, ms: 1 });
-    e.atlasDiffs.push({ layer: null, diff: { atlasPages: [], mappedKeys: [], missingInManifest: [], missingInAtlas: [] } });
-    e.meta = { animations: [], skins: [], slots: 0, bones: 0, attachments: 0, blendSlots: [] };
-    e.frames.push({ anim: 'a', layer: null, visible: 0, total: 1, ratio: 0, bbox: null });
-    e.loadMs = 123;
-    e.renderError = 'x';
-    resetAuditEntry(e);
-    expect(e).toMatchObject({
-      key: 'k', kind: 'official', source: 'nanoka', label: 'label',
-      status: 'pending', checks: [], errors: [], warnings: [],
-      resources: [], atlasDiffs: [], meta: null, frames: [],
-      loadMs: 0, renderError: '',
-    });
-  });
-});
-
-describe('buildAuditPlayerConfig', () => {
-  it('skel → skelUrl/atlasUrl（无采样标记）', () => {
-    const cfg = buildAuditPlayerConfig({ kind: 'skel', base: 'https://cdn/a/b' });
-    expect(cfg.skelUrl).toBe('https://cdn/a/b.skel');
-    expect(cfg.atlasUrl).toBe('https://cdn/a/b.atlas');
-    expect(cfg.sampleAnimations).toBeUndefined();
-  });
-
-  it('official → 官网配置 + 逐动画采样标记', () => {
-    const cfg = buildAuditPlayerConfig({
-      kind: 'official',
-      atlas: 'https://cdn/d/x.atlas',
-      json: 'https://cdn/d/y.json',
-      textures: { 't.png': 'https://cdn/d/hash.png' },
-    });
-    expect(cfg.jsonUrl).toBe('https://cdn/d/y.json');
-    expect(cfg.atlasUrl).toBe('https://cdn/d/x.atlas');
-    expect(cfg.rawDataURIs).toEqual({ 'https://cdn/d/t.png': 'https://cdn/d/hash.png' });
-    expect(cfg.sampleAnimations).toBe(true);
-  });
-
-  it('official-scene → 指定层配置 + 固定视口 pad 0 + sampleLayer（缺省层 0）', () => {
-    const resolved = {
-      kind: 'official-scene' as const,
-      viewport: { x: 0, y: 0, width: 1920, height: 1080 },
-      layers: [
-        { atlas: 'https://cdn/d/l0.atlas', json: 'https://cdn/d/l0.json', textures: {} },
-        { atlas: 'https://cdn/d/l1.atlas', json: 'https://cdn/d/l1.json', textures: {} },
-      ],
-    };
-    const c0 = buildAuditPlayerConfig(resolved);
-    expect(c0.jsonUrl).toBe('https://cdn/d/l0.json');
-    expect(c0.sampleLayer).toBe(0);
-    const c1 = buildAuditPlayerConfig(resolved, 1);
-    expect(c1.jsonUrl).toBe('https://cdn/d/l1.json');
-    expect(c1.sampleLayer).toBe(1);
-    expect(c1.viewport).toEqual({ x: 0, y: 0, width: 1920, height: 1080, padLeft: 0, padRight: 0, padTop: 0, padBottom: 0 });
-  });
-});

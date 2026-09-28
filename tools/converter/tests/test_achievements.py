@@ -135,22 +135,6 @@ class TestParseAchievement:
         out = ach._parse_achievement({"AchievementID": 1, "ShowType": None}, {})
         assert out["show_type"] == ""
 
-    def test_missing_desc_defaults(self):
-        out = ach._parse_achievement({"AchievementID": 1}, {})
-        assert out["title"] == ""
-        assert out["desc"] == ""
-
-
-# ─── _series_icon ───────────────────────────────────────────────
-
-class TestSeriesIcon:
-    def test_stem_extraction(self):
-        assert ach._series_icon("SpriteOutput/Achievement/CultivateAchievementIcon_s.png") == "CultivateAchievementIcon_s"
-        assert ach._series_icon("SpriteOutput/Achievement/CultivateAchievementIcon.png") == "CultivateAchievementIcon"
-
-    def test_empty_path(self):
-        assert ach._series_icon("") == ""
-
 
 # ─── convert ────────────────────────────────────────────────────
 

@@ -3,6 +3,9 @@
  * 深度差决定页面过渡方向（navDir：1=前进深入，-1=返回，0=平级）。
  * 终局内容合并单页（/endgame）：四模式身份为筛选选项，endgame.css 随路由并行加载。
  * meta.cw：货币战争模式路由——驱动全壳暗金主题（data-theme="cw"）与 CW 导航配置。
+ * meta.bareNav：枢纽页（/ 与 /currency）——App.vue 在**所有断点**都不渲染导航条
+ *   （平板/桌面左侧竖栏 + 手机底部栏一并隐藏，页内索引即导航），
+ *   并挂 <html data-nav="bare"> 令内容区左缘避让令牌回退为页面留白（见 tokens.css）。
  * History 模式（Vercel SPA fallback）。
  */
 import { createRouter, createWebHistory, type RouteRecordRaw, type Router } from 'vue-router';
@@ -35,7 +38,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'home',
     component: () => import('../views/HomeView.vue'),
-    meta: { depth: 0, title: '首页' },
+    meta: { depth: 0, bareNav: true, title: '首页' },
   },
   {
     path: '/character',
@@ -119,7 +122,7 @@ const routes: RouteRecordRaw[] = [
     path: '/currency',
     name: 'currency-hub',
     component: () => import('../views/CurrencyHubView.vue'),
-    meta: { depth: 0, cw: true, title: '货币战争' },
+    meta: { depth: 0, cw: true, bareNav: true, title: '货币战争' },
   },
   {
     path: '/currency/role',

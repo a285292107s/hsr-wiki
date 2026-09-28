@@ -29,7 +29,7 @@ export {
 } from './endgame';
 export { loadLocalAchievements, loadLocalAchievementSeries } from './achievements';
 export {
-  loadLocalCurrencyRoles, loadLocalCurrencyRole, loadLocalCurrencySeasons,
+  loadLocalCurrencyRoles, loadLocalCurrencyRole,
   loadLocalCurrencyEquipment, loadLocalCurrencyPortals, loadLocalCurrencyAugments,
   loadLocalCurrencyTraits, loadLocalCurrencyPropIcons,
 } from './currency';

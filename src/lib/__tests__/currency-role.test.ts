@@ -7,7 +7,7 @@ import {
   propLabel, propValue, mergeSkillGroups, buildGrowthMatrix, matrixUp,
   resolveRecommend, buildRecommendRows, catOfTrait, groupTraits,
   resolveServantAttr, buildServantAttrs, buildSkillNameMap, rankMech, rankDesc,
-  stanceText, FB_LABEL, CHARGE_LABEL,
+  stanceText,
 } from '../currency-role';
 import type {
   CharacterData, CurrencyRoleRank, CurrencyRoleRecommend, CurrencyRoleSkill,
@@ -104,12 +104,6 @@ describe('propLabel / propValue', () => {
     expect(propValue(0.15)).toBe('15%');
     expect(propValue(1.5)).toBe('1.5');
     expect(propValue(100)).toBe('100');
-  });
-
-  it('exposes front/back and charge labels', () => {
-    expect(FB_LABEL.Front).toBe('前台');
-    expect(CHARGE_LABEL.EnergyBar).toBe('特殊充能');
-    expect(CHARGE_LABEL.MaxSP).toBe('终结技能量');
   });
 });
 

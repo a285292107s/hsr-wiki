@@ -1,10 +1,14 @@
 /**
  * 目录页配置注册表行为测试
  * 验证所有注册的 CatalogPageConfig 均满足引擎契约：
- * - id 唯一且与注册 key 一致
- * - renderCard 函数存在且返回字符串
  * - filters / buildFilters 字段结构合法
  * - （数据驱动）filter.key 与 option.val 在真实转换数据上可命中（stringly-typed 契约锁）
+ *   —— 本文件的核心价值：filter.key 与数据字段名之间无类型约束，改字段名会让筛选静默失效
+ * - endgame 专属 renderCard / renderColumns 布局与图标 URL 构造
+ *
+ * 不测「id 唯一 / id===注册 key / title 非空 / renderCard 是函数」类形状断言：
+ * 这些由 CatalogPageConfig 类型 + pages.ts 的写法静态保证，且路由↔配置一致性由
+ * app/router/__tests__/registry.test.ts 从行为面覆盖。
  */
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
@@ -54,47 +58,7 @@ function matchesFilter(item: Record<string, unknown>, key: string, val: string):
   return String(cur) === val;
 }
 
-describe('CATALOG_PAGES registry', () => {
-  it('should register at least one page', () => {
-    expect(entries.length).toBeGreaterThan(0);
-  });
-
-  it('all ids are unique', () => {
-    const ids = entries.map(([, cfg]) => cfg.id);
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it('each config id matches its registry key', () => {
-    for (const [key, cfg] of entries) {
-      expect(cfg.id, `key "${key}" should match config.id`).toBe(key);
-    }
-  });
-
-  it('each config has required string fields', () => {
-    for (const [key, cfg] of entries) {
-      expect(cfg.title, `${key}.title`).toBeTruthy();
-      expect(typeof cfg.title).toBe('string');
-      expect(typeof cfg.searchPlaceholder).toBe('string');
-    }
-  });
-});
-
 describe('renderCard', () => {
-  it('every config exposes renderCard as a function', () => {
-    for (const [key, cfg] of entries) {
-      expect(typeof cfg.renderCard, `${key}.renderCard`).toBe('function');
-    }
-  });
-
-  it('renderCard returns a non-empty HTML string for a minimal item', () => {
-    const stub = { name: 'Test', href: '/test' };
-    for (const [key, cfg] of entries) {
-      const html = cfg.renderCard(stub, 0);
-      expect(typeof html, `${key}.renderCard return type`).toBe('string');
-      expect(html.length, `${key}.renderCard should produce non-empty html`).toBeGreaterThan(0);
-    }
-  });
-
   it('endgame renderCard 输出紧凑赛季行（玩法图标+编号+名称+状态+日期），不含完整档案行徽章', () => {
     const egPage = CATALOG_PAGES.endgame;
     const item = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: '进行中', dateRange: '2023.01.01 – 01.15' };

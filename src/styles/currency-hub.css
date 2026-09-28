@@ -9,12 +9,15 @@
       01-05）与真实数据徽章 = 数据锚点，允许使用。
    视频降级纪律：加载失败/慢网/prefers-reduced-motion → 静态 poster 帧
    （本地抽帧资产）+ 黑金渐变兜底，禁止以装饰动画替代视频。
-   样式独立实现（不抽 tokens 共享原语）：Hero 视频层与首页 Spine 场景的媒体
-   来源/断点语义不同，共享仅能覆盖 scrim/content 骨架，抽原语需连带改造首页
-   （回归风险大于收益），故判定为不共享（决策见 CurrencyHubView.vue 注释）。
+   样式独立实现：Hero 视频层与首页 Spine 场景的媒体来源/断点语义不同，共享仅能覆盖
+   scrim/content 骨架，抽原语需连带改造首页（回归风险大于收益），故 **Hero 媒体层不共享**
+   （决策见 CurrencyHubView.vue 注释）；**页脚骨架共享** —— `.nk-hub-footer` 是两页共用的
+   跨页原语，声明在 tokens.css（登记于 docs/agents/ui-design.md §1），本文件不再重复声明。
    色值全部经令牌（--blk 黑阶 / --gold-* + --primary 金系 / --line 发丝 /
    --hero-bg-* 主题兜底），禁止裸彩色。
    圆角三档：卡片 = var(--nk-radius-card) / 内嵌 = calc(卡片 - 2px) / 标签 = 999px。
+   赛季扩充说明的样式已随视图侧一并移除（ADR 0016）；索引区末行「枢纽返回行」复用
+   `.nk-cwhub-index__row` 原语，禁止为它单开选择器。
    BEM 前缀：nk-cwhub-*
    ═══════════════════════════════════════════ */
 
@@ -31,10 +34,8 @@
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
-/* --home-mono 须与首页同栈（catalog.css 将其限定在 #nk-home-app 作用域）：
-   页脚复用 .nk-home-footer__latin 依赖此令牌，缺失会回退默认字体导致与首页视觉不一致 */
-#nk-cwhub-app { --home-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; }
 #nk-cwhub-app * { box-sizing: border-box; }
+/* h1/h2/p 归零：h2 曾服务赛季说明卡片标题，现无 h2，保留重置以约束未来 Hero 内标题层级 */
 #nk-cwhub-app h1, #nk-cwhub-app h2, #nk-cwhub-app p { margin: 0; padding: 0; }
 #nk-cwhub-app::-webkit-scrollbar { width: 6px; }
 #nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
@@ -100,6 +101,10 @@
   margin-left: auto;
   padding: max(44px, 8vh) 48px 0 0;
 }
+/* 枢纽文字出场约定（三段共用；术语见 CONTEXT.md）：
+   必须与首页 Hero 同时序——`nk-home-fade-up` + 0.7s + var(--ease) + 错峰 0.2s/0.35s/0.5s + backwards。
+   禁止改用本地新关键帧、禁止改任一段时序：两枢纽互切时改一处即造成「一边文字展开、一边文字直接就在那里」。
+   每次进入（含枢纽互切）都重播，与首页一致（用户裁定），禁止加「仅首帧」条件。 */
 /* 英文副标：克制小字 + 发丝线（金色族，无发光） */
 .nk-cwhub-hero__supra {
   display: flex;
@@ -110,6 +115,7 @@
   font-size: 0.68rem;
   letter-spacing: 0.22em;
   color: var(--gold-sem);
+  animation: nk-home-fade-up 0.7s var(--ease) 0.2s backwards;
 }
 .nk-cwhub-hero__supra::before {
   content: '';
@@ -126,6 +132,7 @@
   line-height: 1.08;
   color: var(--text-bright);
   text-shadow: 0 2px 24px rgba(0,0,0,0.55);
+  animation: nk-home-fade-up 0.7s var(--ease) 0.35s backwards;
 }
 /* 定位副标题：一行内容清单，与主标题拉开层级 */
 .nk-cwhub-hero__tagline {
@@ -134,102 +141,10 @@
   letter-spacing: 0.1em;
   color: var(--text2);
   text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+  animation: nk-home-fade-up 0.7s var(--ease) 0.5s backwards;
 }
 
-/* ═══ 赛季扩充说明（标题下方空间）：半透明表面承接视频对比度，单栏窄列排版 ═══
-   长内容限高内部滚动（滚动条发丝化同 app 壳）：max-height 视口比例 + 像素上限，
-   剩余内容滚动查看，不撑破 Hero 版式 */
-.nk-cwhub-season {
-  margin-top: 36px;
-  padding: 20px 22px 22px;
-  border-radius: var(--nk-radius-card);
-  border: 1px solid var(--line-1);
-  background: color-mix(in srgb, var(--blk-900) 72%, transparent);
-  backdrop-filter: blur(6px);
-  max-height: min(52vh, 460px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line-2) transparent;
-}
-.nk-cwhub-season::-webkit-scrollbar { width: 6px; }
-.nk-cwhub-season::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
-.nk-cwhub-season::-webkit-scrollbar-track { background: transparent; }
-/* 键盘聚焦可见性：滚动容器 tabindex="0" 后需给出 focus-visible 焦点环（主题色发丝环） */
-.nk-cwhub-season:focus-visible {
-  outline: 1px solid color-mix(in srgb, var(--cwth-500) 70%, transparent);
-  outline-offset: 2px;
-}
-.nk-cwhub-season__title {
-  margin: 0 0 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--cwth-500) 30%, transparent);
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1.35;
-  letter-spacing: 0.02em;
-  color: var(--text-bright);
-}
-/* 正文段落：散文体，段间距拉开 */
-.nk-cwhub-season__body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-}
-.nk-cwhub-season__body p {
-  margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.9;
-  color: var(--text2);
-}
-/* 概览：发丝顶线分区，金色刻条列表（数据 tick 非装饰点） */
-.nk-cwhub-season__overview {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line-2);
-}
-.nk-cwhub-season__ov-head { margin-bottom: 12px; }
-.nk-cwhub-season__ov-title {
-  font-size: 0.86rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: var(--text-bright);
-}
-.nk-cwhub-season__ov-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.nk-cwhub-season__ov-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-/* 行首金色刻条（2×10 刻度，档案 tick 非圆形装饰点） */
-.nk-cwhub-season__ov-item::before {
-  content: '';
-  flex-shrink: 0;
-  width: 2px;
-  height: 10px;
-  margin-top: 7px;
-  background: color-mix(in srgb, var(--primary) 70%, transparent);
-}
-.nk-cwhub-season__ov-text {
-  min-width: 0;
-  font-size: 0.78rem;
-  line-height: 1.75;
-  color: var(--text2);
-}
-/* 多赛季分隔（当前数据仅 1 条，预留结构） */
-.nk-cwhub-season__card + .nk-cwhub-season__card {
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line-1);
-}
+/* 赛季扩充说明样式已随视图侧移除（ADR 0016）；本文件禁止再出现 .nk-cwhub-season 选择器 */
 
 /* ═══ 板块索引：编辑式索引行（镜像首页行范式，icon + 标题 + 箭头；
    无收录计数——Hub 与数据层解耦，计数在各自目录页展示。
@@ -323,12 +238,7 @@
   .nk-cwhub-index__row:hover { background: color-mix(in srgb, var(--cwth-500) 5%, transparent); }
 }
 
-/* ── 页脚：复用首页 nk-home-footer 范式（类定义于全局 catalog.css，含全断点响应式） ── */
-
-/* 非桌面断点（<1024px）：空间有限，隐藏赛季卡（用户裁定；数据仍加载，成本可忽略） */
-@media (max-width: 1023px) {
-  .nk-cwhub-season { display: none; }
-}
+/* ── 页脚：跨页共享原语 `.nk-hub-footer`（声明于 tokens.css，含全断点响应式） ── */
 
 /* 非桌面断点（<1024px）：标题改顶部居中（用户裁定；桌面保留右上角）——
    hero 顶对齐居中、标题区全宽居中、scrim 压暗重心随之移到顶部中央 */
@@ -354,13 +264,22 @@
 }
 
 /* 响应式 ── */
+/* 枢纽文字出场降级（硬标准，禁止删除）：reduced-motion 下三段必须 animation: none →
+   文字直接以终态可见（opacity 1、无位移）。注意此处 `none` 是唯一被允许的覆盖写法，
+   禁止改为超短时长（仍会闪动）或 animation-play-state: paused（会把 backwards 的
+   opacity 0 定格，文字不可见）。 */
+@media (prefers-reduced-motion: reduce) {
+  .nk-cwhub-hero__supra,
+  .nk-cwhub-hero__title,
+  .nk-cwhub-hero__tagline { animation: none; }
+}
 /* 平板（768-1023px）：中等密度；左侧避让由 --nk-content-offset 令牌断点接管 */
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-cwhub-index { padding: 72px 32px 0 var(--nk-content-offset); }
   .nk-cwhub-index__row { padding: 20px 8px; }
 }
-/* 手机（<768px）：紧凑排版，底部避开导航条（safe-area）——
-   内容避让由复用页脚 .nk-home-footer 自带 72px padding 承担（与首页一致），容器不再额外留白 */
+/* 手机（<768px）：紧凑排版，底部留白由共享页脚 .nk-hub-footer 自带承担（与首页一致），
+   容器不再额外留白——枢纽页全断点无导航条，无需为底部栏预留高度 */
 @media (max-width: 767px) {
   /* 手机标题：上限 3.36rem（= 768px 处桌面 7vw 的值 53.76px）——
      与桌面曲线无缝衔接（曾 3.6rem 导致 767/768 处 57.6→53.76 跳变，已修复） */

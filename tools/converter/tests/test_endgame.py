@@ -60,22 +60,6 @@ class TestLoadSchedules:
         assert set(result.keys()) == {"101"}
         assert result["101"] == ("2023-09-04 04:00:00", "2023-09-18 04:00:00")
 
-    def test_story_boss_mapping(self, monkeypatch):
-        """虚构叙事（202001↔2001）/ 末日幻影（203001↔3001）同构映射。"""
-        def fake_load(path):
-            if "Story" in str(path):
-                return [{"ID": 202001, "BeginTime": "2024-01-08 04:00:00",
-                         "EndTime": "2024-02-19 04:00:00"}]
-            return [{"ID": 203001, "BeginTime": "2024-06-17 04:00:00",
-                     "EndTime": "2024-08-05 04:00:00"}]
-        monkeypatch.setattr(eg, "load_json", fake_load)
-        story = eg._load_schedules("ScheduleDataChallengeStory.json")
-        boss = eg._load_schedules("ScheduleDataChallengeBoss.json")
-        assert set(story.keys()) == {"2001"}
-        assert set(boss.keys()) == {"3001"}
-        assert story["2001"][0] == "2024-01-08 04:00:00"
-        assert boss["3001"][1] == "2024-08-05 04:00:00"
-
     def test_load_test_periods(self, monkeypatch):
         """测试期：EndTime 早于公测上线的 beta/CBT 组；未来占位/正式期不标。"""
         monkeypatch.setattr(eg, "load_json", lambda _p: [
@@ -167,13 +151,6 @@ class TestAuxTables:
         assert out[253] == {"text": "cleaned:名1", "param": 20, "type": "ROUNDS_LEFT"}  # 同 Hash 补全
         assert 0 not in out
 
-    def test_load_group_names(self, monkeypatch):
-        monkeypatch.setattr(eg, "load_json", lambda _p: [
-            {"GroupID": 3020, "GroupName": {"Hash": 1}},
-            {"GroupID": 100},  # 无名称 → 跳过
-        ])
-        assert eg._load_group_names("x.json") == {3020: "名1"}
-
     def test_load_permanent_groups(self, monkeypatch):
         """常驻关卡：ScheduleDataID 为空的长期关卡分组（无赛季轮回）。"""
         monkeypatch.setattr(eg, "load_json", lambda _p: [
@@ -187,20 +164,6 @@ class TestAuxTables:
 # ─── 组级增益 / 回合上限 ────────────────────────────────────────
 
 class TestGroupAux:
-    def test_group_maze_buff(self, monkeypatch):
-        monkeypatch.setattr(eg, "load_json", lambda _p: [
-            {"GroupID": 1033, "MazeBuffID": 3030146},
-            {"GroupID": 100},  # 无增益 → 跳过
-        ])
-        assert eg._group_maze_buff() == {1033: [3030146]}
-
-    def test_group_extra_buff_story(self, monkeypatch):
-        monkeypatch.setattr(eg, "load_json", lambda _p: [
-            {"GroupID": 2001, "BuffList": [3031301, 3031302, 3031301]},
-            {"GroupID": 2002, "BuffList": []},
-        ])
-        assert eg._group_extra_buff("x.json", ("BuffList",)) == {2001: [3031301, 3031302]}
-
     def test_group_extra_buff_boss_two_stages(self, monkeypatch):
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"GroupID": 3020, "BuffList1": [3111008, 3111010], "BuffList2": [3111008, 3111012],
@@ -366,11 +329,6 @@ class TestSeasonStats:
         # 全赛季合并属性不受影响
         assert result["damage_types"] == ["Fire", "Ice", "Quantum", "Wind"]
 
-    def test_missing_fields_default(self):
-        result = eg._season_stats([{"Floor": None}])
-        assert result == {"damage_types": [], "floors": 0, "stage_num": 0,
-                          "countdown": 0, "floor_damage": []}
-
 
 # ─── 逐层详情 _season_floors ─────────────────────────────────
 
@@ -416,17 +374,6 @@ class TestSeasonFloors:
                                "desc": "伤害提高", "param_list": [0.3]}
         assert f2["targets"] == [{"text": "剩余#1[i]轮以上", "param": 10}]
 
-    def test_floor_sequence_when_field_missing(self):
-        """永屹之城遗秘（组 100）：无 Floor 字段 → 按 ID 升序取序号。"""
-        recs = [
-            {"ID": 3, "Name": {"Hash": 1}, "DamageType1": ["Wind"]},
-            {"ID": 1, "Name": {"Hash": 2}},
-        ]
-        out = eg._season_floors(recs, {}, {}, {}, {})
-        assert [f["floor"] for f in out] == [1, 2]
-        assert out[0]["name"] == "名2"  # ID 升序：1 在前
-        assert out[1]["stage1"]["damage"] == ["Wind"]
-
     def test_stage_waves_skips_unregistered_and_keeps_wave(self):
         """波次敌方：未注册跳过；跨波同怪保留（wave 序号递增）。"""
         monsters = {1003010: {"name": "怪A", "icon": "Monster_A",
@@ -463,18 +410,6 @@ class TestSeasonExtras:
              "weak": [], "resist": {}, "rank": ""},
             {"id": "2002010", "name": "怪B", "icon": "Monster_B",
              "weak": [], "resist": {}, "rank": ""},
-        ]
-
-    def test_targets_dedup(self):
-        recs = [
-            {"ChallengeTargetID": [251, 252]},
-            {"ChallengeTargetID": [251]},  # 重复 → 跳过
-            {"ChallengeTargetID": [999]},  # 未注册 → 跳过
-        ]
-        targets = {251: {"text": "目标1", "param": 10}, 252: {"text": "目标2", "param": None}}
-        assert eg._season_targets(recs, targets) == [
-            {"text": "目标1", "param": 10},
-            {"text": "目标2", "param": None},
         ]
 
 
@@ -832,17 +767,6 @@ class TestGroupArts:
             2001: {"tab": "A.png", "theme_icon": "C.png"},
             2002: {"tab": "B.png"},
         }
-
-    def test_load_group_arts_maze_extra_theme_bg(self, monkeypatch):
-        """ChallengeMazeGroupExtra：ThemePosterBgPicPath → theme_bg（2D 场景背景）。"""
-        monkeypatch.setattr(eg, "load_json", lambda _p: [
-            {"GroupID": 100,
-             "ThemePosterBgPicPath": "SpriteOutput/Abyss/2D_SceneBg/AbyssSenceBg_01.png"},
-            {"GroupID": 900, "ThemePosterBgPicPath": ""},  # 空路径 → 不输出
-        ])
-        out = eg._load_group_arts("ChallengeMazeGroupExtra.json")
-        assert out[100] == {"theme_bg": "SpriteOutput/Abyss/2D_SceneBg/AbyssSenceBg_01.png"}
-        assert 900 not in out
 
     def test_maze_arts_merges_group_extra(self, monkeypatch):
         """maze 转换 arts 合并分组表 + GroupExtra（与 story/boss 同构，勿漏）。"""

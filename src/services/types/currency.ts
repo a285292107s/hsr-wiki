@@ -210,24 +210,6 @@ export interface CurrencyPropIconMap {
   [propertyType: string]: string;
 }
 
-/* ─── 赛季扩充说明 ─── */
-
-/** 货币战争 · 赛季扩充说明（由 season 转换器从 TextMap 落地） */
-export interface CurrencySeason {
-  /** TextMap 标题 Hash（同时作为唯一 id） */
-  id: string;
-  /** 赛季扩充说明标题，如「货币战争•零和博弈」赛季扩充说明 V4.4 */
-  title: string;
-  /** 赛季扩充说明正文（含新角色、晋升上限、羁绊加强等，字面 \n 分隔段落） */
-  body: string;
-  /** 扩充内容概览（要点式补充说明，▌标题 + ● 条目，字面 \n 分隔；可选） */
-  overview?: string;
-}
-
-export interface CurrencySeasonList {
-  seasons: CurrencySeason[];
-}
-
 /* ─── 装备图鉴 ─── */
 
 export interface CurrencyEquipTag {

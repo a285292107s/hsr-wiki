@@ -8,12 +8,10 @@ import {
   CacheFile,
   collectUrls,
   computeSourceHashes,
-  domainOf,
   planProbe,
   prepareAudit,
   probeUrl,
   runAudit,
-  sha1Hex,
   type DataMap,
 } from '../dead-links';
 import {
@@ -125,14 +123,6 @@ describe('collectUrls', () => {
     // 详情文件为 null 时无 figure URL；icon URL 仍由 monsters.json（同 URL 去重）提供
     expect(urls.has(monsterFigureUrl('Monster_1002011'))).toBe(false);
     expect(urls.get(monsterIconUrl('Monster_1002011'))).toBe('monsters.json#1002011.icon');
-  });
-});
-
-describe('domainOf', () => {
-  it('按域名分类', () => {
-    expect(domainOf('https://cdn.jsdelivr.net/gh/x/a.png')).toBe('jsdelivr');
-    expect(domainOf('https://static.nanoka.cc/assets/hsr/a.webp')).toBe('nanoka');
-    expect(domainOf('https://act-webstatic.mihoyo.com/a.png')).toBe('other');
   });
 });
 
@@ -311,19 +301,14 @@ describe('prepareAudit（数据加载 + 内容签名）', () => {
   });
 });
 
-describe('sha1Hex 与 Node createHash 一致', () => {
-  it('UTF-8 字节 SHA-1 与 Node 端等价（浏览器/Node 缓存可互认；期望值 = Node createHash 输出）', async () => {
-    expect(await sha1Hex('abc')).toBe('a9993e364706816aba3e25717850c26c9cd0d89d');
-    expect(await sha1Hex('{"id":1001,"name":"三月七"}')).toBe('f665584a4f43aeb2c717ea1990a2b3d799d4a76a');
-  });
-});
-
 describe('computeSourceHashes', () => {
-  it('仅对引用的来源文件计算，缺失文件标记 unreadable', async () => {
+  /* 引用了未读取到的来源文件必须标 unreadable（而非静默丢签名）——否则 planProbe 会把
+     「来源读不到」误判成「来源未变」，死链缓存永远不再重测 */
+  it('仅对引用的 .json 来源计算；缺失来源标记 unreadable', async () => {
     const urls = new Map([
       ['https://cdn.jsdelivr.net/a.png', 'characters.json#x'],
       ['https://static.nanoka.cc/b.webp', 'currency/equipment.json#y'],
-      ['https://act-webstatic.mihoyo.com/c.png', 'field-value'], // 非 JSON 来源忽略
+      ['https://act-webstatic.mihoyo.com/c.png', 'field-value'], // 非 .json 来源忽略
     ]);
     const texts = new Map<string, string>([['characters.json', 'a'], ['currency/equipment.json', 'b']]);
     const sha1 = async (t: string) => `H(${t})`;
@@ -331,6 +316,7 @@ describe('computeSourceHashes', () => {
       'characters.json': 'H(a)',
       'currency/equipment.json': 'H(b)',
     });
+    // currency/equipment.json 未读到 → unreadable（不参与复用判定）
     const missing = new Map<string, string>([['characters.json', 'a']]);
     expect(await computeSourceHashes(urls, missing, sha1)).toEqual({
       'characters.json': 'H(a)',

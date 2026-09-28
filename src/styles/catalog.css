@@ -6,9 +6,9 @@
 /* ═══════════════════════════════════════════
    角色列表页（完全重构）
 ═══════════════════════════════════════════ */
-#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px var(--nk-content-offset); background: radial-gradient(ellipse at 50% 0%, var(--nk-page-tint) 0%, transparent 60%); --cat-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; --cat-max: 1440px; }
+#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px var(--nk-content-offset); background: radial-gradient(ellipse at 50% 0%, var(--nk-page-tint) 0%, transparent 60%); --cat-max: 1440px; }
 /* 页头英文副标（档案元信息）：等宽小字 + 竖线分隔，无装饰元素 */
-#nk-catalog-app .nk-cat-subtitle { display: inline-block; font-family: var(--cat-mono); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text3); border-left: 1px solid var(--line-2); padding-left: 10px; margin-left: 2px; flex-shrink: 0; }
+#nk-catalog-app .nk-cat-subtitle { display: inline-block; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text3); border-left: 1px solid var(--line-2); padding-left: 10px; margin-left: 2px; flex-shrink: 0; }
 #nk-catalog-app::-webkit-scrollbar { width: 6px; }
 #nk-catalog-app::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 #nk-catalog-app::-webkit-scrollbar-track { background: transparent; }
@@ -23,7 +23,7 @@
 .nk-cat-title { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 12px; font-family: var(--font-body); font-size: 1.3rem; font-weight: 900; letter-spacing: 0.04em; color: var(--text-bright); white-space: nowrap; overflow: hidden; }
 .nk-cat-title::after { content: ''; flex: 1; height: 1px; align-self: center; background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 55%, transparent 100%); }
 /* 计数元信息：等宽小字，右对齐（档案数据头） */
-.nk-cat-count { flex-shrink: 0; font-family: var(--cat-mono); font-size: 0.62rem; letter-spacing: 0.18em; color: var(--text3); white-space: nowrap; }
+.nk-cat-count { flex-shrink: 0; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.18em; color: var(--text3); white-space: nowrap; }
 /* 吸顶工具条：亚光玻璃层（常规 82% 透明 + blur；反 AI 味：不做全透白描边苹果玻璃，
    保留档案亚光遮蔽感，saturate 提物质感）。底部边界 = 渐变发丝线（与 masthead 标题
    ::after 同语汇，非 1px 实线全横贯）+ 主色染影（禁止纯黑大阴影） */
@@ -419,7 +419,7 @@
 /* 信息条：左对齐档案排版（名称 + 等宽分类元信息），顶部留白与图窗分离 */
 .nk-mob-card__info { display: flex; flex-direction: column; gap: 5px; padding: 12px 4px 4px; }
 .nk-mob-card__name { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
-.nk-mob-card__type { font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nk-mob-card__type { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.14em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* 分类层级：首领 accent、精英次级、喽啰弱化（真实战力语义，非装饰色） */
 .nk-mob-card[data-type="BOSS"] .nk-mob-card__type { color: var(--accent); }
 .nk-mob-card[data-type="ELITE"] .nk-mob-card__type { color: var(--text2); }
@@ -442,8 +442,6 @@
 #nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); background: var(--bg); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
 #nk-home-app h1, #nk-home-app h2, #nk-home-app p { margin: 0; padding: 0; }
-/* 首页专属等宽族（编辑式元信息）：替代 Orbitron 的 HUD 味，系统字体零加载 */
-#nk-home-app { --home-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; }
 
 /* ── Hero：全屏官网 KV 场景（Spine 多层，层数以 spine-manifest-official.json 的 home-bg 为准），标题区退居左下 ── */
 /* 背景渐变 = Spine 加载失败/全部层失败时的视觉兜底（主背景层不透明，正常渲染时被完全遮盖）
@@ -471,7 +469,7 @@
 /* 标题区与导航区同网格：max-width 1440 居中 + 左侧 --nk-content-offset 侧栏间隙（断点由令牌接管） */
 .nk-home-hero__content { position: relative; z-index: 2; width: 100%; max-width: var(--nk-content-max); margin: 0 auto; padding: 0 48px max(44px, 8vh) var(--nk-content-offset); }
 /* 英文副标（品牌行）：系统等宽小字 + 发丝线，克制不发光 */
-.nk-home-hero__supra { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; font-family: var(--home-mono); font-size: 0.68rem; letter-spacing: 0.22em; color: var(--text2); animation: nk-home-fade-up 0.7s var(--ease) 0.2s backwards; }
+.nk-home-hero__supra { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.22em; color: var(--text2); animation: nk-home-fade-up 0.7s var(--ease) 0.2s backwards; }
 .nk-home-hero__supra::before { content: ''; width: 44px; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
 /* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文回退等宽体，观感差）；
    收窄字距 + 单档黑投影，无发光无透视——层级由字重与字号控制 */
@@ -485,7 +483,7 @@
 .nk-home-nav__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 40px; }
 .nk-home-nav__title { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.04em; color: var(--text-bright); }
 .nk-home-nav__rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line-2), transparent); }
-.nk-home-nav__meta { font-family: var(--home-mono); font-size: 0.6rem; letter-spacing: 0.18em; color: var(--text3); white-space: nowrap; }
+.nk-home-nav__meta { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.18em; color: var(--text3); white-space: nowrap; }
 
 /* 分组：组间大留白 + 组首顶线（稀疏分隔，非每行边框） */
 .nk-home-index__group { display: flex; flex-direction: column; }
@@ -496,7 +494,7 @@
 .nk-home-row__icon { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: color-mix(in srgb, var(--primary) 7%, transparent); border: 1px solid var(--line-1); color: var(--text3); transition: color 0.25s, border-color 0.25s, background 0.25s; }
 .nk-home-row__icon svg { width: 18px; height: 18px; }
 .nk-home-row__name { font-size: clamp(1.15rem, 2vw, 2rem); font-weight: 800; letter-spacing: 0.03em; color: var(--text-bright); white-space: nowrap; transition: color 0.25s; }
-.nk-home-row__en { font-family: var(--home-mono); font-size: 0.6rem; letter-spacing: 0.16em; color: var(--text3); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nk-home-row__en { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.16em; color: var(--text3); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .nk-home-row__desc { margin-left: auto; font-size: 0.8rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.25s; }
 .nk-home-row__arrow { width: 18px; height: 18px; flex-shrink: 0; color: var(--text3); transition: transform 0.25s var(--nk-ease-out), color 0.25s; }
 /* hover：名称转高亮紫、图标点亮、箭头位移（仅反馈，无浮起无发光） */
@@ -523,10 +521,8 @@
   .nk-home-row--gateway:hover { background: color-mix(in srgb, var(--gold-500) 5%, transparent); }
 }
 
-/* ── 页脚：品牌标语 + 拉丁格言（无装饰元素，纯排版） ── */
-.nk-home-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 48px var(--nk-content-offset); text-align: center; }
-.nk-home-footer__motto { font-family: var(--font-body); font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.24em; color: var(--text-bright); }
-.nk-home-footer__latin { margin: 16px 0 0; font-family: var(--home-mono); font-size: 0.66rem; letter-spacing: 0.3em; color: var(--text3); }
+/* ── 页脚（品牌标语 + 拉丁格言）：已抽为跨页共享原语 .nk-hub-footer，
+      声明于 tokens.css（两个枢纽页共用，禁止在此重新声明或复制） ── */
 
 /* ── 首页动画（仅入场一次 + 背景淡入；无无限循环） ── */
 @keyframes nk-home-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -540,14 +536,12 @@
   .nk-home-index__group + .nk-home-index__group { margin-top: 56px; }
   .nk-home-hero__content { padding-left: var(--nk-content-offset); padding-right: 32px; }
   .nk-home-nav { padding: 72px 32px 48px var(--nk-content-offset); }
-  .nk-home-footer { padding: 56px 32px 40px var(--nk-content-offset); }
 }
 @media (max-width: 767px) {
-  /* 移动端：左右对称 + 底部避开 56px 底部导航条 + safe-area */
-  .nk-home-nav { padding: 56px 20px calc(88px + env(safe-area-inset-bottom, 0px)); }
-  .nk-home-hero__content { padding: 0 20px max(88px, calc(44px + env(safe-area-inset-bottom, 0px))); }
-  /* 页脚底部预留 72px（56px 导航条 + 16px 呼吸），避免末行文案被底部导航遮挡 */
-  .nk-home-footer { padding: 48px 20px calc(72px + env(safe-area-inset-bottom, 0px)); }
+  /* 移动端：左右对称 + 底部仅留常规呼吸（枢纽页全断点无导航条，底部不再预留 56px 导航高度，
+     只留 safe-area 以免末行文案被手机手势条压住） */
+  .nk-home-nav { padding: 56px 20px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .nk-home-hero__content { padding: 0 20px max(44px, calc(44px + env(safe-area-inset-bottom, 0px))); }
   /* 分区头单行：隐藏发丝线，元信息右推，字号微缩（窄屏防挤压） */
   .nk-home-nav__head { gap: 12px; margin-bottom: 32px; }
   .nk-home-nav__rule { display: none; }

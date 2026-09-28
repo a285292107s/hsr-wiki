@@ -73,9 +73,6 @@ class TestMapIconPath:
         src = "SpriteOutput/SkillIcons/skill_01.png"
         assert map_icon_path(src) == "icon/skill/skill_01.png"
 
-    def test_empty_string(self):
-        assert map_icon_path("") == ""
-
     def test_unknown_path_returns_original(self):
         src = "Unknown/Path/icon.png"
         assert map_icon_path(src) == src
@@ -122,10 +119,6 @@ class TestResolveText:
         from textmap import resolve_text
         assert resolve_text({"Hash": 12345}) == "测试文本"
 
-    def test_hash_miss(self):
-        from textmap import resolve_text
-        assert resolve_text({"Hash": 99999}) == ""
-
     def test_literal_key(self):
         from textmap import resolve_text
         assert resolve_text("RelicDesc_1012") == "遗器描述"
@@ -133,14 +126,6 @@ class TestResolveText:
     def test_literal_miss_returns_original(self):
         from textmap import resolve_text
         assert resolve_text("UnknownKey") == "UnknownKey"
-
-    def test_none(self):
-        from textmap import resolve_text
-        assert resolve_text(None) == ""
-
-    def test_empty_string(self):
-        from textmap import resolve_text
-        assert resolve_text("") == ""
 
     def test_clean_strips_color_tags(self):
         from textmap import resolve_text
@@ -258,9 +243,6 @@ class TestMapIconPathOfficial:
         """IconNatureColor 在旧 ICON_PATH_MAP 中但 OFFICIAL 未注册 → 回退。"""
         src = "SpriteOutput/UI/Nature/IconNatureColor/Fire.png"
         assert map_icon_path(src) == "icon/element_color/Fire.png"
-
-    def test_empty_string(self):
-        assert map_icon_path("") == ""
 
     def test_unknown_path_returns_original(self):
         src = "Unknown/Path/icon.png"

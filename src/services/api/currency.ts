@@ -1,7 +1,7 @@
 /** 货币战争 · 图鉴数据加载器（converter 落地，随站部署） */
 import { cachedFetch } from '../cache';
 import type {
-  CurrencyRoleList, CurrencyRoleDetail, CurrencySeasonList,
+  CurrencyRoleList, CurrencyRoleDetail,
   CurrencyEquipList, CurrencyPortalList, CurrencyAugmentList, CurrencyTraitList,
   CurrencyPropIconMap,
 } from '../types';
@@ -10,7 +10,6 @@ import { singletonLoad } from './singleton';
 
 /** 各图鉴列表（共享单例：只请求一次，失败自动重置允许重试） */
 export const loadLocalCurrencyRoles = singletonLoad<CurrencyRoleList>(`${LOCAL_DATA_BASE}/currency/role.json`);
-export const loadLocalCurrencySeasons = singletonLoad<CurrencySeasonList>(`${LOCAL_DATA_BASE}/currency/season.json`);
 export const loadLocalCurrencyEquipment = singletonLoad<CurrencyEquipList>(`${LOCAL_DATA_BASE}/currency/equipment.json`);
 export const loadLocalCurrencyPortals = singletonLoad<CurrencyPortalList>(`${LOCAL_DATA_BASE}/currency/portals.json`);
 export const loadLocalCurrencyAugments = singletonLoad<CurrencyAugmentList>(`${LOCAL_DATA_BASE}/currency/augments.json`);

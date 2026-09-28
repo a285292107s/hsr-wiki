@@ -2,7 +2,8 @@
  * 全站导航配置（双模式：常规 枢纽+7 板块 + 货币战争 枢纽+5 板块）
  * 侧边栏（SidebarNav）与首页导航网格（HomeView）共享。
  *
- * 「交换」（SWAP_ITEM）为导航首项：点击跳转对方模式的枢纽页（/ ↔ /currency）。
+ * 「交换」（SWAP_ITEM）为导航首项：点击跳转对方模式的图签页（/ → /currency/role，/currency → /character）。
+ * 该落点与「枢纽滚轮」上滚不同（上滚指对方枢纽页），是 ADR 0016 的刻意分工，禁止"顺手统一"。
  * 每个模式各有一个枢纽页 Tab（NORMAL_HUB_ITEM / CW_HUB_ITEM），指向本模式枢纽页。
  * 手机底部栏按规范顺序展示板块，放不下的尾部由 SidebarNav 动态折叠进"更多"抽屉
  * （判据：每槽 ≥44px 触摸宽），不依赖固定主项标记；平板/桌面全部平铺。
@@ -23,7 +24,10 @@ export interface NavItem {
   icon: string;
 }
 
-/** 「交换」按钮：模式切换入口，非普通导航项（目标由当前模式决定） */
+/** 「交换」按钮：模式切换入口，非普通导航项（落点由当前模式决定）
+ *  落点 = 对方模式图签页（/ → /currency/role，/currency → /character），见 ADR 0016 决策 1；
+ *  本常量只提供图标，落点字符串在 SidebarNav.onSwap 内就近维护，禁止在此另建路径表。
+ *  title/en 为可见标签（恒为「交换」/SWAP），不表示落点——禁止据标签反推落点。 */
 export const SWAP_ITEM = {
   title: '交换',
   en: 'SWAP',

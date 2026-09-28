@@ -19,3 +19,4 @@
 | 0013 | CDN 资源兜底架构 | Accepted | 全局健康信号 + 等待有界 + 分层降级（现为 local-first + 远端回退） |
 | 0014 | Dev Server 固定端口与严格失败 | Accepted | 端口 6188 + strictPort，禁止静默递增 |
 | 0015 | 研究线迁入主站 dev-only 路由 | Accepted | `/debug` 由 `import.meta.env.DEV` 注册，生产摇树为零 |
+| 0016 | 枢纽页模式切换入口的落点分工 | Accepted | 三入口分工：侧栏「交换」→ 对方图签页、上滚（≥1024px，Hero 区内）→ 对方枢纽页、`/currency` 页内返回行 → 常规首页；页内切换按钮已移除 |

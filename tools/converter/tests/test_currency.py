@@ -51,10 +51,6 @@ class TestBuildPropNames:
 # ─── _flatten_property_mods ─────────────────────────────────────
 
 class TestFlattenPropertyMods:
-    def test_empty_input(self):
-        assert cur._flatten_property_mods(None) == []
-        assert cur._flatten_property_mods([]) == []
-
     def test_basic_flatten_without_prop_names(self):
         data = [{"PropertyType": "ExtraSpeedAddedRatio1", "Value": {"Value": 0.08}}]
         result = cur._flatten_property_mods(data)

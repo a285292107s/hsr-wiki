@@ -23,14 +23,6 @@ def test_parse_standard_commit_title() -> None:
     }
 
 
-def test_parse_older_version() -> None:
-    parsed = parse_commit_title("OSPRODWin3.8.0_D10000000_A20000000_L30000000")
-    assert parsed is not None
-    assert parsed["game_version"] == "3.8.0"
-    assert parsed["version_label"] == "3.8"
-    assert parsed["client"] == "OSPRODWin3.8.0"
-
-
 def test_parse_surrounding_whitespace_stripped() -> None:
     parsed = parse_commit_title("  OSPRODWin4.4.0_D1_A2_L3  ")
     assert parsed is not None

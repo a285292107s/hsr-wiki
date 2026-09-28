@@ -94,7 +94,6 @@ MODULE_SOURCES: dict[str, list[str]] = {
                           "GridFightPortalBuff.json"],
     "achievements": ["AchievementData.json", "AchievementSeries.json",
                       "TextJoinConfig.json", "TextJoinItem.json"],
-    "season": [],
     # 子模块 git 提交（无 ExcelOutput 文件依赖）：签名取 HEAD 提交哈希，
     # 子模块更新即触发重跑；与文件依赖共用签名拼接，见 _git_sig
     "version": ["git:HEAD"],
