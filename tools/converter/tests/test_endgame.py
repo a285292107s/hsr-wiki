@@ -10,13 +10,11 @@
 - _group_seasons：名称解析 + 排期合并 + 统计 + 增益/敌方/目标/回合
 - _peak_seasons：异相仲裁弱点属性
 
-运行: cd tools/converter && python -m pytest tests/ -v
 """
 
 import sys
 from pathlib import Path
 
-# 确保 converter 根目录在 sys.path 中
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest  # noqa: E402
