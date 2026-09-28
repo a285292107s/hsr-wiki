@@ -212,7 +212,7 @@ _Avoid_: 对比视图、diff 模式、变化视图（避免与旧版已下线词
 ## 图片资源
 
 ### 图片 CDN
-图片资源解析统一收口于 `src/services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / 遗器通用部位图标，根 = `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`，物理目录 `public/data/cn/assets/icons/`）local-first，未入库的新图标自动回退远端；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）。
+图片资源解析统一收口于 `src/services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / 遗器通用部位图标，根 = `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`，物理目录 `public/data/cn/assets/icons/`）local-first，未入库的新图标自动回退远端；另有一个单文件例外——真珠 1503 圆头像（`avatarroundicon`）因上游资产为占位贴图而本地顶替，见该分类 `localFiles` 白名单注释；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）。
 
 ### 图片路径映射
 源数据图片路径（`SpriteOutput/...`）到 CDN 相对路径的映射规则。converter 在 `config.py` 硬编码两套规则：legacy 短路径（`icon/character/1001.png`）与官方 StarRailTextures 仓库相对路径（`avatarshopicon/avatar/1001.png`，`--official-icon-paths` 输出）；前端 `src/services/cdn/` 再按分类解析为 jsDelivr / nanoka 实际 URL。

@@ -40,8 +40,9 @@ export const OFFICIAL_ICON_BASE = `https://cdn.jsdelivr.net/gh/a285292107s/StarR
 // 必须与 public/data/cn/spine-manifest-official.json 与 spine-manifest-nanoka.json 两文件的
 // 顶层 version 字段一致，一致性由 src/services/__tests__/spine-manifest.test.ts 强制校验。
 // v18：官方条目新增 runtime 字段（4.0 格式导出的骨架标 "4.1"，约束见 types/spine.ts runtime 注释）
+// v19：4.6 版本——真珠 1503（首页角色）+ home-bg 场景轮换为 4.6 五层（4.5 场景留档为 home-bg-4.5）
 // （spine-player 运行时版本与 CDN 列表已随引擎层迁至 src/spine/constants.ts）
-export const SPINE_MANIFEST_VERSION = 18;
+export const SPINE_MANIFEST_VERSION = 19;
 
 /** 角色满级（80 级） */
 export const MAX_CHAR_LEVEL = 80;

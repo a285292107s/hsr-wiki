@@ -114,6 +114,23 @@ describe('resolveCdnUri 双源解析', () => {
     expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').source).toBe('nanoka');
   });
 
+  it('avatarroundicon：仅 1503 白名单走本地 override，其余角色仍走远端主源', () => {
+    // 上游 1503 圆头像为占位贴图（HTTP 200），本地 override 顶替；回退必须可达 nanoka
+    expect(resolveCdnUri('avatarroundicon', '1503.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/avatarroundicon/1503.webp`,
+      fallback: `${BASE}/avatarroundicon/1503.webp`,
+      source: 'local',
+    });
+    expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/avatarroundicon/1503.webp`))
+      .toBe(`${BASE}/avatarroundicon/1503.webp`);
+    // 白名单外：远端 nanoka 主源 + jsDelivr 旧档回退，不得被本地化影响
+    expect(resolveCdnUri('avatarroundicon', '1502.webp')).toEqual({
+      primary: `${BASE}/avatarroundicon/1502.webp`,
+      fallback: `${JS_DELIVR_BASE}/avatarroundicon/avatar/1502.png`,
+      source: 'nanoka',
+    });
+  });
+
   it('未注册 jsDelivr 的分类：仅 nanoka 首选，无回退', () => {
     const r = resolveCdnUri('bufficon', 'IconBuffAttackUp.webp');
     expect(r.primary).toBe(`${BASE}/bufficon/IconBuffAttackUp.webp`);

@@ -5,7 +5,7 @@
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { loadLocalLightCones, loadLocalRelicSet } from '../../services/api';
-import { fmtDesc, itemName, pathIconUrl } from '../../lib/format';
+import { avatarRoundIconUrl, fmtDesc, itemName, pathIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PROP_NAMES, SLOT_ICONS, SLOT_NAMES } from '../../lib/constants';
 import { SECTION_IDX, hasRelics } from './sections';
@@ -78,11 +78,11 @@ const teams = computed<{ teamId: number; members: TeamSlot[] }[]>(() => {
       return {
         mid,
         name: itemName(mid, props.nameCache, props.itemDb),
-        img: cdnUri('avatarroundicon', `${mid}.webp`),
+        img: avatarRoundIconUrl(mid),
         backups: backups.slice(0, 4).map((b) => ({
           id: b,
           name: itemName(b, props.nameCache, props.itemDb),
-          img: cdnUri('avatarroundicon', `${b}.webp`),
+          img: avatarRoundIconUrl(b),
         })),
       };
     });
@@ -201,7 +201,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
         </div>
         <div class="nk-build__team-slot nk-build__team-slot--main">
           <RouterLink :to="`/character/${charId}`" class="nk-build__team-link" title="当前角色">
-            <img :src="cdnUri('avatarroundicon', `${charId}.webp`)" alt="当前角色">
+            <img :src="avatarRoundIconUrl(charId)" alt="当前角色">
             <span class="nk-build__team-name">{{ mainName }}</span>
           </RouterLink>
         </div>

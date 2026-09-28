@@ -76,7 +76,13 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   // 仅通用部位图标本地化（官方仓库无对应文件、nanoka 唯一源）；套装件图走 jsDelivr
   relicfigures: { nanoka: 'relicfigures', local: 'relicfigures', localFiles: /^IconRelic(?:Body|Foot|Neck|Goods)\.webp$/ },
   rank: { nanoka: 'rank/_dependencies/textures' },
-  avatarroundicon: { nanoka: 'avatarroundicon' },
+  // 真珠 1503 圆头像 override：上游解包资产（nanoka 与官方镜像两源）该文件内容为游戏内
+  // 「TEST No.999」占位贴图且返回 HTTP 200，绕不过 dom.ts 的 error/挂起回退链，故以本地
+  // 128px 圆像顶替（来源 = 官方 avatarshopicon/1503.webp 裁切，非手绘）。
+  // localFiles 白名单把本地化限定为该单文件：其余角色仍走远端主源，新角色不受影响。
+  // 移除时机：nanoka avatarroundicon/1503.webp 内容变为真珠本人后，删除本行 local/localFiles
+  // 与 public/data/cn/assets/icons/avatarroundicon/1503.webp——禁止本地覆盖长期压过上游更新。
+  avatarroundicon: { nanoka: 'avatarroundicon', local: 'avatarroundicon', localFiles: /^1503\.webp$/ },
   'gridfight-equipment': { nanoka: 'gridfight/equipment' },
   'gridfight-icon': { nanoka: 'gridfight/icon' },
   achievement: { nanoka: 'achievement' },
