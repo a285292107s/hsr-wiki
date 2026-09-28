@@ -24,10 +24,20 @@ afterEach(() => {
 /* ─── fetchJSON（网络层） ─── */
 
 describe('fetchJSON', () => {
-  it('成功解析 JSON 并重置失败计数', async () => {
+  it('成功解析 JSON 文本', async () => {
     const c = await fresh();
     vi.stubGlobal('fetch', okFetch({ a: 1 }));
     await expect(c.fetchJSON('https://static.nanoka.cc/x.json')).resolves.toEqual({ a: 1 });
+  });
+
+  it('响应体非 JSON（部署产物损坏）→ operational 错误', async () => {
+    const c = await fresh();
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, text: async () => '<!doctype html>' })));
+    await expect(c.fetchJSON('https://x/data/cn/characters.json')).rejects.toMatchObject({
+      name: 'NkError',
+      operational: true,
+      message: expect.stringContaining('Invalid JSON'),
+    });
   });
 
   it('HTTP 非 2xx → operational 错误（含状态码）', async () => {

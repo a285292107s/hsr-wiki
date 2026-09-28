@@ -47,11 +47,9 @@ class TestUnwrapValue:
         assert unwrap_value("text") == "text"
         assert unwrap_value(None) is None
 
-    def test_empty_dict(self):
-        assert unwrap_value({}) == {}
-
-    def test_empty_list(self):
-        assert unwrap_value([]) == []
+    # 不测 unwrap_value({}) / unwrap_value([])：空容器不进入任何递归分支，
+    # 把 dict/列表递归改成直接 return obj 后这两条仍绿（实测突变）——无区分度，
+    # 递归本身由 test_dict_with_multiple_keys / test_list_of_values 锁定。
 
 
 # ─── map_icon_path ──────────────────────────────────────────────
@@ -133,11 +131,9 @@ class TestResolveText:
         textmap._text_map["777"] = "<color=#FF0000>红色文字</color>"
         assert resolve_text({"Hash": 777}) == "红色文字"
 
-    def test_clean_nickname(self):
-        from textmap import resolve_text
-        import textmap
-        textmap._text_map["888"] = "{NICKNAME}的冒险"
-        assert resolve_text({"Hash": 888}) == "开拓者的冒险"
+    # 不测 {NICKNAME} 经 resolve_text（clean=True）：NICKNAME 规则本身由
+    # test_textmap.py::test_nickname_placeholder 逐条锁定；「resolve_text 是否走 clean」
+    # 这条接线已由上面的 color 用例覆盖（实测两者在生产文件上执行行集完全相同）。
 
     def test_no_clean(self):
         from textmap import resolve_text
@@ -244,7 +240,6 @@ class TestMapIconPathOfficial:
         src = "SpriteOutput/UI/Nature/IconNatureColor/Fire.png"
         assert map_icon_path(src) == "icon/element_color/Fire.png"
 
-    def test_unknown_path_returns_original(self):
-        src = "Unknown/Path/icon.png"
-        assert map_icon_path(src) == src
+    # 不在此重复「未知路径原样返回」：同一断言已由 TestMapIconPath.test_unknown_path_returns_original 覆盖，
+    # 官方模式下的「未注册 → 回退旧路径」链路由上面两条 fallback 用例锁定。
 

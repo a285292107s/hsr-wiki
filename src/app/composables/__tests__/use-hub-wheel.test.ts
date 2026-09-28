@@ -341,10 +341,8 @@ describe('useHubWheel · start() 契约', () => {
     expect(addSpy).not.toHaveBeenCalled();
     expect(removeSpy).not.toHaveBeenCalled();
 
-    // 行为兜底：叠加监听也不影响单次导航（这条单独看是恒真的，保留作行为记录）
-    wheelOn(h1.inner, 100);
-    expect(h1.push).toHaveBeenCalledTimes(1);
-
+    // 不在此断言「导航只发生一次」：该值在带冷却的 onWheel 里恒为 1（删掉幂等守卫仍绿），
+    // 单次导航已由「验收 4｜冷却」两条用例锁定。
     addSpy.mockRestore();
     removeSpy.mockRestore();
   });

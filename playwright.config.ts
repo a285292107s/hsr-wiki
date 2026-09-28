@@ -44,6 +44,14 @@ export default defineConfig({
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'] },
       testIgnore: [/visual\.spec\.ts/, /accessibility\.spec\.ts/],
+      // 跳过自行 setViewportSize 的用例：其视口由用例钉死，在两个 project 下重复执行同一断言。
+      // 必须用静态标签（collect 期过滤）——动态 annotation 对 grepInvert 无效。
+      // 已知残留（勿当缺陷修）：这类用例在 mobile 侧不再走 Pixel 7 的 `hasTouch`/`isMobile`
+      // 能力分支；当前它们只断言尺寸/间距/圆角/字号等宽度驱动值，能力分支无差异。
+      // 有意留一条不带标签的宽度敏感用例（layout.spec.ts「手机（<768px）：调试台入口隐藏」）
+      // 作 `isMobile` + `<meta name="viewport">` 契约的哨兵——meta 缺失时 layout viewport 退回 980px，
+      // 该用例的 <768 断言会硬失败；其余留在 mobile 的用例对 980px 不敏感，不构成防线。
+      grepInvert: /@viewport-pinned/,
     },
   ],
   webServer: {

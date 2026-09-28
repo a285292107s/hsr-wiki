@@ -43,12 +43,10 @@ class TestCleanText:
     def test_property_unknown_type_fallback_to_basename(self):
         assert clean_text("<property type=ExtraUnknownThing3>") == "ExtraUnknownThing"
 
-    def test_color_tags_stripped_text_kept(self):
-        assert clean_text("<color=#FF0000>红色文字</color>") == "红色文字"
-
-    def test_unbreak_tags_stripped_text_kept(self):
-        assert clean_text("<unbreak>不可打断</unbreak>") == "不可打断"
-
+    # 不单独测 <color> / <unbreak>：二者的专用规则（textmap.py 的 color / unbreak 分支）
+    # 被同一处的通用「未知标签 => 去标签留文字」规则覆盖 —— 删掉专用规则（实测突变）
+    # 这两条仍绿，说明它们锁的是实现细节而非行为。「去标签留文字」由
+    # test_unknown_tags_removed 用 <i> 锁定，专用规则存在与否都不改变输出。
     def test_unknown_tags_removed(self):
         # 未知标签移除但保留文字（与 <color>/<unbreak> 行为一致）
         assert clean_text("a<i>斜体</i>b") == "a斜体b"

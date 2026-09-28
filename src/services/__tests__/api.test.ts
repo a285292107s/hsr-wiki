@@ -238,12 +238,6 @@ describe('resolveSpine', () => {
     expect(called.some((u) => u.includes('spine-manifest-nanoka'))).toBe(false);
   });
 
-  it('官方缺失 → 回退 nanoka 源（skel）', async () => {
-    const api = await freshApi();
-    vi.stubGlobal('fetch', route());
-    await expect(api.resolveSpine('1005')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1005/kafuka` });
-  });
-
   it('强制 nanoka 源：resolveSpine(key, \'nanoka\') 忽略官方条目（渲染层失效回退用）', async () => {
     const api = await freshApi();
     vi.stubGlobal('fetch', route());

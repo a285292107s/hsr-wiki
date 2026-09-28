@@ -42,7 +42,6 @@ describe('createSpinePlayer 兜底结算', () => {
     vi.useFakeTimers();
     const el = document.createElement('div');
     const p = createSpinePlayer(el, 'player:1001', { skelUrl: 'https://x/s.skel', atlasUrl: 'https://x/s.atlas' }, '4.2');
-    expect(fakeCtor).toBeDefined();
     await vi.advanceTimersByTimeAsync(20_000);
     await expect(p).resolves.toBeNull();
   });

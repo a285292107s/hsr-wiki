@@ -374,18 +374,10 @@ class TestSeasonFloors:
                                "desc": "伤害提高", "param_list": [0.3]}
         assert f2["targets"] == [{"text": "剩余#1[i]轮以上", "param": 10}]
 
-    def test_stage_waves_skips_unregistered_and_keeps_wave(self):
-        """波次敌方：未注册跳过；跨波同怪保留（wave 序号递增）。"""
-        monsters = {1003010: {"name": "怪A", "icon": "Monster_A",
-                               "weak": [], "resist": {}, "rank": ""}}
-        stages = {30123011: {"level": 80, "waves": [[1003010, 9999999], [1003010]]}}
-        out = eg._stage_waves_monsters([30123011], stages, monsters)
-        assert out == [
-            {"id": "1003010", "name": "怪A", "icon": "Monster_A",
-             "weak": [], "resist": {}, "rank": "", "wave": 1},
-            {"id": "1003010", "name": "怪A", "icon": "Monster_A",
-             "weak": [], "resist": {}, "rank": "", "wave": 2},
-        ]
+    # 不在此重复测 _stage_waves_monsters 的「未注册怪跳过 + 跨波同怪保留 wave 递增」：
+    # 上面 test_full_structure_with_floor_and_buff 的 stage1 断言覆盖同一 helper、同一输入
+    # （waves=[[1003010, 9999999], [1003010]]）与同一结果；实测突变（删 endgame.py 的未注册怪
+    # 跳过分支）两者同时变红，故单独一条零增益。
 
 
 # ─── 赛季敌方 / 目标 ─────────────────────────────────────────────

@@ -18,14 +18,16 @@ def test_truncate_long_string():
 
 
 def test_truncate_long_list_becomes_valid_summary():
-    """长 list/dict 改为结构化摘要，输出必须是合法 JSON（修复回归）。"""
+    """长 list/dict 改为结构化摘要，输出必须是合法 JSON（修复回归）。
+
+    判据是等值断言（摘要字符串本身）；**不写 `json.dumps(r)` 之类的"合法性"断言**——
+    dict 无论装什么都能 dumps 成功，退回原 bug（`result[k] = v` 直接塞原始 list）
+    时那种断言照样通过（实测突变），锁不住回归。
+    """
     r = gen_catalog.truncate_record({"Tags": list(range(100))})
-    # 直接 json.dumps 不抛异常即合法
-    json.dumps(r, ensure_ascii=False)
     assert r["Tags"] == "<list[100]>"
 
     r2 = gen_catalog.truncate_record({"Info": {f"k{i}": i for i in range(50)}})
-    json.dumps(r2, ensure_ascii=False)
     assert r2["Info"] == "<dict[50]>"
 
 
@@ -41,8 +43,6 @@ def test_truncate_json_roundtrip(tmp_path):
     )
     info = gen_catalog.inspect_json_file(p)
     sample = info["sample"]
-    # 关键断言：截断后的样例仍为合法 JSON
-    json.loads(json.dumps(sample, ensure_ascii=False))
     assert sample["LongText"].endswith("...")
     assert sample["Items"] == "<list[200]>"
 
@@ -83,4 +83,4 @@ def test_inspect_parse_error_records_error(tmp_path):
     info = gen_catalog.inspect_json_file(p)
     assert "error" in info
     assert info["name"] == "C.json"
-    assert info["size_mb"] > 0
+    # 不断言 size_mb > 0：文件已写入内容，该值为正恒真（无区分度）

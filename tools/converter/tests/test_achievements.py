@@ -106,8 +106,13 @@ class TestFormatDesc:
         assert out == "击败40名敌人"
 
     def test_keeps_newline_and_note(self):
-        out = ach._format_desc("通关贝洛伯格\n※成就完成", [], {})
+        # 必须传**字面** \n（两个字符）：源数据里换行是 JSON 双反斜杠转义，_format_desc 的
+        # .replace(r"\n", "\n") 正是为它而设。原先写 Python 转义的真实换行 → 被测行永不触发，
+        # 删掉该行断言仍绿（实测突变），属假覆盖。
+        out = ach._format_desc("通关贝洛伯格\\n※成就完成", [], {})
         assert out == "通关贝洛伯格\n※成就完成"
+        # 真实换行原样保留（不被误替换）
+        assert ach._format_desc("已含真换行\n第二行", [], {}) == "已含真换行\n第二行"
 
 
 # ─── _parse_achievement ─────────────────────────────────────────
@@ -181,12 +186,20 @@ class TestConvert:
         assert [a["id"] for a in achievements] == [404, 402, 401]
 
     def test_unknown_series_priority_fallback(self, monkeypatch):
+        """未知系列走回退优先级 999（`series_by_id.get(..., {}).get("priority", 999)`）。
+
+        必须给**两条**成就：单元素列表的 sorted 比较 0 次，回退值根本不参与排序
+        ——原先的单条版本删掉 `, 999` 默认值仍绿（实测突变）。
+        """
         def fake_load(path):
             name = str(path)
             if name.endswith("AchievementSeries.json"):
-                return []
+                return [{"SeriesID": 1, "SeriesTitle": {"Hash": 1}, "Priority": 500}]
             if name.endswith("AchievementData.json"):
-                return [{"AchievementID": 1, "SeriesID": 99, "Priority": 100, "ParamList": []}]
+                return [
+                    {"AchievementID": 1, "SeriesID": 99, "Priority": 100, "ParamList": []},  # 未注册系列 → 999
+                    {"AchievementID": 2, "SeriesID": 1, "Priority": 500, "ParamList": []},
+                ]
             if name.endswith("TextJoinConfig.json"):
                 return []
             return []
@@ -196,4 +209,5 @@ class TestConvert:
         monkeypatch.setattr(ach, "save_json", lambda data, path: saved.__setitem__(str(path), data))
         ach.convert()
         achievements = saved[str(OUTPUT_DIR / "achievements.json")]
-        assert len(achievements) == 1  # 无系列引用也不崩溃
+        assert len(achievements) == 2  # 无系列引用也不崩溃
+        assert [a["id"] for a in achievements] == [2, 1]  # 500（已注册）< 999（回退）

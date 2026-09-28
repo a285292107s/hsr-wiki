@@ -10,11 +10,11 @@
 
 ## 前端 e2e（Playwright / 布局验收层）
 
-- 配置：`playwright.config.ts`；`webServer` 起 `pnpm dev` 并复用已有 6188 实例（非 CI），单 Chromium；`mobile-chromium`（Pixel 7）仅跑 layout（溢出 / 结构 / console 守卫），`testIgnore` 排除 visual 与 accessibility
+- 配置：`playwright.config.ts`；`webServer` 起 `pnpm dev` 并复用已有 6188 实例（非 CI），单 Chromium；`mobile-chromium`（Pixel 7）仅跑 layout（溢出 / 结构 / console 守卫），`testIgnore` 排除 visual 与 accessibility，`grepInvert: /@viewport-pinned/` 排除**自行 `setViewportSize` 固定视口**的用例（其视口已由用例钉死，两个 project 下重复执行同一断言；标签须静态写在 `test(...)` 第二参，动态 annotation 对收集期过滤无效；标签纪律见 `e2e/layout.spec.ts` 头部）
 - 用例：`e2e/layout.spec.ts`（布局验收）/ `accessibility.spec.ts`（axe-core WCAG 扫描）/ `visual.spec.ts`（像素基线）；公共工具在 `e2e/helpers.ts`
 - **分层**：CI 层 = `pnpm test:e2e:ci`（layout + accessibility，零外部依赖、环境无关）；像素基线回本机（判定依赖环境——CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异，见 `ci.yml` 注释），**禁止把 `visual.spec` 加回 CI**
 - 基线：截图提交 git（`e2e/snapshots/`），本机刷新用 `pnpm test:e2e:update`（详细约束见 [commands.md](commands.md)）
-- 断言能力已固化「验证流程」各级别：`toHaveCSS` / `toHaveText` / `toHaveCount`（T1b/T2）、横向溢出检测 `findHorizontalOverflow`（L3）、`toHaveScreenshot`（L4）、axe-core（a11y）、console / pageerror 守卫（CDN 404 与 JS 异常）
+- 断言能力已固化「验证流程」各级别：`toHaveCSS` / `toHaveText` / `toHaveCount`（T1b/T2）、横向溢出检测 `findHorizontalOverflow`（L3）、`toHaveScreenshot`（L4）、axe-core（a11y）、`pageerror` 硬断言（`console` error 仅收集记录，环境性 CDN 失败不硬断言，见 `helpers.ts` 注释）
 - a11y 既有缺陷登记在 `accessibility.spec.ts` 的 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败；登记带超期复查提示）——修复后须人工裁决并从清单移除。**登记前必须先实测**：只有 axe impact 为 `serious`/`critical` 的违规才进入断言路径，`moderate` 级登记进去等于永不生效的白名单（曾有一条此类死条目，已删）
 - 首页 Hero：≥1024px 渲染 KV Spine 场景（WebGL rAF 动画，`animations: 'disabled'` 对其无效），像素基线中隐藏 `.nk-home-hero__spine`（其渲染验收归研究线）；<1024px 为随机五星立绘轮播，基线不覆盖
 

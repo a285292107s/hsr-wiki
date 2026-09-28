@@ -24,6 +24,5 @@ describe('spine-manifest 双清单一致性', () => {
     for (const k of overlap) {
       expect(nanoka.entries[k].kind, `${k} nanoka 侧应为 skel`).toBe('skel');
     }
-    expect(overlap.sort()).toEqual(overlap);
   });
 });

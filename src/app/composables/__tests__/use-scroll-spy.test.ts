@@ -100,7 +100,7 @@ describe('useScrollSpy', () => {
     expect(spy.activeId.value).toBe('a');
   });
 
-  it('jumpTo 目标非负时钳制为 0', () => {
+  it('jumpTo 目标为负时钳制为 0', () => {
     const scrollTo = vi.fn();
     const container = ref({ ...makeContainer({ scrollTop: 0 }), scrollTo } as HTMLElement & { scrollTo: typeof scrollTo });
     const els = { a: makeEl(10) };

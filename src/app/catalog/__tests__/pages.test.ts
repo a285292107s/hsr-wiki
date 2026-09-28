@@ -122,13 +122,8 @@ describe('filters validity', () => {
     }
   });
 
-  it('buildFilters (if present) is a function', () => {
-    for (const [key, cfg] of entries) {
-      if (cfg.buildFilters !== undefined) {
-        expect(typeof cfg.buildFilters, `${key}.buildFilters`).toBe('function');
-      }
-    }
-  });
+  /* 不测「buildFilters 是函数」：CatalogPageConfig 的可选函数类型已静态保证，
+     且下一条用例直接调用它（不可调用即抛错）。 */
 
   it('buildFilters returns valid filters given stub data', () => {
     const stubData = [

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { collectConsoleIssues, findHorizontalOverflow, waitForCatalogCards } from './helpers';
+import { collectConsoleIssues, findHorizontalOverflow, splitKnownOverflow, waitForCatalogCards } from './helpers';
 
 /**
  * 布局验收（AGENTS.md T1b/T2 的自动化落地）
@@ -14,6 +14,13 @@ import { collectConsoleIssues, findHorizontalOverflow, waitForCatalogCards } fro
  *
  * 每页统一断言：无未捕获 JS 异常 + 无横向溢出 + 关键结构存在。
  * 侧栏结构用例（折叠 / 调试台入口）一律落在非枢纽页——枢纽页按设计全断点不渲染导航条。
+ *
+ * **`@viewport-pinned` 标签（禁止随意增删）**：凡用例内自行 `page.setViewportSize(...)` 固定视口者，
+ * 必须在 `test(...)` 第二参传 `{ tag: '@viewport-pinned' }`。`mobile-chromium` project 以
+ * `grepInvert` 跳过该类用例——其视口由用例自身钉死，在两个 project 下行为完全重复（纯耗时）。
+ * **唯一例外**：「手机（<768px）：调试台入口隐藏」有意不打标签，作为 `isMobile` + `<meta name="viewport">`
+ * 契约的哨兵（理由见该用例上方注释）。增删标签后必须核对：不带该标签的用例在 Pixel 7 视口下确实有意义。
+ * 理由见 playwright.config.ts。
  */
 
 test.describe('布局验收：常规主题', () => {
@@ -29,7 +36,7 @@ test.describe('布局验收：常规主题', () => {
     // 常规模式不得挂 cw 主题
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'cw');
     // L3 溢出
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
@@ -37,15 +44,15 @@ test.describe('布局验收：常规主题', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character');
     await waitForCatalogCards(page);
-    const cardCount = await page.locator('[class$="-grid"] a').count();
+    const cardCount = await page.locator('[class*="-grid"] a').count();
     expect(cardCount).toBeGreaterThan(0);
     // 工具条存在（搜索 + 筛选下拉）
     await expect(page.locator('.nk-cat-toolbar').first()).toBeVisible();
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('角色图鉴 /character：手机断点行式卡（圆头像、单列、无溢出）', async ({ page }) => {
+  test('角色图鉴 /character：手机断点行式卡（圆头像、单列、无溢出）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/character');
@@ -70,7 +77,7 @@ test.describe('布局验收：常规主题', () => {
     expect(size).toEqual({ w: 44, h: 44 });
     const cardH = await cards.first().evaluate((el) => Math.round(el.getBoundingClientRect().height));
     expect(cardH).toBeLessThanOrEqual(80);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 });
@@ -87,7 +94,7 @@ async function collectNavAnchors(page: import('@playwright/test').Page) {
 
 test.describe('布局验收：导航动态溢出折叠', () => {
 
-  test('窄视口：可见项恒为规范序前缀，尾部折叠进"更多"抽屉', async ({ page }) => {
+  test('窄视口：可见项恒为规范序前缀，尾部折叠进"更多"抽屉', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('/settings');
@@ -106,11 +113,13 @@ test.describe('布局验收：导航动态溢出折叠', () => {
       els.map((el) => el.getAttribute('href')),
     );
     expect(drawerHrefs).toEqual(foldedHrefs);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    // 320px 低于**最小声明断点 374**，属未声明支持区间。已知项（.nk-seg 手机宽被裁，登记于
+    // helpers.ts 的 KNOWN_OVERFLOWS）过滤后断言：其余任何溢出仍然失败。
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('宽视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', async ({ page }) => {
+  test('宽视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/settings');
@@ -120,7 +129,7 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     const anchors = await collectNavAnchors(page);
     expect(anchors.length).toBeGreaterThan(1);
     expect(anchors.every((a) => a.visible)).toBe(true);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 });
@@ -134,7 +143,7 @@ async function readContentOffset(page: import('@playwright/test').Page): Promise
 }
 
 test.describe('布局验收：枢纽页无侧栏', () => {
-  test('桌面（1280px）：/ 与 /currency 不渲染侧栏，避让回退为 48px 页面留白', async ({ page }) => {
+  test('桌面（1280px）：/ 与 /currency 不渲染侧栏，避让回退为 48px 页面留白', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
 
@@ -155,26 +164,30 @@ test.describe('布局验收：枢纽页无侧栏', () => {
 
     // 客户端路由切换（非整页加载）的主流程：从枢纽页进入板块后侧栏回归、data-nav 撤下
     // （App.vue 的 v-if 与 bareNav watcher 生效，令牌回到 148px 侧栏避让）
-    await page.locator('.nk-cwhub-index__row').first().click();
+    // 行筛选必须用 href 而非 to：RouterLink 渲染的是 href（`:not([to="/"])` 在真实 DOM 里匹配不到任何元素、
+    // 等于没过滤），返回行 `.nk-cwhub-index__row` 与板块行同类名，只靠 `.first()` 依赖行序。
+    await page.locator('.nk-cwhub-index__row:not([href="/"])').first().click();
+    // 落点断言（期望值取自 CW_NAV_ITEMS[0].path，勿凭直觉）：防「行序变化后点到返回行」却只因后续断言而失败
+    await expect(page).toHaveURL(/\/currency\/role$/);
     await expect(page.locator('.ui-sidebar')).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-nav', 'bare');
     expect(await readContentOffset(page)).toBe(148);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('平板（800px）：/ 无侧栏，避让回退为 32px 页面留白', async ({ page }) => {
+  test('平板（800px）：/ 无侧栏，避让回退为 32px 页面留白', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 800, height: 900 });
     await page.goto('/');
     await expect(page.locator('.ui-sidebar')).toHaveCount(0);
     expect(await readContentOffset(page)).toBe(32);
     await expect(page.locator('.nk-home-nav')).toHaveCSS('padding-left', '32px');
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('手机（390px）：枢纽页不渲染导航条（全断点无导航），无左侧避让', async ({ page }) => {
+  test('手机（390px）：枢纽页不渲染导航条（全断点无导航），无左侧避让', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/currency');
@@ -182,11 +195,11 @@ test.describe('布局验收：枢纽页无侧栏', () => {
     await expect(page.locator('html')).toHaveAttribute('data-nav', 'bare');
     await expect(page.locator('.ui-sidebar')).toHaveCount(0);
     expect(await readContentOffset(page)).toBe(0);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('非枢纽页（/character）：侧栏与 148px 避让照常，无 data-nav', async ({ page }) => {
+  test('非枢纽页（/character）：侧栏与 148px 避让照常，无 data-nav', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/character');
@@ -199,7 +212,7 @@ test.describe('布局验收：枢纽页无侧栏', () => {
 });
 
 test.describe('布局验收：枢纽页共享页脚原语', () => {
-  test('/ 与 /currency 共用 .nk-hub-footer（声明于 tokens.css），全断点留白正确', async ({ page }) => {
+  test('/ 与 /currency 共用 .nk-hub-footer（声明于 tokens.css），全断点留白正确', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     for (const path of ['/', '/currency'] as const) {
@@ -227,11 +240,11 @@ test.describe('布局验收：枢纽页共享页脚原语', () => {
     );
     expect(padBottom).toBeGreaterThanOrEqual(16);
     expect(padBottom).toBeLessThan(56);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('全站等宽令牌 --font-mono：单点声明 + 目录页消费（裸字面量回归防线）', async ({ page }) => {
+  test('全站等宽令牌 --font-mono：单点声明 + 目录页消费（裸字面量回归防线）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/character');
@@ -250,7 +263,7 @@ test.describe('布局验收：枢纽页共享页脚原语', () => {
 test.describe('布局验收：研究线调试台 dev 入口', () => {
   /** e2e 全程 dev server（import.meta.env.DEV=true）：调试台入口应渲染。
    *  手机隐藏由 CSS 承担；平板/桌面竖排侧栏显示于设置按钮上方。 */
-  test('平板/桌面（≥768px）：调试台入口可见且位于设置上方', async ({ page }) => {
+  test('平板/桌面（≥768px）：调试台入口可见且位于设置上方', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/settings');
@@ -263,10 +276,17 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
     const debugY = await debugLink.evaluate((el) => el.getBoundingClientRect().top);
     const settingsY = await settingsLink.evaluate((el) => el.getBoundingClientRect().top);
     expect(debugY).toBeLessThan(settingsY);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
+  /**
+   * **本条有意不带 `@viewport-pinned`**：它是 mobile project 里唯一「便宜且宽度敏感」的哨兵——
+   * `devices['Pixel 7']` 的 `isMobile: true` 使 `<meta name="viewport">`（index.html）参与布局；
+   * 该标签一旦被删/改名，layout viewport 退回 980px，此处 `.ui-sidebar-debug` 由隐藏转可见（tokens.css 断点）
+   * → 本条硬失败。其余 9 条留在 mobile project 的用例均不足以察觉该场景（它们对 980px 不敏感）。
+   * 删除本条或在 playwright.config.ts 里把它一并排除，等于放弃 isMobile + meta viewport 契约的唯一防线。
+   */
   test('手机（<768px）：调试台入口隐藏，导航折叠不受影响', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
@@ -276,7 +296,7 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
     await expect(page.locator('.ui-sidebar-debug')).toBeHidden();
     const anchors = await collectNavAnchors(page);
     expect(anchors.length).toBeGreaterThan(1);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
@@ -297,9 +317,9 @@ test.describe('布局验收：终局合并单页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame');
     await waitForCatalogCards(page);
-    const cardCount = await page.locator('[class$="-grid"] a').count();
+    const cardCount = await page.locator('[class*="-grid"] a').count();
     expect(cardCount).toBeGreaterThan(0);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 });
@@ -314,7 +334,7 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
     const sectionCards = await page.locator('.nk-cwhub-index__row').count();
     expect(sectionCards).toBeGreaterThanOrEqual(5);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
@@ -335,7 +355,7 @@ test.describe('布局验收：货币战争主题', () => {
     // 选择玫瑰金 → <html data-cw-accent="rose">（tokens [data-theme="cw"][data-cw-accent] 规则生效）
     await page.getByRole('button', { name: /玫瑰金/ }).click();
     await expect(page.locator('html')).toHaveAttribute('data-cw-accent', 'rose');
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
@@ -391,7 +411,7 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /cdn\.jsdelivr\.net\/gh\/a285292107s\/StarRailTextures@main\/assets\/asbres\/ui\/ui3d\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.png/);
     // 无内容区块：1001 无专属光锥 → 面板常驻 + 空态提示
     await expect(page.locator('[data-panel="cones"] .nk-crole-empty')).toHaveText('该角色没有专属光锥数据');
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
@@ -409,11 +429,11 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(cone.locator('.nk-crole-cone__icon')).toHaveAttribute('src', /static\.nanoka\.cc\/assets\/hsr\/lightconemediumicon\/23000\.webp/);
     // 等级递进列表保留（5 级）
     await expect(page.locator('[data-panel="cones"] .nk-crole-equip')).toHaveCount(5);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('/currency/role/1001 手机断点：方块星级切换、矩阵横向滚动、无溢出', async ({ page }) => {
+  test('/currency/role/1001 手机断点：方块星级切换、矩阵横向滚动、无溢出', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/currency/role/1001');
@@ -442,7 +462,7 @@ test.describe('布局验收：货币战争主题', () => {
     expect(colsAfter).toEqual(colsBefore);
     // 星级切换不触发定位描述重渲染（Hero 内文本保持）
     await expect(page.locator('.nk-crole-hero__role')).toHaveText(roleText);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 });
@@ -456,11 +476,11 @@ test.describe('布局验收：角色详情页', () => {
     await expect(page.locator('.nk-hero__archive')).toContainText('1001');
     // 概览面板结构出现（PROFILE / TALENTS 等区块）
     await expect(page.locator('.nk-profile, .nk-title').first()).toBeVisible();
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('/character/1001 手机断点：配队标头渲染、队间距 16px、无溢出', async ({ page }) => {
+  test('/character/1001 手机断点：配队标头渲染、队间距 16px、无溢出', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/character/1001'); // 1001 有 2 队（多队才渲染标头）
@@ -474,7 +494,7 @@ test.describe('布局验收：角色详情页', () => {
       (el) => parseFloat(getComputedStyle(el).rowGap),
     );
     expect(gap).toBe(16);
-    expect(await findHorizontalOverflow(page)).toEqual([]);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 });
