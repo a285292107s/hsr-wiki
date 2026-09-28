@@ -14,6 +14,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 | 目录页 / 路由 / 分层结构 / 研究线 / 新增目录端到端 | [docs/agents/architecture.md](docs/agents/architecture.md) |
 | 数据转换 / 字段探索 / vendor 数据查询 | [docs/agents/data-pipeline.md](docs/agents/data-pipeline.md) |
 | 数据源总结 / 字段与研究文档查询 | [docs/data/](docs/data/) + [tools/converter/DATA_CATALOG.md](tools/converter/DATA_CATALOG.md) |
+| 转换器字段映射（表 → 输出 JSON） | [docs/data/转换器字段映射.md](docs/data/转换器字段映射.md) |
 | Spine 机制 / 官网抓取 / 黑块成因 | [docs/spine/](docs/spine/) |
 | 写改测试 / e2e 分层 / 像素基线 | [docs/agents/testing.md](docs/agents/testing.md) |
 | 命令 / 端口 / dev 缓存陈旧 / 部署与门禁 | [docs/agents/commands.md](docs/agents/commands.md) |
@@ -31,6 +32,7 @@ pnpm test               # 运行全部测试（Vitest）
 pnpm vitest run <文件>   # 运行单个测试文件
 pnpm test:e2e:ci        # e2e CI 层（layout + a11y）
 node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删引用即非零退出；仅手动，未进 CI）
+node tools/check-comments.mjs    # 注释累赘度守卫（report-only 先行；长块/超长头/重复断言/护栏基线；存量清零后接 pnpm build）
 ```
 
 全量命令手册（e2e 分层与像素基线、研究线 `/debug`、converter、部署与门禁、dev 缓存自愈）见 [docs/agents/commands.md](docs/agents/commands.md)。
