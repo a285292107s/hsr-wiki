@@ -290,7 +290,7 @@
      0（手机，侧栏为底部栏）/ 88（= 平板侧栏 56 + 缘距 32）/ 148（= 桌面文字侧栏 140 + 缘距 8）。
      视图容器统一以 padding-left / left / margin-left = var(--nk-content-offset) 引用，
      侧栏宽度变更只改本变量（ADR 0003 fixed 侧栏 + 手动避让架构的收口，防遗漏漂移）。
-     枢纽页（App.vue 挂 data-nav="bare"）隐藏侧栏后避让失去对象，由下方断点重映射覆写为页面留白。 */
+     导航条全站全断点恒在（ADR 0019）：避让对象恒存在，不存在「无侧栏页」的断点重映射特例。 */
   --nk-content-offset: 0;
   --nk-detail-max: 1000px;
   --nk-struct-max: 952px;
@@ -337,15 +337,6 @@
 }
 @media (min-width: 1024px) {
   :root { --nk-content-offset: 148px; }
-}
-/* 枢纽页（/ 与 /currency）无侧栏：避让失去对象，回退为与页面右缘留白对称的页面留白
-   （平板 32 = 页内导航右缘 32；桌面 48 = 首页 Hero 标题区右缘 48）。
-   特异性 (0,2,0) 高于上方 :root (0,1,0)，不依赖书写顺序、也不受断点块顺序影响。 */
-@media (min-width: 768px) {
-  :root[data-nav="bare"] { --nk-content-offset: 32px; }
-}
-@media (min-width: 1024px) {
-  :root[data-nav="bare"] { --nk-content-offset: 48px; }
 }
 
 /* ═══ 货币战争模式：全壳主题（黑底 + 主题主色；缺省香槟金，可经 data-cw-accent 切换） ═══
@@ -1083,10 +1074,96 @@ img[data-cdn-down] { visibility: hidden; }
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-hub-footer { padding: 56px 32px 40px var(--nk-content-offset); }
 }
-/* 手机（<768px）：枢纽页全断点无导航条（App.vue bareNav），底部不再预留 56px 导航高度，
-   只留 24px 呼吸 + safe-area，以免手机手势条压住末行文案 */
+/* 手机（<768px）：导航条为底部栏（56px + safe-area），页脚底部必须预留 72px（56 导航 + 16 呼吸），
+   以免末行文案被底部导航遮挡——ADR 0019 底部栏回归的连带项，禁止改回「只留呼吸」 */
 @media (max-width: 767px) {
-  .nk-hub-footer { padding: 48px 20px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .nk-hub-footer { padding: 48px 20px calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ═══════════════════════════════════════════
+   枢纽页共享原语：品牌带（模式身份 + 定位副标）
+   工具化形态（ADR 0018）：枢纽页是「选路页」，首屏必须优先让给板块索引，
+   故**不再承载全屏 KV / 背景视频媒体层**，只在页首保留一条紧凑品牌带。
+   两个模式的枢纽页共用同一段骨架，故声明在全局原语层而非任一页面 CSS；
+   断点随原语就近（桌面基准 → 平板 → 手机），避让值统一取 --nk-content-offset。
+   消费方：HomeView.vue / CurrencyHubView.vue；登记于 docs/agents/ui-design.md §1。
+   min-height 而非固定 height：窄屏副标换行时自然增高，禁裁切文字。
+   禁止在页面 CSS 里重新声明本原语或改断点数值——两页高度不一致会让互切时跳动。
+═══════════════════════════════════════════ */
+.nk-hub-brand {
+  position: relative;
+  min-height: 200px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--th-500) 12%) 100%);
+}
+/* 底部融入页面底色：无媒体层后由渐变承担过渡，品牌带与索引区之间不得出现硬边 */
+.nk-hub-brand__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 0%, transparent 58%, color-mix(in srgb, var(--bg) 76%, transparent) 86%, var(--bg) 100%);
+}
+/* 标题区与索引区同网格：max-width 居中 + 左侧 --nk-content-offset 页面留白（断点由令牌接管） */
+.nk-hub-brand__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--nk-content-max);
+  margin: 0 auto;
+  padding: 0 48px 28px var(--nk-content-offset);
+}
+/* 英文副标（模式代号）：发丝线 + 宽字距，克制不发光 */
+.nk-hub-brand__supra {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+  font-family: var(--font-hud);
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  color: var(--text2);
+  animation: nk-fade 0.7s var(--ease) 0.2s backwards;
+}
+.nk-hub-brand__supra::before { content: ''; width: 44px; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
+/* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文字形）；无投影无发光——层级由字重与字号控制 */
+.nk-hub-brand__title {
+  font-family: var(--font-body);
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: var(--text-bright);
+  animation: nk-fade 0.7s var(--ease) 0.35s backwards;
+}
+/* 定位副标：一行内容清单，与主标题拉开层级 */
+.nk-hub-brand__tagline {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  animation: nk-fade 0.7s var(--ease) 0.5s backwards;
+}
+/* 枢纽页文字入场约定（三段共用；术语见 CONTEXT.md「枢纽页文字入场动画」）：
+   复用全局共享关键帧 nk-fade（禁止为品牌带另立本地关键帧）；两枢纽必须同时序，
+   改任一段时序都会造成互切时「一边文字展开、一边文字直接就在那里」 */
+/* 平板（768-1023px）：中等密度 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-hub-brand { min-height: 176px; }
+  .nk-hub-brand__content { padding: 0 32px 24px var(--nk-content-offset); }
+}
+/* 手机（<768px）：进一步压缩，首屏优先给板块索引 */
+@media (max-width: 767px) {
+  .nk-hub-brand { min-height: 148px; }
+  .nk-hub-brand__content { padding: 0 20px 18px; }
+  .nk-hub-brand__supra { font-size: 0.55rem; letter-spacing: 0.18em; gap: 10px; margin-bottom: 10px; }
+  .nk-hub-brand__supra::before { width: 28px; }
+  .nk-hub-brand__title { font-size: clamp(1.5rem, 7vw, 2rem); }
+  .nk-hub-brand__tagline { margin-top: 10px; font-size: 0.78rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nk-hub-brand__supra, .nk-hub-brand__title, .nk-hub-brand__tagline { animation: none; }
 }
 
 /* ═══════════════════════════════════════════
@@ -1175,7 +1252,10 @@ img[data-cdn-down] { visibility: hidden; }
   .ui-sidebar-link:hover .ui-sidebar-link__cn { color: var(--text-bright); }
   .ui-sidebar-link--active { background: var(--nk-shell-active-bg); }
   .ui-sidebar-link--active .ui-sidebar-link__cn { color: var(--metric-val); }
-  .ui-sidebar-link--active .ui-sidebar-link__en { color: color-mix(in srgb, var(--metric-val) 55%, transparent); }
+  /* 激活态英文小字（8px，按 WCAG 正文 4.5:1 门槛判定）：**禁止降回 55% 混色**——
+     实测 10 套强调色 55% 仅 3.01（terracotta）～4.48（silver），全部不达标；
+     85% 最低 5.19（terracotta）。改动本值前必须在全部 10 套强调色下重新按 sRGB 合成测对比度。 */
+  .ui-sidebar-link--active .ui-sidebar-link__en { color: color-mix(in srgb, var(--metric-val) 85%, transparent); }
   /* 激活档案竖条：左侧主色短竖线 */
   .ui-sidebar-link--active::before {
     content: '';

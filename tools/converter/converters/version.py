@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 import re
 import subprocess
+from functools import lru_cache
 
 from config import OUTPUT_DIR, SOURCE_DIR
 from utils import save_json
@@ -59,6 +60,24 @@ def _read_head_commit() -> tuple[str, str] | None:
         return None
     title, _, date = line.partition("\x1f")
     return title, date
+
+
+@lru_cache(maxsize=1)
+def read_source_version_label() -> str:
+    """读取子模块 HEAD 提交标题解析出的 version_label（如 "4.6"）；不可用时返回空串。
+
+    供 release_version 打标（characters / light_cones）复用，禁止在别处复制一份提交标题
+    解析实现；也不得改读上一轮 version.json——那是上一版数据，标出的版本会落后一版。
+    """
+    head = _read_head_commit()
+    if head is None:
+        logger.warning("无法读取子模块 git 提交，版本号留空")
+        return ""
+    parsed = parse_commit_title(head[0])
+    if parsed is None:
+        logger.warning("提交标题无法解析为版本号: %r（版本号留空）", head[0])
+        return ""
+    return parsed["version_label"]
 
 
 def convert() -> None:

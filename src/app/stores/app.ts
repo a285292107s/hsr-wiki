@@ -23,6 +23,8 @@ export const useAppStore = defineStore('app', () => {
   const versions = ref<string[]>([]);
   /** 游戏版本（本地 version.json，converter 从子模块 git 提交解析） */
   const gameVersion = ref('');
+  /** 大版本标签（version.json 的 version_label，如 "4.6"）：首页「本版本上新」的唯一版本判据（ADR 0019 决策 3） */
+  const versionLabel = ref('');
   /** 物品数据库（item.json） */
   const itemDb = ref<ItemDb>({});
   /** id → 名称（光锥/遗器套装/角色） */
@@ -49,12 +51,14 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  /** 加载游戏版本（本地 version.json；未生成/失败静默回退，不阻塞页面） */
+  /** 加载游戏版本 + 大版本标签（本地 version.json；两者同一次加载，拆分加载会让首页标题与判据版本漂移）。
+   *  未生成/失败静默回退（两个字段保持空串，页面仍可用）。 */
   async function initVersion(): Promise<void> {
-    if (gameVersion.value) return;
+    if (gameVersion.value || versionLabel.value) return;
     try {
       const v = await loadLocalVersion();
       gameVersion.value = v.game_version || '';
+      versionLabel.value = v.version_label || '';
     } catch {
       // 本地 JSON 缺失：静默回退，页面仍可用
     }
@@ -86,7 +90,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   return {
-    version, latestVersion, versions, gameVersion, itemDb, nameCache, toasts,
+    version, latestVersion, versions, gameVersion, versionLabel, itemDb, nameCache, toasts,
     initManifest, initVersion, ensureItems, mergeNames, toast, dismissToast,
   };
 });

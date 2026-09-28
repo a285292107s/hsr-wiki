@@ -11,8 +11,9 @@ test.setTimeout(120_000);
  * 基线截图提交 git（e2e/snapshots/），变更后 `pnpm exec playwright test -u` 刷新。
  * maxDiffPixelRatio 容差吸收 CDN 图片加载时序抖动（网络环境差异，非布局回归）。
  *
- * 注意：Spine 首页 hero 含 WebGL 动画，基线对动画帧敏感——截图前冻结动画
- * （spine 画布由 .nk-home-hero__spine 包裹，等待 spineReady 类出现后稳定帧）。
+ * 注意：枢纽页（/ 与 /currency）自 ADR 0018 起为静态品牌带 + 板块索引，不含 WebGL / 视频帧，
+ * 基线天然稳定，不再需要冻结动画或隐藏媒体层。旧的 `.nk-home-hero__spine` /
+ * `.nk-cwhub-hero__video` 冻结块已随媒体层删除——那两个元素已不存在，保留会让 evaluate 直接失败。
  */
 
 /**
@@ -58,13 +59,8 @@ async function waitImages(page: Page) {
 test.describe('视觉基线', () => {
   test('首页 /', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.nk-home-hero__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
     await waitImages(page);
-    // Spine 为 WebGL rAF 动画（CSS animations 禁用无效），且已有 spine-lab 专用验收引擎
-    // 负责其渲染验收——像素基线将其隐藏，避免动画帧导致基线不稳定
-    await page.locator('.nk-home-hero__spine').evaluate((el) => {
-      (el as HTMLElement).style.display = 'none';
-    });
     await expect(page).toHaveScreenshot('home.png', { maxDiffPixelRatio: 0.05, animations: 'disabled' });
   });
 
@@ -84,13 +80,8 @@ test.describe('视觉基线', () => {
 
   test('货币战争 Hub /currency', async ({ page }) => {
     await page.goto('/currency');
-    await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
     await waitImages(page);
-    // 背景视频为媒体帧动画（CSS animations 禁用无效），基线将其隐藏——
-    // poster 兜底帧（本地抽帧资产）即视觉效果下限，视频就绪后渲染更强，不作为断言对象
-    await page.locator('.nk-cwhub-hero__video').evaluate((el) => {
-      (el as HTMLElement).style.display = 'none';
-    });
     await expect(page).toHaveScreenshot('currency.png', { maxDiffPixelRatio: 0.05, animations: 'disabled' });
   });
 });

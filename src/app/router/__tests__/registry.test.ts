@@ -10,14 +10,14 @@
 import { describe, it, expect } from 'vitest';
 import { createNkRouter } from '../index';
 import { CATALOG_PAGES } from '../../catalog/pages';
-import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM, CW_GATEWAY } from '../../components/nav-items';
+import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM } from '../../components/nav-items';
 import type { NavItem } from '../../components/nav-items';
 
 const router = createNkRouter();
 
 describe('site map consistency', () => {
   it('every nav item path resolves to a registered route', () => {
-    const items: NavItem[] = [NORMAL_HUB_ITEM, CW_HUB_ITEM, CW_GATEWAY, ...NORMAL_NAV_ITEMS, ...CW_NAV_ITEMS];
+    const items: NavItem[] = [NORMAL_HUB_ITEM, CW_HUB_ITEM, ...NORMAL_NAV_ITEMS, ...CW_NAV_ITEMS];
     for (const item of items) {
       const r = router.resolve(item.path);
       expect(r.matched.length, `nav path "${item.path}" should match a route`).toBeGreaterThan(0);

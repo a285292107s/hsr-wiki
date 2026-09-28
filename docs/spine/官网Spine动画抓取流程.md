@@ -2,7 +2,7 @@
 
 > 目标：从米哈游官网（sr.mihoyo.com）抓取角色 Spine 动画资源（atlas / json 骨架 / 纹理图），
 > 写入本地双清单 `public/data/cn/spine-manifest-official.json`（官网源）+ `spine-manifest-nanoka.json`（回退源），
-> 供 wiki 角色详情页 Hero 区与枢纽页 Hero 场景播放。
+> 供 wiki 角色详情页 Hero 区播放（枢纽页 Hero 场景已随 [ADR 0018](../../docs/adr/0018-枢纽页改为工具化入口页.md) 退场——`home-bg` 条目保留作调试台场景选择与历史存档，无产品面消费方）。
 > 已实测验证并覆盖 3.4 起的历次官网角色/背景动画（最新：4.6 真珠 1503 + home-bg 五层场景）；
 > **当前条目清单以两份 manifest 文件为准，本文只记流程与规范**。
 
@@ -155,7 +155,7 @@ nanoka 清单以 `static.nanoka.cc/assets/hsr/spine/manifest.json`（nanoka 站�
 该页另含 bg/tibao2/tibao3/tibaoqj 前景/star 等 KV 场景层，未接入）；
 3.0 首页轮播含乱破/丹恒饮月/黄泉/砂金单角色骨架，活动页系统自 3.0 起存在，均未接入）。
 
-**非角色条目（场景背景）**：条目键可为场景标识而非角色 ID，如 `home-bg`（常规枢纽页 Hero 背景）。
+**非角色条目（场景背景）**：条目键可为场景标识而非角色 ID，如 `home-bg`（常规枢纽页 KV 背景；产品面已随 ADR 0018 退场，保留供调试台场景选择与存档）。
 背景动画位于官网背景节点 `pz-ugmWxhsCCJ` 的 `spineList`（4.5 版 5 层：pc01_beijing 主背景 +
 pc02_shajin / pc03_zhigengniao / pc04_qianjing 角色层 + pc05_kv_top_mask 顶部遮罩；节点 ID 跨版本稳定，
 层内容随版本轮换），完整场景用 `kind: official-scene` 条目（viewport + layers 数组，底→顶顺序）。
@@ -175,7 +175,7 @@ renderOrder 相同时保持 spineList 数组顺序——切勿按数组顺序直
 （boxStyle 19.2rem×10.8rem = 1920×1080 设计值），世界坐标与像素 1:1，各层按骨架世界坐标直接入画，
 出血部分自然裁剪。**切勿按角色层联合边界外扩推导 viewport**——旧版 2192.89×1233.5 联合边界会令画面
 整体缩小 14%，且主背景/出血角色（如姬子 y 超出画布）的取景与官网不一致。
-前端每层一个 SpinePlayer 叠放（`initSpineSceneViewer`），窄屏（<768px）降级仅主背景层。
+前端单画布合并渲染（`createScenePipeline`，顺序绘制全部层——多画布叠放会因透明 dst 退化出黑块，见 [单层模式透明画布黑块成因与衬底方案](单层模式透明画布黑块成因与衬底方案.md)）；生产侧多层场景入口 `initSpineSceneViewer` 自 ADR 0018 起无产品面消费方（保留为预留能力）。
 
 **多纹理命名规律**：atlas 多 page 时纹理键为 `name.png` / `name_2.png` / `name_3.png`…
 （与 `img[].id` 的 `name` / `name_2` / `name_3` 一一对应），如 xilian×3、tenghuang×3、jizi×3。
@@ -189,7 +189,7 @@ renderOrder 相同时保持 spineList 数组顺序——切勿按数组顺序直
 
 > 覆盖说明：official 条目覆盖 3.4（2025-05）至 4.6（2026-09）各版本官网首页角色动画；
 > 3.2/3.3 时代官网首页为旧 Nuxt 架构无 spine，4.2 版本无 Wayback 快照，均不可得。
-> home-bg 场景 = 常规枢纽页 Hero 背景（官网背景动画节点 pz-ugmWxhsCCJ 当期全部可见层，4.5 起固定 5 层，
+> home-bg 场景 = 常规枢纽页 KV 背景（**产品面已随 [ADR 0018](../../docs/adr/0018-枢纽页改为工具化入口页.md) 退场，条目保留供调试台场景选择与存档**，无页面请求）；官网背景动画节点 pz-ugmWxhsCCJ 当期全部可见层，4.5 起固定 5 层，
 > 4.6 层序：pc01_46kv_bg / pc02_46kv_npc / pc03_46kv_boss / pc04_46kv_an（压暗层）/ pc05_46kv_zhengzhu，
 > renderOrder 已升序 0-4 可直写；各层共享统一骨架坐标系，渲染时同一固定 viewport 叠加对齐；
 > 历史版本场景以 `home-bg-{版本号}` 键留档，当前存档 4.4（10 层）/ 4.5（5 层））。

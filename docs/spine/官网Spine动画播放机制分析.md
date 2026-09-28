@@ -54,7 +54,7 @@ config.pc.nodes[] 中 name = "@puzzle/spine-player" 的节点
 
 | 节点 ID | spineList | 模式 | 用途 |
 |---|---|---|---|
-| `pz-ugmWxhsCCJ`（pc.nodes[0]） | **10 层**：`01_bg_pc` 主背景 + 9 层角色/特效（renderOrder 0~9，posX/posY 全 0，scale 1） | 多角色同时播放 | 枢纽页背景群像 |
+| `pz-ugmWxhsCCJ`（pc.nodes[0]） | **10 层**：`01_bg_pc` 主背景 + 9 层角色/特效（renderOrder 0~9，posX/posY 全 0，scale 1） | 多角色同时播放 | 枢纽页背景群像（产品面已随 [ADR 0018](../../docs/adr/0018-枢纽页改为工具化入口页.md) 退场） |
 | `pz-gRE3yO7OWw`（pc.nodes[8]） | **3 个角色**：姬子(270, -730, 1.01)、远坂凛(-90, 0, 0.83)、吉尔伽美什(85, 40, 0.8)，`isSinglePlay: true, initSpineIdx: 1` | 单播切换 | 首页角色展示轮播 |
 
 > 注意背景节点第 10 层 `10_qianjign_pc` 的 `renderOrder: 0`——它是全屏黑色底衬层（multiply 压暗），必须与主背景同层、置于所有角色之下；若按数组顺序直写会盖住全部角色。

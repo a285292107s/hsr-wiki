@@ -8,7 +8,7 @@
 
 | 层 | 文件 | 放什么 | 禁止 |
 |---|---|---|---|
-| 令牌 + 全局原语 | `src/styles/tokens.css` | 四层令牌（§2）；跨页全局原语（导航壳 `ui-sidebar*` / `nk-tabs` / `nk-panels`·`nk-panel` / `nk-secnav` / `nk-skeleton`·`nk-sk--*` / `nk-toast` / `nk-card` / `nk-hub-footer`（两个枢纽页共用的页脚骨架） / 各目录网格族 / `nk-empty`·`nk-error-state`·`nk-img-error`）；无障碍三件套；纸感颗粒覆层 | 页面专属规则；**页面 CSS 直接引用原始层** |
+| 令牌 + 全局原语 | `src/styles/tokens.css` | 四层令牌（§2）；跨页全局原语（导航壳 `ui-sidebar*` / `nk-tabs` / `nk-panels`·`nk-panel` / `nk-secnav` / `nk-skeleton`·`nk-sk--*` / `nk-toast` / `nk-card` / `nk-hub-footer`·`nk-hub-brand`（两个枢纽页共用的页脚骨架与品牌带） / 各目录网格族 / `nk-empty`·`nk-error-state`·`nk-img-error`）；无障碍三件套；纸感颗粒覆层 | 页面专属规则；**页面 CSS 直接引用原始层** |
 | 目录引擎 | `src/styles/catalog.css` | 目录卡片与网格（卡片 HTML 由模板字符串 v-html 注入，scoped 命不中） | 页面专属样式 |
 | 页面 | `src/styles/<page>.css` | 页面专属，由视图组件 `import`，随路由拆 chunk 懒加载 | 跨页复用（先查原语）；复制粘贴其他页面规则 |
 | 组件 | SFC `<style scoped>` | 组件专属（如 CW Hub 导航） | 污染全局命名空间 |
@@ -46,9 +46,10 @@
 - 链路：`theme.ts` / `cw-theme.ts` 持久化到 localStorage（`HSR_WIKI_ACCENT` / `HSR_WIKI_CW_ACCENT`）+ `bootstrap.ts` 挂载前初始化（防首帧主题闪烁）；`tokens.css` 的 `[data-accent]` / `[data-theme="cw"][data-cw-accent]` 规则重映射别名层，语义层与全站自动跟随。两通道**互相独立**。
 - **新增强调色 = 三处同改**（缺一处即失效或漂移）：① 原始层色阶 → ② `[data-accent="…"]`（常规）或 `[data-theme="cw"][data-cw-accent="…"]`（CW）规则重映射别名层 `--th-*` / `--cwth-*` → ③ `theme.ts` 的 `ACCENTS` / `cw-theme.ts` 的 `CW_ACCENTS`（`key` + `label` + 三点 `swatch`）。`:root` 的别名层缺省映射与语义层无需改动（自动跟随）。
 - **色阶结构硬约束**：常规强调色阶为 11 级（`50`–`950`，别名层消费 `300/400/500/600/700`）；CW 强调色阶为 7 位（`200` 亮端 / `300` 文字强调位 / `350` 高亮暖位 / `400-500` 主色位 / `600-700` 降阶暗位）。**两模式的文字强调位对黑底对比度必须 ≥4.5:1**（`check-contrast.mjs` 门禁强制）。
+- **导航激活态英文小字混色下限**：`.ui-sidebar-link--active .ui-sidebar-link__en` 的 `--metric-val` 混色**不得低于 85%**。该文字 8px，按 WCAG 正文 4.5:1 判定；逐色阶实测 55% 在 10 套强调色下仅 3.01（赤陶）～4.48（铂银）、**全部不达标**，85% 最低 5.19。改动该值前必须在全部 10 套强调色下按 sRGB 合成重测对比度（`e2e/accessibility.spec.ts` 只覆盖缺省色，抓不到其余 8 套）。
 - **同一时刻只有一个强调色相**：主题层（背景/表面/强调）禁止第二色相；设置页默认即赤陶，`--accent` 必须是当前色阶成员（禁止恢复游离色）。
 - **领域色豁免**：星级 / 属性 / 元素 / 技能类型 / 强化角标 / 文本高亮保持游戏内约定色，不随主题；CW 内领域金走暗铜降阶。
-- **导航语义豁免**：首页网关入口行 `.nk-home-row--gateway` 的金色 = 「货币战争模式」标识，不视为第三色相（登记于 check-colors 豁免清单）。
+- **导航语义豁免（已退场，ADR 0019）**：旧首页网关入口行 `.nk-home-row--gateway` 随首页板块索引一并删除，跨模式入口由侧栏「交换」承担，不存在第三色相——本分类当前无条目（`check-colors.mjs` 仅保留说明注释）。
 - 设置页布局契约：区块编号与视觉顺序固定为 01 常规主题色 / 02 货币战争主题色 / 03 开拓者形态，**不随语境交换**；可见文案只写玩家可感知语义，禁止出现 `data-accent` / `meta.cw` / localStorage 等架构黑话（规则见 `SettingsView.vue` 头部注释）。
 
 ## 4. 门禁（`pnpm build` 前置三守卫中的两个）
@@ -72,13 +73,13 @@
 
 | 区间 | 布局 |
 |---|---|
-| <768px | 手机：底部 Tab Bar（放不下的尾部动态折叠进「更多」抽屉）；页面过渡统一淡入淡出；Hero 不渲染 Spine |
-| 768–1023px | 平板：竖排图标侧栏；Hero 仍为立绘轮播 |
-| ≥1024px | 桌面：文字侧栏（档案目录册）；Hero 渲染官网 KV Spine 场景 |
+| <768px | 手机：底部 Tab Bar（放不下的尾部动态折叠进「更多」抽屉）；页面过渡统一淡入淡出；枢纽页品牌带 148px |
+| 768–1023px | 平板：竖排图标侧栏；枢纽页品牌带 176px |
+| ≥1024px | 桌面：文字侧栏（档案目录册）；枢纽页品牌带 200px |
 
 - 断点档位集合（新增值须在评审中说明理由，禁止随手新值）：`374 / 560 / 640 / 767(.98) / 768 / 1023 / 1024 / 1280 / 1536 / 1600 / 2560`，外加 `max-height: 500px + landscape`（横屏矮视口压缩侧栏与 Hero）、`hover: hover and pointer: fine` vs `hover: none`（**交互能力判定用能力查询，不用宽度代替**）。
 - 内容留白经令牌断点接管（平板 / 桌面两档），**禁止写死像素**。
-- 首页 Hero 断点策略是硬策略：桌面 Spine KV；平板与手机改为随机五星立绘轮播（6s 交叉淡入淡出，`prefers-reduced-motion` 与后台标签页停播）。布局改动必须保持该策略，实现与理由见 `HomeView.vue` 注释。
+- 枢纽页 Hero 是**跨页共享原语** `.nk-hub-brand`（声明 tokens.css）：桌面 200 / 平板 176 / 手机 148px，纯令牌渐变、无媒体层。**禁止在页面 CSS 重新声明或改断点数值**——两页高度不一致会让 `nk-view-swap` 互切时出现一边文字已展开、一边文字直接就在那里的跳动。策略与理由见 [ADR 0018](../adr/0018-枢纽页改为工具化入口页.md)。
 - 侧栏「调试台」入口：≥768px 显示（设置按钮上方），<768px 隐藏且不参与底部栏折叠测量。
 
 ## 7. 反 AI 味硬约束（不可回退）
@@ -91,7 +92,7 @@
 | 禁霓虹 glow 阴影（`0 0 Npx`）/ 禁渐变填充徽章；hover 仅发丝边框 + 墨色分层阴影 | `src/styles/currency-catalog.css` |
 | CW 详情层不设 glow 变量；阴影以物理黑投影 `rgba(0,0,0,…)` 为主；强调色只用纯色 / 淡底 / 发丝线 | `src/styles/currency-role.css` |
 | 无发光点 / 无药丸胶囊 / 无 box-shadow 堆叠；徽标走文字式 | `src/styles/endgame.css` |
-| Hero 视频层之上禁新增行情式装饰（霓虹 glow / 金币雨 / 行情板 / div 合成装饰 / 装饰字符 / em-dash / 装饰性 eyebrow）；降级必走静态 poster + 渐变，**禁止用装饰动画替代视频** | `src/styles/currency-hub.css` |
+| 枢纽页品牌带之上禁新增行情式装饰（霓虹 glow / 金币雨 / 行情板 / div 合成装饰 / 装饰字符 / em-dash / 装饰性 eyebrow）；**禁补回全屏媒体层**（背景视频 / poster / KV Spine / 立绘轮播），恢复前必须先改 [ADR 0018](../adr/0018-枢纽页改为工具化入口页.md) | `src/styles/currency-hub.css`、`src/styles/tokens.css` |
 | 纸感颗粒禁纤维与云斑（会生成可被眼锁定的条纹与脏 blob = 机器感来源）；唯一收口、禁止页面级复制 | `src/styles/tokens.css` |
 | 弱化霓虹：`--primary-glow` 常规层为 10% 透明度、CW 层为 25%，只保留隐约材质感；禁止新增 glow 类阴影 | `src/styles/tokens.css` |
 | 不做全透白描边的「苹果玻璃」吸顶工具条 | `src/styles/catalog.css` |
@@ -102,7 +103,7 @@
 
 - **职责边界与取证手段**：AI 侧只交规格证据（静态审查 / 可断言规格 / DOM 与计算样式取证），不判定审美——**唯一定义在 [verification.md](verification.md)**，本文件不复述；涉及视觉表现的改动，收尾汇报必须列「视觉待用户确认」项。
 - **像素基线（L4）**：`e2e/visual.spec.ts` 4 张（首页 / 角色图鉴 / 终局 / 货币战争 Hub），基线提交 git（`e2e/snapshots/`），**CI 不跑 visual**（判定依赖环境）。改动只影响局部时只跑相关用例（`--grep 首页` 等），**全量 `visual.spec` 禁止**；用户确认改动符合预期后用 `pnpm test:e2e:update` 刷新（脚本已内置 `--update-snapshots=all`，直接调 playwright 时必须显式传，默认 changed 模式会静默不落盘）。
-- **动画层不进基线**：Spine Hero 与 CW 背景视频在基线中隐藏，其渲染验收归研究线；细节见 [testing.md](testing.md)。
+- **动画层不进基线**：角色详情页 Hero 与调试验收台的 Spine 场景不进基线，其渲染验收归研究线；枢纽页自 [ADR 0018](../adr/0018-枢纽页改为工具化入口页.md) 起为静态品牌带（无 WebGL / 视频帧），基线天然稳定。细节见 [testing.md](testing.md)。
 - **验证级别与预算**（T1a 纯数值 / T1b 布局结构 / T2 模板数据流 / T3 动画）见 AGENTS.md「验证流程」——**改 UI 先定可断言的验收标准**（如「icon 160px、无边框、无溢出」）。
 
 ## 9. 相关文档地图

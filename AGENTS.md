@@ -43,7 +43,8 @@ node tools/check-comments.mjs    # 注释累赘度守卫（report-only 先行；
 - **本地优先数据**：全部目录/详情数据为预转换 JSON（`public/data/cn/`，converter 输出）；仅图片与 Spine 动画运行期走 CDN（基址 `src/lib/constants.ts → CDN`）。
 - **双模式主题**：常规（黑底 + 可切换强调色，缺省赤陶）vs 货币战争（`meta.cw` → `<html data-theme="cw">`，缺省香槟金）；`meta.depth` 驱动方向性页面过渡（手机端 <768px 淡入淡出）。令牌分层、强调色切换通道与色彩门禁见 [docs/agents/ui-design.md](docs/agents/ui-design.md)。
 - **样式随路由懒加载**：页面 CSS 随视图 import 拆为独立 chunk；全局仅 tokens.css + catalog.css。
-- **首页 Hero 断点策略**：桌面（≥1024px）渲染官网 KV Spine 场景；平板（768-1023px）与手机（<768px）不渲染 Spine，改为随机五星立绘轮播（6s 交叉淡入淡出，`prefers-reduced-motion` 与后台标签页停播）——布局改动必须保持该策略，策略与实现见 HomeView.vue 注释。
+- **枢纽页导航条回归 / 首页＝版本上新页（ADR 0019，已实现）**：`/` 与 `/currency` **全断点渲染导航条**（`meta.bareNav` / `data-nav` / 避让回退三件已删除，内容区回到 148px 侧栏避让）；`/` 是**版本上新页**＝品牌带 + `release_version` 恰等于 `version.json` 的 `version_label` 的角色/光锥/遗器三分区 + 页脚，板块索引与两条页内跨模式行已退场，跨模式只走侧栏「交换」。**禁止按 ADR 0018 旧形态回改**——「无侧栏枢纽」与「首页 8 行入口首屏可见」断言均已作废，新断言（1920×1080 内品牌带 + 三分区标题与各自首行卡片完整可见 / 全断点渲染导航条 / 空态一行）在 `e2e/layout.spec.ts`。**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**（ADR 0018 该条继续有效）。
+- **版本上新数据判据（ADR 0019 决策 3-5）**：条目判据 = `release_version` 恰等于 `version.json` 的 `version_label`；角色 / 光锥的版本号由「与上一版已提交输出的 id 差集」推导（converter 侧，无基线时留空），遗器用源数据权威 `RelicSetConfig.ReleaseVersion`；两者同写一个字段，前端只读该字段。
 - **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——数据探索一律走 `query.py` / `DATA_CATALOG.md`，转换走 `convert.py`。
 
 > 分层结构 / 研究线（Spine Lab）/ 核心架构模式 / 新增目录扩展指南（端到端）→ [docs/agents/architecture.md](docs/agents/architecture.md)

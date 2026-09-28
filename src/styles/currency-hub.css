@@ -1,12 +1,13 @@
-/* 货币战争枢纽页(/currency)· V4「官方背景视频」调性，仅 data-theme="cw" 下呈现。
-   完整视觉基调/降级纪律/原语共享决策见 docs/memory/2026-09.md「等宽栈与机制命名收口边界」与 CurrencyHubView.vue 注释（同源）。
-   反 AI 味双段式禁令（不可回退）：
-   ① 素材豁免：Hero 背景=官方活动页背景视频(2500×1080 宽幅)，行情/展览视觉在官方素材本身；
-   ② 文字克制：视频层之上禁止霓虹 glow/金币雨/行情板/div 装饰/装饰字符/em-dash/装饰 eyebrow；档案编号(01-05)与真实数据徽章允许。
-   ③ 加载失败/慢网/reduced-motion → 静态 poster + 黑金渐变兜底，禁止装饰动画替代视频。
-   ④ Hero 媒体层不共享首页 Spine（来源/断点语义不同，抽原语回归>收益）；页脚骨架共享 .nk-hub-footer(声明 tokens.css)。
-   ⑤ 色值全经令牌(--blk/--gold- / --primary / --line / --hero-bg- 层)，禁止裸彩色；圆角三档=卡片/内嵌(卡片-2px)/标签999px。
-   ⑥ 赛季扩充说明样式已随视图移除(ADR 0016)；索引区末行「枢纽返回行」复用 .nk-cwhub-index__row，禁止单开选择器。BEM 前缀 nk-cwhub-
+/* 货币战争枢纽页(/currency)· 工具化形态（ADR 0018），仅 data-theme="cw" 下呈现。
+    枢纽页是「选路页」：首屏优先让给板块索引，故不再承载全屏背景视频媒体层，
+    页首只保留跨页共享的品牌带 .nk-hub-brand（声明 tokens.css，与常规枢纽页同一份骨架）。
+    反 AI 味双段式禁令（不可回退）：
+    ① 品牌带为纯令牌渐变，禁止在其上叠加霓虹 glow/金币雨/行情板/div 装饰/装饰字符/em-dash/装饰 eyebrow；真实数据徽章允许；
+    ② 禁补回全屏媒体层：视频/poster 已随工具化移除（ADR 0018），如需恢复必须先改 ADR；
+    ③ 品牌带与页脚骨架均为跨页共享原语（.nk-hub-brand / .nk-hub-footer，声明 tokens.css），
+       本页禁止重新声明或复制粘贴这两族选择器。
+    ④ 色值全经令牌(--blk/--gold- / --primary / --line / --hero-bg- 层)，禁止裸彩色；圆角三档=卡片/内嵌(卡片-2px)/标签999px。
+    ⑤ 索引行一律复用 .nk-cwhub-index__row 原语，禁止为单行单开选择器（赛季扩充说明样式已随视图移除，ADR 0016）。BEM 前缀 nk-cwhub- */
 /* ── 容器：镜像首页（app 无左侧内边距，Hero 全屏铺满视图区；
    内容留白由 __content / 索引区各自用 --nk-content-offset 令牌断点接管：
    平板 88 / 桌面 148，禁止写死数字——历史遗漏 80px 导致文字被遮） ── */
@@ -27,108 +28,9 @@
 #nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
 #nk-cwhub-app::-webkit-scrollbar-track { background: transparent; }
 
-/* ═══ Hero：全屏官方背景视频（右上标题范式——视频主体居左，标题置右上平衡构图） ═══ */
-.nk-cwhub-hero {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-}
-/* 渐变兜底层：video/poster 均不可用时的最终底（黑金主题注入，始终垫底） */
-.nk-cwhub-hero__fallback {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%),
-    radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%),
-    linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--th-500) 12%) 100%);
-}
-/* poster 帧（本地抽帧资产）：video 就绪前常驻（video opacity 0 隐藏），失败/慢网时兜底 */
-.nk-cwhub-hero__poster {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 33% 50%;
-  pointer-events: none;
-}
-/* 视频层：就绪后淡入盖住 poster；失败时保持 opacity 0（poster 兜底常驻） */
-.nk-cwhub-hero__video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 33% 50%;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-  pointer-events: none;
-}
-.nk-cwhub-hero__video.nk-on { opacity: 1; }
-/* 锚点统一为 33% 50%（用户裁定）：全断点一致，无断点差异化裁切——
-   避免引入 object-position 断点差异（曾因 1024px 断点切左锚导致跳变，已废弃） */
-/* 压暗层：右上文字安全区 + 底部融入页面底色（radial 重心随标题移到右上，主题令牌自动黑金） */
-.nk-cwhub-hero__scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse 70% 85% at 100% 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 34%, transparent 62%),
-    linear-gradient(to bottom, color-mix(in srgb, var(--blk-900) 28%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in srgb, var(--blk-900) 55%, transparent) 88%, var(--bg) 100%);
-}
-/* 标题区：右上角（hero flex 右推 + 顶部对齐；宽度收缩到内容，右侧 48px 呼吸边距） */
-.nk-cwhub-hero__content {
-  position: relative;
-  z-index: 2;
-  width: auto;
-  max-width: min(640px, 100%);
-  margin-left: auto;
-  padding: max(44px, 8vh) 48px 0 0;
-}
-/* 枢纽文字出场约定（三段共用；术语见 CONTEXT.md）：
-   必须与首页 Hero 同时序——`nk-home-fade-up` + 0.7s + var(--ease) + 错峰 0.2s/0.35s/0.5s + backwards。
-   禁止改用本地新关键帧、禁止改任一段时序：两枢纽互切时改一处即造成「一边文字展开、一边文字直接就在那里」。
-   每次进入（含枢纽互切）都重播，与首页一致（用户裁定），禁止加「仅首帧」条件。 */
-/* 英文副标：克制小字 + 发丝线（金色族，无发光） */
-.nk-cwhub-hero__supra {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 22px;
-  font-family: var(--font-hud);
-  font-size: 0.68rem;
-  letter-spacing: 0.22em;
-  color: var(--gold-sem);
-  animation: nk-home-fade-up 0.7s var(--ease) 0.2s backwards;
-}
-.nk-cwhub-hero__supra::before {
-  content: '';
-  width: 44px;
-  height: 1px;
-  background: linear-gradient(90deg, var(--border2), transparent);
-}
-/* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文回退），单档黑投影无发光 */
-.nk-cwhub-hero__title {
-  font-family: var(--font-body);
-  font-size: clamp(2.6rem, 7vw, 6rem);
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  line-height: 1.08;
-  color: var(--text-bright);
-  text-shadow: 0 2px 24px rgba(0,0,0,0.55);
-  animation: nk-home-fade-up 0.7s var(--ease) 0.35s backwards;
-}
-/* 定位副标题：一行内容清单，与主标题拉开层级 */
-.nk-cwhub-hero__tagline {
-  margin-top: 22px;
-  font-size: 0.86rem;
-  letter-spacing: 0.1em;
-  color: var(--text2);
-  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
-  animation: nk-home-fade-up 0.7s var(--ease) 0.5s backwards;
-}
+/* ═══ Hero：已抽为跨页共享原语 .nk-hub-brand（声明 tokens.css，两枢纽共用，ADR 0018）
+   —— 禁止在本文件重新声明品牌带选择器或复制粘贴；两页高度与断点必须由同一份原语接管，
+   否则枢纽互切（nk-view-swap）时会出现一边文字已展开、一边文字直接就在那里的高度跳动。 ═══ */
 
 /* 赛季扩充说明样式已随视图侧移除（ADR 0016）；本文件禁止再出现 .nk-cwhub-season 选择器 */
 
@@ -140,13 +42,13 @@
   flex-direction: column;
   max-width: var(--nk-content-max);
   margin: 0 auto;
-  padding: 88px 40px 0 var(--nk-content-offset);
+  padding: 48px 40px 0 var(--nk-content-offset);
 }
 .nk-cwhub-index__row {
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 24px 8px;
+  padding: 18px 8px;
   color: var(--text);
   text-decoration: none;
   border-bottom: 1px solid var(--line-1);
@@ -225,52 +127,20 @@
 }
 
 /* ── 页脚：跨页共享原语 `.nk-hub-footer`（声明于 tokens.css，含全断点响应式） ── */
-
-/* 非桌面断点（<1024px）：标题改顶部居中（用户裁定；桌面保留右上角）——
-   hero 顶对齐居中、标题区全宽居中、scrim 压暗重心随之移到顶部中央 */
-@media (max-width: 1023px) {
-  .nk-cwhub-hero {
-    justify-content: center;
-    align-items: flex-start;
-  }
-  .nk-cwhub-hero__content {
-    width: 100%;
-    max-width: min(640px, 100%);
-    margin: 0 auto;
-    padding: max(28px, 5vh) 24px 0;
-    text-align: center;
-  }
-  .nk-cwhub-hero__supra { justify-content: center; }
-  /* 居中时发丝线横向拉长整行 → 非桌面隐藏（用户裁定） */
-  .nk-cwhub-hero__supra::before { display: none; }
-  .nk-cwhub-hero__scrim {
-    background: radial-gradient(ellipse 70% 85% at 50% 0%, color-mix(in srgb, var(--blk-900) 82%, transparent) 0%, color-mix(in srgb, var(--blk-900) 50%, transparent) 34%, transparent 62%),
-      linear-gradient(to bottom, color-mix(in srgb, var(--blk-900) 28%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in srgb, var(--blk-900) 55%, transparent) 88%, var(--bg) 100%);
-  }
-}
-
-/* 响应式 ── */
-/* 枢纽文字出场降级（硬标准，禁止删除）：reduced-motion 下三段必须 animation: none →
-   文字直接以终态可见（opacity 1、无位移）。注意此处 `none` 是唯一被允许的覆盖写法，
-   禁止改为超短时长（仍会闪动）或 animation-play-state: paused（会把 backwards 的
-   opacity 0 定格，文字不可见）。 */
-@media (prefers-reduced-motion: reduce) {
-  .nk-cwhub-hero__supra,
-  .nk-cwhub-hero__title,
-  .nk-cwhub-hero__tagline { animation: none; }
-}
+/* 响应式 ──
+   枢纽文字出场降级（硬标准，禁止删除）已上移至共享原语 .nk-hub-brand（tokens.css）：
+   reduced-motion 下三段 animation: none → 文字直接以终态可见。
+   禁止在此重复声明，也禁止改为超短时长（仍会闪动）或 animation-play-state: paused
+   （会把 backwards 的 opacity 0 定格，文字不可见）。 */
 /* 平板（768-1023px）：中等密度；左侧避让由 --nk-content-offset 令牌断点接管 */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .nk-cwhub-index { padding: 72px 32px 0 var(--nk-content-offset); }
-  .nk-cwhub-index__row { padding: 20px 8px; }
+  .nk-cwhub-index { padding: 48px 32px 0 var(--nk-content-offset); }
+  .nk-cwhub-index__row { padding: 16px 8px; }
 }
-/* 手机（<768px）：紧凑排版，底部留白由共享页脚 .nk-hub-footer 自带承担（与首页一致），
-   容器不再额外留白——枢纽页全断点无导航条，无需为底部栏预留高度 */
+/* 手机（<768px）：紧凑排版，底部留白由共享页脚 .nk-hub-footer 自带承担（与首页一致，
+   其中含 56px 底部栏预留），容器不再额外留白 */
 @media (max-width: 767px) {
-  /* 手机标题：上限 3.36rem（= 768px 处桌面 7vw 的值 53.76px）——
-     与桌面曲线无缝衔接（曾 3.6rem 导致 767/768 处 57.6→53.76 跳变，已修复） */
-  .nk-cwhub-hero__title { font-size: clamp(2.6rem, 13vw, 3.36rem); }
-  .nk-cwhub-index { padding: 40px 20px 0 var(--nk-content-offset); }
+  .nk-cwhub-index { padding: 32px 20px 0 var(--nk-content-offset); }
   .nk-cwhub-index__row {
     gap: 10px;
     padding: 12px 14px;

@@ -34,7 +34,7 @@ src/
 4. **双模式主题**：常规模式（黑底 + 可切换强调色，缺省赤陶）vs 货币战争模式（`meta.cw` → `<html data-theme="cw">`，缺省香槟金），CW 路由位于 `/currency/*`。令牌分层与强调色切换通道见 [ui-design.md](ui-design.md) §2/§3。
 5. **方向性页面过渡**：Router `beforeEach` 比较 from/to 的 `meta.depth` 得到 `navDir`（1 前进 / -1 返回 / 0 平级），`App.vue` 据此选择过渡动画。桌面/平板为**交叉过渡**（两视图重叠，离场视图在上层且起步更早，见 [CONTEXT.md](../../CONTEXT.md)「页面过渡」）；手机端（<768px）、平级导航与 `prefers-reduced-motion` 统一简单淡入淡出。
 6. **样式随路由懒加载**：页面 CSS 在对应视图组件内 `import`，由 Vite 拆为独立 CSS chunk；全局样式仅 `tokens.css` + `catalog.css`。分层、命名与共享原语纪律见 [ui-design.md](ui-design.md) §1。
-7. **无侧栏枢纽**：`route.meta.bareNav` 的枢纽页（`/` 与 `/currency`）在**所有断点**都不渲染 `SidebarNav`（平板/桌面左侧竖栏 + 手机底部栏一并隐藏），并以 `<html data-nav="bare">` 令 `--nk-content-offset` 回退为页面留白（平板 32 / 桌面 48；手机本就为 0）。术语见 [CONTEXT.md](../../CONTEXT.md)「无侧栏枢纽」。
+7. **无侧栏枢纽（已作废，见 [ADR 0019](../adr/0019-枢纽页导航条回归与首页改为版本上新页.md)）**：曾由 `route.meta.bareNav` 标记的枢纽页（`/` 与 `/currency`）在**所有断点**都不渲染 `SidebarNav`，并以 `<html data-nav="bare">` 令 `--nk-content-offset` 回退为页面留白（平板 32 / 桌面 48）。**该形态、该旗标与该属性均已作废**——两页全断点恢复导航条，`/` 改为版本上新页（本版本新增角色 / 光锥 / 遗器）。术语见 [CONTEXT.md](../../CONTEXT.md)「无侧栏枢纽」（已移除）。
 
 ## 新增目录/模块扩展指南（端到端）
 

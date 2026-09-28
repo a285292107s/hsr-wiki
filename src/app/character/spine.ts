@@ -44,7 +44,11 @@ export function initSpineViewer(
 }
 
 /**
- * 初始化多层场景 Spine（official-scene 条目，如枢纽页背景）。
+ * 初始化多层场景 Spine（official-scene 条目，如 home-bg 群像场景）。
+ * **预留能力：当前无生产消费方**（ADR 0018 移除枢纽页 Hero 媒体层后，唯一调用方 HomeView 已退场）。
+ * 保留原因：它是「多层场景挂载」的生产形态入口，调试验收台 SpineKvSection 走的是同一条
+ * createScenePipeline，语义一致；若日后恢复任何场景 Hero，从这里接回即可。
+ * **恢复前先改 ADR 0018**；在无消费方期间，禁止据本函数推断任何页面的实际渲染行为。
  * 场景渲染细节见 spine/scene.ts（单画布多骨架 + 固定舞台 cover 适配）；
  * 本层负责：清单解析 → 运行时就绪 → 全量层场景挂载。
  * 断点切换不在此处理：视图层以 v-if 卸载 + 本函数返回的清理函数释放后重新挂载。

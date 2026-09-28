@@ -16,7 +16,7 @@
 - 基线：截图提交 git（`e2e/snapshots/`），本机刷新用 `pnpm test:e2e:update`（详细约束见 [commands.md](commands.md)）
 - 断言能力已固化「验证流程」各级别：`toHaveCSS` / `toHaveText` / `toHaveCount`（T1b/T2）、横向溢出检测 `findHorizontalOverflow`（L3）、`toHaveScreenshot`（L4）、axe-core（a11y）、`pageerror` 硬断言（`console` error 仅收集记录，环境性 CDN 失败不硬断言，见 `helpers.ts` 注释）
 - a11y 既有缺陷登记在 `accessibility.spec.ts` 的 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败；登记带超期复查提示）——修复后须人工裁决并从清单移除。**登记前必须先实测**：只有 axe impact 为 `serious`/`critical` 的违规才进入断言路径，`moderate` 级登记进去等于永不生效的白名单（曾有一条此类死条目，已删）
-- 首页 Hero：≥1024px 渲染 KV Spine 场景（WebGL rAF 动画，`animations: 'disabled'` 对其无效），像素基线中隐藏 `.nk-home-hero__spine`（其渲染验收归研究线）；<1024px 为随机五星立绘轮播，基线不覆盖
+- 枢纽页：`/` 与 `/currency` 为静态品牌带 + 板块索引（无 WebGL / 视频帧），像素基线直接稳定——旧的双枢纽 Hero 媒体层隐藏块已随 [ADR 0018](../adr/0018-枢纽页改为工具化入口页.md) 删除（那些元素已不存在，保留会让 `evaluate` 直接失败）。`/` 首屏入口行数由 `layout.spec.ts` 的可执行断言锁定
 
 ## Converter（pytest）
 

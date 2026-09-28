@@ -1,6 +1,6 @@
 /**
  * 全站导航配置（双模式：常规 枢纽+7 板块 + 货币战争 枢纽+5 板块）
- * 侧边栏（SidebarNav）与首页导航网格（HomeView）共享。
+ * 唯一消费方为侧边栏（SidebarNav）；首页（HomeView）已改为版本上新页，不再消费本表（ADR 0019）。
  *
  * 「交换」（SWAP_ITEM）为导航首项：点击跳转对方模式的图签页（/ → /currency/role，/currency → /character）。
  * 该落点与「枢纽滚轮」上滚不同（上滚指对方枢纽页），是 ADR 0016 的刻意分工，禁止"顺手统一"。
@@ -103,12 +103,3 @@ export const CW_NAV_ITEMS: NavItem[] = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="9" r="3"/><circle cx="17" cy="9" r="3"/><path d="M2 20c0-2.8 2.2-4.5 5-4.5s5 1.7 5 4.5"/><path d="M12 20c0-2.8 2.2-4.5 5-4.5s5 1.7 5 4.5"/></svg>',
   },
 ];
-
-/** 首页网关卡片：常规世界通往货币战争模式的第二入口（金色视觉） */
-export const CW_GATEWAY = {
-  title: '货币战争',
-  en: 'CURRENCY WAR',
-  desc: '进入货币战争模式',
-  path: '/currency',
-  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c0-1.4-1.1-2-2.5-2s-2.5.7-2.5 1.8c0 2.8 5.4 1.4 5.4 4.2 0 1.1-1.3 2-2.9 2s-2.9-.8-2.9-2"/><path d="M12 5.5v2"/><path d="M12 16.5v2"/></svg>',
-} as const;

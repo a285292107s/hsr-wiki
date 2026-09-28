@@ -228,6 +228,10 @@ export interface LocalCharEntry {
   icon_cutin: string;
   rank_ids: number[];
   skill_ids: number[];
+  /** 版本上新判据（ADR 0019）：首次出现在数据快照中的版本号，如 "4.6"。
+   *  converter 由「与上一版已提交输出的 id 差集」推导；无可追溯基线时为空串（旧数据文件可能缺该字段）。
+   *  遗器同理但来源为源数据权威字段（RelicSetConfig.ReleaseVersion）。 */
+  release_version?: string;
 }
 export type LocalCharList = LocalCharEntry[];
 

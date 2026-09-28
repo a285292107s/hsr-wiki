@@ -1,290 +1,81 @@
 <script setup lang="ts">
 /**
- * 首页：深空档案品牌门户（taste-skill 重设计）
- * 全屏官网 KV 场景为唯一视觉主角，标题退居左下档案构图；
- * 板块入口由卡片网格改为编辑式索引（战斗 / 情报 / 独立模式分组）。
- * 移除原 HUD 电玩元素：逐字标题动画 / SCROLL 指示 / 3D 倾斜 / 全息扫光 / 漫射发光。
+ * 首页 `/`：站点首页 —— 版本上新页（ADR 0019 决策 2/3/8/9/10）。
+ *
+ * 结构 = 紧凑品牌带（.nk-hub-brand，声明 tokens.css）+ 本版本新增三分区（角色/光锥/遗器）+ 共享页脚。
+ * 全站板块索引整体退场，选路由导航条承担（决策 2/6）；跨模式只走侧栏「交换」。
+ * 三分区各成一行横向卡片带，无增量的分区不渲染，三分区皆空则显示唯一一行空态（决策 9/10）。
+ * 取数与卡片 HTML 全部复用目录配置的 fetchData() / renderCard()（见 use-release-showcase.ts），
+ * **禁止**为首页另写卡片组件或复制卡片 CSS。
+ *
+ * 首屏密度（决策 8）：1920×1080 内品牌带（200px，**禁止改高度**）+ 三分区标题 + 各自首行卡片必须完整可见；
+ * 节拍靠字号/间距/卡片宽度调节，禁改品牌带与页脚原语。
+ *
+ * **禁止恢复全屏 KV Spine 场景 / 五星立绘轮播 / 枢纽滚轮**（ADR 0018 决策 2/3/4 继续有效，恢复前必须先改 ADR）：
+ * - KV 场景（home-bg）为 15 个 CDN 资源共 8.23MB + spine-player 运行时 587KB，只为装饰首屏；
+ * - 枢纽滚轮的立论是「枢纽页是全屏 KV/视频展示页」——品牌带形态下 Hero 仅 200px，滚轮劫持会把
+ *   「从顶部正常下滚」变成跳转；跨模式通路已由导航条「交换」承担（ADR 0019 决策 6）。
  */
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { computed, onMounted } from 'vue';
 import { useAppStore } from '../stores/app';
-import { NORMAL_NAV_ITEMS, CW_GATEWAY } from '../components/nav-items';
-import { useHubWheel } from '../composables/use-hub-wheel';
+import { useReleaseShowcase } from '../composables/use-release-showcase';
 import { prefetchHighPriority } from '../router/chunks';
-import { initSpineSceneViewer } from '../character/spine';
-import { loadLocalCharacterList } from '../../services/api';
-import { avatarDrawCardJdUrl, avatarDrawCardWebpUrl } from '../../lib/format';
 import { SITE_NAME } from '../../lib/constants';
 
 const app = useAppStore();
-const loading = ref(true);
+const { sections, loaded, load } = useReleaseShowcase();
 
-/* ─── 板块索引分组：战斗（角色/光锥/遗器）· 情报（物品/成就/敌对/终局）· 独立模式（货币战争） ─── */
-const indexGroups = [
-  { items: NORMAL_NAV_ITEMS.slice(0, 3) }, // 战斗
-  { items: NORMAL_NAV_ITEMS.slice(3) },    // 情报
-  { items: [CW_GATEWAY] },                 // 独立模式
-];
-const sectionCount = NORMAL_NAV_ITEMS.length + 1;
-
-/* ─── Hero 背景：桌面（≥1024px）= 官网 KV Spine 场景；平板与手机（<1024px）= 随机五星立绘 ───
-   KV 场景（主背景 + 角色多层群像）为 16:9 宽幅设计，窄屏被 cover 裁剪大半且构图错位，
-   显示效果差；故 <1024px 统一改为随机五星角色立绘（与 KV 群像的五星观感对齐）。
-   立绘仅在页面刷新（F5/重载）时更换：上次展示 ID 存 localStorage，下次加载时排除，保证刷新必换。 */
-
-const spineRef = ref<HTMLElement | null>(null);
-const spineReady = ref(false);
-let disposeSpine: (() => void) | null = null;
-
-function mountHeroSpine(): void {
-  const el = spineRef.value;
-  if (!el) return;
-  disposeSpine = initSpineSceneViewer(el, 'home-bg', () => {
-    spineReady.value = true;
-  });
-}
-
-const isSpine = ref(false);
-let mq: MediaQueryList | null = null;
-
-/* ─── 立绘展示：静态单层（+ 上次立绘垫底），预加载完成才替换；上次展示 ID 持久化，刷新时排除换新 ───
-   立绘源策略（2026-08-28 优化）：主源 = nanoka webp（avatarDrawCardWebpUrl，同分辨率体积仅官方 PNG ~1/4，
-   弱网首现的 4× 差异），失败回退 = 官方 jsDelivr PNG（avatarDrawCardJdUrl 直链，fork 停更仅覆盖旧角色，
-   两源皆 404 时渐变底承接）；预加载 fetchpriority=high，
-   且 <1024px 不预载 Spine 运行时（chunks.ts 断点门控）让带宽给 LCP 立绘。
-   垫底：上次展示立绘的 URL 存 localStorage，刷新时先入栈（大概率缓存命中即时显示），
-   新抽立绘就绪后交叉淡入替换——消除预加载期空白渐变。 */
-interface HeroArt { key: number; id: number; url: string; fbUrl: string }
-const heroArts = ref<HeroArt[]>([]);
-const activeArtKey = ref(0);
-let artSeq = 0;
-let artEpoch = 0; // 代际令牌：断点切换/卸载后丢弃过期异步结果
-const LAST_ART_KEY = 'nk-home-last-art'; // localStorage：上次展示的角色 ID（刷新排除）
-const LAST_ART_URL_KEY = 'nk-home-last-art-url'; // localStorage：上次展示立绘 {id,url}（垫底预显）
-
-/** 依次预加载图片（fetchpriority=high，优先于其余资源调度），返回首个成功的 URL；全部失败返回 null。
- *  失败静默，调用方以渐变背景直接承接。 */
-function preloadFirstImage(urls: string[]): Promise<string | null> {
-  const load = (url: string): Promise<string | null> =>
-    new Promise((resolve) => {
-      const img = new Image();
-      img.fetchPriority = 'high';
-      img.onload = () => resolve(url);
-      img.onerror = () => resolve(null);
-      img.src = url;
-    });
-  return (async () => {
-    for (const url of urls) {
-      const ok = await load(url);
-      if (ok) return ok;
-    }
-    return null;
-  })();
-}
-
-/** 读取上次展示的角色 ID（localStorage 读取失败视为无记录） */
-function loadLastArtId(): number | null {
-  try {
-    const raw = localStorage.getItem(LAST_ART_KEY);
-    return raw ? Number(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-/** 记录本次展示的角色 ID，作为下次刷新排除项 */
-function saveLastArtId(id: number): void {
-  try {
-    localStorage.setItem(LAST_ART_KEY, String(id));
-  } catch { /* 忽略：仅失去去重能力 */ }
-}
-
-/** 读取上次展示立绘 URL（垫底预显用；结构不符/读取失败视为无记录） */
-function loadLastArtUrl(): { id: number; url: string } | null {
-  try {
-    const raw = localStorage.getItem(LAST_ART_URL_KEY);
-    if (!raw) return null;
-    const p = JSON.parse(raw) as { id?: unknown; url?: unknown };
-    return typeof p.id === 'number' && typeof p.url === 'string' ? { id: p.id, url: p.url } : null;
-  } catch {
-    return null;
-  }
-}
-
-/** 记录本次实际展示的立绘 URL（必须是预加载成功的 URL，失效 URL 不得入垫底池） */
-function saveLastArtUrl(art: { id: number; url: string }): void {
-  try {
-    localStorage.setItem(LAST_ART_URL_KEY, JSON.stringify(art));
-  } catch { /* 忽略：仅失去垫底能力 */ }
-}
-
-/** 随机抽取一张角色立绘（五星优先；排除上次刷新展示过的，保证每次刷新换人；webp 主源 + PNG 回退） */
-async function pickHeroArt(): Promise<HeroArt | null> {
-  try {
-    const list = await loadLocalCharacterList();
-    const fives = list.filter((c) => c.rarity === 5);
-    const pool = fives.length > 0 ? fives : list;
-    const lastId = loadLastArtId();
-    const candidates = lastId ? pool.filter((c) => c.id !== lastId) : pool;
-    const pick = (candidates.length > 0 ? candidates : pool)[
-      Math.floor(Math.random() * (candidates.length > 0 ? candidates.length : pool.length))
-    ];
-    if (!pick) return null;
-    saveLastArtId(pick.id);
-    return { key: ++artSeq, id: pick.id, url: avatarDrawCardWebpUrl(pick.id), fbUrl: avatarDrawCardJdUrl(pick.id) };
-  } catch {
-    return null;
-  }
-}
-
-/** 启动立绘展示：上次立绘（URL 垫底，缓存命中即即时显示）→ 新抽立绘预加载成功后交叉淡入替换 */
-function startHeroArt(): void {
-  stopHeroArt();
-  const epoch = ++artEpoch;
-  const last = loadLastArtUrl();
-  const placeholder: HeroArt | null = last
-    ? { key: ++artSeq, id: last.id, url: last.url, fbUrl: '' }
-    : null;
-  heroArts.value = [];
-  void (async () => {
-    // 垫底层先行入栈（上次立绘，大概率缓存命中）：消除等待期空白渐变
-    if (placeholder && epoch === artEpoch) {
-      heroArts.value = [placeholder];
-      activeArtKey.value = placeholder.key;
-    }
-    const first = await pickHeroArt();
-    if (!first || epoch !== artEpoch) return;
-    const effective = await preloadFirstImage([first.url, first.fbUrl]);
-    if (!effective || epoch !== artEpoch) return;
-    first.url = effective; // 实际生效源：webp 优先，回退官方 PNG
-    saveLastArtUrl({ id: first.id, url: effective });
-    // 双栈并置：垫底层失去 nk-on 淡出 + 新层 nk-on 入场（复用轮播交替 CSS），无垫底时直接单层
-    heroArts.value = placeholder ? [placeholder, first] : [first];
-    activeArtKey.value = first.key;
-  })();
-}
-
-/** 停止立绘展示（代际 +1 使在途异步结果作废） */
-function stopHeroArt(): void {
-  artEpoch++;
-}
-
-/** 断点切换：桌面 ↔ 非桌面 重建 Hero 背景（Spine 场景每次全新挂载，无状态残留） */
-function onBreakpointChange(): void {
-  const wide = mq ? mq.matches : false;
-  isSpine.value = wide;
-  if (wide) {
-    stopHeroArt();
-    void nextTick().then(mountHeroSpine);
-  } else {
-    if (disposeSpine) {
-      disposeSpine();
-      disposeSpine = null;
-    }
-    spineReady.value = false;
-    startHeroArt();
-  }
-}
-
-/* ─── 枢纽滚轮（ADR 0016）：Hero 区内下滚 → 图签页 /character；上滚 → CW 枢纽页 /currency ───
-   Hero 的 <section> 是独立 ref（禁止复用 spineRef：后者挂在 Hero 内的背景层上，两者生命周期不同）。
-   绑定时机：Hero 位于 `v-else`（loading 门控）内，**onMounted 时尚未入 DOM**——
-   composable 在 onMounted 快照 hero.value，若此时为 null 则永不绑定。故必须用 watch 等它真正挂载，
-   且 watch 只在 null → 元素 时执行一次（flushing 默认 pre，元素入 DOM 后触发，无需额外 nextTick）。 */
-const heroRef = ref<HTMLElement | null>(null);
-const router = useRouter();
-const hubWheel = useHubWheel({
-  router,
-  hero: heroRef,
-  downPath: '/character',
-  upPath: '/currency',
-});
-watch(heroRef, (el) => {
-  // Hero 一旦挂载即绑定滚轮；卸载由 composable 的 onBeforeUnmount 兜底
-  if (el) hubWheel.start();
-}, { once: true });
+/** 标题恒含本版本号（version.json 缺失时才退化为无版本号的「版本上新」） */
+const releaseTitle = computed(() =>
+  app.versionLabel ? `${app.versionLabel} 版本上新` : '版本上新',
+);
 
 onMounted(() => {
   prefetchHighPriority();
-  // 游戏版本后台加载（本地 version.json；未生成时静默降级为 —）
-  void app.initVersion().catch(() => { /* 降级：游戏版本显示 — */ });
-  loading.value = false;
-  // 断点判定：桌面（≥1024px）→ KV Spine 场景（官网同款完整群像）；平板/手机 → 随机五星立绘
-  mq = window.matchMedia('(min-width: 1024px)');
-  mq.addEventListener('change', onBreakpointChange);
-  isSpine.value = mq.matches;
-  if (mq.matches) {
-    void nextTick().then(mountHeroSpine); // v-if 解锁后 Hero 才入 DOM，再挂载背景 Spine
-  } else {
-    startHeroArt();
-  }
-});
-
-onBeforeUnmount(() => {
-  if (mq) mq.removeEventListener('change', onBreakpointChange);
-  mq = null;
-  stopHeroArt();
-  if (disposeSpine) disposeSpine();
+  // 版本与新上三分区（含 version.json 加载；单来源失败只跳过该分区，永不 reject）
+  void load();
 });
 </script>
 
 <template>
   <div id="nk-home-app">
-    <div v-if="loading" class="nk-loading">LOADING</div>
-    <template v-else>
-      <section ref="heroRef" class="nk-home-hero">
-        <div v-if="isSpine" ref="spineRef" class="nk-home-hero__spine" :class="{ 'nk-on': spineReady }"></div>
-        <div v-else class="nk-home-hero__arts" aria-hidden="true">
-          <div
-            v-for="art in heroArts"
-            :key="art.key"
-            class="nk-home-hero__art"
-            :class="{ 'nk-on': art.key === activeArtKey }"
-            :style="{ backgroundImage: `url(${art.url})` }"
-          ></div>
-        </div>
-        <div class="nk-home-hero__scrim"></div>
-        <div class="nk-home-hero__content">
-          <p class="nk-home-hero__supra">HSR DATA ARCHIVE</p>
-          <h1 class="nk-home-hero__title">{{ SITE_NAME }}</h1>
-          <p class="nk-home-hero__tagline">角色 · 光锥 · 遗器，全图鉴数据</p>
-        </div>
-      </section>
+    <!-- 品牌带：跨页共享原语（tokens.css），与 /currency 共用同一份骨架与断点 -->
+    <header class="nk-hub-brand">
+      <div class="nk-hub-brand__scrim" aria-hidden="true"></div>
+      <div class="nk-hub-brand__content">
+        <p class="nk-hub-brand__supra">HSR DATA ARCHIVE</p>
+        <h1 class="nk-hub-brand__title">{{ SITE_NAME }}</h1>
+        <p class="nk-hub-brand__tagline">角色 · 光锥 · 遗器，全图鉴数据</p>
+      </div>
+    </header>
 
-      <nav class="nk-home-nav">
-        <div class="nk-home-nav__head">
-          <h2 class="nk-home-nav__title">全站板块</h2>
-          <span class="nk-home-nav__rule" aria-hidden="true"></span>
-          <span class="nk-home-nav__meta">DATA v{{ app.gameVersion || '—' }} · {{ sectionCount }} SECTIONS</span>
-        </div>
-        <div class="nk-home-index">
-          <div v-for="group in indexGroups" :key="group.items[0].path" class="nk-home-index__group">
-            <RouterLink
-              v-for="n in group.items"
-              :key="n.path"
-              :to="n.path"
-              class="nk-home-row"
-              :class="{ 'nk-home-row--gateway': n.path === CW_GATEWAY.path }"
-            >
-              <span class="nk-home-row__icon" v-html="n.icon" aria-hidden="true"></span>
-              <span class="nk-home-row__name">{{ n.title }}</span>
-              <span class="nk-home-row__en">{{ n.en }}</span>
-              <span class="nk-home-row__desc">{{ n.desc }}</span>
-              <svg
-                class="nk-home-row__arrow"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-              ><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-            </RouterLink>
-          </div>
-        </div>
-      </nav>
+    <!-- 本版本上新：三分区（角色/光锥/遗器）各一行横向卡片带；卡片 HTML 由 renderCard 产出（v-html） -->
+    <div class="nk-home-release">
+      <div class="nk-home-release__head">
+        <h2 class="nk-home-release__title">{{ releaseTitle }}</h2>
+        <span class="nk-home-release__rule" aria-hidden="true"></span>
+      </div>
 
-      <!-- 页脚：跨页共享原语，与 CW 枢纽页共用（声明于 tokens.css，禁止在两页各写一份） -->
-      <footer class="nk-hub-footer">
-        <p class="nk-hub-footer__motto">愿此行，终抵群星</p>
-        <p class="nk-hub-footer__latin">PER ASPERA AD ASTRA</p>
-      </footer>
-    </template>
+      <template v-if="loaded && sections.length">
+        <section
+          v-for="s in sections"
+          :key="s.kind"
+          class="nk-home-release__section"
+          :data-kind="s.kind"
+          :aria-label="s.label"
+        >
+          <h3 class="nk-home-release__label">{{ s.label }}</h3>
+          <div class="nk-home-release__band" v-html="s.html"></div>
+        </section>
+      </template>
+      <!-- 三分区皆无增量（基线缺失 / 本版本无新增）：不回退板块索引、不改显历史版本（决策 10） -->
+      <p v-else-if="loaded" class="nk-home-release__empty">本版本暂无新增条目</p>
+    </div>
+
+    <!-- 页脚：跨页共享原语，与 CW 枢纽页共用（声明于 tokens.css，禁止在两页各写一份） -->
+    <footer class="nk-hub-footer">
+      <p class="nk-hub-footer__motto">愿此行，终抵群星</p>
+      <p class="nk-hub-footer__latin">PER ASPERA AD ASTRA</p>
+    </footer>
   </div>
 </template>

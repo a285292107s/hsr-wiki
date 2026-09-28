@@ -21,6 +21,9 @@ STATE_FILE = Path(__file__).resolve().parent / ".converter-state.json"
 # 注意：必须覆盖 converters/<module>.py 实际读取的全部源文件（含动态/可选加载），
 # 否则源数据变更不会触发该模块重跑。tests/test_incremental.py 通过 AST 扫描
 # 校验「代码中静态可见的 load_json 调用 ⊆ 本声明」，防止手写漂移。
+# 注意：characters / light_cones 另会读上一版输出 JSON（public/data/cn/characters.json 等）
+# 作 release_version 差集基线。该产物禁止写进本声明：它是这两个模块正要覆盖的产物，
+# 声明后签名每轮都变，增量缓存直接失效。
 MODULE_SOURCES: dict[str, list[str]] = {
     "paths": ["AvatarBaseType.json"],
     "elements": ["DamageType.json"],

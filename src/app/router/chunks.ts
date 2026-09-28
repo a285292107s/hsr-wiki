@@ -41,10 +41,11 @@ export function prefetchByPath(path: string): void {
   if (fn) void fn();
 }
 
-/** 首页 idle 时预加载高频路由（角色目录 + 光锥目录）+ spine 运行时预热（~500KB CDN script，
- *  角色页/首页共用单例；提前加载消除进入有 spine 页面时的下载等待）
- *  Spine 运行时仅桌面首页（≥1024px KV 场景）需要；手机/平板首页为立绘 Hero（LCP 是立绘图片），
- *  且移动端进入角色详情页时运行时仍按需懒加载（spine.ts）——<1024px 断点不预载，让带宽给立绘。 */
+/** 首页 idle 时预加载高频路由（角色目录 + 光锥目录）+ spine 运行时预热（587KB 本地 script，
+ *  角色详情页共用单例；提前加载消除进入有 spine 页面时的下载等待）
+ *  **首页自身已不消费 spine 运行时**（ADR 0018：枢纽页改为品牌带，KV 场景与立绘轮播均已移除）——
+ *  此处预热的是角色详情页运行时。<1024px 不预载是保留的移动端流量策略，
+ *  与首页 LCP 无关（品牌带无媒体资源），禁止据「首页需要」扩大预载范围。 */
 export function prefetchHighPriority(): void {
   const run = (): void => {
     void preloadCatalog();

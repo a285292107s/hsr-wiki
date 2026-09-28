@@ -4,38 +4,83 @@ import { collectConsoleIssues, findHorizontalOverflow, splitKnownOverflow, waitF
 
 /**
  * 布局验收（AGENTS.md T1b/T2 的自动化落地）
- *
- * 覆盖四类关键页面：
- * - /          常规枢纽页（hero + 导航行；meta.bareNav → 全断点无导航条）
- * - /character 目录页（虚拟滚动网格，卡片模板字符串渲染）
- * - /endgame   终局合并单页
- * - /currency  货币战争枢纽页（meta.cw → <html data-theme="cw"> 主题，同 meta.bareNav）
- * - /currency/settings  货币战争设置（CW 主题色选择 → <html data-cw-accent>）
- *
+ * 页面：/（版本上新页，ADR 0019）/ /character（目录网格）/ /endgame（终局单页）
+ *      /currency（CW 枢纽，meta.cw → <html data-theme="cw">）/ /currency/settings（CW 主题色）
  * 每页统一断言：无未捕获 JS 异常 + 无横向溢出 + 关键结构存在。
- * 侧栏结构用例（折叠 / 调试台入口）一律落在非枢纽页——枢纽页按设计全断点不渲染导航条。
+ * 侧栏结构用例（折叠 / 调试台入口）落在目录页取样——ADR 0019 后枢纽页同样渲染导航条，但目录页更接近真实使用路径。
  *
  * **`@viewport-pinned` 标签（禁止随意增删）**：凡用例内自行 `page.setViewportSize(...)` 固定视口者，
- * 必须在 `test(...)` 第二参传 `{ tag: '@viewport-pinned' }`。`mobile-chromium` project 以
- * `grepInvert` 跳过该类用例——其视口由用例自身钉死，在两个 project 下行为完全重复（纯耗时）。
- * **唯一例外**：「手机（<768px）：调试台入口隐藏」有意不打标签，作为 `isMobile` + `<meta name="viewport">`
- * 契约的哨兵（理由见该用例上方注释）。增删标签后必须核对：不带该标签的用例在 Pixel 7 视口下确实有意义。
- * 理由见 playwright.config.ts。
+ * 必须在 `test(...)` 第二参传 `{ tag: '@viewport-pinned' }`：`mobile-chromium` 以 `grepInvert` 跳过该类用例
+ * （其视口由用例自身钉死，两个 project 下行为完全重复）。**唯一例外**：「手机（<768px）：调试台入口隐藏」
+ * 有意不打标签，作为 `isMobile` + `<meta name="viewport">` 契约的哨兵（理由见该用例上方注释与 playwright.config.ts）；
+ * 增删标签后必须核对：不带该标签的用例在 Pixel 7 视口下确实有意义。
  */
 
 test.describe('布局验收：常规主题', () => {
-  test('首页 /：hero 标题、板块导航、无溢出', async ({ page }) => {
+  test('首页 /：品牌带标题、版本上新三分区、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/');
-    await expect(page.locator('.nk-home-hero__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
     // 站点名易变（更名进行中：咸鱼百科→星铁档案馆，后者未提交），不断言具体文案，只验非空
-    await expect(page.locator('.nk-home-hero__title')).toHaveText(/\S/);
-    // 板块导航行数量 = 配置的 indexGroups（≥4 个板块）
-    const rowCount = await page.locator('.nk-home-row').count();
-    expect(rowCount).toBeGreaterThanOrEqual(4);
+    await expect(page.locator('.nk-hub-brand__title')).toHaveText(/\S/);
+    // ADR 0019：首页＝版本上新页，全站板块索引整体退场
+    await expect(page.locator('.nk-home-release__title')).toContainText('版本上新');
+    // 已渲染分区数 ≥1 同时是「版本增量打标管线」的端到端哨兵：converter 基线差集断掉
+    // （整页退化为空态）必须让本断言变红，不允许静默变成一张空首页
+    const sectionCount = await page.locator('.nk-home-release__section').count();
+    expect(sectionCount).toBeGreaterThanOrEqual(1);
     // 常规模式不得挂 cw 主题
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'cw');
     // L3 溢出
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('首页 /：1920×1080 首屏内完整可见品牌带 + 三分区标题与各自首行卡片（ADR 0019 核心验收）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    // 品牌带不得回到「独占首屏」形态：高度必须显著小于视口
+    const bandH = await page.locator('.nk-hub-brand').evaluate((el) =>
+      Math.round(el.getBoundingClientRect().height),
+    );
+    expect(bandH).toBeLessThanOrEqual(240);
+    // 逐区测量：每个已渲染分区的标题与首行卡片都要落在首屏内。
+    // 分区数量由数据决定（无增量的分区不渲染），故不写死 3——首屏价值＝「本版本新增一眼可见」，
+    // 一旦某分区把后面的分区顶出首屏，本断言即红。
+    await expect(page.locator('.nk-home-release__section').first()).toBeVisible();
+    const marks = await page.locator('.nk-home-release__section').evaluateAll((els) =>
+      els.map((el) => ({
+        kind: el.getAttribute('data-kind'),
+        labelBottom: Math.round(el.querySelector('.nk-home-release__label')!.getBoundingClientRect().bottom),
+        firstCardBottom: Math.round(el.querySelector('.nk-home-release__band > *')!.getBoundingClientRect().bottom),
+      })),
+    );
+    expect(marks.length).toBeGreaterThanOrEqual(1);
+    for (const m of marks) {
+      expect(m.labelBottom, `分区 ${m.kind} 的标题应在首屏内`).toBeLessThanOrEqual(1080);
+      expect(m.firstCardBottom, `分区 ${m.kind} 的首行卡片应在首屏内`).toBeLessThanOrEqual(1080);
+    }
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('首页 /：三分区皆无增量时只显示一行空态（ADR 0019 决策 10）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    // 拦截 version.json 抹掉 version_label → 「本版本」不可判定 → 三分区全空。
+    // 深链直达 / 是整页加载，启动时读到的就是被拦截的 version.json（无 store 缓存干扰）。
+    await page.route('**/data/cn/version.json', (route) =>
+      route.fulfill({ contentType: 'application/json', body: JSON.stringify({ game_version: '9.9.9' }) }),
+    );
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await expect(page.locator('.nk-home-release__empty')).toHaveCount(1);
+    await expect(page.locator('.nk-home-release__section')).toHaveCount(0);
+    await expect(page.locator('.nk-home-release__title')).toHaveText('版本上新');
+    // 空态不回退板块索引、不改显历史版本；品牌带与共享页脚仍在
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
@@ -142,58 +187,58 @@ async function readContentOffset(page: import('@playwright/test').Page): Promise
   );
 }
 
-test.describe('布局验收：枢纽页无侧栏', () => {
-  test('桌面（1280px）：/ 与 /currency 不渲染侧栏，避让回退为 48px 页面留白', { tag: '@viewport-pinned' }, async ({ page }) => {
+test.describe('布局验收：枢纽页导航条回归（ADR 0019）', () => {
+  test('桌面（1280px）：/ 与 /currency 渲染侧栏，避让 148px，无 data-nav', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
 
     await page.goto('/');
-    await expect(page.locator('.nk-home-hero__title')).toBeVisible();
-    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
-    await expect(page.locator('html')).toHaveAttribute('data-nav', 'bare');
-    expect(await readContentOffset(page)).toBe(48);
-    // 令牌真实生效：Hero 标题区左缘 = 页面留白，与自身右缘（48px）对称
-    await expect(page.locator('.nk-home-hero__content')).toHaveCSS('padding-left', '48px');
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.ui-sidebar')).toBeVisible();
+    // ADR 0019：无侧栏枢纽形态已移除——data-nav 属性与避让回退一并退场
+    await expect(page.locator('html')).not.toHaveAttribute('data-nav');
+    expect(await readContentOffset(page)).toBe(148);
+    // 令牌真实生效：品牌带标题区左缘 = 侧栏避让 148px（与目录页同一套避让）
+    await expect(page.locator('.nk-hub-brand__content')).toHaveCSS('padding-left', '148px');
 
     await page.goto('/currency');
-    await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
-    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
-    await expect(page.locator('html')).toHaveAttribute('data-nav', 'bare');
-    expect(await readContentOffset(page)).toBe(48);
-    await expect(page.locator('.nk-cwhub-index')).toHaveCSS('padding-left', '48px');
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.ui-sidebar')).toBeVisible();
+    await expect(page.locator('html')).not.toHaveAttribute('data-nav');
+    expect(await readContentOffset(page)).toBe(148);
+    await expect(page.locator('.nk-cwhub-index')).toHaveCSS('padding-left', '148px');
 
-    // 客户端路由切换（非整页加载）的主流程：从枢纽页进入板块后侧栏回归、data-nav 撤下
-    // （App.vue 的 v-if 与 bareNav watcher 生效，令牌回到 148px 侧栏避让）
-    // 行筛选必须用 href 而非 to：RouterLink 渲染的是 href（`:not([to="/"])` 在真实 DOM 里匹配不到任何元素、
-    // 等于没过滤），返回行 `.nk-cwhub-index__row` 与板块行同类名，只靠 `.first()` 依赖行序。
-    await page.locator('.nk-cwhub-index__row:not([href="/"])').first().click();
-    // 落点断言（期望值取自 CW_NAV_ITEMS[0].path，勿凭直觉）：防「行序变化后点到返回行」却只因后续断言而失败
+    // 客户端路由切换（非整页加载）主流程：枢纽页 → 板块页全程导航条在位
+    // （旧的「进入板块后侧栏才回归」已不适用；返回行退场后索引行全部是板块行）
+    await page.locator('.nk-cwhub-index__row').first().click();
+    // 落点断言（期望值取自 CW_NAV_ITEMS[0].path，勿凭直觉）
     await expect(page).toHaveURL(/\/currency\/role$/);
     await expect(page.locator('.ui-sidebar')).toBeVisible();
-    await expect(page.locator('html')).not.toHaveAttribute('data-nav', 'bare');
+    await expect(page.locator('html')).not.toHaveAttribute('data-nav');
     expect(await readContentOffset(page)).toBe(148);
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('平板（800px）：/ 无侧栏，避让回退为 32px 页面留白', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('平板（800px）：/ 渲染侧栏，避让 88px', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 800, height: 900 });
     await page.goto('/');
-    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
-    expect(await readContentOffset(page)).toBe(32);
-    await expect(page.locator('.nk-home-nav')).toHaveCSS('padding-left', '32px');
+    await expect(page.locator('.ui-sidebar')).toBeVisible();
+    await expect(page.locator('html')).not.toHaveAttribute('data-nav');
+    expect(await readContentOffset(page)).toBe(88);
+    await expect(page.locator('.nk-home-release')).toHaveCSS('padding-left', '88px');
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('手机（390px）：枢纽页不渲染导航条（全断点无导航），无左侧避让', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('手机（390px）：枢纽页渲染底部栏（全断点无导航的特例已作废）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/currency');
-    // data-nav 恒挂（断点无关）；手机底部栏同样隐藏——枢纽页身份是「选路」，页内索引即导航
-    await expect(page.locator('html')).toHaveAttribute('data-nav', 'bare');
-    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
+    await expect(page.locator('.ui-sidebar')).toBeVisible();
+    await expect(page.locator('html')).not.toHaveAttribute('data-nav');
+    // 手机端侧面无避让：底部栏不占左缘，避让令牌维持 0
     expect(await readContentOffset(page)).toBe(0);
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
@@ -205,7 +250,7 @@ test.describe('布局验收：枢纽页无侧栏', () => {
     await page.goto('/character');
     await waitForCatalogCards(page);
     await expect(page.locator('.ui-sidebar')).toBeVisible();
-    await expect(page.locator('html')).not.toHaveAttribute('data-nav', 'bare');
+    await expect(page.locator('html')).not.toHaveAttribute('data-nav');
     expect(await readContentOffset(page)).toBe(148);
     assertNoErrors();
   });
@@ -221,8 +266,8 @@ test.describe('布局验收：枢纽页共享页脚原语', () => {
       await expect(footer).toHaveCount(1);
       // 旧首页命名类必须已消失（跨页原语中性化的回归防线）
       await expect(page.locator('.nk-home-footer')).toHaveCount(0);
-      // 桌面：右缘 40 + 枢纽页无侧栏回退的 48 左缘留白
-      await expect(footer).toHaveCSS('padding-left', '48px');
+      // 桌面：右缘 40 + 侧栏避让 148（ADR 0019 后枢纽页与其他页同一套避让，不再有 48px 回退）
+      await expect(footer).toHaveCSS('padding-left', '148px');
       await expect(footer).toHaveCSS('padding-right', '40px');
       // 拉丁格言消费全站等宽令牌 --font-mono（令牌缺失会回退默认字体，视觉不易察觉）
       const font = await footer.locator('.nk-hub-footer__latin').evaluate(
@@ -230,16 +275,15 @@ test.describe('布局验收：枢纽页共享页脚原语', () => {
       );
       expect(font).toContain('ui-monospace');
     }
-    // 手机：枢纽页无导航条（全断点），页脚不再为旧底部栏预留 56px——
-    // 仅 24px 呼吸 + safe-area（headless 无 safe-area，故恰好为 24）
+    // 手机：底部栏回归（ADR 0019），页脚重新为导航高度预留——计算值 72 = 56 底部栏 + 16 呼吸。
+    // 预留低于底部栏实际高度（56）时页脚会被压在栏下，故下限锁 56 而非固定值。
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
-    await expect(page.locator('.ui-sidebar')).toHaveCount(0);
+    await expect(page.locator('.ui-sidebar')).toBeVisible();
     const padBottom = await page.locator('.nk-hub-footer').evaluate(
       (el) => parseFloat(getComputedStyle(el).paddingBottom),
     );
-    expect(padBottom).toBeGreaterThanOrEqual(16);
-    expect(padBottom).toBeLessThan(56);
+    expect(padBottom).toBeGreaterThanOrEqual(56);
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
@@ -290,7 +334,7 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
   test('手机（<768px）：调试台入口隐藏，导航折叠不受影响', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
-    // 必须落在非枢纽页：枢纽页（meta.bareNav）全断点不渲染导航条，折叠断言会退化为空断言
+    // 落在目录页取样：ADR 0019 后枢纽页同样渲染底部栏，但目录页更接近真实使用路径
     await page.goto('/character');
     await waitForCatalogCards(page);
     await expect(page.locator('.ui-sidebar-debug')).toBeHidden();
@@ -331,7 +375,7 @@ test.describe('布局验收：货币战争主题', () => {
     // meta.cw → <html data-theme="cw">
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'cw');
     // CW Hub 导航（索引目录行，5 板块全部上线）
-    await expect(page.locator('.nk-cwhub-hero__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
     const sectionCards = await page.locator('.nk-cwhub-index__row').count();
     expect(sectionCards).toBeGreaterThanOrEqual(5);
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);

@@ -2,13 +2,12 @@
 
 export const CDN = 'https://static.nanoka.cc';
 
-/** 货币战争枢纽页 Hero 背景视频：本地随站（public/data/cn/assets/cw-hero.mp4，官方活动页素材一次性入库）。
- *  原直引 act-webstatic——活动页素材无长期保留 SLA（同 ADR 0009 官网 Spine 结论），下线即失效，故本地化；
- *  poster 兜底见 CurrencyHubView（视频解码失败/慢网/prefers-reduced-motion 场景） */
-export const CW_HERO_VIDEO = '/data/cn/assets/cw-hero.mp4';
-
-/** 货币战争枢纽页 Hero 静态兜底帧（本地抽帧资产，视频失败/慢网时展示） */
-export const CW_HERO_POSTER = '/data/cn/assets/cw-hero-poster.jpg';
+/* 货币战争枢纽页 Hero 视频与 poster 兜底帧的路径常量已随工具化移除（ADR 0018）：
+   两个枢纽页改为紧凑品牌带，不再承载全屏媒体层，故这两个常量已无消费方（删常量而非留死代码）。
+   **两个资产文件保留在库内作档案**——public/data/cn/assets/cw-hero.mp4 与 cw-hero-poster.jpg，
+   来源为官网活动页素材且无长期保留 SLA（同 ADR 0009 结论），删除后无法重新获取；
+   它们不再被任何页面请求（仅占部署体积，不影响页面体积）。
+   若日后要恢复视频 Hero，先在 ADR 0018 上改决策，再重建此处的路径常量与视图侧视频状态机。 */
 
 /** 站点名（浏览器标题 / 首页品牌主标题；曾用名“咸鱼百科”见页脚彩蛋） */
 export const SITE_NAME = '星铁档案馆';
