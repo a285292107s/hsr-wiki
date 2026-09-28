@@ -1,1 +1,7 @@
 vendor/
+node_modules/
+dist/
+coverage/
+coverage-out/
+playwright-report/
+temp/

@@ -12,3 +12,13 @@ node_modules/
 __pycache__/
 *.pyc
 .pytest_cache/
+.venv/
+
+# 测试与截图产物（可随时重跑，索引无价值）
+coverage/
+coverage-out/
+playwright-report/
+test-results/
+.playwright/
+temp/
+.pnpm-store/

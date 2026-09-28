@@ -15,8 +15,15 @@ dist
 dist-ssr
 *.local
 
+# TypeScript 增量编译信息（tsconfig 现落 node_modules/.tmp，此处兜底防配置漂移）
+*.tsbuildinfo
+
+# Vercel CLI 本地关联目录（部署配置 vercel.json 已入库，本目录为本机状态）
+.vercel
+
 # Test coverage
 coverage
+coverage-out/
 
 # Environment
 .env
@@ -27,6 +34,8 @@ coverage
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
+desktop.ini
 *.suo
 *.ntvs*
 *.njsproj
@@ -36,6 +45,8 @@ coverage
 # Python cache
 __pycache__
 *.pyc
+.venv/
+venv/
 
 # Local upstream data (converter source, cloned from DimbreathBot/TurnBasedGameData)
 # 2026-08-12: removed from git submodule to keep Vercel builds fast (~13MB repo);
@@ -48,6 +59,10 @@ tools/converter/.converter-state.json
 # Converter TextMap SQLite cache
 tools/converter/.textmap-cache.db
 tools/converter/.textmap-cache.db-*
+
+# Converter 局部索引（全量 DATA_CATALOG.md 入库；--top / --filter 为本地临时输出，勿提交）
+tools/converter/DATA_CATALOG.top*.md
+tools/converter/DATA_CATALOG.filter-*.md
 
 # Temporary workspace (debug scripts & screenshots)
 temp/
@@ -80,6 +95,7 @@ skills-lock.json
 playwright-report
 blob-report
 playwright/.cache
+.playwright/
 test-results
 
 # Python cache (explicit)
