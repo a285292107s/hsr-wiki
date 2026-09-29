@@ -315,7 +315,7 @@ function onImgLoad(): void { imgDone.value = true; }
       <!-- 强化来源：受哪些星魂 / 行迹加成（折叠式，默认收纳，展开全部展示） -->
       <div v-if="ratedLinks.length" class="nk-skill__links">
         <button
-          class="nk-skill__links-btn"
+          class="nk-skill__toggle"
           :class="{ open: linksOpen }"
           :aria-expanded="linksOpen"
           type="button"
@@ -353,13 +353,13 @@ function onImgLoad(): void { imgDone.value = true; }
       <!-- 技能预览（默认收纳，点开加载动画；clip 惰性挂载，参见 script 注释） -->
       <div v-if="myAnims.length" class="nk-skill__anim">
         <button
-          class="nk-skill__anim-toggle"
+          class="nk-skill__toggle"
           :class="{ open: animOpen }"
           :aria-expanded="animOpen"
           type="button"
           @click="toggleAnim"
         >
-          <span class="arrow">▶</span> 技能预览
+          <span class="arrow">▶</span> {{ animOpen ? '收起技能预览' : '技能预览' }}
         </button>
         <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
         <div class="nk-skill__anim-clip" :class="{ open: animOpen }">
@@ -391,13 +391,13 @@ function onImgLoad(): void { imgDone.value = true; }
     </div>
     <div v-if="table" class="nk-skill__table-wrap">
       <button
-        class="nk-skill__table-btn"
+        class="nk-skill__toggle"
         :class="{ open: tableOpen }"
         :aria-expanded="tableOpen"
         type="button"
         @click="toggleTable"
       >
-        <span class="arrow">▶</span> {{ tableOpen ? '收起数据' : '技能数据' }}
+        <span class="arrow">▶</span> {{ tableOpen ? '收起技能数据' : '技能数据' }}
       </button>
       <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），表格内容首次展开后才挂载 -->
       <div class="nk-table-clip" :class="{ open: tableOpen }">

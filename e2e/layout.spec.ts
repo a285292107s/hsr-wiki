@@ -589,6 +589,52 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
+  test('/character/1001：技能卡折叠开关为可点外观（浅底 + 发丝描边 + 6px 圆角）且文案成对', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/character/1001');
+    const toggles = page.locator('.nk-skill__toggle');
+    // 1001 三类开关齐备：强化来源（3 技能有 rated_rank_id）/ 技能预览 / 技能数据
+    await expect(toggles.first()).toBeVisible();
+    // 技能预览随 animDb 异步就绪后挂载，用轮询而非一次性计数
+    await expect.poll(() => toggles.count()).toBeGreaterThanOrEqual(3);
+    // 可点外观：非裸文字——有描边、有圆角、有非全透明底色（回归「看起来不像按钮」）
+    await expect(toggles.first()).toHaveCSS('border-top-style', 'solid');
+    await expect(toggles.first()).toHaveCSS('border-top-width', '1px');
+    await expect(toggles.first()).toHaveCSS('border-top-left-radius', '6px');
+    const bg = await toggles.first().evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+    // 热区 ≥44px：视觉高约 32px + ::after 上下各 8px（无障碍硬标准）
+    const hot = await toggles.first().evaluate((el) => {
+      const a = getComputedStyle(el, '::after');
+      return { content: a.content, top: a.top, bottom: a.bottom };
+    });
+    expect(hot).toEqual({ content: '""', top: '-8px', bottom: '-8px' });
+    // 文案成对：展开态 = 收起 + 原名（三处统一，不得回退为「收起数据」）
+    await expect(page.getByRole('button', { name: '强化来源' }).first()).toHaveAttribute('aria-expanded', 'false');
+    const dataBtn = page.getByRole('button', { name: '技能数据' }).first();
+    const closed = await dataBtn.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { color: cs.color, border: cs.borderTopColor };
+    });
+    await dataBtn.click();
+    const openedBtn = page.getByRole('button', { name: '收起技能数据' }).first();
+    await expect(openedBtn).toHaveAttribute('aria-expanded', 'true');
+    // 展开态换色换描边（状态可见，非仅箭头旋转）
+    const opened = await openedBtn.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { color: cs.color, border: cs.borderTopColor };
+    });
+    expect(opened).not.toEqual(closed);
+    const animBtn = page.getByRole('button', { name: '技能预览' }).first();
+    await animBtn.click();
+    await expect(page.getByRole('button', { name: '收起技能预览' }).first()).toHaveAttribute('aria-expanded', 'true');
+    const linksBtn = page.getByRole('button', { name: '强化来源' }).first();
+    await linksBtn.click();
+    await expect(page.getByRole('button', { name: '收起强化来源' }).first()).toHaveAttribute('aria-expanded', 'true');
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
   test('/character/1001 手机断点：配队标头渲染、队间距 16px、无溢出', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });

@@ -239,19 +239,32 @@
 }
 .nk-char-page .nk-skill__need-val { color: var(--text2); }
 .nk-char-page .nk-skill__need-val .hl { color: var(--highlight); font-weight: 700; }
-/* 强化来源（受哪些星魂 / 行迹加成）：折叠式，默认收纳，展开全部展示（交互对齐技能数据） */
+/* 强化来源（受哪些星魂 / 行迹加成）：折叠式，默认收纳，展开全部展示 */
 .nk-char-page .nk-skill__links { margin-top: 14px; }
-.nk-char-page .nk-skill__links-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.625rem; font-weight: 500; color: var(--text3);
-  background: none; border: none; cursor: pointer; padding: 4px 0;
-  transition: color 0.2s; letter-spacing: 0.02em;
-  position: relative;
+/* ─── 技能卡折叠开关（强化来源 / 技能预览 / 技能数据共用单点原语，禁页面内复制）───
+   可点外观 = 浅底承载 + 发丝描边 + 6px 圆角；展开态走主色描边 + 8% 淡底
+   （与 .nk-skill__anim-tab.active 同语言）。禁 glow / 禁胶囊（反 AI 味硬约束）。 */
+.nk-char-page .nk-skill__toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  position: relative; cursor: pointer;
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--text2);
+  background: color-mix(in srgb, var(--blk-900) 40%, transparent);
+  border: 1px solid var(--line-1);
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
-.nk-char-page .nk-skill__links-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -12px; bottom: -12px; } /* 热区 ≥44px（无障碍硬标准） */
-.nk-char-page .nk-skill__links-btn:hover { color: var(--primary); }
-.nk-char-page .nk-skill__links-btn .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
-.nk-char-page .nk-skill__links-btn.open .arrow { transform: rotate(90deg); }
+/* 热区 ≥44px（无障碍硬标准）：视觉高约 32px，上下各扩 8px */
+.nk-char-page .nk-skill__toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
+.nk-char-page .nk-skill__toggle:hover { color: var(--text-bright); border-color: var(--line-2); }
+.nk-char-page .nk-skill__toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
+.nk-char-page .nk-skill__toggle.open {
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.nk-char-page .nk-skill__toggle.open:hover { border-color: color-mix(in srgb, var(--primary) 60%, transparent); }
+.nk-char-page .nk-skill__toggle.open .arrow { transform: rotate(90deg); }
 .nk-char-page .nk-links-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
 .nk-char-page .nk-links-clip.open { grid-template-rows: 1fr; }
 .nk-char-page .nk-links-inner { overflow: hidden; min-height: 0; }
@@ -287,19 +300,8 @@
 }
 .nk-char-page .nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
 .nk-char-page .nk-term__name { color: var(--highlight); font-weight: 600; }
-/* 技能预览（折叠式，点开加载动画） */
+/* 技能预览（折叠式，点开加载动画；开关样式见 .nk-skill__toggle 单点原语） */
 .nk-char-page .nk-skill__anim { margin-top: 16px; }
-.nk-char-page .nk-skill__anim-toggle {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.625rem; font-weight: 500; color: var(--text3);
-  background: none; border: none; cursor: pointer; padding: 4px 0;
-  transition: color 0.2s; letter-spacing: 0.02em;
-  position: relative;
-}
-.nk-char-page .nk-skill__anim-toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -12px; bottom: -12px; } /* 热区 ≥44px（无障碍硬标准） */
-.nk-char-page .nk-skill__anim-toggle:hover { color: var(--primary); }
-.nk-char-page .nk-skill__anim-toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
-.nk-char-page .nk-skill__anim-toggle.open .arrow { transform: rotate(90deg); }
 .nk-char-page .nk-skill__anim-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
 .nk-char-page .nk-skill__anim-clip.open { grid-template-rows: 1fr; }
 .nk-char-page .nk-skill__anim-inner { overflow: hidden; min-height: 0; }
@@ -337,20 +339,9 @@
   animation: nk-anim-spin 0.8s linear infinite;
 }
 @keyframes nk-anim-spin { to { transform: rotate(360deg); } }
-/* 数据表折叠 */
+/* 数据表折叠（开关样式见 .nk-skill__toggle 单点原语） */
 .nk-char-page .nk-skill__table-wrap { margin-top: 14px; }
-.nk-char-page .nk-skill__table-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.625rem; font-weight: 500; color: var(--text3);
-  background: none; border: none; cursor: pointer; padding: 4px 0;
-  transition: color 0.2s; letter-spacing: 0.02em;
-  position: relative;
-}
-.nk-char-page .nk-skill__table-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -12px; bottom: -12px; } /* 热区 ≥44px（无障碍硬标准） */
-.nk-char-page .nk-skill__table-btn:hover { color: var(--primary); }
-.nk-char-page .nk-skill__table-btn .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
-.nk-char-page .nk-skill__table-btn.open .arrow { transform: rotate(90deg); }
-.nk-char-page .nk-table-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-table-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
 .nk-char-page .nk-table-clip.open { grid-template-rows: 1fr; }
 .nk-char-page .nk-table-inner { overflow: hidden; min-height: 0; }
 .nk-char-page .nk-table-clip.open .nk-table-inner { overflow-x: auto; }
@@ -998,8 +989,7 @@
 
 /* ═══════════ 焦点环 ═══════════ */
 .nk-char-page .nk-story__head:focus-visible,
-.nk-char-page .nk-skill__anim-toggle:focus-visible,
-.nk-char-page .nk-skill__table-btn:focus-visible,
+.nk-char-page .nk-skill__toggle:focus-visible,
 .nk-char-page .nk-enh-tab:focus-visible,
 .nk-char-page .nk-secnav__btn:focus-visible,
 .nk-char-page .nk-hero__toggle:focus-visible,
@@ -1007,6 +997,8 @@
   outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px;
 }
 .nk-char-page .nk-story__head:focus-visible { border-radius: 0; }
+/* 折叠开关自带 6px 圆角（上组 4px 会改按钮本体圆角，焦点态跳形），单列复位 */
+.nk-char-page .nk-skill__toggle:focus-visible { border-radius: 6px; }
 .nk-char-page .nk-secnav__btn:focus-visible { outline-offset: 1px; }
 
 /* ═══════════ 减弱动态 ═══════════ */
@@ -1036,8 +1028,10 @@
 /* ═══════════ 触屏设备：重置粘滞 hover ═══════════ */
 @media (hover: none) {
   .nk-char-page .nk-story__head:hover { background: none; }
-  .nk-char-page .nk-skill__table-btn:hover { color: var(--text3); }
-  .nk-char-page .nk-skill__anim-toggle:hover { color: var(--text3); }
+  .nk-char-page .nk-skill__toggle:hover { color: var(--text2); border-color: var(--line-1); }
+  .nk-char-page .nk-skill__toggle.open:hover {
+    color: var(--primary); border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  }
   .nk-char-page .nk-enh-tab:hover { color: var(--text3); }
   .nk-char-page .nk-enh-tab--active:hover { color: var(--primary); }
   .nk-char-page .nk-build__team-slot img:hover { transform: none; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
