@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { collectConsoleIssues, findHorizontalOverflow, splitKnownOverflow, waitForCatalogCards } from './helpers';
 
@@ -576,6 +576,152 @@ test.describe('布局验收：货币战争主题', () => {
   });
 });
 
+/* ─── 技能族层级（ADR 0022）取证工具 ───
+   期望文案一律从 characters/*.json 读（族成员 id 原序 → 名），不在断言里写死页面文案；
+   族 id 原序与 src/lib/skill-family.ts 同口径（取锚点首个非空 level_up_skill_id 级）。 */
+function charFamilyIds(charId: string, anchor: string): number[] {
+  const d = JSON.parse(readFileSync(`public/data/cn/characters/${charId}.json`, 'utf8')) as {
+    skill_trees: Record<string, Record<string, { level_up_skill_id?: number[] }>>;
+  };
+  for (const node of Object.values(d.skill_trees[anchor] || {})) {
+    if (node.level_up_skill_id?.length) return node.level_up_skill_id;
+  }
+  throw new Error(`characters/${charId}.json 锚点 ${anchor} 无 level_up_skill_id`);
+}
+
+function charSkillNames(charId: string, ids: number[]): string[] {
+  const d = JSON.parse(readFileSync(`public/data/cn/characters/${charId}.json`, 'utf8')) as {
+    skills: Record<string, { name: string }>;
+  };
+  return ids.map((id) => d.skills[String(id)].name);
+}
+
+/**
+ * 层级线竖轨的页面 x。三种宿主都必须支持：
+ * - 子卡自身（竖轨在 `.nk-skill--child::before`，left 用负偏移抵消行缩进）；
+ * - 父卡（竖轨在其 `.nk-skill__body::before`）；
+ * - 直接传 `.nk-skill__body`。
+ * left 是相对宿主 padding box 的值，故必须 host.rect.left + left 换算成页面 x 后比较（父/子宿主不同，不可直接比数值）。
+ */
+async function skillRailX(host: Locator): Promise<number> {
+  return host.evaluate((el) => {
+    const node = el.classList.contains('nk-skill--child') || el.classList.contains('nk-skill__body')
+      ? el
+      : el.querySelector(':scope > .nk-skill__body')!;
+    const left = parseFloat(getComputedStyle(node, '::before').left) || 0;
+    return node.getBoundingClientRect().left + left;
+  });
+}
+
+interface PseudoBox {
+  top: number;
+  height: number;
+  /** 伪元素左端页面 x（宿主 rect.left + 计算 left；宿主与伪元素均无横向边框） */
+  left: number;
+  width: number;
+  /** 伪元素右端页面 x（left + 计算 width） */
+  rightX: number;
+  /** 伪元素顶边页面 y（宿主 rect.top + 计算 top） */
+  topY: number;
+  /** 伪元素底边页面 y（宿主 rect.top + 计算 top + 计算 height） */
+  bottomY: number;
+  borderLeftWidth: string;
+  borderLeftColor: string;
+  borderTopWidth: string;
+  borderTopStyle: string;
+  content: string;
+}
+
+async function pseudoBox(loc: Locator, pseudo: '::before' | '::after'): Promise<PseudoBox> {
+  return loc.evaluate((el, p) => {
+    const cs = getComputedStyle(el, p);
+    const r = el.getBoundingClientRect();
+    const hostCs = getComputedStyle(el);
+    // 绝对定位伪元素的包含块是宿主 padding box 的**外缘**（= border box + border 宽度）——
+    // 宿主的 padding 不属于偏移量。曾误按「padding box 内缘」加 paddingTop 换算，整套坐标被抬低
+    // 一个 child-gap，掩盖了「折角必须落在子图标中线」的公式错误（见 docs/memory/2026-09.md「包含块原点实测」）。
+    const bt = parseFloat(hostCs.borderTopWidth) || 0;
+    const bl = parseFloat(hostCs.borderLeftWidth) || 0;
+    const top = parseFloat(cs.top) || 0;
+    const height = parseFloat(cs.height) || 0;
+    const left = parseFloat(cs.left) || 0;
+    const width = parseFloat(cs.width) || 0;
+    return {
+      top,
+      height,
+      left: r.left + bl + left,
+      width,
+      rightX: r.left + bl + left + width,
+      topY: r.top + bt + top,
+      bottomY: r.top + bt + top + height,
+      borderLeftWidth: cs.borderLeftWidth,
+      borderLeftColor: cs.borderLeftColor,
+      borderTopWidth: cs.borderTopWidth,
+      borderTopStyle: cs.borderTopStyle,
+      content: cs.content,
+    };
+  }, pseudo);
+}
+
+/** 技能数据表盒 vs 卡片内容区（左/右缘）——用于断言「表格不侵入图标列、不产生卡片级横向溢出」 */
+async function tableBoxWithinCard(card: Locator): Promise<{
+  left: number;
+  right: number;
+  contentLeft: number;
+  contentRight: number;
+}> {
+  return card.evaluate((el) => {
+    const wrap = el.querySelector(':scope > .nk-skill__body > .nk-skill__table-wrap')!;
+    const cs = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    const w = wrap.getBoundingClientRect();
+    return {
+      left: w.left,
+      right: w.right,
+      contentLeft: r.left + (parseFloat(cs.paddingLeft) || 0),
+      contentRight: r.right - (parseFloat(cs.paddingRight) || 0),
+    };
+  });
+}
+
+/**
+ * 技能区横向溢出（与 helpers.ts findHorizontalOverflow 同判据，但限定 `[data-panel="skills"]` 子树）。
+ * **为何不直接对整页断言**：角色详情页 Hero 的 `canvas.spine-player-canvas` 实测恒越出视口
+ * （1212/1503/1509 实测 1280 宽下 right=1289、375 宽下 left=-28 right=403；`.nk-hero__visual { overflow-x: hidden }`
+ * 把它裁掉，故 documentElement.scrollWidth 不越界），属 Hero/spine 域的既有条件，与本轮技能层级改动无关；
+ * 整页断言会把无关缺陷算进技能区用例。此处只对技能区子树取证。
+ */
+async function skillsPanelOverflow(page: import('@playwright/test').Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const root = document.querySelector('[data-panel="skills"]');
+    if (!root) return ['[data-panel="skills"] 缺失'];
+    const vw = window.innerWidth;
+    const bad: string[] = [];
+    const inScrollable = (el: Element): boolean => {
+      let cur = el.parentElement;
+      while (cur && cur !== root.parentElement) {
+        const o = getComputedStyle(cur).overflowX;
+        if (o === 'auto' || o === 'scroll') return true;
+        cur = cur.parentElement;
+      }
+      return false;
+    };
+    root.querySelectorAll('*').forEach((el) => {
+      const cs = getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return;
+      const r = el.getBoundingClientRect();
+      if (r.right > vw + 1 || r.left < -1) {
+        if (cs.position !== 'fixed' && !inScrollable(el)) {
+          bad.push(
+            `${el.tagName.toLowerCase()}${el.className ? '.' + String(el.className).trim().split(/\s+/).slice(0, 2).join('.') : ''} right=${Math.round(r.right)} left=${Math.round(r.left)}`,
+          );
+        }
+      }
+    });
+    return bad.slice(0, 20);
+  });
+}
+
 test.describe('布局验收：角色详情页', () => {
   test('/character/1001：hero、概览面板、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
@@ -650,6 +796,285 @@ test.describe('布局验收：角色详情页', () => {
     );
     expect(gap).toBe(16);
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
+  /* ─── 技能族层级 + 图标列折角线（ADR 0022）：真珠 1503 Point01 族 = 150301 + 150308/150310 ─── */
+
+  test('/character/1503：族内首个为父卡（行笔，临摹断水）+ 2 子卡，子卡缩进一个图标空间、竖轨共线、折角接子图标中线', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/character/1503');
+    const firstCard = page.locator('[data-panel="skills"] > .nk-skill').first();
+    await expect(firstCard.locator('.nk-skill__name').first()).toHaveText('行笔，临摹断水');
+
+    // 族内首个 = 基座技能 = 父卡，其余两条 = 形态技能 = 子卡（禁止 SkillList 顺序判父子）
+    const children = firstCard.locator('.nk-skill--child');
+    await expect(children).toHaveCount(2);
+    await expect(children.locator('.nk-skill__name')).toHaveText(['行笔，幻造星月', '行笔，绘制末浪']);
+
+    // 令牌：缩进 = 一个技能图标空间（= rail = 图标边长）、间距 = 半个图标空间，均由 rail 派生（不得有独立断点值）
+    const tokens = await page.locator('.nk-char-page').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        rail: cs.getPropertyValue('--nk-skill-rail').trim(),
+        gutter: cs.getPropertyValue('--nk-skill-gutter').trim(),
+        indent: cs.getPropertyValue('--nk-skill-child-indent').trim(),
+        gap: cs.getPropertyValue('--nk-skill-child-gap').trim(),
+      };
+    });
+    expect(tokens).toEqual({ rail: '48px', gutter: '10px', indent: '48px', gap: 'calc(48px / 2)' });
+    const indent = parseFloat(tokens.indent);
+
+    // 图标列：子卡整行右移恰好一个图标空间 → 子图标左缘 = 父图标右缘（±1px），两子卡彼此同列
+    const iconBox = async (loc: Locator) =>
+      loc.locator('.nk-skill__icon').first().evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { left: r.left, right: r.right };
+      });
+    const parentIcon = await iconBox(firstCard);
+    const childIcons = await children.locator('.nk-skill__icon').evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { left: r.left, right: r.right };
+      }),
+    );
+    expect(childIcons).toHaveLength(2);
+    for (const box of childIcons) {
+      expect(Math.abs(box.left - (parentIcon.left + indent)), '缩进应等于一个图标空间').toBeLessThanOrEqual(1);
+      expect(Math.abs(box.left - parentIcon.right), '子图标左缘 = 父图标右缘').toBeLessThanOrEqual(1);
+    }
+    expect(Math.abs(childIcons[0].left - childIcons[1].left)).toBeLessThanOrEqual(1);
+
+    // 竖轨共线：子卡竖轨 x 必须与父卡竖轨相等（父卡在 .nk-skill__body::before、子卡在卡片自身），
+    // 且竖轨落点 = 父图标底边水平中点（x = 图标列左缘 + gutter + rail/2）
+    const parentRailX = await skillRailX(firstCard);
+    expect(Math.abs(parentRailX - (parentIcon.left + parentIcon.right) / 2), '竖轨 = 父图标中线').toBeLessThanOrEqual(1);
+    for (let i = 0; i < 2; i++) {
+      const childRailX = await skillRailX(children.nth(i));
+      expect(Math.abs(childRailX - parentRailX), `第 ${i + 1} 张子卡竖轨应与父卡共线`).toBeLessThanOrEqual(1);
+    }
+
+    // └ 收口标记只挂在最后一张子卡上（DOM 序末位）
+    expect(
+      await children.evaluateAll((els) => els.map((el) => el.classList.contains('nk-skill--child-last'))),
+    ).toEqual([false, true]);
+
+    // 旧虚线语言退场：子卡上沿无边框（兄弟边界只由折角线与间距表达）
+    await expect(children.first()).toHaveCSS('border-top-style', 'none');
+
+    // 竖轨（::before）= --line-2 1px；折角（::after）= 1px 上边框
+    const rail = await pseudoBox(children.first(), '::before');
+    expect(rail.borderLeftWidth).toBe('1px');
+    expect(rail.borderLeftColor).toBe('rgba(255, 255, 255, 0.13)');
+    const corner = await pseudoBox(children.first(), '::after');
+    expect(corner.borderTopWidth).toBe('1px');
+    expect(corner.borderTopStyle).toBe('solid');
+
+    // 折角：横段 = 半个图标空间（桌面 24px）→ 右端 x 恰为子卡图标左缘；y 恰为子卡图标中线
+    // （包含块原点是卡顶，故 y = 卡顶 + child-gap + rail/2；pseudoBox 不得再加宿主 padding 换算，否则折角错位也会假通过）
+    expect(corner.width).toBe(24);
+    expect(Math.abs(corner.rightX - childIcons[0].left)).toBeLessThanOrEqual(1);
+    const iconCenterY = async (loc: Locator) =>
+      loc.locator('.nk-skill__icon').first().evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return (r.top + r.bottom) / 2;
+      });
+    expect(Math.abs(corner.topY - (await iconCenterY(children.first()))), '折角 y = 子图标中线').toBeLessThanOrEqual(1);
+
+    // 竖轨跨行不断：子轨上端顶到卡顶（= 包含块原点）、非末位下延越过本卡底部；
+    // 且父卡体底 = 首子卡卡顶、兄弟卡底 = 下一张卡顶（接缝 = 0）
+    const midRail = await pseudoBox(children.first(), '::before');
+    const cardBox = async (i: number) =>
+      children.nth(i).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom };
+      });
+    const [child0Box, child1Box] = [await cardBox(0), await cardBox(1)];
+    const bodyBottom = await firstCard
+      .locator('.nk-skill__body')
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().bottom);
+    expect(Math.abs(midRail.topY - child0Box.top), '子轨上端应顶到卡顶').toBeLessThanOrEqual(1);
+    expect(midRail.bottomY).toBeGreaterThanOrEqual(child0Box.bottom - 1);
+    expect(Math.abs(child0Box.top - bodyBottom), '父卡体底 = 首子卡卡顶（零缝）').toBeLessThanOrEqual(1);
+    expect(Math.abs(child1Box.top - child0Box.bottom), '兄弟卡之间零缝').toBeLessThanOrEqual(1);
+    // 末位子卡（└）竖轨止于本卡图标中线，折角横段与 ├ 同长
+    const lastRail = await pseudoBox(children.last(), '::before');
+    expect(lastRail.bottomY, '└ 竖轨止于子图标中线').toBeLessThanOrEqual((await iconCenterY(children.last())) + 1);
+    expect(lastRail.width).toBe(24);
+
+    expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('/character/1503 手机断点 375×812：无横向溢出，令牌降级为 rail 44 / gutter 8，缩进与间距仍由 rail 派生', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/character/1503');
+    await expect(page.locator('[data-panel="skills"] > .nk-skill').first()).toBeVisible();
+    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(376);
+    // 断点覆盖必须落在 .nk-char-page 上；缩进/间距由 rail 派生（折角 y = 卡顶 + gap + rail/2 = 图标中线，折角长 = rail/2）
+    const vars = await page.locator('.nk-char-page').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        rail: cs.getPropertyValue('--nk-skill-rail').trim(),
+        gutter: cs.getPropertyValue('--nk-skill-gutter').trim(),
+        indent: cs.getPropertyValue('--nk-skill-child-indent').trim(),
+        gap: cs.getPropertyValue('--nk-skill-child-gap').trim(),
+      };
+    });
+    expect(vars).toEqual({ rail: '44px', gutter: '8px', indent: '44px', gap: 'calc(44px / 2)' });
+    expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('/character/1503：子技能行缩进 = 一个技能图标空间落地（桌面 +48px / 375 +44px，±1px）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    /** 子图标相对父图标右移量 + 当前断点的缩进令牌值 */
+    const measure = async () => {
+      const firstCard = page.locator('[data-panel="skills"] > .nk-skill').first();
+      const parentLeft = await firstCard
+        .locator('.nk-skill__icon')
+        .first()
+        .evaluate((el) => el.getBoundingClientRect().left);
+      const childLeft = await firstCard
+        .locator('.nk-skill--child .nk-skill__icon')
+        .first()
+        .evaluate((el) => el.getBoundingClientRect().left);
+      const indent = await page
+        .locator('.nk-char-page')
+        .evaluate((el) => getComputedStyle(el).getPropertyValue('--nk-skill-child-indent').trim());
+      return { delta: childLeft - parentLeft, indent };
+    };
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/character/1503');
+    await expect(page.locator('.nk-skill--child').first()).toBeVisible();
+    const wide = await measure();
+    expect(wide.indent).toBe('48px');
+    expect(Math.abs(wide.delta - 48), `桌面实测右移 ${wide.delta.toFixed(1)}px`).toBeLessThanOrEqual(1);
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expect.poll(async () => (await measure()).indent).toBe('44px');
+    const narrow = await measure();
+    expect(Math.abs(narrow.delta - 44), `375 实测右移 ${narrow.delta.toFixed(1)}px`).toBeLessThanOrEqual(1);
+    // 缩进量即断点令牌值（不是历史遗留的硬编码数字）
+    expect(Math.abs(wide.delta - parseFloat(wide.indent))).toBeLessThanOrEqual(1);
+    expect(Math.abs(narrow.delta - parseFloat(narrow.indent))).toBeLessThanOrEqual(1);
+    expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('/character/1212：战技族父节点以族序为准（父卡「无罅飞光」；SkillList 首位的「寒川映月」降为子卡）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/character/1212');
+    const topCards = page.locator('[data-panel="skills"] > .nk-skill');
+    const bp = topCards.filter({ has: page.locator('[data-type="BPSkill"]') });
+    await expect(bp).toHaveCount(1);
+    await expect(bp.locator('.nk-skill__name').first()).toHaveText('无罅飞光');
+    await expect(bp.locator('.nk-skill--child')).toHaveCount(1);
+    await expect(bp.locator('.nk-skill--child .nk-skill__name')).toHaveText(['寒川映月']);
+    // 形态不得同时充当平级卡的基座
+    const topNames = await topCards.evaluateAll((els) =>
+      els.map((el) => el.querySelector('.nk-skill__name')!.textContent!.trim()),
+    );
+    expect(topNames).toContain('无罅飞光');
+    expect(topNames).not.toContain('寒川映月');
+    assertNoErrors();
+  });
+
+  test('/character/1509：天赋族不再拆成两张平级卡（150904 之下挂 150905）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const ids = charFamilyIds('1509', 'Point04');
+    expect(ids).toEqual([150904, 150905]);
+    const [parentName, childName] = charSkillNames('1509', ids);
+    await page.goto('/character/1509');
+    const topCards = page.locator('[data-panel="skills"] > .nk-skill');
+    const parent = topCards.filter({ hasText: parentName });
+    await expect(parent).toHaveCount(1);
+    await expect(parent.locator('.nk-skill__name').first()).toHaveText(parentName);
+    await expect(parent.locator('.nk-skill--child')).toHaveCount(1);
+    await expect(parent.locator('.nk-skill--child .nk-skill__name')).toHaveText([childName]);
+    const topNames = await topCards.evaluateAll((els) =>
+      els.map((el) => el.querySelector('.nk-skill__name')!.textContent!.trim()),
+    );
+    expect(topNames).toContain(parentName);
+    expect(topNames).not.toContain(childName);
+    assertNoErrors();
+  });
+
+  test('/character/1510：4 成员族（天赋 151004 + 3 条助战技）= 1 父卡 + 恰 3 子卡，子卡名按族序', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const ids = charFamilyIds('1510', 'Point04');
+    expect(ids).toEqual([151004, 151022, 151025, 151026]);
+    const names = charSkillNames('1510', ids);
+    await page.goto('/character/1510');
+    // 数据侧 type=Assist 的三条助战技与 type=Passive 的天赋同族；选父卡用 data-type（唯一顶层 Passive 卡）
+    const parent = page.locator('[data-panel="skills"] > .nk-skill[data-type="Passive"]');
+    await expect(parent).toHaveCount(1);
+    await expect(parent.locator('.nk-skill__name').first()).toHaveText(names[0]);
+    await expect(parent.locator('.nk-skill--child')).toHaveCount(3);
+    const domNames = await parent.locator('.nk-skill--child').evaluateAll((els) =>
+      els.map((el) => el.querySelector('.nk-skill__name')!.textContent!.trim()),
+    );
+    expect(domNames).toEqual(names.slice(1));
+    assertNoErrors();
+  });
+
+  test('/lightcone/首个 id：光锥技能卡不受技能族改动波及（标题行图标在，无图标列）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const cones = JSON.parse(readFileSync('public/data/cn/light_cones.json', 'utf8')) as Record<
+      string,
+      { id: number }
+    >;
+    const lcId = Object.values(cones)[0].id;
+    await page.goto(`/lightcone/${lcId}`);
+    const icon = page.locator('.nk-lc-skill .nk-skill__title-row .nk-skill__icon');
+    await expect(icon).toHaveCount(1);
+    await expect(icon).toBeVisible();
+    // 光锥详情页复用 .nk-skill* 但走标题行内联图标，不得出现角色详情的图标列 / 层级线宿主
+    await expect(page.locator('.nk-skill__rail')).toHaveCount(0);
+    assertNoErrors();
+  });
+
+  test('/character/1503：展开技能数据表后，竖轨与表盒（含首列）不相交、表盒不出卡片内容区', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/character/1503');
+    const card = page.locator('[data-panel="skills"] > .nk-skill').first();
+    const indent = await page
+      .locator('.nk-char-page')
+      .evaluate((el) => parseFloat(getComputedStyle(el).getPropertyValue('--nk-skill-child-indent')));
+    const wrapLeft: Record<string, number> = {};
+
+    for (const target of ['父卡', '首张子卡'] as const) {
+      const host = target === '父卡' ? card : card.locator('.nk-skill--child').first();
+      const wrap = host.locator(':scope > .nk-skill__body > .nk-skill__table-wrap');
+      await wrap.getByRole('button', { name: '技能数据' }).click();
+      await expect(wrap.locator('.nk-table tbody tr').first()).toBeVisible();
+
+      const railX = await skillRailX(host);
+      const box = await tableBoxWithinCard(host);
+      wrapLeft[target] = box.left;
+      // 缺陷史：修复前数据表跨两列，竖轨横跨表盒、首列「#/Lv.N」文字左缘恰等于竖轨 x
+      expect(railX + 8, `${target} 竖轨 x=${railX.toFixed(1)} 必须让开表盒左缘 ${box.left.toFixed(1)}`).toBeLessThan(box.left);
+      const firstColLeft = await wrap
+        .locator('.nk-table tbody td:first-child')
+        .first()
+        .evaluate((el) => el.getBoundingClientRect().left);
+      expect(railX + 8, `${target} 首列左缘 ${firstColLeft.toFixed(1)}`).toBeLessThan(firstColLeft);
+      // 卡片级横向溢出：表盒必须完整落在卡片内容区（表格自身溢出由 .nk-table-inner overflow-x 承担，不在此列）
+      expect(box.left, `${target} 表盒左缘出内容区`).toBeGreaterThanOrEqual(box.contentLeft - 1);
+      expect(box.right, `${target} 表盒右缘出内容区`).toBeLessThanOrEqual(box.contentRight + 1);
+    }
+
+    // 子卡表格随行缩进右移：子卡表盒左缘 = 父卡表盒左缘 + indent（±1px），不再左对齐
+    expect(
+      Math.abs(wrapLeft['首张子卡'] - wrapLeft['父卡'] - indent),
+      `子卡表盒左移量 ${(wrapLeft['首张子卡'] - wrapLeft['父卡']).toFixed(1)}px，indent=${indent}px`,
+    ).toBeLessThanOrEqual(1);
+
+    expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 });

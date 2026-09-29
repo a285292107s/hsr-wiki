@@ -3,7 +3,9 @@
  * 技能卡片（移植自原 character.js 的 renderSkillCard + bindPanels）
  * 原实现滑条交互依赖 data-tpl/data-lvs 属性 + DOM 重渲染，此处改为 Vue 响应式：
  *   lv 变化 → descHtml / 数据表激活行自动重算
- * 子技能通过文件名自引用递归渲染（原结构：子卡片嵌套在父卡片 .nk-skill 内）
+ * 子技能（同族形态技能）通过文件名自引用递归渲染，嵌在父卡片 .nk-skill 内。
+ * 卡体 2 列 = .nk-skill__rail 图标列 + .nk-skill__content 内容列（层级线见 styles/character.css）；
+ * 数据表 .nk-skill__table-wrap 占内容列（grid-column: 2/-1）：跨图标列会让层级线擦过表头首列文字。
  */
 import { computed, ref } from 'vue';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
@@ -291,143 +293,148 @@ function onImgLoad(): void { imgDone.value = true; }
       </div>
     </div>
     <div class="nk-skill__body">
-      <div class="nk-skill__title-row">
+      <div class="nk-skill__rail">
         <img v-if="icon" class="nk-skill__icon" :src="icon">
-        <div class="nk-skill__title">
-          <span class="nk-skill__name">{{ sk.name }}</span>
-          <span class="nk-skill__meta">
-            <span class="nk-skill__type">{{ typeName }}</span>
-            <span v-if="tagLabel" class="nk-skill__tag">{{ tagLabel }}</span>
-          </span>
+      </div>
+      <div class="nk-skill__content">
+        <div class="nk-skill__title-row">
+          <div class="nk-skill__title">
+            <span class="nk-skill__name">{{ sk.name }}</span>
+            <span class="nk-skill__meta">
+              <span class="nk-skill__type">{{ typeName }}</span>
+              <span v-if="tagLabel" class="nk-skill__tag">{{ tagLabel }}</span>
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="nk-skill__desc" v-html="descHtml"></div>
-      <!-- 技能资源消耗条件（如「#5点【新蕊】」→ 渲染为数值） -->
-      <div v-if="needHtml" class="nk-skill__need">
-        <span class="nk-skill__need-label">消耗</span>
-        <span class="nk-skill__need-val" v-html="needHtml"></span>
-      </div>
-      <div v-if="metrics.length" class="nk-skill__metrics">
-        <dl v-for="m in metrics" :key="m.label" class="nk-skill__metric">
-          <dt>{{ m.label }}</dt><dd v-html="m.html"></dd>
-        </dl>
-      </div>
-      <!-- 强化来源：受哪些星魂 / 行迹加成（折叠式，默认收纳，展开全部展示） -->
-      <div v-if="ratedLinks.length" class="nk-skill__links">
-        <button
-          class="nk-skill__toggle"
-          :class="{ open: linksOpen }"
-          :aria-expanded="linksOpen"
-          type="button"
-          @click="toggleLinks"
-        >
-          <span class="arrow">▶</span> {{ linksOpen ? '收起强化来源' : '强化来源' }}
-        </button>
-        <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
-        <div class="nk-links-clip" :class="{ open: linksOpen }">
-          <div v-if="linksEverOpened" class="nk-links-inner">
-            <div
-              v-for="l in ratedLinks"
-              :key="l.kind + l.num"
-              class="nk-skill__link-item"
-              :class="`nk-skill__link-item--${l.kind}`"
-            >
-              <div class="nk-skill__link-item-head">
-                <img
-                  class="nk-skill__link-item-icon"
-                  :src="iconUrl(l.icon)"
-                  :alt="l.name"
-                >
-                <span class="nk-skill__link-item-name">{{ l.name }}</span>
+        <div class="nk-skill__desc" v-html="descHtml"></div>
+        <!-- 技能资源消耗条件（如「#5点【新蕊】」→ 渲染为数值） -->
+        <div v-if="needHtml" class="nk-skill__need">
+          <span class="nk-skill__need-label">消耗</span>
+          <span class="nk-skill__need-val" v-html="needHtml"></span>
+        </div>
+        <div v-if="metrics.length" class="nk-skill__metrics">
+          <dl v-for="m in metrics" :key="m.label" class="nk-skill__metric">
+            <dt>{{ m.label }}</dt><dd v-html="m.html"></dd>
+          </dl>
+        </div>
+        <!-- 强化来源：受哪些星魂 / 行迹加成（折叠式，默认收纳，展开全部展示） -->
+        <div v-if="ratedLinks.length" class="nk-skill__links">
+          <button
+            class="nk-skill__toggle"
+            :class="{ open: linksOpen }"
+            :aria-expanded="linksOpen"
+            type="button"
+            @click="toggleLinks"
+          >
+            <span class="arrow">▶</span> {{ linksOpen ? '收起强化来源' : '强化来源' }}
+          </button>
+          <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
+          <div class="nk-links-clip" :class="{ open: linksOpen }">
+            <div v-if="linksEverOpened" class="nk-links-inner">
+              <div
+                v-for="l in ratedLinks"
+                :key="l.kind + l.num"
+                class="nk-skill__link-item"
+                :class="`nk-skill__link-item--${l.kind}`"
+              >
+                <div class="nk-skill__link-item-head">
+                  <img
+                    class="nk-skill__link-item-icon"
+                    :src="iconUrl(l.icon)"
+                    :alt="l.name"
+                  >
+                  <span class="nk-skill__link-item-name">{{ l.name }}</span>
+                </div>
+                <div class="nk-skill__link-item-desc" v-html="l.descHtml"></div>
               </div>
-              <div class="nk-skill__link-item-desc" v-html="l.descHtml"></div>
+            </div>
+          </div>
+        </div>
+        <div v-if="terms.length" class="nk-skill__terms">
+          <div v-for="t in terms" :key="t.name" class="nk-term">
+            <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
+          </div>
+        </div>
+        <!-- 技能预览（默认收纳，点开加载动画；clip 惰性挂载，参见 script 注释） -->
+        <div v-if="myAnims.length" class="nk-skill__anim">
+          <button
+            class="nk-skill__toggle"
+            :class="{ open: animOpen }"
+            :aria-expanded="animOpen"
+            type="button"
+            @click="toggleAnim"
+          >
+            <span class="arrow">▶</span> {{ animOpen ? '收起技能预览' : '技能预览' }}
+          </button>
+          <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
+          <div class="nk-skill__anim-clip" :class="{ open: animOpen }">
+            <div v-if="everOpened" class="nk-skill__anim-inner">
+              <div v-if="myAnims.length > 1" class="nk-skill__anim-tabs">
+                <button
+                  v-for="(a, i) in myAnims"
+                  :key="i"
+                  type="button"
+                  class="nk-skill__anim-tab"
+                  :class="{ active: i === animIdx }"
+                  @click="selectAnim(i)"
+                >{{ a.title || `${i + 1}` }}</button>
+              </div>
+              <div class="nk-skill__anim-stage" :class="{ loaded: imgDone }">
+                <img
+                  v-if="curAnim"
+                  class="nk-skill__anim-img"
+                  :src="curAnim"
+                  :alt="`${sk.name} 技能预览`"
+                  loading="lazy"
+                  @load="onImgLoad"
+                >
+                <div v-if="animOpen && !imgDone" class="nk-skill__anim-ph"><span></span></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div v-if="terms.length" class="nk-skill__terms">
-        <div v-for="t in terms" :key="t.name" class="nk-term">
-          <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
-        </div>
-      </div>
-      <!-- 技能预览（默认收纳，点开加载动画；clip 惰性挂载，参见 script 注释） -->
-      <div v-if="myAnims.length" class="nk-skill__anim">
+      <div v-if="table" class="nk-skill__table-wrap">
         <button
           class="nk-skill__toggle"
-          :class="{ open: animOpen }"
-          :aria-expanded="animOpen"
+          :class="{ open: tableOpen }"
+          :aria-expanded="tableOpen"
           type="button"
-          @click="toggleAnim"
+          @click="toggleTable"
         >
-          <span class="arrow">▶</span> {{ animOpen ? '收起技能预览' : '技能预览' }}
+          <span class="arrow">▶</span> {{ tableOpen ? '收起技能数据' : '技能数据' }}
         </button>
-        <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
-        <div class="nk-skill__anim-clip" :class="{ open: animOpen }">
-          <div v-if="everOpened" class="nk-skill__anim-inner">
-            <div v-if="myAnims.length > 1" class="nk-skill__anim-tabs">
-              <button
-                v-for="(a, i) in myAnims"
-                :key="i"
-                type="button"
-                class="nk-skill__anim-tab"
-                :class="{ active: i === animIdx }"
-                @click="selectAnim(i)"
-              >{{ a.title || `${i + 1}` }}</button>
-            </div>
-            <div class="nk-skill__anim-stage" :class="{ loaded: imgDone }">
-              <img
-                v-if="curAnim"
-                class="nk-skill__anim-img"
-                :src="curAnim"
-                :alt="`${sk.name} 技能预览`"
-                loading="lazy"
-                @load="onImgLoad"
-              >
-              <div v-if="animOpen && !imgDone" class="nk-skill__anim-ph"><span></span></div>
-            </div>
+        <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），表格内容首次展开后才挂载 -->
+        <div class="nk-table-clip" :class="{ open: tableOpen }">
+          <div v-if="tableEverOpened" class="nk-table-inner">
+            <table class="nk-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th v-for="c in table.cols" :key="c">{{ c }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="row in table.rows"
+                  :key="row.lv"
+                  :class="{ 'nk-table--active': row.lv === effLv }"
+                  :data-lv="row.lv"
+                >
+                  <td>Lv.{{ row.lv }}</td>
+                  <td v-for="(cell, i) in row.cells" :key="i">{{ cell }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
-    <div v-if="table" class="nk-skill__table-wrap">
-      <button
-        class="nk-skill__toggle"
-        :class="{ open: tableOpen }"
-        :aria-expanded="tableOpen"
-        type="button"
-        @click="toggleTable"
-      >
-        <span class="arrow">▶</span> {{ tableOpen ? '收起技能数据' : '技能数据' }}
-      </button>
-      <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），表格内容首次展开后才挂载 -->
-      <div class="nk-table-clip" :class="{ open: tableOpen }">
-        <div v-if="tableEverOpened" class="nk-table-inner">
-          <table class="nk-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th v-for="c in table.cols" :key="c">{{ c }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="row in table.rows"
-                :key="row.lv"
-                :class="{ 'nk-table--active': row.lv === effLv }"
-                :data-lv="row.lv"
-              >
-                <td>Lv.{{ row.lv }}</td>
-                <td v-for="(cell, i) in row.cells" :key="i">{{ cell }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <!-- 子技能（同 type+type_name 分组的后续项，嵌套在父卡片内；动画按索引分发） -->
+    <!-- 子技能（同族形态技能，嵌套在父卡片内；动画按索引分发）；末位子卡加 nk-skill--child-last 供 └ 收口 -->
     <SkillCard
       v-for="(c, ci) in childSkills || []"
       :key="c.id"
+      :class="{ 'nk-skill--child-last': ci === (childSkills?.length ?? 0) - 1 }"
       :sk="c"
       :is-child="true"
       :parent-lv="lv"

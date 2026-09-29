@@ -1,11 +1,12 @@
 <script setup lang="ts">
 /**
- * 技能面板：type+type_name 分组渲染 SkillCard + 忆灵技能。
+ * 技能面板：按行迹族渲染 SkillCard（族内首个 = 基座技能 → 父卡，其余 = 形态技能 → 子卡）+ 忆灵技能。
+ * 层级唯一来源见 ADR 0022：禁止回退 (type + type_name) 分组，禁止用 SkillList 顺序判定父子。
  * SkillCard key 含 enhKey，强化切换时强制重建以重置滑条状态。
  */
 import { computed } from 'vue';
 import SkillCard from './SkillCard.vue';
-import { SKILL_ORDER } from '../../lib/constants';
+import { groupSkillsByFamily } from '../../lib/skill-family';
 import { assignAnimEntries, memoAnimKey } from '../../lib/skill-anim';
 import { SECTION_IDX } from './sections';
 import type { CharacterData, Skill, SkillAnimEntry, SkillAnimationsDb } from '../../services/types';
@@ -36,33 +37,10 @@ function animFor(sk: Skill): SkillAnimEntry[] | null {
   return db[sk.type ?? ''] || null;
 }
 
-/* ─── 技能分组（type + type_name） ─── */
+/* ─── 技能族（行迹族；族序即渲染序） ─── */
 
-interface SkillGroup { main: Skill; children: Skill[] }
-/** 按 (type + type_name) 分组：首个为主技能，同组后续为子技能 */
-function groupSkills(skills: Skill[]): SkillGroup[] {
-  const valid = skills.filter(
-    (s) => !!s.type_name && SKILL_ORDER.includes(s.type),
-  );
-  const map = new Map<string, SkillGroup>();
-  const groups: SkillGroup[] = [];
-  valid.forEach((sk) => {
-    const key = (sk.type || 'null') + '|' + (sk.type_name || '');
-    const exist = map.get(key);
-    if (!exist) {
-      const g: SkillGroup = { main: sk, children: [] };
-      map.set(key, g);
-      groups.push(g);
-    } else {
-      exist.children.push(sk);
-    }
-  });
-  groups.sort((a, b) => SKILL_ORDER.indexOf(a.main.type) - SKILL_ORDER.indexOf(b.main.type));
-  return groups;
-}
-
-const skillGroups = computed<SkillGroup[]>(() =>
-  groupSkills(Object.values(props.d.skills)),
+const skillFamilies = computed(() =>
+  groupSkillsByFamily(props.d.skills, props.d.skill_trees),
 );
 
 /* ─── 忆灵技能（记忆命途召唤物，单独渲染） ─── */
@@ -95,7 +73,7 @@ const memoAnimMap = computed<Record<number, SkillAnimEntry[]>>(() => {
 <template>
   <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS</h2>
   <SkillCard
-    v-for="g in skillGroups"
+    v-for="g in skillFamilies"
     :key="`${enhKey}|${g.main.id}`"
     :sk="g.main"
     :child-skills="g.children"

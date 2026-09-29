@@ -223,6 +223,77 @@
 .nk-char-page .nk-relic-slot:active,
 .nk-char-page .nk-relic-sub:active { transform: none; }
 
+/* ═══════════ 技能卡图标列 + 技能层级线 ═══════════
+   图标独立成列，层级线沿图标列延伸（术语见 CONTEXT.md「图标列」「技能图标空间」「技能层级线」）。
+   硬约束：--nk-skill-rail 必须等于 .nk-skill__icon 边长（skill-card.css 48px / 767px 以下 44px）；
+   --nk-skill-child-gap 与 --nk-skill-child-indent 一律由 rail 派生，禁止按断点另设数值。
+   几何基准（实测见 docs/memory/2026-09.md「包含块原点实测」）：
+   · 竖轨 x = 图标列左缘 + gutter + rail/2 = 父图标底边水平中点，父卡与全部子卡共线；
+   · 子卡绝对定位伪元素的包含块原点是**卡片顶**（padding box 外缘），不是内容顶——
+     折角 y 必须写成 child-gap + rail/2 才是子图标中线（少 child-gap 会落到图标顶边）；
+   · 竖轨跨行不断：子轨 top: 0 顶到卡顶（= 父卡体底 / 上一张子卡卡底）。
+   线只用伪元素（禁新增线 DOM）且只用 --line-2。
+   光锥详情页复用 .nk-skill* 但无图标列、对比模式 CompareSkillCard 复用 .nk-skill__body——
+   故规则全部限定 .nk-char-page，且网格只作用于带 .nk-skill__rail 的卡体。 */
+.nk-char-page {
+  --nk-skill-rail: 48px;
+  --nk-skill-gutter: 10px;
+  --nk-skill-child-gap: calc(var(--nk-skill-rail) / 2);
+  --nk-skill-child-indent: var(--nk-skill-rail);
+}
+@media (max-width: 767px) {
+  .nk-char-page { --nk-skill-rail: 44px; --nk-skill-gutter: 8px; }
+}
+/* 2 列轨：图标列（gutter + rail，图标右对齐 → 图标左缘 = 行左缘 + gutter）+ 内容列；
+   数据表限定内容列（grid-column: 2/-1）——跨图标列时竖轨会擦过表头首列文字（实测首列文字起点 = 竖轨 x）；
+   代价：表格窄一个图标列宽，横向滚动交给既有 .nk-table-inner overflow-x: auto */
+.nk-char-page .nk-skill__body:has(> .nk-skill__rail) {
+  position: relative;
+  display: grid;
+  grid-template-columns: calc(var(--nk-skill-rail) + var(--nk-skill-gutter)) minmax(0, 1fr);
+}
+.nk-char-page .nk-skill__rail { display: flex; align-items: flex-start; justify-content: flex-end; }
+.nk-char-page .nk-skill__content { min-width: 0; }
+.nk-char-page .nk-skill__body:has(> .nk-skill__rail) > .nk-skill__table-wrap { grid-column: 2 / -1; }
+/* 父卡竖轨：自父图标底边水平中点正下方垂直下延至本体末端（= 首张子卡卡顶）；
+   顶端不画短横、不加圆角（父轨即整棵树的直脊）；仅在存在子卡时渲染——单卡族 / 忆灵技能 / 无族退化路径不得出现悬空线 */
+.nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill__body::before {
+  content: ''; position: absolute; pointer-events: none;
+  left: calc(var(--nk-skill-gutter) + var(--nk-skill-rail) / 2);
+  top: var(--nk-skill-rail);
+  bottom: 0;
+  border-left: 1px solid var(--line-2);
+}
+/* 子卡 ├：整行右移 --nk-skill-child-indent（= 一个技能图标空间）后，竖轨用 left
+   = gutter + rail/2 - indent 抵消缩进 → 与父卡竖轨共线（x 恒为父图标底边水平中点）；
+   竖轨 top: 0 顶到卡顶（= 父卡体底 / 上一张子卡卡底）、bottom: 0 下延到卡底，跨行不断；
+   折角 y = child-gap + rail/2 = 子图标中线——包含块原点是**卡顶**，禁再漏掉 child-gap。 */
+.nk-char-page .nk-skill--child::before {
+  content: ''; position: absolute; pointer-events: none;
+  left: calc(var(--nk-skill-gutter) + var(--nk-skill-rail) / 2 - var(--nk-skill-child-indent));
+  top: 0; bottom: 0; width: 0;
+  border-left: 1px solid var(--line-2);
+}
+.nk-char-page .nk-skill--child::after {
+  content: ''; position: absolute; pointer-events: none;
+  left: calc(var(--nk-skill-gutter) + var(--nk-skill-rail) / 2 - var(--nk-skill-child-indent));
+  top: calc(var(--nk-skill-child-gap) + var(--nk-skill-rail) / 2);
+  width: calc(var(--nk-skill-rail) / 2);
+  border-top: 1px solid var(--line-2);
+}
+/* 末位子卡（nk-skill--child-last）└：竖轨自卡顶下延至子图标中线（禁下延至卡底），
+   折角圆角 6px；├ 折角不加圆角（转角即分叉点） */
+.nk-char-page .nk-skill--child-last::before {
+  top: 0;
+  bottom: auto;
+  box-sizing: border-box;
+  width: calc(var(--nk-skill-rail) / 2);
+  height: calc(var(--nk-skill-child-gap) + var(--nk-skill-rail) / 2);
+  border-bottom: 1px solid var(--line-2);
+  border-bottom-left-radius: 6px;
+}
+.nk-char-page .nk-skill--child-last::after { content: none; }
+
 /* ═══════════ 技能区块细节 ═══════════ */
 .nk-char-page .nk-skill { padding: 22px 24px 20px; }
 /* 技能资源消耗条件（SkillNeed） */
@@ -362,14 +433,18 @@
   background: color-mix(in srgb, var(--primary) 7%, transparent);
 }
 .nk-char-page .nk-table tr.nk-table--active td:first-child { color: var(--primary); }
-/* 子技能：父卡片内虚线分区 */
-.nk-char-page .nk-skill--child {
-  margin: 18px 0 0 22px; padding: 16px 0 0;
+/* 子卡行：整行缩进 --nk-skill-child-indent（= 一个技能图标空间 = 图标边长，随 rail 派生）；
+   行相邻、兄弟纵向间距由 padding-top 承担（--nk-skill-child-gap = 半个技能图标空间）→ 层级线竖轨跨行不断；
+   兄弟边界只由折角线表达（无虚线分隔）。该 padding-top 同时是折角 y 的组成部分：
+   折角 y = 卡顶 + padding-top + rail/2 = 子图标中线（包含块原点是卡顶）。
+   选择器经 :has 取 4 段权重：必须压过下方模块宽度规则的 `margin-left: auto`（同权重且更靠后）。 */
+.nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill--child {
+  margin: 0 0 0 var(--nk-skill-child-indent);
+  padding: var(--nk-skill-child-gap) 0 0;
   border: none; background: none; border-radius: 0;
-  border-top: 1px dashed var(--line-2);
 }
-.nk-char-page .nk-skill--child:hover { border-color: transparent; border-top-color: var(--line-2); background: none; }
-.nk-char-page .nk-skill--child .nk-skill__title-row { gap: 12px; margin-bottom: 10px; }
+.nk-char-page .nk-skill.nk-skill--child:hover { border: none; background: none; }
+.nk-char-page .nk-skill--child .nk-skill__title-row { margin-bottom: 10px; }
 .nk-char-page .nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
 .nk-char-page .nk-skill--child .nk-skill__metrics { margin-top: 10px; }
 .nk-char-page .nk-skill__head { border-bottom-color: var(--line-1); }
@@ -394,7 +469,7 @@
 
 /* ═══════════ 卡片垂直间距 · 呼吸感 ═══════════
    同区块内卡片之间 14px（星魂 E1-6 / 技能列表 / 附加能力 / 故事）；
-   子技能为父卡内虚线分区不参与；区块间由 nk-panel--flat padding-bottom 提供 */
+   子卡为父卡内层级行不参与；区块间由 nk-panel--flat padding-bottom 提供 */
 .nk-char-page .nk-panel .nk-skill + .nk-skill:not(.nk-skill--child),
 .nk-char-page .nk-panel .nk-ability + .nk-ability,
 .nk-char-page .nk-panel .nk-eidolon + .nk-eidolon,
@@ -908,7 +983,6 @@
     left: 12px; bottom: 12px;
     font-size: 0.45rem; letter-spacing: 0.24em; padding: 5px 10px;
   }
-  .nk-char-page .nk-skill--child { margin-left: 10px; padding-top: 12px; }
   .nk-char-page .nk-eidolon__head { gap: 14px; }
   .nk-char-page .nk-eidolon__icon { width: 104px; height: 104px; }
   .nk-char-page .nk-eidolon__meta { gap: 10px; padding-bottom: 8px; }
