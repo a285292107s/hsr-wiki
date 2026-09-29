@@ -128,12 +128,16 @@
   --cp-600: #93562E;
   --cp-700: #6A3C20;
   /* 黑阶（中性纯黑，无色相；全站深色表面唯一事实来源——ADR 0011）
-     深色端 4 级：950 纯黑 / 900 近黑 / 850 / 800 渐亮；
-     主题色相由语义层经 color-mix 注入（3~8%），黑阶本身不写色相 */
+     深色端 5 级：950 纯黑（压暗位）/ 900 近黑（压暗位）/ 850 页面底色 / 800 承载面 / 750 卡片面；
+     主题色相由语义层经 color-mix 注入（3~8%），黑阶本身不写色相。
+     用法方向（ADR 0021）：850 作 --bg 页面底色；800 作承载面（外壳 / 面板 / 条 / 牌 / 图窗）；
+     750 作卡片面（--card 及其卡内垫底）；950 / 900 只作「压暗位」——媒体遮罩、暗角内影、scrim、
+     hover 洗色。禁止把 950 / 900 当承载面：底色上移后它们比页面更暗，会读成空洞。 */
   --blk-950: #000000;
   --blk-900: #0A0A0B;
   --blk-850: #121214;
   --blk-800: #1A1A1C;
+  --blk-750: #1E1E22;
 
   /* ═══ 领域层 Domain：数据语义色（不随主题切换，仅被引用不内联） ═══ */
   /* 稀有度 */
@@ -237,9 +241,9 @@
 
   /* ═══ 语义层 Semantic：主题映射（:root 常规暖砖红，[data-theme="cw"] 暗金覆盖） ═══ */
   /* 表面统一走黑阶派生 + 主色注入（结构：黑阶染主色 → 调透明度），领域层豁免不动 */
-  --bg: var(--blk-950);
-  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 85%, transparent);
-  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-850) 94%, var(--primary) 6%) 70%, transparent);
+  --bg: var(--blk-850);
+  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 88%, transparent);
+  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-750) 94%, var(--primary) 6%) 80%, transparent);
   /* 主色 = 当前主题色阶 500（默认 Terracotta 暖砖红、低饱和、反 AI 味）；派生色一律 color-mix 表达 */
   --primary: var(--th-500);
   /* 反 AI 味：弱化霓虹光晕（25%→10%），仅保留隐约材质感；CW 暗金模式见 [data-theme="cw"] */
@@ -252,7 +256,7 @@
   --text: #E2E8F0;
   --text2: #94A3B8;
   --text-bright: #FFFFFF;
-  --text3: #7C8DA6;
+  --text3: #8A9BB4;
   --border: color-mix(in srgb, var(--primary) 20%, transparent);
   --border2: color-mix(in srgb, var(--primary) 40%, transparent);
   /* 文本高亮语义位：并入 gold 族（消除游离橙 #f29e38） */
@@ -308,23 +312,23 @@
   --nk-shadow-card: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px -10px rgba(0,0,0,0.45);
   /* ─── 外壳语义变量（侧栏/抽屉/目录头/卡片边框）：黑阶派生 + 主色注入，
        主题切换自动跟随；CW 在 [data-theme="cw"] 显式覆盖为暗金 ─── */
-  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 97%, var(--primary) 3%) 95%, transparent);
+  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 97%, var(--primary) 3%) 95%, transparent);
   --nk-shell-hover: color-mix(in srgb, var(--primary) 10%, transparent);
   --nk-shell-press: color-mix(in srgb, var(--primary) 18%, transparent);
   --nk-shell-active-bg: color-mix(in srgb, var(--primary) 22%, transparent);
   --nk-shell-active-border: color-mix(in srgb, var(--primary) 40%, transparent);
   --nk-shell-glow: color-mix(in srgb, var(--primary) 18%, transparent);
-  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 94%, transparent);
+  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 94%, transparent);
   --nk-sheet-border: color-mix(in srgb, var(--primary) 35%, transparent);
   --nk-sheet-item-bg: color-mix(in srgb, var(--primary) 5%, transparent);
   --nk-sheet-item-border: color-mix(in srgb, var(--primary) 14%, transparent);
   /* 吸顶条材质（仅 .nk-cat-toolbar 使用）：常规模式亚光玻璃 82%（内容穿过时保留透视层次，
      移动端在 catalog.css 降级为 92% 实底；CW 层保持 94% 不随常规改动） */
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 94%, var(--primary) 6%) 82%, transparent);
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 94%, var(--primary) 6%) 82%, transparent);
   --nk-header-border: color-mix(in srgb, var(--primary) 16%, transparent);
   --nk-input-bg: color-mix(in srgb, var(--primary) 6%, transparent);
   --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
-  --nk-page-tint: color-mix(in srgb, var(--primary) 5%, transparent);
+  --nk-page-tint: color-mix(in srgb, var(--primary) 6%, transparent);
   --nk-card-border: color-mix(in srgb, var(--primary) 30%, transparent);
   /* 中性细线（档案/规格表排版：克制的半透明白线，不随主题色；卡片/分割线用） */
   --line-1: rgba(255,255,255,0.07);
@@ -346,9 +350,9 @@
    语义金 = 主题色阶 600 暗铜哑光（缺省 gold-600）；底色与常规共享同一中性黑阶 + 主题色注入。
    硬约束：导航小字（≤0.75rem）用高亮度暖白，对比度 ≥4.5:1 */
 [data-theme="cw"] {
-  --bg: var(--blk-950);
-  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--cwth-500) 5%) 88%, transparent);
-  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-850) 94%, var(--cwth-500) 6%) 72%, transparent);
+  --bg: var(--blk-850);
+  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 90%, transparent);
+  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-750) 94%, var(--cwth-500) 6%) 82%, transparent);
   /* 主色 = 当前 CW 主题色阶 500（缺省 gold-500 金属金；文字强调位 300 承接明度） */
   --primary: var(--cwth-500);
   --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
@@ -375,21 +379,21 @@
   /* 稀有度 5 星 = 语义金家族：CW 降阶暗铜（领域色不随主题——ADR 0011 恒等式执行特例，保持原金阶） */
   --rarity-5: var(--gold-600);
   /* 外壳：黑阶 + 主题色注入 */
-  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 97%, var(--cwth-500) 3%) 96%, transparent);
+  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 97%, var(--cwth-500) 3%) 96%, transparent);
   --nk-shell-hover: color-mix(in srgb, var(--cwth-500) 10%, transparent);
   --nk-shell-press: color-mix(in srgb, var(--cwth-500) 16%, transparent);
   --nk-shell-active-bg: color-mix(in srgb, var(--cwth-500) 16%, transparent);
   --nk-shell-active-border: color-mix(in srgb, var(--cwth-500) 45%, transparent);
   --nk-shell-glow: color-mix(in srgb, var(--cwth-500) 20%, transparent);
-  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--cwth-500) 5%) 95%, transparent);
+  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 95%, transparent);
   --nk-sheet-border: color-mix(in srgb, var(--cwth-500) 35%, transparent);
   --nk-sheet-item-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
   --nk-sheet-item-border: color-mix(in srgb, var(--cwth-500) 16%, transparent);
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--cwth-500) 5%) 94%, transparent);
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 94%, transparent);
   --nk-header-border: color-mix(in srgb, var(--cwth-500) 14%, transparent);
   --nk-input-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
   --nk-input-border: color-mix(in srgb, var(--cwth-500) 20%, transparent);
-  --nk-page-tint: color-mix(in srgb, var(--cwth-500) 4%, transparent);
+  --nk-page-tint: color-mix(in srgb, var(--cwth-500) 5%, transparent);
   --nk-card-border: color-mix(in srgb, var(--cwth-500) 28%, transparent);
   /* CW 主题：暖白细线（白 + 主题色微注入） */
   --line-1: color-mix(in srgb, var(--text-bright) 8%, transparent);
@@ -654,13 +658,13 @@
    · 超高基频 0.9 各向同性细颗粒——无方向性/无结构，扫一眼无感、细看才有一层纸屑呼吸；
      不叠纤维/云斑（会生成可被眼锁定的条纹与脏 blob = 机器感/ AI 味来源，禁回）。
    · 360px 大瓦片平铺：瓦距周期在超高基频下不可辨，防 160px 级别可见网格。
-   · 强度近阈值 0.07：仅在纯平暗底上能微微感知，不脏到文字与图片上。
+   · 强度 0.08：底色上移到 blk-850 后，白噪点与底的绝对差由 17.9 收窄到 16.6（≈ −7%），按等感知还原取 0.08（还原值 ≈0.075，留余量）；仅在纯平暗底上能微微感知，不脏到文字与图片上。
    · 白颗粒只在暗部显形（亮图/白底上自动隐形）。
    · fixed + pointer-events:none：纯视觉覆层，不拦截交互、不参与布局；
      #app 无 transform，包含块为视口，不被 #app overflow:clip 裁切
    · z-index 高于侧栏(100000)/Toast(99999)：全表面统一纸感（弹层同颗粒，不出现局部哑光）
    · 强度唯一调参位 = --grain-opacity */
-:root { --grain-opacity: 0.07; }
+:root { --grain-opacity: 0.08; }
 #app::after {
   content: '';
   position: fixed; inset: 0;
@@ -841,7 +845,7 @@ background-position: center 15%;
   content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px; /* 热区 ≥44px（无障碍硬标准） */
 }
 .nk-secnav__btn:hover { color: var(--text2); background: transparent; }
-.nk-secnav__btn--active { color: var(--primary); background: transparent; }
+.nk-secnav__btn--active { color: var(--metric-val); background: transparent; }
 .nk-secnav__btn--active::after {
   content: ''; position: absolute; left: 11px; right: 11px; bottom: -7px;
   height: 2px; border-radius: 1px; background: var(--primary); box-shadow: none;
@@ -867,7 +871,7 @@ background-position: center 15%;
   position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   z-index: 30; width: 40px; height: 40px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: color-mix(in srgb, var(--blk-900) 80%, transparent); border: 1px solid var(--line-1);
+  background: color-mix(in srgb, var(--blk-800) 80%, transparent); border: 1px solid var(--line-1);
   color: var(--text3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   box-shadow: 0 4px 16px rgba(0,0,0,0.45);
@@ -969,7 +973,7 @@ background-position: center 15%;
    Toast 通知（Vue TransitionGroup）
 ═══════════════════════════════════════════ */
 .nk-toast-container { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; background: color-mix(in srgb, var(--blk-900) 95%, transparent); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: 0.78rem; color: var(--text); pointer-events: auto; cursor: pointer; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
+.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; background: color-mix(in srgb, var(--blk-800) 95%, transparent); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: 0.78rem; color: var(--text); pointer-events: auto; cursor: pointer; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
 .nk-toast-enter-from, .nk-toast-leave-to { transform: translateX(120%); opacity: 0; }
 .nk-toast-leave-active { transition: transform 0.25s ease-in, opacity 0.25s ease-in; }
 .nk-toast-move { transition: transform var(--nk-dur-normal) var(--nk-ease-out); }
@@ -1019,7 +1023,7 @@ background-position: center 15%;
   background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 80%, transparent) 0%, color-mix(in srgb, var(--blk-900) 20%, transparent) 50%, transparent 100%);
 }
 .nk-skeleton__hero-visual { position: relative; width: 100%; aspect-ratio: 16 / 9; }
-.nk-skeleton__hero-panel { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, color-mix(in srgb, var(--blk-850) 92%, transparent), color-mix(in srgb, var(--blk-900) 92%, transparent)); border-top: 1px solid var(--border); }
+.nk-skeleton__hero-panel { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, color-mix(in srgb, var(--blk-800) 92%, transparent), color-mix(in srgb, var(--blk-850) 92%, transparent)); border-top: 1px solid var(--border); }
 .nk-skeleton__body { padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
 .nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
@@ -1255,7 +1259,7 @@ img[data-cdn-down] { visibility: hidden; }
   /* 激活态英文小字（8px，按 WCAG 正文 4.5:1 门槛判定）：**禁止降回 55% 混色**——
      实测 10 套强调色 55% 仅 3.01（terracotta）～4.48（silver），全部不达标；
      85% 最低 5.19（terracotta）。改动本值前必须在全部 10 套强调色下重新按 sRGB 合成测对比度。 */
-  .ui-sidebar-link--active .ui-sidebar-link__en { color: color-mix(in srgb, var(--metric-val) 85%, transparent); }
+  .ui-sidebar-link--active .ui-sidebar-link__en { color: color-mix(in srgb, var(--metric-val) 92%, transparent); }
   /* 激活档案竖条：左侧主色短竖线 */
   .ui-sidebar-link--active::before {
     content: '';

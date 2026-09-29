@@ -333,7 +333,7 @@
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 10;
-  background: color-mix(in srgb, var(--blk-900) 97%, transparent);
+  background: color-mix(in srgb, var(--blk-800) 97%, transparent);
   backdrop-filter: blur(12px) saturate(1.1); -webkit-backdrop-filter: blur(12px) saturate(1.1);
   border-bottom: 1px solid var(--line-1);
 }

@@ -22,7 +22,7 @@
 .nk-egd.nk-page--detail { padding-top: 46px; } /* 吸顶条占位（44 + 2 进度线） */
 .nk-egd-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-  background: color-mix(in srgb, var(--blk-900) 97%, transparent);
+  background: color-mix(in srgb, var(--blk-800) 97%, transparent);
   backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
   border-bottom: 1px solid var(--line-1);
 }
@@ -279,7 +279,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--blk-900) 75%, transparent);
+  background: color-mix(in srgb, var(--blk-800) 75%, transparent);
   border: 1px solid var(--border);
   padding: 2px;
 }
@@ -690,7 +690,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--blk-900) 72%, transparent);
+  background: color-mix(in srgb, var(--blk-800) 72%, transparent);
   border: 1px solid color-mix(in srgb, var(--eg-color) 22%, transparent);
   object-fit: cover;
   transition: border-color 0.22s ease, transform 0.22s var(--ease), box-shadow 0.22s ease;
@@ -944,7 +944,7 @@
   width: 62px;
   height: 62px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--blk-900) 72%, transparent);
+  background: color-mix(in srgb, var(--blk-800) 72%, transparent);
   border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent);
   object-fit: cover;
   transition: border-color 0.22s ease;
@@ -992,7 +992,7 @@
   padding: 3px 8px;
   border-radius: 999px;
   color: var(--text2);
-  background: color-mix(in srgb, var(--blk-900) 70%, transparent);
+  background: color-mix(in srgb, var(--blk-800) 70%, transparent);
   border: 1px solid var(--line-1);
 }
 /* 敌方分类徽章（头像左上角；非普通怪；中性胶囊，文字区分）——装饰性但保底≥9.6px */
@@ -1007,7 +1007,7 @@
   padding: 2.5px 6px;
   border-radius: 999px;
   color: var(--text2);
-  background: color-mix(in srgb, var(--blk-900) 88%, transparent);
+  background: color-mix(in srgb, var(--blk-800) 88%, transparent);
   border: 1px solid var(--line-1);
 }
 /* 弱点/抗性行（细线分隔 + 小元素图标；展品卡内分区更克制——分隔减少，留白让位） */

@@ -48,7 +48,7 @@
 /* ─── 叠影等级滑条 ─── */
 .nk-lc-rank-slider { gap: 12px; }
 .nk-lc-rank-label {
-  font-size: 0.6875rem; font-weight: 700; color: var(--primary);
+  font-size: 0.6875rem; font-weight: 700; color: var(--metric-val);
   letter-spacing: 0.08em; white-space: nowrap;
   font-family: var(--font-hud);
 }

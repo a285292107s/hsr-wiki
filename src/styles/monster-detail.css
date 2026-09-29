@@ -321,8 +321,8 @@
 
 .nk-mob-skeleton__hero {
   height: 240px;
-  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-850) 80%, transparent) 50%, transparent 70%);
-  background-color: color-mix(in srgb, var(--blk-850) 45%, transparent);
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-750) 80%, transparent) 50%, transparent 70%);
+  background-color: color-mix(in srgb, var(--blk-750) 45%, transparent);
   background-size: 200% 100%;
   animation: nk-mob-shimmer 1.4s ease infinite;
   border-bottom: 1px solid var(--line-1);
@@ -335,8 +335,8 @@
 .nk-mob-skeleton__line {
   height: 14px;
   margin-bottom: 12px;
-  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-850) 80%, transparent) 50%, transparent 70%);
-  background-color: color-mix(in srgb, var(--blk-850) 45%, transparent);
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-750) 80%, transparent) 50%, transparent 70%);
+  background-color: color-mix(in srgb, var(--blk-750) 45%, transparent);
   background-size: 200% 100%;
   animation: nk-mob-shimmer 1.4s ease infinite;
 }
@@ -374,7 +374,7 @@
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-bright);
-  background: color-mix(in srgb, var(--primary) 18%, var(--blk-850) 60%);
+  background: color-mix(in srgb, var(--primary) 18%, var(--blk-750) 60%);
   border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
   cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;

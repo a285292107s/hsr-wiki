@@ -78,7 +78,7 @@
 .nk-relic-effect__head { display: flex; align-items: center; margin-bottom: 8px; }
 .nk-relic-effect__num {
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
-  color: var(--primary); letter-spacing: 0.08em;
+  color: var(--metric-val); letter-spacing: 0.08em;
   padding: 3px 10px; border-radius: 12px;
   background: color-mix(in srgb, var(--primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
 }
@@ -162,7 +162,7 @@
   text-align: left; min-width: 72px;
   font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
   color: var(--text3); letter-spacing: 0.08em;
-  background: color-mix(in srgb, var(--blk-850) 95%, transparent);
+  background: color-mix(in srgb, var(--blk-750) 95%, transparent);
   backdrop-filter: blur(8px);
 }
 .nk-relic-affix-table__slot-h {
@@ -182,7 +182,7 @@
   position: sticky; left: 0; z-index: 1;
   padding: 8px 10px;
   font-size: 0.72rem; font-weight: 600; color: var(--text2);
-  background: color-mix(in srgb, var(--blk-850) 85%, transparent);
+  background: color-mix(in srgb, var(--blk-750) 85%, transparent);
   backdrop-filter: blur(4px);
   border-right: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
   white-space: nowrap;

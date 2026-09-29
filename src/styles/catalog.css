@@ -32,7 +32,7 @@
 .nk-cat-toolbar::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, transparent 0%, var(--nk-header-border) 10%, var(--nk-header-border) 90%, transparent 100%); }
 /* 减弱透明度偏好：实底兜底（glassmorphism solid fallback） */
 @media (prefers-reduced-transparency: reduce) {
-  .nk-cat-toolbar { background: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 97%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .nk-cat-toolbar { background: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 97%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
 .nk-cat-search { flex: 1; min-width: 120px; max-width: 320px; display: flex; align-items: center; gap: 8px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 10px; padding: 7px 14px; transition: all 0.2s; box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent); }
 .nk-cat-search:hover:not(:focus-within) { border-color: color-mix(in srgb, var(--primary) 34%, transparent); }
@@ -413,7 +413,7 @@
 .nk-mob-card:focus-visible { outline: none; }
 .nk-mob-card:focus-visible .nk-mob-card__fig { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
 /* 图窗：深色底板承接怪物深底大头照（cover 填满），发丝内描边替代边框 */
-.nk-mob-card__fig { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 50% 28%, color-mix(in srgb, var(--blk-850) 55%, transparent) 0%, var(--blk-950) 80%); }
+.nk-mob-card__fig { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 50% 28%, color-mix(in srgb, var(--blk-750) 55%, transparent) 0%, var(--blk-950) 80%); }
 .nk-mob-card__fig::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px var(--line-1); transition: box-shadow 0.25s; }
 .nk-mob-card__fig img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s var(--ease); }
 /* 信息条：左对齐档案排版（名称 + 等宽分类元信息），顶部留白与图窗分离 */
@@ -540,7 +540,7 @@
   .nk-cat-masthead { padding: 18px 0 12px; gap: 10px; }
   .nk-cat-title { font-size: 1.05rem; letter-spacing: 0.06em; }
   .nk-cat-count { font-size: 0.55rem; letter-spacing: 0.14em; }
-  .nk-cat-toolbar { gap: 8px; padding: 6px 0; background: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 95%, var(--primary) 5%) 92%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+  .nk-cat-toolbar { gap: 8px; padding: 6px 0; background: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 92%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
   .nk-cat-search { max-width: none; min-width: 0; }
   .nk-cat-search input { min-width: 0; }
   /* 移动端筛选下拉行：左对齐横向滚动（不换行不挤压搜索框） */
@@ -696,7 +696,7 @@
 /* ═══════════════════════════════════════════
    图片懒加载占位色（基于稀有度）
 ═══════════════════════════════════════════ */
-.nk-idx-card__portrait img, .nk-item-card__img img { background: color-mix(in srgb, var(--blk-850) 60%, transparent); }
-.nk-idx-card[data-rarity="5"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
-.nk-idx-card[data-rarity="4"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
-.nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), color-mix(in srgb, var(--blk-850) 60%, transparent)); }
+.nk-idx-card__portrait img, .nk-item-card__img img { background: color-mix(in srgb, var(--blk-750) 60%, transparent); }
+.nk-idx-card[data-rarity="5"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }
+.nk-idx-card[data-rarity="4"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }
+.nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }

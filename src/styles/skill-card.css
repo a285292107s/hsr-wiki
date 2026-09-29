@@ -80,7 +80,7 @@
   width: 10px; height: 14px; border-radius: 2px; border: none; background: transparent; cursor: pointer;
   box-shadow: inset 5px 0 0 0 color-mix(in srgb, var(--text-bright) 60%, transparent);
 }
-.nk-slider__val { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--primary); font-weight: 700; white-space: nowrap; }
+.nk-slider__val { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); font-weight: 700; white-space: nowrap; }
 /* 内容区 */
 .nk-skill__body { }
 .nk-skill__desc { font-size: 0.8125rem; line-height: 1.85; color: var(--text2); }

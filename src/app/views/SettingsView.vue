@@ -211,7 +211,7 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.22em;
-  color: var(--primary);
+  color: var(--metric-val);
   text-transform: uppercase;
 }
 .nk-settings__kicker::before {
@@ -344,7 +344,7 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--blk-900) 80%, transparent);
+  background: color-mix(in srgb, var(--blk-800) 80%, transparent);
   border: 1px solid color-mix(in srgb, var(--text-bright) 36%, transparent);
   color: var(--metric-val);
   opacity: 0;
@@ -377,7 +377,7 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   color: var(--text3);
   transition: color 0.18s;
 }
-.nk-swatch--on .nk-swatch__hex { color: color-mix(in srgb, var(--metric-val) 62%, transparent); }
+.nk-swatch--on .nk-swatch__hex { color: color-mix(in srgb, var(--metric-val) 80%, transparent); }
 
 /* ─── 开拓者形态：名录横条二选一（与全局侧栏激活语言同源：档案竖条 + 淡底） ─── */
 .nk-seg {
