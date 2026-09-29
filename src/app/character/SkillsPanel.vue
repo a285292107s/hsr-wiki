@@ -6,6 +6,7 @@
 import { computed } from 'vue';
 import SkillCard from './SkillCard.vue';
 import { SKILL_ORDER } from '../../lib/constants';
+import { assignAnimEntries, memoAnimKey } from '../../lib/skill-anim';
 import { SECTION_IDX } from './sections';
 import type { CharacterData, Skill, SkillAnimEntry, SkillAnimationsDb } from '../../services/types';
 
@@ -71,6 +72,24 @@ const memoSkills = computed<Skill[]>(() =>
     ? Object.values(props.d.memosprite.skills)
     : [],
 );
+
+/* ─── 忆灵技能预览（Wiki「忆灵技」→ Servant、「忆灵天赋」→ ServantPassive） ─── */
+/* 忆灵技能在面板里平铺渲染（不像主技能那样父子嵌套），故在此按技能 id 分好条目：
+ * 同 type_name 一个池，条目 subTitle 匹配技能名优先，未匹配者顺序补位（分配规则见 lib/skill-anim.ts） */
+const memoAnimMap = computed<Record<number, SkillAnimEntry[]>>(() => {
+  const db = charAnims.value;
+  const map: Record<number, SkillAnimEntry[]> = {};
+  if (!db) return map;
+  const groups = new Map<string, Skill[]>();
+  for (const ms of memoSkills.value) {
+    const key = memoAnimKey(ms);
+    const group = groups.get(key);
+    if (group) group.push(ms);
+    else groups.set(key, [ms]);
+  }
+  for (const [key, group] of groups) Object.assign(map, assignAnimEntries(db[key], group));
+  return map;
+});
 </script>
 
 <template>
@@ -94,5 +113,6 @@ const memoSkills = computed<Skill[]>(() =>
     :char-data="d"
     :enh-mark="enhMark"
     :enh-label="enhKey ? `V${enhKey}` : ''"
+    :anim-entries="memoAnimMap[ms.id] || null"
   />
 </template>

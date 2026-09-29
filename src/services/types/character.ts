@@ -244,5 +244,8 @@ export interface SkillAnimEntry {
   title?: string;
 }
 
-/** 技能动画数据库：charId → skillType → 动画列表 */
+/** 技能动画数据库：charId → 键 → 动画列表。
+ *  键空间：主技能 type（Normal/BPSkill/Ultra/Passive/Maze/Assist 变体、欢愉技 ElationDamage）
+ *  + 忆灵技能合成键 Servant（忆灵技）/ ServantPassive（忆灵天赋，角色数据 type 为空串）；
+ *  写入侧见 spine-lab/tools/wiki-anim-scraper.mjs，消费侧见 src/app/character/SkillsPanel.vue */
 export type SkillAnimationsDb = Record<string, Record<string, SkillAnimEntry[]>>;
