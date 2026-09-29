@@ -5,7 +5,7 @@ import { collectConsoleIssues, findHorizontalOverflow, splitKnownOverflow, waitF
 /**
  * 布局验收（AGENTS.md T1b/T2 的自动化落地）
  * 页面：/（版本上新页，ADR 0019）/ /character（目录网格）/ /endgame（终局单页）
- *      /currency（CW 枢纽，meta.cw → <html data-theme="cw">）/ /currency/settings（CW 主题色）
+ *      /currency（CW 枢纽＝本赛季新增两分区，meta.cw → <html data-theme="cw">）/ /currency/settings（CW 主题色）
  * 每页统一断言：无未捕获 JS 异常 + 无横向溢出 + 关键结构存在。
  * 侧栏结构用例（折叠 / 调试台入口）落在目录页取样——ADR 0019 后枢纽页同样渲染导航条，但目录页更接近真实使用路径。
  *
@@ -24,10 +24,10 @@ test.describe('布局验收：常规主题', () => {
     // 站点名易变（更名进行中：咸鱼百科→星铁档案馆，后者未提交），不断言具体文案，只验非空
     await expect(page.locator('.nk-hub-brand__title')).toHaveText(/\S/);
     // ADR 0019：首页＝版本上新页，全站板块索引整体退场
-    await expect(page.locator('.nk-home-release__title')).toContainText('版本上新');
+    await expect(page.locator('.nk-hub-release__title')).toContainText('版本上新');
     // 已渲染分区数 ≥1 同时是「版本增量打标管线」的端到端哨兵：converter 基线差集断掉
     // （整页退化为空态）必须让本断言变红，不允许静默变成一张空首页
-    const sectionCount = await page.locator('.nk-home-release__section').count();
+    const sectionCount = await page.locator('.nk-hub-release__section').count();
     expect(sectionCount).toBeGreaterThanOrEqual(1);
     // 常规模式不得挂 cw 主题
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'cw');
@@ -49,12 +49,12 @@ test.describe('布局验收：常规主题', () => {
     // 逐区测量：每个已渲染分区的标题与首行卡片都要落在首屏内。
     // 分区数量由数据决定（无增量的分区不渲染），故不写死 3——首屏价值＝「本版本新增一眼可见」，
     // 一旦某分区把后面的分区顶出首屏，本断言即红。
-    await expect(page.locator('.nk-home-release__section').first()).toBeVisible();
-    const marks = await page.locator('.nk-home-release__section').evaluateAll((els) =>
+    await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
+    const marks = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
       els.map((el) => ({
         kind: el.getAttribute('data-kind'),
-        labelBottom: Math.round(el.querySelector('.nk-home-release__label')!.getBoundingClientRect().bottom),
-        firstCardBottom: Math.round(el.querySelector('.nk-home-release__band > *')!.getBoundingClientRect().bottom),
+        labelBottom: Math.round(el.querySelector('.nk-hub-release__label')!.getBoundingClientRect().bottom),
+        firstCardBottom: Math.round(el.querySelector('.nk-hub-release__band > *')!.getBoundingClientRect().bottom),
       })),
     );
     expect(marks.length).toBeGreaterThanOrEqual(1);
@@ -75,9 +75,9 @@ test.describe('布局验收：常规主题', () => {
     );
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
-    await expect(page.locator('.nk-home-release__empty')).toHaveCount(1);
-    await expect(page.locator('.nk-home-release__section')).toHaveCount(0);
-    await expect(page.locator('.nk-home-release__title')).toHaveText('版本上新');
+    await expect(page.locator('.nk-hub-release__empty')).toHaveCount(1);
+    await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
+    await expect(page.locator('.nk-hub-release__title')).toHaveText('版本上新');
     // 空态不回退板块索引、不改显历史版本；品牌带与共享页脚仍在
     await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
     await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
@@ -206,11 +206,11 @@ test.describe('布局验收：枢纽页导航条回归（ADR 0019）', () => {
     await expect(page.locator('.ui-sidebar')).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-nav');
     expect(await readContentOffset(page)).toBe(148);
-    await expect(page.locator('.nk-cwhub-index')).toHaveCSS('padding-left', '148px');
+    await expect(page.locator('.nk-hub-release')).toHaveCSS('padding-left', '148px');
 
-    // 客户端路由切换（非整页加载）主流程：枢纽页 → 板块页全程导航条在位
-    // （旧的「进入板块后侧栏才回归」已不适用；返回行退场后索引行全部是板块行）
-    await page.locator('.nk-cwhub-index__row').first().click();
+    // 客户端路由切换（非整页加载）主流程：枢纽页 → 板块页全程导航条在位。
+    // ADR 0020 后本页 5 行板块索引已退场，故改从侧栏 CW「角色图鉴」项发起跳转（真入口，非构造）
+    await page.locator('.ui-sidebar a[href="/currency/role"]').first().click();
     // 落点断言（期望值取自 CW_NAV_ITEMS[0].path，勿凭直觉）
     await expect(page).toHaveURL(/\/currency\/role$/);
     await expect(page.locator('.ui-sidebar')).toBeVisible();
@@ -227,7 +227,7 @@ test.describe('布局验收：枢纽页导航条回归（ADR 0019）', () => {
     await expect(page.locator('.ui-sidebar')).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-nav');
     expect(await readContentOffset(page)).toBe(88);
-    await expect(page.locator('.nk-home-release')).toHaveCSS('padding-left', '88px');
+    await expect(page.locator('.nk-hub-release')).toHaveCSS('padding-left', '88px');
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
@@ -369,15 +369,80 @@ test.describe('布局验收：终局合并单页', () => {
 });
 
 test.describe('布局验收：货币战争主题', () => {
-  test('/currency：黑金主题挂载、导航齐全、无溢出', async ({ page }) => {
+  test('/currency：黑金主题挂载、本赛季新增两分区、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/currency');
     // meta.cw → <html data-theme="cw">
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'cw');
-    // CW Hub 导航（索引目录行，5 板块全部上线）
     await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
-    const sectionCards = await page.locator('.nk-cwhub-index__row').count();
-    expect(sectionCards).toBeGreaterThanOrEqual(5);
+    // ADR 0020：5 行板块索引退场，改为「本赛季新增」两分区；标题恒不带赛季号 / 版本号（决策 5）
+    await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
+    const kinds = await page
+      .locator('.nk-hub-release__section')
+      .evaluateAll((els) => els.map((el) => el.getAttribute('data-kind')));
+    // 分区按数据渲染（本赛季实测 role + trait 两分区）；无增量时退化为唯一一行空态
+    if (kinds.length === 0) {
+      await expect(page.locator('.nk-hub-release__empty')).toHaveCount(1);
+    } else {
+      expect(kinds).toContain('role');
+      // 分区卡片 href 必须指向对应图鉴详情页——证明 renderCard 复用生效（而非另写的卡片）
+      const hrefs = await page
+        .locator('.nk-hub-release__section[data-kind="role"] .nk-hub-release__band a')
+        .evaluateAll((els) => els.map((el) => el.getAttribute('href') || ''));
+      expect(hrefs.length).toBeGreaterThan(0);
+      expect(hrefs.every((h) => h.startsWith('/currency/role/'))).toBe(true);
+    }
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('/currency：1920×1080 首屏内可见本赛季新增（ADR 0020 核心验收）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/currency');
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    // 品牌带不得回到「独占首屏」形态（与 `/` 同口径）
+    const bandH = await page.locator('.nk-hub-brand').evaluate((el) =>
+      Math.round(el.getBoundingClientRect().height),
+    );
+    expect(bandH).toBeLessThanOrEqual(240);
+    await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
+    // 逐区测量：每个已渲染分区的标题与首行卡片都要落在首屏内（分区数由数据决定，不写死 2）
+    const marks = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
+      els.map((el) => ({
+        kind: el.getAttribute('data-kind'),
+        labelBottom: Math.round(el.querySelector('.nk-hub-release__label')!.getBoundingClientRect().bottom),
+        firstCardBottom: Math.round(el.querySelector('.nk-hub-release__band > *')!.getBoundingClientRect().bottom),
+      })),
+    );
+    expect(marks.length).toBeGreaterThanOrEqual(1);
+    for (const m of marks) {
+      expect(m.labelBottom, `分区 ${m.kind} 的标题应在首屏内`).toBeLessThanOrEqual(1080);
+      expect(m.firstCardBottom, `分区 ${m.kind} 的首行卡片应在首屏内`).toBeLessThanOrEqual(1080);
+    }
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+
+  test('/currency：本赛季无新增时只显示一行空态（ADR 0020 决策 6）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    // 拦截两份 CW 索引，把 is_season_new 全部抹为 false（模拟「*Old 表缺失 / 本赛季无扩充」）
+    for (const [file, listKey] of [['role', 'roles'], ['traits', 'traits']] as const) {
+      await page.route(`**/data/cn/currency/${file}.json`, async (route) => {
+        const body = JSON.parse(readFileSync(`public/data/cn/currency/${file}.json`, 'utf8'));
+        body[listKey] = body[listKey].map((item: Record<string, unknown>) => ({ ...item, is_season_new: false }));
+        await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+      });
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/currency');
+    await expect(page.locator('.nk-hub-release__empty')).toHaveCount(1);
+    await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
+    await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
+    // 空态不回退板块索引；品牌带与共享页脚仍在
+    await expect(page.locator('.nk-cwhub-index')).toHaveCount(0);
+    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
     expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });

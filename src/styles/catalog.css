@@ -434,13 +434,10 @@
 .nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 
 /* ═══════════════════════════════════════════
-   首页：版本上新页（ADR 0019 决策 2/3/8/9/10）
-   结构 = 共享品牌带（.nk-hub-brand，tokens.css）+ 本版本新增三分区（角色/光锥/遗器）+ 共享页脚。
+   首页容器：版本上新页（ADR 0019 决策 2/3/8/9/10）
+   结构 = 共享品牌带（.nk-hub-brand，tokens.css）+ 共享上新区块（.nk-hub-release，见下）+ 共享页脚。
    板块索引整体退场，选路由导航条承担，跨模式只走侧栏「交换」。
-   分区卡片复用目录页既有卡片 CSS（.nk-idx-card / .nk-lc-card / .nk-relic-card），
-   首页只做尺寸覆盖——**禁止改目录页卡片规则**（会连带目录页回归）。
-   首屏节拍（1920×1080）：品牌带 200px + 三分区标题 + 各自首行卡片底部 ≤1080；
-   超预算只准压本节字号/间距/卡片宽度，禁止改品牌带与页脚原语的高度。
+   #nk-home-app 是 e2e（e2e/layout.spec.ts）依赖的容器 id，**禁止**改名。
 ═══════════════════════════════════════════ */
 #nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); background: var(--bg); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
@@ -450,24 +447,45 @@
       禁止在此重新声明 hero 选择器或复制粘贴：两页高度与断点必须由同一份原语接管，
       否则互切时（nk-view-swap）会出现一边文字已展开、一边文字直接就在那里的高度跳动。 ── */
 
-/* ── 版本上新：头部（标题含本版本号）+ 三分区（各一行横向卡片带）+ 空态 ── */
-.nk-home-release { max-width: var(--nk-content-max); margin: 0 auto; padding: 32px 40px 72px var(--nk-content-offset); }
-.nk-home-release__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
-.nk-home-release__title { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.04em; line-height: 1.25; color: var(--text-bright); white-space: nowrap; }
-.nk-home-release__rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line-2), transparent); }
-/* 无增量的分区不渲染（ADR 0019 决策 9）：条数不设上限，只有分区间距 */
-.nk-home-release__section + .nk-home-release__section { margin-top: 22px; }
-.nk-home-release__label { margin-bottom: 10px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; color: var(--text2); }
+/* ═══════════════════════════════════════════
+   枢纽页共用原语：上新区块 .nk-hub-release（ADR 0020 决策 7）
+   消费页恰为两个枢纽页：`/`（本版本上新，判据 = 版本增量）+ `/currency`（本赛季新增，判据 = 赛季代际）。
+   命名必须中性：两页共用同一份骨架与断点，名字里**禁止**出现 home / currency 等页面语义，
+   否则第二页一消费就退化成「页面私有样式被别页借用」。
+   **禁止**在任何页面 CSS（页面 css / SFC <style>）里复制本块：复制即两份断点各自漂移，
+   互切时（nk-view-swap）出现区块高度跳动——复用只能引用本文件这一份。
+   声明位置：catalog.css 是全局随应用加载的两份样式表之一，满足「单点声明」；
+   tokens.css 是令牌 + 全局原语层，本块是页面布局且作用域覆盖目录卡片类
+   （.nk-idx-card / .nk-lc-card / .nk-relic-card / .nk-cw-card），故**必须留在本文件**，禁止搬进 tokens.css。
+   结构 = 头部（标题 + 分隔线）+ N 个分区（各一行横向卡片带）+ 空态；无增量的分区不渲染。
+   分区卡片复用目录页既有卡片 CSS，本块只做尺寸覆盖——**禁止改目录页卡片规则**（会连带目录页回归）。
+   首屏节拍（1920×1080）：品牌带 200px + **每个已渲染分区**的标题与首行卡片底部 ≤1080；
+   超预算只准压本节字号/间距/卡片宽度，禁止改品牌带与页脚原语的高度。
+═══════════════════════════════════════════ */
+/* ── 头部（标题含版本号/赛季文案）+ 分区（各一行横向卡片带）+ 空态 ── */
+.nk-hub-release { max-width: var(--nk-content-max); margin: 0 auto; padding: 32px 40px 72px var(--nk-content-offset); }
+.nk-hub-release__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+.nk-hub-release__title { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.04em; line-height: 1.25; color: var(--text-bright); white-space: nowrap; }
+.nk-hub-release__rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line-2), transparent); }
+/* 无增量的分区不渲染（ADR 0019 决策 9 / ADR 0020 决策 6）：条数不设上限，只有分区间距 */
+.nk-hub-release__section + .nk-hub-release__section { margin-top: 22px; }
+.nk-hub-release__label { margin-bottom: 10px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; color: var(--text2); }
 /* 横向带：内容超出容器时**容器内横向滚动**（页面不得横向溢出）；
    上下 padding 给卡片 hover 抬升 / focus ring 留出不被 overflow 裁掉的余量 */
-.nk-home-release__band { display: flex; align-items: flex-start; gap: 14px; padding: 6px 0 14px; overflow-x: auto; overflow-y: hidden; }
-.nk-home-release__band > * { flex: 0 0 auto; }
-/* 首页作用域尺寸覆盖 = 只给宽度（卡片内部结构与配色仍由目录页规则接管）。
-   144px 宽 → 角色/光锥 3:4 竖卡高 192px：三分区含标题与间距在 1920×1080 内落底 */
-.nk-home-release__band .nk-idx-card { width: 144px; }
-.nk-home-release__band .nk-lc-card { width: 144px; }
-.nk-home-release__band .nk-relic-card { width: 136px; }
-.nk-home-release__empty { padding: 22px 0 6px; font-size: 0.9rem; letter-spacing: 0.06em; color: var(--text2); }
+.nk-hub-release__band { display: flex; align-items: flex-start; gap: 14px; padding: 6px 0 14px; overflow-x: auto; overflow-y: hidden; }
+.nk-hub-release__band > * { flex: 0 0 auto; }
+/* 枢纽页作用域尺寸覆盖 = 只给宽度（卡片内部结构与配色仍由目录页规则接管）。
+   144px 宽 → 角色/光锥 3:4 竖卡高 192px：分区含标题与间距在 1920×1080 内落底 */
+.nk-hub-release__band .nk-idx-card { width: 144px; }
+.nk-hub-release__band .nk-lc-card { width: 144px; }
+.nk-hub-release__band .nk-relic-card { width: 136px; }
+/* CW 图鉴页通用卡（.nk-cw-card，定义在 currency-catalog.css）：取同一 144px 档。
+   必须给宽度——卡片是 flex 纵列且描述无行数上限，缺宽度时在横向带内按 max-content 撑到整行文字宽。
+   ⚠ 两个枢纽页的 CW 分区实际用的是 .nk-crole-card（currency-role.css）与 .nk-cw-trait-card
+   （currency-catalog.css），其 144/116px 由 currency-hub.css 以 #nk-cwhub-app 作用域声明——
+   两处**禁止各写一份**（值漂移会让两页卡片宽度不一致）。 */
+.nk-hub-release__band .nk-cw-card { width: 144px; }
+.nk-hub-release__empty { padding: 22px 0 6px; font-size: 0.9rem; letter-spacing: 0.06em; color: var(--text2); }
 
 
 
@@ -478,25 +496,27 @@
 /* 平板（768-1023px）：中等密度；
    左侧避让由 --nk-content-offset 令牌断点接管（88px = 侧栏 56 + 边距 32，全视图统一） */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .nk-home-release { padding: 28px 32px 56px var(--nk-content-offset); }
-  .nk-home-release__section + .nk-home-release__section { margin-top: 20px; }
+  .nk-hub-release { padding: 28px 32px 56px var(--nk-content-offset); }
+  .nk-hub-release__section + .nk-hub-release__section { margin-top: 20px; }
 }
 @media (max-width: 767px) {
   /* 手机：左右对称。底部导航栏高度预留由共享页脚原语（tokens.css 的 .nk-hub-footer）承担——
      本块**禁止**再叠加一份 56px，否则与页脚预留叠成双份空隙 */
-  .nk-home-release { padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px)); }
-  .nk-home-release__head { gap: 12px; margin-bottom: 18px; }
-  .nk-home-release__title { font-size: 1.05rem; }
-  .nk-home-release__rule { display: none; }
-  .nk-home-release__section + .nk-home-release__section { margin-top: 18px; }
-  .nk-home-release__label { margin-bottom: 8px; font-size: 0.8rem; }
-  .nk-home-release__band { gap: 10px; }
+  .nk-hub-release { padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .nk-hub-release__head { gap: 12px; margin-bottom: 18px; }
+  .nk-hub-release__title { font-size: 1.05rem; }
+  .nk-hub-release__rule { display: none; }
+  .nk-hub-release__section + .nk-hub-release__section { margin-top: 18px; }
+  .nk-hub-release__label { margin-bottom: 8px; font-size: 0.8rem; }
+  .nk-hub-release__band { gap: 10px; }
   /* 角色卡在手机目录页是 63px 行式卡（44px 圆头像 + 流内信息）：横向带沿用其骨架，
      只覆盖尺寸与「列表项」外观（去掉发丝线底边）——**禁止**改目录页规则本身 */
-  .nk-home-release__band .nk-idx-card { width: 190px; min-height: 0; padding: 8px 10px; border: 1px solid var(--line-1); border-radius: var(--nk-radius-card); background: var(--card); }
-  .nk-home-release__band .nk-lc-card { width: 116px; }
-  .nk-home-release__band .nk-relic-card { width: 104px; }
-  .nk-home-release__empty { padding: 18px 0 4px; }
+  .nk-hub-release__band .nk-idx-card { width: 190px; min-height: 0; padding: 8px 10px; border: 1px solid var(--line-1); border-radius: var(--nk-radius-card); background: var(--card); }
+  .nk-hub-release__band .nk-lc-card { width: 116px; }
+  .nk-hub-release__band .nk-relic-card { width: 104px; }
+  /* CW 卡片手机档 = 132px（同目录页图卡缩档比例 ≈0.9）：缺宽度会按 max-content 撑爆横向带 */
+  .nk-hub-release__band .nk-cw-card { width: 132px; }
+  .nk-hub-release__empty { padding: 18px 0 4px; }
 }
 
 /* 触屏设备（hover: none）：重置粘滞 hover 态 */

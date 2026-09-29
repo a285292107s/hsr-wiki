@@ -53,6 +53,8 @@ export const currencyTraitPage: CatalogPageConfig = {
       season_id: t.season_id,
       layers: t.layers,
       remarks: t.remarks,
+      /* 本赛季新增标记（ADR 0020 决策 4）：枢纽页据此分区过滤；字段缺失一律 false，禁止当作新增 */
+      is_season_new: t.is_season_new === true,
     }));
   },
   buildFilters(items: CatalogItem[]) {

@@ -45,6 +45,7 @@ node tools/check-comments.mjs    # 注释累赘度守卫（report-only 先行；
 - **样式随路由懒加载**：页面 CSS 随视图 import 拆为独立 chunk；全局仅 tokens.css + catalog.css。
 - **枢纽页导航条回归 / 首页＝版本上新页（ADR 0019，已实现）**：`/` 与 `/currency` **全断点渲染导航条**（`meta.bareNav` / `data-nav` / 避让回退三件已删除，内容区回到 148px 侧栏避让）；`/` 是**版本上新页**＝品牌带 + `release_version` 恰等于 `version.json` 的 `version_label` 的角色/光锥/遗器三分区 + 页脚，板块索引与两条页内跨模式行已退场，跨模式只走侧栏「交换」。**禁止按 ADR 0018 旧形态回改**——「无侧栏枢纽」与「首页 8 行入口首屏可见」断言均已作废，新断言（1920×1080 内品牌带 + 三分区标题与各自首行卡片完整可见 / 全断点渲染导航条 / 空态一行）在 `e2e/layout.spec.ts`。**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**（ADR 0018 该条继续有效）。
 - **版本上新数据判据（ADR 0019 决策 3-5）**：条目判据 = `release_version` 恰等于 `version.json` 的 `version_label`；角色 / 光锥的版本号由「与上一版已提交输出的 id 差集」推导（converter 侧，无基线时留空），遗器用源数据权威 `RelicSetConfig.ReleaseVersion`；两者同写一个字段，前端只读该字段。
+- **货币战争本赛季新增（ADR 0020，已实现）**：`/currency` 的判据是**赛季代际差集**——`GridFightRoleBasicInfoOld` / `GridFightTraitLayerOld` 的 `ExistSeason` 最大一代 = 上一代名册，当前代名册在 `GridFightRoleBasicInfo` 与 `traits.json`；converter 给 `role.json` / `traits.json` 写布尔 `is_season_new`（表缺失或代数 < 2 → 全 false + 告警，判据纯函数在 `tools/converter/season_delta.py`）。覆盖域仅**角色 + 羁绊**（装备 / 环境 / 策略既无 `*Old` 代际表、版本差集也实测为 0，**禁止**为它们新造判据）。**两页口径禁止混用**：常规模式 = 版本增量，货币战争 = 赛季代际；文案写「本赛季新增」且**不显示赛季号**（当前代编号 1 与旧代 101/102/103 体系不一致）。两页共用区块原语 `.nk-hub-release*`（单点声明在 `catalog.css`）。
 - **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——数据探索一律走 `query.py` / `DATA_CATALOG.md`，转换走 `convert.py`。
 
 > 分层结构 / 研究线（Spine Lab）/ 核心架构模式 / 新增目录扩展指南（端到端）→ [docs/agents/architecture.md](docs/agents/architecture.md)

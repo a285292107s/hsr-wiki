@@ -1,11 +1,14 @@
 /**
- * 首页版本上新编排纯函数单测（ADR 0019 决策 3/9/10）。
- * 覆盖：本版本判据（恰等 / 空标签 / 未打标条目）、无增量分区不渲染、卡片 HTML 复用 renderCard。
+ * 枢纽页「新增」编排纯函数单测（ADR 0019 决策 3/9/10 + ADR 0020 决策 2/4/6）。
+ * 覆盖：首页本版本判据（恰等 / 空标签 / 未打标条目）、CW 赛季代际判据（布尔 / 缺字段）、
+ * 无增量分区不渲染、卡片 HTML 复用 renderCard。
  */
 import { describe, expect, it } from 'vitest';
 import {
   buildReleaseSections,
+  buildReleaseSectionsBy,
   pickCurrentVersion,
+  pickSeasonNew,
   type ReleaseSource,
   type ReleaseTagged,
 } from '../use-release-showcase';
@@ -94,6 +97,89 @@ describe('buildReleaseSections', () => {
     const sections = buildReleaseSections([
       source('character', '角色', [tag(1503, '4.6')], [{ id: '1001', name: '乙' }]),
     ], '4.6');
+    expect(sections).toEqual([]);
+  });
+});
+
+describe('pickSeasonNew', () => {
+  const season = (id: number, is_season_new?: boolean): ReleaseTagged => ({ id, is_season_new });
+
+  it('只取 is_season_new === true 的条目，保持入参顺序', () => {
+    const list = [season(1, true), season(2, false), season(3, true), season(4)];
+    expect(pickSeasonNew(list).map((i) => i.id)).toEqual([1, 3]);
+  });
+
+  it('字段缺失（未打标 / *Old 代际表缺失）一律视为 false，禁止退化为全量新增', () => {
+    const list = [season(1), season(2), season(3, false)];
+    expect(pickSeasonNew(list)).toEqual([]);
+  });
+
+  it('只认布尔 true（真值串 / 1 不算新增）', () => {
+    const list = [{ id: 1, is_season_new: 'true' }, { id: 2, is_season_new: 1 }] as unknown as ReleaseTagged[];
+    expect(pickSeasonNew(list)).toEqual([]);
+  });
+
+  it('不修改入参', () => {
+    const list = [season(1, true), season(2)];
+    const snapshot = JSON.stringify(list);
+    pickSeasonNew(list);
+    expect(JSON.stringify(list)).toBe(snapshot);
+  });
+});
+
+describe('CW 两分区（buildReleaseSectionsBy + pickSeasonNew）', () => {
+  const renderCard = (item: CatalogItem, i: number): string =>
+    `<a class="c" data-id="${String(item.id)}" style="--i:${i}"></a>`;
+
+  /** 只保留 is_season_new 的条目（模拟 fetchData 透传后由本层投影出的 tagged） */
+  const cwSource = (
+    kind: ReleaseSource['kind'],
+    label: string,
+    items: readonly CatalogItem[],
+  ): ReleaseSource => ({
+    kind,
+    label,
+    tagged: items.map((it) => ({ id: String(it.id), is_season_new: it.is_season_new === true })),
+    items,
+    renderCard,
+  });
+
+  const items: CatalogItem[] = [
+    { id: '1001', name: '姬子•启行', is_season_new: true },
+    { id: '1002', name: '千冶•刃', is_season_new: true },
+    { id: '1003', name: '旧角色' },
+    { id: '1004', name: '旧角色2', is_season_new: false },
+  ];
+
+  it('两分区按 is_season_new 过滤，data-kind / label 与本页 DOM 契约一致', () => {
+    const sections = buildReleaseSectionsBy([
+      cwSource('role', '角色图鉴', items),
+      cwSource('trait', '羁绊图鉴', [
+        { id: '2001', name: '领航员', is_season_new: true },
+        { id: '2002', name: '旧羁绊' },
+      ]),
+    ], pickSeasonNew);
+    expect(sections.map((s) => s.kind)).toEqual(['role', 'trait']);
+    expect(sections.map((s) => s.label)).toEqual(['角色图鉴', '羁绊图鉴']);
+    expect(sections.map((s) => s.count)).toEqual([2, 1]);
+    expect(sections[0].html).toBe(
+      '<a class="c" data-id="1001" style="--i:0"></a><a class="c" data-id="1002" style="--i:1"></a>',
+    );
+  });
+
+  it('某分区无新增（字段缺失 / 全 false）→ 该分区不产出', () => {
+    const sections = buildReleaseSectionsBy([
+      cwSource('role', '角色图鉴', [{ id: '1003', name: '旧角色' }]),
+      cwSource('trait', '羁绊图鉴', [{ id: '2001', name: '领航员', is_season_new: true }]),
+    ], pickSeasonNew);
+    expect(sections.map((s) => s.kind)).toEqual(['trait']);
+  });
+
+  it('两分区皆无新增 → 返回空数组（视图据此渲染唯一一行空态）', () => {
+    const sections = buildReleaseSectionsBy([
+      cwSource('role', '角色图鉴', [{ id: '1003', name: '旧角色' }]),
+      cwSource('trait', '羁绊图鉴', []),
+    ], pickSeasonNew);
     expect(sections).toEqual([]);
   });
 });

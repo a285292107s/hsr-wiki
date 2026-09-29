@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
+from season_delta import apply_season_new, mark_season_new
 from textmap import resolve_text
 from utils import load_json, save_json
 
@@ -285,6 +286,17 @@ def convert() -> None:
     servant_skills = _build_index(_load_excel("GridFightServantSkill.json"), "SkillID")
     skill_extra = _build_index(_load_excel("GridFightBackSkillExtraDesc.json"), "SkillID")
 
+    # 赛季代际差集基线（ADR 0020 决策 2/4）：GridFightRoleBasicInfoOld 的 ExistSeason 最大代 = 上一代。
+    # 当前代名册 = 本表 IsInBook 角色（与输出条目同口径）；两表 ID 体系不同，只能按 AvatarID 比。
+    role_old_path = EXCEL_DIR / "GridFightRoleBasicInfoOld.json"
+    role_old = _load_excel("GridFightRoleBasicInfoOld.json") if role_old_path.exists() else []
+    current_avatar_ids = [
+        role_raw.get("AvatarID", role_raw["ID"]) for role_raw in role_list_raw if role_raw.get("IsInBook")
+    ]
+    season_new_by_avatar = mark_season_new(
+        current_avatar_ids, role_old, id_key="AvatarID", label="GridFightRoleBasicInfoOld 角色名册"
+    )
+
     # 2. 构建角色名映射 AvatarID → 中文名
     name_map: dict[int, str] = {}
     for cfg in avatar_config + avatar_ld:
@@ -507,6 +519,10 @@ def convert() -> None:
         }
 
         save_json(detail, detail_dir / f"{rid}.json")
+
+    # 赛季新增标记：按 avatar_id 落标；详情文件不带该字段，列表页判据唯一来源
+    n_season_new = apply_season_new(roles_out, season_new_by_avatar, id_field="avatar_id")
+    logger.info("赛季新增角色：%d 位", n_season_new)
 
     # 5. 写列表
     list_out = {"roles": roles_out}

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
+from season_delta import apply_season_new, mark_season_new
 from textmap import resolve_text, clean_text
 from utils import load_json, save_json
 from converters.currency import _build_prop_names
@@ -80,9 +81,15 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) 
     forge_index = _build_index(forge_raw)
 
     out: list[dict] = []
+    skipped_unnamed: list[int] = []
     for item in items_raw:
         iid = item["ID"]
         name = resolve_text(item.get("ItemName", {}))
+        # 名称解析失败（TextMap 无该 hash）→ 空壳卡：name/desc/category 全空、图标沿用旧 id。
+        # ADR 0020 决策 9：整条过滤，禁止输出无名占位条目。
+        if not name:
+            skipped_unnamed.append(iid)
+            continue
         icon = item.get("IconPath", "")
         small_icon = item.get("SmallIconPath", "")
         priority = item.get("ItemPriority", 0)
@@ -137,6 +144,9 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) 
             "props": props,
             "recommend_roles": recommend_roles,
         })
+
+    if skipped_unnamed:
+        logger.warning("  装备图鉴：过滤名称解析失败条目 %s（共 %d 条）", skipped_unnamed, len(skipped_unnamed))
 
     # 按分类 → 优先级排序
     out.sort(key=lambda x: (x["category"], -x["priority"], x["id"]))
@@ -286,6 +296,9 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
     layer_raw = _load_excel("GridFightTraitLayer.json")
     mazebuff_raw = _load_excel("GridFightTraitMazebuff.json")
     remark_raw = _load_excel("GridFightTraitRemark.json")
+    # 赛季代际差集基线（ADR 0020 决策 2/4）：GridFightTraitLayerOld 的 ExistSeason 最大代 = 上一代
+    trait_old_path = EXCEL_DIR / "GridFightTraitLayerOld.json"
+    trait_old = _load_excel("GridFightTraitLayerOld.json") if trait_old_path.exists() else []
     mazebuff_index = _build_index(mazebuff_raw)
 
     # 构建层级索引
@@ -385,6 +398,14 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
             "layers": layer_by_trait.get(tid, []),
             "remarks": remark_by_trait.get(tid, []),
         })
+
+    # 赛季新增标记：当前代羁绊名册（本表全体）− 上一代名册（GridFightTraitLayerOld 最大代）
+    n_season_new = apply_season_new(
+        out,
+        mark_season_new([e["id"] for e in out], trait_old, id_key="TraitID",
+                        label="GridFightTraitLayerOld 羁绊名册"),
+    )
+    logger.info("  赛季新增羁绊: %d 个", n_season_new)
 
     out.sort(key=lambda x: x["sort_priority"])
 

@@ -199,6 +199,9 @@ export interface CurrencyRoleEntry {
   season_ids: number[];
   /** 女性形态 AvatarID（GridFightGenderOverride；仅开拓者有值，其余为 null） */
   female_avatar_id: number | null;
+  /** 本代赛季新增（ADR 0020）：converter 用 `GridFightRoleBasicInfoOld` 的 `ExistSeason` 最大代
+   *  算出「当前代名册 − 上一代名册」后写入；`*Old` 表缺失或代数 < 2 时恒为 false（旧数据可能缺该字段）。 */
+  is_season_new?: boolean;
 }
 
 export interface CurrencyRoleList {
@@ -311,6 +314,8 @@ export interface CurrencyTraitEntry {
   sort_priority: number;
   layers: CurrencyTraitLayer[];
   remarks: CurrencyTraitRemark[];
+  /** 本代赛季新增（ADR 0020）：来源与语义同 `CurrencyRoleEntry.is_season_new`（走 `GridFightTraitLayerOld`）。 */
+  is_season_new?: boolean;
 }
 
 export interface CurrencyTraitList {

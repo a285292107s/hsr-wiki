@@ -85,6 +85,9 @@ MODULE_SOURCES: dict[str, list[str]] = {
         "GridFightItems.json", "GridFightRoleRecommendEquip.json",
         "GridFightServantStar.json", "GridFightServantSkill.json",
         "GridFightBackSkillExtraDesc.json", "GridFightGenderOverride.json",
+        # 赛季代际差集基线（ADR 0020）：*Old 名册换代即改变 is_season_new，必须进依赖，
+        # 否则 ExistSeason 追加一代时 currency 不重跑，标记静默过期。
+        "GridFightRoleBasicInfoOld.json",
     ],
     "currency_catalog": ["GridFightItems.json", "GridFightEquipment.json",
                           "GridFightEquipCategoryInfo.json", "GridFightEquipTag.json",
@@ -92,6 +95,8 @@ MODULE_SOURCES: dict[str, list[str]] = {
                           "GridFightRoleBasicInfo.json", "GridFightTraitBasicInfo.json",
                           "GridFightRolePropertyConfig.json",
                           "GridFightTraitLayer.json", "GridFightTraitMazebuff.json",
+                          # 赛季代际差集基线（ADR 0020）：羁绊名册换代 → traits.json 的 is_season_new 变化
+                          "GridFightTraitLayerOld.json",
                           "GridFightTraitRemark.json", "GridFightAugment.json",
                           "GridFightConsumables.json", "GridFightForge.json",
                           "GridFightPortalBuff.json"],

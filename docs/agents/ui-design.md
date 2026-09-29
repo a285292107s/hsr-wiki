@@ -9,7 +9,7 @@
 | 层 | 文件 | 放什么 | 禁止 |
 |---|---|---|---|
 | 令牌 + 全局原语 | `src/styles/tokens.css` | 四层令牌（§2）；跨页全局原语（导航壳 `ui-sidebar*` / `nk-tabs` / `nk-panels`·`nk-panel` / `nk-secnav` / `nk-skeleton`·`nk-sk--*` / `nk-toast` / `nk-card` / `nk-hub-footer`·`nk-hub-brand`（两个枢纽页共用的页脚骨架与品牌带） / 各目录网格族 / `nk-empty`·`nk-error-state`·`nk-img-error`）；无障碍三件套；纸感颗粒覆层 | 页面专属规则；**页面 CSS 直接引用原始层** |
-| 目录引擎 | `src/styles/catalog.css` | 目录卡片与网格（卡片 HTML 由模板字符串 v-html 注入，scoped 命不中） | 页面专属样式 |
+| 目录引擎 | `src/styles/catalog.css` | 目录卡片与网格（卡片 HTML 由模板字符串 v-html 注入，scoped 命不中）；**两个枢纽页共用的上新区块原语 `nk-hub-release*`**（本章程特例：它是页面布局且作用域覆盖目录卡片类，故单点声明留在本文件而非 tokens.css，见 [ADR 0020](../adr/0020-货币战争枢纽页改为本赛季新增页.md) 决策 7） | 页面专属样式；复制该区块 |
 | 页面 | `src/styles/<page>.css` | 页面专属，由视图组件 `import`，随路由拆 chunk 懒加载 | 跨页复用（先查原语）；复制粘贴其他页面规则 |
 | 组件 | SFC `<style scoped>` | 组件专属（如 CW Hub 导航） | 污染全局命名空间 |
 

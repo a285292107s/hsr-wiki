@@ -50,26 +50,26 @@ onMounted(() => {
     </header>
 
     <!-- 本版本上新：三分区（角色/光锥/遗器）各一行横向卡片带；卡片 HTML 由 renderCard 产出（v-html） -->
-    <div class="nk-home-release">
-      <div class="nk-home-release__head">
-        <h2 class="nk-home-release__title">{{ releaseTitle }}</h2>
-        <span class="nk-home-release__rule" aria-hidden="true"></span>
+    <div class="nk-hub-release">
+      <div class="nk-hub-release__head">
+        <h2 class="nk-hub-release__title">{{ releaseTitle }}</h2>
+        <span class="nk-hub-release__rule" aria-hidden="true"></span>
       </div>
 
       <template v-if="loaded && sections.length">
         <section
           v-for="s in sections"
           :key="s.kind"
-          class="nk-home-release__section"
+          class="nk-hub-release__section"
           :data-kind="s.kind"
           :aria-label="s.label"
         >
-          <h3 class="nk-home-release__label">{{ s.label }}</h3>
-          <div class="nk-home-release__band" v-html="s.html"></div>
+          <h3 class="nk-hub-release__label">{{ s.label }}</h3>
+          <div class="nk-hub-release__band" v-html="s.html"></div>
         </section>
       </template>
       <!-- 三分区皆无增量（基线缺失 / 本版本无新增）：不回退板块索引、不改显历史版本（决策 10） -->
-      <p v-else-if="loaded" class="nk-home-release__empty">本版本暂无新增条目</p>
+      <p v-else-if="loaded" class="nk-hub-release__empty">本版本暂无新增条目</p>
     </div>
 
     <!-- 页脚：跨页共享原语，与 CW 枢纽页共用（声明于 tokens.css，禁止在两页各写一份） -->

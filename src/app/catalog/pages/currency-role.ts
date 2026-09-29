@@ -99,6 +99,8 @@ export const currencyRolePage: CatalogPageConfig = {
         trait_combat: traits.filter((t) => t.cat === 'combat').map((t) => t.id),
         trait_special: traits.filter((t) => t.cat === 'special').map((t) => t.id),
         has_equipment: r.equipment_id != null,
+        /* 本赛季新增标记（ADR 0020 决策 4）：枢纽页据此分区过滤；字段缺失一律 false，禁止当作新增 */
+        is_season_new: r.is_season_new === true,
       };
     });
   },
