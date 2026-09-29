@@ -2,7 +2,7 @@
 
 独立部署于 **Vercel** 的《崩坏：星穹铁道》数据展示型 Wiki（Vue 3 + TypeScript + Vite + Pinia）。全部目录与详情数据由 `tools/converter/` 从官方解包数据离线转换为本地 JSON 随站分发；图片与 Spine 动画在运行期经 `src/services/cdn/` 解析并回退。
 
-- **在线 Demo**：`https://hsr-wiki.vercel.app/`
+- **在线 Demo**：`https://myhsr.vercel.app/`
 
 ## 功能特性
 
