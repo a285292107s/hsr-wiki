@@ -2,11 +2,14 @@
    兜底链：① 本地主源失败→现场反查远端最优源（localFallbackFromPrimary，不依赖属性/健康态）；
    ② 双源回退：带 data-cdn-fallback 的 img 替换 src 并清除属性，保证仅回退一次（覆盖 v-html 卡片图）；
    ③ CDN down 短路：健康探测判定不可用后不再逐图尝试，直接标记降级；
-   ④ 最终降级：回退/首选（nanoka）失败→data-cdn-down（CSS 隐藏破图，卡片渐变底承接），CDN 恢复时重载全部降级图。
+   ④ 最终降级：回退/首选（nanoka）失败→data-cdn-down（CSS 隐藏破图，卡片渐变底承接）；
+      未 opt-out（data-cdn-noph）且主源为远端 URL 时改换占位图形（data-cdn-placeholder，见 placeholder.ts），
+      原 URL 存 dataset.cdnSrc 供恢复链还原。CDN 恢复时重载全部降级图。
    挂起兜底 STALL_TIMEOUT_MS：jsDelivr 大仓库偶发挂起不触发 error，经 MutationObserver 对受管 img 启超时定时器走同链。 */
 import { isCdnDown, subscribeCdnHealth } from './health';
 import { LOCAL_ICONS_BASE } from './base';
 import { localFallbackFromPrimary } from './resolve';
+import { MISSING_ICON_SRC } from './placeholder';
 
 /** 挂起超时：jsDelivr 冷回源/网络偶发挂起的兜底阈值（远大于正常加载耗时） */
 export const CDN_STALL_TIMEOUT_MS = 10_000;
@@ -16,20 +19,68 @@ function isCdnImage(src: string): boolean {
   return /^https?:\/\//.test(src);
 }
 
-/** 标记最终降级：CSS 隐藏破图图标（布局占位保留，卡片渐变底承接） */
-function markDown(img: HTMLImageElement): void {
+/* 图标占位（opt-in）：带 `data-cdn-noph` 的 img 不参与。组件自带语义占位（物品卡立方体、
+   遗器部位图的真实通用图标、终局 buff 的星形）与「有意空图」位（Hero 立绘渐变底、gridFight
+   属性图标）都打该属性——占位只服务「本该有图却没有」的图标，不得盖掉它们。
+   `noPlaceholder` 用于 CDN 整体不可用（isCdnDown 短路）：那是环境故障而非缺图，
+   满屏占位比留白更吵，且恢复链会整页重载（ADR 0013）。 */
+function markDown(img: HTMLImageElement, noPlaceholder = false): void {
   if (img.dataset.cdnDown) return;
   img.dataset.cdnDown = '1';
-  // 慢响应自愈：jsDelivr 冷回源可能慢于超时阈值但最终成功，load 时自动清除降级标记恢复显示
-  // （真失败无 load 事件，保持隐藏）
-  img.addEventListener('load', () => img.removeAttribute('data-cdn-down'), { once: true });
+  const src = img.getAttribute('src') || '';
+  if (noPlaceholder || img.hasAttribute('data-cdn-placeholder') || img.hasAttribute('data-cdn-noph') || !isCdnImage(src)) {
+    /* 非占位路线（opt-out / 本地源 / CDN down 短路）：真源最终 load 成功 → 清降级标记恢复显示 */
+    img.addEventListener('load', () => clearDegrade(img), { once: true });
+    return;
+  }
+  /* 占位路线：状态用**占位是否已实际加载**（`placeholderLoaded`）而不是 src 值——同源重试
+     （src 等于记录的原失败源）成功后也必须能清，故不能拿 src 相等当「不清」的依据。
+     监听常驻（非 `{ once: true }`）：真实浏览器里占位自身的 load 与组件接管那次是两个独立事件，
+     一次性监听会被前者消费掉。 */
+  let placeholderLoaded = false;
+  img.dataset.cdnSrc = src;
+  img.setAttribute('data-cdn-placeholder', '1');
+  watchDegradedSrcSwap(img);
+  img.addEventListener('load', () => {
+    if (!placeholderLoaded) {
+      placeholderLoaded = true;
+      return;
+    }
+    if (!isPlaceholderSrc(img.currentSrc)) clearDegrade(img);
+  });
+  img.src = MISSING_ICON_SRC;
+}
+
+/* 已降级元素被组件换源后又失败：`markDown` 首行会早退，元素既不带占位（CSS 不隐藏）也不重新
+   判定 ⇒ 可见破图。这里监听 src 变更：一旦它与记录的原失败源不同（= 组件换了新源），先清降级
+   态把元素恢复成普通图片，让新源自己的 error 重新走完整回退链（含重新落占位）。 */
+function watchDegradedSrcSwap(img: HTMLImageElement): void {
+  new MutationObserver(() => {
+    const cur = img.getAttribute('src') || '';
+    if (img.hasAttribute('data-cdn-down') && cur !== img.dataset.cdnSrc && !isPlaceholderSrc(cur)) {
+      clearDegrade(img);
+    }
+  }).observe(img, { attributes: true, attributeFilter: ['src'] });
+}
+
+/** 清降级态（可重复调用）：自愈 load / 恢复重载 / 组件接管 load / 换源观察者四路共用的唯一出口 */
+function clearDegrade(img: HTMLImageElement): void {
+  img.removeAttribute('data-cdn-down');
+  img.removeAttribute('data-cdn-placeholder');
+  delete img.dataset.cdnSrc;
+}
+
+/* 判「当前 src 是不是占位图形」。只认 data URI 前缀——浏览器/测试环境都可能把属性值
+   （未编码的 `<>`）规范化后再回读，全串精确比较不可靠。 */
+function isPlaceholderSrc(src: string): boolean {
+  return src.startsWith('data:image/svg+xml,');
 }
 
 /** CDN 恢复：重载当前页面全部已降级图片（重设 src 重新请求；仍失败会再次标记，幂等） */
 function reloadDownedImages(): void {
   document.querySelectorAll<HTMLImageElement>('img[data-cdn-down]').forEach((img) => {
-    const src = img.getAttribute('src');
-    img.removeAttribute('data-cdn-down');
+    const src = img.dataset.cdnSrc || img.getAttribute('src');
+    clearDegrade(img);
     if (src && !src.startsWith('data:')) img.src = src;
   });
 }
@@ -61,7 +112,7 @@ function handleFailure(img: HTMLImageElement): void {
   if (!isCdnImage(src)) return;
 
   if (isCdnDown()) {
-    markDown(img);
+    markDown(img, true);
     return;
   }
   const fb = img.getAttribute('data-cdn-fallback');

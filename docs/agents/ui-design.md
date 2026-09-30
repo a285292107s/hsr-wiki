@@ -18,6 +18,7 @@
 - **不使用 CSS 预处理器**；全局原语用 `:where()` 保持零特异性，页面规则必须永远能覆盖原语。
 - **纸感颗粒覆层**（`#app::after`）唯一收口于 tokens.css，**禁止页面级复制或调参**；强度唯一调参位 `--grain-opacity`。
 - **无障碍三件套**（tokens.css 末尾，全站硬标准）：`focus-visible` 统一 2px 主色焦点环；`prefers-reduced-motion: reduce` 全站禁用位移/过渡；`hover: none` 重置粘滞 hover。页面级只在各自 CSS 追加细化，不重复定义基础态。
+- **图标占位不登记为 CSS 全局原语**：`MISSING_ICON_SVG` / `MISSING_ICON_SRC` 是 TS 共享常量（`src/services/cdn/placeholder.ts`，内联 SVG data URI），没有类名也没有选择器、跨页复用靠 import 而非 CSS ⇒ 按本表分层它属「共享常量」而非「跨页全局原语」，不进上表；**禁止**在页面 CSS / 组件里复制该 SVG。CSS 侧配套只有 tokens.css 的一条降级规则 `img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden }`（占位必须可见），判定与 opt-out 语义见 [ADR 0024](../adr/0024-图标回退链与真缺失占位.md)。
 
 ## 2. 色彩：四层令牌与单向事实链
 

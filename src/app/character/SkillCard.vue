@@ -5,7 +5,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
 import {
-  fmtDesc, fmtToughness, skillIconUrl, iconUrl,
+  fmtDesc, fmtToughness, skillIconUrl, iconUrl, iconImgAttrs,
 } from '../../lib/format';
 import { ELEM, TYPE } from '../../lib/constants';
 import { extraTerms } from './utils';
@@ -183,6 +183,7 @@ const officialMaxLv = computed(() => props.sk.max_level ?? maxLv.value);
 const typeName = computed(() => props.sk.type_name || TYPE[props.sk.type ?? ''] || '');
 const tagLabel = computed(() => props.sk.tag || '');
 const icon = computed(() => skillIconUrl(props.sk, props.charId, props.charData));
+const iconAttrs = computed(() => iconImgAttrs(icon.value));
 const typeKey = computed(() => props.sk.type || '');
 
 const terms = computed(() => extraTerms(props.sk));
@@ -282,11 +283,11 @@ function onImgLoad(): void { imgDone.value = true; }
     </div>
     <div class="nk-skill__body">
       <div v-if="!isMobile" class="nk-skill__rail">
-        <img v-if="icon" class="nk-skill__icon" :src="icon" alt="">
+        <img v-if="icon" class="nk-skill__icon" v-bind="iconAttrs" alt="">
       </div>
       <div class="nk-skill__content">
         <div class="nk-skill__title-row">
-          <img v-if="isMobile && icon" class="nk-skill__icon" :src="icon" alt="">
+          <img v-if="isMobile && icon" class="nk-skill__icon" v-bind="iconAttrs" alt="">
           <div class="nk-skill__title">
             <span class="nk-skill__name">{{ sk.name }}</span>
             <span class="nk-skill__meta">
@@ -327,7 +328,7 @@ function onImgLoad(): void { imgDone.value = true; }
                 <div class="nk-skill__link-item-head">
                   <img
                     class="nk-skill__link-item-icon"
-                    :src="iconUrl(l.icon)"
+                    v-bind="iconImgAttrs(iconUrl(l.icon))"
                     :alt="l.name"
                   >
                   <span class="nk-skill__link-item-name">{{ l.name }}</span>

@@ -22,7 +22,7 @@ _TRIGGER_TYPE_MAP = {
     "Skill34": None,
 }
 
-def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dict]:
+def _build_skills(skill_data: list[dict], skill_ids: list[int], avatar_id: int) -> dict[str, dict]:
     """从 AvatarSkillConfig 构建 skills 字典，含所有等级的 param_list。"""
     by_id: dict[int, list[dict]] = defaultdict(list)
     for item in skill_data:
@@ -73,7 +73,7 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
             "type": skill_type,
             "type_name": type_desc,
             "tag": tag,
-            "icon": map_icon_path(first.get("SkillIcon", "")),
+            "icon": _map_skill_icon(first.get("SkillIcon", ""), avatar_id),
             "sp_base": unwrap_value(first.get("SPBase", None)),
             "sp_need": unwrap_value(first.get("SPNeed", None)),
             "bp_need": unwrap_value(first.get("BPNeed", None)),
@@ -92,7 +92,7 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int]) -> dict[str, dic
 
     return result
 
-def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int]) -> dict[str, dict]:
+def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int], avatar_id: int) -> dict[str, dict]:
     """从 AvatarServantSkillConfig 构建忆灵技能字典。
 
     与角色技能不同：不做 HideInUI/TriggerKey 过滤（CDN 包含全部忆灵技能），
@@ -135,7 +135,7 @@ def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int]) 
             "type": skill_type,
             "type_name": type_desc,
             "tag": tag,
-            "icon": map_icon_path(first.get("SkillIcon", "")),
+            "icon": _map_skill_icon(first.get("SkillIcon", ""), avatar_id),
             "sp_base": unwrap_value(first.get("SPBase", None)),
             "sp_need": unwrap_value(first.get("SPNeed", None)),
             "bp_need": unwrap_value(first.get("BPNeed", None)),
@@ -179,11 +179,11 @@ def _build_memosprite(servant_config: list[dict], servant_skill_data: list[dict]
             "speed_base": s.get("SpeedBase", "0"),
             "speed_inherit": s.get("SpeedInherit", "0"),
             "aggro": unwrap_value(s.get("Aggro", {})),
-            "skills": _build_servant_skills(servant_skill_data, s.get("SkillIDList", [])),
+            "skills": _build_servant_skills(servant_skill_data, s.get("SkillIDList", []), avatar_id),
         }
     return None
 
-def _build_ranks(rank_data: list[dict], rank_ids: list[int]) -> dict[str, dict]:
+def _build_ranks(rank_data: list[dict], rank_ids: list[int], avatar_id: int) -> dict[str, dict]:
     """从 AvatarRankConfig 构建 ranks 字典。"""
     result: dict[str, dict] = {}
     for item in rank_data:
@@ -199,33 +199,51 @@ def _build_ranks(rank_data: list[dict], rank_ids: list[int]) -> dict[str, dict]:
             "id": rid,
             "name": name,
             "desc": desc,
-            "icon": map_icon_path(item.get("IconPath", "")),
+            "icon": _map_skill_icon(item.get("IconPath", ""), avatar_id),
             "param_list": [unwrap_value(p) for p in item.get("Param", [])],
             "extra": {},
         }
 
     return result
 
-def _normalize_tree_icon(icon: str, avatar_id: int) -> str:
-    """将「进阶」行迹的图标从 1{avatar_id} 伪目录归一到角色自身 ID 目录。
+_PSEUDO_SKILL_ICON_RE = re.compile(r"^((?:SpriteOutput/SkillIcons/Avatar|icon/skill/Avatar)/)(\d+)/(.+)$")
+"""技能/星魂/行迹图标路径结构：前缀 + 目录 id + 文件名。
 
-    部分角色的源数据存在「进阶」行迹重复行（EnhancedID），其 IconPath 指向
-    1{avatar_id} 目录（如卡芙卡 1005 → 11005），该目录在 CDN 上可能不存在，
-    导致附加能力图标 404。这里仅针对这种 1{avatar_id} 伪目录归一到角色自身 ID。
+同时接受源路径（SpriteOutput/SkillIcons/Avatar/，归一必须在 map_icon_path 之前执行）
+与已映射的旧短路径（icon/skill/Avatar/，仅为兼容既有调用）。
+"""
+
+def _normalize_tree_icon(icon: str, avatar_id: int) -> str:
+    """将技能/星魂/行迹图标的 1{avatar_id} 伪目录归一到角色自身 ID 目录。
+
+    部分源数据存在「进阶」重复行（EnhancedID）与加强技能/星魂，其图标指向
+    1{avatar_id} 伪目录（如卡芙卡 1005 → 11005，文件名亦为 SkillIcon_11005_*），
+    该资产在 CDN 上不存在，导致技能卡/星魂/附加能力图标 404。这里把目录与文件名
+    中的 id 一并归一，落到与基础行同名的真实资产（SkillIcon_1005_*）。
 
     注意：其他跨 ID 引用是有意为之、不能改动。例如开拓者偶数变体（8002/8004…）
-    自身无图标资产，源数据引用配对奇数 ID（8001/8003…）的真实图标。
+    自身无图标资产，源数据引用配对奇数 ID（8001/8003…）的真实图标；忆灵技能的
+    SkillIcon_11402_Servant* 文件名用的是忆灵 ID，目录本就是角色自身 ID。
     """
     if not icon:
         return icon
-    m = re.match(r"^icon/skill/Avatar/(\d+)/(.+)$", icon)
+    m = _PSEUDO_SKILL_ICON_RE.match(icon)
     if not m:
         return icon
-    other_id, filename = m.group(1), m.group(2)
+    prefix, other_id, filename = m.group(1), m.group(2), m.group(3)
     if other_id != f"1{avatar_id}":
         return icon
     filename = filename.replace(f"SkillIcon_{other_id}_", f"SkillIcon_{avatar_id}_", 1)
-    return f"icon/skill/Avatar/{avatar_id}/{filename}"
+    return f"{prefix}{avatar_id}/{filename}"
+
+def _map_skill_icon(source_path: str, avatar_id: int) -> str:
+    """技能/星魂/行迹图标：源路径先归一伪目录，再映射为 CDN 路径。
+
+    顺序不可颠倒：--official-icon-paths 模式下 map_icon_path 产出
+    skillicons/avatar/{id}/... 前缀，_normalize_tree_icon 的匹配式覆盖不到，
+    归一会被静默跳过（技能/星魂/行迹三处同款洞，故统一收口到本函数）。
+    """
+    return map_icon_path(_normalize_tree_icon(source_path, avatar_id))
 
 def _build_skill_trees(tree_data: list[dict], avatar_id: int, enhanced_id: int | None = None) -> dict[str, dict[str, dict]]:
     """从 AvatarSkillTreeConfig 构建 skill_trees。
@@ -264,7 +282,7 @@ def _build_skill_trees(tree_data: list[dict], avatar_id: int, enhanced_id: int |
                 "avatar_promotion_limit": e.get("AvatarPromotionLimit"),
                 "avatar_level_limit": e.get("AvatarLevelLimit"),
                 "default_unlock": e.get("DefaultUnlock", False),
-                "icon": _normalize_tree_icon(map_icon_path(e.get("IconPath", "")), avatar_id),
+                "icon": _map_skill_icon(e.get("IconPath", ""), avatar_id),
                 "level_up_skill_id": e.get("LevelUpSkillID", []),
                 "material_list": e.get("MaterialList", []),
                 "max_level": e.get("MaxLevel", 1),
@@ -389,8 +407,8 @@ def _build_enhanced(
         skill_ids = e.get("SkillList", [])
         rank_ids = e.get("RankIDList", [])
         result[str(enh_key)] = {
-            "skills": _build_skills(skill_config, skill_ids),
-            "ranks": _build_ranks(rank_config, rank_ids),
+            "skills": _build_skills(skill_config, skill_ids, avatar_id),
+            "ranks": _build_ranks(rank_config, rank_ids, avatar_id),
             "skill_trees": _build_skill_trees(tree_config, avatar_id, enhanced_id=enh_key),
             "descs": _enhanced_descs(hint_data, avatar_id, enh_key),
             "sp_need": unwrap_value(e.get("SPNeed")),
@@ -513,9 +531,9 @@ def convert() -> None:
             "voicelines": [],
         }
 
-        skills = _build_skills(skill_config, skill_ids)
+        skills = _build_skills(skill_config, skill_ids, avatar_id)
 
-        ranks = _build_ranks(rank_config, rank_ids)
+        ranks = _build_ranks(rank_config, rank_ids, avatar_id)
 
         skill_trees = _build_skill_trees(tree_config, avatar_id)
 

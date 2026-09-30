@@ -1,5 +1,5 @@
 
-import { cdnUri, cdnRawUrl, nanokaUrl, resolveCdnUri } from '../services/cdn';
+import { cdnFallbackFromPrimary, cdnUri, cdnRawUrl, nanokaUrl, resolveCdnUri } from '../services/cdn';
 import {
   USE_OFFICIAL_PATHS,
   OFFICIAL_ICON_BASE,
@@ -26,6 +26,14 @@ export function iconUrl(i: string | null | undefined): string {
   }
   const name = i.includes('/') ? i.split('/').pop()! : i;
   return cdnUri('skillicons', name.replace('.png', '.webp'));
+}
+
+/* 把图标 URL 解析成 `<img>` 的属性（主源 + 回退源）：`cdnUri` 只返回 primary、把 jsDelivr 回退
+   丢掉，模板若只绑 `:src` 则主源 404 后 dom 委托读不到回退源、直接判死（图标永久空白，实测见
+   docs/memory/2026-09.md）。消费方必须同时绑 src 与 data-cdn-fallback。 */
+export function iconImgAttrs(url: string): { src: string; 'data-cdn-fallback'?: string } {
+  const fb = cdnFallbackFromPrimary(url);
+  return { src: url, 'data-cdn-fallback': fb || undefined };
 }
 
 /** 忆灵 ID：优先从 memosprite.icon 解析（SpriteOutput/ServantIconTeam/11415B.png → 11415），回退 1+charId */

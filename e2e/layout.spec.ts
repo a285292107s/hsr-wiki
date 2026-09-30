@@ -1117,6 +1117,54 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
+  /* 技能图标 CDN 契约：主源 404 时必须靠 data-cdn-fallback 换 jsDelivr（强化模式的 1{charId}
+     伪目录名在 nanoka 缺失——镜流 1212 是实例）；两源皆失败才允许出现占位图形。 */
+  test('/character/1212：强化技能图标（nanoka 404 名）必须经回退源加载成功，不得出现占位', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/character/1212');
+    const icons = page.locator('[data-panel="skills"] .nk-skill__icon');
+    await expect(icons.first()).toBeVisible();
+    await expect.poll(() => icons.count()).toBeGreaterThanOrEqual(5);
+    // 回退属性必须绑上（这条先于占位生效，否则本来能加载的资产会被占位盖住）
+    await expect(icons.first()).toHaveAttribute('data-cdn-fallback', /cdn\.jsdelivr\.net\/.*skillicons\/avatar\//);
+    const states = await icons.evaluateAll((els) => els.map((el) => ({
+      complete: (el as HTMLImageElement).complete,
+      w: (el as HTMLImageElement).naturalWidth,
+      down: (el as HTMLImageElement).hasAttribute('data-cdn-down'),
+      ph: (el as HTMLImageElement).hasAttribute('data-cdn-placeholder'),
+      src: (el as HTMLImageElement).currentSrc,
+    })));
+    for (const s of states) {
+      expect(s.ph, `占位不应出现（src=${s.src}）`).toBe(false);
+      expect(s.w, `图标应加载出位图（complete=${s.complete} src=${s.src}）`).toBeGreaterThan(0);
+    }
+    assertNoErrors();
+  });
+
+  test('/character/1212：两源皆 404 时显示占位图形（naturalWidth>0）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.route('**/assets/hsr/skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
+    await page.route('**/cdn.jsdelivr.net/**skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
+    await page.goto('/character/1212');
+    const icon = page.locator('[data-panel="skills"] .nk-skill__icon').first();
+    await expect(icon).toBeVisible();
+    await expect.poll(async () => icon.getAttribute('data-cdn-placeholder'), { timeout: 15000 }).toBe('1');
+    // 占位是内联 SVG data URI：naturalWidth>0 才是「真画出来了」的最强信号（降级留白时为 0）
+    const state = await icon.evaluate((el) => ({
+      src: el.getAttribute('src') || '',
+      w: (el as HTMLImageElement).naturalWidth,
+      box: el.getBoundingClientRect().width,
+      visibility: getComputedStyle(el).visibility,
+    }));
+    expect(state.src.startsWith('data:image/svg+xml,')).toBe(true);
+    expect(state.w).toBeGreaterThan(0);
+    expect(state.box).toBeGreaterThan(0);
+    expect(state.visibility).toBe('visible');
+    assertNoErrors();
+  });
+
   test('/lightcone/首个 id：光锥技能卡不受技能族改动波及（标题行图标在，无图标列）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const cones = JSON.parse(readFileSync('public/data/cn/light_cones.json', 'utf8')) as Record<

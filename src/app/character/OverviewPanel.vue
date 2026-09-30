@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { extraTerms } from './utils';
-import { escHtml, fmtDesc, iconUrl } from '../../lib/format';
+import { escHtml, fmtDesc, iconUrl, iconImgAttrs } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PROP_ICON, PROP_NAMES } from '../../lib/constants';
 import { SECTION_IDX, hasBonusNodes, hasProfile, hasStories, hasTalentNodes } from './sections';
@@ -149,7 +149,7 @@ const abilities = computed<Ability[]>(() => {
       class="nk-ability"
     >
       <div class="nk-skill__title-row">
-        <img v-if="ab.icon" class="nk-skill__icon" :src="ab.icon" alt="">
+        <img v-if="ab.icon" class="nk-skill__icon" v-bind="iconImgAttrs(ab.icon)" alt="">
         <div class="nk-skill__title">
           <span class="nk-skill__name">{{ ab.name }}</span>
           <span class="nk-skill__tag">附加能力 {{ ab.idx + 1 }}</span>

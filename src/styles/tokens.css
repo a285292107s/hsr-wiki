@@ -822,7 +822,7 @@ background-position: center 15%;
 .nk-idx-grid .nk-skeleton__card-img { aspect-ratio: 3 / 4; border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
 
-img[data-cdn-down] { visibility: hidden; }
+img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
 
 .nk-placeholder { position: absolute; inset: 0; overflow-y: auto; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 0 24px calc(56px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 768px) { .nk-placeholder { padding-bottom: 0; } }

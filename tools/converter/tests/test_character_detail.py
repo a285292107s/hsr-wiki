@@ -23,7 +23,7 @@ class TestBuildSkills:
             {"SkillID": 1, "Level": 3, "AttackType": "Normal", "ParamList": [{"Value": 3}]},
             {"SkillID": 1, "Level": 1, "AttackType": "Normal", "ParamList": [{"Value": 1}]},
         ]
-        result = cd._build_skills(data, [1])
+        result = cd._build_skills(data, [1], 1001)
         assert list(result["1"]["level"].keys()) == ["1", "3"]
         assert result["1"]["level"]["1"]["param_list"] == [1]
         assert result["1"]["level"]["3"]["param_list"] == [3]
@@ -31,49 +31,49 @@ class TestBuildSkills:
     def test_hideinui_filtered_except_assist(self):
         hidden = {"SkillID": 2, "Level": 1, "AttackType": "Normal", "HideInUI": True}
         assist = {"SkillID": 3, "Level": 1, "AttackType": "Assist", "HideInUI": True}
-        result = cd._build_skills([hidden, assist], [2, 3])
+        result = cd._build_skills([hidden, assist], [2, 3], 1001)
         assert "2" not in result
         assert "3" in result
 
     def test_internal_trigger_keys_filtered(self):
         data = [{"SkillID": 4, "Level": 1, "AttackType": "Normal", "SkillTriggerKey": "Skill31"}]
-        assert cd._build_skills(data, [4]) == {}
+        assert cd._build_skills(data, [4], 1001) == {}
 
     def test_skill_type_from_trigger_key(self):
         data = [{"SkillID": 5, "Level": 1, "AttackType": "", "SkillTriggerKey": "Skill03"}]
-        result = cd._build_skills(data, [5])
+        result = cd._build_skills(data, [5], 1001)
         assert result["5"]["type"] == "Ultra"
 
     def test_skill_type_fallback_to_attack_type(self):
         data = [{"SkillID": 6, "Level": 1, "AttackType": "BPSkill", "SkillTriggerKey": ""}]
-        result = cd._build_skills(data, [6])
+        result = cd._build_skills(data, [6], 1001)
         assert result["6"]["type"] == "BPSkill"
 
     def test_sp_unwrapped(self):
         data = [{"SkillID": 7, "Level": 1, "AttackType": "Normal", "SPBase": {"Value": 30}}]
-        result = cd._build_skills(data, [7])
+        result = cd._build_skills(data, [7], 1001)
         assert result["7"]["sp_base"] == 30
 
     def test_tag_resolved_from_skill_tag(self):
         import textmap
         textmap._text_map["100001"] = "单攻"
         data = [{"SkillID": 8, "Level": 1, "AttackType": "Normal", "SkillTag": {"Hash": 100001}}]
-        result = cd._build_skills(data, [8])
+        result = cd._build_skills(data, [8], 1001)
         assert result["8"]["tag"] == "单攻"
 
     def test_tag_none_when_skill_tag_missing(self):
         data = [{"SkillID": 9, "Level": 1, "AttackType": "Normal"}]
-        result = cd._build_skills(data, [9])
+        result = cd._build_skills(data, [9], 1001)
         assert result["9"]["tag"] is None
 
     def test_unknown_trigger_no_attack_type_outputs_none(self):
         data = [{"SkillID": 140805, "Level": 1, "AttackType": "", "SkillTriggerKey": "SkillP02"}]
-        result = cd._build_skills(data, [140805])
+        result = cd._build_skills(data, [140805], 1001)
         assert result["140805"]["type"] is None
 
     def test_unknown_trigger_falls_back_to_attack_type(self):
         data = [{"SkillID": 141508, "Level": 1, "AttackType": "Normal", "SkillTriggerKey": "Skill11"}]
-        result = cd._build_skills(data, [141508])
+        result = cd._build_skills(data, [141508], 1001)
         assert result["141508"]["type"] == "Normal"
 
     def test_audit_fields_output(self):
@@ -89,7 +89,7 @@ class TestBuildSkills:
             "RatedRankID": [101402],
             "RatedSkillTreeID": [1014103],
         }]
-        result = cd._build_skills(data, [20])
+        result = cd._build_skills(data, [20], 1001)
         s = result["20"]
         assert s["max_level"] == 10
         assert s["stance_damage_type"] == "Fire"
@@ -101,7 +101,7 @@ class TestBuildSkills:
 
     def test_audit_fields_null_when_missing(self):
         data = [{"SkillID": 21, "Level": 1, "AttackType": "Normal"}]
-        result = cd._build_skills(data, [21])
+        result = cd._build_skills(data, [21], 1001)
         s = result["21"]
         assert s["max_level"] is None
         assert s["stance_damage_type"] is None
@@ -114,13 +114,27 @@ class TestBuildSkills:
     def test_skill_icon_mapped(self):
         data = [{"SkillID": 30, "Level": 1, "AttackType": "Normal",
                  "SkillIcon": "SpriteOutput/SkillIcons/Avatar/30/SkillIcon_30_Normal02.png"}]
-        result = cd._build_skills(data, [30])
+        result = cd._build_skills(data, [30], 1001)
         assert result["30"]["icon"] == "icon/skill/Avatar/30/SkillIcon_30_Normal02.png"
+
+    def test_skill_icon_pseudo_dir_normalized(self):
+        """加强技能（1{avatar_id} 伪目录 + 伪文件名）归一到角色自身 ID 的真实资产。"""
+        data = [{"SkillID": 1100501, "Level": 1, "AttackType": "Normal",
+                 "SkillIcon": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Normal.png"}]
+        result = cd._build_skills(data, [1100501], 1005)
+        assert result["1100501"]["icon"] == "icon/skill/Avatar/1005/SkillIcon_1005_Normal.png"
+
+    def test_cross_id_reference_kept(self):
+        """反向守卫：开拓者偶数变体引用配对奇数 ID 的真实图标，不得归一。"""
+        data = [{"SkillID": 800201, "Level": 1, "AttackType": "Normal",
+                 "SkillIcon": "SpriteOutput/SkillIcons/Avatar/8001/SkillIcon_8001_Normal.png"}]
+        result = cd._build_skills(data, [800201], 8002)
+        assert result["800201"]["icon"] == "icon/skill/Avatar/8001/SkillIcon_8001_Normal.png"
 
 class TestBuildServantSkills:
     def test_no_filter_and_servant_type(self):
         data = [{"SkillID": 10, "Level": 1, "AttackType": "Servant", "HideInUI": True}]
-        result = cd._build_servant_skills(data, [10])
+        result = cd._build_servant_skills(data, [10], 1001)
         assert "10" in result
         assert result["10"]["type"] == "Servant"
 
@@ -129,28 +143,29 @@ class TestBuildServantSkills:
             {"SkillID": 12, "Level": 1, "AttackType": "Normal"},
             {"SkillID": 11, "Level": 1, "AttackType": "Normal"},
         ]
-        result = cd._build_servant_skills(data, [11, 12])
+        result = cd._build_servant_skills(data, [11, 12], 1001)
         assert list(result.keys()) == ["11", "12"]
 
     def test_missing_skill_skipped(self):
-        assert cd._build_servant_skills([], [99]) == {}
+        assert cd._build_servant_skills([], [99], 1001) == {}
 
     def test_tag_resolved_from_skill_tag(self):
         import textmap
         textmap._text_map["200001"] = "群攻"
         data = [{"SkillID": 13, "Level": 1, "AttackType": "Servant", "SkillTag": {"Hash": 200001}}]
-        result = cd._build_servant_skills(data, [13])
+        result = cd._build_servant_skills(data, [13], 1001)
         assert result["13"]["tag"] == "群攻"
 
     def test_skill_icon_mapped(self):
         data = [{"SkillID": 14, "Level": 1, "AttackType": "Servant",
-                 "SkillIcon": "SpriteOutput/SkillIcons/Avatar/11414/SkillIcon_11414_Servant.png"}]
-        result = cd._build_servant_skills(data, [14])
-        assert result["14"]["icon"] == "icon/skill/Avatar/11414/SkillIcon_11414_Servant.png"
+                 "SkillIcon": "SpriteOutput/SkillIcons/Avatar/1414/SkillIcon_11414_Servant.png"}]
+        result = cd._build_servant_skills(data, [14], 1414)
+        # 忆灵：目录是角色自身 ID（1414）、文件名是忆灵 ID（11414），不得被归一
+        assert result["14"]["icon"] == "icon/skill/Avatar/1414/SkillIcon_11414_Servant.png"
 
     def test_audit_fields_same_structure(self):
         data = [{"SkillID": 14, "Level": 1, "AttackType": "Servant", "SPNeed": {"Value": 110}}]
-        result = cd._build_servant_skills(data, [14])
+        result = cd._build_servant_skills(data, [14], 1001)
         s = result["14"]
         assert s["sp_need"] == 110
         assert s["max_level"] is None
@@ -160,14 +175,20 @@ class TestBuildServantSkills:
 class TestBuildRanks:
     def test_keyed_by_rank_number(self):
         data = [{"RankID": 1001, "Rank": 2, "Name": "二魂", "Param": [{"Value": 5}]}]
-        result = cd._build_ranks(data, [1001])
+        result = cd._build_ranks(data, [1001], 1001)
         assert "2" in result
         assert result["2"]["id"] == 1001
         assert result["2"]["param_list"] == [5]
 
     def test_unrelated_ranks_skipped(self):
         data = [{"RankID": 9999, "Rank": 1, "Name": ""}]
-        assert cd._build_ranks(data, [1001]) == {}
+        assert cd._build_ranks(data, [1001], 1001) == {}
+
+    def test_rank_icon_pseudo_dir_normalized(self):
+        data = [{"RankID": 1100501, "Rank": 1, "Name": "",
+                 "IconPath": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Rank1.png"}]
+        result = cd._build_ranks(data, [1100501], 1005)
+        assert result["1"]["icon"] == "icon/skill/Avatar/1005/SkillIcon_1005_Rank1.png"
 
 class TestBuildStats:
     def test_stages_ordered_by_max_level(self):
@@ -198,14 +219,55 @@ class TestNormalizeTreeIcon:
         icon = "icon/skill/Avatar/11005/SkillIcon_11005_1.png"
         assert cd._normalize_tree_icon(icon, 1005) == "icon/skill/Avatar/1005/SkillIcon_1005_1.png"
 
+    def test_source_path_pseudo_dir_normalized(self):
+        """源路径形态（map_icon_path 之前）同样归一，否则 --official-icon-paths 模式下静默失效。"""
+        icon = "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Normal.png"
+        assert cd._normalize_tree_icon(icon, 1005) == \
+            "SpriteOutput/SkillIcons/Avatar/1005/SkillIcon_1005_Normal.png"
+
     def test_other_cross_id_kept(self):
         icon = "icon/skill/Avatar/8001/SkillIcon_8001_1.png"
         assert cd._normalize_tree_icon(icon, 8002) == icon
+
+    def test_servant_icon_kept(self):
+        """忆灵：目录 == 角色自身 ID（非 1{id}），文件名忆灵 ID 保持原样。"""
+        icon = "SpriteOutput/SkillIcons/Avatar/1402/SkillIcon_11402_Servant01.png"
+        assert cd._normalize_tree_icon(icon, 1402) == icon
 
     def test_empty_and_non_skill_kept(self):
         assert cd._normalize_tree_icon("", 1005) == ""
         other = "icon/path/Warrior.png"
         assert cd._normalize_tree_icon(other, 1005) == other
+
+class TestOfficialIconPathsNormalization:
+    """--official-icon-paths 模式：归一必须发生在 map_icon_path 之前，产出官方短路径。
+
+    若把归一写在 map_icon_path 之后，前缀变成 skillicons/avatar/... 匹配不到 → 伪目录漏网。
+    """
+
+    @pytest.fixture(autouse=True)
+    def official_paths(self, monkeypatch):
+        import utils
+        monkeypatch.setattr(utils, "_USE_OFFICIAL_PATHS", True)
+
+    def test_skill_pseudo_dir_normalized(self):
+        data = [{"SkillID": 1100501, "Level": 1, "AttackType": "Normal",
+                 "SkillIcon": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Normal.png"}]
+        result = cd._build_skills(data, [1100501], 1005)
+        assert result["1100501"]["icon"] == "skillicons/avatar/1005/SkillIcon_1005_Normal.png"
+
+    def test_rank_pseudo_dir_normalized(self):
+        data = [{"RankID": 1100501, "Rank": 1, "Name": "",
+                 "IconPath": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Rank1.png"}]
+        result = cd._build_ranks(data, [1100501], 1005)
+        assert result["1"]["icon"] == "skillicons/avatar/1005/SkillIcon_1005_Rank1.png"
+
+    def test_skill_tree_pseudo_dir_normalized(self):
+        data = [{"AvatarID": 1005, "AnchorType": "Point01", "Level": 1, "PointID": 11005101,
+                 "PointName": {}, "ParamList": [], "EnhancedID": 1,
+                 "IconPath": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_1.png"}]
+        result = cd._build_skill_trees(data, 1005, enhanced_id=1)
+        assert result["Point01"]["1"]["icon"] == "skillicons/avatar/1005/SkillIcon_1005_1.png"
 
 class TestBuildMemosprite:
     def test_owner_base_mapping(self):
@@ -262,12 +324,23 @@ class TestBuildEnhanced:
             "EnhancedDesc1": {"Hash": 5001}, "EnhancedDesc2": {"Hash": 5002},
         }]
         skill_config = [{"SkillID": 1100501, "Level": 1, "AttackType": "Normal",
-                         "ParamList": [], "SkillName": {}}]
-        rank_config = [{"RankID": 1100501, "Rank": 1, "Name": "", "Param": []}]
+                         "ParamList": [], "SkillName": {},
+                         "SkillIcon": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Normal.png"}]
+        rank_config = [{"RankID": 1100501, "Rank": 1, "Name": "", "Param": [],
+                        "IconPath": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Rank1.png"}]
         tree_config = [{"AvatarID": 1005, "AnchorType": "Point01", "Level": 1,
                         "PointID": 11005101, "PointName": {}, "ParamList": [],
-                        "EnhancedID": 1}]
+                        "EnhancedID": 1,
+                        "IconPath": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_1.png"}]
         return enhanced_config, hint_data, skill_config, rank_config, tree_config
+
+    def test_enhanced_icons_normalized_to_own_id(self):
+        """加强技能/星魂/行迹的 1{avatar_id} 伪目录一律归一到角色自身 ID 目录。"""
+        cfg = self._config()
+        bundle = cd._build_enhanced(*cfg, 1005)["1"]
+        assert bundle["skills"]["1100501"]["icon"] == "icon/skill/Avatar/1005/SkillIcon_1005_Normal.png"
+        assert bundle["ranks"]["1"]["icon"] == "icon/skill/Avatar/1005/SkillIcon_1005_Rank1.png"
+        assert bundle["skill_trees"]["Point01"]["1"]["icon"] == "icon/skill/Avatar/1005/SkillIcon_1005_1.png"
 
     def test_bundle_shape_and_fields(self):
         import textmap

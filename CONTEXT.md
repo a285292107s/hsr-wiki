@@ -295,6 +295,11 @@ _Avoid_: 注释比例、注释占比（都不是判据）
 
 ### 图片 CDN
 图片资源解析统一收口于 `src/services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / 遗器通用部位图标，根 = `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`，物理目录 `public/data/cn/assets/icons/`）local-first，未入库的新图标自动回退远端；另有一个单文件例外——真珠 1503 圆头像（`avatarroundicon`）因上游资产为占位贴图而本地顶替，见该分类 `localFiles` 白名单注释；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）。
+**运行期回退链**：`<img>` 失败由全局事件委托（`src/services/cdn/dom.ts`）接管——主源失败先换第二源（模板须绑 `data-cdn-fallback` 绑定的回退源），两源皆失效才落到「图标占位」（见下条）；CDN 整体不可用（健康探测判定 down）时短路、不上占位。**只绑 `:src` 的图标位读不到回退源，主源 404 即判死**。
+
+### 图标占位（Icon Placeholder）
+`<img>` 首选源与回退源皆失效（或加载挂起超时）后由全局委托顶替 `src` 的**中性占位图形**：单点常量在 `src/services/cdn/placeholder.ts`（内联 SVG 描边问号、中性灰），并打 `data-cdn-placeholder`；被顶替的原 URL 存 `dataset.cdnSrc` 供 CDN 恢复链还原。它读作「此处无图」，**不是**「加载中」；CDN 整体不可用（down 短路）与预留在 `data-cdn-noph` 上的有意空图**不上**占位。组件自带语义兜底的图标面（物品卡立方体 / 遗器部位图 / 终局 buff 星形）不由本占位接管。**禁止改用 `<text>` 字形**（字体可用性随宿主变化）。
+_Avoid_: 破图、默认图、加载中占位
 
 ### 图片路径映射
 源数据图片路径（`SpriteOutput/...`）到 CDN 相对路径的映射规则。converter 在 `config.py` 硬编码两套规则：legacy 短路径（`icon/character/1001.png`）与官方 StarRailTextures 仓库相对路径（`avatarshopicon/avatar/1001.png`，`--official-icon-paths` 输出）；前端 `src/services/cdn/` 再按分类解析为 jsDelivr / nanoka 实际 URL。

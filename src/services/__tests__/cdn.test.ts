@@ -251,24 +251,127 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.src).toBe('https://fb.example/x.webp');
       expect(img.hasAttribute('data-cdn-fallback')).toBe(false);
-      // 再次触发 error：属性已清除，不再替换（防回退源循环）
+      // 再次触发 error：属性已清除，不再替换（防回退源循环）→ 终态占位图形顶替失败的回退源
       img.dispatchEvent(new Event('error', { bubbles: true }));
-      expect(img.src).toBe('https://fb.example/x.webp');
+      expect(img.dataset.cdnSrc).toBe('https://fb.example/x.webp');
+      expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     } finally {
       off();
       img.remove();
     }
   });
 
-  it('无回退属性且首选源（nanoka）失败 → 标记 data-cdn-down（src 不变，CSS 隐藏破图）', () => {
+  it('无回退属性且首选源（nanoka）失败 → 标记 data-cdn-down 并换占位图形（原 URL 存 dataset.cdnSrc）', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
     img.src = 'https://primary.example/x.webp';
     document.body.appendChild(img);
     try {
       img.dispatchEvent(new Event('error', { bubbles: true }));
-      expect(img.src).toBe('https://primary.example/x.webp');
       expect(img.dataset.cdnDown).toBe('1');
+      expect(img.dataset.cdnPlaceholder).toBe('1');
+      expect(img.dataset.cdnSrc).toBe('https://primary.example/x.webp');
+      expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('已降级 img 在 CDN 恢复后 load 成功 → 清除降级标记（慢响应自愈）', () => {
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.setAttribute('data-cdn-noph', '1');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    try {
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.dataset.cdnDown).toBe('1');
+      img.dispatchEvent(new Event('load'));
+      expect(img.hasAttribute('data-cdn-down')).toBe(false);
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('占位后组件换上自带兜底源并 load 成功 → 降级态干净退场（无残留标记）', async () => {
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    try {
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.dataset.cdnPlaceholder).toBe('1');
+      // 组件接管：自己把 src 换成语义兜底源（物品卡 / 遗器部位图 / 终局 buff 星形走这条）
+      img.src = 'https://component-fallback.example/slot-icon.webp';
+      img.dispatchEvent(new Event('load'));
+      await Promise.resolve();
+      expect(img.hasAttribute('data-cdn-down')).toBe(false);
+      expect(img.hasAttribute('data-cdn-placeholder')).toBe(false);
+      expect(img.dataset.cdnSrc).toBeUndefined();
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('占位后同源重试成功（放行原失败源）→ 降级态退场', async () => {
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    try {
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.dataset.cdnPlaceholder).toBe('1');
+      img.dispatchEvent(new Event('load')); // 占位自身 data URI 的 load（真实浏览器里是独立事件）
+      // 放行后把同一个原失败源写回并加载成功
+      img.src = 'https://primary.example/x.webp';
+      img.dispatchEvent(new Event('load'));
+      await Promise.resolve();
+      expect(img.hasAttribute('data-cdn-down')).toBe(false);
+      expect(img.hasAttribute('data-cdn-placeholder')).toBe(false);
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('占位后组件换新源又失败 → 允许重新落占位（不因早退而露出可见破图）', async () => {
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    try {
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      img.dispatchEvent(new Event('load'));
+      expect(img.dataset.cdnPlaceholder).toBe('1');
+      // 组件换成一个同样 404 的新远端源 → 必须先清降级态，才能重新走完整回退链
+      img.src = 'https://other.example/y.webp';
+      await Promise.resolve();
+      expect(img.hasAttribute('data-cdn-down')).toBe(false);
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.dataset.cdnDown).toBe('1');
+      expect(img.dataset.cdnPlaceholder).toBe('1');
+      expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
+      expect(img.dataset.cdnSrc).toBe('https://other.example/y.webp');
+    } finally {
+      off();
+      img.remove();
+    }
+  });
+
+  it('data-cdn-noph（组件自带占位 / 有意空图）→ 只标记降级，不换占位图形', () => {
+    const off = installCdnImgFallback();
+    const img = document.createElement('img');
+    img.setAttribute('data-cdn-noph', '1');
+    img.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img);
+    try {
+      img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.dataset.cdnDown).toBe('1');
+      expect(img.getAttribute('src')).toBe('https://primary.example/x.webp');
+      expect(img.hasAttribute('data-cdn-placeholder')).toBe(false);
     } finally {
       off();
       img.remove();
@@ -284,8 +387,10 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     try {
       img.dispatchEvent(new Event('error', { bubbles: true }));
       img.dispatchEvent(new Event('error', { bubbles: true }));
-      expect(img.src).toBe('https://fb.example/x.webp');
       expect(img.dataset.cdnDown).toBe('1');
+      // 回退源是最终失败的那一个：占位图形顶替它，原回退 URL 存进 dataset.cdnSrc 供恢复链还原
+      expect(img.dataset.cdnSrc).toBe('https://fb.example/x.webp');
+      expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     } finally {
       off();
       img.remove();
@@ -300,9 +405,10 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     try {
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.src).toBe(`${BASE}/element/fire.webp`);
-      // 远端再失败：src 已是 http(s)，无回退属性 → data-cdn-down
+      // 远端再失败：src 已是 http(s)，无回退属性 → 占位图形
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.dataset.cdnDown).toBe('1');
+      expect(img.dataset.cdnSrc).toBe(`${BASE}/element/fire.webp`);
     } finally {
       off();
       img.remove();
@@ -415,7 +521,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     img.remove();
   });
 
-  it('挂起超时：无回退属性的首选源 img → 标记 data-cdn-down 降级', async () => {
+  it('挂起超时：无回退属性的首选源 img → 标记 data-cdn-down 并换占位图形', async () => {
     vi.useFakeTimers();
     const off = installCdnImgFallback();
     const img = document.createElement('img');
@@ -424,9 +530,9 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     document.body.appendChild(img);
     await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS + 100);
     expect(img.dataset.cdnDown).toBe('1');
-    // 慢响应自愈：最终 load 成功 → 清除降级标记恢复显示
-    img.dispatchEvent(new Event('load'));
-    expect(img.hasAttribute('data-cdn-down')).toBe(false);
+    // 挂起路线也上占位（真挂起与真失败在视觉上同解），原 URL 留待 CDN 恢复重载
+    expect(img.dataset.cdnSrc).toBe('https://primary.example/x.webp');
+    expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     off();
     img.remove();
   });

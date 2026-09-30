@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import CompareSkillCard from './CompareSkillCard.vue';
 import { buildCompare } from '../../lib/compare';
-import { fmtDesc, iconUrl, eidolonIconUrl } from '../../lib/format';
+import { fmtDesc, iconUrl, iconImgAttrs, eidolonIconUrl } from '../../lib/format';
 import { SECTION_IDX } from './sections';
 import type { CharacterData } from '../../services/types';
 import type { CompareResult, RankDiff, TreeDiff } from '../../lib/compare';
@@ -138,7 +138,7 @@ const spNote = computed<string | null>(() => {
       >
         <span class="nk-cmp-badge">变化</span>
         <div class="nk-skill__title-row">
-          <img v-if="c.icon" class="nk-skill__icon" :src="c.icon" alt="">
+          <img v-if="c.icon" class="nk-skill__icon" v-bind="iconImgAttrs(c.icon)" alt="">
           <div class="nk-skill__title">
             <span class="nk-skill__name">
               <template v-if="c.nameChanged">
