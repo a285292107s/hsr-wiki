@@ -5,143 +5,143 @@
  * getter 恒返回主版(4.2)，window.spine 自加载起未被污染，无时序窗口；var/spine=/window.spine=/globalThis.spine= 三种挂载均生效。
  * 单例 Promise 按版本独立共享，本地主源+全 CDN 兜底失败自动置空允许重试(验收台「重新加载」依赖此语义)。
  */
-import { SPINE_RUNTIME_41_CDNS, SPINE_RUNTIME_CDNS, SPINE_RUNTIME_LOCAL } from './constants';
-import { isCdnDown } from '../services/cdn/health';
-import type { SpineLib, SpinePlayerCtor, SpineRuntimeVersion } from './types';
-
-/** 单源注入超时：连接黑洞（DNS/握手挂起）时 onerror 可能永不触发，超时按失败结算进入下一源 */
-const SCRIPT_TIMEOUT_MS = 8000;
-
-/** 各版本 CDN 兜底列表（4.1=备用 / 4.2=主；本地主源失败后才尝试） */
-const VERSION_CDNS: Record<SpineRuntimeVersion, string[]> = {
-  '4.1': SPINE_RUNTIME_41_CDNS,
-  '4.2': SPINE_RUNTIME_CDNS,
-};
-
-/** 各版本运行时引用（访问器代理捕获的全局 spine 命名空间） */
-const libs = new Map<SpineRuntimeVersion, SpineLib>();
-
-/** 各版本加载单例 Promise：失败后自动置空允许重试，成功则共享结果 */
-const _runtimeLoads = new Map<SpineRuntimeVersion, Promise<boolean>>();
-
-/** 当前注入 script 对应的版本（访问器 setter 捕获用上下文；注入串行化保证不被并发覆盖） */
-let loadingVersion: SpineRuntimeVersion | null = null;
-
-/** window.spine 访问器代理是否已安装（幂等） */
-let proxyInstalled = false;
-
-/** script 注入互斥链：同一时刻只允许一个版本的 IIFE 在途，防止 loadingVersion 被并发覆盖导致错位捕获 */
-let injectChain: Promise<unknown> = Promise.resolve();
-
-/**
- * 安装 window.spine 访问器代理（首次加载前调用，幂等）：
- * - setter 按 loadingVersion 上下文捕获 IIFE 注入的引用进 libs（不真正覆盖全局值）
- * - getter 恒返回主版本（4.2），保证任意时刻读取 window.spine 均为主运行时
- */
-function installSpineProxy(): void {
-  if (proxyInstalled) return;
-  proxyInstalled = true;
-  try {
-    Object.defineProperty(window, 'spine', {
-      configurable: true, // 保留可替换/删除能力
-      get(): SpineLib | null {
-        return libs.get('4.2') ?? libs.get('4.1') ?? null;
-      },
-      set(v: unknown): void {
-        try {
-          if (loadingVersion && v && typeof v === 'object') libs.set(loadingVersion, v as SpineLib);
-        } catch {
-          /* 捕获失败仅影响该版本加载判定，不扩散 */
-        }
-      },
-    });
-  } catch {
-    /* 极端环境 defineProperty 失败 → 走 onload 捕获 + 恢复主版本兜底路径（captureFallback） */
-  }
-}
-
-/**
- * 代理失效兜底：script onload 后直接从 window.spine 捕获，并恢复主版本引用
- * （仅当访问器代理安装失败时使用；此时 IIFE 直接覆盖了全局）
- */
-function captureFallback(version: SpineRuntimeVersion): boolean {
-  try {
-    const g = globalThis as { spine?: SpineLib };
-    if (!g.spine) return false;
-    libs.set(version, g.spine);
-    const main = libs.get('4.2');
-    if (main && g.spine !== main) g.spine = main; // 防止 4.1 污染全局
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/** 注入单个版本 CDN script（串行化：前一个下载+执行结算后才注入下一个；单源 8s 超时兜底） */
-function injectScript(url: string, version: SpineRuntimeVersion): Promise<boolean> {
-  const run = injectChain.then(
-    () =>
-      new Promise<boolean>((resolve) => {
-        let settled = false;
-        let timer: ReturnType<typeof setTimeout> | null = null;
-        const settle = (ok: boolean): void => {
-          if (settled) return;
-          settled = true;
-          if (timer !== null) clearTimeout(timer);
-          s.onload = null;
-          s.onerror = null;
-          resolve(ok);
-        };
-        loadingVersion = version; // IIFE 同步执行瞬间走 setter → 按版本捕获
-        const s = document.createElement('script');
-        s.src = url;
-        s.onload = () => settle(proxyInstalled ? getSpineCtor(version) !== null : captureFallback(version));
-        s.onerror = () => settle(false);
-        // 超时：移除 script（避免残留网络请求），按失败结算
-        timer = setTimeout(() => {
-          s.remove();
-          settle(false);
-        }, SCRIPT_TIMEOUT_MS);
-        document.head.appendChild(s);
-      }),
-  );
-  injectChain = run.catch(() => undefined);
-  return run;
-}
-
-/** 读取对应版本的 spine-player 构造器（SpinePlayer 级 API；缺省主版本 4.2） */
-export function getSpineCtor(version: SpineRuntimeVersion = '4.2'): SpinePlayerCtor | null {
-  const lib = libs.get(version);
-  return (lib && lib.SpinePlayer) || null;
-}
-
-/** 读取对应版本的 spine 运行时（SceneRenderer 级 API；缺省主版本 4.2） */
-export function getSpineLib(version: SpineRuntimeVersion = '4.2'): SpineLib | null {
-  return libs.get(version) ?? null;
-}
-
-/** 动态加载指定版本 spine-player 运行时：本地主源（public/vendor/spine，同源静态资源）→
- *  CDN 兜底（仅健康探测正常时尝试）；全部失败返回 false 并清空单例允许重试
- *  （审核台「重新加载」按钮依赖此语义） */
-export function loadSpineRuntime(version: SpineRuntimeVersion = '4.2'): Promise<boolean> {
-  if (getSpineCtor(version)) return Promise.resolve(true);
-  const pending = _runtimeLoads.get(version);
-  if (pending) return pending;
-  const promise = (async (): Promise<boolean> => {
-    installSpineProxy();
-    // 本地主源：同源加载，不受 CDN 健康状态影响（CDN down 时动画功能仍可用）
-    if (await injectScript(SPINE_RUNTIME_LOCAL[version], version)) return true;
-    // 本地失败才会走到 CDN 兜底：CDN 整体不可用时跳过注入，允许恢复后重试
-    if (isCdnDown()) return false;
-    for (const url of VERSION_CDNS[version]) {
-      const ok = await injectScript(url, version);
-      if (ok) return true;
-    }
-    return false;
-  })().then((ok) => {
-    if (!ok) _runtimeLoads.delete(version); // 失败后清空单例 → 「重新加载」可重试
-    return ok;
-  });
-  _runtimeLoads.set(version, promise);
-  return promise;
-}
+import { SPINE_RUNTIME_41_CDNS, SPINE_RUNTIME_CDNS, SPINE_RUNTIME_LOCAL } from './constants';
+import { isCdnDown } from '../services/cdn/health';
+import type { SpineLib, SpinePlayerCtor, SpineRuntimeVersion } from './types';
+
+/** 单源注入超时：连接黑洞（DNS/握手挂起）时 onerror 可能永不触发，超时按失败结算进入下一源 */
+const SCRIPT_TIMEOUT_MS = 8000;
+
+/** 各版本 CDN 兜底列表（4.1=备用 / 4.2=主；本地主源失败后才尝试） */
+const VERSION_CDNS: Record<SpineRuntimeVersion, string[]> = {
+  '4.1': SPINE_RUNTIME_41_CDNS,
+  '4.2': SPINE_RUNTIME_CDNS,
+};
+
+/** 各版本运行时引用（访问器代理捕获的全局 spine 命名空间） */
+const libs = new Map<SpineRuntimeVersion, SpineLib>();
+
+/** 各版本加载单例 Promise：失败后自动置空允许重试，成功则共享结果 */
+const _runtimeLoads = new Map<SpineRuntimeVersion, Promise<boolean>>();
+
+/** 当前注入 script 对应的版本（访问器 setter 捕获用上下文；注入串行化保证不被并发覆盖） */
+let loadingVersion: SpineRuntimeVersion | null = null;
+
+/** window.spine 访问器代理是否已安装（幂等） */
+let proxyInstalled = false;
+
+/** script 注入互斥链：同一时刻只允许一个版本的 IIFE 在途，防止 loadingVersion 被并发覆盖导致错位捕获 */
+let injectChain: Promise<unknown> = Promise.resolve();
+
+/**
+ * 安装 window.spine 访问器代理（首次加载前调用，幂等）：
+ * - setter 按 loadingVersion 上下文捕获 IIFE 注入的引用进 libs（不真正覆盖全局值）
+ * - getter 恒返回主版本（4.2），保证任意时刻读取 window.spine 均为主运行时
+ */
+function installSpineProxy(): void {
+  if (proxyInstalled) return;
+  proxyInstalled = true;
+  try {
+    Object.defineProperty(window, 'spine', {
+      configurable: true, // 保留可替换/删除能力
+      get(): SpineLib | null {
+        return libs.get('4.2') ?? libs.get('4.1') ?? null;
+      },
+      set(v: unknown): void {
+        try {
+          if (loadingVersion && v && typeof v === 'object') libs.set(loadingVersion, v as SpineLib);
+        } catch {
+          /* 捕获失败仅影响该版本加载判定，不扩散 */
+        }
+      },
+    });
+  } catch {
+    /* 极端环境 defineProperty 失败 → 走 onload 捕获 + 恢复主版本兜底路径（captureFallback） */
+  }
+}
+
+/**
+ * 代理失效兜底：script onload 后直接从 window.spine 捕获，并恢复主版本引用
+ * （仅当访问器代理安装失败时使用；此时 IIFE 直接覆盖了全局）
+ */
+function captureFallback(version: SpineRuntimeVersion): boolean {
+  try {
+    const g = globalThis as { spine?: SpineLib };
+    if (!g.spine) return false;
+    libs.set(version, g.spine);
+    const main = libs.get('4.2');
+    if (main && g.spine !== main) g.spine = main; // 防止 4.1 污染全局
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** 注入单个版本 CDN script（串行化：前一个下载+执行结算后才注入下一个；单源 8s 超时兜底） */
+function injectScript(url: string, version: SpineRuntimeVersion): Promise<boolean> {
+  const run = injectChain.then(
+    () =>
+      new Promise<boolean>((resolve) => {
+        let settled = false;
+        let timer: ReturnType<typeof setTimeout> | null = null;
+        const settle = (ok: boolean): void => {
+          if (settled) return;
+          settled = true;
+          if (timer !== null) clearTimeout(timer);
+          s.onload = null;
+          s.onerror = null;
+          resolve(ok);
+        };
+        loadingVersion = version; // IIFE 同步执行瞬间走 setter → 按版本捕获
+        const s = document.createElement('script');
+        s.src = url;
+        s.onload = () => settle(proxyInstalled ? getSpineCtor(version) !== null : captureFallback(version));
+        s.onerror = () => settle(false);
+        // 超时：移除 script（避免残留网络请求），按失败结算
+        timer = setTimeout(() => {
+          s.remove();
+          settle(false);
+        }, SCRIPT_TIMEOUT_MS);
+        document.head.appendChild(s);
+      }),
+  );
+  injectChain = run.catch(() => undefined);
+  return run;
+}
+
+/** 读取对应版本的 spine-player 构造器（SpinePlayer 级 API；缺省主版本 4.2） */
+export function getSpineCtor(version: SpineRuntimeVersion = '4.2'): SpinePlayerCtor | null {
+  const lib = libs.get(version);
+  return (lib && lib.SpinePlayer) || null;
+}
+
+/** 读取对应版本的 spine 运行时（SceneRenderer 级 API；缺省主版本 4.2） */
+export function getSpineLib(version: SpineRuntimeVersion = '4.2'): SpineLib | null {
+  return libs.get(version) ?? null;
+}
+
+/** 动态加载指定版本 spine-player 运行时：本地主源（public/vendor/spine，同源静态资源）→
+ *  CDN 兜底（仅健康探测正常时尝试）；全部失败返回 false 并清空单例允许重试
+ *  （审核台「重新加载」按钮依赖此语义） */
+export function loadSpineRuntime(version: SpineRuntimeVersion = '4.2'): Promise<boolean> {
+  if (getSpineCtor(version)) return Promise.resolve(true);
+  const pending = _runtimeLoads.get(version);
+  if (pending) return pending;
+  const promise = (async (): Promise<boolean> => {
+    installSpineProxy();
+    // 本地主源：同源加载，不受 CDN 健康状态影响（CDN down 时动画功能仍可用）
+    if (await injectScript(SPINE_RUNTIME_LOCAL[version], version)) return true;
+    // 本地失败才会走到 CDN 兜底：CDN 整体不可用时跳过注入，允许恢复后重试
+    if (isCdnDown()) return false;
+    for (const url of VERSION_CDNS[version]) {
+      const ok = await injectScript(url, version);
+      if (ok) return true;
+    }
+    return false;
+  })().then((ok) => {
+    if (!ok) _runtimeLoads.delete(version); // 失败后清空单例 → 「重新加载」可重试
+    return ok;
+  });
+  _runtimeLoads.set(version, promise);
+  return promise;
+}

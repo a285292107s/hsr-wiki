@@ -1,0 +1,4 @@
+# 文本文件行尾一律 LF：双 CR（\r\r\n）曾在本仓 35 个文件上累积，导致 git 报整文件
+# diff、行号工具读成双倍（见 docs/memory/2026-09.md）。编辑工具会把双 CR 归一为 CRLF，
+# 故只要仓库内不存在 CRLF 文件，盲目 LF→CRLF 的转换就无法再翻倍。
+* text=auto eol=lf

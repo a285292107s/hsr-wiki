@@ -1,911 +1,911 @@
-/* ═══════════════════════════════════════════
-   Gaming HUD 设计系统 · 设计令牌 + 全局组件
-   移植自原 CSS 设计令牌（nanoka 视觉规范）
-   - #app 为应用挂载容器；角色页滚动容器拆分至 .nk-page--detail
-   - 页面过渡/Toast 改写为 Vue Transition 类名
-═══════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
-
-:root {
-  /* ═══ 原始层 Primitive：色阶事实（单一事实来源；仅允许被语义层/领域层引用） ═══ */
-  /* Purple Heart 色阶（Kigen.design） */
-  --ph-50: #f5eefd;
-  --ph-100: #e6d4fb;
-  --ph-200: #d2aaf7;
-  --ph-300: #c183f4;
-  --ph-400: #b259f0;
-  --ph-500: #a02fe0;
-  --ph-600: #8a27c2;
-  --ph-700: #6e1d9b;
-  --ph-800: #4f1271;
-  --ph-900: #2f0845;
-  --ph-950: #1e032e;
-  /* Terracotta 色阶（Kigen.design 赤陶族；反 AI 味主色——暖砖红、低饱和、无霓虹；
-     主题强调色唯一来源，领域语义色不得引用本阶） */
-  --tc-50: #FBF2EC;
-  --tc-100: #F5E0D2;
-  --tc-200: #EAC0A4;
-  --tc-300: #DE9A74;
-  --tc-400: #CC7648;
-  --tc-500: #B85C33;
-  --tc-600: #9C4928;
-  --tc-700: #7C3920;
-  --tc-800: #5B2A18;
-  --tc-900: #3B1C10;
-  --tc-950: #271209;
-  /* Olive 橄榄青色阶（低饱和军绿/苔藓；主题强调色可选源之一，领域色不得引用） */
-  --ol-50: #F4F6EF;
-  --ol-100: #E4E9D8;
-  --ol-200: #C9D3B4;
-  --ol-300: #A8B88C;
-  --ol-400: #8A9B6A;
-  --ol-500: #6F7F4E;
-  --ol-600: #57653C;
-  --ol-700: #414C2C;
-  --ol-800: #2E371F;
-  --ol-900: #1F2516;
-  --ol-950: #141812;
-  /* Slate 雾霭蓝灰（低饱和雾蓝/石板；主题强调色可选源之一，领域色不得引用） */
-  --sl-50: #F2F5F7;
-  --sl-100: #E0E7EB;
-  --sl-200: #C2CDD4;
-  --sl-300: #9FAFB9;
-  --sl-400: #7E919D;
-  --sl-500: #63767F;
-  --sl-600: #4E5E66;
-  --sl-700: #3C484E;
-  --sl-800: #2B3439;
-  --sl-900: #1E2529;
-  --sl-950: #14181B;
-  /* Sand 暖沙棕色阶（温暖大地色；主题强调色可选源之一，领域色不得引用） */
-  --sd-50: #F7F3EC;
-  --sd-100: #EDE3D3;
-  --sd-200: #DCC9AC;
-  --sd-300: #C6AC82;
-  --sd-400: #AD8E5F;
-  --sd-500: #937447;
-  --sd-600: #775C37;
-  --sd-700: #5A4529;
-  --sd-800: #40301C;
-  --sd-900: #2B1F12;
-  --sd-950: #1C150B;
-  /* Iris 暮山紫色阶（低饱和灰蓝紫——冷色补位，与领域层 --ph-* 泛品红紫不同源；
-     主题强调色可选源之一，领域色不得引用） */
-  --ir-50: #F4F2FA;
-  --ir-100: #E7E4F4;
-  --ir-200: #CFC9E6;
-  --ir-300: #B0A6D4;
-  --ir-400: #9184BE;
-  --ir-500: #786BA8;
-  --ir-600: #5F5490;
-  --ir-700: #474071;
-  --ir-800: #332D52;
-  --ir-900: #211D37;
-  --ir-950: #161325;
-  /* 金色阶（CW 主题 / 星级 / 网关入口；gold-350 为项目自有高亮暖金；
-     gold-600/700 为暗铜阶——CW 语义金降阶位（金阶拆族） */
-  --gold-200: #FDE68A;
-  --gold-300: #FCD34D;
-  --gold-350: #F5D67B;
-  --gold-400: #FBBF24;
-  --gold-500: #D4AF37;
-  --gold-600: #A8862E;
-  --gold-700: #7A6220;
-  /* CW 主题候选色阶（原始层事实：贵金属/珠宝调性，供 [data-cw-accent]
-     切换为 CW 主题主色；仅经 --cwth-* 别名引用，领域语义色不得直接引用）
-     每套 7 位：200 近白亮端 / 300 文字强调位（黑底对比度 ≥4.5:1 硬约束）/
-     350 高亮暖位 / 400-500 主色位 / 600-700 降阶暗位 */
-  /* Rose 玫瑰金（暖粉金属） */
-  --rs-200: #F8DDD6;
-  --rs-300: #F1C4BA;
-  --rs-350: #E9B0A4;
-  --rs-400: #DB8D7D;
-  --rs-500: #C67360;
-  --rs-600: #9C5444;
-  --rs-700: #723C30;
-  /* Silver 铂银（冷白金属） */
-  --sv-200: #E9EDF1;
-  --sv-300: #D9E0E6;
-  --sv-350: #C8D2DA;
-  --sv-400: #AAB7C2;
-  --sv-500: #8C9AA7;
-  --sv-600: #687682;
-  --sv-700: #4A5660;
-  /* Emerald 翡翠（深绿金属，钱庄/玉器） */
-  --em-200: #D3E9DA;
-  --em-300: #A9D3B9;
-  --em-350: #91C4A4;
-  --em-400: #6EAC81;
-  --em-500: #539260;
-  --em-600: #3C6E48;
-  --em-700: #2A4F34;
-  /* Copper 赤铜（暖橙铜） */
-  --cp-200: #F6DFCD;
-  --cp-300: #ECC09B;
-  --cp-350: #E2AC7F;
-  --cp-400: #D4905E;
-  --cp-500: #BC7345;
-  --cp-600: #93562E;
-  --cp-700: #6A3C20;
-  /* 黑阶（中性纯黑，无色相；全站深色表面唯一事实来源——ADR 0011）
-     深色端 5 级：950 纯黑（压暗位）/ 900 近黑（压暗位）/ 850 页面底色 / 800 承载面 / 750 卡片面；
-     主题色相由语义层经 color-mix 注入（3~8%），黑阶本身不写色相。
-     用法方向（ADR 0021）：850 作 --bg 页面底色；800 作承载面（外壳 / 面板 / 条 / 牌 / 图窗）；
-     750 作卡片面（--card 及其卡内垫底）；950 / 900 只作「压暗位」——媒体遮罩、暗角内影、scrim、
-     hover 洗色。禁止把 950 / 900 当承载面：底色上移后它们比页面更暗，会读成空洞。 */
-  --blk-950: #000000;
-  --blk-900: #0A0A0B;
-  --blk-850: #121214;
-  --blk-800: #1A1A1C;
-  --blk-750: #1E1E22;
-
-  /* ═══ 领域层 Domain：数据语义色（不随主题切换，仅被引用不内联） ═══ */
-  /* 稀有度 */
-  --rarity-1: #94A3B8;
-  --rarity-2: #4ADE80;
-  --rarity-3: #60A5FA;
-  --rarity-4: var(--ph-400);
-  --rarity-4-deep: #A855F7;
-  --rarity-5: var(--gold-400);
-  /* 属性领域色（Hero 面板图标已切换为 trace 图片，令牌供 skill-card 等强调色引用与后续复用） */
-  --prop-hp: #F472B6;
-  --prop-atk: #FCA5A5;
-  --prop-def: #93C5FD;
-  --prop-spd: var(--gold-400);
-  --prop-crit-rate: var(--ph-300);
-  --prop-crit-dmg: var(--gold-400);
-  --prop-taunt: #94A3B8;
-  --prop-energy: var(--ph-400);
-  /* 元素（角色卡属性光斑/边框/图标） */
-  --elem-fire: #FF6B35;
-  --elem-ice: #4FC3F7;
-  --elem-thunder: #AB47BC;
-  --elem-wind: #66BB6A;
-  --elem-quantum: #5C6BC0;
-  --elem-imaginary: #FFD54F;
-  --elem-physical: #B0BEC5;
-  /* 技能类型徽章 */
-  --skill-normal: #CBD5E1;
-  --skill-bp: #60A5FA;
-  --skill-passive: #2DD4BF;
-  --skill-servant-passive: #67E8F9;
-  /* 遗器套装类型 */
-  --relic-planar: #7DD3FC;
-  --relic-planar-deep: #38BDF8;
-  /* 首页 Hero 兜底渐变（Spine 加载失败时的暖砖红底色；收编为黑阶 + 主色注入——ADR 0011） */
-  --hero-bg-deep: color-mix(in srgb, var(--blk-900) 86%, var(--th-400) 14%);
-  --hero-bg-tint: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 70%, var(--th-400) 30%) 55%, transparent);
-  /* 货币战争势力标签（领域色豁免：数据语义，不随主题——ADR 0011/0012）
-     core = 背景/边框基色，同名令牌 = 文字亮端 */
-  --cw-faction-core: #A78BFA;
-  --cw-faction: #C4B5FD;
-  --cw-combat-core: #38BDF8;
-  --cw-combat: #7DD3FC;
-  --cw-special-core: #FB923C;
-  --cw-special: #FDBA74;
-  /* 货币战争稀有度（CW 专属色系，与常规 --rarity-* 不同源） */
-  --cw-rarity-5: #FFD966;
-  --cw-rarity-5-core: #FFD700;
-  --cw-rarity-4: #C084FC;
-  --cw-rarity-3: #60A5FA;
-  --cw-rarity-2: #4ADE80;
-  --cw-rarity-1: #94A3B8;
-  /* 货币战争羁绊标签（chip 语义色） */
-  --crole-chip-fb: #9CCBFF;
-  --crole-chip-fb-core: #50A0FF;
-  --crole-chip-heal: #9FE6B4;
-  --crole-chip-heal-core: #78DC96;
-  --crole-chip-charge: #FFD98A;
-  --crole-chip-charge-core: #FFC85A;
-  --crole-chip-exp: #FF9EC0;
-  --crole-chip-exp-core: #FF78A0;
-  --crole-chip-season: #CBD5E1;
-  /* 货币战争强化步骤 / 增益 / 特质层品质 / 标签粉（领域色豁免） */
-  --crole-step-rose: #F43F5E;
-  --crole-step-amber: #F59E0B;
-  --crole-buff: #5EEAB5;
-  --ctrait-base: #A09678;
-  --ctrait-multicolor: #E879F9;
-  --crole-pink: #D9899F;
-  /* 货币战争前后台槽位（阵型图标语义色：暖金=前台 / 冷靖蓝=后台） */
-  --cw-fb-front: var(--gold-400);
-  --cw-fb-back: #818CF8;
-  /* 成就稀有度（游戏内徽章：Low=铜 / Mid=银 / High=金；core=徽章底色，text=亮端文字） */
-  --ach-rarity-low: var(--gold-700);
-  --ach-rarity-low-text: var(--gold-350);
-  --ach-rarity-mid: #8B93A1;
-  --ach-rarity-mid-text: #D9DEE8;
-  --ach-rarity-high: var(--gold-600);
-  --ach-rarity-high-text: var(--gold-300);
-
-  /* ═══ 主题色阶别名层 Theme Accent：当前强调色阶（默认 Terracotta，可经 data-accent 切换） ═══
-     语义层仅引用 --th-*（当前主题色阶），不直接绑定具体色族；
-     原始色阶（tc/ol/sl/sd/ir）为可选源，设置页经 <html data-accent> 切换。CW 经 [data-theme="cw"] 覆盖为金。 */
-  --th-300: var(--tc-300);
-  --th-400: var(--tc-400);
-  --th-500: var(--tc-500);
-  --th-600: var(--tc-600);
-  --th-700: var(--tc-700);
-
-  /* ═══ CW 主题色阶别名层 CW Theme Accent：货币战争主题主色阶（缺省 = 香槟金 gold） ═══
-     定义于 :root 保证任意上下文（含非 CW 页面加载 CW 样式模块）引用安全；
-     设置页经 <html data-cw-accent="..."> 切换（见下方 [data-cw-accent] 规则），
-     仅 [data-theme="cw"] 语境消费；领域语义色（星级/成就徽章/势力系）不得引用。 */
-  --cwth-200: var(--gold-200);
-  --cwth-300: var(--gold-300);
-  --cwth-350: var(--gold-350);
-  --cwth-400: var(--gold-400);
-  --cwth-500: var(--gold-500);
-  --cwth-600: var(--gold-600);
-  --cwth-700: var(--gold-700);
-
-  /* ═══ 语义层 Semantic：主题映射（:root 常规暖砖红，[data-theme="cw"] 暗金覆盖） ═══ */
-  /* 表面统一走黑阶派生 + 主色注入（结构：黑阶染主色 → 调透明度），领域层豁免不动 */
-  --bg: var(--blk-850);
-  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 88%, transparent);
-  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-750) 94%, var(--primary) 6%) 80%, transparent);
-  /* 主色 = 当前主题色阶 500（默认 Terracotta 暖砖红、低饱和、反 AI 味）；派生色一律 color-mix 表达 */
-  --primary: var(--th-500);
-  /* 反 AI 味：弱化霓虹光晕（25%→10%），仅保留隐约材质感；CW 暗金模式见 [data-theme="cw"] */
-  --primary-glow: color-mix(in srgb, var(--primary) 10%, transparent);
-  /* 主色梯度端（ADR 0011 收编：原玫红 #F43F5E → 主色族成员 th-400，第三色相消失） */
-  --accent: var(--th-400);
-  --gold: var(--gold-400);
-  /* 语义金（强化/文本高亮等语义强调）：随主题——常规亮金，CW 降阶暗铜（主题金与语义金永不重叠） */
-  --gold-sem: var(--gold-300);
-  --text: #E2E8F0;
-  --text2: #94A3B8;
-  --text-bright: #FFFFFF;
-  --text3: #8A9BB4;
-  --border: color-mix(in srgb, var(--primary) 20%, transparent);
-  --border2: color-mix(in srgb, var(--primary) 40%, transparent);
-  /* 文本高亮语义位：并入 gold 族（消除游离橙 #f29e38） */
-  --highlight: var(--gold-300);
-  /* 高亮数值/激活态文字 = 当前主题色阶 300 */
-  --metric-val: var(--th-300);
-  /* 终局/错误状态色（--season-live/--season-upcoming/toast 错误引用；勿删） */
-  --diff-add: #34D399;
-  --diff-del: #F87171;
-  --diff-text: #60A5FA;
-  /* 终局赛季状态（live 与 diff-add 同绿、upcoming 与 diff-text 同蓝，引用保持同步） */
-  --season-live: var(--diff-add);
-  --season-upcoming: var(--diff-text);
-  --season-ended: #64748B;
-  /* 终局内容四模式专属色（领域层：不随主题，供 endgame.css 引用）
-     忘却之庭=记忆靛蓝 / 虚构叙事=文墨青 / 末日幻影=灾厄赤 / 异相仲裁=裁决金 */
-  --eg-maze: #818CF8;
-  --eg-story: #2DD4BF;
-  --eg-boss: #FB7185;
-  --eg-peak: #FBBF24;
-  --badge-test: #F59E0B;
-  --font-hud: 'Orbitron', monospace;
-  --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
-  /* 全站唯一等宽族声明点（编辑式元信息小字：枢纽页元信息 / 目录页头 / 怪物卡分类 / 侧栏英文）。
-     所有等宽栈必须引用本令牌，禁止在页面 CSS 或 SFC scoped 里重复字面量。
-     研究线调试台（/debug）另用两条栈（ui-monospace, monospace；SystemMapSection 的
-     ui-monospace, 'SF Mono', Consolas, monospace），属研究线专用、不并入本令牌
-     （用户裁定：dev-only 面板不属产品面视觉体系），收口时禁止一并改掉。 */
-  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
-  --ease: cubic-bezier(0.16,1,0.3,1);
-  /* 布局宽度令牌：页面内容统一边界 / 正文可读行宽
-     三层宽度系列：detail 展示层 1000 / struct 结构层 952 / prose 阅读层 800 */
-  --nk-content-max: 1440px;
-  /* 内容区侧栏避让（单一事实源，禁止视图写死数字）：
-     0（手机，侧栏为底部栏）/ 88（= 平板侧栏 56 + 缘距 32）/ 148（= 桌面文字侧栏 140 + 缘距 8）。
-     视图容器统一以 padding-left / left / margin-left = var(--nk-content-offset) 引用，
-     侧栏宽度变更只改本变量（ADR 0003 fixed 侧栏 + 手动避让架构的收口，防遗漏漂移）。
-     导航条全站全断点恒在（ADR 0019）：避让对象恒存在，不存在「无侧栏页」的断点重映射特例。 */
-  --nk-content-offset: 0;
-  --nk-detail-max: 1000px;
-  --nk-struct-max: 952px;
-  --nk-prose-max: 800px;
-  /* 动画时序令牌 */
-  --nk-dur-fast: 150ms;
-  --nk-dur-normal: 300ms;
-  --nk-dur-slow: 500ms;
-  --nk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --nk-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --nk-stagger: 40ms;
-  --nk-radius-card: 10px;
-  /* 表面阴影：扩散式染色阴影（取代霓虹 glow，营造墨色分层质感） */
-  --nk-shadow-lift: 0 2px 6px rgba(0,0,0,0.28), 0 10px 24px -8px rgba(0,0,0,0.5);
-  --nk-shadow-card: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px -10px rgba(0,0,0,0.45);
-  /* ─── 外壳语义变量（侧栏/抽屉/目录头/卡片边框）：黑阶派生 + 主色注入，
-       主题切换自动跟随；CW 在 [data-theme="cw"] 显式覆盖为暗金 ─── */
-  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 97%, var(--primary) 3%) 95%, transparent);
-  --nk-shell-hover: color-mix(in srgb, var(--primary) 10%, transparent);
-  --nk-shell-press: color-mix(in srgb, var(--primary) 18%, transparent);
-  --nk-shell-active-bg: color-mix(in srgb, var(--primary) 22%, transparent);
-  --nk-shell-active-border: color-mix(in srgb, var(--primary) 40%, transparent);
-  --nk-shell-glow: color-mix(in srgb, var(--primary) 18%, transparent);
-  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 94%, transparent);
-  --nk-sheet-border: color-mix(in srgb, var(--primary) 35%, transparent);
-  --nk-sheet-item-bg: color-mix(in srgb, var(--primary) 5%, transparent);
-  --nk-sheet-item-border: color-mix(in srgb, var(--primary) 14%, transparent);
-  /* 吸顶条材质（仅 .nk-cat-toolbar 使用）：常规模式亚光玻璃 82%（内容穿过时保留透视层次，
-     移动端在 catalog.css 降级为 92% 实底；CW 层保持 94% 不随常规改动） */
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 94%, var(--primary) 6%) 82%, transparent);
-  --nk-header-border: color-mix(in srgb, var(--primary) 16%, transparent);
-  --nk-input-bg: color-mix(in srgb, var(--primary) 6%, transparent);
-  --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
-  --nk-page-tint: color-mix(in srgb, var(--primary) 6%, transparent);
-  --nk-card-border: color-mix(in srgb, var(--primary) 30%, transparent);
-  /* 中性细线（档案/规格表排版：克制的半透明白线，不随主题色；卡片/分割线用） */
-  --line-1: rgba(255,255,255,0.07);
-  --line-2: rgba(255,255,255,0.13);
-}
-
-/* 内容区侧栏避让断点重映射：768 = 平板 56px 书脊侧栏 + 32 缘距；1024 = 桌面 140px 文字侧栏 + 8 缘距 */
-@media (min-width: 768px) {
-  :root { --nk-content-offset: 88px; }
-}
-@media (min-width: 1024px) {
-  :root { --nk-content-offset: 148px; }
-}
-
-/* ═══ 货币战争模式：全壳主题（黑底 + 主题主色；缺省香槟金，可经 data-cw-accent 切换） ═══
-   由 App.vue 根据 route.meta.cw 挂载 <html data-theme="cw">。
-   ADR 0011：主色 = 当前 CW 主题色阶 500（缺省 gold-500 金属金，唯一发光位），
-   文字强调位 = 主题色阶 300 亮端（缺省 gold-300 亮金），
-   语义金 = 主题色阶 600 暗铜哑光（缺省 gold-600）；底色与常规共享同一中性黑阶 + 主题色注入。
-   硬约束：导航小字（≤0.75rem）用高亮度暖白，对比度 ≥4.5:1 */
-[data-theme="cw"] {
-  --bg: var(--blk-850);
-  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 90%, transparent);
-  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-750) 94%, var(--cwth-500) 6%) 82%, transparent);
-  /* 主色 = 当前 CW 主题色阶 500（缺省 gold-500 金属金；文字强调位 300 承接明度） */
-  --primary: var(--cwth-500);
-  --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
-  /* 主色梯度端：暗铜（主题色阶 600） */
-  --accent: var(--cwth-600);
-  /* 主题色阶别名同步为当前 CW 主题色：跨模式共享样式（catalog 等）若直接引用 --th-* 时保持主题一致 */
-  --th-300: var(--cwth-300);
-  --th-400: var(--cwth-600);
-  --th-500: var(--cwth-500);
-  --th-600: var(--cwth-700);
-  --th-700: var(--cwth-700);
-  --gold: var(--cwth-600);
-  --gold-sem: var(--cwth-600);
-  /* 暖白文本：白 + 主题色微注入（与黑底、主题色成暖白金属文本） */
-  --text: color-mix(in srgb, var(--text-bright) 94%, var(--cwth-300) 6%);
-  --text2: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 70%, transparent);
-  --text-bright: color-mix(in srgb, white 94%, var(--cwth-300) 6%);
-  --text3: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 52%, transparent);
-  --border: color-mix(in srgb, var(--cwth-500) 18%, transparent);
-  --border2: color-mix(in srgb, var(--cwth-500) 40%, transparent);
-  --highlight: var(--cwth-300);
-  /* 文字/细线强调位：主题色阶 300 亮端（缺省亮金） */
-  --metric-val: var(--cwth-300);
-  /* 稀有度 5 星 = 语义金家族：CW 降阶暗铜（领域色不随主题——ADR 0011 恒等式执行特例，保持原金阶） */
-  --rarity-5: var(--gold-600);
-  /* 外壳：黑阶 + 主题色注入 */
-  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 97%, var(--cwth-500) 3%) 96%, transparent);
-  --nk-shell-hover: color-mix(in srgb, var(--cwth-500) 10%, transparent);
-  --nk-shell-press: color-mix(in srgb, var(--cwth-500) 16%, transparent);
-  --nk-shell-active-bg: color-mix(in srgb, var(--cwth-500) 16%, transparent);
-  --nk-shell-active-border: color-mix(in srgb, var(--cwth-500) 45%, transparent);
-  --nk-shell-glow: color-mix(in srgb, var(--cwth-500) 20%, transparent);
-  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 95%, transparent);
-  --nk-sheet-border: color-mix(in srgb, var(--cwth-500) 35%, transparent);
-  --nk-sheet-item-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
-  --nk-sheet-item-border: color-mix(in srgb, var(--cwth-500) 16%, transparent);
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 94%, transparent);
-  --nk-header-border: color-mix(in srgb, var(--cwth-500) 14%, transparent);
-  --nk-input-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
-  --nk-input-border: color-mix(in srgb, var(--cwth-500) 20%, transparent);
-  --nk-page-tint: color-mix(in srgb, var(--cwth-500) 5%, transparent);
-  --nk-card-border: color-mix(in srgb, var(--cwth-500) 28%, transparent);
-  /* CW 主题：暖白细线（白 + 主题色微注入） */
-  --line-1: color-mix(in srgb, var(--text-bright) 8%, transparent);
-  --line-2: color-mix(in srgb, var(--text-bright) 15%, transparent);
-}
-
-/* ═══ 货币战争主题色切换：设置页经 <html data-cw-accent="..."> 选择 CW 模式主题色阶 ═══
-   仅重映射 --cwth-*（CW 主题色阶别名层），[data-theme="cw"] 语义层经它自动跟随；
-   常规模式（无 data-theme="cw"）不受影响。缺省（无 data-cw-accent）= 香槟金 gold。
-   领域语义色（星级 / 成就徽章 / 势力系 / 技能类型）不随切换，保持原金阶。 */
-[data-theme="cw"][data-cw-accent="rose"] {
-  --cwth-200: var(--rs-200);
-  --cwth-300: var(--rs-300);
-  --cwth-350: var(--rs-350);
-  --cwth-400: var(--rs-400);
-  --cwth-500: var(--rs-500);
-  --cwth-600: var(--rs-600);
-  --cwth-700: var(--rs-700);
-}
-[data-theme="cw"][data-cw-accent="silver"] {
-  --cwth-200: var(--sv-200);
-  --cwth-300: var(--sv-300);
-  --cwth-350: var(--sv-350);
-  --cwth-400: var(--sv-400);
-  --cwth-500: var(--sv-500);
-  --cwth-600: var(--sv-600);
-  --cwth-700: var(--sv-700);
-}
-[data-theme="cw"][data-cw-accent="emerald"] {
-  --cwth-200: var(--em-200);
-  --cwth-300: var(--em-300);
-  --cwth-350: var(--em-350);
-  --cwth-400: var(--em-400);
-  --cwth-500: var(--em-500);
-  --cwth-600: var(--em-600);
-  --cwth-700: var(--em-700);
-}
-[data-theme="cw"][data-cw-accent="copper"] {
-  --cwth-200: var(--cp-200);
-  --cwth-300: var(--cp-300);
-  --cwth-350: var(--cp-350);
-  --cwth-400: var(--cp-400);
-  --cwth-500: var(--cp-500);
-  --cwth-600: var(--cp-600);
-  --cwth-700: var(--cp-700);
-}
-/* gold 为缺省（无 data-cw-accent 即命中 :root 缺省映射），显式键不设规则保证幂等 */
-
-/* ═══ 主题强调色切换：设置页经 <html data-accent="..."> 选择常规模式强调色阶 ═══
-   仅重映射 --th-*（当前主题色阶别名），语义层/领域层通过它自动跟随；
-   CW（[data-theme="cw"]）不受本组规则影响（其主题色经 data-cw-accent 独立切换）。缺省（无 data-accent）= Terracotta。 */
-[data-accent="olive"] {
-  --th-300: var(--ol-300);
-  --th-400: var(--ol-400);
-  --th-500: var(--ol-500);
-  --th-600: var(--ol-600);
-  --th-700: var(--ol-700);
-}
-[data-accent="slate"] {
-  --th-300: var(--sl-300);
-  --th-400: var(--sl-400);
-  --th-500: var(--sl-500);
-  --th-600: var(--sl-600);
-  --th-700: var(--sl-700);
-}
-[data-accent="sand"] {
-  --th-300: var(--sd-300);
-  --th-400: var(--sd-400);
-  --th-500: var(--sd-500);
-  --th-600: var(--sd-600);
-  --th-700: var(--sd-700);
-}
-[data-accent="iris"] {
-  --th-300: var(--ir-300);
-  --th-400: var(--ir-400);
-  --th-500: var(--ir-500);
-  --th-600: var(--ir-600);
-  --th-700: var(--ir-700);
-}
-/* Terracotta 为默认（无 data-accent 即命中 :root），显式值保证幂等 */
-[data-accent="terracotta"] {
-  --th-300: var(--tc-300);
-  --th-400: var(--tc-400);
-  --th-500: var(--tc-500);
-  --th-600: var(--tc-600);
-  --th-700: var(--tc-700);
-}
-
-/* 主题切换瞬间的渐变过渡（App.vue 临时挂载 ~450ms 后移除，
-   避免常驻 transition 干扰日常 hover 响应速度）。
-
-   本条必须【排除路由视图根】：本规则是 `!important` 的 shorthand，而 shorthand 会一次性
-   把 `transition-property` 设成「仅四个颜色属性」，从而**整体覆盖**视图通道在
-   `.nk-view-*-enter/leave-active` 里声明的 `opacity`/`transform` → 浏览器不插值 →
-   主题翻转的那次导航（唯一翻转 meta.cw 的导航就是 `/` ↔ `/currency`）会**一帧硬切**，
-   本轮的模式置换过渡（nk-view-swap）永不渲染。故第 2 个选择器必须保留
-   `:not([class*="nk-view-"])`：视图根自身要跑 opacity/transform，其**后代会继续被本规则
-   命中**（后代不带该前缀），主题「褪色重染」观感不受影响。
-
-   **禁止**删掉第 2 个选择器里的 `:not([class*="nk-view-"])`（删掉即视图过渡被吃掉）。
-   **禁止**改回 `transition-property: <四个颜色> !important`：它同样把 `transition-property`
-   限定为仅颜色，视图的 opacity/transform 依旧被排除，**实测中间帧为 0，不成立**。
-   **禁止**改成 `transition: all`（会让位移/透明度以外的一切属性参与过渡并放大开销）。
-   可验证锚点：主题过渡期间视图根 computed `transition-property` 必须为 `opacity, transform`
-   且存在中间帧；普通元素仍为四色 / 0.4s。 */
-.theme-transitioning,
-.theme-transitioning *:not([class*="nk-view-"]),
-.theme-transitioning *::before,
-.theme-transitioning *::after {
-  transition: background-color 400ms var(--nk-ease-out),
-              color 400ms var(--nk-ease-out),
-              border-color 400ms var(--nk-ease-out),
-              box-shadow 400ms var(--nk-ease-out) !important;
-}
-
-/* ─── 侧边栏（mobile-first：底部 Tab Bar） ─── */
-.ui-sidebar {
-  position: fixed;
-  top: auto; bottom: 0; left: 0; right: 0; transform: none;
-  width: 100%; height: calc(56px + env(safe-area-inset-bottom, 0px));
-  display: flex; flex-direction: row; align-items: stretch;
-  background: var(--nk-shell-bg);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border); border-radius: 0;
-  padding: 0 4px env(safe-area-inset-bottom, 0px); z-index: 100000;
-}
-/* ─── 交换按钮与导航板块的分隔线（mobile-first：底部栏为纵向细线） ─── */
-.ui-sidebar-divider {
-  flex: none;
-  width: 1px; height: 22px;
-  align-self: center;
-  margin: 0 3px;
-  background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
-  opacity: 0.8;
-}
-/* 全槽位触控目标：flex:1 1 auto + min-width:44px —— 有富余时均分填满整行消除死区，
-   放不下时不压缩（44px 为触控下限），由 SidebarNav 按规范顺序将尾部折叠进"更多"；
-   高度由 align-items: stretch 撑满 56px 栏高（≥ 44px 标准） */
-.ui-sidebar-link {
-  flex: 1 1 auto; min-width: 44px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  /* background/padding 显式重置：<button>（“更多”）否则继承 UA 默认 buttonface 灰底，在深色栏中看似高亮 */
-  background: transparent; padding: 0;
-  border: 1px solid transparent; border-radius: 10px;
-  color: var(--text2); opacity: 0.72;
-  transition: color 0.2s, opacity 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-  position: relative;
-}
-.ui-sidebar-link__icon { display: flex; transition: transform 0.18s var(--nk-ease-out); }
-.ui-sidebar-link__icon svg { width: 20px; height: 20px; transition: transform 0.35s var(--nk-ease-out); }
-/* 文字块（中文 + 英文 mono 小字）：默认隐藏，桌面文字侧栏（≥1024px）显示 */
-.ui-sidebar-link__text { display: none; }
-.ui-sidebar-link__cn, .ui-sidebar-link__en { display: block; }
-/* 按压触觉反馈：图标即时收缩（80-150ms 内响应），不位移槽位布局 */
-.ui-sidebar-link:active .ui-sidebar-link__icon { transform: scale(0.82); }
-/* 交换按钮悬停：双箭头旋转暗示“切换”语义，与普通导航项区分 */
-.ui-sidebar-swap:hover .ui-sidebar-link__icon svg { transform: rotate(180deg); }
-.ui-sidebar-link__label { font-size: 10px; line-height: 1; letter-spacing: 0.01em; white-space: nowrap; }
-.ui-sidebar-link:hover { opacity: 1; background: var(--nk-shell-hover); }
-.ui-sidebar-link:active { opacity: 1; background: var(--nk-shell-press); }
-.ui-sidebar-link:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-/* 激活项：淡底 + 主色文字 + 细边框；霓虹 glow 已去除（收敛为纯物理阴影） */
-.ui-sidebar-link--active { opacity: 1; color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); }
-/* 底部工具组（调试台 + 设置）：手机底部栏内 display:contents——成员不额外占槽位，
-   直接参与均分（debug 手机隐藏后仅设置一枚，与改动前布局一致）；
-   成组置底由平板断点内的 .ui-sidebar-tools 应用（见下） */
-.ui-sidebar-tools { display: contents; }
-/* 设置入口：手机底部栏作为末槽位平铺（与其他按钮垂直居中对齐，无需额外 margin） */
-.ui-sidebar-settings { margin-top: 0; }
-/* 研究线调试台入口（dev-only）：仅平板/桌面竖排侧栏显示（设置按钮上方）；
-   手机底部栏无空间、且不参与动态折叠划分，一律隐藏（SidebarNav 测量亦已显式排除） */
-@media (max-width: 767px) {
-  .ui-sidebar-debug { display: none; }
-}
-
-/* ─── 模式切换「重凝」动画：导航板块从模糊中凝聚，交换按钮与分隔线保持不动 ─── */
-.ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) {
-  animation: ui-nav-materialize 0.38s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-}
-/* 逐槽位递进延迟：凝聚如波浪展开（手机从左到右 / 桌面从上到下） */
-.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(2) { animation-delay: 28ms; }
-.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(3) { animation-delay: 56ms; }
-.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(4) { animation-delay: 84ms; }
-.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(5) { animation-delay: 112ms; }
-.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(6) { animation-delay: 140ms; }
-.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(7) { animation-delay: 168ms; }
-.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(8) { animation-delay: 196ms; }
-.ui-sidebar--swap-anim .ui-sidebar-more { animation-delay: 224ms; }
-@keyframes ui-nav-materialize {
-  from { opacity: 0; filter: blur(3px); transform: scale(0.88); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) { animation: none; }
-}
-
-/* ─── 手机"更多"聚合：按实际空间折叠放不下的板块尾部，其余收入上拉抽屉 ─── */
-/* 折叠项在底部栏隐藏（平板/桌面无折叠项，全部平铺） */
-.ui-sidebar-link--in-more { display: none; }
-/* 无折叠时隐藏"更多"按钮（有折叠时正常展示） */
-.ui-sidebar-more--hidden { display: none; }
-/* 折叠测量态：SidebarNav 在同一帧内强制全部槽位自然宽度且全部可见（含折叠项与隐藏的
-   "更多"按钮），读宽后立即复原——用于计算实际放得下几槽，无可见闪烁 */
-.ui-sidebar--measure .ui-sidebar-link { flex: none !important; width: auto !important; }
-.ui-sidebar--measure .ui-sidebar-link--in-more { display: flex !important; }
-.ui-sidebar--measure .ui-sidebar-more--hidden { display: flex !important; }
-/* 抽屉遮罩：位于底部栏上方（z 低于栏，保证栏始终可点），点遮罩关闭 */
-.ui-more {
-  position: fixed; left: 0; right: 0; top: 0;
-  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
-  z-index: 99990;
-  display: flex; align-items: flex-end;
-  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
-}
-.ui-more__sheet {
-  width: 100%;
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-  padding: 18px 14px 22px;
-  background: var(--nk-sheet-bg);
-  backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border-top: 1px solid var(--nk-sheet-border);
-  border-radius: 18px 18px 0 0;
-  box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
-}
-.ui-more__item {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 14px 6px 12px;
-  border: 1px solid var(--nk-sheet-item-border); border-radius: 12px;
-  background: var(--nk-sheet-item-bg);
-  color: var(--text2);
-  transition: color 0.2s, background 0.2s, border-color 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.ui-more__item:active { background: var(--nk-shell-press); }
-.ui-more__item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-.ui-more__item--active { color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); }
-.ui-more__icon { display: flex; }
-.ui-more__icon svg { width: 24px; height: 24px; }
-.ui-more__label { font-size: 0.72rem; font-weight: 600; }
-.ui-more__en { font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.12em; color: var(--text3); }
-/* 抽屉过渡 */
-.ui-more-enter-from, .ui-more-leave-to { opacity: 0; }
-.ui-more-enter-from .ui-more__sheet, .ui-more-leave-to .ui-more__sheet { transform: translateY(16px); }
-.ui-more-enter-active, .ui-more-leave-active { transition: opacity 0.18s ease; }
-.ui-more-enter-active .ui-more__sheet, .ui-more-leave-active .ui-more__sheet { transition: transform 0.18s var(--nk-ease-out); }
-@media (prefers-reduced-motion: reduce) {
-  .ui-more-enter-active, .ui-more-leave-active,
-  .ui-more-enter-active .ui-more__sheet, .ui-more-leave-active .ui-more__sheet { transition: none; }
-}
-
-/* ─── 挂载容器 ─── */
-/* overflow: clip —— 页面过渡期间 translate 位移会溢出边界，不裁切会导致视口滚动条闪现→内容抖动（各页面均内部滚动，裁切安全；fixed 的侧边栏/Toast 不受影响） */
-#app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
-:where(#app) h1, :where(#app) h2, :where(#app) h3, :where(#app) p, :where(#app) dl, :where(#app) dt, :where(#app) dd { margin: 0; padding: 0; }
-:where(#app) * { box-sizing: border-box; }
-:where(#app) button { font: inherit; color: inherit; cursor: pointer; }
-:where(#app) img { display: inline-block; vertical-align: middle; }
-:where(#app) a { color: inherit; text-decoration: none; }
-
-/* ─── 全局纸感细颗粒（化开纯平死黑，缓解纯色底视觉疲劳）：唯一收口于本规则，禁止页面级复制/调参 ───
-   单层极简白 alpha 细颗粒（feColorMatrix 去色留 alpha，无色相 → 双主题通用，中性豁免不触发色彩守卫）：
-   · 超高基频 0.9 各向同性细颗粒——无方向性/无结构，扫一眼无感、细看才有一层纸屑呼吸；
-     不叠纤维/云斑（会生成可被眼锁定的条纹与脏 blob = 机器感/ AI 味来源，禁回）。
-   · 360px 大瓦片平铺：瓦距周期在超高基频下不可辨，防 160px 级别可见网格。
-   · 强度 0.08：底色上移到 blk-850 后，白噪点与底的绝对差由 17.9 收窄到 16.6（≈ −7%），按等感知还原取 0.08（还原值 ≈0.075，留余量）；仅在纯平暗底上能微微感知，不脏到文字与图片上。
-   · 白颗粒只在暗部显形（亮图/白底上自动隐形）。
-   · fixed + pointer-events:none：纯视觉覆层，不拦截交互、不参与布局；
-     #app 无 transform，包含块为视口，不被 #app overflow:clip 裁切
-   · z-index 高于侧栏(100000)/Toast(99999)：全表面统一纸感（弹层同颗粒，不出现局部哑光）
-   · 强度唯一调参位 = --grain-opacity */
-:root { --grain-opacity: 0.08; }
-#app::after {
-  content: '';
-  position: fixed; inset: 0;
-  z-index: 100001;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='nk-grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0%200%200%200%201%200%200%200%200%201%200%200%200%200%201%200%200%200%200.6%200'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23nk-grain)'/%3E%3C/svg%3E");
-  opacity: var(--grain-opacity);
-}
-
-/* ─── 角色详情页滚动容器（CharacterView 根元素） ─── */
-.nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
-.nk-page--detail::-webkit-scrollbar { width: 6px; }
-.nk-page--detail::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-.nk-page--detail::-webkit-scrollbar-track { background: transparent; }
-
-/* 图片加载失败占位符 */
-.nk-img-error { background: color-mix(in srgb, var(--primary) 6%, transparent); border: 1px dashed var(--border); object-fit: contain; }
-
-/* ─── Hero: 左右结构（宽屏左视觉 + 右信息面板；窄屏回退为堆叠） ─── */
-@property --spine-inner { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
-@property --spine-outer { syntax: '<percentage>'; inherits: false; initial-value: 1%; }
-/* 设计令牌 */
-:root { --nk-hero-panel-pad: 20px 16px; }
-.nk-hero {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  border-radius: 0;
-  flex-shrink: 0;
-  background: var(--bg);
-}
-/* 视觉区（背景 + Spine 动画 + 动画开关） */
-.nk-hero__visual { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; }
-.nk-hero__bg {
-  position: absolute; inset: 0;
-  background-size: cover;
-background-position: center 15%;
-  background-repeat: no-repeat;
-  transition: opacity 0.4s ease 0.4s;
-}
-.nk-hero__bg.nk-dim { opacity: 0.08; transition: opacity 0.8s ease; }
-.nk-hero__spine { position: absolute; inset: 0; z-index: 2; opacity: 0; --spine-inner: 0%; --spine-outer: 1%; -webkit-mask-image: radial-gradient(circle at 50% 45%, black var(--spine-inner), transparent var(--spine-outer)); mask-image: radial-gradient(circle at 50% 45%, black var(--spine-inner), transparent var(--spine-outer)); transition: --spine-inner 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), --spine-outer 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease; }
-.nk-hero__spine.nk-ready { --spine-inner: 55%; --spine-outer: 75%; opacity: 1; transition: --spine-inner 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), --spine-outer 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease; }
-.nk-hero__spine canvas { width: 100%; height: 100%; display: block; transform: scale(1.15); transform-origin: center center; }
-/* 边缘柔化：横向线性渐变（专攻左右边缘）+ 内阴影（兼顾四角） */
-.nk-hero__visual {
-  box-shadow:
-    inset 0 0 120px 30px color-mix(in srgb, var(--blk-900) 85%, transparent),
-    inset 0 0 50px 10px color-mix(in srgb, var(--blk-900) 50%, transparent);
-}
-.nk-hero__visual::before {
-  content: '';
-  position: absolute; inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    to right,
-    var(--bg) 0%,
-    transparent 22%,
-    transparent 78%,
-    var(--bg) 100%
-  );
-  pointer-events: none;
-}
-.nk-hero__scrim { display: none; }
-.nk-hero__toggle { position: absolute; top: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 16px; background: color-mix(in srgb, var(--blk-900) 60%, transparent); border: 1px solid var(--border); backdrop-filter: blur(8px); cursor: pointer; font-size: 0.625rem; color: var(--text2); transition: all 0.2s; user-select: none; }
-/* 触控热区扩展至 ≥44px（视觉尺寸不变） */
-.nk-hero__toggle::before { content: ''; position: absolute; inset: -9px; }
-.nk-hero__toggle:hover { border-color: var(--border2); color: var(--text); }
-.nk-hero__toggle .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.4); transition: all 0.2s; }
-.nk-hero__toggle.off .dot { background: var(--text3); box-shadow: none; }
-.nk-hero__toggle:not(.has-anim) { opacity: 0.35; cursor: default; }
-.nk-hero__toggle:not(.has-anim) .dot { background: var(--text3); box-shadow: none; }
-
-/* 信息面板（右栏内容：毛玻璃深色面板） */
-.nk-hero__panel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: var(--nk-hero-panel-pad);
-  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--blk-900) 60%, transparent) 30%, color-mix(in srgb, var(--blk-900) 92%, transparent) 100%);
-  border-top: 1px solid var(--border);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-/* 头部：阵营 + 名字 + 星级 + 标签 */
-.nk-hero__head { display: flex; flex-direction: column; gap: 8px; }
-.nk-hero__camp {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
-  letter-spacing: 0.18em; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 90%, var(--th-300) 10%) 92%, transparent);
-}
-.nk-hero__camp::before { content: ''; width: 14px; height: 1px; background: color-mix(in srgb, var(--th-400) 85%, transparent); }
-.nk-hero__name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text-bright); text-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 20%, transparent); line-height: 1.15; }
-.nk-hero__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.nk-hero__stars { color: var(--gold); font-size: 1.05rem; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 8px color-mix(in srgb, var(--rarity-5) 22%, transparent); }
-.nk-hero__tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 12px; border-radius: 16px;
-  background: color-mix(in srgb, var(--primary) 8%, transparent); border: 1px solid var(--border);
-  font-size: 0.75rem; color: var(--text2);
-  transition: border-color 0.2s, background 0.2s;
-}
-.nk-hero__tag:hover { border-color: var(--border2); background: color-mix(in srgb, var(--primary) 14%, transparent); }
-.nk-hero__tag img { width: 16px; height: 16px; border-radius: 50%; }
-
-/* 属性区段（标题 + 等级条 + 8 项属性网格） */
-.nk-hero__section { display: flex; flex-direction: column; gap: 10px; }
-.nk-hero__section-title {
-  display: flex; align-items: center; gap: 10px;
-  font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700;
-  letter-spacing: 0.16em; color: var(--text-bright); text-transform: uppercase;
-}
-.nk-hero__section-bar {
-  display: inline-block; width: 4px; height: 14px; border-radius: 2px;
-  background: linear-gradient(180deg, var(--primary), var(--accent));
-}
-.nk-hero__level { display: flex; align-items: center; gap: 12px; }
-.nk-hero__level-label {
-  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.06em; color: var(--text2); white-space: nowrap;
-}
-.nk-hero__level-track {
-  flex: 1; height: 6px; border-radius: 3px; overflow: hidden;
-  background: color-mix(in srgb, var(--primary) 10%, transparent);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.35), inset 0 0 0 1px color-mix(in srgb, var(--primary) 14%, transparent);
-}
-.nk-hero__level-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--th-400));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
-  transition: width 0.6s var(--nk-ease-out);
-}
-/* 8 项属性网格（mobile-first：2 列紧凑） */
-.nk-hero__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; }
-.nk-hero__stat { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent); transition: background 0.2s; }
-.nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.nk-hero__stat:hover { background: color-mix(in srgb, var(--primary) 5%, transparent); }
-.nk-hero__stat-icon {
-  display: inline-block; width: 16px; height: 16px;
-  object-fit: contain;
-  vertical-align: middle;
-}
-/* 图标源：官方 trace 图片（IconMaxHP 等，jsDelivr 路径）+ 嘲讽缺失项的白色线性 SVG 顶替（CharHero 内联 data URI） */
-
-.nk-hero__stat-label { font-size: 0.78rem; color: var(--text2); letter-spacing: 0.02em; }
-.nk-hero__stat-val { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap; }
-
-/* ─── Tab 导航（吸顶全宽外壳 + 内容条约束到面板同宽并居中） ─── */
-.nk-tabs { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
-.nk-tabs__bar { display: flex; justify-content: space-between; align-items: center; gap: 0; max-width: var(--nk-detail-max); margin: 0 auto; padding: 0 16px; overflow-x: auto; }
-.nk-tabs__left { display: flex; }
-.nk-tab { display: inline-flex; align-items: center; min-height: 44px; padding: 12px 16px; font-size: 0.75rem; font-weight: 600; color: var(--text3); cursor: pointer; border: none; background: none; position: relative; transition: color 0.2s; letter-spacing: 0.02em; white-space: nowrap; }
-.nk-tab:first-child { padding-left: 0; }
-.nk-tab:hover { color: var(--text2); }
-.nk-tab--active { color: var(--metric-val); }
-.nk-tab--active::after { content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); border-radius: 1px; }
-
-/* ─── 区块导航（吸顶工具条内；别处也会用到 → 全局语法） ───
-   激活态默认主色（主题层）；身份页面可在页内覆盖为领域色 */
-.nk-secnav {
-  display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0;
-  overflow-x: auto; scrollbar-width: none;
-}
-.nk-secnav::-webkit-scrollbar { display: none; }
-.nk-secnav__btn {
-  display: inline-flex; align-items: baseline; gap: 5px;
-  padding: 6px 11px; border-radius: 4px; border: none; background: transparent;
-  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; /* 与 tokens .nk-tab 标准字号对齐 */
-  color: var(--text3); cursor: pointer; white-space: nowrap;
-  transition: color 0.15s, background 0.15s; position: relative; flex-shrink: 0;
-}
-/* 触控热区垂直扩展至 ≥44px（按钮 30px 高 + 上下各 7px） */
-.nk-secnav__btn::before {
-  content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px; /* 热区 ≥44px（无障碍硬标准） */
-}
-.nk-secnav__btn:hover { color: var(--text2); background: transparent; }
-.nk-secnav__btn--active { color: var(--metric-val); background: transparent; }
-.nk-secnav__btn--active::after {
-  content: ''; position: absolute; left: 11px; right: 11px; bottom: -7px;
-  height: 2px; border-radius: 1px; background: var(--primary); box-shadow: none;
-}
-.nk-secnav__idx { font-family: var(--font-hud); font-size: 0.625rem; opacity: 0.7; }
-.nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
-
-/* ─── Tab 内容区 ─── */
-.nk-panels { flex: 1; overflow: visible; }
-.nk-panels::-webkit-scrollbar { width: 4px; }
-.nk-panels::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.nk-panel { display: none; max-width: var(--nk-detail-max); margin: 0 auto; padding: 24px 16px 60px; animation: nk-fade 0.3s var(--ease); }
-.nk-panel--active { display: block; }
-@keyframes nk-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ─── 通用组件 ─── */
-/* 通用卡片（阅读族基底）：中性细线、无浮起、hover 仅边框/背景亮度变化；
-   浏览族卡片（图鉴/目录，保留位移与光效）见 catalog.css 各卡类 */
-.nk-card { background: rgba(255,255,255,0.016); border: 1px solid var(--line-1); border-radius: var(--nk-radius-card); padding: 20px; margin-bottom: 16px; transition: border-color 0.25s ease, background 0.25s ease; position: relative; }
-.nk-card:hover { border-color: var(--line-2); background: rgba(255,255,255,0.03); }
-/* 返回顶部（全局原语：长页通用） */
-.nk-top-btn {
-  position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-  z-index: 30; width: 40px; height: 40px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: color-mix(in srgb, var(--blk-800) 80%, transparent); border: 1px solid var(--line-1);
-  color: var(--text3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
-}
-.nk-top-btn svg { width: 18px; height: 18px; transition: transform 0.2s var(--nk-ease-out); }
-.nk-top-btn:hover {
-  color: var(--text-bright); border-color: var(--primary); box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-}
-.nk-top-btn:hover svg { transform: translateY(-1.5px); }
-@media (min-width: 768px) {
-  .nk-top-btn { right: 28px; bottom: 28px; }
-}
-/* 章节标题（编辑式基线）：HUD 大写 + 细线延伸线；
-   编号元素 .nk-title__idx 由使用方提供（角色页由 sections.ts 配置表注入固定编号） */
-.nk-title {
-  display: flex; align-items: baseline; gap: 12px;
-  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.24em; text-transform: uppercase;
-  color: var(--text2);
-  margin-bottom: 20px; padding-bottom: 0;
-  border-bottom: none;
-}
-/* 标题延伸线：双段——实线收束后渐隐 */
-.nk-title::after {
-  content: ''; flex: 1; height: 1px; align-self: center;
-  background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
-}
-/* 章节编号元素（00-09，编号 = 身份；数据缺失保留缺口） */
-.nk-title__idx {
-  flex: none; font-size: 0.6rem; letter-spacing: 0; color: var(--metric-val); opacity: 0.95;
-  padding-right: 10px;
-  border-right: 1px solid var(--line-2);
-}
-
+/* ═══════════════════════════════════════════
+   Gaming HUD 设计系统 · 设计令牌 + 全局组件
+   移植自原 CSS 设计令牌（nanoka 视觉规范）
+   - #app 为应用挂载容器；角色页滚动容器拆分至 .nk-page--detail
+   - 页面过渡/Toast 改写为 Vue Transition 类名
+═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+
+:root {
+  /* ═══ 原始层 Primitive：色阶事实（单一事实来源；仅允许被语义层/领域层引用） ═══ */
+  /* Purple Heart 色阶（Kigen.design） */
+  --ph-50: #f5eefd;
+  --ph-100: #e6d4fb;
+  --ph-200: #d2aaf7;
+  --ph-300: #c183f4;
+  --ph-400: #b259f0;
+  --ph-500: #a02fe0;
+  --ph-600: #8a27c2;
+  --ph-700: #6e1d9b;
+  --ph-800: #4f1271;
+  --ph-900: #2f0845;
+  --ph-950: #1e032e;
+  /* Terracotta 色阶（Kigen.design 赤陶族；反 AI 味主色——暖砖红、低饱和、无霓虹；
+     主题强调色唯一来源，领域语义色不得引用本阶） */
+  --tc-50: #FBF2EC;
+  --tc-100: #F5E0D2;
+  --tc-200: #EAC0A4;
+  --tc-300: #DE9A74;
+  --tc-400: #CC7648;
+  --tc-500: #B85C33;
+  --tc-600: #9C4928;
+  --tc-700: #7C3920;
+  --tc-800: #5B2A18;
+  --tc-900: #3B1C10;
+  --tc-950: #271209;
+  /* Olive 橄榄青色阶（低饱和军绿/苔藓；主题强调色可选源之一，领域色不得引用） */
+  --ol-50: #F4F6EF;
+  --ol-100: #E4E9D8;
+  --ol-200: #C9D3B4;
+  --ol-300: #A8B88C;
+  --ol-400: #8A9B6A;
+  --ol-500: #6F7F4E;
+  --ol-600: #57653C;
+  --ol-700: #414C2C;
+  --ol-800: #2E371F;
+  --ol-900: #1F2516;
+  --ol-950: #141812;
+  /* Slate 雾霭蓝灰（低饱和雾蓝/石板；主题强调色可选源之一，领域色不得引用） */
+  --sl-50: #F2F5F7;
+  --sl-100: #E0E7EB;
+  --sl-200: #C2CDD4;
+  --sl-300: #9FAFB9;
+  --sl-400: #7E919D;
+  --sl-500: #63767F;
+  --sl-600: #4E5E66;
+  --sl-700: #3C484E;
+  --sl-800: #2B3439;
+  --sl-900: #1E2529;
+  --sl-950: #14181B;
+  /* Sand 暖沙棕色阶（温暖大地色；主题强调色可选源之一，领域色不得引用） */
+  --sd-50: #F7F3EC;
+  --sd-100: #EDE3D3;
+  --sd-200: #DCC9AC;
+  --sd-300: #C6AC82;
+  --sd-400: #AD8E5F;
+  --sd-500: #937447;
+  --sd-600: #775C37;
+  --sd-700: #5A4529;
+  --sd-800: #40301C;
+  --sd-900: #2B1F12;
+  --sd-950: #1C150B;
+  /* Iris 暮山紫色阶（低饱和灰蓝紫——冷色补位，与领域层 --ph-* 泛品红紫不同源；
+     主题强调色可选源之一，领域色不得引用） */
+  --ir-50: #F4F2FA;
+  --ir-100: #E7E4F4;
+  --ir-200: #CFC9E6;
+  --ir-300: #B0A6D4;
+  --ir-400: #9184BE;
+  --ir-500: #786BA8;
+  --ir-600: #5F5490;
+  --ir-700: #474071;
+  --ir-800: #332D52;
+  --ir-900: #211D37;
+  --ir-950: #161325;
+  /* 金色阶（CW 主题 / 星级 / 网关入口；gold-350 为项目自有高亮暖金；
+     gold-600/700 为暗铜阶——CW 语义金降阶位（金阶拆族） */
+  --gold-200: #FDE68A;
+  --gold-300: #FCD34D;
+  --gold-350: #F5D67B;
+  --gold-400: #FBBF24;
+  --gold-500: #D4AF37;
+  --gold-600: #A8862E;
+  --gold-700: #7A6220;
+  /* CW 主题候选色阶（原始层事实：贵金属/珠宝调性，供 [data-cw-accent]
+     切换为 CW 主题主色；仅经 --cwth-* 别名引用，领域语义色不得直接引用）
+     每套 7 位：200 近白亮端 / 300 文字强调位（黑底对比度 ≥4.5:1 硬约束）/
+     350 高亮暖位 / 400-500 主色位 / 600-700 降阶暗位 */
+  /* Rose 玫瑰金（暖粉金属） */
+  --rs-200: #F8DDD6;
+  --rs-300: #F1C4BA;
+  --rs-350: #E9B0A4;
+  --rs-400: #DB8D7D;
+  --rs-500: #C67360;
+  --rs-600: #9C5444;
+  --rs-700: #723C30;
+  /* Silver 铂银（冷白金属） */
+  --sv-200: #E9EDF1;
+  --sv-300: #D9E0E6;
+  --sv-350: #C8D2DA;
+  --sv-400: #AAB7C2;
+  --sv-500: #8C9AA7;
+  --sv-600: #687682;
+  --sv-700: #4A5660;
+  /* Emerald 翡翠（深绿金属，钱庄/玉器） */
+  --em-200: #D3E9DA;
+  --em-300: #A9D3B9;
+  --em-350: #91C4A4;
+  --em-400: #6EAC81;
+  --em-500: #539260;
+  --em-600: #3C6E48;
+  --em-700: #2A4F34;
+  /* Copper 赤铜（暖橙铜） */
+  --cp-200: #F6DFCD;
+  --cp-300: #ECC09B;
+  --cp-350: #E2AC7F;
+  --cp-400: #D4905E;
+  --cp-500: #BC7345;
+  --cp-600: #93562E;
+  --cp-700: #6A3C20;
+  /* 黑阶（中性纯黑，无色相；全站深色表面唯一事实来源——ADR 0011）
+     深色端 5 级：950 纯黑（压暗位）/ 900 近黑（压暗位）/ 850 页面底色 / 800 承载面 / 750 卡片面；
+     主题色相由语义层经 color-mix 注入（3~8%），黑阶本身不写色相。
+     用法方向（ADR 0021）：850 作 --bg 页面底色；800 作承载面（外壳 / 面板 / 条 / 牌 / 图窗）；
+     750 作卡片面（--card 及其卡内垫底）；950 / 900 只作「压暗位」——媒体遮罩、暗角内影、scrim、
+     hover 洗色。禁止把 950 / 900 当承载面：底色上移后它们比页面更暗，会读成空洞。 */
+  --blk-950: #000000;
+  --blk-900: #0A0A0B;
+  --blk-850: #121214;
+  --blk-800: #1A1A1C;
+  --blk-750: #1E1E22;
+
+  /* ═══ 领域层 Domain：数据语义色（不随主题切换，仅被引用不内联） ═══ */
+  /* 稀有度 */
+  --rarity-1: #94A3B8;
+  --rarity-2: #4ADE80;
+  --rarity-3: #60A5FA;
+  --rarity-4: var(--ph-400);
+  --rarity-4-deep: #A855F7;
+  --rarity-5: var(--gold-400);
+  /* 属性领域色（Hero 面板图标已切换为 trace 图片，令牌供 skill-card 等强调色引用与后续复用） */
+  --prop-hp: #F472B6;
+  --prop-atk: #FCA5A5;
+  --prop-def: #93C5FD;
+  --prop-spd: var(--gold-400);
+  --prop-crit-rate: var(--ph-300);
+  --prop-crit-dmg: var(--gold-400);
+  --prop-taunt: #94A3B8;
+  --prop-energy: var(--ph-400);
+  /* 元素（角色卡属性光斑/边框/图标） */
+  --elem-fire: #FF6B35;
+  --elem-ice: #4FC3F7;
+  --elem-thunder: #AB47BC;
+  --elem-wind: #66BB6A;
+  --elem-quantum: #5C6BC0;
+  --elem-imaginary: #FFD54F;
+  --elem-physical: #B0BEC5;
+  /* 技能类型徽章 */
+  --skill-normal: #CBD5E1;
+  --skill-bp: #60A5FA;
+  --skill-passive: #2DD4BF;
+  --skill-servant-passive: #67E8F9;
+  /* 遗器套装类型 */
+  --relic-planar: #7DD3FC;
+  --relic-planar-deep: #38BDF8;
+  /* 首页 Hero 兜底渐变（Spine 加载失败时的暖砖红底色；收编为黑阶 + 主色注入——ADR 0011） */
+  --hero-bg-deep: color-mix(in srgb, var(--blk-900) 86%, var(--th-400) 14%);
+  --hero-bg-tint: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 70%, var(--th-400) 30%) 55%, transparent);
+  /* 货币战争势力标签（领域色豁免：数据语义，不随主题——ADR 0011/0012）
+     core = 背景/边框基色，同名令牌 = 文字亮端 */
+  --cw-faction-core: #A78BFA;
+  --cw-faction: #C4B5FD;
+  --cw-combat-core: #38BDF8;
+  --cw-combat: #7DD3FC;
+  --cw-special-core: #FB923C;
+  --cw-special: #FDBA74;
+  /* 货币战争稀有度（CW 专属色系，与常规 --rarity-* 不同源） */
+  --cw-rarity-5: #FFD966;
+  --cw-rarity-5-core: #FFD700;
+  --cw-rarity-4: #C084FC;
+  --cw-rarity-3: #60A5FA;
+  --cw-rarity-2: #4ADE80;
+  --cw-rarity-1: #94A3B8;
+  /* 货币战争羁绊标签（chip 语义色） */
+  --crole-chip-fb: #9CCBFF;
+  --crole-chip-fb-core: #50A0FF;
+  --crole-chip-heal: #9FE6B4;
+  --crole-chip-heal-core: #78DC96;
+  --crole-chip-charge: #FFD98A;
+  --crole-chip-charge-core: #FFC85A;
+  --crole-chip-exp: #FF9EC0;
+  --crole-chip-exp-core: #FF78A0;
+  --crole-chip-season: #CBD5E1;
+  /* 货币战争强化步骤 / 增益 / 特质层品质 / 标签粉（领域色豁免） */
+  --crole-step-rose: #F43F5E;
+  --crole-step-amber: #F59E0B;
+  --crole-buff: #5EEAB5;
+  --ctrait-base: #A09678;
+  --ctrait-multicolor: #E879F9;
+  --crole-pink: #D9899F;
+  /* 货币战争前后台槽位（阵型图标语义色：暖金=前台 / 冷靖蓝=后台） */
+  --cw-fb-front: var(--gold-400);
+  --cw-fb-back: #818CF8;
+  /* 成就稀有度（游戏内徽章：Low=铜 / Mid=银 / High=金；core=徽章底色，text=亮端文字） */
+  --ach-rarity-low: var(--gold-700);
+  --ach-rarity-low-text: var(--gold-350);
+  --ach-rarity-mid: #8B93A1;
+  --ach-rarity-mid-text: #D9DEE8;
+  --ach-rarity-high: var(--gold-600);
+  --ach-rarity-high-text: var(--gold-300);
+
+  /* ═══ 主题色阶别名层 Theme Accent：当前强调色阶（默认 Terracotta，可经 data-accent 切换） ═══
+     语义层仅引用 --th-*（当前主题色阶），不直接绑定具体色族；
+     原始色阶（tc/ol/sl/sd/ir）为可选源，设置页经 <html data-accent> 切换。CW 经 [data-theme="cw"] 覆盖为金。 */
+  --th-300: var(--tc-300);
+  --th-400: var(--tc-400);
+  --th-500: var(--tc-500);
+  --th-600: var(--tc-600);
+  --th-700: var(--tc-700);
+
+  /* ═══ CW 主题色阶别名层 CW Theme Accent：货币战争主题主色阶（缺省 = 香槟金 gold） ═══
+     定义于 :root 保证任意上下文（含非 CW 页面加载 CW 样式模块）引用安全；
+     设置页经 <html data-cw-accent="..."> 切换（见下方 [data-cw-accent] 规则），
+     仅 [data-theme="cw"] 语境消费；领域语义色（星级/成就徽章/势力系）不得引用。 */
+  --cwth-200: var(--gold-200);
+  --cwth-300: var(--gold-300);
+  --cwth-350: var(--gold-350);
+  --cwth-400: var(--gold-400);
+  --cwth-500: var(--gold-500);
+  --cwth-600: var(--gold-600);
+  --cwth-700: var(--gold-700);
+
+  /* ═══ 语义层 Semantic：主题映射（:root 常规暖砖红，[data-theme="cw"] 暗金覆盖） ═══ */
+  /* 表面统一走黑阶派生 + 主色注入（结构：黑阶染主色 → 调透明度），领域层豁免不动 */
+  --bg: var(--blk-850);
+  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 88%, transparent);
+  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-750) 94%, var(--primary) 6%) 80%, transparent);
+  /* 主色 = 当前主题色阶 500（默认 Terracotta 暖砖红、低饱和、反 AI 味）；派生色一律 color-mix 表达 */
+  --primary: var(--th-500);
+  /* 反 AI 味：弱化霓虹光晕（25%→10%），仅保留隐约材质感；CW 暗金模式见 [data-theme="cw"] */
+  --primary-glow: color-mix(in srgb, var(--primary) 10%, transparent);
+  /* 主色梯度端（ADR 0011 收编：原玫红 #F43F5E → 主色族成员 th-400，第三色相消失） */
+  --accent: var(--th-400);
+  --gold: var(--gold-400);
+  /* 语义金（强化/文本高亮等语义强调）：随主题——常规亮金，CW 降阶暗铜（主题金与语义金永不重叠） */
+  --gold-sem: var(--gold-300);
+  --text: #E2E8F0;
+  --text2: #94A3B8;
+  --text-bright: #FFFFFF;
+  --text3: #8A9BB4;
+  --border: color-mix(in srgb, var(--primary) 20%, transparent);
+  --border2: color-mix(in srgb, var(--primary) 40%, transparent);
+  /* 文本高亮语义位：并入 gold 族（消除游离橙 #f29e38） */
+  --highlight: var(--gold-300);
+  /* 高亮数值/激活态文字 = 当前主题色阶 300 */
+  --metric-val: var(--th-300);
+  /* 终局/错误状态色（--season-live/--season-upcoming/toast 错误引用；勿删） */
+  --diff-add: #34D399;
+  --diff-del: #F87171;
+  --diff-text: #60A5FA;
+  /* 终局赛季状态（live 与 diff-add 同绿、upcoming 与 diff-text 同蓝，引用保持同步） */
+  --season-live: var(--diff-add);
+  --season-upcoming: var(--diff-text);
+  --season-ended: #64748B;
+  /* 终局内容四模式专属色（领域层：不随主题，供 endgame.css 引用）
+     忘却之庭=记忆靛蓝 / 虚构叙事=文墨青 / 末日幻影=灾厄赤 / 异相仲裁=裁决金 */
+  --eg-maze: #818CF8;
+  --eg-story: #2DD4BF;
+  --eg-boss: #FB7185;
+  --eg-peak: #FBBF24;
+  --badge-test: #F59E0B;
+  --font-hud: 'Orbitron', monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  /* 全站唯一等宽族声明点（编辑式元信息小字：枢纽页元信息 / 目录页头 / 怪物卡分类 / 侧栏英文）。
+     所有等宽栈必须引用本令牌，禁止在页面 CSS 或 SFC scoped 里重复字面量。
+     研究线调试台（/debug）另用两条栈（ui-monospace, monospace；SystemMapSection 的
+     ui-monospace, 'SF Mono', Consolas, monospace），属研究线专用、不并入本令牌
+     （用户裁定：dev-only 面板不属产品面视觉体系），收口时禁止一并改掉。 */
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+  /* 布局宽度令牌：页面内容统一边界 / 正文可读行宽
+     三层宽度系列：detail 展示层 1000 / struct 结构层 952 / prose 阅读层 800 */
+  --nk-content-max: 1440px;
+  /* 内容区侧栏避让（单一事实源，禁止视图写死数字）：
+     0（手机，侧栏为底部栏）/ 88（= 平板侧栏 56 + 缘距 32）/ 148（= 桌面文字侧栏 140 + 缘距 8）。
+     视图容器统一以 padding-left / left / margin-left = var(--nk-content-offset) 引用，
+     侧栏宽度变更只改本变量（ADR 0003 fixed 侧栏 + 手动避让架构的收口，防遗漏漂移）。
+     导航条全站全断点恒在（ADR 0019）：避让对象恒存在，不存在「无侧栏页」的断点重映射特例。 */
+  --nk-content-offset: 0;
+  --nk-detail-max: 1000px;
+  --nk-struct-max: 952px;
+  --nk-prose-max: 800px;
+  /* 动画时序令牌 */
+  --nk-dur-fast: 150ms;
+  --nk-dur-normal: 300ms;
+  --nk-dur-slow: 500ms;
+  --nk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --nk-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --nk-stagger: 40ms;
+  --nk-radius-card: 10px;
+  /* 表面阴影：扩散式染色阴影（取代霓虹 glow，营造墨色分层质感） */
+  --nk-shadow-lift: 0 2px 6px rgba(0,0,0,0.28), 0 10px 24px -8px rgba(0,0,0,0.5);
+  --nk-shadow-card: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px -10px rgba(0,0,0,0.45);
+  /* ─── 外壳语义变量（侧栏/抽屉/目录头/卡片边框）：黑阶派生 + 主色注入，
+       主题切换自动跟随；CW 在 [data-theme="cw"] 显式覆盖为暗金 ─── */
+  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 97%, var(--primary) 3%) 95%, transparent);
+  --nk-shell-hover: color-mix(in srgb, var(--primary) 10%, transparent);
+  --nk-shell-press: color-mix(in srgb, var(--primary) 18%, transparent);
+  --nk-shell-active-bg: color-mix(in srgb, var(--primary) 22%, transparent);
+  --nk-shell-active-border: color-mix(in srgb, var(--primary) 40%, transparent);
+  --nk-shell-glow: color-mix(in srgb, var(--primary) 18%, transparent);
+  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 94%, transparent);
+  --nk-sheet-border: color-mix(in srgb, var(--primary) 35%, transparent);
+  --nk-sheet-item-bg: color-mix(in srgb, var(--primary) 5%, transparent);
+  --nk-sheet-item-border: color-mix(in srgb, var(--primary) 14%, transparent);
+  /* 吸顶条材质（仅 .nk-cat-toolbar 使用）：常规模式亚光玻璃 82%（内容穿过时保留透视层次，
+     移动端在 catalog.css 降级为 92% 实底；CW 层保持 94% 不随常规改动） */
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 94%, var(--primary) 6%) 82%, transparent);
+  --nk-header-border: color-mix(in srgb, var(--primary) 16%, transparent);
+  --nk-input-bg: color-mix(in srgb, var(--primary) 6%, transparent);
+  --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
+  --nk-page-tint: color-mix(in srgb, var(--primary) 6%, transparent);
+  --nk-card-border: color-mix(in srgb, var(--primary) 30%, transparent);
+  /* 中性细线（档案/规格表排版：克制的半透明白线，不随主题色；卡片/分割线用） */
+  --line-1: rgba(255,255,255,0.07);
+  --line-2: rgba(255,255,255,0.13);
+}
+
+/* 内容区侧栏避让断点重映射：768 = 平板 56px 书脊侧栏 + 32 缘距；1024 = 桌面 140px 文字侧栏 + 8 缘距 */
+@media (min-width: 768px) {
+  :root { --nk-content-offset: 88px; }
+}
+@media (min-width: 1024px) {
+  :root { --nk-content-offset: 148px; }
+}
+
+/* ═══ 货币战争模式：全壳主题（黑底 + 主题主色；缺省香槟金，可经 data-cw-accent 切换） ═══
+   由 App.vue 根据 route.meta.cw 挂载 <html data-theme="cw">。
+   ADR 0011：主色 = 当前 CW 主题色阶 500（缺省 gold-500 金属金，唯一发光位），
+   文字强调位 = 主题色阶 300 亮端（缺省 gold-300 亮金），
+   语义金 = 主题色阶 600 暗铜哑光（缺省 gold-600）；底色与常规共享同一中性黑阶 + 主题色注入。
+   硬约束：导航小字（≤0.75rem）用高亮度暖白，对比度 ≥4.5:1 */
+[data-theme="cw"] {
+  --bg: var(--blk-850);
+  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 90%, transparent);
+  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-750) 94%, var(--cwth-500) 6%) 82%, transparent);
+  /* 主色 = 当前 CW 主题色阶 500（缺省 gold-500 金属金；文字强调位 300 承接明度） */
+  --primary: var(--cwth-500);
+  --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
+  /* 主色梯度端：暗铜（主题色阶 600） */
+  --accent: var(--cwth-600);
+  /* 主题色阶别名同步为当前 CW 主题色：跨模式共享样式（catalog 等）若直接引用 --th-* 时保持主题一致 */
+  --th-300: var(--cwth-300);
+  --th-400: var(--cwth-600);
+  --th-500: var(--cwth-500);
+  --th-600: var(--cwth-700);
+  --th-700: var(--cwth-700);
+  --gold: var(--cwth-600);
+  --gold-sem: var(--cwth-600);
+  /* 暖白文本：白 + 主题色微注入（与黑底、主题色成暖白金属文本） */
+  --text: color-mix(in srgb, var(--text-bright) 94%, var(--cwth-300) 6%);
+  --text2: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 70%, transparent);
+  --text-bright: color-mix(in srgb, white 94%, var(--cwth-300) 6%);
+  --text3: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 52%, transparent);
+  --border: color-mix(in srgb, var(--cwth-500) 18%, transparent);
+  --border2: color-mix(in srgb, var(--cwth-500) 40%, transparent);
+  --highlight: var(--cwth-300);
+  /* 文字/细线强调位：主题色阶 300 亮端（缺省亮金） */
+  --metric-val: var(--cwth-300);
+  /* 稀有度 5 星 = 语义金家族：CW 降阶暗铜（领域色不随主题——ADR 0011 恒等式执行特例，保持原金阶） */
+  --rarity-5: var(--gold-600);
+  /* 外壳：黑阶 + 主题色注入 */
+  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 97%, var(--cwth-500) 3%) 96%, transparent);
+  --nk-shell-hover: color-mix(in srgb, var(--cwth-500) 10%, transparent);
+  --nk-shell-press: color-mix(in srgb, var(--cwth-500) 16%, transparent);
+  --nk-shell-active-bg: color-mix(in srgb, var(--cwth-500) 16%, transparent);
+  --nk-shell-active-border: color-mix(in srgb, var(--cwth-500) 45%, transparent);
+  --nk-shell-glow: color-mix(in srgb, var(--cwth-500) 20%, transparent);
+  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 95%, transparent);
+  --nk-sheet-border: color-mix(in srgb, var(--cwth-500) 35%, transparent);
+  --nk-sheet-item-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
+  --nk-sheet-item-border: color-mix(in srgb, var(--cwth-500) 16%, transparent);
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 94%, transparent);
+  --nk-header-border: color-mix(in srgb, var(--cwth-500) 14%, transparent);
+  --nk-input-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
+  --nk-input-border: color-mix(in srgb, var(--cwth-500) 20%, transparent);
+  --nk-page-tint: color-mix(in srgb, var(--cwth-500) 5%, transparent);
+  --nk-card-border: color-mix(in srgb, var(--cwth-500) 28%, transparent);
+  /* CW 主题：暖白细线（白 + 主题色微注入） */
+  --line-1: color-mix(in srgb, var(--text-bright) 8%, transparent);
+  --line-2: color-mix(in srgb, var(--text-bright) 15%, transparent);
+}
+
+/* ═══ 货币战争主题色切换：设置页经 <html data-cw-accent="..."> 选择 CW 模式主题色阶 ═══
+   仅重映射 --cwth-*（CW 主题色阶别名层），[data-theme="cw"] 语义层经它自动跟随；
+   常规模式（无 data-theme="cw"）不受影响。缺省（无 data-cw-accent）= 香槟金 gold。
+   领域语义色（星级 / 成就徽章 / 势力系 / 技能类型）不随切换，保持原金阶。 */
+[data-theme="cw"][data-cw-accent="rose"] {
+  --cwth-200: var(--rs-200);
+  --cwth-300: var(--rs-300);
+  --cwth-350: var(--rs-350);
+  --cwth-400: var(--rs-400);
+  --cwth-500: var(--rs-500);
+  --cwth-600: var(--rs-600);
+  --cwth-700: var(--rs-700);
+}
+[data-theme="cw"][data-cw-accent="silver"] {
+  --cwth-200: var(--sv-200);
+  --cwth-300: var(--sv-300);
+  --cwth-350: var(--sv-350);
+  --cwth-400: var(--sv-400);
+  --cwth-500: var(--sv-500);
+  --cwth-600: var(--sv-600);
+  --cwth-700: var(--sv-700);
+}
+[data-theme="cw"][data-cw-accent="emerald"] {
+  --cwth-200: var(--em-200);
+  --cwth-300: var(--em-300);
+  --cwth-350: var(--em-350);
+  --cwth-400: var(--em-400);
+  --cwth-500: var(--em-500);
+  --cwth-600: var(--em-600);
+  --cwth-700: var(--em-700);
+}
+[data-theme="cw"][data-cw-accent="copper"] {
+  --cwth-200: var(--cp-200);
+  --cwth-300: var(--cp-300);
+  --cwth-350: var(--cp-350);
+  --cwth-400: var(--cp-400);
+  --cwth-500: var(--cp-500);
+  --cwth-600: var(--cp-600);
+  --cwth-700: var(--cp-700);
+}
+/* gold 为缺省（无 data-cw-accent 即命中 :root 缺省映射），显式键不设规则保证幂等 */
+
+/* ═══ 主题强调色切换：设置页经 <html data-accent="..."> 选择常规模式强调色阶 ═══
+   仅重映射 --th-*（当前主题色阶别名），语义层/领域层通过它自动跟随；
+   CW（[data-theme="cw"]）不受本组规则影响（其主题色经 data-cw-accent 独立切换）。缺省（无 data-accent）= Terracotta。 */
+[data-accent="olive"] {
+  --th-300: var(--ol-300);
+  --th-400: var(--ol-400);
+  --th-500: var(--ol-500);
+  --th-600: var(--ol-600);
+  --th-700: var(--ol-700);
+}
+[data-accent="slate"] {
+  --th-300: var(--sl-300);
+  --th-400: var(--sl-400);
+  --th-500: var(--sl-500);
+  --th-600: var(--sl-600);
+  --th-700: var(--sl-700);
+}
+[data-accent="sand"] {
+  --th-300: var(--sd-300);
+  --th-400: var(--sd-400);
+  --th-500: var(--sd-500);
+  --th-600: var(--sd-600);
+  --th-700: var(--sd-700);
+}
+[data-accent="iris"] {
+  --th-300: var(--ir-300);
+  --th-400: var(--ir-400);
+  --th-500: var(--ir-500);
+  --th-600: var(--ir-600);
+  --th-700: var(--ir-700);
+}
+/* Terracotta 为默认（无 data-accent 即命中 :root），显式值保证幂等 */
+[data-accent="terracotta"] {
+  --th-300: var(--tc-300);
+  --th-400: var(--tc-400);
+  --th-500: var(--tc-500);
+  --th-600: var(--tc-600);
+  --th-700: var(--tc-700);
+}
+
+/* 主题切换瞬间的渐变过渡（App.vue 临时挂载 ~450ms 后移除，
+   避免常驻 transition 干扰日常 hover 响应速度）。
+
+   本条必须【排除路由视图根】：本规则是 `!important` 的 shorthand，而 shorthand 会一次性
+   把 `transition-property` 设成「仅四个颜色属性」，从而**整体覆盖**视图通道在
+   `.nk-view-*-enter/leave-active` 里声明的 `opacity`/`transform` → 浏览器不插值 →
+   主题翻转的那次导航（唯一翻转 meta.cw 的导航就是 `/` ↔ `/currency`）会**一帧硬切**，
+   本轮的模式置换过渡（nk-view-swap）永不渲染。故第 2 个选择器必须保留
+   `:not([class*="nk-view-"])`：视图根自身要跑 opacity/transform，其**后代会继续被本规则
+   命中**（后代不带该前缀），主题「褪色重染」观感不受影响。
+
+   **禁止**删掉第 2 个选择器里的 `:not([class*="nk-view-"])`（删掉即视图过渡被吃掉）。
+   **禁止**改回 `transition-property: <四个颜色> !important`：它同样把 `transition-property`
+   限定为仅颜色，视图的 opacity/transform 依旧被排除，**实测中间帧为 0，不成立**。
+   **禁止**改成 `transition: all`（会让位移/透明度以外的一切属性参与过渡并放大开销）。
+   可验证锚点：主题过渡期间视图根 computed `transition-property` 必须为 `opacity, transform`
+   且存在中间帧；普通元素仍为四色 / 0.4s。 */
+.theme-transitioning,
+.theme-transitioning *:not([class*="nk-view-"]),
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition: background-color 400ms var(--nk-ease-out),
+              color 400ms var(--nk-ease-out),
+              border-color 400ms var(--nk-ease-out),
+              box-shadow 400ms var(--nk-ease-out) !important;
+}
+
+/* ─── 侧边栏（mobile-first：底部 Tab Bar） ─── */
+.ui-sidebar {
+  position: fixed;
+  top: auto; bottom: 0; left: 0; right: 0; transform: none;
+  width: 100%; height: calc(56px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: row; align-items: stretch;
+  background: var(--nk-shell-bg);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border); border-radius: 0;
+  padding: 0 4px env(safe-area-inset-bottom, 0px); z-index: 100000;
+}
+/* ─── 交换按钮与导航板块的分隔线（mobile-first：底部栏为纵向细线） ─── */
+.ui-sidebar-divider {
+  flex: none;
+  width: 1px; height: 22px;
+  align-self: center;
+  margin: 0 3px;
+  background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
+  opacity: 0.8;
+}
+/* 全槽位触控目标：flex:1 1 auto + min-width:44px —— 有富余时均分填满整行消除死区，
+   放不下时不压缩（44px 为触控下限），由 SidebarNav 按规范顺序将尾部折叠进"更多"；
+   高度由 align-items: stretch 撑满 56px 栏高（≥ 44px 标准） */
+.ui-sidebar-link {
+  flex: 1 1 auto; min-width: 44px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  /* background/padding 显式重置：<button>（“更多”）否则继承 UA 默认 buttonface 灰底，在深色栏中看似高亮 */
+  background: transparent; padding: 0;
+  border: 1px solid transparent; border-radius: 10px;
+  color: var(--text2); opacity: 0.72;
+  transition: color 0.2s, opacity 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  position: relative;
+}
+.ui-sidebar-link__icon { display: flex; transition: transform 0.18s var(--nk-ease-out); }
+.ui-sidebar-link__icon svg { width: 20px; height: 20px; transition: transform 0.35s var(--nk-ease-out); }
+/* 文字块（中文 + 英文 mono 小字）：默认隐藏，桌面文字侧栏（≥1024px）显示 */
+.ui-sidebar-link__text { display: none; }
+.ui-sidebar-link__cn, .ui-sidebar-link__en { display: block; }
+/* 按压触觉反馈：图标即时收缩（80-150ms 内响应），不位移槽位布局 */
+.ui-sidebar-link:active .ui-sidebar-link__icon { transform: scale(0.82); }
+/* 交换按钮悬停：双箭头旋转暗示“切换”语义，与普通导航项区分 */
+.ui-sidebar-swap:hover .ui-sidebar-link__icon svg { transform: rotate(180deg); }
+.ui-sidebar-link__label { font-size: 10px; line-height: 1; letter-spacing: 0.01em; white-space: nowrap; }
+.ui-sidebar-link:hover { opacity: 1; background: var(--nk-shell-hover); }
+.ui-sidebar-link:active { opacity: 1; background: var(--nk-shell-press); }
+.ui-sidebar-link:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+/* 激活项：淡底 + 主色文字 + 细边框；霓虹 glow 已去除（收敛为纯物理阴影） */
+.ui-sidebar-link--active { opacity: 1; color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); }
+/* 底部工具组（调试台 + 设置）：手机底部栏内 display:contents——成员不额外占槽位，
+   直接参与均分（debug 手机隐藏后仅设置一枚，与改动前布局一致）；
+   成组置底由平板断点内的 .ui-sidebar-tools 应用（见下） */
+.ui-sidebar-tools { display: contents; }
+/* 设置入口：手机底部栏作为末槽位平铺（与其他按钮垂直居中对齐，无需额外 margin） */
+.ui-sidebar-settings { margin-top: 0; }
+/* 研究线调试台入口（dev-only）：仅平板/桌面竖排侧栏显示（设置按钮上方）；
+   手机底部栏无空间、且不参与动态折叠划分，一律隐藏（SidebarNav 测量亦已显式排除） */
+@media (max-width: 767px) {
+  .ui-sidebar-debug { display: none; }
+}
+
+/* ─── 模式切换「重凝」动画：导航板块从模糊中凝聚，交换按钮与分隔线保持不动 ─── */
+.ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) {
+  animation: ui-nav-materialize 0.38s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+/* 逐槽位递进延迟：凝聚如波浪展开（手机从左到右 / 桌面从上到下） */
+.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(2) { animation-delay: 28ms; }
+.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(3) { animation-delay: 56ms; }
+.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(4) { animation-delay: 84ms; }
+.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(5) { animation-delay: 112ms; }
+.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(6) { animation-delay: 140ms; }
+.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(7) { animation-delay: 168ms; }
+.ui-sidebar--swap-anim a.ui-sidebar-link:nth-of-type(8) { animation-delay: 196ms; }
+.ui-sidebar--swap-anim .ui-sidebar-more { animation-delay: 224ms; }
+@keyframes ui-nav-materialize {
+  from { opacity: 0; filter: blur(3px); transform: scale(0.88); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) { animation: none; }
+}
+
+/* ─── 手机"更多"聚合：按实际空间折叠放不下的板块尾部，其余收入上拉抽屉 ─── */
+/* 折叠项在底部栏隐藏（平板/桌面无折叠项，全部平铺） */
+.ui-sidebar-link--in-more { display: none; }
+/* 无折叠时隐藏"更多"按钮（有折叠时正常展示） */
+.ui-sidebar-more--hidden { display: none; }
+/* 折叠测量态：SidebarNav 在同一帧内强制全部槽位自然宽度且全部可见（含折叠项与隐藏的
+   "更多"按钮），读宽后立即复原——用于计算实际放得下几槽，无可见闪烁 */
+.ui-sidebar--measure .ui-sidebar-link { flex: none !important; width: auto !important; }
+.ui-sidebar--measure .ui-sidebar-link--in-more { display: flex !important; }
+.ui-sidebar--measure .ui-sidebar-more--hidden { display: flex !important; }
+/* 抽屉遮罩：位于底部栏上方（z 低于栏，保证栏始终可点），点遮罩关闭 */
+.ui-more {
+  position: fixed; left: 0; right: 0; top: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  z-index: 99990;
+  display: flex; align-items: flex-end;
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+}
+.ui-more__sheet {
+  width: 100%;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  padding: 18px 14px 22px;
+  background: var(--nk-sheet-bg);
+  backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-top: 1px solid var(--nk-sheet-border);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
+}
+.ui-more__item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 6px 12px;
+  border: 1px solid var(--nk-sheet-item-border); border-radius: 12px;
+  background: var(--nk-sheet-item-bg);
+  color: var(--text2);
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ui-more__item:active { background: var(--nk-shell-press); }
+.ui-more__item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.ui-more__item--active { color: var(--metric-val); background: var(--nk-shell-active-bg); border-color: var(--nk-shell-active-border); }
+.ui-more__icon { display: flex; }
+.ui-more__icon svg { width: 24px; height: 24px; }
+.ui-more__label { font-size: 0.72rem; font-weight: 600; }
+.ui-more__en { font-family: var(--font-hud); font-size: 0.5rem; letter-spacing: 0.12em; color: var(--text3); }
+/* 抽屉过渡 */
+.ui-more-enter-from, .ui-more-leave-to { opacity: 0; }
+.ui-more-enter-from .ui-more__sheet, .ui-more-leave-to .ui-more__sheet { transform: translateY(16px); }
+.ui-more-enter-active, .ui-more-leave-active { transition: opacity 0.18s ease; }
+.ui-more-enter-active .ui-more__sheet, .ui-more-leave-active .ui-more__sheet { transition: transform 0.18s var(--nk-ease-out); }
+@media (prefers-reduced-motion: reduce) {
+  .ui-more-enter-active, .ui-more-leave-active,
+  .ui-more-enter-active .ui-more__sheet, .ui-more-leave-active .ui-more__sheet { transition: none; }
+}
+
+/* ─── 挂载容器 ─── */
+/* overflow: clip —— 页面过渡期间 translate 位移会溢出边界，不裁切会导致视口滚动条闪现→内容抖动（各页面均内部滚动，裁切安全；fixed 的侧边栏/Toast 不受影响） */
+#app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+:where(#app) h1, :where(#app) h2, :where(#app) h3, :where(#app) p, :where(#app) dl, :where(#app) dt, :where(#app) dd { margin: 0; padding: 0; }
+:where(#app) * { box-sizing: border-box; }
+:where(#app) button { font: inherit; color: inherit; cursor: pointer; }
+:where(#app) img { display: inline-block; vertical-align: middle; }
+:where(#app) a { color: inherit; text-decoration: none; }
+
+/* ─── 全局纸感细颗粒（化开纯平死黑，缓解纯色底视觉疲劳）：唯一收口于本规则，禁止页面级复制/调参 ───
+   单层极简白 alpha 细颗粒（feColorMatrix 去色留 alpha，无色相 → 双主题通用，中性豁免不触发色彩守卫）：
+   · 超高基频 0.9 各向同性细颗粒——无方向性/无结构，扫一眼无感、细看才有一层纸屑呼吸；
+     不叠纤维/云斑（会生成可被眼锁定的条纹与脏 blob = 机器感/ AI 味来源，禁回）。
+   · 360px 大瓦片平铺：瓦距周期在超高基频下不可辨，防 160px 级别可见网格。
+   · 强度 0.08：底色上移到 blk-850 后，白噪点与底的绝对差由 17.9 收窄到 16.6（≈ −7%），按等感知还原取 0.08（还原值 ≈0.075，留余量）；仅在纯平暗底上能微微感知，不脏到文字与图片上。
+   · 白颗粒只在暗部显形（亮图/白底上自动隐形）。
+   · fixed + pointer-events:none：纯视觉覆层，不拦截交互、不参与布局；
+     #app 无 transform，包含块为视口，不被 #app overflow:clip 裁切
+   · z-index 高于侧栏(100000)/Toast(99999)：全表面统一纸感（弹层同颗粒，不出现局部哑光）
+   · 强度唯一调参位 = --grain-opacity */
+:root { --grain-opacity: 0.08; }
+#app::after {
+  content: '';
+  position: fixed; inset: 0;
+  z-index: 100001;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='nk-grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0%200%200%200%201%200%200%200%200%201%200%200%200%200%201%200%200%200%200.6%200'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23nk-grain)'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+}
+
+/* ─── 角色详情页滚动容器（CharacterView 根元素） ─── */
+.nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+.nk-page--detail::-webkit-scrollbar { width: 6px; }
+.nk-page--detail::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.nk-page--detail::-webkit-scrollbar-track { background: transparent; }
+
+/* 图片加载失败占位符 */
+.nk-img-error { background: color-mix(in srgb, var(--primary) 6%, transparent); border: 1px dashed var(--border); object-fit: contain; }
+
+/* ─── Hero: 左右结构（宽屏左视觉 + 右信息面板；窄屏回退为堆叠） ─── */
+@property --spine-inner { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --spine-outer { syntax: '<percentage>'; inherits: false; initial-value: 1%; }
+/* 设计令牌 */
+:root { --nk-hero-panel-pad: 20px 16px; }
+.nk-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 0;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+/* 视觉区（背景 + Spine 动画 + 动画开关） */
+.nk-hero__visual { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; }
+.nk-hero__bg {
+  position: absolute; inset: 0;
+  background-size: cover;
+background-position: center 15%;
+  background-repeat: no-repeat;
+  transition: opacity 0.4s ease 0.4s;
+}
+.nk-hero__bg.nk-dim { opacity: 0.08; transition: opacity 0.8s ease; }
+.nk-hero__spine { position: absolute; inset: 0; z-index: 2; opacity: 0; --spine-inner: 0%; --spine-outer: 1%; -webkit-mask-image: radial-gradient(circle at 50% 45%, black var(--spine-inner), transparent var(--spine-outer)); mask-image: radial-gradient(circle at 50% 45%, black var(--spine-inner), transparent var(--spine-outer)); transition: --spine-inner 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), --spine-outer 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease; }
+.nk-hero__spine.nk-ready { --spine-inner: 55%; --spine-outer: 75%; opacity: 1; transition: --spine-inner 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), --spine-outer 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease; }
+.nk-hero__spine canvas { width: 100%; height: 100%; display: block; transform: scale(1.15); transform-origin: center center; }
+/* 边缘柔化：横向线性渐变（专攻左右边缘）+ 内阴影（兼顾四角） */
+.nk-hero__visual {
+  box-shadow:
+    inset 0 0 120px 30px color-mix(in srgb, var(--blk-900) 85%, transparent),
+    inset 0 0 50px 10px color-mix(in srgb, var(--blk-900) 50%, transparent);
+}
+.nk-hero__visual::before {
+  content: '';
+  position: absolute; inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to right,
+    var(--bg) 0%,
+    transparent 22%,
+    transparent 78%,
+    var(--bg) 100%
+  );
+  pointer-events: none;
+}
+.nk-hero__scrim { display: none; }
+.nk-hero__toggle { position: absolute; top: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 16px; background: color-mix(in srgb, var(--blk-900) 60%, transparent); border: 1px solid var(--border); backdrop-filter: blur(8px); cursor: pointer; font-size: 0.625rem; color: var(--text2); transition: all 0.2s; user-select: none; }
+/* 触控热区扩展至 ≥44px（视觉尺寸不变） */
+.nk-hero__toggle::before { content: ''; position: absolute; inset: -9px; }
+.nk-hero__toggle:hover { border-color: var(--border2); color: var(--text); }
+.nk-hero__toggle .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.4); transition: all 0.2s; }
+.nk-hero__toggle.off .dot { background: var(--text3); box-shadow: none; }
+.nk-hero__toggle:not(.has-anim) { opacity: 0.35; cursor: default; }
+.nk-hero__toggle:not(.has-anim) .dot { background: var(--text3); box-shadow: none; }
+
+/* 信息面板（右栏内容：毛玻璃深色面板） */
+.nk-hero__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: var(--nk-hero-panel-pad);
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--blk-900) 60%, transparent) 30%, color-mix(in srgb, var(--blk-900) 92%, transparent) 100%);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+/* 头部：阵营 + 名字 + 星级 + 标签 */
+.nk-hero__head { display: flex; flex-direction: column; gap: 8px; }
+.nk-hero__camp {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.18em; color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 90%, var(--th-300) 10%) 92%, transparent);
+}
+.nk-hero__camp::before { content: ''; width: 14px; height: 1px; background: color-mix(in srgb, var(--th-400) 85%, transparent); }
+.nk-hero__name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text-bright); text-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 0 14px color-mix(in srgb, var(--primary) 20%, transparent); line-height: 1.15; }
+.nk-hero__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.nk-hero__stars { color: var(--gold); font-size: 1.05rem; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 8px color-mix(in srgb, var(--rarity-5) 22%, transparent); }
+.nk-hero__tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 16px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent); border: 1px solid var(--border);
+  font-size: 0.75rem; color: var(--text2);
+  transition: border-color 0.2s, background 0.2s;
+}
+.nk-hero__tag:hover { border-color: var(--border2); background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.nk-hero__tag img { width: 16px; height: 16px; border-radius: 50%; }
+
+/* 属性区段（标题 + 等级条 + 8 项属性网格） */
+.nk-hero__section { display: flex; flex-direction: column; gap: 10px; }
+.nk-hero__section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.16em; color: var(--text-bright); text-transform: uppercase;
+}
+.nk-hero__section-bar {
+  display: inline-block; width: 4px; height: 14px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+}
+.nk-hero__level { display: flex; align-items: center; gap: 12px; }
+.nk-hero__level-label {
+  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; color: var(--text2); white-space: nowrap;
+}
+.nk-hero__level-track {
+  flex: 1; height: 6px; border-radius: 3px; overflow: hidden;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.35), inset 0 0 0 1px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+.nk-hero__level-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--th-400));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: width 0.6s var(--nk-ease-out);
+}
+/* 8 项属性网格（mobile-first：2 列紧凑） */
+.nk-hero__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; }
+.nk-hero__stat { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent); transition: background 0.2s; }
+.nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.nk-hero__stat:hover { background: color-mix(in srgb, var(--primary) 5%, transparent); }
+.nk-hero__stat-icon {
+  display: inline-block; width: 16px; height: 16px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+/* 图标源：官方 trace 图片（IconMaxHP 等，jsDelivr 路径）+ 嘲讽缺失项的白色线性 SVG 顶替（CharHero 内联 data URI） */
+
+.nk-hero__stat-label { font-size: 0.78rem; color: var(--text2); letter-spacing: 0.02em; }
+.nk-hero__stat-val { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.01em; text-align: right; white-space: nowrap; }
+
+/* ─── Tab 导航（吸顶全宽外壳 + 内容条约束到面板同宽并居中） ─── */
+.nk-tabs { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
+.nk-tabs__bar { display: flex; justify-content: space-between; align-items: center; gap: 0; max-width: var(--nk-detail-max); margin: 0 auto; padding: 0 16px; overflow-x: auto; }
+.nk-tabs__left { display: flex; }
+.nk-tab { display: inline-flex; align-items: center; min-height: 44px; padding: 12px 16px; font-size: 0.75rem; font-weight: 600; color: var(--text3); cursor: pointer; border: none; background: none; position: relative; transition: color 0.2s; letter-spacing: 0.02em; white-space: nowrap; }
+.nk-tab:first-child { padding-left: 0; }
+.nk-tab:hover { color: var(--text2); }
+.nk-tab--active { color: var(--metric-val); }
+.nk-tab--active::after { content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); border-radius: 1px; }
+
+/* ─── 区块导航（吸顶工具条内；别处也会用到 → 全局语法） ───
+   激活态默认主色（主题层）；身份页面可在页内覆盖为领域色 */
+.nk-secnav {
+  display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nk-secnav::-webkit-scrollbar { display: none; }
+.nk-secnav__btn {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 6px 11px; border-radius: 4px; border: none; background: transparent;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; /* 与 tokens .nk-tab 标准字号对齐 */
+  color: var(--text3); cursor: pointer; white-space: nowrap;
+  transition: color 0.15s, background 0.15s; position: relative; flex-shrink: 0;
+}
+/* 触控热区垂直扩展至 ≥44px（按钮 30px 高 + 上下各 7px） */
+.nk-secnav__btn::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px; /* 热区 ≥44px（无障碍硬标准） */
+}
+.nk-secnav__btn:hover { color: var(--text2); background: transparent; }
+.nk-secnav__btn--active { color: var(--metric-val); background: transparent; }
+.nk-secnav__btn--active::after {
+  content: ''; position: absolute; left: 11px; right: 11px; bottom: -7px;
+  height: 2px; border-radius: 1px; background: var(--primary); box-shadow: none;
+}
+.nk-secnav__idx { font-family: var(--font-hud); font-size: 0.625rem; opacity: 0.7; }
+.nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
+
+/* ─── Tab 内容区 ─── */
+.nk-panels { flex: 1; overflow: visible; }
+.nk-panels::-webkit-scrollbar { width: 4px; }
+.nk-panels::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.nk-panel { display: none; max-width: var(--nk-detail-max); margin: 0 auto; padding: 24px 16px 60px; animation: nk-fade 0.3s var(--ease); }
+.nk-panel--active { display: block; }
+@keyframes nk-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── 通用组件 ─── */
+/* 通用卡片（阅读族基底）：中性细线、无浮起、hover 仅边框/背景亮度变化；
+   浏览族卡片（图鉴/目录，保留位移与光效）见 catalog.css 各卡类 */
+.nk-card { background: rgba(255,255,255,0.016); border: 1px solid var(--line-1); border-radius: var(--nk-radius-card); padding: 20px; margin-bottom: 16px; transition: border-color 0.25s ease, background 0.25s ease; position: relative; }
+.nk-card:hover { border-color: var(--line-2); background: rgba(255,255,255,0.03); }
+/* 返回顶部（全局原语：长页通用） */
+.nk-top-btn {
+  position: fixed; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  z-index: 30; width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--blk-800) 80%, transparent); border: 1px solid var(--line-1);
+  color: var(--text3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+}
+.nk-top-btn svg { width: 18px; height: 18px; transition: transform 0.2s var(--nk-ease-out); }
+.nk-top-btn:hover {
+  color: var(--text-bright); border-color: var(--primary); box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+.nk-top-btn:hover svg { transform: translateY(-1.5px); }
+@media (min-width: 768px) {
+  .nk-top-btn { right: 28px; bottom: 28px; }
+}
+/* 章节标题（编辑式基线）：HUD 大写 + 细线延伸线；
+   编号元素 .nk-title__idx 由使用方提供（角色页由 sections.ts 配置表注入固定编号） */
+.nk-title {
+  display: flex; align-items: baseline; gap: 12px;
+  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 20px; padding-bottom: 0;
+  border-bottom: none;
+}
+/* 标题延伸线：双段——实线收束后渐隐 */
+.nk-title::after {
+  content: ''; flex: 1; height: 1px; align-self: center;
+  background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
+}
+/* 章节编号元素（00-09，编号 = 身份；数据缺失保留缺口） */
+.nk-title__idx {
+  flex: none; font-size: 0.6rem; letter-spacing: 0; color: var(--metric-val); opacity: 0.95;
+  padding-right: 10px;
+  border-right: 1px solid var(--line-2);
+}
+
 /* 页面切换过渡（Vue Transition 类名，方向由 navDir 决定）。
    完整实测根因 / 叠层方向 / 第四通道 nk-view-swap 见 docs/memory/2026-09.md「串行转场→交叉过渡」与「模式置换过渡通道」两节（逐字记录，含探针数据）。
    硬约束（禁止/必须，改此须同步上述文档）：
@@ -915,466 +915,466 @@ background-position: center 15%;
    ⑤ 禁止改回错峰等长（叠影发灰）；⑥ 禁止把 swap 并入 fade/fwd/back（位移/时长语义不同）；
    ⑦ swap 的 position:absolute+z-index:1 必须保留；手机(<768px)不出现 swap（App.vue 恒返回 nk-view-fade）；
    ⑧ prefers-reduced-motion 下 swap 仍出现，reduce 块必须覆盖 swap 并 transform:none。*/
-.nk-view-fwd-enter-from { opacity: 0; transform: translateX(24px); }
-.nk-view-fwd-leave-to { opacity: 0; transform: translateX(-24px); }
-.nk-view-back-enter-from { opacity: 0; transform: translateX(-24px); }
-.nk-view-back-leave-to { opacity: 0; transform: translateX(24px); }
-.nk-view-fade-enter-from { opacity: 0; transform: translateY(8px); }
-.nk-view-fade-leave-to { opacity: 0; transform: translateY(-8px); }
-/* 模式置换位移目标：±40px，单向「替换」（见段首「第四通道」）。禁止缩小到 fwd/back 的 24px */
-.nk-view-swap-enter-from { opacity: 0; transform: translateX(40px); }
-.nk-view-swap-leave-to { opacity: 0; transform: translateX(-40px); }
-
-/* 离场段：立即起步、无 transition-delay */
-.nk-view-fwd-leave-active,
-.nk-view-back-leave-active,
-.nk-view-fade-leave-active { transition: opacity 0.26s var(--nk-ease-out), transform 0.26s var(--nk-ease-out); }
-/* 进场段：错峰延后 60ms 起步、时长 0.22s */
-.nk-view-fwd-enter-active,
-.nk-view-back-enter-active,
-.nk-view-fade-enter-active { transition: opacity 0.22s var(--nk-ease-out), transform 0.22s var(--nk-ease-out); transition-delay: 60ms; }
-/* 模式置换的错峰比常规分支更长，匹配更大的位移：leave 0.34s 立即起步、enter 0.30s 延后 80ms */
-.nk-view-swap-leave-active { transition: opacity 0.34s var(--nk-ease-out), transform 0.34s var(--nk-ease-out); }
-.nk-view-swap-enter-active { transition: opacity 0.30s var(--nk-ease-out), transform 0.30s var(--nk-ease-out); transition-delay: 80ms; }
-
-/* 离场页脱离文档流 + 强制「旧页在上」（见段首「叠层方向」）：
-   `position: absolute` 让离场页不再参与文档流（与已 absolute 的目录页/首页根元素一致）；
-   `z-index: 1` 抵消实测的 [旧页, 新页] 顺序（不加则为进场页在上）。禁止删除任一条。
-   本规则同时也是手机/reduced-motion 两块的叠层来源：那两块只覆写 transition，
-   不重复声明 position/z-index，**禁止**在那里加 `position: static` 之类的覆写。 */
-.nk-view-fwd-leave-active, .nk-view-back-leave-active, .nk-view-fade-leave-active, .nk-view-swap-leave-active { position: absolute; inset: 0; z-index: 1; }
-
-/* 手机断点：纯淡入淡出、无位移、更快速，消除底部导航切换闪烁。
-   降级必须同时满足「交叉 + 错峰 + 无位移」：leave 0.14s / enter 0.12s + 60ms 延迟。 */
-@media (max-width: 767px) {
-  .nk-view-fade-enter-from, .nk-view-fade-leave-to { opacity: 0; transform: none; }
-  .nk-view-fade-leave-active { transition: opacity 0.14s var(--nk-ease-out); }
-  .nk-view-fade-enter-active { transition: opacity 0.12s var(--nk-ease-out); transition-delay: 60ms; }
-}
-
-/* 减弱动效偏好：只留淡入淡出、无位移，但保留错峰节奏（禁止改为串行或加长时长） */
-@media (prefers-reduced-motion: reduce) {
-  .nk-view-fwd-enter-from, .nk-view-fwd-leave-to,
-  .nk-view-back-enter-from, .nk-view-back-leave-to,
-  .nk-view-fade-enter-from, .nk-view-fade-leave-to,
-  .nk-view-swap-enter-from, .nk-view-swap-leave-to { opacity: 0; transform: none; }
-  /* 本块不重复 `position/z-index`：绝对值继承自段内主规则，此处只改时长 */
-  .nk-view-fwd-leave-active,
-  .nk-view-back-leave-active,
-  .nk-view-fade-leave-active,
-  .nk-view-swap-leave-active { transition: opacity 0.14s var(--nk-ease-out); }
-  .nk-view-fwd-enter-active,
-  .nk-view-back-enter-active,
-  .nk-view-fade-enter-active,
-  .nk-view-swap-enter-active { transition: opacity 0.12s var(--nk-ease-out); transition-delay: 60ms; }
-}
-
-/* ═══════════════════════════════════════════
-   Toast 通知（Vue TransitionGroup）
-═══════════════════════════════════════════ */
-.nk-toast-container { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; background: color-mix(in srgb, var(--blk-800) 95%, transparent); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: 0.78rem; color: var(--text); pointer-events: auto; cursor: pointer; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
-.nk-toast-enter-from, .nk-toast-leave-to { transform: translateX(120%); opacity: 0; }
-.nk-toast-leave-active { transition: transform 0.25s ease-in, opacity 0.25s ease-in; }
-.nk-toast-move { transition: transform var(--nk-dur-normal) var(--nk-ease-out); }
-.nk-toast__icon { width: 18px; height: 18px; flex-shrink: 0; }
-.nk-toast__icon svg { width: 100%; height: 100%; }
-.nk-toast--error { border-color: rgba(248,113,113,0.4); }
-.nk-toast--error .nk-toast__icon { color: var(--diff-del); }
-.nk-toast--warn { border-color: color-mix(in srgb, var(--rarity-5) 40%, transparent); }
-.nk-toast--warn .nk-toast__icon { color: var(--gold); }
-.nk-toast--info .nk-toast__icon { color: var(--primary); }
-.nk-toast--success { border-color: rgba(52,211,153,0.4); }
-.nk-toast--success .nk-toast__icon { color: var(--diff-add); }
-
-/* ═══════════════════════════════════════════
-   骨架屏 + Shimmer 动画
-═══════════════════════════════════════════ */
-.nk-sk { background: color-mix(in srgb, var(--primary) 12%, transparent); border-radius: 6px; }
-.nk-sk--shimmer { position: relative; overflow: hidden; }
-/* 骨架语义类：抽取常用尺寸，避免逐处 inline style 硬编码 */
-.nk-sk--text-sm { height: 14px; border-radius: 4px; }
-.nk-sk--text-md { height: 16px; border-radius: 4px; }
-.nk-sk--title { height: 28px; border-radius: 6px; }
-.nk-sk--chip { height: 22px; border-radius: 14px; }
-.nk-sk--stat { height: 48px; border-radius: 8px; }
-.nk-sk--block { width: 100%; border-radius: 8px; }
-.nk-sk--block-sm { width: 100%; height: 60px; border-radius: 8px; }
-.nk-sk--block-md { width: 100%; height: 80px; border-radius: 8px; }
-.nk-sk--block-lg { width: 100%; height: 160px; border-radius: 8px; }
-.nk-sk--bar-xs { width: 48px; }
-.nk-sk--bar-sm { width: 80px; }
-.nk-sk--bar-md { width: 120px; }
-.nk-sk--bar-lg { width: 180px; }
-.nk-sk--fill { position: absolute; inset: 0; border-radius: 0; }
-.nk-sk--bar-line { width: 100%; height: 6px; border-radius: 3px; }
-.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--primary) 8%, transparent) 35%, color-mix(in srgb, var(--th-400) 18%, transparent) 50%, color-mix(in srgb, var(--primary) 8%, transparent) 65%, transparent 100%); animation: nk-shimmer 1.4s linear infinite; }
-@keyframes nk-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-.nk-skeleton { padding: 0; }
-.nk-skeleton--char { max-width: 100%; }
-/* 骨架屏：左右结构镜像真实 Hero */
-.nk-skeleton__hero {
-  position: relative;
-  display: flex; flex-direction: column;
-  border-radius: 0 0 12px 12px;
-  margin-bottom: 0;
-  max-width: 100%;
-  margin-left: auto; margin-right: auto;
-  background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 80%, transparent) 0%, color-mix(in srgb, var(--blk-900) 20%, transparent) 50%, transparent 100%);
-}
-.nk-skeleton__hero-visual { position: relative; width: 100%; aspect-ratio: 16 / 9; }
-.nk-skeleton__hero-panel { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, color-mix(in srgb, var(--blk-800) 92%, transparent), color-mix(in srgb, var(--blk-850) 92%, transparent)); border-top: 1px solid var(--border); }
-.nk-skeleton__body { padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
-.nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
-.nk-skeleton--catalog { padding: 0 24px 80px var(--nk-content-offset); }
-.nk-skeleton__header { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
-.nk-skeleton__filters { padding: 12px 0; }
-.nk-skeleton__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min, 150px), 1fr)); gap: var(--nk-grid-gap, 14px); padding-top: 16px; }
-/* 骨架卡占位：默认 3:4（角色/光锥）；遗器/物品/敌对物种为 1:1，由 gridClass 上下文覆盖 */
-.nk-skeleton__card-img { width: 100%; aspect-ratio: 3 / 4; border-radius: 10px; }
-.nk-relic-grid .nk-skeleton__card-img,
-.nk-item-grid .nk-skeleton__card-img,
-.nk-mob-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
-/* 终局星际档案卡：横向占位条，匹配真实卡片形态 */
-.nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 12px; }
-/* 角色画廊墙：3:4 竖版占位（与真实卡片立绘窗同比例，防切换 CLS） */
-.nk-idx-grid .nk-skeleton__card-img { aspect-ratio: 3 / 4; border-radius: 8px; }
-@media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
-
-/* CDN 图片最终降级：全局委托（installCdnImgFallback）在 nanoka 也失败时标记 data-cdn-down，
-   隐藏破图图标（布局占位保留，由卡片渐变底承接）；恢复重载时由委托移除标记 */
-img[data-cdn-down] { visibility: hidden; }
-
-/* ═══════════════════════════════════════════
-   错误态 / 空状态
-═══════════════════════════════════════════ */
-/* 占位页容器：与其他页面根元素保持同构（absolute + 内部滚动），避免过渡时布局模式切换跳变 */
-.nk-placeholder { position: absolute; inset: 0; overflow-y: auto; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 0 24px calc(56px + env(safe-area-inset-bottom, 0px)); }
-@media (min-width: 768px) { .nk-placeholder { padding-bottom: 0; } }
-.nk-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
-.nk-empty__icon { font-size: 2.5rem; opacity: 0.8; }
-.nk-empty__title { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text2); }
-.nk-empty__sub { font-size: 0.78rem; color: var(--text3); line-height: 1.6; }
-.nk-error-state, .nk-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 80px 24px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
-.nk-error-state__icon, .nk-empty-state__icon { width: 48px; height: 48px; color: var(--text3); opacity: 0.6; }
-.nk-error-state__icon svg, .nk-empty-state__icon svg { width: 100%; height: 100%; }
-.nk-error-state__icon { color: var(--diff-del); }
-.nk-error-state__title, .nk-empty-state__title { font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text2); text-transform: uppercase; }
-.nk-error-state__detail, .nk-empty-state__sub { font-size: 0.78rem; color: var(--text3); max-width: 400px; line-height: 1.6; }
-.nk-error-state__retry { margin-top: 8px; padding: 8px 24px; border-radius: 20px; background: var(--primary); border: none; color: var(--text-bright); font-family: var(--font-hud); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; cursor: pointer; transition: all var(--nk-dur-fast) ease; }
-.nk-error-state__retry:hover { box-shadow: 0 0 20px var(--primary-glow); transform: translateY(-1px); }
-
-/* ═══════════════════════════════════════════
-   枢纽页共享原语：页脚（品牌标语 + 拉丁格言）
-   两个模式的枢纽页（`/` 与 `/currency`）共用同一段页脚骨架，故声明在全局原语层而非任一页面 CSS；
-   断点随原语就近（桌面基准 → 平板 → 手机），避让值统一取 --nk-content-offset。
-   消费方：HomeView.vue / CurrencyHubView.vue；登记于 docs/agents/ui-design.md §1。
-═══════════════════════════════════════════ */
-.nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 48px var(--nk-content-offset); text-align: center; }
-.nk-hub-footer__motto { font-family: var(--font-body); font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.24em; color: var(--text-bright); }
-.nk-hub-footer__latin { margin: 16px 0 0; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.3em; color: var(--text3); }
-/* 平板（768-1023px）：中等密度 */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .nk-hub-footer { padding: 56px 32px 40px var(--nk-content-offset); }
-}
-/* 手机（<768px）：导航条为底部栏（56px + safe-area），页脚底部必须预留 72px（56 导航 + 16 呼吸），
-   以免末行文案被底部导航遮挡——ADR 0019 底部栏回归的连带项，禁止改回「只留呼吸」 */
-@media (max-width: 767px) {
-  .nk-hub-footer { padding: 48px 20px calc(72px + env(safe-area-inset-bottom, 0px)); }
-}
-
-/* ═══════════════════════════════════════════
-   枢纽页共享原语：品牌带（模式身份 + 定位副标）
-   工具化形态（ADR 0018）：枢纽页是「选路页」，首屏必须优先让给板块索引，
-   故**不再承载全屏 KV / 背景视频媒体层**，只在页首保留一条紧凑品牌带。
-   两个模式的枢纽页共用同一段骨架，故声明在全局原语层而非任一页面 CSS；
-   断点随原语就近（桌面基准 → 平板 → 手机），避让值统一取 --nk-content-offset。
-   消费方：HomeView.vue / CurrencyHubView.vue；登记于 docs/agents/ui-design.md §1。
-   min-height 而非固定 height：窄屏副标换行时自然增高，禁裁切文字。
-   禁止在页面 CSS 里重新声明本原语或改断点数值——两页高度不一致会让互切时跳动。
-═══════════════════════════════════════════ */
-.nk-hub-brand {
-  position: relative;
-  min-height: 200px;
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-  background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--th-500) 12%) 100%);
-}
-/* 底部融入页面底色：无媒体层后由渐变承担过渡，品牌带与索引区之间不得出现硬边 */
-.nk-hub-brand__scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(to bottom, transparent 0%, transparent 58%, color-mix(in srgb, var(--bg) 76%, transparent) 86%, var(--bg) 100%);
-}
-/* 标题区与索引区同网格：max-width 居中 + 左侧 --nk-content-offset 页面留白（断点由令牌接管） */
-.nk-hub-brand__content {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: var(--nk-content-max);
-  margin: 0 auto;
-  padding: 0 48px 28px var(--nk-content-offset);
-}
-/* 英文副标（模式代号）：发丝线 + 宽字距，克制不发光 */
-.nk-hub-brand__supra {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 12px;
-  font-family: var(--font-hud);
-  font-size: 0.68rem;
-  letter-spacing: 0.22em;
-  color: var(--text2);
-  animation: nk-fade 0.7s var(--ease) 0.2s backwards;
-}
-.nk-hub-brand__supra::before { content: ''; width: 44px; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
-/* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文字形）；无投影无发光——层级由字重与字号控制 */
-.nk-hub-brand__title {
-  font-family: var(--font-body);
-  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
-  color: var(--text-bright);
-  animation: nk-fade 0.7s var(--ease) 0.35s backwards;
-}
-/* 定位副标：一行内容清单，与主标题拉开层级 */
-.nk-hub-brand__tagline {
-  margin-top: 12px;
-  font-size: 0.84rem;
-  letter-spacing: 0.1em;
-  color: var(--text2);
-  animation: nk-fade 0.7s var(--ease) 0.5s backwards;
-}
-/* 枢纽页文字入场约定（三段共用；术语见 CONTEXT.md「枢纽页文字入场动画」）：
-   复用全局共享关键帧 nk-fade（禁止为品牌带另立本地关键帧）；两枢纽必须同时序，
-   改任一段时序都会造成互切时「一边文字展开、一边文字直接就在那里」 */
-/* 平板（768-1023px）：中等密度 */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .nk-hub-brand { min-height: 176px; }
-  .nk-hub-brand__content { padding: 0 32px 24px var(--nk-content-offset); }
-}
-/* 手机（<768px）：进一步压缩，首屏优先给板块索引 */
-@media (max-width: 767px) {
-  .nk-hub-brand { min-height: 148px; }
-  .nk-hub-brand__content { padding: 0 20px 18px; }
-  .nk-hub-brand__supra { font-size: 0.55rem; letter-spacing: 0.18em; gap: 10px; margin-bottom: 10px; }
-  .nk-hub-brand__supra::before { width: 28px; }
-  .nk-hub-brand__title { font-size: clamp(1.5rem, 7vw, 2rem); }
-  .nk-hub-brand__tagline { margin-top: 10px; font-size: 0.78rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .nk-hub-brand__supra, .nk-hub-brand__title, .nk-hub-brand__tagline { animation: none; }
-}
-
-/* ═══════════════════════════════════════════
-   响应式断点
-   手机  : max-width  767px
-   平板  : min-width  768px
-   桌面  : min-width 1024px
-═══════════════════════════════════════════ */
-/* ── 平板（≥768px）增强 ── */
-@media (min-width: 768px) {
-  /* 书脊式全高侧栏：背景色带延伸至视口全高，仅右侧发丝线与内容区分隔；
-     去圆角/去全框/去投影（档案书脊隐喻），导航项顶部对齐 */
-  .ui-sidebar {
-    position: fixed;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    width: 56px; padding: 20px 8px 16px; border-radius: 0;
-    background: var(--nk-sheet-bg);
-    border: none; border-right: 1px solid var(--line-1);
-    box-shadow: none;
-    backdrop-filter: none; -webkit-backdrop-filter: none; /* 清除手机底部栏继承的 blur：书脊色带用高不透明底 */
-    top: 0; bottom: 0; left: 0; right: auto; transform: none;
-    height: auto; z-index: 10000;
-  }
-  /* 平板/桌面：图标式竖排，隐藏文字标签；触控目标提升至 44px（iPad 触屏标准） */
-  .ui-sidebar-link { flex: none; width: 44px; height: 44px; }
-  .ui-sidebar-link__label { display: none; }
-  /* 平板/桌面：分隔线转为横向，把交换按钮与竖排导航板块隔开 */
-  .ui-sidebar-divider {
-    width: auto; height: 1px;
-    align-self: stretch;
-    margin: 4px 8px;
-    background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
-  }
-  /* 平板/桌面：恢复全部 10 项，隐藏"更多"入口与抽屉（含手机展开后旋屏的防御） */
-  .ui-sidebar-more { display: none; }
-  .ui-sidebar-link--in-more { display: flex; }
-  .ui-more { display: none; }
-  /* 竖排侧栏：底部工具组（调试台+设置）整体推至栏底部（成员不再各自置底；
-     手机底部栏内 display:contents 无此规则生效） */
-  .ui-sidebar-tools {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    margin-top: auto;
-  }
-  .nk-page--detail { left: var(--nk-content-offset); bottom: 0; }
-  .nk-hero__panel { padding: 28px 36px; gap: 22px; }
-  .nk-hero__name { font-size: 1.85rem; }
-  /* 平板：视觉区降为 21:9，减少首屏占比；属性网格自适应列数 */
-  .nk-hero__visual { aspect-ratio: 21 / 9; }
-  .nk-hero__stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 12px; }
-  .nk-hero__stat { padding: 8px 12px; }
-  .nk-hero__stat-val { font-size: 0.95rem; }
-  .nk-tabs__bar { padding: 0 24px; overflow-x: visible; }
-  .nk-tab { padding: 14px 24px; font-size: 0.8125rem; white-space: normal; }
-  .nk-panel { padding: 28px 24px 60px; }
-  .nk-skeleton__hero { max-width: 100%; }
-  .nk-skeleton__hero-panel { padding: 28px 36px; }
-  .nk-skeleton__hero-visual { aspect-ratio: 21 / 9; }
-  .nk-skeleton__body { padding: 28px 24px 60px; }
-}
-/* ── 桌面（≥1024px）：文字侧栏（档案目录册）──
-   图标 + 中文 + 英文 mono 小字竖排，发丝线边框、直角、无投影；
-   激活项 = 淡底 + 主色文字 + 左侧档案竖条（与名录格 hover 语言同源）。
-   内容区避让同步加宽至 148px（侧栏 140 + 左缘 8）。 */
-@media (min-width: 1024px) {
-  .ui-sidebar {
-    width: 140px; padding: 24px 8px 16px; border-radius: 0;
-    align-items: stretch; gap: 2px;
-    background: var(--nk-sheet-bg);
-    border: none; border-right: 1px solid var(--line-1);
-    box-shadow: none;
-  }
-  .ui-sidebar-link {
-    flex: none; width: auto; height: auto;
-    flex-direction: row; align-items: center; justify-content: flex-start;
-    gap: 10px; padding: 7px 10px; border-radius: 8px;
-    opacity: 1; color: var(--text2);
-  }
-  .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
-  .ui-sidebar-link__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-  .ui-sidebar-link__cn { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; transition: color 0.2s; }
-  .ui-sidebar-link__en { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ui-sidebar-link:hover { background: var(--nk-shell-hover); }
-  .ui-sidebar-link:hover .ui-sidebar-link__cn { color: var(--text-bright); }
-  .ui-sidebar-link--active { background: var(--nk-shell-active-bg); }
-  .ui-sidebar-link--active .ui-sidebar-link__cn { color: var(--metric-val); }
-  /* 激活态英文小字（8px，按 WCAG 正文 4.5:1 门槛判定）：**禁止降回 55% 混色**——
-     实测 10 套强调色 55% 仅 3.01（terracotta）～4.48（silver），全部不达标；
-     85% 最低 5.19（terracotta）。改动本值前必须在全部 10 套强调色下重新按 sRGB 合成测对比度。 */
-  .ui-sidebar-link--active .ui-sidebar-link__en { color: color-mix(in srgb, var(--metric-val) 92%, transparent); }
-  /* 激活档案竖条：左侧主色短竖线 */
-  .ui-sidebar-link--active::before {
-    content: '';
-    position: absolute;
-    left: -1px; top: 50%;
-    transform: translateY(-50%);
-    width: 2px; height: 62%;
-    border-radius: 1px;
-    background: var(--primary);
-  }
-  .ui-sidebar-divider { margin: 4px 8px; }
-  .nk-hero {
-    flex-direction: row;
-    max-width: var(--nk-detail-max);
-    border-radius: 0 0 12px 12px;
-    min-height: 480px;
-  }
-  .nk-hero__visual { flex: 0 0 40%; aspect-ratio: auto; height: auto; min-height: 480px; }
-  .nk-hero__bg { background-size: cover; background-position: center 15%; }
-  .nk-hero__panel {
-    flex: 1 1 auto;
-    border-top: none;
-    border-left: none;
-    padding: 36px 40px;
-    gap: 28px;
-    justify-content: center;
-  }
-  .nk-hero__name { font-size: 2.25rem; }
-  .nk-hero__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
-  .nk-skeleton__hero { flex-direction: row; max-width: var(--nk-detail-max); min-height: 480px; }
-  .nk-skeleton__hero-visual { flex: 0 0 40%; height: auto; min-height: 480px; aspect-ratio: auto; }
-  .nk-skeleton__hero-panel {
-    flex: 1 1 auto;
-    border-top: none;
-    border-left: none;
-    padding: 36px 40px;
-  }
-  .nk-skeleton__stat-grid { grid-template-columns: repeat(2, 1fr); }
-}
-/* ── 手机横屏（视口高度 ≤500px）：Hero 视觉区限高，避免 16:9 占满首屏 ── */
-@media (max-height: 500px) and (orientation: landscape) {
-  .nk-hero__visual { aspect-ratio: auto; height: 38vh; height: 38dvh; }
-  .nk-skeleton__hero-visual { aspect-ratio: auto; height: 38vh; height: 38dvh; }
-}
-/* ── 矮视口 + 平板布局（手机横屏触发 ≥768px 断点）：压缩侧边栏避免纵向裁切导致中间项不可达 ── */
-/* ── 矮视口 + 平板（手机横屏触发 ≥768px 断点）：压缩图标侧栏避免纵向裁切导致中间项不可达；
-   桌面文字侧栏（≥1024px）不参与压缩 */
-@media (min-width: 768px) and (max-width: 1023px) and (max-height: 500px) {
-  .ui-sidebar { gap: 3px; padding: 12px 6px; }
-  .ui-sidebar-link { width: 36px; height: 36px; }
-  .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
-}
-/* ── 触屏设备（hover: none）：重置点击后粘滞的 hover 态 ── */
-@media (hover: none) {
-  .ui-sidebar-link:not(.ui-sidebar-link--active):hover { opacity: 0.72; background: transparent; }
-  .nk-tab:hover { color: var(--text3); }
-  .nk-tab--active:hover { color: var(--primary); }
-  .nk-hero__stat:hover { background: transparent; }
-  .nk-hero__toggle:hover { border-color: var(--border); color: var(--text2); }
-}
-
-/* ═══════════════════════════════════════════
-   全局交互默认（无障碍硬标准）：focus-visible / reduced-motion / hover:none
-   三件套升级为 tokens 全局原语；页面级细化规则可在各自 CSS 追加覆盖
-   · 选择器均用 :where 保持零特异性，保证页面级规则永远可以覆盖
-═══════════════════════════════════════════ */
-/* 焦点环：交互元素统一 2px 主色焦点环 */
-:where(#app) button:focus-visible,
-:where(#app) a:focus-visible,
-:where(#app) [tabindex]:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-/* 减弱动态：全站禁用位移/过渡/动画（页面级可细化覆盖，如目录卡 reduced-motion 静止态） */
-@media (prefers-reduced-motion: reduce) {
-  :where(#app) *,
-  :where(#app) *::before,
-  :where(#app) *::after {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
-    transition-duration: 0.01ms;
-    scroll-behavior: auto;
-  }
-}
-/* 触屏设备：基础粘滞 hover 重置（位移类反馈不保留）；页面级细化追加即可 */
-@media (hover: none) {
-  :where(#app) a:hover,
-  :where(#app) button:hover { transform: none; }
-}
-
-/* ═══════════════════════════════════════════
-   全局交互默认（无障碍硬标准）：focus-visible / reduced-motion / hover:none
-   三件套升级为 tokens 全局原语；页面级细化规则可在各自 CSS 追加覆盖
-   · 选择器均用 :where 保持零特异性，保证页面级规则永远可以覆盖
-═══════════════════════════════════════════ */
-/* 焦点环：交互元素统一 2px 主色焦点环 */
-:where(#app) button:focus-visible,
-:where(#app) a:focus-visible,
-:where(#app) [tabindex]:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-/* 减弱动态：全站禁用位移/过渡/动画（页面级可细化覆盖，如目录卡 reduced-motion 静止态） */
-@media (prefers-reduced-motion: reduce) {
-  :where(#app) *,
-  :where(#app) *::before,
-  :where(#app) *::after {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
-    transition-duration: 0.01ms;
-    scroll-behavior: auto;
-  }
-}
-/* 触屏设备：基础粘滞 hover 重置（位移类反馈不保留）；页面级细化追加即可 */
-@media (hover: none) {
-  :where(#app) a:hover,
-  :where(#app) button:hover { transform: none; }
+.nk-view-fwd-enter-from { opacity: 0; transform: translateX(24px); }
+.nk-view-fwd-leave-to { opacity: 0; transform: translateX(-24px); }
+.nk-view-back-enter-from { opacity: 0; transform: translateX(-24px); }
+.nk-view-back-leave-to { opacity: 0; transform: translateX(24px); }
+.nk-view-fade-enter-from { opacity: 0; transform: translateY(8px); }
+.nk-view-fade-leave-to { opacity: 0; transform: translateY(-8px); }
+/* 模式置换位移目标：±40px，单向「替换」（见段首「第四通道」）。禁止缩小到 fwd/back 的 24px */
+.nk-view-swap-enter-from { opacity: 0; transform: translateX(40px); }
+.nk-view-swap-leave-to { opacity: 0; transform: translateX(-40px); }
+
+/* 离场段：立即起步、无 transition-delay */
+.nk-view-fwd-leave-active,
+.nk-view-back-leave-active,
+.nk-view-fade-leave-active { transition: opacity 0.26s var(--nk-ease-out), transform 0.26s var(--nk-ease-out); }
+/* 进场段：错峰延后 60ms 起步、时长 0.22s */
+.nk-view-fwd-enter-active,
+.nk-view-back-enter-active,
+.nk-view-fade-enter-active { transition: opacity 0.22s var(--nk-ease-out), transform 0.22s var(--nk-ease-out); transition-delay: 60ms; }
+/* 模式置换的错峰比常规分支更长，匹配更大的位移：leave 0.34s 立即起步、enter 0.30s 延后 80ms */
+.nk-view-swap-leave-active { transition: opacity 0.34s var(--nk-ease-out), transform 0.34s var(--nk-ease-out); }
+.nk-view-swap-enter-active { transition: opacity 0.30s var(--nk-ease-out), transform 0.30s var(--nk-ease-out); transition-delay: 80ms; }
+
+/* 离场页脱离文档流 + 强制「旧页在上」（见段首「叠层方向」）：
+   `position: absolute` 让离场页不再参与文档流（与已 absolute 的目录页/首页根元素一致）；
+   `z-index: 1` 抵消实测的 [旧页, 新页] 顺序（不加则为进场页在上）。禁止删除任一条。
+   本规则同时也是手机/reduced-motion 两块的叠层来源：那两块只覆写 transition，
+   不重复声明 position/z-index，**禁止**在那里加 `position: static` 之类的覆写。 */
+.nk-view-fwd-leave-active, .nk-view-back-leave-active, .nk-view-fade-leave-active, .nk-view-swap-leave-active { position: absolute; inset: 0; z-index: 1; }
+
+/* 手机断点：纯淡入淡出、无位移、更快速，消除底部导航切换闪烁。
+   降级必须同时满足「交叉 + 错峰 + 无位移」：leave 0.14s / enter 0.12s + 60ms 延迟。 */
+@media (max-width: 767px) {
+  .nk-view-fade-enter-from, .nk-view-fade-leave-to { opacity: 0; transform: none; }
+  .nk-view-fade-leave-active { transition: opacity 0.14s var(--nk-ease-out); }
+  .nk-view-fade-enter-active { transition: opacity 0.12s var(--nk-ease-out); transition-delay: 60ms; }
+}
+
+/* 减弱动效偏好：只留淡入淡出、无位移，但保留错峰节奏（禁止改为串行或加长时长） */
+@media (prefers-reduced-motion: reduce) {
+  .nk-view-fwd-enter-from, .nk-view-fwd-leave-to,
+  .nk-view-back-enter-from, .nk-view-back-leave-to,
+  .nk-view-fade-enter-from, .nk-view-fade-leave-to,
+  .nk-view-swap-enter-from, .nk-view-swap-leave-to { opacity: 0; transform: none; }
+  /* 本块不重复 `position/z-index`：绝对值继承自段内主规则，此处只改时长 */
+  .nk-view-fwd-leave-active,
+  .nk-view-back-leave-active,
+  .nk-view-fade-leave-active,
+  .nk-view-swap-leave-active { transition: opacity 0.14s var(--nk-ease-out); }
+  .nk-view-fwd-enter-active,
+  .nk-view-back-enter-active,
+  .nk-view-fade-enter-active,
+  .nk-view-swap-enter-active { transition: opacity 0.12s var(--nk-ease-out); transition-delay: 60ms; }
+}
+
+/* ═══════════════════════════════════════════
+   Toast 通知（Vue TransitionGroup）
+═══════════════════════════════════════════ */
+.nk-toast-container { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; background: color-mix(in srgb, var(--blk-800) 95%, transparent); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: 0.78rem; color: var(--text); pointer-events: auto; cursor: pointer; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
+.nk-toast-enter-from, .nk-toast-leave-to { transform: translateX(120%); opacity: 0; }
+.nk-toast-leave-active { transition: transform 0.25s ease-in, opacity 0.25s ease-in; }
+.nk-toast-move { transition: transform var(--nk-dur-normal) var(--nk-ease-out); }
+.nk-toast__icon { width: 18px; height: 18px; flex-shrink: 0; }
+.nk-toast__icon svg { width: 100%; height: 100%; }
+.nk-toast--error { border-color: rgba(248,113,113,0.4); }
+.nk-toast--error .nk-toast__icon { color: var(--diff-del); }
+.nk-toast--warn { border-color: color-mix(in srgb, var(--rarity-5) 40%, transparent); }
+.nk-toast--warn .nk-toast__icon { color: var(--gold); }
+.nk-toast--info .nk-toast__icon { color: var(--primary); }
+.nk-toast--success { border-color: rgba(52,211,153,0.4); }
+.nk-toast--success .nk-toast__icon { color: var(--diff-add); }
+
+/* ═══════════════════════════════════════════
+   骨架屏 + Shimmer 动画
+═══════════════════════════════════════════ */
+.nk-sk { background: color-mix(in srgb, var(--primary) 12%, transparent); border-radius: 6px; }
+.nk-sk--shimmer { position: relative; overflow: hidden; }
+/* 骨架语义类：抽取常用尺寸，避免逐处 inline style 硬编码 */
+.nk-sk--text-sm { height: 14px; border-radius: 4px; }
+.nk-sk--text-md { height: 16px; border-radius: 4px; }
+.nk-sk--title { height: 28px; border-radius: 6px; }
+.nk-sk--chip { height: 22px; border-radius: 14px; }
+.nk-sk--stat { height: 48px; border-radius: 8px; }
+.nk-sk--block { width: 100%; border-radius: 8px; }
+.nk-sk--block-sm { width: 100%; height: 60px; border-radius: 8px; }
+.nk-sk--block-md { width: 100%; height: 80px; border-radius: 8px; }
+.nk-sk--block-lg { width: 100%; height: 160px; border-radius: 8px; }
+.nk-sk--bar-xs { width: 48px; }
+.nk-sk--bar-sm { width: 80px; }
+.nk-sk--bar-md { width: 120px; }
+.nk-sk--bar-lg { width: 180px; }
+.nk-sk--fill { position: absolute; inset: 0; border-radius: 0; }
+.nk-sk--bar-line { width: 100%; height: 6px; border-radius: 3px; }
+.nk-sk--shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--primary) 8%, transparent) 35%, color-mix(in srgb, var(--th-400) 18%, transparent) 50%, color-mix(in srgb, var(--primary) 8%, transparent) 65%, transparent 100%); animation: nk-shimmer 1.4s linear infinite; }
+@keyframes nk-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.nk-skeleton { padding: 0; }
+.nk-skeleton--char { max-width: 100%; }
+/* 骨架屏：左右结构镜像真实 Hero */
+.nk-skeleton__hero {
+  position: relative;
+  display: flex; flex-direction: column;
+  border-radius: 0 0 12px 12px;
+  margin-bottom: 0;
+  max-width: 100%;
+  margin-left: auto; margin-right: auto;
+  background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 80%, transparent) 0%, color-mix(in srgb, var(--blk-900) 20%, transparent) 50%, transparent 100%);
+}
+.nk-skeleton__hero-visual { position: relative; width: 100%; aspect-ratio: 16 / 9; }
+.nk-skeleton__hero-panel { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, color-mix(in srgb, var(--blk-800) 92%, transparent), color-mix(in srgb, var(--blk-850) 92%, transparent)); border-top: 1px solid var(--border); }
+.nk-skeleton__body { padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
+.nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.nk-skeleton--catalog { padding: 0 24px 80px var(--nk-content-offset); }
+.nk-skeleton__header { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.nk-skeleton__filters { padding: 12px 0; }
+.nk-skeleton__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min, 150px), 1fr)); gap: var(--nk-grid-gap, 14px); padding-top: 16px; }
+/* 骨架卡占位：默认 3:4（角色/光锥）；遗器/物品/敌对物种为 1:1，由 gridClass 上下文覆盖 */
+.nk-skeleton__card-img { width: 100%; aspect-ratio: 3 / 4; border-radius: 10px; }
+.nk-relic-grid .nk-skeleton__card-img,
+.nk-item-grid .nk-skeleton__card-img,
+.nk-mob-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
+/* 终局星际档案卡：横向占位条，匹配真实卡片形态 */
+.nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 12px; }
+/* 角色画廊墙：3:4 竖版占位（与真实卡片立绘窗同比例，防切换 CLS） */
+.nk-idx-grid .nk-skeleton__card-img { aspect-ratio: 3 / 4; border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
+
+/* CDN 图片最终降级：全局委托（installCdnImgFallback）在 nanoka 也失败时标记 data-cdn-down，
+   隐藏破图图标（布局占位保留，由卡片渐变底承接）；恢复重载时由委托移除标记 */
+img[data-cdn-down] { visibility: hidden; }
+
+/* ═══════════════════════════════════════════
+   错误态 / 空状态
+═══════════════════════════════════════════ */
+/* 占位页容器：与其他页面根元素保持同构（absolute + 内部滚动），避免过渡时布局模式切换跳变 */
+.nk-placeholder { position: absolute; inset: 0; overflow-y: auto; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 0 24px calc(56px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 768px) { .nk-placeholder { padding-bottom: 0; } }
+.nk-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
+.nk-empty__icon { font-size: 2.5rem; opacity: 0.8; }
+.nk-empty__title { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text2); }
+.nk-empty__sub { font-size: 0.78rem; color: var(--text3); line-height: 1.6; }
+.nk-error-state, .nk-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 80px 24px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
+.nk-error-state__icon, .nk-empty-state__icon { width: 48px; height: 48px; color: var(--text3); opacity: 0.6; }
+.nk-error-state__icon svg, .nk-empty-state__icon svg { width: 100%; height: 100%; }
+.nk-error-state__icon { color: var(--diff-del); }
+.nk-error-state__title, .nk-empty-state__title { font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text2); text-transform: uppercase; }
+.nk-error-state__detail, .nk-empty-state__sub { font-size: 0.78rem; color: var(--text3); max-width: 400px; line-height: 1.6; }
+.nk-error-state__retry { margin-top: 8px; padding: 8px 24px; border-radius: 20px; background: var(--primary); border: none; color: var(--text-bright); font-family: var(--font-hud); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; cursor: pointer; transition: all var(--nk-dur-fast) ease; }
+.nk-error-state__retry:hover { box-shadow: 0 0 20px var(--primary-glow); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════
+   枢纽页共享原语：页脚（品牌标语 + 拉丁格言）
+   两个模式的枢纽页（`/` 与 `/currency`）共用同一段页脚骨架，故声明在全局原语层而非任一页面 CSS；
+   断点随原语就近（桌面基准 → 平板 → 手机），避让值统一取 --nk-content-offset。
+   消费方：HomeView.vue / CurrencyHubView.vue；登记于 docs/agents/ui-design.md §1。
+═══════════════════════════════════════════ */
+.nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 48px var(--nk-content-offset); text-align: center; }
+.nk-hub-footer__motto { font-family: var(--font-body); font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.24em; color: var(--text-bright); }
+.nk-hub-footer__latin { margin: 16px 0 0; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.3em; color: var(--text3); }
+/* 平板（768-1023px）：中等密度 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-hub-footer { padding: 56px 32px 40px var(--nk-content-offset); }
+}
+/* 手机（<768px）：导航条为底部栏（56px + safe-area），页脚底部必须预留 72px（56 导航 + 16 呼吸），
+   以免末行文案被底部导航遮挡——ADR 0019 底部栏回归的连带项，禁止改回「只留呼吸」 */
+@media (max-width: 767px) {
+  .nk-hub-footer { padding: 48px 20px calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ═══════════════════════════════════════════
+   枢纽页共享原语：品牌带（模式身份 + 定位副标）
+   工具化形态（ADR 0018）：枢纽页是「选路页」，首屏必须优先让给板块索引，
+   故**不再承载全屏 KV / 背景视频媒体层**，只在页首保留一条紧凑品牌带。
+   两个模式的枢纽页共用同一段骨架，故声明在全局原语层而非任一页面 CSS；
+   断点随原语就近（桌面基准 → 平板 → 手机），避让值统一取 --nk-content-offset。
+   消费方：HomeView.vue / CurrencyHubView.vue；登记于 docs/agents/ui-design.md §1。
+   min-height 而非固定 height：窄屏副标换行时自然增高，禁裁切文字。
+   禁止在页面 CSS 里重新声明本原语或改断点数值——两页高度不一致会让互切时跳动。
+═══════════════════════════════════════════ */
+.nk-hub-brand {
+  position: relative;
+  min-height: 200px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--th-500) 12%) 100%);
+}
+/* 底部融入页面底色：无媒体层后由渐变承担过渡，品牌带与索引区之间不得出现硬边 */
+.nk-hub-brand__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 0%, transparent 58%, color-mix(in srgb, var(--bg) 76%, transparent) 86%, var(--bg) 100%);
+}
+/* 标题区与索引区同网格：max-width 居中 + 左侧 --nk-content-offset 页面留白（断点由令牌接管） */
+.nk-hub-brand__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--nk-content-max);
+  margin: 0 auto;
+  padding: 0 48px 28px var(--nk-content-offset);
+}
+/* 英文副标（模式代号）：发丝线 + 宽字距，克制不发光 */
+.nk-hub-brand__supra {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+  font-family: var(--font-hud);
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  color: var(--text2);
+  animation: nk-fade 0.7s var(--ease) 0.2s backwards;
+}
+.nk-hub-brand__supra::before { content: ''; width: 44px; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
+/* 中文品牌主标题：正文粗体承载中文（Orbitron 无中文字形）；无投影无发光——层级由字重与字号控制 */
+.nk-hub-brand__title {
+  font-family: var(--font-body);
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: var(--text-bright);
+  animation: nk-fade 0.7s var(--ease) 0.35s backwards;
+}
+/* 定位副标：一行内容清单，与主标题拉开层级 */
+.nk-hub-brand__tagline {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  animation: nk-fade 0.7s var(--ease) 0.5s backwards;
+}
+/* 枢纽页文字入场约定（三段共用；术语见 CONTEXT.md「枢纽页文字入场动画」）：
+   复用全局共享关键帧 nk-fade（禁止为品牌带另立本地关键帧）；两枢纽必须同时序，
+   改任一段时序都会造成互切时「一边文字展开、一边文字直接就在那里」 */
+/* 平板（768-1023px）：中等密度 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-hub-brand { min-height: 176px; }
+  .nk-hub-brand__content { padding: 0 32px 24px var(--nk-content-offset); }
+}
+/* 手机（<768px）：进一步压缩，首屏优先给板块索引 */
+@media (max-width: 767px) {
+  .nk-hub-brand { min-height: 148px; }
+  .nk-hub-brand__content { padding: 0 20px 18px; }
+  .nk-hub-brand__supra { font-size: 0.55rem; letter-spacing: 0.18em; gap: 10px; margin-bottom: 10px; }
+  .nk-hub-brand__supra::before { width: 28px; }
+  .nk-hub-brand__title { font-size: clamp(1.5rem, 7vw, 2rem); }
+  .nk-hub-brand__tagline { margin-top: 10px; font-size: 0.78rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nk-hub-brand__supra, .nk-hub-brand__title, .nk-hub-brand__tagline { animation: none; }
+}
+
+/* ═══════════════════════════════════════════
+   响应式断点
+   手机  : max-width  767px
+   平板  : min-width  768px
+   桌面  : min-width 1024px
+═══════════════════════════════════════════ */
+/* ── 平板（≥768px）增强 ── */
+@media (min-width: 768px) {
+  /* 书脊式全高侧栏：背景色带延伸至视口全高，仅右侧发丝线与内容区分隔；
+     去圆角/去全框/去投影（档案书脊隐喻），导航项顶部对齐 */
+  .ui-sidebar {
+    position: fixed;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    width: 56px; padding: 20px 8px 16px; border-radius: 0;
+    background: var(--nk-sheet-bg);
+    border: none; border-right: 1px solid var(--line-1);
+    box-shadow: none;
+    backdrop-filter: none; -webkit-backdrop-filter: none; /* 清除手机底部栏继承的 blur：书脊色带用高不透明底 */
+    top: 0; bottom: 0; left: 0; right: auto; transform: none;
+    height: auto; z-index: 10000;
+  }
+  /* 平板/桌面：图标式竖排，隐藏文字标签；触控目标提升至 44px（iPad 触屏标准） */
+  .ui-sidebar-link { flex: none; width: 44px; height: 44px; }
+  .ui-sidebar-link__label { display: none; }
+  /* 平板/桌面：分隔线转为横向，把交换按钮与竖排导航板块隔开 */
+  .ui-sidebar-divider {
+    width: auto; height: 1px;
+    align-self: stretch;
+    margin: 4px 8px;
+    background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
+  }
+  /* 平板/桌面：恢复全部 10 项，隐藏"更多"入口与抽屉（含手机展开后旋屏的防御） */
+  .ui-sidebar-more { display: none; }
+  .ui-sidebar-link--in-more { display: flex; }
+  .ui-more { display: none; }
+  /* 竖排侧栏：底部工具组（调试台+设置）整体推至栏底部（成员不再各自置底；
+     手机底部栏内 display:contents 无此规则生效） */
+  .ui-sidebar-tools {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    margin-top: auto;
+  }
+  .nk-page--detail { left: var(--nk-content-offset); bottom: 0; }
+  .nk-hero__panel { padding: 28px 36px; gap: 22px; }
+  .nk-hero__name { font-size: 1.85rem; }
+  /* 平板：视觉区降为 21:9，减少首屏占比；属性网格自适应列数 */
+  .nk-hero__visual { aspect-ratio: 21 / 9; }
+  .nk-hero__stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 12px; }
+  .nk-hero__stat { padding: 8px 12px; }
+  .nk-hero__stat-val { font-size: 0.95rem; }
+  .nk-tabs__bar { padding: 0 24px; overflow-x: visible; }
+  .nk-tab { padding: 14px 24px; font-size: 0.8125rem; white-space: normal; }
+  .nk-panel { padding: 28px 24px 60px; }
+  .nk-skeleton__hero { max-width: 100%; }
+  .nk-skeleton__hero-panel { padding: 28px 36px; }
+  .nk-skeleton__hero-visual { aspect-ratio: 21 / 9; }
+  .nk-skeleton__body { padding: 28px 24px 60px; }
+}
+/* ── 桌面（≥1024px）：文字侧栏（档案目录册）──
+   图标 + 中文 + 英文 mono 小字竖排，发丝线边框、直角、无投影；
+   激活项 = 淡底 + 主色文字 + 左侧档案竖条（与名录格 hover 语言同源）。
+   内容区避让同步加宽至 148px（侧栏 140 + 左缘 8）。 */
+@media (min-width: 1024px) {
+  .ui-sidebar {
+    width: 140px; padding: 24px 8px 16px; border-radius: 0;
+    align-items: stretch; gap: 2px;
+    background: var(--nk-sheet-bg);
+    border: none; border-right: 1px solid var(--line-1);
+    box-shadow: none;
+  }
+  .ui-sidebar-link {
+    flex: none; width: auto; height: auto;
+    flex-direction: row; align-items: center; justify-content: flex-start;
+    gap: 10px; padding: 7px 10px; border-radius: 8px;
+    opacity: 1; color: var(--text2);
+  }
+  .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
+  .ui-sidebar-link__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .ui-sidebar-link__cn { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; transition: color 0.2s; }
+  .ui-sidebar-link__en { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ui-sidebar-link:hover { background: var(--nk-shell-hover); }
+  .ui-sidebar-link:hover .ui-sidebar-link__cn { color: var(--text-bright); }
+  .ui-sidebar-link--active { background: var(--nk-shell-active-bg); }
+  .ui-sidebar-link--active .ui-sidebar-link__cn { color: var(--metric-val); }
+  /* 激活态英文小字（8px，按 WCAG 正文 4.5:1 门槛判定）：**禁止降回 55% 混色**——
+     实测 10 套强调色 55% 仅 3.01（terracotta）～4.48（silver），全部不达标；
+     85% 最低 5.19（terracotta）。改动本值前必须在全部 10 套强调色下重新按 sRGB 合成测对比度。 */
+  .ui-sidebar-link--active .ui-sidebar-link__en { color: color-mix(in srgb, var(--metric-val) 92%, transparent); }
+  /* 激活档案竖条：左侧主色短竖线 */
+  .ui-sidebar-link--active::before {
+    content: '';
+    position: absolute;
+    left: -1px; top: 50%;
+    transform: translateY(-50%);
+    width: 2px; height: 62%;
+    border-radius: 1px;
+    background: var(--primary);
+  }
+  .ui-sidebar-divider { margin: 4px 8px; }
+  .nk-hero {
+    flex-direction: row;
+    max-width: var(--nk-detail-max);
+    border-radius: 0 0 12px 12px;
+    min-height: 480px;
+  }
+  .nk-hero__visual { flex: 0 0 40%; aspect-ratio: auto; height: auto; min-height: 480px; }
+  .nk-hero__bg { background-size: cover; background-position: center 15%; }
+  .nk-hero__panel {
+    flex: 1 1 auto;
+    border-top: none;
+    border-left: none;
+    padding: 36px 40px;
+    gap: 28px;
+    justify-content: center;
+  }
+  .nk-hero__name { font-size: 2.25rem; }
+  .nk-hero__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+  .nk-skeleton__hero { flex-direction: row; max-width: var(--nk-detail-max); min-height: 480px; }
+  .nk-skeleton__hero-visual { flex: 0 0 40%; height: auto; min-height: 480px; aspect-ratio: auto; }
+  .nk-skeleton__hero-panel {
+    flex: 1 1 auto;
+    border-top: none;
+    border-left: none;
+    padding: 36px 40px;
+  }
+  .nk-skeleton__stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+/* ── 手机横屏（视口高度 ≤500px）：Hero 视觉区限高，避免 16:9 占满首屏 ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .nk-hero__visual { aspect-ratio: auto; height: 38vh; height: 38dvh; }
+  .nk-skeleton__hero-visual { aspect-ratio: auto; height: 38vh; height: 38dvh; }
+}
+/* ── 矮视口 + 平板布局（手机横屏触发 ≥768px 断点）：压缩侧边栏避免纵向裁切导致中间项不可达 ── */
+/* ── 矮视口 + 平板（手机横屏触发 ≥768px 断点）：压缩图标侧栏避免纵向裁切导致中间项不可达；
+   桌面文字侧栏（≥1024px）不参与压缩 */
+@media (min-width: 768px) and (max-width: 1023px) and (max-height: 500px) {
+  .ui-sidebar { gap: 3px; padding: 12px 6px; }
+  .ui-sidebar-link { width: 36px; height: 36px; }
+  .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
+}
+/* ── 触屏设备（hover: none）：重置点击后粘滞的 hover 态 ── */
+@media (hover: none) {
+  .ui-sidebar-link:not(.ui-sidebar-link--active):hover { opacity: 0.72; background: transparent; }
+  .nk-tab:hover { color: var(--text3); }
+  .nk-tab--active:hover { color: var(--primary); }
+  .nk-hero__stat:hover { background: transparent; }
+  .nk-hero__toggle:hover { border-color: var(--border); color: var(--text2); }
+}
+
+/* ═══════════════════════════════════════════
+   全局交互默认（无障碍硬标准）：focus-visible / reduced-motion / hover:none
+   三件套升级为 tokens 全局原语；页面级细化规则可在各自 CSS 追加覆盖
+   · 选择器均用 :where 保持零特异性，保证页面级规则永远可以覆盖
+═══════════════════════════════════════════ */
+/* 焦点环：交互元素统一 2px 主色焦点环 */
+:where(#app) button:focus-visible,
+:where(#app) a:focus-visible,
+:where(#app) [tabindex]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+/* 减弱动态：全站禁用位移/过渡/动画（页面级可细化覆盖，如目录卡 reduced-motion 静止态） */
+@media (prefers-reduced-motion: reduce) {
+  :where(#app) *,
+  :where(#app) *::before,
+  :where(#app) *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+/* 触屏设备：基础粘滞 hover 重置（位移类反馈不保留）；页面级细化追加即可 */
+@media (hover: none) {
+  :where(#app) a:hover,
+  :where(#app) button:hover { transform: none; }
+}
+
+/* ═══════════════════════════════════════════
+   全局交互默认（无障碍硬标准）：focus-visible / reduced-motion / hover:none
+   三件套升级为 tokens 全局原语；页面级细化规则可在各自 CSS 追加覆盖
+   · 选择器均用 :where 保持零特异性，保证页面级规则永远可以覆盖
+═══════════════════════════════════════════ */
+/* 焦点环：交互元素统一 2px 主色焦点环 */
+:where(#app) button:focus-visible,
+:where(#app) a:focus-visible,
+:where(#app) [tabindex]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+/* 减弱动态：全站禁用位移/过渡/动画（页面级可细化覆盖，如目录卡 reduced-motion 静止态） */
+@media (prefers-reduced-motion: reduce) {
+  :where(#app) *,
+  :where(#app) *::before,
+  :where(#app) *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+/* 触屏设备：基础粘滞 hover 重置（位移类反馈不保留）；页面级细化追加即可 */
+@media (hover: none) {
+  :where(#app) a:hover,
+  :where(#app) button:hover { transform: none; }
 }
