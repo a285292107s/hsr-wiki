@@ -98,13 +98,22 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 - `Disallow: /prerender/`（快照是同一内容的第二份 URL，避免重复收录；爬虫请求的 `/character/1308` 与 rewrite 目标无关，robots 只作用于请求 URL）。
 - 末行 `Sitemap: https://myhsr.vercel.app/sitemap.xml`。
 
+### 站点所有权验证（Google Search Console，2026-09 落地）
+
+GSC 资源 = **URL 前缀** `https://myhsr.vercel.app/`（`vercel.app` 的 DNS 不归站方控制，故「网域」资源不可用）。**两个验证资产都必须常驻**，GSC 会周期性复验，删任一即失去数据：
+
+1. `index.html` 的 `<meta name="google-site-verification" content="5PSScRDejeMnyjRVQTH2t05GY4tmJ2oG3-JMqQZL_cs" />`（随 shell 模板进入全部快照；首页由 `dist/index.html` 直接投递，GSC 抓首页即读到）；
+2. `public/google0415a67deffb7705.html`，内容为 `google-site-verification: google0415a67deffb7705.html`（GSC 推荐/默认自动尝试的方式；文件在 dist 根，文件系统优先命中，不受 catch-all 影响）。
+
+换 token 必须在 GSC 重新获取后**同步改这两处**。验证通过后应在 GSC「站点地图」提交 `https://myhsr.vercel.app/sitemap.xml`（Google 唯一主动提交入口）。
+
 ## 6. 守卫：`tools/check-ai-endpoints.mjs`
 
 构建后运行（`pnpm build` 末步），失败即构建失败。断言：
 
 1. `public/robots.txt` 存在、含上表 5 个 UA 组、`Disallow: /prerender/`、`Sitemap:` 与生成器 `SITE_ORIGIN` 同源。
 2. `dist/sitemap.xml` 为合法 URL set，`<loc>` 全为绝对 URL 且同源，无重复，URL 数 = 快照数 + 0（快照与 sitemap 一一对应），单文件未超 50,000。
-3. 每个 `dist/prerender/**/*.html`：`<title>` 非空且不等于站点默认标题、有 `<link rel="canonical">`（同源）、有 ≥1 个 `href="/`、去标签后中文字符 ≥ 80、`<h1>` 存在、JSON-LD `JSON.parse` 成功、无残留游戏标记、**无未展开参数标记 `#\d+\[[^\]]*\]`**（缺参数的字段必须整段省略，见 §3「参数展开保真」；字面 `#NN` 编号与 `{TEXTJOIN#…}` 不在此列）、入口 `<script src="/assets/…">` 与 `dist/index.html` 一致。
+3. 每个 `dist/prerender/**/*.html`：`<title>` 非空且不等于站点默认标题、有 `<link rel="canonical">`（同源）、有 ≥1 个 `href="/`、去标签后中文字符 ≥ 80、`<h1>` 存在、JSON-LD `JSON.parse` 成功、无残留游戏标记、**无未展开参数标记 `#\d+\[[^\]]*\]`**（缺参数的字段必须整段省略，见 §3「参数展开保真」；字面 `#NN` 编号与 `{TEXTJOIN#…}` 不在此列）、入口 `<script src="/assets/…">` 与 **`dist/prerender/_shell.html`** 一致（`dist/index.html` 现在是 home 快照，不得再当外壳基线）。
    - 另：**`currency/item.html`（CW 装备）与 `currency/augment.html`（CW 投资策略）的可见文本不得含裸 `#N`**——该族数据条目携带 `params` 语义（见 §3），裸 `#N` 即占位符；**裸形态无法全局区分字面与占位符**（角色/成就/物品里的「天才俱乐部#81号会员」是上游字面，必须保留），故按页点名而非全局正则。**该断言只扫实体解码后的可见文本**（`html, body { background:#121214 }` 这类 shell 模板色值只出现在注释 / `<style>` / 内联属性里，按原始面断言会永久红）；原始面扫描须先剥 HTML 注释。**已知覆盖边界**：裸 `#N` 断言只点名上列两页——生成器侧已按「条目是否携带 `params`/`base_params`/`param_list`」通用判定（`hasParamSemantics`），若未来在**其它** params 语义族（如 `/currency/buff`）发现泄漏，须把该页加入点名表并复跑守卫。
 4. **覆盖率（文件级 + 条目级）**：① 每族生成文件数 = §2 表内**应用可见**条目数；② 12 个与数据一一对应的目录页，快照内 `<li class="nk-snapshot__entry">` 计数 = 同一可见条目数（防「静默漏条目」——生成器 map 中途异常/上限误用不会被文件数断言发现）；③ `/`、`/currency` 枢纽页断言条目数 ≥1（新版本必定有新条目；`release_version` / 赛季代际判据失效导致的静默空态必须拦住）。期望一律从数据 + 应用可见性判据**实时统计**，禁止写死数字。
 5. 汇总一行 `[PASS] …`/`[FAIL] …`，非零退出即失败。
