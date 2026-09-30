@@ -28,7 +28,13 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 4. 一段 `<script type="application/ld+json">`（见 §4）；
 5. `<div id="app">` 内注入 `<div class="nk-snapshot">…</div>`（见 §3）。
 
-**必须复制构建后的 shell 而非重写模板**：否则 `/assets/*` 内容哈希会漂移。守卫断言快照引用的入口 JS 与 `dist/index.html` 完全一致。
+**必须复制构建后的 shell 而非重写模板**：否则 `/assets/*` 内容哈希会漂移。守卫断言快照引用的入口 JS 与 shell 完全一致。
+
+**Vercel 投递模型（2026-09 线上实测，决定产物布局）**：Vercel **先命中文件系统、再走 rewrites**。因此：
+- 有对应静态文件的路由（`/robots.txt`、`/prerender/x.html`）直接被文件服务，rewrite 不参与；
+- 无文件的路由（`/character/1308`）才落到 rewrite → 投递 `prerender/character/1308.html`；
+- **`/` 会命中 `dist/index.html`，`{"source":"/"}` 的 rewrite 永不生效** → 因此 home 快照**必须同时写入 `dist/index.html`**（与 `prerender/home.html` 字节一致），而把**纯 SPA 外壳**放到 `dist/prerender/_shell.html`（下划线前缀 = 非快照，守卫跳过；`/prerender/` 已在 robots 里 Disallow），catch-all rewrite 指向它。
+- rewrite 目标缺文件时**回落到 catch-all**（实测 `/character/99999`、`/endgame/boss/3022` 返回 SPA 外壳而非 404）——未发布/不存在实体的 URL 行为与改造前一致，无回归。
 
 ## 2. 路由覆盖（唯一权威清单）
 

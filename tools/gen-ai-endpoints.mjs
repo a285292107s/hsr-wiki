@@ -24,6 +24,8 @@ const DIST_DIR = join(ROOT, 'dist');
 const TEMPLATE_FILE = join(DIST_DIR, 'index.html');
 const PRERENDER_DIR = join(DIST_DIR, 'prerender');
 const SITEMAP_FILE = join(DIST_DIR, 'sitemap.xml');
+/** 纯 shell 落点（下划线前缀 = 非快照：不注入 .nk-snapshot/canonical/title，不进 sitemap/覆盖率统计） */
+const SHELL_FILE = join(PRERENDER_DIR, '_shell.html');
 
 /** 单实体文本上限（契约 §3）：目录条目 4000 / 详情页 20000，超出截断并加 … */
 const SNAPSHOT_TEXT_LIMIT_ENTRY = 4000;
@@ -1403,21 +1405,43 @@ function main() {
   if (!existsSync(TEMPLATE_FILE)) {
     fail(`缺少 ${TEMPLATE_FILE}：请先执行 \`pnpm exec vite build\`（快照模板必须是构建产物，禁止用源码模板）`);
   }
-  const template = readFileSync(TEMPLATE_FILE, 'utf8');
+  /**
+   * 模板取值（Vercel 投递模型 = 文件系统先于 rewrites，契约 §1）：
+   * 生成后 `dist/index.html` 会被 **home 快照覆盖**（否则 `/` 永远命中空壳，`{"source":"/"}` rewrite 不生效），
+   * 因此**再次运行**时禁止拿它当模板——优先复用上一轮原样落盘的纯 shell `dist/prerender/_shell.html`。
+   * `_shell.html` 缺失且 `dist/index.html` 已被注入时立即失败，避免拿 home 快照当 shell 二次注入。
+   */
+  const shellSource = existsSync(SHELL_FILE) ? SHELL_FILE : TEMPLATE_FILE;
+  const template = readFileSync(shellSource, 'utf8');
+  if (shellSource === TEMPLATE_FILE && template.includes('class="nk-snapshot"')) {
+    fail(`${TEMPLATE_FILE} 已是注入过的快照且缺少 ${SHELL_FILE}：请先执行 \`pnpm exec vite build\` 重建纯 shell 模板`);
+  }
   const ctx = loadContext();
   const pages = buildPages(ctx);
 
   // 每次重建都清空 prerender：残留快照会让「快照数 = 数据条目数」与 sitemap 一一对应断言失效
   rmSync(PRERENDER_DIR, { recursive: true, force: true });
+  mkdirSync(PRERENDER_DIR, { recursive: true });
+  /**
+   * 纯 shell 原样落盘（供 vercel.json catch-all rewrite 投递 SPA 外壳）。
+   * 下划线前缀 = **非快照**标记：禁止给它注入 `.nk-snapshot` / canonical / title / JSON-LD——
+   * 守卫与覆盖率统计都跳过 `_` 前缀文件（它不是路由，也不进 sitemap）。
+   */
+  writeFileSync(SHELL_FILE, template);
 
   let bytes = 0;
+  let homeHtml = null;
   for (const page of pages) {
     const out = join(PRERENDER_DIR, page.file);
     mkdirSync(dirname(out), { recursive: true });
     const html = renderSnapshot(template, page);
     writeFileSync(out, html);
     bytes += Buffer.byteLength(html);
+    // home 快照要同时覆盖 dist/index.html（字节一致）→ `/` 命中正文；此处只渲染一次，避免两份不一致
+    if (page.route === '/') homeHtml = html;
   }
+  if (homeHtml == null) fail('未构建 route="/" 的 home 页面，无法覆盖 dist/index.html');
+  writeFileSync(TEMPLATE_FILE, homeHtml);
   const sitemap = renderSitemap(ctx, pages);
   writeFileSync(SITEMAP_FILE, sitemap);
   bytes += Buffer.byteLength(sitemap);
@@ -1428,10 +1452,12 @@ function main() {
   for (const [family, count] of [...byFamily.entries()].sort()) {
     console.log(`  ${family}: ${count}`);
   }
+  console.log(`[OK] ${SHELL_FILE}（纯 shell，非快照，已跳过注入）`);
+  console.log(`[OK] ${TEMPLATE_FILE} = home 快照（与 prerender/home.html 字节一致，供路由 / 直接命中）`);
   console.log(`[OK] ${SITEMAP_FILE}（${pages.length} <loc>，origin=${SITE_ORIGIN}）`);
 
   const fileCount = countFiles(PRERENDER_DIR);
-  if (fileCount !== pages.length) fail(`快照文件数 ${fileCount} ≠ 页面数 ${pages.length}`);
+  if (fileCount !== pages.length) fail(`快照文件数 ${fileCount} ≠ 页面数 ${pages.length}（应已排除 _ 前缀非快照）`);
 }
 
 function countFiles(dir) {
@@ -1439,7 +1465,8 @@ function countFiles(dir) {
   for (const name of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, name.name);
     if (name.isDirectory()) n += countFiles(p);
-    else if (name.name.endsWith('.html')) n += 1;
+    // 下划线前缀 = 非快照（_shell.html），不计入快照数
+    else if (name.name.endsWith('.html') && !name.name.startsWith('_')) n += 1;
   }
   return n;
 }

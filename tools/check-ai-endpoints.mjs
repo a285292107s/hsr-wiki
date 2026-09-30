@@ -1,24 +1,23 @@
 #!/usr/bin/env node
 /**
  * AI 检索可见性端点守卫（契约 docs/agents/ai-discoverability.md §6；构建末步运行，失败即构建失败）。
- * 断言 6 项：① robots.txt 五个 UA 组各自自足 + Disallow: /prerender/ + Sitemap 与生成器同源；
- * ② sitemap.xml 合法 URL set、loc 全绝对同源、无重复、与快照一一对应、单文件 ≤50000；
- * ③ 每个 prerender 快照的 title/canonical/站内内链/去标签中文字符数/h1/JSON-LD/游戏标记/
- *    未展开参数占位符 `#\d+\[…\]`（字面 `#81`、`{TEXTJOIN#61}` 放行）/裸 `#N`（**仅** `currency/item.html`
- *    与 `currency/augment.html` 按页点名，禁止全局化——其余页字面 `#N` 是上游原文）/入口 JS
- *    + 详情页禁止出现 nk-snapshot__entry（契约 §3 冻结该类名仅用于目录条目清单）；
+ * 断言 7 项：① robots.txt 五个 UA 组各自自足 + Disallow: /prerender/ + Sitemap 与生成器同源；
+ * ② sitemap.xml 合法、loc 全绝对同源无重复、与快照一一对应、≤50000；
+ * ③ 每个快照的 title/canonical/内链/中文字符数/h1/JSON-LD/游戏标记/未展开参数占位符 `#\d+\[…\]`/
+ *    裸 `#N`（仅 currency/item.html 与 currency/augment.html 按页点名，禁止全局化）/入口 JS，详情页禁 nk-snapshot__entry；
  * ④ 文件级覆盖率：每族快照数 = 数据 + 应用可见性判据独立推导的期望（禁写死数字；契约 §2「可见性对齐」）；
- * ⑤ 条目级覆盖率：12 个目录页 nk-snapshot__entry 计数 = 同一条目数（防生成器静默漏条目）、/ 与 /currency ≥1、
- *    详情页抽样该类名 = 0（契约 §6.4②③）；
- * ⑥ 汇总一行 [PASS]/[FAIL]，任一失败退出码 1。
+ * ⑤ 条目级覆盖率：12 个目录页 nk-snapshot__entry 计数 = 同一条目数、枢纽 ≥1、详情页抽样 = 0（契约 §6.4②③）；
+ * ⑥ 外壳与首页：`prerender/_shell.html` 存在且不含 nk-snapshot、`dist/index.html` ≡ `prerender/home.html`（sha256）、
+ *    `dist/index.html` 有非空 h1 与中文正文（Vercel 文件系统先于 rewrites，'/' 直接命中它）；
+ * ⑦ 汇总一行 [PASS]/[FAIL]，任一失败退出码 1。prerender 下 `_` 前缀文件为非快照内部文件，扫描跳过并报数。
  * 用法：node tools/check-ai-endpoints.mjs [--dist dist] [--data public/data/cn]
  *        [--robots public/robots.txt] [--generator tools/gen-ai-endpoints.mjs]
- * 相对路径按仓库根解析（与 cwd 无关）。--robots / --generator 仅供 temp/ 下合成夹具自测，
- * 默认值即真实产物路径，集成阶段不得改动。
+ * 相对路径按仓库根解析（与 cwd 无关）。--robots / --generator 仅供 temp/ 下合成夹具自测，默认值即真实产物路径。
  * 禁止：把 SITE_ORIGIN 或覆盖率数字写死成本文件常量——SITE_ORIGIN 唯一事实源是生成器模块导出。
  */
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, relative, isAbsolute, sep } from 'node:path';
+import { createHash } from 'node:crypto';
+import { join, relative, isAbsolute, sep, basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
@@ -162,11 +161,18 @@ function loadJson(relPath) {
 
 /* ─── 扫描产物 ─── */
 const PRERENDER = join(DIST, 'prerender');
-const snapshotFiles = existsSync(PRERENDER)
+/** 下划线前缀 = 内部文件（如 `_shell.html` 纯 SPA 外壳，由 vercel catch-all rewrite 投递）：
+ *  它**不是快照**——禁止计入快照数 / sitemap 一一对应 / 覆盖率 / 条目数。 */
+const isInternalFile = (f) => basename(f).startsWith('_');
+const allPrerenderHtml = existsSync(PRERENDER)
   ? walk(PRERENDER).filter((f) => f.toLowerCase().endsWith('.html')).sort()
   : [];
+const internalFiles = allPrerenderHtml.filter(isInternalFile);
+const snapshotFiles = allPrerenderHtml.filter((f) => !isInternalFile(f));
+const SHELL = join(PRERENDER, '_shell.html');
 const DIST_INDEX = join(DIST, 'index.html');
 const SITEMAP = join(DIST, 'sitemap.xml');
+const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
 /** prerender 内文件 → 路由（契约 §2：home.html 即 `/`） */
 function routeOf(file) {
@@ -325,14 +331,16 @@ let sitemapCount = -1;
   const details = [];
   let defaultTitle = null;
   let entryScripts = [];
-  if (!existsSync(DIST_INDEX)) {
-    details.push(`dist/index.html 不存在（快照模板缺失）: ${rel(DIST_INDEX)}`);
+  /** 基线 = 纯 SPA 外壳 `prerender/_shell.html`（**不再**是 dist/index.html——它现在是 home 快照，
+   *  其 title/h1 是首页标题，拿它当外壳基线会把每个快照都判成「默认标题」） */
+  if (!existsSync(SHELL)) {
+    details.push(`缺纯 SPA 外壳 ${rel(SHELL)}，无法取得默认 title 与入口 <script src> 基线（task-10 落地前会如此）`);
   } else {
-    const idx = readFileSync(DIST_INDEX, 'utf-8');
-    defaultTitle = tagText(idx, /<title[^>]*>([\s\S]*?)<\/title>/i);
-    entryScripts = scriptSrcs(idx).sort();
-    if (!defaultTitle) details.push('dist/index.html 无 <title>，无法判定快照默认标题');
-    if (entryScripts.length === 0) details.push('dist/index.html 无 <script src> 入口，无法校验快照入口一致性');
+    const shellHtml = readFileSync(SHELL, 'utf-8');
+    defaultTitle = tagText(shellHtml, /<title[^>]*>([\s\S]*?)<\/title>/i);
+    entryScripts = scriptSrcs(shellHtml).sort();
+    if (!defaultTitle) details.push(`${rel(SHELL)} 无 <title>，无法判定快照默认标题`);
+    if (entryScripts.length === 0) details.push(`${rel(SHELL)} 无 <script src> 入口，无法校验快照入口一致性`);
   }
   if (snapshotFiles.length === 0) {
     details.push(`未发现任何快照: ${rel(PRERENDER)} 下 0 个 .html（先跑 node tools/gen-ai-endpoints.mjs）`);
@@ -466,8 +474,11 @@ let sitemapCount = -1;
   if (bareHashHits.length > 0) {
     details.unshift(`裸 #N 占位符命中 ${bareHashHits.length}/${BARE_HASH_PAGES.length} 个 CW 目录页（${bareHashHits.join(', ')}）——仅按页点名；其余页的字面 #N 属上游原文，必须放行`);
   }
+  const skipNote = internalFiles.length > 0
+    ? `；跳过内部文件 ${internalFiles.length} 个（${internalFiles.map((f) => basename(f)).join(', ')}——非快照，不计入覆盖率/条目数）`
+    : '';
   const title = details.length === 0
-    ? `快照正文（${snapshotFiles.length} 个文件 × 11 项断言全通过）`
+    ? `快照正文（${snapshotFiles.length} 个文件 × 11 项断言全通过${skipNote}）`
     : `快照正文（${violations.length} 项文件级违规 + ${preCount} 项前置问题）`;
   push('3', title, details);
 }
@@ -726,11 +737,44 @@ let sitemapCount = -1;
   push('5', title, details);
 }
 
+/* ═══ 6/7 外壳与首页一致性（线上实测：Vercel 文件系统先于 rewrites，`/` 必须直接命中 home 快照） ═══ */
+{
+  const details = [];
+  // ① 纯 SPA 外壳存在且不含任何快照内容（catch-all rewrite 的投递目标）
+  if (!existsSync(SHELL)) {
+    details.push(`缺纯 SPA 外壳 ${rel(SHELL)}（vercel catch-all rewrite 的投递目标；task-10 落地前会如此）`);
+  } else {
+    const shellHtml = readFileSync(SHELL, 'utf-8');
+    const marks = (shellHtml.match(/nk-snapshot/g) || []).length;
+    if (marks !== 0) details.push(`${rel(SHELL)}: 出现 ${marks} 处 nk-snapshot——纯外壳不得含快照内容（它经 rewrite 投递给全部 CSR 路由）`);
+  }
+  // ② dist/index.html ≡ prerender/home.html（字节等价，sha256）
+  if (!existsSync(DIST_INDEX)) {
+    details.push(`缺 ${rel(DIST_INDEX)}（'/' 的文件系统命中目标）`);
+  } else if (!existsSync(join(PRERENDER, 'home.html'))) {
+    details.push(`缺 ${rel(join(PRERENDER, 'home.html'))}，无法与 dist/index.html 比对`);
+  } else {
+    const hi = sha256(readFileSync(DIST_INDEX));
+    const hh = sha256(readFileSync(join(PRERENDER, 'home.html')));
+    if (hi !== hh) {
+      details.push(`dist/index.html 与 prerender/home.html 字节不等价（sha256 ${hi.slice(0, 12)}… ≠ ${hh.slice(0, 12)}…）——'/' 由文件系统直接投递，两份必须是同一份 home 快照`);
+    }
+  }
+  // ③ dist/index.html 必须自带正文（否则 '/' 又变回空壳——线上实测 962 B）
+  if (existsSync(DIST_INDEX)) {
+    const html = readFileSync(DIST_INDEX, 'utf-8');
+    const h1 = tagText(html, /<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+    if (!h1) details.push(`${rel(DIST_INDEX)}: 缺非空 <h1>（'/' 必须投递含正文的 home 快照，不能是纯外壳）`);
+    if (countCjk(visibleText(html)) === 0) details.push(`${rel(DIST_INDEX)}: 去标签中文字符 = 0（线上实测 '/' 曾返回 962 B 空壳）`);
+  }
+  push('6', '外壳与首页（_shell.html 无 nk-snapshot / dist/index.html ≡ prerender/home.html / index.html 有 h1 与正文）', details);
+}
+
 /* ═══ 输出 ═══ */
 let failed = 0;
 const lines = [];
 for (const c of checks) {
-  lines.push(`[${c.ok ? 'PASS' : 'FAIL'}] ${c.id}/6 ${c.title}`);
+  lines.push(`[${c.ok ? 'PASS' : 'FAIL'}] ${c.id}/7 ${c.title}`);
   if (!c.ok) failed++;
   for (const d of c.details.slice(0, DETAIL_CAP)) lines.push(`       - ${d}`);
   if (c.details.length > DETAIL_CAP) lines.push(`       - …另有 ${c.details.length - DETAIL_CAP} 项未列出`);
@@ -738,8 +782,8 @@ for (const c of checks) {
 console.log(lines.join('\n'));
 console.log(
   failed === 0
-    ? `[PASS] 6/6 汇总：AI 端点守卫通过（快照 ${snapshotFiles.length}，sitemap ${sitemapCount}，robots UA 组 ${REQUIRED_ROBOTS_UAS.length}，SITE_ORIGIN ${SITE_ORIGIN}）`
-    : `[FAIL] 6/6 汇总：AI 端点守卫失败（${failed}/6 项断言不通过，明细见上）`,
+    ? `[PASS] 7/7 汇总：AI 端点守卫通过（快照 ${snapshotFiles.length}，跳过内部文件 ${internalFiles.length}${internalFiles.length ? `(${internalFiles.map((f) => basename(f)).join(', ')})` : ''}，sitemap ${sitemapCount}，robots UA 组 ${REQUIRED_ROBOTS_UAS.length}，SITE_ORIGIN ${SITE_ORIGIN}）`
+    : `[FAIL] 7/7 汇总：AI 端点守卫失败（${failed}/7 项断言不通过，明细见上）`,
 );
 /* 用 exitCode 而非 process.exit()：失败明细可能上千行，process.exit 在管道下可能截断 stdout */
 process.exitCode = failed === 0 ? 0 : 1;
