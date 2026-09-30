@@ -26,11 +26,11 @@ pnpm dev       # → http://localhost:6188/
 ## 构建与预览
 
 ```bash
-pnpm build     # 构建守卫 → vue-tsc -b → vite build → dist/
+pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 + 守卫 → dist/
 pnpm preview   # 预览构建产物
 ```
 
-`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度三守卫串行）。
+`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度三守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml` 并断言覆盖率，契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
 
 ## 测试
 

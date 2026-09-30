@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node tools/check-guards.mjs && vue-tsc -b && vite build",
+    "build": "node tools/check-guards.mjs && vue-tsc -b && vite build && node tools/gen-ai-endpoints.mjs && node tools/check-ai-endpoints.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

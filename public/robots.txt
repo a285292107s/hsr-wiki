@@ -1,0 +1,44 @@
+# HSR Wiki — AI 检索入口显式放行（机制与依据见 docs/agents/ai-discoverability.md）
+#
+# 必须显式分组：robots.txt 命中具体 UA 组时 User-agent: * 组被完全忽略、两者不合并，
+# 因此每个 AI 组都要自足声明 Allow，否则该组只能吃 "无匹配组" 的默认语义。
+# Disallow /prerender/：那是同一内容的第二份 URL（由 vercel.json rewrite 投递），
+# 爬虫请求的 /character/1308 等公开 URL 与之无关，禁止它直接收录 /prerender/ 造成重复内容。
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /prerender/
+Disallow: /settings
+Disallow: /currency/settings
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /prerender/
+Disallow: /settings
+Disallow: /currency/settings
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /prerender/
+Disallow: /settings
+Disallow: /currency/settings
+
+User-agent: Googlebot
+Allow: /
+Disallow: /prerender/
+Disallow: /settings
+Disallow: /currency/settings
+
+User-agent: bingbot
+Allow: /
+Disallow: /prerender/
+Disallow: /settings
+Disallow: /currency/settings
+
+User-agent: *
+Allow: /
+Disallow: /prerender/
+Disallow: /settings
+Disallow: /currency/settings
+
+Sitemap: https://myhsr.vercel.app/sitemap.xml

@@ -16,6 +16,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 | 数据源总结 / 字段与研究文档查询 | [docs/data/](docs/data/) + [tools/converter/DATA_CATALOG.md](tools/converter/DATA_CATALOG.md) |
 | 转换器字段映射（表 → 输出 JSON） | [docs/data/转换器字段映射.md](docs/data/转换器字段映射.md) |
 | Spine 机制 / 官网抓取 / 技能预览动画抓取 / 黑块成因 | [docs/spine/](docs/spine/) |
+| AI 检索可见性 / 预渲染快照 / robots.txt / sitemap | [docs/agents/ai-discoverability.md](docs/agents/ai-discoverability.md) |
 | 写改测试 / e2e 分层 / 像素基线 | [docs/agents/testing.md](docs/agents/testing.md) |
 | 命令 / 端口 / dev 缓存陈旧 / 部署与门禁 | [docs/agents/commands.md](docs/agents/commands.md) |
 | UI 样式 / 色彩令牌 / 主题与强调色 / 断点 / 反 AI 味 | [docs/agents/ui-design.md](docs/agents/ui-design.md) |
@@ -27,10 +28,12 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 ```bash
 pnpm install            # 需 Node 22+；包管理器锁定 pnpm 11（packageManager 字段）
 pnpm dev                # → http://localhost:6188/（固定端口 strictPort；禁止改回 5173；「改了不生效」先自愈，见 commands.md）
-pnpm build              # 三守卫（色彩收口 / Spine 清单 / 对比度）→ vue-tsc -b → vite build
+pnpm build              # 三守卫（色彩收口 / Spine 清单 / 对比度）→ vue-tsc -b → vite build → AI 端点生成 + AI 端点守卫
 pnpm test               # 运行全部测试（Vitest）
 pnpm vitest run <文件>   # 运行单个测试文件
 pnpm test:e2e:ci        # e2e CI 层（layout + a11y）
+node tools/gen-ai-endpoints.mjs   # 单独重建 AI 快照（读 dist/index.html 为模板，须先 vite build）
+node tools/check-ai-endpoints.mjs # AI 端点守卫（快照正文/内链/sitemap/robots 覆盖率；pnpm build 末步自动跑）
 node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删引用即非零退出；仅手动，未进 CI）
 node tools/check-comments.mjs    # 注释累赘度守卫（report-only 先行；长块/超长头/重复断言/护栏基线；存量清零后接 pnpm build）
 ```
@@ -47,6 +50,7 @@ node tools/check-comments.mjs    # 注释累赘度守卫（report-only 先行；
 - **版本上新数据判据（ADR 0019 决策 3-5）**：条目判据 = `release_version` 恰等于 `version.json` 的 `version_label`；角色 / 光锥的版本号由「与上一版已提交输出的 id 差集」推导（converter 侧，无基线时留空），遗器用源数据权威 `RelicSetConfig.ReleaseVersion`；两者同写一个字段，前端只读该字段。
 - **货币战争本赛季新增（ADR 0020，已实现）**：`/currency` 的判据是**赛季代际差集**——`GridFightRoleBasicInfoOld` / `GridFightTraitLayerOld` 的 `ExistSeason` 最大一代 = 上一代名册，当前代名册在 `GridFightRoleBasicInfo` 与 `traits.json`；converter 给 `role.json` / `traits.json` 写布尔 `is_season_new`（表缺失或代数 < 2 → 全 false + 告警，判据纯函数在 `tools/converter/season_delta.py`）。覆盖域仅**角色 + 羁绊**（装备 / 环境 / 策略既无 `*Old` 代际表、版本差集也实测为 0，**禁止**为它们新造判据）。**两页口径禁止混用**：常规模式 = 版本增量，货币战争 = 赛季代际；文案写「本赛季新增」且**不显示赛季号**（当前代编号 1 与旧代 101/102/103 体系不一致）。两页共用区块原语 `.nk-hub-release*`（单点声明在 `catalog.css`）。
 - **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——数据探索一律走 `query.py` / `DATA_CATALOG.md`，转换走 `convert.py`。
+- **AI 检索可见性＝构建期预渲染快照**：服务端 HTML 决定 AI 可见性（实测 AI 爬虫零 JS 执行），故 `pnpm build` 末步由 `tools/gen-ai-endpoints.mjs` 为每个可索引路由生成含正文与内链的 `dist/prerender/**.html`，`vercel.json` 在 catch-all 之前用明确 rewrite 投递（并排除 `robots.txt`/`sitemap.xml`）；JS 用户拿到同一份 HTML、Vue 挂载覆盖快照，内容对所有 UA 一致（非 cloaking）。**新增可索引路由必须同步快照覆盖 + rewrite + sitemap**，否则末步守卫 `tools/check-ai-endpoints.mjs` 失败。契约见 [docs/agents/ai-discoverability.md](docs/agents/ai-discoverability.md)。
 
 > 分层结构 / 研究线（Spine Lab）/ 核心架构模式 / 新增目录扩展指南（端到端）→ [docs/agents/architecture.md](docs/agents/architecture.md)
 
