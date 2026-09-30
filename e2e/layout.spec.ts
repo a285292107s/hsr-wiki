@@ -905,14 +905,17 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1503 手机断点 375×812：无横向溢出，令牌降级为 rail 44（gutter 全断点恒 0），缩进与间距仍由 rail 派生', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1503 手机断点 375×812：图标列退场、正文单列全宽、子卡虚线分区 + 12px 缩进（ADR 0023）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/character/1503');
-    await expect(page.locator('[data-panel="skills"] > .nk-skill').first()).toBeVisible();
+    const firstCard = page.locator('[data-panel="skills"] > .nk-skill').first();
+    await expect(firstCard).toBeVisible();
+    await expect(page.locator('.nk-skill--child').first()).toBeVisible();
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(scrollWidth).toBeLessThanOrEqual(376);
-    // 断点覆盖必须落在 .nk-char-page 上；缩进/间距由 rail 派生（折角 y = 卡顶 + gap + rail/2 = 图标中线，折角长 = rail/2）
+
+    // 缩进/间距令牌：缩进 12px（4px 栅格档位），间距仍由 rail 派生
     const vars = await page.locator('.nk-char-page').evaluate((el) => {
       const cs = getComputedStyle(el);
       return {
@@ -922,14 +925,109 @@ test.describe('布局验收：角色详情页', () => {
         gap: cs.getPropertyValue('--nk-skill-child-gap').trim(),
       };
     });
-    expect(vars).toEqual({ rail: '44px', gutter: '0px', indent: '44px', gap: 'calc(44px / 2)' });
+    expect(vars).toEqual({ rail: '44px', gutter: '0px', indent: '12px', gap: 'calc(44px / 2)' });
+
+    // 图标内联：手机断点图标列不渲染，图标换宿主进标题行（与标题同一行、同起左缘）。
+    // 判据必须含**竖向重叠**——只比左缘时「图标堆在标题行上方」也成立（本轮实测盲区：+44px/卡）。
+    await expect(firstCard.locator('.nk-skill__rail')).toHaveCount(0);
+    const iconInRow = await firstCard.evaluate((el) => {
+      const row = el.querySelector(':scope > .nk-skill__body > .nk-skill__content > .nk-skill__title-row')!;
+      const icon = row.querySelector('.nk-skill__icon')!;
+      const name = row.querySelector('.nk-skill__name')!;
+      const r = row.getBoundingClientRect();
+      const i = icon.getBoundingClientRect();
+      return {
+        iconParentIsRow: icon.parentElement === row,
+        iconTop: i.top,
+        iconLeft: i.left,
+        rowTop: r.top,
+        rowLeft: r.left,
+        nameTop: name.getBoundingClientRect().top,
+      };
+    });
+    expect(iconInRow.iconParentIsRow).toBe(true);
+    expect(Math.abs(iconInRow.iconTop - iconInRow.rowTop), '图标应与标题行同起（不得堆在其上方）').toBeLessThanOrEqual(1);
+    expect(Math.abs(iconInRow.iconLeft - iconInRow.rowLeft), '图标内联后应与标题行同起').toBeLessThanOrEqual(1);
+
+    // 正文单列全宽：卡片体不再是网格（图标换宿主后 body 只剩内容列），内容列 = 卡内容宽
+    const body = await firstCard.evaluate((el) => {
+      const node = el.querySelector(':scope > .nk-skill__body')!;
+      const content = node.querySelector(':scope > .nk-skill__content')!;
+      const cs = getComputedStyle(el);
+      return {
+        display: getComputedStyle(node).display,
+        contentWidth: content.getBoundingClientRect().width,
+        cardContentWidth: el.getBoundingClientRect().width - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0),
+      };
+    });
+    expect(body.display).toBe('block');
+    expect(Math.abs(body.contentWidth - body.cardContentWidth), `内容列 ${body.contentWidth} vs 卡内容宽 ${body.cardContentWidth}`).toBeLessThanOrEqual(1);
+
+    // 虚线分区：子卡上沿 1px dashed --line-2；父卡与单卡不加线
+    const children = firstCard.locator('.nk-skill--child');
+    await expect(children.first()).toHaveCSS('border-top-style', 'dashed');
+    await expect(children.first()).toHaveCSS('border-top-width', '1px');
+    await expect(children.first()).toHaveCSS('border-top-color', 'rgba(255, 255, 255, 0.13)');
+    await expect(firstCard).toHaveCSS('border-top-style', 'none');
+    const monoCard = page.locator('[data-panel="skills"] > .nk-skill:not(:has(.nk-skill--child))').first();
+    if (await monoCard.count()) await expect(monoCard).toHaveCSS('border-top-style', 'none');
+
+    /* 虚线上下留白等距（用户报「分割虚线上方没有留空隙」）：线上方 = 线之前最后一个可见元素
+       的底边到线；线下方 = 子卡 padding-top（半个图标空间）。父卡内容体必须留下等量余量，
+       仅靠 padding-top 会让线上方只剩余量（实测 9px）而看着贴住上文。 */
+    const dash = await firstCard.evaluate((card) => {
+      const child = card.querySelector(':scope > .nk-skill--child')!;
+      const lineY = child.getBoundingClientRect().top;
+      let lastBottom = card.getBoundingClientRect().top;
+      // DOM 序取「线之前」的最后一个可见元素：文档序保证它就是最近的上方内容
+      for (const el of card.querySelectorAll('*')) {
+        if (el === child || el.contains(child)) continue;
+        const r = el.getBoundingClientRect();
+        if (r.height > 0 && r.width > 0 && getComputedStyle(el).visibility !== 'hidden' && r.bottom <= lineY + 1) {
+          lastBottom = r.bottom;
+        }
+      }
+      return {
+        above: +(lineY - lastBottom).toFixed(1),
+        below: parseFloat(getComputedStyle(child).paddingTop),
+      };
+    });
+    expect(dash.above, `虚线上方 ${dash.above} 应≈下方 ${dash.below}（±2px）`).toBeGreaterThanOrEqual(dash.below - 2);
+
+    // 折角线语言退场：三个宿主伪元素的 computed content 必须是 none。
+    // 判据只用 content——Chrome 对「未被 content 生成的伪元素」在 getComputedStyle 上仍返回
+    // 声明侧数值（实测 forced content:'' 才出现 353.125px 盒），拿 width/height 当判据会漏判。
+    for (const [host, pseudo] of [
+      [firstCard.locator('.nk-skill__body').first(), '::before'],
+      [children.first(), '::before'],
+      [children.first(), '::after'],
+    ] as const) {
+      const content = await host.evaluate((el, p) => getComputedStyle(el, p).content, pseudo);
+      expect(content, `${pseudo} 应被 content: none 抑制`).toBe('none');
+    }
+
+    // 左轴唯一：图标左缘 = 卡内容左缘 = 卡头类型竖条左轴
+    const axis = await firstCard.evaluate((el) => {
+      const icon = el.querySelector('.nk-skill__icon')!;
+      const dot = el.querySelector(':scope > .nk-skill__head > .nk-skill__type-dot')!;
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return {
+        iconLeft: icon.getBoundingClientRect().left,
+        dotLeft: dot.getBoundingClientRect().left,
+        contentLeft: r.left + (parseFloat(cs.paddingLeft) || 0),
+      };
+    });
+    expect(Math.abs(axis.iconLeft - axis.contentLeft), '图标左缘 = 卡内容左缘').toBeLessThanOrEqual(1);
+    expect(Math.abs(axis.dotLeft - axis.contentLeft), '类型竖条左缘 = 卡内容左缘（左轴唯一）').toBeLessThanOrEqual(1);
+
     expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 
-  test('/character/1503：子技能行缩进 = 一个技能图标空间落地（桌面 +48px / 375 +44px，±1px）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1503：手机断点不再右移子卡（旧「缩进一个图标空间」只在 ≥768px 成立）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
-    /** 子图标相对父图标右移量 + 当前断点的缩进令牌值 */
+    /** 子卡图标相对父卡图标的右移量（手机断点只差 12px 缩进） */
     const measure = async () => {
       const firstCard = page.locator('[data-panel="skills"] > .nk-skill').first();
       const parentLeft = await firstCard
@@ -952,13 +1050,12 @@ test.describe('布局验收：角色详情页', () => {
     const wide = await measure();
     expect(wide.indent).toBe('48px');
     expect(Math.abs(wide.delta - 48), `桌面实测右移 ${wide.delta.toFixed(1)}px`).toBeLessThanOrEqual(1);
+    expect(Math.abs(wide.delta - parseFloat(wide.indent))).toBeLessThanOrEqual(1);
 
     await page.setViewportSize({ width: 375, height: 812 });
-    await expect.poll(async () => (await measure()).indent).toBe('44px');
+    await expect.poll(async () => (await measure()).indent).toBe('12px');
     const narrow = await measure();
-    expect(Math.abs(narrow.delta - 44), `375 实测右移 ${narrow.delta.toFixed(1)}px`).toBeLessThanOrEqual(1);
-    // 缩进量即断点令牌值（不是历史遗留的硬编码数字）
-    expect(Math.abs(wide.delta - parseFloat(wide.indent))).toBeLessThanOrEqual(1);
+    expect(Math.abs(narrow.delta - 12), `375 实测右移 ${narrow.delta.toFixed(1)}px`).toBeLessThanOrEqual(1);
     expect(Math.abs(narrow.delta - parseFloat(narrow.indent))).toBeLessThanOrEqual(1);
     expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
@@ -1036,8 +1133,10 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1503：展开技能数据表后，竖轨与表盒（含首列）不相交、表盒不出卡片内容区', async ({ page }) => {
+  // 竖轨几何只在 ≥768px 存在，故本用例钉桌面视口（否则 mobile-chromium project 会跑到无竖轨的断点上）
+  test('/character/1503：展开技能数据表后，竖轨与表盒（含首列）不相交、表盒不出卡片内容区', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1503');
     const card = page.locator('[data-panel="skills"] > .nk-skill').first();
     const indent = await page

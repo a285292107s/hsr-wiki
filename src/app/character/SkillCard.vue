@@ -2,7 +2,7 @@
 /**
  * 数据表 .nk-skill__table-wrap 必须占内容列（grid-column: 2/-1）：跨图标列会让层级线擦过表头首列文字。
  */
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
 import {
   fmtDesc, fmtToughness, skillIconUrl, iconUrl,
@@ -43,6 +43,22 @@ const fillPct = computed(() =>
 const effLv = computed(() =>
   props.isChild ? Math.min(props.parentLv ?? 1, maxLv.value) : lv.value,
 );
+
+/**
+ * 手机断点图标内联开关（与 character.css 的 `max-width: 767px` 块同断点）。
+ * 图标必须换宿主才能内联——`.nk-skill__rail` 与 `.nk-skill__title-row` 是兄弟节点，
+ * 纯 CSS（含 display: contents）只能让图标成为 body 的 grid item，抬不进标题行的 flex 行。
+ */
+const MQ_MOBILE = '(max-width: 767px)';
+const isMobile = ref(typeof window !== 'undefined' && window.matchMedia(MQ_MOBILE).matches);
+let mq: MediaQueryList | null = null;
+const onMq = (e: MediaQueryListEvent): void => { isMobile.value = e.matches; };
+onMounted(() => {
+  mq = window.matchMedia(MQ_MOBILE);
+  isMobile.value = mq.matches;
+  mq.addEventListener('change', onMq);
+});
+onBeforeUnmount(() => mq?.removeEventListener('change', onMq));
 
 const descHtml = computed(() => {
   if (!props.sk.desc) return '-';
@@ -265,11 +281,12 @@ function onImgLoad(): void { imgDone.value = true; }
       </div>
     </div>
     <div class="nk-skill__body">
-      <div class="nk-skill__rail">
+      <div v-if="!isMobile" class="nk-skill__rail">
         <img v-if="icon" class="nk-skill__icon" :src="icon" alt="">
       </div>
       <div class="nk-skill__content">
         <div class="nk-skill__title-row">
+          <img v-if="isMobile && icon" class="nk-skill__icon" :src="icon" alt="">
           <div class="nk-skill__title">
             <span class="nk-skill__name">{{ sk.name }}</span>
             <span class="nk-skill__meta">

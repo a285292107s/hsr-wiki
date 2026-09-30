@@ -210,6 +210,40 @@
 }
 .nk-char-page .nk-skill--child-last::after { content: none; }
 
+/* 手机断点：图标列退场、图标回到标题行内联，层级改由子卡上沿虚线分区表达（ADR 0023）。
+   平板/桌面仍走上面的图标列 + 折角线；两套语言按断点互斥，禁止在同一断点并用。 */
+@media (max-width: 767px) {
+  .nk-char-page {
+    --nk-skill-child-indent: 12px;
+  }
+  /* 手机断点卡片体不是网格（图标已换宿主进标题行，body 只剩内容列）：单列全宽 */
+  .nk-char-page .nk-skill__body { display: block; }
+  /* 图标内联是换宿主实现的（见 SkillCard.vue 的 isMobile）：`.nk-skill__rail` 与
+     `.nk-skill__title-row` 是兄弟节点，`display: contents` 只能把图标变成 body 的 grid item，
+     抬不进标题行的 flex 行（实测图标堆在标题行上方、每卡高 44px）。 */
+  .nk-char-page .nk-skill__title-row { align-items: flex-start; }
+  /* 虚线分区的呼吸：子卡 padding-top = 半个图标空间（22px）是线下方空隙，线上方原本只有
+     上一行内容自带的余量（实测 9px）⇒ 父卡内容体补 13px，使虚线上下各 22px 等距。
+     只在手机断点生效，平板/桌面保持原垂直节奏（ADR 0023）。 */
+  .nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill__body { padding-bottom: 13px; }
+  .nk-char-page .nk-skill__body::before,
+  .nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill__body::before,
+  .nk-char-page .nk-skill--child::before,
+  .nk-char-page .nk-skill--child::after,
+  .nk-char-page .nk-skill--child-last::before { content: none; }
+  /* 基础规则的 `border: none` 把上沿重置为 none：只写上沿长写、且特异性不低于它（0,4,1），
+     否则虚线会被简写或权重压掉（两处均在本轮实测回归过）。 */
+  .nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill.nk-skill--child,
+  .nk-char-page .nk-skill.nk-skill--child {
+    margin: 0 0 0 var(--nk-skill-child-indent);
+    padding: var(--nk-skill-child-gap) 0 0;
+    border-top-width: 1px;
+    border-top-style: dashed;
+    border-top-color: var(--line-2);
+  }
+  .nk-char-page .nk-skill.nk-skill--child:hover { border-top-color: var(--line-2); }
+}
+
 .nk-char-page .nk-skill { padding: 24px; margin-bottom: 0; }
 .nk-char-page .nk-skill__need {
   display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
