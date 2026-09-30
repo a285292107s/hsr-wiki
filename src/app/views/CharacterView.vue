@@ -195,7 +195,7 @@ onBeforeUnmount(() => {
             <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:60px;"></div>
             <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:70px;"></div>
           </div>
-          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--block" style="margin-top:14px;"></div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--block" style="margin-top:16px;"></div>
         </div>
       </div>
       <div class="nk-skeleton__body">

@@ -822,7 +822,7 @@ test.describe('布局验收：角色详情页', () => {
         gap: cs.getPropertyValue('--nk-skill-child-gap').trim(),
       };
     });
-    expect(tokens).toEqual({ rail: '48px', gutter: '10px', indent: '48px', gap: 'calc(48px / 2)' });
+    expect(tokens).toEqual({ rail: '48px', gutter: '0px', indent: '48px', gap: 'calc(48px / 2)' });
     const indent = parseFloat(tokens.indent);
 
     // 图标列：子卡整行右移恰好一个图标空间 → 子图标左缘 = 父图标右缘（±1px），两子卡彼此同列
@@ -844,6 +844,14 @@ test.describe('布局验收：角色详情页', () => {
       expect(Math.abs(box.left - parentIcon.right), '子图标左缘 = 父图标右缘').toBeLessThanOrEqual(1);
     }
     expect(Math.abs(childIcons[0].left - childIcons[1].left)).toBeLessThanOrEqual(1);
+
+    // 左轴唯一：图标左缘必须与卡头领起元素（类型竖条）落在同一条轴上 = 卡片内容轴。
+    // --nk-skill-gutter 一旦非 0 就把图标推出该轴，卡内出现第二条左轴 + 一段无承载物空档（用户报障项）。
+    const dotLeft = await firstCard
+      .locator('.nk-skill__type-dot')
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().left);
+    expect(Math.abs(parentIcon.left - dotLeft), '图标左缘 = 卡头左轴（gutter 必须为 0）').toBeLessThanOrEqual(1);
 
     // 竖轨共线：子卡竖轨 x 必须与父卡竖轨相等（父卡在 .nk-skill__body::before、子卡在卡片自身），
     // 且竖轨落点 = 父图标底边水平中点（x = 图标列左缘 + gutter + rail/2）
@@ -907,7 +915,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1503 手机断点 375×812：无横向溢出，令牌降级为 rail 44 / gutter 8，缩进与间距仍由 rail 派生', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1503 手机断点 375×812：无横向溢出，令牌降级为 rail 44（gutter 全断点恒 0），缩进与间距仍由 rail 派生', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/character/1503');
@@ -924,7 +932,7 @@ test.describe('布局验收：角色详情页', () => {
         gap: cs.getPropertyValue('--nk-skill-child-gap').trim(),
       };
     });
-    expect(vars).toEqual({ rail: '44px', gutter: '8px', indent: '44px', gap: 'calc(44px / 2)' });
+    expect(vars).toEqual({ rail: '44px', gutter: '0px', indent: '44px', gap: 'calc(44px / 2)' });
     expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
