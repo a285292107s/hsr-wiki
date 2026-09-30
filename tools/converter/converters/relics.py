@@ -8,21 +8,16 @@ from utils import load_json, save_json, map_icon_path, unwrap_value
 
 logger = logging.getLogger("converter")
 
-
 def convert() -> None:
     """转换 RelicSetConfig.json + RelicConfig.json + RelicSetSkillConfig.json → relics.json。
 
     按套装 ID 聚合，只保留最高稀有度（5星）的部位列表。
     """
-    # 加载套装配置
     set_data = load_json(EXCEL_DIR / "RelicSetConfig.json")
-    # 加载遗器配置（单个部位+稀有度）
     relic_data = load_json(EXCEL_DIR / "RelicConfig.json")
-    # 加载套装效果配置
     skill_data = load_json(EXCEL_DIR / "RelicSetSkillConfig.json")
 
-    # 按 SetID 聚合套装效果（desc 模板 + AbilityParamList 参数值）
-    set_skills: dict[int, dict[int, tuple[str, list]]] = {}  # set_id → {require_num: (desc, params)}
+    set_skills: dict[int, dict[int, tuple[str, list]]] = {}
     for skill in skill_data:
         set_id = skill.get("SetID", 0)
         require_num = skill.get("RequireNum", 0)
@@ -32,13 +27,11 @@ def convert() -> None:
             set_skills[set_id] = {}
         set_skills[set_id][require_num] = (desc, params)
 
-    # 按 SetID 聚合部位，只保留最高稀有度（5星）
-    set_pieces: dict[int, list] = {}  # set_id → [piece, ...]
+    set_pieces: dict[int, list] = {}
     for relic in relic_data:
         set_id = relic.get("SetID", 0)
         rarity_key = relic.get("Rarity", "")
         rarity = RARITY_MAP.get(rarity_key, 0)
-        # 只保留 5 星
         if rarity != 5:
             continue
         piece_type = relic.get("Type", "")
@@ -54,12 +47,10 @@ def convert() -> None:
             "sub_affix_group": relic.get("SubAffixGroup", 0),
         })
 
-    # 构建结果
     result = {}
     for item in set_data:
         set_id = item.get("SetID", 0)
         name = resolve_text(item.get("SetName", {}))
-        # 跳过未发布套装
         if not item.get("Release", False):
             continue
 
@@ -70,7 +61,6 @@ def convert() -> None:
             if params:
                 param_list[str(rn)] = params
         pieces = set_pieces.get(set_id, [])
-        # 按部位顺序排序
         type_order = {"HEAD": 0, "HAND": 1, "BODY": 2, "FOOT": 3, "NECK": 4, "OBJECT": 5}
         pieces.sort(key=lambda p: type_order.get(p["type"], 99))
 
@@ -86,10 +76,8 @@ def convert() -> None:
             "release_version": item.get("ReleaseVersion", ""),
         }
 
-    # 按 id 排序输出为列表
     sorted_result = [result[k] for k in sorted(result.keys(), key=int)]
     save_json(sorted_result, OUTPUT_DIR / "relics.json")
-
 
 def convert_stories() -> None:
     """转换 RelicDataInfo.json → relic_stories.json（遗器来历/部位故事）。
@@ -104,7 +92,6 @@ def convert_stories() -> None:
         set_id = item.get("SetID", 0)
         piece_type = item.get("Type", "")
         story = resolve_text(item.get("BGStoryContent", ""), clean=False)
-        # 无来历文本的部位不输出（避免空块）
         if not story:
             continue
         result.setdefault(str(set_id), {})[piece_type] = {
@@ -113,6 +100,5 @@ def convert_stories() -> None:
             "story": story,
         }
 
-    # 按 set_id 排序输出
     sorted_result = {k: result[k] for k in sorted(result.keys(), key=int)}
     save_json(sorted_result, OUTPUT_DIR / "relic_stories.json")

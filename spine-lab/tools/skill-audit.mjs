@@ -1,12 +1,5 @@
-/**
- * 技能审计脚本：遍历 CDN 全角色数据，检测：
- * 1. 被 groupSkills 过滤逻辑排除的技能（原版网页显示但当前实现不显示）
- * 2. 已显示技能的图标 URL 在 CDN 上 404 的情况
- * 用法：node tools/skill-audit.mjs
- */
 const CDN = 'https://static.nanoka.cc';
 
-/* ─── 复制前端过滤逻辑（src/lib/constants.ts + CharacterView.vue groupSkills） ─── */
 const SKILL_ORDER = ['Normal', 'BPSkill', 'Ultra', 'Passive', 'ElationDamage', null, 'Maze', 'Assist'];
 const SKILL_ICON_KEY = {
   Normal: 'Normal', BPSkill: 'BP', Ultra: 'Ultra',
@@ -45,7 +38,6 @@ function skillIconUrl(sk, charId, data) {
   return `${CDN}/assets/hsr/skillicons/SkillIcon_${id}_${iconKey}.webp`;
 }
 
-/** 与前端 groupSkills 完全一致的过滤条件，返回 [通过, 被过滤(含原因)] */
 function analyzeSkills(skills) {
   const shown = [];
   const hidden = [];
@@ -60,7 +52,6 @@ function analyzeSkills(skills) {
   return { shown, hidden };
 }
 
-/* ─── 网络工具 ─── */
 async function fetchJson(url) {
   const r = await fetch(url);
   if (!r.ok) throw new Error(`HTTP ${r.status}: ${url}`);
@@ -82,25 +73,21 @@ async function checkIcon(url) {
   }
 }
 
-/* ─── 主流程 ─── */
 async function main() {
   console.log('=== HSR Wiki 技能审计 ===\n');
 
-  // 1. manifest
   const manifest = await fetchJson(`${CDN}/manifest.json`);
   const ver = manifest.hsr?.latest || manifest.hsr?.available?.[0];
   console.log(`数据版本: ${ver}\n`);
 
-  // 2. 角色列表
   const charList = await fetchJson(`${CDN}/hsr/${ver}/character.json`);
   const charIds = Object.keys(charList).sort((a, b) => Number(a) - Number(b));
   console.log(`角色总数: ${charIds.length}\n`);
 
-  const hiddenReport = [];  // { charId, name, skills: [{id, name, type, type_name, reasons}] }
-  const iconReport = [];    // { charId, name, missing: [{skillName, type, url, status}] }
+  const hiddenReport = [];
+  const iconReport = [];
   let processed = 0;
 
-  // 并发控制
   const CONCURRENCY = 6;
   let idx = 0;
   async function worker() {
@@ -110,7 +97,6 @@ async function main() {
         const d = await fetchJson(`${CDN}/hsr/${ver}/zh/character/${charId}.json`);
         const name = d.name || charId;
 
-        // 3. 过滤分析（主体 skills）
         const { shown, hidden } = analyzeSkills(d.skills);
         if (hidden.length) {
           hiddenReport.push({
@@ -122,7 +108,6 @@ async function main() {
           });
         }
 
-        // 4. 图标检查（显示的技能 + 忆灵技能）
         const allShown = [...shown];
         if (d.memosprite && d.memosprite.skills) {
           allShown.push(...Object.values(d.memosprite.skills));
@@ -147,14 +132,12 @@ async function main() {
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
   console.log(`\r已处理: ${processed}/${charIds.length}\n`);
 
-  /* ─── 输出报告 ─── */
   console.log('════════════════════════════════════════════════════════');
   console.log('【一】原版数据中存在、但当前实现不显示的技能');
   console.log('════════════════════════════════════════════════════════\n');
   if (!hiddenReport.length) {
     console.log('  无（所有技能均正常显示）\n');
   } else {
-    // 按原因分类统计
     const byReason = {};
     for (const r of hiddenReport) {
       for (const s of r.skills) {
@@ -171,7 +154,6 @@ async function main() {
       if (items.length > 30) console.log(`    ... 还有 ${items.length - 30} 条`);
       console.log('');
     }
-    // 逐角色明细
     console.log('  ── 逐角色明细 ──');
     for (const r of hiddenReport) {
       console.log(`  [${r.charId}] ${r.name}:`);

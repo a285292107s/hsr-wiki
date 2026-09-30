@@ -22,59 +22,42 @@ import pytest  # noqa: E402
 from converters import endgame as eg  # noqa: E402
 from converters import endgame_catalog as egc  # noqa: E402
 
-
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
     """mock TextMap，避免加载真实大文件；共享聚合模块（monster_common）同步 mock。"""
     import textmap
     import converters.monster_common as mc
     monkeypatch.setattr(textmap, "_text_map", {})
-    # 默认 resolve_text：空引用返回 ""（与真实行为一致），否则 "名{Hash}"
     fake_resolve = lambda ref, clean=False: "" if not ref else f"名{ref.get('Hash', 0)}"  # noqa: E731
     monkeypatch.setattr(eg, "resolve_text", fake_resolve)
     monkeypatch.setattr(mc, "resolve_text", fake_resolve)
     return mc
 
-
-# ─── _load_schedules ────────────────────────────────────────────
-
 class TestLoadSchedules:
     def test_maps_and_filters(self, monkeypatch):
         monkeypatch.setattr(eg, "load_json", lambda _p: [
-            # 正常排期 → 组 101（200101-200000）
             {"ID": 200101, "BeginTime": "2023-09-04 04:00:00", "EndTime": "2023-09-18 04:00:00"},
-            # 公测前整段（beta 占位）→ 丢弃
             {"ID": 200102, "BeginTime": "2022-11-14 04:00:00", "EndTime": "2022-11-28 04:00:00"},
-            # 起点 2030+（未来占位）→ 丢弃
             {"ID": 200108, "BeginTime": "2033-02-06 04:00:00", "EndTime": "2033-02-20 04:00:00"},
             {"ID": 201034, "BeginTime": "2030-01-01 04:00:00", "EndTime": "2030-01-15 04:00:00"},
-            # 缺字段 / 非法日期 → 丢弃
             {"ID": 201001, "BeginTime": "", "EndTime": "2023-09-18 04:00:00"},
             {"ID": 201002, "BeginTime": "not-a-date", "EndTime": "2023-09-18 04:00:00"},
             {"BeginTime": "2023-09-04 04:00:00", "EndTime": "2023-09-18 04:00:00"},
         ])
         result = eg._load_schedules("ScheduleDataChallengeMaze.json")
-        # 仅 101 保留，其余全部过滤
         assert set(result.keys()) == {"101"}
         assert result["101"] == ("2023-09-04 04:00:00", "2023-09-18 04:00:00")
 
     def test_load_test_periods(self, monkeypatch):
         """测试期：EndTime 早于公测上线的 beta/CBT 组；未来占位/正式期不标。"""
         monkeypatch.setattr(eg, "load_json", lambda _p: [
-            # 测试期（公测前整段）→ 101/102
             {"ID": 200101, "BeginTime": "2023-02-06 04:00:00", "EndTime": "2023-03-06 04:00:00"},
             {"ID": 200102, "BeginTime": "2022-11-14 04:00:00", "EndTime": "2022-11-28 04:00:00"},
-            # 跨公测（EndTime 在公测后）→ 不标（如 117）
             {"ID": 200117, "BeginTime": "2023-04-17 04:00:00", "EndTime": "2023-05-15 04:00:00"},
-            # 未来占位（2033）→ 不标
             {"ID": 200108, "BeginTime": "2033-02-06 04:00:00", "EndTime": "2033-02-20 04:00:00"},
-            # 缺字段 → 跳过
             {"ID": 201001, "BeginTime": "", "EndTime": "2023-09-18 04:00:00"},
         ])
         assert eg._load_test_periods() == {101, 102}
-
-
-# ─── 辅助表解析 ─────────────────────────────────────────────────
 
 class TestAuxTables:
     def test_load_maze_buffs(self, monkeypatch):
@@ -83,11 +66,10 @@ class TestAuxTables:
              "BuffDesc": {"Hash": 3},
              "ParamList": [{"Value": 0.5}, {"Value": 1}]},
             {"ID": 3031301, "BuffName": {"Hash": 2}, "BuffDesc": {}},
-            {"ID": 0},  # 缺名称 → 跳过
+            {"ID": 0},
         ])
         out = eg._load_maze_buffs()
         assert out[3030146] == {"name": "名1", "desc": "名3", "param_list": [0.5, 1], "icon": ""}
-        # 无 ParamList → 空数组；缺名称 → 不入表
         assert out[3031301]["param_list"] == []
         assert 0 not in out
 
@@ -116,7 +98,6 @@ class TestAuxTables:
         assert full["skills"] == [{"name": "名30", "tag": "名31"}]
         assert "stats" not in full
         assert "figure" not in full
-        # 未注册 mid → 仅输出 id（调用方需自行保证 mid 已注册）
         assert eg._monster_out(9999, {}) == {"id": "9999"}
 
     def test_monster_out_tpl_alias(self):
@@ -129,7 +110,6 @@ class TestAuxTables:
         assert out == {"id": "200401014", "tpl": "2004010", "name": "名1",
                        "icon": "Monster_1", "weak": [], "resist": {},
                        "rank": "", "camp": "", "stance": 300}
-        # speed=0（模板缺失）→ 不输出 speed
         assert "speed" not in out
 
     def test_load_targets_clean(self, monkeypatch):
@@ -137,35 +117,32 @@ class TestAuxTables:
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"ID": 251, "ChallengeTargetName": {"Hash": 1},
              "ChallengeTargetParam1": 20, "ChallengeTargetType": "ROUNDS_LEFT"},
-            {"ID": 252, "ChallengeTargetName": {"Hash": 2}},  # 无参数 → param None；无类型 → 不输出
+            {"ID": 252, "ChallengeTargetName": {"Hash": 2}},
             {"ID": 253, "ChallengeTargetName": {"Hash": 1},
-             "ChallengeTargetType": "ROUNDS_LEFT"},  # 同 Hash 缺参数 → 补全 20
-            {"ID": 0},  # 无名称 → 跳过
+             "ChallengeTargetType": "ROUNDS_LEFT"},
+            {"ID": 0},
         ])
         monkeypatch.setattr(eg, "clean_text", lambda s: f"cleaned:{s}" if s else "")
         out = eg._load_targets()
         assert out[251] == {"text": "cleaned:名1", "param": 20, "type": "ROUNDS_LEFT"}
         assert out[252] == {"text": "cleaned:名2", "param": None}
-        assert out[253] == {"text": "cleaned:名1", "param": 20, "type": "ROUNDS_LEFT"}  # 同 Hash 补全
+        assert out[253] == {"text": "cleaned:名1", "param": 20, "type": "ROUNDS_LEFT"}
         assert 0 not in out
 
     def test_load_permanent_groups(self, monkeypatch):
         """常驻关卡：ScheduleDataID 为空的长期关卡分组（无赛季轮回）。"""
         monkeypatch.setattr(eg, "load_json", lambda _p: [
-            {"GroupID": 100},  # 永屹之城遗秘：无排期关联 → 常驻
-            {"GroupID": 900},  # 天艟求仙迷航录：无排期关联 → 常驻
-            {"GroupID": 1001, "ScheduleDataID": 201001},  # 赛季组 → 排除
+            {"GroupID": 100},
+            {"GroupID": 900},
+            {"GroupID": 1001, "ScheduleDataID": 201001},
         ])
         assert eg._load_permanent_groups() == {100, 900}
-
-
-# ─── 组级增益 / 回合上限 ────────────────────────────────────────
 
 class TestGroupAux:
     def test_group_extra_buff_boss_two_stages(self, monkeypatch):
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"GroupID": 3020, "BuffList1": [3111008, 3111010], "BuffList2": [3111008, 3111012],
-             "BuffList3": [3111082]},  # 第三阶段不采集
+             "BuffList3": [3111082]},
         ])
         out = eg._group_extra_buff("x.json", ("BuffList1", "BuffList2"))
         assert out == {3020: [3111008, 3111010, 3111012]}
@@ -174,7 +151,7 @@ class TestGroupAux:
         """战意赛季主题机制：SubMazeBuffList 去重保序；Normal 赛季（空列表）不入表。"""
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"GroupID": 2025, "SubMazeBuffList": [3031232, 3031233, 3031234, 3031232]},
-            {"GroupID": 2001, "SubMazeBuffList": []},  # Normal 赛季 → 不入表
+            {"GroupID": 2001, "SubMazeBuffList": []},
             {"GroupID": 0},
         ])
         out = eg._group_extra_sub_buffs()
@@ -185,12 +162,9 @@ class TestGroupAux:
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"ID": 20011, "TurnLimit": 5},
             {"ID": 20012, "TurnLimit": 6},
-            {"ID": 20111, "TurnLimit": 4},  # 另一组（2011）
+            {"ID": 20111, "TurnLimit": 4},
         ])
         assert eg._load_story_turns() == {"2001": 6, "2011": 4}
-
-
-# ─── _season_stats ──────────────────────────────────────────────
 
 class TestTierce:
     """星启模式（Tierce）表解析：DLCKKJFMJOB → 关卡表 GroupID 映射。"""
@@ -205,7 +179,7 @@ class TestTierce:
                          "GNOOAGPBNLD": 45,
                          "OGEOMCGNNMP": [601, 602, 999],
                          "HFIAAGAKFMD": [30123123],
-                         "JEBMBCLBIOI": [5014010, 9999999]}]  # 未注册目标/怪物 → 跳过
+                         "JEBMBCLBIOI": [5014010, 9999999]}]
             if name.endswith("ChallengeMazeConfig.json"):
                 return [{"ID": 5212, "GroupID": 1033,
                          "EventIDList1": [30123031], "EventIDList2": [30123032]},
@@ -214,10 +188,10 @@ class TestTierce:
                 return [{"PHFMCACHFIJ": 20245, "DLCKKJFMJOB": 20244,
                          "LOJCIDLKPKG": ["Physical"], "GNOOAGPBNLD": 0,
                          "IDBJENCBJHM": 45000, "OGEOMCGNNMP": [4001],
-                         "GNGENMHNLAH": 4000,  # 满分档（99000）并入 targets
+                         "GNGENMHNLAH": 4000,
                          "EGEEJLHBALB": [{"ItemID": 122002},
                                           {"ItemID": 213, "ItemNum": 24},
-                                          {"ItemID": 2, "ItemNum": 380000}]}]  # 无 HFIAAGAKFMD → 回退 Boss 代表
+                                          {"ItemID": 2, "ItemNum": 380000}]}]
             if name.endswith("ChallengeStoryMazeConfig.json"):
                 return [{"ID": 20244, "GroupID": 2024}]
             if name.endswith("StageConfig.json"):
@@ -250,10 +224,9 @@ class TestTierce:
             "damage_types": ["Fire", "Imaginary"],
             "countdown": 45,
             "score": None,
-            "level": 95,  # 星启 Boss 战等级（StageConfig.Level）
+            "level": 95,
             "targets": [{"text": "剩余#1[i]轮", "param": 15, "type": "ROUNDS_LEFT"},
                          {"text": "剩余#1[i]轮", "param": 30, "type": "ROUNDS_LEFT"}],
-            # StageConfig 波次：波 1 双怪 + 波 2 Boss（wave 序号）
             "monsters": [
                 {"id": "5013040", "name": "先锋", "icon": "Monster_5013040",
                  "weak": [], "resist": {}, "rank": "Elite", "wave": 1},
@@ -262,7 +235,6 @@ class TestTierce:
                 {"id": "5014010", "name": "星啸", "icon": "Monster_5014010",
                  "weak": [], "resist": {}, "rank": "", "wave": 2},
             ],
-            # 3 节点敌方：节点 1/2 = 常规最高难度关（5212）上下半场；节点 3 = 星启附加关
             "nodes": [
                 {"idx": 1, "monsters": [{"id": "5014010", "name": "星啸",
                                             "icon": "Monster_5014010", "weak": [],
@@ -280,10 +252,8 @@ class TestTierce:
                 ]},
             ],
         }
-        # 虚构叙事：score 输出；无 Stage 配置 → 回退 Boss 代表（无波次）；组 1034 无星启 → 不入表
         assert out["2024"]["score"] == 45000
         assert out["2024"]["monsters"] == []
-        # 满分档目标（GNGENMHNLAH=4000，99000 分）并入 targets 末尾；通关奖励输出 id+num
         assert out["2024"]["targets"] == [
             {"text": "获得#1[i]分", "param": 60000, "type": "TOTAL_SCORE"},
             {"text": "获得#1[i]分", "param": 99000, "type": "TOTAL_SCORE"},
@@ -294,9 +264,6 @@ class TestTierce:
             {"id": 2, "num": 380000},
         ]
         assert "1034" not in out
-
-
-# ─── _season_stats ──────────────────────────────────────────────
 
 class TestSeasonStats:
     def test_max_of_floors_stage_countdown(self):
@@ -324,11 +291,7 @@ class TestSeasonStats:
             {"floor": 1, "stage1": ["Ice"], "stage2": []},
             {"floor": 2, "stage1": ["Wind", "Fire"], "stage2": ["Ice", "Quantum"]},
         ]
-        # 全赛季合并属性不受影响
         assert result["damage_types"] == ["Fire", "Ice", "Quantum", "Wind"]
-
-
-# ─── 逐层详情 _season_floors ─────────────────────────────────
 
 class TestSeasonFloors:
     def test_full_structure_with_floor_and_buff(self):
@@ -347,7 +310,6 @@ class TestSeasonFloors:
                                "weak": [], "resist": {}, "rank": ""}}
         buffs = {3030146: {"name": "记忆紊流", "desc": "伤害提高", "param_list": [0.3]}}
         targets = {251: {"text": "剩余#1[i]轮以上", "param": 10}}
-        # 波次：stage1 两波（波 2 含未注册怪 → 跳过）；stage2 单波
         stages = {30123011: {"level": 80, "waves": [[1003010, 9999999], [1003010]]},
                   30123012: {"level": 80, "waves": [[2002010]]}}
         out = eg._season_floors(recs, monsters, buffs, targets, stages)
@@ -355,16 +317,16 @@ class TestSeasonFloors:
         f1, f2 = out
         assert f1 == {"floor": 1, "name": "名2", "countdown": 0,
                       "stage1": {"damage": [], "monsters": []},
-                      "stage2": {"damage": [], "monsters": []}}  # 未注册 buff → 无 buff 键
+                      "stage2": {"damage": [], "monsters": []}}
         assert f2["floor"] == 2
         assert f2["name"] == "名1"
         assert f2["countdown"] == 40
-        assert f2["level"] == 80  # 关卡等级（StageConfig.Level）
+        assert f2["level"] == 80
         assert f2["stage1"] == {"damage": ["Fire"], "monsters": [
             {"id": "1003010", "name": "怪A", "icon": "Monster_A",
              "weak": ["Physical"], "resist": {}, "rank": "Elite", "wave": 1},
             {"id": "1003010", "name": "怪A", "icon": "Monster_A",
-             "weak": ["Physical"], "resist": {}, "rank": "Elite", "wave": 2}]}  # 波 1 未注册怪跳过；波 2 同怪保留
+             "weak": ["Physical"], "resist": {}, "rank": "Elite", "wave": 2}]}
         assert f2["stage2"] == {"damage": ["Ice"], "monsters": [
             {"id": "2002010", "name": "怪B", "icon": "Monster_B",
              "weak": [], "resist": {}, "rank": "", "wave": 1}]}
@@ -372,21 +334,13 @@ class TestSeasonFloors:
                                "desc": "伤害提高", "param_list": [0.3]}
         assert f2["targets"] == [{"text": "剩余#1[i]轮以上", "param": 10}]
 
-    # 不在此重复测 _stage_waves_monsters 的「未注册怪跳过 + 跨波同怪保留 wave 递增」：
-    # 上面 test_full_structure_with_floor_and_buff 的 stage1 断言覆盖同一 helper、同一输入
-    # （waves=[[1003010, 9999999], [1003010]]）与同一结果；实测突变（删 endgame.py 的未注册怪
-    # 跳过分支）两者同时变红，故单独一条零增益。
-
-
-# ─── 赛季敌方 / 目标 ─────────────────────────────────────────────
-
 class TestSeasonExtras:
     def test_monsters_ordered_dedup(self):
         """赛季敌方：各层 StageConfig 波次按层序收集去重（跨波同怪合并）。"""
         recs = [
             {"ID": 1, "EventIDList1": [30123011], "EventIDList2": [30123012]},
-            {"ID": 2, "EventIDList1": [30123011]},  # 重复 → 跳过
-            {"ID": 3, "EventIDList1": [99999999]},  # 未收录 stage → 空
+            {"ID": 2, "EventIDList1": [30123011]},
+            {"ID": 3, "EventIDList1": [99999999]},
         ]
         stages = {30123011: {"level": 80, "waves": [[1003010], [1003010]]},
                   30123012: {"level": 80, "waves": [[2002010]]}}
@@ -401,9 +355,6 @@ class TestSeasonExtras:
             {"id": "2002010", "name": "怪B", "icon": "Monster_B",
              "weak": [], "resist": {}, "rank": ""},
         ]
-
-
-# ─── _group_seasons ─────────────────────────────────────────────
 
 class TestGroupSeasons:
     def test_merges_schedule_stats_and_extras(self, monkeypatch):
@@ -435,7 +386,7 @@ class TestGroupSeasons:
             sub_buffs={1001: [3030147]},
         )
         entry = out["1001"]
-        assert entry["zh"] == "名2"  # 代表记录 = 最小 ID（2001 有 Name {Hash:2}）
+        assert entry["zh"] == "名2"
         assert entry["live_begin"] == "2023-09-04 04:00:00"
         assert entry["live_end"] == "2023-09-18 04:00:00"
         assert entry["floors"] == 2
@@ -443,17 +394,14 @@ class TestGroupSeasons:
         assert entry["damage_types"] == ["Fire"]
         assert entry["floor_damage"] == [{"floor": 2, "stage1": ["Fire"], "stage2": []}]
         assert entry["buffs"] == [{"id": 3030146, "name": "记忆紊流", "desc": "伤害提高 #1[i]%", "param_list": [0.3]}]
-        # 战意赛季主题机制（SubMazeBuffList）独立输出
         assert entry["sub_buffs"] == [{"id": 3030147, "name": "追加攻击", "desc": "积累 #1[i] 点战意值", "param_list": [8]}]
         assert entry["monsters"] == [{"id": "1003010", "name": "虚卒", "icon": "Monster_1003010",
                                        "weak": ["Physical"], "resist": {}, "rank": "Elite"}]
-        # 卡片代表阵容：最终层（最高层）敌方按 rank 去重取前 4（去 wave，与 monsters 同构）
         assert entry["final_monsters"] == [{"id": "1003010", "name": "虚卒",
                                              "icon": "Monster_1003010",
                                              "weak": ["Physical"], "resist": {},
                                              "rank": "Elite"}]
         assert entry["targets"] == [{"text": "剩余#1[i]轮以上", "param": 10, "type": "ROUNDS_LEFT"}]
-        # 逐层详情：按 ID 升序，层级增益/目标/波次敌方随层输出
         assert entry["floor_details"] == [
             {"floor": 1, "name": "名2", "countdown": 40,
              "stage1": {"damage": [], "monsters": []},
@@ -494,7 +442,7 @@ class TestGroupSeasons:
 
     def test_group_name_priority(self, monkeypatch):
         """赛季名取分组名（GroupName）而非首层关卡名（Name 带期数后缀）。"""
-        recs = [{"GroupID": 3020, "ID": 30201, "Name": {"Hash": 1}}]  # 首层名"名1"
+        recs = [{"GroupID": 3020, "ID": 30201, "Name": {"Hash": 1}}]
         monkeypatch.setattr(eg, "load_json", lambda _p: recs)
         out = eg._group_seasons(
             "ChallengeBossMazeConfig.json", "Name", {},
@@ -537,9 +485,6 @@ class TestGroupSeasons:
         assert out["101"].get("test") is True
         assert "test" not in out["110"]
 
-
-# ─── 异相仲裁 peak ────────────────────────────────────────────
-
 class TestPeakSeasons:
     def test_battle_targets_filtered(self, monkeypatch):
         """BattleTargetConfig：仅 Type=ChallengeTarget 采集，缺名跳过。"""
@@ -547,8 +492,8 @@ class TestPeakSeasons:
             {"ID": 3000, "Type": "ChallengeTarget", "TargetName": {"Hash": 1},
              "TargetParam": 4},
             {"ID": 3001, "Type": "Other", "TargetName": {"Hash": 2},
-             "TargetParam": 9},  # 非挑战目标 → 跳过
-            {"ID": 3002, "Type": "ChallengeTarget", "TargetName": {}},  # 缺名 → 跳过
+             "TargetParam": 9},
+            {"ID": 3002, "Type": "ChallengeTarget", "TargetName": {}},
         ])
         monkeypatch.setattr(eg, "clean_text", lambda s: f"c:{s}" if s else "")
         out = eg._load_battle_targets()
@@ -666,7 +611,6 @@ class TestPeakSeasons:
         assert entry["damage_types"] == ["Fire", "Ice", "Quantum"]
         assert len(entry["levels"]) == 4
         k1, k2, k3, king = entry["levels"]
-        # 骑士（一）：事件 → Stage → 敌人；目标 3001/3000；标签解析为 MazeBuff 名
         assert k1["kind"] == "knight" and k1["name"] == "名10"
         assert k1["damage"] == ["Fire"]
         assert k1["level"] == 95
@@ -677,10 +621,8 @@ class TestPeakSeasons:
         assert k1["targets"] == [{"text": "名4", "param": 4},
                                   {"text": "名3", "param": None}]
         assert k1["tags"] == ["名20"]
-        # 骑士（二）：Stage 未收录 → 无等级/敌人；骑士（三）：无事件
         assert "level" not in k2 and k2["monsters"] == []
         assert k3["damage"] == [] and k3["targets"] == [] and k3["tags"] == []
-        # 王棋：增益 BuffList + 绝境变体（HardTitle/敌人/目标/标签）
         assert king["kind"] == "king" and king["name"] == "名13"
         assert king["level"] == 100
         assert king["buffs"] == [{"id": 3033006, "name": "名22",
@@ -693,7 +635,6 @@ class TestPeakSeasons:
                                       "stance": 720, "wave": 1}]
         assert hard["targets"] == [{"text": "名6", "param": 2}]
         assert hard["tags"] == ["名23"]
-        # 全关卡合并：敌方去重保序 / 增益仅王棋
         assert entry["monsters"] == [
             {"id": "1003010", "name": "名30", "icon": "Monster_1003010",
              "weak": ["Physical"], "resist": {"Fire": 0.2}, "rank": "Elite",
@@ -702,7 +643,6 @@ class TestPeakSeasons:
              "weak": [], "resist": {}, "rank": "MinionLv2",
              "camp": "", "stance": 0},
         ]
-        # 卡片代表阵容：王棋最终关敌方（2002010 MinionLv2）按 rank 取前 4
         assert entry["final_monsters"] == [
             {"id": "2002010", "name": "名31", "icon": "",
              "weak": [], "resist": {}, "rank": "MinionLv2",
@@ -710,12 +650,8 @@ class TestPeakSeasons:
         ]
         assert entry["buffs"] == [{"id": 3033006, "name": "名22",
                                     "desc": "", "param_list": [], "icon": ""}]
-        # 赛季主题图标：ChallengePeakGroupConfig.ThemeIconPicPath → arts.tab
         assert entry["arts"] == {
             "tab": "SpriteOutput/ChallengePeak/ChallengePeakIcon_4001.png"}
-
-
-# ─── 玩法级默认图标 ────────────────────────────────────────────
 
 class TestGroupArts:
     def test_load_group_arts_maps_all_fields(self, monkeypatch):
@@ -743,7 +679,6 @@ class TestGroupArts:
             "poster_tab": "SpriteOutput/Quest/TabIcon/BtnChallengeStoryAlternation_2001.png",
             "handbook_banner": "SpriteOutput/DailyMission/Banner/ChallengePeakPanelBanner_4002.png",
         }
-        # 缺失字段不输出
         assert out[2002] == {
             "tab": "SpriteOutput/TabIcon/Abyss/ChallengeThemeTabIcon_2002.png"}
 
@@ -775,7 +710,6 @@ class TestGroupArts:
             "theme_bg": "SpriteOutput/Abyss/2D_SceneBg/AbyssSenceBg_01.png",
         }
 
-
 class TestModeDefaultIcons:
     def test_load_mode_default_icons_maps_three_modes(self, monkeypatch):
         """ChallengeGeneralConfig：Memory/Story/Boss → maze/story/boss；Peak 无记录。"""
@@ -786,8 +720,8 @@ class TestModeDefaultIcons:
              "TabImgPath": "SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png"},
             {"ChallengeGroupType": "Boss",
              "TabImgPath": "SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg3.png"},
-            {"ChallengeGroupType": "Peak", "TabImgPath": ""},  # 无记录或缺路径 → 跳过
-            {"ChallengeGroupType": "Unknown"},                # 未知玩法 → 跳过
+            {"ChallengeGroupType": "Peak", "TabImgPath": ""},
+            {"ChallengeGroupType": "Unknown"},
         ])
         out = eg._load_mode_default_icons()
         assert out == {
@@ -800,16 +734,13 @@ class TestModeDefaultIcons:
         """_attach_default_icon：无默认路径跳过；有则并入各条 arts.default（缺失 arts 时新建）。"""
         entries = {
             "1": {"zh": "A", "arts": {"tab": "x"}},
-            "2": {"zh": "B"},  # 无 arts → setdefault 新建
+            "2": {"zh": "B"},
         }
         eg._attach_default_icon(entries, None)
         assert "default" not in entries["1"]["arts"]
         eg._attach_default_icon(entries, "SpriteOutput/UI/ChallengeBoss/Img1.png")
         assert entries["1"]["arts"]["default"] == "SpriteOutput/UI/ChallengeBoss/Img1.png"
         assert entries["2"]["arts"] == {"default": "SpriteOutput/UI/ChallengeBoss/Img1.png"}
-
-
-# ─── 目录卡轻量输出（endgame_catalog）────────────────────────────
 
 class TestCatalogLight:
     """endgame_catalog：目录卡轻量条目派生（剥离重型字段）。"""
@@ -820,7 +751,6 @@ class TestCatalogLight:
             "id": "2001", "zh": "游辞漫说",
             "live_begin": "2023-11-20 04:00:00", "live_end": "2023-12-11 04:00:00",
             "permanent": True, "test": True,
-            # 顶层 damage_types 为全层并集字段，目录卡不需要（前端已无推荐属性筛选）
             "damage_types": ["Fire", "Ice", "Thunder", "Wind", "Quantum", "Physical", "Imaginary"],
             "floor_details": [{"floor": 1, "stage1": {"damage": ["Fire", "Fire"]},
                                "stage2": {"damage": ["Ice"]}}],
@@ -837,16 +767,12 @@ class TestCatalogLight:
         out = egc._season_catalog(entry)
         assert out["id"] == "2001" and out["zh"] == "游辞漫说"
         assert out["permanent"] is True and out["test"] is True
-        # 顶层 damage_types（全层并集）不进目录卡
         assert "damage_types" not in out
         assert "floor_details" not in out
-        # buff 剥离 desc/param_list/icon；敌方剥离 intro/skills
         assert out["buffs"] == [{"id": 1, "name": "增益"}]
         assert out["monsters"][0] == {"id": "1", "name": "怪", "icon": "M", "weak": [],
                                        "resist": {}, "rank": "Elite", "camp": "c"}
         assert "intro" not in out["final_monsters"][0] and "skills" not in out["final_monsters"][0]
-        # 星启仅保留存在性字段（id/damage_types/countdown），剥离 nodes/monsters/targets
         assert out["tierce"] == {"id": 9, "damage_types": ["Wind"], "countdown": 30}
         assert "nodes" not in out["tierce"]
-        # 关卡组成仅 kind
         assert out["levels"] == [{"kind": "knight"}, {"kind": "king"}]

@@ -1,8 +1,4 @@
 <script setup lang="ts">
-/**
- * 配装面板：推荐光锥 / 推荐队伍 / 遗器主副词条 + 套装（描述异步加载）。
- * 套装描述加载 watch baseData（base 数据）而非渲染视图 d —— 加强切换不重复请求。
- */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { loadLocalLightCones, loadLocalRelicSet } from '../../services/api';
 import { avatarRoundIconUrl, fmtDesc, itemName, pathIconUrl } from '../../lib/format';
@@ -21,13 +17,10 @@ const props = withDefaults(
     charId: string;
     nameCache: NameCache;
     itemDb: ItemDb;
-    /** 渲染区块子集（平铺拆分布局用；默认全部） */
     sections?: BuildSection[];
   }>(),
   { sections: () => ['cones', 'teams', 'relics'] },
 );
-
-/* ─── 光锥 / 队伍 ─── */
 
 /** 光锥元数据（id → rarity/path，来自共享单例 light_cones.json；推荐卡片星级/命途徽章用） */
 const lcMeta = ref<Record<string, { rarity: number; path: string }>>({});
@@ -90,8 +83,6 @@ const teams = computed<{ teamId: number; members: TeamSlot[] }[]>(() => {
   });
 });
 
-/* ─── 遗器 ─── */
-
 const relic = computed(() => props.d.relics || null);
 const relicMainStats = computed(() => (relic.value && relic.value.property_list) || []);
 const relicSubs = computed(() =>
@@ -136,7 +127,7 @@ watch(
         }
       }),
     ).then((entries) => {
-      if (gen !== relicGen) return; // 已被更新的加载取代
+      if (gen !== relicGen) return;
       relicSets.value = Object.fromEntries(entries);
     });
   },
@@ -166,7 +157,6 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
 <template>
   <template v-if="props.sections.includes('cones') && cones.length">
     <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.cones }}</span>LIGHT CONES</h2>
-    <!-- 推荐光锥卡片：复用图鉴 nk-lc-card 视觉（3:4 相框立绘 + 星级光晕 + 命途徽章 + 扫光），另加 REC. 序号徽章 -->
     <div class="nk-build__cones">
       <a
         v-for="c in cones"
@@ -226,19 +216,17 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
   <template v-if="props.sections.includes('relics') && hasRelics(props.d)">
     <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.relics }}</span>RELICS</h2>
     <div class="nk-build__relics">
-      <!-- 主词条槽位卡片 -->
       <div v-if="relicMainStats.length" class="nk-relic-slots">
         <div
           v-for="p in relicMainStats"
           :key="p.relic_type + p.property_type"
           class="nk-relic-slot"
         >
-          <img class="nk-relic-slot__icon" :src="cdnUri('relicfigures', `${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`)">
+          <img class="nk-relic-slot__icon" alt="" :src="cdnUri('relicfigures', `${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`)">
           <span class="nk-relic-slot__stat">{{ PROP_NAMES[p.property_type] || p.property_type }}</span>
           <span class="nk-relic-slot__slot">{{ SLOT_NAMES[p.relic_type] || p.relic_type }}</span>
         </div>
       </div>
-      <!-- 推荐副词条卡片 -->
       <div v-if="relicSubs.length" class="nk-relic-sub">
         <span class="nk-relic-sub__label">推荐副词条</span>
         <div class="nk-relic-sub__list">
@@ -248,7 +236,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
       <div v-if="setIdList.length" class="nk-build__sets">
         <div v-for="s in setIdList" :key="`${s.id}-${s.pc}`" class="nk-build__set">
           <div class="nk-build__set-head">
-            <img :src="setIcon(relicSets[s.id]) || undefined">
+            <img alt="" :src="setIcon(relicSets[s.id]) || undefined">
             <div>
               <div class="nk-build__set-badge">{{ s.pc }}PC</div>
               <div class="nk-build__set-name">{{ setName(s.id, relicSets[s.id]) }}</div>

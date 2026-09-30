@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 /**
- * 构建守卫统一入口（build 前置，CI 挂接）：
- *   node tools/check-guards.mjs
+ * 构建守卫统一入口（build 前置，CI 挂接）：node tools/check-guards.mjs
  *
  * 依次运行三个独立守卫（各脚本保持可单独运行）：
- *   1. check-colors.mjs --strict        色彩令牌收口（ADR 0012）
+ *   1. check-colors.mjs --strict        色彩令牌收口
  *   2. check-spine-manifest.mjs         双清单结构校验
  *   3. check-contrast.mjs --strict      令牌 WCAG 对比度
  *

@@ -1,11 +1,6 @@
-/**
- * use-kv-acceptance 验收编排单测：
- * 经 AcceptBridge 注入假场景控制器，覆盖结算/中止/超时/快速失败四条轮询路径与场景恢复语义。
- */
 import { describe, expect, it, vi } from 'vitest';
 import { useKvAcceptance, type AcceptBridge } from '../use-kv-acceptance';
 
-/** 快速 timing：真实定时器下缩短轮询/结算/超时等待 */
 const FAST = { pollMs: 5, settleDelayMs: 1, sceneTimeoutMs: 80 };
 
 interface FakeState {
@@ -51,7 +46,6 @@ describe('useKvAcceptance', () => {
     expect(accept.report.value).toHaveLength(2);
     expect(accept.report.value.map((r) => r.verdict)).toEqual(['PASS', 'PASS']);
     expect(accept.report.value.map((r) => r.key)).toEqual(['scene-a', 'scene-b']);
-    // 验收结束后恢复验收前的场景
     expect(bridge.getKey()).toBe('home-bg');
   });
 
@@ -76,7 +70,6 @@ describe('useKvAcceptance', () => {
   });
 
   it('超时：始终未结算 → FAIL（合并渲染超时）', async () => {
-    // bridge 状态自洽：合并管线始终未就绪（快照 mergedReady=false），轮询等到超时后交判定
     const bridge = makeBridge({
       settled: () => false,
       loadKeys: async () => ['scene-a'],

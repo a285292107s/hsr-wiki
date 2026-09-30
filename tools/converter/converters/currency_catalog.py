@@ -21,14 +21,11 @@ logger = logging.getLogger("converter.currency_catalog")
 
 OUT_SUBDIR = "currency"
 
-
 def _load_excel(name: str) -> list[dict]:
     return load_json(EXCEL_DIR / name)
 
-
 def _build_index(data: list[dict], key: str = "ID") -> dict[Any, dict]:
     return {item[key]: item for item in data}
-
 
 def _unwrap(v: Any, default: Any = None) -> Any:
     if v is None:
@@ -36,7 +33,6 @@ def _unwrap(v: Any, default: Any = None) -> Any:
     if isinstance(v, dict) and "Value" in v:
         return v["Value"]
     return v
-
 
 def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None = None) -> list[dict]:
     """将 [{PropertyType: ..., Value: {Value: ...}}, ...] → 标准化列表。
@@ -57,11 +53,6 @@ def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None =
             node["prop_name"] = prop_names[typ]
         out.append(node)
     return out
-
-
-# ─────────────────────────────────────────────
-# 装备图鉴
-# ─────────────────────────────────────────────
 
 def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) -> int:
     items_raw = _load_excel("GridFightItems.json")
@@ -85,8 +76,6 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) 
     for item in items_raw:
         iid = item["ID"]
         name = resolve_text(item.get("ItemName", {}))
-        # 名称解析失败（TextMap 无该 hash）→ 空壳卡：name/desc/category 全空、图标沿用旧 id。
-        # ADR 0020 决策 9：整条过滤，禁止输出无名占位条目。
         if not name:
             skipped_unnamed.append(iid)
             continue
@@ -119,8 +108,6 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) 
         recommend = recommend_index.get(iid)
         recommend_roles = recommend.get("RecommendRoleIDList", []) if recommend else []
 
-        # 功能道具描述：优先 ConsumableDesc（拆装扳手等），
-        # 回退 ForgeDesc（武装箱/聘用书/邀请函等 99990-99999）
         consumable = consumable_index.get(iid)
         forge = forge_index.get(iid)
         if consumable:
@@ -148,16 +135,10 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) 
     if skipped_unnamed:
         logger.warning("  装备图鉴：过滤名称解析失败条目 %s（共 %d 条）", skipped_unnamed, len(skipped_unnamed))
 
-    # 按分类 → 优先级排序
     out.sort(key=lambda x: (x["category"], -x["priority"], x["id"]))
 
     save_json({"items": out}, out_dir / "equipment.json")
     return len(out)
-
-
-# ─────────────────────────────────────────────
-# 投资环境（Portal Buff）
-# ─────────────────────────────────────────────
 
 def _convert_portals(out_dir: Path) -> int:
     raw = _load_excel("GridFightPortalBuff.json")
@@ -185,14 +166,7 @@ def _convert_portals(out_dir: Path) -> int:
     save_json({"portals": out}, out_dir / "portals.json")
     return len(out)
 
-
-# ─────────────────────────────────────────────
-# 投资策略（Augment）
-# ─────────────────────────────────────────────
-
-# <gridfightinfo type=item|role id=N> 标签正则
 _GRIDFIGHTINFO_RE = re.compile(r"<gridfightinfo\s+type=(\w+)\s+id=(\d+)\s*/?>")
-
 
 def _build_name_indexes() -> tuple[dict[int, str], dict[int, str]]:
     """构建物品名称索引和角色名称索引，用于解析 <gridfightinfo> 标签。
@@ -200,7 +174,6 @@ def _build_name_indexes() -> tuple[dict[int, str], dict[int, str]]:
     Returns:
         (item_names, role_names): ID → 名称 映射
     """
-    # 物品名称：GridFightItems.json
     items_raw = _load_excel("GridFightItems.json")
     item_names: dict[int, str] = {}
     for item in items_raw:
@@ -209,7 +182,6 @@ def _build_name_indexes() -> tuple[dict[int, str], dict[int, str]]:
         if name:
             item_names[iid] = name
 
-    # 角色名称：GridFightRoleBasicInfo.json → AvatarID → AvatarConfig(+LD).json
     role_raw = _load_excel("GridFightRoleBasicInfo.json")
     avatar_raw = _load_excel("AvatarConfig.json")
     ld_path = EXCEL_DIR / "AvatarConfigLD.json"
@@ -233,7 +205,6 @@ def _build_name_indexes() -> tuple[dict[int, str], dict[int, str]]:
 
     return item_names, role_names
 
-
 def _resolve_gridfightinfo(
     text: str,
     item_names: dict[int, str],
@@ -249,7 +220,6 @@ def _resolve_gridfightinfo(
         return ""
     return _GRIDFIGHTINFO_RE.sub(_repl, text)
 
-
 def _convert_augments(out_dir: Path) -> int:
     raw = _load_excel("GridFightAugment.json")
     item_names, role_names = _build_name_indexes()
@@ -258,7 +228,6 @@ def _convert_augments(out_dir: Path) -> int:
     for entry in raw:
         aid = entry["ID"]
         name = resolve_text(entry.get("HexName", {}))
-        # 先解析 gridfightinfo 标签为实际名称，再清洗其余标签
         raw_desc = resolve_text(entry.get("HexDesc", {}), clean=False)
         raw_desc = _resolve_gridfightinfo(raw_desc, item_names, role_names)
         desc = clean_text(raw_desc)
@@ -286,22 +255,15 @@ def _convert_augments(out_dir: Path) -> int:
     save_json({"augments": out}, out_dir / "augments.json")
     return len(out)
 
-
-# ─────────────────────────────────────────────
-# 羁绊图鉴（Trait）
-# ─────────────────────────────────────────────
-
 def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> int:
     raw = _load_excel("GridFightTraitBasicInfo.json")
     layer_raw = _load_excel("GridFightTraitLayer.json")
     mazebuff_raw = _load_excel("GridFightTraitMazebuff.json")
     remark_raw = _load_excel("GridFightTraitRemark.json")
-    # 赛季代际差集基线（ADR 0020 决策 2/4）：GridFightTraitLayerOld 的 ExistSeason 最大代 = 上一代
     trait_old_path = EXCEL_DIR / "GridFightTraitLayerOld.json"
     trait_old = _load_excel("GridFightTraitLayerOld.json") if trait_old_path.exists() else []
     mazebuff_index = _build_index(mazebuff_raw)
 
-    # 构建层级索引
     layer_by_trait: dict[int, list[dict]] = {}
     for entry in layer_raw:
         tid = entry.get("TraitID")
@@ -311,7 +273,6 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
         params = [_unwrap(p, 0) for p in (entry.get("PropertyParamList") or [])]
         member_props = _flatten_property_mods(entry.get("TraitMemberPropertyList"), prop_names)
         all_props = _flatten_property_mods(entry.get("AllMemberPropertyList"), prop_names)
-        # Mazebuff 补充描述（含攻击段数等战斗机制细节）
         buff_desc = ""
         buff_params: list = []
         mb_id = entry.get("MazebuffID")
@@ -319,12 +280,10 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
         if mb:
             mb_desc = resolve_text(mb.get("BuffDesc") or mb.get("BuffSimpleDesc", {}))
             mb_params = [_unwrap(p, 0) for p in (mb.get("ParamList") or [])]
-            # 回退：直接字段全空时，用 Mazebuff 作为主描述
             if not desc and not member_props and not all_props:
                 desc = mb_desc
                 params = mb_params
             elif mb_desc and mb_desc != desc:
-                # 补充：已有属性描述时，Mazebuff 描述作为额外机制说明
                 buff_desc = mb_desc
                 buff_params = mb_params
         node = {
@@ -342,7 +301,6 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
     for tid in layer_by_trait:
         layer_by_trait[tid].sort(key=lambda x: x["layer"])
 
-    # 构建备注索引（GridFightTraitRemark → TraitID → 备注列表）
     remark_by_trait: dict[int, list[dict]] = {}
     for entry in remark_raw:
         tid = entry.get("ID")
@@ -358,7 +316,6 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
             "text_order": entry.get("TextOrder", 0),
         }
         remark_by_trait.setdefault(tid, []).append(node)
-    # 按 TextOrder 排序
     for tid in remark_by_trait:
         remark_by_trait[tid].sort(key=lambda x: x.get("text_order", 0))
 
@@ -375,7 +332,6 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
         season_id = entry.get("SeasonID", 0)
         sort_priority = entry.get("TraitSortPriority", 0)
 
-        # 分类：1000系阵营 / 2000系战斗 / 3000系特殊
         if 1000 <= tid < 2000:
             cat = "faction"
         elif 2000 <= tid < 3000:
@@ -399,7 +355,6 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
             "remarks": remark_by_trait.get(tid, []),
         })
 
-    # 赛季新增标记：当前代羁绊名册（本表全体）− 上一代名册（GridFightTraitLayerOld 最大代）
     n_season_new = apply_season_new(
         out,
         mark_season_new([e["id"] for e in out], trait_old, id_key="TraitID",
@@ -412,17 +367,11 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
     save_json({"traits": out}, out_dir / "traits.json")
     return len(out)
 
-
-# ─────────────────────────────────────────────
-# 主入口
-# ─────────────────────────────────────────────
-
 def convert() -> None:
     logger.info("--- 货币战争图鉴数据 (currency_catalog) ---")
     out_dir = OUTPUT_DIR / OUT_SUBDIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 官方属性名索引（TextMap，GridFightRolePropertyConfig.PropertyName）
     prop_names = _build_prop_names(_load_excel("GridFightRolePropertyConfig.json"))
 
     n_equip = _convert_equipment(out_dir, prop_names)
@@ -438,7 +387,6 @@ def convert() -> None:
     logger.info("  羁绊图鉴: %d 条", n_trait)
 
     logger.info("货币战争图鉴数据完成")
-
 
 if __name__ == "__main__":
     from textmap import load_textmap

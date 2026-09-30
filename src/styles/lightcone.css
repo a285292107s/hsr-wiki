@@ -1,25 +1,14 @@
-/* ═══════════════════════════════════════════
-   光锥详情页样式 · 典藏画廊（Curator Detail）
-   复用角色页骨架（nk-hero / nk-skill / nk-title），
-   反霓虹语言：画架式 Hero（稀有度色相微染 + 发丝线框）+ 阶段卡片网格，
-   无扫描光、无辉光投影；数值一律 mono（--font-hud）。
-═══════════════════════════════════════════ */
 
-/* ─── 稀有度色相：单一来源（--lc-r），Hero 画架与阶段卡共享 ═══ */
 .nk-hero__visual[data-rarity='3'], .nk-lc-phase[data-rarity='3'] { --lc-r: var(--rarity-3); }
 .nk-hero__visual[data-rarity='4'], .nk-lc-phase[data-rarity='4'] { --lc-r: var(--rarity-4); }
 .nk-hero__visual[data-rarity='5'], .nk-lc-phase[data-rarity='5'] { --lc-r: var(--rarity-5); }
 
-/* ─── Hero 画架 ───
-   画架 = 稀有度色相 radial 底染 + 发丝线外框 + 低透明度暗角（非霓虹）。
-   对齐遗器页头图尺度：视觉区 2:1 扁比，最小高度 240px */
 .nk-hero--lc .nk-hero__visual { min-height: 240px; aspect-ratio: 2 / 1; }
 .nk-hero--lc .nk-hero__visual::after {
   content: '';
   position: absolute; inset: 0; z-index: 3; pointer-events: none;
   border: 1px solid var(--line-1);
 }
-/* 暗角降级：覆盖 tokens.css 全局 120px 强暗角，仅留轻量渐隐保持立绘融底 */
 .nk-hero--lc .nk-hero__visual {
   box-shadow:
     inset 0 0 60px 18px color-mix(in srgb, var(--blk-900) 55%, transparent),
@@ -30,7 +19,6 @@
   background-position: center 20%;
   background-repeat: no-repeat;
 }
-/* 稀有度色相底染：立绘透明 PNG 与黑底之间垫一层色相氛围，构成画架承载感 */
 .nk-hero--lc .nk-hero__visual::before {
   content: '';
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
@@ -45,7 +33,6 @@
   color: var(--text3); letter-spacing: 0.06em;
 }
 
-/* ─── 叠影等级滑条 ─── */
 .nk-lc-rank-slider { gap: 12px; }
 .nk-lc-rank-label {
   font-size: 0.6875rem; font-weight: 700; color: var(--metric-val);
@@ -53,8 +40,6 @@
   font-family: var(--font-hud);
 }
 
-/* ─── 叠影数值对比表 ───
-   减噪：无逐行发丝线（仅 thead 下一次分隔线），active 列高亮保留 */
 .nk-lc-rank-table-wrap {
   margin-top: 16px; overflow-x: auto;
   border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent); border-radius: 8px;
@@ -88,9 +73,6 @@
 }
 thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 
-/* ─── 晋阶属性 · 阶段卡片网格 ───
-   每突破阶段一张典藏卡：突破号 + 等级上限大字 + 三属性 + 突破材料。
-   发丝线边框 + 透明底，hover 微亮；末卡（满级）加稀有度色相微染 */
 .nk-lc-asc-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -108,7 +90,6 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   transition: border-color 0.28s var(--ease), transform 0.28s var(--ease);
 }
 .nk-lc-phase:hover { border-color: var(--line-2); transform: translateY(-2px); }
-/* 满级卡：稀有度色相微染（唯一层级强调，语义 = 到达终点的阶段） */
 .nk-lc-phase--max {
   border-color: color-mix(in srgb, var(--lc-r, var(--rarity-5)) 34%, transparent);
   background: linear-gradient(160deg,
@@ -174,7 +155,6 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   color: var(--text2);
 }
 
-/* ─── 卡面描述（STORY） ─── */
 .nk-lc-story {
   max-width: 65ch;
   font-size: 0.8125rem; line-height: 2; color: var(--text2);
@@ -190,21 +170,17 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   font-size: 0.75rem; line-height: 1.6; color: var(--text3);
 }
 
-/* ─── 骨架屏变体 ─── */
 .nk-skeleton--lc .nk-skeleton__stat-grid { grid-template-columns: repeat(3, 1fr); }
 
-/* ─── 响应式 ─── */
 @media (max-width: 640px) {
   .nk-hero--lc .nk-hero__visual { min-height: 180px; aspect-ratio: 5 / 2; }
   .nk-lc-asc-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
 
-/* 平板：光锥立绘为竖版，维持 21:9 扁比，仅收紧最小高度 */
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-hero--lc .nk-hero__visual { aspect-ratio: 21 / 9; }
 }
 
-/* 桌面：对齐遗器页，视觉区收窄至 34% 且高度降至 320px */
 @media (min-width: 1024px) {
   .nk-hero--lc { min-height: auto; }
   .nk-hero--lc .nk-hero__visual { min-height: 320px; flex: 0 0 34%; }

@@ -10,11 +10,8 @@ from utils import load_json, save_json, map_icon_path, unwrap_value, sort_by_id
 
 logger = logging.getLogger("converter")
 
-
 def convert() -> None:
     """转换 AvatarConfig.json + AvatarConfigLD.json → characters.json。"""
-    # 版本上新打标（ADR 0019 决策 4/5）：基线 = 覆盖输出前读到的上一版已提交 JSON。
-    # 基线已有 id 沿用其 release_version，本版新增 id 才写当前版本号，无基线全部留空。
     baseline = load_baseline_versions(OUTPUT_DIR / "characters.json")
 
     data = load_json(EXCEL_DIR / "AvatarConfig.json")
@@ -27,12 +24,10 @@ def convert() -> None:
     result = []
 
     for item in data:
-        # 过滤未发布角色
         if not item.get("Release", False):
             continue
 
         avatar_id = item.get("AvatarID", 0)
-        # 跳过非标准角色 ID（NPC 等，标准角色 ID 为 1xxx）
         if not (1000 <= avatar_id <= 9999):
             continue
 
@@ -46,7 +41,6 @@ def convert() -> None:
                 full_name = name
         rarity_key = item.get("Rarity", "")
         rarity = RARITY_MAP.get(rarity_key, 0)
-        # SPNeed 缺失时输出 null（如遐蝶 1407 无该字段），前端以 ?? 0 兑底
         sp_need = unwrap_value(item.get("SPNeed"))
 
         result.append({

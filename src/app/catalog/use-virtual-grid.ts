@@ -1,21 +1,9 @@
-/**
- * 虚拟网格（>400 条目，如物品页）
- *
- * 迁移自 catalog.js 的 initVirtualGrid / renderVirtualRows，适配点：
- * - 原实现增量 DOM 补丁（insertAdjacentHTML / remove）；此处重建 cells 数组，
- *   由 Vue 按 key（条目索引）diff——滚动时保留的单元格 DOM 复用，新增的挂载即观察。
- * - 滚动容器是 #nk-catalog-app（自滚动容器）。
- * - 动态 buffer（滚动速度越快缓冲行越多）与 reveal 延迟策略原样保留。
- */
 import { nextTick, ref, type Directive, type Ref } from 'vue';
 import type { CatalogItem, CatalogPageConfig } from './types';
 
 export interface VirtualCell {
-  /** 条目在 filtered 中的索引（稳定 key） */
   key: number;
-  /** renderCard 输出（v-html） */
   html: string;
-  /** 定位样式串：top / left / width / padding / --reveal-delay */
   style: string;
 }
 
@@ -26,8 +14,6 @@ const REVEAL_ROW_DELAY = 80;
 const REVEAL_LARGE_JUMP_MAX = 480;
 const REVEAL_LARGE_JUMP_MIN_ROW = 15;
 const GAP = 10;
-
-/* ─── Reveal 观察器（模块级单例 + 指令） ─── */
 
 let revealObserver: IntersectionObserver | null = null;
 
@@ -48,7 +34,6 @@ function getRevealObserver(): IntersectionObserver {
   return revealObserver;
 }
 
-/** 虚拟单元格入场观察：进入视口后添加 .nk-revealed 触发动画 */
 export const vReveal: Directive<HTMLElement> = {
   mounted(el) {
     getRevealObserver().observe(el);
@@ -58,15 +43,10 @@ export const vReveal: Directive<HTMLElement> = {
   },
 };
 
-/* ─── composable ─── */
-
 export interface VirtualGridOptions {
   filtered: Ref<CatalogItem[]>;
-  /** 页面配置（支持 getter，保证组件复用时始终读取最新 config） */
   config: CatalogPageConfig | (() => CatalogPageConfig);
-  /** 滚动容器（#nk-catalog-app） */
   scroller: Ref<HTMLElement | null>;
-  /** 网格元素（.nk-virtual-grid） */
   grid: Ref<HTMLElement | null>;
 }
 
@@ -92,8 +72,6 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     const g = grid.value;
     const gridWidth = (g && g.clientWidth) || 800;
     const minColW = cfg().virtualMinColW || 150;
-    /* 手机单列行式（config.virtualMobileRowH 配置后启用，断点与 catalog.css max-width:767px 对齐）：
-       列数固定 1，行高由配置直接给定（含 cell 底部 GAP）；未配置时永远走下方多列网格 */
     const mobileRowH = cfg().virtualMobileRowH;
     if (mobileRowH != null && window.innerWidth <= 767) {
       cols = 1;
@@ -102,7 +80,6 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     }
     cols = Math.max(2, Math.floor((gridWidth + GAP) / (minColW + GAP)));
     const colW = (gridWidth - (cols - 1) * GAP) / cols;
-    /* ?? 而非 ||：virtualImgRatio=0 是合法显式值（行高与列宽解耦，成就页用），|| 会误兑底为默认 1 */
     const imgRatio = cfg().virtualImgRatio ?? 1;
     const infoH = cfg().virtualInfoH ?? 36;
     rowH = colW * imgRatio + infoH + 12 + GAP;
@@ -151,8 +128,6 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
         if (idx >= items.length) break;
         const delay = calcRevealDelay(r, c, startRow, endRow, buffer, baseRow, rowDelay, direction);
         const left = c * colW;
-        /* 固定单元格高度 = 行高：卡片 height:100% 等高填充（如成就卡），
-           无 height:100% 的卡片（物品/怪物）保持内容高度、视觉不变 */
         out.push({
           key: idx,
           html: cfg().renderCard(items[idx], idx),
@@ -239,7 +214,6 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     }, 150);
   }
 
-  /** 挂载后调用：计算度量、首屏渲染、绑定监听 */
   function start(): void {
     recalcMetrics();
     lastScrollTop = scroller.value ? scroller.value.scrollTop : 0;
@@ -248,7 +222,6 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     window.addEventListener('resize', onResize);
   }
 
-  /** 卸载时调用：解绑监听与计时器 */
   function stop(): void {
     if (scrollRaf !== null) cancelAnimationFrame(scrollRaf);
     scrollRaf = null;
@@ -258,7 +231,6 @@ export function useVirtualGrid(opts: VirtualGridOptions) {
     window.removeEventListener('resize', onResize);
   }
 
-  /** 筛选变化 / 面板折叠后调用：重置度量缓存并强制重渲染 */
   function refresh(): void {
     gridTop = null;
     lastStart = -1;

@@ -1,4 +1,3 @@
-/** 货币战争 · 角色图鉴目录页配置 */
 import { cdnUri } from '../../../services/cdn';
 import { escHtml, avatarShopIconUrl, gridFightTraitIconById } from '../../../lib/format';
 import { loadLocalCurrencyRoles } from '../../../services/api';
@@ -20,14 +19,10 @@ const TRAIT_CAT_LABEL: Record<TraitCat, string> = {
   faction: '阵营', combat: '流派', special: '特殊',
 };
 
-/* 前后台 SVG 图标（自绘，无网络依赖；nk-cat-select__fb 为筛选菜单选项宽度类，卡片角标不受影响）
-   设计语言：「阵型槽位」——横向胶囊条 = 行位，实心亮色 = 占据，半透明幽灵描边 = 空槽。
-   暖金 = 前台，冷靖蓝 = 后台；三图标共享同一几何，仅填充状态不同。 */
 const FB_SVG_FRONT = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-front);fill-opacity:.15;stroke:var(--cw-fb-front);stroke-opacity:.62" stroke-width="1.5"/></svg>`;
 const FB_SVG_BACK = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-back);fill-opacity:.15;stroke:var(--cw-fb-back);stroke-opacity:.62" stroke-width="1.5"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
 const FB_SVG_BOTH = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
 
-/* 位置筛选选项图标（与卡片角标同源；前/后/前后台三态） */
 const FB_OPTION_SVG: Record<string, string> = {
   Front: FB_SVG_FRONT, Back: FB_SVG_BACK, Both: FB_SVG_BOTH,
 };
@@ -40,22 +35,17 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const fbType = (item.front_back_type as string) ?? 'Both';
   const charge = (item.charge_type || []).map((c) => CHARGE_LABEL[c] ?? c).join(' · ');
   const expert = item.is_expert ? '<span class="nk-crole-card__exp">专家</span>' : '';
-  /* 充能类型：跟随角色名后方（由卡片底部 meta 迁移至此，弱色小字） */
   const chargeEl = charge ? `<span class="nk-crole-card__charge">${escHtml(charge)}</span>` : '';
-  /* 前后台角标（SVG 图标 + 磨砂底座，头像左上角） */
   const fbIcon = fbType === 'Both' ? FB_SVG_BOTH
     : fbType === 'Front' ? FB_SVG_FRONT
     : fbType === 'Back' ? FB_SVG_BACK
     : '';
   const fbBadge = fbIcon ? `<span class="nk-crole-card__fb">${fbIcon}</span>` : '';
-  /* 费用菱形徽章（头像右上角，稀有度配色） */
   const costBadge = rarity >= 1 ? `<span class="nk-crole-card__cost" title="${rarity}费"><b>${rarity}</b></span>` : '';
-  /* 特质标签（数据驱动，由 converter 从 TextMap 解析；带小图标） */
   const traits = (item.traits as Array<{ id: number; name: string; cat: TraitCat }>) || [];
   const traitChips = traits
     .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}"><img class="nk-crole-tcard-trait__icon" src="${cdnUri('gridfight-icon', `${t.id}.webp`)}" alt="" loading="lazy">${escHtml(t.name || `#${t.id}`)}</span>`)
     .join('');
-  /* 卡牌结构：头像出血（叠加 fb 角标 + 费用菱形 + scrim 名称）+ 紧凑 body */
   return `<a class="nk-crole-card" href="${item.href}" data-id="${escHtml(id)}" data-name="${escHtml(item.name)}" data-rarity="${rarity}" style="--i:${index}">
       <div class="nk-crole-card__avatar">
         <img loading="lazy" src="${escHtml(avatar)}" alt="${escHtml(item.name)}">
@@ -75,7 +65,6 @@ export const currencyRolePage: CatalogPageConfig = {
   searchPlaceholder: '搜索角色…',
   gridClass: 'nk-cat-grid nk-crole-grid',
   cardClass: '.nk-crole-card',
-  /* CW 卡片共享样式 + 角色卡片专属（nk-crole-card） */
   styles: [loadCwCatalogCss, () => import('../../../../src/styles/currency-role.css')],
   async fetchData() {
     const { roles } = await loadLocalCurrencyRoles();
@@ -99,7 +88,6 @@ export const currencyRolePage: CatalogPageConfig = {
         trait_combat: traits.filter((t) => t.cat === 'combat').map((t) => t.id),
         trait_special: traits.filter((t) => t.cat === 'special').map((t) => t.id),
         has_equipment: r.equipment_id != null,
-        /* 本赛季新增标记（ADR 0020 决策 4）：枢纽页据此分区过滤；字段缺失一律 false，禁止当作新增 */
         is_season_new: r.is_season_new === true,
       };
     });
@@ -107,7 +95,6 @@ export const currencyRolePage: CatalogPageConfig = {
   buildFilters(items: CatalogItem[]) {
     const filters: CatalogFilter[] = [];
 
-    // 稀有度（降序排列）
     const rarities = [...new Set(items.map((it) => Number(it.rarity)))].filter((v) => v > 0).sort((a, b) => b - a);
     if (rarities.length) {
       filters.push({
@@ -120,7 +107,6 @@ export const currencyRolePage: CatalogPageConfig = {
       });
     }
 
-    // 特质筛选：按分类（阵营 / 流派 / 特殊）从数据动态汇总
     const traitByName = (cat: TraitCat) => {
       const seen = new Map<number, string>();
       items.forEach((it) => {
@@ -140,13 +126,11 @@ export const currencyRolePage: CatalogPageConfig = {
         label: TRAIT_CAT_LABEL[cat],
         options: [
           { val: '', label: '全部' },
-          /* 图标与详情页羁绊图标同源（gridFightTraitIconById），防双事实源漂移 */
           ...entries.map(([id, name]) => ({ val: String(id), label: name, icon: gridFightTraitIconById(id) })),
         ],
       });
     }
 
-    // 位置（含"未定位"选项，null → 'None'）
     const POS_ORDER: Record<string, number> = { Front: 0, Back: 1, Both: 2 };
     const positions = [...new Set(items.map((i) => String(i.front_back_type)).filter(Boolean))];
     if (positions.length) {
@@ -161,7 +145,6 @@ export const currencyRolePage: CatalogPageConfig = {
       });
     }
 
-    // 充能
     const charge = new Set<string>();
     items.forEach((it) => (Array.isArray(it.charge_type) ? it.charge_type : []).forEach((c) => charge.add(c)));
     if (charge.size) {
@@ -175,7 +158,6 @@ export const currencyRolePage: CatalogPageConfig = {
       });
     }
 
-    // 专家
     filters.push({
       key: 'is_expert',
       label: '专家',
@@ -185,7 +167,6 @@ export const currencyRolePage: CatalogPageConfig = {
       ],
     });
 
-    // 专属光锥
     filters.push({
       key: 'has_equipment',
       label: '光锥',

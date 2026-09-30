@@ -1,14 +1,12 @@
-/**
- * Spine 动画清单（双清单：spine-manifest-official.json 官网源优先
- * + spine-manifest-nanoka.json 回退源，随站部署）
- */
+/* Spine 动画清单（双清单：spine-manifest-official.json 官网源优先
+   + spine-manifest-nanoka.json 回退源，随站部署） */
 import { CDN, SPINE_MANIFEST_VERSION } from '../../lib/constants';
 import { cachedFetch } from '../cache';
 import type { SpineOfficialManifest, SpineNanokaManifest, SpineResolved, SpineRuntimeVersion, SpineSource } from '../types';
 import { LOCAL_DATA_BASE } from './base';
 
-/** 缓存键后缀随 manifest.version 联动（v{SPINE_MANIFEST_VERSION}）；
- *  版本号必须与两个清单文件顶层 version 一致（测试强制） */
+/* 缓存键后缀随 manifest.version 联动（v{SPINE_MANIFEST_VERSION}）；
+   版本号必须与两个清单文件顶层 version 一致（测试强制） */
 const SPINE_OFFICIAL_KEY = `spine_manifest_official_v${SPINE_MANIFEST_VERSION}`;
 const SPINE_NANOKA_KEY = `spine_manifest_nanoka_v${SPINE_MANIFEST_VERSION}`;
 
@@ -42,14 +40,11 @@ export async function loadSpineManifests(): Promise<{
   };
 }
 
-/**
- * 解析 spine 资源描述（官方源优先，缺失回退 nanoka 源）：
- * - official 条目展开为完整官网资源 URL（atlas/json/纹理映射）
- * - official-scene 条目展开多层场景 URL（固定视口 + 骨架层列表）
- * - skel 条目返回 nanoka 基地址（多段名跳过 bg）
- * 传 source 强制指定源（渲染层失效回退用：resolveSpine(key, 'nanoka')）。
- * 查无或解析失败返回 null。
- */
+/* 解析 spine 资源描述（官方源优先，缺失回退 nanoka 源）：
+   - official 条目展开为完整官网资源 URL（atlas/json/纹理映射）
+   - official-scene 条目展开多层场景 URL（固定视口 + 骨架层列表）
+   - skel 条目返回 nanoka 基地址（多段名跳过 bg）
+   传 source 强制指定源（渲染层失效回退用：resolveSpine(key, 'nanoka')）。查无或解析失败返回 null。 */
 export async function resolveSpine(spineKey: string, source?: SpineSource): Promise<SpineResolved | null> {
   try {
     if (source !== 'nanoka') {
@@ -137,10 +132,10 @@ export async function loadSpineSceneKeys(): Promise<string[]> {
   }
 }
 
-/** 运行时版本分派（全站唯一实现，渲染层与审核台共用）：
- *  - skel（nanoka 4.1 二进制，位域格式 4.2 不兼容）→ '4.1'
- *  - official 条目按 manifest 的 runtime 标记（4.0 格式导出标 '4.1'，缺省 '4.2'）
- *  - official-scene（官网场景，均为 4.2 格式导出）→ '4.2' */
+/* 运行时版本分派（全站唯一实现，渲染层与审核台共用）：
+    - skel（nanoka 4.1 二进制，位域格式 4.2 不兼容）→ '4.1'
+    - official 条目按 manifest 的 runtime 标记（4.0 格式导出标 '4.1'，缺省 '4.2'）
+    - official-scene（官网场景，均为 4.2 格式导出）→ '4.2' */
 export function spineRuntimeFor(entry: SpineResolved): SpineRuntimeVersion {
   if (entry.kind === 'skel') return '4.1';
   if (entry.kind === 'official') return entry.runtime ?? '4.2';

@@ -1,10 +1,4 @@
-/**
- * 图标 / 图片 URL 构造器（无状态纯函数）。
- * USE_OFFICIAL_PATHS=false（当前默认）→ 统一经 services/cdn 解析：nanoka 主源 + jsDelivr 旧档回退。
- * USE_OFFICIAL_PATHS=true → 官方仓库相对路径直拼 OFFICIAL_ICON_BASE（无任何回退；仅 fork 恢复
- * 同步后允许切回，见 constants.ts 注释）。gridFightPropIconUrl 等无 nanoka 等价源的构造器
- * 不受开关影响，恒直拼 jsDelivr。
- */
+
 import { cdnUri, cdnRawUrl, nanokaUrl, resolveCdnUri } from '../services/cdn';
 import {
   USE_OFFICIAL_PATHS,
@@ -16,12 +10,11 @@ import {
 } from './constants';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../services/types';
 
-/** USE_OFFICIAL_PATHS=true 时拼接官方基址 + 相对路径；相对路径为空串时返回 '' */
 function official(pathRel: string): string {
   return pathRel ? `${OFFICIAL_ICON_BASE}/${pathRel}` : '';
 }
 
-/** 判断 iconPath 是否为"旧短路径"格式（icon/ 开头）；新格式直接以官方分类名开头（avatarshopicon/…） */
+/** 判断 iconPath 是否为「旧短路径」格式（icon/ 开头）；新格式直接以官方分类名开头（avatarshopicon/…） */
 function isLegacyIconPath(p: string): boolean {
   return p.startsWith('icon/');
 }
@@ -31,7 +24,6 @@ export function iconUrl(i: string | null | undefined): string {
   if (USE_OFFICIAL_PATHS && !isLegacyIconPath(i)) {
     return official(i);
   }
-  // 从完整路径中提取文件名（兼容 converter 输出的相对路径和 CDN 原始格式）
   const name = i.includes('/') ? i.split('/').pop()! : i;
   return cdnUri('skillicons', name.replace('.png', '.webp'));
 }
@@ -47,20 +39,18 @@ export function memospriteId(charId: string, data: CharacterData | null): string
 }
 
 export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | null): string {
-  // 源数据 SkillIcon 字段优先（converter 输出，事实源）：覆盖大世界攻击复用普攻图标、
-  // Normal02/BP02/AssisSkill01-03 等 type 无法推断的变体命名；空串回退 type 推断
+  /* 源数据 SkillIcon 字段优先（converter 输出，事实源）：覆盖大世界攻击复用普攻图标、
+     Normal02/BP02/AssisSkill01-03 等 type 无法推断的变体命名；空串回退 type 推断 */
   if (sk.icon) return iconUrl(sk.icon);
   const key = SKILL_ICON_KEY[sk.type ?? ''] || (sk.type_name && SKILL_ICON_KEY_BY_NAME[sk.type_name]) || '';
   if (!key || !charId) return '';
   let id = (key === 'Servant' || key === 'ServantPassive') ? memospriteId(charId, data) : charId;
   if (!id) return '';
-  // 忆灵技图标 CDN 后缀不统一，按忆灵 ID 查映射表
   const iconKey = key === 'Servant' ? (SERVANT_ICON_KEY[id] || key) : key;
-  // 开拓者偶数变体无图标资产，回退配对奇数 ID
   id = TRAILBLAZER_ICON_FALLBACK[id] || id;
   if (USE_OFFICIAL_PATHS) {
-    // 忆灵技能文件名按忆灵 ID（SkillIcon_11402_Servant*），仓库目录按角色 ID 组织
-    // （skillicons/avatar/1402/；忆灵 ID = 角色 ID + 10000，18007 → 8007 开拓者特例）
+    // 忆灵技能文件名按忆灵 ID（SkillIcon_11402_Servant*），仓库目录却按角色 ID 组织
+    // （skillicons/avatar/1402/）；忆灵 ID = 角色 ID + 10000（18007 → 8007 开拓者特例）
     const isServant = key === 'Servant' || key === 'ServantPassive';
     const dir = isServant && Number(id) > 10000 ? String(Number(id) - 10000) : id;
     return official(`skillicons/avatar/${dir}/SkillIcon_${id}_${iconKey}.png`);
@@ -68,17 +58,16 @@ export function skillIconUrl(sk: Skill, charId: string, data: CharacterData | nu
   return cdnUri('skillicons', `SkillIcon_${id}_${iconKey}.webp`);
 }
 
-/** 星魂本体展示图标：经 rank 分类双源解析（jsDelivr 官方源首选 + nanoka 回退，E1-6 全量）。
- * 官方仓库位于 ui/ui3d/rank/_dependencies/textures/{charId}/{charId}_Rank_{num}.png，
- * 收录 E1-6 全套（含 skillicons/avatar/ 目录缺失的 Rank3/5——AvatarRankConfig.IconPath
- * 对 E3/E5 指向所加成技能图标，buff 栏用图标；本体展示仍须用 Rank{num} 文件）。
- * buff 栏图标（技能卡片强化一栏）使用 ranks[].icon（源数据 IconPath），与此不同源。 */
+/* 星魂本体展示图标走 rank 分类双源（jsDelivr 官方源首选 + nanoka 回退，E1-6 全量）。
+   官方仓库为 ui/ui3d/rank/_dependencies/textures/{charId}/{charId}_Rank_{num}.png，
+   收录 E1-6 全套（含 skillicons/avatar/ 目录缺失的 Rank3/5）；buff 栏图标（技能卡强化一栏）
+   用 ranks[].icon（源数据 IconPath），与此不同源。 */
 export function eidolonIconUrl(charId: string, rankNum: number | string): string {
   return charId ? cdnUri('rank', `${charId}/${charId}_Rank_${rankNum}.webp`) : '';
 }
 
-/** 角色立绘（全身像）：双源解析——nanoka webp 主源（同分辨率体积约官方 PNG 1/4）+ jsDelivr PNG 回退。
- *  角色详情页背景（CSS background-image 无 error 事件，主源必须直出）与货币战争角色页共用。 */
+/* 角色立绘：nanoka webp 主源（同分辨率体积约官方 PNG 1/4）+ jsDelivr PNG 回退。
+   角色详情页背景走 CSS background-image（无 error 事件，主源必须直出）。 */
 export function avatarDrawCardUrl(charId: string | number): string {
   if (USE_OFFICIAL_PATHS && charId) {
     return official(`avatardrawcard/${charId}.png`);
@@ -86,23 +75,20 @@ export function avatarDrawCardUrl(charId: string | number): string {
   return cdnUri('avatardrawcard', `${charId}.webp`);
 }
 
-/** 角色立绘 jsDelivr PNG 直链（不经开关，恒直拼）：仅供首页 Hero 预载链作第二源——
- *  fork 停更后仅覆盖冻结前角色，新角色两源皆 404 时由调用方渐变底承接。 */
+/* jsDelivr PNG 直链（不经开关，恒直拼）：仅供首页 Hero 预载链作第二源——
+   fork 停更后仅覆盖冻结前角色，新角色两源皆 404 时由调用方渐变底承接。 */
 export function avatarDrawCardJdUrl(charId: string | number): string {
   return charId ? official(`avatardrawcard/${charId}.png`) : '';
 }
 
-/** 移动端 Hero 立绘（轻量 webp，nanoka 唯一源）。
- *  官方仓库仅提供 2048×2048 PNG（实测 2.9~4.9MB），同分辨率 webp 仅 ~1/4；
- *  该体积差直接决定弱网下立绘首现速度，故首页 Hero（<1024px 断点）专用此源，
- *  桌面角色详情页背景走 avatarDrawCardUrl（同为 nanoka webp 主源 + jsDelivr 回退）。
- *  消费方必须保留回退链：webp 加载失败 → avatarDrawCardJdUrl 的官方 PNG（HomeView preload 链）。
- *  禁止改用 cdnUri('avatardrawcard', ...) —— jsDelivr 规则会把 .webp 重写回 .png（jsdelivr.ts）。 */
+/* 移动端 Hero 立绘（nanoka 唯一源）。官方仓库仅有 2048×2048 PNG（实测 2.9~4.9MB），
+   同分辨率 webp 仅约 1/4；该体积差决定弱网下立绘首现速度，故 <1024px 断点专用此源。
+   消费方必须保留回退链：webp 失败 → avatarDrawCardJdUrl 的官方 PNG（HomeView preload 链）。
+   **禁止**改用 cdnUri('avatardrawcard', …)——jsDelivr 规则会把 .webp 重写回 .png（见 jsdelivr.ts） */
 export function avatarDrawCardWebpUrl(charId: string | number): string {
   return charId ? nanokaUrl('avatardrawcard', `${charId}.webp`) : '';
 }
 
-/** 物品图标：itemfigures/{数字}.webp（从 item_figure_icon_path 解析） */
 export function itemIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
   if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
@@ -119,9 +105,6 @@ export function itemIconUrl(iconPath: string | null | undefined): string {
   return cdnUri('itemfigures', `${m[1]}.webp`);
 }
 
-/* ─── 目录页图标 URL（standalone CDN 数据源，复现卡片图片命名规律） ─── */
-
-/** 角色头像：avatarshopicon/{charId}.webp */
 export function avatarShopIconUrl(charId: string | number): string {
   if (USE_OFFICIAL_PATHS && charId) {
     return official(`avatarshopicon/avatar/${charId}.png`);
@@ -129,7 +112,6 @@ export function avatarShopIconUrl(charId: string | number): string {
   return charId ? cdnUri('avatarshopicon', `${charId}.webp`) : '';
 }
 
-/** 角色圆头像（游戏内角色列表头像）：avatarroundicon/{charId}.webp（127×127 透明圆像） */
 export function avatarRoundIconUrl(charId: string | number): string {
   if (USE_OFFICIAL_PATHS && charId) {
     return official(`avatarroundicon/avatar/${charId}.png`);
@@ -137,8 +119,8 @@ export function avatarRoundIconUrl(charId: string | number): string {
   return charId ? cdnUri('avatarroundicon', `${charId}.webp`) : '';
 }
 
-/** 属性图标：本地随站（resolve 层 local-first，见 services/cdn/base.ts LOCAL_ICONS_BASE）；
- *  未入库的新属性自动回退远端最优源（jsDelivr → nanoka） */
+/* 属性图标：本地随站（resolve 层 local-first，见 services/cdn/base.ts LOCAL_ICONS_BASE）；
+   未入库的新属性自动回退远端最优源（jsDelivr → nanoka） */
 export function elementIconUrl(damageType: string | null | undefined): string {
   return damageType ? cdnUri('element', `${damageType.toLowerCase()}.webp`) : '';
 }
@@ -148,7 +130,6 @@ export function pathIconUrl(baseType: string | null | undefined): string {
   return baseType ? cdnUri('pathicon', `${baseType.toLowerCase()}.webp`) : '';
 }
 
-/** 光锥立绘：lightconemediumicon/{id}.png */
 export function lightconeIconUrl(id: string | number): string {
   if (USE_OFFICIAL_PATHS && id) {
     return official(`lightconemediumicon/${id}.png`);
@@ -156,14 +137,11 @@ export function lightconeIconUrl(id: string | number): string {
   return id ? cdnUri('lightconemediumicon', `${id}.webp`) : '';
 }
 
-/**
- * 怪物图标官方路径统一构造。
- * 输入兼容三种形态：
- * - 官方相对路径（monstermiddleicon/Monster_xxx.png，converter --official-icon-paths 输出）→ 直接拼基址
- * - 完整 SpriteOutput 路径（converter 遗漏转换的旧数据，含官方错拼 MosterIcon）→ 剥前缀 + 归类目录
- * - basename（monster_common 详情页输出的 ManikinImagePath / ImagePath 末段）→ 补官方分类目录
- * USE_OFFICIAL_PATHS=false 时统一走 CDN basename 分支（降级/测试场景）。
- */
+/* 怪物图标官方路径统一构造。输入兼容三种形态：
+   - 官方相对路径（monstermiddleicon/Monster_xxx.png，converter --official-icon-paths 输出）→ 直接拼基址
+   - 完整 SpriteOutput 路径（converter 遗漏转换的旧数据，含官方错拼 MosterIcon）→ 剥前缀 + 归类目录
+   - basename（monster_common 详情页输出的 ManikinImagePath / ImagePath 末段）→ 补官方分类目录
+   USE_OFFICIAL_PATHS=false 时统一走 CDN basename 分支（降级/测试场景）。 */
 function monsterOfficialUrl(iconPath: string, cat: 'monstermiddleicon' | 'monsterfigure'): string {
   if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
     let rel = iconPath.replace(/^SpriteOutput\//i, '');
@@ -194,11 +172,9 @@ export function gridFightIconUrl(iconPath: string | null | undefined): string {
   return cdnRawUrl(`${m[1].toLowerCase()}.webp`);
 }
 
-/**
- * 货币战争装备专用图标：CDN 统一存于 gridfight/equipment/{文件名}.webp（保留原始大小写）。
- * 源路径可能为 Equipment/350101.png 或 GridItem/GridFight_WeaponBox3.png，
- * 两者均映射到 equipment 目录，且命名图标（非数字 ID）须保留大小写。
- */
+/* 货币战争装备专用图标：CDN 统一存于 gridfight/equipment/{文件名}.webp（保留原始大小写）。
+   源路径可能为 Equipment/350101.png 或 GridItem/GridFight_WeaponBox3.png，
+   两者均映射到 equipment 目录，且命名图标（非数字 ID）须保留大小写。 */
 export function gridFightEquipIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
   const m = iconPath.match(/([^/]+)\.png$/i);
@@ -206,11 +182,8 @@ export function gridFightEquipIconUrl(iconPath: string | null | undefined): stri
   return cdnUri('gridfight-equipment', `${m[1]}.webp`);
 }
 
-/**
- * 货币战争羁绊图标：CDN 统一存于 gridfight/icon/{文件名}.webp。
- * 源路径为 TraitIcon/Icon/1001.png 或 TraitIcon/MiniIcon/1001S.png，
- * 均映射到 gridfight/icon/ 目录。
- */
+/* 货币战争羁绊图标：CDN 统一存于 gridfight/icon/{文件名}.webp。
+   源路径为 TraitIcon/Icon/1001.png 或 TraitIcon/MiniIcon/1001S.png，均映射到 gridfight/icon/。 */
 export function gridFightTraitIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
   const m = iconPath.match(/([^/]+)\.png$/i);
@@ -218,10 +191,8 @@ export function gridFightTraitIconUrl(iconPath: string | null | undefined): stri
   return cdnUri('gridfight-icon', `${m[1]}.webp`);
 }
 
-/**
- * 货币战争角色详情页装备图标（带 ID 回退）：icon 非空时同 gridFightEquipIconUrl
- * （文件名保留原始大小写），为空时回退 `${id}.webp`（无图标数据的装备走 ID 命名）。
- */
+/* 货币战争角色详情页装备图标（带 ID 回退）：icon 非空时同 gridFightEquipIconUrl
+   （文件名保留原始大小写），为空时回退 `${id}.webp`（无图标数据的装备走 ID 命名）。 */
 export function gridFightEquipIconWithFallback(icon: string | null | undefined, id: number): string {
   if (icon) {
     const name = icon.includes('/') ? icon.split('/').pop()! : icon;
@@ -235,13 +206,10 @@ export function gridFightTraitIconById(id: number): string {
   return cdnUri('gridfight-icon', `${id}.webp`);
 }
 
-/**
- * 货币战争技能图标双源：nanoka 平铺主源 + jsDelivr 旧档兜底（复用 skillicons 分类的
- * JS_DELIVR_RULES 规则：avatar/{id}/ 目录 + 忆灵 ID 特例，与常规技能图标同一套）。
- * 返回 { src, fb }：fb 空串 = 无兜底（jsDelivr 规则不适用时仅 nanoka）。
- * 消费方 img 须同时绑定 :data-cdn-fallback="fb || undefined"，由全局委托完成回退与最终隐藏
- * （禁止再绑 hideOnError——会抢在回退前隐藏 img）。
- */
+/* 货币战争技能图标双源：nanoka 平铺主源 + jsDelivr 旧档兜底（复用 skillicons 分类的
+   JS_DELIVR_RULES：avatar/{id}/ 目录 + 忆灵 ID 特例）。fb 空串 = 无兜底（仅 nanoka）。
+   消费方 img 须同时绑定 :data-cdn-fallback="fb || undefined"，由全局委托完成回退与最终隐藏
+   （**禁止**再绑 hideOnError——会抢在回退前隐藏 img）。 */
 export function gridFightSkillIconSrc(icon: string | null | undefined): { src: string; fb: string } {
   if (!icon) return { src: '', fb: '' };
   const name = icon.split('/').pop()?.replace(/\.png$/i, '') || '';
@@ -250,11 +218,9 @@ export function gridFightSkillIconSrc(icon: string | null | undefined): { src: s
   return { src: primary, fb: fallback };
 }
 
-/**
- * 货币战争属性图标：jsDelivr 官方镜像唯一源（nanoka 无 GridFight/AttributeIcon 资源）。
- * 官方库规则：目录段全小写 + 文件名保留大小写（SpriteOutput/{Rel}/X.png →
- * spriteoutput/{rel 小写}/X.png）。加载失败由视图 hideOnError 隐藏（无兜底源）。
- */
+/* 货币战争属性图标：jsDelivr 官方镜像唯一源（nanoka 无 GridFight/AttributeIcon 资源）。
+   官方库规则：目录段全小写 + 文件名保留大小写（SpriteOutput/{Rel}/X.png → spriteoutput/{rel 小写}/X.png）。
+   加载失败由视图 hideOnError 隐藏（无兜底源）。 */
 export function gridFightPropIconUrl(icon: string | null | undefined): string {
   if (!icon) return '';
   const m = icon.match(/SpriteOutput\/(.+)\.png$/i);

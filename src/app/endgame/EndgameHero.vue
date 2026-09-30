@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * 终局赛季详情 · Hero 头（模式铭牌 + 赛季信息）。
- * 横幅（theme_banner：虚构/末日统一横幅语言）优先，无横幅时回退背景图
- * （maze 场景背景 / peak 图鉴横幅）——同一区域只保留一张主题大图。
- */
 import { computed } from 'vue';
 import {
   ENDGAME_MODES, MAZE_STATUS_CLASS, mazeStatus, mazeDateRange,
@@ -24,12 +19,9 @@ const dateRange = computed(() => mazeDateRange(props.data));
 /** 玩法级默认图标（modeDefaultArtUrl：统一用玩法入口默认图，抛弃每季 arts.tab 页签图——
  *  4 类玩法图标恒定不随新赛季漂移，规避 jsDelivr fork 冻结后的新赛季破图残留；空串不渲染） */
 const seasonArt = computed(() => modeDefaultArtUrl(props.modeKey));
-/** 赛季横幅（theme_banner：虚构/末日/忘却之庭宣传 BANNER，Hero 右侧装饰；无字段不渲染） */
 const seasonBanner = computed(() => seasonBannerUrl(props.data.arts));
-/** 赛季 Hero 背景（maze=场景背景 / story=海报背景 / peak=图鉴横幅；boss 无大图不渲染） */
 const seasonHeroBg = computed(() => seasonHeroBgUrl(props.data.arts));
 const showBanner = computed(() => !!seasonBanner.value);
-/** Hero 背景：仅当无横幅时回退使用（同区域双图叠加会重影，横幅优先避免 cover 裁切破构） */
 const showHeroBg = computed(() => !!seasonHeroBg.value && !showBanner.value);
 </script>
 

@@ -1,4 +1,3 @@
-/** 货币战争 · 投资环境图鉴目录页配置 */
 import { escHtml, gridFightIconUrl, fmtDesc } from '../../../lib/format';
 import { loadLocalCurrencyPortals } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
@@ -22,7 +21,6 @@ export const currencyPortalPage: CatalogPageConfig = {
   searchPlaceholder: '搜索投资环境…',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',
-  /* CW 卡片共享样式（nk-cw-card） */
   styles: [loadCwCatalogCss],
   async fetchData() {
     const { portals } = await loadLocalCurrencyPortals();

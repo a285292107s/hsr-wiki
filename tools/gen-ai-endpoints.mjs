@@ -11,11 +11,12 @@
  * 必须：数据派生文本先 clean()（剥 <color=…>/<unbreak>/<u>/\n）再 esc()（HTML 转义，同前端 escHtml）；
  * 详情页含 h1 + 摘要 + 数据事实表 + 面包屑 + ≥3 条同类内链 + 数据最后更新，目录页含 h1 + 条目清单 + 更新时间。
  */
+
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-/** 站点源（快照 canonical / sitemap / JSON-LD 只用它；robots.txt 与 vercel.json 由 Lead 与它同源对齐） */
+/** 站点源（快照 canonical / sitemap / JSON-LD 只用它） */
 export const SITE_ORIGIN = 'https://myhsr.vercel.app';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -31,7 +32,7 @@ const SHELL_FILE = join(PRERENDER_DIR, '_shell.html');
 const SNAPSHOT_TEXT_LIMIT_ENTRY = 4000;
 const SNAPSHOT_TEXT_LIMIT_DETAIL = 20000;
 
-/** 站点名（与 src/lib/constants.ts SITE_NAME 一致；站点自身的品牌名，非实体内容） */
+/** 站点名（与 src/lib/constants.ts SITE_NAME 一致） */
 const SITE_NAME = '星铁档案馆';
 /** 角色满级等级（与 src/lib/constants.ts MAX_CHAR_LEVEL 一致；满级属性 = base + add*(N-1)） */
 const MAX_CHAR_LEVEL = 80;
@@ -132,7 +133,7 @@ function fmtParam(value, tag, pct) {
 
 /**
  * 替换 #N[tag]% / 裸 #N 占位符（描述文本里的参数必须展开，否则文本不可读）。
- * 坑位：`%` 属于占位符语法（正则把它单独捕获），替换时必须**原样补回**——前端 fmtDesc 输出
+ * 坑位：`%` 属于占位符语法（正则把它单独捕获），替换时必须原样补回——前端 fmtDesc 输出
  * `${n}${pct}`；漏补会让「治疗量提高#1[i]%。」变成「治疗量提高10。」（丢百分号）。
  */
 function fillParams(text, params) {
@@ -145,7 +146,7 @@ function fillParams(text, params) {
     .replace(/#(\d+)/g, (raw, i) => fmtParam(params[Number(i) - 1], '', '') ?? raw);
 }
 
-/** 截断到 limit 并加 …（截断在转义前做，避免切断 &amp; 之类的实体） */
+/** 截断到 limit 并加 … */
 function cut(text, limit) {
   return limit && text.length > limit ? `${text.slice(0, limit)}…` : text;
 }
@@ -163,13 +164,9 @@ function txt(raw, params, limit = SNAPSHOT_TEXT_LIMIT_DETAIL) {
 /**
  * 目录条目字段的安全渲染（契约 §3「参数展开保真」，含裸 `#N` 语义判据）：
  * 1) 先按 fmtDesc/fmtVal 口径展开 `#N[tag]%`；展开后仍含 `#N[...]` → 省略该字段。
- * 2) 裸 `#N` 的语义取决于**该字段所属数据条目是否携带 params 语义**（`params` / `base_params` / `param_list` 数组存在，
- *    即便为空数组也算携带）：
- *    - `paramsSemantics = true` → 裸 `#N` 是占位符：`params[N-1]` 可取值就展开（`fillParams` 已处理）；
- *      展不开（空数组 / 缺位）→ 整个字段省略（应用在这些条目上走 fmtDesc，会渲染成 `?` 残句，快照不复制该噪声）；
- *    - `paramsSemantics = false` → 裸 `#N` 是**上游字面量**（角色 `desc`/`stories`、成就 `desc`、物品名、敌对 `intro`、
- *      `{TEXTJOIN#61}`），必须原样保留——应用同样原样渲染（如 CharHero 走 escHtml）。
- * 判定一律用**未截断**的展开文本，避免截断把占位符切成半截。
+ * 2) 裸 `#N` 的语义取决于该字段所属数据条目是否携带 params 语义（`params` / `base_params` / `param_list` 数组存在，
+ *    即便为空数组也算携带）：携带 → 展不开则整个字段省略；不携带 → 是上游字面量，必须原样保留。
+ * 判定一律用未截断的展开文本，避免截断把占位符切成半截。
  */
 function txtSafe(raw, params, limit = SNAPSHOT_TEXT_LIMIT_ENTRY, paramsSemantics = false) {
   const expanded = plain(raw, params);
@@ -246,10 +243,10 @@ function snapSection(title, html) {
 
 /**
  * 条目清单：name/href 由本函数转义；meta/desc 必须是调用方已转义片段。
- * `entry=true` 给**内容面收录条目**加稳定标记 class `nk-snapshot__entry`（契约 §3「目录条目稳定标记」）：
+ * `entry=true` 给内容面收录条目加稳定标记 class `nk-snapshot__entry`（契约 §3）：
  * 覆盖目录页条目清单 + 枢纽页收录条目分区（`/` 版本上新三分区、`/currency` 本赛季两分区）——
  * 这两类判据失效会静默空态，故必须可被守卫逐条计数。
- * 禁止把它加在详情页的导航性列表上（同图鉴/同模式内链、羁绊成员）——守卫断言详情页该类名计数 = 0。
+ * 禁止把它加在详情页的导航性列表上——守卫断言详情页该类名计数 = 0。
  */
 function linkList(items, entry = false) {
   const open = entry ? '<li class="nk-snapshot__entry">' : '<li>';
@@ -302,7 +299,7 @@ function detailBody(ctx, o) {
   return parts.join('');
 }
 
-/* ═══════════ JSON-LD（契约 §4：富结果与实体消歧用，不是 AI 引用杠杆） ═══════════ */
+/* ═══════════ JSON-LD（契约 §4） ═══════════ */
 
 function ldCollection(route, title, description, entries) {
   return {
@@ -318,7 +315,6 @@ function ldCollection(route, title, description, entries) {
       numberOfItems: entries.length,
       itemListElement: entries.map((e, i) => {
         const node = { '@type': 'ListItem', position: i + 1, name: e.name };
-        // 无详情路由的条目（物品 / 成就 / CW 装备与环境策略）不造 url
         if (e.href) node.url = SITE_ORIGIN + e.href;
         return node;
       }),
@@ -351,7 +347,7 @@ function ldArticle(route, headline, description, crumbs, ctx) {
   };
 }
 
-/** JSON-LD 序列化：转义 < 防 </script> 截断；JSON.parse 必须成功 */
+/** JSON-LD 序列化：转义 < 防 </script> 截断 */
 function serializeLd(ld) {
   return JSON.stringify(ld).replace(/</g, '\\u003c');
 }
@@ -374,7 +370,7 @@ function renderSnapshot(template, page) {
   const canonical = SITE_ORIGIN + page.route;
   let html = template;
 
-  // 3) title / description / og（canonical 与 JSON-LD 在下方统一插到 </head> 前）
+  // 3) title / description / og
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(page.title)}</title>`);
   html = upsertMeta(html, 'name', 'description', page.description);
   html = upsertMeta(html, 'property', 'og:title', page.title);
@@ -399,7 +395,7 @@ function renderSnapshot(template, page) {
 }
 
 function renderSitemap(ctx, pages) {
-  // 同步日期（converter 的 version.json.synced_at）合法才写 <lastmod>，否则省略
+  // 同步日期（converter 的 version.json.synced_at）合法才写 <lastmod>
   const lastmod = /^\d{4}-\d{2}-\d{2}/.test(ctx.syncedAt || '')
     ? `<lastmod>${esc(ctx.syncedAt)}</lastmod>` : '';
   const urls = pages
@@ -420,7 +416,7 @@ function loadContext() {
   };
 }
 
-/** 首页判据（与 use-release-showcase.ts pickCurrentVersion 同口径：恰等于本版本 label，label 空则无增量） */
+/** 首页判据（与 use-release-showcase.ts pickCurrentVersion 同口径） */
 function pickRelease(list, label) {
   const target = String(label || '').trim();
   if (!target) return [];
@@ -538,11 +534,7 @@ function characterPages(ctx) {
     const st = statKey != null ? stats[String(statKey)] : null;
     const stories = (d.chara_info && d.chara_info.stories) || {};
     const firstStory = Object.keys(stories).sort((a, b) => Number(a) - Number(b)).map((k) => stories[k]).find((s) => clean(s));
-    /**
-     * 摘要段判据（契约 §3）：只在源文本存在时输出（desc 或首个非空 story），否则整段省略——
-     * 应用 CharHero 对空 desc 渲染空描述，快照禁止补合成句（如 1224 三月七与 8 个开拓者形态 desc="" 且 stories 全 null）。
-     * meta description 仍须非空：源文本缺失时用数据字段拼装（名称 · 稀有度 · 元素 · 命途）。
-     */
+    /** 摘要段判据（契约 §3）：只在源文本存在时输出（desc 或首个非空 story），否则整段省略（应用 CharHero 对空 desc 渲染空描述）；meta description 缺失时用数据字段拼装 */
     const sourceSummary = clean(d.desc) || clean(firstStory);
     const rarityNum = /(\d+)\s*$/.exec(String(d.rarity || ''))?.[1];
     const description = sourceSummary
@@ -632,11 +624,6 @@ function lightconePages(ctx) {
   });
   const links = ordered.map((c) => ({ name: c.name, href: `/lightcone/${c.id}` }));
   const summaryPlain = `${SITE_NAME}光锥图鉴：共 ${ordered.length} 把光锥，含稀有度、命途、技能效果与晋阶属性。`;
-  /**
-   * 目录条目：应用光锥卡片只渲染 名称/稀有度/命途/skill_name（catalog/pages/lightcone.ts renderCard），
-   * **不渲染 skill_desc**；且列表层 skill_desc 的 `#N[..]` 无 param 数组可展开 → 目录条目一律不输出该字段
-   * （完整效果文本留在 `/lightcone/:id` 详情快照，那里的技能等级参数可完整展开）。
-   */
   const items = ordered.map((c) => ({
     name: c.name,
     href: `/lightcone/${c.id}`,
@@ -757,7 +744,7 @@ function relicPages(ctx) {
     const pieceHtml = (entry.pieces || [])
       .map((p) => `<li><span>${txt(p.type_name, null, 40)}</span><p>${esc(`最高等级 ${p.max_level} · 稀有度 ${starText(p.rarity)}`)}</p></li>`)
       .join('');
-    // 摘要取套装效果源文本；参数口径同 RelicView（fmtDesc(descriptions[n], param_list[n])）→ 必须展开 #N[i]%
+    // 摘要取套装效果源文本；参数口径同 RelicView（fmtDesc(descriptions[n], param_list[n])）
     const effectTexts = reqNums.map((n) => plain(descriptions[String(n)], params[String(n)]));
     const firstEffect = effectTexts.find(Boolean);
     const sourceSummary = firstEffect || '';
@@ -854,7 +841,7 @@ function monsterPages(ctx) {
     const route = `/monster/${entry.id}`;
     const weak = (d.weak || []).map((e) => ctx.elemNames.get(e) || e);
     const resist = Object.entries(d.resist || {}).map(([k, v]) => `${ctx.elemNames.get(k) || k} ${Math.round(Number(v) * 100)}%`);
-    // 摘要段只在 intro 源文本存在时输出（应用对空 intro 渲染空描述）；meta description 缺源文本时用 分类+阵营 拼装
+    // 摘要段只在 intro 源文本存在时输出；meta description 缺源文本时用 分类+阵营 拼装
     const sourceSummary = clean(d.intro);
     const description = sourceSummary
       ? cut(sourceSummary, 150)
@@ -883,7 +870,7 @@ function monsterPages(ctx) {
         ['速度', d.stats ? esc(String(d.stats.speed)) : ''],
       ],
       sections: [
-        // 空 intro 时「图鉴记录」整段省略（禁占位句；前端占位文本不得成为第二事实源）
+        // 空 intro 时「图鉴记录」整段省略
         { title: '图鉴记录', html: sourceSummary ? `<p>${txt(d.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: '技能', html: skillHtml ? `<ul class="nk-snapshot__blocks">${skillHtml}</ul>` : '' },
       ],
@@ -924,9 +911,7 @@ function endgamePages(ctx) {
   const catalogs = ENDGAME_MODES.map((m) => ({ mode: m, db: readJson(m.file) }));
   /**
    * 可见性判据 = 应用同一判据（src/app/catalog/pages/endgame.ts:190 `if (!info || !info.zh) continue;`）：
-   * 名称为空/空白的赛季应用不展示（maze_boss.catalog.json 的 `3022` 是唯一一例，未发布占位行），
-   * 严禁为其造兜底名——快照与 sitemap 都不生成该 URL（线上落 404 是期望行为：未发布内容不入索引）。
-   * 四模式合计 116 键 → 115 条可展示（maze 57 / story 27 / boss 21 / peak 10）。
+   * 名称为空/空白的赛季应用不展示，且不为其造兜底名——快照与 sitemap 都不生成该 URL（未发布内容不入索引）。
    */
   const all = [];
   for (const { mode, db } of catalogs) {
@@ -984,10 +969,8 @@ function endgamePages(ctx) {
           return `<li><span>${txt(m.name, null, 100)}</span><p>${txt(bits.join(' · '), null, 120)}</p></li>`;
         })
         .join('');
-      /**
-       * 赛季 catalog 没有描述性源字段 → **不输出可见摘要段**（禁止合成「X是…的一期终局挑战」这类实体事实句）；
-       * 事实由下方 facts 表承载；meta description 用数据字段拼装（玩法 · 排期 · 增益数 · 敌方数）。
-       */
+      /** 赛季 catalog 没有描述性源字段 → 不输出可见摘要段；事实由下方 facts 表承载，
+       *  meta description 用数据字段拼装（玩法 · 排期 · 增益数 · 敌方数）。 */
       const description = cut(factMeta(
         [mode.label, dateRange(entry), `${buffs.length} 项赛季增益`, `${monsters.length} 名敌方`],
         CATALOG_TITLE['/endgame'],
@@ -1134,8 +1117,8 @@ function currencyRolePages(ctx) {
     const route = `/currency/role/${entry.id}`;
     const starKeys = Object.keys(d.stars || {}).sort((a, b) => Number(a) - Number(b));
     /**
-     * 角色详情数据（currency/role/{id}.json）只有结构化字段、无描述性源字段 → **不输出可见摘要段**
-     * （禁止合成「X是…货币战争模式中的 N 费角色」这类实体事实句）；meta description 用数据字段拼装。
+     * 角色详情数据（currency/role/{id}.json）只有结构化字段、无描述性源字段 → 不输出可见摘要段；
+     * meta description 用数据字段拼装。
      */
     const description = cut(factMeta(
       [`${d.rarity}费`, d.front_back_type ? (CW_FB_LABEL[d.front_back_type] || d.front_back_type) : '', chargeText(d)],
@@ -1250,7 +1233,7 @@ function currencyListPages(ctx) {
 
   /**
    * 可见性判据 = 应用同一判据（src/app/catalog/pages/currency-portal.ts:30 `.filter((p) => p.in_book)`）：
-   * 未收录图鉴的投资环境应用不展示（portals.json 84 条 → 83 条），快照只列收录项。
+   * 未收录图鉴的投资环境应用不展示，快照只列收录项。
    */
   const portals = (readJson('currency/portals.json').portals || []).filter((p) => p.in_book && p.title);
   const portalSummary = `${SITE_NAME}货币战争投资环境图鉴：共 ${portals.length} 个投资环境。`;
@@ -1275,7 +1258,7 @@ function currencyListPages(ctx) {
     name: a.name,
     href: null,
     meta: txt(CW_QUALITY_LABEL[a.quality] || a.quality, null, 40),
-    // 目录条目：条目携带 params 语义（此处 params 全为 [] ，即占位符不可展开）→ 含裸 `#N` 的 desc 整段省略
+    // 目录条目：条目携带 params 语义（此处 params 全为 []，即占位符不可展开）→ 含裸 `#N` 的 desc 整段省略
     desc: txtSafe(a.desc, a.params, 400, hasParamSemantics(a)),
   }));
   pages.push(makePage('currency-augment-list', {
@@ -1327,7 +1310,7 @@ function currencyTraitPages(ctx) {
     const name = clean(entry.name) || `#${entry.id}`;
     const route = `/currency/trait/${entry.id}`;
     const members = roles.filter((r) => (r.trait_list || []).includes(Number(entry.id)));
-    // 摘要段只在源文本（简述 / 完整描述）存在时输出；参数口径同羁绊详情（desc + base_params）→ 展开 #N[i]%
+    // 摘要段只在源文本（简述 / 完整描述）存在时输出；参数口径同羁绊详情（desc + base_params）
     const sourceSummary = plain(entry.simple_desc, entry.base_params) || plain(entry.desc, entry.base_params);
     const description = sourceSummary
       ? cut(sourceSummary, 150)
@@ -1355,7 +1338,7 @@ function currencyTraitPages(ctx) {
         ['所属赛季', entry.season_id != null ? esc(String(entry.season_id)) : ''],
       ],
       sections: [
-        // 空 desc 时「效果说明」整段省略（不输出空 <p>）
+        // 空 desc 时「效果说明」整段省略
         { title: '效果说明', html: clean(entry.desc) ? `<p>${txt(entry.desc, entry.base_params, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: '层级效果', html: layerHtml ? `<ul class="nk-snapshot__blocks">${layerHtml}</ul>` : '' },
         { title: '机制详情', html: remarkHtml ? `<ul class="nk-snapshot__blocks">${remarkHtml}</ul>` : '' },
@@ -1407,8 +1390,8 @@ function main() {
   }
   /**
    * 模板取值（Vercel 投递模型 = 文件系统先于 rewrites，契约 §1）：
-   * 生成后 `dist/index.html` 会被 **home 快照覆盖**（否则 `/` 永远命中空壳，`{"source":"/"}` rewrite 不生效），
-   * 因此**再次运行**时禁止拿它当模板——优先复用上一轮原样落盘的纯 shell `dist/prerender/_shell.html`。
+   * 生成后 `dist/index.html` 会被 home 快照覆盖，因此再次运行时禁止拿它当模板——
+   * 优先复用上一轮原样落盘的纯 shell `dist/prerender/_shell.html`。
    * `_shell.html` 缺失且 `dist/index.html` 已被注入时立即失败，避免拿 home 快照当 shell 二次注入。
    */
   const shellSource = existsSync(SHELL_FILE) ? SHELL_FILE : TEMPLATE_FILE;
@@ -1424,8 +1407,8 @@ function main() {
   mkdirSync(PRERENDER_DIR, { recursive: true });
   /**
    * 纯 shell 原样落盘（供 vercel.json catch-all rewrite 投递 SPA 外壳）。
-   * 下划线前缀 = **非快照**标记：禁止给它注入 `.nk-snapshot` / canonical / title / JSON-LD——
-   * 守卫与覆盖率统计都跳过 `_` 前缀文件（它不是路由，也不进 sitemap）。
+   * 下划线前缀 = 非快照标记：不注入 `.nk-snapshot` / canonical / title / JSON-LD，
+   * 守卫与覆盖率统计都跳过 `_` 前缀文件。
    */
   writeFileSync(SHELL_FILE, template);
 
@@ -1471,7 +1454,7 @@ function countFiles(dir) {
   return n;
 }
 
-/* 入口判断：被 import 取 SITE_ORIGIN 时绝不执行主流程（守卫会 import 本模块） */
+/* 入口判断：被 import 取 SITE_ORIGIN 时绝不执行主流程 */
 const isEntry = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntry) {
   main();

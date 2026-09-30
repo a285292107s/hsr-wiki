@@ -17,7 +17,6 @@ from utils import load_json, save_json, map_icon_path, unwrap_value
 
 logger = logging.getLogger("converter")
 
-
 def convert() -> None:
     """转换光锥详情数据 → light_cones/{id}.json。"""
     equip_data = load_json(EXCEL_DIR / "EquipmentConfig.json")
@@ -25,17 +24,14 @@ def convert() -> None:
     promo_data = load_json(EXCEL_DIR / "EquipmentPromotionConfig.json")
     item_data = load_json(EXCEL_DIR / "ItemConfigEquipment.json")
 
-    # 技能按 SkillID 分组（每个光锥 5 级叠影）
     skill_by_id: dict[int, list[dict]] = defaultdict(list)
     for s in skill_data:
         skill_by_id[s.get("SkillID", 0)].append(s)
 
-    # 晋阶按 EquipmentID 分组
     promo_by_id: dict[int, list[dict]] = defaultdict(list)
     for p in promo_data:
         promo_by_id[p.get("EquipmentID", 0)].append(p)
 
-    # 物品描述按 ID 索引
     item_by_id: dict[int, dict] = {it.get("ID", 0): it for it in item_data}
 
     output_dir = OUTPUT_DIR / "light_cones"
@@ -57,7 +53,6 @@ def convert() -> None:
         max_promotion = item.get("MaxPromotion", 6)
         max_rank = item.get("MaxRank", 5)
 
-        # ─── 技能（叠影 1-5 级） ───
         skill_entries = sorted(
             skill_by_id.get(skill_id, []),
             key=lambda x: x.get("Level", 1),
@@ -69,14 +64,12 @@ def convert() -> None:
             lv = e.get("Level", 1)
             if lv == 1:
                 skill_name = resolve_text(e.get("SkillName", {}))
-                # 保留原始标签（clean=False），前端自行处理 <color>/<unbreak>
                 skill_desc = resolve_text(e.get("SkillDesc", {}), clean=False)
             skill_levels[str(lv)] = {
                 "level": lv,
                 "param_list": [unwrap_value(p) for p in e.get("ParamList", [])],
             }
 
-        # ─── 晋阶属性（0→6 阶段） ───
         promo_entries = sorted(
             promo_by_id.get(equip_id, []),
             key=lambda x: x.get("Promotion", 0),
@@ -95,13 +88,10 @@ def convert() -> None:
                 "cost": e.get("PromotionCostList", []),
             }
 
-        # ─── 物品描述 ───
         item_info = item_by_id.get(equip_id, {})
         desc = resolve_text(item_info.get("ItemDesc", {}))
-        # 卡面描述（含 <i> 对话标签与 \n 换行，保留原始标记由前端渲染）
         story = resolve_text(item_info.get("ItemBGDesc", {}), clean=False)
 
-        # ─── 拼装输出 ───
         detail = {
             "id": equip_id,
             "name": name,

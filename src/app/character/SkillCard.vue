@@ -1,11 +1,6 @@
 <script setup lang="ts">
 /**
- * 技能卡片（移植自原 character.js 的 renderSkillCard + bindPanels）
- * 原实现滑条交互依赖 data-tpl/data-lvs 属性 + DOM 重渲染，此处改为 Vue 响应式：
- *   lv 变化 → descHtml / 数据表激活行自动重算
- * 子技能（同族形态技能）通过文件名自引用递归渲染，嵌在父卡片 .nk-skill 内。
- * 卡体 2 列 = .nk-skill__rail 图标列 + .nk-skill__content 内容列（层级线见 styles/character.css）；
- * 数据表 .nk-skill__table-wrap 占内容列（grid-column: 2/-1）：跨图标列会让层级线擦过表头首列文字。
+ * 数据表 .nk-skill__table-wrap 必须占内容列（grid-column: 2/-1）：跨图标列会让层级线擦过表头首列文字。
  */
 import { computed, ref } from 'vue';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
@@ -13,6 +8,7 @@ import {
   fmtDesc, fmtToughness, skillIconUrl, iconUrl,
 } from '../../lib/format';
 import { ELEM, TYPE } from '../../lib/constants';
+import { extraTerms } from './utils';
 
 const props = defineProps<{
   sk: Skill;
@@ -30,7 +26,6 @@ const props = defineProps<{
   enhLabel?: string;
 }>();
 
-/* ─── 技能等级滑条（响应式替代原 data-tpl/data-lvs 方案） ─── */
 const maxLv = computed(() => (props.sk.level ? Object.keys(props.sk.level).length : 1));
 const defaultLv = computed(() =>
   props.sk.type === 'Normal' ? Math.min(6, maxLv.value) : Math.min(10, maxLv.value),
@@ -49,7 +44,6 @@ const effLv = computed(() =>
   props.isChild ? Math.min(props.parentLv ?? 1, maxLv.value) : lv.value,
 );
 
-/* ─── 描述渲染（当前等级参数；空 desc 显示 "-" 占位，对齐原站） ─── */
 const descHtml = computed(() => {
   if (!props.sk.desc) return '-';
   const lvData = props.sk.level ? props.sk.level[String(effLv.value)] : null;
@@ -66,7 +60,6 @@ const metrics = computed<Metric[]>(() => {
   if (props.sk.sp_base != null) {
     met.push({ label: '能量', html: String(props.sk.sp_base) });
   }
-  // 技能级能量需求（终结技/忆灵终结技；与 sp_base 的回复量互补）
   if (props.sk.sp_need != null) {
     met.push({ label: '能量需求', html: String(props.sk.sp_need) });
   }
@@ -94,7 +87,6 @@ const metrics = computed<Metric[]>(() => {
   return met;
 });
 
-/* ─── 技能资源消耗条件（SkillNeed，随当前等级参数渲染） ─── */
 const needHtml = computed(() => {
   const raw = props.sk.skill_need;
   if (!raw) return '';
@@ -102,14 +94,12 @@ const needHtml = computed(() => {
   return fmtDesc(raw, (lvData && lvData.param_list) || []);
 });
 
-/* ─── 强化关联（rated_rank_id → 星魂 E 编号；rated_skill_tree_id → 行迹名） ─── */
 /* 用户可见文案「强化来源」，与强化模式角标「强化」区分（前者=被什么强化，后者=处于加强形态） */
 interface RatedLink {
   kind: 'rank' | 'tree';
   num: string;
   name: string;
   icon: string;
-  /** 强化描述 HTML（fmtDesc 渲染，含参数高亮） */
   descHtml: string;
 }
 const ratedLinks = computed<RatedLink[]>(() => {
@@ -159,7 +149,6 @@ const ratedLinks = computed<RatedLink[]>(() => {
   return links;
 });
 
-/* ─── 强化来源折叠状态（默认收纳，点击展开全部条目，随卡片重建重置） ─── */
 /* 惰性渲染：内容在首次展开后才挂载并常驻（DOM 瘦身——折叠态不渲染内部条目） */
 const linksOpen = ref(false);
 const linksEverOpened = ref(false);
@@ -168,7 +157,6 @@ function toggleLinks(): void {
   if (linksOpen.value) linksEverOpened.value = true;
 }
 
-/* ─── 强化角标（强化模式下标记被强化技能） ─── */
 const isEnhanced = computed(() =>
   !!(props.enhMark && props.enhMark.skillIds.has(props.sk.id)),
 );
@@ -176,27 +164,13 @@ const isEnhanced = computed(() =>
 /* ─── 官方技能最高等级（max_level；缺失时回退 level 表长度） ─── */
 const officialMaxLv = computed(() => props.sk.max_level ?? maxLv.value);
 
-/* ─── 头部信息 ─── */
 const typeName = computed(() => props.sk.type_name || TYPE[props.sk.type ?? ''] || '');
-/** 技能标签：官方 SkillTag 中文文本（如「单攻」「召唤」），空则不显示 */
 const tagLabel = computed(() => props.sk.tag || '');
 const icon = computed(() => skillIconUrl(props.sk, props.charId, props.charData));
-/** 技能类型键（用于 data-type 色彩映射） */
 const typeKey = computed(() => props.sk.type || '');
 
-/* ─── 词条（extra 按 name 去重） ─── */
-const terms = computed(() => {
-  const extra = props.sk.extra;
-  if (!extra) return [];
-  const seen = new Set<string>();
-  return Object.values(extra).filter((t) => {
-    if (!t || seen.has(t.name)) return false;
-    seen.add(t.name);
-    return true;
-  });
-});
+const terms = computed(() => extraTerms(props.sk));
 
-/* ─── 可折叠技能数据（A/B/C 参数列） ─── */
 interface TableRow {
   lv: number;
   cells: (number | string)[];
@@ -216,18 +190,16 @@ const table = computed<{ cols: string[]; rows: TableRow[] } | null>(() => {
   return { cols, rows };
 });
 const tableOpen = ref(false);
-/* 惰性渲染：表格内容首次展开后才挂载并常驻（DOM 瘦身——折叠态不渲染 15 行数据表） */
 const tableEverOpened = ref(false);
 function toggleTable(): void {
   tableOpen.value = !tableOpen.value;
   if (tableOpen.value) tableEverOpened.value = true;
 }
 
-/* ─── 技能预览（米游社 Wiki animated webp/gif，默认收纳、点开加载） ─── */
 /* clip 整体惰性挂载：首次展开后才渲染并常驻（避免折叠态下残留空轨道容器）；
  * everOpened 同时驱动 img 挂载（避免重复解码大体积动画） */
-const animOpen = ref(false);   // 折叠状态（默认收纳）
-const everOpened = ref(false); // 首次展开即挂载 clip + img，此后收起/展开不再卸载
+const animOpen = ref(false);
+const everOpened = ref(false);
 const animIdx = ref(0);
 const imgDone = ref(false);
 
@@ -289,12 +261,12 @@ function onImgLoad(): void { imgDone.value = true; }
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">
         <span class="nk-slider__val">Lv.{{ lv }}<template v-if="officialMaxLv > 1">/{{ officialMaxLv }}</template></span>
-        <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
+        <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :aria-label="`${sk.name} 等级`" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
       </div>
     </div>
     <div class="nk-skill__body">
       <div class="nk-skill__rail">
-        <img v-if="icon" class="nk-skill__icon" :src="icon">
+        <img v-if="icon" class="nk-skill__icon" :src="icon" alt="">
       </div>
       <div class="nk-skill__content">
         <div class="nk-skill__title-row">
@@ -307,7 +279,6 @@ function onImgLoad(): void { imgDone.value = true; }
           </div>
         </div>
         <div class="nk-skill__desc" v-html="descHtml"></div>
-        <!-- 技能资源消耗条件（如「#5点【新蕊】」→ 渲染为数值） -->
         <div v-if="needHtml" class="nk-skill__need">
           <span class="nk-skill__need-label">消耗</span>
           <span class="nk-skill__need-val" v-html="needHtml"></span>
@@ -317,7 +288,6 @@ function onImgLoad(): void { imgDone.value = true; }
             <dt>{{ m.label }}</dt><dd v-html="m.html"></dd>
           </dl>
         </div>
-        <!-- 强化来源：受哪些星魂 / 行迹加成（折叠式，默认收纳，展开全部展示） -->
         <div v-if="ratedLinks.length" class="nk-skill__links">
           <button
             class="nk-skill__toggle"
@@ -355,7 +325,6 @@ function onImgLoad(): void { imgDone.value = true; }
             <span class="nk-term__name">{{ t.name }}</span>：{{ t.desc }}
           </div>
         </div>
-        <!-- 技能预览（默认收纳，点开加载动画；clip 惰性挂载，参见 script 注释） -->
         <div v-if="myAnims.length" class="nk-skill__anim">
           <button
             class="nk-skill__toggle"
@@ -366,7 +335,6 @@ function onImgLoad(): void { imgDone.value = true; }
           >
             <span class="arrow">▶</span> {{ animOpen ? '收起技能预览' : '技能预览' }}
           </button>
-          <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
           <div class="nk-skill__anim-clip" :class="{ open: animOpen }">
             <div v-if="everOpened" class="nk-skill__anim-inner">
               <div v-if="myAnims.length > 1" class="nk-skill__anim-tabs">
@@ -404,7 +372,6 @@ function onImgLoad(): void { imgDone.value = true; }
         >
           <span class="arrow">▶</span> {{ tableOpen ? '收起技能数据' : '技能数据' }}
         </button>
-        <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），表格内容首次展开后才挂载 -->
         <div class="nk-table-clip" :class="{ open: tableOpen }">
           <div v-if="tableEverOpened" class="nk-table-inner">
             <table class="nk-table">

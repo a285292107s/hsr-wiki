@@ -1,36 +1,18 @@
 <script setup lang="ts">
-/**
- * 系统地图（研究线 Tab）：交互式等轴测架构地图
- *
- * 研究线调试台为主站 dev-only 路由 /debug（import.meta.env.DEV 注册，生产构建摇树），本面板仅存在于开发环境。
- * 数据全部来自 src/app/debug/system-map/map-data.ts（单一事实源）——建筑 = 模块，
- * 连线 = 真实控制/数据路径；文件路径、加载链均为仓库内事实，禁止在视图层编造。
- * 渲染：2:1 等轴测投影（菱形网格 S=88，基座 BW=0.48S），CSS 3D 风格 cuboid（三面 + 屋顶装饰），
- * 建筑按 painter 序（gx+gy 升序）绘制；hover/选中建筑 → 高亮关联路径 + 解释面板。
- * 颜色：--nk-c 由 layer.color 令牌注入，面/边/装饰全部 color-mix 派生（色彩收口）。
- * a11y：建筑为 role=button（Enter/Space 等效）；SVG role=img + aria-label。
- */
 import { computed, ref } from 'vue';
 import {
   EDGES, EDGE_KINDS, LAYERS, NODES,
   type EdgeKind, type MapEdge, type MapNode,
 } from './system-map/map-data';
 
-/** 等轴测投影：2:1 菱形网格（单元半宽 88）。
- *  基座 BW=0.48S：相邻单元中心距 S=88 > 基座宽 0.96S，模块间留出空隙，连线可辨。 */
 const S = 88;
-/** 建筑基座半宽（菱形）；必须 < S/2 防单元重叠 */
 const BW = S * 0.48;
-/** 基座半高（2:1 菱形） */
 const BHY = BW / 2;
-/** 行区（gy）累计垂直偏移：云端/网关/视图/核心/引擎/数据矿区逐区拉开，留出路径走廊。
- *  最小行距 = 44 + 40 = 84px ≥ 最高楼顶（h_max×20 + BHY = 81px），楼顶不越上一行基线 */
 const ROW_OFFSETS: Record<number, number> = { 0: 0, 1: 44, 2: 84, 3: 126, 4: 166, 5: 208 };
 
 const sel = ref<string | null>(null);
 const hover = ref<string | null>(null);
 const kindFilter = ref<EdgeKind | 'all'>('all');
-/** 手机端面板开关（≥768px 常驻，开关仅影响折叠） */
 const legendOpen = ref(window.matchMedia('(min-width: 768px)').matches);
 const infoOpen = ref(true);
 
@@ -39,12 +21,10 @@ interface Geom {
   top: string; left: string; right: string;
 }
 
-/** 网格坐标 → 屏幕坐标（2:1 等轴测；y 附加 ROW_OFFSETS 分区走廊偏移） */
 function gridToScreen(gx: number, gy: number): { x: number; y: number } {
   return { x: (gx - gy) * S, y: (gx + gy) * (S / 2) + (ROW_OFFSETS[gy] ?? 0) };
 }
 
-/** 建筑几何：地面菱形（top 面）+ 左右立面 + 屋顶中心 rc */
 function nodeGeom(n: MapNode): Geom {
   const { x, y } = gridToScreen(n.gx, n.gy);
   const h = n.h * 20;
@@ -60,12 +40,10 @@ function nodeGeom(n: MapNode): Geom {
 const layerById = new Map(LAYERS.map((l) => [l.id, l]));
 const nodes = NODES.map((n) => ({ node: n, layer: layerById.get(n.layer)!, g: nodeGeom(n) }));
 const byId = new Map(nodes.map((e) => [e.node.id, e]));
-/** painter 序：gx+gy 升序（近景后绘） */
 const sortedNodes = [...nodes].sort(
   (a, b) => (a.node.gx + a.node.gy) - (b.node.gx + b.node.gy) || a.node.gx - b.node.gx,
 );
 
-/** 视口自适应建筑 + 网格范围 */
 const vb = computed(() => {
   let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
   const feed = (x: number, y: number): void => {
@@ -82,7 +60,6 @@ const vb = computed(() => {
 
 interface EdgeGeom { edge: MapEdge; d: string; mx: number; my: number }
 
-/** 按路径筛选（图例「路径筛选」）后的边 + 几何 */
 const visibleEdges = computed<EdgeGeom[]>(() =>
   EDGES
     .filter((e) => kindFilter.value === 'all' || e.kind === kindFilter.value)
@@ -91,7 +68,6 @@ const visibleEdges = computed<EdgeGeom[]>(() =>
       const dx = b.g.x - a.g.x; const dy = b.g.y - a.g.y;
       const len = Math.hypot(dx, dy) || 1;
       const ux = dx / len; const uy = dy / len;
-      // 锚点外推到基座边缘外 8px：线头线尾露出建筑，数据流方向不被立面遮挡
       const off = BW + 8;
       const ax = a.g.x + ux * off; const ay = a.g.y + uy * off;
       const bx = b.g.x - ux * off; const by = b.g.y - uy * off;
@@ -99,14 +75,12 @@ const visibleEdges = computed<EdgeGeom[]>(() =>
     }),
 );
 
-/** 当前激活（hover/选中）节点集合 */
 const activeIds = computed(() => {
   const s = new Set<string>();
   if (hover.value) s.add(hover.value);
   if (sel.value) s.add(sel.value);
   return s;
 });
-/** 与激活节点相连的边 */
 const linked = computed(() => {
   const s = new Set<string>();
   for (const id of activeIds.value) {
@@ -133,7 +107,6 @@ const filters: { id: EdgeKind | 'all'; label: string }[] = [
   ...EDGE_KINDS.map((k) => ({ id: k.id, label: k.label })),
 ];
 
-/** 边标签仅在被选中建筑的关联路径上展示（避免地图噪声） */
 function showEdgeLabel(e: MapEdge): boolean {
   return !!sel.value && linked.value.has(e.id);
 }
@@ -146,12 +119,9 @@ function onKey(e: KeyboardEvent, id: string): void {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(id); }
 }
 
-/** 点击空白区域取消选中 */
 function onStageClick(e: MouseEvent): void {
   if (!(e.target as Element | null)?.closest?.('.nk-bld')) select(null);
 }
-
-/* ─── 屋顶装饰（建筑形态多样性） ─── */
 
 interface DecorEl {
   el: 'polygon' | 'line' | 'ellipse' | 'rect' | 'circle' | 'path';
@@ -162,7 +132,7 @@ interface DecorEl {
 function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   const { x, rc, h } = g;
   const out: DecorEl[] = [];
-  const R = BW * 0.72; // 装饰基准半径（随基座缩放）
+  const R = BW * 0.72;
   switch (n.shape) {
     case 'tower':
       out.push({ el: 'line', a: { x1: x, y1: rc - 10, x2: x, y2: rc - 26 } });
@@ -182,7 +152,7 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
     case 'twin': {
       const mh = Math.round(h * 0.6);
       const sm = Math.round(BW * 0.6);
-      const rc2 = rc + 2; // 双子塔底座落在屋顶面上
+      const rc2 = rc + 2;
       for (const off of [-BW * 0.52, BW * 0.52]) {
         const cx = Math.round(x + off);
         out.push({ el: 'polygon', cls: 'nk-decor--side', a: { points: (cx - sm) + ',' + rc2 + ' ' + cx + ',' + (rc2 + sm / 2) + ' ' + cx + ',' + (rc2 + sm / 2 - mh) + ' ' + (cx - sm) + ',' + (rc2 - mh) } });
@@ -192,7 +162,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
       break;
     }
     case 'silo':
-      // 顶面为椭圆（主面已画），补中心接缝线增强筒仓感
       out.push({ el: 'line', a: { x1: x, y1: rc - BHY, x2: x, y2: rc + BHY } });
       break;
     case 'factory':
@@ -206,7 +175,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
       out.push({ el: 'line', a: { x1: x + 6, y1: rc - 3, x2: x + 13, y2: rc - 3 } });
       break;
     case 'bank':
-      // 山花饰（pediment）贴右面顶边
       out.push({ el: 'polygon', cls: 'nk-decor--pediment', a: { points: x + ',' + (rc + BHY) + ' ' + (x + BW) + ',' + rc + ' ' + (x + BW / 2) + ',' + Math.round(rc + BHY / 2 - 14) } });
       break;
     case 'flat':
@@ -223,7 +191,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
     :class="{ 'has-active': hasActive, 'is-legend-open': legendOpen, 'is-info-open': infoOpen }"
   >
     <div class="nk-sysmap__grid">
-      <!-- ─── 图例面板 ─── -->
       <aside class="nk-sysmap__legend">
         <header class="nk-sysmap__legend-head">
           <h2 class="nk-sysmap__panel-title">图例</h2>
@@ -278,7 +245,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
         </div>
       </aside>
 
-      <!-- ─── 地图舞台 ─── -->
       <section class="nk-sysmap__stage">
         <svg
           class="nk-sysmap__svg"
@@ -304,7 +270,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
             </marker>
           </defs>
 
-          <!-- 地面节点：替代平行网格线，随建筑行区偏移，无折线断裂 -->
           <g class="nk-sysmap__plots">
             <polygon
               v-for="en in sortedNodes"
@@ -376,7 +341,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
             </g>
           </g>
 
-          <!-- 高亮覆盖层：选中/hover 建筑的关联路径在建筑之上加粗渲染，流动方向不被遮挡 -->
           <g class="nk-sysmap__edges nk-sysmap__edges--top">
             <g
               v-for="e in visibleEdges"
@@ -394,7 +358,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
         </svg>
       </section>
 
-      <!-- ─── 解释面板 ─── -->
       <aside class="nk-sysmap__info" aria-live="polite">
         <template v-if="selNode">
           <header class="nk-sysmap__info-head">
@@ -438,7 +401,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
       </aside>
     </div>
 
-    <!-- 手机端面板开关 -->
     <nav class="nk-sysmap__bar" aria-label="面板开关">
       <button type="button" :aria-expanded="legendOpen" @click="legendOpen = !legendOpen">图例</button>
       <button type="button" :aria-expanded="infoOpen" @click="infoOpen = !infoOpen">说明</button>
@@ -447,14 +409,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
 </template>
 
 <style scoped>
-/**
- * 系统地图（研究线 Tab）样式：scoped 内联（lab 组件惯例，不进主项目）
- *
- * 色彩收口（ADR 0012）：全部颜色经 tokens 三层令牌 + color-mix 派生，
- * 本文件不出现裸彩色值（豁免：中性黑/白/灰 rgba）。
- * 分层色由视图内联 --nk-c（layer.color 令牌），面/边/装饰在下方派生；
- * 边类型色 --nk-edge-* 定义于本文件根（控制/数据/CDN/主题/构建）。
- */
 .nk-sysmap {
   --nk-edge-control: var(--ir-400);
   --nk-edge-data: var(--em-500);
@@ -464,8 +418,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   color: var(--text);
 }
 
-/* ─── 三栏布局：≥1536 三列；768-1535 图例折叠为顶栏、地图+说明两列；<768 单列 + 底栏 ───
-   max-width:1480 与其余板块同宽对齐；左应交由父容器（.nk-spine-debug）统一提供 ─── */
 .nk-sysmap__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -487,7 +439,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   }
 }
 
-/* ─── 面板通用 ─── */
 .nk-sysmap__legend,
 .nk-sysmap__info {
   background: var(--nk-sheet-bg);
@@ -539,7 +490,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
 }
 .nk-sysmap__sub:first-child { margin-top: 0; }
 
-/* ─── 分层色块 chips ─── */
 .nk-sysmap__chips {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
@@ -575,7 +525,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   color: var(--text3);
 }
 
-/* ─── 线型图例 ─── */
 .nk-sysmap__kinds { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .nk-sysmap__kind {
   display: flex;
@@ -599,7 +548,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
 .nk-sysmap__kind-meta b { font-size: 11px; font-weight: 600; color: var(--text); }
 .nk-sysmap__kind-meta span { font-size: 10px; color: var(--text3); }
 
-/* ─── 路径筛选 ─── */
 .nk-sysmap__filters { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-sysmap__filter {
   display: inline-flex;
@@ -628,7 +576,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
 .nk-sysmap__filter.is-on em { color: var(--highlight); }
 .nk-sysmap__hint { margin: 12px 0 0; font-size: 10px; line-height: 1.6; color: var(--text3); }
 
-/* ─── 地图舞台 ─── */
 .nk-sysmap__stage {
   overflow: auto;
   border: 1px solid var(--nk-sheet-border);
@@ -646,7 +593,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   user-select: none;
 }
 
-/* ─── 地面节点（替代平行网格线） ─── */
 .nk-sysmap__plots {
   pointer-events: none;
 }
@@ -656,7 +602,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   stroke-width: 1;
 }
 
-/* ─── 路径连线（casing + core + 流动层） ─── */
 .nk-edge { pointer-events: none; }
 .nk-edge__casing {
   fill: none;
@@ -695,11 +640,9 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   to { stroke-dashoffset: -20; }
 }
 
-/* 高亮与弱化（底层边随激活节点降透明；顶层高亮边常显） */
 .nk-sysmap.has-active .nk-sysmap__edges:not(.nk-sysmap__edges--top) .nk-edge:not(.is-linked) { opacity: 0.16; }
 .nk-edge.is-linked .nk-edge__core { stroke-width: 3; }
 
-/* 顶层高亮：建筑之上的路由可视化（hover/选中时浮现） */
 .nk-sysmap__edges--top { pointer-events: none; }
 .nk-sysmap__edges--top .nk-edge { opacity: 1; }
 .nk-sysmap__edges--top .nk-edge__casing {
@@ -721,7 +664,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   pointer-events: none;
 }
 
-/* ─── 建筑（cuboid 三面 + 屋顶 + 标签板） ─── */
 .nk-bld {
   cursor: pointer;
   transition: transform 0.25s var(--nk-ease-out), opacity 0.2s ease;
@@ -742,7 +684,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
 .nk-face--right { fill: color-mix(in srgb, var(--nk-c) 66%, var(--blk-900) 34%); }
 .nk-face--top { fill: color-mix(in srgb, var(--nk-c) 84%, var(--text-bright) 16%); }
 
-/* 屋顶装饰 */
 .nk-decor {
   fill: color-mix(in srgb, var(--nk-c) 80%, var(--text-bright) 20%);
   stroke: color-mix(in srgb, var(--nk-c) 55%, var(--blk-900) 45%);
@@ -756,7 +697,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
 .nk-decor--top2 { fill: color-mix(in srgb, var(--nk-c) 88%, var(--text-bright) 12%); }
 .nk-decor--pediment { fill: color-mix(in srgb, var(--nk-c) 90%, var(--text-bright) 10%); }
 
-/* 屋顶标签板（深色底保证任意屋顶色下可读/对比度） */
 .nk-bld__plate {
   fill: rgba(0, 0, 0, 0.72);
   stroke: rgba(255, 255, 255, 0.1);
@@ -778,7 +718,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   pointer-events: none;
 }
 
-/* ─── 解释面板 ─── */
 .nk-sysmap__info-head {
   display: flex;
   align-items: flex-start;
@@ -878,7 +817,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   color: var(--text2);
 }
 
-/* ─── 手机端：底栏 + 底部抽屉面板 ─── */
 .nk-sysmap__bar {
   display: flex;
   gap: 8px;
@@ -930,7 +868,6 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   .nk-sysmap__stage { min-width: 0; }
 }
 
-/* 动效偏好：关闭流动动画 */
 @media (prefers-reduced-motion: reduce) {
   .nk-edge__flow { animation: none; }
   .nk-bld { transition: none; }

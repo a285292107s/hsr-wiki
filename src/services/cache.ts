@@ -1,20 +1,14 @@
-/**
- * 请求缓存引擎（内存级）
- *
- *   L1 内存 Map（80 条上限，淘汰最早 20%）
- *   L2 in-flight 去重（同 cacheKey 并发请求复用同一 Promise）
- *   L3 网络（15s 超时）
- *
- * 数据均为同域静态 JSON（Vercel CDN 托管），跨刷新持久化由 HTTP 缓存承担，
- * 无需 IndexedDB 持久层（已精简：原 L2 IDB + TTL + 版本清理已移除）。
- */
+/* 请求缓存引擎（内存级）
+     L1 内存 Map（80 条上限，淘汰最早 20%）
+     L2 in-flight 去重（同 cacheKey 并发请求复用同一 Promise）
+     L3 网络（15s 超时）
+   数据均为同域静态 JSON（Vercel CDN 托管），跨刷新持久化由 HTTP 缓存承担，无需 IndexedDB 持久层。 */
 import { NkError } from '../lib/errors';
 
 const FETCH_TIMEOUT = 15000;
 const MEM_MAX = 80;
 
-/* ─── 网络请求（最底层） ─── */
-
+/* 网络请求（最底层） */
 async function requestText(url: string): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT);
@@ -24,7 +18,8 @@ async function requestText(url: string): Promise<string> {
     return await r.text();
   } catch (e) {
     if (e instanceof NkError) throw e;
-    if (e instanceof Error && (e.name === 'AbortError' || (e as DOMException).code === 20 /* ABORT_ERR */)) {
+    // 20 = DOMException.ABORT_ERR（超时中止）
+    if (e instanceof Error && (e.name === 'AbortError' || (e as DOMException).code === 20)) {
       throw new NkError(`Request timed out: ${url}`, true);
     }
     throw new NkError(e instanceof Error ? e.message || 'Network error' : 'Network error', true);
@@ -55,10 +50,8 @@ export interface ResourceStatus {
   ms: number;
 }
 
-/**
- * 资源可达性检查（Spine 审核台等诊断用途）：只取响应头不消费 body（立即取消传输，不产生下载流量）。
- * 不抛异常，超时/网络失败统一归一为 { ok:false, status:0 }，调用方按诊断语境解读。
- */
+/* 资源可达性检查（Spine 审核台等诊断用途）：只取响应头不消费 body（立即取消传输，不产生下载流量）。
+   不抛异常，超时/网络失败统一归一为 { ok:false, status:0 }，调用方按诊断语境解读。 */
 export async function fetchResourceStatus(url: string, timeoutMs = 15000): Promise<ResourceStatus> {
   const t0 = performance.now();
   const ctrl = new AbortController();
@@ -77,8 +70,7 @@ export async function fetchResourceStatus(url: string, timeoutMs = 15000): Promi
   }
 }
 
-/* ─── L1 内存缓存（SPA 生命周期内只请求一次） ─── */
-
+/* L1 内存缓存（SPA 生命周期内只请求一次） */
 const mem = new Map<string, unknown>();
 
 function memSet(key: string, data: unknown): void {
@@ -103,8 +95,7 @@ export function memStore(key: string, data: unknown): void {
   memSet(key, data);
 }
 
-/* ─── 带缓存的 fetch：内存 → in-flight 去重 → 网络 ─── */
-
+/* 带缓存的 fetch：内存 → in-flight 去重 → 网络 */
 const pending = new Map<string, Promise<unknown>>();
 
 async function cachedRequest<T>(

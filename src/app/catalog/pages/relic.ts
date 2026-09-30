@@ -1,4 +1,3 @@
-/** 遗器目录页配置 */
 import { escHtml, itemIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalRelicSets } from '../../../services/api';
@@ -23,11 +22,9 @@ export const relicPage: CatalogPageConfig = {
         href: `/relic/${info.id}`,
         img: itemIconUrl(info.icon),
         set_type: setType,
-        // 遗器独有语义标签：隧洞套装（4 件套）/ 位面饰品（2 件套）
         set_tag: setType === '4' ? '4件套' : '2件套',
       });
     }
-    // 默认按 ID 降序：新遗器（ID 大）排在前面
     items.sort((a, b) => Number(b.id) - Number(a.id));
     return items;
   },

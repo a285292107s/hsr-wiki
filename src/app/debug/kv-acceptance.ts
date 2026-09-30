@@ -1,15 +1,7 @@
-/**
- * KV 场景验收判定引擎（SpineDebugView 验收台专用；纯函数可单测）
- *
- * 职责：验收项类型、判定阈值、PASS/FAIL 判定（reasons 聚合）、报告文本构建。
- * 编排（场景加载 / 轮询 / 中止）与渲染状态留在视图层；像素采样在 debug/pixels.ts。
- */
 
-/* ─── 黑块检测阈值（近黑不透明像素占比 %）─── */
 export const NEAR_BLACK_WARN = 3;  // ≥3% 提示疑似暗块（夜景底色波动区间）
 export const NEAR_BLACK_FAIL = 6;  // ≥6% 判 FAIL（实测：正常合并渲染 ≈1.4%，透明画布黑块 ≈9%）
 
-/** 验收场景快照（视图层把响应式渲染状态投影为纯数据后交给判定） */
 export interface AcceptSceneSnapshot {
   key: string;
   loadError: string;
@@ -18,13 +10,10 @@ export interface AcceptSceneSnapshot {
   mergedError: string;
   missingKeys: string[];
   nearBlackPct: number | null;
-  /** 验收被中止（用户点击中止 / 组件卸载 / 场景被外部切换） */
   aborted: boolean;
-  /** 中止原因（aborted=true 时写入报告） */
   abortReason?: string;
 }
 
-/** 验收报告单行 */
 export interface AcceptItem {
   key: string;
   layerTotal: number;
@@ -39,7 +28,6 @@ export interface AcceptItem {
   aborted: boolean;
 }
 
-/** nearBlack 徽章配色档位：≥FAIL 红 / ≥WARN 黄 / 其余绿 / 无采样灰 */
 export function nearBlackClass(pct: number | null): 'is-fail' | 'is-warn' | 'is-ok' | 'is-off' {
   if (pct === null) return 'is-off';
   if (pct >= NEAR_BLACK_FAIL) return 'is-fail';
@@ -47,7 +35,6 @@ export function nearBlackClass(pct: number | null): 'is-fail' | 'is-warn' | 'is-
   return 'is-ok';
 }
 
-/** 由场景快照判定验收结果（reasons 聚合 → verdict；任一 reason 存在即 FAIL） */
 export function judgeAccept(s: AcceptSceneSnapshot, durationMs: number): AcceptItem {
   const failedLayers = s.layers.filter((l) => l.status === 'fail').map((l) => `${l.label}: ${l.error}`);
   const reasons: string[] = [];
@@ -74,7 +61,6 @@ export function judgeAccept(s: AcceptSceneSnapshot, durationMs: number): AcceptI
   };
 }
 
-/** 验收报告纯文本（复制剪贴板用） */
 export function buildAcceptReportText(
   items: AcceptItem[],
   runtimeVersion: string,

@@ -11,15 +11,11 @@ import pytest  # noqa: E402
 
 from converters import character_detail as cd  # noqa: E402
 
-
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
     """mock TextMap，避免加载真实 50MB 文件。"""
     import textmap
     monkeypatch.setattr(textmap, "_text_map", {})
-
-
-# ─── _build_skills ──────────────────────────────────────────────
 
 class TestBuildSkills:
     def test_levels_grouped_and_sorted(self):
@@ -59,7 +55,6 @@ class TestBuildSkills:
         assert result["7"]["sp_base"] == 30
 
     def test_tag_resolved_from_skill_tag(self):
-        # 官方 SkillTag（Hash 引用）解析为中文文本（方案 A，与货币战争模块一致）
         import textmap
         textmap._text_map["100001"] = "单攻"
         data = [{"SkillID": 8, "Level": 1, "AttackType": "Normal", "SkillTag": {"Hash": 100001}}]
@@ -72,21 +67,16 @@ class TestBuildSkills:
         assert result["9"]["tag"] is None
 
     def test_unknown_trigger_no_attack_type_outputs_none(self):
-        # SkillP02（天赋 2，如 140805）无 AttackType：透传 None 而非空串，
-        # 前端 SKILL_ORDER.includes(null) 为 true 可独立成组显示（P10 修复契约）
         data = [{"SkillID": 140805, "Level": 1, "AttackType": "", "SkillTriggerKey": "SkillP02"}]
         result = cd._build_skills(data, [140805])
         assert result["140805"]["type"] is None
 
     def test_unknown_trigger_falls_back_to_attack_type(self):
-        # Skill11（强化普攻，如 141508）不在映射表 → AttackType 兜底 Normal
         data = [{"SkillID": 141508, "Level": 1, "AttackType": "Normal", "SkillTriggerKey": "Skill11"}]
         result = cd._build_skills(data, [141508])
         assert result["141508"]["type"] == "Normal"
 
     def test_audit_fields_output(self):
-        # 2026-08-03 字段审计收录：max_level/stance_damage_type/stance_damage_display/
-        # skill_need/sp_need/rated_rank_id/rated_skill_tree_id（见 docs/audit/字段审计-AvatarSkillConfig.md）
         import textmap
         textmap._text_map["300001"] = "#5点【新蕊】"
         data = [{
@@ -110,7 +100,6 @@ class TestBuildSkills:
         assert s["rated_skill_tree_id"] == [1014103]
 
     def test_audit_fields_null_when_missing(self):
-        # 源字段缺失时新字段全部输出 None（与 sp_base 等现有可选字段契约一致）
         data = [{"SkillID": 21, "Level": 1, "AttackType": "Normal"}]
         result = cd._build_skills(data, [21])
         s = result["21"]
@@ -123,15 +112,10 @@ class TestBuildSkills:
         assert s["rated_skill_tree_id"] is None
 
     def test_skill_icon_mapped(self):
-        # 源数据 SkillIcon（事实源）→ map_icon_path 输出旧短路径（默认模式）
         data = [{"SkillID": 30, "Level": 1, "AttackType": "Normal",
                  "SkillIcon": "SpriteOutput/SkillIcons/Avatar/30/SkillIcon_30_Normal02.png"}]
         result = cd._build_skills(data, [30])
         assert result["30"]["icon"] == "icon/skill/Avatar/30/SkillIcon_30_Normal02.png"
-
-
-
-# ─── _build_servant_skills ──────────────────────────────────────
 
 class TestBuildServantSkills:
     def test_no_filter_and_servant_type(self):
@@ -152,7 +136,6 @@ class TestBuildServantSkills:
         assert cd._build_servant_skills([], [99]) == {}
 
     def test_tag_resolved_from_skill_tag(self):
-        # 忆灵技能官方 SkillTag（如 1141501 → 「群攻」）
         import textmap
         textmap._text_map["200001"] = "群攻"
         data = [{"SkillID": 13, "Level": 1, "AttackType": "Servant", "SkillTag": {"Hash": 200001}}]
@@ -166,7 +149,6 @@ class TestBuildServantSkills:
         assert result["14"]["icon"] == "icon/skill/Avatar/11414/SkillIcon_11414_Servant.png"
 
     def test_audit_fields_same_structure(self):
-        # 忆灵技能与角色技能保持同结构（审计字段缺失输出 None，契约一致性）
         data = [{"SkillID": 14, "Level": 1, "AttackType": "Servant", "SPNeed": {"Value": 110}}]
         result = cd._build_servant_skills(data, [14])
         s = result["14"]
@@ -174,9 +156,6 @@ class TestBuildServantSkills:
         assert s["max_level"] is None
         assert s["stance_damage_type"] is None
         assert s["rated_rank_id"] is None
-
-
-# ─── _build_ranks ───────────────────────────────────────────────
 
 class TestBuildRanks:
     def test_keyed_by_rank_number(self):
@@ -189,9 +168,6 @@ class TestBuildRanks:
     def test_unrelated_ranks_skipped(self):
         data = [{"RankID": 9999, "Rank": 1, "Name": ""}]
         assert cd._build_ranks(data, [1001]) == {}
-
-
-# ─── _build_stats ───────────────────────────────────────────────
 
 class TestBuildStats:
     def test_stages_ordered_by_max_level(self):
@@ -208,9 +184,6 @@ class TestBuildStats:
         data = [{"AvatarID": 2001, "MaxLevel": 20, "HPBase": {"Value": 1}}]
         assert cd._build_stats(data, 1001) == {}
 
-
-# ─── _build_relics ──────────────────────────────────────────────
-
 class TestBuildRelics:
     def test_match_avatar(self):
         data = [{"AvatarID": 1001, "Set4IDList": [1, 2]}]
@@ -220,16 +193,12 @@ class TestBuildRelics:
     def test_no_match_returns_empty(self):
         assert cd._build_relics([{"AvatarID": 2001}], 1001) == {}
 
-
-# ─── _normalize_tree_icon ───────────────────────────────────────
-
 class TestNormalizeTreeIcon:
     def test_pseudo_dir_normalized(self):
         icon = "icon/skill/Avatar/11005/SkillIcon_11005_1.png"
         assert cd._normalize_tree_icon(icon, 1005) == "icon/skill/Avatar/1005/SkillIcon_1005_1.png"
 
     def test_other_cross_id_kept(self):
-        # 开拓者偶数变体引用配对奇数 ID 的真实图标，不得归一
         icon = "icon/skill/Avatar/8001/SkillIcon_8001_1.png"
         assert cd._normalize_tree_icon(icon, 8002) == icon
 
@@ -237,9 +206,6 @@ class TestNormalizeTreeIcon:
         assert cd._normalize_tree_icon("", 1005) == ""
         other = "icon/path/Warrior.png"
         assert cd._normalize_tree_icon(other, 1005) == other
-
-
-# ─── _build_memosprite ──────────────────────────────────────────
 
 class TestBuildMemosprite:
     def test_owner_base_mapping(self):
@@ -249,7 +215,6 @@ class TestBuildMemosprite:
         assert result["skills"] == {}
 
     def test_trailblazer_pair_ownership(self):
-        # 18007 → 8007 & 8008 均可命中
         data = [{"ServantID": 18007, "ServantName": {}, "SkillIDList": []}]
         assert cd._build_memosprite(data, [], 8007) is not None
         assert cd._build_memosprite(data, [], 8008) is not None
@@ -258,13 +223,8 @@ class TestBuildMemosprite:
         data = [{"ServantID": 11001, "ServantName": {}, "SkillIDList": []}]
         assert cd._build_memosprite(data, [], 1002) is None
 
-
-# ─── _build_skill_trees（EnhancedID 分流） ──────────────────────
-
 class TestBuildSkillTreesEnhancedFilter:
     def test_base_only_by_default(self):
-        # 同 anchor 同 level 的基础（EnhancedID 缺失）与加强（EnhancedID=1）并存时，
-        # 默认只输出基础行迹（修复历史覆盖 bug：加强行迹曾顶掉基础行迹）
         data = [
             {"AvatarID": 1005, "AnchorType": "Point01", "Level": 1,
              "PointID": 1005001, "PointName": {}, "ParamList": []},
@@ -290,9 +250,6 @@ class TestBuildSkillTreesEnhancedFilter:
         data = [{"AvatarID": 1006, "AnchorType": "Point01", "Level": 1,
                  "PointID": 1006001, "PointName": {}, "ParamList": []}]
         assert cd._build_skill_trees(data, 1005) == {}
-
-
-# ─── _build_enhanced（角色强化包） ───────────────────────────────
 
 class TestBuildEnhanced:
     def _config(self):
@@ -321,7 +278,7 @@ class TestBuildEnhanced:
         assert result is not None
         bundle = result["1"]
         assert "1100501" in bundle["skills"]
-        assert "1" in bundle["ranks"]          # 星魂按 Rank 序号键控
+        assert "1" in bundle["ranks"]
         assert bundle["skill_trees"]["Point01"]["1"]["point_id"] == 11005101
         assert bundle["descs"] == [
             "战技可以使<color=#f29e38>所有攻击目标</color>的持续伤害立即额外触发1次伤害",

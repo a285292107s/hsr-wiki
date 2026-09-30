@@ -1,4 +1,3 @@
-/** 光锥目录页配置 */
 import { PATH } from '../../../lib/constants';
 import { escHtml, lightconeIconUrl, pathIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';

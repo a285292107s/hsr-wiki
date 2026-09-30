@@ -1,52 +1,22 @@
-/** 全局常量：CDN 地址 / 命途 / 属性 / 技能类型 / 韧性标签映射（沿用原项目数据） */
 
 export const CDN = 'https://static.nanoka.cc';
 
-/* 货币战争枢纽页 Hero 视频与 poster 兜底帧的路径常量已随工具化移除（ADR 0018）：
-   两个枢纽页改为紧凑品牌带，不再承载全屏媒体层，故这两个常量已无消费方（删常量而非留死代码）。
-   **两个资产文件保留在库内作档案**——public/data/cn/assets/cw-hero.mp4 与 cw-hero-poster.jpg，
-   来源为官网活动页素材且无长期保留 SLA（同 ADR 0009 结论），删除后无法重新获取；
-   它们不再被任何页面请求（仅占部署体积，不影响页面体积）。
-   若日后要恢复视频 Hero，先在 ADR 0018 上改决策，再重建此处的路径常量与视图侧视频状态机。 */
-
-/** 站点名（浏览器标题 / 首页品牌主标题；曾用名“咸鱼百科”见页脚彩蛋） */
 export const SITE_NAME = '星铁档案馆';
 
-/**
- * 图片源模式开关（当前 false = 双源解析模式）：
- * - false：全部图标经 services/cdn 解析——nanoka 主源（持续更新）+ jsDelivr 回退（旧档补全）。
- *   背景：jsDelivr 镜像仓库（自建 fork StarRailTextures）已停止跟随上游，仅含冻结时点前的资产；
- *   新版本内容（冻结后新增角色/物品等）在 jsDelivr 上不存在，直拼 jsDelivr 必 404，故主源必须是 nanoka。
- *   保留 isLegacyIconPath('icon/...') 判断分支与 official() 直拼分支（true 模式）仅为保留切换能力，
- *   禁止在 true 模式下上线——该模式无任何回退，jsDelivr 404 即破图。
- * - true：converter 输出的官方仓库相对路径直拼 OFFICIAL_ICON_BASE，跳过 cdn 解析层。
- *   仅当 fork 恢复跟随上游同步后，经验证命中率再允许切回。
- */
 export let USE_OFFICIAL_PATHS = false;
 
-/** 测试/调试专用：运行时切换 USE_OFFICIAL_PATHS（ESM 导入绑定只读，必须通过 setter 修改源模块变量）。 */
 export function setUseOfficialPaths(v: boolean): void {
   USE_OFFICIAL_PATHS = v;
 }
 
-/** 官方 jsDelivr StarRailTextures 镜像分支（自建 fork a285292107s，跟 main 最新以获取新版本数据）。 */
 export const JS_DELIVR_BRANCH = 'main';
 
-/** 官方图片 CDN 基址（USE_OFFICIAL_PATHS=true 时图标直接在此后拼仓库相对路径）。 */
 export const OFFICIAL_ICON_BASE = `https://cdn.jsdelivr.net/gh/a285292107s/StarRailTextures@${JS_DELIVR_BRANCH}/assets/asbres/spriteoutput`;
 
-// spine-manifest 版本（缓存键后缀：spine_manifest_official_v{N} / spine_manifest_nanoka_v{N}）。
-// 必须与 public/data/cn/spine-manifest-official.json 与 spine-manifest-nanoka.json 两文件的
-// 顶层 version 字段一致，一致性由 src/services/__tests__/spine-manifest.test.ts 强制校验。
-// v18：官方条目新增 runtime 字段（4.0 格式导出的骨架标 "4.1"，约束见 types/spine.ts runtime 注释）
-// v19：4.6 版本——真珠 1503（首页角色）+ home-bg 场景轮换为 4.6 五层（4.5 场景留档为 home-bg-4.5）
-// （spine-player 运行时版本与 CDN 列表已随引擎层迁至 src/spine/constants.ts）
 export const SPINE_MANIFEST_VERSION = 19;
 
-/** 角色满级（80 级） */
 export const MAX_CHAR_LEVEL = 80;
 
-/** 命途（含大小写两种键，兼容不同数据源） */
 export const PATH: Record<string, string> = {
   Knight: '存护', Rogue: '巡猎', Mage: '智识', Warlock: '虚无',
   Warrior: '毁灭', Shaman: '同谐', Priest: '丰饶', Memory: '记忆', Elation: '欢愉',
@@ -54,57 +24,47 @@ export const PATH: Record<string, string> = {
   warrior: '毁灭', shaman: '同谐', priest: '丰饶', memory: '记忆', elation: '欢愉',
 };
 
-/** 战斗属性 */
 export const ELEM: Record<string, string> = {
   Wind: '风', Fire: '火', Ice: '冰', Thunder: '雷',
   Quantum: '量子', Imaginary: '虚数', Physical: '物理',
 };
 
-/** 敌方分类（MonsterTemplateConfig.Rank → 中文；未知分类不渲染） */
 export const MON_RANK: Record<string, string> = {
   Minion: '普通', MinionLv2: '普通',
   Elite: '精英', LittleBoss: '准首领', BigBoss: '首领',
 };
 
-/** 技能类型 */
 export const TYPE: Record<string, string> = {
   Normal: '普攻', BPSkill: '战技', Ultra: '终结技', Passive: '天赋',
   Maze: '秘技', Servant: '忆灵技', ServantPassive: '忆灵天赋',
 };
 
-/** 韧性条标签（show_stance_list 下标对应枚举 → 中文） */
 export const STANCE_TAG: Record<string, string> = {
   SingleAttack: '单攻', AoEAttack: '群攻', Blast: '扩散',
 };
 
-/** 技能图标键映射（SkillIcon_{id}_{key}.webp） */
 export const SKILL_ICON_KEY: Record<string, string> = {
   Normal: 'Normal', BPSkill: 'BP', Ultra: 'Ultra',
   Passive: 'Passive', Maze: 'Maze', Servant: 'Servant',
   ServantPassive: 'ServantPassive',
-  // 原版遍漏修复：MazeNormal（秘技普攻）与普攻共用图标；
-  // ElationDamage（欢愉技）CDN 键名为 Elation；Assist（助战技）无独立图标资产，回退终结技图标
+
   MazeNormal: 'Normal', ElationDamage: 'Elation', Assist: 'Ultra',
 };
 
-/** 忆灵技图标 CDN 后缀按忆灵 ID 硬编码（资产命名不统一：无后缀/01/03）；未收录的默认 'Servant' */
 export const SERVANT_ICON_KEY: Record<string, string> = {
   '11402': 'Servant01', '11407': 'Servant01', '11413': 'Servant03', '18007': 'Servant01',
 };
 
-/** 开拓者偶数变体（8002/04/06/08）CDN 无图标资产，回退配对奇数 ID */
 export const TRAILBLAZER_ICON_FALLBACK: Record<string, string> = {
   '8002': '8001', '8004': '8003', '8006': '8005', '8008': '8007',
 };
 
-/** type_name → 图标键反查（部分角色天赋技能 type 为 null，仅有 type_name） */
 export const SKILL_ICON_KEY_BY_NAME: Record<string, string> = {
   '普攻': 'Normal', '战技': 'BP', '终结技': 'Ultra',
   '天赋': 'Passive', '秘技': 'Maze', '忆灵技': 'Servant',
   '忆灵天赋': 'ServantPassive', '欢愉技': 'Elation', '助战技': 'Ultra',
 };
 
-/** 行迹属性加成图标映射（property_type → trace 图标键；图标路径 `${CDN}/assets/hsr/trace/Icon{key}.webp`） */
 export const PROP_ICON: Record<string, string> = {
   AttackAddedRatio: 'Attack', HPAddedRatio: 'MaxHP', DefenceAddedRatio: 'Defence',
   SpeedDelta: 'Speed', CriticalChanceBase: 'CriticalChance', CriticalDamageBase: 'CriticalDamage',
@@ -116,18 +76,12 @@ export const PROP_ICON: Record<string, string> = {
   ImaginaryAddedRatio: 'ImaginaryAddedRatio',
 };
 
-/** 韧性条下标枚举（show_stance_list 下标对应） */
 export const STANCE_LABEL = ['SingleAttack', 'AoEAttack', 'Blast'] as const;
 
-/** 技能展示排序（null 为分隔位）；ElationDamage（欢愉技）置于天赋后 */
 export const SKILL_ORDER: (string | null)[] = ['Normal', 'BPSkill', 'Ultra', 'Passive', 'ElationDamage', null, 'Maze', 'Assist'];
 
-/** 角色详情页 Tab */
 export const CHAR_TABS = ['overview', 'skills', 'eidolons', 'builds'] as const;
 
-/* ─── 遗器属性 / 部位映射（角色配装与遗器详情页共用） ─── */
-
-/** 属性类型 → 中文名（遗器主副词条 / 行迹加成共用） */
 export const PROP_NAMES: Record<string, string> = {
   CriticalDamageBase: '暴击伤害', CriticalChanceBase: '暴击率', SpeedDelta: '速度',
   HPAddedRatio: '生命值%', AttackAddedRatio: '攻击力%', SPRatioBase: '能量恢复效率',
@@ -144,17 +98,14 @@ export const PROP_NAMES: Record<string, string> = {
   ElationDamageAddedRatioBase: '欢愉伤害提高',
 };
 
-/** 部位 → 遗器部位图标键（CDN: relicfigures/{key}.webp；HEAD/HAND 无独立图标） */
 export const SLOT_ICONS: Record<string, string> = {
   BODY: 'IconRelicBody', FOOT: 'IconRelicFoot', NECK: 'IconRelicNeck', OBJECT: 'IconRelicGoods',
 };
 
-/** 部位 → 中文名 */
 export const SLOT_NAMES: Record<string, string> = {
   HEAD: '头部', HAND: '手部', BODY: '躯干', FOOT: '脚部', NECK: '位面球', OBJECT: '连结绳',
 };
 
-/** 部位 → 图标索引（CDN: relicfigures/IconRelic_{setId}_{index}.webp） */
 export const SLOT_INDEX: Record<string, number> = {
   HEAD: 1, HAND: 2, BODY: 3, FOOT: 4, NECK: 5, OBJECT: 6,
 };

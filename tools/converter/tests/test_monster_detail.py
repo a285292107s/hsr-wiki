@@ -12,7 +12,6 @@ import pytest  # noqa: E402
 
 from converters import monster_detail as md  # noqa: E402
 
-
 @pytest.fixture(autouse=True)
 def fake_monsters(monkeypatch):
     """mock 共享聚合表 + save_json 捕获输出。"""
@@ -44,7 +43,6 @@ def fake_monsters(monkeypatch):
     monkeypatch.setattr(Path, "mkdir", lambda *a, **k: None)
     return saved
 
-
 class TestConvert:
     def test_output_structure(self, fake_monsters):
         """每怪物一个文件：字段完整、技能为全量、intro 为空串仍输出。"""
@@ -62,6 +60,5 @@ class TestConvert:
             "type_desc": "技能", "damage_type": "Quantum",
             "attack_type": "Normal", "desc": "造成伤害", "param_list": [3],
         }]
-        # 无介绍/技能的怪物同样输出（前端兜底展示）
         assert fake_monsters["1002011.json"]["intro"] == ""
         assert fake_monsters["1002011.json"]["skills"] == []

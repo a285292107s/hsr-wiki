@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * 遗器详情页
- * 结构：Hero（套装图 + 基础信息）/ 套装效果（2件/4件）/ 部位（5星部件）/ 主词条（各部位可选）/ 副词条（强化池）
- * 数据：relics.json（按 ID 查找）+ relic_main_affixes.json + relic_sub_affixes.json
- */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
@@ -13,7 +8,6 @@ import { cdnUri } from '../../services/cdn';
 import { PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES, SITE_NAME } from '../../lib/constants';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
-// 遗器详情页专属样式（随本路由 chunk 懒加载）
 import '../../styles/relic.css';
 
 const route = useRoute();
@@ -24,10 +18,8 @@ const relic = useRelicStore();
 const phase = computed<'loading' | 'error' | 'ready'>(() =>
   relic.error ? 'error' : relic.data ? 'ready' : 'loading',
 );
-/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏（useDelayedSkeleton 统一接管 timer 与生命周期清理） */
 const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 const d = computed(() => relic.data);
-/** 动态页面标题 */
 watch(d, (data) => {
   if (data) document.title = `${data.name} - ${SITE_NAME}`;
 });
@@ -53,15 +45,10 @@ watch(
   },
 );
 
-/* ═══════════ Hero ═══════════ */
-
 const figureUrl = computed(() => (d.value ? itemIconUrl(d.value.icon) : ''));
-/** 套装类型：含 4 件套需求 → 隧洞遗器；否则 → 位面饰品 */
 const isCavern = computed(() => (d.value?.require_num || []).includes(4));
 const setTypeLabel = computed(() => (isCavern.value ? '隧洞遗器' : '位面饰品'));
 const setTypeEn = computed(() => (isCavern.value ? 'CAVERN RELIC' : 'PLANAR ORNAMENT'));
-
-/* ═══════════ 套装效果 ═══════════ */
 
 const setEffects = computed<{ num: number; html: string }[]>(() => {
   if (!d.value) return [];
@@ -77,11 +64,8 @@ const setEffects = computed<{ num: number; html: string }[]>(() => {
     }));
 });
 
-/* ═══════════ 部位 ═══════════ */
-
 const pieces = computed<LocalRelicPiece[]>(() => d.value?.pieces || []);
 
-/** 部位专属图标（relicfigures/IconRelic_{setId}_{slotIndex}.webp），加载失败时回退部位通用图标 */
 function pieceIconUrl(p: LocalRelicPiece): string {
   return cdnUri('relicfigures', `IconRelic_${d.value!.id}_${SLOT_INDEX[p.type] ?? 1}.webp`);
 }
@@ -94,16 +78,11 @@ function onPieceImgError(e: Event, p: LocalRelicPiece): void {
   img.src = slotIconUrl(p);
 }
 
-/* ═══════════ 数值格式化 ═══════════ */
-
-/** 词条数值格式化：百分比属性（基础值 < 1 的比率）保留 1 位小数 + %；速度为小数值保留 1 位；其余平坦值（生命/攻击/防御）取整 */
 function fmtAffix(value: number, property: string, baseValue: number): string {
   if (baseValue > 0 && baseValue < 1) return `${(value * 100).toFixed(1)}%`;
   if (property === 'SpeedDelta') return value.toFixed(1);
   return String(Math.round(value));
 }
-
-/* ═══════════ 主词条（各部位可选） ═══════════ */
 
 interface PieceAffixGroup {
   piece: LocalRelicPiece;
@@ -121,8 +100,6 @@ function mainAffixMax(a: RelicMainAffix, maxLevel: number): number {
   return a.base_value + a.level_add * maxLevel;
 }
 
-/* ─── 主词条对比表：行=属性，列=部位，单元格=初始→满值 ─── */
-
 interface MainAffixCell { piece: LocalRelicPiece; affix: RelicMainAffix | null }
 interface MainAffixRow {
   property: string;
@@ -130,10 +107,8 @@ interface MainAffixRow {
   cells: MainAffixCell[];
 }
 
-/** 对比表列：部位列表 */
 const mainAffixColumns = computed<LocalRelicPiece[]>(() => pieces.value);
 
-/** 对比表行：每个属性对应各部位的 affix（无则 null） */
 const mainAffixRows = computed<MainAffixRow[]>(() => {
   const props: string[] = [];
   const seen = new Set<string>();
@@ -158,8 +133,6 @@ const mainAffixRows = computed<MainAffixRow[]>(() => {
   }));
 });
 
-/* ═══════════ 副词条（强化池） ═══════════ */
-
 const subAffixList = computed<RelicSubAffix[]>(() => {
   const group = pieces.value[0]?.sub_affix_group;
   if (group == null) return [];
@@ -171,7 +144,6 @@ function subAffixTierCount(a: RelicSubAffix): number {
   return (a.step_num ?? 0) + 1;
 }
 
-/** 单条副词条的所有数值档位（从低到高排列） */
 function subAffixTiers(a: RelicSubAffix): number[] {
   const count = subAffixTierCount(a);
   return Array.from({ length: count }, (_, i) => a.base_value - a.step_value * (a.step_num - i));
@@ -184,24 +156,17 @@ const enhanceInfo = computed(() => {
   return { maxLevel, rolls, multiplier: 1 + rolls };
 });
 
-/** 单条副词条理论满值：最高档（=base_value）× (1 初始 + 满级强化次数) */
 function subAffixMax(a: RelicSubAffix): number {
   return a.base_value * enhanceInfo.value.multiplier;
 }
 
-/* ═══════════ 遗器来历（部位故事） ═══════════ */
-
 interface PieceStoryItem {
   piece: LocalRelicPiece;
-  /** 部位名（作为故事标题） */
   name: string;
-  /** 题记 HTML */
   descHtml: string;
-  /** 正文 HTML */
   storyHtml: string;
 }
 
-/** 来历文本 → HTML：字面量 \n 转 <br>，保留 <i> 对话标签 */
 function toStoryHtml(text: string): string {
   return text.replace(/\\n/g, '<br>');
 }
@@ -224,9 +189,6 @@ const pieceStories = computed<PieceStoryItem[]>(() => {
   return items;
 });
 
-/* ═══════════ 主词条表横向滚动检测 ═══════════ */
-
-/** 表格内容溢出时显示右侧渐变提示；滚到末尾移除提示 */
 const affixWrapRef = ref<HTMLElement | null>(null);
 const affixScrollable = ref(false);
 let affixRo: ResizeObserver | null = null;
@@ -239,7 +201,6 @@ function checkAffixOverflow(): void {
 function onAffixScroll(): void {
   const el = affixWrapRef.value;
   if (!el) return;
-  // 滚到末尾时移除渐变提示（已无更多内容可看）
   const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
   affixScrollable.value = !atEnd && el.scrollWidth > el.clientWidth + 2;
 }
@@ -293,7 +254,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- ─── 错误态 ─── -->
     <div v-else-if="phase === 'error'" class="nk-error-state">
       <div class="nk-error-state__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
@@ -306,9 +266,7 @@ onBeforeUnmount(() => {
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
 
-    <!-- ─── 正文 ─── -->
     <template v-else-if="d">
-      <!-- Hero -->
       <div class="nk-hero nk-hero--relic">
         <div class="nk-hero__visual">
           <div
@@ -329,7 +287,6 @@ onBeforeUnmount(() => {
             <div class="nk-relic-type-en">{{ setTypeEn }}</div>
           </header>
 
-          <!-- 部位预览：图标 + 部位名标签，网格布局 -->
           <section v-if="pieces.length" class="nk-hero__section">
             <div class="nk-hero__section-title">
               <span class="nk-hero__section-bar"></span>
@@ -353,7 +310,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- 内容面板 -->
       <div class="nk-tabs">
         <div class="nk-tabs__bar">
           <div class="nk-tabs__left">
@@ -369,7 +325,6 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="nk-panels">
-        <!-- 套装效果 -->
         <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'effect' }]" data-panel="effect">
           <template v-if="setEffects.length">
             <div class="nk-relic-effects">
@@ -387,7 +342,6 @@ onBeforeUnmount(() => {
           </template>
         </div>
 
-        <!-- 主词条 -->
         <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'main' }]" data-panel="main">
           <template v-if="mainAffixRows.length">
             <div class="nk-relic-affix-note">初始 → 满级（+{{ pieces[0]?.max_level || 15 }}）</div>
@@ -429,7 +383,6 @@ onBeforeUnmount(() => {
           </template>
         </div>
 
-        <!-- 副词条 -->
         <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'sub' }]" data-panel="sub">
           <template v-if="subAffixList.length">
             <div class="nk-relic-submeta">
@@ -474,7 +427,6 @@ onBeforeUnmount(() => {
           </template>
         </div>
 
-        <!-- 遗器来历 -->
         <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'story' }]" data-panel="story">
           <template v-if="pieceStories.length">
             <div class="nk-relic-stories">

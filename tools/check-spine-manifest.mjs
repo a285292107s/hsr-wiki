@@ -85,7 +85,6 @@ for (const [name, m] of [['official', official], ['nanoka', nanoka]]) {
 }
 const overlap = allKeys.filter((k, i) => allKeys.indexOf(k) !== i);
 if (overlap.length > 0) {
-  // 预期行为：官方角色在 nanoka 侧保留回退条目（官方失效时自动回退）
   console.log(`[INFO] 两清单重复键 ${overlap.length} 个（${overlap.join(', ')}）：官方优先，失效时回退 nanoka`);
 }
 

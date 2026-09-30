@@ -22,7 +22,6 @@ logger = logging.getLogger("converter")
 
 DEFAULT_SEASON_KEY = "ExistSeason"
 
-
 def generations(
     rows: Sequence[Mapping[str, Any]] | None,
     key: str = DEFAULT_SEASON_KEY,
@@ -37,7 +36,6 @@ def generations(
             out.add(value)
     return sorted(out)
 
-
 def prev_generation(
     rows: Sequence[Mapping[str, Any]] | None,
     key: str = DEFAULT_SEASON_KEY,
@@ -49,7 +47,6 @@ def prev_generation(
     """
     gens = generations(rows, key)
     return gens[-1] if gens else None
-
 
 def mark_season_new(
     current_ids: Iterable[Any],
@@ -81,10 +78,8 @@ def mark_season_new(
         for row in old_rows
         if isinstance(row, Mapping) and row.get(key) == prev and row.get(id_key) is not None
     }
-    # 记录实际基线，换代后可直接从日志核验（ADR 0020「换代后实测一次」）
     logger.info("[%s] 上一代=%d（名册 %d 个），当前代 %d 个", label, prev, len(prev_ids), len(ids))
     return {i: i not in prev_ids for i in ids}
-
 
 def apply_season_new(
     entries: Sequence[dict],

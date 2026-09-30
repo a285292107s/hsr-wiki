@@ -8,23 +8,18 @@ from utils import load_json, save_json, map_icon_path, sort_by_id
 
 logger = logging.getLogger("converter")
 
-# 不属于"物品"分类、应从物品目录中剔除的主类型（整体排除）。
-# - Display：遗器套装/稀有度展示占位桩，非真实物品，仅供遗器页 UI 引用。
-# - Pet：宠物/呼噜乐，独立概念，不应出现在物品列表。
 EXCLUDED_MAIN_TYPES = {"Display", "Pet"}
 
-# Usable 主类型下，属于外观/个性化解锁（非消耗/收藏向物品）的子类型，剔除。
 EXCLUDED_USABLE_SUBTYPES = {
-    "PhoneTheme",       # 手机主题
-    "PlayerOutfit",     # 列车长时装
-    "ChatBubble",       # 聊天气泡
-    "PersonalCard",     # 个人名片
-    "HeadIconFrame",    # 头像框
-    "PamSkin",          # 帕姆皮肤
-    "PhoneCase",        # 手机壳
-    "PlatformBoundGift",  # 平台绑定外观礼盒
+    "PhoneTheme",
+    "PlayerOutfit",
+    "ChatBubble",
+    "PersonalCard",
+    "HeadIconFrame",
+    "PamSkin",
+    "PhoneCase",
+    "PlatformBoundGift",
 }
-
 
 def _is_excluded(item: dict) -> bool:
     main_type = item.get("ItemMainType", "")
@@ -33,7 +28,6 @@ def _is_excluded(item: dict) -> bool:
     if main_type == "Usable" and item.get("ItemSubType", "") in EXCLUDED_USABLE_SUBTYPES:
         return True
     return False
-
 
 def _parse_item(item: dict) -> dict:
     """单条 ItemConfig 记录 → items.json 条目。"""
@@ -51,7 +45,6 @@ def _parse_item(item: dict) -> dict:
         "icon": map_icon_path(item.get("ItemIconPath", "")),
         "figure_icon": map_icon_path(item.get("ItemFigureIconPath", "")),
     }
-
 
 def convert() -> None:
     """转换 ItemConfig.json → items.json（剔除非物品类型）。"""

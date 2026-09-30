@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * 令牌对比度审计（设计语言 §10 对比度验收表 / 迭代 §14）
+ * 令牌对比度审计
  *
  * 读取 tokens.css 的 :root 与 [data-theme="cw"] 两块令牌，
  * 解析 var() / color-mix() / rgba 直值，计算文本色令牌对 --bg 的 WCAG 对比度。
  *
- * 验收标准（§10 对比度验收表）：
+ * 验收标准：
  *   - 正文类（--text / --text2 / --text3 / --highlight / --gold-sem / --metric-val）≥ 4.5:1
  *   - 主色文字（--primary：编号 / 激活态 / 焦点——装饰与大字豁免）≥ 3:1
  *
@@ -158,7 +158,7 @@ function extractBlocks(css) {
       if (mm) tokens[mm[1]] = mm[2].trim();
     }
     const key = m[1].trim();
-    // :root 可出现多次（局部覆盖块），同主题合并（后者覆盖前者，符合级联语义）
+    // :root 可出现多次（局部覆盖块），同主题合并
     blocks.set(key, { ...(blocks.get(key) || {}), ...tokens });
   }
   return blocks;
@@ -171,7 +171,7 @@ let failures = 0;
 
 for (const [theme, tokens] of blocks) {
   if (!tokens['--bg']) continue; // 跳过无底色的局部 :root 覆盖块
-  // 非 :root 块（CW）继承 :root 基底：CSS 变量级联语义
+  // 非 :root 块（CW）继承 :root 基底
   const scope = theme === ':root' ? tokens : { ...rootTokens, ...tokens };
   const resolve = makeResolver(scope);
   const bg = composite(resolve(tokens['--bg']), [0, 0, 0, 1]);

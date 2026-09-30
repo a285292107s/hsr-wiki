@@ -1,13 +1,6 @@
-/* ═══════════════════════════════════════════
-   遗器详情页样式
-   复用角色/光锥页设计语言（nk-hero / nk-tabs / nk-panel），
-   遗器专属组件：套装类型徽章 / 套装效果卡 / 主词条对比表 / 副词条档位徽章
-═══════════════════════════════════════════ */
 
-/* ─── 遗器 Tabs 模式：每个 panel 独立，首项无需顶部间距 ─── */
 .nk-panel--relic { padding-top: 4px; }
 
-/* ─── Hero 遗器变体 ─── */
 .nk-hero--relic .nk-hero__visual { min-height: 240px; aspect-ratio: 2 / 1; }
 .nk-hero__bg--relic {
   background-size: 52%;
@@ -16,7 +9,6 @@
   filter: saturate(1.05) drop-shadow(0 4px 18px rgba(0,0,0,0.45));
 }
 
-/* 套装类型徽章 */
 .nk-relic-type-badge {
   font-weight: 700; letter-spacing: 0.04em;
 }
@@ -41,7 +33,6 @@
   color: var(--text3); letter-spacing: 0.06em;
 }
 
-/* Hero 部位预览：网格布局，含图标 + 部位名标签 */
 .nk-relic-hero-pieces {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
@@ -68,7 +59,6 @@
   letter-spacing: 0.04em; text-align: center; line-height: 1;
 }
 
-/* ─── 套装效果 ─── */
 .nk-relic-effects { display: flex; flex-direction: column; gap: 12px; }
 .nk-relic-effect {
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
@@ -85,13 +75,11 @@
 .nk-relic-effect__desc { font-size: 0.8125rem; line-height: 1.8; color: var(--text2); }
 .nk-relic-effect__desc .hl { color: var(--highlight); font-weight: 600; }
 
-/* ─── 主词条对比表 ─── */
 .nk-relic-affix-note {
   margin: 12px 0 12px;
   font-size: 0.6875rem; line-height: 1.7; color: var(--text3); letter-spacing: 0.03em;
 }
 
-/* ─── 副词条：关键指标徽章 + 简述 ─── */
 .nk-relic-submeta { margin: 12px 0 14px; }
 .nk-relic-submeta__badges {
   display: flex; flex-wrap: wrap; gap: 8px;
@@ -135,7 +123,6 @@
   background: var(--card);
   -webkit-overflow-scrolling: touch;
 }
-/* 横向滚动渐变提示：右侧淡出阴影暗示可滑动（不裁切内容） */
 .nk-relic-affix-table-wrap::after {
   content: ''; position: absolute;
   top: 0; right: 0; bottom: 0; width: 24px;
@@ -211,7 +198,6 @@
   color: var(--text3); opacity: 0.35; font-size: 0.875rem;
 }
 
-/* ─── 副词条：档位徽章网格 ─── */
 .nk-relic-subgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
 .nk-relic-subcell {
   display: flex; flex-direction: column; gap: 8px;
@@ -245,7 +231,6 @@
   transition: background 0.2s, color 0.2s;
 }
 
-/* ─── 遗器来历（部位故事） ─── */
 .nk-relic-stories {
   display: flex; flex-direction: column; gap: 14px;
   max-width: var(--nk-prose-max); margin: 0 auto;
@@ -276,18 +261,13 @@
 .nk-relic-story__body { font-size: 0.8125rem; line-height: 2; color: var(--text2); }
 .nk-relic-story__body i { font-style: normal; color: var(--text-bright); }
 
-/* ─── 骨架屏变体 ─── */
 .nk-skeleton--relic .nk-skeleton__stat-grid { grid-template-columns: repeat(4, 1fr); }
 
-/* ─── 响应式 ─── */
 @media (max-width: 640px) {
   .nk-hero--relic .nk-hero__visual { min-height: 180px; aspect-ratio: 5 / 2; }
-  /* 部位预览：窄屏每行最多 3 个 */
   .nk-relic-hero-pieces { grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); max-width: 100%; }
   .nk-relic-hero-piece__img { width: 48px; height: 48px; }
-  /* 副词条网格：单列堆叠，便于 4 档徽章横向展开 */
   .nk-relic-subgrid { grid-template-columns: 1fr; }
-  /* 主词条表：缩小首列，腾出空间给数值列；表头紧凑化 */
   .nk-relic-affix-table__prop-h, .nk-relic-affix-table__prop { min-width: 56px; padding-left: 6px; padding-right: 6px; font-size: 0.625rem; }
   .nk-relic-affix-table__slot-h { min-width: 64px; padding: 8px 4px; }
   .nk-relic-affix-table__icon { width: 30px; height: 30px; padding: 3px; margin-bottom: 3px; }
@@ -298,17 +278,13 @@
 }
 
 @media (min-width: 768px) {
-  /* 平板：部位预览居中显示，避免拉伸过宽 */
   .nk-relic-hero-pieces { max-width: 100%; }
-  /* 副词条：2 列 */
   .nk-relic-subgrid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 }
 
 @media (min-width: 1024px) {
-  /* 桌面：遗器视觉区缩小，图标不需要占据大面积 */
   .nk-hero--relic { min-height: auto; }
   .nk-hero--relic .nk-hero__visual { min-height: 320px; flex: 0 0 34%; }
   .nk-hero__bg--relic { background-size: 60%; }
-  /* 副词条 3 列，提升密度 */
   .nk-relic-subgrid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 }

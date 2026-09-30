@@ -1,7 +1,4 @@
 <script setup lang="ts">
-/**
- * 404 页面：Gaming HUD 风格，数据节点未连接。
- */
 import { RouterLink } from 'vue-router';
 </script>
 

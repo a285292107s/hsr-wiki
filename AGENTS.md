@@ -35,7 +35,6 @@ pnpm test:e2e:ci        # e2e CI 层（layout + a11y）
 node tools/gen-ai-endpoints.mjs   # 单独重建 AI 快照（读 dist/index.html 为模板，须先 vite build）
 node tools/check-ai-endpoints.mjs # AI 端点守卫（快照正文/内链/sitemap/robots 覆盖率；pnpm build 末步自动跑）
 node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删引用即非零退出；仅手动，未进 CI）
-node tools/check-comments.mjs    # 注释累赘度守卫（report-only 先行；长块/超长头/重复断言/护栏基线；存量清零后接 pnpm build）
 ```
 
 全量命令手册（e2e 分层与像素基线、研究线 `/debug`、converter、部署与门禁、dev 缓存自愈）见 [docs/agents/commands.md](docs/agents/commands.md)。
@@ -58,7 +57,7 @@ node tools/check-comments.mjs    # 注释累赘度守卫（report-only 先行；
 
 - Vue SFC 统一 `<script setup lang="ts">`；CSS 用 BEM + 双前缀（内容与设计系统 `nk-` / 应用外壳 `ui-`）；不使用预处理器；**不引入 ESLint / Prettier**。
 - 样式分层（tokens.css 令牌与全局原语 / catalog.css 目录引擎 / 页面 css 随路由懒加载 / SFC scoped 组件）与命名、共享原语的完整纪律见 [docs/agents/ui-design.md](docs/agents/ui-design.md) §1——页面间复用先查原语，**禁止复制粘贴**。
-- 注释第一读者是后续接手的 AI：写成「禁止…」「必须…」可执行形态，只写可验证事实，禁复述实现、禁过期断言，坑位当场注释。细则见 [docs/agents/conventions.md](docs/agents/conventions.md)。
+- **注释只写「代码与数据都推不出、且 `docs/` 里也不存在」的事实**；可推理的一律不写，可能频繁改动的（样式数值尤其）一律不写。细则见 [docs/agents/conventions.md](docs/agents/conventions.md)。
 
 ## 任务交付流程
 

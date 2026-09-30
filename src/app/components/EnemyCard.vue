@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * 敌方完整信息卡（星启 / 末日幻影纯 Boss 战共用）：
- * 头像 + 分类徽章 + 阵营/韧性标签 + 弱点/抗性行 + 图鉴介绍 + 技能胶囊。
- * 样式位于 endgame-detail.css（.nk-egd-mon 系，随终局详情路由懒加载）。
- */
 import type { MazeMonsterInfo } from '../../services/types';
 import { ELEM, MON_RANK } from '../../lib/constants';
 import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
@@ -16,7 +11,6 @@ function introHtml(m: MazeMonsterInfo): string {
 
 defineProps<{ monster: MazeMonsterInfo }>();
 
-/** 元素图标行 */
 function elemRow(types: string[]): string {
   return types.map((d) => {
     const src = elementIconUrl(d);
@@ -26,19 +20,16 @@ function elemRow(types: string[]): string {
   }).join('');
 }
 
-/** 敌方分类中文（未知分类返回空 → 不渲染徽章） */
 function monRank(rank?: string): string {
   return rank ? (MON_RANK[rank] || '') : '';
 }
 
-/** 伤害抗性文本：`火 20% / 冰 60%`（属性 → ELEM 中文；用于 title 提示） */
 function resistText(m: MazeMonsterInfo): string {
   const es = Object.entries(m.resist || {});
   if (!es.length) return '';
   return es.map(([d, v]) => `${ELEM[d] || d} ${Math.round(v * 100)}%`).join(' / ');
 }
 
-/** 伤害抗性图标行：属性图标 + 百分比（与弱点行同款元素图标） */
 function resistRowHtml(m: MazeMonsterInfo): string {
   const es = Object.entries(m.resist || {});
   if (!es.length) return '';
@@ -51,7 +42,6 @@ function resistRowHtml(m: MazeMonsterInfo): string {
   }).join('');
 }
 
-/** 敌方悬浮提示：名称 · 分类 · 阵营 · 韧性 · 速度 · 弱点 · 抗性 */
 function monTitle(m: MazeMonsterInfo): string {
   const parts = [m.name];
   const r = monRank(m.rank);
@@ -71,7 +61,6 @@ function monTitle(m: MazeMonsterInfo): string {
     <div class="nk-egd-mon__head">
       <div class="nk-egd-mon__figure">
         <span v-if="monRank(monster.rank)" class="nk-egd-mon__rank" :class="`nk-egd-mon__rank--${monster.rank}`">{{ monRank(monster.rank) }}</span>
-        <!-- 立绘可点击跳转敌对物种详情（/monster/:模板 ID；无 tpl 时 id 即模板 ID） -->
         <router-link
           class="nk-egd-mon__figlink"
           :to="`/monster/${monster.tpl || monster.id}`"

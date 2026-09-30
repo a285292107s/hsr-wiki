@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * 审核条目展开详情（SpineAuditView 子组件）：
- * 渲染 L0 资源表 / atlas 对照 / L1 元数据 / L2 采样 + 诊断建议 + 动画预览。
- * 预览生命周期随组件挂载/卸载自管理（同一时刻仅一个详情展开，父级保证 v-if 单实例），
- * 模板 ref 不再落入 v-for → 无需「取数组末项」兜底。
- */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { SpineResolved } from '../../services/types';
 import type { SpinePlayerInstance } from '../../spine/types';
@@ -16,34 +10,25 @@ import {
 
 const props = defineProps<{
   entry: AuditEntry;
-  /** 父级按条目所属源解析的结果（null = 不可解析） */
   resolved: SpineResolved | null;
 }>();
 
-/** WebGL 上下文占用变化通知（预览实例创建 +1 / 释放 -1），父级汇总 GL 配额 */
 const emit = defineEmits<{ glChange: [delta: number] }>();
 
-/** 诊断建议（errors/warnings 变化时随 computed 自动刷新，模板单次求值） */
 const diagnosis = computed(() => buildDiagnosis(props.entry));
 
-/** 混合模式去重摘要（如 additive / screen） */
 const blendModes = computed(() => {
   const slots = props.entry.meta?.blendSlots;
   if (!slots || !slots.length) return '';
   return [...new Set(slots.map((b) => b.name))].join(' / ');
 });
 
-/** 混合 slot 完整明细（title 悬停查看，如 S22:additive S23:additive …） */
 const blendDetail = computed(() => {
   const slots = props.entry.meta?.blendSlots;
   if (!slots || !slots.length) return '';
   return slots.map((b) => `S${b.index}:${b.name}`).join(' ');
 });
 
-/**
- * 无元数据时的占位文案（按状态区分，防「未运行」被误读为「渲染失败」）：
- * 元数据仅在审核队列 L2 渲染成功后写入，未开跑/排队中的条目 meta 天然为空。
- */
 const metaPlaceholder = computed(() => {
   const e = props.entry;
   if (e.renderError) return e.renderError;
@@ -51,8 +36,6 @@ const metaPlaceholder = computed(() => {
   if (e.status === 'pending') return '尚未运行审核 — 点击顶部「开始审核」后查看元数据';
   return '渲染失败，无元数据';
 });
-
-/* ─── 预览 ─── */
 
 const stageRef = ref<HTMLElement | null>(null);
 const player = ref<SpinePlayerInstance | null>(null);
@@ -77,7 +60,6 @@ async function mountPreview(): Promise<void> {
   host.replaceChildren();
   try {
     const p = new Ctor(host, {
-      // 场景条目仅预览主背景层（buildAuditPlayerConfig 缺省 layer 0 + pad 0）
       ...buildAuditPlayerConfig(resolved),
       alpha: true,
       backgroundColor: '00000000',
@@ -93,7 +75,7 @@ async function mountPreview(): Promise<void> {
           try {
             pl.setAnimation(def);
             pl.play();
-          } catch { /* 静默 */ }
+          } catch {}
         }
       },
       error(_pl, msg) {
@@ -123,7 +105,7 @@ function onAnim(name: string): void {
     p.setAnimation(name);
     p.play();
     paused.value = false;
-  } catch { /* 静默 */ }
+  } catch {}
 }
 
 function togglePause(): void {
@@ -133,7 +115,7 @@ function togglePause(): void {
   try {
     if (paused.value) p.pause();
     else p.resume ? p.resume() : p.play(); // 4.1 运行时无 resume，退化为 play
-  } catch { /* 静默 */ }
+  } catch {}
 }
 
 onMounted(() => {
@@ -231,7 +213,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* ─── 详情（两列诊断 + 预览舞台） ─── */
 .nk-spine-audit__detail {
   padding: 14px;
   border-left: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
@@ -326,9 +307,7 @@ onBeforeUnmount(() => {
 }
 .nk-spine-audit__advice li { color: #ffd9a3; }
 
-/* ─── 预览 ─── */
 .nk-spine-audit__preview { margin-top: 16px; }
-/* 舞台尺寸跟随容器（最大 640 宽 + 16:9）：Spine canvas 自动 100% 填充 */
 .nk-spine-audit__stage {
   width: 100%;
   max-width: 640px;
@@ -354,7 +333,6 @@ onBeforeUnmount(() => {
   word-break: break-all;
 }
 
-/* ─── 详情内控件（与父页同名类隔离，scoped 不穿透） ─── */
 .nk-spine-audit__select {
   padding: 3px 8px;
   max-width: 220px;

@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * 对比技能卡：单条技能的前后变化视图（原始灰 → 强化金，双段）。
- * 等级滑条范围取 base/enh 最大值；层级参数各自代入渲染；
- * 头部结构沿用 nk-skill 全局原语（与技能卡视觉一致），对比样式为本组件 scoped。
- */
 import { computed, ref } from 'vue';
 import { fmtDesc, skillIconUrl, fmtToughness } from '../../lib/format';
 import { ELEM, TYPE } from '../../lib/constants';
@@ -15,8 +10,6 @@ const props = defineProps<{
   charId: string;
   charData: CharacterData | null;
 }>();
-
-/* ─── 等级滑条（范围 = 双侧 max；单侧缺级时该侧渲染「—」） ─── */
 
 function lvCount(sk: Skill | undefined): number {
   return sk && sk.level ? Object.keys(sk.level).length : 0;
@@ -43,14 +36,12 @@ function sideHtml(sk: Skill | undefined): string {
 const baseHtml = computed(() => sideHtml(props.diff.base));
 const enhHtml = computed(() => sideHtml(props.diff.enh));
 
-/* ─── 头部（图标用 base 确保可用；名称/标签用强化侧新形态） ─── */
+/* 图标用 base 确保可用；名称/标签用强化侧新形态 */
 
 const typeName = computed(() => props.diff.enh.type_name || TYPE[props.diff.enh.type ?? ''] || '');
 const tagLabel = computed(() => props.diff.enh.tag || '');
 const icon = computed(() => skillIconUrl(props.diff.base, props.charId, props.charData));
 const typeKey = computed(() => props.diff.enh.type || '');
-
-/* ─── 数值类变化（能量/削韧/韧性/战技点：kinds 命中时双段展示） ─── */
 
 interface MetricDiff { label: string; base: string; enh: string }
 const metricDiffs = computed<MetricDiff[]>(() => {
@@ -68,7 +59,7 @@ const metricDiffs = computed<MetricDiff[]>(() => {
   if (has('stance_damage_display') || has('show_stance_list')) {
     out.push({ label: '削韧', base: fmtTough(b), enh: fmtTough(e) });
   }
-  // 战技点对比：正值 = 消耗 N（-N），-1 = 不消耗哨兵（非产出，2026-08-15 勘正）
+  // 战技点对比：正值 = 消耗 N（-N），-1 = 不消耗哨兵（非产出）
   const fmtBP = (v: number | null | undefined): string => {
     if (v == null) return '—';
     return v === -1 ? '不消耗' : '-' + String(v);
@@ -79,18 +70,18 @@ const metricDiffs = computed<MetricDiff[]>(() => {
 </script>
 
 <template>
-  <div class="nk-skill nk-cmp-skill" :data-type="typeKey">
+  <div class="nk-skill" :data-type="typeKey">
     <span class="nk-cmp-badge">变化</span>
     <div class="nk-skill__head">
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">
         <span class="nk-slider__val">Lv.{{ lv }}<template v-if="maxLv > 1">/{{ maxLv }}</template></span>
-        <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
+        <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :aria-label="`${diff.enh.name} 等级`" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
       </div>
     </div>
     <div class="nk-skill__body">
       <div class="nk-skill__title-row">
-        <img v-if="icon" class="nk-skill__icon" :src="icon">
+        <img v-if="icon" class="nk-skill__icon" :src="icon" alt="">
         <div class="nk-skill__title">
           <span class="nk-skill__name">{{ diff.enh.name }}</span>
           <span class="nk-skill__meta">

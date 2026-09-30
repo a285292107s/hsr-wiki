@@ -13,12 +13,10 @@ import pytest  # noqa: E402
 
 from converters import monster_common as mc  # noqa: E402
 
-
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
     """mock TextMap，避免加载真实大文件。"""
     monkeypatch.setattr(mc, "resolve_text", lambda ref, clean=False: "" if not ref else f"名{ref.get('Hash', 0)}")
-
 
 def _fake_load(path):
     name = str(path)
@@ -35,7 +33,7 @@ def _fake_load(path):
              "Rank": "MinionLv2"},
             {"MonsterTemplateID": 9002, "MonsterName": {"Hash": 3},
              "ManikinImagePath": "", "Rank": "BigBoss"},
-            {"MonsterTemplateID": 9999999, "ManikinImagePath": ""},  # 无名称 → 跳过
+            {"MonsterTemplateID": 9999999, "ManikinImagePath": ""},
         ]
     if name.endswith("MonsterConfig.json"):
         return [
@@ -46,11 +44,9 @@ def _fake_load(path):
                  {"DamageType": "Thunder", "Value": {"Value": 0.2}},
              ],
              "MonsterIntroduction": {"Hash": 10},
-             "SkillList": [801301001, 999999]},  # 未注册技能 → 跳过
-            # MonsterID 与模板 ID 不一致（9001 实例绑定 9002 模板）→ 按 MonsterTemplateID 回退
+             "SkillList": [801301001, 999999]},
             {"MonsterID": 9001, "MonsterTemplateID": 9002,
              "StanceWeakList": ["Quantum"], "DamageTypeResistance": []},
-            # 3024012 无配置记录 → 弱点/抗性/介绍空
         ]
     if name.endswith("MonsterCamp.json"):
         return [{"ID": 3, "Name": {"Hash": 20}}]
@@ -59,10 +55,9 @@ def _fake_load(path):
                  "SkillTag": {"Hash": 31}, "SkillTypeDesc": {"Hash": 32},
                  "DamageType": "Quantum", "AttackType": "Normal",
                  "SkillDesc": {"Hash": 33}, "ParamList": [{"Value": 3}, {"Value": 0.5}]},
-                {"SkillID": 999999, "SkillName": {}},  # 无名称 → 不入索引
-                {"SkillID": None}]  # 无 ID → 跳过
+                {"SkillID": 999999, "SkillName": {}},
+                {"SkillID": None}]
     return []
-
 
 class TestLoadMonsters:
     def test_full_fields(self, monkeypatch):
@@ -73,7 +68,7 @@ class TestLoadMonsters:
             "name": "名1",
             "icon": "Monster_8013010",
             "figure": "Monster_8013010",
-            "weak": ["Physical", "Ice"],  # 去重保序
+            "weak": ["Physical", "Ice"],
             "resist": {"Fire": 0.2, "Thunder": 0.2},
             "rank": "Elite", "camp": "名20",
             "intro": "名10",

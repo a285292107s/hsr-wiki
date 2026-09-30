@@ -1,32 +1,16 @@
-/* ═══════════════════════════════════════════
-   终局赛季详情页（Endgame Season Detail）· 深空档案编辑式排版
-   由路由 /endgame/:mode/:id 懒加载（EndgameView）。
-   - 模式身份：--eg-color 经 data-mode 映射（领域层 --eg-* 令牌，与目录页同源）
-   - 设计语言：
-     编辑式章节标题 / 中性细线阅读族卡片 / 规格表数据 / 克制用色
-     · 模式色仅存于身份锚点：层序号 hover、章节徽标、指标数值、元素边框、导航目标
-     · 卡片 hover 仅边框/背景亮度变化，无位移无 glow；强调词走语义金 --highlight
-   - 覆盖：Hero / 增益卡 / 关卡层级 / 敌方网格 / 星启模式 / 相邻赛季导航
-═══════════════════════════════════════════ */
 
-/* ─── 模式身份映射 ─── */
 .nk-egd[data-mode="maze"] { --eg-color: var(--eg-maze); }
 .nk-egd[data-mode="story"] { --eg-color: var(--eg-story); }
 .nk-egd[data-mode="boss"] { --eg-color: var(--eg-boss); }
 .nk-egd[data-mode="peak"] { --eg-color: var(--eg-peak); }
 
-/* ═══════════════════════════════════════════
-   吸顶工具条：章节导航 + 层级折叠控制 + 阅读进度线
-   （fixed 视口级全宽横贯；近实底 0.97 + blur，内容避让侧栏与滚动容器对齐）
-═══════════════════════════════════════════ */
-.nk-egd.nk-page--detail { padding-top: 46px; } /* 吸顶条占位（44 + 2 进度线） */
+.nk-egd.nk-page--detail { padding-top: 46px; }
 .nk-egd-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 10;
   background: color-mix(in srgb, var(--blk-800) 97%, transparent);
   backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
   border-bottom: 1px solid var(--line-1);
 }
-/* 内容区避让侧栏：在（视口 - 侧栏宽）区域内居中，与滚动容器内容对齐（令牌断点接管平板 88 / 桌面 148） */
 @media (min-width: 768px) {
   .nk-egd-bar { padding-left: var(--nk-content-offset); }
 }
@@ -34,13 +18,9 @@
   display: flex; align-items: center; gap: 12px;
   max-width: var(--nk-detail-max); margin: 0 auto; padding: 6px 16px; min-height: 44px;
 }
-/* 区块导航：激活态用模式色（身份锚点，覆盖 tokens 默认主色） */
 .nk-egd-secnav .nk-secnav__btn--active { color: var(--eg-color); }
 .nk-egd-secnav .nk-secnav__btn--active::after { background: var(--eg-color); }
-/* 触控热区补足 44px（硬标准：tokens 全局 ::before 上下 -7px，实测 28px 视觉合计 42px，此处补 1px） */
 .nk-egd-secnav .nk-secnav__btn::before { top: -8px; bottom: -8px; }
-/* 章节工具行：层级批量展开/折叠（位于"关卡层级 LEVELS"标题行内，随章节同屏；
-   按钮紧跟标题文字，延伸线保持完整收束；::before 扩展 44px 热区） */
 .nk-egd-title-tools {
   display: inline-flex;
   align-items: center;
@@ -55,21 +35,15 @@
   transition: color 0.15s;
 }
 .nk-egd-title-tool::before {
-  content: ''; position: absolute; left: -6px; right: -6px; top: -12px; bottom: -12px; /* 热区 ≥44px */
+  content: ''; position: absolute; left: -6px; right: -6px; top: -12px; bottom: -12px;
 }
 .nk-egd-title-tool:hover { color: var(--eg-color); }
-/* 阅读进度线（模式色渐变，与 Hero 身份线同语言） */
 .nk-egd-bar__progress {
   height: 2px; width: 0;
   background: linear-gradient(90deg, color-mix(in srgb, var(--eg-color) 45%, transparent) 0%, var(--eg-color) 55%, color-mix(in srgb, var(--eg-color) 75%, #fff) 100%);
 }
-/* 锚点滚动补偿（吸顶条高度 44 + 进度线 2 + 余量） */
 #egd-buffs, #egd-tierce, #egd-floors, #egd-levels, #egd-sub-buffs { scroll-margin-top: 56px; }
 
-/* ═══════════════════════════════════════════
-   Hero：档案铭牌 + 赛季信息
-   （本体透明底；沉浸式背景 __bg 经 mask 渐隐铺底，顶部模式色细线为身份线，底部渐隐衔接内容）
-═══════════════════════════════════════════ */
 .nk-egd-hero {
   position: relative;
   display: flex;
@@ -82,7 +56,6 @@
   flex-shrink: 0;
   background: transparent;
 }
-/* 顶部模式色细线（档案扉页身份线，克制无 glow） */
 .nk-egd-hero::before {
   content: '';
   position: absolute;
@@ -96,7 +69,6 @@
   opacity: 0.6;
   z-index: 1;
 }
-/* 底部渐隐（与内容面板衔接，功能材质） */
 .nk-egd-hero::after {
   content: '';
   position: absolute;
@@ -105,9 +77,6 @@
   background: linear-gradient(90deg, transparent 4%, var(--line-2) 50%, transparent 96%);
   z-index: 1;
 }
-/* 沉浸式背景（maze 场景背景 / story 海报背景 / peak 图鉴横幅）：低透明度铺底，
-   左侧文字区渐隐保护对比度（plate 深底 + 名称区无背景干扰），右侧保留视觉焦点；
-   z-index 0 低于铭牌/信息面板/身份线，加载失败隐藏后不占位 */
 .nk-egd-hero__bg {
   position: absolute;
   inset: 0;
@@ -123,9 +92,6 @@
   z-index: 0;
 }
 
-/* 赛季横幅（theme_banner：宣传 BANNER）——Hero 右侧装饰底图，左侧渐隐与内容衔接，
-   低于铭牌/信息面板（z-index 0）；与 __bg 互斥（模板 showHeroBg 控制，横幅优先），
-   虚构/末日统一横幅语言，避免同区域双图叠加重影 */
 .nk-egd-hero__banner {
   position: absolute;
   top: 50%;
@@ -142,8 +108,6 @@
   z-index: 0;
 }
 
-/* 铭牌：模式徽记 + 赛季图标（档案角标；深底细线，无渐变无 glow）
-   编号已移至右侧信息面板 meta 行（弱化展示为 No.XXX） */
 .nk-egd-hero__plate {
   position: relative;
   z-index: 1;
@@ -176,8 +140,6 @@
   color: color-mix(in srgb, var(--eg-color) 70%, var(--text2));
 }
 .nk-egd-hero__emblem svg { width: 100%; height: 100%; }
-/* 赛季页签图标（TabIcon）：图章式融入铭牌——无底板无边框无阴影（去"卡中卡"），
-   absolute 覆盖 SVG 徽记；加载失败隐藏后露出徽记，形成"徽记 → 图章"渐进 */
 .nk-egd-hero__art {
   position: absolute;
   top: 50%;
@@ -187,7 +149,6 @@
   height: 100px;
   object-fit: contain;
 }
-/* 信息面板 */
 .nk-egd-hero__panel {
   position: relative;
   z-index: 1;
@@ -228,7 +189,6 @@
   gap: 10px;
   flex-wrap: wrap;
 }
-/* 状态徽章（与目录卡同色系，语义色）：统一基线高度 */
 .nk-egd-hero__status {
   display: inline-flex;
   align-items: center;
@@ -255,7 +215,6 @@
   color: var(--text3);
   padding: 5px 0;
 }
-/* 赛季编号（内部 ID，低重要性：meta 行内小号弱化展示） */
 .nk-egd-hero__sid {
   display: inline-flex;
   align-items: center;
@@ -273,8 +232,6 @@
   white-space: nowrap;
 }
 
-/* 指标条已移除（层数/阶段/回合为恒值或低价值冗余） */
-
 .nk-egd-elem {
   width: 20px;
   height: 20px;
@@ -284,11 +241,6 @@
   padding: 2px;
 }
 
-/* ═══════════════════════════════════════════
-   内容区 · 宽度体系：面板 L1 1000，模块 L2 952，文本 L3 800
-═══════════════════════════════════════════ */
-/* 终局面板：独立于 tab 面板原语（tokens.css .nk-panel 默认 display:none 供多 Tab 激活切换；
-   详情页唯一面板直接显示，沿用居中宽度与 nk-fade 入场） */
 .nk-egd-body .nk-egd-panel { display: block; max-width: var(--nk-detail-max); margin: 0 auto; padding: 24px 16px 60px; animation: nk-fade 0.3s var(--ease); }
 .nk-egd-body .nk-title,
 .nk-egd-body .nk-egd-fury,
@@ -298,9 +250,7 @@
 .nk-egd-body .nk-egd-empty,
 .nk-egd-body .nk-egd-nav { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }
 
-/* ─── 赛季增益（轻卡片：平级独立卡，无嵌套——与层级/节点等含展品卡的容器区分） ─── */
 .nk-egd-buffs { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
-/* 赛季主题图标（theme_icon：虚构/末日每赛季主题图，标题装饰；基线对齐兼容 nk-title） */
 .nk-egd-title-icon {
   width: 26px;
   height: 26px;
@@ -330,7 +280,6 @@
   background: color-mix(in srgb, var(--blk-900) 22%, transparent);
 }
 .nk-egd-buff__head { display: flex; align-items: baseline; gap: 12px; }
-/* 增益图标（bufficon CDN；未就绪时 SVG 占位）：卡片头部垂直居中 */
 .nk-egd-buff__head { align-items: center; }
 .nk-egd-buff__icon {
   width: 30px;
@@ -360,14 +309,8 @@
   max-width: var(--nk-prose-max);
 }
 
-/* ═══════════════════════════════════════════
-   战意机制（虚构叙事 Fever 赛季主题：机制 + 战熄潮平/战意汹涌两阶段效果）
-   SubMazeBuffList：机制 1 条 + 效果 2 条；小节标签与层级阶段标签同语言
-═══════════════════════════════════════════ */
 .nk-egd-fury { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
 .nk-egd-fury__mech, .nk-egd-fury__eff { display: flex; flex-direction: column; gap: 8px; }
-/* 战意效果容器：作为 flex item 时共享规则的 margin:auto 会收缩不拉伸（838px 缩窄居中），
-   覆写为全宽拉伸，与战意机制卡 / 赛季增益卡对齐（952px） */
 .nk-egd-fury__eff .nk-egd-buffs {
   width: 100%;
   margin-left: 0;
@@ -388,17 +331,12 @@
 .nk-egd-buff__desc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-buff__desc .nowrap { white-space: nowrap; }
 
-/* ═══════════════════════════════════════════
-   关卡层级章节（以层级为章节名的完整内容）
-═══════════════════════════════════════════ */
 .nk-egd-floors {
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin-bottom: 8px;
 }
-/* 层级章节：编辑式（无盒框）——层与层以细线收束，层头承载折叠交互；
-   boss 模式敌卡直接铺于页面，杜绝"层卡内嵌敌卡"的卡中卡嵌套 */
 .nk-egd-floor {
   position: relative;
   padding: 20px 4px 24px;
@@ -410,7 +348,6 @@
   animation-delay: min(calc(var(--i, 0) * 60ms), 480ms);
 }
 .nk-egd-floor:first-child { border-top: none; padding-top: 6px; }
-/* 章节头（层头 button：点击切换折叠；折叠态即层级索引；去卡后行 hover 承载反馈） */
 .nk-egd-floor__head {
   position: relative;
   display: flex;
@@ -428,7 +365,6 @@
   cursor: pointer;
   transition: background 0.2s var(--ease);
 }
-/* 触控热区扩展至 ≥44px（硬标准：视觉高度近 44px，上下各补 4px 余量） */
 .nk-egd-floor__head::before {
   content: '';
   position: absolute;
@@ -437,7 +373,6 @@
 .nk-egd-floor__head:hover {
   background: color-mix(in srgb, var(--eg-color) 5%, transparent);
 }
-/* 展开箭头（微动级：旋转 90°；hover 仅颜色变化） */
 .nk-egd-floor__arrow {
   flex-shrink: 0;
   width: 13px; height: 13px;
@@ -446,7 +381,6 @@
 }
 .nk-egd-floor--open .nk-egd-floor__arrow { transform: rotate(90deg); }
 .nk-egd-floor__head:hover .nk-egd-floor__arrow { color: var(--eg-color); }
-/* 折叠态摘要：推荐属性索引行（编辑式——上细线收束，无盒框） */
 .nk-egd-floor__summary {
   display: flex;
   align-items: center;
@@ -465,7 +399,6 @@
 }
 .nk-egd-floor__summary .nk-egd-floor__elems { gap: 6px; }
 .nk-egd-floor__summary .nk-egd-elem { width: 20px; height: 20px; }
-/* 折叠摘要右侧数据（波数·敌数汇总，与 moncount 徽标同语言） */
 .nk-egd-floor__summarydata {
   margin-left: auto;
   flex-shrink: 0;
@@ -479,7 +412,6 @@
   background: color-mix(in srgb, var(--eg-color) 9%, transparent);
   white-space: nowrap;
 }
-/* 展开体（grid-rows 0fr→1fr 折叠动画，设计语言披露控件同款） */
 .nk-egd-floor__body {
   display: grid;
   grid-template-rows: 0fr;
@@ -493,8 +425,6 @@
   border-top: 0 solid var(--line-1);
   transition: padding 0.3s var(--ease), border-top-width 0.3s var(--ease);
 }
-/* 展开态：层头（题头）与正文之间以细线分隔——"章节题头 + 分隔线 + 正文"的编辑式结构；
-   折叠态无分隔（纯索引行）。折叠过渡时 padding/border 随 grid 轨道同步收束 */
 .nk-egd-floor--open .nk-egd-floor__body-inner {
   padding-top: 18px;
   border-top-width: 1px;
@@ -514,7 +444,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* 层头数据组（等级/回合/分数线：规格表式 label+value 列，替代原等宽胶囊） */
 .nk-egd-floor__data {
   margin-left: auto;
   flex-shrink: 0;
@@ -550,20 +479,17 @@
   color: var(--text3);
   white-space: nowrap;
 }
-/* 上下半场双列（编辑式：无阶段盒框，仅列间细分隔线 + 行式规格表） */
 .nk-egd-floor__stages {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
 }
-/* 单阶段层：唯一阶段占满两列，避免右侧留空；三阶段层第 3 阶段全宽（末日幻影 3 阶段制） */
 .nk-egd-floor__stages > .nk-egd-floor__stage:only-child { grid-column: 1 / -1; }
 .nk-egd-floor__stages > .nk-egd-floor__stage:nth-child(3) {
   grid-column: 1 / -1;
   border-left: none;
   padding-left: 0;
 }
-/* 第二列以细分隔线收束，替代整卡边框 */
 .nk-egd-floor__stage + .nk-egd-floor__stage {
   border-left: 1px solid var(--line-1);
   padding-left: 28px;
@@ -575,7 +501,6 @@
   min-width: 0;
   padding: 0;
 }
-/* 阶段卡头：模式色胶囊 + 右置波数/敌数汇总，底部分隔线独立卡头（与层头同语言） */
 .nk-egd-floor__stagehead {
   display: flex;
   align-items: center;
@@ -597,7 +522,6 @@
   background: color-mix(in srgb, var(--eg-color) 9%, transparent);
   white-space: nowrap;
 }
-/* 规格表行：行间 1px 分隔线（末行去线，表格收束不悬空） */
 .nk-egd-floor__row {
   display: flex;
   align-items: center;
@@ -611,16 +535,11 @@
   padding-bottom: 0;
   border-bottom: none;
 }
-/* 敌方配置行：内容区可能被波次组撑高，label 顶对齐首行而非垂直居中悬空 */
 .nk-egd-floor__row--mons { align-items: flex-start; }
 .nk-egd-floor__row--mons .nk-egd-floor__label { padding-top: 3px; }
-/* Boss 信息卡直挂行内：窄卡（452px）下换行会导致 label 悬空，禁止换行并让卡片占剩余宽度
-   （阶段制与上下半场统一经 StageContent 渲染，Boss 卡在 wave 内 .nk-egd-mons 撑满剩余空间） */
 .nk-egd-floor__stage .nk-egd-floor__row--mons { flex-wrap: nowrap; }
-/* 逐级撑满：monswrap 占 row 剩余、wave 内 boss 卡 grid 占 wave 剩余（label 不悬空） */
 .nk-egd-floor__row--mons > .nk-egd-floor__monswrap { flex: 1 1 auto; min-width: 0; }
 .nk-egd-floor__wave > .nk-egd-mons { flex: 1 1 auto; min-width: 0; }
-/* 绝境变体子卡：dashed 边框已标识层级，内部不再细分隔线 */
 .nk-egd-floor__hard .nk-egd-floor__row {
   margin: 0;
   padding: 8px 0;
@@ -635,14 +554,12 @@
 }
 .nk-egd-floor__elems { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 .nk-egd-floor__elems .nk-egd-elem { width: 24px; height: 24px; }
-/* 敌方头像行（小尺寸；hover 微浮 1px，无 glow） */
 .nk-egd-floor__monswrap {
   display: flex;
   flex-direction: column;
   gap: 9px;
   min-width: 0;
 }
-/* 单波次组：标签 + 头像行 —— 波次标签前加模式色圆点增强锚点 */
 .nk-egd-floor__wave {
   display: flex;
   align-items: flex-start;
@@ -667,7 +584,6 @@
   background: color-mix(in srgb, var(--eg-color) 72%, var(--text2));
   flex-shrink: 0;
 }
-/* 波数·敌数徽标（如“3 波 · 9 敌”，HUD 风格） */
 .nk-egd-floor__moncount {
   flex-shrink: 0;
   font-family: var(--font-hud);
@@ -700,7 +616,6 @@
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
-/* 敌方小图详情链接（/monster/:模板 ID；悬浮提示上移，链接承接 hover） */
 .nk-egd-floor__monlink {
   display: inline-block;
   line-height: 0;
@@ -710,7 +625,6 @@
   display: block;
   transform-origin: center;
 }
-/* 可用增益（层级 MazeBuff，如记忆紊流；轻卡片——层章节本身无框，层内轻卡不构成嵌套） */
 .nk-egd-floor__buff {
   margin-top: 18px;
   padding: 16px 18px;
@@ -751,8 +665,6 @@
 }
 .nk-egd-floor__buffdesc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-floor__buffdesc .nowrap { white-space: nowrap; }
-/* 层级挑战目标 */
-/* 挑战目标：规格表行（编号列 + 文本，行间 1px 分隔线，末行去线） */
 .nk-egd-floor__targets {
   list-style: none;
   margin: 12px 0 0;
@@ -786,7 +698,6 @@
 }
 .nk-egd-floor__targettext .hl { color: var(--highlight); font-weight: 700; }
 
-/* ─── 异相仲裁关卡（骑士/王棋徽标 + 机制标签 + 绝境变体） ─── */
 .nk-egd-peak__kind {
   flex-shrink: 0;
   font-size: 0.66rem;
@@ -799,19 +710,16 @@
   background: color-mix(in srgb, var(--eg-color) 10%, transparent);
   white-space: nowrap;
 }
-/* 王棋：实心强化（领域金语义） */
 .nk-egd-peak__kind--king {
   color: var(--blk-900);
   border-color: color-mix(in srgb, var(--eg-color) 70%, transparent);
   background: linear-gradient(160deg, color-mix(in srgb, var(--eg-color) 82%, #fff) 0%, var(--eg-color) 100%);
 }
-/* 绝境：红系描边警示（--diff-del 领域层） */
 .nk-egd-peak__kind--hard {
   color: color-mix(in srgb, var(--diff-del) 80%, #fff);
   border-color: color-mix(in srgb, var(--diff-del) 60%, transparent);
   background: color-mix(in srgb, var(--diff-del) 14%, transparent);
 }
-/* 机制标签行（标签对齐其它行 label） */
 .nk-egd-floor__tagsrow {
   display: flex;
   align-items: center;
@@ -837,7 +745,6 @@
   background: color-mix(in srgb, var(--blk-900) 52%, transparent);
   white-space: nowrap;
 }
-/* 段位徽章行（当期青铜/白银/黄金/彩钻勋章，ChallengeBadgeConfig；轻胶囊——平级不嵌套） */
 .nk-egd-peak__badges {
   display: flex;
   flex-wrap: wrap;
@@ -863,13 +770,11 @@
   object-fit: cover;
   background: var(--blk-800);
 }
-/* 王棋增益容器（多个 buff 叠放，各自上细线分隔） */
 .nk-egd-floor__buffs {
   display: flex;
   flex-direction: column;
   gap: 0;
 }
-/* 绝境变体：编辑式子章节——左侧红系竖条承载"变体"辨识度，上细线收束，无盒框 */
 .nk-egd-floor__hard {
   position: relative;
   margin-top: 18px;
@@ -905,16 +810,12 @@
 .nk-egd-floor__hard .nk-egd-floor__row { margin: 0; }
 .nk-egd-floor__hard .nk-egd-floor__targets { margin-top: 0; }
 
-/* ─── 敌方阵容网格（hover 仅边框/背景变化，无位移无 glow） ─── */
 .nk-egd-mons {
   display: grid;
-  /* min(300px, 100%)：320px 窄视口（内容区 288px）下最小列收敛到容器宽，防横向溢出 */
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 12px;
   margin-bottom: 8px;
 }
-/* 敌方信息卡（全页唯一保留的"展品卡"：行式头像 + 名称/标签；弱点/抗性行；图鉴介绍；技能胶囊）
-   去嵌套后敌卡直接铺于页面，是内容的视觉焦点——加大头像、内部更透气 */
 .nk-egd-mon {
   position: relative;
   display: flex;
@@ -952,7 +853,6 @@
 .nk-egd-mon:hover .nk-egd-mon__img {
   border-color: color-mix(in srgb, var(--eg-color) 55%, transparent);
 }
-/* 敌方立绘详情链接（保持圆形头像视觉，hover 轻微上浮提示可点） */
 .nk-egd-mon__figlink {
   display: inline-block;
   line-height: 0;
@@ -995,7 +895,6 @@
   background: color-mix(in srgb, var(--blk-800) 70%, transparent);
   border: 1px solid var(--line-1);
 }
-/* 敌方分类徽章（头像左上角；非普通怪；中性胶囊，文字区分）——装饰性但保底≥9.6px */
 .nk-egd-mon__rank {
   position: absolute;
   top: -5px;
@@ -1010,7 +909,6 @@
   background: color-mix(in srgb, var(--blk-800) 88%, transparent);
   border: 1px solid var(--line-1);
 }
-/* 弱点/抗性行（细线分隔 + 小元素图标；展品卡内分区更克制——分隔减少，留白让位） */
 .nk-egd-mon__rows {
   display: flex;
   flex-direction: column;
@@ -1030,7 +928,6 @@
   letter-spacing: 0.05em;
   color: var(--text3);
 }
-/* 无弱点/无抗性占位（源数据空 = 游戏内无弱点/全 0% 抗性，如蕉研组本体等召唤型机制怪） */
 .nk-egd-mon__none {
   font-size: 0.66rem;
   letter-spacing: 0.06em;
@@ -1042,7 +939,6 @@
   gap: 4px;
 }
 .nk-egd-mon__weak .nk-egd-elem { width: 16px; height: 16px; }
-/* 抗性行：属性图标 + 百分比（与弱点行同款元素图标） */
 .nk-egd-mon__resist {
   display: inline-flex;
   align-items: center;
@@ -1060,7 +956,6 @@
   line-height: 1;
   color: var(--text2);
 }
-/* 图鉴介绍（pre-line 保留换行；缩 3 行，hover 展开全文） */
 .nk-egd-mon__intro {
   margin: 0;
   font-size: 0.66rem;
@@ -1075,7 +970,6 @@
 .nk-egd-mon:hover .nk-egd-mon__intro {
   -webkit-line-clamp: unset;
 }
-/* 技能胶囊（名称 + hover 标签） */
 .nk-egd-mon__skills {
   display: flex;
   flex-wrap: wrap;
@@ -1100,7 +994,6 @@
   color: var(--text1);
 }
 
-/* 精简模式空态（maze/story/boss 无星启内容时） */
 .nk-egd-empty {
   padding: 18px;
   margin-bottom: 8px;
@@ -1113,8 +1006,6 @@
   border-radius: var(--nk-radius-card);
 }
 
-/* ─── 星启模式板块（独立进阶关卡；编辑式规格章节 —— 无板块盒框，
-       内容以细线规格条 / 规格表行 / 节点刻度线组织，杜绝与节点、敌卡形成卡中卡嵌套） ─── */
 .nk-egd-tierce {
   position: relative;
   display: flex;
@@ -1122,8 +1013,6 @@
   gap: 20px;
   margin-bottom: 8px;
 }
-/* 星启关卡指标：弱点 / 回合 / 分数 —— 轻卡片式指标条（平级独立卡，无嵌套；
-       指标与节点/波次/敌卡均为平行关系，不再逐项套卡） */
 .nk-egd-tierce__stats {
   display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap;
   padding: 18px 6px;
@@ -1140,7 +1029,6 @@
   padding: 2px 22px;
   min-width: 112px;
 }
-/* 桌面：列式排列 + 列间细分隔线（规格表语言），移动端回退为流式排列 */
 @media (min-width: 768px) {
   .nk-egd-tierce__stats {
     display: grid;
@@ -1171,8 +1059,6 @@
   color: var(--text3);
   white-space: nowrap;
 }
-/* 星启目标（整场挑战评价条件：分数档/剩余轮数/减员限制，与节点敌方正交；
-       规格表行——细线分隔，末行去线，行 hover 微亮） */
 .nk-egd-tierce__targets { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .nk-egd-node {
   display: flex;
@@ -1186,7 +1072,6 @@
 .nk-egd-node:hover {
   background: color-mix(in srgb, var(--blk-900) 16%, transparent);
 }
-/* 目标类型徽章：内联 SVG 语义图标 + 中文短标（模式色胶囊，去编号后更干净） */
 .nk-egd-node__type {
   display: inline-flex;
   align-items: center;
@@ -1225,12 +1110,6 @@
 }
 .nk-egd-node__text .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-tierce__mons { margin-bottom: 0; }
-/* ═══════════════════════════════════════════
-   星启节点 / 波次 章节节奏（编辑式，无嵌套盒框）
-   章节：节点 = 编辑式子章节（NODE 徽标 + 章节头，无盒框）
-   分组：波次 = 刻度线容器（L 刻度线 + 级联色条 + 头分组栏）
-   内容：敌卡 = 独立内容卡（.nk-egd-mon 展品卡，章节内仅此一层卡片）
-   ═══════════════════════════════════════════ */
 .nk-egd-tierce__waves {
   list-style: none;
   margin: 0;
@@ -1239,16 +1118,11 @@
   flex-direction: column;
   gap: 16px;
 }
-/* ── 节点容器：编辑式子章节 ──
-   不设盒框（无底色 / 边框 / 左竖条），身份由 NODE 徽标 + 波次 L 刻度线承载，
-   与敌卡不再形成"卡中卡"嵌套。 */
 .nk-egd-tierce__node {
   position: relative;
   display: flex;
   flex-direction: column;
 }
-/* ── 节点章节头（整行可点击切换折叠） ──
-   无容器化背景，hover 仅模式色 6% 微亮（与波次头同语言）。 */
 .nk-egd-tierce__nodehead {
   all: unset;
   position: relative;
@@ -1261,7 +1135,6 @@
   transition: background 0.2s var(--ease);
   user-select: none;
 }
-/* 触控热区扩展至 ≥44px（硬标准：视觉约 28px 高，上下各扩 10px） */
 .nk-egd-tierce__nodehead::before {
   content: '';
   position: absolute;
@@ -1270,15 +1143,12 @@
 .nk-egd-tierce__nodehead:hover {
   background: color-mix(in srgb, var(--eg-color) 6%, transparent);
 }
-/* Keyboard focus-visible 焦点环（A11y 必须）：模式色 2px 外描边 */
 .nk-egd-tierce__nodehead:focus-visible,
 .nk-egd-tierce__wavehead:focus-visible {
   outline: 2px solid var(--eg-color);
   outline-offset: -1px;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--eg-color) 22%, transparent);
 }
-/* 节点 HUD 标签：编辑式编号（中文小节标签 + Orbitron 编号 + 细线延伸），
-   无胶囊底——节点是章节性结构，用编号承载身份而非盒子 */
 .nk-egd-tierce__nodelabel {
   flex-shrink: 0;
   display: inline-flex;
@@ -1306,7 +1176,6 @@
   background: var(--line-2);
   align-self: center;
 }
-/* 摘要：总波数 · 总敌数，tabular-nums 对齐；宽度自适应省略。 */
 .nk-egd-tierce__nodesummary {
   flex: 1 1 auto;
   font-family: var(--font-hud);
@@ -1320,7 +1189,6 @@
   text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
 }
-/* 折叠箭头：常态↓ 折叠态←（rotate -90°），颜色折叠态变主色。 */
 .nk-egd-tierce__arrow {
   flex-shrink: 0;
   width: 16px;
@@ -1333,7 +1201,6 @@
   transform: rotate(-90deg);
   color: var(--eg-color);
 }
-/* ── 节点卡片体（waves 容器：grid-rows 折叠过渡） ── */
 .nk-egd-tierce__nodebody {
   display: grid;
   grid-template-rows: 1fr;
@@ -1350,12 +1217,9 @@
   flex-direction: column;
   gap: 14px;
 }
-/* ── 波次容器：中层分组（不做卡片）——分组身份由波头分组栏与敌卡网格承载，
-   不设背景 / 不设边框 / 不设左竖线：避免与内部敌卡的"卡片"视觉套壳 */
 .nk-egd-tierce__wave {
   position: relative;
 }
-/* ── 波次头部（分组标签栏：点击整栏切换波次折叠） ── */
 .nk-egd-tierce__wavehead {
   all: unset;
   position: relative;
@@ -1368,7 +1232,6 @@
   user-select: none;
   border-radius: 6px;
 }
-/* 触控热区扩展至 ≥44px（硬标准：视觉约 33px 高，上下各扩 7px） */
 .nk-egd-tierce__wavehead::before {
   content: '';
   position: absolute;
@@ -1377,8 +1240,6 @@
 .nk-egd-tierce__wavehead:hover {
   background: color-mix(in srgb, var(--eg-color) 6%, transparent);
 }
-/* 折叠态（收纳槽）：波头极淡色底标识"可展开条目"，文字降灰弱化——
-   与展开态（透明底 + 文字提亮）形成明确对比 */
 .nk-egd-tierce__wave--collapsed .nk-egd-tierce__wavehead {
   background: color-mix(in srgb, var(--eg-color) 5%, transparent);
 }
@@ -1395,7 +1256,6 @@
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
-/* 摘要：× N 敌，使用 × 号分隔更贴近 HUD 军事风格（×=单位数量）。 */
 .nk-egd-tierce__wavesummary {
   flex: 1 1 auto;
   font-family: var(--font-hud);
@@ -1409,8 +1269,6 @@
   text-overflow: ellipsis;
 }
 .nk-egd-tierce__wave .nk-egd-tierce__arrow { width: 14px; height: 14px; }
-/* ── 波次卡片体（敌方网格：grid-rows 折叠过渡） ──
-   无背景：透明容器，仅内部敌卡作为内容卡显示，避免视觉套壳。 */
 .nk-egd-tierce__wavebody {
   display: grid;
   grid-template-rows: 1fr;
@@ -1426,21 +1284,16 @@
   opacity: 1;
   transition: opacity 0.24s ease, padding 0.28s var(--ease);
 }
-/* 折叠态：敌卡淡出 + padding 归零（grid-rows 0fr 无法压缩 padding，残留 20px 空行） */
 .nk-egd-tierce__wavebody--collapsed .nk-egd-tierce__wavebody-inner {
   opacity: 0;
   padding-top: 0;
   padding-bottom: 0;
 }
-/* 波次容器内的敌卡网格：调整 gap 从 12 到 10，避免在分组内过松。 */
 .nk-egd-tierce__wavebody-inner .nk-egd-mons {
   gap: 10px;
   margin-bottom: 0;
 }
 
-/* ═══════════════════════════════════════════
-   星启通关奖励（虚构叙事 EGEEJLHBALB：物品行 + 通关目标分数）
-═══════════════════════════════════════════ */
 .nk-egd-reward {
   padding: 20px 0 0;
   border-top: 1px solid var(--line-1);
@@ -1475,7 +1328,6 @@
   flex-wrap: wrap;
   gap: 10px;
 }
-/* 奖励条目：轻小卡（图标 + 名称 + 数量聚合，平级不嵌套） */
 .nk-egd-reward__item {
   display: inline-flex;
   align-items: center;
@@ -1515,7 +1367,6 @@
   white-space: nowrap;
 }
 
-/* ─── 相邻赛季导航（轻卡片双栏：平级独立卡，无嵌套） ─── */
 .nk-egd-nav {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1538,8 +1389,6 @@
   border-color: var(--line-2);
   background: color-mix(in srgb, var(--blk-900) 22%, transparent);
 }
-/* 海报页签缩略图（poster_tab：虚构/末日/仲裁 Btn* 扁长按钮图 260×92，纵横比 2.83，
-   完整比例展示不裁切——方形 cover 会切掉左右内容；next 项镜像到右侧） */
 .nk-egd-nav__thumb {
   width: 104px;
   height: auto;
@@ -1568,7 +1417,6 @@
   color: var(--eg-color);
 }
 
-/* ─── 骨架屏 ─── */
 .nk-skeleton--egd .nk-egd-sk {
   width: 100%;
   max-width: var(--nk-detail-max);
@@ -1577,7 +1425,6 @@
   border-radius: 0;
 }
 
-/* ── 响应式：移动端不继续缩小，保持基线可阅读性 ── */
 @media (max-width: 767px) {
   .nk-egd-hero {
     flex-direction: column;
@@ -1597,7 +1444,6 @@
   .nk-egd-hero__banner { display: none; }
   .nk-egd-hero__name { font-size: 1.35rem; }
   .nk-egd-hero__sid { font-size: 0.66rem; padding: 2px 8px; }
-  /* 桌面端标签基线一致，移动端不降档，避免 <10px */
   .nk-egd-hero__status { font-size: 0.7rem; padding: 5px 11px; }
   .nk-egd-peak__kind { font-size: 0.7rem; }
   .nk-egd-floor__targetidx { font-size: 0.78rem; }
@@ -1614,7 +1460,6 @@
   .nk-egd-node__type { font-size: 0.72rem; padding: 5px 10px; gap: 5px; }
   .nk-egd-node__typeicon { width: 15px; height: 15px; }
   .nk-egd-node__text { font-size: 0.9rem; }
-  /* 移动端：节点 HUD 胶囊点击热区不降档，保持大 padding 和高度 */
   .nk-egd-tierce__nodelabel { font-size: 0.7rem; height: 28px; padding: 0 12px; }
   .nk-egd-tierce__nodesummary { font-size: 0.68rem; letter-spacing: 0.06em; }
   .nk-egd-tierce__wavename { font-size: 0.72rem; }
@@ -1635,22 +1480,15 @@
   .nk-egd-peak__badge { font-size: 0.88rem; }
   .nk-egd-empty { font-size: 0.8rem; }
   .nk-egd-floor__stages { grid-template-columns: 1fr; }
-  /* 单列后移除阶段间细分隔线（列式分界仅在双列时成立） */
   .nk-egd-floor__stage + .nk-egd-floor__stage { border-left: none; padding-left: 0; }
   .nk-egd-floor__head { flex-wrap: wrap; }
-  /* 层头数据保持右置（规格表数据右置语言；wrap 时独占一行右侧而非孤悬左缘） */
   .nk-egd-floor__data { margin-left: auto; }
-  /* boss 敌卡行：单列后 label+网格同行 nowrap 放不下（内容 335 - label 49 - gap 14 = 272
-     < 网格最小列 300），允许换行——label 首行、敌卡网格次行撑满全宽 */
   .nk-egd-floor__stage .nk-egd-floor__row--mons { flex-wrap: wrap; }
   .nk-egd-nav { grid-template-columns: 1fr; }
   .nk-egd-nav__item--next { justify-content: flex-start; text-align: left; }
-  /* 吸顶章节导航：4 按钮全部可见（story 四板块 344px > 343px 需滚动）；
-     触控热区由 ::before 扩展，padding 收窄不影响 ≥44px */
   .nk-egd-secnav .nk-secnav__btn { padding: 6px 6px; }
 }
 
-/* ── 减弱动效 ── */
 @media (prefers-reduced-motion: reduce) {
   .nk-egd-buff, .nk-egd-floor { animation: none; }
   .nk-egd-floor__head { transition: none; }
@@ -1658,7 +1496,6 @@
   .nk-egd-floor__mon:hover { transform: none; }
 }
 
-/* ── 触屏设备：重置粘滞 hover ── */
 @media (hover: none) {
   .nk-egd-floor__head:hover { background: transparent; }
   .nk-egd-buff:hover,
@@ -1668,7 +1505,6 @@
     background: color-mix(in srgb, var(--blk-900) 14%, transparent);
   }
   .nk-egd-mon:hover { border-color: var(--line-1); background: color-mix(in srgb, var(--blk-900) 30%, transparent); }
-  /* 规格表行/章节头：透明无粘滞 */
   .nk-egd-node:hover,
   .nk-egd-tierce__nodehead:hover,
   .nk-egd-tierce__wavehead:hover { background: transparent; }

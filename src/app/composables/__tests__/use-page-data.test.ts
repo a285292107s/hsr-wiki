@@ -1,7 +1,3 @@
-/**
- * usePageData 页面级加载编排单测：
- * 成功/失败状态机、加载代竞态（过期结果静默丢弃）、延迟骨架屏、retry。
- */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePageData } from '../use-page-data';
 
@@ -39,7 +35,7 @@ describe('usePageData', () => {
     const pd = usePageData<{ id: number }>(() => new Promise((res) => { resolvers.push(res); }));
     const p1 = pd.run();
     const p2 = pd.run();
-    resolvers[0]({ id: 1 }); // 第一代完成（已被第二代取代）
+    resolvers[0]({ id: 1 });
     await p1;
     expect(pd.data.value).toBeNull();
     resolvers[1]({ id: 2 });
@@ -62,7 +58,7 @@ describe('usePageData', () => {
     rejectOld(new Error('old fail'));
     await p1;
     expect(pd.error.value).toBe('');
-    expect(pd.loading.value).toBe(true); // 新一代仍在加载
+    expect(pd.loading.value).toBe(true);
     resolveNew({ id: 2 });
     await p2;
     expect(pd.error.value).toBe('');

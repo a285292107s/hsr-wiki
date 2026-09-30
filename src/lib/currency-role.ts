@@ -1,13 +1,4 @@
-/**
- * 货币战争角色详情页数据转换（纯函数，无状态）
- *
- * 自 CurrencyRoleView.vue 提取（该视图原内联 40+ 条映射与跨星级合并逻辑）：
- * - 标签映射：前后台 / 充能类型 / 技能分组 / 属性名 / 属性语义分组
- * - 数据合并：跨星级技能合并（mergeSkillGroups）、成长矩阵（buildGrowthMatrix）
- * - 视图辅助：推荐装备分组 / 特质分类 / 随从 #N 引用解析 / 星魂机制文案
- *
- * 视图层只保留编排（加载 / Tab / 选中态）与模板渲染，本模块可独立单测。
- */
+
 import { fmtDesc } from './format';
 import { ELEM } from './constants';
 import type {
@@ -15,27 +6,24 @@ import type {
   CurrencyRoleSkill, CurrencyRoleStar, CurrencyRoleTrait,
 } from '../services/types';
 
-/* ─── 标签映射 ─── */
-
-/** 前后台定位标签 */
 export const FB_LABEL: Record<string, string> = { Front: '前台', Back: '后台', Both: '前后台' };
 
-/** 充能类型标签（用词依据 TextMap 官方文本：EnergyBar→「特殊充能」（技能描述「获得充能/充能达到N点」）,MaxSP→「终结技能量」（「初始终结技能量/恢复N终结技能量」）） */
+/* 充能类型标签：用词依据 TextMap 官方文本——EnergyBar →「特殊充能」（技能描述「获得充能/充能达到N点」）、
+   MaxSP →「终结技能量」（「初始终结技能量/恢复N终结技能量」） */
 export const CHARGE_LABEL: Record<string, string> = {
   Speed: '速度', EnergyBar: '特殊充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点',
 };
 
-/** 技能分组标签 */
 export const SKILL_GROUP_LABEL: Record<string, string> = {
   front_show_skill: '前台技能',
   back_show_skill: '后台技能',
   servant_show_skill: '随从技能',
 };
 
-/** 属性名称映射：对齐 GridFightRolePropertyConfig.PropertyName（TextMap 官方名称） */
+/* 属性名称映射：对齐 GridFightRolePropertyConfig.PropertyName（TextMap 官方名称）。
+   无前缀键 = 常规模式属性体系（GridFightRolePropertyConfig 未收录 → 数据无 prop_name，兜底表补齐官方术语）；
+   术语事实来源：tools/converter/config.py PROPERTY_MAP + TextMap 官方描述句式（全量审计 2026-08-15）。 */
 export const PROP_LABEL: Record<string, string> = {
-  /* 无前缀键 = 常规模式属性体系（GridFightRolePropertyConfig 未收录 → 数据无 prop_name，兜底表补齐官方术语）；
-     术语事实来源：tools/converter/config.py PROPERTY_MAP（自建官方映射）+ TextMap 官方描述句式（全量审计 2026-08-15） */
   CriticalChanceBase: '暴击率',
   CriticalDamageBase: '暴击伤害',
   HealRatioBase: '治疗量',
@@ -87,9 +75,9 @@ export const PROP_LABEL: Record<string, string> = {
   HPAddedRatio: '生命增幅',
 };
 
-/** 属性名解析：优先 converter 落地的 prop_name（TextMap 官方名，官方改称呼自动同步）；
- *  缺失时查映射表，再回退去前缀（Extra/AddedRatio 噪声）。
- *  参数为结构化类型（非 Record）：调用方传 CurrencyPropMod / CurrencyEquipProp 等 interface 无需索引签名。 */
+/* 属性名解析：优先 converter 落地的 prop_name（TextMap 官方名，官方改称呼自动同步）；
+   缺失时查映射表，再回退去前缀（Extra/AddedRatio 噪声）。
+   参数为结构化类型（非 Record）：调用方传 CurrencyPropMod / CurrencyEquipProp 等 interface 无需索引签名。 */
 export function propLabel(m: { prop_name?: unknown; property_type?: unknown; name?: unknown }): string {
   const official = m.prop_name;
   if (typeof official === 'string' && official) return official;
@@ -101,8 +89,6 @@ export function propLabel(m: { prop_name?: unknown; property_type?: unknown; nam
 export function propValue(v: number): string {
   return Math.abs(v) < 1 ? `${(v * 100).toFixed(0)}%` : String(v);
 }
-
-/* ─── 技能跨星级合并 ─── */
 
 /** 跨星级合并技能：同名技能在各星级的参数集合并，描述以斜杠分隔多星级值 */
 export interface MergedSkill {
@@ -131,7 +117,6 @@ export interface MergedSkill {
 
 const SKILL_GROUPS = ['front_show_skill', 'back_show_skill', 'servant_show_skill'] as const;
 
-/** 跨星级技能合并：按技能组 × 技能名收集各星级同名技能，参数集跨星级并置 */
 export function mergeSkillGroups(
   stars: Record<string, CurrencyRoleStar> | null | undefined,
 ): Array<{ key: string; label: string; skills: MergedSkill[] }> {
@@ -140,7 +125,7 @@ export function mergeSkillGroups(
   if (!cols.length) return [];
   const out: Array<{ key: string; label: string; skills: MergedSkill[] }> = [];
   for (const g of SKILL_GROUPS) {
-    // 以名称为键收集各星级的同名技能（附带星级号：技能可能在部分星级缺失，下标不能等价星级）
+
     const byName = new Map<string, Array<{ sk: CurrencyRoleSkill; star: number }>>();
     for (const c of cols) {
       for (const sk of (stars[c]?.[g] || [])) {
@@ -158,7 +143,7 @@ export function mergeSkillGroups(
         return lv ? lv.param_list : [];
       });
       const stars = list.map((x) => x.star);
-      // 附加条件（触发条件）同样跨星级合并
+
       const extraSets: MergedSkill['extraSets'] = [];
       const exKeys = new Set<string>();
       list.forEach(({ sk }) => Object.keys(sk.extra || {}).forEach((ek) => exKeys.add(ek)));
@@ -196,9 +181,6 @@ export function mergeSkillGroups(
   return out;
 }
 
-/* ─── 成长矩阵 ─── */
-
-/** PropertyType → 语义分组标签（源数据 GridFightRolePropertyConfig.Order 映射） */
 export const PROP_GROUP: Record<string, string> = {
   ExtraFrontPowerBase: '强度', ExtraFrontPowerAddedRatio1: '强度', ExtraFrontPowerAddedRatio2: '强度',
   ExtraBackPowerBase: '强度', ExtraBackPowerAddedRatio1: '强度', ExtraBackPowerAddedRatio2: '强度',
@@ -217,36 +199,27 @@ export const PROP_GROUP: Record<string, string> = {
   ExtraElationDamageAddedRatio1: '伤害', ExtraDamageAddedRatio1: '伤害',
   ExtraInitSP: '机制', ExtraEnergyBar: '机制',
   ExtraLuckChance: '机制', ExtraLuckDamage: '机制',
-  /* 后台机制值（独立字段，非 PropertyType；充能条体系与终结技能量体系互斥出现） */
+
   BackEnergyBar: '机制', BackInitialEnergyBar: '机制',
   BackMaxSP: '机制', BackInitialSP: '机制',
   BackSpeedRewrite: '速度', BackSpeedAddedRatio: '速度',
 };
 
-/** 分组展示顺序 */
 export const GROUP_ORDER = ['强度', '生存', '速度', '伤害', '机制'] as const;
 
-/** 成长矩阵行（跨星级属性值列） */
 export interface MatrixRow {
   key: string;
   label: string;
   values: Array<{ text: string; raw: number | null }>;
-  /** 属性图标源路径（prop mod 自带或 propIcons 查表；空 = 无图标不渲染） */
+
   icon?: string;
 }
 
-/** 成长矩阵分组 */
 export interface MatrixGroup {
   group: string;
   rows: MatrixRow[];
 }
 
-/**
- * 成长矩阵：跨星级全属性聚合（合并原「成长总览」表 + 「星级属性」分组）。
- * 属性按语义分组（PROP_GROUP），强度分组额外注入 front/back_power_base 行。
- * propIcons：PropertyType → 图标源路径（converter 落地 currency/prop_icons.json）；
- * 独立字段（幸运一击/治疗强度等）与 power 行靠它补图标，prop mod 自带 icon 优先。
- */
 export function buildGrowthMatrix(
   stars: Record<string, CurrencyRoleStar> | null | undefined,
   propIcons?: Record<string, string> | null,
@@ -254,7 +227,7 @@ export function buildGrowthMatrix(
   if (!stars) return [];
   const cols = Object.keys(stars).sort((a, b) => Number(a) - Number(b));
   if (!cols.length) return [];
-  /** 提取单星级全属性（GeneralPropertyModifyList + 独立字段），保持源序 */
+
   const extract = (s: CurrencyRoleStar | undefined): Array<{ key: string; label: string; raw: number; icon?: string }> => {
     if (!s) return [];
     const items: Array<{ key: string; label: string; raw: number; icon?: string }> = [];
@@ -275,7 +248,7 @@ export function buildGrowthMatrix(
     if (s.luck_damage != null) items.push({ key: 'ExtraLuckDamage', label: '幸运一击伤害', raw: s.luck_damage, icon: propIcons?.['ExtraLuckDamage'] });
     if (s.extra_heal_base != null) items.push({ key: 'ExtraHealBase', label: '基础治疗强度', raw: s.extra_heal_base, icon: propIcons?.['ExtraHealBase'] });
     if (s.extra_shield_base != null) items.push({ key: 'ExtraShieldBase', label: '基础护盾强度', raw: s.extra_shield_base, icon: propIcons?.['ExtraShieldBase'] });
-    /* 后台机制值（数据存在才入矩阵；back_speed_* 为预留字段，当前全量 null 自动跳过） */
+
     if (s.back_energy_bar != null) items.push({ key: 'BackEnergyBar', label: '后台充能条', raw: s.back_energy_bar, icon: propIcons?.['ExtraEnergyBar'] });
     if (s.back_initial_energy_bar != null) items.push({ key: 'BackInitialEnergyBar', label: '后台初始充能', raw: s.back_initial_energy_bar, icon: propIcons?.['ExtraEnergyBar'] });
     if (s.back_max_sp != null) items.push({ key: 'BackMaxSP', label: '后台最大能量', raw: s.back_max_sp, icon: propIcons?.['ExtraInitSP'] });
@@ -284,7 +257,7 @@ export function buildGrowthMatrix(
     if (s.back_speed_added_ratio != null) items.push({ key: 'BackSpeedAddedRatio', label: '后台速度提升', raw: s.back_speed_added_ratio, icon: propIcons?.['ExtraSpeedAddedRatio1'] });
     return items;
   };
-  // 以首现顺序收集全部属性 key
+
   const keyOrder: string[] = [];
   const keyLabel = new Map<string, string>();
   const keyIcon = new Map<string, string>();
@@ -294,13 +267,13 @@ export function buildGrowthMatrix(
       if (!keyIcon.has(item.key) && item.icon) keyIcon.set(item.key, item.icon);
     }
   }
-  // 每星级 key → raw 索引
+
   const starMaps = cols.map((c) => {
     const map = new Map<string, number>();
     for (const item of extract(stars[c])) map.set(item.key, item.raw);
     return map;
   });
-  // 按语义分组构建行
+
   const groupMap = new Map<string, MatrixRow[]>();
   for (const key of keyOrder) {
     const g = PROP_GROUP[key] || '其它';
@@ -315,7 +288,7 @@ export function buildGrowthMatrix(
       icon: keyIcon.get(key),
     });
   }
-  // 强度行：front/back_power_base 注入「强度」分组首位
+
   const powerRows: MatrixRow[] = [];
   const powOf = (field: 'front_power_base' | 'back_power_base') =>
     cols.map((c) => { const raw = stars[c]?.[field] ?? null; return { text: raw != null ? String(raw) : '—', raw }; });
@@ -338,7 +311,6 @@ export function buildGrowthMatrix(
   return out;
 }
 
-/** 矩阵单元格增量标记：选中列值 ≠ 前一列值 */
 export function matrixUp(row: MatrixRow, colIdx: number): boolean {
   if (colIdx <= 0) return false;
   const cur = row.values[colIdx]?.raw;
@@ -346,9 +318,6 @@ export function matrixUp(row: MatrixRow, colIdx: number): boolean {
   return cur != null && prev != null && cur !== prev;
 }
 
-/* ─── 推荐装备 ─── */
-
-/** 推荐装备解析：各星级数据一致，取当前选中星级，回退首个非空星级 */
 export function resolveRecommend(
   stars: Record<string, CurrencyRoleStar> | null | undefined,
   selected: CurrencyRoleStar | null | undefined,
@@ -362,7 +331,6 @@ export function resolveRecommend(
   return null;
 }
 
-/** 推荐装备按行分组：前台一行、后台一行，每行内含首选/次选 */
 export function buildRecommendRows(
   rec: CurrencyRoleRecommend | null,
 ): Array<{ pos: string; groups: Array<{ priority: string; items: CurrencyRoleRecommendItem[] }> }> {
@@ -380,8 +348,6 @@ export function buildRecommendRows(
   return rows;
 }
 
-/* ─── 特质分类（头图羁绊图标分组，按 ID 段判定分类） ─── */
-
 export const TRAIT_CATEGORY = {
   faction: { range: [1000, 2000] as [number, number] },
   combat: { range: [2000, 3000] as [number, number] },
@@ -397,7 +363,6 @@ export function catOfTrait(id: number): TraitCat {
   return 'special';
 }
 
-/** 特质按分类分组（仅含非空分类，分类顺序固定） */
 export function groupTraits(traits: CurrencyRoleTrait[] | null | undefined): Array<{ cat: TraitCat; items: CurrencyRoleTrait[] }> {
   if (!traits || traits.length === 0) return [];
   const groups: Array<{ cat: TraitCat; items: CurrencyRoleTrait[] }> = [];
@@ -408,9 +373,6 @@ export function groupTraits(traits: CurrencyRoleTrait[] | null | undefined): Arr
   return groups;
 }
 
-/* ─── 随从属性 #N 参数解析（#N → 常规模式角色技能 param_list） ─── */
-
-/** 解析 #N 引用；字面值原样；无法解析返回 null（隐藏） */
 export function resolveServantAttr(
   ref: string | number | null | undefined,
   skillId: number | null | undefined,
@@ -425,7 +387,6 @@ export function resolveServantAttr(
   return null;
 }
 
-/** 随从属性展示项（仅显示可解析项） */
 export function buildServantAttrs(
   servant: CurrencyRoleStar['servant'] | null | undefined,
   charData: CharacterData | null,
@@ -443,9 +404,6 @@ export function buildServantAttrs(
   return items;
 }
 
-/* ─── 星魂辅助 ─── */
-
-/** 技能 ID → 技能名（星魂机制「强化技能」映射用；星级间同名同义） */
 export function buildSkillNameMap(
   stars: Record<string, CurrencyRoleStar> | null | undefined,
 ): Map<number, string> {
@@ -459,7 +417,6 @@ export function buildSkillNameMap(
   return map;
 }
 
-/** 星魂机制效果：强化技能（映射为技能名）+ 能量条修改 */
 export function rankMech(rk: CurrencyRoleRank, nameMap: Map<number, string>): string {
   const parts: string[] = [];
   if (rk.modify_skill_list && rk.modify_skill_list.length) {
@@ -470,21 +427,16 @@ export function rankMech(rk: CurrencyRoleRank, nameMap: Map<number, string>): st
   return parts.join(' · ');
 }
 
-/** 后台星魂描述：用 param_list 渲染 */
 export function rankDesc(rk: CurrencyRoleRank): string {
   if (rk.param_list && rk.param_list.length) return fmtDesc(rk.desc, rk.param_list);
   return fmtDesc(rk.desc).replace(/#\d+\[i\]/g, '');
 }
 
-/* ─── 杂项 ─── */
-
-/** 韧性值文本：全零列表返回空串，否则以 ' / ' 分隔 */
 export function stanceText(list: number[] | null): string {
   if (!list || list.every((v) => !v)) return '';
   return list.join(' / ');
 }
 
-/** 削韧展示文本：官方展示值（属性 + 显示值，如「虚数 10」）优先，缺失时回退 show_stance_list 引擎值 */
 export function stanceLine(sk: {
   stance_damage_type: string | null;
   stance_damage_display: number | null;

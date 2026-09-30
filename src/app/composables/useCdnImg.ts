@@ -1,10 +1,3 @@
-/**
- * 单图双源回退组合式函数：暴露响应式 src 与 onError 处理器。
- * 组件用法：`<img :src="img.src" @error="img.onError">`。
- * - 主源（官方源）加载失败时切回退源（nanoka）
- * - 回退源再失败 / 无回退源失败 → 标记 data-cdn-down（CSS 隐藏破图，卡片渐变底承接）
- * - CDN 健康探测判定不可用时直接标记降级，不做逐图回退尝试
- */
 import { ref } from 'vue';
 import { isCdnDown, resolveCdnUri, type CdnCategory } from '../../services/cdn';
 

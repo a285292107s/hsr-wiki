@@ -1,15 +1,3 @@
-/**
- * 目录页配置注册表行为测试
- * 验证所有注册的 CatalogPageConfig 均满足引擎契约：
- * - filters / buildFilters 字段结构合法
- * - （数据驱动）filter.key 与 option.val 在真实转换数据上可命中（stringly-typed 契约锁）
- *   —— 本文件的核心价值：filter.key 与数据字段名之间无类型约束，改字段名会让筛选静默失效
- * - endgame 专属 renderCard / renderColumns 布局与图标 URL 构造
- *
- * 不测「id 唯一 / id===注册 key / title 非空 / renderCard 是函数」类形状断言：
- * 这些由 CatalogPageConfig 类型 + pages.ts 的写法静态保证，且路由↔配置一致性由
- * app/router/__tests__/registry.test.ts 从行为面覆盖。
- */
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
@@ -36,21 +24,17 @@ async function readLocalText(filePath: string): Promise<string> {
   });
 }
 
-/** 数据 URL → 本地文件绝对路径（Vite 静态根为 public/：URL /data/... 对应 public/data/...；
- *  正斜杠拼接即可，Node fs 在 Windows 亦兼容） */
 function urlToFsPath(url: string): string {
   let pathname = url;
   try {
     pathname = new URL(url).pathname;
   } catch {
-    /* 相对路径原样处理 */
   }
   const p = decodeURIComponent(pathname).replace(/^\/+/, '').replace(/\\/g, '/');
   const rel = p.startsWith('data/') ? `public/${p}` : p;
   return `${process.cwd()}/${rel}`;
 }
 
-/** 复刻 CatalogPage 的筛选匹配语义：item[key] 为数组按元素匹配，否则字符串严格相等 */
 function matchesFilter(item: Record<string, unknown>, key: string, val: string): boolean {
   const cur = item[key];
   if (cur == null) return false;
@@ -64,14 +48,12 @@ describe('renderCard', () => {
     const item = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: '进行中', dateRange: '2023.01.01 – 01.15' };
     const html = egPage.renderCard(item, 0);
     expect(html).toContain('nk-eg-lrow');
-    // 玩法级默认图标（modeDefaultArtUrl＝模式筛选项同款 Img1-4）
     expect(html).toContain('nk-eg-lrow__icon');
     expect(html).toContain('ChallengeBossQuestTabImg1.png');
     expect(html).toContain('№ 101');
     expect(html).toContain('琥珀恩赐');
     expect(html).toContain('进行中');
     expect(html).toContain('2023.01.01 – 01.15');
-    // 紧凑行去掉完整档案行的徽章/增益/敌方，仅图标+编号+名称+状态+日期
     expect(html).not.toContain('nk-eg-card__perm');
     expect(html).not.toContain('nk-eg-card__test');
     expect(html).not.toContain('nk-eg-card__tier');
@@ -85,7 +67,6 @@ describe('renderCard', () => {
       { name: '游辞漫说', href: '/endgame/story/2001', mode: 'story', id: 'ID 2001' },
     ];
     const colHtml = egPage.renderColumns!(items, (it, i) => egPage.renderCard(it, i));
-    // 两列（maze/story），各带列头中文名 + 英文名 + 数量
     expect(colHtml).toContain('nk-eg-col');
     expect(colHtml).toContain('忘却之庭');
     expect(colHtml).toContain('FORGOTTEN HALL');
@@ -93,7 +74,6 @@ describe('renderCard', () => {
     expect(colHtml).toContain('虚构叙事');
     expect(colHtml).toContain('PURE FICTION');
     expect(colHtml).toContain('1');
-    // 列内保持传入次序（最新在前由 fetchData 排序保证）
     expect(colHtml.indexOf('琥珀恩赐')).toBeGreaterThan(colHtml.indexOf('永屹之城遗秘'));
   });
 });
@@ -122,9 +102,6 @@ describe('filters validity', () => {
     }
   });
 
-  /* 不测「buildFilters 是函数」：CatalogPageConfig 的可选函数类型已静态保证，
-     且下一条用例直接调用它（不可调用即抛错）。 */
-
   it('buildFilters returns valid filters given stub data', () => {
     const stubData = [
       { name: 'A', element: 'fire', path: 'Destruction', rarity: 5, subType: 'Material', quality: 'gold', cat: 'offense' },
@@ -140,8 +117,6 @@ describe('filters validity', () => {
 });
 
 describe('data-driven filter contract (real data)', () => {
-  /* 读入真实转换数据（public/data/cn）跑 fetchData，把「filter.key 能命中字段」的
-   * stringly-typed 契约固化为回归闸门：目录配置与数据演化（如新增/改名字段）一旦漂移即报错。 */
   beforeAll(() => {
     vi.stubGlobal('fetch', async (input: unknown) => {
       const url = input instanceof URL ? input.href : String(input);
@@ -224,13 +199,10 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
   });
 
   it('seasonHeroBgUrl 按模式取唯一大图（background/theme_bg/handbook_banner），白名单外返回空串', () => {
-    // maze：场景背景
     expect(seasonHeroBgUrl({ background: 'SpriteOutput/Abyss/UI3D_SceneBg/AbyssSenceBg_01.png' }))
       .toBe(`${BASE}/abyss/ui3d_scenebg/AbyssSenceBg_01.png`);
-    // story：海报背景
     expect(seasonHeroBgUrl({ theme_bg: 'SpriteOutput/ChallengeTheme/ThemeBg/ChallengeThemeBg_2001.png' }))
       .toBe(`${BASE}/challengetheme/themebg/ChallengeThemeBg_2001.png`);
-    // peak：图鉴横幅
     expect(seasonHeroBgUrl({ handbook_banner: 'SpriteOutput/DailyMission/Banner/ChallengePeakPanelBanner_4002.png' }))
       .toBe(`${BASE}/dailymission/banner/ChallengePeakPanelBanner_4002.png`);
     // 多字段并存时按 background → theme_bg → handbook_banner 优先级

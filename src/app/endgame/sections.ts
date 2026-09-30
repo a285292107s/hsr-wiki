@@ -1,7 +1,3 @@
-/**
- * 终局详情页板块章节定义（单一事实源）：
- * EndgameView 吸顶条导航与各面板组件的编号（.nk-title__idx）同源，禁止各自计算。
- */
 import type { MazeListEntry, PeakLevelInfo } from '../../services/types';
 
 export interface EndgameSection {
@@ -10,10 +6,6 @@ export interface EndgameSection {
   label: string;
 }
 
-/**
- * 章节导航（吸顶条）：编号与 .nk-title 同源（战意机制 01 / 赛季增益 02 / 星启 03 / 层级 04；
- * peak 关卡组成 01）；编号随板块存在性动态顺延。
- */
 export function buildEndgameSections(
   data: MazeListEntry | null,
   modeKey: string,
@@ -35,7 +27,6 @@ export function buildEndgameSections(
   return s;
 }
 
-/** 板块编号映射（模板 .nk-title__idx 与吸顶条导航同源） */
 export function sectionIdxMap(sections: EndgameSection[]): Record<string, string> {
   const m: Record<string, string> = {};
   for (const sec of sections) m[sec.id] = sec.idx;

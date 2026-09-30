@@ -26,20 +26,20 @@ const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const REQUIRED_ROBOTS_UAS = ['OAI-SearchBot', 'PerplexityBot', 'Claude-SearchBot', 'Googlebot', 'bingbot'];
 const SITEMAP_MAX_URLS = 50000;
 const MIN_CJK_CHARS = 80;
-/** 单次运行每条断言的明细上限（真实产物上千快照，避免刷屏） */
+/** 单次运行每条断言的明细上限 */
 const DETAIL_CAP = 20;
 /** 快照正文里出现即判失败的游戏标记（契约 §3：必须剥成纯文本） */
 const GAME_MARKERS = ['<color=', '<unbreak>', '<u>'];
 /**
  * 未展开的参数占位符（契约 §3「参数展开保真」/ §6.3）：如 `#1[i]`、`#2[f1]%`——必须由 fillParams 展开，
- * 缺参数时应整段省略。**禁止误伤上游原文**：字面 `#81`（无 `[..]`）与 `{TEXTJOIN#61}` 不匹配本正则，必须放行。
+ * 缺参数时应整段省略。字面 `#81`（无 `[..]`）与 `{TEXTJOIN#61}` 不匹配本正则，必须放行。
  */
 const PARAM_PLACEHOLDER_RE = /#\d+\[[^\]]*\]/g;
 /**
- * 裸 `#N` 占位符（契约 §3「参数展开保真」延伸 / §6.3）：**只对下面两个 CW 目录页断言**。
- * 为什么按页点名而**禁止**扩成全局断言：裸 `#N` 无法与上游字面区分——`character/1303`「天才俱乐部#81号会员」、
- * `item.html` 的「#8拉姆」、`{TEXTJOIN#61}`、`achievement.html` 的 233 处都是与应用显示一致的上游原文，必须放行；
- * 而 CW 装备 / CW 投资策略这两族的数据条目携带 `params` 语义，裸 `#N` 即未展开占位符（应用侧渲染 `?`，缺参数须整段省略）。
+ * 裸 `#N` 占位符（契约 §3 延伸 / §6.3）：只对下面两个 CW 目录页断言。
+ * 禁止扩成全局断言：裸 `#N` 无法与上游字面区分（「天才俱乐部#81号会员」、`item.html` 的「#8拉姆」、
+ * `{TEXTJOIN#61}`、`achievement.html` 的 233 处都是与应用显示一致的上游原文，必须放行）；
+ * 而 CW 装备 / CW 投资策略这两族的数据条目携带 `params` 语义，裸 `#N` 即未展开占位符。
  */
 const BARE_HASH_PAGES = ['currency/item.html', 'currency/augment.html'];
 const BARE_HASH_RE = /#\d+/g;
@@ -58,7 +58,7 @@ const GENERATOR = resolveFromRoot(arg('generator', join('tools', 'gen-ai-endpoin
 
 const rel = (p) => relative(ROOT, p) || p;
 
-/* ─── SITE_ORIGIN 唯一事实源：生成器模块（对 import 无副作用） ─── */
+/* ─── SITE_ORIGIN 唯一事实源：生成器模块 ─── */
 let SITE_ORIGIN = null;
 let originError = null;
 try {
@@ -161,8 +161,8 @@ function loadJson(relPath) {
 
 /* ─── 扫描产物 ─── */
 const PRERENDER = join(DIST, 'prerender');
-/** 下划线前缀 = 内部文件（如 `_shell.html` 纯 SPA 外壳，由 vercel catch-all rewrite 投递）：
- *  它**不是快照**——禁止计入快照数 / sitemap 一一对应 / 覆盖率 / 条目数。 */
+/** 纯 SPA 外壳 `prerender/_shell.html`：下划线前缀 = 内部文件（由 vercel catch-all rewrite 投递），
+ *  它不是快照——禁止计入快照数 / sitemap 一一对应 / 覆盖率 / 条目数。 */
 const isInternalFile = (f) => basename(f).startsWith('_');
 const allPrerenderHtml = existsSync(PRERENDER)
   ? walk(PRERENDER).filter((f) => f.toLowerCase().endsWith('.html')).sort()
@@ -331,7 +331,7 @@ let sitemapCount = -1;
   const details = [];
   let defaultTitle = null;
   let entryScripts = [];
-  /** 基线 = 纯 SPA 外壳 `prerender/_shell.html`（**不再**是 dist/index.html——它现在是 home 快照，
+  /** 基线 = 纯 SPA 外壳 `prerender/_shell.html`（不是 dist/index.html——它现在是 home 快照，
    *  其 title/h1 是首页标题，拿它当外壳基线会把每个快照都判成「默认标题」） */
   if (!existsSync(SHELL)) {
     details.push(`缺纯 SPA 外壳 ${rel(SHELL)}，无法取得默认 title 与入口 <script src> 基线（task-10 落地前会如此）`);
@@ -347,7 +347,7 @@ let sitemapCount = -1;
   }
 
   const violations = [];
-  /** 命中未展开参数占位符的快照数（用于在明细首行给出规模，单个文件仍逐条点名） */
+  /** 命中未展开参数占位符的快照数 */
   let phFiles = 0;
   /** 命中裸 #N 的 CW 目录页（按页点名，最多 2 页） */
   const bareHashHits = [];
@@ -434,15 +434,14 @@ let sitemapCount = -1;
     const phText = text.match(PARAM_PLACEHOLDER_RE) || [];
     const phRaw = rawScan.match(PARAM_PLACEHOLDER_RE) || [];
     if (phText.length > 0 || phRaw.length > 0) {
-      // 计数优先取可见文本面；占位符只在标签属性里出现时（标签剥离后不可见）回退原始面计数
+      // 计数优先取可见文本面；占位符只在标签属性里出现时回退原始面计数
       const n = phText.length > 0 ? phText.length : phRaw.length;
       phFiles++;
       add(`正文残留未展开参数占位符 ${n} 处（如 ${(phText[0] || phRaw[0]).replace(/</g, '&lt;')}）`);
     }
 
-    // 裸 #N：**按页点名**，仅 BARE_HASH_PAGES 两页（禁止全局化——理由见该常量注释）。
-    // 只扫**可见文本**面（text），不扫原始面：标签属性/注释/CSS 里的十六进制色（如 shell 注释的
-    // `--blk-850 #121214`、`style="border-color:#121214"`）匹配 `#\d+` 但都不是可见文本，扫原始面会误报。
+    // 裸 #N 只按页点名（BARE_HASH_PAGES 两页），且只扫可见文本面：标签属性/注释/CSS 里的十六进制色
+    // （如 `#121214`）匹配 `#\d+` 但都不是可见文本，扫原始面会误报。
     const snapPath = relative(PRERENDER, file).split(sep).join('/');
     if (BARE_HASH_PAGES.includes(snapPath)) {
       const bh = text.match(BARE_HASH_RE) || [];
@@ -452,13 +451,13 @@ let sitemapCount = -1;
       }
     }
 
-    // 入口 JS 与 dist/index.html 完全一致（复制 shell 而非重写模板）
+    // 入口 JS 与 shell 基线完全一致（复制 shell 而非重写模板）
     const scripts = scriptSrcs(html).sort();
     if (entryScripts.length > 0 && scripts.join('|') !== entryScripts.join('|')) {
       add(`入口 <script src> 与 dist/index.html 不一致: [${scripts.join(', ')}] ≠ [${entryScripts.join(', ')}]`);
     }
 
-    // 契约 §3：nk-snapshot__entry 冻结为「仅目录条目清单」——详情页出现即违规（此处 html 已读入，全量覆盖零额外 IO）
+    // 契约 §3：nk-snapshot__entry 冻结为「仅目录条目清单」——详情页出现即违规
     const relNoExt = relative(PRERENDER, file).split(sep).join('/').replace(/\.html$/i, '');
     if (DETAIL_ROUTE_PREFIXES.some((p) => relNoExt.startsWith(p))) {
       const marks = countEntryMarks(html);
@@ -466,7 +465,7 @@ let sitemapCount = -1;
     }
   }
 
-  const preCount = details.length; // 逐文件扫描前的前置问题（模板缺失 / 入口缺失 / 无快照）
+  const preCount = details.length; // 逐文件扫描前的前置问题
   details.push(...violations);
   if (phFiles > 0) {
     details.unshift(`未展开参数占位符命中 ${phFiles}/${snapshotFiles.length} 个快照（契约 §3「参数展开保真」：缺参数须整段省略，禁止原样发布）`);
@@ -506,13 +505,12 @@ let sitemapCount = -1;
   ];
 
   /**
-   * 详情族：id 集 = 数据 + **应用可见性判据**（契约 §2「可见性对齐」）独立推导，禁止信生成器自述。
+   * 详情族：id 集 = 数据 + 应用可见性判据（契约 §2「可见性对齐」）独立推导，禁止信生成器自述。
    * 逐条对齐 src/app/catalog/pages/*.ts 的 fetchData：
-   *  · character/lightcone/relic/monster：`if (!info.name) continue;`（character.ts:28 / lightcone.ts:19 / relic.ts:17 / monster.ts:34）
-   *  · currency/role、currency/trait：`roles.map` / `traits.map` 无条目过滤（currency-role.ts:84 / currency-trait.ts:71）→ 全量计入
-   *  · 未纳入的例外：character.ts:29 的开拓者形态过滤读 localStorage 偏好（默认女），是**用户偏好**不是数据判据，
-   *    且 8xxx 详情路由不受它影响；按它收缩会丢 5 个真实可达实体页（8001/8003/8005/8007/8009），
-   *    故本族仍计全部非空 name 条目（与 §2 表 98 一致）。该特例已上报 Lead 裁决。
+   *  · character/lightcone/relic/monster：`if (!info.name) continue;`
+   *  · currency/role、currency/trait：`roles.map` / `traits.map` 无条目过滤 → 全量计入
+   *  · 未纳入的例外：character.ts:29 的开拓者形态过滤读 localStorage 偏好（默认女），是用户偏好不是数据判据，
+   *    按它收缩会丢 5 个真实可达实体页（8001/8003/8005/8007/8009），故本族仍计全部非空 name 条目。
    */
   const idFamilyDefs = [
     ['character', 'character', 'characters.json', (j) => j.filter((x) => x && x.name).map((x) => String(x.id))],
@@ -525,8 +523,8 @@ let sitemapCount = -1;
 
   /** 终局：mode 与 catalog 的对应关系取自 src/app/router（maze/story/boss/peak）。
    *  条目判据 = src/app/catalog/pages/endgame.ts:190 `if (!info || !info.zh) continue;`（zh 求真值），
-   *  故 maze_boss 的 3022（zh 为空串）**不计入期望**；生成器必须施加同一判据，禁止为其兜底命名。
-   *  期望值与数据同源自动跟随：数据出现新的空 zh 赛季即自动从期望中消失。 */
+   *  故 maze_boss 的 3022（zh 为空串）不计入期望；生成器必须施加同一判据，禁止为其兜底命名。
+   *  期望值与数据同源自动跟随。 */
   const endgameModes = [
     ['maze', 'maze.catalog.json'],
     ['story', 'maze_extra.catalog.json'],
@@ -737,7 +735,7 @@ let sitemapCount = -1;
   push('5', title, details);
 }
 
-/* ═══ 6/7 外壳与首页一致性（线上实测：Vercel 文件系统先于 rewrites，`/` 必须直接命中 home 快照） ═══ */
+/* ═══ 6/7 外壳与首页一致性（Vercel 文件系统先于 rewrites，`/` 必须直接命中 home 快照） ═══ */
 {
   const details = [];
   // ① 纯 SPA 外壳存在且不含任何快照内容（catch-all rewrite 的投递目标）
@@ -760,7 +758,7 @@ let sitemapCount = -1;
       details.push(`dist/index.html 与 prerender/home.html 字节不等价（sha256 ${hi.slice(0, 12)}… ≠ ${hh.slice(0, 12)}…）——'/' 由文件系统直接投递，两份必须是同一份 home 快照`);
     }
   }
-  // ③ dist/index.html 必须自带正文（否则 '/' 又变回空壳——线上实测 962 B）
+  // ③ dist/index.html 必须自带正文（否则 '/' 又变回空壳）
   if (existsSync(DIST_INDEX)) {
     const html = readFileSync(DIST_INDEX, 'utf-8');
     const h1 = tagText(html, /<h1\b[^>]*>([\s\S]*?)<\/h1>/i);

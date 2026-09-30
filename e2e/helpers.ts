@@ -1,13 +1,5 @@
 import { type Page } from '@playwright/test';
 
-/**
- * e2e 布局验收公共工具
- *
- * 把 AGENTS.md「验证流程」L1-L3 固化：
- * - collectConsoleIssues → console / pageerror 守卫（CDN 404 / JS 异常自动捕获）
- * - assertNoHorizontalOverflow → L3 横向溢出检测
- */
-
 export interface ConsoleIssues {
   pageErrors: string[];
   consoleErrors: string[];
@@ -39,11 +31,10 @@ export function collectConsoleIssues(page: Page): {
 }
 
 /**
- * 已登记的**既有**横向溢出（已知缺陷，非豁免机制）。
- *
- * 命中项在 `splitKnownOverflow` 里被过滤并 `console.warn`，**未登记的新溢出仍然失败**。
- * 纪律：禁止往这里堆条目以「修绿」——每条都必须是**已实测、已定性、且已裁决暂不修**的真实缺陷，
- * 并在 note 里写清现象与修法归属（视觉取舍须用户确认）。修掉后**必须**把条目删掉。
+ * 已登记的既有横向溢出（已知缺陷，非豁免机制）。
+ * 命中项在 `splitKnownOverflow` 里被过滤并 `console.warn`，未登记的新溢出仍然失败。
+ * 纪律：禁止往这里堆条目以「修绿」——每条必须是已实测、已定性、且已裁决暂不修的真实缺陷，
+ * 并在 note 里写清现象与修法归属。修掉后必须把条目删掉。
  */
 export const KNOWN_OVERFLOWS: { match: string; note: string }[] = [
   {
@@ -69,12 +60,10 @@ export function splitKnownOverflow(found: string[]): { known: string[]; unknown:
 /**
  * L3 横向溢出检测：全树扫描 body 元素，找出右边界超出视口的元素。
  *
- * **只豁免「用户能滚动到位」的祖先（overflow-x: auto/scroll）**——那里内容横向可达，属设计内滚动。
- * **hidden / clip 不做豁免**：全站布局根（`#app { overflow: clip }`、`#nk-catalog-app` / `#nk-home-app`
- * / `.nk-page--detail` 的 `overflow-x: hidden`）会把超宽内容直接**裁掉**，被它们裁掉的正是本函数要找的
- * 布局缺陷。历史上把「被任意祖先裁剪」计入豁免，导致每个应用内元素都被 `#app` 豁免、本函数**恒返回 `[]`**
- * （19 条 layout 用例的溢出断言实为死断言，2026-09 实测：向 `#nk-catalog-app` 内插入 5000px 宽元素
- * 仍返回 `[]`，同元素插入 `<body>` 才报出）。**禁止改回「被祖先裁剪即豁免」。**
+ * 只豁免「用户能滚动到位」的祖先（overflow-x: auto/scroll）——那里内容横向可达，属设计内滚动。
+ * hidden / clip 不做豁免：全站布局根（`#app { overflow: clip }`、`#nk-catalog-app` / `#nk-home-app`
+ * / `.nk-page--detail` 的 `overflow-x: hidden`）会把超宽内容直接裁掉，被它们裁掉的正是本函数要找的
+ * 布局缺陷。若把「被任意祖先裁剪」计入豁免，每个应用内元素都会被 `#app` 豁免、本函数恒返回 `[]`。
  */
 export async function findHorizontalOverflow(page: Page): Promise<string[]> {
   // 页面过渡期间视图根带 nk-view-*-active 位移（±24/±40px），此刻测量会把「整页」报成溢出（假阳性）。
@@ -85,7 +74,7 @@ export async function findHorizontalOverflow(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const bad: string[] = [];
     const vw = window.innerWidth;
-    /** 元素是否处于「用户可横向滚动到位」的祖先内：这类内容横向可达，不算溢出缺陷 */
+    /** 元素是否处于「用户可横向滚动到位」的祖先内 */
     const inScrollableAncestor = (el: Element): boolean => {
       let cur: Element | null = el.parentElement;
       while (cur) {
@@ -122,10 +111,10 @@ export async function findHorizontalOverflow(page: Page): Promise<string[]> {
 /**
  * 等待目录卡片渲染完成（skeleton 消失、真实卡片出现）
  *
- * 选择器必须用**子串** `[class*="-grid"]`，禁止写作 `[class$="-grid"]`：
+ * 选择器必须用子串 `[class*="-grid"]`，禁止写作 `[class$="-grid"]`：
  * `CatalogPage.vue` 的网格 class 绑定为 `[config.gridClass, 'nk-virtual-grid', { 'nk-fast-jump': …, 'nk-no-reveal': … }]`
- * ——尾随条件类一旦挂上（快跳转 / 档案页滚动），属性串就不再以 `-grid` 结尾，属性**结尾**选择器会失配并
- * 退化成 15s 超时（表现为「目录页卡住」而非真实缺陷）。`nk-skeleton__grid` 不含 `-grid` 子串，不会误命中。
+ * ——尾随条件类一旦挂上，属性串就不再以 `-grid` 结尾，属性结尾选择器会失配并退化成 15s 超时。
+ * `nk-skeleton__grid` 不含 `-grid` 子串，不会误命中。
  */
 export async function waitForCatalogCards(page: Page, selector = '[class*="-grid"] a') {
   await page.waitForSelector(selector, { state: 'attached', timeout: 15_000 });

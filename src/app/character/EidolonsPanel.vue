@@ -1,7 +1,4 @@
 <script setup lang="ts">
-/**
- * 星魂面板：E1-6 卡片。
- */
 import { computed } from 'vue';
 import { extraTerms } from './utils';
 import { eidolonIconUrl, fmtDesc } from '../../lib/format';
@@ -22,7 +19,6 @@ interface EidolonCard {
   name: string;
   img: string;
   descHtml: string;
-  /** 强化模式下被强化的星魂 */
   enhanced: boolean;
   terms: SkillExtra[];
 }
@@ -50,7 +46,7 @@ const eidolons = computed<EidolonCard[]>(() => {
   >
     <span v-if="e.enhanced" class="nk-eidolon__enh-badge">{{ enhLabel }}</span>
     <div class="nk-eidolon__head">
-      <!-- 星魂大图：官方 ui/ui3d/rank 3D 渲染源（2048² 正方形），展品式陈列 -->
+      <!-- 星魂大图 = 官方 ui/ui3d/rank 3D 渲染源（2048² 正方形） -->
       <img class="nk-eidolon__icon" :src="e.img" :alt="e.name" loading="lazy">
       <div class="nk-eidolon__info">
         <div class="nk-eidolon__meta">

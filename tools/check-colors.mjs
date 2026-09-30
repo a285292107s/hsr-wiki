@@ -1,6 +1,5 @@
 /**
- * 色彩令牌收口检查器（ADR 0012 规则豁免模式）：扫描 src 下裸色值(hex/rgb/rgba)输出未收口清单。
- * 配合四层令牌(tokens.css 原始 --ph- / --gold- / --blk- 层 → 语义 --primary* → 领域 --rarity- / --cw- 层)。
+ * 色彩令牌收口检查器：扫描 src 下裸色值(hex/rgb/rgba)输出未收口清单。
  * 规则：严格中性(三分量差≤4)；var() fallback 内色值纳入检查(禁裸彩色 fallback)；
  * SKIP_FILE 仅豁免 debug 诊断与测试(currency-* 已收编)。
  * 用法：node tools/check-colors.mjs [--strict]（strict 有裸色值即退出 1）。
@@ -14,23 +13,21 @@ const EXT = new Set(['.css', '.vue', '.ts']);
 const strict = process.argv.includes('--strict');
 
 /** 跳过整个文件（debug 诊断色 / 测试数据 / 主题预览数据）：
- *  src/app/debug/ = 研究线调试台（Spine Lab 迁入，dev-only 路由，生产构建摇树不打包）——
- *  诊断面板状态色板（ok/fail/warn）为研究工具语义，非产品 UI 令牌，目录级豁免（ADR 0012 §3） */
+ *  src/app/debug/ = 研究线调试台（dev-only 路由，生产构建摇树不打包）——
+ *  诊断面板状态色板（ok/fail/warn）为研究工具语义，非产品 UI 令牌，目录级豁免 */
 const SKIP_FILE = /(^|[\\/])(__tests__|theme\.ts|cw-theme\.ts)|(^|[\\/])debug([\\/]|$)/;
 
-/* ═══ 豁免登记（ADR 0012 §3 三分类；变更须同步 ADR 引用） ═══
+/* ═══ 豁免登记（ADR 0012 §3 三分类） ═══
  * 1. 中性豁免：三分量差 ≤4 的灰阶/黑/白（含 SVG data URI 内联白——物理限制无法 var()）
  * 2. 领域色豁免：数据语义色已全部收编为领域层令牌
  *    （--rarity-* / --prop-* / --elem-* / --skill-* / --eg-* / --diff-* / --season-* /
  *      --cw-* / --crole-* / --ctrait-*），页面只允许 var() 引用，
  *    裸色值在 tokens.css 领域层唯一定义——本清单无裸色条目
- * 3. 导航语义豁免：**已退场（ADR 0019）**——旧首页网关入口行（`.nk-home-row--gateway`，
- *    "金色=CW 模式"导航标识）随首页板块索引一并删除；跨模式入口现由侧栏「交换」承担，
- *    不存在第三色相，故本分类当前无条目
+ * 3. 导航语义豁免：已退场，本分类当前无条目
  * 若未来确有无法令牌化的裸色值，必须在此登记（带理由 + ADR 引用），禁止静默豁免 */
 const DOMAIN_EXEMPT = [];
 
-/** 严格中性判定：三分量差 ≤4（纯黑/白/灰阶才豁免——ADR 0012） */
+/** 严格中性判定：三分量差 ≤4（纯黑/白/灰阶才豁免） */
 const NEUTRAL_DELTA = 4;
 
 /** 合法的色值形态：关键词 */

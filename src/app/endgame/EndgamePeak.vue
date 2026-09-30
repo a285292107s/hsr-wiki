@@ -1,7 +1,4 @@
 <script setup lang="ts">
-/**
- * 终局赛季详情 · 异相仲裁关卡组成面板（3 骑士试炼 + 1 王棋最终关，含绝境变体）。
- */
 import { computed } from 'vue';
 import { buildEndgameSections, sectionIdxMap } from './sections';
 import {
@@ -17,14 +14,12 @@ const props = defineProps<{
   peakLevels: PeakLevelInfo[];
 }>();
 
-/** 板块编号（吸顶条导航同源；peak 分支固定 01） */
 const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, 'peak', props.peakLevels)));
 </script>
 
 <template>
   <template v-if="peakLevels.length">
     <h2 id="egd-levels" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['levels'] || '01' }}</span>关卡组成 LEVELS</h2>
-    <!-- 段位徽章：当期青铜/白银/黄金/彩钻勋章（ChallengeBadgeConfig） -->
     <div v-if="data.badges?.length" class="nk-egd-peak__badges">
       <div v-for="b in data.badges" :key="b.level" class="nk-egd-peak__badge" :title="b.desc || b.name">
         <img v-if="itemIconUrl(b.icon)" :src="itemIconUrl(b.icon)" :alt="b.name" loading="lazy" @error="($event.target as HTMLImageElement).classList.add('nk-img-error')">
@@ -38,7 +33,6 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
         class="nk-egd-floor nk-egd-peak"
         :style="{ '--i': i }"
       >
-        <!-- 章节头：骑士/王棋徽标 + 官方关卡名 + 等级 -->
         <header class="nk-egd-floor__head">
           <span class="nk-egd-peak__kind" :class="`nk-egd-peak__kind--${l.kind}`">
             {{ l.kind === 'king' ? '王棋' : '骑士' }}
@@ -52,7 +46,6 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
           </span>
         </header>
 
-        <!-- 推荐属性 + 敌方配置 -->
         <div class="nk-egd-floor__stage">
           <div v-if="l.damage?.length" class="nk-egd-floor__row">
             <span class="nk-egd-floor__label">推荐属性</span>
@@ -87,13 +80,11 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
           </div>
         </div>
 
-        <!-- 机制标签（如韧甲/反相/吸能） -->
         <div v-if="l.tags?.length" class="nk-egd-floor__tagsrow">
           <span class="nk-egd-floor__label">机制</span>
           <span class="nk-egd-floor__tags" v-html="peakTagsHtml(l.tags)"></span>
         </div>
 
-        <!-- 挑战目标 -->
         <ol v-if="l.targets?.length" class="nk-egd-floor__targets">
           <li v-for="(t, ti) in l.targets" :key="ti" class="nk-egd-floor__target">
             <span class="nk-egd-floor__targetidx">{{ String(ti + 1).padStart(2, '0') }}</span>
@@ -101,7 +92,6 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
           </li>
         </ol>
 
-        <!-- 王棋增益（出奇制胜/步骑协同/锤砧战术） -->
         <div v-if="l.buffs?.length" class="nk-egd-floor__buffs">
           <div v-for="b in l.buffs" :key="b.id" class="nk-egd-floor__buff">
             <div class="nk-egd-floor__buffhead">
@@ -113,7 +103,6 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
           </div>
         </div>
 
-        <!-- 王棋•绝境变体 -->
         <div v-if="l.hard" class="nk-egd-floor__hard">
           <div class="nk-egd-floor__hardhead">
             <span class="nk-egd-peak__kind nk-egd-peak__kind--hard">绝境</span>

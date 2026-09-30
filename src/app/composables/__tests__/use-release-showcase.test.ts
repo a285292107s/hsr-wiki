@@ -1,8 +1,3 @@
-/**
- * 枢纽页「新增」编排纯函数单测（ADR 0019 决策 3/9/10 + ADR 0020 决策 2/4/6）。
- * 覆盖：首页本版本判据（恰等 / 空标签 / 未打标条目）、CW 赛季代际判据（布尔 / 缺字段）、
- * 无增量分区不渲染、卡片 HTML 复用 renderCard。
- */
 import { describe, expect, it } from 'vitest';
 import {
   buildReleaseSections,
@@ -131,7 +126,6 @@ describe('CW 两分区（buildReleaseSectionsBy + pickSeasonNew）', () => {
   const renderCard = (item: CatalogItem, i: number): string =>
     `<a class="c" data-id="${String(item.id)}" style="--i:${i}"></a>`;
 
-  /** 只保留 is_season_new 的条目（模拟 fetchData 透传后由本层投影出的 tagged） */
   const cwSource = (
     kind: ReleaseSource['kind'],
     label: string,

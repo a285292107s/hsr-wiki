@@ -19,15 +19,11 @@ import pytest  # noqa: E402
 from config import OUTPUT_DIR  # noqa: E402
 from converters import achievements as ach  # noqa: E402
 
-
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
     """mock TextMap，避免加载真实大文件。"""
     import textmap
     monkeypatch.setattr(textmap, "_text_map", {})
-
-
-# ─── _load_textjoin ─────────────────────────────────────────────
 
 class TestLoadTextjoin:
     def test_default_item_resolution(self, monkeypatch):
@@ -39,7 +35,7 @@ class TestLoadTextjoin:
                   {"TextJoinItemID": 999, "TextJoinText": "无引用条目"}]
         ))
         out = ach._load_textjoin()
-        assert out == {54: ""}  # mock TextMap 空 → 文本为空串
+        assert out == {54: ""}
 
     def test_missing_default_skipped(self, monkeypatch):
         monkeypatch.setattr(ach, "load_json", lambda p: (
@@ -48,9 +44,6 @@ class TestLoadTextjoin:
             else []
         ))
         assert ach._load_textjoin() == {}
-
-
-# ─── _expand_textjoin ───────────────────────────────────────────
 
 class TestExpandTextjoin:
     def test_expands_known_id(self):
@@ -65,9 +58,6 @@ class TestExpandTextjoin:
         """解析出的文本为空串时保留占位符（避免误删信息）。"""
         out = ach._expand_textjoin("归还{TEXTJOIN#54}", {54: ""})
         assert out == "归还{TEXTJOIN#54}"
-
-
-# ─── _fill_params ───────────────────────────────────────────────
 
 class TestFillParams:
     def test_integer_and_percent(self):
@@ -90,9 +80,6 @@ class TestFillParams:
         out = ach._fill_params("#1[i]场战斗中#2[i]名角色", [10, 3])
         assert out == "10场战斗中3名角色"
 
-
-# ─── _format_desc ───────────────────────────────────────────────
-
 class TestFormatDesc:
     def test_textjoin_then_params(self):
         textjoin = {54: "记忆泡"}
@@ -104,16 +91,9 @@ class TestFormatDesc:
         assert out == "击败40名敌人"
 
     def test_keeps_newline_and_note(self):
-        # 必须传**字面** \n（两个字符）：源数据里换行是 JSON 双反斜杠转义，_format_desc 的
-        # .replace(r"\n", "\n") 正是为它而设。原先写 Python 转义的真实换行 → 被测行永不触发，
-        # 删掉该行断言仍绿（实测突变），属假覆盖。
         out = ach._format_desc("通关贝洛伯格\\n※成就完成", [], {})
         assert out == "通关贝洛伯格\n※成就完成"
-        # 真实换行原样保留（不被误替换）
         assert ach._format_desc("已含真换行\n第二行", [], {}) == "已含真换行\n第二行"
-
-
-# ─── _parse_achievement ─────────────────────────────────────────
 
 class TestParseAchievement:
     def test_field_mapping(self, monkeypatch):
@@ -137,9 +117,6 @@ class TestParseAchievement:
     def test_show_type_none_normalized_to_empty(self):
         out = ach._parse_achievement({"AchievementID": 1, "ShowType": None}, {})
         assert out["show_type"] == ""
-
-
-# ─── convert ────────────────────────────────────────────────────
 
 class TestConvert:
     def test_sort_and_output(self, monkeypatch):
@@ -173,13 +150,11 @@ class TestConvert:
 
         ach.convert()
 
-        # 系列按 Priority 升序
         series = saved[str(OUTPUT_DIR / "achievement_series.json")]
         assert [s["id"] for s in series] == [4, 1]
         assert series[0]["icon"] == "BIcon"
         assert series[0]["icon_s"] == "BIcon_s"
 
-        # 成就：系列 4 在前；系列内按 Priority 降序
         achievements = saved[str(OUTPUT_DIR / "achievements.json")]
         assert [a["id"] for a in achievements] == [404, 402, 401]
 
@@ -195,7 +170,7 @@ class TestConvert:
                 return [{"SeriesID": 1, "SeriesTitle": {"Hash": 1}, "Priority": 500}]
             if name.endswith("AchievementData.json"):
                 return [
-                    {"AchievementID": 1, "SeriesID": 99, "Priority": 100, "ParamList": []},  # 未注册系列 → 999
+                    {"AchievementID": 1, "SeriesID": 99, "Priority": 100, "ParamList": []},
                     {"AchievementID": 2, "SeriesID": 1, "Priority": 500, "ParamList": []},
                 ]
             if name.endswith("TextJoinConfig.json"):
@@ -207,5 +182,5 @@ class TestConvert:
         monkeypatch.setattr(ach, "save_json", lambda data, path: saved.__setitem__(str(path), data))
         ach.convert()
         achievements = saved[str(OUTPUT_DIR / "achievements.json")]
-        assert len(achievements) == 2  # 无系列引用也不崩溃
-        assert [a["id"] for a in achievements] == [2, 1]  # 500（已注册）< 999（回退）
+        assert len(achievements) == 2
+        assert [a["id"] for a in achievements] == [2, 1]

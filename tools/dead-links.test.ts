@@ -1,10 +1,9 @@
 /**
- * 死链低频审计（数据变更后本机按需执行，不在 CI 跑——2026-08-14 起，原因见 data-sync.yml）。
- * 设计意图：死链是静态事实(URL 404)，改数据驱动+HTTP 探测替代 e2e 渲染态检查；
- * URL 构造复用前端真实构造函数(src/lib/icons.ts / services/cdn)→零维护漂移；
+ * 死链低频审计（数据变更后本机按需执行，不在 CI 跑——原因见 data-sync.yml）。
+ * URL 构造复用前端真实构造函数(src/lib/icons.ts / services/cdn)；
  * 死链判定=明确 HTTP 404(HEAD+Range GET 双重确认)才 FAIL，其余环境性信号仅 WARN。
- * 必须本机跑：CI 数据中心 IP 对 jsDelivr 403(历史实证)→全判 env，真死链发现不了且缓存空转。
- * jsDelivr 限流纪律(禁止违反)：404 带 no-cache,no-store 不缓存→每次回源，已知结果本地缓存(localStorage)+源文件 sha1；
+ * 必须本机跑：CI 数据中心 IP 对 jsDelivr 403→全判 env，真死链发现不了且缓存空转。
+ * jsDelivr 限流纪律(禁止违反)：404 带 no-cache,no-store 不缓存→每次回源，已知结果本地缓存+源文件 sha1；
  * 并发硬上限 DEFAULT_CONCURRENCY=3 禁止调高；浏览器禁自定义 UA；重定向自动跟随，HEAD 404 直接判 dead。
  * 缓存策略：失效依据=URL 来源文件内容 sha1(确定性输出零网络复用)；ok/dead 缓存 7 天，env 1 天；落 temp/dead-links-cache.json。
  * 用法：pnpm vitest run --config tools/dead-links.vitest.config.ts（默认增量）；DEAD_LINKS_FORCE=1 全量；
@@ -42,7 +41,7 @@ const FORCE = process.env.DEAD_LINKS_FORCE === '1';
 /** 增量预算（ms）：探测累计超过预算即停并落盘进度，未覆盖 URL 不判失败（本机分块推进） */
 const BUDGET_MS = Number(process.env.DEAD_LINKS_BUDGET_MS || 0);
 
-/** jsDelivr 对 burst 敏感（实证），并发压到 3；nanoka 同样保守 */
+/** jsDelivr 对 burst 敏感，并发压到 3；nanoka 同样保守 */
 const CONCURRENCY = 3;
 /** ok/dead 缓存时长（天）；env 环境性信号短缓存 */
 const TTL_OK_DEAD = 7;

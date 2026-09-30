@@ -1,11 +1,10 @@
-/** 角色列表 / 详情 / 技能动画 / 配装名称加载器 */
+
 import { cachedFetch } from '../cache';
 import type { CharacterData, LocalCharList, NameCache, SkillAnimationsDb } from '../types';
 import { LOCAL_DATA_BASE } from './base';
 import { loadLocalLightCones } from './items';
 import { loadLocalRelicSets } from './relics';
 import { singletonLoad } from './singleton';
-
 /** 角色列表（共享单例：只请求一次，失败自动重置允许重试） */
 export const loadLocalCharacterList = singletonLoad<LocalCharList>(`${LOCAL_DATA_BASE}/characters.json`);
 
@@ -17,10 +16,8 @@ export function loadLocalCharacter(charId: string): Promise<CharacterData> {
 /** 技能动画（米游社 Wiki 抓取数据；共享单例） */
 export const loadSkillAnimations = singletonLoad<SkillAnimationsDb>(`${LOCAL_DATA_BASE}/skill_animations.json`);
 
-/**
- * 从本地 JSON 加载配装名称（光锥/遗器套装/队伍成员）。
- * 返回合并后的新 NameCache（不修改入参）。失败项回退为 '#id'。
- */
+/* 从本地 JSON 加载配装名称（光锥/遗器套装/队伍成员）。
+   返回合并后的新 NameCache（不修改入参）。失败项回退为 '#id'。 */
 export async function loadLocalBuildNames(
   d: CharacterData,
   existing: NameCache = {},

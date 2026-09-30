@@ -1,11 +1,9 @@
-/**
- * 全局 CDN 图片回退（DOM 副作用，仅 bootstrap 注册一次；事件委托捕获 <img> error 到 document）。
- * 兜底链：① 本地主源失败→现场反查远端最优源(localFallbackFromPrimary，不依赖属性/健康态)；
- * ② 双源回退：带 data-cdn-fallback 的 img 替换 src 并清除属性，保证仅回退一次(覆盖 v-html 卡片图)；
- * ③ CDN down 短路：健康探测判定不可用后不再逐图尝试，直接标记降级；
- * ④ 最终降级：回退/首选(nanoka)失败→data-cdn-down(CSS 隐藏破图，卡片渐变底承接)，CDN 恢复时重载全部降级图。
- * 挂起兜底 STALL_TIMEOUT_MS：jsDelivr 大仓库偶发挂起不触发 error，经 MutationObserver 对受管 img 启超时定时器走同链。
- */
+/* 全局 CDN 图片回退（DOM 副作用，仅 bootstrap 注册一次；事件委托捕获 <img> error 到 document）。
+   兜底链：① 本地主源失败→现场反查远端最优源（localFallbackFromPrimary，不依赖属性/健康态）；
+   ② 双源回退：带 data-cdn-fallback 的 img 替换 src 并清除属性，保证仅回退一次（覆盖 v-html 卡片图）；
+   ③ CDN down 短路：健康探测判定不可用后不再逐图尝试，直接标记降级；
+   ④ 最终降级：回退/首选（nanoka）失败→data-cdn-down（CSS 隐藏破图，卡片渐变底承接），CDN 恢复时重载全部降级图。
+   挂起兜底 STALL_TIMEOUT_MS：jsDelivr 大仓库偶发挂起不触发 error，经 MutationObserver 对受管 img 启超时定时器走同链。 */
 import { isCdnDown, subscribeCdnHealth } from './health';
 import { LOCAL_ICONS_BASE } from './base';
 import { localFallbackFromPrimary } from './resolve';
@@ -61,7 +59,7 @@ function handleFailure(img: HTMLImageElement): void {
     return;
   }
   if (!isCdnImage(src)) return;
-  // CDN 整体不可用：跳过回退尝试，直接降级（省去逐图失败等待）
+
   if (isCdnDown()) {
     markDown(img);
     return;
@@ -72,16 +70,16 @@ function handleFailure(img: HTMLImageElement): void {
     img.src = fb;
     return;
   }
-  // 首选源失败且无回退 → 最终降级
+
   markDown(img);
 }
 
 /** 对受管 img 启动挂起定时器（已 complete 或已有定时器则跳过） */
 function watchStall(img: HTMLImageElement): void {
   if (img.complete || stallTimers.has(img)) return;
-  // lazy 图片进入视口前浏览器不会发起加载（complete 恒 false）——此时把「未加载」当作
-  // 「请求挂起」会误标 data-cdn-down 隐藏（屏外卡片全量中招）。仅在浏览器真正开始拉取
-  // 资源（loadstart）后再启动定时器；未开始的 lazy 图挂起监听，开始加载时经 watchStall 重入。
+  /* lazy 图片进入视口前浏览器不会发起加载（complete 恒 false）——此时把「未加载」当作
+     「请求挂起」会误标 data-cdn-down 隐藏（屏外卡片全量中招）。仅在浏览器真正开始拉取
+     资源（loadstart）后再启动定时器；未开始的 lazy 图挂起监听，开始加载时经 watchStall 重入。 */
   if (img.loading === 'lazy' && !img.currentSrc) {
     img.addEventListener('loadstart', () => watchStall(img), { once: true });
     return;

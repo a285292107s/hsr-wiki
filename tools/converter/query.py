@@ -17,14 +17,12 @@ from functools import lru_cache
 from pathlib import Path
 from typing import cast
 
-# Windows 控制台强制 UTF-8，避免中文输出乱码
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-# 同时支持脚本运行（from config）与模块运行（from .config）
 if __package__ in (None, ""):
     from config import EXCEL_DIR  # pyright: ignore[reportImplicitRelativeImport]
     import textmap_db  # pyright: ignore[reportImplicitRelativeImport]
@@ -32,7 +30,6 @@ else:
     from .config import EXCEL_DIR
     from . import textmap_db
 
-# JSON 数据结构（json.load 返回的动态数据统一收敛到此类型）
 JSONValue = (
     bool
     | int
@@ -43,13 +40,11 @@ JSONValue = (
     | dict[str, "JSONValue"]
 )
 
-# 常见 ID 字段名（按优先级）
 ID_FIELDS = [
     "AvatarID", "ID", "Id", "id", "LightconeID", "RelicID",
     "MonsterID", "StageID", "ItemID", "SkillID", "RankID",
     "MazeID", "PlaneID", "FloorID", "GroupID",
 ]
-
 
 @dataclass
 class QueryArgs:
@@ -62,7 +57,6 @@ class QueryArgs:
     head: int
     limit: int
 
-
 @lru_cache(maxsize=4)
 def load_excel(filename: str) -> JSONValue:
     """加载 ExcelOutput 下的 JSON 文件（进程内缓存，同一文件只解析一次）。
@@ -70,7 +64,6 @@ def load_excel(filename: str) -> JSONValue:
     与 utils.load_json 同理：源数据只读不写，查询运行期文件不会变化，缓存安全；
     调用方不得原地修改返回的 dict/list。
     """
-    # 支持省略 .json 后缀
     if not filename.endswith(".json"):
         filename += ".json"
     path = EXCEL_DIR / filename
@@ -81,7 +74,6 @@ def load_excel(filename: str) -> JSONValue:
     with open(path, encoding="utf-8") as f:
         return cast("JSONValue", json.load(f))
 
-
 def find_id_field(record: dict[str, JSONValue]) -> str | None:
     """自动检测记录的 ID 字段名。"""
     for field in ID_FIELDS:
@@ -89,14 +81,12 @@ def find_id_field(record: dict[str, JSONValue]) -> str | None:
             return field
     return None
 
-
 def print_json(data: JSONValue, compact: bool = False) -> None:
     """格式化输出 JSON。"""
     if compact:
         print(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
     else:
         print(json.dumps(data, ensure_ascii=False, indent=2))
-
 
 def cmd_schema(data: JSONValue, filename: str) -> None:
     """显示文件 schema 信息（全量字段统计，非仅首条记录）。
@@ -121,7 +111,6 @@ def cmd_schema(data: JSONValue, filename: str) -> None:
             print(f"字段数: {len(fields)}（全量扫描；首条记录仅 {len(first)} 个）")
             print(f"字段列表:")
             for field in fields:
-                # 类型推断：优先首条记录；首条缺失时取首个包含该字段的记录
                 if field in first:
                     val = first[field]
                 else:
@@ -138,14 +127,12 @@ def cmd_schema(data: JSONValue, filename: str) -> None:
         print(f"键数: {len(data):,}")
         sample_keys = list(data.keys())[:5]
         print(f"键样例: {sample_keys}")
-        # 全量扫描所有值对象的字段并集（与数组型一致，防可选字段遗漏）
         fields = set()
         for v in data.values():
             if isinstance(v, dict):
                 fields |= set(v.keys())
         if fields:
             print(f"值字段 ({len(fields)}): {', '.join(sorted(fields))}")
-
 
 def cmd_list(keyword: str) -> None:
     """列出 ExcelOutput 下匹配关键词的文件。"""
@@ -157,7 +144,6 @@ def cmd_list(keyword: str) -> None:
         size_mb = f.stat().st_size / (1024 * 1024)
         print(f"  {f.name:<50} {size_mb:>7.2f} MB")
 
-
 def cmd_resolve(hash_val: str) -> None:
     """解析 TextMap Hash 值（走 SQLite 缓存）。"""
     result = textmap_db.resolve_hash(hash_val)
@@ -165,7 +151,6 @@ def cmd_resolve(hash_val: str) -> None:
         print(f"Hash {hash_val} → {result}")
     else:
         print(f"Hash {hash_val} 未命中")
-
 
 def cmd_search(keyword: str, limit: int = 20) -> None:
     """在 TextMap 中搜索包含关键词的文本（走 SQLite 缓存）。"""
@@ -176,10 +161,8 @@ def cmd_search(keyword: str, limit: int = 20) -> None:
         + ("（已达上限）" if len(results) >= limit else "")
     )
     for k, v in results:
-        # 截断过长文本
         display = v if len(v) <= 100 else v[:100] + "..."
         print(f"  [{k}] {display}")
-
 
 def cmd_query(data: JSONValue, args: QueryArgs) -> None:
     """通用查询逻辑。"""
@@ -190,14 +173,12 @@ def cmd_query(data: JSONValue, args: QueryArgs) -> None:
     else:
         records = []
 
-    # --id 查询
     if args.id is not None:
         if records and isinstance(records[0], dict):
             id_field = find_id_field(records[0])
             if not id_field:
                 print("错误: 无法自动检测 ID 字段，请用 --where 指定条件")
                 sys.exit(1)
-            # 支持数字和字符串比较
             target = args.id
             matches = [
                 r
@@ -212,7 +193,6 @@ def cmd_query(data: JSONValue, args: QueryArgs) -> None:
             print("错误: 数据不是字典数组，无法按 ID 查询")
             return
 
-    # --where 过滤
     if args.where:
         conditions = args.where.split(",")
         filtered: list[JSONValue] = records
@@ -231,13 +211,11 @@ def cmd_query(data: JSONValue, args: QueryArgs) -> None:
         records = filtered
         print(f"过滤结果: {len(records)} 条")
 
-    # --grep 模糊搜索
     if args.grep:
         keyword = args.grep
         grepped: list[JSONValue] = []
         for r in records:
             if isinstance(r, dict):
-                # 整条记录序列化一次（避免对每个值反复 json.dumps）
                 if keyword in json.dumps(r, ensure_ascii=False):
                     grepped.append(r)
             elif isinstance(r, str) and keyword in r:
@@ -245,13 +223,11 @@ def cmd_query(data: JSONValue, args: QueryArgs) -> None:
         records = grepped
         print(f"grep \"{keyword}\" → {len(records)} 条")
 
-    # --head / --limit（--head 为 --limit 的兼容别名，任一指定即生效）
     limit = args.limit or args.head or 10
     if len(records) > limit:
         print(f"（显示前 {limit} 条，共 {len(records)} 条）")
         records = records[:limit]
 
-    # --fields 筛选
     if args.fields and records and isinstance(records[0], dict):
         field_list = [f.strip() for f in args.fields.split(",")]
         records = [
@@ -260,12 +236,10 @@ def cmd_query(data: JSONValue, args: QueryArgs) -> None:
             if isinstance(r, dict)
         ]
 
-    # 输出
     if len(records) == 1:
         print_json(records[0])
     else:
         print_json(records)
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -299,7 +273,6 @@ def main() -> None:
 
     ns = parser.parse_args()
 
-    # 显式提取为带类型的局部变量，消除 argparse.Namespace 的 Any 泄漏
     file_arg: str = ns.file
     schema_arg: bool = ns.schema
     id_arg: str | None = ns.id
@@ -313,7 +286,6 @@ def main() -> None:
     search_arg: str = ns.search
     rebuild_textmap_arg: bool = ns.rebuild_textmap
 
-    # 全局命令（不需要文件名）
     if list_arg is not None:
         cmd_list(list_arg)
         return
@@ -330,7 +302,6 @@ def main() -> None:
         cmd_search(search_arg, limit=limit_arg or 20)
         return
 
-    # 需要文件名的命令
     if not file_arg:
         parser.print_help()
         sys.exit(0)
@@ -352,7 +323,6 @@ def main() -> None:
             limit=limit_arg,
         ),
     )
-
 
 if __name__ == "__main__":
     main()

@@ -20,9 +20,7 @@ from converters.monster_common import load_monsters
 
 logger = logging.getLogger("converter")
 
-# 公测上线时间：整段早于此时段的排期视为 beta/测试占位
 _LAUNCH_TS = datetime(2023, 4, 26, 0, 0, 0)
-
 
 def _load_schedules(filename: str) -> dict[str, tuple[str, str]]:
     """读取赛季排期并按 GroupID 映射（ScheduleID - 200000 = GroupID）。
@@ -48,7 +46,6 @@ def _load_schedules(filename: str) -> dict[str, tuple[str, str]]:
         out[str(sid - 200000)] = (begin, end)
     return out
 
-
 def _load_test_periods(filename: str = "ScheduleDataChallengeMaze.json") -> set[int]:
     """测试期分组：排期整段早于公测上线的 beta/CBT 测试期数。
 
@@ -71,7 +68,6 @@ def _load_test_periods(filename: str = "ScheduleDataChallengeMaze.json") -> set[
         if et < _LAUNCH_TS:
             out.add(sid - 200000)
     return out
-
 
 def _load_maze_buffs() -> dict[int, dict]:
     """MazeBuff.json → {ID: {name, desc, param_list, icon}}（赛季增益名称 + 效果描述）。
@@ -100,7 +96,6 @@ def _load_maze_buffs() -> dict[int, dict]:
         }
     return out
 
-
 def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dict:
     """敌方输出对象：{id, name, icon, weak, resist, rank, camp, stance, speed}。
 
@@ -118,7 +113,7 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
         out["tpl"] = str(tpl)
     for k, v in info.items():
         if k in ("figure", "_tpl"):
-            continue  # 详情页专属字段（共享聚合表带来的字段）不泄漏进赛季输出
+            continue
         if k == "stats":
             if v.get("speed"):
                 out["speed"] = v["speed"]
@@ -126,12 +121,10 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
         if not full and k in ("intro", "skills"):
             continue
         if k == "skills":
-            # skills 仅取名称 + 标签（技能全量字段由 monster_detail 转换器输出）
             out[k] = [{"name": s["name"], "tag": s.get("tag")} for s in v]
         else:
             out[k] = v
     return out
-
 
 def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dict]:
     """目标表 → {ID: {text, param, type}}（挑战目标描述 + 参数 + 类型，三模式通用）。
@@ -145,7 +138,6 @@ def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dic
     """
     data = load_json(EXCEL_DIR / filename)
     out: dict[int, dict] = {}
-    # 文本 Hash → 首个非 None 参数（供缺失记录补全）
     hash_params: dict[int, int] = {}
     raw: list[tuple[int, str, int | None, int | None, str]] = []
     for rec in data:
@@ -171,7 +163,6 @@ def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dic
         out[tid] = entry
     return out
 
-
 def _group_maze_buff(filename: str = "ChallengeGroupConfig.json") -> dict[int, list[int]]:
     """忘却之庭分组表 → {GroupID: [MazeBuffID]}（赛季增益单值）。"""
     data = load_json(EXCEL_DIR / filename)
@@ -183,7 +174,6 @@ def _group_maze_buff(filename: str = "ChallengeGroupConfig.json") -> dict[int, l
             continue
         out[gid] = [bid]
     return out
-
 
 def _group_extra_buff(filename: str, keys: tuple[str, ...]) -> dict[int, list[int]]:
     """虚构叙事 / 末日幻影主题表 → {GroupID: [BuffID...]}（去重保序）。
@@ -205,7 +195,6 @@ def _group_extra_buff(filename: str, keys: tuple[str, ...]) -> dict[int, list[in
             out[gid] = ids
     return out
 
-
 def _group_extra_sub_buffs(filename: str = "ChallengeStoryGroupExtra.json") -> dict[int, list[int]]:
     """虚构叙事战意赛季主题机制 → {GroupID: [BuffID...]}（SubMazeBuffList，去重保序）。
 
@@ -226,7 +215,6 @@ def _group_extra_sub_buffs(filename: str = "ChallengeStoryGroupExtra.json") -> d
             out[gid] = ids
     return out
 
-
 def _load_group_names(filename: str) -> dict[int, str]:
     """分组表 → {GroupID: GroupName}（赛季名缺失时回退，如最新未命名赛季）。"""
     data = load_json(EXCEL_DIR / filename)
@@ -240,7 +228,6 @@ def _load_group_names(filename: str) -> dict[int, str]:
             out[gid] = name
     return out
 
-
 def _load_permanent_groups(filename: str = "ChallengeGroupConfig.json") -> set[int]:
     """常驻关卡分组：ScheduleDataID 为空的长期关卡（无赛季轮回）。
 
@@ -251,21 +238,17 @@ def _load_permanent_groups(filename: str = "ChallengeGroupConfig.json") -> set[i
     return {r.get("GroupID") for r in data if r.get("GroupID") is not None
             and not r.get("ScheduleDataID")}
 
-
-# 分组表 → arts 字段映射（源字段名 → 输出键；仅收录语义适合展示的路径，
-# 排除 AbyssSwitch 开关图等 UI 控件——前端白名单另有语义闸门双重把关）
 _GROUP_ART_FIELDS: dict[str, str] = {
-    "BackGroundPath": "background",             # 3D 场景背景（仅忘却之庭）
-    "TabPicPath": "tab",                        # 赛季专属页签图
-    "TabPicSelectPath": "tab_select",           # 开关图 On 态（与 tab 同资源）
-    "ThemePicPath": "theme_banner",             # 赛季横幅（宣传 BANNER）
-    "ThemeToastPicPath": "theme_toast",         # 主题小图（虚构叙事）
-    "ThemeIconPicPath": "theme_icon",           # 主题图标（虚构叙事/末日幻影）
-    "ThemePosterBgPicPath": "theme_bg",         # 海报背景（虚构叙事）
-    "ThemePosterTabPicPath": "poster_tab",      # 海报页签（虚构/末日/仲裁）
-    "HandBookPanelBannerPath": "handbook_banner",  # 图鉴横幅（异相仲裁）
+    "BackGroundPath": "background",
+    "TabPicPath": "tab",
+    "TabPicSelectPath": "tab_select",
+    "ThemePicPath": "theme_banner",
+    "ThemeToastPicPath": "theme_toast",
+    "ThemeIconPicPath": "theme_icon",
+    "ThemePosterBgPicPath": "theme_bg",
+    "ThemePosterTabPicPath": "poster_tab",
+    "HandBookPanelBannerPath": "handbook_banner",
 }
-
 
 def _load_group_arts(filename: str) -> dict[int, dict]:
     """分组表 → {GroupID: {background, tab, ...}}（赛季海报/标签图路径）。
@@ -289,7 +272,6 @@ def _load_group_arts(filename: str) -> dict[int, dict]:
             out[gid] = arts
     return out
 
-
 def _merge_arts(*arts_maps: dict[int, dict]) -> dict[int, dict]:
     """多表 arts 逐键合并（同 GroupID 的字段互补，不互相覆盖）。"""
     out: dict[int, dict] = {}
@@ -297,7 +279,6 @@ def _merge_arts(*arts_maps: dict[int, dict]) -> dict[int, dict]:
         for gid, arts in m.items():
             out.setdefault(gid, {}).update(arts)
     return out
-
 
 def _load_mode_default_icons() -> dict[str, str]:
     """ChallengeGeneralConfig → {玩法键: 玩法级默认图标路径}。
@@ -316,14 +297,12 @@ def _load_mode_default_icons() -> dict[str, str]:
             out[key_map[gtype]] = path
     return out
 
-
 def _attach_default_icon(entries: dict, default_path: str | None) -> None:
     """玩法级默认图标兜底：并入各赛季 arts.default（无赛季专属图标时前端使用）。"""
     if not default_path:
         return
     for entry in entries.values():
         entry.setdefault("arts", {})["default"] = default_path
-
 
 def _load_battle_targets() -> dict[int, dict]:
     """BattleTargetConfig → {ID: {text, param}}（异相仲裁挑战目标）。
@@ -342,7 +321,6 @@ def _load_battle_targets() -> dict[int, dict]:
             continue
         out[tid] = {"text": desc, "param": rec.get("TargetParam")}
     return out
-
 
 def _load_stage_monsters_by_id(stage_ids: set[int]) -> dict[int, dict]:
     """StageConfig 按需提取 → {StageID: {level, waves}}。
@@ -366,7 +344,6 @@ def _load_stage_monsters_by_id(stage_ids: set[int]) -> dict[int, dict]:
         out[sid] = {"level": rec.get("Level", 0) or 0, "waves": waves}
     return out
 
-
 def _stage_mids(events: list[int], stages: dict[int, dict]) -> list[int]:
     """EventIDList → StageConfig 波次扁平 ID 列表（波内保序去重，未命中跳过）。"""
     out: list[int] = []
@@ -379,7 +356,6 @@ def _stage_mids(events: list[int], stages: dict[int, dict]) -> list[int]:
                 if mid not in out:
                     out.append(mid)
     return out
-
 
 def _stage_waves_monsters(
     events: list[int],
@@ -406,7 +382,6 @@ def _stage_waves_monsters(
                 out.append({**_monster_out(mid, monsters, full), "wave": wave_no})
     return out
 
-
 def _load_story_turns() -> dict[str, int]:
     """ChallengeStoryMazeExtra.json → {GroupID: 最大回合限制}（层记录 ID // 10 = GroupID）。"""
     data = load_json(EXCEL_DIR / "ChallengeStoryMazeExtra.json")
@@ -419,7 +394,6 @@ def _load_story_turns() -> dict[str, int]:
         gid = str(rid // 10)
         out[gid] = max(out.get(gid, 0), turn)
     return out
-
 
 def _load_story_scores() -> dict[str, int]:
     """ChallengeStoryMazeExtra.json → {GroupID: 通关分数线 ClearScore}（层记录 ID // 10）。
@@ -435,7 +409,6 @@ def _load_story_scores() -> dict[str, int]:
             continue
         out[str(rid // 10)] = max(out.get(str(rid // 10), 0), score)
     return out
-
 
 def _load_tierce(
     tierce_files: list[tuple[str, str]],
@@ -454,7 +427,6 @@ def _load_tierce(
     （星启附加关，兼容目录页/旧结构）。
     """
     out: dict[str, dict] = {}
-    # 预载关卡表（GroupID 映射 + 按 ID 查常规最高难度关），收集全部 StageID
     by_id_maps: dict[str, dict[int, dict]] = {}
     id2gid_maps: dict[str, dict[int, int]] = {}
     stage_ids: set[int] = set()
@@ -485,14 +457,12 @@ def _load_tierce(
             gid = id2gid.get(prev) if prev is not None else None
             if gid is None:
                 continue
-            # 星启附加关敌方（节点 3）：HFIAAGAKFMD → StageConfig 波次，未收录回退 Boss 代表
             node3 = _stage_waves_monsters(
                 rec.get("HFIAAGAKFMD", []) or [], stages, monsters, full=True
             ) or [
                 _monster_out(mid, monsters, full=True)
                 for mid in (rec.get("JEBMBCLBIOI", []) or []) if mid in monsters
             ]
-            # 3 节点敌方：节点 1/2 = 常规最高难度关（DLCKKJFMJOB）上下半场；节点 3 = 星启附加关
             prev_rec = by_id.get(prev) if prev is not None else None
             nodes: list[dict] = []
             for evkey in ("EventIDList1", "EventIDList2"):
@@ -502,14 +472,10 @@ def _load_tierce(
                         (prev_rec or {}).get(evkey, []) or [], stages, monsters, full=True),
                 })
             nodes.append({"idx": 3, "monsters": node3})
-            # 目标档位：OGEOMCGNNMP（60000/75000/90000）+ GNGENMHNLAH（99000 满分档，
-            # 官网关卡奖励表五档中的最高档，追加保持分数升序）
             tids = list(rec.get("OGEOMCGNNMP", []) or [])
             full_tid = rec.get("GNGENMHNLAH")
             if full_tid and full_tid not in tids:
                 tids.append(full_tid)
-            # 通关奖励（EGEEJLHBALB 全量含数量；OGALGHMIIAH 仅为展示顺序，取前者）；
-            # 仅虚构叙事提供（每期固定），其他模式缺省不输出
             rewards = [
                 {"id": r.get("ItemID"), "num": r.get("ItemNum", 0)}
                 for r in (rec.get("EGEEJLHBALB", []) or []) if r.get("ItemID")
@@ -534,7 +500,6 @@ def _load_tierce(
                 entry["level"] = s_lv
             out[str(gid)] = entry
     return out
-
 
 def _season_stats(recs: list[dict]) -> dict:
     """聚合赛季统计：最大层数 / 阶段数 / 回合上限 / 弱点属性 + 逐层弱点。
@@ -572,7 +537,6 @@ def _season_stats(recs: list[dict]) -> dict:
         "floor_damage": floor_damage,
     }
 
-
 def _stage_monsters(
     mid_list: list[int], monsters: dict[int, dict]
 ) -> list[dict]:
@@ -583,7 +547,6 @@ def _stage_monsters(
             continue
         out.append(_monster_out(mid, monsters))
     return out
-
 
 def _season_monsters(
     recs: list[dict], monsters: dict[int, dict], stages: dict[int, dict]
@@ -602,12 +565,9 @@ def _season_monsters(
                 out.append(_monster_out(mid, monsters))
     return out
 
-
-# 敌方模板分类权重（BigBoss > LittleBoss > Elite > MinionLv2 > Minion）
 _RANK_ORDER = {
     "BigBoss": 5, "LittleBoss": 4, "Elite": 3, "MinionLv2": 2, "Minion": 1,
 }
-
 
 def _final_monsters(pool: list[dict], fallback: list[dict], n: int = 4) -> list[dict]:
     """卡片代表阵容：敌方池按 rank 优先级去重取前 n。
@@ -631,7 +591,6 @@ def _final_monsters(pool: list[dict], fallback: list[dict], n: int = 4) -> list[
             break
     return out
 
-
 def _load_boss_phases() -> dict[int, list[int]]:
     """ChallengeBossMazeExtra → {层记录 ID: [阶段敌人 MonsterID 列表]}（阶段制）。
 
@@ -649,7 +608,6 @@ def _load_boss_phases() -> dict[int, list[int]]:
         if mids:
             out[rid] = mids
     return out
-
 
 def _season_floors(
     recs: list[dict],
@@ -695,7 +653,6 @@ def _season_floors(
         }
         if lv:
             node["level"] = lv
-        # 末日幻影阶段制：ChallengeBossMazeExtra 每层 1-3 阶段 Boss 清单（含 StageConfig 缺失的第 3 阶段）
         if phases and r.get("ID") in phases:
             node["phases"] = [
                 _monster_out(mid, monsters, full=True)
@@ -713,7 +670,6 @@ def _season_floors(
         out.append(node)
     return out
 
-
 def _season_targets(recs: list[dict], targets: dict[int, dict]) -> list[dict]:
     """赛季挑战目标：组内 ChallengeTargetID 全收集 → {text, param}（去重保序）。"""
     out: list[dict] = []
@@ -728,7 +684,6 @@ def _season_targets(recs: list[dict], targets: dict[int, dict]) -> list[dict]:
             seen.add(tid)
             out.append(info)
     return out
-
 
 def _group_seasons(
     filename: str,
@@ -766,7 +721,6 @@ def _group_seasons(
             continue
         groups[gid].append(rec)
 
-    # 收集全部 StageID（上下半场事件），一次性按需提取波次配置
     stage_ids: set[int] = set()
     for rec in data:
         stage_ids.update(rec.get("EventIDList1", []) or [])
@@ -795,30 +749,23 @@ def _group_seasons(
             "live_begin": live_begin,
             "live_end": live_end,
         }
-        # 常驻关卡（无赛季轮回的长期关卡；如忘却之庭 100/900）
         if permanent and gid in permanent:
             entry["permanent"] = True
-        # 测试期（beta/CBT 排期整段早于公测的试炼翻版；如忘却之庭 101-107/116）
         if test_period and gid in test_period:
             entry["test"] = True
         entry.update(_season_stats(recs))
-        # 逐层详情：关卡层级章节（推荐属性 / 敌方配置（波次） / 可用增益 / 挑战目标）
         entry["floor_details"] = _season_floors(
             recs, monsters, buffs, targets, stages, full=full_monsters, phases=phases)
-        # 赛季增益：组级 BuffID 列表 → {id, name, desc, param_list}（描述供详情页渲染）
         entry["buffs"] = [
             {"id": bid, **buffs[bid]}
             for bid in buff_map.get(gid, []) if bid in buffs
         ]
-        # 战意赛季主题机制（SubMazeBuffList：机制 + 战熄潮平/战意汹涌；仅 Fever 赛季）
         if sub_buffs:
             entry["sub_buffs"] = [
                 {"id": bid, **buffs[bid]}
                 for bid in sub_buffs.get(gid, []) if bid in buffs
             ]
         entry["monsters"] = _season_monsters(recs, monsters, stages)
-        # 卡片代表阵容：最终层（最高层）上下半场敌方按 rank 去重取前 4
-        # （目录卡片展示赛季终点真实阵容——Boss + 精英护卫，而非第 1 层先出现的小怪）
         floors = entry.get("floor_details") or []
         final_pool: list[dict] = []
         if floors:
@@ -827,18 +774,14 @@ def _group_seasons(
             final_pool = list(s1) + list(s2)
         entry["final_monsters"] = _final_monsters(final_pool, entry["monsters"])
         entry["targets"] = _season_targets(recs, targets)
-        # 虚构叙事回合上限：ChallengeStoryMazeExtra.TurnLimit 覆盖 countdown
         if turns and str(gid) in turns:
             entry["countdown"] = turns[str(gid)]
-        # 虚构叙事通关分数线：ChallengeStoryMazeExtra.ClearScore（全层统一）
         if scores and str(gid) in scores:
             entry["clear_score"] = scores[str(gid)]
-        # 赛季海报/标签图（CDN 未就绪，数据层先行）
         if arts and gid in arts:
             entry["arts"] = arts[gid]
         result[str(gid)] = entry
     return result
-
 
 def _peak_level_node(
     rec: dict | None,
@@ -876,7 +819,6 @@ def _peak_level_node(
         node["level"] = stage["level"]
     return node
 
-
 def _load_peak_badges() -> dict[int, list[dict]]:
     """ChallengeBadgeConfig → {期 ID: [段位徽章]}（Bronze/Silver/Gold/Ultra 四段）。
 
@@ -901,7 +843,6 @@ def _load_peak_badges() -> dict[int, list[dict]]:
         })
     return out
 
-
 def _peak_seasons() -> dict:
     """异相仲裁：每期 = 3 骑士试炼 + 1 王棋最终关（含「绝境」变体）。
 
@@ -920,7 +861,6 @@ def _peak_seasons() -> dict:
     targets = _load_battle_targets()
     badges_map = _load_peak_badges()
 
-    # 收集全部 StageID（关卡事件 + 绝境事件），一次性按需提取
     stage_ids: set[int] = set()
     for r in level_data:
         stage_ids.update(r.get("EventIDList", []) or [])
@@ -941,7 +881,6 @@ def _peak_seasons() -> dict:
         seen: set[int] = set()
         all_buffs: list[dict] = []
         levels: list[dict] = []
-        # 骑士试炼关卡（PreLevelIDList 保序）
         for lid in g.get("PreLevelIDList", []) or []:
             node = _peak_level_node(
                 level_by_id.get(lid), stages, monsters, buffs, targets, "knight")
@@ -951,20 +890,17 @@ def _peak_seasons() -> dict:
                 if int(m["id"]) not in seen:
                     seen.add(int(m["id"]))
                     all_mons.append({k: v for k, v in m.items() if k != "wave"})
-        # 王棋最终关（BossLevelID）
         boss_id = g.get("BossLevelID")
         if boss_id is not None:
             node = _peak_level_node(
                 level_by_id.get(boss_id), stages, monsters, buffs, targets, "king")
             ext = boss_ext.get(boss_id)
             if ext:
-                # 王棋增益（BuffList → MazeBuff）
                 node["buffs"] = [
                     {"id": bid, **buffs[bid]}
                     for bid in (ext.get("BuffList", []) or []) if bid in buffs
                 ]
                 all_buffs = node["buffs"]
-                # 绝境变体（困难王棋）
                 hard_events = ext.get("HardEventIDList", []) or []
                 hard_stage = stages.get(hard_events[0]) if hard_events else None
                 hard: dict = {
@@ -988,7 +924,6 @@ def _peak_seasons() -> dict:
                 if int(m["id"]) not in seen:
                     seen.add(int(m["id"]))
                     all_mons.append({k: v for k, v in m.items() if k != "wave"})
-        # 卡片代表阵容：王棋最终关（无则最后一关）敌方按 rank 去重取前 4
         king = next((l for l in levels if l.get("kind") == "king"), None)
         final_pool = ((king or levels[-1]).get("monsters") or []) if levels else []
         result[str(gid)] = {
@@ -1008,15 +943,11 @@ def _peak_seasons() -> dict:
             "final_monsters": _final_monsters(final_pool, all_mons),
             "buffs": all_buffs,
         }
-        # 段位徽章：ChallengeBadgeConfig 按期分组（Bronze/Silver/Gold/Ultra）
         if gid in badges_map:
             result[str(gid)]["badges"] = badges_map[gid]
-        # 赛季主题图标：ChallengePeakGroupConfig.ThemeIconPicPath → arts.tab
-        # （每赛季专属 ChallengePeakIcon_4xxx；前端 seasonArtUrl 优先解析）
         icon_path = g.get("ThemeIconPicPath") or ""
         if icon_path:
             result[str(gid)].setdefault("arts", {})["tab"] = icon_path
-        # 海报页签 / 图鉴横幅（BtnChallengePeak_4xxx / ChallengePeakPanelBanner*）
         poster_path = g.get("ThemePosterTabPicPath") or ""
         if poster_path:
             result[str(gid)].setdefault("arts", {})["poster_tab"] = poster_path
@@ -1024,7 +955,6 @@ def _peak_seasons() -> dict:
         if banner_path:
             result[str(gid)].setdefault("arts", {})["handbook_banner"] = banner_path
     return result
-
 
 def convert() -> None:
     schedules_maze = _load_schedules("ScheduleDataChallengeMaze.json")
@@ -1043,7 +973,6 @@ def convert() -> None:
     story_sub_buffs = _group_extra_sub_buffs()
     mode_default_icons = _load_mode_default_icons()
 
-    # 三模式目标表合并（ID 不冲突：maze 6xx / story 4xxx / boss 5xxx）
     targets_all = {
         **_load_targets("ChallengeTargetConfig.json"),
         **_load_targets("ChallengeStoryTargetConfig.json"),
@@ -1059,13 +988,10 @@ def convert() -> None:
         monsters,
     )
 
-    # 忘却之庭
     maze = _group_seasons(
         "ChallengeMazeConfig.json", "Name", schedules_maze,
         buff_map=maze_buff_map, buffs=buffs, monsters=monsters, targets=targets,
         group_names=_load_group_names("ChallengeGroupConfig.json"),
-        # 分组表 + 主题 extra 表合并（ThemePosterBgPicPath → theme_bg 2D 场景背景，
-        # 与虚构叙事/末日幻影同构——勿漏 GroupExtra）
         arts=_merge_arts(
             _load_group_arts("ChallengeGroupConfig.json"),
             _load_group_arts("ChallengeMazeGroupExtra.json"),
@@ -1079,7 +1005,6 @@ def convert() -> None:
     _attach_default_icon(maze, mode_default_icons.get("maze"))
     save_json(maze, OUTPUT_DIR / "maze.json")
 
-    # 虚构叙事（挑战目标走 ChallengeStoryTargetConfig，勿传 maze 目标表）
     story = _group_seasons(
         "ChallengeStoryMazeConfig.json", "Name", schedules_story,
         buff_map=story_buff_map, buffs=buffs, monsters=monsters,
@@ -1099,14 +1024,12 @@ def convert() -> None:
     _attach_default_icon(story, mode_default_icons.get("story"))
     save_json(story, OUTPUT_DIR / "maze_extra.json")
 
-    # 末日幻影（挑战目标走 ChallengeBossTargetConfig，勿传 maze 目标表；
-    # 层级敌方按 ChallengeBossMazeExtra 阶段制补全，含 StageConfig 缺失的第 3 阶段）
     boss = _group_seasons(
         "ChallengeBossMazeConfig.json", "Name", schedules_boss,
         buff_map=boss_buff_map, buffs=buffs, monsters=monsters,
         targets=_load_targets("ChallengeBossTargetConfig.json"),
         group_names=_load_group_names("ChallengeBossGroupConfig.json"),
-        full_monsters=True,  # 末日幻影纯 Boss 战：层级敌方输出全字段供信息卡展示
+        full_monsters=True,
         phases=_load_boss_phases(),
         arts=_merge_arts(
             _load_group_arts("ChallengeBossGroupConfig.json"),
@@ -1119,6 +1042,5 @@ def convert() -> None:
     _attach_default_icon(boss, mode_default_icons.get("boss"))
     save_json(boss, OUTPUT_DIR / "maze_boss.json")
 
-    # 异相仲裁
     peak = _peak_seasons()
     save_json(peak, OUTPUT_DIR / "maze_peak.json")

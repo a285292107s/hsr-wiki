@@ -21,7 +21,6 @@ from typing import Iterable, Mapping, Sequence
 
 logger = logging.getLogger("converter")
 
-
 def load_baseline_versions(path: Path) -> dict[str, str] | None:
     """读取上一版输出 JSON，返回 {id: release_version} 基线。
 
@@ -45,10 +44,8 @@ def load_baseline_versions(path: Path) -> dict[str, str] | None:
         if not isinstance(item, dict) or item.get("id") is None:
             continue
         value = item.get("release_version", "")
-        # id 统一转字符串：基线来自 JSON 与 git 历史快照，两种来源的 id 数值类型需可比
         baseline[str(item["id"])] = value if isinstance(value, str) else ""
     return baseline
-
 
 def tag_release_versions(
     current_ids: Iterable[int],
@@ -65,7 +62,6 @@ def tag_release_versions(
     if baseline is None:
         return dict.fromkeys(ids, "")
     return {i: baseline[i] if i in baseline else current_version for i in ids}
-
 
 def apply_release_versions(entries: Sequence[dict], versions: Mapping[str, str]) -> int:
     """把 {id: release_version} 原地写入条目，返回实际发生变化的条目数。

@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * 货币战争 · 羁绊详情页
- * 数据：从 traits.json 按 ID 查找（共享单例缓存）
- * 展示：沉浸式头部 → 完整描述 → 备注机制 → 层级进度（含属性表）
- */
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../lib/format';
@@ -12,7 +7,6 @@ import { propLabel } from '../../lib/currency-role';
 import { usePageData } from '../composables/use-page-data';
 import { loadLocalCurrencyTraits, loadLocalCurrencyRoles } from '../../services/api';
 import type { CurrencyTraitEntry, CurrencyRoleEntry } from '../../services/types';
-// 货币战争模式专属样式（随本路由 chunk 懒加载）
 import '../../styles/currency-trait-detail.css';
 
 const route = useRoute();
@@ -46,7 +40,6 @@ const catLabel = computed(() => CAT_LABEL[cat.value] || cat.value);
 const actLabel = computed(() => ACT_LABEL[data.value?.activation_type || ''] || '');
 
 
-/** 页面级加载编排：双 loader 并行 + 加载代竞态；members（羁绊成员）在 loader 内一并解析 */
 const { data, error, showSkeleton, run, retry } = usePageData<CurrencyTraitEntry>(async () => {
   const [{ traits }, { roles }] = await Promise.all([
     loadLocalCurrencyTraits(),
@@ -67,7 +60,6 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
 
 <template>
   <div class="nk-ctrait">
-    <!-- 加载骨架（延迟显示，缓存命中不闪屏；镜像真实首屏 = Hero 段 + 首节 section 段） -->
     <div v-if="showSkeleton" class="nk-ctrait__skeleton" role="status" aria-live="polite" aria-label="羁绊详情加载中">
       <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-icon"></div>
       <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-title" style="width:40%"></div>
@@ -78,7 +70,6 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
       </div>
     </div>
 
-    <!-- 错误 -->
     <div v-else-if="error" class="nk-ctrait__state nk-ctrait__state--err">
       <span class="nk-ctrait__state-icon">⚠</span>
       <p>{{ error }}</p>
@@ -86,7 +77,6 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
     </div>
 
     <template v-else-if="data">
-      <!-- ═══ Hero 头部 ═══ -->
       <header class="nk-ctrait-hero" :data-cat="cat">
         <div class="nk-ctrait-hero__glow"></div>
         <div class="nk-ctrait-hero__content">
@@ -102,13 +92,11 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
         </div>
       </header>
 
-      <!-- ═══ 完整描述 ═══ -->
       <section class="nk-ctrait-section">
         <h2 class="nk-ctrait-section__title">效果说明</h2>
         <div class="nk-ctrait-desc" v-html="fmtDesc(data.desc, data.base_params)"></div>
       </section>
 
-      <!-- ═══ 备注机制 ═══ -->
       <section v-if="data.remarks && data.remarks.length" class="nk-ctrait-section">
         <h2 class="nk-ctrait-section__title">机制详情</h2>
         <div class="nk-ctrait-remarks">
@@ -118,7 +106,6 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
         </div>
       </section>
 
-      <!-- ═══ 羁绊成员 ═══ -->
       <section v-if="members.length" class="nk-ctrait-section">
         <h2 class="nk-ctrait-section__title">羁绊成员<span class="nk-ctrait-section__note">（{{ members.length }} 人）</span></h2>
         <div class="nk-ctrait-members">
@@ -135,7 +122,6 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
         </div>
       </section>
 
-      <!-- ═══ 层级效果 ═══ -->
       <section v-if="data.layers && data.layers.length" class="nk-ctrait-section">
         <h2 class="nk-ctrait-section__title">层级效果<span v-if="actLabel" class="nk-ctrait-section__note">（{{ actLabel }}）</span></h2>
         <div class="nk-ctrait-layers">
@@ -145,11 +131,9 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
             class="nk-ctrait-layer"
             :class="`nk-ctrait-layer--${ly.quality ? (QUALITY_CSS[ly.quality] || '') : 'base'}`"
           >
-            <!-- 左侧：品质菱形节点（内嵌阈值数字）+ 进度轨 -->
             <div class="nk-ctrait-layer__mark">
               <span class="nk-ctrait-layer__node"><span class="nk-ctrait-layer__num">{{ ly.layer }}</span></span>
             </div>
-            <!-- 右侧：内容面板 -->
             <div class="nk-ctrait-layer__body">
               <header class="nk-ctrait-layer__head">
                 <span class="nk-ctrait-layer__quality">
@@ -159,7 +143,6 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
               </header>
               <div v-if="ly.desc" class="nk-ctrait-layer__desc" v-html="fmtDesc(ly.desc, ly.params)"></div>
               <div v-if="ly.buff_desc" class="nk-ctrait-layer__buff" v-html="fmtDesc(ly.buff_desc, ly.buff_params || [])"></div>
-              <!-- 属性芯片仅在没有描述文本时展示 -->
               <div v-if="!ly.desc && (ly.member_props.length || ly.all_props.length)" class="nk-ctrait-layer__props">
                 <div v-for="(p, pi) in ly.member_props" :key="'m'+pi" class="nk-ctrait-prop">
                   <span class="nk-ctrait-prop__scope">成员</span>

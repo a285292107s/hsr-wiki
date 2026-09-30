@@ -1,7 +1,3 @@
-/**
- * spine-audit.ts 审核引擎纯函数测试（atlas 解析 / 像素分析 / 分级 / 诊断建议）
- * 仅测纯函数；渲染检查（L2）依赖 spine 运行时与 WebGL，由人工审核台验证。
- */
 import { describe, expect, it } from 'vitest';
 import {
   analyzePixels, buildDiagnosis, createAuditEntry, parseAtlasPages,
@@ -63,7 +59,6 @@ describe('analyzePixels', () => {
   });
 
   it('局部可见：数量统计 + 左上原点 bbox（readPixels 底部行 → 屏幕顶部行翻转）', () => {
-    // buf 行 2~3（= 屏幕顶部两行）的 x∈[1,2] 可见 → 屏幕 bbox {x0:1, y0:0, x1:2, y1:1}
     const buf = mk(4, 4, (x, row) => x >= 1 && x <= 2 && row >= 2 && row <= 3);
     const r = analyzePixels(buf, 4, 4);
     expect(r.visible).toBe(4);
@@ -74,7 +69,7 @@ describe('analyzePixels', () => {
 
   it('部分透明（alpha=1）也计入可见', () => {
     const buf = new Uint8Array(2 * 2 * 4);
-    buf[3] = 1; // buf 行 0（WebGL 底部行）x=0 处 alpha=1 → 屏幕 y = h-1-0 = 1
+    buf[3] = 1;
     const r = analyzePixels(buf, 2, 2);
     expect(r.visible).toBe(1);
     expect(r.bbox).toEqual({ x0: 0, y0: 1, x1: 0, y1: 1 });
@@ -121,7 +116,7 @@ describe('buildDiagnosis', () => {
     e.errors.push('渲染失败: Offset is outside the bounds of the DataView');
     const d = buildDiagnosis(e);
     expect(d.some((t) => t.includes('Spine 版本兼容'))).toBe(true);
-    expect(d.some((t) => t.includes('备用运行时'))).toBe(false); // 不误报 skel 专属建议
+    expect(d.some((t) => t.includes('备用运行时'))).toBe(false);
   });
 
   it('无关键词匹配 → 空建议', () => {

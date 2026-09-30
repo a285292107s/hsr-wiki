@@ -24,9 +24,6 @@ from season_delta import (  # noqa: E402
     prev_generation,
 )
 
-
-# ─── generations / prev_generation ──────────────────────────────
-
 class TestPrevGeneration:
     def test_returns_max_generation(self):
         rows = [
@@ -44,9 +41,9 @@ class TestPrevGeneration:
     def test_ignores_missing_and_non_int_season(self):
         rows = [
             {"ExistSeason": 103, "ID": 1},
-            {"ID": 2},                      # 缺代字段
+            {"ID": 2},
             {"ExistSeason": None, "ID": 3},
-            {"ExistSeason": "101", "ID": 4},  # 字符串不是有效代
+            {"ExistSeason": "101", "ID": 4},
         ]
         assert generations(rows) == [103]
         assert prev_generation(rows) == 103
@@ -55,27 +52,20 @@ class TestPrevGeneration:
         rows = [{"Season": 1, "ID": 1}, {"Season": 2, "ID": 2}]
         assert prev_generation(rows, key="Season") == 2
 
-
-# ─── mark_season_new ────────────────────────────────────────────
-
 def _roster(*pairs: tuple[int, int]) -> list[dict]:
     return [{"ExistSeason": s, "AvatarID": a} for s, a in pairs]
 
-
 class TestMarkSeasonNew:
     def test_current_not_in_prev_generation_is_new(self):
-        # 上一代（103）= {1, 2}；当前代 = {1, 2, 3, 4}
         rows = _roster((101, 1), (102, 1), (103, 1), (102, 2), (103, 2))
         flags = mark_season_new([1, 2, 3, 4], rows, id_key="AvatarID")
         assert flags == {1: False, 2: False, 3: True, 4: True}
 
     def test_generation_earlier_than_max_is_not_baseline(self):
-        # 只在代 101 出现、代 103 不在名册里 → 相对上一代（103）算新增（差集是单向的）
         rows = _roster((101, 7), (103, 8))
         assert mark_season_new([7, 8], rows, id_key="AvatarID") == {7: True, 8: False}
 
     def test_rotated_out_id_does_not_affect_flags(self):
-        # 旧代有、当前代无（轮换出）→ 结果里不出现，且不影响其它条目
         rows = _roster((103, 1), (103, 9))
         assert mark_season_new([1], rows, id_key="AvatarID") == {1: False}
 
@@ -92,7 +82,6 @@ class TestMarkSeasonNew:
         assert any("赛季代际差集降级" in r.message for r in caplog.records)
 
     def test_single_generation_is_all_false_with_warning(self, caplog):
-        # 只有一代 → 无「上一代」可比，全 false（禁止把唯一一代当上一代而全 true）
         with caplog.at_level(logging.WARNING, logger="converter"):
             flags = mark_season_new([1, 2, 3], _roster((103, 1)), id_key="AvatarID")
         assert flags == {1: False, 2: False, 3: False}
@@ -117,11 +106,7 @@ class TestMarkSeasonNew:
 
     def test_missing_id_field_rows_are_ignored(self):
         rows = [{"ExistSeason": 102}, {"ExistSeason": 103}, {"ExistSeason": 103, "ID": 5}]
-        # 代 103 的有效 id 只有 5；缺 ID 的行不得把 None 混入上一代集合
         assert mark_season_new([5, 6], rows) == {5: False, 6: True}
-
-
-# ─── apply_season_new ───────────────────────────────────────────
 
 class TestApplySeasonNew:
     def test_writes_flag_and_counts_true(self):
@@ -130,7 +115,6 @@ class TestApplySeasonNew:
         assert [e["is_season_new"] for e in entries] == [True, False, True]
 
     def test_id_field_selects_match_key(self):
-        # 角色按 avatar_id 匹配（旧代表主键是 AvatarID，不是 role id）
         entries = [{"id": 1001, "avatar_id": 8007}, {"id": 1002, "avatar_id": 8008}]
         assert apply_season_new(entries, {8007: False, 8008: True}, id_field="avatar_id") == 1
         assert [e["is_season_new"] for e in entries] == [False, True]
@@ -141,11 +125,9 @@ class TestApplySeasonNew:
         assert [e["is_season_new"] for e in entries] == [False, False]
 
     def test_overwrites_previous_flag(self):
-        # 幂等前提：字段每次整体重写，不沿用旧值（源表换代后旧标必须能被改掉）
         entries = [{"id": 1, "is_season_new": True}]
         assert apply_season_new(entries, {1: False}) == 0
         assert entries[0]["is_season_new"] is False
-
 
 @pytest.mark.parametrize("ids", [[], [1]])
 def test_empty_current_ids_returns_empty_mapping(ids):

@@ -1,4 +1,3 @@
-/** 货币战争 · 投资策略图鉴目录页配置 */
 import { escHtml, gridFightIconUrl, fmtDesc } from '../../../lib/format';
 import { loadLocalCurrencyAugments } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
@@ -7,7 +6,6 @@ import { loadCwCatalogCss } from './shared';
 const QUALITY_LABEL: Record<string, string> = {
   Silver: '银色', Gold: '金色', Prismatic: '棱彩',
 };
-/** 品质排序：银色 → 金色 → 棱彩 */
 const QUALITY_ORDER = ['Silver', 'Gold', 'Prismatic'];
 
 function renderAugmentCard(item: CatalogItem, index = 0): string {
@@ -31,7 +29,6 @@ export const currencyAugmentPage: CatalogPageConfig = {
   searchPlaceholder: '搜索投资策略…',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',
-  /* CW 卡片共享样式（nk-cw-card） */
   styles: [loadCwCatalogCss],
   async fetchData() {
     const { augments } = await loadLocalCurrencyAugments();
@@ -49,7 +46,6 @@ export const currencyAugmentPage: CatalogPageConfig = {
   },
   buildFilters(items: CatalogItem[]) {
     const filters: CatalogFilter[] = [];
-    // 品质筛选（按银/金/棱彩排序）
     const qualities = [...new Set(items.map((it) => it.quality as string).filter(Boolean))]
       .sort((a, b) => QUALITY_ORDER.indexOf(a) - QUALITY_ORDER.indexOf(b));
     if (qualities.length) {

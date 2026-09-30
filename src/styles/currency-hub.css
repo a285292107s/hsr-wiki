@@ -1,16 +1,3 @@
-/* 货币战争枢纽页(/currency)· 工具化形态（ADR 0018），仅 data-theme="cw" 下呈现。
-    本页 = 品牌带 + 本赛季新增两分区（角色图鉴 / 羁绊图鉴）+ 共享页脚（ADR 0020 决策 1/2/6）；
-    5 行板块索引整体退场，选路由全站导航条承担；页首只保留跨页共享的品牌带 .nk-hub-brand（声明 tokens.css，与常规枢纽页同一份骨架）。
-    反 AI 味双段式禁令（不可回退）：
-    ① 品牌带为纯令牌渐变，禁止在其上叠加霓虹 glow/金币雨/行情板/div 装饰/装饰字符/em-dash/装饰 eyebrow；真实数据徽章允许；
-    ② 禁补回全屏媒体层：视频/poster 已随工具化移除（ADR 0018），如需恢复必须先改 ADR；
-    ③ 品牌带、页脚、上新区块骨架均为跨页共享原语（.nk-hub-brand / .nk-hub-footer / .nk-hub-release，声明 tokens.css / catalog.css），
-       本页禁止重新声明或复制粘贴这三族选择器——上新区块只准在此写「卡片宽度覆盖」这一种规则；
-    ④ 色值全经令牌(--blk/--gold- / --primary / --line / --hero-bg- 层)，禁止裸彩色；圆角三档=卡片/内嵌(卡片-2px)/标签999px；
-    ⑤ 禁止恢复板块索引族选择器（索引块已随 ADR 0020 整体删除，选路交导航条）。BEM 前缀 nk-cwhub- 仅供本页专有结构 */
-/* ── 容器：镜像首页（app 无左侧内边距，Hero 全屏铺满视图区；
-   内容留白由 __content / 上新区块各自用 --nk-content-offset 令牌断点接管：
-   平板 88 / 桌面 148，禁止写死数字——历史遗漏 80px 导致文字被遮） ── */
 #nk-cwhub-app {
   position: absolute;
   inset: 0;
@@ -22,37 +9,14 @@
   -webkit-font-smoothing: antialiased;
 }
 #nk-cwhub-app * { box-sizing: border-box; }
-/* h1/h2/h3/p 归零：h2 = 上新区块标题、h3 = 分区名（tokens.css 的 #app 重置已覆盖，此处保证容器内不依赖全局样式顺序） */
 #nk-cwhub-app h1, #nk-cwhub-app h2, #nk-cwhub-app h3, #nk-cwhub-app p { margin: 0; padding: 0; }
 #nk-cwhub-app::-webkit-scrollbar { width: 6px; }
 #nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
 #nk-cwhub-app::-webkit-scrollbar-track { background: transparent; }
 
-/* ═══ Hero：已抽为跨页共享原语 .nk-hub-brand（声明 tokens.css，两枢纽共用，ADR 0018）
-   —— 禁止在本文件重新声明品牌带选择器或复制粘贴；两页高度与断点必须由同一份原语接管，
-   否则枢纽互切（nk-view-swap）时会出现一边文字已展开、一边文字直接就在那里的高度跳动。 ═══ */
-
-/* 赛季扩充说明样式已随视图侧移除（ADR 0016）；本文件禁止再出现 .nk-cwhub-season 选择器 */
-
-/* ═══ 本赛季新增：区块骨架（.nk-hub-release 的头部 / 分区 / 卡片带 / 空态）由 catalog.css 单点声明，
-   本页**禁止**重新声明或复制该族选择器（复制即两份断点漂移，两枢纽互切时区块高度跳动）；
-   此处只写「卡片宽度覆盖」这一种规则：卡片带是 flex 行且子项为 flex: 0 0 auto，
-   卡片自身无宽度时按 max-content 撑开（羁绊卡的名称与描述无行宽上限，会撑到整行文字宽），故必须给定宽度。
-   144px 与首页卡片带同档；252px 供羁绊卡「菱形图标 38px + 名称 + 层数 + 两行描述」横向密排。
-   作用域限定 #nk-cwhub-app：禁止外溢到 /currency/role 与 /currency/trait 目录页。
-   （catalog.css 里的 .nk-cw-card 宽度不是本页两类卡片，勿依赖；本页卡片 = .nk-crole-card / .nk-cw-trait-card） ═══ */
 #nk-cwhub-app .nk-hub-release__band .nk-crole-card { width: 144px; }
 #nk-cwhub-app .nk-hub-release__band .nk-cw-trait-card { width: 252px; }
 
-/* ── 页脚：跨页共享原语 `.nk-hub-footer`（声明于 tokens.css，含全断点响应式） ── */
-/* 响应式 ──
-   枢纽文字出场降级（硬标准，禁止删除）已上移至共享原语 .nk-hub-brand（tokens.css）：
-   reduced-motion 下三段 animation: none → 文字直接以终态可见。
-   禁止在此重复声明，也禁止改为超短时长（仍会闪动）或 animation-play-state: paused
-   （会把 backwards 的 opacity 0 定格，文字不可见）。 */
-/* 手机（<768px）：卡片带宽度收一档（仍在容器内横向滚动）；
-   区块内边距与页脚 56px 底部栏预留由共享原语承担（catalog.css 的 .nk-hub-release / tokens.css 的 .nk-hub-footer），
-   本页**禁止**再叠加一份内边距（会与页脚预留叠成双份空隙）。 */
 @media (max-width: 767px) {
   #nk-cwhub-app .nk-hub-release__band .nk-crole-card { width: 116px; }
   #nk-cwhub-app .nk-hub-release__band .nk-cw-trait-card { width: 224px; }

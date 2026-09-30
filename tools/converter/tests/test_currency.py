@@ -15,7 +15,6 @@ import pytest  # noqa: E402
 
 from converters import currency as cur  # noqa: E402
 
-
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
     """mock TextMap，避免加载真实 50MB 文件。"""
@@ -24,9 +23,6 @@ def setup_textmap(monkeypatch):
         "9774490082531591747": "初始能量",
         "14993609201079937303": "伤害增幅",
     })
-
-
-# ─── _build_prop_names ──────────────────────────────────────────
 
 class TestBuildPropNames:
     def test_resolves_property_names_from_textmap(self):
@@ -46,9 +42,6 @@ class TestBuildPropNames:
         data = [{"PropertyName": {"Hash": 9774490082531591747}}, {}]
         assert cur._build_prop_names(data) == {}
 
-
-# ─── _flatten_property_mods ─────────────────────────────────────
-
 class TestFlattenPropertyMods:
     def test_basic_flatten_without_prop_names(self):
         data = [{"PropertyType": "ExtraSpeedAddedRatio1", "Value": {"Value": 0.08}}]
@@ -66,7 +59,6 @@ class TestFlattenPropertyMods:
         assert result[0]["value"] == 60
 
     def test_no_prop_name_for_unlisted_key(self):
-        # 常规模式属性体系（AttackAddedRatio 等）未收录 → 不输出 prop_name
         data = [{"PropertyType": "AttackAddedRatio", "Value": {"Value": 0.2}}]
         result = cur._flatten_property_mods(data, {"ExtraInitSP": "初始能量"})
         assert "prop_name" not in result[0]
@@ -81,9 +73,6 @@ class TestFlattenPropertyMods:
         result = cur._flatten_property_mods(data)
         assert [r["property_type"] for r in result] == ["A", "B"]
         assert result[1]["value"] == 2
-
-
-# ─── _index_gender_override ──────────────────────────────────────
 
 class TestIndexGenderOverride:
     def test_maps_role_to_female_avatar(self):

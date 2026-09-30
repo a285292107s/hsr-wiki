@@ -16,7 +16,6 @@ import json
 import sys
 from pathlib import Path
 
-# Windows 控制台强制 UTF-8，避免中文输出乱码
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
@@ -26,10 +25,8 @@ from config import EXCEL_DIR, TEXTMAP_DIR
 
 OUTPUT_FILE = Path(__file__).resolve().parent / "DATA_CATALOG.md"
 
-
 def get_file_size_mb(path: Path) -> float:
     return path.stat().st_size / (1024 * 1024)
-
 
 def inspect_json_file(path: Path) -> dict:
     """检查单个 JSON 文件，返回元信息。"""
@@ -50,8 +47,6 @@ def inspect_json_file(path: Path) -> dict:
         info["type"] = "array"
         info["count"] = len(data)
         if data and isinstance(data[0], dict):
-            # 遍历全部记录求字段并集：官方数据中可选字段可能仅出现在部分记录，
-            # 只取首条记录会遗漏字段（曾导致 AI 依据索引误判字段不存在）
             fields: set[str] = set()
             for rec in data:
                 if isinstance(rec, dict):
@@ -61,13 +56,11 @@ def inspect_json_file(path: Path) -> dict:
     elif isinstance(data, dict):
         info["type"] = "object"
         info["count"] = len(data)
-        # 取前几个 key 作为样例
         sample_keys = list(data.keys())[:3]
         info["sample_keys"] = sample_keys
         if sample_keys:
             first_val = data[sample_keys[0]]
             if isinstance(first_val, dict):
-                # 值字段并集（与数组型一致，防可选字段遗漏）
                 fields = set()
                 for v in data.values():
                     if isinstance(v, dict):
@@ -77,7 +70,6 @@ def inspect_json_file(path: Path) -> dict:
         info["type"] = type(data).__name__
 
     return info
-
 
 def truncate_record(record: dict, max_str_len: int = 40) -> dict:
     """截断记录中的长字段，用于样例展示。
@@ -98,7 +90,6 @@ def truncate_record(record: dict, max_str_len: int = 40) -> dict:
         else:
             result[k] = v
     return result
-
 
 def format_catalog(entries: list[dict], textmap_info: dict) -> str:
     """生成 Markdown 格式的目录索引。"""
@@ -133,7 +124,6 @@ def format_catalog(entries: list[dict], textmap_info: dict) -> str:
         "",
     ]
 
-    # 按大小降序
     entries_sorted = sorted(entries, key=lambda x: x["size_mb"], reverse=True)
 
     for e in entries_sorted:
@@ -165,7 +155,6 @@ def format_catalog(entries: list[dict], textmap_info: dict) -> str:
 
     return "\n".join(lines)
 
-
 def inspect_textmap() -> list[dict]:
     """检查 TextMap 目录下的文件。"""
     results = []
@@ -176,7 +165,6 @@ def inspect_textmap() -> list[dict]:
             continue
         size_mb = get_file_size_mb(f)
         info = {"name": f.name, "size_mb": size_mb}
-        # 只对 CHS 文件统计条目数（其他语言文件太大，跳过加载）
         if "CHS" in f.name:
             try:
                 with open(f, encoding="utf-8") as fp:
@@ -188,7 +176,6 @@ def inspect_textmap() -> list[dict]:
             info["count"] = "跳过"
         results.append(info)
     return results
-
 
 def main():
     parser = argparse.ArgumentParser(description="生成 ExcelOutput 数据目录索引")
@@ -208,7 +195,6 @@ def main():
         files = [f for f in files if args.filter.lower() in f.name.lower()]
         print(f"过滤后: {len(files)} 个文件含 '{args.filter}'")
 
-    # 按大小排序后取 top N
     if args.top > 0:
         files = sorted(files, key=lambda p: p.stat().st_size, reverse=True)[:args.top]
 
@@ -223,7 +209,6 @@ def main():
     print("检查 TextMap ...")
     textmap_info = inspect_textmap()
 
-    # 局部索引（--top / --filter）输出到独立文件，避免覆盖全量索引
     suffix = []
     if args.filter:
         suffix.append(f"filter-{args.filter.lower()}")
@@ -239,7 +224,6 @@ def main():
     print(f"✅ 已生成 {output_file} ({len(catalog) / 1024:.0f} KB)")
     if suffix:
         print(f"⚠️ 局部索引（{len(entries)} 个文件），请勿提交到版本控制")
-
 
 if __name__ == "__main__":
     main()

@@ -1,14 +1,7 @@
-/**
- * useScrollSpy 滚动追踪单测：
- * 注入 mock 容器与区块元素（可控 getBoundingClientRect），验证
- * 激活态判定（offset 越过 / fallbackFirst）、进度、showTop 阈值、jumpTo 目标计算。
- * 生命周期挂载（scroll 监听）在非组件上下文不注册，仅测核心算法。
- */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
 import { useScrollSpy } from '../use-scroll-spy';
 
-/** 可控 top 的 mock 元素（getBoundingClientRect 返回容器坐标系 top） */
 function makeEl(top: number): HTMLElement {
   return {
     getBoundingClientRect: () => ({
@@ -75,7 +68,7 @@ describe('useScrollSpy', () => {
       { offset: 300 },
     );
     spy.refresh();
-    expect(spy.activeId.value).toBe('b'); // a(100) 与 b(250) 均命中，取最后一个：b；c(900) 未命中
+    expect(spy.activeId.value).toBe('b');
   });
 
   it('无命中时默认返回空串，fallbackFirst 时回退首区块', () => {
@@ -95,7 +88,6 @@ describe('useScrollSpy', () => {
     const els = { a: makeEl(200) };
     const spy = useScrollSpy(container, () => ['a'], (id) => els[id as keyof typeof els], { offset: 64 });
     spy.jumpTo('a');
-    // top = el.top - container.top + container.scrollTop - offset = 200 - 0 + 100 - 64 = 236
     expect(scrollTo).toHaveBeenCalledWith({ top: 236, behavior: 'smooth' });
     expect(spy.activeId.value).toBe('a');
   });

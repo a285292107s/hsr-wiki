@@ -1,11 +1,4 @@
 <script setup lang="ts">
-/**
- * 死链审核台（研究线 Tab 之一）：
- * 浏览器端数据驱动死链审计（替代 tools/dead-links.test.ts 的 Node 版本机运行）——
- * 复用同一批 URL 构造函数收集全量渲染 URL，HEAD 探测可达性，明确 404 才判 DEAD。
- * 引擎与限流纪律（并发 ≤3、404 本地缓存、内容签名零网络）见 src/app/debug/dead-links.ts。
- * 本文件仅承担队列编排与面板框架，不承载审核逻辑。
- */
 import { computed, onBeforeUnmount, reactive, ref } from 'vue';
 import { toast } from './lib/toast';
 import { downloadJson } from './report';
@@ -29,8 +22,6 @@ type Row = { url: string; source: string; status: ProbeStatus | 'pending' };
 
 const DOMAIN_ORDER: UrlDomain[] = ['jsdelivr', 'nanoka', 'other'];
 const DOMAIN_LABEL: Record<UrlDomain, string> = { jsdelivr: 'jsDelivr', nanoka: 'nanoka', other: 'other' };
-
-/* ─── 状态 ─── */
 
 const phase = ref<'idle' | 'loading' | 'running' | 'error'>('idle');
 const loadError = ref('');
@@ -76,7 +67,6 @@ const grouped = computed(() => {
     const dom = domainOf(url);
     if (filterDomain.value !== 'all' && filterDomain.value !== dom) continue;
     const st: Row['status'] = results.value[url]?.status ?? 'pending';
-    // 非异常（ok/待测）跳过；写为 非dead且非env 避免 TS 收窄链报错
     if (onlyIssue.value && st !== 'dead' && st !== 'env') continue;
     g[dom].push({ url, source, status: st });
   }
@@ -104,8 +94,6 @@ function badgeText(s: Row['status']): string {
     default: return '—';
   }
 }
-
-/* ─── 队列编排 ─── */
 
 const onResult = (url: string, status: ProbeStatus): void => {
   results.value[url] = { status, ts: Date.now() };
@@ -136,7 +124,6 @@ async function run(toProbe: string[]): Promise<void> {
   }
 }
 
-/** 增量审核：先收集数据（会话内复用），再按缓存 + 内容签名计算待测集 */
 async function startAudit(force: boolean): Promise<void> {
   if (phase.value === 'running' || phase.value === 'loading') return;
   control.stopped = false;
@@ -150,7 +137,6 @@ async function startAudit(force: boolean): Promise<void> {
       sourceHashes.value = prepared.sourceHashes;
       dataFileCount.value = prepared.dataFileCount;
     }
-    // force 时忽略缓存（清空结果态）；增量时缓存 + 来源内容签名决定待测集
     const cache = force ? null : loadCacheFromStorage();
     const plan = planProbe(urls.value, cache, sourceHashes.value, Date.now(), force);
     results.value = plan.results;
@@ -167,7 +153,6 @@ async function startAudit(force: boolean): Promise<void> {
   }
 }
 
-/** 仅重跑异常条目（dead/env）：先清其缓存条目强制重测，保留 ok 结果 */
 async function rerunIssues(): Promise<void> {
   if (phase.value === 'running' || phase.value === 'loading') return;
   const issues = Object.entries(results.value)
@@ -220,7 +205,7 @@ function exportReport(): void {
 }
 
 onBeforeUnmount(() => {
-  control.stopped = true; // 切 Tab 不卸载组件（v-show 常驻），仅兜底
+  control.stopped = true;
 });
 </script>
 
@@ -335,7 +320,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* ─── 限流警示条：行为约束常驻可见，弱化样式不抢操作区注意力 ─── */
 .nk-deadlinks__banner {
   max-width: 1480px;
   margin-bottom: 12px;
@@ -349,7 +333,6 @@ onBeforeUnmount(() => {
 }
 .nk-deadlinks__banner strong { color: #ffd9a3; font-weight: 700; }
 
-/* ─── 工具栏：抬升墨色 sheet ─── */
 .nk-deadlinks__toolbar {
   display: flex;
   align-items: center;
@@ -433,7 +416,6 @@ onBeforeUnmount(() => {
   word-break: break-all;
 }
 
-/* ─── 筛选行 ─── */
 .nk-deadlinks__filters {
   max-width: 1480px;
   display: flex;
@@ -454,7 +436,6 @@ onBeforeUnmount(() => {
   color: var(--text3);
 }
 
-/* ─── 分组面板：整组抬升为墨色 sheet，头部 + 条目行同板 ─── */
 .nk-deadlinks__group { max-width: 1480px; margin-bottom: 18px; }
 .nk-deadlinks__panel {
   border: 1px solid var(--nk-sheet-border);
@@ -497,7 +478,6 @@ onBeforeUnmount(() => {
 .nk-deadlinks__group-state.is-fail { color: #ffb3b3; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.14); }
 .nk-deadlinks__group-state.is-warn { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
 
-/* ─── 条目行 ─── */
 .nk-deadlinks__row {
   position: relative;
   display: flex;
@@ -560,7 +540,6 @@ onBeforeUnmount(() => {
   line-height: 1.7;
 }
 
-/* ─── 通用控件 ─── */
 .nk-deadlinks__select {
   padding: 3px 8px;
   max-width: 220px;
@@ -590,7 +569,6 @@ onBeforeUnmount(() => {
 .nk-deadlinks__btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 .nk-deadlinks__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
 .nk-deadlinks__btn.is-danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.12); }
-/* 主操作按钮：暖板 CTA（无霓虹、无渐变）。hover 深一档暖板 + 墨色浮起 */
 .nk-deadlinks__btn.is-primary {
   border-color: var(--primary);
   background: color-mix(in srgb, var(--primary) 20%, transparent);

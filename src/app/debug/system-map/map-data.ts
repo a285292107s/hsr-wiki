@@ -1,27 +1,14 @@
-/**
- * 系统地图数据（单一事实源）
- *
- * 等轴测系统地图的静态数据底座：分层（LAYERS）、建筑（NODES）、真实控制/数据路径（EDGES）。
- * 全部字段由当前 main 分支源码静态推导——文件路径为仓库内真实路径，禁止编造。
- * 本文件不持有任何颜色值：颜色经 layer.color 引用 tokens 三层令牌（原始层色阶），
- * 由 SystemMapSection.vue 内联为 CSS 变量 --nk-c 后以 color-mix 派生面/边/装饰色。
- * 修改地图内容（增删建筑/路径）只改本文件；渲染层零改动。
- */
 export type EdgeKind = 'control' | 'data' | 'cdn' | 'theme' | 'build';
 
-/** 建筑屋顶形态（决定 3D 轮廓多样性；视图据此绘制装饰） */
 export type BuildingShape =
   | 'flat' | 'tower' | 'spire' | 'dome' | 'twin' | 'silo'
   | 'factory' | 'bunker' | 'bank' | 'sat';
 
 export interface MapLayer {
   id: string;
-  /** 分层中文名（图例/解释面板展示） */
   name: string;
   en: string;
-  /** tokens 原始层色阶变量名（如 '--ir-500'）；视图解析为 var() 引用 */
   color: string;
-  /** 图例说明 */
   desc: string;
 }
 
@@ -30,15 +17,11 @@ export interface MapNode {
   name: string;
   en: string;
   layer: string;
-  /** 等轴测网格坐标（2:1 投影；(gx+gy) 相同 = 同一视觉行） */
   gx: number;
   gy: number;
   shape: BuildingShape;
-  /** 高度倍率（1..4；基础 34px） */
   h: number;
-  /** 关键文件（仓库真实路径；外部节点 = 引用它的仓库文件） */
   files: string[];
-  /** 职责一句话（解释面板） */
   desc: string;
 }
 
@@ -47,9 +30,7 @@ export interface MapEdge {
   from: string;
   to: string;
   kind: EdgeKind;
-  /** 路径名（图例/解释面板） */
   label: string;
-  /** 路径涉及的仓库文件（真实引用链） */
   files: string[];
 }
 
@@ -58,8 +39,6 @@ export interface EdgeKindSpec {
   label: string;
   desc: string;
 }
-
-/* ═══════════════════════════ 分层 ═══════════════════════════ */
 
 export const LAYERS: MapLayer[] = [
   { id: 'entry',     name: '入口与引导',   en: 'ENTRY',   color: '--ir-500', desc: 'main.ts → bootstrap()：应用启动装配（Pinia/Router/CDN 探测）' },
@@ -83,12 +62,7 @@ export const LAYERS: MapLayer[] = [
   { id: 'ext',       name: '外部云端',     en: 'CLOUD',   color: '--sl-600', desc: 'nanoka / jsDelivr 镜像 / 官网源 / Vercel' },
 ];
 
-/* ═══════════════════════════ 建筑（27 座） ═══════════════════════════
- * 坐标布局（gy 行）：0=云端带（外部队列）→ 1=入口网关 → 2=视图城区 →
- * 3=逻辑核心 → 4=引擎与地基 → 5=数据矿区（近景）。 */
-
 export const NODES: MapNode[] = [
-  /* ─── gy=0 云端带（外部依赖） ─── */
   { id: 'nanoka', name: 'nanoka CDN', en: 'NANOKA', layer: 'ext', gx: 0, gy: 0, shape: 'sat', h: 2,
     files: ['src/lib/constants.ts'], desc: 'static.nanoka.cc：图片/Spine 运行时/场景资源的主 CDN 与统一回退源' },
   { id: 'jsdelivr', name: 'jsDelivr 镜像', en: 'JSDELIVR', layer: 'ext', gx: 1, gy: 0, shape: 'sat', h: 2,
@@ -97,7 +71,6 @@ export const NODES: MapNode[] = [
     files: ['src/services/cdn/base.ts (OFFICIAL_BASE)', 'src/spine/config.ts (ADR 0009)'], desc: 'act-webstatic.mihoyo.com：官网活动素材与 Spine 场景源（atlas/json/纹理 hash URL）' },
   { id: 'vercel', name: 'Vercel 部署', en: 'VERCEL', layer: 'ext', gx: 3, gy: 0, shape: 'tower', h: 3,
     files: ['vercel.json', 'package.json'], desc: 'main 推送 → 自动构建部署（SPA fallback；回滚 = Dashboard Rollback）' },
-  /* ─── gy=1 入口网关 ─── */
   { id: 'entry', name: '入口引导', en: 'BOOTSTRAP', layer: 'entry', gx: 0, gy: 1, shape: 'spire', h: 3,
     files: ['src/main.ts', 'src/app/bootstrap.ts'], desc: 'createApp + Pinia + Router + CDN 探测注册 + 全局样式导入' },
   { id: 'shell', name: '应用壳', en: 'APP SHELL', layer: 'shell', gx: 1, gy: 1, shape: 'flat', h: 2,
@@ -106,7 +79,6 @@ export const NODES: MapNode[] = [
     files: ['src/app/router/index.ts', 'src/app/router/chunks.ts'], desc: 'History 路由表（meta.depth 过渡方向 / meta.cw 主题）+ chunk 预加载' },
   { id: 'theme', name: '主题系统', en: 'THEME', layer: 'theme', gx: 3, gy: 1, shape: 'bank', h: 2,
     files: ['src/lib/theme.ts', 'src/lib/cw-theme.ts'], desc: '常规黑紫 / 货币战争黑金双主题 + data-accent/data-cw-accent 强调色链路' },
-  /* ─── gy=2 视图城区 ─── */
   { id: 'home', name: '首页', en: 'HOME', layer: 'views', gx: 0, gy: 2, shape: 'flat', h: 1,
     files: ['src/app/views/HomeView.vue'], desc: 'KV Spine Hero（≥1024px）+ 板块索引 + idle 预加载' },
   { id: 'catalog', name: '目录引擎', en: 'CATALOG ENGINE', layer: 'engine', gx: 1, gy: 2, shape: 'factory', h: 2,
@@ -117,7 +89,6 @@ export const NODES: MapNode[] = [
     files: ['src/app/views/CurrencyHubView.vue', 'src/app/views/CurrencyRoleView.vue', 'src/app/views/CurrencyTraitView.vue'], desc: '独立路由树（/currency/*）+ 暗金主题（meta.cw）' },
   { id: 'settings', name: '设置与兜底', en: 'SETTINGS', layer: 'views', gx: 4, gy: 2, shape: 'bunker', h: 1,
     files: ['src/app/views/SettingsView.vue', 'src/app/views/NotFoundView.vue'], desc: '设置页（主题强调色选择）/ 404 / 旧路径兼容重定向' },
-  /* ─── gy=3 逻辑核心 ─── */
   { id: 'stores', name: '状态仓库', en: 'PINIA STORES', layer: 'store', gx: 0, gy: 3, shape: 'bank', h: 2,
     files: ['src/app/stores/app.ts', 'src/app/stores/character.ts', 'src/app/stores/lightcone.ts', 'src/app/stores/relic.ts'], desc: 'Pinia store：数据加载编排 / 竞态代保护 / Toast 队列' },
   { id: 'api', name: '数据接口层', en: 'SERVICES/API', layer: 'api', gx: 1, gy: 3, shape: 'factory', h: 2,
@@ -128,7 +99,6 @@ export const NODES: MapNode[] = [
     files: ['src/services/cdn/resolve.ts', 'src/services/cdn/health.ts', 'src/services/cdn/dom.ts', 'src/services/cdn/base.ts'], desc: '图片 URL 双源解析 + HEAD manifest 健康探测 + v-html 图片回退委托' },
   { id: 'types', name: '类型契约', en: 'SERVICES/TYPES', layer: 'types', gx: 4, gy: 3, shape: 'bunker', h: 1,
     files: ['src/services/types/index.ts', 'src/services/types/character.ts', 'src/services/types/currency.ts'], desc: '共享接口 barrel：所有共享 interface 定义归属（api 仅 import type）' },
-  /* ─── gy=4 引擎与地基 ─── */
   { id: 'spine', name: 'Spine 引擎', en: 'SPINE ENGINE', layer: 'spine', gx: 0, gy: 4, shape: 'silo', h: 3,
     files: ['src/spine/runtime.ts', 'src/spine/player.ts', 'src/spine/scene.ts', 'src/spine/registry.ts'], desc: '中立引擎层（零 Vue 依赖）：运行时动态加载 / 播放器单例 / 场景渲染' },
   { id: 'lib', name: '工具函数', en: 'LIB', layer: 'lib', gx: 1, gy: 4, shape: 'flat', h: 1,
@@ -139,7 +109,6 @@ export const NODES: MapNode[] = [
     files: ['src/app/composables/use-load-generation.ts', 'src/app/composables/use-delayed-skeleton.ts', 'src/app/composables/use-scroll-restore.ts'], desc: '加载代竞态保护 / 延迟骨架屏 / 滚动恢复 / 视差' },
   { id: 'lab', name: '研究线', en: 'SPINE LAB', layer: 'lab', gx: 4, gy: 4, shape: 'dome', h: 2,
     files: ['src/app/debug/DebugConsoleView.vue', 'src/app/debug/index.ts', 'src/app/debug/dead-links.ts'], desc: '主站 dev-only 路由 /debug：KV 场景验收 / 清单审核 / 死链审核 / 系统地图（生产构建摇树）' },
-  /* ─── gy=5 数据矿区 ─── */
   { id: 'converter', name: '数据转换工厂', en: 'CONVERTER', layer: 'converter', gx: 0, gy: 5, shape: 'factory', h: 2,
     files: ['tools/converter/convert.py', 'tools/converter/converters/characters.py', 'tools/converter/query.py'], desc: 'Python 工具：官方解包 ExcelOutput → public/data/cn（增量跳过未变更）' },
   { id: 'data', name: '本地数据仓库', en: 'DATA/CN', layer: 'data', gx: 1, gy: 5, shape: 'bunker', h: 2,
@@ -150,8 +119,6 @@ export const NODES: MapNode[] = [
     files: ['public/data/cn/characters/1001.json', 'public/data/cn/monsters/*.json', 'public/data/cn/currency/role/*.json'], desc: '按 ID 拆分的详情 JSON（角色/敌对/光锥/货币角色）' },
 ];
 
-/* ═══════════════════════════ 路径（26 条真实控制/数据流） ═══════════════════════════ */
-
 export const EDGE_KINDS: EdgeKindSpec[] = [
   { id: 'control',  label: '控制流',   desc: '模块调用与装配（实线）' },
   { id: 'data',     label: '数据加载', desc: 'JSON/URL 解析链路（流动虚线）' },
@@ -161,7 +128,6 @@ export const EDGE_KINDS: EdgeKindSpec[] = [
 ];
 
 export const EDGES: MapEdge[] = [
-  /* 装配（控制流） */
   { id: 'boot', from: 'entry', to: 'shell', kind: 'control', label: '应用装配',
     files: ['src/main.ts', 'src/app/bootstrap.ts', 'src/app/App.vue'] },
   { id: 'probe', from: 'entry', to: 'cdn', kind: 'control', label: 'CDN 探测注册',
@@ -184,7 +150,6 @@ export const EDGES: MapEdge[] = [
     files: ['src/app/stores/app.ts', 'src/services/cdn/health.ts'] },
   { id: 'api-types', from: 'api', to: 'types', kind: 'control', label: '类型契约',
     files: ['src/services/api/index.ts', 'src/services/types/index.ts'] },
-  /* 数据加载（数据流） */
   { id: 'view-cdn', from: 'detail', to: 'cdn', kind: 'data', label: '图标 URL 双源解析',
     files: ['src/app/views/*.vue', 'src/lib/icons.ts', 'src/services/cdn/resolve.ts'] },
   { id: 'api-cache', from: 'api', to: 'cache', kind: 'data', label: 'cachedFetch / singletonLoad',
@@ -193,7 +158,6 @@ export const EDGES: MapEdge[] = [
     files: ['src/services/cache.ts', 'src/services/api/base.ts'] },
   { id: 'spine-manifest', from: 'spine', to: 'manifest', kind: 'data', label: '双清单加载',
     files: ['src/services/api/spine.ts', 'src/spine/runtime.ts'] },
-  /* CDN 网络（外部） */
   { id: 'cdn-jsdelivr', from: 'cdn', to: 'jsdelivr', kind: 'cdn', label: '官方镜像首选',
     files: ['src/services/cdn/resolve.ts', 'src/services/cdn/jsdelivr.ts'] },
   { id: 'cdn-nanoka', from: 'cdn', to: 'nanoka', kind: 'cdn', label: 'nanoka 主源/回退 + HEAD 探测',
@@ -204,14 +168,12 @@ export const EDGES: MapEdge[] = [
     files: ['src/spine/runtime.ts', 'src/spine/scene.ts', 'src/spine/player.ts'] },
   { id: 'lab-cdn', from: 'lab', to: 'nanoka', kind: 'cdn', label: '资源可达性审计',
     files: ['src/app/debug/dead-links.ts'] },
-  /* 主题传导 */
   { id: 'theme-shell', from: 'shell', to: 'theme', kind: 'theme', label: 'meta.cw 主题切换',
     files: ['src/app/App.vue', 'src/lib/theme.ts', 'src/lib/cw-theme.ts'] },
   { id: 'theme-styles', from: 'theme', to: 'styles', kind: 'theme', label: 'data-accent → 令牌变量',
     files: ['src/lib/theme.ts', 'src/styles/tokens.css'] },
   { id: 'styles-views', from: 'styles', to: 'detail', kind: 'theme', label: '页面 CSS 随路由懒加载',
     files: ['src/app/views/CharacterView.vue', 'src/styles/character.css', 'src/styles/skill-card.css'] },
-  /* 构建/部署 */
   { id: 'converter-data', from: 'converter', to: 'data', kind: 'build', label: 'convert.py 产出 JSON',
     files: ['tools/converter/convert.py', 'tools/converter/converters/characters.py'] },
   { id: 'vercel-deploy', from: 'vercel', to: 'entry', kind: 'build', label: '构建产物部署',

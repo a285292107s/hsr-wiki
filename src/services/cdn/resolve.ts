@@ -1,9 +1,7 @@
-/**
- * CDN URL 解析（纯函数）：按分类解析双源 URL + v-html 卡片回退属性。
- * 源优先级：本地图标（local-first）> nanoka 主源（持续更新）> jsDelivr 回退（旧档补全，
- * fork 停更后不再跟版本）；trace 例外保持 jsDelivr 主源（spec.jdPrimary，nanoka 源为占位图）。
- * 统一收口：所有图片 URL 构造（icons.ts 及视图内联）最终经此解析。
- */
+/* CDN URL 解析（纯函数）：按分类解析双源 URL + v-html 卡片回退属性。
+   源优先级：本地图标（local-first）> nanoka 主源（持续更新）> jsDelivr 回退（旧档补全，
+   fork 停更后不再跟版本）；trace 例外保持 jsDelivr 主源（spec.jdPrimary，nanoka 源为占位图）。
+   统一收口：所有图片 URL 构造（icons.ts 及视图内联）最终经此解析。 */
 import { CDN } from '../../lib/constants';
 import { escHtml } from '../../lib/html';
 import { CDN_CATEGORIES, LOCAL_ICONS_BASE, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
@@ -23,10 +21,10 @@ export function nanokaUrl(category: CdnCategory, file: string, spec = CDN_CATEGO
   return `${CDN}${NANOKA_HUD}/${spec.nanoka}/${file}`;
 }
 
-/** 远端双源解析：nanoka 主源（持续更新）+ jsDelivr 回退（旧档补全；fork 已停止跟随上游，
- *  冻结后新增内容仅 nanoka 有，直拼 jsDelivr 必 404——禁止反转回旧优先级，除非 fork 恢复同步）。
- *  例外：spec.jdPrimary 分类（trace，nanoka 源为占位图）保持 jsDelivr 主源；
- *  spec.official 且 OFFICIAL_BASE 非空时官方源优先（预留插槽，当前 OFFICIAL_BASE 为空不生效）。 */
+/* 远端双源解析：nanoka 主源（持续更新）+ jsDelivr 回退（旧档补全）。fork 已停止跟随上游，
+   冻结后新增内容仅 nanoka 有，直拼 jsDelivr 必 404——**禁止**反转回旧优先级，除非 fork 恢复同步。
+   例外：spec.jdPrimary 分类（trace，nanoka 源为占位图）保持 jsDelivr 主源；
+   spec.official 且 OFFICIAL_BASE 非空时官方源优先（预留插槽，当前基址为空不生效）。 */
 function remoteCdnUri(
   category: CdnCategory,
   file: string,
@@ -53,9 +51,9 @@ function remoteCdnUri(
   return { primary: nanoka, fallback: jdUrl, source: 'nanoka' };
 }
 
-/** 三级解析：本地图标（local-first）> jsDelivr 镜像 > 官方源 > nanoka。
- *  本地主源缺失（新版本新增图标未入库）时 fallback = 远端最优源
- *  （jsDelivr 规则命中 → jsDelivr，否则 nanoka），由 dom 委托在 img 失败时现场切换。 */
+/* 三级解析：本地图标（local-first）> jsDelivr 镜像 > 官方源 > nanoka。
+   本地主源缺失（新版本新增图标未入库）时 fallback = 远端最优源
+   （jsDelivr 规则命中 → jsDelivr，否则 nanoka），由 dom 委托在 img 失败时现场切换。 */
 export function resolveCdnUri(
   category: CdnCategory,
   file: string,
@@ -97,8 +95,8 @@ export function localFallbackFromPrimary(primary: string): string {
   return '';
 }
 
-/** 依据主 URL 反查回退源（v-html 卡片用）：本地图标反查远端最优源；nanoka 主源反查 jsDelivr 旧档
- *  （主源反转后的主路径）；jsDelivr 源反查 nanoka（jdPrimary 分类主源用）；否则 '' */
+/* 依据主 URL 反查回退源（v-html 卡片用）：本地图标反查远端最优源；nanoka 主源反查 jsDelivr 旧档
+   （主源反转后的主路径）；jsDelivr 源反查 nanoka（jdPrimary 分类主源用）；否则 '' */
 export function cdnFallbackFromPrimary(primary: string): string {
   if (!primary) return '';
   // 本地主源 → 远端最优源（jsDelivr 规则命中 → jsDelivr，否则 nanoka）
@@ -144,10 +142,10 @@ export function cdnFallbackFromPrimary(primary: string): string {
   return '';
 }
 
-/** 生成 v-html 卡片 <img> 的 data-cdn-fallback 属性（无回退源时返回空串）。
- *  主源失效切换由 dom.ts 委托执行（读到空 fallback 时跳过切换，保留 stall→CSS 占位降级）；
- *  禁止恢复「USE_OFFICIAL_PATHS=true 时返回空串」的短路——该模式下主源 404 无任何回退，
- *  是 jsDelivr fork 停更期间新内容破图的直接原因。 */
+/* 生成 v-html 卡片 <img> 的 data-cdn-fallback 属性（无回退源时返回空串）。
+   主源失效切换由 dom.ts 委托执行（读到空 fallback 时跳过切换，保留 stall→CSS 占位降级）；
+   **禁止**恢复「USE_OFFICIAL_PATHS=true 时返回空串」的短路——该模式下主源 404 无任何回退，
+   是 jsDelivr fork 停更期间新内容破图的直接原因。 */
 export function cdnImgFallbackAttr(src: string): string {
   const fb = cdnFallbackFromPrimary(src);
   return fb ? ` data-cdn-fallback="${escHtml(fb)}"` : '';

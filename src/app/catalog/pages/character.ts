@@ -1,4 +1,3 @@
-/** 角色目录页配置 */
 import { PATH } from '../../../lib/constants';
 import { escHtml, avatarShopIconUrl, avatarRoundIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
@@ -7,7 +6,6 @@ import { getSavedTrailblazerGender, isTrailblazerId, trailblazerGenderOfId } fro
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import { STAR_SVG } from './shared';
 
-/** 属性图标 URL 键（小写） → 中文名 */
 const ELEM_NAMES: Record<string, string> = {
   fire: '火', ice: '冰', thunder: '雷', wind: '风',
   quantum: '量子', imaginary: '虚数', physical: '物理',
@@ -88,8 +86,6 @@ export const characterPage: CatalogPageConfig = {
     const stars = '★'.repeat(Number(item.rarity) || 5);
     const element = String(item.element || '');
     const path = String(item.path || '');
-    /* 双源 picture：手机（≤767px，与 catalog.css 手机断点一致）用 127px 圆头像压缩体积，
-       桌面保持 avatarshopicon 半身立绘；浏览器仅加载匹配 media 的 source，无双下载 */
     const avatarItem = String(item.avatar || '');
     const roundSrc = avatarRoundIconUrl(String(item.id));
     const avatar = roundSrc

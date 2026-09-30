@@ -1,7 +1,3 @@
-/**
- * 光锥详情页状态：数据加载 / 叠影等级切换
- * 加载流程：light_cones/{id}.json → 校验 → 更新标题
- */
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { loadLocalLightConeDetail } from '../../services/api';
@@ -12,12 +8,10 @@ import type { LightConeDetail } from '../../services/types';
 export const useLightconeStore = defineStore('lightcone', () => {
   const lcId = ref('');
   const data = ref<LightConeDetail | null>(null);
-  /** 当前叠影等级（1-5） */
   const rank = ref(1);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  /** 加载代：光锥间快速导航时防止旧数据覆盖新数据（统一 useLoadGeneration 模式） */
   const loadGen = useLoadGeneration();
 
   async function load(id: string): Promise<void> {
@@ -46,7 +40,6 @@ export const useLightconeStore = defineStore('lightcone', () => {
     rank.value = r;
   }
 
-  /** 路由离开时重置（避免旧数据闪现） */
   function reset(): void {
     lcId.value = '';
     data.value = null;

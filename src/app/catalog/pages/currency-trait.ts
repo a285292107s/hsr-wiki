@@ -1,4 +1,3 @@
-/** 货币战争 · 羁绊图鉴目录页配置 */
 import { escHtml, gridFightTraitIconUrl } from '../../../lib/format';
 import { loadLocalCurrencyTraits } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
@@ -36,7 +35,6 @@ export const currencyTraitPage: CatalogPageConfig = {
   searchPlaceholder: '搜索羁绊…',
   gridClass: 'nk-cat-grid nk-cw-trait-grid',
   cardClass: '.nk-cw-trait-card',
-  /* CW 卡片共享样式（nk-cw-trait-card 专属类位于 currency-catalog.css） */
   styles: [loadCwCatalogCss],
   async fetchData() {
     const { traits } = await loadLocalCurrencyTraits();
@@ -53,7 +51,6 @@ export const currencyTraitPage: CatalogPageConfig = {
       season_id: t.season_id,
       layers: t.layers,
       remarks: t.remarks,
-      /* 本赛季新增标记（ADR 0020 决策 4）：枢纽页据此分区过滤；字段缺失一律 false，禁止当作新增 */
       is_season_new: t.is_season_new === true,
     }));
   },

@@ -10,27 +10,21 @@ from utils import load_json, save_json, map_icon_path, sort_by_id
 
 logger = logging.getLogger("converter")
 
-
 def convert() -> None:
     """转换 EquipmentConfig.json + EquipmentSkillConfig.json → light_cones.json。"""
-    # 版本上新打标（ADR 0019 决策 4/5）：基线 = 覆盖输出前读到的上一版已提交 JSON。
-    # 基线已有 id 沿用其 release_version，本版新增 id 才写当前版本号，无基线全部留空。
     baseline = load_baseline_versions(OUTPUT_DIR / "light_cones.json")
 
-    # 加载光锥基础配置
     equip_data = load_json(EXCEL_DIR / "EquipmentConfig.json")
-    # 加载光锥技能配置（按 SkillID 索引，取 Level=1）
     skill_data = load_json(EXCEL_DIR / "EquipmentSkillConfig.json")
     skill_map = {}
     for skill in skill_data:
         sid = skill.get("SkillID", 0)
         if sid not in skill_map:
-            skill_map[sid] = skill  # 取第一条（Level=1）
+            skill_map[sid] = skill
 
     result = []
 
     for item in equip_data:
-        # 过滤未发布光锥
         if not item.get("Release", False):
             continue
 
@@ -39,7 +33,6 @@ def convert() -> None:
         rarity_key = item.get("Rarity", "")
         rarity = RARITY_MAP.get(rarity_key, 0)
 
-        # 关联技能数据
         skill_id = item.get("SkillID", 0)
         skill = skill_map.get(skill_id, {})
         skill_name = resolve_text(skill.get("SkillName", {}))

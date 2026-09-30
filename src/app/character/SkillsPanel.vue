@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * 技能面板：按行迹族渲染 SkillCard（族内首个 = 基座技能 → 父卡，其余 = 形态技能 → 子卡）+ 忆灵技能。
- * 层级唯一来源见 ADR 0022：禁止回退 (type + type_name) 分组，禁止用 SkillList 顺序判定父子。
- * SkillCard key 含 enhKey，强化切换时强制重建以重置滑条状态。
- */
 import { computed } from 'vue';
 import SkillCard from './SkillCard.vue';
 import { groupSkillsByFamily } from '../../lib/skill-family';
@@ -22,9 +17,6 @@ const props = defineProps<{
   animDb: SkillAnimationsDb | null;
 }>();
 
-/* ─── 技能动画映射（米游社 Wiki 数据，charId → type → 动画列表） ─── */
-
-/** 当前角色动画索引（一次查表，供 v-for 内多次调用） */
 const charAnims = computed(() => {
   const db = props.animDb;
   if (!db || !props.charId) return null;
@@ -37,13 +29,9 @@ function animFor(sk: Skill): SkillAnimEntry[] | null {
   return db[sk.type ?? ''] || null;
 }
 
-/* ─── 技能族（行迹族；族序即渲染序） ─── */
-
 const skillFamilies = computed(() =>
   groupSkillsByFamily(props.d.skills, props.d.skill_trees),
 );
-
-/* ─── 忆灵技能（记忆命途召唤物，单独渲染） ─── */
 
 const memoSkills = computed<Skill[]>(() =>
   props.d.memosprite && props.d.memosprite.skills
@@ -51,9 +39,6 @@ const memoSkills = computed<Skill[]>(() =>
     : [],
 );
 
-/* ─── 忆灵技能预览（Wiki「忆灵技」→ Servant、「忆灵天赋」→ ServantPassive） ─── */
-/* 忆灵技能在面板里平铺渲染（不像主技能那样父子嵌套），故在此按技能 id 分好条目：
- * 同 type_name 一个池，条目 subTitle 匹配技能名优先，未匹配者顺序补位（分配规则见 lib/skill-anim.ts） */
 const memoAnimMap = computed<Record<number, SkillAnimEntry[]>>(() => {
   const db = charAnims.value;
   const map: Record<number, SkillAnimEntry[]> = {};

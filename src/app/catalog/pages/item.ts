@@ -1,4 +1,3 @@
-/** 物品目录页配置 */
 import { escHtml, itemIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalItems, RARITY_NUM_TO_KEY } from '../../../services/api';
@@ -12,9 +11,7 @@ const ITEM_RARITY_MAP: Record<string, { stars: number; label: string; color: str
   Normal: { stars: 1, label: '1★', color: 'var(--rarity-1)' },
 };
 
-/** 物品 sub_type → 中文名（覆盖数据中出现的所有子类型，避免卡片回退成英文） */
 const ITEM_TYPE_NAMES: Record<string, string> = {
-  // Material 主类型
   Material: '材料',
   ComposeMaterial: '合成素材',
   CommonMonsterDrop: '怪物掉落',
@@ -37,9 +34,7 @@ const ITEM_TYPE_NAMES: Record<string, string> = {
   IdleLiveItem: '摸鱼道具',
   MatchThreeV2: '三消道具',
   PixAirMaterial: '像素飞机道具',
-  // Virtual 主类型
   Virtual: '货币',
-  // Usable 主类型
   Book: '书籍',
   Food: '食物',
   Gift: '礼物',
@@ -49,24 +44,19 @@ const ITEM_TYPE_NAMES: Record<string, string> = {
   ForceOpitonalGift: '剧情赠礼',
   RogueMedal: '模拟宇宙勋章',
   FindChest: '寻宝道具',
-  // Mission 主类型
   Mission: '任务道具',
 };
 
-/** 类型筛选的优先展示顺序（其余按字母序排在后面） */
 const ITEM_TYPE_PREFERRED = [
   'Material', 'Virtual', 'Food', 'Book', 'Gift', 'Mission',
   'AvatarExp', 'EquipmentExp', 'RelicExp', 'Formula',
 ];
 
-/** sub_type 所属主类型 → 组序（main_type 值域 4 类固定，组序与 ITEM_TYPE_NAMES 分类同形） */
 const MAIN_TYPE_ORDER = ['Material', 'Virtual', 'Usable', 'Mission'];
-/** 主类型 → 组名（未知值回退英文原值，不造文案） */
 const MAIN_TYPE_NAMES: Record<string, string> = {
   Material: '材料', Virtual: '货币', Usable: '可用', Mission: '任务',
 };
 
-/** 物品无图标时的占位图形（立方体/物资标识） */
 const ITEM_NO_ICON_SVG =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
   + '<path d="M21 8v8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.73l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/>'
@@ -100,7 +90,6 @@ export const itemPage: CatalogPageConfig = {
     return items;
   },
   buildFilters(data) {
-    // 动态从数据汇总所有 sub_type，保证筛选选项始终完整（新增类型自动出现）
     const seen = new Set<string>();
     const subTypes: string[] = [];
     for (const item of data) {
@@ -120,8 +109,6 @@ export const itemPage: CatalogPageConfig = {
       }
       return a.localeCompare(b);
     });
-    /* 按 main_type 分组（组序固定）：subType → mainType 一次构建，排序/计数共用；
-       连续同组选项由 CatalogFilterSelect 渲染一个分组头（组名 + 组内类型数） */
     const mainOf = new Map<string, string>();
     for (const it of data) {
       const st = String(it.subType || '');

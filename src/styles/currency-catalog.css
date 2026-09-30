@@ -1,21 +1,7 @@
-/* ═══════════════════════════════════════════
-   货币战争 · 图鉴目录页通用卡片（装备/环境/策略/羁绊）
-   BEM 前缀：nk-cw-*
-   暗金主题下自动适配（继承 [data-theme="cw"] 令牌）
-   反 AI 味约束：禁止霓虹 glow 阴影（0 0 Npx）、禁止渐变填充徽章；
-   卡片 hover 仅发丝边框提亮 + 墨色分层阴影（--nk-shadow-*）。
-   圆角三档规则：卡片 = var(--nk-radius-card)（10px）/
-   内嵌图标 = calc(卡片 - 2px)/ 标签·徽章 = 999px。
-   ═══════════════════════════════════════════ */
 
-/* ── 网格布局 ── */
 .nk-cw-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-/* wide 网格 min 委约：260px 保持 1024 断点（侧栏 88→148 使内容区窄 60px）3 列——
-   数学临界 276px（floor(852+12)/(min+12) ≥ 3），取 260 留 16px 裕量防样式漂移；
-   容器内滚动条 6px 使网格实宽 846，仍成立（floor(858)/(272)=3.15）；高于 276 则 1023 三列 / 1024 回退两列 */
 .nk-cw-grid--wide { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 
-/* ── 通用卡片 ── */
 .nk-cw-card {
   display: flex;
   flex-direction: column;
@@ -28,7 +14,6 @@
   text-align: center;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   animation: nk-cw-fadein 0.35s ease both;
-  /* 与其他卡片一致：延迟封顶 600ms，避免大量卡片（如 334 条策略）末尾卡片等待数秒才淡入 */
   animation-delay: min(calc(var(--i, 0) * 30ms), 600ms);
 }
 .nk-cw-card:hover {
@@ -42,7 +27,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── 图标 ── */
 .nk-cw-card__icon {
   width: 64px;
   height: 64px;
@@ -58,7 +42,6 @@
   display: block;
 }
 
-/* ── 文本区 ── */
 .nk-cw-card__body {
   display: flex;
   flex-direction: column;
@@ -85,7 +68,6 @@
   color: var(--text2);
   line-height: 1.45;
 }
-/* 非宽卡片（紧凑布局）仍限制行数 */
 .nk-cw-grid:not(.nk-cw-grid--wide) .nk-cw-card__desc {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -100,7 +82,6 @@
   justify-content: center;
 }
 
-/* ── 标签 ── */
 .nk-cw-card__tags {
   display: flex;
   flex-wrap: wrap;
@@ -117,7 +98,6 @@
   border: 1px solid var(--border);
   white-space: nowrap;
 }
-/* 分类/品质语义色：仅文字 + 发丝边框表达，无填充底色 */
 .nk-cw-tag--faction { color: var(--cw-faction); border-color: color-mix(in srgb, var(--cw-faction-core) 45%, transparent); }
 .nk-cw-tag--combat  { color: var(--cw-combat);  border-color: color-mix(in srgb, var(--cw-combat-core) 45%, transparent); }
 .nk-cw-tag--special { color: var(--cw-special); border-color: color-mix(in srgb, var(--cw-special-core) 45%, transparent); }
@@ -125,9 +105,6 @@
 .nk-cw-tag--gold    { color: var(--gold);        border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
 .nk-cw-tag--prismatic { color: var(--ctrait-multicolor); border-color: color-mix(in srgb, var(--ctrait-multicolor) 55%, transparent); }
 
-/* ═══ 羁绊卡片专用样式（垂直信息密集型布局，参考游戏内羁绊详情面板） ═══ */
-
-/* 羁绊目录网格：mobile 单列，tablet 三列，desktop 四列 */
 .nk-cw-trait-grid {
   grid-template-columns: repeat(1, 1fr);
   gap: 10px;
@@ -139,7 +116,6 @@
   .nk-cw-trait-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
-/* 羁绊紧凑卡片（可点击链接） */
 .nk-cw-trait-card {
   display: flex;
   align-items: center;
@@ -160,7 +136,6 @@
   transform: translateY(-2px);
 }
 
-/* 菱形图标（羁绊面板意象：旋转 45deg 呈现；圆角仍走内嵌档） */
 .nk-cw-trait-card__icon {
   width: 38px;
   height: 38px;
@@ -180,7 +155,6 @@
   transform: rotate(-45deg) scale(1.25);
 }
 
-/* 卡片主体 */
 .nk-cw-trait-card__body {
   flex: 1;
   min-width: 0;
@@ -217,12 +191,10 @@
   overflow: hidden;
 }
 
-/* 分类语义左边线（发丝级色带） */
 .nk-cw-trait-card[data-cat="faction"] { border-left: 2px solid color-mix(in srgb, var(--cw-faction-core) 50%, transparent); }
 .nk-cw-trait-card[data-cat="combat"]  { border-left: 2px solid color-mix(in srgb, var(--cw-combat-core) 50%, transparent); }
 .nk-cw-trait-card[data-cat="special"] { border-left: 2px solid color-mix(in srgb, var(--cw-special-core) 50%, transparent); }
 
-/* 手机端适配 */
 @media (max-width: 767px) {
   .nk-cw-trait-grid { gap: 8px; }
   .nk-cw-trait-card { padding: 10px 12px; gap: 8px; }
@@ -230,7 +202,6 @@
   .nk-cw-trait-card__name { font-size: 0.82rem; }
 }
 
-/* ── 宽卡片（环境/策略/羁绊）：横向布局 ── */
 .nk-cw-grid--wide .nk-cw-card {
   flex-direction: row;
   text-align: left;
@@ -245,7 +216,6 @@
   height: 48px;
 }
 
-/* 装备卡片在宽网格中仍保持垂直布局（覆盖 .nk-cw-grid--wide .nk-cw-card 的 row 方向） */
 .nk-cw-grid--wide .nk-cw-equip-card {
   flex-direction: column;
   align-items: stretch;
@@ -253,7 +223,6 @@
   gap: 10px;
 }
 
-/* ═══ 装备卡片专用样式（垂直结构化布局） ═══ */
 .nk-cw-equip-card {
   flex-direction: column;
   align-items: stretch;
@@ -262,7 +231,6 @@
   gap: 10px;
 }
 
-/* 头部：图标 + 标题区 */
 .nk-cw-equip-header {
   display: flex;
   align-items: flex-start;
@@ -307,14 +275,12 @@
   line-height: 1.2;
 }
 
-/* 标签行 */
 .nk-cw-equip-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-/* 属性行列表 */
 .nk-cw-equip-stats {
   display: flex;
   flex-direction: column;
@@ -351,7 +317,6 @@
   flex-shrink: 0;
 }
 
-/* 描述文本 */
 .nk-cw-equip-desc {
   font-size: 0.75rem;
   color: var(--text2);
@@ -359,23 +324,17 @@
   padding-top: 4px;
 }
 
-/* ── 手机端适配 ── */
 @media (max-width: 767px) {
   .nk-cw-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
   .nk-cw-grid--wide { grid-template-columns: 1fr; }
   .nk-cw-card { padding: 10px 8px; }
   .nk-cw-card__icon { width: 52px; height: 52px; }
   .nk-cw-grid--wide .nk-cw-card__icon { width: 44px; height: 44px; }
-  /* 装备卡片手机端微调 */
   .nk-cw-equip-card { padding: 12px; gap: 8px; }
   .nk-cw-equip-icon { width: 48px; height: 48px; }
   .nk-cw-equip-name { font-size: 0.88rem; }
 }
 
-/* ═══ 滚动恢复时抑制入场动画 ═══
-   返回目录页且滚动位置被恢复到中部时，卡片入场交错延迟（按绝对索引从列表首个起算）
-   会让视口内卡片滞留最多 ~0.95s 才显现。此时禁用全部卡片入场动画，令其即时呈现。
-   本文件最后导入，级联优先级足以覆盖 catalog.css / currency-role.css 的卡片动画。 */
 .nk-no-reveal .nk-idx-card,
 .nk-no-reveal .nk-lc-card,
 .nk-no-reveal .nk-relic-card,
@@ -385,7 +344,6 @@
 .nk-no-reveal .nk-cw-card {
   animation: none;
 }
-/* 虚拟网格：单元格默认 opacity:0 等待 .nk-revealed；抑制时直接显现并取消动画 */
 .nk-no-reveal .nk-virtual-cell .nk-item-card,
 .nk-no-reveal .nk-virtual-cell .nk-idx-card,
 .nk-no-reveal .nk-virtual-cell .nk-lc-card {

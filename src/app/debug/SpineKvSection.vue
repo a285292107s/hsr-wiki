@@ -1,17 +1,4 @@
 <script setup lang="ts">
-/**
- * KV 场景验收面板（SpineDebugView 的 Tab 之一）：
- * 游戏每个版本的 KV 场景（official-scene，主背景 + 多层角色群像）资源从官网重新抓取写入
- * spine-manifest.json 后，在本面板验收其能否正常渲染：
- * - 「一键验收」顺序加载全部场景：逐层加载状态 + 单画布合并渲染（复用生产管线 createScenePipeline，
- *   验收基线 = 生产渲染由代码结构保证）+ 黑块自动检测（近黑不透明像素占比），生成可导出的 PASS/FAIL 报告；
- *   判定引擎在 src/app/debug/kv-acceptance.ts，验收编排在 src/app/debug/use-kv-acceptance.ts。
- * - 单层模式为逐层状态视图：每层独立画布 + 加载状态/耗时/错误，供定位「哪一层异常」；
- *   画布带不透明深色衬底（LAYER_BG），混合 slot 的 dst 非透明 → 无透明退化黑块。
- * 渲染参数与生产完全一致：同一固定 viewport + pad 0 + rawDataURIs 纹理重映射。
- * 逻辑拆分：渲染编排在 debug/use-scene-pipeline.ts；本文件仅承担场景加载编排、
- * 跨模式播放控制、PNG 导出装配与视图组装。
- */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { getQueryParam, setQueryParam, subscribeQueryChange } from './lib/query-state';
 import { loadSpineSceneKeys, resolveSpine } from '../../services/api';
@@ -25,15 +12,11 @@ import { toast } from './lib/toast';
 /** 浏览器活跃 WebGL 上下文上限约 16，达到此值预警 */
 const GL_WARN_AT = 12;
 
-/** 面板是否处于激活 Tab（激活时才加载场景，直达 ?tab=audit 不浪费资源） */
 const props = defineProps<{ active: boolean }>();
-
-/* ─── 渲染子系统：单层 player / 合并管线（lab/* composable） ─── */
 
 const layersApi = useSingleLayers();
 const merged = useMergedPipeline();
 
-/* 模板绑定别名（保持既有模板引用名不变） */
 const { layers, playerAlive } = layersApi;
 const mergedOn = merged.on;
 const mergedReady = merged.ready;
@@ -47,10 +30,8 @@ const viewportText = ref('');
 const loadError = ref('');
 const paused = ref(false);
 
-/** 当前占用的 WebGL 上下文总数（单层 player + 合并画布） */
 const glTotal = computed(() => playerAlive.value + (mergedOn.value ? 1 : 0));
 
-/** 汇总：就绪/失败/总数（头部工具栏状态条） */
 const summary = computed(() => {
   const ok = layers.value.filter((l) => l.status === 'ok').length;
   const fail = layers.value.filter((l) => l.status === 'fail').length;
@@ -60,19 +41,14 @@ const summary = computed(() => {
   return `LOADING ${ok}/${total}`;
 });
 
-/** 验收报告 PASS 数（报告头部汇总徽章） */
 const reportPass = computed(() => acceptReport.value.filter((r) => r.verdict === 'PASS').length);
 
 function badgeText(st: LayerState): string {
   return st.status === 'ok' ? 'OK' : st.status === 'fail' ? 'FAIL' : '加载中';
 }
 
-/* ─── 场景加载编排（驱动单层 + 合并两条渲染链） ─── */
-
-/** 场景代际令牌：loadScene 每次递增；验收轮询检测到变化即中止当前项（外部操作抢占场景） */
 let sceneEpoch = 0;
 
-/** 加载指定场景：先释放旧资源，再重建两条渲染链 */
 async function loadScene(key: string): Promise<void> {
   sceneEpoch++;
   layersApi.reset();
@@ -82,7 +58,7 @@ async function loadScene(key: string): Promise<void> {
   viewportText.value = '';
   try {
     const entry = await resolveSpine(key);
-    if (sceneKey.value !== key) return; // 已切换到其他场景，丢弃过期结果
+    if (sceneKey.value !== key) return;
     if (!entry || entry.kind !== 'official-scene') {
       loadError.value = `未找到 ${key} 场景条目（kind 非 official-scene）`;
       return;
@@ -91,15 +67,12 @@ async function loadScene(key: string): Promise<void> {
     const ok = await loadSpineRuntime();
     if (sceneKey.value !== key) return;
     if (!ok) {
-      // 保持 layers 为空 → 验收轮询走「无层 + 有错误」快速失败路径，不空转 90s
       loadError.value = 'spine-player 运行时加载失败（全部 CDN 不可达），点击「重新加载」重试';
       return;
     }
     const Ctor = getSpineCtor();
     if (!Ctor) return;
-    // runtime 就绪后才填充层状态（失败时保持空数组，供验收快速判定）
     await layersApi.initLayers(entry, Ctor);
-    // 默认开启合并渲染（生产 initSpineSceneViewer 同款单画布方案，为正确呈现基准）
     merged.enable(entry, paused.value);
   } catch (e) {
     loadError.value = String(e);
@@ -113,9 +86,6 @@ function selectScene(key: string): void {
   void loadScene(key);
 }
 
-/* ─── 播放控制：暂停/恢复（两种渲染模式通用） ─── */
-
-/** 显式设置暂停状态（单选组） */
 function setPaused(on: boolean): void {
   if (paused.value === on) return;
   togglePause();
@@ -130,8 +100,6 @@ function togglePause(): void {
   layersApi.setPausedAll(paused.value);
 }
 
-/* ─── PNG 导出：合并模式直接导出画布（单层模式无导出） ─── */
-
 function exportPng(): void {
   try {
     const canvas = merged.canvas(); // 管线 preserveDrawingBuffer=true，像素稳定可读
@@ -140,8 +108,6 @@ function exportPng(): void {
     console.warn('[debug-spine] PNG 导出失败:', e);
   }
 }
-
-/* ─── 一键验收：编排在 use-kv-acceptance.ts，经 Bridge 注入场景控制与状态投影 ─── */
 
 const bridge: AcceptBridge = {
   getKey: () => sceneKey.value,
@@ -153,7 +119,7 @@ const bridge: AcceptBridge = {
   epoch: () => sceneEpoch,
   loadKeys: async () => {
     const keys = await loadSpineSceneKeys();
-    sceneKeys.value = keys; // 工具条下拉共用同一数据源
+    sceneKeys.value = keys;
     return keys;
   },
   settled: () => layers.value.length > 0
@@ -184,10 +150,7 @@ const acceptError = accept.error;
 const reacceptingKey = accept.reacceptingKey;
 const runAcceptance = accept.run;
 const cancelAcceptance = accept.cancel;
-/** 报告行「重验」：仅重跑该场景，结束后停留在该场景（不强制恢复） */
 const reacceptScene = accept.reaccept;
-
-/* ─── 验收报告导出：文本复制 + JSON 下载（剪贴板/Blob 工具在 debug/report.ts） ─── */
 
 async function copyReport(): Promise<void> {
   const ok = await copyText(accept.reportText());
@@ -208,17 +171,14 @@ function downloadReportJson(): void {
   }
 }
 
-/** 显式设置渲染模式（单选组：合并渲染 / 单层模式） */
 function setMerged(on: boolean): void {
   merged.set(on, paused.value);
 }
 
 onMounted(async () => {
-  // 场景键列表（下拉选择用；失败不影响当前场景渲染）——轻量加载,不依赖面板激活
   void bridge.loadKeys().catch(() => undefined);
 });
 
-// 激活 Tab 时加载当前场景（直达 ?tab=audit 不触发渲染；切回 KV 时补加载）
 watch(
   () => props.active,
   (on) => {
@@ -227,7 +187,6 @@ watch(
   { immediate: true },
 );
 
-// 响应地址栏 / 外部导航的 ?scene= 变化（手改 URL / 前进后退均生效；验收期间场景被抢占时由 epoch 令牌中止轮询）
 const unsubscribeQuery = subscribeQueryChange(() => {
   const k = getQueryParam('scene') ?? 'home-bg';
   if (k !== sceneKey.value) selectScene(k);
@@ -235,25 +194,20 @@ const unsubscribeQuery = subscribeQueryChange(() => {
 
 onBeforeUnmount(() => {
   unsubscribeQuery();
-  accept.markDisposed(); // 验收轮询检测到卸载即中止，避免旧循环在组件销毁后继续跑
+  accept.markDisposed();
   merged.dispose(); // 合并渲染的 rAF 循环与 WebGL 上下文必须在此释放（否则离开页面后持续泄漏）
   layersApi.disposeAll();
 });
 </script>
 
 <template>
-  <!-- 根类必须与页面外层包装（DebugConsoleView .nk-spine-debug）区分开：
-       Vue scoped 会把父级样式级联到子组件唯一根元素，若沿用同名会把外层 padding/背景再套一层 → 左侧凭空多出 28px。
-       本文件内部子样式全部用 .nk-spine-debug__* 前缀，不受根类名影响。 -->
   <div class="nk-spine-kv">
-    <!-- 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 -->
     <div class="nk-spine-debug__statusbar">
       <span class="nk-spine-debug__chip" :class="summary.startsWith('READY') ? 'is-ok' : summary.startsWith('FAIL') ? 'is-fail' : 'is-loading'">{{ summary }}</span>
       <span class="nk-spine-debug__chip">{{ viewportText || 'viewport —' }}</span>
       <span class="nk-spine-debug__chip" :class="glTotal >= GL_WARN_AT ? 'is-fail' : ''" title="活跃 WebGL 上下文数（浏览器上限约 16）">GL {{ glTotal }}/16</span>
       <span class="nk-spine-debug__chip" :class="mergedOn ? 'is-ok' : ''">模式 {{ mergedOn ? '合并' : '单层' }}</span>
     </div>
-    <!-- 工具条：按功能分组（场景 / 渲染 / 验收），主任务「一键验收」独立于实验性操作 -->
     <div class="nk-spine-debug__toolbar">
       <div class="nk-spine-debug__group">
         <span class="nk-spine-debug__group-label">场景</span>
@@ -283,7 +237,6 @@ onBeforeUnmount(() => {
     </div>
     <p v-if="loadError" class="nk-spine-debug__error" role="alert">{{ loadError }}</p>
 
-    <!-- 验收报告：一键验收完成后展示，可复制文本 / 下载 JSON -->
     <section v-if="acceptReport.length > 0 || acceptError" class="nk-spine-debug__report">
       <header class="nk-spine-debug__report-head">
         <span class="nk-spine-debug__num">RPT</span>
@@ -348,7 +301,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* ─── 状态栏：只读状态（层 / 视口 / GL 配额 / 渲染模式），与操作按钮分离 ─── */
 .nk-spine-debug__statusbar {
   display: flex;
   flex-wrap: wrap;
@@ -363,18 +315,15 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: flex-start;
   flex-wrap: wrap;
-  /* 行距用 column-gap 承载分组间隔：换行到下一行的分组顶部不残留悬空竖线 */
   gap: 10px 16px;
   max-width: 1480px;
   padding: 12px 14px;
   margin-bottom: 14px;
-  /* 抬升为墨色 sheet：与环境光分离的独立面板层 */
   border: 1px solid var(--nk-sheet-border);
   border-radius: var(--nk-radius-card);
   background: var(--nk-sheet-bg);
   box-shadow: var(--nk-shadow-card);
 }
-/* 工具条分组：场景 / 渲染 / 验收（以列距 + 组长标签建立层级，避免包裹时悬空分隔线） */
 .nk-spine-debug__group {
   display: flex;
   flex-wrap: wrap;
@@ -404,7 +353,6 @@ onBeforeUnmount(() => {
 .nk-spine-debug__chip.is-fail { color: #ffb3b3; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.14); }
 .nk-spine-debug__chip.is-loading { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
 .nk-spine-debug__bulk { display: flex; flex-wrap: wrap; gap: 8px; }
-/* 渲染模式单选组（分段控件）：合并渲染 / 单层模式互斥选中；内凹承载 + 激活暖板 */
 .nk-spine-debug__seg {
   display: inline-flex;
   gap: 2px;
@@ -429,7 +377,6 @@ onBeforeUnmount(() => {
 .nk-spine-debug__seg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .nk-spine-debug__seg-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 
-/* ─── 验收报告：头部汇总 + 明细表（等宽代码风）；整体为抬升墨色 sheet ─── */
 .nk-spine-debug__report {
   max-width: 1480px;
   margin-bottom: 20px;
@@ -476,7 +423,6 @@ onBeforeUnmount(() => {
   word-break: break-all;
 }
 
-/* ─── 场景/动画下拉：代码风等宽，贴合深色控制台 ─── */
 .nk-spine-debug__select {
   padding: 3px 8px;
   max-width: 180px;
@@ -491,7 +437,6 @@ onBeforeUnmount(() => {
 .nk-spine-debug__select:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 .nk-spine-debug__select:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ─── 错误（就近展示 + 读屏播报） ─── */
 .nk-spine-debug__error {
   margin: 10px 0 0;
   color: #ff6b6b;
@@ -499,7 +444,6 @@ onBeforeUnmount(() => {
   line-height: 1.6;
 }
 
-/* ─── 合并渲染区（单画布多骨架） ─── */
 .nk-spine-debug__merged {
   border: 1px solid var(--nk-sheet-border);
   border-radius: var(--nk-radius-card);
@@ -524,7 +468,6 @@ onBeforeUnmount(() => {
     repeating-conic-gradient(#151d33 0% 25%, #0d1326 0% 50%) 0 0 / 24px 24px;
 }
 
-/* ─── 层卡片网格；max-width 与其余板块同宽对齐 ─── */
 .nk-spine-debug__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
@@ -574,7 +517,6 @@ onBeforeUnmount(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* 右上角状态组：加载耗时徽章 + 就绪徽章 */
 .nk-spine-debug__states {
   display: flex;
   align-items: center;
@@ -639,7 +581,6 @@ onBeforeUnmount(() => {
 .nk-spine-debug__btn:hover { border-color: color-mix(in srgb, var(--text) 55%, transparent); }
 .nk-spine-debug__btn:active { background: color-mix(in srgb, var(--text) 14%, transparent); transform: translateY(0); }
 .nk-spine-debug__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-/* 主操作：暖板 CTA（无霓虹、无渐变）。hover 深一档暖板 + 墨色浮起 */
 .nk-spine-debug__btn.is-primary {
   border-color: var(--primary);
   background: color-mix(in srgb, var(--primary) 20%, transparent);
@@ -656,7 +597,6 @@ onBeforeUnmount(() => {
 .nk-spine-debug__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
 .nk-spine-debug__btn.is-danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.12); }
 
-/* ─── 移动端：单列 + 舞台按比例缩放（16:9，实例化前尺寸即确定，不触发 buffer 比例错位） ─── */
 @media (max-width: 560px) {
   .nk-spine-debug__grid { grid-template-columns: 1fr; }
   .nk-spine-debug__stage { width: 100%; height: auto; aspect-ratio: 16 / 9; }

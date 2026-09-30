@@ -20,9 +20,7 @@ from utils import save_json
 
 logger = logging.getLogger("converter")
 
-# 目录卡敌方保留字段（卡图 + 悬浮提示用；剥离 intro/skills/stance/speed/tpl/wave 等重型/详情字段）
 _CATALOG_MONSTER_KEEP = ("id", "name", "icon", "weak", "resist", "rank", "camp")
-
 
 def _read_full(base: str) -> dict:
     """读取已生成的全量赛季文件（raw json）。
@@ -34,11 +32,9 @@ def _read_full(base: str) -> dict:
     with open(OUTPUT_DIR / f"{base}.json", encoding="utf-8") as f:
         return json.load(f)
 
-
 def _catalog_monster(m: dict) -> dict:
     """目录卡敌方：仅保留卡图与悬浮提示所需字段（剥离重型/详情字段）。"""
     return {k: m[k] for k in _CATALOG_MONSTER_KEEP if k in m}
-
 
 def _season_catalog(entry: dict) -> dict:
     """全量赛季条目 → 目录卡轻量条目。
@@ -62,7 +58,6 @@ def _season_catalog(entry: dict) -> dict:
         out["permanent"] = True
     if entry.get("test"):
         out["test"] = True
-    # 星启：目录卡仅需存在性（★ 徽章），剥离重型节点/技能/奖励
     if entry.get("tierce"):
         t = entry["tierce"]
         out["tierce"] = {
@@ -70,11 +65,9 @@ def _season_catalog(entry: dict) -> dict:
             "damage_types": t.get("damage_types", []),
             "countdown": t.get("countdown"),
         }
-    # 异相仲裁：目录卡仅需关卡组成 kind 计数（骑士×N · 王棋）
     if entry.get("levels"):
         out["levels"] = [{"kind": l["kind"]} for l in entry["levels"] if l.get("kind")]
     return out
-
 
 def convert_catalog() -> None:
     """由全量 maze*.json 派生目录卡轻量文件（*.catalog.json，同目录）。

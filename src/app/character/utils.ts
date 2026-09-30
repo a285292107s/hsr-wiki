@@ -1,4 +1,3 @@
-/** 角色详情页子组件共享的纯工具函数 */
 import type { SkillExtra } from '../../services/types';
 
 /** 词条提取（extra 按 name 去重；行迹树节点 extra 为 unknown，运行时过滤） */

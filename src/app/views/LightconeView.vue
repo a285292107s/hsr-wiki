@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * 光锥详情页
- * 结构：Hero（光锥立绘 + 基础信息）/ 技能（叠影等级滑条）/ 属性（晋阶阶段）/ 故事
- * 交互：叠影 1-5 切换实时重渲染技能数值
- */
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
@@ -13,7 +8,6 @@ import { fmtDesc, lightconeIconUrl, itemName } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { PATH, SITE_NAME } from '../../lib/constants';
 import type { LightConeStats } from '../../services/types';
-// 光锥详情页专属样式（随本路由 chunk 懒加载；技能卡片原语与角色页共享）
 import '../../styles/skill-card.css';
 import '../../styles/lightcone.css';
 
@@ -25,10 +19,8 @@ const lc = useLightconeStore();
 const phase = computed<'loading' | 'error' | 'ready'>(() =>
   lc.error ? 'error' : lc.data ? 'ready' : 'loading',
 );
-/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏（useDelayedSkeleton 统一接管 timer 与生命周期清理） */
 const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 const d = computed(() => lc.data);
-/** 动态页面标题 */
 watch(d, (data) => {
   if (data) document.title = `${data.name} - ${SITE_NAME}`;
 });
@@ -54,14 +46,10 @@ watch(
   },
 );
 
-/* ═══════════ Hero ═══════════ */
-
 const stars = computed(() => (d.value ? '★'.repeat(d.value.rarity) : ''));
 const figureUrl = computed(() =>
   d.value ? lightconeIconUrl(d.value.id) : '',
 );
-
-/* ═══════════ 技能（叠影等级切换） ═══════════ */
 
 const rankLevels = computed<number[]>(() => {
   if (!d.value) return [];
@@ -74,7 +62,6 @@ const skillDescHtml = computed(() => {
   return fmtDesc(d.value.skill.desc, lv ? lv.param_list : []);
 });
 
-/** 叠影参数对比表：每个参数在 5 级的数值 */
 const rankTable = computed<{ idx: number; values: string[] }[]>(() => {
   if (!d.value) return [];
   const levels = rankLevels.value;
@@ -87,13 +74,10 @@ const rankTable = computed<{ idx: number; values: string[] }[]>(() => {
       const p = d.value!.skill.level[String(lv)];
       const v = p && p.param_list[i];
       if (v == null) return '?';
-      // 百分比参数（<1 的小数）显示为百分比整数
       return v < 1 && v > 0 && !Number.isInteger(v) ? String(Math.round(v * 100)) : String(Math.round(v));
     }),
   }));
 });
-
-/* ═══════════ 属性（晋阶阶段） ═══════════ */
 
 interface StatRow { phase: number; maxLevel: number; hp: number; atk: number; def: number; cost: { id: number; num: number; name: string }[] }
 
@@ -115,13 +99,10 @@ const statRows = computed<StatRow[]>(() => {
     }));
 });
 
-/** 满级（Lv.80 突破6）属性摘要 */
 const maxStats = computed(() => {
   const rows = statRows.value;
   return rows.length ? rows[rows.length - 1] : null;
 });
-
-/* ═══════════ 描述 / 卡面故事 ═══════════ */
 
 const descHtml = computed(() =>
   d.value && d.value.desc ? d.value.desc.replace(/\\n/g, '<br>') : '',
@@ -169,7 +150,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- ─── 错误态 ─── -->
     <div v-else-if="phase === 'error'" class="nk-error-state">
       <div class="nk-error-state__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
@@ -182,9 +162,7 @@ onBeforeUnmount(() => {
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
 
-    <!-- ─── 正文 ─── -->
     <template v-else-if="d">
-      <!-- Hero -->
       <div class="nk-hero nk-hero--lc">
         <div class="nk-hero__visual" :data-rarity="d.rarity">
           <div
@@ -205,7 +183,6 @@ onBeforeUnmount(() => {
             </div>
           </header>
 
-          <!-- 满级属性摘要 -->
           <section v-if="maxStats" class="nk-hero__section">
             <div class="nk-hero__section-title">
               <span class="nk-hero__section-bar"></span>
@@ -233,10 +210,8 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- 内容面板 -->
       <div class="nk-panels">
         <div class="nk-panel nk-panel--active">
-          <!-- 技能 -->
           <h2 class="nk-title">SKILL</h2>
           <div class="nk-skill nk-lc-skill">
             <div class="nk-skill__head">
@@ -263,7 +238,6 @@ onBeforeUnmount(() => {
             </div>
             <div class="nk-skill__desc" v-html="skillDescHtml"></div>
             <div v-if="descHtml" class="nk-lc-skill-note" v-html="descHtml"></div>
-            <!-- 叠影数值对比表 -->
             <div v-if="rankTable.length" class="nk-lc-rank-table-wrap">
               <table class="nk-lc-rank-table">
                 <thead>
@@ -290,7 +264,6 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- 晋阶属性：阶段卡片网格（每阶段一张典藏卡：等级上限大字 + 三属 + 突破材料） -->
           <template v-if="statRows.length">
             <h2 class="nk-title">ASCENSION</h2>
             <div class="nk-lc-asc-grid">
@@ -342,7 +315,6 @@ onBeforeUnmount(() => {
             </div>
           </template>
 
-          <!-- 故事：卡面描述 -->
           <template v-if="storyHtml">
             <h2 class="nk-title">STORY</h2>
             <div class="nk-lc-story" v-html="storyHtml"></div>

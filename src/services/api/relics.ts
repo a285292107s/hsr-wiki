@@ -27,9 +27,7 @@ export const loadLocalRelicSubAffixes = singletonLoad<RelicSubAffixList>(`${LOCA
 /** 遗器来历表（relic_stories.json，set_id → 部位类型 → 故事；共享单例） */
 export const loadLocalRelicStories = singletonLoad<RelicStoriesMap>(`${LOCAL_DATA_BASE}/relic_stories.json`);
 
-/**
- * 从本地 relics.json 加载遗器套装信息，返回与 CDN RelicSetData 兼容的结构。
- */
+/** 从本地 relics.json 加载遗器套装信息，返回与 CDN RelicSetData 兼容的结构 */
 export async function loadLocalRelicSet(id: number | string): Promise<RelicSetData | null> {
   try {
     const list = await loadLocalRelicSets();

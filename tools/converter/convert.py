@@ -14,12 +14,10 @@ import sys
 import time
 from pathlib import Path
 
-# Windows 控制台强制 UTF-8，避免中文日志乱码
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
 
-# 将当前目录加入 sys.path，使子模块能正常导入
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from textmap import load_textmap
@@ -28,10 +26,10 @@ from incremental import load_state, save_state, should_skip, update_state
 from converters import paths, elements, items, properties
 from converters import characters, character_detail
 from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame, endgame_catalog
-from converters import currency, currency_catalog  # noqa: E402 – 本地数据，无需网络
+from converters import currency, currency_catalog  # noqa: E402
 from converters import achievements
 from converters import monster_detail
-from converters import version  # noqa: E402 – 子模块 git 提交信息
+from converters import version  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,7 +38,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("converter")
 
-# 模块注册表：名称 → 转换函数列表
 MODULES: dict[str, list] = {
     "paths": [paths.convert],
     "elements": [elements.convert],
@@ -61,7 +58,6 @@ MODULES: dict[str, list] = {
     "achievements": [achievements.convert],
     "version": [version.convert],
 }
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="TurnBasedGameData → 前端 JSON 转换工具")
@@ -88,18 +84,15 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-
 def main() -> None:
     args = parse_args()
     start = time.time()
 
-    # 输出模式
     if args.pretty:
         set_pretty(True)
     if args.official_icon_paths:
         set_official_paths(True)
 
-    # 确定要运行的模块
     if args.only:
         selected = [m.strip() for m in args.only.split(",") if m.strip()]
         unknown = [m for m in selected if m not in MODULES]
@@ -111,14 +104,11 @@ def main() -> None:
 
     logger.info("=== 转换工具启动（%d 个模块）===", len(selected))
 
-    # 1. 加载 TextMap（始终需要）
     load_textmap()
 
-    # 2. 增量状态
     state = load_state()
     skipped: list[str] = []
 
-    # 3. 执行转换
     stats: dict[str, float] = {}
     for name in selected:
         if should_skip(name, state, force=args.force):
@@ -133,7 +123,6 @@ def main() -> None:
 
     save_state(state)
 
-    # 4. 摘要
     elapsed = time.time() - start
     logger.info("=== 转换完成 ===")
     logger.info("总耗时: %.1fs", elapsed)
@@ -141,7 +130,6 @@ def main() -> None:
         logger.info("跳过（未变更）: %s", ", ".join(skipped))
     for name, dur in stats.items():
         logger.info("  %-20s %5.1fs", name, dur)
-
 
 if __name__ == "__main__":
     main()

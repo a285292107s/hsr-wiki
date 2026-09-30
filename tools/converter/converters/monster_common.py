@@ -13,7 +13,6 @@ from utils import load_json, unwrap_value
 
 logger = logging.getLogger("converter")
 
-
 def load_monsters() -> dict[int, dict]:
     """敌方信息聚合 → {ID: {name, icon, figure, weak, resist, rank, camp, intro, skills, stance, stats}}。"""
     templates = load_json(EXCEL_DIR / "MonsterTemplateConfig.json")
@@ -22,7 +21,6 @@ def load_monsters() -> dict[int, dict]:
         r["ID"]: resolve_text(r.get("Name", {}))
         for r in load_json(EXCEL_DIR / "MonsterCamp.json") if r.get("ID") is not None
     }
-    # 技能预解析（名称缺失不入索引；desc 保留原始富文本供前端 fmtDesc 渲染）
     skills = {}
     for r in load_json(EXCEL_DIR / "MonsterSkillConfig.json"):
         sid = r.get("SkillID")
@@ -75,9 +73,6 @@ def load_monsters() -> dict[int, dict]:
                 "speed": unwrap_value(rec.get("SpeedBase", {})) or 0,
             },
         }
-    # 实例别名：MonsterConfig.MonsterID（战斗波次引用实例 ID，如 200401009）→
-    # 同模板信息（MonsterTemplateID 已注册时），使波次引用直接命中；
-    # 附加内部字段 _tpl 记录模板 ID（供赛季输出 tpl，前端跳转怪物详情用模板 ID）
     for rec in configs:
         mid, tpl = rec.get("MonsterID"), rec.get("MonsterTemplateID")
         if mid is not None and tpl is not None and mid != tpl and tpl in out:

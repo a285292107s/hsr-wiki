@@ -1,17 +1,16 @@
-/**
- * CDN 健康探测（全局兜底信号源，唯一实现）
- *
- * 背景：CDN（static.nanoka.cc / 官网源）整体不可达时，逐资源失败会放大等待与破图。
- * 本模块在 bootstrap 后发起一次轻量探测（HEAD manifest.json，3s 超时）：
- * - 失败 → cdnDown 置位，订阅方（图片委托 / spine 运行时 / manifest 加载）短路跳过等待
- * - down 状态下每 30s 后台重探直至恢复；恢复后 cdnDown 清除并通知订阅方（图片重载 / toast 提示）
- *   恢复即停止探测（正常态无需监视；若会话内再次失效由新会话的探测覆盖）
- * 探测永不阻塞调用方：fire-and-forget，状态经 isCdnDown() / subscribeCdnHealth() 读取。
- */
+/* CDN 健康探测（全局兜底信号源，唯一实现）。
+   背景：CDN 整体不可达时，逐资源失败会放大等待与破图。
+   本模块在 bootstrap 后发起一次轻量探测（HEAD manifest.json，3s 超时）：
+   - 失败 → cdnDown 置位，订阅方（图片委托 / spine 运行时 / manifest 加载）短路跳过等待
+   - down 状态下每 30s 后台重探直至恢复；恢复后 cdnDown 清除并通知订阅方（图片重载 / toast 提示），
+     恢复即停止探测（正常态无需监视；若会话内再次失效由新会话的探测覆盖）
+   探测永不阻塞调用方：fire-and-forget，状态经 isCdnDown() / subscribeCdnHealth() 读取。
+   **唯一登记豁免**：此处的裸 fetch 为 CDN 健康 HEAD 探针，与 fetchJSON 的 15s/NkError 语义不兼容。 */
 import { CDN } from '../../lib/constants';
 
 /** 探测超时：远小于 fetchJSON 15s，保证短路信号尽快生效 */
 export const CDN_PROBE_TIMEOUT_MS = 3000;
+
 /** 探测失败后的重探周期（恢复检测） */
 export const CDN_RETRY_INTERVAL_MS = 30_000;
 
@@ -71,11 +70,9 @@ async function probeLoop(): Promise<void> {
   }
 }
 
-/**
- * 启动 CDN 健康探测（幂等，bootstrap 注册一次）。
- * 探测结果经 isCdnDown() / subscribeCdnHealth() 消费；模块内持有 retryTimer，
- * 测试通过 resetCdnHealth() 清理后重新探测。
- */
+/* 启动 CDN 健康探测（幂等，bootstrap 注册一次）。
+   探测结果经 isCdnDown() / subscribeCdnHealth() 消费；模块内持有 retryTimer，
+   测试通过 resetCdnHealthForTest() 清理后重新探测。 */
 export function startCdnHealthProbe(): void {
   if (probeStarted) return;
   probeStarted = true;

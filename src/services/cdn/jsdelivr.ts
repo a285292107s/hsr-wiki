@@ -1,11 +1,9 @@
-/**
- * jsDelivr 源（自建 fork StarRailTextures 镜像）：当前角色=回退源，仅补 nanoka 缺失旧档。
- * fork 已冻结(仅含冻结前资产)，主源必须是 nanoka(持续更新)；禁止把 jsDelivr 重新设为任何分类首选源
- * （唯一例外：trace 分类 nanoka 为占位图，经 base.ts spec.jdPrimary 保持 jsDelivr 主源）。
- * 路径规则：SpriteOutput/{SubDir} → spriteoutput/{subdir}(目录小写/文件名保大小写)；
- * skillicons 按角色 id 分目录(avatar/{id}/)、trace 在 ui/avatar/icon/、element 在 icondamagetype/、pathicon 在 professioniconmiddle/
- * （Priest→Pirest、Elation→Joy 官方拼写差异）。若 fork 恢复同步：无需改码，必要时 purge.jsdelivr.net 清缓存并实测算复核。
- */
+/* jsDelivr 源（自建 fork StarRailTextures 镜像）：当前为回退源，仅补 nanoka 缺失旧档。
+   fork 已冻结（仅含冻结前资产），主源必须是 nanoka（持续更新）；**禁止**把 jsDelivr 重新设为
+   任何分类首选源——唯一例外是 trace 分类（nanoka 为占位图，经 base.ts spec.jdPrimary 保持主源）。
+   路径规则：SpriteOutput/{SubDir} → spriteoutput/{subdir}（目录小写 / 文件名保大小写）；
+   skillicons 按角色 id 分目录（avatar/{id}/）、trace 在 ui/avatar/icon/、element 在 icondamagetype/、
+   pathicon 在 professioniconmiddle/（Priest→Pirest、Elation→Joy 官方拼写差异）。 */
 import type { CdnCategory } from './base';
 import { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH, OFFICIAL_ICON_BASE } from '../../lib/constants';
 
@@ -13,8 +11,8 @@ import { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH, OFFICIAL_ICON_BASE } from '../../
 export { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH };
 export const JS_DELIVR_BASE = OFFICIAL_ICON_BASE;
 
-/** 星魂图标官方源基址：ui/ui3d/rank/ 位于 assets/asbres/ 下，与 spriteoutput/ 平级
- * （JS_DELIVR_BASE 含 /spriteoutput 后缀，故独立收口；供 resolve 层 rank 分类特判）。 */
+/* 星魂图标官方源基址：ui/ui3d/rank/ 位于 assets/asbres/ 下，与 spriteoutput/ 平级
+   （JS_DELIVR_BASE 含 /spriteoutput 后缀，故独立收口；供 resolve 层 rank 分类特判）。 */
 export const JS_DELIVR_UI3D_BASE = JS_DELIVR_BASE.replace(/\/spriteoutput$/, '');
 
 /** 官方拼写差异（AvatarBaseType 数据源验证：Priest 官方写作 Pirest，Elation 官方写作 Joy）；键为项目传入的小写 baseType */
@@ -23,11 +21,9 @@ const PROFESSION_MAP_REV: Record<string, string> = Object.fromEntries(
   Object.entries(PROFESSION_MAP).map(([k, v]) => [v, k]),
 );
 
-/**
- * 分类 → jsDelivr 仓库相对路径（file 为项目 nanoka 文件名，含 .webp 后缀）。
- * 仅注册经核对脚本验证全命中的分类；新增分类前先跑核对脚本。
- * 返回 null 表示该文件名不适用于 jsDelivr 规则（如无角色 id 的虚构名），调用方回退 nanoka。
- */
+/* 分类 → jsDelivr 仓库相对路径（file 为项目 nanoka 文件名，含 .webp 后缀）。
+   仅注册经核对脚本验证全命中的分类；新增分类前先跑核对脚本。
+   返回 null 表示该文件名不适用 jsDelivr 规则（如无角色 id 的虚构名），调用方回退 nanoka。 */
 export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => string | null>> = {
   avatarshopicon: (f) => `avatarshopicon/avatar/${f.replace(/\.webp$/i, '')}.png`,
   avatarroundicon: (f) => `avatarroundicon/avatar/${f.replace(/\.webp$/i, '')}.png`,
@@ -67,10 +63,9 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
   rank: (f) => `ui/ui3d/rank/_dependencies/textures/${f.replace(/\.webp$/i, '')}.png`,
 };
 
-/** 通用转换规则：官方 SpriteOutput 完整路径 → 仓库相对路径（目录段小写、文件名保留）。
- * 与 converter config.py _rule_dir_lower 规则对齐；
- * 供输入为完整 SpriteOutput 路径、未注册 JS_DELIVR_RULES 分类的场景复用（如终局赛季页签图）。
- */
+/* 通用转换规则：官方 SpriteOutput 完整路径 → 仓库相对路径（目录段小写、文件名保留）。
+   与 converter config.py _rule_dir_lower 规则对齐；
+   供输入为完整 SpriteOutput 路径、未注册 JS_DELIVR_RULES 分类的场景复用（如终局赛季页签图）。 */
 export function spriteOutputToRel(path: string): string {
   const rel = path.replace(/^SpriteOutput\//i, '');
   const parts = rel.split('/');

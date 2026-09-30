@@ -20,10 +20,7 @@ from utils import save_json
 
 logger = logging.getLogger("converter.version")
 
-# 官方客户端版本标识：OSPRODWin4.4.0_D15909703_A15802547_L15874300
-# 平台前缀 + 版本号 + D(数据)/A(音频)/L(语言) 构建号
 _COMMIT_TITLE_PATTERN = re.compile(r"^OSPRODWin(\d+\.\d+\.\d+)_(D\d+)_(A\d+)_(L\d+)$")
-
 
 def parse_commit_title(title: str) -> dict | None:
     """解析提交标题为版本对象；无法解析时返回 None。"""
@@ -33,12 +30,10 @@ def parse_commit_title(title: str) -> dict | None:
     game_version = m.group(1)
     return {
         "game_version": game_version,
-        # 大版本标签（前端目录页/展示用）：4.4.0 → 4.4
         "version_label": game_version.rsplit(".", 1)[0],
         "client": f"OSPRODWin{game_version}",
         "build": f"{m.group(2)}_{m.group(3)}_{m.group(4)}",
     }
-
 
 def _read_head_commit() -> tuple[str, str] | None:
     """读取子模块最新提交（标题, 日期）；git 不可用时返回 None。"""
@@ -61,7 +56,6 @@ def _read_head_commit() -> tuple[str, str] | None:
     title, _, date = line.partition("\x1f")
     return title, date
 
-
 @lru_cache(maxsize=1)
 def read_source_version_label() -> str:
     """读取子模块 HEAD 提交标题解析出的 version_label（如 "4.6"）；不可用时返回空串。
@@ -78,7 +72,6 @@ def read_source_version_label() -> str:
         logger.warning("提交标题无法解析为版本号: %r（版本号留空）", head[0])
         return ""
     return parsed["version_label"]
-
 
 def convert() -> None:
     logger.info("--- 游戏版本信息 (version) ---")
@@ -97,7 +90,6 @@ def convert() -> None:
     save_json(out, OUTPUT_DIR / "version.json")
     logger.info("游戏版本 %s（%s，构建 %s，同步于 %s）",
                 out["game_version"], out["client"], out["build"], out["synced_at"])
-
 
 if __name__ == "__main__":
     convert()

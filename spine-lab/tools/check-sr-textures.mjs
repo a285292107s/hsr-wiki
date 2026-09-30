@@ -1,10 +1,3 @@
-/**
- * StarRailTextures 仓库覆盖度核对(jsDelivr 加速源)：以项目实际数据驱动的文件名集合，
- * 验证其对 17 个 CDN 分类命中率，输出 rank/trace/pathicon/element 等官方路径映射，
- * 为「以 jsDelivr 取缔 nanoka」提供事实依据。输出控制台报告 + temp/sr-textures-audit.json。
- * 已知：星魂 3/5 官方无独立图标(IconPath 复用技能图标 Rank3→Ultra/Rank5→BP)，仓库缺文件属预期。
- * 用法：node tools/check-sr-textures.mjs [--limit N](默认120；数字ID类全量)。
- */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,19 +5,16 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'public/data/cn');
 const LIMIT = Number(process.argv.find((a) => a.startsWith('--limit='))?.split('=')[1] ?? 120);
-// jsDelivr 分支（自建 fork a285292107s/StarRailTextures，跟 main 最新获取 4.4+ 数据；与 lib/constants.ts 同步）
 const GH = 'https://cdn.jsdelivr.net/gh/a285292107s/StarRailTextures@main/assets/asbres/spriteoutput';
 
-/* ─── 数据读取 ─── */
 function loadJson(f) {
   try { return JSON.parse(readFileSync(join(DATA, f), 'utf8')); } catch { return null; }
 }
 function asList(d) { return Array.isArray(d) ? d : Object.values(d); }
 
-/* ─── 文件名集合抽取（真实数据驱动；gridfight 为 {sub,name} 携带官方子路径） ─── */
 const charIds = asList(loadJson('characters.json') || []).map((c) => c.id).filter(Boolean);
 const lcIds = asList(loadJson('light_cones.json') || []).map((c) => c.id).filter(Boolean);
-const gfFlat = (f) => Object.values(loadJson(f) || {}).flat().filter(Boolean); // 顶层对象、值嵌套数组
+const gfFlat = (f) => Object.values(loadJson(f) || {}).flat().filter(Boolean);
 
 const SAMPLES = {
   avatarshopicon: charIds,
@@ -40,7 +30,6 @@ const SAMPLES = {
   ],
   skillicons: [
     ...charIds.flatMap((id) => ['Normal', 'BP', 'Ultra', 'Passive', 'Maze'].map((k) => `SkillIcon_${id}_${k}`)),
-    // 忆灵技能：文件名按忆灵 ID、目录按角色 ID（忆灵 ID - 10000；18007 → 8007 开拓者特例）
     ...['11402', '11407', '11413', '11415', '18007'].flatMap((id) => [`SkillIcon_${id}_ServantPassive`, `SkillIcon_${id}_Servant01`]),
   ],
   rank: charIds.flatMap((id) => [1, 2, 3, 4, 5, 6].map((n) => `SkillIcon_${id}_Rank${n}`)),
@@ -61,8 +50,7 @@ const SAMPLES = {
     .filter(Boolean),
 };
 
-/* ─── 官方路径映射规则（分类 → 仓库相对路径构造） ─── */
-const PROFESSION_MAP = { Priest: 'Pirest', Elation: 'Joy' }; // 官方拼写差异
+const PROFESSION_MAP = { Priest: 'Pirest', Elation: 'Joy' };
 const RULES = {
   avatarshopicon: (f) => `avatarshopicon/avatar/${f}.png`,
   avatardrawcard: (f) => `avatardrawcard/${f}.png`,
@@ -74,7 +62,6 @@ const RULES = {
   relicfigures: (f) => `relicfigures/${f}.png`,
   skillicons: (f) => {
     const id = f.match(/\d+/)[0];
-    // 忆灵技能文件名以忆灵 ID 为前缀（SkillIcon_11402_Servant*），仓库目录按角色 ID 组织（忆灵 ID - 10000）
     const dir = /_Servant/.test(f) && Number(id) > 10000 ? String(Number(id) - 10000) : id;
     return `skillicons/avatar/${dir}/${f}.png`;
   },
@@ -88,7 +75,6 @@ const RULES = {
   'gridfight-icon': (o) => `gridfight/traiticon/${o.sub.toLowerCase()}/${o.name}.png`,
 };
 
-/* ─── 验证（并发池） ─── */
 async function pool(items, worker, size = 10) {
   const out = new Array(items.length);
   let i = 0;
@@ -112,7 +98,6 @@ async function check(url) {
   } finally { clearTimeout(t); }
 }
 
-/** 非 200 重试一次（jsDelivr 瞬时抖动会误报缺失） */
 async function checkRetry(url) {
   const first = await check(url);
   if (first === 200) return 200;
@@ -120,7 +105,6 @@ async function checkRetry(url) {
   return check(url);
 }
 
-/* ─── 主流程 ─── */
 const report = {};
 let grand = { ok: 0, miss: 0 };
 console.log(`StarRailTextures 覆盖度核对（limit=${LIMIT}/分类）\n${'─'.repeat(72)}`);

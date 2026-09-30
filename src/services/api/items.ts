@@ -27,7 +27,6 @@ export async function loadLocalItemDb(): Promise<ItemDb> {
   }
   return db;
 }
-
 /** 敌对物种列表（共享单例：只请求一次，失败自动重置允许重试） */
 export const loadLocalMonsterList = singletonLoad<LocalMonsterList>(`${LOCAL_DATA_BASE}/monsters.json`);
 

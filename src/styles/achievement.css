@@ -1,19 +1,8 @@
-/* 成就目录页(常规)——档案书册横条条目。卡片=侧栏(系列图标40px暗底+竖发丝线)+信息区(编号行等宽7位+稀有度菱形/标题/达成要求/系列名)。
-   形态绑定断点：≥768 横条(side 64px)；<768 竖卡(side 隐藏，系列图标回 meta，描述4行)。
-   反 AI 味硬约束（不可回退）：禁止 head 渐变/box-shadow 发光/backdrop-filter 玻璃徽章/虚线分隔；
-   hover 仅边框提亮 + --nk-shadow-card 墨色扩散阴影，禁止位移/scale 跳动(虚拟滚动重渲染会抖)。
-   稀有度=左缘2px色条(::before，--ach-rarity-* 不随主题)+右上菱形徽记。
-   行高预算 rowH=colW*virtualImgRatio+virtualInfoH+22，须≥卡片实际最大高度；desc 限行≥768为3行、以下4行
-   （改字号/行高须同步重算本预算与 achievement.ts 配置）。网格列宽抽变量与骨架屏共用(catalog.css)。*/
 
-/* 网格：列宽抽变量与骨架屏共用（catalog.css 定义）；桌面 min 与 achievement.ts virtualMinColW 同源，
-   手机覆盖为 2 列紧凑列宽 */
 .nk-ach-grid { --nk-grid-min: 320px; }
 
-/* 骨架屏占位：横条形态（与终局星际档案卡同语言：横向条，非 3:4 竖块） */
 .nk-ach-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 10px; }
 
-/* 卡片：虚拟网格填满单元格高度（≥768 横条 row；<768 竖卡 column），无位移类动画 */
 .nk-ach-card {
   position: relative;
   display: flex;
@@ -29,7 +18,6 @@
   animation-delay: min(calc(var(--i, 0) * 16ms), 600ms);
 }
 
-/* 左缘稀有度色条（金/银/铜，2px，圆角贴合卡片左上；与菱形徽记同族双表达） */
 .nk-ach-card::before {
   content: '';
   position: absolute;
@@ -45,7 +33,6 @@
 .nk-ach-card--mid::before  { background: color-mix(in srgb, var(--ach-rarity-mid) 45%, transparent); }
 .nk-ach-card--low::before  { background: color-mix(in srgb, var(--ach-rarity-low) 45%, transparent); }
 
-/* 侧栏：系列图标暗底徽记 + 右侧竖发丝线；卡片整体撑满，侧栏纵向贯通 */
 .nk-ach-card__side {
   flex-shrink: 0;
   width: 64px;
@@ -62,7 +49,6 @@
   opacity: 0.9;
 }
 
-/* 信息区：纵向铺满（head 顶 / desc flex 吸收余量 / meta 沉底） */
 .nk-ach-card__main {
   flex: 1;
   min-width: 0;
@@ -71,7 +57,6 @@
   padding: 12px 14px 10px;
 }
 
-/* 档案编号行：等宽 7 位编号（tabular 对齐，档案身份锚点）+ 右上稀有度菱形徽记 */
 .nk-ach-card__head {
   flex-shrink: 0;
   display: flex;
@@ -90,7 +75,6 @@
   white-space: nowrap;
   transition: color 0.25s var(--ease);
 }
-/* 稀有度菱形徽记：旋转 45° 的细边方块，金/银/铜低饱和色（禁 glow/禁玻璃）；语义由 title/aria-label 承载 */
 .nk-ach-card__gem {
   flex-shrink: 0;
   width: 9px;
@@ -104,7 +88,6 @@
 .nk-ach-card--mid .nk-ach-card__gem  { background: color-mix(in srgb, var(--ach-rarity-mid) 50%, transparent); border: 1px solid color-mix(in srgb, var(--ach-rarity-mid) 80%, transparent); }
 .nk-ach-card--low .nk-ach-card__gem  { background: color-mix(in srgb, var(--ach-rarity-low) 55%, transparent); border: 1px solid color-mix(in srgb, var(--ach-rarity-low) 85%, transparent); }
 
-/* 标题：横条内单行聚焦（clamp 1）；手机竖卡恢复 2 行 */
 .nk-ach-card__title {
   flex-shrink: 0;
   margin-top: 2px;
@@ -118,7 +101,6 @@
   overflow: hidden;
 }
 
-/* 达成要求：横条 3 行（flex 吸收余量），含换行 pre-line */
 .nk-ach-card__desc {
   flex: 1;
   min-height: 0;
@@ -133,8 +115,6 @@
   white-space: pre-line;
 }
 
-/* 隐藏描述成就（ShowType=HiddenDesc）：描述区渲染为墨色涂抹条（文档打码质感），
-   内部「？？？」文字透明保留 → 屏幕阅读器与视觉语义一致；悬停 title 揭示原文 */
 .nk-ach-card__redact {
   display: block;
   height: 1.15em;
@@ -146,11 +126,8 @@
   color: transparent;
   user-select: none;
 }
-/* 涂抹条走普通流，脱离 line-clamp 盒（-webkit-box 内 block 子元素截断行为不稳定） */
 .nk-ach-card--hidden .nk-ach-card__desc { display: block; }
 
-/* 底部系列名：发丝线分隔；side 已承载 40px 图标 → 桌面 meta 无图标，
-   手机 side 隐藏后由 meta 的 14px 小图标承接系列识别 */
 .nk-ach-card__meta {
   flex-shrink: 0;
   display: flex;
@@ -179,11 +156,9 @@
   text-overflow: ellipsis;
 }
 
-/* 隐藏成就：系列图标降饱和 */
 .nk-ach-card--hidden .nk-ach-card__series-icon,
 .nk-ach-card--hidden .nk-ach-card__icon { filter: grayscale(0.55) brightness(0.75) contrast(0.92); }
 
-/* hover 微响应（仅精细指针）：边框提亮 + 墨色扩散阴影 + 编号/菱形微提（同色族加深，无位移缩放） */
 @media (hover: hover) and (pointer: fine) {
   .nk-ach-card:hover {
     border-color: color-mix(in srgb, var(--primary) 38%, transparent);
@@ -193,7 +168,6 @@
   .nk-ach-card:hover .nk-ach-card__gem { filter: brightness(1.2); }
 }
 
-/* ─── 虚拟网格集成（与 .nk-cat-card 同源：reveal 入场 / 图标 loaded 淡入 / 快速跳跃降级） ─── */
 .nk-virtual-cell .nk-ach-card { opacity: 0; transform: translateY(16px); }
 .nk-virtual-cell.nk-revealed .nk-ach-card { opacity: 1; transform: none; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: var(--reveal-delay, 0ms); }
 .nk-virtual-grid .nk-ach-card__icon,
@@ -204,15 +178,12 @@
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-ach-card { animation: nk-card-fade 0.25s ease backwards; }
 .nk-no-reveal .nk-virtual-cell .nk-ach-card { opacity: 1; transform: none; animation: none; }
 
-/* 无障碍：减少动态 → 禁用入场动画 */
 @media (prefers-reduced-motion: reduce) {
   .nk-ach-card { animation: none; }
   .nk-virtual-cell .nk-ach-card { opacity: 1; transform: none; }
   .nk-virtual-cell.nk-revealed .nk-ach-card { animation: none; }
 }
 
-/* ─── 响应式：<768 竖卡形态（2 列紧凑，手机惯例）───
-   竖卡 = head 行（编号 + 菱形）+ 标题 2 行 + 描述 4 行 + meta（系列图标 + 系列名） */
 @media (max-width: 767.98px) {
   .nk-ach-grid { --nk-grid-min: 140px; }
   .nk-ach-card { flex-direction: column; }

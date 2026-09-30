@@ -13,13 +13,11 @@ logger = logging.getLogger("converter")
 
 _text_map: dict[str, str] = {}
 
-
 def load_textmap() -> None:
     """加载 TextMap 到内存。"""
     global _text_map
     _text_map = load_json(TEXTMAP_FILE)
     logger.info("已加载 TextMap（%s 条）", len(_text_map))
-
 
 def clean_text(text: str) -> str:
     """清洗游戏内文本标签，返回纯文本。
@@ -36,35 +34,23 @@ def clean_text(text: str) -> str:
     if not text:
         return ""
 
-    # 替换占位符
     text = text.replace("{NICKNAME}", "开拓者")
     text = text.replace("{SPACE}", " ")
 
-    # 移除 RUBY 标签
     text = re.sub(r"\{RUBY_[EB]#(?:[^}]*)\}", "", text)
 
-    # <property type=XXX ...> → 友好属性名（自走棋羁绊/技能的效果属性引用）
-    # 原标签无内容、无闭合，直接删除会导致描述残缺（如“的和提高”丢失属性名）
-    # 相邻 property 标签组：检查后续文本是否已含属性名，避免重复
     text = _process_adjacent_properties(text)
     text = re.sub(r"<property\s+type=(\w+)[^>]*>", _property_label, text)
 
-    # 处理 <color=...>...</color> → 保留文字
     text = re.sub(r"<color=([^>]+)>", "", text)
     text = re.sub(r"</color>", "", text)
 
-    # 处理 <unbreak>...</unbreak> → 保留文字
     text = re.sub(r"</?unbreak>", "", text)
 
-    # 移除其他未知 HTML 标签（保留 <u> 标签用于下划线，如不需要可移除）
-    # 这里保留纯文字，移除所有标签
     text = re.sub(r"<[^>]+>", "", text)
 
     return text
 
-
-# <property type=XXX> 标签的属性名映射（去“提高”后缀，用名词形式以适配“的X和Y提高”句式）
-# key 为去末尾数字后缀后的属性类型（如 ExtraHPAddedRatio1 → ExtraHPAddedRatio）
 _PROPERTY_LABEL: dict[str, str] = {
     "ExtraAllDamageTypeAddedRatio": "全伤害",
     "ExtraHPAddedRatio": "生命增幅",
@@ -100,13 +86,11 @@ _PROPERTY_LABEL: dict[str, str] = {
     "ExtraShieldRatioBase": "护盾量",
 }
 
-
 def _property_label(match: "re.Match[str]") -> str:
     """<property type=XXX> → 友好属性名；未命中时回退到去后缀的 type 名。"""
     t = match.group(1)
-    base = re.sub(r"\d+$", "", t)  # 去末尾数字后缀（层级版本号）
+    base = re.sub(r"\d+$", "", t)
     return _PROPERTY_LABEL.get(base) or _PROPERTY_LABEL.get(t) or base
-
 
 def _property_label_from_tag(tag: str) -> str:
     """从完整 <property type=XXX ...> 标签提取属性名。"""
@@ -117,10 +101,7 @@ def _property_label_from_tag(tag: str) -> str:
     base = re.sub(r"\d+$", "", t)
     return _PROPERTY_LABEL.get(base) or _PROPERTY_LABEL.get(t) or base
 
-
-# 匹配一组紧密相邻的 property 标签（2个或以上）
 _ADJACENT_PROP_RE = re.compile(r"(?:<property\s+type=\w+[^>]*>){2,}")
-
 
 def _process_adjacent_properties(text: str) -> str:
     """处理相邻 property 标签组。
@@ -131,23 +112,16 @@ def _process_adjacent_properties(text: str) -> str:
     """
     def _replace_group(m: re.Match[str]) -> str:
         group = m.group(0)
-        # 提取组内所有属性名
         labels = [_property_label_from_tag(t) for t in re.findall(r"<property\s+[^>]+>", group)]
-        # 查看组后文本（到下一个标签或字符串结尾）
         after = text[m.end():]
         after_text_match = re.match(r"([^<]*)", after)
         after_text = after_text_match.group(1) if after_text_match else ""
-        # 取后续文本中到第一个标点前的部分作为“共享标签”
         shared = re.split(r"[。；，、！？\.]", after_text)[0]
         if shared and any(lbl and lbl in shared for lbl in labels):
-            # 后续文本已含属性名，移除标签组（避免重复）
             return ""
-        # 后续无属性名文本，插入 labels 以 "/" 连接
         return "/".join(lbl for lbl in labels if lbl)
 
     return _ADJACENT_PROP_RE.sub(_replace_group, text)
-
-
 
 def resolve_text(ref: Any, clean: bool = True) -> str:
     """解析文本引用，支持 Hash 对象和字面量字符串。
@@ -166,7 +140,6 @@ def resolve_text(ref: Any, clean: bool = True) -> str:
 
     result = ""
 
-    # 空字典 / 无 Hash 的字典：视为空引用
     if isinstance(ref, dict):
         if "Hash" in ref:
             key = str(ref["Hash"])
@@ -174,21 +147,17 @@ def resolve_text(ref: Any, clean: bool = True) -> str:
         else:
             return ""
 
-    # 字面量字符串
     elif isinstance(ref, str):
         if not ref:
             return ""
-        # 先直接查 TextMap
         if ref in _text_map:
             result = _text_map[ref]
         else:
-            # 未命中，计算 xxhash64 再查
             h = xxhash.xxh64(ref).intdigest()
             key = str(h)
             if key in _text_map:
                 result = _text_map[key]
             else:
-                # 都未命中，返回原文
                 result = ref
 
     else:

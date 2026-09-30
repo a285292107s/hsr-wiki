@@ -1,12 +1,3 @@
-/**
- * 站点注册表一致性测试
- *
- * 路由（router/index.ts）、导航（components/nav-items.ts）、目录配置（catalog/pages.ts）
- * 三者彼此独立维护，本测试锁定漂移：
- * - 导航项 path / activePaths 必须能解析到已注册路由
- * - catalog 路由的 meta.catalog 必须存在于 CATALOG_PAGES，且 meta.title 与配置标题一致
- * - 每个 CATALOG_PAGES 注册项必须至少有一条路由暴露
- */
 import { describe, it, expect } from 'vitest';
 import { createNkRouter } from '../index';
 import { CATALOG_PAGES } from '../../catalog/pages';

@@ -1,7 +1,3 @@
-/**
- * 目录卡片 3D 倾斜特效（mousemove 事件委托 + rAF 节流）。
- * 通过 --rx/--ry CSS 变量驱动，仅用于非虚拟网格（虚拟网格窗口随滚动重建，tilt 状态会丢失）。
- */
 import { onScopeDispose, type Ref } from 'vue';
 
 export interface CardTilt {

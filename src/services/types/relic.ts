@@ -1,7 +1,6 @@
 /** 遗器相关数据类型（套装列表/详情 + 主副词条 + 来历） */
 
-/* ─── relicset/{id}.json（CDN 兼容结构） ─── */
-
+/* relicset/{id}.json（CDN 兼容结构） */
 export interface RelicSetData {
   name?: string;
   /** 图标路径（取末段数字 → itemfigures/{id}.webp） */
@@ -11,7 +10,7 @@ export interface RelicSetData {
   [k: string]: unknown;
 }
 
-/* ─── 本地遗器数据（converter 输出） ─── */
+/* 本地遗器数据（converter 输出） */
 
 /** 遗器套装列表条目 */
 export interface LocalRelicEntry {
@@ -75,8 +74,9 @@ export interface RelicPieceStory {
   name: string;
   /** 短描述（题记） */
   desc: string;
-  /** 完整来历（保留 \\n 与 <i> 标签，前端转 <br> 渲染） */
+  /** 完整来历（保留 \n 与 <i> 标签，前端转 <br> 渲染） */
   story: string;
 }
+
 /** set_id → { piece_type → RelicPieceStory } */
 export type RelicStoriesMap = Record<string, Record<string, RelicPieceStory>>;

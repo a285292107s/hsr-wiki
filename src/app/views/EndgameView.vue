@@ -1,11 +1,4 @@
 <script setup lang="ts">
-/**
- * 终局赛季详情页（编排层）
- * 结构：Hero（模式铭牌 + 赛季信息 + HUD 指标条）/ 赛季增益 / 关卡层级章节
- *   （每层：推荐属性 + 敌方配置 + 可用增益 + 挑战目标）/ 星启模式 / 相邻赛季导航
- * 面板组件（EndgameHero/Buffs/Peak/Tierce/Floors）各自内聚派生与折叠状态机；
- * 本文件保留：加载编排、章节导航（sections.ts 单一事实源）、滚动追踪、相邻赛季。
- */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { seasonPosterTabUrl } from '../catalog/pages/endgame';
@@ -22,13 +15,11 @@ import EndgameBuffs from '../endgame/EndgameBuffs.vue';
 import EndgamePeak from '../endgame/EndgamePeak.vue';
 import EndgameTierce from '../endgame/EndgameTierce.vue';
 import EndgameFloors from '../endgame/EndgameFloors.vue';
-// 终局详情页专属样式（随本路由 chunk 懒加载）
 import '../../styles/endgame-detail.css';
 
 const route = useRoute();
 
 
-/** mode → 赛季列表加载器（与目录页 api 同源） */
 const MODE_LOADERS: Record<string, () => Promise<MazeListDb>> = {
   maze: loadLocalMazeList,
   story: loadLocalStoryList,
@@ -39,13 +30,10 @@ const MODE_LOADERS: Record<string, () => Promise<MazeListDb>> = {
 const phase = ref<'loading' | 'error' | 'ready'>('loading');
 const error = ref<string | null>(null);
 const data = ref<MazeListEntry | null>(null);
-/** 当前模式赛季列表（相邻导航取相邻赛季 arts.poster_tab 缩略图） */
 const listDb = ref<MazeListDb | null>(null);
-/** 当前赛季在列表中的位置（供"上一赛季 / 下一赛季"导航） */
 const seasonIndex = ref(-1);
 const seasonKeys = ref<string[]>([]);
 
-/** 延迟显示骨架屏：加载超过阈值才呈现，缓存命中的快速切换不闪骨架屏 */
 const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 
 async function load(mode: string, id: string): Promise<void> {
@@ -71,8 +59,6 @@ async function load(mode: string, id: string): Promise<void> {
     data.value = entry;
     seasonIndex.value = keys.indexOf(id);
     document.title = `${entry.zh} - ${SITE_NAME}`;
-    // 下一帧再切换 ready，避免 loading 骨架闪烁；随后 nextTick 等正文 DOM 就绪，
-    // 重置滚动、刷新滚动追踪（区块激活态；面板组件内折叠状态机随数据自行初始化）。
     // 后台标签页 rAF 会被浏览器暂停导致永久骨架屏：visibility hidden 时用 setTimeout 兜底推进
     const settleReady = (): void => {
       phase.value = 'ready';
@@ -104,19 +90,12 @@ watch(
   },
 );
 
-/* ═══════════ 派生 ═══════════ */
-
 const modeKey = computed(() => String(route.params.mode || ''));
-/** 逐层章节（以关卡层级为章节名的完整内容；倒序：最高层在前）
- *  全模式全量展示（重构后不再"仅最后一层"回退），配合折叠交互控制页面长度 */
 const floorSections = computed(() => [...(data.value?.floor_details || [])].reverse());
-/** 异相仲裁关卡组成（3 骑士试炼 + 1 王棋最终关，含绝境变体） */
 const peakLevels = computed<PeakLevelInfo[]>(() => data.value?.levels || []);
 
-/** 章节导航（吸顶条）与面板编号同源：sections.ts 单一事实源 */
 const navSections = computed(() => buildEndgameSections(data.value, modeKey.value, peakLevels.value));
 
-/** 相邻赛季导航（排期开始降序；与目录页同序；posterTab 为相邻赛季海报页签缩略图） */
 const prevSeason = computed(() => {
   const i = seasonIndex.value;
   if (i <= 0 || !listDb.value) return null;
@@ -131,8 +110,6 @@ const nextSeason = computed(() => {
   if (!key) return null;
   return { key, href: `/endgame/${modeKey.value}/${key}`, posterTab: listDb.value[key]?.arts?.poster_tab };
 });
-
-/* ═══════════ 吸顶工具条（章节导航 + 阅读进度线 + 返回顶部） ═══════════ */
 
 const pageRef = ref<HTMLElement | null>(null);
 const { activeId, progress, showTop, jumpTo, scrollTop, refresh } = useScrollSpy(
@@ -167,7 +144,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- ─── 错误态 ─── -->
     <div v-else-if="phase === 'error'" class="nk-error-state">
       <div class="nk-error-state__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
@@ -180,9 +156,7 @@ onBeforeUnmount(() => {
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
 
-    <!-- ─── 正文 ─── -->
     <template v-else-if="data">
-      <!-- 吸顶工具条：章节导航 + 阅读进度线（fixed 视口级，近实底） -->
       <div class="nk-egd-bar">
         <div class="nk-egd-bar__inner">
           <nav class="nk-secnav nk-egd-secnav" aria-label="内容区块导航">
@@ -203,7 +177,6 @@ onBeforeUnmount(() => {
         <div class="nk-egd-bar__progress" :style="{ width: `${progress}%` }"></div>
       </div>
 
-      <!-- 返回顶部（滚动超过阈值出现） -->
       <button
         v-show="showTop"
         class="nk-top-btn"
@@ -214,28 +187,20 @@ onBeforeUnmount(() => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
 
-      <!-- Hero：模式铭牌 + 赛季信息（横幅优先，无横幅回退背景图） -->
       <EndgameHero :data="data" :mode-key="modeKey" />
 
-      <!-- 内容面板 -->
       <div class="nk-panels nk-egd-body">
         <div class="nk-egd-panel">
-          <!-- 战意机制 + 赛季增益 -->
           <EndgameBuffs :data="data" :mode-key="modeKey" />
 
-          <!-- 异相仲裁关卡组成 -->
           <EndgamePeak :data="data" :peak-levels="peakLevels" />
 
-          <!-- 数据空态提示（无星启 / 无层级 / 无关卡组成时） -->
           <div v-if="!data.tierce && !floorSections.length && !peakLevels.length" class="nk-egd-empty">本赛季暂无关卡数据</div>
 
-          <!-- 星启模式 -->
           <EndgameTierce :data="data" :mode-key="modeKey" />
 
-          <!-- 关卡层级 -->
           <EndgameFloors :data="data" :mode-key="modeKey" :floor-sections="floorSections" />
 
-          <!-- 相邻赛季导航（含海报页签缩略图 poster_tab：虚构/末日/仲裁有，忘却之庭无则不渲染） -->
           <nav v-if="prevSeason || nextSeason" class="nk-egd-nav" aria-label="相邻赛季">
             <router-link
               v-if="prevSeason"

@@ -1,6 +1,3 @@
-/**
- * 应用级状态：版本信息 / 物品库 / 名称缓存 / Toast 队列
- */
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { loadManifest, loadLocalVersion, resolveVersion, loadLocalItemDb } from '../../services/api';
@@ -17,17 +14,12 @@ export interface ToastItem {
 }
 
 export const useAppStore = defineStore('app', () => {
-  /** 当前数据版本（manifest.hsr.latest） */
   const version = ref('');
   const latestVersion = ref('');
   const versions = ref<string[]>([]);
-  /** 游戏版本（本地 version.json，converter 从子模块 git 提交解析） */
   const gameVersion = ref('');
-  /** 大版本标签（version.json 的 version_label，如 "4.6"）：首页「本版本上新」的唯一版本判据（ADR 0019 决策 3） */
   const versionLabel = ref('');
-  /** 物品数据库（item.json） */
   const itemDb = ref<ItemDb>({});
-  /** id → 名称（光锥/遗器套装/角色） */
   const nameCache = ref<NameCache>({});
   const toasts = ref<ToastItem[]>([]);
   let toastSeq = 0;
@@ -35,10 +27,8 @@ export const useAppStore = defineStore('app', () => {
   let manifestFailedAt = 0;
   const MANIFEST_COOLDOWN_MS = 60_000;
 
-  /** 加载 manifest 并设置版本（幂等：SPA 生命周期内只请求一次；CDN 不可用时静默回退） */
   async function initManifest(): Promise<void> {
     if (latestVersion.value) return;
-    // CDN 不可用（健康探测判定 / 最近失败冷却期内）：立即返回，不发 15s 超时请求
     if (isCdnDown() || Date.now() - manifestFailedAt < MANIFEST_COOLDOWN_MS) return;
     try {
       const m = await loadManifest();
@@ -47,12 +37,9 @@ export const useAppStore = defineStore('app', () => {
       latestVersion.value = version.value;
     } catch {
       manifestFailedAt = Date.now();
-      // CDN 不可用：静默回退，不阻塞页面加载
     }
   }
 
-  /** 加载游戏版本 + 大版本标签（本地 version.json；两者同一次加载，拆分加载会让首页标题与判据版本漂移）。
-   *  未生成/失败静默回退（两个字段保持空串，页面仍可用）。 */
   async function initVersion(): Promise<void> {
     if (gameVersion.value || versionLabel.value) return;
     try {
@@ -60,11 +47,9 @@ export const useAppStore = defineStore('app', () => {
       gameVersion.value = v.game_version || '';
       versionLabel.value = v.version_label || '';
     } catch {
-      // 本地 JSON 缺失：静默回退，页面仍可用
     }
   }
 
-  /** 确保物品库就绪（失败回退空对象，不阻塞页面） */
   async function ensureItems(): Promise<void> {
     if (Object.keys(itemDb.value).length) return;
     await initManifest();
@@ -78,8 +63,6 @@ export const useAppStore = defineStore('app', () => {
   function mergeNames(names: NameCache): void {
     nameCache.value = { ...nameCache.value, ...names };
   }
-
-  /* ─── Toast ─── */
 
   function toast(type: ToastType, message: string, duration = 3500): void {
     toasts.value.push({ id: ++toastSeq, type, message, duration });

@@ -1,14 +1,4 @@
 <script setup lang="ts">
-/**
- * Spine 导入审核面板（SpineDebugView 的 Tab 之一）：
- * 全量 spine-manifest 条目批量体检（skel / official / official-scene），三级自动诊断：
- *   L0 静态：URL 可达性 + atlas 纹理映射对照（零 WebGL）
- *   L1 解析：骨架元数据提取（动画/皮肤/slot/附件/混合模式）
- *   L2 渲染：串行单实例渲染检查 + 像素采样（official 逐动画；skel/场景降级仅默认动画）
- * 人工只需浏览异常项 → 展开详情看资源表/纹理对照/元数据/采样 → 预览动画确认 → 按诊断建议修复。
- * 本文件仅承担队列编排与面板框架；审核引擎在 src/app/debug/spine-audit.ts，
- * 展开详情（含预览生命周期）在 src/app/debug/SpineAuditDetail.vue。
- */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { loadSpineManifests, resolveSpine } from '../../services/api';
 import type { SpineResolved } from '../../services/types';
@@ -19,8 +9,6 @@ import {
   AuditEntry, AuditKind, buildDiagnosis, classifyStatus,
   createAuditEntry, resetAuditEntry, auditRender, auditStaticResources,
 } from './spine-audit';
-
-/* ─── 常量与状态 ─── */
 
 const KIND_LABEL: Record<AuditKind, string> = {
   skel: 'NANOKA 源',
@@ -64,7 +52,6 @@ const grouped = computed(() => {
   return g;
 });
 
-/** 组内状态统计（组头迷你徽章） */
 function groupState(kind: AuditKind): { fail: number; warn: number; pass: number } {
   const list = grouped.value[kind];
   let fail = 0, warn = 0, pass = 0;
@@ -86,7 +73,6 @@ function badgeText(e: AuditEntry): string {
   }
 }
 
-/** 行内错误摘要（截断） */
 function shortErrors(e: AuditEntry): string {
   return e.errors
     .map((t) => (t.includes('HTTP ') ? t.slice(0, t.indexOf(':')) : t))
@@ -94,12 +80,9 @@ function shortErrors(e: AuditEntry): string {
     .slice(0, 120);
 }
 
-/* ─── 审核队列 ─── */
-
 async function buildEntries(): Promise<AuditEntry[]> {
   const { official, nanoka } = await loadSpineManifests();
   const list: AuditEntry[] = [];
-  // 官方源（优先）：official / official-scene 条目
   for (const [key, v] of Object.entries(official?.entries ?? {})) {
     if (v.kind === 'official') {
       list.push(createAuditEntry(key, 'official', Object.keys(v.textures)[0] ?? '—', 'official'));
@@ -107,7 +90,6 @@ async function buildEntries(): Promise<AuditEntry[]> {
       list.push(createAuditEntry(key, 'official-scene', key, 'official'));
     }
   }
-  // nanoka 源（回退）：skel 条目，label 加前缀便于与官方条目区分
   for (const [key, v] of Object.entries(nanoka?.entries ?? {})) {
     list.push(createAuditEntry(key, 'skel', `[nanoka] ${v.name}`, 'nanoka'));
   }
@@ -120,11 +102,10 @@ async function runQueue(list: AuditEntry[]): Promise<void> {
     for (const e of list) {
       while (paused.value && !cancelled) await sleep(200);
       if (cancelled) break;
-      resetAuditEntry(e); // 重跑前清空旧结果，防 errors/frames 叠加重复计数
+      resetAuditEntry(e);
       e.status = 'running';
       let resolved: SpineResolved | null = null;
       try {
-        // 按条目所属源强制解析（nanoka 条目不被官方优先拦截）
         resolved = await resolveSpine(e.key, e.source);
       } catch {
         resolved = null;
@@ -161,7 +142,6 @@ async function startAudit(): Promise<void> {
   await runQueue(entries.value);
 }
 
-/** 仅重跑异常条目（fail / warn），保留已 pass 的结果 */
 async function rerunIssues(): Promise<void> {
   if (running.value) return;
   cancelled = false;
@@ -175,16 +155,12 @@ function togglePause(): void {
   paused.value = !paused.value;
 }
 
-/** 停止审核：置取消标志并解除暂停阻塞，队列在下一检查点退出（在途渲染自然走完） */
 function stopAudit(): void {
   cancelled = true;
   paused.value = false;
 }
 
-/* ─── 详情下钻（预览生命周期由 SpineAuditDetail 子组件自管理） ─── */
-
 const detailResolved = ref<SpineResolved | null>(null);
-/** 详情代际令牌：解析在途时若被后续展开/收起抢占，过期结果丢弃 */
 let detailEpoch = 0;
 
 async function toggleDetail(e: AuditEntry): Promise<void> {
@@ -196,12 +172,11 @@ async function toggleDetail(e: AuditEntry): Promise<void> {
   const epoch = ++detailEpoch;
   let resolved: SpineResolved | null = null;
   try {
-    // 按条目所属源解析（nanoka 条目不被官方优先拦截）
     resolved = await resolveSpine(e.key, e.source);
   } catch {
     resolved = null;
   }
-  if (epoch !== detailEpoch) return; // 已被后续操作抢占，丢弃过期结果
+  if (epoch !== detailEpoch) return;
   detailResolved.value = resolved;
   expandedKey.value = e.key;
 }
@@ -212,12 +187,9 @@ function closeDetail(): void {
   expandedKey.value = null;
 }
 
-/** 预览 WebGL 上下文占用变化 → 汇总至顶部 GL 配额徽章 */
 function onPreviewGlChange(delta: number): void {
   glAlive.value += delta;
 }
-
-/* ─── 报告导出 ─── */
 
 async function exportReport(): Promise<void> {
   const report = {
@@ -241,14 +213,12 @@ async function exportReport(): Promise<void> {
   if (await copyText(text)) {
     toast('success', '审核报告已复制到剪贴板');
   } else {
-    // 剪贴板不可用时下载文件兜底
     downloadJson(report, `spine-audit-${Date.now()}.json`);
     toast('success', '剪贴板不可用，报告已下载为 JSON');
   }
 }
 
 onMounted(async () => {
-  // 仅预加载条目清单（不自动开跑，人工确认后点「开始审核」）
   try {
     entries.value = await buildEntries();
   } catch {
@@ -258,7 +228,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   cancelled = true;
-  closeDetail(); // 详情子组件卸载时自行释放预览 WebGL 上下文
+  closeDetail();
 });
 </script>
 
@@ -350,7 +320,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* ─── 头部工具栏：抬升墨色 sheet；max-width 与其余板块同宽对齐 ─── */
 .nk-spine-audit__toolbar {
   display: flex;
   align-items: center;
@@ -378,7 +347,7 @@ onBeforeUnmount(() => {
 .nk-spine-audit__chip.is-ok { color: #b7f2bd; border-color: rgba(127, 224, 138, 0.45); background: rgba(127, 224, 138, 0.12); }
 .nk-spine-audit__chip.is-fail { color: #ffb3b3; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.14); }
 .nk-spine-audit__chip.is-warn { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
-.nk-spine-audit__chip--gl { opacity: 0.55; } /* 次要监控信息：弱化不抢主状态注意力 */
+.nk-spine-audit__chip--gl { opacity: 0.55; }
 .nk-spine-audit__chip--gl.is-fail { opacity: 1; }
 .nk-spine-audit__bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .nk-spine-audit__progress-text {
@@ -411,7 +380,6 @@ onBeforeUnmount(() => {
   word-break: break-all;
 }
 
-/* ─── 筛选行 ─── */
 .nk-spine-audit__filters {
   display: flex;
   align-items: center;
@@ -424,7 +392,6 @@ onBeforeUnmount(() => {
   font-size: 12px;
   color: #ffd9a3;
 }
-/* 「仅异常」为审核台核心操作（人工只看异常项），开启态用主色暖板强化（无霓虹） */
 .nk-spine-audit__btn.is-toggle.is-on {
   border-color: var(--primary);
   color: var(--primary);
@@ -432,7 +399,6 @@ onBeforeUnmount(() => {
   background: color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
-/* ─── 分组面板：整组抬升为墨色 sheet，头部 + 条目行同板；max-width 与其余板块同宽 ─── */
 .nk-spine-audit__group { max-width: 1480px; margin-bottom: 18px; }
 .nk-spine-audit__panel {
   border: 1px solid var(--nk-sheet-border);
@@ -477,7 +443,6 @@ onBeforeUnmount(() => {
 .nk-spine-audit__group-state.is-warn { color: #ffd9a3; border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.1); }
 .nk-spine-audit__group-state.is-ok { color: #b7f2bd; border-color: rgba(127, 224, 138, 0.4); background: rgba(127, 224, 138, 0.1); }
 
-/* ─── 条目行 ─── */
 .nk-spine-audit__row {
   position: relative;
   display: flex;
@@ -489,7 +454,6 @@ onBeforeUnmount(() => {
   transition: background 0.15s;
 }
 .nk-spine-audit__row:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
-/* 左侧状态条：异常强信号，PASS 弱化避免绿色噪声 */
 .nk-spine-audit__bar {
   position: absolute;
   left: 0; top: 0; bottom: 0;
@@ -568,7 +532,6 @@ onBeforeUnmount(() => {
 .nk-spine-audit__badge.is-pending { color: var(--text3); background: color-mix(in srgb, var(--text) 10%, transparent); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); }
 .nk-spine-audit__caret { color: var(--text3); font-size: 10px; flex: none; }
 
-/* ─── 通用控件 ─── */
 .nk-spine-audit__select {
   padding: 3px 8px;
   max-width: 220px;
@@ -598,7 +561,6 @@ onBeforeUnmount(() => {
 .nk-spine-audit__btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 .nk-spine-audit__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
 .nk-spine-audit__btn.is-danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.12); }
-/* 主操作按钮：暖板 CTA（无霓虹、无渐变）。hover 深一档暖板 + 墨色浮起 */
 .nk-spine-audit__btn.is-primary {
   border-color: var(--primary);
   background: color-mix(in srgb, var(--primary) 20%, transparent);
@@ -613,7 +575,6 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 560px) {
-  /* 移动端行内仅保留身份 + 徽章：错误摘要与耗时折叠进详情 */
   .nk-spine-audit__err { display: none; }
   .nk-spine-audit__ms { display: none; }
   .nk-spine-audit__row { gap: 8px; padding: 8px 10px 8px 12px; }

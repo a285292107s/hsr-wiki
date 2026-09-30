@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * 概览面板：角色档案（CV）+ 总属性加成 diff + TALENTS 附加能力 diff + 角色故事手风琴。
- * 一句话介绍位于 Hero 面板头部下方（CharHero）；基础属性已迁出至 00 属性区块（StatsPanel）。
- * 平铺布局下通过 sections 渲染区块子集（各区块可独立排列在页面序列中）。
- * openStory 状态由面板内部持有（加载期父模板整体卸载，切换角色自动重置）。
- */
 import { computed, ref } from 'vue';
 import { extraTerms } from './utils';
 import { escHtml, fmtDesc, iconUrl } from '../../lib/format';
@@ -18,13 +12,10 @@ type OverviewSection = 'profile' | 'bonuses' | 'talents' | 'stories';
 const props = withDefaults(
   defineProps<{
     d: CharacterData;
-    /** 渲染区块子集（平铺拆分布局用；默认全部） */
     sections?: OverviewSection[];
   }>(),
   { sections: () => ['profile', 'bonuses', 'talents', 'stories'] },
 );
-
-/* ─── 档案 / 故事 ─── */
 
 interface ProfileRow { label: string; value: string }
 const profileRows = computed<ProfileRow[]>(() => {
@@ -62,11 +53,8 @@ function toggleStory(key: string): void {
   openStory.value = openStory.value === key ? null : key;
 }
 
-/* ─── 总属性加成（行迹树聚合） ─── */
-
 interface AttrBonus { name: string; v: string; icon: string }
 
-/** 聚合行迹树全部节点的 status_add_list（同 property 求和） */
 function aggregateBonuses(
   trees: Record<string, Record<string, SkillTree>> | undefined,
 ): Map<string, { name: string; sum: number }> {
@@ -91,7 +79,6 @@ function fmtBonus(type: string, sum: number): string {
   return `+${Math.round(sum * 1000) / 10}%`;
 }
 
-/** 总属性加成：行迹树属性节点汇总 */
 const attrBonuses = computed<AttrBonus[]>(() => {
   const agg = aggregateBonuses(props.d.skill_trees);
   return [...agg.entries()].map(([type, b]) => {
@@ -103,8 +90,6 @@ const attrBonuses = computed<AttrBonus[]>(() => {
     };
   });
 });
-
-/* ─── TALENTS 附加能力 ─── */
 
 interface Ability {
   /** 行迹点 ID（唯一标识：作渲染 key；缺失时回退 name） */
@@ -150,7 +135,7 @@ const abilities = computed<Ability[]>(() => {
     <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.bonuses }}</span>STAT BONUSES</h2>
     <div class="nk-bonus-grid">
       <div v-for="b in attrBonuses" :key="b.name" class="nk-bonus">
-        <img v-if="b.icon" class="nk-bonus__icon" :src="b.icon" loading="lazy">
+        <img v-if="b.icon" class="nk-bonus__icon" :src="b.icon" alt="" loading="lazy">
         <span class="nk-bonus__val">{{ b.v }}</span>
         <span class="nk-bonus__name">{{ b.name }}</span>
       </div>
@@ -164,7 +149,7 @@ const abilities = computed<Ability[]>(() => {
       class="nk-ability"
     >
       <div class="nk-skill__title-row">
-        <img v-if="ab.icon" class="nk-skill__icon" :src="ab.icon">
+        <img v-if="ab.icon" class="nk-skill__icon" :src="ab.icon" alt="">
         <div class="nk-skill__title">
           <span class="nk-skill__name">{{ ab.name }}</span>
           <span class="nk-skill__tag">附加能力 {{ ab.idx + 1 }}</span>
@@ -186,7 +171,12 @@ const abilities = computed<Ability[]>(() => {
         :key="s.key"
         :class="['nk-story', { 'nk-story--open': openStory === s.key }]"
       >
-        <button class="nk-story__head" type="button" @click="toggleStory(s.key)">
+        <button
+          class="nk-story__head"
+          type="button"
+          :aria-expanded="openStory === s.key"
+          @click="toggleStory(s.key)"
+        >
           <span class="nk-story__num">{{ String(s.idx).padStart(2, '0') }}</span>
           <span class="nk-story__label">角色档案 · {{ s.idx }}</span>
           <span class="nk-story__arrow"></span>

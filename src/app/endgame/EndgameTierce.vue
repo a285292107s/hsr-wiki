@@ -1,8 +1,4 @@
 <script setup lang="ts">
-/**
- * 终局赛季详情 · 星启模式面板（独立进阶关卡：星启弱点 / 目标 / Boss）。
- * 节点/波次折叠状态机本地化（默认全部展开，仅记录「已折叠」条目）。
- */
 import { computed, ref, watch } from 'vue';
 import { buildEndgameSections, sectionIdxMap } from './sections';
 import {
@@ -18,7 +14,6 @@ const props = defineProps<{
   modeKey: string;
 }>();
 
-/** 板块编号（与吸顶条导航同源：sections.ts 单一事实源） */
 const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, [])));
 
 const tierceDamage = computed<string[]>(() => props.data.tierce?.damage_types || []);
@@ -30,7 +25,6 @@ const tierceMonsters = computed(() => props.data.tierce?.monsters || []);
 /** 星启 3 节点敌方（节点 1/2 = 常规最高难度关上下半场；节点 3 = 星启附加关） */
 const tierceNodes = computed(() => props.data.tierce?.nodes || []);
 
-/** 物品库 id → {name, icon}（星启通关奖励映射；loadLocalItems 共享单例去重） */
 const itemMap = ref<Map<number, Pick<LocalItemEntry, 'name' | 'icon'>>>(new Map());
 /** 星启通关奖励（EGEEJLHBALB：物品 id + 数量，经 items.json 映射名称/图标） */
 const tierceRewards = computed(() => {
@@ -45,13 +39,11 @@ watch(
     if (!t) return;
     loadLocalItems()
       .then((list) => { itemMap.value = new Map(list.map((it) => [it.id, { name: it.name, icon: it.icon }])); })
-      .catch(() => { /* 失败降级空表：奖励名称回退 #id，不阻塞正文 */ });
+      .catch(() => {});
   },
   { immediate: true },
 );
 
-/* ═══════════ 星启节点 / 波次折叠状态机 ═══════════
- * 默认全部展开；仅记录「已折叠」的条目，未命中视为展开（无需初始化键集）。 */
 const collapsedNodes = ref<Set<string>>(new Set());
 const collapsedWaves = ref<Set<string>>(new Set());
 function nodeKey(ni: number): string { return `n${ni}`; }
@@ -76,7 +68,6 @@ function toggleWave(ni: number, wi: number): void {
   <template v-if="data.tierce">
     <h2 id="egd-tierce" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['tierce'] }}</span>星启模式 STARLIT</h2>
     <div class="nk-egd-tierce">
-      <!-- 星启节点指标：推荐属性 / 等级 / 回合 / 分数（副注把内部计数翻译成玩家语义） -->
       <div v-if="tierceDamage.length || tierceLevel || tierceCountdown || tierceScore != null" class="nk-egd-tierce__stats">
         <div v-if="tierceDamage.length" class="nk-egd-tierce__stat">
           <span class="nk-egd-tierce__val nk-egd-tierce__val--elems" v-html="elemRow(tierceDamage)"></span>
@@ -95,8 +86,6 @@ function toggleWave(ni: number, wi: number): void {
           <span class="nk-egd-tierce__label">分数限制 SCORE</span>
         </div>
       </div>
-      <!-- 星启目标：整场星启挑战的评价条件（分数档/剩余轮数/减员限制），
-           与 3 个节点（敌方配置）正交，非节点级条件 -->
       <ol v-if="tierceTargets.length" class="nk-egd-tierce__targets">
         <li v-for="(t, i) in tierceTargets" :key="i" class="nk-egd-node">
           <span
@@ -108,9 +97,6 @@ function toggleWave(ni: number, wi: number): void {
           <span class="nk-egd-node__text" v-html="targetHtml(t)"></span>
         </li>
       </ol>
-      <!-- 星启敌方：3 节点各自挑战（节点 1/2 = 常规最高难度关上下半场；节点 3 = 星启附加关），
-           节点内按波次分组的完整信息卡
-           分组层级：节点 = 外层章节卡（左模式色竖条 + HUD 角标 + 整头可折叠）；波 = 中层分组容器（L 刻度线 + 级联色条 + 头可折叠）；敌 = 内层内容卡 -->
       <ul v-if="tierceNodes.length" class="nk-egd-tierce__waves" aria-label="星启节点列表">
         <li
           v-for="(nd, ni) in tierceNodes"
@@ -118,7 +104,6 @@ function toggleWave(ni: number, wi: number): void {
           class="nk-egd-tierce__node"
           :class="{ 'nk-egd-tierce__node--collapsed': !isNodeExpanded(ni) }"
         >
-          <!-- 节点卡片头（按钮：点击切换整个节点折叠） -->
           <button
             type="button"
             class="nk-egd-tierce__nodehead"
@@ -131,7 +116,6 @@ function toggleWave(ni: number, wi: number): void {
             <span class="nk-egd-tierce__nodesummary" :title="nodeSummary(nd)">{{ nodeSummary(nd) }}</span>
             <svg class="nk-egd-tierce__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
-          <!-- 节点卡片体（waves 容器，grid-rows 折叠过渡）；折叠时 inert 移出焦点序 -->
           <div
             class="nk-egd-tierce__nodebody"
             :id="`egd-node-${ni}-body`"
@@ -146,7 +130,6 @@ function toggleWave(ni: number, wi: number): void {
                 class="nk-egd-tierce__wave"
                 :class="{ 'nk-egd-tierce__wave--collapsed': !isWaveExpanded(ni, gi) }"
               >
-                <!-- 波次头部（永远可见：分组标签 + 敌数摘要；多波时显示，单波时仍展示精简版标签用于层级一致） -->
                 <button
                   type="button"
                   class="nk-egd-tierce__wavehead"
@@ -159,7 +142,6 @@ function toggleWave(ni: number, wi: number): void {
                   <span class="nk-egd-tierce__wavesummary" :title="`${g.items.length} 敌`">× {{ g.items.length }} 敌</span>
                   <svg class="nk-egd-tierce__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
-                <!-- 波次体：敌方卡片网格（折叠过渡）；折叠时 inert 移出焦点序 -->
                 <div
                   class="nk-egd-tierce__wavebody"
                   :id="`egd-wave-${ni}-${gi}-body`"
@@ -178,11 +160,9 @@ function toggleWave(ni: number, wi: number): void {
           </div>
         </li>
       </ul>
-      <!-- 兼容：无 nodes 时回退 tierceMonsters 直接渲染 -->
       <div v-else-if="tierceMonsters.length" class="nk-egd-mons">
         <EnemyCard v-for="m in tierceMonsters" :key="m.id" :monster="m" />
       </div>
-      <!-- 通关奖励（仅虚构叙事：EGEEJLHBALB 每期固定，与 score 通关分数线对应） -->
       <div v-if="tierceRewards.length" class="nk-egd-reward">
         <div class="nk-egd-reward__head">
           <span class="nk-egd-reward__label">通关奖励</span>

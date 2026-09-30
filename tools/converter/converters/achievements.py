@@ -16,11 +16,8 @@ from utils import load_json, save_json, unwrap_value
 
 logger = logging.getLogger("converter")
 
-# {TEXTJOIN#54} 跨文本引用占位符
 _TEXTJOIN_RE = re.compile(r"\{TEXTJOIN#(\d+)\}")
-# #1[i] 数值参数占位符（[i] 整数 / [f1] 一位小数；可带 % 后缀）
 _PARAM_RE = re.compile(r"#(\d+)\[([a-z0-9]+)\](%?)")
-
 
 def _load_textjoin() -> dict[int, str]:
     """构建 TEXTJOIN 索引：TextJoinID → 默认形态文本（DefaultItem → TextJoinItem → TextMap）。
@@ -44,7 +41,6 @@ def _load_textjoin() -> dict[int, str]:
         out[tid] = item_text.get(default, "")
     return out
 
-
 def _expand_textjoin(text: str, textjoin: dict[int, str]) -> str:
     """替换 {TEXTJOIN#id} 为默认形态文本；无对应配置时保留原占位符。"""
 
@@ -53,7 +49,6 @@ def _expand_textjoin(text: str, textjoin: dict[int, str]) -> str:
         return text_get if text_get else m.group(0)
 
     return _TEXTJOIN_RE.sub(_replace, text)
-
 
 def _fill_params(text: str, param_list: list) -> str:
     """替换 #n[i] 参数占位符为 ParamList[n-1] 数值。
@@ -68,7 +63,6 @@ def _fill_params(text: str, param_list: list) -> str:
         val = param_list[idx]
         if val is None:
             return m.group(0)
-        # 整数占位：[i] 取整；浮点占位：[f1] 保留一位小数
         if m.group(2) == "i":
             display = str(int(val)) if isinstance(val, (int, float)) else str(val)
         else:
@@ -77,14 +71,11 @@ def _fill_params(text: str, param_list: list) -> str:
 
     return _PARAM_RE.sub(_replace, text)
 
-
 def _format_desc(text: str, param_list: list, textjoin: dict[int, str]) -> str:
     """描写处理流水线：TEXTJOIN 展开 → 参数替换 → 字面 \n 转真实换行。"""
     text = _expand_textjoin(text, textjoin)
     text = _fill_params(text, [unwrap_value(p) for p in param_list])
-    # 源数据中换行为字面 \n（JSON 双反斜杠转义）→ 转真实换行（前端 pre-line 渲染）
     return text.replace(r"\n", "\n")
-
 
 def _parse_achievement(item: dict, textjoin: dict[int, str]) -> dict:
     """单条成就记录 → achievements.json 条目。"""
@@ -101,10 +92,8 @@ def _parse_achievement(item: dict, textjoin: dict[int, str]) -> dict:
         "rarity": item.get("Rarity", ""),
         "series_id": item.get("SeriesID", 0),
         "priority": item.get("Priority", 0),
-        # None → 常显；ShowAfterFinish → 完成后显示；HiddenDesc → 隐藏描述
         "show_type": item.get("ShowType") or "",
     }
-
 
 def _series_icon(icon_path: str) -> str:
     """系列图标路径 → CDN 文件名（去扩展名）。
@@ -114,7 +103,6 @@ def _series_icon(icon_path: str) -> str:
     if not icon_path:
         return ""
     return Path(icon_path).stem
-
 
 def _parse_series(item: dict) -> dict:
     """单条系列记录 → achievement_series.json 条目。"""
@@ -126,22 +114,18 @@ def _parse_series(item: dict) -> dict:
         "priority": item.get("Priority", 0),
     }
 
-
 def convert() -> None:
     """转换成就数据 → achievements.json + achievement_series.json。"""
     textjoin = _load_textjoin()
 
-    # ─── 系列 ───
     series_data = load_json(EXCEL_DIR / "AchievementSeries.json")
     series = [_parse_series(s) for s in series_data]
     series.sort(key=lambda s: s["priority"])
     series_by_id = {s["id"]: s for s in series}
     save_json(series, OUTPUT_DIR / "achievement_series.json")
 
-    # ─── 成就 ───
     ach_data = load_json(EXCEL_DIR / "AchievementData.json")
     achievements = [_parse_achievement(a, textjoin) for a in ach_data]
-    # 游戏内顺序：系列按 Priority 升序，系列内按成就 Priority 降序
     achievements.sort(key=lambda a: (
         series_by_id.get(a["series_id"], {}).get("priority", 999),
         -a["priority"],

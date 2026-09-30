@@ -1,8 +1,3 @@
-/**
- * dead-links.ts 死链审核引擎纯函数测试
- * 仅测纯逻辑（URL 收集 / 缓存计划 / 探测分类 / 队列并发）；真实网络探测由审核台人工运行。
- * URL 断言与真实构造函数输出比对（引擎与 Node 版 tools/dead-links.test.ts 同源）。
- */
 import { describe, expect, it, vi } from 'vitest';
 import {
   CacheFile,
@@ -35,7 +30,6 @@ import {
 import { SLOT_INDEX } from '../../../lib/constants';
 import { cdnUri } from '../../../services/cdn';
 
-/** mock 数据覆盖 collectUrls 全部来源分支（字段结构与 converter 输出对齐） */
 function mockData(): DataMap {
   return {
     'characters.json': [{ id: 1001, element: 'Ice', path: 'Knight' }],
@@ -77,12 +71,9 @@ describe('collectUrls', () => {
     expect(urls.get(avatarDrawCardUrl(1001))).toBe('characters.json#1001.drawcard');
     expect(urls.get(elementIconUrl('Ice'))).toBe('characters.json#1001.element');
     expect(urls.get(pathIconUrl('Knight'))).toBe('characters.json#1001.path');
-    // 技能：SkillIcon 字段优先
     expect(urls.has(skillIconUrl({ type: 'Normal', icon: 'SkillIcon_1001_Normal.png' } as never, '1001', null))).toBe(true);
-    // 星魂：展示图标 + buff 栏 icon（legacy 短路径）
     expect(urls.get(eidolonIconUrl('1001', '1'))).toBe('characters/1001.json#rank1');
     expect(urls.has(iconUrl('icon/skill/Avatar/1001/SkillIcon_1001_Rank1.png'))).toBe(true);
-    // 附加能力
     expect(urls.has(iconUrl('SpriteOutput/AvatarSkill/1001/AbilityIcon.png'))).toBe(true);
   });
 
@@ -93,7 +84,7 @@ describe('collectUrls', () => {
     expect(urls.has(monsterIconUrl('Monster_1002011'))).toBe(true);
     expect(urls.has(monsterFigureUrl('Monster_1002011'))).toBe(true);
     expect(urls.has(itemIconUrl('icon/items/1.png'))).toBe(true);
-    expect(urls.has(itemIconUrl('icon/items/3.png'))).toBe(true); // maze 终局奖励
+    expect(urls.has(itemIconUrl('icon/items/3.png'))).toBe(true);
     expect(urls.has(gridFightEquipIconUrl('SpriteOutput/GridFight/Equipment/350101.png'))).toBe(true);
     expect(urls.has(gridFightIconUrl('SpriteOutput/GridFight/GridItem/Box1.png'))).toBe(true);
     expect(urls.has(gridFightTraitIconUrl('SpriteOutput/TraitIcon/Icon/1001.png'))).toBe(true);
@@ -110,7 +101,6 @@ describe('collectUrls', () => {
 
   it('https 绝对 URL 全量扫描（皮肤图等，来源标签为 文件#直接键）', () => {
     const urls = collectUrls(mockData());
-    // scanAbs 递归时来源标签只记直接键（'skin.url' 记作 'url'），与 Node 版一致
     expect(urls.get('https://act-webstatic.mihoyo.com/puzzle/skin/1001.png')).toBe('characters/1001.json#url');
   });
 
@@ -120,7 +110,6 @@ describe('collectUrls', () => {
     data['characters/1001.json'] = { skills: null, ranks: null };
     expect(() => collectUrls(data)).not.toThrow();
     const urls = collectUrls(data);
-    // 详情文件为 null 时无 figure URL；icon URL 仍由 monsters.json（同 URL 去重）提供
     expect(urls.has(monsterFigureUrl('Monster_1002011'))).toBe(false);
     expect(urls.get(monsterIconUrl('Monster_1002011'))).toBe('monsters.json#1002011.icon');
   });
@@ -152,7 +141,7 @@ describe('planProbe（缓存复用判定）', () => {
     const p = planProbe(urls, cache, { 'characters.json': 'old-hash', 'currency/equipment.json': 'eq-hash' }, now, false);
     expect(p.reuseCount).toBe(3);
     expect(p.toProbe).toEqual([]);
-    expect(p.results['https://cdn.jsdelivr.net/b.png'].status).toBe('dead'); // 死链也复用（防反复回源）
+    expect(p.results['https://cdn.jsdelivr.net/b.png'].status).toBe('dead');
 
     const changed = planProbe(urls, cache, { 'characters.json': 'NEW-hash', 'currency/equipment.json': 'eq-hash' }, now, false);
     expect(changed.toProbe).toContain('https://cdn.jsdelivr.net/a.png');
@@ -164,8 +153,8 @@ describe('planProbe（缓存复用判定）', () => {
     const cache: CacheFile = {
       sourceHashes: { 'characters.json': 'h' },
       entries: {
-        'https://cdn.jsdelivr.net/a.png': { status: 'env', ts: now - 2 * 24 * 3600 * 1000 }, // 过期
-        'https://cdn.jsdelivr.net/b.png': { status: 'ok', ts: now - 5 * 24 * 3600 * 1000 }, // 有效
+        'https://cdn.jsdelivr.net/a.png': { status: 'env', ts: now - 2 * 24 * 3600 * 1000 },
+        'https://cdn.jsdelivr.net/b.png': { status: 'ok', ts: now - 5 * 24 * 3600 * 1000 },
       },
     };
     const p = planProbe(urls, cache, { 'characters.json': 'h' }, now, false);
@@ -189,7 +178,6 @@ describe('probeUrl', () => {
     (async () => {
       const next = responses.shift();
       if (next instanceof Error) throw next;
-      // 断言调用次数与 responses 匹配（超出则按 500 处理，避免类型 undefined）
       return { ok: (next?.status ?? 500) >= 200 && (next?.status ?? 500) < 300, status: next?.status ?? 500 } as Response;
     }) as unknown as typeof fetch;
 
@@ -206,7 +194,7 @@ describe('probeUrl', () => {
   it('429/503 退避重试后成功 → ok；三次仍限流 → env', async () => {
     const sleepMock = vi.fn(noSleep);
     expect(await probeUrl('u', mkFetch([{ status: 429 }, { status: 503 }, { status: 200 }]), sleepMock)).toBe('ok');
-    expect(sleepMock).toHaveBeenCalledTimes(2); // 两次退避
+    expect(sleepMock).toHaveBeenCalledTimes(2);
     expect(await probeUrl('u', mkFetch([{ status: 429 }, { status: 429 }, { status: 429 }]), noSleep)).toBe('env');
   });
 
@@ -247,12 +235,12 @@ describe('runAudit（并发与停止）', () => {
     const run = runAudit(target, 3, control, { onResult: (u) => seen.push(u) }, fetchImpl);
     setTimeout(() => { control.stopped = true; }, 30);
     await run;
-    expect(seen.length).toBeLessThan(20); // 中途停止，未探测全部
+    expect(seen.length).toBeLessThan(20);
   });
 
   it('暂停挂起队列，恢复后继续', async () => {
     const fetchImpl = (async () => {
-      await new Promise((r) => setTimeout(r, 5)); // 每探测 5ms，确保暂停时序有效
+      await new Promise((r) => setTimeout(r, 5));
       return { ok: true, status: 200 } as Response;
     }) as unknown as typeof fetch;
     const control = { stopped: false, paused: false };
@@ -262,7 +250,7 @@ describe('runAudit（并发与停止）', () => {
     setTimeout(() => {
       const mid = done;
       setTimeout(() => {
-        expect(done).toBe(mid); // 暂停期间无新结果
+        expect(done).toBe(mid);
         control.paused = false;
       }, 120);
     }, 100);
@@ -290,7 +278,6 @@ describe('prepareAudit（数据加载 + 内容签名）', () => {
     const result = await prepareAudit({ fetchImpl, sha1Impl: sha1 });
     expect(result.dataFileCount).toBe(2);
     expect(result.urls.has(avatarShopIconUrl(1001))).toBe(true);
-    // sha1 对来源文件文本（与 Node 版 readFileSync 字节一致）计算
     expect(result.sourceHashes['characters.json']).toBe(`sha1:${files['characters.json'].length}`);
     expect(sha1).toHaveBeenCalledWith(files['characters.json']);
   });
@@ -308,7 +295,7 @@ describe('computeSourceHashes', () => {
     const urls = new Map([
       ['https://cdn.jsdelivr.net/a.png', 'characters.json#x'],
       ['https://static.nanoka.cc/b.webp', 'currency/equipment.json#y'],
-      ['https://act-webstatic.mihoyo.com/c.png', 'field-value'], // 非 .json 来源忽略
+      ['https://act-webstatic.mihoyo.com/c.png', 'field-value'],
     ]);
     const texts = new Map<string, string>([['characters.json', 'a'], ['currency/equipment.json', 'b']]);
     const sha1 = async (t: string) => `H(${t})`;
@@ -316,7 +303,6 @@ describe('computeSourceHashes', () => {
       'characters.json': 'H(a)',
       'currency/equipment.json': 'H(b)',
     });
-    // currency/equipment.json 未读到 → unreadable（不参与复用判定）
     const missing = new Map<string, string>([['characters.json', 'a']]);
     expect(await computeSourceHashes(urls, missing, sha1)).toEqual({
       'characters.json': 'H(a)',

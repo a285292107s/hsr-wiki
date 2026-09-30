@@ -2,7 +2,7 @@
 /**
  * 文档链接与引用一致性检查器（CI 门禁；断链/误删引用即退出 1）。
  * 扫描 README/AGENTS/CONTEXT.md、docs/**、tools/converter/README.md、spine-lab 下的 md；
- * 排除 node_modules/dist/temp/vendor/.agents/public/缓存 与自动生成的 DATA_CATALOG.md(3.4万行)。
+ * 排除 node_modules/dist/temp/vendor/.agents/public/缓存 与自动生成的 DATA_CATALOG.md。
  * 检查项：① 断链([text](path)/图片/反引号路径，目录/http(s)/mailto/锚点跳过)；
  * ② 误删引用(HEAD 有、工作区无→报错，同名迁移给建议路径)；③ 重复(sha256 全等或 Jaccard≥0.8)。
  * 用法：node tools/check-doc-links.mjs [--verbose|--report|--strict]。
@@ -101,7 +101,6 @@ const BT_PATH_RE = /`([^`\n]+)`/g;
  * 归一化候选引用：
  * - 去掉 #锚点 与 ?query，解码 %20 等
  * - 丢弃外链、纯锚点、含通配/占位符的模板路径
- * @returns {{target:string, anchor:boolean}|null}
  */
 const normalize = (raw, anchor) => {
   let s = raw.trim();

@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * 设置页(/settings 与 /currency/settings，按 meta.cw 切常规/CW 语境)：
- * 常规强调色(setAccent→<html data-accent>，tokens.css [data-accent] 重映射 --th-*)、CW 主题色(setCwAccent→data-cw-accent，仅 data-theme="cw" 生效)、开拓者形态(默认女，CW 切立绘)。
- * 布局家族(v2 反模板化)：头部「当前主题档案签」(名+色阶三点+中位hex，来自 theme.ts/cw-theme.ts swatch 禁止写死)；区块编号固定 01 常规/02 CW/03 形态(禁止语境交换)。
- * 文案分级：可写=生效范围/缺省值/即时保存/形态对内容影响；禁止进文案=data-accent/data-cw-accent/语境(meta.cw)/主题档案/黑金外壳/localStorage；hex 标注为 swatch 真实值允许。
- */
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { ACCENTS, DEFAULT_ACCENT, getSavedAccent, setAccent, type AccentKey } from '../../lib/theme';
@@ -18,7 +12,6 @@ import {
 } from '../../lib/trailblazer';
 
 const route = useRoute();
-/** 当前是否为货币战争语境（/currency/settings）：驱动头部描述与档案签语境；区块顺序不随语境变化 */
 const inCw = computed(() => !!route.meta.cw);
 
 const current = ref<AccentKey>(getSavedAccent());
@@ -35,9 +28,6 @@ function chooseCw(key: SwatchKey): void {
   cwCurrent.value = key as CwAccentKey;
 }
 
-/** 主题色选择区配置（01 常规 / 02 CW 数据驱动渲染，消除双区同构模板）：
- *  onChoose 依赖「items 与回调同型」配对约束，键值断言由该约束保证——
- *  禁止把某区 items 与另一区回调混配 */
 type SwatchKey = AccentKey | CwAccentKey;
 interface SwatchSection {
   id: string;
@@ -45,10 +35,8 @@ interface SwatchSection {
   title: string;
   listboxLabel: string;
   items: ReadonlyArray<{ key: SwatchKey; label: string; swatch: readonly [string, string, string] }>;
-  /** 读取当前键（ref 闭包，模板渲染时求值保持响应式） */
   currentValue: () => SwatchKey;
   onChoose: (key: SwatchKey) => void;
-  /** 缺省键与缺省提示（仅当前键 === 缺省键时展示） */
   defaultKey: SwatchKey;
   defaultHintText: string;
 }
@@ -70,7 +58,6 @@ const accentSections: SwatchSection[] = [
   },
 ];
 
-/** 开拓者形态选项（性别符号 + 名称；默认女性） */
 const GENDER_OPTIONS: ReadonlyArray<{ key: TrailblazerGender; label: string; icon: string }> = [
   { key: 'female', label: '女性开拓者', icon: '♀' },
   { key: 'male', label: '男性开拓者', icon: '♂' },
@@ -83,19 +70,16 @@ function chooseGender(gender: TrailblazerGender): void {
   currentGender.value = gender;
 }
 
-/* ─── 头部档案签：当前语境激活主题的档案数据（swatch 三点 + 中位 hex） ─── */
 const activeProfile = computed(() => {
   const table = inCw.value ? CW_ACCENTS : ACCENTS;
   const key = inCw.value ? cwCurrent.value : current.value;
   return table.find((a) => a.key === key) ?? table[0];
 });
 
-/** 头部描述随语境切换（玩家语言：影响范围 + 即时生效，不写机制词） */
 const headDesc = computed(() => (inCw.value
   ? '调整货币战争模式的主色调。只对本模式生效，普通模式配色保持不变。'
   : '调整全站主色调与开拓者形象。选择即时生效并自动保存，与货币战争模式各有独立配色，互不影响。'));
 
-/** 对勾徽章路径（stroke-dasharray 入画动画，见 CSS） */
 const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 </script>
 
@@ -182,7 +166,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 </template>
 
 <style scoped>
-/* ─── 页面骨架：左侧避让导航条（与 Spine Lab 研究线同语言） ─── */
 .nk-settings {
   padding: 24px;
   font-family: var(--font-body);
@@ -192,7 +175,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   .nk-settings { margin-left: var(--nk-content-offset); }
 }
 
-/* ─── 头部：左文案 + 右「当前主题档案签」（真实 swatch 数据驱动） ─── */
 .nk-settings__head {
   max-width: 1480px;
   margin-bottom: 30px;
@@ -234,7 +216,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   line-height: 1.7;
   color: var(--text2);
 }
-/* 档案签：HUD 参数面板质感（墨底 + 细描边 + 采样色点） */
 .nk-settings__tag {
   display: flex;
   flex-direction: column;
@@ -276,13 +257,10 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   color: var(--text3);
 }
 
-/* ─── 区块：三区块直列同父（相邻兄弟选择器统一管理间距；顺序固定不随语境变化） ─── */
 .nk-settings__section { max-width: 1480px; }
 .nk-settings__section + .nk-settings__section { margin-top: 34px; }
-/* 标题行复用全局 .nk-title 原语（HUD 大写 + 编号 + 延伸线），仅收口底部距 */
 .nk-settings__section .nk-title { margin-bottom: 16px; }
 
-/* ─── 主题选择：大色板卡（材料感渐变板 + 对勾徽章 + hex 标注） ─── */
 .nk-settings__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -311,7 +289,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   border-color: var(--nk-shell-active-border);
   background: color-mix(in srgb, var(--primary) 12%, transparent);
 }
-/* 色板：色阶 300→400→500 渐变 + 釉面高光 + 墨色内描边 */
 .nk-swatch__plate {
   position: relative;
   height: 56px;
@@ -332,7 +309,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 }
 .nk-swatch:hover .nk-swatch__plate { filter: brightness(1.07); }
 .nk-swatch:active .nk-swatch__plate { transform: scale(0.98); }
-/* 对勾徽章：墨底圆徽 + 主色对勾，stroke 入画动画（状态切换时勾线画出） */
 .nk-swatch__badge {
   position: absolute;
   top: 8px;
@@ -362,7 +338,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   transition: stroke-dashoffset 0.3s var(--nk-ease-out) 0.04s;
 }
 .nk-swatch--on .nk-swatch__badge path { stroke-dashoffset: 0; }
-/* 名称 + hex：悬停/选中时 hex 跟进主色亮端 */
 .nk-swatch__meta {
   display: flex;
   align-items: baseline;
@@ -379,7 +354,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 }
 .nk-swatch--on .nk-swatch__hex { color: color-mix(in srgb, var(--metric-val) 80%, transparent); }
 
-/* ─── 开拓者形态：名录横条二选一（与全局侧栏激活语言同源：档案竖条 + 淡底） ─── */
 .nk-seg {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -402,7 +376,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 }
 .nk-seg__opt + .nk-seg__opt { border-left: 1px solid var(--nk-sheet-item-border); }
 .nk-seg__opt:hover { background: var(--nk-shell-hover); color: var(--text); }
-/* 激活档案竖条：左侧主色短竖线（与 .ui-sidebar-link--active 语言同源） */
 .nk-seg__opt--on { background: var(--nk-shell-active-bg); color: var(--metric-val); }
 .nk-seg__opt--on::before {
   content: '';
@@ -453,7 +426,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 }
 .nk-seg__opt--on .nk-seg__mark { background: var(--primary); opacity: 1; }
 
-/* ─── 提示行：主色竖线标注（默认状态 / 语境说明） ─── */
 .nk-settings__hint {
   display: flex;
   align-items: center;

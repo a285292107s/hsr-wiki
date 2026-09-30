@@ -1,14 +1,3 @@
-/**
- * Spine 骨骼动画查看器编排层（薄层）
- *
- * 仅自主渲染（ADR 0002/0009）：引擎层实现见 src/spine/
- * （types 契约 / runtime 运行时加载 / config URL 构造 / player 单实例 / scene 场景渲染器 / registry 注册表）。
- * 本文件只保留业务编排：
- * - 清单解析与源回退（resolveSpine 官方优先 → 渲染失败强制回退 nanoka）
- * - 单角色查看器（initSpineViewer）：按 `player:{spineKey}` 精确释放
- * - 多层场景（initSpineSceneViewer）：全量层挂载；断点切换由视图层 v-if + dispose 重建
- * 资源路径：skel 为 static.nanoka.cc/assets/hsr/spine/{charId}/{name}.skel|.atlas
- */
 import { resolveSpine, spineRuntimeFor } from '../../services/api';
 import type { SpineResolved } from '../../services/types';
 import { buildOfficialConfig } from '../../spine/config';
@@ -22,7 +11,7 @@ import type { SpineRuntimeVersion } from '../../spine/types';
 const PLAYER_KEY = (spineKey: string): string => `player:${spineKey}`;
 
 /**
- * 初始化 Spine 查看器（纯自主渲染）。
+ * 初始化 Spine 查看器。
  * @param container 播放器挂载容器（.nk-hero__spine）
  * @param spineKey 清单条目键（角色 ID 或场景标识如 home-bg）
  * @param onReady 动画就绪回调（视图层据此点亮切换按钮 / 压暗背景）
@@ -45,13 +34,7 @@ export function initSpineViewer(
 
 /**
  * 初始化多层场景 Spine（official-scene 条目，如 home-bg 群像场景）。
- * **预留能力：当前无生产消费方**（ADR 0018 移除枢纽页 Hero 媒体层后，唯一调用方 HomeView 已退场）。
- * 保留原因：它是「多层场景挂载」的生产形态入口，调试验收台 SpineKvSection 走的是同一条
- * createScenePipeline，语义一致；若日后恢复任何场景 Hero，从这里接回即可。
- * **恢复前先改 ADR 0018**；在无消费方期间，禁止据本函数推断任何页面的实际渲染行为。
- * 场景渲染细节见 spine/scene.ts（单画布多骨架 + 固定舞台 cover 适配）；
- * 本层负责：清单解析 → 运行时就绪 → 全量层场景挂载。
- * 断点切换不在此处理：视图层以 v-if 卸载 + 本函数返回的清理函数释放后重新挂载。
+ * **预留能力：当前无生产消费方**。
  * @param container 场景挂载容器（内部自建舞台 + 单画布）
  * @param sceneKey 清单条目键（如 home-bg）
  * @param onReady 场景就绪回调（视图层据此点亮切换按钮 / 压暗背景）
@@ -119,7 +102,6 @@ async function renderPlayer(
   return player !== null;
 }
 
-/** 自主 Spine 渲染：manifest 解析 → 运行时加载 → SpinePlayer 实例化 */
 function renderSpineSelf(
   container: HTMLElement,
   charId: string,

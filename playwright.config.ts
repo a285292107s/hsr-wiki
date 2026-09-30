@@ -2,27 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 import os from 'node:os';
 import path from 'node:path';
 
-/**
- * Playwright e2e / 布局验收层（AGENTS.md「验证流程」的自动化落地）
- *
- * 定位：把 T1b/T2 的「一次性 CDP 取证」固化为可重复的测试基线——
- * - toHaveCSS / 溢出检测 → T1b 布局结构变更
- * - toHaveText / toHaveCount / toMatchAriaSnapshot → T2 模板与数据流
- * - toHaveScreenshot → L4 像素基线（本地 Percy，基线提交 git，-u 更新）
- * - @axe-core/playwright → a11y 维度（新增能力空白）
- * - console / pageerror 监听 → CDN 404 / JS 异常自动守卫
- *
- * Vercel 为静态托管：webServer 直接起 vite dev server，无需任何视觉平台。
- * 单 Chromium 起步（多浏览器使截图基线 ×3 且易 flaky，官方亦建议单浏览器起步）。
- */
 export default defineConfig({
   testDir: './e2e',
-  // 测试产物（失败截图/trace）放系统临时目录：适配 WorkBuddy safe-delete shim——
-  // shim 对 OS 临时目录下的删除走原生直删（shouldUseNativeDelete 豁免通道），
-  // 而项目内路径会走回收站 trash，genie-trash 在 Windows 文件占用时会 fail-closed 抛错
-  // 导致 playwright 清理 outputDir 中止。产物为诊断临时物，放 temp 不损失价值。
   outputDir: path.join(os.tmpdir(), 'hsr-wiki-e2e-results'),
-  // 截图基线随 git 提交；本地开发用 --update-snapshots 刷新
   snapshotPathTemplate: './e2e/snapshots/{testFilePath}/{arg}{ext}',
   fullyParallel: false,
   retries: process.env.CI ? 2 : 0,
@@ -39,23 +21,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      // 移动端布局守护（P1-2）：只跑 layout（溢出/结构/console 守卫），
-      // 不跑 visual 像素基线（避免基线 ×2 维护成本）与 a11y（视口不影响，避免重复扫描成本）
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'] },
       testIgnore: [/visual\.spec\.ts/, /accessibility\.spec\.ts/],
-      // 跳过自行 setViewportSize 的用例：其视口由用例钉死，在两个 project 下重复执行同一断言。
-      // 必须用静态标签（collect 期过滤）——动态 annotation 对 grepInvert 无效。
-      // 已知残留（勿当缺陷修）：这类用例在 mobile 侧不再走 Pixel 7 的 `hasTouch`/`isMobile`
-      // 能力分支；当前它们只断言尺寸/间距/圆角/字号等宽度驱动值，能力分支无差异。
-      // 有意留一条不带标签的宽度敏感用例（layout.spec.ts「手机（<768px）：调试台入口隐藏」）
-      // 作 `isMobile` + `<meta name="viewport">` 契约的哨兵——meta 缺失时 layout viewport 退回 980px，
-      // 该用例的 <768 断言会硬失败；其余留在 mobile 的用例对 980px 不敏感，不构成防线。
       grepInvert: /@viewport-pinned/,
     },
   ],
   webServer: {
-    // 复用已有 6188 实例（AGENTS.md：先探测端口复用），无实例才新起
     command: 'pnpm dev',
     url: 'http://localhost:6188',
     reuseExistingServer: !process.env.CI,

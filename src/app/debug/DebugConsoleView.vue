@@ -1,11 +1,4 @@
 <script setup lang="ts">
-/**
- * 研究线调试台（dev-only 路由 /debug，Spine Lab 迁入主站的入口页）：
- * 双 Tab 面板常驻(v-show)以保留各自运行状态——审核队列中途切 Tab 不丢结果;
- * KV 面板仅在激活 Tab 时加载场景。tab 状态经 URL query 同步（沿用研究线
- * query-state 自包含实现，不依赖 vue-router——见 lib/query-state.ts 头注释）。
- * 生产构建不注册本路由（router/index.ts DEV 分支），视图 chunk 随摇树移除。
- */
 import { onBeforeUnmount, ref } from 'vue';
 import SpineKvSection from './SpineKvSection.vue';
 import SpineAuditSection from './SpineAuditSection.vue';
@@ -34,7 +27,6 @@ function selectTab(id: TabId): void {
   setQueryParam('tab', id);
 }
 
-// 响应地址栏 / 外部导航的 ?tab= 变化(replaceState 写入与前进后退均触发)
 const unsubscribe = subscribeQueryChange(() => {
   const t: TabId = getQueryParam('tab') === 'audit' ? 'audit'
     : getQueryParam('tab') === 'deadlinks' ? 'deadlinks'
@@ -85,8 +77,6 @@ onBeforeUnmount(unsubscribe);
 </template>
 
 <style scoped>
-/* ─── 页面骨架：墨色控制台（研究级仪表）。主站文档流页面，≥768 内容区左避让侧栏 ───
-   底色非纯平黑：顶部主色微注入的弱径向晕营造纵深，替代霓虹发光的反 AI 味基调 ─── */
 .nk-spine-debug {
   padding: 28px;
   font-family: var(--font-body);
@@ -101,7 +91,6 @@ onBeforeUnmount(unsubscribe);
   .nk-spine-debug { margin-left: var(--nk-content-offset); }
 }
 
-/* ─── 头部：HUD 引导行 + 标题 + 说明 + 仪表 Tab ─── */
 .nk-spine-debug__head { max-width: 1480px; margin-bottom: 24px; }
 .nk-spine-debug__kicker {
   margin: 0 0 8px;
@@ -115,7 +104,6 @@ onBeforeUnmount(unsubscribe);
   color: var(--primary);
   text-transform: uppercase;
 }
-/* 引导行收尾一枚主色「原点」，把纯文字转为仪器刻度感 */
 .nk-spine-debug__kicker::after {
   content: '';
   flex: none;
@@ -141,7 +129,6 @@ onBeforeUnmount(unsubscribe);
   color: var(--text2);
 }
 
-/* 仪表 Tab：胶囊条承载，激活态=主色暖板 + 字重强化；摒弃生硬的分段盒 */
 .nk-spine-debug__tabs {
   display: inline-flex;
   gap: 4px;

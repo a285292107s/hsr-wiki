@@ -1,7 +1,6 @@
 <script setup lang="ts">
 /**
  * 00 属性面板：角色满级基础属性规格表 + 等级条。
- * 原 CharHero 属性区段迁出（Hero 以立绘展示为主），区块编号 00（见 sections.ts）。
  * 术语与图标均出自子仓库 AvatarPropertyConfig：PropertyName → TextMap 官方名称；
  * IconPath → SpriteOutput/UI/Avatar/Icon/Icon*.png，经 cdnUri trace 分类解析为 jsDelivr 路径。
  */
@@ -24,7 +23,6 @@ const TRACE_TAUNT_SVG =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 19.5 6v5.5c0 4.6-3.2 7.8-7.5 9.5-4.3-1.7-7.5-4.9-7.5-9.5V6z' fill='none' stroke='#fff' stroke-width='1.8' stroke-linejoin='round'/><path d='M12 8.5v6.5M9.5 10.5 12 8l2.5 2.5' fill='none' stroke='#fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
 
-/** 全部 8 项展示属性 */
 const stats = computed<Stat[]>(() => {
   const dd = props.d;
   const s = maxLevelStat(dd.stats);

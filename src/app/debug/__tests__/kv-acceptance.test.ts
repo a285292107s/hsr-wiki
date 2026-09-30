@@ -1,7 +1,3 @@
-/**
- * kv-acceptance.ts 验收判定引擎纯函数测试（判定阈值 / reasons 聚合 / 报告文本）
- * 像素采样（pixels.ts）依赖 canvas/WebGL，由人工验收台验证；此处仅测判定与报告逻辑。
- */
 import { describe, expect, it } from 'vitest';
 import {
   type AcceptSceneSnapshot,
@@ -12,7 +8,6 @@ import {
   nearBlackClass,
 } from '../kv-acceptance';
 
-/** 全绿快照基线：逐层 OK + 合并就绪 + 无缺失 + 正常近黑占比 */
 const okSnapshot = (over: Partial<AcceptSceneSnapshot> = {}): AcceptSceneSnapshot => ({
   key: 'home-bg',
   loadError: '',
@@ -35,7 +30,7 @@ describe('judgeAccept', () => {
     expect(item.reason).toBe('');
     expect(item.layerOk).toBe(2);
     expect(item.layerTotal).toBe(2);
-    expect(item.loadMs).toBe(200); // 各层 loadMs 求和
+    expect(item.loadMs).toBe(200);
     expect(item.durationMs).toBe(3210);
     expect(item.aborted).toBe(false);
   });

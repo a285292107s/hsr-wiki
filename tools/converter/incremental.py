@@ -16,18 +16,10 @@ logger = logging.getLogger("converter")
 
 STATE_FILE = Path(__file__).resolve().parent / ".converter-state.json"
 
-# 模块 → 依赖的源文件/目录（相对于 EXCEL_DIR 或绝对路径）
-# 目录类型会递归收集所有 .json 文件的 mtime+size
-# 注意：必须覆盖 converters/<module>.py 实际读取的全部源文件（含动态/可选加载），
-# 否则源数据变更不会触发该模块重跑。tests/test_incremental.py 通过 AST 扫描
-# 校验「代码中静态可见的 load_json 调用 ⊆ 本声明」，防止手写漂移。
-# 注意：characters / light_cones 另会读上一版输出 JSON（public/data/cn/characters.json 等）
-# 作 release_version 差集基线。该产物禁止写进本声明：它是这两个模块正要覆盖的产物，
-# 声明后签名每轮都变，增量缓存直接失效。
 MODULE_SOURCES: dict[str, list[str]] = {
     "paths": ["AvatarBaseType.json"],
     "elements": ["DamageType.json"],
-    "properties": [],  # 纯静态映射，无源文件依赖
+    "properties": [],
     "items": ["ItemConfig.json"],
     "characters": ["AvatarConfig.json", "AvatarConfigLD.json"],
     "character_detail": [
@@ -69,7 +61,6 @@ MODULE_SOURCES: dict[str, list[str]] = {
                  "StageConfig.json", "MonsterConfig.json", "MonsterCamp.json",
                  "MonsterSkillConfig.json", "ChallengeBadgeConfig.json",
                  "ChallengeBossMazeExtra.json", "ChallengeGeneralConfig.json"],
-    # 目录卡轻量文件：由全量 maze*.json（OUTPUT_DIR）派生，全量文件变更即重跑
     "endgame_catalog": [
         str(OUTPUT_DIR / "maze.json"),
         str(OUTPUT_DIR / "maze_extra.json"),
@@ -85,8 +76,6 @@ MODULE_SOURCES: dict[str, list[str]] = {
         "GridFightItems.json", "GridFightRoleRecommendEquip.json",
         "GridFightServantStar.json", "GridFightServantSkill.json",
         "GridFightBackSkillExtraDesc.json", "GridFightGenderOverride.json",
-        # 赛季代际差集基线（ADR 0020）：*Old 名册换代即改变 is_season_new，必须进依赖，
-        # 否则 ExistSeason 追加一代时 currency 不重跑，标记静默过期。
         "GridFightRoleBasicInfoOld.json",
     ],
     "currency_catalog": ["GridFightItems.json", "GridFightEquipment.json",
@@ -95,18 +84,14 @@ MODULE_SOURCES: dict[str, list[str]] = {
                           "GridFightRoleBasicInfo.json", "GridFightTraitBasicInfo.json",
                           "GridFightRolePropertyConfig.json",
                           "GridFightTraitLayer.json", "GridFightTraitMazebuff.json",
-                          # 赛季代际差集基线（ADR 0020）：羁绊名册换代 → traits.json 的 is_season_new 变化
                           "GridFightTraitLayerOld.json",
                           "GridFightTraitRemark.json", "GridFightAugment.json",
                           "GridFightConsumables.json", "GridFightForge.json",
                           "GridFightPortalBuff.json"],
     "achievements": ["AchievementData.json", "AchievementSeries.json",
                       "TextJoinConfig.json", "TextJoinItem.json"],
-    # 子模块 git 提交（无 ExcelOutput 文件依赖）：签名取 HEAD 提交哈希，
-    # 子模块更新即触发重跑；与文件依赖共用签名拼接，见 _git_sig
     "version": ["git:HEAD"],
 }
-
 
 def _file_sig(path: Path) -> str:
     """文件签名：mtime_ns:size（快速，无需读内容）。"""
@@ -116,7 +101,6 @@ def _file_sig(path: Path) -> str:
     except OSError:
         return "missing"
 
-
 def _dir_sig(directory: Path) -> str:
     """目录签名：所有 .json 文件签名拼接的 md5（跨进程稳定）。"""
     if not directory.exists():
@@ -125,7 +109,6 @@ def _dir_sig(directory: Path) -> str:
     for f in sorted(directory.rglob("*.json")):
         sigs.append(f"{f.name}:{_file_sig(f)}")
     return hashlib.md5("|".join(sigs).encode()).hexdigest()
-
 
 def _git_sig(spec: str) -> str:
     """git 引用签名：取子模块指定引用当前指向的提交哈希（子模块更新即变化）。"""
@@ -144,7 +127,6 @@ def _git_sig(spec: str) -> str:
         return "missing"
     return proc.stdout.strip()
 
-
 def _module_sig(module_name: str) -> str:
     """计算模块当前源数据签名。"""
     sources = MODULE_SOURCES.get(module_name, [])
@@ -152,9 +134,7 @@ def _module_sig(module_name: str) -> str:
         return "static"
 
     parts = []
-    # TextMap 始终参与签名（文本变更影响所有模块）
     parts.append(f"TextMap:{_file_sig(TEXTMAP_FILE)}")
-
     for src in sources:
         if src.startswith("git:"):
             parts.append(f"{src}:{_git_sig(src)}")
@@ -169,7 +149,6 @@ def _module_sig(module_name: str) -> str:
 
     return "|".join(parts)
 
-
 def load_state() -> dict[str, str]:
     """加载上次转换状态。"""
     if STATE_FILE.exists():
@@ -179,11 +158,9 @@ def load_state() -> dict[str, str]:
             pass
     return {}
 
-
 def save_state(state: dict[str, str]) -> None:
     """保存转换状态。"""
     STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-
 
 def should_skip(module_name: str, state: dict[str, str], force: bool = False) -> bool:
     """判断模块是否可跳过（源数据未变更）。"""
@@ -191,10 +168,8 @@ def should_skip(module_name: str, state: dict[str, str], force: bool = False) ->
         return False
     current = _module_sig(module_name)
     if current == "static":
-        # 无源文件依赖的模块：仅在首次运行时执行
         return module_name in state
     return state.get(module_name) == current
-
 
 def update_state(module_name: str, state: dict[str, str]) -> None:
     """模块转换成功后更新状态。"""

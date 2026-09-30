@@ -1,7 +1,3 @@
-/**
- * 目录页配置注册表
- * 各目录配置已拆分至 ./pages/ 子模块，本文件仅做聚合导出。
- */
 import type { CatalogPageConfig } from './types';
 import { characterPage } from './pages/character';
 import { lightconePage } from './pages/lightcone';
