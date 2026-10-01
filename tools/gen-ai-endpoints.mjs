@@ -9,7 +9,8 @@
  * （数据只从 public/data/cn/** 读，口径以 src/services/api|app/views|app/catalog/pages 为准）；
  * 把 SNAPSHOT_TEXT_LIMIT_* 截断改成全量输出；输出 # 或 JS 链接。
  * 必须：数据派生文本先 clean()（剥 <color=…>/<unbreak>/<u>/\n）再 esc()（HTML 转义，同前端 escHtml）；
- * 详情页含 h1 + 摘要 + 数据事实表 + 面包屑 + ≥3 条同类内链 + 数据最后更新，目录页含 h1 + 条目清单 + 更新时间。
+ * 详情页含 h1 + 摘要 + 数据事实表 + 面包屑 + ≥3 条同类内链 + 数据最后更新，目录页含 h1 + 条目清单 + 更新时间，
+ * 专题页（/voracity）含 h1 + 面包屑 + 分区 + 数据最后更新（非目录，故无 nk-snapshot__entry 条目标记）。
  */
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -54,6 +55,16 @@ const CATALOG_TITLE = {
   '/currency/augment': '货币战争 · 投资策略',
   '/currency/trait': '货币战争 · 羁绊图鉴',
 };
+
+/** 专题页 `/voracity` 的标题（与 src/app/router/index.ts 该路由 meta.title 逐字一致；非目录故不进 CATALOG_TITLE） */
+const VORACITY_TITLE = '贪饕污染';
+/**
+ * 专题页「污染」同形词说明（页面级自撰文案，源数据里没有这段文本）：来自 CONTEXT.md「污染」同形词节
+ * + ADR 0025 决策——本页说的是「贪饕」侵蚀污染，与 4.5 联动「圣杯战争 · 污染等级」无关联，
+ * 禁止合并叙述或互相内链。属契约 §3 的页面级合成文案，但**内容级文本必须与页面逐字一致**（非 chrome 级）。
+ */
+// 与 src/app/views/VoracityView.vue 的同形词说明逐字一致（契约：同一分区文本对所有 UA 一致）
+const VORACITY_DISAMBIGUATION = '本页「污染」指「贪饕」侵蚀污染；4.5 联动「命运/今晚留下来」的「圣杯战争 · 污染等级 1–7 / 深度污染 / 污染词条」是另一套无关体系，两者不合并叙述、也不互相内链。';
 
 /** 终局四模式（与 src/app/catalog/pages/endgame.ts ENDGAME_MODES 的 key/label 一致） */
 const ENDGAME_MODES = [
@@ -853,22 +864,37 @@ function monsterPages(ctx) {
         return `<li><span>${txt(s.name, null, 100)}${metaParts.length ? `（${txt(metaParts.join(' · '), null, 60)}）` : ''}</span><p>${txt(s.desc, s.param_list)}</p></li>`;
       })
       .join('');
+    /**
+     * 「贪饕」侵蚀标记与回链（ADR 0025）：怪物详情数据带可选块 `invaded` 时，输出事实行 + `/voracity` 内链。
+     * 判据 = **目录条目自身的详情文件**里该块是否存在（`monsters.json` 条目 → `monsters/{id}.json`）：
+     * 不按 id 白名单硬编码、也不枚举 `monsters/` 目录——该目录下的实例变体页（长号实例 ID）不在
+     * `monsters.json` 目录内，应用不展示、快照也不生成（实测 217 个详情文件带该块，其中仅 24 个是目录条目）。
+     * 等级取 `invaded.invasion_ids`，与页面「受『贪饕』侵蚀 · 等级 N」同口径；无该块的怪物不输出此行。
+     */
+    const facts = [
+      ['分类', txt(MON_RANK[d.rank] || d.rank, null, 40)],
+      ['阵营', txt(d.camp, null, 60)],
+      ['图鉴编号', esc(String(d.id))],
+      ['韧性', d.stance ? esc(String(d.stance)) : ''],
+      ['韧性弱点', esc(weak.join(' / '))],
+      ['伤害抗性', esc(resist.join(' / '))],
+      ['生命', d.stats ? esc(String(d.stats.hp)) : ''],
+      ['攻击', d.stats ? esc(String(d.stats.atk)) : ''],
+      ['防御', d.stats ? esc(String(d.stats.def)) : ''],
+      ['速度', d.stats ? esc(String(d.stats.speed)) : ''],
+    ];
+    if (d.invaded) {
+      const invadedLevels = (d.invaded.invasion_ids || []).filter((n) => n != null);
+      facts.push(['受『贪饕』侵蚀', [
+        invadedLevels.length ? `等级 ${esc(invadedLevels.join(' / '))}` : '',
+        `<a href="/voracity">${esc(VORACITY_TITLE)}</a>`,
+      ].filter(Boolean).join(' · ')]);
+    }
     const body = detailBody(ctx, {
       crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/monster'], '/monster'], [name, null]]),
       h1: name,
       summary: sourceSummary ? esc(cut(sourceSummary, 200)) : '',
-      facts: [
-        ['分类', txt(MON_RANK[d.rank] || d.rank, null, 40)],
-        ['阵营', txt(d.camp, null, 60)],
-        ['图鉴编号', esc(String(d.id))],
-        ['韧性', d.stance ? esc(String(d.stance)) : ''],
-        ['韧性弱点', esc(weak.join(' / '))],
-        ['伤害抗性', esc(resist.join(' / '))],
-        ['生命', d.stats ? esc(String(d.stats.hp)) : ''],
-        ['攻击', d.stats ? esc(String(d.stats.atk)) : ''],
-        ['防御', d.stats ? esc(String(d.stats.def)) : ''],
-        ['速度', d.stats ? esc(String(d.stats.speed)) : ''],
-      ],
+      facts,
       sections: [
         // 空 intro 时「图鉴记录」整段省略
         { title: '图鉴记录', html: sourceSummary ? `<p>${txt(d.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
@@ -1365,6 +1391,157 @@ function currencyTraitPages(ctx) {
   return pages;
 }
 
+/* ─── 专题页 `/voracity`（「贪饕污染」；ADR 0025 的第三种页面形态：非目录、非实体详情） ─── */
+
+/**
+ * 比例字段 → 百分比文本（专题页的进度类字段专用）：镜像页面 `src/app/views/VoracityView.vue` 的
+ * `ratioPct`/`fmtPct`——0~1 视为比例、>1 原样视为已是百分数、钳到 [0,100]、保留 1 位小数；
+ * `null`/非数值返回空串（该档不输出百分比）。用于 `progress_steps[*].progress` 与
+ * `activity.buff_levels[*].progress_percent`：数据事实必须与页面同口径（契约 §3「页面 ↔ 快照的对齐粒度」）。
+ */
+function pctText(v) {
+  if (v == null || !Number.isFinite(Number(v))) return '';
+  const n = Number(v);
+  return `${Math.round(Math.max(0, Math.min(100, n <= 1 ? n * 100 : n)) * 10) / 10}%`;
+}
+
+/**
+ * 专题页正文（契约 §3「专题页正文规则」）：数据全部来自 `voracity.json`（converter 的 voracity 模块单文件产物），
+ * 五块分区 + 「污染」同形词说明；**不使用** `nk-snapshot__entry`——该类名被契约 §3 冻结为
+ * 「12 个目录页 + 枢纽页的收录条目清单」，专题页的分区列表不是「应用收录条目集合」，标记它会把专题页
+ * 误计入条目级覆盖率断言（见 tools/check-ai-endpoints.mjs 检查 5 的注释）。JSON-LD 用 ldArticle：专题页不是目录，
+ * 不用 CollectionPage + ItemList。所有描述字段走 txtSafe——按 fmtDesc/fmtVal 口径展开 `#N[tag]%`，
+ * 缺参数展开不了的字段整段省略（守卫断言无残留 `#\d+\[…\]`）。
+ */
+function voracityPages(ctx) {
+  const db = readJson('voracity.json');
+  const activity = db.activity || {};
+  const invasion = db.invasion || {};
+  const levels = Array.isArray(invasion.levels) ? invasion.levels : [];
+  const stages = Array.isArray(invasion.stages) ? invasion.stages : [];
+  const buffLevels = Array.isArray(activity.buff_levels) ? activity.buff_levels : [];
+  const scores = Array.isArray(activity.scores) ? activity.scores : [];
+  const steps = Array.isArray(activity.progress_steps) ? activity.progress_steps : [];
+  const statuses = Array.isArray(db.statuses) ? db.statuses : [];
+  const tutorials = Array.isArray(db.tutorials) ? db.tutorials : [];
+  const affixes = Array.isArray(db.affixes) ? db.affixes : [];
+
+  /** 名称回退 = 数据自身的 id（禁止为无名条目合成实体文案；id 是数据字段） */
+  const nameOrId = (entry, key, fallbackKey) => txtSafe(entry && entry[key], null, 120)
+    || (entry && entry[fallbackKey] != null ? esc(String(entry[fallbackKey])) : '');
+
+  const monsterTotal = stages.reduce((n, st) => n + (Array.isArray(st && st.monsters) ? st.monsters.length : 0), 0);
+  const stageHtml = stages.map((st) => {
+    const monsters = (Array.isArray(st && st.monsters) ? st.monsters : []).map((m) => {
+      const name = txtSafe(m && m.name, null, 120) || (m && m.monster_id != null ? esc(String(m.monster_id)) : '');
+      // detail_id 非空才给真实内链；为空（认不出模板）输出纯文本，禁止造 `#` 链接
+      const href = m && m.detail_id != null && String(m.detail_id) !== '' ? `/monster/${m.detail_id}` : null;
+      const label = href ? `<a href="${esc(href)}">${name}</a>` : `<span>${name}</span>`;
+      return `<li>${label}</li>`;
+    }).join('');
+    const head = [
+      st && st.stage_id != null ? `关卡 ${esc(String(st.stage_id))}` : '',
+      st && st.invasion_id != null ? `侵蚀等级 ${esc(String(st.invasion_id))}` : '',
+    ].filter(Boolean).join(' · ');
+    if (!head && !monsters) return '';
+    return `<li>${head ? `<span>${head}</span>` : ''}${monsters ? `<ul class="nk-snapshot__list">${monsters}</ul>` : ''}</li>`;
+  }).join('');
+
+  const levelHtml = levels.map((lv) => {
+    const desc = txtSafe(lv && lv.desc, lv && lv.param_list, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(lv));
+    if (!desc) return '';
+    const head = lv && lv.invasion_id != null ? `侵蚀等级 ${esc(String(lv.invasion_id))}` : '';
+    return `<li>${head ? `<span>${head}</span>` : ''}<p>${desc}</p></li>`;
+  }).join('');
+  const buffHtml = buffLevels.map((b) => {
+    const name = nameOrId(b, 'name', 'buff_id');
+    const desc = txtSafe(b && b.desc, b && b.param_list, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(b));
+    // 愿力分档进度是数据事实（页面同处渲染）→ 有值必输出，标签沿用页面文案「愿力进度」；null 档不输出
+    const pct = pctText(b && b.progress_percent);
+    if (!name && !desc && !pct) return '';
+    const head = `${name}${b && b.level != null ? `（等级 ${esc(String(b.level))}）` : ''}`;
+    return `<li><span>${head}</span>${pct ? `<p>愿力进度 ${esc(pct)}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}</li>`;
+  }).join('');
+
+  const scoreHtml = scores.length ? `<p>愿力档位：${scores.map((s) => esc(String(s))).join(' / ')}</p>` : '';
+  /** 进度档位百分比：与页面 `fmtPct` 同口径（pctText），无值档不输出百分比 */
+  const stepHtml = steps.map((p) => {
+    const prog = pctText(p && p.progress);
+    const desc = txtSafe(p && p.desc, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
+    if (!prog && !desc) return '';
+    return `<li>${prog ? `<span>进度 ${esc(prog)}</span>` : ''}${desc ? `<p>${desc}</p>` : ''}</li>`;
+  }).join('');
+
+  const statusHtml = statuses.map((s) => {
+    const name = nameOrId(s, 'name', 'status_id');
+    const type = txtSafe(s && s.type, null, 40);
+    const desc = txtSafe(s && s.desc, s && s.param_list, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(s));
+    if (!name && !desc) return '';
+    return `<li><span>${name}${type ? `（${type}）` : ''}</span>${desc ? `<p>${desc}</p>` : ''}</li>`;
+  }).join('');
+
+  const tutorialHtml = tutorials.map((t) => {
+    const desc = txtSafe(t && t.desc, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
+    return desc ? `<li><p>${desc}</p></li>` : '';
+  }).join('');
+
+  const affixHtml = affixes.map((a) => {
+    const name = nameOrId(a, 'name', 'id');
+    const desc = txtSafe(a && a.desc, a && a.params, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(a));
+    if (!name && !desc) return '';
+    return `<li><span>${name}</span>${desc ? `<p>${desc}</p>` : ''}</li>`;
+  }).join('');
+
+  const activityName = clean(activity.name);
+  const introHtml = txtSafe(activity.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
+  const summaryPlain = `${SITE_NAME}贪饕污染专题：${activityName ? `${activityName}，` : ''}`
+    + '含污染等级与愿力、「贪饕」侵蚀（敌方强化与玩家支援）、波及关卡与被污染怪物、状态词条、教程图文与货币战争位面词条。';
+  const description = cut(summaryPlain, 150);
+  const body = detailBody(ctx, {
+    crumbs: crumbHtml([['首页', '/'], [VORACITY_TITLE, null]]),
+    h1: VORACITY_TITLE,
+    summary: '',
+    facts: [
+      ['活动', txtSafe(activity.name, null, 120)],
+      ['解锁任务', activity.unlock_mission_id != null ? esc(String(activity.unlock_mission_id)) : ''],
+      ['波及关卡数', esc(String(stages.length))],
+      ['怪物名单条目数', esc(String(monsterTotal))],
+      ['状态词条数', esc(String(statuses.length))],
+      ['位面词条数', esc(String(affixes.length))],
+    ],
+    sections: [
+      { title: '玩法概览', html: introHtml ? `<p>${introHtml}</p>` : '' },
+      {
+        title: '污染等级与愿力',
+        html: scoreHtml + (stepHtml ? `<ul class="nk-snapshot__blocks">${stepHtml}</ul>` : ''),
+      },
+      {
+        title: '「贪饕」侵蚀（敌方与玩家支援）',
+        html: [
+          levelHtml ? `<p>敌方强化（关卡侵蚀）</p><ul class="nk-snapshot__blocks">${levelHtml}</ul>` : '',
+          buffHtml ? `<p>玩家支援（愿力分档）</p><ul class="nk-snapshot__blocks">${buffHtml}</ul>` : '',
+        ].join(''),
+      },
+      {
+        title: '波及关卡与被污染怪物',
+        html: stageHtml ? `<ul class="nk-snapshot__blocks">${stageHtml}</ul>` : '',
+      },
+      { title: '状态词条', html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
+      { title: '教程图文', html: tutorialHtml ? `<ul class="nk-snapshot__blocks">${tutorialHtml}</ul>` : '' },
+      { title: '位面词条', html: affixHtml ? `<ul class="nk-snapshot__blocks">${affixHtml}</ul>` : '' },
+      { title: '「污染」同形词说明', html: `<p>${esc(VORACITY_DISAMBIGUATION)}</p>` },
+    ],
+  });
+  return [makePage('voracity-page', {
+    route: '/voracity',
+    file: 'voracity.html',
+    title: `${VORACITY_TITLE} - ${SITE_NAME}`,
+    description,
+    ld: ldArticle('/voracity', VORACITY_TITLE, description, [['首页', '/'], [VORACITY_TITLE, '/voracity']], ctx),
+    body,
+  })];
+}
+
 /* ═══════════ 主流程 ═══════════ */
 
 function buildPages(ctx) {
@@ -1381,6 +1558,7 @@ function buildPages(ctx) {
     ...currencyRolePages(ctx),
     ...currencyListPages(ctx),
     ...currencyTraitPages(ctx),
+    ...voracityPages(ctx),
   ];
 }
 

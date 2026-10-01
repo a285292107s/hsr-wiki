@@ -5,3 +5,4 @@ export * from './relic';
 export * from './spine';
 export * from './currency';
 export * from './achievement';
+export * from './voracity';

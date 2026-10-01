@@ -4,9 +4,11 @@
  * 断言 7 项：① robots.txt 五个 UA 组各自自足 + Disallow: /prerender/ + Sitemap 与生成器同源；
  * ② sitemap.xml 合法、loc 全绝对同源无重复、与快照一一对应、≤50000；
  * ③ 每个快照的 title/canonical/内链/中文字符数/h1/JSON-LD/游戏标记/未展开参数占位符 `#\d+\[…\]`/
- *    裸 `#N`（仅 currency/item.html 与 currency/augment.html 按页点名，禁止全局化）/入口 JS，详情页禁 nk-snapshot__entry；
+ *    裸 `#N`（仅 currency/item.html 与 currency/augment.html 按页点名，禁止全局化）/入口 JS，详情页与专题页
+ *    voracity.html 禁 nk-snapshot__entry；
  * ④ 文件级覆盖率：每族快照数 = 数据 + 应用可见性判据独立推导的期望（禁写死数字；契约 §2「可见性对齐」）；
  * ⑤ 条目级覆盖率：12 个目录页 nk-snapshot__entry 计数 = 同一条目数、枢纽 ≥1、详情页抽样 = 0（契约 §6.4②③）；
+ *    专题页 `/voracity` **不在此列**——它不是目录，正文分区不是「应用收录条目集合」，故无条目级断言（契约 §3/§6.4 注）。
  * ⑥ 外壳与首页：`prerender/_shell.html` 存在且不含 nk-snapshot、`dist/index.html` ≡ `prerender/home.html`（sha256）、
  *    `dist/index.html` 有非空 h1 与中文正文（Vercel 文件系统先于 rewrites，'/' 直接命中它）；
  * ⑦ 汇总一行 [PASS]/[FAIL]，任一失败退出码 1。prerender 下 `_` 前缀文件为非快照内部文件，扫描跳过并报数。
@@ -457,11 +459,16 @@ let sitemapCount = -1;
       add(`入口 <script src> 与 dist/index.html 不一致: [${scripts.join(', ')}] ≠ [${entryScripts.join(', ')}]`);
     }
 
-    // 契约 §3：nk-snapshot__entry 冻结为「仅目录条目清单」——详情页出现即违规
+    // 契约 §3：nk-snapshot__entry 冻结为「仅目录条目清单」——详情页与专题页出现即违规
     const relNoExt = relative(PRERENDER, file).split(sep).join('/').replace(/\.html$/i, '');
+    const marks = countEntryMarks(html);
     if (DETAIL_ROUTE_PREFIXES.some((p) => relNoExt.startsWith(p))) {
-      const marks = countEntryMarks(html);
       if (marks > 0) add(`详情页出现 ${marks} 个 nk-snapshot__entry（契约 §3：该类名仅用于目录条目清单）`);
+    } else if (relNoExt === 'voracity' && marks > 0) {
+      // 专题页点名（ADR 0025）：它的分区列表是异构条目的叙述性集合，不是「应用收录条目集合」，
+      // 也没有对应的条目级覆盖率期望（见检查 5）。若未来有人把分区当目录收录清单来标，这里直接拦下，
+      // 而不是让它静默变成一条覆盖率数字。
+      add(`专题页出现 ${marks} 个 nk-snapshot__entry（契约 §3：专题页分区不是应用收录条目集合，禁止使用该标记）`);
     }
   }
 
@@ -502,6 +509,9 @@ let sitemapCount = -1;
     ['currency/buff', 'currency/buff.html', '/currency/buff'],
     ['currency/augment', 'currency/augment.html', '/currency/augment'],
     ['currency/trait', 'currency/trait.html', '/currency/trait'],
+    // 专题页（第三种页面形态，ADR 0025）：期望值是「有且仅有 1 个快照文件」这一形态事实，
+    // 与数据条目数无关——它的分区列表不是「应用收录条目集合」，故只有文件级断言，无条目级断言（见检查 5）。
+    ['voracity', 'voracity.html', '/voracity'],
   ];
 
   /**
@@ -630,6 +640,15 @@ let sitemapCount = -1;
   const details = [];
   const ENTRY = 'nk-snapshot__entry';
   const named = (x) => Boolean(x && x.name);
+
+  /**
+   * 专题页 `/voracity` 无条目级断言（契约 §3/§6.4）：它是 ADR 0025 的第三种页面形态，既不是目录页
+   * （正文分区不是「应用收录的条目集合」），也不是枢纽页（没有 `release_version` / 赛季代际这类会静默空态的判据）。
+   * 生成器对该页**不渲染** `nk-snapshot__entry`；若在此按 voracity.json 的条目数断言，等于把
+   * 「专题页正文 = 目录收录清单」写成契约，与页面形态冲突，并把异构条目（状态词条 / 教程图文 / 位面词条）
+   * 误算进覆盖率。该页的存在性与唯一性由检查 4 的单页族断言（各恰好 1 个快照文件）；
+   * 「不得误用该类名」由检查 3 的专题页点名断言（计数必须 = 0）保证，不靠人工核查。
+   */
 
   /** 目录页期望：判据与检查 4 同源（数据 + 应用可见性），逐条对齐 pages/*.ts 的 fetchData */
   const specs = [];

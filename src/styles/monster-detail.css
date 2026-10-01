@@ -82,6 +82,39 @@
   color: var(--text-bright);
 }
 
+.nk-mob-invaded {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 5px 12px;
+  border: 1px solid color-mix(in srgb, var(--vor-500) 45%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--vor-500) 8%, transparent);
+  transition: border-color 0.2s var(--nk-ease-out);
+}
+
+.nk-mob-invaded:hover {
+  border-color: var(--vor-500);
+}
+
+.nk-mob-invaded__text {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--vor-300);
+  white-space: nowrap;
+}
+
+.nk-mob-invaded__lv {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+  white-space: nowrap;
+}
+
 .nk-mob-sec {
   padding: 26px 0 6px;
 }

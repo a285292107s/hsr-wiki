@@ -243,3 +243,10 @@ export function itemName(id: string | number, nameCache: NameCache, itemDb: Item
   const key = String(id);
   return nameCache[key] || (itemDb[key] || {}).item_name || '#' + id;
 }
+
+/* 教程图文：源数据只给无扩展名的相对路径（TutorialPic/TutorialPage_*），nanoka
+   分类目录 tutorialpic 下为 webp；无 jsDelivr 规则 ⇒ 主源失效走全局图标占位。 */
+export function tutorialPicUrl(image: string | null | undefined): string {
+  if (!image) return '';
+  return cdnUri('tutorialpic', `${image.replace(/\.(webp|png)$/i, '')}.webp`);
+}

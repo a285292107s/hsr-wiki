@@ -14,7 +14,8 @@ from converters import monster_detail as md  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def fake_monsters(monkeypatch):
-    """mock 共享聚合表 + save_json 捕获输出。"""
+    """mock 共享聚合表 + 侵入归属 + save_json 捕获输出（不读真实源数据）。"""
+    monkeypatch.setattr(md, "load_invasion_map", lambda _monsters: {})
     monkeypatch.setattr(md, "load_monsters", lambda: {
         8013010: {
             "name": "反物质军团·践踏者", "icon": "Monster_8013010",

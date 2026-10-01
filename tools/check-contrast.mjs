@@ -22,8 +22,8 @@ const strict = process.argv.includes('--strict');
 const BODY_MIN = 4.5;
 const PRIMARY_MIN = 3.0;
 
-/** 正文类令牌（超阈值即失败） */
-const BODY_TOKENS = ['--text', '--text2', '--text3', '--text-bright', '--highlight', '--gold-sem', '--metric-val'];
+/** 正文类令牌（超阈值即失败）；--vor-300 为「贪饕」污染色的文字亮端（ADR 0027） */
+const BODY_TOKENS = ['--text', '--text2', '--text3', '--text-bright', '--highlight', '--gold-sem', '--metric-val', '--vor-300'];
 /** 主色文字令牌（装饰/大字豁免位，≥3:1） */
 const PRIMARY_TOKENS = ['--primary'];
 

@@ -151,12 +151,26 @@ export interface MazeMonsterInfo {
   wave?: number;
 }
 
+/** 污染等级（converter 由 StageInvasionConfig 写入关卡节点，ADR 0026）。
+ *  level = InvasionID（1–3）；被污染怪物取自 MonsterInvasionList，未注册的实例 ID 被跳过，
+ *  因此 monsters 可能缺省——**末日幻影楼层只登记首领**，被污染小怪不在该层敌方配置里。 */
+export interface MazeStageInvasion {
+  /** 污染等级（StageInvasionConfig.InvasionID，1–3） */
+  level: number;
+  /** 上游污染关卡 ID（StageInvasionConfig.StageID，用于回溯核对） */
+  stage_id?: number;
+  /** 被污染怪物（图鉴内已注册者） */
+  monsters?: MazeMonsterInfo[];
+}
+
 /** 单阶段（上半/下半场）内容：推荐属性 + 敌方配置 */
 export interface MazeStageDetail {
   /** 该阶段推荐属性 */
   damage?: string[];
   /** 该阶段敌方（icon 为 MonsterMiddleIcon basename） */
   monsters?: MazeMonsterInfo[];
+  /** 该场次的污染等级（仅污染关卡有；见 MazeStageInvasion） */
+  invasion?: MazeStageInvasion;
 }
 
 /** 挑战目标（converter 输出：text 为 clean_text 清洗后文本，param 为 #N[i] 占位符参数，
@@ -220,6 +234,8 @@ export interface PeakLevelInfo {
   tags?: string[];
   /** 王棋增益（仅 king：出奇制胜/步骑协同/锤砧战术） */
   buffs?: MazeBuffInfo[];
+  /** 污染等级（异相仲裁无层/半场，污染直接落在单关上；见 MazeStageInvasion） */
+  invasion?: MazeStageInvasion;
   /** 王棋•绝境变体（仅 king） */
   hard?: {
     name?: string;
@@ -248,7 +264,7 @@ export interface MazeTierceInfo {
   monsters?: MazeMonsterInfo[];
   /** 3 节点敌方：节点 1/2 = 常规最高难度关上下半场（DLCKKJFMJOB → EventIDList1/2），
    *  节点 3 = 星启附加关（HFIAAGAKFMD → StageConfig 波次） */
-  nodes?: { idx: number; monsters: MazeMonsterInfo[] }[];
+  nodes?: { idx: number; monsters: MazeMonsterInfo[]; invasion?: MazeStageInvasion }[];
   /** 星启通关奖励（仅虚构叙事：EGEEJLHBALB ItemID/ItemNum 列表，每期固定；
    *  与 score 通关分数线对应，官网“关卡奖励”板块数据源） */
   rewards?: { id: number; num?: number }[];
@@ -327,8 +343,16 @@ export interface MazeListEntry {
   levels?: PeakLevelInfo[];
   /** 异相仲裁段位徽章（ChallengeBadgeConfig：青铜/白银/黄金/彩钻，仅 peak） */
   badges?: MazeBadgeInfo[];
+  /** 赛季级污染汇总（污染关卡数 + 去重升序等级；无污染赛季缺省。ADR 0026） */
+  pollution?: PollutionSummary;
 }
 export type MazeListDb = Record<string, MazeListEntry>;
+
+/** 赛季级污染汇总：count = 污染关卡数（按 StageID 去重，星启节点 1/2 与常规末层同关卡不重复计） */
+export interface PollutionSummary {
+  count: number;
+  levels: number[];
+}
 
 /**
  * 终局目录卡轻量条目（maze*.catalog.json：converter endgame_catalog 派生自全量）。
@@ -450,6 +474,14 @@ export interface MonsterDetail {
   stats: { hp: number; atk: number; def: number; speed: number };
   /** 技能列表（SkillList → MonsterSkillConfig） */
   skills: MonsterSkillDetail[];
+  /** 「贪饕」侵蚀侵入名单（StageInvasionConfig；未进入名单的怪物无此字段） */
+  invaded?: MonsterInvaded;
+}
+
+/** 侵入名单：invasion_ids 为侵蚀等级序号，stages 为波及关卡 ID（用于详情页标记与回链） */
+export interface MonsterInvaded {
+  invasion_ids: number[];
+  stages: number[];
 }
 
 /* ─── 光锥详情（converter 输出，每光锥一个 JSON） ─── */

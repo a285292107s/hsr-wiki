@@ -138,7 +138,7 @@ _Avoid_: 本版本上新（货币战争语境下）、新赛季内容
 _Avoid_: 切换、模式开关
 
 ### 常规模式（Normal Mode）
-站点默认模式。**黑底 + 可切换强调色主题**（黑色基底 + 当前强调色阶，缺省赤陶 Terracotta 暖砖红，见「双色约束」「强调色」），导航为 7 个内容板块（角色、光锥、遗器、物品、成就、敌对物种、终局内容），枢纽页为 `/`。
+站点默认模式。**黑底 + 可切换强调色主题**（黑色基底 + 当前强调色阶，缺省赤陶 Terracotta 暖砖红，见「双色约束」「强调色」），导航为 8 个内容板块（角色、光锥、遗器、终局内容、物品、成就、敌对物种、贪饕污染），枢纽页为 `/`。
 _Avoid_: 主模式、普通模式
 
 ### 货币战争模式（Currency War Mode / CW 模式）
@@ -261,6 +261,14 @@ _Avoid_: 导航金、主题外标识
 游戏数据自带的颜色（富文本 `<color>` 标签，如技能描述官方强调色），由渲染层运行时透传为 inline style，不参与令牌体系与双色约束。比领域色豁免更外层——它连"令牌"都不是，是数据本身（与 ADR 0008/0010 官方标签透传原则一致）。
 _Avoid_: 内联色、富文本色
 
+### 语境色（Context Accent）
+在某一机制 / 模式**自己的子树内局部取代主题强调色**的特征色：它随该子树的语境而定（终局四模式各自的模式色、机制专题页所属机制的身份色），**不随用户选择的强调色切换**，也不是「主色族」的成员。它回答的是「这片页面的强调面用哪支色」；与「领域色豁免」回答的「是否参与双色约束」是两个问题。
+_Avoid_: 页面主题色、局部强调色
+
+### 污染色（Contamination Color）
+「贪饕」侵蚀 / 污染在站内的唯一身份色（游戏内该机制的主题色为不祥的猩红）。一份色值两处身份：既是该机制数据标记的**领域语义色**，又是其专题页子树内的**语境色**；凡表达该机制的表面都消费同一支色，不另调色。**不与** 4.5 Fate 联动「圣杯战争 · 污染等级 / 深度污染」共用（见「污染」同形词）。
+_Avoid_: 贪饕红、侵蚀色、污染主题色
+
 ## 角色强化
 
 ### 角色强化（Character Enhancement）
@@ -337,6 +345,31 @@ _Avoid_: 挑战任务、目标条件
 ### 波次（Wave）
 StageConfig.MonsterList 的出场序列：每波为 {Monster0..N} 字典，波内可含重复敌人；EventIDList 多事件为顺序波次（候选事件拼接，wave 序号跨事件连续递增）。层级/peak 敌方带 wave 字段，前端按波分组展示"第 N 波"。
 _Avoid_: 回合、阶段（波次 ≠ 阶段）
+
+## 贪饕污染
+
+### 贪饕污染（Gluttony Contamination）
+站点对 4.6「贪饕」侵蚀/污染体系的工作名：单页专题 `/voracity`（导航第 8 板块），数据由 converter 的 `voracity` 模块单文件产出（`public/data/cn/voracity.json`），覆盖活动与愿力、关卡侵蚀、状态词条、教程图文、货币战争位面词条五块。**游戏内无此合成名词**：活动名取官方「镇伏『贪饕』，汇聚愿力」，机制名取官方文案「『贪饕』侵蚀污染」。
+_Avoid_: 污染系统（与本文件的「污染」同形词条冲突）、贪饕活动页
+
+### 「贪饕」侵蚀（Gluttony Invasion）
+上游 `StageInvasionConfig` / `StageInvasionBuff` 表达的关卡机制：被点名的关卡里部分敌人被「贪饕」侵染（游戏内文案作「污染」），获得速度与生命上限强化；敌方侧对应 `MazeBuff` 3034001–3034003（战斗绑定 `ChallengePeakBattle_GluttonyAbility_LV1–3`），玩家侧支援为 `MazeBuff` 3034011–3034013。**落点是终局四模式的关卡**（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁），不在玩法级或赛季级；同一套等级在材料本（`StageInvasionMaterial`）、大世界 NPC 怪物（`StageInvasionNPCMonster`）、差分宇宙周挑战（`StageInvasionRogueConfig/RogueMonster`）各有平行表，站点当前只呈现终局侧。
+_Avoid_: 入侵、被侵蚀关卡（作机制名时）
+
+### 污染等级（Contamination Level）
+`StageInvasionConfig.InvasionID`（1–3）的站点名，判据是上游逐关卡的 `InvasionID`（全表 14 个关卡），等级描述取 `StageInvasionBuff.InvasionDesc` + `MazeBuff` 3034001–3034003 的参数与图标。每只被污染怪物的愿力分档（4 / 10 / 40，`ConstValueCommon` 的 `Activity_TantaoInvasion_Score`）与本等级**同序**，是说明而非判据来源。
+_Avoid_: 侵蚀等级、污染档位、深度污染（后者专指 Fate 联动体系）
+
+### 污染关卡（Contaminated Stage）
+被 `StageInvasionConfig` 点名、`InvasionID` 非空的关卡：全库 14 条，全部落在终局四模式的关卡表里——`ChallengeMazeConfig` / `ChallengeStoryMazeConfig` / `ChallengeBossMazeConfig` 的 `EventIDList1/2` 与 `ChallengePeakConfig` 的 `EventIDList`。**被污染怪物不保证出现在该关卡的敌方配置里**：末日幻影楼层只登记首领，被污染的小怪由机制额外加入，只能从 `StageInvasionConfig.MonsterInvasionList` 得到（按怪物级 join 会整层漏判）。
+_Avoid_: 污染层、侵蚀关卡
+
+### 愿力（Wish Power）
+二相乐园 / 幻月游戏体系的力量计量；在本系统里由消灭被污染怪物累积，阿哈据此发放分档战斗力支援（`ActivityVoracityInvasionPro` 的 8 档进度）。**不限于**贪饕污染：愿力在 4.5 起就是乐园玩法的通用计量，禁止把它当作本机制独有概念。
+
+### 「污染」同形词（Fate 联动）
+4.5 起的联动「命运/今晚留下来」另有「圣杯战争·污染等级 1–7 / 深度污染 / 污染词条」体系（`FateArea.json` 等），与「贪饕」侵蚀/污染**无关联**。站内引用「污染」必须指明体系，**禁止**把两套合称「污染系统」或互相内链。
+_Avoid_: 污染系统、污染机制（不指体系时的笼统说法）
 
 ## 动画资源
 

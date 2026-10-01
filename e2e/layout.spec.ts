@@ -138,7 +138,7 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('/settings');
-    // 320px 常规模式 8 导航项放不下 → 至少折叠出"更多"入口
+    // 320px 常规模式 9 导航项放不下 → 至少折叠出"更多"入口
     await expect(page.locator('.ui-sidebar-more')).toBeVisible();
     const anchors = await collectNavAnchors(page);
     expect(anchors.length).toBeGreaterThan(1);
@@ -1220,6 +1220,45 @@ test.describe('布局验收：角色详情页', () => {
     ).toBeLessThanOrEqual(1);
 
     expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
+    assertNoErrors();
+  });
+});
+
+test.describe('布局验收：贪饕污染专题页（ADR 0025）', () => {
+  test('/voracity：H1、八区块、怪物内链、侧栏前缀性、无溢出', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/voracity');
+    await expect(page.locator('.nk-vor-hero__title')).toHaveText('贪饕污染');
+    // 区块数与首末区块（分区顺序 = 信息层级；数据决定的中段区块不逐个写死）
+    const secnav = page.locator('.nk-vor-secnav .nk-secnav__btn');
+    await expect(secnav).toHaveCount(8);
+    await expect(secnav.first()).toContainText('玩法概览');
+    await expect(secnav.last()).toContainText('同形词说明');
+    await expect(page.locator('#vor-affixes .nk-vor-affix')).toHaveCount(3);
+    // 波及关卡的怪物项必须内链到敌人详情（detail_id 非空口径）
+    await expect.poll(() => page.locator('.nk-vor-mon__name--link').count()).toBeGreaterThan(0);
+    expect(
+      await page.locator('.nk-vor-mon__name--link').evaluateAll((els) =>
+        els.every((el) => /^\/monster\/\d+$/.test(el.getAttribute('href') || '')),
+      ),
+    ).toBe(true);
+    // 关卡 → 所属终局赛季的闭环（ADR 0026）：14 个污染关卡里 13 个有已发布赛季归属
+    // （420533/420534 同属未发布赛季 3022 的那一份按判据省略），每关至少 1 条可达链接
+    const scopeHrefs = await page.locator('.nk-vor-scope').evaluateAll((els) =>
+      els.map((el) => el.getAttribute('href') || ''),
+    );
+    expect(scopeHrefs.length).toBeGreaterThanOrEqual(13);
+    expect(scopeHrefs.every((h) => /^\/endgame\/(maze|story|boss|peak)\/\d+$/.test(h))).toBe(true);
+    expect(scopeHrefs).toContain('/endgame/boss/3020');
+    await expect(page.locator('.nk-vor-stgroup__badge').first()).toContainText('污染等级');
+    // 侧栏：本页为内容板块，锚点可见性仍是规范序前缀（不写死项数）
+    const anchors = await collectNavAnchors(page);
+    expect(anchors.length).toBeGreaterThan(1);
+    const visIdx = anchors.map((a, i) => (a.visible ? i : -1)).filter((i) => i >= 0);
+    expect(visIdx).toEqual(Array.from({ length: visIdx.length }, (_, i) => i));
+    // 当前板块在侧栏内处于激活态（导航第 8 项入口可达）
+    await expect(page.locator('.ui-sidebar a[href="/voracity"]')).toHaveCount(1);
+    expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
     assertNoErrors();
   });
 });

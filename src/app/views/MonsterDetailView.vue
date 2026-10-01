@@ -39,6 +39,12 @@ const figureUrl = computed(() => {
   return monsterFigureUrl(d.value.figure) || monsterIconUrl(d.value.icon);
 });
 const rankLabel = computed(() => (d.value ? MON_RANK[d.value.rank] || '' : ''));
+const invaded = computed(() => d.value?.invaded ?? null);
+/** 侵蚀等级序号（同一怪物可被多个等级点名） */
+const invadedLevels = computed(() => {
+  const ids = invaded.value?.invasion_ids ?? [];
+  return [...new Set(ids)].sort((a, b) => a - b).join(' / ');
+});
 
 function elemTag(elem: string): string {
   const name = ELEM[elem] || elem;
@@ -100,6 +106,10 @@ function skillMeta(s: MonsterSkillDetail): string {
             <span class="nk-mob-hero__no">{{ d.id }}</span>
           </div>
           <h1 class="nk-mob-hero__name">{{ d.name }}</h1>
+          <RouterLink v-if="invaded" class="nk-mob-invaded" to="/voracity">
+            <span class="nk-mob-invaded__text">受『贪饕』侵蚀</span>
+            <span v-if="invadedLevels" class="nk-mob-invaded__lv">· 等级 {{ invadedLevels }}</span>
+          </RouterLink>
         </div>
       </div>
 

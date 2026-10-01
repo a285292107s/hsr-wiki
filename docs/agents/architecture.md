@@ -28,7 +28,7 @@ src/
 
 ## 核心架构模式
 
-1. **配置驱动目录页**：所有列表页都是 `CatalogPageConfig`——每个目录一个 `src/app/catalog/pages/<id>.ts` 子模块（`shared.ts` 提供共享常量），由 `pages.ts` 注册为注册表。目录清单**以 `pages.ts` 注册表为准**，本文件不复述清单。`CatalogView.vue` 按 `route.meta.catalog` 取配置，交由单一 `CatalogPage.vue` 渲染，无需新视图；带专属样式的目录在配置 `styles` 字段声明，路由层并行加载（`src/app/router/index.ts` 的 `catalogView` 工厂）。
+1. **配置驱动目录页**：所有列表页都是 `CatalogPageConfig`——每个目录一个 `src/app/catalog/pages/<id>.ts` 子模块（`shared.ts` 提供共享常量），由 `pages.ts` 注册为注册表。目录清单**以 `pages.ts` 注册表为准**，本文件不复述清单。`CatalogView.vue` 按 `route.meta.catalog` 取配置，交由单一 `CatalogPage.vue` 渲染，无需新视图；带专属样式的目录在配置 `styles` 字段声明，路由层并行加载（`src/app/router/index.ts` 的 `catalogView` 工厂）。**非列表页有两类例外**：枢纽页（`/`、`/currency`）与**专题页**（`/voracity`，单页分区承载跨模式机制，既非目录也非实体详情——见 [ADR 0025](../adr/0025-贪饕污染专题页与导航第8板块.md)；其 AI 快照无条目级 `nk-snapshot__entry` 断言）。
 2. **数据流向**：`Pinia store` → `src/services/api/` 纯函数 → 本地 JSON（`public/data/cn/`，随站部署）；图片 URL 经 `src/services/cdn/` 纯函数解析。Store 负责加载编排、缓存与错误处理。
 3. **本地优先数据**：全部目录/详情数据为预转换 JSON；仅图片与 Spine 动画在运行期走 CDN。CDN 基址定义于 `src/lib/constants.ts → CDN`。
 4. **双模式主题**：常规模式（黑底 + 可切换强调色，缺省赤陶）vs 货币战争模式（`meta.cw` → `<html data-theme="cw">`，缺省香槟金），CW 路由位于 `/currency/*`。令牌分层与强调色切换通道见 [ui-design.md](ui-design.md) §2/§3。

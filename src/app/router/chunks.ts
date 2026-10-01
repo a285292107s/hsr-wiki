@@ -9,6 +9,7 @@ export const preloadRelicDetail = () => import('../views/RelicView.vue');
 export const preloadHome = () => import('../views/HomeView.vue');
 export const preloadCurrencyHub = () => import('../views/CurrencyHubView.vue');
 export const preloadCurrencyRoleDetail = () => import('../views/CurrencyRoleView.vue');
+export const preloadVoracity = () => import('../views/VoracityView.vue');
 
 const PREFETCH_MAP: Record<string, () => Promise<unknown>> = {
   '/': preloadHome,
@@ -18,6 +19,7 @@ const PREFETCH_MAP: Record<string, () => Promise<unknown>> = {
   '/item': preloadCatalog,
   '/monster': preloadCatalog,
   '/endgame/maze': preloadCatalog,
+  '/voracity': preloadVoracity,
   '/currency': preloadCurrencyHub,
   '/currency/role': preloadCatalog,
   '/currency/item': preloadCatalog,

@@ -18,6 +18,7 @@ export {
   loadLocalMazeCatalog, loadLocalStoryCatalog, loadLocalBossCatalog, loadLocalPeakCatalog,
 } from './endgame';
 export { loadLocalAchievements, loadLocalAchievementSeries } from './achievements';
+export { loadLocalVoracity } from './voracity';
 export {
   loadLocalCurrencyRoles, loadLocalCurrencyRole,
   loadLocalCurrencyEquipment, loadLocalCurrencyPortals, loadLocalCurrencyAugments,

@@ -156,6 +156,12 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 1, catalog: 'achievement', title: '成就' },
   },
   {
+    path: '/voracity',
+    name: 'voracity',
+    component: () => import('../views/VoracityView.vue'),
+    meta: { depth: 1, title: '贪饕污染' },
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: () => import('../views/SettingsView.vue'),

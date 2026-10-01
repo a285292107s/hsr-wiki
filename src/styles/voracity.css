@@ -1,0 +1,425 @@
+/* 贪饕污染专题（/voracity）：长文阅读流 + 吸顶区块导航。
+   栏目结构 = 数据事实分栏（概览 / 档位 / 侵蚀 / 关卡 / 词条 / 教程）；
+   数据卡走直角系（4px 档位），分区之间以 1px 发丝线分栏。 */
+
+.nk-vor.nk-page--detail { padding-top: 46px; }
+
+.nk-vor-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line-1);
+}
+@media (min-width: 768px) {
+  .nk-vor-bar { padding-left: var(--nk-content-offset); }
+}
+.nk-vor-bar__inner {
+  display: flex; align-items: center;
+  max-width: var(--nk-detail-max); margin: 0 auto; padding: 6px 16px; min-height: 44px;
+}
+.nk-vor-secnav .nk-secnav__btn { padding-left: 9px; padding-right: 9px; }
+.nk-vor-bar__progress { height: 2px; width: 0; background: var(--vor-500); }
+
+.nk-vor-hero {
+  max-width: var(--nk-detail-max);
+  margin: 0 auto;
+  padding: 40px 16px 26px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-vor-hero__title {
+  font-size: clamp(1.7rem, 3.6vw, 2.3rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  color: var(--text-bright);
+}
+.nk-vor-hero__act {
+  margin-top: 12px;
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+}
+
+.nk-vor-sec { padding: 30px 0 6px; scroll-margin-top: 56px; }
+.nk-vor-sec + .nk-vor-sec { border-top: 1px solid var(--line-1); margin-top: 26px; }
+
+.nk-vor-intro {
+  font-size: 0.88rem;
+  line-height: 2;
+  color: var(--text2);
+  max-width: 74ch;
+}
+
+.nk-vor-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 32px;
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-vor-fact { display: flex; align-items: baseline; gap: 10px; }
+.nk-vor-fact dt {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+.nk-vor-fact dd {
+  margin: 0;
+  font-family: var(--font-hud);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--vor-300);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-vor-code {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.nk-vor-code--bind { color: var(--text3); opacity: 0.8; }
+
+.nk-vor-scores { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.nk-vor-scores__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+  margin-right: 6px;
+}
+.nk-vor-score {
+  min-width: 42px;
+  padding: 5px 10px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--vor-500) 5%, transparent);
+  font-family: var(--font-hud);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--vor-300);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-vor-steps { list-style: none; margin: 24px 0 0; padding: 0; }
+.nk-vor-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+}
+.nk-vor-step + .nk-vor-step { border-top: 1px solid var(--line-1); }
+.nk-vor-step__no {
+  flex: none;
+  width: 24px;
+  padding-top: 3px;
+  font-family: var(--font-hud);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--text3);
+}
+.nk-vor-step__main { flex: 1; min-width: 0; }
+.nk-vor-step__meter { display: flex; align-items: center; gap: 12px; }
+.nk-vor-step__track {
+  flex: 1;
+  min-width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--vor-500) 12%, transparent);
+}
+.nk-vor-step__fill { height: 100%; background: var(--vor-500); }
+.nk-vor-step__pct {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+.nk-vor-step__desc {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  color: var(--text2);
+}
+.nk-vor-step__meter + .nk-vor-step__desc { margin-top: 10px; }
+
+.nk-vor-group + .nk-vor-group { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line-1); }
+.nk-vor-group__title {
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+}
+
+.nk-vor-levels { display: flex; flex-direction: column; gap: 14px; }
+.nk-vor-level {
+  padding: 16px 18px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  background: var(--card);
+}
+.nk-vor-level__head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.nk-vor-level__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--vor-500) 5%, transparent);
+}
+.nk-vor-level__no {
+  font-family: var(--font-hud);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--vor-300);
+}
+.nk-vor-level__desc { margin: 0; font-size: 0.82rem; line-height: 1.85; color: var(--text2); }
+
+.nk-vor-buffs { display: flex; flex-direction: column; gap: 14px; }
+.nk-vor-buff {
+  padding: 16px 18px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  background: var(--card);
+}
+.nk-vor-buff__head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.nk-vor-buff__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--vor-500) 5%, transparent);
+}
+.nk-vor-buff__lv {
+  font-family: var(--font-hud);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--vor-300);
+}
+.nk-vor-buff__name { font-size: 0.92rem; font-weight: 800; color: var(--text-bright); }
+.nk-vor-buff__desc { margin: 10px 0 0; font-size: 0.82rem; line-height: 1.85; color: var(--text2); }
+.nk-vor-buff__pct {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  color: var(--text3);
+}
+.nk-vor-buff__pctval { color: var(--vor-300); font-weight: 700; }
+
+.nk-vor-affixes { display: flex; flex-direction: column; gap: 14px; }
+.nk-vor-affix {
+  padding: 16px 18px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  background: var(--card);
+}
+.nk-vor-affix__head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.nk-vor-affix__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--vor-500) 5%, transparent);
+}
+.nk-vor-affix__name { font-size: 0.92rem; font-weight: 800; color: var(--text-bright); }
+.nk-vor-affix__desc { margin: 10px 0 0; font-size: 0.82rem; line-height: 1.85; color: var(--text2); }
+.nk-vor-params { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.nk-vor-params__label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+.nk-vor-param {
+  padding: 3px 8px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-vor-stgroup + .nk-vor-stgroup { margin-top: 26px; }
+.nk-vor-stgroup__head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.nk-vor-stgroup__badge {
+  padding: 4px 10px;
+  border: 1px solid color-mix(in srgb, var(--vor-500) 40%, transparent);
+  border-radius: 4px;
+  font-family: var(--font-hud);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--vor-300);
+}
+.nk-vor-stgroup__count {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+}
+
+.nk-vor-stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; }
+.nk-vor-stage {
+  padding: 14px 16px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  background: var(--card);
+}
+.nk-vor-stage__id {
+  font-family: var(--font-hud);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+/* 关卡所属终局赛季（ADR 0026：专题页 → 赛季详情页的闭环入口） */
+.nk-vor-scopes { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.nk-vor-scope {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 5px 8px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--vor-500) 5%, transparent);
+  text-decoration: none;
+  color: var(--text2);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.nk-vor-scope:hover { border-color: color-mix(in srgb, var(--vor-500) 34%, transparent); color: var(--text-bright); }
+.nk-vor-scope__mode {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+}
+.nk-vor-scope__name { font-size: 0.78rem; font-weight: 600; }
+.nk-vor-scope__pos {
+  margin-left: auto;
+  font-size: 0.64rem;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.nk-vor-mons { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.nk-vor-mon { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.nk-vor-mon__icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--vor-500) 5%, transparent);
+}
+.nk-vor-mon__name {
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nk-vor-mon__name--link { color: var(--text2); border-bottom: 1px solid var(--line-2); }
+.nk-vor-mon__name--link:hover { color: var(--text-bright); border-bottom-color: var(--vor-500); }
+
+.nk-vor-statuses { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 14px; }
+.nk-vor-status {
+  padding: 16px 18px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  background: var(--card);
+}
+.nk-vor-status__head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.nk-vor-status__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--vor-500) 5%, transparent);
+}
+.nk-vor-status__name { font-size: 0.94rem; font-weight: 800; color: var(--text-bright); }
+.nk-vor-status__type {
+  padding: 3px 8px;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+}
+.nk-vor-status__desc { margin: 10px 0 0; font-size: 0.82rem; line-height: 1.85; color: var(--text2); }
+.nk-vor-status__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-vor-status__flag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+}
+
+.nk-vor-tutorials { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 16px; }
+.nk-vor-tutorial {
+  margin: 0;
+  border: 1px solid var(--line-1);
+  border-radius: 4px;
+  background: var(--card);
+  overflow: hidden;
+}
+.nk-vor-tutorial__frame {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--vor-500) 4%, transparent);
+}
+.nk-vor-tutorial__img { width: 100%; height: 100%; object-fit: cover; }
+.nk-vor-tutorial__cap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 16px 16px;
+}
+.nk-vor-tutorial__desc { font-size: 0.8rem; line-height: 1.8; color: var(--text2); }
+
+.nk-vor-note {
+  max-width: 74ch;
+  padding: 16px 18px;
+  border-left: 2px solid color-mix(in srgb, var(--vor-500) 45%, transparent);
+  background: color-mix(in srgb, var(--vor-500) 4%, transparent);
+  font-size: 0.82rem;
+  line-height: 1.9;
+  color: var(--text2);
+}
+
+.nk-vor-skeleton { max-width: var(--nk-detail-max); margin: 0 auto; }
+
+/* 语境色（ADR 0027）：本页强调位不吃用户强调色，全走污染族 */
+.nk-vor-secnav .nk-secnav__btn--active { color: var(--vor-300); }
+.nk-vor-secnav .nk-secnav__btn--active::after { background: var(--vor-500); }
+.nk-vor .nk-title__idx { color: var(--vor-300); }
+
+@media (max-width: 767px) {
+  .nk-vor-hero { padding: 26px 16px 20px; }
+  .nk-vor-sec { padding-top: 24px; }
+  .nk-vor-stages,
+  .nk-vor-statuses,
+  .nk-vor-tutorials { grid-template-columns: 1fr; }
+  .nk-vor-level,
+  .nk-vor-buff,
+  .nk-vor-affix,
+  .nk-vor-status { padding: 14px; }
+}

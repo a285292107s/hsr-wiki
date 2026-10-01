@@ -53,6 +53,16 @@ export function fmtDesc(
   return s;
 }
 
+/** 描述的 #N 占位符是否全部有实参：缺参时消费方整段省略，不落残缺占位与 `?` */
+export function refsResolved(
+  desc: string | null | undefined,
+  params: number[] | null | undefined,
+): boolean {
+  const refs = (desc || '').match(/#\d+/g);
+  if (!refs) return true;
+  return refs.every((r) => params?.[Number(r.slice(1)) - 1] != null);
+}
+
 export function fmtDescMerged(
   desc: string | null | undefined,
   paramSets: Array<number[] | null | undefined>,

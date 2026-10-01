@@ -29,6 +29,7 @@ from converters import light_cones, light_cone_detail, relics, relic_affixes, mo
 from converters import currency, currency_catalog  # noqa: E402
 from converters import achievements
 from converters import monster_detail
+from converters import voracity
 from converters import version  # noqa: E402
 
 logging.basicConfig(
@@ -51,6 +52,7 @@ MODULES: dict[str, list] = {
     "relic_affixes": [relic_affixes.convert],
     "monsters": [monsters.convert],
     "monster_detail": [monster_detail.convert],
+    "voracity": [voracity.convert],
     "endgame": [endgame.convert],
     "endgame_catalog": [endgame_catalog.convert_catalog],
     "currency": [currency.convert],

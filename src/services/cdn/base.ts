@@ -20,7 +20,8 @@ export type CdnCategory =
   | 'gridfight-equipment'
   | 'gridfight-icon'
   | 'achievement'
-  | 'bufficon';
+  | 'bufficon'
+  | 'tutorialpic';
 
 export interface CdnCategorySpec {
   /** nanoka 子路径（相对 /assets/hsr/） */
@@ -77,4 +78,5 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   'gridfight-icon': { nanoka: 'gridfight/icon' },
   achievement: { nanoka: 'achievement' },
   bufficon: { nanoka: 'bufficon' },
+  tutorialpic: { nanoka: 'tutorialpic' },
 };

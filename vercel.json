@@ -40,6 +40,7 @@
     { "source": "/currency/augment", "destination": "/prerender/currency/augment.html" },
     { "source": "/currency/trait", "destination": "/prerender/currency/trait.html" },
     { "source": "/currency/trait/:id(\\d+)", "destination": "/prerender/currency/trait/:id.html" },
+    { "source": "/voracity", "destination": "/prerender/voracity.html" },
     { "source": "/((?!data/|assets/|robots\\.txt|sitemap\\.xml|prerender/_shell\\.html).*)", "destination": "/prerender/_shell.html" }
   ]
 }

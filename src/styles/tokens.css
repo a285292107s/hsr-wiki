@@ -213,6 +213,9 @@
   --eg-story: #2DD4BF;
   --eg-boss: #FB7185;
   --eg-peak: #FBBF24;
+  /* 语境色·污染族（ADR 0027）：500 = 基准位（只承载非文字）/ 300 = 文字亮端（正文对比度门禁） */
+  --vor-500: #C40C6A;
+  --vor-300: #FC48AC;
   --badge-test: #F59E0B;
   --font-hud: 'Orbitron', monospace;
   --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
