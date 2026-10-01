@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { buildEndgameSections, sectionIdxMap } from './sections';
-import {
-  BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl, mergedMonCount, phaseDamage,
-  stageDamageSummary, targetHtml,
-} from './renders';
+import { mergedMonCount, stageDamageSummary } from './renders';
 import StageContent from './StageContent.vue';
+import EndgameFloorBuff from './EndgameFloorBuff.vue';
+import EndgameTargets from './EndgameTargets.vue';
+import { floorPollution, halfLabel, pollutionLabel } from './pollution';
 import type { MazeFloorDetail, MazeListEntry } from '../../services/types';
 
 const props = defineProps<{
@@ -66,6 +66,14 @@ function isExpanded(id: number): boolean { return expanded.value.has(id); }
           <svg class="nk-egd-floor__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
           <span :id="`floor-title-${f.floor}`" class="nk-egd-floor__title" role="heading" aria-level="3">第 {{ f.floor }} 层</span>
           <span v-if="f.name" class="nk-egd-floor__name">{{ f.name }}</span>
+          <span v-if="floorPollution(f).length" class="nk-egd-floor__poll">
+            <span
+              v-for="(p, pi) in floorPollution(f)"
+              :key="pi"
+              class="nk-egd-pollchip"
+              :data-level="p.invasion.level"
+            >{{ pollutionLabel(p.invasion) }}<span class="nk-egd-pollchip__half">{{ halfLabel(p.half) }}</span></span>
+          </span>
           <span
             v-if="f.level || f.countdown || (modeKey === 'story' && data.clear_score)"
             class="nk-egd-floor__data"
@@ -96,39 +104,16 @@ function isExpanded(id: number): boolean { return expanded.value.has(id); }
           class="nk-egd-floor__body"
           :inert="!isExpanded(f.floor)"
         >
-          <div class="nk-egd-floor__body-inner">
+          <div class="nk-egd-floor__body-inner nk-egd-children">
 
             <div class="nk-egd-floor__stages">
-              <template v-if="modeKey === 'boss' && f.phases?.length">
-                <StageContent
-                  v-for="(p, pi) in f.phases"
-                  :key="p.id"
-                  :label="`阶段 ${pi + 1}`"
-                  :stage="{ damage: phaseDamage(f, pi), monsters: [p] }"
-                  :is-boss="true"
-                />
-              </template>
-              <template v-else>
-                <StageContent label="上半场" :stage="f.stage1" :is-boss="modeKey === 'boss'" />
-                <StageContent label="下半场" :stage="f.stage2" :is-boss="modeKey === 'boss'" />
-              </template>
+              <StageContent label="上半场" :stage="f.stage1" :is-boss="modeKey === 'boss'" />
+              <StageContent label="下半场" :stage="f.stage2" :is-boss="modeKey === 'boss'" />
             </div>
 
-            <div v-if="f.buff" class="nk-egd-floor__buff">
-              <div class="nk-egd-floor__buffhead">
-                <img v-if="f.buff.icon" class="nk-egd-buff__icon nk-egd-buff__icon--sm" :src="buffIconUrl(f.buff)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-                <span class="nk-egd-floor__bufflabel">可用增益</span>
-                <span class="nk-egd-floor__buffname">{{ f.buff.name }}</span>
-              </div>
-              <p v-if="f.buff.desc" class="nk-egd-floor__buffdesc" v-html="buffDescHtml(f.buff)"></p>
-            </div>
+            <EndgameFloorBuff :buff="f.buff" />
 
-            <ol v-if="f.targets?.length" class="nk-egd-floor__targets">
-              <li v-for="(t, ti) in f.targets" :key="ti" class="nk-egd-floor__target">
-                <span class="nk-egd-floor__targetidx">{{ String(ti + 1).padStart(2, '0') }}</span>
-                <span class="nk-egd-floor__targettext" v-html="targetHtml(t)"></span>
-              </li>
-            </ol>
+            <EndgameTargets :items="f.targets || []" />
           </div>
         </div>
       </section>

@@ -327,15 +327,24 @@ _Avoid_: 混沌回忆（仅指周期赛季部分）
 _Avoid_: 虚构叙事赛季增益名
 
 ### 末日幻影（Apocalypse）
-**阶段制战斗**：每层 1-3 阶段，各阶段一个 Boss 形态（ChallengeBossMazeExtra 的 MonsterID1/2/3），非上下半场结构；部分层含 StageConfig 波次缺失的第 3 阶段。层级无官方层名（源数据 Name 为空），挑战目标走 ChallengeBossTargetConfig。
-_Avoid_: 上下半场（该词仅用于忘却之庭/虚构叙事）
+每期两个首领投影、4 个挑战难度，**每个难度只有两场战斗**（游戏内文案作「节点一/节点二」，站点按玩家口径称**上半场/下半场**，对应 `EventIDList1/2` + `DamageType1/2`，与忘却之庭/虚构叙事同构）；含星启模式的赛季在末层**之外**另有第 3 场（星启节点 3 = 星启附加关，只归星启 tab，不算末层的第三场）。**层级敌方一律取实际战斗数据**（`EventIDList1/2` → `StageConfig` 波次，含护卫与波次序号），**禁止**改用 `ChallengeBossMazeExtra` 的 `MonsterID1/2/3`：该表逐项对应上述节点（不是首领形态解包），但它的第 2 项在「影将军」战斗里登记的是指南别名「蚀心兽」，按序号取值会把实际战斗敌方换成指南敌方（见 ADR 0031）。层级无官方层名（源数据 Name 为空），挑战目标走 ChallengeBossTargetConfig。站点详情页按「第 1..N 层 / 星启模式」子 tab 编排：层 tab 内按场次挂该场次的赛季增益与首领特性。
+_Avoid_: 阶段（本站层级节点不叫「阶段」；也禁止把 `ChallengeBossMazeExtra` 的 `MonsterID1/2/3` 当首领形态或层级敌方）
+
+### 赛季增益（Season Buff）
+玩法级的当期环境效果，作用于整期挑战（末日幻影中「终焉公理」按**场次**各 3 条下发，星启模式另 3 条）。末日幻影的数据落点是赛季级 `buff_groups`（`stage1/stage2/tierce`）；扁平 `buffs` 保留 `BuffList1+2` 的并集，供目录卡与 AI 快照沿用。展示上随场次挂在该场次所属的层 tab 半场 / 星启节点内（星启那 3 条挂在节点 3）——**按节点的场次键 `origin` 取**，不在节点里复制。
+_Avoid_: 遗器套装增益、行迹额外能力（同名「增益」但不同层）
+
+### 首领特性（Boss Trait）
+末日幻影首领幻影的战斗机制条目（名称 + 简述 + `#N[i]` 参数，如「坚防守备」：首领幻影受到的伤害降低 50%、弱点击破后行动额外延后且受到的伤害提高 100%），游戏内教程「◆ 首领特性 ◆」定义为随难度提升首领追加的特性。数据源为 `MonsterGuideConfig × MonsterGuideTag`，按敌方**模板**聚合为赛季级 `boss_traits`（按场次分组）。
+**注意同名不同指**：游戏内文案把每期的「末法余烬」（`ChallengeBossMazeConfig.MazeBuffID`，本站楼层内呈现为「可用增益」）称作「关卡效果」——**「关卡效果」一词在站点内不指本词条**，站点一律用官方术语「首领特性」（末日幻影中挂在层级 / 星启子 tab 的对应场次下）。
+_Avoid_: 关卡效果（游戏内指末法余烬）、敌方机制（笼统）、可用增益（那是末法余烬）
 
 ### 异相仲裁（Anomaly）
 每期 3 骑士试炼 + 1 王棋最终关（含「绝境」困难变体）；挑战目标走 BattleTargetConfig（Type=ChallengeTarget）。段位徽章系统（ChallengeBadgeConfig）：青铜/白银/黄金/彩钻四段，按期分组（部分期缺省）。
 _Avoid_: 徽章奖励、段位
 
 ### 星启模式（Starlit）
-三模式的独立进阶关卡：Tierce 表（ChallengeMazeTierce 等）记录常规最高难度关 ID（DLCKKJFMJOB）+ 星启附加关（HFIAAGAKFMD），3 节点敌方（节点 1/2 = 常规最高难度关上下半场，节点 3 = 星启附加关）。
+三模式的独立进阶关卡：Tierce 表（ChallengeMazeTierce 等）记录常规最高难度关 ID（DLCKKJFMJOB）+ 星启附加关（HFIAAGAKFMD），**3 个节点各是一场完整战斗**（节点 1/2 = 常规最高难度关的上下半场，节点 3 = 星启附加关），每个节点的内容口径与层 tab 的场次一致：推荐属性（节点 1/2 = 层级关的 `DamageType1/2`，节点 3 = 星启表的整场弱点 `LOJCIDLKPKG`，不从附加关敌方韧性弱点推导）+ 敌方配置 + 等级/回合 + 该场次的赛季增益与首领特性 + 可用增益。**挑战目标与通关奖励独立于常规层**（目标 = `OGEOMCGNNMP` 3 档 + 满分档 `GNGENMHNLAH` 并入末位；奖励 = `EGEEJLHBALB`，经 items.json 映射名称/图标）。节点的「场次键」`origin`（`stage1`/`stage2`/`tierce`）是取赛季级分场次字段（`buff_groups` / `boss_traits`）的**唯一入口**，前端禁止再按节点序号硬判。末日幻影详情页把它与「第 1..N 层」并列为子 tab，节点 1/2 以「同第 N 层」标出与常规末层的同源关系；节点编号（节点 N）不再上屏——一个节点就是一场战斗，标题走场次口径（上半场/下半场/星启附加关）。面板顶部统计行只留赛季级独有的项（回合限制 / 分数限制）——原先那两项推荐属性与敌人等级**所指就是附加关那一场**（Tierce 的 `LOJCIDLKPKG` 与 `HFIAAGAKFMD` 的 `StageConfig.Level` 只描述这一场，不是三节点汇总），已随场次卡下移、不再在面板级重复。
 _Avoid_: 星启、进阶模式
 
 ### 挑战目标（Challenge Target）

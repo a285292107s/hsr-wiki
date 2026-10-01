@@ -79,7 +79,7 @@ describe('pollutionEntries', () => {
       id: '1', zh: '混合',
       floor_details: [pollutedFloor],
       levels: [{ kind: 'knight', name: '骑士（一）', invasion: { level: 2 } }],
-      tierce: { id: 9, nodes: [{ idx: 3, monsters: [], invasion: { level: 3 } }] },
+      tierce: { id: 9, nodes: [{ idx: 3, origin: 'tierce', monsters: [], invasion: { level: 3 } }] },
     } as MazeListEntry;
     expect(pollutionEntries(entry).map((e) => e.half)).toEqual(['stage1', 'level', 'tierce']);
   });
@@ -90,8 +90,8 @@ describe('pollutionEntries', () => {
       id: '1', zh: '去重',
       floor_details: [floor(4, { stage1: { invasion: { level: 3, stage_id: 420534 } } })],
       tierce: { id: 9, nodes: [
-        { idx: 1, monsters: [], invasion: { level: 3, stage_id: 420534 } },
-        { idx: 3, monsters: [], invasion: { level: 3, stage_id: 30126123 } },
+        { idx: 1, origin: 'stage1', monsters: [], invasion: { level: 3, stage_id: 420534 } },
+        { idx: 3, origin: 'tierce', monsters: [], invasion: { level: 3, stage_id: 30126123 } },
       ] },
       pollution: summary,
     } as MazeListEntry;

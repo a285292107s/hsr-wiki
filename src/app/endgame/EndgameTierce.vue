@@ -2,28 +2,55 @@
 import { computed, ref, watch } from 'vue';
 import { buildEndgameSections, sectionIdxMap } from './sections';
 import {
-  TARGET_TYPE_LABEL, elemRow, monWaveGroups, nodeSummary, targetHtml, targetTypeIconHtml,
+  TARGET_TYPE_LABEL, targetHtml, targetTypeIconHtml,
 } from './renders';
+import StageContent from './StageContent.vue';
+import StageHead from './StageHead.vue';
+import EndgameBuffGroup from './EndgameBuffGroup.vue';
+import EndgameTraitGroup from './EndgameTraitGroup.vue';
+import EndgameFloorBuff from './EndgameFloorBuff.vue';
 import { itemIconUrl } from '../../lib/format';
 import { loadLocalItems } from '../../services/api';
 import EnemyCard from '../components/EnemyCard.vue';
-import type { LocalItemEntry, MazeListEntry } from '../../services/types';
+import type { LocalItemEntry, MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeTierceNode } from '../../services/types';
 
 const props = defineProps<{
   data: MazeListEntry;
   modeKey: string;
+  /** 作为子 tab 面板渲染（末日幻影）：不渲染区块标题 */
+  embedded?: boolean;
 }>();
 
 const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, [])));
 
-const tierceDamage = computed<string[]>(() => props.data.tierce?.damage_types || []);
 const tierceCountdown = computed<number>(() => props.data.tierce?.countdown || 0);
 const tierceScore = computed<number | null>(() => props.data.tierce?.score ?? null);
-const tierceLevel = computed<number>(() => props.data.tierce?.level || 0);
 const tierceTargets = computed(() => props.data.tierce?.targets || []);
 const tierceMonsters = computed(() => props.data.tierce?.monsters || []);
-/** 星启 3 节点敌方（节点 1/2 = 常规最高难度关上下半场；节点 3 = 星启附加关） */
-const tierceNodes = computed(() => props.data.tierce?.nodes || []);
+/** 星启 3 节点，每个节点是一整场战斗（完整场次内容） */
+const tierceNodes = computed<MazeTierceNode[]>(() => props.data.tierce?.nodes || []);
+
+/** 节点 1/2 同源的常规末层层号（Tierce 的 DLCKKJFMJOB = 常规最高难度关，即最大层） */
+const sameFloor = computed<number | null>(() => {
+  const floors = (props.data.floor_details || []).map((f) => f.floor);
+  return floors.length ? Math.max(...floors) : null;
+});
+/** 节点 1/2 的同源标注（这两个节点就是末层上下半场；节点 3 是星启附加关，不标） */
+function nodeOrigin(idx: number): string {
+  if (!sameFloor.value || idx > 2) return '';
+  return `同第 ${sameFloor.value} 层`;
+}
+/** 节点标题走场次口径（节点编号只活在数据里，不上屏） */
+function nodeLabel(nd: MazeTierceNode): string {
+  return nd.idx === 1 ? '上半场' : nd.idx === 2 ? '下半场' : '星启附加关';
+}
+/** 该场次的赛季增益与首领特性：按 origin 取赛季级分场次字段（仅末日幻影产出） */
+function nodeBuffs(nd: MazeTierceNode): MazeBuffInfo[] {
+  return props.data.buff_groups?.[nd.origin] || [];
+}
+function nodeTraits(nd: MazeTierceNode): MazeBossTrait[] {
+  return props.data.boss_traits?.[nd.origin] || [];
+}
 
 const itemMap = ref<Map<number, Pick<LocalItemEntry, 'name' | 'icon'>>>(new Map());
 /** 星启通关奖励（EGEEJLHBALB：物品 id + 数量，经 items.json 映射名称/图标） */
@@ -43,40 +70,13 @@ watch(
   },
   { immediate: true },
 );
-
-const collapsedNodes = ref<Set<string>>(new Set());
-const collapsedWaves = ref<Set<string>>(new Set());
-function nodeKey(ni: number): string { return `n${ni}`; }
-function waveKey(ni: number, wi: number): string { return `n${ni}-w${wi}`; }
-function isNodeExpanded(ni: number): boolean { return !collapsedNodes.value.has(nodeKey(ni)); }
-function isWaveExpanded(ni: number, wi: number): boolean { return !collapsedWaves.value.has(waveKey(ni, wi)); }
-function toggleNode(ni: number): void {
-  const s = new Set(collapsedNodes.value);
-  const k = nodeKey(ni);
-  if (s.has(k)) s.delete(k); else s.add(k);
-  collapsedNodes.value = s;
-}
-function toggleWave(ni: number, wi: number): void {
-  const s = new Set(collapsedWaves.value);
-  const k = waveKey(ni, wi);
-  if (s.has(k)) s.delete(k); else s.add(k);
-  collapsedWaves.value = s;
-}
 </script>
 
 <template>
   <template v-if="data.tierce">
-    <h2 id="egd-tierce" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['tierce'] }}</span>星启模式 STARLIT</h2>
+    <h2 v-if="!embedded" id="egd-tierce" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['tierce'] }}</span>星启模式 STARLIT</h2>
     <div class="nk-egd-tierce">
-      <div v-if="tierceDamage.length || tierceLevel || tierceCountdown || tierceScore != null" class="nk-egd-tierce__stats">
-        <div v-if="tierceDamage.length" class="nk-egd-tierce__stat">
-          <span class="nk-egd-tierce__val nk-egd-tierce__val--elems" v-html="elemRow(tierceDamage)"></span>
-          <span class="nk-egd-tierce__label">推荐属性 RECOMMENDED</span>
-        </div>
-        <div v-if="tierceLevel" class="nk-egd-tierce__stat">
-          <span class="nk-egd-tierce__val">{{ tierceLevel }}</span>
-          <span class="nk-egd-tierce__label">敌人等级 ENEMY LV</span>
-        </div>
+      <div v-if="tierceCountdown || tierceScore != null" class="nk-egd-tierce__stats">
         <div v-if="tierceCountdown" class="nk-egd-tierce__stat">
           <span class="nk-egd-tierce__val">{{ tierceCountdown }}</span>
           <span class="nk-egd-tierce__label">回合限制 CYCLES</span>
@@ -86,96 +86,73 @@ function toggleWave(ni: number, wi: number): void {
           <span class="nk-egd-tierce__label">分数限制 SCORE</span>
         </div>
       </div>
-      <ol v-if="tierceTargets.length" class="nk-egd-tierce__targets">
-        <li v-for="(t, i) in tierceTargets" :key="i" class="nk-egd-node">
-          <span
-            v-if="t.type && TARGET_TYPE_LABEL[t.type]"
-            class="nk-egd-node__type"
-            :title="TARGET_TYPE_LABEL[t.type]"
-            v-html="targetTypeIconHtml(t.type)"
-          ></span>
-          <span class="nk-egd-node__text" v-html="targetHtml(t)"></span>
-        </li>
-      </ol>
-      <ul v-if="tierceNodes.length" class="nk-egd-tierce__waves" aria-label="星启节点列表">
-        <li
-          v-for="(nd, ni) in tierceNodes"
-          :key="ni"
-          class="nk-egd-tierce__node"
-          :class="{ 'nk-egd-tierce__node--collapsed': !isNodeExpanded(ni) }"
-        >
-          <button
-            type="button"
-            class="nk-egd-tierce__nodehead"
-            :aria-expanded="isNodeExpanded(ni)"
-            :aria-controls="`egd-node-${ni}-body`"
-            :aria-label="`节点 ${nd.idx}，${nodeSummary(nd)}，点击${isNodeExpanded(ni) ? '折叠' : '展开'}`"
-            @click="toggleNode(ni)"
-          >
-            <span class="nk-egd-tierce__nodelabel"><span class="nk-egd-tierce__nodezh">节点</span>NODE-{{ String(nd.idx).padStart(2, '0') }}</span>
-            <span class="nk-egd-tierce__nodesummary" :title="nodeSummary(nd)">{{ nodeSummary(nd) }}</span>
-            <svg class="nk-egd-tierce__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div
-            class="nk-egd-tierce__nodebody"
-            :id="`egd-node-${ni}-body`"
-            role="region"
-            :inert="!isNodeExpanded(ni)"
-            :class="{ 'nk-egd-tierce__nodebody--collapsed': !isNodeExpanded(ni) }"
-          >
-            <div class="nk-egd-tierce__nodebody-inner">
-              <div
-                v-for="(g, gi) in monWaveGroups(nd.monsters)"
-                :key="gi"
-                class="nk-egd-tierce__wave"
-                :class="{ 'nk-egd-tierce__wave--collapsed': !isWaveExpanded(ni, gi) }"
-              >
-                <button
-                  type="button"
-                  class="nk-egd-tierce__wavehead"
-                  :aria-expanded="isWaveExpanded(ni, gi)"
-                  :aria-controls="`egd-wave-${ni}-${gi}-body`"
-                  :aria-label="`节点 ${nd.idx} 第 ${g.wave} 波，${g.items.length} 敌，点击${isWaveExpanded(ni, gi) ? '折叠' : '展开'}`"
-                  @click="toggleWave(ni, gi)"
-                >
-                  <span class="nk-egd-tierce__wavename">第 {{ g.wave }} 波</span>
-                  <span class="nk-egd-tierce__wavesummary" :title="`${g.items.length} 敌`">× {{ g.items.length }} 敌</span>
-                  <svg class="nk-egd-tierce__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div
-                  class="nk-egd-tierce__wavebody"
-                  :id="`egd-wave-${ni}-${gi}-body`"
-                  role="group"
-                  :inert="!isWaveExpanded(ni, gi)"
-                  :class="{ 'nk-egd-tierce__wavebody--collapsed': !isWaveExpanded(ni, gi) }"
-                >
-                  <div class="nk-egd-tierce__wavebody-inner">
-                    <div class="nk-egd-mons">
-                      <EnemyCard v-for="m in g.items" :key="`${m.id}-${ni}-${gi}`" :monster="m" />
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <div v-if="tierceTargets.length || tierceRewards.length" class="nk-egd-tierce__head">
+        <div v-if="tierceTargets.length" class="nk-egd-tierce__col">
+          <span class="nk-egd-tierce__headlabel">挑战目标</span>
+          <ol class="nk-egd-tierce__targets">
+            <li v-for="(t, i) in tierceTargets" :key="i" class="nk-egd-node">
+              <span
+                v-if="t.type && TARGET_TYPE_LABEL[t.type]"
+                class="nk-egd-node__type"
+                :title="TARGET_TYPE_LABEL[t.type]"
+                v-html="targetTypeIconHtml(t.type)"
+              ></span>
+              <span class="nk-egd-node__text" v-html="targetHtml(t)"></span>
+            </li>
+          </ol>
+        </div>
+        <div v-if="tierceRewards.length" class="nk-egd-tierce__col nk-egd-reward">
+          <div class="nk-egd-reward__head">
+            <span class="nk-egd-tierce__headlabel">通关奖励</span>
+            <span v-if="tierceScore" class="nk-egd-reward__goal">通关目标：获得 {{ tierceScore.toLocaleString() }} 分</span>
+          </div>
+          <div class="nk-egd-reward__items">
+            <span v-for="r in tierceRewards" :key="r.id" class="nk-egd-reward__item">
+              <img v-if="r.icon" class="nk-egd-reward__icon" :src="itemIconUrl(r.icon)" :alt="r.name" :title="r.name" loading="lazy" @error="($event.target as HTMLImageElement).classList.add('nk-img-error')">
+              <span v-else class="nk-egd-reward__icon nk-egd-reward__icon--void">{{ String(r.id).slice(0, 2) }}</span>
+              <span class="nk-egd-reward__name">{{ r.name }}</span>
+              <span v-if="r.num" class="nk-egd-reward__num">×{{ r.num.toLocaleString() }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <ol v-if="tierceNodes.length" class="nk-egd-tierce__nodes" aria-label="星启节点列表">
+        <li v-for="nd in tierceNodes" :key="nd.idx" class="nk-egd-tierce__node">
+          <header class="nk-egd-tierce__nodehead">
+            <span class="nk-egd-tierce__nodelabel"><span class="nk-egd-tierce__nodezh">{{ nodeLabel(nd) }}</span></span>
+            <span v-if="nodeOrigin(nd.idx)" class="nk-egd-tierce__nodefrom">{{ nodeOrigin(nd.idx) }}</span>
+            <StageHead :stage="nd" />
+            <span v-if="nd.level || nd.countdown" class="nk-egd-floor__data">
+              <span v-if="nd.level" class="nk-egd-floor__dataitem">
+                <span class="nk-egd-floor__dataval">{{ nd.level }}</span>
+                <span class="nk-egd-floor__datalabel">等级</span>
+              </span>
+              <span v-if="nd.countdown" class="nk-egd-floor__dataitem">
+                <span class="nk-egd-floor__dataval">{{ nd.countdown }}</span>
+                <span class="nk-egd-floor__datalabel">回合</span>
+              </span>
+            </span>
+          </header>
+          <div class="nk-egd-tierce__nodebody nk-egd-children">
+            <StageContent :stage="nd" :is-boss="true" headless />
+            <div v-if="nodeBuffs(nd).length || nodeTraits(nd).length" class="nk-egd-lvl__effects">
+              <EndgameBuffGroup
+                v-if="nodeBuffs(nd).length"
+                title="赛季增益"
+                :items="nodeBuffs(nd)"
+              />
+              <EndgameTraitGroup
+                v-if="nodeTraits(nd).length"
+                title="首领特性"
+                :items="nodeTraits(nd)"
+              />
             </div>
+            <EndgameFloorBuff :buff="nd.buff" />
           </div>
         </li>
-      </ul>
+      </ol>
       <div v-else-if="tierceMonsters.length" class="nk-egd-mons">
         <EnemyCard v-for="m in tierceMonsters" :key="m.id" :monster="m" />
-      </div>
-      <div v-if="tierceRewards.length" class="nk-egd-reward">
-        <div class="nk-egd-reward__head">
-          <span class="nk-egd-reward__label">通关奖励</span>
-          <span v-if="tierceScore" class="nk-egd-reward__goal">通关目标：获得 {{ tierceScore.toLocaleString() }} 分</span>
-        </div>
-        <div class="nk-egd-reward__items">
-          <span v-for="r in tierceRewards" :key="r.id" class="nk-egd-reward__item">
-            <img v-if="r.icon" class="nk-egd-reward__icon" :src="itemIconUrl(r.icon)" :alt="r.name" :title="r.name" loading="lazy" @error="($event.target as HTMLImageElement).classList.add('nk-img-error')">
-            <span v-else class="nk-egd-reward__icon nk-egd-reward__icon--void">{{ String(r.id).slice(0, 2) }}</span>
-            <span class="nk-egd-reward__name">{{ r.name }}</span>
-            <span v-if="r.num" class="nk-egd-reward__num">×{{ r.num.toLocaleString() }}</span>
-          </span>
-        </div>
       </div>
     </div>
   </template>

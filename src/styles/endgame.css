@@ -42,6 +42,8 @@
 .nk-eg-lrow__meta { display: flex; align-items: center; gap: 9px; min-width: 0; }
 .nk-eg-lrow__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; color: var(--st-color); }
 .nk-eg-lrow__dot { width: 4px; height: 4px; border-radius: 50%; background: var(--st-color); flex-shrink: 0; }
+/* 赛季含污染关卡（ADR 0026）：等级细节走详情页，列表只给存在性标记；色值走污染族（ADR 0027），不吃模式色 */
+.nk-eg-lrow__poll { flex-shrink: 0; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--vor-500) 45%, transparent); border-radius: 999px; font-size: 0.54rem; font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; color: var(--vor-300); background: color-mix(in srgb, var(--vor-500) 9%, transparent); }
 .nk-eg-lrow__date { flex-shrink: 0; min-width: 0; font-family: var(--font-hud); font-size: 0.54rem; letter-spacing: 0.04em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .nk-eg-lrow--live { --st-color: var(--season-live); }
 .nk-eg-lrow--ended { --st-color: var(--season-ended); }

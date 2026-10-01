@@ -2,11 +2,46 @@ import { ELEM, MON_RANK } from '../../lib/constants';
 import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
 import type {
-  MazeBuffInfo, MazeFloorDetail, MazeMonsterInfo, MazeStageDetail, MazeTargetInfo,
+  MazeBossTrait, MazeBuffInfo, MazeFloorDetail, MazeMonsterInfo, MazeStageDetail, MazeTargetInfo,
 } from '../../services/types';
 
 export function buffDescHtml(b: MazeBuffInfo): string {
   return fmtDesc(b.desc, b.param_list || []);
+}
+
+/** 首领特性描述（与赛季增益同渲染：#N[i] 参数占位由 fmtDesc 替换） */
+export function bossTraitDescHtml(t: MazeBossTrait): string {
+  return fmtDesc(t.desc, t.param_list || []);
+}
+
+/** 末日幻影分场次条目的场次键（源表 BuffList1/2/3） */
+export type EndgameGroupKey = 'stage1' | 'stage2' | 'tierce';
+
+export const ENDGAME_GROUP_LABELS: Record<EndgameGroupKey, string> = {
+  stage1: '上半场',
+  stage2: '下半场',
+  tierce: '星启模式',
+};
+
+export interface EndgameGroup<T> {
+  key: string;
+  label: string;
+  items: T[];
+}
+
+/** 分场次条目 → 渲染分组（末日幻影的赛季增益/首领特性按场次下发）。
+
+  无分场次数据时降级为单个**无标签**分组，使其余模式的扁平列表复用同一模板。 */
+export function endgameGroups<T>(
+  groups: Partial<Record<EndgameGroupKey, T[]>> | undefined,
+  flat?: T[],
+): EndgameGroup<T>[] {
+  if (groups) {
+    return (['stage1', 'stage2', 'tierce'] as const)
+      .filter((k) => (groups[k]?.length ?? 0) > 0)
+      .map((k) => ({ key: k, label: ENDGAME_GROUP_LABELS[k], items: groups[k] as T[] }));
+  }
+  return flat?.length ? [{ key: 'all', label: '', items: flat }] : [];
 }
 
 /** 增益图标 URL（bufficon CDN；资源未就绪时 404，img error 事件兜底 SVG 占位） */
@@ -19,11 +54,6 @@ export const BUFF_ICON_FALLBACK =
 
 export function stageHasContent(s?: MazeStageDetail): boolean {
   return !!s && (!!s.damage?.length || !!s.monsters?.length);
-}
-
-/** 末日幻影阶段对应推荐属性（阶段 1/2 取上下半场属性列；第 3 阶段源数据无属性列） */
-export function phaseDamage(f: MazeFloorDetail, pi: number): string[] | undefined {
-  return pi === 0 ? f.stage1?.damage : pi === 1 ? f.stage2?.damage : undefined;
 }
 
 export function stageDamageSummary(f: MazeFloorDetail): string {
@@ -109,12 +139,6 @@ export function targetTypeIconHtml(type: string): string {
 export function targetHtml(t: MazeTargetInfo): string {
   if (t.param != null) return fmtDesc(t.text, [t.param]);
   return t.text.replace(/#\d+\[[^\]]*\]%?/g, '').replace(/#\d+/g, '');
-}
-
-export function nodeSummary(nd: { idx: number; monsters: MazeMonsterInfo[] }): string {
-  const groups = monWaveGroups(nd.monsters);
-  const total = groups.reduce((acc, g) => acc + g.items.length, 0);
-  return `${groups.length} 波 · ${total} 敌`;
 }
 
 export function hideOnError(e: Event): void {

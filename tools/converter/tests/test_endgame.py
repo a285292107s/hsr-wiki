@@ -3,7 +3,8 @@
 用合成数据验证核心行为，不依赖真实源数据：
 - _load_schedules：ScheduleID-200000 → GroupID 映射；公测前/2030 未来占位过滤
 - _load_maze_buffs / _load_monsters / _load_targets：辅助表解析（名称/图标 basename）
-- _group_maze_buff / _group_extra_buff / _load_story_turns：组级增益 / 回合上限
+- _group_maze_buff / _group_extra_buff / _group_extra_buff_groups / _load_story_turns：组级/分场次增益 / 回合上限
+- _load_guide_traits / _stage_traits / _attach_boss_traits：末日幻影首领特性（模板聚合与技能 ID 反查）
 - _season_stats：层数/阶段/回合取最大，弱点合并去重，逐层弱点 floor_damage
 - _season_floors：逐层详情（序号/层名/上下半场属性与敌方/层级增益/目标）
 - _season_monsters / _season_targets：敌方按层序收集去重、目标描述去重
@@ -158,6 +159,17 @@ class TestGroupAux:
         assert out == {2025: [3031232, 3031233, 3031234]}
         assert 2001 not in out
 
+    def test_group_extra_buff_groups_by_half(self, monkeypatch):
+        """分场次赛季增益：BuffList1/2/3 → stage1/stage2/tierce；组内去重保序，空场次不落键。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"GroupID": 3020, "BuffList1": [1, 2, 2], "BuffList2": [3, 4, 5], "BuffList3": [6]},
+            {"GroupID": 3001, "BuffList1": [], "BuffList2": [], "BuffList3": []},
+            {"GroupID": 0},
+        ])
+        out = eg._group_extra_buff_groups("ChallengeBossGroupExtra.json")
+        assert out == {3020: {"stage1": [1, 2], "stage2": [3, 4, 5], "tierce": [6]}}
+        assert 3001 not in out
+
     def test_load_story_turns(self, monkeypatch):
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"ID": 20011, "TurnLimit": 5},
@@ -165,6 +177,82 @@ class TestGroupAux:
             {"ID": 20111, "TurnLimit": 4},
         ])
         assert eg._load_story_turns() == {"2001": 6, "2011": 4}
+
+class TestBossTraits:
+    """末日幻影「首领特性」（MonsterGuideConfig × MonsterGuideTag → 敌方模板 → 场次）。"""
+
+    @staticmethod
+    def _guide(tag_recs, config_recs, monkeypatch):
+        def fake(path):
+            return config_recs if str(path).endswith("MonsterGuideConfig.json") else tag_recs
+        monkeypatch.setattr(eg, "load_json", fake)
+        return eg._load_guide_traits()
+
+    def test_direct_template_index(self, monkeypatch):
+        """配置表 MonsterID（模板×100+实例序号）→ 模板：同模板各难度实例共用一份清单。"""
+        tag = {"TagID": 101701, "TagName": {"Hash": 11}, "TagBriefDescription": {"Hash": 12},
+               "ParameterList": [{"Value": 0.5}, 1]}
+        out = self._guide([tag], [
+            {"MonsterID": 202401601, "TagList": [101701]},
+            {"MonsterID": 202401604, "TagList": [101701]},
+        ], monkeypatch)
+        assert out == {2024016: [{"id": 101701, "name": "名11", "desc": "名12", "param_list": [0.5, 1]}]}
+
+    def test_skill_id_alias_when_template_missing(self, monkeypatch):
+        """配置表登记的敌方 ID ≠ 战斗敌方（影将军 2035012 登记为蚀心兽 2033022）→
+        Tag.SkillID // 100 反查补上，使战斗模板能命中首领特性。"""
+        tags = [
+            {"TagID": 101201, "TagName": {"Hash": 1}, "TagBriefDescription": {"Hash": 2},
+             "ParameterList": [], "SkillID": 203501211},
+            {"TagID": 101202, "TagName": {"Hash": 3}, "TagBriefDescription": {"Hash": 4},
+             "ParameterList": []},
+        ]
+        out = self._guide(tags, [{"MonsterID": 203302201, "TagList": [101201, 101202]}], monkeypatch)
+        assert [e["id"] for e in out[2035012]] == [101201, 101202]
+
+    def test_alias_ambiguous_or_already_direct_skipped(self, monkeypatch):
+        """反查键被多组 TagList 共享（技能跨首领复用）时放弃；配置表已有该模板时不用反查覆盖。"""
+        tags = [
+            {"TagID": 1, "TagName": {"Hash": 1}, "TagBriefDescription": {}, "ParameterList": [],
+             "SkillID": 203501211},
+            {"TagID": 2, "TagName": {"Hash": 2}, "TagBriefDescription": {}, "ParameterList": [],
+             "SkillID": 203501212},
+            {"TagID": 3, "TagName": {"Hash": 3}, "TagBriefDescription": {}, "ParameterList": [],
+             "SkillID": 100401410},
+        ]
+        out = self._guide(tags, [
+            {"MonsterID": 203302201, "TagList": [1]},
+            {"MonsterID": 203302301, "TagList": [2]},
+            {"MonsterID": 100401401, "TagList": [3]},
+        ], monkeypatch)
+        assert 2035012 not in out
+        assert [e["id"] for e in out[1004014]] == [3]
+
+    def test_stage_traits_template_dedup(self):
+        """一个场次的首领特性：按敌方模板命中并按 TagID 去重保序（未登记模板跳过）。"""
+        a, b = {"id": 101701, "name": "坚防守备"}, {"id": 101702, "name": "丰亨豫大"}
+        guide = {2024016: [a, b], 5014014: [{"id": 101601, "name": "双重战场"}]}
+        mons = [{"id": "202401601"}, {"id": "202401602"}, {"id": "100402601", "tpl": "1004026"}]
+        assert eg._stage_traits(mons, guide) == [a, b]
+
+    def test_attach_boss_traits_top_floor_and_star_node(self):
+        """赛季级首领特性取末层两个场次 + 星启节点 3；无命中/无节点不落字段。"""
+        a, b = {"id": 101701, "name": "坚防守备"}, {"id": 101601, "name": "双重战场"}
+        guide = {2024016: [a], 5014014: [b]}
+        entry = {
+            "floor_details": [
+                {"floor": 1, "stage1": {"monsters": [{"id": "202401601"}]}, "stage2": {"monsters": []}},
+                {"floor": 4, "stage1": {"monsters": [{"id": "202401604"}]},
+                 "stage2": {"monsters": [{"id": "999901"}]}},
+            ],
+            "tierce": {"nodes": [{"idx": 1, "monsters": [{"id": "202401604"}]},
+                                 {"idx": 3, "monsters": [{"id": "501401404"}]}]},
+        }
+        eg._attach_boss_traits(entry, guide)
+        assert entry["boss_traits"] == {"stage1": [a], "tierce": [b]}
+        empty = {"floor_details": [{"floor": 1, "stage1": {"monsters": []}, "stage2": {"monsters": []}}]}
+        eg._attach_boss_traits(empty, guide)
+        assert "boss_traits" not in empty
 
 class TestTierce:
     """星启模式（Tierce）表解析：DLCKKJFMJOB → 关卡表 GroupID 映射。"""
@@ -182,7 +270,9 @@ class TestTierce:
                          "JEBMBCLBIOI": [5014010, 9999999]}]
             if name.endswith("ChallengeMazeConfig.json"):
                 return [{"ID": 5212, "GroupID": 1033,
-                         "EventIDList1": [30123031], "EventIDList2": [30123032]},
+                         "EventIDList1": [30123031], "EventIDList2": [30123032],
+                         "ChallengeCountDown": 30, "MazeBuffID": 999,
+                         "DamageType1": ["Physical"], "DamageType2": ["Fire"]},
                         {"ID": 5312, "GroupID": 1034}]
             if name.endswith("ChallengeStoryMazeTierce.json"):
                 return [{"PHFMCACHFIJ": 20245, "DLCKKJFMJOB": 20244,
@@ -218,6 +308,8 @@ class TestTierce:
             [("ChallengeMazeTierce.json", "ChallengeMazeConfig.json"),
              ("ChallengeStoryMazeTierce.json", "ChallengeStoryMazeConfig.json")],
             targets, monsters,
+            buffs={999: {"name": "末法余烬", "desc": "霸者机制", "param_list": [0.5],
+                         "icon": "BuffIcon/Inlevel/X"}},
         )
         assert out["1033"] == {
             "id": 5213,
@@ -236,13 +328,23 @@ class TestTierce:
                  "weak": [], "resist": {}, "rank": "", "wave": 2},
             ],
             "nodes": [
-                {"idx": 1, "monsters": [{"id": "5014010", "name": "星啸",
-                                            "icon": "Monster_5014010", "weak": [],
-                                            "resist": {}, "rank": "", "wave": 1}]},
-                {"idx": 2, "monsters": [{"id": "5013040", "name": "先锋",
-                                            "icon": "Monster_5013040", "weak": [],
-                                            "resist": {}, "rank": "Elite", "wave": 1}]},
-                {"idx": 3, "monsters": [
+                {"idx": 1, "origin": "stage1", "damage": ["Physical"], "level": 95,
+                 "countdown": 30,
+                 "buff": {"id": 999, "name": "末法余烬", "desc": "霸者机制",
+                          "param_list": [0.5], "icon": "BuffIcon/Inlevel/X"},
+                 "monsters": [{"id": "5014010", "name": "星啸",
+                                             "icon": "Monster_5014010", "weak": [],
+                                             "resist": {}, "rank": "", "wave": 1}]},
+                {"idx": 2, "origin": "stage2", "damage": ["Fire"], "level": 95,
+                 "countdown": 30,
+                 "buff": {"id": 999, "name": "末法余烬", "desc": "霸者机制",
+                          "param_list": [0.5], "icon": "BuffIcon/Inlevel/X"},
+                 "monsters": [{"id": "5013040", "name": "先锋",
+                                             "icon": "Monster_5013040", "weak": [],
+                                             "resist": {}, "rank": "Elite", "wave": 1}]},
+                {"idx": 3, "origin": "tierce", "damage": ["Fire", "Imaginary"],
+                 "level": 95, "countdown": 45,
+                 "monsters": [
                     {"id": "5013040", "name": "先锋", "icon": "Monster_5013040",
                      "weak": [], "resist": {}, "rank": "Elite", "wave": 1},
                     {"id": "5014010", "name": "星啸", "icon": "Monster_5014010",
@@ -776,3 +878,135 @@ class TestCatalogLight:
         assert out["tierce"] == {"id": 9, "damage_types": ["Wind"], "countdown": 30}
         assert "nodes" not in out["tierce"]
         assert out["levels"] == [{"kind": "knight"}, {"kind": "king"}]
+
+    def test_season_catalog_keeps_pollution_summary(self):
+        """污染赛季的轻量条目保留 pollution 汇总（目录卡「含污染」标记的唯一判据）。"""
+        entry = {"id": "3021", "zh": "支配遗忘", "pollution": {"count": 2, "levels": [2, 3]}}
+        assert egc._season_catalog(entry)["pollution"] == {"count": 2, "levels": [2, 3]}
+        assert "pollution" not in egc._season_catalog({"id": "1", "zh": "无污染"})
+
+
+class TestPollution:
+    """污染等级写入终局数据（ADR 0026）：关卡级判据 = EventIDList 命中 StageInvasionConfig。"""
+
+    def test_load_invasion_index_dedupes_monster_ids(self, monkeypatch):
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"StageID": 420503, "InvasionID": 2, "MonsterInvasionList": [
+                {"DBLDCKODNEN": 202206017}, {"DBLDCKODNEN": 202206017},
+                {"DBLDCKODNEN": 202303203},
+            ]},
+            {"StageID": 1, "InvasionID": 3},
+            {"InvasionID": 1, "MonsterInvasionList": [{"DBLDCKODNEN": 1}]},
+        ])
+        assert eg._load_invasion_index() == {
+            420503: {"level": 2, "monster_ids": [202206017, 202303203]},
+            1: {"level": 3, "monster_ids": []},
+        }
+
+    def test_stage_invasion_only_registered_monsters(self):
+        """被污染怪物只收录图鉴内已注册者（未注册的实例 ID 无名称/图标，跳过）。"""
+        invasions = {420503: {"level": 2, "monster_ids": [202206017, 9000]}}
+        monsters = {202206017: {"name": "器元士", "icon": "Monster_2022060",
+                                "weak": [], "resist": {}, "rank": "MinionLv2"}}
+        assert eg._stage_invasion([420503], invasions, monsters)["monsters"] == [
+            {"id": "202206017", "name": "器元士", "icon": "Monster_2022060",
+             "weak": [], "resist": {}, "rank": "MinionLv2"},
+        ]
+        # 未命中任何污染关卡 → None（字段整体省略，而非空对象）
+        assert eg._stage_invasion([999], invasions, monsters) is None
+
+    def test_stage_invasion_keeps_level_when_no_monster_registered(self):
+        """污染关卡的怪物全未注册时仍保留等级（等级是关卡级事实，不依赖怪物清单）。"""
+        invasions = {1: {"level": 3, "monster_ids": [9000]}}
+        assert eg._stage_invasion([1], invasions, {}) == {"level": 3, "stage_id": 1}
+
+    def test_season_floors_attaches_invasion_per_half(self):
+        recs = [{"ID": 1, "Floor": 3, "Name": {"Hash": 1},
+                 "EventIDList1": [420503], "EventIDList2": [420513]}]
+        stages = {420503: {"level": 80, "waves": [[1003010]]},
+                  420513: {"level": 80, "waves": [[1003010]]}}
+        monsters = {1003010: {"name": "怪A", "icon": "Monster_A",
+                              "weak": [], "resist": {}, "rank": "Elite"}}
+        out = eg._season_floors(
+            recs, monsters, {}, {}, stages,
+            invasions={420503: {"level": 2, "monster_ids": [1003010]}})
+        assert out[0]["stage1"]["invasion"] == {
+            "level": 2, "stage_id": 420503,
+            "monsters": [{"id": "1003010", "name": "怪A", "icon": "Monster_A",
+                          "weak": [], "resist": {}, "rank": "Elite"}],
+        }
+        assert "invasion" not in out[0]["stage2"]
+        # 不传 invasions（旧调用方）时不落该字段
+        assert "invasion" not in eg._season_floors(recs, monsters, {}, {}, stages)[0]["stage1"]
+
+    def test_apply_pollution_dedupes_by_stage_id(self):
+        """赛季汇总按 StageID 去重：星启节点 1/2 与常规末层同关卡，不得重复计数。"""
+        entry = {
+            "floor_details": [
+                {"floor": 12, "stage1": {"invasion": {"level": 3, "stage_id": 30125121}},
+                 "stage2": {}},
+            ],
+            "tierce": {"nodes": [
+                {"idx": 1, "invasion": {"level": 3, "stage_id": 30125121}},
+                {"idx": 2, "invasion": {"level": 2, "stage_id": 30125122}},
+                {"idx": 3, "invasion": {"level": 3, "stage_id": 30126123}},
+            ]},
+        }
+        eg._apply_pollution(entry)
+        assert entry["pollution"] == {"count": 3, "levels": [2, 3]}
+
+    def test_apply_pollution_omitted_without_nodes(self):
+        entry = {"floor_details": [{"floor": 1, "stage1": {}, "stage2": {}}]}
+        eg._apply_pollution(entry)
+        assert "pollution" not in entry
+
+    def test_peak_level_node_and_season_summary(self, monkeypatch):
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"StageID": 30509012, "InvasionID": 2,
+             "MonsterInvasionList": [{"DBLDCKODNEN": 1003010}]},
+        ])
+        invasions = eg._load_invasion_index()
+        monsters = {1003010: {"name": "怪A", "icon": "Monster_A",
+                              "weak": [], "resist": {}, "rank": "Elite"}}
+        rec = {"ID": 902, "Title": {"Hash": 1}, "DamageType": ["Fire"],
+               "EventIDList": [30509012], "NormalTargetList": [], "TagList": []}
+        stages = {30509012: {"level": 95, "waves": [[1003010]]}}
+        node = eg._peak_level_node(rec, stages, monsters, {}, {}, "knight", invasions)
+        assert node["invasion"] == {
+            "level": 2, "stage_id": 30509012,
+            "monsters": [{"id": "1003010", "name": "怪A", "icon": "Monster_A",
+                          "weak": [], "resist": {}, "rank": "Elite"}]}
+        entry = {"levels": [node]}
+        eg._apply_pollution(entry)
+        assert entry["pollution"] == {"count": 1, "levels": [2]}
+
+    def test_tierce_node_carries_invasion(self, monkeypatch):
+        """星启附加关（节点 3）本身就是污染关卡：不覆盖则整条只存在于上游表里。"""
+        def fake_load(path):
+            name = str(path)
+            if name.endswith("ChallengeMazeTierce.json"):
+                return [{"PHFMCACHFIJ": 5513, "DLCKKJFMJOB": 5512,
+                         "HFIAAGAKFMD": [30126123], "JEBMBCLBIOI": []}]
+            if name.endswith("ChallengeMazeConfig.json"):
+                return [{"ID": 5512, "GroupID": 1036,
+                         "EventIDList1": [30126121], "EventIDList2": [30126122]}]
+            if name.endswith("StageConfig.json"):
+                return [{"StageID": 30126123, "Level": 92, "MonsterList": [{"Monster0": 1003010}]}]
+            return []
+        monkeypatch.setattr(eg, "load_json", fake_load)
+        monsters = {1003010: {"name": "怪A", "icon": "Monster_A",
+                              "weak": [], "resist": {}, "rank": "Elite"}}
+        out = eg._load_tierce(
+            [("ChallengeMazeTierce.json", "ChallengeMazeConfig.json")],
+            {}, monsters,
+            {30126123: {"level": 3, "monster_ids": [1003010]}},
+        )
+        nodes = out["1036"]["nodes"]
+        assert nodes[2]["invasion"] == {
+            "level": 3, "stage_id": 30126123,
+            "monsters": [{"id": "1003010", "name": "怪A", "icon": "Monster_A",
+                          "weak": [], "resist": {}, "rank": "Elite"}]}
+        assert "invasion" not in nodes[0]
+        entry = {"tierce": out["1036"]}
+        eg._apply_pollution(entry)
+        assert entry["pollution"] == {"count": 1, "levels": [3]}

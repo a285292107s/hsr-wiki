@@ -61,7 +61,9 @@ MODULE_SOURCES: dict[str, list[str]] = {
                  "ChallengePeakBossConfig.json", "BattleTargetConfig.json",
                  "StageConfig.json", "MonsterConfig.json", "MonsterCamp.json",
                  "MonsterSkillConfig.json", "ChallengeBadgeConfig.json",
-                 "ChallengeBossMazeExtra.json", "ChallengeGeneralConfig.json"],
+                 "ChallengeGeneralConfig.json",
+                 "StageInvasionConfig.json", "MonsterGuideConfig.json",
+                 "MonsterGuideTag.json"],
     "endgame_catalog": [
         str(OUTPUT_DIR / "maze.json"),
         str(OUTPUT_DIR / "maze_extra.json"),

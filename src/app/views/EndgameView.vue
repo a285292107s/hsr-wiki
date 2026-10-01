@@ -5,19 +5,29 @@ import { seasonPosterTabUrl } from '../catalog/pages/endgame';
 import { SITE_NAME } from '../../lib/constants';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
+  loadLocalVoracity,
 } from '../../services/api';
-import type { MazeListDb, MazeListEntry, PeakLevelInfo } from '../../services/types';
+import type {
+  MazeListDb, MazeListEntry, PeakLevelInfo, VoracityInvasionLevel,
+} from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import { buildEndgameSections } from '../endgame/sections';
+import { buildBossLevelTabs } from '../endgame/levels';
+import type { BossLevelTab } from '../endgame/levels';
 import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
 import EndgamePeak from '../endgame/EndgamePeak.vue';
 import EndgameTierce from '../endgame/EndgameTierce.vue';
 import EndgameFloors from '../endgame/EndgameFloors.vue';
+import EndgamePollution from '../endgame/EndgamePollution.vue';
+import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
+import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
 import '../../styles/endgame-detail.css';
 
 const route = useRoute();
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 
 const MODE_LOADERS: Record<string, () => Promise<MazeListDb>> = {
@@ -33,6 +43,8 @@ const data = ref<MazeListEntry | null>(null);
 const listDb = ref<MazeListDb | null>(null);
 const seasonIndex = ref(-1);
 const seasonKeys = ref<string[]>([]);
+/** 污染等级词条（voracity.json 的 invasion.levels）：仅污染赛季按需加载，等级描述不在本模块产物里 */
+const invasionLevels = ref<VoracityInvasionLevel[]>([]);
 
 const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 
@@ -59,6 +71,13 @@ async function load(mode: string, id: string): Promise<void> {
     data.value = entry;
     seasonIndex.value = keys.indexOf(id);
     document.title = `${entry.zh} - ${SITE_NAME}`;
+    // 污染等级词条只在污染赛季拉取（voracity.json 单例，专题页与本页共用同一份）
+    invasionLevels.value = [];
+    if (entry.pollution) {
+      loadLocalVoracity()
+        .then((v) => { invasionLevels.value = v.invasion?.levels || []; })
+        .catch(() => { invasionLevels.value = []; });
+    }
     // 后台标签页 rAF 会被浏览器暂停导致永久骨架屏：visibility hidden 时用 setTimeout 兜底推进
     const settleReady = (): void => {
       phase.value = 'ready';
@@ -95,6 +114,29 @@ const floorSections = computed(() => [...(data.value?.floor_details || [])].reve
 const peakLevels = computed<PeakLevelInfo[]>(() => data.value?.levels || []);
 
 const navSections = computed(() => buildEndgameSections(data.value, modeKey.value, peakLevels.value));
+
+/** 末日幻影的子 tab（第 1..N 层 + 星启模式）；其余模式为空数组 → 顶部条走区块导航 */
+const levelTabs = computed<BossLevelTab[]>(
+  () => (modeKey.value === 'boss' ? buildBossLevelTabs(data.value) : []),
+);
+const activeLevel = ref('');
+watch(
+  levelTabs,
+  (tabs) => {
+    if (!tabs.some((t) => t.key === activeLevel.value)) activeLevel.value = tabs[0]?.key || '';
+  },
+  { immediate: true },
+);
+
+function selectLevel(key: string): void {
+  activeLevel.value = key;
+  void nextTick(() => {
+    document.getElementById('egd-level-tabs')?.scrollIntoView({
+      block: 'start',
+      behavior: reducedMotion ? 'auto' : 'smooth',
+    });
+  });
+}
 
 const prevSeason = computed(() => {
   const i = seasonIndex.value;
@@ -157,7 +199,7 @@ onBeforeUnmount(() => {
     </div>
 
     <template v-else-if="data">
-      <div class="nk-egd-bar">
+      <div v-if="!levelTabs.length" class="nk-egd-bar">
         <div class="nk-egd-bar__inner">
           <nav class="nk-secnav nk-egd-secnav" aria-label="内容区块导航">
             <button
@@ -191,15 +233,31 @@ onBeforeUnmount(() => {
 
       <div class="nk-panels nk-egd-body">
         <div class="nk-egd-panel">
-          <EndgameBuffs :data="data" :mode-key="modeKey" />
+          <template v-if="levelTabs.length">
+            <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
 
-          <EndgamePeak :data="data" :peak-levels="peakLevels" />
+            <EndgameLevelTabs
+              :tabs="levelTabs"
+              :active="activeLevel"
+              @select="selectLevel"
+            />
 
-          <div v-if="!data.tierce && !floorSections.length && !peakLevels.length" class="nk-egd-empty">本赛季暂无关卡数据</div>
+            <EndgameLevelPanel :data="data" :mode-key="modeKey" :tabs="levelTabs" :active="activeLevel" />
+          </template>
 
-          <EndgameTierce :data="data" :mode-key="modeKey" />
+          <template v-else>
+            <EndgameBuffs :data="data" :mode-key="modeKey" />
 
-          <EndgameFloors :data="data" :mode-key="modeKey" :floor-sections="floorSections" />
+            <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
+
+            <EndgamePeak :data="data" :peak-levels="peakLevels" />
+
+            <div v-if="!data.tierce && !floorSections.length && !peakLevels.length" class="nk-egd-empty">本赛季暂无关卡数据</div>
+
+            <EndgameTierce :data="data" :mode-key="modeKey" />
+
+            <EndgameFloors :data="data" :mode-key="modeKey" :floor-sections="floorSections" />
+          </template>
 
           <nav v-if="prevSeason || nextSeason" class="nk-egd-nav" aria-label="相邻赛季">
             <router-link

@@ -112,6 +112,26 @@ export interface MazeBuffInfo {
   icon?: string;
 }
 
+/** 首领特性（末日幻影「坚防守备」等首领幻影机制条目，源 MonsterGuideConfig × MonsterGuideTag；
+ *  游戏内教程「◆ 首领特性 ◆」：随难度提升首领添加的新特性） */
+export interface MazeBossTrait {
+  /** MonsterGuideTag ID */
+  id: number;
+  /** 机制名（如「坚防守备」） */
+  name: string;
+  /** 机制简述（原始富文本，前端 fmtDesc 渲染） */
+  desc?: string;
+  /** 占位符替换参数（MonsterGuideTag.ParameterList 原序，末位可能不被描述引用） */
+  param_list?: number[];
+}
+
+/** 按场次分组的条目（末日幻影：stage1 = 上半场 / stage2 = 下半场 / tierce = 星启模式） */
+export interface MazeHalfGroups<T> {
+  stage1?: T;
+  stage2?: T;
+  tierce?: T;
+}
+
 /** 逐层推荐属性（converter 输出：按上下半场拆分，DamageType1=上半场 / DamageType2=下半场） */
 export interface FloorDamageInfo {
   floor: number;
@@ -163,11 +183,12 @@ export interface MazeStageInvasion {
   monsters?: MazeMonsterInfo[];
 }
 
-/** 单阶段（上半/下半场）内容：推荐属性 + 敌方配置 */
+/** 单个场次（上半/下半场）内容：推荐属性 + 敌方配置 */
 export interface MazeStageDetail {
-  /** 该阶段推荐属性 */
+  /** 该场次推荐属性（星启附加关 = Tierce 的 LOJCIDLKPKG，即整场星启挑战的弱点，
+   *  与赛季级 `tierce.damage_types` 同值——不从敌方韧性弱点推导） */
   damage?: string[];
-  /** 该阶段敌方（icon 为 MonsterMiddleIcon basename） */
+  /** 该场次敌方（icon 为 MonsterMiddleIcon basename） */
   monsters?: MazeMonsterInfo[];
   /** 该场次的污染等级（仅污染关卡有；见 MazeStageInvasion） */
   invasion?: MazeStageInvasion;
@@ -198,8 +219,6 @@ export interface MazeFloorDetail {
   stage2?: MazeStageDetail;
   /** 层级可用增益（MazeBuff，如“记忆紊流”；未注册时缺省） */
   buff?: MazeBuffInfo | null;
-  /** 末日幻影阶段制 Boss 清单（ChallengeBossMazeExtra 的 MonsterID1/2/3，全字段含第 3 阶段） */
-  phases?: MazeMonsterInfo[];
   /** 该层挑战目标（text + param，fmtDesc 渲染） */
   targets?: MazeTargetInfo[];
 }
@@ -246,6 +265,22 @@ export interface PeakLevelInfo {
   };
 }
 
+/** 星启节点（converter 输出：完整场次内容——节点 1/2 = 常规最高难度关上下半场，
+ *  节点 3 = 星启附加关；字段口径与 MazeStageDetail 一致，另带 origin 场次键） */
+export interface MazeTierceNode extends MazeStageDetail {
+  /** 节点序号（1/2 = 末层上下半场；3 = 星启附加关） */
+  idx: number;
+  /** 场次键：按它取赛季级 `buff_groups`（赛季增益）与 `boss_traits`（首领特性）
+   *  ——`tierce` = 星启附加关那一组，只有末日幻影产出这两项 */
+  origin: 'stage1' | 'stage2' | 'tierce';
+  /** 该场次关卡等级（StageConfig.Level） */
+  level?: number;
+  /** 该场次回合上限（ChallengeCountDown；星启附加关取 Tierce 回合限制） */
+  countdown?: number;
+  /** 该场次层级可用增益（最高难度关 MazeBuffID，即“末法余烬”） */
+  buff?: MazeBuffInfo | null;
+}
+
 /** 星启模式关卡（converter 输出：常规最后一关之后的独立进阶关卡，含 3 节点目标） */
 export interface MazeTierceInfo {
   /** 星启关卡 ID */
@@ -262,11 +297,10 @@ export interface MazeTierceInfo {
   targets?: MazeTargetInfo[];
   /** 星启敌方（节点 3 = 星启附加关，完整信息卡消费） */
   monsters?: MazeMonsterInfo[];
-  /** 3 节点敌方：节点 1/2 = 常规最高难度关上下半场（DLCKKJFMJOB → EventIDList1/2），
+  /** 3 节点：节点 1/2 = 常规最高难度关上下半场（DLCKKJFMJOB → EventIDList1/2），
    *  节点 3 = 星启附加关（HFIAAGAKFMD → StageConfig 波次） */
-  nodes?: { idx: number; monsters: MazeMonsterInfo[]; invasion?: MazeStageInvasion }[];
-  /** 星启通关奖励（仅虚构叙事：EGEEJLHBALB ItemID/ItemNum 列表，每期固定；
-   *  与 score 通关分数线对应，官网“关卡奖励”板块数据源） */
+  nodes?: MazeTierceNode[];
+  /** 星启通关奖励（EGEEJLHBALB ItemID/ItemNum 列表，三模式均产出，每期固定） */
   rewards?: { id: number; num?: number }[];
 }
 
@@ -322,8 +356,12 @@ export interface MazeListEntry {
     /** 图鉴横幅（异相仲裁 ChallengePeakPanelBanner*） */
     handbook_banner?: string;
   };
-  /** 赛季增益（名称 + 效果描述） */
+  /** 赛季增益（名称 + 效果描述；末日幻影为 BuffList1+2 并集，分场次见 buff_groups） */
   buffs?: MazeBuffInfo[];
+  /** 分场次赛季增益（仅末日幻影：源表 BuffList1/2/3 = 上半场/下半场/星启模式，各 3 条） */
+  buff_groups?: MazeHalfGroups<MazeBuffInfo[]>;
+  /** 分场次首领特性（仅末日幻影：首领幻影机制，源 MonsterGuideConfig × MonsterGuideTag） */
+  boss_traits?: MazeHalfGroups<MazeBossTrait[]>;
   /** 战意赛季主题机制（虚构叙事 Fever 赛季 SubMazeBuffList：机制 + 战熄潮平/战意汹涌；
    *  普通赛季缺省） */
   sub_buffs?: MazeBuffInfo[];
@@ -378,6 +416,8 @@ export interface MazeCatalogEntry {
   tierce?: Pick<MazeTierceInfo, 'id' | 'damage_types' | 'countdown'>;
   /** 异相仲裁：目录卡仅需关卡组成 kind 计数（骑士×N · 王棋） */
   levels?: { kind: 'knight' | 'king' }[];
+  /** 赛季级污染汇总（目录卡「含污染」标记判据） */
+  pollution?: PollutionSummary;
 }
 
 /** 目录卡轻量赛季表（键 = 赛季 ID） */

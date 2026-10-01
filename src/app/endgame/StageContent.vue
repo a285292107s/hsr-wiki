@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import EnemyCard from '../components/EnemyCard.vue';
+import StageHead from './StageHead.vue';
 import { cdnUri } from '../../services/cdn';
-import { elemRow, monCountLabel, monTitle, monWaveGroups } from './renders';
+import { elemRow, monTitle, monWaveGroups } from './renders';
 import type { MazeStageDetail } from '../../services/types';
 
 defineProps<{
-  label: string;
+  /** 场次标签（层 tab：上半场/下半场）；由父级行头承担时留空 */
+  label?: string;
   stage: MazeStageDetail | undefined;
   isBoss: boolean;
+  /** 行头由父级节点承担（末日幻影层/星启节点把场次行头提到节点级以横跨两栏） */
+  headless?: boolean;
 }>();
 </script>
 
 <template>
-  <div v-if="stage && (stage.damage?.length || stage.monsters?.length)" class="nk-egd-floor__stage">
-    <div class="nk-egd-floor__stagehead">
-      <span class="nk-egd-floor__stagelabel">{{ label }}</span>
-      <span v-if="monCountLabel(stage.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(stage.monsters) }}</span>
+  <div v-if="stage && (stage.damage?.length || stage.monsters?.length || stage.invasion)" class="nk-egd-floor__stage">
+    <div v-if="!headless" class="nk-egd-floor__stagehead">
+      <StageHead :label="label" :stage="stage" />
     </div>
     <div v-if="stage.damage?.length" class="nk-egd-floor__row">
       <span class="nk-egd-floor__label">推荐属性</span>

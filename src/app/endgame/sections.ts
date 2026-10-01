@@ -22,8 +22,13 @@ export function buildEndgameSections(
     if (peakLevels.length) push('levels', '关卡组成');
     return s;
   }
+  // 末日幻影由「第 1..N 层 / 星启模式」子 tab 承载（ADR 0030）：赛季级区块只剩污染等级
+  if (modeKey === 'boss') {
+    if (data?.pollution) push('pollution', '污染等级');
+    return s;
+  }
   if (data?.sub_buffs?.length) push('sub-buffs', '战意机制');
-  if (data?.buffs?.length) push('buffs', '赛季增益');
+  if (data?.buffs?.length || data?.buff_groups) push('buffs', '赛季增益');
   if (data?.pollution) push('pollution', '污染等级');
   if (data?.tierce) push('tierce', '星启模式');
   if (data?.floor_details?.length) push('floors', '关卡层级');

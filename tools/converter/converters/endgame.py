@@ -3,9 +3,20 @@
 完整表→字段→输出映射见 docs/data/转换器字段映射.md（endgame 段），本文件只留硬约束：
 - 排期 ID 结构：ScheduleID - 200000 = 赛季 GroupID；早于公测(2023-04-26)或 ≥2030 的占位排期丢弃。
 - 敌方以 StageConfig 波次为准（非关卡表 NpcMonsterIDList 代表怪，仅 61 个、缺 2/3）。
+- 末日幻影层级敌方只取 EventIDList1/2 波次（ADR 0031）：ChallengeBossMazeExtra 的
+  MonsterID1/2/3 是**节点**不是首领形态，末层第 3 项就是星启附加关、第 2 项在影将军
+  那场是指南别名，故该表一律不读。
 - floors 键 = 赛季最大层数统计；永屹之城遗秘(组100)无 Floor 字段，按 ID 升序取序号。
 - 混淆解包字段：PHFMCACHFIJ=星启关ID / LOJCIDLKPKG=弱点 / GNOOAGPBNLD=回合 /
   OGEOMCGNNMP=目标ID组 / JEBMBCLBIOI=敌方ID（详见映射表）。
+- 污染等级（ADR 0026）判据是 StageInvasionConfig.StageID ∈ EventIDList1/2（异相仲裁
+  为 EventIDList），不是怪物 ID：末日幻影楼层只登记首领，被污染小怪由机制额外加入，
+  按怪物 join 会整层漏判。
+- 赛季增益按场次下发（末日幻影 BuffList1/2/3 = 上半场/下半场/星启模式），扁平 buffs
+  仍是 1+2 的并集（目录卡与 AI 快照沿用），分场次落 buff_groups。
+- 首领特性（末日幻影，官方文案；对照站与旧稿称「关卡效果」）取 MonsterGuideConfig ×
+  MonsterGuideTag，按**敌方模板**聚合；配置表的敌方 ID 未必等于战斗敌方，缺失时用
+  Tag.SkillID // 100 唯一反查（见 _load_guide_traits）。
 - param 字段前端未消费，置空数组贴合结构。
 """
 
@@ -15,7 +26,7 @@ from datetime import datetime
 
 from config import EXCEL_DIR, OUTPUT_DIR
 from textmap import clean_text, resolve_text
-from utils import load_json, save_json, map_icon_path
+from utils import load_json, save_json, map_icon_path, unwrap_value
 from converters.monster_common import load_monsters
 
 logger = logging.getLogger("converter")
@@ -94,6 +105,74 @@ def _load_maze_buffs() -> dict[int, dict]:
             "param_list": [p.get("Value") for p in (rec.get("ParamList", []) or [])],
             "icon": icon,
         }
+    return out
+
+def _load_guide_traits() -> dict[int, list[dict]]:
+    """MonsterGuideConfig × MonsterGuideTag → {敌方模板 ID: [首领特性]}（末日幻影）。
+
+    首领特性 = 首领幻影的战斗机制条目（名称 + 简述 + 参数，如「坚防守备」，游戏内教程
+    「◆ 首领特性 ◆」；对照站与旧稿称「关卡效果」，但游戏内「关卡效果」实指每期「末法余烬」）。
+    源表按敌方 ID 登记 TagList、MonsterGuideTag 提供文案与 ParameterList；同一模板的各难度
+    实例实测共用同一份清单（4 个难度的 TagList 逐字相同），故按模板聚合一次。
+    模板 ID 取 MonsterID // 100（MonsterID = 模板 ×100 + 实例序号）；**配置表的敌方 ID
+    未必等于战斗敌方**——业火焚心的影将军战斗模板 2035012 在配置表里登记为蚀心兽 2033022，
+    直接按模板 join 会整层漏。缺失时用 Tag.SkillID // 100 反查（技能 ID = 模板 ×100 +
+    技能序号），**仅当反查结果唯一**时采用：技能 ID 会被多个首领共享（如 100401410），
+    不唯一即放弃，宁缺勿错挂。
+    """
+    tag_recs = load_json(EXCEL_DIR / "MonsterGuideTag.json")
+    tags: dict[int, dict] = {}
+    tag_skill: dict[int, int] = {}
+    for rec in tag_recs:
+        tid = rec.get("TagID")
+        if tid is None:
+            continue
+        name = resolve_text(rec.get("TagName", {}))
+        desc = resolve_text(rec.get("TagBriefDescription", {}), clean=False)
+        if not name and not desc:
+            continue
+        tags[tid] = {
+            "id": tid,
+            "name": name,
+            "desc": desc,
+            "param_list": [unwrap_value(p) for p in (rec.get("ParameterList") or [])],
+        }
+        if rec.get("SkillID"):
+            tag_skill[tid] = rec["SkillID"]
+
+    configs = load_json(EXCEL_DIR / "MonsterGuideConfig.json")
+    direct: dict[int, list[int]] = {}
+    for rec in configs:
+        mid = rec.get("MonsterID")
+        if mid is None:
+            continue
+        ids = direct.setdefault(mid // 100, [])
+        for tid in rec.get("TagList", []) or []:
+            if tid in tags and tid not in ids:
+                ids.append(tid)
+
+    # 技能 ID 反查：只补配置表缺失的模板，且同一反查键必须唯一命中一组 TagList
+    alias: dict[int, set[tuple[int, ...]]] = {}
+    for rec in configs:
+        group = tuple(t for t in (rec.get("TagList", []) or []) if t in tags)
+        if not group:
+            continue
+        for tid in group:
+            sk = tag_skill.get(tid)
+            if not sk:
+                continue
+            alt = sk // 100
+            if alt == (rec.get("MonsterID") or 0) // 100:
+                continue
+            alias.setdefault(alt, set()).add(group)
+
+    out: dict[int, list[dict]] = {
+        tpl: [tags[t] for t in ids] for tpl, ids in direct.items() if ids
+    }
+    for alt, groups in alias.items():
+        if alt in out or len(groups) != 1:
+            continue
+        out[alt] = [tags[t] for t in next(iter(groups))]
     return out
 
 def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dict:
@@ -178,7 +257,8 @@ def _group_maze_buff(filename: str = "ChallengeGroupConfig.json") -> dict[int, l
 def _group_extra_buff(filename: str, keys: tuple[str, ...]) -> dict[int, list[int]]:
     """虚构叙事 / 末日幻影主题表 → {GroupID: [BuffID...]}（去重保序）。
 
-    story 取 BuffList；boss 取 BuffList1/2（前两阶段增益，第三阶段缺省）。
+    story 取 BuffList；boss 取 BuffList1/2 的并集（分场次见 _group_extra_buff_groups——
+    BuffList3 = 星启模式增益，不进扁平 buffs）。
     """
     data = load_json(EXCEL_DIR / filename)
     out: dict[int, list[int]] = {}
@@ -193,6 +273,37 @@ def _group_extra_buff(filename: str, keys: tuple[str, ...]) -> dict[int, list[in
                     ids.append(bid)
         if ids:
             out[gid] = ids
+    return out
+
+_BUFF_GROUP_KEYS: dict[str, str] = {
+    "BuffList1": "stage1",
+    "BuffList2": "stage2",
+    "BuffList3": "tierce",
+}
+
+def _group_extra_buff_groups(filename: str) -> dict[int, dict[str, list[int]]]:
+    """末日幻影主题表 → {GroupID: {场次: [BuffID...]}}（分场次赛季增益，各场次去重保序）。
+
+    末日幻影的赛季增益按场次下发：BuffList1 = 上半场、BuffList2 = 下半场、BuffList3 = 星启模式
+    （每场次 3 条，与战斗内节点一一对应）。合并成一串会丢掉「哪三条属于哪一场」，故按场次分组
+    输出；扁平 buffs 仍保留 BuffList1+2 的并集，供目录卡与 AI 快照沿用（口径为 6 条）。
+    """
+    data = load_json(EXCEL_DIR / filename)
+    out: dict[int, dict[str, list[int]]] = {}
+    for rec in data:
+        gid = rec.get("GroupID")
+        if gid is None:
+            continue
+        groups: dict[str, list[int]] = {}
+        for key, group in _BUFF_GROUP_KEYS.items():
+            ids: list[int] = []
+            for bid in rec.get(key, []) or []:
+                if bid and bid not in ids:
+                    ids.append(bid)
+            if ids:
+                groups[group] = ids
+        if groups:
+            out[gid] = groups
     return out
 
 def _group_extra_sub_buffs(filename: str = "ChallengeStoryGroupExtra.json") -> dict[int, list[int]]:
@@ -414,17 +525,32 @@ def _load_tierce(
     tierce_files: list[tuple[str, str]],
     targets: dict[int, dict],
     monsters: dict[int, dict],
+    invasions: dict[int, dict] | None = None,
+    buffs: dict[int, dict] | None = None,
 ) -> dict[str, dict]:
     """解析星启模式（Tierce）表 → {GroupID: 星启条目}。
 
     关联规则：Tierce 记录 DLCKKJFMJOB（常规模式最后一关 ID）→ 查关卡表得 GroupID。
     每个 (Tierce 表, 关卡表) 二元组对应一种模式；targets 为三模式目标表合并。
     输出：id / damage_types（弱点）/ countdown（回合）/ score（仅虚构叙事）/
-    targets（目标描述 + 参数）/ monsters（敌方配置）/ nodes（3 节点敌方）。
-    星启 3 关卡 = 常规最高难度关上下半场（节点 1/2，DLCKKJFMJOB → 关卡表
+    targets（目标描述 + 参数）/ monsters（敌方配置）/ nodes（3 节点）。
+    星启 3 节点 = 常规最高难度关上下半场（节点 1/2，DLCKKJFMJOB → 关卡表
     EventIDList1/2 → StageConfig 波次）+ 星启附加关（节点 3，HFIAAGAKFMD →
     StageConfig 波次，未收录时回退 JEBMBCLBIOI）。monsters 为节点 3 敌方
-    （星启附加关，兼容目录页/旧结构）。
+    （星启附加关，兼容目录页/旧结构）。invasions 传入时，污染节点附加 invasion
+    ——星启附加关（节点 3）本身就是污染关卡，不覆盖则整条只出现在上游表里。
+
+    节点输出**完整场次内容**（与 _season_floors 同口径）：damage（该半场
+    DamageType1/2）/ monsters / level（StageConfig.Level）/ countdown
+    （ChallengeCountDown，星启附加关取 Tierce 回合限制）/ buff（该场次层级可用
+    增益 = 最高难度关 MazeBuffID，buffs 传入时解析）/ invasion；另带
+    origin（场次键 stage1/stage2/tierce），供前端按场次取赛季级
+    `buff_groups`（赛季增益）与 `boss_traits`（首领特性）——这两项只有末日幻影
+    产出，其余模式按缺省不渲染。
+
+    节点 3（星启附加关）的 damage 取 Tierce 记录自身的 `LOJCIDLKPKG`（与赛季级
+    `damage_types` 同值）：星启表只有这一处推荐属性口径，不能从敌方 `weak` 推导
+    ——附加关关卡内登记的敌方可能是无弱点的机制本体（3019 猴把戏），或另有召唤首领。
     """
     out: dict[str, dict] = {}
     by_id_maps: dict[str, dict[int, dict]] = {}
@@ -457,7 +583,7 @@ def _load_tierce(
             gid = id2gid.get(prev) if prev is not None else None
             if gid is None:
                 continue
-            node3 = _stage_waves_monsters(
+            node3_mons = _stage_waves_monsters(
                 rec.get("HFIAAGAKFMD", []) or [], stages, monsters, full=True
             ) or [
                 _monster_out(mid, monsters, full=True)
@@ -465,13 +591,55 @@ def _load_tierce(
             ]
             prev_rec = by_id.get(prev) if prev is not None else None
             nodes: list[dict] = []
-            for evkey in ("EventIDList1", "EventIDList2"):
-                nodes.append({
+            for evkey, half, dmgkey in (
+                ("EventIDList1", "stage1", "DamageType1"),
+                ("EventIDList2", "stage2", "DamageType2"),
+            ):
+                events = (prev_rec or {}).get(evkey, []) or []
+                node: dict = {
                     "idx": len(nodes) + 1,
-                    "monsters": _stage_waves_monsters(
-                        (prev_rec or {}).get(evkey, []) or [], stages, monsters, full=True),
-                })
-            nodes.append({"idx": 3, "monsters": node3})
+                    "origin": half,
+                    "damage": list(dict.fromkeys((prev_rec or {}).get(dmgkey, []) or [])),
+                    "monsters": _stage_waves_monsters(events, stages, monsters, full=True),
+                }
+                lv = next(
+                    (stages[e]["level"] for e in events
+                     if e in stages and stages[e]["level"]),
+                    None,
+                )
+                if lv:
+                    node["level"] = lv
+                cd = (prev_rec or {}).get("ChallengeCountDown", 0) or 0
+                if cd:
+                    node["countdown"] = cd
+                bid = (prev_rec or {}).get("MazeBuffID")
+                if bid and buffs and bid in buffs:
+                    node["buff"] = {"id": bid, **buffs[bid]}
+                if invasions:
+                    inv = _stage_invasion(events, invasions, monsters)
+                    if inv:
+                        node["invasion"] = inv
+                nodes.append(node)
+            damage_types = sorted(rec.get("LOJCIDLKPKG", []) or [])
+            node3: dict = {
+                "idx": 3,
+                "origin": "tierce",
+                "damage": damage_types,
+                "monsters": node3_mons,
+            }
+            s_eid = (rec.get("HFIAAGAKFMD", []) or [None])[0]
+            s_lv = stages[s_eid]["level"] if s_eid in stages else None
+            if s_lv:
+                node3["level"] = s_lv
+            cd3 = rec.get("GNOOAGPBNLD", 0) or 0
+            if cd3:
+                node3["countdown"] = cd3
+            if invasions:
+                inv = _stage_invasion(
+                    rec.get("HFIAAGAKFMD", []) or [], invasions, monsters)
+                if inv:
+                    node3["invasion"] = inv
+            nodes.append(node3)
             tids = list(rec.get("OGEOMCGNNMP", []) or [])
             full_tid = rec.get("GNGENMHNLAH")
             if full_tid and full_tid not in tids:
@@ -482,20 +650,18 @@ def _load_tierce(
             ]
             entry = {
                 "id": rec.get("PHFMCACHFIJ"),
-                "damage_types": sorted(rec.get("LOJCIDLKPKG", []) or []),
+                "damage_types": damage_types,
                 "countdown": rec.get("GNOOAGPBNLD", 0) or 0,
                 "score": rec.get("IDBJENCBJHM"),
                 "targets": [
                     {k: v for k, v in targets[t].items() if k in ("text", "param", "type")}
                     for t in tids if t in targets
                 ],
-                "monsters": node3,
+                "monsters": node3_mons,
                 "nodes": nodes,
             }
             if rewards:
                 entry["rewards"] = rewards
-            s_eid = (rec.get("HFIAAGAKFMD", []) or [None])[0]
-            s_lv = stages[s_eid]["level"] if s_eid in stages else None
             if s_lv:
                 entry["level"] = s_lv
             out[str(gid)] = entry
@@ -591,23 +757,124 @@ def _final_monsters(pool: list[dict], fallback: list[dict], n: int = 4) -> list[
             break
     return out
 
-def _load_boss_phases() -> dict[int, list[int]]:
-    """ChallengeBossMazeExtra → {层记录 ID: [阶段敌人 MonsterID 列表]}（阶段制）。
+def _load_invasion_index() -> dict[int, dict]:
+    """StageInvasionConfig → {StageID: {level, monster_ids}}（污染等级，ADR 0026）。
 
-    末日幻影为阶段制战斗：每层 1-3 阶段，各阶段一个 Boss 形态（MonsterID1/2/3，
-    实例 ID → _load_monsters 已注册的同模板信息）。部分层第 3 阶段仅存在于本表
-    （StageConfig 波次不含），据此补全层级敌人。
+    污染等级是**关卡级**属性：MonsterInvasionList[].DBLDCKODNEN 为实例怪物 ID，
+    被污染怪物的名称/图标由消费方经 monsters 注册表解析。上游全表 14 条，全部落
+    在本模块读取的四张关卡表内（EventIDList1/2 / EventIDList）；按怪物级 join 会
+    整层漏判（末日幻影楼层只登记首领，被污染小怪由机制额外加入）。
     """
-    data = load_json(EXCEL_DIR / "ChallengeBossMazeExtra.json")
-    out: dict[int, list[int]] = {}
+    data = load_json(EXCEL_DIR / "StageInvasionConfig.json")
+    out: dict[int, dict] = {}
     for rec in data:
-        rid = rec.get("ID")
-        if rid is None:
+        stage_id = rec.get("StageID")
+        if stage_id is None:
             continue
-        mids = [v for v in (rec.get("MonsterID1"), rec.get("MonsterID2"), rec.get("MonsterID3")) if v]
-        if mids:
-            out[rid] = mids
+        mids: list[int] = []
+        for item in rec.get("MonsterInvasionList") or []:
+            mid = item.get("DBLDCKODNEN")
+            if mid is not None and mid not in mids:
+                mids.append(mid)
+        out[stage_id] = {"level": rec.get("InvasionID"), "monster_ids": mids}
     return out
+
+def _stage_invasion(
+    events: list[int], invasions: dict[int, dict], monsters: dict[int, dict]
+) -> dict | None:
+    """半场（或异相仲裁单关）的污染信息：{level, stage_id, monsters}；无污染返回 None。
+
+    events 为 EventIDList1/2（异相仲裁为 EventIDList）；命中多条时取首条（上游
+    一个 EventIDList 内至多一条污染关卡）。monsters 只收录已注册的详情对象（未注册
+    的实例 ID 无名称/图标可展示，跳过而不落空对象）。
+    """
+    for eid in events or []:
+        inv = invasions.get(eid)
+        if not inv:
+            continue
+        node: dict = {"level": inv["level"], "stage_id": eid}
+        mons = [
+            _monster_out(mid, monsters)
+            for mid in inv["monster_ids"] if mid in monsters
+        ]
+        if mons:
+            node["monsters"] = mons
+        return node
+    return None
+
+def _stage_traits(monsters: list[dict], guide: dict[int, list[dict]]) -> list[dict]:
+    """一个场次（或星启附加关）的首领特性：该场次敌方模板的命中项按 TagID 去重保序。
+
+    未登记机制条目的敌方（普通精英/护卫，如杰帕德）自然不产出，故只按模板 join，
+    不做等级/波次筛选。missing 模板（未登记机制的历史首领）返回空列表。
+    """
+    out: list[dict] = []
+    seen: set[int] = set()
+    for m in monsters:
+        tpl = int(m["tpl"]) if m.get("tpl") else int(m["id"]) // 100
+        for eff in guide.get(tpl, []):
+            if eff["id"] in seen:
+                continue
+            seen.add(eff["id"])
+            out.append(eff)
+    return out
+
+def _attach_boss_traits(entry: dict, guide: dict[int, list[dict]]) -> None:
+    """赛季级「首领特性」：上半场/下半场取末层（最高难度）两个场次，星启模式取星启附加关节点。
+
+    各难度共用同一份机制清单（同名实例的 TagList 逐字相同），按末层取一次即可，避免逐层重复；
+    星启节点 1/2 就是末层的上下半场（同一场战斗），只有节点 3 是星启 Boss，故星启只取节点 3。
+    无命中（未登记机制）不落该字段。
+    """
+    groups: dict[str, list[dict]] = {}
+    floors = entry.get("floor_details") or []
+    if floors:
+        for key in ("stage1", "stage2"):
+            items = _stage_traits((floors[-1].get(key) or {}).get("monsters") or [], guide)
+            if items:
+                groups[key] = items
+    star = next(
+        (n for n in ((entry.get("tierce") or {}).get("nodes") or []) if n.get("idx") == 3),
+        None,
+    )
+    if star:
+        items = _stage_traits(star.get("monsters") or [], guide)
+        if items:
+            groups["tierce"] = items
+    if groups:
+        entry["boss_traits"] = groups
+
+def _apply_pollution(entry: dict) -> None:
+    """按条目自身的污染节点写赛季级汇总 {count, levels}（ADR 0026）。
+
+    扫描层半场 + 异相仲裁单关 + 星启节点，按 stage_id 去重后计数：星启节点 1/2
+    就是常规最后一层的上下半场（同一关卡重复出现），不按节点数计数。逐关详情
+    （层 / 半场 / 怪物）留在各自节点上，此处只放目录卡与筛选所需的轻量汇总。
+    无污染赛季不落该字段。
+    """
+    nodes: list[dict] = []
+    for f in entry.get("floor_details") or []:
+        for key in ("stage1", "stage2"):
+            inv = (f.get(key) or {}).get("invasion")
+            if inv:
+                nodes.append(inv)
+    for lv in entry.get("levels") or []:
+        if lv.get("invasion"):
+            nodes.append(lv["invasion"])
+    for n in (entry.get("tierce") or {}).get("nodes") or []:
+        if n.get("invasion"):
+            nodes.append(n["invasion"])
+    levels_by_stage: dict[int, int | None] = {}
+    for n in nodes:
+        stage_id = n.get("stage_id")
+        if stage_id is not None:
+            levels_by_stage[stage_id] = n.get("level")
+    if not levels_by_stage:
+        return
+    entry["pollution"] = {
+        "count": len(levels_by_stage),
+        "levels": sorted({lv for lv in levels_by_stage.values() if lv}),
+    }
 
 def _season_floors(
     recs: list[dict],
@@ -616,7 +883,7 @@ def _season_floors(
     targets: dict[int, dict],
     stages: dict[int, dict],
     full: bool = False,
-    phases: dict[int, list[int]] | None = None,
+    invasions: dict[int, dict] | None = None,
 ) -> list[dict]:
     """逐层详情：详情页以关卡层级为章节的完整内容。
 
@@ -626,7 +893,8 @@ def _season_floors(
     （MazeBuffID 解析）/ 层级挑战目标 targets（ChallengeTargetID 解析）。
     敌方带 wave 序号（战斗波次，前端分组展示）；full=True 时输出 intro/skills
     （末日幻影纯 Boss 战，前端以完整信息卡展示）；level 为关卡等级（上下半场
-    StageConfig.Level，同级取首事件）。
+    StageConfig.Level，同级取首事件）。invasions 传入时，污染关卡所在半场附加
+    invasion（{level, stage_id, monsters}，见 _stage_invasion）。
     """
     out: list[dict] = []
     for i, r in enumerate(sorted(recs, key=lambda x: x.get("ID", 0)), start=1):
@@ -636,28 +904,28 @@ def _season_floors(
              for e in (r.get(key, []) or []) if e in stages and stages[e]["level"]),
             None,
         )
+        events1 = r.get("EventIDList1", []) or []
+        events2 = r.get("EventIDList2", []) or []
         node: dict = {
             "floor": floor,
             "name": resolve_text(r.get("Name", {})),
             "countdown": r.get("ChallengeCountDown", 0) or 0,
             "stage1": {
                 "damage": list(dict.fromkeys(r.get("DamageType1", []) or [])),
-                "monsters": _stage_waves_monsters(
-                    r.get("EventIDList1", []) or [], stages, monsters, full),
+                "monsters": _stage_waves_monsters(events1, stages, monsters, full),
             },
             "stage2": {
                 "damage": list(dict.fromkeys(r.get("DamageType2", []) or [])),
-                "monsters": _stage_waves_monsters(
-                    r.get("EventIDList2", []) or [], stages, monsters, full),
+                "monsters": _stage_waves_monsters(events2, stages, monsters, full),
             },
         }
+        if invasions:
+            for key, events in (("stage1", events1), ("stage2", events2)):
+                inv = _stage_invasion(events, invasions, monsters)
+                if inv:
+                    node[key]["invasion"] = inv
         if lv:
             node["level"] = lv
-        if phases and r.get("ID") in phases:
-            node["phases"] = [
-                _monster_out(mid, monsters, full=True)
-                for mid in phases[r["ID"]] if mid in monsters
-            ]
         bid = r.get("MazeBuffID")
         if bid and bid in buffs:
             node["buff"] = {"id": bid, **buffs[bid]}
@@ -691,6 +959,7 @@ def _group_seasons(
     schedules: dict[str, tuple[str, str]],
     *,
     buff_map: dict[int, list[int]] | None = None,
+    buff_groups: dict[int, dict[str, list[int]]] | None = None,
     buffs: dict[int, dict] | None = None,
     monsters: dict[int, tuple[str, str]] | None = None,
     targets: dict[int, dict] | None = None,
@@ -699,19 +968,22 @@ def _group_seasons(
     group_names: dict[int, str] | None = None,
     arts: dict[int, dict] | None = None,
     full_monsters: bool = False,
-    phases: dict[int, list[int]] | None = None,
     sub_buffs: dict[int, list[int]] | None = None,
     permanent: set[int] | None = None,
     test_period: set[int] | None = None,
+    invasions: dict[int, dict] | None = None,
 ) -> dict:
     """读取挑战配置，按 GroupID 聚合为赛季条目。
 
     赛季名取分组表 GroupName（如"琥珀恩赐"），缺失时回退首层关卡 Name
     （如"琥珀恩赐其一"）——第一关名带期数后缀，不作卡片标题。
     full_monsters=True（末日幻影）时层级敌方输出 intro/skills 全字段；
-    phases 传入时（末日幻影）层级敌方追加阶段制清单（ChallengeBossMazeExtra）；
     permanent 传入时（忘却之庭常驻关卡 100/900）条目输出 permanent 标记；
-    test_period 传入时（beta/CBT 测试期）条目输出 test 标记。
+    test_period 传入时（beta/CBT 测试期）条目输出 test 标记；
+    invasions 传入时（StageInvasionConfig）污染关卡所在半场附加 invasion，
+    并在赛季级写出 pollution 汇总（{count, levels}，供目录卡与筛选）。
+    buff_groups 传入时（末日幻影分场次增益）条目附加 buff_groups（场次 → 增益列表），
+    扁平 buffs 口径不变。
     """
     data = load_json(EXCEL_DIR / filename)
     groups: dict[int, list] = defaultdict(list)
@@ -732,6 +1004,7 @@ def _group_seasons(
     monsters = monsters or {}
     targets = targets or {}
     group_names = group_names or {}
+    invasions = invasions or {}
 
     result: dict[str, dict] = {}
     for gid, recs in groups.items():
@@ -755,11 +1028,20 @@ def _group_seasons(
             entry["test"] = True
         entry.update(_season_stats(recs))
         entry["floor_details"] = _season_floors(
-            recs, monsters, buffs, targets, stages, full=full_monsters, phases=phases)
+            recs, monsters, buffs, targets, stages, full=full_monsters,
+            invasions=invasions)
         entry["buffs"] = [
             {"id": bid, **buffs[bid]}
             for bid in buff_map.get(gid, []) if bid in buffs
         ]
+        if buff_groups and gid in buff_groups:
+            grouped = {
+                key: [{"id": bid, **buffs[bid]} for bid in ids if bid in buffs]
+                for key, ids in buff_groups[gid].items()
+            }
+            grouped = {key: items for key, items in grouped.items() if items}
+            if grouped:
+                entry["buff_groups"] = grouped
         if sub_buffs:
             entry["sub_buffs"] = [
                 {"id": bid, **buffs[bid]}
@@ -790,12 +1072,14 @@ def _peak_level_node(
     buffs: dict[int, dict],
     targets: dict[int, dict],
     kind: str,
+    invasions: dict[int, dict] | None = None,
 ) -> dict:
     """异相仲裁单关节点：名称 / 弱点 / 敌人 / 目标 / 机制标签。
 
     kind 为官方术语：knight=骑士试炼 / king=王棋最终关；敌人取自
     EventIDList 首项引用的 StageConfig；目标取自 NormalTargetList 引用的
-    BattleTargetConfig；标签 TagList 解析为 MazeBuff 名称。
+    BattleTargetConfig；标签 TagList 解析为 MazeBuff 名称。invasions 传入时，
+    污染关卡附加 invasion（异相仲裁无层/半场，污染直接落在单关上）。
     """
     if rec is None:
         return {}
@@ -817,6 +1101,10 @@ def _peak_level_node(
     }
     if stage and stage["level"]:
         node["level"] = stage["level"]
+    if invasions:
+        inv = _stage_invasion(events, invasions, monsters)
+        if inv:
+            node["invasion"] = inv
     return node
 
 def _load_peak_badges() -> dict[int, list[dict]]:
@@ -849,7 +1137,8 @@ def _peak_seasons() -> dict:
     期表 ChallengePeakGroupConfig 给出骑士（PreLevelIDList）与王棋（BossLevelID）
     的关卡 ID 组；王棋扩展表 ChallengePeakBossConfig 提供增益 BuffList 与绝境
     配置（HardTitle / HardEventIDList / HardTarget / HardTagList）。
-    输出 levels 数组 + 全关卡合并 damage_types / monsters / buffs（供目录卡片）。
+    输出 levels 数组 + 全关卡合并 damage_types / monsters / buffs（供目录卡片）；
+    污染关卡在单关上附加 invasion，并在期级写出 pollution 汇总（见 _merge_pollution）。
     """
     groups = load_json(EXCEL_DIR / "ChallengePeakGroupConfig.json")
     level_data = load_json(EXCEL_DIR / "ChallengePeakConfig.json")
@@ -860,6 +1149,7 @@ def _peak_seasons() -> dict:
     buffs = _load_maze_buffs()
     targets = _load_battle_targets()
     badges_map = _load_peak_badges()
+    invasions = _load_invasion_index()
 
     stage_ids: set[int] = set()
     for r in level_data:
@@ -883,7 +1173,8 @@ def _peak_seasons() -> dict:
         levels: list[dict] = []
         for lid in g.get("PreLevelIDList", []) or []:
             node = _peak_level_node(
-                level_by_id.get(lid), stages, monsters, buffs, targets, "knight")
+                level_by_id.get(lid), stages, monsters, buffs, targets, "knight",
+                invasions)
             levels.append(node)
             dmg.update(node["damage"])
             for m in node["monsters"]:
@@ -893,7 +1184,8 @@ def _peak_seasons() -> dict:
         boss_id = g.get("BossLevelID")
         if boss_id is not None:
             node = _peak_level_node(
-                level_by_id.get(boss_id), stages, monsters, buffs, targets, "king")
+                level_by_id.get(boss_id), stages, monsters, buffs, targets, "king",
+                invasions)
             ext = boss_ext.get(boss_id)
             if ext:
                 node["buffs"] = [
@@ -943,6 +1235,7 @@ def _peak_seasons() -> dict:
             "final_monsters": _final_monsters(final_pool, all_mons),
             "buffs": all_buffs,
         }
+        _apply_pollution(result[str(gid)])
         if gid in badges_map:
             result[str(gid)]["badges"] = badges_map[gid]
         icon_path = g.get("ThemeIconPicPath") or ""
@@ -968,10 +1261,13 @@ def convert() -> None:
     boss_buff_map = _group_extra_buff(
         "ChallengeBossGroupExtra.json", ("BuffList1", "BuffList2")
     )
+    boss_buff_groups = _group_extra_buff_groups("ChallengeBossGroupExtra.json")
+    guide_traits = _load_guide_traits()
     story_turns = _load_story_turns()
     story_scores = _load_story_scores()
     story_sub_buffs = _group_extra_sub_buffs()
     mode_default_icons = _load_mode_default_icons()
+    invasions = _load_invasion_index()
 
     targets_all = {
         **_load_targets("ChallengeTargetConfig.json"),
@@ -986,6 +1282,8 @@ def convert() -> None:
         ],
         targets_all,
         monsters,
+        invasions=invasions,
+        buffs=buffs,
     )
 
     maze = _group_seasons(
@@ -998,10 +1296,13 @@ def convert() -> None:
         ),
         permanent=_load_permanent_groups(),
         test_period=_load_test_periods(),
+        invasions=invasions,
     )
     for k in maze:
         if k in tierce:
             maze[k]["tierce"] = tierce[k]
+    for entry in maze.values():
+        _apply_pollution(entry)
     _attach_default_icon(maze, mode_default_icons.get("maze"))
     save_json(maze, OUTPUT_DIR / "maze.json")
 
@@ -1017,28 +1318,36 @@ def convert() -> None:
             _load_group_arts("ChallengeStoryGroupExtra.json"),
         ),
         sub_buffs=story_sub_buffs,
+        invasions=invasions,
     )
     for k in story:
         if k in tierce:
             story[k]["tierce"] = tierce[k]
+    for entry in story.values():
+        _apply_pollution(entry)
     _attach_default_icon(story, mode_default_icons.get("story"))
     save_json(story, OUTPUT_DIR / "maze_extra.json")
 
     boss = _group_seasons(
         "ChallengeBossMazeConfig.json", "Name", schedules_boss,
         buff_map=boss_buff_map, buffs=buffs, monsters=monsters,
+        buff_groups=boss_buff_groups,
         targets=_load_targets("ChallengeBossTargetConfig.json"),
         group_names=_load_group_names("ChallengeBossGroupConfig.json"),
         full_monsters=True,
-        phases=_load_boss_phases(),
         arts=_merge_arts(
             _load_group_arts("ChallengeBossGroupConfig.json"),
             _load_group_arts("ChallengeBossGroupExtra.json"),
         ),
+        invasions=invasions,
     )
     for k in boss:
         if k in tierce:
             boss[k]["tierce"] = tierce[k]
+    for entry in boss.values():
+        _attach_boss_traits(entry, guide_traits)
+    for entry in boss.values():
+        _apply_pollution(entry)
     _attach_default_icon(boss, mode_default_icons.get("boss"))
     save_json(boss, OUTPUT_DIR / "maze_boss.json")
 
