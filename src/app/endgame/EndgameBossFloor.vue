@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import StageContent from './StageContent.vue';
-import StageHead from './StageHead.vue';
-import EndgameBuffGroup from './EndgameBuffGroup.vue';
-import EndgameTraitGroup from './EndgameTraitGroup.vue';
-import EndgameFloorBuff from './EndgameFloorBuff.vue';
-import EndgameTargets from './EndgameTargets.vue';
-import { floorPollution, halfLabel, pollutionLabel } from './pollution';
+import { computed, ref, watch } from 'vue';
+import EndgameStarTargets from './EndgameStarTargets.vue';
+import EndgameNodeCards from './EndgameNodeCards.vue';
+import EndgameBoard from './EndgameBoard.vue';
+import { halfLabel } from './pollution';
 import type {
   MazeBossTrait, MazeBuffInfo, MazeFloorDetail, MazeListEntry, MazeStageDetail,
 } from '../../services/types';
@@ -18,84 +15,75 @@ const props = defineProps<{
 
 type HalfKey = 'stage1' | 'stage2';
 
-interface FloorNode {
-  idx: number;
+interface HalfNode {
   half: HalfKey;
   stage: MazeStageDetail;
 }
 
 /** 一层只有上下半场两场战斗（ADR 0031）：敌方取实际战斗数据（EventIDList1/2 波次），
  *  星启附加关归星启子 tab，不在层内出现。 */
-const nodes = computed<FloorNode[]>(() => {
-  const out: FloorNode[] = [];
-  (['stage1', 'stage2'] as const).forEach((half, pi) => {
-    const stage = props.floor[half];
-    if (stage && (stage.monsters?.length || stage.damage?.length)) {
-      out.push({ idx: pi + 1, half, stage });
-    }
-  });
-  return out;
-});
+const nodes = computed<HalfNode[]>(() =>
+  (['stage1', 'stage2'] as const)
+    .map((half) => ({ half, stage: props.floor[half] }))
+    .filter((n): n is HalfNode => !!n.stage && (!!n.stage.monsters?.length || !!n.stage.damage?.length)));
 
-const pollution = computed(() => floorPollution(props.floor));
+/** 半场卡片 = 子切换导航，卡面与星启节点卡片同形（半场名 + 末波首领图 + 推荐属性 + 等级）。
+ *  等级是层共用值，只在卡片上出现（层标题不再复述）。 */
+const cards = computed(() => nodes.value.map((n) => ({
+  key: n.half,
+  label: halfLabel(n.half),
+  stage: n.stage,
+  level: props.floor.level || 0,
+})));
 
-function nodeBuffs(n: FloorNode): MazeBuffInfo[] {
-  return props.data.buff_groups?.[n.half] || [];
+/** 看板当前半场：缺该场次时退回第一个（数据缺半场或切层后旧场次不存在） */
+const activeHalf = ref<HalfKey | ''>('');
+watch(nodes, (list) => {
+  if (!list.some((n) => n.half === activeHalf.value)) activeHalf.value = list[0]?.half || '';
+}, { immediate: true });
+const activeNode = computed<HalfNode | null>(
+  () => nodes.value.find((n) => n.half === activeHalf.value) || null,
+);
+
+function selectHalf(key: string): void {
+  activeHalf.value = key as HalfKey;
 }
 
-function nodeTraits(n: FloorNode): MazeBossTrait[] {
-  return props.data.boss_traits?.[n.half] || [];
-}
+/** 该半场的赛季增益与首领特性：按场次键取赛季级分场次字段（仅末日幻影产出） */
+const activeBuffs = computed<MazeBuffInfo[]>(
+  () => (activeNode.value ? props.data.buff_groups?.[activeNode.value.half] || [] : []),
+);
+const activeTraits = computed<MazeBossTrait[]>(
+  () => (activeNode.value ? props.data.boss_traits?.[activeNode.value.half] || [] : []),
+);
+
+const targets = computed(() => props.floor.targets || []);
 </script>
 
 <template>
   <div class="nk-egd-lvl">
-    <header class="nk-egd-lvl__head">
-      <h2 class="nk-egd-lvl__title">第 {{ floor.floor }} 层</h2>
-      <span v-if="floor.name" class="nk-egd-lvl__name">{{ floor.name }}</span>
-      <span v-if="pollution.length" class="nk-egd-lvl__poll">
-        <span
-          v-for="(p, pi) in pollution"
-          :key="pi"
-          class="nk-egd-pollchip"
-          :data-level="p.invasion.level"
-        >{{ pollutionLabel(p.invasion) }}<span class="nk-egd-pollchip__half">{{ halfLabel(p.half) }}</span></span>
-      </span>
-      <span v-if="floor.level || floor.countdown" class="nk-egd-floor__data">
-        <span v-if="floor.level" class="nk-egd-floor__dataitem">
-          <span class="nk-egd-floor__dataval">{{ floor.level }}</span>
-          <span class="nk-egd-floor__datalabel">等级</span>
-        </span>
-        <span v-if="floor.countdown" class="nk-egd-floor__dataitem">
-          <span class="nk-egd-floor__dataval">{{ floor.countdown }}</span>
-          <span class="nk-egd-floor__datalabel">回合</span>
-        </span>
-      </span>
-    </header>
+    <div v-if="targets.length" class="nk-egd-head">
+      <EndgameStarTargets :items="targets" />
+    </div>
 
-    <section v-for="n in nodes" :key="n.half" class="nk-egd-lvl__node">
-      <header class="nk-egd-lvl__nodehead">
-        <StageHead :label="halfLabel(n.half)" :stage="n.stage" />
-      </header>
-      <StageContent :stage="n.stage" :is-boss="true" headless />
-      <div v-if="nodeBuffs(n).length || nodeTraits(n).length" class="nk-egd-lvl__effects">
-        <EndgameBuffGroup
-          v-if="nodeBuffs(n).length"
-          title="赛季增益"
-          :label="halfLabel(n.half)"
-          :items="nodeBuffs(n)"
-        />
-        <EndgameTraitGroup
-          v-if="nodeTraits(n).length"
-          title="首领特性"
-          :label="halfLabel(n.half)"
-          :items="nodeTraits(n)"
-        />
-      </div>
-    </section>
+    <EndgameNodeCards
+      v-if="cards.length > 1"
+      :items="cards"
+      :active="activeHalf"
+      id-prefix="egd-floor-half-tab"
+      tabs-label="半场"
+      panel-id="egd-floor-board"
+      @select="selectHalf"
+    />
 
-    <EndgameFloorBuff :buff="floor.buff" />
-
-    <EndgameTargets :items="floor.targets || []" />
+    <EndgameBoard
+      v-if="activeNode"
+      id="egd-floor-board"
+      :labelled-by="cards.length > 1 ? `egd-floor-half-tab-${activeHalf}` : undefined"
+      :stage="activeNode.stage"
+      :buff="floor.buff"
+      :traits="activeTraits"
+      :buffs="activeBuffs"
+    />
   </div>
 </template>

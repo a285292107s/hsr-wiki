@@ -169,6 +169,24 @@ export interface MazeMonsterInfo {
   tpl?: string;
   /** 战斗波次序号（StageConfig.MonsterList 波次展开，1 起；层级/peak/星启节点敌方均带此字段） */
   wave?: number;
+  /** 该敌方实例的召唤物（`MonsterConfig.SummonIDList` 命中本场次时输出；见 MazeSummonInfo） */
+  summons?: MazeSummonInfo[];
+}
+
+/** 召唤物（ADR 0036）：隶属于**某个敌方实例**的额外敌人——由该实例的
+ *  `MonsterConfig.SummonIDList` 得到，挂在 `MazeMonsterInfo.summons` 上（同场多个敌方
+ *  都具备召唤能力时会在各自卡片里各出现一次，如幼蛰虫分裂出自己）。
+ *  轻形态：只消费图标 + 名称 + 污染徽标，弱点/抗性/韧性/速度/技能不出（与 MazeMonsterInfo 区分）。 */
+export interface MazeSummonInfo {
+  id: string;
+  /** 模板 ID（仅实例别名 MonsterID≠MonsterTemplateID 时输出；详情页跳转 /monster/:tpl 用） */
+  tpl?: string;
+  /** 怪物名（TextMap 解析） */
+  name: string;
+  /** MonsterMiddleIcon basename（前端经 CDN 构造 webp URL） */
+  icon: string;
+  /** 该召唤物受「贪饕」污染时的污染等级（同场次 InvasionID，1–3）；未受污染不落该字段 */
+  polluted?: number;
 }
 
 /** 污染等级（converter 由 StageInvasionConfig 写入关卡节点，ADR 0026）。

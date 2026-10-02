@@ -35,7 +35,8 @@ const ROUTES: GuardRoute[] = [
   { path: '/currency', roots: ['.nk-hub-brand__title', '.nk-hub-release__title'] },
   { path: '/currency/role/1001', roots: ['.nk-crole-hero__name', '.nk-crole-bar'] },
   { path: '/settings', roots: ['#accent-title', '.ui-sidebar'] },
-  { path: '/endgame/boss/3020', roots: ['.nk-egd-tabs', '.nk-egd-lvl'] },
+  // 末日幻影默认停在星启模式（用户裁决）：关键容器取两条分支共有的看板，不取只在层分支下存在的 `.nk-egd-lvl`
+  { path: '/endgame/boss/3020', roots: ['.nk-egd-tabs', '.nk-egd-board'] },
 ];
 
 test.describe('不变量守卫（视觉改动不得让其变红）', () => {

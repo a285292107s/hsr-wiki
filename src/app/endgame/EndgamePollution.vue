@@ -41,15 +41,6 @@ const levelViews = computed(() => presentLevels.value.map((l) => {
   return { ...l, buff, html: refsResolved(l.desc, l.param_list) ? buffDescHtml(buff) : '' };
 }));
 
-const summary = computed(() => {
-  const p = props.data.pollution;
-  if (!p) return '';
-  const range = p.levels.length > 1
-    ? `${p.levels[0]}–${p.levels[p.levels.length - 1]}`
-    : String(p.levels[0] ?? '');
-  return `本季 ${p.count} 处关卡受「贪饕」侵蚀，污染等级 ${range}`;
-});
-
 /** 污染怪物的详情页跳转键：详情文件按模板 ID 命名（无 tpl 时回退实例 ID） */
 function monsterHref(m: { id: string; tpl?: string }): string {
   return `/monster/${m.tpl || m.id}`;
@@ -62,8 +53,6 @@ function monsterHref(m: { id: string; tpl?: string }): string {
       <span class="nk-title__idx">{{ sectionIdx['pollution'] }}</span>污染等级 CONTAMINATION
     </h2>
     <div class="nk-egd-poll">
-      <p v-if="summary" class="nk-egd-poll__summary">{{ summary }}</p>
-
       <div v-if="levelViews.length" class="nk-egd-poll__levels">
         <article v-for="l in levelViews" :key="l.invasion_id" class="nk-egd-poll__level">
           <header class="nk-egd-poll__levelhead">

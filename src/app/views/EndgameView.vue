@@ -13,7 +13,7 @@ import type {
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import { buildEndgameSections } from '../endgame/sections';
-import { buildBossLevelTabs } from '../endgame/levels';
+import { buildBossLevelTabs, defaultLevelKey } from '../endgame/levels';
 import type { BossLevelTab } from '../endgame/levels';
 import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
@@ -115,7 +115,7 @@ const peakLevels = computed<PeakLevelInfo[]>(() => data.value?.levels || []);
 
 const navSections = computed(() => buildEndgameSections(data.value, modeKey.value, peakLevels.value));
 
-/** 末日幻影的子 tab（第 1..N 层 + 星启模式）；其余模式为空数组 → 顶部条走区块导航 */
+/** 末日幻影的子 tab（第 1..N 层 + 星启模式）；其余模式为空数组 → 顶部条走区块导航。默认激活星启（见 `defaultLevelKey`）。 */
 const levelTabs = computed<BossLevelTab[]>(
   () => (modeKey.value === 'boss' ? buildBossLevelTabs(data.value) : []),
 );
@@ -123,7 +123,7 @@ const activeLevel = ref('');
 watch(
   levelTabs,
   (tabs) => {
-    if (!tabs.some((t) => t.key === activeLevel.value)) activeLevel.value = tabs[0]?.key || '';
+    if (!tabs.some((t) => t.key === activeLevel.value)) activeLevel.value = defaultLevelKey(tabs);
   },
   { immediate: true },
 );

@@ -75,6 +75,15 @@ export function elemRow(types: string[]): string {
   }).join('');
 }
 
+/** 末波首领（最后一波的第 1 只）：战斗卡片「打谁」的唯一判据——
+ *  末日幻影每场 1 敌即首领本体，忘却之庭 / 虚构叙事的末波是压轴首领（波 1 是小怪）。 */
+export function lastWaveBoss(mons: MazeMonsterInfo[] | undefined): MazeMonsterInfo | null {
+  const list = mons || [];
+  if (!list.length) return null;
+  const maxWave = Math.max(...list.map((m) => m.wave || 1));
+  return list.find((m) => (m.wave || 1) === maxWave) || list[list.length - 1] || null;
+}
+
 export function monTitle(m: MazeMonsterInfo): string {
   const parts = [m.name];
   const r = m.rank ? (MON_RANK[m.rank] || '') : '';

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { buildEndgameSections, sectionIdxMap } from './sections';
+import EndgameSummons from './EndgameSummons.vue';
 import {
   BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl,
   elemRow, monCountLabel, monWaveGroups, monTitle, peakTagsHtml, targetHtml,
@@ -62,22 +63,23 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
                 <span v-for="(g, gi) in monWaveGroups(l.monsters)" :key="gi" class="nk-egd-floor__wave">
                   <span v-if="monWaveGroups(l.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
                   <span class="nk-egd-floor__mons">
-                    <router-link
-                      v-for="m in g.items"
-                      :key="`${m.id}-${gi}`"
-                      class="nk-egd-floor__monlink"
-                      :to="`/monster/${m.tpl || m.id}`"
-                      :title="monTitle(m)"
-                      :aria-label="`查看 ${m.name} 详情`"
-                    >
-                      <img
-                        class="nk-egd-floor__mon"
-                        :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                        :alt="m.name"
-                        loading="lazy"
-                        @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                    <span v-for="m in g.items" :key="`${m.id}-${gi}`" class="nk-egd-floor__moncell">
+                      <router-link
+                        class="nk-egd-floor__monlink"
+                        :to="`/monster/${m.tpl || m.id}`"
+                        :title="monTitle(m)"
+                        :aria-label="`查看 ${m.name} 详情`"
                       >
-                    </router-link>
+                        <img
+                          class="nk-egd-floor__mon"
+                          :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                          :alt="m.name"
+                          loading="lazy"
+                          @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                        >
+                      </router-link>
+                      <EndgameSummons :items="m.summons || []" />
+                    </span>
                   </span>
                 </span>
               </span>
@@ -124,22 +126,23 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
                 <span v-for="(g, gi) in monWaveGroups(l.hard.monsters)" :key="gi" class="nk-egd-floor__wave">
                   <span v-if="monWaveGroups(l.hard.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
                   <span class="nk-egd-floor__mons">
-                    <router-link
-                      v-for="m in g.items"
-                      :key="`${m.id}-${gi}`"
-                      class="nk-egd-floor__monlink"
-                      :to="`/monster/${m.tpl || m.id}`"
-                      :title="monTitle(m)"
-                      :aria-label="`查看 ${m.name} 详情`"
-                    >
-                      <img
-                        class="nk-egd-floor__mon"
-                        :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                        :alt="m.name"
-                        loading="lazy"
-                        @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                    <span v-for="m in g.items" :key="`${m.id}-${gi}`" class="nk-egd-floor__moncell">
+                      <router-link
+                        class="nk-egd-floor__monlink"
+                        :to="`/monster/${m.tpl || m.id}`"
+                        :title="monTitle(m)"
+                        :aria-label="`查看 ${m.name} 详情`"
                       >
-                    </router-link>
+                        <img
+                          class="nk-egd-floor__mon"
+                          :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                          :alt="m.name"
+                          loading="lazy"
+                          @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                        >
+                      </router-link>
+                      <EndgameSummons :items="m.summons || []" />
+                    </span>
                   </span>
                 </span>
               </span>

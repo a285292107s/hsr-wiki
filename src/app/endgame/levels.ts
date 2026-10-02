@@ -29,6 +29,12 @@ export function buildBossLevelTabs(data: MazeListEntry | null): BossLevelTab[] {
   return tabs;
 }
 
+/** 默认激活的子 tab：星启模式优先（用户裁决，推翻 ADR 0030 决策 6 的「默认第 1 层」），
+ *  不含星启的赛季退回首个层级 tab */
+export function defaultLevelKey(tabs: BossLevelTab[]): string {
+  return (tabs.find((t) => t.kind === 'tierce') || tabs[0])?.key || '';
+}
+
 /** 子 tab → 层级详情（非层级 tab 或数据缺层时返回 null） */
 export function bossLevelFloor(data: MazeListEntry | null, key: string): MazeFloorDetail | null {
   if (!data || !key.startsWith(FLOOR_KEY_PREFIX)) return null;

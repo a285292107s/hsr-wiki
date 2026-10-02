@@ -380,8 +380,10 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
    无法派生的只剩两类：① 站点自创文案（如 H1「贪饕污染」、区块标题「首领特性」）；
    ② UI 格式（「第 N 层」「污染等级 N」「NO.<id>」的拼装方式）——这两类保留字面量并注明理由。 */
 
-interface MonsterLike { name: string; icon?: string; wave?: number }
+interface MonsterLike { name: string; icon?: string; wave?: number; summons?: SummonLike[] }
 interface InvasionLike { level: number; stage_id?: number; monsters?: MonsterLike[] }
+/** 召唤物（ADR 0036 修订）：轻形态 + 受污染者带 polluted（污染等级）；挂在召唤者自己的敌方条目上 */
+interface SummonLike { id: string; name: string; tpl?: string; polluted?: number }
 interface StageLike { monsters?: MonsterLike[]; invasion?: InvasionLike }
 interface FloorLike {
   floor: number;
@@ -405,7 +407,13 @@ interface SeasonLike {
     monsters?: MonsterLike[];
     nodes?: { idx: number; level?: number; damage?: string[]; monsters?: MonsterLike[]; invasion?: InvasionLike; buff?: { name: string } }[];
   };
-  levels?: { name?: string; invasion?: InvasionLike }[];
+  levels?: {
+    name?: string;
+    damage?: string[];
+    monsters?: MonsterLike[];
+    invasion?: InvasionLike;
+    hard?: { monsters?: MonsterLike[] };
+  }[];
   buffs?: { name: string }[];
   pollution?: { count: number; levels: number[] };
 }
@@ -488,6 +496,19 @@ function pollutionEntries(season: SeasonLike): PollutionEntry[] {
 /** 污染徽标文案（站点术语「污染等级 N」，勿简写成侵蚀等级） */
 const pollutionBadge = (e: PollutionEntry): string => `污染等级 ${e.invasion.level}`;
 
+/** 某场次/某节点敌方条目上的召唤物（按召唤者分发，见 ADR 0036 修订） */
+function summonsOf(mons: MonsterLike[] | undefined): SummonLike[] {
+  return (mons ?? []).flatMap((m) => m.summons ?? []);
+}
+
+/** 其中受污染的那些（站点在它们身上挂污染徽标） */
+function pollutedSummons(mons: MonsterLike[] | undefined): SummonLike[] {
+  return summonsOf(mons).filter((s) => s.polluted);
+}
+
+/** 污染徽标文案（召唤物条目上的 polluted = 该场次 InvasionID） */
+const summonBadge = (s: SummonLike): string => `污染等级 ${s.polluted}`;
+
 /** 污染节点位置文案（与 pollutionPosition 同口径） */
 function pollutionPosition(e: PollutionEntry): string {
   if (e.half === 'tierce') return '星启附加关';
@@ -537,13 +558,23 @@ test.describe('布局验收：终局合并单页', () => {
     // 赛季级区块保留在子 tab 之上（本模式下它是唯一赛季级区块，序号为 01）
     await expect(page.locator('#egd-pollution')).toBeVisible();
     await expect(page.locator('#egd-pollution')).toHaveText(/污染等级/);
-    // 子 tab：紧接污染等级区块（并列一行）、数据层序 + 星启模式，默认停在第 1 层
+    // 子 tab：紧接污染等级区块（并列一行）、数据层序 + 星启模式；默认停在星启模式（用户裁决，推翻 ADR 0030 决策 6）
     await expect(page.locator('.nk-egd-poll + .nk-egd-tabs')).toHaveCount(1);
     const tabs = page.locator('.nk-egd-tabs [role="tab"]');
     await expect(tabs).toHaveText(levelTabLabels(season));
-    await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
-    // 层尾末法余烬只显示增益名（站点已移除「可用增益」标签，全站统一）；增益名取自层数据
-    await expect(page.locator('.nk-egd-lvl > .nk-egd-floor__buff .nk-egd-floor__buffhead'))
+    await expect(tabs.last()).toHaveAttribute('aria-selected', 'true');
+    // 默认停在星启模式，故先显式切到第 1 层：层口径的断言（星级目标 / 半场卡片 / 看板）都在层 tab 分支下
+    await page.locator('#egd-level-tab-floor-1').click();
+    // 层没有标题行（用户裁决）：面板首块即星级目标
+    await expect(page.locator('.nk-egd-lvl__head')).toHaveCount(0);
+    // 星级目标逐档一行（档数取自层数据）
+    await expect(page.locator('#egd-level-panel .nk-egd-head__label')).toHaveText('星级目标');
+    const floor1Targets = season.floor_details![0].targets!;
+    const starRows = page.locator('#egd-level-panel .nk-egd-startargets li');
+    await expect(starRows).toHaveCount(floor1Targets.length);
+    await expect(starRows.last()).toContainText(String(floor1Targets[floor1Targets.length - 1].param));
+    // 末法余烬与星启看板同位：看板首块，只显示增益名（「可用增益」标签全站已移除）
+    await expect(page.locator('#egd-floor-board > .nk-egd-board__body > .nk-egd-floor__buff .nk-egd-floor__buffhead'))
       .toHaveText(season.floor_details![0].buff!.name);
     await expect(page.locator('.nk-egd-floor__bufflabel')).toHaveCount(0);
     const tabBoxes = await tabs.evaluateAll((els) => els.map((el) => {
@@ -560,16 +591,20 @@ test.describe('布局验收：终局合并单页', () => {
     const cleanFloor = (season.floor_details ?? []).find(
       (f) => !polledFloors.some((e) => e.floor === f.floor),
     );
-    // 无污染层徽标为零（数据判据），有污染层的徽标随层级面板切换
+    // 层标题不再承载逐半场污染徽标（用户裁决）：徽标随所属半场落在看板内（与星启看板同一规则）
+    await expect(page.locator('.nk-egd-lvl__poll')).toHaveCount(0);
+    const selectHalf = async (floor: number, half: 'stage1' | 'stage2'): Promise<void> => {
+      await page.locator(`#egd-level-tab-floor-${floor}`).click();
+      await page.locator(`#egd-floor-half-tab-${half}`).click();
+    };
     if (cleanFloor) {
-      await page.locator(`#egd-level-tab-floor-${cleanFloor.floor}`).click();
-      await expect(page.locator('.nk-egd-lvl__poll .nk-egd-pollchip')).toHaveCount(0);
+      await selectHalf(cleanFloor.floor, 'stage1');
+      await expect(page.locator('#egd-floor-board .nk-egd-pollchip')).toHaveCount(0);
     }
     for (const entry of polledFloors) {
-      await page.locator(`#egd-level-tab-floor-${entry.floor}`).click();
-      await expect(page.locator('.nk-egd-lvl__poll .nk-egd-pollchip')).toContainText(pollutionBadge(entry));
-      await expect(page.locator('.nk-egd-lvl__poll .nk-egd-pollchip__half'))
-        .toHaveText(entry.half === 'stage1' ? '上半场' : '下半场');
+      await selectHalf(entry.floor!, entry.half === 'stage1' ? 'stage1' : 'stage2');
+      // 徽标只认看板头那一枚：卡内召唤物条目上的徽标属于召唤物（ADR 0036），不参与这里的断言
+      await expect(page.locator('#egd-floor-board .nk-egd-board__head .nk-egd-pollchip')).toHaveText(pollutionBadge(entry));
     }
     // 赛季级汇总条数与徽标 = 污染节点数据；等级词条只列数据里出现过的档位
     await expect(page.locator('.nk-egd-poll__item')).toHaveCount(poll.length);
@@ -596,41 +631,84 @@ test.describe('布局验收：终局合并单页', () => {
     const tierceData = season.tierce!;
     const tabs = page.locator('.nk-egd-tabs [role="tab"]');
     await expect(tabs).toHaveText(levelTabLabels(season));
+    // 默认停在星启模式（用户裁决，推翻 ADR 0030 决策 6）；层口径的断言在下方显式切到第 1 层后取
+    await expect(tabs.last()).toHaveAttribute('aria-selected', 'true');
+    await page.locator('#egd-level-tab-floor-1').click();
     await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
-    // 第 1 层：只有上下半场两个战斗节点，各挂该场次的赛季增益 + 首领特性（条数取自数据）
-    const nodes = page.locator('.nk-egd-lvl__node');
-    await expect(nodes).toHaveCount(stageNum);
-    await expect(nodes.nth(0).locator('.nk-egd-floor__stagelabel')).toHaveText('上半场');
-    await expect(nodes.nth(1).locator('.nk-egd-floor__stagelabel')).toHaveText('下半场');
+    // 第 1 层：半场卡片行（两张）+ 一次只渲染一个半场的看板；看板块序 = 首领特性 → 敌方配置 → 赛季增益
+    const halfCards = page.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]');
+    await expect(halfCards).toHaveCount(stageNum);
+    await expect(halfCards.locator('.nk-egd-nodecard__name')).toHaveText(['上半场', '下半场']);
+    await expect(halfCards.first()).toHaveAttribute('aria-selected', 'true');
+    const floorBoard = page.locator('#egd-floor-board');
+    await expect(floorBoard).toHaveCount(1);
+    await expect(floorBoard).toHaveAttribute('aria-labelledby', 'egd-floor-half-tab-stage1');
     // 敌方取实际战斗数据（影将军），不是 ChallengeBossMazeExtra 的指南别名蚀心兽（ADR 0031）
-    await expect(nodes.nth(0).locator('.nk-egd-mon__name')).toHaveText(floorBossName(season, 1, 'stage1'));
-    await expect(nodes.nth(1).locator('.nk-egd-mon__name')).toHaveText(floorBossName(season, 1, 'stage2'));
-    const firstNodeGroups = nodes.nth(0).locator('.nk-egd-group');
-    await expect(firstNodeGroups.nth(0).locator('.nk-egd-group__title')).toHaveText('赛季增益');
-    await expect(firstNodeGroups.nth(0).locator('.nk-egd-group__label')).toHaveText('上半场');
-    await expect(firstNodeGroups.nth(0).locator('.nk-egd-buff')).toHaveCount(stageBuffs.length);
-    await expect(firstNodeGroups.nth(1).locator('.nk-egd-group__title')).toHaveText('首领特性');
-    await expect(firstNodeGroups.nth(1).locator('.nk-egd-trait')).toHaveCount(stageTraits.length);
+    await expect(floorBoard.locator('.nk-egd-mon__name')).toHaveText(floorBossName(season, 1, 'stage1'));
+    // 半场身份只在卡片上出现一次：看板内不复述场次标签 / 场次行头 / 波次·敌数
+    await expect(floorBoard.locator('.nk-egd-group__label')).toHaveCount(0);
+    await expect(floorBoard.locator('.nk-egd-floor__stagelabel')).toHaveCount(0);
+    await expect(floorBoard.locator('.nk-egd-floor__moncount')).toHaveCount(0);
+    const boardGroups = floorBoard.locator('.nk-egd-group');
+    await expect(boardGroups).toHaveCount(2);
+    await expect(boardGroups.nth(0).locator('.nk-egd-group__title')).toHaveText('首领特性');
+    // 首领特性 = 整组一张卡（与星启看板同形），条数取自该半场数据
+    await expect(boardGroups.nth(0).locator('.nk-egd-traits')).toHaveCount(1);
+    await expect(boardGroups.nth(0).locator('.nk-egd-trait')).toHaveCount(stageTraits.length);
     // 坚防守备（#1/#2 参数按 ParameterList 渲染为百分比，期望值取自 param_list）
-    const trait0 = firstNodeGroups.nth(1).locator('.nk-egd-trait').first();
+    const trait0 = boardGroups.nth(0).locator('.nk-egd-trait').first();
     await expect(trait0).toContainText(stageTraits[0].name);
     await expect(trait0).toContainText(`${stageTraits[0].param_list![0] * 100}%`);
     await expect(trait0).toContainText(`${stageTraits[0].param_list![1] * 100}%`);
+    await expect(boardGroups.nth(1).locator('.nk-egd-group__title')).toHaveText('赛季增益');
+    await expect(boardGroups.nth(1).locator('.nk-egd-buff')).toHaveCount(stageBuffs.length);
+    // 第 1 层上半场：本层无污染，但召唤物照样在首领卡内列出（触发条件 = 该敌方有召唤表），且全程无徽标
+    await expect(floorBoard.locator('.nk-egd-board__head .nk-egd-pollchip')).toHaveCount(0);
+    const floor1Stage = (season.floor_details ?? []).find((f) => f.floor === 1)!.stage1!;
+    const floor1Summons = summonsOf(floor1Stage.monsters);
+    expect(floor1Summons.length).toBeGreaterThan(0);
+    await expect(floorBoard.locator('.nk-egd-mon > .nk-egd-mon__data > .nk-egd-summons .nk-egd-summon'))
+      .toHaveCount(floor1Summons.length);
+    await expect(floorBoard.locator('.nk-egd-mon > .nk-egd-mon__data > .nk-egd-summons .nk-egd-pollchip')).toHaveCount(0);
+    // 召唤物不再是独立一行（ADR 0036 修订）：归属落在召唤者卡片内
+    await expect(floorBoard.locator('.nk-egd-floor__row--summons')).toHaveCount(0);
+    // 下半场：切卡片即换看板（敌方随子切换），身份只在卡片上变
+    await halfCards.nth(1).click();
+    await expect(halfCards.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await expect(floorBoard).toHaveAttribute('aria-labelledby', 'egd-floor-half-tab-stage2');
+    await expect(floorBoard.locator('.nk-egd-mon__name')).toHaveText(floorBossName(season, 1, 'stage2'));
+    // 第 3 层上半场（污染关卡）：同一首领的召唤物里只有一部分受污染，其余不挂徽标
+    await page.locator('#egd-level-tab-floor-3').click();
+    await page.locator('#egd-floor-half-tab-stage1').click();
+    const floor3Stage = (season.floor_details ?? []).find((f) => f.floor === 3)!.stage1!;
+    const floor3Summons = summonsOf(floor3Stage.monsters);
+    const floor3Polled = pollutedSummons(floor3Stage.monsters);
+    expect(floor3Polled.length, '污染关卡应有受污染的召唤物').toBeGreaterThan(0);
+    expect(floor3Polled.length).toBeLessThan(floor3Summons.length);
+    await expect(floorBoard.locator('.nk-egd-mon > .nk-egd-mon__data > .nk-egd-summons .nk-egd-summon'))
+      .toHaveCount(floor3Summons.length);
+    await expect(floorBoard.locator('.nk-egd-mon > .nk-egd-mon__data > .nk-egd-summons .nk-egd-pollchip'))
+      .toHaveText(floor3Polled.map(summonBadge));
     // 第 4 层：仍只有上下半场两场战斗——星启附加关（超偶像）只在星启模式 tab 出现
     await page.locator('#egd-level-tab-floor-4').click();
-    await expect(page.locator('.nk-egd-lvl__node')).toHaveCount(stageNum);
-    await expect(page.locator('.nk-egd-lvl__node').nth(1).locator('.nk-egd-mon__name')).toHaveText(floorBossName(season, 4, 'stage2'));
+    await expect(page.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]')).toHaveCount(stageNum);
+    await page.locator('#egd-floor-half-tab-stage2').click();
+    await expect(floorBoard.locator('.nk-egd-mon__name')).toHaveText(floorBossName(season, 4, 'stage2'));
     await expect(page.locator('.nk-egd-lvl')).not.toContainText(nodeBoss[2]);
-    // 该层挑战目标仍是层级自己的档位（不含星启的 4 档）：档数与末档分数都取自层数据
+    // 该层星级目标仍是层级自己的档位（不含星启的 4 档）：档数与末档分数都取自层数据
     const floor4Targets = (season.floor_details ?? []).find((f) => f.floor === 4)!.targets!;
-    const floorTargets = page.locator('.nk-egd-floor__target');
+    const floorTargets = page.locator('.nk-egd-startargets li');
     await expect(floorTargets).toHaveCount(floor4Targets.length);
     await expect(floorTargets.last()).toContainText(String(floor4Targets[floor4Targets.length - 1].param));
-    // 记录第 4 层上下半场的推荐属性与赛季增益，用于与星启节点 1/2 逐字比对
-    const floor4Elems = await page.locator('.nk-egd-lvl__node .nk-egd-floor__elems')
+    // 记录第 4 层上下半场的推荐属性（卡片）与赛季增益（逐半场取），用于与星启节点 1/2 逐字比对
+    const floor4Elems = await page.locator('.nk-egd-nodecards[aria-label="半场"] .nk-egd-nodecard__elems')
       .evaluateAll((els) => els.map((el) => el.innerHTML));
-    const floor4Buffs = await page.locator('.nk-egd-lvl__node .nk-egd-buff__name')
-      .evaluateAll((els) => els.map((el) => el.textContent?.trim() || ''));
+    const floor4Buffs: string[] = [];
+    for (const key of ['stage1', 'stage2'] as const) {
+      await page.locator(`#egd-floor-half-tab-${key}`).click();
+      floor4Buffs.push(...await floorBoard.locator('.nk-egd-buff__name')
+        .evaluateAll((els) => els.map((el) => el.textContent?.trim() || '')));
+    }
     // 星启模式 tab：面板级「星级目标｜通关奖励」在顶，其下是节点子切换 + 单节点看板
     await page.locator('#egd-level-tab-tierce').click();
     const tierce = page.locator('#egd-level-panel .nk-egd-tierce');
@@ -686,20 +764,42 @@ test.describe('布局验收：终局合并单页', () => {
         { timeout: 15_000 },
       ).toBeGreaterThan(0);
     }
-    const board = tierce.locator('.nk-egd-tierce__node');
+    const board = tierce.locator('.nk-egd-board');
     await expect(board).toHaveCount(1);
     // 看板行头整块退场（用户裁决）：节点身份由卡片子切换承担，看板内不再复述节点号与波次·敌数
     await expect(board.locator('.nk-egd-tierce__nodezh')).toHaveCount(0);
     await expect(board.locator('.nk-egd-tierce__nodefrom')).toHaveCount(0);
-    // 3020 各节点都有首领特性 → 污染徽标在特性行，行头连容器都不渲染
-    await expect(board.locator('.nk-egd-tierce__nodehead')).toHaveCount(0);
+    // 3020 节点 1 带污染：徽标只在看板头出现一次（特性行右端那份已按用户裁决移除）
+    await expect(board.locator('.nk-egd-board__head .nk-egd-pollchip')).toHaveCount(1);
+    await expect(board.locator('.nk-egd-group__head .nk-egd-pollchip')).toHaveCount(0);
     await expect(board).toHaveAttribute('aria-labelledby', 'egd-tierce-node-tab-1');
     await expect(board.locator('.nk-egd-mon__name')).toHaveText(nodeBoss[0]);
-    // 看板行头不重复等级与推荐属性（卡片已承载），只留敌方配置行
+    // 看板行头不重复等级与推荐属性（卡片已承载）：只剩敌方配置一行
     await expect(board.locator('.nk-egd-tierce__damagerow')).toHaveCount(0);
     await expect(board.locator('.nk-egd-floor__row')).toHaveCount(1);
-    await expect(board.locator('.nk-egd-floor__row')).toHaveClass(/nk-egd-floor__row--mons/);
+    await expect(board.locator('.nk-egd-floor__row--mons')).toHaveCount(1);
     await expect(board.locator('.nk-egd-floor__moncount')).toHaveCount(0);
+    // 召唤物（ADR 0036 修订）：并入召唤者自己的敌方卡片——末日幻影每场只登记首领本体，
+    // 召唤物由该首领的 SummonIDList 得到；受污染者挂污染等级徽标，未挂徽标即未受污染
+    const node1Summons = summonsOf(tierceNodes[0].monsters);
+    expect(node1Summons.length).toBeGreaterThan(0);
+    const bossCard = board.locator('.nk-egd-mon');
+    await expect(bossCard).toHaveCount(1);
+    await expect(board.locator('.nk-egd-mon > .nk-egd-mon__data > .nk-egd-summons')).toHaveCount(1);
+    await expect(bossCard.locator('.nk-egd-summons__label')).toHaveText('召唤物');
+    await expect(bossCard.locator('.nk-egd-summon')).toHaveCount(node1Summons.length);
+    await expect(bossCard.locator('.nk-egd-summon__name')).toHaveText(node1Summons.map((s) => s.name));
+    const node1Polled = pollutedSummons(tierceNodes[0].monsters);
+    expect(node1Polled.length, '同批召唤物里只有一部分受污染').toBeGreaterThan(0);
+    expect(node1Polled.length).toBeLessThan(node1Summons.length);
+    await expect(bossCard.locator('.nk-egd-pollchip')).toHaveCount(node1Polled.length);
+    await expect(bossCard.locator('.nk-egd-pollchip')).toHaveText(node1Polled.map(summonBadge));
+    // 召唤物不再另起一行：场次块里没有召唤物行，只有卡片内部这一处
+    await expect(board.locator('.nk-egd-floor__row--summons')).toHaveCount(0);
+    // 卡内分区语言：召唤物块与「弱点/抗性」「技能」同构（上发丝线 + 上内距），不是贴在卡外的旁注
+    const cardSummons = board.locator('.nk-egd-mon > .nk-egd-mon__data > .nk-egd-summons');
+    expect(await computedNumber(cardSummons, 'border-top-width'), '卡内召唤物块应有上发丝线').toBe(1);
+    expect(await computedNumber(cardSummons, 'padding-top'), '卡内召唤物块应有上内距').toBeGreaterThan(0);
     // 字号档位（绝对值交 CSS，这里只锁相对序与「档位真的拉开」）：
     // 卡片节点号 > 区块标题（= 敌方配置标题，同一处声明）> 正文 > 卡片内行首标签
     // 同一条用例在桌面与手机两种断点下都要成立
@@ -710,10 +810,10 @@ test.describe('布局验收：终局合并单页', () => {
       };
       return {
         card: fs('.nk-egd-nodecard__name'),
-        groupTitle: fs('.nk-egd-tierce__node .nk-egd-group__title'),
-        monsTitle: fs('.nk-egd-tierce__node .nk-egd-floor__row--mons > .nk-egd-floor__label'),
-        prose: fs('.nk-egd-tierce__node .nk-egd-trait__desc'),
-        rowLabel: fs('.nk-egd-tierce__node .nk-egd-mon__label'),
+        groupTitle: fs('.nk-egd-board .nk-egd-group__title'),
+        monsTitle: fs('.nk-egd-board .nk-egd-floor__row--mons > .nk-egd-floor__label'),
+        prose: fs('.nk-egd-board .nk-egd-trait__desc'),
+        rowLabel: fs('.nk-egd-board .nk-egd-mon__label'),
       };
     });
     // 「敌方配置」已提为区块标题（用户裁决）：与「首领特性 / 赛季增益」同档、共用一处字号声明
@@ -725,6 +825,49 @@ test.describe('布局验收：终局合并单页', () => {
     ] as const) {
       expect(higher, `${name}（${higher} vs ${lower}）`).toBeGreaterThan(lower + 0.5);
     }
+    // 敌方卡 = 左右结构（用户裁决）：左列立绘、右列数据。
+    // 判据取几何而非类名：数据列整体在立绘列右侧且水平不重叠；两列顶边对齐；
+    // 立绘保持 376×512 竖版原比例（不做圆形裁切 → 宽高比 ~0.73、非 1:1），且未被裁到 62px 的旧圆形尺寸。
+    const monLayout = await board.locator('.nk-egd-mon').first().evaluate((card) => {
+      const art = card.querySelector('.nk-egd-mon__art') as HTMLElement;
+      const data = card.querySelector('.nk-egd-mon__data') as HTMLElement;
+      const img = card.querySelector('.nk-egd-mon__img') as HTMLImageElement;
+      const a = art.getBoundingClientRect();
+      const d = data.getBoundingClientRect();
+      const i = img.getBoundingClientRect();
+      const cs = getComputedStyle(card);
+      return {
+        cardDisplay: cs.display,
+        artRight: Math.round(a.right),
+        dataLeft: Math.round(d.left),
+        artTop: Math.round(a.top),
+        dataTop: Math.round(d.top),
+        imgW: Math.round(i.width),
+        imgH: Math.round(i.height),
+        radius: parseFloat(getComputedStyle(img).borderTopLeftRadius) || 0,
+      };
+    });
+    expect(monLayout.cardDisplay, '敌方卡应为左右两列网格').toBe('grid');
+    expect(monLayout.dataLeft, '数据列应在立绘列右侧').toBeGreaterThanOrEqual(monLayout.artRight);
+    expect(monLayout.dataTop, '两列顶边应对齐').toBe(monLayout.artTop);
+    expect(monLayout.imgH, '立绘应为竖版原比例（高 > 宽）').toBeGreaterThan(monLayout.imgW);
+    expect(monLayout.radius, '立绘不应再做圆形裁切').toBe(0);
+    // 立绘列宽度 = 该卡内容区里立绘的渲染宽；数据列占满剩余宽
+    const colFit = await board.locator('.nk-egd-mon').first().evaluate((card) => {
+      const art = card.querySelector('.nk-egd-mon__art') as HTMLElement;
+      const data = card.querySelector('.nk-egd-mon__data') as HTMLElement;
+      const cs = getComputedStyle(card);
+      const inner = card.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const a = art.getBoundingClientRect();
+      const d = data.getBoundingClientRect();
+      return {
+        sum: Math.round(a.width + d.width),
+        inner: Math.round(inner),
+        spill: Math.max(art.scrollWidth - art.clientWidth, data.scrollWidth - data.clientWidth),
+      };
+    });
+    expect(Math.abs(colFit.sum - colFit.inner), '两列宽度应占满卡内容宽').toBeLessThanOrEqual(20);
+    expect(colFit.spill, '两列均不应横向溢出').toBeLessThanOrEqual(1);
     // 敌方配置 = 标题在上、卡组在下（消掉原「左标签列 + 右卡片」在桌面端标签下方那一整列空列）：
     // 卡组顶边在标题底边之下、左缘与标题齐平、并占满行的内容宽
     const monsHeading = await board.locator('.nk-egd-floor__row--mons').evaluate((row) => {
@@ -754,7 +897,7 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(board.locator('.nk-egd-buff')).toHaveCount(stageBuffs.length);
     // 首领特性 = 整组一张卡片 + 组内逐条平铺（用户裁决：不再用子 tab 切换说明）
     await expect(board.locator('.nk-egd-pilltabs')).toHaveCount(0);
-    const traitCard = board.locator('.nk-egd-traits--card');
+    const traitCard = board.locator('.nk-egd-traits');
     await expect(traitCard).toHaveCount(1);
     const traitItems = traitCard.locator('.nk-egd-trait');
     await expect(traitItems).toHaveCount(stageTraits.length);
@@ -790,20 +933,32 @@ test.describe('布局验收：终局合并单页', () => {
     });
     expect(descRatio, '正文档行高不得缩水').toBeGreaterThan(1.6);
     // 敌方配置块下方不得留尾随空白：末波敌方网格的 8px 下外边距只服务多波之间
-    // （`.nk-egd-floor__monswrap` 已有 9px gap），末位归零——块间距回到看板体自身的 gap（桌面 14 / 手机 12）
+    // （`.nk-egd-floor__monswrap` 已有 9px gap），末位归零。召唤物并入敌方卡内（ADR 0036 修订）后
+    // 「敌方配置」重回场次块末行，`.nk-egd-floor__row:last-child` 收掉下内距与发丝线。
     const monsSpacing = await board.evaluate((el) => {
-      const body = el.querySelector('.nk-egd-tierce__nodebody') as HTMLElement;
+      const body = el.querySelector('.nk-egd-board__body') as HTMLElement;
       const stage = body.querySelector('.nk-egd-floor__stage') as HTMLElement;
       const grid = stage.querySelector('.nk-egd-mons') as HTMLElement;
+      const wrap = stage.querySelector('.nk-egd-floor__monswrap') as HTMLElement;
+      const monsRow = stage.querySelector('.nk-egd-floor__row--mons') as HTMLElement;
+      const last = stage.lastElementChild as HTMLElement;
       const next = stage.nextElementSibling as HTMLElement | null;
       return {
         gap: parseFloat(getComputedStyle(body).rowGap) || 0,
-        tail: Math.round(stage.getBoundingClientRect().bottom - grid.getBoundingClientRect().bottom),
+        gridMargin: parseFloat(getComputedStyle(grid).marginBottom) || 0,
+        wrapTail: Math.round(wrap.getBoundingClientRect().bottom - grid.getBoundingClientRect().bottom),
+        belowWrap: Math.round(monsRow.getBoundingClientRect().bottom - wrap.getBoundingClientRect().bottom),
+        lastIsMons: last === monsRow,
+        tail: Math.round(stage.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom),
         toNext: next ? Math.round(next.getBoundingClientRect().top - stage.getBoundingClientRect().bottom) : -1,
       };
     });
     expect(monsSpacing.gap, '看板体应声明区块间距').toBeGreaterThan(0);
-    expect(monsSpacing.tail, '敌方配置块下方不应有余白').toBe(0);
+    expect(monsSpacing.gridMargin, '末波敌方网格下外边距应归零').toBe(0);
+    expect(monsSpacing.wrapTail, '敌方卡组下方不应有余白').toBe(0);
+    expect(monsSpacing.belowWrap, '敌方配置块下方不应有余白').toBe(0);
+    expect(monsSpacing.lastIsMons, '敌方配置应重新成为场次块末行').toBe(true);
+    expect(monsSpacing.tail, '场次块末行下方不应有余白').toBe(0);
     expect(monsSpacing.toNext, '敌方配置与下一区块的间距 = 看板体 gap').toBe(monsSpacing.gap);
     // 节点 1/2 与第 4 层上下半场逐字同源：推荐属性（卡片）与赛季增益同源同值（ADR 0032 决策 3）
     const node1Elems = await nodeTabs.nth(0).locator('.nk-egd-nodecard__elems').innerHTML();
@@ -842,11 +997,11 @@ test.describe('布局验收：终局合并单页', () => {
     expect(statLabels).not.toContain('推荐属性 RECOMMENDED');
     expect(statLabels).not.toContain('敌人等级 ENEMY LV');
     // 面板级目标区 = 星级目标（档数与分数取自 tierce 数据）+ 通关奖励（项数取自数据）
-    await expect(tierce.locator('.nk-egd-tierce__headlabel')).toHaveText(['星级目标', '通关奖励']);
+    await expect(tierce.locator('.nk-egd-head__label')).toHaveText(['星级目标', '通关奖励']);
     const tierceTargets = tierceData.targets!;
-    await expect(tierce.locator('.nk-egd-tierce__star')).toHaveCount(tierceTargets.length);
-    await expect(tierce.locator('.nk-egd-tierce__targets li')).toHaveCount(tierceTargets.length);
-    await expect(tierce.locator('.nk-egd-tierce__targets li').last())
+    await expect(tierce.locator('.nk-egd-startargets__star')).toHaveCount(tierceTargets.length);
+    await expect(tierce.locator('.nk-egd-startargets li')).toHaveCount(tierceTargets.length);
+    await expect(tierce.locator('.nk-egd-startargets li').last())
       .toContainText(String(tierceTargets[tierceTargets.length - 1].param));
     await expect(tierce.locator('.nk-egd-reward__name')).toHaveCount(tierceData.rewards!.length);
     await noUnknownOverflow(page);
@@ -858,6 +1013,20 @@ test.describe('布局验收：终局合并单页', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/endgame/boss/3020');
     const season = seasonData('maze_boss.json', '3020');
+    // 默认停在星启模式，故先切到第 1 层再取层分支的半场卡片几何
+    await page.locator('#egd-level-tab-floor-1').click();
+    // 层 tab 的半场卡片同形：375px 下两张同一行、卡内上下排版、行不横滚
+    const floorCards = await page.locator('.nk-egd-nodecards[aria-label="半场"]').evaluate((el) => {
+      const items = [...el.children] as HTMLElement[];
+      return {
+        scroll: el.scrollWidth - el.clientWidth,
+        rows: new Set(items.map((c) => Math.round(c.getBoundingClientRect().y))).size,
+        dir: getComputedStyle(items[0]).flexDirection,
+      };
+    });
+    expect(floorCards.scroll).toBeLessThanOrEqual(1);
+    expect(floorCards.rows).toBe(1);
+    expect(floorCards.dir).toBe('column');
     await page.locator('#egd-level-tab-tierce').click();
     const cards = page.locator('.nk-egd-nodecards');
     const card = page.locator('.nk-egd-nodecard').first();
@@ -935,6 +1104,8 @@ test.describe('布局验收：终局合并单页', () => {
     await page.goto('/endgame/boss/3020');
     // 层 tab 分支（星启 tab 之前测）：同一处面板级内距必须同时承担两条分支的留白
     // （历史教训：把留白加在 head 自身只修好星启 tab，层 tab 分支仍贴着发丝线）
+    // 默认停在星启模式，故显式切到第 1 层取层分支几何，再切回星启 tab 取另一条分支
+    await page.locator('#egd-level-tab-floor-1').click();
     const floorBranch = await page.evaluate(() => {
       const panel = document.querySelector('#egd-level-panel') as HTMLElement;
       const first = panel.firstElementChild as HTMLElement;
@@ -944,12 +1115,12 @@ test.describe('布局验收：终局合并单页', () => {
       };
     });
     await page.locator('#egd-level-tab-tierce').click();
-    const head = page.locator('#egd-level-panel .nk-egd-tierce__head');
+    const head = page.locator('#egd-level-panel .nk-egd-head');
     await expect(head).toBeVisible();
     // 两栏各带区块标签：左 = 星级目标（档数与分数取自数据），右 = 通关奖励（项数取自数据）
     const tierceData = seasonData('maze_boss.json', '3020').tierce!;
-    await expect(head.locator('.nk-egd-tierce__headlabel')).toHaveText(['星级目标', '通关奖励']);
-    await expect(head.locator('.nk-egd-tierce__targets li')).toHaveCount(tierceData.targets!.length);
+    await expect(head.locator('.nk-egd-head__label')).toHaveText(['星级目标', '通关奖励']);
+    await expect(head.locator('.nk-egd-startargets li')).toHaveCount(tierceData.targets!.length);
     await expect(head.locator('.nk-egd-reward__name')).toHaveCount(tierceData.rewards!.length);
     // 分数档之间靠行距分行，不画分隔线（同级只读条目，线不承载层级）
     await expect(head.locator('.nk-egd-node').first()).toHaveCSS('border-bottom-width', '0px');
@@ -957,14 +1128,14 @@ test.describe('布局验收：终局合并单页', () => {
     const desktop = await page.evaluate(() => {
       const box = (el: Element) => el.getBoundingClientRect().toJSON() as DOMRect;
       const panel = document.querySelector('#egd-level-panel') as HTMLElement;
-      const h = document.querySelector('#egd-level-panel .nk-egd-tierce__head') as HTMLElement;
+      const h = document.querySelector('#egd-level-panel .nk-egd-head') as HTMLElement;
       const cols = [...h.children];
       return {
         head: box(h),
         tabs: box(document.querySelector('.nk-egd-tabs') as HTMLElement),
         left: box(cols[0]),
         right: box(cols[1]),
-        nodes: box(document.querySelector('#egd-level-panel .nk-egd-tierce__node') as HTMLElement),
+        nodes: box(document.querySelector('#egd-level-panel .nk-egd-board') as HTMLElement),
         panelPadTop: parseFloat(getComputedStyle(panel).paddingTop) || 0,
       };
     });
@@ -994,7 +1165,7 @@ test.describe('布局验收：终局合并单页', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     const narrow = await page.evaluate(() => {
       const box = (el: Element) => el.getBoundingClientRect().toJSON() as DOMRect;
-      const cols = [...(document.querySelector('#egd-level-panel .nk-egd-tierce__head') as HTMLElement).children];
+      const cols = [...(document.querySelector('#egd-level-panel .nk-egd-head') as HTMLElement).children];
       return { left: box(cols[0]), right: box(cols[1]) };
     });
     expect(Math.round(narrow.right.x)).toBe(Math.round(narrow.left.x));
@@ -1003,35 +1174,71 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：场次单列纵向（无两栏）+ 字号五档与 4px 间距节奏', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3020：层 tab 单看板（星级目标 + 半场卡片）+ 字号五档与间距节奏', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
     await expect(page.locator('.nk-egd-tabs [role="tab"]').first()).toBeVisible();
-    const node = page.locator('.nk-egd-lvl__node').first();
-    // 全宽场次行头；节点/层尾一律单列纵向（禁两栏：grid-template-columns 必须为 none）
-    await expect(node.locator('.nk-egd-lvl__nodehead .nk-egd-floor__stagelabel')).toHaveText('上半场');
-    const nodeBox = await node.boundingBox();
-    const headBox = await node.locator('.nk-egd-lvl__nodehead').boundingBox();
-    expect(Math.round(headBox!.width)).toBe(Math.round(nodeBox!.width));
-    await expect(node).toHaveCSS('display', 'flex');
-    await expect(node).toHaveCSS('grid-template-columns', 'none');
-    const stageBox = await node.locator('.nk-egd-floor__stage').boundingBox();
-    const effectsBox = await node.locator('.nk-egd-lvl__effects').boundingBox();
-    expect(effectsBox!.y).toBeGreaterThanOrEqual(stageBox!.y + stageBox!.height);
-    expect(Math.round(stageBox!.x)).toBe(Math.round(effectsBox!.x));
-    // 分组行头单行：标题与场次标签同一 y（此前是纵向两行）
-    const group = node.locator('.nk-egd-group').first();
-    const titleBox = await group.locator('.nk-egd-group__title').boundingBox();
-    const labelBox = await group.locator('.nk-egd-group__label').boundingBox();
-    expect(Math.round(titleBox!.y)).toBe(Math.round(labelBox!.y));
-    // 层尾纵向收束：末法余烬在挑战目标之上，目标列表带区块标签
-    await expect(page.locator('.nk-egd-floor__goalslabel')).toHaveText('挑战目标');
+    // 默认停在星启模式，故显式切到第 1 层：本用例断的是层分支的块序与间距（层无标题行，面板首块 = 星级目标）
+    await page.locator('#egd-level-tab-floor-1').click();
+    // 层没有标题行（用户裁决）：面板首块 = 星级目标；纵向顺序 = 目标 → 卡片行 → 看板
+    await expect(page.locator('.nk-egd-lvl__head')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-head__label')).toHaveText('星级目标');
+    const stack = await page.evaluate(() => {
+      const box = (sel: string) => (document.querySelector(sel) as HTMLElement).getBoundingClientRect().toJSON() as DOMRect;
+      return {
+        head: box('#egd-level-panel .nk-egd-head'),
+        cards: box('#egd-level-panel .nk-egd-nodecards'),
+        board: box('#egd-level-panel .nk-egd-board'),
+      };
+    });
+    expect(stack.cards.y).toBeGreaterThanOrEqual(stack.head.bottom - 1);
+    expect(stack.board.y).toBeGreaterThanOrEqual(stack.cards.bottom - 1);
     // 各档同级条目靠行距分行，不画分隔线（与星启头部同一判据）
-    await expect(page.locator('.nk-egd-floor__target').first()).toHaveCSS('border-bottom-width', '0px');
-    const buffBox = await page.locator('.nk-egd-lvl > .nk-egd-floor__buff').boundingBox();
-    const goalsBox = await page.locator('.nk-egd-lvl > .nk-egd-floor__goals').boundingBox();
-    expect(goalsBox!.y).toBeGreaterThanOrEqual(buffBox!.y + buffBox!.height);
+    await expect(page.locator('.nk-egd-startargets .nk-egd-node').first()).toHaveCSS('border-bottom-width', '0px');
+    // 半场卡片行：两张同一行等宽（层内半场不再纵向铺开）
+    const cardBoxes = await page.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]').evaluateAll((els) => els.map((el) => {
+      const r = el.getBoundingClientRect();
+      return { y: Math.round(r.y), w: Math.round(r.width) };
+    }));
+    expect(new Set(cardBoxes.map((b) => b.y)).size).toBe(1);
+    expect(new Set(cardBoxes.map((b) => b.w)).size).toBe(1);
+    // 看板：一次一个半场，块序 = 首领特性 → 敌方配置 → 赛季增益；层内不复述半场身份
+    const board = page.locator('#egd-floor-board');
+    await expect(board).toHaveCount(1);
+    await expect(board).toHaveCSS('display', 'flex');
+    await expect(board.locator('.nk-egd-group__title')).toHaveText(['首领特性', '赛季增益']);
+    await expect(board.locator('.nk-egd-group__label')).toHaveCount(0);
+    // 块序与星启看板逐字同序：末法余烬 → 首领特性 → 敌方配置 → 赛季增益（层共用块随看板显示）
+    const boardBlocks = await board.locator('.nk-egd-board__body').evaluate((el) =>
+      [...el.children].map((c) => (c as HTMLElement).className.split(' ')[0]));
+    expect(boardBlocks).toEqual(['nk-egd-floor__buff', 'nk-egd-group', 'nk-egd-floor__stage', 'nk-egd-group']);
+    await expect(board.locator('.nk-egd-floor__stagelabel')).toHaveCount(0);
+    await expect(board.locator('.nk-egd-floor__moncount')).toHaveCount(0);
+    // 「敌方配置」提为区块标题、卡组在其下方占满行内容宽（无空列）
+    const monsHeading = await board.locator('.nk-egd-floor__row--mons').evaluate((row) => {
+      const label = row.querySelector('.nk-egd-floor__label') as HTMLElement;
+      const wrap = row.querySelector('.nk-egd-floor__monswrap') as HTMLElement;
+      const cs = getComputedStyle(row);
+      const l = label.getBoundingClientRect();
+      const w = wrap.getBoundingClientRect();
+      const r = row.getBoundingClientRect();
+      const contentW = r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return {
+        stacked: Math.round(w.top) >= Math.round(l.bottom),
+        sameLeft: Math.abs(Math.round(w.left) - Math.round(l.left)) <= 1,
+        fullWidth: Math.abs(Math.round(w.width) - Math.round(contentW)) <= 1,
+      };
+    });
+    expect(monsHeading.stacked, '敌方卡组应排在标题下方').toBe(true);
+    expect(monsHeading.sameLeft, '敌方卡组左缘应与标题齐平').toBe(true);
+    expect(monsHeading.fullWidth, '敌方卡组应占满行内容宽').toBe(true);
+    // 看板体走 ADR 0028 的缩进档但不画模式色竖轨（与星启看板同判据：缩进保留、轨宽归零）
+    const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');
+    const boardBody = page.locator('.nk-egd-board__body');
+    await expectTokenNumber(boardBody, 'padding-left', egIndent, '层看板体缩进');
+    expect(await boardBody.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0),
+      '层看板体的层级竖轨应归零（缩进保留）').toBe(0);
     // 字号档位（绝对值交 CSS）：同族卡片标题同档、档位严格拉开、行首标签最小档
     const tier = {
       cardName: await fontPx(page.locator('.nk-egd-buff__name').first()),
@@ -1048,31 +1255,44 @@ test.describe('布局验收：终局合并单页', () => {
     });
     // 历史 bug：污染徽标继承 1rem，与同行关卡位置不同档
     expect(badgeVsPos[0]).toBe(badgeVsPos[1]);
-    // 间距契约：同族卡片同内边距、同 gap；正文行高不缩水（行高倍数而非钉死 24.192px）
+    // 间距契约：首领特性改整组单卡（与星启看板同形）后，卡形（内距 / 填充 / 描边）由容器承担、
+    // 条目自身归零——同族的赛季增益卡与它共用一套内距；正文行高不缩水（行高倍数而非钉死像素）
     const padAndGap = await page.evaluate(() => {
       const cs = (s: string): CSSStyleDeclaration => getComputedStyle(document.querySelector(s) as Element);
       return {
         buffPad: [cs('.nk-egd-buff').paddingTop, cs('.nk-egd-buff').paddingLeft],
+        traitCardPad: [cs('.nk-egd-traits').paddingTop, cs('.nk-egd-traits').paddingLeft],
         traitPad: [cs('.nk-egd-trait').paddingTop, cs('.nk-egd-trait').paddingLeft],
-        buffsGap: cs('.nk-egd-buffs').rowGap,
-        traitsGap: cs('.nk-egd-traits').rowGap,
+        buffsGap: parseFloat(cs('.nk-egd-buffs').rowGap) || 0,
+        traitsGap: parseFloat(cs('.nk-egd-traits').rowGap) || 0,
         descLh: parseFloat(cs('.nk-egd-trait__desc').lineHeight),
         descFs: parseFloat(cs('.nk-egd-trait__desc').fontSize),
       };
     });
-    expect(padAndGap.traitPad).toEqual(padAndGap.buffPad);
-    expect(padAndGap.buffsGap).toBe(padAndGap.traitsGap);
+    expect(padAndGap.traitCardPad, '整组卡片与赛季增益卡同内距').toEqual(padAndGap.buffPad);
+    expect(padAndGap.traitPad, '条目内距归整组卡片').toEqual(['0px', '0px']);
+    expect(padAndGap.buffsGap).toBeGreaterThan(0);
+    expect(padAndGap.traitsGap).toBeGreaterThan(0);
     expect(padAndGap.descLh, '正文档行高不得缩水（≥1.5 倍字号）').toBeGreaterThanOrEqual(padAndGap.descFs * 1.5);
-    // 窄屏仍单列且小字不回退：手机档字号必须 ≥ 桌面档（同一元素跨断点比较，不钉绝对值）
+    // 窄屏：小字不回退（同一元素跨断点比较，不钉绝对值），两张半场卡片仍同一行且卡内上下排版
     const desktopMonLabel = await fontPx(page.locator('.nk-egd-mon__label').first());
-    const desktopStageLabel = await fontPx(page.locator('.nk-egd-floor__stagelabel').first());
     expect(desktopMonLabel).toBeGreaterThan(0);
     await page.setViewportSize({ width: 390, height: 844 });
-    await expect(node).toHaveCSS('display', 'flex');
+    await expect(board).toHaveCSS('display', 'flex');
     const mobileMonLabel = await fontPx(page.locator('.nk-egd-mon__label').first());
     expect(mobileMonLabel, `手机档 ${mobileMonLabel} 不得小于桌面档 ${desktopMonLabel}`)
       .toBeGreaterThanOrEqual(desktopMonLabel);
-    expect(mobileMonLabel).toBeLessThan(desktopStageLabel * 2);
+    const mobileCards = await page.locator('.nk-egd-nodecards[aria-label="半场"]').evaluate((el) => {
+      const items = [...el.children] as HTMLElement[];
+      return {
+        scroll: el.scrollWidth - el.clientWidth,
+        rows: new Set(items.map((c) => Math.round(c.getBoundingClientRect().y))).size,
+        dir: getComputedStyle(items[0]).flexDirection,
+      };
+    });
+    expect(mobileCards.scroll).toBeLessThanOrEqual(1);
+    expect(mobileCards.rows).toBe(1);
+    expect(mobileCards.dir).toBe('column');
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -1084,9 +1304,9 @@ test.describe('布局验收：终局合并单页', () => {
     const tierce = page.locator('#egd-level-panel .nk-egd-tierce');
     const nodeCardTabs = tierce.locator('.nk-egd-nodecards[aria-label="星启节点"] [role="tab"]');
     await nodeCardTabs.nth(2).click();
-    const board = tierce.locator('.nk-egd-tierce__node');
+    const board = tierce.locator('.nk-egd-board');
     const season = seasonData('maze_boss.json', '3019');
-    await expect(board.locator('.nk-egd-traits--card .nk-egd-trait'))
+    await expect(board.locator('.nk-egd-traits .nk-egd-trait'))
       .toHaveCount(season.boss_traits!.tierce.length);
     await expect(nodeCardTabs.nth(2).locator('.nk-egd-nodecard__label')).toHaveText(['推荐属性', '等级']);
     // 该赛季附加关关卡内登记的是无弱点机制本体「心蕉如火的猴把戏」；
@@ -1135,13 +1355,23 @@ test.describe('布局验收：终局合并单页', () => {
       .evaluateAll((els) => els.map((el) => el.textContent?.trim()));
     expect(mazeLevels).toEqual(mazePoll.map(pollutionBadge));
     await expect(page.locator('.nk-egd-poll__pos')).toHaveText(mazePoll.map(pollutionPosition));
-    // 星启看板自身也标出污染节点（数据里带 invasion 的那个节点；该模式无首领特性 → 行头只承载这一枚污染徽标）
+    // 星启看板自身也标出污染节点（数据里带 invasion 的那个节点）：看板头是污染徽标在板内的唯一位置
     const mazeNode = (maze.tierce?.nodes ?? []).findIndex((nd) => nd.invasion);
     expect(mazeNode, '忘却之庭星启节点里应有污染节点').toBeGreaterThanOrEqual(0);
     await page.locator('.nk-egd-nodecards[aria-label="星启节点"] [role="tab"]').nth(mazeNode).click();
-    const mazeHead = page.locator('.nk-egd-tierce__nodehead');
+    const mazeHead = page.locator('.nk-egd-board__head');
     await expect(mazeHead.locator('.nk-egd-pollchip')).toHaveCount(1);
     await expect(mazeHead).toHaveText(pollutionBadge(pollutionEntries(maze).find((e) => e.half === 'tierce')!));
+    // 受污染的召唤物：挂在召唤者自己的敌方卡片里（星启看板一律用敌方卡，四模式共用同一判据，ADR 0036）
+    const mazeNodeData = maze.tierce!.nodes![mazeNode];
+    const mazeNodeSummons = summonsOf(mazeNodeData.monsters);
+    const mazeNodePolled = pollutedSummons(mazeNodeData.monsters);
+    expect(mazeNodePolled.length, '该星启节点应有受污染的召唤物').toBeGreaterThan(0);
+    const mazeSummonCards = page.locator('#egd-tierce-board .nk-egd-mon .nk-egd-summon');
+    await expect(mazeSummonCards).toHaveCount(mazeNodeSummons.length);
+    await expect(page.locator('#egd-tierce-board .nk-egd-mon .nk-egd-pollchip'))
+      .toHaveText(mazeNodePolled.map(summonBadge));
+    await expect(page.locator('#egd-tierce-board .nk-egd-floor__row--summons')).toHaveCount(0);
     // 星启附加关同样带自己的推荐属性（三模式共用的补全，不只在末日幻影）——落在节点卡片上
     await expect(page.locator('.nk-egd-nodecard--active .nk-egd-nodecard__label').first()).toHaveText('推荐属性');
     await noUnknownOverflow(page);
@@ -1163,6 +1393,18 @@ test.describe('布局验收：终局合并单页', () => {
     // 异相仲裁的层级增益与楼层同一渲染位（内联一份），标签一并移除；增益名取自该赛季增益表
     await expect(page.locator('.nk-egd-floor__buffname').first()).toHaveText(peak.buffs![0].name);
     await expect(page.locator('.nk-egd-floor__bufflabel')).toHaveCount(0);
+    // 异相仲裁单关与绝境变体同样把召唤物并进敌方图标格（触发条件 = 该敌方有召唤表）：条数由该期数据派生
+    const peakSummons = (peak.levels ?? []).flatMap(
+      (l) => [...summonsOf(l.monsters), ...summonsOf(l.hard?.monsters)],
+    );
+    expect(peakSummons.length, '异相仲裁应有带召唤物的单关').toBeGreaterThan(0);
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__moncell .nk-egd-summon'))
+      .toHaveCount(peakSummons.length);
+    await expect(page.locator('.nk-egd-peak .nk-egd-summons__label').first()).toHaveText('召唤物');
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__row--summons')).toHaveCount(0);
+    // 图标格顶边对齐（带召唤物的格子更高，居中会让同级图标错位）
+    expect(await page.locator('.nk-egd-peak .nk-egd-floor__mons').first()
+      .evaluate((el) => getComputedStyle(el).alignItems)).toBe('flex-start');
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -1181,7 +1423,7 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(activeCardName).toHaveCSS('font-weight', '700');
     // 父档字号必须严格大于孙档「第 N 波」标签（档位序，绝对值交 CSS）
     expect(await fontPx(activeCardName)).toBeGreaterThan(
-      await fontPx(page.locator('.nk-egd-tierce__node .nk-egd-floor__wavelabel').first()) + 0.5,
+      await fontPx(page.locator('.nk-egd-board .nk-egd-floor__wavelabel').first()) + 0.5,
     );
     // 卡片 boss 图取末波首领（忘却之庭一个节点 3 敌、波 1 是小怪）：图源随节点数据
     await expect(page.locator('.nk-egd-nodecards[aria-label="星启节点"] [role="tab"]').first()
@@ -1195,17 +1437,17 @@ test.describe('布局验收：终局合并单页', () => {
     // 孙档：节点内「第 N 波」标签小于子档场次标签
     const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');
     expect(egIndent, '父子层级缩进令牌必须在 .nk-egd 上声明').toBeGreaterThan(0);
-    const child = page.locator('.nk-egd-tierce__nodebody').first();
+    const child = page.locator('.nk-egd-board__body').first();
     await expectTokenNumber(child, 'padding-left', egIndent, '星启看板体缩进');
     const childRailWidth = await child.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0);
     expect(childRailWidth, '星启看板体的层级竖轨应已移除（缩进保留）').toBe(0);
-    const waveFs = await fontPx(page.locator('.nk-egd-tierce__node .nk-egd-floor__wavelabel').first());
+    const waveFs = await fontPx(page.locator('.nk-egd-board .nk-egd-floor__wavelabel').first());
     const stageFs = await fontPx(page.locator('.nk-egd-floor__stagelabel').first());
     expect(stageFs).toBeGreaterThan(waveFs + 0.5);
-    expect(await fontPx(page.locator('.nk-egd-tierce__node .nk-egd-floor__wavelabel').first()))
+    expect(await fontPx(page.locator('.nk-egd-board .nk-egd-floor__wavelabel').first()))
       .toBe(await fontPx(page.locator('.nk-egd-floor__wavelabel').first()));
     // 敌方卡网格的 8px 下外边距只服务多波之间：非末波仍为 8px，末波归零（尾随留白不进入块间距）
-    const waveGridMargins = await page.locator('.nk-egd-tierce__node .nk-egd-floor__monswrap').first()
+    const waveGridMargins = await page.locator('.nk-egd-board .nk-egd-floor__monswrap').first()
       .evaluate((wrap) => [...wrap.querySelectorAll(':scope > .nk-egd-floor__wave > .nk-egd-mons')]
         .map((g) => parseFloat(getComputedStyle(g).marginBottom) || 0));
     expect(waveGridMargins.length, '忘却之庭星启节点应有多波敌方网格').toBeGreaterThan(1);
@@ -1240,13 +1482,13 @@ test.describe('布局验收：终局合并单页', () => {
     // 父档（卡片节点号）字号仍严格大于子档「第 N 波」标签
     const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');
     expect(egIndent, '手机档缩进令牌必须在 .nk-egd 上声明').toBeGreaterThan(0);
-    const child = page.locator('.nk-egd-tierce__nodebody').first();
+    const child = page.locator('.nk-egd-board__body').first();
     await expect(child).toBeVisible();
     await expectTokenNumber(child, 'padding-left', egIndent, '手机档星启看板体缩进');
     const railWidth = await child.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0);
     expect(railWidth, '手机档星启看板体同样不画层级竖轨').toBe(0);
     const cardFs = await fontPx(page.locator('.nk-egd-nodecard--active .nk-egd-nodecard__name'));
-    const waveFs = await fontPx(page.locator('.nk-egd-tierce__node .nk-egd-floor__wavelabel').first());
+    const waveFs = await fontPx(page.locator('.nk-egd-board .nk-egd-floor__wavelabel').first());
     const stageFs = await fontPx(page.locator('.nk-egd-floor__stagelabel').first());
     expect(cardFs).toBeGreaterThan(waveFs);
     expect(stageFs).toBeGreaterThan(waveFs);

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import EnemyCard from '../components/EnemyCard.vue';
 import StageHead from './StageHead.vue';
+import EndgameSummons from './EndgameSummons.vue';
 import { cdnUri } from '../../services/cdn';
 import { elemRow, monTitle, monWaveGroups } from './renders';
 import type { MazeStageDetail } from '../../services/types';
@@ -10,9 +11,9 @@ defineProps<{
   label?: string;
   stage: MazeStageDetail | undefined;
   isBoss: boolean;
-  /** 行头由父级节点承担（末日幻影层/星启节点把场次行头提到节点级以横跨两栏） */
+  /** 行头由父级卡片行承担（战斗看板：场次身份只在卡片上出现一次） */
   headless?: boolean;
-  /** 推荐属性行由父级行头承担（星启看板把它提到看板头部） */
+  /** 推荐属性行由父级卡片行承担（战斗看板：属性只在卡片上出现一次） */
   hideDamage?: boolean;
 }>();
 </script>
@@ -35,22 +36,23 @@ defineProps<{
             <EnemyCard v-for="m in g.items" :key="`${m.id}-${gi}`" :monster="m" />
           </div>
           <span v-else class="nk-egd-floor__mons">
-            <router-link
-              v-for="m in g.items"
-              :key="`${m.id}-${gi}`"
-              class="nk-egd-floor__monlink"
-              :to="`/monster/${m.tpl || m.id}`"
-              :title="monTitle(m)"
-              :aria-label="`查看 ${m.name} 详情`"
-            >
-              <img
-                class="nk-egd-floor__mon"
-                :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                :alt="m.name"
-                loading="lazy"
-                @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+            <span v-for="m in g.items" :key="`${m.id}-${gi}`" class="nk-egd-floor__moncell">
+              <router-link
+                class="nk-egd-floor__monlink"
+                :to="`/monster/${m.tpl || m.id}`"
+                :title="monTitle(m)"
+                :aria-label="`查看 ${m.name} 详情`"
               >
-            </router-link>
+                <img
+                  class="nk-egd-floor__mon"
+                  :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+                  :alt="m.name"
+                  loading="lazy"
+                  @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                >
+              </router-link>
+              <EndgameSummons :items="m.summons || []" />
+            </span>
           </span>
         </span>
       </span>

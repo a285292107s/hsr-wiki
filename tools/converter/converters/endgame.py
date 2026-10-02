@@ -491,12 +491,17 @@ def _stage_waves_monsters(
     stages: dict[int, dict],
     monsters: dict[int, dict],
     full: bool = False,
+    summons: dict[int, list[int]] | None = None,
+    invasion: dict | None = None,
 ) -> list[dict]:
     """EventIDList → StageConfig 波次 → 带 wave 序号的敌方对象（波内保序，未注册跳过）。
 
     wave 为战斗波次序号（1 起，跨事件连续递增）；默认轻量字段输出（intro/skills
-    仅星启信息卡 full=True 时输出，控制体积）。
+    仅星启信息卡 full=True 时输出，控制体积）。summons 传入时，**每个敌方条目**
+    附加该实例自己的召唤物 `summons[]`（见 _monster_summons，ADR 0036）——召唤物归属
+    召唤者，故不再在场次上单独出行；invasion 同时传入时，命中的召唤物带污染等级。
     """
+    polluted = _polluted_index(invasion)
     out: list[dict] = []
     wave_no = 0
     for eid in events or []:
@@ -508,7 +513,12 @@ def _stage_waves_monsters(
             for mid in wave:
                 if mid not in monsters:
                     continue
-                out.append({**_monster_out(mid, monsters, full), "wave": wave_no})
+                entry = {**_monster_out(mid, monsters, full), "wave": wave_no}
+                if summons:
+                    items = _monster_summons(mid, monsters, summons, polluted)
+                    if items:
+                        entry["summons"] = items
+                out.append(entry)
     return out
 
 def _load_story_turns() -> dict[str, int]:
@@ -545,6 +555,7 @@ def _load_tierce(
     monsters: dict[int, dict],
     invasions: dict[int, dict] | None = None,
     buffs: dict[int, dict] | None = None,
+    summons: dict[int, list[int]] | None = None,
 ) -> dict[str, dict]:
     """解析星启模式（Tierce）表 → {GroupID: 星启条目}。
 
@@ -604,8 +615,11 @@ def _load_tierce(
             gid = id2gid.get(prev) if prev is not None else None
             if gid is None:
                 continue
+            inv3 = _stage_invasion(
+                rec.get("HFIAAGAKFMD", []) or [], invasions, monsters) if invasions else None
             node3_mons = _stage_waves_monsters(
-                rec.get("HFIAAGAKFMD", []) or [], stages, monsters, full=True
+                rec.get("HFIAAGAKFMD", []) or [], stages, monsters, full=True,
+                summons=summons, invasion=inv3,
             ) or [
                 _monster_out(mid, monsters, full=True)
                 for mid in (rec.get("JEBMBCLBIOI", []) or []) if mid in monsters
@@ -617,11 +631,13 @@ def _load_tierce(
                 ("EventIDList2", "stage2", "DamageType2"),
             ):
                 events = (prev_rec or {}).get(evkey, []) or []
+                inv = _stage_invasion(events, invasions, monsters) if invasions else None
                 node: dict = {
                     "idx": len(nodes) + 1,
                     "origin": half,
                     "damage": list(dict.fromkeys((prev_rec or {}).get(dmgkey, []) or [])),
-                    "monsters": _stage_waves_monsters(events, stages, monsters, full=True),
+                    "monsters": _stage_waves_monsters(
+                        events, stages, monsters, full=True, summons=summons, invasion=inv),
                 }
                 lv = next(
                     (stages[e]["level"] for e in events
@@ -636,10 +652,8 @@ def _load_tierce(
                 bid = (prev_rec or {}).get("MazeBuffID")
                 if bid and buffs and bid in buffs:
                     node["buff"] = {"id": bid, **buffs[bid]}
-                if invasions:
-                    inv = _stage_invasion(events, invasions, monsters)
-                    if inv:
-                        node["invasion"] = inv
+                if inv:
+                    node["invasion"] = inv
                 nodes.append(node)
             damage_types = sorted(rec.get("LOJCIDLKPKG", []) or [])
             node3: dict = {
@@ -664,11 +678,8 @@ def _load_tierce(
             )
             if bid3 and buffs and bid3 in buffs:
                 node3["buff"] = {"id": bid3, **buffs[bid3]}
-            if invasions:
-                inv = _stage_invasion(
-                    rec.get("HFIAAGAKFMD", []) or [], invasions, monsters)
-                if inv:
-                    node3["invasion"] = inv
+            if inv3:
+                node3["invasion"] = inv3
             nodes.append(node3)
             tids = list(rec.get("OGEOMCGNNMP", []) or [])
             full_tid = rec.get("GNGENMHNLAH")
@@ -832,6 +843,70 @@ def _stage_invasion(
         return node
     return None
 
+def _load_summon_index() -> dict[int, list[int]]:
+    """MonsterConfig.SummonIDList → {实例怪物 ID: [被召唤实例 ID]}（召唤物，ADR 0036）。
+
+    只保留有召唤物的实例（全表 2722 条中 712 条）。被召唤者是**实例 ID**，与关卡
+    波次、污染名单同一命名空间，故可与「同场次敌方」逐层精确求交。
+    """
+    out: dict[int, list[int]] = {}
+    for rec in load_json(EXCEL_DIR / "MonsterConfig.json"):
+        mid = rec.get("MonsterID")
+        summons = [s for s in (rec.get("SummonIDList") or []) if s]
+        if mid is not None and summons:
+            out[mid] = list(dict.fromkeys(summons))
+    return out
+
+def _summon_out(mid: int, monsters: dict[int, dict], polluted: int | None = None) -> dict:
+    """召唤物条目（轻形态，ADR 0036）：{id, tpl?, name, icon, polluted?}。
+
+    行内只消费图标 + 名称 + 污染徽标，故不出弱点/抗性/韧性/速度/技能——与「敌方配置」
+    的 `_monster_out` 区分（全站 2337 条引用，用完整形态要多付约 320 KB）。
+    调用方需自行保证 mid 已注册。
+    """
+    info = monsters.get(mid) or {}
+    out: dict = {
+        "id": str(mid),
+        "name": info.get("name") or "",
+        "icon": info.get("icon") or "",
+    }
+    tpl = info.get("_tpl")
+    if tpl:
+        out["tpl"] = str(tpl)
+    if polluted:
+        out["polluted"] = polluted
+    return out
+
+def _polluted_index(invasion: dict | None) -> dict[int, int]:
+    """invasion → {被污染实例 ID: 污染等级}（实例级，逐层精确）。"""
+    level = (invasion or {}).get("level")
+    if not level:
+        return {}
+    return {
+        int(m["id"]): level
+        for m in (invasion or {}).get("monsters") or []
+        if m.get("id") is not None
+    }
+
+def _monster_summons(
+    mid: int,
+    monsters: dict[int, dict],
+    summons: dict[int, list[int]],
+    polluted: dict[int, int] | None = None,
+) -> list[dict]:
+    """单个敌方实例自己的召唤物：该实例 `MonsterConfig.SummonIDList` → 轻形态条目。
+
+    **归属到召唤者**（ADR 0036 修订）：同一召唤物被同场多个敌方列出时就出现在多张敌方
+    卡片里——多召唤者不是歧义，而是各自都具备召唤该单位的技能（如幼蛰虫分裂出自己、
+    银鬃尉官与布洛妮娅都能召出银鬃近卫）。未注册实例跳过（无名称/图标）。
+    """
+    out: list[dict] = []
+    for sid in summons.get(mid, []):
+        if sid not in monsters:
+            continue
+        out.append(_summon_out(sid, monsters, (polluted or {}).get(sid)))
+    return out
+
 def _stage_traits(monsters: list[dict], guide: dict[int, list[dict]]) -> list[dict]:
     """一个场次（或星启附加关）的首领特性：该场次敌方模板的命中项按 TagID 去重保序。
 
@@ -914,6 +989,7 @@ def _season_floors(
     stages: dict[int, dict],
     full: bool = False,
     invasions: dict[int, dict] | None = None,
+    summons: dict[int, list[int]] | None = None,
 ) -> list[dict]:
     """逐层详情：详情页以关卡层级为章节的完整内容。
 
@@ -924,7 +1000,8 @@ def _season_floors(
     敌方带 wave 序号（战斗波次，前端分组展示）；full=True 时输出 intro/skills
     （末日幻影纯 Boss 战，前端以完整信息卡展示）；level 为关卡等级（上下半场
     StageConfig.Level，同级取首事件）。invasions 传入时，污染关卡所在半场附加
-    invasion（{level, stage_id, monsters}，见 _stage_invasion）。
+    invasion（{level, stage_id, monsters}，见 _stage_invasion）；summons 传入时，
+    召唤物按召唤者挂进该半场的敌方条目（`monsters[].summons[]`，见 _monster_summons）。
     """
     out: list[dict] = []
     for i, r in enumerate(sorted(recs, key=lambda x: x.get("ID", 0)), start=1):
@@ -936,24 +1013,25 @@ def _season_floors(
         )
         events1 = r.get("EventIDList1", []) or []
         events2 = r.get("EventIDList2", []) or []
+        halves: dict[str, dict] = {}
+        for key, events in (("stage1", events1), ("stage2", events2)):
+            inv = _stage_invasion(events, invasions, monsters) if invasions else None
+            half: dict = {
+                "damage": list(dict.fromkeys(r.get(
+                    "DamageType1" if key == "stage1" else "DamageType2", []) or [])),
+                "monsters": _stage_waves_monsters(
+                    events, stages, monsters, full, summons=summons, invasion=inv),
+            }
+            if inv:
+                half["invasion"] = inv
+            halves[key] = half
         node: dict = {
             "floor": floor,
             "name": resolve_text(r.get("Name", {})),
             "countdown": r.get("ChallengeCountDown", 0) or 0,
-            "stage1": {
-                "damage": list(dict.fromkeys(r.get("DamageType1", []) or [])),
-                "monsters": _stage_waves_monsters(events1, stages, monsters, full),
-            },
-            "stage2": {
-                "damage": list(dict.fromkeys(r.get("DamageType2", []) or [])),
-                "monsters": _stage_waves_monsters(events2, stages, monsters, full),
-            },
+            "stage1": halves["stage1"],
+            "stage2": halves["stage2"],
         }
-        if invasions:
-            for key, events in (("stage1", events1), ("stage2", events2)):
-                inv = _stage_invasion(events, invasions, monsters)
-                if inv:
-                    node[key]["invasion"] = inv
         if lv:
             node["level"] = lv
         bid = r.get("MazeBuffID")
@@ -1002,6 +1080,7 @@ def _group_seasons(
     permanent: set[int] | None = None,
     test_period: set[int] | None = None,
     invasions: dict[int, dict] | None = None,
+    summons: dict[int, list[int]] | None = None,
 ) -> dict:
     """读取挑战配置，按 GroupID 聚合为赛季条目。
 
@@ -1011,7 +1090,9 @@ def _group_seasons(
     permanent 传入时（忘却之庭常驻关卡 100/900）条目输出 permanent 标记；
     test_period 传入时（beta/CBT 测试期）条目输出 test 标记；
     invasions 传入时（StageInvasionConfig）污染关卡所在半场附加 invasion，
-    并在赛季级写出 pollution 汇总（{count, levels}，供目录卡与筛选）。
+    并在赛季级写出 pollution 汇总（{count, levels}，供目录卡与筛选）；
+    summons 传入时（MonsterConfig.SummonIDList）召唤物按召唤者挂进敌方条目
+    （见 _monster_summons；与污染标记同一行内消费）。
     buff_groups 传入时（末日幻影分场次增益）条目附加 buff_groups（场次 → 增益列表），
     扁平 buffs 口径不变。
     """
@@ -1035,6 +1116,7 @@ def _group_seasons(
     targets = targets or {}
     group_names = group_names or {}
     invasions = invasions or {}
+    summons = summons or {}
 
     result: dict[str, dict] = {}
     for gid, recs in groups.items():
@@ -1059,7 +1141,7 @@ def _group_seasons(
         entry.update(_season_stats(recs))
         entry["floor_details"] = _season_floors(
             recs, monsters, buffs, targets, stages, full=full_monsters,
-            invasions=invasions)
+            invasions=invasions, summons=summons)
         entry["buffs"] = [
             {"id": bid, **buffs[bid]}
             for bid in buff_map.get(gid, []) if bid in buffs
@@ -1103,24 +1185,28 @@ def _peak_level_node(
     targets: dict[int, dict],
     kind: str,
     invasions: dict[int, dict] | None = None,
+    summons: dict[int, list[int]] | None = None,
 ) -> dict:
     """异相仲裁单关节点：名称 / 弱点 / 敌人 / 目标 / 机制标签。
 
     kind 为官方术语：knight=骑士试炼 / king=王棋最终关；敌人取自
     EventIDList 首项引用的 StageConfig；目标取自 NormalTargetList 引用的
     BattleTargetConfig；标签 TagList 解析为 MazeBuff 名称。invasions 传入时，
-    污染关卡附加 invasion（异相仲裁无层/半场，污染直接落在单关上）。
+    污染关卡附加 invasion（异相仲裁无层/半场，污染直接落在单关上）；summons
+    传入时召唤物按召唤者挂进敌方条目（见 _monster_summons）。
     """
     if rec is None:
         return {}
     events = rec.get("EventIDList", []) or []
     stage = stages.get(events[0]) if events else None
+    inv = _stage_invasion(events, invasions, monsters) if invasions else None
     node: dict = {
         "id": rec.get("ID"),
         "kind": kind,
         "name": resolve_text(rec.get("Title", {})),
         "damage": sorted(rec.get("DamageType", []) or []),
-        "monsters": _stage_waves_monsters(events, stages, monsters),
+        "monsters": _stage_waves_monsters(
+            events, stages, monsters, summons=summons, invasion=inv),
         "targets": [
             {"text": targets[t]["text"], "param": targets[t]["param"]}
             for t in (rec.get("NormalTargetList", []) or []) if t in targets
@@ -1131,10 +1217,8 @@ def _peak_level_node(
     }
     if stage and stage["level"]:
         node["level"] = stage["level"]
-    if invasions:
-        inv = _stage_invasion(events, invasions, monsters)
-        if inv:
-            node["invasion"] = inv
+    if inv:
+        node["invasion"] = inv
     return node
 
 def _load_peak_badges() -> dict[int, list[dict]]:
@@ -1180,6 +1264,7 @@ def _peak_seasons() -> dict:
     targets = _load_battle_targets()
     badges_map = _load_peak_badges()
     invasions = _load_invasion_index()
+    summons = _load_summon_index()
 
     stage_ids: set[int] = set()
     for r in level_data:
@@ -1204,7 +1289,7 @@ def _peak_seasons() -> dict:
         for lid in g.get("PreLevelIDList", []) or []:
             node = _peak_level_node(
                 level_by_id.get(lid), stages, monsters, buffs, targets, "knight",
-                invasions)
+                invasions, summons)
             levels.append(node)
             dmg.update(node["damage"])
             for m in node["monsters"]:
@@ -1215,7 +1300,7 @@ def _peak_seasons() -> dict:
         if boss_id is not None:
             node = _peak_level_node(
                 level_by_id.get(boss_id), stages, monsters, buffs, targets, "king",
-                invasions)
+                invasions, summons)
             ext = boss_ext.get(boss_id)
             if ext:
                 node["buffs"] = [
@@ -1227,7 +1312,8 @@ def _peak_seasons() -> dict:
                 hard_stage = stages.get(hard_events[0]) if hard_events else None
                 hard: dict = {
                     "name": resolve_text(ext.get("HardTitle", {})),
-                    "monsters": _stage_waves_monsters(hard_events, stages, monsters),
+                    "monsters": _stage_waves_monsters(
+                        hard_events, stages, monsters, summons=summons),
                     "targets": [
                         {"text": targets[t]["text"], "param": targets[t]["param"]}
                         for t in [ext.get("HardTarget")] if t in targets
@@ -1298,6 +1384,7 @@ def convert() -> None:
     story_sub_buffs = _group_extra_sub_buffs()
     mode_default_icons = _load_mode_default_icons()
     invasions = _load_invasion_index()
+    summons = _load_summon_index()
 
     targets_all = {
         **_load_targets("ChallengeTargetConfig.json"),
@@ -1314,6 +1401,7 @@ def convert() -> None:
         monsters,
         invasions=invasions,
         buffs=buffs,
+        summons=summons,
     )
 
     maze = _group_seasons(
@@ -1327,6 +1415,7 @@ def convert() -> None:
         permanent=_load_permanent_groups(),
         test_period=_load_test_periods(),
         invasions=invasions,
+        summons=summons,
     )
     for k in maze:
         if k in tierce:
@@ -1349,6 +1438,7 @@ def convert() -> None:
         ),
         sub_buffs=story_sub_buffs,
         invasions=invasions,
+        summons=summons,
     )
     for k in story:
         if k in tierce:
@@ -1370,6 +1460,7 @@ def convert() -> None:
             _load_group_arts("ChallengeBossGroupExtra.json"),
         ),
         invasions=invasions,
+        summons=summons,
     )
     for k in boss:
         if k in tierce:

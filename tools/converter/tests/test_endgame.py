@@ -7,6 +7,8 @@
 - _load_guide_traits / _stage_traits / _attach_boss_traits：末日幻影首领特性（模板聚合与技能 ID 反查）
 - _season_stats：层数/阶段/回合取最大，弱点合并去重，逐层弱点 floor_damage
 - _season_floors：逐层详情（序号/层名/上下半场属性与敌方/层级增益/目标）
+- _load_summon_index / _summon_out / _monster_summons：召唤物（敌方实例的 SummonIDList，
+  轻形态 + 污染等级，按召唤者挂进敌方条目）
 - _season_monsters / _season_targets：敌方按层序收集去重、目标描述去重
 - _group_seasons：名称解析 + 排期合并 + 统计 + 增益/敌方/目标/回合
 - _peak_seasons：异相仲裁弱点属性
@@ -1045,3 +1047,109 @@ class TestPollution:
         entry = {"tierce": out["1036"]}
         eg._apply_pollution(entry)
         assert entry["pollution"] == {"count": 1, "levels": [3]}
+
+
+class TestSummons:
+    """召唤物写入终局数据（ADR 0036 修订）：判据 = **同场次敌方实例**的 `SummonIDList`，
+    产出挂在**召唤者自己的敌方条目**上（`monsters[].summons[]`），不再出场次级列表。"""
+
+    def test_load_summon_index_keeps_only_summoners(self, monkeypatch):
+        """只收有召唤物的实例；被召唤者去重保序（空表/缺 ID 不落）。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"MonsterID": 202401603, "SummonIDList": [202206017, 202303203, 202206017]},
+            {"MonsterID": 202206017, "SummonIDList": []},
+            {"SummonIDList": [1]},
+        ])
+        assert eg._load_summon_index() == {202401603: [202206017, 202303203]}
+
+    def test_summon_out_light_shape(self):
+        """轻形态：只出 id/name/icon（别名附 tpl），不出弱点/抗性/阵营/韧性/速度/技能。"""
+        monsters = {
+            202206017: {"name": "器元士", "icon": "Monster_2022060",
+                        "weak": [], "resist": {}, "rank": "MinionLv2"},
+            202303204: {"name": "仙人天女", "icon": "Monster_2023030",
+                        "_tpl": 2023032, "weak": [], "resist": {}},
+        }
+        assert eg._summon_out(202206017, monsters) == {
+            "id": "202206017", "name": "器元士", "icon": "Monster_2022060"}
+        assert eg._summon_out(202303204, monsters, 2) == {
+            "id": "202303204", "tpl": "2023032", "name": "仙人天女",
+            "icon": "Monster_2023030", "polluted": 2}
+
+    def test_polluted_index_is_instance_level(self):
+        """污染索引 = invasion.monsters 的实例 ID → 等级；无 invasion / 无等级 → 空表。"""
+        inv = {"level": 2, "monsters": [{"id": "202206017"}, {"id": 202303203}]}
+        assert eg._polluted_index(inv) == {202206017: 2, 202303203: 2}
+        assert eg._polluted_index(None) == {}
+        assert eg._polluted_index({"level": 0, "monsters": [{"id": "1"}]}) == {}
+        assert eg._polluted_index({"monsters": [{"id": "1"}]}) == {}
+
+    def test_monster_summons_skips_unregistered(self):
+        """该实例自己的召唤表：未注册实例跳过（无名称/图标），污染标记按实例命中。"""
+        monsters = {
+            202401603: {"name": "不老仙", "icon": "Monster_B"},
+            202206017: {"name": "器元士", "icon": "Monster_2022060"},
+            202303203: {"name": "仙人天女", "icon": "Monster_2023030"},
+        }
+        summons = {202401603: [202206017, 9000, 202303203]}
+        out = eg._monster_summons(202401603, monsters, summons, {202206017: 2})
+        assert [m["id"] for m in out] == ["202206017", "202303203"]
+        assert [m.get("polluted") for m in out] == [2, None]
+        # 无召唤表的实例 → 空列表（调用方不落字段）
+        assert eg._monster_summons(202206017, monsters, summons) == []
+
+    def test_stage_waves_monsters_nests_by_summoner(self):
+        """按召唤者归属：同场两个敌方各自的召唤物落在各自条目上（多召唤者合法重复）。"""
+        stages = {420503: {"level": 80, "waves": [[202401603, 1003010], [202401603]]}}
+        monsters = {
+            202401603: {"name": "不老仙", "icon": "Monster_B"},
+            1003010: {"name": "银鬃尉官", "icon": "Monster_A"},
+            1002040: {"name": "银鬃近卫", "icon": "Monster_C"},
+            202206017: {"name": "器元士", "icon": "Monster_2022060"},
+        }
+        summons = {202401603: [202206017, 1002040], 1003010: [1002040]}
+        invasion = {"level": 2, "stage_id": 420503,
+                    "monsters": [{"id": "202206017"}]}
+        out = eg._stage_waves_monsters([420503], stages, monsters, summons=summons,
+                                      invasion=invasion)
+        assert [[m["id"] for m in e.get("summons", [])] for e in out] == [
+            ["202206017", "1002040"], ["1002040"], ["202206017", "1002040"]]
+        # 污染等级只落在命中实例上
+        assert out[0]["summons"][0]["polluted"] == 2
+        assert "polluted" not in out[0]["summons"][1]
+        # 不传 summons（旧调用方）时不落该字段
+        assert all("summons" not in e for e in eg._stage_waves_monsters(
+            [420503], stages, monsters))
+
+    def test_season_floors_nests_summons_per_enemy(self):
+        """层级详情：召唤物落在该半场的敌方条目里，另一半场不串。"""
+        recs = [{"ID": 1, "Floor": 3, "Name": {"Hash": 1},
+                 "EventIDList1": [420503], "EventIDList2": [420513]}]
+        stages = {420503: {"level": 80, "waves": [[202401603]]},
+                  420513: {"level": 80, "waves": [[1003010]]}}
+        monsters = {
+            202401603: {"name": "首领", "icon": "Monster_B"},
+            202206017: {"name": "器元士", "icon": "Monster_2022060"},
+            1003010: {"name": "怪A", "icon": "Monster_A"},
+        }
+        out = eg._season_floors(
+            recs, monsters, {}, {}, stages,
+            invasions={420503: {"level": 2, "monster_ids": [202206017]}},
+            summons={202401603: [202206017], 1003010: []})
+        assert out[0]["stage1"]["monsters"][0]["summons"] == [
+            {"id": "202206017", "name": "器元士", "icon": "Monster_2022060", "polluted": 2}]
+        assert "summons" not in out[0]["stage1"]
+        assert "summons" not in out[0]["stage2"]["monsters"][0]
+
+    def test_peak_level_node_carries_summons(self):
+        """异相仲裁单关同样按召唤者归属（四模式一致，见 ADR 0036 决策 1）。"""
+        rec = {"ID": 902, "Title": {"Hash": 1}, "DamageType": ["Fire"],
+               "EventIDList": [30509012], "NormalTargetList": [], "TagList": []}
+        stages = {30509012: {"level": 95, "waves": [[5023010]]}}
+        monsters = {5023010: {"name": "王棋", "icon": "Monster_K"},
+                    5013010: {"name": "骑士", "icon": "Monster_C"}}
+        node = eg._peak_level_node(rec, stages, monsters, {}, {}, "knight", None,
+                                   {5023010: [5013010]})
+        assert node["monsters"][0]["summons"] == [
+            {"id": "5013010", "name": "骑士", "icon": "Monster_C"}]
+        assert "summons" not in node

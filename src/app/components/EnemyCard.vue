@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EndgameSummons from '../endgame/EndgameSummons.vue';
 import type { MazeMonsterInfo } from '../../services/types';
 import { ELEM, MON_RANK } from '../../lib/constants';
 import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
@@ -58,24 +59,28 @@ function monTitle(m: MazeMonsterInfo): string {
 
 <template>
   <article class="nk-egd-mon" :title="monTitle(monster)">
-    <div class="nk-egd-mon__head">
-      <div class="nk-egd-mon__figure">
-        <span v-if="monRank(monster.rank)" class="nk-egd-mon__rank" :class="`nk-egd-mon__rank--${monster.rank}`">{{ monRank(monster.rank) }}</span>
-        <router-link
-          class="nk-egd-mon__figlink"
-          :to="`/monster/${monster.tpl || monster.id}`"
-          :title="`查看 ${monster.name} 详情`"
-          :aria-label="`查看 ${monster.name} 详情`"
+    <!-- 立绘列（左）：monstermiddleicon 是 376×512 竖版全身像（透明底、Alpha 框紧贴上下边），
+         故按原比例整幅铺满列宽，不做圆形裁切——圆形会把竖长立绘裁掉上下大半。
+         甲级徽标骑在立绘列左上角。 -->
+    <div class="nk-egd-mon__art">
+      <span v-if="monRank(monster.rank)" class="nk-egd-mon__rank" :class="`nk-egd-mon__rank--${monster.rank}`">{{ monRank(monster.rank) }}</span>
+      <router-link
+        class="nk-egd-mon__figlink"
+        :to="`/monster/${monster.tpl || monster.id}`"
+        :title="`查看 ${monster.name} 详情`"
+        :aria-label="`查看 ${monster.name} 详情`"
+      >
+        <img
+          class="nk-egd-mon__img"
+          :src="monster.icon ? cdnUri('monstermiddleicon', `${monster.icon}.webp`) : ''"
+          :alt="monster.name"
+          loading="lazy"
+          @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
         >
-          <img
-            class="nk-egd-mon__img"
-            :src="monster.icon ? cdnUri('monstermiddleicon', `${monster.icon}.webp`) : ''"
-            :alt="monster.name"
-            loading="lazy"
-            @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
-          >
-        </router-link>
-      </div>
+      </router-link>
+    </div>
+    <!-- 数据列（右）：名称 → 标签 → 弱点/抗性 → 图鉴介绍 → 技能 → 召唤物 -->
+    <div class="nk-egd-mon__data">
       <div class="nk-egd-mon__meta">
         <span class="nk-egd-mon__name">{{ monster.name }}</span>
         <span class="nk-egd-mon__tags">
@@ -84,30 +89,25 @@ function monTitle(m: MazeMonsterInfo): string {
           <span v-if="monster.speed" class="nk-egd-mon__tag">速度 {{ monster.speed }}</span>
         </span>
       </div>
-    </div>
-    <!-- 弱点/抗性行：有数据展示图标，无数据显式占位“无”（源数据空 = 游戏内无弱点/全 0% 抗性，
-         如蕉研组本体等召唤型机制怪；避免误读为数据缺失） -->
-    <div v-if="monster.name" class="nk-egd-mon__rows">
-      <div v-if="monster.weak?.length" class="nk-egd-mon__row">
-        <span class="nk-egd-mon__label">弱点</span>
-        <span class="nk-egd-mon__weak" v-html="elemRow(monster.weak)"></span>
+      <!-- 弱点/抗性行：有数据展示图标，无数据显式占位“无”（源数据空 = 游戏内无弱点/全 0% 抗性，
+           如蕉研组本体等召唤型机制怪；避免误读为数据缺失） -->
+      <div v-if="monster.name" class="nk-egd-mon__rows">
+        <div class="nk-egd-mon__row">
+          <span class="nk-egd-mon__label">弱点</span>
+          <span v-if="monster.weak?.length" class="nk-egd-mon__weak" v-html="elemRow(monster.weak)"></span>
+          <span v-else class="nk-egd-mon__none">无</span>
+        </div>
+        <div class="nk-egd-mon__row">
+          <span class="nk-egd-mon__label">抗性</span>
+          <span v-if="resistText(monster)" class="nk-egd-mon__resist" v-html="resistRowHtml(monster)"></span>
+          <span v-else class="nk-egd-mon__none">无</span>
+        </div>
       </div>
-      <div v-else class="nk-egd-mon__row">
-        <span class="nk-egd-mon__label">弱点</span>
-        <span class="nk-egd-mon__none">无</span>
+      <p v-if="monster.intro" class="nk-egd-mon__intro" v-html="introHtml(monster)"></p>
+      <div v-if="monster.skills?.length" class="nk-egd-mon__skills">
+        <span v-for="s in monster.skills" :key="s.name" class="nk-egd-mon__skill" :title="s.tag ? `${s.name} · ${s.tag}` : s.name">{{ s.name }}</span>
       </div>
-      <div v-if="resistText(monster)" class="nk-egd-mon__row">
-        <span class="nk-egd-mon__label">抗性</span>
-        <span class="nk-egd-mon__resist" v-html="resistRowHtml(monster)"></span>
-      </div>
-      <div v-else class="nk-egd-mon__row">
-        <span class="nk-egd-mon__label">抗性</span>
-        <span class="nk-egd-mon__none">无</span>
-      </div>
-    </div>
-    <p v-if="monster.intro" class="nk-egd-mon__intro" v-html="introHtml(monster)"></p>
-    <div v-if="monster.skills?.length" class="nk-egd-mon__skills">
-      <span v-for="s in monster.skills" :key="s.name" class="nk-egd-mon__skill" :title="s.tag ? `${s.name} · ${s.tag}` : s.name">{{ s.name }}</span>
+      <EndgameSummons :items="monster.summons || []" />
     </div>
   </article>
 </template>
