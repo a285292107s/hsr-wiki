@@ -4,8 +4,9 @@
 .nk-egd[data-mode="boss"] { --eg-color: var(--eg-boss); }
 .nk-egd[data-mode="peak"] { --eg-color: var(--eg-peak); }
 
-.nk-egd.nk-page--detail { padding-top: 46px; }
-.nk-egd.nk-page--detail[data-mode="boss"] { padding-top: 0; }
+/* 只有异相仲裁仍有顶部固定条（无层级子 tab，靠区块导航）；层级模式由页内子 tab 行承担导航 */
+.nk-egd.nk-page--detail { padding-top: 0; }
+.nk-egd.nk-page--detail[data-mode="peak"] { padding-top: 46px; }
 .nk-egd-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 10;
   background: color-mix(in srgb, var(--blk-800) 97%, transparent);
@@ -22,7 +23,7 @@
 .nk-egd-secnav .nk-secnav__btn--active { color: var(--eg-color); }
 .nk-egd-secnav .nk-secnav__btn--active::after { background: var(--eg-color); }
 .nk-egd-secnav .nk-secnav__btn::before { top: -8px; bottom: -8px; }
-/* 末日幻影「第 1..N 层 / 星启模式」子 tab：页内并列一行（复用 nk-tab 原语，下划线骑在行底边上） */
+/* 层级模式（第 1..N 层 / 星启模式）子 tab：页内并列一行（复用 nk-tab 原语，下划线骑在行底边上） */
 .nk-egd-tabs {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px;
   width: 100%;
@@ -33,28 +34,11 @@
 .nk-egd-tabs .nk-tab:first-child::after { left: 0; }
 .nk-egd-tabs .nk-tab--active { color: var(--eg-color); }
 .nk-egd-tabs .nk-tab--active::after { background: var(--eg-color); box-shadow: none; }
-.nk-egd-title-tools {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-}
-.nk-egd-title-tool {
-  position: relative;
-  padding: 8px 6px; border: none; background: transparent;
-  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em;
-  color: var(--text3); cursor: pointer; white-space: nowrap;
-  transition: color 0.15s;
-}
-.nk-egd-title-tool::before {
-  content: ''; position: absolute; left: -6px; right: -6px; top: -12px; bottom: -12px;
-}
-.nk-egd-title-tool:hover { color: var(--eg-color); }
 .nk-egd-bar__progress {
   height: 2px; width: 0;
   background: linear-gradient(90deg, color-mix(in srgb, var(--eg-color) 45%, transparent) 0%, var(--eg-color) 55%, color-mix(in srgb, var(--eg-color) 75%, #fff) 100%);
 }
-#egd-buffs, #egd-tierce, #egd-floors, #egd-levels, #egd-sub-buffs { scroll-margin-top: 56px; }
+#egd-buffs, #egd-levels, #egd-sub-buffs { scroll-margin-top: 56px; }
 
 .nk-egd-hero {
   position: relative;
@@ -266,7 +250,7 @@
 .nk-egd-body .nk-egd-tierce,
 .nk-egd-body .nk-egd-empty,
 .nk-egd-body .nk-egd-nav { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }
-/* 面板内容与子 tab 行底边之间留白：面板首元素（层标题 / 星启胶囊标签）此前紧贴那条发丝线 */
+/* 面板内容与子 tab 行底边之间留白：面板首元素（目标栏 / 星启统计行）紧贴那条发丝线 */
 .nk-egd-level-panel { scroll-margin-top: 16px; padding-top: 20px; }
 
 /* groups 内层是 flex 项：auto 外边距会取消 stretch，必须显式 width:100% 才能维持
@@ -459,8 +443,7 @@
   margin-left: 0;
   margin-right: 0;
 }
-.nk-egd-fury__label,
-.nk-egd-group__label {
+.nk-egd-fury__label {
   align-self: flex-start;
   font-size: 0.68rem;
   font-weight: 600;
@@ -513,72 +496,12 @@
 .nk-egd-floor__head:hover {
   background: color-mix(in srgb, var(--eg-color) 5%, transparent);
 }
-.nk-egd-floor__arrow {
-  flex-shrink: 0;
-  width: 13px; height: 13px;
-  color: var(--text3);
-  transition: transform 0.22s var(--ease), color 0.2s;
-}
-.nk-egd-floor--open .nk-egd-floor__arrow { transform: rotate(90deg); }
-.nk-egd-floor__head:hover .nk-egd-floor__arrow { color: var(--eg-color); }
-.nk-egd-floor__summary {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: -2px 0 16px;
-  padding: 10px 8px;
-  border-top: 1px solid var(--line-1);
-  min-width: 0;
-}
-.nk-egd-floor__summarylabel {
-  flex-shrink: 0;
-  min-width: 4.4em;
-  font-size: 0.64rem;
-  letter-spacing: 0.08em;
-  color: var(--text3);
-}
-.nk-egd-floor__summary .nk-egd-floor__elems { gap: 6px; }
-.nk-egd-floor__summary .nk-egd-elem { width: 20px; height: 20px; }
-.nk-egd-floor__summarydata {
-  margin-left: auto;
-  flex-shrink: 0;
-  font-family: var(--font-hud);
-  font-size: 0.64rem;
-  letter-spacing: 0.06em;
-  color: color-mix(in srgb, var(--eg-color) 76%, #fff);
-  white-space: nowrap;
-}
-.nk-egd-floor__body {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.3s var(--ease);
-}
-.nk-egd-floor--open .nk-egd-floor__body { grid-template-rows: 1fr; }
-.nk-egd-floor__body-inner {
-  overflow: hidden;
-  min-height: 0;
-  padding-top: 0;
-  border-top: 0 solid var(--line-1);
-  transition: padding 0.3s var(--ease), border-top-width 0.3s var(--ease);
-}
-.nk-egd-floor--open .nk-egd-floor__body-inner {
-  padding-top: 18px;
-  border-top-width: 1px;
-}
 .nk-egd-floor__title {
   font-size: 1.08rem;
   font-weight: 800;
   letter-spacing: -0.01em;
   color: var(--text-bright);
   white-space: nowrap;
-}
-.nk-egd-floor__name {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .nk-egd-floor__data {
   margin-left: auto;
@@ -615,44 +538,12 @@
   color: var(--text3);
   white-space: nowrap;
 }
-.nk-egd-floor__stages {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0;
-}
-.nk-egd-floor__stages > .nk-egd-floor__stage:only-child { grid-column: 1 / -1; }
-.nk-egd-floor__stages > .nk-egd-floor__stage:nth-child(3) {
-  grid-column: 1 / -1;
-  border-left: none;
-  padding-left: 0;
-}
-.nk-egd-floor__stage + .nk-egd-floor__stage {
-  border-left: 1px solid var(--line-1);
-  padding-left: 28px;
-}
 .nk-egd-floor__stage {
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-width: 0;
   padding: 0;
-}
-.nk-egd-floor__stagehead {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 14px;
-  margin-bottom: 2px;
-  border-bottom: 1px solid var(--line-2);
-}
-.nk-egd-floor__stagehead .nk-egd-floor__moncount { margin-left: auto; }
-.nk-egd-floor__stagelabel {
-  align-self: flex-start;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
-  white-space: nowrap;
 }
 .nk-egd-floor__row {
   display: flex;
@@ -792,14 +683,6 @@
   gap: 12px;
   margin-bottom: 6px;
 }
-.nk-egd-floor__goalslabel {
-  font-family: var(--font-hud);
-  font-size: 0.64rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  color: var(--text3);
-  white-space: nowrap;
-}
 .nk-egd-floor__buffname {
   font-size: 0.88rem;
   font-weight: 700;
@@ -814,12 +697,6 @@
 }
 .nk-egd-floor__buffdesc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-floor__buffdesc .nowrap { white-space: nowrap; }
-.nk-egd-floor__goals {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
-}
 .nk-egd-floor__targets {
   list-style: none;
   margin: 0;
@@ -1152,8 +1029,8 @@
   border-radius: var(--nk-radius-card);
 }
 
-/* 末日幻影层 tab：星级目标（一行）+ 半场卡片行 + 单半场看板（块序与卡面取自星启看板）。
-   层没有标题行（用户裁决：层名无价值），层共用值只由卡片上的等级与看板首块的末法余烬承担。 */
+/* 层级模式的层 tab：挑战/星级目标（+ 赛季规则右栏）+ 半场卡片行 + 单半场看板。
+   层没有标题行（层名无价值），层共用值只由卡片上的等级 / 回合与看板首块的层级增益承担。 */
 .nk-egd-lvl {
   display: flex;
   flex-direction: column;
@@ -1203,6 +1080,29 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   color: color-mix(in srgb, var(--eg-color) 78%, var(--text2));
+  white-space: nowrap;
+}
+/* 赛季规则右栏（虚构叙事：回合限制 + 通关分数线；与每层取值相同的项已由半场卡片承担，不进这里） */
+.nk-egd-rules__item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.nk-egd-rules__val {
+  font-family: var(--font-hud);
+  font-size: 1.22rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--eg-color);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.nk-egd-rules__label {
+  font-family: var(--font-hud);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text3);
   white-space: nowrap;
 }
 .nk-egd-tierce__stats {
@@ -1460,7 +1360,6 @@
   .nk-egd-hero__status { font-size: 0.7rem; padding: 5px 11px; }
   .nk-egd-peak__kind { font-size: 0.7rem; }
   .nk-egd-floor__targetidx { font-size: 0.78rem; }
-  .nk-egd-floor__stagelabel { font-size: 0.72rem; }
   .nk-egd-floor__wavelabel { font-size: 0.7rem; }
   .nk-egd-mon__tag { font-size: 0.7rem; }
   .nk-egd-mon__rank { font-size: 0.64rem; }
@@ -1485,8 +1384,6 @@
   .nk-egd-peak__tag { font-size: 0.8rem; }
   .nk-egd-peak__badge { font-size: 0.88rem; }
   .nk-egd-empty { font-size: 0.8rem; }
-  .nk-egd-floor__stages { grid-template-columns: 1fr; }
-  .nk-egd-floor__stage + .nk-egd-floor__stage { border-left: none; padding-left: 0; }
   .nk-egd-floor__head { flex-wrap: wrap; }
   .nk-egd-floor__data { margin-left: auto; }
   /* 敌方配置行在手机档不再需要换行开关：标题 / 卡组的上下结构已是基础形态（见 `.nk-egd-floor__row--mons`） */
@@ -1505,7 +1402,6 @@
 @media (prefers-reduced-motion: reduce) {
   .nk-egd-buff, .nk-egd-floor { animation: none; }
   .nk-egd-floor__head { transition: none; }
-  .nk-egd-floor__body { transition: none; }
   .nk-egd-floor__mon:hover { transform: none; }
   .nk-egd-mon__figlink:hover .nk-egd-mon__img { transform: none; }
 }
@@ -1521,8 +1417,6 @@
   .nk-egd-mon:hover { border-color: var(--line-1); background: color-mix(in srgb, var(--blk-900) 30%, transparent); }
   .nk-egd-mon__figlink:hover .nk-egd-mon__img { transform: none; }
   .nk-egd-floor__mon:hover { transform: none; }
-  .nk-egd-floor__head:hover .nk-egd-floor__arrow { color: var(--text3); }
-  .nk-egd-title-tool:hover { color: var(--text3); }
 }
 
 /* ─── 父子层级刻度（ADR 0028）：档位按 DOM 嵌套深度落位，子块几何在此单点声明 ─── */
@@ -1568,13 +1462,6 @@
   white-space: nowrap;
   color: var(--vor-300);
 }
-.nk-egd-pollchip__half {
-  font-family: var(--font-body);
-  font-size: 0.58rem;
-  letter-spacing: 0.04em;
-  color: var(--text3);
-}
-.nk-egd-floor__poll { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .nk-egd-code {
   font-family: var(--font-mono);
   font-size: 0.6rem;
@@ -1743,7 +1630,6 @@
 .nk-egd-floor__label,
 .nk-egd-floor__targetidx,
 .nk-egd-fury__label,
-.nk-egd-floor__goalslabel,
 .nk-egd-mon__label,
 .nk-egd-summons__label,
 .nk-egd-poll__monslabel,
@@ -1752,13 +1638,10 @@
 /* 字档收口：区块标题压在正文（0.84rem）之上，标签档低于正文，数值档高于标签。 */
 .nk-egd-group__title { font-size: 0.78rem; }
 
-.nk-egd-group__label,
 .nk-egd-nodecard__label,
 .nk-egd-floor__datalabel,
-.nk-egd-floor__summarylabel,
-.nk-egd-floor__summarydata,
+.nk-egd-rules__label,
 .nk-egd-hero__sid,
-.nk-egd-pollchip__half,
 .nk-egd-code,
 .nk-egd-mon__tag,
 .nk-egd-mon__none,
@@ -1784,7 +1667,6 @@
 .nk-egd-poll__list { gap: 10px; }
 .nk-egd-poll__item { padding: 12px 14px; }
 .nk-egd-floor__row { padding: 10px 0; }
-.nk-egd-floor__stagehead { padding-bottom: 12px; }
 .nk-egd-mon__rows { gap: 8px; }
 
 @media (max-width: 767px) {

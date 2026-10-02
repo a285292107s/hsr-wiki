@@ -384,11 +384,12 @@ interface MonsterLike { name: string; icon?: string; wave?: number; summons?: Su
 interface InvasionLike { level: number; stage_id?: number; monsters?: MonsterLike[] }
 /** 召唤物（ADR 0036 修订）：轻形态 + 受污染者带 polluted（污染等级）；挂在召唤者自己的敌方条目上 */
 interface SummonLike { id: string; name: string; tpl?: string; polluted?: number }
-interface StageLike { monsters?: MonsterLike[]; invasion?: InvasionLike }
+interface StageLike { monsters?: MonsterLike[]; invasion?: InvasionLike; damage?: string[] }
 interface FloorLike {
   floor: number;
   name?: string;
   level?: number;
+  countdown?: number;
   buff?: { name: string };
   targets?: { param: number; type?: string }[];
   stage1?: StageLike;
@@ -398,6 +399,10 @@ interface SeasonLike {
   id: string;
   zh?: string;
   floors?: number;
+  countdown?: number;
+  clear_score?: number;
+  buffs?: { id: number; name: string }[];
+  sub_buffs?: { id: number; name: string }[];
   floor_details?: FloorLike[];
   buff_groups?: Record<string, { name: string }[]>;
   boss_traits?: Record<string, { name: string; param_list?: number[] }[]>;
@@ -419,7 +424,7 @@ interface SeasonLike {
 }
 
 /** 读某个终局赛季的原始数据（maze_boss / maze / maze_peak 三表同构） */
-function seasonData(file: 'maze_boss.json' | 'maze.json' | 'maze_peak.json', id: string): SeasonLike {
+function seasonData(file: 'maze_boss.json' | 'maze.json' | 'maze_extra.json' | 'maze_peak.json', id: string): SeasonLike {
   const all = readJson<Record<string, SeasonLike>>(`public/data/cn/${file}`);
   const found = all[id];
   if (!found) throw new Error(`public/data/cn/${file} 缺少赛季 ${id}`);
@@ -429,12 +434,12 @@ function seasonData(file: 'maze_boss.json' | 'maze.json' | 'maze_peak.json', id:
 /** 节点卡片序号文案的中文数字（站点自创格式，非数据字段） */
 const CN_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
 
-/** 末波最后一只敌方（= 首领本体；ADR 0031：取实际战斗数据而非指南别名） */
+/** 末波首领（= 战斗卡片「打谁」的判据，与 `renders.lastWaveBoss` 同源：最后一波的第 1 只） */
 function lastWaveMonster(stage: { monsters?: MonsterLike[] } | undefined): MonsterLike {
   const mons = stage?.monsters ?? [];
   if (!mons.length) throw new Error('该节点/场次无敌方数据，无法派生末波首领');
   const lastWave = Math.max(...mons.map((m) => m.wave ?? 1));
-  return mons.filter((m) => (m.wave ?? 1) === lastWave).slice(-1)[0];
+  return mons.filter((m) => (m.wave ?? 1) === lastWave)[0];
 }
 
 /** 末波首领名 */
@@ -445,6 +450,17 @@ function lastWaveBossName(stage: StageLike | undefined): string {
 /** 层级 tab 文案：数据层序 + 星启模式（不写死层数） */
 function levelTabLabels(season: SeasonLike): string[] {
   return [...(season.floor_details ?? []).map((f) => `第 ${f.floor} 层`), '星启模式'];
+}
+
+/** 子 tab 文案（层 tab + 有星启才有的星启 tab；层级模式三玩法共用） */
+function seasonTabLabels(season: SeasonLike): string[] {
+  const floors = (season.floor_details ?? []).map((f) => `第 ${f.floor} 层`);
+  return season.tierce ? [...floors, '星启模式'] : floors;
+}
+
+/** 千分位（页面数值档用 toLocaleString 渲染，断言不依赖运行环境的 locale） */
+function grouped(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 /** 某层半场的末波首领名 */
@@ -1409,6 +1425,91 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
+  test('/endgame/maze/1036 + /endgame/story/2026：层级子 tab + 目标栏 + 半场卡片 + 单半场看板（ADR 0037）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+
+    // ── 忘却之庭：目标为回合 / 减员档，栏名是「挑战目标」；回合与增益都随层走 ──
+    await page.goto('/endgame/maze/1036');
+    const maze = seasonData('maze.json', '1036');
+    const mazeFloor1 = maze.floor_details![0];
+    // 顶部固定条退场：层级模式由页内子 tab 承担导航（仅异相仲裁保留固定条）
+    await expect(page.locator('.nk-egd-bar')).toHaveCount(0);
+    await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveText(seasonTabLabels(maze));
+    // 默认激活星启模式（有星启的赛季；无星启的赛季回退第 1 层）
+    await expect(page.locator('#egd-level-tab-tierce')).toHaveAttribute('aria-selected', 'true');
+
+    await page.locator('#egd-level-tab-floor-1').click();
+    const mazePanel = page.locator('#egd-level-panel');
+    await expect(mazePanel.locator('.nk-egd-head__label')).toHaveText('挑战目标');
+    await expect(mazePanel.locator('.nk-egd-startargets li'))
+      .toHaveCount(mazeFloor1.targets!.length);
+    await expect(mazePanel.locator('.nk-egd-startargets li').last())
+      .toContainText(String(mazeFloor1.targets!.at(-1)!.param));
+    // 非分数档：行首走语义标签（回合 / 减员），不出现星标
+    await expect(mazePanel.locator('.nk-egd-startargets__star')).toHaveCount(0);
+    // 赛季增益与每层的层级增益同文（「记忆紊流」）→ 赛季级区块整块退场，不重复陈述
+    await expect(page.locator('#egd-buffs')).toHaveCount(0);
+    // 赛季回合上限 = 每层回合上限 → 不进赛季规则右栏，改由半场卡片承担
+    await expect(mazePanel.locator('.nk-egd-rules__item')).toHaveCount(0);
+    // 层内增益随看板首块（末法余烬位），不再是层尾
+    await expect(mazePanel.locator('.nk-egd-floor__buffname')).toHaveText(mazeFloor1.buff!.name);
+
+    // 半场卡片两张同一行：卡面 = 半场名 + 末波首领图 + 推荐属性 + 等级 + 回合
+    const mazeHalves = mazePanel.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]');
+    await expect(mazeHalves).toHaveCount(2);
+    await expect(mazeHalves.locator('.nk-egd-nodecard__name')).toHaveText(['上半场', '下半场']);
+    await expect(mazeHalves.first().locator('.nk-egd-nodecard__img'))
+      .toHaveAttribute('src', new RegExp(lastWaveMonster(mazeFloor1.stage1).icon!));
+    await expect(mazeHalves.first().locator('.nk-egd-nodecard__label'))
+      .toHaveText(['推荐属性', '等级', '回合']);
+    await expect(mazeHalves.first().locator('.nk-egd-nodecard__val'))
+      .toHaveText([String(mazeFloor1.level), String(mazeFloor1.countdown)]);
+    // 一次一个看板：看板只渲染当前半场，且不复述场次身份
+    await expect(mazePanel.locator('.nk-egd-board')).toHaveCount(1);
+    await expect(mazePanel.locator('.nk-egd-board__body > .nk-egd-floor__stage')).toHaveCount(1);
+    await expect(mazePanel.locator('.nk-egd-mon__name').first())
+      .toHaveText(mazeFloor1.stage1!.monsters![0].name);
+    await expect(mazePanel.locator('.nk-egd-floor__label')).toHaveText('敌方配置');
+    // 切半场：换的是当前半场那份战斗数据
+    await mazeHalves.nth(1).click();
+    await expect(mazePanel.locator('.nk-egd-mon__name').first())
+      .toHaveText(mazeFloor1.stage2!.monsters![0].name);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+
+    // ── 虚构叙事：分数档 → 栏名是「星级目标」；回合限制与通关分数线是赛季维度 ──
+    await page.goto('/endgame/story/2026');
+    const story = seasonData('maze_extra.json', '2026');
+    const storyFloor1 = story.floor_details![0];
+    // 战意机制 / 赛季增益仍留在子 tab 之上的赛季级区块（这两项无逐层对应）
+    await expect(page.locator('#egd-sub-buffs')).toBeVisible();
+    await expect(page.locator('#egd-buffs')).toBeVisible();
+    await expect(page.locator('.nk-egd-bar')).toHaveCount(0);
+    await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveText(seasonTabLabels(story));
+
+    await page.locator('#egd-level-tab-floor-1').click();
+    const storyPanel = page.locator('#egd-level-panel');
+    await expect(storyPanel.locator('.nk-egd-head__label')).toHaveText(['星级目标', '赛季规则']);
+    await expect(storyPanel.locator('.nk-egd-startargets__star'))
+      .toHaveCount(storyFloor1.targets!.length);
+    await expect(storyPanel.locator('.nk-egd-rules__label'))
+      .toHaveText(['回合限制 CYCLES', '通关分数线 SCORE']);
+    await expect(storyPanel.locator('.nk-egd-rules__val'))
+      .toHaveText([String(story.countdown), grouped(story.clear_score!)]);
+    // 层内回合为 0 → 卡片不出现「回合」行（层内增益缺省 → 看板首块无末法余烬）
+    const storyHalves = storyPanel.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]');
+    await expect(storyHalves.first().locator('.nk-egd-nodecard__label'))
+      .toHaveText(['推荐属性', '等级']);
+    await expect(storyPanel.locator('.nk-egd-floor__buff')).toHaveCount(0);
+    // 星启 tab 仍在末位，且用同一套节点卡片 + 看板
+    await page.locator('#egd-level-tab-tierce').click();
+    await expect(storyPanel.locator('.nk-egd-nodecards[aria-label="星启节点"] .nk-egd-nodecard__name'))
+      .toHaveText(['节点一', '节点二', '节点三']);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
   test('/endgame/maze/1036：父子层级刻度（ADR 0028）桌面', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -1433,17 +1534,14 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(page.locator('.nk-egd-nodecard').first().locator('.nk-egd-nodecard__val'))
       .toHaveText(String(maze.tierce!.nodes![0].level));
     // 子档：缩进 = --eg-indent 令牌落值；**星启看板体不画层级竖轨**（用户裁决：通体模式色线重复点题，
-    // 层级改由「缩进 + 字号档」承担），轨线只保留在楼层折叠体与异相仲裁；
-    // 孙档：节点内「第 N 波」标签小于子档场次标签
+    // 层级改由「缩进 + 字号档」承担），轨线只保留在异相仲裁卡体。
+    // 孙档：看板内「第 N 波」标签与层级刻度无关，但两处取值同源（字号不得分叉）
     const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');
     expect(egIndent, '父子层级缩进令牌必须在 .nk-egd 上声明').toBeGreaterThan(0);
     const child = page.locator('.nk-egd-board__body').first();
     await expectTokenNumber(child, 'padding-left', egIndent, '星启看板体缩进');
     const childRailWidth = await child.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0);
     expect(childRailWidth, '星启看板体的层级竖轨应已移除（缩进保留）').toBe(0);
-    const waveFs = await fontPx(page.locator('.nk-egd-board .nk-egd-floor__wavelabel').first());
-    const stageFs = await fontPx(page.locator('.nk-egd-floor__stagelabel').first());
-    expect(stageFs).toBeGreaterThan(waveFs + 0.5);
     expect(await fontPx(page.locator('.nk-egd-board .nk-egd-floor__wavelabel').first()))
       .toBe(await fontPx(page.locator('.nk-egd-floor__wavelabel').first()));
     // 敌方卡网格的 8px 下外边距只服务多波之间：非末波仍为 8px，末波归零（尾随留白不进入块间距）
@@ -1455,21 +1553,16 @@ test.describe('布局验收：终局合并单页', () => {
       waveGridMargins.slice(0, -1).map(() => 8),
     );
     expect(waveGridMargins[waveGridMargins.length - 1], '末波网格不应有尾随下外边距').toBe(0);
-    // 楼层与异相仲裁子块同档：整个卡体缩进（同令牌）+ 模式色竖轨（同轨宽）——两处共用一条声明
-    const bodyInner = page.locator('.nk-egd-floor__body-inner').first();
-    await expectTokenNumber(bodyInner, 'padding-left', egIndent, '楼层卡体缩进');
-    const railWidth = await bodyInner.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0);
-    expect(railWidth, '楼层折叠体的层级竖轨必须保留（只在星启看板移除）').toBeGreaterThan(0);
     await noUnknownOverflow(page);
     assertNoErrors();
 
-    // 异相仲裁（无折叠体）：卡体即子块
+    // 异相仲裁（唯一的非子 tab 卡体）：卡体即子块，缩进 + 模式色竖轨都在
     await page.goto('/endgame/peak/9');
     const peakBody = page.locator('.nk-egd-peak__body').first();
     await expect(peakBody).toBeVisible();
     await expectTokenNumber(peakBody, 'padding-left', egIndent, '异相仲裁卡体缩进');
-    expect(await peakBody.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0))
-      .toBe(railWidth);
+    const railWidth = await peakBody.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0);
+    expect(railWidth, '异相仲裁卡体的层级竖轨必须保留（只在战斗看板移除）').toBeGreaterThan(0);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -1478,24 +1571,23 @@ test.describe('布局验收：终局合并单页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/endgame/maze/1036');
-    // 手机端缩进降档（仍由同一令牌声明）、轨线在下述两处各有归属；
-    // 父档（卡片节点号）字号仍严格大于子档「第 N 波」标签
+    // 手机端缩进降档（仍由同一令牌声明）、轨线只保留在异相仲裁卡体；
+    // 父档（卡片节点号）字号仍严格大于孙档「第 N 波」标签
     const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');
     expect(egIndent, '手机档缩进令牌必须在 .nk-egd 上声明').toBeGreaterThan(0);
     const child = page.locator('.nk-egd-board__body').first();
     await expect(child).toBeVisible();
     await expectTokenNumber(child, 'padding-left', egIndent, '手机档星启看板体缩进');
-    const railWidth = await child.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0);
-    expect(railWidth, '手机档星启看板体同样不画层级竖轨').toBe(0);
+    expect(await child.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0),
+      '手机档星启看板体同样不画层级竖轨').toBe(0);
     const cardFs = await fontPx(page.locator('.nk-egd-nodecard--active .nk-egd-nodecard__name'));
     const waveFs = await fontPx(page.locator('.nk-egd-board .nk-egd-floor__wavelabel').first());
-    const stageFs = await fontPx(page.locator('.nk-egd-floor__stagelabel').first());
     expect(cardFs).toBeGreaterThan(waveFs);
-    expect(stageFs).toBeGreaterThan(waveFs);
-    const floorBody = page.locator('.nk-egd-floor__body-inner').first();
-    await expectTokenNumber(floorBody, 'padding-left', egIndent, '手机档楼层卡体缩进');
-    expect(await floorBody.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0),
-      '手机档楼层折叠体的层级竖轨必须保留').toBeGreaterThan(0);
+    await page.goto('/endgame/peak/9');
+    const peakBody = page.locator('.nk-egd-peak__body').first();
+    await expectTokenNumber(peakBody, 'padding-left', egIndent, '手机档异相仲裁卡体缩进');
+    expect(await peakBody.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0),
+      '手机档异相仲裁卡体的层级竖轨必须保留').toBeGreaterThan(0);
     await noUnknownOverflow(page);
     assertNoErrors();
   });

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue';
 import { tabNextIndex } from './tabs';
-import type { BossLevelTab } from './levels';
+import type { LevelTab } from './levels';
 
 const props = defineProps<{
-  tabs: BossLevelTab[];
+  tabs: LevelTab[];
   active: string;
 }>();
 

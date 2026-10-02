@@ -4,6 +4,7 @@ import EndgameStarTargets from './EndgameStarTargets.vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
 import { halfLabel } from './pollution';
+import { seasonRules } from './renders';
 import type {
   MazeBossTrait, MazeBuffInfo, MazeFloorDetail, MazeListEntry, MazeStageDetail,
 } from '../../services/types';
@@ -27,13 +28,14 @@ const nodes = computed<HalfNode[]>(() =>
     .map((half) => ({ half, stage: props.floor[half] }))
     .filter((n): n is HalfNode => !!n.stage && (!!n.stage.monsters?.length || !!n.stage.damage?.length)));
 
-/** 半场卡片 = 子切换导航，卡面与星启节点卡片同形（半场名 + 末波首领图 + 推荐属性 + 等级）。
- *  等级是层共用值，只在卡片上出现（层标题不再复述）。 */
+/** 半场卡片 = 子切换导航，卡面与星启节点卡片同形（半场名 + 末波首领图 + 推荐属性 + 等级 / 回合）。
+ *  等级与回合是层共用值，只在卡片上出现（层标题不再复述）。 */
 const cards = computed(() => nodes.value.map((n) => ({
   key: n.half,
   label: halfLabel(n.half),
   stage: n.stage,
   level: props.floor.level || 0,
+  countdown: props.floor.countdown || 0,
 })));
 
 /** 看板当前半场：缺该场次时退回第一个（数据缺半场或切层后旧场次不存在） */
@@ -58,12 +60,20 @@ const activeTraits = computed<MazeBossTrait[]>(
 );
 
 const targets = computed(() => props.floor.targets || []);
+const rules = computed(() => seasonRules(props.data));
 </script>
 
 <template>
   <div class="nk-egd-lvl">
-    <div v-if="targets.length" class="nk-egd-head">
-      <EndgameStarTargets :items="targets" />
+    <div v-if="targets.length || rules.length" class="nk-egd-head">
+      <EndgameStarTargets v-if="targets.length" :items="targets" />
+      <div v-if="rules.length" class="nk-egd-head__col">
+        <span class="nk-egd-head__label">赛季规则</span>
+        <span v-for="r in rules" :key="r.label" class="nk-egd-rules__item">
+          <span class="nk-egd-rules__val">{{ r.value.toLocaleString() }}</span>
+          <span class="nk-egd-rules__label">{{ r.label }}</span>
+        </span>
+      </div>
     </div>
 
     <EndgameNodeCards

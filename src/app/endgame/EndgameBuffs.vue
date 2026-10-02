@@ -1,12 +1,12 @@
 <script setup lang="ts">
 // 战意（Fever）赛季主题机制 + 两阶段效果（官网"战意机制 / 战意效果"对应 SubMazeBuffList：
-// 机制 1 条 + 效果 2 条，仅虚构叙事 Fever 赛季）；赛季增益为当期环境效果
-// （记忆紊流 / 战意），组标签为空时按扁平列表渲染（末日幻影按场次挂在层级子 tab，不走本组件）。
+// 机制 1 条 + 效果 2 条，仅虚构叙事 Fever 赛季）；赛季增益为当期环境效果（记忆紊流 / 战意），
+// 与逐层已呈现的增益同文的不再复述（见 seasonBuffList）。
 import { computed } from 'vue';
 import { seasonThemeIconUrl } from '../catalog/pages/endgame';
 import { buildEndgameSections, sectionIdxMap } from './sections';
 import {
-  BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl, endgameGroups,
+  BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl, seasonBuffList,
 } from './renders';
 import EndgameBuffGroup from './EndgameBuffGroup.vue';
 import type { MazeBuffInfo, MazeListEntry } from '../../services/types';
@@ -18,9 +18,7 @@ const props = defineProps<{
 
 const subBuffsMech = computed<MazeBuffInfo | null>(() => props.data.sub_buffs?.[0] || null);
 const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.slice(1) || []);
-const seasonBuffGroups = computed(
-  () => endgameGroups(props.data.buff_groups, props.data.buffs),
-);
+const seasonBuffs = computed(() => seasonBuffList(props.data));
 const seasonThemeIcon = computed(() => seasonThemeIconUrl(props.data.arts));
 const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, [])));
 </script>
@@ -59,7 +57,7 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
     </div>
   </template>
 
-  <template v-if="modeKey !== 'peak' && seasonBuffGroups.length">
+  <template v-if="seasonBuffs.length">
     <h2 id="egd-buffs" class="nk-title">
       <img
         v-if="seasonThemeIcon"
@@ -72,12 +70,7 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
       <span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>赛季增益 BUFFS
     </h2>
     <div class="nk-egd-groups">
-      <EndgameBuffGroup
-        v-for="g in seasonBuffGroups"
-        :key="g.key"
-        :label="g.label"
-        :items="g.items"
-      />
+      <EndgameBuffGroup :items="seasonBuffs" />
     </div>
   </template>
 </template>

@@ -13,13 +13,10 @@ import type {
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import { buildEndgameSections } from '../endgame/sections';
-import { buildBossLevelTabs, defaultLevelKey } from '../endgame/levels';
-import type { BossLevelTab } from '../endgame/levels';
+import { buildLevelTabs, defaultLevelKey, isLevelMode, type LevelTab } from '../endgame/levels';
 import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
 import EndgamePeak from '../endgame/EndgamePeak.vue';
-import EndgameTierce from '../endgame/EndgameTierce.vue';
-import EndgameFloors from '../endgame/EndgameFloors.vue';
 import EndgamePollution from '../endgame/EndgamePollution.vue';
 import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
 import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
@@ -110,14 +107,14 @@ watch(
 );
 
 const modeKey = computed(() => String(route.params.mode || ''));
-const floorSections = computed(() => [...(data.value?.floor_details || [])].reverse());
 const peakLevels = computed<PeakLevelInfo[]>(() => data.value?.levels || []);
 
 const navSections = computed(() => buildEndgameSections(data.value, modeKey.value, peakLevels.value));
 
-/** 末日幻影的子 tab（第 1..N 层 + 星启模式）；其余模式为空数组 → 顶部条走区块导航。默认激活星启（见 `defaultLevelKey`）。 */
-const levelTabs = computed<BossLevelTab[]>(
-  () => (modeKey.value === 'boss' ? buildBossLevelTabs(data.value) : []),
+/** 层级模式（忘却之庭 / 虚构叙事 / 末日幻影）的「第 1..N 层 / 星启模式」子 tab；
+ *  异相仲裁无层级，为空数组 → 顶部条继续走区块导航。默认激活星启（见 `defaultLevelKey`）。 */
+const levelTabs = computed<LevelTab[]>(
+  () => (isLevelMode(modeKey.value) ? buildLevelTabs(data.value) : []),
 );
 const activeLevel = ref('');
 watch(
@@ -234,6 +231,8 @@ onBeforeUnmount(() => {
       <div class="nk-panels nk-egd-body">
         <div class="nk-egd-panel">
           <template v-if="levelTabs.length">
+            <EndgameBuffs :data="data" :mode-key="modeKey" />
+
             <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
 
             <EndgameLevelTabs
@@ -246,17 +245,11 @@ onBeforeUnmount(() => {
           </template>
 
           <template v-else>
-            <EndgameBuffs :data="data" :mode-key="modeKey" />
-
             <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
 
             <EndgamePeak :data="data" :peak-levels="peakLevels" />
 
-            <div v-if="!data.tierce && !floorSections.length && !peakLevels.length" class="nk-egd-empty">本赛季暂无关卡数据</div>
-
-            <EndgameTierce :data="data" :mode-key="modeKey" />
-
-            <EndgameFloors :data="data" :mode-key="modeKey" :floor-sections="floorSections" />
+            <div v-if="!peakLevels.length" class="nk-egd-empty">本赛季暂无关卡数据</div>
           </template>
 
           <nav v-if="prevSeason || nextSeason" class="nk-egd-nav" aria-label="相邻赛季">

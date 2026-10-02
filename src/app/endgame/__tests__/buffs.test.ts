@@ -1,29 +1,76 @@
 import { describe, it, expect } from 'vitest';
-import { bossTraitDescHtml, endgameGroups } from '../renders';
+import { bossTraitDescHtml, seasonBuffList, seasonRules } from '../renders';
 import { buildEndgameSections, sectionIdxMap } from '../sections';
 import type { MazeBossTrait, MazeListEntry } from '../../../services/types';
 
 const buff = (id: number, name: string) => ({ id, name });
 
-describe('endgameGroups 分场次分组', () => {
-  it('末日幻影：按上半场/下半场/星启模式分组，空场次不产生分组', () => {
-    const groups = endgameGroups(
-      { stage1: [buff(1, '膏腴之地')], stage2: [buff(2, '才藻富赡')], tierce: [] },
-      undefined,
-    );
-    expect(groups.map((g) => [g.key, g.label, g.items.length])).toEqual([
-      ['stage1', '上半场', 1],
-      ['stage2', '下半场', 1],
+describe('seasonBuffList 赛季增益（与层内增益同文的不复述）', () => {
+  it('忘却之庭：赛季增益与每层层内增益同一条 → 赛季级列表整块退场', () => {
+    const data = {
+      id: '1036', zh: '物竞天择',
+      buffs: [buff(3030149, '记忆紊流')],
+      floor_details: [{ floor: 1, buff: buff(3030149, '记忆紊流') }, { floor: 2, buff: buff(3030149, '记忆紊流') }],
+    } as MazeListEntry;
+    expect(seasonBuffList(data)).toEqual([]);
+  });
+
+  it('虚构叙事：赛季增益无逐层对应 → 原样保留', () => {
+    const flat = [buff(1, '触技'), buff(2, '笑韵'), buff(3, '变奏')];
+    const data = { id: '2026', zh: '立界开篇', buffs: flat, floor_details: [{ floor: 1 }] } as MazeListEntry;
+    expect(seasonBuffList(data)).toEqual(flat);
+  });
+
+  it('只有部分增益被逐层承担时，只留差额部分', () => {
+    const data = {
+      id: '3001', zh: '冽风骑士',
+      buffs: [buff(1, '甲'), buff(2, '乙')],
+      floor_details: [{ floor: 1, buff: buff(1, '甲') }],
+    } as MazeListEntry;
+    expect(seasonBuffList(data).map((b) => b.name)).toEqual(['乙']);
+  });
+
+  it('星启节点自带增益也算逐层已承担', () => {
+    const data = {
+      id: '3020', zh: '仙客天狼',
+      buffs: [buff(9, '余烬')],
+      floor_details: [{ floor: 1 }],
+      tierce: { id: 30205, nodes: [{ idx: 3, origin: 'tierce', buff: buff(9, '余烬') }] },
+    } as unknown as MazeListEntry;
+    expect(seasonBuffList(data)).toEqual([]);
+  });
+
+  it('无增益返回空数组', () => {
+    expect(seasonBuffList({ id: '1', zh: 'x' } as MazeListEntry)).toEqual([]);
+  });
+});
+
+describe('seasonRules 赛季级规则数值', () => {
+  it('忘却之庭：回合上限与每层一致 → 不进赛季规则右栏（由半场卡片承担）', () => {
+    const data = {
+      id: '1036', zh: '物竞天择', countdown: 30,
+      floor_details: [{ floor: 1, countdown: 30 }, { floor: 2, countdown: 30 }],
+    } as MazeListEntry;
+    expect(seasonRules(data)).toEqual([]);
+  });
+
+  it('虚构叙事：回合限制与通关分数线都是赛季维度', () => {
+    const data = {
+      id: '2026', zh: '立界开篇', countdown: 5, clear_score: 30000,
+      floor_details: [{ floor: 1, countdown: 0 }],
+    } as MazeListEntry;
+    expect(seasonRules(data)).toEqual([
+      { label: '回合限制 CYCLES', value: 5 },
+      { label: '通关分数线 SCORE', value: 30000 },
     ]);
   });
 
-  it('无分场次数据时降级为单个无标签分组（忘却之庭/虚构叙事的扁平列表）', () => {
-    const flat = [buff(1, '记忆紊流')];
-    expect(endgameGroups(undefined, flat)).toEqual([{ key: 'all', label: '', items: flat }]);
-    expect(endgameGroups(undefined, [])).toEqual([]);
-    expect(endgameGroups(undefined, undefined)).toEqual([]);
-    // 分场次数据优先：即使同时带扁平列表也不重复渲染
-    expect(endgameGroups({ stage1: flat }, flat).map((g) => g.key)).toEqual(['stage1']);
+  it('末日幻影：赛季回合上限为 0 → 规则栏退场（基准页形态不变）', () => {
+    const data = {
+      id: '3020', zh: '仙客天狼', countdown: 0,
+      floor_details: [{ floor: 1, countdown: 0 }, { floor: 2, countdown: 0 }],
+    } as MazeListEntry;
+    expect(seasonRules(data)).toEqual([]);
   });
 });
 
@@ -50,7 +97,7 @@ describe('bossTraitDescHtml 首领特性文案', () => {
   });
 });
 
-describe('buildEndgameSections 末日幻影子 tab 承载', () => {
+describe('buildEndgameSections 子 tab 承载后的赛季级区块', () => {
   const bossData = {
     id: '3020',
     zh: '仙客天狼',
@@ -62,7 +109,7 @@ describe('buildEndgameSections 末日幻影子 tab 承载', () => {
     floor_details: [{ floor: 1, stage1: {}, stage2: {} }],
   } as MazeListEntry;
 
-  it('赛季增益/首领特性/星启/关卡层级不再进区块导航，只剩赛季级污染等级', () => {
+  it('末日幻影：赛季增益/首领特性/星启/关卡层级不再进区块导航，只剩赛季级污染等级', () => {
     expect(buildEndgameSections(bossData, 'boss', []).map((s) => s.id)).toEqual(['pollution']);
     expect(sectionIdxMap(buildEndgameSections(bossData, 'boss', []))).toEqual({ pollution: '01' });
   });
@@ -72,8 +119,37 @@ describe('buildEndgameSections 末日幻影子 tab 承载', () => {
     expect(buildEndgameSections(clean, 'boss', [])).toEqual([]);
   });
 
-  it('其余模式口径不变（忘却之庭：赛季增益区块）', () => {
-    const data = { id: '1035', zh: '回忆', buffs: [buff(1, '记忆紊流')] } as MazeListEntry;
-    expect(buildEndgameSections(data, 'maze', []).map((s) => s.id)).toEqual(['buffs']);
+  it('忘却之庭：赛季增益与层内增益同文 → 只剩污染等级', () => {
+    const data = {
+      id: '1036', zh: '物竞天择',
+      buffs: [buff(3030149, '记忆紊流')],
+      floor_details: [{ floor: 1, buff: buff(3030149, '记忆紊流') }],
+      pollution: { count: 2, levels: [2, 3] },
+    } as MazeListEntry;
+    expect(buildEndgameSections(data, 'maze', []).map((s) => s.id)).toEqual(['pollution']);
+  });
+
+  it('虚构叙事：战意机制 → 赛季增益 → 污染等级（块序与模板顺序一致）', () => {
+    const data = {
+      id: '2026', zh: '立界开篇',
+      sub_buffs: [buff(1, '获得笑点'), buff(2, '战熄潮平')],
+      buffs: [buff(3, '狂欢')],
+      pollution: { count: 1, levels: [2] },
+      floor_details: [{ floor: 1 }],
+    } as MazeListEntry;
+    expect(buildEndgameSections(data, 'story', []).map((s) => s.id))
+      .toEqual(['sub-buffs', 'buffs', 'pollution']);
+    expect(sectionIdxMap(buildEndgameSections(data, 'story', [])))
+      .toEqual({ 'sub-buffs': '01', buffs: '02', pollution: '03' });
+  });
+
+  it('异相仲裁口径不变（污染等级 → 关卡组成），赛季增益不进其区块导航', () => {
+    const data = {
+      id: '9', zh: '将杀王棋',
+      buffs: [buff(1, '出奇制胜')],
+      pollution: { count: 1, levels: [2] },
+    } as MazeListEntry;
+    expect(buildEndgameSections(data, 'peak', [{ kind: 'king' }]).map((s) => s.id))
+      .toEqual(['pollution', 'levels']);
   });
 });

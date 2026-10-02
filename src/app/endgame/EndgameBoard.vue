@@ -35,7 +35,7 @@ defineProps<{
       </header>
       <EndgameFloorBuff :buff="buff" />
       <EndgameTraitGroup v-if="traits.length" title="首领特性" :items="traits" />
-      <StageContent :stage="stage" :is-boss="true" headless hide-damage />
+      <StageContent :stage="stage" />
       <EndgameBuffGroup v-if="buffs.length" title="赛季增益" :items="buffs" />
     </div>
   </div>

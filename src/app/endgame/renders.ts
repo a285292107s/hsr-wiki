@@ -2,7 +2,7 @@ import { ELEM, MON_RANK } from '../../lib/constants';
 import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
 import type {
-  MazeBossTrait, MazeBuffInfo, MazeFloorDetail, MazeMonsterInfo, MazeStageDetail, MazeTargetInfo,
+  MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo, MazeTargetInfo,
 } from '../../services/types';
 
 export function buffDescHtml(b: MazeBuffInfo): string {
@@ -14,34 +14,33 @@ export function bossTraitDescHtml(t: MazeBossTrait): string {
   return fmtDesc(t.desc, t.param_list || []);
 }
 
-/** 末日幻影分场次条目的场次键（源表 BuffList1/2/3） */
-export type EndgameGroupKey = 'stage1' | 'stage2' | 'tierce';
-
-export const ENDGAME_GROUP_LABELS: Record<EndgameGroupKey, string> = {
-  stage1: '上半场',
-  stage2: '下半场',
-  tierce: '星启模式',
-};
-
-export interface EndgameGroup<T> {
-  key: string;
-  label: string;
-  items: T[];
+/** 赛季增益列表：与逐层已呈现的增益同文的不再复述一份（忘却之庭的「记忆紊流」既是赛季增益
+ *  也是每层的层级增益，由层看板逐层承担，赛季级区块整块退场）。 */
+export function seasonBuffList(data: MazeListEntry): MazeBuffInfo[] {
+  const flat = data.buffs || [];
+  if (!flat.length) return [];
+  const carried = new Set<number>();
+  for (const f of data.floor_details || []) if (f.buff) carried.add(f.buff.id);
+  for (const nd of data.tierce?.nodes || []) if (nd.buff) carried.add(nd.buff.id);
+  return flat.filter((b) => !carried.has(b.id));
 }
 
-/** 分场次条目 → 渲染分组（末日幻影的赛季增益/首领特性按场次下发）。
+export interface SeasonRule {
+  label: string;
+  value: number;
+}
 
-  无分场次数据时降级为单个**无标签**分组，使其余模式的扁平列表复用同一模板。 */
-export function endgameGroups<T>(
-  groups: Partial<Record<EndgameGroupKey, T[]>> | undefined,
-  flat?: T[],
-): EndgameGroup<T>[] {
-  if (groups) {
-    return (['stage1', 'stage2', 'tierce'] as const)
-      .filter((k) => (groups[k]?.length ?? 0) > 0)
-      .map((k) => ({ key: k, label: ENDGAME_GROUP_LABELS[k], items: groups[k] as T[] }));
+/** 赛季级规则数值（层面板右栏）：与每层取值完全相同的项不再复述——忘却之庭的回合上限
+ *  就是逐层回合上限（已落在半场卡片上），虚构叙事的回合上限与通关分数线才是赛季维度。 */
+export function seasonRules(data: MazeListEntry): SeasonRule[] {
+  const perFloor = (data.floor_details || []).map((f) => f.countdown || 0);
+  const rules: SeasonRule[] = [];
+  const cd = data.countdown || 0;
+  if (cd && !(perFloor.length > 0 && perFloor.every((c) => c === cd))) {
+    rules.push({ label: '回合限制 CYCLES', value: cd });
   }
-  return flat?.length ? [{ key: 'all', label: '', items: flat }] : [];
+  if (data.clear_score) rules.push({ label: '通关分数线 SCORE', value: data.clear_score });
+  return rules;
 }
 
 /** 增益图标 URL（bufficon CDN；资源未就绪时 404，img error 事件兜底 SVG 占位） */
@@ -51,20 +50,6 @@ export function buffIconUrl(b: MazeBuffInfo): string {
 
 export const BUFF_ICON_FALLBACK =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0a0b0' stroke-width='1.5' stroke-linejoin='round'><path d='M12 2.5l2.3 6.2 6.2 2.3-6.2 2.3-2.3 6.2-2.3-6.2-6.2-2.3 6.2-2.3z'/><circle cx='12' cy='12' r='1.4' fill='%23a0a0b0' stroke='none'/></svg>";
-
-export function stageHasContent(s?: MazeStageDetail): boolean {
-  return !!s && (!!s.damage?.length || !!s.monsters?.length);
-}
-
-export function stageDamageSummary(f: MazeFloorDetail): string {
-  const uniq = [...new Set([...(f.stage1?.damage || []), ...(f.stage2?.damage || [])])];
-  return uniq.length ? elemRow(uniq) : '';
-}
-
-export function mergedMonCount(f: MazeFloorDetail): string {
-  const mons = [...(f.stage1?.monsters || []), ...(f.stage2?.monsters || [])];
-  return mons.length ? monCountLabel(mons) : '';
-}
 
 export function elemRow(types: string[]): string {
   return types.map((d) => {

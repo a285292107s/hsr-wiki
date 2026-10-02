@@ -1,4 +1,5 @@
 import type { MazeListEntry, PeakLevelInfo } from '../../services/types';
+import { seasonBuffList } from './renders';
 
 export interface EndgameSection {
   id: string;
@@ -22,16 +23,15 @@ export function buildEndgameSections(
     if (peakLevels.length) push('levels', '关卡组成');
     return s;
   }
-  // 末日幻影由「第 1..N 层 / 星启模式」子 tab 承载（ADR 0030）：赛季级区块只剩污染等级
+  // 层级模式（忘却之庭 / 虚构叙事 / 末日幻影，ADR 0030 + 0037）：关卡层级与星启模式由
+  // 「第 1..N 层 / 星启模式」子 tab 承载，区块导航只剩赛季级维度
   if (modeKey === 'boss') {
     if (data?.pollution) push('pollution', '污染等级');
     return s;
   }
   if (data?.sub_buffs?.length) push('sub-buffs', '战意机制');
-  if (data?.buffs?.length || data?.buff_groups) push('buffs', '赛季增益');
+  if (data && seasonBuffList(data).length) push('buffs', '赛季增益');
   if (data?.pollution) push('pollution', '污染等级');
-  if (data?.tierce) push('tierce', '星启模式');
-  if (data?.floor_details?.length) push('floors', '关卡层级');
   return s;
 }
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { buildEndgameSections, sectionIdxMap } from './sections';
 import EndgameStarTargets from './EndgameStarTargets.vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
@@ -13,12 +12,7 @@ import type {
 
 const props = defineProps<{
   data: MazeListEntry;
-  modeKey: string;
-  /** 作为子 tab 面板渲染（末日幻影）：不渲染区块标题 */
-  embedded?: boolean;
 }>();
-
-const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, [])));
 
 const tierceCountdown = computed<number>(() => props.data.tierce?.countdown || 0);
 const tierceScore = computed<number | null>(() => props.data.tierce?.score ?? null);
@@ -82,7 +76,6 @@ watch(
 
 <template>
   <template v-if="data.tierce">
-    <h2 v-if="!embedded" id="egd-tierce" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['tierce'] }}</span>星启模式 STARLIT</h2>
     <div class="nk-egd-tierce">
       <div v-if="tierceCountdown || tierceScore != null" class="nk-egd-tierce__stats">
         <div v-if="tierceCountdown" class="nk-egd-tierce__stat">

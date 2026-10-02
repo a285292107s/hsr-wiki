@@ -6,10 +6,17 @@ import { tabNextIndex } from './tabs';
 import type { MazeStageDetail } from '../../services/types';
 
 /** 战斗卡片行（层 tab 的半场卡片 / 星启看板的节点卡片共用）：
- *  卡片兼作子切换与身份位——一场战斗的「打谁（末波首领图）/ 什么属性 / 多少级」同屏可比，
- *  看板内因此不再复述这三项。 */
+ *  卡片兼作子切换与身份位——一场战斗的「打谁（末波首领图）/ 什么属性 / 多少级 / 几回合」同屏可比，
+ *  看板内因此不再复述这四项。 */
 const props = defineProps<{
-  items: { key: string; label: string; stage: MazeStageDetail | undefined; level: number }[];
+  items: {
+    key: string;
+    label: string;
+    stage: MazeStageDetail | undefined;
+    level: number;
+    /** 该层回合上限（层共用值，缺省或 0 不渲染——末日幻影层恒为 0） */
+    countdown?: number;
+  }[];
   /** 当前选中卡的 key */
   active: string;
   /** tab id 前缀：`${idPrefix}-${key}`，与看板的 aria-labelledby 同源 */
@@ -32,6 +39,7 @@ const cards = computed(() => props.items.map((it) => {
     icon: boss?.icon ? cdnUri('monstermiddleicon', `${boss.icon}.webp`) : '',
     elems: it.stage?.damage?.length ? elemRow(it.stage.damage) : '',
     level: it.level,
+    countdown: it.countdown || 0,
   };
 }));
 
@@ -88,6 +96,10 @@ function onKeydown(e: KeyboardEvent, i: number): void {
         <span v-if="t.level" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
           <span class="nk-egd-nodecard__label">等级</span>
           <span class="nk-egd-nodecard__val">{{ t.level }}</span>
+        </span>
+        <span v-if="t.countdown" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
+          <span class="nk-egd-nodecard__label">回合</span>
+          <span class="nk-egd-nodecard__val">{{ t.countdown }}</span>
         </span>
       </span>
     </button>
