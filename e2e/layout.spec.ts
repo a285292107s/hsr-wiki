@@ -1475,6 +1475,11 @@ test.describe('布局验收：终局合并单页', () => {
     await mazeHalves.nth(1).click();
     await expect(mazePanel.locator('.nk-egd-mon__name').first())
       .toHaveText(mazeFloor1.stage2!.monsters![0].name);
+    // 星启节点三 = 附加关：增益位与节点 1/2 同源（该关卡自身未登记绑定，回退同赛季末层的层级增益）
+    await page.locator('#egd-level-tab-tierce').click();
+    await mazePanel.locator('.nk-egd-nodecards[aria-label="星启节点"] [role="tab"]').nth(2).click();
+    await expect(mazePanel.locator('.nk-egd-floor__buffname'))
+      .toHaveText(maze.tierce!.nodes![2].buff!.name);
     await noUnknownOverflow(page);
     assertNoErrors();
 

@@ -383,6 +383,55 @@ class TestTierce:
         assert out["1033"]["nodes"][0]["buff"]["id"] == 999
         assert out["1033"]["nodes"][2]["buff"]["id"] == 998
 
+    def test_node3_buff_falls_back_to_season_buff_when_stage_silent(self, monkeypatch):
+        """附加关未登记 `_BindingMazeBuff` 时回退同赛季末层 `MazeBuffID`（忘却之庭 4 个星启赛季）。"""
+        def fake_load(path):
+            name = str(path)
+            if name.endswith("ChallengeMazeTierce.json"):
+                return [{"PHFMCACHFIJ": 5213, "DLCKKJFMJOB": 5212,
+                         "LOJCIDLKPKG": ["Fire"], "GNOOAGPBNLD": 45,
+                         "HFIAAGAKFMD": [30123123]}]
+            if name.endswith("ChallengeMazeConfig.json"):
+                return [{"ID": 5212, "GroupID": 1033, "MazeBuffID": 999,
+                         "EventIDList1": [30123031], "EventIDList2": [30123032]}]
+            if name.endswith("StageConfig.json"):
+                return [{"StageID": 30123123, "Level": 95,
+                         "StageConfigData": [{"BFLIFKBEOPJ": "_Wave", "MNDFOPKBHKP": "1"}],
+                         "MonsterList": [{"Monster0": 5014010}]},
+                        {"StageID": 30123031, "Level": 95, "MonsterList": [{"Monster0": 5014010}]},
+                        {"StageID": 30123032, "Level": 95, "MonsterList": [{"Monster0": 5014010}]}]
+            return []
+        monkeypatch.setattr(eg, "load_json", fake_load)
+        monsters = {5014010: {"name": "星啸", "icon": "Monster_5014010",
+                              "weak": [], "resist": {}, "rank": ""}}
+        out = eg._load_tierce(
+            [("ChallengeMazeTierce.json", "ChallengeMazeConfig.json")],
+            {}, monsters,
+            buffs={999: {"name": "记忆紊流", "desc": "伤害提高", "param_list": [0.3]}},
+        )
+        assert [n["buff"]["id"] for n in out["1033"]["nodes"]] == [999, 999, 999]
+
+    def test_node3_buff_absent_when_neither_source_registered(self, monkeypatch):
+        """虚构叙事口径：层记录的 `MazeBuffID` 未在 MazeBuff 注册 → 节点三仍不落 buff。"""
+        def fake_load(path):
+            name = str(path)
+            if name.endswith("ChallengeStoryMazeTierce.json"):
+                return [{"PHFMCACHFIJ": 20245, "DLCKKJFMJOB": 20244,
+                         "LOJCIDLKPKG": ["Physical"], "HFIAAGAKFMD": [30126123]}]
+            if name.endswith("ChallengeStoryMazeConfig.json"):
+                return [{"ID": 20244, "GroupID": 2024, "MazeBuffID": 3031220}]
+            if name.endswith("StageConfig.json"):
+                return [{"StageID": 30126123, "Level": 80, "MonsterList": [{"Monster0": 5014010}]}]
+            return []
+        monkeypatch.setattr(eg, "load_json", fake_load)
+        monsters = {5014010: {"name": "星啸", "icon": "Monster_5014010",
+                              "weak": [], "resist": {}, "rank": ""}}
+        out = eg._load_tierce(
+            [("ChallengeStoryMazeTierce.json", "ChallengeStoryMazeConfig.json")],
+            {}, monsters, buffs={3031359: {"name": "触技", "desc": "", "param_list": []}},
+        )
+        assert all("buff" not in n for n in out["2024"]["nodes"])
+
 class TestStageBindingBuff:
     """StageConfig 自身绑定的关卡增益（`StageConfigData._BindingMazeBuff`）。"""
 

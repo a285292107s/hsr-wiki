@@ -437,7 +437,7 @@ def _stage_binding_buff(rec: dict) -> int | None:
     """StageConfig 自身登记的战斗内关卡增益（`StageConfigData._BindingMazeBuff`）→ BuffID；无则 None。
 
     末日幻影每层与星启附加关都在这里绑定当期「末法余烬」，与层记录 `MazeBuffID` 同值
-    ——星启表没有 buff 字段，节点 3 只能从这里取。
+    ——星启表没有 buff 字段。忘却之庭 / 虚构叙事的附加关无此绑定（缺失由调用方另行回退）。
     """
     for item in rec.get("StageConfigData") or []:
         if item.get("BFLIFKBEOPJ") != "_BindingMazeBuff":
@@ -577,8 +577,10 @@ def _load_tierce(
     产出，其余模式按缺省不渲染。
 
     节点 buff 的来源分两处：节点 1/2 取最高难度关记录的 `MazeBuffID`；节点 3 取附加关
-    StageConfig 自身的 `_BindingMazeBuff`（星启表 14 个字段里没有 buff 字段）。两者在
-    含星启的赛季里逐条相等（同为当期「末法余烬」），省略配置时按缺省不落该字段。
+    StageConfig 自身的 `_BindingMazeBuff`（星启表 14 个字段里没有 buff 字段），附加关未登记
+    时回退同一条 `MazeBuffID`——附加关属同一模式、增益是模式级的，节点 1/2 已按此口径取。
+    含星启的 5 个末日幻影赛季两处逐条相等（同为当期「末法余烬」）；虚构叙事 4 季两层都取不到
+    （`MazeBuffID` 未在 MazeBuff 注册），不落该字段。
 
     节点 3（星启附加关）的 damage 取 Tierce 记录自身的 `LOJCIDLKPKG`（与赛季级
     `damage_types` 同值）：星启表只有这一处推荐属性口径，不能从敌方 `weak` 推导
@@ -676,6 +678,9 @@ def _load_tierce(
                 ) if b),
                 None,
             )
+            # 附加关未登记绑定时回退同赛季末层的层级增益（节点 1/2 同源，ADR 0032 修订）
+            if not bid3:
+                bid3 = (prev_rec or {}).get("MazeBuffID")
             if bid3 and buffs and bid3 in buffs:
                 node3["buff"] = {"id": bid3, **buffs[bid3]}
             if inv3:
