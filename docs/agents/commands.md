@@ -44,11 +44,31 @@ e2e（Playwright，webServer 自动起 dev server 并复用已有 6188 实例）
 
 ```bash
 pnpm test:e2e          # 本机层：全量（含像素基线）
-pnpm test:e2e:ci       # CI 层：仅 layout + a11y（环境无关）
-pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all）
+pnpm test:e2e:ci       # CI 层：仅 layout + a11y（环境无关；覆盖不得下降）
+pnpm test:e2e:guards   # 不变量层：guards + a11y（不受 UI 迭代影响，永远可跑）
+pnpm test:e2e:affected # 受影响用例层：按 git diff 推导并直接执行（= node tools/e2e-affected.mjs --run）
+pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all；重构期只在收敛后跑一次）
 ```
 
 **直接调用 playwright 时必须显式传覆盖模式**：`pnpm exec playwright test --update-snapshots=all`——Playwright 默认 `changed` 模式在更新已有基线时静默 pass 不落盘。只跑改动实际影响的用例（`--grep 首页` 等），`visual.spec` 全量禁止。
+
+`playwright.config.ts` 保持 `fullyParallel: false`（串行）——**并行实测过但不采纳**：本地 4 worker 全量墙钟比串行快约两成，代价是 3 次全量里出现 1 次并发竞态 flake（同一用例串行复跑 2/2 与单独复跑 3/3 均绿，属并发下 dev server 争用而非代码缺陷）。**禁止为提速放宽断言、加 `--retries` 或改配置掩盖 flake**；要提速应减少用例数而不是提高并发度。
+
+## 漂移与影响面工具（report-only，默认不阻塞）
+
+四个工具都**默认不阻塞**（退出码 `0`）：三个漂移检查器只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）是硬门禁，不属本组。
+
+```bash
+node tools/check-adr-index.mjs     # ADR 索引 ↔ 正文双向一致（编号 / 标题 / Status / 互指修订）
+node tools/check-e2e-literals.mjs  # e2e 裸 px 字面量扫描 + 计数基线
+node tools/check-doc-drift.mjs     # living docs 提到的类名 / 路径 vs 代码现状
+node tools/e2e-affected.mjs        # 按 git diff 推导受影响路由 → 用例（可 --run 直接执行）
+```
+
+- **退出码**：`0` = 报告完成（含无 `--strict` 时的命中）；`1` = 漂移检查器带 `--strict` 且有命中。
+- `check-e2e-literals.mjs`：`--baseline <json>` 改计数基线；基线文件缺失时以「当前计数」为基线并提示生成，不报失败。行内豁免 `// e2e-literal-ok: 理由`（不可漂移的契约值，如侧栏避让 / 断点）。
+- `check-doc-drift.mjs`：**只扫 living docs**（`docs/agents/` 与 `CONTEXT.md`）；`docs/memory/` 是历史档案，必须排除，否则全是假阳性。
+- `e2e-affected.mjs`：`--base <ref>` 改 diff 基线，`--run` 直接执行推出的命令；命中全局文件（tokens / 全局 css / App 外壳 / 路由 / 入口）判「影响全部页面」，**推导不出受影响用例时打印「跑 guards 层 + 全量 layout」而不是静默输出空命令**。
 
 ## 研究线（Spine Lab 调试台）
 

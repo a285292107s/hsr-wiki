@@ -277,12 +277,91 @@
 /* 分组行头：标题与场次标签同行（场次标签的 align-self 在行内向是顶部对齐，须覆写为居中） */
 .nk-egd-group__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; align-self: stretch; }
 .nk-egd-group__head > * { align-self: center; }
-.nk-egd-group__title {
-  align-self: flex-start;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+.nk-egd-group__tail { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; }
+/* 星启节点卡片行：三张并列一行（节点号 + 末波首领头像 + 推荐属性 + 等级），手机端也维持一行。
+   卡片兼作当前节点的身份位，看板内不再重复节点号/首领名/属性。 */
+.nk-egd-nodecards {
+  display: flex;
+  gap: 12px;
+}
+.nk-egd-nodecard {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  text-align: left;
+  background: color-mix(in srgb, var(--blk-900) 16%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.nk-egd-nodecard:hover { border-color: var(--line-2); }
+.nk-egd-nodecard--active {
+  border-color: color-mix(in srgb, var(--eg-color) 42%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 12%, transparent);
+}
+.nk-egd-nodecard__fig {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--blk-800) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent);
+  transition: border-color 0.2s ease;
+}
+.nk-egd-nodecard--active .nk-egd-nodecard__fig {
+  border-color: color-mix(in srgb, var(--eg-color) 55%, transparent);
+}
+.nk-egd-nodecard__img { width: 100%; height: 100%; object-fit: cover; }
+.nk-egd-nodecard__body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.nk-egd-nodecard__name { font-weight: 700; color: var(--text-bright); }
+.nk-egd-nodecard--active .nk-egd-nodecard__name { color: var(--eg-color); }
+.nk-egd-nodecard__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.nk-egd-nodecard__label {
+  font-family: var(--font-hud);
+  letter-spacing: 0.08em;
   color: var(--text3);
+  white-space: nowrap;
+}
+.nk-egd-nodecard__val { font-weight: 700; color: var(--text-bright); }
+.nk-egd-nodecard__elems { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 767px) {
+  /* 一行三卡：卡片内改上下排版（图在上、信息在下），三张按 flex 均分一屏宽，不横滚 */
+  .nk-egd-nodecards { gap: 8px; }
+  .nk-egd-nodecard {
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 6px;
+    text-align: center;
+  }
+  .nk-egd-nodecard__fig { width: 44px; height: 44px; }
+  .nk-egd-nodecard__body { align-items: center; gap: 3px; }
+  .nk-egd-nodecard__row { gap: 4px; }
+  /* 推荐属性：标签单独一行、图标下移（4 枚 14px 图标在 100px 卡宽里放得下） */
+  .nk-egd-nodecard__row--elems { flex-direction: column; gap: 3px; }
+  .nk-egd-nodecard__elems { justify-content: center; gap: 3px; }
+  .nk-egd-nodecard__elems .nk-egd-elem { width: 14px; height: 14px; }
+}
+/* 区块标题 = 章节层级，必须压在它所统领的正文之上（正文 0.84rem）——字体最小的字不该是最外层的标题。
+   下沿发丝线是该区块与下一区块的分节依据，取代原先的填充胶囊。 */
+.nk-egd-group__head {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-2);
+}
+/* 区块标题的统一档位：`.nk-egd-group__title`（赛季增益 / 首领特性）与提为标题的「敌方配置」共用一处声明 */
+.nk-egd-group__title,
+.nk-egd-floor__row--mons > .nk-egd-floor__label {
+  align-self: flex-start;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-bright);
 }
 .nk-egd-traits { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; width: 100%; }
 .nk-egd-trait {
@@ -379,14 +458,10 @@
 .nk-egd-fury__label,
 .nk-egd-group__label {
   align-self: flex-start;
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
-  background: color-mix(in srgb, var(--eg-color) 9%, transparent);
   white-space: nowrap;
 }
 .nk-egd-buff__desc .hl { color: var(--highlight); font-weight: 700; }
@@ -467,10 +542,6 @@
   font-size: 0.64rem;
   letter-spacing: 0.06em;
   color: color-mix(in srgb, var(--eg-color) 76%, #fff);
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
-  background: color-mix(in srgb, var(--eg-color) 9%, transparent);
   white-space: nowrap;
 }
 .nk-egd-floor__body {
@@ -575,12 +646,8 @@
   align-self: flex-start;
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
-  background: color-mix(in srgb, var(--eg-color) 9%, transparent);
   white-space: nowrap;
 }
 .nk-egd-floor__row {
@@ -596,10 +663,22 @@
   padding-bottom: 0;
   border-bottom: none;
 }
-.nk-egd-floor__row--mons { align-items: flex-start; }
-.nk-egd-floor__row--mons .nk-egd-floor__label { padding-top: 3px; }
-.nk-egd-floor__stage .nk-egd-floor__row--mons { flex-wrap: nowrap; }
-.nk-egd-floor__row--mons > .nk-egd-floor__monswrap { flex: 1 1 auto; min-width: 0; }
+/* 敌方配置行 = 「区块标题 + 敌方卡」上下结构（用户裁决）：原「左标签列 + 右卡片」在桌面端会让标签
+   下方整列留空（卡片越高空列越长，实测 270px）。标题提到卡组上方，字号/字重/字距/颜色与
+   `.nk-egd-group__title` 同点声明（同一套区块标题语言）；卡组用 `flex: 1 1 100%` 独占次行，
+   标题行右侧留给「波次 · 敌数」——异相仲裁的敌方行带该计数，故不能用 column 方向把它挤成独立一行。
+   手机端本就换行堆叠，此形态顺带省掉标签行那一档留白。 */
+.nk-egd-floor__row--mons {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+.nk-egd-floor__row--mons > .nk-egd-floor__label {
+  align-self: center;
+  min-width: 0;
+  padding: 0;
+}
+.nk-egd-floor__row--mons > .nk-egd-floor__monswrap { flex: 1 1 100%; width: 100%; min-width: 0; }
 .nk-egd-floor__wave > .nk-egd-mons { flex: 1 1 auto; min-width: 0; }
 .nk-egd-floor__hard .nk-egd-floor__row {
   margin: 0;
@@ -651,10 +730,6 @@
   font-size: 0.62rem;
   letter-spacing: 0.06em;
   color: color-mix(in srgb, var(--eg-color) 76%, #fff);
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
-  background: color-mix(in srgb, var(--eg-color) 9%, transparent);
   white-space: nowrap;
 }
 .nk-egd-floor__mons {
@@ -704,7 +779,6 @@
   gap: 12px;
   margin-bottom: 6px;
 }
-.nk-egd-floor__bufflabel,
 .nk-egd-floor__goalslabel {
   font-family: var(--font-hud);
   font-size: 0.64rem;
@@ -875,6 +949,11 @@
   gap: 12px;
   margin-bottom: 8px;
 }
+/* 敌方卡网格的 8px 下外边距只服务「多波之间」（`.nk-egd-floor__monswrap` 的 9px gap 与它叠加）；
+   末波网格下方没有后续内容，看板里独立的敌方网格同理——两处都是纯尾随留白，归零（用户点名
+   「敌方配置下方的多余空间」）。**只收口末位，不删基础声明**：整类删掉会连带把多波间隔压掉 8px。 */
+.nk-egd-floor__monswrap > .nk-egd-floor__wave:last-child > .nk-egd-mons,
+.nk-egd-tierce__nodebody > .nk-egd-mons { margin-bottom: 0; }
 .nk-egd-mon {
   position: relative;
   display: flex;
@@ -931,6 +1010,8 @@
   gap: 6px;
   min-width: 0;
 }
+/* 敌方名由父级行头承担时（星启看板）元信息列只剩标签；空容器会在头像右侧留出空洞 */
+.nk-egd-mon__meta:empty { display: none; }
 .nk-egd-mon__name {
   font-size: 0.84rem;
   font-weight: 600;
@@ -949,7 +1030,7 @@
   line-height: 1;
   letter-spacing: 0.03em;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: 4px;
   color: var(--text2);
   background: color-mix(in srgb, var(--blk-800) 70%, transparent);
   border: 1px solid var(--line-1);
@@ -963,7 +1044,7 @@
   line-height: 1;
   letter-spacing: 0.04em;
   padding: 2.5px 6px;
-  border-radius: 999px;
+  border-radius: 4px;
   color: var(--text2);
   background: color-mix(in srgb, var(--blk-800) 88%, transparent);
   border: 1px solid var(--line-1);
@@ -1065,7 +1146,7 @@
   border-radius: var(--nk-radius-card);
 }
 
-/* 末日幻影子 tab 面板：一层 = 各战斗节点（敌方 + 该场次的赛季增益/首领特性）+ 可用增益 + 挑战目标 */
+/* 末日幻影子 tab 面板：一层 = 各战斗节点（敌方 + 该场次的赛季增益/首领特性）+ 末法余烬 + 挑战目标 */
 .nk-egd-lvl {
   display: flex;
   flex-direction: column;
@@ -1141,16 +1222,15 @@
   gap: 10px;
   min-width: 0;
 }
+/* 面板头部两栏的栏名：小字 + 发丝下边线分节，不做填充胶囊 */
 .nk-egd-tierce__headlabel {
   align-self: flex-start;
+  padding-bottom: 7px;
+  border-bottom: 1px solid color-mix(in srgb, var(--eg-color) 34%, transparent);
   font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--eg-color) 30%, transparent);
-  background: color-mix(in srgb, var(--eg-color) 9%, transparent);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: color-mix(in srgb, var(--eg-color) 78%, var(--text2));
   white-space: nowrap;
 }
 .nk-egd-tierce__stats {
@@ -1214,10 +1294,6 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   color: color-mix(in srgb, var(--eg-color) 82%, var(--text2));
-  padding: 5px 11px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--eg-color) 28%, transparent);
-  background: color-mix(in srgb, var(--eg-color) 9%, transparent);
   white-space: nowrap;
   align-self: flex-start;
   margin-top: 2px;
@@ -1243,15 +1319,20 @@
 }
 .nk-egd-node__text .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-tierce__mons { margin-bottom: 0; }
-.nk-egd-tierce__nodes {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+/* 星级目标行首图标（TOTAL_SCORE 档位；其余目标类型仍走语义胶囊标签） */
+.nk-egd-tierce__star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin-top: 4px;
+  color: var(--highlight);
 }
-/* 星启节点 = 一整场战斗（ADR 0032）：父档行头（场次）+ 子档体（推荐属性/敌方 + 该场次增益/特性 + 可用增益） */
+.nk-egd-tierce__star svg { width: 100%; height: 100%; fill: currentColor; }
+/* 星启看板 = 一次一个节点（ADR 0033）：节点卡片行是子切换，同时承担该节点的身份与属性
+   （节点号 + 末波首领头像 + 推荐属性 + 等级），看板内不再重复陈述节点号与属性。 */
 .nk-egd-tierce__node {
   position: relative;
   display: flex;
@@ -1259,58 +1340,25 @@
   gap: 14px;
   min-width: 0;
 }
-.nk-egd-tierce__node + .nk-egd-tierce__node {
-  border-top: 1px solid var(--line-1);
-  padding-top: 24px;
+.nk-egd-lvl__nodehead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.nk-egd-lvl__nodehead,
+/* 看板体：整块挂 `.nk-egd-children`，行头（只有无首领特性节点的污染徽标会落在这里）与下方区块共用同一条缩进竖轨与左基准。 */
+.nk-egd-tierce__nodebody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 .nk-egd-tierce__nodehead {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
-.nk-egd-tierce__nodelabel {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 9px;
-  white-space: nowrap;
-  line-height: 1;
-}
-.nk-egd-tierce__nodezh {
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: var(--text-bright);
-}
-.nk-egd-tierce__nodelabel::after {
-  content: '';
-  width: 22px;
-  height: 1px;
-  background: var(--line-2);
-  align-self: center;
-}
-/* 星启节点 1/2 的同源标注：这两个节点就是常规末层上下半场（ADR 0031） */
-.nk-egd-tierce__nodefrom {
-  flex: 0 1 auto;
-  min-width: 0;
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-left: 9px;
-  border-left: 1px solid var(--line-2);
-}
-.nk-egd-tierce__nodebody {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-/* 节点体末尾的「可用增益」由父级 gap 承担留白（块状父级沿用基础 margin-top） */
+/* 节点体末尾的「末法余烬」由父级 gap 承担留白（块状父级沿用基础 margin-top） */
 .nk-egd-tierce__nodebody > .nk-egd-floor__buff,
 .nk-egd-lvl > .nk-egd-floor__buff,
 .nk-egd-lvl > .nk-egd-floor__goals { margin-top: 0; }
@@ -1334,7 +1382,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px 6px 6px;
+  padding: 4px 10px 4px 4px;
   background: color-mix(in srgb, var(--blk-900) 14%, transparent);
   border: 1px solid var(--line-1);
   border-radius: var(--nk-radius-card);
@@ -1342,9 +1390,9 @@
 }
 .nk-egd-reward__item:hover { border-color: var(--line-2); }
 .nk-egd-reward__icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   object-fit: cover;
   background: color-mix(in srgb, var(--blk-900) 60%, transparent);
 }
@@ -1364,10 +1412,10 @@
 }
 .nk-egd-reward__num {
   font-family: var(--font-hud);
-  font-size: 0.72rem;
   color: color-mix(in srgb, var(--eg-color) 80%, var(--text2));
   white-space: nowrap;
 }
+.nk-egd-reward__name + .nk-egd-reward__num { margin-left: 4px; }
 
 .nk-egd-nav {
   display: grid;
@@ -1445,7 +1493,7 @@
   .nk-egd-hero__bg { display: none; }
   .nk-egd-hero__banner { display: none; }
   .nk-egd-hero__name { font-size: 1.35rem; }
-  .nk-egd-hero__sid { font-size: 0.66rem; padding: 2px 8px; }
+  .nk-egd-hero__sid { font-size: 0.7rem; padding: 2px 8px; }
   .nk-egd-hero__status { font-size: 0.7rem; padding: 5px 11px; }
   .nk-egd-peak__kind { font-size: 0.7rem; }
   .nk-egd-floor__targetidx { font-size: 0.78rem; }
@@ -1462,13 +1510,8 @@
   .nk-egd-node__type { font-size: 0.72rem; padding: 5px 10px; gap: 5px; }
   .nk-egd-node__typeicon { width: 15px; height: 15px; }
   .nk-egd-node__text { font-size: 0.9rem; }
-  .nk-egd-tierce__nodezh { font-size: 0.92rem; }
-  .nk-egd-tierce__nodefrom { font-size: 0.62rem; padding-left: 8px; }
-  .nk-egd-tierce__nodes { gap: 18px; }
-  .nk-egd-tierce__node + .nk-egd-tierce__node { padding-top: 18px; }
   .nk-egd-tierce__nodebody { gap: 12px; }
   .nk-egd-tierce__headlabel { font-size: 0.7rem; }
-  .nk-egd-reward__goal { font-size: 0.82rem; }
   .nk-egd-reward__name { font-size: 0.86rem; }
   .nk-egd-reward__num { font-size: 0.76rem; }
   .nk-egd-nav__dir { font-size: 0.76rem; }
@@ -1480,9 +1523,11 @@
   .nk-egd-floor__stage + .nk-egd-floor__stage { border-left: none; padding-left: 0; }
   .nk-egd-floor__head { flex-wrap: wrap; }
   .nk-egd-floor__data { margin-left: auto; }
-  .nk-egd-floor__stage .nk-egd-floor__row--mons { flex-wrap: wrap; }
-  .nk-egd-nav { grid-template-columns: 1fr; }
-  .nk-egd-nav__item--next { justify-content: flex-start; text-align: left; }
+  /* 敌方配置行在手机档不再需要换行开关：标题 / 卡组的上下结构已是基础形态（见 `.nk-egd-floor__row--mons`） */
+  /* 相邻赛季手机断点仍是一行两栏（上一赛季｜下一赛季对称镜像），缩略图收窄腾出文字宽度 */
+  .nk-egd-nav { gap: 8px; }
+  .nk-egd-nav__item { padding: 10px; gap: 8px; }
+  .nk-egd-nav__thumb { width: 56px; }
   .nk-egd-secnav .nk-secnav__btn { padding: 6px 6px; }
   .nk-egd-tabs { gap: 0 2px; }
   .nk-egd-tabs .nk-tab { min-height: 36px; padding: 9px 9px; font-size: 0.72rem; }
@@ -1517,6 +1562,8 @@
 /* ─── 父子层级刻度（ADR 0028）：档位按 DOM 嵌套深度落位，子块几何在此单点声明 ─── */
 .nk-egd { --eg-indent: 16px; }
 .nk-egd-children {
+  /* 轨宽即「这一层要不要画轨」的开关：0 = 不画（消费层可覆写，见星启看板体） */
+  --eg-rail-w: 3px;
   position: relative;
   padding-left: var(--eg-indent);
 }
@@ -1526,7 +1573,7 @@
   left: 0;
   top: 8px;
   bottom: 8px;
-  width: 3px;
+  width: var(--eg-rail-w);
   border-radius: 0 3px 3px 0;
   background: linear-gradient(
     180deg,
@@ -1534,6 +1581,10 @@
     color-mix(in srgb, var(--eg-childrail, var(--eg-color)) 34%, transparent) 100%
   );
 }
+/* 星启看板体不画这条模式色竖轨（用户裁决）：看板内区块已由「区块标题下沿发丝线 + 区块节奏」分节，
+   再挂一条通体色线属重复点题。**缩进保留**（左基准与 ADR 0028 刻度不变），只把轨宽归零。
+   楼层折叠体与异相仲裁仍走上面的父子层级竖轨（缺省 3px）。 */
+.nk-egd-tierce__nodebody { --eg-rail-w: 0; }
 @media (max-width: 767px) {
   .nk-egd { --eg-indent: 12px; }
 }
@@ -1544,15 +1595,12 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  padding: 3px 10px;
-  border-radius: 999px;
   font-family: var(--font-hud);
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   white-space: nowrap;
   color: var(--vor-300);
-  border: 1px solid color-mix(in srgb, var(--vor-500) 45%, transparent);
-  background: color-mix(in srgb, var(--vor-500) 10%, transparent);
 }
 .nk-egd-pollchip__half {
   font-family: var(--font-body);
@@ -1679,7 +1727,10 @@
 }
 
 /* ─── 排版刻度收口（终局详情页）：字号五档 + 4px 间距节奏 ───
-   字号：卡片标题 0.95 / 次级标题 0.88 / 正文 0.84 / 行首标签·小字正文 0.72 / 值下注脚·计数·标签 0.68。
+   字号：看板节点头 1.02 / 卡片标题 0.95 / 次级标题 0.88 / 正文 0.84 / 区块标题 0.78 /
+   行首标签·小字正文 0.72 / 值下注脚·计数·标签 0.68 / 状态徽标 0.62。
+   **区块标题（0.78）必须高于它所统领的正文（0.84）之下的标签档**——标题是章节层级，
+   比正文最小的一档还小属层级倒挂（原为 0.68rem/字距 0.14em，已修）。
    刻度外的既有契约（ADR 0028 父子层级刻度，e2e 钉住）：`__stagelabel` 0.72、`__wavelabel` 0.66、
    `.nk-egd-children` 缩进 16px（手机 12px）——不随本刻度调整。
    间距：卡片内边距 16px 18px；同族卡片列表 gap 10px；区块间 16px；大区块之间 24px（窄屏 18px 由断点块承担）。
@@ -1703,22 +1754,21 @@
 
 .nk-egd-floor__label,
 .nk-egd-floor__targetidx,
-.nk-egd-group__title,
 .nk-egd-fury__label,
-.nk-egd-floor__bufflabel,
 .nk-egd-floor__goalslabel,
 .nk-egd-mon__label,
 .nk-egd-poll__monslabel,
 .nk-egd-tierce__headlabel { font-size: 0.72rem; }
-.nk-egd-group__title { color: var(--text2); }
+
+/* 字档收口：区块标题压在正文（0.84rem）之上，标签档低于正文，数值档高于标签。 */
+.nk-egd-group__title { font-size: 0.78rem; }
 
 .nk-egd-group__label,
+.nk-egd-nodecard__label,
 .nk-egd-floor__datalabel,
-.nk-egd-floor__moncount,
 .nk-egd-floor__summarylabel,
 .nk-egd-floor__summarydata,
 .nk-egd-hero__sid,
-.nk-egd-pollchip,
 .nk-egd-pollchip__half,
 .nk-egd-code,
 .nk-egd-mon__tag,
@@ -1727,8 +1777,10 @@
 .nk-egd-mon__skill,
 .nk-egd-mon__rank,
 .nk-egd-tierce__label,
-.nk-egd-tierce__nodefrom,
 .nk-egd-reward__num { font-size: 0.68rem; }
+.nk-egd-floor__moncount,
+.nk-egd-pollchip { font-size: 0.62rem; }
+.nk-egd-nodecard__val { font-size: 0.86rem; }
 
 .nk-egd-mon__intro { font-size: 0.72rem; }
 
@@ -1738,6 +1790,23 @@
 
 .nk-egd-buff { padding: 16px 18px; gap: 8px; }
 .nk-egd-trait { padding: 16px 18px; }
+/* 整组单卡形态（星启看板）：特性不再每条一卡，而是全部同屏平铺在同一张卡内（用户裁决）。
+   卡形（填充 / 四边描边 / 圆角）整组承担，条目自身归零、只靠行距分节——不画分隔线、不加模式色左沿。
+   与赛季增益 / 末法余烬同一套中性卡形。 */
+.nk-egd-traits--card {
+  gap: 16px;
+  padding: 16px 18px;
+  background: color-mix(in srgb, var(--blk-900) 12%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+}
+.nk-egd-traits--card .nk-egd-trait {
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  animation: none;
+}
 .nk-egd-buffs { gap: 10px; }
 .nk-egd-group > .nk-egd-buffs,
 .nk-egd-group > .nk-egd-traits { margin-bottom: 0; }
@@ -1765,11 +1834,11 @@
   .nk-egd-mon__label,
   .nk-egd-mon__intro { font-size: 0.72rem; }
   .nk-egd-node__text { font-size: 0.9rem; }
-  .nk-egd-tierce__nodefrom { font-size: 0.68rem; }
   .nk-egd-tierce__headlabel { font-size: 0.72rem; }
   .nk-egd-reward__goal { font-size: 0.84rem; }
   .nk-egd-reward__name { font-size: 0.88rem; }
   .nk-egd-reward__num { font-size: 0.76rem; }
   .nk-egd-nav__id { font-size: 0.9rem; }
+  .nk-egd-nodecard__name { font-size: 0.84rem; }
   .nk-egd-lvl__node + .nk-egd-lvl__node { padding-top: 0; margin-top: 8px; }
 }

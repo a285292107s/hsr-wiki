@@ -5,7 +5,7 @@ import type { MazeStageDetail } from '../../services/types';
 
 /** 场次行头片段（场次标签 / 污染徽标 / 波次·敌数）：
  *  只出三个 chip，几何由所在容器承担——StageContent 内联时是 `.nk-egd-floor__stagehead`，
- *  末日幻影层节点与星启节点把它提到节点级 `.nk-egd-lvl__nodehead` / `.nk-egd-tierce__nodehead`。 */
+ *  末日幻影层节点把它提到节点级 `.nk-egd-lvl__nodehead`。 */
 defineProps<{
   label?: string;
   stage: MazeStageDetail | undefined;

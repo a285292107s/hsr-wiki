@@ -9,7 +9,6 @@ defineProps<{ buff: MazeBuffInfo | null | undefined }>();
   <div v-if="buff" class="nk-egd-floor__buff">
     <div class="nk-egd-floor__buffhead">
       <img v-if="buff.icon" class="nk-egd-buff__icon nk-egd-buff__icon--sm" :src="buffIconUrl(buff)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-      <span class="nk-egd-floor__bufflabel">可用增益</span>
       <span class="nk-egd-floor__buffname">{{ buff.name }}</span>
     </div>
     <p v-if="buff.desc" class="nk-egd-floor__buffdesc" v-html="buffDescHtml(buff)"></p>

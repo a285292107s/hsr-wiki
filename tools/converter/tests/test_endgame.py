@@ -258,7 +258,10 @@ class TestTierce:
     """星启模式（Tierce）表解析：DLCKKJFMJOB → 关卡表 GroupID 映射。"""
 
     def test_load_tierce_mapping_and_fields(self, monkeypatch):
-        """星启：HFIAAGAKFMD → StageConfig 波次（wave 序号）；无 Stage 回退 Boss 代表。"""
+        """星启：HFIAAGAKFMD → StageConfig 波次（wave 序号）；无 Stage 回退 Boss 代表。
+
+        节点 1/2 的 buff 取层记录 `MazeBuffID`，节点 3 取附加关 StageConfig 的
+        `_BindingMazeBuff`（星启表无 buff 字段）。"""
         def fake_load(path):
             name = str(path)
             if name.endswith("ChallengeMazeTierce.json"):
@@ -287,6 +290,10 @@ class TestTierce:
             if name.endswith("StageConfig.json"):
                 return [
                     {"StageID": 30123123, "Level": 95,
+                     "StageConfigData": [
+                         {"BFLIFKBEOPJ": "_Wave", "MNDFOPKBHKP": "1"},
+                         {"BFLIFKBEOPJ": "_BindingMazeBuff", "MNDFOPKBHKP": "998"},
+                     ],
                      "MonsterList": [{"Monster0": 5013040, "Monster1": 5014010},
                                       {"Monster0": 5014010}]},
                     {"StageID": 30123031, "Level": 95, "MonsterList": [{"Monster0": 5014010}]},
@@ -309,7 +316,9 @@ class TestTierce:
              ("ChallengeStoryMazeTierce.json", "ChallengeStoryMazeConfig.json")],
             targets, monsters,
             buffs={999: {"name": "末法余烬", "desc": "霸者机制", "param_list": [0.5],
-                         "icon": "BuffIcon/Inlevel/X"}},
+                         "icon": "BuffIcon/Inlevel/X"},
+                   998: {"name": "附加关增益", "desc": "星启附加关机制", "param_list": [1],
+                         "icon": "BuffIcon/Inlevel/Y"}},
         )
         assert out["1033"] == {
             "id": 5213,
@@ -344,6 +353,8 @@ class TestTierce:
                                              "resist": {}, "rank": "Elite", "wave": 1}]},
                 {"idx": 3, "origin": "tierce", "damage": ["Fire", "Imaginary"],
                  "level": 95, "countdown": 45,
+                 "buff": {"id": 998, "name": "附加关增益", "desc": "星启附加关机制",
+                          "param_list": [1], "icon": "BuffIcon/Inlevel/Y"},
                  "monsters": [
                     {"id": "5013040", "name": "先锋", "icon": "Monster_5013040",
                      "weak": [], "resist": {}, "rank": "Elite", "wave": 1},
@@ -366,6 +377,27 @@ class TestTierce:
             {"id": 2, "num": 380000},
         ]
         assert "1034" not in out
+        # 节点 3 的 buff 来自附加关自身绑定（998），不是节点 1/2 的层记录（999）
+        assert out["1033"]["nodes"][0]["buff"]["id"] == 999
+        assert out["1033"]["nodes"][2]["buff"]["id"] == 998
+
+class TestStageBindingBuff:
+    """StageConfig 自身绑定的关卡增益（`StageConfigData._BindingMazeBuff`）。"""
+
+    def test_reads_binding_skipping_other_keys(self):
+        assert eg._stage_binding_buff({"StageConfigData": [
+            {"BFLIFKBEOPJ": "_Wave", "MNDFOPKBHKP": "1"},
+            {"BFLIFKBEOPJ": "_BGM", "MNDFOPKBHKP": "State_X"},
+            {"BFLIFKBEOPJ": "_BindingMazeBuff", "MNDFOPKBHKP": "3110017"},
+        ]}) == 3110017
+
+    def test_missing_or_unparsable_returns_none(self):
+        assert eg._stage_binding_buff({}) is None
+        assert eg._stage_binding_buff({"StageConfigData": []}) is None
+        assert eg._stage_binding_buff({"StageConfigData": [
+            {"BFLIFKBEOPJ": "_BindingMazeBuff", "MNDFOPKBHKP": ""}]}) is None
+        assert eg._stage_binding_buff({"StageConfigData": [
+            {"BFLIFKBEOPJ": "_BindingMazeBuff", "MNDFOPKBHKP": "abc"}]}) is None
 
 class TestSeasonStats:
     def test_max_of_floors_stage_countdown(self):
@@ -602,18 +634,19 @@ class TestPeakSeasons:
         assert out == {3000: {"text": "c:名1", "param": 4}}
 
     def test_stage_monsters_by_id_only_wanted(self, monkeypatch):
-        """StageConfig：仅提取关心的 StageID，波次结构保序保留（含波内重复）。"""
+        """StageConfig：仅提取关心的 StageID，波次结构保序保留（含波内重复）+ 关卡绑定增益。"""
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"StageID": 30501011, "Level": 95,
+             "StageConfigData": [{"BFLIFKBEOPJ": "_BindingMazeBuff", "MNDFOPKBHKP": "3110017"}],
              "MonsterList": [{"Monster0": 3012020, "Monster1": 3013010},
                               {"Monster0": 3012020, "Monster1": 3004012}]},
             {"StageID": 999999, "Level": 10, "MonsterList": [{"Monster0": 1}]},
             {"StageID": 30501012, "Level": 0, "MonsterList": []},
         ])
         out = eg._load_stage_monsters_by_id({30501011, 30501012})
-        assert out[30501011] == {"level": 95,
+        assert out[30501011] == {"level": 95, "maze_buff": 3110017,
                                  "waves": [[3012020, 3013010], [3012020, 3004012]]}
-        assert out[30501012] == {"level": 0, "waves": []}
+        assert out[30501012] == {"level": 0, "waves": [], "maze_buff": None}
         assert 999999 not in out
 
     def test_peak_seasons_full_structure(self, monkeypatch, setup_textmap):
@@ -1007,6 +1040,8 @@ class TestPollution:
             "monsters": [{"id": "1003010", "name": "怪A", "icon": "Monster_A",
                           "weak": [], "resist": {}, "rank": "Elite"}]}
         assert "invasion" not in nodes[0]
+        # 未传 buffs 时节点 3 不落 buff（其来源是关卡绑定，不是层记录）
+        assert "buff" not in nodes[2]
         entry = {"tierce": out["1036"]}
         eg._apply_pollution(entry)
         assert entry["pollution"] == {"count": 1, "levels": [3]}

@@ -37,6 +37,11 @@ const PAGES = [
   { path: '/endgame', label: '终局内容', wait: () => waitForCatalogCards },
   // 终局详情（含污染等级区块，ADR 0026）：等层级子 tab 出现即数据就绪
   { path: '/endgame/boss/3021', label: '终局详情·含污染', wait: () => (page: Page) => page.waitForSelector('.nk-egd-tabs [role="tab"]', { state: 'attached', timeout: 15_000 }) },
+  // 星启看板（ADR 0033）：节点子切换与首领特性整组单卡只在星启 tab 下渲染，先切 tab 再扫
+  { path: '/endgame/boss/3020', label: '终局详情·星启看板', wait: () => async (page: Page) => {
+    await page.locator('#egd-level-tab-tierce').click();
+    await page.waitForSelector('.nk-egd-traits--card .nk-egd-trait', { state: 'attached', timeout: 15_000 });
+  } },
   { path: '/currency', label: '货币战争 Hub', wait: null },
   // 专题页（ADR 0025）：等分区导航出现即数据就绪；无分区导航时首屏仍是骨架屏
   { path: '/voracity', label: '贪饕污染', wait: () => (page: Page) => page.waitForSelector('.nk-vor-secnav .nk-secnav__btn', { state: 'attached', timeout: 15_000 }) },

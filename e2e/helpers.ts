@@ -1,4 +1,5 @@
-import { type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export interface ConsoleIssues {
   pageErrors: string[];
@@ -106,6 +107,62 @@ export async function findHorizontalOverflow(page: Page): Promise<string[]> {
     }
     return bad.slice(0, 20);
   });
+}
+
+/**
+ * 令牌/关系规格原语 —— 数值断言不得钉死绝对值，只有三种合法形态：
+ *   1) 与 CSS 令牌一致（`readToken`/`readTokenPx` 读期望，`computedNumber`/`fontPx` 读实际）；
+ *   2) 元素之间的相对关系（序、等值、整数倍、跨断点只放大不缩小）；
+ *   3) 期望值从随站数据派生（`readJson`）。
+ * 绝对值只允许出现在「跨会话不得漂移的契约值」（侧栏避让 148/88、断点 768、底部栏高度下限）。
+ */
+
+/** 读取 CSS 自定义属性的计算值（原样返回，含单位；缺省返回空串）。 */
+export async function readToken(page: Page, name: string, host = 'html'): Promise<string> {
+  return page.locator(host).first().evaluate((el, n) => getComputedStyle(el).getPropertyValue(n).trim(), name);
+}
+
+/** 读取 CSS 自定义属性的数值（px 数字；缺省或无单位如手机档 `--nk-content-offset: 0` 返回 0）。 */
+export async function readTokenPx(page: Page, name: string, host = 'html'): Promise<number> {
+  return parseFloat(await readToken(page, name, host)) || 0;
+}
+
+/** 读取元素某个计算样式的数值（px 数字；`none`/0 等非数值返回 0）。 */
+export async function computedNumber(loc: Locator, prop: string): Promise<number> {
+  return loc.evaluate((el, p) => parseFloat(getComputedStyle(el).getPropertyValue(p)) || 0, prop);
+}
+
+/** 读取元素计算字号（px 数字），字号档位断言的统一入口。 */
+export async function fontPx(loc: Locator): Promise<number> {
+  return computedNumber(loc, 'font-size');
+}
+
+/**
+ * 把令牌解析成计算颜色（`rgb(...)`/`rgba(...)`），用于「元素实际颜色 = 令牌」类断言。
+ * 实现：把令牌原值挂到一个离线探针元素上再由浏览器归一化（hex / color-mix / rgba 皆可）。
+ * 令牌未声明时抛错——空令牌会让探针静默继承父级颜色，断言会假通过。
+ */
+export async function resolveTokenColor(page: Page, name: string, host = 'html'): Promise<string> {
+  const raw = await readToken(page, name, host);
+  if (!raw) throw new Error(`令牌 ${name} 在 ${host} 上未声明，无法派生期望颜色`);
+  return page.evaluate((value) => {
+    const probe = document.createElement('span');
+    probe.style.color = value;
+    document.body.appendChild(probe);
+    const out = getComputedStyle(probe).color;
+    probe.remove();
+    return out;
+  }, raw);
+}
+
+/** 读取随站分发的数据 JSON（相对仓库根路径），供期望值从数据派生。 */
+export function readJson<T>(relPath: string): T {
+  return JSON.parse(readFileSync(relPath, 'utf8')) as T;
+}
+
+/** 未知横向溢出断言：已登记项过滤后必须为空（全站布局根统一判据）。 */
+export async function expectNoUnknownOverflow(page: Page): Promise<void> {
+  expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([]);
 }
 
 /**

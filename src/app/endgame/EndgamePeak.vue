@@ -100,7 +100,6 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
             <div v-for="b in l.buffs" :key="b.id" class="nk-egd-floor__buff">
               <div class="nk-egd-floor__buffhead">
                 <img v-if="b.icon" class="nk-egd-buff__icon nk-egd-buff__icon--sm" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-                <span class="nk-egd-floor__bufflabel">可用增益</span>
                 <span class="nk-egd-floor__buffname">{{ b.name }}</span>
               </div>
               <p v-if="b.desc" class="nk-egd-floor__buffdesc" v-html="buffDescHtml(b)"></p>

@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { buildEndgameSections, sectionIdxMap } from './sections';
 import {
-  TARGET_TYPE_LABEL, targetHtml, targetTypeIconHtml,
+  TARGET_TYPE_LABEL, TARGET_TYPE_SVG, elemRow, targetHtml, targetTypeIconHtml,
 } from './renders';
+import { pollutionLabel } from './pollution';
+import { tabNextIndex } from './tabs';
 import StageContent from './StageContent.vue';
-import StageHead from './StageHead.vue';
 import EndgameBuffGroup from './EndgameBuffGroup.vue';
 import EndgameTraitGroup from './EndgameTraitGroup.vue';
 import EndgameFloorBuff from './EndgameFloorBuff.vue';
 import { itemIconUrl } from '../../lib/format';
+import { cdnUri } from '../../services/cdn';
 import { loadLocalItems } from '../../services/api';
 import EnemyCard from '../components/EnemyCard.vue';
-import type { LocalItemEntry, MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeTierceNode } from '../../services/types';
+import type {
+  LocalItemEntry, MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo, MazeTierceNode,
+} from '../../services/types';
 
 const props = defineProps<{
   data: MazeListEntry;
@@ -30,26 +34,58 @@ const tierceMonsters = computed(() => props.data.tierce?.monsters || []);
 /** 星启 3 节点，每个节点是一整场战斗（完整场次内容） */
 const tierceNodes = computed<MazeTierceNode[]>(() => props.data.tierce?.nodes || []);
 
-/** 节点 1/2 同源的常规末层层号（Tierce 的 DLCKKJFMJOB = 常规最高难度关，即最大层） */
-const sameFloor = computed<number | null>(() => {
-  const floors = (props.data.floor_details || []).map((f) => f.floor);
-  return floors.length ? Math.max(...floors) : null;
-});
-/** 节点 1/2 的同源标注（这两个节点就是末层上下半场；节点 3 是星启附加关，不标） */
-function nodeOrigin(idx: number): string {
-  if (!sameFloor.value || idx > 2) return '';
-  return `同第 ${sameFloor.value} 层`;
-}
-/** 节点标题走场次口径（节点编号只活在数据里，不上屏） */
+/** 节点号：子切换口径（游戏内文案作「节点一/节点二」） */
+const NODE_ZH: Record<number, string> = { 1: '节点一', 2: '节点二', 3: '节点三' };
 function nodeLabel(nd: MazeTierceNode): string {
-  return nd.idx === 1 ? '上半场' : nd.idx === 2 ? '下半场' : '星启附加关';
+  return NODE_ZH[nd.idx] || `节点${nd.idx}`;
 }
+
+/** 该节点的末波首领（最后一波的第 1 只）：末日幻影多数节点 1 敌即首领本体，
+ *  忘却之庭 / 虚构叙事的末波是压轴首领（波 1 是小怪） */
+function nodeBoss(nd: MazeTierceNode): MazeMonsterInfo | null {
+  const ms = nd.monsters || [];
+  if (!ms.length) return null;
+  const maxWave = Math.max(...ms.map((m) => m.wave ?? 1));
+  return ms.find((m) => (m.wave ?? 1) === maxWave) ?? ms[ms.length - 1] ?? null;
+}
+
+/** 节点卡片 = 子切换导航 + 节点自身属性（节点号 + 末波首领头像 + 推荐属性 + 等级）。
+ *  看板不再重复陈述节点身份：切换行即当前节点的身份位。 */
+const nodeCards = computed(() => tierceNodes.value.map((nd) => {
+  const boss = nodeBoss(nd);
+  return {
+    idx: nd.idx,
+    label: nodeLabel(nd),
+    icon: boss?.icon ? cdnUri('monstermiddleicon', `${boss.icon}.webp`) : '',
+    elems: nd.damage?.length ? elemRow(nd.damage) : '',
+    level: nd.level || 0,
+  };
+}));
+
+/** 看板当前节点：节点子切换的选中态，缺失时退回第一个（切换赛季后旧序号可能不存在） */
+const activeIdx = ref(1);
+const activeNd = computed<MazeTierceNode | null>(
+  () => tierceNodes.value.find((nd) => nd.idx === activeIdx.value) || tierceNodes.value[0] || null,
+);
 /** 该场次的赛季增益与首领特性：按 origin 取赛季级分场次字段（仅末日幻影产出） */
-function nodeBuffs(nd: MazeTierceNode): MazeBuffInfo[] {
-  return props.data.buff_groups?.[nd.origin] || [];
-}
-function nodeTraits(nd: MazeTierceNode): MazeBossTrait[] {
-  return props.data.boss_traits?.[nd.origin] || [];
+const activeBuffs = computed<MazeBuffInfo[]>(
+  () => (activeNd.value ? props.data.buff_groups?.[activeNd.value.origin] || [] : []),
+);
+const activeTraits = computed<MazeBossTrait[]>(
+  () => (activeNd.value ? props.data.boss_traits?.[activeNd.value.origin] || [] : []),
+);
+
+const nodeCardsRef = ref<HTMLElement | null>(null);
+function onNodeKeydown(e: KeyboardEvent, i: number): void {
+  const next = tabNextIndex(e.key, i, tierceNodes.value.length);
+  if (next < 0) return;
+  e.preventDefault();
+  const nd = tierceNodes.value[next];
+  if (!nd) return;
+  activeIdx.value = nd.idx;
+  void nextTick(() => {
+    nodeCardsRef.value?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+  });
 }
 
 const itemMap = ref<Map<number, Pick<LocalItemEntry, 'name' | 'icon'>>>(new Map());
@@ -64,6 +100,8 @@ watch(
   () => props.data.tierce,
   (t) => {
     if (!t) return;
+    const first = t.nodes?.[0];
+    activeIdx.value = first ? first.idx : 1;
     loadLocalItems()
       .then((list) => { itemMap.value = new Map(list.map((it) => [it.id, { name: it.name, icon: it.icon }])); })
       .catch(() => {});
@@ -88,15 +126,16 @@ watch(
       </div>
       <div v-if="tierceTargets.length || tierceRewards.length" class="nk-egd-tierce__head">
         <div v-if="tierceTargets.length" class="nk-egd-tierce__col">
-          <span class="nk-egd-tierce__headlabel">挑战目标</span>
+          <span class="nk-egd-tierce__headlabel">星级目标</span>
           <ol class="nk-egd-tierce__targets">
             <li v-for="(t, i) in tierceTargets" :key="i" class="nk-egd-node">
               <span
-                v-if="t.type && TARGET_TYPE_LABEL[t.type]"
+                v-if="t.type && t.type !== 'TOTAL_SCORE' && TARGET_TYPE_LABEL[t.type]"
                 class="nk-egd-node__type"
                 :title="TARGET_TYPE_LABEL[t.type]"
                 v-html="targetTypeIconHtml(t.type)"
               ></span>
+              <span v-else class="nk-egd-tierce__star" aria-hidden="true" v-html="TARGET_TYPE_SVG.TOTAL_SCORE"></span>
               <span class="nk-egd-node__text" v-html="targetHtml(t)"></span>
             </li>
           </ol>
@@ -116,41 +155,72 @@ watch(
           </div>
         </div>
       </div>
-      <ol v-if="tierceNodes.length" class="nk-egd-tierce__nodes" aria-label="星启节点列表">
-        <li v-for="nd in tierceNodes" :key="nd.idx" class="nk-egd-tierce__node">
-          <header class="nk-egd-tierce__nodehead">
-            <span class="nk-egd-tierce__nodelabel"><span class="nk-egd-tierce__nodezh">{{ nodeLabel(nd) }}</span></span>
-            <span v-if="nodeOrigin(nd.idx)" class="nk-egd-tierce__nodefrom">{{ nodeOrigin(nd.idx) }}</span>
-            <StageHead :stage="nd" />
-            <span v-if="nd.level || nd.countdown" class="nk-egd-floor__data">
-              <span v-if="nd.level" class="nk-egd-floor__dataitem">
-                <span class="nk-egd-floor__dataval">{{ nd.level }}</span>
-                <span class="nk-egd-floor__datalabel">等级</span>
-              </span>
-              <span v-if="nd.countdown" class="nk-egd-floor__dataitem">
-                <span class="nk-egd-floor__dataval">{{ nd.countdown }}</span>
-                <span class="nk-egd-floor__datalabel">回合</span>
-              </span>
+      <div
+        v-if="nodeCards.length > 1"
+        id="egd-tierce-nodetabs"
+        ref="nodeCardsRef"
+        class="nk-egd-nodecards"
+        role="tablist"
+        aria-label="星启节点"
+      >
+        <button
+          v-for="(t, i) in nodeCards"
+          :id="`egd-tierce-node-tab-${t.idx}`"
+          :key="t.idx"
+          type="button"
+          role="tab"
+          class="nk-egd-nodecard"
+          :class="{ 'nk-egd-nodecard--active': t.idx === activeIdx }"
+          :aria-selected="t.idx === activeIdx"
+          aria-controls="egd-tierce-board"
+          :tabindex="t.idx === activeIdx ? 0 : -1"
+          @click="activeIdx = t.idx"
+          @keydown="onNodeKeydown($event, i)"
+        >
+          <span class="nk-egd-nodecard__fig">
+            <img
+              v-if="t.icon"
+              class="nk-egd-nodecard__img"
+              :src="t.icon"
+              alt=""
+              loading="lazy"
+              @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+            >
+          </span>
+          <span class="nk-egd-nodecard__body">
+            <span class="nk-egd-nodecard__name">{{ t.label }}</span>
+            <span v-if="t.elems" class="nk-egd-nodecard__row nk-egd-nodecard__row--elems">
+              <span class="nk-egd-nodecard__label">推荐属性</span>
+              <span class="nk-egd-nodecard__elems" v-html="t.elems"></span>
             </span>
+            <span v-if="t.level" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
+              <span class="nk-egd-nodecard__label">等级</span>
+              <span class="nk-egd-nodecard__val">{{ t.level }}</span>
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        v-if="activeNd"
+        id="egd-tierce-board"
+        class="nk-egd-tierce__node"
+        :role="tierceNodes.length > 1 ? 'tabpanel' : undefined"
+        :aria-labelledby="tierceNodes.length > 1 ? `egd-tierce-node-tab-${activeNd.idx}` : undefined"
+      >
+        <div class="nk-egd-tierce__nodebody nk-egd-children">
+          <header v-if="activeNd.invasion && !activeTraits.length" class="nk-egd-tierce__nodehead">
+            <span class="nk-egd-pollchip" :data-level="activeNd.invasion.level">{{ pollutionLabel(activeNd.invasion) }}</span>
           </header>
-          <div class="nk-egd-tierce__nodebody nk-egd-children">
-            <StageContent :stage="nd" :is-boss="true" headless />
-            <div v-if="nodeBuffs(nd).length || nodeTraits(nd).length" class="nk-egd-lvl__effects">
-              <EndgameBuffGroup
-                v-if="nodeBuffs(nd).length"
-                title="赛季增益"
-                :items="nodeBuffs(nd)"
-              />
-              <EndgameTraitGroup
-                v-if="nodeTraits(nd).length"
-                title="首领特性"
-                :items="nodeTraits(nd)"
-              />
-            </div>
-            <EndgameFloorBuff :buff="nd.buff" />
-          </div>
-        </li>
-      </ol>
+          <EndgameFloorBuff :buff="activeNd.buff" />
+          <EndgameTraitGroup v-if="activeTraits.length" card title="首领特性" :items="activeTraits">
+            <template #head-end>
+              <span v-if="activeNd.invasion" class="nk-egd-pollchip" :data-level="activeNd.invasion.level">{{ pollutionLabel(activeNd.invasion) }}</span>
+            </template>
+          </EndgameTraitGroup>
+          <StageContent :stage="activeNd" :is-boss="true" headless hide-damage />
+          <EndgameBuffGroup v-if="activeBuffs.length" title="赛季增益" :items="activeBuffs" />
+        </div>
+      </div>
       <div v-else-if="tierceMonsters.length" class="nk-egd-mons">
         <EnemyCard v-for="m in tierceMonsters" :key="m.id" :monster="m" />
       </div>

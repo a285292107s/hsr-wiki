@@ -11,6 +11,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ci": "playwright test e2e/layout.spec.ts e2e/accessibility.spec.ts",
+    "test:e2e:guards": "playwright test e2e/guards.spec.ts e2e/accessibility.spec.ts",
+    "test:e2e:affected": "node tools/e2e-affected.mjs --run",
     "test:e2e:update": "playwright test --update-snapshots=all"
   },
   "dependencies": {

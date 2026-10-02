@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue';
+import { tabNextIndex } from './tabs';
 import type { BossLevelTab } from './levels';
 
 const props = defineProps<{
@@ -12,12 +13,7 @@ const emit = defineEmits<{ select: [key: string] }>();
 const listRef = ref<HTMLElement | null>(null);
 
 function onKeydown(e: KeyboardEvent, i: number): void {
-  const n = props.tabs.length;
-  const next = e.key === 'ArrowRight' ? (i + 1) % n
-    : e.key === 'ArrowLeft' ? (i - 1 + n) % n
-      : e.key === 'Home' ? 0
-        : e.key === 'End' ? n - 1
-          : -1;
+  const next = tabNextIndex(e.key, i, props.tabs.length);
   if (next < 0) return;
   e.preventDefault();
   const tab = props.tabs[next];

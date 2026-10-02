@@ -167,7 +167,7 @@ export interface MazeMonsterInfo {
   /** 模板 ID（仅实例别名 MonsterID≠MonsterTemplateID 时输出，如 501211002 → 5012110；
    *  详情页跳转 /monster/:tpl 用；无别名时 id 即模板 ID） */
   tpl?: string;
-  /** 战斗波次序号（StageConfig.MonsterList 波次展开，1 起；层级/peak 敌方带此字段，星启无） */
+  /** 战斗波次序号（StageConfig.MonsterList 波次展开，1 起；层级/peak/星启节点敌方均带此字段） */
   wave?: number;
 }
 
@@ -217,7 +217,7 @@ export interface MazeFloorDetail {
   stage1?: MazeStageDetail;
   /** 下半场 */
   stage2?: MazeStageDetail;
-  /** 层级可用增益（MazeBuff，如“记忆紊流”；未注册时缺省） */
+  /** 层级增益（MazeBuff，如“记忆紊流”；未注册时缺省） */
   buff?: MazeBuffInfo | null;
   /** 该层挑战目标（text + param，fmtDesc 渲染） */
   targets?: MazeTargetInfo[];
@@ -277,7 +277,8 @@ export interface MazeTierceNode extends MazeStageDetail {
   level?: number;
   /** 该场次回合上限（ChallengeCountDown；星启附加关取 Tierce 回合限制） */
   countdown?: number;
-  /** 该场次层级可用增益（最高难度关 MazeBuffID，即“末法余烬”） */
+  /** 该场次层级增益（即“末法余烬”）：节点 1/2 = 最高难度关记录 `MazeBuffID`，
+   *  节点 3 = 附加关 StageConfig 自身绑定的 `_BindingMazeBuff`（星启表无 buff 字段） */
   buff?: MazeBuffInfo | null;
 }
 
@@ -373,7 +374,7 @@ export interface MazeListEntry {
   targets?: MazeTargetInfo[];
   /** 逐层推荐属性（按上下半场拆分） */
   floor_damage?: FloorDamageInfo[];
-  /** 逐层详情（关卡层级章节：推荐属性 / 敌方配置 / 可用增益 / 挑战目标） */
+  /** 逐层详情（关卡层级章节：推荐属性 / 敌方配置 / 末法余烬 / 挑战目标） */
   floor_details?: MazeFloorDetail[];
   /** 星启模式关卡（存在时赛季含独立进阶关） */
   tierce?: MazeTierceInfo;
