@@ -1,4 +1,4 @@
-/** 角色相关数据类型（character/{charId}.json + converter 本地列表 + 技能动画映射） */
+/** 角色相关数据类型（character/{charId}.json 详情 + character.json 列表端点 + converter 本地列表 + 技能动画映射） */
 
 /* ─── character/{charId}.json ─── */
 
@@ -249,3 +249,25 @@ export interface SkillAnimEntry {
  *  + 忆灵技能合成键 Servant（忆灵技）/ ServantPassive（忆灵天赋，角色数据 type 为空串）；
  *  写入侧见 spine-lab/tools/wiki-anim-scraper.mjs，消费侧见 src/app/character/SkillsPanel.vue */
 export type SkillAnimationsDb = Record<string, Record<string, SkillAnimEntry[]>>;
+
+/* ─── character.json 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
+
+/** character.json 条目（键 = 角色 ID） */
+export interface CharListEntry {
+  /** 实装时间戳（未实装角色缺省） */
+  release?: number;
+  icon?: string;
+  /** 稀有度（CombatPowerAvatarRarityType4/5） */
+  rank?: string;
+  /** 命途（Knight/Mage/...） */
+  baseType?: string;
+  /** 属性（Ice/Quantum/...） */
+  damageType?: string;
+  en?: string;
+  zh?: string;
+  ja?: string;
+  ko?: string;
+  enhance?: unknown[];
+  desc?: string;
+}
+export type CharListDb = Record<string, CharListEntry>;

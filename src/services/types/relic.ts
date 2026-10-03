@@ -1,4 +1,4 @@
-/** 遗器相关数据类型（套装列表/详情 + 主副词条 + 来历） */
+/** 遗器相关数据类型（套装详情 + relicset.json 列表端点 + 本地列表 + 主副词条 + 来历） */
 
 /* relicset/{id}.json（CDN 兼容结构） */
 export interface RelicSetData {
@@ -80,3 +80,17 @@ export interface RelicPieceStory {
 
 /** set_id → { piece_type → RelicPieceStory } */
 export type RelicStoriesMap = Record<string, Record<string, RelicPieceStory>>;
+
+/* ─── relicset.json 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
+
+/** relicset.json 条目（键 = 遗器套装 ID） */
+export interface RelicsetListEntry {
+  /** 图标路径（SpriteOutput/ItemIcon/71000.png → itemfigures/71000.webp） */
+  icon?: string;
+  en?: string;
+  zh?: string;
+  ja?: string;
+  ko?: string;
+  set?: Record<string, unknown>;
+}
+export type RelicsetListDb = Record<string, RelicsetListEntry>;
