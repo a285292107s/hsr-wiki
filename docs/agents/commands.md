@@ -52,7 +52,9 @@ pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all�
 
 **直接调用 playwright 时必须显式传覆盖模式**：`pnpm exec playwright test --update-snapshots=all`——Playwright 默认 `changed` 模式在更新已有基线时静默 pass 不落盘。只跑改动实际影响的用例（`--grep 首页` 等），`visual.spec` 全量禁止。
 
-`playwright.config.ts` 保持 `fullyParallel: false`（串行）——**并行实测过但不采纳**：本地 4 worker 全量墙钟比串行快约两成，代价是 3 次全量里出现 1 次并发竞态 flake（同一用例串行复跑 2/2 与单独复跑 3/3 均绿，属并发下 dev server 争用而非代码缺陷）。**禁止为提速放宽断言、加 `--retries` 或改配置掩盖 flake**；要提速应减少用例数而不是提高并发度。
+`playwright.config.ts` 保持 `fullyParallel: false`（**文件内**串行）——全局并行实测过但不采纳：本地 4 worker 全量墙钟比串行快约两成，代价是 3 次全量里出现 1 次并发竞态 flake（同一用例串行复跑 2/2 与单独复跑 3/3 均绿，属并发下 dev server 争用而非代码缺陷）。**禁止为提速放宽断言、加 `--retries` 或改配置掩盖 flake**。
+
+**但「不采纳全局并行」≠「接受单文件串行」**：`fullyParallel: false` 并不禁止**文件级**并行（Playwright 始终按文件分派 worker）。layout 曾是单个 74 用例 / 469s 的大文件，等于把全量调度压成一个串行单元——实测墙钟 327s，其中 a11y 仅 85s 就跑完、其余两个 worker 空转约 5.5 分钟。按 `describe` 边界拆成 `e2e/layout-*.spec.ts` 后：**墙钟约 327s → 约 120s，每条用例的隔离性与拆分前完全一致**（文件内本就串行，未新增任何并发面），并发纪律零妥协。**要提速就走这条路：减用例数或按域拆文件，禁止提高并发度。**
 
 ## 漂移与影响面工具（report-only，默认不阻塞）
 

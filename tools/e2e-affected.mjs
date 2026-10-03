@@ -271,7 +271,13 @@ const grepOf = (list) => {
 };
 const fileList = (list) => [...new Set(list.map((t) => t.file))].sort();
 const guards = existsSync(join(ROOT, 'e2e', 'guards.spec.ts')) ? 'e2e/guards.spec.ts' : null;
-const FALLBACK = [guards, 'e2e/layout.spec.ts'].filter(Boolean).join(' ');
+/** layout 验收层按 describe 边界拆成 `layout-*.spec.ts` 多个文件（文件级并行换墙钟，见 commands.md）；
+ *  目录扫描而非硬编码文件名——新增/重命名 layout 分文件无需同步改本工具，漏改会退化成「跑不到用例」而非报错。 */
+const layoutSpecs = readdirSync(join(ROOT, 'e2e'))
+  .filter((n) => /^layout.*\.spec\.ts$/.test(n))
+  .sort()
+  .map((n) => `e2e/${n}`);
+const FALLBACK = [guards, ...layoutSpecs].filter(Boolean).join(' ');
 const CI_CMD = `pnpm exec playwright test ${FALLBACK}`;
 
 /* ═══ 报告 ═══ */

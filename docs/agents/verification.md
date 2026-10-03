@@ -19,7 +19,7 @@ AI 侧验证基线 = **代码与规格工作流**（静态审查 / 可断言规�
 | 级别 | 手段 | 固化位置 |
 |---|---|---|
 | L1 静态结构 | `--dump-dom`、骨架/清单解析（无需渲染） | CDP 兜底命令；`src/app/debug/spine-audit.ts` 的骨架解析与元数据提取 |
-| L2 渲染态断言 | `toHaveCSS` / `toHaveText` / `toHaveCount` | `e2e/layout.spec.ts` |
+| L2 渲染态断言 | `toHaveCSS` / `toHaveText` / `toHaveCount` | `e2e/layout-*.spec.ts` |
 | L3 横向溢出检测 | 全树扫描右边界超出视口/产生横向滚动条的元素 | `e2e/helpers.ts → findHorizontalOverflow` |
 | L4 像素基线 | `toHaveScreenshot`（本机刷新基线，CI 不跑） | `e2e/visual.spec.ts` |
 

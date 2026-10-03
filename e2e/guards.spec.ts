@@ -11,7 +11,7 @@ import { collectConsoleIssues, expectNoUnknownOverflow, waitForCatalogCards } fr
  *   3) 关键容器可达 且 未落进共享错误态（`.nk-error-state` 是加载失败的唯一出口）。
  *
  * 分层约定：语义契约（该显示什么、顺序、计数）与数值规格（字号序、令牌派生）分别在
- * layout.spec.ts / 各页用例；**这里只放「破了就是页面坏了」的底线**。
+ * `layout-*.spec.ts` 各域文件；**这里只放「破了就是页面坏了」的底线**。
  * 用例标题内嵌路由，便于 `--grep "/endgame/boss/3020"` 只跑受影响页面。
  *
  * 双 project 覆盖：本文件不打 `@viewport-pinned`（用例不钉视口），故 desktop 与

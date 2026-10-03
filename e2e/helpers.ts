@@ -47,13 +47,21 @@ export const KNOWN_OVERFLOWS: { match: string; note: string }[] = [
 /**
  * 拆分溢出检测结果：`known` = 已登记项（打印告警），`unknown` = 新溢出（调用方断言为空）。
  * 用法：`expect(splitKnownOverflow(await findHorizontalOverflow(page)).unknown).toEqual([])`
+ *
+ * 告警按**缺陷条目**聚合而非按元素：同一登记项常命中整棵子树的多个元素
+ * （`.nk-seg` 实测 5 个元素同源），逐元素打印会把同一条 note 刷 N 遍。
+ * 每次调用内按登记项去重——「哪条已知缺陷被触发」本身已是可行动信息，元素级细节留在
+ * 报告产物（trace / HTML report）里，不占终端输出。
  */
 export function splitKnownOverflow(found: string[]): { known: string[]; unknown: string[] } {
-  const isKnown = (s: string) => KNOWN_OVERFLOWS.some((k) => s.includes(k.match));
-  const known = found.filter(isKnown);
-  for (const s of known) {
-    const hit = KNOWN_OVERFLOWS.find((k) => s.includes(k.match));
-    console.warn(`[layout 已知溢出] ${s} — ${hit?.note ?? ''}`);
+  const isKnown = (s: string) => KNOWN_OVERFLOWS.find((k) => s.includes(k.match));
+  const known = found.filter((s) => isKnown(s));
+  for (const k of KNOWN_OVERFLOWS) {
+    const hits = known.filter((s) => s.includes(k.match));
+    if (!hits.length) continue;
+    console.warn(
+      `[layout 已知溢出] ${k.match}：命中 ${hits.length} 个元素（${hits.map((s) => s.split(' ')[0]).join(', ')}）— ${k.note}`,
+    );
   }
   return { known, unknown: found.filter((s) => !isKnown(s)) };
 }
