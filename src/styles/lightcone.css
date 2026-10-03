@@ -42,12 +42,6 @@
   .nk-hero__stats--lc { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .nk-hero__stats--lc .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
-.nk-lc-lv {
-  margin-left: auto;
-  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
-  color: var(--text3); letter-spacing: 0.06em;
-}
-
 .nk-lc-rank-slider { gap: 12px; }
 .nk-lc-rank-label {
   font-size: 0.6875rem; font-weight: 700; color: var(--metric-val);
@@ -55,10 +49,23 @@
   font-family: var(--font-hud);
 }
 
+/* 参数表横滚提示：机制与 relic.css 词条表同款（溢出时才亮右缘渐隐，滚到尽头熄灭） */
 .nk-lc-rank-table-wrap {
+  position: relative;
   margin-top: 16px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent); border-radius: 8px;
 }
+.nk-lc-rank-table-wrap::after {
+  content: ''; position: absolute;
+  top: 0; right: 0; bottom: 0; width: 24px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--card) 80%);
+  border-radius: 0 8px 8px 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.nk-lc-rank-table-wrap.is-scrollable::after { opacity: 1; }
 .nk-lc-rank-table {
   width: 100%; border-collapse: collapse;
   font-size: 0.75rem; text-align: center;
@@ -171,18 +178,12 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 }
 
 .nk-lc-story {
-  max-width: 65ch;
-  font-size: 0.8125rem; line-height: 2; color: var(--text2);
+  max-width: var(--nk-prose-max);
+  font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
   padding: 4px 0 12px;
 }
 .nk-lc-story i {
   font-style: normal; color: var(--text-bright);
-}
-.nk-lc-skill-note {
-  margin-top: 10px; padding: 8px 12px;
-  border-left: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
-  background: color-mix(in srgb, var(--primary) 4%, transparent); border-radius: 0 6px 6px 0;
-  font-size: 0.75rem; line-height: 1.6; color: var(--text3);
 }
 
 .nk-skeleton--lc .nk-skeleton__stat-grid { grid-template-columns: repeat(3, 1fr); }
