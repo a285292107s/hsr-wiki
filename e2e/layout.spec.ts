@@ -2508,6 +2508,33 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
+  // 8bit 等值线：视觉区两层浅 inset 暗角 + 稀有度椭圆晕染（各只有 3.7 / 4.0 每 255 深度却铺满全幅）
+  // 与面板 90deg 浅渐变（整幅 8/255）都会塌成色带——前者是「一圈一圈的圆角矩形印记」，
+  // 后者是「竖立的条纹」。此处钉住「不再有浅渐变覆层」，像素级外观交用户 RunPreview。
+  test('/lightcone：hero 视觉层与信息面板不挂浅渐变覆层（等值线来源）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const cones = readJson<Record<string, { id: number }>>('public/data/cn/light_cones.json');
+    const lcId = Object.values(cones)[0].id;
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/lightcone/${lcId}`);
+
+    const visual = page.locator('.nk-hero--lc .nk-hero__visual');
+    await expect(visual).toHaveCount(1);
+    expect(await visual.evaluate((el) => getComputedStyle(el).boxShadow), '视觉区不得有 inset 暗角').toBe('none');
+    expect(
+      await visual.evaluate((el) => getComputedStyle(el, '::before').backgroundImage),
+      '稀有度晕染层不得留渐变',
+    ).toBe('none');
+
+    const panel = await page.locator('.nk-hero--lc .nk-hero__panel').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { image: cs.backgroundImage, color: cs.backgroundColor };
+    });
+    expect(panel.image, '信息面板底必须是纯色，不得是横向渐变').toBe('none');
+    expect(panel.color, '纯色底须给出实际颜色而非透明').not.toBe('rgba(0, 0, 0, 0)');
+    assertNoErrors();
+  });
+
   // 竖轨几何只在 ≥768px 存在，故本用例钉桌面视口（否则 mobile-chromium project 会跑到无竖轨的断点上）
   test('/character/1503：展开技能数据表后，竖轨与表盒（含首列）不相交、表盒不出卡片内容区', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);

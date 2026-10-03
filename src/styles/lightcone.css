@@ -10,9 +10,11 @@
   border: 1px solid var(--line-1);
 }
 .nk-hero--lc .nk-hero__visual {
-  box-shadow:
-    inset 0 0 60px 18px color-mix(in srgb, var(--blk-900) 55%, transparent),
-    inset 0 0 30px 8px color-mix(in srgb, var(--blk-900) 35%, transparent);
+  /* 8bit 等值线：这两层浅 inset 暗角整幅只有 ~3.7/255 深（实测中心 16.7 → 边缘 13.0），
+     摊在 ~200px 上必然塌成 2~3 条圆角矩形等值线，即用户报的「一圈一圈的圆角矩形印记」
+     （与角色 hero 同类缺陷，2026-09 已按同一判据去掉）。必须显式 none：删掉整条规则会回落
+     tokens.css 基线那两层更重的暗角（85% / 50%），不是「取消」。 */
+  box-shadow: none;
 }
 .nk-hero__bg--lc {
   background-size: contain;
@@ -22,9 +24,15 @@
 .nk-hero--lc .nk-hero__visual::before {
   content: '';
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: radial-gradient(ellipse 62% 58% at 50% 34%,
-    color-mix(in srgb, var(--lc-r, var(--rarity-5)) 15%, transparent) 0%,
-    transparent 72%);
+  /* 稀有度椭圆晕染只有 ~4/255 深却铺满全幅（实测中心 22.7 → 边缘 18.7），等值线同样可见，
+     故一并退场；仅移除本条规则会回落基线的左右渐隐（同样是浅渐变）。 */
+  background: none;
+}
+.nk-hero--lc .nk-hero__panel {
+  /* 基线 90deg 渐变整幅只跨 ~8/255（660px），塌成 7~8 条竖直色带：实测无文字区列向噪声 SD
+     1.34 / 行向 0.10（列行比 ≈ 12），即用户报的「竖立的条纹」。改为等平均深度的纯色
+     （70% ≈ 原渐变面积均值 13.0，实测同值），去渐变即去色带。 */
+  background: color-mix(in srgb, var(--blk-900) 70%, transparent);
 }
 /* 光锥属性恒为 HP/ATK/DEF 三项：宽屏一行三列，需解除基线两列网格「末项满行」规则，
    否则第 3 项（DEF）会被 grid-column: 1/-1 挤到独立整行；窄屏放不下三列时回落两列并保留满行。 */
