@@ -1,0 +1,103 @@
+/* 角色详情页 · 强化条与强化徽标（ADR 0010）。拆分块 4/6。 */
+.nk-char-page .nk-enh-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  background: color-mix(in srgb, var(--blk-800) 97%, transparent);
+  backdrop-filter: blur(12px) saturate(1.1); -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border-bottom: 1px solid var(--line-1);
+}
+@media (min-width: 768px) {
+  .nk-char-page .nk-enh-bar { padding-left: var(--nk-content-offset); }
+}
+@media (min-width: 1024px) {
+  .nk-char-page .nk-enh-bar { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+.nk-char-page .nk-enh-bar__inner {
+  display: flex; align-items: center; gap: 8px;
+  max-width: var(--nk-detail-max); margin: 0 auto; padding: 6px 16px; min-height: 44px;
+}
+.nk-char-page .nk-enh-module {
+  scroll-margin-top: 64px;
+}
+.nk-char-page .nk-enh-module__head {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.02em;
+  color: var(--text-bright); margin-bottom: 16px;
+}
+.nk-char-page .nk-enh-module__mark {
+  width: 4px; height: 14px; border-radius: 1px; flex-shrink: 0;
+  background: var(--gold-sem); opacity: 0.9;
+}
+.nk-char-page .nk-enh-module__state {
+  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
+  letter-spacing: 0.14em; color: var(--gold-sem);
+  padding-left: 12px; border-left: 1px solid var(--line-2);
+}
+.nk-char-page .nk-enh-tabs {
+  display: flex; align-items: center; gap: 4px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-char-page .nk-enh-tab {
+  display: inline-flex; align-items: baseline; gap: 8px;
+  padding: 8px 12px; border: none; background: transparent;
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--text3); cursor: pointer; white-space: nowrap;
+  transition: color 0.15s; position: relative;
+}
+.nk-char-page .nk-enh-tab::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -9px; bottom: -9px;
+}
+.nk-char-page .nk-enh-tab:hover { color: var(--text2); }
+.nk-char-page .nk-enh-tab--active { color: var(--primary); }
+.nk-char-page .nk-enh-tab--active::after {
+  content: ''; position: absolute; left: 12px; right: 12px; bottom: -1px;
+  height: 2px; border-radius: 1px; background: var(--primary);
+}
+.nk-char-page .nk-enh-tabs__sep {
+  width: 1px; height: 14px; margin: 0 12px;
+  background: var(--line-1); flex-shrink: 0;
+}
+.nk-char-page .nk-enh-tab--cmp {
+  color: var(--text3); font-weight: 500; letter-spacing: 0.04em;
+}
+.nk-char-page .nk-enh-tab--cmp:hover { color: var(--text2); }
+.nk-char-page .nk-enh-tab--active.nk-enh-tab--cmp:hover { color: var(--primary); }
+.nk-char-page .nk-enh-tab__idx {
+  font-family: var(--font-hud); font-size: 0.55rem; opacity: 0.7;
+}
+.nk-char-page .nk-enh-tab--active .nk-enh-tab__idx { opacity: 1; }
+.nk-char-page .nk-enh-bar__progress {
+  height: 2px; width: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 55%, transparent) 0%, var(--primary) 35%, var(--th-400) 100%);
+}
+
+.nk-char-page .nk-enh-notes {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 16px;
+  padding: 2px 0 2px 16px;
+  border-left: 2px solid color-mix(in srgb, var(--gold-sem) 50%, transparent);
+}
+.nk-char-page .nk-enh-notes__title {
+  font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gold-sem); font-weight: 700;
+}
+.nk-char-page .nk-enh-notes__list {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.nk-char-page .nk-enh-notes__list li {
+  font-size: 0.75rem; line-height: 1.7; color: var(--text2);
+}
+.nk-char-page .nk-enh-notes__list li span[style*="color"] {
+  color: var(--gold-sem); font-weight: 700;
+}
+
+.nk-char-page .nk-skill__enh-badge,
+.nk-char-page .nk-eidolon__enh-badge {
+  position: absolute; top: 10px; right: 10px;
+  display: inline-flex; align-items: center;
+  font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.08em;
+  padding: 1px 6px; border-radius: 3px;
+  font-weight: 700; z-index: 2; pointer-events: none;
+  background: color-mix(in srgb, var(--gold-sem) 12%, transparent);
+  color: var(--gold-sem); border: 1px solid color-mix(in srgb, var(--gold-sem) 26%, transparent);
+}

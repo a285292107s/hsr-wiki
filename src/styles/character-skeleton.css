@@ -1,0 +1,188 @@
+/* 角色详情页 · 骨架屏 / 断点覆盖 / reduced-motion / 触屏。拆分块 6/6，须在本组最后导入。 */
+
+.nk-char-page .nk-skeleton__hero { background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 85%, transparent) 0%, color-mix(in srgb, var(--blk-900) 30%, transparent) 50%, transparent 100%); }
+.nk-char-page .nk-skeleton__hero-panel { background: linear-gradient(180deg, color-mix(in srgb, var(--blk-800) 50%, transparent), var(--bg)); }
+.nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 4 / 5; }
+@media (min-width: 768px) {
+  .nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 3 / 2; }
+}
+.nk-char-page .nk-skeleton__stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0 40px; }
+.nk-char-page .nk-sk--stat { height: 33px; border-radius: 4px; }
+
+@media (min-width: 768px) {
+  .nk-char-page .nk-hero__panel { padding: 32px; }
+  .nk-char-page .nk-hero__name { font-size: 2rem; }
+  .nk-char-page .nk-stats__stat { padding: 12px 0; }
+  .nk-char-page .nk-stats__val { font-size: 0.92rem; }
+  .nk-char-page .nk-sk--stat { height: 44px; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-char-page .nk-eidolon__icon { width: 132px; height: 132px; }
+}
+@media (min-width: 1024px) {
+  .nk-char-page .nk-hero { min-height: clamp(560px, 76vh, 820px); overflow: clip; }
+  .nk-char-page .nk-hero__visual { position: absolute; inset: 0; aspect-ratio: auto; }
+  .nk-char-page .nk-hero__visual::before { background: none; }
+  .nk-char-page .nk-hero__panel {
+    --nk-hero-text-halo: 0 1px 2px rgba(0,0,0,0.95), 0 -1px 2px rgba(0,0,0,0.95), 1px 0 2px rgba(0,0,0,0.95), -1px 0 2px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9);
+    position: absolute; left: 24px; bottom: 24px; z-index: 5;
+    width: min(520px, 58%);
+    padding: 0;
+    gap: 24px;
+    text-shadow: var(--nk-hero-text-halo);
+  }
+  .nk-char-page .nk-hero__head { gap: 16px; }
+  .nk-char-page .nk-hero__name {
+    font-size: clamp(2.4rem, 4.2vw, 3.4rem);
+    line-height: 1.1;
+    text-wrap: balance;
+    text-shadow:
+      var(--nk-hero-text-halo),
+      0 2px 6px rgba(0,0,0,0.6),
+      0 0 18px rgba(0,0,0,0.5),
+      0 0 44px rgba(0,0,0,0.4);
+  }
+  .nk-char-page .nk-hero__stars { text-shadow: var(--nk-hero-text-halo); }
+  .nk-char-page .nk-hero__desc { font-size: 0.875rem; line-height: 1.7; }
+  .nk-char-page .nk-hero__badge img { filter: drop-shadow(0 0 2px rgba(0,0,0,0.95)) drop-shadow(0 1px 2px rgba(0,0,0,0.9)); }
+  .nk-char-page .nk-hero__archive { left: auto; right: 20px; bottom: 20px; }
+  .nk-char-page .nk-hero__toggle { top: 20px; right: 20px; }
+  .nk-char-page .nk-stats__grid { gap: 0 48px; }
+  .nk-char-page .nk-skill { padding: 24px 28px; }
+  .nk-char-page .nk-eidolon, .nk-char-page .nk-ability { padding: 24px 28px; }
+  .nk-char-page .nk-cmp-rank, .nk-char-page .nk-cmp-tree { padding: 24px 28px; }
+
+  .nk-char-page .nk-skeleton__hero { display: block; min-height: clamp(560px, 76vh, 820px); overflow: clip; }
+  .nk-char-page .nk-skeleton__hero-visual { position: absolute; inset: 0; flex: none; min-height: 0; aspect-ratio: auto; }
+  .nk-char-page .nk-skeleton__hero-panel {
+    position: absolute; left: 24px; bottom: 24px; z-index: 1;
+    width: min(520px, 58%);
+    padding: 0; gap: 12px;
+    border-top: none; background: none;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .nk-char-page .nk-hero__archive { display: none; }
+}
+@media (max-width: 767px) {
+  .nk-char-page .nk-stats__grid { gap: 0 16px; }
+  .nk-char-page .nk-stats__stat { gap: 8px; grid-template-columns: 15px 1fr auto; }
+  .nk-char-page .nk-stats__label { font-size: 0.68rem; }
+  .nk-char-page .nk-stats__val { font-size: 0.8rem; }
+  .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
+  .nk-char-page .nk-hero__badge--enh { padding: 5px 9px 5px 7px; }
+  .nk-char-page .nk-hero__archive {
+    left: 12px; bottom: 12px;
+    font-size: 0.45rem; letter-spacing: 0.24em; padding: 5px 10px;
+  }
+  .nk-char-page .nk-eidolon__head { gap: 16px; }
+  .nk-char-page .nk-eidolon__icon { width: 104px; height: 104px; }
+  .nk-char-page .nk-eidolon__meta { gap: 12px; padding-bottom: 12px; }
+  .nk-char-page .nk-eidolon__num { font-size: 1.25rem; padding-right: 12px; }
+  .nk-char-page .nk-build__teams { gap: 16px; }
+  .nk-char-page .nk-build__team-head {
+    display: flex; align-items: baseline; gap: 8px;
+    font-family: var(--font-hud); font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--text3);
+  }
+  .nk-char-page .nk-build__team-head__num { color: var(--primary); font-size: 0.85rem; }
+  .nk-char-page .nk-build__team-head__total { color: var(--text3); opacity: 0.75; font-weight: 500; }
+  .nk-char-page .nk-build__team {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 12px;
+  }
+  .nk-char-page .nk-build__team-slot {
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+  }
+  .nk-char-page .nk-build__team-slot ~ .nk-build__team-slot {
+    border-top: 1px solid var(--line-1);
+    padding-top: 12px;
+  }
+  .nk-char-page .nk-build__team-slot img { width: 44px; height: 44px; }
+  .nk-char-page .nk-build__team-slot--main img { width: 50px; height: 50px; }
+  .nk-char-page .nk-build__team-slot--main {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    border-radius: 8px;
+    padding: 8px 0;
+  }
+  .nk-char-page .nk-build__team-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .nk-char-page .nk-build__team-link:active img { transform: scale(0.94); }
+  .nk-char-page .nk-build__team-name {
+    display: inline;
+    font-size: 0.7rem; font-weight: 600; color: var(--text2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 72px; min-width: 0; flex-shrink: 1;
+  }
+  .nk-char-page .nk-build__team-slot--main .nk-build__team-name { color: var(--primary); }
+  .nk-char-page .nk-build__team-alt {
+    margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
+    border: 1px solid var(--line-2); border-radius: 999px;
+    padding: 12px;
+  }
+  .nk-char-page .nk-build__team-alt img { width: 30px; height: 30px; }
+  .nk-char-page .nk-build__team-alt .nk-build__team-link { padding: 8px; margin: -8px; opacity: 0.8; }
+  .nk-char-page .nk-build__team-alt .nk-build__team-link:hover,
+  .nk-char-page .nk-build__team-alt .nk-build__team-link:active { opacity: 1; }
+  .nk-char-page .nk-build__team-plus { display: none; }
+}
+
+.nk-char-page .nk-enh-tab:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-char-page .nk-top-btn:hover svg { transform: none; }
+  .nk-char-page .nk-skill:hover .nk-skill__icon { transform: none; }
+  .nk-char-page .nk-eidolon:hover .nk-eidolon__icon { transform: none; }
+  .nk-char-page .nk-eidolon:hover,
+  .nk-char-page .nk-ability:hover,
+  .nk-char-page .nk-story:hover,
+  .nk-char-page .nk-build__team:hover,
+  .nk-char-page .nk-build__set:hover,
+  .nk-char-page .nk-relic-slot:hover,
+  .nk-char-page .nk-relic-sub:hover,
+  .nk-char-page .nk-profile__item:hover,
+  .nk-char-page .nk-bonus:hover { transform: none; box-shadow: none; }
+}
+
+@media (hover: none) {
+  .nk-char-page .nk-skill__toggle:hover { color: var(--text2); border-color: var(--line-1); }
+  .nk-char-page .nk-skill__toggle.open:hover {
+    color: var(--primary); border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  .nk-char-page .nk-enh-tab:hover { color: var(--text3); }
+  .nk-char-page .nk-enh-tab--active:hover { color: var(--primary); }
+  .nk-char-page .nk-skill:hover,
+  .nk-char-page .nk-eidolon:hover,
+  .nk-char-page .nk-ability:hover,
+  .nk-char-page .nk-story:hover,
+  .nk-char-page .nk-bonus:hover,
+  .nk-char-page .nk-build__set:hover,
+  .nk-char-page .nk-profile__item:hover,
+  .nk-char-page .nk-build__team:hover,
+  .nk-char-page .nk-relic-slot:hover,
+  .nk-char-page .nk-relic-sub:hover {
+    background: color-mix(in srgb, var(--blk-900) 30%, transparent);
+    transform: none; box-shadow: none;
+  }
+  .nk-char-page .nk-skill:hover .nk-skill__icon { transform: none; }
+  .nk-char-page .nk-eidolon:hover .nk-eidolon__icon { transform: none; }
+  .nk-char-page .nk-eidolon:hover .nk-eidolon__num { opacity: 0.85; }
+  .nk-char-page .nk-story__head:hover .nk-story__arrow { border-color: var(--text3); }
+  .nk-char-page .nk-secnav__btn:hover { color: var(--text3); background: transparent; }
+  .nk-char-page .nk-secnav__btn--active:hover { color: var(--metric-val); background: transparent; }
+  .nk-char-page .nk-hero__badge:hover { color: var(--text2); }
+  .nk-char-page .nk-hero__badge--enh:hover { border-color: color-mix(in srgb, var(--gold-sem) 32%, transparent); background: color-mix(in srgb, var(--gold-sem) 7%, transparent); }
+}

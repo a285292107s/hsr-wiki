@@ -20,7 +20,14 @@ import EndgamePeak from '../endgame/EndgamePeak.vue';
 import EndgamePollution from '../endgame/EndgamePollution.vue';
 import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
 import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
-import '../../styles/endgame-detail.css';
+/* endgame-detail 拆分块：导入顺序即级联顺序（断点覆盖块在基础块后、排版收口块必须最后），不得乱序 */
+import '../../styles/endgame-frame.css';
+import '../../styles/endgame-panels.css';
+import '../../styles/endgame-monsters.css';
+import '../../styles/endgame-levels.css';
+import '../../styles/endgame-breakpoints.css';
+import '../../styles/endgame-pollution.css';
+import '../../styles/endgame-type-scale.css';
 
 const route = useRoute();
 

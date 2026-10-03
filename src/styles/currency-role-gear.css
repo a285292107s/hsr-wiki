@@ -1,0 +1,115 @@
+/* 货币战争角色详情 · 光锥与装备。拆分块 3/4。 */
+
+.nk-crole-cone {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.014);
+  border: 1px solid var(--line-1);
+}
+.nk-crole-cone__icon {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
+  border: 1px solid var(--line-1);
+  background: rgba(255, 255, 255, 0.02);
+  object-fit: cover;
+}
+.nk-crole-cone__body { min-width: 0; }
+.nk-crole-cone__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-bright);
+  line-height: 1.4;
+}
+.nk-crole-cone__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 3px;
+  font-size: 11px;
+}
+.nk-crole-cone__rarity {
+  color: var(--gold-400);
+  letter-spacing: 0.08em;
+}
+.nk-crole-cone__path {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text2);
+}
+.nk-crole-cone__id {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+
+.nk-crole-equips {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: 24px;
+}
+.nk-crole-equips::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 20px;
+  bottom: 20px;
+  width: 1px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--crole-buff) 55%, transparent), color-mix(in srgb, var(--crole-buff) 14%, transparent));
+}
+.nk-crole-equip {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 12px 0;
+  position: relative;
+}
+.nk-crole-equip::before {
+  content: '';
+  position: absolute;
+  left: -19px;
+  top: 21px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--crole-buff);
+  border: 1px solid var(--bg);
+}
+.nk-crole-equip__lv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: var(--crole-buff-soft);
+  border: 1px solid var(--crole-buff-border);
+  justify-content: center;
+}
+.nk-crole-equip__lv-num {
+  font-family: var(--font-hud);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--crole-buff);
+  line-height: 1;
+}
+.nk-crole-equip__lv-label {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.nk-crole-equip__body { flex: 1; min-width: 0; }
+.nk-crole-equip__desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0; }
+.nk-crole-equip__desc span { color: var(--crole-num); font-weight: 600; }

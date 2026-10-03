@@ -1,0 +1,268 @@
+/* 角色详情页 · 技能卡（图标列层级线 / ADR 0023 手机断点 / 动画与参数表）。拆分块 2/6。 */
+.nk-char-page .nk-title { margin-bottom: 24px; }
+
+.nk-char-page .nk-skill,
+.nk-char-page .nk-eidolon,
+.nk-char-page .nk-ability,
+.nk-char-page .nk-story,
+.nk-char-page .nk-build__team,
+.nk-char-page .nk-build__set,
+.nk-char-page .nk-relic-slot,
+.nk-char-page .nk-relic-sub {
+  background: color-mix(in srgb, var(--blk-900) 30%, transparent);
+  border: none;
+  border-radius: 12px;
+  transition: background 0.25s ease;
+}
+.nk-char-page .nk-skill:hover,
+.nk-char-page .nk-eidolon:hover,
+.nk-char-page .nk-ability:hover,
+.nk-char-page .nk-story:hover,
+.nk-char-page .nk-build__team:hover,
+.nk-char-page .nk-build__set:hover,
+.nk-char-page .nk-relic-slot:hover,
+.nk-char-page .nk-relic-sub:hover {
+  background: color-mix(in srgb, var(--blk-900) 24%, transparent);
+  transform: none; box-shadow: none;
+}
+
+.nk-char-page {
+  --nk-skill-rail: 48px;
+  --nk-skill-gutter: 0px;
+  --nk-skill-child-gap: calc(var(--nk-skill-rail) / 2);
+  --nk-skill-child-indent: var(--nk-skill-rail);
+}
+@media (max-width: 767px) {
+  .nk-char-page { --nk-skill-rail: 44px; }
+}
+.nk-char-page .nk-skill__body:has(> .nk-skill__rail) {
+  position: relative;
+  display: grid;
+  grid-template-columns: calc(var(--nk-skill-rail) + var(--nk-skill-gutter)) minmax(0, 1fr);
+  column-gap: 16px;
+}
+.nk-char-page .nk-skill__rail { display: flex; align-items: flex-start; justify-content: flex-end; }
+.nk-char-page .nk-skill__content { min-width: 0; }
+.nk-char-page .nk-skill__body:has(> .nk-skill__rail) > .nk-skill__table-wrap { grid-column: 2 / -1; }
+.nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill__body::before {
+  content: ''; position: absolute; pointer-events: none;
+  left: calc(var(--nk-skill-gutter) + var(--nk-skill-rail) / 2);
+  top: var(--nk-skill-rail);
+  bottom: 0;
+  border-left: 1px solid var(--line-2);
+}
+.nk-char-page .nk-skill--child::before {
+  content: ''; position: absolute; pointer-events: none;
+  left: calc(var(--nk-skill-gutter) + var(--nk-skill-rail) / 2 - var(--nk-skill-child-indent));
+  top: 0; bottom: 0; width: 0;
+  border-left: 1px solid var(--line-2);
+}
+.nk-char-page .nk-skill--child::after {
+  content: ''; position: absolute; pointer-events: none;
+  left: calc(var(--nk-skill-gutter) + var(--nk-skill-rail) / 2 - var(--nk-skill-child-indent));
+  top: calc(var(--nk-skill-child-gap) + var(--nk-skill-rail) / 2);
+  width: calc(var(--nk-skill-rail) / 2);
+  border-top: 1px solid var(--line-2);
+}
+.nk-char-page .nk-skill--child-last::before {
+  top: 0;
+  bottom: auto;
+  box-sizing: border-box;
+  width: calc(var(--nk-skill-rail) / 2);
+  height: calc(var(--nk-skill-child-gap) + var(--nk-skill-rail) / 2);
+  border-bottom: 1px solid var(--line-2);
+  border-bottom-left-radius: 6px;
+}
+.nk-char-page .nk-skill--child-last::after { content: none; }
+
+/* 手机断点：图标列退场、图标回到标题行内联，层级改由子卡上沿虚线分区表达（ADR 0023）。
+   平板/桌面仍走上面的图标列 + 折角线；两套语言按断点互斥，禁止在同一断点并用。 */
+@media (max-width: 767px) {
+  .nk-char-page {
+    --nk-skill-child-indent: 12px;
+  }
+  /* 手机断点卡片体不是网格（图标已换宿主进标题行，body 只剩内容列）：单列全宽 */
+  .nk-char-page .nk-skill__body { display: block; }
+  /* 图标内联是换宿主实现的（见 SkillCard.vue 的 isMobile）：`.nk-skill__rail` 与
+     `.nk-skill__title-row` 是兄弟节点，`display: contents` 只能把图标变成 body 的 grid item，
+     抬不进标题行的 flex 行（实测图标堆在标题行上方、每卡高 44px）。 */
+  .nk-char-page .nk-skill__title-row { align-items: flex-start; }
+  /* 虚线分区的呼吸：子卡 padding-top = 半个图标空间（22px）是线下方空隙，线上方原本只有
+     上一行内容自带的余量（实测 9px）⇒ 父卡内容体补 13px，使虚线上下各 22px 等距。
+     只在手机断点生效，平板/桌面保持原垂直节奏（ADR 0023）。 */
+  .nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill__body { padding-bottom: 13px; }
+  .nk-char-page .nk-skill__body::before,
+  .nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill__body::before,
+  .nk-char-page .nk-skill--child::before,
+  .nk-char-page .nk-skill--child::after,
+  .nk-char-page .nk-skill--child-last::before { content: none; }
+  /* 基础规则的 `border: none` 把上沿重置为 none：只写上沿长写、且特异性不低于它（0,4,1），
+     否则虚线会被简写或权重压掉（两处均在本轮实测回归过）。 */
+  .nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill.nk-skill--child,
+  .nk-char-page .nk-skill.nk-skill--child {
+    margin: 0 0 0 var(--nk-skill-child-indent);
+    padding: var(--nk-skill-child-gap) 0 0;
+    border-top-width: 1px;
+    border-top-style: dashed;
+    border-top-color: var(--line-2);
+  }
+  .nk-char-page .nk-skill.nk-skill--child:hover { border-top-color: var(--line-2); }
+}
+
+.nk-char-page .nk-skill { padding: 24px; margin-bottom: 0; }
+.nk-char-page .nk-skill__need {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  margin-top: 16px; font-size: 0.75rem; line-height: 1.7;
+}
+.nk-char-page .nk-skill__need-label {
+  flex-shrink: 0; font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.05em; font-family: var(--font-hud);
+  padding: 1px 7px; border-radius: 4px;
+  background: color-mix(in srgb, var(--sk-accent) 10%, transparent);
+  color: var(--sk-accent);
+}
+.nk-char-page .nk-skill__need-val { color: var(--text2); }
+.nk-char-page .nk-skill__need-val .hl { color: var(--highlight); font-weight: 700; }
+.nk-char-page .nk-skill__links { margin-top: 16px; }
+.nk-char-page .nk-skill__toggle {
+  display: inline-flex; align-items: center; gap: 8px;
+  position: relative; cursor: pointer;
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--text2);
+  background: color-mix(in srgb, var(--blk-900) 40%, transparent);
+  border: 1px solid var(--line-1);
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.nk-char-page .nk-skill__toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
+.nk-char-page .nk-skill__toggle:hover { color: var(--text-bright); border-color: var(--line-2); }
+.nk-char-page .nk-skill__toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
+.nk-char-page .nk-skill__toggle.open {
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.nk-char-page .nk-skill__toggle.open:hover { border-color: color-mix(in srgb, var(--primary) 60%, transparent); }
+.nk-char-page .nk-skill__toggle.open .arrow { transform: rotate(90deg); }
+.nk-char-page .nk-links-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-char-page .nk-links-clip.open { grid-template-rows: 1fr; }
+.nk-char-page .nk-links-inner { overflow: hidden; min-height: 0; }
+.nk-char-page .nk-skill__link-item {
+  margin-top: 12px; padding: 12px 16px; border-radius: 8px;
+  background: color-mix(in srgb, var(--blk-900) 40%, transparent); border: 1px solid var(--line-1);
+}
+.nk-char-page .nk-skill__link-item + .nk-skill__link-item { margin-top: 8px; }
+.nk-char-page .nk-skill__link-item-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+}
+.nk-char-page .nk-skill__link-item-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: color-mix(in srgb, var(--blk-800) 80%, transparent);
+  flex-shrink: 0; object-fit: contain;
+}
+.nk-char-page .nk-skill__link-item-name {
+  display: block; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em;
+}
+.nk-char-page .nk-skill__link-item--rank .nk-skill__link-item-name { color: var(--primary); }
+.nk-char-page .nk-skill__link-item--tree .nk-skill__link-item-name { color: var(--sk-accent); }
+.nk-char-page .nk-skill__link-item-desc { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
+.nk-char-page .nk-skill__link-item-desc .hl { color: var(--highlight); font-weight: 700; }
+.nk-char-page .nk-skill__metrics { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 16px; }
+.nk-char-page .nk-skill__metric { display: inline-flex; align-items: baseline; gap: 8px; font-size: 0.75rem; margin: 0; }
+.nk-char-page .nk-skill__metric + .nk-skill__metric::before { content: '·'; margin: 0 12px; color: var(--text3); opacity: 0.4; }
+.nk-char-page .nk-skill__metric dt { display: inline; margin: 0; font-size: 0.6875rem; color: var(--text3); }
+.nk-char-page .nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); }
+.nk-char-page .nk-skill__terms {
+  margin-top: 16px; padding: 16px; border-radius: 8px;
+  background: color-mix(in srgb, var(--blk-900) 40%, transparent); border: 1px solid var(--line-1);
+}
+.nk-char-page .nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
+.nk-char-page .nk-term__name { color: var(--highlight); font-weight: 600; }
+.nk-char-page .nk-skill__anim { margin-top: 20px; }
+.nk-char-page .nk-skill__anim-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-char-page .nk-skill__anim-clip.open { grid-template-rows: 1fr; }
+.nk-char-page .nk-skill__anim-inner { overflow: hidden; min-height: 0; }
+.nk-char-page .nk-skill__anim-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.nk-char-page .nk-skill__anim-tab {
+  font-size: 0.625rem; font-weight: 600; padding: 2px 10px;
+  border-radius: 4px; border: 1px solid var(--line-1);
+  background: transparent; color: var(--text3); cursor: pointer;
+  transition: all 0.2s; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nk-char-page .nk-skill__anim-tab:hover { border-color: var(--line-2); color: var(--text2); }
+.nk-char-page .nk-skill__anim-tab.active {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent); color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.nk-char-page .nk-skill__anim-stage {
+  margin-top: 12px; border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--line-1);
+  background: rgba(0,0,0,0.3);
+  aspect-ratio: 960 / 514;
+  position: relative;
+}
+.nk-char-page .nk-skill__anim-img {
+  display: block; width: 100%; height: 100%; object-fit: contain;
+  opacity: 0; transition: opacity 0.4s ease;
+}
+.nk-char-page .nk-skill__anim-stage.loaded .nk-skill__anim-img { opacity: 1; }
+.nk-char-page .nk-skill__anim-ph {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.nk-char-page .nk-skill__anim-ph span {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--primary) 25%, transparent); border-top-color: var(--primary);
+  animation: nk-anim-spin 0.8s linear infinite;
+}
+@keyframes nk-anim-spin { to { transform: rotate(360deg); } }
+.nk-char-page .nk-skill__table-wrap { margin-top: 16px; }
+.nk-char-page .nk-table-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
+.nk-char-page .nk-table-clip.open { grid-template-rows: 1fr; }
+.nk-char-page .nk-table-inner { overflow: hidden; min-height: 0; }
+.nk-char-page .nk-table-clip.open .nk-table-inner { overflow-x: auto; }
+.nk-char-page .nk-table {
+  width: 100%; border-collapse: collapse; margin-top: 12px;
+  font-family: var(--font-hud); font-size: 0.75rem; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.nk-char-page .nk-table th {
+  padding: 8px 12px; color: var(--text3); border-bottom: 1px solid var(--line-1);
+  font-weight: 400; letter-spacing: 0.1em; white-space: nowrap;
+}
+.nk-char-page .nk-table td { padding: 8px 12px; color: var(--text2); border-bottom: 1px solid var(--line-1); white-space: nowrap; }
+.nk-char-page .nk-table td:first-child { color: var(--text3); letter-spacing: 0.04em; }
+.nk-char-page .nk-table tr.nk-table--active td {
+  color: var(--primary); font-weight: 700;
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+.nk-char-page .nk-table tr.nk-table--active td:first-child { color: var(--primary); }
+.nk-char-page .nk-skill:has(> .nk-skill--child) > .nk-skill--child {
+  margin: 0 0 0 var(--nk-skill-child-indent);
+  padding: var(--nk-skill-child-gap) 0 0;
+  border: none; background: none; border-radius: 0;
+}
+.nk-char-page .nk-skill.nk-skill--child:hover { border: none; background: none; }
+.nk-char-page .nk-skill--child .nk-skill__title-row { margin-bottom: 12px; }
+.nk-char-page .nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
+.nk-char-page .nk-skill--child .nk-skill__metrics { margin-top: 12px; }
+.nk-char-page .nk-skill__head { border-bottom-color: var(--line-1); padding-bottom: 12px; margin-bottom: 16px; }
+.nk-char-page .nk-skill__title-row { margin-bottom: 16px; }
+.nk-char-page .nk-skill__type-dot {
+  width: 3px; height: 16px; border-radius: 1.5px;
+  background: var(--sk-accent); opacity: 0.9;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14);
+}
+.nk-char-page .nk-skill__icon {
+  border-color: var(--line-2); border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -6px 12px rgba(0,0,0,0.3);
+  transition: transform 0.25s var(--nk-ease-out);
+}
+.nk-char-page .nk-skill:hover .nk-skill__icon { transform: translateY(-1px); }
+.nk-char-page .nk-skill--child:hover .nk-skill__icon { transform: none; }
+
+.nk-char-page .nk-panel .nk-skill + .nk-skill:not(.nk-skill--child),
+.nk-char-page .nk-panel .nk-ability + .nk-ability,
+.nk-char-page .nk-panel .nk-eidolon + .nk-eidolon,
+.nk-char-page .nk-panel .nk-cmp-rank + .nk-cmp-rank,
+.nk-char-page .nk-panel .nk-cmp-tree + .nk-cmp-tree { margin-top: 20px; }

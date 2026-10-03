@@ -1,0 +1,310 @@
+/* 终局详情页 · 区块原语：区块标题 / 战斗卡片行（半场卡与节点卡）/ 首领特性 / 赛季增益 / 楼层头。
+   拆分块第 2 块（接骨架块之后、敌方卡块之前）。 */
+/* 面板内容与子 tab 行底边之间留白：面板首元素（目标栏 / 星启统计行）紧贴那条发丝线 */
+.nk-egd-level-panel { scroll-margin-top: 16px; padding-top: 20px; }
+
+/* groups 内层是 flex 项：auto 外边距会取消 stretch，必须显式 width:100% 才能维持
+   .nk-egd-buffs / .nk-egd-traits 的 struct-max 宽度（否则各组按内容收缩、宽度不一致） */
+.nk-egd-buffs { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; width: 100%; }
+.nk-egd-groups { display: flex; flex-direction: column; gap: 18px; margin-bottom: 8px; }
+.nk-egd-group { display: flex; flex-direction: column; gap: 10px; }
+/* 分组行头：标题与场次标签同行（场次标签的 align-self 在行内向是顶部对齐，须覆写为居中） */
+.nk-egd-group__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; align-self: stretch; }
+.nk-egd-group__head > * { align-self: center; }
+/* 战斗卡片行（层 tab 的半场卡片 / 星启看板的节点卡片共用）：并列一行（名称 + 末波首领图 + 推荐属性 + 等级），
+   手机端也维持一行。卡片兼作当前战斗的身份位，看板内不再重复名称与属性。 */
+.nk-egd-nodecards {
+  display: flex;
+  gap: 12px;
+}
+.nk-egd-nodecard {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  text-align: left;
+  background: color-mix(in srgb, var(--blk-900) 16%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.nk-egd-nodecard:hover { border-color: var(--line-2); }
+.nk-egd-nodecard--active {
+  border-color: color-mix(in srgb, var(--eg-color) 42%, transparent);
+  background: color-mix(in srgb, var(--eg-color) 12%, transparent);
+}
+.nk-egd-nodecard__fig {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--blk-800) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent);
+  transition: border-color 0.2s ease;
+}
+.nk-egd-nodecard--active .nk-egd-nodecard__fig {
+  border-color: color-mix(in srgb, var(--eg-color) 55%, transparent);
+}
+.nk-egd-nodecard__img { width: 100%; height: 100%; object-fit: cover; }
+.nk-egd-nodecard__body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.nk-egd-nodecard__name { font-weight: 700; color: var(--text-bright); }
+.nk-egd-nodecard--active .nk-egd-nodecard__name { color: var(--eg-color); }
+.nk-egd-nodecard__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.nk-egd-nodecard__label {
+  font-family: var(--font-hud);
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.nk-egd-nodecard__val { font-weight: 700; color: var(--text-bright); }
+.nk-egd-nodecard__elems { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 767px) {
+  /* 一行三卡：卡片内改上下排版（图在上、信息在下），三张按 flex 均分一屏宽，不横滚 */
+  .nk-egd-nodecards { gap: 8px; }
+  .nk-egd-nodecard {
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 6px;
+    text-align: center;
+  }
+  .nk-egd-nodecard__fig { width: 44px; height: 44px; }
+  .nk-egd-nodecard__body { align-items: center; gap: 3px; }
+  .nk-egd-nodecard__row { gap: 4px; }
+  /* 推荐属性：标签单独一行、图标下移（4 枚 14px 图标在 100px 卡宽里放得下） */
+  .nk-egd-nodecard__row--elems { flex-direction: column; gap: 3px; }
+  .nk-egd-nodecard__elems { justify-content: center; gap: 3px; }
+  .nk-egd-nodecard__elems .nk-egd-elem { width: 14px; height: 14px; }
+}
+/* 区块标题 = 章节层级，必须压在它所统领的正文之上（正文 0.84rem）——字体最小的字不该是最外层的标题。
+   下沿发丝线是该区块与下一区块的分节依据，取代原先的填充胶囊。 */
+.nk-egd-group__head {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-2);
+}
+/* 区块标题的统一档位：`.nk-egd-group__title`（赛季增益 / 首领特性）与提为标题的「敌方配置」共用一处声明 */
+.nk-egd-group__title,
+.nk-egd-floor__row--mons > .nk-egd-floor__label {
+  align-self: flex-start;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-bright);
+}
+/* 首领特性整组一张卡片（层 tab 与星启看板同形）：卡形（填充 / 四边描边 / 圆角 / 内距）整组承担，
+   条目自身归零、只靠行距分节——不画分隔线、不加模式色左沿，与赛季增益 / 末法余烬同一套中性卡形。 */
+.nk-egd-traits {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 8px;
+  width: 100%;
+  padding: 16px 18px;
+  background: color-mix(in srgb, var(--blk-900) 12%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+}
+.nk-egd-trait {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nk-egd-trait__name {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+.nk-egd-trait__desc {
+  font-size: 0.84rem;
+  line-height: 1.8;
+  color: var(--text2);
+  max-width: var(--nk-prose-max);
+}
+.nk-egd-trait__desc .hl { color: var(--highlight); font-weight: 700; }
+.nk-egd-title-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: cover;
+  align-self: center;
+  background: var(--blk-800);
+  border: 1px solid var(--line-1);
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+.nk-egd-buff {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  background: color-mix(in srgb, var(--blk-900) 14%, transparent);
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  transition: border-color 0.25s ease, background 0.25s ease;
+  animation: nk-fade 0.35s var(--ease) backwards;
+  animation-delay: min(calc(var(--i, 0) * 70ms), 420ms);
+}
+.nk-egd-buff:hover {
+  border-color: var(--line-2);
+  background: color-mix(in srgb, var(--blk-900) 22%, transparent);
+}
+.nk-egd-buff__head { display: flex; align-items: baseline; gap: 12px; }
+.nk-egd-buff__head { align-items: center; }
+.nk-egd-buff__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--eg-color) 22%, transparent);
+  flex-shrink: 0;
+}
+.nk-egd-buff__icon--sm {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+}
+.nk-egd-buff__name {
+  font-size: 1.0rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+.nk-egd-buff__desc {
+  font-size: 0.84rem;
+  line-height: 1.8;
+  color: var(--text2);
+  max-width: var(--nk-prose-max);
+}
+
+.nk-egd-fury { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
+.nk-egd-fury__mech, .nk-egd-fury__eff { display: flex; flex-direction: column; gap: 8px; }
+.nk-egd-fury__eff .nk-egd-buffs {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+.nk-egd-fury__label {
+  align-self: flex-start;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
+  white-space: nowrap;
+}
+.nk-egd-buff__desc .hl { color: var(--highlight); font-weight: 700; }
+.nk-egd-buff__desc .nowrap { white-space: nowrap; }
+
+.nk-egd-floors {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.nk-egd-floor {
+  position: relative;
+  padding: 20px 4px 24px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  border-top: 1px solid var(--line-1);
+  animation: nk-fade 0.35s var(--ease) backwards;
+  animation-delay: min(calc(var(--i, 0) * 60ms), 480ms);
+}
+.nk-egd-floor:first-child { border-top: none; padding-top: 6px; }
+.nk-egd-floor__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 10px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+.nk-egd-floor__head::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+}
+.nk-egd-floor__head:hover {
+  background: color-mix(in srgb, var(--eg-color) 5%, transparent);
+}
+.nk-egd-floor__title {
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+.nk-egd-floor__data {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+.nk-egd-floor__dataitem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding: 2px 16px;
+  border-left: 1px solid var(--line-1);
+}
+.nk-egd-floor__dataitem:first-child { border-left: none; }
+.nk-egd-floor__dataval {
+  font-family: var(--font-hud);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.nk-egd-floor__datalabel {
+  font-family: var(--font-hud);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.nk-egd-floor__stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+}
+.nk-egd-floor__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex-wrap: wrap;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line-2);
+}
+.nk-egd-floor__row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}

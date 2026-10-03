@@ -1,0 +1,137 @@
+/* 角色详情页 · 页面骨架 / Hero / 属性面板。拆分块 1/6：六块必须按导入顺序级联。 */
+/* 45 = 吸顶条 44 + 1 边框 */
+.nk-char-page.nk-page--detail { padding-top: 45px; }
+.nk-char-page { --nk-panel-pad-top: 24px; --nk-panel-pad-bottom: 40px; }
+@media (min-width: 768px) {
+  .nk-char-page { --nk-panel-pad-top: 32px; --nk-panel-pad-bottom: 48px; }
+}
+/* 源序依赖：须早于 .nk-panel--overview（同权重 0,2,0，后者靠源序置 padding-top: 0） */
+.nk-char-page .nk-panel { display: block; padding-top: var(--nk-panel-pad-top); padding-bottom: var(--nk-panel-pad-bottom); }
+.nk-char-page .nk-panel--overview { padding-top: 0; }
+.nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 32px); max-width: var(--nk-detail-max); margin: 0 -16px 0; }
+@media (min-width: 768px) {
+  .nk-char-page .nk-panel--overview .nk-hero { width: calc(100% + 48px); max-width: var(--nk-detail-max); margin: 0 -24px 0; }
+}
+
+.nk-char-page .nk-hero__visual { aspect-ratio: 4 / 5; box-shadow: none; }
+@media (min-width: 768px) {
+  .nk-char-page .nk-hero__visual { aspect-ratio: 3 / 2; }
+}
+.nk-char-page .nk-hero__bg {
+  background-size: contain;
+  background-position: center 40%;
+}
+.nk-char-page .nk-hero__visual::before {
+  background:
+    linear-gradient(to right, var(--bg) 0%, transparent 10%),
+    linear-gradient(to left, var(--bg) 0%, transparent 14%);
+}
+.nk-char-page .nk-hero__archive {
+  position: absolute; left: 16px; bottom: 16px; z-index: 4;
+  font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700;
+  letter-spacing: 0.3em; color: rgba(255,255,255,0.5);
+  padding: 6px 12px; border-radius: 6px;
+  background: color-mix(in srgb, var(--blk-900) 50%, transparent); border: 1px solid var(--line-1);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  pointer-events: none; user-select: none;
+}
+.nk-char-page .nk-hero__toggle {
+  border-color: var(--line-1); background: color-mix(in srgb, var(--blk-900) 50%, transparent); color: var(--text3);
+}
+.nk-char-page .nk-hero__toggle:hover { border-color: var(--line-2); color: var(--text2); }
+
+.nk-char-page .nk-hero__panel {
+  background: none;
+  border-top: none;
+  padding-top: 32px;
+  gap: 20px;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.nk-char-page ::selection {
+  background: color-mix(in srgb, var(--primary) 32%, transparent);
+  color: var(--text-bright);
+}
+
+.nk-char-page .nk-hero__head { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; min-width: 0; }
+.nk-char-page .nk-hero__meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.nk-char-page .nk-hero__stars + .nk-hero__badge { margin-left: 16px; }
+.nk-char-page .nk-hero__camp { color: var(--text3); white-space: nowrap; }
+.nk-char-page .nk-hero__camp::before { display: none; }
+.nk-char-page .nk-hero__stars {
+  font-size: 0.8rem; letter-spacing: 0.14em;
+  text-shadow: none;
+}
+.nk-char-page .nk-hero__name {
+  font-size: 1.75rem; font-weight: 900; letter-spacing: 0.01em;
+  color: var(--text-bright); text-shadow: none; line-height: 1.12;
+}
+.nk-char-page .nk-hero__badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0;
+  border: none; background: none;
+  font-size: 0.72rem; font-weight: 600; color: var(--text2);
+  letter-spacing: 0.04em; white-space: nowrap;
+  transition: color 0.2s;
+}
+.nk-char-page .nk-hero__badge:hover { color: var(--text-bright); }
+.nk-char-page .nk-hero__badge img { width: 18px; height: 18px; }
+
+.nk-char-page .nk-hero__badge--enh {
+  padding: 5px 10px 5px 7px; border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--gold-sem) 32%, transparent);
+  background: color-mix(in srgb, var(--gold-sem) 7%, transparent);
+  color: var(--gold-sem);
+  position: relative;
+}
+.nk-char-page .nk-hero__badge--enh:hover {
+  border-color: color-mix(in srgb, var(--gold-sem) 55%, transparent);
+  background: color-mix(in srgb, var(--gold-sem) 11%, transparent);
+}
+.nk-char-page .nk-hero__badge--enh::after { content: ''; position: absolute; left: -6px; right: -6px; top: -8px; bottom: -8px; }
+.nk-char-page .nk-hero__badge-mark {
+  width: 4px; height: 4px; flex-shrink: 0;
+  background: var(--gold-sem); opacity: 0.85;
+}
+
+.nk-char-page .nk-hero__desc {
+  border-left: none; padding: 0;
+  font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
+  max-width: 560px;
+}
+
+.nk-char-page .nk-stats {
+  display: block;
+  max-width: var(--nk-struct-max); margin: 0 auto;
+}
+.nk-char-page .nk-stats__grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 40px;
+}
+.nk-char-page .nk-stats__stat {
+  display: grid; grid-template-columns: 15px 1fr auto; align-items: center; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--line-1);
+}
+.nk-char-page .nk-stats__stat:nth-child(4n) { border-bottom: none; }
+.nk-char-page .nk-stats__icon { width: 15px; height: 15px; opacity: 0.9; }
+.nk-char-page .nk-stats__label { font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em; }
+.nk-char-page .nk-stats__val {
+  font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700;
+  color: var(--text-bright); text-align: right; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-char-page .nk-stats__level { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
+.nk-char-page .nk-stats__level-label {
+  font-family: var(--font-hud); font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.08em; color: var(--text3); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.nk-char-page .nk-stats__level-track {
+  flex: 1; height: 3px; border-radius: 2px; overflow: hidden;
+  background: rgba(255,255,255,0.06);
+}
+.nk-char-page .nk-stats__level-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--th-400));
+}
+

@@ -1,0 +1,88 @@
+/* 终局详情页 · 排版刻度收口：字号五档 + 4px 间距节奏。
+   拆分块第 7 块，**必须最后导入**：本块在同特异性下覆写前六块的字号与间距声明
+   （曾在同文件末尾承担同一职责，见 ADR 0034）。 */
+/* ─── 排版刻度收口（终局详情页）：字号五档 + 4px 间距节奏 ───
+   字号：看板节点头 1.02 / 卡片标题 0.95 / 次级标题 0.88 / 正文 0.84 / 区块标题 0.78 /
+   行首标签·小字正文 0.72 / 值下注脚·计数·标签 0.68 / 状态徽标 0.62。
+   **区块标题（0.78）必须高于它所统领的正文（0.84）之下的标签档**——标题是章节层级，
+   比正文最小的一档还小属层级倒挂（原为 0.68rem/字距 0.14em，已修）。
+   刻度外的既有契约（ADR 0028 父子层级刻度，e2e 钉住）：`__stagelabel` 0.72、`__wavelabel` 0.66、
+   `.nk-egd-children` 缩进 16px（手机 12px）——不随本刻度调整。
+   间距：卡片内边距 16px 18px；同族卡片列表 gap 10px；区块间 16px；大区块之间 24px（窄屏 18px 由断点块承担）。
+   本节声明在既有 `max-width: 767px` 块之后，故手机值必须在本节末重述，否则会被桌面值覆盖。 */
+.nk-egd-buff__name,
+.nk-egd-trait__name,
+.nk-egd-floor__buffname,
+.nk-egd-poll__levelno { font-size: 0.95rem; }
+
+.nk-egd-mon__name,
+.nk-egd-poll__pos,
+.nk-egd-poll__badge,
+.nk-egd-floor__dataval,
+.nk-egd-reward__name,
+.nk-egd-nav__id { font-size: 0.88rem; }
+
+.nk-egd-node__text,
+.nk-egd-reward__goal { font-size: 0.84rem; }
+
+.nk-egd-floor__label,
+.nk-egd-floor__targetidx,
+.nk-egd-fury__label,
+.nk-egd-mon__label,
+.nk-egd-summons__label,
+.nk-egd-poll__monslabel,
+.nk-egd-head__label { font-size: 0.72rem; }
+
+/* 字档收口：区块标题压在正文（0.84rem）之上，标签档低于正文，数值档高于标签。 */
+.nk-egd-group__title { font-size: 0.78rem; }
+
+.nk-egd-nodecard__label,
+.nk-egd-floor__datalabel,
+.nk-egd-rules__label,
+.nk-egd-hero__sid,
+.nk-egd-code,
+.nk-egd-mon__tag,
+.nk-egd-mon__none,
+.nk-egd-mon__resval,
+.nk-egd-mon__skill,
+.nk-egd-mon__rank,
+.nk-egd-tierce__label,
+.nk-egd-reward__num { font-size: 0.68rem; }
+.nk-egd-floor__moncount,
+.nk-egd-pollchip { font-size: 0.62rem; }
+.nk-egd-nodecard__val { font-size: 0.86rem; }
+
+.nk-egd-mon__intro { font-size: 0.72rem; }
+
+/* 等级词条行头在窄屏换行；绑定码是长 token（ChallengePeakBattle_…），字档抬高后必须允许断行 */
+.nk-egd-poll__levelhead { flex-wrap: wrap; }
+.nk-egd-code { white-space: normal; overflow-wrap: anywhere; }
+
+.nk-egd-buff { padding: 16px 18px; gap: 8px; }
+.nk-egd-buffs { gap: 10px; }
+.nk-egd-group > .nk-egd-buffs,
+.nk-egd-group > .nk-egd-traits { margin-bottom: 0; }
+.nk-egd-poll__list { gap: 10px; }
+.nk-egd-poll__item { padding: 12px 14px; }
+.nk-egd-floor__row { padding: 10px 0; }
+.nk-egd-mon__rows { gap: 8px; }
+
+@media (max-width: 767px) {
+  .nk-egd-floor__targetidx { font-size: 0.78rem; }
+  .nk-egd-hero__sid,
+  .nk-egd-mon__rank,
+  .nk-egd-mon__tag,
+  .nk-egd-mon__none,
+  .nk-egd-mon__resval,
+  .nk-egd-mon__skill { font-size: 0.7rem; }
+  .nk-egd-mon__label,
+  .nk-egd-summons__label,
+  .nk-egd-mon__intro { font-size: 0.72rem; }
+  .nk-egd-node__text { font-size: 0.9rem; }
+  .nk-egd-head__label { font-size: 0.72rem; }
+  .nk-egd-reward__goal { font-size: 0.84rem; }
+  .nk-egd-reward__name { font-size: 0.88rem; }
+  .nk-egd-reward__num { font-size: 0.76rem; }
+  .nk-egd-nav__id { font-size: 0.9rem; }
+  .nk-egd-nodecard__name { font-size: 0.84rem; }
+}

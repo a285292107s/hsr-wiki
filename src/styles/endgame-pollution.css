@@ -1,0 +1,155 @@
+/* 终局详情页 · 污染等级（ADR 0026）与召唤物（ADR 0036）：徽标 / 赛季汇总区块 / 召唤列表。
+   拆分块第 6 块（接断点与刻度块之后、排版收口块之前）。 */
+/* ─── 污染等级（ADR 0026）：楼层头 / 半场 / 单关徽标 + 赛季汇总区块 ─── */
+.nk-egd-pollchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-family: var(--font-hud);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: var(--vor-300);
+}
+.nk-egd-code {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+
+.nk-egd-poll { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
+.nk-egd-poll__levels { display: flex; flex-direction: column; gap: 10px; }
+.nk-egd-poll__level {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  background: color-mix(in srgb, var(--blk-900) 14%, transparent);
+}
+.nk-egd-poll__levelhead { display: flex; align-items: center; gap: 10px; }
+.nk-egd-poll__levelicon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--blk-800);
+  border: 1px solid var(--line-1);
+  flex-shrink: 0;
+}
+.nk-egd-poll__levelno {
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-bright);
+}
+.nk-egd-poll__leveldesc {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.75;
+  color: var(--text2);
+}
+.nk-egd-poll__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nk-egd-poll__item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  background: color-mix(in srgb, var(--blk-900) 10%, transparent);
+}
+.nk-egd-poll__pos {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+.nk-egd-poll__mons {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+.nk-egd-poll__monslabel {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+}
+.nk-egd-poll__mon,
+.nk-egd-summon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text2);
+  transition: color 0.2s ease;
+}
+.nk-egd-poll__mon:hover,
+.nk-egd-summon:hover { color: var(--text-bright); }
+.nk-egd-poll__monicon,
+.nk-egd-summon__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--blk-800);
+  border: 1px solid var(--line-1);
+  flex-shrink: 0;
+}
+.nk-egd-poll__monname,
+.nk-egd-summon__name { font-size: 0.8rem; }
+/* 召唤物列表（ADR 0036 修订）：挂在**召唤者自己的**敌方卡片 / 图标格里——归属由 converter 按
+   敌方实例的 `MonsterConfig.SummonIDList` 算好，前端不做 join。条目复用赛季级被污染怪物行那套
+   原语（`.nk-egd-poll__mon*`），受污染者挂 `.nk-egd-pollchip`（未挂即未受污染）。 */
+.nk-egd-summons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.nk-egd-summons__label {
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  color: var(--text3);
+}
+/* 敌方卡内与「弱点/抗性」「技能」同构：整段上方发丝线 + 上内距（卡内分区语言） */
+.nk-egd-mon__data > .nk-egd-summons {
+  padding-top: 12px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-egd-summon__list {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-width: 0;
+}
+.nk-egd-poll__more { margin: 0; font-size: 0.82rem; }
+.nk-egd-poll__badge { color: var(--vor-300); font-weight: 700; }
+.nk-egd-poll__link {
+  color: var(--vor-300);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--vor-500) 45%, transparent);
+  padding-bottom: 1px;
+}
+.nk-egd-poll__link:hover { border-bottom-color: color-mix(in srgb, var(--vor-500) 70%, transparent); }
+
+@media (max-width: 767px) {
+  .nk-egd-poll__mons { margin-left: 0; }
+}

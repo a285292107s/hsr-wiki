@@ -65,7 +65,13 @@ export const currencyRolePage: CatalogPageConfig = {
   searchPlaceholder: '搜索角色…',
   gridClass: 'nk-cat-grid nk-crole-grid',
   cardClass: '.nk-crole-card',
-  styles: [loadCwCatalogCss, () => import('../../../../src/styles/currency-role.css')],
+  /* 拆分块须按级联顺序串行加载（styles 数组各 loader 并行执行，顺序不保） */
+  styles: [loadCwCatalogCss, async () => {
+    await import('../../../../src/styles/currency-role-hero.css');
+    await import('../../../../src/styles/currency-role-sections.css');
+    await import('../../../../src/styles/currency-role-gear.css');
+    await import('../../../../src/styles/currency-role-skills.css');
+  }],
   async fetchData() {
     const { roles } = await loadLocalCurrencyRoles();
     // 开拓者：设置选女性时头像用 female_avatar_id（GridFightGenderOverride 映射，仅立绘切换）

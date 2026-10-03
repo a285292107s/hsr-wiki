@@ -93,7 +93,7 @@
 |---|---|
 | 禁 head 渐变 / 禁 box-shadow 发光（glow）/ 禁 `backdrop-filter` 徽章胶囊 / 禁虚线分隔（发丝线取代）；hover 只允许边框提亮 + 墨色阴影，**禁位移与 scale**（虚拟滚动中重渲染单元格会抖动） | `src/styles/achievement.css` |
 | 禁霓虹 glow 阴影（`0 0 Npx`）/ 禁渐变填充徽章；hover 仅发丝边框 + 墨色分层阴影 | `src/styles/currency-catalog.css` |
-| CW 详情层不设 glow 变量；阴影以物理黑投影 `rgba(0,0,0,…)` 为主；强调色只用纯色 / 淡底 / 发丝线 | `src/styles/currency-role.css` |
+| CW 详情层不设 glow 变量；阴影以物理黑投影 `rgba(0,0,0,…)` 为主；强调色只用纯色 / 淡底 / 发丝线 | `src/styles/currency-role-*.css`（hero / sections / gear / skills 四拆分块） |
 | 无发光点 / 无药丸胶囊 / 无 box-shadow 堆叠；徽标走文字式 | `src/styles/endgame.css` |
 | 枢纽页品牌带之上禁新增行情式装饰（霓虹 glow / 金币雨 / 行情板 / div 合成装饰 / 装饰字符 / em-dash / 装饰性 eyebrow）；**禁补回全屏媒体层**（背景视频 / poster / KV Spine / 立绘轮播），恢复前必须先改 [ADR 0018](../adr/0018-枢纽页改为工具化入口页.md) | `src/styles/currency-hub.css`、`src/styles/tokens.css` |
 | 纸感颗粒禁纤维与云斑（会生成可被眼锁定的条纹与脏 blob = 机器感来源）；唯一收口、禁止页面级复制 | `src/styles/tokens.css` |
@@ -102,7 +102,7 @@
 
 页面级设计语言（直角系 / 圆角三档 / 材质与栏目结构）就近写在各自 CSS 头部注释，**改页面视觉前先读该页面 CSS 头部**。
 
-**有意豁免登记 · 技能卡子卡虚线分区**：`src/styles/character.css` 在 `max-width: 767px` 块内用 `border-top: 1px dashed var(--line-2)` 表达技能族层级（子卡上沿；父卡与单卡族不加线），与上表「禁虚线分隔」相抵。判据 = **该虚线承载同族层级语义，不是装饰性分隔**（出处：`src/styles/character.css` 的手机断点块 + [ADR 0023](../adr/0023-手机断点技能卡改回虚线分区.md)），且与 `character.css` 既有 3 处虚线（技能故事 / 对比模式）同类。**豁免不扩展到**成就页与其它页面的装饰性分隔——上表该行对它们继续有效。
+**有意豁免登记 · 技能卡子卡虚线分区**：`src/styles/character-skills.css`（`character.css` 拆分后的技能块）在 `max-width: 767px` 块内用 `border-top: 1px dashed var(--line-2)` 表达技能族层级（子卡上沿；父卡与单卡族不加线），与上表「禁虚线分隔」相抵。判据 = **该虚线承载同族层级语义，不是装饰性分隔**（出处：`character-skills.css` 的手机断点块 + [ADR 0023](../adr/0023-手机断点技能卡改回虚线分区.md)），且与技能故事（`character-skills.css`）/ 对比模式（`character-compare.css`）既有 3 处虚线同类。**豁免不扩展到**成就页与其它页面的装饰性分隔——上表该行对它们继续有效。
 
 ## 8. 视觉验收（UI 侧入口）
 

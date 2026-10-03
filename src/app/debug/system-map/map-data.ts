@@ -173,7 +173,7 @@ export const EDGES: MapEdge[] = [
   { id: 'theme-styles', from: 'theme', to: 'styles', kind: 'theme', label: 'data-accent → 令牌变量',
     files: ['src/lib/theme.ts', 'src/styles/tokens.css'] },
   { id: 'styles-views', from: 'styles', to: 'detail', kind: 'theme', label: '页面 CSS 随路由懒加载',
-    files: ['src/app/views/CharacterView.vue', 'src/styles/character.css', 'src/styles/skill-card.css'] },
+    files: ['src/app/views/CharacterView.vue', 'src/styles/character-hero.css', 'src/styles/character-skills.css', 'src/styles/character-builds.css', 'src/styles/character-enhance.css', 'src/styles/character-compare.css', 'src/styles/character-skeleton.css', 'src/styles/skill-card.css'] },
   { id: 'converter-data', from: 'converter', to: 'data', kind: 'build', label: 'convert.py 产出 JSON',
     files: ['tools/converter/convert.py', 'tools/converter/converters/characters.py'] },
   { id: 'vercel-deploy', from: 'vercel', to: 'entry', kind: 'build', label: '构建产物部署',

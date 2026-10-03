@@ -25,7 +25,11 @@ import type {
   CurrencyRoleDetail, CurrencyRoleStar,
   CurrencyRoleRank, CharacterData, CurrencyPropIconMap, LocalLightConeEntry,
 } from '../../services/types';
-import '../../styles/currency-role.css';
+/* 拆分块按级联顺序导入，不得乱序 */
+import '../../styles/currency-role-hero.css';
+import '../../styles/currency-role-sections.css';
+import '../../styles/currency-role-gear.css';
+import '../../styles/currency-role-skills.css';
 
 const route = useRoute();
 const roleId = computed(() => String(route.params.id));
