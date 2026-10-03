@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * spine-manifest 双清单回退链回归锁
  *

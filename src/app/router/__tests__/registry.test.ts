@@ -12,9 +12,12 @@ describe('site map consistency', () => {
     for (const item of items) {
       const r = router.resolve(item.path);
       expect(r.matched.length, `nav path "${item.path}" should match a route`).toBeGreaterThan(0);
+      // catch-all 兜底让拼错路径也 matched > 0，须排除 404 兜底记录才算注册成功
+      expect(r.name, `nav path "${item.path}" should not fall through to the not-found catch-all`).not.toBe('not-found');
       for (const ap of item.activePaths || []) {
         const ra = router.resolve(ap);
         expect(ra.matched.length, `nav activePath "${ap}" should match a route`).toBeGreaterThan(0);
+        expect(ra.name, `nav activePath "${ap}" should not fall through to the not-found catch-all`).not.toBe('not-found');
       }
     }
   });

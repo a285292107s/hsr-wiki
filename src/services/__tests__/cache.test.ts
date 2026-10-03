@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * cache.ts 请求缓存引擎测试（内存 L1 + in-flight 去重 + 网络）
  *

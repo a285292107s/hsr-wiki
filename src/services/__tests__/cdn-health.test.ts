@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * CDN 健康探测模块单测。
  * - 探测成功：cdnDown 保持 false，不触发订阅（未发生过 down）

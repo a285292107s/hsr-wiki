@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { bossTraitDescHtml, seasonBuffList, seasonRules } from '../renders';
 import { buildEndgameSections, sectionIdxMap } from '../sections';

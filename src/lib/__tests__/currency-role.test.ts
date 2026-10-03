@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * lib/currency-role.ts 纯函数单元测试
  * 合成 fixture（结构对齐 CurrencyRoleDetail 类型），不依赖真实数据。

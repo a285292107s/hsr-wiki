@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * compare.ts（对比模式纯函数）单元测试
  * 内联 fixture 参照本地转换数据真实结构手工构造（ID 前缀规则：强化 ID = base ID + 1000000）。

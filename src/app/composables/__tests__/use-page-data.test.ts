@@ -1,3 +1,5 @@
+// 数据加载编排测试：fake timers + Vue 响应式，loader 全部注入，不依赖 DOM
+// @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePageData } from '../use-page-data';
 

@@ -1,3 +1,5 @@
+// 纯函数测试（版本过滤/分区构建），不依赖 DOM
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import {
   buildReleaseSections,

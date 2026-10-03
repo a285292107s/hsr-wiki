@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * services/api API 层测试
  * 内联 fixture 参照真实响应结构手工构造（manifest / spine manifest 的 "bg|a|b" 多段格式）。

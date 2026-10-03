@@ -1,3 +1,5 @@
+// 验收编排测试：AcceptBridge 全 fake，时钟走真实定时器，不依赖 DOM
+// @vitest-environment node
 import { describe, expect, it, vi } from 'vitest';
 import { useKvAcceptance, type AcceptBridge } from '../use-kv-acceptance';
 

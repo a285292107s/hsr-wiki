@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * 技能族推导（skill-family.ts）契约测试（ADR 0022）。
  * 必须读真实数据 public/data/cn/characters/*.json：全量不变量是「换分组不丢技能」的端到端哨兵，禁止改用纯手写夹具。

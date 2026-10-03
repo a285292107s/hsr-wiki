@@ -1,3 +1,5 @@
+// atlas 解析/像素统计/诊断建议纯函数测试，不依赖 DOM
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import {
   analyzePixels, buildDiagnosis, createAuditEntry, parseAtlasPages,

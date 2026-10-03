@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * format.ts 纯函数单元测试
  * 内联 fixture 参照本地转换数据真实结构手工构造（测试不读取数据文件，运行时更不依赖）。

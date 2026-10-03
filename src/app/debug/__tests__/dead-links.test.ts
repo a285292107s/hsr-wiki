@@ -1,3 +1,5 @@
+// 死链审计纯逻辑测试：fetch/哈希/时钟全部注入式替换，不依赖 DOM
+// @vitest-environment node
 import { describe, expect, it, vi } from 'vitest';
 import {
   CacheFile,

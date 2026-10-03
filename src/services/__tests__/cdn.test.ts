@@ -241,7 +241,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     vi.useRealTimers();
   });
 
-  it('捕获 <img> 的 error 事件并替换为回退源，仅回退一次', () => {
+  it('捕获 <img> 的 error 事件并替换为回退源，仅回退一次；回退源再失败 → 降级 + 占位顶替', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
     img.setAttribute('data-cdn-fallback', 'https://fb.example/x.webp');
@@ -251,8 +251,10 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.src).toBe('https://fb.example/x.webp');
       expect(img.hasAttribute('data-cdn-fallback')).toBe(false);
-      // 再次触发 error：属性已清除，不再替换（防回退源循环）→ 终态占位图形顶替失败的回退源
+      // 再次触发 error：属性已清除，不再替换（防回退源循环）→ 终态降级 + 占位图形顶替失败的回退源
       img.dispatchEvent(new Event('error', { bubbles: true }));
+      expect(img.dataset.cdnDown).toBe('1');
+      // 回退源是最终失败的那一个：原回退 URL 存 dataset.cdnSrc 供恢复链还原
       expect(img.dataset.cdnSrc).toBe('https://fb.example/x.webp');
       expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     } finally {
@@ -378,25 +380,6 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     }
   });
 
-  it('回退源再失败 → 标记 data-cdn-down', () => {
-    const off = installCdnImgFallback();
-    const img = document.createElement('img');
-    img.setAttribute('data-cdn-fallback', 'https://fb.example/x.webp');
-    img.src = 'https://primary.example/x.webp';
-    document.body.appendChild(img);
-    try {
-      img.dispatchEvent(new Event('error', { bubbles: true }));
-      img.dispatchEvent(new Event('error', { bubbles: true }));
-      expect(img.dataset.cdnDown).toBe('1');
-      // 回退源是最终失败的那一个：占位图形顶替它，原回退 URL 存进 dataset.cdnSrc 供恢复链还原
-      expect(img.dataset.cdnSrc).toBe('https://fb.example/x.webp');
-      expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
-    } finally {
-      off();
-      img.remove();
-    }
-  });
-
   it('本地主源 img 失败：现场反查远端主源回退（不依赖 data-cdn-fallback 属性），远端再失败最终降级', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
@@ -505,7 +488,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     img.remove();
   });
 
-  it('挂起超时：img 长时间未 complete → 走同一回退链（替换 fallback）', async () => {
+  it('挂起超时：img 长时间未 complete → 走同一回退链（有 fallback 替换 / 无 fallback 降级占位）', async () => {
     vi.useFakeTimers();
     const off = installCdnImgFallback();
     const img = document.createElement('img');
@@ -517,24 +500,18 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS + 100);
     expect(img.src).toBe('https://fb.example/x.webp');
     expect(img.hasAttribute('data-cdn-fallback')).toBe(false);
-    off();
-    img.remove();
-  });
-
-  it('挂起超时：无回退属性的首选源 img → 标记 data-cdn-down 并换占位图形', async () => {
-    vi.useFakeTimers();
-    const off = installCdnImgFallback();
-    const img = document.createElement('img');
-    Object.defineProperty(img, 'complete', { configurable: true, value: false });
-    img.src = 'https://primary.example/x.webp';
-    document.body.appendChild(img);
+    // 无回退属性的首选源挂起：标记降级 + 上占位（真挂起与真失败在视觉上同解），原 URL 留待 CDN 恢复重载
+    const img2 = document.createElement('img');
+    Object.defineProperty(img2, 'complete', { configurable: true, value: false });
+    img2.src = 'https://primary.example/x.webp';
+    document.body.appendChild(img2);
     await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS + 100);
-    expect(img.dataset.cdnDown).toBe('1');
-    // 挂起路线也上占位（真挂起与真失败在视觉上同解），原 URL 留待 CDN 恢复重载
-    expect(img.dataset.cdnSrc).toBe('https://primary.example/x.webp');
-    expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
+    expect(img2.dataset.cdnDown).toBe('1');
+    expect(img2.dataset.cdnSrc).toBe('https://primary.example/x.webp');
+    expect(img2.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     off();
     img.remove();
+    img2.remove();
   });
 
   it('挂起检测跳过未开始加载的 lazy 图（屏外不启动定时器，不误标降级）', async () => {
