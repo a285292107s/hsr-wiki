@@ -1,53 +1,28 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';
-import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
+import { useDetailView } from '../composables/use-detail-view';
 import {
   avatarRoundIconUrl, fmtDesc, fmtVal, gameTagsToHtml, iconImgAttrs, itemName, lightconeIconUrl, pathIconUrl,
 } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { loadLocalCharacterList } from '../../services/api';
-import { PATH, SITE_NAME } from '../../lib/constants';
+import { PATH } from '../../lib/constants';
 import type { LightConeStats } from '../../services/types';
 import '../../styles/skill-card.css';
 import '../../styles/lightcone.css';
 
-const route = useRoute();
 const app = useAppStore();
 const lc = useLightconeStore();
 
-
-const phase = computed<'loading' | 'error' | 'ready'>(() =>
-  lc.error ? 'error' : lc.data ? 'ready' : 'loading',
-);
-const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
+const { phase, showSkeleton, retry } = useDetailView({
+  hasData: () => !!lc.data,
+  error: () => lc.error,
+  currentId: () => lc.lcId,
+  load: (id) => lc.load(id),
+});
 const d = computed(() => lc.data);
-watch(d, (data) => {
-  if (data) document.title = `${data.name} - ${SITE_NAME}`;
-});
-
-async function load(id: string): Promise<void> {
-  try {
-    await lc.load(id);
-  } catch {
-    app.toast('error', `加载失败: ${lc.error || '未知错误'}`);
-  }
-}
-function retry(): void {
-  void load(String(route.params.id || ''));
-}
-
-onMounted(() => {
-  void load(String(route.params.id || ''));
-});
-watch(
-  () => route.params.id,
-  (id) => {
-    if (id && String(id) !== lc.lcId) void load(String(id));
-  },
-);
 
 const stars = computed(() => (d.value ? '★'.repeat(d.value.rarity) : ''));
 const figureUrl = computed(() =>

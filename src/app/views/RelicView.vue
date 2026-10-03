@@ -1,49 +1,22 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useAppStore } from '../stores/app';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useRelicStore } from '../stores/relic';
 import { fmtDesc, itemIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
-import { PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES, SITE_NAME } from '../../lib/constants';
+import { PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES } from '../../lib/constants';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
-import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
+import { useDetailView } from '../composables/use-detail-view';
 import '../../styles/relic.css';
 
-const route = useRoute();
-const app = useAppStore();
 const relic = useRelicStore();
 
-
-const phase = computed<'loading' | 'error' | 'ready'>(() =>
-  relic.error ? 'error' : relic.data ? 'ready' : 'loading',
-);
-const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
+const { phase, showSkeleton, retry } = useDetailView({
+  hasData: () => !!relic.data,
+  error: () => relic.error,
+  currentId: () => relic.relicId,
+  load: (id) => relic.load(id),
+});
 const d = computed(() => relic.data);
-watch(d, (data) => {
-  if (data) document.title = `${data.name} - ${SITE_NAME}`;
-});
-
-async function load(id: string): Promise<void> {
-  try {
-    await relic.load(id);
-  } catch {
-    app.toast('error', `加载失败: ${relic.error || '未知错误'}`);
-  }
-}
-function retry(): void {
-  void load(String(route.params.id || ''));
-}
-
-onMounted(() => {
-  void load(String(route.params.id || ''));
-});
-watch(
-  () => route.params.id,
-  (id) => {
-    if (id && String(id) !== relic.relicId) void load(String(id));
-  },
-);
 
 const figureUrl = computed(() => (d.value ? itemIconUrl(d.value.icon) : ''));
 const isCavern = computed(() => (d.value?.require_num || []).includes(4));

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useAppStore } from '../stores/app';
 import { useCharacterStore } from '../stores/character';
-import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
+import { useDetailView } from '../composables/use-detail-view';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import CharHero from '../character/CharHero.vue';
 import StatsPanel from '../character/StatsPanel.vue';
@@ -13,50 +12,33 @@ import EidolonsPanel from '../character/EidolonsPanel.vue';
 import BuildsPanel from '../character/BuildsPanel.vue';
 import ComparePanel from '../character/ComparePanel.vue';
 import { visibleSections, SECTION_IDX } from '../character/sections';
-import { SITE_NAME } from '../../lib/constants';
 import { loadSkillAnimations } from '../../services/api';
 import { gameTagsToHtml } from '../../lib/format';
 import type { CharacterData, SkillAnimationsDb } from '../../services/types';
 import '../../styles/skill-card.css';
-import '../../styles/character.css';
+/* 拆分块按级联顺序导入，不得乱序 */
+import '../../styles/character-hero.css';
+import '../../styles/character-skills.css';
+import '../../styles/character-builds.css';
+import '../../styles/character-enhance.css';
+import '../../styles/character-compare.css';
+import '../../styles/character-skeleton.css';
 
-const route = useRoute();
 const app = useAppStore();
 const char = useCharacterStore();
 
-
-const phase = computed<'loading' | 'error' | 'ready'>(() =>
-  char.error ? 'error' : char.data ? 'ready' : 'loading',
-);
-const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
-watch(() => char.data, (data) => {
-  if (data) document.title = `${data.name} - ${SITE_NAME}`;
+const { phase, showSkeleton, retry } = useDetailView({
+  hasData: () => !!char.data,
+  error: () => char.error,
+  currentId: () => char.charId,
+  load: (id) => char.load(id),
+  onLoaded: () => {
+    loadSkillAnimations().then((db) => { animDb.value = db; }).catch(() => {});
+  },
 });
 const d = computed<CharacterData | null>(() => char.renderData);
 
 const animDb = ref<SkillAnimationsDb | null>(null);
-
-async function load(id: string): Promise<void> {
-  try {
-    await char.load(id);
-    loadSkillAnimations().then((db) => { animDb.value = db; }).catch(() => {});
-  } catch {
-    app.toast('error', `加载失败: ${char.error || '未知错误'}`);
-  }
-}
-function retry(): void {
-  void load(String(route.params.id || ''));
-}
-
-onMounted(() => {
-  void load(String(route.params.id || ''));
-});
-watch(
-  () => route.params.id,
-  (id) => {
-    if (id && String(id) !== char.charId) void load(String(id));
-  },
-);
 
 const enhNotes = computed<string[]>(() => {
   if (!char.enhKey || !char.data) return [];
