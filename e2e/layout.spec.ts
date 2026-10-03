@@ -2467,6 +2467,47 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
+  // 缺陷史：属性网格是三列，但第 3 项命中基线 `.nk-hero__stat:last-child:nth-child(odd) { grid-column: 1/-1 }`
+  // （两列网格的「末项满行」规则），DEF 被挤成独立整行。此处钉住「三项同行成列 + 网格不横溢」。
+  test('/lightcone：hero 属性三项同行成列，窄屏回落两列且 DEF 满行，无溢出', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const cones = readJson<Record<string, { id: number }>>('public/data/cn/light_cones.json');
+    const lcId = Object.values(cones)[0].id;
+    const grid = page.locator('.nk-hero__stats--lc');
+    const stats = grid.locator('> .nk-hero__stat');
+    const boxes = () =>
+      stats.evaluateAll((els) =>
+        els.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { top: Math.round(r.top), left: Math.round(r.left), width: Math.round(r.width) };
+        }),
+      );
+    const spill = () => grid.evaluate((el) => el.scrollWidth - el.clientWidth);
+
+    for (const width of [1440, 375]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/lightcone/${lcId}`);
+      await expect(stats).toHaveCount(3);
+      const b = await boxes();
+      expect(new Set(b.map((x) => x.top)).size, `${width}px：三项须同一行`).toBe(1);
+      expect(b[1].left, `${width}px：ATK 须在 HP 右侧`).toBeGreaterThan(b[0].left);
+      expect(b[2].left, `${width}px：DEF 须在 ATK 右侧`).toBeGreaterThan(b[1].left);
+      expect(await spill(), `${width}px：属性网格不得横向溢出`).toBeLessThanOrEqual(1);
+      await noUnknownOverflow(page);
+    }
+
+    // <360px：三列放不下 → 回落两列，DEF 独占第二行满宽（不得横溢）
+    await page.setViewportSize({ width: 320, height: 720 });
+    await page.goto(`/lightcone/${lcId}`);
+    await expect(stats).toHaveCount(3);
+    const b = await boxes();
+    expect(b[0].top, '320px：HP 与 ATK 同行').toBe(b[1].top);
+    expect(b[2].top, '320px：DEF 应落到第二行').toBeGreaterThan(b[0].top);
+    expect(b[2].width, '320px：DEF 应满行').toBeGreaterThan((await grid.evaluate((el) => el.clientWidth)) * 0.8);
+    expect(await spill(), '320px：属性网格不得横向溢出').toBeLessThanOrEqual(1);
+    assertNoErrors();
+  });
+
   // 竖轨几何只在 ≥768px 存在，故本用例钉桌面视口（否则 mobile-chromium project 会跑到无竖轨的断点上）
   test('/character/1503：展开技能数据表后，竖轨与表盒（含首列）不相交、表盒不出卡片内容区', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);

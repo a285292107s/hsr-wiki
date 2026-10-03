@@ -26,7 +26,14 @@
     color-mix(in srgb, var(--lc-r, var(--rarity-5)) 15%, transparent) 0%,
     transparent 72%);
 }
-.nk-hero__stats--lc { grid-template-columns: repeat(3, 1fr); }
+/* 光锥属性恒为 HP/ATK/DEF 三项：宽屏一行三列，需解除基线两列网格「末项满行」规则，
+   否则第 3 项（DEF）会被 grid-column: 1/-1 挤到独立整行；窄屏放不下三列时回落两列并保留满行。 */
+.nk-hero__stats--lc { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.nk-hero__stats--lc .nk-hero__stat:last-child:nth-child(odd) { grid-column: auto; }
+@media (max-width: 359px) {
+  .nk-hero__stats--lc { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nk-hero__stats--lc .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
 .nk-lc-lv {
   margin-left: auto;
   font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
