@@ -36,6 +36,8 @@ const PAGES = [
   { path: '/character/1001', label: '角色详情', wait: () => (page: Page) => waitForCatalogCards(page, '.nk-hero--char') },
   // 等光锥 hero 面板出现即数据就绪（入口数据首条 = 首个 3★ 光锥 id 20000）
   { path: '/lightcone/20000', label: '光锥详情', wait: () => (page: Page) => page.waitForSelector('.nk-hero--lc', { timeout: 15_000 }) },
+  // 适配角色区块只在「该光锥有官方推荐记录」时渲染（20000 是空态）：另取一份带 chip 的样本单独扫
+  { path: '/lightcone/24000', label: '光锥详情·适配角色', wait: () => (page: Page) => page.waitForSelector('.nk-lc-adapt__item', { timeout: 15_000 }) },
   { path: '/endgame', label: '终局内容', wait: () => waitForCatalogCards },
   // 终局详情（含污染等级区块，ADR 0026）：等层级子 tab 出现即数据就绪
   { path: '/endgame/boss/3021', label: '终局详情·含污染', wait: () => (page: Page) => page.waitForSelector('.nk-egd-tabs [role="tab"]', { state: 'attached', timeout: 15_000 }) },

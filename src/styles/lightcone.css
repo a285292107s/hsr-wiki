@@ -186,6 +186,44 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   font-style: normal; color: var(--text-bright);
 }
 
+/* 适配角色：与角色页「推荐光锥」互为镜像——圆头像 + 名 + 推荐顺位，整块是导航性内链 */
+.nk-lc-adapt {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.nk-lc-adapt__item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 11px 7px 7px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-card);
+  background: color-mix(in srgb, var(--blk-900) 24%, transparent);
+  text-decoration: none;
+  transition: border-color 0.28s var(--ease), transform 0.28s var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .nk-lc-adapt__item:hover { border-color: var(--line-2); transform: translateY(-2px); }
+}
+.nk-lc-adapt__item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.nk-lc-adapt__icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+}
+.nk-lc-adapt__name {
+  flex: 1; min-width: 0;
+  font-size: 0.78rem; font-weight: 600; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nk-lc-adapt__rec {
+  flex-shrink: 0;
+  font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em;
+  color: var(--text-bright); padding: 2px 7px; border-radius: 4px;
+  background: color-mix(in srgb, var(--blk-800) 72%, transparent);
+  border: 1px solid var(--line-1);
+}
+
 .nk-skeleton--lc .nk-skeleton__stat-grid { grid-template-columns: repeat(3, 1fr); }
 
 @media (max-width: 640px) {

@@ -634,6 +634,10 @@ function lightconePages(ctx) {
     return Number(b.id) - Number(a.id);
   });
   const links = ordered.map((c) => ({ name: c.name, href: `/lightcone/${c.id}` }));
+  // 适配角色的名字来源：converter 只给 id（反向索引），名字在角色列表
+  const charNames = new Map(
+    readJson('characters.json').filter((c) => c.name).map((c) => [String(c.id), clean(c.name)]),
+  );
   const summaryPlain = `${SITE_NAME}光锥图鉴：共 ${ordered.length} 把光锥，含稀有度、命途、技能效果与晋阶属性。`;
   const items = ordered.map((c) => ({
     name: c.name,
@@ -682,6 +686,10 @@ function lightconePages(ctx) {
     }
     const levels = Object.keys((d.skill && d.skill.level) || {}).map(Number).filter((n) => !Number.isNaN(n)).sort((a, b) => b - a);
     const skillParams = levels.length ? d.skill.level[String(levels[0])]?.param_list : null;
+    // 适配角色：同「推荐光锥」一张表的反向读法，rank = 该光锥在该角色推荐列表中的顺位
+    const adapt = (d.recommend_chars || [])
+      .map((c) => ({ id: c.id, rank: c.rank, name: charNames.get(String(c.id)) }))
+      .filter((c) => c.name);
     const phaseHtml = phases
       .map((p) => {
         const s = d.stats[String(p)];
@@ -702,6 +710,12 @@ function lightconePages(ctx) {
             : '',
         },
         { title: '晋阶属性', html: phaseHtml ? `<ul class="nk-snapshot__blocks">${phaseHtml}</ul>` : '' },
+        {
+          title: '适配角色',
+          html: adapt.length
+            ? linkList(adapt.map((c) => ({ name: c.name, href: `/character/${c.id}`, meta: esc(`REC. ${c.rank}`) })))
+            : '',
+        },
         { title: '卡面故事', html: d.story ? `<p>${txt(d.story, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
       ],
       links: siblingsOf(links, idx),

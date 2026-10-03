@@ -5,9 +5,10 @@ import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import {
-  fmtDesc, fmtVal, gameTagsToHtml, iconImgAttrs, itemName, lightconeIconUrl, pathIconUrl,
+  avatarRoundIconUrl, fmtDesc, fmtVal, gameTagsToHtml, iconImgAttrs, itemName, lightconeIconUrl, pathIconUrl,
 } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
+import { loadLocalCharacterList } from '../../services/api';
 import { PATH, SITE_NAME } from '../../lib/constants';
 import type { LightConeStats } from '../../services/types';
 import '../../styles/skill-card.css';
@@ -127,6 +128,34 @@ const maxStats = computed(() => {
 /** 卡面故事：与其他卡面文本同管线（gameTagsToHtml 剥 <unbreak> 等游戏标签、保留 <i> 对话斜体） */
 const storyHtml = computed(() =>
   d.value?.story ? gameTagsToHtml(d.value.story).replace(/\\n/g, '<br>') : '',
+);
+
+/* 适配角色：官方配装推荐（AvatarEquipRecommend）的反向索引——与角色页 BuildsPanel 的「推荐光锥」
+   是同一张表的正反两面（rank 同源）。角色名走 characters.json 共享单例（对称于角色页用光锥
+   列表反解光锥名）；名字未就绪时整块不渲染，不落 '#id' 占位。 */
+const charNames = ref<Record<string, string>>({});
+let charNamesRequested = false;
+watch(
+  () => (d.value?.recommend_chars || []).length,
+  (n) => {
+    if (!n || charNamesRequested) return;
+    charNamesRequested = true;
+    void loadLocalCharacterList()
+      .then((list) => {
+        const map: Record<string, string> = {};
+        for (const c of list) map[String(c.id)] = c.name;
+        charNames.value = map;
+      })
+      .catch(() => {
+        charNamesRequested = false; // 名单拉取失败：保留块不渲染，下次进页重试
+      });
+  },
+  { immediate: true },
+);
+const adaptChars = computed(() =>
+  (d.value?.recommend_chars || [])
+    .filter((c) => charNames.value[String(c.id)])
+    .map((c) => ({ id: c.id, rank: c.rank, name: charNames.value[String(c.id)] })),
 );
 
 /* 参数表横滚提示（机制同 RelicView 词条表：溢出时才亮右缘渐隐） */
@@ -383,8 +412,30 @@ onBeforeUnmount(() => {
             </div>
           </template>
 
+          <template v-if="adaptChars.length">
+            <h2 class="nk-title"><span class="nk-title__idx">03</span>适配角色 RECOMMENDED</h2>
+            <div class="nk-lc-adapt">
+              <RouterLink
+                v-for="c in adaptChars"
+                :key="c.id"
+                class="nk-lc-adapt__item"
+                :to="`/character/${c.id}`"
+                :title="c.name"
+              >
+                <img
+                  class="nk-lc-adapt__icon"
+                  v-bind="iconImgAttrs(avatarRoundIconUrl(c.id))"
+                  alt=""
+                  loading="lazy"
+                >
+                <span class="nk-lc-adapt__name">{{ c.name }}</span>
+                <span class="nk-lc-adapt__rec">REC. {{ c.rank }}</span>
+              </RouterLink>
+            </div>
+          </template>
+
           <template v-if="storyHtml">
-            <h2 class="nk-title"><span class="nk-title__idx">03</span>卡面 STORY</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">04</span>卡面 STORY</h2>
             <div class="nk-lc-story" v-html="storyHtml"></div>
           </template>
         </div>

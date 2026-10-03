@@ -2535,6 +2535,36 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
+  // 「适配角色」= 官方配装推荐（AvatarEquipRecommend）的反向索引，与角色页「推荐光锥」是同一张表的两面：
+  // 这里钉「chip 逐条 = 数据条目、链接指向该角色页、REC. 顺位与数据同源、两端不横滚」。
+  // 数据只覆盖部分光锥（无记录的光锥整块不渲染），故取料按数据找「有记录的那把」。
+  test('/lightcone：适配角色区块逐条对应反向索引（链接 / REC. 顺位 / 无溢出）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const cones = readJson<{ id: number }[]>('public/data/cn/light_cones.json');
+    let target: { id: number; chars: { id: number; rank: number }[] } | null = null;
+    for (const c of cones) {
+      const chars = readJson<{ recommend_chars?: { id: number; rank: number }[] }>(
+        `public/data/cn/light_cones/${c.id}.json`,
+      ).recommend_chars || [];
+      if (chars.length >= 2) { target = { id: c.id, chars }; break; }
+    }
+    expect(target, '数据集中必须存在带适配角色的光锥').not.toBeNull();
+    const hit = target!;
+
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/lightcone/${hit.id}`);
+      await expect(page.getByRole('heading', { name: /适配角色/ })).toBeVisible();
+      const items = page.locator('.nk-lc-adapt__item');
+      await expect(items).toHaveCount(hit.chars.length);
+      // 首条即数据首条（converter 按 (rank, id) 排序，前端不再重排）
+      await expect(items.first()).toHaveAttribute('href', `/character/${hit.chars[0].id}`);
+      await expect(items.first().locator('.nk-lc-adapt__rec')).toHaveText(`REC. ${hit.chars[0].rank}`);
+      await noUnknownOverflow(page);
+    }
+    assertNoErrors();
+  });
+
   // 竖轨几何只在 ≥768px 存在，故本用例钉桌面视口（否则 mobile-chromium project 会跑到无竖轨的断点上）
   test('/character/1503：展开技能数据表后，竖轨与表盒（含首列）不相交、表盒不出卡片内容区', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);

@@ -591,6 +591,9 @@ export interface LightConeDetail {
   skill: LightConeSkill;
   /** 晋阶阶段 0-6 → 属性 */
   stats: Record<string, LightConeStats>;
+  /** 适配角色（AvatarEquipRecommend 反向索引，仅收录官方配装推荐过该光锥的角色；
+   *  rank = 该光锥在其推荐列表中的顺位，1 起，与角色页 REC. 序号同源） */
+  recommend_chars?: { id: number; rank: number }[];
   icon: string;
   icon_figure: string;
 }
