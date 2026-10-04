@@ -333,6 +333,18 @@ function ldCollection(route, title, description, entries) {
   };
 }
 
+/** 面包屑节点（各页共用同一种形状） */
+function breadcrumbNode(crumbs) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map(([label, href], i) => {
+      const node = { '@type': 'ListItem', position: i + 1, name: label };
+      if (href) node.item = SITE_ORIGIN + href;
+      return node;
+    }),
+  };
+}
+
 function ldArticle(route, headline, description, crumbs, ctx) {
   return {
     '@context': 'https://schema.org',
@@ -346,14 +358,64 @@ function ldArticle(route, headline, description, crumbs, ctx) {
         mainEntityOfPage: SITE_ORIGIN + route,
         isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
       },
+      breadcrumbNode(crumbs),
+    ],
+  };
+}
+
+/**
+ * 角色详情页的 JSON-LD（验收标准 B5）。
+ *
+ * 与 `ldArticle` 的差别：角色详情页不是「一篇文章」，而是一个**虚构角色实体**。
+ * 用 `Article` 描述它等于把数据页说成资讯稿 —— 机器既拿不到角色属性、也拿不到角色身份。
+ * 结构：`WebPage`（这是页面）+ `mainEntity` = `Person`（角色本体，`additionalType: VideoGameSeries`
+ * 说明它属于哪类虚构世界）+ `BreadcrumbList`（层级位置）。依据：
+ * - `Person.characterAttribute`（见 schema.org/VideoGameSeries）：「a piece of data that represents a
+ *   particular aspect of a fictional character (skill, power, character points, advantage, disadvantage)」
+ *   —— 正好是稀有度 / 命途 / 属性 / 阵营 / 终结技能量这类游戏属性。
+ * - `Person.alternateName`：拉丁转写名（本仓 `name_en`；开拓者形态为空串，故省略而不是落占位符）。
+ * 数据全部来自 `public/data/cn/characters/<id>.json`（不新增数据源；空值一律省略）。
+ */
+function ldCharacter(route, name, description, crumbs, ctx, d) {
+  const attrs = [];
+  const rarity = /(\d+)\s*$/.exec(String(d.rarity || ''))?.[1];
+  if (rarity) attrs.push({ '@type': 'PropertyValue', name: '稀有度', value: rarity });
+  const pathName = ctx.pathNames.get(d.base_type) || d.base_type;
+  if (pathName) attrs.push({ '@type': 'PropertyValue', name: '命途', value: pathName });
+  const elemName = ctx.elemNames.get(d.damage_type) || d.damage_type;
+  if (elemName) attrs.push({ '@type': 'PropertyValue', name: '属性', value: elemName });
+  const camp = clean(d.chara_info && d.chara_info.camp);
+  if (camp) attrs.push({ '@type': 'PropertyValue', name: '阵营', value: camp });
+  if (d.sp_need != null) attrs.push({ '@type': 'PropertyValue', name: '终结技能量', value: String(d.sp_need) });
+
+  const character = {
+    '@type': 'Person',
+    '@id': `${SITE_ORIGIN}${route}#character`,
+    name,
+    additionalType: 'https://schema.org/VideoGameSeries',
+    description,
+    inLanguage: 'zh-CN',
+    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
+  };
+  const nameEn = clean(d.name_en);
+  if (nameEn) character.alternateName = nameEn;
+  if (attrs.length) character.characterAttribute = attrs;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
       {
-        '@type': 'BreadcrumbList',
-        itemListElement: crumbs.map(([label, href], i) => {
-          const node = { '@type': 'ListItem', position: i + 1, name: label };
-          if (href) node.item = SITE_ORIGIN + href;
-          return node;
-        }),
+        '@type': 'WebPage',
+        '@id': `${SITE_ORIGIN}${route}#page`,
+        name,
+        description,
+        url: SITE_ORIGIN + route,
+        inLanguage: 'zh-CN',
+        isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
+        mainEntity: { '@id': `${SITE_ORIGIN}${route}#character` },
       },
+      character,
+      breadcrumbNode(crumbs),
     ],
   };
 }
@@ -614,8 +676,8 @@ function characterPages(ctx) {
       file: `character/${entry.id}.html`,
       title: `${name} - ${SITE_NAME}`,
       description,
-      ld: ldArticle(route, name, description,
-        [['首页', '/'], [CATALOG_TITLE['/character'], '/character'], [name, route]], ctx),
+      ld: ldCharacter(route, name, description,
+        [['首页', '/'], [CATALOG_TITLE['/character'], '/character'], [name, route]], ctx, d),
       body,
     }));
   });

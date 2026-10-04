@@ -29,7 +29,19 @@ export async function loadLocalBuildNames(
   if (d.relics) {
     (d.relics.set4_id_list || []).concat(d.relics.set2_id_list || []).forEach((id) => needed.add(String(id)));
   }
-  if (d.teams) d.teams.forEach((t) => (t.member_list || []).forEach((id) => needed.add(String(id))));
+  if (d.teams) {
+    d.teams.forEach((t) => {
+      (t.member_list || []).forEach((id) => needed.add(String(id)));
+      // 备选队友（backup_list1..N）此前漏收集 ⇒ 它们的头像只拿得到 '#id' 回退。
+      // 队列表的键按位编号（backup_list1 对应 member_list[0]），没有数组字段可枚举，故按前缀扫键。
+      const raw = t as unknown as Record<string, unknown>;
+      for (const key of Object.keys(raw)) {
+        if (!key.startsWith('backup_list')) continue;
+        const list = raw[key];
+        if (Array.isArray(list)) for (const id of list as number[]) needed.add(String(id));
+      }
+    });
+  }
 
   try {
     // 复用共享单例，避免与其他加载路径产生重复请求

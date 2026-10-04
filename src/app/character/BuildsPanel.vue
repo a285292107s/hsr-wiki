@@ -148,6 +148,15 @@ function setIcon(data: RelicSetData | null | undefined): string {
 function setName(id: number, data: RelicSetData | null | undefined): string {
   return (data && data.name) || itemName(id, props.nameCache, props.itemDb);
 }
+/* 队列表的 `#id` 是上游未解析时的回退串（`itemName` 的最后一跳），只承载「这是哪个 id」的调试信息。
+   备选队友头像没有可见文字，`title` / `alt` 就是它唯一对外的话 ⇒ 把回退串当名字念给读屏用户毫无意义，
+   故回退串归空，模板据此走「图片装饰化 + 用 href 里的 id 兜底」。 */
+function isIdFallback(name: string): boolean {
+  return /^#\d+$/.test(name);
+}
+function slotLabel(name: string, id: number): string {
+  return isIdFallback(name) ? `角色 ${id}` : name;
+}
 function setDescHtml(pc: number, data: RelicSetData | null | undefined): string {
   const info = data && data.require_num && data.require_num[String(pc)];
   return info && info.desc ? fmtDesc(info.desc, info.param_list || []) : '';
@@ -198,13 +207,15 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
         <span class="nk-build__team-plus">+</span>
         <template v-for="(m, i) in t.members" :key="m.mid">
           <div class="nk-build__team-slot">
-            <RouterLink :to="`/character/${m.mid}`" class="nk-build__team-link" :title="m.name">
-              <img :src="m.img" :alt="m.name">
+            <RouterLink :to="`/character/${m.mid}`" class="nk-build__team-link" :title="slotLabel(m.name, m.mid)">
+              <!-- 成员槽带可见角色名 ⇒ 头像装饰化（同名 alt 会触发 axe image-redundant-alt） -->
+              <img :src="m.img" alt="">
               <span class="nk-build__team-name">{{ m.name }}</span>
             </RouterLink>
             <div v-if="m.backups.length" class="nk-build__team-alt">
-              <RouterLink v-for="b in m.backups" :key="b.id" :to="`/character/${b.id}`" class="nk-build__team-link" :title="b.name">
-                <img :src="b.img" :alt="b.name">
+              <!-- 备选队友槽**没有**可见文字 ⇒ alt/title 是它唯一的可达名 -->
+              <RouterLink v-for="b in m.backups" :key="b.id" :to="`/character/${b.id}`" class="nk-build__team-link" :title="slotLabel(b.name, b.id)">
+                <img :src="b.img" :alt="slotLabel(b.name, b.id)">
               </RouterLink>
             </div>
           </div>

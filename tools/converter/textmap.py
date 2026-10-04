@@ -7,17 +7,41 @@ from typing import Any
 import xxhash
 
 from utils import load_json
-from config import TEXTMAP_FILE
+from config import TEXTMAP_FILE, TEXTMAP_EN_FILE
 
 logger = logging.getLogger("converter")
 
 _text_map: dict[str, str] = {}
+_text_map_en: dict[str, str] = {}
 
 def load_textmap() -> None:
     """加载 TextMap 到内存。"""
     global _text_map
     _text_map = load_json(TEXTMAP_FILE)
     logger.info("已加载 TextMap（%s 条）", len(_text_map))
+
+def ensure_textmap_en() -> None:
+    """按需加载英文 TextMap（55.9MB，仅角色英文名等少量字段消费，不随 load_textmap 常驻）。"""
+    global _text_map_en
+    if not _text_map_en:
+        _text_map_en = load_json(TEXTMAP_EN_FILE)
+        logger.info("已加载 TextMapEN（%s 条）", len(_text_map_en))
+
+def resolve_text_en(ref: Any) -> str:
+    """从英文 TextMap 解析 Hash 引用。
+
+    仅接受 Hash 对象（当前唯一消费方 = AvatarName）；未命中返回空串。
+    源值为 `{NICKNAME}` 类占位符（开拓者，其显示名由玩家命名）时同样返回空串——
+    占位符不是译名，禁止用它拼出「假英文名」。
+    命中的文本仍走 `clean_text`：英文名同样带游戏内标签（银狼 LV.999 的
+    `Silver Wolf LV.<unbreak>999</unbreak>`），漏清洗会让标签作为可见文本进 JSON。
+    先判占位符再清洗：`clean_text` 会把 `{NICKNAME}` 替换成中文「开拓者」，
+    顺序反了就会把占位符洗成一个假的英文名。
+    """
+    if not isinstance(ref, dict) or "Hash" not in ref:
+        return ""
+    text = _text_map_en.get(str(ref["Hash"]), "")
+    return "" if text.startswith("{") else clean_text(text)
 
 def clean_text(text: str) -> str:
     """清洗游戏内文本标签，返回纯文本。

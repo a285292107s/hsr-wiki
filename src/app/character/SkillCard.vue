@@ -16,6 +16,8 @@ const props = defineProps<{
   charData: CharacterData | null;
   isChild?: boolean;
   childSkills?: Skill[];
+  /** 区块内索引的跳转落点（仅父卡传入；子卡不参与索引） */
+  anchor?: string;
   /** 父卡片的当前等级（子技能共用父级滑条） */
   parentLv?: number;
   /** 技能动画列表（米游社 Wiki 数据，仅父卡片传入） */
@@ -272,6 +274,7 @@ function onImgLoad(): void { imgDone.value = true; }
   <div
     :class="isChild ? 'nk-skill nk-skill--child' : 'nk-skill'"
     :data-type="typeKey"
+    :id="!isChild && anchor ? anchor : undefined"
   >
     <span v-if="isEnhanced" class="nk-skill__enh-badge">{{ enhLabel }}</span>
     <div v-if="!isChild" class="nk-skill__head">

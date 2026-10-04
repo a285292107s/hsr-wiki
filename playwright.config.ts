@@ -37,6 +37,16 @@ export default defineConfig({
       testIgnore: [/visual\.spec\.ts/, /accessibility\.spec\.ts/],
       grepInvert: /@viewport-pinned/,
     },
+    // Firefox 只跑角色详情页的布局契约（`@viewport-pinned` 用例自钉视口，不受项目默认视口影响）。
+    // 存在理由：滚动驱动动画在 Firefox **不支持**（`CSS.supports('animation-timeline','scroll()')` = false），
+    // 而缺 `@supports` 门时动画会退回普通时间轴跑完并停在末帧 ⇒ 媒体层永久下移 36px（本轮实测到的真实缺陷）。
+    // **不扩到全部 layout 用例**：那是「三引擎 × 全量」，墙钟与既有 flake 面都会成倍放大，收益不匹配。
+    // 未覆盖：WebKit 与其余 spec —— 见 docs/audit/角色详情页验收标准.md 的 B3 条目。
+    {
+      name: 'firefox-layout-contract',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: /layout-character\.spec\.ts/,
+    },
   ],
   webServer: {
     command: 'pnpm dev',

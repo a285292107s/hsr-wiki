@@ -1,4 +1,11 @@
 /* 角色详情页 · 强化条与强化徽标（ADR 0010）。拆分块 4/6。 */
+/* 焦点可见性补口：全局焦点环（tokens.css 的 `:where(#app) button/a/[tabindex]:focus-visible`）不含 `input`，
+   而本页的技能等级滑条是 `input[type=range]` ⇒ 键盘聚焦后**零视觉反馈**（实测 5 个滑条焦点前后样式无变化）。
+   滑条是本页唯一的表单控件，故在页面作用域内补齐；令牌与偏移沿用全局那套（primary + 2px / offset 2）。 */
+.nk-char-page input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 .nk-char-page .nk-enh-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 10;
   background: color-mix(in srgb, var(--blk-800) 97%, transparent);
@@ -15,6 +22,34 @@
   display: flex; align-items: center; gap: 8px;
   max-width: var(--nk-detail-max); margin: 0 auto; padding: 6px 16px; min-height: 44px;
 }
+/* 区块导航在 <1024 档横向溢出（手机 390 实测 scrollWidth 647 / clientWidth 358 ⇒ 10 项只有 5 项可见，
+   且本页没有别的入口能到「遗器 / 档案 / 配音」）⇒ 加右侧渐隐提示「还有内容」，否则被裁的项等于不存在。
+   mask 是纯几何提示，不引入新颜色（反 AI 味禁令针对的是装饰性色块与渐变头，不是可滚动的可达性提示）。
+   ≥1024 三项全可见、无溢出，故只在溢出档加。 */
+.nk-char-page .nk-secnav { -webkit-mask-image: none; mask-image: none; }
+@media (max-width: 1023px) {
+  .nk-char-page .nk-secnav {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+}
+/* 触控目标：`.nk-secnav__btn` 视觉盒 28px 高（跨页共用原语，动它就是动 4 个详情页的吸顶条），
+   故只在本页把按钮撑到 44（WCAG 2.2 AA 目标尺寸）。**只在本页横滑档（<1024）生效**：≥1024 三项全可见、
+   指针操作，撑高只会让吸顶条 47→59、连带挪动全页 scroll-margin 与 scrollspy 偏移，属无收益的版面位移。
+   <1024 撑到 44 时导航盒 = 44 = `.nk-enh-bar__inner` 已有的 min-height ⇒ **吸顶条总高不变**（实测 47）。
+   原 `::before { top/bottom: -7px }` 在 overflow-x:auto 的滚动容器里会被裁掉，抬不高命中区，
+   故这里抬真实高度而不是扩不可见热区。 */
+@media (max-width: 1023px) {
+  .nk-char-page .nk-secnav { min-height: 44px; }
+  .nk-char-page .nk-secnav__btn { min-height: 44px; padding-top: 0; padding-bottom: 0; }
+  /* 导航盒 44 + 原内距 6×2 = 56 > 原条高 44 ⇒ 条会长到 59，而 `.nk-page--detail` 的
+     `padding-top: 45px` 是按条高 47 定的 —— 条一长，首屏 hero 就被吸顶条盖住（实测 390 档盖 12px）。
+     故同档把内距归零：条高回到 47（44 导航 + 1 边框 + 亚像素），与既有 45px 避让对齐。 */
+  .nk-char-page .nk-enh-bar__inner { padding-top: 0; padding-bottom: 0; }
+  /* 版心内距 16 + 按钮水平内距 11 下，44px 高的横排可点文字偏宽；把内距收到 7，
+     与 voracity / endgame 两处同类收紧同口径，收益是手机档多一项可见（实测 567 - 490 = 80px） */
+  .nk-char-page .nk-secnav__btn { padding-left: 7px; padding-right: 7px; }
+}
 .nk-char-page .nk-enh-module {
   scroll-margin-top: 64px;
 }
@@ -24,7 +59,7 @@
   color: var(--text-bright); margin-bottom: 16px;
 }
 .nk-char-page .nk-enh-module__mark {
-  width: 4px; height: 14px; border-radius: 1px; flex-shrink: 0;
+  width: 4px; height: 14px; border-radius: 0; flex-shrink: 0;
   background: var(--gold-sem); opacity: 0.9;
 }
 .nk-char-page .nk-enh-module__state {
@@ -50,7 +85,7 @@
 .nk-char-page .nk-enh-tab--active { color: var(--primary); }
 .nk-char-page .nk-enh-tab--active::after {
   content: ''; position: absolute; left: 12px; right: 12px; bottom: -1px;
-  height: 2px; border-radius: 1px; background: var(--primary);
+  height: 2px; border-radius: 0; background: var(--primary);
 }
 .nk-char-page .nk-enh-tabs__sep {
   width: 1px; height: 14px; margin: 0 12px;
@@ -96,7 +131,7 @@
   position: absolute; top: 10px; right: 10px;
   display: inline-flex; align-items: center;
   font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.08em;
-  padding: 1px 6px; border-radius: 3px;
+  padding: 1px 6px; border-radius: 4px;
   font-weight: 700; z-index: 2; pointer-events: none;
   background: color-mix(in srgb, var(--gold-sem) 12%, transparent);
   color: var(--gold-sem); border: 1px solid color-mix(in srgb, var(--gold-sem) 26%, transparent);

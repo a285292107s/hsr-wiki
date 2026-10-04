@@ -119,6 +119,38 @@ class TestResolveText:
         textmap._text_map["999"] = "<color=#FFF>原文</color>"
         assert resolve_text({"Hash": 999}, clean=False) == "<color=#FFF>原文</color>"
 
+class TestResolveTextEn:
+    """resolve_text_en：英文 TextMap 的 Hash 查表（只接受 Hash 对象）。"""
+
+    @pytest.fixture(autouse=True)
+    def setup_textmap_en(self, monkeypatch):
+        import textmap
+        monkeypatch.setattr(textmap, "_text_map_en", {
+            "6186714091647966180": "March 7th",
+            "8001": "{NICKNAME}",
+        })
+
+    def test_hash_object(self):
+        from textmap import resolve_text_en
+        assert resolve_text_en({"Hash": 6186714091647966180}) == "March 7th"
+
+    def test_nickname_placeholder_returns_empty(self):
+        """开拓者形态名由玩家命名，占位符不得当译名输出。"""
+        from textmap import resolve_text_en
+        assert resolve_text_en({"Hash": 8001}) == ""
+
+    def test_literal_string_returns_empty(self):
+        from textmap import resolve_text_en
+        assert resolve_text_en("March 7th") == ""
+
+    def test_missing_hash_returns_empty(self):
+        from textmap import resolve_text_en
+        assert resolve_text_en({"Hash": 404}) == ""
+
+    def test_none_returns_empty(self):
+        from textmap import resolve_text_en
+        assert resolve_text_en(None) == ""
+
 class TestMapIconPathOfficial:
     """OFFICIAL_ICON_RULES 映射：SpriteOutput 前缀 → StarRailTextures 仓库相对路径。"""
 

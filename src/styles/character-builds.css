@@ -4,7 +4,7 @@
 .nk-char-page .nk-eidolon__head { display: flex; align-items: flex-start; gap: 24px; }
 .nk-char-page .nk-eidolon__icon {
   width: 160px; height: 160px; flex-shrink: 0; object-fit: contain;
-  border-radius: 10px;
+  border-radius: var(--nk-char-radius-card);
   background: color-mix(in srgb, var(--blk-900) 45%, transparent);
   transition: transform 0.25s var(--nk-ease-out);
 }
@@ -33,7 +33,7 @@
   display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1px; padding: 0;
   background: var(--line-1);
-  border: 1px solid var(--line-1); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--line-1); border-radius: var(--nk-char-radius-card); overflow: hidden;
   margin: 0 auto; max-width: var(--nk-struct-max);
 }
 .nk-char-page .nk-bonus {
@@ -61,7 +61,7 @@
   pointer-events: none;
 }
 .nk-char-page .nk-build__teams { display: flex; flex-direction: column; gap: 16px; margin-bottom: 0; }
-.nk-char-page .nk-build__team { display: flex; align-items: center; padding: 20px 24px; border-radius: 10px; }
+.nk-char-page .nk-build__team { display: flex; align-items: center; padding: 20px 24px; border-radius: var(--nk-char-radius-card); }
 .nk-char-page .nk-build__team-head { display: none; }
 .nk-char-page .nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
 .nk-char-page .nk-build__team-link { display: flex; }
@@ -85,17 +85,17 @@
 .nk-char-page .nk-relic-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .nk-char-page .nk-relic-slot {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 16px 12px; border-radius: 10px;
+  padding: 16px 12px; border-radius: var(--nk-char-radius-card);
 }
 .nk-char-page .nk-relic-slot__icon {
-  width: 40px; height: 40px; border-radius: 6px;
+  width: 40px; height: 40px; border-radius: 4px;
   background: rgba(0,0,0,0.3); border: 1px solid var(--line-1); padding: 4px; margin-bottom: 4px;
 }
 .nk-char-page .nk-relic-slot__stat { font-size: 0.8125rem; font-weight: 600; color: var(--text-bright); text-align: center; }
 .nk-char-page .nk-relic-slot__slot { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
 .nk-char-page .nk-relic-sub {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px;
-  padding: 16px; margin-bottom: 16px; border-radius: 10px;
+  padding: 16px; margin-bottom: 16px; border-radius: var(--nk-char-radius-card);
 }
 .nk-char-page .nk-relic-sub__label { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; flex-shrink: 0; }
 .nk-char-page .nk-relic-sub__list { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -105,10 +105,10 @@
   border: 1px solid var(--line-1);
 }
 .nk-char-page .nk-build__sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-.nk-char-page .nk-build__set { padding: 16px; border-radius: 10px; }
+.nk-char-page .nk-build__set { padding: 16px; border-radius: var(--nk-char-radius-card); }
 .nk-char-page .nk-build__set-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .nk-char-page .nk-build__set-head img {
-  width: 44px; height: 44px; border-radius: 6px;
+  width: 44px; height: 44px; border-radius: 4px;
   background: rgba(0,0,0,0.3); border: 1px solid var(--line-1); padding: 4px;
 }
 .nk-char-page .nk-build__set-badge {
@@ -127,7 +127,7 @@
 }
 .nk-char-page .nk-profile__item {
   display: flex; flex-direction: column; gap: 4px;
-  padding: 16px; border-radius: 10px;
+  padding: 16px; border-radius: var(--nk-char-radius-card);
   border: 1px solid var(--line-1);
   transition: border-color 0.2s;
 }
@@ -135,7 +135,7 @@
 .nk-char-page .nk-profile__label { font-size: 0.625rem; font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
 .nk-char-page .nk-profile__val { font-size: 0.8125rem; font-weight: 600; color: var(--text); }
 .nk-char-page .nk-stories { display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-struct-max); margin: 0 auto; }
-.nk-char-page .nk-story { overflow: hidden; border-radius: 10px; }
+.nk-char-page .nk-story { overflow: hidden; border-radius: var(--nk-char-radius-card); }
 .nk-char-page .nk-story__head {
   display: flex; align-items: center; gap: 12px; width: 100%;
   padding: 16px 20px; background: none; border: none; cursor: pointer;

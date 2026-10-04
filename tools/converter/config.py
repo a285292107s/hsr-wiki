@@ -15,6 +15,7 @@ TEXTMAP_DIR = SOURCE_DIR / "TextMap"
 OUTPUT_DIR = PROJECT_ROOT / "public" / "data" / "cn"
 
 TEXTMAP_FILE = TEXTMAP_DIR / "TextMapCHS.json"
+TEXTMAP_EN_FILE = TEXTMAP_DIR / "TextMapEN.json"
 
 RARITY_MAP = {
     "CombatPowerAvatarRarityType4": 4,

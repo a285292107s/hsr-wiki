@@ -5,7 +5,7 @@ import re
 from collections import defaultdict
 
 from config import EXCEL_DIR, OUTPUT_DIR, SKILL_TYPE_MAP, PATH_NAME_FALLBACK
-from textmap import resolve_text
+from textmap import ensure_textmap_en, resolve_text, resolve_text_en
 from utils import load_json, save_json, map_icon_path, unwrap_value
 
 logger = logging.getLogger("converter")
@@ -419,6 +419,7 @@ def _build_enhanced(
 
 def convert() -> None:
     """拼装完整 CharacterData 并输出到 characters/{id}.json。"""
+    ensure_textmap_en()
     avatar_config = load_json(EXCEL_DIR / "AvatarConfig.json")
     ld_path = EXCEL_DIR / "AvatarConfigLD.json"
     if ld_path.exists():
@@ -495,6 +496,8 @@ def convert() -> None:
         name = resolve_text(item.get("AvatarName", {}))
         if not name:
             continue
+        # 开拓者形态名的拉丁转写留空：上游 AvatarName 为 {NICKNAME} 占位符（见 textmap.resolve_text_en）
+        name_en = resolve_text_en(item.get("AvatarName", {}))
 
         rarity = item.get("Rarity", "")
         base_type = item.get("AvatarBaseType", "")
@@ -549,6 +552,7 @@ def convert() -> None:
 
         char_data = {
             "name": name,
+            "name_en": name_en,
             "desc": desc,
             "chara_info": chara_info,
             "rarity": rarity,

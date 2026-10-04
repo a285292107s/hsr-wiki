@@ -13,7 +13,8 @@ import type { CharacterData } from '../../services/types';
 
 const props = defineProps<{ d: CharacterData }>();
 
-interface Stat { v: number | string; l: string; icon: string }
+/** k = 属性键，供 data-prop 消费领域层 --prop-* 身份色（character-hero.css） */
+interface Stat { v: number | string; l: string; icon: string; k: string }
 
 /**
  * 嘲讽无官方图标资产（已核实：AvatarPropertyConfig 无 Aggro 条目、IconPath 全量扫描无引用；
@@ -28,18 +29,18 @@ const stats = computed<Stat[]>(() => {
   const s = maxLevelStat(dd.stats);
   if (!s) return [];
   const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
-  const mk = (v: number | string, l: string, icon: string): Stat => ({
-    v, l, icon,
+  const mk = (v: number | string, l: string, k: string, icon: string): Stat => ({
+    v, l, k, icon,
   });
   return [
-    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), '生命值', cdnUri('trace', 'IconMaxHP.webp')),
-    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), '攻击力', cdnUri('trace', 'IconAttack.webp')),
-    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), '防御力', cdnUri('trace', 'IconDefence.webp')),
-    mk(s.speed_base, '速度', cdnUri('trace', 'IconSpeed.webp')),
-    mk(fmtPct(s.critical_chance), '暴击率', cdnUri('trace', 'IconCriticalChance.webp')),
-    mk(fmtPct(s.critical_damage), '暴击伤害', cdnUri('trace', 'IconCriticalDamage.webp')),
-    mk(s.base_aggro ?? 0, '嘲讽', TRACE_TAUNT_SVG),
-    mk(dd.sp_need ?? 0, '能量上限', cdnUri('trace', 'IconEnergyLimit.webp')),
+    mk(Math.round(maxLevelValue(s.hp_base, s.hp_add)), '生命值', 'hp', cdnUri('trace', 'IconMaxHP.webp')),
+    mk(Math.round(maxLevelValue(s.attack_base, s.attack_add)), '攻击力', 'atk', cdnUri('trace', 'IconAttack.webp')),
+    mk(Math.round(maxLevelValue(s.defence_base, s.defence_add)), '防御力', 'def', cdnUri('trace', 'IconDefence.webp')),
+    mk(s.speed_base, '速度', 'spd', cdnUri('trace', 'IconSpeed.webp')),
+    mk(fmtPct(s.critical_chance), '暴击率', 'crit-rate', cdnUri('trace', 'IconCriticalChance.webp')),
+    mk(fmtPct(s.critical_damage), '暴击伤害', 'crit-dmg', cdnUri('trace', 'IconCriticalDamage.webp')),
+    mk(s.base_aggro ?? 0, '嘲讽', 'taunt', TRACE_TAUNT_SVG),
+    mk(dd.sp_need ?? 0, '能量上限', 'energy', cdnUri('trace', 'IconEnergyLimit.webp')),
   ];
 });
 </script>
@@ -48,17 +49,17 @@ const stats = computed<Stat[]>(() => {
   <section class="nk-stats">
     <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.stats }}</span>BASE STATS</h2>
     <div class="nk-stats__grid">
-      <div v-for="st in stats" :key="st.l" class="nk-stats__stat">
+      <div v-for="(st, i) in stats" :key="st.l" class="nk-stats__stat" :data-prop="st.k">
+        <span class="nk-stats__idx" aria-hidden="true">{{ SECTION_IDX.stats }}-{{ i + 1 }}</span>
         <img class="nk-stats__icon" :src="st.icon" alt="" aria-hidden="true">
         <span class="nk-stats__label">{{ st.l }}</span>
+        <span class="nk-stats__lead" aria-hidden="true"></span>
         <span class="nk-stats__val">{{ st.v }}</span>
       </div>
     </div>
     <div class="nk-stats__level">
       <span class="nk-stats__level-label">Lv. {{ MAX_CHAR_LEVEL }}/{{ MAX_CHAR_LEVEL }}</span>
-      <div class="nk-stats__level-track">
-        <div class="nk-stats__level-fill" style="width: 100%"></div>
-      </div>
+      <span class="nk-stats__level-rule" aria-hidden="true"></span>
     </div>
   </section>
 </template>

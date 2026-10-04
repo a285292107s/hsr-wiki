@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import SkillCard from './SkillCard.vue';
+import SectionIndex from './SectionIndex.vue';
 import { groupSkillsByFamily } from '../../lib/skill-family';
 import { assignAnimEntries, memoAnimKey } from '../../lib/skill-anim';
 import { SECTION_IDX } from './sections';
+import { TYPE } from '../../lib/constants';
 import type { CharacterData, Skill, SkillAnimEntry, SkillAnimationsDb } from '../../services/types';
 
 const props = defineProps<{
@@ -53,13 +55,34 @@ const memoAnimMap = computed<Record<number, SkillAnimEntry[]>>(() => {
   for (const [key, group] of groups) Object.assign(map, assignAnimEntries(db[key], group));
   return map;
 });
+
+/** 技能族锚点：技能 id 唯一，前缀可避免与页面其它 id 冲突 */
+function skillAnchor(id: number): string {
+  return `nk-skill-${id}`;
+}
+
+/** 区块内索引项（技能 1808px 长区块的定位层）：note 用技能类型词，label 用技能名 */
+const indexItems = computed(() => [
+  ...skillFamilies.value.map((g) => ({
+    id: skillAnchor(g.main.id),
+    label: g.main.name,
+    note: TYPE[g.main.type ?? ''] || g.main.type_name || '',
+  })),
+  ...memoSkills.value.map((ms) => ({
+    id: skillAnchor(ms.id),
+    label: ms.name,
+    note: TYPE[ms.type ?? ''] || ms.type_name || '',
+  })),
+]);
 </script>
 
 <template>
   <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS</h2>
+  <SectionIndex v-if="indexItems.length > 1" :items="indexItems" label="技能索引" />
   <SkillCard
     v-for="g in skillFamilies"
     :key="`${enhKey}|${g.main.id}`"
+    :anchor="skillAnchor(g.main.id)"
     :sk="g.main"
     :child-skills="g.children"
     :char-id="charId"
@@ -71,6 +94,7 @@ const memoAnimMap = computed<Record<number, SkillAnimEntry[]>>(() => {
   <SkillCard
     v-for="ms in memoSkills"
     :key="`memo-${enhKey}|${ms.id}`"
+    :anchor="skillAnchor(ms.id)"
     :sk="ms"
     :char-id="charId"
     :char-data="d"

@@ -90,6 +90,26 @@ describe('数据加载', () => {
     expect(db['23013'].item_figure_icon_path).toBe('');
   });
 
+  it('loadLocalBuildNames 收集备选队友（backup_listN）的名字，不得只收 member_list', async () => {
+    const api = await freshApi();
+    vi.stubGlobal('fetch', routeFetch({
+      'characters.json': [
+        { id: 1204, name: '景元' }, { id: 1313, name: '星期日' }, { id: 8007, name: '开拓者·记忆' },
+      ],
+      'light_cones.json': [],
+      'relics.json': [],
+    }));
+    // 队列表的键按位编号：backup_list1 对应 member_list[0]
+    const d = {
+      lightcones: [], relics: null,
+      teams: [{ team_id: 1, member_list: [1313], backup_list1: [8007, 9999] }],
+    } as unknown as Parameters<typeof api.loadLocalBuildNames>[0];
+    const names = await api.loadLocalBuildNames(d, {});
+    expect(names['1313'], 'member_list 的名字').toBe('星期日');
+    expect(names['8007'], 'backup_list 的名字此前漏收集 ⇒ 只拿得到 #id 回退').toBe('开拓者·记忆');
+    expect(names['9999'], '名录里没有的 id 仍走 #id 回退').toBe('#9999');
+  });
+
   it('loadLocalMonsterDetail 按 ID 加载详情 JSON', async () => {
     const api = await freshApi();
     const fixture = {

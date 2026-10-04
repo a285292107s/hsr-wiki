@@ -89,7 +89,6 @@ onBeforeUnmount(() => {
         :style="{ backgroundImage: `url(${heroBg})` }"
       ></div>
       <div ref="spineRef" class="nk-hero__spine" :class="{ 'nk-ready': spineVisible }"></div>
-      <span class="nk-hero__archive">ARCHIVE · № {{ charId }}</span>
       <button
         class="nk-hero__toggle"
         :class="{ off: !spineVisible, 'has-anim': spineReady }"
@@ -102,8 +101,12 @@ onBeforeUnmount(() => {
     </div>
     <div class="nk-hero__panel">
       <header class="nk-hero__head">
-        <div class="nk-hero__meta-row">
+        <div class="nk-hero__rubric">
+          <span class="nk-hero__archive">ARCHIVE · <span class="nk-hero__archive-no">№ {{ charId }}</span></span>
+          <span class="nk-hero__rubric-rule" aria-hidden="true"></span>
           <span v-if="d.chara_info && d.chara_info.camp" class="nk-hero__camp">{{ d.chara_info.camp }}</span>
+        </div>
+        <div class="nk-hero__meta-row">
           <span class="nk-hero__stars">{{ stars }}</span>
           <span class="nk-hero__badge">
             <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`" alt="">
@@ -123,7 +126,12 @@ onBeforeUnmount(() => {
             <span>强化形态</span>
           </button>
         </div>
-        <h1 class="nk-hero__name">{{ d.name }}</h1>
+        <div class="nk-hero__title">
+          <span class="nk-hero__name-slot">
+            <h1 class="nk-hero__name" :data-len="[...(d.name || '')].length">{{ d.name }}</h1>
+            <span v-if="d.name_en" class="nk-hero__name-en">{{ d.name_en }}</span>
+          </span>
+        </div>
       </header>
 
       <div v-if="heroDesc" class="nk-hero__desc" v-html="heroDesc"></div>

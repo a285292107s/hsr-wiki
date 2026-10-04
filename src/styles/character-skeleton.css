@@ -6,48 +6,75 @@
 @media (min-width: 768px) {
   .nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 3 / 2; }
 }
-.nk-char-page .nk-skeleton__stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0 40px; }
-.nk-char-page .nk-sk--stat { height: 33px; border-radius: 4px; }
+.nk-char-page .nk-skeleton__stat-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.nk-char-page .nk-sk--stat { height: 35px; border-radius: 0; }
+/* 骨架 hero 面板只代理「盒子」不代理「结构」：实测 **全量 98 只**角色的就绪面板高度中位数
+   桌面 239.8 / 平板 262.5 / 手机 223.5（p25≈p75 极稳，除长简介离群）——盒高一律**对中位数上取整**，
+   否则两条测量路径（探针 vs e2e）的次像素差会击穿 1px 容差。故固定盒高 + 内距与就绪面板逐档对齐 +
+   条块均分剩余空间。主字分档（`.nk-hero__name` 的 `data-len`）后名长度不再改变盒高——名称族高度槽
+   `--nk-hero-name-slot` 按档取本档主字上限的行盒，故同一档内盒高恒定（跨档差见同一探针的 max 列）。
+   gap 归零、间距全交给 space-between：条块总高 98px 恒小于最小盒内容高
+   （768~1023 档 = 263 - 64 padding = 199），故均分不会重叠；**新增条块须同时复核此不等式**。
+
+   这三条 `height` 同时是**验收标准 B1 的 CLS 代理指标**（见 docs/audit/角色详情页验收标准.md）：
+   骨架→就绪的替换是本页最大的潜在布局位移，e2e「骨架态与就绪态 hero 面板同宽同高（±1px）」把它锁死；
+   实测真实 CLS（dev 环境，12 组×3 次）最大 0.0107、14 次里 9 次为 0，远低于 0.1。 */
+.nk-char-page .nk-skeleton__hero-panel {
+  padding: 32px 16px 20px; height: 224px; gap: 0; justify-content: space-between;
+}
 
 @media (min-width: 768px) {
   .nk-char-page .nk-hero__panel { padding: 32px; }
-  .nk-char-page .nk-hero__name { font-size: 2rem; }
-  .nk-char-page .nk-stats__stat { padding: 12px 0; }
-  .nk-char-page .nk-stats__val { font-size: 0.92rem; }
-  .nk-char-page .nk-sk--stat { height: 44px; }
+  .nk-char-page .nk-stats__stat { padding: 11px 0; }
+  .nk-char-page .nk-stats__val { font-size: 1rem; }
+  .nk-char-page .nk-sk--stat { height: 41px; }
+  .nk-char-page .nk-skeleton__hero-panel { padding: 32px; height: 226px; }
 }
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-char-page .nk-eidolon__icon { width: 132px; height: 132px; }
+  /* 平板档并排版式（媒体在左 · 文字在右）的骨架镜像：几何逐项对齐就绪态 */
+  .nk-char-page .nk-skeleton__hero { flex-direction: row; align-items: flex-start; }
+  .nk-char-page .nk-skeleton__hero-visual { flex: 0 0 46%; aspect-ratio: 4 / 5; }
+  .nk-char-page .nk-skeleton__hero-panel { flex: 1 1 auto; align-self: center; padding: 0 0 0 32px; height: 263px; }
 }
 @media (min-width: 1024px) {
   .nk-char-page .nk-hero { min-height: clamp(560px, 76vh, 820px); overflow: clip; }
   .nk-char-page .nk-hero__visual { position: absolute; inset: 0; aspect-ratio: auto; }
   .nk-char-page .nk-hero__visual::before { background: none; }
+  /* 文字可读性只落在字形自身：面板不给底板、媒体上不铺整片压暗。用户判据——底板浓度无论怎么调都会
+     明显影响立绘与 Spine，而文字与立绘重叠本就不多，为 AA 破坏观感得不偿失。
+     面板左对齐（`--nk-hero-panel-edge` / 宽 520）而素材居中：文字列与立绘的横向重叠只出现在最窄桌面档
+     （1024 实测规格行最坏 2.52:1、主字 0%，1440 起抬头行 / 规格行归零），非桌面档面板在媒体下方、零重叠。
+     代价：AA 由硬保证降为记录值（最坏单像素实测见 docs/memory/2026-10.md，此处不复述数值）。 */
   .nk-char-page .nk-hero__panel {
-    --nk-hero-text-halo: 0 1px 2px rgba(0,0,0,0.95), 0 -1px 2px rgba(0,0,0,0.95), 1px 0 2px rgba(0,0,0,0.95), -1px 0 2px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9);
-    position: absolute; left: 24px; bottom: 24px; z-index: 5;
+    position: absolute; left: var(--nk-hero-panel-edge); bottom: var(--nk-hero-panel-edge); z-index: 5;
     width: min(520px, 58%);
     padding: 0;
-    gap: 24px;
-    text-shadow: var(--nk-hero-text-halo);
+    gap: 20px;
+    text-shadow: var(--nk-hero-glyph-shadow);
   }
   .nk-char-page .nk-hero__head { gap: 16px; }
+  .nk-char-page .nk-hero__title { margin-top: 4px; }
+  /* 主字分两档（档位判据与宽度天花板见 character-hero.css 的名称族注释）：1 字名 4.5~5.5rem、≥2 字名
+     4.25~4.5rem。槽高 = 本档主字上限 × 行距 1.06（5.5rem × 1.06 = 93.28 → 5.83rem）；同档内槽高恒定，
+     故 hero 面板高度不随名长度变化（骨架屏只代理一个固定盒高，见文件头注释的头一条不等式）。 */
   .nk-char-page .nk-hero__name {
-    font-size: clamp(2.4rem, 4.2vw, 3.4rem);
-    line-height: 1.1;
+    font-size: clamp(4.25rem, 5.2vw, 4.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.005em;
     text-wrap: balance;
-    text-shadow:
-      var(--nk-hero-text-halo),
-      0 2px 6px rgba(0,0,0,0.6),
-      0 0 18px rgba(0,0,0,0.5),
-      0 0 44px rgba(0,0,0,0.4);
+    text-shadow: var(--nk-hero-glyph-shadow);
   }
-  .nk-char-page .nk-hero__stars { text-shadow: var(--nk-hero-text-halo); }
-  .nk-char-page .nk-hero__desc { font-size: 0.875rem; line-height: 1.7; }
-  .nk-char-page .nk-hero__badge img { filter: drop-shadow(0 0 2px rgba(0,0,0,0.95)) drop-shadow(0 1px 2px rgba(0,0,0,0.9)); }
-  .nk-char-page .nk-hero__archive { left: auto; right: 20px; bottom: 20px; }
-  .nk-char-page .nk-hero__toggle { top: 20px; right: 20px; }
-  .nk-char-page .nk-stats__grid { gap: 0 48px; }
+  .nk-char-page .nk-hero__name[data-len='1'] { font-size: clamp(4.5rem, 6.1vw, 5.5rem); }
+  .nk-char-page { --nk-hero-name-slot: 4.77rem; }
+  .nk-char-page:has(.nk-hero__name[data-len='1']) { --nk-hero-name-slot: 5.83rem; }
+  .nk-char-page .nk-hero__stars { text-shadow: var(--nk-hero-glyph-shadow); }
+  .nk-char-page .nk-hero__desc { font-size: 0.875rem; line-height: 1.75; }
+  .nk-char-page .nk-hero__badge img { filter: none; }
+  .nk-char-page .nk-hero__toggle { top: var(--nk-hero-toggle-inset); right: var(--nk-hero-toggle-inset); }
+  .nk-char-page .nk-stats__grid { gap: 0; }
+  .nk-char-page .nk-stats__stat { padding: 12px 0; }
+  .nk-char-page .nk-sk--stat { height: 43px; }
   .nk-char-page .nk-skill { padding: 24px 28px; }
   .nk-char-page .nk-eidolon, .nk-char-page .nk-ability { padding: 24px 28px; }
   .nk-char-page .nk-cmp-rank, .nk-char-page .nk-cmp-tree { padding: 24px 28px; }
@@ -55,26 +82,38 @@
   .nk-char-page .nk-skeleton__hero { display: block; min-height: clamp(560px, 76vh, 820px); overflow: clip; }
   .nk-char-page .nk-skeleton__hero-visual { position: absolute; inset: 0; flex: none; min-height: 0; aspect-ratio: auto; }
   .nk-char-page .nk-skeleton__hero-panel {
-    position: absolute; left: 24px; bottom: 24px; z-index: 1;
+    position: absolute; left: var(--nk-hero-panel-edge); bottom: var(--nk-hero-panel-edge); z-index: 1;
     width: min(520px, 58%);
-    padding: 0; gap: 12px;
+    padding: 0; gap: 0; height: 240px; justify-content: space-between;
     border-top: none; background: none;
   }
+}
+/* 桌面档立绘横向偏移（构图偏移走布局、不走 transform —— transform 留给滚动视差；且构图不得依赖动画在跑）。
+   左右同时外移保持媒体盒宽不变（只改 left/right 会连带缩放盒宽、把偏移量吃掉一半）。
+   取值在 character-hero.css 的 `--nk-hero-media-shift`（≥1440 = 60px，其余档 0）；这里只提供应用通道
+   （left/right + 开关反向补偿），故 ≥1024 与 ≥1440 两档共用同一段代码。 */
+@media (min-width: 1024px) {
+  .nk-char-page .nk-hero__visual {
+    left: var(--nk-hero-media-shift);
+    right: calc(-1 * var(--nk-hero-media-shift));
+  }
+  .nk-char-page .nk-skeleton__hero-visual { left: var(--nk-hero-media-shift); right: calc(-1 * var(--nk-hero-media-shift)); }
+  /* 媒体右移后开关会跟着移出内容列 ⇒ 反向补偿回原位（与内容列右缘对齐） */
+  .nk-char-page .nk-hero__toggle { right: calc(var(--nk-hero-toggle-inset) + var(--nk-hero-media-shift)); }
 }
 @media (max-height: 500px) and (orientation: landscape) {
   .nk-char-page .nk-hero__archive { display: none; }
 }
 @media (max-width: 767px) {
-  .nk-char-page .nk-stats__grid { gap: 0 16px; }
-  .nk-char-page .nk-stats__stat { gap: 8px; grid-template-columns: 15px 1fr auto; }
-  .nk-char-page .nk-stats__label { font-size: 0.68rem; }
-  .nk-char-page .nk-stats__val { font-size: 0.8rem; }
+  .nk-char-page .nk-stats__grid { gap: 0; }
+  .nk-char-page .nk-stats__stat {
+    gap: 0 10px; padding: 9px 0;
+    grid-template-columns: 3px 2.9em 15px auto minmax(20px, 1fr) auto;
+  }
+  .nk-char-page .nk-stats__label { font-size: 0.75rem; }
+  .nk-char-page .nk-stats__val { font-size: 0.875rem; min-width: 5ch; }
   .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
   .nk-char-page .nk-hero__badge--enh { padding: 5px 9px 5px 7px; }
-  .nk-char-page .nk-hero__archive {
-    left: 12px; bottom: 12px;
-    font-size: 0.45rem; letter-spacing: 0.24em; padding: 5px 10px;
-  }
   .nk-char-page .nk-eidolon__head { gap: 16px; }
   .nk-char-page .nk-eidolon__icon { width: 104px; height: 104px; }
   .nk-char-page .nk-eidolon__meta { gap: 12px; padding-bottom: 12px; }
@@ -109,7 +148,7 @@
   .nk-char-page .nk-build__team-slot--main img { width: 50px; height: 50px; }
   .nk-char-page .nk-build__team-slot--main {
     background: color-mix(in srgb, var(--primary) 8%, transparent);
-    border-radius: 8px;
+    border-radius: var(--nk-char-radius-card);
     padding: 8px 0;
   }
   .nk-char-page .nk-build__team-link {
@@ -128,7 +167,7 @@
   .nk-char-page .nk-build__team-slot--main .nk-build__team-name { color: var(--primary); }
   .nk-char-page .nk-build__team-alt {
     margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
-    border: 1px solid var(--line-2); border-radius: 999px;
+    border: 1px solid var(--line-2); border-radius: 4px;
     padding: 12px;
   }
   .nk-char-page .nk-build__team-alt img { width: 30px; height: 30px; }

@@ -411,7 +411,11 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   background: transparent; padding: 0;
   border: 1px solid transparent; border-radius: 10px;
-  color: var(--text2); opacity: 0.72;
+  /* 非激活态整体 0.72 的不透明度把 10px 标签压到 4.07:1（`--text2` 以 0.72 复合到手机底栏底色
+     `#1e1c1d`）——**低于 WCAG 1.4.3 的 4.5:1**，且只在 <768 档出现（该档底栏不透明、标签可见）。
+     取 0.85：该底色下 5.16:1、页面底色下 5.56:1，仍是明确的「弱化」档（激活态为不透明 + metric-val）。
+     口径：不透明度不保留文本语义，改用显式取值即可同时满足对比度与「弱化」的视觉意图。 */
+  color: var(--text2); opacity: 0.85;
   transition: color 0.2s, opacity 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   position: relative;

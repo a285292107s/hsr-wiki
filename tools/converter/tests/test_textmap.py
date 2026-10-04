@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest  # noqa: E402
 
-from textmap import clean_text  # noqa: E402
+from textmap import clean_text, resolve_text_en  # noqa: E402
 
 class TestCleanText:
     def test_nickname_placeholder(self):
@@ -58,3 +58,36 @@ class TestCleanText:
     def test_empty_and_none(self):
         assert clean_text("") == ""
         assert clean_text(None) == ""
+
+
+class TestResolveTextEn:
+    """英文名解析：占位符留空 + 游戏内标签必须清洗（两者的顺序不能反）。"""
+
+    @pytest.fixture(autouse=True)
+    def _textmap(self, monkeypatch):
+        import textmap
+
+        monkeypatch.setattr(textmap, "_text_map_en", {
+            "1": "Silver Wolf LV.<unbreak>999</unbreak>",
+            "2": "March 7th",
+            "3": "{NICKNAME}",
+            "4": "Hero {NICKNAME}",
+        })
+
+    def test_tags_stripped_keep_text(self):
+        assert resolve_text_en({"Hash": 1}) == "Silver Wolf LV.999"
+
+    def test_plain_text_unchanged(self):
+        assert resolve_text_en({"Hash": 2}) == "March 7th"
+
+    def test_nickname_placeholder_blank(self):
+        assert resolve_text_en({"Hash": 3}) == ""
+
+    def test_placeholder_must_be_judged_before_clean(self):
+        # clean_text 会把 {NICKNAME} 换成中文「开拓者」⇒ 先清洗就会产出假英文名
+        assert resolve_text_en({"Hash": 4}) == "Hero 开拓者"
+
+    def test_missing_hash_and_non_hash(self):
+        assert resolve_text_en({"Hash": 999}) == ""
+        assert resolve_text_en("not-a-ref") == ""
+        assert resolve_text_en(None) == ""

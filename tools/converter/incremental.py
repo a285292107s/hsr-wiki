@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from config import EXCEL_DIR, SOURCE_DIR, TEXTMAP_FILE, OUTPUT_DIR
+from config import EXCEL_DIR, SOURCE_DIR, TEXTMAP_FILE, TEXTMAP_EN_FILE, OUTPUT_DIR
 
 logger = logging.getLogger("converter")
 
@@ -34,6 +34,7 @@ MODULE_SOURCES: dict[str, list[str]] = {
         "AvatarServantConfig.json", "AvatarServantSkillConfig.json",
         "TeamBuildConfig.json",
         "AvatarConfigEnhanced.json", "AvatarEnhancedHintConfig.json",
+        str(TEXTMAP_EN_FILE),
     ],
     "light_cones": ["EquipmentConfig.json", "EquipmentSkillConfig.json"],
     "light_cone_detail": ["EquipmentConfig.json", "EquipmentSkillConfig.json",

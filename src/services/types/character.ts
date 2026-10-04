@@ -166,6 +166,9 @@ export interface EnhancedBundle {
 
 export interface CharacterData {
   name: string;
+  /** 拉丁转写（converter 由 TextMapEN × AvatarName 解析）。开拓者形态名为 `{NICKNAME}` 占位
+   *  ⇒ 上游无译名，输出空串，消费方须按「缺字段」处理（不渲染），禁止回退拼造。 */
+  name_en?: string;
   desc?: string;
   chara_info?: {
     /** 所属阵营（如「星穹列车」「星核猎手」） */

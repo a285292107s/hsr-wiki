@@ -131,6 +131,10 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="pageRef" class="nk-page--detail nk-char-page" :aria-busy="phase === 'loading'">
+    <!-- 看板主区：页面除侧栏外的全部内容都在这里。
+         加 landmark 的判据 = axe `region`（WCAG 1.3.1 / best-practice）在本页命中 69~77 个节点
+         ——此前正文没有任何 landmark 归属，读屏用户只能从头听到尾；`<main>` 是这块内容的语义归属。 -->
+    <main class="nk-char-main">
     <div
       v-if="phase === 'loading' && showSkeleton"
       class="nk-skeleton nk-skeleton--char"
@@ -143,15 +147,21 @@ onBeforeUnmount(() => {
           <div class="nk-sk nk-sk--shimmer nk-sk--fill"></div>
         </div>
         <div class="nk-skeleton__hero-panel">
-          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:90px;"></div>
-          <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-lg"></div>
-          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-md"></div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:90px;"></div>
+            <div class="nk-sk nk-sk--shimmer" style="flex:1;height:1px;"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:52px;"></div>
+          </div>
           <div style="display:flex;gap:8px;">
             <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:64px;"></div>
             <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:60px;"></div>
             <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:70px;"></div>
           </div>
-          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--block" style="margin-top:16px;"></div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-lg"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:120px;"></div>
+          </div>
+          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:240px;"></div>
         </div>
       </div>
       <div class="nk-skeleton__body">
@@ -345,5 +355,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </template>
+    </main>
   </div>
 </template>

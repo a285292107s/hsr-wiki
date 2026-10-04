@@ -426,6 +426,35 @@ let sitemapCount = -1;
       }
     }
 
+    // 角色详情页的结构化数据形状（验收标准 B5）：必须是「角色实体」而不是「文章」。
+    // 只查形状与必填项，不查具体取值（取值随数据变，锁死会假红）。
+    if (String(file).includes(`${sep}character${sep}`) && !String(file).includes(`_shell`)) {
+      try {
+        const graph = JSON.parse(lds[0].trim())['@graph'] || [];
+        const page = graph.find((n) => n['@type'] === 'WebPage');
+        const person = graph.find((n) => n['@type'] === 'Person');
+        const crumbs = graph.find((n) => n['@type'] === 'BreadcrumbList');
+        if (!page) add('角色详情 JSON-LD 缺 WebPage 节点');
+        if (!person) add('角色详情 JSON-LD 缺 Person（角色实体）节点——用 Article 描述角色等于把数据页说成资讯稿');
+        if (!crumbs) add('角色详情 JSON-LD 缺 BreadcrumbList 节点');
+        if (page && person) {
+          const ref = page.mainEntity && page.mainEntity['@id'];
+          if (!ref || ref !== person['@id']) add('角色详情 JSON-LD 的 WebPage.mainEntity 必须指向同页 Person 节点');
+        }
+        if (person) {
+          if (!person.name) add('角色详情 JSON-LD 的 Person 缺 name');
+          if (!Array.isArray(person.characterAttribute) || person.characterAttribute.length === 0) {
+            add('角色详情 JSON-LD 的 Person 缺 characterAttribute（稀有度/命途/属性/阵营等游戏属性）');
+          }
+          if ('alternateName' in person && !person.alternateName) {
+            add('角色详情 JSON-LD 的 alternateName 不许留空串（无拉丁转写名时应整键省略）');
+          }
+        }
+      } catch (e) {
+        add(`角色详情 JSON-LD 形状检查失败: ${e.message}`);
+      }
+    }
+
     // 游戏标记残留（原始标签面 + 解码后的正文面，覆盖转义与未转义两种残留）
     for (const marker of GAME_MARKERS) {
       if (rawScan.includes(marker) || text.includes(marker)) add(`正文残留游戏标记 ${marker}`);

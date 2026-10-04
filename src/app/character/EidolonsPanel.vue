@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import SectionIndex from './SectionIndex.vue';
 import { extraTerms } from './utils';
 import { eidolonIconUrl, fmtDesc } from '../../lib/format';
 import { SECTION_IDX } from './sections';
@@ -35,13 +36,25 @@ const eidolons = computed<EidolonCard[]>(() => {
     terms: extraTerms(rk),
   }));
 });
+
+/** 星魂锚点：星魂编号（ranks 的键）在角色内唯一 */
+function eidolonAnchor(num: string): string {
+  return `nk-eidolon-${num}`;
+}
+
+/** 区块内索引项（星魂 1481px 长区块的定位层）：no 用 E 编号，label 用星魂名 */
+const indexItems = computed(() =>
+  eidolons.value.map((e) => ({ id: eidolonAnchor(e.num), label: e.name, note: `E${e.num}` })),
+);
 </script>
 
 <template>
   <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS</h2>
+  <SectionIndex v-if="indexItems.length > 1" :items="indexItems" label="星魂索引" />
   <div
     v-for="e in eidolons"
     :key="e.num"
+    :id="eidolonAnchor(e.num)"
     class="nk-eidolon"
   >
     <span v-if="e.enhanced" class="nk-eidolon__enh-badge">{{ enhLabel }}</span>
