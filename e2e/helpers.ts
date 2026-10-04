@@ -76,10 +76,21 @@ export function splitKnownOverflow(found: string[]): { known: string[]; unknown:
  */
 export async function findHorizontalOverflow(page: Page): Promise<string[]> {
   // 页面过渡期间视图根带 nk-view-*-active 位移（±24/±40px），此刻测量会把「整页」报成溢出（假阳性）。
-  // 语义上应测**稳定态**布局，故先等过渡类消失（上限 1s，超时按当前态测量，不掩盖真实超时）。
+  // 语义上应测**稳定态**布局，故先等过渡类消失。
+  //
+  // 上限 10s（原为 1s）：**1s 是 CI flaky 的根因**——慢 runner 上「过渡 + 首屏渲染」实测超过 1s，
+  // 上限过期后回落到「按过渡态测量」，于是报出整页同向位移。CI 证据（2026-10）：失败列表首项为
+  // `div.nk-view-swap-enter-from.nk-view-swap-enter-active right=1320 left=40`（1280 视口 +40 位移），
+  // 其后 5 项（brand / scrim / content / release / footer）是同一棵树的同一位移。10s 留一个数量级余量，
+  // 正常路径仍是「条件一满足就返回」（本地实测 <20ms）。
+  // 超时只告警不硬失败：真卡住的过渡会在后续断言里以「整页同向位移」现形，且提示语直接给出该指纹。
   await page
-    .waitForFunction(() => !document.querySelector('[class*="nk-view-"][class*="-active"]'), undefined, { timeout: 1_000 })
-    .catch(() => {});
+    .waitForFunction(() => !document.querySelector('[class*="nk-view-"][class*="-active"]'), undefined, { timeout: 10_000 })
+    .catch(() =>
+      console.warn(
+        '[L3 溢出] 等待视图过渡类消失超时（10s），按当前态测量；若报出整页同向位移（right ≈ 视口 + 24/40）即为过渡未结束，不是布局缺陷',
+      ),
+    );
   return page.evaluate(() => {
     const bad: string[] = [];
     const vw = window.innerWidth;
