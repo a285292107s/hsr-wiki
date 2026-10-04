@@ -90,6 +90,7 @@ export function mazeDateRange(info: MazeListEntry): string {
   const end = fmt(info.live_end) ?? fmt(info.end);
   if (start && end) return `${start} – ${end}`;
   if (start) return `${start} –`;
+  if (end) return `– ${end}`;
   return '';
 }
 
@@ -133,13 +134,27 @@ export function modeDefaultArtUrl(modeKey: string): string {
   return mode?.icon ? endgameArtUrl(mode.icon, TAB_ART_PREFIXES) : '';
 }
 
-function bySeasonDesc(a: CatalogItem, b: CatalogItem): number {
-  const ta = String(a.liveBegin || '');
-  const tb = String(b.liveBegin || '');
-  if (ta && tb && ta !== tb) return ta < tb ? 1 : -1;
-  if (ta) return -1;
-  if (tb) return 1;
+// 排序键 = 首个已知端点（live_begin 优先、回退 live_end：新赛季排期可能只有单边日期）；
+// 同日平局开始端在前（当天开始的赛季新于当天结束的）；两端皆无者按编号降序沉底。
+// 镜像副本：tools/gen-ai-endpoints.mjs endgamePages 的 all.sort。
+export function bySeasonDesc(a: CatalogItem, b: CatalogItem): number {
+  const ka = seasonSortKey(a);
+  const kb = seasonSortKey(b);
+  if (ka.date && kb.date && ka.date !== kb.date) return ka.date < kb.date ? 1 : -1;
+  if (ka.date && kb.date) {
+    if (ka.isBegin !== kb.isBegin) return ka.isBegin ? -1 : 1;
+  } else if (ka.date) {
+    return -1;
+  } else if (kb.date) {
+    return 1;
+  }
   return Number(String(b.id).replace(/\D/g, '')) - Number(String(a.id).replace(/\D/g, ''));
+}
+
+function seasonSortKey(item: CatalogItem): { date: string; isBegin: boolean } {
+  const begin = String(item.liveBegin || '');
+  if (begin) return { date: begin, isBegin: true };
+  return { date: String(item.liveEnd || ''), isBegin: false };
 }
 
 export const endgamePage: CatalogPageConfig = {
@@ -165,6 +180,7 @@ export const endgamePage: CatalogPageConfig = {
           searchText: mode.label,
           href: `/endgame/${mode.key}/${key}`,
           liveBegin: info.live_begin,
+          liveEnd: info.live_end,
           status: mazeStatus(info),
           dateRange: mazeDateRange(info),
           permanent: info.permanent,

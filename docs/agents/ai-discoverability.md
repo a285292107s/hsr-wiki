@@ -38,7 +38,7 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 
 ## 2. 路由覆盖（唯一权威清单）
 
-`origin` 常量 = `https://myhsr.vercel.app`（`tools/gen-ai-endpoints.mjs` 内 `SITE_ORIGIN`；`public/robots.txt` 的 `Sitemap:` 行必须与之同源，守卫断言一致）。
+`origin` 常量 = `https://myhsr.wiki`（自有域名，2026-10 迁入；旧 origin `myhsr.vercel.app` 因中国大陆可达性问题不再作为 canonical/sitemap 源；`tools/gen-ai-endpoints.mjs` 内 `SITE_ORIGIN`；`public/robots.txt` 的 `Sitemap:` 行必须与之同源，守卫断言一致）。
 
 | 路由 | 快照文件 | 数据源（`public/data/cn/` 下） | 详情条目 |
 | --- | --- | --- | --- |
@@ -101,16 +101,16 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 
 - 分组显式 `Allow: /`：`OAI-SearchBot`、`PerplexityBot`、`Claude-SearchBot`、`Googlebot`、`bingbot`（命中具体 UA 组时 `User-agent: *` 组被完全忽略，故每组必须自足）。
 - `Disallow: /prerender/`（快照是同一内容的第二份 URL，避免重复收录；爬虫请求的 `/character/1308` 与 rewrite 目标无关，robots 只作用于请求 URL）。
-- 末行 `Sitemap: https://myhsr.vercel.app/sitemap.xml`。
+- 末行 `Sitemap: https://myhsr.wiki/sitemap.xml`。
 
 ### 站点所有权验证（Google Search Console，2026-09 落地）
 
-GSC 资源 = **URL 前缀** `https://myhsr.vercel.app/`（`vercel.app` 的 DNS 不归站方控制，故「网域」资源不可用）。**两个验证资产都必须常驻**，GSC 会周期性复验，删任一即失去数据：
+origin 迁至自有域名 `myhsr.wiki` 后 DNS 归站方控制：GSC 应为 `myhsr.wiki` 建 **网域** 资源（DNS TXT 验证，一次覆盖全部协议与子域）；旧 `myhsr.vercel.app` 前缀资源仅余历史数据，新域收录必须走新资源。**两个验证资产都必须常驻**（token 与 HTML 文件属生成它们的 Google 账号、与域名无关，URL 前缀资源可复用），GSC 会周期性复验，删任一即失去数据：
 
 1. `index.html` 的 `<meta name="google-site-verification" content="5PSScRDejeMnyjRVQTH2t05GY4tmJ2oG3-JMqQZL_cs" />`（随 shell 模板进入全部快照；首页由 `dist/index.html` 直接投递，GSC 抓首页即读到）；
 2. `public/google0415a67deffb7705.html`，内容为 `google-site-verification: google0415a67deffb7705.html`（GSC 推荐/默认自动尝试的方式；文件在 dist 根，文件系统优先命中，不受 catch-all 影响）。
 
-换 token 必须在 GSC 重新获取后**同步改这两处**。验证通过后应在 GSC「站点地图」提交 `https://myhsr.vercel.app/sitemap.xml`（Google 唯一主动提交入口）。
+换 token 必须在 GSC 重新获取后**同步改这两处**。验证通过后应在 GSC「站点地图」提交 `https://myhsr.wiki/sitemap.xml`（Google 唯一主动提交入口）。
 
 ## 6. 守卫：`tools/check-ai-endpoints.mjs`
 

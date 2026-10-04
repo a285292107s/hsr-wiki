@@ -1,7 +1,8 @@
 """endgame 转换器纯函数契约测试。
 
 用合成数据验证核心行为，不依赖真实源数据：
-- _load_schedules：ScheduleID-200000 → GroupID 映射；公测前/2030 未来占位过滤
+- _load_schedules：分组表 ScheduleDataID 指针解析 + 迷宫全局表回退；单边日期、
+  公测前/2030 占位过滤与测试期分类（ADR 0038）
 - _load_maze_buffs / _load_monsters / _load_targets：辅助表解析（名称/图标 basename）
 - _group_maze_buff / _group_extra_buff / _group_extra_buff_groups / _load_story_turns：组级/分场次增益 / 回合上限
 - _load_guide_traits / _stage_traits / _attach_boss_traits：末日幻影首领特性（模板聚合与技能 ID 反查）
@@ -37,30 +38,96 @@ def setup_textmap(monkeypatch):
     return mc
 
 class TestLoadSchedules:
-    def test_maps_and_filters(self, monkeypatch):
-        monkeypatch.setattr(eg, "load_json", lambda _p: [
-            {"ID": 200101, "BeginTime": "2023-09-04 04:00:00", "EndTime": "2023-09-18 04:00:00"},
-            {"ID": 200102, "BeginTime": "2022-11-14 04:00:00", "EndTime": "2022-11-28 04:00:00"},
-            {"ID": 200108, "BeginTime": "2033-02-06 04:00:00", "EndTime": "2033-02-20 04:00:00"},
-            {"ID": 201034, "BeginTime": "2030-01-01 04:00:00", "EndTime": "2030-01-15 04:00:00"},
-            {"ID": 201001, "BeginTime": "", "EndTime": "2023-09-18 04:00:00"},
-            {"ID": 201002, "BeginTime": "not-a-date", "EndTime": "2023-09-18 04:00:00"},
-            {"BeginTime": "2023-09-04 04:00:00", "EndTime": "2023-09-18 04:00:00"},
-        ])
-        result = eg._load_schedules("ScheduleDataChallengeMaze.json")
-        assert set(result.keys()) == {"101"}
-        assert result["101"] == ("2023-09-04 04:00:00", "2023-09-18 04:00:00")
+    """排期按分组表 ScheduleDataID 指针解析（ADR 0038）：迷宫回退全局表 + 单边日期。"""
 
-    def test_load_test_periods(self, monkeypatch):
-        """测试期：EndTime 早于公测上线的 beta/CBT 组；未来占位/正式期不标。"""
-        monkeypatch.setattr(eg, "load_json", lambda _p: [
-            {"ID": 200101, "BeginTime": "2023-02-06 04:00:00", "EndTime": "2023-03-06 04:00:00"},
-            {"ID": 200102, "BeginTime": "2022-11-14 04:00:00", "EndTime": "2022-11-28 04:00:00"},
-            {"ID": 200117, "BeginTime": "2023-04-17 04:00:00", "EndTime": "2023-05-15 04:00:00"},
-            {"ID": 200108, "BeginTime": "2033-02-06 04:00:00", "EndTime": "2033-02-20 04:00:00"},
-            {"ID": 201001, "BeginTime": "", "EndTime": "2023-09-18 04:00:00"},
-        ])
-        assert eg._load_test_periods() == {101, 102}
+    MAZE_GROUP_TABLE = "ChallengeGroupConfig.json"
+
+    def _stub(self, monkeypatch, tables):
+        monkeypatch.setattr(eg, "load_json", lambda p: tables[Path(p).name])
+
+    def test_pointer_maps_and_global_fallback(self, monkeypatch):
+        """指针直查迷宫排期表；记录仅在全局表（291015/291016 形态）回退命中；
+        单边日期原样保留；无指针的常驻组（100）与无排期记录的指针不产出。"""
+        self._stub(monkeypatch, {
+            "ChallengeGroupConfig.json": [
+                {"GroupID": 101, "ScheduleDataID": 200101},
+                {"GroupID": 1034, "ScheduleDataID": 291015},
+                {"GroupID": 1035, "ScheduleDataID": 291016},
+                {"GroupID": 1037, "ScheduleDataID": 299999},
+                {"GroupID": 100, "ScheduleDataID": None},
+            ],
+            "ScheduleDataChallengeMaze.json": [
+                {"ID": 200101, "BeginTime": "2023-09-04 04:00:00", "EndTime": "2023-09-18 04:00:00"},
+            ],
+            "ScheduleDataGlobal.json": [
+                {"ID": 291015, "BeginTime": "2026-08-17 04:00:00", "EndTime": ""},
+                {"ID": 291016, "BeginTime": "", "EndTime": "2026-11-02 04:00:00"},
+            ],
+        })
+        schedules, test = eg._load_schedules(
+            self.MAZE_GROUP_TABLE,
+            ("ScheduleDataChallengeMaze.json", "ScheduleDataGlobal.json"),
+        )
+        assert schedules == {
+            "101": ("2023-09-04 04:00:00", "2023-09-18 04:00:00"),
+            "1034": ("2026-08-17 04:00:00", ""),
+            "1035": ("", "2026-11-02 04:00:00"),
+        }
+        assert test == set()
+
+    def test_maze_table_wins_over_global(self, monkeypatch):
+        """同 ID 两表并存时先登记的迷宫排期表优先。"""
+        self._stub(monkeypatch, {
+            "ChallengeGroupConfig.json": [{"GroupID": 101, "ScheduleDataID": 200101}],
+            "ScheduleDataChallengeMaze.json": [
+                {"ID": 200101, "BeginTime": "2023-09-04 04:00:00", "EndTime": "2023-09-18 04:00:00"},
+            ],
+            "ScheduleDataGlobal.json": [
+                {"ID": 200101, "BeginTime": "1999-01-01 04:00:00", "EndTime": "1999-01-02 04:00:00"},
+            ],
+        })
+        schedules, _ = eg._load_schedules(
+            self.MAZE_GROUP_TABLE,
+            ("ScheduleDataChallengeMaze.json", "ScheduleDataGlobal.json"),
+        )
+        assert schedules["101"] == ("2023-09-04 04:00:00", "2023-09-18 04:00:00")
+
+    def test_placeholders_test_periods_and_cross_launch(self, monkeypatch):
+        """≥2030（任一端点）丢弃；End<公测 → 测试期；仅 Begin 且 <公测丢弃；
+        Begin<公测但 End≥公测（跨公测排期，如组 117）保留并落全日期；双空/坏日期跳过。"""
+        self._stub(monkeypatch, {
+            "ChallengeGroupConfig.json": [
+                {"GroupID": 101, "ScheduleDataID": 200101},
+                {"GroupID": 102, "ScheduleDataID": 200102},
+                {"GroupID": 103, "ScheduleDataID": 200103},
+                {"GroupID": 104, "ScheduleDataID": 200104},
+                {"GroupID": 105, "ScheduleDataID": 200105},
+                {"GroupID": 117, "ScheduleDataID": 200117},
+                {"GroupID": 118, "ScheduleDataID": 200118},
+                {"GroupID": 119, "ScheduleDataID": 200119},
+            ],
+            "ScheduleDataChallengeMaze.json": [
+                # End < 公测 → 测试期
+                {"ID": 200101, "BeginTime": "2023-02-06 04:00:00", "EndTime": "2023-03-06 04:00:00"},
+                # 起点 ≥2030 → 未来占位
+                {"ID": 200102, "BeginTime": "2033-02-06 04:00:00", "EndTime": "2033-02-20 04:00:00"},
+                # 仅 End 且 ≥2030 → 未来占位
+                {"ID": 200103, "BeginTime": "", "EndTime": "2030-01-15 04:00:00"},
+                # 仅 Begin 且 <公测 → beta 残留
+                {"ID": 200104, "BeginTime": "2023-01-09 04:00:00", "EndTime": ""},
+                # End 为坏日期 → 跳过
+                {"ID": 200105, "BeginTime": "2023-05-01 04:00:00", "EndTime": "not-a-date"},
+                # Begin<公测但 End≥公测 → 保留
+                {"ID": 200117, "BeginTime": "2023-04-17 04:00:00", "EndTime": "2023-05-15 04:00:00"},
+                # 双端皆空 → 跳过
+                {"ID": 200118, "BeginTime": "", "EndTime": ""},
+            ],
+        })
+        schedules, test = eg._load_schedules(
+            self.MAZE_GROUP_TABLE, ("ScheduleDataChallengeMaze.json",)
+        )
+        assert schedules == {"117": ("2023-04-17 04:00:00", "2023-05-15 04:00:00")}
+        assert test == {101}
 
 class TestAuxTables:
     def test_load_maze_buffs(self, monkeypatch):

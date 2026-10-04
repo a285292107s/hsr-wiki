@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
-import { modeDefaultArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../pages/endgame';
+import { bySeasonDesc, mazeDateRange, modeDefaultArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../pages/endgame';
 
 /* ─── node 内建类型 shim（app tsconfig 无 @types/node；测试运行时由 vitest/node 提供） ─── */
 declare const process: { cwd(): string };
@@ -157,6 +157,43 @@ describe('data-driven filter contract (real data)', () => {
       }
     }
   }, 30000);
+
+  it('endgame 赛季排序：单边排期参与排序，当期赛季不沉底（ADR 0038 回归）', async () => {
+    const cfg = CATALOG_PAGES.endgame;
+    if (!cfg.fetchData) return;
+    const items = await cfg.fetchData({ version: '' });
+    const maze = items.filter((it) => it.mode === 'maze');
+    const pos = (id: string) => maze.findIndex((it) => it.id === id);
+    // 1036（开始端 2026-11-02）与 1035（仅结束端 2026-11-02）同日 → 开始端在前
+    expect(pos('ID 1036')).toBeLessThan(pos('ID 1035'));
+    // 1035（结束端 2026-11-02）与 1034（仅开始端 2026-08-17）都新于 1033（开始 2026-07-06）
+    expect(pos('ID 1035')).toBeLessThan(pos('ID 1033'));
+    expect(pos('ID 1034')).toBeLessThan(pos('ID 1033'));
+    expect(pos('ID 1034')).toBeGreaterThan(pos('ID 1035'));
+  });
+});
+
+describe('endgame 赛季排序与日期区间（ADR 0038）', () => {
+  const item = (id: string, liveBegin?: string, liveEnd?: string) => ({ id, name: id, liveBegin, liveEnd });
+
+  it('bySeasonDesc：排序键取首个已知端点，同日开始端在前，无日期按编号降序沉底', () => {
+    const scrambled = [
+      item('ID 900'),                                     // 常驻，无日期
+      item('ID 1033', '2026-07-06 04:00:00', '2026-08-17 04:00:00'),
+      item('ID 1035', undefined, '2026-11-02 04:00:00'),  // 当期：仅结束端
+      item('ID 100'),                                     // 常驻，无日期
+      item('ID 1036', '2026-11-02 04:00:00'),             // 未来赛季：开始端与 1035 结束端同日
+      item('ID 1034', '2026-08-17 04:00:00'),             // 上期：仅开始端
+    ];
+    expect([...scrambled].sort(bySeasonDesc).map((it) => it.id))
+      .toEqual(['ID 1036', 'ID 1035', 'ID 1034', 'ID 1033', 'ID 900', 'ID 100']);
+  });
+
+  it('mazeDateRange：单边日期各取已知端（仅结束端渲染 – 截止日）', () => {
+    expect(mazeDateRange({ live_begin: '2026-08-17 04:00:00', live_end: '' })).toBe('2026.08.17 –');
+    expect(mazeDateRange({ live_begin: '', live_end: '2026-11-02 04:00:00' })).toBe('– 2026.11.02');
+    expect(mazeDateRange({ live_begin: '', live_end: '' })).toBe('');
+  });
 });
 
 describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {

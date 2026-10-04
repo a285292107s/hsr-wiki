@@ -1,7 +1,9 @@
 """终局内容（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）转换器。
 
 完整表→字段→输出映射见 docs/data/转换器字段映射.md（endgame 段），本文件只留硬约束：
-- 排期 ID 结构：ScheduleID - 200000 = 赛季 GroupID；早于公测(2023-04-26)或 ≥2030 的占位排期丢弃。
+- 排期按分组表 ScheduleDataID 指针解析（ADR 0038；旧「ScheduleID-200000=GroupID」推断废弃
+  ——迷宫新赛季指针 291015/291016 已迁全局表且脱离编号约定），忘却之庭回退
+  ScheduleDataGlobal 且允许单边日期；早于公测(2023-04-26)或 ≥2030 占位丢弃。
 - 敌方以 StageConfig 波次为准（非关卡表 NpcMonsterIDList 代表怪，仅 61 个、缺 2/3）。
 - 末日幻影层级敌方只取 EventIDList1/2 波次（ADR 0031）：ChallengeBossMazeExtra 的
   MonsterID1/2/3 是**节点**不是首领形态，末层第 3 项就是星启附加关、第 2 项在影将军
@@ -33,52 +35,54 @@ logger = logging.getLogger("converter")
 
 _LAUNCH_TS = datetime(2023, 4, 26, 0, 0, 0)
 
-def _load_schedules(filename: str) -> dict[str, tuple[str, str]]:
-    """读取赛季排期并按 GroupID 映射（ScheduleID - 200000 = GroupID）。
+def _load_schedules(
+    group_table: str, schedule_tables: tuple[str, ...]
+) -> tuple[dict[str, tuple[str, str]], set[int]]:
+    """赛季排期：按分组表 ScheduleDataID 指针查排期记录（ADR 0038）。
 
-    过滤占位排期：整段早于公测上线（beta 占位）或起点年份 ≥2030（未来占位）。
-    无排期的赛季（组 100 / 900 等）不进入结果。
+    旧「ScheduleID - 200000 = GroupID」推断已废弃：迷宫 1034/1035 起指针脱离该编号
+    约定（291015/291016）且记录迁入全局表。排期记录按 schedule_tables 顺序查找，
+    先登记者胜（忘却之庭 = ScheduleDataChallengeMaze 优先、ScheduleDataGlobal 回退）。
+    单边日期（Begin/End 其一为空）原样保留，排序/状态展示由前端取首个已知端点。
+    占位过滤：任一已知端点年份 ≥2030 丢弃；End 早于公测为 beta 测试期（打测试标、
+    不落日期）；仅 Begin 且早于公测视同 beta 残留丢弃。无指针的常驻组不进入结果。
     """
-    data = load_json(EXCEL_DIR / filename)
-    out: dict[str, tuple[str, str]] = {}
-    for rec in data:
-        sid = rec.get("ID")
-        begin = rec.get("BeginTime", "")
-        end = rec.get("EndTime", "")
-        if not sid or not begin or not end:
+    pointers: dict[int, int] = {}
+    for rec in load_json(EXCEL_DIR / group_table):
+        gid = rec.get("GroupID")
+        sid = rec.get("ScheduleDataID")
+        if gid is not None and sid:
+            pointers[gid] = sid
+    tables: dict[int, dict] = {}
+    for filename in schedule_tables:
+        for rec in load_json(EXCEL_DIR / filename):
+            sid = rec.get("ID")
+            if sid and sid not in tables:
+                tables[sid] = rec
+    schedules: dict[str, tuple[str, str]] = {}
+    test_periods: set[int] = set()
+    for gid, sid in pointers.items():
+        rec = tables.get(sid)
+        if rec is None:
+            continue
+        begin = rec.get("BeginTime", "") or ""
+        end = rec.get("EndTime", "") or ""
+        if not begin and not end:
             continue
         try:
-            bt = datetime.fromisoformat(begin.replace(" ", "T"))
-            et = datetime.fromisoformat(end.replace(" ", "T"))
+            bt = datetime.fromisoformat(begin.replace(" ", "T")) if begin else None
+            et = datetime.fromisoformat(end.replace(" ", "T")) if end else None
         except ValueError:
             continue
-        if et < _LAUNCH_TS or bt.year >= 2030:
+        if (bt and bt.year >= 2030) or (et and et.year >= 2030):
             continue
-        out[str(sid - 200000)] = (begin, end)
-    return out
-
-def _load_test_periods(filename: str = "ScheduleDataChallengeMaze.json") -> set[int]:
-    """测试期分组：排期整段早于公测上线的 beta/CBT 测试期数。
-
-    测试期（如忘却之庭 101-107/116 的"琥珀恩赐/霜痕旧梦/永冬试炼"轮换试炼）
-    与未来占位（起点 ≥2030）均被 _load_schedules 过滤（无 live_*）；本函数仅
-    识别测试期，供前端打"测试期"徽章与正式赛季区分。
-    """
-    data = load_json(EXCEL_DIR / filename)
-    out: set[int] = set()
-    for rec in data:
-        sid = rec.get("ID")
-        begin = rec.get("BeginTime", "")
-        end = rec.get("EndTime", "")
-        if not sid or not begin or not end:
+        if et and et < _LAUNCH_TS:
+            test_periods.add(gid)
             continue
-        try:
-            et = datetime.fromisoformat(end.replace(" ", "T"))
-        except ValueError:
+        if bt and bt < _LAUNCH_TS and not (et and et >= _LAUNCH_TS):
             continue
-        if et < _LAUNCH_TS:
-            out.add(sid - 200000)
-    return out
+        schedules[str(gid)] = (begin, end)
+    return schedules, test_periods
 
 def _load_maze_buffs() -> dict[int, dict]:
     """MazeBuff.json → {ID: {name, desc, param_list, icon}}（赛季增益名称 + 效果描述）。
@@ -1371,9 +1375,16 @@ def _peak_seasons() -> dict:
     return result
 
 def convert() -> None:
-    schedules_maze = _load_schedules("ScheduleDataChallengeMaze.json")
-    schedules_story = _load_schedules("ScheduleDataChallengeStory.json")
-    schedules_boss = _load_schedules("ScheduleDataChallengeBoss.json")
+    schedules_maze, maze_test_periods = _load_schedules(
+        "ChallengeGroupConfig.json",
+        ("ScheduleDataChallengeMaze.json", "ScheduleDataGlobal.json"),
+    )
+    schedules_story, _ = _load_schedules(
+        "ChallengeStoryGroupConfig.json", ("ScheduleDataChallengeStory.json",)
+    )
+    schedules_boss, _ = _load_schedules(
+        "ChallengeBossGroupConfig.json", ("ScheduleDataChallengeBoss.json",)
+    )
     buffs = _load_maze_buffs()
     monsters = load_monsters()
     targets = _load_targets()
@@ -1418,7 +1429,7 @@ def convert() -> None:
             _load_group_arts("ChallengeMazeGroupExtra.json"),
         ),
         permanent=_load_permanent_groups(),
-        test_period=_load_test_periods(),
+        test_period=maze_test_periods,
         invasions=invasions,
         summons=summons,
     )

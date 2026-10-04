@@ -41,4 +41,4 @@ Disallow: /prerender/
 Disallow: /settings
 Disallow: /currency/settings
 
-Sitemap: https://myhsr.vercel.app/sitemap.xml
+Sitemap: https://myhsr.wiki/sitemap.xml

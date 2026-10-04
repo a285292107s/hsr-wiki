@@ -18,7 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 /** 站点源（快照 canonical / sitemap / JSON-LD 只用它） */
-export const SITE_ORIGIN = 'https://myhsr.vercel.app';
+export const SITE_ORIGIN = 'https://myhsr.wiki';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DATA_DIR = join(ROOT, 'public', 'data', 'cn');
@@ -944,6 +944,7 @@ function dateRange(entry) {
   const end = fmt(entry.live_end);
   if (start && end) return `${start} – ${end}`;
   if (start) return `${start} –`;
+  if (end) return `– ${end}`;
   return '';
 }
 
@@ -960,13 +961,24 @@ function endgamePages(ctx) {
       all.push({ mode, id, entry, name: clean(entry.zh) });
     }
   }
-  // 排序镜像 catalog/pages/endgame.ts bySeasonDesc：排期开始降序，无排期按 ID 降序
+  // 排序镜像 catalog/pages/endgame.ts bySeasonDesc：首个已知端点降序（live_begin 优先、
+  // 回退 live_end，单边排期也参与排序），同日开始端在前，两端皆无按 ID 降序
+  const sortKey = (entry) => {
+    const begin = String(entry.live_begin || '');
+    if (begin) return { date: begin, isBegin: true };
+    return { date: String(entry.live_end || ''), isBegin: false };
+  };
   all.sort((a, b) => {
-    const ta = String(a.entry.live_begin || '');
-    const tb = String(b.entry.live_begin || '');
-    if (ta && tb && ta !== tb) return ta < tb ? 1 : -1;
-    if (ta) return -1;
-    if (tb) return 1;
+    const ka = sortKey(a.entry);
+    const kb = sortKey(b.entry);
+    if (ka.date && kb.date && ka.date !== kb.date) return ka.date < kb.date ? 1 : -1;
+    if (ka.date && kb.date) {
+      if (ka.isBegin !== kb.isBegin) return ka.isBegin ? -1 : 1;
+    } else if (ka.date) {
+      return -1;
+    } else if (kb.date) {
+      return 1;
+    }
     return Number(String(b.id).replace(/\D/g, '')) - Number(String(a.id).replace(/\D/g, ''));
   });
 
