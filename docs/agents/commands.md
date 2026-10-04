@@ -44,7 +44,7 @@ e2e（Playwright，webServer 自动起 dev server 并复用已有 6188 实例）
 
 ```bash
 pnpm test:e2e          # 本机层：全量（含像素基线）
-pnpm test:e2e:ci       # CI 层：layout + a11y（环境无关；覆盖不得下降，`@font-calibrated` 除外——见 testing.md）
+pnpm test:e2e:ci       # CI 层：layout + a11y（环境无关；覆盖不得下降，`@font-calibrated` 与 2026-10 登记在案的 firefox/mobile 收窄除外——见 testing.md）
 pnpm test:e2e:guards   # 不变量层：guards + a11y（不受 UI 迭代影响，永远可跑）
 pnpm test:e2e:affected # 受影响用例层：按 git diff 推导并直接执行（= node tools/e2e-affected.mjs --run）
 pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all；重构期只在收敛后跑一次）
@@ -54,21 +54,23 @@ pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all�
 
 `playwright.config.ts` 保持 `fullyParallel: false`（**文件内**串行）——全局并行实测过但不采纳：本地 4 worker 全量墙钟比串行快约两成，代价是 3 次全量里出现 1 次并发竞态 flake（同一用例串行复跑 2/2 与单独复跑 3/3 均绿，属并发下 dev server 争用而非代码缺陷）。**禁止为提速放宽断言、加 `--retries` 或改配置掩盖 flake**。
 
-**但「不采纳全局并行」≠「接受单文件串行」**：`fullyParallel: false` 并不禁止**文件级**并行（Playwright 始终按文件分派 worker）。layout 曾是单个 74 用例 / 469s 的大文件，等于把全量调度压成一个串行单元——实测墙钟 327s，其中 a11y 仅 85s 就跑完、其余两个 worker 空转约 5.5 分钟。按 `describe` 边界拆成 `e2e/layout-*.spec.ts` 后：**墙钟约 327s → 约 120s，每条用例的隔离性与拆分前完全一致**（文件内本就串行，未新增任何并发面），并发纪律零妥协。**要提速就走这条路：减用例数或按域拆文件，禁止提高并发度。**
+**但「不采纳全局并行」≠「接受单文件串行」**：`fullyParallel: false` 并不禁止**文件级**并行（Playwright 始终按文件分派 worker）。layout 曾是单个 74 用例 / 469s 的大文件，等于把全量调度压成一个串行单元——实测墙钟 327s。按 `describe` 边界拆成 `e2e/layout-*.spec.ts` 后墙钟大幅下降，**但这纪律会随用例增长复发**：2026-10 实测全量 180 用例 / 361.6s，`layout-character.spec.ts` 又长回 39 用例单文件、firefox 项目只跑它、它又排在项目数组末尾 ⇒ 末段 168s（占墙钟 46%）只有 1 个 worker 在跑。故再拆成七个 `layout-character-*.spec.ts`，并把 firefox project 提到项目最前（Playwright 按项目顺序分派，最长单元先起跑）。**要提速就走这条路：减用例数、按域拆文件、最长的 project 放最前——禁止提高并发度**（唯一例外是先把 flake 根因修掉，见下条）。
 
 ## 漂移与影响面工具（report-only，默认不阻塞）
 
-四个工具都**默认不阻塞**（退出码 `0`）：三个漂移检查器只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）是硬门禁，不属本组。
+四个漂移检查器都**默认不阻塞**（退出码 `0`）：只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）是硬门禁，不属本组。
 
 ```bash
-node tools/check-adr-index.mjs     # ADR 索引 ↔ 正文双向一致（编号 / 标题 / Status / 互指修订）
-node tools/check-e2e-literals.mjs  # e2e 裸 px 字面量扫描 + 计数基线
-node tools/check-doc-drift.mjs     # living docs 提到的类名 / 路径 vs 代码现状
-node tools/e2e-affected.mjs        # 按 git diff 推导受影响路由 → 用例（可 --run 直接执行）
+node tools/check-adr-index.mjs          # ADR 索引 ↔ 正文双向一致（编号 / 标题 / Status / 互指修订）
+node tools/check-e2e-literals.mjs       # e2e 裸 px 字面量扫描 + 计数基线
+node tools/check-e2e-viewport-tags.mjs  # 自钉视口的 e2e 用例必须声明 @viewport-pinned
+node tools/check-doc-drift.mjs          # living docs 提到的类名 / 路径 vs 代码现状
+node tools/e2e-affected.mjs             # 按 git diff 推导受影响路由 → 用例（可 --run 直接执行）
 ```
 
 - **退出码**：`0` = 报告完成（含无 `--strict` 时的命中）；`1` = 漂移检查器带 `--strict` 且有命中。
 - `check-e2e-literals.mjs`：`--baseline <json>` 改计数基线；基线文件缺失时以「当前计数」为基线并提示生成，不报失败。行内豁免 `// e2e-literal-ok: 理由`（不可漂移的契约值，如侧栏避让 / 断点）。
+- `check-e2e-viewport-tags.mjs`：`--strict` 时「用例体调用 `page.setViewportSize` 但签名未声明 `@viewport-pinned`」即退出 1。行内豁免 `// e2e-viewport-ok: 理由`（缺理由不豁免）。**不是风格洁癖**：漏标会让 `mobile-chromium` 用 Pixel 7 的触摸仿真重跑一条本已钉死视口的桌面契约，实测把 CI 拖成 30s 超时 × 3 次重试（见 docs/memory/2026-10）。
 - `check-doc-drift.mjs`：**只扫 living docs**（`docs/agents/` 与 `CONTEXT.md`）；`docs/memory/` 是历史档案，必须排除，否则全是假阳性。
 - `e2e-affected.mjs`：`--base <ref>` 改 diff 基线，`--run` 直接执行推出的命令；命中全局文件（tokens / 全局 css / App 外壳 / 路由 / 入口）判「影响全部页面」，**推导不出受影响用例时打印「跑 guards 层 + 全量 layout」而不是静默输出空命令**。
 

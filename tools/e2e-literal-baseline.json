@@ -1,7 +1,7 @@
 {
   "total": 19,
   "files": {
-    "e2e/layout-character.spec.ts": 13,
+    "e2e/layout-character-skill-family.spec.ts": 13,
     "e2e/layout-currency.spec.ts": 1,
     "e2e/layout-endgame.spec.ts": 5
   }

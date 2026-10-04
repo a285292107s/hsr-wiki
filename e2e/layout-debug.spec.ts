@@ -46,6 +46,7 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
    * 该标签一旦被删/改名，layout viewport 退回 980px，此处 `.ui-sidebar-debug` 由隐藏转可见（tokens.css 断点）
    * → 本条硬失败。删除本条或在 playwright.config.ts 里把它一并排除，等于放弃该契约的唯一防线。
    */
+  // e2e-viewport-ok: 用例内 setViewportSize 是**被测对象**（手机档哨兵），必须留在 mobile project 里跑
   test('手机（<768px）：调试台入口隐藏，导航折叠不受影响', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { waitForCatalogCards } from './helpers';
+import { waitForCatalogCards, waitForSettled } from './helpers';
 
 // 目录页含 80+ 张 CDN 图 + 破图重试预算（25s），默认 30s 测试超时不够
 test.setTimeout(120_000);
@@ -44,7 +44,7 @@ async function waitImages(page: Page) {
         `[visual] 视口内图片加载超时（20s），${pending.length} 张未就绪（疑似 jsDelivr burst 限流）；前 5 张：${pending.slice(0, 5).join(' , ')}`,
       );
     });
-  await page.waitForTimeout(500);
+  await waitForSettled(page);
 }
 
 test.describe('视觉基线', () => {

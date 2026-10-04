@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { waitForCatalogCards } from './helpers';
+import { waitForCatalogCards, waitForSettled } from './helpers';
 
 /**
  * 可访问性扫描（WCAG 2.2 AA，axe-core）
@@ -64,8 +64,8 @@ for (const { path, label, wait } of PAGES) {
   test(`a11y 扫描：${label} ${path}`, async ({ page }) => {
     await page.goto(path);
     if (wait) await wait()(page);
-    // 等首屏稳定后再扫，避免骨架屏阶段误报
-    await page.waitForTimeout(500);
+    // 等首屏稳定（骨架退场 + 字体就绪）后再扫，避免骨架屏阶段误报
+    await waitForSettled(page);
     const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     const violations = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
 
@@ -112,7 +112,7 @@ test('a11y 扫描：角色详情 390×844（手机档底栏文字标签的对比
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/character/1204');
   await page.waitForSelector('.nk-stats__stat', { timeout: 15_000 });
-  await page.waitForTimeout(500);
+  await waitForSettled(page);
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   const violations = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
   expect(

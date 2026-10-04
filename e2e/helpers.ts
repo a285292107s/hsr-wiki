@@ -174,6 +174,24 @@ export async function expectNoUnknownOverflow(page: Page): Promise<void> {
 }
 
 /**
+ * 骨架退场 + 两帧绘制。确定性等待，替代固定 sleep——固定值在慢机器上不可靠、在快机器上白等。
+ * 超时不失败：骨架未退场是页面缺陷，由各用例自己的断言（真卡片 / 关键容器）暴露，不由等待掩盖。
+ */
+async function afterSkeletonGone(page: Page, timeout = 5_000): Promise<void> {
+  await page.waitForFunction(() => !document.querySelector('.nk-skeleton'), undefined, { timeout }).catch(() => {});
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  );
+}
+
+/** 首屏稳定：字体就绪 + 骨架退场 + 两帧绘制。a11y 扫描与像素基线取值前必须调用（骨架阶段取值会误报）。
+ *  两条等待各设 5s 上限：最坏情况（CI 上字体请求卡住 + 骨架不退场）也只花 10s，不会逼近 30s 的用例超时。 */
+export async function waitForSettled(page: Page): Promise<void> {
+  await page.waitForFunction(() => document.fonts.status === 'loaded', undefined, { timeout: 5_000 }).catch(() => {});
+  await afterSkeletonGone(page, 5_000);
+}
+
+/**
  * 等待目录卡片渲染完成（skeleton 消失、真实卡片出现）
  *
  * 选择器必须用子串 `[class*="-grid"]`，禁止写作 `[class$="-grid"]`：
@@ -183,6 +201,6 @@ export async function expectNoUnknownOverflow(page: Page): Promise<void> {
  */
 export async function waitForCatalogCards(page: Page, selector = '[class*="-grid"] a') {
   await page.waitForSelector(selector, { state: 'attached', timeout: 15_000 });
-  // 虚拟滚动首屏渲染完成后等待一帧，保证截图稳定
-  await page.waitForTimeout(300);
+  // 虚拟滚动首屏渲染完成后等骨架退场 + 两帧
+  await afterSkeletonGone(page);
 }

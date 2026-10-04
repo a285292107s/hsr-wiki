@@ -14,8 +14,11 @@ export default defineConfig({
   outputDir: path.join(os.tmpdir(), 'hsr-wiki-e2e-results'),
   snapshotPathTemplate: './e2e/snapshots/{testFilePath}/{arg}{ext}',
   // `fullyParallel: false` 只禁**文件内**并行；文件级并行始终生效。layout 按域拆成 `layout-*.spec.ts`
-  // 后，单文件不再是唯一调度单元，全量墙钟 327s → 约 150s，且每条用例的隔离性与拆分前一致
-  // （文件内本就串行，未新增用例级并发面）。
+  // 后，单文件不再是唯一调度单元，每条用例的隔离性与拆分前一致（文件内本就串行，未新增并发面）。
+  // **但一条巨型文件仍能锁死墙钟**：2026-10 实测全量 180 用例 / 361.6s，其中 `layout-character.spec.ts`
+  // 单文件 39 用例、firefox 项目只跑它、而它排在项目列表末尾 ⇒ 末段 168s（占墙钟 46%）只有 1 个 worker
+  // 在跑（另一个空转）。故角色详情页再按域拆成 `layout-character-*.spec.ts` 七个文件，
+  // 并把 firefox 项目提到项目列表最前（Playwright 按项目顺序分派，最长单元要先起跑）。
   //
   // `workers: 2` 是实测的「无 flake 又有收益」平衡点：
   //  - 不限并发（Playwright 取 CPU 半数，本机 12 核 → 6）：84 用例必现 4 条 30s 超时，单独复跑全绿；
@@ -34,6 +37,20 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
+    // Firefox 只跑 `@cross-engine`（判定可能随引擎差异变化的用例；`@viewport-pinned` 用例自钉视口，
+    // 不受项目默认视口影响）。标签须静态写在 `test(...)` 第二参，动态 annotation 对收集期过滤无效。
+    // 存在理由：滚动驱动动画在 Firefox **不支持**（`CSS.supports('animation-timeline','scroll()')` = false），
+    // 而缺 `@supports` 门时动画会退回普通时间轴跑完并停在末帧 ⇒ 媒体层永久下移 36px（实测到的真实缺陷）；
+    // 同类的引擎相关面还有 mask-image 渐变提示、焦点环绘制、极端视口溢出。
+    // **不扩到全部 layout 用例**：那是「三引擎 × 全量」，墙钟与既有 flake 面都会成倍放大，收益不匹配。
+    // 未覆盖：WebKit 与其余 spec —— 见 docs/audit/角色详情页验收标准.md 的 B3 条目。
+    {
+      name: 'firefox-layout-contract',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: /layout-character.*\.spec\.ts/,
+      grep: /@cross-engine/,
+      grepInvert: ciFontCalibratedExclude,
+    },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
@@ -43,18 +60,11 @@ export default defineConfig({
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'] },
       testIgnore: [/visual\.spec\.ts/, /accessibility\.spec\.ts/],
-      grepInvert: process.env.CI ? [/@viewport-pinned/, fontCalibrated] : /@viewport-pinned/,
-    },
-    // Firefox 只跑角色详情页的布局契约（`@viewport-pinned` 用例自钉视口，不受项目默认视口影响）。
-    // 存在理由：滚动驱动动画在 Firefox **不支持**（`CSS.supports('animation-timeline','scroll()')` = false），
-    // 而缺 `@supports` 门时动画会退回普通时间轴跑完并停在末帧 ⇒ 媒体层永久下移 36px（本轮实测到的真实缺陷）。
-    // **不扩到全部 layout 用例**：那是「三引擎 × 全量」，墙钟与既有 flake 面都会成倍放大，收益不匹配。
-    // 未覆盖：WebKit 与其余 spec —— 见 docs/audit/角色详情页验收标准.md 的 B3 条目。
-    {
-      name: 'firefox-layout-contract',
-      use: { ...devices['Desktop Firefox'] },
-      testMatch: /layout-character\.spec\.ts/,
-      grepInvert: ciFontCalibratedExclude,
+      // `@viewport-pinned`：用例自钉视口；`@viewport-independent`：断言与断点无关（数据 / 结构 / 网络来源），
+      // 手机档重跑只是重复同一条断言。手机档只补「非固定视口下的手机断点面」。
+      grepInvert: process.env.CI
+        ? [/@viewport-pinned/, /@viewport-independent/, fontCalibrated]
+        : [/@viewport-pinned/, /@viewport-independent/],
     },
   ],
   webServer: {
