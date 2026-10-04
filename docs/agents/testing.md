@@ -11,7 +11,8 @@
 
 ## 前端 e2e（Playwright / 布局验收层）
 
-- 配置：`playwright.config.ts`；`webServer` 起 `pnpm dev` 并复用已有 6188 实例（非 CI），单 Chromium；`mobile-chromium`（Pixel 7）仅跑 layout（溢出 / 结构 / console 守卫），`testIgnore` 排除 visual 与 accessibility，`grepInvert: /@viewport-pinned/` 排除**自行 `setViewportSize` 固定视口**的用例（其视口已由用例钉死，两个 project 下重复执行同一断言；标签须静态写在 `test(...)` 第二参，动态 annotation 对收集期过滤无效；标签纪律见任一 `e2e/layout-*.spec.ts` 头部）
+- 配置：`playwright.config.ts`；`webServer` 起 `pnpm dev` 并复用已有 6188 实例（非 CI）。三个 project：`chromium`（全部 spec）；`mobile-chromium`（Pixel 7）仅跑 layout（溢出 / 结构 / console 守卫），`testIgnore` 排除 visual 与 accessibility，`grepInvert: /@viewport-pinned/` 排除**自行 `setViewportSize` 固定视口**的用例（其视口已由用例钉死，两个 project 下重复执行同一断言；标签须静态写在 `test(...)` 第二参，动态 annotation 对收集期过滤无效；标签纪律见任一 `e2e/layout-*.spec.ts` 头部）；`firefox-layout-contract`（Firefox）仅跑 `layout-character.spec.ts`——Firefox 不支持滚动驱动动画，跨引擎构图契约靠它锁，裁决与未覆盖范围（WebKit 未入 CI）见[验收标准](../audit/角色详情页验收标准.md) B3
+- **新增 project 必须同步 `.github/workflows/ci.yml` 的 `playwright install` 浏览器清单**（当前 `chromium firefox`；`mobile-chromium` 复用 chromium 二进制）：CI 只装清单内的浏览器，漏登记时该 project 的全部用例以 `browserType.launch: Executable doesn't exist` 告负——而本机浏览器齐全故恒绿，**该缺口只有 CI 能显形**（不装浏览器的项目 = 零覆盖，但仍占 `test:e2e:ci` 的用例数）
 - 用例：`e2e/guards.spec.ts`（不变量，见下「三层归属」）/ `e2e/layout-*.spec.ts` 九个分域文件（布局与语义契约验收）/ `accessibility.spec.ts`（axe-core WCAG 扫描）/ `visual.spec.ts`（像素基线）；公共工具在 `e2e/helpers.ts`，layout 跨文件共用的取值原语与数据派生在 `e2e/layout.shared.ts`（只放取值与派生，不放 `test()`/`expect()`）
 - **layout 必须按 `describe` 边界分文件**：`fullyParallel: false` 只禁**文件内**并行，文件级并行始终生效——单文件 layout 曾把 74 用例 / 469s 串成一个调度单元，全量墙钟锁死 6.6 分钟（a11y 仅 85s 跑完后两个 worker 空转约 5.5 分钟）。拆成 `layout-*.spec.ts` 后墙钟降到约 2 分钟，且每条用例的隔离性与拆分前完全一致（文件内本就串行），**不触碰已记录的并发 flake 纪律**。新增 layout 用例归入对应域文件，不要再堆回单一大文件。
 - **分层**：CI 层 = `pnpm test:e2e:ci`（layout + accessibility，零外部依赖、环境无关）；像素基线回本机（判定依赖环境——CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异，见 `ci.yml` 注释），**禁止把 `visual.spec` 加回 CI**

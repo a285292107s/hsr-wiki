@@ -53,14 +53,18 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Playwright 浏览器二进制缓存（版本由 lockfile 锁定；命中后 install 秒级跳过）
+      # key 的 -v2 后缀：缓存需重建一次才含 firefox，否则命中旧缓存后每次 run 都要重下 firefox
       - name: Cache Playwright browsers
         uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-v2
 
-      - name: Install Playwright chromium
-        run: pnpm exec playwright install --with-deps chromium
+      # 浏览器清单必须覆盖 playwright.config.ts 的每个 project（当前 chromium / firefox；
+      # mobile-chromium 复用 chromium 二进制）。漏登记 ⇒ 该 project 全部用例以
+      # browserType.launch「Executable doesn't exist」告负，而本机装了浏览器故全绿——只有 CI 能显形。
+      - name: Install Playwright browsers（chromium + firefox）
+        run: pnpm exec playwright install --with-deps chromium firefox
 
       - name: E2E tests（T1b/T2 布局 + a11y，环境无关守卫；visual 像素基线已回本机，勿加回）
         run: pnpm test:e2e:ci
