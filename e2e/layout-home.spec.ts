@@ -28,9 +28,11 @@ test.describe('布局验收：常规主题', () => {
     // 站点名易变，不断言具体文案，只验非空
     await expect(page.locator('.nk-hub-brand__title')).toHaveText(/\S/);
     await expect(page.locator('.nk-hub-release__title')).toContainText('版本上新');
-    // 已渲染分区数 ≥1 同时是「版本增量打标管线」的端到端哨兵：整页退化为空态必须让本断言变红
-    const sectionCount = await page.locator('.nk-hub-release__section').count();
-    expect(sectionCount).toBeGreaterThanOrEqual(1);
+    // 已渲染分区数 ≥1 同时是「版本增量打标管线」的端到端哨兵：整页退化为空态必须让本断言变红。
+    // 用 `expect.poll` 而不是一次性 `count()`——分区是**数据驱动渲染**（version.json + 版本差集），
+    // 上面两条等待只覆盖静态品牌带/标题；慢 runner 上首读可能是 0（就绪竞态，CI 实测首跑红、retry 绿），
+    // 而真空态会让 poll 超时照样变红（空态形态由下一条用例单独锁定）。
+    await expect.poll(() => page.locator('.nk-hub-release__section').count(), { timeout: 10_000 }).toBeGreaterThanOrEqual(1);
     // 常规模式不得挂 cw 主题
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'cw');
     // L3 溢出
@@ -111,10 +113,12 @@ test.describe('布局验收：常规主题', () => {
     );
     expect(tops[1]).toBeGreaterThan(tops[0]);
     // picture 双源命中：手机断点 currentSrc 为 127px 圆头像（非半身立绘）
-    const src = await cards.first().locator('img').first().evaluate(
-      (el) => (el as HTMLImageElement).currentSrc,
-    );
-    expect(src).toContain('avatarroundicon');
+    // `currentSrc` 要等浏览器**异步**完成资源选择后才有值（元素插入 ≠ 已选源，实测首读可能是空串），
+    // 故用 poll 等待而不是一次性读——与 `layout-character-skill-data.spec.ts` 的「先等位图真的到位再断言」同一判据。
+    const portraitImg = cards.first().locator('img').first();
+    await expect
+      .poll(() => portraitImg.evaluate((el) => (el as HTMLImageElement).currentSrc), { timeout: 10_000 })
+      .toContain('avatarroundicon');
     // 行卡：44px 圆头像 + 总高 ≤ 80px（半身立绘大卡让位）
     const size = await cards.first().locator('.nk-idx-card__portrait').evaluate((el) => {
       const r = el.getBoundingClientRect();
