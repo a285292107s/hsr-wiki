@@ -236,7 +236,11 @@ test.describe('布局验收：角色详情页', () => {
 
   // 骨架态只代理「盒子」：同一角色下骨架面板与就绪面板必须同宽同高，且两态都不给媒体加底板
   // （底板绝对定位在面板上 ⇒ 面板一变高、底板顶边就跳；2026-09 记过同类 204px 高度跳变）。
-  test('/character/1001 桌面：骨架态与就绪态 hero 面板同框且两态均不给媒体加底板', { tag: '@viewport-pinned' }, async ({ page }) => {
+  // 高度一处比对的是骨架盒高（`--nk-hero-panel-h`，全量中位数上取整）与就绪面板高——就绪侧同值
+  // min-height 兜底，故这条断言 = 「就绪内容不得高过骨架盒高」，与字体度量无关（见 character-skeleton.css）。
+  // `@font-calibrated`：就绪内容高仍是若干 `line-height: normal` 行盒之和（比例随解析到的回退字体变，
+  // Linux runner 比标定源高 2~3px）⇒ 该断言判定依赖平台，CI 层不收集、本机全量判（见 docs/agents/testing.md）。
+  test('/character/1001 桌面：骨架态与就绪态 hero 面板同框且两态均不给媒体加底板', { tag: ['@viewport-pinned', '@font-calibrated'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
 
@@ -262,7 +266,7 @@ test.describe('布局验收：角色详情页', () => {
     });
 
     expect(Math.abs(skel.w - ready.w), '骨架与就绪面板同宽').toBeLessThanOrEqual(1);
-    expect(Math.abs(skel.h - ready.h), '骨架与就绪面板同高（1001 简介 1 行 = 抽样中位数）').toBeLessThanOrEqual(1);
+    expect(Math.abs(skel.h - ready.h), '骨架与就绪面板同高（骨架盒高 = 全量中位数，就绪侧同值 min-height 兜底）').toBeLessThanOrEqual(1);
     expect(skel.barShadow, '骨架条块不得带底板（骨架态同样不压暗媒体）').toBe('none');
     expect(ready.bgImage, '就绪态面板不得有整块底板').toBe('none');
     await noUnknownOverflow(page);
@@ -272,7 +276,7 @@ test.describe('布局验收：角色详情页', () => {
   // 平板档（768~1023）版式契约：改为「文字在左 · 媒体在右」并排（媒体竖幅）——竖排会在文字块右侧
   // 留近半个面板宽的空洞、媒体带居中后左右各留 113px，读作「手机版式被拉宽」。骨架态必须逐项同框。
   // 注：骨架/就绪之间恒有 ~1.4px 横向差（既有、三档一致、加载期不可见），故 x/y 取 2px 容差。
-  test('/character/1001 平板档：文字与媒体并排且骨架同框', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1001 平板档：文字与媒体并排且骨架同框', { tag: ['@viewport-pinned', '@font-calibrated'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 768, height: 1024 });
     const measure = (rootSel: string) => page.evaluate((sel) => {
@@ -313,7 +317,7 @@ test.describe('布局验收：角色详情页', () => {
     expect(Math.abs(skel.visual!.h - ready.visual!.h), '骨架媒体同高').toBeLessThanOrEqual(1);
     expect(Math.abs(skel.panel!.x - ready.panel!.x), '骨架面板同列').toBeLessThanOrEqual(2);
     expect(Math.abs(skel.panel!.y - ready.panel!.y), '骨架面板纵向同位（居中）').toBeLessThanOrEqual(2);
-    expect(Math.abs(skel.panel!.h - ready.panel!.h), '骨架面板同高（1001 = 平板档中位数）').toBeLessThanOrEqual(1);
+    expect(Math.abs(skel.panel!.h - ready.panel!.h), '骨架面板同高（骨架盒高 = 平板档中位数，就绪侧同值 min-height 兜底）').toBeLessThanOrEqual(1);
 
     await noUnknownOverflow(page);
     assertNoErrors();

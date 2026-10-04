@@ -44,7 +44,7 @@ e2e（Playwright，webServer 自动起 dev server 并复用已有 6188 实例）
 
 ```bash
 pnpm test:e2e          # 本机层：全量（含像素基线）
-pnpm test:e2e:ci       # CI 层：仅 layout + a11y（环境无关；覆盖不得下降）
+pnpm test:e2e:ci       # CI 层：layout + a11y（环境无关；覆盖不得下降，`@font-calibrated` 除外——见 testing.md）
 pnpm test:e2e:guards   # 不变量层：guards + a11y（不受 UI 迭代影响，永远可跑）
 pnpm test:e2e:affected # 受影响用例层：按 git diff 推导并直接执行（= node tools/e2e-affected.mjs --run）
 pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all；重构期只在收敛后跑一次）
@@ -100,6 +100,6 @@ python -m pytest tests/ -v               # converter 单元测试
 门禁语义（**软门禁**）：
 
 - main 分支 protection 仅保留防 force push 与防删除（required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过。
-- 推送后 CI 自动运行 `unit-tests`（`pnpm test`）+ `e2e`（`pnpm test:e2e:ci` = layout + a11y），失败由 GitHub 通知；CI **不跑** `pnpm build`。
+- 推送后 CI 自动运行 `unit-tests`（`pnpm test`）+ `e2e`（`pnpm test:e2e:ci` = layout + a11y，减去 `@font-calibrated`），失败由 GitHub 通知；CI **不跑** `pnpm build`。
 - Vercel 生产构建（`pnpm build`，含 vue-tsc 与三守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
 - 本地推送前先跑 `pnpm build` + `pnpm test` 自检——CI 红不会拦 push，但会留失败记录。

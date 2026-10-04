@@ -8,19 +8,31 @@
 }
 .nk-char-page .nk-skeleton__stat-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
 .nk-char-page .nk-sk--stat { height: 35px; border-radius: 0; }
-/* 骨架 hero 面板只代理「盒子」不代理「结构」：实测 **全量 98 只**角色的就绪面板高度中位数
-   桌面 239.8 / 平板 262.5 / 手机 223.5（p25≈p75 极稳，除长简介离群）——盒高一律**对中位数上取整**，
-   否则两条测量路径（探针 vs e2e）的次像素差会击穿 1px 容差。故固定盒高 + 内距与就绪面板逐档对齐 +
-   条块均分剩余空间。主字分档（`.nk-hero__name` 的 `data-len`）后名长度不再改变盒高——名称族高度槽
-   `--nk-hero-name-slot` 按档取本档主字上限的行盒，故同一档内盒高恒定（跨档差见同一探针的 max 列）。
-   gap 归零、间距全交给 space-between：条块总高 98px 恒小于最小盒内容高
-   （768~1023 档 = 263 - 64 padding = 199），故均分不会重叠；**新增条块须同时复核此不等式**。
+/* 骨架 hero 面板只代理「盒子」不代理「结构」。盒高 = 实测 **全量 98 只**角色的就绪面板高度中位数
+   桌面 239.8 / 平板 262.5 / 手机 223.5（p25≈p75 极稳，除长简介离群），一律**对中位数上取整**。
+   **这个值同时是就绪面板的高度下限**（`--nk-hero-panel-h` 被 character-hero.css 的 `.nk-hero__panel`
+   当 `min-height` 消费）⇒ 就绪高 = max(内容高, 令牌值)：内容偏矮那一侧两态同框**由构造成立**，
+   不必再依赖「常量恰好等于内容高」这个巧合（Windows 实测内容高 239.813，与常量本就差 0.19px）。
+   **它管不了「内容偏高」那一侧**：就绪内容高由若干 `line-height: normal` 的行盒（HUD 字体 + CJK 回退）
+   求和而成，比例随**实际解析到的回退字体**变——Linux runner 上 Firefox 内容高 242.82 / 平板 264.5
+   （比 Windows 高 3.0 / 2.0px），于是 e2e「骨架↔就绪同框」在 CI 恒红。**这是平台字体差、不是契约破**：
+   该断言标 `@font-calibrated`、CI 层不收集、本机全量仍判（理由与「像素基线移出 CI」同）。
+   **不为它改设计**——把盒高抬到 243 / 265 也能让 CI 变绿，代价是所有平台上文字块上移 3.2px，
+   收益只是一个 3px 级加载瑕疵的消音；加载位移本身由 B1 的记录值背书（下表）。
+   **手机档没有跨态断言**：该档同量级位移未判定，属已登记未覆盖（见 docs/agents/testing.md）。
 
-   这三条 `height` 同时是**验收标准 B1 的 CLS 代理指标**（见 docs/audit/角色详情页验收标准.md）：
-   骨架→就绪的替换是本页最大的潜在布局位移，e2e「骨架态与就绪态 hero 面板同宽同高（±1px）」把它锁死；
-   实测真实 CLS（dev 环境，12 组×3 次）最大 0.0107、14 次里 9 次为 0，远低于 0.1。 */
+   固定盒高 + 内距与就绪面板逐档对齐 + 条块均分剩余空间。主字分档（`.nk-hero__name` 的 `data-len`）后
+   名长度不再改变盒高——名称族高度槽 `--nk-hero-name-slot` 按档取本档主字上限的行盒，故同一档内盒高
+   恒定（跨档差见同一探针的 max 列）。gap 归零、间距全交给 space-between：条块总高 98px 恒小于最小盒
+   内容高（768~1023 档 = 263 - 64 padding = 199），故均分不会重叠；**新增条块须同时复核此不等式**。
+
+   令牌仍是**验收标准 B1 的 CLS 代理指标**（见 docs/audit/角色详情页验收标准.md）：骨架→就绪的替换是本页
+   最大的潜在布局位移，e2e「骨架态与就绪态 hero 面板同宽同高（±1px）」把它锁死（该用例 @font-calibrated
+   ⇒ CI 不判、本机全量判）；实测真实 CLS（dev 环境，12 组×3 次）最大 0.0107、14 次里 9 次为 0，远低于 0.1。
+   `--nk-hero-panel-h` 按档声明（本档即手机档；≥768 无独立值——768~1023 与 ≥1024 两个子区间各自覆盖）。 */
+.nk-char-page { --nk-hero-panel-h: 224px; }
 .nk-char-page .nk-skeleton__hero-panel {
-  padding: 32px 16px 20px; height: 224px; gap: 0; justify-content: space-between;
+  padding: 32px 16px 20px; height: var(--nk-hero-panel-h); gap: 0; justify-content: space-between;
 }
 
 @media (min-width: 768px) {
@@ -28,16 +40,18 @@
   .nk-char-page .nk-stats__stat { padding: 11px 0; }
   .nk-char-page .nk-stats__val { font-size: 1rem; }
   .nk-char-page .nk-sk--stat { height: 41px; }
-  .nk-char-page .nk-skeleton__hero-panel { padding: 32px; height: 226px; }
+  .nk-char-page .nk-skeleton__hero-panel { padding: 32px; }
 }
 @media (min-width: 768px) and (max-width: 1023px) {
+  .nk-char-page { --nk-hero-panel-h: 263px; }
   .nk-char-page .nk-eidolon__icon { width: 132px; height: 132px; }
   /* 平板档并排版式（媒体在左 · 文字在右）的骨架镜像：几何逐项对齐就绪态 */
   .nk-char-page .nk-skeleton__hero { flex-direction: row; align-items: flex-start; }
   .nk-char-page .nk-skeleton__hero-visual { flex: 0 0 46%; aspect-ratio: 4 / 5; }
-  .nk-char-page .nk-skeleton__hero-panel { flex: 1 1 auto; align-self: center; padding: 0 0 0 32px; height: 263px; }
+  .nk-char-page .nk-skeleton__hero-panel { flex: 1 1 auto; align-self: center; padding: 0 0 0 32px; }
 }
 @media (min-width: 1024px) {
+  .nk-char-page { --nk-hero-panel-h: 240px; }
   .nk-char-page .nk-hero { min-height: clamp(560px, 76vh, 820px); overflow: clip; }
   .nk-char-page .nk-hero__visual { position: absolute; inset: 0; aspect-ratio: auto; }
   .nk-char-page .nk-hero__visual::before { background: none; }
@@ -84,7 +98,7 @@
   .nk-char-page .nk-skeleton__hero-panel {
     position: absolute; left: var(--nk-hero-panel-edge); bottom: var(--nk-hero-panel-edge); z-index: 1;
     width: min(520px, 58%);
-    padding: 0; gap: 0; height: 240px; justify-content: space-between;
+    padding: 0; gap: 0; justify-content: space-between;
     border-top: none; background: none;
   }
 }

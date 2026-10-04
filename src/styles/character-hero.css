@@ -179,6 +179,11 @@
   padding-top: 32px;
   gap: 20px;
   backdrop-filter: none; -webkit-backdrop-filter: none;
+  /* 高度下限 = 骨架盒高（同一个 `--nk-hero-panel-h`，取值与依据见 character-skeleton.css）：
+     就绪高 = max(内容高, 令牌值) ⇒ 内容偏矮那一侧两态同框由构造成立。内容**偏高**（Linux runner
+     的回退字体比 Windows 高 3.0 / 2.0px）不由 CSS 兜——那是平台字体差不是契约破，故 e2e 的同框
+     断言标 `@font-calibrated`、CI 层不判、本机全量判。长简介（2 行）仍会高过下限、照常向下增长，不裁切。 */
+  min-height: var(--nk-hero-panel-h);
 }
 .nk-char-page ::selection {
   background: color-mix(in srgb, var(--primary) 32%, transparent);

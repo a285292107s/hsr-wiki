@@ -13,6 +13,7 @@
 
 - 配置：`playwright.config.ts`；`webServer` 起 `pnpm dev` 并复用已有 6188 实例（非 CI）。三个 project：`chromium`（全部 spec）；`mobile-chromium`（Pixel 7）仅跑 layout（溢出 / 结构 / console 守卫），`testIgnore` 排除 visual 与 accessibility，`grepInvert: /@viewport-pinned/` 排除**自行 `setViewportSize` 固定视口**的用例（其视口已由用例钉死，两个 project 下重复执行同一断言；标签须静态写在 `test(...)` 第二参，动态 annotation 对收集期过滤无效；标签纪律见任一 `e2e/layout-*.spec.ts` 头部）；`firefox-layout-contract`（Firefox）仅跑 `layout-character.spec.ts`——Firefox 不支持滚动驱动动画，跨引擎构图契约靠它锁，裁决与未覆盖范围（WebKit 未入 CI）见[验收标准](../audit/角色详情页验收标准.md) B3
 - **新增 project 必须同步 `.github/workflows/ci.yml` 的 `playwright install` 浏览器清单**（当前 `chromium firefox`；`mobile-chromium` 复用 chromium 二进制）：CI 只装清单内的浏览器，漏登记时该 project 的全部用例以 `browserType.launch: Executable doesn't exist` 告负——而本机浏览器齐全故恒绿，**该缺口只有 CI 能显形**（不装浏览器的项目 = 零覆盖，但仍占 `test:e2e:ci` 的用例数）
+- **`@font-calibrated` = 判定依赖平台字体度量的断言，CI 层不收集**（当前 2 条：`layout-character.spec.ts` 的桌面 / 平板「骨架↔就绪同框」）：它们比「骨架盒高 == 就绪面板内容高」，而就绪内容高 = 若干 `line-height: normal` 行盒之和，比例随**实际解析到的回退字体**变——Linux runner 的 Firefox 实测内容高 242.82 / 平板 264.5，比标定源（Windows 239.813 / 262.453）高 3.0 / 2.0px，故在 CI 恒差。`playwright.config.ts` 三个 project 都按 `process.env.CI` 收起该标签（本机 `pnpm test:e2e` 全量仍判；CI 报告里显示为未收集而非失败）。**这是有意的覆盖率收窄**，理由与「像素基线移出 CI」同一条（判定依赖环境，见 `ci.yml` 注释）——**新增判定依赖字体度量的断言必须打此标签**，否则 CI 会在 Linux runner 上翻红；反之，**禁止**为了把它留在 CI 而把面板几何抬到跨平台上界（那是拿全局视觉位移换一条 3px 级加载瑕疵的消音，实测记录见 docs/memory/2026-10.md）。
 - 用例：`e2e/guards.spec.ts`（不变量，见下「三层归属」）/ `e2e/layout-*.spec.ts` 九个分域文件（布局与语义契约验收）/ `accessibility.spec.ts`（axe-core WCAG 扫描）/ `visual.spec.ts`（像素基线）；公共工具在 `e2e/helpers.ts`，layout 跨文件共用的取值原语与数据派生在 `e2e/layout.shared.ts`（只放取值与派生，不放 `test()`/`expect()`）
 - **layout 必须按 `describe` 边界分文件**：`fullyParallel: false` 只禁**文件内**并行，文件级并行始终生效——单文件 layout 曾把 74 用例 / 469s 串成一个调度单元，全量墙钟锁死 6.6 分钟（a11y 仅 85s 跑完后两个 worker 空转约 5.5 分钟）。拆成 `layout-*.spec.ts` 后墙钟降到约 2 分钟，且每条用例的隔离性与拆分前完全一致（文件内本就串行），**不触碰已记录的并发 flake 纪律**。新增 layout 用例归入对应域文件，不要再堆回单一大文件。
 - **分层**：CI 层 = `pnpm test:e2e:ci`（layout + accessibility，零外部依赖、环境无关）；像素基线回本机（判定依赖环境——CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异，见 `ci.yml` 注释），**禁止把 `visual.spec` 加回 CI**
@@ -30,7 +31,7 @@
 | **specs 数值规格层** | 尺寸 / 间距 / 字号 / 圆角等展示取值 | 随展示迭代改 | 同上；裸 px 由字面量工具扫描（命令与退出码见 [commands.md](commands.md)） |
 
 - **数值断言硬规则（specs 层，可机检）**：禁止裸 px 断言——数值断言必须**令牌派生**（`e2e/helpers.ts → readToken`）或**相对序**（如 `scale.card > scale.groupTitle > scale.label`）；内容真值（首领名 / 污染等级 / 目标分数 / 节点数等）优先从 `public/data/cn/` 的产物 JSON 派生，不在断言里写死页面文案。真正不可漂移的契约值（令牌单点声明值、`0px` 直角 / `1px` 发丝线的**语义即值**类）允许保留字面量，二选一收口：行内标 `// e2e-literal-ok: 理由`，或由基线计数兜底（`tools/e2e-literal-baseline.json`）。扫描器只统计**断言调用里的** px——注释 / 用例标题 / 视口声明不进计数，避免守卫对着注释报警再逼人改注释。
-- **改动路由**：展示迭代只需跑 guards 层 + 受影响用例（`pnpm test:e2e:affected`）；**禁止**为过测修改 guards 层——它变红即不变量被破坏，是代码问题而非断言问题。`pnpm test:e2e:ci` 语义不变（layout + a11y），**CI 覆盖率不得下降**。
+- **改动路由**：展示迭代只需跑 guards 层 + 受影响用例（`pnpm test:e2e:affected`）；**禁止**为过测修改 guards 层——它变红即不变量被破坏，是代码问题而非断言问题。`pnpm test:e2e:ci` 语义不变（layout + a11y，**减去 `@font-calibrated` 那 2 条**——该收窄是登记在案的例外，见上方条目），**除此之外 CI 覆盖率不得下降**。
 ## Converter（pytest）
 
 - 位置：`tools/converter/tests/`

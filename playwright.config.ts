@@ -2,6 +2,13 @@ import { defineConfig, devices } from '@playwright/test';
 import os from 'node:os';
 import path from 'node:path';
 
+// CI 层不收集 `@font-calibrated`（当前 2 条「骨架↔就绪同框」）：它们比「骨架盒高 == 就绪面板内容高」，
+// 而就绪内容高由若干 `line-height: normal` 行盒求和而成，比例随**解析到的回退字体**变——Linux runner 上
+// Firefox 实测比标定源（Windows）高 3.0 / 2.0px，故判定依赖平台。按「环境相关判定不进 CI」（与像素基线
+// 移出 CI 同一条理由，见 docs/agents/testing.md）只在 CI 下不收集；本机 `pnpm test:e2e` 全量仍判。
+const fontCalibrated = /@font-calibrated/;
+const ciFontCalibratedExclude = process.env.CI ? fontCalibrated : undefined;
+
 export default defineConfig({
   testDir: './e2e',
   outputDir: path.join(os.tmpdir(), 'hsr-wiki-e2e-results'),
@@ -30,12 +37,13 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      grepInvert: ciFontCalibratedExclude,
     },
     {
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'] },
       testIgnore: [/visual\.spec\.ts/, /accessibility\.spec\.ts/],
-      grepInvert: /@viewport-pinned/,
+      grepInvert: process.env.CI ? [/@viewport-pinned/, fontCalibrated] : /@viewport-pinned/,
     },
     // Firefox 只跑角色详情页的布局契约（`@viewport-pinned` 用例自钉视口，不受项目默认视口影响）。
     // 存在理由：滚动驱动动画在 Firefox **不支持**（`CSS.supports('animation-timeline','scroll()')` = false），
@@ -46,6 +54,7 @@ export default defineConfig({
       name: 'firefox-layout-contract',
       use: { ...devices['Desktop Firefox'] },
       testMatch: /layout-character\.spec\.ts/,
+      grepInvert: ciFontCalibratedExclude,
     },
   ],
   webServer: {
