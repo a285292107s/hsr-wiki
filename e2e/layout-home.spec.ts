@@ -183,4 +183,66 @@ test.describe('布局验收：常规主题', () => {
     await noUnknownOverflow(page);
     assertNoErrors();
   });
+
+  /* 版本上新特写行：盒宽**不得依赖图片是否加载**。
+     实测缺陷（2026-10）：第二列轨写成 `max-content`，而该列的 max-content 由卡内懒加载图的固有宽度决定
+     —— 图未就绪（`naturalWidth = 0`）时塌成卡名文字宽，遗器卡实测 `96.1×122`、图就绪后变 `240×266`，
+     列轨随之从 `306│95.84│818` 跳到 `306│240│674` ⇒ 首页每次首屏都有一次 144px 的布局位移，
+     同屏第二张卡大小差 2.5 倍。判据取两件实现无关的事实：① 同一行内各卡等宽；② 把图片响应**延迟**
+     （不是 abort，避免走进 CDN 降级链）测得的盒宽/行高与正常加载逐项一致。 */
+  test('首页 /：版本上新特写行的盒宽不依赖图片加载（禁 max-content 塌缩）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+
+    const measure = async (delayImages: boolean) => {
+      if (delayImages) {
+        await page.route('**/*.{webp,png}', async (route) => {
+          await new Promise((resolve) => setTimeout(resolve, 8_000));
+          await route.continue();
+        });
+      }
+      await page.goto('/');
+      await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
+      const rows = await page.evaluate(() =>
+        [...document.querySelectorAll('.nk-hub-release__section')].map((section) => {
+          const band = section.querySelector('.nk-hub-release__band') as HTMLElement;
+          return {
+            kind: section.getAttribute('data-kind') ?? '',
+            // 量**卡本体**而不是网格单元：手机档主卡单元的轨是 `1fr`（262px）而卡只有 104px，
+            // 单元等宽是没有意义的判据；要锁的是「同屏两张卡看起来一样大」。
+            widths: [...section.querySelectorAll('.nk-hub-release__cell')].map((cell) => {
+              const card = cell.firstElementChild as HTMLElement | null;
+              return Math.round((card ?? cell).getBoundingClientRect().width);
+            }),
+            bandHeight: Math.round(band.getBoundingClientRect().height),
+          };
+        }),
+      );
+      if (delayImages) await page.unroute('**/*.{webp,png}');
+      return rows;
+    };
+
+    const pending = await measure(true);
+    const loaded = await measure(false);
+    expect(loaded.length, '版本上新应有分区').toBeGreaterThan(0);
+    for (let i = 0; i < loaded.length; i++) {
+      const row = loaded[i];
+      const pendingRow = pending[i];
+      expect(pendingRow?.kind).toBe(row.kind);
+      for (const w of row.widths) {
+        expect(
+          Math.abs(w - row.widths[0]),
+          `${row.kind}：同一行内各卡必须等宽，实测 ${row.widths.join(' / ')}`,
+        ).toBeLessThanOrEqual(1);
+      }
+      expect(
+        row.widths,
+        `${row.kind}：卡片盒宽不得依赖图片是否加载（加载前 ${pendingRow.widths.join('/')} ↔ 加载后 ${row.widths.join('/')}）`,
+      ).toEqual(pendingRow.widths);
+      expect(
+        Math.abs(row.bandHeight - pendingRow.bandHeight),
+        `${row.kind}：行高不得随图片加载变化`,
+      ).toBeLessThanOrEqual(1);
+    }
+    assertNoErrors();
+  });
 });

@@ -377,10 +377,14 @@
 .nk-hub-release__label { margin-bottom: 10px; font-size: var(--nk-fs-4); font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; color: var(--text2); }
 .nk-hub-release__label-count { margin-left: 8px; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.08em; color: color-mix(in srgb, var(--metric-val) 72%, transparent); vertical-align: 1px; font-variant-numeric: tabular-nums; }
 .nk-hub-release__band { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(210px, 17%, 300px); align-items: start; gap: 16px; padding: 8px 0 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
-/* 特写档：`306px` 主卡列 + 主条目列（max-content，避免「其余条目」被拉伸）+ 1fr 空气列。
-   规格块跨后两列 ⇒ 它的顶线横跨整行右侧，成为这一行的骨架（旧形态是紧贴主卡的一小块重复信息：
-   实测 1440 档卡片文字「真珠/★★★★★/冰/欢愉」与规格块「真珠/冰/欢愉」逐字重复）。 */
-.nk-hub-release__band--feature { grid-auto-flow: row; grid-auto-columns: unset; grid-template-columns: minmax(0, 306px) minmax(0, max-content) minmax(0, 1fr); align-items: start; justify-content: start; overflow-x: hidden; }
+/* 特写档：主卡列 + 其余条目列（**同宽**）+ 1fr 空气列。规格块跨后两列 ⇒ 它的顶线横跨整行右侧，
+   成为这一行的骨架（旧形态是紧贴主卡的一小块重复信息：实测 1440 档卡片文字「真珠/★★★★★/冰/欢愉」
+   与规格块「真珠/冰/欢愉」逐字重复）。
+   第二列**必须是确定宽度**，不能写 `max-content`：该列的 max-content 由卡内懒加载图的固有宽度决定，
+   图未加载时（`naturalWidth = 0`）塌成卡名文字宽（实测遗器卡 96.1px、图就绪后 240px）⇒ 首页每次都有
+   一次 **144px 的布局位移**，且第二张卡在位移前后大小差 2.5 倍（1440 档实测列轨 `306│95.84│818` →
+   `306│240│674`）。写死 306px 后两列同宽、盒宽与图片加载无关、也不再有位移。 */
+.nk-hub-release__band--feature { grid-auto-flow: row; grid-auto-columns: unset; grid-template-columns: minmax(0, 306px) minmax(0, 306px) minmax(0, 1fr); align-items: start; justify-content: start; overflow-x: hidden; }
 .nk-hub-release__section--feature:has(.nk-hub-release__cell:last-child:first-child) .nk-hub-release__band--feature { grid-template-columns: minmax(0, 420px); }
 .nk-hub-release__cell { min-width: 0; }
 .nk-hub-release__band--feature > .nk-hub-release__cell[data-pos='rest'] { grid-column: 2; }
