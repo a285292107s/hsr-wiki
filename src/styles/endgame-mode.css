@@ -12,12 +12,20 @@
   position: relative;
   flex: none;
   width: 100%;
-  max-width: var(--nk-detail-max);
-  margin: 0 auto;
-  padding: 30px 20px 26px;
+  padding: 30px 0 26px;
   background-color: color-mix(in srgb, var(--blk-850) 88%, transparent);
   border-bottom: 1px solid var(--line-1);
   overflow: hidden;
+}
+/* 底色铺满内容区，文字列仍由子项收回 1000px。此前整块 Hero 就是 1000px 宽 ⇒ 它那层 88% 不透明
+   底色在页面固定的环境光渐变上切开一道硬直边（实测 2026-10：右缘 x=1294 处有明显竖缝，底色本身
+   与页面底色同值、唯一可见效果就是「把环境光裁成一个矩形」）。 */
+.nk-egm__hero > * {
+  position: relative;
+  width: 100%;
+  max-width: var(--nk-detail-max);
+  margin-inline: auto;
+  padding-inline: 20px;
 }
 /* 模式领域色（与目录页 `.nk-eg-col[data-mode]` 同一批令牌）：只在右上角做一层很淡的晕，
    不复用 UI 页签小图当大图（那图只有 144px，`cover` 铺 1000px 会放大 6.9× 糊成一片）。 */
@@ -34,7 +42,6 @@
 .nk-egm__hero[data-mode='story'] { --eg-color: var(--eg-story); }
 .nk-egm__hero[data-mode='boss'] { --eg-color: var(--eg-boss); }
 .nk-egm__hero[data-mode='peak'] { --eg-color: var(--eg-peak); }
-.nk-egm__hero > * { position: relative; }
 /* 徽记用原图尺寸（144px）内缩到 48px 显示：清晰且不承担背景职责 */
 .nk-egm__emblem { width: 48px; height: 48px; object-fit: contain; flex: none; }
 .nk-egm__head { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
@@ -52,10 +59,15 @@
   margin: 0 0 6px;
   font-size: 0.86rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright);
 }
-.nk-egm__para { margin: 0 0 8px; font-size: 0.82rem; line-height: 1.95; color: var(--text2); text-wrap: pretty; }
+/* 规则正文按阅读列宽收窄：此前没有任何列宽 ⇒ 实测首行铺满 960px 面板、每行 72 全角字，
+   是站点里唯一一处长文没有阅读列宽的地方。列宽必须落在**承载正文的那一级**（段落与列表项，
+   字号 0.82rem）——`--nk-prose-max` 是 em 定值，落在字号 1rem 的 `<article>` 上会解析成 704px、
+   只有 53 字/行。 */
+.nk-egm__para { margin: 0 0 8px; max-width: var(--nk-prose-max); font-size: 0.82rem; line-height: 1.95; color: var(--text2); text-wrap: pretty; }
 .nk-egm__list { margin: 0 0 8px; padding: 0 0 0 2px; list-style: none; }
 .nk-egm__list li {
   position: relative; padding-left: 14px; margin-bottom: 4px;
+  max-width: var(--nk-prose-max);
   font-size: 0.82rem; line-height: 1.9; color: var(--text2);
 }
 .nk-egm__list li::before {

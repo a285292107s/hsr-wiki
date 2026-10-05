@@ -210,7 +210,9 @@
   --nk-content-offset: 0;
   --nk-detail-max: 1000px;
   --nk-struct-max: 952px;
-  --nk-prose-max: 800px;
+  /* 正文阅读列宽按**字号**缩放（≈44 全角字）。定值 px 会让每行字数随字号漂移，同一站点里
+     13.12px 档 61 字 / 14.08px 档 57 字——都超出长文可回扫的 40 字量级。 */
+  --nk-prose-max: 44em;
   --nk-dur-fast: 150ms;
   --nk-dur-hover: 200ms;
   --nk-dur-zoom: 400ms;

@@ -62,6 +62,10 @@ test.describe('不变量守卫（视觉改动不得让其变红）', () => {
       for (const selector of route.roots) {
         await expect(page.locator(selector).first(), `${route.path} 关键容器 ${selector} 应可达`).toBeVisible();
       }
+      // 文档大纲必须有落点：目录页的 masthead 标题曾渲染成 `<span>` ⇒ 整页零标题（读屏无法按标题
+      // 跳转，页面在文档结构里没有名字）。四类页面（枢纽 / 目录 / 详情 / 设置）各恰好一个 h1。
+      await expect(page.locator('h1'), `${route.path} 应有且仅有一个 h1`).toHaveCount(1);
+      await expect(page.locator('h1').first(), `${route.path} 的 h1 必须可见`).toBeVisible();
       // 加载失败是硬性不变量：错误态一旦出现，下面所有结构断言都会退化成「结构不存在」
       await expect(page.locator('.nk-error-state')).toHaveCount(0);
       await expectNoUnknownOverflow(page);

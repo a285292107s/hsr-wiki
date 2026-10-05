@@ -1117,6 +1117,32 @@ test.describe('布局验收：终局玩法详情页（第四种页面形态）',
       expect(g, `产物应含模式 ${m.key}`).toBeTruthy();
       expect(await page.locator('.nk-egm__rule').count(), '规则分节数应与产物一致').toBe(g.sections.length);
 
+      /* 阅读列宽：规则正文此前没有任何 max-width ⇒ 实测首行铺满 960px 面板、每行 72 全角字
+         （站点里唯一一处长文没有阅读列宽）。判据取「每行全角字数」而非 px——列宽令牌是 em 定值、
+         随字号缩放，字数是读者真正感知的量；期望上限从令牌读，不写绝对值。 */
+      const proseMax = await page.evaluate(() =>
+        getComputedStyle(document.documentElement).getPropertyValue('--nk-prose-max').trim(),
+      );
+      expect(proseMax, '阅读列宽令牌必须按字号缩放（em）；px 定值会让每行字数随字号漂移').toMatch(/em$/);
+      const firstLineEm = await page.locator('.nk-egm__para, .nk-egm__list li').evaluateAll((els) =>
+        els.map((el) => {
+          const textNode = [...el.childNodes].find(
+            (n) => n.nodeType === 3 && (n.textContent ?? '').trim().length > 20,
+          );
+          if (!textNode) return 0;
+          const range = document.createRange();
+          range.selectNodeContents(textNode);
+          const rects = [...range.getClientRects()];
+          if (!rects.length) return 0;
+          return rects[0].width / parseFloat(getComputedStyle(el).fontSize);
+        }),
+      );
+      expect(firstLineEm.length, '规则正文应有可测量的段落').toBeGreaterThan(0);
+      for (const em of firstLineEm) {
+        expect(em, `规则正文每行不得超过令牌列宽（+2 容差）全角字，实测 ${em.toFixed(1)}`)
+          .toBeLessThanOrEqual(parseFloat(proseMax) + 2);
+      }
+
       // 体系名必须上屏：区块标题含体系名，且与产物逐字一致
       const sysTitle = page.locator('.nk-egm__panel .nk-title').filter({ hasText: g.system!.name });
       await expect(sysTitle.first()).toBeVisible();

@@ -21,9 +21,9 @@ const emit = defineEmits<{
 
 <template>
   <div class="nk-cat-masthead">
-    <span class="nk-cat-title">
+    <h1 class="nk-cat-title">
       {{ title }}<span v-if="subtitle" class="nk-cat-subtitle">{{ subtitle }}</span>
-    </span>
+    </h1>
     <span class="nk-cat-count">{{ countText }}</span>
   </div>
   <div class="nk-cat-toolbar">

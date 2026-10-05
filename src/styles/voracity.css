@@ -65,7 +65,7 @@
   font-size: 0.88rem;
   line-height: 2;
   color: var(--text2);
-  max-width: 74ch;
+  max-width: var(--nk-prose-max);
   text-wrap: pretty;
 }
 
@@ -420,7 +420,7 @@
 .nk-vor-tutorial__desc { font-size: 0.8rem; line-height: 1.8; color: var(--text2); }
 
 .nk-vor-note {
-  max-width: 74ch;
+  max-width: var(--nk-prose-max);
   padding: 16px 18px;
   border-left: 2px solid color-mix(in srgb, var(--vor-500) 45%, transparent);
   background: color-mix(in srgb, var(--vor-500) 4%, transparent);
