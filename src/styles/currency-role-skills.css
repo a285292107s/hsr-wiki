@@ -19,13 +19,13 @@
   min-width: 40px;
   min-height: 30px;
   padding: 4px 11px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   border: 1px solid var(--line-1);
   background: transparent;
   color: var(--text2);
   cursor: pointer;
   font-family: var(--font-hud);
-  font-size: 13px;
+  font-size: var(--nk-fs-4);
   font-weight: 700;
   letter-spacing: 0.04em;
   transition: color 0.2s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out), transform 0.15s var(--nk-ease-out);
@@ -54,7 +54,7 @@
   width: 100%;
   min-width: 440px;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--nk-fs-4);
 }
 .nk-crole-gm__table th,
 .nk-crole-gm__table td {
@@ -69,7 +69,7 @@
 .nk-crole-gm__table th.nk-crole-gm__star { min-width: 64px; }
 .nk-crole-gm__table thead th {
   font-family: var(--font-hud);
-  font-size: 12px;
+  font-size: var(--nk-fs-3);
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--text2);
@@ -96,7 +96,7 @@
   position: relative;
   text-align: left;
   font-family: var(--font-hud);
-  font-size: 10px;
+  font-size: var(--nk-fs-2);
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -117,7 +117,7 @@
 .nk-crole-gm__label {
   text-align: left;
   font-weight: 500;
-  font-size: 12px;
+  font-size: var(--nk-fs-3);
   color: var(--text2);
   white-space: nowrap;
 }
@@ -144,7 +144,7 @@
   width: 0;
   line-height: 0;
   overflow: visible;
-  font-size: 9px;
+  font-size: var(--nk-fs-1);
   margin-left: 3px;
   color: var(--crole-buff);
 }
@@ -155,7 +155,7 @@
 .nk-crole-skillgroup__title {
   display: flex; align-items: baseline; gap: 10px;
   font-family: var(--font-hud);
-  font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+  font-size: var(--nk-fs-3); font-weight: 700; letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--metric-val); margin: 0 0 10px;
 }
@@ -173,10 +173,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--nk-fs-3);
   color: var(--text2);
   padding: 3px 10px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   background: rgba(255, 255, 255, 0.016);
   border: 1px solid var(--line-1);
 }
@@ -213,18 +213,18 @@
 .nk-crole-skill__icon {
   width: 34px;
   height: 34px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   border: 1px solid var(--line-1);
   background: rgba(255, 255, 255, 0.02);
   object-fit: cover;
   flex: none;
 }
-.nk-crole-skill__name { font-weight: 700; font-size: 15px; color: var(--text-bright); }
+.nk-crole-skill__name { font-weight: 700; font-size: var(--nk-fs-5); color: var(--text-bright); }
 .nk-crole-skill__tag,
 .nk-crole-skill__type {
-  font-size: 10px;
+  font-size: var(--nk-fs-2);
   padding: 2px 7px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   background: transparent;
   border: 1px solid var(--line-1);
   color: var(--text3);
@@ -239,12 +239,12 @@
   min-width: 28px;
   height: 22px;
   padding: 0 5px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   border: 1px solid var(--line-1);
   background: transparent;
   color: var(--text3);
   font-family: var(--font-hud);
-  font-size: 10px;
+  font-size: var(--nk-fs-2);
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
@@ -259,7 +259,7 @@
 }
 .nk-crole-skill__unlock {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--nk-fs-3);
   color: var(--text-dim);
 }
 .nk-crole-skill__unlock b { color: var(--crole-num); font-weight: 600; }
@@ -267,23 +267,23 @@
   display: flex;
   gap: 14px;
   font-family: var(--font-hud);
-  font-size: 11px;
+  font-size: var(--nk-fs-3);
   color: var(--text3);
   margin: 9px 0 8px;
   padding-bottom: 9px;
   border-bottom: 1px solid var(--line-1);
 }
 .nk-crole-skill__cost b { color: var(--crole-num); font-weight: 600; }
-.nk-crole-skill__simple { font-size: 13px; color: var(--text); margin: 8px 0; line-height: 1.55; }
+.nk-crole-skill__simple { font-size: var(--nk-fs-4); color: var(--text); margin: 8px 0; line-height: 1.55; }
 .nk-crole-skill__simple span { color: var(--crole-num); font-weight: 600; }
-.nk-crole-skill__desc { font-size: 13px; color: var(--text2); line-height: 1.7; }
+.nk-crole-skill__desc { font-size: var(--nk-fs-4); color: var(--text2); line-height: 1.7; }
 .nk-crole-skill__desc span { color: var(--crole-num); font-weight: 600; }
 .nk-crole-skill__extra {
   margin-top: 10px;
   padding: 10px 12px 2px;
   border-top: 1px solid var(--line-1);
   list-style: none;
-  font-size: 12px;
+  font-size: var(--nk-fs-3);
   color: var(--text2);
 }
 .nk-crole-skill__extra li { margin: 0 0 8px; }

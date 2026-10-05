@@ -6,7 +6,7 @@
   gap: 14px;
   padding: 12px 14px;
   margin-bottom: 14px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   background: rgba(255, 255, 255, 0.014);
   border: 1px solid var(--line-1);
 }
@@ -14,14 +14,14 @@
   flex: none;
   width: 52px;
   height: 52px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   border: 1px solid var(--line-1);
   background: rgba(255, 255, 255, 0.02);
   object-fit: cover;
 }
 .nk-crole-cone__body { min-width: 0; }
 .nk-crole-cone__name {
-  font-size: 15px;
+  font-size: var(--nk-fs-5);
   font-weight: 700;
   color: var(--text-bright);
   line-height: 1.4;
@@ -31,7 +31,7 @@
   align-items: baseline;
   gap: 10px;
   margin-top: 3px;
-  font-size: 11px;
+  font-size: var(--nk-fs-3);
 }
 .nk-crole-cone__rarity {
   color: var(--gold-400);
@@ -39,13 +39,13 @@
 }
 .nk-crole-cone__path {
   font-family: var(--font-hud);
-  font-size: 10px;
+  font-size: var(--nk-fs-2);
   letter-spacing: 0.12em;
   color: var(--text2);
 }
 .nk-crole-cone__id {
   font-family: var(--font-hud);
-  font-size: 10px;
+  font-size: var(--nk-fs-2);
   letter-spacing: 0.12em;
   color: var(--text3);
 }
@@ -80,7 +80,7 @@
   top: 21px;
   width: 7px;
   height: 7px;
-  border-radius: 2px;
+  border-radius: var(--nk-radius-1);
   background: var(--crole-buff);
   border: 1px solid var(--bg);
 }
@@ -91,25 +91,25 @@
   flex: none;
   width: 40px;
   height: 40px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   background: var(--crole-buff-soft);
   border: 1px solid var(--crole-buff-border);
   justify-content: center;
 }
 .nk-crole-equip__lv-num {
   font-family: var(--font-hud);
-  font-size: 16px;
+  font-size: var(--nk-fs-5);
   font-weight: 800;
   color: var(--crole-buff);
   line-height: 1;
 }
 .nk-crole-equip__lv-label {
-  font-size: 8px;
+  font-size: var(--nk-fs-1);
   font-weight: 600;
   color: var(--text3);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .nk-crole-equip__body { flex: 1; min-width: 0; }
-.nk-crole-equip__desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0; }
+.nk-crole-equip__desc { font-size: var(--nk-fs-4); color: var(--text2); line-height: 1.6; margin: 0; }
 .nk-crole-equip__desc span { color: var(--crole-num); font-weight: 600; }

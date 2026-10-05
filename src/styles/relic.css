@@ -21,17 +21,17 @@
   color: var(--relic-planar); background: color-mix(in srgb, var(--relic-planar-deep) 12%, transparent); border-color: color-mix(in srgb, var(--relic-planar-deep) 35%, transparent);
 }
 .nk-relic-ver {
-  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
   color: var(--text3); letter-spacing: 0.06em;
 }
 .nk-relic-type-en {
   margin-top: 6px;
-  font-family: var(--font-hud); font-size: 0.6rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
   letter-spacing: 0.22em; color: var(--text3); opacity: 0.8;
 }
 .nk-relic-count {
   margin-left: auto;
-  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
   color: var(--text3); letter-spacing: 0.06em;
 }
 
@@ -44,7 +44,7 @@
 .nk-relic-hero-piece {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   padding: 8px 4px 6px;
-  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--nk-radius-3);
   transition: border-color 0.2s var(--nk-ease-out), transform 0.2s var(--nk-ease-out);
 }
 .nk-relic-hero-piece:hover { border-color: var(--border2); transform: translateY(-2px); }
@@ -57,29 +57,29 @@
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
 }
 .nk-relic-hero-piece__slot {
-  font-size: 0.65rem; font-weight: 600; color: var(--text2);
+  font-size: var(--nk-fs-2); font-weight: 600; color: var(--text2);
   letter-spacing: 0.04em; text-align: center; line-height: 1;
 }
 
 .nk-relic-effects { display: flex; flex-direction: column; gap: 12px; }
 .nk-relic-effect {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--nk-radius-3);
   padding: 14px 16px; transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-relic-effect:hover { border-color: var(--border2); }
 .nk-relic-effect__head { display: flex; align-items: center; margin-bottom: 8px; }
 .nk-relic-effect__num {
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 700;
   color: var(--metric-val); letter-spacing: 0.08em;
-  padding: 3px 10px; border-radius: 12px;
+  padding: 3px 10px; border-radius: var(--nk-radius-3);
   background: color-mix(in srgb, var(--primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
 }
-.nk-relic-effect__desc { font-size: 0.8125rem; line-height: 1.8; color: var(--text2); }
+.nk-relic-effect__desc { font-size: var(--nk-fs-4); line-height: 1.8; color: var(--text2); }
 .nk-relic-effect__desc .hl { color: var(--highlight); font-weight: 600; }
 
 .nk-relic-affix-note {
   margin: 12px 0 12px;
-  font-size: 0.6875rem; line-height: 1.7; color: var(--text3); letter-spacing: 0.03em;
+  font-size: var(--nk-fs-3); line-height: 1.7; color: var(--text3); letter-spacing: 0.03em;
 }
 
 .nk-relic-submeta { margin: 12px 0 14px; }
@@ -105,23 +105,23 @@
   border-color: color-mix(in srgb, var(--primary) 70%, transparent);
 }
 .nk-relic-submeta__val {
-  font-family: var(--font-hud); font-size: 0.8125rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-4); font-weight: 700;
   color: var(--text-bright); letter-spacing: 0.02em;
   line-height: 1;
 }
 .nk-relic-submeta__badge--accent .nk-relic-submeta__val { color: var(--metric-val); }
 .nk-relic-submeta__lbl {
-  font-size: 0.625rem; font-weight: 600; color: var(--text3);
+  font-size: var(--nk-fs-2); font-weight: 600; color: var(--text3);
   letter-spacing: 0.04em; line-height: 1;
 }
 .nk-relic-submeta__hint {
-  font-size: 0.6875rem; line-height: 1.7; color: var(--text3);
+  font-size: var(--nk-fs-3); line-height: 1.7; color: var(--text3);
   letter-spacing: 0.02em;
 }
 .nk-relic-affix-table-wrap {
   position: relative;
   overflow-x: auto;
-  border: 1px solid var(--border); border-radius: 12px;
+  border: 1px solid var(--border); border-radius: var(--nk-radius-3);
   background: var(--card);
   -webkit-overflow-scrolling: touch;
 }
@@ -130,14 +130,14 @@
   top: 0; right: 0; bottom: 0; width: 24px;
   pointer-events: none;
   background: linear-gradient(to right, transparent, var(--card) 80%);
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 var(--nk-radius-3) var(--nk-radius-3) 0;
   opacity: 0;
   transition: opacity 0.2s var(--nk-ease-out);
 }
 .nk-relic-affix-table-wrap.is-scrollable::after { opacity: 1; }
 .nk-relic-affix-table {
   width: 100%; border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: var(--nk-fs-3);
 }
 .nk-relic-affix-table__prop-h,
 .nk-relic-affix-table__slot-h {
@@ -151,7 +151,7 @@
 .nk-relic-affix-table__prop-h {
   position: sticky; left: 0; z-index: 2;
   text-align: left; min-width: 72px;
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 700;
   color: var(--text3); letter-spacing: 0.08em;
   background: color-mix(in srgb, var(--blk-750) 95%, transparent);
   backdrop-filter: blur(8px);
@@ -160,19 +160,19 @@
   text-align: center; min-width: 72px;
 }
 .nk-relic-affix-table__icon {
-  width: 40px; height: 40px; object-fit: contain; border-radius: 8px;
+  width: 40px; height: 40px; object-fit: contain; border-radius: var(--nk-radius-2);
   background: rgba(0,0,0,0.3); padding: 4px;
   display: block; margin: 0 auto 6px;
 }
 .nk-relic-affix-table__slot-name {
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 700;
   color: var(--text2); letter-spacing: 0.04em;
   white-space: nowrap;
 }
 .nk-relic-affix-table__prop {
   position: sticky; left: 0; z-index: 1;
   padding: 8px 10px;
-  font-size: 0.72rem; font-weight: 600; color: var(--text2);
+  font-size: var(--nk-fs-3); font-weight: 600; color: var(--text2);
   background: color-mix(in srgb, var(--blk-750) 85%, transparent);
   backdrop-filter: blur(4px);
   border-right: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
@@ -187,7 +187,7 @@
 .nk-relic-affix-table tbody tr:last-child .nk-relic-affix-table__cell { border-bottom: none; }
 .nk-relic-affix-table tbody tr:hover .nk-relic-affix-table__cell { background: color-mix(in srgb, var(--primary) 4%, transparent); }
 .nk-relic-affix-table__init {
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 500;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 500;
   color: var(--text3);
 }
 .nk-relic-affix-table__arrow {
@@ -195,29 +195,29 @@
   margin: 0 4px;
 }
 .nk-relic-affix-table__max {
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 700;
   color: var(--metric-val);
 }
 .nk-relic-affix-table__empty {
-  color: var(--text3); opacity: 0.35; font-size: 0.875rem;
+  color: var(--text3); opacity: 0.35; font-size: var(--nk-fs-4);
 }
 
 .nk-relic-subgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
 .nk-relic-subcell {
   display: flex; flex-direction: column; gap: 8px;
   padding: 10px 12px; background: var(--card);
-  border: 1px solid var(--border); border-radius: 10px;
+  border: 1px solid var(--border); border-radius: var(--nk-radius-3);
   transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-relic-subcell:hover { border-color: var(--border2); }
 .nk-relic-subcell__head {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-.nk-relic-subcell__name { font-size: 0.75rem; font-weight: 600; color: var(--text); }
+.nk-relic-subcell__name { font-size: var(--nk-fs-3); font-weight: 600; color: var(--text); }
 .nk-relic-subcell__max {
-  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 700;
   color: var(--metric-val); letter-spacing: 0.03em;
-  padding: 2px 8px; border-radius: 10px;
+  padding: 2px 8px; border-radius: var(--nk-radius-3);
   background: color-mix(in srgb, var(--primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
   white-space: nowrap;
 }
@@ -227,11 +227,11 @@
 .nk-relic-subcell__tier {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 4px 2px;
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 600;
   color: var(--text3);
   background: color-mix(in srgb, var(--primary) 6%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
-  border-radius: 6px;
+  border-radius: var(--nk-radius-2);
   transition: background 0.2s var(--nk-ease-out), color 0.2s var(--nk-ease-out);
 }
 
@@ -240,29 +240,29 @@
   max-width: var(--nk-prose-max); margin: 0 auto;
 }
 .nk-relic-story {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--nk-radius-3);
   padding: 16px 18px; transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-relic-story:hover { border-color: var(--border2); }
 .nk-relic-story__head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .nk-relic-story__icon {
-  width: 52px; height: 52px; object-fit: contain; border-radius: 8px;
+  width: 52px; height: 52px; object-fit: contain; border-radius: var(--nk-radius-2);
   background: rgba(0,0,0,0.3); padding: 5px; flex-shrink: 0;
   border: 1px solid var(--border);
 }
 .nk-relic-story__heading { display: flex; flex-direction: column; gap: 2px; }
-.nk-relic-story__name { font-size: 0.9375rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
+.nk-relic-story__name { font-size: var(--nk-fs-5); font-weight: 700; color: var(--text-bright); letter-spacing: 0.02em; }
 .nk-relic-story__slot {
-  font-family: var(--font-hud); font-size: 0.6rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
   color: var(--text3); letter-spacing: 0.12em;
 }
 .nk-relic-story__desc {
   margin-bottom: 10px; padding: 8px 12px;
   border-left: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
-  background: color-mix(in srgb, var(--primary) 4%, transparent); border-radius: 0 6px 6px 0;
-  font-size: 0.78rem; line-height: 1.8; color: var(--text3);
+  background: color-mix(in srgb, var(--primary) 4%, transparent); border-radius: 0 var(--nk-radius-2) var(--nk-radius-2) 0;
+  font-size: var(--nk-fs-4); line-height: 1.8; color: var(--text3);
 }
-.nk-relic-story__body { font-size: 0.8125rem; line-height: 2; color: var(--text2); text-wrap: pretty; }
+.nk-relic-story__body { font-size: var(--nk-fs-4); line-height: 2; color: var(--text2); text-wrap: pretty; }
 .nk-relic-story__body i { font-style: normal; color: var(--text-bright); }
 
 .nk-skeleton--relic .nk-skeleton__stat-grid { grid-template-columns: repeat(4, 1fr); }
@@ -280,12 +280,12 @@
   .nk-relic-hero-pieces { grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); max-width: 100%; }
   .nk-relic-hero-piece__img { width: 48px; height: 48px; }
   .nk-relic-subgrid { grid-template-columns: 1fr; }
-  .nk-relic-affix-table__prop-h, .nk-relic-affix-table__prop { min-width: 56px; padding-left: 6px; padding-right: 6px; font-size: 0.625rem; }
+  .nk-relic-affix-table__prop-h, .nk-relic-affix-table__prop { min-width: 56px; padding-left: 6px; padding-right: 6px; font-size: var(--nk-fs-2); }
   .nk-relic-affix-table__slot-h { min-width: 64px; padding: 8px 4px; }
   .nk-relic-affix-table__icon { width: 30px; height: 30px; padding: 3px; margin-bottom: 3px; }
-  .nk-relic-affix-table__slot-name { font-size: 0.625rem; letter-spacing: 0.02em; }
+  .nk-relic-affix-table__slot-name { font-size: var(--nk-fs-2); letter-spacing: 0.02em; }
   .nk-relic-affix-table__cell { padding: 6px 4px; }
-  .nk-relic-affix-table__init, .nk-relic-affix-table__max { font-size: 0.625rem; }
+  .nk-relic-affix-table__init, .nk-relic-affix-table__max { font-size: var(--nk-fs-2); }
   .nk-relic-affix-table__arrow { margin: 0 2px; }
 }
 

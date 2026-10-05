@@ -1,9 +1,9 @@
 /* 货币战争角色详情 · 详情区块：状态芯片 / 区块标题 / 层级 / 时间线 / 推荐 / 空态。拆分块 2/4。 */
 
 .nk-crole-chip {
-  font-size: 11px;
+  font-size: var(--nk-fs-3);
   padding: 3px 9px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   border: 1px solid transparent;
 }
 .nk-crole-chip--charge { background: color-mix(in srgb, var(--crole-chip-charge-core) 14%, transparent); color: var(--crole-chip-charge); border-color: color-mix(in srgb, var(--crole-chip-charge-core) 28%, transparent); }
@@ -14,7 +14,7 @@
   align-items: baseline;
   gap: 12px;
   font-family: var(--font-hud);
-  font-size: 13px;
+  font-size: var(--nk-fs-4);
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -30,7 +30,7 @@
 }
 .nk-crole-section__hint {
   margin: -4px 0 12px;
-  font-size: 12px;
+  font-size: var(--nk-fs-3);
   color: var(--text-dim);
   opacity: 0.8;
 }
@@ -43,13 +43,13 @@
   flex-wrap: wrap;
   gap: 6px 14px;
 }
-.nk-crole-layer__props li { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.nk-crole-layer__props li { display: flex; align-items: center; gap: 6px; font-size: var(--nk-fs-3); }
 .nk-crole-layer__scope {
-  font-size: 10px;
+  font-size: var(--nk-fs-2);
   font-weight: 600;
   letter-spacing: 0.04em;
   padding: 0 5px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   background: var(--crole-scope-bg);
   color: var(--crole-scope-text);
   line-height: 1.6;
@@ -63,7 +63,7 @@
   vertical-align: -2px;
   opacity: 0.85;
 }
-.nk-crole-layer__pval { color: var(--crole-buff); font-weight: 700; font-size: 12px; }
+.nk-crole-layer__pval { color: var(--crole-buff); font-weight: 700; font-size: var(--nk-fs-3); }
 
 .nk-crole-timeline {
   display: flex;
@@ -84,7 +84,7 @@
 .nk-crole-timeline__icon {
   width: 42px;
   height: 42px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line-2);
@@ -95,7 +95,7 @@
   z-index: 1;
 }
 .nk-crole-timeline__icon img { width: 100%; height: 100%; object-fit: contain; }
-.nk-crole-timeline__num { font-family: var(--font-hud); font-size: 15px; font-weight: 800; color: var(--crole-num); }
+.nk-crole-timeline__num { font-family: var(--font-hud); font-size: var(--nk-fs-5); font-weight: 800; color: var(--crole-num); }
 .nk-crole-timeline__line {
   flex: 1;
   width: 1px;
@@ -118,20 +118,20 @@
 .nk-crole-timeline__head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
 .nk-crole-timeline__step {
   font-family: var(--font-hud);
-  font-size: 11px;
+  font-size: var(--nk-fs-3);
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--crole-step-text);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   background: var(--crole-step-bg);
 }
-.nk-crole-timeline__name { font-weight: 600; font-size: 14px; color: var(--text-bright); }
-.nk-crole-timeline__desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0; }
+.nk-crole-timeline__name { font-weight: 600; font-size: var(--nk-fs-4); color: var(--text-bright); }
+.nk-crole-timeline__desc { font-size: var(--nk-fs-4); color: var(--text2); line-height: 1.6; margin: 0; }
 .nk-crole-timeline__desc span { color: var(--crole-num); font-weight: 600; }
 .nk-crole-timeline__mech {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--nk-fs-3);
   color: var(--metric-val);
   line-height: 1.5;
 }
@@ -152,7 +152,7 @@
 .nk-crole-rec__head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .nk-crole-rec__pos {
   font-family: var(--font-hud);
-  font-size: 11px;
+  font-size: var(--nk-fs-3);
   font-weight: 700;
   letter-spacing: 0.16em;
   color: var(--text2);
@@ -179,11 +179,11 @@
 .nk-crole-rec__grp .nk-crole-rec__prio { margin-top: 9px; }
 .nk-crole-rec__prio {
   font-family: var(--font-hud);
-  font-size: 10px;
+  font-size: var(--nk-fs-2);
   font-weight: 700;
   letter-spacing: 0.1em;
   padding: 2px 7px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   border: 1px solid;
 }
 .nk-crole-rec__prio.is-first { color: var(--crole-num); border-color: color-mix(in srgb, var(--crole-num) 42%, transparent); background: color-mix(in srgb, var(--crole-num) 7%, transparent); }
@@ -194,7 +194,7 @@
   align-items: center;
   gap: 10px;
   padding: 6px 8px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   background: rgba(255, 255, 255, 0.018);
   border: 1px solid var(--line-1);
   transition: border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
@@ -204,7 +204,7 @@
   flex: none;
   width: 36px;
   height: 36px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-2);
   overflow: hidden;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--line-1);
@@ -213,4 +213,4 @@
   justify-content: center;
 }
 .nk-crole-recitem__icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.nk-crole-recitem__name { font-size: 13px; font-weight: 600; color: var(--text); }
+.nk-crole-recitem__name { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text); }

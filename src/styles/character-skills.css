@@ -117,7 +117,7 @@
   font-family: var(--font-hud);
 }
 .nk-char-page .nk-idxstrip__label {
-  flex: none; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.28em;
+  flex: none; font-size: var(--nk-fs-2); font-weight: 700; letter-spacing: 0.28em;
   color: var(--text3); user-select: none;
 }
 .nk-char-page .nk-idxstrip__rule { flex: 1 1 24px; height: 1px; background: var(--line-1); }
@@ -126,13 +126,13 @@
   display: inline-flex; align-items: center; gap: 6px;
   min-height: 44px; padding: 0 10px; border-radius: 0;
   border: 1px solid var(--line-1); background: none; cursor: pointer;
-  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; color: var(--text2);
+  font-size: var(--nk-fs-3); font-weight: 600; letter-spacing: 0.04em; color: var(--text2);
   transition: color 0.2s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out);
 }
 .nk-char-page .nk-idxstrip__item:hover { color: var(--text-bright); border-color: var(--line-2); }
 .nk-char-page .nk-idxstrip__item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-char-page .nk-idxstrip__no {
-  font-size: 0.6875rem; font-weight: 700; color: var(--text3);
+  font-size: var(--nk-fs-3); font-weight: 700; color: var(--text3);
   letter-spacing: 0; font-variant-numeric: tabular-nums;
 }
 /* 索引入口 12px 档字距下与技能名易混：索引项的名称不换行（手机上靠整条换行保持可点） */
@@ -141,12 +141,12 @@
 .nk-char-page .nk-skill { padding: 24px; margin-bottom: 0; }
 .nk-char-page .nk-skill__need {
   display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
-  margin-top: 16px; font-size: 0.75rem; line-height: 1.7;
+  margin-top: 16px; font-size: var(--nk-fs-3); line-height: 1.7;
 }
 .nk-char-page .nk-skill__need-label {
-  flex-shrink: 0; font-size: 0.6875rem; font-weight: 600;
+  flex-shrink: 0; font-size: var(--nk-fs-3); font-weight: 600;
   letter-spacing: 0.05em; font-family: var(--font-hud);
-  padding: 1px 7px; border-radius: 4px;
+  padding: 1px 7px; border-radius: var(--nk-radius-2);
   background: color-mix(in srgb, var(--sk-accent) 10%, transparent);
   color: var(--sk-accent);
 }
@@ -156,8 +156,8 @@
 .nk-char-page .nk-skill__toggle {
   display: inline-flex; align-items: center; gap: 8px;
   position: relative; cursor: pointer;
-  padding: 6px 12px; border-radius: 4px;
-  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.02em;
+  padding: 6px 12px; border-radius: var(--nk-radius-2);
+  font-size: var(--nk-fs-3); font-weight: 600; letter-spacing: 0.02em;
   color: var(--text2);
   background: color-mix(in srgb, var(--blk-900) 40%, transparent);
   border: 1px solid var(--line-1);
@@ -165,7 +165,7 @@
 }
 .nk-char-page .nk-skill__toggle::after { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
 .nk-char-page .nk-skill__toggle:hover { color: var(--text-bright); border-color: var(--line-2); }
-.nk-char-page .nk-skill__toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: 0.55rem; }
+.nk-char-page .nk-skill__toggle .arrow { transition: transform 0.25s var(--nk-ease-out); display: inline-block; font-size: var(--nk-fs-1); }
 .nk-char-page .nk-skill__toggle.open {
   color: var(--primary);
   border-color: color-mix(in srgb, var(--primary) 45%, transparent);
@@ -185,27 +185,27 @@
   display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
 }
 .nk-char-page .nk-skill__link-item-icon {
-  width: 28px; height: 28px; border-radius: 4px;
+  width: 28px; height: 28px; border-radius: var(--nk-radius-2);
   background: color-mix(in srgb, var(--blk-800) 80%, transparent);
   flex-shrink: 0; object-fit: contain;
 }
 .nk-char-page .nk-skill__link-item-name {
-  display: block; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em;
+  display: block; font-size: var(--nk-fs-3); font-weight: 700; letter-spacing: 0.02em;
 }
 .nk-char-page .nk-skill__link-item--rank .nk-skill__link-item-name { color: var(--primary); }
 .nk-char-page .nk-skill__link-item--tree .nk-skill__link-item-name { color: var(--sk-accent); }
-.nk-char-page .nk-skill__link-item-desc { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
+.nk-char-page .nk-skill__link-item-desc { font-size: var(--nk-fs-3); line-height: 1.75; color: var(--text2); }
 .nk-char-page .nk-skill__link-item-desc .hl { color: var(--highlight); font-weight: 700; }
 .nk-char-page .nk-skill__metrics { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 16px; }
-.nk-char-page .nk-skill__metric { display: inline-flex; align-items: baseline; gap: 8px; font-size: 0.75rem; margin: 0; }
+.nk-char-page .nk-skill__metric { display: inline-flex; align-items: baseline; gap: 8px; font-size: var(--nk-fs-3); margin: 0; }
 .nk-char-page .nk-skill__metric + .nk-skill__metric::before { content: '·'; margin: 0 12px; color: var(--text3); opacity: 0.4; }
-.nk-char-page .nk-skill__metric dt { display: inline; margin: 0; font-size: 0.6875rem; color: var(--text3); }
-.nk-char-page .nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); }
+.nk-char-page .nk-skill__metric dt { display: inline; margin: 0; font-size: var(--nk-fs-3); color: var(--text3); }
+.nk-char-page .nk-skill__metric dd { display: inline; margin: 0; font-weight: 700; font-family: var(--font-hud); font-size: var(--nk-fs-3); color: var(--metric-val); }
 .nk-char-page .nk-skill__terms {
   margin-top: 16px; padding: 16px; border-radius: var(--nk-char-radius-card);
   background: color-mix(in srgb, var(--blk-900) 40%, transparent); border: 1px solid var(--line-1);
 }
-.nk-char-page .nk-term { font-size: 0.75rem; line-height: 1.75; color: var(--text2); }
+.nk-char-page .nk-term { font-size: var(--nk-fs-3); line-height: 1.75; color: var(--text2); }
 .nk-char-page .nk-term__name { color: var(--highlight); font-weight: 600; }
 .nk-char-page .nk-skill__anim { margin-top: 20px; }
 .nk-char-page .nk-skill__anim-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
@@ -213,8 +213,8 @@
 .nk-char-page .nk-skill__anim-inner { overflow: hidden; min-height: 0; }
 .nk-char-page .nk-skill__anim-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .nk-char-page .nk-skill__anim-tab {
-  font-size: 0.625rem; font-weight: 600; padding: 2px 10px;
-  border-radius: 4px; border: 1px solid var(--line-1);
+  font-size: var(--nk-fs-2); font-weight: 600; padding: 2px 10px;
+  border-radius: var(--nk-radius-2); border: 1px solid var(--line-1);
   background: transparent; color: var(--text3); cursor: pointer;
   transition: all 0.2s var(--nk-ease-out); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
@@ -252,7 +252,7 @@
 .nk-char-page .nk-table-clip.open .nk-table-inner { overflow-x: auto; }
 .nk-char-page .nk-table {
   width: 100%; border-collapse: collapse; margin-top: 12px;
-  font-family: var(--font-hud); font-size: 0.75rem; text-align: center;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); text-align: center;
   font-variant-numeric: tabular-nums;
 }
 .nk-char-page .nk-table th {
@@ -273,7 +273,7 @@
 }
 .nk-char-page .nk-skill.nk-skill--child:hover { border: none; background: none; }
 .nk-char-page .nk-skill--child .nk-skill__title-row { margin-bottom: 12px; }
-.nk-char-page .nk-skill--child .nk-skill__desc { font-size: 0.75rem; }
+.nk-char-page .nk-skill--child .nk-skill__desc { font-size: var(--nk-fs-3); }
 .nk-char-page .nk-skill--child .nk-skill__metrics { margin-top: 12px; }
 .nk-char-page .nk-skill__head { border-bottom-color: var(--line-1); padding-bottom: 12px; margin-bottom: 16px; }
 .nk-char-page .nk-skill__title-row { margin-bottom: 16px; }

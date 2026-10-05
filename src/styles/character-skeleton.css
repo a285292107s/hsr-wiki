@@ -43,7 +43,7 @@
 @media (min-width: 768px) {
   .nk-char-page .nk-hero__panel { padding: 32px; }
   .nk-char-page .nk-stats__stat { padding: 11px 0; }
-  .nk-char-page .nk-stats__val { font-size: 1rem; }
+  .nk-char-page .nk-stats__val { font-size: var(--nk-fs-5); }
   .nk-char-page .nk-sk--stat { height: 41px; }
   .nk-char-page .nk-skeleton__hero-panel { padding: 32px; }
 }
@@ -74,21 +74,21 @@
   }
   .nk-char-page .nk-hero__head { gap: 16px; }
   .nk-char-page .nk-hero__title { margin-top: 4px; }
-  /* 主字分两档（档位判据与宽度天花板见 character-hero.css 的名称族注释）：1 字名 4.5~5.5rem、≥2 字名
-     4.25~4.5rem。槽高 = 本档主字上限 × 行距 1.06（5.5rem × 1.06 = 93.28 → 5.83rem）；同档内槽高恒定，
-     故 hero 面板高度不随名长度变化（骨架屏只代理一个固定盒高，见文件头注释的头一条不等式）。 */
+  /* 主字分两档（档位判据与宽度天花板见 character-hero.css 的名称族注释）：单字名 `--nk-fs-hero-lg`、
+     多字名 `--nk-fs-hero`。槽高 = 本档主字上限 × 行距 1.06；同档内槽高恒定，故 hero 面板高度不随
+     名长度变化（骨架屏只代理一个固定盒高，见文件头注释的头一条不等式）。 */
   .nk-char-page .nk-hero__name {
-    font-size: clamp(4.25rem, 5.2vw, 4.5rem);
+    font-size: clamp(var(--nk-fs-hero), 5.2vw, var(--nk-fs-hero));
     line-height: 1.06;
     letter-spacing: -0.005em;
     text-wrap: balance;
     text-shadow: var(--nk-hero-glyph-shadow);
   }
-  .nk-char-page .nk-hero__name[data-len='1'] { font-size: clamp(4.5rem, 6.1vw, 5.5rem); }
+  .nk-char-page .nk-hero__name[data-len='1'] { font-size: clamp(var(--nk-fs-hero), 6.1vw, var(--nk-fs-hero-lg)); }
   .nk-char-page { --nk-hero-name-slot: 4.77rem; }
   .nk-char-page:has(.nk-hero__name[data-len='1']) { --nk-hero-name-slot: 5.83rem; }
   .nk-char-page .nk-hero__stars { text-shadow: var(--nk-hero-glyph-shadow); }
-  .nk-char-page .nk-hero__desc { font-size: 0.875rem; line-height: 1.75; }
+  .nk-char-page .nk-hero__desc { font-size: var(--nk-fs-4); line-height: 1.75; }
   .nk-char-page .nk-hero__badge img { filter: none; }
   .nk-char-page .nk-hero__toggle { top: var(--nk-hero-toggle-inset); right: var(--nk-hero-toggle-inset); }
   .nk-char-page .nk-stats__grid { gap: 0; }
@@ -129,21 +129,21 @@
     gap: 0 10px; padding: 9px 0;
     grid-template-columns: 3px 2.9em 15px auto minmax(20px, 1fr) auto;
   }
-  .nk-char-page .nk-stats__label { font-size: 0.75rem; }
-  .nk-char-page .nk-stats__val { font-size: 0.875rem; min-width: 5ch; }
+  .nk-char-page .nk-stats__label { font-size: var(--nk-fs-3); }
+  .nk-char-page .nk-stats__val { font-size: var(--nk-fs-4); min-width: 5ch; }
   .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
   .nk-char-page .nk-hero__badge--enh { padding: 5px 9px 5px 7px; }
   .nk-char-page .nk-eidolon__head { gap: 16px; }
   .nk-char-page .nk-eidolon__icon { width: 104px; height: 104px; }
   .nk-char-page .nk-eidolon__meta { gap: 12px; padding-bottom: 12px; }
-  .nk-char-page .nk-eidolon__num { font-size: 1.25rem; padding-right: 12px; }
+  .nk-char-page .nk-eidolon__num { font-size: var(--nk-fs-7); padding-right: 12px; }
   .nk-char-page .nk-build__teams { gap: 16px; }
   .nk-char-page .nk-build__team-head {
     display: flex; align-items: baseline; gap: 8px;
-    font-family: var(--font-hud); font-size: 0.7rem; font-weight: 700;
+    font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 700;
     letter-spacing: 0.12em; color: var(--text3);
   }
-  .nk-char-page .nk-build__team-head__num { color: var(--primary); font-size: 0.85rem; }
+  .nk-char-page .nk-build__team-head__num { color: var(--primary); font-size: var(--nk-fs-4); }
   .nk-char-page .nk-build__team-head__total { color: var(--text3); opacity: 0.75; font-weight: 500; }
   .nk-char-page .nk-build__team {
     flex-direction: column;
@@ -179,14 +179,14 @@
   .nk-char-page .nk-build__team-link:active img { transform: scale(0.94); }
   .nk-char-page .nk-build__team-name {
     display: inline;
-    font-size: 0.7rem; font-weight: 600; color: var(--text2);
+    font-size: var(--nk-fs-3); font-weight: 600; color: var(--text2);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     max-width: 72px; min-width: 0; flex-shrink: 1;
   }
   .nk-char-page .nk-build__team-slot--main .nk-build__team-name { color: var(--primary); }
   .nk-char-page .nk-build__team-alt {
     margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
-    border: 1px solid var(--line-2); border-radius: 4px;
+    border: 1px solid var(--line-2); border-radius: var(--nk-radius-2);
     padding: 12px;
   }
   .nk-char-page .nk-build__team-alt img { width: 30px; height: 30px; }
@@ -197,7 +197,7 @@
 }
 
 .nk-char-page .nk-enh-tab:focus-visible {
-  outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px;
+  outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--nk-radius-2);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -109,35 +109,43 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  // 圆角档位契约（全站反 AI 味立场）：本页圆角只允许四值 —— 0（直角）/ 内联档 / 容器档 / 50%（真圆形）。
-  // 2026-10 清过 10px（全局卡片 token 与页面声明冲突）与 999px（手机档「备选队友簇」胶囊），随后把残留的
-  // 1.5px（记号端头，半径已达宽度一半 = 全圆端头）与 3px（内联 chip）也并了档。
-  // **期望值一律从页面令牌派生**（容器档解析 `--nk-char-radius-card`），只把内联档 4px 写成契约常量：
-  // 它是「内联 chip / 小图标」这个尺寸类别的取值，页面没有对应令牌，写绝对值即跨会话不得漂移的契约。
-  test('/character/1204：页面圆角只有四值（0 / 内联 / 容器令牌 / 圆形）', async ({ page }) => {
+  // 圆角档位契约（全站反 AI 味立场）：本页圆角只允许走刻度三档（`--nk-radius-1..3`）、直角 0 与真圆形 50%。
+  // 2026-10 之前这里锁的是「0 / 内联 4px / 容器令牌 / 圆形」四值——4px 是当时页面自定义的内联档；刻度收口后
+  // 内联 chip 与控件统一到 6px（`--nk-radius-2`），原先硬编码的 4px 常量随之退场。
+  // **期望值一律从页面与根令牌派生**（容器档解析 `--nk-char-radius-card`，三档解析 `--nk-radius-*`），
+  // 断言里不再写任何绝对 px 常量。
+  test('/character/1204：页面圆角只走刻度三档（+ 直角与圆形）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1204');
     await page.waitForSelector('.nk-stats__stat');
-    const containerPx = await page
-      .locator('.nk-char-page')
-      .evaluate((el) => getComputedStyle(el).getPropertyValue('--nk-char-radius-card').trim());
-    expect(containerPx, '容器圆角档须来自页面令牌（缺失即回到字面量时代）').not.toBe('');
-    const containerNum = parseFloat(containerPx);
+    const tiers = await page.evaluate(() => {
+      const root = getComputedStyle(document.documentElement);
+      const px = (name: string) => parseFloat(root.getPropertyValue(name));
+      const pageTok = getComputedStyle(document.querySelector('.nk-char-page') as Element)
+        .getPropertyValue('--nk-char-radius-card')
+        .trim();
+      return { one: px('--nk-radius-1'), two: px('--nk-radius-2'), three: px('--nk-radius-3'), raw: pageTok };
+    });
+    expect(tiers.raw, '容器圆角档须来自页面令牌（缺失即回到字面量时代）').not.toBe('');
+    expect(tiers.three, '刻度三档必须存在且为数值').toBeGreaterThan(0);
+    const containerNum = parseFloat(tiers.raw);
 
-    const hits = await page.evaluate((container) => {
+    const hits = await page.evaluate((t) => {
+      const allowed = new Set([0, t.one, t.two, t.three]);
       const out: string[] = [];
       document.querySelectorAll('.nk-char-page *').forEach((el) => {
         const r = getComputedStyle(el).borderTopLeftRadius;
         if (!r || r === '0px') return;
-        const n = parseFloat(r);
         if (r.endsWith('%')) return;              // 真圆形（头像 / 状态点）属形状，不属档位
-        if (n === container) return;              // 容器档：期望值从页面令牌派生
-        if (n === 4 || n <= 2) return;            // 内联档 4px；≤2px 的记号端头等同直角
+        const n = parseFloat(r);
+        if (allowed.has(n)) return;               // 刻度三档与直角
+        if (n <= t.one) return;                   // 记号端头（≤ 芯片档）等同直角
         out.push(`${(el as HTMLElement).className}`.slice(0, 40) + ' = ' + r);
       });
       return Array.from(new Set(out)).slice(0, 8);
-    }, containerNum);
-    expect(hits, '页面圆角出现了四值之外的档位（含胶囊回潮）').toEqual([]);
+    }, tiers);
+    expect(hits, '页面圆角出现了刻度三档之外的档位（含胶囊回潮）').toEqual([]);
+    expect(containerNum).toBe(tiers.three);
     assertNoErrors();
   });
 

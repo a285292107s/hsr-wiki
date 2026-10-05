@@ -48,7 +48,7 @@
 }
 .nk-char-page .nk-enh-module__head {
   display: flex; align-items: center; gap: 12px;
-  font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.02em;
+  font-size: var(--nk-fs-4); font-weight: 700; letter-spacing: 0.02em;
   color: var(--text-bright); margin-bottom: 16px;
 }
 .nk-char-page .nk-enh-module__mark {
@@ -56,7 +56,7 @@
   background: var(--gold-sem); opacity: 0.9;
 }
 .nk-char-page .nk-enh-module__state {
-  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
   letter-spacing: 0.14em; color: var(--gold-sem);
   padding-left: 12px; border-left: 1px solid var(--line-2);
 }
@@ -67,7 +67,7 @@
 .nk-char-page .nk-enh-tab {
   display: inline-flex; align-items: baseline; gap: 8px;
   padding: 8px 12px; border: none; background: transparent;
-  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em;
+  font-size: var(--nk-fs-3); font-weight: 600; letter-spacing: 0.06em;
   color: var(--text3); cursor: pointer; white-space: nowrap;
   transition: color var(--nk-dur-hover) var(--nk-ease-out); position: relative;
 }
@@ -90,7 +90,7 @@
 .nk-char-page .nk-enh-tab--cmp:hover { color: var(--text2); }
 .nk-char-page .nk-enh-tab--active.nk-enh-tab--cmp:hover { color: var(--primary); }
 .nk-char-page .nk-enh-tab__idx {
-  font-family: var(--font-hud); font-size: 0.55rem; opacity: 0.7;
+  font-family: var(--font-hud); font-size: var(--nk-fs-1); opacity: 0.7;
 }
 .nk-char-page .nk-enh-tab--active .nk-enh-tab__idx { opacity: 1; }
 .nk-char-page .nk-enh-bar__progress {
@@ -105,7 +105,7 @@
   border-left: 2px solid color-mix(in srgb, var(--gold-sem) 50%, transparent);
 }
 .nk-char-page .nk-enh-notes__title {
-  font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.12em;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--gold-sem); font-weight: 700;
 }
 .nk-char-page .nk-enh-notes__list {
@@ -113,7 +113,7 @@
   display: flex; flex-direction: column; gap: 8px;
 }
 .nk-char-page .nk-enh-notes__list li {
-  font-size: 0.75rem; line-height: 1.7; color: var(--text2);
+  font-size: var(--nk-fs-3); line-height: 1.7; color: var(--text2);
 }
 .nk-char-page .nk-enh-notes__list li span[style*="color"] {
   color: var(--gold-sem); font-weight: 700;
@@ -123,8 +123,8 @@
 .nk-char-page .nk-eidolon__enh-badge {
   position: absolute; top: 10px; right: 10px;
   display: inline-flex; align-items: center;
-  font-family: var(--font-hud); font-size: 0.625rem; letter-spacing: 0.08em;
-  padding: 1px 6px; border-radius: 4px;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); letter-spacing: 0.08em;
+  padding: 1px 6px; border-radius: var(--nk-radius-2);
   font-weight: 700; z-index: 2; pointer-events: none;
   background: color-mix(in srgb, var(--gold-sem) 12%, transparent);
   color: var(--gold-sem); border: 1px solid color-mix(in srgb, var(--gold-sem) 26%, transparent);

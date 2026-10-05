@@ -15,13 +15,13 @@
   border-bottom: 1px solid var(--line-1);
 }
 .nk-char-page .nk-eidolon__num {
-  font-family: var(--font-hud); font-size: 1.5rem; font-weight: 700; line-height: 1;
+  font-family: var(--font-hud); font-size: var(--nk-fs-8); font-weight: 700; line-height: 1;
   color: var(--primary); letter-spacing: 0.02em;
   padding-right: 16px; border-right: 1px solid var(--line-2);
   opacity: 0.85; transition: opacity 0.2s var(--nk-ease-out);
 }
 .nk-char-page .nk-eidolon__name {
-  font-weight: 600; font-size: 1rem;
+  font-weight: 600; font-size: var(--nk-fs-5);
   color: var(--text-bright); line-height: 1.3;
 }
 .nk-char-page .nk-eidolon:hover .nk-eidolon__num { opacity: 1; }
@@ -44,18 +44,18 @@
 .nk-char-page .nk-bonus__icon { width: 22px; height: 22px; opacity: 0.92; }
 .nk-char-page .nk-bonus__name {
   order: 1; flex: 1; min-width: 0;
-  font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em;
+  font-size: var(--nk-fs-3); color: var(--text3); letter-spacing: 0.05em;
 }
-.nk-char-page .nk-bonus__val { order: 2; font-size: 0.85rem; font-weight: 700; color: var(--gold-sem); }
+.nk-char-page .nk-bonus__val { order: 2; font-size: var(--nk-fs-4); font-weight: 700; color: var(--gold-sem); }
 
 .nk-char-page .nk-build__cones { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 16px; margin-bottom: 0; }
 .nk-char-page .nk-build__cones .nk-lc-card__info { padding: 12px; gap: 4px; }
-.nk-char-page .nk-build__cones .nk-lc-card__name { font-size: 0.72rem; }
-.nk-char-page .nk-build__cones .nk-lc-card__stars { font-size: 0.58rem; }
+.nk-char-page .nk-build__cones .nk-lc-card__name { font-size: var(--nk-fs-3); }
+.nk-char-page .nk-build__cones .nk-lc-card__stars { font-size: var(--nk-fs-2); }
 .nk-char-page .nk-lc-mini__rec {
   position: absolute; left: 10px; top: 10px; z-index: 3;
-  font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em;
-  color: var(--text-bright); padding: 2px 7px; border-radius: 4px;
+  font-family: var(--font-hud); font-size: var(--nk-fs-1); font-weight: 700; letter-spacing: 0.06em;
+  color: var(--text-bright); padding: 2px 7px; border-radius: var(--nk-radius-2);
   background: color-mix(in srgb, var(--blk-800) 72%, transparent); border: 1px solid var(--line-1);
   backdrop-filter: blur(4px);
   pointer-events: none;
@@ -81,7 +81,7 @@
 .nk-char-page .nk-build__team-alt img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-1); }
 .nk-char-page .nk-build__team-alt .nk-build__team-link { opacity: 0.65; transition: opacity 0.2s var(--nk-ease-out); }
 .nk-char-page .nk-build__team-alt .nk-build__team-link:hover { opacity: 1; }
-.nk-char-page .nk-build__team-plus { color: var(--text3); font-size: 0.8rem; font-weight: 400; flex-shrink: 0; margin: 0 4px; align-self: center; }
+.nk-char-page .nk-build__team-plus { color: var(--text3); font-size: var(--nk-fs-4); font-weight: 400; flex-shrink: 0; margin: 0 4px; align-self: center; }
 .nk-char-page .nk-build__relics { margin-bottom: 0; }
 .nk-char-page .nk-relic-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .nk-char-page .nk-relic-slot {
@@ -89,37 +89,37 @@
   padding: 16px 12px;
 }
 .nk-char-page .nk-relic-slot__icon {
-  width: 40px; height: 40px; border-radius: 4px;
+  width: 40px; height: 40px; border-radius: var(--nk-radius-2);
   background: rgba(0,0,0,0.3); border: 1px solid var(--line-1); padding: 4px; margin-bottom: 4px;
 }
-.nk-char-page .nk-relic-slot__stat { font-size: 0.8125rem; font-weight: 600; color: var(--text-bright); text-align: center; }
-.nk-char-page .nk-relic-slot__slot { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
+.nk-char-page .nk-relic-slot__stat { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text-bright); text-align: center; }
+.nk-char-page .nk-relic-slot__slot { font-size: var(--nk-fs-3); color: var(--text3); letter-spacing: 0.03em; }
 .nk-char-page .nk-relic-sub {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px;
   padding: 16px; margin-bottom: 16px;
 }
-.nk-char-page .nk-relic-sub__label { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; flex-shrink: 0; }
+.nk-char-page .nk-relic-sub__label { font-size: var(--nk-fs-3); color: var(--text3); letter-spacing: 0.03em; flex-shrink: 0; }
 .nk-char-page .nk-relic-sub__list { display: flex; flex-wrap: wrap; gap: 8px; }
 .nk-char-page .nk-relic-sub__chip {
-  font-size: 0.75rem; font-weight: 600; color: var(--text2);
-  padding: 2px 10px; border-radius: 4px;
+  font-size: var(--nk-fs-3); font-weight: 600; color: var(--text2);
+  padding: 2px 10px; border-radius: var(--nk-radius-2);
   border: 1px solid var(--line-1);
 }
 .nk-char-page .nk-build__sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .nk-char-page .nk-build__set { padding: 16px; }
 .nk-char-page .nk-build__set-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .nk-char-page .nk-build__set-head img {
-  width: 44px; height: 44px; border-radius: 4px;
+  width: 44px; height: 44px; border-radius: var(--nk-radius-2);
   background: rgba(0,0,0,0.3); border: 1px solid var(--line-1); padding: 4px;
 }
 .nk-char-page .nk-build__set-badge {
   display: inline-block;
-  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.03em;
-  color: var(--primary); padding: 1px 7px; border-radius: 4px;
+  font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.03em;
+  color: var(--primary); padding: 1px 7px; border-radius: var(--nk-radius-2);
   background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
-.nk-char-page .nk-build__set-name { font-size: 0.8125rem; font-weight: 600; }
-.nk-char-page .nk-build__set-desc { font-size: 0.6875rem; color: var(--text3); line-height: 1.7; }
+.nk-char-page .nk-build__set-name { font-size: var(--nk-fs-4); font-weight: 600; }
+.nk-char-page .nk-build__set-desc { font-size: var(--nk-fs-3); color: var(--text3); line-height: 1.7; }
 .nk-char-page .nk-build__set-desc .hl { color: var(--highlight); font-weight: 700; }
 
 .nk-char-page .nk-profile {
@@ -133,8 +133,8 @@
   transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-char-page .nk-profile__item:hover { border-color: var(--line-2); transform: none; }
-.nk-char-page .nk-profile__label { font-size: 0.625rem; font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
-.nk-char-page .nk-profile__val { font-size: 0.8125rem; font-weight: 600; color: var(--text); }
+.nk-char-page .nk-profile__label { font-size: var(--nk-fs-2); font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
+.nk-char-page .nk-profile__val { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text); }
 .nk-char-page .nk-stories { display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-struct-max); margin: 0 auto; }
 .nk-char-page .nk-story { overflow: hidden; }
 .nk-char-page .nk-story__head {
@@ -142,9 +142,9 @@
   padding: 16px 20px; background: none; border: none; cursor: pointer;
   text-align: left;
 }
-.nk-char-page .nk-story__num { font-family: var(--font-hud); font-size: 0.68rem; font-weight: 700; color: var(--text3); min-width: 1.6em; }
+.nk-char-page .nk-story__num { font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 700; color: var(--text3); min-width: 1.6em; }
 .nk-char-page .nk-story--open .nk-story__num { color: var(--primary); }
-.nk-char-page .nk-story__label { font-size: 0.8125rem; font-weight: 600; color: var(--text2); letter-spacing: 0.02em; flex: 1; }
+.nk-char-page .nk-story__label { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text2); letter-spacing: 0.02em; flex: 1; }
 .nk-char-page .nk-story--open .nk-story__label { color: var(--text); }
 .nk-char-page .nk-story__arrow {
   width: 7px; height: 7px; flex-shrink: 0;
@@ -158,7 +158,7 @@
 .nk-char-page .nk-story__inner { overflow: hidden; min-height: 0; }
 /* 正文测度（max-width）由 character-compare.css 的 `__story__text / __skill__terms` 组单点声明 */
 .nk-char-page .nk-story__text {
-  font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
+  font-size: var(--nk-fs-4); line-height: 1.9; color: var(--text2);
   border-top: 1px dashed var(--line-1);
   padding: 16px 20px 20px;
 }

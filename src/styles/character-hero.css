@@ -14,17 +14,17 @@
 .nk-char-page {
   --nk-panel-pad-top: 24px;
   --nk-panel-pad-bottom: 40px;
-  /* 名称族高度槽（手机档长名档 = 2.125rem × 1.12 = 38.08 → 2.38rem）：取值口径见 .nk-hero__name-slot */
-  --nk-hero-name-slot: 2.38rem;
-  /* 本页的容器圆角（内容卡档）。全局 `--nk-radius-card` = 10px，本页声明是 12px——两者共用同一个名字
-     会让「本页容器档」与「全站卡片档」无法分辨，故本页另立一名并在此收口，页面 CSS 不再写圆角字面量。 */
-  --nk-char-radius-card: 12px;
+  /* 名称族高度槽（= 本档最大主字的行盒）：默认档多字档 = `--nk-fs-title-2` × 1.12。取值口径见
+     `.nk-hero__name-slot`。档位规则的权重一律相等，跨本文件与 character-skeleton.css 靠源序判定
+     ——本档规则在源序上最早，平板档与宽档（后出）自然接管。 */
+  --nk-hero-name-slot: 2.24rem;
+  /* 本页容器圆角直接取全站卡片档（`--nk-radius-card` = 面板档 12px）；页面 CSS 不写圆角字面量。 */
+  --nk-char-radius-card: var(--nk-radius-card);
   /* Hero 面板的落位与「动画」开关到内容列右缘的距离：两处都按「吸顶条 + 版心」几何算出来的同一距离
      （44px 触控目标）与同一边距，各被 ≥2 处消费（就绪面板 / 骨架面板；媒体右移时的反向补偿）。
      骨架是就绪态的代理，两处必须同值 ⇒ 收口成令牌，避免改一处漏一处。 */
   --nk-hero-panel-edge: 24px;
-  --nk-hero-toggle-inset: 20px;
-  /* Hero 艺术资产是 2048×2048 方图（icons.ts avatarDrawCardUrl），落进横带必然留白：
+  --nk-hero-toggle-inset: 20px;  /* Hero 艺术资产是 2048×2048 方图（icons.ts avatarDrawCardUrl），落进横带必然留白：
      两个值集中在这里重映射，页面别处不再写 background-size / position。 */
   --nk-hero-art-scale: contain;
   --nk-hero-art-pos: center 40%;
@@ -43,6 +43,10 @@
   --nk-hero-glyph-ink: color-mix(in srgb, var(--blk-950) 82%, transparent);
   --nk-hero-glyph-shadow: 0 1px 3px var(--nk-hero-glyph-ink), 0 0 14px var(--nk-hero-glyph-ink);
 }
+/* 单字档的槽高必须跟着它自己的字号：默认档槽按多字档（`--nk-fs-title-2` × 1.12）算，单字档字号更大
+   ⇒ 不另开变体，单字名就会压出槽外、骨架与实际盒高错位。本条是源序最早的档位规则，平板档与宽档
+   （后出、同权重）各自接管。 */
+.nk-char-page:has(.nk-hero__name[data-len='1']) { --nk-hero-name-slot: 3.36rem; }
 /* 宽档偏移量：1440 起素材两侧余量明确（该档两侧余量 146px、1920 档 386px），偏移 60px 可把
    抬头第二行 / 规格行 / 简介的压绘整体清零（逐字形像素实测见 docs/memory/2026-10.md）。 */
 @media (min-width: 1440px) {
@@ -142,18 +146,18 @@
   .nk-char-page .nk-hero__rubric-rule { display: none; }
 }
 /* 平板档主字分档：文字列只有 335px（并排 46% 媒体之后），两档都比手机档再上一格。
-   槽高 = 本档主字上限的行盒（1 字档 3.2rem × 1.12 = 57.34 → 3.58rem），同档内名长度不影响盒高。
+   槽高 = 本档主字上限的行盒（单字档 `--nk-fs-title-4` × 1.12），同档内名长度不影响盒高。
    槽定义在 `.nk-char-page`（名称族是它的后代，`--nk-hero-name-slot` 沿继承下来），
    档位判定靠 `:has()` 读 `.nk-hero__name` 上的 `data-len`。 */
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-char-page { --nk-hero-name-slot: 2.52rem; }
-  .nk-char-page .nk-hero__name[data-len='1'] { font-size: 3.2rem; }
-  .nk-char-page .nk-hero__name { font-size: 2.25rem; }
-  .nk-char-page:has(.nk-hero__name[data-len='1']) { --nk-hero-name-slot: 3.58rem; }
+  .nk-char-page .nk-hero__name[data-len='1'] { font-size: var(--nk-fs-title-4); }
+  .nk-char-page .nk-hero__name { font-size: var(--nk-fs-title-3); }
+  .nk-char-page:has(.nk-hero__name[data-len='1']) { --nk-hero-name-slot: 3.36rem; }
 }
 .nk-char-page .nk-hero__archive {
   flex: none; white-space: nowrap;
-  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 700;
   letter-spacing: 0.28em; color: var(--text3);
   user-select: none;
 }
@@ -161,7 +165,7 @@
    全页字阶只有「64 / 14 / 11」三级跳。编号是卷宗里唯一带检索语义的中档内容（上游 id），
    升为 1.25rem 后主字之下有了中档，主字仍是唯一主角（编号不得越档到主字之上）。 */
 .nk-char-page .nk-hero__archive-no {
-  font-size: 1.25rem; font-weight: 600;
+  font-size: var(--nk-fs-7); font-weight: 600;
   letter-spacing: 0.06em; color: var(--text2);
 }
 .nk-char-page .nk-hero__toggle {
@@ -191,7 +195,7 @@
 .nk-char-page .nk-hero__camp { flex: none; color: var(--text2); white-space: nowrap; }
 .nk-char-page .nk-hero__camp::before { display: none; }
 .nk-char-page .nk-hero__stars {
-  font-size: 0.85rem; letter-spacing: 0.1em;
+  font-size: var(--nk-fs-4); letter-spacing: 0.1em;
   text-shadow: none;
 }
 /* 名称族：中文主字 + 拉丁转写（hud 注音），一个排版单元，故内部间距小于 head 行距。
@@ -208,15 +212,15 @@
   display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
   gap: 6px; min-height: var(--nk-hero-name-slot);
 }
-/* 手机 / 默认档分两档：1 字名 2.75rem、≥2 字名 2.125rem。手机文字列 358px 只容得下两档——
+/* 默认档分两档：单字名 `--nk-fs-title-4`、多字名 `--nk-fs-title-2`。文字列 358px 只容得下两档——
    3~4 字名与 6 字名的自然宽度差不到 90px，切三档只换来 4px 却把字阶切成四段。 */
 .nk-char-page .nk-hero__name {
-  font-size: 2.125rem; font-weight: 900; letter-spacing: 0.01em;
+  font-size: var(--nk-fs-title-2); font-weight: 900; letter-spacing: 0.01em;
   color: var(--text-bright); text-shadow: none; line-height: 1.12;
 }
-.nk-char-page .nk-hero__name[data-len='1'] { font-size: 2.75rem; }
+.nk-char-page .nk-hero__name[data-len='1'] { font-size: var(--nk-fs-title-4); }
 .nk-char-page .nk-hero__name-en {
-  font-family: var(--font-hud); font-size: 0.6875rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 600;
   letter-spacing: 0.3em; text-transform: uppercase; color: var(--text3);
   white-space: nowrap; user-select: none;
 }
@@ -224,7 +228,7 @@
   display: inline-flex; align-items: center; gap: 8px;
   padding: 0;
   border: none; background: none;
-  font-size: 0.72rem; font-weight: 600; color: var(--text2);
+  font-size: var(--nk-fs-3); font-weight: 600; color: var(--text2);
   letter-spacing: 0.04em; white-space: nowrap;
   transition: color 0.2s var(--nk-ease-out);
 }
@@ -250,7 +254,7 @@
 
 .nk-char-page .nk-hero__desc {
   border-left: none; padding: 0;
-  font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
+  font-size: var(--nk-fs-4); line-height: 1.9; color: var(--text2);
   max-width: 560px;
 }
 /* 卷宗封面入场：抬头 → 规格 → 名称族 → 摘要，一次性 stagger（backwards 保证首帧即隐藏位移）。
@@ -276,12 +280,12 @@
    字阶：章标索引 20 / 章标 18 / 正文 16 及以下。**全断点同档**：手机档一度降到 16px，与最大正文齐平
    （层级不成立，被 e2e 当场判红）——章标是章节边界，不该随断点缩到与正文同级。 */
 .nk-char-page .nk-title {
-  font-size: 1.125rem; letter-spacing: 0.1em;
+  font-size: var(--nk-fs-6); letter-spacing: 0.1em;
   color: var(--text-bright);
   margin-bottom: 28px;
 }
 .nk-char-page .nk-title__idx {
-  font-size: 1.25rem; font-weight: 800; letter-spacing: 0.02em;
+  font-size: var(--nk-fs-7); font-weight: 800; letter-spacing: 0.02em;
   padding-right: 16px;
 }
 /* 章标横线从前缀档的「渐隐渐变」改为实心发丝线：本页行内引导线（属性规格表 / 技能族层级）全是实心线，
@@ -315,18 +319,18 @@
 .nk-char-page .nk-stats__stat[data-prop="taunt"] { --st-c: var(--prop-taunt); }
 .nk-char-page .nk-stats__stat[data-prop="energy"] { --st-c: var(--prop-energy); }
 .nk-char-page .nk-stats__idx {
-  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
   letter-spacing: 0.04em; color: var(--text3);
   font-variant-numeric: tabular-nums;
 }
 .nk-char-page .nk-stats__icon { width: 15px; height: 15px; opacity: 0.9; }
 .nk-char-page .nk-stats__label {
-  font-size: 0.8125rem; color: var(--text2); letter-spacing: 0.04em;
+  font-size: var(--nk-fs-4); color: var(--text2); letter-spacing: 0.04em;
   white-space: nowrap;
 }
 .nk-char-page .nk-stats__lead { height: 1px; background: var(--line-1); }
 .nk-char-page .nk-stats__val {
-  font-family: var(--font-hud); font-size: 1rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-5); font-weight: 700;
   color: var(--text-bright); text-align: right; white-space: nowrap;
   font-variant-numeric: tabular-nums;
   min-width: 5.5ch;
@@ -334,7 +338,7 @@
 
 .nk-char-page .nk-stats__level { display: flex; align-items: center; gap: 16px; margin-top: 20px; }
 .nk-char-page .nk-stats__level-label {
-  font-family: var(--font-hud); font-size: 0.68rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 600;
   letter-spacing: 0.08em; color: var(--text3); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }

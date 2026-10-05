@@ -2,23 +2,23 @@
 
 .nk-char-page .nk-cmp-count {
   margin-left: auto; font-family: var(--font-hud);
-  font-size: 0.6rem; letter-spacing: 0.1em;
+  font-size: var(--nk-fs-2); letter-spacing: 0.1em;
   color: var(--text3); font-weight: 600;
 }
 .nk-char-page .nk-cmp-spnote {
   margin: 0 0 16px; padding: 12px 16px;
   border: 1px solid color-mix(in srgb, var(--gold-sem) 30%, transparent);
-  border-radius: 4px; font-size: 0.75rem; color: var(--text2);
+  border-radius: var(--nk-radius-2); font-size: var(--nk-fs-3); color: var(--text2);
 }
 .nk-char-page .nk-cmp-empty {
   padding: 32px 0; text-align: center;
-  font-family: var(--font-hud); font-size: 0.6875rem; letter-spacing: 0.1em;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); letter-spacing: 0.1em;
   color: var(--text3);
 }
 .nk-char-page .nk-cmp-badge {
   position: absolute; top: 10px; right: 10px; z-index: 2; pointer-events: none;
-  font-family: var(--font-hud); font-size: 0.5625rem; letter-spacing: 0.08em;
-  padding: 2px 7px; border-radius: 4px; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-1); letter-spacing: 0.08em;
+  padding: 2px 7px; border-radius: var(--nk-radius-2); font-weight: 700;
   background: color-mix(in srgb, var(--gold-sem) 15%, transparent);
   color: var(--gold-sem); border: 1px solid color-mix(in srgb, var(--gold-sem) 30%, transparent);
 }
@@ -29,8 +29,8 @@
   border-top: 1px dashed var(--line-1);
 }
 .nk-char-page .nk-cmp-tag {
-  flex: none; margin-top: 2px; padding: 0 6px; border-radius: 4px;
-  font-family: var(--font-hud); font-size: 0.5625rem; letter-spacing: 0.1em;
+  flex: none; margin-top: 2px; padding: 0 6px; border-radius: var(--nk-radius-2);
+  font-family: var(--font-hud); font-size: var(--nk-fs-1); letter-spacing: 0.1em;
   line-height: 18px; color: var(--text3);
   background: color-mix(in srgb, var(--blk-900) 60%, transparent);
   border: 1px solid var(--line-1);
@@ -49,7 +49,7 @@
 }
 .nk-char-page .nk-cmp-metric {
   display: flex; gap: 8px; align-items: baseline;
-  margin: 0; font-size: 0.6875rem;
+  margin: 0; font-size: var(--nk-fs-3);
 }
 .nk-char-page .nk-cmp-metric dt { color: var(--text3); }
 .nk-char-page .nk-cmp-rank { padding: 24px; position: relative; }
@@ -64,10 +64,10 @@
   flex: 1; min-width: 0;
 }
 .nk-char-page .nk-cmp-rank__num {
-  font-family: var(--font-hud); font-size: 1.25rem; font-weight: 700; line-height: 1;
+  font-family: var(--font-hud); font-size: var(--nk-fs-7); font-weight: 700; line-height: 1;
   color: var(--primary); letter-spacing: 0.02em; opacity: 0.85;
 }
-.nk-char-page .nk-cmp-rank__name { font-weight: 600; font-size: 1rem; color: var(--text-bright); line-height: 1.3; }
+.nk-char-page .nk-cmp-rank__name { font-weight: 600; font-size: var(--nk-fs-5); color: var(--text-bright); line-height: 1.3; }
 .nk-char-page .nk-cmp-tree { padding: 24px; position: relative; }
 @media (max-width: 767px) {
   .nk-char-page .nk-cmp-rank__icon { width: 64px; height: 64px; }

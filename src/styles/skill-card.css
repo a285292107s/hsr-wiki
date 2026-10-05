@@ -1,7 +1,7 @@
 .nk-skill {
   --sk-accent: var(--primary);
   position: relative; background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 24px 24px 20px; margin-bottom: 16px;
+  border-radius: var(--nk-radius-3); padding: 24px 24px 20px; margin-bottom: 16px;
   transition: border-color 0.2s var(--nk-ease-out), transform 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out);
 }
 .nk-skill[data-type="Normal"]   { --sk-accent: var(--skill-normal); }
@@ -19,7 +19,7 @@
   border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
 }
 .nk-skill__icon {
-  width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
+  width: 48px; height: 48px; border-radius: var(--nk-radius-3); flex-shrink: 0;
   border: 1px solid var(--border2);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -6px 12px rgba(0,0,0,0.25);
 }
@@ -31,15 +31,15 @@
 }
 .nk-skill__meta { display: flex; align-items: center; gap: 6px; }
 .nk-skill__type {
-  font-size: 0.625rem; font-weight: 700; letter-spacing: 0.03em;
-  color: var(--sk-accent); padding: 1px 7px; border-radius: 4px;
+  font-size: var(--nk-fs-2); font-weight: 700; letter-spacing: 0.03em;
+  color: var(--sk-accent); padding: 1px 7px; border-radius: var(--nk-radius-2);
   background: color-mix(in srgb, var(--sk-accent) 9%, transparent);
 }
 
-.nk-skill__name { font-weight: 600; font-size: 0.875rem; line-height: 1.3; color: var(--text); }
+.nk-skill__name { font-weight: 600; font-size: var(--nk-fs-4); line-height: 1.3; color: var(--text); }
 .nk-skill__tag {
-  font-size: 0.625rem; color: var(--text3); font-weight: 600; padding: 1px 7px;
-  border-radius: 4px; background: color-mix(in srgb, var(--text2) 10%, transparent); letter-spacing: 0.03em;
+  font-size: var(--nk-fs-2); color: var(--text3); font-weight: 600; padding: 1px 7px;
+  border-radius: var(--nk-radius-2); background: color-mix(in srgb, var(--text2) 10%, transparent); letter-spacing: 0.03em;
 }
 .nk-skill__slider {
   display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
@@ -54,28 +54,28 @@
 .nk-skill__slider input[type=range]:hover { opacity: 1; }
 .nk-skill__slider input[type=range]:disabled { opacity: 0.35; cursor: default; }
 .nk-skill__slider input[type=range]::-webkit-slider-runnable-track {
-  height: 8px; border-radius: 2px;
+  height: 8px; border-radius: var(--nk-radius-1);
   background:
     repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,0.45) 5px 7px),
     linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent) var(--fill), color-mix(in srgb, var(--text2) 8%, transparent) var(--fill));
 }
 .nk-skill__slider input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 11px; height: 17px; margin-top: -5px;
-  border-radius: 2px; border: none; background: var(--metric-val); cursor: pointer;
+  border-radius: var(--nk-radius-1); border: none; background: var(--metric-val); cursor: pointer;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--blk-950) 55%, transparent);
 }
 .nk-skill__slider input[type=range]::-moz-range-track {
-  height: 8px; border-radius: 2px;
+  height: 8px; border-radius: var(--nk-radius-1);
   background:
     repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,0.45) 5px 7px),
     linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent) var(--fill), color-mix(in srgb, var(--text2) 8%, transparent) var(--fill));
 }
 .nk-skill__slider input[type=range]::-moz-range-thumb {
-  width: 11px; height: 17px; border-radius: 2px; border: none; background: var(--metric-val); cursor: pointer;
+  width: 11px; height: 17px; border-radius: var(--nk-radius-1); border: none; background: var(--metric-val); cursor: pointer;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--blk-950) 55%, transparent);
 }
-.nk-slider__val { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); font-weight: 700; white-space: nowrap; }
-.nk-skill__desc { font-size: 0.8125rem; line-height: 1.85; color: var(--text2); }
+.nk-slider__val { font-family: var(--font-hud); font-size: var(--nk-fs-3); color: var(--metric-val); font-weight: 700; white-space: nowrap; }
+.nk-skill__desc { font-size: var(--nk-fs-4); line-height: 1.85; color: var(--text2); }
 .nk-skill__desc .hl { color: var(--highlight); font-weight: 700; }
 .nk-skill__desc .nowrap, .nk-build__set-desc .nowrap { white-space: nowrap; }
 .nk-skill__desc u { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--text-bright) 80%, transparent); text-underline-offset: 3px; color: color-mix(in srgb, var(--text-bright) 80%, transparent); }

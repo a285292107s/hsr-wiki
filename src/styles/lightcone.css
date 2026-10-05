@@ -5,7 +5,7 @@
 
 .nk-hero--lc .nk-hero__visual { min-height: 240px; aspect-ratio: 2 / 1; }
 /* hero 名称升档：660px 画室里 2rem 折损了图鉴口吻；保持基线一族字重/字距 */
-.nk-hero--lc .nk-hero__name { font-size: clamp(1.85rem, 2.8vw, 2.5rem); }
+.nk-hero--lc .nk-hero__name { font-size: clamp(var(--nk-fs-title-1), 2.8vw, var(--nk-fs-title-3)); }
 .nk-hero--lc .nk-hero__visual::after {
   content: '';
   position: absolute; inset: 0; z-index: 3; pointer-events: none;
@@ -46,7 +46,7 @@
 }
 .nk-lc-rank-slider { gap: 12px; }
 .nk-lc-rank-label {
-  font-size: 0.6875rem; font-weight: 700; color: var(--metric-val);
+  font-size: var(--nk-fs-3); font-weight: 700; color: var(--metric-val);
   letter-spacing: 0.08em; white-space: nowrap;
   font-family: var(--font-hud);
 }
@@ -70,7 +70,7 @@
 .nk-lc-rank-table-wrap.is-scrollable::after { opacity: 1; }
 .nk-lc-rank-table {
   width: 100%; border-collapse: collapse;
-  font-size: 0.75rem; text-align: center;
+  font-size: var(--nk-fs-3); text-align: center;
 }
 .nk-lc-rank-table th,
 .nk-lc-rank-table td {
@@ -78,7 +78,7 @@
   border-bottom: none;
 }
 .nk-lc-rank-table thead th {
-  font-family: var(--font-hud); font-size: 0.625rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 700;
   color: var(--text3); letter-spacing: 0.06em;
   background: color-mix(in srgb, var(--primary) 4%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
@@ -89,7 +89,7 @@
 }
 .nk-lc-rank-table__param {
   text-align: left; color: var(--text3); font-weight: 600;
-  font-family: var(--font-hud); font-size: 0.6875rem;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3);
 }
 .nk-lc-rank-table--active {
   color: var(--text-bright) !important;
@@ -126,12 +126,12 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   border-bottom: 1px solid var(--line-1);
 }
 .nk-lc-phase__idx {
-  font-family: var(--font-hud); font-size: 0.62rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 700;
   letter-spacing: 0.08em; color: var(--primary); white-space: nowrap;
 }
 .nk-lc-phase--max .nk-lc-phase__idx { color: var(--lc-r, var(--rarity-5)); }
 .nk-lc-phase__lv {
-  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 700;
   letter-spacing: 0.04em; color: var(--text-bright); white-space: nowrap;
 }
 .nk-lc-phase__stats {
@@ -143,11 +143,11 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   display: flex; flex-direction: column; gap: 2px;
 }
 .nk-lc-phase__stat-label {
-  font-family: var(--font-hud); font-size: 0.56rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-1); font-weight: 600;
   letter-spacing: 0.1em; color: var(--text3);
 }
 .nk-lc-phase__stat-val {
-  font-family: var(--font-hud); font-size: 0.78rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-4); font-weight: 700;
   color: var(--text2); white-space: nowrap;
 }
 .nk-lc-phase--max .nk-lc-phase__stat-val { color: var(--text-bright); }
@@ -157,31 +157,31 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   border-top: 1px solid var(--line-1);
 }
 .nk-lc-phase__cost--none {
-  font-size: 0.68rem; color: var(--text3); opacity: 0.75;
+  font-size: var(--nk-fs-3); color: var(--text3); opacity: 0.75;
 }
 .nk-lc-phase__cost-item {
   display: flex; align-items: center; gap: 4px;
-  font-size: 0.7rem; color: var(--text2);
+  font-size: var(--nk-fs-3); color: var(--text2);
 }
 .nk-lc-phase__cost-item img {
-  width: 28px; height: 28px; border-radius: 6px;
+  width: 28px; height: 28px; border-radius: var(--nk-radius-2);
   border: 1px solid var(--line-1);
 }
 .nk-lc-phase__credit {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 6px;
+  width: 28px; height: 28px; border-radius: var(--nk-radius-2);
   background: color-mix(in srgb, var(--rarity-5) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--rarity-5) 25%, transparent);
-  color: var(--gold); font-size: 0.9rem;
+  color: var(--gold); font-size: var(--nk-fs-5);
 }
 .nk-lc-phase__cost-num {
-  font-family: var(--font-hud); font-size: 0.64rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
   color: var(--text2);
 }
 
 .nk-lc-story {
   max-width: var(--nk-prose-max);
-  font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
+  font-size: var(--nk-fs-4); line-height: 1.9; color: var(--text2);
   padding: 4px 0 12px;
   text-wrap: pretty;
 }
@@ -219,7 +219,7 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 }
 .nk-lc-adapt__name {
   flex: 1; min-width: 0;
-  font-size: 0.78rem; font-weight: 600; color: var(--text);
+  font-size: var(--nk-fs-4); font-weight: 600; color: var(--text);
   /* 名字是这张卡的主信息：宁可换行也不截断。`-webkit-line-clamp` 只作为超长名的兜底——
      当前数据里最长的名字（8 字符宽）在 208px 列里仍是单行显示。 */
   display: -webkit-box;
@@ -232,8 +232,8 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 }
 .nk-lc-adapt__rec {
   flex-shrink: 0;
-  font-family: var(--font-hud); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em;
-  color: var(--text-bright); padding: 2px 7px; border-radius: 4px;
+  font-family: var(--font-hud); font-size: var(--nk-fs-1); font-weight: 700; letter-spacing: 0.06em;
+  color: var(--text-bright); padding: 2px 7px; border-radius: var(--nk-radius-2);
   background: color-mix(in srgb, var(--blk-800) 72%, transparent);
   border: 1px solid var(--line-1);
 }
@@ -262,5 +262,5 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 @media (min-width: 1024px) {
   .nk-hero--lc { min-height: auto; }
   .nk-hero--lc .nk-hero__visual { min-height: 320px; flex: 0 0 34%; }
-  .nk-hero--lc .nk-hero__name { font-size: 2rem; }
+  .nk-hero--lc .nk-hero__name { font-size: var(--nk-fs-title-2); }
 }
