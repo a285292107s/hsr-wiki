@@ -216,13 +216,13 @@
   background: color-mix(in srgb, var(--blk-900) 52%, transparent);
   white-space: nowrap;
 }
-.nk-egd-peak__badges {
+.nk-egd-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 18px 0 6px;
+  margin-bottom: 20px;
 }
-.nk-egd-peak__badge {
+.nk-egd-badges__item {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -234,7 +234,7 @@
   color: var(--text2);
   white-space: nowrap;
 }
-.nk-egd-peak__badge img {
+.nk-egd-badges__item img {
   width: 28px;
   height: 28px;
   border-radius: 50%;

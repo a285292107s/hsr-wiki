@@ -8,16 +8,15 @@ import {
   loadLocalVoracity, loadLocalEndgameGuide,
 } from '../../services/api';
 import type {
-  EndgameGuideDb, MazeListDb, MazeListEntry, PeakLevelInfo, VoracityInvasionLevel,
+  EndgameGuideDb, MazeListDb, MazeListEntry, VoracityInvasionLevel,
 } from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
-import { buildEndgameSections } from '../endgame/sections';
 import { seasonBuffSystemLine, seasonBuffSystemName } from '../endgame/guide';
-import { buildLevelTabs, defaultLevelKey, isLevelMode, type LevelTab } from '../endgame/levels';
+import { buildLevelTabs, defaultLevelKey, type LevelTab } from '../endgame/levels';
 import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
-import EndgamePeak from '../endgame/EndgamePeak.vue';
+import EndgameBadges from '../endgame/EndgameBadges.vue';
 import EndgamePollution from '../endgame/EndgamePollution.vue';
 import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
 import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
@@ -121,21 +120,14 @@ watch(
 );
 
 const modeKey = computed(() => String(route.params.mode || ''));
-const peakLevels = computed<PeakLevelInfo[]>(() => data.value?.levels || []);
 
 /** 增益体系名与选法说明（按玩法取自 endgame_guide.json；产物缺省时回退站点工作名/空串） */
 const systemName = computed(() => seasonBuffSystemName(guide.value, modeKey.value));
 const systemLine = computed(() => seasonBuffSystemLine(guide.value, modeKey.value));
 
-const navSections = computed(
-  () => buildEndgameSections(data.value, modeKey.value, peakLevels.value, systemName.value),
-);
-
-/** 层级模式（忘却之庭 / 虚构叙事 / 末日幻影）的「第 1..N 层 / 星启模式」子 tab；
- *  异相仲裁无层级，为空数组 → 顶部条继续走区块导航。默认激活星启（见 `defaultLevelKey`）。 */
-const levelTabs = computed<LevelTab[]>(
-  () => (isLevelMode(modeKey.value) ? buildLevelTabs(data.value) : []),
-);
+/** 四个玩法的关卡都由子 tab 承载（ADR 0043）：层级模式 = 「第 1..N 层 / 星启模式」，
+ *  异相仲裁 = 「骑士（一）… / 将杀王棋」。默认激活星启，无星启的模式激活首关（见 `defaultLevelKey`）。 */
+const levelTabs = computed<LevelTab[]>(() => buildLevelTabs(data.value));
 const activeLevel = ref('');
 watch(
   levelTabs,
@@ -171,12 +163,9 @@ const nextSeason = computed(() => {
 });
 
 const pageRef = ref<HTMLElement | null>(null);
-const { activeId, progress, showTop, jumpTo, scrollTop, refresh } = useScrollSpy(
-  pageRef,
-  () => navSections.value.map((s) => s.id),
-  (id) => document.getElementById(`egd-${id}`),
-  { offset: 64, fallbackFirst: true },
-);
+/** 固定条退场后（ADR 0043）本页没有区块导航：关卡定位由子 tab 承担，滚动定位只剩「返回顶部」圆钮 */
+const NO_BLOCK_NAV: string[] = [];
+const { showTop, scrollTop, refresh } = useScrollSpy(pageRef, () => NO_BLOCK_NAV, () => null);
 
 
 onBeforeUnmount(() => {
@@ -216,26 +205,6 @@ onBeforeUnmount(() => {
     </div>
 
     <template v-else-if="data">
-      <div v-if="!levelTabs.length" class="nk-egd-bar">
-        <div class="nk-egd-bar__inner">
-          <nav class="nk-secnav nk-egd-secnav" aria-label="内容区块导航">
-            <button
-              v-for="s in navSections"
-              :key="s.id"
-              type="button"
-              class="nk-secnav__btn"
-              :class="{ 'nk-secnav__btn--active': activeId === s.id }"
-              :aria-current="activeId === s.id ? 'true' : undefined"
-              @click="jumpTo(s.id)"
-            >
-              <span class="nk-secnav__idx">{{ s.idx }}</span>
-              {{ s.label }}
-            </button>
-          </nav>
-        </div>
-        <div class="nk-egd-bar__progress" :style="{ width: `${progress}%` }"></div>
-      </div>
-
       <button
         v-show="showTop"
         class="nk-top-btn"
@@ -260,6 +229,8 @@ onBeforeUnmount(() => {
 
             <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
 
+            <EndgameBadges v-if="data.badges?.length" :data="data" :mode-key="modeKey" />
+
             <EndgameLevelTabs
               :tabs="levelTabs"
               :active="activeLevel"
@@ -275,13 +246,7 @@ onBeforeUnmount(() => {
             />
           </template>
 
-          <template v-else>
-            <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
-
-            <EndgamePeak :data="data" :peak-levels="peakLevels" :system-name="systemName" />
-
-            <div v-if="!peakLevels.length" class="nk-slot-empty">本赛季暂无关卡数据</div>
-          </template>
+          <div v-else class="nk-slot-empty">本赛季暂无关卡数据</div>
 
           <nav v-if="prevSeason || nextSeason" class="nk-egd-nav" aria-label="相邻赛季">
             <router-link

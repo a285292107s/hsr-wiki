@@ -1,30 +1,13 @@
-/* 终局详情页 · 骨架：模式色 / 固定条 / Hero / 面板容器。
+/* 终局详情页 · 骨架：模式色 / Hero / 面板容器 / 关架子 tab。
    本文件是 endgame-detail 拆分块的第 1 块：七个拆分块必须按导入顺序级联，不得乱序合并。 */
 .nk-egd[data-mode="maze"] { --eg-color: var(--eg-maze); }
 .nk-egd[data-mode="story"] { --eg-color: var(--eg-story); }
 .nk-egd[data-mode="boss"] { --eg-color: var(--eg-boss); }
 .nk-egd[data-mode="peak"] { --eg-color: var(--eg-peak); }
 
-/* 只有异相仲裁仍有顶部固定条（无层级子 tab，靠区块导航）；层级模式由页内子 tab 行承担导航 */
+/* 四个玩法的关卡都由子 tab 承载（ADR 0043）→ 无顶部固定条，页面无需为常驻横条留避让内距 */
 .nk-egd.nk-page--detail { padding-top: 0; }
-.nk-egd.nk-page--detail[data-mode="peak"] { padding-top: 46px; }
-.nk-egd-bar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-  background: color-mix(in srgb, var(--blk-800) 97%, transparent);
-  backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  border-bottom: 1px solid var(--line-1);
-}
-@media (min-width: 768px) {
-  .nk-egd-bar { padding-left: var(--nk-content-offset); }
-}
-.nk-egd-bar__inner {
-  display: flex; align-items: center; gap: 12px;
-  max-width: var(--nk-detail-max); margin: 0 auto; padding: 6px 16px; min-height: 44px;
-}
-.nk-egd-secnav .nk-secnav__btn--active { color: var(--eg-color); }
-.nk-egd-secnav .nk-secnav__btn--active::after { background: var(--eg-color); }
-.nk-egd-secnav .nk-secnav__btn::before { top: -8px; bottom: -8px; }
-/* 层级模式（第 1..N 层 / 星启模式）子 tab：页内并列一行（复用 nk-tab 原语，下划线骑在行底边上） */
+/* 关架子 tab（第 1..N 层 / 星启模式 / 异相仲裁单关）：页内并列一行（复用 nk-tab 原语，下划线骑在行底边上） */
 .nk-egd-tabs {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px;
   width: 100%;
@@ -35,11 +18,6 @@
 .nk-egd-tabs .nk-tab:first-child::after { left: 0; }
 .nk-egd-tabs .nk-tab--active { color: var(--eg-color); }
 .nk-egd-tabs .nk-tab--active::after { background: var(--eg-color); box-shadow: none; }
-.nk-egd-bar__progress {
-  height: 2px; width: 0;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--eg-color) 45%, transparent) 0%, var(--eg-color) 55%, color-mix(in srgb, var(--eg-color) 75%, #fff) 100%);
-}
-#egd-buffs, #egd-levels, #egd-sub-buffs { scroll-margin-top: 56px; }
 
 .nk-egd-hero {
   position: relative;
@@ -242,7 +220,7 @@
 .nk-egd-body .nk-egd-buffs,
 .nk-egd-body .nk-egd-traits,
 .nk-egd-body .nk-egd-poll,
-.nk-egd-body .nk-egd-floors,
+.nk-egd-body .nk-egd-badges,
 .nk-egd-body .nk-egd-tierce,
 .nk-egd-body .nk-slot-empty,
 .nk-egd-body .nk-egd-nav { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }

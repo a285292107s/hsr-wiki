@@ -30,7 +30,7 @@ const systemTitle = computed(() => props.systemName || FALLBACK_SYSTEM_NAME);
 /** 站点工作名只在体系名生效时降为次标；回退时主标题已是它，不再重复 */
 const aliasTitle = computed(() => (props.systemName ? '赛季增益' : ''));
 const sectionIdx = computed(
-  () => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, [], systemTitle.value)),
+  () => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, systemTitle.value)),
 );
 </script>
 
