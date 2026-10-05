@@ -214,6 +214,27 @@
 .nk-cat-empty__reset:active { transform: translateY(1px); }
 .nk-cat-empty__reset:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
+/* 玩法说明入口（全站原语）：目录页列头与赛季详情页 Hero 共用。
+   此前「玩法说明」只有目录页列标题一个隐藏入口（标题本身就是链接、零提示性），赛季详情页完全没有入口。
+   形态 = 带图标的显式文字链（不是仅有下划线的文本链接）：有边框、有图标、hover 变主色，才具备可发现性。
+   两处调用点分属「模板字符串」与「Vue 模板」两条渲染路径，故样式收在这里、图标 SVG 各自内联。 */
+.nk-guide-link {
+  display: inline-flex; align-items: center; gap: 5px; flex: none;
+  padding: 3px 9px 3px 7px; border: 1px solid var(--line-2); border-radius: 999px;
+  font-size: 0.7rem; font-weight: 600; line-height: 1.5; color: var(--text2); white-space: nowrap;
+  /* 原语必须在任何上下文里都成立：宿主可能带 letter-spacing / HUD 字体（如赛季 Hero 的 camp 行），
+     故这两项显式归位，避免出现「字距被拉开的按钮」这种宿主泄漏。 */
+  font-family: var(--font-body); letter-spacing: normal;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out), border-color var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out);
+}
+.nk-guide-link svg { width: 13px; height: 13px; flex: none; }
+.nk-guide-link:hover {
+  color: var(--text-bright);
+  border-color: color-mix(in srgb, var(--primary) 46%, transparent);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.nk-guide-link:active { transform: translateY(1px); }
+
 .nk-lc-grid { --nk-grid-min: 160px; --nk-grid-gap: 16px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
 .nk-lc-card[data-rarity='3'] { --lc-r: var(--rarity-3); }
 .nk-lc-card[data-rarity='4'] { --lc-r: var(--rarity-4); }

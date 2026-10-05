@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
 import {
   ENDGAME_MODES, MAZE_STATUS_CLASS, mazeStatus, mazeDateRange,
   modeDefaultArtUrl, seasonBannerUrl, seasonHeroBgUrl,
@@ -50,7 +51,13 @@ const showHeroBg = computed(() => !!seasonHeroBg.value && !showBanner.value);
       <img v-if="seasonArt" class="nk-egd-hero__art" :src="seasonArt" alt="" aria-hidden="true" @error="hideOnError">
     </div>
     <div class="nk-egd-hero__panel">
-      <div class="nk-egd-hero__camp">{{ modeInfo?.label || modeKey }} · {{ modeInfo?.en || '' }}</div>
+      <div class="nk-egd-hero__camp">
+        <span>{{ modeInfo?.label || modeKey }} · {{ modeInfo?.en || '' }}</span>
+        <RouterLink class="nk-guide-link" :to="`/endgame/${modeKey}`" :aria-label="`${modeInfo?.label || modeKey}玩法说明`">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>
+          玩法说明
+        </RouterLink>
+      </div>
       <h1 class="nk-egd-hero__name">{{ data.zh }}</h1>
       <div class="nk-egd-hero__meta">
         <span

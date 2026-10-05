@@ -238,9 +238,10 @@ export const endgamePage: CatalogPageConfig = {
       if (!col.length) continue;
       html += `<section class="nk-eg-col" data-mode="${m.key}">
         <h2 class="nk-eg-col__head">
-          <a class="nk-eg-col__name" href="/endgame/${escHtml(m.key)}">${escHtml(m.label)}</a>
+          <span class="nk-eg-col__name">${escHtml(m.label)}</span>
           <span class="nk-eg-col__en">${escHtml(m.en)}</span>
           <span class="nk-eg-col__count">${col.length}</span>
+          <a class="nk-guide-link" href="/endgame/${escHtml(m.key)}" aria-label="${escHtml(m.label)}玩法说明"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>玩法说明</a>
         </h2>
         <div class="nk-eg-col__list">${col.map((it, ci) => renderCard(it, ci)).join('')}</div>
       </section>`;

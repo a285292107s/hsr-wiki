@@ -3,6 +3,7 @@
 // 机制 1 条 + 效果 2 条，仅虚构叙事 Fever 赛季）；赛季增益为当期环境效果（记忆紊流 / 战意），
 // 与逐层已呈现的增益同文的不再复述（见 seasonBuffList）。
 import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
 import { seasonThemeIconUrl } from '../catalog/pages/endgame';
 import { buildEndgameSections, sectionIdxMap } from './sections';
 import { FALLBACK_SYSTEM_NAME } from './guide';
@@ -78,6 +79,11 @@ const sectionIdx = computed(
         @error="($event.target as HTMLImageElement).style.display='none'"
       >
       <span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>{{ systemTitle }}<span v-if="aliasTitle" class="nk-egd-title-alias">{{ aliasTitle }}</span>
+      <!-- 反向入口：读到这里正想问「这体系是什么/怎么选」时，就地可去玩法说明（与路径入口同一原语） -->
+      <RouterLink class="nk-guide-link" :to="`/endgame/${modeKey}`" :aria-label="`${systemTitle}玩法说明`">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>
+        玩法说明
+      </RouterLink>
     </h2>
     <p v-if="systemLine" class="nk-egd-buffs__hint">{{ systemLine }}</p>
     <div class="nk-egd-groups">
