@@ -260,4 +260,59 @@ test.describe('布局验收：货币战争主题', () => {
     await noUnknownOverflow(page);
     assertNoErrors();
   });
+
+  /* 羁绊详情：正文阅读列宽 + 区块内容左对齐（UI质量验收标准 A5.1 / A1）
+     实测缺陷（2026-10）：① `.nk-ctrait-layer__desc` 无列宽 ⇒ 首行 58.4 全角字（令牌 44em ≈ 44 字）；
+     ② `.nk-ctrait-desc` 带 `margin-inline: auto` ⇒ 同一页 3 个区块里它居中、另两个左对齐（盒左缘 484 vs 310）。
+     判据取「每行全角字数」与「区块首个内容块与区块标题的盒左缘」——两者都不依赖具体类名或绝对值。 */
+  test('/currency/trait/3006：正文阅读列宽 + 区块内容与标题同左缘', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/currency/trait/3006');
+    await expect(page.locator('.nk-ctrait-section').first()).toBeVisible();
+
+    const proseMax = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--nk-prose-max').trim(),
+    );
+    expect(proseMax, '阅读列宽令牌必须按字号缩放（em）；px 定值会让每行字数随字号漂移').toMatch(/em$/);
+    const firstLineEm = await page
+      .locator('.nk-ctrait-desc, .nk-ctrait-layer__desc')
+      .evaluateAll((els) =>
+        els.map((el) => {
+          const textNode = [...el.childNodes].find(
+            (n) => n.nodeType === 3 && (n.textContent ?? '').trim().length > 30,
+          );
+          if (!textNode) return 0;
+          const range = document.createRange();
+          range.selectNodeContents(textNode);
+          const rects = [...range.getClientRects()];
+          if (!rects.length) return 0;
+          return rects[0].width / parseFloat(getComputedStyle(el).fontSize);
+        }),
+      );
+    expect(firstLineEm.length, '应有可测量的正文块').toBeGreaterThan(0);
+    for (const em of firstLineEm) {
+      expect(em, `羁绊正文每行不得超过令牌列宽（+2 容差）全角字，实测 ${em.toFixed(1)}`)
+        .toBeLessThanOrEqual(parseFloat(proseMax) + 2);
+    }
+
+    // 盒左缘而非文字左缘：区块标题自带 12px 内距 + 3px 边线，用文字对齐会假红。
+    const misaligned = await page.evaluate(() =>
+      [...document.querySelectorAll('.nk-ctrait-section')]
+        .map((section) => {
+          const title = section.querySelector('.nk-ctrait-section__title');
+          const first = title?.nextElementSibling;
+          if (!title || !first) return null;
+          return {
+            title: (title.textContent ?? '').trim().slice(0, 10),
+            delta: Math.round(first.getBoundingClientRect().left - title.getBoundingClientRect().left),
+          };
+        })
+        .filter((row): row is { title: string; delta: number } => row !== null)
+        .filter((row) => Math.abs(row.delta) > 1),
+    );
+    expect(misaligned, '区块内容必须与区块标题同左缘（内容块不得居中）').toEqual([]);
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
 });

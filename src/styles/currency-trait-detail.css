@@ -209,7 +209,6 @@
   overflow: hidden;
   transition: border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
   max-width: var(--nk-prose-max);
-  margin-inline: auto;
 }
 .nk-ctrait-desc:hover {
   border-color: var(--border2);
@@ -463,6 +462,7 @@
 }
 
 .nk-ctrait-layer__desc {
+  max-width: var(--nk-prose-max);
   font-size: 0.82rem;
   color: var(--text2);
   line-height: 1.75;
