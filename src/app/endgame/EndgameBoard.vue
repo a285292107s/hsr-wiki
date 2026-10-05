@@ -4,6 +4,7 @@ import EndgameBuffGroup from './EndgameBuffGroup.vue';
 import EndgameTraitGroup from './EndgameTraitGroup.vue';
 import EndgameFloorBuff from './EndgameFloorBuff.vue';
 import { pollutionLabel } from './pollution';
+import { FALLBACK_SYSTEM_NAME } from './guide';
 import type { MazeBossTrait, MazeBuffInfo, MazeStageDetail } from '../../services/types';
 
 /** 战斗看板（层 tab 的半场看板 / 星启看板的节点看板共用）：一次只渲染当前这一场战斗。
@@ -19,6 +20,8 @@ defineProps<{
   buffs: MazeBuffInfo[];
   /** 该场次的末法余烬 */
   buff?: MazeBuffInfo | null;
+  /** 增益体系名（自上而下透传；缺省回退站点工作名「赛季增益」） */
+  systemName?: string;
 }>();
 </script>
 
@@ -36,7 +39,7 @@ defineProps<{
       <EndgameFloorBuff :buff="buff" />
       <EndgameTraitGroup v-if="traits.length" title="首领特性" :items="traits" />
       <StageContent :stage="stage" />
-      <EndgameBuffGroup v-if="buffs.length" title="赛季增益" :items="buffs" />
+      <EndgameBuffGroup v-if="buffs.length" :title="systemName || FALLBACK_SYSTEM_NAME" :items="buffs" />
     </div>
   </div>
 </template>

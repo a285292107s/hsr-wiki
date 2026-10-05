@@ -43,11 +43,11 @@
   min-width: 0;
 }
 /* 面板顶部两栏的栏名：小字 + 发丝下边线分节，不做填充胶囊 */
+/* 本文件不声明这些元素的字号：字号统归 `endgame-type-scale.css`（末块导入、同特异性覆写，见 ADR 0034 决策 2） */
 .nk-egd-head__label {
   align-self: flex-start;
   padding-bottom: 7px;
   border-bottom: 1px solid color-mix(in srgb, var(--eg-color) 34%, transparent);
-  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: color-mix(in srgb, var(--eg-color) 78%, var(--text2));
@@ -70,38 +70,28 @@
 }
 .nk-egd-rules__label {
   font-family: var(--font-hud);
-  font-size: 0.64rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: var(--text3);
   white-space: nowrap;
 }
+/* 赛季级统计条：值与标签同行读取（左对齐数据条）。原「每项占满 1fr、内容居中」的写法在
+   星启面板只剩一项时（ADR 0032 决策 2 收窄后必然出现）会摊成一张几乎空白的整宽卡。 */
 .nk-egd-tierce__stats {
-  display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap;
-  padding: 18px 6px;
+  display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+  padding: 14px 4px;
   background: color-mix(in srgb, var(--blk-900) 14%, transparent);
   border: 1px solid var(--line-1);
   border-radius: var(--nk-radius-card);
 }
 .nk-egd-tierce__stat {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
+  align-items: baseline;
+  gap: 10px;
   padding: 2px 22px;
-  min-width: 112px;
+  border-left: 1px solid var(--line-1);
 }
-@media (min-width: 768px) {
-  .nk-egd-tierce__stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0;
-    padding: 20px 2px;
-  }
-  .nk-egd-tierce__stat { padding: 2px 20px; border-left: 1px solid var(--line-1); }
-  .nk-egd-tierce__stat:first-child { border-left: none; }
-}
+.nk-egd-tierce__stat:first-child { border-left: none; }
 .nk-egd-tierce__val {
   font-family: var(--font-hud);
   font-size: 1.22rem;
@@ -114,7 +104,6 @@
 }
 .nk-egd-tierce__label {
   font-family: var(--font-hud);
-  font-size: 0.64rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: var(--text3);
@@ -155,7 +144,6 @@
 .nk-egd-node__text {
   flex: 1;
   min-width: 0;
-  font-size: 0.86rem;
   line-height: 1.78;
   color: var(--text1);
   padding-top: 2px;
@@ -204,7 +192,6 @@
   flex-wrap: wrap;
 }
 .nk-egd-reward__goal {
-  font-size: 0.78rem;
   color: var(--text2);
 }
 .nk-egd-reward__items {
@@ -220,7 +207,7 @@
   background: color-mix(in srgb, var(--blk-900) 14%, transparent);
   border: 1px solid var(--line-1);
   border-radius: var(--nk-radius-card);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-egd-reward__item:hover { border-color: var(--line-2); }
 .nk-egd-reward__icon {
@@ -239,7 +226,6 @@
   color: var(--text3);
 }
 .nk-egd-reward__name {
-  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-bright);
   white-space: nowrap;
@@ -295,7 +281,6 @@
 }
 .nk-egd-nav__id {
   font-family: var(--font-hud);
-  font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--eg-color);

@@ -12,6 +12,8 @@ import type {
 
 const props = defineProps<{
   data: MazeListEntry;
+  /** 增益体系名（自上而下透传；缺省回退站点工作名） */
+  systemName?: string;
 }>();
 
 const tierceCountdown = computed<number>(() => props.data.tierce?.countdown || 0);
@@ -121,6 +123,7 @@ watch(
         :buff="activeNd.buff"
         :traits="activeTraits"
         :buffs="activeBuffs"
+        :system-name="props.systemName"
       />
       <div v-else-if="tierceMonsters.length" class="nk-egd-mons">
         <EnemyCard v-for="m in tierceMonsters" :key="m.id" :monster="m" />

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { SpineResolved } from '../../services/types';
+import './spine-audit.css';
 import type { SpinePlayerInstance } from '../../spine/types';
 import { disposePlayer, pickAnimName } from '../../spine/player';
 import {
@@ -325,39 +326,4 @@ onBeforeUnmount(() => {
   gap: 8px;
   margin-top: 8px;
 }
-.nk-spine-audit__error {
-  margin: 10px 0 0;
-  color: #ff6b6b;
-  font-size: 13px;
-  line-height: 1.6;
-  word-break: break-all;
-}
-
-.nk-spine-audit__select {
-  padding: 3px 8px;
-  max-width: 220px;
-  font-family: ui-monospace, monospace;
-  font-size: 12px;
-  color: var(--text);
-  background: color-mix(in srgb, var(--bg) 85%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text) 24%, transparent);
-  border-radius: 6px;
-  cursor: pointer;
-}
-.nk-spine-audit__select:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-.nk-spine-audit__btn {
-  padding: 4px 12px;
-  font-size: 12px;
-  font-family: inherit;
-  color: var(--text);
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.18s, border-color 0.18s;
-}
-.nk-spine-audit__btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--text) 55%, transparent); }
-.nk-spine-audit__btn:active:not(:disabled) { background: color-mix(in srgb, var(--text) 14%, transparent); }
-.nk-spine-audit__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-.nk-spine-audit__btn:disabled { opacity: 0.45; cursor: not-allowed; }
 </style>

@@ -1,6 +1,7 @@
 /** 物品 / 光锥 / 敌对物种加载器 */
 import { cachedFetch } from '../cache';
 import type { ItemDb, LocalItemList, LocalLightConeList, LocalMonsterList, LightConeDetail, MonsterDetail } from '../types';
+import type { MonsterLevelCurve } from '../../lib/monster-stats';
 import { LOCAL_DATA_BASE } from './base';
 import { singletonLoad } from './singleton';
 
@@ -29,6 +30,9 @@ export async function loadLocalItemDb(): Promise<ItemDb> {
 }
 /** 敌对物种列表（共享单例：只请求一次，失败自动重置允许重试） */
 export const loadLocalMonsterList = singletonLoad<LocalMonsterList>(`${LOCAL_DATA_BASE}/monsters.json`);
+
+/** 怪物等级曲线（共享单例：745 行共享一份，详情页按难度组取行做战斗数值合成） */
+export const loadLocalMonsterLevelCurve = singletonLoad<MonsterLevelCurve>(`${LOCAL_DATA_BASE}/monster-level-curve.json`);
 
 /** 敌对物种详情（monsters/{id}.json，按 ID 按需加载，走请求缓存） */
 export function loadLocalMonsterDetail(id: string): Promise<MonsterDetail> {

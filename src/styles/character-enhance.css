@@ -1,11 +1,4 @@
 /* 角色详情页 · 强化条与强化徽标（ADR 0010）。拆分块 4/6。 */
-/* 焦点可见性补口：全局焦点环（tokens.css 的 `:where(#app) button/a/[tabindex]:focus-visible`）不含 `input`，
-   而本页的技能等级滑条是 `input[type=range]` ⇒ 键盘聚焦后**零视觉反馈**（实测 5 个滑条焦点前后样式无变化）。
-   滑条是本页唯一的表单控件，故在页面作用域内补齐；令牌与偏移沿用全局那套（primary + 2px / offset 2）。 */
-.nk-char-page input:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
 .nk-char-page .nk-enh-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 10;
   background: color-mix(in srgb, var(--blk-800) 97%, transparent);
@@ -76,7 +69,7 @@
   padding: 8px 12px; border: none; background: transparent;
   font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em;
   color: var(--text3); cursor: pointer; white-space: nowrap;
-  transition: color 0.15s; position: relative;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out); position: relative;
 }
 .nk-char-page .nk-enh-tab::before {
   content: ''; position: absolute; left: 0; right: 0; top: -9px; bottom: -9px;

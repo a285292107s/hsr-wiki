@@ -237,13 +237,13 @@ onMounted(() => { void load(); });
               <li v-for="(p, i) in progressSteps" :key="i" class="nk-vor-step">
                 <span class="nk-vor-step__no">{{ String(i + 1).padStart(2, '0') }}</span>
                 <div class="nk-vor-step__main">
+                  <p v-if="p.html" class="nk-vor-step__desc" v-html="p.html"></p>
                   <div class="nk-vor-step__meter">
                     <div v-if="p.progress != null" class="nk-vor-step__track">
                       <div class="nk-vor-step__fill" :style="{ width: `${ratioPct(p.progress)}%` }"></div>
                     </div>
                     <span v-if="p.progress != null" class="nk-vor-step__pct">{{ fmtPct(p.progress) }}</span>
                   </div>
-                  <p v-if="p.html" class="nk-vor-step__desc" v-html="p.html"></p>
                 </div>
               </li>
             </ol>

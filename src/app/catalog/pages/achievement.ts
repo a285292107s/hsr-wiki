@@ -30,18 +30,15 @@ function renderAchievementCard(item: CatalogItem, index = 0): string {
     ? `<span class="nk-ach-card__redact">${escHtml(descText)}</span>`
     : escHtml(descText);
   return `<div class="nk-ach-card nk-ach-card--${rarity.toLowerCase() || 'none'}${hidden ? ' nk-ach-card--hidden' : ''}" data-id="${escHtml(String(item.id))}" data-name="${escHtml(item.name)}" data-rarity="${escHtml(rarity)}" data-series="${escHtml(String(item.series_id || ''))}" data-show-type="${escHtml(String(item.show_type || ''))}" style="--i:${index}">
-      <div class="nk-ach-card__side">
-        ${img ? `<img class="nk-ach-card__icon" src="${escHtml(img)}" alt="" loading="lazy">` : ''}
-      </div>
       <div class="nk-ach-card__main">
         <div class="nk-ach-card__head">
+          ${img ? `<img class="nk-ach-card__icon" src="${escHtml(img)}" alt="" loading="lazy">` : ''}
           <span class="nk-ach-card__no">${escHtml(String(item.id))}</span>
           ${gem}
         </div>
         <div class="nk-ach-card__title">${escHtml(item.name)}</div>
         <div class="nk-ach-card__desc" title="${escHtml(descTip)}">${descHtml}</div>
         <div class="nk-ach-card__meta">
-          ${img ? `<img class="nk-ach-card__series-icon" src="${escHtml(img)}" alt="" loading="lazy">` : ''}
           <span class="nk-ach-card__series">${escHtml(series) || '未知系列'}</span>
         </div>
       </div>
@@ -56,9 +53,16 @@ export const achievementPage: CatalogPageConfig = {
   gridClass: 'nk-cat-grid nk-ach-grid',
   cardClass: '.nk-ach-card',
   styles: [() => import('../../../../src/styles/achievement.css')],
-  virtualMinColW: 320,
+  /* 虚拟网格刻度：卡是「无图纯文本」型，行高由文本块决定而不是由列宽 × 图比决定（virtualImgRatio 0）。
+     刻度按实测内容高定（详见图例注释）：桌面上 `--nk-grid-min` 不得小于此处的 virtualMinColW，
+     否则骨架网格与卡片网格列数不一致（加载完成会跳一档）。 */
+  virtualMinColW: 276,
   virtualImgRatio: 0,
-  virtualInfoH: 174,
+  virtualInfoH: 144,
+  /* 手机档 1 列 + 横向行布局（与「敌方物种」目录同构，见 achievement.css 的 <768 块）：
+     行高按「id 行 + 单行标题 + 3 行描述 + 系列行」的实测内容给定——描述 3 行推算 136.2px，
+     单元格 154px（卡 144px）留 ~8px 余量。 */
+  virtualMobileRowH: 160,
   async fetchData() {
     const [achievements, series] = await Promise.all([
       loadLocalAchievements(),

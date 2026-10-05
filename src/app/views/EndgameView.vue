@@ -5,14 +5,15 @@ import { seasonPosterTabUrl } from '../catalog/pages/endgame';
 import { SITE_NAME } from '../../lib/constants';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
-  loadLocalVoracity,
+  loadLocalVoracity, loadLocalEndgameGuide,
 } from '../../services/api';
 import type {
-  MazeListDb, MazeListEntry, PeakLevelInfo, VoracityInvasionLevel,
+  EndgameGuideDb, MazeListDb, MazeListEntry, PeakLevelInfo, VoracityInvasionLevel,
 } from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import { buildEndgameSections } from '../endgame/sections';
+import { seasonBuffSystemLine, seasonBuffSystemName } from '../endgame/guide';
 import { buildLevelTabs, defaultLevelKey, isLevelMode, type LevelTab } from '../endgame/levels';
 import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
@@ -49,6 +50,8 @@ const seasonIndex = ref(-1);
 const seasonKeys = ref<string[]>([]);
 /** 污染等级词条（voracity.json 的 invasion.levels）：仅污染赛季按需加载，等级描述不在本模块产物里 */
 const invasionLevels = ref<VoracityInvasionLevel[]>([]);
+/** 玩法说明（endgame_guide.json）：体系名 / 条数 / 选法。缺省不阻塞页面——体系名回退站点工作名「赛季增益」 */
+const guide = ref<EndgameGuideDb | null>(null);
 
 const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
 
@@ -82,6 +85,10 @@ async function load(mode: string, id: string): Promise<void> {
         .then((v) => { invasionLevels.value = v.invasion?.levels || []; })
         .catch(() => { invasionLevels.value = []; });
     }
+    // 玩法说明同属「按需、不阻塞」：拿不到就回退站点工作名，不因此判页面失败
+    loadLocalEndgameGuide()
+      .then((g) => { guide.value = g; })
+      .catch(() => { guide.value = null; });
     // 后台标签页 rAF 会被浏览器暂停导致永久骨架屏：visibility hidden 时用 setTimeout 兜底推进
     const settleReady = (): void => {
       phase.value = 'ready';
@@ -116,7 +123,13 @@ watch(
 const modeKey = computed(() => String(route.params.mode || ''));
 const peakLevels = computed<PeakLevelInfo[]>(() => data.value?.levels || []);
 
-const navSections = computed(() => buildEndgameSections(data.value, modeKey.value, peakLevels.value));
+/** 增益体系名与选法说明（按玩法取自 endgame_guide.json；产物缺省时回退站点工作名/空串） */
+const systemName = computed(() => seasonBuffSystemName(guide.value, modeKey.value));
+const systemLine = computed(() => seasonBuffSystemLine(guide.value, modeKey.value));
+
+const navSections = computed(
+  () => buildEndgameSections(data.value, modeKey.value, peakLevels.value, systemName.value),
+);
 
 /** 层级模式（忘却之庭 / 虚构叙事 / 末日幻影）的「第 1..N 层 / 星启模式」子 tab；
  *  异相仲裁无层级，为空数组 → 顶部条继续走区块导航。默认激活星启（见 `defaultLevelKey`）。 */
@@ -238,7 +251,12 @@ onBeforeUnmount(() => {
       <div class="nk-panels nk-egd-body">
         <div class="nk-egd-panel">
           <template v-if="levelTabs.length">
-            <EndgameBuffs :data="data" :mode-key="modeKey" />
+            <EndgameBuffs
+              :data="data"
+              :mode-key="modeKey"
+              :system-name="systemName"
+              :system-line="systemLine"
+            />
 
             <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
 
@@ -248,15 +266,21 @@ onBeforeUnmount(() => {
               @select="selectLevel"
             />
 
-            <EndgameLevelPanel :data="data" :mode-key="modeKey" :tabs="levelTabs" :active="activeLevel" />
+            <EndgameLevelPanel
+              :data="data"
+              :mode-key="modeKey"
+              :tabs="levelTabs"
+              :active="activeLevel"
+              :system-name="systemName"
+            />
           </template>
 
           <template v-else>
             <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
 
-            <EndgamePeak :data="data" :peak-levels="peakLevels" />
+            <EndgamePeak :data="data" :peak-levels="peakLevels" :system-name="systemName" />
 
-            <div v-if="!peakLevels.length" class="nk-egd-empty">本赛季暂无关卡数据</div>
+            <div v-if="!peakLevels.length" class="nk-slot-empty">本赛季暂无关卡数据</div>
           </template>
 
           <nav v-if="prevSeason || nextSeason" class="nk-egd-nav" aria-label="相邻赛季">

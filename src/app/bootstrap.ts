@@ -5,13 +5,11 @@ import { createNkRouter } from './router';
 import { installCdnImgFallback, startCdnHealthProbe, subscribeCdnHealth } from '../services/cdn';
 import { useAppStore } from './stores/app';
 import { initAccent } from '../lib/theme';
-import { initCwAccent } from '../lib/cw-theme';
 import '../styles/tokens.css';
 import '../styles/catalog.css';
 
 export async function bootstrap(): Promise<void> {
   initAccent();
-  initCwAccent();
   const app = createApp(App);
   const router = createNkRouter();
   app.use(createPinia());

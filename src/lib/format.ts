@@ -20,6 +20,18 @@ export function fmtVal(v: number | null | undefined, tag: string, isPct: boolean
   return String(n);
 }
 
+/* 面板数值的统一呈现：≥4 位加千分位。此前同一类「角色 / 敌人面板数值」两处写法不同——
+   光锥 hero 与终局奖励走 `toLocaleString()`，角色属性面板与敌人战斗数值直接输出 `{{ st.v }}`，
+   于是同一档内容里「1,058」与「25377.9」并存。字符串原样返回（百分比 `25.0%`、占位符 `—` 等
+   已格式化过的文本不能被再格式化）；纯数字串则按数值格式化（converter 有把数值写成字符串的字段）。 */
+export function fmtStatValue(v: number | string | null | undefined): string {
+  if (v == null) return '';
+  if (typeof v === 'number') return Number.isFinite(v) ? v.toLocaleString() : String(v);
+  const t = v.trim();
+  if (t !== '' && /^-?\d+(\.\d+)?$/.test(t)) return Number(t).toLocaleString();
+  return v;
+}
+
 export function fmtDescWithFormat(
   desc: string | null | undefined,
   params: number[] | null | undefined,

@@ -36,7 +36,14 @@
 .nk-mob-hero__figure img {
   position: relative;
   z-index: 1;
-  max-width: 88%;
+  /* `width: 88%` + `aspect-ratio: 1` 让**未解码**的立绘也有确定的方框：只用 `max-width: 88%` 时
+     图片未到达前不产生盒子（高 0），figure 只有 `min-height: 300px` 撑着，图片一到就长到 357px
+     ⇒ 整个 hero 由 301 跳到 358、下方 `.nk-panels` 被推下 57px（实测 CLS 0.0288，全 632 个敌方详情页）。
+     取值与 `max-width` 同（原就是 88% 宽），故渲染尺寸不变；立绘实际是 1024² 的图标（`figure` 字段
+     全量为空、走 `monsterIconUrl` 回退），远大于渲染尺寸 ⇒ 不存在被拉大糊掉的问题。
+     手机档 figure 有 `max-height: 240px` 上限、本就不跳，改动对它只是让盒子高也确定。 */
+  width: 88%;
+  aspect-ratio: 1;
   max-height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.42));
@@ -70,8 +77,10 @@
 }
 
 .nk-mob-hero__no {
-  margin-left: auto;
-  color: var(--text3);
+  font-family: var(--font-hud);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--metric-val);
 }
 
 .nk-mob-hero__name {
@@ -249,6 +258,48 @@
   grid-column: 1 / -1;
 }
 
+/* 战斗数值口径注记：数值的含义必须与数字一起出现（ADR 0040） */
+.nk-mob-stat-note {
+  margin: 14px 0 0;
+  font-size: 0.68rem;
+  line-height: 1.7;
+  color: var(--text3);
+}
+
+/* 等级滑条：读数标签 + range 原语在此页独立成段（光锥页原语不随路由到达，不可跨页借用） */
+.nk-mob-level { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; min-width: 0; }
+.nk-mob-level__label {
+  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.08em; color: var(--metric-val); white-space: nowrap;
+}
+.nk-mob-level input[type=range] {
+  --fill: 0%;
+  /* 同 skill-card：不裸重置 outline，焦点环交给全局规则 */
+  flex: 1; width: auto; height: 24px; -webkit-appearance: none; appearance: none;
+  background: transparent; cursor: pointer; opacity: 0.92;
+}
+.nk-mob-level input[type=range]::-webkit-slider-runnable-track {
+  height: 8px; border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,0.45) 5px 7px),
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent) var(--fill), color-mix(in srgb, var(--text2) 8%, transparent) var(--fill));
+}
+.nk-mob-level input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 11px; height: 17px; margin-top: -5px;
+  border-radius: 2px; border: none; background: var(--metric-val); cursor: pointer;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--blk-950) 55%, transparent);
+}
+.nk-mob-level input[type=range]::-moz-range-track {
+  height: 8px; border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,0.45) 5px 7px),
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent) var(--fill), color-mix(in srgb, var(--text2) 8%, transparent) var(--fill));
+}
+.nk-mob-level input[type=range]::-moz-range-thumb {
+  width: 11px; height: 17px; border-radius: 2px; border: none; background: var(--metric-val); cursor: pointer;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--blk-950) 55%, transparent);
+}
+
 .nk-mob-stat--stance .nk-mob-stat__val {
   color: var(--accent);
 }
@@ -331,7 +382,9 @@
 }
 
 .nk-mob-skeleton__hero {
-  height: 240px;
+  /* 与真实 hero 同档：真实高度 = 图列 `min-height` 300（≥768）/ 240（<768）+ 信息列内容（meta/名/标签）
+     ⇒ 实测 358 / 338。旧值 240 / 200 会让加载完成时整块下跳 ~130px。 */
+  height: 358px;
   background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-750) 80%, transparent) 50%, transparent 70%);
   background-color: color-mix(in srgb, var(--blk-750) 45%, transparent);
   background-size: 200% 100%;
@@ -361,40 +414,9 @@
   100% { background-position: -200% 0; }
 }
 
-.nk-mob-error {
-  max-width: var(--nk-detail-max);
-  margin: 0 auto;
-  padding: 60px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.nk-mob-error__text {
-  font-size: 0.85rem;
-  color: var(--text2);
-  text-align: center;
-}
-
-.nk-mob-error__retry {
-  padding: 8px 22px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-bright);
-  background: color-mix(in srgb, var(--primary) 18%, var(--blk-750) 60%);
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.nk-mob-error__retry:hover {
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
-
 @media (max-width: 767px) {
+  /* 本页走文档流滚动而非 .nk-page--detail，须自己避让 <768 档固定底栏，否则页尾技能描述被永久遮住 */
+  .nk-mob-page { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
   .nk-mob-hero {
     flex-direction: column;
   }
@@ -414,7 +436,7 @@
   }
 
   .nk-mob-hero__no {
-    margin-left: 0;
+    letter-spacing: 0.14em;
   }
 
   .nk-mob-stats {
@@ -426,6 +448,6 @@
   }
 
   .nk-mob-skeleton__hero {
-    height: 200px;
+    height: 338px;
   }
 }

@@ -12,6 +12,8 @@ import type {
 const props = defineProps<{
   data: MazeListEntry;
   floor: MazeFloorDetail;
+  /** 增益体系名（自上而下透传；缺省回退站点工作名） */
+  systemName?: string;
 }>();
 
 type HalfKey = 'stage1' | 'stage2';
@@ -94,6 +96,7 @@ const rules = computed(() => seasonRules(props.data));
       :buff="floor.buff"
       :traits="activeTraits"
       :buffs="activeBuffs"
+      :system-name="props.systemName"
     />
   </div>
 </template>

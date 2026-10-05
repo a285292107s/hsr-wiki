@@ -1,0 +1,127 @@
+/* 终局玩法详情页（第四种页面形态：单页数据页）。
+   随视图 import 懒加载；只消费 tokens.css 语义层令牌，复用 `.nk-page--detail` / `.nk-title` /
+   `.nk-eg-card`（目录页卡片）等既有原语，不自造重复样式。 */
+
+.nk-egm { padding-bottom: 48px; }
+
+/* ── Hero：玩法名 + en + 原尺寸徽记 + 模式领域色。
+   注意 `flex: none` 不是可选项：`.nk-page--detail` 是 column flex 容器，而本 Hero 带 `overflow: hidden`
+   —— `overflow != visible` 会把 flex item 的 `min-height: auto` 降为 0，于是 Hero 被压成 51px、h1 被裁掉
+   （实测 2026-10）。加 `flex: none` 后高度回到内容高。 */
+.nk-egm__hero {
+  position: relative;
+  flex: none;
+  width: 100%;
+  max-width: var(--nk-detail-max);
+  margin: 0 auto;
+  padding: 30px 20px 26px;
+  background-color: color-mix(in srgb, var(--blk-850) 88%, transparent);
+  border-bottom: 1px solid var(--line-1);
+  overflow: hidden;
+}
+/* 模式领域色（与目录页 `.nk-eg-col[data-mode]` 同一批令牌）：只在右上角做一层很淡的晕，
+   不复用 UI 页签小图当大图（那图只有 144px，`cover` 铺 1000px 会放大 6.9× 糊成一片）。 */
+.nk-egm__hero::after {
+  content: '';
+  position: absolute;
+  inset: -40% -10% auto auto;
+  width: 460px;
+  height: 320px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--eg-color) 16%, transparent), transparent);
+  pointer-events: none;
+}
+.nk-egm__hero[data-mode='maze'] { --eg-color: var(--eg-maze); }
+.nk-egm__hero[data-mode='story'] { --eg-color: var(--eg-story); }
+.nk-egm__hero[data-mode='boss'] { --eg-color: var(--eg-boss); }
+.nk-egm__hero[data-mode='peak'] { --eg-color: var(--eg-peak); }
+.nk-egm__hero > * { position: relative; }
+/* 徽记用原图尺寸（144px）内缩到 48px 显示：清晰且不承担背景职责 */
+.nk-egm__emblem { width: 48px; height: 48px; object-fit: contain; flex: none; }
+.nk-egm__head { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.nk-egm__crumbs { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text3); }
+.nk-egm__crumbs a { color: var(--text2); transition: color var(--nk-dur-hover) var(--nk-ease-out); }
+.nk-egm__crumbs a:hover { color: var(--text-bright); }
+.nk-egm__sep { color: var(--text3); }
+.nk-egm__title { margin: 10px 0 0; font-size: 1.9rem; font-weight: 900; letter-spacing: 0.01em; line-height: 1.15; color: var(--text-bright); }
+.nk-egm__en { margin: 4px 0 0; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text3); }
+
+/* ── 面板：规则正文 / 结构口径 / 增益体系 / 赛季列表 */
+.nk-egm__panel { width: 100%; max-width: var(--nk-detail-max); margin: 0 auto; padding: 26px 20px 0; }
+.nk-egm__rule + .nk-egm__rule { margin-top: 18px; }
+.nk-egm__rule-title {
+  margin: 0 0 6px;
+  font-size: 0.86rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright);
+}
+.nk-egm__para { margin: 0 0 8px; font-size: 0.82rem; line-height: 1.95; color: var(--text2); text-wrap: pretty; }
+.nk-egm__list { margin: 0 0 8px; padding: 0 0 0 2px; list-style: none; }
+.nk-egm__list li {
+  position: relative; padding-left: 14px; margin-bottom: 4px;
+  font-size: 0.82rem; line-height: 1.9; color: var(--text2);
+}
+.nk-egm__list li::before {
+  content: ''; position: absolute; left: 2px; top: 0.82em;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 70%, transparent);
+}
+.nk-egm__note { margin: 0 0 12px; font-size: 0.72rem; line-height: 1.7; color: var(--text3); }
+.nk-egm__link { color: var(--metric-val); }
+.nk-egm__link:hover { text-decoration: underline; }
+
+/* ── 结构口径：键值栅格（数值用等宽 + 表格数字，便于竖向对齐） */
+.nk-egm__facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px; margin: 0 0 14px;
+  background: var(--line-1);
+  border: 1px solid var(--line-1); border-radius: 10px; overflow: hidden;
+}
+.nk-egm__fact { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; background: var(--card); }
+.nk-egm__fact dt { font-size: 0.68rem; letter-spacing: 0.08em; color: var(--text3); }
+.nk-egm__fact dd {
+  margin: 0; font-family: var(--font-hud); font-size: 1.02rem; font-weight: 700;
+  color: var(--text-bright); font-variant-numeric: tabular-nums;
+}
+
+/* ── 当期增益：只出名称与图标（D6：不出 desc，避免快照出现未展开占位符） */
+.nk-egm__buffs { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.nk-egm__buff {
+  display: flex; align-items: center; gap: 9px; padding: 9px 12px;
+  background: var(--card); border: 1px solid var(--line-1); border-radius: 9px;
+}
+.nk-egm__buff img { width: 26px; height: 26px; border-radius: 6px; object-fit: contain; flex: none; }
+.nk-egm__buff-name { font-size: 0.78rem; font-weight: 600; color: var(--text-bright); }
+
+/* ── 赛季列表：直接复用目录页的行渲染（`.nk-eg-lrow`），但目录页是「每列一个模式」的多列竖表，
+   单模式 57 期若单列到底会得到 3500px 的长条、且每行 960px 宽只放三十来个字 ⇒ 这里按同一读法
+   分栏（≥768 两列 / ≥1024 三列），行样式全部仍来自 endgame.css，不复制。 */
+.nk-egm__seasons { columns: 1; column-gap: 14px; }
+/* 只声明断页与分栏：**不要**覆写子项的 display/width —— 行本身是 flex 行，改成 block 会把
+   「图标 + 文案 + 日期」压成上下堆叠，手机档行高从 62px 涨到 96px（实测整页反而变长 27%）。 */
+.nk-egm__seasons > * { break-inside: avoid; }
+@media (min-width: 768px) { .nk-egm__seasons { columns: 2; } }
+@media (min-width: 1024px) { .nk-egm__seasons { columns: 3; } }
+
+/* ── 其它玩法入口 */
+.nk-egm__others {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  width: 100%; max-width: var(--nk-detail-max); margin: 26px auto 0; padding: 0 20px;
+}
+.nk-egm__other {
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1 1 180px; padding: 11px 14px;
+  background: var(--card); border: 1px solid var(--line-1); border-radius: 10px;
+  transition: border-color var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out);
+}
+.nk-egm__other:hover { border-color: color-mix(in srgb, var(--primary) 34%, transparent); background: var(--nk-shell-hover); }
+.nk-egm__other-cn { font-size: 0.86rem; font-weight: 700; color: var(--text-bright); }
+.nk-egm__other-en { font-family: var(--font-mono); font-size: 0.56rem; letter-spacing: 0.16em; color: var(--text3); }
+
+/* ── 骨架（复用 nk-skeleton 原语，只补本页几何） */
+.nk-skeleton--egm .nk-skeleton__hero--egm { display: block; min-height: 168px; max-width: var(--nk-detail-max); margin: 0 auto; }
+.nk-skeleton--egm .nk-sk--title { height: 34px; }
+
+@media (max-width: 767px) {
+  .nk-egm__hero { padding: 18px 16px 16px; }
+  .nk-egm__title { font-size: 1.5rem; }
+  .nk-egm__panel, .nk-egm__others { padding-left: 16px; padding-right: 16px; }
+  .nk-egm__seasons { grid-template-columns: minmax(0, 1fr); }
+}

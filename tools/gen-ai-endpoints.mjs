@@ -1051,8 +1051,7 @@ function endgamePages(ctx) {
     meta: [esc(s.mode.label), esc(dateRange(s.entry)), esc(`${(s.entry.monsters || []).length} 名敌方`)].filter(Boolean).join(' · '),
   }));
   const pages = [makePage('endgame-list', {
-    route: '/endgame',
-    file: 'endgame.html',
+    route: '/endgame',    file: 'endgame.html',
     title: `${CATALOG_TITLE['/endgame']} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/endgame', CATALOG_TITLE['/endgame'], cut(summaryPlain, 150), items),
@@ -1064,11 +1063,102 @@ function endgamePages(ctx) {
     }),
   })];
 
+  /* ── 玩法详情页（第四种页面形态：单页数据页）─────────────────────────────
+     正文逐字来自 endgame_guide.json（IntroData 分节）；结构口径与当期增益取当期赛季（目录排序首位）。
+     形态约定：**不使用 `nk-snapshot__entry`**、无条目级覆盖率断言（见 docs/agents/ai-discoverability.md §3）；
+     当期增益只出名称（不出 desc，避免快照出现未展开的 `#N[i]` 占位符）。 */
+  const guide = readJson('endgame_guide.json');
+  // 选择语义文案与 src/app/endgame/guide.ts 的 CHOICE_LABEL 同源同写（生成器不能 import TS，故镜像一份）
+  const MODE_CHOICE_LABEL = {
+    fixed: '固定生效，不可选择',
+    per_team: '每支队伍选 1 条',
+    per_stage: '每场战斗选 1 条',
+    per_king: '王棋挑战前选 1 条',
+  };
+  for (const { mode } of catalogs) {
+    const modeOrdered = all.filter((s) => s.mode.key === mode.key);
+    if (!modeOrdered.length) continue;
+    const g = guide.modes?.[mode.key];
+    const system = g?.system || null;
+    const systemName = clean(system?.name) || '赛季增益';
+    const current = modeOrdered[0];
+    const cur = current.entry;
+    const floors = cur.floor_details || [];
+    const levels = cur.levels || [];
+    const halfs = floors.length ? ((floors[0].stage1 ? 1 : 0) + (floors[0].stage2 ? 1 : 0)) : 0;
+    // 当期增益：peak 取王棋关、boss 取分场次表（扁平 buffs 是 1∪2 并集，口径不同，禁用）
+    const rawBuffs = mode.key === 'peak'
+      ? ((levels.find((l) => l.kind === 'king') || levels[levels.length - 1] || {}).buffs || [])
+      : mode.key === 'boss' ? ((cur.buff_groups || {}).stage1 || []) : (cur.buffs || []);
+    const curBuffs = rawBuffs.map((b) => clean(b?.name)).filter(Boolean);
+    const ruleSections = (g?.sections || []).map((sec) => {
+      // 数据里换行是**字面量** `\n`（非真换行），故按两字符序列拆行；`●`/`○` 起首的行归入列表
+      const lines = String(sec.text || '').split('\\n').map((l) => l.trim()).filter(Boolean);
+      const paras = lines.filter((l) => !l.startsWith('●') && !l.startsWith('○'));
+      const items = lines.filter((l) => l.startsWith('●') || l.startsWith('○')).map((l) => l.replace(/^[●○]\s*/, ''));
+      return {
+        title: clean(sec.title),
+        html: [
+          paras.map((p) => `<p>${txt(p, null, 400)}</p>`).join(''),
+          items.length ? `<ul class="nk-snapshot__list">${items.map((i) => `<li>${txt(i, null, 200)}</li>`).join('')}</ul>` : '',
+        ].join(''),
+      };
+    });
+    const seasonLinks = modeOrdered.slice(0, 8).map((s) => ({ name: s.name, href: `/endgame/${mode.key}/${s.id}` }));
+    const otherModeLinks = catalogs
+      .filter((c) => c.mode.key !== mode.key)
+      .map((c) => ({ name: c.mode.label, href: `/endgame/${c.mode.key}` }));
+    const description = cut(
+      factMeta([mode.label, systemName, `${modeOrdered.length} 期赛季`], CATALOG_TITLE['/endgame'], mode.label), 150,
+    );
+    const route = `/endgame/${mode.key}`;
+    pages.push(makePage('endgame-mode', {
+      route,
+      file: `endgame/${mode.key}.html`,
+      title: `${mode.label} - ${SITE_NAME}`,
+      description,
+      ld: ldArticle(route, mode.label, description,
+        [['首页', '/'], [CATALOG_TITLE['/endgame'], '/endgame'], [mode.label, route]], ctx),
+      body: detailBody(ctx, {
+        crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/endgame'], '/endgame'], [mode.label, null]]),
+        h1: mode.label,
+        summary: '',
+        facts: [
+          ['所属玩法', esc(mode.label)],
+          ['英文名', esc(mode.en)],
+          ['当期赛季', esc(current.name)],
+          ['关卡层级', floors.length ? esc(`${floors.length} 层`) : ''],
+          ['每层场次', halfs ? esc(`${halfs} 场`) : ''],
+          ['关卡组成', levels.length ? esc(`${levels.length} 关`) : ''],
+          ['回合上限', cur.countdown ? esc(`${cur.countdown} 轮`) : ''],
+          ['分数上限', cur.clear_score ? esc(String(cur.clear_score)) : ''],
+          ['星启模式', cur.tierce ? '含' : '不含'],
+          ['增益体系', esc(systemName)],
+          ['每期条数', system ? esc(String(system.count)) : ''],
+          ['选择方式', system ? esc(MODE_CHOICE_LABEL[system.choice] || '') : ''],
+        ],
+        sections: [
+          ...ruleSections,
+          {
+            title: systemName,
+            html: curBuffs.length ? `<ul class="nk-snapshot__list">${curBuffs.map((b) => `<li>${txt(b, null, 100)}</li>`).join('')}</ul>` : '',
+          },
+          { title: '赛季列表', html: linkList(seasonLinks) },
+        ],
+        links: otherModeLinks,
+        listLabel: '其它玩法',
+      }),
+    }));
+  }
+
   for (const { mode, db } of catalogs) {
     const keys = Object.keys(db).filter((k) => db[k] && clean(db[k].zh));
     // 同模式内按排期开始降序（与目录排序同口径）取相邻赛季作为内链
     const modeOrdered = all.filter((s) => s.mode.key === mode.key);
     const links = modeOrdered.map((s) => ({ name: s.name, href: `/endgame/${s.mode.key}/${s.id}` }));
+    const guideMode = guide.modes?.[mode.key];
+    /** 体系名（游戏内命名，来自 IntroData 分节标题）——与页面逐字一致；缺省回退站点工作名（见 src/app/endgame/guide.ts） */
+    const systemName = clean(guideMode?.system?.name) || '赛季增益';
     for (const id of keys) {
       const entry = db[id];
       const name = clean(entry.zh);
@@ -1104,7 +1194,7 @@ function endgamePages(ctx) {
           ['测试期', entry.test ? '是' : ''],
         ],
         sections: [
-          { title: '赛季增益', html: buffs.length ? `<ul class="nk-snapshot__list">${buffs.map((b) => `<li>${txt(b, null, 100)}</li>`).join('')}</ul>` : '' },
+          { title: systemName, html: buffs.length ? `<ul class="nk-snapshot__list">${buffs.map((b) => `<li>${txt(b, null, 100)}</li>`).join('')}</ul>` : '' },
           { title: '最终层阵容', html: finalM.length ? `<ul class="nk-snapshot__blocks">${finalM.map((m) => `<li><span>${txt(m.name, null, 100)}</span><p>${txt([MON_RANK[m.rank] || m.rank, m.camp].filter(Boolean).join(' · '), null, 80)}</p></li>`).join('')}</ul>` : '' },
           { title: '敌方配置', html: monsterHtml ? `<ul class="nk-snapshot__blocks">${monsterHtml}</ul>` : '' },
           {

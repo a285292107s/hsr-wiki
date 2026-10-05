@@ -531,6 +531,12 @@ let sitemapCount = -1;
     ['item', 'item.html', '/item'],
     ['monster', 'monster.html', '/monster'],
     ['endgame', 'endgame.html', '/endgame'],
+    // 玩法详情页 = 契约 §2 单页族（第四种页面形态「单页数据页」：无 nk-snapshot__entry、
+    // 无条目级覆盖率断言；正文来自 endgame_guide.json）
+    ['endgame/maze', 'endgame/maze.html', '/endgame/maze'],
+    ['endgame/story', 'endgame/story.html', '/endgame/story'],
+    ['endgame/boss', 'endgame/boss.html', '/endgame/boss'],
+    ['endgame/peak', 'endgame/peak.html', '/endgame/peak'],
     ['achievement', 'achievement.html', '/achievement'],
     ['currency', 'currency.html', '/currency'],
     ['currency/role', 'currency/role.html', '/currency/role'],

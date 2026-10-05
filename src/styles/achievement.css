@@ -1,5 +1,9 @@
 
-.nk-ach-grid { --nk-grid-min: 320px; }
+/* 列宽下限与 `achievement.ts` 的 virtualMinColW 同步：骨架网格走 CSS 网格（本变量），
+   卡片网格走虚拟滚动的列数计算——两者不一致会在加载完成时跳一档列数。
+   276px 在目录内容宽度上给：768→2 列 / 1024→3 列 / 1440→4 列（旧值 320 分别是 1 / 2 / 3 列，
+   且 1440 档 423px 宽的卡只配 1 行描述 ⇒ 每卡白扔 ~72px 高）。 */
+.nk-ach-grid { --nk-grid-min: 276px; --nk-grid-gap: 10px; }
 
 .nk-ach-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 10px; }
 
@@ -13,8 +17,8 @@
   border-radius: var(--nk-radius-card);
   overflow: hidden;
   cursor: default;
-  transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
-  animation: nk-card-in 0.4s var(--ease) backwards;
+  transition: border-color 0.3s var(--nk-ease-out), box-shadow 0.3s var(--nk-ease-out);
+  animation: nk-card-in 0.4s var(--nk-ease-out) backwards;
   animation-delay: min(calc(var(--i, 0) * 16ms), 600ms);
 }
 
@@ -33,20 +37,13 @@
 .nk-ach-card--mid::before  { background: color-mix(in srgb, var(--ach-rarity-mid) 45%, transparent); }
 .nk-ach-card--low::before  { background: color-mix(in srgb, var(--ach-rarity-low) 45%, transparent); }
 
-.nk-ach-card__side {
-  flex-shrink: 0;
-  width: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: color-mix(in srgb, var(--blk-900) 55%, transparent);
-  border-right: 1px solid var(--line-1);
-}
+.nk-ach-card__side { display: none; }
 .nk-ach-card__icon {
-  width: 40px;
-  height: 40px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
-  opacity: 0.9;
+  opacity: 0.88;
+  flex-shrink: 0;
 }
 
 .nk-ach-card__main {
@@ -54,17 +51,18 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 12px 14px 10px;
+  padding: 11px 15px 10px;
 }
 
 .nk-ach-card__head {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
 }
 .nk-ach-card__no {
+  min-width: 0;
+  overflow: hidden;
   font-family: var(--font-mono);
   font-size: 0.58rem;
   font-weight: 500;
@@ -73,16 +71,17 @@
   color: var(--text3);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  transition: color 0.25s var(--ease);
+  text-overflow: ellipsis;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-ach-card__gem {
   flex-shrink: 0;
+  margin-left: auto;
   width: 9px;
   height: 9px;
   transform: rotate(45deg);
   border-radius: 2px;
-  margin-top: 1px;
-  transition: filter 0.25s var(--ease);
+  transition: filter var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-ach-card--high .nk-ach-card__gem { background: color-mix(in srgb, var(--ach-rarity-high) 55%, transparent); border: 1px solid color-mix(in srgb, var(--ach-rarity-high) 85%, transparent); }
 .nk-ach-card--mid .nk-ach-card__gem  { background: color-mix(in srgb, var(--ach-rarity-mid) 50%, transparent); border: 1px solid color-mix(in srgb, var(--ach-rarity-mid) 80%, transparent); }
@@ -90,10 +89,10 @@
 
 .nk-ach-card__title {
   flex-shrink: 0;
-  margin-top: 2px;
-  font-size: 0.82rem;
+  margin-top: 7px;
+  font-size: 0.88rem;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.32;
   color: var(--text-bright);
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -102,11 +101,10 @@
 }
 
 .nk-ach-card__desc {
-  flex: 1;
-  min-height: 0;
-  margin-top: 6px;
-  font-size: 0.74rem;
-  line-height: 1.5;
+  flex: 0 1 auto;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  line-height: 1.55;
   color: var(--text2);
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -133,10 +131,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 6px;
-  padding-top: 7px;
-  border-top: 1px solid var(--line-1);
-  min-height: 24px;
+  /* 系列行做卡脚：行高由「最坏 3 行描述」定，1 行描述的卡会多出空间——
+     把这截空间放到位（而不是在末尾留白），系列行因此在整行/整列对齐成一条基线。 */
+  margin-top: auto;
+  padding-top: 6px;
 }
 .nk-ach-card__series-icon {
   display: none;
@@ -156,7 +154,6 @@
   text-overflow: ellipsis;
 }
 
-.nk-ach-card--hidden .nk-ach-card__series-icon,
 .nk-ach-card--hidden .nk-ach-card__icon { filter: grayscale(0.55) brightness(0.75) contrast(0.92); }
 
 @media (hover: hover) and (pointer: fine) {
@@ -169,11 +166,9 @@
 }
 
 .nk-virtual-cell .nk-ach-card { opacity: 0; transform: translateY(16px); }
-.nk-virtual-cell.nk-revealed .nk-ach-card { opacity: 1; transform: none; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: var(--reveal-delay, 0ms); }
-.nk-virtual-grid .nk-ach-card__icon,
-.nk-virtual-grid .nk-ach-card__series-icon { opacity: 0; transition: opacity 0.25s ease; }
-.nk-virtual-grid .nk-ach-card__icon.loaded { opacity: 0.9; }
-.nk-virtual-grid .nk-ach-card__series-icon.loaded { opacity: 0.85; }
+.nk-virtual-cell.nk-revealed .nk-ach-card { opacity: 1; transform: none; animation: nk-card-in 0.4s var(--nk-ease-out) backwards; animation-delay: var(--reveal-delay, 0ms); }
+.nk-virtual-grid .nk-ach-card__icon { opacity: 0; transition: opacity var(--nk-dur-normal) var(--nk-ease-out); }
+.nk-virtual-grid .nk-ach-card__icon.loaded { opacity: 0.88; }
 .nk-fast-jump .nk-virtual-cell .nk-ach-card { transform: none; }
 .nk-fast-jump .nk-virtual-cell.nk-revealed .nk-ach-card { animation: nk-card-fade 0.25s ease backwards; }
 .nk-no-reveal .nk-virtual-cell .nk-ach-card { opacity: 1; transform: none; animation: none; }
@@ -185,16 +180,15 @@
 }
 
 @media (max-width: 767.98px) {
-  .nk-ach-grid { --nk-grid-min: 140px; }
-  .nk-ach-card { flex-direction: column; }
-  .nk-ach-card__side { display: none; }
-  .nk-ach-card__main { padding: 0 10px 8px; }
-  .nk-ach-card__head { padding: 8px 0 3px; }
-  .nk-ach-card__title { -webkit-line-clamp: 2; margin-top: 4px; }
-  .nk-ach-card__desc { -webkit-line-clamp: 4; margin-top: 4px; }
-  .nk-ach-card__meta { margin-top: 4px; }
-  .nk-ach-card__series-icon { display: block; }
-}
-@media (max-width: 374px) {
-  .nk-ach-grid { --nk-grid-min: 128px; }
+  /* 手机档：1 列 + 横向行布局（虚拟网格在 <768 且声明了 virtualMobileRowH 时固定 1 列）。
+     旧形态是 2 列竖向卡，卡内只占 ~114px 而单元格 186px ⇒ 每张卡底部白扔 70px；
+     横向行把 id / 标题 / 描述 / 系列压成一条 140px 的行，描述放宽到 3 行（358px 宽下一行约 27 字，
+     覆盖全长 71 字的最长描述），文字反而比 2 列时更完整。 */
+  .nk-ach-grid { --nk-grid-min: 320px; }
+  .nk-ach-card { flex-direction: row; }
+  .nk-ach-card__main { padding: 10px 12px 10px 14px; }
+  .nk-ach-card__head { padding: 0; }
+  .nk-ach-card__icon { width: 18px; height: 18px; }
+  .nk-ach-card__title { -webkit-line-clamp: 1; margin-top: 5px; font-size: 0.86rem; }
+  .nk-ach-card__desc { -webkit-line-clamp: 3; margin-top: 4px; }
 }

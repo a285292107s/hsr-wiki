@@ -2,7 +2,7 @@
   --sk-accent: var(--primary);
   position: relative; background: var(--card); border: 1px solid var(--border);
   border-radius: 12px; padding: 24px 24px 20px; margin-bottom: 16px;
-  transition: border-color 0.2s, transform 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out);
+  transition: border-color 0.2s var(--nk-ease-out), transform 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out);
 }
 .nk-skill[data-type="Normal"]   { --sk-accent: var(--skill-normal); }
 .nk-skill[data-type="BPSkill"]  { --sk-accent: var(--skill-bp); }
@@ -46,8 +46,10 @@
 }
 .nk-skill__slider input[type=range] {
   --fill: 0%;
-  flex: 1; width: auto; height: 18px; -webkit-appearance: none; appearance: none; outline: none;
-  background: transparent; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
+  /* 24px 高度 = WCAG 2.2 Target Size (Minimum) 的下限命中区 */
+  /* 不写 `outline: none`：滑条也是 Tab 可达控件，裸重置会盖过全局焦点环（:where 特异性 0）⇒ 键盘零反馈 */
+  flex: 1; width: auto; height: 24px; -webkit-appearance: none; appearance: none;
+  background: transparent; cursor: pointer; opacity: 0.92; transition: opacity 0.2s var(--nk-ease-out);
 }
 .nk-skill__slider input[type=range]:hover { opacity: 1; }
 .nk-skill__slider input[type=range]:disabled { opacity: 0.35; cursor: default; }
@@ -58,9 +60,9 @@
     linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent) var(--fill), color-mix(in srgb, var(--text2) 8%, transparent) var(--fill));
 }
 .nk-skill__slider input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 10px; height: 14px; margin-top: -3px;
-  border-radius: 2px; border: none; background: transparent; cursor: pointer;
-  box-shadow: inset 5px 0 0 0 color-mix(in srgb, var(--text-bright) 60%, transparent);
+  -webkit-appearance: none; width: 11px; height: 17px; margin-top: -5px;
+  border-radius: 2px; border: none; background: var(--metric-val); cursor: pointer;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--blk-950) 55%, transparent);
 }
 .nk-skill__slider input[type=range]::-moz-range-track {
   height: 8px; border-radius: 2px;
@@ -69,8 +71,8 @@
     linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent) var(--fill), color-mix(in srgb, var(--text2) 8%, transparent) var(--fill));
 }
 .nk-skill__slider input[type=range]::-moz-range-thumb {
-  width: 10px; height: 14px; border-radius: 2px; border: none; background: transparent; cursor: pointer;
-  box-shadow: inset 5px 0 0 0 color-mix(in srgb, var(--text-bright) 60%, transparent);
+  width: 11px; height: 17px; border-radius: 2px; border: none; background: var(--metric-val); cursor: pointer;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--blk-950) 55%, transparent);
 }
 .nk-slider__val { font-family: var(--font-hud); font-size: 0.6875rem; color: var(--metric-val); font-weight: 700; white-space: nowrap; }
 .nk-skill__desc { font-size: 0.8125rem; line-height: 1.85; color: var(--text2); }

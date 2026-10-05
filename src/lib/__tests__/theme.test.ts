@@ -19,7 +19,7 @@ describe('theme accents', () => {
     document.documentElement.removeAttribute('data-accent');
   });
 
-  it('无存储时回退默认主题（terracotta）', () => {
+  it('无存储时回退默认主题（橄榄青）', () => {
     expect(getSavedAccent()).toBe(DEFAULT_ACCENT);
   });
 
@@ -46,8 +46,20 @@ describe('theme accents', () => {
   });
 
   it('initAccent：按持久化值初始化 data-accent', () => {
+    localStorage.setItem(STORAGE_KEY, 'iris');
+    initAccent();
+    expect(document.documentElement.dataset.accent).toBe('iris');
+  });
+
+  it('缺省主题色 = 橄榄青：持久化为它时不写 data-accent（:root 默认块即它）', () => {
+    expect(DEFAULT_ACCENT).toBe('olive');
     localStorage.setItem(STORAGE_KEY, 'olive');
     initAccent();
-    expect(document.documentElement.dataset.accent).toBe('olive');
+    expect(document.documentElement.dataset.accent).toBeUndefined();
+    // 非缺省色板仍必须显式落属性（否则切色失效）
+    applyAccent('terracotta');
+    expect(document.documentElement.dataset.accent).toBe('terracotta');
+    applyAccent('olive');
+    expect(document.documentElement.dataset.accent).toBeUndefined();
   });
 });

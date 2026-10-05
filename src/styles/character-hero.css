@@ -7,7 +7,7 @@
    3. 图底关系：压在媒体上的文字只靠字形自身（细软影）拉开，不给媒体垫底板、不整片压暗立绘——
       面板左对齐而素材居中，实测文字列与立绘的横向重叠 1920 → 0%、1440 → 20%、1024 → 62%，
       绝大部分文字本就落在页面底色上；代价是 AA 由硬保证降为记录值（判据见 docs/memory/2026-10.md）。
-   4. 身份色只走领域层（--prop-*），强调位仍由 --primary 独占（双色约束）。 */
+   4. 身份色只走领域层（--prop-*），强调位仍由 --primary 独占（单强调色通道）。 */
 
 /* 45 = 吸顶条 44 + 1 边框 */
 .nk-char-page.nk-page--detail { padding-top: 45px; }
@@ -185,11 +185,6 @@
      断言标 `@font-calibrated`、CI 层不判、本机全量判。长简介（2 行）仍会高过下限、照常向下增长，不裁切。 */
   min-height: var(--nk-hero-panel-h);
 }
-.nk-char-page ::selection {
-  background: color-mix(in srgb, var(--primary) 32%, transparent);
-  color: var(--text-bright);
-}
-
 .nk-char-page .nk-hero__head { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; min-width: 0; }
 .nk-char-page .nk-hero__meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .nk-char-page .nk-hero__stars + .nk-hero__badge { margin-left: 16px; }
@@ -231,7 +226,7 @@
   border: none; background: none;
   font-size: 0.72rem; font-weight: 600; color: var(--text2);
   letter-spacing: 0.04em; white-space: nowrap;
-  transition: color 0.2s;
+  transition: color 0.2s var(--nk-ease-out);
 }
 .nk-char-page .nk-hero__badge:hover { color: var(--text-bright); }
 .nk-char-page .nk-hero__badge img { width: 18px; height: 18px; }

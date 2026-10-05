@@ -35,7 +35,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const fbType = (item.front_back_type as string) ?? 'Both';
   const charge = (item.charge_type || []).map((c) => CHARGE_LABEL[c] ?? c).join(' · ');
   const expert = item.is_expert ? '<span class="nk-crole-card__exp">专家</span>' : '';
-  const chargeEl = charge ? `<span class="nk-crole-card__charge">${escHtml(charge)}</span>` : '';
+  const chargeEl = charge ? `<span class="nk-crole-card__charge" title="${escHtml(charge)}">${escHtml(charge)}</span>` : '';
   const fbIcon = fbType === 'Both' ? FB_SVG_BOTH
     : fbType === 'Front' ? FB_SVG_FRONT
     : fbType === 'Back' ? FB_SVG_BACK
@@ -51,7 +51,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
         <img loading="lazy" src="${escHtml(avatar)}" alt="${escHtml(item.name)}">
         ${fbBadge}
         ${costBadge}
-        <span class="nk-crole-card__name">${escHtml(item.name)}${expert}${chargeEl}</span>
+        <span class="nk-crole-card__name"><span class="nk-crole-card__name-row">${escHtml(item.name)}${expert}</span>${chargeEl}</span>
       </div>
       <div class="nk-crole-card__body">
         ${traitChips ? `<div class="nk-crole-card__traits">${traitChips}</div>` : ''}
@@ -62,6 +62,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
 export const currencyRolePage: CatalogPageConfig = {
   id: 'currency-role',
   title: '货币战争 · 角色图鉴',
+  subtitle: 'ROLES',
   searchPlaceholder: '搜索角色…',
   gridClass: 'nk-cat-grid nk-crole-grid',
   cardClass: '.nk-crole-card',

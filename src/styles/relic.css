@@ -1,5 +1,5 @@
 
-.nk-panel--relic { padding-top: 4px; }
+.nk-panel--relic { padding-top: 20px; }
 
 .nk-hero--relic .nk-hero__visual { min-height: 240px; aspect-ratio: 2 / 1; }
 .nk-hero__bg--relic {
@@ -12,8 +12,10 @@
 .nk-relic-type-badge {
   font-weight: 700; letter-spacing: 0.04em;
 }
+/* 徽标色收口：cavern 徽章此前直接消费别名层 --th-300，违反「领域色不引用别名层」；
+   改走语义强调位（跟随用户强调色），语义不变。 */
 .nk-relic-type-badge--cavern {
-  color: var(--th-300); background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  color: var(--metric-val); background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: color-mix(in srgb, var(--primary) 40%, transparent);
 }
 .nk-relic-type-badge--planar {
   color: var(--relic-planar); background: color-mix(in srgb, var(--relic-planar-deep) 12%, transparent); border-color: color-mix(in srgb, var(--relic-planar-deep) 35%, transparent);
@@ -43,7 +45,7 @@
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   padding: 8px 4px 6px;
   background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-  transition: border-color 0.2s, transform 0.2s var(--ease);
+  transition: border-color 0.2s var(--nk-ease-out), transform 0.2s var(--nk-ease-out);
 }
 .nk-relic-hero-piece:hover { border-color: var(--border2); transform: translateY(-2px); }
 .nk-relic-hero-piece__img {
@@ -62,7 +64,7 @@
 .nk-relic-effects { display: flex; flex-direction: column; gap: 12px; }
 .nk-relic-effect {
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  padding: 14px 16px; transition: border-color 0.2s;
+  padding: 14px 16px; transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-relic-effect:hover { border-color: var(--border2); }
 .nk-relic-effect__head { display: flex; align-items: center; margin-bottom: 8px; }
@@ -91,7 +93,7 @@
   background: color-mix(in srgb, var(--primary) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
   border-radius: 999px;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
 }
 .nk-relic-submeta__badge:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); background: color-mix(in srgb, var(--primary) 12%, transparent); }
 .nk-relic-submeta__badge--accent {
@@ -130,7 +132,7 @@
   background: linear-gradient(to right, transparent, var(--card) 80%);
   border-radius: 0 12px 12px 0;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s var(--nk-ease-out);
 }
 .nk-relic-affix-table-wrap.is-scrollable::after { opacity: 1; }
 .nk-relic-affix-table {
@@ -144,6 +146,8 @@
   background: color-mix(in srgb, var(--primary) 6%, transparent);
   vertical-align: middle;
 }
+/* 属性表头 = 粘性首列：**有意**覆盖上面那组表头的半透明底——横向滚动时它必须不透明，
+   否则下层的行内容会从其背后透出来（重复选择器扫描会把它列为「同文件属性重叠」，属有意分层）。 */
 .nk-relic-affix-table__prop-h {
   position: sticky; left: 0; z-index: 2;
   text-align: left; min-width: 72px;
@@ -203,7 +207,7 @@
   display: flex; flex-direction: column; gap: 8px;
   padding: 10px 12px; background: var(--card);
   border: 1px solid var(--border); border-radius: 10px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-relic-subcell:hover { border-color: var(--border2); }
 .nk-relic-subcell__head {
@@ -228,7 +232,7 @@
   background: color-mix(in srgb, var(--primary) 6%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
   border-radius: 6px;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s var(--nk-ease-out), color 0.2s var(--nk-ease-out);
 }
 
 .nk-relic-stories {
@@ -237,7 +241,7 @@
 }
 .nk-relic-story {
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  padding: 16px 18px; transition: border-color 0.2s;
+  padding: 16px 18px; transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-relic-story:hover { border-color: var(--border2); }
 .nk-relic-story__head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -258,10 +262,18 @@
   background: color-mix(in srgb, var(--primary) 4%, transparent); border-radius: 0 6px 6px 0;
   font-size: 0.78rem; line-height: 1.8; color: var(--text3);
 }
-.nk-relic-story__body { font-size: 0.8125rem; line-height: 2; color: var(--text2); }
+.nk-relic-story__body { font-size: 0.8125rem; line-height: 2; color: var(--text2); text-wrap: pretty; }
 .nk-relic-story__body i { font-style: normal; color: var(--text-bright); }
 
 .nk-skeleton--relic .nk-skeleton__stat-grid { grid-template-columns: repeat(4, 1fr); }
+/* 同 lightcone：骨架 hero 与它的 visual 都照抄 `.nk-hero--relic .nk-hero__visual` 的档位
+   （基准 240 / ≥1024 为 320），否则共享的 480px 骨架会让遗器详情在加载完成时上跳 160px。 */
+.nk-skeleton--relic .nk-skeleton__hero,
+.nk-skeleton--relic .nk-skeleton__hero-visual { min-height: 240px; }
+@media (min-width: 1024px) {
+  .nk-skeleton--relic .nk-skeleton__hero,
+  .nk-skeleton--relic .nk-skeleton__hero-visual { min-height: 320px; }
+}
 
 @media (max-width: 640px) {
   .nk-hero--relic .nk-hero__visual { min-height: 180px; aspect-ratio: 5 / 2; }

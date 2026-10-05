@@ -70,10 +70,17 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
       </div>
     </div>
 
-    <div v-else-if="error" class="nk-ctrait__state nk-ctrait__state--err">
-      <span class="nk-ctrait__state-icon">⚠</span>
-      <p>{{ error }}</p>
-      <button class="nk-ctrait__retry" @click="retry">重试</button>
+    <div v-else-if="error" class="nk-error-state" role="alert">
+      <div class="nk-error-state__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <path d="M12 9v4" /><path d="M12 17h.01" />
+        </svg>
+      </div>
+      <div class="nk-error-state__title">羁绊数据加载失败</div>
+      <div class="nk-error-state__detail">可能是网络波动或该条目暂时不可用，重试即可恢复。</div>
+      <div class="nk-error-state__tech">{{ error }}</div>
+      <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
 
     <template v-else-if="data">
@@ -86,8 +93,10 @@ watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { im
           <div class="nk-ctrait-hero__info">
             <div class="nk-ctrait-hero__badges">
               <span class="nk-ctrait-hero__cat" :class="`nk-ctrait-hero__cat--${cat}`">{{ catLabel }}</span>
+              <span v-if="actLabel" class="nk-ctrait-hero__act">{{ actLabel }}</span>
             </div>
             <h1 class="nk-ctrait-hero__name">{{ data.name }}</h1>
+            <p class="nk-ctrait-hero__rubric">ARCHIVE · № {{ data.id }}</p>
           </div>
         </div>
       </header>

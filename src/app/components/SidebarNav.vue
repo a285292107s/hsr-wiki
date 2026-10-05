@@ -10,6 +10,10 @@ const router = useRouter();
 
 const isCw = computed(() => !!route.meta.cw);
 
+/** 跨模式入口的可见文案 = 目的地模式名（常规模式页显示「货币战争」，反之显示「常规模式」） */
+const swapLabel = computed(() => (isCw.value ? SWAP_ITEM.inCw : SWAP_ITEM.inNormal));
+const swapDest = computed(() => (isCw.value ? '常规模式' : '货币战争'));
+
 const navItems = computed<NavItem[]>(() =>
   isCw.value ? [CW_HUB_ITEM, ...CW_NAV_ITEMS] : [NORMAL_HUB_ITEM, ...NORMAL_NAV_ITEMS],
 );
@@ -131,20 +135,15 @@ const DEBUG_ITEM = {
 
 <template>
   <nav ref="sidebarRef" class="ui-sidebar" :class="{ 'ui-sidebar--cw': isCw, 'ui-sidebar--swap-anim': swapping }" aria-label="主导航">
-    <button
-      type="button"
-      class="ui-sidebar-link ui-sidebar-swap"
-      :title="isCw ? '前往常规模式' : '前往货币战争'"
-      :aria-label="isCw ? '前往常规模式' : '前往货币战争'"
-      @click="onSwap"
-    >
-      <span class="ui-sidebar-link__icon" v-html="SWAP_ITEM.icon" />
-      <span class="ui-sidebar-link__text">
-        <span class="ui-sidebar-link__cn">交换</span>
-        <span class="ui-sidebar-link__en">SWAP</span>
+    <RouterLink to="/" class="ui-sidebar-brand" title="星铁档案馆 · 首页">
+      <span class="ui-sidebar-brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c.7 4 2.3 7.2 4.9 8.6-2.6 1.4-4.2 4.6-4.9 8.6-.7-4-2.3-7.2-4.9-8.6C9.7 9.2 11.3 6 12 2z"/><circle cx="18.4" cy="5.6" r="1.1"/><circle cx="5.2" cy="18.6" r="0.9"/></svg>
       </span>
-      <span class="ui-sidebar-link__label">交换</span>
-    </button>
+      <span class="ui-sidebar-brand__text">
+        <span class="ui-sidebar-brand__cn">星铁档案馆</span>
+        <span class="ui-sidebar-brand__en">HSR Archive</span>
+      </span>
+    </RouterLink>
 
     <span class="ui-sidebar-divider" aria-hidden="true"></span>
 
@@ -215,6 +214,22 @@ const DEBUG_ITEM = {
         </span>
         <span class="ui-sidebar-link__label">调试台</span>
       </RouterLink>
+
+      <!-- 跨模式入口：属「工具」位而非内容章节，故与设置同组、紧贴设置之上 -->
+      <button
+        type="button"
+        class="ui-sidebar-link ui-sidebar-swap"
+        :title="`前往${swapDest}`"
+        :aria-label="`前往${swapDest}`"
+        @click="onSwap"
+      >
+        <span class="ui-sidebar-link__icon" v-html="SWAP_ITEM.icon" />
+        <span class="ui-sidebar-link__text">
+          <span class="ui-sidebar-link__cn">{{ swapLabel.title }}</span>
+          <span class="ui-sidebar-link__en">{{ swapLabel.en }}</span>
+        </span>
+        <span class="ui-sidebar-link__label">{{ swapLabel.title }}</span>
+      </button>
 
       <RouterLink
         :to="settingsPath"

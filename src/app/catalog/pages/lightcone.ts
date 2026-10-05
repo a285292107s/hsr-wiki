@@ -8,6 +8,7 @@ import { STAR_SVG } from './shared';
 export const lightconePage: CatalogPageConfig = {
   id: 'lightcone',
   title: '光锥图鉴',
+  subtitle: 'LIGHT CONES',
   searchPlaceholder: '搜索光锥...',
   gridClass: 'nk-cat-grid nk-lc-grid',
   cardClass: '.nk-lc-card',

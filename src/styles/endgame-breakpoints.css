@@ -19,34 +19,21 @@
   .nk-egd-hero__bg { display: none; }
   .nk-egd-hero__banner { display: none; }
   .nk-egd-hero__name { font-size: 1.35rem; }
-  .nk-egd-hero__sid { font-size: 0.7rem; padding: 2px 8px; }
+  /* 手机档字号归 `endgame-type-scale.css` 末段（本块之后导入、同特异性覆写）——
+     此处不再重述：重述等于死声明，且会让人误以为改这里能生效（ADR 0034 决策 2）。 */
+  .nk-egd-hero__sid { padding: 2px 8px; }
   .nk-egd-hero__status { font-size: 0.7rem; padding: 5px 11px; }
   .nk-egd-peak__kind { font-size: 0.7rem; }
-  .nk-egd-floor__targetidx { font-size: 0.78rem; }
   .nk-egd-floor__wavelabel { font-size: 0.7rem; }
-  .nk-egd-mon__tag { font-size: 0.7rem; }
-  .nk-egd-mon__rank { font-size: 0.64rem; }
-  .nk-egd-mon__label { font-size: 0.68rem; }
-  .nk-egd-mon__none { font-size: 0.7rem; }
-  .nk-egd-mon__resval { font-size: 0.7rem; }
-  .nk-egd-mon__intro { font-size: 0.7rem; }
-  .nk-egd-mon__skill { font-size: 0.7rem; }
   /* 手机档立绘列收窄：单列敌方卡（卡宽 ~300px）下 104px 立绘 + 数据列会挤到数据列只剩 150px */
   .nk-egd-mon__img { width: 84px; }
   .nk-egd-mon { gap: 14px; }
-  .nk-egd-tierce__label { font-size: 0.68rem; }
   .nk-egd-node__type { font-size: 0.72rem; padding: 5px 10px; gap: 5px; }
   .nk-egd-node__typeicon { width: 15px; height: 15px; }
-  .nk-egd-node__text { font-size: 0.9rem; }
   .nk-egd-board__body { gap: 12px; }
-  .nk-egd-head__label { font-size: 0.7rem; }
-  .nk-egd-reward__name { font-size: 0.86rem; }
-  .nk-egd-reward__num { font-size: 0.76rem; }
   .nk-egd-nav__dir { font-size: 0.76rem; }
-  .nk-egd-nav__id { font-size: 0.9rem; }
   .nk-egd-peak__tag { font-size: 0.8rem; }
   .nk-egd-peak__badge { font-size: 0.88rem; }
-  .nk-egd-empty { font-size: 0.8rem; }
   .nk-egd-floor__head { flex-wrap: wrap; }
   .nk-egd-floor__data { margin-left: auto; }
   /* 敌方配置行在手机档不再需要换行开关：标题 / 卡组的上下结构已是基础形态（见 `.nk-egd-floor__row--mons`） */

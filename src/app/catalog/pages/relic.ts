@@ -6,6 +6,7 @@ import type { CatalogItem, CatalogPageConfig } from '../types';
 export const relicPage: CatalogPageConfig = {
   id: 'relic',
   title: '遗器图鉴',
+  subtitle: 'RELICS',
   searchPlaceholder: '搜索遗器...',
   gridClass: 'nk-cat-grid nk-relic-grid',
   cardClass: '.nk-relic-card',

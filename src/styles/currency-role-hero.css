@@ -1,36 +1,25 @@
 /* 货币战争角色详情 · Hero / 吸顶条 / 图鉴卡。拆分块 1/4：四块必须按导入顺序级联。 */
 
+/* 本页局部令牌：主题位一律走语义令牌（全站单强调色通道，见 ADR 0041）；
+   领域位（派系 / 战斗 / 增益 / 阶位）保留各自语义色——领域色不随主题合并。
+   `.nk-crole-card` 也挂一份：图鉴卡不在 `.nk-crole` 之内（目录页 / 枢纽带独立渲染）。 */
 .nk-crole,
-.nk-crole-hero {
+.nk-crole-hero,
+.nk-crole-card {
   --crole-scrim: var(--blk-900);
   --crole-scrim-70: color-mix(in srgb, var(--blk-900) 70%, transparent);
   --crole-scrim-40: color-mix(in srgb, var(--blk-900) 40%, transparent);
   --crole-scrim-15: color-mix(in srgb, var(--blk-900) 15%, transparent);
-  --crole-num: var(--cwth-350);
-  --crole-scope-bg: color-mix(in srgb, var(--cw-faction-core) 14%, transparent);
-  --crole-scope-text: var(--cw-faction);
-  --crole-scope-all-bg: color-mix(in srgb, var(--cw-combat-core) 14%, transparent);
-  --crole-scope-all-text: var(--cw-combat);
-  --crole-buff-soft: color-mix(in srgb, var(--crole-buff) 8%, transparent);
-  --crole-buff-border: color-mix(in srgb, var(--crole-buff) 25%, transparent);
-  --crole-col-active: color-mix(in srgb, var(--cwth-400) 3%, transparent);
-  --crole-seg-bg: var(--cwth-300);
-  --crole-seg-text: var(--blk-900);
-  --crole-step-bg: color-mix(in srgb, var(--crole-step-rose) 8%, transparent);
-  --crole-step-text: var(--crole-step-rose);
-}
-
-[data-theme="cw"] .nk-crole,
-[data-theme="cw"] .nk-crole-hero,
-[data-theme="cw"] .nk-crole-card {
-  --crole-scope-bg: color-mix(in srgb, var(--cwth-500) 14%, transparent);
-  --crole-scope-text: var(--cwth-350);
-  --crole-scope-all-bg: color-mix(in srgb, var(--cwth-400) 12%, transparent);
-  --crole-scope-all-text: var(--cwth-300);
-  --crole-num: var(--cwth-300);
+  --crole-num: var(--metric-val);
+  --crole-scope-bg: color-mix(in srgb, var(--primary) 14%, transparent);
+  --crole-scope-text: var(--metric-val);
+  --crole-scope-all-bg: color-mix(in srgb, var(--accent) 12%, transparent);
+  --crole-scope-all-text: var(--metric-val);
   --crole-buff-soft: color-mix(in srgb, var(--crole-buff) 7%, transparent);
   --crole-buff-border: color-mix(in srgb, var(--crole-buff) 22%, transparent);
-  --crole-col-active: color-mix(in srgb, var(--cwth-400) 3%, transparent);
+  --crole-col-active: color-mix(in srgb, var(--accent) 3%, transparent);
+  --crole-seg-bg: var(--primary);
+  --crole-seg-text: var(--text-bright);
   --crole-step-bg: color-mix(in srgb, var(--crole-step-amber) 11%, transparent);
   --crole-step-text: var(--crole-step-amber);
 }
@@ -51,8 +40,8 @@
   color: var(--text);
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s;
-  animation: nk-card-in 0.4s var(--ease) backwards;
+  transition: transform 0.3s var(--nk-ease-out), border-color 0.3s var(--nk-ease-out), box-shadow 0.3s var(--nk-ease-out);
+  animation: nk-card-in 0.4s var(--nk-ease-out) backwards;
   animation-delay: min(calc(var(--i, 0) * 20ms), 600ms);
   transform-style: preserve-3d;
 }
@@ -68,7 +57,7 @@
   inset: 0;
   background: linear-gradient(115deg, transparent 30%, color-mix(in srgb, var(--holo-color) 16%, transparent) 50%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.4s var(--ease);
+  transition: opacity var(--nk-dur-zoom) var(--nk-ease-out);
   pointer-events: none;
   z-index: 0;
 }
@@ -99,7 +88,7 @@
   z-index: 1;
   box-shadow: inset 0 0 22px color-mix(in srgb, var(--holo-color) 30%, transparent);
   pointer-events: none;
-  transition: box-shadow 0.3s;
+  transition: box-shadow 0.3s var(--nk-ease-out);
 }
 .nk-crole-card:hover .nk-crole-card__avatar::after,
 .nk-crole-card:focus-visible .nk-crole-card__avatar::after {
@@ -109,7 +98,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s var(--ease);
+  transition: transform var(--nk-dur-zoom) var(--nk-ease-out);
 }
 .nk-crole-card:hover .nk-crole-card__avatar > img,
 .nk-crole-card:focus-visible .nk-crole-card__avatar > img { transform: scale(1.06); }
@@ -128,7 +117,7 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  transition: border-color 0.25s, transform 0.25s var(--ease);
+  transition: border-color var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out);
 }
 .nk-crole-card:hover .nk-crole-card__fb { border-color: rgba(255, 255, 255, 0.32); transform: scale(1.08); }
 .nk-crole-card__fb svg {
@@ -152,7 +141,7 @@
   border: 1.4px solid color-mix(in srgb, var(--cost-c) 75%, transparent);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  transition: box-shadow 0.25s, border-color 0.25s;
+  transition: box-shadow var(--nk-dur-normal) var(--nk-ease-out), border-color var(--nk-dur-normal) var(--nk-ease-out);
 }
 .nk-crole-card__cost b {
   transform: rotate(-45deg);
@@ -175,6 +164,9 @@
   right: 0;
   bottom: 0;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   padding: 16px 10px 7px;
   background: linear-gradient(to top, color-mix(in srgb, var(--blk-950) 85%, transparent) 15%, color-mix(in srgb, var(--blk-950) 45%, transparent) 60%, transparent);
   font-size: 14px;
@@ -182,10 +174,13 @@
   color: var(--text-bright);
   text-align: left;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+.nk-crole-card__name-row {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  pointer-events: none;
 }
 
 .nk-crole-card__body {
@@ -209,10 +204,8 @@
 }
 
 .nk-crole-card__charge {
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: 6px;
-  max-width: 45%;
+  display: block;
+  max-width: 100%;
   font-size: 9px;
   font-weight: 500;
   line-height: 1.3;
@@ -223,9 +216,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.nk-crole-card__charge:empty { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .nk-crole-card { animation: none; transition: border-color 0.2s, box-shadow 0.2s; }
+  .nk-crole-card { animation: none; transition: border-color var(--nk-dur-normal) var(--nk-ease-out), box-shadow var(--nk-dur-normal) var(--nk-ease-out); }
   .nk-crole-card:hover,
   .nk-crole-card:focus-visible { transform: none; }
   .nk-crole-card:hover .nk-crole-card__avatar > img,
@@ -253,7 +247,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.2s;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-crole-tcard-trait__icon {
   width: 20px;
@@ -262,7 +256,7 @@
   border-radius: 4px;
   flex-shrink: 0;
   opacity: 0.88;
-  transition: opacity 0.2s, transform 0.2s var(--ease);
+  transition: opacity var(--nk-dur-hover) var(--nk-ease-out), transform var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-crole-card:hover .nk-crole-tcard-trait__icon {
   opacity: 1;
@@ -316,27 +310,8 @@
   background: linear-gradient(90deg, var(--primary), var(--accent));
   transition: width 0.2s linear;
 }
-[data-theme="cw"] .nk-crole-bar__progress {
-  background: linear-gradient(90deg, var(--cwth-300), var(--cwth-500));
-}
 .nk-crole-bar .nk-secnav__btn--active { color: var(--primary); }
 .nk-crole-bar .nk-secnav__btn--active::after { background: var(--primary); }
-[data-theme="cw"] .nk-crole-bar .nk-secnav__btn--active { color: var(--cwth-300); }
-[data-theme="cw"] .nk-crole-bar .nk-secnav__btn--active::after { background: var(--cwth-300); }
-
-.nk-crole__state { padding: 60px 20px; text-align: center; color: var(--text2); display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.nk-crole__state--err { color: var(--diff-del); }
-.nk-crole__state-icon { width: 40px; height: 40px; opacity: 0.85; }
-.nk-crole__state p { margin: 0; }
-.nk-crole__retry {
-  margin-top: 4px; padding: 9px 22px; border-radius: 4px;
-  background: var(--primary); border: none; color: var(--text-bright);
-  font-family: var(--font-hud); font-size: 12px; font-weight: 700; letter-spacing: 0.12em;
-  cursor: pointer; transition: transform 0.15s var(--ease), background 0.2s;
-}
-.nk-crole__retry:hover { background: var(--th-400); }
-.nk-crole__retry:active { transform: scale(0.97); }
-.nk-crole__retry:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
 
 .nk-crole__skeleton { display: flex; flex-direction: column; gap: 20px; padding: 16px; }
 .nk-crole__skeleton-hero { display: flex; gap: 16px; padding: 18px 16px; border-bottom: 1px solid var(--line-1); }
@@ -401,15 +376,21 @@
   letter-spacing: 0.16em;
   color: var(--crole-num);
 }
-.nk-crole-hero__fee,
-.nk-crole-hero__season {
+.nk-crole-hero__fee {
   font-family: var(--font-hud);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.55);
 }
-.nk-crole-hero__season { color: rgba(255, 255, 255, 0.4); }
+/* 赛季号比费用更弱一档（它是辅助坐标，不是读数），故单独声明而不是靠后覆盖 */
+.nk-crole-hero__season {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+}
 .nk-crole-slot {
   display: inline-grid;
   place-items: center;
@@ -422,14 +403,13 @@
   color: rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  transition: color 0.2s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
 }
 .nk-crole-slot.is-on {
   color: var(--text-bright);
   background: var(--primary);
   border-color: transparent;
 }
-[data-theme="cw"] .nk-crole-slot.is-on { color: var(--blk-900); }
 .nk-crole-slot--role {
   width: 28px;
   height: 20px;
@@ -490,7 +470,7 @@
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(0, 0, 0, 0.38);
   overflow: hidden;
-  transition: border-color 0.22s, transform 0.22s var(--nk-ease-out);
+  transition: border-color 0.22s var(--nk-ease-out), transform 0.22s var(--nk-ease-out);
 }
 .nk-crole-herotrait__icon img {
   width: 100%;
@@ -508,7 +488,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
-  transition: color 0.22s;
+  transition: color 0.22s var(--nk-ease-out);
 }
 .nk-crole-herotrait--faction .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-faction-core) 58%, transparent); }
 .nk-crole-herotrait--combat  .nk-crole-herotrait__icon { border-color: color-mix(in srgb, var(--cw-combat-core) 58%, transparent); }
@@ -541,9 +521,9 @@
   border-radius: 0;
   overflow: hidden;
   padding: 3px;
-  border: 1px solid color-mix(in srgb, var(--cwth-500) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 60%, transparent);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--cwth-500) 16%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--primary) 16%, transparent),
     0 10px 30px rgba(0, 0, 0, 0.45);
   background: color-mix(in srgb, var(--blk-950) 72%, transparent);
 }

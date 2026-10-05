@@ -3,7 +3,6 @@
   inset: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--bg);
   font-family: var(--font-body);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -14,6 +13,7 @@
 #nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
 #nk-cwhub-app::-webkit-scrollbar-track { background: transparent; }
 
+#nk-cwhub-app .nk-hub-release__band { grid-auto-columns: max-content; }
 #nk-cwhub-app .nk-hub-release__band .nk-crole-card { width: 144px; }
 #nk-cwhub-app .nk-hub-release__band .nk-cw-trait-card { width: 252px; }
 

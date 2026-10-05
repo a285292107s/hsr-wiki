@@ -14,7 +14,10 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
   const catLabel = CAT_LABEL[cat] || cat;
   const layers = (item.layers as Array<{ layer: number }>) || [];
   const layerCount = layers.length;
-  const simpleDesc = escHtml((item.simple_desc as string || '').slice(0, 60));
+  const simpleDesc = escHtml(
+    (item.simple_desc as string || '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60),
+  );
+  const descTruncated = simpleDesc.length >= 60 ? '…' : '';
 
   return `<a class="nk-cw-trait-card" href="/currency/trait/${escHtml(item.id)}" data-cat="${escHtml(cat)}" style="--i:${index}">
       <div class="nk-cw-trait-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
@@ -24,7 +27,7 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
           <span class="nk-cw-tag nk-cw-tag--${cat}">${escHtml(catLabel)}</span>
           ${layerCount ? `<span class="nk-cw-trait-card__layers">${layerCount}层</span>` : ''}
         </div>
-        <div class="nk-cw-trait-card__desc">${simpleDesc}</div>
+        <div class="nk-cw-trait-card__desc">${simpleDesc}${descTruncated}</div>
       </div>
     </a>`;
 }
@@ -32,6 +35,7 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
 export const currencyTraitPage: CatalogPageConfig = {
   id: 'currency-trait',
   title: '货币战争 · 羁绊图鉴',
+  subtitle: 'TRAITS',
   searchPlaceholder: '搜索羁绊…',
   gridClass: 'nk-cat-grid nk-cw-trait-grid',
   cardClass: '.nk-cw-trait-card',

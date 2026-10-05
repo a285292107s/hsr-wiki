@@ -18,15 +18,34 @@ export interface ReleaseSection {
   kind: ReleaseKind;
   label: string;
   count: number;
+  /** 带规格：全部条目串行的模板串， 与 positions 均无关；来自各目录页 renderCard。 */
   html: string;
+  /**
+   * 特写规格（count ≤ 2）：逐条模板串，并给出各自落位。
+   * 落位只改排版（主条目特写、余者列侧），不改变目本身的数据与链接。
+   */
+  cards?: string[];
+  positions?: ('lead' | 'rest')[];
+  leadMeta?: ReleaseLeadMeta;
+  feature: boolean;
 }
 
+export interface ReleaseLeadMeta {
+  name: string;
+  href?: string;
+}
+
+/* 特写规格（count ≤ 2）的**文字块**：只放条目自身可推出、且卡上没有的事实。
+   实测卡内文字（`nk-idx-card` 真珠/★★★★★/冰/欢愉、`nk-lc-card` 献给明日的色彩/挥墨、
+   `nk-relic-card` 4件套/贪噬禁果的异端）——元素、命途、技能名、套装标签**都已在卡上**，
+   故本块只留「名字 + 详情链接」：名字是特写的排版权重，链接是卡之外唯一的显式动作。 */
 export interface ReleaseSource {
   kind: ReleaseKind;
   label: string;
   tagged: readonly ReleaseTagged[];
   items: readonly CatalogItem[];
   renderCard: (item: CatalogItem, index: number) => string;
+  leadMeta?: (item: CatalogItem) => ReleaseLeadMeta;
 }
 
 export function pickCurrentVersion<T extends ReleaseTagged>(
@@ -42,6 +61,11 @@ export function pickSeasonNew<T extends ReleaseTagged>(list: readonly T[]): T[] 
   return list.filter((item) => item.is_season_new === true);
 }
 
+/* 特写判据：卡带天生是「多卡横流」，而版本上新常见 1~2 张新条目——把带内
+   210px 小规格硬套在 1 张卡上，就是首页曾出现过的「90% 空白挂 1 张小卡」。
+   门槛取 2：3 张以上时带规格的信息密度已经足够，特写反而打断横向节奏。 */
+const FEATURE_MAX = 2;
+
 export function buildReleaseSectionsBy(
   sources: readonly ReleaseSource[],
   pick: (list: readonly ReleaseTagged[]) => readonly ReleaseTagged[],
@@ -52,11 +76,19 @@ export function buildReleaseSectionsBy(
     if (!ids.size) continue;
     const picked = source.items.filter((item) => ids.has(String(item.id)));
     if (!picked.length) continue;
+    const feature = picked.length <= FEATURE_MAX;
+    const cards = picked.map((item, i) => source.renderCard(item, i));
     sections.push({
       kind: source.kind,
       label: source.label,
       count: picked.length,
-      html: picked.map((item, i) => source.renderCard(item, i)).join(''),
+      html: cards.join(''),
+      cards: feature ? cards : undefined,
+      positions: feature
+        ? cards.map((_, i) => (i === 0 ? ('lead' as const) : ('rest' as const)))
+        : undefined,
+      leadMeta: feature && source.leadMeta ? source.leadMeta(picked[0]) : undefined,
+      feature,
     });
   }
   return sections;
@@ -74,10 +106,29 @@ const RELEASE_SOURCES: Array<{
   label: string;
   page: CatalogPageConfig;
   loadTagged: () => Promise<readonly ReleaseTagged[]>;
+  leadMeta: (item: CatalogItem) => ReleaseLeadMeta;
 }> = [
-  { kind: 'character', label: '角色', page: characterPage, loadTagged: () => loadLocalCharacterList() },
-  { kind: 'lightcone', label: '光锥', page: lightconePage, loadTagged: () => loadLocalLightCones() },
-  { kind: 'relic', label: '遗器', page: relicPage, loadTagged: () => loadLocalRelicSets() },
+  {
+    kind: 'character', label: '角色', page: characterPage, loadTagged: () => loadLocalCharacterList(),
+    leadMeta: (item) => ({
+      name: String(item.name || ''),
+      href: item.href ? String(item.href) : undefined,
+    }),
+  },
+  {
+    kind: 'lightcone', label: '光锥', page: lightconePage, loadTagged: () => loadLocalLightCones(),
+    leadMeta: (item) => ({
+      name: String(item.name || ''),
+      href: item.href ? String(item.href) : undefined,
+    }),
+  },
+  {
+    kind: 'relic', label: '遗器', page: relicPage, loadTagged: () => loadLocalRelicSets(),
+    leadMeta: (item) => ({
+      name: String(item.name || ''),
+      href: item.href ? String(item.href) : undefined,
+    }),
+  },
 ];
 
 const CW_RELEASE_SOURCES: Array<{
@@ -120,7 +171,8 @@ export function useReleaseShowcase(): ReleaseShowcase {
           spec.page.fetchData ? spec.page.fetchData(ctx) : Promise.resolve<CatalogItem[]>([]),
         ]);
         sources.push({
-          kind: spec.kind, label: spec.label, tagged, items, renderCard: spec.page.renderCard,
+          kind: spec.kind, label: spec.label, tagged, items,
+          renderCard: spec.page.renderCard, leadMeta: spec.leadMeta,
         });
       } catch {
       }

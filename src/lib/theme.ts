@@ -12,7 +12,8 @@ export interface AccentOption {
 
 const STORAGE_KEY = 'HSR_WIKI_ACCENT';
 
-export const DEFAULT_ACCENT: AccentKey = 'terracotta';
+/** 缺省主题色 = 橄榄青（`--th-*` 默认块同样指向 `--ol-*`，两处必须一致；改一处即视为契约变更） */
+export const DEFAULT_ACCENT: AccentKey = 'olive';
 
 export const ACCENTS: AccentOption[] = [
   { key: 'terracotta', label: '赤陶', swatch: ['#DE9A74', '#CC7648', '#B85C33'] },

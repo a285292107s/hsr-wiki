@@ -12,6 +12,7 @@ import {
   deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
   avatarDrawCardUrl, avatarDrawCardJdUrl, itemName, itemIconUrl, validateCharData,
+  fmtStatValue,
 } from '../format';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
 
@@ -427,5 +428,33 @@ describe('validateCharData', () => {
   it('缺失字段列出名称', () => {
     const bad = { ...baseChar(), name: '', stats: null } as unknown as CharacterData;
     expect(() => validateCharData(bad)).toThrowError(/name.*stats|stats.*name/);
+  });
+});
+
+describe('fmtStatValue：面板数值统一加千分位', () => {
+  it('≥4 位整数与小数都加分隔符', () => {
+    expect(fmtStatValue(1436)).toBe('1,436');
+    expect(fmtStatValue(25377.9)).toBe('25,377.9');
+    expect(fmtStatValue(1200)).toBe('1,200');
+    expect(fmtStatValue(-1234)).toBe('-1,234');
+  });
+  it('不足 4 位原样（不加多余的 .0）', () => {
+    expect(fmtStatValue(132)).toBe('132');
+    expect(fmtStatValue(773.2)).toBe('773.2');
+    expect(fmtStatValue(0)).toBe('0');
+  });
+  it('已格式化的字符串（百分比 / 占位符）不得被再格式化', () => {
+    expect(fmtStatValue('25.0%')).toBe('25.0%');
+    expect(fmtStatValue('—')).toBe('—');
+    expect(fmtStatValue('5★')).toBe('5★');
+  });
+  it('纯数字串按数值格式化（converter 有数值写成字符串的字段）', () => {
+    expect(fmtStatValue('25377.9')).toBe('25,377.9');
+    expect(fmtStatValue(' 1200 ')).toBe('1,200');
+  });
+  it('空值返回空串，非有限数原样字符串化', () => {
+    expect(fmtStatValue(null)).toBe('');
+    expect(fmtStatValue(undefined)).toBe('');
+    expect(fmtStatValue(Number.NaN)).toBe('NaN');
   });
 });

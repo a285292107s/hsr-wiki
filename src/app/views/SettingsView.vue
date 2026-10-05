@@ -1,34 +1,19 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useRoute } from 'vue-router';
 import { ACCENTS, DEFAULT_ACCENT, getSavedAccent, setAccent, type AccentKey } from '../../lib/theme';
-import {
-  CW_ACCENTS, DEFAULT_CW_ACCENT, getSavedCwAccent, setCwAccent,
-  type CwAccentKey,
-} from '../../lib/cw-theme';
 import {
   DEFAULT_TRAILBLAZER_GENDER, getSavedTrailblazerGender, setTrailblazerGender,
   type TrailblazerGender,
 } from '../../lib/trailblazer';
 
-const route = useRoute();
-const inCw = computed(() => !!route.meta.cw);
-
 const current = ref<AccentKey>(getSavedAccent());
 
-const cwCurrent = ref<CwAccentKey>(getSavedCwAccent());
-
-function choose(key: SwatchKey): void {
-  setAccent(key as AccentKey);
-  current.value = key as AccentKey;
+function choose(key: AccentKey): void {
+  setAccent(key);
+  current.value = key;
 }
 
-function chooseCw(key: SwatchKey): void {
-  setCwAccent(key as CwAccentKey);
-  cwCurrent.value = key as CwAccentKey;
-}
-
-type SwatchKey = AccentKey | CwAccentKey;
+type SwatchKey = AccentKey;
 interface SwatchSection {
   id: string;
   idx: string;
@@ -43,18 +28,11 @@ interface SwatchSection {
 
 const accentSections: SwatchSection[] = [
   {
-    id: 'accent-title', idx: '01', title: '常规模式主题色', listboxLabel: '主题强调色',
+    id: 'accent-title', idx: '01', title: '主题色', listboxLabel: '主题强调色',
     items: ACCENTS,
     currentValue: () => current.value,
     onChoose: choose,
     defaultKey: DEFAULT_ACCENT, defaultHintText: '当前使用默认主题 · 赤陶',
-  },
-  {
-    id: 'cw-accent-title', idx: '02', title: '货币战争主题色', listboxLabel: '货币战争主题强调色',
-    items: CW_ACCENTS,
-    currentValue: () => cwCurrent.value,
-    onChoose: chooseCw,
-    defaultKey: DEFAULT_CW_ACCENT, defaultHintText: '当前使用默认主题 · 香槟金',
   },
 ];
 
@@ -70,15 +48,9 @@ function chooseGender(gender: TrailblazerGender): void {
   currentGender.value = gender;
 }
 
-const activeProfile = computed(() => {
-  const table = inCw.value ? CW_ACCENTS : ACCENTS;
-  const key = inCw.value ? cwCurrent.value : current.value;
-  return table.find((a) => a.key === key) ?? table[0];
-});
+const activeProfile = computed(() => ACCENTS.find((a) => a.key === current.value) ?? ACCENTS[0]);
 
-const headDesc = computed(() => (inCw.value
-  ? '调整货币战争模式的主色调。只对本模式生效，普通模式配色保持不变。'
-  : '调整全站主色调与开拓者形象。选择即时生效并自动保存，与货币战争模式各有独立配色，互不影响。'));
+const headDesc = '调整全站主色调与开拓者形象。选择即时生效并自动保存——全站（含货币战争）共用这一套配色。';
 
 const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 </script>
@@ -139,7 +111,7 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 
     <section class="nk-settings__section" aria-labelledby="trailblazer-title">
       <h2 id="trailblazer-title" class="nk-title">
-        <span class="nk-title__idx">03</span>
+        <span class="nk-title__idx">02</span>
         开拓者形态
       </h2>
       <div class="nk-seg" role="listbox" aria-label="开拓者性别">
@@ -375,6 +347,12 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   transition: background 0.18s, color 0.18s;
 }
 .nk-seg__opt + .nk-seg__opt { border-left: 1px solid var(--nk-sheet-item-border); }
+/* 手机档双列列宽放不下（两选项 min-content ≈ 182px，320/412 实测均裁第二列）。纵栈修掉：
+   两选项全宽直排，溢出源消失；此缺陷原登记在 e2e/helpers.ts KNOWN_OVERFLOWS，已随修复删除。 */
+@media (max-width: 767px) {
+  .nk-seg { grid-template-columns: 1fr; max-width: none; }
+  .nk-seg__opt + .nk-seg__opt { border-left: none; border-top: 1px solid var(--nk-sheet-item-border); }
+}
 .nk-seg__opt:hover { background: var(--nk-shell-hover); color: var(--text); }
 .nk-seg__opt--on { background: var(--nk-shell-active-bg); color: var(--metric-val); }
 .nk-seg__opt--on::before {

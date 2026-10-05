@@ -8,8 +8,13 @@
 }
 .nk-char-page .nk-skeleton__stat-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
 .nk-char-page .nk-sk--stat { height: 35px; border-radius: 0; }
-/* 骨架 hero 面板只代理「盒子」不代理「结构」。盒高 = 实测 **全量 98 只**角色的就绪面板高度中位数
-   桌面 239.8 / 平板 262.5 / 手机 223.5（p25≈p75 极稳，除长简介离群），一律**对中位数上取整**。
+/* 骨架 hero 面板只代理「盒子」不代理「结构」。盒高 = 实测 **全量 98 只**角色的就绪面板高度
+   **p75 上取整**（旧口径取中位数；2026-10 字体栈由 Orbitron 换成 IBM Plex Mono + Noto Sans SC 后
+   分布被拉宽——桌面 中位 243.8 / p75 243.8，平板 263.0 / 266.5，手机 229.8 / 254.5——
+   中位口径已盖不住本机跨态断言所选的角色 1001（平板内容 266.5 > 263），故改按 p75 定盒高：
+   盒高同时是就绪面板的 `min-height`，取 p75 后**两侧都由构造成立**，覆盖 ≥75% 的角色。
+   同一次重测也把桌面 239.8 → 243.8、手机 223.5 → 229.8 的数字一并更新。
+   **字体/字号一变就要重跑这条标定**（跑法：遍历全量角色量 `.nk-hero__panel` 高，见 memory 第 12 轮）。
    **这个值同时是就绪面板的高度下限**（`--nk-hero-panel-h` 被 character-hero.css 的 `.nk-hero__panel`
    当 `min-height` 消费）⇒ 就绪高 = max(内容高, 令牌值)：内容偏矮那一侧两态同框**由构造成立**，
    不必再依赖「常量恰好等于内容高」这个巧合（Windows 实测内容高 239.813，与常量本就差 0.19px）。
@@ -30,7 +35,7 @@
    最大的潜在布局位移，e2e「骨架态与就绪态 hero 面板同宽同高（±1px）」把它锁死（该用例 @font-calibrated
    ⇒ CI 不判、本机全量判）；实测真实 CLS（dev 环境，12 组×3 次）最大 0.0107、14 次里 9 次为 0，远低于 0.1。
    `--nk-hero-panel-h` 按档声明（本档即手机档；≥768 无独立值——768~1023 与 ≥1024 两个子区间各自覆盖）。 */
-.nk-char-page { --nk-hero-panel-h: 224px; }
+.nk-char-page { --nk-hero-panel-h: 255px; }
 .nk-char-page .nk-skeleton__hero-panel {
   padding: 32px 16px 20px; height: var(--nk-hero-panel-h); gap: 0; justify-content: space-between;
 }
@@ -43,7 +48,7 @@
   .nk-char-page .nk-skeleton__hero-panel { padding: 32px; }
 }
 @media (min-width: 768px) and (max-width: 1023px) {
-  .nk-char-page { --nk-hero-panel-h: 263px; }
+  .nk-char-page { --nk-hero-panel-h: 267px; }
   .nk-char-page .nk-eidolon__icon { width: 132px; height: 132px; }
   /* 平板档并排版式（媒体在左 · 文字在右）的骨架镜像：几何逐项对齐就绪态 */
   .nk-char-page .nk-skeleton__hero { flex-direction: row; align-items: flex-start; }
@@ -51,7 +56,7 @@
   .nk-char-page .nk-skeleton__hero-panel { flex: 1 1 auto; align-self: center; padding: 0 0 0 32px; }
 }
 @media (min-width: 1024px) {
-  .nk-char-page { --nk-hero-panel-h: 240px; }
+  .nk-char-page { --nk-hero-panel-h: 244px; }
   .nk-char-page .nk-hero { min-height: clamp(560px, 76vh, 820px); overflow: clip; }
   .nk-char-page .nk-hero__visual { position: absolute; inset: 0; aspect-ratio: auto; }
   .nk-char-page .nk-hero__visual::before { background: none; }

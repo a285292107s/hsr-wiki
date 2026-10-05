@@ -284,7 +284,8 @@ onBeforeUnmount(() => {
             <div class="nk-skill__head">
               <span class="nk-skill__type-dot" aria-hidden="true"></span>
               <div class="nk-skill__slider nk-lc-rank-slider">
-                <span class="nk-lc-rank-label">叠影</span>
+                <!-- 当前叠影等级并入左端标签：右端悬浮的孤值读不出上下文 -->
+                <span class="nk-lc-rank-label">叠影 {{ lc.rank }}</span>
                 <input
                   type="range"
                   aria-label="叠影等级"
@@ -294,7 +295,6 @@ onBeforeUnmount(() => {
                   :style="{ '--fill': `${((lc.rank - 1) / Math.max(rankLevels.length - 1, 1)) * 100}%` }"
                   @input="lc.setRank(Number(($event.target as HTMLInputElement).value))"
                 >
-                <span class="nk-slider__val">{{ lc.rank }}</span>
               </div>
             </div>
             <div class="nk-skill__title-row">

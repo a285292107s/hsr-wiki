@@ -348,3 +348,35 @@ export type MazeCatalogDb = Record<string, MazeCatalogEntry>;
 
 /** zh/maze/version.json：版本 → 赛季 ID 列表（键按版本降序） */
 export type MazeVersionMap = Record<string, (number | string)[]>;
+
+/** 增益体系的选择语义（`endgame_guide.json` 的 `system.choice`；展示文案在前端 `endgame/guide.ts`） */
+export type EndgameSystemChoice = 'fixed' | 'per_team' | 'per_stage' | 'per_king';
+
+/** 玩法详情页的一节规则正文（正文逐字来自 IntroData，换行为字面量 `\n`，由展示层转行） */
+export interface EndgameGuideSection {
+  title: string;
+  text: string;
+}
+
+/** 赛季增益体系：体系名派生自 IntroData 分节标题（游戏内按玩法命名，不是站点工作名「赛季增益」） */
+export interface EndgameGuideSystem {
+  name: string;
+  count: number;
+  choice: EndgameSystemChoice;
+}
+
+/** 单个终局玩法的说明（`endgame_guide.json` → `modes[key]`） */
+export interface EndgameGuideMode {
+  key: string;
+  label: string;
+  en: string;
+  intro_id: number;
+  sections: EndgameGuideSection[];
+  /** 体系名未在分节标题里命中时缺省（转换器宁可缺、不自造） */
+  system?: EndgameGuideSystem;
+}
+
+/** zh/endgame_guide.json：四玩法规则正文与增益体系（键 = maze / story / boss / peak） */
+export interface EndgameGuideDb {
+  modes: Record<string, EndgameGuideMode>;
+}

@@ -18,7 +18,7 @@
   font-family: var(--font-hud); font-size: 1.5rem; font-weight: 700; line-height: 1;
   color: var(--primary); letter-spacing: 0.02em;
   padding-right: 16px; border-right: 1px solid var(--line-2);
-  opacity: 0.85; transition: opacity 0.2s;
+  opacity: 0.85; transition: opacity 0.2s var(--nk-ease-out);
 }
 .nk-char-page .nk-eidolon__name {
   font-weight: 600; font-size: 1rem;
@@ -61,7 +61,8 @@
   pointer-events: none;
 }
 .nk-char-page .nk-build__teams { display: flex; flex-direction: column; gap: 16px; margin-bottom: 0; }
-.nk-char-page .nk-build__team { display: flex; align-items: center; padding: 20px 24px; border-radius: var(--nk-char-radius-card); }
+/* 面板底色 / 描边 / 圆角由 `character-skills.css` 顶部的面板表面组单点声明（本文件只排布盒内） */
+.nk-char-page .nk-build__team { display: flex; align-items: center; padding: 20px 24px; }
 .nk-char-page .nk-build__team-head { display: none; }
 .nk-char-page .nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
 .nk-char-page .nk-build__team-link { display: flex; }
@@ -78,14 +79,14 @@
 }
 .nk-char-page .nk-build__team-alt { display: flex; gap: 4px; }
 .nk-char-page .nk-build__team-alt img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-1); }
-.nk-char-page .nk-build__team-alt .nk-build__team-link { opacity: 0.65; transition: opacity 0.2s; }
+.nk-char-page .nk-build__team-alt .nk-build__team-link { opacity: 0.65; transition: opacity 0.2s var(--nk-ease-out); }
 .nk-char-page .nk-build__team-alt .nk-build__team-link:hover { opacity: 1; }
 .nk-char-page .nk-build__team-plus { color: var(--text3); font-size: 0.8rem; font-weight: 400; flex-shrink: 0; margin: 0 4px; align-self: center; }
 .nk-char-page .nk-build__relics { margin-bottom: 0; }
 .nk-char-page .nk-relic-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .nk-char-page .nk-relic-slot {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 16px 12px; border-radius: var(--nk-char-radius-card);
+  padding: 16px 12px;
 }
 .nk-char-page .nk-relic-slot__icon {
   width: 40px; height: 40px; border-radius: 4px;
@@ -95,7 +96,7 @@
 .nk-char-page .nk-relic-slot__slot { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; }
 .nk-char-page .nk-relic-sub {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px;
-  padding: 16px; margin-bottom: 16px; border-radius: var(--nk-char-radius-card);
+  padding: 16px; margin-bottom: 16px;
 }
 .nk-char-page .nk-relic-sub__label { font-size: 0.6875rem; color: var(--text3); letter-spacing: 0.03em; flex-shrink: 0; }
 .nk-char-page .nk-relic-sub__list { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -105,7 +106,7 @@
   border: 1px solid var(--line-1);
 }
 .nk-char-page .nk-build__sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-.nk-char-page .nk-build__set { padding: 16px; border-radius: var(--nk-char-radius-card); }
+.nk-char-page .nk-build__set { padding: 16px; }
 .nk-char-page .nk-build__set-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .nk-char-page .nk-build__set-head img {
   width: 44px; height: 44px; border-radius: 4px;
@@ -129,13 +130,13 @@
   display: flex; flex-direction: column; gap: 4px;
   padding: 16px; border-radius: var(--nk-char-radius-card);
   border: 1px solid var(--line-1);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s var(--nk-ease-out);
 }
 .nk-char-page .nk-profile__item:hover { border-color: var(--line-2); transform: none; }
 .nk-char-page .nk-profile__label { font-size: 0.625rem; font-weight: 600; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--font-hud); }
 .nk-char-page .nk-profile__val { font-size: 0.8125rem; font-weight: 600; color: var(--text); }
 .nk-char-page .nk-stories { display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-struct-max); margin: 0 auto; }
-.nk-char-page .nk-story { overflow: hidden; border-radius: var(--nk-char-radius-card); }
+.nk-char-page .nk-story { overflow: hidden; }
 .nk-char-page .nk-story__head {
   display: flex; align-items: center; gap: 12px; width: 100%;
   padding: 16px 20px; background: none; border: none; cursor: pointer;
@@ -148,15 +149,16 @@
 .nk-char-page .nk-story__arrow {
   width: 7px; height: 7px; flex-shrink: 0;
   border-right: 1.5px solid var(--text3); border-bottom: 1.5px solid var(--text3);
-  transform: rotate(-45deg); transition: transform 0.25s var(--nk-ease-out), border-color 0.2s;
+  transform: rotate(-45deg); transition: transform 0.25s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out);
 }
 .nk-char-page .nk-story__head:hover .nk-story__arrow { border-color: var(--text2); }
 .nk-char-page .nk-story--open .nk-story__arrow { transform: rotate(45deg); border-color: var(--primary); }
 .nk-char-page .nk-story__clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
 .nk-char-page .nk-story--open .nk-story__clip { grid-template-rows: 1fr; }
 .nk-char-page .nk-story__inner { overflow: hidden; min-height: 0; }
+/* 正文测度（max-width）由 character-compare.css 的 `__story__text / __skill__terms` 组单点声明 */
 .nk-char-page .nk-story__text {
   font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
   border-top: 1px dashed var(--line-1);
-  padding: 16px 20px 20px; max-width: var(--nk-prose-max);
+  padding: 16px 20px 20px;
 }

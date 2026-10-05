@@ -735,6 +735,7 @@ function roofDecor(n: MapNode, g: Geom): DecorEl[] {
   font-family: var(--font-hud);
   letter-spacing: 1px;
 }
+/* **有意**覆盖上面那组标题的字号：详情名比面板标题大两号（重复选择器扫描会列为同文件重叠）。 */
 .nk-sysmap__info-name { margin-top: 8px; font-size: 15px; }
 .nk-sysmap__info-en {
   margin: 3px 0 0;

@@ -5,7 +5,6 @@ import { useAppStore } from '../stores/app';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useLoadGeneration } from '../composables/use-load-generation';
 import { useScrollRestore } from '../composables/use-scroll-restore';
-import { useCardTilt } from '../composables/use-card-tilt';
 import CatalogToolbar from './CatalogToolbar.vue';
 import { useVirtualGrid, vReveal } from './use-virtual-grid';
 import type { CatalogItem, CatalogPageConfig } from './types';
@@ -52,7 +51,7 @@ const useVirtual = computed(() => items.value.length > VIRTUAL_THRESHOLD);
 const filtered = computed<CatalogItem[]>(() => {
   const q = query.value.trim().toLowerCase();
   const af = activeFilters.value;
-  return items.value.filter((item) => {
+  const list = items.value.filter((item) => {
     if (q) {
       const haystack = `${item.name || ''}\n${item.searchText || ''}`.toLowerCase();
       if (!haystack.includes(q)) return false;
@@ -70,6 +69,18 @@ const filtered = computed<CatalogItem[]>(() => {
     }
     return true;
   });
+  if (!q) return list;
+  /* 检索命中分档：名字前缀 > 名字包含 > **仅描述命中**（`searchText`）。没有这一档时，
+     把描述纳入检索域会让精确同名条目被埋在描述命中之后——实测 /item 搜「信用点」时
+     同名卡排到第 8 位、第一屏首张是「金币」（其描述里提到信用点）。同档保持原序（Array#sort 稳定），
+     故各页既有的稀有度/版本序不受影响。 */
+  const rank = (it: CatalogItem): number => {
+    const name = String(it.name || '').toLowerCase();
+    if (name.startsWith(q)) return 0;
+    if (name.includes(q)) return 1;
+    return 2;
+  };
+  return [...list].sort((a, b) => rank(a) - rank(b));
 });
 
 const gridHtml = computed(() =>
@@ -101,7 +112,7 @@ async function load(): Promise<void> {
     if (cancelled.value || !loadGen.isCurrent(gen)) return;
     errorMsg.value = e instanceof Error ? e.message : String(e);
     phase.value = 'error';
-    app.toast('error', `${props.config.title}: ${errorMsg.value}`);
+    // 就地错误态已经是完整信号，不再叠 toast（toast 只留给「结果不在视口内」的动作，如复制/下载）
   }
 }
 
@@ -176,6 +187,15 @@ function onSearch(value: string): void {
   onSearchInput();
 }
 
+/** 空态的恢复动作：一次清掉搜索词与全部筛选（URL 同步由既有 watch 负责） */
+const hasQuery = computed(() => query.value.trim().length > 0);
+const hasFilters = computed(() => Object.values(activeFilters.value).some(Boolean));
+function resetSearchAndFilters(): void {
+  query.value = '';
+  activeFilters.value = {};
+  if (useVirtual.value) refresh();
+}
+
 function onSearchInput(): void {
   if (!useVirtual.value) return;
   if (searchTimer !== null) clearTimeout(searchTimer);
@@ -210,16 +230,6 @@ function onCardImgError(e: Event): void {
   img.style.display = 'none';
   img.closest('.nk-eg-card')?.classList.remove('nk-eg-card--has-art');
 }
-
-function onGridMove(e: MouseEvent): void {
-  tilt.onMove(e);
-}
-
-function onGridLeave(): void {
-  tilt.onLeave();
-}
-
-const tilt = useCardTilt(gridRef, () => props.config.cardClass || '.nk-cat-card');
 
 onMounted(() => {
   void load();
@@ -304,14 +314,28 @@ onBeforeUnmount(() => {
         ref="gridRef"
         :class="[config.gridClass, { 'nk-no-reveal': noReveal }]"
         v-html="gridHtml"
-        @mousemove="onGridMove"
-        @mouseleave="onGridLeave"
       ></div>
 
-      <div class="nk-cat-empty" :class="{ show: filtered.length === 0 }">
-        <span class="nk-cat-empty__icon">//</span>
+      <div class="nk-cat-empty" :class="{ show: filtered.length === 0 }" role="status">
+        <span class="nk-cat-empty__mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+            <rect x="9" y="12" width="30" height="24" rx="3" />
+            <path d="M15 20h18M15 26h12" opacity="0.55" />
+            <path d="M33 33l6 6" />
+          </svg>
+        </span>
         <span class="nk-cat-empty__text">NO MATCH FOUND</span>
-        <span class="nk-cat-empty__sub">未找到匹配结果，请调整筛选条件</span>
+        <p class="nk-cat-empty__sub">
+          {{ hasQuery || hasFilters ? '当前搜索或筛选条件下没有匹配条目。' : '该分类暂无可展示的条目。' }}
+        </p>
+        <button
+          v-if="hasQuery || hasFilters"
+          type="button"
+          class="nk-cat-empty__reset"
+          @click="resetSearchAndFilters"
+        >
+          清除搜索与筛选
+        </button>
       </div>
       </template>
     </template>
