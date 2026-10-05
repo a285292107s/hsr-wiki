@@ -43,9 +43,9 @@ node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删�
 
 - **配置驱动目录页**：所有列表页均为 `CatalogPageConfig`（`src/app/catalog/pages/` 子模块 + `pages.ts` 注册，目录清单以注册表为准）+ 单一 `CatalogView` 按 `route.meta.catalog` 渲染，无需新视图；带专属样式的目录在配置 `styles` 字段声明，自动随路由并行加载。
 - **本地优先数据**：全部目录/详情数据为预转换 JSON（`public/data/cn/`，converter 输出）；仅图片与 Spine 动画运行期走 CDN（基址 `src/lib/constants.ts → CDN`）。
-- **双模式主题**：常规（黑底 + 可切换强调色，缺省赤陶）vs 货币战争（`meta.cw` → `<html data-theme="cw">`，缺省香槟金）；`meta.depth` 驱动方向性页面过渡（手机端 <768px 淡入淡出）。令牌分层、强调色切换通道与色彩门禁见 [docs/agents/ui-design.md](docs/agents/ui-design.md)。
+- **单强调色主题**：全站（含货币战争）共用一套可切换强调色（缺省赤陶），开关 `<html data-accent>`；货币战争的 `meta.cw` → `<html data-theme="cw">` 只是**模式标记**，不再重映射颜色（[ADR 0041](docs/adr/0041-主题色统一为单强调色通道.md)）。`meta.depth` 驱动方向性页面过渡（手机端 <768px 淡入淡出）。令牌分层、强调色通道与色彩门禁见 [docs/agents/ui-design.md](docs/agents/ui-design.md)。
 - **样式随路由懒加载**：页面 CSS 随视图 import 拆为独立 chunk；全局仅 tokens.css + catalog.css。
-- **枢纽页导航条回归 / 首页＝版本上新页（ADR 0019，已实现）**：`/` 与 `/currency` **全断点渲染导航条**（`meta.bareNav` / `data-nav` / 避让回退三件已删除，内容区回到 148px 侧栏避让）；`/` 是**版本上新页**＝品牌带 + `release_version` 恰等于 `version.json` 的 `version_label` 的角色/光锥/遗器三分区 + 页脚，板块索引与两条页内跨模式行已退场，跨模式只走侧栏「交换」。**禁止按 ADR 0018 旧形态回改**——「无侧栏枢纽」与「首页 8 行入口首屏可见」断言均已作废，新断言（1920×1080 内品牌带 + 三分区标题与各自首行卡片完整可见 / 全断点渲染导航条 / 空态一行）在 `e2e/layout-home.spec.ts` 与 `e2e/layout-hub.spec.ts`。**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**（ADR 0018 该条继续有效）。
+- **枢纽页导航条回归 / 首页＝版本上新页（ADR 0019，已实现）**：`/` 与 `/currency` **全断点渲染导航条**（`meta.bareNav` / `data-nav` / 避让回退三件已删除，内容区回到 148px 侧栏避让）；`/` 是**版本上新页**＝品牌带 + `release_version` 恰等于 `version.json` 的 `version_label` 的角色/光锥/遗器三分区 + 页脚，板块索引与两条页内跨模式行已退场，跨模式只走侧栏「交换」。**禁止按 ADR 0018 旧形态回改**——「无侧栏枢纽」与「首页 8 行入口首屏可见」断言均已作废，新断言（1920×1080 内品牌带 + 版本上新标题与第一分区首行卡片完整可见 / 全断点渲染导航条 / 空态一行；ADR 0019 决策 11）在 `e2e/layout-home.spec.ts` 与 `e2e/layout-hub.spec.ts`。**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**（ADR 0018 该条继续有效）。
 - **版本上新数据判据（ADR 0019 决策 3-5）**：条目判据 = `release_version` 恰等于 `version.json` 的 `version_label`；角色 / 光锥的版本号由「与上一版已提交输出的 id 差集」推导（converter 侧，无基线时留空），遗器用源数据权威 `RelicSetConfig.ReleaseVersion`；两者同写一个字段，前端只读该字段。
 - **货币战争本赛季新增（ADR 0020，已实现）**：`/currency` 的判据是**赛季代际差集**——`GridFightRoleBasicInfoOld` / `GridFightTraitLayerOld` 的 `ExistSeason` 最大一代 = 上一代名册，当前代名册在 `GridFightRoleBasicInfo` 与 `traits.json`；converter 给 `role.json` / `traits.json` 写布尔 `is_season_new`（表缺失或代数 < 2 → 全 false + 告警，判据纯函数在 `tools/converter/season_delta.py`）。覆盖域仅**角色 + 羁绊**（装备 / 环境 / 策略既无 `*Old` 代际表、版本差集也实测为 0，**禁止**为它们新造判据）。**两页口径禁止混用**：常规模式 = 版本增量，货币战争 = 赛季代际；文案写「本赛季新增」且**不显示赛季号**（当前代编号 1 与旧代 101/102/103 体系不一致）。两页共用区块原语 `.nk-hub-release*`（单点声明在 `catalog.css`）。
 - **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——数据探索一律走 `query.py` / `DATA_CATALOG.md`，转换走 `convert.py`。
@@ -98,7 +98,7 @@ node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删�
 - **一目录一文件**：每个目录页配置必须放在 `src/app/catalog/pages/<id>.ts`，由 `pages.ts` 统一 re-export 注册。禁止在 `pages.ts` 中直接编写目录逻辑。
 - **卡片渲染**：目录卡片 HTML 以模板字符串渲染（非 Vue 组件），服务于虚拟滚动性能。所有用户可见文本必须经 `escHtml()` 转义。
 - **文本数据来源**：所有展示文本必须来自现有数据源（converter 输出 JSON / TextMap），禁止在代码中写死或自建数据源。
-- **色彩令牌收口**：所有颜色必须落入 `tokens.css` 四层令牌体系（原始层色阶 → 主题色阶别名层 `--th-*` / `--cwth-*` → 语义层 `--primary` 等 → 领域层数据语义色）。派生色用 `color-mix(in srgb, var(--primary) X%, transparent)` 表达；**禁止在页面 CSS / 组件内联裸色值**，**禁止消费层直接引用原始层**，**领域色不得引用别名层**。新增颜色先查令牌，缺失按四步评审闸落层；`node tools/check-colors.mjs --strict` 与 `node tools/check-contrast.mjs --strict` 必须全绿。四层定义、豁免与流程见 [docs/agents/ui-design.md](docs/agents/ui-design.md) §2/§5。
+- **色彩令牌收口**：所有颜色必须落入 `tokens.css` 四层令牌体系（原始层色阶 → 主题色阶别名层 `--th-*`（全站唯一，随 `data-accent`）→ 语义层 `--primary` 等 → 领域层数据语义色）。派生色用 `color-mix(in srgb, var(--primary) X%, transparent)` 表达；**禁止在页面 CSS / 组件内联裸色值**，**禁止消费层直接引用原始层**，**领域色不得引用别名层**。新增颜色先查令牌，缺失按四步评审闸落层；`node tools/check-colors.mjs --strict` 与 `node tools/check-contrast.mjs --strict` 必须全绿。四层定义、豁免与流程见 [docs/agents/ui-design.md](docs/agents/ui-design.md) §2/§5。
 - **构建守卫**：每次变更必须通过 `pnpm build`（含 vue-tsc 类型检查）+ `pnpm test` 全绿后方可提交。
 
 ## 验证流程

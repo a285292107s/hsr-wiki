@@ -2,7 +2,8 @@
 /**
  * 令牌对比度审计
  *
- * 读取 tokens.css 的 :root 与 [data-theme="cw"] 两块令牌，
+ * 读取 tokens.css 的 `:root` 令牌，并逐个读取强调色通道 `[data-accent="…"]`（全站唯一的主题色通道，
+ * ADR 0041 之前货币战争另有一套 `[data-theme="cw"]`，该层已退场），
  * 解析 var() / color-mix() / rgba 直值，计算文本色令牌对 --bg 的 WCAG 对比度。
  *
  * 验收标准：
@@ -147,11 +148,11 @@ function contrast(a, b) {
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
-/** 提取令牌块（:root / [data-theme="cw"]）：先剥离注释避免干扰，跳过无底色的局部覆盖块 */
+/** 提取令牌块（`:root`）：先剥离注释避免干扰，跳过无底色的局部覆盖块 */
 function extractBlocks(css) {
   const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   const blocks = new Map();
-  for (const m of noComments.matchAll(/(:root|\[data-theme="cw"\])\s*\{([^{}]*)\}/g)) {
+  for (const m of noComments.matchAll(/(:root)\s*\{([^{}]*)\}/g)) {
     const tokens = {};
     for (const line of m[2].split(';')) {
       const mm = line.match(/^\s*(--[\w-]+):\s*(.+?)\s*$/);
@@ -164,6 +165,21 @@ function extractBlocks(css) {
   return blocks;
 }
 
+/** 强调色通道块：`[data-accent="…"] { --th-*: … }`（不含 --bg，须叠在 :root 基上解析） */
+function extractAccentBlocks(css) {
+  const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const out = [];
+  for (const m of noComments.matchAll(/\[data-accent="([\w-]+)"\]\s*\{([^{}]*)\}/g)) {
+    const tokens = {};
+    for (const line of m[2].split(';')) {
+      const mm = line.match(/^\s*(--[\w-]+):\s*(.+?)\s*$/);
+      if (mm) tokens[mm[1]] = mm[2].trim();
+    }
+    out.push({ accent: m[1], tokens });
+  }
+  return out;
+}
+
 const css = readFileSync(TOKENS, 'utf8');
 const blocks = extractBlocks(css);
 const rootTokens = blocks.get(':root') || {};
@@ -171,9 +187,7 @@ let failures = 0;
 
 for (const [theme, tokens] of blocks) {
   if (!tokens['--bg']) continue; // 跳过无底色的局部 :root 覆盖块
-  // 非 :root 块（CW）继承 :root 基底
-  const scope = theme === ':root' ? tokens : { ...rootTokens, ...tokens };
-  const resolve = makeResolver(scope);
+  const resolve = makeResolver(tokens);
   const bg = composite(resolve(tokens['--bg']), [0, 0, 0, 1]);
   console.log(`\n════ ${theme}（底色 ${tokens['--bg']}） ════`);
   for (const name of [...BODY_TOKENS, ...PRIMARY_TOKENS]) {
@@ -187,6 +201,30 @@ for (const [theme, tokens] of blocks) {
     console.log(
       `  ${ok ? '✅' : (strict ? '❌' : '⚠')} ${name.padEnd(16)} ${ratio.toFixed(2).padStart(5)}:1  ${ok ? '' : `低于 ${min}:1`}`,
     );
+  }
+}
+
+// 强调色通道逐个验收：统一后它是全站唯一的主题色通道（货币战争同样吃这一套），
+// 故 5 个色板都必须过——只验缺省的 :root 会漏掉「换色后某档文字掉到 4.5:1 以下」。
+const rootTokensForAccent = blocks.get(':root') || {};
+const accents = extractAccentBlocks(css);
+if (accents.length) {
+  const bg = composite(makeResolver(rootTokensForAccent)(rootTokensForAccent['--bg']), [0, 0, 0, 1]);
+  for (const { accent, tokens } of accents) {
+    const scope = { ...rootTokensForAccent, ...tokens };
+    const resolve = makeResolver(scope);
+    console.log(`\n════ [data-accent="${accent}"]（底色 ${rootTokensForAccent['--bg']}） ════`);
+    for (const name of [...BODY_TOKENS, ...PRIMARY_TOKENS]) {
+      if (!(name in rootTokensForAccent)) continue;
+      const fg = composite(resolve(scope[name]), bg);
+      const ratio = contrast(fg, bg);
+      const min = PRIMARY_TOKENS.includes(name) ? PRIMARY_MIN : BODY_MIN;
+      const ok = ratio >= min;
+      if (!ok && strict) failures++;
+      console.log(
+        `  ${ok ? '✅' : (strict ? '❌' : '⚠')} ${name.padEnd(16)} ${ratio.toFixed(2).padStart(5)}:1  ${ok ? '' : `低于 ${min}:1`}`,
+      );
+    }
   }
 }
 
