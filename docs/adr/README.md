@@ -10,12 +10,12 @@
 | 0004 | 寄生油猴 → 独立站 | Accepted（部署条款已被现况取代） | 脱离宿主做独立站；现为 Vercel + History 路由 |
 | 0005 | 引入 TurnBasedGameData 转换工具 | Accepted（源获取/输出路径条款已取代） | Python 离线转换官方解包数据，产出随站 JSON |
 | 0006 | 数据格式与映射策略 | Accepted（输出清单与分期计划失效） | TextMap 解析/图标映射/枚举规范的策略结论；现况以 converter 产物为准 |
-| 0007 | 货币战争升级为独立模式 | Accepted | CW 独立路由 + 交换导航 + 全壳换肤主题 |
+| 0007 | 货币战争升级为独立模式 | Accepted（全壳换肤主题部分被 0041 修订：`data-theme="cw"` 只作模式标记、不再重映射颜色） | CW 独立路由 + 交换导航 + 全壳换肤主题 |
 | 0008 | 技能标签以官方 SkillTag 为唯一来源 | Accepted | 转换器直出官方中文标签，删除前端 TAG 映射 |
 | 0009 | 官网 Spine 动画增量接入 | Accepted | 在自主渲染之上增加官网源（纹理重映射 + 运行时按条目标记分派） |
 | 0010 | 角色强化展示范式 | Accepted | 强化数据纯替换展示（默认强化）+ 三态对比模式；删除词级红绿 diff |
-| 0011 | 全局色彩管理：黑与紫 / 黑与金 | Accepted（固定色相已被强调色切换取代） | 中性黑阶为单一事实来源 + 领域色豁免 |
-| 0012 | 色彩代码架构：事实链与三道闸门 | Accepted | 色彩事实单向依赖；门禁规则豁免三分类 |
+| 0011 | 全局色彩管理：黑与紫 / 黑与金 | Accepted（固定色相已被强调色切换取代；**双色约束被 0041 修订**，别名层由两条并为一条） | 中性黑阶为单一事实来源 + 领域色豁免 |
+| 0012 | 色彩代码架构：事实链与三道闸门 | Accepted（四层令牌描述中「别名层 `--th-*` / `--cwth-*` 两条」被 0041 修订为一条） | 色彩事实单向依赖；门禁规则豁免三分类 |
 | 0013 | CDN 资源兜底架构 | Accepted | 全局健康信号 + 等待有界 + 分层降级（现为 local-first + 远端回退） |
 | 0014 | Dev Server 固定端口与严格失败 | Accepted | 端口 6188 + strictPort，禁止静默递增 |
 | 0015 | 研究线迁入主站 dev-only 路由 | Accepted | `/debug` 由 `import.meta.env.DEV` 注册，生产摇树为零 |
@@ -42,3 +42,6 @@
 | 0037 | 忘却之庭 / 虚构叙事详情页并入层级子 tab 编排 | Accepted（已实现；修订 0030 决策 1 的固定条作用域与决策 2 / 3 的子 tab 归属、0035 决策 1 / 2 与中性条「`EndgameTargets` / `StageHead` 保留」、0028 决策 2 的三处几何挂点） | 三种层级模式共用「第 1..N 层 / 星启模式」子 tab + 单场看板（`isLevelMode` 判据，顶部固定条只剩异相仲裁，`padding-top` 例外从 `boss` 翻成 `peak`）；赛季增益与逐层同文时不复述（`seasonBuffList`，按增益 ID 判）；层级目标栏名按类型派生（全 `TOTAL_SCORE` = 星级目标，否则挑战目标），赛季维度数值（回合限制 / 通关分数线）进层面板右栏、逐层取值进半场卡片；层内敌方一律走敌方详情卡；删除折叠楼层与 `EndgameFloors` / `EndgameTargets` / `StageHead` / `endgameGroups` 等死形态 |
 | 0038 | 终局排期按分组表指针解析，忘却之庭单边排期参与目录排序 | Accepted（已实现） | 排期解析废弃「ScheduleID − 200000 = GroupID」编号推断，统一按分组表 `ScheduleDataID` 指针直查（忘却之庭回退 `ScheduleDataGlobal`；story/boss 指针解析与旧推断逐条等价）；单边排期（迷宫 1034/1035 指针 `291015/291016`，各只有 Begin/End 一端）原样保留不合成；前端排序键 = 首个已知端点（`live_begin` 优先回退 `live_end`，同日开始端在前），当期赛季不再沉底，日期区间补「– 截止日」单边渲染；AI 快照生成器镜像同步；测试期/常驻关仍沉底按编号降序 |
 | 0039 | 角色拉丁转写名由转换器写入（TextMapEN × AvatarName） | Accepted（已实现） | 角色详情 `name_en` 由 converter 从 TextMapEN 直查 `AvatarName.Hash` 写入（按需加载 55.9MB 文本表 + 登记增量源），上游 `{NICKNAME}` 占位符输出空串且前端不渲染（禁自造译名）；hero 名称族 = 中文主字 + hud 拉丁注音，注音仅次级字阶、族内距小于行距 |
+| 0040 | 怪物详情页战斗数值口径 | Accepted（已实现） | `MonsterTemplateConfig` 直出四项是**模板基准值**不是战斗值（HP 69.75 = 无想面具线型基数）；修正为前端合成 `基准 × MonsterConfig 维度修饰比 × HardLevelGroup 等级曲线`，曲线单文件 `monster-level-curve.json` + 详情 payload 增 `stat_ratio` / `level_group`；详情页 `基础数值` → `战斗数值` + 等级滑条（缺省 100）+ 口径与基准值注记同屏；变体档（别名页）必须用**自己**的 config 记录；难度组缺位保留基准值降级，场景系数不合成 |
+| 0041 | 主题色统一为单强调色通道 | Accepted（已实现；修订 0007 的「全壳换肤主题」与 0011 的「双色约束」，同步 0012 的四层令牌描述） | 删除货币战争独立色阶 `--cwth-*` 与 `data-cw-accent` 切换器（含 `cw-theme.ts` / 设置页 02 区块），`data-theme="cw"` 只作模式标记；货币战争页面主题位改用语义令牌并删掉为浅金准备的深色补偿；`check-contrast` 升级为「`:root` + 全部 `[data-accent]` 色板」逐个验收 |
+| 0042 | 终局玩法详情页与赛季增益体系名 | Accepted（已实现） | 新增第四种页面形态「单页数据页」`/endgame/{mode}`（规则正文 + 结构口径 + 增益体系 + 赛季列表）；体系名由 `IntroData` 分节标题派生（记忆紊流 / 荒腔走板 / 终焉公理 / 裁决象限）并上屏，站点工作名「赛季增益」降为回退；新产物 `endgame_guide.json` + 4 条快照/rewrite |
