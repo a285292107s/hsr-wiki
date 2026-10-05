@@ -68,44 +68,6 @@
   color: color-mix(in srgb, var(--eg-color) 76%, #fff);
   white-space: nowrap;
 }
-.nk-egd-floor__mons {
-  display: inline-flex;
-  align-items: flex-start;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-/* 图标格：图标 + 该敌方自己的召唤物（ADR 0036）——调用方 `align-items: flex-start` 让同行图标
-   顶边对齐，否则带召唤物的格子会把同级图标挤到垂直居中。 */
-.nk-egd-floor__moncell {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-.nk-egd-floor__mon {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--blk-800) 72%, transparent);
-  border: 1px solid color-mix(in srgb, var(--eg-color) 22%, transparent);
-  object-fit: cover;
-  transition: border-color 0.22s ease, transform 0.22s var(--nk-ease-out), box-shadow 0.22s ease;
-}
-.nk-egd-floor__mon:hover {
-  border-color: color-mix(in srgb, var(--eg-color) 60%, transparent);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-.nk-egd-floor__monlink {
-  display: inline-block;
-  line-height: 0;
-  border-radius: 50%;
-}
-.nk-egd-floor__monlink .nk-egd-floor__mon {
-  display: block;
-  transform-origin: center;
-}
 .nk-egd-floor__buff {
   margin-top: 18px;
   padding: 16px 18px;
