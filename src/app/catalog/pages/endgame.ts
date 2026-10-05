@@ -160,6 +160,7 @@ function seasonSortKey(item: CatalogItem): { date: string; isBegin: boolean } {
 export const endgamePage: CatalogPageConfig = {
   id: 'endgame',
   title: '终局内容',
+  subtitle: 'ENDGAME',
   searchPlaceholder: '搜索赛季...',
   gridClass: 'nk-cat-grid nk-eg-grid',
   cardClass: '.nk-eg-card',
@@ -237,7 +238,7 @@ export const endgamePage: CatalogPageConfig = {
       if (!col.length) continue;
       html += `<section class="nk-eg-col" data-mode="${m.key}">
         <h2 class="nk-eg-col__head">
-          <span class="nk-eg-col__name">${escHtml(m.label)}</span>
+          <a class="nk-eg-col__name" href="/endgame/${escHtml(m.key)}">${escHtml(m.label)}</a>
           <span class="nk-eg-col__en">${escHtml(m.en)}</span>
           <span class="nk-eg-col__count">${col.length}</span>
         </h2>

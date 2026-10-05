@@ -54,7 +54,7 @@ export const monsterPage: CatalogPageConfig = {
         <img src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
       </span>
       <span class="nk-mob-card__info">
-        <span class="nk-mob-card__name">${escHtml(item.name)}</span>
+        <span class="nk-mob-card__name" title="${escHtml(item.name)}">${escHtml(item.name)}</span>
         <span class="nk-mob-card__type">${escHtml(typeLabel || '未知')}</span>
       </span>
     </a>`;

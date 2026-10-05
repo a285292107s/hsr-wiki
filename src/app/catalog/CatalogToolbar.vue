@@ -27,8 +27,10 @@ const emit = defineEmits<{
     <span class="nk-cat-count">{{ countText }}</span>
   </div>
   <div class="nk-cat-toolbar">
-    <div class="nk-cat-search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+    <!-- `<label>` 而非 `<div>`：整块 40px 高的输入域（含放大镜与左右内距）都能落焦，
+         旧形态只有中间 21px 高的 input 本体可点，点了边缘/图标没有任何反应。 -->
+    <label class="nk-cat-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
         <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4" stroke-linecap="round"/>
       </svg>
       <input
@@ -37,7 +39,7 @@ const emit = defineEmits<{
         :value="query"
         @input="(e) => emit('search', (e.target as HTMLInputElement).value)"
       >
-    </div>
+    </label>
     <div v-if="filters.length" class="nk-cat-filters-bar">
       <CatalogFilterSelect
         v-for="f in filters"

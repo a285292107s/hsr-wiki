@@ -224,10 +224,17 @@ function hideOnError(e: Event) {
       </div>
     </div>
 
-    <div v-else-if="error" class="nk-crole__state nk-crole__state--err" role="alert">
-      <svg class="nk-crole__state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
-      <p>{{ error }}</p>
-      <button class="nk-crole__retry" @click="load">重试</button>
+    <div v-else-if="error" class="nk-error-state" role="alert">
+      <div class="nk-error-state__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <path d="M12 9v4" /><path d="M12 17h.01" />
+        </svg>
+      </div>
+      <div class="nk-error-state__title">角色数据加载失败</div>
+      <div class="nk-error-state__detail">可能是网络波动或该条目暂时不可用，重试即可恢复。</div>
+      <div class="nk-error-state__tech">{{ error }}</div>
+      <button class="nk-error-state__retry" type="button" @click="load">RETRY</button>
     </div>
 
     <template v-else-if="data">
@@ -358,7 +365,7 @@ function hideOnError(e: Event) {
               </table>
             </div>
           </template>
-          <div v-else class="nk-crole-empty">该角色没有成长数据</div>
+          <div v-else class="nk-slot-empty">该角色没有成长数据</div>
         </div>
 
         <div class="nk-panel" data-panel="skills">
@@ -429,7 +436,7 @@ function hideOnError(e: Event) {
               </div>
             </div>
           </template>
-          <div v-else class="nk-crole-empty">该角色没有技能数据</div>
+          <div v-else class="nk-slot-empty">该角色没有技能数据</div>
         </div>
 
         <div class="nk-panel" data-panel="ranks">
@@ -469,7 +476,7 @@ function hideOnError(e: Event) {
             </div>
             </div>
           </template>
-          <div v-else class="nk-crole-empty">该角色没有后台星魂数据</div>
+          <div v-else class="nk-slot-empty">该角色没有后台星魂数据</div>
         </div>
 
         <div class="nk-panel" data-panel="cones">
@@ -513,7 +520,7 @@ function hideOnError(e: Event) {
             </div>
           </div>
           </template>
-          <div v-else class="nk-crole-empty">该角色没有专属光锥数据</div>
+          <div v-else class="nk-slot-empty">该角色没有专属光锥数据</div>
         </div>
 
         <div class="nk-panel" data-panel="equips">
@@ -541,7 +548,7 @@ function hideOnError(e: Event) {
             </div>
           </template>
 
-          <div v-if="!recommendRows.length" class="nk-crole-empty">该角色没有推荐装备数据</div>
+          <div v-if="!recommendRows.length" class="nk-slot-empty">该角色没有推荐装备数据</div>
         </div>
 
       </div>

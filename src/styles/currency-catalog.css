@@ -12,7 +12,7 @@
   border: 1px solid var(--border);
   background: var(--card);
   text-align: center;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  transition: border-color var(--nk-dur-normal) var(--nk-ease-out), box-shadow var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out);
   animation: nk-cw-fadein 0.35s ease both;
   animation-delay: min(calc(var(--i, 0) * 30ms), 600ms);
 }
@@ -126,7 +126,7 @@
   background: var(--card);
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  transition: border-color var(--nk-dur-normal) var(--nk-ease-out), box-shadow var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out);
   animation: nk-cw-fadein 0.35s ease both;
   animation-delay: min(calc(var(--i, 0) * 30ms), 600ms);
 }

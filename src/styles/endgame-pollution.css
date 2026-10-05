@@ -1,13 +1,13 @@
 /* 终局详情页 · 污染等级（ADR 0026）与召唤物（ADR 0036）：徽标 / 赛季汇总区块 / 召唤列表。
    拆分块第 6 块（接断点与刻度块之后、排版收口块之前）。 */
 /* ─── 污染等级（ADR 0026）：楼层头 / 半场 / 单关徽标 + 赛季汇总区块 ─── */
+/* 字号 / 间距归 `endgame-type-scale.css` 末段收口（本块之后导入）：本文件只声明非刻度属性 */
 .nk-egd-pollchip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
   font-family: var(--font-hud);
-  font-size: 0.64rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   white-space: nowrap;
@@ -15,10 +15,8 @@
 }
 .nk-egd-code {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
   letter-spacing: 0.08em;
   color: var(--text3);
-  white-space: nowrap;
 }
 
 .nk-egd-poll { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
@@ -43,7 +41,6 @@
   flex-shrink: 0;
 }
 .nk-egd-poll__levelno {
-  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--text-bright);
@@ -57,7 +54,6 @@
 .nk-egd-poll__list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -67,13 +63,11 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 11px 14px;
   border: 1px solid var(--line-1);
   border-radius: var(--nk-radius-card);
   background: color-mix(in srgb, var(--blk-900) 10%, transparent);
 }
 .nk-egd-poll__pos {
-  font-size: 0.84rem;
   font-weight: 600;
   color: var(--text-bright);
   white-space: nowrap;
@@ -87,7 +81,6 @@
 }
 .nk-egd-poll__monslabel {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
   letter-spacing: 0.1em;
   color: var(--text3);
 }
@@ -124,7 +117,6 @@
   min-width: 0;
 }
 .nk-egd-summons__label {
-  font-size: 0.64rem;
   letter-spacing: 0.05em;
   color: var(--text3);
 }

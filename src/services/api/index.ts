@@ -5,6 +5,7 @@ export { loadLocalVersion } from './version';
 export {
   RARITY_NUM_TO_KEY, loadLocalItems, loadLocalItemDb,
   loadLocalMonsterList, loadLocalMonsterDetail, loadLocalLightCones, loadLocalLightConeDetail,
+  loadLocalMonsterLevelCurve,
 } from './items';
 export {
   loadLocalCharacterList, loadLocalCharacter, loadSkillAnimations, loadLocalBuildNames,
@@ -16,6 +17,7 @@ export {
 export {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
   loadLocalMazeCatalog, loadLocalStoryCatalog, loadLocalBossCatalog, loadLocalPeakCatalog,
+  loadLocalEndgameGuide,
 } from './endgame';
 export { loadLocalAchievements, loadLocalAchievementSeries } from './achievements';
 export { loadLocalVoracity } from './voracity';

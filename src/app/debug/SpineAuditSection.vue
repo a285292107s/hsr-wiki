@@ -5,6 +5,7 @@ import type { SpineResolved } from '../../services/types';
 import { toast } from './lib/toast';
 import SpineAuditDetail from './SpineAuditDetail.vue';
 import { copyText, downloadJson } from './report';
+import './spine-audit.css';
 import {
   AuditEntry, AuditKind, buildDiagnosis, classifyStatus,
   createAuditEntry, resetAuditEntry, auditRender, auditStaticResources,
@@ -372,13 +373,6 @@ onBeforeUnmount(() => {
   background: var(--primary);
   transition: width 0.3s var(--nk-ease-out);
 }
-.nk-spine-audit__error {
-  margin: 10px 0 0;
-  color: #ff6b6b;
-  font-size: 13px;
-  line-height: 1.6;
-  word-break: break-all;
-}
 
 .nk-spine-audit__filters {
   display: flex;
@@ -532,33 +526,6 @@ onBeforeUnmount(() => {
 .nk-spine-audit__badge.is-pending { color: var(--text3); background: color-mix(in srgb, var(--text) 10%, transparent); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); }
 .nk-spine-audit__caret { color: var(--text3); font-size: 10px; flex: none; }
 
-.nk-spine-audit__select {
-  padding: 3px 8px;
-  max-width: 220px;
-  font-family: ui-monospace, monospace;
-  font-size: 12px;
-  color: var(--text);
-  background: color-mix(in srgb, var(--bg) 85%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text) 24%, transparent);
-  border-radius: 6px;
-  cursor: pointer;
-}
-.nk-spine-audit__select:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-.nk-spine-audit__btn {
-  padding: 4px 12px;
-  font-size: 12px;
-  font-family: inherit;
-  color: var(--text);
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
-  border-radius: 7px;
-  cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.18s var(--nk-ease-out);
-}
-.nk-spine-audit__btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--text) 55%, transparent); }
-.nk-spine-audit__btn:active:not(:disabled) { background: color-mix(in srgb, var(--text) 14%, transparent); transform: translateY(0); }
-.nk-spine-audit__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-.nk-spine-audit__btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 .nk-spine-audit__btn.is-danger { border-color: rgba(229, 72, 77, 0.5); color: #ffb3b3; }
 .nk-spine-audit__btn.is-danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.12); }
 .nk-spine-audit__btn.is-primary {
@@ -582,7 +549,7 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nk-spine-audit__btn, .nk-spine-audit__row, .nk-spine-audit__progress-bar { transition: none; }
+  .nk-spine-audit__row, .nk-spine-audit__progress-bar { transition: none; }
   .nk-spine-audit__row.is-running .nk-spine-audit__bar,
   .nk-spine-audit__badge.is-running { animation: none; }
 }

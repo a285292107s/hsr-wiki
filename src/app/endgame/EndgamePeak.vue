@@ -14,9 +14,13 @@ import type { MazeListEntry, PeakLevelInfo } from '../../services/types';
 const props = defineProps<{
   data: MazeListEntry;
   peakLevels: PeakLevelInfo[];
+  /** 增益体系名（异相仲裁 = 裁决象限；来自 `endgame_guide.json`，空串则不渲染该标签） */
+  systemName?: string;
 }>();
 
-const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, 'peak', props.peakLevels)));
+const sectionIdx = computed(
+  () => sectionIdxMap(buildEndgameSections(props.data, 'peak', props.peakLevels, props.systemName)),
+);
 </script>
 
 <template>
@@ -99,6 +103,8 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
           </ol>
 
           <div v-if="l.buffs?.length" class="nk-egd-floor__buffs">
+            <!-- 王棋关卡增益的体系名（游戏内「裁决象限」，取自 endgame_guide.json；缺省回退站点工作名） -->
+            <div v-if="systemName" class="nk-egd-floor__label">{{ systemName }}</div>
             <div v-for="b in l.buffs" :key="b.id" class="nk-egd-floor__buff">
               <div class="nk-egd-floor__buffhead">
                 <img v-if="b.icon" class="nk-egd-buff__icon nk-egd-buff__icon--sm" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">

@@ -1,6 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+/* 字体的加载不放这里：`@import` 在 CSS 里是**串行**的（要先取到并解析本文件，才会去请求被导入的
+   样式表），实测字体 CSS 到 +65ms 才起步、往返 531ms，等于把首屏字体推到应用 CSS 之后。
+   已改为 `index.html` 里的 `<link rel="preconnect">` + `<link rel="stylesheet">`（并行发现 + 预先建连）。 */
 
 :root {
+  /* 本页永远是深色：声明 `color-scheme: dark` 后，浏览器把原生滚动条、表单控件下拉、iOS 过度滚动
+     背景一律按深色绘制。此前没声明，目录页的滚动条与（调试台的）原生 select 弹层都是浅色。 */
+  color-scheme: dark;
   --ph-50: #f5eefd;
   --ph-100: #e6d4fb;
   --ph-200: #d2aaf7;
@@ -74,20 +79,8 @@
   --gold-500: #D4AF37;
   --gold-600: #A8862E;
   --gold-700: #7A6220;
-  --rs-200: #F8DDD6;
-  --rs-300: #F1C4BA;
-  --rs-350: #E9B0A4;
-  --rs-400: #DB8D7D;
-  --rs-500: #C67360;
-  --rs-600: #9C5444;
-  --rs-700: #723C30;
-  --sv-200: #E9EDF1;
-  --sv-300: #D9E0E6;
-  --sv-350: #C8D2DA;
-  --sv-400: #AAB7C2;
-  --sv-500: #8C9AA7;
-  --sv-600: #687682;
-  --sv-700: #4A5660;
+  /* 绿松石阶：全部消费点在调试台系统地图（`SystemMapSection.vue` 的 --nk-edge-data 与
+     `map-data.ts` 的「研究线」节点色）——研究工具身份色，非产品 UI 令牌 */
   --em-200: #D3E9DA;
   --em-300: #A9D3B9;
   --em-350: #91C4A4;
@@ -95,13 +88,6 @@
   --em-500: #539260;
   --em-600: #3C6E48;
   --em-700: #2A4F34;
-  --cp-200: #F6DFCD;
-  --cp-300: #ECC09B;
-  --cp-350: #E2AC7F;
-  --cp-400: #D4905E;
-  --cp-500: #BC7345;
-  --cp-600: #93562E;
-  --cp-700: #6A3C20;
   --blk-950: #000000;
   --blk-900: #0A0A0B;
   --blk-850: #121214;
@@ -173,19 +159,14 @@
   --ach-rarity-high: var(--gold-600);
   --ach-rarity-high-text: var(--gold-300);
 
-  --th-300: var(--tc-300);
-  --th-400: var(--tc-400);
-  --th-500: var(--tc-500);
-  --th-600: var(--tc-600);
-  --th-700: var(--tc-700);
-
-  --cwth-200: var(--gold-200);
-  --cwth-300: var(--gold-300);
-  --cwth-350: var(--gold-350);
-  --cwth-400: var(--gold-400);
-  --cwth-500: var(--gold-500);
-  --cwth-600: var(--gold-600);
-  --cwth-700: var(--gold-700);
+  /* 缺省主题色 = **橄榄青**（`--ol-*`）。切到其它色相写 `<html data-accent="...">`；
+     切回橄榄青时移除该属性即可（`src/lib/theme.ts` 的 applyAccent 对默认值走 delete 分支）。
+     赤陶仍是可选色板，只是不再占据缺省位。 */
+  --th-300: var(--ol-300);
+  --th-400: var(--ol-400);
+  --th-500: var(--ol-500);
+  --th-600: var(--ol-600);
+  --th-700: var(--ol-700);
 
   --bg: var(--blk-850);
   --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 88%, transparent);
@@ -217,16 +198,22 @@
   --vor-500: #C40C6A;
   --vor-300: #FC48AC;
   --badge-test: #F59E0B;
-  --font-hud: 'Orbitron', monospace;
-  --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
-  --ease: cubic-bezier(0.16,1,0.3,1);
+  /* 双族排版：Noto Sans SC 承载中文与正文（含 900 真字重），IBM Plex Mono 承载全部
+     拉丁标签 / 编号 / 读数。此前 --font-mono 走系统 mono 栈、--font-hud 走 Orbitron——
+     前者随操作系统漂移（同一页面在 macOS / Windows 上字形不同），后者是装饰性科技体，
+     两者都不满足「读数与标签必须精确且处处一致」的档案语气。 */
+  --font-hud: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+  --font-body: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+
   --nk-content-max: 1440px;
   --nk-content-offset: 0;
   --nk-detail-max: 1000px;
   --nk-struct-max: 952px;
   --nk-prose-max: 800px;
   --nk-dur-fast: 150ms;
+  --nk-dur-hover: 200ms;
+  --nk-dur-zoom: 400ms;
   --nk-dur-normal: 300ms;
   --nk-dur-slow: 500ms;
   --nk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -245,7 +232,10 @@
   --nk-sheet-border: color-mix(in srgb, var(--primary) 35%, transparent);
   --nk-sheet-item-bg: color-mix(in srgb, var(--primary) 5%, transparent);
   --nk-sheet-item-border: color-mix(in srgb, var(--primary) 14%, transparent);
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 94%, var(--primary) 6%) 82%, transparent);
+  /* 吸顶控制条（目录工具栏）：此前是「同色相暖调浅板」（blk-800 + 6% 强调色，比页面底色更亮），
+     贴在冷黑页面上像换了一种材质；改为**冷色压暗 + 一点强调色**，与 `backdrop-filter` 合起来读作磨砂玻璃。
+     两个令牌只有 `.nk-cat-toolbar` 一个消费点，故可安全地按它调。 */
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 96%, var(--primary) 4%) 86%, transparent);
   --nk-header-border: color-mix(in srgb, var(--primary) 16%, transparent);
   --nk-input-bg: color-mix(in srgb, var(--primary) 6%, transparent);
   --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
@@ -262,86 +252,9 @@
   :root { --nk-content-offset: 148px; }
 }
 
-[data-theme="cw"] {
-  --bg: var(--blk-850);
-  --surface: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 90%, transparent);
-  --card: color-mix(in srgb, color-mix(in srgb, var(--blk-750) 94%, var(--cwth-500) 6%) 82%, transparent);
-  --primary: var(--cwth-500);
-  --primary-glow: color-mix(in srgb, var(--primary) 25%, transparent);
-  --accent: var(--cwth-600);
-  --th-300: var(--cwth-300);
-  --th-400: var(--cwth-600);
-  --th-500: var(--cwth-500);
-  --th-600: var(--cwth-700);
-  --th-700: var(--cwth-700);
-  --gold: var(--cwth-600);
-  --gold-sem: var(--cwth-600);
-  --text: color-mix(in srgb, var(--text-bright) 94%, var(--cwth-300) 6%);
-  --text2: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 70%, transparent);
-  --text-bright: color-mix(in srgb, white 94%, var(--cwth-300) 6%);
-  --text3: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 52%, transparent);
-  --border: color-mix(in srgb, var(--cwth-500) 18%, transparent);
-  --border2: color-mix(in srgb, var(--cwth-500) 40%, transparent);
-  --highlight: var(--cwth-300);
-  --metric-val: var(--cwth-300);
-  --rarity-5: var(--gold-600);
-  --nk-shell-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 97%, var(--cwth-500) 3%) 96%, transparent);
-  --nk-shell-hover: color-mix(in srgb, var(--cwth-500) 10%, transparent);
-  --nk-shell-press: color-mix(in srgb, var(--cwth-500) 16%, transparent);
-  --nk-shell-active-bg: color-mix(in srgb, var(--cwth-500) 16%, transparent);
-  --nk-shell-active-border: color-mix(in srgb, var(--cwth-500) 45%, transparent);
-  --nk-shell-glow: color-mix(in srgb, var(--cwth-500) 20%, transparent);
-  --nk-sheet-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 95%, transparent);
-  --nk-sheet-border: color-mix(in srgb, var(--cwth-500) 35%, transparent);
-  --nk-sheet-item-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
-  --nk-sheet-item-border: color-mix(in srgb, var(--cwth-500) 16%, transparent);
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--cwth-500) 5%) 94%, transparent);
-  --nk-header-border: color-mix(in srgb, var(--cwth-500) 14%, transparent);
-  --nk-input-bg: color-mix(in srgb, var(--cwth-500) 6%, transparent);
-  --nk-input-border: color-mix(in srgb, var(--cwth-500) 20%, transparent);
-  --nk-page-tint: color-mix(in srgb, var(--cwth-500) 5%, transparent);
-  --nk-card-border: color-mix(in srgb, var(--cwth-500) 28%, transparent);
-  --line-1: color-mix(in srgb, var(--text-bright) 8%, transparent);
-  --line-2: color-mix(in srgb, var(--text-bright) 15%, transparent);
-}
-
-[data-theme="cw"][data-cw-accent="rose"] {
-  --cwth-200: var(--rs-200);
-  --cwth-300: var(--rs-300);
-  --cwth-350: var(--rs-350);
-  --cwth-400: var(--rs-400);
-  --cwth-500: var(--rs-500);
-  --cwth-600: var(--rs-600);
-  --cwth-700: var(--rs-700);
-}
-[data-theme="cw"][data-cw-accent="silver"] {
-  --cwth-200: var(--sv-200);
-  --cwth-300: var(--sv-300);
-  --cwth-350: var(--sv-350);
-  --cwth-400: var(--sv-400);
-  --cwth-500: var(--sv-500);
-  --cwth-600: var(--sv-600);
-  --cwth-700: var(--sv-700);
-}
-[data-theme="cw"][data-cw-accent="emerald"] {
-  --cwth-200: var(--em-200);
-  --cwth-300: var(--em-300);
-  --cwth-350: var(--em-350);
-  --cwth-400: var(--em-400);
-  --cwth-500: var(--em-500);
-  --cwth-600: var(--em-600);
-  --cwth-700: var(--em-700);
-}
-[data-theme="cw"][data-cw-accent="copper"] {
-  --cwth-200: var(--cp-200);
-  --cwth-300: var(--cp-300);
-  --cwth-350: var(--cp-350);
-  --cwth-400: var(--cp-400);
-  --cwth-500: var(--cp-500);
-  --cwth-600: var(--cp-600);
-  --cwth-700: var(--cp-700);
-}
-
+/* 主题色单通道（ADR 0041）：原 `[data-theme="cw"]` 的整层语义重映射与 4 个 CW 专属色板
+   （rose / silver / emerald / copper）已退场——货币战争跟随常规强调色通道 `data-accent` / `--th-*`，
+   全站同一时刻只有一个色相。 */
 [data-accent="olive"] {
   --th-300: var(--ol-300);
   --th-400: var(--ol-400);
@@ -406,17 +319,46 @@
   background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
   opacity: 0.8;
 }
+/* 手机底栏：分隔线改画在「章节组 ↔ 工具组（调试台 / 跨模式入口 / 设置）」之间。
+   桌面档它是品牌带下的整条发丝线（位置不动），而底栏里品牌带是隐藏的——
+   跨模式入口移入工具组后，分隔线若留在原位会变成最左缘一根无来由的竖线。 */
+@media (max-width: 767px) {
+  .ui-sidebar-divider { order: 1; }
+  .ui-sidebar-tools > * { order: 2; }
+}
+.ui-sidebar-brand { display: none; }
+@media (min-width: 768px) {
+  .ui-sidebar-brand {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; flex: none;
+    padding: 2px 0 10px; text-decoration: none;
+  }
+  .ui-sidebar-brand__mark { display: flex; width: 30px; height: 30px; color: var(--metric-val); transition: transform 0.5s var(--nk-ease-out); }
+  .ui-sidebar-brand__mark svg { width: 100%; height: 100%; }
+  .ui-sidebar-brand:hover .ui-sidebar-brand__mark { transform: rotate(180deg); }
+  .ui-sidebar-brand__text { display: none; }
+}
+@media (min-width: 1024px) {
+  .ui-sidebar-brand { justify-content: flex-start; gap: 10px; padding: 2px 6px 12px; }
+  .ui-sidebar-brand__mark { width: 26px; height: 26px; flex: none; }
+  .ui-sidebar-brand__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .ui-sidebar-brand__cn { font-size: 0.84rem; font-weight: 700; letter-spacing: 0.06em; color: var(--text-bright); white-space: nowrap; }
+  .ui-sidebar-brand__en { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.18em; color: var(--text3); text-transform: uppercase; white-space: nowrap; }
+}
+
 .ui-sidebar-link {
   flex: 1 1 auto; min-width: 44px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   background: transparent; padding: 0;
   border: 1px solid transparent; border-radius: 10px;
+  /* 内容项是 `<RouterLink>`、交换/「更多」是 `<button>`，两者的文案落位差异由外壳的
+     `:where(#app) button { text-align: inherit }` 收口（见那条注释）；这里不再单独声明。 */
   /* 非激活态整体 0.72 的不透明度把 10px 标签压到 4.07:1（`--text2` 以 0.72 复合到手机底栏底色
      `#1e1c1d`）——**低于 WCAG 1.4.3 的 4.5:1**，且只在 <768 档出现（该档底栏不透明、标签可见）。
      取 0.85：该底色下 5.16:1、页面底色下 5.56:1，仍是明确的「弱化」档（激活态为不透明 + metric-val）。
      口径：不透明度不保留文本语义，改用显式取值即可同时满足对比度与「弱化」的视觉意图。 */
   color: var(--text2); opacity: 0.85;
-  transition: color 0.2s, opacity 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out), opacity var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out), border-color var(--nk-dur-hover) var(--nk-ease-out), box-shadow var(--nk-dur-hover) var(--nk-ease-out);
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   position: relative;
 }
@@ -483,7 +425,7 @@
   border: 1px solid var(--nk-sheet-item-border); border-radius: 12px;
   background: var(--nk-sheet-item-bg);
   color: var(--text2);
-  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  transition: color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out);
   -webkit-tap-highlight-color: transparent;
 }
 .ui-more__item:active { background: var(--nk-shell-press); }
@@ -502,10 +444,48 @@
   .ui-more-enter-active .ui-more__sheet, .ui-more-leave-active .ui-more__sheet { transition: none; }
 }
 
-#app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+/* 全站环境层（单一事实源）：页面根容器一律透明，只有 #app 画这一层。
+   构成 = 右上角光源（高峰值 + 快衰减，读成「有一束光」而不是一片糊）+ 顶部地平线带
+   + 四周暗角（把网格压回背景、给内容让出对比度）+ 96px 档案网格（精密感来源）。
+   旧版是两块大椭圆主色 wash（ellipse 90% 52% at 72% -8%），低峰值大范围在黑底上
+   只会读成一团脏斑——峰值低、衰减慢是「糊」的两个成因，改的是这两项不是颜色。 */
+:root {
+  --nk-ambient-lattice: 120px;
+  /* 底纹用**点阵**而不是直线网：页面里到处是 1px 发丝线（`--line-1/2` = 白 7% / 13%），
+     而 `#app` 的底纹是 `background-attachment: fixed`（滚动时不动）⇒ 直线网会与发丝线
+     周期性**并行重合**，读者看到的是忽明忽暗的「重线」；点阵不形成长直线，从根上不与之竞争。
+     模数同时由 96px 放到 120px（更疏），点用 3.2%（比原来的 2% 直线略亮做补偿——同不透明度下
+     一个 1px 点比 1px 线的视觉重量轻得多）。 */
+  --nk-ambient-dot: color-mix(in srgb, var(--text-bright) 3.2%, transparent);
+  --nk-ambient-image:
+    radial-gradient(56% 26% at 86% -6%, color-mix(in srgb, var(--primary) 15%, transparent) 0%, transparent 72%),
+    linear-gradient(180deg, color-mix(in srgb, var(--primary) 5%, transparent) 0%, transparent 240px),
+    radial-gradient(118% 94% at 50% 44%, transparent 50%, color-mix(in srgb, var(--blk-950) 55%, transparent) 100%),
+    radial-gradient(circle at center, var(--nk-ambient-dot) 1px, transparent 1.6px);
+  --nk-ambient-size: auto, auto, auto,
+    var(--nk-ambient-lattice) var(--nk-ambient-lattice);
+}
+#app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background-color: var(--bg); background-image: var(--nk-ambient-image); background-size: var(--nk-ambient-size); background-attachment: fixed; -webkit-font-smoothing: antialiased; scrollbar-color: var(--border2) transparent; }
+/* 外壳级细节三件：选区 / 光标 / 滚动条。
+   ① `::selection` 此前只写在 `.nk-char-page` 里（`character-hero.css`），其余 100+ 页是浏览器默认蓝，
+      与赤陶强调色不搭 ⇒ 提为全局单点声明，页面级那份删掉（同一事实只留一处）。
+   ② 输入框光标此前是文字色（近白），改随强调色——搜索框是本站最主要的输入点。
+   ③ `scrollbar-color` 是**继承属性**，写在 `#app` 上即可覆盖目录页 / 首页 / 详情页的全部滚动容器；
+      **刻意不设 `scrollbar-width: thin`**：细滚动条会让滚动容器宽出约 7px，虚拟网格的列数/格子宽
+      随之改变（会连带刷新像素基线与目录断言），收益只是滚动条窄一点，不值得。
+      需要隐藏滚动条的地方仍各自 `scrollbar-width: none`（如筛选条、横向卡片带）。 */
+:where(#app) ::selection { background: color-mix(in srgb, var(--primary) 32%, transparent); color: var(--text-bright); }
+:where(#app) input,
+:where(#app) textarea { caret-color: var(--primary); }
 :where(#app) h1, :where(#app) h2, :where(#app) h3, :where(#app) p, :where(#app) dl, :where(#app) dt, :where(#app) dd { margin: 0; padding: 0; }
 :where(#app) * { box-sizing: border-box; }
-:where(#app) button { font: inherit; color: inherit; cursor: pointer; }
+/* `text-align: inherit` 是**元素类型差异的收口**：UA 给 `<button>` 声明了 `text-align: center`，而
+   `<a>` / `<div>` 只是继承。类名相同的元素因此按标签表现不同——侧栏「货币战争」看着居中而其余 tab
+   左对齐就是这个原因（≥1024 档 `.ui-sidebar-link__text` 纵向 flex 把两行拉到同宽后，由 `text-align`
+   决定落位）。差分实测（把 11 个按钮族的 `text-align` 逐个内联改掉再比文字 ink 位移）：除侧栏交换项外
+   其余族的居中来自各自的 flex 布局、`text-align` 无可见影响 ⇒ 这条收口**不改变任何现有渲染**，
+   但消除了「下一个纵向拉伸的按钮内文案又会居中」这类隐患。 */
+:where(#app) button { font: inherit; color: inherit; cursor: pointer; text-align: inherit; }
 :where(#app) img { display: inline-block; vertical-align: middle; }
 :where(#app) a { color: inherit; text-decoration: none; }
 
@@ -571,10 +551,10 @@ background-position: center 15%;
   pointer-events: none;
 }
 .nk-hero__scrim { display: none; }
-.nk-hero__toggle { position: absolute; top: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 16px; background: color-mix(in srgb, var(--blk-900) 60%, transparent); border: 1px solid var(--border); backdrop-filter: blur(8px); cursor: pointer; font-size: 0.625rem; color: var(--text2); transition: all 0.2s; user-select: none; }
+.nk-hero__toggle { position: absolute; top: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 16px; background: color-mix(in srgb, var(--blk-900) 60%, transparent); border: 1px solid var(--border); backdrop-filter: blur(8px); cursor: pointer; font-size: 0.625rem; color: var(--text2); transition: all 0.2s var(--nk-ease-out); user-select: none; }
 .nk-hero__toggle::before { content: ''; position: absolute; inset: -9px; }
 .nk-hero__toggle:hover { border-color: var(--border2); color: var(--text); }
-.nk-hero__toggle .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.4); transition: all 0.2s; }
+.nk-hero__toggle .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.4); transition: all 0.2s var(--nk-ease-out); }
 .nk-hero__toggle.off .dot { background: var(--text3); box-shadow: none; }
 .nk-hero__toggle:not(.has-anim) { opacity: 0.35; cursor: default; }
 .nk-hero__toggle:not(.has-anim) .dot { background: var(--text3); box-shadow: none; }
@@ -605,7 +585,7 @@ background-position: center 15%;
   padding: 5px 12px; border-radius: 16px;
   background: color-mix(in srgb, var(--primary) 8%, transparent); border: 1px solid var(--border);
   font-size: 0.75rem; color: var(--text2);
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
 }
 .nk-hero__tag:hover { border-color: var(--border2); background: color-mix(in srgb, var(--primary) 14%, transparent); }
 .nk-hero__tag img { width: 16px; height: 16px; border-radius: 50%; }
@@ -637,7 +617,7 @@ background-position: center 15%;
   transition: width 0.6s var(--nk-ease-out);
 }
 .nk-hero__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; }
-.nk-hero__stat { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent); transition: background 0.2s; }
+.nk-hero__stat { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent); transition: background 0.2s var(--nk-ease-out); }
 .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .nk-hero__stat:hover { background: color-mix(in srgb, var(--primary) 5%, transparent); }
 .nk-hero__stat-icon {
@@ -652,11 +632,12 @@ background-position: center 15%;
 .nk-tabs { position: sticky; top: 0; z-index: 10; width: 100%; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
 .nk-tabs__bar { display: flex; justify-content: space-between; align-items: center; gap: 0; max-width: var(--nk-detail-max); margin: 0 auto; padding: 0 16px; overflow-x: auto; }
 .nk-tabs__left { display: flex; }
-.nk-tab { display: inline-flex; align-items: center; min-height: 44px; padding: 12px 16px; font-size: 0.75rem; font-weight: 600; color: var(--text3); cursor: pointer; border: none; background: none; position: relative; transition: color 0.2s; letter-spacing: 0.02em; white-space: nowrap; }
+.nk-tab { display: inline-flex; align-items: center; min-height: 44px; padding: 12px 16px; font-size: 0.75rem; font-weight: 600; color: var(--text3); cursor: pointer; border: none; background: none; position: relative; transition: color var(--nk-dur-hover) var(--nk-ease-out); letter-spacing: 0.02em; white-space: nowrap; }
 .nk-tab:first-child { padding-left: 0; }
 .nk-tab:hover { color: var(--text2); }
 .nk-tab--active { color: var(--metric-val); }
-.nk-tab--active::after { content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); border-radius: 1px; }
+.nk-tab--active::after { content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); border-radius: 1px; transform-origin: left center; animation: nk-tab-in 0.3s var(--nk-ease-out); }
+@keyframes nk-tab-in { from { transform: scaleX(0); } }
 
 .nk-secnav {
   display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0;
@@ -668,7 +649,7 @@ background-position: center 15%;
   padding: 6px 11px; border-radius: 4px; border: none; background: transparent;
   font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em;
   color: var(--text3); cursor: pointer; white-space: nowrap;
-  transition: color 0.15s, background 0.15s; position: relative; flex-shrink: 0;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out); position: relative; flex-shrink: 0;
 }
 .nk-secnav__btn::before {
   content: ''; position: absolute; left: 0; right: 0; top: -7px; bottom: -7px;
@@ -685,7 +666,7 @@ background-position: center 15%;
 .nk-panels { flex: 1; overflow: visible; }
 .nk-panels::-webkit-scrollbar { width: 4px; }
 .nk-panels::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.nk-panel { display: none; max-width: var(--nk-detail-max); margin: 0 auto; padding: 24px 16px 60px; animation: nk-fade 0.3s var(--ease); }
+.nk-panel { display: none; max-width: var(--nk-detail-max); margin: 0 auto; padding: 24px 16px 60px; animation: nk-fade 0.3s var(--nk-ease-out); }
 .nk-panel--active { display: block; }
 @keyframes nk-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -697,7 +678,7 @@ background-position: center 15%;
   display: flex; align-items: center; justify-content: center;
   background: color-mix(in srgb, var(--blk-800) 80%, transparent); border: 1px solid var(--line-1);
   color: var(--text3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  cursor: pointer; transition: color 0.2s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out), transform 0.2s var(--nk-ease-out);
   box-shadow: 0 4px 16px rgba(0,0,0,0.45);
 }
 .nk-top-btn svg { width: 18px; height: 18px; transition: transform 0.2s var(--nk-ease-out); }
@@ -710,18 +691,18 @@ background-position: center 15%;
 }
 .nk-title {
   display: flex; align-items: baseline; gap: 12px;
-  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.24em; text-transform: uppercase;
-  color: var(--text2);
+  font-family: var(--font-body); font-size: 0.8125rem; font-weight: 800;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text-bright);
   margin-bottom: 20px; padding-bottom: 0;
   border-bottom: none;
 }
 .nk-title::after {
   content: ''; flex: 1; height: 1px; align-self: center;
-  background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 48%, transparent 100%);
+  background: var(--line-2);
 }
 .nk-title__idx {
-  flex: none; font-size: 0.6rem; letter-spacing: 0; color: var(--metric-val); opacity: 0.95;
+  flex: none; font-family: var(--font-hud); font-size: 0.8125rem; letter-spacing: 0.04em; color: var(--metric-val);
   padding-right: 10px;
   border-right: 1px solid var(--line-2);
 }
@@ -817,7 +798,10 @@ background-position: center 15%;
 .nk-skeleton__body { padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
 .nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
-.nk-skeleton--catalog { padding: 0 24px 80px var(--nk-content-offset); }
+/* `.nk-skeleton--catalog` 不带内距：它渲染在 `#nk-catalog-app` 之内，而后者已声明
+   `padding: 0 24px 80px var(--nk-content-offset)`。此处再声明一份等于**双层内距**——
+   骨架网格被多推入 148px（桌面）且窄 172px，数据到达时整块内容会向左跳并重排列数。
+   骨架级距由包裹容器（`#nk-catalog-app`）唯一提供，见 CatalogPage.vue 的模板。 */
 .nk-skeleton__header { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .nk-skeleton__filters { padding: 12px 0; }
 .nk-skeleton__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min, 150px), 1fr)); gap: var(--nk-grid-gap, 14px); padding-top: 16px; }
@@ -825,44 +809,46 @@ background-position: center 15%;
 .nk-relic-grid .nk-skeleton__card-img,
 .nk-item-grid .nk-skeleton__card-img,
 .nk-mob-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
-.nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 12px; }
 .nk-idx-grid .nk-skeleton__card-img { aspect-ratio: 3 / 4; border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) { .nk-sk--shimmer::after { animation: none; } }
 
 img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
 
-.nk-placeholder { position: absolute; inset: 0; overflow-y: auto; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 0 24px calc(56px + env(safe-area-inset-bottom, 0px)); }
-@media (min-width: 768px) { .nk-placeholder { padding-bottom: 0; } }
-.nk-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
-.nk-empty__icon { font-size: 2.5rem; opacity: 0.8; }
-.nk-empty__title { font-family: var(--font-hud); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text2); }
-.nk-empty__sub { font-size: 0.78rem; color: var(--text3); line-height: 1.6; }
-.nk-error-state, .nk-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 80px 24px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
-.nk-error-state__icon, .nk-empty-state__icon { width: 48px; height: 48px; color: var(--text3); opacity: 0.6; }
-.nk-error-state__icon svg, .nk-empty-state__icon svg { width: 100%; height: 100%; }
-.nk-error-state__icon { color: var(--diff-del); }
-.nk-error-state__title, .nk-empty-state__title { font-family: var(--font-hud); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text2); text-transform: uppercase; }
-.nk-error-state__detail, .nk-empty-state__sub { font-size: 0.78rem; color: var(--text3); max-width: 400px; line-height: 1.6; }
-.nk-error-state__retry { margin-top: 8px; padding: 8px 24px; border-radius: 20px; background: var(--primary); border: none; color: var(--text-bright); font-family: var(--font-hud); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; cursor: pointer; transition: all var(--nk-dur-fast) ease; }
-.nk-error-state__retry:hover { box-shadow: 0 0 20px var(--primary-glow); transform: translateY(-1px); }
+/* 面板空槽：虚线框标出「此处本应有数据」，是设计态而不是留白 */
+.nk-slot-empty { padding: 30px 20px; text-align: center; font-size: 0.78rem; line-height: 1.7; letter-spacing: 0.02em; color: var(--text3); border: 1px dashed var(--line-2); border-radius: 4px; }
+.nk-error-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 80px 24px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
+.nk-error-state__icon { width: 48px; height: 48px; color: var(--diff-del); opacity: 0.6; }
+.nk-error-state__icon svg { width: 100%; height: 100%; }
+.nk-error-state__title { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em; color: var(--text-bright); }
+.nk-error-state__detail { font-size: 0.78rem; color: var(--text3); max-width: 400px; line-height: 1.6; }
+.nk-error-state__tech { max-width: 52ch; font-family: var(--font-hud); font-size: 0.62rem; letter-spacing: 0.06em; line-height: 1.6; color: var(--text3); overflow-wrap: anywhere; }
+.nk-error-state__retry { margin-top: 8px; padding: 9px 22px; border-radius: 4px; background: var(--primary); border: 1px solid transparent; color: var(--text-bright); font-family: var(--font-hud); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.15em; cursor: pointer; transition: background var(--nk-dur-fast) ease, border-color var(--nk-dur-fast) ease; }
+.nk-error-state__retry:hover { background: color-mix(in srgb, var(--primary) 86%, var(--text-bright) 14%); }
+.nk-error-state__retry:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
 
-.nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 48px var(--nk-content-offset); text-align: center; }
-.nk-hub-footer__motto { font-family: var(--font-body); font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.24em; color: var(--text-bright); }
-.nk-hub-footer__latin { margin: 16px 0 0; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.3em; color: var(--text3); }
+.nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 88px 40px 56px var(--nk-content-offset); text-align: center; }
+.nk-hub-footer::before { content: ''; display: block; width: min(320px, 52%); height: 1px; margin: 0 auto 44px; background: linear-gradient(90deg, transparent, var(--line-2) 30%, var(--line-2) 70%, transparent); }
+.nk-hub-footer__motto { font-family: var(--font-body); font-size: clamp(1.25rem, 2.4vw, 1.7rem); font-weight: 900; letter-spacing: 0.3em; text-indent: 0.3em; color: var(--text-bright); }
+.nk-hub-footer__latin { margin: 14px 0 0; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.42em; text-indent: 0.42em; color: var(--text3); }
 @media (min-width: 768px) and (max-width: 1023px) {
-  .nk-hub-footer { padding: 56px 32px 40px var(--nk-content-offset); }
+  .nk-hub-footer { padding: 64px 32px 44px var(--nk-content-offset); }
+  .nk-hub-footer::before { margin-bottom: 36px; }
 }
 @media (max-width: 767px) {
-  .nk-hub-footer { padding: 48px 20px calc(72px + env(safe-area-inset-bottom, 0px)); }
+  .nk-hub-footer { padding: 52px 20px calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .nk-hub-footer::before { margin-bottom: 30px; }
 }
 
 .nk-hub-brand {
   position: relative;
-  min-height: 200px;
+  min-height: clamp(210px, 22vh, 240px);
   display: flex;
   align-items: flex-end;
   overflow: hidden;
-  background: radial-gradient(ellipse 90% 70% at 72% 22%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 55%), radial-gradient(ellipse 130% 100% at 8% 110%, var(--hero-bg-tint) 0%, transparent 62%), linear-gradient(170deg, var(--hero-bg-deep) 0%, var(--bg) 55%, color-mix(in srgb, var(--blk-900) 88%, var(--th-500) 12%) 100%);
+  background:
+    radial-gradient(42% 130% at 86% -4%, color-mix(in srgb, var(--primary) 20%, transparent) 0%, transparent 66%),
+    radial-gradient(64% 120% at 10% 6%, color-mix(in srgb, var(--primary) 7%, transparent) 0%, transparent 62%),
+    linear-gradient(168deg, var(--hero-bg-deep) 0%, var(--bg) 64%);
 }
 .nk-hub-brand__scrim {
   position: absolute;
@@ -876,47 +862,48 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   width: 100%;
   max-width: var(--nk-content-max);
   margin: 0 auto;
-  padding: 0 48px 28px var(--nk-content-offset);
+  padding: 0 48px 40px var(--nk-content-offset);
 }
 .nk-hub-brand__supra {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   font-family: var(--font-hud);
-  font-size: 0.68rem;
-  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
   color: var(--text2);
-  animation: nk-fade 0.7s var(--ease) 0.2s backwards;
+  animation: nk-fade 0.8s var(--nk-ease-out) 0.15s backwards;
 }
 .nk-hub-brand__supra::before { content: ''; width: 44px; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
 .nk-hub-brand__title {
   font-family: var(--font-body);
-  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  font-size: clamp(2rem, 3.6vw, 3rem);
   font-weight: 900;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
+  letter-spacing: 0.03em;
+  line-height: 1.08;
   color: var(--text-bright);
-  animation: nk-fade 0.7s var(--ease) 0.35s backwards;
+  text-shadow: 0 2px 28px color-mix(in srgb, var(--primary) 22%, transparent);
+  animation: nk-fade 0.8s var(--nk-ease-out) 0.3s backwards;
 }
 .nk-hub-brand__tagline {
-  margin-top: 12px;
-  font-size: 0.84rem;
-  letter-spacing: 0.1em;
+  margin-top: 14px;
+  font-size: 0.92rem;
+  letter-spacing: 0.16em;
   color: var(--text2);
-  animation: nk-fade 0.7s var(--ease) 0.5s backwards;
+  animation: nk-fade 0.8s var(--nk-ease-out) 0.45s backwards;
 }
 @media (min-width: 768px) and (max-width: 1023px) {
-  .nk-hub-brand { min-height: 176px; }
-  .nk-hub-brand__content { padding: 0 32px 24px var(--nk-content-offset); }
+  .nk-hub-brand { min-height: 210px; }
+  .nk-hub-brand__content { padding: 0 32px 30px var(--nk-content-offset); }
 }
 @media (max-width: 767px) {
-  .nk-hub-brand { min-height: 148px; }
-  .nk-hub-brand__content { padding: 0 20px 18px; }
-  .nk-hub-brand__supra { font-size: 0.55rem; letter-spacing: 0.18em; gap: 10px; margin-bottom: 10px; }
+  .nk-hub-brand { min-height: 196px; }
+  .nk-hub-brand__content { padding: 0 20px 24px; }
+  .nk-hub-brand__supra { font-size: 0.55rem; letter-spacing: 0.22em; gap: 10px; margin-bottom: 10px; }
   .nk-hub-brand__supra::before { width: 28px; }
-  .nk-hub-brand__title { font-size: clamp(1.5rem, 7vw, 2rem); }
-  .nk-hub-brand__tagline { margin-top: 10px; font-size: 0.78rem; }
+  .nk-hub-brand__title { font-size: clamp(1.9rem, 8.5vw, 2.4rem); }
+  .nk-hub-brand__tagline { margin-top: 10px; font-size: 0.78rem; letter-spacing: 0.1em; }
 }
 @media (prefers-reduced-motion: reduce) {
   .nk-hub-brand__supra, .nk-hub-brand__title, .nk-hub-brand__tagline { animation: none; }
@@ -983,7 +970,7 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   }
   .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
   .ui-sidebar-link__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-  .ui-sidebar-link__cn { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; transition: color 0.2s; }
+  .ui-sidebar-link__cn { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; transition: color 0.2s var(--nk-ease-out); }
   .ui-sidebar-link__en { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ui-sidebar-link:hover { background: var(--nk-shell-hover); }
   .ui-sidebar-link:hover .ui-sidebar-link__cn { color: var(--text-bright); }
@@ -1045,39 +1032,41 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   .nk-hero__toggle:hover { border-color: var(--border); color: var(--text2); }
 }
 
+/* 全局焦点环：**表单控件也必须在内**——`input`/`select`/`textarea`/`summary` 都能被 Tab 聚焦，
+   漏掉它们就得依赖各浏览器的 UA 默认环（颜色/形状随平台变，站点无法保证可见与一致）。
+   注意 `:where()` 特异性为 0 ⇒ 组件自己的 `outline: none`（如 `.nk-cat-search input`，改用宿主
+   `:focus-within` 的边框+内投影做指示）依旧能按特异性盖过本规则，不会出现双环。 */
 :where(#app) button:focus-visible,
 :where(#app) a:focus-visible,
+:where(#app) summary:focus-visible,
+:where(#app) input:focus-visible,
+:where(#app) select:focus-visible,
+:where(#app) textarea:focus-visible,
 :where(#app) [tabindex]:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+/* 全局动效降级（reduce 下动画立即结束、只跑一次）。这里**必须**用 id 选择器 `#app *`
+   （特异性 1,0,0）：组件自己的 `animation: nk-card-in 0.4s` 简写是 (0,1,0)，会盖过
+   `:where(#app) *` 那类零特异性规则——旧写法下「全局降级」对**几乎所有真在动的组件都失效**
+   （实测 reduce 下 `.nk-lc-card` / `.nk-mob-card` 仍跑 0.4s、`.nk-panel` 仍跑 0.3s）。
+   `animation-delay` 同样要归零：目录卡入场用 `backwards` 填充 + 最多 600ms 错峰，
+   只压 duration 会让 reduce 用户先看到一片透明再突然出现。 */
 @media (prefers-reduced-motion: reduce) {
-  :where(#app) *,
-  :where(#app) *::before,
-  :where(#app) *::after {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
-    transition-duration: 0.01ms;
-    scroll-behavior: auto;
+  #app *,
+  #app *::before,
+  #app *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
   }
 }
-@media (hover: none) {
-  :where(#app) a:hover,
-  :where(#app) button:hover { transform: none; }
-}
-
-:where(#app) button:focus-visible,
-:where(#app) a:focus-visible,
-:where(#app) [tabindex]:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
+/* 过渡只做**兜底**，故仍用零特异性：页面过渡在 reduce 下有意保留 0.12–0.14s 的淡入
+   （见上方 `.nk-view-*` 规则），颜色/边框类过渡也不属于「运动」，不该被一刀切掉。 */
 @media (prefers-reduced-motion: reduce) {
   :where(#app) *,
   :where(#app) *::before,
   :where(#app) *::after {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
     transition-duration: 0.01ms;
     scroll-behavior: auto;
   }

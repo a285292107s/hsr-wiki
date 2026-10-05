@@ -1,8 +1,17 @@
 
 .nk-ctrait {
-  max-width: 800px;
+  /* 阅读列宽仍按 --nk-prose-max 收窄（文本块各自声明），外层不再复制 800 字面量（它与 --nk-prose-max 同值纯属巧合复制） */
+  max-width: var(--nk-detail-max);
   margin: 0 auto;
   padding: 0 16px 60px;
+}
+@media (min-width: 768px) {
+  /* 本页走文档流而非 .nk-page--detail：内容区被 148px 侧栏占据，居中须在「视口 − 侧栏」里做，
+     否则与光锥/遗器/怪物的整卷居中线错位 74px（.nk-page--detail 的 left = offset 面板在余区居中）。 */
+  .nk-ctrait {
+    margin-left: calc(var(--nk-content-offset) + max(0px, (100vw - var(--nk-content-offset) - var(--nk-detail-max)) / 2));
+    margin-right: auto;
+  }
 }
 
 @keyframes nk-ctrait-fade-up {
@@ -37,28 +46,6 @@
   border-top: 1px solid var(--line-1);
 }
 
-.nk-ctrait__state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 80px 20px;
-  color: var(--text2);
-  text-align: center;
-}
-.nk-ctrait__state-icon { font-size: 2rem; opacity: 0.6; }
-.nk-ctrait__retry {
-  padding: 8px 20px;
-  border-radius: 6px;
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--text-bright);
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.nk-ctrait__retry:hover { background: rgba(255,255,255,0.06); box-shadow: 0 0 12px var(--primary-glow); }
-
 .nk-ctrait-hero {
   position: relative;
   padding: 52px 28px 36px;
@@ -70,8 +57,8 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 50% 70% at 25% 30%, color-mix(in srgb, var(--cwth-300) 7%, transparent), transparent 65%),
-    radial-gradient(ellipse 80% 40% at 70% 90%, color-mix(in srgb, var(--cwth-500) 4%, transparent), transparent 60%);
+    radial-gradient(ellipse 50% 70% at 25% 30%, color-mix(in srgb, var(--metric-val) 7%, transparent), transparent 65%),
+    radial-gradient(ellipse 80% 40% at 70% 90%, color-mix(in srgb, var(--primary) 4%, transparent), transparent 60%);
   pointer-events: none;
 }
 .nk-ctrait-hero[data-cat="faction"] .nk-ctrait-hero__glow {
@@ -167,13 +154,21 @@
   font-family: var(--font-hud);
 }
 .nk-ctrait-hero__name {
-  font-size: clamp(1.3rem, 3.33vw, 1.6rem);
+  font-size: clamp(1.6rem, 2.4vw + 0.4rem, 2.2rem);
   font-weight: 900;
   color: var(--text-bright);
   line-height: 1.2;
   margin: 0;
   letter-spacing: -0.01em;
   text-shadow: 0 0 20px var(--primary-glow);
+}
+.nk-ctrait-hero__rubric {
+  margin: 8px 0 0;
+  font-family: var(--font-hud);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  color: var(--text3);
 }
 
 .nk-ctrait-section {
@@ -189,7 +184,7 @@
   color: var(--text-bright);
   margin: 0 0 14px;
   padding-left: 12px;
-  border-left: 3px solid var(--primary, var(--cwth-300));
+  border-left: 3px solid var(--primary);
   line-height: 1.4;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -207,12 +202,14 @@
   color: var(--text);
   line-height: 1.8;
   padding: 16px 18px;
-  border-radius: 10px;
+  border-radius: var(--nk-radius-card);
   background: rgba(255,255,255,0.025);
   border: 1px solid var(--border);
   position: relative;
   overflow: hidden;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
+  max-width: var(--nk-prose-max);
+  margin-inline: auto;
 }
 .nk-ctrait-desc:hover {
   border-color: var(--border2);
@@ -225,13 +222,13 @@
   left: 16px;
   right: 60%;
   height: 1px;
-  background: linear-gradient(90deg, var(--primary, var(--cwth-300)), transparent);
+  background: linear-gradient(90deg, var(--primary), transparent);
   opacity: 0.4;
 }
 .nk-ctrait-desc :where(.hl) {
-  color: var(--highlight, var(--cwth-300));
+  color: var(--highlight);
   font-weight: 600;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--cwth-300) 20%, transparent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 20%, transparent);
 }
 
 .nk-ctrait-remarks {
@@ -245,7 +242,7 @@
   background: rgba(255,255,255,0.025);
   border: 1px solid var(--border);
   border-left: 3px solid var(--border2);
-  transition: border-top-color 0.2s, border-right-color 0.2s, border-bottom-color 0.2s, background 0.2s;
+  transition: border-top-color 0.2s var(--nk-ease-out), border-right-color 0.2s var(--nk-ease-out), border-bottom-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
 }
 .nk-ctrait-remark:hover {
   border-top-color: var(--border2);
@@ -259,9 +256,9 @@
   line-height: 1.75;
 }
 .nk-ctrait-remark__text :where(.hl) {
-  color: var(--highlight, var(--cwth-300));
+  color: var(--highlight);
   font-weight: 600;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--cwth-300) 15%, transparent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 15%, transparent);
 }
 
 .nk-ctrait-section__note {
@@ -287,7 +284,7 @@
   background: rgba(255,255,255,0.025);
   border: 1px solid var(--border);
   text-decoration: none;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s var(--nk-ease-out);
+  transition: border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out), transform 0.2s var(--nk-ease-out);
 }
 .nk-ctrait-member:hover {
   border-color: var(--border2);
@@ -302,10 +299,10 @@
   object-fit: cover;
   border: 2px solid var(--border2);
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s var(--nk-ease-out), box-shadow 0.2s var(--nk-ease-out);
 }
 .nk-ctrait-member:hover .nk-ctrait-member__avatar {
-  border-color: var(--primary, var(--cwth-300));
+  border-color: var(--primary);
   box-shadow: 0 0 12px var(--primary-glow);
 }
 .nk-ctrait-member__name {
@@ -323,11 +320,11 @@
   font-size: 0.6rem;
   font-weight: 700;
   font-family: var(--font-hud);
-  color: var(--primary, var(--cwth-300));
+  color: var(--primary);
   padding: 1px 6px;
   border-radius: 3px;
-  background: color-mix(in srgb, var(--cwth-300) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--cwth-300) 20%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 .nk-ctrait-layers {
@@ -377,7 +374,7 @@
   border: 2px solid var(--border2);
   background: var(--bg);
   box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s var(--nk-ease-out);
+  transition: border-color 0.25s var(--nk-ease-out), box-shadow 0.25s var(--nk-ease-out), transform 0.25s var(--nk-ease-out);
 }
 .nk-ctrait-layer:hover .nk-ctrait-layer__node {
   transform: rotate(45deg) scale(1.1);
@@ -390,7 +387,7 @@
   font-weight: 800;
   color: var(--text2);
   line-height: 1;
-  transition: color 0.25s;
+  transition: color 0.25s var(--nk-ease-out);
 }
 .nk-ctrait-layer:hover .nk-ctrait-layer__num {
   color: var(--text-bright);
@@ -414,7 +411,7 @@
   border-radius: 0 10px 10px 0;
   border: none;
   background: linear-gradient(90deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008) 70%, transparent);
-  transition: background 0.25s, box-shadow 0.25s, transform 0.25s var(--nk-ease-out);
+  transition: background 0.25s var(--nk-ease-out), box-shadow 0.25s var(--nk-ease-out), transform 0.25s var(--nk-ease-out);
 }
 .nk-ctrait-layer:last-child .nk-ctrait-layer__body { margin-bottom: 0; }
 .nk-ctrait-layer:hover .nk-ctrait-layer__body {
@@ -451,7 +448,7 @@
   background: currentColor;
   box-shadow: 0 0 5px currentColor;
 }
-.nk-ctrait-layer--base .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--ctrait-base) 8%, transparent); color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--cwth-300) 20%) 60%, transparent); border: 1px solid color-mix(in srgb, var(--ctrait-base) 22%, transparent); }
+.nk-ctrait-layer--base .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--ctrait-base) 8%, transparent); color: color-mix(in srgb, color-mix(in srgb, var(--text-bright) 80%, var(--metric-val) 20%) 60%, transparent); border: 1px solid color-mix(in srgb, var(--ctrait-base) 22%, transparent); }
 .nk-ctrait-layer--silver .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--cw-rarity-1) 10%, transparent); color: var(--crole-chip-season); border: 1px solid color-mix(in srgb, var(--cw-rarity-1) 25%, transparent); }
 .nk-ctrait-layer--gold .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--gold) 8%, transparent); color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent); }
 .nk-ctrait-layer--multicolor .nk-ctrait-layer__quality { background: color-mix(in srgb, var(--ctrait-multicolor) 8%, transparent); color: var(--ctrait-multicolor); border: 1px solid color-mix(in srgb, var(--ctrait-multicolor) 25%, transparent); }
@@ -473,9 +470,9 @@
 }
 .nk-ctrait-layer__desc:last-child { margin-bottom: 0; }
 .nk-ctrait-layer__desc :where(.hl) {
-  color: var(--highlight, var(--cwth-300));
+  color: var(--highlight);
   font-weight: 600;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--cwth-300) 15%, transparent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 15%, transparent);
 }
 .nk-ctrait-layer__buff {
   font-size: 0.78rem;
@@ -493,11 +490,11 @@
   top: 0.15em;
   bottom: 0.15em;
   width: 2px;
-  background: color-mix(in srgb, var(--cwth-300) 28%, transparent);
+  background: color-mix(in srgb, var(--metric-val) 28%, transparent);
   border-radius: 1px;
 }
 .nk-ctrait-layer__buff :where(.hl) {
-  color: var(--highlight, var(--cwth-300));
+  color: var(--highlight);
   font-weight: 600;
 }
 
@@ -515,7 +512,7 @@
   background: rgba(255,255,255,0.025);
   border: 1px solid var(--border);
   font-size: 0.74rem;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s var(--nk-ease-out), background 0.2s var(--nk-ease-out);
 }
 .nk-ctrait-prop:hover {
   border-color: var(--border2);
@@ -527,18 +524,18 @@
   padding: 2px 6px;
   border-radius: 4px;
   background: color-mix(in srgb, var(--cw-combat-core) 10%, transparent);
-  color: var(--cw-combat)
+  color: var(--cw-combat);
   letter-spacing: 0.03em;
 }
 .nk-ctrait-prop__scope--all {
-  background: color-mix(in srgb, var(--cwth-300) 10%, transparent);
-  color: var(--cwth-300)
+  background: color-mix(in srgb, var(--metric-val) 10%, transparent);
+  color: var(--metric-val)
 }
 .nk-ctrait-prop__name {
   color: var(--text2);
 }
 .nk-ctrait-prop__val {
-  color: var(--cw-rarity-2)
+  color: var(--cw-rarity-2);
   font-weight: 700;
   font-family: var(--font-hud);
   font-size: 0.72rem;

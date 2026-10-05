@@ -71,6 +71,10 @@ export interface MonsterDetail {
   intro: string;
   /** 基础属性（模板表，无属性为 0） */
   stats: { hp: number; atk: number; def: number; speed: number };
+  /** 维度修饰比（MonsterConfig FaceId 版面；模板自身记录缺省位为 1） */
+  stat_ratio?: { hp?: number; atk?: number; def?: number; speed?: number };
+  /** 等级曲线难度组（MonsterConfig.HardLevelGroup，缺省 1；曲线全量走 monster-level-curve.json） */
+  level_group?: number;
   /** 技能列表（SkillList → MonsterSkillConfig） */
   skills: MonsterSkillDetail[];
   /** 「贪饕」侵蚀侵入名单（StageInvasionConfig；未进入名单的怪物无此字段） */

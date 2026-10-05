@@ -5,7 +5,14 @@
 
 /* groups 内层是 flex 项：auto 外边距会取消 stretch，必须显式 width:100% 才能维持
    .nk-egd-buffs / .nk-egd-traits 的 struct-max 宽度（否则各组按内容收缩、宽度不一致） */
-.nk-egd-buffs { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; width: 100%; }
+.nk-egd-buffs { display: flex; flex-direction: column; margin-bottom: 8px; width: 100%; }
+/* 体系名的次标（站点工作名「赛季增益」降级为它）与选法说明。取用方：EndgameBuffs 的区块标题。 */
+.nk-egd-title-alias {
+  font-family: var(--font-mono); font-size: 0.58rem; font-weight: 500;
+  letter-spacing: 0.16em; color: var(--text3);
+  border-left: 1px solid var(--line-2); padding-left: 8px;
+}
+.nk-egd-buffs__hint { margin: -10px 0 14px; font-size: 0.72rem; line-height: 1.6; color: var(--text3); }
 .nk-egd-groups { display: flex; flex-direction: column; gap: 18px; margin-bottom: 8px; }
 .nk-egd-group { display: flex; flex-direction: column; gap: 10px; }
 /* 分组行头：标题与场次标签同行（场次标签的 align-self 在行内向是顶部对齐，须覆写为居中） */
@@ -87,15 +94,19 @@
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line-2);
 }
-/* 区块标题的统一档位：`.nk-egd-group__title`（赛季增益 / 首领特性）与提为标题的「敌方配置」共用一处声明 */
+/* 区块标题的统一档位：`.nk-egd-group__title`（赛季增益 / 首领特性）与提为标题的「敌方配置」
+   共用同一套语言。字档归 `endgame-type-scale.css` 收口；但「敌方配置」标签挂的是**更高特异性**的
+   `.nk-egd-floor__row--mons > .nk-egd-floor__label`（0,2,0 > 收口块的 0,1,0），收口块压不住它，
+   故它的 0.78 必须在此显式声明（下一段），否则会被打回标签档 0.72。 */
 .nk-egd-group__title,
 .nk-egd-floor__row--mons > .nk-egd-floor__label {
   align-self: flex-start;
-  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--text-bright);
 }
+/* 「敌方配置」标签的标题档：见上一段注释——它靠特异性压过收口块的标签档 */
+.nk-egd-floor__row--mons > .nk-egd-floor__label { font-size: 0.78rem; }
 /* 首领特性整组一张卡片（层 tab 与星启看板同形）：卡形（填充 / 四边描边 / 圆角 / 内距）整组承担，
    条目自身归零、只靠行距分节——不画分隔线、不加模式色左沿，与赛季增益 / 末法余烬同一套中性卡形。 */
 .nk-egd-traits {
@@ -115,7 +126,6 @@
   gap: 8px;
 }
 .nk-egd-trait__name {
-  font-size: 0.94rem;
   font-weight: 700;
   color: var(--text-bright);
   letter-spacing: 0.02em;
@@ -143,21 +153,18 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px 20px;
   background: color-mix(in srgb, var(--blk-900) 14%, transparent);
   border: 1px solid var(--line-1);
   border-radius: var(--nk-radius-card);
   transition: border-color 0.25s ease, background 0.25s ease;
-  animation: nk-fade 0.35s var(--ease) backwards;
+  animation: nk-fade 0.35s var(--nk-ease-out) backwards;
   animation-delay: min(calc(var(--i, 0) * 70ms), 420ms);
 }
 .nk-egd-buff:hover {
   border-color: var(--line-2);
   background: color-mix(in srgb, var(--blk-900) 22%, transparent);
 }
-.nk-egd-buff__head { display: flex; align-items: baseline; gap: 12px; }
-.nk-egd-buff__head { align-items: center; }
+.nk-egd-buff__head { display: flex; align-items: center; gap: 12px; }
 .nk-egd-buff__icon {
   width: 30px;
   height: 30px;
@@ -173,7 +180,6 @@
   border-radius: 5px;
 }
 .nk-egd-buff__name {
-  font-size: 1.0rem;
   font-weight: 700;
   color: var(--text-bright);
   letter-spacing: 0.02em;
@@ -195,7 +201,6 @@
 }
 .nk-egd-fury__label {
   align-self: flex-start;
-  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   color: color-mix(in srgb, var(--eg-color) 75%, var(--text2));
@@ -217,7 +222,7 @@
   border: none;
   border-radius: 0;
   border-top: 1px solid var(--line-1);
-  animation: nk-fade 0.35s var(--ease) backwards;
+  animation: nk-fade 0.35s var(--nk-ease-out) backwards;
   animation-delay: min(calc(var(--i, 0) * 60ms), 480ms);
 }
 .nk-egd-floor:first-child { border-top: none; padding-top: 6px; }
@@ -236,7 +241,7 @@
   text-align: left;
   color: inherit;
   cursor: pointer;
-  transition: background 0.2s var(--ease);
+  transition: background 0.2s var(--nk-ease-out);
 }
 .nk-egd-floor__head::before {
   content: '';
@@ -272,7 +277,6 @@
 .nk-egd-floor__dataitem:first-child { border-left: none; }
 .nk-egd-floor__dataval {
   font-family: var(--font-hud);
-  font-size: 0.84rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.02em;
@@ -282,7 +286,6 @@
 }
 .nk-egd-floor__datalabel {
   font-family: var(--font-hud);
-  font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: var(--text3);
@@ -301,7 +304,6 @@
   gap: 14px;
   min-width: 0;
   flex-wrap: wrap;
-  padding: 9px 0;
   border-bottom: 1px solid var(--line-2);
 }
 .nk-egd-floor__row:last-child {

@@ -1,0 +1,53 @@
+/* 研究线调试台「Spine 审核」两处视图共用的控件原语：列表视图 `SpineAuditSection` 与预览视图
+   `SpineAuditDetail`。拆出的理由：这 8 条选择器（错误行 / 下拉 / 按钮 + 4 个状态）此前在**两个 SFC**
+   的 scoped 样式里各写一份，属跨文件重复实现（`tools/check-css-dup-selectors.mjs` 的 C 段）。
+
+   为什么放在 `src/app/debug/` 而不是 `src/styles/`：本表含诊断色 hex（`#ff6b6b` 等），而色彩守卫
+   `check-colors.mjs` 的 `SKIP_FILE` 只豁免 `debug/` 路径与测试——与「debug 诊断色不进产品令牌体系」
+   的既有裁定一致；挪进 `styles/` 会立刻被守卫拦下。
+
+   未拆出去的部分：`.is-danger` / `.is-primary` / `.is-toggle.is-on` 是列表视图自己的按钮变体，
+   留在 `SpineAuditSection.vue` 的 scoped 块里（选择器带有额外类，本就只在该组件出现）。
+
+   取值取两处实现中较完整的一份：过渡含 box-shadow/transform（`is-primary:hover` 有 `translateY(-1px)`）、
+   `:active` 归位、`:disabled` 清 transform/box-shadow；圆角统一 6px（与同组的下拉一致，此前 6/7px 不一）。 */
+.nk-spine-audit__error {
+  margin: 10px 0 0;
+  color: #ff6b6b;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.nk-spine-audit__select {
+  padding: 3px 8px;
+  max-width: 220px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 24%, transparent);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.nk-spine-audit__select:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.nk-spine-audit__btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.18s var(--nk-ease-out), border-color 0.18s var(--nk-ease-out), box-shadow 0.18s var(--nk-ease-out), transform 0.18s var(--nk-ease-out);
+}
+.nk-spine-audit__btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--text) 55%, transparent); }
+.nk-spine-audit__btn:active:not(:disabled) { background: color-mix(in srgb, var(--text) 14%, transparent); transform: translateY(0); }
+.nk-spine-audit__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.nk-spine-audit__btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-spine-audit__btn,
+  .nk-spine-audit__select { transition: none; }
+}

@@ -6,7 +6,7 @@
  */
 import { computed } from 'vue';
 import { cdnUri } from '../../services/cdn';
-import { maxLevelStat, maxLevelValue } from '../../lib/format';
+import { fmtStatValue, maxLevelStat, maxLevelValue } from '../../lib/format';
 import { MAX_CHAR_LEVEL } from '../../lib/constants';
 import { SECTION_IDX } from './sections';
 import type { CharacterData } from '../../services/types';
@@ -54,7 +54,7 @@ const stats = computed<Stat[]>(() => {
         <img class="nk-stats__icon" :src="st.icon" alt="" aria-hidden="true">
         <span class="nk-stats__label">{{ st.l }}</span>
         <span class="nk-stats__lead" aria-hidden="true"></span>
-        <span class="nk-stats__val">{{ st.v }}</span>
+        <span class="nk-stats__val">{{ fmtStatValue(st.v) }}</span>
       </div>
     </div>
     <div class="nk-stats__level">

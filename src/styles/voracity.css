@@ -19,11 +19,30 @@
 .nk-vor-secnav .nk-secnav__btn { padding-left: 9px; padding-right: 9px; }
 .nk-vor-bar__progress { height: 2px; width: 0; background: var(--vor-500); }
 
+/* `.nk-vor-hero` 是 `.nk-page--detail`（纵向 flex 容器）的**直接子项**：此时 `margin: 0 auto`
+   会顶掉 `align-items: stretch`，盒子塌成内容宽（实测 1440 档 186px）并被居中——于是标题看着像
+   「居中式 hero」、分割线缩成一小截，与下方分区（952px、左轴 318px）全不同轴。宽度必须显式给
+   `100%`，再由 `max-width` 收到内容列宽。 */
 .nk-vor-hero {
+  position: relative;
+  width: 100%;
   max-width: var(--nk-detail-max);
   margin: 0 auto;
-  padding: 40px 16px 26px;
-  border-bottom: 1px solid var(--line-1);
+  /* 横向内距 = `.nk-panel` 的横向内距，hero 的标题与分割线才与下方分区同轴（正文左缘）。
+     分割线走 ::after 并用同一个变量，避免「内距改了、线的内缩没跟着改」的漂移。 */
+  --vor-hero-pad: 24px;
+  padding: 40px var(--vor-hero-pad) 26px;
+}
+/* 分割线画在**内容轴**上（与 `.nk-vor-sec` 的 `border-top` 同轴）：盒边含内距，
+   直接写 `border-bottom` 会比下方每条分区线各宽一个内距。 */
+.nk-vor-hero::after {
+  content: '';
+  position: absolute;
+  left: var(--vor-hero-pad);
+  right: var(--vor-hero-pad);
+  bottom: 0;
+  height: 1px;
+  background: var(--line-1);
 }
 .nk-vor-hero__title {
   font-size: clamp(1.7rem, 3.6vw, 2.3rem);
@@ -47,6 +66,7 @@
   line-height: 2;
   color: var(--text2);
   max-width: 74ch;
+  text-wrap: pretty;
 }
 
 .nk-vor-facts {
@@ -122,9 +142,12 @@
   color: var(--text3);
 }
 .nk-vor-step__main { flex: 1; min-width: 0; }
-.nk-vor-step__meter { display: flex; align-items: center; gap: 12px; }
+.nk-vor-step__meter { display: flex; align-items: center; gap: 10px; }
+/* 读数条是「该档的进度读数」，不是页面的装饰长条：宽度收到 220px 并贴在档位文案之下，
+   整列读数才会对齐成一条竖线；旧值是 `flex: 1`，在 952px 宽的分区里拉出一根 ~880px 的条，
+   读数（%）被推到行尾，与它所属的那行文案隔了一整行。 */
 .nk-vor-step__track {
-  flex: 1;
+  flex: 0 1 220px;
   min-width: 80px;
   height: 4px;
   border-radius: 2px;
@@ -145,7 +168,8 @@
   line-height: 1.8;
   color: var(--text2);
 }
-.nk-vor-step__meter + .nk-vor-step__desc { margin-top: 10px; }
+/* 文案在前、读数在后：先给「这是哪一档」，再给「走到多少」 */
+.nk-vor-step__desc + .nk-vor-step__meter { margin-top: 8px; }
 
 .nk-vor-group + .nk-vor-group { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line-1); }
 .nk-vor-group__title {
@@ -405,7 +429,10 @@
   color: var(--text2);
 }
 
-.nk-vor-skeleton { max-width: var(--nk-detail-max); margin: 0 auto; }
+/* 骨架盒与 hero 同病同治：`.nk-vor-skeleton` 也是 `.nk-page--detail`（纵向 flex）的直接子项，
+   只写 `max-width + margin: 0 auto` 会被 auto 外边距塌成内容宽并居中（实测骨架标题落在 x=794，
+   而正文轴在 294）⇒ 加载完成时整块横向跳 500px。 */
+.nk-vor-skeleton { width: 100%; max-width: var(--nk-detail-max); margin: 0 auto; }
 
 /* 语境色（ADR 0027）：本页强调位不吃用户强调色，全走污染族 */
 .nk-vor-secnav .nk-secnav__btn--active { color: var(--vor-300); }
@@ -413,7 +440,7 @@
 .nk-vor .nk-title__idx { color: var(--vor-300); }
 
 @media (max-width: 767px) {
-  .nk-vor-hero { padding: 26px 16px 20px; }
+  .nk-vor-hero { --vor-hero-pad: 16px; padding: 26px var(--vor-hero-pad) 20px; }
   .nk-vor-sec { padding-top: 24px; }
   .nk-vor-stages,
   .nk-vor-statuses,

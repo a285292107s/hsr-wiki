@@ -35,7 +35,7 @@ onMounted(() => { void load(); });
           :data-kind="s.kind"
           :aria-label="s.label"
         >
-          <h3 class="nk-hub-release__label">{{ s.label }}</h3>
+          <h3 class="nk-hub-release__label">{{ s.label }}<span class="nk-hub-release__label-count">{{ s.count }}</span></h3>
           <div class="nk-hub-release__band" v-html="s.html"></div>
         </section>
       </template>

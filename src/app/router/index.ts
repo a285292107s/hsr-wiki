@@ -82,15 +82,19 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, catalog: 'endgame', title: '终局内容' },
   },
   {
+    // 玩法详情页（第四种页面形态：单页数据页）——规则正文 + 结构口径 + 增益体系 + 赛季列表。
+    // 正则白名单保证 `/endgame/xyz` 落到 catch-all 404，不吃掉未登记的玩法名。
+    path: '/endgame/:mode(maze|story|boss|peak)',
+    name: 'endgame-mode',
+    component: () => import('../views/EndgameModeView.vue'),
+    meta: { depth: 3, title: '玩法详情' },
+  },
+  {
     path: '/endgame/:mode/:id(\\d+)',
     name: 'endgame-season',
     component: () => import('../views/EndgameView.vue'),
-    meta: { depth: 3, title: '赛季详情' },
+    meta: { depth: 4, title: '赛季详情' },
   },
-  { path: '/endgame/maze', redirect: '/endgame' },
-  { path: '/endgame/story', redirect: '/endgame' },
-  { path: '/endgame/boss', redirect: '/endgame' },
-  { path: '/endgame/peak', redirect: '/endgame' },
   { path: '/maze', redirect: '/endgame' },
   { path: '/story', redirect: '/endgame' },
   { path: '/boss', redirect: '/endgame' },

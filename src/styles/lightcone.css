@@ -4,6 +4,8 @@
 .nk-hero__visual[data-rarity='5'], .nk-lc-phase[data-rarity='5'] { --lc-r: var(--rarity-5); }
 
 .nk-hero--lc .nk-hero__visual { min-height: 240px; aspect-ratio: 2 / 1; }
+/* hero 名称升档：660px 画室里 2rem 折损了图鉴口吻；保持基线一族字重/字距 */
+.nk-hero--lc .nk-hero__name { font-size: clamp(1.85rem, 2.8vw, 2.5rem); }
 .nk-hero--lc .nk-hero__visual::after {
   content: '';
   position: absolute; inset: 0; z-index: 3; pointer-events: none;
@@ -54,16 +56,16 @@
   position: relative;
   margin-top: 16px; overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent); border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent); border-radius: var(--nk-radius-card);
 }
 .nk-lc-rank-table-wrap::after {
   content: ''; position: absolute;
   top: 0; right: 0; bottom: 0; width: 24px;
   pointer-events: none;
   background: linear-gradient(to right, transparent, var(--card) 80%);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 var(--nk-radius-card) var(--nk-radius-card) 0;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s var(--nk-ease-out);
 }
 .nk-lc-rank-table-wrap.is-scrollable::after { opacity: 1; }
 .nk-lc-rank-table {
@@ -83,7 +85,7 @@
 }
 .nk-lc-rank-table td {
   font-family: var(--font-hud); font-weight: 600; color: var(--text2);
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-lc-rank-table__param {
   text-align: left; color: var(--text3); font-weight: 600;
@@ -109,7 +111,7 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   border: 1px solid var(--line-1);
   border-radius: var(--nk-radius-card);
   background: color-mix(in srgb, var(--blk-900) 24%, transparent);
-  transition: border-color 0.28s var(--ease), transform 0.28s var(--ease);
+  transition: border-color var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out);
 }
 .nk-lc-phase:hover { border-color: var(--line-2); transform: translateY(-2px); }
 .nk-lc-phase--max {
@@ -141,11 +143,11 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   display: flex; flex-direction: column; gap: 2px;
 }
 .nk-lc-phase__stat-label {
-  font-family: var(--font-hud); font-size: 0.52rem; font-weight: 600;
+  font-family: var(--font-hud); font-size: 0.56rem; font-weight: 600;
   letter-spacing: 0.1em; color: var(--text3);
 }
 .nk-lc-phase__stat-val {
-  font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: 0.78rem; font-weight: 700;
   color: var(--text2); white-space: nowrap;
 }
 .nk-lc-phase--max .nk-lc-phase__stat-val { color: var(--text-bright); }
@@ -181,15 +183,19 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   max-width: var(--nk-prose-max);
   font-size: 0.8125rem; line-height: 1.9; color: var(--text2);
   padding: 4px 0 12px;
+  text-wrap: pretty;
 }
 .nk-lc-story i {
   font-style: normal; color: var(--text-bright);
 }
 
-/* 适配角色：与角色页「推荐光锥」互为镜像——圆头像 + 名 + 推荐顺位，整块是导航性内链 */
+/* 适配角色：与角色页「推荐光锥」互为镜像——圆头像 + 名 + 推荐顺位，整块是导航性内链。
+   列宽下限按「角色名最长 6 个全角字」定：条目固定开销 = 左右内距 18 + 头像 36 + 间距 10 +
+   顺位徽标 ~49 + 名与徽标间距 10 = 109px，故 208px 列给名字留 ~99px（最长名「开拓者·同谐」实测需 75px）。
+   旧值 168px 只留 59px，把这类名字截成「开拓者·同…」。 */
 .nk-lc-adapt {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(208px, 1fr));
   gap: 10px;
   margin-bottom: 24px;
 }
@@ -200,7 +206,7 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   border-radius: var(--nk-radius-card);
   background: color-mix(in srgb, var(--blk-900) 24%, transparent);
   text-decoration: none;
-  transition: border-color 0.28s var(--ease), transform 0.28s var(--ease);
+  transition: border-color var(--nk-dur-normal) var(--nk-ease-out), transform var(--nk-dur-normal) var(--nk-ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .nk-lc-adapt__item:hover { border-color: var(--line-2); transform: translateY(-2px); }
@@ -214,7 +220,15 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 .nk-lc-adapt__name {
   flex: 1; min-width: 0;
   font-size: 0.78rem; font-weight: 600; color: var(--text);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  /* 名字是这张卡的主信息：宁可换行也不截断。`-webkit-line-clamp` 只作为超长名的兜底——
+     当前数据里最长的名字（8 字符宽）在 208px 列里仍是单行显示。 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
 }
 .nk-lc-adapt__rec {
   flex-shrink: 0;
@@ -225,6 +239,16 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 }
 
 .nk-skeleton--lc .nk-skeleton__stat-grid { grid-template-columns: repeat(3, 1fr); }
+/* 骨架 hero 必须与真实 hero 同档高度：共享的 `.nk-skeleton__hero` 与它的 `__hero-visual` 都是
+   480px（为角色详情那档竖向 hero 定的），而光锥 hero 只有 240/320 ⇒ 加载完成时整页上跳 160px。
+   两个盒子都要改（visual 自带 `min-height: 480px`，只改外层无效）。档位照抄下方
+   `.nk-hero--lc .nk-hero__visual` 的规则（基准 240 / ≥1024 为 320）。 */
+.nk-skeleton--lc .nk-skeleton__hero,
+.nk-skeleton--lc .nk-skeleton__hero-visual { min-height: 240px; }
+@media (min-width: 1024px) {
+  .nk-skeleton--lc .nk-skeleton__hero,
+  .nk-skeleton--lc .nk-skeleton__hero-visual { min-height: 320px; }
+}
 
 @media (max-width: 640px) {
   .nk-hero--lc .nk-hero__visual { min-height: 180px; aspect-ratio: 5 / 2; }

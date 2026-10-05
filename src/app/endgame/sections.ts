@@ -11,6 +11,8 @@ export function buildEndgameSections(
   data: MazeListEntry | null,
   modeKey: string,
   peakLevels: PeakLevelInfo[],
+  /** 该玩法的增益体系名（`endgame_guide.json` 分节标题派生）；空串/缺省回退站点工作名「赛季增益」 */
+  systemName = '赛季增益',
 ): EndgameSection[] {
   const s: EndgameSection[] = [];
   let idx = 1;
@@ -30,7 +32,7 @@ export function buildEndgameSections(
     return s;
   }
   if (data?.sub_buffs?.length) push('sub-buffs', '战意机制');
-  if (data && seasonBuffList(data).length) push('buffs', '赛季增益');
+  if (data && seasonBuffList(data).length) push('buffs', systemName || '赛季增益');
   if (data?.pollution) push('pollution', '污染等级');
   return s;
 }

@@ -66,6 +66,7 @@ const ITEM_NO_ICON_SVG =
 export const itemPage: CatalogPageConfig = {
   id: 'item',
   title: '物品',
+  subtitle: 'ITEMS',
   searchPlaceholder: '搜索物品...',
   gridClass: 'nk-cat-grid nk-item-grid',
   cardClass: '.nk-item-card',
@@ -83,6 +84,13 @@ export const itemPage: CatalogPageConfig = {
         mainType: info.main_type || '',
         rarity: RARITY_NUM_TO_KEY[info.rarity] || 'Normal',
         icon: itemIconUrl(info.figure_icon),
+        /* 物品描述此前**既不显示也不可检索**：2606 条里 1609 条有 `desc`（中位 23 字，99% ≤80 字）、
+           2058 条有 `bg_desc`（背景故事），而 10 列 × 127px 的图标栅格放不下它们、卡片也不是链接。
+           `searchText` 按成就页的同口径把描述纳入检索域（含背景故事，让「记得描述、记不住名字」
+           的查法能命中）；`descTip` 是卡片的悬停提示（优先功能描述，无则退到背景故事）。
+           **两个字段都要显式带过来**：`renderCard` 只拿到这里构造的对象，漏带就会静默失效。 */
+        searchText: `${info.desc || ''}\n${info.bg_desc || ''}`,
+        descTip: String(info.desc || info.bg_desc || ''),
       });
     }
     const rarityOrder: Record<string, number> = { SuperRare: 0, VeryRare: 1, Rare: 2, NotNormal: 3, Normal: 4 };
@@ -167,16 +175,20 @@ export const itemPage: CatalogPageConfig = {
     const subType = String(item.subType || '');
     const typeName = ITEM_TYPE_NAMES[subType] || subType;
     const hasIcon = Boolean(item.icon);
+    /* 描述（`descTip`：功能描述优先，无则背景故事）挂在卡根上：栅格里放不下正文，但悬停可读。
+       卡上还有名字自己的 title（第 13 轮，长名被截断时可复原），两者作用域不同、互不冲突。 */
+    const descTip = String(item.descTip || '').replace(/\s+/g, ' ').trim();
+    const tipAttr = descTip ? ` title="${escHtml(descTip)}"` : '';
     const pic = hasIcon
       ? `<img class="nk-item-card__pic" src="${escHtml(item.icon)}"${cdnImgFallbackAttr(String(item.icon))} alt="${escHtml(item.name)}" loading="lazy" onerror="this.classList.add('is-broken')">`
       : '';
-    return `<div class="nk-item-card" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-sub-type="${escHtml(subType)}" style="--i:${i};--rarity-color:${r.color}">
+    return `<div class="nk-item-card" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-sub-type="${escHtml(subType)}" style="--i:${i};--rarity-color:${r.color}"${tipAttr}>
       <div class="nk-item-card__img">
         ${pic}
         <div class="nk-item-card__noimg" aria-hidden="true">${ITEM_NO_ICON_SVG}</div>
       </div>
       <div class="nk-item-card__info">
-        <span class="nk-item-card__name">${escHtml(item.name)}</span>
+        <span class="nk-item-card__name" title="${escHtml(item.name)}">${escHtml(item.name)}</span>
         <span class="nk-item-card__meta">${typeName} · ${r.label}</span>
       </div>
     </div>`;

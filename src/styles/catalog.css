@@ -1,32 +1,50 @@
 
-#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 24px 80px var(--nk-content-offset); background: radial-gradient(ellipse at 50% 0%, var(--nk-page-tint) 0%, transparent 60%); --cat-max: 1440px; }
-#nk-catalog-app .nk-cat-subtitle { display: inline-block; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text3); border-left: 1px solid var(--line-2); padding-left: 10px; margin-left: 2px; flex-shrink: 0; }
+#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 var(--cat-pad-x) 80px var(--nk-content-offset); --cat-max: 1440px; --cat-pad-x: 24px; }
 #nk-catalog-app::-webkit-scrollbar { width: 6px; }
 #nk-catalog-app::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 #nk-catalog-app::-webkit-scrollbar-track { background: transparent; }
 
-.nk-cat-masthead { display: flex; align-items: baseline; gap: 16px; padding: 26px 0 16px; }
-.nk-cat-title { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 12px; font-family: var(--font-body); font-size: 1.3rem; font-weight: 900; letter-spacing: 0.04em; color: var(--text-bright); white-space: nowrap; overflow: hidden; }
-.nk-cat-title::after { content: ''; flex: 1; height: 1px; align-self: center; background: linear-gradient(90deg, var(--line-2) 0%, var(--line-2) 55%, transparent 100%); }
-.nk-cat-count { flex-shrink: 0; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.18em; color: var(--text3); white-space: nowrap; }
-.nk-cat-toolbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 12px; padding: 8px 0; background: var(--nk-header-bg); backdrop-filter: blur(18px) saturate(1.15); -webkit-backdrop-filter: blur(18px) saturate(1.15); box-shadow: 0 10px 28px -16px color-mix(in srgb, color-mix(in srgb, var(--blk-950) 70%, var(--primary) 30%) 55%, transparent); }
-.nk-cat-toolbar::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, transparent 0%, var(--nk-header-border) 10%, var(--nk-header-border) 90%, transparent 100%); }
-@media (prefers-reduced-transparency: reduce) {
-  .nk-cat-toolbar { background: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 97%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+/* 报头 v2（编辑部级）：主标题升口径，改为「底部整线 + 左端主色起笔」承担分区，
+   删除原先藏在标题里、随标题变长的那个自由渐变腰线——腰线把主字与读数钉在同一行
+   基线上，主字一升口径就会把读数挤到视口边。 */
+.nk-cat-masthead { display: flex; align-items: flex-end; gap: 18px; padding: 44px 0 16px; position: relative; border-bottom: 1px solid var(--line-2); }
+.nk-cat-masthead::before { content: ''; position: absolute; left: 0; bottom: -1px; width: 96px; height: 2px; background: linear-gradient(90deg, var(--primary), transparent 88%); }
+.nk-cat-title { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 14px; font-family: var(--font-body); font-size: clamp(1.7rem, 2.3vw, 2.35rem); font-weight: 900; letter-spacing: 0.015em; line-height: 1.12; color: var(--text-bright); white-space: nowrap; overflow: hidden; }
+#nk-catalog-app .nk-cat-subtitle { display: inline-block; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.26em; text-transform: uppercase; color: var(--text3); border-left: 1px solid var(--line-2); padding-left: 10px; margin-left: 2px; flex-shrink: 0; transform: translateY(-0.32em); }
+.nk-cat-count { flex-shrink: 0; margin-left: auto; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; padding-bottom: 0.28em; }
+/* 工具栏（吸顶控制条）。三处调整的理由：
+   ① **左右 8px 内距**：此前内距为 0，搜索框那圈边框直接贴在内容区左缘（下方卡片因格子自带
+      `padding: 0 5px` 反而有视觉内距），看着像被裁掉一截。内距只作用在内容上——
+      条带背景与接缝放在伪元素里并向两侧各扩 `--cat-pad-x`（= 容器内距），仍**满出血**。
+   ② **背景改冷色压暗**：`--nk-header-bg` 原是同色相暖调的浅板（比页面底色更亮），在冷黑页面上
+      像贴了一块别的材质；改为略带强调色的**冷色压暗**，配 `backdrop-filter` 读作「磨砂玻璃」。
+   ③ **接缝改实心**：原来是「两端 8% 渐隐」的 accent 线，两端消失会在满出血条带下显得没画完；
+      改为整条实心（仍用 `--nk-header-border` 的强调色调），与下方卡片发丝线同一族的观感。 */
+.nk-cat-toolbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 12px; padding: 10px 8px 12px; margin-top: 0; }
+.nk-cat-toolbar::before {
+  content: ''; position: absolute; inset: 0 calc(-1 * var(--cat-pad-x)); z-index: -1;
+  background: var(--nk-header-bg);
+  backdrop-filter: blur(18px) saturate(1.15); -webkit-backdrop-filter: blur(18px) saturate(1.15);
 }
-.nk-cat-search { flex: 1; min-width: 120px; max-width: 320px; display: flex; align-items: center; gap: 8px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 10px; padding: 7px 14px; transition: all 0.2s; box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent); }
+.nk-cat-toolbar::after { content: ''; position: absolute; left: calc(-1 * var(--cat-pad-x)); right: calc(-1 * var(--cat-pad-x)); bottom: -1px; height: 1px; background: var(--nk-header-border); }
+@media (prefers-reduced-transparency: reduce) {
+  .nk-cat-toolbar::before { background: color-mix(in srgb, var(--blk-850) 97%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+.nk-cat-search { flex: 1; min-width: 140px; max-width: 360px; display: flex; align-items: center; gap: 9px; height: 40px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: 8px; padding: 0 14px; transition: all 0.2s var(--nk-ease-out); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent); }
 .nk-cat-search:hover:not(:focus-within) { border-color: color-mix(in srgb, var(--primary) 34%, transparent); }
 .nk-cat-search:focus-within { border-color: var(--primary); background: var(--nk-shell-hover); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent), 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
 .nk-cat-search svg { width: 14px; height: 14px; color: var(--text3); flex-shrink: 0; }
-.nk-cat-search input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 0.8rem; font-family: var(--font-body); }
+/* input 撑满宿主高度：点击域 = 视觉域（旧形态只有中间 21px 可点，边缘与放大镜点不动）。 */
+.nk-cat-search input { flex: 1; min-width: 0; height: 100%; background: none; border: none; outline: none; color: var(--text); font-size: 0.8rem; font-family: var(--font-body); }
 .nk-cat-search input::placeholder { color: var(--text3); }
-.nk-cat-filters-bar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; justify-content: flex-end; overflow-x: auto; scrollbar-width: none; }
+.nk-cat-filters-bar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+@media (max-width: 1023px) { .nk-cat-filters-bar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } }
 .nk-cat-filters-bar::-webkit-scrollbar { display: none; }
 .nk-cat-select { flex-shrink: 0; position: relative; }
-.nk-cat-select__btn { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; background: var(--nk-shell-hover); border: 1px solid var(--nk-input-border); color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+.nk-cat-select__btn { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; background: var(--nk-shell-hover); border: 1px solid var(--nk-input-border); color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: background var(--nk-dur-hover) var(--nk-ease-out), border-color var(--nk-dur-hover) var(--nk-ease-out), color var(--nk-dur-hover) var(--nk-ease-out); flex-shrink: 0; }
 .nk-cat-select__btn::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
 .nk-cat-select__btn:hover { background: var(--nk-shell-press); border-color: var(--primary); color: var(--text-bright); }
-.nk-cat-select__btn .arrow { width: 12px; height: 12px; transition: transform 0.2s; flex-shrink: 0; color: var(--text3); }
+.nk-cat-select__btn .arrow { width: 12px; height: 12px; transition: transform var(--nk-dur-hover) var(--nk-ease-out); flex-shrink: 0; color: var(--text3); }
 .nk-cat-select.open .nk-cat-select__btn { background: var(--nk-shell-press); border-color: var(--primary); }
 .nk-cat-select.open .nk-cat-select__btn .arrow { transform: rotate(180deg); }
 .nk-cat-select.is-active .nk-cat-select__btn { background: var(--primary-glow); border-color: var(--primary); color: var(--text-bright); }
@@ -53,7 +71,7 @@
   margin: 0 2px 8px;
   background: linear-gradient(90deg, transparent, var(--line-1) 15%, var(--line-1) 85%, transparent);
 }
-.nk-cat-select__opt { display: flex; align-items: center; gap: 6px; width: 100%; padding: 7px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); cursor: pointer; text-align: left; transition: background 0.15s, color 0.15s; }
+.nk-cat-select__opt { display: flex; align-items: center; gap: 6px; width: 100%; padding: 7px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text2); font-size: 0.72rem; font-family: var(--font-body); cursor: pointer; text-align: left; transition: background 0.15s var(--nk-ease-out), color 0.15s var(--nk-ease-out); }
 .nk-cat-select__opt:hover { background: var(--nk-shell-hover); color: var(--text); }
 .nk-cat-select__opt.is-active { background: var(--primary-glow); color: var(--text-bright); }
 .nk-cat-select__opt .nk-cat-select__icon { width: 18px; height: 18px; }
@@ -62,6 +80,13 @@
 
 .nk-cat-grid,
 .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 14px; }
+/* 目录骨架与卡片网格必须同宽同列，否则加载完成时整块重排：
+   ① 骨架**不得**再声明一层页面内距（它渲染在 `#nk-catalog-app` 之内，后者已声明
+      `padding: 0 24px 80px var(--nk-content-offset)`）——双层内距会让骨架右移 148px 且窄 172px；
+   ② 走虚拟滚动的目录页（成就 / 物品 / 敌对物种）列数由引擎算（`use-virtual-grid.ts` 的 minColW
+      + **固定 10px** 间距常量），其页级 `--nk-grid-gap` 因此按 10px 对齐；不走虚拟滚动的页
+      （角色 / 光锥 / 遗器 / 终局）列数由 `--nk-grid-min` 主导，沿用各自档位。
+   ③ `--nk-grid-min` 必须与各页 `virtualMinColW` 同值（骨架走 CSS 网格、卡片走引擎）。 */
 .nk-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); padding-top: 16px; }
 .nk-virtual-grid { display: block; position: relative; }
 .nk-virtual-cell .nk-item-card,
@@ -69,10 +94,10 @@
 .nk-virtual-cell .nk-lc-card { opacity: 0; transform: translateY(16px); }
 .nk-virtual-cell.nk-revealed .nk-item-card,
 .nk-virtual-cell.nk-revealed .nk-idx-card,
-.nk-virtual-cell.nk-revealed .nk-lc-card { opacity: 1; transform: none; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: var(--reveal-delay, 0ms); }
+.nk-virtual-cell.nk-revealed .nk-lc-card { opacity: 1; transform: none; animation: nk-card-in 0.4s var(--nk-ease-out) backwards; animation-delay: var(--reveal-delay, 0ms); }
 .nk-virtual-grid .nk-item-card__img img,
 .nk-virtual-grid .nk-idx-card__portrait img,
-.nk-virtual-grid .nk-lc-card__img img { opacity: 0; transition: opacity 0.25s ease; }
+.nk-virtual-grid .nk-lc-card__img img { opacity: 0; transition: opacity var(--nk-dur-normal) var(--nk-ease-out); }
 .nk-virtual-grid .nk-item-card__img img.loaded,
 .nk-virtual-grid .nk-idx-card__portrait img.loaded,
 .nk-virtual-grid .nk-lc-card__img img.loaded { opacity: 1; }
@@ -85,27 +110,17 @@
 
 .nk-idx-grid {
   --nk-grid-min: 160px;
-  --nk-grid-gap: 12px;
+  --nk-grid-gap: 14px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr));
   gap: var(--nk-grid-gap);
   padding-top: 20px;
 }
-.nk-idx-card {
-  position: relative;
-  display: block;
-  border-radius: 8px;
-  overflow: hidden;
-  background: transparent;
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.28s var(--nk-ease-out);
-  animation: nk-idx-in 0.4s var(--nk-ease-out) backwards;
-  animation-delay: min(calc(var(--i, 0) * 16ms), 480ms);
-}
-.nk-idx-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
+.nk-idx-card { position: relative; display: block; border-radius: 8px; overflow: hidden; background: transparent; cursor: pointer; text-decoration: none; transition: opacity var(--nk-dur-normal) var(--nk-ease-out); animation: nk-idx-in 0.4s var(--nk-ease-out) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 480ms); }
+.nk-idx-card::after { content: ''; position: absolute; inset: 0; z-index: 3; border-radius: 8px; border: 1px solid var(--line-1); pointer-events: none; transition: border-color 0.25s var(--nk-ease-out); }
 @media (hover: hover) and (pointer: fine) {
-  .nk-idx-card:hover .nk-idx-card__portrait img { transform: scale(1.04); }
+  .nk-idx-card:hover::after { border-color: color-mix(in srgb, var(--metric-val) 46%, transparent); }
+  .nk-idx-card:hover .nk-idx-card__name { color: var(--metric-val); }
 }
 .nk-idx-card__portrait {
   display: block;
@@ -117,7 +132,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s var(--nk-ease-out);
 }
 .nk-idx-card__body {
   position: absolute;
@@ -127,9 +141,9 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 30px 12px 10px;
-  background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 94%, transparent) 0%, color-mix(in srgb, var(--blk-900) 55%, transparent) 55%, transparent 100%);
+  gap: 4px;
+  padding: 34px 12px 11px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--blk-950) 92%, transparent) 0%, color-mix(in srgb, var(--blk-900) 62%, transparent) 34%, transparent 84%);
 }
 .nk-idx-card__name-row {
   display: flex;
@@ -140,7 +154,7 @@
 .nk-idx-card__name {
   flex: 1;
   min-width: 0;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text-bright);
@@ -148,7 +162,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.2s;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-idx-card:hover .nk-idx-card__name { color: var(--metric-val); }
 .nk-idx-card__stars {
@@ -165,55 +179,61 @@
   align-items: center;
   gap: 4px;
   min-width: 0;
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   color: var(--text3);
   text-shadow: 0 1px 4px rgba(0,0,0,0.6);
   white-space: nowrap;
   overflow: hidden;
 }
-.nk-idx-card__icon { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.nk-idx-card__icon { width: 13px; height: 13px; border-radius: 50%; flex: none; }
 .nk-idx-card__sep { color: var(--text3); opacity: 0.5; margin: 0 2px; }
 @keyframes nk-idx-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes nk-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes nk-card-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes nk-card-sheen { 0%, 6% { opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); } 24% { opacity: 0.5; } 52% { opacity: 0.68; } 80% { opacity: 0.48; } 100% { opacity: 0; transform: translate3d(430%,0,0) rotate(-22deg); } }
 
 @media (prefers-reduced-motion: reduce) {
   .nk-idx-card, .nk-lc-card, .nk-relic-card, .nk-item-card, .nk-mob-card { animation: none; }
-  .nk-idx-card:hover .nk-idx-card__portrait img { transform: none; }
   .nk-virtual-cell .nk-item-card, .nk-virtual-cell .nk-idx-card, .nk-virtual-cell .nk-lc-card { opacity: 1; transform: none; }
   .nk-virtual-cell.nk-revealed .nk-item-card, .nk-virtual-cell.nk-revealed .nk-idx-card, .nk-virtual-cell.nk-revealed .nk-lc-card { animation: none; }
 }
 
-.nk-cat-empty { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 72px 0; text-align: center; }
-.nk-cat-empty.show { display: flex; animation: nk-fade 0.35s var(--ease); }
-.nk-cat-empty__icon { font-family: var(--font-hud); font-size: 1.3rem; font-weight: 900; letter-spacing: 0.1em; color: color-mix(in srgb, var(--primary) 40%, transparent); }
-.nk-cat-empty__text { font-family: var(--font-hud); font-size: 0.62rem; letter-spacing: 0.22em; color: var(--text3); }
-.nk-cat-empty__sub { font-size: 0.72rem; color: var(--text3); opacity: 0.7; }
+.nk-cat-empty { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 88px 0 96px; text-align: center; }
+.nk-cat-empty.show { display: flex; animation: nk-fade 0.35s var(--nk-ease-out); }
+.nk-cat-empty__mark { display: block; width: 46px; height: 46px; color: color-mix(in srgb, var(--primary) 52%, transparent); margin-bottom: 4px; }
+.nk-cat-empty__mark svg { width: 100%; height: 100%; display: block; }
+.nk-cat-empty__text { font-family: var(--font-hud); font-size: 0.68rem; letter-spacing: 0.24em; color: var(--text2); }
+.nk-cat-empty__sub { font-size: 0.8rem; color: var(--text3); }
+.nk-cat-empty__reset {
+  margin-top: 8px; padding: 10px 20px; border-radius: 4px;
+  background: var(--nk-shell-active-bg); border: 1px solid var(--nk-shell-active-border);
+  color: var(--metric-val); font-family: var(--font-body); font-size: 0.82rem; font-weight: 600;
+  letter-spacing: 0.04em; cursor: pointer;
+  transition: background var(--nk-dur-hover) var(--nk-ease-out), border-color var(--nk-dur-hover) var(--nk-ease-out), color var(--nk-dur-hover) var(--nk-ease-out), transform var(--nk-dur-hover) var(--nk-ease-out);
+}
+.nk-cat-empty__reset:hover { background: var(--nk-shell-press); color: var(--text-bright); }
+.nk-cat-empty__reset:active { transform: translateY(1px); }
+.nk-cat-empty__reset:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .nk-lc-grid { --nk-grid-min: 160px; --nk-grid-gap: 16px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
 .nk-lc-card[data-rarity='3'] { --lc-r: var(--rarity-3); }
 .nk-lc-card[data-rarity='4'] { --lc-r: var(--rarity-4); }
 .nk-lc-card[data-rarity='5'] { --lc-r: var(--rarity-5); }
-.nk-lc-card { position: relative; background: transparent; border: none; overflow: visible; cursor: pointer; text-decoration: none; display: block; transition: transform 0.28s var(--ease); animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 18ms), 540ms); }
-.nk-lc-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); border-radius: 6px; }
+.nk-lc-card { position: relative; background: transparent; border: none; overflow: visible; cursor: pointer; text-decoration: none; display: block; animation: nk-card-in 0.4s var(--nk-ease-out) backwards; animation-delay: min(calc(var(--i, 0) * 18ms), 540ms); }
+.nk-lc-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 @media (hover: hover) and (pointer: fine) {
-  .nk-lc-card:hover { transform: translateY(-3px); }
   .nk-lc-card:hover .nk-lc-card__img::after { border-color: color-mix(in srgb, var(--lc-r, var(--rarity-5)) 70%, transparent); }
-  .nk-lc-card:hover .nk-lc-card__img img.lc-avatar { transform: scale(1.04); }
   .nk-lc-card:hover .nk-lc-card__name { color: var(--lc-r, var(--rarity-5)); }
-  .nk-lc-card:hover .nk-lc-card__badge img { transform: scale(1.08); }
 }
 .nk-lc-card__img { position: relative; aspect-ratio: 3/4; overflow: visible; isolation: isolate; }
-.nk-lc-card__img::after { content: ''; position: absolute; inset: 0; z-index: 3; border: 1px solid var(--line-1); border-radius: 6px; pointer-events: none; transition: border-color 0.28s var(--ease); }
-.nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 5; border-radius: 6px; transition: opacity 0.35s ease; }
+.nk-lc-card__img::after { content: ''; position: absolute; inset: 0; z-index: 3; border: 1px solid var(--line-1); border-radius: 6px; pointer-events: none; transition: border-color 0.28s var(--nk-ease-out); }
+.nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 5; border-radius: 6px; transition: opacity var(--nk-dur-normal) var(--nk-ease-out); }
 .nk-lc-card__img img.loaded ~ .nk-lc-card__shimmer { opacity: 0; pointer-events: none; }
-.nk-lc-card__img img.lc-avatar { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; padding: 4px; transform: none; transform-origin: center center; transition: transform 0.3s var(--ease); }
+.nk-lc-card__img img.lc-avatar { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; padding: 4px; transform: none; transform-origin: center center; }
 .nk-lc-card__badge { position: absolute; top: 8px; right: 8px; z-index: 4; }
-.nk-lc-card__badge img { width: 22px; height: 22px; border-radius: 50%; background: transparent; border: none; padding: 2px; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); box-shadow: 0 1px 5px rgba(0,0,0,0.35); }
+.nk-lc-card__badge img { width: 22px; height: 22px; border-radius: 50%; background: transparent; border: none; padding: 2px; box-shadow: 0 1px 5px rgba(0,0,0,0.35); }
 .nk-lc-card__info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 13px 12px 11px; background: linear-gradient(to top, color-mix(in srgb, var(--lc-r, var(--rarity-5)) 16%, transparent) 0%, color-mix(in srgb, var(--blk-900) 72%, transparent) 22%, transparent 64%); }
 .nk-lc-card__stars { font-size: 0.66rem; letter-spacing: 2px; color: var(--gold); text-shadow: 0 0 6px color-mix(in srgb, var(--rarity-5) 50%, transparent); line-height: 1; }
-.nk-lc-card__name { font-size: 0.82rem; font-weight: 700; line-height: 1.25; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); transition: color 0.28s var(--ease); }
+.nk-lc-card__name { font-size: 0.82rem; font-weight: 700; line-height: 1.25; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); transition: color var(--nk-dur-hover) var(--nk-ease-out); }
 .nk-lc-card__skill { font-family: var(--font-hud); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.08em; color: var(--text3); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 .nk-relic-grid { --nk-grid-min: 150px; --nk-grid-gap: 16px; }
@@ -224,7 +244,7 @@
   gap: 8px;
   text-decoration: none;
   cursor: pointer;
-  animation: nk-card-in 0.4s var(--ease) backwards;
+  animation: nk-card-in 0.4s var(--nk-ease-out) backwards;
   animation-delay: min(calc(var(--i, 0) * 18ms), 540ms);
 }
 .nk-relic-card__plate {
@@ -242,19 +262,18 @@
   justify-content: center;
   padding: 14px;
   overflow: hidden;
-  transition: border-color 0.28s var(--ease), transform 0.28s var(--ease), box-shadow 0.28s var(--ease);
+  transition: border-color var(--nk-dur-normal) var(--nk-ease-out), box-shadow var(--nk-dur-normal) var(--nk-ease-out);
 }
 .nk-relic-card__img {
   width: 66%; height: 66%;
   object-fit: contain;
   filter: drop-shadow(0 3px 10px rgba(0,0,0,0.45));
-  transition: transform 0.32s var(--ease);
 }
 .nk-relic-card__tag {
   position: absolute;
   top: 9px; left: 9px;
-  padding: 2px 8px;
-  border-radius: 999px;
+  padding: 3px 8px;
+  border-radius: 4px;
   border: 1px solid var(--line-1);
   background: color-mix(in srgb, var(--blk-900) 55%, transparent);
   font-family: var(--font-hud);
@@ -274,41 +293,38 @@
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  transition: color 0.24s var(--ease);
+  transition: color var(--nk-dur-hover) var(--nk-ease-out);
 }
-.nk-relic-card:hover .nk-relic-card__plate,
-.nk-relic-card:focus-visible .nk-relic-card__plate {
+.nk-relic-card:hover .nk-relic-card__plate {
   border-color: color-mix(in srgb, var(--rarity-5) 42%, transparent);
-  transform: translateY(-3px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 14px 26px rgba(0,0,0,0.38);
 }
-.nk-relic-card:hover .nk-relic-card__img,
-.nk-relic-card:focus-visible .nk-relic-card__img { transform: scale(1.07); }
 .nk-relic-card:hover .nk-relic-card__name,
 .nk-relic-card:focus-visible .nk-relic-card__name { color: var(--metric-val); }
-.nk-relic-card:focus-visible { outline: none; }
-.nk-relic-card:focus-visible .nk-relic-card__plate { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 45%, transparent); }
+.nk-relic-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* 键盘聚焦只给内高光 + 边框提亮：外投影会和焦点环叠成「卡片浮起来」，与 hover 的观感混在一起 */
+.nk-relic-card:focus-visible .nk-relic-card__plate {
+  border-color: color-mix(in srgb, var(--rarity-5) 42%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+}
 
 .nk-item-grid { --nk-grid-min: 110px; --nk-grid-gap: 10px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); }
-.nk-item-card { --rarity-color: var(--rarity-1); position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 12ms), 600ms); cursor: default; }
-.nk-item-card:hover { transform: translateY(-4px) scale(1.03); border-color: color-mix(in srgb, var(--rarity-color) 40%, transparent); box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px color-mix(in srgb, var(--rarity-color) 15%, transparent); }
+.nk-item-card { --rarity-color: var(--rarity-1); position: relative; background: var(--card); border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent); border-radius: var(--nk-radius-card); overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: border-color 0.25s var(--nk-ease-out), box-shadow 0.25s var(--nk-ease-out); animation: nk-card-in 0.4s var(--nk-ease-out) backwards; animation-delay: min(calc(var(--i, 0) * 12ms), 600ms); cursor: default; }
+.nk-item-card:hover { border-color: color-mix(in srgb, var(--rarity-color) 40%, transparent); box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 0 0 1px color-mix(in srgb, var(--rarity-color) 22%, transparent); }
 .nk-item-card__img { position: relative; width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; padding: 6px; }
-.nk-item-card__img::before { content: ''; position: absolute; width: 46%; height: 190%; top: -45%; left: -65%; z-index: 1; pointer-events: none; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.03) 70%, transparent 100%); mix-blend-mode: screen; opacity: 0; transform: translate3d(0,0,0) rotate(-22deg); backface-visibility: hidden; }
-.nk-item-card:hover .nk-item-card__img::before { animation: nk-card-sheen 1.35s cubic-bezier(0.25,0.46,0.45,0.94) 1 both; }
-.nk-item-card__img img { width: 72%; height: 72%; object-fit: contain; transition: transform 0.3s var(--ease); filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
-.nk-item-card:hover .nk-item-card__img img { transform: scale(1.12); }
+.nk-item-card__img img { width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
 .nk-item-card__info { width: 100%; padding: 6px 8px 8px; text-align: center; }
 .nk-item-card__name { display: block; font-size: 0.68rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nk-item-card__meta { display: block; font-size: 0.56rem; color: var(--text3); margin-top: 2px; }
 .nk-item-card__pic.is-broken { display: none; }
-.nk-item-card__noimg { width: 70%; height: 70%; display: flex; align-items: center; justify-content: center; color: color-mix(in srgb, var(--rarity-color) 60%, var(--text3)); opacity: 0.66; transition: transform 0.3s var(--ease), opacity 0.3s, color 0.3s; }
+.nk-item-card__noimg { width: 70%; height: 70%; display: flex; align-items: center; justify-content: center; color: color-mix(in srgb, var(--rarity-color) 60%, var(--text3)); opacity: 0.66; transition: opacity 0.3s var(--nk-ease-out), color 0.3s var(--nk-ease-out); }
 .nk-item-card__noimg svg { width: 100%; height: 100%; }
-.nk-item-card:hover .nk-item-card__noimg { transform: scale(1.12); opacity: 1; color: color-mix(in srgb, var(--rarity-color) 75%, var(--text)); }
+.nk-item-card:hover .nk-item-card__noimg { opacity: 1; color: color-mix(in srgb, var(--rarity-color) 75%, var(--text)); }
 .nk-item-card__pic:not(.is-broken) ~ .nk-item-card__noimg { display: none; }
 
-.nk-mob-grid { --nk-grid-min: 130px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
-.nk-mob-card { position: relative; display: block; text-decoration: none; cursor: pointer; animation: nk-card-in 0.4s var(--ease) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); }
-.nk-mob-card::before { content: ''; position: absolute; left: -6px; top: 34%; width: 2px; height: 0; transform: translateY(-50%); border-radius: 1px; background: var(--primary); opacity: 0; transition: height 0.22s var(--nk-ease-out), opacity 0.22s; pointer-events: none; }
+.nk-mob-grid { --nk-grid-min: 130px; --nk-grid-gap: 10px; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); }
+.nk-mob-card { position: relative; display: block; text-decoration: none; cursor: pointer; animation: nk-card-in 0.4s var(--nk-ease-out) backwards; animation-delay: min(calc(var(--i, 0) * 16ms), 600ms); }
+.nk-mob-card::before { content: ''; position: absolute; left: -6px; top: 34%; width: 2px; height: 0; transform: translateY(-50%); border-radius: 1px; background: var(--primary); opacity: 0; transition: height 0.22s var(--nk-ease-out), opacity 0.22s var(--nk-ease-out); pointer-events: none; }
 @media (hover: hover) and (pointer: fine) {
   .nk-mob-card:hover::before, .nk-mob-card:focus-visible::before { height: 46%; opacity: 1; }
   .nk-mob-card:hover .nk-mob-card__fig::after { box-shadow: inset 0 0 0 1px var(--line-2); }
@@ -318,20 +334,17 @@
 .nk-mob-card:focus-visible { outline: none; }
 .nk-mob-card:focus-visible .nk-mob-card__fig { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 50%, transparent); }
 .nk-mob-card__fig { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 50% 28%, color-mix(in srgb, var(--blk-750) 55%, transparent) 0%, var(--blk-950) 80%); }
-.nk-mob-card__fig::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px var(--line-1); transition: box-shadow 0.25s; }
-.nk-mob-card__fig img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s var(--ease); }
+.nk-mob-card__fig::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px var(--line-1); transition: box-shadow 0.25s var(--nk-ease-out); }
+.nk-mob-card__fig img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--nk-dur-zoom) var(--nk-ease-out); }
 .nk-mob-card__info { display: flex; flex-direction: column; gap: 5px; padding: 12px 4px 4px; }
-.nk-mob-card__name { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
+.nk-mob-card__name { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color var(--nk-dur-hover) var(--nk-ease-out); }
 .nk-mob-card__type { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.14em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nk-mob-card[data-type="BOSS"] .nk-mob-card__type { color: var(--accent); }
 .nk-mob-card[data-type="ELITE"] .nk-mob-card__type { color: var(--text2); }
-@media (prefers-reduced-motion: reduce) {
-  .nk-mob-card { animation: none; }
-}
 
 .nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 
-#nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); background: var(--bg); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+#nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
 #nk-home-app h1, #nk-home-app h2, #nk-home-app p { margin: 0; padding: 0; }
 
@@ -341,13 +354,43 @@
 .nk-hub-release__rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line-2), transparent); }
 .nk-hub-release__section + .nk-hub-release__section { margin-top: 22px; }
 .nk-hub-release__label { margin-bottom: 10px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; color: var(--text2); }
-.nk-hub-release__band { display: flex; align-items: flex-start; gap: 14px; padding: 6px 0 14px; overflow-x: auto; overflow-y: hidden; }
-.nk-hub-release__band > * { flex: 0 0 auto; }
-.nk-hub-release__band .nk-idx-card { width: 144px; }
-.nk-hub-release__band .nk-lc-card { width: 144px; }
-.nk-hub-release__band .nk-relic-card { width: 136px; }
-.nk-hub-release__band .nk-cw-card { width: 144px; }
+.nk-hub-release__label-count { margin-left: 8px; font-family: var(--font-hud); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em; color: color-mix(in srgb, var(--metric-val) 72%, transparent); vertical-align: 1px; font-variant-numeric: tabular-nums; }
+.nk-hub-release__band { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(210px, 17%, 300px); align-items: start; gap: 16px; padding: 8px 0 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+/* 特写档：`306px` 主卡列 + 主条目列（max-content，避免「其余条目」被拉伸）+ 1fr 空气列。
+   规格块跨后两列 ⇒ 它的顶线横跨整行右侧，成为这一行的骨架（旧形态是紧贴主卡的一小块重复信息：
+   实测 1440 档卡片文字「真珠/★★★★★/冰/欢愉」与规格块「真珠/冰/欢愉」逐字重复）。 */
+.nk-hub-release__band--feature { grid-auto-flow: row; grid-auto-columns: unset; grid-template-columns: minmax(0, 306px) minmax(0, max-content) minmax(0, 1fr); align-items: start; justify-content: start; overflow-x: hidden; }
+.nk-hub-release__section--feature:has(.nk-hub-release__cell:last-child:first-child) .nk-hub-release__band--feature { grid-template-columns: minmax(0, 420px); }
+.nk-hub-release__cell { min-width: 0; }
+.nk-hub-release__band--feature > .nk-hub-release__cell[data-pos='rest'] { grid-column: 2; }
+.nk-hub-release__cell + .nk-hub-release__cell { padding-top: 2px; }
+/* 特写规格块：名字 + 详情入口，一行两端对齐。名字是特写的排版权重（卡上那个是 0.9rem 的标签），
+   入口是卡之外唯一的显式动作；元素 / 命途 / 技能名 / 套装标签一律不再重复（卡上已有）。 */
+.nk-hub-release__spec {
+  grid-column: 2 / 4;
+  display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+  gap: 16px; min-width: 0; align-self: end;
+  border-top: 1px solid var(--line-2); padding-top: 14px;
+}
+/* 有第二个条目时，主卡右侧已被它占用 ⇒ 规格块退到第二行并横跨整行；
+   它描述的是主卡，故从最左列起（否则顶线从「其余条目」下方开始，像在描述那一条）。 */
+.nk-hub-release__section--feature:has(.nk-hub-release__cell[data-pos='rest']) .nk-hub-release__spec { grid-column: 1 / -1; }
+.nk-hub-release__spec-name { font-size: clamp(1.5rem, 2.2vw, 2rem); font-weight: 900; letter-spacing: 0.02em; line-height: 1.15; color: var(--text-bright); }
+.nk-hub-release__spec-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 4px; background: var(--nk-shell-active-bg); border: 1px solid var(--nk-shell-active-border); color: var(--metric-val); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; width: fit-content; transition: background 0.2s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out), color 0.2s var(--nk-ease-out); }
+.nk-hub-release__spec-link svg { width: 15px; height: 15px; transition: transform 0.25s var(--nk-ease-out); }
+.nk-hub-release__spec-link:hover { background: var(--nk-shell-press); color: var(--text-bright); }
+.nk-hub-release__spec-link:hover svg { transform: translateX(3px); }
+.nk-hub-release__spec-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.nk-hub-release__band::-webkit-scrollbar { height: 6px; }
+.nk-hub-release__band::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.nk-hub-release__band .nk-relic-card { max-width: 240px; }
 .nk-hub-release__empty { padding: 22px 0 6px; font-size: 0.9rem; letter-spacing: 0.06em; color: var(--text2); }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .nk-hub-release__section { animation: nk-section-in linear both; animation-timeline: view(); animation-range: entry 0% entry 42%; }
+  }
+}
+@keyframes nk-section-in { from { opacity: 0; transform: translateY(26px); } }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-hub-release { padding: 28px 32px 56px var(--nk-content-offset); }
@@ -360,7 +403,20 @@
   .nk-hub-release__rule { display: none; }
   .nk-hub-release__section + .nk-hub-release__section { margin-top: 18px; }
   .nk-hub-release__label { margin-bottom: 8px; font-size: 0.8rem; }
-  .nk-hub-release__band { gap: 10px; }
+  .nk-hub-release__band { display: flex; align-items: flex-start; gap: 10px; scrollbar-width: none; }
+  .nk-hub-release__band::-webkit-scrollbar { display: none; }
+  /* 特写档（count ≤ 2）：手机上纵向栈，主条目特写在上、读数列在下。
+     注意：它必须排在上面那条 `display: flex` 之后 —— flex 规则若晚于本组会让本组失效。
+     只有存在「其余条目」时才开第二列（`auto` 轨），故单条目情形不会白丢一个列间距；
+     规格块 `1 / -1` 跨过全部显式轨 ⇒ 两种情形下顶线都横跨整行。 */
+  .nk-hub-release__band--feature { display: grid; grid-template-columns: minmax(0, 1fr); overflow-x: visible; gap: 6px; }
+  .nk-hub-release__section--feature:has(.nk-hub-release__cell[data-pos='rest']) .nk-hub-release__band--feature { grid-template-columns: minmax(0, 1fr) auto; }
+  .nk-hub-release__band--feature .nk-hub-release__cell[data-pos='lead'] .nk-idx-card { width: min(300px, 82vw); }
+  .nk-hub-release__band--feature .nk-hub-release__cell[data-pos='lead'] .nk-lc-card { width: min(230px, 62vw); }
+  .nk-hub-release__band--feature .nk-hub-release__cell[data-pos='lead'] .nk-relic-card { max-width: min(220px, 60vw); }
+  .nk-hub-release__spec { grid-column: 1 / -1; gap: 14px; margin-top: 8px; padding-top: 12px; }
+  /* 卡内已写名（手机档卡是名行），读数列不再复述 */
+  .nk-hub-release__spec-name { display: none; }
   .nk-hub-release__band .nk-idx-card { width: 190px; min-height: 0; padding: 8px 10px; border: 1px solid var(--line-1); border-radius: var(--nk-radius-card); background: var(--card); }
   .nk-hub-release__band .nk-lc-card { width: 116px; }
   .nk-hub-release__band .nk-relic-card { width: 104px; }
@@ -369,24 +425,25 @@
 }
 
 @media (hover: none) {
-  .nk-idx-card:hover { background: transparent; border-color: transparent; }
-  .nk-idx-card:hover::before { height: 0; opacity: 0; }
+  .nk-idx-card:hover::after { border-color: transparent; }
   .nk-idx-card:hover .nk-idx-card__name { color: var(--text-bright); }
-  .nk-idx-card:hover .nk-idx-card__portrait img { transform: none; }
 }
 
 @media (max-width: 767px) {
-  #nk-catalog-app { padding-left: 16px; padding-right: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  /* 手机档：`--nk-content-offset` 为 0（侧栏变底栏），左侧留白必须显式给回 16px，
+     否则工具栏/搜索框/卡片会一起贴到屏幕左缘（`--cat-pad-x` 只决定条带的出血宽度与右内距）。 */
+  #nk-catalog-app { --cat-pad-x: 16px; padding-left: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
   .nk-cat-masthead { padding: 18px 0 12px; gap: 10px; }
   .nk-cat-title { font-size: 1.05rem; letter-spacing: 0.06em; }
   .nk-cat-count { font-size: 0.55rem; letter-spacing: 0.14em; }
-  .nk-cat-toolbar { gap: 8px; padding: 6px 0; background: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 95%, var(--primary) 5%) 92%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
-  .nk-cat-search { max-width: none; min-width: 0; }
-  .nk-cat-search input { min-width: 0; }
-  .nk-cat-filters-bar { justify-content: flex-start; }
+  /* 手机档条带不透明、关掉毛玻璃（性能），内距与桌面一致，搜索框不再贴容器边缘 */
+  .nk-cat-toolbar { gap: 8px; padding: 6px 8px 10px; flex-wrap: wrap; }
+  .nk-cat-toolbar::before { background: color-mix(in srgb, var(--blk-850) 94%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .nk-cat-search { flex: 1 1 100%; max-width: none; min-width: 0; }
+  /* 搜索占满一整行后，筛选 chip 行在第二行完整排出（不再被 360px 搜索框挤到只剩半枚可点 chip） */
+  .nk-cat-filters-bar { flex: 1 1 100%; justify-content: flex-start; overflow-x: auto; }
   .nk-cat-filters-bar .nk-cat-select { flex-shrink: 0; }
   .nk-cat-select__btn { padding: 6px 8px; }
-  .nk-skeleton--catalog { padding-left: 16px; padding-right: 16px; }
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
   .nk-lc-grid { grid-template-columns: repeat(3, 1fr); }
   .nk-lc-card__info { padding: 10px 8px 8px; }
@@ -402,7 +459,7 @@
     padding: 8px 4px;
     border-radius: 0;
     border-bottom: 1px solid var(--line-1);
-    transition: background 0.15s;
+    transition: background var(--nk-dur-fast) var(--nk-ease-out);
   }
   .nk-idx-card__portrait {
     flex: none;
@@ -479,11 +536,18 @@
 }
 @media (min-width: 1024px) {
   .nk-idx-grid,
-  .nk-lc-grid { --nk-grid-min: 160px; }
+  .nk-lc-grid { --nk-grid-gap: 16px; }
+  /* 角色卡承担整页视觉重量：桌面卡宽 168 → 竖屏曼陀罗立绘大到能看清表情，
+     才对得起「图鉴」而不是缩略图墙；1280 / 1536 两档继续放大。 */
+  .nk-lc-grid { --nk-grid-min: 168px; }
+  .nk-idx-grid { --nk-grid-min: 186px; }
 }
 @media (min-width: 1280px) {
+  .nk-idx-grid { --nk-grid-min: 204px; }
+}
+@media (min-width: 1536px) {
   .nk-idx-grid,
-  .nk-lc-grid { grid-template-columns: repeat(8, 1fr); }
+  .nk-lc-grid { grid-template-columns: repeat(8, 1fr); --nk-grid-gap: 18px; }
 }
 @media (min-width: 1024px) {
 }

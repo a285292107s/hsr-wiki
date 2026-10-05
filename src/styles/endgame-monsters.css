@@ -10,8 +10,9 @@
   flex-wrap: wrap;
   gap: 10px 14px;
 }
+/* align-self 归 `endgame-panels.css` 的区块标题档位组（`.nk-egd-group__title` 同点声明）——此处不再重述，
+   否则两块样式表谁后加载谁生效：本文件在 EndgameView 的 import 序里排在 panels 之后，等于静默吃掉档位声明。 */
 .nk-egd-floor__row--mons > .nk-egd-floor__label {
-  align-self: center;
   min-width: 0;
   padding: 0;
 }
@@ -25,7 +26,6 @@
 .nk-egd-floor__label {
   flex-shrink: 0;
   min-width: 4.8em;
-  font-size: 0.64rem;
   letter-spacing: 0.08em;
   color: var(--text3);
 }
@@ -64,7 +64,6 @@
 .nk-egd-floor__moncount {
   flex-shrink: 0;
   font-family: var(--font-hud);
-  font-size: 0.62rem;
   letter-spacing: 0.06em;
   color: color-mix(in srgb, var(--eg-color) 76%, #fff);
   white-space: nowrap;
@@ -91,7 +90,7 @@
   background: color-mix(in srgb, var(--blk-800) 72%, transparent);
   border: 1px solid color-mix(in srgb, var(--eg-color) 22%, transparent);
   object-fit: cover;
-  transition: border-color 0.22s ease, transform 0.22s var(--ease), box-shadow 0.22s ease;
+  transition: border-color 0.22s ease, transform 0.22s var(--nk-ease-out), box-shadow 0.22s ease;
 }
 .nk-egd-floor__mon:hover {
   border-color: color-mix(in srgb, var(--eg-color) 60%, transparent);
@@ -126,7 +125,6 @@
   margin-bottom: 6px;
 }
 .nk-egd-floor__buffname {
-  font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-bright);
 }
@@ -158,7 +156,6 @@
 .nk-egd-floor__targetidx {
   flex-shrink: 0;
   font-family: var(--font-hud);
-  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: color-mix(in srgb, var(--eg-color) 74%, var(--text3));
@@ -272,7 +269,6 @@
   font-weight: 700;
   color: var(--text-bright);
 }
-.nk-egd-floor__hard .nk-egd-floor__row { margin: 0; }
 .nk-egd-floor__hard .nk-egd-floor__targets { margin-top: 0; }
 
 .nk-egd-mons {
@@ -313,7 +309,7 @@
   width: 104px;
   height: auto;
   object-fit: contain;
-  transition: transform 0.22s var(--ease);
+  transition: transform 0.22s var(--nk-ease-out);
 }
 .nk-egd-mon__figlink {
   display: block;
@@ -338,7 +334,6 @@
 /* 敌方名由父级行头承担时（星启看板）元信息列只剩标签；空容器会在头像右侧留出空洞 */
 .nk-egd-mon__meta:empty { display: none; }
 .nk-egd-mon__name {
-  font-size: 0.84rem;
   font-weight: 600;
   line-height: 1.35;
   color: var(--text1);
@@ -351,7 +346,6 @@
 .nk-egd-mon__tag {
   display: inline-flex;
   align-items: center;
-  font-size: 0.66rem;
   line-height: 1;
   letter-spacing: 0.03em;
   padding: 3px 8px;
@@ -365,7 +359,6 @@
   top: -5px;
   left: -5px;
   z-index: 1;
-  font-size: 0.6rem;
   line-height: 1;
   letter-spacing: 0.04em;
   padding: 2.5px 6px;
@@ -377,7 +370,6 @@
 .nk-egd-mon__rows {
   display: flex;
   flex-direction: column;
-  gap: 7px;
   padding-top: 12px;
   border-top: 1px solid var(--line-1);
 }
@@ -389,12 +381,10 @@
 .nk-egd-mon__label {
   flex-shrink: 0;
   min-width: 28px;
-  font-size: 0.64rem;
   letter-spacing: 0.05em;
   color: var(--text3);
 }
 .nk-egd-mon__none {
-  font-size: 0.66rem;
   letter-spacing: 0.06em;
   color: var(--text3);
 }
@@ -417,13 +407,11 @@
 }
 .nk-egd-mon__resitem .nk-egd-elem { width: 16px; height: 16px; }
 .nk-egd-mon__resval {
-  font-size: 0.66rem;
   line-height: 1;
   color: var(--text2);
 }
 .nk-egd-mon__intro {
   margin: 0;
-  font-size: 0.66rem;
   line-height: 1.6;
   color: var(--text3);
   white-space: pre-line;
@@ -445,7 +433,6 @@
 .nk-egd-mon__skill {
   display: inline-flex;
   align-items: center;
-  font-size: 0.66rem;
   line-height: 1;
   padding: 5px 9px;
   border-radius: 6px;
@@ -459,14 +446,3 @@
   color: var(--text1);
 }
 
-.nk-egd-empty {
-  padding: 18px;
-  margin-bottom: 8px;
-  font-size: 0.76rem;
-  letter-spacing: 0.04em;
-  text-align: center;
-  color: var(--text3);
-  background: color-mix(in srgb, var(--blk-900) 24%, transparent);
-  border: 1px dashed var(--line-2);
-  border-radius: var(--nk-radius-card);
-}

@@ -5,6 +5,7 @@
 import { computed } from 'vue';
 import { seasonThemeIconUrl } from '../catalog/pages/endgame';
 import { buildEndgameSections, sectionIdxMap } from './sections';
+import { FALLBACK_SYSTEM_NAME } from './guide';
 import {
   BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl, seasonBuffList,
 } from './renders';
@@ -14,13 +15,22 @@ import type { MazeBuffInfo, MazeListEntry } from '../../services/types';
 const props = defineProps<{
   data: MazeListEntry;
   modeKey: string;
+  /** 该玩法的增益体系名（游戏内命名，来自 `endgame_guide.json`）；缺省回退站点工作名「赛季增益」 */
+  systemName?: string;
+  /** 选法说明（`3 条 · 每场战斗选 1 条`）；为空则不渲染该行 */
+  systemLine?: string;
 }>();
 
 const subBuffsMech = computed<MazeBuffInfo | null>(() => props.data.sub_buffs?.[0] || null);
 const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.slice(1) || []);
 const seasonBuffs = computed(() => seasonBuffList(props.data));
 const seasonThemeIcon = computed(() => seasonThemeIconUrl(props.data.arts));
-const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, [])));
+const systemTitle = computed(() => props.systemName || FALLBACK_SYSTEM_NAME);
+/** 站点工作名只在体系名生效时降为次标；回退时主标题已是它，不再重复 */
+const aliasTitle = computed(() => (props.systemName ? '赛季增益' : ''));
+const sectionIdx = computed(
+  () => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, [], systemTitle.value)),
+);
 </script>
 
 <template>
@@ -67,8 +77,9 @@ const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data,
         loading="lazy"
         @error="($event.target as HTMLImageElement).style.display='none'"
       >
-      <span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>赛季增益 BUFFS
+      <span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>{{ systemTitle }}<span v-if="aliasTitle" class="nk-egd-title-alias">{{ aliasTitle }}</span>
     </h2>
+    <p v-if="systemLine" class="nk-egd-buffs__hint">{{ systemLine }}</p>
     <div class="nk-egd-groups">
       <EndgameBuffGroup :items="seasonBuffs" />
     </div>
