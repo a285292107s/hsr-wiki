@@ -64,6 +64,21 @@
   background: color-mix(in srgb, var(--primary) 70%, transparent);
 }
 .nk-egm__note { margin: 0 0 12px; font-size: 0.72rem; line-height: 1.7; color: var(--text3); }
+/* 增益体系的「规格行」：条数用 HUD 字体加重（与结构口径的数值同一套读法），选法用正文色可读字号。
+   刻意**不用**注脚字号与 --text3 —— 这两个信息是读者进入该区块最先需要的规格，不是附注。 */
+.nk-egm__system { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin: -6px 0 14px; }
+.nk-egm__system-count {
+  font-family: var(--font-hud); font-size: 1.0rem; font-weight: 700;
+  color: var(--text-bright); font-variant-numeric: tabular-nums;
+}
+.nk-egm__system-choice {
+  position: relative; padding-left: 15px;
+  font-size: 0.84rem; font-weight: 600; color: var(--text2);
+}
+.nk-egm__system-choice::before {
+  content: ''; position: absolute; left: 0; top: 50%; width: 9px; height: 1px;
+  background: color-mix(in srgb, var(--primary) 60%, transparent);
+}
 .nk-egm__link { color: var(--metric-val); }
 .nk-egm__link:hover { text-decoration: underline; }
 
@@ -81,14 +96,9 @@
   color: var(--text-bright); font-variant-numeric: tabular-nums;
 }
 
-/* ── 当期增益：只出名称与图标（D6：不出 desc，避免快照出现未展开占位符） */
-.nk-egm__buffs { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
-.nk-egm__buff {
-  display: flex; align-items: center; gap: 9px; padding: 9px 12px;
-  background: var(--card); border: 1px solid var(--line-1); border-radius: 9px;
-}
-.nk-egm__buff img { width: 26px; height: 26px; border-radius: 6px; object-fit: contain; flex: none; }
-.nk-egm__buff-name { font-size: 0.78rem; font-weight: 600; color: var(--text-bright); }
+/* 玩法页不再列具体增益条目（每期/每半场各不相同，归赛季页）：入口用全站原语 .nk-guide-link，故此处不再需要卡片样式 */
+.nk-egm__system-cta { align-self: flex-start; margin-bottom: 4px; }
+
 
 /* ── 赛季列表：直接复用目录页的行渲染（`.nk-eg-lrow`），但目录页是「每列一个模式」的多列竖表，
    单模式 57 期若单列到底会得到 3500px 的长条、且每行 960px 宽只放三十来个字 ⇒ 这里按同一读法

@@ -39,9 +39,13 @@ describe('选法文案与口径行', () => {
   it('枚举 → 文案映射四档齐备', () => {
     expect(Object.keys(CHOICE_LABEL).sort()).toEqual(['fixed', 'per_king', 'per_stage', 'per_team']);
   });
-  it('choiceLabel 与口径行', () => {
-    expect(seasonBuffChoiceLabel(db, 'boss')).toBe('每场战斗选 1 条');
-    expect(seasonBuffSystemLine(db, 'boss')).toBe('3 条 · 每场战斗选 1 条');
+  it('choiceLabel 与口径行（措辞逐条对齐官方原话）', () => {
+    // boss 必须写明「每场首领挑战」与「上/下半场各一套」——数据是每个首领投影一套，
+    // 只写「每场战斗选 1 条」会被读成整期只有一套（判据见 guide.ts 的 CHOICE_LABEL 注释）
+    expect(seasonBuffChoiceLabel(db, 'boss')).toBe('每场首领挑战前选 1 条（上/下半场各一套）');
+    expect(seasonBuffSystemLine(db, 'boss')).toBe('每期 3 条 · 每场首领挑战前选 1 条（上/下半场各一套）');
+    // 口径行是**常青规格**（不随赛季轮换），故用「每期 N 条」而不是「本期 N 条」
+    expect(seasonBuffSystemLine(db, 'boss')).toContain('每期 3 条');
     // 无体系数据时为空串（调用方据此不渲染该行）
     expect(seasonBuffChoiceLabel(db, 'maze')).toBe('');
     expect(seasonBuffSystemLine(db, 'maze')).toBe('');
