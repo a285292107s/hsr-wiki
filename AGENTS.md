@@ -20,6 +20,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 | 写改测试 / e2e 分层 / 像素基线 | [docs/agents/testing.md](docs/agents/testing.md) |
 | 命令 / 端口 / dev 缓存陈旧 / 部署与门禁 | [docs/agents/commands.md](docs/agents/commands.md) |
 | UI 样式 / 色彩令牌 / 主题与强调色 / 断点 / 反 AI 味 | [docs/agents/ui-design.md](docs/agents/ui-design.md) |
+| UI 质量验收标准（获奖级达标判据 / 分层门禁 / 终止条件） | [docs/audit/UI质量验收标准.md](docs/audit/UI质量验收标准.md) |
 | 视觉职责边界 / 环境性排障 / 取证金字塔 / headless 与 PowerShell 陷阱 | [docs/agents/verification.md](docs/agents/verification.md) |
 | 代码与注释规范 / ADR 门槛 / commit 风格 / 字段审计 | [docs/agents/conventions.md](docs/agents/conventions.md) |
 
