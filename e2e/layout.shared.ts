@@ -87,14 +87,20 @@ export interface SeasonLike {
     nodes?: { idx: number; level?: number; damage?: string[]; monsters?: MonsterLike[]; invasion?: InvasionLike; buff?: { name: string } }[];
   };
   levels?: {
+    id?: number;
+    kind?: 'knight' | 'king';
     name?: string;
+    level?: number;
     damage?: string[];
+    targets?: { text?: string; param: number | null }[];
     monsters?: MonsterLike[];
+    buffs?: { id: number; name: string }[];
     invasion?: InvasionLike;
-    hard?: { monsters?: MonsterLike[] };
+    hard?: { name?: string; level?: number; monsters?: MonsterLike[]; targets?: { param: number | null }[] };
   }[];
   buffs?: { name: string }[];
   pollution?: { count: number; levels: number[] };
+  badges?: { level: string; name: string; desc?: string; icon: string }[];
 }
 
 /** 读某个终局赛季的原始数据（maze_boss / maze / maze_peak 三表同构） */
@@ -130,6 +136,11 @@ export function levelTabLabels(season: SeasonLike): string[] {
 export function seasonTabLabels(season: SeasonLike): string[] {
   const floors = (season.floor_details ?? []).map((f) => `第 ${f.floor} 层`);
   return season.tierce ? [...floors, '星启模式'] : floors;
+}
+
+/** 异相仲裁单关 tab 文案：官方关卡名、按源序（骑士（一）… → 将杀王棋） */
+export function peakTabLabels(season: SeasonLike): string[] {
+  return (season.levels ?? []).map((l) => l.name ?? '');
 }
 
 /** 千分位（页面数值档用 toLocaleString 渲染，断言不依赖运行环境的 locale） */

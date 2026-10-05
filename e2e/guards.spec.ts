@@ -37,6 +37,8 @@ const ROUTES: GuardRoute[] = [
   { path: '/settings', roots: ['#accent-title', '.ui-sidebar'] },
   // 末日幻影默认停在星启模式（用户裁决）：关键容器取两条分支共有的看板，不取只在层分支下存在的 `.nk-egd-lvl`
   { path: '/endgame/boss/3020', roots: ['.nk-egd-tabs', '.nk-egd-board'] },
+  // 异相仲裁默认停在首个关卡 tab（无星启）：关键容器取子 tab 行与单关面板（ADR 0043）
+  { path: '/endgame/peak/9', roots: ['#egd-level-tabs', '.nk-egd-peak'] },
 ];
 
 test.describe('不变量守卫（视觉改动不得让其变红）', () => {
