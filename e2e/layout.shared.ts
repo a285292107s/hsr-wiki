@@ -54,7 +54,18 @@ export async function readContentOffset(page: import('@playwright/test').Page): 
    无法派生的只剩两类：① 站点自创文案（如 H1「贪饕污染」、区块标题「首领特性」）；
    ② UI 格式（「第 N 层」「污染等级 N」「NO.<id>」的拼装方式）——这两类保留字面量并注明理由。 */
 
-export interface MonsterLike { name: string; icon?: string; wave?: number; summons?: SummonLike[] }
+export interface MonsterLike {
+  name: string;
+  icon?: string;
+  wave?: number;
+  summons?: SummonLike[];
+  /** 以下四项只随「全字段」形态出现（末日幻影楼层 / 星启节点 / 异相仲裁单关的敌方详情卡） */
+  intro?: string;
+  skills?: { name: string; tag?: string }[];
+  weak?: string[];
+  resist?: Record<string, number>;
+  rank?: string;
+}
 export interface InvasionLike { level: number; stage_id?: number; monsters?: MonsterLike[] }
 /** 召唤物（ADR 0036 修订）：轻形态 + 受污染者带 polluted（污染等级）；挂在召唤者自己的敌方条目上 */
 export interface SummonLike { id: string; name: string; tpl?: string; polluted?: number }
@@ -141,6 +152,12 @@ export function seasonTabLabels(season: SeasonLike): string[] {
 /** 异相仲裁单关 tab 文案：官方关卡名、按源序（骑士（一）… → 将杀王棋） */
 export function peakTabLabels(season: SeasonLike): string[] {
   return (season.levels ?? []).map((l) => l.name ?? '');
+}
+
+/** 「N 波 · M 敌」摘要（与 `src/app/endgame/renders.ts → monCountLabel` 同口径：波数 = wave 去重计数） */
+export function monCountLabel(mons: MonsterLike[] | undefined): string {
+  if (!mons?.length) return '';
+  return `${new Set(mons.map((m) => m.wave ?? 1)).size} 波 · ${mons.length} 敌`;
 }
 
 /** 千分位（页面数值档用 toLocaleString 渲染，断言不依赖运行环境的 locale） */

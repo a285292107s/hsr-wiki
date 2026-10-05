@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, resolveTokenColor, waitForCatalogCards } from './helpers';
-import { CN_NUM, expectTokenNumber, floorBossName, grouped, lastWaveBossName, lastWaveMonster, levelTabLabels, noUnknownOverflow, peakTabLabels, pollutedMonsterCount, pollutedSeasonHrefs, pollutedSummons, pollutionBadge, pollutionEntries, pollutionPosition, seasonData, seasonTabLabels, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
+import { CN_NUM, expectTokenNumber, floorBossName, grouped, lastWaveBossName, lastWaveMonster, levelTabLabels, monCountLabel, noUnknownOverflow, peakTabLabels, pollutedMonsterCount, pollutedSeasonHrefs, pollutedSummons, pollutionBadge, pollutionEntries, pollutionPosition, seasonData, seasonTabLabels, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
 
 /**
  * 布局验收：终局合并单页 —— layout 验收层（语义契约 + 数值规格）分文件之一。
@@ -888,23 +888,22 @@ test.describe('布局验收：终局合并单页', () => {
     await page.locator('#egd-level-tabs [role="tab"]', { hasText: king!.name! }).click();
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__buffname')).toHaveText(king!.buffs!.map((b) => b.name));
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__bufflabel')).toHaveCount(0);
-    // 异相仲裁单关与绝境变体同样把召唤物并进敌方图标格（触发条件 = 该敌方有召唤表）：
-    // 每个 tab 的条数由该关数据派生
+    // 单关与绝境变体的敌方走同一套敌方详情卡（与末日幻影层看板同源 `StageContent`）：
+    // 召唤物挂在召唤者卡内，条数由该关数据派生
     const peakSummons = (peak.levels ?? []).flatMap(
       (l) => [...summonsOf(l.monsters), ...summonsOf(l.hard?.monsters)],
     );
     expect(peakSummons.length, '异相仲裁应有带召唤物的单关').toBeGreaterThan(0);
     for (const lv of peak.levels ?? []) {
       await page.locator('#egd-level-tabs [role="tab"]', { hasText: lv.name! }).click();
-      await expect(page.locator('.nk-egd-peak .nk-egd-floor__moncell .nk-egd-summon'))
+      await expect(page.locator('.nk-egd-peak .nk-egd-mon .nk-egd-summon'))
         .toHaveCount(summonsOf(lv.monsters).length + summonsOf(lv.hard?.monsters).length);
     }
     await page.locator('#egd-level-tabs [role="tab"]', { hasText: (peak.levels ?? [])[0].name! }).click();
     await expect(page.locator('.nk-egd-peak .nk-egd-summons__label').first()).toHaveText('召唤物');
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__row--summons')).toHaveCount(0);
-    // 图标格顶边对齐（带召唤物的格子更高，居中会让同级图标错位）
-    expect(await page.locator('.nk-egd-peak .nk-egd-floor__mons').first()
-      .evaluate((el) => getComputedStyle(el).alignItems)).toBe('flex-start');
+    // 敌方详情卡的图标格与卡片表格分离：旧图标格形态（圆形小图标 + 格内召唤物）已整批退场
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__moncell')).toHaveCount(0);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -1265,6 +1264,54 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     await expect(page.locator('.nk-egd-panel .nk-title')).toHaveCount(0);
     await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveText(peakTabLabels(peak));
     await expect(page.locator('.nk-egd-peak')).toHaveCount(1);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame/peak/9：单关敌方走敌方详情卡（与末日幻影层看板同源 StageContent）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const peak = seasonData('maze_peak.json', '9');
+    await page.goto('/endgame/peak/9');
+
+    for (const lv of peak.levels ?? []) {
+      await page.locator('#egd-level-tabs [role="tab"]', { hasText: lv.name! }).click();
+      const panel = page.locator('.nk-egd-peak');
+      const mono = lv.monsters ?? [];
+      const hardMons = lv.hard?.monsters ?? [];
+      const cards = panel.locator('.nk-egd-mon');
+      // 卡片条数 = 该关敌方 + 绝境变体敌方（卡片是唯一的敌方渲染形态；旧图标格不得复活）
+      await expect(cards).toHaveCount(mono.length + hardMons.length);
+      await expect(panel.locator('.nk-egd-floor__moncell, .nk-egd-floor__monlink')).toHaveCount(0);
+      // 推荐属性与「N 波 · M 敌」摘要只由没有卡片行的异相仲裁保留
+      await expect(panel.locator('.nk-egd-floor__row > .nk-egd-floor__label').first()).toHaveText('推荐属性');
+      await expect(panel.locator('.nk-egd-floor__elems .nk-egd-elem')).toHaveCount((lv.damage ?? []).length);
+      await expect(panel.locator('.nk-egd-floor__moncount'))
+        .toHaveText([monCountLabel(mono), monCountLabel(hardMons)].filter(Boolean));
+
+      // 卡面 = 立绘（可跳详情）+ 名称 + 阵营/韧性/速度标签 + 弱点/抗性 + 图鉴介绍 + 技能
+      const card = cards.first();
+      const first = mono[0];
+      await expect(card.locator('.nk-egd-mon__name')).toHaveText(first.name);
+      await expect(card.locator('.nk-egd-mon__img'))
+        .toHaveAttribute('src', new RegExp(first.icon!));
+      await expect(card.locator('.nk-egd-mon__figlink'))
+        .toHaveAttribute('aria-label', `查看 ${first.name} 详情`);
+      await expect(card.locator('.nk-egd-mon__label')).toHaveText(['弱点', '抗性']);
+      await expect(card.locator('.nk-egd-mon__weak .nk-egd-elem')).toHaveCount((first.weak ?? []).length);
+      // 图鉴介绍与技能全字段只随详情卡出现（末日幻影楼层同口径；期级列表仍是轻形态）
+      expect(first.intro, '该期首关首个敌方应带图鉴介绍').toBeTruthy();
+      await expect(card.locator('.nk-egd-mon__intro')).toContainText(first.intro!.slice(0, 12));
+      await expect(card.locator('.nk-egd-mon__skill'))
+        .toHaveText((first.skills ?? []).map((s) => s.name));
+    }
+
+    // 绝境变体同样走卡片（含它自己的召唤物），不是另一套内联行
+    const king = (peak.levels ?? []).find((l) => l.kind === 'king');
+    await page.locator('#egd-level-tabs [role="tab"]', { hasText: king!.name! }).click();
+    const hardCard = page.locator('.nk-egd-peak .nk-egd-floor__hard .nk-egd-mon');
+    await expect(hardCard).toHaveCount((king!.hard?.monsters ?? []).length);
+    await expect(hardCard.locator('.nk-egd-mon__name'))
+      .toHaveText((king!.hard!.monsters ?? []).map((m) => m.name));
     await noUnknownOverflow(page);
     assertNoErrors();
   });
