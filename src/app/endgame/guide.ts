@@ -12,12 +12,16 @@ import type { EndgameGuideDb, EndgameGuideMode, EndgameSystemChoice } from '../.
 /** 站点工作名：仅在体系名不可用时兜底（不得用于给体系命名，见文件头） */
 export const FALLBACK_SYSTEM_NAME = '赛季增益';
 
-/** 选择语义 → 说明文案。枚举（`choice`）由转换器产出，文案只在本表维护。 */
+/** 选择语义 → 说明文案。枚举（`choice`）由转换器产出，文案只在本表维护。
+ *  措辞逐条对齐 `endgame_guide.json` 里该体系分节的**官方原话**（判据，不是我的概括）：
+ *  maze「每一关都有其独特的效果且仅在当前关卡内生效」／story「挑战…关卡前，可以为每支队伍选择其中一种」
+ *  ／boss「在首领挑战前，可以为每支队伍选择其中一种」（数据是**每个首领投影一套**＝上/下半场各一套，
+ *  故必须写明，否则「每场战斗选 1」会被读成整期只有一套）／peak「在挑战王棋前，可以为队伍选择其中一种」。 */
 export const CHOICE_LABEL: Record<EndgameSystemChoice, string> = {
-  fixed: '固定生效，不可选择',
-  per_team: '每支队伍选 1 条',
-  per_stage: '每场战斗选 1 条',
-  per_king: '王棋挑战前选 1 条',
+  fixed: '随层生效，不可选择',
+  per_team: '挑战关卡前每支队伍选 1 条',
+  per_stage: '每场首领挑战前选 1 条（上/下半场各一套）',
+  per_king: '挑战王棋前为队伍选 1 条',
 };
 
 export function guideMode(
@@ -55,12 +59,13 @@ export function seasonBuffChoiceLabel(
   return CHOICE_LABEL[system.choice] ?? '';
 }
 
-/** 一句话口径：`3 条 · 每场战斗选 1 条`（条数与选法都缺时为空串） */
+/** 一句话口径：`每期 3 条 · 每场首领挑战前选 1 条（上/下半场各一套）`。
+ *  条数与选法都是**常青规格**（不随赛季轮换），故口径行不带「本期」字样——带「本期」会把它说成每期数据。 */
 export function seasonBuffSystemLine(
   guide: EndgameGuideDb | null | undefined,
   modeKey: string,
 ): string {
   const count = seasonBuffCount(guide, modeKey);
   const choice = seasonBuffChoiceLabel(guide, modeKey);
-  return [count ? `${count} 条` : '', choice].filter(Boolean).join(' · ');
+  return [count ? `每期 ${count} 条` : '', choice].filter(Boolean).join(' · ');
 }

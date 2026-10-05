@@ -6,13 +6,14 @@
 /* groups 内层是 flex 项：auto 外边距会取消 stretch，必须显式 width:100% 才能维持
    .nk-egd-buffs / .nk-egd-traits 的 struct-max 宽度（否则各组按内容收缩、宽度不一致） */
 .nk-egd-buffs { display: flex; flex-direction: column; margin-bottom: 8px; width: 100%; }
-/* 体系名的次标（站点工作名「赛季增益」降级为它）与选法说明。取用方：EndgameBuffs 的区块标题。 */
+/* 体系名的次标（站点工作名「赛季增益」降级为它）与规格行。取用方：EndgameBuffs 的区块标题。
+   规格行给到 0.84rem / --text2：它是本区块的规格（几条、怎么选），不是附注。 */
 .nk-egd-title-alias {
   font-family: var(--font-mono); font-size: 0.58rem; font-weight: 500;
   letter-spacing: 0.16em; color: var(--text3);
   border-left: 1px solid var(--line-2); padding-left: 8px;
 }
-.nk-egd-buffs__hint { margin: -10px 0 14px; font-size: 0.72rem; line-height: 1.6; color: var(--text3); }
+.nk-egd-buffs__hint { margin: -10px 0 14px; font-size: 0.84rem; font-weight: 600; line-height: 1.6; color: var(--text2); }
 .nk-egd-groups { display: flex; flex-direction: column; gap: 18px; margin-bottom: 8px; }
 .nk-egd-group { display: flex; flex-direction: column; gap: 10px; }
 /* 分组行头：标题与场次标签同行（场次标签的 align-self 在行内向是顶部对齐，须覆写为居中） */

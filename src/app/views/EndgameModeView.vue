@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
 import { SITE_NAME } from '../../lib/constants';
 import {
-  ENDGAME_MODES, endgamePage, modeDefaultArtUrl,
+  ENDGAME_MODES, endgamePage, mazeStatus, modeDefaultArtUrl,
 } from '../catalog/pages/endgame';
 import {
   loadLocalBossList, loadLocalEndgameGuide, loadLocalMazeList,
@@ -19,7 +19,6 @@ import type {
 } from '../../services/types';
 import type { CatalogItem } from '../catalog/types';
 import { seasonBuffChoiceLabel, seasonBuffCount } from '../endgame/guide';
-import { buffIconUrl, BUFF_ICON_FALLBACK } from '../endgame/renders';
 import '../../styles/endgame.css';
 import '../../styles/endgame-mode.css';
 
@@ -46,14 +45,30 @@ const system = computed(() => guideMode.value?.system ?? null);
 const heroArt = computed(() => modeDefaultArtUrl(modeKey.value));
 const otherModes = computed(() => ENDGAME_MODES.filter((m) => m.key !== modeKey.value));
 
-/** 当期赛季 = 目录排序第一位（结构口径与当期增益都以它为准；层数历史上变过，禁用多季众数）。
+/** 当期赛季 = **正在进行中**的那一期（判据与目录页状态同源 `mazeStatus`）。
+ *  目录排序是「最新在前」，而最新一期常常是「未开始」——直接取首位会把**未上线赛季**的层数/增益
+ *  当现状陈述（实测 maze 首位 1036 未开始、进行中的是 1035）。赛季间隙里没有进行中的一期，
+ *  此时回落到最新一期，并在文案里显式标注状态，避免让读者误以为那就是当期。
  *  赛季 id 从卡片 href（`/endgame/<mode>/<id>`）解析——目录条目本身不带 id 字段。 */
-const currentSeason = computed<MazeListEntry | null>(() => {
-  const href = String(seasonCards.value[0]?.href || '');
-  const id = href.split('/').pop() || '';
-  return (id && listDb.value?.[id]) || null;
+const currentSeasonInfo = computed<{ id: string; entry: MazeListEntry | null; live: boolean }>(() => {
+  const pick = (card: CatalogItem | undefined) => {
+    const id = String(card?.href || '').split('/').pop() || '';
+    return { id, entry: (id && listDb.value?.[id]) || null };
+  };
+  for (const card of seasonCards.value) {
+    const { id, entry } = pick(card);
+    if (entry && mazeStatus(entry) === '进行中') return { id, entry, live: true };
+  }
+  const { id, entry } = pick(seasonCards.value[0]);
+  return { id, entry, live: false };
 });
-const currentSeasonId = computed(() => String(seasonCards.value[0]?.href || '').split('/').pop() || '');
+const currentSeason = computed<MazeListEntry | null>(() => currentSeasonInfo.value.entry);
+const currentSeasonId = computed(() => currentSeasonInfo.value.id);
+const currentSeasonLive = computed(() => currentSeasonInfo.value.live);
+/** 非进行中时的状态词（未开始 / 已结束 / 未知），用于把「最新一期」说清楚 */
+const currentSeasonStatus = computed(
+  () => (currentSeason.value ? mazeStatus(currentSeason.value) : '未知'),
+);
 
 /** 结构事实（全部取自当期赛季，页面上显式标注「以当期赛季为准」） */
 const structure = computed<Array<{ label: string; value: string }>>(() => {
@@ -67,27 +82,34 @@ const structure = computed<Array<{ label: string; value: string }>>(() => {
     if (halfs) rows.push({ label: '每层场次', value: `${halfs} 场` });
   }
   const levels = s.levels || [];
-  if (levels.length) rows.push({ label: '关卡组成', value: `${levels.length} 关` });
+  if (levels.length) {
+    rows.push({ label: '关卡组成', value: `${levels.length} 关` });
+    // 异相仲裁没有「层级」概念，关卡分两类（骑士试炼 / 王棋）——分开列，否则事实栏只剩两格、
+    // 与另外三个玩法（4–5 格）疏密失衡，也说不清这 4 关是什么
+    const knights = levels.filter((l) => l.kind === 'knight').length;
+    const kings = levels.filter((l) => l.kind === 'king').length;
+    if (knights) rows.push({ label: '骑士试炼', value: `${knights} 关` });
+    if (kings) rows.push({ label: '王棋关卡', value: `${kings} 关` });
+    const withTargets = levels.filter((l) => (l.targets || []).length).length;
+    if (withTargets) rows.push({ label: '设挑战目标', value: `${withTargets} 关` });
+  }
   if (s.countdown) rows.push({ label: '回合上限', value: `${s.countdown} 轮` });
   if (s.clear_score) rows.push({ label: '分数上限', value: String(s.clear_score) });
   rows.push({ label: '星启模式', value: s.tierce ? '含' : '不含' });
   return rows;
 });
 
-/** 当期增益（D6：只输出名称与图标，不输出 desc——避免快照里出现未展开的 #N[i] 占位） */
-const currentBuffs = computed(() => {
-  const s = currentSeason.value;
-  if (!s) return [];
-  if (modeKey.value === 'peak') {
-    const king = (s.levels || []).find((l) => l.kind === 'king') || (s.levels || []).slice(-1)[0];
-    return king?.buffs || [];
-  }
-  if (modeKey.value === 'boss') {
-    // 「每场战斗 3 选 1」必须取分场次表：扁平 buffs 是 1∪2 的并集（20 季 6 条、2 季 5 条）
-    return s.buff_groups?.stage1 || [];
-  }
-  return s.buffs || [];
-});
+/**
+ * 玩法页**不再列出具体增益条目**（原实现列「当期 N 条」）。
+ *
+ * 判据（按玩法核对数据后定）：
+ * - 条目名每期都换（story 66 / boss 70 / peak 28 个去重名），效果又依赖上下文，属**每期信息**，
+ *   归赛季页；常青页列它必然要么过时、要么只能截取一部分。
+ * - **boss 是硬错误**：同期上/下半场各有一套（`buff_groups.stage1/stage2`，扁平 `buffs` 只是并集），
+ *   原实现取 stage1 那 3 条却以「本期 3 条」呈现 ⇒ 玩家会以为整期只有一套。
+ * - maze 的条目名恒定（全期去重只有「记忆紊流」）且与层内同文，列出来是假时钟 + 复述。
+ * 故：本页只讲常青规格（条数/时机/作用范围），条目与效果一律由赛季页承载，这里给入口。
+ */
 
 /** 正文行：字面量 `\n` 拆行；`●`/`○` 起首的行归入列表（列表外的行按段落） */
 const ruleBlocks = computed<Array<{ title: string; paras: string[]; items: string[] }>>(
@@ -177,22 +199,23 @@ function cardHtml(item: CatalogItem, i: number): string {
           </div>
         </dl>
         <p class="nk-egm__note">
-          当期赛季：<RouterLink class="nk-egm__link" :to="`/endgame/${modeKey}/${currentSeasonId}`">{{ seasonCards[0]?.name }}</RouterLink>
+          {{ currentSeasonLive ? '当期赛季' : (currentSeasonStatus === '未知' ? '最新赛季' : `最新赛季（${currentSeasonStatus}）`) }}：<RouterLink class="nk-egm__link" :to="`/endgame/${modeKey}/${currentSeasonId}`">{{ currentSeason?.zh }}</RouterLink>
         </p>
       </section>
 
       <section class="nk-egm__panel">
         <h2 class="nk-title"><span class="nk-title__idx">03</span>{{ system?.name || '赛季增益' }}</h2>
-        <p v-if="system" class="nk-egm__note">
-          本期 {{ seasonBuffCount(guide, modeKey) }} 条 · {{ seasonBuffChoiceLabel(guide, modeKey) }}
+        <!-- 条数与选法是这个区块的**规格**（读者最需要先知道的两件事），故做成可读的规格行，
+             不用 0.72rem / --text3 的小字注脚（用户反馈：太小）。 -->
+        <p v-if="system" class="nk-egm__system">
+          <span class="nk-egm__system-count">每期 {{ seasonBuffCount(guide, modeKey) }} 条</span>
+          <span class="nk-egm__system-choice">{{ seasonBuffChoiceLabel(guide, modeKey) }}</span>
         </p>
-        <ul v-if="currentBuffs.length" class="nk-egm__buffs">
-          <li v-for="b in currentBuffs" :key="b.id" class="nk-egm__buff">
-            <img v-if="b.icon" :src="buffIconUrl(b)" :alt="b.name" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-            <span class="nk-egm__buff-name">{{ b.name }}</span>
-          </li>
-        </ul>
-        <p v-else class="nk-egm__note">当期赛季没有增益记录。</p>
+        <!-- 条目与效果留在赛季页（那里有半场/关卡上下文）：本页给一个明确的入口，不复制一份残缺的清单 -->
+        <RouterLink class="nk-guide-link nk-egm__system-cta" :to="`/endgame/${modeKey}/${currentSeasonId}`">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          查看{{ currentSeasonLive ? '当期' : '最新' }}赛季（{{ currentSeason?.zh }}）的增益
+        </RouterLink>
       </section>
 
       <section class="nk-egm__panel">
