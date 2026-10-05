@@ -767,6 +767,27 @@ class TestPeakSeasons:
         assert out[30501012] == {"level": 0, "waves": [], "maze_buff": None}
         assert 999999 not in out
 
+    def test_peak_level_node_full_monsters(self, monkeypatch):
+        """full=True 时单关敌方带 intro/skills（详情页敌方详情卡，与末日幻影层看板同口径）；缺省轻量。"""
+        monsters = {1003010: {"name": "名30", "icon": "Monster_1003010", "weak": ["Physical"],
+                              "intro": "图鉴介绍", "skills": [{"name": "技名", "tag": "技标"}]}}
+        stages = {30501011: {"level": 95, "maze_buff": None, "waves": [[1003010]]}}
+        rec = {"ID": 101, "Title": {"Hash": 1}, "DamageType": ["Fire"],
+               "EventIDList": [30501011], "NormalTargetList": [], "TagList": []}
+        monkeypatch.setattr(eg, "resolve_text", lambda _h: "名")
+        full = eg._peak_level_node(rec, stages, monsters, {}, {}, "knight", None, None, True)
+        assert full["monsters"][0]["intro"] == "图鉴介绍"
+        assert full["monsters"][0]["skills"] == [{"name": "技名", "tag": "技标"}]
+        light = eg._peak_level_node(rec, stages, monsters, {}, {}, "knight", None, None)
+        assert "intro" not in light["monsters"][0]
+        assert "skills" not in light["monsters"][0]
+
+    def test_lean_monster_strips_wave_and_full_fields(self):
+        """期级合并列表用轻形态：wave / intro / skills 都不进（只服务目录卡与 AI 快照）。"""
+        m = {"id": "1", "name": "甲", "icon": "I", "wave": 2,
+             "intro": "介绍", "skills": [{"name": "技"}], "rank": "Elite"}
+        assert eg._lean_monster(m) == {"id": "1", "name": "甲", "icon": "I", "rank": "Elite"}
+
     def test_peak_seasons_full_structure(self, monkeypatch, setup_textmap):
         mc = setup_textmap
         """期 = 3 骑士 + 1 王棋（含绝境变体）；全关卡合并 damage/monsters/buffs。"""

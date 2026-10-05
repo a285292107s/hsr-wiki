@@ -1197,6 +1197,7 @@ def _peak_level_node(
     kind: str,
     invasions: dict[int, dict] | None = None,
     summons: dict[int, list[int]] | None = None,
+    full: bool = False,
 ) -> dict:
     """异相仲裁单关节点：名称 / 弱点 / 敌人 / 目标 / 机制标签。
 
@@ -1205,6 +1206,8 @@ def _peak_level_node(
     BattleTargetConfig；标签 TagList 解析为 MazeBuff 名称。invasions 传入时，
     污染关卡附加 invasion（异相仲裁无层/半场，污染直接落在单关上）；summons
     传入时召唤物按召唤者挂进敌方条目（见 _monster_summons）。
+    full=True 时单关敌方输出 intro/skills 全字段（详情页以敌方详情卡展示，
+    与末日幻影层看板同口径；绝境变体一并全字段）。
     """
     if rec is None:
         return {}
@@ -1217,7 +1220,7 @@ def _peak_level_node(
         "name": resolve_text(rec.get("Title", {})),
         "damage": sorted(rec.get("DamageType", []) or []),
         "monsters": _stage_waves_monsters(
-            events, stages, monsters, summons=summons, invasion=inv),
+            events, stages, monsters, full, summons=summons, invasion=inv),
         "targets": [
             {"text": targets[t]["text"], "param": targets[t]["param"]}
             for t in (rec.get("NormalTargetList", []) or []) if t in targets
@@ -1256,7 +1259,15 @@ def _load_peak_badges() -> dict[int, list[dict]]:
         })
     return out
 
-def _peak_seasons() -> dict:
+def _lean_monster(m: dict) -> dict:
+    """单关敌方 → 期级合并列表用的轻形态（去 wave 与 full 形态的 intro/skills）。
+
+    期级 `monsters` 只服务目录卡代表阵容与 AI 快照（名称/阵营/弱点），与另外三种模式的
+    期级列表同口径；单关节点保留全字段供详情页敌方详情卡，两处不共用同一份引用。
+    """
+    return {k: v for k, v in m.items() if k not in ("wave", "intro", "skills")}
+
+def _peak_seasons(full_monsters: bool = False) -> dict:
     """异相仲裁：每期 = 3 骑士试炼 + 1 王棋最终关（含「绝境」变体）。
 
     期表 ChallengePeakGroupConfig 给出骑士（PreLevelIDList）与王棋（BossLevelID）
@@ -1264,6 +1275,9 @@ def _peak_seasons() -> dict:
     配置（HardTitle / HardEventIDList / HardTarget / HardTagList）。
     输出 levels 数组 + 全关卡合并 damage_types / monsters / buffs（供目录卡片）；
     污染关卡在单关上附加 invasion，并在期级写出 pollution 汇总（见 _merge_pollution）。
+    full_monsters=True 时单关敌方输出 intro/skills 全字段（详情页以敌方详情卡展示）；
+    期级合并列表 `monsters` 始终轻量——它只服务目录卡代表阵容与 AI 快照
+    （渲染名称/阵营/弱点），与另外三种模式的期级列表同口径，不带图鉴介绍与技能。
     """
     groups = load_json(EXCEL_DIR / "ChallengePeakGroupConfig.json")
     level_data = load_json(EXCEL_DIR / "ChallengePeakConfig.json")
@@ -1300,18 +1314,18 @@ def _peak_seasons() -> dict:
         for lid in g.get("PreLevelIDList", []) or []:
             node = _peak_level_node(
                 level_by_id.get(lid), stages, monsters, buffs, targets, "knight",
-                invasions, summons)
+                invasions, summons, full_monsters)
             levels.append(node)
             dmg.update(node["damage"])
             for m in node["monsters"]:
                 if int(m["id"]) not in seen:
                     seen.add(int(m["id"]))
-                    all_mons.append({k: v for k, v in m.items() if k != "wave"})
+                    all_mons.append(_lean_monster(m))
         boss_id = g.get("BossLevelID")
         if boss_id is not None:
             node = _peak_level_node(
                 level_by_id.get(boss_id), stages, monsters, buffs, targets, "king",
-                invasions, summons)
+                invasions, summons, full_monsters)
             ext = boss_ext.get(boss_id)
             if ext:
                 node["buffs"] = [
@@ -1324,7 +1338,7 @@ def _peak_seasons() -> dict:
                 hard: dict = {
                     "name": resolve_text(ext.get("HardTitle", {})),
                     "monsters": _stage_waves_monsters(
-                        hard_events, stages, monsters, summons=summons),
+                        hard_events, stages, monsters, full_monsters, summons=summons),
                     "targets": [
                         {"text": targets[t]["text"], "param": targets[t]["param"]}
                         for t in [ext.get("HardTarget")] if t in targets
@@ -1342,7 +1356,7 @@ def _peak_seasons() -> dict:
             for m in node["monsters"]:
                 if int(m["id"]) not in seen:
                     seen.add(int(m["id"]))
-                    all_mons.append({k: v for k, v in m.items() if k != "wave"})
+                    all_mons.append(_lean_monster(m))
         king = next((l for l in levels if l.get("kind") == "king"), None)
         final_pool = ((king or levels[-1]).get("monsters") or []) if levels else []
         result[str(gid)] = {
@@ -1490,5 +1504,5 @@ def convert() -> None:
     _attach_default_icon(boss, mode_default_icons.get("boss"))
     save_json(boss, OUTPUT_DIR / "maze_boss.json")
 
-    peak = _peak_seasons()
+    peak = _peak_seasons(full_monsters=True)
     save_json(peak, OUTPUT_DIR / "maze_peak.json")
