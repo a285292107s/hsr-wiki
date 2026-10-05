@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
+import { Analytics } from '@vercel/analytics/vue';
 import { navDir } from './router';
 import SidebarNav from './components/SidebarNav.vue';
 import ToastHost from './components/ToastHost.vue';
@@ -63,4 +64,5 @@ onBeforeUnmount(() => { if (themeTimer !== null) clearTimeout(themeTimer); });
     </Transition>
   </RouterView>
   <ToastHost />
+  <Analytics />
 </template>
