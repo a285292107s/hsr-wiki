@@ -18,14 +18,13 @@ export interface ReleaseSection {
   kind: ReleaseKind;
   label: string;
   count: number;
-  /** 带规格：全部条目串行的模板串， 与 positions 均无关；来自各目录页 renderCard。 */
+  /** 该分区全部条目的模板串（来自各目录页 renderCard），在带内横向排列 */
   html: string;
   /**
-   * 特写规格（count ≤ 2）：逐条模板串，并给出各自落位。
-   * 落位只改排版（主条目特写、余者列侧），不改变目本身的数据与链接。
+   * 特写档（**恰 1 条**）：这一行只有主条目，故额外给「名字 + 详情入口」的规格块，
+   * 由它在行右端承担排版权重与显式动作。
+   * 2 条及以上一律平权卡带——每条的名字就在卡上、卡本身就是入口（判据见 FEATURE_MAX）。
    */
-  cards?: string[];
-  positions?: ('lead' | 'rest')[];
   leadMeta?: ReleaseLeadMeta;
   feature: boolean;
 }
@@ -61,10 +60,13 @@ export function pickSeasonNew<T extends ReleaseTagged>(list: readonly T[]): T[] 
   return list.filter((item) => item.is_season_new === true);
 }
 
-/* 特写判据：卡带天生是「多卡横流」，而版本上新常见 1~2 张新条目——把带内
-   210px 小规格硬套在 1 张卡上，就是首页曾出现过的「90% 空白挂 1 张小卡」。
-   门槛取 2：3 张以上时带规格的信息密度已经足够，特写反而打断横向节奏。 */
-const FEATURE_MAX = 2;
+/* 特写档判据：**恰 1 条**。
+   2 条时「挑一条特写」没有任何判据——旧判据是 `count ≤ 2` 且取 `picked[0]`，实测 4.6 的遗器两套里
+   只有第一套拿到大名字 + 查看档案，另一套权重相同却什么都没有，读起来像漏了一条；
+   反过来给两条都加，则是每个分区多出一排与卡内标签重复的名字 + 按钮（原型实测 4 条档：
+   分区高 446 → 584px、同屏 4 个大名字 + 4 个指向同一 href 的按钮）。
+   故 ≥2 条一律平权卡带：名字与入口由卡本身承担（卡是 `<a>`、名在卡上、hover/焦点态齐全）。 */
+const FEATURE_MAX = 1;
 
 /** 单源失败只丢该分区，但要**计数**：全失败与「本版本无新增」在页面上必须可区分，
     否则一次网络故障会被渲染成「本版本暂无新增条目」——把故障说成事实。 */
@@ -84,16 +86,11 @@ export function buildReleaseSectionsBy(
     const picked = source.items.filter((item) => ids.has(String(item.id)));
     if (!picked.length) continue;
     const feature = picked.length <= FEATURE_MAX;
-    const cards = picked.map((item, i) => source.renderCard(item, i));
     sections.push({
       kind: source.kind,
       label: source.label,
       count: picked.length,
-      html: cards.join(''),
-      cards: feature ? cards : undefined,
-      positions: feature
-        ? cards.map((_, i) => (i === 0 ? ('lead' as const) : ('rest' as const)))
-        : undefined,
+      html: picked.map((item, i) => source.renderCard(item, i)).join(''),
       leadMeta: feature && source.leadMeta ? source.leadMeta(picked[0]) : undefined,
       feature,
     });

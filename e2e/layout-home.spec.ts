@@ -44,20 +44,22 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：版本上新特写块不复述卡片内容，且行骨架横跨整行（无尾空）', async ({ page }) => {
+  test('首页 /：特写块只属于恰 1 条的分区，≥2 条一律平权卡带（不偏袒第一条）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/');
     await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
 
     /* 判据（2026-10 修订）：特写块的规格列**只承担排版权重与显式动作**，不得复述卡上已有的文字。
        实测旧形态：卡内「真珠 / ★★★★★ / 冰 / 欢愉」与规格列「真珠 / 冰 / 欢愉」逐字重复，
-       两处链接还同指详情页——同一屏里同一信息出现两遍是「没做完」的观感。允许重复的只有名字
-       （它是特写的排版权重），其余任何逐字重复都算回归。
+       两处链接还同指详情页——同一屏里同一信息出现两遍是「没做完」的观感。允许重复的只有名字。
 
-       判据（2026-11 追加，名字落位）：允许重复的名字也不能**并排同基线**——旧形态规格名贴主卡右缘起排，
-       与卡自带的小名横向只隔 310px（1440 档光锥实测 y=1135 ↔ 1174），读起来仍是复读。
-       单条目行（1 张卡）⇒ 名字是这一行的「值」，必须落到行的右半区；
-       多条目行（≥2 张卡）⇒ 规格块是主卡的注脚，仍须贴住主卡左缘（靠右会读成在描述右边那条）。 */
+       判据（2026-11 修订 a，名字落位）：允许重复的名字也不能**并排同基线**——旧形态规格名贴主卡右缘
+       起排，与卡自带的小名横向只隔 310px（1440 档光锥实测 y=1135 ↔ 1174），读起来仍是复读。
+       故单条目分区的名字必须落到这一行的右半区（它是这一行的落值）。
+
+       判据（2026-11 修订 b，≥2 条不再特写某一条）：旧判据是 `count ≤ 2` 且取 `picked[0]`，实测 4.6
+       遗器两套里只有第一套拿到大名字 + 入口，另一套权重相同却什么都没有——「特写哪一条」没有判据，
+       纯由数据顺序决定。故 **≥2 条的分区不得出现规格块**：每条的名字在卡上、卡本身就是入口。 */
     const rows = await page.evaluate(() => {
       const leafTexts = (root: Element) =>
         [...root.querySelectorAll('*')]
@@ -70,60 +72,78 @@ test.describe('布局验收：常规主题', () => {
         return b.width ? { x: Math.round(b.x) } : null;
       };
       return [...document.querySelectorAll('.nk-hub-release__section')].map((sec) => {
+        const band = sec.querySelector('.nk-hub-release__band') as HTMLElement;
         const cell = sec.querySelector('.nk-hub-release__cell');
         const spec = sec.querySelector('.nk-hub-release__spec');
-        if (!cell || !spec) return null;
-        const card = leafTexts(cell);
-        const specTexts = leafTexts(spec);
-        const band = sec.querySelector('.nk-hub-release__band')!.getBoundingClientRect();
-        const specBox = spec.getBoundingClientRect();
-        const cells = [...sec.querySelectorAll('.nk-hub-release__cell')];
+        // 卡本体：特写档是 cell 内的卡，平权档直接是带的子元素（`<a>`）
+        const cards = [...band.children].filter((el) => el !== spec);
+        const bandBox = band.getBoundingClientRect();
+        const specBox = spec ? spec.getBoundingClientRect() : null;
         return {
           kind: sec.getAttribute('data-kind'),
-          duplicated: specTexts.filter((t) => card.includes(t)),
-          shownName: spec.querySelector('.nk-hub-release__spec-name')?.textContent?.trim() ?? '',
-          trailing: Math.round(band.right - specBox.right),
-          cardLink: cell.querySelector('a')?.getAttribute('href') ?? null,
-          specLink: spec.querySelector('a')?.getAttribute('href') ?? null,
+          count: Number(sec.querySelector('.nk-hub-release__label-count')?.textContent?.trim() || '0'),
+          specCount: sec.querySelectorAll('.nk-hub-release__spec').length,
+          duplicated: spec ? leafTexts(spec).filter((t) => leafTexts(cell ?? band).includes(t)) : [],
+          shownName: spec?.querySelector('.nk-hub-release__spec-name')?.textContent?.trim() ?? '',
+          trailing: specBox ? Math.round(bandBox.right - specBox.right) : null,
+          cardLink: cell?.querySelector('a')?.getAttribute('href') ?? null,
+          specLink: spec?.querySelector('a')?.getAttribute('href') ?? null,
           // 手机档规格名 `display: none`（卡内已有名）⇒ 该档不参与名字落位断言
           vw: window.innerWidth,
-          single: cells.length === 1,
-          bandWidth: Math.round(band.width),
-          cardName: nameBox(cells[0].querySelector('.nk-idx-card__name, .nk-lc-card__name, .nk-relic-card__name')),
-          specName: nameBox(spec.querySelector('.nk-hub-release__spec-name')),
+          bandWidth: Math.round(bandBox.width),
+          cardName: nameBox(cards[0]?.querySelector('.nk-idx-card__name, .nk-lc-card__name, .nk-relic-card__name') ?? null),
+          specName: spec ? nameBox(spec.querySelector('.nk-hub-release__spec-name')) : null,
+          // 平权档：每条都必须自己是链接、且卡内写着自己的名字
+          plainCards: cards.map((c) => ({
+            isLink: c.tagName === 'A',
+            href: c.getAttribute('href'),
+            name: (c.querySelector('.nk-idx-card__name, .nk-lc-card__name, .nk-relic-card__name')?.textContent || '').trim(),
+          })),
+          bandOverflow: band.scrollWidth > band.clientWidth + 1,
         };
-      }).filter(Boolean);
+      });
     });
     expect(rows.length).toBeGreaterThanOrEqual(1);
     type Row = {
-      kind: string; duplicated: string[]; shownName: string; trailing: number;
-      cardLink: string | null; specLink: string | null; vw: number; single: boolean;
+      kind: string; count: number; specCount: number; duplicated: string[]; shownName: string;
+      trailing: number | null; cardLink: string | null; specLink: string | null; vw: number;
       bandWidth: number; cardName: { x: number } | null; specName: { x: number } | null;
+      plainCards: { isLink: boolean; href: string | null; name: string }[]; bandOverflow: boolean;
     };
+    let singleRows = 0;
+    let plainRows = 0;
     for (const r of rows as Row[]) {
-      expect(
-        r.duplicated.filter((t) => t !== r.shownName),
-        `${r.kind}：特写块复述了卡片内容——规格列只保留名字与入口`,
-      ).toEqual([]);
-      // 行骨架（规格块的顶线）必须横跨到整行右缘：否则右下角是一片无来由的空档
-      expect(Math.abs(r.trailing), `${r.kind}：特写行尾部留空 ${r.trailing}px`).toBeLessThanOrEqual(2);
-      // 入口指向的必须是这张主卡条目
-      expect(r.specLink, `${r.kind}：特写块入口缺失`).toBeTruthy();
-      expect(r.specLink).toBe(r.cardLink);
-      if (r.vw < 768 || !r.cardName) continue;
-      if (r.single) {
+      if (r.count === 1) {
+        singleRows++;
+        expect(r.specCount, `${r.kind}：单条目分区应有且只有一个规格块`).toBe(1);
+        expect(
+          r.duplicated.filter((t) => t !== r.shownName),
+          `${r.kind}：特写块复述了卡片内容——规格列只保留名字与入口`,
+        ).toEqual([]);
+        // 行骨架（规格块的顶线）必须横跨到整行右缘：否则右下角是一片无来由的空档
+        expect(Math.abs(r.trailing!), `${r.kind}：特写行尾部留空 ${r.trailing}px`).toBeLessThanOrEqual(2);
+        // 入口指向的必须是这张主卡条目
+        expect(r.specLink, `${r.kind}：特写块入口缺失`).toBeTruthy();
+        expect(r.specLink).toBe(r.cardLink);
+        if (r.vw < 768 || !r.cardName) continue;
         expect(r.specName, `${r.kind}：单条目行的规格名缺失`).toBeTruthy();
         expect(
           r.specName!.x - r.cardName.x,
           `${r.kind}：单条目行的名字与主卡自带名并排（实测横向相距 ${r.specName!.x - r.cardName.x}px）`,
         ).toBeGreaterThanOrEqual(r.bandWidth / 2);
-      } else if (r.specName) {
-        expect(
-          Math.abs(r.specName.x - r.cardName.x),
-          `${r.kind}：多条目行的规格块应贴住主卡（实测偏移 ${r.specName.x - r.cardName.x}px）`,
-        ).toBeLessThanOrEqual(8);
+      } else {
+        plainRows++;
+        expect(r.specCount, `${r.kind}：≥2 条的分区不得有规格块（不偏袒第一条）`).toBe(0);
+        expect(r.plainCards.length, `${r.kind}：平权档的条目数应等于分区条数`).toBe(r.count);
+        for (const c of r.plainCards) {
+          expect(c.isLink, `${r.kind}：平权档每条必须是卡片自身链接`).toBe(true);
+          expect(c.name, `${r.kind}：平权档卡内必须写着条目名`).toBeTruthy();
+        }
       }
     }
+    // 数据侧哨兵：两条形态都要在真实数据里被覆盖到，否则本用例会空转
+    expect(singleRows, '应至少有一个单条目分区').toBeGreaterThanOrEqual(1);
+    expect(plainRows, '应至少有一个 ≥2 条分区').toBeGreaterThanOrEqual(1);
 
     await noUnknownOverflow(page);
     assertNoErrors();
@@ -268,13 +288,14 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  /* 版本上新特写行：盒宽**不得依赖图片是否加载**。
+  /* 版本上新各档：盒宽**不得依赖图片是否加载**。
      实测缺陷（2026-10）：第二列轨写成 `max-content`，而该列的 max-content 由卡内懒加载图的固有宽度决定
      —— 图未就绪（`naturalWidth = 0`）时塌成卡名文字宽，遗器卡实测 `96.1×122`、图就绪后变 `240×266`，
      列轨随之从 `306│95.84│818` 跳到 `306│240│674` ⇒ 首页每次首屏都有一次 144px 的布局位移，
-     同屏第二张卡大小差 2.5 倍。判据取两件实现无关的事实：① 同一行内各卡等宽；② 把图片响应**延迟**
-     （不是 abort，避免走进 CDN 降级链）测得的盒宽/行高与正常加载逐项一致。 */
-  test('首页 /：版本上新特写行的盒宽不依赖图片加载（禁 max-content 塌缩）', async ({ page }) => {
+     同屏第二张卡大小差 2.5 倍（特写档现已是 `306px + 1fr` 两条确定轨，该结构已不可能出现，
+     用例继续覆盖两种档：① 同一行内各卡等宽；② 把图片响应**延迟**（不是 abort，避免走进 CDN 降级链）
+     测得的盒宽/行高与正常加载逐项一致）。 */
+  test('首页 /：版本上新各档的盒宽不依赖图片加载（禁 max-content 塌缩）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
 
     const measure = async (delayImages: boolean) => {
@@ -291,12 +312,16 @@ test.describe('布局验收：常规主题', () => {
           const band = section.querySelector('.nk-hub-release__band') as HTMLElement;
           return {
             kind: section.getAttribute('data-kind') ?? '',
-            // 量**卡本体**而不是网格单元：手机档主卡单元的轨是 `1fr`（262px）而卡只有 104px，
-            // 单元等宽是没有意义的判据；要锁的是「同屏两张卡看起来一样大」。
-            widths: [...section.querySelectorAll('.nk-hub-release__cell')].map((cell) => {
-              const card = cell.firstElementChild as HTMLElement | null;
-              return Math.round((card ?? cell).getBoundingClientRect().width);
-            }),
+            // 量**卡本体**而不是网格单元：特写档卡在 `__cell` 里（手机档该单元的轨是 `1fr` 而卡只有
+            // 104~300px），平权档带内直接就是卡。单元等宽没有意义，要锁的是「同屏各卡一样大」。
+            widths: [...band.children]
+              .filter((el) => !el.classList.contains('nk-hub-release__spec'))
+              .map((el) => {
+                const card = el.classList.contains('nk-hub-release__cell')
+                  ? (el.firstElementChild as HTMLElement | null)
+                  : (el as HTMLElement);
+                return Math.round((card ?? el).getBoundingClientRect().width);
+              }),
             bandHeight: Math.round(band.getBoundingClientRect().height),
           };
         }),

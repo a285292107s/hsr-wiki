@@ -85,16 +85,10 @@ onMounted(() => {
           :aria-label="s.label"
         >
           <h3 class="nk-hub-release__label">{{ s.label }} <span class="nk-hub-release__label-count">{{ s.count }}</span></h3>
-          <div v-if="s.feature && s.cards && s.positions" class="nk-hub-release__band nk-hub-release__band--feature">
-            <div
-              v-for="(card, i) in s.cards"
-              :key="i"
-              class="nk-hub-release__cell"
-              :data-pos="s.positions[i]"
-              v-html="card"
-            ></div>
+          <div v-if="s.feature" class="nk-hub-release__band nk-hub-release__band--feature">
+            <div class="nk-hub-release__cell" v-html="s.html"></div>
             <aside
-              v-if="s.positions[0] === 'lead' && s.leadMeta"
+              v-if="s.leadMeta"
               class="nk-hub-release__spec"
               :aria-label="s.leadMeta.name"
             >

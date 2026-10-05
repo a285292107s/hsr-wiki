@@ -117,6 +117,37 @@ describe('buildReleaseSections', () => {
   });
 });
 
+describe('特写档判据 = 恰 1 条（≥2 条不再偏袒第一条）', () => {
+  const items: CatalogItem[] = [
+    { id: '1', name: '甲' },
+    { id: '2', name: '乙' },
+    { id: '3', name: '丙' },
+  ];
+  const renderCard = (item: CatalogItem, i: number): string =>
+    `<a class="c" data-name="${String(item.name)}" style="--i:${i}"></a>`;
+  const withLead = (tagged: readonly ReleaseTagged[]): ReleaseSource => ({
+    kind: 'character', label: '角色', tagged, items, renderCard,
+    leadMeta: (item) => ({ name: String(item.name), href: `/character/${item.id}` }),
+  });
+
+  it('恰 1 条 → 特写档，并带这一条的名字与入口（它在行右端承担排版权重与显式动作）', () => {
+    const [s] = buildReleaseSections([withLead([tag(1, '4.6')])], '4.6');
+    expect(s.feature).toBe(true);
+    expect(s.count).toBe(1);
+    expect(s.leadMeta).toEqual({ name: '甲', href: '/character/1' });
+  });
+
+  it('2 条及以上 → 平权卡带：不 feature、无 leadMeta（旧判据 count ≤ 2 会让第一条独占大名字与入口）', () => {
+    for (const ids of [['1', '2'], ['1', '2', '3']]) {
+      const [s] = buildReleaseSections([withLead(ids.map((id) => tag(Number(id), '4.6')))], '4.6');
+      expect(s.feature, `${ids.length} 条不应进特写档`).toBe(false);
+      expect(s.leadMeta, `${ids.length} 条不应有 leadMeta`).toBeUndefined();
+      expect(s.count).toBe(ids.length);
+      expect(s.html).toBe(items.slice(0, ids.length).map((it, i) => renderCard(it, i)).join(''));
+    }
+  });
+});
+
 describe('pickSeasonNew', () => {
   const season = (id: number, is_season_new?: boolean): ReleaseTagged => ({ id, is_season_new });
 

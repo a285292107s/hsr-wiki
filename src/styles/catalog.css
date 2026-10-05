@@ -380,15 +380,19 @@
 .nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 22px; }
 .nk-hub-release__label { margin-bottom: 10px; font-size: var(--nk-fs-4); font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; color: var(--text2); }
 .nk-hub-release__label-count { margin-left: 6px; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.08em; color: color-mix(in srgb, var(--metric-val) 72%, transparent); vertical-align: 1px; font-variant-numeric: tabular-nums; }
-.nk-hub-release__band { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(210px, 17%, 300px); align-items: start; gap: 16px; padding: 8px 0 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
-/* 特写档：主卡列 + 其余条目列（**同宽**）+ 1fr 空气列。规格块跨后两列 ⇒ 它的顶线横跨整行右侧，
+/* 平权卡带（分区 ≥2 条）：卡宽 `clamp(210px, 24%, 306px)`——1440 档 = 300px，**恰好 4 张铺满一带**
+   （4×300+3×16 = 1248 / 带宽 1252），5 张起横向滚动；与特写档的 306px 同档（ADR 0019 决策 11 的
+   「编辑级卡宽 210–300px」区间顶端）。旧档位 `17%/300px` 在 1440 档只给 213px：3~4 条的新版本
+   既没有名字与入口，卡还比单条版本小一圈（实测 306 → 213），一条数据的差别换来两种体量。 */
+.nk-hub-release__band { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(210px, 24%, 306px); align-items: start; gap: 16px; padding: 8px 0 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+/* 特写档（**恰 1 条**）：主卡列 + 规格列的 1fr 轨。规格块占第二轨 ⇒ 它的顶线横跨到本行右缘，
    成为这一行的骨架（旧形态是紧贴主卡的一小块重复信息：实测 1440 档卡片文字「真珠/★★★★★/冰/欢愉」
    与规格块「真珠/冰/欢愉」逐字重复）。
-   第二列**必须是确定宽度**，不能写 `max-content`：该列的 max-content 由卡内懒加载图的固有宽度决定，
+   第二轨**必须是确定宽度**，不能写 `max-content`：轨的 max-content 由卡内懒加载图的固有宽度决定，
    图未加载时（`naturalWidth = 0`）塌成卡名文字宽（实测遗器卡 96.1px、图就绪后 240px）⇒ 首页每次都有
-   一次 **144px 的布局位移**，且第二张卡在位移前后大小差 2.5 倍（1440 档实测列轨 `306│95.84│818` →
-   `306│240│674`）。写死 306px 后两列同宽、盒宽与图片加载无关、也不再有位移。 */
-.nk-hub-release__band--feature { grid-auto-flow: row; grid-auto-columns: unset; grid-template-columns: minmax(0, 306px) minmax(0, 306px) minmax(0, 1fr); align-items: start; justify-content: start; overflow-x: hidden; }
+   一次 **144px 的布局位移**（1440 档实测列轨 `306│95.84│818` → `306│240│674`）。
+   卡片列写死 306px 后盒宽与图片加载无关，也不再有位移。 */
+.nk-hub-release__band--feature { grid-auto-flow: row; grid-auto-columns: unset; grid-template-columns: minmax(0, 306px) minmax(0, 1fr); align-items: start; justify-content: start; overflow-x: hidden; }
 /* 此处曾有一条「单条目档放宽为 `minmax(0, 420px)` 单列」的规则，选择器是
    `.nk-hub-release__section--feature:has(.nk-hub-release__cell:last-child:first-child)`。
    它自写下的那一轮起**从未命中过一次**：特写档的规格块 `<aside>` 与卡片同级，卡片永远不是 `:last-child`
@@ -396,29 +400,23 @@
    1024×768 实测第一张卡底部 883px > 768px（306px 档 731px），会顶掉「第一分区首行卡片完整可见」。
    判据留在这里，规则删除：留着它等于给下一次误读留一个假入口。 */
 .nk-hub-release__cell { min-width: 0; }
-.nk-hub-release__band--feature > .nk-hub-release__cell[data-pos='rest'] { grid-column: 2; }
-.nk-hub-release__cell + .nk-hub-release__cell { padding-top: 2px; }
-/* 特写规格块：名字 + 详情入口，**紧贴主卡排成一段**（不是两端对齐）。名字是特写的排版权重
-   （卡上那个是更小档的标签），入口是卡之外唯一的显式动作；元素 / 命途 / 技能名 / 套装标签一律
-   不再重复（卡上已有）。顶线仍横跨到本行右缘——两端对齐会把这两件 200px 宽的东西推到 930px 行的
-   两个极端，中间留下 820px 空档；收成一段后顶线读作账册行线，而不是「缺了一列」。 */
+/* 特写规格块（只属于恰 1 条的分区）：名字 + 详情入口，**紧贴主卡排成一段**（不是两端对齐）。
+   名字是这一行的落值，入口是卡之外唯一的显式动作；元素 / 命途 / 技能名 / 套装标签一律不再重复
+   （卡上已有）。顶线横跨到本行右缘，读作账册行线，而不是「缺了一列」。 */
 .nk-hub-release__spec {
-  grid-column: 2 / 4;
+  grid-column: 2;
   display: flex; flex-direction: row; align-items: center; justify-content: flex-start;
   gap: 28px; min-width: 0; align-self: end;
   border-top: 1px solid var(--line-2); padding-top: 14px;
 }
-/* 单条目档（无「其余条目」）：名字 + 入口成组靠右，这一行读作「条目 …… 值 / 动作」。
+/* 名字 + 入口成组靠右，这一行读作「条目 …… 值 / 动作」。
    此前它们贴主卡右缘起排，而主卡自带的小名就在同一基线上（实测 1440 档光锥：卡名 y=1174、
    规格名 y=1135，横向相距 310px）——同一屏里同一个名字并排出现两次，读起来是复读；
    靠右后两者横向相距 ≥1 个行宽，名字同时成为这一行的落值（账册行线的右端）。
    只作用于 ≥768：手机档已隐藏规格名（见 ≤767 块），左起的一个按钮没必要再甩到右边。 */
 @media (min-width: 768px) {
-  .nk-hub-release__section--feature:not(:has(.nk-hub-release__cell[data-pos='rest'])) .nk-hub-release__spec { justify-content: flex-end; }
+  .nk-hub-release__spec { justify-content: flex-end; }
 }
-/* 有第二个条目时，主卡右侧已被它占用 ⇒ 规格块退到第二行并横跨整行；
-   它描述的是主卡，故从最左列起（否则顶线从「其余条目」下方开始，像在描述那一条）。 */
-.nk-hub-release__section--feature:has(.nk-hub-release__cell[data-pos='rest']) .nk-hub-release__spec { grid-column: 1 / -1; }
 .nk-hub-release__spec-name { font-size: clamp(var(--nk-fs-8), 2.2vw, var(--nk-fs-title-2)); font-weight: 900; letter-spacing: 0.02em; line-height: 1.15; color: var(--text-bright); }
 .nk-hub-release__spec-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: var(--nk-radius-2); background: var(--nk-shell-active-bg); border: 1px solid var(--nk-shell-active-border); color: var(--metric-val); font-size: var(--nk-fs-4); font-weight: 600; letter-spacing: 0.04em; width: fit-content; transition: background 0.2s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out), color 0.2s var(--nk-ease-out); }
 .nk-hub-release__spec-link svg { width: 15px; height: 15px; transition: transform 0.25s var(--nk-ease-out); }
@@ -459,15 +457,13 @@
   .nk-hub-release__label { margin-bottom: 8px; font-size: var(--nk-fs-4); }
   .nk-hub-release__band { display: flex; align-items: flex-start; gap: 10px; scrollbar-width: none; }
   .nk-hub-release__band::-webkit-scrollbar { display: none; }
-  /* 特写档（count ≤ 2）：手机上纵向栈，主条目特写在上、读数列在下。
+  /* 特写档（恰 1 条）：手机上纵向栈，主条目在上、规格行在下。
      注意：它必须排在上面那条 `display: flex` 之后 —— flex 规则若晚于本组会让本组失效。
-     只有存在「其余条目」时才开第二列（`auto` 轨），故单条目情形不会白丢一个列间距；
-     规格块 `1 / -1` 跨过全部显式轨 ⇒ 两种情形下顶线都横跨整行。 */
+     规格块 `1 / -1` 跨过全部显式轨 ⇒ 顶线横跨整行。 */
   .nk-hub-release__band--feature { display: grid; grid-template-columns: minmax(0, 1fr); overflow-x: visible; gap: 6px; }
-  .nk-hub-release__section--feature:has(.nk-hub-release__cell[data-pos='rest']) .nk-hub-release__band--feature { grid-template-columns: minmax(0, 1fr) auto; }
-  .nk-hub-release__band--feature .nk-hub-release__cell[data-pos='lead'] .nk-idx-card { width: min(300px, 82vw); }
-  .nk-hub-release__band--feature .nk-hub-release__cell[data-pos='lead'] .nk-lc-card { width: min(230px, 62vw); }
-  .nk-hub-release__band--feature .nk-hub-release__cell[data-pos='lead'] .nk-relic-card { max-width: min(220px, 60vw); }
+  .nk-hub-release__band--feature .nk-hub-release__cell .nk-idx-card { width: min(300px, 82vw); }
+  .nk-hub-release__band--feature .nk-hub-release__cell .nk-lc-card { width: min(230px, 62vw); }
+  .nk-hub-release__band--feature .nk-hub-release__cell .nk-relic-card { max-width: min(220px, 60vw); }
   .nk-hub-release__spec { grid-column: 1 / -1; gap: 14px; margin-top: 8px; padding-top: 12px; }
   /* 卡内已写名（手机档卡是名行），读数列不再复述 */
   .nk-hub-release__spec-name { display: none; }
