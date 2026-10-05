@@ -67,32 +67,14 @@
   .nk-egd-mon__intro { display: block; -webkit-line-clamp: unset; overflow: visible; }
 }
 
-/* ─── 父子层级刻度（ADR 0028）：档位按 DOM 嵌套深度落位，子块几何在此单点声明 ─── */
+/* ─── 父子层级缩进（ADR 0028）：档位按 DOM 嵌套深度落位，子块几何在此单点声明 ───
+   原先挂在 ::before 上的模式色竖轨已整条退场（用户裁决，对齐末日幻影看板：区块分节由
+   「区块标题下沿发丝线 + 区块节奏」承担，通体色线属重复点题）——缩进保留，左基准不变。 */
 .nk-egd { --eg-indent: 16px; }
 .nk-egd-children {
-  /* 轨宽即「这一层要不要画轨」的开关：0 = 不画（消费层可覆写，见星启看板体） */
-  --eg-rail-w: 3px;
   position: relative;
   padding-left: var(--eg-indent);
 }
-.nk-egd-children::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: var(--eg-rail-w);
-  border-radius: 0 3px 3px 0;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--eg-childrail, var(--eg-color)) 72%, transparent) 0%,
-    color-mix(in srgb, var(--eg-childrail, var(--eg-color)) 34%, transparent) 100%
-  );
-}
-/* 看板体（层 tab 与星启看板）不画这条模式色竖轨（用户裁决）：看板内区块已由「区块标题下沿发丝线 +
-   区块节奏」分节，再挂一条通体色线属重复点题。**缩进保留**（左基准与 ADR 0028 刻度不变），只把轨宽归零。
-   楼层折叠体与异相仲裁仍走上面的父子层级竖轨（缺省 3px）。 */
-.nk-egd-board__body { --eg-rail-w: 0; }
 @media (max-width: 767px) {
   .nk-egd { --eg-indent: 12px; }
 }

@@ -20,6 +20,7 @@ export function buildEndgameSections(
   };
   // 区块顺序必须与 EndgameView 模板里的组件顺序一致（区块序号按同一份清单派生）
   if (modeKey === 'peak') {
+    if (data && seasonBuffList(data).length) push('buffs', systemName || '赛季增益');
     if (data?.pollution) push('pollution', '污染等级');
     if (data?.badges?.length) push('badges', '段位徽章');
     return s;

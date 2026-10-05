@@ -208,9 +208,8 @@
   flex-direction: column;
   gap: 0;
 }
-/* 缩进与竖轨几何取自 .nk-egd-children（ADR 0028），此处只覆写轨道色为绝境语义色 */
+/* 缩进几何取自 .nk-egd-children（父子层级刻度，ADR 0028）；层级竖轨已整条退场，只剩缩进与上边线 */
 .nk-egd-floor__hard {
-  --eg-childrail: var(--diff-del);
   position: relative;
   margin-top: 18px;
   padding: 16px 0 2px var(--eg-indent);

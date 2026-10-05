@@ -15,15 +15,15 @@ export function bossTraitDescHtml(t: MazeBossTrait): string {
 }
 
 /** 赛季增益列表：与逐层已呈现的增益同文的不再复述一份（忘却之庭的「记忆紊流」既是赛季增益
- *  也是每层的层级增益，由层看板逐层承担，赛季级区块整块退场；异相仲裁同 3 条既是赛季 `buffs`
- *  也是王棋关 `levels[].buffs`，同理整块退场）。 */
+ *  也是每层的层级增益，由层看板逐层承担，赛季级区块整块退场）。异相仲裁的赛季 buffs 虽与
+ *  王棋关增益同一批 ID，但赛季级照常显示——与末日幻影「赛季级区块 + 看板内分组」双显同一口径，
+ *  故关卡级增益不进「已承担」集合（`levels` 仅异相仲裁产出）。 */
 export function seasonBuffList(data: MazeListEntry): MazeBuffInfo[] {
   const flat = data.buffs || [];
   if (!flat.length) return [];
   const carried = new Set<number>();
   for (const f of data.floor_details || []) if (f.buff) carried.add(f.buff.id);
   for (const nd of data.tierce?.nodes || []) if (nd.buff) carried.add(nd.buff.id);
-  for (const l of data.levels || []) for (const b of l.buffs || []) carried.add(b.id);
   return flat.filter((b) => !carried.has(b.id));
 }
 

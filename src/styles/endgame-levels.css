@@ -170,7 +170,7 @@
   gap: 14px;
   min-width: 0;
 }
-/* 看板体：整块挂 `.nk-egd-children`，看板头（只有无首领特性节点的污染徽标会落在这里）与下方区块共用同一条缩进竖轨与左基准。 */
+/* 看板体：整块挂 `.nk-egd-children`，看板头（只有无首领特性节点的污染徽标会落在这里）与下方区块共用同一档缩进与左基准。 */
 .nk-egd-board__body {
   display: flex;
   flex-direction: column;

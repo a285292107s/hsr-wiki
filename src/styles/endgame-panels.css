@@ -212,7 +212,7 @@
 
 /* 异相仲裁单关面板（关卡子 tab 的 tabpanel 内容，ADR 0043）：唯一不挂卡片行的层级面板，也是 `.nk-egd-floor`
    这个块级类的唯一消费方（`.nk-egd-floor__*` 元素类仍被层 / 星启 / 单关三处共用）。左基准与另外三模式的
-   层级面板一致（`#egd-level-panel` 内容区左缘），子档缩进 + 竖轨由 `.nk-egd-children` 承担。 */
+   层级面板一致（`#egd-level-panel` 内容区左缘），子档缩进由 `.nk-egd-children` 承担。 */
 .nk-egd-floor {
   position: relative;
   padding: 0 0 24px;
