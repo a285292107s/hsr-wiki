@@ -71,7 +71,7 @@ describe('buildReleaseSections', () => {
     label: string,
     tagged: readonly ReleaseTagged[],
     list: readonly CatalogItem[] = items,
-  ): ReleaseSource => ({ kind, label, tagged, items: list, renderCard });
+  ): ReleaseSource => ({ kind, label, listHref: `/${kind}`, tagged, items: list, renderCard });
 
   it('无本版本条目的分区不产出，顺序与入参一致', () => {
     const sections = buildReleaseSections([
@@ -126,7 +126,7 @@ describe('特写档判据 = 恰 1 条（≥2 条不再偏袒第一条）', () =>
   const renderCard = (item: CatalogItem, i: number): string =>
     `<a class="c" data-name="${String(item.name)}" style="--i:${i}"></a>`;
   const withLead = (tagged: readonly ReleaseTagged[]): ReleaseSource => ({
-    kind: 'character', label: '角色', tagged, items, renderCard,
+    kind: 'character', label: '角色', listHref: '/character', tagged, items, renderCard,
     leadMeta: (item) => ({ name: String(item.name), href: `/character/${item.id}` }),
   });
 
@@ -135,6 +135,8 @@ describe('特写档判据 = 恰 1 条（≥2 条不再偏袒第一条）', () =>
     expect(s.feature).toBe(true);
     expect(s.count).toBe(1);
     expect(s.leadMeta).toEqual({ name: '甲', href: '/character/1' });
+    // 分区级入口（图鉴页）在任何条数下都在——它是唯一不偏袒条目的显式动作
+    expect(s.listHref).toBe('/character');
   });
 
   it('2 条及以上 → 平权卡带：不 feature、无 leadMeta（旧判据 count ≤ 2 会让第一条独占大名字与入口）', () => {
@@ -142,6 +144,7 @@ describe('特写档判据 = 恰 1 条（≥2 条不再偏袒第一条）', () =>
       const [s] = buildReleaseSections([withLead(ids.map((id) => tag(Number(id), '4.6')))], '4.6');
       expect(s.feature, `${ids.length} 条不应进特写档`).toBe(false);
       expect(s.leadMeta, `${ids.length} 条不应有 leadMeta`).toBeUndefined();
+      expect(s.listHref, `${ids.length} 条仍须带分区级入口`).toBe('/character');
       expect(s.count).toBe(ids.length);
       expect(s.html).toBe(items.slice(0, ids.length).map((it, i) => renderCard(it, i)).join(''));
     }
@@ -185,6 +188,7 @@ describe('CW 两分区（buildReleaseSectionsBy + pickSeasonNew）', () => {
   ): ReleaseSource => ({
     kind,
     label,
+    listHref: `/currency/${kind}`,
     tagged: items.map((it) => ({ id: String(it.id), is_season_new: it.is_season_new === true })),
     items,
     renderCard,

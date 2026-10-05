@@ -27,6 +27,8 @@ export interface ReleaseSection {
    */
   leadMeta?: ReleaseLeadMeta;
   feature: boolean;
+  /** 分区级入口（该族图鉴页）：任何条数下都恰好一个显式动作，不偏袒任何条目 */
+  listHref: string;
 }
 
 export interface ReleaseLeadMeta {
@@ -41,6 +43,8 @@ export interface ReleaseLeadMeta {
 export interface ReleaseSource {
   kind: ReleaseKind;
   label: string;
+  /** 分区级入口目标：该族图鉴页（任何条数下唯一且不偏袒条目的显式动作） */
+  listHref: string;
   tagged: readonly ReleaseTagged[];
   items: readonly CatalogItem[];
   renderCard: (item: CatalogItem, index: number) => string;
@@ -93,6 +97,7 @@ export function buildReleaseSectionsBy(
       html: picked.map((item, i) => source.renderCard(item, i)).join(''),
       leadMeta: feature && source.leadMeta ? source.leadMeta(picked[0]) : undefined,
       feature,
+      listHref: source.listHref,
     });
   }
   return sections;
@@ -108,26 +113,27 @@ export function buildReleaseSections(
 const RELEASE_SOURCES: Array<{
   kind: ReleaseKind;
   label: string;
+  listHref: string;
   page: CatalogPageConfig;
   loadTagged: () => Promise<readonly ReleaseTagged[]>;
   leadMeta: (item: CatalogItem) => ReleaseLeadMeta;
 }> = [
   {
-    kind: 'character', label: '角色', page: characterPage, loadTagged: () => loadLocalCharacterList(),
+    kind: 'character', label: '角色', listHref: '/character', page: characterPage, loadTagged: () => loadLocalCharacterList(),
     leadMeta: (item) => ({
       name: String(item.name || ''),
       href: item.href ? String(item.href) : undefined,
     }),
   },
   {
-    kind: 'lightcone', label: '光锥', page: lightconePage, loadTagged: () => loadLocalLightCones(),
+    kind: 'lightcone', label: '光锥', listHref: '/lightcone', page: lightconePage, loadTagged: () => loadLocalLightCones(),
     leadMeta: (item) => ({
       name: String(item.name || ''),
       href: item.href ? String(item.href) : undefined,
     }),
   },
   {
-    kind: 'relic', label: '遗器', page: relicPage, loadTagged: () => loadLocalRelicSets(),
+    kind: 'relic', label: '遗器', listHref: '/relic', page: relicPage, loadTagged: () => loadLocalRelicSets(),
     leadMeta: (item) => ({
       name: String(item.name || ''),
       href: item.href ? String(item.href) : undefined,
@@ -141,16 +147,19 @@ const RELEASE_LABELS: readonly string[] = RELEASE_SOURCES.map((s) => s.label);
 const CW_RELEASE_SOURCES: Array<{
   kind: ReleaseKind;
   label: string;
+  listHref: string;
   loadPage: () => Promise<CatalogPageConfig>;
 }> = [
   {
     kind: 'role',
     label: '角色图鉴',
+    listHref: '/currency/role',
     loadPage: () => import('../catalog/pages/currency-role').then((m) => m.currencyRolePage),
   },
   {
     kind: 'trait',
     label: '羁绊图鉴',
+    listHref: '/currency/trait',
     loadPage: () => import('../catalog/pages/currency-trait').then((m) => m.currencyTraitPage),
   },
 ];
@@ -189,7 +198,7 @@ export function useReleaseShowcase(): ReleaseShowcase {
             spec.page.fetchData ? spec.page.fetchData(ctx) : Promise.resolve<CatalogItem[]>([]),
           ]);
           return {
-            kind: spec.kind, label: spec.label, tagged, items,
+            kind: spec.kind, label: spec.label, listHref: spec.listHref, tagged, items,
             renderCard: spec.page.renderCard, leadMeta: spec.leadMeta,
           };
         } catch {
@@ -227,6 +236,7 @@ export function useCwReleaseShowcase(): ReleaseShowcase {
           return {
             kind: spec.kind,
             label: spec.label,
+            listHref: spec.listHref,
             tagged: items.map((item) => ({
               id: String(item.id),
               is_season_new: item.is_season_new === true,

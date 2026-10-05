@@ -82,6 +82,14 @@ test.describe('布局验收：常规主题', () => {
         return {
           kind: sec.getAttribute('data-kind'),
           count: Number(sec.querySelector('.nk-hub-release__label-count')?.textContent?.trim() || '0'),
+          labelText: (sec.querySelector('.nk-hub-release__label')?.textContent || '').replace(/\s+/g, ' ').trim(),
+          // 分区级入口（图鉴页）：任何条数下唯一、且不偏袒条目的显式动作
+          entry: (() => {
+            const a = sec.querySelector('.nk-hub-release__all') as HTMLAnchorElement | null;
+            if (!a) return null;
+            const b = a.getBoundingClientRect();
+            return { text: a.textContent.replace(/\s+/g, ' ').trim(), href: a.getAttribute('href'), right: Math.round(b.right) };
+          })(),
           specCount: sec.querySelectorAll('.nk-hub-release__spec').length,
           duplicated: spec ? leafTexts(spec).filter((t) => leafTexts(cell ?? band).includes(t)) : [],
           shownName: spec?.querySelector('.nk-hub-release__spec-name')?.textContent?.trim() ?? '',
@@ -91,6 +99,7 @@ test.describe('布局验收：常规主题', () => {
           // 手机档规格名 `display: none`（卡内已有名）⇒ 该档不参与名字落位断言
           vw: window.innerWidth,
           bandWidth: Math.round(bandBox.width),
+          bandRight: Math.round(bandBox.right),
           cardName: nameBox(cards[0]?.querySelector('.nk-idx-card__name, .nk-lc-card__name, .nk-relic-card__name') ?? null),
           specName: spec ? nameBox(spec.querySelector('.nk-hub-release__spec-name')) : null,
           // 平权档：每条都必须自己是链接、且卡内写着自己的名字
@@ -107,12 +116,20 @@ test.describe('布局验收：常规主题', () => {
     type Row = {
       kind: string; count: number; specCount: number; duplicated: string[]; shownName: string;
       trailing: number | null; cardLink: string | null; specLink: string | null; vw: number;
-      bandWidth: number; cardName: { x: number } | null; specName: { x: number } | null;
+      bandWidth: number; bandRight: number; cardName: { x: number } | null; specName: { x: number } | null;
       plainCards: { isLink: boolean; href: string | null; name: string }[]; bandOverflow: boolean;
+      labelText: string; entry: { text: string; href: string | null; right: number } | null;
     };
+    /* 分区级入口：三个分区各指向自己的图鉴页，且右缘与内容列右缘（= 带的右缘）齐平——
+       它与单条目行的「查看档案」共用同一条右基准线，页面只有一条右列。 */
+    const LIST_ROUTE: Record<string, string> = { character: '/character', lightcone: '/lightcone', relic: '/relic' };
     let singleRows = 0;
     let plainRows = 0;
     for (const r of rows as Row[]) {
+      expect(r.entry, `${r.kind}：分区级入口缺失`).toBeTruthy();
+      expect(r.entry!.href, `${r.kind}：分区级入口目标应为该族图鉴页`).toBe(LIST_ROUTE[r.kind]);
+      expect(r.entry!.text, `${r.kind}：入口文案应与分区标签同源`).toBe(`全部${r.labelText.split(/\s+/)[0]}`);
+      expect(Math.abs(r.bandRight - r.entry!.right), `${r.kind}：入口未与内容列右缘齐平`).toBeLessThanOrEqual(1);
       if (r.count === 1) {
         singleRows++;
         expect(r.specCount, `${r.kind}：单条目分区应有且只有一个规格块`).toBe(1);

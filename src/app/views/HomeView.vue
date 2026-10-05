@@ -84,7 +84,13 @@ onMounted(() => {
           :data-kind="s.kind"
           :aria-label="s.label"
         >
-          <h3 class="nk-hub-release__label">{{ s.label }} <span class="nk-hub-release__label-count">{{ s.count }}</span></h3>
+          <div class="nk-hub-release__sechead">
+            <h3 class="nk-hub-release__label">{{ s.label }} <span class="nk-hub-release__label-count">{{ s.count }}</span></h3>
+            <RouterLink class="nk-hub-release__all" :to="s.listHref">
+              全部{{ s.label }}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </RouterLink>
+          </div>
           <div v-if="s.feature" class="nk-hub-release__band nk-hub-release__band--feature">
             <div class="nk-hub-release__cell" v-html="s.html"></div>
             <aside

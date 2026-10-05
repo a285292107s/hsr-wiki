@@ -252,6 +252,12 @@ function snapSection(title, html) {
   return html ? `<section class="nk-snapshot__section"><h2>${esc(title)}</h2>${html}</section>` : '';
 }
 
+/** 分区级列表入口：与 SPA 分区头右端的 `.nk-hub-release__all` 同源同目标（同一 href、同一份 listHref）。
+    措辞属页面级 chrome（页面写「全部角色」），此处用「查看全部角色」——按 §3 粒度规则允许不同。 */
+function snapMore(href, label) {
+  return `<p class="nk-snapshot__more"><a href="${esc(href)}">查看全部${esc(label)}</a></p>`;
+}
+
 /**
  * 条目清单：name/href 由本函数转义；meta/desc 必须是调用方已转义片段。
  * `entry=true` 给内容面收录条目加稳定标记 class `nk-snapshot__entry`（契约 §3）：
@@ -540,7 +546,7 @@ function homePages(ctx) {
   for (const g of groups) {
     if (!g.rows.length) continue;
     const items = g.rows.map((row) => ({ name: row.name, href: g.href(row), meta: g.meta(row) }));
-    sections.push({ title: `${g.label}（${items.length}）`, html: linkList(items, true) });
+    sections.push({ title: `${g.label}（${items.length}）`, html: linkList(items, true) + snapMore(g.listHref, g.label) });
     for (const it of items) ldEntries.push(it);
   }
   const versionText = ctx.versionLabel ? `${ctx.versionLabel} 版本上新` : '版本上新';
@@ -1261,12 +1267,12 @@ function currencyHubPages(ctx) {
   const ldEntries = [];
   if (newRoles.length) {
     const items = newRoles.map((r) => ({ name: r.name, href: `/currency/role/${r.id}`, meta: esc(`${r.rarity}费`) }));
-    sections.push({ title: `角色图鉴（${items.length}）`, html: linkList(items, true) });
+    sections.push({ title: `角色图鉴（${items.length}）`, html: linkList(items, true) + snapMore('/currency/role', '角色图鉴') });
     ldEntries.push(...items);
   }
   if (newTraits.length) {
     const items = newTraits.map((t) => ({ name: t.name, href: `/currency/trait/${t.id}`, meta: esc(CW_CAT_LABEL[t.cat] || t.cat || '') }));
-    sections.push({ title: `羁绊图鉴（${items.length}）`, html: linkList(items, true) });
+    sections.push({ title: `羁绊图鉴（${items.length}）`, html: linkList(items, true) + snapMore('/currency/trait', '羁绊图鉴') });
     ldEntries.push(...items);
   }
   const summaryPlain = `${SITE_NAME}货币战争模式枢纽：本赛季新增角色图鉴与羁绊图鉴条目。`;

@@ -379,6 +379,17 @@
 .nk-hub-release__section + .nk-hub-release__section,
 .nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 22px; }
 .nk-hub-release__label { margin-bottom: 10px; font-size: var(--nk-fs-4); font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; color: var(--text2); }
+/* 分区头：标签在左、**分区级入口**（该族图鉴页）在右，中间是留白。
+   入口是任何条数下唯一且不偏袒条目的显式动作（多条目的卡带里"特写哪一条"没有判据，故不给条目再加入口）；
+   它的右缘与单条目行的「名字 + 查看档案」同一条右列（内容列右缘），页面因此只有一条右基准线。
+   骨架仍用 `__label` 自带的下外边距，故这里把标签的 margin 归零、由本行承担间距——两者相差 0px。 */
+.nk-hub-release__sechead { display: flex; align-items: baseline; gap: 16px; margin-bottom: 10px; }
+.nk-hub-release__sechead > .nk-hub-release__label { margin-bottom: 0; }
+.nk-hub-release__all { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 600; letter-spacing: 0.12em; color: var(--text2); text-decoration: none; transition: color var(--nk-dur-hover) var(--nk-ease-out); }
+.nk-hub-release__all svg { width: 12px; height: 12px; transition: transform var(--nk-dur-hover) var(--nk-ease-out); }
+.nk-hub-release__all:hover { color: var(--metric-val); }
+.nk-hub-release__all:hover svg { transform: translateX(2px); }
+.nk-hub-release__all:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-hub-release__label-count { margin-left: 6px; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.08em; color: color-mix(in srgb, var(--metric-val) 72%, transparent); vertical-align: 1px; font-variant-numeric: tabular-nums; }
 /* 平权卡带（分区 ≥2 条）：卡宽 `clamp(210px, 24%, 306px)`——1440 档 = 300px，**恰好 4 张铺满一带**
    （4×300+3×16 = 1248 / 带宽 1252），5 张起横向滚动；与特写档的 306px 同档（ADR 0019 决策 11 的
@@ -455,6 +466,12 @@
   .nk-hub-release__section + .nk-hub-release__section,
   .nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 18px; }
   .nk-hub-release__label { margin-bottom: 8px; font-size: var(--nk-fs-4); }
+  .nk-hub-release__sechead { margin-bottom: 8px; gap: 12px; }
+  .nk-hub-release__sechead > .nk-hub-release__label { margin-bottom: 0; }
+  /* 手机档分区头一行放得下：标签 13.12px + 入口 11.52px（实测 390 档最长的「全部角色图鉴 →」仍余量充足）。
+     入口的命中区补到 24px 高（WCAG 2.5.8 下限）用负外边距抵消，行高与桌面档一致、不推挤下方卡片带。
+     注意只写上下两向：`margin` 简写会把基线的 `margin-left: auto`（靠右的本体）一起清掉。 */
+  .nk-hub-release__all { font-size: var(--nk-fs-2); letter-spacing: 0.1em; padding: 6px 0; margin-top: -6px; margin-bottom: -6px; }
   .nk-hub-release__band { display: flex; align-items: flex-start; gap: 10px; scrollbar-width: none; }
   .nk-hub-release__band::-webkit-scrollbar { display: none; }
   /* 特写档（恰 1 条）：手机上纵向栈，主条目在上、规格行在下。

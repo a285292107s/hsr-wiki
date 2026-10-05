@@ -44,6 +44,26 @@ test.describe('布局验收：货币战争主题', () => {
         .evaluateAll((els) => els.map((el) => el.getAttribute('href') || ''));
       expect(hrefs.length).toBeGreaterThan(0);
       expect(hrefs.every((h) => h.startsWith('/currency/role/'))).toBe(true);
+      /* 分区级入口（与首页同一条原语）：每个分区指向自己的图鉴页，且右缘与内容列右缘齐平——
+         它是任何条数下唯一、且不偏袒条目的显式动作（本赛季角色 4 条 / 羁绊 3 条，都不该只特写第一条）。 */
+      const entries = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
+        els.map((el) => {
+          const kind = el.getAttribute('data-kind');
+          const a = el.querySelector('.nk-hub-release__all') as HTMLAnchorElement | null;
+          const band = el.querySelector('.nk-hub-release__band')!.getBoundingClientRect();
+          return {
+            kind,
+            text: a ? a.textContent.replace(/\s+/g, ' ').trim() : null,
+            href: a ? a.getAttribute('href') : null,
+            delta: a ? Math.round(band.right - a.getBoundingClientRect().right) : null,
+          };
+        }),
+      );
+      expect(entries.map((e) => e.href)).toEqual(kinds.map((k) => `/currency/${k}`));
+      for (const e of entries) {
+        expect(e.text, `${e.kind}：入口文案应与分区标签同源`).toMatch(/^全部\S+$/);
+        expect(Math.abs(e.delta!), `${e.kind}：入口未与内容列右缘齐平`).toBeLessThanOrEqual(1);
+      }
     }
     await noUnknownOverflow(page);
     assertNoErrors();
