@@ -601,10 +601,14 @@ class TestMonsterDetailInvaded:
         monsters = {
             2022060: {"name": "虚卒·掠夺者", "icon": "A", "figure": "A", "rank": "Minion",
                       "camp": "", "stance": 0, "weak": [], "resist": {}, "intro": "",
-                      "stats": {}, "skills": []},
+                      "stats": {}, "skills": [],
+                      "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+                      "level_group": 1},
             5013010: {"name": "侵蚀者", "icon": "B", "figure": "B", "rank": "Elite",
                       "camp": "", "stance": 0, "weak": [], "resist": {}, "intro": "",
-                      "stats": {}, "skills": []},
+                      "stats": {}, "skills": [],
+                      "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+                      "level_group": 1},
         }
         saved: dict = {}
         monkeypatch.setattr(md, "load_monsters", lambda: monsters)
@@ -625,7 +629,10 @@ class TestMonsterDetailInvaded:
         """实例别名页（_tpl 指向模板）与模板页同值；模板无标记时别名页也不写该键。"""
         base = {"name": "虚卒·掠夺者", "icon": "A", "figure": "A", "rank": "Minion",
                 "camp": "", "stance": 0, "weak": [], "resist": {}, "intro": "",
-                "stats": {}, "skills": []}
+                "stats": {}, "skills": [],
+                # 战斗数值合成链字段（ADR 0040）
+                "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+                "level_group": 1}
         monsters = {
             2022060: dict(base),
             202206017: {**base, "_tpl": 2022060},
@@ -669,7 +676,10 @@ class TestMonsterDetailInvadedInvariants:
     def env(self, monkeypatch):
         base = {"name": "甲", "icon": "I", "figure": "F", "rank": "Minion",
                 "camp": "", "stance": 0, "weak": [], "resist": {}, "intro": "",
-                "stats": {}, "skills": []}
+                "stats": {}, "skills": [],
+                # 战斗数值合成链字段（ADR 0040）：怪物详情 payload 的两段新增
+                "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+                "level_group": 1}
         template_of: dict[int, int] = {}
         monsters: dict[int, dict] = {}
         for tpl in (*self._INVADED_VARIANTS, *self._OUTSIDE_VARIANTS):
@@ -692,9 +702,10 @@ class TestMonsterDetailInvadedInvariants:
         return saved, template_of, usage
 
     def test_invaded_key_iff_template_in_invasion_list(self, env):
-        """双向：有键 ⇔ 该文件的模板 ID 在侵入名单模板集合内。"""
+        """双向：有键 ⇔ 该文件的模板 ID 在侵入名单模板集合内。
+        （曲线单点 monster-level-curve.json 是共享文件，不计入怪物文件数）"""
         saved, template_of, usage = env
-        assert len(saved) == len(template_of)
+        assert len(saved) - ("monster-level-curve.json" in saved) == len(template_of)
         for mid, tpl in template_of.items():
             assert ("invaded" in saved[f"{mid}.json"]) is (tpl in usage), mid
 

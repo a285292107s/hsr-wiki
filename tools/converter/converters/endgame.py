@@ -188,6 +188,8 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
     （未注册返回空 dict，勿直接使用）。
     实例别名（MonsterID≠MonsterTemplateID）附 tpl=模板 ID，前端跳转怪物详情用
     （详情文件按模板 ID 命名）；stats 仅提升 speed（模板 SpeedBase，与韧性同源）。
+    stat_ratio / level_group（战斗数值合成链，ADR 0040）同样不进终局 payload：
+    终局敌方卡不显示这层合成，随归属详情页；
     """
     info = monsters.get(mid) or {}
     out = {"id": str(mid)}
@@ -195,7 +197,7 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
     if tpl:
         out["tpl"] = str(tpl)
     for k, v in info.items():
-        if k in ("figure", "_tpl"):
+        if k in ("figure", "_tpl", "stat_ratio", "level_group"):
             continue
         if k == "stats":
             if v.get("speed"):

@@ -61,7 +61,8 @@ def _fake_load(path):
 
 class TestLoadMonsters:
     def test_full_fields(self, monkeypatch):
-        """模板表 + 配置表 + 技能表全字段合并；弱点去重保序。"""
+        """模板表 + 配置表 + 技能表全字段合并；弱点去重保序。
+        战斗数值合成链字段（ADR 0040）：本模板自带 config 记录但无修饰比字段 → 中性 1 / 组 1。"""
         monkeypatch.setattr(mc, "load_json", _fake_load)
         out = mc.load_monsters()
         assert out[8013010] == {
@@ -80,6 +81,8 @@ class TestLoadMonsters:
             }],
             "stance": 240,
             "stats": {"hp": 1023, "atk": 18, "def": 210, "speed": 100},
+            "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+            "level_group": 1,
         }
 
     def test_missing_config_and_icon(self, monkeypatch):
@@ -91,6 +94,8 @@ class TestLoadMonsters:
             "weak": [], "resist": {}, "rank": "MinionLv2",
             "camp": "", "intro": "", "skills": [],
             "stance": 0, "stats": {"hp": 0, "atk": 0, "def": 0, "speed": 0},
+            "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+            "level_group": 1,
         }
 
     def test_instance_alias_and_skip(self, monkeypatch):
@@ -103,3 +108,68 @@ class TestLoadMonsters:
         assert out[9001]["weak"] == ["Quantum"]
         assert out[9001]["name"] == "名3"
         assert 9999999 not in out
+
+    def test_alias_carries_own_variant_ratios(self, monkeypatch):
+        """别名变体的修饰比/难度组用**它自己**的 config 记录，不沿用模板（ADR 0040 决策 3）：
+        同模板不同档位正是靠这两项区分。"""
+        extra_cfg = {
+            **_fake_load(Path("MonsterConfig.json"))[0],
+            "MonsterID": 801301099, "MonsterTemplateID": 8013010,
+            "HPModifyRatio": {"Value": 0.266667},
+            "AttackModifyRatio": {"Value": 1.5},
+            "DefenceModifyRatio": {"Value": {"Value": 0.5}},
+            "HardLevelGroup": 3,
+        }
+        monkeypatch.setattr(mc, "load_json", lambda p: (
+            [extra_cfg] if str(p).endswith("MonsterConfig.json") else _fake_load(p)))
+        out = mc.load_monsters()
+        variant = out[801301099]
+        assert variant["_tpl"] == 8013010
+        assert variant["name"] == "名1"          # 名称/立绘等仍是模板家族信息
+        assert variant["stat_ratio"] == {"hp": 0.266667, "atk": 1.5, "def": 0.5, "speed": 1.0}
+        assert variant["level_group"] == 3
+
+    def test_stat_ratio_double_wrap_and_garbage(self, monkeypatch):
+        """双层 ValueWrap（{Value:{Value:n}}）逐层解；非数值按中性 1。
+        数值（含负值）原样透传——语义同样是修正的透明度，不静默改写官方数值。"""
+        cfg = {"HPModifyRatio": {"Value": {"Value": 5}},
+               "AttackModifyRatio": {"Value": None},
+               "DefenceModifyRatio": {"Value": -2},
+               "SpeedModifyRatio": "not-a-number"}
+        assert mc._stat_ratio_from_cfg(cfg) == {
+            "hp": 5.0, "atk": 1.0, "def": -2.0, "speed": 1.0,
+        }
+
+
+class TestLoadLevelCurve:
+    def test_curve_groups_and_str_keys(self, monkeypatch):
+        """难度组 → 等级 → 四维曲线；键全部字符串化（JSON 无整型键）。"""
+        monkeypatch.setattr(mc, "load_json", lambda p: [
+            {"HardLevelGroup": 1, "Level": 1, "HPRatio": {"Value": 0.8},
+             "AttackRatio": {"Value": 0.64}, "DefenceRatio": {"Value": 1},
+             "SpeedRatio": {"Value": 1}},
+            {"HardLevelGroup": 1, "Level": 80, "HPRatio": {"Value": 148.01102},
+             "AttackRatio": {"Value": 30.684488}, "DefenceRatio": {"Value": 4.761905},
+             "SpeedRatio": {"Value": 1.2}},
+            {"HardLevelGroup": 2, "Level": 40, "HPRatio": {"Value": None}},
+        ])
+        curve = mc.load_level_curve()
+        assert curve["1"]["1"] == {"hp": 0.8, "atk": 0.64, "def": 1.0, "speed": 1.0}
+        assert curve["1"]["80"]["hp"] == 148.01102
+        # 缺位曲线值按中性 1 组合：比率维度四项都有键
+        assert curve["2"]["40"] == {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0}
+        # 垃圾行（缺组/缺等级）不入表
+        monkeypatch.setattr(mc, "load_json", lambda p: [
+            {"HardLevelGroup": None, "Level": 1, "HPRatio": {"Value": 1}},
+            {"HardLevelGroup": 1, "Level": None},
+        ])
+        assert mc.load_level_curve() == {}
+
+    def test_curve_duplicate_key_keeps_first(self, monkeypatch, caplog):
+        """同一 (组, 等级) 重复出现 → 保留首条并告警，不静默覆盖。"""
+        monkeypatch.setattr(mc, "load_json", lambda p: [
+            {"HardLevelGroup": 1, "Level": 1, "HPRatio": {"Value": 0.8}},
+            {"HardLevelGroup": 1, "Level": 1, "HPRatio": {"Value": 99}},
+        ])
+        curve = mc.load_level_curve()
+        assert curve["1"]["1"]["hp"] == 0.8
