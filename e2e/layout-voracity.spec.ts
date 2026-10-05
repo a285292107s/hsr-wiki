@@ -80,4 +80,78 @@ test.describe('布局验收：贪饕污染专题页（ADR 0025）', () => {
     await noUnknownOverflow(page);
     assertNoErrors();
   });
+
+  test('/voracity：hero 与首区块同轴（含分割线），愿力档位「文案在前、读数在后」', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/voracity');
+    await expect(page.locator('.nk-vor-sec .nk-title').first()).toBeVisible();
+
+    /* 回归闸（2026-10 实测缺陷）：hero 是 `.nk-page--detail`（纵向 flex）的直接子项，只写
+       `max-width + margin: 0 auto` 会被 auto 外边距顶掉 `align-items: stretch`，盒子塌成内容宽
+       （1440 档实测 186px vs 分区 952px）——标题看着像「居中式 hero」、hero 分割线缩成一小截，
+       与下方分区全都不同轴。宽度须显式 100%，横向内距须与 `.nk-panel` 同值。 */
+    const axis = await page.evaluate(() => {
+      const rect = (sel: string) => {
+        const el = document.querySelector(sel);
+        return el ? el.getBoundingClientRect() : null;
+      };
+      const hero = rect('.nk-vor-hero');
+      const heroTitle = rect('.nk-vor-hero__title');
+      const sec = rect('.nk-vor-sec');
+      const secTitle = rect('.nk-vor-sec .nk-title');
+      const after = getComputedStyle(document.querySelector('.nk-vor-hero')!, '::after');
+      if (!hero || !heroTitle || !sec || !secTitle) return null;
+      return {
+        heroTitleLeft: Math.round(heroTitle.left),
+        secTitleLeft: Math.round(secTitle.left),
+        ruleLeft: Math.round(hero.left + parseFloat(after.left)),
+        ruleRight: Math.round(hero.right - parseFloat(after.right)),
+        secRight: Math.round(sec.right),
+        heroWidth: Math.round(hero.width),
+        secWidth: Math.round(sec.width),
+      };
+    });
+    expect(axis, 'hero / 区块节点缺失').not.toBeNull();
+    expect(axis!.heroTitleLeft, 'hero 标题必须与首区块标题同轴').toBe(axis!.secTitleLeft);
+    expect(axis!.ruleLeft, 'hero 分割线左端必须落在同一条内容轴上').toBe(axis!.secTitleLeft);
+    expect(axis!.ruleRight, 'hero 分割线右端必须与区块右缘对齐').toBe(axis!.secRight);
+    // 塌陷判据：hero 盒不得窄于区块盒（曾经 186px vs 952px）
+    expect(axis!.heroWidth).toBeGreaterThanOrEqual(axis!.secWidth);
+
+    /* 阅读序：一行两段信息的先后不能反——先给「这是哪一档」，再给「走到多少」。
+       旧形态把读数条放在文案之上且 `flex: 1` 拉满区块宽（~880px），% 被推到行尾。 */
+    const rows = await page.locator('.nk-vor-step').evaluateAll((els) =>
+      els.map((el) => {
+        const desc = el.querySelector('.nk-vor-step__desc');
+        const meter = el.querySelector('.nk-vor-step__meter');
+        const track = el.querySelector('.nk-vor-step__track');
+        const fill = el.querySelector('.nk-vor-step__fill');
+        const pct = el.querySelector('.nk-vor-step__pct');
+        const sec = el.closest('.nk-vor-sec');
+        const trackW = track ? track.getBoundingClientRect().width : 0;
+        const fillW = fill ? fill.getBoundingClientRect().width : 0;
+        return {
+          hasPct: !!pct,
+          descBeforeMeter: desc && meter ? desc.getBoundingClientRect().top <= meter.getBoundingClientRect().top : true,
+          trackWidth: Math.round(trackW),
+          fillPct: trackW > 0 ? Math.round((fillW / trackW) * 100) : 0,
+          shownPct: Math.round(parseFloat((pct?.textContent || '0').replace('%', ''))),
+          secWidth: sec ? Math.round(sec.getBoundingClientRect().width) : 0,
+        };
+      }),
+    );
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.filter((r) => !r.descBeforeMeter).length, '档位文案必须排在读数之前').toBe(0);
+    const metered = rows.filter((r) => r.hasPct);
+    expect(metered.length).toBeGreaterThan(0);
+    // 读数条是「行内读数」：整列同宽（对齐成一条竖线），且填充比例必须等于同一行显示的百分比
+    expect(new Set(metered.map((r) => r.trackWidth)).size, '各档读数条必须同宽').toBe(1);
+    expect(
+      metered.filter((r) => Math.abs(r.fillPct - r.shownPct) > 2).map((r) => `${r.fillPct}% vs ${r.shownPct}%`),
+      '填充比例必须与该档显示的百分比一致',
+    ).toEqual([]);
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
 });

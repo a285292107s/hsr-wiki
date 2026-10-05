@@ -145,7 +145,7 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(trait0).toContainText(stageTraits[0].name);
     await expect(trait0).toContainText(`${stageTraits[0].param_list![0] * 100}%`);
     await expect(trait0).toContainText(`${stageTraits[0].param_list![1] * 100}%`);
-    await expect(boardGroups.nth(1).locator('.nk-egd-group__title')).toHaveText('赛季增益');
+    await expect(boardGroups.nth(1).locator('.nk-egd-group__title')).toHaveText('终焉公理');
     await expect(boardGroups.nth(1).locator('.nk-egd-buff')).toHaveCount(stageBuffs.length);
     // 第 1 层上半场：本层无污染，但召唤物照样在首领卡内列出（触发条件 = 该敌方有召唤表），且全程无徽标
     await expect(floorBoard.locator('.nk-egd-board__head .nk-egd-pollchip')).toHaveCount(0);
@@ -375,10 +375,10 @@ test.describe('布局验收：终局合并单页', () => {
     // 同页两个正文档位（特性描述 / 增益描述）必须同值：档位漂移会在这里暴露，而非靠钉死 13.44px
     expect(await fontPx(board.locator('.nk-egd-trait__desc').first()))
       .toBe(await fontPx(board.locator('.nk-egd-buff__desc').first()));
-    // 看板体块序：末法余烬 → 首领特性 → 敌方配置 → 赛季增益（末法余烬行只留增益名，标签「可用增益」已移除）
+    // 看板体块序：末法余烬 → 首领特性 → 敌方配置 → 增益体系（正名后 = 该玩法体系名；末法余烬行只留增益名）
     await expect(board.locator('.nk-egd-floor__buffhead')).toHaveText(tierceData.nodes![0].buff!.name);
     await expect(board.locator('.nk-egd-floor__bufflabel')).toHaveCount(0);
-    await expect(board.locator('.nk-egd-group__title')).toHaveText(['首领特性', '赛季增益']);
+    await expect(board.locator('.nk-egd-group__title')).toHaveText(['首领特性', '终焉公理']);
     await expect(board.locator('.nk-egd-buff')).toHaveCount(stageBuffs.length);
     // 首领特性 = 整组一张卡片 + 组内逐条平铺（用户裁决：不再用子 tab 切换说明）
     await expect(board.locator('.nk-egd-pilltabs')).toHaveCount(0);
@@ -688,11 +688,11 @@ test.describe('布局验收：终局合并单页', () => {
     }));
     expect(new Set(cardBoxes.map((b) => b.y)).size).toBe(1);
     expect(new Set(cardBoxes.map((b) => b.w)).size).toBe(1);
-    // 看板：一次一个半场，块序 = 首领特性 → 敌方配置 → 赛季增益；层内不复述半场身份
+    // 看板：一次一个半场，块序 = 首领特性 → 敌方配置 → 增益体系（= 终焉公理）；层内不复述半场身份
     const board = page.locator('#egd-floor-board');
     await expect(board).toHaveCount(1);
     await expect(board).toHaveCSS('display', 'flex');
-    await expect(board.locator('.nk-egd-group__title')).toHaveText(['首领特性', '赛季增益']);
+    await expect(board.locator('.nk-egd-group__title')).toHaveText(['首领特性', '终焉公理']);
     await expect(board.locator('.nk-egd-group__label')).toHaveCount(0);
     // 块序与星启看板逐字同序：末法余烬 → 首领特性 → 敌方配置 → 赛季增益（层共用块随看板显示）
     const boardBlocks = await board.locator('.nk-egd-board__body').evaluate((el) =>
@@ -1062,6 +1062,98 @@ test.describe('布局验收：终局合并单页', () => {
     await expectTokenNumber(peakBody, 'padding-left', egIndent, '手机档异相仲裁卡体缩进');
     expect(await peakBody.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0),
       '手机档异相仲裁卡体的层级竖轨必须保留').toBeGreaterThan(0);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+});
+
+test.describe('布局验收：终局玩法详情页（第四种页面形态）', () => {
+  const MODES = [
+    { key: 'maze', label: '忘却之庭', system: '记忆紊流' },
+    { key: 'story', label: '虚构叙事', system: '荒腔走板' },
+    { key: 'boss', label: '末日幻影', system: '终焉公理' },
+    { key: 'peak', label: '异相仲裁', system: '裁决象限' },
+  ] as const;
+
+  for (const m of MODES) {
+    test(`/endgame/${m.key}：规则正文 + 体系名 + 赛季内链可达`, async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      await page.goto(`/endgame/${m.key}`);
+
+      // h1 = 玩法名；正文分节数与体系名都来自产物（endgame_guide.json），故期望值从产物读。
+      // 必须用 toBeVisible + 盒模型，不能只 toHaveText：h1 被 Hero 的 overflow 裁掉时 toHaveText
+      // 依然通过（实测踩过：Hero 缺 `flex: none` 被压成 51px、h1 不可见而用例全绿）。
+      const h1 = page.locator('.nk-egm__hero h1');
+      await expect(h1).toBeVisible();
+      await expect(h1).toHaveText(m.label);
+      const heroBox = await page.locator('.nk-egm__hero').boundingBox();
+      const h1Box = await h1.boundingBox();
+      expect(heroBox?.height ?? 0, 'Hero 高度必须是内容高（column flex + overflow:hidden 会压塌它）').toBeGreaterThanOrEqual(96);
+      expect(h1Box?.height ?? 0, 'h1 必须有真实高度').toBeGreaterThan(0);
+      expect((h1Box?.y ?? 0) + (h1Box?.height ?? 0), 'h1 必须完整落在 Hero 盒内')
+        .toBeLessThanOrEqual((heroBox?.y ?? 0) + (heroBox?.height ?? 0) + 1);
+      expect(
+        await page.locator('.nk-egm__hero').evaluate((el) => getComputedStyle(el).backgroundImage.includes('url(')),
+        'Hero 不得用 UI 页签小图当背景（144px cover 到 1000px 会放大 6.9×）',
+      ).toBe(false);
+      const guide = readJson<{ modes: Record<string, { sections: unknown[]; system?: { name: string; count: number } }> }>(
+        'public/data/cn/endgame_guide.json',
+      );
+      const g = guide.modes[m.key];
+      expect(g, `产物应含模式 ${m.key}`).toBeTruthy();
+      expect(await page.locator('.nk-egm__rule').count(), '规则分节数应与产物一致').toBe(g.sections.length);
+
+      // 体系名必须上屏：区块标题含体系名，且与产物逐字一致
+      const sysTitle = page.locator('.nk-egm__panel .nk-title').filter({ hasText: g.system!.name });
+      await expect(sysTitle.first()).toBeVisible();
+      expect(g.system!.name, `该玩法体系名应为 ${m.system}`).toBe(m.system);
+
+      // 当期增益只出名称与图标（D6）：不得出现未展开的 #N[i] 占位符
+      expect(await page.locator('.nk-egm__buffs .nk-egm__buff').count()).toBeGreaterThan(0);
+      await expect(page.locator('.nk-egm__buffs')).not.toContainText('#');
+
+      // 赛季内链 ≥3 条 + 其它玩法入口 3 条
+      expect(await page.locator('.nk-egm__seasons a[href^="/endgame/"]').count()).toBeGreaterThanOrEqual(3);
+      await expect(page.locator('.nk-egm__other')).toHaveCount(3);
+      // 单页数据页形态：不得出现条目级覆盖率的标记
+      await expect(page.locator('.nk-snapshot__entry')).toHaveCount(0);
+
+      await noUnknownOverflow(page);
+      assertNoErrors();
+    });
+  }
+
+  test('/endgame/xyz：未登记玩法名落 404（正则白名单），不被玩法页吃下', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/endgame/xyz');
+    await expect(page.locator('.nk-egm__rule')).toHaveCount(0);
+    await expect(page.getByText('404')).toBeVisible();
+    assertNoErrors();
+  });
+});
+
+test.describe('布局验收：赛季页增益体系正名（体系名取代站点工作名）', () => {
+  test('/endgame/story/2026：区块标题 = 荒腔走板，且带选法说明', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/endgame/story/2026');
+    const h2 = page.locator('#egd-buffs');
+    await expect(h2).toBeVisible();
+    // 主标题 = 体系名（数据派生），站点工作名降为次标
+    await expect(h2).toContainText('荒腔走板');
+    await expect(h2.locator('.nk-egd-title-alias')).toHaveText('赛季增益');
+    // 选法说明与 endgame_guide.json 同源（3 条 · 每支队伍选 1 条）
+    await expect(page.locator('.nk-egd-buffs__hint')).toContainText('每支队伍选 1 条');
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame/maze/1036：赛季级增益区块仍退场，体系名出现在层看板的层级增益行', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/endgame/maze/1036');
+    // ADR 0037 的「整块退场」不得因正名而恢复
+    await expect(page.locator('#egd-buffs')).toHaveCount(0);
+    // 体系名 = 记忆紊流，与层看板的层级增益同文（该行只留增益名）
+    await expect(page.locator('.nk-egd-floor__buffname', { hasText: '记忆紊流' }).first()).toBeVisible();
     await noUnknownOverflow(page);
     assertNoErrors();
   });
