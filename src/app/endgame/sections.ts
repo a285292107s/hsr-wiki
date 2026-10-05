@@ -1,4 +1,4 @@
-import type { MazeListEntry, PeakLevelInfo } from '../../services/types';
+import type { MazeListEntry } from '../../services/types';
 import { seasonBuffList } from './renders';
 
 export interface EndgameSection {
@@ -10,7 +10,6 @@ export interface EndgameSection {
 export function buildEndgameSections(
   data: MazeListEntry | null,
   modeKey: string,
-  peakLevels: PeakLevelInfo[],
   /** 该玩法的增益体系名（`endgame_guide.json` 分节标题派生）；空串/缺省回退站点工作名「赛季增益」 */
   systemName = '赛季增益',
 ): EndgameSection[] {
@@ -19,14 +18,14 @@ export function buildEndgameSections(
   const push = (id: string, label: string): void => {
     s.push({ id, idx: String(idx++).padStart(2, '0'), label });
   };
-  // 区块顺序必须与 EndgameView 模板里的组件顺序一致（滚动定位按 DOM 锚点）
+  // 区块顺序必须与 EndgameView 模板里的组件顺序一致（区块序号按同一份清单派生）
   if (modeKey === 'peak') {
     if (data?.pollution) push('pollution', '污染等级');
-    if (peakLevels.length) push('levels', '关卡组成');
+    if (data?.badges?.length) push('badges', '段位徽章');
     return s;
   }
-  // 层级模式（忘却之庭 / 虚构叙事 / 末日幻影，ADR 0030 + 0037）：关卡层级与星启模式由
-  // 「第 1..N 层 / 星启模式」子 tab 承载，区块导航只剩赛季级维度
+  // 层级模式（忘却之庭 / 虚构叙事 / 末日幻影，ADR 0030 + 0037）与异相仲裁的关卡
+  // 都由层级子 tab 承载，区块导航只剩赛季级维度
   if (modeKey === 'boss') {
     if (data?.pollution) push('pollution', '污染等级');
     return s;

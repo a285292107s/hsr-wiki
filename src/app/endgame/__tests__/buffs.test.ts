@@ -41,6 +41,27 @@ describe('seasonBuffList 赛季增益（与层内增益同文的不复述）', (
     expect(seasonBuffList(data)).toEqual([]);
   });
 
+  it('异相仲裁：赛季 buffs 是王棋关增益的副本 → 赛季级区块退场（王棋关承担）', () => {
+    const data = {
+      id: '9', zh: '军团再临',
+      buffs: [buff(3033073, '美妙奇笑'), buff(3033074, '终结之吻'), buff(3033087, '蜂群忆质')],
+      levels: [
+        { kind: 'knight' },
+        { kind: 'king', buffs: [buff(3033073, '美妙奇笑'), buff(3033074, '终结之吻'), buff(3033087, '蜂群忆质')] },
+      ],
+    } as unknown as MazeListEntry;
+    expect(seasonBuffList(data)).toEqual([]);
+  });
+
+  it('异相仲裁：只有部分是王棋关增益时，只留差额（新机制不重复陈述）', () => {
+    const data = {
+      id: '9', zh: '军团再临',
+      buffs: [buff(1, '甲'), buff(2, '乙')],
+      levels: [{ kind: 'king', buffs: [buff(1, '甲')] }],
+    } as unknown as MazeListEntry;
+    expect(seasonBuffList(data).map((b) => b.name)).toEqual(['乙']);
+  });
+
   it('无增益返回空数组', () => {
     expect(seasonBuffList({ id: '1', zh: 'x' } as MazeListEntry)).toEqual([]);
   });
@@ -111,13 +132,13 @@ describe('buildEndgameSections 子 tab 承载后的赛季级区块', () => {
   } as MazeListEntry;
 
   it('末日幻影：赛季增益/首领特性/星启/关卡层级不再进区块导航，只剩赛季级污染等级', () => {
-    expect(buildEndgameSections(bossData, 'boss', []).map((s) => s.id)).toEqual(['pollution']);
-    expect(sectionIdxMap(buildEndgameSections(bossData, 'boss', []))).toEqual({ pollution: '01' });
+    expect(buildEndgameSections(bossData, 'boss').map((s) => s.id)).toEqual(['pollution']);
+    expect(sectionIdxMap(buildEndgameSections(bossData, 'boss'))).toEqual({ pollution: '01' });
   });
 
-  it('无污染赛季的末日幻影无区块导航（顶部条改由层级子 tab 承担）', () => {
+  it('无污染赛季的末日幻影无赛季级区块（导航由关卡子 tab 承担）', () => {
     const clean = { ...bossData, pollution: undefined, tierce: undefined } as MazeListEntry;
-    expect(buildEndgameSections(clean, 'boss', [])).toEqual([]);
+    expect(buildEndgameSections(clean, 'boss')).toEqual([]);
   });
 
   it('忘却之庭：赛季增益与层内增益同文 → 只剩污染等级', () => {
@@ -127,7 +148,7 @@ describe('buildEndgameSections 子 tab 承载后的赛季级区块', () => {
       floor_details: [{ floor: 1, buff: buff(3030149, '记忆紊流') }],
       pollution: { count: 2, levels: [2, 3] },
     } as MazeListEntry;
-    expect(buildEndgameSections(data, 'maze', []).map((s) => s.id)).toEqual(['pollution']);
+    expect(buildEndgameSections(data, 'maze').map((s) => s.id)).toEqual(['pollution']);
   });
 
   it('虚构叙事：战意机制 → 赛季增益 → 污染等级（块序与模板顺序一致）', () => {
@@ -138,19 +159,26 @@ describe('buildEndgameSections 子 tab 承载后的赛季级区块', () => {
       pollution: { count: 1, levels: [2] },
       floor_details: [{ floor: 1 }],
     } as MazeListEntry;
-    expect(buildEndgameSections(data, 'story', []).map((s) => s.id))
+    expect(buildEndgameSections(data, 'story').map((s) => s.id))
       .toEqual(['sub-buffs', 'buffs', 'pollution']);
-    expect(sectionIdxMap(buildEndgameSections(data, 'story', [])))
+    expect(sectionIdxMap(buildEndgameSections(data, 'story')))
       .toEqual({ 'sub-buffs': '01', buffs: '02', pollution: '03' });
   });
 
-  it('异相仲裁口径不变（污染等级 → 关卡组成），赛季增益不进其区块导航', () => {
+  it('异相仲裁：关卡由子 tab 承载 → 赛季级只剩污染等级 / 段位徽章', () => {
     const data = {
-      id: '9', zh: '将杀王棋',
+      id: '9', zh: '军团再临',
       buffs: [buff(1, '出奇制胜')],
+      levels: [{ kind: 'king', buffs: [buff(1, '出奇制胜')] }],
+      badges: [{ level: 'Gold', name: '「军团再临」黄金勋章', icon: 'x.png' }],
       pollution: { count: 1, levels: [2] },
-    } as MazeListEntry;
-    expect(buildEndgameSections(data, 'peak', [{ kind: 'king' }]).map((s) => s.id))
-      .toEqual(['pollution', 'levels']);
+    } as unknown as MazeListEntry;
+    expect(buildEndgameSections(data, 'peak').map((s) => s.id)).toEqual(['pollution', 'badges']);
+    expect(sectionIdxMap(buildEndgameSections(data, 'peak'))).toEqual({ pollution: '01', badges: '02' });
+  });
+
+  it('异相仲裁无污染且无徽章的期：区块为空（关卡仍在子 tab 内）', () => {
+    const data = { id: '1', zh: '智械残局', levels: [{ kind: 'knight' }] } as MazeListEntry;
+    expect(buildEndgameSections(data, 'peak')).toEqual([]);
   });
 });

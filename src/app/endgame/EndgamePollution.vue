@@ -16,7 +16,7 @@ const props = defineProps<{
   levels: VoracityInvasionLevel[];
 }>();
 
-const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, [])));
+const sectionIdx = computed(() => sectionIdxMap(buildEndgameSections(props.data, props.modeKey)));
 
 const entries = computed(() => pollutionEntries(props.data));
 

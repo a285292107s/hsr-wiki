@@ -210,54 +210,27 @@
 .nk-egd-buff__desc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-buff__desc .nowrap { white-space: nowrap; }
 
-.nk-egd-floors {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 8px;
-}
+/* 异相仲裁单关面板（关卡子 tab 的 tabpanel 内容，ADR 0043）：唯一不挂卡片行的层级面板，也是 `.nk-egd-floor`
+   这个块级类的唯一消费方（`.nk-egd-floor__*` 元素类仍被层 / 星启 / 单关三处共用）。左基准与另外三模式的
+   层级面板一致（`#egd-level-panel` 内容区左缘），子档缩进 + 竖轨由 `.nk-egd-children` 承担。 */
 .nk-egd-floor {
   position: relative;
-  padding: 20px 4px 24px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  border-top: 1px solid var(--line-1);
+  padding: 0 0 24px;
   animation: nk-fade 0.35s var(--nk-ease-out) backwards;
-  animation-delay: min(calc(var(--i, 0) * 60ms), 480ms);
 }
-.nk-egd-floor:first-child { border-top: none; padding-top: 6px; }
+/* 单关面板头：非交互（关卡名由激活的 tab 承载），只排「类别胶囊 + 污染徽标 + 敌方等级」。
+   该行是面板自己的身份条（不是独立区块），故内距归零、与面板内容区顶边齐平，只留 12px 接住下方内容块。 */
 .nk-egd-floor__head {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
   margin: 0 0 12px;
-  padding: 10px 8px;
-  border: none;
-  border-radius: 6px;
+  padding: 0;
   background: transparent;
   font: inherit;
   text-align: left;
   color: inherit;
-  cursor: pointer;
-  transition: background 0.2s var(--nk-ease-out);
-}
-.nk-egd-floor__head::before {
-  content: '';
-  position: absolute;
-  inset: -4px 0;
-}
-.nk-egd-floor__head:hover {
-  background: color-mix(in srgb, var(--eg-color) 5%, transparent);
-}
-.nk-egd-floor__title {
-  font-size: 1.08rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: var(--text-bright);
-  white-space: nowrap;
 }
 .nk-egd-floor__data {
   margin-left: auto;

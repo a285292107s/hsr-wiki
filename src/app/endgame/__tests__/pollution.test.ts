@@ -120,23 +120,20 @@ describe('buildEndgameSections 污染等级区块', () => {
       tierce: { id: 9 },
       floor_details: [cleanFloor],
     } as MazeListEntry;
-    expect(buildEndgameSections(data, 'maze', []).map((s) => s.id))
+    expect(buildEndgameSections(data, 'maze').map((s) => s.id))
       .toEqual(['buffs', 'pollution']);
-    expect(sectionIdxMap(buildEndgameSections(data, 'maze', []))).toMatchObject({
+    expect(sectionIdxMap(buildEndgameSections(data, 'maze'))).toMatchObject({
       buffs: '01', pollution: '02',
     });
   });
 
-  it('异相仲裁：排在关卡组成之前（污染等级是本期维度）', () => {
-    const levels = [{ kind: 'knight' as const, name: '骑士（一）' }];
-    expect(buildEndgameSections(polluted, 'peak', levels).map((s) => s.id))
-      .toEqual(['pollution', 'levels']);
+  it('异相仲裁：关卡由子 tab 承载，赛季级只剩污染等级', () => {
+    expect(buildEndgameSections(polluted, 'peak').map((s) => s.id)).toEqual(['pollution']);
   });
 
   it('无污染赛季不产生该区块', () => {
-    expect(buildEndgameSections(clean, 'maze', []).map((s) => s.id))
+    expect(buildEndgameSections(clean, 'maze').map((s) => s.id))
       .not.toContain('pollution');
-    expect(buildEndgameSections(clean, 'peak', [{ kind: 'knight' as const }]).map((s) => s.id))
-      .toEqual(['levels']);
+    expect(buildEndgameSections(clean, 'peak').map((s) => s.id)).toEqual([]);
   });
 });
