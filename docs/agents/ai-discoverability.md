@@ -53,6 +53,7 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 | `/monster` | `prerender/monster.html` | monsters.json | 632 |
 | `/monster/:id` | `prerender/monster/{id}.html` | monsters/{id}.json | 同列表 id 集 |
 | `/endgame` | `prerender/endgame.html` | maze*.catalog.json（四模式） | 四模式赛季并集 |
+| `/endgame/{mode}` | `prerender/endgame/{mode}.html` | endgame_guide.json + maze*.catalog.json | 四模式各 1 页（玩法页；正则白名单，`/endgame/xyz` 落 404） |
 | `/endgame/:mode/:id` | `prerender/endgame/{mode}/{id}.html` | maze.catalog / maze_extra.catalog / maze_boss.catalog / maze_peak.catalog | 按 mode 取表，且**仅 `zh` 非空白者**（`endgame.ts:190`；未发布占位行如 boss 3022 不产快照、不入 sitemap，线上落 404） |
 | `/achievement` | `prerender/achievement.html` | achievements.json + achievement_series.json | 1950 |
 | `/currency` | `prerender/currency.html` | currency/role.json 等 5 表 | 枢纽 |
@@ -127,3 +128,14 @@ origin 迁至自有域名 `myhsr.wiki` 后 DNS 归站方控制：GSC 应为 `myh
 
 - AI 侧只保证**代码与规格**：构建产物断言 + 无 JS 可读性（静态文件取证）。线上 rewrite 投递行为需 preview 部署实测（Vercel 对 rewrite 目标缺文件的处理 = 404 或回落 catch-all，两者均可接受）。
 - 视觉表现（快照在真实浏览器中是否闪现）交用户 RunPreview 确认；JS 用户路径在 `html.js` 规则下与现状一致。
+
+## 8. 页面形态：第四种「单页数据页」（玩法详情页）
+
+`/endgame/{mode}`（忘却之庭 / 虚构叙事 / 末日幻影 / 异相仲裁）是继「枢纽页 / 目录页 / 详情页」之后的第四种形态：
+
+- **定位**：一页讲清一个**玩法**（常青规则），不随赛季轮换；赛季级内容仍在 `/endgame/{mode}/{id}`。
+- **正文来源**：`public/data/cn/endgame_guide.json`（`sections` 逐字来自 `IntroData` 分节）+ 终局产物（当期赛季的结构口径与当期增益名）。
+- **快照约定**：**不使用 `nk-snapshot__entry`**，**无条目级覆盖率断言**（`check-ai-endpoints.mjs` 把它归入 `singleFamilies`，各恰好 1 个快照文件）；正文含 h1 + 面包屑 + 规则分节 + 结构事实 + 增益体系（名/条数/选法）+ 当期增益**名称清单** + ≥3 条同玩法赛季内链 + 其它玩法内链。
+- **为什么当期增益只出名称**：`MazeBuff.desc` 含 `#N[i]` 参数占位，快照不展开参数 ⇒ 直接输出 desc 会命中守卫的「禁未展开 `#N[i]`」断言。名称清单已足够承载「本期有哪些增益」。
+- **与专题页（`/voracity`）的区别**：专题页正文是站点撰写的长文；玩法页正文是**官方规则原文**，站点不加润色。
+
