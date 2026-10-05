@@ -1108,9 +1108,14 @@ test.describe('布局验收：终局玩法详情页（第四种页面形态）',
       await expect(sysTitle.first()).toBeVisible();
       expect(g.system!.name, `该玩法体系名应为 ${m.system}`).toBe(m.system);
 
-      // 当期增益只出名称与图标（D6）：不得出现未展开的 #N[i] 占位符
-      expect(await page.locator('.nk-egm__buffs .nk-egm__buff').count()).toBeGreaterThan(0);
-      await expect(page.locator('.nk-egm__buffs')).not.toContainText('#');
+      // 玩法页是**常青页**：只讲规格（条数/时机/作用范围），**不得列具体增益条目**
+      // （条目每期都换，boss 同期上/下半场还各一套——列一份必然误导；条目与效果由赛季页承载）
+      await expect(page.locator('.nk-egm__system')).toContainText('每期');
+      await expect(page.locator('.nk-egm__buffs .nk-egm__buff')).toHaveCount(0);
+      const cta = page.locator('.nk-egm__system-cta');
+      await expect(cta).toBeVisible();
+      // 入口必须指向当期（进行中的）赛季详情页，而不是泛泛回目录
+      await expect(cta).toHaveAttribute('href', new RegExp(`^/endgame/${m.key}/\\d+$`));
 
       // 赛季内链 ≥3 条 + 其它玩法入口 3 条
       expect(await page.locator('.nk-egm__seasons a[href^="/endgame/"]').count()).toBeGreaterThanOrEqual(3);
@@ -1155,6 +1160,83 @@ test.describe('布局验收：赛季页增益体系正名（体系名取代站�
     // 体系名 = 记忆紊流，与层看板的层级增益同文（该行只留增益名）
     await expect(page.locator('.nk-egd-floor__buffname', { hasText: '记忆紊流' }).first()).toBeVisible();
     await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+});
+
+test.describe('玩法说明入口可发现性（目录页列头 + 赛季详情页 Hero）', () => {
+  test('两处入口都可见、命中区达标，且点击进入玩法页', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+
+    // ① 目录页：每个模式列头一个显式入口（此前只有「列标题即链接」这一零提示性入口）
+    await page.goto('/endgame');
+    const chips = page.locator('.nk-eg-col__head .nk-guide-link');
+    await expect(chips.first()).toBeVisible();
+    expect(await chips.count(), '目录页每个模式列头各一个入口').toBeGreaterThanOrEqual(1);
+    for (let i = 0; i < await chips.count(); i += 1) {
+      await expect(chips.nth(i)).toHaveAttribute('aria-label', /玩法说明$/);
+    }
+    const chipBox = await chips.first().boundingBox();
+    expect(chipBox?.height ?? 0, '入口命中区应达 WCAG 2.2 下限 24px').toBeGreaterThanOrEqual(24);
+
+    // ② 赛季详情页：Hero 的模式行此前是纯文本、完全没有入口
+    await page.goto('/endgame/boss/3020');
+    const heroLink = page.locator('.nk-egd-hero__camp .nk-guide-link');
+    await expect(heroLink).toBeVisible();
+    await expect(heroLink).toHaveText(/玩法说明/);
+    await heroLink.click();
+    await expect(page).toHaveURL(/\/endgame\/boss$/);
+    await expect(page.locator('.nk-egm__hero h1')).toHaveText('末日幻影');
+
+    assertNoErrors();
+  });
+});
+
+test.describe('玩法页「当期赛季」判据（不得取未开始的那一期）', () => {
+  for (const mode of ['maze', 'story', 'boss', 'peak'] as const) {
+    test(`/endgame/${mode}：当期 = 列表中状态为「进行中」的那一期`, async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      await page.goto(`/endgame/${mode}`);
+
+      const r = await page.evaluate(() => {
+        const link = document.querySelector('.nk-egm__note .nk-egm__link');
+        const rows = [...document.querySelectorAll('.nk-egm__seasons .nk-eg-lrow')];
+        const live = rows.find((x) => x.getAttribute('data-status') === '进行中');
+        return {
+          note: link?.closest('.nk-egm__note')?.textContent?.trim().replace(/\s+/g, ' ') ?? null,
+          href: link?.getAttribute('href') ?? null,
+          liveHref: live?.getAttribute('href') ?? null,
+          firstStatus: rows[0]?.getAttribute('data-status') ?? null,
+        };
+      });
+      expect(r.note, '必须显式标注是当期还是最新一期').toBeTruthy();
+      if (r.liveHref) {
+        // 有进行中的一期：必须选它，且文案说「当期赛季」（不能把未开始的那期当现状陈述）
+        expect(r.href, `当期应取进行中的 ${r.liveHref}（列表首行状态 ${r.firstStatus}）`).toBe(r.liveHref);
+        expect(r.note).toContain('当期赛季');
+      } else {
+        // 赛季间隙：回落到最新一期，但必须如实标注，不得冒充当期
+        expect(r.note, '没有进行中的赛季时不得写成「当期赛季」').not.toContain('当期赛季');
+        expect(r.note).toContain('最新赛季');
+      }
+      assertNoErrors();
+    });
+  }
+});
+
+test.describe('赛季页增益区块的反向入口（就地可去玩法说明）', () => {
+  test('/endgame/story/2026：区块标题旁有玩法说明入口，点击进入玩法页', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/endgame/story/2026');
+    const h2 = page.locator('#egd-buffs');
+    await expect(h2).toBeVisible();
+    const guide = h2.locator('.nk-guide-link');
+    await expect(guide).toBeVisible();
+    await expect(guide).toHaveAttribute('href', '/endgame/story');
+    await expect(guide).toHaveAttribute('aria-label', /玩法说明$/);
+    await guide.click();
+    await expect(page).toHaveURL(/\/endgame\/story$/);
+    await expect(page.locator('.nk-egm__hero h1')).toHaveText('虚构叙事');
     assertNoErrors();
   });
 });
