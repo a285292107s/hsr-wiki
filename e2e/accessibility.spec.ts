@@ -61,6 +61,11 @@ const PAGES = [
     await page.locator('#egd-level-tab-tierce').click();
     await page.waitForSelector('.nk-egd-traits .nk-egd-trait', { state: 'attached', timeout: 15_000 });
   } },
+  // 异相仲裁（ADR 0043）：关卡子 tab + 单关面板 + 段位徽章区块；先切到王棋关（增益与绝境变体只在该关）
+  { path: '/endgame/peak/9', label: '终局详情·异相仲裁单关', wait: () => async (page: Page) => {
+    await page.locator('#egd-level-tab-peak-904').click();
+    await page.waitForSelector('.nk-egd-peak .nk-egd-floor__hardname', { state: 'attached', timeout: 15_000 });
+  } },
   { path: '/currency', label: '货币战争 Hub', wait: null },
   // 专题页（ADR 0025）：等分区导航出现即数据就绪；无分区导航时首屏仍是骨架屏
   { path: '/voracity', label: '贪饕污染', wait: () => (page: Page) => page.waitForSelector('.nk-vor-secnav .nk-secnav__btn', { state: 'attached', timeout: 15_000 }) },

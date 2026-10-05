@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, resolveTokenColor, waitForCatalogCards } from './helpers';
-import { CN_NUM, expectTokenNumber, floorBossName, grouped, lastWaveBossName, lastWaveMonster, levelTabLabels, noUnknownOverflow, pollutedMonsterCount, pollutedSeasonHrefs, pollutedSummons, pollutionBadge, pollutionEntries, pollutionPosition, seasonData, seasonTabLabels, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
+import { CN_NUM, expectTokenNumber, floorBossName, grouped, lastWaveBossName, lastWaveMonster, levelTabLabels, noUnknownOverflow, peakTabLabels, pollutedMonsterCount, pollutedSeasonHrefs, pollutedSummons, pollutionBadge, pollutionEntries, pollutionPosition, seasonData, seasonTabLabels, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
 
 /**
  * 布局验收：终局合并单页 —— layout 验收层（语义契约 + 数值规格）分文件之一。
@@ -862,29 +862,44 @@ test.describe('布局验收：终局合并单页', () => {
     await noUnknownOverflow(page);
     assertNoErrors();
 
-    // 异相仲裁：无层/半场，污染直接落在单关上，且区块排在「关卡组成」之前
+    // 异相仲裁：关卡由子 tab 承载（ADR 0043），面板一次只渲染一关；污染落在单关上
     const peak = seasonData('maze_peak.json', '9');
     const peakPoll = pollutionEntries(peak);
     expect(peakPoll.length).toBeGreaterThan(0);
     await page.goto('/endgame/peak/9');
     await expect(page.locator('#egd-pollution')).toBeVisible();
-    const secnav = page.locator('.nk-egd-secnav .nk-secnav__btn');
-    await expect(secnav).toHaveCount(2);
-    await expect(secnav.first()).toContainText('污染等级');
-    await expect(secnav.last()).toContainText('关卡组成');
+    // 无固定条（四模式一致；ADR 0043 撤销 ADR 0037 决策 1 的「只剩异相仲裁」）
+    await expect(page.locator('.nk-egd-bar')).toHaveCount(0);
+    await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveText(peakTabLabels(peak));
     await expect(page.locator('.nk-egd-poll__pos')).toHaveText(peakPoll.map(pollutionPosition));
     await expect(page.locator('.nk-egd-poll__leveldesc')).toHaveCount(peakPoll.length);
-    await expect(page.locator('.nk-egd-peak .nk-egd-pollchip')).toHaveCount(peakPoll.length);
-    // 异相仲裁的层级增益与楼层同一渲染位（内联一份），标签一并移除；增益名取自该赛季增益表
-    await expect(page.locator('.nk-egd-floor__buffname').first()).toHaveText(peak.buffs![0].name);
-    await expect(page.locator('.nk-egd-floor__bufflabel')).toHaveCount(0);
-    // 异相仲裁单关与绝境变体同样把召唤物并进敌方图标格（触发条件 = 该敌方有召唤表）：条数由该期数据派生
+    // 污染徽标只出现在被污染的那一关（面板不再一次渲染 4 关）
+    const pollLevel = (peak.levels ?? []).find((l) => l.invasion);
+    expect(pollLevel?.name, '当期应有受污染的单关').toBeTruthy();
+    await page.locator('#egd-level-tabs [role="tab"]', { hasText: pollLevel!.name! }).click();
+    await expect(page.locator('.nk-egd-peak .nk-egd-pollchip')).toHaveCount(1);
+    // 单关面板一次只渲染一关：容器数与 aria-labelledby 都跟随激活 tab
+    await expect(page.locator('.nk-egd-peak')).toHaveCount(1);
+    await expect(page.locator('#egd-level-panel'))
+      .toHaveAttribute('aria-labelledby', `egd-level-tab-peak-${pollLevel!.id}`);
+    // 王棋关的层级增益：增益名与描述同渲染位，标签仍不出现（ADR 0033 决策 8）
+    const king = (peak.levels ?? []).find((l) => l.kind === 'king');
+    expect(king?.buffs?.length, '王棋关应带裁决象限增益').toBeGreaterThan(0);
+    await page.locator('#egd-level-tabs [role="tab"]', { hasText: king!.name! }).click();
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__buffname')).toHaveText(king!.buffs!.map((b) => b.name));
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__bufflabel')).toHaveCount(0);
+    // 异相仲裁单关与绝境变体同样把召唤物并进敌方图标格（触发条件 = 该敌方有召唤表）：
+    // 每个 tab 的条数由该关数据派生
     const peakSummons = (peak.levels ?? []).flatMap(
       (l) => [...summonsOf(l.monsters), ...summonsOf(l.hard?.monsters)],
     );
     expect(peakSummons.length, '异相仲裁应有带召唤物的单关').toBeGreaterThan(0);
-    await expect(page.locator('.nk-egd-peak .nk-egd-floor__moncell .nk-egd-summon'))
-      .toHaveCount(peakSummons.length);
+    for (const lv of peak.levels ?? []) {
+      await page.locator('#egd-level-tabs [role="tab"]', { hasText: lv.name! }).click();
+      await expect(page.locator('.nk-egd-peak .nk-egd-floor__moncell .nk-egd-summon'))
+        .toHaveCount(summonsOf(lv.monsters).length + summonsOf(lv.hard?.monsters).length);
+    }
+    await page.locator('#egd-level-tabs [role="tab"]', { hasText: (peak.levels ?? [])[0].name! }).click();
     await expect(page.locator('.nk-egd-peak .nk-egd-summons__label').first()).toHaveText('召唤物');
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__row--summons')).toHaveCount(0);
     // 图标格顶边对齐（带召唤物的格子更高，居中会让同级图标错位）
@@ -1008,7 +1023,7 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(page.locator('.nk-egd-nodecard').first().locator('.nk-egd-nodecard__val'))
       .toHaveText(String(maze.tierce!.nodes![0].level));
     // 子档：缩进 = --eg-indent 令牌落值；**星启看板体不画层级竖轨**（用户裁决：通体模式色线重复点题，
-    // 层级改由「缩进 + 字号档」承担），轨线只保留在异相仲裁卡体。
+    // 层级改由「缩进 + 字号档」承担），轨线只保留在异相仲裁单关面板体。
     // 孙档：看板内「第 N 波」标签与层级刻度无关，但两处取值同源（字号不得分叉）
     const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');
     expect(egIndent, '父子层级缩进令牌必须在 .nk-egd 上声明').toBeGreaterThan(0);
@@ -1030,13 +1045,13 @@ test.describe('布局验收：终局合并单页', () => {
     await noUnknownOverflow(page);
     assertNoErrors();
 
-    // 异相仲裁（唯一的非子 tab 卡体）：卡体即子块，缩进 + 模式色竖轨都在
+    // 异相仲裁单关面板（子 tab 承载关卡后仍是「无卡片行」的唯一模式）：缩进 + 模式色竖轨都在
     await page.goto('/endgame/peak/9');
     const peakBody = page.locator('.nk-egd-peak__body').first();
     await expect(peakBody).toBeVisible();
-    await expectTokenNumber(peakBody, 'padding-left', egIndent, '异相仲裁卡体缩进');
+    await expectTokenNumber(peakBody, 'padding-left', egIndent, '异相仲裁单关面板体缩进');
     const railWidth = await peakBody.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0);
-    expect(railWidth, '异相仲裁卡体的层级竖轨必须保留（只在战斗看板移除）').toBeGreaterThan(0);
+    expect(railWidth, '异相仲裁单关面板体的层级竖轨必须保留（只在战斗看板移除）').toBeGreaterThan(0);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -1045,7 +1060,7 @@ test.describe('布局验收：终局合并单页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/endgame/maze/1036');
-    // 手机端缩进降档（仍由同一令牌声明）、轨线只保留在异相仲裁卡体；
+    // 手机端缩进降档（仍由同一令牌声明）、轨线只保留在异相仲裁单关面板体；
     // 父档（卡片节点号）字号仍严格大于孙档「第 N 波」标签
     const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');
     expect(egIndent, '手机档缩进令牌必须在 .nk-egd 上声明').toBeGreaterThan(0);
@@ -1059,9 +1074,9 @@ test.describe('布局验收：终局合并单页', () => {
     expect(cardFs).toBeGreaterThan(waveFs);
     await page.goto('/endgame/peak/9');
     const peakBody = page.locator('.nk-egd-peak__body').first();
-    await expectTokenNumber(peakBody, 'padding-left', egIndent, '手机档异相仲裁卡体缩进');
+    await expectTokenNumber(peakBody, 'padding-left', egIndent, '手机档异相仲裁单关面板体缩进');
     expect(await peakBody.evaluate((el) => parseFloat(getComputedStyle(el, '::before').width) || 0),
-      '手机档异相仲裁卡体的层级竖轨必须保留').toBeGreaterThan(0);
+      '手机档异相仲裁单关面板体的层级竖轨必须保留').toBeGreaterThan(0);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -1188,6 +1203,69 @@ test.describe('玩法说明入口可发现性（目录页列头 + 赛季详情�
     await expect(page).toHaveURL(/\/endgame\/boss$/);
     await expect(page.locator('.nk-egm__hero h1')).toHaveText('末日幻影');
 
+    assertNoErrors();
+  });
+});
+
+test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', () => {
+  test('/endgame/peak/9：关卡子 tab + 单关面板 + 段位徽章区块，无固定条', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const peak = seasonData('maze_peak.json', '9');
+    await page.goto('/endgame/peak/9');
+
+    // ① 四个玩法的赛季页现在同构：无固定条、无区块导航，关卡定位由页内子 tab 承担
+    await expect(page.locator('.nk-egd-bar')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-secnav')).toHaveCount(0);
+    await expect(page.locator('.nk-egd.nk-page--detail')).toHaveCSS('padding-top', '0px'); // e2e-literal-ok: 无固定条 ⇒ 避让内距必须为 0（定义性契约值，非可漂移设计值）
+    await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveText(peakTabLabels(peak));
+    // 默认激活首个关卡 tab（异相仲裁无星启模式，见 `defaultLevelKey`）
+    await expect(page.locator('#egd-level-tabs [role="tab"]').first()).toHaveAttribute('aria-selected', 'true');
+
+    // ② 一次只渲染一关：关卡名不再在面板内复述（身份由激活 tab 承担），面板头只留类别 + 等级
+    await expect(page.locator('.nk-egd-peak')).toHaveCount(1);
+    await expect(page.locator('.nk-egd-floor.nk-egd-peak .nk-egd-floor__title')).toHaveCount(0);
+    const first = (peak.levels ?? [])[0];
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__head .nk-egd-peak__kind')).toHaveText('骑士');
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__head .nk-egd-floor__dataval')).toHaveText(String(first.level));
+
+    // ③ 切 tab 换的是这一关那份数据（敌方等级 + 关卡 ID 都跟随）
+    const king = (peak.levels ?? []).find((l) => l.kind === 'king');
+    expect(king, '当期应有王棋关').toBeTruthy();
+    await page.locator('#egd-level-tabs [role="tab"]', { hasText: king!.name! }).click();
+    await expect(page.locator('#egd-level-panel'))
+      .toHaveAttribute('aria-labelledby', `egd-level-tab-peak-${king!.id}`);
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__head .nk-egd-peak__kind')).toHaveText('王棋');
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__head .nk-egd-floor__dataval')).toHaveText(String(king!.level));
+    // 绝境变体是同一关内的子块，不是第二个 tab
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__hardname')).toHaveText(king!.hard!.name!);
+    await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveCount((peak.levels ?? []).length);
+
+    // ④ 段位徽章升为赛季级区块（不再埋在「关卡组成」里）：条数与数据一致，标题进区块序号
+    await expect(page.locator('#egd-badges')).toBeVisible();
+    await expect(page.locator('#egd-badges')).toContainText('段位徽章');
+    await expect(page.locator('.nk-egd-badges__item')).toHaveCount((peak.badges ?? []).length);
+    await expect(page.locator('.nk-egd-badges__item').first()).toContainText(peak.badges![0].name);
+    await expect(page.locator('#egd-badges .nk-title__idx')).toHaveText('02');
+
+    // ⑤ 赛季级增益区块对异相仲裁整块退场（3 条既是赛季 buffs 也是王棋关增益，王棋 tab 内已陈述）
+    await expect(page.locator('#egd-buffs')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-peak .nk-egd-floor__buffname'))
+      .toHaveText(king!.buffs!.map((b) => b.name));
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame/peak/1：无污染无徽章的期只剩子 tab + 单关面板（区块序号不悬空）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const peak = seasonData('maze_peak.json', '1');
+    await page.goto('/endgame/peak/1');
+    await expect(page.locator('#egd-pollution')).toHaveCount(0);
+    await expect(page.locator('#egd-badges')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-panel .nk-title')).toHaveCount(0);
+    await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveText(peakTabLabels(peak));
+    await expect(page.locator('.nk-egd-peak')).toHaveCount(1);
+    await noUnknownOverflow(page);
     assertNoErrors();
   });
 });
