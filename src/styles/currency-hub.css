@@ -8,7 +8,9 @@
   -webkit-font-smoothing: antialiased;
 }
 #nk-cwhub-app * { box-sizing: border-box; }
-#nk-cwhub-app h1, #nk-cwhub-app h2, #nk-cwhub-app h3, #nk-cwhub-app p { margin: 0; padding: 0; }
+/* 此处曾有一条 `#nk-cwhub-app h1…p { margin: 0; padding: 0 }`：与 `catalog.css` 的首页同款重复重置，
+   同一 ID 特异度问题（品牌带副标题 / 页脚拉丁行 / 空态内距被压死，两枢纽页须同时修，
+   否则 `nk-view-swap` 互切时两页品牌带内部间距不一致）。UA 默认由 tokens.css 的 `:where(#app)` 清。 */
 #nk-cwhub-app::-webkit-scrollbar { width: 6px; }
 #nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: var(--nk-radius-1); }
 #nk-cwhub-app::-webkit-scrollbar-track { background: transparent; }

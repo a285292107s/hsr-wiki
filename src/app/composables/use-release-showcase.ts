@@ -66,6 +66,13 @@ export function pickSeasonNew<T extends ReleaseTagged>(list: readonly T[]): T[] 
    门槛取 2：3 张以上时带规格的信息密度已经足够，特写反而打断横向节奏。 */
 const FEATURE_MAX = 2;
 
+/** 单源失败只丢该分区，但要**计数**：全失败与「本版本无新增」在页面上必须可区分，
+    否则一次网络故障会被渲染成「本版本暂无新增条目」——把故障说成事实。 */
+export function splitSources<T>(sourced: readonly (T | null)[]): { ok: T[]; failed: number } {
+  const ok = sourced.filter((s): s is T => s !== null);
+  return { ok, failed: sourced.length - ok.length };
+}
+
 export function buildReleaseSectionsBy(
   sources: readonly ReleaseSource[],
   pick: (list: readonly ReleaseTagged[]) => readonly ReleaseTagged[],
@@ -131,6 +138,9 @@ const RELEASE_SOURCES: Array<{
   },
 ];
 
+/** 加载期骨架的标签来源：与分区标签同源（骨架不显示条数，条数要等数据） */
+const RELEASE_LABELS: readonly string[] = RELEASE_SOURCES.map((s) => s.label);
+
 const CW_RELEASE_SOURCES: Array<{
   kind: ReleaseKind;
   label: string;
@@ -148,9 +158,15 @@ const CW_RELEASE_SOURCES: Array<{
   },
 ];
 
+const CW_RELEASE_LABELS: readonly string[] = CW_RELEASE_SOURCES.map((s) => s.label);
+
 export interface ReleaseShowcase {
   sections: Ref<ReleaseSection[]>;
   loaded: Ref<boolean>;
+  /** 失败的源个数（0 = 全部成功）。等于源总数时视图必须渲染错误态，不得回落空态 */
+  failedCount: Ref<number>;
+  /** 加载期骨架用的分区标签：与分区标签同源，不另写一份文案 */
+  labels: readonly string[];
   load(): Promise<void>;
 }
 
@@ -158,38 +174,50 @@ export function useReleaseShowcase(): ReleaseShowcase {
   const app = useAppStore();
   const sections = shallowRef<ReleaseSection[]>([]);
   const loaded = ref(false);
+  const failedCount = ref(0);
 
   async function load(): Promise<void> {
+    loaded.value = false;
+    failedCount.value = 0;
     await app.initVersion();
     const label = app.versionLabel;
     const ctx: CatalogContext = { version: app.version };
-    const sources: ReleaseSource[] = [];
-    for (const spec of RELEASE_SOURCES) {
-      try {
-        const [tagged, items] = await Promise.all([
-          spec.loadTagged(),
-          spec.page.fetchData ? spec.page.fetchData(ctx) : Promise.resolve<CatalogItem[]>([]),
-        ]);
-        sources.push({
-          kind: spec.kind, label: spec.label, tagged, items,
-          renderCard: spec.page.renderCard, leadMeta: spec.leadMeta,
-        });
-      } catch {
-      }
-    }
-    sections.value = buildReleaseSections(sources, label);
+    /* 三个源彼此独立 ⇒ 并发取（原先的 for + await 是 3 段串行往返，弱网下首屏空窗 = 3×RTT；
+       版本判定只依赖 version.json，与条目索引无关，故并发不影响判据）。 */
+    const sourced = await Promise.all(
+      RELEASE_SOURCES.map(async (spec): Promise<ReleaseSource | null> => {
+        try {
+          const [tagged, items] = await Promise.all([
+            spec.loadTagged(),
+            spec.page.fetchData ? spec.page.fetchData(ctx) : Promise.resolve<CatalogItem[]>([]),
+          ]);
+          return {
+            kind: spec.kind, label: spec.label, tagged, items,
+            renderCard: spec.page.renderCard, leadMeta: spec.leadMeta,
+          };
+        } catch {
+          return null;
+        }
+      }),
+    );
+    const { ok, failed } = splitSources(sourced);
+    failedCount.value = failed;
+    sections.value = buildReleaseSections(ok, label);
     loaded.value = true;
   }
 
-  return { sections, loaded, load };
+  return { sections, loaded, failedCount, labels: RELEASE_LABELS, load };
 }
 
 export function useCwReleaseShowcase(): ReleaseShowcase {
   const app = useAppStore();
   const sections = shallowRef<ReleaseSection[]>([]);
   const loaded = ref(false);
+  const failedCount = ref(0);
 
   async function load(): Promise<void> {
+    loaded.value = false;
+    failedCount.value = 0;
     await app.initVersion();
     const ctx: CatalogContext = { version: app.version };
 
@@ -214,12 +242,11 @@ export function useCwReleaseShowcase(): ReleaseShowcase {
         }
       }),
     );
-    sections.value = buildReleaseSectionsBy(
-      sourced.filter((s): s is ReleaseSource => s !== null),
-      pickSeasonNew,
-    );
+    const { ok, failed } = splitSources(sourced);
+    failedCount.value = failed;
+    sections.value = buildReleaseSectionsBy(ok, pickSeasonNew);
     loaded.value = true;
   }
 
-  return { sections, loaded, load };
+  return { sections, loaded, failedCount, labels: CW_RELEASE_LABELS, load };
 }

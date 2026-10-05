@@ -367,15 +367,19 @@
 
 #nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
-#nk-home-app h1, #nk-home-app h2, #nk-home-app p { margin: 0; padding: 0; }
+/* 此处曾有一条 `#nk-home-app h1, h2, p { margin: 0; padding: 0 }`：UA 默认边距已由
+   `tokens.css` 的 `:where(#app) h1…p` 统一清空，这条只是重复，**却带着 ID 特异度 (1,0,1)**
+   —— 它把区块内三条类选择器的间距全部压死（品牌带副标题 14px、页脚拉丁行 14px、
+   空态 `padding 22px 0 6px`，探针实测三者皆为 0）。删掉重复，别再写成 `#id 元素` 形态。 */
 
 .nk-hub-release { max-width: var(--nk-content-max); margin: 0 auto; padding: 32px 40px 72px var(--nk-content-offset); }
 .nk-hub-release__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
 .nk-hub-release__title { font-size: var(--nk-fs-7); font-weight: 800; letter-spacing: 0.04em; line-height: 1.25; color: var(--text-bright); white-space: nowrap; }
 .nk-hub-release__rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line-2), transparent); }
-.nk-hub-release__section + .nk-hub-release__section { margin-top: 22px; }
+.nk-hub-release__section + .nk-hub-release__section,
+.nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 22px; }
 .nk-hub-release__label { margin-bottom: 10px; font-size: var(--nk-fs-4); font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; color: var(--text2); }
-.nk-hub-release__label-count { margin-left: 8px; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.08em; color: color-mix(in srgb, var(--metric-val) 72%, transparent); vertical-align: 1px; font-variant-numeric: tabular-nums; }
+.nk-hub-release__label-count { margin-left: 6px; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.08em; color: color-mix(in srgb, var(--metric-val) 72%, transparent); vertical-align: 1px; font-variant-numeric: tabular-nums; }
 .nk-hub-release__band { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(210px, 17%, 300px); align-items: start; gap: 16px; padding: 8px 0 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
 /* 特写档：主卡列 + 其余条目列（**同宽**）+ 1fr 空气列。规格块跨后两列 ⇒ 它的顶线横跨整行右侧，
    成为这一行的骨架（旧形态是紧贴主卡的一小块重复信息：实测 1440 档卡片文字「真珠/★★★★★/冰/欢愉」
@@ -385,7 +389,12 @@
    一次 **144px 的布局位移**，且第二张卡在位移前后大小差 2.5 倍（1440 档实测列轨 `306│95.84│818` →
    `306│240│674`）。写死 306px 后两列同宽、盒宽与图片加载无关、也不再有位移。 */
 .nk-hub-release__band--feature { grid-auto-flow: row; grid-auto-columns: unset; grid-template-columns: minmax(0, 306px) minmax(0, 306px) minmax(0, 1fr); align-items: start; justify-content: start; overflow-x: hidden; }
-.nk-hub-release__section--feature:has(.nk-hub-release__cell:last-child:first-child) .nk-hub-release__band--feature { grid-template-columns: minmax(0, 420px); }
+/* 此处曾有一条「单条目档放宽为 `minmax(0, 420px)` 单列」的规则，选择器是
+   `.nk-hub-release__section--feature:has(.nk-hub-release__cell:last-child:first-child)`。
+   它自写下的那一轮起**从未命中过一次**：特写档的规格块 `<aside>` 与卡片同级，卡片永远不是 `:last-child`
+   （实测命中 0 个分区），而修好选择器也不可取——420px 档的卡高 = 420×4/3 = 560px，
+   1024×768 实测第一张卡底部 883px > 768px（306px 档 731px），会顶掉「第一分区首行卡片完整可见」。
+   判据留在这里，规则删除：留着它等于给下一次误读留一个假入口。 */
 .nk-hub-release__cell { min-width: 0; }
 .nk-hub-release__band--feature > .nk-hub-release__cell[data-pos='rest'] { grid-column: 2; }
 .nk-hub-release__cell + .nk-hub-release__cell { padding-top: 2px; }
@@ -398,6 +407,14 @@
   display: flex; flex-direction: row; align-items: center; justify-content: flex-start;
   gap: 28px; min-width: 0; align-self: end;
   border-top: 1px solid var(--line-2); padding-top: 14px;
+}
+/* 单条目档（无「其余条目」）：名字 + 入口成组靠右，这一行读作「条目 …… 值 / 动作」。
+   此前它们贴主卡右缘起排，而主卡自带的小名就在同一基线上（实测 1440 档光锥：卡名 y=1174、
+   规格名 y=1135，横向相距 310px）——同一屏里同一个名字并排出现两次，读起来是复读；
+   靠右后两者横向相距 ≥1 个行宽，名字同时成为这一行的落值（账册行线的右端）。
+   只作用于 ≥768：手机档已隐藏规格名（见 ≤767 块），左起的一个按钮没必要再甩到右边。 */
+@media (min-width: 768px) {
+  .nk-hub-release__section--feature:not(:has(.nk-hub-release__cell[data-pos='rest'])) .nk-hub-release__spec { justify-content: flex-end; }
 }
 /* 有第二个条目时，主卡右侧已被它占用 ⇒ 规格块退到第二行并横跨整行；
    它描述的是主卡，故从最左列起（否则顶线从「其余条目」下方开始，像在描述那一条）。 */
@@ -412,6 +429,14 @@
 .nk-hub-release__band::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--nk-radius-1); }
 .nk-hub-release__band .nk-relic-card { max-width: 240px; }
 .nk-hub-release__empty { padding: 22px 0 6px; font-size: var(--nk-fs-5); letter-spacing: 0.06em; color: var(--text2); }
+/* 加载期骨架：分区标签与卡片位按就绪态规格占位（桌面 306×408 = 单条目特写档的卡），
+   行距复用上面的分区间距声明。骨架不带 `.nk-hub-release__section`——那个类名是「数据已就绪」的判定依据，
+   骨架若带上它，就绪竞态（e2e 的 poll 等待）会被自己的占位骗过。 */
+.nk-hub-release__sk-band { padding: 8px 0 12px; }
+.nk-hub-release__sk-card { display: block; width: 306px; aspect-ratio: 3 / 4; border-radius: var(--nk-radius-card); }
+/* 部分索引未取到：好数据照常渲染，只用一行说明缺了什么（静默少一个分区会被读成「本版本没有」） */
+.nk-hub-release__notice { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; font-size: var(--nk-fs-4); letter-spacing: 0.02em; color: var(--text2); }
+.nk-hub-release__notice .nk-error-state__retry { margin-top: 0; }
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .nk-hub-release__section { animation: nk-section-in linear both; animation-timeline: view(); animation-range: entry 0% entry 42%; }
@@ -421,14 +446,16 @@
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-hub-release { padding: 28px 32px 56px var(--nk-content-offset); }
-  .nk-hub-release__section + .nk-hub-release__section { margin-top: 20px; }
+  .nk-hub-release__section + .nk-hub-release__section,
+  .nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 20px; }
 }
 @media (max-width: 767px) {
   .nk-hub-release { padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px)); }
   .nk-hub-release__head { gap: 12px; margin-bottom: 18px; }
   .nk-hub-release__title { font-size: var(--nk-fs-6); }
   .nk-hub-release__rule { display: none; }
-  .nk-hub-release__section + .nk-hub-release__section { margin-top: 18px; }
+  .nk-hub-release__section + .nk-hub-release__section,
+  .nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 18px; }
   .nk-hub-release__label { margin-bottom: 8px; font-size: var(--nk-fs-4); }
   .nk-hub-release__band { display: flex; align-items: flex-start; gap: 10px; scrollbar-width: none; }
   .nk-hub-release__band::-webkit-scrollbar { display: none; }
@@ -449,6 +476,9 @@
   .nk-hub-release__band .nk-relic-card { width: 104px; }
   .nk-hub-release__band .nk-cw-card { width: 132px; }
   .nk-hub-release__empty { padding: 18px 0 4px; }
+  /* 骨架卡宽跟目录同档的手机卡（190px），高度不必与三类卡族一一对齐：
+     骨架行不是跨帧持久的元素（它是被替换掉的节点），位移不计入 CLS。 */
+  .nk-hub-release__sk-card { width: 190px; }
 }
 
 @media (hover: none) {

@@ -33,6 +33,10 @@ test.describe('布局验收：常规主题', () => {
     // 上面两条等待只覆盖静态品牌带/标题；慢 runner 上首读可能是 0（就绪竞态，CI 实测首跑红、retry 绿），
     // 而真空态会让 poll 超时照样变红（空态形态由下一条用例单独锁定）。
     await expect.poll(() => page.locator('.nk-hub-release__section').count(), { timeout: 10_000 }).toBeGreaterThanOrEqual(1);
+    // 分区标题的条数不得与标签连写（"角色1" 会被读成一个词 / 一条文本）：必须是「标签 + 空白 + 数字」
+    const labelTexts = await page.locator('.nk-hub-release__label').allTextContents();
+    expect(labelTexts.length).toBeGreaterThanOrEqual(1);
+    for (const t of labelTexts) expect(t).toMatch(/^\S+\s+\d+$/);
     // 常规模式不得挂 cw 主题
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'cw');
     // L3 溢出
@@ -48,13 +52,23 @@ test.describe('布局验收：常规主题', () => {
     /* 判据（2026-10 修订）：特写块的规格列**只承担排版权重与显式动作**，不得复述卡上已有的文字。
        实测旧形态：卡内「真珠 / ★★★★★ / 冰 / 欢愉」与规格列「真珠 / 冰 / 欢愉」逐字重复，
        两处链接还同指详情页——同一屏里同一信息出现两遍是「没做完」的观感。允许重复的只有名字
-       （它是特写的排版权重），其余任何逐字重复都算回归。 */
+       （它是特写的排版权重），其余任何逐字重复都算回归。
+
+       判据（2026-11 追加，名字落位）：允许重复的名字也不能**并排同基线**——旧形态规格名贴主卡右缘起排，
+       与卡自带的小名横向只隔 310px（1440 档光锥实测 y=1135 ↔ 1174），读起来仍是复读。
+       单条目行（1 张卡）⇒ 名字是这一行的「值」，必须落到行的右半区；
+       多条目行（≥2 张卡）⇒ 规格块是主卡的注脚，仍须贴住主卡左缘（靠右会读成在描述右边那条）。 */
     const rows = await page.evaluate(() => {
       const leafTexts = (root: Element) =>
         [...root.querySelectorAll('*')]
           .filter((el) => el.children.length === 0)
           .map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim())
           .filter(Boolean);
+      const nameBox = (el: Element | null) => {
+        if (!el) return null;
+        const b = el.getBoundingClientRect();
+        return b.width ? { x: Math.round(b.x) } : null;
+      };
       return [...document.querySelectorAll('.nk-hub-release__section')].map((sec) => {
         const cell = sec.querySelector('.nk-hub-release__cell');
         const spec = sec.querySelector('.nk-hub-release__spec');
@@ -63,20 +77,30 @@ test.describe('布局验收：常规主题', () => {
         const specTexts = leafTexts(spec);
         const band = sec.querySelector('.nk-hub-release__band')!.getBoundingClientRect();
         const specBox = spec.getBoundingClientRect();
-        const cardLink = cell.querySelector('a')?.getAttribute('href') ?? null;
-        const specLink = spec.querySelector('a')?.getAttribute('href') ?? null;
+        const cells = [...sec.querySelectorAll('.nk-hub-release__cell')];
         return {
           kind: sec.getAttribute('data-kind'),
           duplicated: specTexts.filter((t) => card.includes(t)),
           shownName: spec.querySelector('.nk-hub-release__spec-name')?.textContent?.trim() ?? '',
           trailing: Math.round(band.right - specBox.right),
-          cardLink,
-          specLink,
+          cardLink: cell.querySelector('a')?.getAttribute('href') ?? null,
+          specLink: spec.querySelector('a')?.getAttribute('href') ?? null,
+          // 手机档规格名 `display: none`（卡内已有名）⇒ 该档不参与名字落位断言
+          vw: window.innerWidth,
+          single: cells.length === 1,
+          bandWidth: Math.round(band.width),
+          cardName: nameBox(cells[0].querySelector('.nk-idx-card__name, .nk-lc-card__name, .nk-relic-card__name')),
+          specName: nameBox(spec.querySelector('.nk-hub-release__spec-name')),
         };
       }).filter(Boolean);
     });
     expect(rows.length).toBeGreaterThanOrEqual(1);
-    for (const r of rows as Array<{ kind: string; duplicated: string[]; shownName: string; trailing: number; cardLink: string | null; specLink: string | null }>) {
+    type Row = {
+      kind: string; duplicated: string[]; shownName: string; trailing: number;
+      cardLink: string | null; specLink: string | null; vw: number; single: boolean;
+      bandWidth: number; cardName: { x: number } | null; specName: { x: number } | null;
+    };
+    for (const r of rows as Row[]) {
       expect(
         r.duplicated.filter((t) => t !== r.shownName),
         `${r.kind}：特写块复述了卡片内容——规格列只保留名字与入口`,
@@ -86,6 +110,19 @@ test.describe('布局验收：常规主题', () => {
       // 入口指向的必须是这张主卡条目
       expect(r.specLink, `${r.kind}：特写块入口缺失`).toBeTruthy();
       expect(r.specLink).toBe(r.cardLink);
+      if (r.vw < 768 || !r.cardName) continue;
+      if (r.single) {
+        expect(r.specName, `${r.kind}：单条目行的规格名缺失`).toBeTruthy();
+        expect(
+          r.specName!.x - r.cardName.x,
+          `${r.kind}：单条目行的名字与主卡自带名并排（实测横向相距 ${r.specName!.x - r.cardName.x}px）`,
+        ).toBeGreaterThanOrEqual(r.bandWidth / 2);
+      } else if (r.specName) {
+        expect(
+          Math.abs(r.specName.x - r.cardName.x),
+          `${r.kind}：多条目行的规格块应贴住主卡（实测偏移 ${r.specName.x - r.cardName.x}px）`,
+        ).toBeLessThanOrEqual(8);
+      }
     }
 
     await noUnknownOverflow(page);
@@ -118,6 +155,53 @@ test.describe('布局验收：常规主题', () => {
       expect(m.labelBottom, `第一分区 ${m.kind} 的标题应在首屏内`).toBeLessThanOrEqual(1080);
       expect(m.firstCardBottom, `第一分区 ${m.kind} 的首行卡片应在首屏内`).toBeLessThanOrEqual(1080);
     }
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  /* 三态（UI质量验收标准 A4.6）：加载期与「索引没取到」都不许冒充「本版本暂无新增条目」。
+     实测旧行为：加载期整块空白（无骨架）；三份索引全失败时显示空态文案——把一次网络故障写成了
+     一句事实陈述；只失败一份时该分区静默消失。加载期的骨架不带 `.nk-hub-release__section`，
+     因为那个类名同时是「数据已就绪」的判定依据（上面几条用例都靠它等就绪），骨架不能自己骗过它。 */
+  test('首页 /：加载期给分区骨架、索引全失败给错误态且可重试，都不冒充空态', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const INDEXES = '**/data/cn/*.json';
+    const isIndex = (url: string) => /(characters|light_cones|relics)\.json$/.test(url);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+
+    // ① 加载期：三份索引各延后 3s
+    await page.route(INDEXES, async (route) => {
+      if (isIndex(route.request().url())) await new Promise((resolve) => setTimeout(resolve, 3_000));
+      await route.continue();
+    });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.nk-hub-release__sk')).toBeVisible();
+    // 骨架行数 = 分区数（标签来自同一份源，与数据无关）
+    await expect(page.locator('.nk-hub-release__sk-row')).toHaveCount(3);
+    await expect(page.locator('.nk-hub-release__title')).toHaveText(/版本上新/);
+    await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
+    await expect(page.locator('.nk-hub-release__empty')).toHaveCount(0);
+    // 数据到位：骨架退场、真实分区上位
+    await expect.poll(() => page.locator('.nk-hub-release__section').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+    await expect(page.locator('.nk-hub-release__sk')).toHaveCount(0);
+    await page.unroute(INDEXES);
+
+    // ② 三份索引全失败：错误态 + 重试入口；空态必须缺席
+    await page.route(INDEXES, (route) =>
+      (isIndex(route.request().url()) ? route.abort() : route.continue()));
+    await page.goto('/');
+    await expect(page.locator('.nk-error-state')).toBeVisible();
+    await expect(page.locator('.nk-error-state__retry')).toBeVisible();
+    await expect(page.locator('.nk-hub-release__empty')).toHaveCount(0);
+    await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
+
+    // ③ 重试必须真能恢复（共享列表单例失败后重置槽位，故无需刷新页面）
+    await page.unroute(INDEXES);
+    await page.locator('.nk-error-state__retry').click();
+    await expect.poll(() => page.locator('.nk-hub-release__section').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+    await expect(page.locator('.nk-error-state')).toHaveCount(0);
+
     await noUnknownOverflow(page);
     assertNoErrors();
   });

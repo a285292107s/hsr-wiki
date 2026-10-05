@@ -6,12 +6,31 @@ import {
   buildReleaseSectionsBy,
   pickCurrentVersion,
   pickSeasonNew,
+  splitSources,
   type ReleaseSource,
   type ReleaseTagged,
 } from '../use-release-showcase';
 import type { CatalogItem } from '../../catalog/types';
 
 const tag = (id: number, release_version?: string): ReleaseTagged => ({ id, release_version });
+
+describe('splitSources（单源失败只丢该分区，但必须计数）', () => {
+  it('全部成功 → 保持顺序、失败数 0', () => {
+    expect(splitSources(['a', 'b', 'c'])).toEqual({ ok: ['a', 'b', 'c'], failed: 0 });
+  });
+
+  it('部分失败 → 保序丢弃 null，失败数 = null 个数（视图据此渲染「未取到」提示）', () => {
+    expect(splitSources(['a', null, 'c'])).toEqual({ ok: ['a', 'c'], failed: 1 });
+  });
+
+  it('全失败 → ok 为空且失败数 = 源总数（视图据此渲染错误态，而不是「本版本暂无新增」）', () => {
+    expect(splitSources([null, null, null])).toEqual({ ok: [], failed: 3 });
+  });
+
+  it('空数组（未来源被删空）→ 不把 0 个源误判成全失败', () => {
+    expect(splitSources([])).toEqual({ ok: [], failed: 0 });
+  });
+});
 
 describe('pickCurrentVersion', () => {
   it('只取 release_version 恰等于本版本的条目，保持入参顺序', () => {
