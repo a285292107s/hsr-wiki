@@ -22,6 +22,13 @@ import { waitForCatalogCards, waitForSettled } from './helpers';
  */
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa'];
 
+/* `target-size`（WCAG 2.2 AA / 2.5.8 目标尺寸）在 axe-core 里 `enabled: false`：
+   它挂在 wcag22aa 标签下，但默认不跑——只用 `withTags(WCAG_TAGS)` 时**这条从未被执行**，
+   「全仓口径声称 2.2 AA 目标尺寸」因此一直是未验证的声明。此处显式开启。
+   该规则实现的是 2.5.8 的**间距例外**（目标 <24px 时，以目标为中心的 24px 圆不与相邻目标相交即合格），
+   故它不会把行内文本链与间隔足够的 22px 小按钮判红；真被它抓到的是「成簇且都小于 24px」的控件。 */
+const AXE_OPTIONS = { rules: { 'target-size': { enabled: true } } } as const;
+
 interface KnownViolation {
   id: string;
   /** target 的 CSS 选择器指纹（axe node.target 数组 join 后的首段） */
@@ -45,6 +52,8 @@ const PAGES = [
   // 适配角色区块只在「该光锥有官方推荐记录」时渲染（20000 是空态）：另取一份带 chip 的样本单独扫
   { path: '/lightcone/24000', label: '光锥详情·适配角色', wait: () => (page: Page) => page.waitForSelector('.nk-lc-adapt__item', { timeout: 15_000 }) },
   { path: '/endgame', label: '终局内容', wait: () => waitForCatalogCards },
+  // 玩法详情页（第四种页面形态「单页数据页」）：等规则分节渲染即数据就绪
+  { path: '/endgame/maze', label: '玩法详情·忘却之庭', wait: () => (page: Page) => page.waitForSelector('.nk-egm__rule', { state: 'attached', timeout: 15_000 }) },
   // 终局详情（含污染等级区块，ADR 0026）：等层级子 tab 出现即数据就绪
   { path: '/endgame/boss/3021', label: '终局详情·含污染', wait: () => (page: Page) => page.waitForSelector('.nk-egd-tabs [role="tab"]', { state: 'attached', timeout: 15_000 }) },
   // 星启看板（ADR 0033）：节点子切换与首领特性整组单卡只在星启 tab 下渲染，先切 tab 再扫
@@ -66,7 +75,7 @@ for (const { path, label, wait } of PAGES) {
     if (wait) await wait()(page);
     // 等首屏稳定（骨架退场 + 字体就绪）后再扫，避免骨架屏阶段误报
     await waitForSettled(page);
-    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).options(AXE_OPTIONS).analyze();
     const violations = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
 
     const unknown = violations.filter((v) => {
@@ -119,4 +128,55 @@ test('a11y 扫描：角色详情 390×844（手机档底栏文字标签的对比
     violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, help: v.help })),
     '手机档 WCAG 2.2 AA：不得有 serious/critical 违规',
   ).toEqual([]);
+});
+
+/**
+ * `prefers-reduced-motion: reduce` 的降级验收。
+ *
+ * 判据：reduce 下**任何元素及其伪元素**的有效动画时长必须 ≤1ms、延迟为 0、迭代为 1
+ * （骨架 shimmer 挂在 `::after` 上，只查元素自身会漏掉）。
+ * 全局降级在 `tokens.css`：必须用 `#app *`（特异性 1,0,0）而非 `:where(#app) *`（0,0,0）——
+ * 组件自己的 `animation: … 0.4s` 简写是 (0,1,0)，零特异性规则盖不住它，实测曾有
+ * `.nk-lc-card` / `.nk-mob-card` / `.nk-panel` 三个族在 reduce 下照跑 0.3–0.4s；
+ * `animation-delay` 也必须归零（卡片入场 `backwards` + 最多 600ms 错峰 ⇒ 否则先透明后突现）。
+ */
+test.describe('prefers-reduced-motion：动画必须立即结束', () => {
+  const ROUTES = ['/', '/character', '/monster', '/voracity', '/currency/role/1001'] as const;
+
+  for (const route of ROUTES) {
+    test(`${route}：无仍在跑的动画`, async ({ page }) => {
+      // 用 `emulateMedia` 而不是 `test.use({ reducedMotion })`：后者在本仓配置下实测**不生效**
+      // （探针里 `matchMedia('(prefers-reduced-motion: reduce)').matches` 仍为 false）；
+      // `emulateMedia` 是 `layout-character-hero-motion.spec.ts` 已在用的可靠写法。
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(route);
+      await waitForSettled(page);
+      const running = await page.evaluate(() => {
+        const out: string[] = [];
+        const read = (el: Element, pseudo?: string) => {
+          const cs = getComputedStyle(el, pseudo);
+          const name = cs.animationName;
+          if (!name || name === 'none') return;
+          const dur = parseFloat(cs.animationDuration) || 0;
+          if (dur <= 0) return;
+          const delay = parseFloat(cs.animationDelay) || 0;
+          if (dur > 0.001 || delay > 0.001 || cs.animationIterationCount !== '1') {
+            const cls = (el.className || '').toString().split(' ').filter(Boolean).slice(0, 2).join('.');
+            out.push(`${cls || el.tagName.toLowerCase()}${pseudo ?? ''} ${name} ${dur}s/${cs.animationIterationCount}`);
+          }
+        };
+        for (const el of document.querySelectorAll('*')) {
+          const b = el.getBoundingClientRect();
+          if (b.width < 4 || b.height < 4) continue;
+          read(el);
+          for (const p of ['::before', '::after']) {
+            const cs = getComputedStyle(el, p);
+            if (cs.content && cs.content !== 'none' && cs.content !== 'normal') read(el, p);
+          }
+        }
+        return out;
+      });
+      expect(running, `${route}：reduce 下仍有动画在跑`).toEqual([]);
+    });
+  }
 });

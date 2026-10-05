@@ -61,3 +61,101 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     assertNoErrors();
   });
 });
+
+test.describe('布局验收：跨模式入口文案', () => {
+
+  test('可见标签 = 目的地模式名（常规↔货币战争双向），点击落到对方图签页', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const swap = page.locator('.ui-sidebar-swap');
+
+    // 常规模式页：按钮直接写目的地「货币战争」，旧标签「交换 / SWAP」退场
+    await page.goto('/character');
+    await expect(swap.locator('.ui-sidebar-link__cn')).toHaveText('货币战争');
+    await expect(swap.locator('.ui-sidebar-link__en')).toHaveText('CURRENCY WAR');
+    // 手机底栏显示的是 __label 那份，必须同文案（桌面档该元素 display:none，文本仍可比对）
+    await expect(swap.locator('.ui-sidebar-link__label')).toHaveText('货币战争');
+    await expect(swap).toHaveAttribute('aria-label', '前往货币战争');
+    await expect(swap).toHaveAttribute('title', '前往货币战争');
+    await expect(swap).not.toContainText('交换');
+
+    // 位置契约：入口属「工具」组（与设置同组、紧贴其前），不再是导航首项
+    await expect(page.locator('.ui-sidebar-tools').locator('.ui-sidebar-swap')).toHaveCount(1);
+    expect(await swap.evaluate((el) => el.nextElementSibling?.classList.contains('ui-sidebar-settings'))).toBe(true);
+    const vis = await page.evaluate(() => {
+      const s = document.querySelector('.ui-sidebar-swap')!.getBoundingClientRect();
+      const e = document.querySelector('.ui-sidebar-settings')!.getBoundingClientRect();
+      return { swapY: s.y, swapX: s.x, settingsY: e.y, settingsX: e.x };
+    });
+    // 视觉序：侧栏里在上（同列）或底栏里在左（同行），两种断点都成立
+    expect(vis.swapY <= vis.settingsY + 1 || vis.swapX < vis.settingsX).toBe(true);
+
+    // 点击 → 对方模式的图签页（ADR 0016 决策 1 的落点粒度不变）
+    await swap.click();
+    await expect(page).toHaveURL(/\/currency\/role$/);
+
+    // 货币战争页：反过来写「常规模式」
+    await expect(swap.locator('.ui-sidebar-link__cn')).toHaveText('常规模式');
+    await expect(swap.locator('.ui-sidebar-link__en')).toHaveText('NORMAL MODE');
+    await expect(swap.locator('.ui-sidebar-link__label')).toHaveText('常规模式');
+    await expect(swap).toHaveAttribute('aria-label', '前往常规模式');
+    await expect(swap).toHaveAttribute('title', '前往常规模式');
+
+    await swap.click();
+    await expect(page).toHaveURL(/\/character$/);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+});
+
+test.describe('布局验收：侧栏各项风格一致', () => {
+  test('侧栏文案落位一致：内容项（a）与工具项（button）的两行文案左缘必须对齐', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/character');
+    await expect(page.locator('.ui-sidebar-link').first()).toBeVisible();
+
+    /* 用户报的缺陷：侧栏「货币战争」看着居中、与别的 tab 不齐。
+       根因是**元素类型**而非类名——内容项是 `<RouterLink>`（`a`，UA 默认 `text-align: start`），
+       「交换」与「更多」是 `<button>`（UA 默认 `center`）；而 ≥1024 档 `.ui-sidebar-link__text`
+       是纵向 flex，两行文案被拉伸到同宽后由 `text-align` 决定落位 ⇒ 只有按钮项的两行居中。
+       判据不写绝对 px：① 各项 `text-align` 必须与首项相同；② **同一项内** CN 与 EN 两行文字的
+       ink 左缘必须一致（居中的话较短的 CN 行会右移）。 */
+    const rows = await page.evaluate(() => {
+      const inkLeft = (node: Element) => {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        return Math.round(range.getBoundingClientRect().left);
+      };
+      return [...document.querySelectorAll('.ui-sidebar-link')]
+        .filter((el) => getComputedStyle(el).display !== 'none')
+        .map((el) => {
+          const cn = el.querySelector('.ui-sidebar-link__cn');
+          const en = el.querySelector('.ui-sidebar-link__en');
+          const label = el.querySelector('.ui-sidebar-link__label');
+          const visible = (n: Element | null) => n && getComputedStyle(n).display !== 'none' && n.getBoundingClientRect().width > 0;
+          return {
+            name: (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 12),
+            tag: el.tagName.toLowerCase(),
+            textAlign: getComputedStyle(el).textAlign,
+            cnLeft: visible(cn) ? inkLeft(cn!) : null,
+            enLeft: visible(en) ? inkLeft(en!) : null,
+            labelLeft: visible(label) ? inkLeft(label!) : null,
+          };
+        });
+    });
+    expect(rows.length, '侧栏应有可见项').toBeGreaterThan(5);
+
+    const ref = rows[0];
+    expect(ref.textAlign, '基准项应为左对齐').toBe('start');
+    for (const r of rows) {
+      expect(r.textAlign, `${r.name}（${r.tag}）的 text-align 应与基准一致`).toBe(ref.textAlign);
+      if (r.cnLeft !== null && r.enLeft !== null) {
+        expect(Math.abs(r.cnLeft - r.enLeft), `${r.name}：CN 与 EN 两行左缘必须对齐（居中即不对齐）`).toBeLessThanOrEqual(1);
+      }
+      if (r.cnLeft !== null && r.labelLeft !== null) {
+        expect(Math.abs(r.cnLeft - r.labelLeft), `${r.name}：CN 与底栏标签左缘必须对齐`).toBeLessThanOrEqual(1);
+      }
+    }
+    assertNoErrors();
+  });
+});

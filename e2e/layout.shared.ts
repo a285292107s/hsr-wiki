@@ -31,7 +31,7 @@ export async function expectNoSkillsOverflow(page: import('@playwright/test').Pa
 
 /* ─── 侧栏与内容区避让（原「常规主题」块内，供导航折叠 / 枢纽页 / 页脚三块共用）─── */
 
-/** 收集侧栏导航锚点（排除 设置/交换/更多/调试台入口——仅统计 navItems 板块）；返回 DOM 序（= 规范序）下的可见性 */
+/** 收集侧栏导航锚点（排除 设置/跨模式入口/更多/调试台——仅统计 navItems 板块）；返回 DOM 序（= 规范序）下的可见性 */
 export async function collectNavAnchors(page: import('@playwright/test').Page) {
   return page.locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)').evaluateAll((els) =>
     els.map((el) => ({

@@ -59,10 +59,12 @@ test.describe('布局验收：货币战争主题', () => {
       Math.round(el.getBoundingClientRect().height),
     );
     expect(bandH).toBeLessThanOrEqual(240);
+    // 首屏契约（ADR 0019 决策 11 同步收窄）：标题 + 第一分区标题与首行卡片完整可见；
+    // 后续分区随滚动进入，不再钉进首屏。
+    await expect(page.locator('.nk-hub-release__title')).toBeVisible();
     await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
-    // 逐区测量：每个已渲染分区的标题与首行卡片都要落在首屏内（分区数由数据决定，不写死 2）
     const marks = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
-      els.map((el) => ({
+      els.slice(0, 1).map((el) => ({
         kind: el.getAttribute('data-kind'),
         labelBottom: Math.round(el.querySelector('.nk-hub-release__label')!.getBoundingClientRect().bottom),
         firstCardBottom: Math.round(el.querySelector('.nk-hub-release__band > *')!.getBoundingClientRect().bottom),
@@ -70,8 +72,8 @@ test.describe('布局验收：货币战争主题', () => {
     );
     expect(marks.length).toBeGreaterThanOrEqual(1);
     for (const m of marks) {
-      expect(m.labelBottom, `分区 ${m.kind} 的标题应在首屏内`).toBeLessThanOrEqual(1080);
-      expect(m.firstCardBottom, `分区 ${m.kind} 的首行卡片应在首屏内`).toBeLessThanOrEqual(1080);
+      expect(m.labelBottom, `第一分区 ${m.kind} 的标题应在首屏内`).toBeLessThanOrEqual(1080);
+      expect(m.firstCardBottom, `第一分区 ${m.kind} 的首行卡片应在首屏内`).toBeLessThanOrEqual(1080);
     }
     await noUnknownOverflow(page);
     assertNoErrors();
@@ -100,23 +102,27 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency/settings：CW 主题色选择（黑金语境、区块顺序固定、data-cw-accent 写入）', async ({ page }) => {
+  test('/currency/settings：单一主题色通道（货币战争不再有自己的色板）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/currency/settings');
-    // meta.cw → <html data-theme="cw">；缺省无 data-cw-accent（默认香槟金不挂属性）
+    // meta.cw → <html data-theme="cw">：仅作模式标记，不再重映射任何颜色（ADR 0041）
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'cw');
+    // 货币战争专属主题色区块与属性整体退场
+    await expect(page.locator('#cw-accent-title')).toHaveCount(0);
+    await expect(page.getByRole('listbox', { name: '货币战争主题强调色' })).toHaveCount(0);
     await expect(page.locator('html')).not.toHaveAttribute('data-cw-accent');
-    // CW 主题色区：5 个预置色板；区块顺序固定（01 常规模式主题色在 02 货币战争主题色上方）
-    const cwTitle = page.locator('#cw-accent-title');
-    const normalTitle = page.locator('#accent-title');
-    await expect(cwTitle).toBeVisible();
-    await expect(page.getByRole('listbox', { name: '货币战争主题强调色' }).locator('button')).toHaveCount(5);
-    const cwY = await cwTitle.evaluate((el) => el.getBoundingClientRect().top);
-    const normalY = await normalTitle.evaluate((el) => el.getBoundingClientRect().top);
-    expect(normalY).toBeLessThan(cwY);
-    // 选择玫瑰金 → <html data-cw-accent="rose">（tokens [data-theme="cw"][data-cw-accent] 规则生效）
-    await page.getByRole('button', { name: /玫瑰金/ }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-cw-accent', 'rose');
+    // 全站只剩一个主题色区块（5 个预置色板）
+    await expect(page.locator('#accent-title')).toBeVisible();
+    await expect(page.getByRole('listbox', { name: '主题强调色' }).locator('button')).toHaveCount(5);
+    // 换色走常规通道：同一套强调色在货币战争语境里也生效（页面主色随之改变）
+    const terracotta = await resolveTokenColor(page, '--primary', '.nk-settings');
+    await page.getByRole('button', { name: /暮山紫/ }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-accent', 'iris');
+    const iris = await resolveTokenColor(page, '--primary', '.nk-settings');
+    expect(iris).not.toBe(terracotta);
+    // 进货币战争页复核：主色 = 同一通道解析出的值（证明两模式共用一套配色）
+    await page.goto('/currency/role/1001');
+    expect(await resolveTokenColor(page, '--primary', '.nk-crole')).toBe(iris);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -148,14 +154,15 @@ test.describe('布局验收：货币战争主题', () => {
     });
     expect(portrait.w).toBe(portrait.h);
     expect(portrait.radius).toBe('0px');
-    // 星级分段控件激活态：亮金底 + 黑字（无渐变/无 glow 的方形控件，直角系）
+    // 星级分段控件激活态：主色底 + 族内亮端文字（单强调色通道后不再有「浅金底 + 深色字」的补偿，
+    // 与同页 `.nk-crole-slot.is-on` 的 --text-bright 口径一致；无渐变/无 glow 的方形控件，直角系）
     const pill = await page.locator('.nk-crole-gm-pill.is-active').first().evaluate((el) => {
       const cs = getComputedStyle(el);
       return { bg: cs.backgroundColor, color: cs.color, radius: cs.borderRadius };
     });
     // 颜色从令牌派生（消费层令牌 → 期望色），不再钉死 rgb 值
     expect(pill.bg).toBe(await resolveTokenColor(page, '--crole-seg-bg', '.nk-crole-gm-pill.is-active'));
-    expect(pill.color).toBe(await resolveTokenColor(page, '--blk-900'));
+    expect(pill.color).toBe(await resolveTokenColor(page, '--crole-seg-text', '.nk-crole-gm-pill.is-active'));
     // 直角系：同页方形控件（星级 pill / 技能星级按钮）圆角同档，且不得退化成胶囊
     const starRadius = await page.locator('.nk-crole-skill__star').first()
       .evaluate((el) => getComputedStyle(el).borderRadius);
@@ -181,7 +188,7 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(rankIcon).toHaveAttribute('src', /static\.nanoka\.cc\/assets\/hsr\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.webp/);
     await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /cdn\.jsdelivr\.net\/gh\/a285292107s\/StarRailTextures@main\/assets\/asbres\/ui\/ui3d\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.png/);
     // 无内容区块：1001 无专属光锥 → 面板常驻 + 空态提示
-    await expect(page.locator('[data-panel="cones"] .nk-crole-empty')).toHaveText('该角色没有专属光锥数据');
+    await expect(page.locator('[data-panel="cones"] .nk-slot-empty')).toHaveText('该角色没有专属光锥数据');
     await noUnknownOverflow(page);
     assertNoErrors();
   });

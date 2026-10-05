@@ -40,7 +40,59 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：1920×1080 首屏内完整可见品牌带 + 三分区标题与各自首行卡片（ADR 0019 核心验收）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：版本上新特写块不复述卡片内容，且行骨架横跨整行（无尾空）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/');
+    await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
+
+    /* 判据（2026-10 修订）：特写块的规格列**只承担排版权重与显式动作**，不得复述卡上已有的文字。
+       实测旧形态：卡内「真珠 / ★★★★★ / 冰 / 欢愉」与规格列「真珠 / 冰 / 欢愉」逐字重复，
+       两处链接还同指详情页——同一屏里同一信息出现两遍是「没做完」的观感。允许重复的只有名字
+       （它是特写的排版权重），其余任何逐字重复都算回归。 */
+    const rows = await page.evaluate(() => {
+      const leafTexts = (root: Element) =>
+        [...root.querySelectorAll('*')]
+          .filter((el) => el.children.length === 0)
+          .map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+      return [...document.querySelectorAll('.nk-hub-release__section')].map((sec) => {
+        const cell = sec.querySelector('.nk-hub-release__cell');
+        const spec = sec.querySelector('.nk-hub-release__spec');
+        if (!cell || !spec) return null;
+        const card = leafTexts(cell);
+        const specTexts = leafTexts(spec);
+        const band = sec.querySelector('.nk-hub-release__band')!.getBoundingClientRect();
+        const specBox = spec.getBoundingClientRect();
+        const cardLink = cell.querySelector('a')?.getAttribute('href') ?? null;
+        const specLink = spec.querySelector('a')?.getAttribute('href') ?? null;
+        return {
+          kind: sec.getAttribute('data-kind'),
+          duplicated: specTexts.filter((t) => card.includes(t)),
+          shownName: spec.querySelector('.nk-hub-release__spec-name')?.textContent?.trim() ?? '',
+          trailing: Math.round(band.right - specBox.right),
+          cardLink,
+          specLink,
+        };
+      }).filter(Boolean);
+    });
+    expect(rows.length).toBeGreaterThanOrEqual(1);
+    for (const r of rows as Array<{ kind: string; duplicated: string[]; shownName: string; trailing: number; cardLink: string | null; specLink: string | null }>) {
+      expect(
+        r.duplicated.filter((t) => t !== r.shownName),
+        `${r.kind}：特写块复述了卡片内容——规格列只保留名字与入口`,
+      ).toEqual([]);
+      // 行骨架（规格块的顶线）必须横跨到整行右缘：否则右下角是一片无来由的空档
+      expect(Math.abs(r.trailing), `${r.kind}：特写行尾部留空 ${r.trailing}px`).toBeLessThanOrEqual(2);
+      // 入口指向的必须是这张主卡条目
+      expect(r.specLink, `${r.kind}：特写块入口缺失`).toBeTruthy();
+      expect(r.specLink).toBe(r.cardLink);
+    }
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('首页 /：1920×1080 首屏内完整可见品牌带 + 版本上新标题与第一分区首行卡片（ADR 0019 核心验收）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto('/');
@@ -50,11 +102,12 @@ test.describe('布局验收：常规主题', () => {
       Math.round(el.getBoundingClientRect().height),
     );
     expect(bandH).toBeLessThanOrEqual(240);
-    // 逐区测量：每个已渲染分区的标题与首行卡片都要落在首屏内。分区数量由数据决定（无增量的分区不渲染），
-    // 故不写死 3——一旦某分区把后面的分区顶出首屏，本断言即红。
+    // 首屏契约（ADR 0019 决策 11 收窄）：品牌带 + 版本上新标题 + 第一分区标题与首行卡片完整可见。
+    // 后续分区随滚动进入（scroll-driven reveal 编排），不再钉进首屏——那会把上新卡压回仪表盘尺度。
+    await expect(page.locator('.nk-hub-release__title')).toBeVisible();
     await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
     const marks = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
-      els.map((el) => ({
+      els.slice(0, 1).map((el) => ({
         kind: el.getAttribute('data-kind'),
         labelBottom: Math.round(el.querySelector('.nk-hub-release__label')!.getBoundingClientRect().bottom),
         firstCardBottom: Math.round(el.querySelector('.nk-hub-release__band > *')!.getBoundingClientRect().bottom),
@@ -62,8 +115,8 @@ test.describe('布局验收：常规主题', () => {
     );
     expect(marks.length).toBeGreaterThanOrEqual(1);
     for (const m of marks) {
-      expect(m.labelBottom, `分区 ${m.kind} 的标题应在首屏内`).toBeLessThanOrEqual(1080);
-      expect(m.firstCardBottom, `分区 ${m.kind} 的首行卡片应在首屏内`).toBeLessThanOrEqual(1080);
+      expect(m.labelBottom, `第一分区 ${m.kind} 的标题应在首屏内`).toBeLessThanOrEqual(1080);
+      expect(m.firstCardBottom, `第一分区 ${m.kind} 的首行卡片应在首屏内`).toBeLessThanOrEqual(1080);
     }
     await noUnknownOverflow(page);
     assertNoErrors();

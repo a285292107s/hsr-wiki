@@ -37,12 +37,7 @@ export function collectConsoleIssues(page: Page): {
  * 纪律：禁止往这里堆条目以「修绿」——每条必须是已实测、已定性、且已裁决暂不修的真实缺陷，
  * 并在 note 里写清现象与修法归属。修掉后必须把条目删掉。
  */
-export const KNOWN_OVERFLOWS: { match: string; note: string }[] = [
-  {
-    match: 'nk-seg',
-    note: '「开拓者形态」分段控件（SettingsView.vue 的 .nk-seg 双列 grid；两选项 min-content 各约 182px）在手机宽（320 / 412 实测）下超出可用宽，被自身 overflow:hidden 裁掉第二列（412px 实测 right=467）。属真实排版缺陷；修法涉排版取舍 → 视觉改动须用户确认后再动产品 CSS',
-  },
-];
+export const KNOWN_OVERFLOWS: { match: string; note: string }[] = [];
 
 /**
  * 拆分溢出检测结果：`known` = 已登记项（打印告警），`unknown` = 新溢出（调用方断言为空）。
