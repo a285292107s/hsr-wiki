@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import EndgameSummons from './EndgameSummons.vue';
-import {
-  BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl,
-  elemRow, monCountLabel, monWaveGroups, monTitle, peakTagsHtml, targetHtml,
-} from './renders';
-import { cdnUri } from '../../services/cdn';
+import StageContent from './StageContent.vue';
+import { BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl, peakTagsHtml, targetHtml } from './renders';
 import { pollutionLabel } from './pollution';
 import type { PeakLevelInfo } from '../../services/types';
 
 /** 异相仲裁单关面板（由关卡子 tab 切换，一次只渲染一关）：关卡身份（关卡名）由激活的 tab 承担，
- *  面板头只留类别胶囊 + 污染等级徽标 + 敌方等级（该关独有、tab 上读不到的字段）。 */
+ *  面板头只留类别胶囊 + 污染等级徽标 + 敌方等级（该关独有、tab 上读不到的字段）；
+ *  推荐属性与敌方配置走共享件 `StageContent`（敌方一律敌方详情卡，与末日幻影层看板同口径）。 */
 defineProps<{
   level: PeakLevelInfo;
   /** 增益体系名（异相仲裁 = 裁决象限；来自 `endgame_guide.json`，空串则不渲染该标签） */
@@ -34,40 +31,9 @@ defineProps<{
 
     <div class="nk-egd-peak__body nk-egd-children">
 
-      <div class="nk-egd-floor__stage">
-        <div v-if="level.damage?.length" class="nk-egd-floor__row">
-          <span class="nk-egd-floor__label">推荐属性</span>
-          <span class="nk-egd-floor__elems" v-html="elemRow(level.damage)"></span>
-        </div>
-        <div v-if="level.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
-          <span class="nk-egd-floor__label">敌方配置</span>
-          <span v-if="monCountLabel(level.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(level.monsters) }}</span>
-          <span class="nk-egd-floor__monswrap">
-            <span v-for="(g, gi) in monWaveGroups(level.monsters)" :key="gi" class="nk-egd-floor__wave">
-              <span v-if="monWaveGroups(level.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
-              <span class="nk-egd-floor__mons">
-                <span v-for="m in g.items" :key="`${m.id}-${gi}`" class="nk-egd-floor__moncell">
-                  <router-link
-                    class="nk-egd-floor__monlink"
-                    :to="`/monster/${m.tpl || m.id}`"
-                    :title="monTitle(m)"
-                    :aria-label="`查看 ${m.name} 详情`"
-                  >
-                    <img
-                      class="nk-egd-floor__mon"
-                      :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                      :alt="m.name"
-                      loading="lazy"
-                      @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
-                    >
-                  </router-link>
-                  <EndgameSummons :items="m.summons || []" />
-                </span>
-              </span>
-            </span>
-          </span>
-        </div>
-      </div>
+      <!-- 推荐属性 / 敌方配置走共享件（敌方详情卡，与末日幻影层看板同一渲染口径）：
+           异相仲裁没有卡片行，故推荐属性与「N 波 · M 敌」摘要由调用方显式传入 -->
+      <StageContent :stage="level" :damage="level.damage" show-count />
 
       <div v-if="level.tags?.length" class="nk-egd-floor__tagsrow">
         <span class="nk-egd-floor__label">机制</span>
@@ -104,34 +70,7 @@ defineProps<{
             </span>
           </span>
         </div>
-        <div v-if="level.hard.monsters?.length" class="nk-egd-floor__row nk-egd-floor__row--mons">
-          <span class="nk-egd-floor__label">敌方配置</span>
-          <span v-if="monCountLabel(level.hard.monsters)" class="nk-egd-floor__moncount">{{ monCountLabel(level.hard.monsters) }}</span>
-          <span class="nk-egd-floor__monswrap">
-            <span v-for="(g, gi) in monWaveGroups(level.hard.monsters)" :key="gi" class="nk-egd-floor__wave">
-              <span v-if="monWaveGroups(level.hard.monsters).length > 1" class="nk-egd-floor__wavelabel">第 {{ g.wave }} 波</span>
-              <span class="nk-egd-floor__mons">
-                <span v-for="m in g.items" :key="`${m.id}-${gi}`" class="nk-egd-floor__moncell">
-                  <router-link
-                    class="nk-egd-floor__monlink"
-                    :to="`/monster/${m.tpl || m.id}`"
-                    :title="monTitle(m)"
-                    :aria-label="`查看 ${m.name} 详情`"
-                  >
-                    <img
-                      class="nk-egd-floor__mon"
-                      :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
-                      :alt="m.name"
-                      loading="lazy"
-                      @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
-                    >
-                  </router-link>
-                  <EndgameSummons :items="m.summons || []" />
-                </span>
-              </span>
-            </span>
-          </span>
-        </div>
+        <StageContent :stage="level.hard" show-count />
         <div v-if="level.hard.tags?.length" class="nk-egd-floor__tagsrow">
           <span class="nk-egd-floor__label">机制</span>
           <span class="nk-egd-floor__tags" v-html="peakTagsHtml(level.hard.tags)"></span>

@@ -50,12 +50,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .nk-egd-buff, .nk-egd-floor { animation: none; }
-  .nk-egd-floor__mon:hover { transform: none; }
   .nk-egd-mon__figlink:hover .nk-egd-mon__img { transform: none; }
 }
 
 @media (hover: none) {
-  .nk-egd-floor__head:hover { background: transparent; }
   .nk-egd-buff:hover,
   .nk-egd-nav__item:hover,
   .nk-egd-floor__buff:hover {
@@ -64,7 +62,9 @@
   }
   .nk-egd-mon:hover { border-color: var(--line-1); background: color-mix(in srgb, var(--blk-900) 30%, transparent); }
   .nk-egd-mon__figlink:hover .nk-egd-mon__img { transform: none; }
-  .nk-egd-floor__mon:hover { transform: none; }
+  /* 图鉴介绍的展开途径只有 hover（桌面 3 行截断 → 悬停展开）；触摸端没有 hover，
+     留在截断态等于永久读不全 ⇒ 触摸端整段放开。 */
+  .nk-egd-mon__intro { display: block; -webkit-line-clamp: unset; overflow: visible; }
 }
 
 /* ─── 父子层级刻度（ADR 0028）：档位按 DOM 嵌套深度落位，子块几何在此单点声明 ─── */
