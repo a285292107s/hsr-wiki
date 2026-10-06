@@ -1,8 +1,11 @@
 
 .nk-eg-grid { --nk-grid-min: 410px; --nk-grid-gap: 14px; }
-.nk-eg-grid:has(> .nk-eg-col) { --nk-grid-min: 0px; display: grid; grid-template-columns: 1fr; gap: 22px; }
-@media (min-width: 768px) { .nk-eg-grid:has(> .nk-eg-col) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1024px) { .nk-eg-grid:has(> .nk-eg-col) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* 分模式列：列下限 = 一行卡片完整内容宽（行头开销 62 = 内距 16 + 图标 34 + 间距 10 + 边框 2，
+   状态·日期行 186 = 状态 40 + 间距 9 + 「YYYY.MM.DD – YYYY.MM.DD」137，IBM Plex Mono 实测 ≈ 248），
+   取 256 留字体回退余量；列数交给 auto-fit 按可用宽度落档（4 / 3 / 2 / 1），
+   不再按固定 2 / 4 列硬切——1024 宽下四列只剩 197px，日期行溢出到相邻列（实测最右越界 42px）。
+   auto-fit 而非 auto-fill：不足的末行不留空轨，宽屏下四列仍铺满整行。 */
+.nk-eg-grid:has(> .nk-eg-col) { --nk-grid-min: 256px; display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--nk-grid-min), 1fr)); gap: 22px; }
 .nk-eg-col {
   min-width: 0;
   border: 1px solid var(--line-1);
@@ -49,9 +52,10 @@
 .nk-eg-lrow__meta { display: flex; align-items: center; gap: 9px; min-width: 0; }
 .nk-eg-lrow__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; color: var(--st-color); }
 .nk-eg-lrow__dot { width: 4px; height: 4px; border-radius: 50%; background: var(--st-color); flex-shrink: 0; }
-/* 赛季含污染关卡（ADR 0026）：等级细节走详情页，列表只给存在性标记；色值走污染族（ADR 0027），不吃模式色 */
+/* 赛季含污染关卡（ADR 0026）：等级细节走详情页，列表只给存在性标记；色值走污染族（ADR 0027），不吃模式色。
+   徽标挂在赛季名行内（名称靠 overflow:hidden 取得自动最小尺寸 0，可被压缩，故徽标既不会被挤出也不溢出） */
 .nk-eg-lrow__poll { flex-shrink: 0; padding: 1.5px 7px; border: 1px solid color-mix(in srgb, var(--vor-500) 45%, transparent); border-radius: 4px; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; color: var(--vor-300); background: color-mix(in srgb, var(--vor-500) 9%, transparent); }
-.nk-eg-lrow__date { flex-shrink: 0; min-width: 0; font-family: var(--font-hud); font-size: 0.58rem; letter-spacing: 0.04em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.nk-eg-lrow__date { flex: 0 1 auto; min-width: 0; font-family: var(--font-hud); font-size: 0.58rem; letter-spacing: 0.04em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .nk-eg-lrow--live { --st-color: var(--season-live); }
 .nk-eg-lrow--ended { --st-color: var(--season-ended); }
 .nk-eg-lrow--upcoming { --st-color: var(--season-upcoming); }

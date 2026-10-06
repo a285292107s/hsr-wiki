@@ -42,7 +42,7 @@ def _season_catalog(entry: dict) -> dict:
     剥离 floor_details / floor_damage / sub_buffs / targets / clear_score / badges /
     完整 buff 描述 / 敌方重型字段 / 星启与仲裁重字段 / arts（目录卡图标已走玩法级默认图）；
     仅保留目录卡渲染与筛选所需（模式/状态筛选读 top-level 字段）。
-    pollution 为赛季级轻量汇总（{count, levels}），目录卡「含污染」标记由它判定；
+    pollution 为赛季级轻量汇总（{count, levels}），目录卡「贪饕污染」标记由它判定；
     逐关详情仍在全量文件里，不复制进轻量条目。
     """
     out: dict = {

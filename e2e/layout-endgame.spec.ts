@@ -883,12 +883,20 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
-  test('/endgame：含污染赛季卡片带标记，无污染赛季不带', async ({ page }) => {
+  test('/endgame：贪饕污染赛季卡片带标记（挂赛季名后），无污染赛季不带', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame');
     await waitForCatalogCards(page);
     const polluted = pollutedSeasonHrefs();
     expect(polluted.length, '目录数据里应有已登记的污染赛季').toBeGreaterThan(0);
+    const badges = await page.locator('.nk-eg-lrow__poll').evaluateAll((els) => els.map((el) => ({
+      text: el.textContent?.trim() || '',
+      // 位置契约：与赛季名同一行且紧跟其后，不在状态/日期行里
+      afterName: el.previousElementSibling?.classList.contains('nk-eg-lrow__name') ?? false,
+      inMeta: el.closest('.nk-eg-lrow__meta') !== null,
+    })));
+    expect(badges.length, '渲染窗口内应有带标记的赛季（取样为空 = 位置契约没被验到）').toBeGreaterThan(0);
+    for (const b of badges) expect(b).toEqual({ text: '贪饕污染', afterName: true, inMeta: false });
     const marks = await page.locator('.nk-eg-lrow__poll').evaluateAll((els) =>
       els.map((el) => (el.closest('a')?.getAttribute('href') || '')),
     );
@@ -900,6 +908,44 @@ test.describe('布局验收：终局合并单页', () => {
     expect(expectedMarks.length, '当前渲染窗口内应至少有一个污染赛季（管线静默失效会红）').toBeGreaterThan(0);
     expect(marks.slice().sort()).toEqual(expectedMarks.slice().sort());
     await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame：分模式列不窄于 --nk-grid-min（日期整串不被截断也不越到相邻列）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    /* 列数是 auto-fit 按可用宽度落档的结果（1920 → 4 列、1280 → 4 列、1024 → 3 列、768 → 2 列），
+       断言的是**每列都不窄于下限**这件不变量：列数与下限都由 CSS 给出，测试不钉列数（断点改档不该红）。 */
+    for (const width of [768, 1024, 1280, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/endgame');
+      await waitForCatalogCards(page);
+      const min = await readTokenPx(page, '--nk-grid-min', '.nk-eg-grid');
+      expect(min, '下限必须是正数（列数落档全靠它）').toBeGreaterThan(0);
+      const colWidths = await page.locator('.nk-eg-col').evaluateAll((els) =>
+        els.map((el) => Math.round(el.getBoundingClientRect().width)),
+      );
+      expect(colWidths.length, `视口 ${width}：四个模式列都应在`).toBe(4);
+      for (const w of colWidths) expect(w, `视口 ${width}：列宽 ${w} < 下限 ${min}`).toBeGreaterThanOrEqual(min - 0.5);
+
+      /* 日期是行内最长的不可换行串（「YYYY.MM.DD – YYYY.MM.DD」）：列不够宽时旧实现会
+         ① 截断成省略号（scrollWidth > clientWidth）或 ② 整串越出列框压到相邻列上（flex-shrink: 0）。 */
+      const clipped = await page.locator('.nk-eg-lrow').evaluateAll((els) =>
+        els
+          .filter((el) => {
+            const meta = el.querySelector('.nk-eg-lrow__meta');
+            const date = el.querySelector('.nk-eg-lrow__date');
+            if (!meta || !date) return false;
+            if (date.scrollWidth > date.clientWidth + 1) return true;
+            if (meta.scrollWidth > meta.clientWidth + 1) return true;
+            const col = date.closest('.nk-eg-col');
+            return !!col && date.getBoundingClientRect().right > col.getBoundingClientRect().right + 0.5;
+          })
+          .map((el) => el.getAttribute('href') || '')
+          .slice(0, 3),
+      );
+      expect(clipped, `视口 ${width}：这些行的日期被截断或越出列框`).toEqual([]);
+      await noUnknownOverflow(page);
+    }
     assertNoErrors();
   });
 

@@ -59,6 +59,21 @@ describe('renderCard', () => {
     expect(html).not.toContain('nk-eg-card__tier');
   });
 
+  it('endgame renderCard 把「贪饕污染」徽标挂在赛季名之后（不进状态/日期行）', () => {
+    const egPage = CATALOG_PAGES.endgame;
+    const base = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: '进行中', dateRange: '2023.01.01 – 01.15' };
+    const html = egPage.renderCard({ ...base, pollution: { count: 2, levels: [1, 2] } }, 0);
+    expect(html).toContain('贪饕污染');
+    expect(html).not.toContain('含污染');
+    // 徽标紧贴赛季名（同一 head 行内），且整段位于 __meta（状态 + 日期）之前
+    expect(html).toContain('<span class="nk-eg-lrow__name">琥珀恩赐</span><span class="nk-eg-lrow__poll"');
+    expect(html.indexOf('nk-eg-lrow__poll')).toBeLessThan(html.indexOf('nk-eg-lrow__meta'));
+    // 无污染不落徽标，日期行照旧
+    const plain = egPage.renderCard(base, 0);
+    expect(plain).not.toContain('nk-eg-lrow__poll');
+    expect(plain).toContain('2023.01.01 – 01.15');
+  });
+
   it('endgame renderColumns 按玩法分列（每列一玩法，列头含徽记/名称/英文/数量，列内次序保持）', () => {
     const egPage = CATALOG_PAGES.endgame;
     const items = [

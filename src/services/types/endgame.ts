@@ -386,7 +386,7 @@ export interface MazeCatalogEntry {
   tierce?: Pick<MazeTierceInfo, 'id' | 'damage_types' | 'countdown'>;
   /** 异相仲裁：目录卡仅需关卡组成 kind 计数（骑士×N · 王棋） */
   levels?: { kind: 'knight' | 'king' }[];
-  /** 赛季级污染汇总（目录卡「含污染」标记判据） */
+  /** 赛季级污染汇总（目录卡「贪饕污染」标记判据） */
   pollution?: PollutionSummary;
 }
 

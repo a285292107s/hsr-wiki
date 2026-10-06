@@ -192,7 +192,7 @@ export const endgamePage: CatalogPageConfig = {
           finalMonsters: info.final_monsters || [],
           tierce: info.tierce,
           levels: info.levels,
-          /** 赛季级污染汇总（ADR 0026）：卡片「含污染」标记的唯一判据 */
+          /** 赛季级污染汇总（ADR 0026）：卡片「贪饕污染」标记的唯一判据 */
           pollution: info.pollution,
         });
       }
@@ -216,17 +216,18 @@ export const endgamePage: CatalogPageConfig = {
     const idStr = String(item.id || '');
     const pollInfo = item.pollution as { count?: number; levels?: number[] } | undefined;
     const pollLevels = (pollInfo?.levels || []).join(' / ');
+    // 徽标挂赛季名之后（不随状态/日期行——被日期夹住会被读成排期信息）
     const poll = pollInfo?.count
-      ? `<span class="nk-eg-lrow__poll" title="${escHtml(`本季 ${pollInfo.count} 处污染关卡 · 等级 ${pollLevels}`)}">含污染</span>`
+      ? `<span class="nk-eg-lrow__poll" title="${escHtml(`本季 ${pollInfo.count} 处污染关卡 · 等级 ${pollLevels}`)}">贪饕污染</span>`
       : '';
-    const meta = (badge || date || poll) ? `<span class="nk-eg-lrow__meta">${badge}${poll}${date}</span>` : '';
+    const meta = (badge || date) ? `<span class="nk-eg-lrow__meta">${badge}${date}</span>` : '';
     const iconSrc = modeDefaultArtUrl(String(item.mode || ''));
     const iconHtml = iconSrc
       ? `<span class="nk-eg-lrow__fig"><img class="nk-eg-lrow__icon" src="${escHtml(iconSrc)}" alt="" loading="lazy"></span>` : '';
     return `<a class="nk-eg-lrow nk-eg-lrow--${stCls}" href="${escHtml(String(item.href || ''))}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(name)} ${escHtml(idStr)}" data-status="${escHtml(st)}" style="--i:${i}">
       ${iconHtml}
       <span class="nk-eg-lrow__main">
-        <span class="nk-eg-lrow__head">${noHtml}<span class="nk-eg-lrow__name">${escHtml(name)}</span></span>
+        <span class="nk-eg-lrow__head">${noHtml}<span class="nk-eg-lrow__name">${escHtml(name)}</span>${poll}</span>
         ${meta}
       </span>
     </a>`;
