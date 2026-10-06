@@ -8,7 +8,7 @@ import {
 import type { MonsterLevelCurve } from '../../lib/monster-stats';
 import { monsterMaxLevel, monsterStanceValue, monsterStatAt } from '../../lib/monster-stats';
 import { fmtStatValue } from '../../lib/format';
-import { atlasFormsOf, monsterFamilyKey, monsterFamilyOf, monsterIconStem } from '../../lib/monster-family';
+import { atlasFormsOf, monsterFamilyKey, monsterFamilyOf } from '../../lib/monster-family';
 import { loadLocalMonsterDetail, loadLocalMonsterLevelCurve, loadLocalMonsterList } from '../../services/api';
 import type { LocalMonsterEntry, MonsterDetail, MonsterExtraEffect, MonsterPhase, MonsterSkillDetail } from '../../services/types';
 import { usePageData } from '../composables/use-page-data';
@@ -132,8 +132,6 @@ const familyDetails = ref<Record<string, MonsterDetail>>({});
    与上方「同族变体」互补：这里只列**不属于同一张卡**的其他形态，避免同一批卡被列两遍。 */
 const atlasSelf = ref<LocalMonsterEntry | null>(null);
 const atlasRows = ref<LocalMonsterEntry[]>([]);
-/** 目录列表（同族判据与「共用美术」都要用；`loadFamily` 里一次性落盘） */
-const listRows = ref<LocalMonsterEntry[]>([]);
 
 async function loadFamily(): Promise<void> {
   const id = String(route.params.id);
@@ -147,7 +145,6 @@ async function loadFamily(): Promise<void> {
     list = await loadLocalMonsterList();
     const self = list.find((m) => String(m.id) === id);
     if (!self) return; // 实例变体页（长号 ID）不在目录内，快照也不生成，无同族条
-    listRows.value = list;
     members = monsterFamilyOf(list, self);
     atlasSelf.value = self;
     atlasRows.value = atlasFormsOf(list, self);
@@ -196,16 +193,12 @@ const atlasOthers = computed(() => {
   return atlasRows.value.filter((r) => monsterFamilyKey(r) !== key);
 });
 
-/** 与本形态**共用同一套美术**的其他怪物名（卡面图标 stem 相同但名字不同）。
- *  用途：活动常直接复用别的怪物的模型/立绘（实测「托帕幻象」用可可利亚那套），
- *  不写出来读者只能看到"名字与立绘对不上"；判据纯数据（图标 stem 共享）。 */
-const artSharedWith = computed(() => {
-  const self = atlasSelf.value;
-  if (!self) return [];
-  const stem = monsterIconStem(self.icon);
-  return [...new Set(listRows.value
-    .filter((r) => monsterIconStem(r.icon) === stem && r.name !== self.name)
-    .map((r) => r.name))];
+/** 活动出处里那个「等级」区间的文案：**单档时只写一个数**（源数据里确有 5 个活动敌人
+ *  全档同等级，写「85–85」是假区间）。 */
+const eventLevelText = computed(() => {
+  const levels = d.value?.event?.levels ?? [];
+  if (!levels.length) return '';
+  return levels.length > 1 ? `${levels[0]}–${levels[levels.length - 1]}` : String(levels[0]);
 });
 
 function elemTag(elem: string): string {
@@ -546,29 +539,37 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
               <span class="nk-mob-sec__en">ENCOUNTERS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
-            <!-- 口径与空态都显式：统计只覆盖「关卡波次 + 召唤链」。实测 88/632 个模板在该口径下
-                 无记录，而其中 18 个只在无限波次玩法的**随机编组池**里出现（`StageInfiniteMonsterGroup`
-                 1714 个编组 / 84,242 次引用）——那是随机池不是关卡，逐模板最多 9511 个编组，
-                 与「关卡数」不同量纲，混进同一个数字必然误导，故只写口径、不并数。 -->
-            <p v-if="appearances" class="nk-mob-appear__count">
-              共出现在 <strong>{{ appearances.total }}</strong> 个关卡，含被召唤出场的关卡。
-            </p>
-            <p v-else class="nk-mob-appear__count nk-mob-appear__count--none">暂无关卡出场记录。</p>
-            <p class="nk-mob-appear__note">口径：关卡波次（StageConfig）+ 召唤链；不含无限波次玩法的随机编组池。</p>
-            <div v-if="appearances?.samples.length" class="nk-mob-appear__samples">
-              <span v-for="s in appearances.samples" :key="s.id" class="nk-mob-appear__sample">{{ s.name }}</span>
-            </div>
-            <!-- 活动出处备注（ADR 无需：纯展示）。判据与文本来源见 monster_extra.load_event_sources：
-                 活动名/页签名都是源文本，不是本文案自撰；「共用美术」由图标 stem 共享推导。 -->
-            <div v-if="d.event" class="nk-mob-event">
-              <p class="nk-mob-event__k">备注</p>
-              <p class="nk-mob-event__line">
-                活动出处：「{{ d.event.name }}」活动关卡（{{ d.event.count }} 个，等级
-                {{ d.event.levels[0] }}–{{ d.event.levels[d.event.levels.length - 1] }}<template v-if="d.event.tabs.length">；活动页签：{{ d.event.tabs.join(' / ') }}</template>）。
+            <!-- 三行结构：计数（大数）→ 样本（活动名弱化 + 关卡名）→ 一句人话说明；技术口径收进折叠块。
+                 空态与「有计数无样本」都显式：源数据里没有关卡名的关卡只计数、不以敌人名替代（ADR 0047）。 -->
+            <template v-if="appearances">
+              <p class="nk-mob-appear__count">
+                出现在 <strong>{{ appearances.total }}</strong> 个关卡<template v-if="appearances.samples.length">，以下为其中几处：</template><template v-else>。</template>
               </p>
-              <p v-if="artSharedWith.length" class="nk-mob-event__line">
-                官方在该活动中直接复用「{{ artSharedWith[0] }}」的模型、立绘与技能组
-                （同卡面的 {{ artSharedWith.length + 1 }} 个形态共用这一套），本形态没有独立美术资源。
+              <ul v-if="appearances.samples.length" class="nk-mob-appear__samples">
+                <li v-for="s in appearances.samples" :key="s.id" class="nk-mob-appear__sample"><template v-if="s.activity"><span class="nk-mob-appear__sample-from">{{ s.activity }}</span> · </template>{{ s.name }}</li>
+              </ul>
+              <p class="nk-mob-appear__tip">
+                <template v-if="appearances.samples.length">关卡名取自游戏内（活动关卡 / 终局层级 / 侵蚀隧洞 · 凝滞虚影 / 强敌挑战 · 剑试），至多列 3 处。</template>
+                <template v-else>这些关卡在游戏内没有关卡名，只计入上面的数量。</template>
+              </p>
+            </template>
+            <p v-else class="nk-mob-appear__count nk-mob-appear__count--none">暂无关卡出场记录。</p>
+            <details class="nk-mob-appear__how">
+              <summary>统计口径</summary>
+              <p>按关卡波次统计，被其他敌人召唤出场的关卡也算；同一个关卡只算一次，一个关卡名可能覆盖多个难度档或上下半场。无限波次玩法里随机抽取的编组不算关卡，不计入。</p>
+            </details>
+            <!-- 活动出处（判据见 ADR 0048）：活动名/页签名是源文本；「美术复用」按转换器给的
+                 `art_shared`（同卡面图标 + 立绘是否相同两个维度）表述，**不写站点证不了的「技能组复用」**。 -->
+            <div v-if="d.event" class="nk-mob-event">
+              <p class="nk-mob-event__k">活动出处</p>
+              <p class="nk-mob-event__line">
+                <template v-if="d.event.count !== (appearances?.total ?? -1)">其中 {{ d.event.count }} 个在「{{ d.event.name }}」活动里，</template>
+                <template v-else>全部关卡都在「{{ d.event.name }}」活动里，</template>
+                等级 {{ eventLevelText }}<template v-if="d.event.tabs.length">；页签：{{ d.event.tabs.join(' / ') }}</template>。
+              </p>
+              <p v-if="d.art_shared" class="nk-mob-event__line">
+                <template v-if="d.art_shared.figure">本形态没有独立美术：卡面与立绘与「{{ d.art_shared.name }}」共用（同卡面共 {{ d.art_shared.forms }} 个形态）。</template>
+                <template v-else>本形态与「{{ d.art_shared.name }}」等 {{ d.art_shared.forms }} 个形态同卡面图标，立绘不同。</template>
               </p>
             </div>
           </section>
@@ -587,6 +588,13 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 </header>
                 <div v-if="skillMeta(s)" class="nk-mob-skill__meta" v-html="skillMeta(s)"></div>
                 <div v-if="skillHtml(s)" class="nk-mob-skill__desc" v-html="skillHtml(s)"></div>
+                <!-- 原始参数（ParamList 数组原值）：描述引用与否都展示——#N 已展开的技能重复一次
+                     供对照，缺行比重复更困惑（描述常只写「大概率」不说值）；值间「 / 」分隔，
+                     防止 1 与 1 连读成 11。官方 ParamList 是无标注数组，不声称任何语义含义。 -->
+                <div v-if="s.param_list?.length" class="nk-mob-skill__params">
+                  <span class="nk-mob-skill__paramsk">参数</span>
+                  <span class="nk-mob-skill__paramsvals">{{ s.param_list.map((p) => fmtStatValue(p)).join(' / ') }}</span>
+                </div>
                 <!-- 附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键）：技能另外施加的机制，
                      名称 + 描述都是数据文本；图标在两侧 CDN 全 404，故不落图标 -->
                 <div v-if="s.extra_effects?.length" class="nk-mob-skill__fx">

@@ -13,6 +13,10 @@
 （StageConfig 波次 + 召唤链，关卡数与样本）/ `phases`（MonsterAtlasExtraPhase(s)，按
 TemplateGroupID 归属）。三者与 `invaded` 一样**按模板归属**写入——实例别名页与模板页同值。
 
+另按模板写入 `art_shared`（同卡面图标但名字不同的其他形态，含立绘是否相同与形态数；判据见
+`_art_shared`）——活动出处备注要用它，且**判据必须在数据层**（视图只拿得到自己的立绘，
+比不了同伴的）。
+
 输出在传统字段基础上追加 `stat_ratio`（维度修饰比）与 `level_group`（难度组号），
 战斗数值在**前端**合成：stat = stats × stat_ratio × curve[level_group][level]（ADR 0040）。
 
@@ -26,6 +30,7 @@ import logging
 from config import OUTPUT_DIR
 from utils import save_json
 from converters.monster_common import load_level_curve, load_monsters
+from converters.monsters import catalog_rows
 from converters.monster_extra import (
     load_appearances, load_drops, load_event_sources, load_phases, load_skill_extra_effects,
     load_statuses,
@@ -35,6 +40,44 @@ from converters.voracity import load_invasion_map
 logger = logging.getLogger("converter")
 
 
+def _art_shared(monsters: dict, rows: list[dict]) -> dict[int, dict]:
+    """同卡面图标（`icon` 同一份资源）但**名字不同**的其他形态 → `{模板ID: {id, name, figure, forms}}`。
+
+    `figure` = 被点名那个同伴的**立绘**是否与本形态相同 —— 同卡面**不等于**共用立绘（实测 42 个
+    活动敌人里 40 个立绘相同、2 个不同，如「王下一桶」与「王下一桶（投影）」），两个维度分开给，
+    页面上才既能把「为什么立绘是别的怪」说清，又不会过度断言。优先点名**立绘相同**的同伴。
+    `forms` = 同卡面形态数（含自己），供页面写「同卡面的 N 个形态共用这一套」。
+    """
+    by_stem: dict[str, list[dict]] = {}
+    for row in rows:
+        stem = (row.get("icon") or "").rsplit("/", 1)[-1].removesuffix(".png")
+        by_stem.setdefault(stem, []).append(row)
+    figure_of = lambda mid: (monsters.get(mid) or {}).get("figure") or ""  # noqa: E731
+    out: dict[int, dict] = {}
+    for group in by_stem.values():
+        if len({r["name"] for r in group}) < 2:
+            continue
+        for row in group:
+            peers: list[dict] = []
+            seen: set[str] = set()
+            for p in group:
+                if p["name"] == row["name"] or p["name"] in seen:
+                    continue
+                seen.add(p["name"])
+                peers.append(p)
+            if not peers:
+                continue
+            same_figure = [p for p in peers if figure_of(p["id"]) == figure_of(row["id"])]
+            pick = same_figure[0] if same_figure else peers[0]
+            out[row["id"]] = {
+                "id": pick["id"],
+                "name": pick["name"],
+                "figure": figure_of(pick["id"]) == figure_of(row["id"]),
+                "forms": len(peers) + 1,
+            }
+    return out
+
+
 def convert() -> None:
     """转换敌对物种详情数据 → monsters/{id}.json + 共享等级曲线 monster-level-curve.json。"""
     monsters = load_monsters()
@@ -42,6 +85,7 @@ def convert() -> None:
     # 等级曲线单独落盘：745 行共享一份，详情页按需取（shared single），避免 632 份 payload 各带一份
     save_json(curve, OUTPUT_DIR / "monster-level-curve.json")
     invaded = load_invasion_map(monsters)
+    art_shared = _art_shared(monsters, catalog_rows(monsters))
     drops = load_drops()
     appearances = load_appearances()
     phases = load_phases()
@@ -99,6 +143,8 @@ def convert() -> None:
             detail["statuses"] = statuses[tpl]
         if events.get(tpl):
             detail["event"] = events[tpl]
+        if art_shared.get(tpl):
+            detail["art_shared"] = art_shared[tpl]
         save_json(detail, output_dir / f"{mid}.json")
         count += 1
 

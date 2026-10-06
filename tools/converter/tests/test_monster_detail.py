@@ -61,7 +61,31 @@ def fake_monsters(monkeypatch):
             "level_group": 1,
             "skills": [],
         },
+        # 同卡面三人组：8013011 立绘相同、8013012 立绘不同（`_art_shared` 的两个分支都要能测到）
+        8013011: {
+            "name": "反物质军团·践踏者（完整）", "icon": "Monster_8013010",
+            "figure": "Monster_8013010", "rank": "Elite", "camp": "",
+            "stance": 0, "weak": [], "resist": {}, "intro": "",
+            "stats": {"hp": 1, "atk": 1, "def": 1, "speed": 1},
+            "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+            "level_group": 1, "skills": [],
+        },
+        8013012: {
+            "name": "反物质军团·践踏者（幻象）", "icon": "Monster_8013010",
+            "figure": "Monster_9999999", "rank": "Elite", "camp": "",
+            "stance": 0, "weak": [], "resist": {}, "intro": "",
+            "stats": {"hp": 1, "atk": 1, "def": 1, "speed": 1},
+            "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+            "level_group": 1, "skills": [],
+        },
     })
+    # 目录全集（`monsters.catalog_rows`）要挡掉，否则会去读真实 MonsterTemplateConfig
+    monkeypatch.setattr(md, "catalog_rows", lambda _facets=None: [
+        {"id": 8013010, "name": "反物质军团·践踏者", "icon": "Monster_8013010"},
+        {"id": 8013011, "name": "反物质军团·践踏者（完整）", "icon": "Monster_8013010"},
+        {"id": 8013012, "name": "反物质军团·践踏者（幻象）", "icon": "Monster_8013010"},
+        {"id": 1002011, "name": "虚卒·掠夺者", "icon": "Monster_1002011"},
+    ])
     saved: dict[str, dict] = {}
     monkeypatch.setattr(md, "save_json", lambda data, path: saved.__setitem__(path.name, data))
     monkeypatch.setattr(Path, "mkdir", lambda *a, **k: None)
@@ -72,7 +96,7 @@ class TestConvert:
         """每怪物一个文件：字段完整、技能为全量、intro 为空串仍输出；曲线单点另落一份。"""
         md.convert()
         assert set(fake_monsters.keys()) == {
-            "8013010.json", "1002011.json", "monster-level-curve.json",
+            "8013010.json", "8013011.json", "8013012.json", "1002011.json", "monster-level-curve.json",
         }
         # 曲线是独立共享单点（供 2722 份详情与目录共用），不进任何怪物 payload
         assert fake_monsters["monster-level-curve.json"] == {
@@ -112,6 +136,21 @@ class TestConvert:
         assert fake_monsters["1002011.json"]["phases"] == [
             {"phase_id": 1, "weak": ["Ice"], "resist": {"Fire": 0.2}},
         ]
+
+    def test_art_shared_prefers_same_figure_peer(self, fake_monsters):
+        """同卡面图标（名字不同）→ `art_shared`：优先点名**立绘相同**的同伴；只有立绘不同的同伴时
+        明说 `figure: false`（页面据此改口径——不能把「同卡面」说成「共用美术」）。"""
+        md.convert()
+        assert fake_monsters["8013010.json"]["art_shared"] == {
+            "id": 8013011, "name": "反物质军团·践踏者（完整）", "figure": True, "forms": 3,
+        }, "立绘相同的同伴优先被点名"
+        assert fake_monsters["8013011.json"]["art_shared"] == {
+            "id": 8013010, "name": "反物质军团·践踏者", "figure": True, "forms": 3,
+        }
+        assert fake_monsters["8013012.json"]["art_shared"] == {
+            "id": 8013010, "name": "反物质军团·践踏者", "figure": False, "forms": 3,
+        }, "没有立绘相同的同伴时退回第一个并标记 figure=false"
+        assert "art_shared" not in fake_monsters["1002011.json"], "没有同卡面同伴 → 不落键"
 
     def test_skill_extra_effects_attached_per_skill(self, fake_monsters, monkeypatch):
         """附带效果按技能 ID 挂在该技能条目上；无效果的技能不落键（不是空数组占位）。"""

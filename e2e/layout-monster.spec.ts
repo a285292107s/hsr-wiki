@@ -33,14 +33,19 @@ interface MonsterDetailJson {
   skills: {
     id: number;
     name: string;
+    /** 效果描述（原始富文本，含 #N 占位符）与占位符替换参数 */
+    desc?: string;
+    param_list?: number[];
     /** 技能附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键） */
     extra_effects?: { id: number; name: string; desc?: string; param_list?: number[] }[];
   }[];
   /** 活动出处（仅被活动关卡引用的怪物有值） */
   event?: { name: string; tabs: string[]; levels: number[]; count: number };
+  /** 同卡面图标但名字不同的其他形态（活动出处的「美术复用」用它） */
+  art_shared?: { id: number; name: string; figure: boolean; forms: number };
   /** 掉落 / 出没 / 额外阶段（monster_extra.py 的三块） */
   drops?: MonsterDropTierJson[];
-  appearances?: { total: number; samples: { id: number; name: string }[] };
+  appearances?: { total: number; samples: { id: number; name: string; activity?: string }[] };
   phases?: { phase_id: number; weak: string[]; resist: Record<string, number> }[];
 }
 
@@ -56,6 +61,9 @@ const familyOf = (id: number): MonsterListEntry[] => {
   return self ? list.filter((m) => key(m) === key(self)).sort((a, b) => a.id - b.id) : [];
 };
 const detailOf = (id: number): MonsterDetailJson => readJson<MonsterDetailJson>(`public/data/cn/monsters/${id}.json`);
+/** 样本 chip 的屏上文本 = 「活动名 · 关卡名」（活动名缺位时只有关卡名；分隔符与视图逐字一致） */
+const sampleLabel = (s: { name: string; activity?: string }): string =>
+  s.activity ? `${s.activity} · ${s.name}` : s.name;
 
 test.describe('布局验收：敌方详情页', () => {
   test(`/monster/${MONSTER_ID}：立绘延迟到达时 hero 高度不得变化`, async ({ page }) => {
@@ -238,8 +246,33 @@ test.describe('布局验收：敌方详情页', () => {
       await expect(note).toHaveCount(1);
       const text = ((await note.innerText()) || '').replace(/\s+/g, ' ');
       expect(text, '活动名来自源 ActivityPanel.TitleName').toContain(`「${ev.name}」`);
-      expect(text, '档位数来自源关卡引用次数').toContain(`${ev.count} 个`);
+      /* 活动内关卡数只在**与上方总数不同**时才写（相同＝信息重复，此时改说「全部关卡都在…」） */
+      if (ev.count === detailOf(target!.id).appearances?.total) {
+        expect(text, '数量与总数相同时不重复报数').toContain('全部关卡都在');
+        expect(text, '数量与总数相同时不重复报数').not.toContain(`${ev.count} 个`);
+      } else {
+        expect(text, '活动内关卡数来自源关卡引用次数').toContain(`其中 ${ev.count} 个`);
+      }
+      expect(text, '等级区间单档时只写一个数').not.toMatch(/等级 (\d+)–\1/);
       for (const tab of ev.tabs) expect(text, `页签「${tab}」来自源 ActivityQuestRewardData`).toContain(tab);
+
+      /* 美术复用（ADR 0048）：口径按转换器给的 `art_shared` 两个维度走，且**禁止**声称站点证不了的
+         「技能组复用」（旧文案的过度断言：实测 26/42 个活动敌人的技能集与同伴不同）。 */
+      const artTarget = list.slice(0, 200).find((m) => {
+        const d = detailOf(m.id);
+        return !!d.event && !!d.art_shared;
+      });
+      expect(artTarget, '前 200 个目录条目里应有「活动出处 + 同卡面同伴」的怪物（断言前提）').toBeTruthy();
+      const art = detailOf(artTarget!.id).art_shared!;
+      await page.goto(`/monster/${artTarget!.id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const artText = ((await page.locator('.nk-mob-event').innerText()) || '').replace(/\s+/g, ' ');
+      expect(artText, '立绘相同 → 说「卡面与立绘与其共用」').toContain(
+        art.figure
+          ? `卡面与立绘与「${art.name}」共用（同卡面共 ${art.forms} 个形态）`
+          : `与「${art.name}」等 ${art.forms} 个形态同卡面图标，立绘不同`,
+      );
+      expect(artText, '不得声称站点证不了的「技能组复用」').not.toContain('技能组');
 
       const none = list.find((m) => !detailOf(m.id).event && m.id < 200);
       if (none) {
@@ -406,6 +439,60 @@ test.describe('布局验收：敌方详情页', () => {
         page.locator('.nk-mob-appear__count strong'),
         '出没关卡数 = 数据 total',
       ).toHaveText(String(dropMon.appearances!.total));
+      /* 样本 chip 的名字必须逐项等于数据：活动关卡的名来自活动表（ADR 0046），
+         不是 `StageConfig.StageName` 的活动级常量——写成别的一律红。 */
+      const chips = page.locator('.nk-mob-appear__sample');
+      await expect(chips, '样本 chip 数 = 数据样本数').toHaveCount(dropMon.appearances!.samples.length);
+      expect(
+        (await chips.allTextContents()).map((t) => t.trim()),
+        '样本名逐项与数据一致（顺序同 DOM；活动关卡为「活动名 · 关卡名」）',
+      ).toEqual(dropMon.appearances!.samples.map(sampleLabel));
+
+      /* 活动关卡与终局/入口/强敌表（ADR 0046 / 0047）：以用户报过的 1004015（托帕幻象，星天演武仪典）
+         为回归哨——它的 14 个关卡在 `StageConfig` 里共用同一个 `StageName`「承露天人」（同活动里的
+         另一只敌人），若有人把名称来源退回 `StageConfig.StageName`，这里会读出「承露天人」。 */
+      const festMon = detailOf(1004015);
+      await page.goto('/monster/1004015');
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const festNames = (await page.locator('.nk-mob-appear__sample').allTextContents()).map((t) => t.trim());
+      expect(festNames, '活动关卡样本名逐项与数据一致').toEqual(festMon.appearances!.samples.map(sampleLabel));
+      expect(festNames, '活动级常量 StageName 不得作为关卡名上屏').not.toContain('承露天人');
+      expect(festNames[0], '活动链样本名应带「活动名 · 关卡名」前缀').toMatch(/^星天演武仪典 · /);
+
+      /* 回归哨（ADR 0047）：**自己名字不得作为关卡名上屏**。取用户报过的 1003011（银鬃尉官（错误））
+         与 1003012（银鬃尉官（完整））——它们的关卡全在 VerseSimulation / RogueChallengeActivity，
+         源里没有玩家可见关卡名，`StageConfig.StageName` 只是敌方标识（1003011 那条与自己的名字逐字相同，
+         1003012 那条是另一只怪的名字）。若有人把名称来源退回 StageName，这两条断言立刻红。 */
+      for (const id of [1003011, 1003012]) {
+        const mon = detailOf(id);
+        expect(mon.appearances!.total, `${id} 应有出没计数（断言前提）`).toBeGreaterThan(0);
+        expect(mon.appearances!.samples.map((s) => s.name), `${id} 数据里不得出现自己名字`).not.toContain(mon.name);
+        await page.goto(`/monster/${id}`);
+        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+        const chipNames = (await page.locator('.nk-mob-appear__sample').allTextContents()).map((t) => t.trim());
+        expect(chipNames, `${id} 自己名字不得上屏`).not.toContain(mon.name);
+        expect(chipNames, `${id} chip 逐项等于数据`).toEqual(mon.appearances!.samples.map(sampleLabel));
+      }
+
+      /* 数据派生的一遍补充：任取一个「total>0 且 samples 为空」的目录条目，chips 区整块不渲染、
+         计数照旧、说明行说清「没有关卡名」（与上面两条硬编码哨互不替代：这条跟着数据走，哨跟着规则走）。 */
+      const noChipId = readJson<MonsterListEntry[]>('public/data/cn/monsters.json')
+        .slice(0, 120)
+        .map((m) => m.id)
+        .find((id) => {
+          const a = detailOf(id).appearances;
+          return !!a && a.total > 0 && a.samples.length === 0;
+        });
+      expect(noChipId, '应有「有计数、无样本」的目录条目（断言前提）').toBeTruthy();
+      const noChipMon = detailOf(noChipId!);
+      await page.goto(`/monster/${noChipId}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(page.locator('.nk-mob-appear__count strong')).toHaveText(String(noChipMon.appearances!.total));
+      await expect(page.locator('.nk-mob-appear__sample'), '无实名源的关卡不得产出 chip').toHaveCount(0);
+      await expect(
+        page.locator('.nk-mob-appear__tip'),
+        '无样本时必须说明「游戏内没有关卡名」，不能用沉默代替口径',
+      ).toContainText('没有关卡名');
 
       /* 额外阶段：只渲染与本体现值不同的阶段（实测 48 条阶段行里 36 条与本体逐字相同），
          故期望值也要按同一判据从数据派生，而不是 `phases.length`。 */
@@ -435,6 +522,47 @@ test.describe('布局验收：敌方详情页', () => {
         expectPhases[0].weak.map((e) => `${e.toLowerCase()}.webp`),
       );
 
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<id>：技能参数行与 ParamList 逐值一致（/ 分隔；描述引用与否都展示）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      /* 判据与页面同式：param_list 非空即出参数行——描述里 #N 已展开的技能也重复展示
+         （重复供对照，缺行更困惑）。2023030 四个技能带参数、一个空数组；
+         2004013 混有描述带 #1[i] 的「压迫」（值已展开进文本，行照出）。 */
+      const wantsRow = (s: MonsterDetailJson['skills'][number]): boolean =>
+        (s.param_list?.length ?? 0) > 0;
+      const check = async (id: number): Promise<void> => {
+        const mon = detailOf(id);
+        expect(mon.skills.some(wantsRow), `${id} 应有带参数的技能（样本前提）`).toBe(true);
+        expect(
+          Math.max(...mon.skills.flatMap((s) => (s.param_list ?? [0]).map(Math.abs))),
+          `${id} 参数值应全部 <1000（页面按 fmtStatValue 加千分位，样本越界即换样本）`,
+        ).toBeLessThan(1000);
+        await page.goto(`/monster/${id}`);
+        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+        await expect(
+          page.locator('.nk-mob-skill__params'),
+          `${id} 参数行数 = 带参数的技能数`,
+        ).toHaveCount(mon.skills.filter(wantsRow).length);
+        const rendered = await page.locator('.nk-mob-skill').evaluateAll((els) => els.map((el) => ({
+          name: (el.querySelector('.nk-mob-skill__name')?.textContent || '').trim(),
+          params: (el.querySelector('.nk-mob-skill__paramsvals')?.textContent || '').trim(),
+        })));
+        mon.skills.forEach((s, i) => {
+          expect(rendered[i].name, `第 ${i + 1} 张技能卡`).toBe(s.name);
+          expect(rendered[i].params.length > 0, `${s.name} 参数行有无`).toBe(wantsRow(s));
+          if (wantsRow(s)) {
+            expect(rendered[i].params, `${s.name} 参数逐值一致`).toBe(s.param_list!.map(String).join(' / '));
+          }
+        });
+      };
+      await check(2023030);
+      await check(2004013);
       assertNoErrors();
     },
   );

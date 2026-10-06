@@ -420,7 +420,7 @@
   object-fit: contain;
 }
 
-/* ─── 出没关卡：总数 + 关卡名样本 ─── */
+/* ─── 出没关卡：计数 + 关卡名样本 + 折叠口径 ─── */
 .nk-mob-appear__count {
   margin: 0 0 10px;
   font-size: 0.84rem;
@@ -437,11 +437,41 @@
   color: var(--text3);
 }
 
-.nk-mob-appear__note {
-  margin: -4px 0 10px;
+.nk-mob-appear__tip {
+  margin: 10px 0 0;
   font-size: 0.68rem;
   line-height: 1.7;
   color: var(--text3);
+}
+
+/* 统计口径折叠块：默认收起，避免把维护者口径当正文压在玩家脸上（`details` 原生可点，移动端同样可用） */
+.nk-mob-appear__how {
+  margin-top: 8px;
+  font-size: 0.68rem;
+  line-height: 1.7;
+  color: var(--text3);
+}
+
+.nk-mob-appear__how > summary {
+  /* 不用 inline-flex：那会吃掉 summary 的 list-item 显示，连带丢掉默认的展开三角（可点性提示） */
+  width: fit-content;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+
+.nk-mob-appear__how > summary::marker {
+  color: var(--text3);
+}
+
+.nk-mob-appear__how > summary:hover {
+  color: var(--text2);
+}
+
+.nk-mob-appear__how > p {
+  margin: 6px 0 0;
 }
 
 /* 活动出处备注：与「出没」同区块收尾，左发丝线区分"这是注记不是数据行" */
@@ -470,6 +500,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .nk-mob-appear__sample {
@@ -479,6 +512,12 @@
   background: color-mix(in srgb, var(--blk-900) 30%, transparent);
   font-size: 0.76rem;
   color: var(--text2);
+}
+
+/* 活动名是上下文（弱），关卡名是值（主）——同一胶囊内两级字阶 */
+.nk-mob-appear__sample-from {
+  font-size: 0.66rem;
+  color: var(--text3);
 }
 
 /* 图鉴族互链（官方 TemplateGroupID）：与「同族变体」并排的第二个维度，语言更轻——
@@ -824,6 +863,34 @@
   font-size: 0.78rem;
   line-height: 1.7;
   color: var(--text3);
+}
+
+/* 技能参数（ParamList 原值，无语义标签，描述引用与否都展示——重复供对照，缺行更困惑）：
+   与附带效果同级——左发丝线 + 次级字阶。值串以「 / 」分隔（防 1/1 连读成 11），
+   数值走 fmtStatValue（≥4 位加千分位）。 */
+.nk-mob-skill__params {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 2px solid var(--line-2);
+}
+
+.nk-mob-skill__paramsk {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+}
+
+.nk-mob-skill__paramsvals {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text2);
 }
 
 .nk-mob-skeleton {

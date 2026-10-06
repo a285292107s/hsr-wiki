@@ -41,11 +41,16 @@ def _monster_type(rank: str) -> str:
     return "MINION"
 
 
-def convert() -> None:
-    templates = load_json(EXCEL_DIR / "MonsterTemplateConfig.json")
-    facets = load_monsters()
-    result = []
-    for t in templates:
+def catalog_rows(facets: dict | None = None) -> list[dict]:
+    """目录条目（**有名字与图标**的模板，`monsters.json` 的构建单点）。
+
+    `facets` = `monster_common.load_monsters()` 的聚合（缺省时自取）；`monster_detail` 也用它
+    划定「同卡面形态」的全集——两处必须同源，否则页面上会出现目录里看不到的同卡面同伴。
+    """
+    if facets is None:
+        facets = load_monsters()
+    rows = []
+    for t in load_json(EXCEL_DIR / "MonsterTemplateConfig.json"):
         mid = t.get("MonsterTemplateID")
         name = resolve_text(t.get("MonsterName", {}))
         icon = map_icon_path(t.get("IconPath", ""))
@@ -64,7 +69,11 @@ def convert() -> None:
         group = t.get("TemplateGroupID")
         if group is not None:
             row["atlas_group"] = group
-        result.append(row)
-    result = sort_by_id(result)
+        rows.append(row)
+    return sort_by_id(rows)
+
+
+def convert() -> None:
+    result = catalog_rows()
     save_json(result, OUTPUT_DIR / "monsters.json")
     logger.info("monsters: %d entries", len(result))

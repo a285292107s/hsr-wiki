@@ -95,16 +95,18 @@ export interface MonsterDropTier {
   items: MonsterDropItem[];
 }
 
-/** 出没样本：一关的 ID 与名称（StageConfig.StageName 的 TextMap 文案） */
+/** 出没样本：一关的 ID 与关卡名；`activity` 是活动出处（仅活动关卡有，缺位不落键） */
 export interface MonsterAppearanceSample {
   id: number;
   name: string;
+  activity?: string;
 }
 
 /**
  * 出没统计（StageConfig 波次 + `MonsterConfig.SummonIDList` 召唤链）。
  * `total` = 该模板（含其被召唤出场）出现过的关卡数（同关多波只计一次）；
- * `samples` = 至多 3 个「关卡名与来源类型都不同」的样本，可能为空（关卡无名时不落样本）。
+ * `samples` = 至多 3 个「关卡名与来源类型都不同」的样本，可能为空（该口径下只有无名关卡时）。
+ * `name` 只放关卡名，活动名另走 `activity`——展示层按「活动名 · 关卡名」拼接（ADR 0047 决策 6）。
  */
 export interface MonsterAppearances {
   total: number;
@@ -143,6 +145,19 @@ export interface MonsterStatusDetail {
    *  （`ReadParamList` 只有键名），`%CasterName` / `%DynamicTargetName` 这类运行时替换也不可知；
    *  照仓规「缺参整段省略，不落残缺占位与 `?`」（`src/lib/format.ts → refsResolved`） */
   desc?: string;
+}
+
+/** 同卡面图标（目录里看到的卡面图标是同一份资源）但**名字不同**的形态；`monster_detail._art_shared` 产出。
+ *  `figure` = 被点名那个同伴的**立绘**是否与本形态相同——同卡面不等于共用立绘（实测 92 个多名字组里
+ *  90 组立绘一致、2 组不一致），所以两个维度分开给，页面不会把「同卡面」说成「共用美术」。 */
+export interface MonsterArtShared {
+  /** 被点名的同伴（优先挑立绘相同的那个） */
+  id: number;
+  name: string;
+  /** 同伴的立绘是否与本形态相同 */
+  figure: boolean;
+  /** 同卡面形态数（含本形态） */
+  forms: number;
 }
 
 /** 活动出处（`monster_extra.load_event_sources`）：怪物被活动关卡引用时产出。
@@ -205,6 +220,8 @@ export interface MonsterDetail {
   statuses?: MonsterStatusDetail[];
   /** 活动出处（仅被活动关卡引用的怪物有值；实测 42 个模板，含「星天演武仪典」的 7 个活动敌人） */
   event?: MonsterEventSource;
+  /** 同卡面图标但名字不同的其他形态（活动出处的「美术复用」用它；缺位＝目录里没有这样的同伴） */
+  art_shared?: MonsterArtShared;
 }
 
 /** 侵入名单：invasion_ids 为侵蚀等级序号，stages 为波及关卡 ID（用于详情页标记与回链） */

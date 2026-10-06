@@ -4,6 +4,7 @@
 - 掉落：空档位行（`DisplayItemList` 为空）必须丢掉，`WorldLevel=None` 的基准档必须排在最前；
 - 出没：同关多波只计一次；**召唤者出场要算作被召唤者的出场**（漏了会把冰锋这类召唤型小怪
   判成从未出场）；样本按「关卡名 + StageType」双去重（只按类型去重会得到三条同名样本）；
+  活动关卡的名必须取活动表（`StageConfig.StageName` 是活动级常量），常量名不落样本；
 - 阶段：同名双表按 `(组, 阶段)` 去重取并集；族内每个成员都带同一组阶段；组号为空无阶段。
 """
 
@@ -43,27 +44,145 @@ def _fake_sources(monkeypatch, **overrides):
             {"MonsterID": 1005010, "MonsterTemplateID": 1005010, "SummonIDList": [1002011]},
             # 活动关卡用（见下 StageID 4190010）
             {"MonsterID": 1002040, "MonsterTemplateID": 1002040, "SummonIDList": []},
+            # 活动关卡名四条链各自的被试怪物（键互不重叠，断言互不干扰）
+            {"MonsterID": 1003010, "MonsterTemplateID": 1003010, "SummonIDList": []},
+            {"MonsterID": 1003011, "MonsterTemplateID": 1003011, "SummonIDList": []},
+            {"MonsterID": 1003012, "MonsterTemplateID": 1003012, "SummonIDList": []},
+            {"MonsterID": 1003013, "MonsterTemplateID": 1003013, "SummonIDList": []},
+            {"MonsterID": 1003014, "MonsterTemplateID": 1003014, "SummonIDList": []},
+            {"MonsterID": 1003015, "MonsterTemplateID": 1003015, "SummonIDList": []},
+            {"MonsterID": 1003016, "MonsterTemplateID": 1003016, "SummonIDList": []},
+            {"MonsterID": 1003017, "MonsterTemplateID": 1003017, "SummonIDList": []},
+            # ②③④ 三档实名源各自的被试怪物
+            {"MonsterID": 1003020, "MonsterTemplateID": 1003020, "SummonIDList": []},
+            {"MonsterID": 1003021, "MonsterTemplateID": 1003021, "SummonIDList": []},
+            {"MonsterID": 1003022, "MonsterTemplateID": 1003022, "SummonIDList": []},
+            {"MonsterID": 1003023, "MonsterTemplateID": 1003023, "SummonIDList": []},
+            # 无实名源关卡（且关卡名与本怪同名）的被试怪物
+            {"MonsterID": 1003024, "MonsterTemplateID": 1003024, "SummonIDList": []},
         ],
         "StageConfig.json": [
-            # 同一关两波都带 1002011 → 只能计一次
-            {"StageID": 1, "StageType": "Mainline", "StageName": {"Hash": 11},
+            # 同一关两波都带 1002011 → 只能计一次；名字来自终局表（StageName 一律不取）
+            {"StageID": 1, "StageType": "Challenge", "StageName": {"Hash": 11},
              "MonsterList": [{"a": 1002011}, {"b": 1002011}]},
-            # 召唤者出场 → 被召唤者（1002011）也计一次
+            # 召唤者出场 → 被召唤者（1002011）也计一次；同类型（Challenge）只出一条样本
             {"StageID": 2, "StageType": "Challenge", "StageName": {"Hash": 12},
              "MonsterList": [{"a": 1005010}]},
-            # 同类型同名的第三关不产生第三条样本；无名关卡不产生样本
+            # 无实名源的三关（Mainline / Trial / VerseSimulation）→ 只计 total、不落样本
             {"StageID": 3, "StageType": "Mainline", "StageName": {"Hash": 11},
              "MonsterList": [{"a": 1002011}]},
             {"StageID": 4, "StageType": "Trial", "StageName": {},
              "MonsterList": [{"a": 1002011}]},
+            {"StageID": 5, "StageType": "VerseSimulation", "StageName": {"Hash": 11},
+             "MonsterList": [{"a": 1002011}]},
+            # 关卡名与本怪同名（hash 96 = 测试怪）且无实名源 → 依然不落样本
+            {"StageID": 6, "StageType": "VerseSimulation", "StageName": {"Hash": 96},
+             "MonsterList": [{"a": 1003024}]},
             # 活动关卡：StageType 与 ActivityPanel.UIPrefab 同名（FightFest）→ 产出活动出处。
             # 用 1002040（不参与 drops/appearances 夹具断言），避免扰动既有用例。
             {"StageID": 4190010, "StageType": "FightFest", "StageName": {"Hash": 74}, "Level": 20,
              "MonsterList": [{"Monster0": 1002040}]},
+            # 活动级常量名且无实名源（FightActivity）→ 只计 total、不落样本
+            {"StageID": 30, "StageType": "FightActivity", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003010}]},
+            {"StageID": 31, "StageType": "FightActivity", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003010}]},
+            # 四条活动链：EventID = StageID // 10
+            {"StageID": 4270010, "StageType": "ElationActivity", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003011}]},
+            {"StageID": 4280010, "StageType": "TelevisionActivity", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003012}]},
+            {"StageID": 4210010, "StageType": "SummonActivity", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003013}]},
+            # 「关卡号 = 活动号」的单关特例：对不上 //10 折算，退回原值查活动表
+            {"StageID": 419000, "StageType": "FightFest", "StageName": {"Hash": 74}, "Level": 85,
+             "MonsterList": [{"Monster0": 1003014}]},
+            # BoxingClub：304099 没有名称行 ⇒ 不落样本（**不退回** StageName）
+            {"StageID": 3040010, "StageType": "BoxingClub", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003015}]},
+            {"StageID": 3040990, "StageType": "BoxingClub", "StageName": {"Hash": 13},
+             "MonsterList": [{"a": 1003016}]},
+            # StarFightActivity：两跳链 EventID → GroupID → GroupTitle
+            {"StageID": 4170010, "StageType": "StarFightActivity", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003017}]},
+            # ③ 侵蚀隧洞 / 凝滞虚影：StageID(列表/单值) + MappingInfoID → MappingInfo.Name
+            {"StageID": 1043050, "StageType": "Cocoon", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003020}]},
+            {"StageID": 1012160, "StageType": "FarmElement", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003021}]},
+            # ④ 强敌挑战 / 剑试：EventID==StageID / StageID 精确连接
+            {"StageID": 420012, "StageType": "StrongChallengeActivity", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003022}]},
+            {"StageID": 418001, "StageType": "SwordTraining", "StageName": {"Hash": 15},
+             "MonsterList": [{"a": 1003023}]},
+        ],
+        "ChallengeMazeConfig.json": [
+            {"ID": 2001, "Name": {"Hash": 90}, "EventIDList1": [1, 3], "EventIDList2": []},
+        ],
+        "ChallengeStoryMazeConfig.json": [
+            {"ID": 2002, "Name": {"Hash": 91}, "EventIDList1": [], "EventIDList2": [2]},
+        ],
+        "ChallengeBossMazeConfig.json": [],
+        "ChallengePeakConfig.json": [],
+        "MappingInfo.json": [
+            {"ID": 900, "Name": {"Hash": 93}},
+            {"ID": 901, "Name": {"Hash": 93}},
+        ],
+        "CocoonConfig.json": [
+            {"ID": 1, "StageIDList": [1043050], "MappingInfoID": 900},
+        ],
+        "FarmElementConfig.json": [
+            {"ID": 1, "StageID": 1012160, "MappingInfoID": 901},
+        ],
+        "StrongChallengeStage.json": [
+            {"StrongChallengeStageID": 6, "EventID": 420012, "Name": {"Hash": 94}},
+            # 类型闸：这条指向 Challenge 关（StageID 1），StageType 不匹配时必须整条忽略
+            {"StrongChallengeStageID": 7, "EventID": 1, "Name": {"Hash": 94}},
+        ],
+        "SwordTrainingExam.json": [
+            {"ExamID": 101, "StageID": 418001, "EnemyName": {"Hash": 95}},
+        ],
+        "FightFestStageInfo.json": [
+            {"EventID": 419001, "ChallengeName": {"Hash": 75}},
+            # 关卡号 = 活动号的单关特例（StageID 419000 对不上 //10 折算）由调用方退回原值查
+            {"EventID": 419000, "ChallengeName": {"Hash": 79}},
+        ],
+        "ElationBattleLevel.json": [
+            {"EventID": 427001, "StageName": {"Hash": 76}},
+        ],
+        "ActivityTelevisionLevel.json": [
+            {"EventID": 428001, "TelevisionID": 7},
+        ],
+        "ActivityTelevisionStage.json": [
+            {"TelevisionID": 7, "StageName": {"Hash": 77}, "ActivityModuleID": 4000501},
+        ],
+        "ActivitySummonLevel.json": [
+            {"EventID": 421001, "GroupID": 3},
+        ],
+        "ActivitySummonGroup.json": [
+            {"GroupID": 3, "StageName": {"Hash": 78}, "ActivityModuleID": 5002001},
+        ],
+        "BoxingClubStage.json": [
+            {"EventID": 304001, "Name": {"Hash": 80}},
+        ],
+        "StarFightStageConfig.json": [
+            {"EventID": 417001, "GroupID": 1},
+        ],
+        "ActivityStarFightGroup.json": [
+            {"GroupID": 1, "GroupTitle": {"Hash": 81}, "ActivityModuleID": 5001601},
         ],
         "ActivityPanel.json": [
             {"PanelID": 50018, "UIPrefab": "UI/Quest/Widget/FightFestPanel.prefab",
              "TitleName": {"Hash": 71}},
+            # 活动名前缀：ActivityModuleID 前导 = PanelID（4000 是短号干扰项，必须被 40005 盖住）
+            {"PanelID": 4000, "UIPrefab": "UI/Quest/Widget/UnknownPanel.prefab",
+             "TitleName": {"Hash": 89}},
+            {"PanelID": 40005, "UIPrefab": "UI/Quest/Widget/QuestTelevisionPanel.prefab",
+             "TitleName": {"Hash": 97}},
+            {"PanelID": 50020, "UIPrefab": "UI/Quest/Widget/QuestTrashCanSummonPanel.prefab",
+             "TitleName": {"Hash": 98}},
+            {"PanelID": 50016, "UIPrefab": "UI/Quest/Widget/QuestStarChallengePanel.prefab",
+             "TitleName": {"Hash": 99}},
         ],
         "ActivityQuestRewardData.json": [
             # ActivityModuleID 以该面板 ID 开头 → 它的页签算这个活动的
@@ -149,9 +268,15 @@ def _fake_sources(monkeypatch, **overrides):
         1: "信用点", 2: "铁卫扣饰", 11: "于枯冬之中", 12: "混沌回忆", 21: "疯王·第二阶段", 22: "阶段介绍",
         41: "额外回合", 42: "获得 #1[i] 个额外回合",
         51: "阿尔法", 52: "阿尔法（完整）", 53: "贝塔", 54: "伽马",
+        13: "第八日", 15: "裂界造物",
         61: "防御力降低", 62: "防御力降低 20%。", 63: "攻击力提高", 64: "攻击力提高#1[i]%。",
         65: "超甲", 66: "狂怒", 67: "支援", 68: "受到%CasterName支援。",
         71: "「星天演武仪典」", 72: "「梦境训练」", 73: "别的活动页签", 74: "活动关卡",
+        75: "擂台赛•其一", 76: "花火的千变假面", 77: "与银袋山同行", 78: "人山人海的桶",
+        79: "新人首秀", 80: "很多鸽子", 81: "星海竞逐",
+        90: "回忆其一", 91: "虚构其一", 93: "魔占之径 • 侵蚀隧洞", 94: "长生久视的一梦",
+        95: "热血的云骑战士", 96: "测试怪", 89: "短号活动", 97: "惊梦电视台", 98: "开拓，友谊魔法！",
+        99: "星芒烁变",
     }.get((h or {}).get("Hash"), "")
     monkeypatch.setattr(mx, "resolve_text", text)
     monkeypatch.setattr(it, "resolve_text", text)
@@ -180,18 +305,113 @@ class TestLoadAppearances:
     def test_counts_stage_once_and_follows_summons(self, monkeypatch):
         _fake_sources(monkeypatch)
         app = mx.load_appearances()
-        assert app[1002011]["total"] == 4, "同关两波只计一次；召唤者所在关卡也要计入被召唤者"
+        assert app[1002011]["total"] == 5, "同关两波只计一次；召唤者所在关卡也要计入被召唤者"
         assert app[1005010]["total"] == 1
 
-    def test_samples_dedupe_by_type_and_name(self, monkeypatch):
+    def test_samples_only_from_player_visible_sources(self, monkeypatch):
+        """样本名只取玩家可见源（本夹具 = 终局表）；`StageConfig.StageName` 一律不取。"""
         _fake_sources(monkeypatch)
         app = mx.load_appearances()
-        samples = app[1002011]["samples"]
-        # 关 1/3 同类型同名、关 4 无名 → 只剩「主线关 1」与「挑战关 2」两条
-        assert samples == [
-            {"id": 1, "name": "于枯冬之中"},
-            {"id": 2, "name": "混沌回忆"},
+        # 关 1（Challenge，两波同怪）与关 2（Challenge，召唤者）都命中终局表 → 同一 StageType 只出一条
+        assert app[1002011]["samples"] == [{"id": 1, "name": "回忆其一"}]
+        assert app[1005010]["samples"] == [{"id": 2, "name": "虚构其一"}]
+
+    def test_activity_name_travels_as_its_own_field(self, monkeypatch):
+        """活动名不拼进 `name`：视图/AI 快照各按同一格式拼接（数据层两个字段各管一件事）。"""
+        _fake_sources(monkeypatch)
+        app = mx.load_appearances()
+        assert app[1002040]["samples"] == [
+            {"id": 4190010, "name": "擂台赛•其一", "activity": "星天演武仪典"}
         ]
+        assert app[1003011]["samples"] == [{"id": 4270010, "name": "花火的千变假面"}], (
+            "ElationActivity 无活动名验证链 → 不落 activity 键"
+        )
+
+    def test_stage_without_player_visible_name_yields_no_sample(self, monkeypatch):
+        """无实名源的关卡只进 total：关 3/4/5 都不落样本，即便关卡名与本怪同名（关 6）。"""
+        _fake_sources(monkeypatch)
+        app = mx.load_appearances()
+        assert app[1003024]["total"] == 1
+        assert app[1003024]["samples"] == [], "关卡名 == 本怪名字（敌方标识）不得上屏"
+        # 1002011 还出现在关 3/4/5（Mainline / Trial / VerseSimulation）→ total 5，但样本只有关 1
+        assert app[1002011]["total"] == 5
+
+
+class TestPlayerStageNames:
+    """出没样本的唯一名称来源：活动链 + 终局四表 + 入口表 + 强敌/剑试表（ADR 0047）。"""
+
+    def test_activity_chains_indexed_by_event_id(self, monkeypatch):
+        """活动链返回 `{EventID: {name, activity}}`；活动名只在**有验证链**时给。"""
+        _fake_sources(monkeypatch)
+        names = mx.load_activity_stage_names()
+        assert names["FightFest"][419001] == {"name": "擂台赛•其一", "activity": "星天演武仪典"}, (
+            "FightFest 的活动名走「UIPrefab basename == StageType」同名约定"
+        )
+        assert names["TelevisionActivity"][428001] == {"name": "与银袋山同行", "activity": "惊梦电视台"}
+        assert names["SummonActivity"][421001] == {"name": "人山人海的桶", "activity": "开拓，友谊魔法！"}
+        assert names["StarFightActivity"][417001] == {"name": "星海竞逐", "activity": "星芒烁变"}
+        assert names["ElationActivity"][427001] == {"name": "花火的千变假面", "activity": ""}, (
+            "ElationActivity 全库无 ActivityModuleID 连接 → 宁缺前缀，不猜活动"
+        )
+        assert names["BoxingClub"][304001] == {"name": "很多鸽子", "activity": ""}, (
+            "BoxingClub 只有 20/97 个活动号能连到挑战表 → 同样不带活动名"
+        )
+
+    def test_four_source_families_resolve_to_stage_id(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        stage_types = {r["StageID"]: r["StageType"] for r in mx._load_table("StageConfig")}
+        names = mx.load_player_stage_names(stage_types)
+        # ① 活动（含「关卡号 = 活动号」的单关特例、无名称行；活动名与关卡名分列两个字段）
+        assert names[4190010] == {"name": "擂台赛•其一", "activity": "星天演武仪典"}
+        assert names[419000] == {"name": "新人首秀", "activity": "星天演武仪典"}
+        assert names[3040010] == {"name": "很多鸽子", "activity": ""}, "无活动名验证链的活动链 activity 为空"
+        assert names[4270010] == {"name": "花火的千变假面", "activity": ""}
+        assert names[4280010] == {"name": "与银袋山同行", "activity": "惊梦电视台"}
+        assert names[4210010] == {"name": "人山人海的桶", "activity": "开拓，友谊魔法！"}
+        assert names[4170010] == {"name": "星海竞逐", "activity": "星芒烁变"}
+        assert 3040990 not in names, "活动表无名称行的关卡不产出名字"
+        # ② 终局四表：列表里直接装关卡 ID
+        assert names[1] == {"name": "回忆其一", "activity": ""}
+        assert names[2] == {"name": "虚构其一", "activity": ""}
+        # ③ MappingInfoID（真外键）→ MappingInfo.Name
+        assert names[1043050] == {"name": "魔占之径 • 侵蚀隧洞", "activity": ""}
+        assert names[1012160] == {"name": "魔占之径 • 侵蚀隧洞", "activity": ""}
+        # ④ EventID == StageID / StageID 精确连接
+        assert names[420012] == {"name": "长生久视的一梦", "activity": ""}
+        assert names[418001] == {"name": "热血的云骑战士", "activity": ""}
+        # 无源的关卡（FightActivity 常量名 / Mainline / Trial / VerseSimulation / BoxingClub 缺行）都不在表里
+        for sid in (3, 4, 5, 6, 30, 31, 3040990):
+            assert sid not in names
+
+    def test_activity_prefix_takes_longest_panel_id(self, monkeypatch):
+        """`ActivityModuleID` 前导匹配取**最长** PanelID：夹具里 4000 与 40005 都能前缀命中，须选 40005。"""
+        _fake_sources(monkeypatch)
+        stage_types = {r["StageID"]: r["StageType"] for r in mx._load_table("StageConfig")}
+        names = mx.load_player_stage_names(stage_types)
+        assert names[4280010]["activity"] == "惊梦电视台", "短号面板 4000 不得抢匹配"
+
+    def test_stage_type_guard_rejects_cross_type_record(self, monkeypatch):
+        """表内记录指向了**别的 StageType** 的关卡时整条忽略（夹具里 EventID=1 是 Challenge 关）。"""
+        _fake_sources(monkeypatch)
+        stage_types = {r["StageID"]: r["StageType"] for r in mx._load_table("StageConfig")}
+        names = mx.load_player_stage_names(stage_types)
+        assert names[1]["name"] == "回忆其一", "强敌挑战表的 EventID=1 记录不得覆盖 Challenge 关的名字"
+
+    def test_missing_table_skips_that_source_only(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        inner = mx.load_json
+
+        def fake(path):
+            if Path(path).name in ("ElationBattleLevel.json", "ChallengeMazeConfig.json"):
+                raise FileNotFoundError(path)
+            return inner(path)
+
+        monkeypatch.setattr(mx, "load_json", fake)
+        stage_types = {r["StageID"]: r["StageType"] for r in mx._load_table("StageConfig")}
+        names = mx.load_player_stage_names(stage_types)
+        assert names[4190010] == {"name": "擂台赛•其一", "activity": "星天演武仪典"}, "缺表只掉对应那条源"
+        assert 1 not in names, "终局表缺失 → 该关退化为无名（不退回 StageName）"
+        assert names[1043050] == {"name": "魔占之径 • 侵蚀隧洞", "activity": ""}
 
 
 class TestLoadPhases:
@@ -229,7 +449,7 @@ class TestLoadEventSources:
     def test_derives_name_tabs_levels(self, monkeypatch):
         _fake_sources(monkeypatch)
         ev = mx.load_event_sources()
-        assert set(ev) == {1002040}, "只有活动关卡的怪物产出"
+        assert set(ev) == {1002040, 1003014}, "只有活动关卡的怪物产出"
         assert ev[1002040]["name"] == "星天演武仪典", "TitleName 的「」要剥掉"
         assert ev[1002040]["tabs"] == ["梦境训练"], "只取 ActivityModuleID 属于该面板的页签"
         assert ev[1002040]["levels"] == [20]

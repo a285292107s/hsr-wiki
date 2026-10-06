@@ -12,9 +12,11 @@
 - **出没** `StageConfig`（29,515 关）的波次 `MonsterList` → 实例 ID 折算到模板；再沿
   `MonsterConfig.SummonIDList` 把「召唤者出场」计入被召唤者。**不沿召唤链会误判**：冰锋 /
   无尽寒冬之槊这类由首领召唤出场的小怪，波次里根本没有它们（实测只看波次 394 个模板命中，
-  加召唤链 544 个）。样本取「不同 `StageType` 各一关」，名称用 `StageConfig.StageName` 的
-  TextMap。**不落 `StageType` 英文枚举**：全仓没有该枚举（33 种）的中文标签源，自造 33 个玩法名
-  等于自建数据源。
+  加召唤链 544 个）。样本取「不同 `StageType` 各一关」，名称只取玩家可见的关卡名
+  （`load_player_stage_names`：活动表 / 终局四表 / 侵蚀隧洞·凝滞虚影入口表 / 强敌挑战·剑试表），
+  源里没有关卡名的关卡只计入总数、不落样本——`StageConfig.StageName` 在这些玩法里是敌方标识
+  （常与本怪同名），拿它当关卡名会让读者困惑（ADR 0047）。**不落 `StageType` 英文枚举**：全仓
+  没有该枚举（33 种）的中文标签源，自造 33 个玩法名等于自建数据源。
 - **阶段** `MonsterAtlasExtraPhase` / `MonsterAtlasExtraPhases`（9 + 12 行，字段同构的同名双表，
   按 `(TemplateGroupID, PhaseID)` 去重）按 `TemplateGroupID` 归属某族：给出该阶段的弱点与伤害
   抗性，可选名称/介绍（实测仅 3/9 有文本）。族内**每个成员**都带同一组阶段（阶段是族/战斗的
@@ -75,16 +77,214 @@ def load_drops() -> dict[int, list[dict]]:
     return by_tpl
 
 
+def _load_table(name: str) -> list[dict]:
+    """整表读取；表缺失返回空列表（活动名称各链相互独立，缺一张不影响其它链）。"""
+    try:
+        return load_json(EXCEL_DIR / f"{name}.json")
+    except FileNotFoundError:
+        return []
+
+
+def _activity_panel_names() -> dict[int, str]:
+    """`{ActivityPanel.PanelID: 活动名}`（`TitleName` 剥「」）。"""
+    out: dict[int, str] = {}
+    for rec in _load_table("ActivityPanel"):
+        pid = rec.get("PanelID")
+        name = resolve_text(rec.get("TitleName") or {}).strip("「」")
+        if pid is not None and name:
+            out[pid] = name
+    return out
+
+
+def _panel_name_for(module_id: object, panels: dict[int, str]) -> str:
+    """`ActivityModuleID` 的前导 = `ActivityPanel.PanelID` → 活动名（取**最长**前缀，避免短号抢匹配）。
+
+    与 `load_event_sources` 取活动页签用的是同一条约定（`ActivityModuleID` 以面板 ID 开头）；
+    命不中返回空串——不给活动名，不猜活动。
+    """
+    if not isinstance(module_id, int):
+        return ""
+    text = str(module_id)
+    best = ""
+    for pid in panels:
+        key = str(pid)
+        if text.startswith(key) and len(key) > len(best):
+            best = key
+    return panels.get(int(best), "") if best else ""
+
+
+def load_activity_stage_names() -> dict[str, dict[int, dict]]:
+    """活动关卡名 `{StageType: {EventID: {"name": 关卡名, "activity": 活动名}}}`。
+
+    **为什么不能直接用 `StageConfig.StageName`**：活动关卡的该字段是**活动级常量**——FightFest
+    134 关 / TelevisionActivity 70 关 / ElationActivity 49 关 / SummonActivity 70 关各自全类型
+    共用一个文本，且该文本与关卡名单无关（「承露天人」是同一活动里的另一只敌人，模板 2023030；
+    「裂界造物」「反物质军团」是阵营名）。真实关卡名在活动表里，各链都按 `EventID = StageID // 10`
+    折算（调用方还会退回原值查一次，覆盖 FightFest 419000 这类「关卡号 = 活动号」的单关特例）：
+
+    - FightFest → `FightFestStageInfo.ChallengeName`（擂台赛•其一 / 梦境训练•托帕 …）
+    - ElationActivity → `ElationBattleLevel.StageName`（花火的千变假面 …）
+    - TelevisionActivity → `ActivityTelevisionLevel.EventID → TelevisionID` →
+      `ActivityTelevisionStage.StageName`（与银袋山同行 …）
+    - SummonActivity → `ActivitySummonLevel.EventID → GroupID` → `ActivitySummonGroup.StageName`
+    - BoxingClub → `BoxingClubStage.Name`（「很多鸽子」…；97/121 个活动号有行，缺行的关卡按无名处理）
+    - StarFightActivity → `StarFightStageConfig.EventID → GroupID` → `ActivityStarFightGroup.GroupTitle`
+
+    `activity`（活动名，用于样本标签前缀）只在**有验证链**时给，否则空串：
+
+    - FightFest：`ActivityPanel.UIPrefab` basename == `StageType`（`load_event_sources` 同一约定）
+    - TelevisionActivity / SummonActivity / StarFightActivity：关卡名来源表上的 `ActivityModuleID`
+      → `ActivityPanel`（「惊梦电视台」「开拓，友谊魔法！」「星芒烁变 / 星芒启明」）
+    - BoxingClub / ElationActivity：**给不出**——BoxingClub 只有 20/97 个活动号能连到挑战表
+      （`BoxingClubChallenge.StageGroupList → BoxingClubStageGroup.EventIDList`，样本关仅 4/19），
+      ElationActivity 全库无 `ActivityModuleID` 连接。宁缺前缀，不猜活动。
+
+    其余活动类型（FightActivity / TreasureDungeon / GridFightActivity / FateRin / FateActivity /
+    BattleCollege / Heliobus / AetherDivide）仓内没有可用的逐关名源，调用方对它们不落样本。
+    字典**恒含这 6 个键**（哪怕某张表缺失、取到空字典）：调用方据此判定「该类型有实名源」，
+    缺表时退化为不落样本，而不是退回活动级常量名。
+    """
+    panels = _activity_panel_names()
+    festival = {
+        (p.get("UIPrefab") or "").rsplit("/", 1)[-1].replace("Panel.prefab", ""): resolve_text(
+            p.get("TitleName") or {}
+        ).strip("「」")
+        for p in _load_table("ActivityPanel")
+    }
+    tv_stage = {r.get("TelevisionID"): r for r in _load_table("ActivityTelevisionStage")}
+    tv_key = {r.get("EventID"): r.get("TelevisionID") for r in _load_table("ActivityTelevisionLevel")}
+    summon_group = {r.get("GroupID"): r for r in _load_table("ActivitySummonGroup")}
+    summon_key = {r.get("EventID"): r.get("GroupID") for r in _load_table("ActivitySummonLevel")}
+    star_group = {r.get("GroupID"): r for r in _load_table("ActivityStarFightGroup")}
+    star_key = {r.get("EventID"): r.get("GroupID") for r in _load_table("StarFightStageConfig")}
+
+    def entry(name: str, activity: str = "") -> dict:
+        return {"name": name, "activity": activity}
+
+    def chain(keys: dict, rows: dict, name_field: str, event_field: str = "EventID") -> dict[int, dict]:
+        out: dict[int, dict] = {}
+        for event, key in keys.items():
+            row = rows.get(key)
+            name = resolve_text(row.get(name_field, {})) if row else ""
+            if name:
+                out[event] = entry(name, _panel_name_for(row.get("ActivityModuleID"), panels))
+        return out
+
+    return {
+        "FightFest": {
+            r.get("EventID"): entry(
+                resolve_text(r.get("ChallengeName", {})), festival.get("FightFest", "")
+            )
+            for r in _load_table("FightFestStageInfo")
+        },
+        "ElationActivity": {
+            r.get("EventID"): entry(resolve_text(r.get("StageName", {})))
+            for r in _load_table("ElationBattleLevel")
+        },
+        "TelevisionActivity": chain(tv_key, tv_stage, "StageName"),
+        "SummonActivity": chain(summon_key, summon_group, "StageName"),
+        "BoxingClub": {
+            r.get("EventID"): entry(resolve_text(r.get("Name", {})))
+            for r in _load_table("BoxingClubStage")
+        },
+        "StarFightActivity": chain(star_key, star_group, "GroupTitle"),
+    }
+
+
+def _absorb_id_names(out: dict[int, dict], table: str, key: str, allowed: set[str],
+                     stage_types: dict[int, str], name_field: str = "Name") -> None:
+    """精确连接：表内 `key` 的值**就是**关卡 ID（非活动关，无活动名）。"""
+    for rec in _load_table(table):
+        sid = rec.get(key)
+        name = resolve_text(rec.get(name_field, {}))
+        if name and isinstance(sid, int) and stage_types.get(sid) in allowed:
+            out[sid] = {"name": name, "activity": ""}
+
+
+def _absorb_list_names(out: dict[int, dict], table: str, fields: tuple[str, ...], allowed: set[str],
+                       stage_types: dict[int, str], name_field: str = "Name") -> None:
+    """精确连接：表内某个**列表**字段里装的关卡 ID（非活动关，无活动名）。"""
+    for rec in _load_table(table):
+        name = resolve_text(rec.get(name_field, {}))
+        if not name:
+            continue
+        for field in fields:
+            for sid in rec.get(field) or []:
+                if isinstance(sid, int) and stage_types.get(sid) in allowed:
+                    out[sid] = {"name": name, "activity": ""}
+
+
+def _absorb_entrance_names(out: dict[int, dict], table: str, stage_field: str,
+                           mapping: dict, allowed: set[str], stage_types: dict[int, str]) -> None:
+    """`MappingInfoID`（真外键，实测 100% 非空）→ `MappingInfo.Name`（玩家可见的入口名）。"""
+    for rec in _load_table(table):
+        name = mapping.get(rec.get("MappingInfoID"))
+        if not name:
+            continue
+        raw = rec.get(stage_field)
+        for sid in raw if isinstance(raw, list) else [raw]:
+            if isinstance(sid, int) and stage_types.get(sid) in allowed:
+                out[sid] = {"name": name, "activity": ""}
+
+
+def load_player_stage_names(stage_types: dict[int, str]) -> dict[int, dict]:
+    """`{关卡 ID: {"name": 玩家可见的关卡名, "activity": 活动名（可空）}}` —— 出没样本**唯一**的名称来源（ADR 0047）。
+
+    判据：玩家在游戏里认得出的名字只活在这些表里，`StageConfig.StageName` 在若干玩法里只是
+    **敌方标识**（实测 181 个「自己名字」样本里 160 个与 `MonsterTemplateConfig.MonsterName`
+    是同一个 TextMap hash），故一律不取。四类源（各源按 `StageType` 互斥，实测覆盖 298/742 个样本）：
+
+    ① 活动关卡（`load_activity_stage_names`，`EventID = StageID // 10` 折算 + 原值兜底）：62 个样本。
+       `activity`（活动名）**原样带出、不拼进 `name`**——页面上活动名是弱化的上下文、关卡名才是值；
+       拼接只发生在展示层（视图 / AI 快照各按同一格式），数据层保持两个字段各管一件事。
+       BoxingClub / ElationActivity 无连接，`activity` 缺位（见 `load_activity_stage_names` 的证据）。
+    ② 终局四表——`ChallengeMazeConfig` / `ChallengeStoryMazeConfig` / `ChallengeBossMazeConfig` 的
+       `EventIDList1/2` 与 `ChallengePeakConfig` 的 `EventIDList` **直接装关卡 ID** → `Name`
+       （「出故乡记其十」「支配恶兽·难度01」…，站点终局页已在用同一判据）：163 个样本
+    ③ `CocoonConfig.StageIDList` / `FarmElementConfig.StageID` → `MappingInfoID` →
+       `MappingInfo.Name`（「魔占之径 • 侵蚀隧洞」「焦炙之形 • 凝滞虚影」）：45 个样本
+    ④ `StrongChallengeStage.EventID` → `Name`（「长生久视的一梦」）、`SwordTrainingExam.StageID` →
+       `EnemyName`（「热血的云骑战士」）：28 个样本
+
+    **不要退回的候选**：`MappingInfo.ID == StageID // 100` 是巧合——90 个 `FARM_ENTRANCE` 里只有 1 个
+    存在 `ID*100+k` 关卡家族（非 FARM 的 923 里有 74 个），且逐关核对 `ShowMonsterList` 与波次 0 交集。
+    """
+    names: dict[int, dict] = {}
+    activity = load_activity_stage_names()
+    for sid, stype in stage_types.items():
+        book = activity.get(stype)
+        entry = (book.get(sid // 10) or book.get(sid)) if book else None
+        if entry and entry["name"]:
+            names[sid] = {"name": entry["name"], "activity": entry["activity"]}
+    for table in ("ChallengeMazeConfig", "ChallengeStoryMazeConfig", "ChallengeBossMazeConfig"):
+        _absorb_list_names(names, table, ("EventIDList1", "EventIDList2"), {"Challenge"}, stage_types)
+    _absorb_list_names(names, "ChallengePeakConfig", ("EventIDList",), {"Challenge"}, stage_types)
+    mapping = {
+        r.get("ID"): resolve_text(r.get("Name", {}))
+        for r in _load_table("MappingInfo")
+    }
+    _absorb_entrance_names(names, "CocoonConfig", "StageIDList", mapping, {"Cocoon"}, stage_types)
+    _absorb_entrance_names(names, "FarmElementConfig", "StageID", mapping, {"FarmElement"}, stage_types)
+    _absorb_id_names(names, "StrongChallengeStage", "EventID", {"StrongChallengeActivity"}, stage_types)
+    _absorb_id_names(names, "SwordTrainingExam", "StageID", {"SwordTraining"}, stage_types, "EnemyName")
+    return names
+
+
 def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:
     """StageConfig 波次 + 召唤链 → {模板ID: {total, samples:[{id, name}]}}。
 
     `total` = 该模板（含其被召唤出场）出现过的**关卡数**（同关多波只计一次）；
-    `samples` = 至多 `sample_kinds` 个关卡样本，`StageType` 与关卡名都去重（避免同一场战斗刷屏：
-    召唤型小怪的全部出场都是同一个首领战，只按类型去重会得到三条同名样本），名称为空时不收
-    ——宁可少一条样本，不落无名关卡。
+    `samples` = 至多 `sample_kinds` 个关卡样本：**同一 `StageType` 只取一关**（首个命中者）、
+    关卡名不重复（同一场战斗在多个难度档各一行，只按类型去重会得到三条同名样本）。
+
+    名称只有一档来源：`load_player_stage_names`（玩家可见关卡名，ADR 0047）。**解析不出名字的关卡
+    只进 `total`、不落样本**——`StageConfig.StageName` 在 VerseSimulation / Trial / Mainline 等玩法里
+    是敌方标识（常与本怪同名），拿它当关卡名只会让读者困惑（ADR 0046 的「已知边界」由此收口）。
     """
     stages = load_json(EXCEL_DIR / "StageConfig.json")
     configs = load_json(EXCEL_DIR / "MonsterConfig.json")
+    stage_types = {r.get("StageID"): (r.get("StageType") or "") for r in stages}
+    names = load_player_stage_names({k: v for k, v in stage_types.items() if k is not None})
     id2tpl: dict[int, int] = {}
     summons: dict[int, list] = {}
     for rec in configs:
@@ -100,8 +300,9 @@ def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:
     samples: dict[int, list[dict]] = {}
     for rec in stages:
         sid = rec.get("StageID")
-        name = resolve_text(rec.get("StageName", {}))
         stype = rec.get("StageType") or ""
+        named = names.get(sid) or {}
+        name = named.get("name", "")
         tpls: set[int] = set()
         for wave in rec.get("MonsterList") or []:
             for mid in wave.values():
@@ -122,12 +323,18 @@ def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:
                 and len(book) < sample_kinds
                 and all(s["type"] != stype and s["name"] != name for s in book)
             ):
-                book.append({"id": sid, "name": name, "type": stype})
+                sample = {"id": sid, "name": name, "type": stype}
+                if named.get("activity"):
+                    sample["activity"] = named["activity"]
+                book.append(sample)
 
     return {
         tpl: {
             "total": n,
-            "samples": [{"id": s["id"], "name": s["name"]} for s in samples.get(tpl, [])],
+            "samples": [
+                {"id": s["id"], "name": s["name"], **({"activity": s["activity"]} if s.get("activity") else {})}
+                for s in samples.get(tpl, [])
+            ],
         }
         for tpl, n in total.items()
     }

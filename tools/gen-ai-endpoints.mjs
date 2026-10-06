@@ -174,6 +174,14 @@ function txt(raw, params, limit = SNAPSHOT_TEXT_LIMIT_DETAIL) {
   return esc(plain(raw, params, limit));
 }
 
+/** 活动出处的等级文案：**单档只写一个数**（源里确有全档同等级的活动敌人，写「85–85」是假区间）。
+ *  与页面 `MonsterDetailView.vue → eventLevelText` 同一口径。 */
+function eventLevelRange(levels) {
+  const list = Array.isArray(levels) ? levels.filter((n) => n != null) : [];
+  if (!list.length) return '';
+  return list.length > 1 ? `${list[0]}–${list[list.length - 1]}` : String(list[0]);
+}
+
 /**
  * 目录条目字段的安全渲染（契约 §3「参数展开保真」，含裸 `#N` 语义判据）：
  * 1) 先按 fmtDesc/fmtVal 口径展开 `#N[tag]%`；展开后仍含 `#N[...]` → 省略该字段。
@@ -958,7 +966,12 @@ function monsterPages(ctx) {
           .filter((f) => f && f.name)
           .map((f) => `<p>附带效果 ${txt(f.name, null, 60)}${f.desc ? `：${txt(f.desc, f.param_list)}` : ''}</p>`)
           .join('');
-        return `<li><span>${txt(s.name, null, 100)}${metaParts.length ? `（${txt(metaParts.join(' · '), null, 60)}）` : ''}</span><p>${txt(s.desc, s.param_list)}</p>${fx}</li>`;
+        /* 原始参数行（与页面 MonsterDetailView 同口径：描述引用与否都展示——重复供对照、
+           缺行更困惑）。数值 String() 原样，不做取整/千分位。 */
+        const rawParams = Array.isArray(s.param_list) && s.param_list.length
+          ? `<p>参数 ${s.param_list.map((v) => esc(String(v))).join(' / ')}</p>`
+          : '';
+        return `<li><span>${txt(s.name, null, 100)}${metaParts.length ? `（${txt(metaParts.join(' · '), null, 60)}）` : ''}</span><p>${txt(s.desc, s.param_list)}</p>${rawParams}${fx}</li>`;
       })
       .join('');
     /**
@@ -983,9 +996,10 @@ function monsterPages(ctx) {
       ['防御（模板基准）', d.stats ? esc(String(d.stats.def)) : ''],
       ['速度（模板基准）', d.stats ? esc(String(d.stats.speed)) : ''],
       /* 活动出处（`monster_extra.load_event_sources`）：活动名与页签都是源文本
-         （`ActivityPanel.TitleName` / `ActivityQuestRewardData.QuestTabName`），不是自撰文案。 */
+         （`ActivityPanel.TitleName` / `ActivityQuestRewardData.QuestTabName`），不是自撰文案；
+         等级单档时不写区间（源数据里 5 个活动敌人全档同等级，写「85–85」是假区间）。 */
       ['活动出处', d.event
-        ? txt(`${d.event.name}（${d.event.count} 个活动关卡，等级 ${d.event.levels[0]}–${d.event.levels[d.event.levels.length - 1]}${d.event.tabs.length ? `；页签 ${d.event.tabs.join('/')}` : ''}）`, null, 160)
+        ? txt(`${d.event.name}（${d.event.count} 个活动关卡，等级 ${eventLevelRange(d.event.levels)}${d.event.tabs.length ? `；页签 ${d.event.tabs.join('/')}` : ''}）`, null, 160)
         : ''],
     ];
     if (d.invaded) {
@@ -997,9 +1011,12 @@ function monsterPages(ctx) {
     }
     /* 掉落与出没（`monster_extra` 的三块之二）：值与页面同源（都读详情 JSON 的 `drops` /
        `appearances`，禁止在此另算一遍）；掉落只列基准档物品名，档数在括号里给总量——
-       逐档铺开会把 632 个快照各撑大数百字节，而「掉什么」这一问答所需的信息基准档已足够。 */
+       逐档铺开会把 632 个快照各撑大数百字节，而「掉什么」这一问答所需的信息基准档已足够。
+       出没的样本名与页面同格式：`activity` 有值时拼成「活动名 · 关卡名」（分隔符与页面逐字一致）。 */
     if (d.appearances && d.appearances.total) {
-      const samples = (d.appearances.samples || []).map((s) => s.name).filter(Boolean);
+      const samples = (d.appearances.samples || [])
+        .map((s) => (s.activity ? `${s.activity} · ${s.name}` : s.name))
+        .filter(Boolean);
       facts.push(['出没关卡', `${d.appearances.total} 个${samples.length ? `（如 ${esc(samples.join(' / '))}）` : ''}`]);
     }
     if (Array.isArray(d.drops) && d.drops.length) {
