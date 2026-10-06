@@ -29,20 +29,29 @@ def _is_excluded(item: dict) -> bool:
         return True
     return False
 
+def item_name_icon(item: dict) -> tuple[str, str]:
+    """单条 ItemConfig 记录 → (名称, 图标官方路径)。
+
+    单点声明物品的名称/图标取法：`items.json` 与敌对物种掉落（`monster_extra.load_drops`）共用，
+    避免两处各写一份解析而漂移（掉落的 `DisplayItemList` 只给 ItemID，名称与图标必须回到本表取）。
+    """
+    return resolve_text(item.get("ItemName", {})), map_icon_path(item.get("ItemIconPath", ""))
+
 def _parse_item(item: dict) -> dict:
     """单条 ItemConfig 记录 → items.json 条目。"""
     item_id = item.get("ID", 0)
     rarity_key = item.get("Rarity", "")
+    name, icon = item_name_icon(item)
     return {
         "id": item_id,
-        "name": resolve_text(item.get("ItemName", {})),
+        "name": name,
         "desc": resolve_text(item.get("ItemDesc", {})),
         "bg_desc": resolve_text(item.get("ItemBGDesc", {})),
         "main_type": item.get("ItemMainType", ""),
         "sub_type": item.get("ItemSubType", ""),
         "rarity": RARITY_MAP.get(rarity_key, 0),
         "purpose_type": item.get("PurposeType", 0),
-        "icon": map_icon_path(item.get("ItemIconPath", "")),
+        "icon": icon,
         "figure_icon": map_icon_path(item.get("ItemFigureIconPath", "")),
     }
 
