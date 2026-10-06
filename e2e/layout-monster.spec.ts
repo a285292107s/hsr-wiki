@@ -241,11 +241,14 @@ test.describe('布局验收：敌方详情页', () => {
         type: (el.querySelector('.nk-mob-status__type')?.textContent || '').trim(),
         dispel: Boolean(el.querySelector('.nk-mob-status__dispel')),
         desc: (el.querySelector('.nk-mob-status__desc')?.textContent || '').trim(),
+        // 图标位占位：状态图标资源双侧 404，先占住格子（图标入库后换成 <img>）
+        iconSlot: Boolean(el.querySelector('.nk-mob-status__icon svg')),
       })));
       rows.forEach((s, i) => {
         expect(rendered[i].name, `第 ${i + 1} 条词条名`).toBe(s.name);
         expect(rendered[i].type, `${s.name} 的类型标签`).toBe(TYPE[s.type] || s.type || '其他');
         expect(rendered[i].dispel, `${s.name} 的可驱散标记`).toBe(Boolean(s.dispel));
+        expect(rendered[i].iconSlot, `${s.name} 的图标位占位符`).toBe(true);
         // 描述按「无占位符才落」的规则走：有源文本就该有渲染文本（且不含未替换的占位符残留）
         if (s.desc) expect(rendered[i].desc.length, `${s.name} 的描述应上屏`).toBeGreaterThan(0);
         expect(rendered[i].desc, `${s.name} 不得出现未替换的占位符`).not.toContain('#');

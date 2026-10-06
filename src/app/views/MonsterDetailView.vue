@@ -463,7 +463,7 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 <dd class="nk-mob-stat__val">{{ fmtStatValue(stanceValue ?? d.stance) }}</dd>
               </div>
             </dl>
-            <p class="nk-mob-stat-note">口径：模板基准 × 维度修饰比 × 等级曲线（难度组 {{ d.level_group ?? 1 }}）＋ 实例修正值；基准值 {{ d.stats.hp }} / {{ d.stats.atk }} / {{ d.stats.def }} / {{ d.stats.speed }}<template v-if="d.stance_modify != null || d.speed_modify != null">，本档修正 <template v-if="d.stance_modify != null">韧性 {{ d.stance_modify > 0 ? '+' : '' }}{{ d.stance_modify }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">速度 {{ d.speed_modify > 0 ? '+' : '' }}{{ d.speed_modify }}</template></template>，未含关卡级剧情与场景系数。</p>
+            <p class="nk-mob-stat-note">口径：模板基准 × 维度修饰比 × 等级曲线（难度组 {{ d.level_group ?? 1 }}）＋ 实例修正值；<strong>韧性不入该曲线</strong>（韧性 = 韧性基准 + 实例修正值，不随等级变化，故在上方单独一行）；基准值 {{ d.stats.hp }} / {{ d.stats.atk }} / {{ d.stats.def }} / {{ d.stats.speed }}<template v-if="d.stance_modify != null || d.speed_modify != null">，本档修正 <template v-if="d.stance_modify != null">韧性 {{ d.stance_modify > 0 ? '+' : '' }}{{ d.stance_modify }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">速度 {{ d.speed_modify > 0 ? '+' : '' }}{{ d.speed_modify }}</template></template>，未含关卡级剧情与场景系数。</p>
           </section>
 
           <section v-if="drops.length" class="nk-mob-sec">
@@ -548,6 +548,18 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             <div class="nk-mob-statuses">
               <article v-for="s in d.statuses" :key="s.id" class="nk-mob-status" :data-type="s.type">
                 <header class="nk-mob-status__head">
+                  <!-- 图标位（占位）：状态图标源路径 `StatusIconPath` 全是 `BuffIcon/Inlevel/*`，
+                       该目录在 nanoka 与 jsDelivr **双侧 404**（实测），本仓也没有本地入库，
+                       故先放占位符、把尺寸与位置固定下来。
+                       图标资源到位后：数据侧给 `statuses[]` 加 `icon`（basename），
+                       这里把 <svg> 换成 <img :src="cdnUri('bufficon', `${s.icon}.webp`)">，
+                       并给 img 加 @error 兜底（与终局增益图标同款 SVG）。 -->
+                  <span class="nk-mob-status__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                      <path d="M12 2.5l2.3 6.2 6.2 2.3-6.2 2.3-2.3 6.2-2.3-6.2-6.2-2.3 6.2-2.3z" />
+                      <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+                    </svg>
+                  </span>
                   <span class="nk-mob-status__name">{{ s.name }}</span>
                   <span class="nk-mob-status__type">{{ statusTypeLabel(s.type) }}</span>
                   <span v-if="s.dispel" class="nk-mob-status__dispel">可驱散</span>

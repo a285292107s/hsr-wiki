@@ -485,6 +485,23 @@
   gap: 8px;
 }
 
+/* 图标位（占位）：状态图标资源双侧 404，先把格子占住——图标入库后这里换成 <img>，尺寸不变。
+   视觉沿用终局增益图标缺图时的同款中性字形（不新造符号）。 */
+.nk-mob-status__icon {
+  flex: none;
+  align-self: center;
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  color: var(--text3);
+  opacity: 0.5;
+}
+
+.nk-mob-status__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 .nk-mob-status__name {
   font-size: 0.86rem;
   font-weight: 700;
