@@ -21,7 +21,8 @@ export type CdnCategory =
   | 'gridfight-icon'
   | 'achievement'
   | 'bufficon'
-  | 'tutorialpic';
+  | 'tutorialpic'
+  | 'statusimmune';
 
 export interface CdnCategorySpec {
   /** nanoka 子路径（相对 /assets/hsr/） */
@@ -35,9 +36,12 @@ export interface CdnCategorySpec {
   /* 本地化文件名白名单（与 local 同用；缺省 = 该分类全量文件本地化）。
      relicfigures 分类整体为套装件图（量大走 jsDelivr），仅 4 个通用部位图标入库 */
   localFiles?: RegExp;
-  /* 保持 jsDelivr 为该分类主源（nanoka 退居回退）。
-     唯一使用场景：trace 的 nanoka 源为占位图（真源是 jsDelivr ui/avatar/icon/），
-     本地缺失回退必须落到 jsDelivr；**其余分类禁止设置**（fork 停更后 jsDelivr 仅作旧档补全源） */
+  /* 保持 jsDelivr 为该分类主源（nanoka 退居回退）。两个使用场景：
+     - trace：nanoka 源为占位图（真源是 jsDelivr ui/avatar/icon/）；
+     - statusimmune：nanoka 完全没有这批免疫图标（实测四条候选子路径全 404），
+       故「本地为主 + jsDelivr 兜底」，jdPrimary 的作用是让**本地缺失时的回退**落到 jsDelivr
+       而不是必然 404 的 nanoka。
+     **其余分类禁止设置**（fork 停更后 jsDelivr 仅作旧档补全源）。 */
   jdPrimary?: boolean;
 }
 
@@ -79,4 +83,8 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   achievement: { nanoka: 'achievement' },
   bufficon: { nanoka: 'bufficon' },
   tutorialpic: { nanoka: 'tutorialpic' },
+  /* 免疫图标（`MonsterStatusResistanceType` 的 `Type → SpriteOutput/UI/Avatar/Icon/IconImmune*.png`，
+     128×128 纯白字形 + 透明底，随站入库 11 个 webp）：本地为主（构建期一次性入库、永不更新），
+     nanoka 无该批文件故其子路径仅作占位（与 trace 同源目录），缺失时回退 jsDelivr 官方镜像。 */
+  statusimmune: { nanoka: 'trace', local: 'statusimmune', jdPrimary: true },
 };

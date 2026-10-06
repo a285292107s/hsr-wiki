@@ -1,6 +1,7 @@
 /* CDN URL 解析（纯函数）：按分类解析双源 URL + v-html 卡片回退属性。
    源优先级：本地图标（local-first）> nanoka 主源（持续更新）> jsDelivr 回退（旧档补全，
-   fork 停更后不再跟版本）；trace 例外保持 jsDelivr 主源（spec.jdPrimary，nanoka 源为占位图）。
+   fork 停更后不再跟版本）；trace / statusimmune 例外保持 jsDelivr 为回退目标（spec.jdPrimary：
+   前者 nanoka 源为占位图，后者 nanoka 无该批图标，本地缺失时回退必须落到 jsDelivr）。
    统一收口：所有图片 URL 构造（icons.ts 及视图内联）最终经此解析。 */
 import { CDN } from '../../lib/constants';
 import { escHtml } from '../../lib/html';
@@ -23,7 +24,8 @@ export function nanokaUrl(category: CdnCategory, file: string, spec = CDN_CATEGO
 
 /* 远端双源解析：nanoka 主源（持续更新）+ jsDelivr 回退（旧档补全）。fork 已停止跟随上游，
    冻结后新增内容仅 nanoka 有，直拼 jsDelivr 必 404——**禁止**反转回旧优先级，除非 fork 恢复同步。
-   例外：spec.jdPrimary 分类（trace，nanoka 源为占位图）保持 jsDelivr 主源；
+   例外：spec.jdPrimary 分类（trace：nanoka 源为占位图；statusimmune：nanoka 无该批免疫图标）
+   在本地缺失时保持 jsDelivr 为回退目标；
    spec.official 且 OFFICIAL_BASE 非空时官方源优先（预留插槽，当前基址为空不生效）。 */
 function remoteCdnUri(
   category: CdnCategory,

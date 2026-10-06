@@ -74,6 +74,14 @@ describe('resolveCdnUri 双源解析', () => {
       fallback: `${JS_DELIVR_BASE}/ui/avatar/icon/IconAttack.png`,
       source: 'local',
     });
+    // statusimmune（免疫图标）：本地入库为主，nanoka 无该批文件 → 本地缺失也必须回退 jsDelivr（同目录）
+    expect(resolveCdnUri('statusimmune', 'IconImmuneFrozen.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/statusimmune/IconImmuneFrozen.webp`,
+      fallback: `${JS_DELIVR_BASE}/ui/avatar/icon/IconImmuneFrozen.png`,
+      source: 'local',
+    });
+    expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/statusimmune/IconImmuneFrozen.webp`))
+      .toBe(`${JS_DELIVR_BASE}/ui/avatar/icon/IconImmuneFrozen.png`);
   });
 
   it('jsDelivr 映射分类：skillicons 主源 nanoka 平铺，回退按角色 id 分目录', () => {

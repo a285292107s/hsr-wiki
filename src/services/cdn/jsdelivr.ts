@@ -1,9 +1,10 @@
 /* jsDelivr 源（自建 fork StarRailTextures 镜像）：当前为回退源，仅补 nanoka 缺失旧档。
    fork 已冻结（仅含冻结前资产），主源必须是 nanoka（持续更新）；**禁止**把 jsDelivr 重新设为
-   任何分类首选源——唯一例外是 trace 分类（nanoka 为占位图，经 base.ts spec.jdPrimary 保持主源）。
+   任何分类首选源——例外只有两个：trace（nanoka 为占位图，经 base.ts spec.jdPrimary 保持主源）
+   与 statusimmune（nanoka 无该批免疫图标，本地为主、jsDelivr 兜底，同样经 jdPrimary 让回退落到它）。
    路径规则：SpriteOutput/{SubDir} → spriteoutput/{subdir}（目录小写 / 文件名保大小写）；
-   skillicons 按角色 id 分目录（avatar/{id}/）、trace 在 ui/avatar/icon/、element 在 icondamagetype/、
-   pathicon 在 professioniconmiddle/（Priest→Pirest、Elation→Joy 官方拼写差异）。 */
+   skillicons 按角色 id 分目录（avatar/{id}/）、trace 与 statusimmune 在 ui/avatar/icon/、
+   element 在 icondamagetype/、pathicon 在 professioniconmiddle/（Priest→Pirest、Elation→Joy 官方拼写差异）。 */
 import type { CdnCategory } from './base';
 import { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH, OFFICIAL_ICON_BASE } from '../../lib/constants';
 
@@ -32,6 +33,8 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
   lightconemediumicon: (f) => `lightconemediumicon/${f.replace(/\.webp$/i, '')}.png`,
   achievement: (f) => `achievement/${f.replace(/\.webp$/i, '')}.png`,
   trace: (f) => `ui/avatar/icon/${f.replace(/\.webp$/i, '')}.png`,
+  // 免疫图标与行迹图标同目录（ui/avatar/icon/），文件名自带 IconImmune 前缀
+  statusimmune: (f) => `ui/avatar/icon/${f.replace(/\.webp$/i, '')}.png`,
   monstermiddleicon: (f) => `monstermiddleicon/${f.replace(/\.webp$/i, '')}.png`,
   monsterfigure: (f) => `monsterfigure/${f.replace(/\.webp$/i, '')}.png`,
   relicfigures: (f) => {
