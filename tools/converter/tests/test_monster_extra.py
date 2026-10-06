@@ -89,6 +89,10 @@ def _fake_sources(monkeypatch, **overrides):
             {"StatusID": 9005, "ModifierName": "MMonster_W9_Alpha_00_Skill02_DefenceDown",
              "StatusName": {"Hash": 61}, "StatusType": "Debuff",
              "StatusDesc": {"Hash": 62}, "CanDispel": True},
+            # 描述带 `%宏`（运行时替换的施放者名）→ 同样不落 desc
+            {"StatusID": 9006, "ModifierName": "MMonster_W9_Alpha_00_Support",
+             "StatusName": {"Hash": 67}, "StatusType": "Other",
+             "StatusDesc": {"Hash": 68}},
         ],
         "MonsterAtlasExtraPhase.json": [
             {"TemplateGroupID": 4014010, "PhaseID": 1,
@@ -130,7 +134,7 @@ def _fake_sources(monkeypatch, **overrides):
         41: "额外回合", 42: "获得 #1[i] 个额外回合",
         51: "阿尔法", 52: "阿尔法（完整）", 53: "贝塔", 54: "伽马",
         61: "防御力降低", 62: "防御力降低 20%。", 63: "攻击力提高", 64: "攻击力提高#1[i]%。",
-        65: "超甲", 66: "狂怒",
+        65: "超甲", 66: "狂怒", 67: "支援", 68: "受到%CasterName支援。",
     }.get((h or {}).get("Hash"), "")
     monkeypatch.setattr(mx, "resolve_text", text)
     monkeypatch.setattr(it, "resolve_text", text)
@@ -210,7 +214,7 @@ class TestLoadStatuses:
         st = mx.load_statuses()
         # 阿尔法 / 阿尔法（完整）同 token 同基名 → 两条都拿到
         assert set(st) == {7001, 7002}, "跨名 token（贝塔/伽马）整条丢弃，两边都不挂"
-        assert [s["name"] for s in st[7001]] == ["防御力降低", "攻击力提高"], (
+        assert [s["name"] for s in st[7001]] == ["防御力降低", "攻击力提高", "支援"], (
             "渲染签名全同的两条（9001 / 9005）只留一条，且按 StatusID 升序"
         )
 
@@ -220,6 +224,7 @@ class TestLoadStatuses:
         assert rows[9001]["desc"] == "防御力降低 20%。", "无占位符 → 描述照落"
         assert rows[9001]["dispel"] is True
         assert "desc" not in rows[9002], "带 #N[i] 占位符（数值来自动态属性）→ 不落不可渲染的描述"
+        assert "desc" not in rows[9006], "带 %宏（运行时替换的施放者名）→ 同样不落描述"
         assert "dispel" not in rows[9002], "CanDispel 为假不落键"
 
     def test_unmatched_status_dropped(self, monkeypatch):

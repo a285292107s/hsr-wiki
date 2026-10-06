@@ -249,9 +249,11 @@ def load_statuses() -> dict[int, list[dict]]:
     「（完整）/（幻象）/（错误）」等形态。宁可少归、不可错归。
 
     两处**刻意不落**：
-    - `desc` 只在没有 `#N[i]` 占位符时落。状态描述的数值来自动态属性（`ReadParamList` 只有键名
-      如 `MDF_PropertyValue`、没有数值，实测 313/706 条描述带占位符），照仓规「缺参时消费方整段
-      省略、不落残缺占位与 `?`」（`src/lib/format.ts → refsResolved`），不落不可渲染的描述；
+    - `desc` 只在**既无 `#N[i]` 占位符、也无 `%宏`**（`%CasterName` / `%DynamicTargetName` 这类运行时
+      文本替换）时落。状态描述的数值来自动态属性（`ReadParamList` 只有键名如 `MDF_PropertyValue`、
+      没有数值，实测 313/706 条带占位符），运行时的施放者/目标名同样不可知；照仓规「缺参时消费方
+      整段省略、不落残缺占位与 `?`」（`src/lib/format.ts → refsResolved`），不落不可渲染的描述
+      （实测另有 4 条描述带 `%CasterName`，如「援军：受到%CasterName支援。」）；
     - 图标不落：`StatusIconPath` 全是 `BuffIcon/Inlevel/*`，该目录 nanoka 与 jsDelivr **双侧 404**。
     """
     templates = load_json(EXCEL_DIR / "MonsterTemplateConfig.json")
@@ -291,7 +293,8 @@ def load_statuses() -> dict[int, list[dict]]:
         if rec.get("CanDispel"):
             entry["dispel"] = True
         desc = resolve_text(rec.get("StatusDesc", {}))
-        if desc and not re.search(r"#\d", desc):
+        # 不可渲染的描述整段不落：`#N[i]` 的数值与 `%宏`（施放者/目标名）都在运行时才知道
+        if desc and not re.search(r"#\d|%[A-Za-z]", desc):
             entry["desc"] = desc
         for m in tpls:
             by_tpl.setdefault(m, []).append(dict(entry))

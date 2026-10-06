@@ -133,7 +133,8 @@ export interface MonsterStatusDetail {
   type: string;
   /** 可被驱散（源字段 `CanDispel` 为真才落键） */
   dispel?: boolean;
-  /** 描述——**只在没有 `#N[i]` 占位符时**落：状态描述的数值来自动态属性（`ReadParamList` 只有键名），
+  /** 描述——**只在既无 `#N[i]` 占位符、也无 `%宏`** 时落：状态描述的数值来自动态属性
+   *  （`ReadParamList` 只有键名），`%CasterName` / `%DynamicTargetName` 这类运行时替换也不可知；
    *  照仓规「缺参整段省略，不落残缺占位与 `?`」（`src/lib/format.ts → refsResolved`） */
   desc?: string;
 }

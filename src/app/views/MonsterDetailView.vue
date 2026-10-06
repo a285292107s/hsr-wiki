@@ -544,7 +544,7 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             <!-- 口径：归属靠命名约定（`MonsterStatusConfig.ModifierName` 含怪物配置名），不是外键；
                  只保留「该配置名下的模板去形态后缀后同名」的词条（宁可少归不可错归）。
                  带 `#N[i]` 的描述（数值来自动态属性）本仓无值，按仓规整段省略——故有些词条只有名称与类型。 -->
-            <p class="nk-mob-status__lead">口径：按状态配置名与怪物配置名的命名约定归属；数值未公开具体数值的词条只列名称与类型。</p>
+            <p class="nk-mob-status__lead">口径：按状态配置名与怪物配置名的命名约定归属；数值或动态名称未公开的词条只列名称与类型。</p>
             <div class="nk-mob-statuses">
               <article v-for="s in d.statuses" :key="s.id" class="nk-mob-status" :data-type="s.type">
                 <header class="nk-mob-status__head">
