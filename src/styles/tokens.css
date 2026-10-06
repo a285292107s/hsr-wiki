@@ -502,7 +502,9 @@
 :where(#app) ::selection { background: color-mix(in srgb, var(--primary) 32%, transparent); color: var(--text-bright); }
 :where(#app) input,
 :where(#app) textarea { caret-color: var(--primary); }
-:where(#app) h1, :where(#app) h2, :where(#app) h3, :where(#app) p, :where(#app) dl, :where(#app) dt, :where(#app) dd { margin: 0; padding: 0; }
+/* h4..h6 与 h1..h3 同批收口（全站 3 个 h4 此前各自漏着 UA 的 1.33em 上下外边距） */
+:where(#app) h1, :where(#app) h2, :where(#app) h3, :where(#app) h4, :where(#app) h5, :where(#app) h6,
+:where(#app) p, :where(#app) dl, :where(#app) dt, :where(#app) dd { margin: 0; padding: 0; }
 :where(#app) * { box-sizing: border-box; }
 /* `text-align: inherit` 是**元素类型差异的收口**：UA 给 `<button>` 声明了 `text-align: center`，而
    `<a>` / `<div>` 只是继承。类名相同的元素因此按标签表现不同——侧栏「货币战争」看着居中而其余 tab
@@ -849,6 +851,7 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
 .nk-error-state__tech { max-width: 52ch; font-family: var(--font-hud); font-size: var(--nk-fs-2); letter-spacing: 0.06em; line-height: 1.6; color: var(--text3); overflow-wrap: anywhere; }
 .nk-error-state__retry { margin-top: 8px; padding: 9px 22px; border-radius: var(--nk-radius-2); background: var(--primary); border: 1px solid transparent; color: var(--text-bright); font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 700; letter-spacing: 0.15em; cursor: pointer; transition: background var(--nk-dur-fast) ease, border-color var(--nk-dur-fast) ease; }
 .nk-error-state__retry:hover { background: color-mix(in srgb, var(--primary) 86%, var(--text-bright) 14%); }
+.nk-error-state__retry:active { transform: translateY(1px); }
 .nk-error-state__retry:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
 
 .nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 88px 40px 56px var(--nk-content-offset); text-align: center; }

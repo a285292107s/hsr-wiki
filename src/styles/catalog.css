@@ -389,6 +389,8 @@
 .nk-hub-release__all svg { width: 12px; height: 12px; transition: transform var(--nk-dur-hover) var(--nk-ease-out); }
 .nk-hub-release__all:hover { color: var(--metric-val); }
 .nk-hub-release__all:hover svg { transform: translateX(2px); }
+/* 按压反馈与全站动作语言同档（translateY(1px)：nk-guide-link / nk-cat-empty__reset 同款） */
+.nk-hub-release__all:active { transform: translateY(1px); }
 .nk-hub-release__all:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-hub-release__label-count { margin-left: 6px; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.08em; color: color-mix(in srgb, var(--metric-val) 72%, transparent); vertical-align: 1px; font-variant-numeric: tabular-nums; }
 /* 平权卡带（分区 ≥2 条）：卡宽 `clamp(210px, 24%, 306px)`——1440 档 = 300px，**恰好 4 张铺满一带**
@@ -411,28 +413,24 @@
    1024×768 实测第一张卡底部 883px > 768px（306px 档 731px），会顶掉「第一分区首行卡片完整可见」。
    判据留在这里，规则删除：留着它等于给下一次误读留一个假入口。 */
 .nk-hub-release__cell { min-width: 0; }
-/* 特写规格块（只属于恰 1 条的分区）：名字 + 详情入口，**紧贴主卡排成一段**（不是两端对齐）。
-   名字是这一行的落值，入口是卡之外唯一的显式动作；元素 / 命途 / 技能名 / 套装标签一律不再重复
-   （卡上已有）。顶线横跨到本行右缘，读作账册行线，而不是「缺了一列」。 */
+/* 特写规格块（只属于恰 1 条的分区）：编辑式「图 + 注释栏」——名字领先、数据正文承中、入口殿后。
+   名字是排版权重；正文是该条目**卡上没有**的定义性事实（角色一句话简介 / 光锥技能效果 /
+   遗器四件套效果，fmtDesc 渲染，随分区同批就绪 ⇒ 无后到 CLS）；入口是卡之外唯一的显式动作。
+   元素 / 命途 / 技能名 / 套装标签一律不再重复（卡上已有）。顶线与主卡顶对齐、横跨到本行右缘。 */
 .nk-hub-release__spec {
   grid-column: 2;
-  display: flex; flex-direction: row; align-items: center; justify-content: flex-start;
-  gap: 28px; min-width: 0; align-self: end;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
+  gap: 14px; min-width: 0; align-self: start;
   border-top: 1px solid var(--line-2); padding-top: 14px;
 }
-/* 名字 + 入口成组靠右，这一行读作「条目 …… 值 / 动作」。
-   此前它们贴主卡右缘起排，而主卡自带的小名就在同一基线上（实测 1440 档光锥：卡名 y=1174、
-   规格名 y=1135，横向相距 310px）——同一屏里同一个名字并排出现两次，读起来是复读；
-   靠右后两者横向相距 ≥1 个行宽，名字同时成为这一行的落值（账册行线的右端）。
-   只作用于 ≥768：手机档已隐藏规格名（见 ≤767 块），左起的一个按钮没必要再甩到右边。 */
-@media (min-width: 768px) {
-  .nk-hub-release__spec { justify-content: flex-end; }
-}
 .nk-hub-release__spec-name { font-size: clamp(var(--nk-fs-8), 2.2vw, var(--nk-fs-title-2)); font-weight: 900; letter-spacing: 0.02em; line-height: 1.15; color: var(--text-bright); }
+.nk-hub-release__spec-brief { max-width: var(--nk-prose-max); font-size: var(--nk-fs-5); line-height: 1.85; color: var(--text2); }
+.nk-hub-release__spec-brief :where(.hl) { color: var(--highlight); font-weight: 700; }
 .nk-hub-release__spec-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: var(--nk-radius-2); background: var(--nk-shell-active-bg); border: 1px solid var(--nk-shell-active-border); color: var(--metric-val); font-size: var(--nk-fs-4); font-weight: 600; letter-spacing: 0.04em; width: fit-content; transition: background 0.2s var(--nk-ease-out), border-color 0.2s var(--nk-ease-out), color 0.2s var(--nk-ease-out); }
 .nk-hub-release__spec-link svg { width: 15px; height: 15px; transition: transform 0.25s var(--nk-ease-out); }
 .nk-hub-release__spec-link:hover { background: var(--nk-shell-press); color: var(--text-bright); }
 .nk-hub-release__spec-link:hover svg { transform: translateX(3px); }
+.nk-hub-release__spec-link:active { transform: translateY(1px); }
 .nk-hub-release__spec-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-hub-release__band::-webkit-scrollbar { height: 6px; }
 .nk-hub-release__band::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--nk-radius-1); }

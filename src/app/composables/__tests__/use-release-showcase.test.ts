@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildReleaseSections,
   buildReleaseSectionsBy,
+  fillFeatureBriefs,
   pickCurrentVersion,
   pickSeasonNew,
   splitSources,
@@ -148,6 +149,47 @@ describe('特写档判据 = 恰 1 条（≥2 条不再偏袒第一条）', () =>
       expect(s.count).toBe(ids.length);
       expect(s.html).toBe(items.slice(0, ids.length).map((it, i) => renderCard(it, i)).join(''));
     }
+  });
+});
+
+describe('fillFeatureBriefs（特写档数据正文：与分区同批就绪，失败只丢正文）', () => {
+  const renderCard = (item: CatalogItem, i: number): string =>
+    `<a class="c" data-name="${String(item.name)}" style="--i:${i}"></a>`;
+  const src = (over: Partial<ReleaseSource>): ReleaseSource => ({
+    kind: 'character', label: '角色', listHref: '/character',
+    tagged: [{ id: 1, release_version: '4.6' }],
+    items: [{ id: '1', name: '甲' }],
+    renderCard,
+    leadMeta: (item) => ({ name: String(item.name), href: `/character/${item.id}` }),
+    ...over,
+  });
+
+  it('特写档拿到正文 → 写入 leadMeta.brief；leadId 指向主条目', async () => {
+    const [s] = buildReleaseSections([src({ loadBrief: async () => '<span class="hl">正文</span>' })], '4.6');
+    expect(s.leadId).toBe('1');
+    await fillFeatureBriefs([src({ loadBrief: async () => '<span class="hl">正文</span>' })], [s]);
+    expect(s.leadMeta?.brief).toBe('<span class="hl">正文</span>');
+  });
+
+  it('平权档（非 feature）不取正文；loadBrief 缺失（CW 源）为 no-op', async () => {
+    const sections = buildReleaseSectionsBy([
+      src({ tagged: [{ id: 1, release_version: '4.6' }, { id: 2, release_version: '4.6' }], items: [{ id: '1', name: '甲' }, { id: '2', name: '乙' }], loadBrief: async () => 'X' }),
+    ], (list) => list);
+    expect(sections[0].feature).toBe(false);
+    const snapshot = JSON.stringify(sections);
+    await fillFeatureBriefs([], sections);
+    expect(JSON.stringify(sections)).toBe(snapshot);
+  });
+
+  it('正文抛错 / 返回空串 → 规格块保底名字+入口，不抛出', async () => {
+    const [failSec] = buildReleaseSections([src({ loadBrief: async () => { throw new Error('net'); } })], '4.6');
+    await expect(fillFeatureBriefs([src({ loadBrief: async () => { throw new Error('net'); } })], [failSec])).resolves.toBeUndefined();
+    expect(failSec.leadMeta?.brief).toBeUndefined();
+    expect(failSec.leadMeta?.name).toBe('甲');
+
+    const [emptySec] = buildReleaseSections([src({ loadBrief: async () => '' })], '4.6');
+    await fillFeatureBriefs([src({ loadBrief: async () => '' })], [emptySec]);
+    expect(emptySec.leadMeta?.brief).toBeUndefined();
   });
 });
 

@@ -18,8 +18,12 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
     (item.simple_desc as string || '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60),
   );
   const descTruncated = simpleDesc.length >= 60 ? '…' : '';
+  /* 截断复原（触屏没有 hover 也要可达）：名条 nowrap+ellipsis 与描述 60 字截断的完整原文都挂卡根 title */
+  const fullDesc = escHtml(
+    (item.simple_desc as string || '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim(),
+  );
 
-  return `<a class="nk-cw-trait-card" href="/currency/trait/${escHtml(item.id)}" data-cat="${escHtml(cat)}" style="--i:${index}">
+  return `<a class="nk-cw-trait-card" href="/currency/trait/${escHtml(item.id)}" data-cat="${escHtml(cat)}" title="${escHtml(item.name as string)}：${fullDesc}" style="--i:${index}">
       <div class="nk-cw-trait-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
       <div class="nk-cw-trait-card__body">
         <div class="nk-cw-trait-card__name">${escHtml(item.name)}</div>

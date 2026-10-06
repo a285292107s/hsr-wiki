@@ -30,7 +30,7 @@
 .nk-cw-card__icon {
   width: 64px;
   height: 64px;
-  border-radius: calc(var(--nk-radius-card) - 2px);
+  border-radius: var(--nk-radius-card);
   overflow: hidden;
   background: var(--line-1);
   flex-shrink: 0;
@@ -141,7 +141,7 @@
   height: 38px;
   flex-shrink: 0;
   transform: rotate(45deg);
-  border-radius: calc(var(--nk-radius-card) - 2px);
+  border-radius: var(--nk-radius-card);
   overflow: hidden;
   border: 1.5px solid var(--border2);
   background: var(--line-1);
@@ -239,7 +239,7 @@
 .nk-cw-equip-icon {
   width: 56px;
   height: 56px;
-  border-radius: calc(var(--nk-radius-card) - 2px);
+  border-radius: var(--nk-radius-card);
   overflow: hidden;
   background: var(--line-1);
   flex-shrink: 0;

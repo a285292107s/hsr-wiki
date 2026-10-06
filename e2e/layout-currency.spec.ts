@@ -122,6 +122,100 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
+  /* 三态（UI质量验收标准 A4.6）：与首页同一套判据——加载期与「索引没取到」都不许冒充
+     「本赛季暂无新增条目」。实测旧行为：加载期整块空白；两份索引全失败时空态文案把一次网络故障
+     写成了事实陈述；只失败一份时该分区静默消失。骨架行带 data-sk，就绪后按该族真实卡形占位。 */
+  test('/currency：加载期给分区骨架、索引全失败给错误态且可重试，都不冒充空态', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const INDEXES = '**/data/cn/currency/*.json';
+    const isIndex = (url: string) => /(currency\/role|currency\/traits)\.json$/.test(url);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+
+    // ① 加载期：两份索引各延后 3s
+    await page.route(INDEXES, async (route) => {
+      if (isIndex(route.request().url())) await new Promise((resolve) => setTimeout(resolve, 3_000));
+      await route.continue();
+    });
+    await page.goto('/currency', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.nk-hub-release__sk')).toBeVisible();
+    // 骨架行数 = 分区数（标签来自同一份源，与数据无关）
+    await expect(page.locator('.nk-hub-release__sk-row')).toHaveCount(2);
+    await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
+    await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
+    await expect(page.locator('.nk-hub-release__empty')).toHaveCount(0);
+    // 骨架卡宽 = 就绪卡宽（A3.5 骨架↔就绪同量级）：竖版角色卡与横排羁绊卡各按带内真卡占位
+    const skRole = await page.locator(".nk-hub-release__sk-row[data-sk='role'] .nk-hub-release__sk-card")
+      .evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    const skTrait = await page.locator(".nk-hub-release__sk-row[data-sk='trait'] .nk-hub-release__sk-card")
+      .evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    // 数据到位：骨架退场、真实分区上位
+    await expect.poll(() => page.locator('.nk-hub-release__section').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+    await expect(page.locator('.nk-hub-release__sk')).toHaveCount(0);
+    const roleCard = await page
+      .locator('.nk-hub-release__section[data-kind="role"] .nk-hub-release__band .nk-crole-card')
+      .first().evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    const traitCard = await page
+      .locator('.nk-hub-release__section[data-kind="trait"] .nk-hub-release__band .nk-cw-trait-card')
+      .first().evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    expect(Math.abs(skRole - roleCard), `角色行骨架卡 ${skRole}px ↔ 就绪卡 ${roleCard}px 应同宽`).toBeLessThanOrEqual(1);
+    expect(Math.abs(skTrait - traitCard), `羁绊行骨架卡 ${skTrait}px ↔ 就绪卡 ${traitCard}px 应同宽`).toBeLessThanOrEqual(1);
+    await page.unroute(INDEXES);
+
+    // ② 两份索引全失败：错误态 + 重试入口；空态必须缺席
+    await page.route(INDEXES, (route) =>
+      (isIndex(route.request().url()) ? route.abort() : route.continue()));
+    await page.goto('/currency');
+    await expect(page.locator('.nk-error-state')).toBeVisible();
+    await expect(page.locator('.nk-error-state__retry')).toBeVisible();
+    await expect(page.locator('.nk-hub-release__empty')).toHaveCount(0);
+    await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
+
+    // ③ 重试必须真能恢复（共享列表单例失败后重置槽位，故无需刷新页面）
+    await page.unroute(INDEXES);
+    await page.locator('.nk-error-state__retry').click();
+    await expect.poll(() => page.locator('.nk-hub-release__section').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+    await expect(page.locator('.nk-error-state')).toHaveCount(0);
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  /* 截断复原（A5.5）：羁绊卡描述是**字符串级** 60 字截断（文本以…结束，不产生 CSS 溢出，
+     CSS 溢出探针不可见）⇒ 完整原文必须挂在卡根 title 上，触屏没有 hover 也要可复原。
+     期望值全部从 traits.json 派生。 */
+  test('/currency：羁绊卡描述截断有 title 复原（完整原文可读）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/currency');
+    const section = page.locator('.nk-hub-release__section[data-kind="trait"]');
+    await expect(section).toBeVisible();
+    const traits = readJson<{ traits: { name: string; simple_desc: string }[] }>('public/data/cn/currency/traits.json').traits;
+    // 与渲染器同一归一化管线：字面 `\n`（数据源为两字符）与真实换行都折成空格再收空白
+    const normalize = (s: string) => s.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+    const rows = await section.locator('.nk-cw-trait-card').evaluateAll((cards) =>
+      cards.map((c) => ({
+        name: (c.querySelector('.nk-cw-trait-card__name')?.textContent || '').trim(),
+        desc: (c.querySelector('.nk-cw-trait-card__desc')?.textContent || '').trim(),
+        title: c.getAttribute('title') || '',
+      })),
+    );
+    expect(rows.length, '本赛季新增羁绊卡应在带内渲染').toBeGreaterThanOrEqual(1);
+    for (const r of rows) {
+      const full = normalize(traits.find((t) => t.name === r.name)?.simple_desc || '');
+      expect(full, `${r.name}：数据里应有 simple_desc`).toBeTruthy();
+      expect(
+        r.title.includes(full),
+        `${r.name}：卡根 title 必须含完整描述原文（实测 title ${r.title.length} 字 / 全文 ${full.length} 字）`,
+      ).toBe(true);
+      if (full.length >= 60) {
+        expect(r.desc.endsWith('…'), `${r.name}：超 60 字应以…截断`).toBe(true);
+        expect(full.startsWith(r.desc.replace(/…$/, '')), `${r.name}：截断前缀必须与全文一致`).toBe(true);
+      }
+    }
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
   test('/currency/settings：单一主题色通道（货币战争不再有自己的色板）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/currency/settings');
