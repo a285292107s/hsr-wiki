@@ -459,6 +459,58 @@
   color: var(--text2);
 }
 
+/* ─── 状态词条（MonsterStatusConfig 安全子集）─── */
+.nk-mob-status__lead {
+  margin: 0 0 14px;
+  font-size: 0.72rem;
+  line-height: 1.7;
+  color: var(--text3);
+}
+
+.nk-mob-statuses {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px 18px;
+}
+
+.nk-mob-status {
+  padding: 10px 0 2px;
+  border-top: 1px solid var(--line-1);
+}
+
+.nk-mob-status__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nk-mob-status__name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+.nk-mob-status__type,
+.nk-mob-status__dispel {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+
+.nk-mob-status__dispel {
+  padding-left: 8px;
+  border-left: 1px solid var(--line-2);
+}
+
+.nk-mob-status__desc {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text2);
+}
+
 .nk-mob-resist__row {
   display: flex;
   align-items: flex-start;

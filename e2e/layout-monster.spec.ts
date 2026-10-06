@@ -216,6 +216,46 @@ test.describe('布局验收：敌方详情页', () => {
   );
 
   test(
+    '/monster/<id>：状态词条逐项等于数据（命名约定归属的安全子集，非外键）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      /* 归属是命名约定桥（`MonsterStatusConfig.ModifierName` 含怪物配置名 + 去形态后缀同名），
+         不是外键 ⇒ 数据里只有「安全子集」；期望值仍全部从详情 payload 派生。
+         取第一只有词条的目录条目（测试成本：按 id 升序读若干详情文件，通常前几十条即命中）。 */
+      const list = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json');
+      let target: { id: number; name: string } | undefined;
+      for (const m of list.slice(0, 120)) {
+        if (detailOf(m.id).statuses?.length) { target = m; break; }
+      }
+      expect(target, '前 120 个目录条目里应有带状态词条的怪物（断言前提）').toBeTruthy();
+      const rows = detailOf(target!.id).statuses!;
+      const TYPE: Record<string, string> = { Buff: '增益', Debuff: '减益', Other: '其他' };
+
+      await page.goto(`/monster/${target!.id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const cards = page.locator('.nk-mob-status');
+      await expect(cards, '词条行数 = 数据条数').toHaveCount(rows.length);
+      const rendered = await cards.evaluateAll((els) => els.map((el) => ({
+        name: (el.querySelector('.nk-mob-status__name')?.textContent || '').trim(),
+        type: (el.querySelector('.nk-mob-status__type')?.textContent || '').trim(),
+        dispel: Boolean(el.querySelector('.nk-mob-status__dispel')),
+        desc: (el.querySelector('.nk-mob-status__desc')?.textContent || '').trim(),
+      })));
+      rows.forEach((s, i) => {
+        expect(rendered[i].name, `第 ${i + 1} 条词条名`).toBe(s.name);
+        expect(rendered[i].type, `${s.name} 的类型标签`).toBe(TYPE[s.type] || s.type || '其他');
+        expect(rendered[i].dispel, `${s.name} 的可驱散标记`).toBe(Boolean(s.dispel));
+        // 描述按「无占位符才落」的规则走：有源文本就该有渲染文本（且不含未替换的占位符残留）
+        if (s.desc) expect(rendered[i].desc.length, `${s.name} 的描述应上屏`).toBeGreaterThan(0);
+        expect(rendered[i].desc, `${s.name} 不得出现未替换的占位符`).not.toContain('#');
+      });
+
+      assertNoErrors();
+    },
+  );
+
+  test(
     '/monster/<id>：技能附带效果按技能逐项等于数据（ExtraEffectIDList × ExtraEffectConfig 完整外键）',
     { tag: '@viewport-independent' },
     async ({ page }) => {

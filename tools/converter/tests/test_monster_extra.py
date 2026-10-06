@@ -59,6 +59,36 @@ def _fake_sources(monkeypatch, **overrides):
             {"MonsterTemplateID": 4014010, "TemplateGroupID": 4014010},
             {"MonsterTemplateID": 4014011, "TemplateGroupID": 4014010},
             {"MonsterTemplateID": 1002011, "TemplateGroupID": None},
+            # 状态词条归属用：同一只怪的两种形态（去括号后缀同名 → 都归属）
+            {"MonsterTemplateID": 7001, "MonsterName": {"Hash": 51},
+             "JsonConfig": "Config/ConfigCharacter/Monster/Monster_W9_Alpha_00_Config.json"},
+            {"MonsterTemplateID": 7002, "MonsterName": {"Hash": 52},
+             "JsonConfig": "Config/ConfigCharacter/Monster/Monster_W9_Alpha_00_Config.json"},
+            # 同一 token 下**另一个怪物**（去括号后缀仍不同名 → 该 token 的状态整条丢弃）
+            {"MonsterTemplateID": 7003, "MonsterName": {"Hash": 53},
+             "JsonConfig": "Config/ConfigCharacter/Monster/Monster_W9_Beta_00_Config.json"},
+            {"MonsterTemplateID": 7004, "MonsterName": {"Hash": 54},
+             "JsonConfig": "Config/ConfigCharacter/Monster/Monster_W9_Beta_00_Config.json"},
+        ],
+        "MonsterStatusConfig.json": [
+            # 命中唯一 token，描述无占位符 → 全字段落
+            {"StatusID": 9001, "ModifierName": "MMonster_W9_Alpha_00_Skill01_DefenceDown",
+             "StatusName": {"Hash": 61}, "StatusType": "Debuff",
+             "StatusDesc": {"Hash": 62}, "CanDispel": True},
+            # 描述带 #N[i] 占位符（数值来自动态属性）→ 不落 desc，其余照落
+            {"StatusID": 9002, "ModifierName": "MMonster_W9_Alpha_00_AttackUp",
+             "StatusName": {"Hash": 63}, "StatusType": "Buff",
+             "StatusDesc": {"Hash": 64}, "CanDispel": False},
+            # 命中的 token 跨了两个名字（贝塔/伽马）→ 整条丢弃，两边都不挂
+            {"StatusID": 9004, "ModifierName": "MMonster_W9_Beta_00_Fury",
+             "StatusName": {"Hash": 66}, "StatusType": "Debuff", "StatusDesc": {"Hash": 62}},
+            # 无 token 命中 → 丢弃
+            {"StatusID": 9003, "ModifierName": "MCommon_SuperArmor",
+             "StatusName": {"Hash": 65}, "StatusType": "Other", "StatusDesc": {"Hash": 62}},
+            # 渲染签名与 9001 全同（不同 StatusID）→ 去重后只留一条
+            {"StatusID": 9005, "ModifierName": "MMonster_W9_Alpha_00_Skill02_DefenceDown",
+             "StatusName": {"Hash": 61}, "StatusType": "Debuff",
+             "StatusDesc": {"Hash": 62}, "CanDispel": True},
         ],
         "MonsterAtlasExtraPhase.json": [
             {"TemplateGroupID": 4014010, "PhaseID": 1,
@@ -98,6 +128,9 @@ def _fake_sources(monkeypatch, **overrides):
     text = lambda h: {  # noqa: E731
         1: "信用点", 2: "铁卫扣饰", 11: "于枯冬之中", 12: "混沌回忆", 21: "疯王·第二阶段", 22: "阶段介绍",
         41: "额外回合", 42: "获得 #1[i] 个额外回合",
+        51: "阿尔法", 52: "阿尔法（完整）", 53: "贝塔", 54: "伽马",
+        61: "防御力降低", 62: "防御力降低 20%。", 63: "攻击力提高", 64: "攻击力提高#1[i]%。",
+        65: "超甲", 66: "狂怒",
     }.get((h or {}).get("Hash"), "")
     monkeypatch.setattr(mx, "resolve_text", text)
     monkeypatch.setattr(it, "resolve_text", text)
@@ -167,3 +200,29 @@ class TestLoadSkillExtraEffects:
             "id": 10000027, "name": "额外回合",
             "desc": "获得 #1[i] 个额外回合", "param_list": [0.3],
         }]
+
+
+class TestLoadStatuses:
+    """状态词条的安全子集：**最长 token + 去形态后缀同名**；只有无占位符的描述才落。"""
+
+    def test_attributes_to_same_name_forms_only(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        st = mx.load_statuses()
+        # 阿尔法 / 阿尔法（完整）同 token 同基名 → 两条都拿到
+        assert set(st) == {7001, 7002}, "跨名 token（贝塔/伽马）整条丢弃，两边都不挂"
+        assert [s["name"] for s in st[7001]] == ["防御力降低", "攻击力提高"], (
+            "渲染签名全同的两条（9001 / 9005）只留一条，且按 StatusID 升序"
+        )
+
+    def test_desc_only_without_placeholder_and_dispenl_flag(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        rows = {s["id"]: s for s in mx.load_statuses()[7001]}
+        assert rows[9001]["desc"] == "防御力降低 20%。", "无占位符 → 描述照落"
+        assert rows[9001]["dispel"] is True
+        assert "desc" not in rows[9002], "带 #N[i] 占位符（数值来自动态属性）→ 不落不可渲染的描述"
+        assert "dispel" not in rows[9002], "CanDispel 为假不落键"
+
+    def test_unmatched_status_dropped(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        ids = {s["id"] for rows in mx.load_statuses().values() for s in rows}
+        assert 9003 not in ids, "无 token 命中的通用状态（MCommon_*）不归属任何怪物"

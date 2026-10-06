@@ -79,6 +79,8 @@ const MON_RANK = {
   Minion: '普通', MinionLv2: '普通', Elite: '精英', LittleBoss: '准首领', BigBoss: '首领',
 };
 const MON_TYPE = { BOSS: '首领', ELITE: '精英', MINION: '喽啰' };
+/** 状态词条类型（与 `MonsterDetailView.vue` 的 STATUS_TYPE 逐字一致） */
+const MON_STATUS_TYPE = { Buff: '增益', Debuff: '减益', Other: '其他' };
 
 /** 物品主类型（与 src/app/catalog/pages/item.ts MAIN_TYPE_NAMES 一致；子类型不建映射，原样输出数据值） */
 const ITEM_MAIN_TYPE = { Material: '材料', Virtual: '货币', Usable: '可用', Mission: '任务' };
@@ -1001,6 +1003,15 @@ function monsterPages(ctx) {
       const tiers = d.drops.length > 1 ? `（共 ${d.drops.length} 档均衡等级）` : '';
       if (names) facts.push(['掉落', `${esc(names)}${esc(tiers)}`]);
     }
+    /* 状态词条（`MonsterStatusConfig` 安全子集：命名约定归属 + 去形态后缀同名）。
+       desc 只在无 `#N[i]` 占位符时才有（数值来自动态属性，本仓无值），故有则输出、无则省略整段。 */
+    const statusHtml = (d.statuses || [])
+      .filter((s) => s && s.name)
+      .map((s) => {
+        const meta = `${MON_STATUS_TYPE[s.type] || s.type || '其他'}${s.dispel ? ' · 可驱散' : ''}`;
+        return `<li><span>${txt(s.name, null, 60)}（${txt(meta, null, 30)}）</span>${s.desc ? `<p>${txt(s.desc, null, 200)}</p>` : ''}</li>`;
+      })
+      .join('');
     const body = detailBody(ctx, {
       crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/monster'], '/monster'], [name, null]]),
       h1: name,
@@ -1010,6 +1021,7 @@ function monsterPages(ctx) {
         // 空 intro 时「图鉴记录」整段省略
         { title: '图鉴记录', html: sourceSummary ? `<p>${txt(d.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: '技能', html: skillHtml ? `<ul class="nk-snapshot__blocks">${skillHtml}</ul>` : '' },
+        { title: '状态词条', html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
       ],
       links: siblingsOf(links, idx),
       listLabel: '同图鉴敌对物种',

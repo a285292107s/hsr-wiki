@@ -210,6 +210,17 @@ function fxHtml(fx: MonsterExtraEffect): string {
   return fmtDesc(fx.desc, fx.param_list);
 }
 
+/** 状态词条类型：源字段枚举 → 中文（与 ELEM / MON_RANK 同类的枚举映射，不是自建数据源） */
+const STATUS_TYPE: Record<string, string> = { Buff: '增益', Debuff: '减益', Other: '其他' };
+function statusTypeLabel(type: string): string {
+  return STATUS_TYPE[type] || type || '其他';
+}
+
+/** 状态词条描述：本仓只落**无 `#N[i]` 占位符**的描述，故按普通富文本渲染（换行仍走 fmtDesc） */
+function statusDesc(desc?: string): string {
+  return fmtDesc(desc, []);
+}
+
 /** 同族条的 4 个数值格（弱点格单独渲染：图标）。该档详情未到达时给破折号，不猜值。 */
 function variantCell(det: MonsterDetail | null, key: 'stance' | 'hp' | 'speed' | 'skills'): string {
   if (!det) return '—';
@@ -521,6 +532,27 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                     <span v-if="fxHtml(fx)" class="nk-mob-skill__fxdesc" v-html="fxHtml(fx)"></span>
                   </span>
                 </div>
+              </article>
+            </div>
+          </section>
+          <section v-if="d.statuses?.length" class="nk-mob-sec">
+            <header class="nk-mob-sec__head">
+              <h2 class="nk-mob-sec__title">状态词条</h2>
+              <span class="nk-mob-sec__en">STATUSES</span>
+              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+            </header>
+            <!-- 口径：归属靠命名约定（`MonsterStatusConfig.ModifierName` 含怪物配置名），不是外键；
+                 只保留「该配置名下的模板去形态后缀后同名」的词条（宁可少归不可错归）。
+                 带 `#N[i]` 的描述（数值来自动态属性）本仓无值，按仓规整段省略——故有些词条只有名称与类型。 -->
+            <p class="nk-mob-status__lead">口径：按状态配置名与怪物配置名的命名约定归属；数值未公开具体数值的词条只列名称与类型。</p>
+            <div class="nk-mob-statuses">
+              <article v-for="s in d.statuses" :key="s.id" class="nk-mob-status" :data-type="s.type">
+                <header class="nk-mob-status__head">
+                  <span class="nk-mob-status__name">{{ s.name }}</span>
+                  <span class="nk-mob-status__type">{{ statusTypeLabel(s.type) }}</span>
+                  <span v-if="s.dispel" class="nk-mob-status__dispel">可驱散</span>
+                </header>
+                <p v-if="s.desc" class="nk-mob-status__desc" v-html="statusDesc(s.desc)"></p>
               </article>
             </div>
           </section>

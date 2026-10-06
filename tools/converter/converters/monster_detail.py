@@ -27,7 +27,7 @@ from config import OUTPUT_DIR
 from utils import save_json
 from converters.monster_common import load_level_curve, load_monsters
 from converters.monster_extra import (
-    load_appearances, load_drops, load_phases, load_skill_extra_effects,
+    load_appearances, load_drops, load_phases, load_skill_extra_effects, load_statuses,
 )
 from converters.voracity import load_invasion_map
 
@@ -47,6 +47,8 @@ def convert() -> None:
     # 技能附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键）：按技能 ID 挂在技能条目上，
     # 有值才落键（实测覆盖 215/632 个目录模板、937 次引用）
     extra_effects = load_skill_extra_effects()
+    # 状态词条（MonsterStatusConfig，安全子集：命名约定桥 + 去形态后缀同名才归属；实测 234/632 个模板）
+    statuses = load_statuses()
     output_dir = OUTPUT_DIR / "monsters"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -90,6 +92,8 @@ def convert() -> None:
             detail["appearances"] = appearances[tpl]
         if phases.get(tpl):
             detail["phases"] = phases[tpl]
+        if statuses.get(tpl):
+            detail["statuses"] = statuses[tpl]
         save_json(detail, output_dir / f"{mid}.json")
         count += 1
 

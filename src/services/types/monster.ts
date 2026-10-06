@@ -120,6 +120,24 @@ export interface MonsterPhase {
   intro?: string;
 }
 
+/**
+ * 状态词条（`MonsterStatusConfig`，**安全子集**）。
+ * 归属是**命名约定桥**而非外键：`ModifierName = <怪物配置名>[_<SkillTriggerKey>]_<效果后缀>`，
+ * 取包含式最长 token，且该 token 命中的模板**去掉形态括号后缀后必须同名**才归属
+ * （宁可少归、不可错归：实测 598 → 304 条，覆盖 234/632 个目录模板）。
+ */
+export interface MonsterStatusDetail {
+  id: number;
+  name: string;
+  /** 源字段 `StatusType` 原值（Buff / Debuff / Other；前端映射为 增益/减益/其他） */
+  type: string;
+  /** 可被驱散（源字段 `CanDispel` 为真才落键） */
+  dispel?: boolean;
+  /** 描述——**只在没有 `#N[i]` 占位符时**落：状态描述的数值来自动态属性（`ReadParamList` 只有键名），
+   *  照仓规「缺参整段省略，不落残缺占位与 `?`」（`src/lib/format.ts → refsResolved`） */
+  desc?: string;
+}
+
 /** 敌对物种详情（monsters/{id}.json） */
 export interface MonsterDetail {
   id: number;
@@ -162,6 +180,8 @@ export interface MonsterDetail {
   appearances?: MonsterAppearances;
   /** 额外阶段（MonsterAtlasExtraPhase(s)；实测仅 9 个族有数据、覆盖 39 个模板） */
   phases?: MonsterPhase[];
+  /** 状态词条（MonsterStatusConfig 安全子集；实测覆盖 234/632 个目录模板） */
+  statuses?: MonsterStatusDetail[];
 }
 
 /** 侵入名单：invasion_ids 为侵蚀等级序号，stages 为波及关卡 ID（用于详情页标记与回链） */

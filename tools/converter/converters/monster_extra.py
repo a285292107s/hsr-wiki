@@ -22,6 +22,7 @@
   效果抵抗解析（`MonsterStatusResistanceType` 图标）同构，重复实现必然两处漂移。
 """
 import logging
+import re
 
 from config import EXCEL_DIR
 from textmap import resolve_text
@@ -210,6 +211,104 @@ def load_skill_extra_effects() -> dict[int, list[dict]]:
         if rows:
             out[sid] = rows
     return out
+
+
+def _family_token(path: str) -> str:
+    """配置路径 basename → 归属 token（去扩展名、去 `_Config`、去 `Manikin_`/`GridFight_` 前缀）。
+
+    例：`Config/ConfigCharacter/Monster/Monster_W1_CocoliaP1_00_Config.json` → `Monster_W1_CocoliaP1_00`。
+    """
+    name = (path or "").rsplit("/", 1)[-1]
+    for suf in (".json", ".prefab"):
+        if name.endswith(suf):
+            name = name[: -len(suf)]
+    if name.endswith("_Config"):
+        name = name[: -len("_Config")]
+    for pre in ("Manikin_", "GridFight_"):
+        if name.startswith(pre):
+            name = name[len(pre):]
+    return name
+
+
+def _base_name(name: str) -> str:
+    """去掉目录命名里的形态后缀：`杰帕德（完整）/（幻象）` → `杰帕德`。
+
+    用途见 `load_statuses`：同一个 token 命中的模板必须「去形态后缀仍同名」才允许归属。
+    """
+    return re.sub(r"[（(][^）)]*[）)]", "", name or "").strip()
+
+
+def load_statuses() -> dict[int, list[dict]]:
+    """`MonsterStatusConfig` → {模板ID: [{id, name, type, dispel?, desc?}]}（**安全子集**）。
+
+    归属桥是**命名约定**而非外键：`ModifierName = <怪物配置名>[_<SkillTriggerKey>]_<效果后缀>`
+    （全仓 22 张含 `ModifierName` 的表与本表字符串交集为 0，真绑定在二进制技能配置里）。
+    规则 = 「包含式**最长** token」+ 「该 token 命中的模板集合**去掉形态括号后缀后必须同名**」：
+    实测 598 → **304 条**（覆盖 234/632 个目录模板），剔掉的正是真跨怪——可可利亚的 token 家族里
+    混着「托帕幻象 / 无望冽风的幻灭者」，银鬃尉官的家族里混着「邓恩」；保留的是同一只怪的
+    「（完整）/（幻象）/（错误）」等形态。宁可少归、不可错归。
+
+    两处**刻意不落**：
+    - `desc` 只在没有 `#N[i]` 占位符时落。状态描述的数值来自动态属性（`ReadParamList` 只有键名
+      如 `MDF_PropertyValue`、没有数值，实测 313/706 条描述带占位符），照仓规「缺参时消费方整段
+      省略、不落残缺占位与 `?`」（`src/lib/format.ts → refsResolved`），不落不可渲染的描述；
+    - 图标不落：`StatusIconPath` 全是 `BuffIcon/Inlevel/*`，该目录 nanoka 与 jsDelivr **双侧 404**。
+    """
+    templates = load_json(EXCEL_DIR / "MonsterTemplateConfig.json")
+    name_of: dict[int, str] = {}
+    tok2tpl: dict[str, set[int]] = {}
+    for rec in templates:
+        mid = rec.get("MonsterTemplateID")
+        name = resolve_text(rec.get("MonsterName", {}))
+        if mid is None or not name:
+            continue
+        name_of[mid] = name
+        for field in ("JsonConfig", "PrefabPath", "ManikinConfigPath"):
+            tok = _family_token(rec.get(field, ""))
+            if len(tok) >= 6:
+                tok2tpl.setdefault(tok, set()).add(mid)
+
+    by_tpl: dict[int, list[dict]] = {}
+    for rec in load_json(EXCEL_DIR / "MonsterStatusConfig.json"):
+        mod = rec.get("ModifierName") or ""
+        sid = rec.get("StatusID")
+        if not mod or sid is None:
+            continue
+        name = resolve_text(rec.get("StatusName", {}))
+        if not name:
+            continue
+        cands = [(len(tok), tok) for tok in tok2tpl if tok in mod]
+        if not cands:
+            continue
+        best = max(cands)[0]
+        tpls: set[int] = set()
+        for ln, tok in cands:
+            if ln == best:
+                tpls |= tok2tpl[tok]
+        if len({_base_name(name_of[m]) for m in tpls}) != 1:
+            continue
+        entry: dict = {"id": sid, "name": name, "type": rec.get("StatusType", "") or ""}
+        if rec.get("CanDispel"):
+            entry["dispel"] = True
+        desc = resolve_text(rec.get("StatusDesc", {}))
+        if desc and not re.search(r"#\d", desc):
+            entry["desc"] = desc
+        for m in tpls:
+            by_tpl.setdefault(m, []).append(dict(entry))
+    for rows in by_tpl.values():
+        rows.sort(key=lambda r: r["id"])
+        # 按**渲染签名**去重：实测同一怪物会挂到多个 StatusID 但名称/类型/描述/可否驱散全同的行
+        # （69 行），照原样铺开就是同一条词条重复两遍；同名但**描述不同**的（61 行）是真数据，保留。
+        seen: set[tuple] = set()
+        kept: list[dict] = []
+        for r in rows:
+            sig = (r["name"], r["type"], r.get("desc", ""), bool(r.get("dispel")))
+            if sig in seen:
+                continue
+            seen.add(sig)
+            kept.append(r)
+        rows[:] = kept
+    return by_tpl
 
 
 def _frac(value: object) -> float:
