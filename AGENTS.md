@@ -90,7 +90,7 @@ node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删�
 
 ## 强制规则（MUST）
 
-> **生成期约束唯一来源**：本节是强制约束的生成期视图（AI 写码时遵守）。若仓库存在 `.opencodereview/rule.json`（评审期视图，OCR 检查时加载），修改本节任一已映射条目（请求层 2 条 / 类型定义归属 / 目录页 2 条 / 文本数据来源 / 色彩令牌收口）必须同步该文件对应条目，反之亦然；「共享列表单例」与「构建守卫」为流程/CI 约束，不进 rule.json。
+> **生成期约束唯一来源**：本节是强制约束的生成期视图（AI 写码时遵守），不再有评审期镜像视图。
 
 - **禁止裸 `fetch`**：所有数据请求必须走 `src/services/cache.ts` 导出的 `fetchJSON<T>(url)`。它提供 15s 超时、NkError 包装、AbortController 中断。绝不允许在 api.ts 或视图层直接调用 `fetch()`。**唯一登记豁免**：`src/services/cdn/health.ts` 的 CDN 健康 HEAD 探针（fire-and-forget、3s 超时，与 fetchJSON 的 15s/NkError 语义不兼容）；新增裸 `fetch` 必须在此登记豁免。
 - **错误类型统一**：请求失败必须抛出 `NkError(message, true)`（operational），由 store 层决定是否展示重试 UI。禁止抛裸 `new Error()`。

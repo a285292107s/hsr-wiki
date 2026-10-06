@@ -87,10 +87,8 @@ temp/
 .qoder-cn
 .trae
 .reasonix
-# AI skill toolchain (OCR, local-only)
+# AI skill toolchain (local-only)
 .agents
-skills-lock.json
-.opencodereview
 # Playwright
 playwright-report
 blob-report
