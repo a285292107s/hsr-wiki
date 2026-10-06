@@ -982,6 +982,11 @@ function monsterPages(ctx) {
       ['攻击（模板基准）', d.stats ? esc(String(d.stats.atk)) : ''],
       ['防御（模板基准）', d.stats ? esc(String(d.stats.def)) : ''],
       ['速度（模板基准）', d.stats ? esc(String(d.stats.speed)) : ''],
+      /* 活动出处（`monster_extra.load_event_sources`）：活动名与页签都是源文本
+         （`ActivityPanel.TitleName` / `ActivityQuestRewardData.QuestTabName`），不是自撰文案。 */
+      ['活动出处', d.event
+        ? txt(`${d.event.name}（${d.event.count} 个活动关卡，等级 ${d.event.levels[0]}–${d.event.levels[d.event.levels.length - 1]}${d.event.tabs.length ? `；页签 ${d.event.tabs.join('/')}` : ''}）`, null, 160)
+        : ''],
     ];
     if (d.invaded) {
       const invadedLevels = (d.invaded.invasion_ids || []).filter((n) => n != null);

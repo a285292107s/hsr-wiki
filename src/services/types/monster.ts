@@ -145,6 +145,20 @@ export interface MonsterStatusDetail {
   desc?: string;
 }
 
+/** 活动出处（`monster_extra.load_event_sources`）：怪物被活动关卡引用时产出。
+ *  判据是活动面板与关卡类型的**同名约定**（`ActivityPanel.UIPrefab` basename = `StageConfig.StageType`），
+ *  活动名与页签名全部取自源文本（实测「星天演武仪典」的页签含「梦境训练」）。 */
+export interface MonsterEventSource {
+  /** 活动名（`ActivityPanel.TitleName`，源文本原值） */
+  name: string;
+  /** 活动任务页签名（`ActivityQuestRewardData` 中 `ActivityModuleID` 属于该面板的行） */
+  tabs: string[];
+  /** 该怪物出现的活动关卡等级档（升序） */
+  levels: number[];
+  /** 该怪物被活动关卡引用的次数（含实例） */
+  count: number;
+}
+
 /** 敌对物种详情（monsters/{id}.json） */
 export interface MonsterDetail {
   id: number;
@@ -189,6 +203,8 @@ export interface MonsterDetail {
   phases?: MonsterPhase[];
   /** 状态词条（MonsterStatusConfig 安全子集；实测覆盖 234/632 个目录模板） */
   statuses?: MonsterStatusDetail[];
+  /** 活动出处（仅被活动关卡引用的怪物有值；实测 42 个模板，含「星天演武仪典」的 7 个活动敌人） */
+  event?: MonsterEventSource;
 }
 
 /** 侵入名单：invasion_ids 为侵蚀等级序号，stages 为波及关卡 ID（用于详情页标记与回链） */

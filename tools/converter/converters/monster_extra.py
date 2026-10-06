@@ -314,6 +314,64 @@ def load_statuses() -> dict[int, list[dict]]:
     return by_tpl
 
 
+def load_event_sources() -> dict[int, dict]:
+    """活动关卡的怪物 → 活动出处（`{模板ID: {name, tabs, levels, count}}`）。
+
+    判据是**活动面板与关卡类型的同名约定**（`ActivityPanel.UIPrefab` basename = `StageConfig.StageType`，
+    实测 `UI/Quest/Widget/FightFestPanel.prefab` ↔ `StageType = 'FightFest'`），活动名取该面板的
+    `TitleName`（源文本「星天演武仪典」），页签名取 `ActivityQuestRewardData` 里
+    `ActivityModuleID` 以该面板 ID 开头的行（实测 `5001801` ← `PanelID 50018`，页签「梦境训练」）。
+    **两条都不是硬编码**：换活动只换表里那行；表对不上就整条不产出（静默降级，不猜）。
+    用途：这类"活动专属敌人"的数值/美术常常直接复用别的怪物（实测托帕幻象复用可可利亚的
+    模型、立绘与技能组），详情页需要一句出处说明，否则读者只能看到一堆对不上的引用。
+    """
+    try:
+        panels = load_json(EXCEL_DIR / "ActivityPanel.json")
+        rewards = load_json(EXCEL_DIR / "ActivityQuestRewardData.json")
+        stages = load_json(EXCEL_DIR / "StageConfig.json")
+        configs = load_json(EXCEL_DIR / "MonsterConfig.json")
+    except FileNotFoundError:
+        return {}
+
+    panels_by_token: dict[str, dict] = {}
+    for p in panels:
+        token = (p.get("UIPrefab") or "").rsplit("/", 1)[-1].replace("Panel.prefab", "")
+        name = resolve_text(p.get("TitleName") or {}).strip("「」")
+        if token and name:
+            panels_by_token[token] = {"panel_id": p.get("PanelID"), "name": name}
+
+    id2tpl = {c.get("MonsterID"): c.get("MonsterTemplateID") for c in configs}
+    out: dict[int, dict] = {}
+    for st in stages:
+        panel = panels_by_token.get(st.get("StageType") or "")
+        if not panel:
+            continue
+        ids: list[int] = []
+        for wave in st.get("MonsterList") or []:
+            if isinstance(wave, dict):
+                ids.extend(v for k, v in wave.items() if k.startswith("Monster") and isinstance(v, int))
+        levels = st.get("Level")
+        for i in ids:
+            tpl = id2tpl.get(i, i)
+            if tpl not in out:
+                out[tpl] = {"name": panel["name"], "tabs": [], "levels": [], "count": 0}
+            rec = out[tpl]
+            rec["count"] += 1
+            if isinstance(levels, int) and levels not in rec["levels"]:
+                rec["levels"].append(levels)
+    for rec in out.values():
+        rec["levels"].sort()
+    for r in rewards:
+        module = str(r.get("ActivityModuleID") or "")
+        for panel in panels_by_token.values():
+            if module.startswith(str(panel["panel_id"])):
+                tab = resolve_text(r.get("QuestTabName") or {}).strip("「」")
+                for rec in out.values():
+                    if rec["name"] == panel["name"] and tab and tab not in rec["tabs"]:
+                        rec["tabs"].append(tab)
+    return out
+
+
 def _frac(value: object) -> float:
     """逐层剥 `{"Value": …}`（个别记录双层包装；`unwrap_value` 单次只剥一层）。"""
     depth = 0

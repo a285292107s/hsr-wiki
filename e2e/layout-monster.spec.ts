@@ -36,6 +36,8 @@ interface MonsterDetailJson {
     /** 技能附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键） */
     extra_effects?: { id: number; name: string; desc?: string; param_list?: number[] }[];
   }[];
+  /** 活动出处（仅被活动关卡引用的怪物有值） */
+  event?: { name: string; tabs: string[]; levels: number[]; count: number };
   /** 掉落 / 出没 / 额外阶段（monster_extra.py 的三块） */
   drops?: MonsterDropTierJson[];
   appearances?: { total: number; samples: { id: number; name: string }[] };
@@ -210,6 +212,41 @@ test.describe('布局验收：敌方详情页', () => {
         '速度 = 基准 × 修饰比 × 曲线 + 修正值（修正值不被曲线缩放）',
       ).toHaveText(String(wantSpeed));
       await expect(page.locator('.nk-mob-stat-note'), '口径注记必须写明含实例修正值').toContainText('实例修正值');
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<id>：活动出处备注逐项等于数据（活动名/页签/档位来自源文本，非自撰）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      /* 期望值全部数据派生：挑第一只带 `event` 的目录条目，断言备注里的活动名、档位数与页签
+         都来自详情 payload；再挑一只没有 `event` 的，断言该块整块不渲染。 */
+      const list = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json');
+      let target: { id: number; name: string } | undefined;
+      for (const m of list.slice(0, 200)) {
+        if (detailOf(m.id).event) { target = m; break; }
+      }
+      expect(target, '前 200 个目录条目里应有带活动出处的怪物（断言前提）').toBeTruthy();
+      const ev = detailOf(target!.id).event!;
+
+      await page.goto(`/monster/${target!.id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const note = page.locator('.nk-mob-event');
+      await expect(note).toHaveCount(1);
+      const text = ((await note.innerText()) || '').replace(/\s+/g, ' ');
+      expect(text, '活动名来自源 ActivityPanel.TitleName').toContain(`「${ev.name}」`);
+      expect(text, '档位数来自源关卡引用次数').toContain(`${ev.count} 个`);
+      for (const tab of ev.tabs) expect(text, `页签「${tab}」来自源 ActivityQuestRewardData`).toContain(tab);
+
+      const none = list.find((m) => !detailOf(m.id).event && m.id < 200);
+      if (none) {
+        await page.goto(`/monster/${none.id}`);
+        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+        await expect(page.locator('.nk-mob-event'), '无活动出处时不渲染备注').toHaveCount(0);
+      }
 
       assertNoErrors();
     },

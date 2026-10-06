@@ -41,6 +41,8 @@ def _fake_sources(monkeypatch, **overrides):
             {"MonsterID": 1002011, "MonsterTemplateID": 1002011, "SummonIDList": []},
             # 召唤者：冰锋由它召唤出场，波次名单里没有冰锋
             {"MonsterID": 1005010, "MonsterTemplateID": 1005010, "SummonIDList": [1002011]},
+            # 活动关卡用（见下 StageID 4190010）
+            {"MonsterID": 1002040, "MonsterTemplateID": 1002040, "SummonIDList": []},
         ],
         "StageConfig.json": [
             # 同一关两波都带 1002011 → 只能计一次
@@ -54,6 +56,20 @@ def _fake_sources(monkeypatch, **overrides):
              "MonsterList": [{"a": 1002011}]},
             {"StageID": 4, "StageType": "Trial", "StageName": {},
              "MonsterList": [{"a": 1002011}]},
+            # 活动关卡：StageType 与 ActivityPanel.UIPrefab 同名（FightFest）→ 产出活动出处。
+            # 用 1002040（不参与 drops/appearances 夹具断言），避免扰动既有用例。
+            {"StageID": 4190010, "StageType": "FightFest", "StageName": {"Hash": 74}, "Level": 20,
+             "MonsterList": [{"Monster0": 1002040}]},
+        ],
+        "ActivityPanel.json": [
+            {"PanelID": 50018, "UIPrefab": "UI/Quest/Widget/FightFestPanel.prefab",
+             "TitleName": {"Hash": 71}},
+        ],
+        "ActivityQuestRewardData.json": [
+            # ActivityModuleID 以该面板 ID 开头 → 它的页签算这个活动的
+            {"ActivityModuleID": 5001801, "QuestTabName": {"Hash": 72}},
+            # 别的活动的页签不得混入
+            {"ActivityModuleID": 9999999, "QuestTabName": {"Hash": 73}},
         ],
         "MonsterTemplateConfig.json": [
             {"MonsterTemplateID": 4014010, "TemplateGroupID": 4014010},
@@ -135,6 +151,7 @@ def _fake_sources(monkeypatch, **overrides):
         51: "阿尔法", 52: "阿尔法（完整）", 53: "贝塔", 54: "伽马",
         61: "防御力降低", 62: "防御力降低 20%。", 63: "攻击力提高", 64: "攻击力提高#1[i]%。",
         65: "超甲", 66: "狂怒", 67: "支援", 68: "受到%CasterName支援。",
+        71: "「星天演武仪典」", 72: "「梦境训练」", 73: "别的活动页签", 74: "活动关卡",
     }.get((h or {}).get("Hash"), "")
     monkeypatch.setattr(mx, "resolve_text", text)
     monkeypatch.setattr(it, "resolve_text", text)
@@ -204,6 +221,37 @@ class TestLoadSkillExtraEffects:
             "id": 10000027, "name": "额外回合",
             "desc": "获得 #1[i] 个额外回合", "param_list": [0.3],
         }]
+
+
+class TestLoadEventSources:
+    """活动出处：判据是 `ActivityPanel.UIPrefab` basename ↔ `StageConfig.StageType` 的同名约定。"""
+
+    def test_derives_name_tabs_levels(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        ev = mx.load_event_sources()
+        assert set(ev) == {1002040}, "只有活动关卡的怪物产出"
+        assert ev[1002040]["name"] == "星天演武仪典", "TitleName 的「」要剥掉"
+        assert ev[1002040]["tabs"] == ["梦境训练"], "只取 ActivityModuleID 属于该面板的页签"
+        assert ev[1002040]["levels"] == [20]
+        assert ev[1002040]["count"] == 1
+
+    def test_panel_missing_yields_nothing(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        inner = mx.load_json
+
+        def fake(path):
+            if Path(path).name == "ActivityPanel.json":
+                raise FileNotFoundError(path)
+            return inner(path)
+
+        monkeypatch.setattr(mx, "load_json", fake)
+        assert mx.load_event_sources() == {}, "表缺失就整条不产出（静默降级，不猜）"
+
+    def test_non_event_stages_ignored(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        # 夹具里 Mainline / Challenge / Trial 三个非活动关不得产出任何条目
+        ev = mx.load_event_sources()
+        assert 1002011 not in ev and 1005010 not in ev
 
 
 class TestLoadStatuses:

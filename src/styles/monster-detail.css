@@ -444,6 +444,28 @@
   color: var(--text3);
 }
 
+/* 活动出处备注：与「出没」同区块收尾，左发丝线区分"这是注记不是数据行" */
+.nk-mob-event {
+  margin-top: 14px;
+  padding: 10px 0 2px 10px;
+  border-left: 2px solid var(--line-2);
+}
+
+.nk-mob-event__k {
+  margin: 0 0 4px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+}
+
+.nk-mob-event__line {
+  margin: 0 0 4px;
+  font-size: 0.74rem;
+  line-height: 1.75;
+  color: var(--text2);
+}
+
 .nk-mob-appear__samples {
   display: flex;
   flex-wrap: wrap;

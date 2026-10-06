@@ -27,7 +27,8 @@ from config import OUTPUT_DIR
 from utils import save_json
 from converters.monster_common import load_level_curve, load_monsters
 from converters.monster_extra import (
-    load_appearances, load_drops, load_phases, load_skill_extra_effects, load_statuses,
+    load_appearances, load_drops, load_event_sources, load_phases, load_skill_extra_effects,
+    load_statuses,
 )
 from converters.voracity import load_invasion_map
 
@@ -49,6 +50,8 @@ def convert() -> None:
     extra_effects = load_skill_extra_effects()
     # 状态词条（MonsterStatusConfig，安全子集：命名约定桥 + 去形态后缀同名才归属；实测 234/632 个模板）
     statuses = load_statuses()
+    # 活动出处（仅"有活动关卡引用"的怪物有值；判据见 monster_extra.load_event_sources）
+    events = load_event_sources()
     output_dir = OUTPUT_DIR / "monsters"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -94,6 +97,8 @@ def convert() -> None:
             detail["phases"] = phases[tpl]
         if statuses.get(tpl):
             detail["statuses"] = statuses[tpl]
+        if events.get(tpl):
+            detail["event"] = events[tpl]
         save_json(detail, output_dir / f"{mid}.json")
         count += 1
 
