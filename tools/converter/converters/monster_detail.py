@@ -7,6 +7,7 @@
 - MonsterCamp.json            阵营名称
 - MonsterSkillConfig.json     技能全量（名称 / 标签 / 类型 / 伤害与攻击类型 / 描述 / 参数）
 - HardLevelGroup.json         等级曲线（单例落 monster-level-curve.json，与详情页共用）
+- EliteGroup.json             精英组倍率（单例落 monster-elite-group.json，与详情页共用）
 
 附加块（`monster_extra.py`，**不进**共享聚合表——该聚合被 endgame/voracity 共用，加键会漏进
 它们的 payload）：`drops`（MonsterDrop × ItemConfig，按均衡等级分档）/ `appearances`
@@ -17,8 +18,9 @@ TemplateGroupID 归属）。三者与 `invaded` 一样**按模板归属**写入�
 `_art_shared`）——活动出处备注要用它，且**判据必须在数据层**（视图只拿得到自己的立绘，
 比不了同伴的）。
 
-输出在传统字段基础上追加 `stat_ratio`（维度修饰比）与 `level_group`（难度组号），
-战斗数值在**前端**合成：stat = stats × stat_ratio × curve[level_group][level]（ADR 0040）。
+输出在传统字段基础上追加 `stat_ratio`（维度修饰比）、`level_group`（难度组号）与
+`elite_group`（精英组号），战斗数值在**前端**合成：
+stat = stats × stat_ratio × elite_ratio × curve[level_group][level]（ADR 0040/0045/0049）。
 
 技能描述保留原始富文本（#N[i] 参数占位 + color/unbreak 标签），前端 fmtDesc 渲染；
 param_list 为 ParamList 的 Value 数组（占位符替换参数）。
@@ -29,7 +31,7 @@ import logging
 
 from config import OUTPUT_DIR
 from utils import save_json
-from converters.monster_common import load_level_curve, load_monsters
+from converters.monster_common import load_elite_groups, load_level_curve, load_monsters
 from converters.monsters import catalog_rows
 from converters.monster_extra import (
     load_appearances, load_drops, load_event_sources, load_phases, load_skill_extra_effects,
@@ -84,6 +86,8 @@ def convert() -> None:
     curve = load_level_curve()
     # 等级曲线单独落盘：745 行共享一份，详情页按需取（shared single），避免 632 份 payload 各带一份
     save_json(curve, OUTPUT_DIR / "monster-level-curve.json")
+    # 精英组倍率同理共享落盘（1,423 组；落全量——关卡侧指派的组不被怪物配置引用，ADR 0049）
+    save_json(load_elite_groups(), OUTPUT_DIR / "monster-elite-group.json")
     invaded = load_invasion_map(monsters)
     art_shared = _art_shared(monsters, catalog_rows(monsters))
     drops = load_drops()
@@ -125,9 +129,10 @@ def convert() -> None:
             #  该算式的验证见 ADR 0045）。缺位不落键。
             **({"stance_modify": info["stance_modify"]} if info.get("stance_modify") is not None else {}),
             **({"speed_modify": info["speed_modify"]} if info.get("speed_modify") is not None else {}),
-            # 战斗数值合成链第二/三段（ADR 0040）：基准 stats × 维度修饰比 × level_group 曲线
+            # 战斗数值合成链第二/三/四段（ADR 0040/0049）：基准 stats × 维度修饰比 × 精英组倍率 × level_group 曲线
             "stat_ratio": info["stat_ratio"],
             "level_group": info["level_group"],
+            "elite_group": info.get("elite_group", 1),
         }
         # 实例别名页与模板页同源（_tpl 指向模板 ID）：附加块一律按模板归属写入，避免同怪两页不一致
         tpl = info.get("_tpl") or mid

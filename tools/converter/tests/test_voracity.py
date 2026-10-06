@@ -703,9 +703,11 @@ class TestMonsterDetailInvadedInvariants:
 
     def test_invaded_key_iff_template_in_invasion_list(self, env):
         """双向：有键 ⇔ 该文件的模板 ID 在侵入名单模板集合内。
-        （曲线单点 monster-level-curve.json 是共享文件，不计入怪物文件数）"""
+        （曲线 / 精英组两个共享单点 monster-level-curve.json / monster-elite-group.json
+        不计入怪物文件数）"""
         saved, template_of, usage = env
-        assert len(saved) - ("monster-level-curve.json" in saved) == len(template_of)
+        shared = sum(name in saved for name in ("monster-level-curve.json", "monster-elite-group.json"))
+        assert len(saved) - shared == len(template_of)
         for mid, tpl in template_of.items():
             assert ("invaded" in saved[f"{mid}.json"]) is (tpl in usage), mid
 

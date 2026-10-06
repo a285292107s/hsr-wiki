@@ -30,6 +30,12 @@ interface MonsterDetailJson {
   weak: string[];
   stance: number;
   stats: { hp: number; atk: number; def: number; speed: number };
+  /** 战斗数值合成链字段（ADR 0040/0049）：维度修饰比 / 难度组 / 精英组 / 实例修正值 */
+  stat_ratio?: { hp?: number; atk?: number; def?: number; speed?: number };
+  level_group?: number;
+  elite_group?: number;
+  stance_modify?: number;
+  speed_modify?: number;
   skills: {
     id: number;
     name: string;
@@ -220,6 +226,90 @@ test.describe('布局验收：敌方详情页', () => {
         '速度 = 基准 × 修饰比 × 曲线 + 修正值（修正值不被曲线缩放）',
       ).toHaveText(String(wantSpeed));
       await expect(page.locator('.nk-mob-stat-note'), '口径注记必须写明含实例修正值').toContainText('实例修正值');
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<实例>：精英组倍率进合成链（组 2 = HP×1.7 / ATK×0.8，参考站同档逐位吻合）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      /* ADR 0049：`基准 × 修饰比 × 精英组倍率 × 曲线 + 修正值`。100205006 实测带 EliteGroup 2
+         （银鬃射手家族变体，修饰比全 1、无修正值——面板差异只能来自精英组）；参考站同页该档
+         显示 51,203 / 574，与本仓数据独立折算逐位吻合，不含精英组的旧链会算出 30,119 / 718。 */
+      const id = 100205006;
+      const mon = detailOf(id);
+      expect(mon.elite_group, `${id} 应带精英组 2（断言前提）`).toBe(2);
+      const curve = readJson<Record<string, Record<string, { hp: number; atk: number }>>>(
+        'public/data/cn/monster-level-curve.json',
+      );
+      const elite = readJson<Record<string, { hp: number; atk: number }>>(
+        'public/data/cn/monster-elite-group.json',
+      );
+      const group = String(mon.level_group ?? 1);
+      const maxLevel = Math.max(...Object.keys(curve[group]).map(Number));
+      const row = curve[group][String(maxLevel)];
+      const wantHp = Math.round(
+        mon.stats.hp * (mon.stat_ratio?.hp ?? 1) * elite['2'].hp * row.hp * 10,
+      ) / 10;
+      const wantAtk = Math.round(
+        mon.stats.atk * (mon.stat_ratio?.atk ?? 1) * elite['2'].atk * row.atk * 10,
+      ) / 10;
+
+      await page.goto(`/monster/${id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(
+        page.locator('.nk-mob-stat__val[data-prop="hp"]'),
+        'HP = 基准 × 修饰比 × 精英组倍率 × 曲线',
+      ).toHaveText(wantHp.toLocaleString('en-US'));
+      await expect(
+        page.locator('.nk-mob-stat__val[data-prop="atk"]'),
+        'ATK = 基准 × 修饰比 × 精英组倍率 × 曲线',
+      ).toHaveText(wantAtk.toLocaleString('en-US'));
+      await expect(page.locator('.nk-mob-stat-note'), '口径注记必须写明精英组倍率段').toContainText('精英组倍率');
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<id>：出没样本按关卡语境合成实战面板（Π精英组 = 自身组 × 关卡指派组）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      /* ADR 0050：样本面板 = 基准 × 修饰比 × (自身精英组 × 关卡精英组) × 曲线[关卡难度组][关卡等级] + 修正值。
+         期望值由 payload + 双共享表独立折算；目标条目从数据派生（第一个带完整语境的样本）。 */
+      const elite = readJson<Record<string, Record<string, number>>>('public/data/cn/monster-elite-group.json');
+      const curve = readJson<Record<string, Record<string, Record<string, number>>>>('public/data/cn/monster-level-curve.json');
+      const entry = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json')
+        .map((m) => ({ m, mon: detailOf(m.id) }))
+        .find(({ mon }) => (mon.appearances?.samples ?? []).some(
+          (s) => s.level != null && s.elite_group != null && curve[String(s.level_group ?? 1)]?.[String(s.level)],
+        ));
+      expect(entry, '应有样本带完整关卡语境的目录条目（断言前提）').toBeTruthy();
+      const { m: entryMeta, mon } = entry!;
+      const sample = mon.appearances!.samples.find(
+        (s) => s.level != null && s.elite_group != null && curve[String(s.level_group ?? 1)]?.[String(s.level)],
+      )!;
+
+      const own = elite[String(mon.elite_group ?? 1)] ?? {};
+      const stg = elite[String(sample.elite_group!)] ?? {};
+      const row = curve[String(sample.level_group ?? 1)][String(sample.level!)];
+      const v = (p: 'hp' | 'atk' | 'def' | 'speed'): string => {
+        const add = p === 'speed' ? (mon.speed_modify ?? 0) : 0;
+        const raw = mon.stats[p] * (mon.stat_ratio?.[p] ?? 1) * (own[p] ?? 1) * (stg[p] ?? 1) * row[p] + add;
+        return (Math.round(raw * 10) / 10).toLocaleString('en-US');
+      };
+      const wantPanel = `等级 ${sample.level} · HP ${v('hp')} / ATK ${v('atk')} / DEF ${v('def')} / SPD ${v('speed')}`;
+
+      await page.goto(`/monster/${entryMeta.id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(
+        page.locator('.nk-mob-appear__sample-panel').first(),
+        '样本面板逐字等于关卡语境独立折算（等级 + 四维）',
+      ).toHaveText(wantPanel);
 
       assertNoErrors();
     },
@@ -440,11 +530,12 @@ test.describe('布局验收：敌方详情页', () => {
         '出没关卡数 = 数据 total',
       ).toHaveText(String(dropMon.appearances!.total));
       /* 样本 chip 的名字必须逐项等于数据：活动关卡的名来自活动表（ADR 0046），
-         不是 `StageConfig.StageName` 的活动级常量——写成别的一律红。 */
+         不是 `StageConfig.StageName` 的活动级常量——写成别的一律红。名字挂在
+         `.nk-mob-appear__sample-name` 上（chip 内还有 ADR 0050 的关卡面板行）。 */
       const chips = page.locator('.nk-mob-appear__sample');
       await expect(chips, '样本 chip 数 = 数据样本数').toHaveCount(dropMon.appearances!.samples.length);
       expect(
-        (await chips.allTextContents()).map((t) => t.trim()),
+        (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim()),
         '样本名逐项与数据一致（顺序同 DOM；活动关卡为「活动名 · 关卡名」）',
       ).toEqual(dropMon.appearances!.samples.map(sampleLabel));
 
@@ -454,7 +545,7 @@ test.describe('布局验收：敌方详情页', () => {
       const festMon = detailOf(1004015);
       await page.goto('/monster/1004015');
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      const festNames = (await page.locator('.nk-mob-appear__sample').allTextContents()).map((t) => t.trim());
+      const festNames = (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim());
       expect(festNames, '活动关卡样本名逐项与数据一致').toEqual(festMon.appearances!.samples.map(sampleLabel));
       expect(festNames, '活动级常量 StageName 不得作为关卡名上屏').not.toContain('承露天人');
       expect(festNames[0], '活动链样本名应带「活动名 · 关卡名」前缀').toMatch(/^星天演武仪典 · /);
@@ -469,7 +560,7 @@ test.describe('布局验收：敌方详情页', () => {
         expect(mon.appearances!.samples.map((s) => s.name), `${id} 数据里不得出现自己名字`).not.toContain(mon.name);
         await page.goto(`/monster/${id}`);
         await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-        const chipNames = (await page.locator('.nk-mob-appear__sample').allTextContents()).map((t) => t.trim());
+        const chipNames = (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim());
         expect(chipNames, `${id} 自己名字不得上屏`).not.toContain(mon.name);
         expect(chipNames, `${id} chip 逐项等于数据`).toEqual(mon.appearances!.samples.map(sampleLabel));
       }

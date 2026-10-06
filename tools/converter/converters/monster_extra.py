@@ -270,8 +270,31 @@ def load_player_stage_names(stage_types: dict[int, str]) -> dict[int, dict]:
     return names
 
 
+def _stage_context(rec: dict) -> dict:
+    """StageConfig 行 → 关卡语境 {level, level_group, elite_group}（缺位不落键，ADR 0050）。
+
+    「N 关 M 级怪的实际面板」的原始三件套：等级与难度组定曲线行，关卡精英组与怪物自身组
+    **叠乘**（Π精英组别系数）。只透传关卡行原值，合成留在前端（`monster-stats.ts` 同一算式）；
+    个别行的嵌套 `{Value:…}` 包装逐层解开。
+    """
+    def val(field: str):
+        v = rec.get(field)
+        depth = 0
+        while isinstance(v, dict) and depth < 4:
+            v = v.get("Value")
+            depth += 1
+        return v if isinstance(v, int) else None
+
+    ctx: dict = {}
+    for key, field in (("level", "Level"), ("level_group", "HardLevelGroup"), ("elite_group", "EliteGroup")):
+        v = val(field)
+        if v is not None:
+            ctx[key] = v
+    return ctx
+
+
 def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:
-    """StageConfig 波次 + 召唤链 → {模板ID: {total, samples:[{id, name}]}}。
+    """StageConfig 波次 + 召唤链 → {模板ID: {total, samples:[{id, name, activity?, level?, level_group?, elite_group?}]}}。
 
     `total` = 该模板（含其被召唤出场）出现过的**关卡数**（同关多波只计一次）；
     `samples` = 至多 `sample_kinds` 个关卡样本：**同一 `StageType` 只取一关**（首个命中者）、
@@ -326,13 +349,19 @@ def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:
                 sample = {"id": sid, "name": name, "type": stype}
                 if named.get("activity"):
                     sample["activity"] = named["activity"]
+                sample.update(_stage_context(rec))
                 book.append(sample)
 
     return {
         tpl: {
             "total": n,
             "samples": [
-                {"id": s["id"], "name": s["name"], **({"activity": s["activity"]} if s.get("activity") else {})}
+                {
+                    "id": s["id"],
+                    "name": s["name"],
+                    **({"activity": s["activity"]} if s.get("activity") else {}),
+                    **({k: s[k] for k in ("level", "level_group", "elite_group") if k in s}),
+                }
                 for s in samples.get(tpl, [])
             ],
         }

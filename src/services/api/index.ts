@@ -5,7 +5,7 @@ export { loadLocalVersion } from './version';
 export {
   RARITY_NUM_TO_KEY, loadLocalItems, loadLocalItemDb,
   loadLocalMonsterList, loadLocalMonsterDetail, loadLocalLightCones, loadLocalLightConeDetail,
-  loadLocalMonsterLevelCurve,
+  loadLocalMonsterLevelCurve, loadLocalMonsterEliteGroups,
 } from './items';
 export {
   loadLocalCharacterList, loadLocalCharacter, loadSkillAnimations, loadLocalBuildNames,

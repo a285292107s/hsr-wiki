@@ -506,6 +506,10 @@
 }
 
 .nk-mob-appear__sample {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   padding: 4px 10px;
   border: 1px solid var(--line-1);
   border-radius: var(--nk-radius-2);
@@ -517,6 +521,18 @@
 /* 活动名是上下文（弱），关卡名是值（主）——同一胶囊内两级字阶 */
 .nk-mob-appear__sample-from {
   font-size: 0.66rem;
+  color: var(--text3);
+}
+
+/* 关卡实战面板行（ADR 0050）：等级与四维按该关语境合成；比关卡名行低一档、数值比标签亮一档 */
+.nk-mob-appear__sample-panel {
+  font-size: 0.66rem;
+  line-height: 1.6;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-mob-appear__sample-panel-lv {
   color: var(--text3);
 }
 

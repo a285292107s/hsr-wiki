@@ -1,7 +1,7 @@
 /** 物品 / 光锥 / 敌对物种加载器 */
 import { cachedFetch } from '../cache';
 import type { ItemDb, LocalItemList, LocalLightConeList, LocalMonsterList, LightConeDetail, MonsterDetail } from '../types';
-import type { MonsterLevelCurve } from '../../lib/monster-stats';
+import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
 import { LOCAL_DATA_BASE } from './base';
 import { singletonLoad } from './singleton';
 
@@ -33,6 +33,9 @@ export const loadLocalMonsterList = singletonLoad<LocalMonsterList>(`${LOCAL_DAT
 
 /** 怪物等级曲线（共享单例：745 行共享一份，详情页按难度组取行做战斗数值合成） */
 export const loadLocalMonsterLevelCurve = singletonLoad<MonsterLevelCurve>(`${LOCAL_DATA_BASE}/monster-level-curve.json`);
+
+/** 怪物精英组倍率（共享单例：EliteGroup 全量 1,423 组一份，详情页按 elite_group 取行做战斗数值合成） */
+export const loadLocalMonsterEliteGroups = singletonLoad<MonsterEliteGroups>(`${LOCAL_DATA_BASE}/monster-elite-group.json`);
 
 /** 敌对物种详情（monsters/{id}.json，按 ID 按需加载，走请求缓存） */
 export function loadLocalMonsterDetail(id: string): Promise<MonsterDetail> {

@@ -240,7 +240,7 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
     实例自带的 `{Stance,Speed}ModifyValue` **在此直接并入** stance/speed（敌方卡无等级语境：
     口径 = 基准 + 修正值，见 ADR 0045），故输出里没有这两个键；详情页因要支持等级滑条而保留
     原值、由前端按 `基准 × 修饰比 × 曲线 + 修正值` 合成。
-    stat_ratio / level_group（战斗数值合成链，ADR 0040）同样不进终局 payload：
+    stat_ratio / level_group / elite_group（战斗数值合成链，ADR 0040/0049）同样不进终局 payload：
     终局敌方卡不显示这层合成，随归属详情页；
     full=True 追加 intro/skills/debuff_resist（敌方详情卡形态：末日幻影楼层 / 星启节点 /
     异相仲裁单关）；轻形态剥掉这三项——效果抵抗只在详情卡上有位，图标 + 百分比行落卡内。
@@ -251,7 +251,7 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
     if tpl:
         out["tpl"] = str(tpl)
     for k, v in info.items():
-        if k in ("figure", "_tpl", "stat_ratio", "level_group", "stance_modify", "speed_modify"):
+        if k in ("figure", "_tpl", "stat_ratio", "level_group", "elite_group", "stance_modify", "speed_modify"):
             continue
         if k == "stats":
             if v.get("speed"):

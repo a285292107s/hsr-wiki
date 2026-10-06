@@ -5,11 +5,11 @@ import { ELEM, MON_RANK, SITE_NAME } from '../../lib/constants';
 import {
   elementIconUrl, escHtml, fmtDesc, itemIconUrl, monsterFigureUrl, monsterIconUrl,
 } from '../../lib/format';
-import type { MonsterLevelCurve } from '../../lib/monster-stats';
-import { monsterMaxLevel, monsterStanceValue, monsterStatAt } from '../../lib/monster-stats';
+import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
+import { monsterEliteRatiosProduct, monsterMaxLevel, monsterStanceValue, monsterStatAt } from '../../lib/monster-stats';
 import { fmtStatValue } from '../../lib/format';
 import { atlasFormsOf, monsterFamilyKey, monsterFamilyOf } from '../../lib/monster-family';
-import { loadLocalMonsterDetail, loadLocalMonsterLevelCurve, loadLocalMonsterList } from '../../services/api';
+import { loadLocalMonsterDetail, loadLocalMonsterEliteGroups, loadLocalMonsterLevelCurve, loadLocalMonsterList } from '../../services/api';
 import type { LocalMonsterEntry, MonsterDetail, MonsterExtraEffect, MonsterPhase, MonsterSkillDetail } from '../../services/types';
 import { usePageData } from '../composables/use-page-data';
 import '../../styles/monster-detail.css';
@@ -37,14 +37,16 @@ const d = computed(() => data.value);
 watch(d, (data) => {
   if (data) document.title = `${data.name} - ${SITE_NAME}`;
 });
-/* 战斗数值合成（ADR 0040 + ADR 0045）：曲线作为共享单例随详情页拉取。
+/* 战斗数值合成（ADR 0040 + 0045 + 0049）：曲线与精英组倍率作为共享单例随详情页拉取。
    缺省等级 = **该难度组曲线的最高档**（不再写死 100：曲线各组上限不同——组 1/2 到 100、组 3 到 120、
    组 1401 只到 40，写死 100 会让组 1401 的怪显示「等级 100」却合成不出曲线值、静默回退基准值）。 */
 const curveRef = ref<MonsterLevelCurve | null>(null);
+const eliteRef = ref<MonsterEliteGroups | null>(null);
 /** 用户拖动后的等级；null = 未拖动 → 用该组最高档 */
 const levelOverride = ref<number | null>(null);
 onMounted(() => {
   void loadLocalMonsterLevelCurve().then((c) => { curveRef.value = c; });
+  void loadLocalMonsterEliteGroups().then((t) => { eliteRef.value = t; });
 });
 /** 曲线在该怪难度组下的最高等级（滑条上限；曲线缺组 → 0 = 静态展示基准值）。 */
 const maxLevel = computed(() => (d.value ? monsterMaxLevel(curveRef.value, String(d.value.level_group ?? 1)) : 0));
@@ -60,6 +62,8 @@ const combatStats = computed(() => {
   const meta = {
     statRatio: v.stat_ratio ?? null,
     levelGroup: v.level_group ?? 1,
+    // 精英组倍率行（组缺位 → 中性 1，ADR 0049）
+    eliteRatios: eliteRef.value?.[String(v.elite_group ?? 1)] ?? null,
     stats: v.stats,
     curve: curveRef.value,
     // 速度的实例修正值：加在曲线之后（ADR 0045）
@@ -72,8 +76,16 @@ const combatStats = computed(() => {
     speed: monsterStatAt('speed', combatLevel.value, meta),
   };
 });
-/** 韧性：不入等级曲线链（基准 + 实例修正值） */
-const stanceValue = computed(() => (d.value ? monsterStanceValue(d.value.stance, d.value.stance_modify) : null));
+/** 韧性：不入等级曲线链（基准 × 精英组韧性倍率 + 实例修正值；倍率缺位按 1） */
+const stanceValue = computed(() => (
+  d.value
+    ? monsterStanceValue(
+        d.value.stance,
+        d.value.stance_modify,
+        eliteRef.value?.[String(d.value.elite_group ?? 1)]?.stance ?? null,
+      )
+    : null
+));
 const figureUrl = computed(() => {
   if (!d.value) return '';
   return monsterFigureUrl(d.value.figure) || monsterIconUrl(d.value.icon);
@@ -262,6 +274,38 @@ function variantCell(det: MonsterDetail | null, key: 'stance' | 'hp' | 'speed' |
    关卡无名时不落样本，此时只呈现总数）；额外阶段按源表 PhaseID 呈现，**不翻译成游戏内阶段号**。 */
 const drops = computed(() => d.value?.drops ?? []);
 const appearances = computed(() => d.value?.appearances ?? null);
+/* 关卡实战面板（ADR 0050）：样本带关卡语境（等级 / 难度组 / 关卡精英组），
+   Π精英组别系数 = 怪物自身组 × 关卡指派组；曲线行缺失或四维任一合成失败 → 该样本无面板（不假数值）。 */
+type MonsterSamplePanel = { hp: number; atk: number; def: number; speed: number };
+const samplePanels = computed<Record<number, MonsterSamplePanel | null> | null>(() => {
+  const v = d.value;
+  if (!v) return null;
+  const own = eliteRef.value?.[String(v.elite_group ?? 1)] ?? null;
+  const out: Record<number, MonsterSamplePanel | null> = {};
+  for (const s of v.appearances?.samples ?? []) {
+    if (s.level == null) {
+      out[s.id] = null;
+      continue;
+    }
+    const stageElite = eliteRef.value?.[String(s.elite_group ?? 1)] ?? null;
+    const meta = {
+      statRatio: v.stat_ratio ?? null,
+      levelGroup: s.level_group ?? 1,
+      eliteRatios: monsterEliteRatiosProduct(own, stageElite),
+      stats: v.stats,
+      curve: curveRef.value,
+      modify: v.speed_modify == null ? null : { speed: v.speed_modify },
+    };
+    const hp = monsterStatAt('hp', s.level, meta);
+    const atk = monsterStatAt('atk', s.level, meta);
+    const def = monsterStatAt('def', s.level, meta);
+    const speed = monsterStatAt('speed', s.level, meta);
+    out[s.id] = hp != null && atk != null && def != null && speed != null
+      ? { hp, atk, def, speed }
+      : null;
+  }
+  return out;
+});
 /** 弱点 + 抗性的比对签名（抗性键序归一：JSON 键序会随写入顺序变，直接 stringify 会误判为不同） */
 function phaseSig(weak: string[] | undefined, resist: Record<string, number> | undefined): string {
   return JSON.stringify([
@@ -507,7 +551,7 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 <dd class="nk-mob-stat__val">{{ fmtStatValue(stanceValue ?? d.stance) }}</dd>
               </div>
             </dl>
-            <p class="nk-mob-stat-note">口径：模板基准 × 维度修饰比 × 等级曲线（难度组 {{ d.level_group ?? 1 }}）＋ 实例修正值；<strong>韧性不入该曲线</strong>（韧性 = 韧性基准 + 实例修正值，不随等级变化，故在上方单独一行）；基准值 {{ d.stats.hp }} / {{ d.stats.atk }} / {{ d.stats.def }} / {{ d.stats.speed }}<template v-if="d.stance_modify != null || d.speed_modify != null">，本档修正 <template v-if="d.stance_modify != null">韧性 {{ d.stance_modify > 0 ? '+' : '' }}{{ d.stance_modify }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">速度 {{ d.speed_modify > 0 ? '+' : '' }}{{ d.speed_modify }}</template></template>，未含关卡级剧情与场景系数。</p>
+            <p class="nk-mob-stat-note">口径：模板基准 × 维度修饰比 × 精英组倍率（组 {{ d.elite_group ?? 1 }}）× 等级曲线（难度组 {{ d.level_group ?? 1 }}）＋ 实例修正值；<strong>韧性不入该曲线</strong>（韧性 = 韧性基准 × 精英组韧性倍率 + 实例修正值，不随等级变化，故在上方单独一行）；基准值 {{ d.stats.hp }} / {{ d.stats.atk }} / {{ d.stats.def }} / {{ d.stats.speed }}<template v-if="d.stance_modify != null || d.speed_modify != null">，本档修正 <template v-if="d.stance_modify != null">韧性 {{ d.stance_modify > 0 ? '+' : '' }}{{ d.stance_modify }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">速度 {{ d.speed_modify > 0 ? '+' : '' }}{{ d.speed_modify }}</template></template>，未含关卡侧精英组指派（侵蚀隧洞、拟造花萼等副本的额外倍率）与剧情系数。</p>
           </section>
 
           <section v-if="drops.length" class="nk-mob-sec">
@@ -546,7 +590,11 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 出现在 <strong>{{ appearances.total }}</strong> 个关卡<template v-if="appearances.samples.length">，以下为其中几处：</template><template v-else>。</template>
               </p>
               <ul v-if="appearances.samples.length" class="nk-mob-appear__samples">
-                <li v-for="s in appearances.samples" :key="s.id" class="nk-mob-appear__sample"><template v-if="s.activity"><span class="nk-mob-appear__sample-from">{{ s.activity }}</span> · </template>{{ s.name }}</li>
+                <li v-for="s in appearances.samples" :key="s.id" class="nk-mob-appear__sample">
+                  <span class="nk-mob-appear__sample-name"><template v-if="s.activity"><span class="nk-mob-appear__sample-from">{{ s.activity }}</span> · </template>{{ s.name }}</span>
+                  <!-- 单行插值：textContent 逐字可断言（等级 + 四维，千分位同 fmtStatValue 口径） -->
+                  <span v-if="samplePanels?.[s.id]" class="nk-mob-appear__sample-panel"><span class="nk-mob-appear__sample-panel-lv">等级 {{ s.level }}</span> · HP {{ fmtStatValue(samplePanels[s.id]!.hp) }} / ATK {{ fmtStatValue(samplePanels[s.id]!.atk) }} / DEF {{ fmtStatValue(samplePanels[s.id]!.def) }} / SPD {{ fmtStatValue(samplePanels[s.id]!.speed) }}</span>
+                </li>
               </ul>
               <p class="nk-mob-appear__tip">
                 <template v-if="appearances.samples.length">关卡名取自游戏内（活动关卡 / 终局层级 / 侵蚀隧洞 · 凝滞虚影 / 强敌挑战 · 剑试），至多列 3 处。</template>

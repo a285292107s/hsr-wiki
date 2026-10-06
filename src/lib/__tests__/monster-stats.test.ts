@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { monsterMaxLevel, monsterStanceValue, monsterStatAt, type MonsterLevelCurve } from '../monster-stats';
+import { monsterEliteRatiosProduct, monsterMaxLevel, monsterStanceValue, monsterStatAt, type MonsterLevelCurve } from '../monster-stats';
 
 const CURVE: MonsterLevelCurve = {
   '1': {
@@ -74,6 +74,55 @@ describe('实例修正值（ADR 0045）', () => {
 
   it('修正值非数值 → 按 0（不静默把字段变成 NaN）', () => {
     expect(monsterStatAt('speed', 100, { ...DETAIL, modify: { speed: Number.NaN } })).toBe(r1(100 * 1.43));
+  });
+});
+
+/* ADR 0049：精英组倍率段（`基准 × 修饰比 × 精英组 × 曲线 + 修正值`）。
+   判据由参考站变体卡实测逐位验证：银鬃射手 #100205006（精英组 2 · 难度组 1，L95）
+   显示 51,203 / 574 / 1,150 / 132 —— 与 `102.3×1.7×曲线` / `18×0.8×曲线` 吻合，
+   不含精英组的旧链会算出 30,119 / 718。 */
+describe('精英组倍率（ADR 0049）', () => {
+  const CURVE95: MonsterLevelCurve = {
+    '1': { '95': { hp: 294.42172, atk: 39.889835, def: 5.47619, speed: 1.32 } },
+  };
+  const GEPARD_SOLDIER = {
+    stats: { hp: 102.3, atk: 18, def: 210, speed: 100 },
+    statRatio: null,
+    levelGroup: 1,
+    curve: CURVE95,
+    eliteRatios: { hp: 1.7, atk: 0.8 } as const,
+  };
+
+  it('精英组倍率参与合成（组 2 = HP×1.7 / ATK×0.8；防御/速度倍率为 1 不变）', () => {
+    expect(monsterStatAt('hp', 95, GEPARD_SOLDIER)).toBe(r1(102.3 * 1.7 * 294.42172));
+    expect(monsterStatAt('atk', 95, GEPARD_SOLDIER)).toBe(r1(18 * 0.8 * 39.889835));
+    expect(monsterStatAt('def', 95, GEPARD_SOLDIER)).toBe(r1(210 * 5.47619));
+    expect(monsterStatAt('speed', 95, GEPARD_SOLDIER)).toBe(r1(100 * 1.32));
+  });
+
+  it('缺组 / 缺行 → 中性 1（与不传 eliteRatios 等价，2722 条里 2695 条组 1 数值不变）', () => {
+    const noElite = { ...GEPARD_SOLDIER, eliteRatios: undefined };
+    expect(monsterStatAt('hp', 95, { ...GEPARD_SOLDIER, eliteRatios: null })).toBe(monsterStatAt('hp', 95, noElite));
+    expect(monsterStatAt('hp', 95, noElite)).toBe(r1(102.3 * 294.42172));
+  });
+
+  it('修正值仍在曲线之后（精英组倍率不吞掉修正值位置）', () => {
+    const withModify = { ...GEPARD_SOLDIER, modify: { speed: -44 } };
+    expect(monsterStatAt('speed', 95, withModify)).toBe(r1(100 * 1.32 - 44));
+  });
+
+  it('Π 精英组叠乘：自身组 × 关卡组，缺位维度按中性 1，整行缺位不参与', () => {
+    expect(monsterEliteRatiosProduct({ hp: 2 }, { hp: 3, atk: 0.5 })).toEqual({ hp: 6, atk: 0.5 });
+    expect(monsterEliteRatiosProduct(null, { atk: 0.8 })).toEqual({ atk: 0.8 });
+    expect(monsterEliteRatiosProduct()).toEqual({});
+  });
+
+  it('韧性：基准 × 精英组韧性倍率 + 修正值（缺位按 1；当前被怪物引用的组韧性倍率全 1）', () => {
+    expect(monsterStanceValue(60, null, 1)).toBe(60);
+    expect(monsterStanceValue(60, null, 2)).toBe(120);
+    expect(monsterStanceValue(60, 30, 1)).toBe(90);
+    expect(monsterStanceValue(60, null, null)).toBe(60);
+    expect(monsterStanceValue(60, null, Number.NaN)).toBe(60);
   });
 });
 

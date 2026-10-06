@@ -321,11 +321,37 @@ class TestLoadAppearances:
         _fake_sources(monkeypatch)
         app = mx.load_appearances()
         assert app[1002040]["samples"] == [
-            {"id": 4190010, "name": "擂台赛•其一", "activity": "星天演武仪典"}
-        ]
+            {"id": 4190010, "name": "擂台赛•其一", "activity": "星天演武仪典", "level": 20}
+        ], "关卡行带 Level 时样本透传关卡语境（4190010 的夹具行 Level=20）"
         assert app[1003011]["samples"] == [{"id": 4270010, "name": "花火的千变假面"}], (
             "ElationActivity 无活动名验证链 → 不落 activity 键"
         )
+
+    def test_stage_context_carries_level_group_and_elite_group(self, monkeypatch):
+        """关卡语境三件套（ADR 0050）：Level/HardLevelGroup/EliteGroup 逐项透传，缺位不落键；
+        嵌套 `{Value:…}` 包装逐层解开；关卡名解析不出的关卡不产样本，语境随行丢弃。"""
+        stages = [
+            # 全套语境：隧洞类关卡行（实测形态：Level + HardLevelGroup + EliteGroup）；
+            # StageID 1 挂假终局表 EventIDList1 拿到玩家可见关卡名
+            {"StageID": 1, "StageType": "Challenge", "StageName": {"Hash": 11},
+             "Level": 68, "HardLevelGroup": 1, "EliteGroup": 6,
+             "MonsterList": [{"a": 1002011}]},
+            # 精英组双层包装 + 缺 Level：只有解出的 elite_group 落键（走④强敌挑战链的关卡名）
+            {"StageID": 420012, "StageType": "StrongChallengeActivity", "Level": None,
+             "EliteGroup": {"Value": {"Value": 35001}},
+             "MonsterList": [{"a": 1002011}]},
+        ]
+        _fake_sources(monkeypatch, **{"StageConfig.json": stages})
+        app = mx.load_appearances()
+        assert app[1002011]["samples"][0] == {"id": 1, "name": "回忆其一",
+                                              "level": 68, "level_group": 1, "elite_group": 6}
+        assert app[1002011]["samples"][1] == {"id": 420012, "name": "长生久视的一梦", "elite_group": 35001}
+
+    def test_stage_context_absent_fields_not_emitted(self, monkeypatch):
+        """关卡行不带 Level/HardLevelGroup/EliteGroup（如夹具的 Challenge 关）→ 样本保持三键。"""
+        _fake_sources(monkeypatch)
+        app = mx.load_appearances()
+        assert app[1002011]["samples"][0] == {"id": 1, "name": "回忆其一"}
 
     def test_stage_without_player_visible_name_yields_no_sample(self, monkeypatch):
         """无实名源的关卡只进 total：关 3/4/5 都不落样本，即便关卡名与本怪同名（关 6）。"""

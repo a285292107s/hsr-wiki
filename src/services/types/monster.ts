@@ -100,6 +100,12 @@ export interface MonsterAppearanceSample {
   id: number;
   name: string;
   activity?: string;
+  /** 关卡语境（ADR 0050，缺位不落键）：该关卡行 `StageConfig.Level` 的战斗等级 */
+  level?: number;
+  /** 该关卡指定的难度组（`StageConfig.HardLevelGroup`，等级曲线查表组） */
+  level_group?: number;
+  /** 该关卡指派的精英组（`StageConfig.EliteGroup`，与怪物自身精英组叠乘——Π精英组别系数） */
+  elite_group?: number;
 }
 
 /**
@@ -206,6 +212,8 @@ export interface MonsterDetail {
   speed_modify?: number;
   /** 等级曲线难度组（MonsterConfig.HardLevelGroup，缺省 1；曲线全量走 monster-level-curve.json） */
   level_group?: number;
+  /** 精英组号（MonsterConfig.EliteGroup，缺省 1；倍率表全量走 monster-elite-group.json，ADR 0049） */
+  elite_group?: number;
   /** 技能列表（SkillList → MonsterSkillConfig） */
   skills: MonsterSkillDetail[];
   /** 「贪饕」侵蚀侵入名单（StageInvasionConfig；未进入名单的怪物无此字段） */

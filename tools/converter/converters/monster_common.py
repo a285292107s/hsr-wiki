@@ -2,14 +2,16 @@
 
 完整表→字段→输出映射见 docs/data/转换器字段映射.md（monster_common 段）。
 源：MonsterTemplateConfig / MonsterConfig / MonsterCamp / MonsterSkillConfig / HardLevelGroup /
-MonsterStatusResistanceType。
+EliteGroup / MonsterStatusResistanceType。
 输出 {模板ID: {name,icon,figure,weak,resist,rank,camp,intro,skills,stance,stats,
-                stat_ratio,level_group,debuff_resist}}；
+                stat_ratio,level_group,elite_group,debuff_resist}}；
 实例别名 MonsterID(如200401009)≠模板ID时指向同模板，使波次引用直接命中。
-战斗数值合成链（社群逆向共识 + HardLevelGroup 表结构一致，判据见 ADR 0040）：
-  stat(level) = stats[基准] × stat_ratio[维度修饰比] × level_curve[level_group][level]
-等级曲线不进每怪物 payload（745 行共享一份），由 monster_detail 单独落
-monster-level-curve.json；模板页基准值 stats 仍是官方模板原值，供列表与对照。
+战斗数值合成链（米游社《星铁数据机制通论》公式，参考站逐位反推验证，判据见 ADR 0040/0045/0049）：
+  stat(level) = stats[基准] × stat_ratio[维度修饰比] × elite_ratio[精英组倍率]
+                × level_curve[level_group][level] ＋ 修正值[曲线后加，ADR 0045]
+等级曲线（745 行）与精英组倍率（1,423 组）都不进每怪物 payload，各共享一份，
+由 monster_detail 分别落 monster-level-curve.json / monster-elite-group.json；
+模板页基准值 stats 仍是官方模板原值，供列表与对照。
 """
 import logging
 
@@ -64,6 +66,50 @@ def load_level_curve() -> dict[str, dict[str, dict[str, float]]]:
             "speed": frac("SpeedRatio"),
         }
     return curve
+
+
+def _elite_group(cfg: dict) -> int:
+    """`MonsterConfig.EliteGroup` → 精英组号（缺位/不可解析 → 1 基准组，组 1 全倍率为 1）。"""
+    v: object = cfg.get("EliteGroup")
+    depth = 0
+    while isinstance(v, dict) and depth < 4:
+        v = v.get("Value")
+        depth += 1
+    return int(v) if isinstance(v, (int, float)) and v else 1
+
+
+def load_elite_groups() -> dict[str, dict[str, float]]:
+    """EliteGroup 精英组倍率 → {group: {hp,atk,def,speed,stance}}（键 str 化以贴合 JSON）。
+    战斗数值合成链的第四段（ADR 0049）：不随等级变化的整体倍率，怪物自身
+    （MonsterConfig.EliteGroup）与关卡侧指派（StageConfig.EliteGroup 等）共用本表、可叠乘。
+    落全量——关卡指派的组（隧洞组 3、花萼组 7 等）不被任何怪物配置引用，但关卡语境合成要用。
+    比率缺位取中性 1，不静默归零。"""
+    out: dict[str, dict[str, float]] = {}
+    for r in load_json(EXCEL_DIR / "EliteGroup.json"):
+        g = r.get("EliteGroup")
+        if g is None:
+            continue
+
+        def frac(field: str) -> float:
+            v: object = r.get(field)
+            depth = 0
+            while isinstance(v, dict) and depth < 4:
+                v = v.get("Value")
+                depth += 1
+            return float(v) if isinstance(v, (int, float)) else 1.0
+
+        key = str(g)
+        if key in out:
+            logger.warning("EliteGroup 组键重复：group=%s，保留首条", g)
+            continue
+        out[key] = {
+            "hp": frac("HPRatio"),
+            "atk": frac("AttackRatio"),
+            "def": frac("DefenceRatio"),
+            "speed": frac("SpeedRatio"),
+            "stance": frac("StanceRatio"),
+        }
+    return out
 
 
 def load_status_resist_icons() -> dict[str, str]:
@@ -123,7 +169,7 @@ def _modify_value(cfg: dict, field: str) -> float | None:
 
 def load_monsters() -> dict[int, dict]:
     """敌方信息聚合 → {ID: {name, icon, figure, weak, resist, rank, camp, intro, skills, stance, stats,
-                             stat_ratio, level_group, debuff_resist}}。"""
+                             stat_ratio, level_group, elite_group, debuff_resist}}。"""
     templates = load_json(EXCEL_DIR / "MonsterTemplateConfig.json")
     configs = load_json(EXCEL_DIR / "MonsterConfig.json")
     resist_icons = load_status_resist_icons()
@@ -182,9 +228,10 @@ def load_monsters() -> dict[int, dict]:
                 "def": unwrap_value(rec.get("DefenceBase", {})) or 0,
                 "speed": unwrap_value(rec.get("SpeedBase", {})) or 0,
             },
-            # 维度修饰比与难度组：战斗合成链第二/三段（ADR 0040）。模板自身 cfg 缺位时按中性 1 / 组 1。
+            # 维度修饰比/难度组/精英组：战斗合成链第二/三/四段（ADR 0040/0049）。模板自身 cfg 缺位时按中性 1 / 组 1。
             "stat_ratio": _stat_ratio_from_cfg(cfg) if cfg else {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": (cfg.get("HardLevelGroup") or 1) if cfg else 1,
+            "elite_group": _elite_group(cfg) if cfg else 1,
             # 效果抵抗（DebuffResist × MonsterStatusResistanceType）：按状态类别给图标，无文字名
             "debuff_resist": _debuff_resist(cfg, resist_icons),
         }
@@ -196,14 +243,15 @@ def load_monsters() -> dict[int, dict]:
     for rec in configs:
         mid, tpl = rec.get("MonsterID"), rec.get("MonsterTemplateID")
         if mid is not None and tpl is not None and mid != tpl and tpl in out:
-            # 实例变体的修饰比/难度组用**它自己**的 config 记录：模板与变体的同三项不同值
-            # （1002011 hpR=1，100201101 hpR=0.266667），沿用模板值会把变体战斗数值算错；
-            # 效果抵抗同理按实例自己的 DebuffResist（逐实例登记的抵抗率可能不同）
+            # 实例变体的修饰比/难度组/精英组用**它自己**的 config 记录：模板与变体的同四项不同值
+            # （1002011 hpR=1，100201101 hpR=0.266667；1002050 精英组 1，100205006 精英组 2），
+            # 沿用模板值会把变体战斗数值算错；效果抵抗同理按实例自己的 DebuffResist（逐实例登记的抵抗率可能不同）
             variant = {
                 **out[tpl],
                 "_tpl": tpl,
                 "stat_ratio": _stat_ratio_from_cfg(rec),
                 "level_group": rec.get("HardLevelGroup") or 1,
+                "elite_group": _elite_group(rec),
                 "debuff_resist": _debuff_resist(rec, resist_icons),
             }
             # 修正值同样以实例自己的记录为准：**不得继承模板的**（模板有 +30 而实例无值时，

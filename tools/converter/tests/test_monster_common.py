@@ -94,6 +94,7 @@ class TestLoadMonsters:
             "stats": {"hp": 1023, "atk": 18, "def": 210, "speed": 100},
             "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 1,
+            "elite_group": 1,
             # 效果抵抗：只留图标表里登记的状态类别（无图标 / 未登记的 key 跳过）
             "debuff_resist": [{"key": "STAT_CTRL_Frozen", "value": 0.75, "icon": "IconImmuneFrozen"}],
         }
@@ -109,6 +110,7 @@ class TestLoadMonsters:
             "stance": 0, "stats": {"hp": 0, "atk": 0, "def": 0, "speed": 0},
             "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 1,
+            "elite_group": 1,
             "debuff_resist": [],
         }
 
@@ -124,8 +126,8 @@ class TestLoadMonsters:
         assert 9999999 not in out
 
     def test_alias_carries_own_variant_ratios(self, monkeypatch):
-        """别名变体的修饰比/难度组用**它自己**的 config 记录，不沿用模板（ADR 0040 决策 3）：
-        同模板不同档位正是靠这两项区分；效果抵抗同理逐实例取（双层 ValueWrap 一并解开）。"""
+        """别名变体的修饰比/难度组/精英组用**它自己**的 config 记录，不沿用模板（ADR 0040 决策 3 /
+        ADR 0049）：同模板不同档位正是靠这几项区分；效果抵抗同理逐实例取（双层 ValueWrap 一并解开）。"""
         extra_cfg = {
             **_fake_load(Path("MonsterConfig.json"))[0],
             "MonsterID": 801301099, "MonsterTemplateID": 8013010,
@@ -133,6 +135,7 @@ class TestLoadMonsters:
             "AttackModifyRatio": {"Value": 1.5},
             "DefenceModifyRatio": {"Value": {"Value": 0.5}},
             "HardLevelGroup": 3,
+            "EliteGroup": 2,
             "DebuffResist": [{"Key": "STAT_CTRL_Frozen", "Value": {"Value": {"Value": 1}}}],
         }
         monkeypatch.setattr(mc, "load_json", lambda p: (
@@ -143,6 +146,7 @@ class TestLoadMonsters:
         assert variant["name"] == "名1"          # 名称/立绘等仍是模板家族信息
         assert variant["stat_ratio"] == {"hp": 0.266667, "atk": 1.5, "def": 0.5, "speed": 1.0}
         assert variant["level_group"] == 3
+        assert variant["elite_group"] == 2, "精英组不继承模板的组 1（1002050 vs 100205006 的判据）"
         assert variant["debuff_resist"] == [
             {"key": "STAT_CTRL_Frozen", "value": 1, "icon": "IconImmuneFrozen"},
         ]
@@ -216,3 +220,28 @@ class TestLoadLevelCurve:
         ])
         curve = mc.load_level_curve()
         assert curve["1"]["1"]["hp"] == 0.8
+
+
+class TestLoadEliteGroups:
+    def test_groups_str_keys_and_neutral_fallback(self, monkeypatch):
+        """精英组 → 五维倍率；键字符串化；缺位/垃圾值按中性 1（ADR 0049）。"""
+        monkeypatch.setattr(mc, "load_json", lambda p: [
+            {"EliteGroup": 1, "HPRatio": {"Value": 1}, "AttackRatio": {"Value": 0.7},
+             "DefenceRatio": {"Value": {"Value": 1}}},
+            {"EliteGroup": 2, "HPRatio": {"Value": 1.7}, "AttackRatio": {"Value": 0.8},
+             "SpeedRatio": None, "StanceRatio": {"Value": 1}},
+        ])
+        out = mc.load_elite_groups()
+        assert out["2"] == {"hp": 1.7, "atk": 0.8, "def": 1.0, "speed": 1.0, "stance": 1.0}
+        assert out["1"]["stance"] == 1.0, "未登记的维度也落键（中性 1），前端无需判键是否存在"
+
+    def test_elite_group_duplicate_and_garbage(self, monkeypatch):
+        """重复组号保留首条并告警；缺组号的垃圾行不入表。"""
+        monkeypatch.setattr(mc, "load_json", lambda p: [
+            {"EliteGroup": 5, "HPRatio": {"Value": 1.25}},
+            {"EliteGroup": 5, "HPRatio": {"Value": 99}},
+            {"EliteGroup": None, "HPRatio": {"Value": 1}},
+        ])
+        out = mc.load_elite_groups()
+        assert out["5"]["hp"] == 1.25
+        assert list(out) == ["5"]
