@@ -170,17 +170,12 @@
   gap: 14px;
   min-width: 0;
 }
-/* 看板体：整块挂 `.nk-egd-children`，看板头（只有无首领特性节点的污染徽标会落在这里）与下方区块共用同一档缩进与左基准。 */
+/* 看板体：整块挂 `.nk-egd-children`，各区块共用同一档缩进与左基准
+   （面板级污染徽标已退场，看板首块即末法余烬/赛季增益/敌方配置）。 */
 .nk-egd-board__body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-}
-.nk-egd-board__head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
 }
 /* 看板体首块的「末法余烬」由父级 gap 承担留白（块状父级沿用基础 margin-top） */
 .nk-egd-board__body > .nk-egd-floor__buff { margin-top: 0; }

@@ -37,8 +37,16 @@ onMounted(() => {
 
     <main class="nk-hub-release">
       <div class="nk-hub-release__head">
-        <h2 class="nk-hub-release__title">{{ releaseTitle }}</h2>
+        <div class="nk-hub-release__heading">
+          <p class="nk-hub-release__kicker">LATEST TRANSMISSION</p>
+          <h2 class="nk-hub-release__title">{{ releaseTitle }}</h2>
+        </div>
         <span class="nk-hub-release__rule" aria-hidden="true"></span>
+        <p class="nk-hub-release__edition" aria-label="角色、光锥与遗器">
+          <span class="nk-hub-release__edition-item">CHARACTER</span>
+          <span class="nk-hub-release__edition-item">LIGHT CONE</span>
+          <span class="nk-hub-release__edition-item">RELIC</span>
+        </p>
       </div>
 
       <!-- 加载期：分区标签与卡片位按就绪态的规格占位（桌面 306×408 = 单条目特写档的卡），

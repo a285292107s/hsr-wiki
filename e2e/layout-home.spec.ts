@@ -154,6 +154,36 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
+  test('首页 /：版本抬头的编辑层级与类别索引完整可见', async ({ page }) => {
+    await page.goto('/');
+    const kicker = page.locator('.nk-hub-release__kicker');
+    const title = page.locator('.nk-hub-release__title');
+    const edition = page.locator('.nk-hub-release__edition');
+    await expect(kicker).toHaveText('LATEST TRANSMISSION');
+    await expect(title).toBeVisible();
+    await expect(edition).toHaveAttribute('aria-label', '角色、光锥与遗器');
+    await expect(edition).toContainText('CHARACTER');
+    await expect(edition).toContainText('LIGHT CONE');
+    await expect(edition).toContainText('RELIC');
+    const geometry = await page.evaluate(() => {
+      const head = document.querySelector('.nk-hub-release__head')!.getBoundingClientRect();
+      const kickerBox = document.querySelector('.nk-hub-release__kicker')!.getBoundingClientRect();
+      const titleBox = document.querySelector('.nk-hub-release__title')!.getBoundingClientRect();
+      const editionBox = document.querySelector('.nk-hub-release__edition')!.getBoundingClientRect();
+      return {
+        stack: kickerBox.bottom <= titleBox.top,
+        editionWithinHead: editionBox.right <= head.right + 1,
+        itemCount: document.querySelectorAll('.nk-hub-release__edition-item').length,
+        itemNames: [...document.querySelectorAll('.nk-hub-release__edition-item')].map((el) => el.textContent?.trim()),
+      };
+    });
+    expect(geometry.stack, '辅助标签应在主标题上方形成层级').toBe(true);
+    expect(geometry.editionWithinHead, '类别索引不得越出标题行').toBe(true);
+    expect(geometry.itemCount).toBe(3);
+    expect(geometry.itemNames).toEqual(['CHARACTER', 'LIGHT CONE', 'RELIC']);
+    await noUnknownOverflow(page);
+  });
+
   test('首页 /：1920×1080 首屏内完整可见品牌带 + 版本上新标题与第一分区首行卡片（ADR 0019 核心验收）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1920, height: 1080 });

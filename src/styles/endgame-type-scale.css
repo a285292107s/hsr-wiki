@@ -34,6 +34,8 @@
 .nk-egd-fury__label,
 .nk-egd-mon__label,
 .nk-egd-summons__label,
+.nk-egd-guide__label,
+.nk-egd-phase__label,
 .nk-egd-poll__monslabel,
 .nk-egd-head__label { font-size: 0.72rem; }
 
@@ -58,14 +60,22 @@
 
 .nk-egd-mon__intro { font-size: 0.72rem; }
 
+/* 首领机制（末日幻影卡内分区）：特性与阶段名同档（0.95，与赛季增益条目名同族——它们都是
+   读者要扫的机制名）；说明与应对策略走正文 0.84；小节问答的名 0.78 / 答 0.72（攻略附注档）。 */
+.nk-egd-phase__name { font-size: 0.95rem; }
+.nk-egd-trait__desc,
+.nk-egd-phase__desc,
+.nk-egd-phase__answer { font-size: 0.84rem; }
+.nk-egd-phase__skillname { font-size: 0.78rem; }
+.nk-egd-phase__skilldesc { font-size: 0.72rem; }
+
 /* 等级词条行头在窄屏换行；绑定码是长 token（ChallengePeakBattle_…），字档抬高后必须允许断行 */
 .nk-egd-poll__levelhead { flex-wrap: wrap; }
 .nk-egd-code { white-space: normal; overflow-wrap: anywhere; }
 
 .nk-egd-buff { padding: 16px 18px; gap: 8px; }
 .nk-egd-buffs { gap: 10px; }
-.nk-egd-group > .nk-egd-buffs,
-.nk-egd-group > .nk-egd-traits { margin-bottom: 0; }
+.nk-egd-group > .nk-egd-buffs { margin-bottom: 0; }
 .nk-egd-poll__list { gap: 10px; }
 .nk-egd-poll__item { padding: 12px 14px; }
 .nk-egd-floor__row { padding: 10px 0; }

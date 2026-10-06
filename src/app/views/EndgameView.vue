@@ -12,7 +12,7 @@ import type {
 } from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
-import { seasonBuffSystemLine, seasonBuffSystemName } from '../endgame/guide';
+import { seasonBuffSystemName } from '../endgame/guide';
 import { buildLevelTabs, defaultLevelKey, type LevelTab } from '../endgame/levels';
 import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
@@ -121,9 +121,8 @@ watch(
 
 const modeKey = computed(() => String(route.params.mode || ''));
 
-/** 增益体系名与选法说明（按玩法取自 endgame_guide.json；产物缺省时回退站点工作名/空串） */
+/** 增益体系名（按玩法取自 endgame_guide.json） */
 const systemName = computed(() => seasonBuffSystemName(guide.value, modeKey.value));
-const systemLine = computed(() => seasonBuffSystemLine(guide.value, modeKey.value));
 
 /** 四个玩法的关卡都由子 tab 承载（ADR 0043）：层级模式 = 「第 1..N 层 / 星启模式」，
  *  异相仲裁 = 「骑士（一）… / 将杀王棋」。默认激活星启，无星启的模式激活首关（见 `defaultLevelKey`）。 */
@@ -221,10 +220,9 @@ onBeforeUnmount(() => {
         <div class="nk-egd-panel">
           <template v-if="levelTabs.length">
             <EndgameBuffs
+              v-if="modeKey === 'story' && data.sub_buffs?.length"
               :data="data"
               :mode-key="modeKey"
-              :system-name="systemName"
-              :system-line="systemLine"
             />
 
             <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
