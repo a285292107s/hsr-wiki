@@ -28,6 +28,35 @@ export interface MazeBossTrait {
   param_list?: number[];
 }
 
+/** 阶段小节问答（MonsterGuideSkill × MonsterGuideSkillText：SkillName 是问句、正文是答句，
+ *  如「如何高效削减首领幻影的韧性」；实测各只有 1 条文本且无 #N[i] 占位符） */
+export interface MazeBossPhaseSkill {
+  name: string;
+  desc?: string;
+}
+
+/** 首领阶段（MonsterGuidePhase，游戏内首领图鉴的阶段机制）：阶段名自带「阶段一：…」前缀，
+ *  answer 是官方应对策略原文（含「应对策略：」前缀） */
+export interface MazeBossPhase {
+  /** MonsterGuidePhase.PhaseID */
+  id: number;
+  name: string;
+  /** 机制说明（原始富文本） */
+  desc?: string;
+  /** 官方应对策略（原始富文本） */
+  answer?: string;
+  /** 该阶段的小节问答 */
+  skills?: MazeBossPhaseSkill[];
+}
+
+/** 首领机制正文（converter 输出：敌方模板 ID → 首领特性 + 阶段机制；仅末日幻影产出）。
+ *  归属由转换器算好：命中登记的敌方条目带 `boss_guide` 模板指针，前端按指针取本表，
+ *  **不做模板推导**（配置表的敌方 ID 未必等于战斗敌方，见 ADR 0029 修订） */
+export interface MazeBossGuide {
+  traits?: MazeBossTrait[];
+  phases?: MazeBossPhase[];
+}
+
 /** 按场次分组的条目（末日幻影：stage1 = 上半场 / stage2 = 下半场 / tierce = 星启模式） */
 export interface MazeHalfGroups<T> {
   stage1?: T;
@@ -63,9 +92,12 @@ export interface MazeMonsterInfo {
   intro?: string;
   /** 技能列表（MonsterConfig.SkillList → MonsterSkillConfig，名称 + 标签） */
   skills?: { name: string; tag?: string }[];
-  /** 韧性值（MonsterTemplateConfig.StanceBase.Value，如 360） */
+  /** 韧性值（`StanceBase` **+ 该实例的 `StanceModifyValue`**，如 300 − 120 = 180；模板缺失时不输出）。
+   *  韧性不入等级曲线链，故只有「基准 + 修正」；修正值在转换期并入（ADR 0045） */
   stance?: number;
   /** 速度（MonsterTemplateConfig.SpeedBase.Value，如 144；模板缺失时不输出） */
+  /** 速度（`MonsterTemplateConfig.SpeedBase.Value` **+ 该实例的 `SpeedModifyValue`**，如 144 − 44 = 100；
+   *  模板缺失时不输出）。修正值在转换期并入（敌方卡无等级语境，口径见 ADR 0045） */
   speed?: number;
   /** 模板 ID（仅实例别名 MonsterID≠MonsterTemplateID 时输出，如 501211002 → 5012110；
    *  详情页跳转 /monster/:tpl 用；无别名时 id 即模板 ID） */
@@ -74,6 +106,21 @@ export interface MazeMonsterInfo {
   wave?: number;
   /** 该敌方实例的召唤物（`MonsterConfig.SummonIDList` 命中本场次时输出；见 MazeSummonInfo） */
   summons?: MazeSummonInfo[];
+  /** 首领机制指针（模板 ID，键指向赛季级 `boss_guides`；仅末日幻影登记机制条目的敌方有）。
+   *  由转换器按敌方模板算出——**召唤物不带**（同组的部件与形态会重复渲染同一批机制） */
+  boss_guide?: string;
+  /** 效果抵抗（`MonsterConfig.DebuffResist` × `MonsterStatusResistanceType`：状态类别 → 免疫图标）。
+   *  **上游只有图标没有文字名**（TextMap 无「免疫冻结」类文案），故只呈现图标 + 百分比；
+   *  只随「敌方详情卡」形态输出（末日幻影楼层 / 星启节点 / 异相仲裁单关），轻形态不带 */
+  debuff_resist?: MazeDebuffResistInfo[];
+}
+
+/** 单条效果抵抗：key 为上游状态类别（如 `STAT_CTRL_Frozen`，仅供回溯，不上屏）；
+ *  value 为抵抗率（0–1，实测 0.5 / 0.75 / 1）；icon 为 `statusimmune` 分类的 basename */
+export interface MazeDebuffResistInfo {
+  key: string;
+  value: number;
+  icon: string;
 }
 
 /** 召唤物（ADR 0036）：隶属于**某个敌方实例**的额外敌人——由该实例的
@@ -191,8 +238,8 @@ export interface PeakLevelInfo {
 export interface MazeTierceNode extends MazeStageDetail {
   /** 节点序号（1/2 = 末层上下半场；3 = 星启附加关） */
   idx: number;
-  /** 场次键：按它取赛季级 `buff_groups`（赛季增益）与 `boss_traits`（首领特性）
-   *  ——`tierce` = 星启附加关那一组，只有末日幻影产出这两项 */
+  /** 场次键：按它取赛季级 `buff_groups`（赛季增益）——`tierce` = 星启附加关那一组，
+   *  只有末日幻影产出该项。首领机制不走场次键（按敌方模板键，见 MazeMonsterInfo.boss_guide） */
   origin: 'stage1' | 'stage2' | 'tierce';
   /** 该场次关卡等级（StageConfig.Level） */
   level?: number;
@@ -283,8 +330,8 @@ export interface MazeListEntry {
   buffs?: MazeBuffInfo[];
   /** 分场次赛季增益（仅末日幻影：源表 BuffList1/2/3 = 上半场/下半场/星启模式，各 3 条） */
   buff_groups?: MazeHalfGroups<MazeBuffInfo[]>;
-  /** 分场次首领特性（仅末日幻影：首领幻影机制，源 MonsterGuideConfig × MonsterGuideTag） */
-  boss_traits?: MazeHalfGroups<MazeBossTrait[]>;
+  /** 首领机制正文（仅末日幻影：敌方模板 ID → 首领特性 + 阶段机制，按敌方 `boss_guide` 指针取） */
+  boss_guides?: Record<string, MazeBossGuide>;
   /** 战意赛季主题机制（虚构叙事 Fever 赛季 SubMazeBuffList：机制 + 战熄潮平/战意汹涌；
    *  普通赛季缺省） */
   sub_buffs?: MazeBuffInfo[];

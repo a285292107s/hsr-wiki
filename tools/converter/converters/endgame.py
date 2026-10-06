@@ -16,9 +16,10 @@
   按怪物 join 会整层漏判。
 - 赛季增益按场次下发（末日幻影 BuffList1/2/3 = 上半场/下半场/星启模式），扁平 buffs
   仍是 1+2 的并集（目录卡与 AI 快照沿用），分场次落 buff_groups。
-- 首领特性（末日幻影，官方文案；对照站与旧稿称「关卡效果」）取 MonsterGuideConfig ×
-  MonsterGuideTag，按**敌方模板**聚合；配置表的敌方 ID 未必等于战斗敌方，缺失时用
-  Tag.SkillID // 100 唯一反查（见 _load_guide_traits）。
+- 首领机制（末日幻影，官方文案；对照站与旧稿称「关卡效果」）= 首领特性（MonsterGuideConfig ×
+  MonsterGuideTag）+ 阶段机制（MonsterGuidePhase × MonsterGuideSkill × MonsterGuideSkillText），
+  按**敌方模板**聚合落赛季级 `boss_guides`，命中登记的敌方条目带 `boss_guide` 模板指针；
+  配置表的敌方 ID 未必等于战斗敌方，缺失时用 Tag.SkillID // 100 唯一反查（见 _load_boss_guides）。
 - param 字段前端未消费，置空数组贴合结构。
 """
 
@@ -111,23 +112,59 @@ def _load_maze_buffs() -> dict[int, dict]:
         }
     return out
 
-def _load_guide_traits() -> dict[int, list[dict]]:
-    """MonsterGuideConfig × MonsterGuideTag → {敌方模板 ID: [首领特性]}（末日幻影）。
+def _load_guide_phases() -> dict[int, dict]:
+    """MonsterGuidePhase × MonsterGuideSkill × MonsterGuideSkillText → {PhaseID: 阶段条目}。
 
-    首领特性 = 首领幻影的战斗机制条目（名称 + 简述 + 参数，如「坚防守备」，游戏内教程
-    「◆ 首领特性 ◆」；对照站与旧稿称「关卡效果」，但游戏内「关卡效果」实指每期「末法余烬」）。
-    源表按敌方 ID 登记 TagList、MonsterGuideTag 提供文案与 ParameterList；同一模板的各难度
-    实例实测共用同一份清单（4 个难度的 TagList 逐字相同），故按模板聚合一次。
-    模板 ID 取 MonsterID // 100（MonsterID = 模板 ×100 + 实例序号）；**配置表的敌方 ID
-    未必等于战斗敌方**——业火焚心的影将军战斗模板 2035012 在配置表里登记为蚀心兽 2033022，
-    直接按模板 join 会整层漏。缺失时用 Tag.SkillID // 100 反查（技能 ID = 模板 ×100 +
-    技能序号），**仅当反查结果唯一**时采用：技能 ID 会被多个首领共享（如 100401410），
-    不唯一即放弃，宁缺勿错挂。
+    阶段条目 = 阶段名（PhaseName 自带「阶段一：…」前缀）+ 机制说明（PhaseDescription）+
+    官方应对策略（PhaseAnswer）+ 小节问答（SkillList → MonsterGuideSkill.SkillName 是问句，
+    正文在 MonsterGuideSkillText.SkillDescription，如「如何高效削减首领幻影的韧性」）。
+    实测 29 个被引用阶段的三段文本均无 #N[i] 占位符、57 个招式各只有 1 条文本，故不落
+    param_list；PhasePic 全为空串，不消费。
     """
-    tag_recs = load_json(EXCEL_DIR / "MonsterGuideTag.json")
+    texts: dict[int, str] = {}
+    for rec in load_json(EXCEL_DIR / "MonsterGuideSkillText.json"):
+        tid = rec.get("SkillTextID")
+        if tid is not None:
+            texts[tid] = resolve_text(rec.get("SkillDescription", {}), clean=False)
+    skills: dict[int, dict] = {}
+    for rec in load_json(EXCEL_DIR / "MonsterGuideSkill.json"):
+        sid = rec.get("SkillID")
+        if sid is None:
+            continue
+        skills[sid] = {
+            "name": resolve_text(rec.get("SkillName", {})),
+            "desc": " ".join(t for t in (texts.get(t) for t in (rec.get("SkillTextIDList") or [])) if t),
+        }
+    out: dict[int, dict] = {}
+    for rec in load_json(EXCEL_DIR / "MonsterGuidePhase.json"):
+        pid = rec.get("PhaseID")
+        if pid is None:
+            continue
+        out[pid] = {
+            "id": pid,
+            "name": resolve_text(rec.get("PhaseName", {})),
+            "desc": resolve_text(rec.get("PhaseDescription", {}), clean=False),
+            "answer": resolve_text(rec.get("PhaseAnswer", {}), clean=False),
+            "skills": [skills[s] for s in (rec.get("SkillList") or []) if s in skills],
+        }
+    return out
+
+def _load_boss_guides() -> dict[int, dict]:
+    """MonsterGuideConfig × MonsterGuideTag × MonsterGuidePhase → {敌方模板 ID: 首领机制}（末日幻影）。
+
+    输出 {tpl: {"traits": [机制条目], "phases": [阶段条目]}}，**按敌方模板键**：绑定关系在
+    上游只到「模板」这一层（TagList 挂在 MonsterID 实例上，实例 = 模板 ×100 + 难度序号），
+    故按模板聚合一次——实测同模板的 4 个难度实例 TagList 与 PhaseList 都逐字相同（21/21）。
+    首领特性 = 首领幻影的战斗机制条目（如「坚防守备」，游戏内教程「◆ 首领特性 ◆」；
+    对照站与旧稿把它称「关卡效果」，但游戏内「关卡效果」实指每期「末法余烬」）。
+    **配置表的敌方 ID 未必等于战斗敌方**——业火焚心的影将军战斗模板 2035012 在配置表里
+    登记为蚀心兽 2033022，直接按模板 join 会整层漏。缺失时用 Tag.SkillID // 100 反查
+    （技能 ID = 模板 ×100 + 技能序号），**仅当反查结果唯一**时采用：技能 ID 会被多个首领
+    共享（如 100401410），不唯一即放弃，宁缺勿错挂。
+    """
     tags: dict[int, dict] = {}
     tag_skill: dict[int, int] = {}
-    for rec in tag_recs:
+    for rec in load_json(EXCEL_DIR / "MonsterGuideTag.json"):
         tid = rec.get("TagID")
         if tid is None:
             continue
@@ -144,39 +181,51 @@ def _load_guide_traits() -> dict[int, list[dict]]:
         if rec.get("SkillID"):
             tag_skill[tid] = rec["SkillID"]
 
-    configs = load_json(EXCEL_DIR / "MonsterGuideConfig.json")
-    direct: dict[int, list[int]] = {}
-    for rec in configs:
+    tpl_tag_ids: dict[int, list[int]] = {}
+    tpl_phase_ids: dict[int, list[int]] = {}
+    for rec in load_json(EXCEL_DIR / "MonsterGuideConfig.json"):
         mid = rec.get("MonsterID")
         if mid is None:
             continue
-        ids = direct.setdefault(mid // 100, [])
+        tpl = mid // 100
+        ids = tpl_tag_ids.setdefault(tpl, [])
         for tid in rec.get("TagList", []) or []:
             if tid in tags and tid not in ids:
                 ids.append(tid)
+        phase_ids = tpl_phase_ids.setdefault(tpl, [])
+        for pid in rec.get("PhaseList", []) or []:
+            if pid not in phase_ids:
+                phase_ids.append(pid)
 
-    # 技能 ID 反查：只补配置表缺失的模板，且同一反查键必须唯一命中一组 TagList
-    alias: dict[int, set[tuple[int, ...]]] = {}
-    for rec in configs:
-        group = tuple(t for t in (rec.get("TagList", []) or []) if t in tags)
-        if not group:
-            continue
-        for tid in group:
+    phases = _load_guide_phases()
+    out: dict[int, dict] = {}
+    for tpl, ids in tpl_tag_ids.items():
+        block: dict = {}
+        if ids:
+            block["traits"] = [tags[t] for t in ids]
+        items = [phases[p] for p in tpl_phase_ids.get(tpl, []) if p in phases]
+        if items:
+            block["phases"] = items
+        if block:
+            out[tpl] = block
+
+    # 技能 ID 反查：只补配置表缺失的模板，且同一反查键必须唯一命中一个登记模板
+    alias: dict[int, set[int]] = defaultdict(set)
+    for tpl, ids in tpl_tag_ids.items():
+        for tid in ids:
             sk = tag_skill.get(tid)
             if not sk:
                 continue
             alt = sk // 100
-            if alt == (rec.get("MonsterID") or 0) // 100:
+            if alt == tpl:
                 continue
-            alias.setdefault(alt, set()).add(group)
-
-    out: dict[int, list[dict]] = {
-        tpl: [tags[t] for t in ids] for tpl, ids in direct.items() if ids
-    }
-    for alt, groups in alias.items():
-        if alt in out or len(groups) != 1:
+            alias[alt].add(tpl)
+    for alt, srcs in alias.items():
+        if alt in out or len(srcs) != 1:
             continue
-        out[alt] = [tags[t] for t in next(iter(groups))]
+        src = next(iter(srcs))
+        if src in out:
+            out[alt] = out[src]
     return out
 
 def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dict:
@@ -188,8 +237,13 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
     （未注册返回空 dict，勿直接使用）。
     实例别名（MonsterID≠MonsterTemplateID）附 tpl=模板 ID，前端跳转怪物详情用
     （详情文件按模板 ID 命名）；stats 仅提升 speed（模板 SpeedBase，与韧性同源）。
+    实例自带的 `{Stance,Speed}ModifyValue` **在此直接并入** stance/speed（敌方卡无等级语境：
+    口径 = 基准 + 修正值，见 ADR 0045），故输出里没有这两个键；详情页因要支持等级滑条而保留
+    原值、由前端按 `基准 × 修饰比 × 曲线 + 修正值` 合成。
     stat_ratio / level_group（战斗数值合成链，ADR 0040）同样不进终局 payload：
     终局敌方卡不显示这层合成，随归属详情页；
+    full=True 追加 intro/skills/debuff_resist（敌方详情卡形态：末日幻影楼层 / 星启节点 /
+    异相仲裁单关）；轻形态剥掉这三项——效果抵抗只在详情卡上有位，图标 + 百分比行落卡内。
     """
     info = monsters.get(mid) or {}
     out = {"id": str(mid)}
@@ -197,18 +251,27 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
     if tpl:
         out["tpl"] = str(tpl)
     for k, v in info.items():
-        if k in ("figure", "_tpl", "stat_ratio", "level_group"):
+        if k in ("figure", "_tpl", "stat_ratio", "level_group", "stance_modify", "speed_modify"):
             continue
         if k == "stats":
             if v.get("speed"):
                 out["speed"] = v["speed"]
             continue
-        if not full and k in ("intro", "skills"):
+        if not full and k in ("intro", "skills", "debuff_resist"):
             continue
         if k == "skills":
             out[k] = [{"name": s["name"], "tag": s.get("tag")} for s in v]
         else:
             out[k] = v
+    # 实例修正值在此**直接并入**：敌方卡没有等级滑条（无等级语境），口径 = 基准 + 修正值
+    # （`最终值 = 基准 × 修饰比 × 曲线 + 修正值` 在曲线缺位时退化为基准确认值与修正值相加）。
+    # 判据与验证见 ADR 0045；详情页因要支持等级滑条而保留原值、由前端合成。
+    stance_mod = info.get("stance_modify")
+    if stance_mod is not None and "stance" in out:
+        out["stance"] = out["stance"] + stance_mod
+    speed_mod = info.get("speed_modify")
+    if speed_mod is not None and "speed" in out:
+        out["speed"] = out["speed"] + speed_mod
     return out
 
 def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dict]:
@@ -579,8 +642,9 @@ def _load_tierce(
     DamageType1/2）/ monsters / level（StageConfig.Level）/ countdown
     （ChallengeCountDown，星启附加关取 Tierce 回合限制）/ buff（该场次层级可用
     增益）/ invasion；另带 origin（场次键 stage1/stage2/tierce），供前端按场次取
-    赛季级 `buff_groups`（赛季增益）与 `boss_traits`（首领特性）——这两项只有末日幻影
-    产出，其余模式按缺省不渲染。
+    赛季级 `buff_groups`（赛季增益）——该项只有末日幻影产出，其余模式按缺省不渲染。
+    首领机制不走场次键：它按**敌方模板**落赛季级 `boss_guides`，由敌方条目上的
+    `boss_guide` 指针取（见 _attach_boss_guides）。
 
     节点 buff 的来源分两处：节点 1/2 取最高难度关记录的 `MazeBuffID`；节点 3 取附加关
     StageConfig 自身的 `_BindingMazeBuff`（星启表 14 个字段里没有 buff 字段），附加关未登记
@@ -918,47 +982,49 @@ def _monster_summons(
         out.append(_summon_out(sid, monsters, (polluted or {}).get(sid)))
     return out
 
-def _stage_traits(monsters: list[dict], guide: dict[int, list[dict]]) -> list[dict]:
-    """一个场次（或星启附加关）的首领特性：该场次敌方模板的命中项按 TagID 去重保序。
+def _guide_template(m: dict, guides: dict[int, dict]) -> int:
+    """敌方条目 → 首领机制键（敌方模板 ID）。
 
-    未登记机制条目的敌方（普通精英/护卫，如杰帕德）自然不产出，故只按模板 join，
-    不做等级/波次筛选。missing 模板（未登记机制的历史首领）返回空列表。
+    实例条目带 `tpl`（MonsterID ≠ MonsterTemplateID 时由 `_monster_out` 写出）直接用；
+    不带 `tpl` 即 id 本身已是模板（如召唤物 2033022），此时先试 id 再试 id // 100——
+    末日幻影的波次敌方恒为实例（id = 模板 ×100 + 难度序号），两条候选都取不到即无机制条目。
     """
-    out: list[dict] = []
-    seen: set[int] = set()
-    for m in monsters:
-        tpl = int(m["tpl"]) if m.get("tpl") else int(m["id"]) // 100
-        for eff in guide.get(tpl, []):
-            if eff["id"] in seen:
+    if m.get("tpl"):
+        return int(m["tpl"])
+    mid = int(m["id"])
+    return mid if mid in guides else mid // 100
+
+def _attach_boss_guides(entry: dict, guides: dict[int, dict]) -> None:
+    """赛季级「首领机制」：命中登记的敌方条目加 `boss_guide` 模板指针，正文按模板去重落 `boss_guides`。
+
+    归属域 = **波次清单里的敌方**（层级上下半场 / 星启节点 / 星启整场 / 赛季代表阵容）。
+    召唤物是同一首领组的部件与形态（灭星兽的左右手与引擎、幻灭者的虚妄之母、影将军的蚀心兽
+    都与本场首领同组，实测 44/44），一并挂会在同一场里把同一组机制渲染多份，故不挂。
+    指针写在**每一层**的敌方条目上（机制随难度不变，但卡片要按当前层各自的条目取）；
+    正文只落一份，避免 191 个场次块各存一份 4 条特性 + 阶段文本。无命中不落该字段。
+    """
+    used: dict[str, dict] = {}
+
+    def walk(mons: list[dict] | None) -> None:
+        for m in mons or []:
+            key = str(_guide_template(m, guides))
+            block = guides.get(int(key))
+            if not block:
                 continue
-            seen.add(eff["id"])
-            out.append(eff)
-    return out
+            used[key] = block
+            m["boss_guide"] = key
 
-def _attach_boss_traits(entry: dict, guide: dict[int, list[dict]]) -> None:
-    """赛季级「首领特性」：上半场/下半场取末层（最高难度）两个场次，星启模式取星启附加关节点。
-
-    各难度共用同一份机制清单（同名实例的 TagList 逐字相同），按末层取一次即可，避免逐层重复；
-    星启节点 1/2 就是末层的上下半场（同一场战斗），只有节点 3 是星启 Boss，故星启只取节点 3。
-    无命中（未登记机制）不落该字段。
-    """
-    groups: dict[str, list[dict]] = {}
-    floors = entry.get("floor_details") or []
-    if floors:
-        for key in ("stage1", "stage2"):
-            items = _stage_traits((floors[-1].get(key) or {}).get("monsters") or [], guide)
-            if items:
-                groups[key] = items
-    star = next(
-        (n for n in ((entry.get("tierce") or {}).get("nodes") or []) if n.get("idx") == 3),
-        None,
-    )
-    if star:
-        items = _stage_traits(star.get("monsters") or [], guide)
-        if items:
-            groups["tierce"] = items
-    if groups:
-        entry["boss_traits"] = groups
+    for f in entry.get("floor_details") or []:
+        for k in ("stage1", "stage2"):
+            walk((f.get(k) or {}).get("monsters"))
+    tierce = entry.get("tierce") or {}
+    for nd in tierce.get("nodes") or []:
+        walk(nd.get("monsters"))
+    walk(tierce.get("monsters"))
+    walk(entry.get("monsters"))
+    walk(entry.get("final_monsters"))
+    if used:
+        entry["boss_guides"] = used
 
 def _apply_pollution(entry: dict) -> None:
     """按条目自身的污染节点写赛季级汇总 {count, levels}（ADR 0026）。
@@ -1260,12 +1326,13 @@ def _load_peak_badges() -> dict[int, list[dict]]:
     return out
 
 def _lean_monster(m: dict) -> dict:
-    """单关敌方 → 期级合并列表用的轻形态（去 wave 与 full 形态的 intro/skills）。
+    """单关敌方 → 期级合并列表用的轻形态（去 wave 与 full 形态的 intro/skills/debuff_resist）。
 
     期级 `monsters` 只服务目录卡代表阵容与 AI 快照（名称/阵营/弱点），与另外三种模式的
     期级列表同口径；单关节点保留全字段供详情页敌方详情卡，两处不共用同一份引用。
+    实例修正值已在 `_monster_out` 并入 stance/speed，此处无需再剥。
     """
-    return {k: v for k, v in m.items() if k not in ("wave", "intro", "skills")}
+    return {k: v for k, v in m.items() if k not in ("wave", "intro", "skills", "debuff_resist")}
 
 def _peak_seasons(full_monsters: bool = False) -> dict:
     """异相仲裁：每期 = 3 骑士试炼 + 1 王棋最终关（含「绝境」变体）。
@@ -1410,7 +1477,7 @@ def convert() -> None:
         "ChallengeBossGroupExtra.json", ("BuffList1", "BuffList2")
     )
     boss_buff_groups = _group_extra_buff_groups("ChallengeBossGroupExtra.json")
-    guide_traits = _load_guide_traits()
+    boss_guides = _load_boss_guides()
     story_turns = _load_story_turns()
     story_scores = _load_story_scores()
     story_sub_buffs = _group_extra_sub_buffs()
@@ -1498,7 +1565,7 @@ def convert() -> None:
         if k in tierce:
             boss[k]["tierce"] = tierce[k]
     for entry in boss.values():
-        _attach_boss_traits(entry, guide_traits)
+        _attach_boss_guides(entry, boss_guides)
     for entry in boss.values():
         _apply_pollution(entry)
     _attach_default_icon(boss, mode_default_icons.get("boss"))

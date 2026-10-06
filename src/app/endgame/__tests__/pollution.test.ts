@@ -113,7 +113,7 @@ describe('buildEndgameSections 污染等级区块', () => {
   const polluted = { id: '3021', zh: '支配遗忘', pollution: { count: 2, levels: [2, 3] } } as MazeListEntry;
   const clean = { id: '3001', zh: '冽风骑士' } as MazeListEntry;
 
-  it('层级模式：排在赛季增益之后；星启与关卡层级已由子 tab 承载，不进区块导航', () => {
+  it('层级模式：赛季级区块只留污染等级；增益位于节点面板', () => {
     const data = {
       ...polluted,
       buffs: [{ id: 1, name: '增益' }],
@@ -121,9 +121,9 @@ describe('buildEndgameSections 污染等级区块', () => {
       floor_details: [cleanFloor],
     } as MazeListEntry;
     expect(buildEndgameSections(data, 'maze').map((s) => s.id))
-      .toEqual(['buffs', 'pollution']);
+      .toEqual(['pollution']);
     expect(sectionIdxMap(buildEndgameSections(data, 'maze'))).toMatchObject({
-      buffs: '01', pollution: '02',
+      pollution: '01',
     });
   });
 

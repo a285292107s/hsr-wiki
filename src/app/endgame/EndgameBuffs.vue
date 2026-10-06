@@ -1,42 +1,22 @@
 <script setup lang="ts">
 // 战意（Fever）赛季主题机制 + 两阶段效果（官网"战意机制 / 战意效果"对应 SubMazeBuffList：
-// 机制 1 条 + 效果 2 条，仅虚构叙事 Fever 赛季）；赛季增益为当期环境效果（记忆紊流 / 战意），
-// 与逐层已呈现的增益同文的不再复述（见 seasonBuffList）。
+// 机制 1 条 + 效果 2 条，仅虚构叙事 Fever 赛季）。
 import { computed } from 'vue';
-import { RouterLink } from 'vue-router';
-import { seasonThemeIconUrl } from '../catalog/pages/endgame';
-import { buildEndgameSections, sectionIdxMap } from './sections';
-import { FALLBACK_SYSTEM_NAME } from './guide';
-import {
-  BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl, seasonBuffList,
-} from './renders';
-import EndgameBuffGroup from './EndgameBuffGroup.vue';
+import { BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl } from './renders';
 import type { MazeBuffInfo, MazeListEntry } from '../../services/types';
 
 const props = defineProps<{
   data: MazeListEntry;
   modeKey: string;
-  /** 该玩法的增益体系名（游戏内命名，来自 `endgame_guide.json`）；缺省回退站点工作名「赛季增益」 */
-  systemName?: string;
-  /** 选法说明（`3 条 · 每场战斗选 1 条`）；为空则不渲染该行 */
-  systemLine?: string;
 }>();
 
 const subBuffsMech = computed<MazeBuffInfo | null>(() => props.data.sub_buffs?.[0] || null);
 const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.slice(1) || []);
-const seasonBuffs = computed(() => seasonBuffList(props.data));
-const seasonThemeIcon = computed(() => seasonThemeIconUrl(props.data.arts));
-const systemTitle = computed(() => props.systemName || FALLBACK_SYSTEM_NAME);
-/** 站点工作名只在体系名生效时降为次标；回退时主标题已是它，不再重复 */
-const aliasTitle = computed(() => (props.systemName ? '赛季增益' : ''));
-const sectionIdx = computed(
-  () => sectionIdxMap(buildEndgameSections(props.data, props.modeKey, systemTitle.value)),
-);
 </script>
 
 <template>
   <template v-if="modeKey === 'story' && subBuffsMech">
-    <h2 id="egd-sub-buffs" class="nk-title"><span class="nk-title__idx">{{ sectionIdx['sub-buffs'] }}</span>战意机制 FURY</h2>
+    <h2 id="egd-sub-buffs" class="nk-title">战意机制 FURY</h2>
     <div class="nk-egd-fury">
       <div class="nk-egd-fury__mech">
         <span class="nk-egd-fury__label">战意机制</span>
@@ -68,26 +48,4 @@ const sectionIdx = computed(
     </div>
   </template>
 
-  <template v-if="seasonBuffs.length">
-    <h2 id="egd-buffs" class="nk-title">
-      <img
-        v-if="seasonThemeIcon"
-        class="nk-egd-title-icon"
-        :src="seasonThemeIcon"
-        alt=""
-        loading="lazy"
-        @error="($event.target as HTMLImageElement).style.display='none'"
-      >
-      <span class="nk-title__idx">{{ sectionIdx['buffs'] }}</span>{{ systemTitle }}<span v-if="aliasTitle" class="nk-egd-title-alias">{{ aliasTitle }}</span>
-      <!-- 反向入口：读到这里正想问「这体系是什么/怎么选」时，就地可去玩法说明（与路径入口同一原语） -->
-      <RouterLink class="nk-guide-link" :to="`/endgame/${modeKey}`" :aria-label="`${systemTitle}玩法说明`">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>
-        玩法说明
-      </RouterLink>
-    </h2>
-    <p v-if="systemLine" class="nk-egd-buffs__hint">{{ systemLine }}</p>
-    <div class="nk-egd-groups">
-      <EndgameBuffGroup :items="seasonBuffs" />
-    </div>
-  </template>
 </template>

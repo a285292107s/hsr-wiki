@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import EndgameSummons from '../endgame/EndgameSummons.vue';
-import type { MazeMonsterInfo } from '../../services/types';
+import EndgameBossGuide from '../endgame/EndgameBossGuide.vue';
+import { pollutionLabel } from '../endgame/pollution';
+import type { MazeBossGuide, MazeMonsterInfo } from '../../services/types';
 import { ELEM, MON_RANK } from '../../lib/constants';
 import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
@@ -10,7 +12,15 @@ function introHtml(m: MazeMonsterInfo): string {
   return fmtDesc(m.intro, []);
 }
 
-defineProps<{ monster: MazeMonsterInfo }>();
+const props = defineProps<{
+  monster: MazeMonsterInfo;
+  /** 该敌方**实例**受「贪饕」污染时的污染等级（同场次 InvasionID，1–3）；未受污染不传。
+   *  判据是实例 ID 命中（与转换器 `_polluted_index` 同源）——污染名单按实例登记，
+   *  按模板匹配会把同模板的未污染实例一并标错。 */
+  polluted?: number;
+  /** 该敌方的首领机制（由赛季级 `boss_guides` 按 `monster.boss_guide` 指针取，见 EndgameBossGuide） */
+  guide?: MazeBossGuide;
+}>();
 
 function elemRow(types: string[]): string {
   return types.map((d) => {
@@ -40,6 +50,18 @@ function resistRowHtml(m: MazeMonsterInfo): string {
     const label = ELEM[d] || d;
     const pct = `${Math.round(v * 100)}%`;
     return `<span class="nk-egd-mon__resitem"><img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(label)}" title="${escHtml(label)} ${pct}" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
+  }).join('');
+}
+
+/** 效果抵抗行（`MonsterConfig.DebuffResist` × `MonsterStatusResistanceType`）：上游只有免疫图标、
+ *  **没有任何文字名**，故每项只出「图标 + 百分比」——图标是纯白字形（透明底），故只作装饰
+ *  （`alt=""` + `aria-hidden`），可读信息由行首标签「效果抵抗」与百分比承担，title 供鼠标查看。 */
+function debuffResistHtml(m: MazeMonsterInfo): string {
+  return (m.debuff_resist || []).map((d) => {
+    const src = cdnUri('statusimmune', `${d.icon}.webp`);
+    const pct = `${Math.round(d.value * 100)}%`;
+    const label = `效果抵抗 ${pct}`;
+    return `<span class="nk-egd-mon__resitem" title="${escHtml(label)}"><img class="nk-egd-mon__immicon" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="" aria-hidden="true" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
   }).join('');
 }
 
@@ -79,11 +101,12 @@ function monTitle(m: MazeMonsterInfo): string {
         >
       </router-link>
     </div>
-    <!-- 数据列（右）：名称 → 标签 → 弱点/抗性 → 图鉴介绍 → 技能 → 召唤物 -->
+    <!-- 数据列（右）：名称 → 标签 → 弱点/抗性/效果抵抗 → 图鉴介绍 → 首领机制 → 技能 → 召唤物 -->
     <div class="nk-egd-mon__data">
       <div class="nk-egd-mon__meta">
         <span class="nk-egd-mon__name">{{ monster.name }}</span>
         <span class="nk-egd-mon__tags">
+          <span v-if="polluted" class="nk-egd-pollchip" :data-level="polluted">{{ pollutionLabel({ level: polluted }) }}</span>
           <span v-if="monster.camp" class="nk-egd-mon__tag">{{ monster.camp }}</span>
           <span v-if="monster.stance" class="nk-egd-mon__tag">韧性 {{ monster.stance }}</span>
           <span v-if="monster.speed" class="nk-egd-mon__tag">速度 {{ monster.speed }}</span>
@@ -102,8 +125,13 @@ function monTitle(m: MazeMonsterInfo): string {
           <span v-if="resistText(monster)" class="nk-egd-mon__resist" v-html="resistRowHtml(monster)"></span>
           <span v-else class="nk-egd-mon__none">无</span>
         </div>
+        <div v-if="monster.debuff_resist?.length" class="nk-egd-mon__row">
+          <span class="nk-egd-mon__label">效果抵抗</span>
+          <span class="nk-egd-mon__resist" v-html="debuffResistHtml(monster)"></span>
+        </div>
       </div>
       <p v-if="monster.intro" class="nk-egd-mon__intro" v-html="introHtml(monster)"></p>
+      <EndgameBossGuide v-if="guide" :guide="guide" />
       <div v-if="monster.skills?.length" class="nk-egd-mon__skills">
         <span v-for="s in monster.skills" :key="s.name" class="nk-egd-mon__skill" :title="s.tag ? `${s.name} · ${s.tag}` : s.name">{{ s.name }}</span>
       </div>

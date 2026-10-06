@@ -367,6 +367,14 @@
   gap: 3px;
 }
 .nk-egd-mon__resitem .nk-egd-elem { width: 16px; height: 16px; }
+/* 效果抵抗的免疫图标：上游是 128×128 纯白字形（透明底，已按 alpha 包围盒裁到本地 webp），
+   字形是「状态图案 + 禁止斜杠」的细节图，比元素图标大一档才认得出；无底色块，靠白字在暗卡上成像。 */
+.nk-egd-mon__immicon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
 .nk-egd-mon__resval {
   line-height: 1;
   color: var(--text2);
@@ -405,5 +413,75 @@
 .nk-egd-mon__skill:hover {
   border-color: var(--line-2);
   color: var(--text1);
+}
+/* 首领机制（末日幻影，ADR 0029 修订）：首领特性与阶段机制两个卡内分区，与「技能」「召唤物」
+   同一套语言——上方发丝线 + 上内距 + 区块标签。归属由 converter 写到敌方条目的 `boss_guide`
+   指针上，故同场只有首领本体长出这两段（召唤物与护卫没有指针，也不接收该分区）。 */
+.nk-egd-mon__data > .nk-egd-guide,
+.nk-egd-mon__data > .nk-egd-phase {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-egd-guide__label,
+.nk-egd-phase__label {
+  letter-spacing: 0.05em;
+  color: var(--text3);
+}
+.nk-egd-trait,
+.nk-egd-phase__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.nk-egd-trait__name,
+.nk-egd-phase__name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+.nk-egd-trait__desc,
+.nk-egd-phase__desc,
+.nk-egd-phase__answer {
+  margin: 0;
+  line-height: 1.75;
+  color: var(--text2);
+  max-width: var(--nk-prose-max);
+}
+.nk-egd-trait__desc .hl { color: var(--highlight); font-weight: 700; }
+/* 官方应对策略原文自带「应对策略：」前缀，故只用左侧发丝线区分，不另加标签 */
+.nk-egd-phase__answer {
+  padding-left: 10px;
+  border-left: 1px solid var(--line-2);
+  color: var(--text1);
+}
+.nk-egd-phase__skills {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.nk-egd-phase__skill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.nk-egd-phase__skillname {
+  font-weight: 600;
+  color: var(--text1);
+  line-height: 1.5;
+}
+.nk-egd-phase__skilldesc {
+  line-height: 1.7;
+  color: var(--text3);
+  max-width: var(--nk-prose-max);
 }
 

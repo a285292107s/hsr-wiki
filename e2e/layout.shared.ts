@@ -55,10 +55,16 @@ export async function readContentOffset(page: import('@playwright/test').Page): 
    ② UI 格式（「第 N 层」「污染等级 N」「NO.<id>」的拼装方式）——这两类保留字面量并注明理由。 */
 
 export interface MonsterLike {
+  /** 实例怪物 ID（污染名单与召唤关系都按实例登记，见 `pollutedMonsters`） */
+  id?: string;
   name: string;
   icon?: string;
   wave?: number;
   summons?: SummonLike[];
+  /** 首领机制指针（仅末日幻影登记机制条目的首领有；键指向赛季级 `boss_guides`） */
+  boss_guide?: string;
+  /** 效果抵抗（`MonsterConfig.DebuffResist` × `MonsterStatusResistanceType`，只随全字段形态输出） */
+  debuff_resist?: { key: string; value: number; icon: string }[];
   /** 以下四项只随「全字段」形态出现（末日幻影楼层 / 星启节点 / 异相仲裁单关的敌方详情卡） */
   intro?: string;
   skills?: { name: string; tag?: string }[];
@@ -69,6 +75,11 @@ export interface MonsterLike {
 export interface InvasionLike { level: number; stage_id?: number; monsters?: MonsterLike[] }
 /** 召唤物（ADR 0036 修订）：轻形态 + 受污染者带 polluted（污染等级）；挂在召唤者自己的敌方条目上 */
 export interface SummonLike { id: string; name: string; tpl?: string; polluted?: number }
+/** 首领机制正文（converter 输出：敌方模板 ID → 首领特性 + 阶段机制） */
+export interface BossGuideLike {
+  traits?: { name: string; param_list?: number[] }[];
+  phases?: { id: number; name: string; desc?: string; answer?: string; skills?: { name: string; desc?: string }[] }[];
+}
 export interface StageLike { monsters?: MonsterLike[]; invasion?: InvasionLike; damage?: string[] }
 export interface FloorLike {
   floor: number;
@@ -90,7 +101,7 @@ export interface SeasonLike {
   sub_buffs?: { id: number; name: string }[];
   floor_details?: FloorLike[];
   buff_groups?: Record<string, { name: string }[]>;
-  boss_traits?: Record<string, { name: string; param_list?: number[] }[]>;
+  boss_guides?: Record<string, BossGuideLike>;
   tierce?: {
     targets?: { param: number }[];
     rewards?: unknown[];
@@ -177,6 +188,29 @@ export function tierceNodeBossNames(season: SeasonLike): string[] {
   return (season.tierce?.nodes ?? []).map((nd) => lastWaveMonster(nd).name);
 }
 
+/** 首领机制正文：按敌方条目上的 `boss_guide` 指针取赛季级 `boss_guides`。
+ *  召唤物与未登记机制的敌方没有指针（转换器只挂在波次敌方上），故返回 undefined。 */
+export function guideOf(season: SeasonLike, m?: MonsterLike): BossGuideLike | undefined {
+  return m?.boss_guide ? season.boss_guides?.[m.boss_guide] : undefined;
+}
+
+/** 该场次的首领机制（末日幻影每场恰好一只首领命中登记，其余模式恒无） */
+export function stageGuide(season: SeasonLike, stage?: StageLike): BossGuideLike | undefined {
+  for (const m of stage?.monsters ?? []) {
+    const g = guideOf(season, m);
+    if (g) return g;
+  }
+  return undefined;
+}
+
+/** 该层半场的首领机制（期望值取自数据，用于卡内「首领特性 / 阶段机制」断言） */
+export function floorGuide(
+  season: SeasonLike, floor: number, half: 'stage1' | 'stage2',
+): BossGuideLike | undefined {
+  const f = (season.floor_details ?? []).find((x) => x.floor === floor);
+  return stageGuide(season, f?.[half]);
+}
+
 export interface PollutionEntry {
   half: 'stage1' | 'stage2' | 'level' | 'tierce';
   floor?: number;
@@ -226,6 +260,17 @@ export function pollutedSummons(mons: MonsterLike[] | undefined): SummonLike[] {
 
 /** 污染徽标文案（召唤物条目上的 polluted = 该场次 InvasionID） */
 export const summonBadge = (s: SummonLike): string => `污染等级 ${s.polluted}`;
+
+/** 该场次**确实出现在敌方配置里**且被污染的敌方（站点只在它们身上挂污染徽标）。
+ *  判据与转换器 `_polluted_index` 一致：**实例 ID 精确匹配**（按模板匹配会把同模板的未污染实例误标）。
+ *  末日幻影的被污染小怪不在该层敌方配置内（只作召唤物出现），此处自然返回空。 */
+export function pollutedMonsters(inv: InvasionLike | undefined, mons: MonsterLike[] | undefined): MonsterLike[] {
+  const ids = new Set((inv?.monsters ?? []).map((m) => String(m.id)));
+  return (mons ?? []).filter((m) => m.id != null && ids.has(String(m.id)));
+}
+
+/** 敌方卡上的污染徽标文案（同一场次共用一个污染等级） */
+export const monsterBadge = (inv: InvasionLike): string => `污染等级 ${inv.level}`;
 
 /** 污染节点位置文案（与 pollutionPosition 同口径） */
 export function pollutionPosition(e: PollutionEntry): string {

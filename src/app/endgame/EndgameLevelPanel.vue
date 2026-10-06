@@ -11,7 +11,7 @@ const props = defineProps<{
   modeKey: string;
   tabs: LevelTab[];
   active: string;
-  /** 增益体系名（透传给层 / 星启 / 单关看板；缺省回退站点工作名） */
+  /** 增益体系名（透传给当前节点面板；缺省回退站点工作名） */
   systemName?: string;
 }>();
 

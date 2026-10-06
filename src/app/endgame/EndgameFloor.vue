@@ -4,9 +4,9 @@ import EndgameStarTargets from './EndgameStarTargets.vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
 import { halfLabel } from './pollution';
-import { seasonRules } from './renders';
+import { seasonBuffList, seasonRules } from './renders';
 import type {
-  MazeBossTrait, MazeBuffInfo, MazeFloorDetail, MazeListEntry, MazeStageDetail,
+  MazeBuffInfo, MazeFloorDetail, MazeListEntry, MazeStageDetail,
 } from '../../services/types';
 
 const props = defineProps<{
@@ -53,14 +53,14 @@ function selectHalf(key: string): void {
   activeHalf.value = key as HalfKey;
 }
 
-/** 该半场的赛季增益与首领特性：按场次键取赛季级分场次字段（仅末日幻影产出） */
-const activeBuffs = computed<MazeBuffInfo[]>(
-  () => (activeNode.value ? props.data.buff_groups?.[activeNode.value.half] || [] : []),
-);
-const activeTraits = computed<MazeBossTrait[]>(
-  () => (activeNode.value ? props.data.boss_traits?.[activeNode.value.half] || [] : []),
-);
-
+/** 敌方配置之前的赛季增益：末日幻影按半场取分组；其余玩法取赛季增益并剔除已由层级增益承载的
+ *  同 ID 项（忘却之庭的「记忆紊流」由看板首块末法余烬位逐层呈现，此处不再复述）。 */
+const nodeBuffs = computed<MazeBuffInfo[]>(() => {
+  if (!activeNode.value) return [];
+  const grouped = props.data.buff_groups?.[activeNode.value.half];
+  if (grouped?.length) return grouped;
+  return seasonBuffList(props.data);
+});
 const targets = computed(() => props.floor.targets || []);
 const rules = computed(() => seasonRules(props.data));
 </script>
@@ -94,8 +94,8 @@ const rules = computed(() => seasonRules(props.data));
       :labelled-by="cards.length > 1 ? `egd-floor-half-tab-${activeHalf}` : undefined"
       :stage="activeNode.stage"
       :buff="floor.buff"
-      :traits="activeTraits"
-      :buffs="activeBuffs"
+      :guides="props.data.boss_guides"
+      :buffs="nodeBuffs"
       :system-name="props.systemName"
     />
   </div>

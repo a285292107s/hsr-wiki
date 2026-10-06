@@ -14,10 +14,9 @@ export function bossTraitDescHtml(t: MazeBossTrait): string {
   return fmtDesc(t.desc, t.param_list || []);
 }
 
-/** 赛季增益列表：与逐层已呈现的增益同文的不再复述一份（忘却之庭的「记忆紊流」既是赛季增益
- *  也是每层的层级增益，由层看板逐层承担，赛季级区块整块退场）。异相仲裁的赛季 buffs 虽与
- *  王棋关增益同一批 ID，但赛季级照常显示——与末日幻影「赛季级区块 + 看板内分组」双显同一口径，
- *  故关卡级增益不进「已承担」集合（`levels` 仅异相仲裁产出）。 */
+/** 赛季增益列表：剔除已由关卡自身承载的同 ID 增益（忘却之庭的「记忆紊流」既是赛季增益
+ *  也是每层的层级增益，由层 / 节点看板首块的末法余烬位逐层呈现，赛季级一份不再复述）。
+ *  判据用增益 ID 而非文案比对：同 ID 即同一条上游记录。 */
 export function seasonBuffList(data: MazeListEntry): MazeBuffInfo[] {
   const flat = data.buffs || [];
   if (!flat.length) return [];

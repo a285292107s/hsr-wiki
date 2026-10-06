@@ -5,7 +5,7 @@
   公测前/2030 占位过滤与测试期分类（ADR 0038）
 - _load_maze_buffs / _load_monsters / _load_targets：辅助表解析（名称/图标 basename）
 - _group_maze_buff / _group_extra_buff / _group_extra_buff_groups / _load_story_turns：组级/分场次增益 / 回合上限
-- _load_guide_traits / _stage_traits / _attach_boss_traits：末日幻影首领特性（模板聚合与技能 ID 反查）
+- _load_boss_guides / _attach_boss_guides：末日幻影首领机制（特性 + 阶段，模板键聚合与技能 ID 反查）
 - _season_stats：层数/阶段/回合取最大，弱点合并去重，逐层弱点 floor_damage
 - _season_floors：逐层详情（序号/层名/上下半场属性与敌方/层级增益/目标）
 - _load_summon_index / _summon_out / _monster_summons：召唤物（敌方实例的 SummonIDList，
@@ -182,6 +182,25 @@ class TestAuxTables:
                        "rank": "", "camp": "", "stance": 300}
         assert "speed" not in out
 
+    def test_monster_out_scene_modify_merged(self):
+        """实例自带的修正值**在转换期并入** stance/speed（敌方卡无等级语境：口径 = 基准 + 修正值，
+        ADR 0045），且原始键不外泄——前端没有第二处需要合成的逻辑。"""
+        info = {"name": "名1", "icon": "Monster_1", "weak": [], "resist": {},
+                "rank": "", "camp": "", "stance": 60,
+                "stats": {"hp": 1, "atk": 2, "def": 3, "speed": 100},
+                "stance_modify": 30, "speed_modify": -44}
+        light = eg._monster_out(1, {1: info})
+        assert light["stance"] == 90, "韧性 = 基准 60 + 修正 +30"
+        assert light["speed"] == 56, "速度 = 基准 100 + 修正 -44"
+        assert "stance_modify" not in light and "speed_modify" not in light, "原始键不外泄"
+        full = eg._monster_out(1, {1: info}, full=True)
+        assert full["stance"] == 90 and full["speed"] == 56
+        # 无修正（模板档）时原样透传
+        no_mod = {"name": "甲", "icon": "I", "weak": [], "resist": {}, "rank": "", "camp": "",
+                  "stance": 60, "stats": {"hp": 1, "atk": 2, "def": 3, "speed": 100}}
+        assert eg._monster_out(2, {2: no_mod})["stance"] == 60
+        assert eg._monster_out(2, {2: no_mod})["speed"] == 100
+
     def test_load_targets_clean(self, monkeypatch):
         """目标表：文本清洗 + 参数补全 + 类型输出（ChallengeTargetType）。"""
         monkeypatch.setattr(eg, "load_json", lambda _p: [
@@ -247,40 +266,66 @@ class TestGroupAux:
         ])
         assert eg._load_story_turns() == {"2001": 6, "2011": 4}
 
-class TestBossTraits:
-    """末日幻影「首领特性」（MonsterGuideConfig × MonsterGuideTag → 敌方模板 → 场次）。"""
+class TestBossGuides:
+    """末日幻影「首领机制」：MonsterGuideConfig × MonsterGuideTag × MonsterGuidePhase
+    → 敌方模板键的 {traits, phases}，敌方条目带 boss_guide 指针。"""
 
     @staticmethod
-    def _guide(tag_recs, config_recs, monkeypatch):
-        def fake(path):
-            return config_recs if str(path).endswith("MonsterGuideConfig.json") else tag_recs
-        monkeypatch.setattr(eg, "load_json", fake)
-        return eg._load_guide_traits()
+    def _guides(tags, configs, monkeypatch, phases=None, skills=None, texts=None):
+        files = {
+            "MonsterGuideTag.json": tags,
+            "MonsterGuideConfig.json": configs,
+            "MonsterGuidePhase.json": phases or [],
+            "MonsterGuideSkill.json": skills or [],
+            "MonsterGuideSkillText.json": texts or [],
+        }
+        monkeypatch.setattr(eg, "load_json", lambda p: files[Path(p).name])
+        return eg._load_boss_guides()
 
-    def test_direct_template_index(self, monkeypatch):
-        """配置表 MonsterID（模板×100+实例序号）→ 模板：同模板各难度实例共用一份清单。"""
-        tag = {"TagID": 101701, "TagName": {"Hash": 11}, "TagBriefDescription": {"Hash": 12},
-               "ParameterList": [{"Value": 0.5}, 1]}
-        out = self._guide([tag], [
-            {"MonsterID": 202401601, "TagList": [101701]},
-            {"MonsterID": 202401604, "TagList": [101701]},
-        ], monkeypatch)
-        assert out == {2024016: [{"id": 101701, "name": "名11", "desc": "名12", "param_list": [0.5, 1]}]}
+    def test_direct_template_with_phases(self, monkeypatch):
+        """配置表 MonsterID（模板×100+实例序号）→ 模板键：同模板各难度实例共用一份清单；
+        阶段来自 PhaseList → MonsterGuidePhase（招式正文来自 MonsterGuideSkillText）。"""
+        tags = [{"TagID": 101701, "TagName": {"Hash": 11}, "TagBriefDescription": {"Hash": 12},
+                 "ParameterList": [{"Value": 0.5}, 1]}]
+        configs = [
+            {"MonsterID": 202401601, "TagList": [101701], "PhaseList": [10171]},
+            {"MonsterID": 202401604, "TagList": [101701], "PhaseList": [10171]},
+        ]
+        phases = [{"PhaseID": 10171, "PhaseName": {"Hash": 21}, "PhaseDescription": {"Hash": 22},
+                   "PhaseAnswer": {"Hash": 23}, "SkillList": [101711]}]
+        skills = [{"SkillID": 101711, "SkillName": {"Hash": 31}, "SkillTextIDList": [1017111]}]
+        texts = [{"SkillTextID": 1017111, "SkillDescription": {"Hash": 32}}]
+        out = self._guides(tags, configs, monkeypatch, phases, skills, texts)
+        assert out == {2024016: {
+            "traits": [{"id": 101701, "name": "名11", "desc": "名12", "param_list": [0.5, 1]}],
+            "phases": [{"id": 10171, "name": "名21", "desc": "名22", "answer": "名23",
+                        "skills": [{"name": "名31", "desc": "名32"}]}],
+        }}
+
+    def test_phase_without_traits_kept(self, monkeypatch):
+        """只有阶段、没有机制条目的模板也落块（两个维度各自独立，缺一不丢另一）。"""
+        out = self._guides([], [{"MonsterID": 302501301, "PhaseList": [30251]}], monkeypatch,
+                           phases=[{"PhaseID": 30251, "PhaseName": {"Hash": 9}, "SkillList": []}])
+        assert out == {3025013: {"phases": [{"id": 30251, "name": "名9", "desc": "",
+                                             "answer": "", "skills": []}]}}
 
     def test_skill_id_alias_when_template_missing(self, monkeypatch):
         """配置表登记的敌方 ID ≠ 战斗敌方（影将军 2035012 登记为蚀心兽 2033022）→
-        Tag.SkillID // 100 反查补上，使战斗模板能命中首领特性。"""
+        Tag.SkillID // 100 反查补上，使战斗模板能命中首领机制（阶段随登记模板一并复用）。"""
         tags = [
             {"TagID": 101201, "TagName": {"Hash": 1}, "TagBriefDescription": {"Hash": 2},
              "ParameterList": [], "SkillID": 203501211},
             {"TagID": 101202, "TagName": {"Hash": 3}, "TagBriefDescription": {"Hash": 4},
              "ParameterList": []},
         ]
-        out = self._guide(tags, [{"MonsterID": 203302201, "TagList": [101201, 101202]}], monkeypatch)
-        assert [e["id"] for e in out[2035012]] == [101201, 101202]
+        out = self._guides(tags, [{"MonsterID": 203302201, "TagList": [101201, 101202],
+                                   "PhaseList": [10121]}], monkeypatch,
+                           phases=[{"PhaseID": 10121, "PhaseName": {"Hash": 7}, "SkillList": []}])
+        assert [e["id"] for e in out[2035012]["traits"]] == [101201, 101202]
+        assert out[2033022] == out[2035012]
 
     def test_alias_ambiguous_or_already_direct_skipped(self, monkeypatch):
-        """反查键被多组 TagList 共享（技能跨首领复用）时放弃；配置表已有该模板时不用反查覆盖。"""
+        """反查键被多个登记模板共享（技能跨首领复用）时放弃；配置表已有该模板时不用反查覆盖。"""
         tags = [
             {"TagID": 1, "TagName": {"Hash": 1}, "TagBriefDescription": {}, "ParameterList": [],
              "SkillID": 203501211},
@@ -289,39 +334,53 @@ class TestBossTraits:
             {"TagID": 3, "TagName": {"Hash": 3}, "TagBriefDescription": {}, "ParameterList": [],
              "SkillID": 100401410},
         ]
-        out = self._guide(tags, [
+        out = self._guides(tags, [
             {"MonsterID": 203302201, "TagList": [1]},
             {"MonsterID": 203302301, "TagList": [2]},
             {"MonsterID": 100401401, "TagList": [3]},
         ], monkeypatch)
         assert 2035012 not in out
-        assert [e["id"] for e in out[1004014]] == [3]
+        assert [e["id"] for e in out[1004014]["traits"]] == [3]
 
-    def test_stage_traits_template_dedup(self):
-        """一个场次的首领特性：按敌方模板命中并按 TagID 去重保序（未登记模板跳过）。"""
-        a, b = {"id": 101701, "name": "坚防守备"}, {"id": 101702, "name": "丰亨豫大"}
-        guide = {2024016: [a, b], 5014014: [{"id": 101601, "name": "双重战场"}]}
-        mons = [{"id": "202401601"}, {"id": "202401602"}, {"id": "100402601", "tpl": "1004026"}]
-        assert eg._stage_traits(mons, guide) == [a, b]
+    def test_guide_template_resolution(self):
+        """指针键：带 tpl 用 tpl；不带 tpl 时先试 id 本身（id 即模板）再试 id // 100。"""
+        guides = {2024016: {}, 2033022: {}, 1004026: {}}
+        assert eg._guide_template({"id": "202401604", "tpl": "2024016"}, guides) == 2024016
+        assert eg._guide_template({"id": "2033022"}, guides) == 2033022
+        assert eg._guide_template({"id": "100402604"}, guides) == 1004026
 
-    def test_attach_boss_traits_top_floor_and_star_node(self):
-        """赛季级首领特性取末层两个场次 + 星启节点 3；无命中/无节点不落字段。"""
-        a, b = {"id": 101701, "name": "坚防守备"}, {"id": 101601, "name": "双重战场"}
-        guide = {2024016: [a], 5014014: [b]}
+    def test_attach_boss_guides_pointers_every_floor(self):
+        """机制随难度不变但卡片按当前层取 → 每一层的波次敌方都写指针；
+        正文按模板去重（跨层/跨星启节点只落一份）；召唤物不写（同组的部件与形态会重复渲染）。"""
+        block = {"traits": [{"id": 101701, "name": "坚防守备"}],
+                 "phases": [{"id": 10171, "name": "阶段一：丰饶大军", "skills": []}]}
+        star = {"traits": [{"id": 101601, "name": "双重战场"}]}
+        guides = {2024016: block, 5014014: star}
         entry = {
             "floor_details": [
                 {"floor": 1, "stage1": {"monsters": [{"id": "202401601"}]}, "stage2": {"monsters": []}},
-                {"floor": 4, "stage1": {"monsters": [{"id": "202401604"}]},
+                {"floor": 4, "stage1": {"monsters": [{"id": "202401604",
+                                                     "summons": [{"id": "501401404"}]}]},
                  "stage2": {"monsters": [{"id": "999901"}]}},
             ],
             "tierce": {"nodes": [{"idx": 1, "monsters": [{"id": "202401604"}]},
                                  {"idx": 3, "monsters": [{"id": "501401404"}]}]},
+            "monsters": [{"id": "100402604", "tpl": "1004026"}],
         }
-        eg._attach_boss_traits(entry, guide)
-        assert entry["boss_traits"] == {"stage1": [a], "tierce": [b]}
-        empty = {"floor_details": [{"floor": 1, "stage1": {"monsters": []}, "stage2": {"monsters": []}}]}
-        eg._attach_boss_traits(empty, guide)
-        assert "boss_traits" not in empty
+        eg._attach_boss_guides(entry, guides)
+        assert entry["boss_guides"] == {"2024016": block, "5014014": star}
+        assert entry["floor_details"][0]["stage1"]["monsters"][0]["boss_guide"] == "2024016"
+        deep = entry["floor_details"][1]["stage1"]["monsters"][0]
+        assert deep["boss_guide"] == "2024016"
+        assert "boss_guide" not in deep["summons"][0]
+        assert entry["tierce"]["nodes"][1]["monsters"][0]["boss_guide"] == "5014014"
+        assert "boss_guide" not in entry["monsters"][0]
+
+    def test_attach_boss_guides_no_hit(self):
+        """无命中不落字段（其余模式与未登记机制的历史首领）。"""
+        empty = {"floor_details": [{"floor": 1, "stage1": {"monsters": [{"id": "999901"}]}}]}
+        eg._attach_boss_guides(empty, {2024016: {"traits": []}})
+        assert "boss_guides" not in empty
 
 class TestTierce:
     """星启模式（Tierce）表解析：DLCKKJFMJOB → 关卡表 GroupID 映射。"""
@@ -783,7 +842,8 @@ class TestPeakSeasons:
         assert "skills" not in light["monsters"][0]
 
     def test_lean_monster_strips_wave_and_full_fields(self):
-        """期级合并列表用轻形态：wave / intro / skills 都不进（只服务目录卡与 AI 快照）。"""
+        """期级合并列表用轻形态：wave / intro / skills 都不进（只服务目录卡与 AI 快照；
+        实例修正值已在 `_monster_out` 并入 stance/speed，故此处没有需要额外剥离的同名字段）。"""
         m = {"id": "1", "name": "甲", "icon": "I", "wave": 2,
              "intro": "介绍", "skills": [{"name": "技"}], "rank": "Elite"}
         assert eg._lean_monster(m) == {"id": "1", "name": "甲", "icon": "I", "rank": "Elite"}

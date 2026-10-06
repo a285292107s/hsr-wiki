@@ -5,9 +5,10 @@ import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
 import { itemIconUrl } from '../../lib/format';
 import { loadLocalItems } from '../../services/api';
+import { seasonBuffList } from './renders';
 import EnemyCard from '../components/EnemyCard.vue';
 import type {
-  LocalItemEntry, MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeTierceNode,
+  LocalItemEntry, MazeBuffInfo, MazeListEntry, MazeTierceNode,
 } from '../../services/types';
 
 const props = defineProps<{
@@ -42,13 +43,16 @@ const activeKey = ref('1');
 const activeNd = computed<MazeTierceNode | null>(
   () => tierceNodes.value.find((nd) => String(nd.idx) === activeKey.value) || tierceNodes.value[0] || null,
 );
-/** 该场次的赛季增益与首领特性：按 origin 取赛季级分场次字段（仅末日幻影产出） */
-const activeBuffs = computed<MazeBuffInfo[]>(
-  () => (activeNd.value ? props.data.buff_groups?.[activeNd.value.origin] || [] : []),
-);
-const activeTraits = computed<MazeBossTrait[]>(
-  () => (activeNd.value ? props.data.boss_traits?.[activeNd.value.origin] || [] : []),
-);
+/** 敌方配置之前的赛季增益：末日幻影按 origin 取分组；其余玩法取赛季增益并剔除已由节点增益
+ *  承载的同 ID 项（忘却之庭的「记忆紊流」由节点看板首块末法余烬位呈现，此处不再复述）。 */
+const nodeBuffs = computed<MazeBuffInfo[]>(() => {
+  if (!activeNd.value) return [];
+  const grouped = props.data.buff_groups?.[activeNd.value.origin];
+  if (grouped?.length) return grouped;
+  return seasonBuffList(props.data);
+});
+/** 首领机制随敌方卡呈现（末日幻影）：`boss_guides` 是赛季级正文表，看板按敌方条目上的
+ *  `boss_guide` 指针取，故这里不再有场次级首领特性列表（ADR 0029 修订）。 */
 
 function selectNode(key: string): void {
   activeKey.value = key;
@@ -121,12 +125,17 @@ watch(
         :labelled-by="cardItems.length > 1 ? `egd-tierce-node-tab-${activeKey}` : undefined"
         :stage="activeNd"
         :buff="activeNd.buff"
-        :traits="activeTraits"
-        :buffs="activeBuffs"
+        :guides="props.data.boss_guides"
+        :buffs="nodeBuffs"
         :system-name="props.systemName"
       />
       <div v-else-if="tierceMonsters.length" class="nk-egd-mons">
-        <EnemyCard v-for="m in tierceMonsters" :key="m.id" :monster="m" />
+        <EnemyCard
+          v-for="m in tierceMonsters"
+          :key="m.id"
+          :monster="m"
+          :guide="m.boss_guide ? props.data.boss_guides?.[m.boss_guide] : undefined"
+        />
       </div>
     </div>
   </template>

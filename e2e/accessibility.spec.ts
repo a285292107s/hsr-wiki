@@ -56,10 +56,10 @@ const PAGES = [
   { path: '/endgame/maze', label: '玩法详情·忘却之庭', wait: () => (page: Page) => page.waitForSelector('.nk-egm__rule', { state: 'attached', timeout: 15_000 }) },
   // 终局详情（含污染等级区块，ADR 0026）：等层级子 tab 出现即数据就绪
   { path: '/endgame/boss/3021', label: '终局详情·含污染', wait: () => (page: Page) => page.waitForSelector('.nk-egd-tabs [role="tab"]', { state: 'attached', timeout: 15_000 }) },
-  // 星启看板（ADR 0033）：节点子切换与首领特性整组单卡只在星启 tab 下渲染，先切 tab 再扫
+  // 星启看板（ADR 0033 / 0029 修订）：节点子切换与卡内「首领机制」分区只在星启 tab 下渲染，先切 tab 再扫
   { path: '/endgame/boss/3020', label: '终局详情·星启看板', wait: () => async (page: Page) => {
     await page.locator('#egd-level-tab-tierce').click();
-    await page.waitForSelector('.nk-egd-traits .nk-egd-trait', { state: 'attached', timeout: 15_000 });
+    await page.waitForSelector('.nk-egd-guide .nk-egd-trait', { state: 'attached', timeout: 15_000 });
   } },
   // 异相仲裁（ADR 0043）：关卡子 tab + 单关面板 + 段位徽章区块；先切到王棋关（增益与绝境变体只在该关）
   { path: '/endgame/peak/9', label: '终局详情·异相仲裁单关', wait: () => async (page: Page) => {
