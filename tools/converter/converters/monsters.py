@@ -12,6 +12,14 @@ monster_common 的共享聚合表，本文件不复制解析逻辑。
 **不落 `figure`**：同族判据是「名称 + 卡面图标（IconPath stem）」而不是立绘 —— 立绘是
 per-变体的（冰锋 1002011/1002012 立绘不同、卡面图标相同），按立绘分组会把用户看到的 4 张
 同图卡拆成 2+2（`src/lib/monster-family.ts` 单点声明该判据，列表页与详情页共用）。
+
+另落官方 `TemplateGroupID` → `atlas_group`（**缺位不落键**）：官方把「同一图鉴条目的各具名形态」
+（完整 / 幻象 / 错误 / 污染，甚至剧情改名如「无望冽风的幻灭者」）登记为一组，实测 **比卡面判据更粗**
+（113 个多成员官方组里 12 个连卡面图标都不同），故只作**第二个维度**（详情页「图鉴族」互链），
+不参与同族变体判定。**在此文件解析、不进 `monster_common` 共享聚合表**——聚合表被 endgame /
+voracity 共用，多加一个键会漏进它们的 payload（见 `docs/memory/2026-10.md` 的前向审计坑位）。
+官方 `AtlasSortID`（组内形态序）**不落**：实测只有 169/472 有值、113 个多成员组里仅 2 组齐全，
+拿它排序会让组内第一项跳到官方位、其余按 id，读起来是随机序。
 """
 import logging
 
@@ -44,16 +52,19 @@ def convert() -> None:
         if not name or not icon:
             continue
         facet = facets.get(mid) or {}
-        result.append(
-            {
-                "id": mid,
-                "name": name,
-                "icon": icon,
-                "type": _monster_type(t.get("Rank", "")),
-                "weak": list(facet.get("weak") or []),
-                "camp": facet.get("camp") or "",
-            }
-        )
+        row = {
+            "id": mid,
+            "name": name,
+            "icon": icon,
+            "type": _monster_type(t.get("Rank", "")),
+            "weak": list(facet.get("weak") or []),
+            "camp": facet.get("camp") or "",
+        }
+        # 官方图鉴族号：有值才落键（前端据「键存在」决定是否出「图鉴族」互链）
+        group = t.get("TemplateGroupID")
+        if group is not None:
+            row["atlas_group"] = group
+        result.append(row)
     result = sort_by_id(result)
     save_json(result, OUTPUT_DIR / "monsters.json")
     logger.info("monsters: %d entries", len(result))

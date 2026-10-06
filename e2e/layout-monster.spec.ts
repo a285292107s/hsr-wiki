@@ -216,6 +216,50 @@ test.describe('布局验收：敌方详情页', () => {
   );
 
   test(
+    '/monster/<id>：图鉴族互链逐项等于数据（官方 TemplateGroupID，排除同卡面档位）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      const list = readJson<{ id: number; name: string; icon?: string; atlas_group?: number }[]>(
+        'public/data/cn/monsters.json',
+      );
+      const key = (m: { name: string; icon?: string }): string =>
+        `${m.name}\u0000${(m.icon || '').split('/').pop()?.replace(/\.png$/i, '') || ''}`;
+      const othersOf = (self: typeof list[number]): typeof list =>
+        list.filter((r) => r.atlas_group === self.atlas_group)
+          .sort((a, b) => Number(a.id) - Number(b.id))
+          .filter((r) => key(r) !== key(self));
+
+      /* 期望值全部数据派生：图鉴族 = 官方 TemplateGroupID 的同组形态，**排除同卡面的档位**
+         （那些已由上方「同族变体」列出，两处不得重复列同一批卡）。 */
+      const target = list.find((m) => m.atlas_group != null && othersOf(m).length >= 2);
+      expect(target, '应存在带图鉴族且含 ≥2 个非同卡面形态的怪物（断言前提）').toBeTruthy();
+      const want = othersOf(target!);
+
+      await page.goto(`/monster/${target!.id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const links = await page.locator('.nk-mob-atlas__link').evaluateAll((els) => els.map((e) => ({
+        name: (e.textContent || '').trim(),
+        href: e.getAttribute('href') || '',
+      })));
+      expect(links.map((l) => l.name), '图鉴族互链的名称与顺序').toEqual(want.map((r) => r.name));
+      expect(links.map((l) => l.href)).toEqual(want.map((r) => `/monster/${r.id}`));
+
+      /* 反向：同组全为同卡面档位的怪 → 该行整块不渲染（否则与同族变体条重复列同一批卡） */
+      const soloGroup = list.find((m) => m.atlas_group != null
+        && list.filter((r) => r.atlas_group === m.atlas_group).length > 1
+        && othersOf(m).length === 0);
+      if (soloGroup) {
+        await page.goto(`/monster/${soloGroup.id}`);
+        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+        await expect(page.locator('.nk-mob-atlas')).toHaveCount(0);
+      }
+
+      assertNoErrors();
+    },
+  );
+
+  test(
     '/monster/<id>：状态词条逐项等于数据（命名约定归属的安全子集，非外键）',
     { tag: '@viewport-independent' },
     async ({ page }) => {

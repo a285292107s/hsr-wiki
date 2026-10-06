@@ -8,7 +8,7 @@ import {
 import type { MonsterLevelCurve } from '../../lib/monster-stats';
 import { monsterMaxLevel, monsterStanceValue, monsterStatAt } from '../../lib/monster-stats';
 import { fmtStatValue } from '../../lib/format';
-import { monsterFamilyOf } from '../../lib/monster-family';
+import { atlasFormsOf, monsterFamilyKey, monsterFamilyOf } from '../../lib/monster-family';
 import { loadLocalMonsterDetail, loadLocalMonsterLevelCurve, loadLocalMonsterList } from '../../services/api';
 import type { LocalMonsterEntry, MonsterDetail, MonsterExtraEffect, MonsterPhase, MonsterSkillDetail } from '../../services/types';
 import { usePageData } from '../composables/use-page-data';
@@ -126,16 +126,28 @@ function variantSig(d: MonsterDetail): Record<VariantSigKey, string> {
 const familyRows = ref<LocalMonsterEntry[]>([]);
 const familyDetails = ref<Record<string, MonsterDetail>>({});
 
+/* ─── 图鉴族（官方 `TemplateGroupID` → 列表字段 `atlas_group`）：第二个、更粗的维度 ───
+   官方把「同一图鉴条目的各具名形态」（完整 / 幻象 / 错误 / 污染，甚至剧情改名）登记为一组，
+   比卡面同族判据更粗（113 个多成员组里 12 个连卡面图标都不同），故只作互链、不参与变体序号。
+   与上方「同族变体」互补：这里只列**不属于同一张卡**的其他形态，避免同一批卡被列两遍。 */
+const atlasSelf = ref<LocalMonsterEntry | null>(null);
+const atlasRows = ref<LocalMonsterEntry[]>([]);
+
 async function loadFamily(): Promise<void> {
   const id = String(route.params.id);
   familyRows.value = [];
   familyDetails.value = {};
+  atlasSelf.value = null;
+  atlasRows.value = [];
   let members: LocalMonsterEntry[];
+  let list: LocalMonsterEntry[];
   try {
-    const list = await loadLocalMonsterList();
+    list = await loadLocalMonsterList();
     const self = list.find((m) => String(m.id) === id);
     if (!self) return; // 实例变体页（长号 ID）不在目录内，快照也不生成，无同族条
     members = monsterFamilyOf(list, self);
+    atlasSelf.value = self;
+    atlasRows.value = atlasFormsOf(list, self);
   } catch {
     return; // 同族条是附加信息：共享列表拉取失败不得让详情页进错误态
   }
@@ -154,8 +166,7 @@ async function loadFamily(): Promise<void> {
   familyDetails.value = out;
 }
 
-const variants = computed(() => {
-  const cur = data.value;
+const variants = computed(() => {  const cur = data.value;
   if (!cur || familyRows.value.length < 2) return [];
   const curSig = variantSig(cur);
   return familyRows.value.map((row) => {
@@ -172,6 +183,14 @@ const variants = computed(() => {
         : '与当前档一致';
     return { row, det, isCurrent, diffCells, flag };
   });
+});
+
+/** 图鉴族里**不属于当前这张卡**的其他形态（同卡面的档位已由上方「同族变体」列出，去重避免列两遍）。 */
+const atlasOthers = computed(() => {
+  const self = atlasSelf.value;
+  if (!self || atlasRows.value.length < 2) return [];
+  const key = monsterFamilyKey(self);
+  return atlasRows.value.filter((r) => monsterFamilyKey(r) !== key);
 });
 
 function elemTag(elem: string): string {
@@ -312,14 +331,14 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
 
       <div class="nk-panels">
         <div class="nk-panel nk-panel--active">
-          <section v-if="variants.length" class="nk-mob-sec">
+          <section v-if="variants.length || atlasOthers.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
               <h2 class="nk-mob-sec__title">同族变体</h2>
               <span class="nk-mob-sec__en">VARIANTS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
-              <span class="nk-mob-var__count">{{ variants.length }} 档</span>
+              <span v-if="variants.length" class="nk-mob-var__count">{{ variants.length }} 档</span>
             </header>
-            <p class="nk-mob-var__lead">
+            <p v-if="variants.length" class="nk-mob-var__lead">
               名称与卡面相同的 {{ variants.length }} 个数值档，弱点／韧性／数值／技能各不相同。
               「差分」列出的字段是本档与本页当前档不同的全部差异。
             </p>
@@ -368,6 +387,23 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 </span>
                 <span class="nk-mob-var__flag">{{ v.flag }}</span>
               </RouterLink>
+            </div>
+            <!-- 图鉴族（官方 `TemplateGroupID`）：与上方互补的第二个维度——官方把「同一图鉴条目的
+                 各具名形态」并组，比卡面判据粗（12 个多成员组连卡面图标都不同）。此处只列非同卡面的
+                 形态，且**不用它排变体序号**。官方 `AtlasSortID` 不作序（169/472 有值、仅 2/113 组齐全）。 -->
+            <div v-if="atlasOthers.length" class="nk-mob-atlas">
+              <span class="nk-mob-atlas__k">图鉴族</span>
+              <span class="nk-mob-atlas__note">
+                官方登记的同一条目下另有 {{ atlasOthers.length }} 个形态（共 {{ atlasRows.length }} 个，含本页）
+              </span>
+              <span class="nk-mob-atlas__links">
+                <RouterLink
+                  v-for="f in atlasOthers"
+                  :key="f.id"
+                  class="nk-mob-atlas__link"
+                  :to="`/monster/${f.id}`"
+                >{{ f.name }}</RouterLink>
+              </span>
             </div>
           </section>
 

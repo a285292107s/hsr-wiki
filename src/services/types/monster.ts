@@ -34,6 +34,12 @@ export interface LocalMonsterEntry {
   weak?: string[];
   /** 阵营名称（MonsterTemplateConfig.MonsterCampID → MonsterCamp.Name；无阵营为空串，实测 379/632 为空）。 */
   camp?: string;
+  /**
+   * 官方图鉴族号（`MonsterTemplateConfig.TemplateGroupID`；**缺位不落键**，实测 472/632 有值）。
+   * 口径比卡面同族判据**更粗**（官方把「同一图鉴条目的各具名形态」并组：完整/幻象/错误/污染，
+   * 甚至剧情改名），故只作详情页「图鉴族」互链的第二个维度，**不参与变体 i/n**。
+   */
+  atlas_group?: number;
 }
 export type LocalMonsterList = LocalMonsterEntry[];
 

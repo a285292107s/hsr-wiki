@@ -1012,6 +1012,17 @@ function monsterPages(ctx) {
         return `<li><span>${txt(s.name, null, 60)}（${txt(meta, null, 30)}）</span>${s.desc ? `<p>${txt(s.desc, null, 200)}</p>` : ''}</li>`;
       })
       .join('');
+    /* 图鉴族（官方 `TemplateGroupID`）：与页面同源——只列**非同卡面**的其他形态
+       （同卡面的档位由 `siblingsOf` 的同类内链与页面「同族变体」承担，两处不重复列同一批卡）。 */
+    const atlasForms = entry.atlas_group == null
+      ? []
+      : list.filter((m) => m.atlas_group === entry.atlas_group)
+        .sort((a, b) => Number(a.id) - Number(b.id));
+    const atlasOthers = atlasForms.filter((m) => `${m.name}\u0000${(m.icon || '').split('/').pop()?.replace(/\.png$/i, '') || ''}`
+      !== `${name}\u0000${(entry.icon || '').split('/').pop()?.replace(/\.png$/i, '') || ''}`);
+    const atlasHtml = atlasOthers.length
+      ? `<ul class="nk-snapshot__list">${atlasOthers.map((m) => `<li><a href="/monster/${m.id}">${txt(m.name, null, 80)}</a></li>`).join('')}</ul>`
+      : '';
     const body = detailBody(ctx, {
       crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/monster'], '/monster'], [name, null]]),
       h1: name,
@@ -1022,6 +1033,8 @@ function monsterPages(ctx) {
         { title: '图鉴记录', html: sourceSummary ? `<p>${txt(d.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: '技能', html: skillHtml ? `<ul class="nk-snapshot__blocks">${skillHtml}</ul>` : '' },
         { title: '状态词条', html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
+        // 「同图鉴其他形态」= 官方图鉴族里非同卡面的形态（口径见 docs/agents/ai-discoverability.md）
+        { title: atlasHtml ? `同图鉴其他形态（本族共 ${atlasForms.length} 个形态）` : '', html: atlasHtml },
       ],
       links: siblingsOf(links, idx),
       listLabel: '同图鉴敌对物种',

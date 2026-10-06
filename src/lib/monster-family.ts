@@ -10,6 +10,9 @@
  *     它把「银鬃尉官 / 银鬃尉官（错误）/ 银鬃尉官（完整）/ 邓恩」归为一族，而这些条目的
  *     名称与卡面各不相同，按它分组会把**不同怪物**并成一张卡的变体。两者语义不同：
  *     TemplateGroupID = 同一模型的各具名形态，本判据 = 用户看到同一张卡。
+ *     量化关系：我们的族**从不跨官方组**（多成员族 109 个恰在 1 组内、0 个跨 ≥2 组）⇒ 本判据是
+ *     官方组的**细化**；反之 83 个官方组含 ≥2 个我们的族。改用官方组当族：身份 385→328、
+ *     344 条卡会「不同图互为变体」、38 个族（112 条，含冰锋 ×4 / 无尽寒冬之槊 ×8）因组号为空而失去分组。
  *
  * 实测规模：632 条目录条目 → 385 族，147 族多成员，簇内 394 条（62%），最大 8 条。
  * 族内 149 族里 148 族的技能都不同 —— 这些是同一怪物的多个数值档，不是重复数据。 */
@@ -54,4 +57,28 @@ export function monsterFamilyOf<T extends MonsterFamilyInput>(
 ): T[] {
   const key = monsterFamilyKey(self);
   return groupMonsterFamilies(rows).get(key) ?? [self as unknown as T];
+}
+
+/** 官方图鉴族输入：多一个 `TemplateGroupID`（转换器落为 `atlas_group`，缺位不落键）。 */
+export interface MonsterAtlasInput extends MonsterFamilyInput {
+  atlas_group?: number | null;
+}
+
+/** 官方图鉴族（`TemplateGroupID`）成员 —— 同组全部形态**含自身**，按 id 升序；无组号返回 `[]`。
+ *
+ * 它是与「同族变体」**并列的第二个维度**：官方组 = 同一图鉴条目的各具名形态（完整 / 幻象 / 错误 /
+ * 污染，甚至剧情改名），**比卡面判据更粗**（113 个多成员组里 12 个连卡面图标都不同）⇒ 页面只把
+ * 它当「其他形态」互链，绝不拿它当变体序号（那会让两张不同的图互为变体）。
+ *
+ * **不用 `AtlasSortID` 排序**：实测只有 169/472 有值、113 个多成员组里仅 2 组齐全，拿它当序会让
+ * 组内第一项跳到官方位、其余按 id —— 读起来是随机序，故统一按 id。 */
+export function atlasFormsOf<T extends MonsterAtlasInput>(
+  rows: readonly T[],
+  self: MonsterAtlasInput,
+): T[] {
+  const group = self.atlas_group;
+  if (group == null) return [];
+  return rows
+    .filter((r) => r.atlas_group === group)
+    .sort((a, b) => Number(a.id) - Number(b.id));
 }

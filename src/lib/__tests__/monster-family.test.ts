@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupMonsterFamilies, monsterFamilyKey, monsterFamilyOf, monsterIconStem } from '../monster-family';
+import { atlasFormsOf, groupMonsterFamilies, monsterFamilyKey, monsterFamilyOf, monsterIconStem } from '../monster-family';
 
 /** 真实目录里的 4 条冰锋：名称与**卡面图标**全同，立绘两两不同（正是「看起来一样」的原型）。 */
 const ICE_BLADE = [
@@ -71,5 +71,38 @@ describe('monsterFamilyOf', () => {
   it('没有同族成员时返回只含自己的数组（详情页据此隐藏整块）', () => {
     const lone = { id: 999, name: '独行', icon: 'Monster_999' };
     expect(monsterFamilyOf([...ICE_BLADE, lone], lone).map((m) => m.id)).toEqual([999]);
+  });
+});
+
+/* 官方图鉴族（`TemplateGroupID`）：第二个、更粗的维度——它与同族判据**不是**一回事，
+   页面只拿它出「其他形态」互链（见 1004010 真实数据：可可利亚 / （完整）×2 / （幻象）/
+   无望冽风的幻灭者 / 托帕幻象 / （污染）分属 6 个卡面族）。 */
+describe('atlasFormsOf', () => {
+  const GROUP_1004010 = [
+    { id: 1004010, name: '可可利亚', icon: 'Monster_1004010', atlas_group: 1004010 },
+    { id: 1004011, name: '可可利亚（完整）', icon: 'Monster_1004011', atlas_group: 1004010 },
+    { id: 1004016, name: '可可利亚', icon: 'Monster_1004010', atlas_group: 1004010 },
+    { id: 1004015, name: '托帕幻象', icon: 'Monster_1004015', atlas_group: 1004010 },
+    { id: 1004020, name: '杰帕德', icon: 'Monster_1004020', atlas_group: 1004020 },
+    { id: 1009999, name: '无组号的怪', icon: 'Monster_1009999' },
+  ];
+
+  it('取同组全部形态（含自身）、按 id 升序，不混入其他组', () => {
+    expect(atlasFormsOf(GROUP_1004010, GROUP_1004010[0]).map((m) => m.id))
+      .toEqual([1004010, 1004011, 1004015, 1004016]);
+  });
+
+  it('无组号（缺位不落键）→ 空数组，详情页不渲染图鉴族行', () => {
+    expect(atlasFormsOf(GROUP_1004010, GROUP_1004010[5])).toEqual([]);
+    expect(atlasFormsOf(GROUP_1004010, { id: 1, name: 'x', icon: 'i', atlas_group: null })).toEqual([]);
+  });
+
+  it('同卡面的档位与图鉴族是两个正交维度：同卡面档仍在同组内，可被调用方按族键过滤', () => {
+    const forms = atlasFormsOf(GROUP_1004010, GROUP_1004010[0]);
+    const key = monsterFamilyKey(GROUP_1004010[0]);
+    expect(forms.filter((m) => monsterFamilyKey(m) === key).map((m) => m.id))
+      .toEqual([1004010, 1004016]);
+    expect(forms.filter((m) => monsterFamilyKey(m) !== key).map((m) => m.id))
+      .toEqual([1004011, 1004015]);
   });
 });

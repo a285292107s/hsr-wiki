@@ -459,6 +459,47 @@
   color: var(--text2);
 }
 
+/* 图鉴族互链（官方 TemplateGroupID）：与「同族变体」并排的第二个维度，语言更轻——
+   只在同族变体条之后一行呈现，不另起区块头。 */
+.nk-mob-atlas {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-1);
+}
+
+.nk-mob-atlas__k {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+}
+
+.nk-mob-atlas__note {
+  font-size: 0.72rem;
+  color: var(--text3);
+}
+
+.nk-mob-atlas__links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+
+.nk-mob-atlas__link {
+  font-size: 0.78rem;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.nk-mob-atlas__link:hover {
+  text-decoration: underline;
+}
+
 /* ─── 状态词条（MonsterStatusConfig 安全子集）─── */
 .nk-mob-status__lead {
   margin: 0 0 14px;
