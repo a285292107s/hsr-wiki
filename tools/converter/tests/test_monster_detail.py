@@ -20,6 +20,19 @@ def fake_monsters(monkeypatch):
         "1": {"80": {"hp": 148.01102, "atk": 30.684488, "def": 4.761905, "speed": 1.2}},
     })
     monkeypatch.setattr(md, "load_invasion_map", lambda _monsters: {})
+    # 三块附加数据（monster_extra）也要挡掉：否则测试会去读真实源表（既慢又与合成数据无关）
+    monkeypatch.setattr(md, "load_drops", lambda: {
+        8013010: [{"world_level": None, "avatar_exp": 36, "items": [{"id": 2, "name": "信用点", "icon": "icon/item/2.png"}]}],
+    })
+    monkeypatch.setattr(md, "load_appearances", lambda: {
+        8013010: {"total": 12, "samples": [{"id": 1, "name": "于枯冬之中"}]},
+    })
+    monkeypatch.setattr(md, "load_phases", lambda: {
+        1002011: [{"phase_id": 1, "weak": ["Ice"], "resist": {"Fire": 0.2}}],
+    })
+    # 技能附带效果（同一 FK 联结）也要挡掉，否则会去读真实源表；默认空表，
+    # 「有效果才落键」由 test_skill_extra_effects_attached_per_skill 自己补桩
+    monkeypatch.setattr(md, "load_skill_extra_effects", lambda: {})
     monkeypatch.setattr(md, "load_monsters", lambda: {
         8013010: {
             "name": "反物质军团·践踏者", "icon": "Monster_8013010",
@@ -30,6 +43,8 @@ def fake_monsters(monkeypatch):
             "stats": {"hp": 1023, "atk": 18, "def": 210, "speed": 100},
             "stat_ratio": {"hp": 1.2, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 3,
+            # 实例修正值：**不在转换期合成**，原值随 payload 给前端（等级滑条要实时合成）
+            "stance_modify": 30, "speed_modify": -44,
             "skills": [{
                 "id": 801301001, "name": "践踏", "tag": "单攻",
                 "type_desc": "技能", "damage_type": "Quantum",
@@ -72,6 +87,10 @@ class TestConvert:
         assert d["stats"] == {"hp": 1023, "atk": 18, "def": 210, "speed": 100}
         assert d["stat_ratio"] == {"hp": 1.2, "atk": 1.0, "def": 1.0, "speed": 1.0}
         assert d["level_group"] == 3
+        # 实例修正值原值落盘（前端在等级滑条上实时合成，见 ADR 0045）；模板无修正则不落键
+        assert d["stance_modify"] == 30 and d["speed_modify"] == -44
+        assert "stance_modify" not in fake_monsters["1002011.json"]
+        assert "speed_modify" not in fake_monsters["1002011.json"]
         assert d["skills"] == [{
             "id": 801301001, "name": "践踏", "tag": "单攻",
             "type_desc": "技能", "damage_type": "Quantum",
@@ -79,3 +98,30 @@ class TestConvert:
         }]
         assert fake_monsters["1002011.json"]["intro"] == ""
         assert fake_monsters["1002011.json"]["skills"] == []
+
+    def test_extra_blocks_keyed_by_template(self, fake_monsters):
+        """掉落/出没/阶段三块按**模板归属**写入；无数据的怪物不落键（不是空数组占位）。"""
+        md.convert()
+        d = fake_monsters["8013010.json"]
+        assert d["drops"] == [{
+            "world_level": None, "avatar_exp": 36,
+            "items": [{"id": 2, "name": "信用点", "icon": "icon/item/2.png"}],
+        }]
+        assert d["appearances"] == {"total": 12, "samples": [{"id": 1, "name": "于枯冬之中"}]}
+        assert "phases" not in d, "阶段只挂在有数据的模板上"
+        assert fake_monsters["1002011.json"]["phases"] == [
+            {"phase_id": 1, "weak": ["Ice"], "resist": {"Fire": 0.2}},
+        ]
+
+    def test_skill_extra_effects_attached_per_skill(self, fake_monsters, monkeypatch):
+        """附带效果按技能 ID 挂在该技能条目上；无效果的技能不落键（不是空数组占位）。"""
+        monkeypatch.setattr(md, "load_skill_extra_effects", lambda: {
+            801301001: [{"id": 10000027, "name": "额外回合", "desc": "描述", "param_list": [0.3]}],
+        })
+        md.convert()
+        d = fake_monsters["8013010.json"]
+        assert d["skills"][0]["extra_effects"] == [
+            {"id": 10000027, "name": "额外回合", "desc": "描述", "param_list": [0.3]},
+        ]
+        assert d["skills"][0]["name"] == "践踏", "不得改写技能自身字段"
+        assert fake_monsters["1002011.json"]["skills"] == [], "无技能 → 不产出条目"

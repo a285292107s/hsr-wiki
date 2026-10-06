@@ -179,13 +179,292 @@
   line-height: 1.6;
 }
 
+/* ─── 同族变体条：名称+卡面相同、数值档不同的兄弟条目 ───
+   差异用两种提示并列：`差分 …` 文本（主判据，不依赖颜色）+ 该值格的强调色（次判据）。
+   只靠颜色会被色觉障碍读者漏掉，故文本必须始终在场。 */
+.nk-mob-var__count {
+  flex: none;
+  font-family: var(--font-hud);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--metric-val);
+}
+
+.nk-mob-var__lead {
+  margin: 0 0 14px;
+  max-width: var(--nk-prose-max);
+  font-size: 0.78rem;
+  line-height: 1.8;
+  color: var(--text3);
+}
+
+.nk-mob-var {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nk-mob-var__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-1);
+  border-left: 2px solid transparent;
+  border-radius: var(--nk-radius-2);
+  background: color-mix(in srgb, var(--blk-900) 30%, transparent);
+  text-decoration: none;
+  transition: border-color var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out);
+}
+
+.nk-mob-var__row:hover,
+.nk-mob-var__row:focus-visible {
+  border-color: var(--line-2);
+  border-left-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+
+.nk-mob-var__row.is-current {
+  border-color: color-mix(in srgb, var(--primary) 34%, transparent);
+  border-left-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.nk-mob-var__fig {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--nk-radius-2);
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 28%, color-mix(in srgb, var(--blk-750) 55%, transparent) 0%, var(--blk-950) 80%);
+}
+
+.nk-mob-var__fig img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.nk-mob-var__id {
+  flex: none;
+  font-family: var(--font-hud);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--metric-val);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-mob-var__cells {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  min-width: 0;
+}
+
+.nk-mob-var__cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text2);
+  white-space: nowrap;
+}
+
+.nk-mob-var__cell.is-diff {
+  color: var(--accent);
+}
+
+.nk-mob-var__k {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+}
+
+.nk-mob-var__weak {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.nk-mob-var__weak img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.nk-mob-var__none {
+  color: var(--text3);
+}
+
+.nk-mob-var__flag {
+  flex: none;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--text3);
+  text-align: right;
+}
+
+.nk-mob-var__row.is-current .nk-mob-var__flag {
+  color: var(--accent);
+}
+
+/* ─── 额外阶段（源表 MonsterAtlasExtraPhase）：同一族的其他阶段另有弱点/抗性 ─── */
+.nk-mob-phases {
+  margin-top: 18px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line-1);
+}
+
+.nk-mob-phase {
+  padding: 12px 0 2px;
+}
+
+.nk-mob-phase + .nk-mob-phase {
+  margin-top: 10px;
+  border-top: 1px dashed var(--line-1);
+}
+
+.nk-mob-phase__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.nk-mob-phase__no {
+  font-family: var(--font-hud);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--metric-val);
+}
+
+.nk-mob-phase__name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+/* ─── 掉落：按均衡等级分档 ─── */
+.nk-mob-drop__lead {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  line-height: 1.7;
+  color: var(--text3);
+}
+
+.nk-mob-drops {
+  display: flex;
+  flex-direction: column;
+}
+
+.nk-mob-drop {
+  padding: 12px 0;
+  border-top: 1px solid var(--line-1);
+}
+
+.nk-mob-drop:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.nk-mob-drop__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.nk-mob-drop__tier {
+  font-family: var(--font-hud);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--metric-val);
+}
+
+.nk-mob-drop__exp {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+}
+
+.nk-mob-drop__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
+.nk-mob-drop__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.nk-mob-drop__item img {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* ─── 出没关卡：总数 + 关卡名样本 ─── */
+.nk-mob-appear__count {
+  margin: 0 0 10px;
+  font-size: 0.84rem;
+  color: var(--text2);
+}
+
+.nk-mob-appear__count strong {
+  font-family: var(--font-hud);
+  font-size: 1rem;
+  color: var(--metric-val);
+}
+
+.nk-mob-appear__count--none {
+  color: var(--text3);
+}
+
+.nk-mob-appear__note {
+  margin: -4px 0 10px;
+  font-size: 0.68rem;
+  line-height: 1.7;
+  color: var(--text3);
+}
+
+.nk-mob-appear__samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.nk-mob-appear__sample {
+  padding: 4px 10px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-2);
+  background: color-mix(in srgb, var(--blk-900) 30%, transparent);
+  font-size: 0.76rem;
+  color: var(--text2);
+}
+
 .nk-mob-resist__row {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   padding: 12px 0;
 }
-
 .nk-mob-resist__row + .nk-mob-resist__row {
   border-top: 1px dashed var(--line-1);
 }
@@ -376,6 +655,45 @@
   color: var(--text2);
 }
 
+/* 附带效果（技能另外施加的机制）：与技能描述同层但语言更轻——左发丝线 + 次级色，
+   避免读成又一个技能描述段。 */
+.nk-mob-skill__fx {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 2px solid var(--line-2);
+}
+
+.nk-mob-skill__fxk {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+}
+
+.nk-mob-skill__fxitem {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nk-mob-skill__fxname {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.nk-mob-skill__fxdesc {
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text3);
+}
+
 .nk-mob-skeleton {
   max-width: var(--nk-detail-max);
   margin: 0 auto;
@@ -445,6 +763,30 @@
 
   .nk-mob-stat--stance {
     grid-column: 1 / -1;
+  }
+
+  /* 窄档：数值格整体换行到第二行，序号与判据标签留在首行 */
+  .nk-mob-var__row {
+    padding: 10px 12px;
+  }
+
+  .nk-mob-var__cells {
+    flex-basis: 100%;
+    gap: 6px 14px;
+  }
+
+  .nk-mob-var__flag {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .nk-mob-drop__item img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .nk-mob-drop__items {
+    gap: 8px 14px;
   }
 
   .nk-mob-skeleton__hero {

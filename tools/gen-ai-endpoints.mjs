@@ -909,10 +909,17 @@ function monsterPages(ctx) {
   const list = readJson('monsters.json').filter((m) => m.name);
   const links = list.map((m) => ({ name: m.name, href: `/monster/${m.id}` }));
   const summaryPlain = `${SITE_NAME}敌对物种图鉴：共 ${list.length} 个条目，含分类、弱点、抗性与技能。`;
+  /* 条目属性摘要与卡面同源（契约 §3「每条 = 名称 + 属性摘要」）：角色目录早就带「稀有度·属性·命途」，
+     敌对目录此前只有分类。弱点是这张卡**唯一可辨**的差异——632 条里 392 条与另一条名称+图标全同，
+     只写分类时 400 张卡在快照里彼此无法区分，AI 也检索不出「冰弱点的敌人」。 */
   const items = list.map((m) => ({
     name: m.name,
     href: `/monster/${m.id}`,
-    meta: esc(MON_TYPE[m.type] || m.type || ''),
+    meta: [
+      MON_TYPE[m.type] || m.type || '',
+      (m.weak || []).map((e) => ctx.elemNames.get(e) || e).join('/'),
+      m.camp || '',
+    ].filter(Boolean).map(esc).join(' · '),
   }));
   const pages = [makePage('monster-list', {
     route: '/monster',
@@ -943,7 +950,13 @@ function monsterPages(ctx) {
       .filter((s) => s && s.name)
       .map((s) => {
         const metaParts = [s.tag, s.type_desc, s.damage_type ? (ctx.elemNames.get(s.damage_type) || s.damage_type) : ''].filter(Boolean);
-        return `<li><span>${txt(s.name, null, 100)}${metaParts.length ? `（${txt(metaParts.join(' · '), null, 60)}）` : ''}</span><p>${txt(s.desc, s.param_list)}</p></li>`;
+        /* 附带效果（`MonsterExtraEffect`，完整外键 ExtraEffectIDList × ExtraEffectConfig）：与技能描述同源
+           渲染（`txt` 做 #N[i] 参数替换），实测 215/632 个目录模板的技能带效果——AI 侧与页面同源。 */
+        const fx = (s.extra_effects || [])
+          .filter((f) => f && f.name)
+          .map((f) => `<p>附带效果 ${txt(f.name, null, 60)}${f.desc ? `：${txt(f.desc, f.param_list)}` : ''}</p>`)
+          .join('');
+        return `<li><span>${txt(s.name, null, 100)}${metaParts.length ? `（${txt(metaParts.join(' · '), null, 60)}）` : ''}</span><p>${txt(s.desc, s.param_list)}</p>${fx}</li>`;
       })
       .join('');
     /**
@@ -960,10 +973,13 @@ function monsterPages(ctx) {
       ['韧性', d.stance ? esc(String(d.stance)) : ''],
       ['韧性弱点', esc(weak.join(' / '))],
       ['伤害抗性', esc(resist.join(' / '))],
-      ['生命', d.stats ? esc(String(d.stats.hp)) : ''],
-      ['攻击', d.stats ? esc(String(d.stats.atk)) : ''],
-      ['防御', d.stats ? esc(String(d.stats.def)) : ''],
-      ['速度', d.stats ? esc(String(d.stats.speed)) : ''],
+      /* 四维标「模板基准」：详情页按 `基准 × 维度修饰比 × 等级曲线 + 实例修正值` 在等级滑条上合成
+         （实测 1002011 基准 69.75 → 满级 20,536），快照不做合成（不做第二份算式），
+         故必须把口径写进标签，否则读的人会把基准值当成战斗值。 */
+      ['生命（模板基准）', d.stats ? esc(String(d.stats.hp)) : ''],
+      ['攻击（模板基准）', d.stats ? esc(String(d.stats.atk)) : ''],
+      ['防御（模板基准）', d.stats ? esc(String(d.stats.def)) : ''],
+      ['速度（模板基准）', d.stats ? esc(String(d.stats.speed)) : ''],
     ];
     if (d.invaded) {
       const invadedLevels = (d.invaded.invasion_ids || []).filter((n) => n != null);
@@ -971,6 +987,19 @@ function monsterPages(ctx) {
         invadedLevels.length ? `等级 ${esc(invadedLevels.join(' / '))}` : '',
         `<a href="/voracity">${esc(VORACITY_TITLE)}</a>`,
       ].filter(Boolean).join(' · ')]);
+    }
+    /* 掉落与出没（`monster_extra` 的三块之二）：值与页面同源（都读详情 JSON 的 `drops` /
+       `appearances`，禁止在此另算一遍）；掉落只列基准档物品名，档数在括号里给总量——
+       逐档铺开会把 632 个快照各撑大数百字节，而「掉什么」这一问答所需的信息基准档已足够。 */
+    if (d.appearances && d.appearances.total) {
+      const samples = (d.appearances.samples || []).map((s) => s.name).filter(Boolean);
+      facts.push(['出没关卡', `${d.appearances.total} 个${samples.length ? `（如 ${esc(samples.join(' / '))}）` : ''}`]);
+    }
+    if (Array.isArray(d.drops) && d.drops.length) {
+      const base = d.drops.find((t) => t.world_level == null) || d.drops[0];
+      const names = (base.items || []).map((i) => i.name).filter(Boolean).join(' / ');
+      const tiers = d.drops.length > 1 ? `（共 ${d.drops.length} 档均衡等级）` : '';
+      if (names) facts.push(['掉落', `${esc(names)}${esc(tiers)}`]);
     }
     const body = detailBody(ctx, {
       crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/monster'], '/monster'], [name, null]]),

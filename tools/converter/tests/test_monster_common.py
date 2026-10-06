@@ -43,10 +43,21 @@ def _fake_load(path):
                  {"DamageType": "Fire", "Value": {"Value": 0.2}},
                  {"DamageType": "Thunder", "Value": {"Value": 0.2}},
              ],
+             "DebuffResist": [
+                 {"Key": "STAT_CTRL_Frozen", "Value": {"Value": 0.75}},
+                 {"Key": "STAT_NoIcon", "Value": {"Value": 1}},
+                 {"Key": "STAT_Unknown", "Value": {"Value": 1}},
+             ],
              "MonsterIntroduction": {"Hash": 10},
              "SkillList": [801301001, 999999]},
             {"MonsterID": 9001, "MonsterTemplateID": 9002,
              "StanceWeakList": ["Quantum"], "DamageTypeResistance": []},
+        ]
+    if name.endswith("MonsterStatusResistanceType.json"):
+        return [
+            {"Type": "STAT_CTRL_Frozen",
+             "Icon": "SpriteOutput/UI/Avatar/Icon/IconImmuneFrozen.png"},
+            {"Type": "STAT_NoIcon", "Icon": ""},
         ]
     if name.endswith("MonsterCamp.json"):
         return [{"ID": 3, "Name": {"Hash": 20}}]
@@ -83,6 +94,8 @@ class TestLoadMonsters:
             "stats": {"hp": 1023, "atk": 18, "def": 210, "speed": 100},
             "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 1,
+            # 效果抵抗：只留图标表里登记的状态类别（无图标 / 未登记的 key 跳过）
+            "debuff_resist": [{"key": "STAT_CTRL_Frozen", "value": 0.75, "icon": "IconImmuneFrozen"}],
         }
 
     def test_missing_config_and_icon(self, monkeypatch):
@@ -96,6 +109,7 @@ class TestLoadMonsters:
             "stance": 0, "stats": {"hp": 0, "atk": 0, "def": 0, "speed": 0},
             "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 1,
+            "debuff_resist": [],
         }
 
     def test_instance_alias_and_skip(self, monkeypatch):
@@ -111,7 +125,7 @@ class TestLoadMonsters:
 
     def test_alias_carries_own_variant_ratios(self, monkeypatch):
         """别名变体的修饰比/难度组用**它自己**的 config 记录，不沿用模板（ADR 0040 决策 3）：
-        同模板不同档位正是靠这两项区分。"""
+        同模板不同档位正是靠这两项区分；效果抵抗同理逐实例取（双层 ValueWrap 一并解开）。"""
         extra_cfg = {
             **_fake_load(Path("MonsterConfig.json"))[0],
             "MonsterID": 801301099, "MonsterTemplateID": 8013010,
@@ -119,6 +133,7 @@ class TestLoadMonsters:
             "AttackModifyRatio": {"Value": 1.5},
             "DefenceModifyRatio": {"Value": {"Value": 0.5}},
             "HardLevelGroup": 3,
+            "DebuffResist": [{"Key": "STAT_CTRL_Frozen", "Value": {"Value": {"Value": 1}}}],
         }
         monkeypatch.setattr(mc, "load_json", lambda p: (
             [extra_cfg] if str(p).endswith("MonsterConfig.json") else _fake_load(p)))
@@ -128,6 +143,34 @@ class TestLoadMonsters:
         assert variant["name"] == "名1"          # 名称/立绘等仍是模板家族信息
         assert variant["stat_ratio"] == {"hp": 0.266667, "atk": 1.5, "def": 0.5, "speed": 1.0}
         assert variant["level_group"] == 3
+        assert variant["debuff_resist"] == [
+            {"key": "STAT_CTRL_Frozen", "value": 1, "icon": "IconImmuneFrozen"},
+        ]
+
+    def test_scene_modify_transparency(self, monkeypatch):
+        """场景修正值（`{Stance,Speed}ModifyValue`）只作**透明度**透出：原值落盘（含负值）、
+        非空才落键、**实例以自己的记录为准且不继承模板的**（否则会给该实例凭空多出一个标注）；
+        绝不并入 stance / stats.speed（ADR 0040：场景系数不合成，加法位置无据可验）。"""
+        tpl_cfg = {**_fake_load(Path("MonsterConfig.json"))[0],
+                   "StanceModifyValue": {"Value": 30}, "SpeedModifyValue": None}
+        # 实例 1：自己两条都有（双层包装）；实例 2：template 有 +30 但自己无值 → 不得继承
+        inst_a = {"MonsterID": 801301099, "MonsterTemplateID": 8013010,
+                  "StanceWeakList": [], "DamageTypeResistance": [],
+                  "StanceModifyValue": {"Value": {"Value": -60}},
+                  "SpeedModifyValue": {"Value": -44}}
+        inst_b = {"MonsterID": 801301098, "MonsterTemplateID": 8013010,
+                  "StanceWeakList": [], "DamageTypeResistance": []}
+        monkeypatch.setattr(mc, "load_json", lambda p: (
+            [tpl_cfg, inst_a, inst_b] if str(p).endswith("MonsterConfig.json") else _fake_load(p)))
+        out = mc.load_monsters()
+
+        assert out[8013010]["stance_modify"] == 30, "模板自带的修正值也要落"
+        assert "speed_modify" not in out[8013010], "缺位不落键"
+        assert out[8013010]["stance"] == 240, "修正值不得并入 stance"
+        assert out[801301099]["stance_modify"] == -60, "实例用自己的记录（双层包装逐层解）"
+        assert out[801301099]["speed_modify"] == -44
+        assert "stance_modify" not in out[801301098], "实例无值时不继承模板的修正值"
+        assert "speed_modify" not in out[801301098]
 
     def test_stat_ratio_double_wrap_and_garbage(self, monkeypatch):
         """双层 ValueWrap（{Value:{Value:n}}）逐层解；非数值按中性 1。

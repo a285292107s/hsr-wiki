@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { monsterMaxLevel, monsterStatAt, type MonsterLevelCurve } from '../monster-stats';
+import { monsterMaxLevel, monsterStanceValue, monsterStatAt, type MonsterLevelCurve } from '../monster-stats';
 
 const CURVE: MonsterLevelCurve = {
   '1': {
@@ -52,5 +52,41 @@ describe('monsterMaxLevel', () => {
     expect(monsterMaxLevel(CURVE, '1')).toBe(100);
     expect(monsterMaxLevel(CURVE, '9')).toBe(0);
     expect(monsterMaxLevel(null, '1')).toBe(0);
+  });
+});
+
+/* ADR 0045：实例修正值（`MonsterConfig.{Stance,Speed}ModifyValue`）**加在曲线之后、不再被缩放**。
+   算式由参考站逐项反推验证：同族同模板 `144×1.32=190` 带 −44 修正的那一档显示 146
+   （若先加减再乘曲线会得到 132），韧性 `90 + 30 = 120`。 */
+describe('实例修正值（ADR 0045）', () => {
+  it('速度：基准 × 曲线 **+ 修正值**（加在最后，不被曲线缩放）', () => {
+    const speed = { ...DETAIL, modify: { speed: -44 } };
+    // 100 × 1.43 − 44 = 99（先加会得到 (100−44)×1.43 = 80.1，两者可区分）
+    expect(monsterStatAt('speed', 100, speed)).toBe(r1(100 * 1.43 - 44));
+    expect(monsterStatAt('speed', 100, speed)).not.toBe(r1((100 - 44) * 1.43));
+  });
+
+  it('未声明修正的维度不受影响；修正为 0 与缺位等价', () => {
+    expect(monsterStatAt('hp', 100, { ...DETAIL, modify: { speed: -44 } })).toBe(r1(69.75 * 363.84018));
+    expect(monsterStatAt('speed', 100, { ...DETAIL, modify: { speed: 0 } })).toBe(r1(100 * 1.43));
+    expect(monsterStatAt('speed', 100, DETAIL)).toBe(r1(100 * 1.43));
+  });
+
+  it('修正值非数值 → 按 0（不静默把字段变成 NaN）', () => {
+    expect(monsterStatAt('speed', 100, { ...DETAIL, modify: { speed: Number.NaN } })).toBe(r1(100 * 1.43));
+  });
+});
+
+describe('monsterStanceValue', () => {
+  it('韧性不入曲线链：只有「基准 + 修正值」', () => {
+    expect(monsterStanceValue(90, 30)).toBe(120);
+    expect(monsterStanceValue(360, -120)).toBe(240);
+    expect(monsterStanceValue(90)).toBe(90);
+    expect(monsterStanceValue(90, null)).toBe(90);
+  });
+
+  it('基准缺位 → null（调用方降级，不假数值）', () => {
+    expect(monsterStanceValue(null, 30)).toBeNull();
+    expect(monsterStanceValue(undefined, 30)).toBeNull();
   });
 });

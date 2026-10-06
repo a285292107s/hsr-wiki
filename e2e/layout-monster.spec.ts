@@ -1,21 +1,59 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues } from './helpers';
+import { collectConsoleIssues, readJson, waitForCatalogCards } from './helpers';
 
 /**
- * 布局验收：敌方详情页（`/monster/<id>`）。
+ * 布局验收：敌方页（`/monster` 列表 + `/monster/<id>` 详情）。
  *
  * 域独立成文件：本页此前没有任何 layout 分域文件——它的骨架几何由探针背书（第 11 轮），
  * 但「加载态与就绪态不产生位移」这条**契约**一直没人守。第 19 轮抓到真缺陷（见下），故立此文件。
  *
- * 用例只锁一件事：**hero 高度在立绘到达前后不得变化**。
- *   缺陷原型：`.nk-mob-hero__figure` 桌面档只有 `min-height: 300px`，立绘用 `max-width: 88%`
- *   在**未解码时不产生盒子**（高 0）⇒ hero 首帧 301px，立绘到达后内容高 357px ⇒ hero 变 358px，
- *   把下方 `.nk-panels` 整体推下 57px。实测该页 CLS 0.0288（全 632 个敌方详情页同构）。
- *   判据写法与像素/文案无关：只断言「采样窗口内 hero 高度恒定」——立绘尺寸、字体度量变化都不会让它变红，
- *   而一旦有人把 `aspect-ratio` 摘掉就会立刻变红。
+ * 本文件锁两组契约（都属「敌方页」，故同域共存）：
+ *  ① 详情页 hero 高度在立绘到达前后不得变化（原判据，保住）；
+ *  ② 同族各档必须**在卡面上可辨、在详情页里可对照**（后续新增）。
+ *
+ * ②的背景（数据实测，判据单点在 `src/lib/monster-family.ts`）：目录 632 条里 392 条与另一条
+ * 名称+卡面图标全同，只有弱点火雷/量子、韧性、速度、技能这些**页面上没显示的**字段不同；
+ * 卡片只画名称+分类时 400/632 张卡彼此无法区分。故两处断言都从 `public/data/cn/**` 派生期望值，
+ * 不写死序号与数值。
+ *
+ * ①的缺陷原型：`.nk-mob-hero__figure` 桌面档只有 `min-height: 300px`，立绘用 `max-width: 88%`
+ * 在**未解码时不产生盒子**（高 0）⇒ hero 首帧 301px，立绘到达后内容高 357px ⇒ hero 变 358px，
+ * 把下方 `.nk-panels` 整体推下 57px。实测该页 CLS 0.0288（全 632 个敌方详情页同构）。
+ * 判据写法与像素/文案无关：只断言「采样窗口内 hero 高度恒定」——立绘尺寸、字体度量变化都不会让它变红，
+ * 而一旦有人把 `aspect-ratio` 摘掉就会立刻变红。
  */
+
+interface MonsterListEntry { id: number; name: string; icon: string; weak?: string[] }
+interface MonsterDropTierJson { world_level: number | null; avatar_exp: number; items: { id: number; name: string; icon: string }[] }
+interface MonsterDetailJson {
+  id: number;
+  weak: string[];
+  stance: number;
+  stats: { hp: number; atk: number; def: number; speed: number };
+  skills: {
+    id: number;
+    name: string;
+    /** 技能附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键） */
+    extra_effects?: { id: number; name: string; desc?: string; param_list?: number[] }[];
+  }[];
+  /** 掉落 / 出没 / 额外阶段（monster_extra.py 的三块） */
+  drops?: MonsterDropTierJson[];
+  appearances?: { total: number; samples: { id: number; name: string }[] };
+  phases?: { phase_id: number; weak: string[]; resist: Record<string, number> }[];
+}
+
 const MONSTER_ID = '1002011';
 const IMG_DELAY_MS = 2500;
+
+/** 同族判据（与 `src/lib/monster-family.ts` 同式：名称 + 卡面图标 stem；e2e 不引 src） */
+const iconStem = (p: string): string => (p.split('/').pop() || '').replace(/\.png$/i, '');
+const familyOf = (id: number): MonsterListEntry[] => {
+  const list = readJson<MonsterListEntry[]>('public/data/cn/monsters.json').filter((m) => m.name);
+  const key = (m: MonsterListEntry): string => `${m.name}\u0000${iconStem(m.icon)}`;
+  const self = list.find((m) => m.id === id);
+  return self ? list.filter((m) => key(m) === key(self)).sort((a, b) => a.id - b.id) : [];
+};
+const detailOf = (id: number): MonsterDetailJson => readJson<MonsterDetailJson>(`public/data/cn/monsters/${id}.json`);
 
 test.describe('布局验收：敌方详情页', () => {
   test(`/monster/${MONSTER_ID}：立绘延迟到达时 hero 高度不得变化`, async ({ page }) => {
@@ -69,4 +107,251 @@ test.describe('布局验收：敌方详情页', () => {
 
     assertNoErrors();
   });
+
+  test(
+    `/monster/${MONSTER_ID}：同族变体条覆盖全部同族档，「差分」标注逐格与详情数据一致`,
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      const fam = familyOf(Number(MONSTER_ID));
+      expect(fam.length, '冰锋族应有 4 档（断言的数据前提）').toBe(4);
+      const cur = detailOf(Number(MONSTER_ID));
+      const curSig = [
+        JSON.stringify([...cur.weak].sort()),
+        String(cur.stance),
+        String(cur.stats.hp),
+        String(cur.stats.speed),
+        cur.skills.map((s) => s.id).join(','),
+      ];
+
+      await page.goto(`/monster/${MONSTER_ID}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const rows = page.locator('.nk-mob-var__row');
+      await expect(rows, '同族条必须列出全部同族档（缺档 = 用户仍然走不到那一档）').toHaveCount(fam.length);
+
+      const seen = await rows.evaluateAll((els) => els.map((el) => ({
+        no: (el.querySelector('.nk-mob-var__id')?.textContent || '').replace(/\D/g, ''),
+        current: el.classList.contains('is-current'),
+        flag: (el.querySelector('.nk-mob-var__flag')?.textContent || '').trim(),
+        diffCells: [...el.querySelectorAll('.nk-mob-var__cell')].map((c) => c.classList.contains('is-diff')),
+        cellValues: [...el.querySelectorAll('.nk-mob-var__cell')].map((c) => {
+          const k = c.querySelector('.nk-mob-var__k')?.textContent || '';
+          return c.textContent.replace(k, '').trim();
+        }),
+      })));
+
+      const num = (s: string): number => Number(s.replace(/[^\d.-]/g, ''));
+      fam.forEach((m, i) => {
+        const row = seen[i];
+        const o = detailOf(m.id);
+        const isCur = m.id === Number(MONSTER_ID);
+        // 5 个值格顺序：弱点 / 韧性 / HP / 速度 / 技能
+        expect(row.no, `第 ${i + 1} 行必须是同族按 id 升序的第 ${i + 1} 档`).toBe(String(m.id));
+        expect(row.current, `${m.id} 的「当前档」标记`).toBe(isCur);
+        if (isCur) {
+          expect(row.flag, '当前档必须有显式标记（不是靠颜色）').toBe('当前档');
+        } else {
+          expect(row.flag, `${m.id} 必须列出与当前档的差异字段`).toContain('差分');
+        }
+        expect(
+          row.diffCells,
+          `${m.id} 的差分格必须与详情数据逐格一致（谎报「一致」会让用户以为两档没差别）`,
+        ).toEqual([
+          JSON.stringify([...o.weak].sort()) !== curSig[0],
+          String(o.stance) !== curSig[1],
+          String(o.stats.hp) !== curSig[2],
+          String(o.stats.speed) !== curSig[3],
+          o.skills.map((s) => s.id).join(',') !== curSig[4],
+        ]);
+        expect(num(row.cellValues[1]), `${m.id} 韧性值`).toBe(o.stance);
+        expect(num(row.cellValues[2]), `${m.id} HP 值`).toBe(o.stats.hp);
+        expect(num(row.cellValues[3]), `${m.id} 速度值`).toBe(o.stats.speed);
+        expect(num(row.cellValues[4]), `${m.id} 技能条数`).toBe(o.skills.length);
+      });
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<实例>：修正值按「基准 × 修饰比 × 曲线 ＋ 修正值」合成，缺省等级 = 该组曲线最高档',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      /* ADR 0045：修正值加在曲线**之后**（实测同族同模板 `144×1.32=190` 带 −44 的那一档显示 146，
+         先加后乘会得到 132）。期望值在这里由**原始数据独立算一遍**（payload + 曲线表），
+         与页面合成实现互为对照。100201502 实测带 `stance_modify +30`（目录 632 条都不带修正值，
+         故只能取实例页；该页虽不在目录里，详情文件与路由都存在）。 */
+      const id = 100201502;
+      const mon = detailOf(id);
+      expect(mon.stance_modify, `${id} 应带韧性修正（断言前提）`).toBeGreaterThan(0);
+      const curve = readJson<Record<string, Record<string, { speed: number }>>>(
+        'public/data/cn/monster-level-curve.json',
+      );
+      const group = String(mon.level_group ?? 1);
+      const maxLevel = Math.max(...Object.keys(curve[group]).map(Number));
+      const speedRatio = mon.stat_ratio?.speed ?? 1;
+      const wantSpeed = Math.round((mon.stats.speed * speedRatio * curve[group][String(maxLevel)].speed
+        + (mon.speed_modify ?? 0)) * 10) / 10;
+      const wantStance = mon.stance + mon.stance_modify!;
+
+      await page.goto(`/monster/${id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(
+        page.locator('.nk-mob-level__label'),
+        '缺省等级 = 该难度组曲线的最高档（不再写死 100）',
+      ).toHaveText(`等级 ${maxLevel}`);
+      await expect(
+        page.locator('.nk-mob-stat--stance .nk-mob-stat__val'),
+        '韧性 = 韧性基准 + 修正值',
+      ).toHaveText(String(wantStance));
+      await expect(
+        page.locator('.nk-mob-stat__val[data-prop="spd"]'),
+        '速度 = 基准 × 修饰比 × 曲线 + 修正值（修正值不被曲线缩放）',
+      ).toHaveText(String(wantSpeed));
+      await expect(page.locator('.nk-mob-stat-note'), '口径注记必须写明含实例修正值').toContainText('实例修正值');
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<id>：技能附带效果按技能逐项等于数据（ExtraEffectIDList × ExtraEffectConfig 完整外键）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      /* 断言前提由数据派生：实测 215/632 个目录模板的技能带附带效果（937 次引用），
+         这里取其中一个（1004014 的「无望冽风 / 逃无可逃」）；数据若变，下面的前提断言先红。 */
+      const id = 1004014;
+      const mon = detailOf(id);
+      const withFx = (mon.skills || []).filter((s) => s.extra_effects?.length);
+      expect(withFx.length, `${id} 应有带附带效果的技能（断言前提）`).toBeGreaterThan(0);
+
+      await page.goto(`/monster/${id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(
+        page.locator('.nk-mob-skill__fx'),
+        '带附带效果的技能数必须与数据一致',
+      ).toHaveCount(withFx.length);
+
+      const rendered = await page.locator('.nk-mob-skill').evaluateAll((els) => els.map((el) => ({
+        name: (el.querySelector('.nk-mob-skill__name')?.textContent || '').trim(),
+        fx: [...el.querySelectorAll('.nk-mob-skill__fxitem')].map((i) => ({
+          name: (i.querySelector('.nk-mob-skill__fxname')?.textContent || '').trim(),
+          hasDesc: Boolean(i.querySelector('.nk-mob-skill__fxdesc')),
+        })),
+      })));
+      (mon.skills || []).forEach((s, i) => {
+        expect(rendered[i].name, `第 ${i + 1} 张技能卡`).toBe(s.name);
+        const fx = s.extra_effects || [];
+        expect(rendered[i].fx.map((x) => x.name), `${s.name} 的附带效果名与顺序`).toEqual(fx.map((f) => f.name));
+        // 描述经 fmtDesc 渲染（#N[i] 已被参数替换），故只断言「有源文本就该有渲染文本」
+        fx.forEach((f, j) => {
+          if (f.desc) expect(rendered[i].fx[j].hasDesc, `${f.name} 的描述应上屏`).toBe(true);
+        });
+      });
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<id>：掉落 / 出没 / 额外阶段三块逐项等于详情数据（期望值全部数据派生）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+
+      const dropMon = detailOf(Number(MONSTER_ID));
+      expect(dropMon.drops?.length, `${MONSTER_ID} 应有掉落（断言前提）`).toBeGreaterThan(0);
+      expect(dropMon.appearances?.total, `${MONSTER_ID} 应有出没统计（断言前提）`).toBeGreaterThan(0);
+
+      await page.goto(`/monster/${MONSTER_ID}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+
+      const tiers = page.locator('.nk-mob-drop');
+      await expect(tiers, '掉落档数 = 数据档数（少一档就是静默丢数据）').toHaveCount(dropMon.drops!.length);
+      const rendered = await tiers.evaluateAll((els) => els.map((el) => ({
+        tier: (el.querySelector('.nk-mob-drop__tier')?.textContent || '').trim(),
+        items: [...el.querySelectorAll('.nk-mob-drop__item')].map((i) => (i.querySelector('span')?.textContent || '').trim()),
+      })));
+      dropMon.drops!.forEach((t, i) => {
+        expect(rendered[i].tier, `第 ${i + 1} 档标签`).toBe(t.world_level == null ? '基准档' : `均衡等级 ${t.world_level}`);
+        expect(rendered[i].items, `第 ${i + 1} 档物品名与顺序`).toEqual(t.items.map((x) => x.name));
+      });
+      await expect(
+        page.locator('.nk-mob-appear__count strong'),
+        '出没关卡数 = 数据 total',
+      ).toHaveText(String(dropMon.appearances!.total));
+
+      /* 额外阶段：只渲染与本体现值不同的阶段（实测 48 条阶段行里 36 条与本体逐字相同），
+         故期望值也要按同一判据从数据派生，而不是 `phases.length`。 */
+      const phaseId = 3025010;
+      const phaseMon = detailOf(phaseId);
+      const sig = (weak: string[], resist: Record<string, number>): string => JSON.stringify([
+        [...(weak || [])].sort(),
+        Object.entries(resist || {}).sort(([a], [b]) => a.localeCompare(b)),
+      ]);
+      const baseSig = sig(phaseMon.weak, phaseMon.resist);
+      const expectPhases = (phaseMon.phases || []).filter((p) => sig(p.weak, p.resist) !== baseSig);
+      expect(expectPhases.length, `${phaseId} 应有与本体现值不同的阶段（断言前提）`).toBeGreaterThan(0);
+
+      await page.goto(`/monster/${phaseId}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const blocks = page.locator('.nk-mob-phase');
+      await expect(blocks, '仅渲染与本体现值不同的阶段').toHaveCount(expectPhases.length);
+      expect(await blocks.evaluateAll((els) => els.map((el) => (el.querySelector('.nk-mob-phase__no')?.textContent || '').trim())))
+        .toEqual(expectPhases.map((p) => `阶段 ${p.phase_id}`));
+      // 取阶段块**第一行**（韧性弱点）的图标；直接查块内所有 tags 会把下面的抗性行也算进来
+      const firstWeak = await blocks.first().evaluate((el) => {
+        const row = el.querySelector('.nk-mob-resist__row');
+        return [...(row?.querySelectorAll('.nk-mob-resist__tags img') ?? [])]
+          .map((i) => (i.getAttribute('src') || '').split('/').pop() || '');
+      });
+      expect(firstWeak, '阶段弱点的元素图标逐项与数据一致').toEqual(
+        expectPhases[0].weak.map((e) => `${e.toLowerCase()}.webp`),
+      );
+
+      assertNoErrors();
+    },
+  );
+});
+
+test.describe('布局验收：敌方目录（同族各档必须可辨）', () => {
+  test(
+    '/monster：同族各档在卡面给出弱点图标与档位序号（否则同名同图的多张卡彼此无法区分）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      const fam = familyOf(Number(MONSTER_ID));
+      expect(fam.length).toBeGreaterThan(1);
+
+      await page.goto('/monster');
+      await waitForCatalogCards(page);
+      await page.locator('.nk-cat-search input').fill(fam[0].name);
+      await expect(page.locator('.nk-mob-card')).toHaveCount(fam.length);
+
+      const cards = await page.locator('.nk-mob-card').evaluateAll((els) => els.map((el) => ({
+        href: el.getAttribute('href') || '',
+        variant: (el.querySelector('.nk-mob-card__var')?.textContent || '').trim(),
+        weakIcons: [...el.querySelectorAll('.nk-mob-card__weak img')]
+          .map((i) => (i.getAttribute('src') || '').split('/').pop() || ''),
+        title: el.getAttribute('title') || '',
+      })));
+
+      fam.forEach((m, i) => {
+        const card = cards.find((c) => c.href === `/monster/${m.id}`);
+        expect(card, `同族第 ${i + 1} 档 ${m.id} 必须出现在目录里`).toBeTruthy();
+        expect(card!.variant, `${m.id} 的档位序号`).toBe(`变体 ${i + 1}/${fam.length}`);
+        // 弱点图标：元素图标名即属性小写（数据源 StanceWeakList 逐项、保序）
+        expect(card!.weakIcons, `${m.id} 的卡面弱点图标`).toEqual(
+          (m.weak ?? []).map((e) => `${e.toLowerCase()}.webp`),
+        );
+        // 同名同图的卡靠 title 才能落全「弱点/分类/阵营/档位」（触屏上尤其如此）
+        expect(card!.title).toContain(m.name);
+        expect(card!.title).toContain(`变体 ${i + 1}/${fam.length}`);
+      });
+
+      assertNoErrors();
+    },
+  );
 });

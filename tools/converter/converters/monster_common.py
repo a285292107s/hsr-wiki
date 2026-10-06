@@ -1,9 +1,10 @@
 """敌方信息聚合（endgame 赛季敌方 / monster_detail 详情页共用）。
 
 完整表→字段→输出映射见 docs/data/转换器字段映射.md（monster_common 段）。
-源：MonsterTemplateConfig / MonsterConfig / MonsterCamp / MonsterSkillConfig / HardLevelGroup。
+源：MonsterTemplateConfig / MonsterConfig / MonsterCamp / MonsterSkillConfig / HardLevelGroup /
+MonsterStatusResistanceType。
 输出 {模板ID: {name,icon,figure,weak,resist,rank,camp,intro,skills,stance,stats,
-                stat_ratio,level_group}}；
+                stat_ratio,level_group,debuff_resist}}；
 实例别名 MonsterID(如200401009)≠模板ID时指向同模板，使波次引用直接命中。
 战斗数值合成链（社群逆向共识 + HardLevelGroup 表结构一致，判据见 ADR 0040）：
   stat(level) = stats[基准] × stat_ratio[维度修饰比] × level_curve[level_group][level]
@@ -65,11 +66,67 @@ def load_level_curve() -> dict[str, dict[str, dict[str, float]]]:
     return curve
 
 
+def load_status_resist_icons() -> dict[str, str]:
+    """`MonsterStatusResistanceType` → {状态类别 Type: 免疫图标 basename}（11 条）。
+
+    如 `STAT_CTRL_Frozen → IconImmuneFrozen`（源路径 `SpriteOutput/UI/Avatar/Icon/IconImmune*.png`）。
+    **该表只有 Type + Icon 两列，没有任何文字名**（TextMap 搜「免疫冻结」类文案 0 命中、
+    `MonsterStatusConfig` 无 `STAT_CTRL*` 同名 ModifierName）⇒ 消费侧只能呈现「效果抵抗 + 图标 +
+    百分比」，**禁止**自造状态名或按后缀猜名（实测按后缀会得到「深寒 / 待岗 / 债务危机」这类无关状态）。
+    """
+    out: dict[str, str] = {}
+    for rec in load_json(EXCEL_DIR / "MonsterStatusResistanceType.json"):
+        key = rec.get("Type")
+        icon = rec.get("Icon") or ""
+        if key and icon:
+            out[key] = icon.rsplit("/", 1)[-1].removesuffix(".png")
+    return out
+
+def _debuff_resist(cfg: dict, icons: dict[str, str]) -> list[dict]:
+    """`MonsterConfig.DebuffResist` → [{key, value, icon}]（无图标的状态类别跳过）。
+
+    值 = 该类负面效果的抵抗率（实测 0.5 / 0.75 / 1）。图标缺失即无视觉标识，宁缺勿列。
+    逐层剥 `{"Value": …}` 包装（与 `_stat_ratio_from_cfg` 同理：个别记录是双层 ValueWrap，
+    单次 unwrap 会留下一个 dict）。
+    """
+    out: list[dict] = []
+    for rec in cfg.get("DebuffResist") or []:
+        key = rec.get("Key")
+        icon = icons.get(key or "")
+        if not key or not icon:
+            continue
+        value: object = rec.get("Value")
+        depth = 0
+        while isinstance(value, dict) and depth < 4:
+            value = value.get("Value")
+            depth += 1
+        out.append({"key": key, "value": value if isinstance(value, (int, float)) else 0, "icon": icon})
+    return out
+
+def _modify_value(cfg: dict, field: str) -> float | None:
+    """`MonsterConfig.{Stance,Speed}ModifyValue` → 数值（缺位/不可解析 → None）。
+
+    **刻意不并入 `stance` / `stats.speed`**：ADR 0040 只裁决了「基准 × 维度修饰比 × 等级曲线」，
+    `*ModifyValue` 属它明确排除的「场景系数（社群术语修饰值 2）」一侧——实测 `*ModifyRatio` 全
+    2722 条恒为 1（唯一旋钮是 Value）、`StanceModifyValue` 全是 30 的整数倍且 2250/2722 为空、
+    stance 根本不在等级曲线链里，而**加法的位置（曲线前 / 曲线后）在仓内无据可验**。
+    故只作透明度落盘（原值，含负值），由展示层标注「另有修正」，绝不代它算进任何数字。
+    逐层剥 `{"Value": …}`（与 `_stat_ratio_from_cfg` 同理，个别记录双层包装）。
+    """
+    v: object = cfg.get(field)
+    depth = 0
+    while isinstance(v, dict) and depth < 4:
+        v = v.get("Value")
+        depth += 1
+    return float(v) if isinstance(v, (int, float)) else None
+
+
 def load_monsters() -> dict[int, dict]:
     """敌方信息聚合 → {ID: {name, icon, figure, weak, resist, rank, camp, intro, skills, stance, stats,
-                             stat_ratio, level_group, stat_ratio}}。"""
+                             stat_ratio, level_group, debuff_resist}}。"""
     templates = load_json(EXCEL_DIR / "MonsterTemplateConfig.json")
     configs = load_json(EXCEL_DIR / "MonsterConfig.json")
+    resist_icons = load_status_resist_icons()
     camps = {
         r["ID"]: resolve_text(r.get("Name", {}))
         for r in load_json(EXCEL_DIR / "MonsterCamp.json") if r.get("ID") is not None
@@ -128,16 +185,34 @@ def load_monsters() -> dict[int, dict]:
             # 维度修饰比与难度组：战斗合成链第二/三段（ADR 0040）。模板自身 cfg 缺位时按中性 1 / 组 1。
             "stat_ratio": _stat_ratio_from_cfg(cfg) if cfg else {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": (cfg.get("HardLevelGroup") or 1) if cfg else 1,
+            # 效果抵抗（DebuffResist × MonsterStatusResistanceType）：按状态类别给图标，无文字名
+            "debuff_resist": _debuff_resist(cfg, resist_icons),
         }
+        # 场景修正值（透明度透出，口径见 _modify_value）：非空才落键，缺位不占 payload
+        for key, field in (("stance_modify", "StanceModifyValue"), ("speed_modify", "SpeedModifyValue")):
+            mv = _modify_value(cfg, field)
+            if mv is not None:
+                out[mid][key] = mv
     for rec in configs:
         mid, tpl = rec.get("MonsterID"), rec.get("MonsterTemplateID")
         if mid is not None and tpl is not None and mid != tpl and tpl in out:
             # 实例变体的修饰比/难度组用**它自己**的 config 记录：模板与变体的同三项不同值
-            # （1002011 hpR=1，100201101 hpR=0.266667），沿用模板值会把变体战斗数值算错
-            out.setdefault(mid, {
+            # （1002011 hpR=1，100201101 hpR=0.266667），沿用模板值会把变体战斗数值算错；
+            # 效果抵抗同理按实例自己的 DebuffResist（逐实例登记的抵抗率可能不同）
+            variant = {
                 **out[tpl],
                 "_tpl": tpl,
                 "stat_ratio": _stat_ratio_from_cfg(rec),
                 "level_group": rec.get("HardLevelGroup") or 1,
-            })
+                "debuff_resist": _debuff_resist(rec, resist_icons),
+            }
+            # 修正值同样以实例自己的记录为准：**不得继承模板的**（模板有 +30 而实例无值时，
+            # 继承会让这张卡凭空多出一个不属于它的修正标注）
+            for key, field in (("stance_modify", "StanceModifyValue"), ("speed_modify", "SpeedModifyValue")):
+                mv = _modify_value(rec, field)
+                if mv is None:
+                    variant.pop(key, None)
+                else:
+                    variant[key] = mv
+            out.setdefault(mid, variant)
     return out

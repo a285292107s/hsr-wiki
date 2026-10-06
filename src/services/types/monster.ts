@@ -26,10 +26,30 @@ export interface LocalMonsterEntry {
   name: string;
   icon: string;
   type?: string;
+  /**
+   * 韧性弱点属性（MonsterConfig.StanceWeakList，如 ["Physical","Ice"]；空数组 = 无弱点）。
+   * 卡片上**唯一能区分同族各档**的字段：632 个模板里 400 张卡若只展示名称+分类就与另一张
+   * 完全无法区分，而 149 个同族簇里只有 41 个簇弱点相同。
+   */
+  weak?: string[];
+  /** 阵营名称（MonsterTemplateConfig.MonsterCampID → MonsterCamp.Name；无阵营为空串，实测 379/632 为空）。 */
+  camp?: string;
 }
 export type LocalMonsterList = LocalMonsterEntry[];
 
 /* ─── 敌对物种详情（converter 输出，每怪物一个 JSON：monsters/{id}.json） ─── */
+
+/** 技能附带效果（`MonsterSkillConfig.ExtraEffectIDList` → `ExtraEffectConfig`，**完整外键**：
+ *  实测技能侧引用的 118/118 个 ID 全在该表；文案如「额外回合」「行动提前」）。
+ *  图标（`BuffIcon/Inlevel/*`）在 nanoka 与 jsDelivr 双侧 404 ⇒ 只出文本，不落图标字段。 */
+export interface MonsterExtraEffect {
+  id: number;
+  name: string;
+  /** 效果描述（原始富文本，前端 fmtDesc 渲染） */
+  desc?: string;
+  /** 描述里的 `#N[i]` 替换参数 */
+  param_list?: number[];
+}
 
 /** 敌对物种技能详情（MonsterSkillConfig 全量字段） */
 export interface MonsterSkillDetail {
@@ -47,6 +67,57 @@ export interface MonsterSkillDetail {
   desc?: string;
   /** 占位符替换参数 */
   param_list?: number[];
+  /** 附带效果（有值才落键；实测覆盖 215/632 个目录模板） */
+  extra_effects?: MonsterExtraEffect[];
+}
+
+/** 掉落物品（MonsterDrop.DisplayItemList → ItemConfig 的 ItemID：名称/图标与 items.json 同源） */
+export interface MonsterDropItem {
+  id: number;
+  name: string;
+  icon: string;
+}
+
+/**
+ * 掉落档（MonsterDrop 按均衡等级分档）。
+ * `world_level` 为 `null` = 基准档（无均衡等级限制），排序时在最前；其余按等级升序。
+ */
+export interface MonsterDropTier {
+  world_level: number | null;
+  /** 该档的角色经验奖励（AvatarExpReward） */
+  avatar_exp: number;
+  items: MonsterDropItem[];
+}
+
+/** 出没样本：一关的 ID 与名称（StageConfig.StageName 的 TextMap 文案） */
+export interface MonsterAppearanceSample {
+  id: number;
+  name: string;
+}
+
+/**
+ * 出没统计（StageConfig 波次 + `MonsterConfig.SummonIDList` 召唤链）。
+ * `total` = 该模板（含其被召唤出场）出现过的关卡数（同关多波只计一次）；
+ * `samples` = 至多 3 个「关卡名与来源类型都不同」的样本，可能为空（关卡无名时不落样本）。
+ */
+export interface MonsterAppearances {
+  total: number;
+  samples: MonsterAppearanceSample[];
+}
+
+/**
+ * 额外阶段（MonsterAtlasExtraPhase(s)，按 TemplateGroupID 归属某族）。
+ * `phase_id` 是源表字段原值（1/2），**不是**游戏内阶段号——实测 PhaseID=1 的记录里立绘
+ * 就有 `_Phase2` 的（4014010 / 3025010 / 4035010 / 4044010），故页面上按源字段名呈现。
+ */
+export interface MonsterPhase {
+  phase_id: number;
+  weak: string[];
+  resist: Record<string, number>;
+  /** 该阶段的名称（源表仅 3/9 有） */
+  name?: string;
+  /** 该阶段的图鉴介绍（源表仅 3/9 有） */
+  intro?: string;
 }
 
 /** 敌对物种详情（monsters/{id}.json） */
@@ -73,12 +144,24 @@ export interface MonsterDetail {
   stats: { hp: number; atk: number; def: number; speed: number };
   /** 维度修饰比（MonsterConfig FaceId 版面；模板自身记录缺省位为 1） */
   stat_ratio?: { hp?: number; atk?: number; def?: number; speed?: number };
+  /** 该实例的**韧性修正值**（`MonsterConfig.StanceModifyValue`，如 +30 / −120；缺位不落键）。
+   *  口径：`韧性 = 韧性基准 + 修正值`（韧性不入等级曲线链）。判据见 ADR 0045。 */
+  stance_modify?: number;
+  /** 该实例的**速度修正值**（`MonsterConfig.SpeedModifyValue`，如 −44 / +56；缺位不落键）。
+   *  口径：`速度(等级) = 基准 × 修饰比 × 曲线 + 修正值`（修正值加在曲线之后、不再被缩放）。 */
+  speed_modify?: number;
   /** 等级曲线难度组（MonsterConfig.HardLevelGroup，缺省 1；曲线全量走 monster-level-curve.json） */
   level_group?: number;
   /** 技能列表（SkillList → MonsterSkillConfig） */
   skills: MonsterSkillDetail[];
   /** 「贪饕」侵蚀侵入名单（StageInvasionConfig；未进入名单的怪物无此字段） */
   invaded?: MonsterInvaded;
+  /** 掉落（MonsterDrop；实测 398/632 个目录条目有物品，其余只登记了空档位） */
+  drops?: MonsterDropTier[];
+  /** 出没（StageConfig 波次 + 召唤链；实测 544/632 个模板可查到出场） */
+  appearances?: MonsterAppearances;
+  /** 额外阶段（MonsterAtlasExtraPhase(s)；实测仅 9 个族有数据、覆盖 39 个模板） */
+  phases?: MonsterPhase[];
 }
 
 /** 侵入名单：invasion_ids 为侵蚀等级序号，stages 为波及关卡 ID（用于详情页标记与回链） */
