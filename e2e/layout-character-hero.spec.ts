@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor, waitForSettled } from './helpers';
 import {
   charFamilyIds,
   charSkillNames,
@@ -316,6 +316,10 @@ test.describe('布局验收：角色详情页', () => {
       for (const c of NAME_CASES) {
         await page.goto(`/character/${c.id}`);
         await page.waitForSelector('.nk-hero__name');
+        // 本用例断的是**字体度量**（主字宽 vs 名称族槽宽、档位字号序），必须在 webfont 就绪后取值：
+        // `waitForSelector` 只保证节点存在，此时测到的是回退字体的度量，并发/CI 负载下会翻成
+        // `nameW > slotW + 1`（2026-10 实测同一用例在 CI 与双 worker 并发下各翻一次，单跑 5/5 绿）。
+        await waitForSettled(page);
         const r = await read();
         expect(r.len, `${c.id} 的名长度须等于档位判据的期望（期望值派生自随站数据）`).toBe(c.len);
         expect(r.dataLen, `${c.id} 的 data-len 须等于名长度`).toBe(c.len);

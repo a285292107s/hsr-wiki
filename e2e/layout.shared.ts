@@ -418,7 +418,7 @@ export async function skillsPanelOverflow(page: import('@playwright/test').Page)
   return page.evaluate(() => {
     const root = document.querySelector('[data-panel="skills"]');
     if (!root) return ['[data-panel="skills"] 缺失'];
-    const vw = window.innerWidth;
+    const vw = document.documentElement.clientWidth; // 与 helpers.findHorizontalOverflow 同口径（见该处注释）
     const bad: string[] = [];
     const inScrollable = (el: Element): boolean => {
       let cur = el.parentElement;

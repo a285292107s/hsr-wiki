@@ -254,12 +254,24 @@ test.describe('布局验收：角色详情页', () => {
 
     await scrollTo(600);
     await expect.poll(async () => (await snap()).shift, { timeout: 3_000 }).toBeGreaterThan(mid.shift);
-    const far = await snap();
+    // 取值前必须等位移**稳定**（两次采样一致）：只等 `> mid.shift` 会把滚动驱动的中间帧当成末值，
+    // 后面「滚到 4000 后应与它相等（±0.5px）」就必然翻成 false——CI 实测 3s 轮询超时的那次 flake 即此。
+    let farShift: number | null = null;
+    await expect.poll(
+      async () => {
+        const a = (await snap()).shift;
+        const b = (await snap()).shift;
+        if (Math.abs(a - b) > 0.5) return false;
+        farShift = a;
+        return true;
+      },
+      { timeout: 5_000 },
+    ).toBe(true);
 
     // 滚过 animation-range 后位移封顶：继续滚不得再增长（容 0.5px 次像素）
     await scrollTo(4000);
     await expect.poll(
-      async () => Math.abs((await snap()).shift - far.shift) <= 0.5,
+      async () => Math.abs((await snap()).shift - farShift!) <= 0.5,
       { timeout: 3_000 },
     ).toBe(true);
 

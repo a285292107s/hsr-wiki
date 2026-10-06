@@ -79,16 +79,21 @@ export async function findHorizontalOverflow(page: Page): Promise<string[]> {
   // 其后 5 项（brand / scrim / content / release / footer）是同一棵树的同一位移。10s 留一个数量级余量，
   // 正常路径仍是「条件一满足就返回」（本地实测 <20ms）。
   // 超时只告警不硬失败：真卡住的过渡会在后续断言里以「整页同向位移」现形，且提示语直接给出该指纹。
+  let transitionTimedOut = false;
   await page
     .waitForFunction(() => !document.querySelector('[class*="nk-view-"][class*="-active"]'), undefined, { timeout: 10_000 })
-    .catch(() =>
+    .catch(() => {
+      transitionTimedOut = true;
       console.warn(
         '[L3 溢出] 等待视图过渡类消失超时（10s），按当前态测量；若报出整页同向位移（right ≈ 视口 + 24/40）即为过渡未结束，不是布局缺陷',
-      ),
-    );
-  return page.evaluate(() => {
+      );
+    });
+  const { bad, ctx } = await page.evaluate(() => {
     const bad: string[] = [];
-    const vw = window.innerWidth;
+    const de = document.documentElement;
+    // 右边界取**布局视口** `clientWidth`：`innerWidth` 含经典滚动条宽度，做右边界会漏检
+    // 「内容压在滚动条下」的真实溢出，也与下方文档级判据（本来就用 clientWidth）口径不一致。
+    const vw = de.clientWidth;
     /** 元素是否处于「用户可横向滚动到位」的祖先内 */
     const inScrollableAncestor = (el: Element): boolean => {
       let cur: Element | null = el.parentElement;
@@ -114,13 +119,23 @@ export async function findHorizontalOverflow(page: Page): Promise<string[]> {
       }
     });
     // 文档级横向滚动是最硬性信号
-    if (document.documentElement.scrollWidth > document.documentElement.clientWidth + 1) {
-      bad.push(
-        `<html> scrollWidth=${document.documentElement.scrollWidth} clientWidth=${document.documentElement.clientWidth}`,
-      );
+    if (de.scrollWidth > vw + 1) {
+      bad.push(`<html> scrollWidth=${de.scrollWidth} clientWidth=${vw}`);
     }
-    return bad.slice(0, 20);
+    // 各页根是 `inset: 0` + `left: var(--nk-content-offset)`（tokens.css）⇒ 其右边界**恒等于**
+    // 包含块（`#app`）的右边界：页根一旦被判越界，根因在包含块宽度而不是页根本身，故两者一起取证。
+    const app = document.getElementById('app');
+    const appRect = app?.getBoundingClientRect();
+    return {
+      bad: bad.slice(0, 20),
+      ctx: `innerWidth=${window.innerWidth} clientWidth=${vw} htmlScrollWidth=${de.scrollWidth}`
+        + ` dpr=${window.devicePixelRatio} #app=${appRect ? `${appRect.left.toFixed(1)}..${appRect.right.toFixed(1)}` : 'n/a'}`,
+    };
   });
+  if (!bad.length) return bad;
+  // 取证件并入返回值首项：`toEqual([])` 的报错只打印数组本身，没有这些数字就无法区分
+  // 「真实溢出 / 经典滚动条 / DPR / 过渡残留」（2026-10 一次 Linux-only 的 2px 报告事后无从定性）。
+  return [`<诊断 ${ctx}${transitionTimedOut ? ' 过渡等待超时' : ''}>`, ...bad];
 }
 
 /**

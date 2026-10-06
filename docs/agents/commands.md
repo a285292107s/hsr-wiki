@@ -54,6 +54,8 @@ pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all�
 
 `playwright.config.ts` 保持 `fullyParallel: false`（**文件内**串行）——全局并行实测过但不采纳：本地 4 worker 全量墙钟比串行快约两成，代价是 3 次全量里出现 1 次并发竞态 flake（同一用例串行复跑 2/2 与单独复跑 3/3 均绿，属并发下 dev server 争用而非代码缺陷）。**禁止为提速放宽断言、加 `--retries` 或改配置掩盖 flake**。
 
+**2026-10 复测的是另一个配置**——`fullyParallel: true` + `workers: 2`（并发页面数与现状**相同**，只把调度粒度从文件降到用例）：CI 层 206 用例 A/B 实测 **341s → 312s（约 8%）**，且提速那一 arm 跑在更热的缓存上（顺序对 `fullyParallel` 有利）。增益不足以承担改配置的 flake 面，故**仍维持 `false`**；要提速走拆分文件那条路（见下条），**不要**再拿这条做「反正并发数没变」的翻案——翻案需要换序复跑的稳定增益，而不是单次 A/B。
+
 **但「不采纳全局并行」≠「接受单文件串行」**：`fullyParallel: false` 并不禁止**文件级**并行（Playwright 始终按文件分派 worker）。layout 曾是单个 74 用例 / 469s 的大文件，等于把全量调度压成一个串行单元——实测墙钟 327s。按 `describe` 边界拆成 `e2e/layout-*.spec.ts` 后墙钟大幅下降，**但这纪律会随用例增长复发**：2026-10 实测全量 180 用例 / 361.6s，`layout-character.spec.ts` 又长回 39 用例单文件、firefox 项目只跑它、它又排在项目数组末尾 ⇒ 末段 168s（占墙钟 46%）只有 1 个 worker 在跑。故再拆成七个 `layout-character-*.spec.ts`，并把 firefox project 提到项目最前（Playwright 按项目顺序分派，最长单元先起跑）。**要提速就走这条路：减用例数、按域拆文件、最长的 project 放最前——禁止提高并发度**（唯一例外是先把 flake 根因修掉，见下条）。
 
 ## 漂移与影响面工具（report-only，默认不阻塞）
