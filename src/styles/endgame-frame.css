@@ -7,13 +7,22 @@
 
 /* 四个玩法的关卡都由子 tab 承载（ADR 0043）→ 无顶部固定条，页面无需为常驻横条留避让内距 */
 .nk-egd.nk-page--detail { padding-top: 0; }
-/* 关架子 tab（第 1..N 层 / 星启模式 / 异相仲裁单关）：页内并列一行（复用 nk-tab 原语，下划线骑在行底边上） */
+/* 关架子 tab（星启模式 + 第 N..1 层 / 异相仲裁单关）：**固定单行、不折行**，层级过多时整行
+   左右滚动（用户裁决）；激活下划线仍骑在行底边上——滚动容器会裁掉超出 content box 的部分，
+   故留 1px 下内距给 `bottom: -1px` 的 `::after`。滚动条不占行高（可滚性由末位半露的页签表达）。 */
 .nk-egd-tabs {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px;
+  display: flex; flex-wrap: nowrap; align-items: center; gap: 0 4px;
   width: 100%;
+  padding-bottom: 1px;
   border-bottom: 1px solid var(--line-1);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
   scroll-margin-top: 12px;
 }
+.nk-egd-tabs::-webkit-scrollbar { display: none; }
+.nk-egd-tabs .nk-tab { flex: 0 0 auto; }
 .nk-egd-tabs .nk-tab:first-child { padding-left: 0; }
 .nk-egd-tabs .nk-tab:first-child::after { left: 0; }
 .nk-egd-tabs .nk-tab--active { color: var(--eg-color); }
@@ -218,8 +227,6 @@
 .nk-egd-body .nk-title,
 .nk-egd-body .nk-egd-fury,
 .nk-egd-body .nk-egd-buffs,
-.nk-egd-body .nk-egd-poll,
-.nk-egd-body .nk-egd-badges,
 .nk-egd-body .nk-egd-tierce,
 .nk-egd-body .nk-slot-empty,
 .nk-egd-body .nk-egd-nav { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }

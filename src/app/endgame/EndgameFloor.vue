@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import EndgameStarTargets from './EndgameStarTargets.vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
+import EndgameReward from './EndgameReward.vue';
 import { halfLabel } from './pollution';
 import { seasonBuffList, seasonRules } from './renders';
 import type {
@@ -63,11 +64,22 @@ const nodeBuffs = computed<MazeBuffInfo[]>(() => {
 });
 const targets = computed(() => props.floor.targets || []);
 const rules = computed(() => seasonRules(props.data));
+/** 该层通关奖励（Challenge*MazeConfig.RewardID → RewardData，ADR 0051） */
+const floorReward = computed(() => props.floor.reward || []);
+/** 该层星级奖励：本赛季累计星数奖励阶梯**按层序切片**（忘却之庭每层一档、虚构/末日每层三档；
+ *  切片由转换器按层序累计目标数算好，前端不推层序，见 ADR 0051 补记） */
+const starTiers = computed(() => props.floor.star_rewards || []);
+/** 三栏（目标 | 赛季规则 | 通关奖励）只在虚构叙事出现：规则栏是该模式独有的赛季维度 */
+const tripleCols = computed(() => rules.value.length > 0 && floorReward.value.length > 0);
 </script>
 
 <template>
   <div class="nk-egd-lvl">
-    <div v-if="targets.length || rules.length" class="nk-egd-head">
+    <div
+      v-if="targets.length || rules.length || floorReward.length || starTiers.length"
+      class="nk-egd-head"
+      :class="{ 'nk-egd-head--triple': tripleCols }"
+    >
       <EndgameStarTargets v-if="targets.length" :items="targets" />
       <div v-if="rules.length" class="nk-egd-head__col">
         <span class="nk-egd-head__label">赛季规则</span>
@@ -75,6 +87,13 @@ const rules = computed(() => seasonRules(props.data));
           <span class="nk-egd-rules__val">{{ r.value.toLocaleString() }}</span>
           <span class="nk-egd-rules__label">{{ r.label }}</span>
         </span>
+      </div>
+      <EndgameReward v-if="floorReward.length" label="通关奖励" :items="floorReward" />
+      <!-- 星级奖励跨满整行：随本层展示该层可达的累计星数档位，不再另占一栏把头部挤成四列 -->
+      <div v-if="starTiers.length" class="nk-egd-head__col nk-egd-head__wide">
+        <span class="nk-egd-head__label">星级奖励</span>
+        <span class="nk-egd-starrewards__note">每达成 1 个挑战目标计 1 星，累计达下列档位可领取</span>
+        <EndgameReward v-for="t in starTiers" :key="t.star" :star="t.star" :items="t.items" />
       </div>
     </div>
 

@@ -5,10 +5,10 @@ import { seasonPosterTabUrl } from '../catalog/pages/endgame';
 import { SITE_NAME } from '../../lib/constants';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
-  loadLocalVoracity, loadLocalEndgameGuide,
+  loadLocalEndgameGuide,
 } from '../../services/api';
 import type {
-  EndgameGuideDb, MazeListDb, MazeListEntry, VoracityInvasionLevel,
+  EndgameGuideDb, MazeListDb, MazeListEntry,
 } from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
@@ -16,10 +16,9 @@ import { seasonBuffSystemName } from '../endgame/guide';
 import { buildLevelTabs, defaultLevelKey, type LevelTab } from '../endgame/levels';
 import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
-import EndgameBadges from '../endgame/EndgameBadges.vue';
-import EndgamePollution from '../endgame/EndgamePollution.vue';
 import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
 import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
+import EndgameStarRewards from '../endgame/EndgameStarRewards.vue';
 /* endgame-detail 拆分块：导入顺序即级联顺序（断点覆盖块在基础块后、排版收口块必须最后），不得乱序 */
 import '../../styles/endgame-frame.css';
 import '../../styles/endgame-panels.css';
@@ -47,8 +46,6 @@ const data = ref<MazeListEntry | null>(null);
 const listDb = ref<MazeListDb | null>(null);
 const seasonIndex = ref(-1);
 const seasonKeys = ref<string[]>([]);
-/** 污染等级词条（voracity.json 的 invasion.levels）：仅污染赛季按需加载，等级描述不在本模块产物里 */
-const invasionLevels = ref<VoracityInvasionLevel[]>([]);
 /** 玩法说明（endgame_guide.json）：体系名 / 条数 / 选法。缺省不阻塞页面——体系名回退站点工作名「赛季增益」 */
 const guide = ref<EndgameGuideDb | null>(null);
 
@@ -77,13 +74,6 @@ async function load(mode: string, id: string): Promise<void> {
     data.value = entry;
     seasonIndex.value = keys.indexOf(id);
     document.title = `${entry.zh} - ${SITE_NAME}`;
-    // 污染等级词条只在污染赛季拉取（voracity.json 单例，专题页与本页共用同一份）
-    invasionLevels.value = [];
-    if (entry.pollution) {
-      loadLocalVoracity()
-        .then((v) => { invasionLevels.value = v.invasion?.levels || []; })
-        .catch(() => { invasionLevels.value = []; });
-    }
     // 玩法说明同属「按需、不阻塞」：拿不到就回退站点工作名，不因此判页面失败
     loadLocalEndgameGuide()
       .then((g) => { guide.value = g; })
@@ -123,6 +113,10 @@ const modeKey = computed(() => String(route.params.mode || ''));
 
 /** 增益体系名（按玩法取自 endgame_guide.json） */
 const systemName = computed(() => seasonBuffSystemName(guide.value, modeKey.value));
+
+/** 星数奖励阶梯的落位：异相仲裁挂赛季级头部（其段位徽章区块已退场，头部留白给它）；
+ *  其余三模式按关卡切片落在层 tab 内（`EndgameFloor`），故这里只渲染头部形态 */
+const starRewardsInHeader = computed(() => modeKey.value === 'peak');
 
 /** 四个玩法的关卡都由子 tab 承载（ADR 0043）：层级模式 = 「第 1..N 层 / 星启模式」，
  *  异相仲裁 = 「骑士（一）… / 将杀王棋」。默认激活星启，无星启的模式激活首关（见 `defaultLevelKey`）。 */
@@ -225,9 +219,10 @@ onBeforeUnmount(() => {
               :mode-key="modeKey"
             />
 
-            <EndgamePollution :data="data" :mode-key="modeKey" :levels="invasionLevels" />
-
-            <EndgameBadges v-if="data.badges?.length" :data="data" :mode-key="modeKey" />
+            <!-- 赛季级累计星数奖励阶梯（ADR 0051）：每达成 1 个挑战目标计 1 星。
+                 异相仲裁无段位徽章区块（用户裁决），该阶梯挂赛季级头部（子 tab 之上）；
+                 其余三模式按**关卡**切片，落在各自的层 tab 内（`EndgameFloor`） -->
+            <EndgameStarRewards v-if="starRewardsInHeader" head :items="data.star_rewards || []" />
 
             <EndgameLevelTabs
               :tabs="levelTabs"

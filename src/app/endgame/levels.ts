@@ -26,29 +26,33 @@ export function peakKey(peakId: number): string {
   return `${PEAK_KEY_PREFIX}${peakId}`;
 }
 
-/** 子 tab 清单：层级模式 = 第 1..N 层升序 + 星启模式（仅含星启的赛季存在）；
- *  异相仲裁 = `levels` 原序（3 骑士试炼 + 1 王棋最终关），tab 名即官方关卡名
- *  （源序就是 一/二/三 → 王棋，不重排）。 */
+/** 子 tab 清单：层级模式 = 星启模式 → 第 N..1 层（**倒序**，高层在前）；
+ *  异相仲裁 = `levels` 倒序（王棋最终关 → 骑士（三）…）。
+ *  源序是游戏内推进顺序，页面按倒序呈现（用户裁决）：最新的 / 最高的排在最前，
+ *  单行不折行、可左右滚动时不必先划过一整排低级关。
+ *  层级模式无星启时（早期赛季）只有层级 tab，仍按倒序。 */
 export function buildLevelTabs(data: MazeListEntry | null): LevelTab[] {
   if (!data) return [];
   if (data.levels?.length) {
-    return data.levels.map((l, i) => {
+    // id / label 的缺省回退按**源序**推导（与 levelTabPeak 的 id 解析同源），只反转展示顺序
+    const peakTabs: LevelTab[] = data.levels.map((l, i) => {
       const id = l.id ?? i + 1;
       return { key: peakKey(id), kind: 'peak' as const, label: l.name || `关卡 ${i + 1}`, peakId: id };
     });
+    return peakTabs.reverse();
   }
   const tabs: LevelTab[] = [...(data.floor_details || [])]
     .map((f) => f.floor)
-    .sort((a, b) => a - b)
+    .sort((a, b) => b - a)
     .map((floor) => ({ key: floorKey(floor), kind: 'floor' as const, label: `第 ${floor} 层`, floor }));
-  if (data.tierce) tabs.push({ key: 'tierce', kind: 'tierce', label: '星启模式' });
+  if (data.tierce) tabs.unshift({ key: 'tierce', kind: 'tierce', label: '星启模式' });
   return tabs;
 }
 
-/** 默认激活的子 tab：星启模式优先（用户裁决，推翻 ADR 0030 决策 6 的「默认第 1 层」），
- *  不含星启的赛季（含全部异相仲裁期）退回首个关卡 tab */
+/** 默认激活的子 tab = 清单首位（星启模式；无星启的模式是该模式最高一关，
+ *  异相仲裁即王棋最终关）。星启优先由 `buildLevelTabs` 的排序承担，此处不重复判定。 */
 export function defaultLevelKey(tabs: LevelTab[]): string {
-  return (tabs.find((t) => t.kind === 'tierce') || tabs[0])?.key || '';
+  return tabs[0]?.key || '';
 }
 
 /** 子 tab → 层级详情（非层级 tab 或数据缺层时返回 null） */

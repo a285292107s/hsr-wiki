@@ -29,10 +29,19 @@
     grid-template-columns: fit-content(40%) minmax(0, 1fr);
     gap: 0;
   }
+  /* 三栏（虚构叙事：目标 | 赛季规则 | 通关奖励）——规则栏只在该模式出现 */
+  .nk-egd-head--triple {
+    grid-template-columns: fit-content(32%) fit-content(24%) minmax(0, 1fr);
+  }
   .nk-egd-head > :first-child { padding-right: 24px; }
   .nk-egd-head > * + * {
     padding-left: 24px;
     border-left: 1px solid var(--line-1);
+  }
+  /* 跨行栏不带左侧分隔线（它不在列流里） */
+  .nk-egd-head > .nk-egd-head__wide {
+    padding-left: 0;
+    border-left: 0;
   }
 }
 .nk-egd-head__col,
@@ -41,6 +50,12 @@
   flex-direction: column;
   gap: 10px;
   min-width: 0;
+}
+/* 跨满整行的头部栏（层 tab 的星级奖励）：不参与列数分配，避免头部被挤成四列 */
+.nk-egd-head__wide {
+  grid-column: 1 / -1;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-1);
 }
 /* 面板顶部两栏的栏名：小字 + 发丝下边线分节，不做填充胶囊 */
 /* 本文件不声明这些元素的字号：字号统归 `endgame-type-scale.css`（末块导入、同特异性覆写，见 ADR 0034 决策 2） */
@@ -231,6 +246,55 @@
   white-space: nowrap;
 }
 .nk-egd-reward__name + .nk-egd-reward__num { margin-left: 4px; }
+/* 星数奖励每档一行（ADR 0051）：行首星标 + 该档物品；列语义归 `.nk-egd-reward` 本体 */
+.nk-egd-reward--row {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.nk-egd-reward__star {
+  min-width: 42px;
+  font-family: var(--font-hud);
+  font-weight: 800;
+  color: var(--eg-color);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── 赛季级「星数奖励」阶梯（ADR 0051）：关卡面板之后的赛季附录 ─── */
+.nk-egd-starrewards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-egd-starrewards__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.nk-egd-starrewards__title {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-bright);
+}
+.nk-egd-starrewards__note { color: var(--text3); }
+.nk-egd-starrewards__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* 赛季级头部位置（异相仲裁）：上无内容故不画分节线，与子 tab 行之间留出节奏 */
+.nk-egd-starrewards--head {
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-top: 0;
+  border-top: 0;
+}
 
 .nk-egd-nav {
   display: grid;

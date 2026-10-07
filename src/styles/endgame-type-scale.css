@@ -16,12 +16,9 @@
    本节声明在既有 `max-width: 767px` 块之后，故手机值必须在本节末重述，否则会被桌面值覆盖。 */
 .nk-egd-buff__name,
 .nk-egd-trait__name,
-.nk-egd-floor__buffname,
-.nk-egd-poll__levelno { font-size: 0.95rem; }
+.nk-egd-floor__buffname { font-size: 0.95rem; }
 
 .nk-egd-mon__name,
-.nk-egd-poll__pos,
-.nk-egd-poll__badge,
 .nk-egd-floor__dataval,
 .nk-egd-reward__name,
 .nk-egd-nav__id { font-size: 0.88rem; }
@@ -36,7 +33,6 @@
 .nk-egd-summons__label,
 .nk-egd-guide__label,
 .nk-egd-phase__label,
-.nk-egd-poll__monslabel,
 .nk-egd-head__label { font-size: 0.72rem; }
 
 /* 字档收口：区块标题压在正文（0.84rem）之上，标签档低于正文，数值档高于标签。 */
@@ -46,7 +42,6 @@
 .nk-egd-floor__datalabel,
 .nk-egd-rules__label,
 .nk-egd-hero__sid,
-.nk-egd-code,
 .nk-egd-mon__tag,
 .nk-egd-mon__none,
 .nk-egd-mon__resval,
@@ -58,7 +53,10 @@
 .nk-egd-pollchip { font-size: 0.62rem; }
 .nk-egd-nodecard__val { font-size: 0.86rem; }
 
-.nk-egd-mon__intro { font-size: 0.72rem; }
+/* 赛季级「星数奖励」阶梯（ADR 0051）：区块标题走区块标题档，注记与星标走标签档 */
+.nk-egd-starrewards__title { font-size: 0.78rem; }
+.nk-egd-starrewards__note,
+.nk-egd-reward__star { font-size: 0.72rem; }
 
 /* 首领机制（末日幻影卡内分区）：特性与阶段名同档（0.95，与赛季增益条目名同族——它们都是
    读者要扫的机制名）；说明与应对策略走正文 0.84；小节问答的名 0.78 / 答 0.72（攻略附注档）。 */
@@ -69,15 +67,9 @@
 .nk-egd-phase__skillname { font-size: 0.78rem; }
 .nk-egd-phase__skilldesc { font-size: 0.72rem; }
 
-/* 等级词条行头在窄屏换行；绑定码是长 token（ChallengePeakBattle_…），字档抬高后必须允许断行 */
-.nk-egd-poll__levelhead { flex-wrap: wrap; }
-.nk-egd-code { white-space: normal; overflow-wrap: anywhere; }
-
 .nk-egd-buff { padding: 16px 18px; gap: 8px; }
 .nk-egd-buffs { gap: 10px; }
 .nk-egd-group > .nk-egd-buffs { margin-bottom: 0; }
-.nk-egd-poll__list { gap: 10px; }
-.nk-egd-poll__item { padding: 12px 14px; }
 .nk-egd-floor__row { padding: 10px 0; }
 .nk-egd-mon__rows { gap: 8px; }
 
@@ -90,8 +82,7 @@
   .nk-egd-mon__resval,
   .nk-egd-mon__skill { font-size: 0.7rem; }
   .nk-egd-mon__label,
-  .nk-egd-summons__label,
-  .nk-egd-mon__intro { font-size: 0.72rem; }
+  .nk-egd-summons__label { font-size: 0.72rem; }
   .nk-egd-node__text { font-size: 0.9rem; }
   .nk-egd-head__label { font-size: 0.72rem; }
   .nk-egd-reward__goal { font-size: 0.84rem; }

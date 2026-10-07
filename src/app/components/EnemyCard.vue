@@ -4,13 +4,8 @@ import EndgameBossGuide from '../endgame/EndgameBossGuide.vue';
 import { pollutionLabel } from '../endgame/pollution';
 import type { MazeBossGuide, MazeMonsterInfo } from '../../services/types';
 import { ELEM, MON_RANK } from '../../lib/constants';
-import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
+import { escHtml, elementIconUrl } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
-
-/** 图鉴介绍：fmtDesc 处理字面 \n → <br>（与敌对物种详情页同源；数据源为字面 \n 非真实换行，pre-line 不生效） */
-function introHtml(m: MazeMonsterInfo): string {
-  return fmtDesc(m.intro, []);
-}
 
 const props = defineProps<{
   monster: MazeMonsterInfo;
@@ -101,7 +96,7 @@ function monTitle(m: MazeMonsterInfo): string {
         >
       </router-link>
     </div>
-    <!-- 数据列（右）：名称 → 标签 → 弱点/抗性/效果抵抗 → 图鉴介绍 → 首领机制 → 技能 → 召唤物 -->
+    <!-- 数据列（右）：名称 → 标签 → 弱点/抗性/效果抵抗 → 首领机制 → 技能 → 召唤物 -->
     <div class="nk-egd-mon__data">
       <div class="nk-egd-mon__meta">
         <span class="nk-egd-mon__name">{{ monster.name }}</span>
@@ -130,7 +125,6 @@ function monTitle(m: MazeMonsterInfo): string {
           <span class="nk-egd-mon__resist" v-html="debuffResistHtml(monster)"></span>
         </div>
       </div>
-      <p v-if="monster.intro" class="nk-egd-mon__intro" v-html="introHtml(monster)"></p>
       <EndgameBossGuide v-if="guide" :guide="guide" />
       <div v-if="monster.skills?.length" class="nk-egd-mon__skills">
         <span v-for="s in monster.skills" :key="s.name" class="nk-egd-mon__skill" :title="s.tag ? `${s.name} · ${s.tag}` : s.name">{{ s.name }}</span>

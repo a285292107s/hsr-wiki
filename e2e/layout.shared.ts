@@ -81,6 +81,8 @@ export interface BossGuideLike {
   phases?: { id: number; name: string; desc?: string; answer?: string; skills?: { name: string; desc?: string }[] }[];
 }
 export interface StageLike { monsters?: MonsterLike[]; invasion?: InvasionLike; damage?: string[] }
+/** 奖励物品（RewardData 解析：物品 id + 数量；Hcoin 已在转换期并入星琼 id=1，ADR 0051） */
+export interface RewardItemLike { id: number; num?: number }
 export interface FloorLike {
   floor: number;
   name?: string;
@@ -88,6 +90,10 @@ export interface FloorLike {
   countdown?: number;
   buff?: { name: string };
   targets?: { param: number; type?: string }[];
+  /** 该层通关奖励（Challenge*MazeConfig.RewardID → RewardData） */
+  reward?: RewardItemLike[];
+  /** 该层可达的星级奖励档（本赛季累计星数阶梯按层序切片，ADR 0051 补记） */
+  star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
   stage1?: StageLike;
   stage2?: StageLike;
 }
@@ -122,6 +128,8 @@ export interface SeasonLike {
   }[];
   buffs?: { name: string }[];
   pollution?: { count: number; levels: number[] };
+  /** 赛季级累计星数奖励阶梯（主模式按累计星数，异相仲裁按 label 分口径，ADR 0051） */
+  star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
   badges?: { level: string; name: string; desc?: string; icon: string }[];
 }
 
@@ -149,20 +157,28 @@ export function lastWaveBossName(stage: StageLike | undefined): string {
   return lastWaveMonster(stage).name;
 }
 
-/** 层级 tab 文案：数据层序 + 星启模式（不写死层数） */
+/** 层级 tab 文案（倒序口径，用户裁决）：第 N..1 层（不写死层数） */
+function seasonFloorLabels(season: SeasonLike): string[] {
+  return [...(season.floor_details ?? [])]
+    .sort((a, b) => b.floor - a.floor)
+    .map((f) => `第 ${f.floor} 层`);
+}
+
+/** 层级 tab 文案：星启模式在最前 + 第 N..1 层倒序（与 `buildLevelTabs` 同口径） */
 export function levelTabLabels(season: SeasonLike): string[] {
-  return [...(season.floor_details ?? []).map((f) => `第 ${f.floor} 层`), '星启模式'];
+  return ['星启模式', ...seasonFloorLabels(season)];
 }
 
-/** 子 tab 文案（层 tab + 有星启才有的星启 tab；层级模式三玩法共用） */
+/** 子 tab 文案（层 tab + 有星启才有的星启 tab；层级模式三玩法共用）。
+ *  星启模式排在最前（默认项），层级倒序——与 `buildLevelTabs` 同口径。 */
 export function seasonTabLabels(season: SeasonLike): string[] {
-  const floors = (season.floor_details ?? []).map((f) => `第 ${f.floor} 层`);
-  return season.tierce ? [...floors, '星启模式'] : floors;
+  const floors = seasonFloorLabels(season);
+  return season.tierce ? ['星启模式', ...floors] : floors;
 }
 
-/** 异相仲裁单关 tab 文案：官方关卡名、按源序（骑士（一）… → 将杀王棋） */
+/** 异相仲裁单关 tab 文案：官方关卡名、**倒序**（将杀王棋 → 骑士（三）…（一），与 `buildLevelTabs` 同口径） */
 export function peakTabLabels(season: SeasonLike): string[] {
-  return (season.levels ?? []).map((l) => l.name ?? '');
+  return [...(season.levels ?? [])].reverse().map((l) => l.name ?? '');
 }
 
 /** 「N 波 · M 敌」摘要（与 `src/app/endgame/renders.ts → monCountLabel` 同口径：波数 = wave 去重计数） */
@@ -174,6 +190,22 @@ export function monCountLabel(mons: MonsterLike[] | undefined): string {
 /** 千分位（页面数值档用 toLocaleString 渲染，断言不依赖运行环境的 locale） */
 export function grouped(n: number): string {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/** items.json：物品 id → 名称（奖励 chips 的文案断言用；星琼 = 1） */
+export function itemNameMap(): Map<number, string> {
+  const list = readJson<{ id: number; name: string }[]>('public/data/cn/items.json');
+  return new Map(list.map((it) => [it.id, it.name]));
+}
+
+/** 奖励物品名（按数据序；名称缺失回退 `#id`，与页面占位口径一致） */
+export function rewardNames(items: RewardItemLike[], names: Map<number, string>): string[] {
+  return items.map((it) => names.get(it.id) || `#${it.id}`);
+}
+
+/** 奖励数量文案（`×N` 千分位；数量缺省不落键 → 返回 null 由断言侧过滤） */
+export function rewardNums(items: RewardItemLike[]): string[] {
+  return items.filter((it) => it.num).map((it) => `×${grouped(it.num!)}`);
 }
 
 /** 某层半场的末波首领名 */
@@ -245,9 +277,6 @@ export function pollutionEntries(season: SeasonLike): PollutionEntry[] {
   return out;
 }
 
-/** 污染徽标文案（站点术语「污染等级 N」，勿简写成侵蚀等级） */
-export const pollutionBadge = (e: PollutionEntry): string => `污染等级 ${e.invasion.level}`;
-
 /** 某场次/某节点敌方条目上的召唤物（按召唤者分发，见 ADR 0036 修订） */
 export function summonsOf(mons: MonsterLike[] | undefined): SummonLike[] {
   return (mons ?? []).flatMap((m) => m.summons ?? []);
@@ -271,18 +300,6 @@ export function pollutedMonsters(inv: InvasionLike | undefined, mons: MonsterLik
 
 /** 敌方卡上的污染徽标文案（同一场次共用一个污染等级） */
 export const monsterBadge = (inv: InvasionLike): string => `污染等级 ${inv.level}`;
-
-/** 污染节点位置文案（与 pollutionPosition 同口径） */
-export function pollutionPosition(e: PollutionEntry): string {
-  if (e.half === 'tierce') return '星启附加关';
-  if (e.half === 'level') return e.title || '关卡';
-  return `第 ${e.floor} 层 · ${e.half === 'stage1' ? '上半场' : '下半场'}`;
-}
-
-/** 被污染怪物总数（污染数据自带，不在本页敌方配置里） */
-export function pollutedMonsterCount(season: SeasonLike): number {
-  return pollutionEntries(season).reduce((n, e) => n + (e.invasion.monsters?.length ?? 0), 0);
-}
 
 /** 已登记的污染赛季（四张终局目录的 `pollution` 字段 = 目录页标记的唯一判据；目录文件 → 路由 mode 一一对应） */
 export function pollutedSeasonHrefs(): string[] {

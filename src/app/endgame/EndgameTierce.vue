@@ -3,13 +3,10 @@ import { computed, ref, watch } from 'vue';
 import EndgameStarTargets from './EndgameStarTargets.vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
-import { itemIconUrl } from '../../lib/format';
-import { loadLocalItems } from '../../services/api';
+import EndgameReward from './EndgameReward.vue';
 import { seasonBuffList } from './renders';
 import EnemyCard from '../components/EnemyCard.vue';
-import type {
-  LocalItemEntry, MazeBuffInfo, MazeListEntry, MazeTierceNode,
-} from '../../services/types';
+import type { MazeBuffInfo, MazeListEntry, MazeTierceNode } from '../../services/types';
 
 const props = defineProps<{
   data: MazeListEntry;
@@ -58,23 +55,16 @@ function selectNode(key: string): void {
   activeKey.value = key;
 }
 
-const itemMap = ref<Map<number, Pick<LocalItemEntry, 'name' | 'icon'>>>(new Map());
-/** 星启通关奖励（EGEEJLHBALB：物品 id + 数量，经 items.json 映射名称/图标） */
-const tierceRewards = computed(() => {
-  const rs = props.data.tierce?.rewards || [];
-  if (!rs.length) return [];
-  const map = itemMap.value;
-  return rs.map((r) => ({ id: r.id, num: r.num, ...(map.get(r.id) || { name: `#${r.id}`, icon: '' }) }));
-});
+/** 星启通关奖励（EGEEJLHBALB）：名称与图标由共享件 `EndgameReward` 经 items.json 单例映射
+ *  （与层头部的「通关奖励」同源同渲染，避免两处各写一份 chips 模板）。 */
+const tierceRewards = computed(() => props.data.tierce?.rewards || []);
+
 watch(
   () => props.data.tierce,
   (t) => {
     if (!t) return;
     const first = t.nodes?.[0];
     activeKey.value = first ? String(first.idx) : '1';
-    loadLocalItems()
-      .then((list) => { itemMap.value = new Map(list.map((it) => [it.id, { name: it.name, icon: it.icon }])); })
-      .catch(() => {});
   },
   { immediate: true },
 );
@@ -95,20 +85,12 @@ watch(
       </div>
       <div v-if="tierceTargets.length || tierceRewards.length" class="nk-egd-head">
         <EndgameStarTargets v-if="tierceTargets.length" :items="tierceTargets" />
-        <div v-if="tierceRewards.length" class="nk-egd-head__col nk-egd-reward">
-          <div class="nk-egd-reward__head">
-            <span class="nk-egd-head__label">通关奖励</span>
-            <span v-if="tierceScore" class="nk-egd-reward__goal">通关目标：获得 {{ tierceScore.toLocaleString() }} 分</span>
-          </div>
-          <div class="nk-egd-reward__items">
-            <span v-for="r in tierceRewards" :key="r.id" class="nk-egd-reward__item">
-              <img v-if="r.icon" class="nk-egd-reward__icon" :src="itemIconUrl(r.icon)" :alt="r.name" :title="r.name" loading="lazy" @error="($event.target as HTMLImageElement).classList.add('nk-img-error')">
-              <span v-else class="nk-egd-reward__icon nk-egd-reward__icon--void">{{ String(r.id).slice(0, 2) }}</span>
-              <span class="nk-egd-reward__name">{{ r.name }}</span>
-              <span v-if="r.num" class="nk-egd-reward__num">×{{ r.num.toLocaleString() }}</span>
-            </span>
-          </div>
-        </div>
+        <EndgameReward
+          v-if="tierceRewards.length"
+          label="通关奖励"
+          :goal="tierceScore ? `通关目标：获得 ${tierceScore.toLocaleString()} 分` : undefined"
+          :items="tierceRewards"
+        />
       </div>
       <EndgameNodeCards
         v-if="cardItems.length > 1"

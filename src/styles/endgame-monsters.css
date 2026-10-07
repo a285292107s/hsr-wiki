@@ -178,31 +178,6 @@
   background: color-mix(in srgb, var(--blk-900) 52%, transparent);
   white-space: nowrap;
 }
-.nk-egd-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.nk-egd-badges__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 14px 6px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--line-1);
-  background: color-mix(in srgb, var(--blk-900) 14%, transparent);
-  font-size: 0.84rem;
-  color: var(--text2);
-  white-space: nowrap;
-}
-.nk-egd-badges__item img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--blk-800);
-}
 .nk-egd-floor__buffs {
   display: flex;
   flex-direction: column;
@@ -378,19 +353,6 @@
 .nk-egd-mon__resval {
   line-height: 1;
   color: var(--text2);
-}
-.nk-egd-mon__intro {
-  margin: 0;
-  line-height: 1.6;
-  color: var(--text3);
-  white-space: pre-line;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.nk-egd-mon:hover .nk-egd-mon__intro {
-  -webkit-line-clamp: unset;
 }
 .nk-egd-mon__skills {
   display: flex;

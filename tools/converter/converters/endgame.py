@@ -21,6 +21,12 @@
   按**敌方模板**聚合落赛季级 `boss_guides`，命中登记的敌方条目带 `boss_guide` 模板指针；
   配置表的敌方 ID 未必等于战斗敌方，缺失时用 Tag.SkillID // 100 唯一反查（见 _load_boss_guides）。
 - param 字段前端未消费，置空数组贴合结构。
+- 奖励（ADR 0051）：**单目标 → 奖励在本版数据里不可解析**——`ChallengeTargetConfig.RewardID`
+  指向的 1001xx 段在 `RewardData`（9,515 条）里不存在（该段为空），属悬挂字段，勿再尝试。
+  可解析的是两处：**逐层通关奖励**（`Challenge{Maze,StoryMaze,BossMaze}Config.RewardID`，逐层不同）
+  与**累计星数奖励线**（分组表 `RewardLineGroupID` → `Challenge{Maze,Story,Boss}RewardLine`
+  的 `StarCount` → `RewardData`）；异相仲裁取 `ChallengePeakReward` 的两类星数档
+  （骑士星数 / 王棋星数，其余档位语义无官方文案，不上屏）。Hcoin = 星琼（并入物品 1）。
 """
 
 import logging
@@ -35,6 +41,13 @@ from converters.monster_common import load_monsters
 logger = logging.getLogger("converter")
 
 _LAUNCH_TS = datetime(2023, 4, 26, 0, 0, 0)
+
+# RewardData.Hcoin 即星琼：全表 9,515 行无一行把星琼写成 ItemID_1（`ItemConfig` 1 = 星琼），
+# 而 32.6% 的行用它记星琼数量，故解析时并入物品 1。
+_STAR_JADE_ITEM_ID = 1
+
+# 异相仲裁星数奖励分档类型 → 官方文案（TextMap「骑士星数」/「王棋星数」）。
+_PEAK_STAR_REWARD_TYPES = {"MOB_STAR_REWARD": "骑士星数", "BOSS_STAR_REWARD": "王棋星数"}
 
 def _load_schedules(
     group_table: str, schedule_tables: tuple[str, ...]
@@ -310,6 +323,104 @@ def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dic
             entry["type"] = t
         out[tid] = entry
     return out
+
+def _load_reward_items() -> dict[int, list[dict]]:
+    """`RewardData` → {RewardID: [{id, num}]}（最多六槽位，Hcoin 并入星琼）。
+
+    奖励线与逐层通关奖励都指到这张表；槽位空缺或数量为 0 的项跳过。前端经
+    `items.json` 映射名称与图标（星琼 = 物品 1，与 items.json 同键）。
+    """
+    out: dict[int, list[dict]] = {}
+    for rec in load_json(EXCEL_DIR / "RewardData.json"):
+        rid = rec.get("RewardID")
+        if rid is None:
+            continue
+        items: list[dict] = []
+        hcoin = rec.get("Hcoin") or 0
+        if hcoin:
+            items.append({"id": _STAR_JADE_ITEM_ID, "num": int(hcoin)})
+        for i in range(1, 7):
+            iid = rec.get(f"ItemID_{i}")
+            if not iid:
+                continue
+            items.append({"id": int(iid), "num": int(rec.get(f"Count_{i}") or 0)})
+        if items:
+            out[int(rid)] = items
+    return out
+
+def _load_reward_line(filename: str) -> dict[int, list[tuple[int, int]]]:
+    """奖励线表 → {GroupID: [(累计星数, RewardID)]}（按星数升序）。"""
+    out: dict[int, list[tuple[int, int]]] = defaultdict(list)
+    for rec in load_json(EXCEL_DIR / filename):
+        gid, star, rid = rec.get("GroupID"), rec.get("StarCount"), rec.get("RewardID")
+        if gid is None or star is None or rid is None:
+            continue
+        out[int(gid)].append((int(star), int(rid)))
+    return {g: sorted(v) for g, v in out.items()}
+
+def _load_reward_line_groups(filename: str) -> dict[int, int]:
+    """分组表 → {期 GroupID: 奖励线 GroupID}（`RewardLineGroupID` 指针）。"""
+    out: dict[int, int] = {}
+    for rec in load_json(EXCEL_DIR / filename):
+        gid, rlg = rec.get("GroupID"), rec.get("RewardLineGroupID")
+        if gid is None or rlg is None:
+            continue
+        out[int(gid)] = int(rlg)
+    return out
+
+def _season_star_caps(filename: str) -> dict[int, int]:
+    """各期可达星数上限 = Σ 该期层记录的目标数（实测每层 3 个目标 = 3 星）。
+
+    同一奖励线 Group 被层数不同的多期共用（如 10 层期与 12 层期同为 Group 2），
+    上限用于把不可达的档位截掉。
+    """
+    out: dict[int, int] = defaultdict(int)
+    for rec in load_json(EXCEL_DIR / filename):
+        gid = rec.get("GroupID")
+        if gid is None:
+            continue
+        out[int(gid)] += len(rec.get("ChallengeTargetID", []) or [])
+    return dict(out)
+
+def _star_reward_ladder(
+    group_file: str, line_file: str, config_file: str, items: dict[int, list[dict]],
+) -> dict[int, list[dict]]:
+    """赛季累计星数奖励阶梯 → {期 GroupID: [{star, items}]}（升序）。
+
+    指针链：分组表 `RewardLineGroupID` → 奖励线表（`StarCount` → `RewardID`）→ `RewardData`；
+    超过本期星数上限的档位不展示（该档本期不可达）。
+    """
+    lines = _load_reward_line(line_file)
+    caps = _season_star_caps(config_file)
+    out: dict[int, list[dict]] = {}
+    for gid, rlg in _load_reward_line_groups(group_file).items():
+        cap = caps.get(gid, 0)
+        if not cap:
+            continue
+        ladder = [
+            {"star": star, "items": items[rid]}
+            for star, rid in lines.get(rlg, [])
+            if star <= cap and rid in items
+        ]
+        if ladder:
+            out[gid] = ladder
+    return out
+
+def _load_peak_star_rewards(items: dict[int, list[dict]]) -> dict[int, list[dict]]:
+    """`ChallengePeakReward` → {RewardGroupID: [{label, star, items}]}。
+
+    只取两类有官方文案的星数档（TextMap「骑士星数」/「王棋星数」）；通关档
+    （MOB_PASS_REWARD）/ 极限档（BOSS_STAR_LIMIT_REWARD）/ 彩色目标档
+    （BOSS_COLOR_TARGET_REWARD）的档位语义无官方文案，本轮不上屏（ADR 0051）。
+    """
+    out: dict[int, list[dict]] = defaultdict(list)
+    for rec in load_json(EXCEL_DIR / "ChallengePeakReward.json"):
+        label = _PEAK_STAR_REWARD_TYPES.get(rec.get("RewardType", ""))
+        gid, val, rid = rec.get("RewardGroupID"), rec.get("TypeValue"), rec.get("RewardID")
+        if not label or gid is None or val is None or rid not in items:
+            continue
+        out[int(gid)].append({"label": label, "star": int(val), "items": items[int(rid)]})
+    return {g: sorted(v, key=lambda x: (x["label"], x["star"])) for g, v in out.items()}
 
 def _group_maze_buff(filename: str = "ChallengeGroupConfig.json") -> dict[int, list[int]]:
     """忘却之庭分组表 → {GroupID: [MazeBuffID]}（赛季增益单值）。"""
@@ -1067,6 +1178,8 @@ def _season_floors(
     full: bool = False,
     invasions: dict[int, dict] | None = None,
     summons: dict[int, list[int]] | None = None,
+    rewards: dict[int, list[dict]] | None = None,
+    star_rewards: list[dict] | None = None,
 ) -> list[dict]:
     """逐层详情：详情页以关卡层级为章节的完整内容。
 
@@ -1079,8 +1192,14 @@ def _season_floors(
     StageConfig.Level，同级取首事件）。invasions 传入时，污染关卡所在半场附加
     invasion（{level, stage_id, monsters}，见 _stage_invasion）；summons 传入时，
     召唤物按召唤者挂进该半场的敌方条目（`monsters[].summons[]`，见 _monster_summons）。
+    rewards 传入时（RewardData），该层记录 `RewardID` 命中的逐层通关奖励落 `reward`。
+    star_rewards 传入时（本赛季累计星数奖励阶梯），按**层序累计目标数**把阶梯切片挂到该层
+    `star_rewards`（第 N 层满星 = 该层目标数，四模式实测每层 3 个 → 3 星）：勋章式「累计星数」
+    口径在前端不重算，每层 tab 只渲染属于它这一档。累计跨越层序（前一层目标数多则档位顺延），
+    与 `_season_star_caps` 的上限同源。
     """
     out: list[dict] = []
+    stars_used = 0
     for i, r in enumerate(sorted(recs, key=lambda x: x.get("ID", 0)), start=1):
         floor = r.get("Floor") or i
         lv = next(
@@ -1120,6 +1239,15 @@ def _season_floors(
                 {k: v for k, v in targets[t].items() if k in ("text", "param", "type")}
                 for t in tids if t in targets
             ]
+        rid = r.get("RewardID")
+        if rewards and rid in rewards:
+            node["reward"] = rewards[rid]
+        if star_rewards:
+            cap = stars_used + len(tids)
+            tier = [t for t in star_rewards if stars_used < t["star"] <= cap]
+            if tier:
+                node["star_rewards"] = tier
+            stars_used = cap
         out.append(node)
     return out
 
@@ -1158,6 +1286,8 @@ def _group_seasons(
     test_period: set[int] | None = None,
     invasions: dict[int, dict] | None = None,
     summons: dict[int, list[int]] | None = None,
+    rewards: dict[int, list[dict]] | None = None,
+    star_rewards: dict[int, list[dict]] | None = None,
 ) -> dict:
     """读取挑战配置，按 GroupID 聚合为赛季条目。
 
@@ -1172,6 +1302,8 @@ def _group_seasons(
     （见 _monster_summons；与污染标记同一行内消费）。
     buff_groups 传入时（末日幻影分场次增益）条目附加 buff_groups（场次 → 增益列表），
     扁平 buffs 口径不变。
+    rewards / star_rewards 传入时（ADR 0051）逐层输出通关奖励 `floor_details[].reward`，
+    条目附加累计星数奖励阶梯 `star_rewards`。
     """
     data = load_json(EXCEL_DIR / filename)
     groups: dict[int, list] = defaultdict(list)
@@ -1218,7 +1350,8 @@ def _group_seasons(
         entry.update(_season_stats(recs))
         entry["floor_details"] = _season_floors(
             recs, monsters, buffs, targets, stages, full=full_monsters,
-            invasions=invasions, summons=summons)
+            invasions=invasions, summons=summons, rewards=rewards,
+            star_rewards=(star_rewards or {}).get(gid))
         entry["buffs"] = [
             {"id": bid, **buffs[bid]}
             for bid in buff_map.get(gid, []) if bid in buffs
@@ -1245,6 +1378,8 @@ def _group_seasons(
             final_pool = list(s1) + list(s2)
         entry["final_monsters"] = _final_monsters(final_pool, entry["monsters"])
         entry["targets"] = _season_targets(recs, targets)
+        if star_rewards and gid in star_rewards:
+            entry["star_rewards"] = star_rewards[gid]
         if turns and str(gid) in turns:
             entry["countdown"] = turns[str(gid)]
         if scores and str(gid) in scores:
@@ -1345,6 +1480,8 @@ def _peak_seasons(full_monsters: bool = False) -> dict:
     full_monsters=True 时单关敌方输出 intro/skills 全字段（详情页以敌方详情卡展示）；
     期级合并列表 `monsters` 始终轻量——它只服务目录卡代表阵容与 AI 快照
     （渲染名称/阵营/弱点），与另外三种模式的期级列表同口径，不带图鉴介绍与技能。
+    奖励：期表 `RewardGroupID` → `ChallengePeakReward` 的两类星数档落 `star_rewards`
+    （骑士星数 / 王棋星数，见 _load_peak_star_rewards）。
     """
     groups = load_json(EXCEL_DIR / "ChallengePeakGroupConfig.json")
     level_data = load_json(EXCEL_DIR / "ChallengePeakConfig.json")
@@ -1357,6 +1494,7 @@ def _peak_seasons(full_monsters: bool = False) -> dict:
     badges_map = _load_peak_badges()
     invasions = _load_invasion_index()
     summons = _load_summon_index()
+    peak_star_rewards = _load_peak_star_rewards(_load_reward_items())
 
     stage_ids: set[int] = set()
     for r in level_data:
@@ -1446,6 +1584,9 @@ def _peak_seasons(full_monsters: bool = False) -> dict:
         _apply_pollution(result[str(gid)])
         if gid in badges_map:
             result[str(gid)]["badges"] = badges_map[gid]
+        ladder = peak_star_rewards.get(g.get("RewardGroupID"))
+        if ladder:
+            result[str(gid)]["star_rewards"] = ladder
         icon_path = g.get("ThemeIconPicPath") or ""
         if icon_path:
             result[str(gid)].setdefault("arts", {})["tab"] = icon_path
@@ -1503,6 +1644,7 @@ def convert() -> None:
         summons=summons,
     )
 
+    rewards = _load_reward_items()
     maze = _group_seasons(
         "ChallengeMazeConfig.json", "Name", schedules_maze,
         buff_map=maze_buff_map, buffs=buffs, monsters=monsters, targets=targets,
@@ -1515,6 +1657,10 @@ def convert() -> None:
         test_period=maze_test_periods,
         invasions=invasions,
         summons=summons,
+        rewards=rewards,
+        star_rewards=_star_reward_ladder(
+            "ChallengeGroupConfig.json", "ChallengeMazeRewardLine.json",
+            "ChallengeMazeConfig.json", rewards),
     )
     for k in maze:
         if k in tierce:
@@ -1538,6 +1684,10 @@ def convert() -> None:
         sub_buffs=story_sub_buffs,
         invasions=invasions,
         summons=summons,
+        rewards=rewards,
+        star_rewards=_star_reward_ladder(
+            "ChallengeStoryGroupConfig.json", "ChallengeStoryRewardLine.json",
+            "ChallengeStoryMazeConfig.json", rewards),
     )
     for k in story:
         if k in tierce:
@@ -1560,6 +1710,10 @@ def convert() -> None:
         ),
         invasions=invasions,
         summons=summons,
+        rewards=rewards,
+        star_rewards=_star_reward_ladder(
+            "ChallengeBossGroupConfig.json", "ChallengeBossRewardLine.json",
+            "ChallengeBossMazeConfig.json", rewards),
     )
     for k in boss:
         if k in tierce:

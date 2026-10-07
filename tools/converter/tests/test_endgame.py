@@ -645,6 +645,143 @@ class TestSeasonFloors:
                                "desc": "伤害提高", "param_list": [0.3]}
         assert f2["targets"] == [{"text": "剩余#1[i]轮以上", "param": 10}]
 
+class TestRewards:
+    """奖励解析（ADR 0051）：逐层通关奖励 + 累计星数奖励线 + 异相仲裁两类星数档。
+
+    单目标 → 奖励在本版数据里不可解析（`ChallengeTargetConfig.RewardID` 的 1001xx 段在
+    `RewardData` 中不存在），故这里只覆盖可解析的两处。
+    """
+
+    def test_reward_items_hcoin_merges_into_star_jade(self, monkeypatch):
+        """Hcoin 并入星琼（物品 1）；空槽位与数量 0 跳过；整条无物品不落键。"""
+        rows = {
+            "RewardData.json": [
+                {"RewardID": 100, "Hcoin": 60, "ItemID_1": 2, "Count_1": 20000,
+                 "ItemID_2": 262, "Count_2": 100, "ItemID_3": 0, "Count_3": 0},
+                {"RewardID": 101, "ItemID_1": 1, "Count_1": 5},
+                {"RewardID": 102},
+            ],
+        }
+        monkeypatch.setattr(eg, "load_json", lambda p: rows[Path(p).name])
+        assert eg._load_reward_items() == {
+            100: [{"id": 1, "num": 60}, {"id": 2, "num": 20000}, {"id": 262, "num": 100}],
+            101: [{"id": 1, "num": 5}],
+        }
+
+    def test_reward_line_sorted_and_grouped(self, monkeypatch):
+        """奖励线：按 GroupID 分组并按星数升序（源表乱序）。"""
+        rows = {
+            "ChallengeMazeRewardLine.json": [
+                {"GroupID": 2, "StarCount": 6, "RewardID": 200},
+                {"GroupID": 2, "StarCount": 3, "RewardID": 100},
+                {"GroupID": 1, "StarCount": 3, "RewardID": 100},
+            ],
+        }
+        monkeypatch.setattr(eg, "load_json", lambda p: rows[Path(p).name])
+        assert eg._load_reward_line("ChallengeMazeRewardLine.json") == {
+            2: [(3, 100), (6, 200)],
+            1: [(3, 100)],
+        }
+
+    def test_star_ladder_clips_to_season_cap_and_skips_missing_rewards(self, monkeypatch):
+        """上限 = 本期目标总数（每层 3 个 = 3 星）→ 超出档位截掉；奖励无物品的档位整档跳过；
+        无配置记录的期不产出。"""
+        rows = {
+            "ChallengeGroupConfig.json": [
+                {"GroupID": 1, "RewardLineGroupID": 2},
+                {"GroupID": 9, "RewardLineGroupID": 99},
+            ],
+            "ChallengeMazeRewardLine.json": [
+                {"GroupID": 2, "StarCount": 3, "RewardID": 100},
+                {"GroupID": 2, "StarCount": 6, "RewardID": 200},
+                {"GroupID": 2, "StarCount": 9, "RewardID": 999},
+            ],
+            "ChallengeMazeConfig.json": [
+                {"GroupID": 1, "ChallengeTargetID": [11, 12, 13]},
+                {"GroupID": 1, "ChallengeTargetID": [21, 22, 23]},
+            ],
+        }
+        monkeypatch.setattr(eg, "load_json", lambda p: rows[Path(p).name])
+        items = {100: [{"id": 1, "num": 60}], 200: [{"id": 1, "num": 80}]}
+        assert eg._star_reward_ladder(
+            "ChallengeGroupConfig.json", "ChallengeMazeRewardLine.json",
+            "ChallengeMazeConfig.json", items,
+        ) == {
+            1: [{"star": 3, "items": [{"id": 1, "num": 60}]},
+                {"star": 6, "items": [{"id": 1, "num": 80}]}],
+        }
+
+    def test_peak_star_rewards_keep_labeled_types_only(self, monkeypatch):
+        """只取有官方文案的两类星数档（骑士星数 / 王棋星数），其余档位不上屏。"""
+        rows = {
+            "ChallengePeakReward.json": [
+                {"RewardGroupID": 1, "RewardType": "MOB_PASS_REWARD", "TypeValue": 1, "RewardID": 300},
+                {"RewardGroupID": 1, "RewardType": "MOB_STAR_REWARD", "TypeValue": 3, "RewardID": 100},
+                {"RewardGroupID": 1, "RewardType": "BOSS_STAR_REWARD", "TypeValue": 1, "RewardID": 200},
+                {"RewardGroupID": 1, "RewardType": "BOSS_COLOR_TARGET_REWARD",
+                 "TypeValue": None, "RewardID": 400},
+                {"RewardGroupID": 1, "RewardType": "MOB_STAR_REWARD", "TypeValue": 6, "RewardID": 999},
+            ],
+        }
+        monkeypatch.setattr(eg, "load_json", lambda p: rows[Path(p).name])
+        items = {100: [{"id": 1, "num": 60}], 200: [{"id": 226001, "num": 1}],
+                 300: [{"id": 263, "num": 100}]}
+        assert eg._load_peak_star_rewards(items) == {
+            1: [{"label": "王棋星数", "star": 1, "items": [{"id": 226001, "num": 1}]},
+                {"label": "骑士星数", "star": 3, "items": [{"id": 1, "num": 60}]}],
+        }
+
+    def test_season_floors_attaches_floor_reward(self):
+        """层记录的 RewardID 命中时落 `reward`；未命中不落键。"""
+        recs = [
+            {"ID": 1, "Floor": 1, "Name": {"Hash": 1}, "RewardID": 101201},
+            {"ID": 2, "Floor": 2, "Name": {"Hash": 2}, "RewardID": 999999},
+        ]
+        rewards = {101201: [{"id": 2, "num": 10000}, {"id": 261, "num": 8}]}
+        out = eg._season_floors(recs, {}, {}, {}, {}, rewards=rewards)
+        assert out[0]["reward"] == [{"id": 2, "num": 10000}, {"id": 261, "num": 8}]
+        assert "reward" not in out[1]
+
+    def test_season_floors_slices_star_rewards_by_layer_order(self):
+        """星级奖励按**层序累计目标数**切片：忘却之庭每层 3 个目标 = 3 星 → 每层恰好一档。"""
+        recs = [
+            {"ID": 1, "Floor": 1, "Name": {"Hash": 1}, "ChallengeTargetID": [11, 12, 13]},
+            {"ID": 2, "Floor": 2, "Name": {"Hash": 2}, "ChallengeTargetID": [21, 22, 23]},
+        ]
+        ladder = [
+            {"star": s, "items": [{"id": 1, "num": s}]} for s in (3, 6, 9)
+        ]
+        out = eg._season_floors(recs, {}, {}, {}, {}, star_rewards=ladder)
+        assert [t["star"] for t in out[0]["star_rewards"]] == [3]
+        assert [t["star"] for t in out[1]["star_rewards"]] == [6]
+        # 无人认领的档位（超出本期可达星数）不落在任何层上
+        assert [t["star"] for f in out for t in f.get("star_rewards", [])] == [3, 6]
+
+    def test_season_floors_star_slice_handles_multi_tier_floor(self):
+        """每星一档（虚构叙事 / 末日幻影）：一层 3 目标吃到 3 档。"""
+        recs = [{"ID": 1, "Floor": 1, "Name": {"Hash": 1}, "ChallengeTargetID": [11, 12, 13]}]
+        ladder = [{"star": s, "items": [{"id": 1, "num": s}]} for s in (1, 2, 3, 4)]
+        out = eg._season_floors(recs, {}, {}, {}, {}, star_rewards=ladder)
+        assert [t["star"] for t in out[0]["star_rewards"]] == [1, 2, 3]
+
+    def test_group_seasons_attaches_rewards_and_ladder(self, monkeypatch):
+        """_group_seasons 透传：逐层通关奖励 + 赛季累计星数阶梯（并按层切片）。"""
+        recs = [{"GroupID": 1001, "ID": 2001, "Name": {"Hash": 1}, "Floor": 1,
+                 "RewardID": 101201, "ChallengeTargetID": [251]}]
+        monkeypatch.setattr(eg, "load_json", lambda _p: recs)
+        out = eg._group_seasons(
+            "ChallengeMazeConfig.json", "Name", {},
+            rewards={101201: [{"id": 2, "num": 10000}]},
+            star_rewards={1001: [{"star": 1, "items": [{"id": 1, "num": 60}]}]},
+        )
+        entry = out["1001"]
+        assert entry["floor_details"][0]["reward"] == [{"id": 2, "num": 10000}]
+        assert entry["star_rewards"] == [{"star": 1, "items": [{"id": 1, "num": 60}]}]
+        assert [t["star"] for t in entry["floor_details"][0]["star_rewards"]] == [1]
+        assert "star_rewards" not in eg._group_seasons(
+            "ChallengeMazeConfig.json", "Name", {},
+        )["1001"]
+
 class TestSeasonExtras:
     def test_monsters_ordered_dedup(self):
         """赛季敌方：各层 StageConfig 波次按层序收集去重（跨波同怪合并）。"""

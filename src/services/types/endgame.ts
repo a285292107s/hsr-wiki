@@ -189,6 +189,26 @@ export interface MazeFloorDetail {
   buff?: MazeBuffInfo | null;
   /** 该层挑战目标（text + param，fmtDesc 渲染） */
   targets?: MazeTargetInfo[];
+  /** 该层通关奖励（Challenge*MazeConfig.RewardID → RewardData；未命中缺省） */
+  reward?: MazeRewardItem[];
+  /** 该层可达的星级奖励档（本赛季累计星数阶梯按层序切片；见 MazeStarReward / ADR 0051） */
+  star_rewards?: MazeStarReward[];
+}
+
+/** 奖励物品（RewardData 六槽位解析：物品 id + 数量；Hcoin 已在转换期并入星琼 id=1，
+ *  与 items.json 同键，前端经 itemIconUrl / items 单例映射名称与图标） */
+export interface MazeRewardItem {
+  id: number;
+  num?: number;
+}
+
+/** 累计星数奖励阶梯（ADR 0051）：主模式每档 = 累计星数（每达成 1 个挑战目标计 1 星，
+ *  档位按本期可达星数上限截断）；异相仲裁按 `label` 分口径（骑士星数 / 王棋星数）。 */
+export interface MazeStarReward {
+  star: number;
+  items: MazeRewardItem[];
+  /** 异相仲裁的星数口径；主模式缺省（本赛季只有一套星数） */
+  label?: string;
 }
 
 /** 异相仲裁段位徽章（ChallengeBadgeConfig：Bronze/Silver/Gold/Ultra 四段） */
@@ -270,7 +290,7 @@ export interface MazeTierceInfo {
    *  节点 3 = 星启附加关（HFIAAGAKFMD → StageConfig 波次） */
   nodes?: MazeTierceNode[];
   /** 星启通关奖励（EGEEJLHBALB ItemID/ItemNum 列表，三模式均产出，每期固定） */
-  rewards?: { id: number; num?: number }[];
+  rewards?: MazeRewardItem[];
 }
 
 /* ─── maze.json 条目（键 = 赛季 ID） ─── */
@@ -353,6 +373,8 @@ export interface MazeListEntry {
   badges?: MazeBadgeInfo[];
   /** 赛季级污染汇总（污染关卡数 + 去重升序等级；无污染赛季缺省。ADR 0026） */
   pollution?: PollutionSummary;
+  /** 赛季级累计星数奖励阶梯（*RewardLine / ChallengePeakReward；无奖励线缺省。ADR 0051） */
+  star_rewards?: MazeStarReward[];
 }
 export type MazeListDb = Record<string, MazeListEntry>;
 
