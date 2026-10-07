@@ -47,16 +47,17 @@
 .nk-egd-mon__resval,
 .nk-egd-mon__skill,
 .nk-egd-mon__rank,
-.nk-egd-tierce__label,
 .nk-egd-reward__num { font-size: 0.68rem; }
 .nk-egd-floor__moncount,
 .nk-egd-pollchip { font-size: 0.62rem; }
 .nk-egd-nodecard__val { font-size: 0.86rem; }
 
-/* 赛季级「星数奖励」阶梯（ADR 0051）：区块标题走区块标题档，注记与星标走标签档 */
+/* 赛季级「星数奖励」阶梯（ADR 0051）：区块标题走区块标题档，注记与星标走标签档；
+   层 / 星启板的「星级奖励列表」档位徽章同档 */
 .nk-egd-starrewards__title { font-size: 0.78rem; }
 .nk-egd-starrewards__note,
-.nk-egd-reward__star { font-size: 0.72rem; }
+.nk-egd-reward__star,
+.nk-egd-tier__badge { font-size: 0.72rem; }
 
 /* 首领机制（末日幻影卡内分区）：特性与阶段名同档（0.95，与赛季增益条目名同族——它们都是
    读者要扫的机制名）；说明与应对策略走正文 0.84；小节问答的名 0.78 / 答 0.72（攻略附注档）。 */

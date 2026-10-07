@@ -50,11 +50,11 @@ test.describe('布局验收：终局合并单页', () => {
     await page.locator('#egd-level-tab-floor-1').click();
     // 层没有标题行（用户裁决）：面板首块即星级目标
     await expect(page.locator('.nk-egd-lvl__head')).toHaveCount(0);
-    // 星级目标逐档一行（档数取自层数据）
-    await expect(page.locator('#egd-level-panel .nk-egd-head > :first-child .nk-egd-head__label'))
-      .toHaveText('星级目标');
+    // 星级奖励列表：目标逐档一行（档数取自层数据），每行 = 档位徽章 + 该档条件 + 该档奖励
+    await expect(page.locator('#egd-level-panel .nk-egd-tierlist .nk-egd-head__label'))
+      .toHaveText('星级目标 · 星级奖励');
     const floor1Targets = season.floor_details![0].targets!;
-    const starRows = page.locator('#egd-level-panel .nk-egd-startargets li');
+    const starRows = page.locator('#egd-level-panel .nk-egd-tiers .nk-egd-node');
     await expect(starRows).toHaveCount(floor1Targets.length);
     await expect(starRows.last()).toContainText(String(floor1Targets[floor1Targets.length - 1].param));
     // 末日幻影节点看板中的末法余烬仍只显示该层绑定增益名
@@ -222,7 +222,7 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(page.locator('.nk-egd-lvl')).not.toContainText(nodeBoss[2]);
     // 该层星级目标仍是层级自己的档位（不含星启的 4 档）：档数与末档分数都取自层数据
     const floor4Targets = (season.floor_details ?? []).find((f) => f.floor === 4)!.targets!;
-    const floorTargets = page.locator('.nk-egd-startargets li');
+    const floorTargets = page.locator('.nk-egd-tiers .nk-egd-node');
     await expect(floorTargets).toHaveCount(floor4Targets.length);
     await expect(floorTargets.last()).toContainText(String(floor4Targets[floor4Targets.length - 1].param));
     // 记录第 4 层上下半场的推荐属性（卡片）与赛季增益（逐半场取），用于与星启节点 1/2 逐字比对
@@ -525,19 +525,30 @@ test.describe('布局验收：终局合并单页', () => {
     // 赛季增益不再有面板级副本：一份分组只长在当前节点的看板里（首领机制已移入敌方卡，不再占区块）
     await expect(tierce.locator('.nk-egd-group__title')).toHaveCount(1);
     await expect(tierce.locator('.nk-egd-group__title')).toHaveText(['终焉公理']);
-    // 面板级统计行只剩回合限制：推荐属性与敌人等级随看板头部走，不再在上方重复一份
-    const statLabels = await tierce.locator('.nk-egd-tierce__label')
-      .evaluateAll((els) => els.map((el) => el.textContent?.trim() || ''));
-    expect(statLabels).not.toContain('推荐属性 RECOMMENDED');
-    expect(statLabels).not.toContain('敌人等级 ENEMY LV');
-    // 面板级目标区 = 星级目标（档数与分数取自 tierce 数据）+ 通关奖励（项数取自数据）
-    await expect(tierce.locator('.nk-egd-head__label')).toHaveText(['星级目标', '通关奖励']);
-    const tierceTargets = tierceData.targets!;
-    await expect(tierce.locator('.nk-egd-startargets__star')).toHaveCount(tierceTargets.length);
-    await expect(tierce.locator('.nk-egd-startargets li')).toHaveCount(tierceTargets.length);
-    await expect(tierce.locator('.nk-egd-startargets li').last())
+    // 赛季级统计条退场（用户裁决）：回合限制 / 分数限制改由「通关条件」格承担，同一事实只留一处
+    await expect(tierce.locator('.nk-egd-tierce__stats')).toHaveCount(0);
+    // 面板级奖励板 = 通关条件｜通关奖励 / 星级奖励列表（一档一行，含棱彩星档，见 ADR 0051 补记三 / 四）
+    await expect(tierce.locator('.nk-egd-head__label'))
+      .toHaveText(['通关条件', '通关奖励', '星级目标 · 星级奖励']);
+    const tierceTargets = tierceData.targets!.filter((t) => !t.prism);
+    const prismTarget = tierceData.targets!.find((t) => t.prism)!;
+    // 一档一行：3 星档 + 棱彩星档（末位），每行 = 档位徽章 + 该档条件 + 该档奖励 chips
+    const tierRows = tierce.locator('.nk-egd-tiers li');
+    // 分数档不带行首星标（星数由档位徽章给）；末日幻影目标全是分数档 → 无语义胶囊
+    await expect(tierce.locator('.nk-egd-tiers .nk-egd-node__type')).toHaveCount(0);
+    await expect(tierce.locator('.nk-egd-tiers .nk-egd-tier__brace')).toHaveCount(0);
+    await expect(tierce.locator('.nk-egd-tiers .nk-egd-tier__lead')).toHaveCount(tierceData.targets!.length);
+    await expect(tierce.locator('.nk-egd-tiers .nk-egd-node')).toHaveCount(tierceData.targets!.length);
+    await expect(tierRows.nth(tierceTargets.length - 1).locator('.nk-egd-node__text'))
       .toContainText(String(tierceTargets[tierceTargets.length - 1].param));
-    await expect(tierce.locator('.nk-egd-reward__name')).toHaveCount(tierceData.rewards!.length);
+    await expect(tierRows).toHaveCount(tierceTargets.length + 1);
+    await expect(tierRows.last().locator('.nk-egd-tier__badge')).toHaveText('棱彩星');
+    await expect(tierRows.last().locator('.nk-egd-node__text')).toContainText(String(prismTarget.param));
+    await expect(tierRows.last().locator('.nk-egd-reward__name'))
+      .toHaveText(rewardNames(tierceData.prism_reward!, itemNameMap()));
+    // 通关奖励仍是独立的左栏（chips 数取自 EGEEJLHBALB）
+    await expect(page.locator('#egd-level-panel .nk-egd-head > .nk-egd-reward .nk-egd-reward__name'))
+      .toHaveCount(tierceData.rewards!.length);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -632,7 +643,7 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：星启面板头部「星级目标｜通关奖励」左右并排，窄屏堆叠', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3020：星启面板两栏 + 星级奖励列表，窄屏堆叠', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
@@ -651,11 +662,14 @@ test.describe('布局验收：终局合并单页', () => {
     await page.locator('#egd-level-tab-tierce').click();
     const head = page.locator('#egd-level-panel .nk-egd-head');
     await expect(head).toBeVisible();
-    // 两栏各带区块标签：左 = 星级目标（档数与分数取自数据），右 = 通关奖励（项数取自数据）
+    // 六格齐备（2×2 + 星启专属的棱彩星行），星级目标不含满分档
     const tierceData = seasonData('maze_boss.json', '3020').tierce!;
-    await expect(head.locator('.nk-egd-head__label')).toHaveText(['星级目标', '通关奖励']);
-    await expect(head.locator('.nk-egd-startargets li')).toHaveCount(tierceData.targets!.length);
-    await expect(head.locator('.nk-egd-reward__name')).toHaveCount(tierceData.rewards!.length);
+    await expect(head.locator('.nk-egd-head__label'))
+      .toHaveText(['通关条件', '通关奖励', '星级目标 · 星级奖励']);
+    await expect(head.locator('.nk-egd-tiers .nk-egd-node')).toHaveCount(tierceData.targets!.length);
+    await expect(head.locator('.nk-egd-tiers li')).toHaveCount(tierceData.targets!.length);
+    await expect(page.locator('#egd-level-panel .nk-egd-head > .nk-egd-reward')
+      .locator('.nk-egd-reward__name')).toHaveCount(tierceData.rewards!.length);
     // 分数档之间靠行距分行，不画分隔线（同级只读条目，线不承载层级）
     await expect(head.locator('.nk-egd-node').first()).toHaveCSS('border-bottom-width', '0px');
     // 几何必须同帧取：点 tab 后的滚动动画会让先后两次 boundingBox 落在不同滚动位置
@@ -690,25 +704,27 @@ test.describe('布局验收：终局合并单页', () => {
     // 左右并排：两栏顶边齐平、右栏起点接在左栏右边界（中缝发丝线）
     expect(Math.round(desktop.right.y)).toBe(Math.round(desktop.left.y));
     expect(desktop.right.x).toBeGreaterThanOrEqual(desktop.left.x + desktop.left.width);
-    // 左栏按内容收敛（不占半屏），且被 fit-content(40%) 的上限约束
-    expect(desktop.left.width).toBeLessThan(desktop.right.width);
-    expect(desktop.left.width).toBeLessThanOrEqual(desktop.head.width * 0.4 + 1);
+    // 2×2 板：两列等宽（内容自适应换成了对称两栏，见 ADR 0051 补记二）
+    expect(Math.abs(desktop.left.width - desktop.right.width)).toBeLessThanOrEqual(1);
+    expect(desktop.left.width).toBeLessThanOrEqual(desktop.head.width * 0.55);
     // 通关奖励已从面板底部上移到头部：整块位于星启看板之上
     expect(desktop.right.bottom).toBeLessThanOrEqual(desktop.nodes.y);
-    // 窄屏堆叠为单列：两栏同左边界、右栏在左栏之下
+    // 窄屏堆叠为单列：可见格同左边界、后一格在前一格之下（读序＝通关条件 → 通关奖励 → 星级列表）
     await page.setViewportSize({ width: 390, height: 844 });
     const narrow = await page.evaluate(() => {
       const box = (el: Element) => el.getBoundingClientRect().toJSON() as DOMRect;
       const cols = [...(document.querySelector('#egd-level-panel .nk-egd-head') as HTMLElement).children];
-      return { left: box(cols[0]), right: box(cols[1]) };
+      return { cols: cols.map((c) => box(c)) };
     });
-    expect(Math.round(narrow.right.x)).toBe(Math.round(narrow.left.x));
-    expect(narrow.right.y).toBeGreaterThanOrEqual(narrow.left.bottom);
+    for (const c of narrow.cols) expect(Math.round(c.x)).toBe(Math.round(narrow.cols[0].x));
+    for (let i = 1; i < narrow.cols.length; i += 1) {
+      expect(narrow.cols[i].y).toBeGreaterThanOrEqual(narrow.cols[i - 1].bottom - 1);
+    }
     await noUnknownOverflow(page);
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：层 tab 单看板（星级目标 + 半场卡片）+ 字号五档与间距节奏', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3020：层 tab 单看板（星级奖励列表 + 半场卡片）+ 字号五档与间距节奏', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
@@ -717,7 +733,8 @@ test.describe('布局验收：终局合并单页', () => {
     await page.locator('#egd-level-tab-floor-1').click();
     // 层没有标题行（用户裁决）：面板首块 = 星级目标；纵向顺序 = 目标 → 卡片行 → 看板
     await expect(page.locator('.nk-egd-lvl__head')).toHaveCount(0);
-    await expect(page.locator('.nk-egd-head > :first-child .nk-egd-head__label')).toHaveText('星级目标');
+    await expect(page.locator('#egd-level-panel .nk-egd-tierlist .nk-egd-head__label'))
+      .toHaveText('星级目标 · 星级奖励');
     const stack = await page.evaluate(() => {
       const box = (sel: string) => (document.querySelector(sel) as HTMLElement).getBoundingClientRect().toJSON() as DOMRect;
       return {
@@ -729,7 +746,7 @@ test.describe('布局验收：终局合并单页', () => {
     expect(stack.cards.y).toBeGreaterThanOrEqual(stack.head.bottom - 1);
     expect(stack.board.y).toBeGreaterThanOrEqual(stack.cards.bottom - 1);
     // 各档同级条目靠行距分行，不画分隔线（与星启头部同一判据）
-    await expect(page.locator('.nk-egd-startargets .nk-egd-node').first()).toHaveCSS('border-bottom-width', '0px');
+    await expect(page.locator('.nk-egd-tiers .nk-egd-node').first()).toHaveCSS('border-bottom-width', '0px');
     // 半场卡片行：两张同一行等宽（层内半场不再纵向铺开）
     const cardBoxes = await page.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]').evaluateAll((els) => els.map((el) => {
       const r = el.getBoundingClientRect();
@@ -857,8 +874,8 @@ test.describe('布局验收：终局合并单页', () => {
     // 推荐属性只认星启表 LOJCIDLKPKG，不从敌方 weak 推导
     const node3Elems = await nodeCardTabs.nth(2).locator('.nk-egd-nodecard__elems').innerHTML();
     expect(node3Elems.length).toBeGreaterThan(0);
-    // 面板级统计行已无推荐属性副本：该赛季头部属性只能从节点卡片读到
-    await expect(tierce.locator('.nk-egd-tierce__stat .nk-egd-floor__elems')).toHaveCount(0);
+    // 面板级统计条已退场：推荐属性只能从节点卡片读到（不再有面板级副本）
+    await expect(tierce.locator('.nk-egd-tierce__stats')).toHaveCount(0);
     // 整场推荐属性恰好是附加关登记敌方的 4 个弱点，而不是节点 1/2 的推荐属性
     await nodeCardTabs.nth(0).click();
     const node1Elems = await nodeCardTabs.nth(0).locator('.nk-egd-nodecard__elems').innerHTML();
@@ -933,7 +950,7 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3021：每层通关奖励 + 逐层星级奖励（ADR 0051 补记）', async ({ page }) => {
+  test('/endgame/boss/3021：星级奖励一档一行逐层取数（通关条件 / 通关奖励 + 星级列表）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const season = seasonData('maze_boss.json', '3021');
     const names = itemNameMap();
@@ -948,20 +965,23 @@ test.describe('布局验收：终局合并单页', () => {
       .toHaveText(rewardNames(floor1.reward!, names));
     await expect(headReward.locator('.nk-egd-reward__num'))
       .toHaveText(rewardNums(floor1.reward!));
-    // 星级奖励随层展示（不再有赛季级阶梯块）：本层 3 档 = 数据里该层的切片
+    // 星级奖励随层展示（不再有赛季级阶梯块）：本层 3 档 = 数据里该层的切片，
+    // 一档一行（档位徽章 + 该档条件 + 该档奖励 chips）
     await expect(page.locator('.nk-egd-starrewards')).toHaveCount(0);
-    const wide = page.locator('#egd-level-panel .nk-egd-head__wide');
-    await expect(wide).toHaveCount(1);
-    await expect(wide.locator('.nk-egd-head__label')).toHaveText('星级奖励');
-    await expect(wide.locator('.nk-egd-reward__star'))
-      .toHaveText(floor1.star_rewards!.map((t) => `${t.star}★`));
-    await expect(wide.locator('.nk-egd-reward__name'))
+    const list = page.locator('#egd-level-panel .nk-egd-tierlist');
+    await expect(list).toHaveCount(1);
+    await expect(list.locator('.nk-egd-head__label')).toHaveText('星级目标 · 星级奖励');
+    const tierRows = list.locator('.nk-egd-tiers li');
+    await expect(tierRows).toHaveCount(floor1.star_rewards!.length);
+    await expect(list.locator('.nk-egd-tier__badge'))
+      .toHaveText(floor1.star_rewards!.map((t) => `累计 ${t.star}★`));
+    await expect(list.locator('.nk-egd-reward__name'))
       .toHaveText(floor1.star_rewards!.flatMap((t) => rewardNames(t.items, names)));
     // 切层后换成该层自己的切片（末日幻影每层 3 目标 = 3 档，层序顺延）
     const floor2 = season.floor_details![1];
     await page.locator('#egd-level-tab-floor-2').click();
-    await expect(wide.locator('.nk-egd-reward__star'))
-      .toHaveText(floor2.star_rewards!.map((t) => `${t.star}★`));
+    await expect(list.locator('.nk-egd-tier__badge'))
+      .toHaveText(floor2.star_rewards!.map((t) => `累计 ${t.star}★`));
     await expect(headReward.locator('.nk-egd-reward__num'))
       .toHaveText(rewardNums(floor2.reward!));
     // 全期档位 = 各层切片拼起来（前端不推层序，切片由转换器按层序算出）
@@ -971,7 +991,7 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
-  test('/endgame/maze：星级奖励按层切片 + 逐层通关奖励跟本层数据（ADR 0051 补记）', async ({ page }) => {
+  test('/endgame/maze：星级奖励按层切片 + 逐层通关奖励跟本层数据', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const season = seasonData('maze.json', '1035');
     const ladder = season.star_rewards!;
@@ -982,12 +1002,15 @@ test.describe('布局验收：终局合并单页', () => {
     expect(season.floor_details!.every((f) => f.star_rewards!.length === 1)).toBe(true);
     expect(season.floor_details!.map((f) => f.star_rewards![0].star)).toEqual(ladder.map((t) => t.star));
     await page.goto('/endgame/maze/1035');
-    const wide = page.locator('#egd-level-panel .nk-egd-head__wide');
+    const list = page.locator('#egd-level-panel .nk-egd-tierlist');
     await page.locator('#egd-level-tab-floor-1').click();
-    await expect(wide.locator('.nk-egd-reward__star')).toHaveText(['3★']);
+    // 忘却之庭一层 3 个目标只推进 1 档：该档行内条件逐目标一行
+    await expect(list.locator('.nk-egd-tier__badge')).toHaveText(['累计 3★']);
+    await expect(list.locator('.nk-egd-tiers li').first().locator('.nk-egd-node'))
+      .toHaveCount(season.floor_details![0].targets!.length);
     await page.locator('#egd-level-tab-floor-12').click();
-    await expect(wide.locator('.nk-egd-reward__star')).toHaveText(['36★']);
-    await expect(wide.locator('.nk-egd-reward__name'))
+    await expect(list.locator('.nk-egd-tier__badge')).toHaveText(['累计 36★']);
+    await expect(list.locator('.nk-egd-reward__name'))
       .toHaveText(rewardNames(season.floor_details![11].star_rewards![0].items, itemNameMap()));
     await noUnknownOverflow(page);
     assertNoErrors();
@@ -1028,26 +1051,36 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
-  test('/endgame/story/2026：层头部三栏 + 逐层星级奖励（ADR 0051 补记）', async ({ page }) => {
+  test('/endgame/story/2026：星级奖励列表一档一行（目标 × 奖励配对）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const story = seasonData('maze_extra.json', '2026');
     const names = itemNameMap();
     await page.goto('/endgame/story/2026');
     await page.locator('#egd-level-tab-floor-1').click();
     const head = page.locator('#egd-level-panel .nk-egd-head');
-    await expect(head).toHaveClass(/nk-egd-head--triple/);
-    // 三栏：目标 | 赛季规则 | 通关奖励；星级奖励跨满整行（不占第四栏）
-    await expect(head.locator('.nk-egd-head__col:not(.nk-egd-head__wide)')).toHaveCount(2);
+    // 三格：通关条件｜通关奖励 两栏 + 星级奖励列表跨满整行
+    await expect(page.locator('#egd-level-panel .nk-egd-head > *')).toHaveCount(3);
+    await expect(head.locator('.nk-egd-clear')).toHaveCount(1);
+    await expect(head.locator('.nk-egd-tierlist')).toHaveCount(1);
     await expect(page.locator('#egd-level-panel .nk-egd-head > .nk-egd-reward')).toHaveCount(1);
     await expect(page.locator('#egd-level-panel .nk-egd-head > .nk-egd-reward .nk-egd-reward__name'))
       .toHaveText(rewardNames(story.floor_details![0].reward!, names));
-    const wide = head.locator('.nk-egd-head__wide');
-    await expect(wide.locator('.nk-egd-reward__star'))
-      .toHaveText(story.floor_details![0].star_rewards!.map((t) => `${t.star}★`));
+    const list = head.locator('.nk-egd-tierlist');
+    await expect(list.locator('.nk-egd-tier__badge'))
+      .toHaveText(story.floor_details![0].star_rewards!.map((t) => `累计 ${t.star}★`));
+    // 每档一行：档位徽章 + 该档条件（1 目标）+ 该档奖励 chips
+    const storyTierRows = list.locator('.nk-egd-tiers li');
+    await expect(storyTierRows).toHaveCount(story.floor_details![0].star_rewards!.length);
+    await expect(storyTierRows.nth(0).locator('.nk-egd-node'))
+      .toHaveCount(1);
+    await expect(storyTierRows.nth(0).locator('.nk-egd-node__text'))
+      .toContainText(String(story.floor_details![0].targets![0].param));
+    await expect(storyTierRows.nth(0).locator('.nk-egd-reward__name'))
+      .toHaveText(rewardNames(story.floor_details![0].star_rewards![0].items, names));
     // 虚构叙事每层 3 目标 = 3 档（每档 1 星），末层收到 12★
     expect(story.floor_details![3].star_rewards!.map((t) => t.star)).toEqual([10, 11, 12]);
     await page.locator('#egd-level-tab-floor-4').click();
-    await expect(wide.locator('.nk-egd-reward__star')).toHaveText(['10★', '11★', '12★']);
+    await expect(list.locator('.nk-egd-tier__badge')).toHaveText(['累计 10★', '累计 11★', '累计 12★']);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -1173,21 +1206,31 @@ test.describe('布局验收：终局合并单页', () => {
 
     await page.locator('#egd-level-tab-floor-1').click();
     const mazePanel = page.locator('#egd-level-panel');
-    await expect(mazePanel.locator('.nk-egd-head > :first-child .nk-egd-head__label'))
-      .toHaveText('挑战目标');
-    await expect(mazePanel.locator('.nk-egd-startargets li'))
+    await expect(mazePanel.locator('.nk-egd-tierlist .nk-egd-head__label'))
+      .toHaveText('挑战目标 · 星级奖励');
+    await expect(mazePanel.locator('.nk-egd-tiers .nk-egd-node'))
       .toHaveCount(mazeFloor1.targets!.length);
-    await expect(mazePanel.locator('.nk-egd-startargets li').last())
+    // 一档吃 3 个目标（3 星一档）：逐目标标出它那 1 星，条件块右侧一个**横跨这三个目标的括号**，
+    // 括号外再接**一条**引导虚线到该档奖励（奖励只一份，不复制三遍）
+    await expect(mazePanel.locator('.nk-egd-tiers .nk-egd-node__star'))
+      .toHaveCount(mazeFloor1.targets!.length);
+    await expect(mazePanel.locator('.nk-egd-tiers .nk-egd-tier__brace')).toHaveCount(1);
+    await expect(mazePanel.locator('.nk-egd-tiers .nk-egd-tier__lead')).toHaveCount(1);
+    await expect(mazePanel.locator('.nk-egd-tiers .nk-egd-tier__reward')).toHaveCount(1);
+    await expect(mazePanel.locator('.nk-egd-tiers .nk-egd-node').last())
       .toContainText(String(mazeFloor1.targets!.at(-1)!.param));
-    // 非分数档：行首走语义标签（回合 / 减员），不出现星标
-    await expect(mazePanel.locator('.nk-egd-startargets__star')).toHaveCount(0);
+    // 非分数档：行首走语义标签（回合 / 减员）
+    await expect(mazePanel.locator('.nk-egd-tiers .nk-egd-node__type'))
+      .toHaveCount(mazeFloor1.targets!.length);
     // 忘却之庭「记忆紊流」= 层级增益，由每个层 / 半场看板首块的末法余烬位呈现一次（用户裁决：统一到头部）
     await expect(mazePanel.locator('.nk-egd-floor__buffname')).toHaveText(mazeFloor1.buff!.name);
     await expect(mazePanel.locator('.nk-egd-group')).toHaveCount(0);
     await expect(mazePanel.locator('.nk-egd-board__body > :first-child'))
       .toHaveClass(/nk-egd-floor__buff/);
-    // 赛季回合上限 = 每层回合上限 → 不进赛季规则右栏，改由半场卡片承担
-    await expect(mazePanel.locator('.nk-egd-rules__item')).toHaveCount(0);
+    // 通关条件：忘却之庭无数值分数线，取该层回合上限（超过即挑战失败）
+    await expect(mazePanel.locator('.nk-egd-clear .nk-egd-rules__label')).toHaveText('回合上限 CYCLES');
+    await expect(mazePanel.locator('.nk-egd-clear .nk-egd-rules__val'))
+      .toHaveText(String(mazeFloor1.countdown));
 
     // 半场卡片两张同一行：卡面 = 半场名 + 末波首领图 + 推荐属性 + 等级 + 回合
     const mazeHalves = mazePanel.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]');
@@ -1229,15 +1272,16 @@ test.describe('布局验收：终局合并单页', () => {
 
     await page.locator('#egd-level-tab-floor-1').click();
     const storyPanel = page.locator('#egd-level-panel');
-    // 三栏 + 跨行星级奖励：星级目标｜赛季规则｜通关奖励｜星级奖励（ADR 0051 补记）
+    // 板读序：通关条件 → 通关奖励 → 星级奖励列表（一档一行）
     await expect(storyPanel.locator('.nk-egd-head__label'))
-      .toHaveText(['星级目标', '赛季规则', '通关奖励', '星级奖励']);
-    await expect(storyPanel.locator('.nk-egd-startargets__star'))
-      .toHaveCount(storyFloor1.targets!.length);
+      .toHaveText(['通关条件', '通关奖励', '星级目标 · 星级奖励']);
+    await expect(storyPanel.locator('.nk-egd-tiers .nk-egd-node')).toHaveCount(storyFloor1.targets!.length);
+    await expect(storyPanel.locator('.nk-egd-tiers .nk-egd-node__star')).toHaveCount(0);
+    await expect(storyPanel.locator('.nk-egd-tiers .nk-egd-tier__brace')).toHaveCount(0);
     await expect(storyPanel.locator('.nk-egd-rules__label'))
-      .toHaveText(['回合限制 CYCLES', '通关分数线 SCORE']);
+      .toHaveText(['通关分数线 SCORE', '回合上限 CYCLES']);
     await expect(storyPanel.locator('.nk-egd-rules__val'))
-      .toHaveText([String(story.countdown), grouped(story.clear_score!)]);
+      .toHaveText([grouped(story.clear_score!), String(story.countdown)]);
     await expect(storyPanel.locator('.nk-egd-group__title')).toHaveText('荒腔走板');
     await expect(storyPanel.locator('.nk-egd-group .nk-egd-buff__name'))
       .toHaveText(story.buffs!.map((b) => b.name));

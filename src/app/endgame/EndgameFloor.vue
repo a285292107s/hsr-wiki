@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import EndgameStarTargets from './EndgameStarTargets.vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
 import EndgameReward from './EndgameReward.vue';
+import EndgameClearCondition from './EndgameClearCondition.vue';
+import EndgameStarTierList from './EndgameStarTierList.vue';
 import { halfLabel } from './pollution';
-import { seasonBuffList, seasonRules } from './renders';
+import { seasonBuffList, starTierRows } from './renders';
 import type {
   MazeBuffInfo, MazeFloorDetail, MazeListEntry, MazeStageDetail,
 } from '../../services/types';
@@ -63,38 +64,36 @@ const nodeBuffs = computed<MazeBuffInfo[]>(() => {
   return seasonBuffList(props.data);
 });
 const targets = computed(() => props.floor.targets || []);
-const rules = computed(() => seasonRules(props.data));
 /** 该层通关奖励（Challenge*MazeConfig.RewardID → RewardData，ADR 0051） */
 const floorReward = computed(() => props.floor.reward || []);
 /** 该层星级奖励：本赛季累计星数奖励阶梯**按层序切片**（忘却之庭每层一档、虚构/末日每层三档；
  *  切片由转换器按层序累计目标数算好，前端不推层序，见 ADR 0051 补记） */
 const starTiers = computed(() => props.floor.star_rewards || []);
-/** 三栏（目标 | 赛季规则 | 通关奖励）只在虚构叙事出现：规则栏是该模式独有的赛季维度 */
-const tripleCols = computed(() => rules.value.length > 0 && floorReward.value.length > 0);
+/** 等级奖励列表：目标 × 奖励按档配成一行一行 */
+const tierRows = computed(() => starTierRows(targets.value, starTiers.value));
+/** 通关条件（只取值）：回合上限（失败判据）+ 通关分数线；两者都无时退到该难度场次数
+ *  （末日幻影官方判据「击败 2 个首领」，场次数取自本层实际渲染的场次） */
+const clearRows = computed(() => {
+  const rows: { value: string; label: string }[] = [];
+  if (props.data.clear_score) {
+    rows.push({ value: props.data.clear_score.toLocaleString(), label: '通关分数线 SCORE' });
+  }
+  const cd = props.floor.countdown || props.data.countdown || 0;
+  if (cd) rows.push({ value: String(cd), label: '回合上限 CYCLES' });
+  if (!rows.length && nodes.value.length) {
+    rows.push({ value: String(nodes.value.length), label: '击败首领 ENEMIES' });
+  }
+  return rows;
+});
 </script>
 
 <template>
   <div class="nk-egd-lvl">
-    <div
-      v-if="targets.length || rules.length || floorReward.length || starTiers.length"
-      class="nk-egd-head"
-      :class="{ 'nk-egd-head--triple': tripleCols }"
-    >
-      <EndgameStarTargets v-if="targets.length" :items="targets" />
-      <div v-if="rules.length" class="nk-egd-head__col">
-        <span class="nk-egd-head__label">赛季规则</span>
-        <span v-for="r in rules" :key="r.label" class="nk-egd-rules__item">
-          <span class="nk-egd-rules__val">{{ r.value.toLocaleString() }}</span>
-          <span class="nk-egd-rules__label">{{ r.label }}</span>
-        </span>
-      </div>
+    <!-- 面板顶部奖励板：通关条件｜通关奖励 两栏 + 星级奖励列表（一档一行，跨满整行） -->
+    <div v-if="targets.length || floorReward.length" class="nk-egd-head">
+      <EndgameClearCondition :rows="clearRows" />
       <EndgameReward v-if="floorReward.length" label="通关奖励" :items="floorReward" />
-      <!-- 星级奖励跨满整行：随本层展示该层可达的累计星数档位，不再另占一栏把头部挤成四列 -->
-      <div v-if="starTiers.length" class="nk-egd-head__col nk-egd-head__wide">
-        <span class="nk-egd-head__label">星级奖励</span>
-        <span class="nk-egd-starrewards__note">每达成 1 个挑战目标计 1 星，累计达下列档位可领取</span>
-        <EndgameReward v-for="t in starTiers" :key="t.star" :star="t.star" :items="t.items" />
-      </div>
+      <EndgameStarTierList :rows="tierRows" />
     </div>
 
     <EndgameNodeCards

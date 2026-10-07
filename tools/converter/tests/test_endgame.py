@@ -497,7 +497,8 @@ class TestTierce:
         assert out["2024"]["monsters"] == []
         assert out["2024"]["targets"] == [
             {"text": "获得#1[i]分", "param": 60000, "type": "TOTAL_SCORE"},
-            {"text": "获得#1[i]分", "param": 99000, "type": "TOTAL_SCORE"},
+            # 满分档（GNGENMHNLAH）标 prism：它是棱彩星条件档，前端从星级目标里拆出单列
+            {"text": "获得#1[i]分", "param": 99000, "type": "TOTAL_SCORE", "prism": True},
         ]
         assert out["2024"]["rewards"] == [
             {"id": 122002, "num": 0},
@@ -536,6 +537,46 @@ class TestTierce:
             buffs={999: {"name": "记忆紊流", "desc": "伤害提高", "param_list": [0.3]}},
         )
         assert [n["buff"]["id"] for n in out["1033"]["nodes"]] == [999, 999, 999]
+
+    def test_prism_tier_and_reward_from_full_target_and_imcmjhammkk(self, monkeypatch):
+        """棱彩星：满分档标 `prism`，`IMCMJHAMMKK` 解析为 `prism_reward`（独立于通关奖励
+        `EGEEJLHBALB`）。忘却之庭实测 101913 = 星琼 100 + 信用点 20000 + 璧羽 100。"""
+        def fake_load(path):
+            name = str(path)
+            if name.endswith("ChallengeMazeTierce.json"):
+                return [{"PHFMCACHFIJ": 5213, "DLCKKJFMJOB": 5212,
+                         "LOJCIDLKPKG": ["Fire"], "GNOOAGPBNLD": 45,
+                         "OGEOMCGNNMP": [601, 602, 603], "GNGENMHNLAH": 600,
+                         "IMCMJHAMMKK": 101913,
+                         "EGEEJLHBALB": [{"ItemID": 122001}, {"ItemID": 1, "ItemNum": 900}]}]
+            if name.endswith("ChallengeMazeConfig.json"):
+                return [{"ID": 5212, "GroupID": 1033, "MazeBuffID": 999}]
+            return []
+        monkeypatch.setattr(eg, "load_json", fake_load)
+        targets = {
+            601: {"text": "剩余#1[i]轮以上", "param": 15, "type": "ROUNDS_LEFT"},
+            602: {"text": "剩余#1[i]轮以上", "param": 30, "type": "ROUNDS_LEFT"},
+            603: {"text": "不损失角色", "param": 1, "type": "DEAD_AVATAR"},
+            600: {"text": "获得3星，且获胜时剩余#1[i]轮以上", "param": 33, "type": "ROUNDS_LEFT"},
+        }
+        out = eg._load_tierce(
+            [("ChallengeMazeTierce.json", "ChallengeMazeConfig.json")],
+            targets, {},
+            reward_items={101913: [{"id": 1, "num": 100}, {"id": 2, "num": 20000},
+                                   {"id": 262, "num": 100}]},
+        )
+        entry = out["1033"]
+        assert [t.get("prism") for t in entry["targets"]] == [None, None, None, True]
+        assert entry["targets"][-1]["param"] == 33
+        assert entry["prism_reward"] == [{"id": 1, "num": 100}, {"id": 2, "num": 20000},
+                                        {"id": 262, "num": 100}]
+        # 两笔奖励各自独立：通关奖励仍是 EGEEJLHBALB 的解析结果
+        assert entry["rewards"] == [{"id": 122001, "num": 0}, {"id": 1, "num": 900}]
+        # 缺 RewardData 时不出 prism_reward（不产出空数组）
+        out2 = eg._load_tierce(
+            [("ChallengeMazeTierce.json", "ChallengeMazeConfig.json")], targets, {},
+        )
+        assert "prism_reward" not in out2["1033"]
 
     def test_node3_buff_absent_when_neither_source_registered(self, monkeypatch):
         """虚构叙事口径：层记录的 `MazeBuffID` 未在 MazeBuff 注册 → 节点三仍不落 buff。"""

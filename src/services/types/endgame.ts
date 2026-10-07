@@ -169,6 +169,8 @@ export interface MazeTargetInfo {
   text: string;
   param?: number;
   type?: string;
+  /** 满分档（星启表的 `GNGENMHNLAH`）：3 星之外的**棱彩星**条件档，前端从星级目标里拆出来单列 */
+  prism?: boolean;
 }
 
 /** 逐层详情（converter 输出：详情页以关卡层级为章节的完整内容） */
@@ -291,6 +293,9 @@ export interface MazeTierceInfo {
   nodes?: MazeTierceNode[];
   /** 星启通关奖励（EGEEJLHBALB ItemID/ItemNum 列表，三模式均产出，每期固定） */
   rewards?: MazeRewardItem[];
+  /** 棱彩星奖励（满分档 `IMCMJHAMMKK` → RewardData：星琼 100 + 信用点 20000 + 璧羽 100）：
+   *  官方规则说明「星启模式中第 N 关通关且获得 N 分，即可以获得棱彩星和额外的新奖励」 */
+  prism_reward?: MazeRewardItem[];
 }
 
 /* ─── maze.json 条目（键 = 赛季 ID） ─── */

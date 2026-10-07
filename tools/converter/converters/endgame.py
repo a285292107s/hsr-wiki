@@ -736,13 +736,16 @@ def _load_tierce(
     invasions: dict[int, dict] | None = None,
     buffs: dict[int, dict] | None = None,
     summons: dict[int, list[int]] | None = None,
+    reward_items: dict[int, list[dict]] | None = None,
 ) -> dict[str, dict]:
     """解析星启模式（Tierce）表 → {GroupID: 星启条目}。
 
     关联规则：Tierce 记录 DLCKKJFMJOB（常规模式最后一关 ID）→ 查关卡表得 GroupID。
     每个 (Tierce 表, 关卡表) 二元组对应一种模式；targets 为三模式目标表合并。
     输出：id / damage_types（弱点）/ countdown（回合）/ score（仅虚构叙事）/
-    targets（目标描述 + 参数）/ monsters（敌方配置）/ nodes（3 节点）。
+    targets（目标描述 + 参数，含**满分档**并标 `prism`）/ monsters（敌方配置）/ nodes（3 节点）/
+    rewards（通关奖励 EGEEJLHBALB）/ prism_reward（满分档奖励 IMCMJHAMMKK，
+    官方规则说明＝「棱彩星和额外的新奖励」）。
     星启 3 节点 = 常规最高难度关上下半场（节点 1/2，DLCKKJFMJOB → 关卡表
     EventIDList1/2 → StageConfig 波次）+ 星启附加关（节点 3，HFIAAGAKFMD →
     StageConfig 波次，未收录时回退 JEBMBCLBIOI）。monsters 为节点 3 敌方
@@ -880,8 +883,11 @@ def _load_tierce(
                 "damage_types": damage_types,
                 "countdown": rec.get("GNOOAGPBNLD", 0) or 0,
                 "score": rec.get("IDBJENCBJHM"),
+                # 满分档（GNGENMHNLAH）标 prism：它是 3 星之外的**棱彩星**条件档，
+                # 官方规则说明「星启模式中第 N 关通关且获得 N 分，即可以获得棱彩星和额外的新奖励」
                 "targets": [
-                    {k: v for k, v in targets[t].items() if k in ("text", "param", "type")}
+                    {**{k: v for k, v in targets[t].items() if k in ("text", "param", "type")},
+                     **({"prism": True} if t == full_tid else {})}
                     for t in tids if t in targets
                 ],
                 "monsters": node3_mons,
@@ -889,6 +895,11 @@ def _load_tierce(
             }
             if rewards:
                 entry["rewards"] = rewards
+            # 棱彩星奖励（IMCMJHAMMKK = 满分档的奖励 RewardID，与通关奖励 EGEEJLHBALB 是两笔：
+            # 前者 maze 101913 / story 102113 / boss 101713 = 星琼 100 + 信用点 20000 + 璧羽 100）
+            prism_rid = rec.get("IMCMJHAMMKK")
+            if reward_items and prism_rid in reward_items:
+                entry["prism_reward"] = reward_items[prism_rid]
             if s_lv:
                 entry["level"] = s_lv
             out[str(gid)] = entry
@@ -1631,6 +1642,7 @@ def convert() -> None:
         **_load_targets("ChallengeStoryTargetConfig.json"),
         **_load_targets("ChallengeBossTargetConfig.json"),
     }
+    rewards = _load_reward_items()
     tierce = _load_tierce(
         [
             ("ChallengeMazeTierce.json", "ChallengeMazeConfig.json"),
@@ -1642,9 +1654,9 @@ def convert() -> None:
         invasions=invasions,
         buffs=buffs,
         summons=summons,
+        reward_items=rewards,
     )
 
-    rewards = _load_reward_items()
     maze = _group_seasons(
         "ChallengeMazeConfig.json", "Name", schedules_maze,
         buff_map=maze_buff_map, buffs=buffs, monsters=monsters, targets=targets,

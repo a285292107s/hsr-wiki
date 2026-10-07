@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import EndgameStarTargets from './EndgameStarTargets.vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
 import EndgameReward from './EndgameReward.vue';
-import { seasonBuffList } from './renders';
+import EndgameClearCondition from './EndgameClearCondition.vue';
+import EndgameStarTierList from './EndgameStarTierList.vue';
+import { seasonBuffList, starTierRows } from './renders';
 import EnemyCard from '../components/EnemyCard.vue';
 import type { MazeBuffInfo, MazeListEntry, MazeTierceNode } from '../../services/types';
 
@@ -59,6 +60,36 @@ function selectNode(key: string): void {
  *  （与层头部的「通关奖励」同源同渲染，避免两处各写一份 chips 模板）。 */
 const tierceRewards = computed(() => props.data.tierce?.rewards || []);
 
+/** 星级目标 = 3 个节点目标（3 星）；满分档（`prism`）从它里面拆出来——它是**棱彩星**条件
+ *  （官方规则说明「通关且获得 N 分/剩余 N 轮以上，即可以获得棱彩星和额外的新奖励」），
+ *  不是第 4 颗星。 */
+const starTargets = computed(() => tierceTargets.value.filter((t) => !t.prism));
+const prismTarget = computed(() => tierceTargets.value.find((t) => t.prism) || null);
+const prismReward = computed(() => props.data.tierce?.prism_reward || []);
+
+/** 通关条件：星启关自己的回合上限与通关分数线（`ClearScore`，虚构叙事 45000 一类）；
+ *  两者都无时退到节点数（异相仲裁/末日幻影的星启＝完成 3 个节点） */
+const clearRows = computed(() => {
+  const rows: { value: string; label: string }[] = [];
+  if (tierceScore.value) rows.push({ value: tierceScore.value.toLocaleString(), label: '通关分数线 SCORE' });
+  if (tierceCountdown.value) rows.push({ value: String(tierceCountdown.value), label: '回合上限 CYCLES' });
+  if (!rows.length && tierceNodes.value.length) {
+    rows.push({ value: String(tierceNodes.value.length), label: '通关节点 NODES' });
+  }
+  return rows;
+});
+/** 星级奖励：星启关的 3 星与常规末层**共享记录**（官方说明「和常规模式第 N 关共享 3 星挑战记录」），
+ *  故取末层的切片；星启自己的第 4 档（满分/棱彩星）不进星数档，其额外奖励在 `tierce.rewards` 里。 */
+const starTiers = computed(() => {
+  const floors = props.data.floor_details || [];
+  return floors.length ? floors[floors.length - 1].star_rewards || [] : [];
+});
+/** 星级奖励列表：3 个节点目标 × 星数档按档配对，棱彩星（满分档 + 其奖励）走同一行形态追加末位 */
+const tierRows = computed(() => starTierRows(starTargets.value, starTiers.value, {
+  target: prismTarget.value,
+  items: prismReward.value,
+}));
+
 watch(
   () => props.data.tierce,
   (t) => {
@@ -73,24 +104,16 @@ watch(
 <template>
   <template v-if="data.tierce">
     <div class="nk-egd-tierce">
-      <div v-if="tierceCountdown || tierceScore != null" class="nk-egd-tierce__stats">
-        <div v-if="tierceCountdown" class="nk-egd-tierce__stat">
-          <span class="nk-egd-tierce__val">{{ tierceCountdown }}</span>
-          <span class="nk-egd-tierce__label">回合限制 CYCLES</span>
-        </div>
-        <div v-if="tierceScore != null" class="nk-egd-tierce__stat">
-          <span class="nk-egd-tierce__val">{{ tierceScore.toLocaleString() }}</span>
-          <span class="nk-egd-tierce__label">分数限制 SCORE</span>
-        </div>
-      </div>
-      <div v-if="tierceTargets.length || tierceRewards.length" class="nk-egd-head">
-        <EndgameStarTargets v-if="tierceTargets.length" :items="tierceTargets" />
-        <EndgameReward
-          v-if="tierceRewards.length"
-          label="通关奖励"
-          :goal="tierceScore ? `通关目标：获得 ${tierceScore.toLocaleString()} 分` : undefined"
-          :items="tierceRewards"
-        />
+      <!-- 赛季级统计条退场（用户裁决）：回合限制与分数限制已在「通关条件」格里给出，
+           同一事实只留一处 -->
+      <!-- 面板顶部奖励板：通关条件｜通关奖励 两栏 + 星级奖励列表（一档一行，含棱彩星档） -->
+      <div
+        v-if="starTargets.length || tierceRewards.length || starTiers.length"
+        class="nk-egd-head"
+      >
+        <EndgameClearCondition :rows="clearRows" />
+        <EndgameReward v-if="tierceRewards.length" label="通关奖励" :items="tierceRewards" />
+        <EndgameStarTierList :rows="tierRows" />
       </div>
       <EndgameNodeCards
         v-if="cardItems.length > 1"

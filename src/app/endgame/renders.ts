@@ -2,7 +2,8 @@ import { ELEM, MON_RANK } from '../../lib/constants';
 import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
 import type {
-  MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo, MazeTargetInfo,
+  MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo, MazeRewardItem,
+  MazeStarReward, MazeTargetInfo,
 } from '../../services/types';
 
 export function buffDescHtml(b: MazeBuffInfo): string {
@@ -134,6 +135,41 @@ export function targetTypeIconHtml(type: string): string {
 export function targetHtml(t: MazeTargetInfo): string {
   if (t.param != null) return fmtDesc(t.text, [t.param]);
   return t.text.replace(/#\d+\[[^\]]*\]%?/g, '').replace(/#\d+/g, '');
+}
+
+/** 星级目标 × 星级奖励**按档配对**成一行（ADR 0051 补记四）：档位数与目标数不等时
+ *  （忘却之庭一层 3 个目标只推进 1 档），目标按 `ceil(目标数 / 档数)` 成组挂到对应档；
+ *  实测逐层恒为 3 个目标，故忘却之庭 = 1 行 3 目标、虚构叙事 / 末日幻影 = 3 行各 1 目标。
+ *  无档位（奖励线缺失的期）时退化为每目标一行、不带奖励，不隐藏目标。 */
+export interface StarTierRow {
+  /** 累计星数档位；`prism` 档为 0（徽章走「棱彩星」） */
+  star: number;
+  label?: string;
+  prism?: boolean;
+  targets: MazeTargetInfo[];
+  items: MazeRewardItem[];
+}
+
+export function starTierRows(
+  targets: MazeTargetInfo[],
+  tiers: MazeStarReward[],
+  prism?: { target: MazeTargetInfo | null; items: MazeRewardItem[] },
+): StarTierRow[] {
+  const rows: StarTierRow[] = tiers.length
+    ? (() => {
+      const size = Math.ceil(targets.length / tiers.length);
+      return tiers.map((tier, i) => ({
+        star: tier.star,
+        label: tier.label,
+        targets: targets.slice(i * size, (i + 1) * size),
+        items: tier.items,
+      }));
+    })()
+    : targets.map((t) => ({ star: 0, targets: [t], items: [] }));
+  if (prism?.target) {
+    rows.push({ star: 0, prism: true, targets: [prism.target], items: prism.items });
+  }
+  return rows;
 }
 
 export function hideOnError(e: Event): void {
