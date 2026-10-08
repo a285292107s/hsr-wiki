@@ -383,82 +383,6 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
 
       <div class="nk-panels">
         <div class="nk-panel nk-panel--active">
-          <section v-if="variants.length || atlasOthers.length" class="nk-mob-sec">
-            <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">同族变体</h2>
-              <span class="nk-mob-sec__en">VARIANTS</span>
-              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
-              <span v-if="variants.length" class="nk-mob-var__count">{{ variants.length }} 档</span>
-            </header>
-            <p v-if="variants.length" class="nk-mob-var__lead">
-              名称与卡面相同的 {{ variants.length }} 个数值档，弱点／韧性／数值／技能各不相同。
-              「差分」列出的字段是本档与本页当前档不同的全部差异。
-            </p>
-            <div class="nk-mob-var">
-              <RouterLink
-                v-for="v in variants"
-                :key="v.row.id"
-                class="nk-mob-var__row"
-                :class="{ 'is-current': v.isCurrent }"
-                :to="`/monster/${v.row.id}`"
-                :aria-current="v.isCurrent ? 'page' : undefined"
-                :title="`${v.row.name} №${v.row.id} · ${v.flag}`"
-              >
-                <span class="nk-mob-var__fig">
-                  <img :src="monsterIconUrl(v.row.icon)" :alt="v.row.name" loading="lazy">
-                </span>
-                <span class="nk-mob-var__id">№ {{ v.row.id }}</span>
-                <span class="nk-mob-var__cells">
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('weak') }">
-                    <span class="nk-mob-var__k">弱点</span>
-                    <span v-if="v.det" class="nk-mob-var__weak">
-                      <img
-                        v-for="e in v.det.weak"
-                        :key="e"
-                        :src="elementIconUrl(e)"
-                        :alt="ELEM[e] || e"
-                        :title="ELEM[e] || e"
-                        loading="lazy"
-                      >
-                      <span v-if="!v.det.weak.length" class="nk-mob-var__none">无</span>
-                    </span>
-                    <span v-else class="nk-mob-var__none">—</span>
-                  </span>
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('stance') }">
-                    <span class="nk-mob-var__k">韧性</span>{{ variantCell(v.det, 'stance') }}
-                  </span>
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('hp') }">
-                    <span class="nk-mob-var__k">HP</span>{{ variantCell(v.det, 'hp') }}
-                  </span>
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('speed') }">
-                    <span class="nk-mob-var__k">速度</span>{{ variantCell(v.det, 'speed') }}
-                  </span>
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('skills') }">
-                    <span class="nk-mob-var__k">技能</span>{{ variantCell(v.det, 'skills') }}
-                  </span>
-                </span>
-                <span class="nk-mob-var__flag">{{ v.flag }}</span>
-              </RouterLink>
-            </div>
-            <!-- 图鉴族（官方 `TemplateGroupID`）：与上方互补的第二个维度——官方把「同一图鉴条目的
-                 各具名形态」并组，比卡面判据粗（12 个多成员组连卡面图标都不同）。此处只列非同卡面的
-                 形态，且**不用它排变体序号**。官方 `AtlasSortID` 不作序（169/472 有值、仅 2/113 组齐全）。 -->
-            <div v-if="atlasOthers.length" class="nk-mob-atlas">
-              <span class="nk-mob-atlas__k">图鉴族</span>
-              <span class="nk-mob-atlas__note">
-                官方登记的同一条目下另有 {{ atlasOthers.length }} 个形态（共 {{ atlasRows.length }} 个，含本页）
-              </span>
-              <span class="nk-mob-atlas__links">
-                <RouterLink
-                  v-for="f in atlasOthers"
-                  :key="f.id"
-                  class="nk-mob-atlas__link"
-                  :to="`/monster/${f.id}`"
-                >{{ f.name }}</RouterLink>
-              </span>
-            </div>
-          </section>
-
           <section class="nk-mob-sec">
             <header class="nk-mob-sec__head">
               <h2 class="nk-mob-sec__title">图鉴记录</h2>
@@ -554,26 +478,71 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             <p class="nk-mob-stat-note">口径：模板基准 × 维度修饰比 × 精英组倍率（组 {{ d.elite_group ?? 1 }}）× 等级曲线（难度组 {{ d.level_group ?? 1 }}）＋ 实例修正值；<strong>韧性不入该曲线</strong>（韧性 = 韧性基准 × 精英组韧性倍率 + 实例修正值，不随等级变化，故在上方单独一行）；基准值 {{ d.stats.hp }} / {{ d.stats.atk }} / {{ d.stats.def }} / {{ d.stats.speed }}<template v-if="d.stance_modify != null || d.speed_modify != null">，本档修正 <template v-if="d.stance_modify != null">韧性 {{ d.stance_modify > 0 ? '+' : '' }}{{ d.stance_modify }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">速度 {{ d.speed_modify > 0 ? '+' : '' }}{{ d.speed_modify }}</template></template>，未含关卡侧精英组指派（侵蚀隧洞、拟造花萼等副本的额外倍率）与剧情系数。</p>
           </section>
 
-          <section v-if="drops.length" class="nk-mob-sec">
+          <section v-if="d.skills.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">掉落</h2>
-              <span class="nk-mob-sec__en">DROPS</span>
+              <h2 class="nk-mob-sec__title">技能</h2>
+              <span class="nk-mob-sec__en">SKILLS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
-            <p class="nk-mob-drop__lead">按均衡等级分档；「基准档」为无均衡等级限制的那一档。</p>
-            <div class="nk-mob-drops">
-              <div v-for="t in drops" :key="String(t.world_level)" class="nk-mob-drop">
-                <div class="nk-mob-drop__head">
-                  <span class="nk-mob-drop__tier">{{ tierLabel(t.world_level) }}</span>
-                  <span v-if="t.avatar_exp" class="nk-mob-drop__exp">角色经验 {{ t.avatar_exp }}</span>
+            <div class="nk-mob-skills">
+              <article v-for="s in d.skills" :key="s.id" class="nk-mob-skill">
+                <header class="nk-mob-skill__head">
+                  <span class="nk-mob-skill__name">{{ s.name }}</span>
+                  <span v-if="s.tag" class="nk-mob-skill__tag">{{ s.tag }}</span>
+                </header>
+                <div v-if="skillMeta(s)" class="nk-mob-skill__meta" v-html="skillMeta(s)"></div>
+                <div v-if="skillHtml(s)" class="nk-mob-skill__desc" v-html="skillHtml(s)"></div>
+                <!-- 原始参数（ParamList 数组原值）：描述引用与否都展示——#N 已展开的技能重复一次
+                     供对照，缺行比重复更困惑（描述常只写「大概率」不说值）；值间「 / 」分隔，
+                     防止 1 与 1 连读成 11。官方 ParamList 是无标注数组，不声称任何语义含义。 -->
+                <div v-if="s.param_list?.length" class="nk-mob-skill__params">
+                  <span class="nk-mob-skill__paramsk">参数</span>
+                  <span class="nk-mob-skill__paramsvals">{{ s.param_list.map((p) => fmtStatValue(p)).join(' / ') }}</span>
                 </div>
-                <div class="nk-mob-drop__items">
-                  <span v-for="it in t.items" :key="it.id" class="nk-mob-drop__item" :title="it.name">
-                    <img v-if="itemIconUrl(it.icon)" :src="itemIconUrl(it.icon)" :alt="it.name" loading="lazy">
-                    <span>{{ it.name }}</span>
+                <!-- 附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键）：技能另外施加的机制，
+                     名称 + 描述都是数据文本；图标在两侧 CDN 全 404，故不落图标 -->
+                <div v-if="s.extra_effects?.length" class="nk-mob-skill__fx">
+                  <span class="nk-mob-skill__fxk">附带效果</span>
+                  <span v-for="fx in s.extra_effects" :key="fx.id" class="nk-mob-skill__fxitem">
+                    <span class="nk-mob-skill__fxname">{{ fx.name }}</span>
+                    <span v-if="fxHtml(fx)" class="nk-mob-skill__fxdesc" v-html="fxHtml(fx)"></span>
                   </span>
                 </div>
-              </div>
+              </article>
+            </div>
+          </section>
+
+          <section v-if="d.statuses?.length" class="nk-mob-sec">
+            <header class="nk-mob-sec__head">
+              <h2 class="nk-mob-sec__title">状态词条</h2>
+              <span class="nk-mob-sec__en">STATUSES</span>
+              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+            </header>
+            <!-- 口径：归属靠命名约定（`MonsterStatusConfig.ModifierName` 含怪物配置名），不是外键；
+                 只保留「该配置名下的模板去形态后缀后同名」的词条（宁可少归不可错归）。
+                 带 `#N[i]` 的描述（数值来自动态属性）本仓无值，按仓规整段省略——故有些词条只有名称与类型。 -->
+            <p class="nk-mob-status__lead">口径：按状态配置名与怪物配置名的命名约定归属；数值或动态名称未公开的词条只列名称与类型。</p>
+            <div class="nk-mob-statuses">
+              <article v-for="s in d.statuses" :key="s.id" class="nk-mob-status" :data-type="s.type">
+                <header class="nk-mob-status__head">
+                  <!-- 图标位（占位）：状态图标源路径 `StatusIconPath` 全是 `BuffIcon/Inlevel/*`，
+                       该目录在 nanoka 与 jsDelivr **双侧 404**（实测），本仓也没有本地入库，
+                       故先放占位符、把尺寸与位置固定下来。
+                       图标资源到位后：数据侧给 `statuses[]` 加 `icon`（basename），
+                       这里把 <svg> 换成 <img :src="cdnUri('bufficon', `${s.icon}.webp`)">，
+                       并给 img 加 @error 兜底（与终局增益图标同款 SVG）。 -->
+                  <span class="nk-mob-status__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                      <path d="M12 2.5l2.3 6.2 6.2 2.3-6.2 2.3-2.3 6.2-2.3-6.2-6.2-2.3 6.2-2.3z" />
+                      <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+                    </svg>
+                  </span>
+                  <span class="nk-mob-status__name">{{ s.name }}</span>
+                  <span class="nk-mob-status__type">{{ statusTypeLabel(s.type) }}</span>
+                  <span v-if="s.dispel" class="nk-mob-status__dispel">可驱散</span>
+                </header>
+                <p v-if="s.desc" class="nk-mob-status__desc" v-html="statusDesc(s.desc)"></p>
+              </article>
             </div>
           </section>
 
@@ -622,70 +591,102 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             </div>
           </section>
 
-          <section v-if="d.skills.length" class="nk-mob-sec">
+          <section v-if="drops.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">技能</h2>
-              <span class="nk-mob-sec__en">SKILLS</span>
+              <h2 class="nk-mob-sec__title">掉落</h2>
+              <span class="nk-mob-sec__en">DROPS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
-            <div class="nk-mob-skills">
-              <article v-for="s in d.skills" :key="s.id" class="nk-mob-skill">
-                <header class="nk-mob-skill__head">
-                  <span class="nk-mob-skill__name">{{ s.name }}</span>
-                  <span v-if="s.tag" class="nk-mob-skill__tag">{{ s.tag }}</span>
-                </header>
-                <div v-if="skillMeta(s)" class="nk-mob-skill__meta" v-html="skillMeta(s)"></div>
-                <div v-if="skillHtml(s)" class="nk-mob-skill__desc" v-html="skillHtml(s)"></div>
-                <!-- 原始参数（ParamList 数组原值）：描述引用与否都展示——#N 已展开的技能重复一次
-                     供对照，缺行比重复更困惑（描述常只写「大概率」不说值）；值间「 / 」分隔，
-                     防止 1 与 1 连读成 11。官方 ParamList 是无标注数组，不声称任何语义含义。 -->
-                <div v-if="s.param_list?.length" class="nk-mob-skill__params">
-                  <span class="nk-mob-skill__paramsk">参数</span>
-                  <span class="nk-mob-skill__paramsvals">{{ s.param_list.map((p) => fmtStatValue(p)).join(' / ') }}</span>
+            <p class="nk-mob-drop__lead">按均衡等级分档；「基准档」为无均衡等级限制的那一档。</p>
+            <div class="nk-mob-drops">
+              <div v-for="t in drops" :key="String(t.world_level)" class="nk-mob-drop">
+                <div class="nk-mob-drop__head">
+                  <span class="nk-mob-drop__tier">{{ tierLabel(t.world_level) }}</span>
+                  <span v-if="t.avatar_exp" class="nk-mob-drop__exp">角色经验 {{ t.avatar_exp }}</span>
                 </div>
-                <!-- 附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键）：技能另外施加的机制，
-                     名称 + 描述都是数据文本；图标在两侧 CDN 全 404，故不落图标 -->
-                <div v-if="s.extra_effects?.length" class="nk-mob-skill__fx">
-                  <span class="nk-mob-skill__fxk">附带效果</span>
-                  <span v-for="fx in s.extra_effects" :key="fx.id" class="nk-mob-skill__fxitem">
-                    <span class="nk-mob-skill__fxname">{{ fx.name }}</span>
-                    <span v-if="fxHtml(fx)" class="nk-mob-skill__fxdesc" v-html="fxHtml(fx)"></span>
+                <div class="nk-mob-drop__items">
+                  <span v-for="it in t.items" :key="it.id" class="nk-mob-drop__item" :title="it.name">
+                    <img v-if="itemIconUrl(it.icon)" :src="itemIconUrl(it.icon)" :alt="it.name" loading="lazy">
+                    <span>{{ it.name }}</span>
                   </span>
                 </div>
-              </article>
+              </div>
             </div>
           </section>
-          <section v-if="d.statuses?.length" class="nk-mob-sec">
+
+          <section v-if="variants.length || atlasOthers.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">状态词条</h2>
-              <span class="nk-mob-sec__en">STATUSES</span>
+              <h2 class="nk-mob-sec__title">同族变体</h2>
+              <span class="nk-mob-sec__en">VARIANTS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+              <span v-if="variants.length" class="nk-mob-var__count">{{ variants.length }} 档</span>
             </header>
-            <!-- 口径：归属靠命名约定（`MonsterStatusConfig.ModifierName` 含怪物配置名），不是外键；
-                 只保留「该配置名下的模板去形态后缀后同名」的词条（宁可少归不可错归）。
-                 带 `#N[i]` 的描述（数值来自动态属性）本仓无值，按仓规整段省略——故有些词条只有名称与类型。 -->
-            <p class="nk-mob-status__lead">口径：按状态配置名与怪物配置名的命名约定归属；数值或动态名称未公开的词条只列名称与类型。</p>
-            <div class="nk-mob-statuses">
-              <article v-for="s in d.statuses" :key="s.id" class="nk-mob-status" :data-type="s.type">
-                <header class="nk-mob-status__head">
-                  <!-- 图标位（占位）：状态图标源路径 `StatusIconPath` 全是 `BuffIcon/Inlevel/*`，
-                       该目录在 nanoka 与 jsDelivr **双侧 404**（实测），本仓也没有本地入库，
-                       故先放占位符、把尺寸与位置固定下来。
-                       图标资源到位后：数据侧给 `statuses[]` 加 `icon`（basename），
-                       这里把 <svg> 换成 <img :src="cdnUri('bufficon', `${s.icon}.webp`)">，
-                       并给 img 加 @error 兜底（与终局增益图标同款 SVG）。 -->
-                  <span class="nk-mob-status__icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
-                      <path d="M12 2.5l2.3 6.2 6.2 2.3-6.2 2.3-2.3 6.2-2.3-6.2-6.2-2.3 6.2-2.3z" />
-                      <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
-                    </svg>
+            <p v-if="variants.length" class="nk-mob-var__lead">
+              名称与卡面相同的 {{ variants.length }} 个数值档，弱点／韧性／数值／技能各不相同。
+              「差分」列出的字段是本档与本页当前档不同的全部差异。
+            </p>
+            <div class="nk-mob-var">
+              <RouterLink
+                v-for="v in variants"
+                :key="v.row.id"
+                class="nk-mob-var__row"
+                :class="{ 'is-current': v.isCurrent }"
+                :to="`/monster/${v.row.id}`"
+                :aria-current="v.isCurrent ? 'page' : undefined"
+                :title="`${v.row.name} №${v.row.id} · ${v.flag}`"
+              >
+                <span class="nk-mob-var__fig">
+                  <img :src="monsterIconUrl(v.row.icon)" :alt="v.row.name" loading="lazy">
+                </span>
+                <span class="nk-mob-var__id">№ {{ v.row.id }}</span>
+                <span class="nk-mob-var__cells">
+                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('weak') }">
+                    <span class="nk-mob-var__k">弱点</span>
+                    <span v-if="v.det" class="nk-mob-var__weak">
+                      <img
+                        v-for="e in v.det.weak"
+                        :key="e"
+                        :src="elementIconUrl(e)"
+                        :alt="ELEM[e] || e"
+                        :title="ELEM[e] || e"
+                        loading="lazy"
+                      >
+                      <span v-if="!v.det.weak.length" class="nk-mob-var__none">无</span>
+                    </span>
+                    <span v-else class="nk-mob-var__none">—</span>
                   </span>
-                  <span class="nk-mob-status__name">{{ s.name }}</span>
-                  <span class="nk-mob-status__type">{{ statusTypeLabel(s.type) }}</span>
-                  <span v-if="s.dispel" class="nk-mob-status__dispel">可驱散</span>
-                </header>
-                <p v-if="s.desc" class="nk-mob-status__desc" v-html="statusDesc(s.desc)"></p>
-              </article>
+                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('stance') }">
+                    <span class="nk-mob-var__k">韧性</span>{{ variantCell(v.det, 'stance') }}
+                  </span>
+                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('hp') }">
+                    <span class="nk-mob-var__k">HP</span>{{ variantCell(v.det, 'hp') }}
+                  </span>
+                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('speed') }">
+                    <span class="nk-mob-var__k">速度</span>{{ variantCell(v.det, 'speed') }}
+                  </span>
+                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('skills') }">
+                    <span class="nk-mob-var__k">技能</span>{{ variantCell(v.det, 'skills') }}
+                  </span>
+                </span>
+                <span class="nk-mob-var__flag">{{ v.flag }}</span>
+              </RouterLink>
+            </div>
+            <!-- 图鉴族（官方 `TemplateGroupID`）：与上方互补的第二个维度——官方把「同一图鉴条目的
+                 各具名形态」并组，比卡面判据粗（12 个多成员组连卡面图标都不同）。此处只列非同卡面的
+                 形态，且**不用它排变体序号**。官方 `AtlasSortID` 不作序（169/472 有值、仅 2/113 组齐全）。 -->
+            <div v-if="atlasOthers.length" class="nk-mob-atlas">
+              <span class="nk-mob-atlas__k">图鉴族</span>
+              <span class="nk-mob-atlas__note">
+                官方登记的同一条目下另有 {{ atlasOthers.length }} 个形态（共 {{ atlasRows.length }} 个，含本页）
+              </span>
+              <span class="nk-mob-atlas__links">
+                <RouterLink
+                  v-for="f in atlasOthers"
+                  :key="f.id"
+                  class="nk-mob-atlas__link"
+                  :to="`/monster/${f.id}`"
+                >{{ f.name }}</RouterLink>
+              </span>
             </div>
           </section>
         </div>
