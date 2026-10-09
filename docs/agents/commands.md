@@ -5,7 +5,7 @@
 ## 环境与安装
 
 ```bash
-pnpm install   # 需 Node 22+；本地与 CI 均使用 packageManager 指定的 pnpm 11
+pnpm install   # 版本口径与禁用依赖清单见 tech-stack.md（唯一事实源）
 ```
 
 ## 本地开发
@@ -60,7 +60,7 @@ pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all�
 
 ## 漂移与影响面工具（report-only，默认不阻塞）
 
-五个漂移检查器都**默认不阻塞**（退出码 `0`）：只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）是硬门禁，不属本组。
+六个漂移检查器都**默认不阻塞**（退出码 `0`）：只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）是硬门禁，不属本组。
 
 ```bash
 node tools/check-adr-index.mjs          # ADR 索引 ↔ 正文双向一致（编号 / 标题 / Status / 互指修订）
@@ -68,15 +68,33 @@ node tools/check-e2e-literals.mjs       # e2e 裸 px 字面量扫描 + 计数基
 node tools/check-e2e-viewport-tags.mjs  # 自钉视口的 e2e 用例必须声明 @viewport-pinned
 node tools/check-doc-drift.mjs          # living docs 提到的类名 / 路径 vs 代码现状
 node tools/check-css-dup-selectors.mjs  # 同上下文同属性重叠的选择器（后写静默覆盖 / 重复实现）
+node tools/doc-audit.mjs                # 文档结构化审核：体量红线 / 路由登记 / 概论禁词 / 版本号禁入与一致性 / ADR 否决项 / memory 分片
 node tools/e2e-affected.mjs             # 按 git diff 推导受影响路由 → 用例（可 --run 直接执行）
 ```
 
 - **退出码**：`0` = 报告完成（含无 `--strict` 时的命中）；`1` = 漂移检查器带 `--strict` 且有命中。
+- `doc-audit.mjs`：八条可断言检查——① 体量红线（估 token >5 万必须「总索引+分片」）② `docs/agents/*` 必须在 AGENTS.md 路由表登记 ③ living docs 禁 AI 汇报腔（「当然，这是 / 以下是为 / 本文将介绍」）④ 禁会过期的断言（「已修复 / 已全部完成」）⑤ **版本号禁入叙述性文档**（README / AGENTS / `docs/agents/` 只写选型名），外加 `tech-stack.md` 的 `<!--ver:包名-->` 标记与 `package.json` / `requirements.txt` / CI 工作流 / spine constants **逐字比对** ⑥ ADR 必须有**结构化**的「替代方案 / 否决」落点（标题或加粗字段；只有行文暗示则报「疑似缺失待复核」）⑦ memory 分片与月文件总索引同步 ⑧ `DATA_CATALOG.md` 引用的分片存在。**运行时打印覆盖面与豁免数**（哪些文档受写法规则管辖、哪些是历史档案豁免），避免「命中 0」被误读为全覆盖。判据出处：conventions.md「文档体量 / 文档写法」+ AGENTS.md 强制规则。受管范围与跳过名单的唯一来源是 `tools/doc-scope.mjs`（本文件与 `check-doc-links.mjs` 共用，禁止再各写一份）。
 - `check-e2e-literals.mjs`：`--baseline <json>` 改计数基线；基线文件缺失时以「当前计数」为基线并提示生成，不报失败。行内豁免 `// e2e-literal-ok: 理由`（不可漂移的契约值，如侧栏避让 / 断点）。
 - `check-e2e-viewport-tags.mjs`：`--strict` 时「用例体调用 `page.setViewportSize` 但签名未声明 `@viewport-pinned`」即退出 1。行内豁免 `// e2e-viewport-ok: 理由`（缺理由不豁免）。**不是风格洁癖**：漏标会让 `mobile-chromium` 用 Pixel 7 的触摸仿真重跑一条本已钉死视口的桌面契约，实测把 CI 拖成 30s 超时 × 3 次重试（见 docs/memory/2026-10）。
 - `check-doc-drift.mjs`：**只扫 living docs**（`docs/agents/` 与 `CONTEXT.md`）；`docs/memory/` 是历史档案，必须排除，否则全是假阳性。
 - `check-css-dup-selectors.mjs`：判据 = **同一条选择器在同一个 at-rule 上下文里重复声明了同一个属性**（属性不重叠的分组写法不算）。A 段（同文件）必为静默覆盖；B 段（跨文件）由加载序决定生效者，计为 conflict；两侧都是 `<style scoped>` 的 SFC 降级为 C 段（运行时不冲突，只是重复实现）。**命中不都是缺陷**：刻意的变体覆盖（`focus-visible` 收掉投影、断点补偿）也会命中，需人工判读——它只负责把「谁会静默吃掉谁」摆到台面上。
 - `e2e-affected.mjs`：`--base <ref>` 改 diff 基线，`--run` 直接执行推出的命令；命中全局文件（tokens / 全局 css / App 外壳 / 路由 / 入口）判「影响全部页面」，**推导不出受影响用例时打印「跑 guards 层 + 全量 layout」而不是静默输出空命令**。
+
+## 文档体量维护
+
+对应「文档体量红线」（[conventions.md](conventions.md)）。
+
+- **`docs/memory/`＝按域组织的避坑手册**（不是按月日志）：9 份域文件 + [README 索引](../memory/README.md)，新增条目直接写进对应域，**禁止新建按月/按日文件**（时序编号对检索无意义）。
+- **`DATA_CATALOG` 侧**由 `gen_catalog.py` 源头控制分片（脚本内 `SHARDS` 表 + KB 级总索引），不走人工流程。
+- `tools/tidy-memory.mjs` 只服务**旧的按月日志格式**（`strip` 删验证数字 + `split` 按时序分片）；当前 `docs/memory/` 已按域重组，**该工具对本目录已无用途**，保留仅为处理历史文件。它的 `split` 输入必须是含正文小节的日志源——对已生成的总索引再跑一次会丢章节锚点（已加幂等守卫拒绝）。
+
+## 临时工作区 `temp/`（不入库 · 不引用）
+
+`temp/` 在 `.gitignore` 内（第 68 行），是**探针脚本 / 截图 / 原始日志**的临时落点：既不入库，也随时可整目录清空。
+
+- **AI 检索不会命中它**：内容检索走 ripgrep，默认遵循 `.gitignore` ⇒ `temp/` 天然不在检索面内（已实测确认）。所以临时文件**不会**污染 AI 的检索结果，不需要为「怕干扰检索」而刻意回避使用它。
+- **但文档不得把 `temp/` 当引用目标**。一条 `脚本见 temp/xxx.py` 就是**永久死指针**——该路径从未入库（历史提交为 0），清空后读者既找不到也无法从 git 恢复。脚本值得复用 → 放 `tools/`（入库）；一次性探针 → 写明「一次性探针，未入库」。此规则由 `doc-audit.mjs` 检查⑨ 强制。
+- **纪律**：探针用完即删（同一会话内），不要在此囤放需要长期保留的东西——需要留就走 git。
 
 ## 研究线（Spine Lab 调试台）
 

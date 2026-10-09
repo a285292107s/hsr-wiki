@@ -1,6 +1,6 @@
 # AI 检索可见性：构建期预渲染快照（契约）
 
-> 事实依据（检索结论 + 证据强度）见 [docs/memory/ai-crawler-facts.md](../memory/ai-crawler-facts.md)。
+> 事实依据（检索结论 + 证据强度；**外部快照、含检索日期、会过期**）见 [docs/audit/AI检索入口事实清单.md](../audit/AI检索入口事实清单.md)；本站据此踩过的坑与判据见 [docs/memory/ai-visibility.md](../memory/ai-visibility.md)。
 > 本文是**实现契约**：产物路径、路由覆盖、生成规则、守卫断言。改动本文件即改动生成器与守卫的接口，三者必须同步。
 
 ## 0. 为什么做

@@ -1,33 +1,37 @@
 # AGENTS.md
 
-HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki（Vue 3 + TypeScript + Vite + Pinia / Vue Router）：数据由 Python 工具 `tools/converter` 从官方解包数据离线转换为本地 JSON 随站分发，图片与 Spine 动画在运行期走 CDN 双源回退。
+HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki（Vue + TypeScript + Vite + Pinia / Vue Router）：数据由 Python 工具 `tools/converter` 从官方解包数据离线转换为本地 JSON 随站分发，图片与 Spine 动画在运行期走 CDN 双源回退。
 
-> 术语与 `_Avoid_` 禁用词以 [CONTEXT.md](CONTEXT.md) 为准；架构决策见 [docs/adr/](docs/adr/)（索引 [docs/adr/README.md](docs/adr/README.md)）；字段审计裁决见 [docs/audit/](docs/audit/)；历史复盘与坑位见 [docs/memory/](docs/memory/)；数据源总结与字段探索见 [docs/data/](docs/data/)；Spine 机制与抓取流程见 [docs/spine/](docs/spine/)。以下按需读取，不必预读。
+> 术语与 `_Avoid_` 禁用词以 [CONTEXT.md](CONTEXT.md) 为准；架构决策见 [docs/adr/](docs/adr/)（索引 [docs/adr/README.md](docs/adr/README.md)）；字段审计裁决见 [docs/audit/](docs/audit/)；数据源总结与字段探索见 [docs/data/](docs/data/)；Spine 机制与抓取流程见 [docs/spine/](docs/spine/)；**踩过的坑与判据（按域组织的避坑手册）见 [docs/memory/](docs/memory/)（索引 [docs/memory/README.md](docs/memory/README.md)）——动手改某一域前先看对应域，能省掉一次返工**。以下按需读取，不必预读。
 
 ## 任务 → 必读
 
-> 本表是子文件的唯一入口索引：**新增子文件必须在此登记**。子文件一律用相对链接引用——**禁止改回 `@path` 导入写法**（Qoder 等工具会把 `@` 导入递归展开为 include，等于把子文件全量塞进上下文，失去按需加载）。
+> 本表是子文件的唯一入口索引：**新增子文件必须在此登记**。子文件一律用相对链接引用——**禁止改回 `@path` 导入写法**（Qoder 等工具会把 `@` 递归展开为 include，等于把子文件全量塞进上下文，失去按需加载）。
+>
+> **「必读」= 规则（怎么写）；右侧如有「坑位」栏 = 该域踩过的坑与判据**。规则告诉你目标形态，坑位告诉你哪里会静默失败——两者都要，且**坑位只读对应域那 1 份**。
 
-| 你要做的事 | 必读 |
-| --- | --- |
-| 任何改动（硬约束 + 验证级别 + 文档落位） | 本文「强制规则」+「验证流程」+「文档分级（可逆性路由）」 |
-| 目录页 / 路由 / 分层结构 / 研究线 / 新增目录端到端 | [docs/agents/architecture.md](docs/agents/architecture.md) |
-| 数据转换 / 字段探索 / vendor 数据查询 | [docs/agents/data-pipeline.md](docs/agents/data-pipeline.md) |
-| 数据源总结 / 字段与研究文档查询 | [docs/data/](docs/data/) + [tools/converter/DATA_CATALOG.md](tools/converter/DATA_CATALOG.md) |
-| 转换器字段映射（表 → 输出 JSON） | [docs/data/转换器字段映射.md](docs/data/转换器字段映射.md) |
-| Spine 机制 / 官网抓取 / 技能预览动画抓取 / 黑块成因 | [docs/spine/](docs/spine/) |
-| AI 检索可见性 / 预渲染快照 / robots.txt / sitemap | [docs/agents/ai-discoverability.md](docs/agents/ai-discoverability.md) |
-| 写改测试 / e2e 分层 / 像素基线 | [docs/agents/testing.md](docs/agents/testing.md) |
-| 命令 / 端口 / dev 缓存陈旧 / 部署与门禁 | [docs/agents/commands.md](docs/agents/commands.md) |
-| UI 样式 / 色彩令牌 / 主题与强调色 / 断点 / 反 AI 味 | [docs/agents/ui-design.md](docs/agents/ui-design.md) |
-| UI 质量验收标准（获奖级达标判据 / 分层门禁 / 终止条件） | [docs/audit/UI质量验收标准.md](docs/audit/UI质量验收标准.md) |
-| 视觉职责边界 / 环境性排障 / 取证金字塔 / headless 与 PowerShell 陷阱 | [docs/agents/verification.md](docs/agents/verification.md) |
-| 代码与注释规范 / ADR 门槛 / commit 风格 / 字段审计 | [docs/agents/conventions.md](docs/agents/conventions.md) |
+| 你要做的事 | 必读（规则） | 坑位（该域 memory） |
+| --- | --- | --- |
+| 任何改动（硬约束 + 验证级别 + 文档落位） | 本文「强制规则」+「验证流程」+「文档分级（可逆性路由）」 | [docs-process.md](docs/memory/docs-process.md) |
+| 目录页 / 路由 / 分层结构 / 研究线 / 新增目录端到端 | [docs/agents/architecture.md](docs/agents/architecture.md) | [architecture.md](docs/memory/architecture.md) |
+| 技术栈 / 版本 / 依赖现状与禁用清单 | [docs/agents/tech-stack.md](docs/agents/tech-stack.md) | [build-deploy.md](docs/memory/build-deploy.md) |
+| 数据转换 / 字段探索 / vendor 数据查询 | [docs/agents/data-pipeline.md](docs/agents/data-pipeline.md) | [data-pipeline.md](docs/memory/data-pipeline.md) |
+| 数据源总结 / 字段与研究文档查询 | [docs/data/](docs/data/) + [tools/converter/DATA_CATALOG.md](tools/converter/DATA_CATALOG.md)（总索引，按需读 [tools/converter/DATA_CATALOG.parts/](tools/converter/DATA_CATALOG.parts/) 分片） | [data-pipeline.md](docs/memory/data-pipeline.md) |
+| 转换器字段映射（表 → 输出 JSON） | [docs/data/转换器字段映射.md](docs/data/转换器字段映射.md) | [data-pipeline.md](docs/memory/data-pipeline.md) |
+| 数据口径 / 赛季代际 / 展示数值判据 | ADR 数据裁决（`docs/adr/` 索引） | [data-semantics.md](docs/memory/data-semantics.md) |
+| Spine 机制 / 官网抓取 / 技能预览动画抓取 / 黑块成因 | [docs/spine/](docs/spine/) | [spine.md](docs/memory/spine.md) |
+| AI 检索可见性 / 预渲染快照 / robots.txt / sitemap | [docs/agents/ai-discoverability.md](docs/agents/ai-discoverability.md) | [ai-visibility.md](docs/memory/ai-visibility.md) |
+| 写改测试 / e2e 分层 / 像素基线 | [docs/agents/testing.md](docs/agents/testing.md) | [testing.md](docs/memory/testing.md) |
+| 命令 / 端口 / dev 缓存陈旧 / 部署与门禁 | [docs/agents/commands.md](docs/agents/commands.md) | [build-deploy.md](docs/memory/build-deploy.md) |
+| UI 样式 / 色彩令牌 / 主题与强调色 / 断点 / 反 AI 味 | [docs/agents/ui-design.md](docs/agents/ui-design.md) | [ui-tokens.md](docs/memory/ui-tokens.md) |
+| UI 质量验收标准（获奖级达标判据 / 分层门禁 / 终止条件） | [docs/audit/UI质量验收标准.md](docs/audit/UI质量验收标准.md) | [testing.md](docs/memory/testing.md) |
+| 视觉职责边界 / 环境性排障 / 取证金字塔 / headless 与 PowerShell 陷阱 | [docs/agents/verification.md](docs/agents/verification.md) | [testing.md](docs/memory/testing.md) |
+| 代码与注释规范 / ADR 门槛 / commit 风格 / 字段审计 | [docs/agents/conventions.md](docs/agents/conventions.md) | [docs-process.md](docs/memory/docs-process.md) |
 
 ## 常用命令
 
 ```bash
-pnpm install            # 需 Node 22+；包管理器锁定 pnpm 11（packageManager 字段）
+pnpm install            # 依赖安装（版本口径唯一落位 tech-stack.md）
 pnpm dev                # → http://localhost:6188/（固定端口 strictPort；禁止改回 5173；「改了不生效」先自愈，见 commands.md）
 pnpm build              # 三守卫（色彩收口 / Spine 清单 / 对比度）→ vue-tsc -b → vite build → AI 端点生成 + AI 端点守卫
 pnpm test               # 运行全部测试（Vitest）
@@ -49,7 +53,7 @@ node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删�
 - **枢纽页导航条回归 / 首页＝版本上新页（ADR 0019，已实现）**：`/` 与 `/currency` **全断点渲染导航条**（`meta.bareNav` / `data-nav` / 避让回退三件已删除，内容区回到 148px 侧栏避让）；`/` 是**版本上新页**＝品牌带 + `release_version` 恰等于 `version.json` 的 `version_label` 的角色/光锥/遗器三分区 + 页脚，板块索引与两条页内跨模式行已退场，跨模式只走侧栏「交换」。**禁止按 ADR 0018 旧形态回改**——「无侧栏枢纽」与「首页 8 行入口首屏可见」断言均已作废，新断言（1920×1080 内品牌带 + 版本上新标题与第一分区首行卡片完整可见 / 全断点渲染导航条 / 空态一行；ADR 0019 决策 11）在 `e2e/layout-home.spec.ts` 与 `e2e/layout-hub.spec.ts`。**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**（ADR 0018 该条继续有效）。
 - **版本上新数据判据（ADR 0019 决策 3-5）**：条目判据 = `release_version` 恰等于 `version.json` 的 `version_label`；角色 / 光锥的版本号由「与上一版已提交输出的 id 差集」推导（converter 侧，无基线时留空），遗器用源数据权威 `RelicSetConfig.ReleaseVersion`；两者同写一个字段，前端只读该字段。
 - **货币战争本赛季新增（ADR 0020，已实现）**：`/currency` 的判据是**赛季代际差集**——`GridFightRoleBasicInfoOld` / `GridFightTraitLayerOld` 的 `ExistSeason` 最大一代 = 上一代名册，当前代名册在 `GridFightRoleBasicInfo` 与 `traits.json`；converter 给 `role.json` / `traits.json` 写布尔 `is_season_new`（表缺失或代数 < 2 → 全 false + 告警，判据纯函数在 `tools/converter/season_delta.py`）。覆盖域仅**角色 + 羁绊**（装备 / 环境 / 策略既无 `*Old` 代际表、版本差集也实测为 0，**禁止**为它们新造判据）。**两页口径禁止混用**：常规模式 = 版本增量，货币战争 = 赛季代际；文案写「本赛季新增」且**不显示赛季号**（当前代编号 1 与旧代 101/102/103 体系不一致）。两页共用区块原语 `.nk-hub-release*`（单点声明在 `catalog.css`）。
-- **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——数据探索一律走 `query.py` / `DATA_CATALOG.md`，转换走 `convert.py`。
+- **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——数据探索一律走 `query.py`，字段结构走 `DATA_CATALOG.md` 总索引（按需读 `tools/converter/DATA_CATALOG.parts/` 分片，禁整读），转换走 `convert.py`。
 - **AI 检索可见性＝构建期预渲染快照**：服务端 HTML 决定 AI 可见性（实测 AI 爬虫零 JS 执行），故 `pnpm build` 末步由 `tools/gen-ai-endpoints.mjs` 为每个可索引路由生成含正文与内链的 `dist/prerender/**.html`，`vercel.json` 在 catch-all 之前用明确 rewrite 投递（并排除 `robots.txt`/`sitemap.xml`）；JS 用户拿到同一份 HTML、Vue 挂载覆盖快照，内容对所有 UA 一致（非 cloaking）。**新增可索引路由必须同步快照覆盖 + rewrite + sitemap**，否则末步守卫 `tools/check-ai-endpoints.mjs` 失败。契约见 [docs/agents/ai-discoverability.md](docs/agents/ai-discoverability.md)。
 
 > 分层结构 / 研究线（Spine Lab）/ 核心架构模式 / 新增目录扩展指南（端到端）→ [docs/agents/architecture.md](docs/agents/architecture.md)
@@ -68,7 +72,7 @@ node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删�
 2. **例外确认**：意图有歧义、有设计自由、或命中跨模块公共基础（shared 组件 / 共享样式 / services 核心）的改动 → 简述方案与可断言结果，一次确认后执行。
 3. **执行与验证**：按「验证流程」级别与预算执行，超预算即降级并记录（禁全量 e2e）；收尾汇报：改动 diff + 规格验证结果 + 降级/豁免说明；涉及视觉表现的改动附加「视觉待用户确认」清单。
 4. **返工**：失败先修本层（低层失败不触发全量重跑）；同一问题两次修复尝试未果，停下向用户说明情况，不自动重试。
-5. **沉淀**：收尾时命中（用户纠正流程 / 返工 ≥2 次 / 重要教训）→ 写入 `docs/memory/` 日志；流程规则改进须用户确认后生效。
+5. **沉淀**：收尾时命中（用户纠正流程 / 返工 ≥2 次 / 重要教训）→ 写入 [docs/memory/](docs/memory/) **对应域**文件（按域组织，禁止新建按月/按日文件；见 [memory/README.md](docs/memory/README.md) 的域索引与准入判据）；流程规则改进须用户确认后生效。
 
 ## 文档分级（可逆性路由）+ 重构期模式
 
@@ -84,7 +88,7 @@ node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删�
 | 不可逆决策（数据判据 / 路由 / 字段归属 / 令牌层级） | 推翻即牵动数据口径、导航形态或跨模块契约 | ADR（门槛判据与正反例见子文件） |
 | 契约变化（新目录页 / 新令牌类别 / 新 e2e 分层 / 新命令） | 新增了后续要依赖的登记项 | 对应子文件（按上方路由表登记） |
 
-**memory 写法（防流水账）**：只留**判据与坑位**（为何这样判、踩过什么坑）；「降级记录」压成一行（原级别 + 原因）；**验证数字**（用例数 / 耗时 / 断言计数）进 commit message，**不进 memory**。
+**memory 写法（防流水账）**：memory 是**按域组织的避坑手册**，只留**判据与坑位**（为何这样判、踩过什么坑）。**过程叙事一律不进 memory**：「实现落点 / 测试用例数与耗时 / 降级记录 / 交付清单 / 时序编号（第 N 轮）」全部进 commit message。写入前过三条准入：① 读代码或文档能推出来吗？能 → 不写；② 说不出「下次会在哪一步踩到」→ 不写；③ 是判据还是叙事？只有判据可复用。域索引与完整判据见 [docs/memory/README.md](docs/memory/README.md)。
 
 **重构期模式**：UI 重构迭代期内展示层反复变动，验收基准从「取值正确」降为「不变量与契约不破」——只跑不变量层与受影响用例，不为可逆改动开 ADR / 同步子文件 / 逐轮刷新像素基线；收敛后一次性重建基线，并补登记本轮真实发生的契约变化。
 
@@ -101,6 +105,11 @@ node tools/check-doc-links.mjs   # 文档链接/重复校验（断链或误删�
 - **文本数据来源**：所有展示文本必须来自现有数据源（converter 输出 JSON / TextMap），禁止在代码中写死或自建数据源。
 - **色彩令牌收口**：所有颜色必须落入 `tokens.css` 四层令牌体系（原始层色阶 → 主题色阶别名层 `--th-*`（全站唯一，随 `data-accent`）→ 语义层 `--primary` 等 → 领域层数据语义色）。派生色用 `color-mix(in srgb, var(--primary) X%, transparent)` 表达；**禁止在页面 CSS / 组件内联裸色值**，**禁止消费层直接引用原始层**，**领域色不得引用别名层**。新增颜色先查令牌，缺失按四步评审闸落层；`node tools/check-colors.mjs --strict` 与 `node tools/check-contrast.mjs --strict` 必须全绿。四层定义、豁免与流程见 [docs/agents/ui-design.md](docs/agents/ui-design.md) §2/§5。
 - **构建守卫**：每次变更必须通过 `pnpm build`（含 vue-tsc 类型检查）+ `pnpm test` 全绿后方可提交。
+- **版本号禁入叙述性文档**：README / 本文件 / `docs/agents/` 子文件**只写选型名，不写版本号**；版本口径唯一落位 [docs/agents/tech-stack.md](docs/agents/tech-stack.md)，且该校验由 `node tools/doc-audit.mjs` 与 `package.json` / `requirements.txt` / CI 工作流逐字比对（不一致即报）。
+- **依赖准入**：新增任何第三方依赖（含 devDependencies）必须经用户确认并说明「为何现有依赖 / 原生实现不够」；已有依赖升级大版本同样先确认。运行时依赖维持 `vue` / `pinia` / `vue-router` 三件——前端数据 / UI / 工具类一律不引库。禁用清单的完整索引见 [docs/agents/tech-stack.md](docs/agents/tech-stack.md) §5。
+- **改动范围最小化**：只改任务明确要求的内容——**禁止顺手重构、顺手改名、顺手「优化」任务外代码**；交付记录里不得出现范围外改动。两类例外须显式登记才允许：① 阻断本任务的硬错误（如同文件内被本次改动直接破坏的引用）；② 已登记过的漂移修正（如相邻 ADR 的 status 与实现脱节），且在交付记录中单列。发现范围外缺陷 → 记入交付记录的「待用户裁决」清单，不自动修。
+- **helper 先查再用**：新增工具函数 / composable / 选择器 / 原语前，先查 `src/lib/`、`src/services/`、既有共享原语与 `CatalogPageConfig` 注册表是否已有等价实现；有则复用并按其约定扩展，**禁止在不同目录重复封装同一功能**（跨文件复制的 CSS 声明同罪，见 [ui-design.md](docs/agents/ui-design.md) §1 原语纪律）。
+- **文档体量红线（AI 可读性）**：面向 AI 的文档单文件超过约 5 万 token（≈120 KB 中文 / ≈150 KB 英文）即失去「整读」价值。持续增长的内容（数据索引 / 复盘日志 / 审计清单）**必须**拆成「小总索引 + 按需分片」，或按月切分并在头部建 TL;DR 索引；**禁止**把单文件堆到 AI 只能靠 grep 捞。落位前先估体量，细则见 [docs/agents/conventions.md](docs/agents/conventions.md)。
 
 ## 验证流程
 

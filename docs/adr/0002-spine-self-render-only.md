@@ -6,6 +6,10 @@
 
 **结论**：独立站无宿主 canvas 可抢，快路径无存在基础——Spine 一律由本站自建 player 渲染，不依赖宿主任何资源。
 
+**Considered Options**（行文见上，此处结构化）：
+- **宿主 canvas 快路径**（抢宿主已渲染的 WebGL canvas，零开销）：放弃——独立站无宿主 canvas 可抢；快路径为死代码，且其 2s 宽限期会延迟动画出现。
+- **单运行时（合并 4.2 / 4.1）**：放弃——nanoka `.skel` 为自定义封装格式，4.2 运行时无法加载；必须双版本按清单条目分派。
+
 **现状指针**：
 - 引擎层 `src/spine/`（runtime / player / scene / types）；运行时版本常量 `src/spine/constants.ts`；运行时随站本地分发 `public/vendor/spine/`，CDN 仅兜底。
 - 运行时为**双版本并存**：`4.2.43`（官网 JSON 骨架 / 场景）+ `4.1.23`（nanoka `.skel` 二进制）；按清单条目分派，禁止合并为单版本——nanoka skel 为自定义封装格式，4.2 运行时无法加载（探针取证见 docs/memory/2026-08.md）。

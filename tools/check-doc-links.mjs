@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 文档链接与引用一致性检查器（CI 门禁；断链/误删引用即退出 1）。
- * 扫描 README/AGENTS/CONTEXT.md、docs/**、tools/converter/README.md、spine-lab 下的 md；
+ * 受管范围与跳过名单见 tools/doc-scope.mjs（唯一来源，勿在别处再写一份）；
  * 排除 node_modules/dist/temp/vendor/.agents/public/缓存 与自动生成的 DATA_CATALOG.md。
  * 检查项：① 断链([text](path)/图片/反引号路径，目录/http(s)/mailto/锚点跳过)；
  * ② 误删引用(HEAD 有、工作区无→报错，同名迁移给建议路径)；③ 重复(sha256 全等或 Jaccard≥0.8)。
@@ -12,26 +12,15 @@ import { join, extname, relative, sep, dirname, resolve, basename, posix } from 
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { SKIP_DIR, MANAGED_ENTRIES, SKIP_FILE } from './doc-scope.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const reportOnly = process.argv.includes('--report');
 const strict = process.argv.includes('--strict');
 const verbose = process.argv.includes('--verbose');
 
-/** 目录级排除（任一路径段命中即剪枝） */
-const SKIP_DIR = new Set([
-  'node_modules', 'dist', 'temp', 'vendor', '.agents', '.git',
-  'public', 'playwright-report', '.playwright', '.pnpm-store', '.pytest_cache', '.vscode',
-]);
-
-/** 受管 markdown 的入口（相对仓库根） */
-const MANAGED_ENTRIES = [
-  'README.md', 'AGENTS.md', 'CONTEXT.md',
-  'docs', join('tools', 'converter', 'README.md'), 'spine-lab',
-];
-
-/** 自动生成、禁止人工维护链接的文档 */
-const SKIP_FILE = new Set([join('tools', 'converter', 'DATA_CATALOG.md')]);
+/* 受管范围与跳过名单的唯一来源是 tools/doc-scope.mjs（原先此处与 doc-audit.mjs 各写一份，
+   新增生成物目录必然只改一处 → 违反「禁止重复实现同一功能」）。 */
 
 /** 可被识别的仓库内路径后缀（反引号路径只在命中这些后缀时才校验，避免命令/标识符误报） */
 const PATH_EXT = new Set([
@@ -47,7 +36,8 @@ const walk = (abs) => {
   if (st.isFile()) {
     if (extname(abs).toLowerCase() !== '.md') return;
     const rel = relative(ROOT, abs).split(sep).join(posix.sep);
-    if (!SKIP_FILE.has(relative(ROOT, abs))) files.push(rel);
+    // SKIP_FILE 用正斜杠（跨平台一致）；此处必须用 rel 比较，原生分隔符在 Windows 下永不命中
+    if (!SKIP_FILE.has(rel)) files.push(rel);
     return;
   }
   for (const name of readdirSync(abs)) {

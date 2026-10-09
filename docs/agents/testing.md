@@ -21,7 +21,7 @@
 - **分层**：CI 层 = `pnpm test:e2e:ci`（layout + accessibility，零外部依赖、环境无关）；像素基线回本机（判定依赖环境——CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异，见 `ci.yml` 注释），**禁止把 `visual.spec` 加回 CI**
 - 基线：截图提交 git（`e2e/snapshots/`），本机刷新用 `pnpm test:e2e:update`（详细约束见 [commands.md](commands.md)）
 - 断言能力已固化「验证流程」各级别：`toHaveCSS` / `toHaveText` / `toHaveCount`（T1b/T2）、横向溢出检测 `findHorizontalOverflow`（L3）、`toHaveScreenshot`（L4）、axe-core（a11y）、`pageerror` 硬断言（`console` error 仅收集记录，环境性 CDN 失败不硬断言，见 `helpers.ts` 注释）
-- a11y 既有缺陷登记在 `accessibility.spec.ts` 的 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败；登记带超期复查提示）——修复后须人工裁决并从清单移除。**登记前必须先实测**：只有 axe impact 为 `serious`/`critical` 的违规才进入断言路径，`moderate` 级登记进去等于永不生效的白名单（曾有一条此类死条目，已删）。扫描集 = `WCAG_TAGS`（2.2 A/AA）**+ 显式开启 `target-size`**——它挂在 `wcag22aa` 标签下却 `enabled: false`，只写 `withTags` 时 2.5.8 从不执行（「声称 2.2 AA 目标尺寸」的声明曾因此长期未验证，见 [memory](../memory/2026-10.md) 第 10 轮）。
+- a11y 既有缺陷登记在 `accessibility.spec.ts` 的 `KNOWN_VIOLATIONS`（命中降级 warning，新增违规仍失败；登记带超期复查提示）——修复后须人工裁决并从清单移除。**登记前必须先实测**：只有 axe impact 为 `serious`/`critical` 的违规才进入断言路径，`moderate` 级登记进去等于永不生效的白名单（曾有一条此类死条目，已删）。扫描集 = `WCAG_TAGS`（2.2 A/AA）**+ 显式开启 `target-size`**——它挂在 `wcag22aa` 标签下却 `enabled: false`，只写 `withTags` 时 2.5.8 从不执行（「声称 2.2 AA 目标尺寸」的声明曾因此长期未验证，见 [memory](../memory/ui-tokens.md)（可达名与扫描面））。
 - 枢纽页：`/` 与 `/currency` 为静态品牌带 + 板块索引（无 WebGL / 视频帧），像素基线直接稳定——旧的双枢纽 Hero 媒体层隐藏块已随 [ADR 0018](../adr/0018-枢纽页改为工具化入口页.md) 删除（那些元素已不存在，保留会让 `evaluate` 直接失败）。`/` 首屏入口行数由 `e2e/layout-home.spec.ts` 的可执行断言锁定
 
 ### e2e 断言三层归属（不变量 / 契约 / 规格；与上方 CI / 本机归属正交）

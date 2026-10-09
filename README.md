@@ -28,7 +28,7 @@
 
 ## 快速开始
 
-环境要求：Node 22+；包管理器使用 `packageManager` 字段锁定的 pnpm 11。
+环境要求（Node / pnpm / Python 版本口径）见 [docs/agents/tech-stack.md](docs/agents/tech-stack.md)。
 
 ```bash
 pnpm install        # 安装依赖
@@ -45,14 +45,16 @@ pnpm test:e2e:ci    # e2e CI 层（layout + a11y）
 
 | 分类 | 选型 |
 | --- | --- |
-| 框架 | Vue 3（`<script setup>` SFC） |
+| 框架 | Vue（`<script setup>` SFC） |
 | 构建 | Vite |
 | 语言 | TypeScript |
 | 状态 | Pinia |
 | 路由 | Vue Router（`createWebHistory`） |
 | 测试 | Vitest + happy-dom（前端）/ Playwright（e2e）/ pytest（转换工具） |
 | 数据转换 | Python（`tools/converter/`） |
-| 包管理 | pnpm 11（`packageManager`），Node 22+ |
+| 包管理 | pnpm（版本以 `packageManager` 字段为准） |
+
+环境要求、版本号、依赖现状全量清单与**禁用依赖负向约束**以 [docs/agents/tech-stack.md](docs/agents/tech-stack.md) 为唯一事实源。
 
 ## 数据
 
@@ -66,7 +68,7 @@ python convert.py --only characters   # 仅重跑指定模块；全量转换去�
 
 - 本地数据是全部展示文本与数值的**唯一来源**：禁止在代码中写死数据、禁止引入外部样本作为数据源
 
-- 数据探索必须走 `query.py` / `DATA_CATALOG.md`，**禁止直接读取** GB 级原始文件
+- 数据探索必须走 `query.py`；字段结构走 [tools/converter/DATA_CATALOG.md](tools/converter/DATA_CATALOG.md) 总索引与 [tools/converter/DATA_CATALOG.parts/](tools/converter/DATA_CATALOG.parts/) 分片，**禁止直接读取** GB 级原始文件
 
 管线细节、模块划分与探索工具用法见 [docs/agents/data-pipeline.md](docs/agents/data-pipeline.md)。
 

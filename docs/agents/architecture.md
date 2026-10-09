@@ -16,6 +16,40 @@ src/
 
 约束：`spine/` 禁止依赖 Vue 与 `app/`；`services/` 为纯函数层（单例 Promise 除外），不持有全局状态。
 
+### 分层依赖矩阵（越权调用前先查本表）
+
+| 层 | 允许 import | 严禁 import | 核心职责 |
+| --- | --- | --- | --- |
+| `spine/` | 自身 + `lib/constants` | Vue、`app/`、`services/` | Spine 引擎与双运行时（4.2.43 / 4.1.23），零框架依赖 |
+| `services/` | `lib/`、`services/types` | Vue、`app/`、`spine/`（动画播放由 app 编排） | 数据加载 / CDN 解析 / 缓存 / 错误边界，纯函数 + 单例 Promise |
+| `lib/` | 自身 | `app/`、`services/`、`spine/`、Vue | 纯函数：常量映射、格式化、转义、主题通道、错误类型 |
+| `app/`（views / catalog / stores / components / composables） | `lib/`、`services/`、`spine/`（仅动画消费） | 反向被下层引用（禁止） | 页面编排、目录引擎、状态管理、组合式逻辑 |
+| `app/debug/`（研究线） | `lib/`、`services/`、`spine/` | `app/` 业务模块（SidebarNav / 各目录视图）、`stores/` | dev-only `/debug` 调试台四 Tab |
+| `styles/` | —（CSS 令牌单向依赖：原始层 → 别名层 → 语义层 → 领域层） | 消费层直引原始层、领域层引用别名层 | `tokens.css` + `catalog.css` 全局两层；页面 CSS 随路由 import |
+
+派生规则：**下层永远不知道上层的存在**；新增跨层需求时先在本表找允许路径，没有就在对应层内实现，禁止为走捷径反向 import。
+
+### 数据流（端到端一图）
+
+```
+ExcelOutput/TextMap（vendor，禁直读）
+   │ convert.py（离线，tools/converter；开源数据 → 本地 JSON）
+   ▼
+public/data/cn/*.json（随站部署，唯一展示数据源）
+   │ fetchJSON<T>（src/services/cache.ts：15s 超时 / NkError / AbortController）
+   ▼
+services/api/<域>.ts（按域加载器；共享列表 = 模块级单例 Promise）
+   │
+   ▼
+Pinia store（加载编排 / 缓存 / 错误态；不写业务计算）
+   │
+   ▼
+view / catalog 组件（模板字符串卡片 + escHtml；虚拟滚动）
+   │
+   ├─ 图片 / Spine → services/cdn/ 纯函数解析基址 → CDN 双源回退（运行期）
+   └─ 构建期 gen-ai-endpoints.mjs：dist/index.html → dist/prerender/** 快照（AI 可见性）
+```
+
 ## 研究线（Spine Lab 调试台，主站 dev-only 路由）
 
 研究线调试台已并入主站，为 **dev-only 路由 `/debug`**（视图与引擎在 `src/app/debug/`：KV 场景验收 / 清单审核 / 死链审核 / 系统地图 四 Tab）：
