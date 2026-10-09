@@ -1,6 +1,6 @@
 
 import { gameTagsToHtml } from './html';
-import { MAX_CHAR_LEVEL, STANCE_LABEL, STANCE_TAG } from './constants';
+import { CHAR_STAGE_LEVEL_CAPS, MAX_CHAR_LEVEL, STANCE_LABEL, STANCE_TAG } from './constants';
 import { NkError } from './errors';
 import type { CharacterData, CharStats, Skill } from '../services/types';
 
@@ -139,8 +139,32 @@ export function maxLevelStat(stats: Record<string, CharStats> | null | undefined
   return maxK != null ? stats[maxK] : (Object.values(stats).pop() ?? null);
 }
 
+/**
+ * 某突破档曲线在指定等级的取值：`AvatarPromotionConfig` 的每档曲线都是 `Base + Add × (等级 − 1)`（等级从 1 起算）。
+ * 满级值 = 满级档曲线在 `MAX_CHAR_LEVEL` 处的取值（见 `maxLevelValue`）。
+ */
+export function levelStatValue(base: number, add: number, level: number): number {
+  return base + add * (level - 1);
+}
+
 export function maxLevelValue(base: number, add: number): number {
-  return base + add * (MAX_CHAR_LEVEL - 1);
+  return levelStatValue(base, add, MAX_CHAR_LEVEL);
+}
+
+/**
+ * 某等级**可突破到的最高档位**下标（= `stats` 的下标，0 = 未突破）。
+ *
+ * 判据（不是随手取的档）：
+ * 1. 每档的 `Base/Add` 是**该档自己的曲线**，且相邻档的 `Base` 恰好递进 `8 × Add` —— 即**每次突破立刻加面板**
+ *    （满突破 6 次累计 +48 级份）。故同一等级在不同突破状态下有不同面板，「某等级的面板」必须绑定一个突破口径。
+ * 2. 取「上限 ≤ 该等级的档位数」= **每档上限一到就突破**的标准养成路径：Lv.20 显示的是突破 1 之后的值。
+ *    不取「上限 ≥ 该等级的最小档」——那条曲线意味着「过了上限才跳档」，不是任何可达状态
+ *    （Lv.70 未突破 = 下限值，而玩家要升到 Lv.71 必须先突破，届时面板已经跳过了）。
+ */
+export function charStageForLevel(level: number, stageCount: number): number {
+  let stage = 0;
+  for (const cap of CHAR_STAGE_LEVEL_CAPS) if (level >= cap) stage++;
+  return Math.min(stage, Math.max(stageCount - 1, 0));
 }
 
 export function parseRarity(rank: string | null | undefined): number {

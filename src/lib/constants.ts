@@ -17,6 +17,13 @@ export const SPINE_MANIFEST_VERSION = 19;
 
 export const MAX_CHAR_LEVEL = 80;
 
+/**
+ * 角色突破档位的等级上限（`AvatarPromotionConfig` 的 `MaxLevel`，全角色同一套）。
+ * 档位下标与此数组一一对应：0 = 上限 20、1 = 30 …、6 = 80（满级档，不再解锁新档位故不列入）。
+ * 角色详情页的等级滑条靠它把「等级」映射到「可突破到的最高档位」——见 `charStageForLevel`。
+ */
+export const CHAR_STAGE_LEVEL_CAPS: readonly number[] = [20, 30, 40, 50, 60, 70];
+
 export const PATH: Record<string, string> = {
   Knight: '存护', Rogue: '巡猎', Mage: '智识', Warlock: '虚无',
   Warrior: '毁灭', Shaman: '同谐', Priest: '丰饶', Memory: '记忆', Elation: '欢愉',

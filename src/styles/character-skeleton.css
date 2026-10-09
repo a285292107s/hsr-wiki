@@ -7,7 +7,36 @@
   .nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 3 / 2; }
 }
 .nk-char-page .nk-skeleton__stat-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
-.nk-char-page .nk-sk--stat { height: 35px; border-radius: 0; }
+/* 属性铭牌骨架：与就绪态**同构**（两层的 2/3/5 列轴 + 注记落位），条块高度逐项对齐
+   （面板三层文字 ≈ 57px、参数两层 ≈ 37px）。旧骨架是 8 行等高条块，数据到达时会在同一位置重排成
+   两层——那是一次可见位移。上分界沿用就绪态的同一处节奏（20 / 1 / 16）：`margin-top` 归零，
+   20px 由 `__body` 的 flex gap 承担。
+   章标 / 滑条 / 注记三处代理同样按就绪态标定，否则区块以下的内容在数据到达时会整体位移：
+   就绪章标行 27px 高 + `margin-bottom` 28px，骨架这里是 27 +（flex gap 20 + 8）= 55px；
+   就绪滑条行 28px 高（range 控件 24px）+ 20px 下边距 = 骨架 28 + flex gap 20；就绪注记行 20.7px，骨架 20px。
+   注记在 ≥768 的就绪态占面板层尾随两列、<768 落在区块末尾 ⇒ 骨架两处各备一枚，各档只显示一枚。 */
+.nk-char-page .nk-skeleton__stats-title { height: 27px; margin-bottom: 8px; }
+.nk-char-page .nk-skeleton__stats-level { height: 28px; }
+.nk-char-page .nk-skeleton__stats-note { height: 20px; }
+.nk-char-page .nk-skeleton__stats-note--inline { display: none; }
+.nk-char-page .nk-skeleton__stat-grid--panel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.nk-char-page .nk-skeleton__stat-grid--param { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.nk-char-page .nk-skeleton__stat-grid--panel,
+.nk-char-page .nk-skeleton__stat-grid--param { gap: 16px 24px; }
+.nk-char-page .nk-skeleton__stat-grid--panel .nk-sk--stat { height: 57px; }
+.nk-char-page .nk-skeleton__stat-grid--param {
+  margin-top: 0; padding-top: 16px; border-top: 1px solid var(--line-1);
+}
+.nk-char-page .nk-sk--stat { height: 37px; border-radius: 0; }
+@media (max-width: 374px) {
+  .nk-char-page .nk-skeleton__stat-grid--panel,
+  .nk-char-page .nk-skeleton__stat-grid--param { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 768px) {
+  .nk-char-page .nk-skeleton__stat-grid--panel { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .nk-char-page .nk-skeleton__stats-note--inline { display: block; grid-column: 4 / 6; grid-row: 1; align-self: end; }
+  .nk-char-page .nk-skeleton__stats-note--flow { display: none; }
+}
 /* 骨架 hero 面板只代理「盒子」不代理「结构」。盒高 = 实测 **全量 98 只**角色的就绪面板高度
    **p75 上取整**（旧口径取中位数；2026-10 字体栈由 Orbitron 换成 IBM Plex Mono + Noto Sans SC 后
    分布被拉宽——桌面 中位 243.8 / p75 243.8，平板 263.0 / 266.5，手机 229.8 / 254.5——
@@ -42,9 +71,7 @@
 
 @media (min-width: 768px) {
   .nk-char-page .nk-hero__panel { padding: 32px; }
-  .nk-char-page .nk-stats__stat { padding: 11px 0; }
-  .nk-char-page .nk-stats__val { font-size: var(--nk-fs-5); }
-  .nk-char-page .nk-sk--stat { height: 41px; }
+  .nk-char-page .nk-skeleton__stat-grid--param { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .nk-char-page .nk-skeleton__hero-panel { padding: 32px; }
 }
 @media (min-width: 768px) and (max-width: 1023px) {
@@ -91,9 +118,6 @@
   .nk-char-page .nk-hero__desc { font-size: var(--nk-fs-4); line-height: 1.75; }
   .nk-char-page .nk-hero__badge img { filter: none; }
   .nk-char-page .nk-hero__toggle { top: var(--nk-hero-toggle-inset); right: var(--nk-hero-toggle-inset); }
-  .nk-char-page .nk-stats__grid { gap: 0; }
-  .nk-char-page .nk-stats__stat { padding: 12px 0; }
-  .nk-char-page .nk-sk--stat { height: 43px; }
   .nk-char-page .nk-skill { padding: 24px 28px; }
   .nk-char-page .nk-eidolon, .nk-char-page .nk-ability { padding: 24px 28px; }
   .nk-char-page .nk-cmp-rank, .nk-char-page .nk-cmp-tree { padding: 24px 28px; }
@@ -124,13 +148,6 @@
   .nk-char-page .nk-hero__archive { display: none; }
 }
 @media (max-width: 767px) {
-  .nk-char-page .nk-stats__grid { gap: 0; }
-  .nk-char-page .nk-stats__stat {
-    gap: 0 10px; padding: 9px 0;
-    grid-template-columns: 3px 2.9em 15px auto minmax(20px, 1fr) auto;
-  }
-  .nk-char-page .nk-stats__label { font-size: var(--nk-fs-3); }
-  .nk-char-page .nk-stats__val { font-size: var(--nk-fs-4); min-width: 5ch; }
   .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
   .nk-char-page .nk-hero__badge--enh { padding: 5px 9px 5px 7px; }
   .nk-char-page .nk-eidolon__head { gap: 16px; }

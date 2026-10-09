@@ -20,55 +20,256 @@ import {
 
 test.describe('布局验收：角色详情页', () => {
 
-  // 「档案馆」样张的版面契约（R1 铺开前先钉住，否则会被后续区块改造静默改掉）：
-  //   00 属性 = 卷宗规格表 —— 单列、逐行一枚属性身份色、引导线夹在名称与取值之间、取值列右对齐。
-  // 期望值一律派生：行首色从 `--prop-<data-prop>` 令牌解析、行索引从标题索引派生；不写死颜色与像素。
-  test('/character/1001：00 属性为卷宗规格表（单列 / 属性身份色 = --prop-* / 无假进度条）', async ({ page }) => {
+  // 「规格铭牌」的版面契约（推翻了 R1 的卷宗规格表：8 行等高表格 + `00-N` 行索引 + 行底发丝线 +
+  //   名称与取值之间的引导线 = 一屏 16 条同权重线，区块被读成账本，且行索引与章标的 `00` 重复）。
+  // 00 属性 = 面板三项（生命 / 攻击 / 防御，随等级线性成长，带「每级 +N」注记）+ 参数五项（满级即定值）。
+  // 期望值一律派生：身份色从 `--prop-<data-prop>` 令牌解析、成长注记从 characters/*.json 取、列轴与左轴实测几何。
+  // 三条防回流硬判据：① `00-N` 行索引不得回潮；② 区块体内结构性发丝线**恰 1 条**（两层分界）；
+  // ③ 两层各自等分且面板层不留尾列空位（空列会让分界线比内容宽 1.7 倍）。
+  test('/character/1001：00 属性为规格铭牌（两层各自等分 / 无行索引 / 区块内恰 1 条发丝线）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1001');
     await page.waitForSelector('.nk-stats__stat');
 
-    const gridCols = await page.locator('.nk-stats__grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns);
-    expect(gridCols.trim().split(/\s+/), '属性表必须单列（双列削掉引导线长度）').toHaveLength(1);
+    const panel = page.locator('.nk-stats__tier--panel .nk-stats__stat');
+    const param = page.locator('.nk-stats__tier--param .nk-stats__stat');
+    await expect(panel, '面板层 = 随等级线性成长的三项').toHaveCount(3);
+    await expect(param, '参数层 = 满级即定值的五项').toHaveCount(5);
 
+    // ① 行索引退场：DOM 与可见文本都不得再出现 `00-N`
+    await expect(page.locator('.nk-stats__idx')).toHaveCount(0);
+    const text = await page.locator('[data-panel="stats"] .nk-stats').innerText();
+    expect(text, '属性面板不得再出现 `00-N` 行索引').not.toMatch(/\d\d-\d/);
+
+    // ② 发丝线预算：区块体内恰 1 条（两层分界的上边线）。判据同时覆盖「边框画的线」与「背景色画的线」——
+    //    旧的引导线正是后者，只数边框会让它静默复活。
+    const hairlines = await page.evaluate(() => {
+      const sides = ['borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth'] as const;
+      const styles = ['borderTopStyle', 'borderRightStyle', 'borderBottomStyle', 'borderLeftStyle'] as const;
+      let n = 0;
+      document.querySelectorAll('.nk-stats__tier, .nk-stats__tier *').forEach((el) => {
+        const cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden') return;
+        sides.forEach((w, i) => {
+          const v = parseFloat(cs[w]);
+          if (v > 0 && v <= 1.5 && cs[styles[i]] !== 'none') n++;
+        });
+        const r = el.getBoundingClientRect();
+        if (r.width > 12 && r.height <= 2 && cs.backgroundColor !== 'rgba(0, 0, 0, 0)') n++;
+      });
+      return n;
+    });
+    expect(hairlines, '区块体内只允许 1 条结构性发丝线（两层分界）').toBe(1);
+    const rule = await page.locator('.nk-stats__tier--param').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        w: parseFloat(cs.borderTopWidth), style: cs.borderTopStyle, color: cs.borderTopColor,
+        others: [cs.borderBottomWidth, cs.borderLeftWidth, cs.borderRightWidth],
+      };
+    });
+    expect(rule.style, '分界线须为实线（本页唯一线语言）').toBe('solid');
+    expect(rule.w, '分界线须为发丝线').toBeLessThanOrEqual(1);
+    expect(rule.others, '分界只走一条上边线，不得四面加框').toEqual(['0px', '0px', '0px']);
+    expect(rule.color, '分界线须为发丝线令牌色').not.toBe('rgba(0, 0, 0, 0)');
+
+    // ③ 列轴：两层**列宽逐列相等**（≥768 面板层占 5 列栅格的前 3 列，空列由注记占用），且面板层不得留空列。
+    //    面板三项落在五列格线上会空出 41% 宽的尾列，而下方分界线仍横贯整幅 ⇒ 线比内容宽 1.7 倍、
+    //    上部读成「表格缺了两格」。断言不钉视口：档位从页面令牌读，两个视口项目下同一条判据都成立。
+    const cols = await page.evaluate(() => {
+      const g = (s: string) => getComputedStyle(document.querySelector(s) as Element)
+        .gridTemplateColumns.split(/\s+/).map(parseFloat);
+      const tok = (n: string) => parseFloat(
+        getComputedStyle(document.querySelector('.nk-stats') as Element).getPropertyValue(n),
+      );
+      const block = document.querySelector('.nk-stats') as Element;
+      const note = document.querySelector('.nk-stats__note') as Element;
+      const param = document.querySelector('.nk-stats__tier--param') as Element;
+      return {
+        panelToken: tok('--nk-stats-panel-cols'),
+        paramToken: tok('--nk-stats-cols'),
+        panelItems: document.querySelectorAll('.nk-stats__tier--panel .nk-stats__stat').length,
+        panel: g('.nk-stats__tier--panel'),
+        param: g('.nk-stats__tier--param'),
+        noteFlushRight: Math.abs(note.getBoundingClientRect().right - block.getBoundingClientRect().right),
+        noteAboveDivider: note.getBoundingClientRect().bottom <= param.getBoundingClientRect().top,
+        noteLines: Math.round(
+          note.getBoundingClientRect().height / parseFloat(getComputedStyle(note).lineHeight),
+        ),
+      };
+    });
+    expect(cols.panelToken, '面板层列轴档位').toBeGreaterThanOrEqual(2);
+    expect(cols.paramToken, '参数层列轴档位').toBeGreaterThanOrEqual(2);
+    expect(cols.panel, '面板层列数 = 令牌档位').toHaveLength(cols.panelToken);
+    expect(cols.param, '参数层列数 = 令牌档位').toHaveLength(cols.paramToken);
+    expect(cols.panel, '面板层不得留尾列空位（窄档由换行承担）')
+      .toHaveLength(Math.min(cols.panelItems, cols.panelToken));
+    // 各列等宽：`1fr` 的计算值会因亚像素取整差 0.02px 级，故比「极差 ≤1px」而不是比集合相等
+    const spread = (a: number[]): number => Math.max(...a) - Math.min(...a);
+    expect(spread(cols.panel), '面板层各列等宽').toBeLessThanOrEqual(1);
+    expect(spread(cols.param), '参数层各列等宽').toBeLessThanOrEqual(1);
+    // 两层共用同一条列距 = 面板层列宽与参数层列宽逐列相等（面板层只占前 3 列，不另开一套列宽）
+    expect(Math.abs(cols.panel[0] - cols.param[0]), '两层的列宽须相等（同一套列距）').toBeLessThanOrEqual(1);
+    // 出现空列时（桌面档 5 列只放三项），空列必须由注记占用：注记贴区块右缘、落在分界线之上，且**单行**——
+    // 该槽在 768 档仅 238px，注记文案一旦超过 ~20 字就会折行并留下孤字行（`StatsPanel.vue` 里有同一条约束）。
+    if (cols.panelToken > cols.panelItems) {
+      expect(cols.noteFlushRight, '注记须贴区块右缘（占用空列）').toBeLessThanOrEqual(1);
+      expect(cols.noteAboveDivider, '注记须落在面板层内（分界线之上）').toBe(true);
+      expect(cols.noteLines, '注记须单行（文案长度与槽宽绑定）').toBe(1);
+    }
+
+    // ④ 身份色每项恰好一次（行首色标），值从领域层 `--prop-*` 派生（不随主题 / 强调色）
     const rows = page.locator('.nk-stats__stat');
-    const n = await rows.count();
-    expect(n, '基础属性项数 = StatsPanel 输出项数').toBe(8);
-
-    // 行首色：期望值只能从领域层令牌派生（`--prop-*`，不随主题 / 强调色）
     const props = await rows.evaluateAll((els) => els.map((el) => el.getAttribute('data-prop')));
-    expect(props.filter(Boolean)).toHaveLength(n);
-    expect(new Set(props).size, '属性键不得重复').toBe(n);
-    for (let i = 0; i < n; i++) {
-      const actual = await rows.nth(i).evaluate((el) => getComputedStyle(el, '::before').backgroundColor);
-      expect(actual, `第 ${i + 1} 行行首色须等于 --prop-${props[i]}`).toBe(
+    expect(new Set(props).size, '属性键不得重复').toBe(8);
+    for (let i = 0; i < props.length; i++) {
+      const actual = await rows.nth(i).evaluate((el) => getComputedStyle(el.querySelector('.nk-stats__mark') as Element).backgroundColor);
+      expect(actual, `第 ${i + 1} 项色标须等于 --prop-${props[i]}`).toBe(
         await resolveTokenColor(page, `--prop-${props[i]}`, '.nk-char-page'),
       );
     }
 
-    // 索引刻度：行索引 = 标题索引 + 行序（期望值从标题派生，不写死 "00"）
-    const secIdx = (await page.locator('.nk-title__idx').first().innerText()).trim();
-    await expect(rows.locator('.nk-stats__idx')).toHaveText(props.map((_, i) => `${secIdx}-${i + 1}`));
+    // ⑤ 标签与取值共用同一条左轴：色标 + 图标作为悬挂记号占左槽，取值不得压到色标下方
+    const offsets = await rows.evaluateAll((els) => els.map((el) => {
+      const label = el.querySelector('.nk-stats__label')!.getBoundingClientRect();
+      const val = el.querySelector('.nk-stats__val')!.getBoundingClientRect();
+      return Math.abs(val.left - label.left);
+    }));
+    expect(offsets.every((d) => d <= 1), `取值与标签左缘须共线（实测偏差 ${offsets.join(' / ')}）`).toBe(true);
 
-    // 引导线：条数 = 行数，且必须真的夹在名称与取值之间（否则退化成装饰性满行线）
-    await expect(page.locator('.nk-stats__lead')).toHaveCount(n);
-    const [lead, label, val] = await rows.first().evaluate((row) => {
-      const b = (sel: string) => row.querySelector(sel)!.getBoundingClientRect();
-      return [b('.nk-stats__lead'), b('.nk-stats__label'), b('.nk-stats__val')] as const;
-    });
-    expect(lead.left, '引导线起点须在名称之后').toBeGreaterThanOrEqual(label.right - 1);
-    expect(lead.right, '引导线终点须在取值之前').toBeLessThanOrEqual(val.left + 1);
-    expect(lead.width, '引导线须填满中间列').toBeGreaterThan(0);
+    // ⑥ 成长注记 = 数据里的每级增量（期望值从 characters/*.json 取，不在断言里写数字）
+    const st = readJson<{ stats: Record<string, { hp_add: number; attack_add: number; defence_add: number }> }>(
+      'public/data/cn/characters/1001.json',
+    ).stats;
+    const last = st[String(Math.max(...Object.keys(st).map(Number)))];
+    const adds = await panel.locator('.nk-stats__add').allInnerTexts();
+    expect(adds, '面板三项各带一条成长注记').toHaveLength(3);
+    for (const t of adds) expect(t, '注记格式 = 「每级 +数值」').toMatch(/^每级 \+\d/);
+    expect(
+      adds.map((t) => Number(t.replace(/^每级 \+/, ''))),
+      '成长注记须等于数据里的每级增量（生命 / 攻击 / 防御）',
+    ).toEqual([last.hp_add, last.attack_add, last.defence_add]);
+    await expect(param.locator('.nk-stats__add'), '参数层满级即定值，不得出现成长注记').toHaveCount(0);
 
-    // 取值列右对齐 = 等宽数字列：8 行右缘共线
-    const rights = await rows.locator('.nk-stats__val').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
-    for (const r of rights) expect(Math.abs(r - rights[0]), '取值列右缘共线').toBeLessThanOrEqual(1);
-
-    // 恒定 100% 的假进度条（零信息量的「带填充轨道的评分条」）已退场，代之以铭文 + 发丝收口
-    await expect(page.locator('.nk-stats__level-fill, .nk-stats__level-track')).toHaveCount(0);
-    await expect(page.locator('.nk-stats__level-rule')).toHaveCount(1);
+    // ⑦ 等级滑条在章标之下、默认取满级（面板取值 = 满级档曲线在满级的取值，与改版前逐字一致）
+    const slider = page.locator('.nk-stats__level input[type=range]');
+    await expect(slider, '滑条须存在且默认满级（= 自身上限）').toHaveValue(String(await slider.getAttribute('max')));
+    await expect(page.locator('.nk-stats__level-val')).toHaveText(/^Lv\.\d+\/\d+$/);
+    await expect(page.locator('.nk-stats__level-stage')).toHaveText(/^突破 \d$/);
+    await expect(page.locator('.nk-stats__level-rule, .nk-stats__level-fill, .nk-stats__level-track')).toHaveCount(0);
 
     await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  // 等级滑条契约：滑条驱动**面板层**（生命 / 攻击 / 防御），参数层原地不动；键盘可达。
+  // 口径（不是随手取的档）：每档 Base/Add 是该档自己的曲线、相邻档 Base 递进 8×Add ⇒ 突破立刻加面板，
+  // 故某等级取「上限 ≤ 该等级的档位数」那一档（每档上限一到就突破）。期望值全部从 characters/*.json 派生。
+  test('/character/1001：等级滑条按档位口径驱动面板层（参数层不动 / 键盘可达）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/character/1001');
+    await page.waitForSelector('.nk-stats__stat');
+
+    const slider = page.locator('.nk-stats__level input[type=range]');
+    await expect(slider, '滑条范围 = 1…满级').toHaveAttribute('min', '1');
+    const maxLv = Number(await slider.getAttribute('max'));
+    expect(maxLv, '滑条上限 = 角色满级').toBeGreaterThan(1);
+    await expect(slider, '默认满级').toHaveValue(String(maxLv));
+
+    const stats = readJson<{ stats: Record<string, Record<string, number>> }>(
+      'public/data/cn/characters/1001.json',
+    ).stats;
+    const readVals = () => page.locator('.nk-stats__val').allInnerTexts();
+    const grow = (base: number, add: number, lv: number) => Math.round(base + add * (lv - 1)).toLocaleString('en-US');
+    const panelAt = (stage: string, lv: number) =>
+      [['hp_base', 'hp_add'], ['attack_base', 'attack_add'], ['defence_base', 'defence_add']]
+        .map(([b, a]) => grow(stats[stage][b], stats[stage][a], lv));
+    const setLevel = async (lv: number) => {
+      await slider.evaluate((el, v) => {
+        (el as HTMLInputElement).value = String(v);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }, lv);
+    };
+
+    const at80 = await readVals();
+    expect(at80.slice(0, 3), '默认 = 满级档曲线在满级').toEqual(panelAt('6', maxLv));
+
+    // Lv.25：上限 ≤ 25 的档位只有 20 一个 ⇒ 档位 1
+    await setLevel(25);
+    const at25 = await readVals();
+    expect(at25.slice(0, 3), 'Lv.25 = 档位 1 曲线').toEqual(panelAt('1', 25));
+    expect(at25.slice(3), '参数层不随等级变化').toEqual(at80.slice(3));
+    await expect(page.locator('.nk-stats__level-val')).toHaveText('Lv.25/80');
+    await expect(page.locator('.nk-stats__level-stage')).toHaveText('突破 1');
+
+    // Lv.30 已可突破到档 2（不是档 1）：突破立刻加面板，不走「过了上限才跳档」的读法
+    await setLevel(30);
+    expect((await readVals()).slice(0, 3), 'Lv.30 = 档位 2 曲线').toEqual(panelAt('2', 30));
+    await expect(page.locator('.nk-stats__level-stage')).toHaveText('突破 2');
+
+    // 键盘可达：原生 range 的方向键改一档，读数与层取值同步
+    await slider.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(slider, '方向键 = 步进 1').toHaveValue('31');
+    await expect(page.locator('.nk-stats__level-val')).toHaveText('Lv.31/80');
+    await expect(
+      (await readVals()).slice(0, 3),
+      'Lv.31 = 档位 2 曲线',
+    ).toEqual(panelAt('2', 31));
+
+    assertNoErrors();
+  });
+
+  // 窄档列轴与列内贴合（最坏样本）：`1208` 的成长注记「每级 +10.032」是全量 98 只里最长的一条，
+  // 因而是列宽的本征最坏样本（逐只扫描 `*_add` 得）。判据用 `Range` 取**文本实际外延**——
+  // 标签 / 取值 / 注记都是撑满列宽的块元素，量元素盒永远等于列宽、抓不到文本溢出。
+  // **不判「必须落在本列盒内」**：注记略微探进 24px 列间距并不可见，而该字宽随平台 CJK 回退字体浮动
+  // （会变成一条依平台判定的断言）；真正可见的硬边界是「不得侵入同一行的相邻列内容」+「区块不得横向溢出」。
+  test('/character/1208 窄档（320 / 375）：列轴降档正确且文本不侵入相邻列', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    for (const [w, wantCols] of [[320, 2], [375, 3]] as const) {
+      await page.setViewportSize({ width: w, height: 700 });
+      await page.goto('/character/1208');
+      await page.waitForSelector('.nk-stats__stat');
+      const r = await page.evaluate(() => {
+        const rows = [...document.querySelectorAll('.nk-stats__stat')];
+        const collide: string[] = [];
+        rows.forEach((st, i) => {
+          const sb = st.getBoundingClientRect();
+          const next = rows[i + 1]?.getBoundingClientRect();
+          st.querySelectorAll('.nk-stats__label, .nk-stats__val, .nk-stats__add').forEach((el) => {
+            const rg = document.createRange();
+            rg.selectNodeContents(el);
+            const eb = rg.getBoundingClientRect();
+            if (next && Math.abs(next.top - sb.top) < 2 && eb.right > next.left - 1) {
+              collide.push(`${(el as HTMLElement).className}=${el.textContent}`);
+            }
+          });
+        });
+        return {
+          cols: parseFloat(
+            getComputedStyle(document.querySelector('.nk-stats') as Element).getPropertyValue('--nk-stats-cols'),
+          ),
+          panelCols: parseFloat(
+            getComputedStyle(document.querySelector('.nk-stats') as Element).getPropertyValue('--nk-stats-panel-cols'),
+          ),
+          collide,
+          // 区块自身的横向越界（**不整页判**：本页 Spine 画布恒越出视口，是已定性的既有缺陷，
+          // 整页判据会把无关缺陷算进来——同 `noUnknownOverflow` 在 1204 用例的注释）。
+          spill: [...document.querySelectorAll('.nk-stats, .nk-stats *')]
+            .filter((el) => {
+              const cs = getComputedStyle(el);
+              if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+              const b = el.getBoundingClientRect();
+              return b.width > 0 && (b.right > document.documentElement.clientWidth + 1 || b.left < -1);
+            })
+            .map((el) => `${(el as HTMLElement).className}`),
+        };
+      });
+      expect(r.cols, `${w}px 参数层档列轴`).toBe(wantCols);
+      expect(r.panelCols, `${w}px 面板层档列轴`).toBe(wantCols);
+      expect(r.collide, `${w}px：文本不得侵入同一行的相邻列`).toEqual([]);
+      expect(r.spill, `${w}px：区块不得横向越出视口`).toEqual([]);
+    }
     assertNoErrors();
   });
 

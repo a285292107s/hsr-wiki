@@ -165,10 +165,19 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:120px;"></div>
-        <div class="nk-skeleton__stat-grid">
-          <div v-for="i in 8" :key="i" class="nk-sk nk-sk--shimmer nk-sk--stat"></div>
+        <div class="nk-sk nk-sk--shimmer nk-skeleton__stats-title" style="width:120px;"></div>
+        <!-- 等级滑条一行的骨架代理（就绪态 = 28px 行高 + 20px 下边距，两层条块因此不被整体推低） -->
+        <div class="nk-sk nk-sk--shimmer nk-skeleton__stats-level"></div>
+        <!-- 属性铭牌骨架与就绪态同构（两层各自的 2/3/5 列轴 + 注记），否则数据到达时条块会在原位重排。
+             注记在就绪态 ≥768 占面板层尾随两列、<768 落在区块末尾 ⇒ 骨架两处各备一枚，各档只显示一枚。 -->
+        <div class="nk-skeleton__stat-grid nk-skeleton__stat-grid--panel">
+          <div v-for="i in 3" :key="`sp${i}`" class="nk-sk nk-sk--shimmer nk-sk--stat"></div>
+          <div class="nk-sk nk-sk--shimmer nk-skeleton__stats-note nk-skeleton__stats-note--inline"></div>
         </div>
+        <div class="nk-skeleton__stat-grid nk-skeleton__stat-grid--param">
+          <div v-for="i in 5" :key="`sq${i}`" class="nk-sk nk-sk--shimmer nk-sk--stat"></div>
+        </div>
+        <div class="nk-sk nk-sk--shimmer nk-skeleton__stats-note nk-skeleton__stats-note--flow" style="width:220px;"></div>
         <div class="nk-sk nk-sk--shimmer nk-sk--block-sm" style="margin-top:24px;"></div>
         <div class="nk-sk nk-sk--shimmer nk-sk--text-sm" style="width:100px;"></div>
         <div class="nk-skeleton__stat-grid">

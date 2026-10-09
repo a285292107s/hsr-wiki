@@ -292,24 +292,73 @@
    同一页不出现两套线语言。仅作用本页作用域，其余 5 个消费 .nk-title 的页面不受影响。 */
 .nk-char-page .nk-title::after { background: var(--line-1); }
 
-/* 00 属性：卷宗规格表（索引 / 图标 / 名称 / 引导线 / 取值） */
+/* 00 属性：规格铭牌（等级滑条 + 面板三项 + 参数五项）。
+   上一版是 8 行等高表格（`00-N` 行索引 / 行底发丝线 / 名称与取值之间的引导线）：一屏 16 条同权重发丝线
+   把区块读成账本，行索引与章标的 `00` 重复且零信息量；952px 宽下名称与取值相隔 700px，配对只能靠那根线。
+   现版按**成长行为**分两层（见 StatsPanel.vue 头注释）：面板三项随等级成长、取值大字 + 「每级 +N」注记，
+   参数五项全档恒定、取值小一档；两层之间只留 1 条 `--line-1`（全区块唯一结构性发丝线），
+   层内与项间一律靠留白分栏。层级由字号 / 字重 / 色阶建立，不再由线建立。
+   章标下的等级滑条驱动面板层（参数层原地不动），range 原语复用 `.nk-skill__slider`（不新增 range 样式）。
+   身份色仍只走领域层（领域色豁免，ui-design.md §3），且每项只出现一次（左槽 3×15 色标）——
+   色标 + 图标作为**悬挂记号**占左槽，标签与取值共用同一条左轴（取值不压到色标下方）。
+   ≥768 起面板层只占 5 列栅格的前 3 列，第 4~5 列由「口径」注记占用（见文件末尾断点块）。 */
 .nk-char-page .nk-stats {
   display: block;
   max-width: var(--nk-struct-max); margin: 0 auto;
+  /* 左槽三个量 + 列轴档位集中在这里：左槽宽（标签 / 取值的公共左轴）由色标 / 间距 / 图标推出，
+     不另写一个可能与之脱钩的常量——`__term` 的列宽与 `__readout` 的内缩同源于 `--nk-stats-gutter`。 */
+  --nk-stats-mark: 3px;
+  --nk-stats-icon: 15px;
+  --nk-stats-gap: 6px;
+  --nk-stats-gutter: calc(var(--nk-stats-mark) + var(--nk-stats-icon) + 2 * var(--nk-stats-gap));
+  /* 列轴档位：面板层内部 3 列（≤374 两列）、参数层 ≤374 两列 / 375~767 三列 / ≥768 五列。
+     ≥768 起区块本身即 5 列栅格、面板层占前 3 列（见文件末尾的断点块）——两层的**列宽逐列相等**，
+     面板层只是不占空列。档位下限按**全量 98 只里最长的成长注记**（10 字符：1208「每级 +10.032」/
+     1407「每级 +11.088」，等宽字体下同为 70px）定：三列起点 375 的列盒内余量 2.3px、到相邻列内容 26px；
+     两列档余量 56px。最紧的一档仍落在「不侵入相邻列」之内——注记略微探进 24px 列间距不可见，
+     故判据不按列盒卡死（见 e2e/layout-character-panel.spec.ts 的窄档用例）。 */
+  --nk-stats-cols: 3;
+  --nk-stats-panel-cols: 3;
 }
-.nk-char-page .nk-stats__grid { display: grid; grid-template-columns: minmax(0, 1fr); }
-.nk-char-page .nk-stats__stat {
+@media (max-width: 374px) {
+  .nk-char-page .nk-stats { --nk-stats-cols: 2; --nk-stats-panel-cols: 2; }
+}
+@media (min-width: 768px) {
+  .nk-char-page .nk-stats { --nk-stats-cols: 5; }
+}
+@media (max-width: 767px) {
+  /* 窄档左槽每侧收 2px（6 → 4）：三列档（375~767）列宽仅 98px，而最长注记实测 70px，
+     旧槽宽下本列余量归零；收槽后 375 档余 2.3px、390 档余 7.3px。两列档（≤374）同值，两档不必分家。 */
+  .nk-char-page .nk-stats { --nk-stats-gap: 4px; }
+}
+.nk-char-page .nk-stats__level { margin: 0 0 20px; }
+/* 读数用 range 原语那一套（`.nk-slider__val`）并固定最小宽度：等级从 1 位变 2 位时读数宽度不能再变，
+   否则它右侧的滑条会随拖动左右跳（本页技能卡同一处也走这个原语，规格保持一致）。 */
+.nk-char-page .nk-stats__level-val { min-width: 8ch; font-variant-numeric: tabular-nums; }
+/* 档位铭文（突破 0–6）压在读数右侧、弱化一档：它是口径标注，不是第二个读数 */
+.nk-char-page .nk-stats__level-stage {
+  flex: none; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
+  letter-spacing: 0.06em; color: var(--text3); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.nk-char-page .nk-stats__tier {
+  display: grid; margin: 0; column-gap: 24px; row-gap: 16px;
+}
+.nk-char-page .nk-stats__tier--panel { grid-template-columns: repeat(var(--nk-stats-panel-cols), minmax(0, 1fr)); }
+.nk-char-page .nk-stats__tier--param {
+  grid-template-columns: repeat(var(--nk-stats-cols), minmax(0, 1fr));
+  margin-top: 20px; padding-top: 16px;
+  border-top: 1px solid var(--line-1);
+}
+.nk-char-page .nk-stats__stat { min-width: 0; }
+.nk-char-page .nk-stats__term {
   display: grid;
-  grid-template-columns: 3px 3.2em 15px auto minmax(24px, 1fr) auto;
-  align-items: center; gap: 0 12px;
-  padding: 10px 0; border-bottom: 1px solid var(--line-1);
+  grid-template-columns: var(--nk-stats-mark) var(--nk-stats-icon) minmax(0, 1fr);
+  align-items: center; column-gap: var(--nk-stats-gap);
+  font-size: var(--nk-fs-3); line-height: 1.4;
 }
-.nk-char-page .nk-stats__stat:last-child { border-bottom: none; }
-.nk-char-page .nk-stats__stat::before {
-  content: ''; width: 3px; height: 14px;
-  background: var(--st-c, var(--primary));
-}
-/* 属性身份色取领域层（领域色豁免，ui-design.md §3），不随主题 / 强调色 */
+/* 色标高度取图标高：两者在 `dt` 行内并列居中，等高才读作一对记号（旧版 12px 对 15px 图标，读作一根随便定长的短棒） */
+.nk-char-page .nk-stats__mark { width: var(--nk-stats-mark); height: var(--nk-stats-icon); background: var(--st-c, var(--primary)); }
+/* 属性身份色取领域层，不随主题 / 强调色 */
 .nk-char-page .nk-stats__stat[data-prop="hp"] { --st-c: var(--prop-hp); }
 .nk-char-page .nk-stats__stat[data-prop="atk"] { --st-c: var(--prop-atk); }
 .nk-char-page .nk-stats__stat[data-prop="def"] { --st-c: var(--prop-def); }
@@ -318,28 +367,59 @@
 .nk-char-page .nk-stats__stat[data-prop="crit-dmg"] { --st-c: var(--prop-crit-dmg); }
 .nk-char-page .nk-stats__stat[data-prop="taunt"] { --st-c: var(--prop-taunt); }
 .nk-char-page .nk-stats__stat[data-prop="energy"] { --st-c: var(--prop-energy); }
-.nk-char-page .nk-stats__idx {
-  font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600;
-  letter-spacing: 0.04em; color: var(--text3);
-  font-variant-numeric: tabular-nums;
-}
-.nk-char-page .nk-stats__icon { width: 15px; height: 15px; opacity: 0.9; }
+.nk-char-page .nk-stats__icon { width: var(--nk-stats-icon); height: var(--nk-stats-icon); opacity: 0.9; }
 .nk-char-page .nk-stats__label {
-  font-size: var(--nk-fs-4); color: var(--text2); letter-spacing: 0.04em;
-  white-space: nowrap;
+  color: var(--text3); font-weight: 600; letter-spacing: 0.1em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.nk-char-page .nk-stats__lead { height: 1px; background: var(--line-1); }
+.nk-char-page .nk-stats__readout {
+  margin: 4px 0 0; padding-left: var(--nk-stats-gutter);
+  font-variant-numeric: tabular-nums;
+}
 .nk-char-page .nk-stats__val {
-  font-family: var(--font-hud); font-size: var(--nk-fs-5); font-weight: 700;
-  color: var(--text-bright); text-align: right; white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  min-width: 5.5ch;
+  display: block;
+  font-family: var(--font-hud); font-size: var(--nk-fs-4); font-weight: 700;
+  line-height: 1.25; color: var(--text); white-space: nowrap;
 }
-
-.nk-char-page .nk-stats__level { display: flex; align-items: center; gap: 16px; margin-top: 20px; }
-.nk-char-page .nk-stats__level-label {
-  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 600;
-  letter-spacing: 0.08em; color: var(--text3); white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+.nk-char-page .nk-stats__tier--panel .nk-stats__val { font-size: var(--nk-fs-5); color: var(--text-bright); }
+/* 成长注记按**标签级**判定字号（A5.3 合格线 0.6rem = 9.6px）：它与取值同属一项读数，是读数的单位注脚，
+   不是句子。升到 fs-3 会与 `__label` 同档，把「标签 11.5 / 注记 10 / 取值 15」这条三级阶梯压平；
+   而 375 档列宽 98px 也已容不下再大一档的注记。 */
+.nk-char-page .nk-stats__add {
+  display: block; margin-top: 4px;
+  font-family: var(--font-hud); font-size: var(--nk-fs-2); line-height: 1.4;
+  letter-spacing: 0.02em; color: var(--text3); white-space: nowrap;
 }
-.nk-char-page .nk-stats__level-rule { flex: 1; height: 1px; background: var(--line-1); }
+.nk-char-page .nk-stats__note {
+  margin: 20px 0 0;
+  font-size: var(--nk-fs-3); line-height: 1.8; letter-spacing: 0.02em; color: var(--text3);
+}
+/* ≥768：区块自身成为 5 列栅格，面板层只占前 3 列，空出的第 4~5 列交给「口径」注记——
+   ① 面板三项若落在五列格线上，区块上部会留 41% 宽的空列，而上部那条分界线仍横贯整幅 ⇒ 线比它统领的
+   内容宽 1.7 倍，上部被读成「表格缺了两格」（两轮对抗审查各自独立指出同一处）；
+   ② 注记是全区块最该被读到的一句（数据可审计的前提），原先缩在区块末尾当免责小字。
+   面板层占 3 列后，其**内部 3 列的列宽与参数层 5 列逐列相等**（同一个 `column-gap` 推出）——
+   两层因此仍共用同一条列距，只是面板层不再占用空列。注记右缘贴区块右缘。
+   栅格行序：1 章标 / 2 等级滑条 / 3 面板层 + 注记 / 4 参数层。 */
+@media (min-width: 768px) {
+  .nk-char-page .nk-stats {
+    display: grid;
+    grid-template-columns: repeat(var(--nk-stats-cols), minmax(0, 1fr));
+    column-gap: 24px;
+  }
+  .nk-char-page .nk-panel .nk-stats > .nk-title {
+    grid-column: 1 / -1; grid-row: 1;
+    /* 必须显式撤掉 auto 横向外边距：本页的 struct-max 收口（`.nk-char-page .nk-panel .nk-title
+       { max-width: …; margin-inline: auto }`，见 character-compare.css）在**块级**上下文里只是把章标
+       限宽居中；一旦章标成为栅格项，auto 外边距会优先于 `stretch` ⇒ 章标退化成 shrink-to-fit 并居中
+       （实测宽 258.8px、横线宽度归零）。选择器多带一级 `.nk-panel` 正是为了压过那条同权重的收口规则。 */
+    margin-left: 0; margin-right: 0;
+  }
+  .nk-char-page .nk-stats__level { grid-column: 1 / -1; grid-row: 2; }
+  .nk-char-page .nk-stats__tier--panel { grid-column: 1 / 4; grid-row: 3; }
+  .nk-char-page .nk-stats__note {
+    grid-column: 4 / 6; grid-row: 3;
+    align-self: end; margin: 0; text-align: right;
+  }
+  .nk-char-page .nk-stats__tier--param { grid-column: 1 / -1; grid-row: 4; }
+}

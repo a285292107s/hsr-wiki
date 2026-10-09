@@ -12,7 +12,7 @@ import {
   deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
   avatarDrawCardUrl, avatarDrawCardJdUrl, itemName, itemIconUrl, validateCharData,
-  fmtStatValue,
+  fmtStatValue, levelStatValue, charStageForLevel,
 } from '../format';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
 
@@ -269,6 +269,31 @@ describe('maxLevelStat / maxLevelValue', () => {
   });
   it('满级 = base + add * 79', () => {
     expect(maxLevelValue(100, 10)).toBe(890);
+  });
+});
+
+describe('levelStatValue / charStageForLevel（等级滑条口径）', () => {
+  it('档位曲线 = base + add × (等级 − 1)', () => {
+    expect(levelStatValue(100, 10, 1)).toBe(100);
+    expect(levelStatValue(100, 10, 2)).toBe(110);
+    expect(levelStatValue(100, 10, 80)).toBe(890);
+  });
+  it('满级值与 maxLevelValue 同源（默认视图不随滑条改版漂移）', () => {
+    expect(levelStatValue(538.56, 7.92, 80)).toBe(maxLevelValue(538.56, 7.92));
+  });
+  it('档位 = 上限 ≤ 该等级的档位数（每档上限一到就突破）', () => {
+    expect(charStageForLevel(1, 7)).toBe(0);
+    expect(charStageForLevel(19, 7)).toBe(0);
+    expect(charStageForLevel(20, 7)).toBe(1);   // 20 是 P0 的上限：此刻已可突破，取突破后的档
+    expect(charStageForLevel(29, 7)).toBe(1);
+    expect(charStageForLevel(30, 7)).toBe(2);
+    expect(charStageForLevel(69, 7)).toBe(5);
+    expect(charStageForLevel(70, 7)).toBe(6);
+    expect(charStageForLevel(80, 7)).toBe(6);
+  });
+  it('档位数不足时封顶到最后一档（不是 7 档的阶梯不成立）', () => {
+    expect(charStageForLevel(80, 3)).toBe(2);
+    expect(charStageForLevel(80, 0)).toBe(0);
   });
 });
 
