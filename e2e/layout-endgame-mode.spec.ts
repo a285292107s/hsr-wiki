@@ -177,4 +177,42 @@ test.describe('玩法页「当期赛季」判据（不得取未开始的那一�
       assertNoErrors();
     });
   }
+
+});
+
+test.describe('终局详情页 Hero 大图口径（赛季 banner 翻转铺底）', () => {
+  /** Hero 大图口径（用户裁决，含一次当天改主意后的回退）：有 `theme_banner` 的期（maze / story / boss）
+   *  用它**左右翻转**后当背景（不再出右侧画框）；无该字段的期（peak 只有 `handbook_banner`）回退
+   *  赛季大图且不翻。左栏徽标盘保留（用户看版后要求回到这一版）。 */
+  test('/endgame 详情页 Hero：赛季 banner 翻转作背景（保留徽标盘、无右侧画框），无 banner 的期不翻', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const bannerOf = (file: string, id: string) => readJson<Record<string, { arts?: { theme_banner?: string } }>>(
+      `public/data/cn/${file}`,
+    )[id].arts?.theme_banner?.split('/').pop() || '';
+    for (const [route, file, id] of [
+      ['/endgame/maze/1035', 'maze.json', '1035'],
+      ['/endgame/boss/3021', 'maze_boss.json', '3021'],
+    ] as const) {
+      await page.goto(route);
+      const bg = page.locator('.nk-egd-hero__bg');
+      await expect(bg, `${route} 应以赛季 banner 铺底`).toHaveCount(1);
+      await expect(bg).toHaveAttribute('src', new RegExp(bannerOf(file, id).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+      await expect(bg).toHaveClass(/nk-egd-hero__bg--flip/);
+      // 翻转是关系而非绝对值：x 轴缩放为负（镜像）
+      const m = await bg.evaluate((el) => getComputedStyle(el).transform);
+      expect(m, `期望镜像矩阵，实得 ${m}`).toMatch(/^matrix\(-/);
+      await expect(page.locator('.nk-egd-hero__banner'), 'banner 已改作背景，右侧画框退场').toHaveCount(0);
+      await expect(page.locator('.nk-egd-hero__plate'), '徽标盘保留').toHaveCount(1);
+      // 徽标盘只放官方玩法图标：自绘 EMBLEMS 圆环曾叠在它上面，已删（用户裁决）
+      await expect(page.locator('.nk-egd-hero__plate .nk-egd-hero__art')).toHaveCount(1);
+      await expect(page.locator('.nk-egd-hero__emblem')).toHaveCount(0);
+    }
+    // 异相仲裁无 theme_banner：回退 handbook_banner，不翻转
+    await page.goto('/endgame/peak/9');
+    const bg = page.locator('.nk-egd-hero__bg');
+    await expect(bg).toHaveCount(1);
+    await expect(bg).not.toHaveClass(/nk-egd-hero__bg--flip/);
+    assertNoErrors();
+  });
 });

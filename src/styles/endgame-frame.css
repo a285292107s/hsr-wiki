@@ -69,21 +69,16 @@
   z-index: 0;
 }
 
-.nk-egd-hero__banner {
-  position: absolute;
-  top: 50%;
-  right: 14px;
-  transform: translateY(-50%);
-  width: min(46%, 430px);
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
-  opacity: 0.45;
-  /* 与左侧徽标盘同一套「裱装」语言：有硬边就做成有意的画框。原实现只在左缘渐隐、
-     右缘留一刀硬边（图片在内容列右缘被切），读起来像贴图而不是版面元素。 */
-  border: 1px solid var(--line-1);
-  pointer-events: none;
-  z-index: 0;
+/* 赛季 banner 铺成整幅背景时左右翻转：banner 的画面重心在右（原先挂在右缘当画框），
+   直接铺底会与右侧内容抢视线；翻转后主体（水晶）落在右半、文字区落在原图那层**深紫雾**上。
+   实测该口径下文字区背景峰值 ≤ 92（白字对比 ≥6:1），故**不加遮罩、不压不透明度**——
+   底图那套「两侧都收口」的遮罩是给居中场景图调的，套到 banner 上会把主体一起淡掉。 */
+.nk-egd-hero__bg--flip {
+  transform: scaleX(-1);
+  opacity: 1;
+  object-position: center 42%;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 .nk-egd-hero__plate {
@@ -112,12 +107,6 @@
   background: linear-gradient(90deg, transparent 0%, var(--line-2) 50%, transparent 100%);
   opacity: 0.7;
 }
-.nk-egd-hero__emblem {
-  width: 54px;
-  height: 54px;
-  color: color-mix(in srgb, var(--eg-color) 70%, var(--text2));
-}
-.nk-egd-hero__emblem svg { width: 100%; height: 100%; }
 .nk-egd-hero__art {
   position: absolute;
   top: 50%;

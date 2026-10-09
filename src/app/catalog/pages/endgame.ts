@@ -101,28 +101,20 @@ export const MAZE_STATUS_CLASS: Record<string, string> = {
   '未知': 'unknown',
 };
 
-const EMBLEMS: Record<string, string> = {
-  maze: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg>',
-  story: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.2A2.2 2.2 0 0 1 6.2 4H12v16H6.2A2.2 2.2 0 0 1 4 17.8V6.2z"/><path d="M20 6.2A2.2 2.2 0 0 0 17.8 4H12v16h5.8a2.2 2.2 0 0 0 2.2-2.2V6.2z"/></svg>',
-  boss: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2.5l2.3 6.2 6.2 2.3-6.2 2.3-2.3 6.2-2.3-6.2-6.2-2.3 6.2-2.3z"/></svg>',
-  peak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v17"/><path d="M8.5 20.5h7"/><path d="M4.5 6h15"/><path d="M6.4 6l-2.2 4a2.6 2.6 0 0 0 4.6 0L6.6 6"/><path d="M17.6 6l-2.2 4a2.6 2.6 0 0 0 4.6 0l-2.4-4"/></svg>',
-};
-
 export interface EndgameMode {
   key: string;
   label: string;
   en: string;
-  emblem: string;
   /** 玩法入口图（SpriteOutput 路径：ChallangeGeneralConfig TabImgPath 三模 + 仲裁人工延展
    *  Img4；筛选选项 icon 消费，经 endgameArtUrl + UI/ChallengeBoss 白名单解析） */
   icon?: string;
 }
 
 export const ENDGAME_MODES: EndgameMode[] = [
-  { key: 'maze', label: '忘却之庭', en: 'FORGOTTEN HALL', emblem: EMBLEMS.maze, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png' },
-  { key: 'story', label: '虚构叙事', en: 'PURE FICTION', emblem: EMBLEMS.story, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png' },
-  { key: 'boss', label: '末日幻影', en: 'APOCALYPSE', emblem: EMBLEMS.boss, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg3.png' },
-  { key: 'peak', label: '异相仲裁', en: 'ANOMALY', emblem: EMBLEMS.peak, icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg4.png' },
+  { key: 'maze', label: '忘却之庭', en: 'FORGOTTEN HALL', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png' },
+  { key: 'story', label: '虚构叙事', en: 'PURE FICTION', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png' },
+  { key: 'boss', label: '末日幻影', en: 'APOCALYPSE', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg3.png' },
+  { key: 'peak', label: '异相仲裁', en: 'ANOMALY', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg4.png' },
 ];
 
 // 玩法级默认图标 URL（模式统一用玩法入口默认图：抛弃每季 `arts.tab` 页签图——

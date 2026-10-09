@@ -14,10 +14,8 @@
     align-self: flex-start;
     padding: 10px 8px;
   }
-  .nk-egd-hero__emblem { width: 42px; height: 42px; }
   .nk-egd-hero__art { width: 68px; height: 68px; }
   .nk-egd-hero__bg { display: none; }
-  .nk-egd-hero__banner { display: none; }
   .nk-egd-hero__name { font-size: 1.35rem; }
   /* 手机档字号归 `endgame-type-scale.css` 末段（本块之后导入、同特异性覆写）——
      此处不再重述：重述等于死声明，且会让人误以为改这里能生效（ADR 0034 决策 2）。 */

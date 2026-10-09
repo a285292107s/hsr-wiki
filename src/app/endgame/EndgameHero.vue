@@ -18,36 +18,33 @@ const status = computed(() => mazeStatus(props.data));
 const statusClass = computed(() => MAZE_STATUS_CLASS[status.value] || 'unknown');
 const dateRange = computed(() => mazeDateRange(props.data));
 /** 玩法级默认图标（modeDefaultArtUrl：统一用玩法入口默认图，抛弃每季 arts.tab 页签图——
- *  4 类玩法图标恒定不随新赛季漂移，规避 jsDelivr fork 冻结后的新赛季破图残留；空串不渲染） */
+ *  4 类玩法图标恒定不随新赛季漂移，规避 jsDelivr fork 冻结后的新赛季破图残留；空串不渲染）。
+ *  徽标盘**只放这一张官方图标**：自绘的 `EMBLEMS` 圆环曾叠在它上面，读起来像「图标上又盖了一个
+ *  默认图标」，已删（用户裁决）。 */
 const seasonArt = computed(() => modeDefaultArtUrl(props.modeKey));
 const seasonBanner = computed(() => seasonBannerUrl(props.data.arts));
 const seasonHeroBg = computed(() => seasonHeroBgUrl(props.data.arts));
-const showBanner = computed(() => !!seasonBanner.value);
-const showHeroBg = computed(() => !!seasonHeroBg.value && !showBanner.value);
+/** Hero 背景：赛季 banner 存在时用它（**左右翻转**后铺底，见 CSS `--flip`），否则回退赛季大图
+ *  （maze `background` / story `theme_bg` / peak `handbook_banner`）。 */
+const heroBg = computed(() => seasonBanner.value || seasonHeroBg.value);
+/** banner 的画面重心在右（原先挂在右缘当画框），铺成整幅背景时要**左右翻转**，
+ *  否则重心与右侧内容列打架；赛季大图不翻。 */
+const flipHeroBg = computed(() => !!seasonBanner.value);
 </script>
 
 <template>
   <header class="nk-egd-hero">
     <img
-      v-if="showHeroBg"
+      v-if="heroBg"
       class="nk-egd-hero__bg"
-      :src="seasonHeroBg"
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
-      @error="hideOnError"
-    >
-    <img
-      v-if="showBanner"
-      class="nk-egd-hero__banner"
-      :src="seasonBanner"
+      :class="{ 'nk-egd-hero__bg--flip': flipHeroBg }"
+      :src="heroBg"
       alt=""
       aria-hidden="true"
       loading="lazy"
       @error="hideOnError"
     >
     <div class="nk-egd-hero__plate">
-      <span class="nk-egd-hero__emblem" v-html="modeInfo?.emblem || ''"></span>
       <img v-if="seasonArt" class="nk-egd-hero__art" :src="seasonArt" alt="" aria-hidden="true" @error="hideOnError">
     </div>
     <div class="nk-egd-hero__panel">
