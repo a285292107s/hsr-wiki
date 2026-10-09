@@ -3,7 +3,8 @@
 常用：python query.py <File> --schema | --id <n> | --where "K=V" --limit N |
       --fields A,B | --grep "x" | --head N ; 全局：--list [kw] / --resolve <hash> /
       --search "文本" / --rebuild-textmap。更多示例见下方 argparse epilog。
-数据边界：vendor/TurnBasedGameData 禁止直读，探索一律走本工具 / DATA_CATALOG.md。
+数据边界：vendor/TurnBasedGameData 禁止直读，探索一律走本工具；字段结构按需查
+DATA_CATALOG.md 总索引或 DATA_CATALOG.parts/ 分片（全量索引约 30 万 token，禁止整读）。
 """
 
 from __future__ import annotations

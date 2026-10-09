@@ -1,10 +1,10 @@
 # 数据转换工具集
 
-把 `vendor/TurnBasedGameData`（官方解包数据的本地副本，非 git 子模块）转换为前端随站分发的 JSON。字段/源表/记录数索引见 [DATA_CATALOG.md](DATA_CATALOG.md)（由 `gen_catalog.py` 生成）；数据探索与改造转换器的完整工作流见 [docs/agents/data-pipeline.md](../../docs/agents/data-pipeline.md)。
+把 `vendor/TurnBasedGameData`（官方解包数据的本地副本，非 git 子模块）转换为前端随站分发的 JSON。字段/源表/记录数索引见 [DATA_CATALOG.md](DATA_CATALOG.md)（总索引；全量明细按文件名首字母分片存于 `DATA_CATALOG.parts/`，由 `gen_catalog.py` 生成）；数据探索与改造转换器的完整工作流见 [docs/agents/data-pipeline.md](../../docs/agents/data-pipeline.md)。
 
 ## 环境与运行
 
-需 Python 3.10+（CI 固定 3.12）。源数据不在版本控制内，需自行浅克隆，且必须保留 `.git`（`version` 模块用 HEAD 提交取版本号）。
+Python 版本要求（3.10+，CI 固定 3.12）见 [docs/agents/tech-stack.md](../../docs/agents/tech-stack.md)。源数据不在版本控制内，需自行浅克隆，且必须保留 `.git`（`version` 模块用 HEAD 提交取版本号）。
 
 ```bash
 git clone --depth 1 https://github.com/DimbreathBot/TurnBasedGameData.git vendor/TurnBasedGameData
@@ -58,7 +58,7 @@ python query.py ItemConfig --grep "星琼" --limit 5
 python query.py --resolve 6186714091647966180       # TextMap Hash → 文本
 python query.py --search "黄泉" --limit 10
 python query.py --help                              # 全部参数
-python gen_catalog.py                               # 全量索引 → DATA_CATALOG.md
+python gen_catalog.py                               # 全量索引 → DATA_CATALOG.md 总索引 + DATA_CATALOG.parts/*.md 分片
 python gen_catalog.py --top 50                      # 局部索引 → DATA_CATALOG.top50.md（勿提交）
 python gen_catalog.py --filter Avatar               # 局部索引 → DATA_CATALOG.filter-avatar.md（勿提交）
 # TextMap 查询走 .textmap-cache.db（SQLite，已 gitignore）：首次自动建库，源文件变更后自动重建，--rebuild-textmap 强制重建
@@ -79,10 +79,11 @@ tools/converter/
 ├── utils.py            # load/save、unwrap、图标路径等通用工具
 ├── incremental.py      # MODULE_SOURCES 增量签名与状态
 ├── query.py            # 数据查询 CLI
-├── gen_catalog.py      # DATA_CATALOG.md 生成器
+├── gen_catalog.py      # DATA_CATALOG.md 总索引 + DATA_CATALOG.parts/ 分片生成器
 ├── converters/         # 各模块转换器 + monster_common.py（共享助手）
 ├── tests/              # pytest 用例（合成数据，不依赖真实源数据）
-├── DATA_CATALOG.md     # 自动生成的数据索引（纳入版本控制）
+├── DATA_CATALOG.md     # 自动生成的数据索引总入口（纳入版本控制）
+├── DATA_CATALOG.parts/ # 按文件名首字母切分的字段明细分片（自动生成，纳入版本控制）
 ├── requirements.txt    # xxhash（运行时）+ pytest（测试）
 └── README.md
 ```

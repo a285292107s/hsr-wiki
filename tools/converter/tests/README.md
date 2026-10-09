@@ -21,5 +21,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 ## 数据边界
 
-`vendor/TurnBasedGameData` 禁止直接读取或写入；数据探索走 `query.py` / `DATA_CATALOG.md`，
-转换走 `convert.py`。测试一律用合成数据，不依赖真实源数据。
+`vendor/TurnBasedGameData` 禁止直接读取或写入；数据探索走 `query.py`，字段结构走
+`DATA_CATALOG.md` 总索引与 `DATA_CATALOG.parts/` 分片，转换走 `convert.py`。
+测试一律用合成数据，不依赖真实源数据。

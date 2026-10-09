@@ -42,6 +42,8 @@ jobs:
         run: |
           cd tools/converter
           python gen_catalog.py
+        # 全量模式产出总索引 + DATA_CATALOG.parts/ 分片（按文件名首字母），两者都要入库；
+        # --top / --filter 局部索引是本地临时产物，被 .gitignore 排除，不会误提交
 
       # 软门禁（2026-08-12 迭代）：main 无 required checks，直接 push 即达；
       # push 触发 CI（unit-tests + e2e）与 Vercel 构建守卫，失败可回滚。
@@ -52,7 +54,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/cn/ tools/converter/DATA_CATALOG.md
+          git add public/data/cn/ tools/converter/DATA_CATALOG.md tools/converter/DATA_CATALOG.parts/
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0

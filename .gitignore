@@ -60,7 +60,7 @@ tools/converter/.converter-state.json
 tools/converter/.textmap-cache.db
 tools/converter/.textmap-cache.db-*
 
-# Converter 局部索引（全量 DATA_CATALOG.md 入库；--top / --filter 为本地临时输出，勿提交）
+# Converter 局部索引（全量 DATA_CATALOG.md + DATA_CATALOG.parts/ 入库；--top / --filter 为本地临时输出，勿提交）
 tools/converter/DATA_CATALOG.top*.md
 tools/converter/DATA_CATALOG.filter-*.md
 
