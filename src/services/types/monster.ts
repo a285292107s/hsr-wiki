@@ -1,5 +1,7 @@
 /** 敌对物种相关数据类型（monster.json 列表端点 + converter 本地列表 + monsters/{id}.json 详情） */
 
+import type { MazeBossPhase } from './endgame';
+
 /* ─── 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
 
 /** monster.json 条目（键 = 敌对 ID） */
@@ -224,6 +226,11 @@ export interface MonsterDetail {
   appearances?: MonsterAppearances;
   /** 额外阶段（MonsterAtlasExtraPhase(s)；实测仅 9 个族有数据、覆盖 39 个模板） */
   phases?: MonsterPhase[];
+  /** 首领阶段机制（MonsterGuideConfig × MonsterGuidePhase 官方文案；实测覆盖 22 个目录条目）。
+   *  与末日幻影敌方卡的首领机制**同源同形**（`converters/monster_guide.load_boss_guides`），
+   *  故直接复用 endgame 域的 `MazeBossPhase`：阶段名自带「阶段一：…」前缀，这是站内唯一有来源的
+   *  阶段号（`phases[].phase_id` 只是源表组内行键，不是阶段号）。 */
+  guide_phases?: MazeBossPhase[];
   /** 状态词条（MonsterStatusConfig 安全子集；实测覆盖 234/632 个目录模板） */
   statuses?: MonsterStatusDetail[];
   /** 活动出处（仅被活动关卡引用的怪物有值；实测 42 个模板，含「星天演武仪典」的 7 个活动敌人） */

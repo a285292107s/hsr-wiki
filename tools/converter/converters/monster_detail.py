@@ -32,6 +32,7 @@ import logging
 from config import OUTPUT_DIR
 from utils import save_json
 from converters.monster_common import load_elite_groups, load_level_curve, load_monsters
+from converters.monster_guide import load_boss_guides
 from converters.monsters import catalog_rows
 from converters.monster_extra import (
     load_appearances, load_drops, load_event_sources, load_phases, load_skill_extra_effects,
@@ -100,6 +101,10 @@ def convert() -> None:
     statuses = load_statuses()
     # 活动出处（仅"有活动关卡引用"的怪物有值；判据见 monster_extra.load_event_sources）
     events = load_event_sources()
+    # 首领机制（MonsterGuideConfig × MonsterGuidePhase，官方文案）：只取**阶段**一段落进详情页——
+    # 阶段名自带「阶段一：…」前缀，这是站内唯一有来源的阶段号（源表 `MonsterAtlasExtraPhase.PhaseID`
+    # 只是组内行键，**不是**阶段号）。与末日幻影敌方卡的 `boss_guides` 同一装配函数。
+    guides = load_boss_guides()
     output_dir = OUTPUT_DIR / "monsters"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -144,6 +149,8 @@ def convert() -> None:
             detail["appearances"] = appearances[tpl]
         if phases.get(tpl):
             detail["phases"] = phases[tpl]
+        if guides.get(tpl, {}).get("phases"):
+            detail["guide_phases"] = guides[tpl]["phases"]
         if statuses.get(tpl):
             detail["statuses"] = statuses[tpl]
         if events.get(tpl):

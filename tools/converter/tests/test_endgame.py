@@ -5,7 +5,8 @@
   公测前/2030 占位过滤与测试期分类（ADR 0038）
 - _load_maze_buffs / _load_monsters / _load_targets：辅助表解析（名称/图标 basename）
 - _group_maze_buff / _group_extra_buff / _group_extra_buff_groups / _load_story_turns：组级/分场次增益 / 回合上限
-- _load_boss_guides / _attach_boss_guides：末日幻影首领机制（特性 + 阶段，模板键聚合与技能 ID 反查）
+- load_boss_guides（converters/monster_guide，endgame 与 monster_detail 共用）：末日幻影首领机制
+  （特性 + 阶段，模板键聚合与技能 ID 反查）
 - _season_stats：层数/阶段/回合取最大，弱点合并去重，逐层弱点 floor_damage
 - _season_floors：逐层详情（序号/层名/上下半场属性与敌方/层级增益/目标）
 - _load_summon_index / _summon_out / _monster_summons：召唤物（敌方实例的 SummonIDList，
@@ -25,16 +26,18 @@ import pytest  # noqa: E402
 
 from converters import endgame as eg  # noqa: E402
 from converters import endgame_catalog as egc  # noqa: E402
+from converters import monster_guide as mg  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
-    """mock TextMap，避免加载真实大文件；共享聚合模块（monster_common）同步 mock。"""
+    """mock TextMap，避免加载真实大文件；共享聚合模块（monster_common / monster_guide）同步 mock。"""
     import textmap
     import converters.monster_common as mc
     monkeypatch.setattr(textmap, "_text_map", {})
     fake_resolve = lambda ref, clean=False: "" if not ref else f"名{ref.get('Hash', 0)}"  # noqa: E731
     monkeypatch.setattr(eg, "resolve_text", fake_resolve)
     monkeypatch.setattr(mc, "resolve_text", fake_resolve)
+    monkeypatch.setattr(mg, "resolve_text", fake_resolve)
     return mc
 
 class TestLoadSchedules:
@@ -279,8 +282,8 @@ class TestBossGuides:
             "MonsterGuideSkill.json": skills or [],
             "MonsterGuideSkillText.json": texts or [],
         }
-        monkeypatch.setattr(eg, "load_json", lambda p: files[Path(p).name])
-        return eg._load_boss_guides()
+        monkeypatch.setattr(mg, "load_json", lambda p: files[Path(p).name])
+        return mg.load_boss_guides()
 
     def test_direct_template_with_phases(self, monkeypatch):
         """配置表 MonsterID（模板×100+实例序号）→ 模板键：同模板各难度实例共用一份清单；

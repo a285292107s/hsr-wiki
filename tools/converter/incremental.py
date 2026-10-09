@@ -52,7 +52,12 @@ MODULE_SOURCES: dict[str, list[str]] = {
                          "MonsterDrop.json", "ItemConfig.json", "StageConfig.json",
                          "MonsterAtlasExtraPhase.json", "MonsterAtlasExtraPhases.json",
                          "ExtraEffectConfig.json", "ActivityPanel.json",
-                         "ActivityQuestRewardData.json"],
+                         "ActivityQuestRewardData.json",
+                         # 传递依赖：`guide_phases` 由 monster_guide 装配，只改这几张表也要重跑本模块，
+                         # 否则增量会按「本模块自己的静态加载未变」跳过、留下过期的 guide_phases
+                         "MonsterGuideConfig.json", "MonsterGuideTag.json",
+                         "MonsterGuidePhase.json", "MonsterGuideSkill.json",
+                         "MonsterGuideSkillText.json"],
     "monster_extra": ["MonsterTemplateConfig.json", "MonsterConfig.json",
                        "MonsterDrop.json", "ItemConfig.json", "StageConfig.json",
                        "MonsterAtlasExtraPhase.json", "MonsterAtlasExtraPhases.json",
@@ -63,6 +68,10 @@ MODULE_SOURCES: dict[str, list[str]] = {
                         "MonsterCamp.json", "MonsterSkillConfig.json",
                         "HardLevelGroup.json", "EliteGroup.json",
                         "MonsterStatusResistanceType.json"],
+    # 首领机制共享装配：endgame 敌方卡与 monster_detail 详情页两处消费（同一份声明）
+    "monster_guide": ["MonsterGuideConfig.json", "MonsterGuideTag.json",
+                       "MonsterGuidePhase.json", "MonsterGuideSkill.json",
+                       "MonsterGuideSkillText.json"],
     "endgame": ["ChallengeMazeConfig.json", "ChallengeStoryMazeConfig.json",
                  "ChallengeBossMazeConfig.json", "ChallengePeakConfig.json",
                  "ScheduleDataChallengeMaze.json", "ScheduleDataChallengeStory.json",

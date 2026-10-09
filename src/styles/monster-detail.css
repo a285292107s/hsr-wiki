@@ -1,4 +1,11 @@
 
+.nk-mob-page {
+  /* 本页走文档流滚动（不用 `.nk-page--detail` 的绝对定位 + `left: var(--nk-content-offset)`），
+     故自己避让侧栏：≥768 侧栏占 88px、≥1024 占 148px；此前没有任何避让 ⇒ 768~1279 视口下内容被
+     侧栏压住（1024 实测 hero x=12、区块标题与 HP 值被裁）。骨架屏与错误态都在本容器内，一并跟随。 */
+  padding-left: var(--nk-content-offset);
+}
+
 .nk-mob-hero {
   display: flex;
   align-items: stretch;
@@ -124,6 +131,37 @@
   white-space: nowrap;
 }
 
+/* ─── Hero 信息块（弱点与抗性）：信息列内名称之下的定长信息带，发丝线把它与身份行分开。
+     它上收进 hero 的判据是**条数有限、占位固定**（弱点 / 抗性各 ≤7 条 + 罕见的额外阶段），
+     hero 高度不受数据长度摆布；图鉴正文长度不可控（目录里 0~356 字），留在面板区。
+     窄档标签会换行，故 hero 高度仍非逐档恒定——骨架屏同源，见 `.nk-mob-skeleton__hero`。 */
+.nk-mob-hero__sec {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-1);
+}
+
+/* 章标在 hero 内降一档：h1 主字必须是本块唯一的主角（面板区章标仍是 0.98rem） */
+.nk-mob-hero__sec .nk-mob-sec__head {
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.nk-mob-hero__sec .nk-mob-sec__title {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: var(--text2);
+}
+
+.nk-mob-hero__sec .nk-mob-sec__en {
+  font-size: 0.54rem;
+}
+
+/* 块内行距收紧：面板区一行 12px 内距是为「长文档的呼吸」定的，hero 里要与身份行贴成一个整体 */
+.nk-mob-hero__sec .nk-mob-resist__row {
+  padding: 8px 0;
+}
+
 .nk-mob-sec {
   padding: 26px 0 6px;
 }
@@ -171,6 +209,9 @@
   line-height: 2;
   color: var(--text2);
   max-width: var(--nk-prose-max);
+  /* 正文由源文本的 `\n` 切成 `<br>` 段：段内是长中文行，末行只剩「人。」这类孤字很扎眼。
+     `pretty` 只在支持的引擎上把末行摊平，不支持即按原来断行，无副作用。 */
+  text-wrap: pretty;
 }
 
 .nk-mob-empty {
@@ -340,12 +381,12 @@
   margin-bottom: 4px;
 }
 
-.nk-mob-phase__no {
-  font-family: var(--font-hud);
-  font-size: 0.7rem;
+/* 形态标题：官方给了名字就用名字（主字档），只标「其他形态」的用次级色——不给通用标签主字权重 */
+.nk-mob-phase__label {
+  font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--metric-val);
+  letter-spacing: 0.06em;
+  color: var(--text2);
 }
 
 .nk-mob-phase__name {
@@ -909,14 +950,106 @@
   color: var(--text2);
 }
 
+/* ─── 首领阶段机制（MonsterGuideConfig × MonsterGuidePhase，官方文案）───
+   与「技能」同构：一阶段一段、段间发丝线。三段文本各有身份——机制说明（正文）、
+   官方应对策略（左发丝线，数据自带「应对策略：」前缀故不加标签）、小节问答（问句 + 答句）。 */
+.nk-mob-guides {
+  display: flex;
+  flex-direction: column;
+}
+
+.nk-mob-guide {
+  padding: 16px 0 4px;
+}
+
+.nk-mob-guide + .nk-mob-guide {
+  border-top: 1px solid var(--line-1);
+  margin-top: 16px;
+  padding-top: 18px;
+}
+
+.nk-mob-guide__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+/* 阶段编号：官方 `PhaseList` 顺序（实测与前缀序号 100% 一致）——名字不带编号的那批条目
+   （如「末日歧途的盗火者」）靠它才看得出是第几阶段，故用 HUD 数字档而不是次级正文色 */
+.nk-mob-guide__no {
+  flex: none;
+  font-family: var(--font-hud);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--metric-val);
+}
+
+.nk-mob-guide__name {
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
+}
+
+.nk-mob-guide__desc {
+  margin: 8px 0 0;
+  max-width: var(--nk-prose-max);
+  font-size: 0.84rem;
+  line-height: 1.8;
+  color: var(--text2);
+}
+
+.nk-mob-guide__answer {
+  margin: 8px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--line-2);
+  max-width: var(--nk-prose-max);
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: var(--text3);
+}
+
+.nk-mob-guide__qas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nk-mob-guide__qa {
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.nk-mob-guide__q {
+  font-weight: 700;
+  color: var(--text2);
+}
+
+.nk-mob-guide__q::after {
+  content: '：';
+  font-weight: 400;
+  color: var(--text3);
+}
+
+.nk-mob-guide__a {
+  color: var(--text3);
+}
+
 .nk-mob-skeleton {
   max-width: var(--nk-detail-max);
   margin: 0 auto;
 }
 
 .nk-mob-skeleton__hero {
-  /* 与真实 hero 同档：真实高度 = 图列 `min-height` 300（≥768）/ 240（<768）+ 信息列内容（meta/名/标签）
-     ⇒ 实测 358 / 338。旧值 240 / 200 会让加载完成时整块下跳 ~130px。 */
+  /* 与真实 hero 同档：真实高度 = 图列 + 信息列内容（编号行 / 名称 / 弱点与抗性两行）。
+     信息块此后**定长**（弱点、抗性各 ≤7 条；带「其他形态」块的 4 个条目会更高，属离群值不追）。
+     逐档实测中位：≥1150 = 358（图列撑满 400×88% + 内距，信息列更矮）；1024~1149 = 314~358，随
+     版心（视口 − 148）线性放大 ⇒ 取中位 336；768~1023 = 301（图列只剩 `min-height` 300，立绘缩到
+     235 后由图列下限接管）；390px 手机档 = 492（图列 240 + 信息列，抗性 4 条在此档换第二行）。 */
   height: 358px;
   background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-750) 80%, transparent) 50%, transparent 70%);
   background-color: color-mix(in srgb, var(--blk-750) 45%, transparent);
@@ -1005,6 +1138,22 @@
   }
 
   .nk-mob-skeleton__hero {
-    height: 338px;
+    height: 492px;
+  }
+}
+
+/* 平板档（768~1023）：hero 拿不满 1000px 版心，图列宽度缩到 40% × 视口后立绘比 `min-height` 还矮
+   ⇒ hero 由图列下限 300 接管（实测 301），比桌面档矮一档。不拆这条的话加载完成整块下跳 57px。 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-mob-skeleton__hero {
+    height: 301px;
+  }
+}
+
+/* 窄桌面档（1024~1149）：侧栏避让 148px 后版心仍不足 1000px，hero 随视口线性放大（1024 实测 314、
+   1100 实测 341、1150 起吃满 1000px 版心 = 358）⇒ 取中位 336，最大偏差 ±22px。 */
+@media (min-width: 1024px) and (max-width: 1149px) {
+  .nk-mob-skeleton__hero {
+    height: 336px;
   }
 }

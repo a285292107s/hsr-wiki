@@ -34,6 +34,8 @@ def fake_monsters(monkeypatch):
     monkeypatch.setattr(md, "load_phases", lambda: {
         1002011: [{"phase_id": 1, "weak": ["Ice"], "resist": {"Fire": 0.2}}],
     })
+    # 首领阶段（共享装配 monster_guide.load_boss_guides）默认空表：不挡会去读真实 MonsterGuide* 四表
+    monkeypatch.setattr(md, "load_boss_guides", lambda: {})
     # 技能附带效果（同一 FK 联结）也要挡掉，否则会去读真实源表；默认空表，
     # 「有效果才落键」由 test_skill_extra_effects_attached_per_skill 自己补桩
     monkeypatch.setattr(md, "load_skill_extra_effects", lambda: {})
@@ -144,6 +146,26 @@ class TestConvert:
         assert fake_monsters["1002011.json"]["phases"] == [
             {"phase_id": 1, "weak": ["Ice"], "resist": {"Fire": 0.2}},
         ]
+
+    def test_guide_phases_keyed_by_template(self, fake_monsters, monkeypatch):
+        """首领阶段（MonsterGuideConfig × MonsterGuidePhase，共享装配 monster_guide）按**模板**落
+        `guide_phases`：阶段名自带「阶段一：…」前缀，是站内唯一有来源的阶段号。只登记了首领特性、
+        没有阶段的模板不落键（本页只呈现阶段）。"""
+        monkeypatch.setattr(md, "load_boss_guides", lambda: {
+            8013010: {
+                "traits": [{"id": 1, "name": "坚防守备"}],
+                "phases": [{"id": 10011, "name": "阶段一：浮翠流丹", "desc": "机制说明",
+                            "answer": "应对策略：…", "skills": [{"name": "如何削韧", "desc": "答"}]}],
+            },
+            1002011: {"traits": [{"id": 2, "name": "只有首领特性"}]},
+        })
+        md.convert()
+        assert fake_monsters["8013010.json"]["guide_phases"] == [{
+            "id": 10011, "name": "阶段一：浮翠流丹", "desc": "机制说明",
+            "answer": "应对策略：…", "skills": [{"name": "如何削韧", "desc": "答"}],
+        }]
+        assert "guide_phases" not in fake_monsters["1002011.json"], "只有首领特性 → 不落键（页面上屏的只有阶段）"
+        assert "traits" not in fake_monsters["8013010.json"], "首领特性不进详情 payload（只取阶段）"
 
     def test_art_shared_prefers_same_figure_peer(self, fake_monsters):
         """同卡面图标（名字不同）→ `art_shared`：优先点名**立绘相同**的同伴；只有立绘不同的同伴时

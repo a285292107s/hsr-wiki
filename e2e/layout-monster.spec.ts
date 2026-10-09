@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, readJson, waitForCatalogCards } from './helpers';
+import { CN_NUM, expectTokenNumber, noUnknownOverflow, readContentOffset } from './layout.shared';
 
 /**
  * 布局验收：敌方页（`/monster` 列表 + `/monster/<id>` 详情）。
@@ -23,11 +24,13 @@ import { collectConsoleIssues, readJson, waitForCatalogCards } from './helpers';
  * 而一旦有人把 `aspect-ratio` 摘掉就会立刻变红。
  */
 
-interface MonsterListEntry { id: number; name: string; icon: string; weak?: string[] }
+interface MonsterListEntry { id: number; name: string; icon: string; weak?: string[]; atlas_group?: number }
 interface MonsterDropTierJson { world_level: number | null; avatar_exp: number; items: { id: number; name: string; icon: string }[] }
 interface MonsterDetailJson {
   id: number;
   weak: string[];
+  /** 元素抗性（键为元素名，值为 0~1 的比例） */
+  resist: Record<string, number>;
   stance: number;
   stats: { hp: number; atk: number; def: number; speed: number };
   /** 战斗数值合成链字段（ADR 0040/0049）：维度修饰比 / 难度组 / 精英组 / 实例修正值 */
@@ -52,7 +55,7 @@ interface MonsterDetailJson {
   /** 掉落 / 出没 / 额外阶段（monster_extra.py 的三块） */
   drops?: MonsterDropTierJson[];
   appearances?: { total: number; samples: { id: number; name: string; activity?: string }[] };
-  phases?: { phase_id: number; weak: string[]; resist: Record<string, number> }[];
+  phases?: { phase_id: number; weak: string[]; resist: Record<string, number>; name?: string; intro?: string }[];
 }
 
 const MONSTER_ID = '1002011';
@@ -77,7 +80,7 @@ test.describe('布局验收：敌方详情页', () => {
 
     // 采样器要在页面脚本之前装好；只记录几何，不做任何样式注入
     await page.addInitScript(() => {
-      const w = window as unknown as { __heroSamples: Array<{ h: number; fig: number; loaded: boolean }> };
+      const w = window as unknown as { __heroSamples: Array<{ h: number; fig: number; loaded: boolean; fonts: boolean }> };
       w.__heroSamples = [];
       setInterval(() => {
         const hero = document.querySelector('.nk-mob-hero');
@@ -88,6 +91,7 @@ test.describe('布局验收：敌方详情页', () => {
           h: Math.round(hero.getBoundingClientRect().height),
           fig: Math.round(figure.getBoundingClientRect().height),
           loaded: Boolean(img && img.complete && img.naturalWidth > 0),
+          fonts: document.fonts ? document.fonts.status === 'loaded' : true,
         });
       }, 50);
     });
@@ -102,11 +106,10 @@ test.describe('布局验收：敌方详情页', () => {
     await page.waitForTimeout(IMG_DELAY_MS + 1800);
 
     const samples = await page.evaluate(
-      () => (window as unknown as { __heroSamples: Array<{ h: number; fig: number; loaded: boolean }> }).__heroSamples,
+      () => (window as unknown as { __heroSamples: Array<{ h: number; fig: number; loaded: boolean; fonts: boolean }> }).__heroSamples,
     );
-    const heights = samples.map((s) => s.h);
     const figures = samples.map((s) => s.fig);
-    expect(heights.length, '应采到 hero 高度样本').toBeGreaterThan(5);
+    expect(samples.length, '应采到 hero 高度样本').toBeGreaterThan(5);
     expect(samples.some((s) => s.loaded), '立绘最终应加载完成（否则断言会变成空转）').toBe(true);
 
     // ① 立绘方框必须恒定——这正是缺陷原型破掉的性质（桌面档 300 → 357）
@@ -114,8 +117,16 @@ test.describe('布局验收：敌方详情页', () => {
       Math.max(...figures) - Math.min(...figures),
       '立绘方框高度在立绘到达前后必须恒定（`aspect-ratio: 1` 提前给盒子）',
     ).toBe(0);
-    // ② hero 总高只允许 ≤2px 的内容级收尾：手机档实测 +2px，来自信息列的中文行盒随字体落定
-    //    （与立绘无关；缺陷原型是桌面档 +57px，量级差 28 倍，阈值仍能区分二者）
+
+    /* ② hero 总高只允许 ≤2px 的内容级收尾，且只在**字体落定之后**采样：
+       手机档 hero = 图列 + 信息列**纵向相加**，信息列里 meta 行与章标行的行盒高由字体度量决定
+       （中文回退字体 vs webfont 实测各差 2px，与立绘无关）。原 2px 阈值是在信息列只有一行 meta
+       时标定的，图鉴正文上收进 hero 后多了一行章标 ⇒ 落定位移变 4px。按字体落定过滤采样比放宽阈值
+       更贴近本条契约（判的仍是「立绘到达会不会推动 hero」）；桌面档 hero 由更高的图列钉死、本就无关。
+       缺陷原型是桌面档 +57px，量级差 28 倍，阈值仍能区分。 */
+    const settled = samples.filter((s) => s.fonts);
+    expect(settled.length, '应采到字体落定后的样本（否则 ② 会变成空转）').toBeGreaterThan(5);
+    const heights = settled.map((s) => s.h);
     expect(
       Math.max(...heights) - Math.min(...heights),
       'hero 总高变化不得超过内容级收尾（≤2px）',
@@ -585,33 +596,82 @@ test.describe('布局验收：敌方详情页', () => {
         '无样本时必须说明「游戏内没有关卡名」，不能用沉默代替口径',
       ).toContainText('没有关卡名');
 
-      /* 额外阶段：只渲染与本体现值不同的阶段（实测 48 条阶段行里 36 条与本体逐字相同），
-         故期望值也要按同一判据从数据派生，而不是 `phases.length`。 */
-      const phaseId = 3025010;
-      const phaseMon = detailOf(phaseId);
+      /* 「其他形态」源表 `MonsterAtlasExtraPhase(s)` 按**图鉴条目**（`atlas_group`）挂，且没有阶段号
+         （`PhaseID` 只是组内行键）。故与视图同式地派期望值：丢「等于本体」的行；丢「名字能在条目成员里
+         找到」的行（那个形态本身就是同条目的另一个条目页，如 4034013 的「无缘黎明」卡厄斯兰那 = 4034015，
+         已由「图鉴族」互链给入口）；丢「与条目基准成员（`id === atlas_group`）逐字相同且自身无名字/介绍」
+         的行（源表 12 条里 11 条如此）；行间同签名同名再合并。 */
       const sig = (weak: string[], resist: Record<string, number>): string => JSON.stringify([
         [...(weak || [])].sort(),
         Object.entries(resist || {}).sort(([a], [b]) => a.localeCompare(b)),
       ]);
-      const baseSig = sig(phaseMon.weak, phaseMon.resist);
-      const expectPhases = (phaseMon.phases || []).filter((p) => sig(p.weak, p.resist) !== baseSig);
-      expect(expectPhases.length, `${phaseId} 应有与本体现值不同的阶段（断言前提）`).toBeGreaterThan(0);
+      const listEntry = (id: number): MonsterListEntry | undefined =>
+        readJson<MonsterListEntry[]>('public/data/cn/monsters.json').find((m) => m.id === id);
+      /** 同图鉴条目的全部目录成员（含本页）——形态行名字命中其中之一即「它有自己的页面」 */
+      const atlasMembers = (group: number | undefined): MonsterListEntry[] =>
+        group == null ? [] : readJson<MonsterListEntry[]>('public/data/cn/monsters.json')
+          .filter((m) => m.atlas_group === group);
+      const phaseRows = (id: number): { weak: string[]; label: string }[] => {
+        const mon = detailOf(id);
+        const group = listEntry(id)?.atlas_group;
+        const canon = group != null && group !== id
+          ? readJson<MonsterDetailJson>(`public/data/cn/monsters/${group}.json`)
+          : mon;
+        const base = sig(mon.weak, mon.resist);
+        const canonSig = sig(canon.weak, canon.resist);
+        const siblings = new Set(atlasMembers(group).map((m) => m.name));
+        const rows: { weak: string[]; label: string }[] = [];
+        const seen = new Set<string>();
+        for (const p of mon.phases || []) {
+          const s = sig(p.weak, p.resist);
+          if (s === base) continue;
+          if (p.name && siblings.has(p.name)) continue;
+          if (s === canonSig && !p.name && !p.intro) continue;
+          const key = `${s}\u0000${p.name ?? ''}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          rows.push({ weak: p.weak, label: p.name || '其他形态' });
+        }
+        return rows;
+      };
 
-      await page.goto(`/monster/${phaseId}`);
-      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      const blocks = page.locator('.nk-mob-phase');
-      await expect(blocks, '仅渲染与本体现值不同的阶段').toHaveCount(expectPhases.length);
-      expect(await blocks.evaluateAll((els) => els.map((el) => (el.querySelector('.nk-mob-phase__no')?.textContent || '').trim())))
-        .toEqual(expectPhases.map((p) => `阶段 ${p.phase_id}`));
-      // 取阶段块**第一行**（韧性弱点）的图标；直接查块内所有 tags 会把下面的抗性行也算进来
-      const firstWeak = await blocks.first().evaluate((el) => {
-        const row = el.querySelector('.nk-mob-resist__row');
-        return [...(row?.querySelectorAll('.nk-mob-resist__tags img') ?? [])]
-          .map((i) => (i.getAttribute('src') || '').split('/').pop() || '');
-      });
-      expect(firstWeak, '阶段弱点的元素图标逐项与数据一致').toEqual(
-        expectPhases[0].weak.map((e) => `${e.toLowerCase()}.webp`),
-      );
+      /** 形态块：数量/标签/弱点图标逐项等于数据派生值（`want` 为空时断言整块不渲染） */
+      const checkPhases = async (id: number): Promise<void> => {
+        const want = phaseRows(id);
+        await page.goto(`/monster/${id}`);
+        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+        const blocks = page.locator('.nk-mob-phase');
+        await expect(blocks, `${id} 形态块数量`).toHaveCount(want.length);
+        if (!want.length) return;
+        expect(
+          await blocks.evaluateAll((els) => els.map((el) =>
+            (el.querySelector('.nk-mob-phase__name, .nk-mob-phase__label')?.textContent || '').trim())),
+          '标签只能是官方形态名或「其他形态」——不得出现无来源的阶段号',
+        ).toEqual(want.map((r) => r.label));
+        // 取形态块**第一行**（韧性弱点）的图标；直接查块内所有 tags 会把下面的抗性行也算进来
+        const firstWeak = await blocks.first().evaluate((el) => {
+          const row = el.querySelector('.nk-mob-resist__row');
+          return [...(row?.querySelectorAll('.nk-mob-resist__tags img') ?? [])]
+            .map((i) => (i.getAttribute('src') || '').split('/').pop() || '');
+        });
+        expect(firstWeak, '形态弱点的元素图标逐项与数据一致').toEqual(
+          want[0].weak.map((e) => `${e.toLowerCase()}.webp`),
+        );
+      };
+
+      await checkPhases(3025010); // 具名形态「哲学的胎儿」星期日（不在目录里 ⇒ 唯一上屏处）
+      /* 4034013 的那条形态行名字 = 同条目成员 4034015「无缘黎明」卡厄斯兰那 ⇒ 不摆到本页；
+         但入口不能丢：「图鉴族」互链必须仍然给出它（撤块 ≠ 用户走不到）。 */
+      const sibling = 4034015;
+      expect(
+        (await page.goto(`/monster/4034013`).then(() => page.locator('.nk-mob-atlas__link').allTextContents()))
+          .map((t) => t.trim()),
+        '同条目成员必须仍在「图鉴族」互链里',
+      ).toContain(detailOf(sibling).name);
+      await checkPhases(4034013); // 形态块被撤（名字命中的是同条目另一个条目页）
+      /* 8015022（乘间抵隙的煽动者）的两条形态行既无名字、又与基准成员「不死神实•幻胧」逐字相同
+         ⇒ 整块不渲染。判定回退成「只丢等于本体的行」时这里立刻红（会冒出 1 个块）。 */
+      await checkPhases(8015022);
 
       assertNoErrors();
     },
@@ -654,6 +714,104 @@ test.describe('布局验收：敌方详情页', () => {
       };
       await check(2023030);
       await check(2004013);
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<id>：阶段机制逐项等于官方文案，无登记的条目整块不渲染',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      /* 官方首领文案（MonsterGuideConfig.PhaseList → MonsterGuidePhase）实测覆盖 22/632 个目录条目。
+         8015022（乘间抵隙的煽动者）是两个阶段的样本；MONSTER_ID 无登记 ⇒ 断言整块零存在
+         （「本站没接」与「官方没有」必须可分辨——不渲染，而不是渲染空壳）。
+         两个样本分工：8015022 的阶段名**带**「阶段N：」前缀（页面把它剥进编号位）；
+         4034013 的名字**不带**前缀（就是怪物名）——那批正好靠编号位才知道是第几阶段。 */
+      const norm = (s: string): string => s.replace(/\s+/g, ' ').trim();
+      const PREFIX = /^阶段\s*([一二三四五六七八九十\d]+)\s*[：:]\s*/;
+      /** 与视图同式：前缀序号 == 官方顺序时才剥，否则原样 */
+      const shownName = (name: string, i: number): string => {
+        const m = name.match(PREFIX);
+        return m && m[1] === CN_NUM[i] ? name.slice(m[0].length) : name;
+      };
+
+      const check = async (id: number): Promise<void> => {
+        const mon = detailOf(id);
+        const phases = mon.guide_phases || [];
+        expect(phases.length, `${id} 应有阶段机制（断言前提）`).toBeGreaterThan(0);
+
+        await page.goto(`/monster/${id}`);
+        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+        const blocks = page.locator('.nk-mob-guide');
+        await expect(blocks, '阶段块数 = 数据阶段数').toHaveCount(phases.length);
+        const seen = await blocks.evaluateAll((els) => els.map((el) => ({
+          no: (el.querySelector('.nk-mob-guide__no')?.textContent || '').trim(),
+          name: (el.querySelector('.nk-mob-guide__name')?.textContent || '').trim(),
+          desc: (el.querySelector('.nk-mob-guide__desc')?.textContent || '').trim(),
+          answer: (el.querySelector('.nk-mob-guide__answer')?.textContent || '').trim(),
+          qas: [...el.querySelectorAll('.nk-mob-guide__qa')].map((q) => ({
+            q: (q.querySelector('.nk-mob-guide__q')?.textContent || '').trim(),
+            a: (q.querySelector('.nk-mob-guide__a')?.textContent || '').trim(),
+          })),
+        })));
+        phases.forEach((p, i) => {
+          const got = seen[i];
+          /* 编号 = 官方 `PhaseList` 顺序（`guide_phases` 的顺序就是它）。前缀里的序号必须与它一致——
+             不一致时视图不剥前缀、编号位照旧上屏，本条即是那条不变量的哨兵（当前 0 例失配）。 */
+          const prefix = p.name.match(PREFIX);
+          if (prefix) {
+            expect(CN_NUM.indexOf(prefix[1]), `「${p.name}」的前缀序号必须等于官方阶段顺序`).toBe(i);
+          }
+          expect(got.no, `第 ${i + 1} 段的编号位`).toBe(`阶段 ${i + 1}`);
+          expect(got.name, `第 ${i + 1} 段标题`).toBe(norm(shownName(p.name, i)));
+          expect(got.desc, `${p.name} 机制说明`).toBe(norm(p.desc || ''));
+          expect(got.answer, `${p.name} 官方应对策略`).toBe(norm(p.answer || ''));
+          expect(got.qas.map((q) => q.q), `${p.name} 小节问答问句`).toEqual((p.skills || []).map((s) => norm(s.name)));
+          expect(got.qas.map((q) => q.a), `${p.name} 小节问答答句`).toEqual((p.skills || []).map((s) => norm(s.desc || '')));
+        });
+      };
+
+      await check(8015022); // 名字带「阶段N：」前缀 → 前缀进编号位，标题只剩形态名
+      await check(4034013); // 名字不带前缀（就是怪物名）→ 编号位补出「阶段 1」
+
+      await page.goto(`/monster/${MONSTER_ID}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(page.locator('.nk-mob-guide'), '无官方文案的条目不得渲染空壳').toHaveCount(0);
+      assertNoErrors();
+    },
+  );
+
+  /* 本页走文档流滚动（不用 `.nk-page--detail` 的绝对定位），侧栏避让要自己声明：此前 768~1279
+     视口下内容被侧栏压住（1024 实测 hero x=12，区块标题与 HP 值被裁）。判据用**几何关系**
+     （内容左缘 ≥ 侧栏右缘）而不是写死 x，令牌落值另判一次。 */
+  test(
+    '敌方详情页全断点避让侧栏：内容左缘落在侧栏右侧，且无未知横向溢出',
+    { tag: '@viewport-pinned' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      const cases = [
+        { w: 1024, h: 900, offset: 148 },
+        { w: 800, h: 900, offset: 88 },
+        { w: 390, h: 844, offset: 0 },
+      ];
+      for (const { w, h, offset } of cases) {
+        await page.setViewportSize({ width: w, height: h });
+        await page.goto(`/monster/${MONSTER_ID}`);
+        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+        expect(await readContentOffset(page), `${w}px 档避让令牌`).toBe(offset);
+        await expectTokenNumber(page.locator('.nk-mob-page'), 'padding-left', offset, `${w}px 档内容区左避让`);
+        if (offset > 0) {
+          const sidebar = await page.locator('.ui-sidebar').boundingBox();
+          const title = await page.locator('.nk-mob-sec__title').first().boundingBox();
+          expect(sidebar, `${w}px 档侧栏应可见`).toBeTruthy();
+          expect(
+            title!.x - (sidebar!.x + sidebar!.width),
+            `${w}px 档区块标题必须落在侧栏右侧（不得被压住）`,
+          ).toBeGreaterThanOrEqual(0);
+        }
+        await noUnknownOverflow(page);
+      }
       assertNoErrors();
     },
   );

@@ -10,7 +10,7 @@ import { monsterEliteRatiosProduct, monsterMaxLevel, monsterStanceValue, monster
 import { fmtStatValue } from '../../lib/format';
 import { atlasFormsOf, monsterFamilyKey, monsterFamilyOf } from '../../lib/monster-family';
 import { loadLocalMonsterDetail, loadLocalMonsterEliteGroups, loadLocalMonsterLevelCurve, loadLocalMonsterList } from '../../services/api';
-import type { LocalMonsterEntry, MonsterDetail, MonsterExtraEffect, MonsterPhase, MonsterSkillDetail } from '../../services/types';
+import type { LocalMonsterEntry, MazeBossPhase, MonsterDetail, MonsterExtraEffect, MonsterPhase, MonsterSkillDetail } from '../../services/types';
 import { usePageData } from '../composables/use-page-data';
 import '../../styles/monster-detail.css';
 
@@ -144,13 +144,31 @@ const familyDetails = ref<Record<string, MonsterDetail>>({});
    与上方「同族变体」互补：这里只列**不属于同一张卡**的其他形态，避免同一批卡被列两遍。 */
 const atlasSelf = ref<LocalMonsterEntry | null>(null);
 const atlasRows = ref<LocalMonsterEntry[]>([]);
+/** 图鉴条目的**基准成员**（`id === atlas_group`）的详情：判「另一形态」是否只是同一实体的另一套模型时，
+    要拿它的弱点签名做比对。本页就是基准成员（或该字段缺失）时留 null，由消费方退回本页自身签名。 */
+const atlasCanonical = ref<MonsterDetail | null>(null);
+/** 图鉴族数据是否已就位。形态块的显隐依赖基准成员详情（异步），未就位就渲染会先显后隐、把 hero 拽一下，
+    故整块等它——与「图鉴族互链」同一时机。 */
+const atlasReady = ref(false);
 
+/** 形态判定与族互链共用一次加载；`atlasReady` 在所有出口（含提前 return）统一落定 */
 async function loadFamily(): Promise<void> {
+  const id = String(route.params.id);
+  atlasReady.value = false;
+  try {
+    await loadAtlasAndFamily();
+  } finally {
+    if (String(route.params.id) === id) atlasReady.value = true;
+  }
+}
+
+async function loadAtlasAndFamily(): Promise<void> {
   const id = String(route.params.id);
   familyRows.value = [];
   familyDetails.value = {};
   atlasSelf.value = null;
   atlasRows.value = [];
+  atlasCanonical.value = null;
   let members: LocalMonsterEntry[];
   let list: LocalMonsterEntry[];
   try {
@@ -160,6 +178,13 @@ async function loadFamily(): Promise<void> {
     members = monsterFamilyOf(list, self);
     atlasSelf.value = self;
     atlasRows.value = atlasFormsOf(list, self);
+    // 基准成员的详情要在「同族不足 2 档」提前返回之前取，否则多数页面拿不到它（形态行与该条同源）
+    const group = self.atlas_group;
+    if (group != null && String(group) !== id) {
+      const canon = await loadLocalMonsterDetail(String(group)).catch(() => null);
+      if (String(route.params.id) !== id) return;
+      atlasCanonical.value = canon;
+    }
   } catch {
     return; // 同族条是附加信息：共享列表拉取失败不得让详情页进错误态
   }
@@ -251,8 +276,21 @@ function fxHtml(fx: MonsterExtraEffect): string {
 
 /** 状态词条类型：源字段枚举 → 中文（与 ELEM / MON_RANK 同类的枚举映射，不是自建数据源） */
 const STATUS_TYPE: Record<string, string> = { Buff: '增益', Debuff: '减益', Other: '其他' };
+
 function statusTypeLabel(type: string): string {
   return STATUS_TYPE[type] || type || '其他';
+}
+
+/** 阶段编号的中文序数（官方阶段名把「第几阶段」写在名字里：实测 36 条阶段行里 28 条带「阶段N：」前缀，
+ *  且前缀序号与 `PhaseList` 顺序 100% 一致）。只用于**校验**前缀能不能剥，不参与展示。 */
+const CN_ORDINAL = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+
+/** 阶段标题：编号另起一个标记位（`阶段 {{i+1}}`，见模板），故把名字里那句「阶段N：」剥掉——
+ *  同一行把「第几阶段」说两遍会被读成两个不同的东西。前缀与顺序不一致（当前 0 例）或超出十时
+ *  **保留原样**：宁可重复，不可标错号。名字本身不动（源文本保真），这里只是取它的一段。 */
+function guidePhaseName(p: MazeBossPhase, i: number): string {
+  const m = p.name.match(/^阶段\s*([一二三四五六七八九十\d]+)\s*[：:]\s*/);
+  return m && m[1] === CN_ORDINAL[i] ? p.name.slice(m[0].length) : p.name;
 }
 
 /** 状态词条描述：本仓只落**无 `#N[i]` 占位符**的描述，故按普通富文本渲染（换行仍走 fmtDesc） */
@@ -314,15 +352,45 @@ function phaseSig(weak: string[] | undefined, resist: Record<string, number> | u
   ]);
 }
 /**
- * 额外阶段：**只呈现与本体现值不同的阶段**。实测 48 条阶段行里 36 条与本体的弱点/抗性是同一份
- * 数据（阶段表对族内多数模板记的就是本体那份），原样铺开等于在同一屏把同样两行再说一遍；
- * 数据保持原样落盘（源表保真），过滤只发生在渲染层。
+ * 「其他形态」：源表 `MonsterAtlasExtraPhase(s)` 是**图鉴条目**（`TemplateGroupID`）的额外立绘形态表，
+ * 按组挂到该组的每个变体上，且**上游没有给这些行编阶段号**（`PhaseID` 只是组内行键：4015011 的两行
+ * 行序与立绘序号相反，3025010 的 `PhaseID=1` 行立绘名就写着 `_Phase2`）。故只呈现**含新信息**的行：
+ *
+ * ① 与本体现值相同 → 丢弃（同一屏把同样两行再说一遍）；
+ * ② **该形态本身就是同条目的另一个条目页** → 丢弃：名字能在条目成员里找到时，那份弱点属于那个页面
+ *    （`4034013` 的「无缘黎明」卡厄斯兰那 = 条目 `4034015`，连 `MonsterConfig` 都逐字相同），
+ *    摆到本页等于同一事实两处说，还会被读成「本怪的第二形态／阶段」；「图鉴族」互链已给入口。
+ *    实测这条只吃掉 `4034013` / `4034018`，神主日那条（「哲学的胎儿」星期日）**不在目录里**、故保留；
+ * ③ 与**条目基准成员**（`id === atlas_group`）逐字相同、且自己不带名字/介绍 → 丢弃。实测 12 条形态行里
+ *    11 条是这样的「同一实体的另一套模型」，弱点只是条目基线的副本；挂到配置不同的变体上（煽动者
+ *    `8015022`、常胜军 `4014013`）会把基准成员的弱点说成它的形态弱点；
+ * ④ 行间逐字同名（连名字都相同）→ 合并。
+ * 数据保持原样落盘（源表保真），判定只发生在渲染层。
  */
 const phases = computed(() => {
   const cur = d.value;
   if (!cur) return [];
   const base = phaseSig(cur.weak, cur.resist);
-  return (cur.phases ?? []).filter((p) => phaseSig(p.weak, p.resist) !== base);
+  const canon = atlasCanonical.value;
+  const canonSig = canon ? phaseSig(canon.weak, canon.resist) : base;
+  const siblingNames = new Set(atlasRows.value.map((r) => r.name));
+  const rows: Array<MonsterPhase & { phase_ids: number[] }> = [];
+  const seen = new Map<string, number>();
+  for (const p of cur.phases ?? []) {
+    const s = phaseSig(p.weak, p.resist);
+    if (s === base) continue;
+    if (p.name && siblingNames.has(p.name)) continue;
+    if (s === canonSig && !p.name && !p.intro) continue;
+    const key = `${s}\u0000${p.name ?? ''}`;
+    const hit = seen.get(key);
+    if (hit !== undefined) {
+      rows[hit].phase_ids.push(p.phase_id);
+      continue;
+    }
+    seen.set(key, rows.length);
+    rows.push({ ...p, phase_ids: [p.phase_id] });
+  }
+  return rows;
 });
 
 function tierLabel(worldLevel: number | null): string {
@@ -378,21 +446,8 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             <span class="nk-mob-invaded__text">受『贪饕』侵蚀</span>
             <span v-if="invadedLevels" class="nk-mob-invaded__lv">· 等级 {{ invadedLevels }}</span>
           </RouterLink>
-        </div>
-      </div>
-
-      <div class="nk-panels">
-        <div class="nk-panel nk-panel--active">
-          <section class="nk-mob-sec">
-            <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">图鉴记录</h2>
-              <span class="nk-mob-sec__en">DOSSIER</span>
-              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
-            </header>
-            <p class="nk-mob-sec__body nk-mob-intro" v-html="introHtml"></p>
-          </section>
-
-          <section class="nk-mob-sec">
+          <!-- 弱点与抗性上收进 hero 信息列：条数有限、占位固定，不像图鉴正文那样会把 hero 撑长 -->
+          <section class="nk-mob-hero__sec">
             <header class="nk-mob-sec__head">
               <h2 class="nk-mob-sec__title">弱点与抗性</h2>
               <span class="nk-mob-sec__en">VULNERABILITY</span>
@@ -410,14 +465,14 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 <span v-else class="nk-mob-empty">无抗性信息</span>
               </div>
             </div>
-            <!-- 额外阶段（源表 MonsterAtlasExtraPhase）：同一族的其他阶段另有弱点/抗性。
-                 只列与本体现值不同的阶段（见 `phases` 计算属性）；标签用源字段 PhaseID 原值——
-                 实测 PhaseID=1 记录的立绘里就有 `_Phase2`，故不得翻译成「游戏内第 N 阶段」。 -->
-            <div v-if="phases.length" class="nk-mob-phases">
-              <div v-for="p in phases" :key="p.phase_id" class="nk-mob-phase">
+            <!-- 其他形态（源表 MonsterAtlasExtraPhase(s)）：该图鉴条目另有立绘形态，各有自己的弱点/抗性。
+                 上游没有阶段号可依（`PhaseID` 只是组内行键），故**不写「阶段 N」**：官方给了名字就用名字，
+                 没名字的（多为同一实体的另一套模型）只标「其他形态」。判定见 `phases` 计算属性。 -->
+            <div v-if="atlasReady && phases.length" class="nk-mob-phases">
+              <div v-for="p in phases" :key="p.phase_ids[0]" class="nk-mob-phase">
                 <div class="nk-mob-phase__head">
-                  <span class="nk-mob-phase__no">阶段 {{ p.phase_id }}</span>
                   <span v-if="p.name" class="nk-mob-phase__name">{{ p.name }}</span>
+                  <span v-else class="nk-mob-phase__label">其他形态</span>
                 </div>
                 <div class="nk-mob-resist__row">
                   <span class="nk-mob-resist__label">韧性弱点</span>
@@ -430,6 +485,47 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                   <span v-else class="nk-mob-empty">无抗性信息</span>
                 </div>
               </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="nk-panels">
+        <div class="nk-panel nk-panel--active">
+          <!-- 图鉴正文回文档流：长度不可控（目录里 0~356 字），不该由 hero 承担 -->
+          <section class="nk-mob-sec">
+            <header class="nk-mob-sec__head">
+              <h2 class="nk-mob-sec__title">图鉴记录</h2>
+              <span class="nk-mob-sec__en">DOSSIER</span>
+              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+            </header>
+            <p class="nk-mob-sec__body nk-mob-intro" v-html="introHtml"></p>
+          </section>
+
+          <!-- 首领阶段机制（MonsterGuideConfig × MonsterGuidePhase，官方文案）：与末日幻影敌方卡的首领机制
+               同源同形。阶段名自带「阶段一：…」前缀——站内唯一有来源的阶段号（`phases[].phase_id` 不是）。
+               仅 22 个目录条目登记了这套文案，其余不渲染整块。 -->
+          <section v-if="d.guide_phases?.length" class="nk-mob-sec">
+            <header class="nk-mob-sec__head">
+              <h2 class="nk-mob-sec__title">阶段机制</h2>
+              <span class="nk-mob-sec__en">BOSS GUIDE</span>
+              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
+            </header>
+            <div class="nk-mob-guides">
+              <article v-for="(g, i) in d.guide_phases" :key="g.id" class="nk-mob-guide">
+                <header class="nk-mob-guide__head">
+                  <span class="nk-mob-guide__no">阶段 {{ i + 1 }}</span>
+                  <h3 class="nk-mob-guide__name">{{ guidePhaseName(g, i) }}</h3>
+                </header>
+                <p v-if="g.desc" class="nk-mob-guide__desc" v-html="fmtDesc(g.desc, [])"></p>
+                <p v-if="g.answer" class="nk-mob-guide__answer" v-html="fmtDesc(g.answer, [])"></p>
+                <ul v-if="g.skills?.length" class="nk-mob-guide__qas">
+                  <li v-for="s in g.skills" :key="s.name" class="nk-mob-guide__qa">
+                    <span class="nk-mob-guide__q">{{ s.name }}</span>
+                    <span v-if="s.desc" class="nk-mob-guide__a" v-html="fmtDesc(s.desc, [])"></span>
+                  </li>
+                </ul>
+              </article>
             </div>
           </section>
 
