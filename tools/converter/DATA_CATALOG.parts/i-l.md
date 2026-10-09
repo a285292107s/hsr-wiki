@@ -2896,6 +2896,20 @@
 }
 ```
 
+### ILBattleSkillTriggerKey.json (0.00 MB, 8 条)
+
+**字段** (2): `Name, SkillTriggerKey`
+
+**首条记录摘要**:
+```json
+{
+  "SkillTriggerKey": "Skill01",
+  "Name": {
+    "Hash": 17463272543800423219
+  }
+}
+```
+
 ### IdleLiveEvent.json (0.00 MB, 5 条)
 
 **字段** (4): `AvatarList, ChangeTeam, FigurePath, ID`
@@ -2909,20 +2923,6 @@
   ],
   "FigurePath": "SpriteOutput/Quest/TrainParty/EventBg/Ca...",
   "ChangeTeam": true
-}
-```
-
-### ILBattleSkillTriggerKey.json (0.00 MB, 8 条)
-
-**字段** (2): `Name, SkillTriggerKey`
-
-**首条记录摘要**:
-```json
-{
-  "SkillTriggerKey": "Skill01",
-  "Name": {
-    "Hash": 17463272543800423219
-  }
 }
 ```
 
