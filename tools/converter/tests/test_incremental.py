@@ -1,7 +1,11 @@
 """增量依赖一致性测试。
 
 核心保障：converters/<module>.py 中静态可见的源文件加载调用（load_json / _load_excel /
-_maybe_load 且文件名是字面量）必须全部出现在 incremental.MODULE_SOURCES 的对应声明中。
+_maybe_load / _load_optional 且文件名是字面量）必须全部出现在 incremental.MODULE_SOURCES
+的对应声明中。
+
+覆盖上限：helper 把文件名当形参再交给 load_json（`load_json(EXCEL_DIR / filename)`、
+`load_json(ld_path)`）时首实参不是字面量，守卫看不见 ⇒ 该形态须在新增 helper 时人工核对。
 
 否则该源文件变更时模块不会重跑，产生静默数据过期（历史事故：currency/character_detail/
 monsters/endgame 的声明与实际读取曾长期漂移）。
@@ -20,7 +24,7 @@ from incremental import MODULE_SOURCES  # noqa: E402
 
 CONVERTERS_DIR = Path(__file__).resolve().parent.parent / "converters"
 
-_LOAD_CALL_NAMES = {"load_json", "_load_excel", "_maybe_load"}
+_LOAD_CALL_NAMES = {"load_json", "_load_excel", "_maybe_load", "_load_optional"}
 
 def _extract_static_sources(path: Path) -> set[str]:
     """AST 提取文件中静态可见的源文件名（字面量参数）。"""
