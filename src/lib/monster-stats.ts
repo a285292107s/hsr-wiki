@@ -3,10 +3,12 @@
  *  剧情/任务涂改（显示时必须与字段口径一起呈现，禁止去掉口径宣称「这就是战斗内数值」）。 */
 
 export interface MonsterStatBase {
-  hp: number | null;
-  atk: number | null;
-  def: number | null;
-  speed: number | null;
+  /** 四维基准**可缺省位**：上游未登记该字段时转换器不落键（实测 `SpeedBase` 缺 13/632、
+   *  其余三维全量有值）。缺键与 `null` 在下方 `typeof !== "number"` 判据里同路 ⇒ 都走「未知」。 */
+  hp?: number | null;
+  atk?: number | null;
+  def?: number | null;
+  speed?: number | null;
   [k: string]: unknown;
 }
 

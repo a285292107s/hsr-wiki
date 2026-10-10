@@ -6,6 +6,7 @@ EliteGroup / MonsterStatusResistanceType。
 输出 {模板ID: {name,icon,figure,weak,resist,rank,camp,intro,skills,stance,stats,
                 stat_ratio,level_group,elite_group,debuff_resist}}；
 实例别名 MonsterID(如200401009)≠模板ID时指向同模板，使波次引用直接命中。
+`stance` 与 `stats` 内的四维基准**缺位不落键**（源表只有 StanceBase/SpeedBase 会缺，见 `_base_stat`）。
 战斗数值合成链（米游社《星铁数据机制通论》公式，参考站逐位反推验证，判据见 ADR 0040/0045/0049）：
   stat(level) = stats[基准] × stat_ratio[维度修饰比] × elite_ratio[精英组倍率]
                 × level_curve[level_group][level] ＋ 修正值[曲线后加，ADR 0045]
@@ -149,6 +150,28 @@ def _debuff_resist(cfg: dict, icons: dict[str, str]) -> list[dict]:
         out.append({"key": key, "value": value if isinstance(value, (int, float)) else 0, "icon": icon})
     return out
 
+
+_BASE_STATS = (("hp", "HPBase"), ("atk", "AttackBase"), ("def", "DefenceBase"), ("speed", "SpeedBase"))
+"""基准属性源字段 → 输出键（`stats` 的落键顺序即此顺序）。"""
+
+
+def _base_stat(rec: dict, field: str) -> float | None:
+    """`MonsterTemplateConfig` 的基准字段（`StanceBase` / `{HP,Attack,Defence,Speed}Base`）→ 数值。
+
+    **缺字段或非数值一律 None，由调用方决定不落键**（取代旧的 `or 0`）。实测源表 632 条：
+    `StanceBase` 缺 33、`SpeedBase` 缺 13，且这两个字段**只要存在就从不取 0** ⇒ 0 从来不是官方
+    数值，只是「上游没给」的伪造值——它在详情页与终局敌方卡上都会把「未知」显示成 0，比缺数据
+    更误导（仓规「缺位按中性 1，绝不按 0」讲的是**比率**维度；基准值没有中性值可言，故这里只区分
+    「有 / 没有」，不做任何代偿）。逐层剥 `{"Value": …}`（与 `_stat_ratio_from_cfg` 同理）。
+    """
+    v: object = rec.get(field)
+    depth = 0
+    while isinstance(v, dict) and depth < 4:
+        v = v.get("Value")
+        depth += 1
+    return v if isinstance(v, (int, float)) else None
+
+
 def _modify_value(cfg: dict, field: str) -> float | None:
     """`MonsterConfig.{Stance,Speed}ModifyValue` → 数值（缺位/不可解析 → None）。
 
@@ -169,7 +192,11 @@ def _modify_value(cfg: dict, field: str) -> float | None:
 
 def load_monsters() -> dict[int, dict]:
     """敌方信息聚合 → {ID: {name, icon, figure, weak, resist, rank, camp, intro, skills, stance, stats,
-                             stat_ratio, level_group, elite_group, debuff_resist}}。"""
+                             stat_ratio, level_group, elite_group, debuff_resist}}。
+
+    `stance` 与 `stats.{hp,atk,def,speed}` **缺位不落键**（不再是 `or 0`）：源表里这几个字段
+    `HPBase`/`AttackBase`/`DefenceBase` 全 632 条都有值，只有 `StanceBase`(缺 33) 与 `SpeedBase`(缺 13)
+    会缺，故实际只影响这两维；缺位按字段汇总 `logger.warning`（带模板 ID）。"""
     templates = load_json(EXCEL_DIR / "MonsterTemplateConfig.json")
     configs = load_json(EXCEL_DIR / "MonsterConfig.json")
     resist_icons = load_status_resist_icons()
@@ -198,6 +225,9 @@ def load_monsters() -> dict[int, dict]:
     cfg_by_id = {r.get("MonsterID"): r for r in configs}
     cfg_by_tpl = {r.get("MonsterTemplateID"): r for r in configs}
     out: dict[int, dict] = {}
+    # 基准字段缺位登记：源表 632 条里只有 StanceBase(33) / SpeedBase(13) 会缺，逐条 warning 会刷 46+ 行，
+    # 故按**字段**汇总成一行，行内列出模板 ID（可定位到具体哪只怪，仓规「缺位必须留痕」）。
+    missing: dict[str, list[int]] = {}
     for rec in templates:
         mid = rec.get("MonsterTemplateID")
         if mid is None:
@@ -208,6 +238,17 @@ def load_monsters() -> dict[int, dict]:
         icon = rec.get("ManikinImagePath", "") or ""
         figure = rec.get("ImagePath", "") or ""
         cfg = cfg_by_id.get(mid) or cfg_by_tpl.get(mid) or {}
+        # 基准值：有值才落键（缺位见 _base_stat）；缺位记进 missing，循环后**每字段一行**汇总告警
+        stance = _base_stat(rec, "StanceBase")
+        stats: dict[str, float] = {}
+        for key, field in _BASE_STATS:
+            v = _base_stat(rec, field)
+            if v is None:
+                missing.setdefault(field, []).append(mid)
+            else:
+                stats[key] = v
+        if stance is None:
+            missing.setdefault("StanceBase", []).append(mid)
         out[mid] = {
             "name": name,
             "icon": icon.rsplit("/", 1)[-1].replace(".png", "") if icon else "",
@@ -221,13 +262,9 @@ def load_monsters() -> dict[int, dict]:
             "camp": camps.get(rec.get("MonsterCampID"), "") or "",
             "intro": resolve_text(cfg.get("MonsterIntroduction", {})),
             "skills": [skills[sid] for sid in (cfg.get("SkillList") or []) if sid in skills],
-            "stance": unwrap_value(rec.get("StanceBase", {})) or 0,
-            "stats": {
-                "hp": unwrap_value(rec.get("HPBase", {})) or 0,
-                "atk": unwrap_value(rec.get("AttackBase", {})) or 0,
-                "def": unwrap_value(rec.get("DefenceBase", {})) or 0,
-                "speed": unwrap_value(rec.get("SpeedBase", {})) or 0,
-            },
+            # 韧性/四维基准：**缺位不落键**（不再是 `or 0`），前端按「键缺失 = 未知」呈现（见 _base_stat）
+            **({"stance": stance} if stance is not None else {}),
+            "stats": stats,
             # 维度修饰比/难度组/精英组：战斗合成链第二/三/四段（ADR 0040/0049）。模板自身 cfg 缺位时按中性 1 / 组 1。
             "stat_ratio": _stat_ratio_from_cfg(cfg) if cfg else {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": (cfg.get("HardLevelGroup") or 1) if cfg else 1,
@@ -263,4 +300,9 @@ def load_monsters() -> dict[int, dict]:
                 else:
                     variant[key] = mv
             out.setdefault(mid, variant)
+    # 缺位汇总告警（每字段一行，且**只在真缺位时**出）：不落键这件事必须留痕，否则「上游没给」
+    # 会被当成「官方就是没有」而无人察觉（仓规：缺位的静默中性化只做一半仍是静默错）。
+    for field, ids in missing.items():
+        logger.warning("MonsterTemplateConfig 缺基准字段 %s：%d 个模板不落该键（ID：%s）",
+                       field, len(ids), ",".join(str(i) for i in sorted(ids)))
     return out

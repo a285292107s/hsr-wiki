@@ -122,7 +122,10 @@ def convert() -> None:
             "figure": info["figure"],
             "rank": info["rank"],
             "camp": info["camp"],
-            "stance": info["stance"],
+            # 韧性基准：上游缺 StanceBase 的模板（实测 33/632）**不落键**，与 `monster_common._base_stat`
+            # 的「缺位不落键」一致——直接下标会 KeyError，写 0 会把未知显示成 0。`stats` 键恒在
+            # （hp/atk/def 全量有值），内部 speed 缺位时自然不落该键。
+            **({"stance": info["stance"]} if "stance" in info else {}),
             "weak": info["weak"],
             "resist": info["resist"],
             "intro": info["intro"],

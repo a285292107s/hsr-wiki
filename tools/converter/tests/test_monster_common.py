@@ -100,19 +100,82 @@ class TestLoadMonsters:
         }
 
     def test_missing_config_and_icon(self, monkeypatch):
-        """无配置记录 → 弱点/抗性/介绍空；无全身立绘 → figure 空；缺属性 → 0。"""
+        """无配置记录 → 弱点/抗性/介绍空；无全身立绘 → figure 空；
+        基准字段缺失 → **该键不落**（不再写 0，见 `_base_stat`）。"""
         monkeypatch.setattr(mc, "load_json", _fake_load)
         out = mc.load_monsters()
         assert out[3024012] == {
             "name": "名2", "icon": "Monster_3024010", "figure": "",
             "weak": [], "resist": {}, "rank": "MinionLv2",
             "camp": "", "intro": "", "skills": [],
-            "stance": 0, "stats": {"hp": 0, "atk": 0, "def": 0, "speed": 0},
+            # 该条四个基准字段全缺 → `stats` 内四维全不落键（键仍在，值空）
+            "stats": {},
             "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 1,
             "elite_group": 1,
             "debuff_resist": [],
         }
+        assert "stance" not in out[3024012], "缺 StanceBase ⇒ 不落键（0 是伪造值）"
+
+    def test_missing_base_fields_omit_key_and_warn(self, monkeypatch, caplog):
+        """缺字段 / 非数值 ⇒ **不落键**且**出 warning**（仓规：缺位要 write 日志，不能悄悄按 1 / 0 过）。
+
+        告警按**字段汇总**成一行并列出模板 ID（可定位），不逐条刷屏：源表实测只有
+        StanceBase(33) / SpeedBase(13) 会缺，逐条会刷 46+ 行。真值 0 必须原样保留——
+        基准值没有中性值可言，0 只是「官方就是 0」，不得当成缺位抹掉。
+        """
+        tpls = [
+            # 缺 StanceBase + SpeedBase，其余有值
+            {"MonsterTemplateID": 1001, "MonsterName": {"Hash": 1},
+             "HPBase": {"Value": 100}, "AttackBase": {"Value": 10}, "DefenceBase": {"Value": 20}},
+            # 非数值 / None 包装 / 空包装 → 与缺字段同待遇
+            {"MonsterTemplateID": 1002, "MonsterName": {"Hash": 2},
+             "StanceBase": "not-a-number", "SpeedBase": {"Value": None},
+             "HPBase": {"Value": 100}, "AttackBase": {}, "DefenceBase": {"Value": 20}},
+            # 真值 0：原样保留，绝不与缺位同形
+            {"MonsterTemplateID": 1003, "MonsterName": {"Hash": 3},
+             "StanceBase": {"Value": 0}, "HPBase": {"Value": 0}, "AttackBase": {"Value": 0},
+             "DefenceBase": {"Value": 0}, "SpeedBase": {"Value": 0}},
+            # 双层 ValueWrap 也要解开
+            {"MonsterTemplateID": 1004, "MonsterName": {"Hash": 4},
+             "StanceBase": {"Value": {"Value": 240}}, "HPBase": {"Value": {"Value": 1}},
+             "AttackBase": {"Value": 2}, "DefenceBase": {"Value": 3}, "SpeedBase": {"Value": 4}},
+        ]
+        monkeypatch.setattr(mc, "load_json", lambda p: (
+            tpls if str(p).endswith("MonsterTemplateConfig.json") else _fake_load(p)))
+
+        with caplog.at_level("WARNING", logger="converter"):
+            out = mc.load_monsters()
+
+        # 缺位 ⇒ 不落键（顶层 stance 与 stats 四维各自独立判断）
+        assert "stance" not in out[1001] and "speed" not in out[1001]["stats"]
+        assert out[1001]["stats"] == {"hp": 100, "atk": 10, "def": 20}, "有值的维度一个不少"
+        assert "stance" not in out[1002] and "speed" not in out[1002]["stats"]
+        assert "atk" not in out[1002]["stats"], "空包装 {} 与非数值同待遇"
+        assert out[1002]["stats"] == {"hp": 100, "def": 20}
+
+        # 真值 0 原样保留（不是缺位）
+        assert out[1003]["stance"] == 0
+        assert out[1003]["stats"] == {"hp": 0, "atk": 0, "def": 0, "speed": 0}
+
+        # 双层包装解开后取内层数值
+        assert out[1004]["stance"] == 240 and out[1004]["stats"]["hp"] == 1
+        assert out[1004]["stats"] == {"hp": 1, "atk": 2, "def": 3, "speed": 4}
+
+        # 告警：按字段汇总成一行，带模板 ID 可定位；不逐条刷屏
+        warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+        stance_logs = [w for w in warnings if "StanceBase" in w]
+        assert len(stance_logs) == 1, f"StanceBase 缺位应汇成 1 行（实际 {stance_logs}）"
+        assert "1001" in stance_logs[0] and "1002" in stance_logs[0], "模板 ID 必须可定位"
+        assert "1003" not in stance_logs[0] and "1004" not in stance_logs[0], "有值（含 0）的模板不进缺位名单"
+        speed_logs = [w for w in warnings if "SpeedBase" in w]
+        assert len(speed_logs) == 1 and "1001" in speed_logs[0] and "1002" in speed_logs[0]
+        # 1002 的 AttackBase 是空包装 {} ⇒ 同样按缺位处理并单独汇总一行
+        atk_logs = [w for w in warnings if "AttackBase" in w]
+        assert len(atk_logs) == 1 and "1002" in atk_logs[0] and "1001" not in atk_logs[0]
+        # 每个缺位字段恰好一行（hp/def 全有值 ⇒ 不出行）
+        assert len(warnings) == 3, f"应为 SpeedBase / StanceBase / AttackBase 各一行（实际 {warnings}）"
+        assert not any("HPBase" in w or "DefenceBase" in w for w in warnings), "有值字段不得告警"
 
     def test_instance_alias_and_skip(self, monkeypatch):
         """实例别名：MonsterID（9001）≠ 模板 ID → 指向同模板信息（波次引用命中）；

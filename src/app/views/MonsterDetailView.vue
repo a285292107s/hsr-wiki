@@ -312,12 +312,19 @@ function statusDesc(desc?: string): string {
   return fmtDesc(desc, []);
 }
 
+/** 数值格：**缺位显示破折号**，不留空白。
+ *  `fmtStatValue` 对 null/undefined 返回空串（它在别处要的是「不输出」），直接用会让缺位格变成
+ *  空单元格——读者分不清「上游没给」与「值就是 0」。破折号是本页既有的未知标记（见 variantCell）。 */
+function fmtStatCell(v: number | string | null | undefined): string {
+  return v == null ? '—' : fmtStatValue(v);
+}
+
 /** 同族条的 4 个数值格（弱点格单独渲染：图标）。该档详情未到达时给破折号，不猜值。 */
 function variantCell(det: MonsterDetail | null, key: 'stance' | 'hp' | 'speed' | 'skills'): string {
   if (!det) return '—';
-  if (key === 'stance') return fmtStatValue(det.stance);
-  if (key === 'hp') return fmtStatValue(det.stats.hp);
-  if (key === 'speed') return fmtStatValue(det.stats.speed);
+  if (key === 'stance') return fmtStatCell(det.stance);
+  if (key === 'hp') return fmtStatCell(det.stats.hp);
+  if (key === 'speed') return fmtStatCell(det.stats.speed);
   return String(det.skills.length);
 }
 
@@ -453,7 +460,7 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             <span class="nk-mob-hero__no">ARCHIVE · № {{ d.id }}</span>
             <span v-if="rankLabel">{{ rankLabel }}</span>
             <span v-if="d.camp">{{ d.camp }}</span>
-            <span v-if="d.stance">{{ t('mob.stat.stance') }} {{ d.stance }}</span>
+            <span v-if="d.stance != null">{{ t('mob.stat.stance') }} {{ d.stance }}</span>
           </div>
           <h1 class="nk-mob-hero__name">{{ d.name }}</h1>
           <RouterLink v-if="invaded" class="nk-mob-invaded" to="/voracity">
@@ -566,26 +573,26 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             <dl class="nk-mob-stats">
               <div class="nk-mob-stat">
                 <dt class="nk-mob-stat__label">{{ t('mob.stat.hp') }}</dt>
-                <dd class="nk-mob-stat__val" data-prop="hp">{{ fmtStatValue(combatStats?.hp ?? d.stats.hp) }}</dd>
+                <dd class="nk-mob-stat__val" data-prop="hp">{{ fmtStatCell(combatStats?.hp ?? d.stats.hp) }}</dd>
               </div>
               <div class="nk-mob-stat">
                 <dt class="nk-mob-stat__label">{{ t('mob.stat.atk') }}</dt>
-                <dd class="nk-mob-stat__val" data-prop="atk">{{ fmtStatValue(combatStats?.atk ?? d.stats.atk) }}</dd>
+                <dd class="nk-mob-stat__val" data-prop="atk">{{ fmtStatCell(combatStats?.atk ?? d.stats.atk) }}</dd>
               </div>
               <div class="nk-mob-stat">
                 <dt class="nk-mob-stat__label">{{ t('mob.stat.def') }}</dt>
-                <dd class="nk-mob-stat__val" data-prop="def">{{ fmtStatValue(combatStats?.def ?? d.stats.def) }}</dd>
+                <dd class="nk-mob-stat__val" data-prop="def">{{ fmtStatCell(combatStats?.def ?? d.stats.def) }}</dd>
               </div>
               <div class="nk-mob-stat">
                 <dt class="nk-mob-stat__label">{{ t('mob.stat.spd') }}</dt>
-                <dd class="nk-mob-stat__val" data-prop="spd">{{ fmtStatValue(combatStats?.speed ?? d.stats.speed) }}</dd>
+                <dd class="nk-mob-stat__val" data-prop="spd">{{ fmtStatCell(combatStats?.speed ?? d.stats.speed) }}</dd>
               </div>
-              <div v-if="d.stance" class="nk-mob-stat nk-mob-stat--stance">
+              <div v-if="d.stance != null" class="nk-mob-stat nk-mob-stat--stance">
                 <dt class="nk-mob-stat__label">{{ t('mob.stat.stance') }}</dt>
-                <dd class="nk-mob-stat__val">{{ fmtStatValue(stanceValue ?? d.stance) }}</dd>
+                <dd class="nk-mob-stat__val">{{ fmtStatCell(stanceValue ?? d.stance) }}</dd>
               </div>
             </dl>
-            <p class="nk-mob-stat-note">{{ t('mob.statNoteA', { a: d.elite_group ?? 1, b: d.level_group ?? 1 }) }}<strong>{{ t('mob.statNoteStance') }}</strong>{{ t('mob.statNoteStanceNote') }}{{ t('mob.statNoteBase') }} {{ d.stats.hp }} / {{ d.stats.atk }} / {{ d.stats.def }} / {{ d.stats.speed }}<template v-if="d.stance_modify != null || d.speed_modify != null">{{ t('mob.statNoteModify') }} <template v-if="d.stance_modify != null">{{ t('mob.statNoteStanceMod', { v: (d.stance_modify > 0 ? '+' : '') + d.stance_modify }) }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">{{ t('mob.statNoteSpeedMod', { v: (d.speed_modify > 0 ? '+' : '') + d.speed_modify }) }}</template></template>{{ t('mob.statNoteTail') }}</p>
+            <p class="nk-mob-stat-note">{{ t('mob.statNoteA', { a: d.elite_group ?? 1, b: d.level_group ?? 1 }) }}<strong>{{ t('mob.statNoteStance') }}</strong>{{ t('mob.statNoteStanceNote') }}{{ t('mob.statNoteBase') }} {{ fmtStatCell(d.stats.hp) }} / {{ fmtStatCell(d.stats.atk) }} / {{ fmtStatCell(d.stats.def) }} / {{ fmtStatCell(d.stats.speed) }}<template v-if="d.stance_modify != null || d.speed_modify != null">{{ t('mob.statNoteModify') }} <template v-if="d.stance_modify != null">{{ t('mob.statNoteStanceMod', { v: (d.stance_modify > 0 ? '+' : '') + d.stance_modify }) }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">{{ t('mob.statNoteSpeedMod', { v: (d.speed_modify > 0 ? '+' : '') + d.speed_modify }) }}</template></template>{{ t('mob.statNoteTail') }}</p>
           </section>
 
           <section v-if="d.skills.length" class="nk-mob-sec">

@@ -194,16 +194,19 @@ export interface MonsterDetail {
   rank: string;
   /** 阵营名称（MonsterCampID → MonsterCamp.Name；无阵营为空串） */
   camp: string;
-  /** 韧性值（StanceBase） */
-  stance: number;
+  /** 韧性基准（`StanceBase`）。**上游未登记时不落键**（实测 33/632 条无该字段）——
+   *  这与「官方值就是 0」不是一回事：该字段只要存在就从不取 0，故 0 从来只是伪造值
+   *  （转换器已改为缺位不落键，前端按「键缺失 = 未知」呈现）。 */
+  stance?: number;
   /** 韧性弱点属性（StanceWeakList，如 ["Physical","Ice"]） */
   weak: string[];
   /** 伤害抗性映射（属性 → 抗性值，如 { Fire: 0.2 } = 抗火 20%） */
   resist: Record<string, number>;
   /** 图鉴介绍（MonsterIntroduction，含 \n 换行） */
   intro: string;
-  /** 基础属性（模板表，无属性为 0） */
-  stats: { hp: number; atk: number; def: number; speed: number };
+  /** 基础属性（模板表基准值）。**缺位不落键**：实测 hp/atk/def 全 632 条有值，只有 `speed`
+   *  会缺（13/632）——与 `stance` 同理，0 只是伪造值。故 `speed` 可选，其余三维恒在。 */
+  stats: { hp: number; atk: number; def: number; speed?: number };
   /** 维度修饰比（MonsterConfig FaceId 版面；模板自身记录缺省位为 1） */
   stat_ratio?: { hp?: number; atk?: number; def?: number; speed?: number };
   /** 该实例的**韧性修正值**（`MonsterConfig.StanceModifyValue`，如 +30 / −120；缺位不落键）。

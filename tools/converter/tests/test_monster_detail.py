@@ -62,8 +62,19 @@ def fake_monsters(monkeypatch):
         1002011: {
             "name": "虚卒·掠夺者", "icon": "Monster_1002011",
             "figure": "Monster_1002011", "rank": "MinionLv2", "camp": "",
-            "stance": 0, "weak": [], "resist": {}, "intro": "",
+            "weak": [], "resist": {}, "intro": "",
             "stats": {"hp": 100, "atk": 10, "def": 20, "speed": 90},
+            "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
+            "level_group": 1,
+            "skills": [],
+        },
+        # 上游缺 StanceBase / SpeedBase 的模板（实测 33 / 13 条）：聚合表里**不落该键** ⇒
+        # 详情 payload 也不得落键，且不得 KeyError（写 0 会把「未知」显示成 0）
+        1002013: {
+            "name": "虚卒·掠夺者（缺基准）", "icon": "Monster_1002013",
+            "figure": "Monster_1002013", "rank": "MinionLv2", "camp": "",
+            "weak": [], "resist": {}, "intro": "",
+            "stats": {"hp": 100, "atk": 10, "def": 20},
             "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 1,
             "skills": [],
@@ -103,7 +114,7 @@ class TestConvert:
         """每怪物一个文件：字段完整、技能为全量、intro 为空串仍输出；曲线单点另落一份。"""
         md.convert()
         assert set(fake_monsters.keys()) == {
-            "8013010.json", "8013011.json", "8013012.json", "1002011.json",
+            "8013010.json", "8013011.json", "8013012.json", "1002011.json", "1002013.json",
             "monster-level-curve.json", "monster-elite-group.json",
         }
         # 曲线与精英组倍率都是独立共享单点（供 2722 份详情与目录共用），不进任何怪物 payload
@@ -132,6 +143,21 @@ class TestConvert:
         }]
         assert fake_monsters["1002011.json"]["intro"] == ""
         assert fake_monsters["1002011.json"]["skills"] == []
+
+    def test_missing_base_keys_are_omitted_not_zero(self, fake_monsters):
+        """上游缺 StanceBase / SpeedBase ⇒ 详情 payload **不落该键**（不是 `"stance": 0`）。
+
+        判据与 `monster_common._base_stat` 同源：0 从来不是官方数值（实测这两个字段只要存在就
+        从不取 0），落 0 会让页面把「未知」显示成 0；`stats` 键恒在（hp/atk/def 全量有值），
+        缺的只是内部维度。直接下标 `info["stance"]` 会 KeyError，故必须走 `.get` 判存在。
+        """
+        md.convert()
+        d = fake_monsters["1002013.json"]
+        assert "stance" not in d, "缺 StanceBase ⇒ 不落键"
+        assert d["stats"] == {"hp": 100, "atk": 10, "def": 20}, "有值的维度保留，缺的不落键"
+        assert "speed" not in d["stats"]
+        # 有值的模板不受影响（原值不变）
+        assert fake_monsters["1002011.json"]["stats"] == {"hp": 100, "atk": 10, "def": 20, "speed": 90}
 
     def test_extra_blocks_keyed_by_template(self, fake_monsters):
         """掉落/出没/阶段三块按**模板归属**写入；无数据的怪物不落键（不是空数组占位）。"""

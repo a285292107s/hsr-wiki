@@ -1175,14 +1175,17 @@ class TestPeakSeasons:
             {"id": "1003010", "name": "名30", "icon": "Monster_1003010",
              "weak": ["Physical"], "resist": {"Fire": 0.2}, "rank": "Elite",
              "camp": "名40", "stance": 240},
+            # 夹具 2002010 的模板记录（见上方 fake_load）**本来就没有 StanceBase** ⇒ 按 M1 口径
+            # 「缺位不落键」不得含 `stance`。断言要 0 就是在要求伪造值。
             {"id": "2002010", "name": "名31", "icon": "",
              "weak": [], "resist": {}, "rank": "MinionLv2",
-             "camp": "", "stance": 0},
+             "camp": ""},
         ]
+        assert "stance" not in entry["monsters"][1], "缺 StanceBase ⇒ 不落键（0 是伪造值）"
         assert entry["final_monsters"] == [
             {"id": "2002010", "name": "名31", "icon": "",
              "weak": [], "resist": {}, "rank": "MinionLv2",
-             "camp": "", "stance": 0},
+             "camp": ""},
         ]
         assert entry["buffs"] == [{"id": 3033006, "name": "名22",
                                     "desc": "", "param_list": [], "icon": ""}]
