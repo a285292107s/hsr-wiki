@@ -1165,16 +1165,17 @@ function monsterPages(ctx) {
       [ui('catalog.filter.category', '分类'), txt(monRankLabel(d.rank), null, 40)],
       ['阵营', txt(d.camp, null, 60)],
       ['图鉴编号', esc(String(d.id))],
-      ['韧性', d.stance ? esc(String(d.stance)) : ''],
+      ['韧性', d.stance != null ? esc(String(d.stance)) : ''],
       [ui('mob.resist.stance', '韧性弱点'), esc(weak.join(' / '))],
       [ui('mob.resist.damage', '伤害抗性'), esc(resist.join(' / '))],
       /* 四维标「模板基准」：详情页按 `基准 × 维度修饰比 × 精英组倍率 × 等级曲线 + 实例修正值` 在等级滑条上合成
          （实测 1002011 基准 69.75 → 满级 20,536），快照不做合成（不做第二份算式），
-         故必须把口径写进标签，否则读的人会把基准值当成战斗值。 */
-      ['生命（模板基准）', d.stats ? esc(String(d.stats.hp)) : ''],
-      ['攻击（模板基准）', d.stats ? esc(String(d.stats.atk)) : ''],
-      ['防御（模板基准）', d.stats ? esc(String(d.stats.def)) : ''],
-      ['速度（模板基准）', d.stats ? esc(String(d.stats.speed)) : ''],
+         故必须把口径写进标签，否则读的人会把基准值当成战斗值。
+         逐键判断（不是 `d.stats ?`）：上游缺该基准时不落键，对象级判断会渲染出字面量 undefined。 */
+      ['生命（模板基准）', d.stats?.hp != null ? esc(String(d.stats.hp)) : ''],
+      ['攻击（模板基准）', d.stats?.atk != null ? esc(String(d.stats.atk)) : ''],
+      ['防御（模板基准）', d.stats?.def != null ? esc(String(d.stats.def)) : ''],
+      ['速度（模板基准）', d.stats?.speed != null ? esc(String(d.stats.speed)) : ''],
       /* 活动出处（`monster_extra.load_event_sources`）：活动名与页签都是源文本
          （`ActivityPanel.TitleName` / `ActivityQuestRewardData.QuestTabName`），不是自撰文案；
          等级单档时不写区间（源数据里 5 个活动敌人全档同等级，写「85–85」是假区间）。 */
@@ -1732,7 +1733,7 @@ function currencyListPages(ctx) {
     name: a.name,
     href: null,
     meta: txt(a.quality ? cwQualityLabel(a.quality) : '', null, 40),
-    // 目录条目：条目携带 params 语义（此处 params 全为 []，即占位符不可展开）→ 含裸 `#N` 的 desc 整段省略
+    // 目录条目：条目携带 params 语义（能展开就展开，含裸 `#N`），展不开则整段省略该 desc
     desc: txtSafe(a.desc, a.params, 400, hasParamSemantics(a)),
   }));
   pages.push(makePage('currency-augment-list', {

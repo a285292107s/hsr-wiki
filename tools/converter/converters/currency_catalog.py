@@ -270,7 +270,8 @@ def _convert_augments(out_dir: Path) -> int:
         mini_icon = entry.get("MiniIconPath", "")
         quality = entry.get("Quality", "")
         category_id = entry.get("CategoryID", 0)
-        params = [_unwrap(p, 0) for p in (entry.get("DescParamList") or [])]
+        # GridFightAugment 无 `DescParamList`（同表族其它表有，勿按命名惯例改回）
+        params = [_unwrap(p, 0) for p in (entry.get("EffectParamList") or [])]
         chapter_limit = list(entry.get("ChapterLimitList") or [])
 
         out.append({
