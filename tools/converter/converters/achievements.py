@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import math
 import re
 from pathlib import Path
 from typing import Any, Mapping
@@ -21,7 +22,31 @@ from utils import load_json, save_json, unwrap_value
 logger = logging.getLogger("converter")
 
 _TEXTJOIN_RE = re.compile(r"\{TEXTJOIN#(\d+)\}")
-_PARAM_RE = re.compile(r"#(\d+)\[([a-z0-9]+)\](%?)")
+
+# 两种占位符形态，**带标签的写在左边**（同一位置上按分支顺序取首个匹配，与前端
+# `fmtDesc` 的两条正则同序，见 src/lib/format.ts:76-78）。
+# 三种前置断言挡同形前缀，互不重叠。实测 1950 条成就模板里：`<color=#` 357 处、
+# `{TEXTJOIN#N}` 15 处（两者是断言真正要挡的对象），`<=#N` / `>=#N` 与 `##` 均 0 处。
+# ① `(?<!TEXTJOIN)` 挡 `{TEXTJOIN#87}` 这类合并标记——**只挡这一个词**。
+#    曾写成 `(?<![A-Za-z0-9_#])`「挡所有紧跟的 ASCII 字母数字」，但那条**过宽**：外文译文会把
+#    占位符贴在词尾字母后（fr `dés temporels#2` / `Faveur x#1`、id `mengalahkan#1`），实测
+#    3 处因此不展开、原样上屏进可索引快照；中文模板里前置总是汉字/CJK 标点，故 cn 侧一条不露。
+#    **不能用 `\w`**——它含 CJK，会把紧随汉字的占位符一并挡掉（221 条真裸占位符的 233 处
+#    `#` 里 229 处前面就是汉字）。
+# ② `(?<![^<>]=)` 挡 `<color=#8790abff>` 这类颜色码（357 处 `=#` **全部**是 `<color=#`，标签外
+#    `=#` 0 处）；只挡「非 `<`/`>` 再跟 `=`」的形态，故 `<=#2` / `>=#2` 这类比较符后的占位符
+#    仍可展开（该形态当前语料 0 处，属**防御**：`<=#2` 只存在于 TextMap 另两个未被引用的 key）。
+# ③ `(?<!#)` 挡 `##`（当前语料 0 处，同为**防御**）。
+# 收窄前后的差集实测（13 语言语言包）：**新展开 3 条 / 反向损失 0 条**。
+# 走 `_desc_text` 时颜色码已被 `clean_text` 剥掉、TEXTJOIN 也已在上一行展开，断言因此是兜底：
+# 它保的是「未解析成功的 `{TEXTJOIN#N}` 与直接调本函数的调用方」不被改写成参数值。
+# 裸形态**不吃**尾部 `%`：该 `%` 是模板里的字面字符（前端同样只传 `pct=''`，见 :78），
+# 故裸 `#N%` **不做 ×100**——实测 6 条此类模板的参数本就是百分数（5 / 50 / 100 / 200 / 66 / 64,68）；
+# ×100 只发生在**带标签**的 `#N[i]%`（实测 5 个比率参数 0.05 / 0.01 全部走这一形态）。
+# 标签收 `[^\]]*`（含空标签）而非 `[a-z0-9]+`，与前端 :76 一致。
+_PARAM_RE = re.compile(
+    r"#(?P<tagged>\d+)\[(?P<tag>[^\]]*)\](?P<pct>%?)|(?<!TEXTJOIN)(?<![^<>]=)(?<!#)#(?P<bare>\d+)",
+)
 
 def _load_textjoin() -> dict[int, str]:
     """构建 TEXTJOIN 索引：TextJoinID → DefaultItem 的 **TextMap 键**。
@@ -63,24 +88,65 @@ def _expand_textjoin(text: str, tm: Mapping[str, str], textjoin: dict[int, str])
 
     return _TEXTJOIN_RE.sub(_replace, text)
 
-def _fill_params(text: str, param_list: list) -> str:
-    """替换 #n[i] 参数占位符为 ParamList[n-1] 数值。
+_F_RANK_RE = re.compile(r"f([1-6])")
 
+def _js_round(n: float) -> int:
+    """JS `Math.round` 语义（半值向 +∞）。
+
+    Python `round()` 是 banker's rounding（`round(0.5) == 0`），与前端 `fmtVal` 的 `Math.round`
+    （`Math.round(0.5) === 1`）在 .5 处逐值不同，故不能直接用。负数也对齐：
+    `Math.round(-1.5) === -1`、`Math.round(-2.5) === -2`。
+    """
+    return math.floor(n + 0.5)
+
+def _js_num_str(n: float) -> str:
+    """数值 → JS `String(n)` 形态：整值不带小数点（`String(50.0) === '50'`，Python `str` 给 `50.0`）。"""
+    if isinstance(n, int):
+        return str(n)
+    return str(int(n)) if n.is_integer() else str(n)
+
+def _fmt_val(val: Any, tag: str, is_pct: bool) -> str:
+    """数值 + 标签 → 展示字符串，对齐前端 `fmtVal`（src/lib/format.ts:13-24）。
+
+    `bool` 先归 `int`：Python `str(True)` 是 `'True'`，而 JS 里 `true` 参与算术得 `1`。
+    """
+    if isinstance(val, bool):
+        val = int(val)
+    if not isinstance(val, (int, float)):
+        return str(val)
+    n = val * 100 if is_pct else val
+    if tag == "i":
+        return _js_num_str(_js_round(n))
+    rank = _F_RANK_RE.fullmatch(tag)
+    if rank:
+        f = 10 ** int(rank.group(1))
+        return _js_num_str(_js_round(n * f) / f)
+    return _js_num_str(n)
+
+def _fill_params(text: str, param_list: list) -> str:
+    """替换 `#n[tag]%` 与**裸** `#n` 占位符为 ParamList[n-1] 的展示值。
+
+    数值格式化对齐前端 `fmtVal`（src/lib/format.ts:13-24）：`%` ⇒ 先 ×100、tag `i` ⇒ 半值向上
+    取整、`f1`–`f6` ⇒ 定点舍入；非数值参数原样输出。
+    **裸形态不消费尾部 `%`**（那是模板里的字面字符，与前端 :78 传 `pct=''` 一致）⇒ 不做 ×100。
     参数缺失（列表越界 / 值为空）时保留原占位符，避免丢失信息。
     """
 
     def _replace(m: "re.Match[str]") -> str:
-        idx = int(m.group(1)) - 1
+        if m.group("bare") is not None:
+            idx = int(m.group("bare")) - 1
+            tag, suffix, is_pct = "", "", False
+        else:
+            idx = int(m.group("tagged")) - 1
+            tag = m.group("tag")
+            suffix = m.group("pct")
+            is_pct = suffix == "%"
         if idx < 0 or idx >= len(param_list):
             return m.group(0)
         val = param_list[idx]
         if val is None:
             return m.group(0)
-        if m.group(2) == "i":
-            display = str(int(val)) if isinstance(val, (int, float)) else str(val)
-        else:
-            display = str(val)
-        return f"{display}{m.group(3)}"
+        return f"{_fmt_val(val, tag, is_pct)}{suffix}"
 
     return _PARAM_RE.sub(_replace, text)
 
