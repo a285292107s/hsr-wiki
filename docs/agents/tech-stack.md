@@ -13,7 +13,8 @@
 | 语言 | TypeScript | <!--ver:typescript-->6.0.3 | 类型检查走 `vue-tsc -b`（`pnpm build` 内建） |
 | 构建 | Vite（rolldown-vite） | <!--ver:vite-->8.0.11 | Windows dev 缓存坑位见 [commands.md](commands.md)「dev 缓存自愈」 |
 | 状态 | Pinia | <!--ver:pinia-->4.0.2 | store 负责加载编排 / 缓存 / 错误处理 |
-| 路由 | Vue Router（`createWebHistory`） | <!--ver:vue-router-->4.6.4 | History 模式，Vercel SPA fallback |
+| 路由 | Vue Router（`createWebHistory`） | <!--ver:vue-router-->4.6.4 | History 模式，Vercel SPA fallback；非缺省语言的 `/en/` 前缀落在 history base |
+| UI 文案 | vue-i18n（`legacy: false`） | <!--ver:vue-i18n-->11.4.13 | 词典 `src/lib/i18n/messages/*.json`（源语言 `cn`），键集由 `node tools/check-i18n-messages.mjs` 强制对齐 |
 | 宿主 | Node | <!--ver:node-->22 | 权威源是 CI `node-version`；`package.json` **无** `engines` 字段，故此处由 CI 守护 |
 | 包管理 | pnpm | <!--ver:pnpm-->11.17.0 | 权威源 `packageManager`；**禁 npm / yarn**，`pnpm-lock.yaml` 为准 |
 | 部署 | Vercel | — | `vercel.json` rewrite 规则；推送 main 自动构建 |
@@ -38,7 +39,7 @@
 
 ## 四、依赖现状
 
-维护纪律：**运行时依赖只有三个**（`vue` / `pinia` / `vue-router`）——前端零数据 / UI / 工具类三方库。devDependencies 限于构建（`vite` / `@vitejs/plugin-vue` / `vue-tsc` / `typescript`）、测试（`vitest` / `@vitest/coverage-v8` / `happy-dom` / `@playwright/test` / `@axe-core/playwright`）。全量清单与版本以 `package.json` 为唯一权威，本文件只登记上表被引用到的那些（避免抄成第二份清单）。
+维护纪律：**运行时依赖只有四个**（`vue` / `pinia` / `vue-router` / `vue-i18n`）——前端零数据 / UI / 工具类三方库；`vue-i18n` 是经用户批准的一次性放开（UI 文案多语言，复数 / 插值 / 分层词典自建成本高于引入成本，见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md) 决策 4）。devDependencies 限于构建（`vite` / `@vitejs/plugin-vue` / `vue-tsc` / `typescript`）、测试（`vitest` / `@vitest/coverage-v8` / `happy-dom` / `@playwright/test` / `@axe-core/playwright`）。全量清单与版本以 `package.json` 为唯一权威，本文件只登记上表被引用到的那些（避免抄成第二份清单）。
 
 ## 五、禁用清单（负向约束索引）
 

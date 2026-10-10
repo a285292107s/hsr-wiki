@@ -1,13 +1,18 @@
 import { escHtml, itemIconUrl } from '../../../lib/format';
+import { activeHref } from '../../../lib/i18n/active';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalRelicSets } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
+import { translate } from '../../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 
 export const relicPage: CatalogPageConfig = {
   id: 'relic',
-  title: '遗器图鉴',
+  titleKey: 'catalog.relic.title',
   subtitle: 'RELICS',
-  searchPlaceholder: '搜索遗器...',
+  searchKey: 'catalog.relic.search',
   gridClass: 'nk-cat-grid nk-relic-grid',
   cardClass: '.nk-relic-card',
   async fetchData() {
@@ -20,10 +25,10 @@ export const relicPage: CatalogPageConfig = {
       items.push({
         id: String(info.id),
         name: info.name,
-        href: `/relic/${info.id}`,
+        href: activeHref(`/relic/${info.id}`),
         img: itemIconUrl(info.icon),
         set_type: setType,
-        set_tag: setType === '4' ? '4件套' : '2件套',
+        set_tag: t('relic.setPieces', { n: setType === '4' ? 4 : 2 }),
       });
     }
     items.sort((a, b) => Number(b.id) - Number(a.id));
@@ -31,11 +36,11 @@ export const relicPage: CatalogPageConfig = {
   },
   filters: [
     {
-      key: 'set_type', label: '套装类型',
+      key: 'set_type', labelKey: 'catalog.filter.setType',
       options: [
-        { val: '', label: '全部' },
-        { val: '4', label: '4件套 · 隧洞' },
-        { val: '2', label: '2件套 · 位面' },
+        { val: '', labelKey: 'catalog.all' },
+        { val: '4', labelKey: 'catalog.option.set4Cavern' },
+        { val: '2', labelKey: 'catalog.option.set2Planar' },
       ],
     },
   ],

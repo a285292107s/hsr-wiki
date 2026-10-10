@@ -5,6 +5,10 @@ import { computed } from 'vue';
 import { BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl } from './renders';
 import type { MazeBuffInfo, MazeListEntry } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
   modeKey: string;
@@ -16,10 +20,10 @@ const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.sli
 
 <template>
   <template v-if="modeKey === 'story' && subBuffsMech">
-    <h2 id="egd-sub-buffs" class="nk-title">战意机制 FURY</h2>
+    <h2 id="egd-sub-buffs" class="nk-title">{{ t('egd.buffs.title') }}</h2>
     <div class="nk-egd-fury">
       <div class="nk-egd-fury__mech">
-        <span class="nk-egd-fury__label">战意机制</span>
+        <span class="nk-egd-fury__label">{{ t('egd.buffs.mech') }}</span>
         <article class="nk-egd-buff">
           <div class="nk-egd-buff__head">
             <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" :src="buffIconUrl(subBuffsMech)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
@@ -29,7 +33,7 @@ const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.sli
         </article>
       </div>
       <div v-if="subBuffsEffects.length" class="nk-egd-fury__eff">
-        <span class="nk-egd-fury__label">战意效果</span>
+        <span class="nk-egd-fury__label">{{ t('egd.buffs.effect') }}</span>
         <div class="nk-egd-buffs">
           <article
             v-for="(b, i) in subBuffsEffects"

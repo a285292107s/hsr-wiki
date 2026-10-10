@@ -1,88 +1,34 @@
 
 import { fmtDesc } from './format';
-import { ELEM } from './constants';
+import { labelText as tr, labelTextOr as trAuto } from './label-translator';
+import { elemLabel } from './enum-labels';
+import './constants';
 import type {
   CharacterData, CurrencyRoleRank, CurrencyRoleRecommend, CurrencyRoleRecommendItem,
   CurrencyRoleSkill, CurrencyRoleStar, CurrencyRoleTrait,
 } from '../services/types';
 
-export const FB_LABEL: Record<string, string> = { Front: '前台', Back: '后台', Both: '前后台' };
 
 /* 充能类型标签：用词依据 TextMap 官方文本——EnergyBar →「特殊充能」（技能描述「获得充能/充能达到N点」）、
    MaxSP →「终结技能量」（「初始终结技能量/恢复N终结技能量」） */
-export const CHARGE_LABEL: Record<string, string> = {
-  Speed: '速度', EnergyBar: '特殊充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点',
-};
-
-export const SKILL_GROUP_LABEL: Record<string, string> = {
-  front_show_skill: '前台技能',
-  back_show_skill: '后台技能',
-  servant_show_skill: '随从技能',
+const SKILL_GROUP_KEY: Record<string, string> = {
+  front_show_skill: 'skillGroup.front',
+  back_show_skill: 'skillGroup.back',
+  servant_show_skill: 'skillGroup.servant',
 };
 
 /* 属性名称映射：对齐 GridFightRolePropertyConfig.PropertyName（TextMap 官方名称）。
-   无前缀键 = 常规模式属性体系（GridFightRolePropertyConfig 未收录 → 数据无 prop_name，兜底表补齐官方术语）；
-   术语事实来源：tools/converter/config.py PROPERTY_MAP + TextMap 官方描述句式（全量审计 2026-08-15）。 */
-export const PROP_LABEL: Record<string, string> = {
-  CriticalChanceBase: '暴击率',
-  CriticalDamageBase: '暴击伤害',
-  HealRatioBase: '治疗量',
-  StatusResistanceBase: '效果抵抗',
-  SPRatioBase: '能量恢复效率',
-  AllDamageTypeAddedRatio: '全属性伤害',
-  AllDamageTypePenetrate: '全属性抗性穿透',
-  IcePenetrate: '冰属性抗性穿透',
-  ElationDamageAddedRatioBase: '欢愉伤害',
-  BreakDamageExtraAddedRatio: '击破伤害',
-  ExtraAllDamageTypeAddedRatio4: '伤害增幅',
-  ExtraAllDamageTypeAddedRatio1: '伤害增幅',
-  ExtraAllDamageTypeAddedRatio5: '伤害增幅',
-  ExtraDamageAddedRatio1: '伤害增幅',
-  ExtraInitSP: '初始能量',
-  ExtraHPAddedRatio1: '生命增幅',
-  ExtraHPAddedRatio2: '生命增幅',
-  ExtraSpeedAddedRatio1: '速度增幅',
-  ExtraSpeedAddedRatio2: '速度增幅',
-  ExtraAttackAddedRatio: '攻击增幅',
-  ExtraDefenceAddedRatio: '防御增幅',
-  ExtraCriticalChanceBase: '暴击率增幅',
-  ExtraCriticalDamageBase: '暴击伤害增幅',
-  StanceBreakAddedRatio: '击破效率',
-  ExtraBreakDamageAddedRatio: '击破特攻',
-  BreakDamageAddedRatioBase: '击破特攻',
-  ExtraHealBase: '基础治疗强度',
-  ExtraHealRatioBase: '治疗强度',
-  ExtraHealAddedRatio: '治疗强度',
-  ExtraShieldBase: '基础护盾强度',
-  ExtraShieldRatioBase: '护盾强度',
-  ExtraShieldAddedRatio: '护盾强度',
-  ExtraLuckChance: '幸运一击率',
-  ExtraLuckDamage: '幸运一击伤害',
-  ExtraFrontPowerAddedRatio1: '前台强度',
-  ExtraBackPowerAddedRatio1: '后台强度',
-  ExtraDOTDamageAddedRatio1: '持续伤害增幅',
-  ExtraElementDamageAddedRatio1: '击破伤害增幅',
-  ExtraInsertDamageAddedRatio1: '追加攻击伤害增幅',
-  ExtraNormalDamageAddedRatio1: '普攻伤害增幅',
-  ExtraSkillDamageAddedRatio1: '战技伤害增幅',
-  ExtraUltraDamageAddedRatio1: '终结技伤害增幅',
-  ExtraElationDamageAddedRatio1: '欢愉伤害增幅',
-  ExtraAllDamageReduce: '伤害减免',
-  ExtraQuantumResonance: '同频',
-  SpeedAddedRatio: '速度增幅',
-  AttackAddedRatio: '攻击增幅',
-  DefenceAddedRatio: '防御增幅',
-  HPAddedRatio: '生命增幅',
-};
-
-/* 属性名解析：优先 converter 落地的 prop_name（TextMap 官方名，官方改称呼自动同步）；
-   缺失时查映射表，再回退去前缀（Extra/AddedRatio 噪声）。
-   参数为结构化类型（非 Record）：调用方传 CurrencyPropMod / CurrencyEquipProp 等 interface 无需索引签名。 */
+   无前缀键 = 常规模式属性体系（GridFightRolePropertyConfig 未收录 → 数据无 prop_name，改查词典 `prop.*`）；
+   词典值取自官方词条（见 tools/fill-ui-messages.py 的 PROP_LABEL 回填块）。 */
+/** 属性名解析：优先 converter 落地的 prop_name（TextMap 官方名，官方改称呼自动同步）；
+    缺失时查词典 `prop.*`，再回退去前缀（Extra/AddedRatio 噪声）。
+    参数为结构化类型（非 Record）：调用方传 CurrencyPropMod / CurrencyEquipProp 等 interface 无需索引签名。 */
 export function propLabel(m: { prop_name?: unknown; property_type?: unknown; name?: unknown }): string {
   const official = m.prop_name;
   if (typeof official === 'string' && official) return official;
   const key = String(m.property_type || m.name || '');
-  return PROP_LABEL[key] || key.replace(/^Extra/, '').replace(/AddedRatio\d*$/, '');
+  const cleaned = key.replace(/^Extra/, '').replace(/AddedRatio\d*$/, '');
+  return key ? trAuto(`prop.${key}`, cleaned) : cleaned;
 }
 
 /** 属性值格式化：绝对值 < 1 视为比率转百分比 */
@@ -176,36 +122,64 @@ export function mergeSkillGroups(
         extraSets,
       });
     }
-    out.push({ key: g, label: SKILL_GROUP_LABEL[g], skills });
+    out.push({ key: g, label: trAuto(SKILL_GROUP_KEY[g] ?? '', g), skills });
   }
   return out;
 }
 
-export const PROP_GROUP: Record<string, string> = {
-  ExtraFrontPowerBase: '强度', ExtraFrontPowerAddedRatio1: '强度', ExtraFrontPowerAddedRatio2: '强度',
-  ExtraBackPowerBase: '强度', ExtraBackPowerAddedRatio1: '强度', ExtraBackPowerAddedRatio2: '强度',
-  ExtraTotalFrontPower: '强度', ExtraTotalBackPower: '强度',
-  ExtraHPAddedRatio1: '生存', ExtraHPAddedRatio2: '生存',
-  ExtraHealBase: '生存', ExtraHealRatioBase: '生存', ExtraHealAddedRatio: '生存', ExtraTotalHealPower: '生存',
-  ExtraShieldBase: '生存', ExtraShieldRatioBase: '生存', ExtraShieldAddedRatio: '生存', ExtraTotalShieldPower: '生存',
-  ExtraSpeedAddedRatio1: '速度', ExtraSpeedAddedRatio2: '速度', ExtraTotalSpeedAddedRatio: '速度', SpeedAddedRatio: '速度',
-  ExtraAllDamageTypeAddedRatio1: '伤害', ExtraAllDamageTypeAddedRatio4: '伤害', ExtraAllDamageTypeAddedRatio5: '伤害',
-  ExtraAttackAddedRatio: '伤害', ExtraDefenceAddedRatio: '伤害',
-  ExtraCriticalChanceBase: '伤害', ExtraCriticalDamageBase: '伤害',
-  ExtraBreakDamageAddedRatio: '伤害', StanceBreakAddedRatio: '伤害',
-  ExtraUltraDamageAddedRatio1: '伤害', ExtraSkillDamageAddedRatio1: '伤害',
-  ExtraNormalDamageAddedRatio1: '伤害', ExtraInsertDamageAddedRatio1: '伤害',
-  ExtraDOTDamageAddedRatio1: '伤害', ExtraElementDamageAddedRatio1: '伤害',
-  ExtraElationDamageAddedRatio1: '伤害', ExtraDamageAddedRatio1: '伤害',
-  ExtraInitSP: '机制', ExtraEnergyBar: '机制',
-  ExtraLuckChance: '机制', ExtraLuckDamage: '机制',
-
-  BackEnergyBar: '机制', BackInitialEnergyBar: '机制',
-  BackMaxSP: '机制', BackInitialSP: '机制',
-  BackSpeedRewrite: '速度', BackSpeedAddedRatio: '速度',
+const PROP_GROUP_KEY: Record<string, string> = {
+  ExtraFrontPowerBase: 'power',
+  ExtraFrontPowerAddedRatio1: 'power',
+  ExtraFrontPowerAddedRatio2: 'power',
+  ExtraBackPowerBase: 'power',
+  ExtraBackPowerAddedRatio1: 'power',
+  ExtraBackPowerAddedRatio2: 'power',
+  ExtraTotalFrontPower: 'power',
+  ExtraTotalBackPower: 'power',
+  ExtraHPAddedRatio1: 'survival',
+  ExtraHPAddedRatio2: 'survival',
+  ExtraHealBase: 'survival',
+  ExtraHealRatioBase: 'survival',
+  ExtraHealAddedRatio: 'survival',
+  ExtraTotalHealPower: 'survival',
+  ExtraShieldBase: 'survival',
+  ExtraShieldRatioBase: 'survival',
+  ExtraShieldAddedRatio: 'survival',
+  ExtraTotalShieldPower: 'survival',
+  ExtraSpeedAddedRatio1: 'speed',
+  ExtraSpeedAddedRatio2: 'speed',
+  ExtraTotalSpeedAddedRatio: 'speed',
+  SpeedAddedRatio: 'speed',
+  ExtraAllDamageTypeAddedRatio1: 'damage',
+  ExtraAllDamageTypeAddedRatio4: 'damage',
+  ExtraAllDamageTypeAddedRatio5: 'damage',
+  ExtraAttackAddedRatio: 'damage',
+  ExtraDefenceAddedRatio: 'damage',
+  ExtraCriticalChanceBase: 'damage',
+  ExtraCriticalDamageBase: 'damage',
+  ExtraBreakDamageAddedRatio: 'damage',
+  StanceBreakAddedRatio: 'damage',
+  ExtraUltraDamageAddedRatio1: 'damage',
+  ExtraSkillDamageAddedRatio1: 'damage',
+  ExtraNormalDamageAddedRatio1: 'damage',
+  ExtraInsertDamageAddedRatio1: 'damage',
+  ExtraDOTDamageAddedRatio1: 'damage',
+  ExtraElementDamageAddedRatio1: 'damage',
+  ExtraElationDamageAddedRatio1: 'damage',
+  ExtraDamageAddedRatio1: 'damage',
+  ExtraInitSP: 'mechanic',
+  ExtraEnergyBar: 'mechanic',
+  ExtraLuckChance: 'mechanic',
+  ExtraLuckDamage: 'mechanic',
+  BackEnergyBar: 'mechanic',
+  BackInitialEnergyBar: 'mechanic',
+  BackMaxSP: 'mechanic',
+  BackInitialSP: 'mechanic',
+  BackSpeedRewrite: 'speed',
+  BackSpeedAddedRatio: 'speed',
 };
 
-export const GROUP_ORDER = ['强度', '生存', '速度', '伤害', '机制'] as const;
+export const GROUP_ORDER = ['power', 'survival', 'speed', 'damage', 'mechanic'] as const;
 
 export interface MatrixRow {
   key: string;
@@ -244,17 +218,17 @@ export function buildGrowthMatrix(
         });
       }
     }
-    if (s.luck_chance != null) items.push({ key: 'ExtraLuckChance', label: '幸运一击率', raw: s.luck_chance, icon: propIcons?.['ExtraLuckChance'] });
-    if (s.luck_damage != null) items.push({ key: 'ExtraLuckDamage', label: '幸运一击伤害', raw: s.luck_damage, icon: propIcons?.['ExtraLuckDamage'] });
-    if (s.extra_heal_base != null) items.push({ key: 'ExtraHealBase', label: '基础治疗强度', raw: s.extra_heal_base, icon: propIcons?.['ExtraHealBase'] });
-    if (s.extra_shield_base != null) items.push({ key: 'ExtraShieldBase', label: '基础护盾强度', raw: s.extra_shield_base, icon: propIcons?.['ExtraShieldBase'] });
+    if (s.luck_chance != null) items.push({ key: 'ExtraLuckChance', label: trAuto('prop.ExtraLuckChance', 'ExtraLuckChance'), raw: s.luck_chance, icon: propIcons?.['ExtraLuckChance'] });
+    if (s.luck_damage != null) items.push({ key: 'ExtraLuckDamage', label: trAuto('prop.ExtraLuckDamage', 'ExtraLuckDamage'), raw: s.luck_damage, icon: propIcons?.['ExtraLuckDamage'] });
+    if (s.extra_heal_base != null) items.push({ key: 'ExtraHealBase', label: trAuto('prop.ExtraHealBase', 'ExtraHealBase'), raw: s.extra_heal_base, icon: propIcons?.['ExtraHealBase'] });
+    if (s.extra_shield_base != null) items.push({ key: 'ExtraShieldBase', label: trAuto('prop.ExtraShieldBase', 'ExtraShieldBase'), raw: s.extra_shield_base, icon: propIcons?.['ExtraShieldBase'] });
 
-    if (s.back_energy_bar != null) items.push({ key: 'BackEnergyBar', label: '后台充能条', raw: s.back_energy_bar, icon: propIcons?.['ExtraEnergyBar'] });
-    if (s.back_initial_energy_bar != null) items.push({ key: 'BackInitialEnergyBar', label: '后台初始充能', raw: s.back_initial_energy_bar, icon: propIcons?.['ExtraEnergyBar'] });
-    if (s.back_max_sp != null) items.push({ key: 'BackMaxSP', label: '后台最大能量', raw: s.back_max_sp, icon: propIcons?.['ExtraInitSP'] });
-    if (s.back_initial_sp != null) items.push({ key: 'BackInitialSP', label: '后台初始能量', raw: s.back_initial_sp, icon: propIcons?.['ExtraInitSP'] });
-    if (s.back_speed_rewrite != null) items.push({ key: 'BackSpeedRewrite', label: '后台速度重写', raw: s.back_speed_rewrite, icon: propIcons?.['ExtraSpeedAddedRatio1'] });
-    if (s.back_speed_added_ratio != null) items.push({ key: 'BackSpeedAddedRatio', label: '后台速度提升', raw: s.back_speed_added_ratio, icon: propIcons?.['ExtraSpeedAddedRatio1'] });
+    if (s.back_energy_bar != null) items.push({ key: 'BackEnergyBar', label: tr('cwRole.backEnergyBar'), raw: s.back_energy_bar, icon: propIcons?.['ExtraEnergyBar'] });
+    if (s.back_initial_energy_bar != null) items.push({ key: 'BackInitialEnergyBar', label: tr('cwRole.backInitialEnergy'), raw: s.back_initial_energy_bar, icon: propIcons?.['ExtraEnergyBar'] });
+    if (s.back_max_sp != null) items.push({ key: 'BackMaxSP', label: tr('cwRole.backMaxEnergy'), raw: s.back_max_sp, icon: propIcons?.['ExtraInitSP'] });
+    if (s.back_initial_sp != null) items.push({ key: 'BackInitialSP', label: tr('cwRole.backInitialSp'), raw: s.back_initial_sp, icon: propIcons?.['ExtraInitSP'] });
+    if (s.back_speed_rewrite != null) items.push({ key: 'BackSpeedRewrite', label: tr('cwRole.backSpeedRewrite'), raw: s.back_speed_rewrite, icon: propIcons?.['ExtraSpeedAddedRatio1'] });
+    if (s.back_speed_added_ratio != null) items.push({ key: 'BackSpeedAddedRatio', label: tr('cwRole.backSpeedBoost'), raw: s.back_speed_added_ratio, icon: propIcons?.['ExtraSpeedAddedRatio1'] });
     return items;
   };
 
@@ -276,7 +250,7 @@ export function buildGrowthMatrix(
 
   const groupMap = new Map<string, MatrixRow[]>();
   for (const key of keyOrder) {
-    const g = PROP_GROUP[key] || '其它';
+    const g = PROP_GROUP_KEY[key] || 'other';
     if (!groupMap.has(g)) groupMap.set(g, []);
     groupMap.get(g)!.push({
       key,
@@ -293,20 +267,24 @@ export function buildGrowthMatrix(
   const powOf = (field: 'front_power_base' | 'back_power_base') =>
     cols.map((c) => { const raw = stars[c]?.[field] ?? null; return { text: raw != null ? String(raw) : '—', raw }; });
   if (cols.some((c) => stars[c]?.front_power_base != null)) {
-    powerRows.push({ key: '__front_power', label: '基础前台强度', values: powOf('front_power_base'), icon: propIcons?.['ExtraFrontPowerBase'] });
+    powerRows.push({ key: '__front_power', label: tr('cwRole.frontPowerBase'), values: powOf('front_power_base'), icon: propIcons?.['ExtraFrontPowerBase'] });
   }
   if (cols.some((c) => stars[c]?.back_power_base != null)) {
-    powerRows.push({ key: '__back_power', label: '基础后台强度', values: powOf('back_power_base'), icon: propIcons?.['ExtraBackPowerBase'] });
+    powerRows.push({ key: '__back_power', label: tr('cwRole.backPowerBase'), values: powOf('back_power_base'), icon: propIcons?.['ExtraBackPowerBase'] });
   }
   const out: MatrixGroup[] = [];
-  if (powerRows.length) out.push({ group: '强度', rows: [...powerRows, ...(groupMap.get('强度') || [])] });
+  /* 分组字段输出**译文**（内部按枚举归并）：`propGroup.*` 是界面分类名，与属性名同源走词典 */
+  const groupLabel = (g: string): string => trAuto(`propGroup.${g}`, g);
+  if (powerRows.length) {
+    out.push({ group: groupLabel('power'), rows: [...powerRows, ...(groupMap.get('power') || [])] });
+  }
   for (const g of GROUP_ORDER) {
-    if (g === '强度') continue;
+    if (g === 'power') continue;
     const rows = groupMap.get(g);
-    if (rows?.length) out.push({ group: g, rows });
+    if (rows?.length) out.push({ group: groupLabel(g), rows });
   }
   for (const [g, rows] of groupMap) {
-    if (!(GROUP_ORDER as readonly string[]).includes(g)) out.push({ group: g, rows });
+    if (!(GROUP_ORDER as readonly string[]).includes(g)) out.push({ group: groupLabel('other'), rows });
   }
   return out;
 }
@@ -331,21 +309,35 @@ export function resolveRecommend(
   return null;
 }
 
+/** 推荐优先级：**稳定枚举**（不是文案）——视图按它选样式，文案由视图取词典。
+ *  旧实现返回中文文案并让视图拿它做 `=== '首选'` 比较，多语言后该分支恒假（首/次选样式失效）。 */
+export type RecommendPriority = 'first' | 'second';
+
 export function buildRecommendRows(
   rec: CurrencyRoleRecommend | null,
-): Array<{ pos: string; groups: Array<{ priority: string; items: CurrencyRoleRecommendItem[] }> }> {
+): Array<{ pos: string; groups: Array<{ priority: RecommendPriority; items: CurrencyRoleRecommendItem[] }> }> {
   if (!rec) return [];
-  const rows: Array<{ pos: string; groups: Array<{ priority: string; items: CurrencyRoleRecommendItem[] }> }> = [];
-  const POS: Array<[keyof CurrencyRoleRecommend, string]> = [['front', '前台'], ['back', '后台']];
+  const rows: Array<{
+    pos: string;
+    groups: Array<{ priority: RecommendPriority; items: CurrencyRoleRecommendItem[] }>;
+  }> = [];
+  const POS: Array<[keyof CurrencyRoleRecommend, string]> = [
+    ['front', tr('catalog.position.front')], ['back', tr('catalog.position.back')],
+  ];
   for (const [key, posLabel] of POS) {
     const node = rec[key];
     if (!node) continue;
-    const groups: Array<{ priority: string; items: CurrencyRoleRecommendItem[] }> = [];
-    if (node.first?.length) groups.push({ priority: '首选', items: node.first });
-    if (node.second?.length) groups.push({ priority: '次选', items: node.second });
+    const groups: Array<{ priority: RecommendPriority; items: CurrencyRoleRecommendItem[] }> = [];
+    if (node.first?.length) groups.push({ priority: 'first', items: node.first });
+    if (node.second?.length) groups.push({ priority: 'second', items: node.second });
     if (groups.length) rows.push({ pos: posLabel, groups });
   }
   return rows;
+}
+
+/** 推荐优先级 → 展示文案的词典键。 */
+export function recommendPriorityKey(p: RecommendPriority): string {
+  return p === 'first' ? 'cwRole.priorityFirst' : 'cwRole.prioritySecond';
 }
 
 export const TRAIT_CATEGORY = {
@@ -398,9 +390,9 @@ export function buildServantAttrs(
   const spd = resolveServantAttr(servant.speed_base, servant.speed_skill, charData);
   const spdInh = resolveServantAttr(servant.speed_inherit, servant.speed_skill, charData);
   if (hp) items.push({ label: 'HP', value: hp });
-  if (hpInh) items.push({ label: '生命继承', value: `${(Number(hpInh) * 100).toFixed(0)}%` });
-  if (spd) items.push({ label: '速度', value: spd });
-  if (spdInh) items.push({ label: '速度继承', value: `${(Number(spdInh) * 100).toFixed(0)}%` });
+  if (hpInh) items.push({ label: tr('cwRole.hpInherit'), value: `${(Number(hpInh) * 100).toFixed(0)}%` });
+  if (spd) items.push({ label: tr('catalog.charge.speed'), value: spd });
+  if (spdInh) items.push({ label: tr('cwRole.speedInherit'), value: `${(Number(spdInh) * 100).toFixed(0)}%` });
   return items;
 }
 
@@ -421,9 +413,9 @@ export function rankMech(rk: CurrencyRoleRank, nameMap: Map<number, string>): st
   const parts: string[] = [];
   if (rk.modify_skill_list && rk.modify_skill_list.length) {
     const names = rk.modify_skill_list.map((id) => nameMap.get(id) || `#${id}`);
-    parts.push(`强化技能：${names.join('、')}`);
+    parts.push(tr('cwRole.enhancedSkills').replace('{names}', names.join('、')));
   }
-  if (rk.modify_energy_bar != null) parts.push(`能量条 +${rk.modify_energy_bar}`);
+  if (rk.modify_energy_bar != null) parts.push(tr('cwRole.energyBar').replace('{n}', String(rk.modify_energy_bar)));
   return parts.join(' · ');
 }
 
@@ -444,6 +436,6 @@ export function stanceLine(sk: {
 }): string {
   const t = sk.stance_damage_type;
   const d = sk.stance_damage_display;
-  if (t && d != null) return `${ELEM[t] || t} ${d}`.trim();
+  if (t && d != null) return `${elemLabel(t)} ${d}`.trim();
   return stanceText(sk.show_stance_list);
 }

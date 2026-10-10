@@ -30,6 +30,8 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
     // 标题恒不带赛季号 / 版本号
     await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
+    // 等释放块就位再采样：`goto` 后立即读 `data-kind` 会与数据加载赛跑（曾因此在慢启动下假失败）
+    await expect(page.locator('.nk-hub-release__section, .nk-hub-release__empty').first()).toBeVisible();
     const kinds = await page
       .locator('.nk-hub-release__section')
       .evaluateAll((els) => els.map((el) => el.getAttribute('data-kind')));

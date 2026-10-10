@@ -1,4 +1,5 @@
 import type { EndgameGuideDb, EndgameGuideMode, EndgameSystemChoice } from '../../services/types';
+import { translate } from '../i18n';
 
 /**
  * 终局增益体系的展示口径（纯函数，便于单测）。
@@ -10,7 +11,10 @@ import type { EndgameGuideDb, EndgameGuideMode, EndgameSystemChoice } from '../.
  */
 
 /** 站点工作名：仅在体系名不可用时兜底（不得用于给体系命名，见文件头） */
-export const FALLBACK_SYSTEM_NAME = '赛季增益';
+/* 模块加载期不能翻译（会把缺省语言冻死）⇒ 常量改函数，展示时求值 */
+export function fallbackSystemName(): string {
+  return translate('egm.sec.buffs');
+}
 
 /** 选择语义 → 说明文案。枚举（`choice`）由转换器产出，文案只在本表维护。
  *  措辞逐条对齐 `endgame_guide.json` 里该体系分节的**官方原话**（判据，不是我的概括）：
@@ -18,10 +22,10 @@ export const FALLBACK_SYSTEM_NAME = '赛季增益';
  *  ／boss「在首领挑战前，可以为每支队伍选择其中一种」（数据是**每个首领投影一套**＝上/下半场各一套，
  *  故必须写明，否则「每场战斗选 1」会被读成整期只有一套）／peak「在挑战王棋前，可以为队伍选择其中一种」。 */
 export const CHOICE_LABEL: Record<EndgameSystemChoice, string> = {
-  fixed: '随层生效，不可选择',
-  per_team: '挑战关卡前每支队伍选 1 条',
-  per_stage: '每场首领挑战前选 1 条（上/下半场各一套）',
-  per_king: '挑战王棋前为队伍选 1 条',
+  fixed: translate('egd.choice.fixed'),
+  per_team: translate('egd.choice.perTeam'),
+  per_stage: translate('egd.choice.perStage'),
+  per_king: translate('egd.choice.perKing'),
 };
 
 export function guideMode(
@@ -67,5 +71,5 @@ export function seasonBuffSystemLine(
 ): string {
   const count = seasonBuffCount(guide, modeKey);
   const choice = seasonBuffChoiceLabel(guide, modeKey);
-  return [count ? `每期 ${count} 条` : '', choice].filter(Boolean).join(' · ');
+  return [count ? translate('egm.buffCount', { n: count }) : '', choice].filter(Boolean).join(' · ');
 }

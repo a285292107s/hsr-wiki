@@ -7,6 +7,13 @@ import { SECTION_IDX } from './sections';
 import type { CharacterData } from '../../services/types';
 import type { CompareResult, RankDiff, TreeDiff } from '../../lib/compare';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
+/** 文案统一走词典（脚本内不易用 useI18n；见 i18n.ts 的 translate） */
+
+
 const props = withDefaults(
   defineProps<{
     /** 基座角色数据（对比的「原始」侧；强化包随其 enhanced 字段） */
@@ -78,8 +85,8 @@ const spNote = computed<string | null>(() => {
 
 <template>
   <template v-if="sections.includes('skills')">
-    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS<span class="nk-cmp-count">变化 {{ cmp.skills.length }} 项</span></h2>
-    <div v-if="spNote" class="nk-cmp-spnote">终结技能量需求：{{ spNote }}</div>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS<span class="nk-cmp-count">{{ t('cmp.changedCount', { n: cmp.skills.length }) }}</span></h2>
+    <div v-if="spNote" class="nk-cmp-spnote">{{ t('cmp.spNote', { v: spNote }) }}</div>
     <template v-if="cmp.skills.length">
       <CompareSkillCard
         v-for="d in cmp.skills"
@@ -89,18 +96,18 @@ const spNote = computed<string | null>(() => {
         :char-data="base"
       />
     </template>
-    <div v-else class="nk-cmp-empty">本区块无变化</div>
+    <div v-else class="nk-cmp-empty">{{ t('cmp.noChange') }}</div>
   </template>
 
   <template v-if="sections.includes('eidolons')">
-    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS<span class="nk-cmp-count">变化 {{ cmp.ranks.length }} 项</span></h2>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS<span class="nk-cmp-count">{{ t('cmp.changedCount', { n: cmp.ranks.length }) }}</span></h2>
     <template v-if="rankCards.length">
       <div
         v-for="c in rankCards"
         :key="c.num"
         class="nk-cmp-rank"
       >
-        <span class="nk-cmp-badge">变化</span>
+        <span class="nk-cmp-badge">{{ t('cmp.changed') }}</span>
         <div class="nk-cmp-rank__head">
           <img class="nk-cmp-rank__icon" :src="c.img" :alt="c.name" loading="lazy">
           <div class="nk-cmp-rank__meta">
@@ -116,27 +123,27 @@ const spNote = computed<string | null>(() => {
           </div>
         </div>
         <div class="nk-cmp-row">
-          <span class="nk-cmp-tag">原始</span>
+          <span class="nk-cmp-tag">{{ t('char.state.original') }}</span>
           <div class="nk-cmp__orig" v-html="c.baseHtml"></div>
         </div>
         <div class="nk-cmp-row">
-          <span class="nk-cmp-tag">强化</span>
+          <span class="nk-cmp-tag">{{ t('cmp.enhanced') }}</span>
           <div class="nk-cmp__enh" v-html="c.enhHtml"></div>
         </div>
       </div>
     </template>
-    <div v-else class="nk-cmp-empty">本区块无变化</div>
+    <div v-else class="nk-cmp-empty">{{ t('cmp.noChange') }}</div>
   </template>
 
   <template v-if="sections.includes('talents')">
-    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.talents }}</span>TALENTS<span class="nk-cmp-count">变化 {{ cmp.trees.length }} 项</span></h2>
+    <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.talents }}</span>TALENTS<span class="nk-cmp-count">{{ t('cmp.changedCount', { n: cmp.trees.length }) }}</span></h2>
     <template v-if="treeCards.length">
       <div
         v-for="c in treeCards"
         :key="c.diff.anchor + '|' + c.diff.level"
         class="nk-cmp-tree"
       >
-        <span class="nk-cmp-badge">变化</span>
+        <span class="nk-cmp-badge">{{ t('cmp.changed') }}</span>
         <div class="nk-skill__title-row">
           <img v-if="c.icon" class="nk-skill__icon" v-bind="iconImgAttrs(c.icon)" alt="">
           <div class="nk-skill__title">
@@ -148,19 +155,19 @@ const spNote = computed<string | null>(() => {
               </template>
               <template v-else>{{ c.name }}</template>
             </span>
-            <span class="nk-skill__tag">附加能力<template v-if="c.levelLabel"> · {{ c.levelLabel }}</template></span>
+            <span class="nk-skill__tag">{{ t('cmp.talentsTag') }}<template v-if="c.levelLabel"> · {{ c.levelLabel }}</template></span>
           </div>
         </div>
         <div class="nk-cmp-row">
-          <span class="nk-cmp-tag">原始</span>
+          <span class="nk-cmp-tag">{{ t('char.state.original') }}</span>
           <div class="nk-cmp__orig" v-html="c.baseHtml"></div>
         </div>
         <div class="nk-cmp-row">
-          <span class="nk-cmp-tag">强化</span>
+          <span class="nk-cmp-tag">{{ t('cmp.enhanced') }}</span>
           <div class="nk-cmp__enh" v-html="c.enhHtml"></div>
         </div>
       </div>
     </template>
-    <div v-else class="nk-cmp-empty">本区块无变化</div>
+    <div v-else class="nk-cmp-empty">{{ t('cmp.noChange') }}</div>
   </template>
 </template>

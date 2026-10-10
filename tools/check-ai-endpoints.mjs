@@ -17,7 +17,7 @@
  * 相对路径按仓库根解析（与 cwd 无关）。--robots / --generator 仅供 temp/ 下合成夹具自测，默认值即真实产物路径。
  * 禁止：把 SITE_ORIGIN 或覆盖率数字写死成本文件常量——SITE_ORIGIN 唯一事实源是生成器模块导出。
  */
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, relative, isAbsolute, sep, basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -179,8 +179,24 @@ const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 /** prerender 内文件 → 路由（契约 §2：home.html 即 `/`） */
 function routeOf(file) {
   const p = relative(PRERENDER, file).split(sep).join('/').replace(/\.html$/i, '');
+  // 分层多语言快照：`<locale>/home.html` 的真实 URL 是 `/<locale>`（不是 `/<locale>/home`）。
+  // 只有语言段 + home 这一种组合需要特判，其余（含 `en/character` 等）与单语言同形。
+  const layeredHome = /^([a-z]{2,3})\/home$/.exec(p);
+  if (layeredHome) return `/${layeredHome[1]}`;
   return p === 'home' ? '/' : `/${p}`;
 }
+
+/* 语言清单（单一事实源 = converter 的 languages.json）：语言代码 → culture，
+   供分层快照断言（`<html lang>`）与 hreflang 条数校验使用。 */
+const LANG_JSON = JSON.parse(readFileSync(join(ROOT, 'tools', 'converter', 'languages.json'), 'utf-8'));
+const LOCALE_CULTURE = Object.fromEntries(
+  (LANG_JSON.languages ?? LANG_JSON).map((l) => [l.code, l.culture ?? l.code]),
+);
+const LOCALE_CULTURE_SIZE = Object.keys(LOCALE_CULTURE).length;
+/** 分层快照里仍含中文可见文本的**文件数**（按语言累计，供棘轮比对）。 */
+const hanByLocale = new Map();
+const coveredNotes = [];
+const coveredPush = (m) => coveredNotes.push(m);
 
 const checks = [];
 const push = (id, title, details) => checks.push({ id, title, ok: details.length === 0, details });
@@ -349,6 +365,17 @@ let sitemapCount = -1;
   }
 
   const violations = [];
+  /* 快照是**爬虫唯一可见**的那一份。它由 `gen-ai-endpoints.mjs` 独立渲染 ⇒
+     未解析令牌（`$t:…`）或**原始词典键名**（vue-i18n 找不到键时会把键名本身写进页面）
+     都会直接进搜索结果，而 SPA 侧看不出来。键名取自源语言词典，一次编译成正则逐份扫描。 */
+  const cnDictFile = join(ROOT, 'src', 'lib', 'i18n', 'messages', 'cn.json');
+  let keyRe = null;
+  if (existsSync(cnDictFile)) {
+    const keys = Object.keys(JSON.parse(readFileSync(cnDictFile, 'utf-8')));
+    const esc = (k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    keyRe = new RegExp(`(?<![\\w.])(${keys.map(esc).join('|')})(?![\\w.])`);
+  }
+
   /** 命中未展开参数占位符的快照数 */
   let phFiles = 0;
   /** 命中裸 #N 的 CW 目录页（按页点名，最多 2 页） */
@@ -363,6 +390,19 @@ let sitemapCount = -1;
     } catch (e) {
       add(`无法读取（${e.message}）`);
       continue;
+    }
+
+    // 未解析令牌：界面出现 `$t:…` 即语言包/解析链断裂
+    if (html.includes('$t:')) add('正文残留未解析文本令牌 `$t:…`');
+    /* 自造属性名占位符（ADR 0053 方案 A）：生成器必须按 cn 词典解析掉，残留即渲染链断裂 */
+    {
+      const m = html.match(/\{PROP:[A-Za-z0-9_]+\}/);
+      if (m) add(`正文残留未解析属性占位符 ${m[0]}`);
+    }
+    // 原始词典键名：vue-i18n 缺键时会直接把键名渲染出来（本轮修过 4 类）
+    if (keyRe) {
+      const hit = html.match(keyRe);
+      if (hit) add(`正文出现原始词典键名「${hit[1]}」（缺键或未翻译）`);
     }
 
     // title 非空且非站点默认
@@ -408,7 +448,69 @@ let sitemapCount = -1;
       .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
       .replace(/<!--[\s\S]*?-->/g, ' ');
     const cjk = countCjk(text);
-    if (cjk < MIN_CJK_CHARS) add(`去标签正文中文字符 ${cjk} < ${MIN_CJK_CHARS}（服务端 HTML 必须有正文）`);
+    /* 语言感知判据：缺省语言（cn）与 cht 的正文本就含汉字，沿用汉字数；
+       分层多语言快照的非 Han 语言（en/de/ru…）正文本没有汉字，改用「去标签可见文本长度」，
+       同样能拦住「空壳 HTML」（分母不同、目的相同）。 */
+    const firstSeg = relative(PRERENDER, file).split(sep)[0];
+    const isHanLocale = firstSeg === 'cht' || !/^[a-z]{2,3}$/.test(firstSeg);
+    if (isHanLocale) {
+      if (cjk < MIN_CJK_CHARS) add(`去标签正文中文字符 ${cjk} < ${MIN_CJK_CHARS}（服务端 HTML 必须有正文）`);
+    } else {
+      const textLen = text.replace(/\s+/g, '').length;
+      if (textLen < MIN_CJK_CHARS) add(`去标签正文长度 ${textLen} < ${MIN_CJK_CHARS}（服务端 HTML 必须有正文）`);
+    }
+
+    /* ── 分层多语言快照专属断言（方案 B）：`<locale>/…` 才需要，缺省语言不适用 ── */
+    if (!isHanLocale) {
+      const loc = firstSeg;
+      const culture = LOCALE_CULTURE[loc];
+      if (!culture) {
+        add(`未在 languages.json 中找到语言 ${loc}（前缀目录必须与语言清单同源）`);
+      } else {
+        const langAttr = (html.match(/<html[^>]*\slang="([^"]*)"/i) || [])[1];
+        if (langAttr !== culture) {
+          add(`<html lang> 为 ${langAttr ?? '(缺失)'}，应为 ${culture}（languages.json 的 culture）`);
+        }
+      }
+      const alts = [...html.matchAll(/<link[^>]*rel="alternate"[^>]*hreflang="([^"]+)"/gi)].map((m) => m[1]);
+      if (alts.length !== LOCALE_CULTURE_SIZE + 1) {
+        add(`hreflang 有 ${alts.length} 条，应为 ${LOCALE_CULTURE_SIZE} 语言 + x-default = ${LOCALE_CULTURE_SIZE + 1} 条`);
+      } else if (!alts.includes('x-default')) {
+        add('hreflang 缺 x-default（缺省语言回退）');
+      }
+    }
+
+    /* JSON-LD 内嵌 URL 必须与页面同语言同路由：改写漏掉一处就会让富媒体指向别的语言的页面
+       （曾出现 `{PROP:}` 解析走 cn 词典同类问题）。口径取「同源前缀一致」，不比对全路径，
+       以免把 LD 里合法的更深条目 URL 误判。 */
+    if (!isHanLocale) {
+      const canon = (html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/i) || [])[1] ?? '';
+      const wrong = [];
+      for (const m of html.matchAll(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+        for (const u of m[1].matchAll(/"(?:@id|url)"\s*:\s*"([^"]+)"/g)) {
+          const path = u[1].replace(/^https?:\/\/[^/]+/, '');
+          if (!path.startsWith('/')) continue;
+          const seg = path.split('/')[1];
+          if (/^[a-z]{2,3}$/.test(seg) && seg !== firstSeg) wrong.push(path);
+        }
+      }
+      if (wrong.length > 0) {
+        add(`JSON-LD 内嵌 URL 指向别的语言前缀 ${wrong.length} 处: ${wrong.slice(0, 3).join(', ')}（canonical ${canon.replace(/^https?:\/\/[^/]+/, '')}）`);
+      }
+    }
+
+    /* 非 Han 语言的分层快照不得出现中文可见文本（品牌名 `星铁档案馆` 例外，站点名全语言统一）。
+       硬断言会因数据侧个别遗留（如 `王棋关`）而红 ⇒ 取**棘轮**：基线缺失时按实测写入，
+       之后只降不升（与语言包汉字棘轮同一手法）。 */
+    if (!isHanLocale) {
+      /* 口径只看**快照正文**：整页 visibleText 还含 SPA 外壳的固定中文（品牌/兜底文案），
+         会把每个语言都算成 19 个文件，掩盖正文的真实残留。 */
+      const bodyMatch = html.match(/<div class="nk-snapshot">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/);
+      const bodyText = bodyMatch ? visibleText(bodyMatch[1]) : '';
+      const hanRuns = bodyText.match(/[\u4e00-\u9fff]+/g) ?? [];
+      const hanCount = hanRuns.filter((r) => '星铁档案馆'.indexOf(r) === -1).length;
+      if (hanCount > 0) hanByLocale.set(firstSeg, (hanByLocale.get(firstSeg) ?? 0) + 1);
+    }
 
     // h1 非空
     const h1 = tagText(html, /<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
@@ -613,6 +715,11 @@ let sitemapCount = -1;
   const strays = [];
   for (const file of snapshotFiles) {
     const relNoExt = relative(PRERENDER, file).split(sep).join('/').replace(/\.html$/i, '');
+    /* 分层多语言快照（方案 B）：`<locale>/<family>.html` 是同一批路由的**非缺省语言**副本，
+       不是「未登记快照」——它们的覆盖率由本块末尾的分层断言单独校验（数量 + 语言集合）。 */
+    if (/^(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)\//.test(relNoExt)) {
+      continue;
+    }
     const single = families.find((f) => f.kind === 'single' && f.file.replace(/\.html$/i, '') === relNoExt);
     if (single) {
       observedSingle.add(single.id);
@@ -660,8 +767,60 @@ let sitemapCount = -1;
   const expectedTotal =
     families.filter((f) => f.kind === 'single').length +
     families.filter((f) => f.kind === 'ids' && f.expected).reduce((n, f) => n + f.expected.size, 0);
-  if (details.length === 0 && snapshotFiles.length !== expectedTotal) {
-    details.push(`快照总数 ${snapshotFiles.length} ≠ 数据实时统计 ${expectedTotal}`);
+  /* 分层多语言快照（方案 B）：`<locale>/<family>.html` 是同一批路由的非缺省语言副本。
+     语言集合与 vercel.json 的前缀模式改写同源；文件集合 = 契约 §2 的分层家族（非条目级页面）。
+     模式感知：未生成分层快照时只要求单语言基线；一旦生成，必须**完整**覆盖 locale × family。 */
+  const LAYERED_LOCALES = ['en', 'cht', 'de', 'es', 'fr', 'id', 'jp', 'kr', 'pt', 'ru', 'th', 'vi'];
+  const LAYERED_FILES = [
+    'home.html', 'character.html', 'lightcone.html', 'relic.html', 'item.html', 'monster.html',
+    'endgame.html', 'endgame/maze.html', 'endgame/story.html', 'endgame/boss.html', 'endgame/peak.html',
+    'achievement.html', 'currency.html', 'currency/role.html', 'currency/item.html', 'currency/buff.html',
+    'currency/augment.html', 'currency/trait.html', 'voracity.html',
+  ];
+  const layeredSeen = new Set();
+  for (const f of snapshotFiles) {
+    const relNoExt = relative(PRERENDER, f).split(sep).join('/');
+    const seg = relNoExt.split('/')[0];
+    if (LAYERED_LOCALES.includes(seg)) layeredSeen.add(relNoExt);
+  }
+  if (layeredSeen.size > 0) {
+    const missingLayered = [];
+    for (const loc of LAYERED_LOCALES) {
+      for (const file of LAYERED_FILES) {
+        if (!layeredSeen.has(`${loc}/${file}`)) missingLayered.push(`${loc}/${file}`);
+      }
+    }
+    if (missingLayered.length > 0) {
+      details.push(
+        `分层快照缺 ${missingLayered.length}/${LAYERED_LOCALES.length * LAYERED_FILES.length} 个（语言 × 分层家族）: ` +
+        `${missingLayered.slice(0, 8).join(', ')}${missingLayered.length > 8 ? ' …' : ''}`,
+      );
+    }
+  }
+  const layeredTotal = layeredSeen.size > 0 ? LAYERED_LOCALES.length * LAYERED_FILES.length : 0;
+  if (details.length === 0 && snapshotFiles.length !== expectedTotal + layeredTotal) {
+    details.push(
+      `快照总数 ${snapshotFiles.length} ≠ 预期 ${expectedTotal}${layeredTotal ? ` + 分层 ${layeredTotal}` : ''}`,
+    );
+  }
+
+  /* 汉字棘轮：基线缺失 ⇒ 按当前实测写入（首次运行自举）；已存在 ⇒ 只降不升。 */
+  if (hanByLocale.size > 0) {
+    const HAN_BASELINE = join(ROOT, 'tools', 'ai-han-baseline.json');
+    const measured = Object.fromEntries([...hanByLocale.entries()].sort());
+    if (!existsSync(HAN_BASELINE)) {
+      writeFileSync(HAN_BASELINE, `${JSON.stringify(measured, null, 2)}\n`, 'utf-8');
+      coveredPush(`汉字棘轮基线已写入 ${rel(HAN_BASELINE)}: ${JSON.stringify(measured)}`);
+    } else {
+      const base = JSON.parse(readFileSync(HAN_BASELINE, 'utf-8'));
+      const worse = Object.entries(measured).filter(([k, v]) => v > (base[k] ?? 0));
+      if (worse.length > 0) {
+        details.push(
+          `分层快照含中文的文件数上升: ${worse.map(([k, v]) => `${k} ${base[k] ?? 0}→${v}`).join(', ')}` +
+          `（基线 ${rel(HAN_BASELINE)}；只降不升，修好后再降基线）`,
+        );
+      }
+    }
   }
 
   const title = details.length === 0

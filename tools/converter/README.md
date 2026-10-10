@@ -15,12 +15,15 @@ pip install -r requirements.txt
 ## 转换
 
 ```bash
-python convert.py                          # 全量（源数据未变更的模块自动跳过）
+python convert.py                          # 全量（令牌模式：结构层写文本引用令牌 + 生成全语言语言包）
 python convert.py --only characters,relics # 仅重跑指定模块（逗号分隔）
-python convert.py --force                  # 忽略增量缓存，强制全量
+python convert.py --force                  # 忽略增量缓存，强制全量（令牌模式本身就是全量，见下）
 python convert.py --pretty                 # 缩进输出（调试用，默认紧凑）
 python convert.py --official-icon-paths    # 图标路径输出官方仓库相对路径
+python convert.py --raw                    # 关闭令牌化：输出完整中文、不生成语言包（仅调试/比对，产物勿提交）
 ```
+
+令牌模式是默认路径（[ADR 0052](../../docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）：结构层 `public/data/cn/**` 里的文本是引用令牌 `"$t:<键>"`（`clean=False` 取到的原文用 `~raw` 变体），各语言正文落 `public/data/i18n/<语言>/<分组>.json`。**该模式禁用增量跳过**——语言包是整语言产物、分组可由多个模块写入，部分重跑会写出被截断的包。运行结束打印「结构层残留中文」清单（尚未令牌化的转换器自拼文案）。
 
 输出目录为 `public/data/cn/`（`config.py` 的 `OUTPUT_DIR`）；模块名以 `convert.py` 的 `MODULES` 为准，未知模块名报错退出；`endgame_catalog` 由 `endgame` 的全量输出派生（不读源数据），需在 `endgame` 之后运行。
 
@@ -74,7 +77,10 @@ python gen_catalog.py --filter Avatar               # 局部索引 → DATA_CATA
 tools/converter/
 ├── convert.py          # 主入口：MODULES 注册 + CLI
 ├── config.py           # 源/输出路径、枚举与图标路径映射
+├── languages.json      # 语言清单单一事实源（13 语言；前端镜像见 src/lib/i18n/locales.ts）
+├── languages.py        # 语言清单读取/校验 + TextMap 分片路径解析
 ├── textmap.py          # TextMap 加载与 Hash 解析
+├── textpack.py         # 文本引用令牌 + 语言包生成（结构单份，见 docs/adr/0052）
 ├── textmap_db.py       # TextMap SQLite 缓存（query.py 用）
 ├── utils.py            # load/save、unwrap、图标路径等通用工具
 ├── incremental.py      # MODULE_SOURCES 增量签名与状态

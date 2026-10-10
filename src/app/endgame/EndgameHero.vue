@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   ENDGAME_MODES, MAZE_STATUS_CLASS, mazeStatus, mazeDateRange,
   modeDefaultArtUrl, seasonBannerUrl, seasonHeroBgUrl,
@@ -14,6 +15,9 @@ const props = defineProps<{
 }>();
 
 const modeInfo = computed(() => ENDGAME_MODES.find((m) => m.key === props.modeKey));
+const { t } = useI18n();
+/** 模式展示名（官方玩法名，词典键解析） */
+const modeLabel = computed(() => (modeInfo.value ? t(modeInfo.value.labelKey) : props.modeKey));
 const status = computed(() => mazeStatus(props.data));
 const statusClass = computed(() => MAZE_STATUS_CLASS[status.value] || 'unknown');
 const dateRange = computed(() => mazeDateRange(props.data));
@@ -49,10 +53,10 @@ const flipHeroBg = computed(() => !!seasonBanner.value);
     </div>
     <div class="nk-egd-hero__panel">
       <div class="nk-egd-hero__camp">
-        <span>{{ modeInfo?.label || modeKey }} · {{ modeInfo?.en || '' }}</span>
-        <RouterLink class="nk-guide-link" :to="`/endgame/${modeKey}`" :aria-label="`${modeInfo?.label || modeKey}玩法说明`">
+        <span>{{ modeLabel }} · {{ modeInfo?.en || '' }}</span>
+        <RouterLink class="nk-guide-link" :to="`/endgame/${modeKey}`" :aria-label="t('catalog.modeGuideAria', { name: modeLabel })">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>
-          玩法说明
+          {{ t('egd.guideLabel') }}
         </RouterLink>
       </div>
       <h1 class="nk-egd-hero__name">{{ data.zh }}</h1>
@@ -62,7 +66,7 @@ const flipHeroBg = computed(() => !!seasonBanner.value);
           :class="`nk-egd-hero__status--${statusClass}`"
         >{{ status }}</span>
         <span v-if="dateRange" class="nk-egd-hero__date">{{ dateRange }}</span>
-        <span class="nk-egd-hero__sid" :title="`赛季编号 ${data.id}`">No.{{ data.id }}</span>
+        <span class="nk-egd-hero__sid" :title="t('egd.seasonId', { id: data.id })">No.{{ data.id }}</span>
       </div>
     </div>
   </header>

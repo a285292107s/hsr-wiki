@@ -30,7 +30,27 @@ pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 
 pnpm preview   # 预览构建产物
 ```
 
-`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度三守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml` 并断言覆盖率，契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
+`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文七守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml`；逐份断言 title / canonical / 内链 / 中文字符数 / h1 / JSON-LD / 游戏标记 / 未展开参数占位符 `#\d+\[…\]` / **无未解析文本令牌 `$t:…`** / **无原始词典键名**（缺键时 vue-i18n 会把键名本身写进页面），并断言覆盖率。契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
+
+多语言相关三守卫可单独运行（契约见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md)）：
+
+```bash
+node tools/check-languages.mjs     # converter languages.json ↔ 前端 locales.ts 逐项比对 + 上游语言交叉校验 + 禁止无参 toLocaleString()（数字格式化须按站点语言）+ 非 RouterLink 内链必须经 activeHref（否则非缺省语言跳回缺省语言）
+node tools/check-i18n-packs.mjs    # 语言包覆盖：结构层令牌 ↔ 各语言语言包（含缺包与缺键；非中文包不得残留中文「开拓者」= 占位符漏按语言展开；skill_animations 的借值须与 characters 分组一致；非汉字语言包含汉字条目数按 tools/i18n-han-baseline.json 只降不升，`--write-baseline` 重写基线）
+node tools/check-i18n-messages.mjs # UI 词典：13 语言键集对齐 / 空值 / 漏译（非中日韩语言不得含汉字）/ 代码 t() 键拼写 / 值里的花括号只能是 {占位符} / 模板拼接键的数据取值域兜底（itemType、prop、skillType、monster.rank、endgame.status、propGroup）
+node tools/check-ui-chinese.mjs   # 界面中文：代码里不得写死面向用户的中文（品牌名 / 母语自称 / 诊断日志 / 内部校验文本 / 中文解析表经白名单放行）
+```
+
+`check-languages.mjs` 校验两侧语言代码 / culture / 母语名 / URL 前缀一致、`src/` 内无无参 `toLocaleString()`（否则数字按浏览器语言分组）、非 `RouterLink` 内链均经 `activeHref()`，并在 vendor 在场时交叉校验上游 `AllowedTextLanguage.json` 与各语言 TextMap 分片存在性（上游新增语言即失败，强制走一次「要不要支持」的决策）。`check-i18n-packs.mjs` 校验「结构层出现过的令牌 = 必须被语言包覆盖的键」——**与令牌来源无关**，兜住从已令牌化产物派生（`endgame_catalog`）这类透传场景；结构层未令牌化时该守卫恒过。`check-i18n-messages.mjs` 把「漏译」从界面可见缺陷变成构建前失败：源语言是 `cn`，其余语言缺键一律红灯（运行期只会静默回退成中文）。
+
+UI 词典里的**官方术语**（全部 / 命途 / 弱点 / 玩法名…）不要手翻，用 `tools/fill-ui-messages.py` 从官方文本表回填（值 = 官方译文，13 语言一次到位；站点自造标签写在该脚本的 `AUTHORED` 表里）：
+
+```bash
+python tools/fill-ui-messages.py           # 回填/更新词典（保留其它键、按键排序）
+python tools/fill-ui-messages.py --check   # 只检查：官方译文是否与词典现值一致（漂移即非零退出）
+```
+
+同形多义必须人工指定义项（`OVERRIDE_HASH`）：如「命途」既有剧情义 `Fate` 又有界面义 `Path`，自动取键会取错义项。该脚本需要 vendor 文本表，故不进 `pnpm build` 的守卫链（CI 构建不带 vendor）。
 
 ## 测试
 
@@ -125,5 +145,5 @@ python -m pytest tests/ -v               # converter 单元测试
 
 - main 分支 protection 仅保留防 force push 与防删除（required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过。
 - 推送后 CI 自动运行 `unit-tests`（`pnpm test`）+ `e2e`（`pnpm test:e2e:ci` = layout + a11y，减去 `@font-calibrated`），失败由 GitHub 通知；CI **不跑** `pnpm build`。
-- Vercel 生产构建（`pnpm build`，含 vue-tsc 与三守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
+- Vercel 生产构建（`pnpm build`，含 vue-tsc 与四守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
 - 本地推送前先跑 `pnpm build` + `pnpm test` 自检——CI 红不会拦 push，但会留失败记录。

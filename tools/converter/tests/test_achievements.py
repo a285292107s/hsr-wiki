@@ -26,6 +26,8 @@ def setup_textmap(monkeypatch):
     monkeypatch.setattr(textmap, "_text_map", {})
 
 class TestLoadTextjoin:
+    """TEXTJOIN 索引存的是 **TextMap 键**（不是文本）：组合要按语言各自取值。"""
+
     def test_default_item_resolution(self, monkeypatch):
         monkeypatch.setattr(ach, "load_json", lambda p: (
             [{"TextJoinID": 54, "DefaultItem": 540, "TextJoinItemList": [540, 541]}]
@@ -35,7 +37,7 @@ class TestLoadTextjoin:
                   {"TextJoinItemID": 999, "TextJoinText": "无引用条目"}]
         ))
         out = ach._load_textjoin()
-        assert out == {54: ""}
+        assert out == {54: "1"}
 
     def test_missing_default_skipped(self, monkeypatch):
         monkeypatch.setattr(ach, "load_json", lambda p: (
@@ -45,19 +47,38 @@ class TestLoadTextjoin:
         ))
         assert ach._load_textjoin() == {}
 
+    def test_literal_ref_without_key_skipped(self, monkeypatch):
+        """字面量引用既不在文本表、xxhash 也查不到 ⇒ text_key_of 返回 None ⇒ 不建索引。
+
+        （`{"Hash": N}` 形态的键总是可用——它是全局键空间的一部分，与某语言文本表是否收录无关。）
+        """
+        monkeypatch.setattr(ach, "load_json", lambda p: (
+            [{"TextJoinID": 7, "DefaultItem": 70}]
+            if str(p).endswith("TextJoinConfig.json")
+            else [{"TextJoinItemID": 70, "TextJoinText": "不存在的字面量键"}]
+        ))
+        assert ach._load_textjoin() == {}
+
 class TestExpandTextjoin:
+    TM = {"1": "记忆泡", "2": "星琼"}
+
     def test_expands_known_id(self):
-        out = ach._expand_textjoin("归还{TEXTJOIN#54}道具", {54: "记忆泡"})
+        out = ach._expand_textjoin("归还{TEXTJOIN#54}道具", self.TM, {54: "1"})
         assert out == "归还记忆泡道具"
 
     def test_keeps_unknown_id(self):
-        out = ach._expand_textjoin("归还{TEXTJOIN#999}道具", {54: "记忆泡"})
+        out = ach._expand_textjoin("归还{TEXTJOIN#999}道具", self.TM, {54: "1"})
         assert out == "归还{TEXTJOIN#999}道具"
 
     def test_empty_text_keeps_placeholder(self):
-        """解析出的文本为空串时保留占位符（避免误删信息）。"""
-        out = ach._expand_textjoin("归还{TEXTJOIN#54}", {54: ""})
+        """该语言文本表里键缺失时保留占位符（避免误删信息）。"""
+        out = ach._expand_textjoin("归还{TEXTJOIN#54}", self.TM, {54: "404"})
         assert out == "归还{TEXTJOIN#54}"
+
+    def test_language_specific_text(self):
+        """同一 TEXTJOIN id 在不同语言表下产出不同正文——这正是「按语言组合」的意义。"""
+        out = ach._expand_textjoin("归还{TEXTJOIN#54}", {"1": "Memory Bubble"}, {54: "1"})
+        assert out == "归还Memory Bubble"
 
 class TestFillParams:
     def test_integer_and_percent(self):
@@ -80,20 +101,28 @@ class TestFillParams:
         out = ach._fill_params("#1[i]场战斗中#2[i]名角色", [10, 3])
         assert out == "10场战斗中3名角色"
 
-class TestFormatDesc:
+class TestDescText:
+    """组合实现是语言无关的：`tm` 决定语言，缺省语言正文与语言包共用同一份代码。"""
+
     def test_textjoin_then_params(self):
-        textjoin = {54: "记忆泡"}
-        out = ach._format_desc("归还{TEXTJOIN#54}#1[i]个", [3], textjoin)
-        assert out == "归还记忆泡3个"
+        tm = {"1": "记忆泡", "9": "归还{TEXTJOIN#54}#1[i]个"}
+        assert ach._desc_text(tm, "9", [3], {54: "1"}) == "归还记忆泡3个"
+
+    def test_missing_template_key_yields_empty(self):
+        assert ach._desc_text({}, "404", [1], {}) == ""
 
     def test_unwrap_param_values(self):
-        out = ach._format_desc("击败#1[i]名敌人", [{"Value": 40}], {})
+        tm = {"9": "击败#1[i]名敌人"}
+        out = ach._desc_text(tm, "9", [{"Value": 40}], {})
         assert out == "击败40名敌人"
 
     def test_keeps_newline_and_note(self):
-        out = ach._format_desc("通关贝洛伯格\\n※成就完成", [], {})
-        assert out == "通关贝洛伯格\n※成就完成"
-        assert ach._format_desc("已含真换行\n第二行", [], {}) == "已含真换行\n第二行"
+        tm = {"9": "通关贝洛伯格\\n※成就完成", "8": "已含真换行\n第二行"}
+        assert ach._desc_text(tm, "9", [], {}) == "通关贝洛伯格\n※成就完成"
+        assert ach._desc_text(tm, "8", [], {}) == "已含真换行\n第二行"
+
+    def test_missing_template_key_yields_empty(self):
+        assert ach._desc_text({}, "404", [1], {}) == ""
 
 class TestParseAchievement:
     def test_field_mapping(self, monkeypatch):

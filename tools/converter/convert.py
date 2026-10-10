@@ -20,8 +20,11 @@ if sys.platform == "win32":
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from textmap import load_textmap
-from utils import set_pretty, set_official_paths
+from textmap import clean_text, load_textmap
+from utils import set_pretty, set_official_paths, set_text_tokens
+import textpack
+from languages import codes
+from config import OUTPUT_DIR, PACK_DIR
 from incremental import load_state, save_state, should_skip, update_state
 from converters import paths, elements, items, properties
 from converters import characters, character_detail
@@ -86,7 +89,39 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="图标路径输出官方 StarRailTextures 仓库相对路径（默认旧短路径 icon/xxx/yyy.png 格式）",
     )
+    parser.add_argument(
+        "--raw",
+        action="store_true",
+        help="关闭令牌化：输出完整中文、不生成语言包（仅调试 / 与旧产物比对用，产物勿提交）",
+    )
     return parser.parse_args()
+
+def _write_language_packs() -> None:
+    """写出各语言语言包，并盘点结构层残留中文（多语言化进度判据）。"""
+    builder = textpack.session()
+    if builder is None:
+        logger.error("令牌会话未开启，跳过语言包生成")
+        return
+
+    out_dir = PACK_DIR
+    lang_codes = codes()
+    stats = builder.write(out_dir, lang_codes, cleaner=clean_text)
+    logger.info("语言包：%d 个分组 × %d 语言 → %s", len(builder.groups), len(lang_codes), out_dir)
+    for code in lang_codes:
+        logger.info("  %-4s %7d 键", code, stats[code])
+
+    residual = textpack.survey_tree(OUTPUT_DIR)
+    total = sum(len(v) for v in residual.values())
+    logger.warning(
+        "结构层残留中文：%d 处 / %d 个文件（未令牌化；需改稳定枚举键或改走 TextMap）",
+        total,
+        len(residual),
+    )
+    for rel in sorted(residual, key=lambda r: -len(residual[r]))[:15]:
+        logger.warning("  %-42s %4d 处  例：%s", rel, len(residual[rel]), residual[rel][0][1][:40])
+
+    textpack.end()
+
 
 def main() -> None:
     args = parse_args()
@@ -96,6 +131,15 @@ def main() -> None:
         set_pretty(True)
     if args.official_icon_paths:
         set_official_paths(True)
+    if not args.raw:
+        # 令牌模式是默认路径（ADR 0052）：结构层写文本引用令牌 + 生成全语言语言包。
+        # 语言包是「整语言产物」：分组可由多个模块写入，部分重跑会写出被截断的包，
+        # 因此令牌模式下禁用增量跳过（一次全量换一份自洽的语言包）。
+        if not args.force:
+            logger.info("令牌模式：忽略增量跳过，本次全量重跑")
+            args.force = True
+        set_text_tokens(True)
+        textpack.begin()
 
     if args.only:
         selected = [m.strip() for m in args.only.split(",") if m.strip()]
@@ -126,6 +170,9 @@ def main() -> None:
         update_state(name, state)
 
     save_state(state)
+
+    if not args.raw:
+        _write_language_packs()
 
     elapsed = time.time() - start
     logger.info("=== 转换完成 ===")

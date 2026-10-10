@@ -8,43 +8,206 @@
     {
       "source": "/data/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400"
+        }
       ]
     },
     {
       "source": "/assets/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/", "destination": "/prerender/home.html" },
-    { "source": "/character", "destination": "/prerender/character.html" },
-    { "source": "/character/:id(\\d+)", "destination": "/prerender/character/:id.html" },
-    { "source": "/lightcone", "destination": "/prerender/lightcone.html" },
-    { "source": "/lightcone/:id(\\d+)", "destination": "/prerender/lightcone/:id.html" },
-    { "source": "/relic", "destination": "/prerender/relic.html" },
-    { "source": "/relic/:id(\\d+)", "destination": "/prerender/relic/:id.html" },
-    { "source": "/item", "destination": "/prerender/item.html" },
-    { "source": "/monster", "destination": "/prerender/monster.html" },
-    { "source": "/monster/:id(\\d+)", "destination": "/prerender/monster/:id.html" },
-    { "source": "/endgame", "destination": "/prerender/endgame.html" },
-    { "source": "/endgame/maze", "destination": "/prerender/endgame/maze.html" },
-    { "source": "/endgame/story", "destination": "/prerender/endgame/story.html" },
-    { "source": "/endgame/boss", "destination": "/prerender/endgame/boss.html" },
-    { "source": "/endgame/peak", "destination": "/prerender/endgame/peak.html" },
-    { "source": "/endgame/:mode/:id(\\d+)", "destination": "/prerender/endgame/:mode/:id.html" },
-    { "source": "/achievement", "destination": "/prerender/achievement.html" },
-    { "source": "/currency", "destination": "/prerender/currency.html" },
-    { "source": "/currency/role", "destination": "/prerender/currency/role.html" },
-    { "source": "/currency/role/:id(\\d+)", "destination": "/prerender/currency/role/:id.html" },
-    { "source": "/currency/item", "destination": "/prerender/currency/item.html" },
-    { "source": "/currency/buff", "destination": "/prerender/currency/buff.html" },
-    { "source": "/currency/augment", "destination": "/prerender/currency/augment.html" },
-    { "source": "/currency/trait", "destination": "/prerender/currency/trait.html" },
-    { "source": "/currency/trait/:id(\\d+)", "destination": "/prerender/currency/trait/:id.html" },
-    { "source": "/voracity", "destination": "/prerender/voracity.html" },
-    { "source": "/((?!data/|assets/|robots\\.txt|sitemap\\.xml|prerender/_shell\\.html).*)", "destination": "/prerender/_shell.html" }
+    {
+      "source": "/",
+      "destination": "/prerender/home.html"
+    },
+    {
+      "source": "/character",
+      "destination": "/prerender/character.html"
+    },
+    {
+      "source": "/character/:id(\\d+)",
+      "destination": "/prerender/character/:id.html"
+    },
+    {
+      "source": "/lightcone",
+      "destination": "/prerender/lightcone.html"
+    },
+    {
+      "source": "/lightcone/:id(\\d+)",
+      "destination": "/prerender/lightcone/:id.html"
+    },
+    {
+      "source": "/relic",
+      "destination": "/prerender/relic.html"
+    },
+    {
+      "source": "/relic/:id(\\d+)",
+      "destination": "/prerender/relic/:id.html"
+    },
+    {
+      "source": "/item",
+      "destination": "/prerender/item.html"
+    },
+    {
+      "source": "/monster",
+      "destination": "/prerender/monster.html"
+    },
+    {
+      "source": "/monster/:id(\\d+)",
+      "destination": "/prerender/monster/:id.html"
+    },
+    {
+      "source": "/endgame",
+      "destination": "/prerender/endgame.html"
+    },
+    {
+      "source": "/endgame/maze",
+      "destination": "/prerender/endgame/maze.html"
+    },
+    {
+      "source": "/endgame/story",
+      "destination": "/prerender/endgame/story.html"
+    },
+    {
+      "source": "/endgame/boss",
+      "destination": "/prerender/endgame/boss.html"
+    },
+    {
+      "source": "/endgame/peak",
+      "destination": "/prerender/endgame/peak.html"
+    },
+    {
+      "source": "/endgame/:mode/:id(\\d+)",
+      "destination": "/prerender/endgame/:mode/:id.html"
+    },
+    {
+      "source": "/achievement",
+      "destination": "/prerender/achievement.html"
+    },
+    {
+      "source": "/currency",
+      "destination": "/prerender/currency.html"
+    },
+    {
+      "source": "/currency/role",
+      "destination": "/prerender/currency/role.html"
+    },
+    {
+      "source": "/currency/role/:id(\\d+)",
+      "destination": "/prerender/currency/role/:id.html"
+    },
+    {
+      "source": "/currency/item",
+      "destination": "/prerender/currency/item.html"
+    },
+    {
+      "source": "/currency/buff",
+      "destination": "/prerender/currency/buff.html"
+    },
+    {
+      "source": "/currency/augment",
+      "destination": "/prerender/currency/augment.html"
+    },
+    {
+      "source": "/currency/trait",
+      "destination": "/prerender/currency/trait.html"
+    },
+    {
+      "source": "/currency/trait/:id(\\d+)",
+      "destination": "/prerender/currency/trait/:id.html"
+    },
+    {
+      "source": "/voracity",
+      "destination": "/prerender/voracity.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)",
+      "destination": "/prerender/:lang/home.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/character",
+      "destination": "/prerender/:lang/character.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/lightcone",
+      "destination": "/prerender/:lang/lightcone.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/relic",
+      "destination": "/prerender/:lang/relic.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/item",
+      "destination": "/prerender/:lang/item.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/monster",
+      "destination": "/prerender/:lang/monster.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/endgame",
+      "destination": "/prerender/:lang/endgame.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/endgame/maze",
+      "destination": "/prerender/:lang/endgame/maze.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/endgame/story",
+      "destination": "/prerender/:lang/endgame/story.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/endgame/boss",
+      "destination": "/prerender/:lang/endgame/boss.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/endgame/peak",
+      "destination": "/prerender/:lang/endgame/peak.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/achievement",
+      "destination": "/prerender/:lang/achievement.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/currency",
+      "destination": "/prerender/:lang/currency.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/currency/role",
+      "destination": "/prerender/:lang/currency/role.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/currency/item",
+      "destination": "/prerender/:lang/currency/item.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/currency/buff",
+      "destination": "/prerender/:lang/currency/buff.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/currency/augment",
+      "destination": "/prerender/:lang/currency/augment.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/currency/trait",
+      "destination": "/prerender/:lang/currency/trait.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/voracity",
+      "destination": "/prerender/:lang/voracity.html"
+    },
+    {
+      "source": "/((?!data/|assets/|robots\\.txt|sitemap\\.xml|prerender/_shell\\.html).*)",
+      "destination": "/prerender/_shell.html"
+    }
   ]
 }

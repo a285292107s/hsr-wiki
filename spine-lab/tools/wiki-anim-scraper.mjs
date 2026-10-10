@@ -28,6 +28,11 @@ const delayArg = args.find(a => a.startsWith('--delay='));
 const DELAY = delayArg ? parseInt(delayArg.split('=')[1], 10) : 300;
 
 const OUT_PATH = new URL('../../public/data/cn/skill_animations.json', import.meta.url);
+/* 标题里的 `$t:<技能名 hash>` 令牌要能被前端解析 ⇒ 必须同时产出本分组的语言包。
+   值直接取自 `characters` 包（同一批官方词条），缺失时回退缺省语言。 */
+const PACK_DIR = new URL('../../public/data/i18n/', import.meta.url);
+const DEFAULT_LANG = 'cn';
+const LANGS = ['cn', 'cht', 'en', 'jp', 'kr', 'es', 'fr', 'de', 'pt', 'ru', 'th', 'vi', 'id'];
 const CHAR_LIST_PATH = new URL('../../public/data/cn/characters.json', import.meta.url);
 const CHAR_DIR = new URL('../../public/data/cn/characters/', import.meta.url);
 
@@ -49,6 +54,34 @@ function loadSkillNameMap(avatarId) {
     return map;
   } catch {
     return null;
+  }
+}
+
+/**
+ * 动画小标题 → 技能名**令牌**映射（缺省语言技能名 → `$t:<hash>`）。
+ *
+ * 为什么不能直接写 wiki 的 `subTitle` 原文：前端 `assignAnimEntries` 用
+ * `a.title === sk.name` 把动画挂到技能上，而 `sk.name` 是**按语言解析后**的正文
+ * ⇒ 标题写死中文时，非中文语言下匹配必然失败（动画挂错技能），且选择器里显示中文。
+ * 命中官方技能名的标题改写成令牌后随语言解析，两个问题一起消掉。
+ * 未命中（变体小标题，如「解放的金色王权」）保留原文。
+ */
+function loadSkillTokenMap(avatarId) {
+  try {
+    const d = JSON.parse(readFileSync(new URL(`${avatarId}.json`, CHAR_DIR), 'utf-8'));
+    const pack = JSON.parse(readFileSync(new URL('../../public/data/i18n/cn/characters.json', import.meta.url), 'utf-8'));
+    const map = {};
+    const add = (sk) => {
+      if (!sk || !sk.name) return;
+      const token = sk.name;
+      const cn = token.startsWith('$t:') ? pack[token.slice(3)] : token;
+      if (cn) map[cn] = token;
+    };
+    for (const s of Object.values(d.skills || {})) add(s);
+    for (const s of Object.values((d.memosprite && d.memosprite.skills) || {})) add(s);
+    return map;
+  } catch {
+    return {};
   }
 }
 
@@ -118,6 +151,7 @@ function extractAnimations(data, unknownTags) {
 
   const points = [...structuredPoints(rpg), ...template.points];
   const nameMap = loadSkillNameMap(finalId);
+  const tokenMap = loadSkillTokenMap(finalId);
   const skills = {};
 
   for (const p of points) {
@@ -133,7 +167,14 @@ function extractAnimations(data, unknownTags) {
     if (!anims.length) continue;
 
     if (!skills[type]) skills[type] = [];
-    for (const a of anims) skills[type].push(a.title ? { url: a.url, title: a.title } : { url: a.url });
+    for (const a of anims) {
+      if (!a.title) { skills[type].push({ url: a.url }); continue; }
+      const token = tokenMap[a.title];
+      /* 命中官方技能名 → `title` 写名称令牌（随语言解析，且与前端 `a.title === sk.name` 的匹配同源）。
+         未命中（变体小标题，如「解放的金色王权」）→ **不写 title**：它只有 wiki 侧中文原文，
+         写进去会让非中文语言的选择器显示中文；留空则前端回落序号，且结构层不残留中文。 */
+      skills[type].push(token ? { url: a.url, title: token } : { url: a.url });
+    }
   }
 
   return { avatarId: finalId, skills, points: points.length, form: template.points.length ? 'template' : 'structured' };
@@ -142,13 +183,58 @@ function extractAnimations(data, unknownTags) {
 function mergeTypes(target, incoming) {
   for (const [type, list] of Object.entries(incoming)) {
     const cur = target[type] || (target[type] = []);
-    const seen = new Set(cur.map(a => a.url));
+    const byUrl = new Map(cur.map((a, i) => [a.url, i]));
     for (const a of list) {
-      if (seen.has(a.url)) continue;
-      cur.push(a);
-      seen.add(a.url);
+      const i = byUrl.get(a.url);
+      if (i === undefined) {
+        cur.push(a);
+        byUrl.set(a.url, cur.length - 1);
+        continue;
+      }
+      // 条目身份由 url 决定（媒体资源不变即同一条）；title 是元数据，随最新抓取更新。
+      // 若这里也保持「既有优先」，标题就永远停在旧值（本次把标题改成技能名令牌时踩到）。
+      const next = { ...cur[i] };
+      if (a.title !== undefined) next.title = a.title;
+      else delete next.title;
+      cur[i] = next;
     }
   }
+}
+
+/**
+ * 写出 `skill_animations` 分组的 13 语言包（只含本文件用到的令牌键）。
+ *
+ * 为什么抓取脚本要写语言包：标题令牌是**借用**官方技能名词条（其值住在 `characters` 分组），
+ * 而前端按「同分组包」解析令牌（`singletonLocalData('skill_animations.json')`）。
+ * 不写这一份，前端拿到的是未解析的 `$t:…`，守卫 `check-i18n-packs.mjs` 也会报缺包。
+ */
+function writeTitlePacks(merged) {
+  const keys = new Set();
+  for (const types of Object.values(merged)) {
+    for (const arr of Object.values(types)) {
+      for (const a of arr || []) {
+        if (typeof a?.title === 'string' && a.title.startsWith('$t:')) keys.add(a.title.slice(3).split('~')[0]);
+      }
+    }
+  }
+  if (!keys.size) return 0;
+  const read = (lang) => {
+    try {
+      return JSON.parse(readFileSync(new URL(`${lang}/characters.json`, PACK_DIR), 'utf-8'));
+    } catch {
+      return {};
+    }
+  };
+  const packs = Object.fromEntries(LANGS.map((l) => [l, read(l)]));
+  let written = 0;
+  for (const lang of LANGS) {
+    const fallback = packs[DEFAULT_LANG];
+    const out = {};
+    for (const k of [...keys].sort()) out[k] = packs[lang][k] ?? fallback[k] ?? '';
+    writeFileSync(new URL(`${lang}/skill_animations.json`, PACK_DIR), JSON.stringify(out, null, 2) + '\n', 'utf-8');
+    written += 1;
+  }
+  return written;
 }
 
 function reportCoverage(merged, pageInfo) {
@@ -267,6 +353,20 @@ async function main() {
       addedEntries += merged[cid][type].length - before;
     }
   }
+  /* 不变量：`title` 只能是名称令牌，非令牌的一律删除。
+     这里兜的是**联合模式沿用下来的历史值**——wiki 页本轮不再下发的条目会保留旧 `title`，
+     其中若有中文（主角 8001 实测 3 条）就会在非中文语言的选择器里继续露中文。 */
+  for (const types of Object.values(merged)) {
+    for (const arr of Object.values(types)) {
+      for (const e of arr || []) {
+        if (!e) continue;
+        if (typeof e.title === 'string' && !e.title.startsWith('$t:')) delete e.title;
+        /* 历史字段清理：曾把无词条的 wiki 中文小标题存进 `wikiTitle`，它会留在结构层里 */
+        if ('wikiTitle' in e) delete e.wikiTitle;
+      }
+    }
+  }
+
   const carried = [];
   for (const [cid, types] of Object.entries(merged)) {
     for (const type of Object.keys(types)) {
@@ -279,6 +379,8 @@ async function main() {
   const json = pretty ? JSON.stringify(merged, null, 2) : JSON.stringify(merged);
   writeFileSync(OUT_PATH, json + '\n', 'utf-8');
   console.log(`  ${Object.keys(merged).length} 个角色 / ${entryTotal} 条动画；本轮新增 ${addedChars} 角色、${addedEntries} 条`);
+  const packs = writeTitlePacks(merged);
+  if (packs) console.log(`  标题令牌语言包：${packs} 份（值借用 characters 分组）`);
   if (carried.length) console.log(`  ⚠ 本轮未抓到、沿用既有：${carried.join(', ')}`);
 
   console.log('\n[4/4] 覆盖报告');

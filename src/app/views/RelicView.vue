@@ -3,10 +3,15 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useRelicStore } from '../stores/relic';
 import { fmtDesc, itemIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
-import { PROP_NAMES, SLOT_ICONS, SLOT_INDEX, SLOT_NAMES } from '../../lib/constants';
+import { SLOT_ICONS, SLOT_INDEX } from '../../lib/constants';
+import { propLabel, relicSlotLabel } from '../../lib/enum-labels';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
 import { useDetailView } from '../composables/use-detail-view';
 import '../../styles/relic.css';
+import { translate } from '../i18n';
+
+/** 文案统一走词典（脚本内不易用 useI18n；见 i18n.ts 的 translate） */
+const t = translate;
 
 const relic = useRelicStore();
 
@@ -20,7 +25,7 @@ const d = computed(() => relic.data);
 
 const figureUrl = computed(() => (d.value ? itemIconUrl(d.value.icon) : ''));
 const isCavern = computed(() => (d.value?.require_num || []).includes(4));
-const setTypeLabel = computed(() => (isCavern.value ? '隧洞遗器' : '位面饰品'));
+const setTypeLabel = computed(() => t(isCavern.value ? 'relic.setType.cavern' : 'relic.setType.planar'));
 const setTypeEn = computed(() => (isCavern.value ? 'CAVERN RELIC' : 'PLANAR ORNAMENT'));
 
 const setEffects = computed<{ num: number; html: string }[]>(() => {
@@ -98,7 +103,7 @@ const mainAffixRows = computed<MainAffixRow[]>(() => {
   }
   return props.map((prop) => ({
     property: prop,
-    name: PROP_NAMES[prop] || prop,
+    name: propLabel(prop),
     cells: mainAffixColumns.value.map((piece) => ({
       piece,
       affix: cellsByProp.get(prop)?.get(String(piece.id)) || null,
@@ -206,7 +211,7 @@ onBeforeUnmount(() => {
       class="nk-skeleton nk-skeleton--relic"
       role="status"
       aria-live="polite"
-      aria-label="遗器详情加载中"
+      :aria-label="t('relic.loadingAria')"
     >
       <div class="nk-skeleton__hero">
         <div class="nk-skeleton__hero-visual">
@@ -234,7 +239,7 @@ onBeforeUnmount(() => {
           <path d="M12 9v4" /><path d="M12 17h.01" />
         </svg>
       </div>
-      <div class="nk-error-state__title">遗器数据加载失败</div>
+      <div class="nk-error-state__title">{{ t('relic.errorTitle') }}</div>
       <div v-if="relic.error" class="nk-error-state__detail">{{ relic.error }}</div>
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
@@ -263,20 +268,20 @@ onBeforeUnmount(() => {
           <section v-if="pieces.length" class="nk-hero__section">
             <div class="nk-hero__section-title">
               <span class="nk-hero__section-bar"></span>
-              <span>部位</span>
-              <span class="nk-relic-count">{{ pieces.length }} 件</span>
+              <span>{{ t('relic.parts') }}</span>
+              <span class="nk-relic-count">{{ t('relic.pieceCount', { n: pieces.length }) }}</span>
             </div>
             <div class="nk-relic-hero-pieces">
               <div
                 v-for="p in pieces"
                 :key="p.id"
                 class="nk-relic-hero-piece"
-                :title="SLOT_NAMES[p.type] || p.type"
+                :title="relicSlotLabel(p)"
               >
                 <div class="nk-relic-hero-piece__img">
-                  <img :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" @error="onPieceImgError($event, p)">
+                  <img :src="pieceIconUrl(p)" :alt="relicSlotLabel(p)" @error="onPieceImgError($event, p)">
                 </div>
-                <span class="nk-relic-hero-piece__slot">{{ SLOT_NAMES[p.type] || p.type }}</span>
+                <span class="nk-relic-hero-piece__slot">{{ relicSlotLabel(p) }}</span>
               </div>
             </div>
           </section>
@@ -307,7 +312,7 @@ onBeforeUnmount(() => {
                 class="nk-relic-effect"
               >
                 <div class="nk-relic-effect__head">
-                  <span class="nk-relic-effect__num">{{ eff.num }}件套</span>
+                  <span class="nk-relic-effect__num">{{ t('relic.setPieces', { n: eff.num }) }}</span>
                 </div>
                 <div class="nk-relic-effect__desc" v-html="eff.html"></div>
               </div>
@@ -317,7 +322,7 @@ onBeforeUnmount(() => {
 
         <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'main' }]" data-panel="main">
           <template v-if="mainAffixRows.length">
-            <div class="nk-relic-affix-note">初始 → 满级（+{{ pieces[0]?.max_level || 15 }}）</div>
+            <div class="nk-relic-affix-note">{{ t('relic.affixNote', { n: pieces[0]?.max_level || 15 }) }}</div>
             <div
               ref="affixWrapRef"
               class="nk-relic-affix-table-wrap"
@@ -327,14 +332,14 @@ onBeforeUnmount(() => {
               <table class="nk-relic-affix-table">
                 <thead>
                   <tr>
-                    <th class="nk-relic-affix-table__prop-h">词条</th>
+                    <th class="nk-relic-affix-table__prop-h">{{ t('relic.affixCol') }}</th>
                     <th
                       v-for="p in mainAffixColumns"
                       :key="p.id"
                       class="nk-relic-affix-table__slot-h"
                     >
-                      <img class="nk-relic-affix-table__icon" :src="pieceIconUrl(p)" :alt="SLOT_NAMES[p.type] || p.type" @error="onPieceImgError($event, p)">
-                      <span class="nk-relic-affix-table__slot-name">{{ SLOT_NAMES[p.type] || p.type }}</span>
+                      <img class="nk-relic-affix-table__icon" :src="pieceIconUrl(p)" :alt="relicSlotLabel(p)" @error="onPieceImgError($event, p)">
+                      <span class="nk-relic-affix-table__slot-name">{{ relicSlotLabel(p) }}</span>
                     </th>
                   </tr>
                 </thead>
@@ -347,7 +352,7 @@ onBeforeUnmount(() => {
                         <span class="nk-relic-affix-table__arrow">→</span>
                         <span class="nk-relic-affix-table__max">{{ fmtAffix(mainAffixMax(cell.affix, cell.piece.max_level), row.property, cell.affix.base_value) }}</span>
                       </template>
-                      <span v-else class="nk-relic-affix-table__empty" aria-label="该部位无此词条">—</span>
+                      <span v-else class="nk-relic-affix-table__empty" :aria-label="t('relic.noAffixAria')">—</span>
                     </td>
                   </tr>
                 </tbody>
@@ -362,37 +367,37 @@ onBeforeUnmount(() => {
               <div class="nk-relic-submeta__badges">
                 <span class="nk-relic-submeta__badge">
                   <span class="nk-relic-submeta__val">{{ subAffixTierCount(subAffixList[0]) }}</span>
-                  <span class="nk-relic-submeta__lbl">数值档位</span>
+                  <span class="nk-relic-submeta__lbl">{{ t('relic.tier') }}</span>
                 </span>
                 <span class="nk-relic-submeta__badge">
                   <span class="nk-relic-submeta__val">+{{ enhanceInfo.maxLevel }}</span>
-                  <span class="nk-relic-submeta__lbl">满级</span>
+                  <span class="nk-relic-submeta__lbl">{{ t('relic.maxLevel') }}</span>
                 </span>
                 <span class="nk-relic-submeta__badge">
                   <span class="nk-relic-submeta__val">{{ enhanceInfo.rolls }}</span>
-                  <span class="nk-relic-submeta__lbl">次强化</span>
+                  <span class="nk-relic-submeta__lbl">{{ t('relic.nextEnhance') }}</span>
                 </span>
                 <span class="nk-relic-submeta__badge nk-relic-submeta__badge--accent">
                   <span class="nk-relic-submeta__val">×{{ enhanceInfo.multiplier }}</span>
-                  <span class="nk-relic-submeta__lbl">满值倍率</span>
+                  <span class="nk-relic-submeta__lbl">{{ t('relic.maxMultiplier') }}</span>
                 </span>
               </div>
               <p class="nk-relic-submeta__hint">
-                掉落随机取 1 档；强化在 +3/+6/+9/+12/+15 随机累加 1 条 1 档，理论满值 = 最高档 × {{ enhanceInfo.multiplier }}。
+                {{ t('relic.dropNote', { mult: enhanceInfo.multiplier }) }}
               </p>
             </div>
             <div class="nk-relic-subgrid">
               <div v-for="a in subAffixList" :key="a.affix_id" class="nk-relic-subcell">
                 <div class="nk-relic-subcell__head">
-                  <span class="nk-relic-subcell__name">{{ PROP_NAMES[a.property] || a.property }}</span>
-                  <span class="nk-relic-subcell__max">满值 {{ fmtAffix(subAffixMax(a), a.property, a.base_value) }}</span>
+                  <span class="nk-relic-subcell__name">{{ propLabel(a.property) }}</span>
+                  <span class="nk-relic-subcell__max">{{ t('relic.maxValue', { value: fmtAffix(subAffixMax(a), a.property, a.base_value) }) }}</span>
                 </div>
                 <div class="nk-relic-subcell__tiers">
                   <span
                     v-for="(t, i) in subAffixTiers(a)"
                     :key="i"
                     class="nk-relic-subcell__tier"
-                    :title="`第 ${i + 1} 档`"
+                    :title="translate('relic.tierTitle', { n: i + 1 })"
                   >{{ fmtAffix(t, a.property, a.base_value) }}</span>
                 </div>
               </div>
@@ -405,10 +410,10 @@ onBeforeUnmount(() => {
             <div class="nk-relic-stories">
               <article v-for="s in pieceStories" :key="s.piece.id" class="nk-relic-story">
                 <div class="nk-relic-story__head">
-                  <img class="nk-relic-story__icon" :src="pieceIconUrl(s.piece)" :alt="SLOT_NAMES[s.piece.type] || s.piece.type" loading="lazy" @error="onPieceImgError($event, s.piece)">
+                  <img class="nk-relic-story__icon" :src="pieceIconUrl(s.piece)" :alt="relicSlotLabel(s.piece)" loading="lazy" @error="onPieceImgError($event, s.piece)">
                   <div class="nk-relic-story__heading">
                     <div class="nk-relic-story__name">{{ s.name }}</div>
-                    <div class="nk-relic-story__slot">{{ SLOT_NAMES[s.piece.type] || s.piece.type }}</div>
+                    <div class="nk-relic-story__slot">{{ relicSlotLabel(s.piece) }}</div>
                   </div>
                 </div>
                 <div v-if="s.descHtml" class="nk-relic-story__desc" v-html="s.descHtml"></div>

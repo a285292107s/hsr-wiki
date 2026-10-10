@@ -1,4 +1,6 @@
-import { PATH } from '../../../lib/constants';
+
+import { pathLabel } from '../../../lib/enum-labels';
+import { activeHref } from '../../../lib/i18n/active';
 import { escHtml, avatarShopIconUrl, avatarRoundIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalCharacterList } from '../../../services/api';
@@ -7,15 +9,15 @@ import type { CatalogItem, CatalogPageConfig } from '../types';
 import { STAR_SVG } from './shared';
 
 const ELEM_NAMES: Record<string, string> = {
-  fire: '火', ice: '冰', thunder: '雷', wind: '风',
-  quantum: '量子', imaginary: '虚数', physical: '物理',
+  fire: 'Fire', ice: 'Ice', thunder: 'Thunder', wind: 'Wind',
+  quantum: 'Quantum', imaginary: 'Imaginary', physical: 'Physical',
 };
 
 export const characterPage: CatalogPageConfig = {
   id: 'character',
-  title: '角色图鉴',
+  titleKey: 'catalog.character.title',
   subtitle: 'CHARACTER INDEX',
-  searchPlaceholder: '搜索角色...',
+  searchKey: 'catalog.character.search',
   gridClass: 'nk-idx-grid',
   async fetchData() {
     const list = await loadLocalCharacterList();
@@ -31,7 +33,7 @@ export const characterPage: CatalogPageConfig = {
       items.push({
         id,
         name: info.name,
-        href: `/character/${id}`,
+        href: activeHref(`/character/${id}`),
         avatar: avatarShopIconUrl(id),
         elemImg: elementIconUrl(element),
         pathImg: pathIconUrl(path),
@@ -59,23 +61,23 @@ export const characterPage: CatalogPageConfig = {
     const elems = [...new Set(data.map((c) => String(c.element || '')).filter(Boolean))];
     return [
       {
-        key: 'path', label: '命途',
+        key: 'path', labelKey: 'catalog.filter.path',
         options: [
-          { val: '', label: '全部' },
-          ...paths.map((p) => ({ val: p, label: PATH[p] || p, icon: pathIconMap[p] })),
+          { val: '', labelKey: 'catalog.all' },
+          ...paths.map((p) => ({ val: p, label: pathLabel(p), icon: pathIconMap[p] })),
         ],
       },
       {
-        key: 'element', label: '属性',
+        key: 'element', labelKey: 'catalog.filter.element',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           ...elems.map((e) => ({ val: e, label: ELEM_NAMES[e] || e, icon: elemIconMap[e] })),
         ],
       },
       {
-        key: 'rarity', label: '稀有度',
+        key: 'rarity', labelKey: 'catalog.filter.rarity',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           { val: '5', label: STAR_SVG + '5' },
           { val: '4', label: STAR_SVG + '4' },
         ],
@@ -105,7 +107,7 @@ export const characterPage: CatalogPageConfig = {
         <span>${ELEM_NAMES[element] || element}</span>
         <span class="nk-idx-card__sep">·</span>
         ${item.pathImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.pathImg)}" alt="">` : ''}
-        <span>${PATH[path] || path}</span>
+        <span>${pathLabel(path)}</span>
       </span>
     </span>
   </a>`;

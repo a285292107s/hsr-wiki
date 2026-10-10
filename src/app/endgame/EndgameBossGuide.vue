@@ -3,6 +3,10 @@ import { fmtDesc } from '../../lib/format';
 import { bossTraitDescHtml } from './renders';
 import type { MazeBossGuide } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 /** 敌方卡内的两个首领机制分区：首领特性（战斗机制条目）与阶段机制（阶段说明 + 官方应对策略 +
  *  小节问答）。归属由转换器算好——命中登记的敌方条目带 `boss_guide` 模板指针，正文在赛季级
  *  `boss_guides`（配置表的敌方 ID 未必等于战斗敌方，前端不推导模板）。
@@ -13,14 +17,14 @@ defineProps<{ guide: MazeBossGuide }>();
 
 <template>
   <div v-if="guide.traits?.length" class="nk-egd-guide">
-    <span class="nk-egd-guide__label">首领特性</span>
+    <span class="nk-egd-guide__label">{{ t('egd.bossTraits') }}</span>
     <article v-for="t in guide.traits" :key="t.id" class="nk-egd-trait">
       <h4 class="nk-egd-trait__name">{{ t.name }}</h4>
       <p v-if="t.desc" class="nk-egd-trait__desc" v-html="bossTraitDescHtml(t)"></p>
     </article>
   </div>
   <div v-if="guide.phases?.length" class="nk-egd-phase">
-    <span class="nk-egd-phase__label">阶段机制</span>
+    <span class="nk-egd-phase__label">{{ t('mob.sec.guide') }}</span>
     <article v-for="p in guide.phases" :key="p.id" class="nk-egd-phase__item">
       <h4 class="nk-egd-phase__name">{{ p.name }}</h4>
       <p v-if="p.desc" class="nk-egd-phase__desc" v-html="fmtDesc(p.desc, [])"></p>

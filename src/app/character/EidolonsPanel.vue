@@ -6,6 +6,10 @@ import { eidolonIconUrl, fmtDesc } from '../../lib/format';
 import { SECTION_IDX } from './sections';
 import type { CharacterData, SkillExtra } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   d: CharacterData;
   charId: string;
@@ -50,7 +54,7 @@ const indexItems = computed(() =>
 
 <template>
   <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.eidolons }}</span>EIDOLONS</h2>
-  <SectionIndex v-if="indexItems.length > 1" :items="indexItems" label="星魂索引" />
+  <SectionIndex v-if="indexItems.length > 1" :items="indexItems" :label="t('char.eidolonIndex')" />
   <div
     v-for="e in eidolons"
     :key="e.num"

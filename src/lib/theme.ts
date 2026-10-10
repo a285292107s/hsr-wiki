@@ -5,7 +5,8 @@ export interface AccentOption {
 
   key: AccentKey;
 
-  label: string;
+  /** 词典键（模块加载期不能翻译，展示时由视图解析） */
+  labelKey: string;
 
   swatch: [string, string, string];
 }
@@ -16,11 +17,11 @@ const STORAGE_KEY = 'HSR_WIKI_ACCENT';
 export const DEFAULT_ACCENT: AccentKey = 'olive';
 
 export const ACCENTS: AccentOption[] = [
-  { key: 'terracotta', label: '赤陶', swatch: ['#DE9A74', '#CC7648', '#B85C33'] },
-  { key: 'olive', label: '橄榄青', swatch: ['#A8B88C', '#8A9B6A', '#6F7F4E'] },
-  { key: 'slate', label: '雾霭蓝灰', swatch: ['#9FAFB9', '#7E919D', '#63767F'] },
-  { key: 'sand', label: '暖沙棕', swatch: ['#C6AC82', '#AD8E5F', '#937447'] },
-  { key: 'iris', label: '暮山紫', swatch: ['#B0A6D4', '#9184BE', '#786BA8'] },
+  { key: 'terracotta', labelKey: 'theme.accent.terracotta', swatch: ['#DE9A74', '#CC7648', '#B85C33'] },
+  { key: 'olive', labelKey: 'theme.accent.olive', swatch: ['#A8B88C', '#8A9B6A', '#6F7F4E'] },
+  { key: 'slate', labelKey: 'theme.accent.slate', swatch: ['#9FAFB9', '#7E919D', '#63767F'] },
+  { key: 'sand', labelKey: 'theme.accent.sand', swatch: ['#C6AC82', '#AD8E5F', '#937447'] },
+  { key: 'iris', labelKey: 'theme.accent.iris', swatch: ['#B0A6D4', '#9184BE', '#786BA8'] },
 ];
 
 function isAccentKey(v: unknown): v is AccentKey {

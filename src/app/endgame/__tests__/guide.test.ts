@@ -3,7 +3,7 @@
 // 由消费方决定回退，避免 truthy 回退串让「无数据」与「体系名恰好叫赛季增益」不可区分。
 import { describe, expect, it } from 'vitest';
 import {
-  CHOICE_LABEL, FALLBACK_SYSTEM_NAME, guideMode, seasonBuffChoiceLabel,
+  CHOICE_LABEL, fallbackSystemName, guideMode, seasonBuffChoiceLabel,
   seasonBuffCount, seasonBuffSystemLine, seasonBuffSystemName,
 } from '../guide';
 import type { EndgameGuideDb } from '../../../services/types';
@@ -30,8 +30,8 @@ describe('seasonBuffSystemName', () => {
     expect(seasonBuffSystemName(null, 'boss')).toBe('');
   });
   it('站点工作名只作回退常量存在，不得被当作体系名返回', () => {
-    expect(FALLBACK_SYSTEM_NAME).toBe('赛季增益');
-    expect(seasonBuffSystemName(db, 'story')).not.toBe(FALLBACK_SYSTEM_NAME);
+    expect(fallbackSystemName()).toBe('赛季增益');
+    expect(seasonBuffSystemName(db, 'story')).not.toBe(fallbackSystemName());
   });
 });
 

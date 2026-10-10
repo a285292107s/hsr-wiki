@@ -35,7 +35,8 @@ from collections import defaultdict
 from datetime import datetime
 
 from config import EXCEL_DIR, OUTPUT_DIR
-from textmap import clean_text, resolve_text
+from enum_labels import resolve as resolve_label
+from textmap import resolve_text
 from utils import load_json, save_json, map_icon_path, unwrap_value
 from converters.monster_common import load_monsters
 from converters.monster_guide import load_boss_guides, load_guide_phases
@@ -49,7 +50,7 @@ _LAUNCH_TS = datetime(2023, 4, 26, 0, 0, 0)
 _STAR_JADE_ITEM_ID = 1
 
 # 异相仲裁星数奖励分档类型 → 官方文案（TextMap「骑士星数」/「王棋星数」）。
-_PEAK_STAR_REWARD_TYPES = {"MOB_STAR_REWARD": "骑士星数", "BOSS_STAR_REWARD": "王棋星数"}
+_PEAK_STAR_REWARD_TYPES = {"MOB_STAR_REWARD": "peakStarKnight", "BOSS_STAR_REWARD": "peakStarKing"}
 
 def _load_schedules(
     group_table: str, schedule_tables: tuple[str, ...]
@@ -191,7 +192,7 @@ def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dic
         tid = rec.get("ID")
         if tid is None:
             continue
-        desc = clean_text(resolve_text(rec.get("ChallengeTargetName", {})))
+        desc = resolve_text(rec.get("ChallengeTargetName", {}))
         if not desc:
             continue
         name_ref = rec.get("ChallengeTargetName", {}) or {}
@@ -301,7 +302,9 @@ def _load_peak_star_rewards(items: dict[int, list[dict]]) -> dict[int, list[dict
     """
     out: dict[int, list[dict]] = defaultdict(list)
     for rec in load_json(EXCEL_DIR / "ChallengePeakReward.json"):
-        label = _PEAK_STAR_REWARD_TYPES.get(rec.get("RewardType", ""))
+        # 标签取官方词条（enum_labels 的 ui_label 类），不自造中文
+        label_key = _PEAK_STAR_REWARD_TYPES.get(rec.get("RewardType", ""))
+        label = resolve_label("ui_label", label_key, label_key or "") if label_key else None
         gid, val, rid = rec.get("RewardGroupID"), rec.get("TypeValue"), rec.get("RewardID")
         if not label or gid is None or val is None or rid not in items:
             continue
@@ -493,7 +496,7 @@ def _load_battle_targets() -> dict[int, dict]:
         tid = rec.get("ID")
         if tid is None or rec.get("Type") != "ChallengeTarget":
             continue
-        desc = clean_text(resolve_text(rec.get("TargetName", {})))
+        desc = resolve_text(rec.get("TargetName", {}))
         if not desc:
             continue
         out[tid] = {"text": desc, "param": rec.get("TargetParam")}

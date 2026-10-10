@@ -1,4 +1,5 @@
 import { ref, type Ref } from 'vue';
+import { userErrorDetail } from '../../lib/errors';
 import { useLoadGeneration } from '../composables/use-load-generation';
 
 /** fetch 回调拿到的编排上下文：isCurrent 供 await 边界自查代际；submit 供
@@ -57,7 +58,7 @@ export function createDetailCore<T>(): DetailCore<T> {
       submit(d);
     } catch (e) {
       if (!loadGen.isCurrent(gen)) return;
-      error.value = e instanceof Error ? e.message : String(e);
+      error.value = userErrorDetail(e);
       throw e;
     } finally {
       if (loadGen.isCurrent(gen)) loading.value = false;

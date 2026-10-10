@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { activeHref } from '../../lib/i18n/active';
 import { loadLocalLightCones, loadLocalRelicSet } from '../../services/api';
 import { avatarRoundIconUrl, fmtDesc, itemName, pathIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
-import { PROP_NAMES, SLOT_ICONS, SLOT_NAMES } from '../../lib/constants';
+import { SLOT_ICONS } from '../../lib/constants';
+import { propLabel, relicSlotLabel } from '../../lib/enum-labels';
 import { SECTION_IDX, hasRelics } from './sections';
 import type { CharacterData, ItemDb, NameCache, RelicSetData } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 type BuildSection = 'cones' | 'teams' | 'relics';
 
 const props = withDefaults(
@@ -48,7 +54,9 @@ const cones = computed(() =>
       stars: '★'.repeat(rarity),
       path,
       pathImg: path ? pathIconUrl(path) : '',
-      href: `/lightcone/${id}`,
+      /* 模板里是普通 `<a :href>`（不走 RouterLink 的 history base）⇒ 必须显式加语言前缀，
+         否则非缺省语言下点推荐光锥会静默跳回缺省语言（activeHref 的存在意义即此）。 */
+      href: activeHref(`/lightcone/${id}`),
     };
   }),
 );
@@ -86,7 +94,7 @@ const teams = computed<{ teamId: number; members: TeamSlot[] }[]>(() => {
 const relic = computed(() => props.d.relics || null);
 const relicMainStats = computed(() => (relic.value && relic.value.property_list) || []);
 const relicSubs = computed(() =>
-  ((relic.value && relic.value.sub_affix_property_list) || []).map((p) => PROP_NAMES[p] || p),
+  ((relic.value && relic.value.sub_affix_property_list) || []).map((p) => propLabel(p)),
 );
 const setIdList = computed<{ id: number; pc: number }[]>(() => {
   const arr: { id: number; pc: number }[] = [];
@@ -155,7 +163,7 @@ function isIdFallback(name: string): boolean {
   return /^#\d+$/.test(name);
 }
 function slotLabel(name: string, id: number): string {
-  return isIdFallback(name) ? `角色 ${id}` : name;
+  return isIdFallback(name) ? t('char.idFallback', { id }) : name;
 }
 function setDescHtml(pc: number, data: RelicSetData | null | undefined): string {
   const info = data && data.require_num && data.require_num[String(pc)];
@@ -195,12 +203,12 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
       <div v-for="t in teams" :key="t.teamId" class="nk-build__team">
         <!-- 配队标头：多队角色显示编号锚点（编号取数据 team_id，非数组下标）；桌面隐藏，手机断点启用 -->
         <div v-if="teams.length > 1" class="nk-build__team-head">
-          配队 <span class="nk-build__team-head__num">{{ String(t.teamId).padStart(2, '0') }}</span>
+          {{ translate('build.team') }} <span class="nk-build__team-head__num">{{ String(t.teamId).padStart(2, '0') }}</span>
           <span class="nk-build__team-head__total">/ {{ String(teams.length).padStart(2, '0') }}</span>
         </div>
         <div class="nk-build__team-slot nk-build__team-slot--main">
-          <RouterLink :to="`/character/${charId}`" class="nk-build__team-link" title="当前角色">
-            <img :src="avatarRoundIconUrl(charId)" alt="当前角色">
+          <RouterLink :to="`/character/${charId}`" class="nk-build__team-link" :title="translate('build.currentChar')">
+            <img :src="avatarRoundIconUrl(charId)" :alt="translate('build.currentChar')">
             <span class="nk-build__team-name">{{ mainName }}</span>
           </RouterLink>
         </div>
@@ -234,12 +242,12 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
           class="nk-relic-slot"
         >
           <img class="nk-relic-slot__icon" alt="" :src="cdnUri('relicfigures', `${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`)">
-          <span class="nk-relic-slot__stat">{{ PROP_NAMES[p.property_type] || p.property_type }}</span>
-          <span class="nk-relic-slot__slot">{{ SLOT_NAMES[p.relic_type] || p.relic_type }}</span>
+          <span class="nk-relic-slot__stat">{{ propLabel(p.property_type) }}</span>
+          <span class="nk-relic-slot__slot">{{ relicSlotLabel({ type: p.relic_type, type_name: p.relic_type_name }) }}</span>
         </div>
       </div>
       <div v-if="relicSubs.length" class="nk-relic-sub">
-        <span class="nk-relic-sub__label">推荐副词条</span>
+        <span class="nk-relic-sub__label">{{ t('build.recommendedSub') }}</span>
         <div class="nk-relic-sub__list">
           <span v-for="s in relicSubs" :key="s" class="nk-relic-sub__chip">{{ s }}</span>
         </div>
@@ -258,5 +266,5 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
       </div>
     </div>
   </template>
-  <p v-if="buildsEmpty" style="color: var(--text3)">暂无配装数据</p>
+  <p v-if="buildsEmpty" style="color: var(--text3)">{{ t('build.empty') }}</p>
 </template>

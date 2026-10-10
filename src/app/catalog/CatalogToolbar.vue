@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CatalogFilterSelect from './CatalogFilterSelect.vue';
 import type { CatalogFilter } from './types';
 
-defineProps<{
+const props = defineProps<{
   title: string;
   subtitle?: string;
   placeholder: string;
@@ -17,6 +19,19 @@ const emit = defineEmits<{
   search: [value: string];
   select: [key: string, val: string];
 }>();
+
+const { t } = useI18n();
+
+/* 筛选器文案两种来源：词典键（界面自造文案，随语言切换）与数据派生 label（已本地化）。
+   两者可叠加：`labelKey` 存在时 `label` 视为**前置 HTML**（如星级/前后台图标），解析结果为
+   `label + t(labelKey)`——否则带图标的选项会因替换掉整段 label 而丢图标。 */
+const resolvedFilters = computed(() =>
+  props.filters.map((f) => ({
+    ...f,
+    label: (f.label ?? '') + (f.labelKey ? t(f.labelKey) : ''),
+    options: f.options.map((o) => ({ ...o, label: (o.label ?? '') + (o.labelKey ? t(o.labelKey) : '') })),
+  })),
+);
 </script>
 
 <template>
@@ -42,7 +57,7 @@ const emit = defineEmits<{
     </label>
     <div v-if="filters.length" class="nk-cat-filters-bar">
       <CatalogFilterSelect
-        v-for="f in filters"
+        v-for="f in resolvedFilters"
         :key="f.key"
         :label="f.label"
         :options="f.options"

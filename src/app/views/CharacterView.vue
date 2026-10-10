@@ -23,6 +23,10 @@ import '../../styles/character-builds.css';
 import '../../styles/character-enhance.css';
 import '../../styles/character-compare.css';
 import '../../styles/character-skeleton.css';
+import { translate } from '../i18n';
+
+/** 文案统一走词典（脚本内不易用 useI18n；见 i18n.ts 的 translate） */
+const t = translate;
 
 const app = useAppStore();
 const char = useCharacterStore();
@@ -63,21 +67,21 @@ const enhMark = computed<{ skillIds: Set<number>; rankIds: Set<number> } | null>
 const enhLabel = computed<string>(() => (char.enhKey ? `V${char.enhKey}` : ''));
 
 const enhStateLabel = computed<string>(() => {
-  if (char.compareOn) return '对比';
-  return char.enhKey ? `V${char.enhKey} 强化` : '原始';
+  if (char.compareOn) return t('char.state.compare');
+  return char.enhKey ? t('char.state.enhanced', { n: char.enhKey }) : t('char.state.original');
 });
 
 const sectionDefs = [
-  { id: 'stats', label: '属性' },
-  { id: 'skills', label: '技能' },
-  { id: 'talents', label: '附加' },
-  { id: 'eidolons', label: '星魂' },
-  { id: 'bonuses', label: '加成' },
-  { id: 'cones', label: '光锥' },
-  { id: 'teams', label: '队伍' },
-  { id: 'relics', label: '遗器' },
-  { id: 'stories', label: '档案' },
-  { id: 'profile', label: '配音' },
+  { id: 'stats', label: t('char.sec.stats') },
+  { id: 'skills', label: t('catalog.sig.skills') },
+  { id: 'talents', label: t('char.sec.talents') },
+  { id: 'eidolons', label: t('char.sec.eidolons') },
+  { id: 'bonuses', label: t('char.sec.bonuses') },
+  { id: 'cones', label: t('catalog.lightcone.title') },
+  { id: 'teams', label: t('char.sec.teams') },
+  { id: 'relics', label: t('catalog.relic.title') },
+  { id: 'stories', label: t('char.sec.stories') },
+  { id: 'profile', label: t('char.sec.profile') },
 ] as const;
 
 const navSections = computed(() => {
@@ -140,7 +144,7 @@ onBeforeUnmount(() => {
       class="nk-skeleton nk-skeleton--char"
       role="status"
       aria-live="polite"
-      aria-label="角色详情加载中"
+      :aria-label="t('char.loadingAria')"
     >
       <div class="nk-skeleton__hero">
         <div class="nk-skeleton__hero-visual">
@@ -202,7 +206,7 @@ onBeforeUnmount(() => {
           <path d="M12 9v4" /><path d="M12 17h.01" />
         </svg>
       </div>
-      <div class="nk-error-state__title">角色数据加载失败</div>
+      <div class="nk-error-state__title">{{ t('char.errorTitle') }}</div>
       <div v-if="char.error" class="nk-error-state__detail">{{ char.error }}</div>
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
@@ -210,7 +214,7 @@ onBeforeUnmount(() => {
     <template v-else-if="d">
       <div ref="enhBarRef" class="nk-enh-bar">
         <div class="nk-enh-bar__inner">
-          <nav class="nk-secnav" aria-label="内容区块导航">
+          <nav class="nk-secnav" :aria-label="t('cwRole.navAria')">
             <button
               v-for="s in navSections"
               :key="s.id"
@@ -232,7 +236,7 @@ onBeforeUnmount(() => {
         v-show="showTop"
         class="nk-top-btn"
         type="button"
-        aria-label="返回顶部"
+        :aria-label="t('cwRole.topAria')"
         @click="scrollTop"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -253,17 +257,17 @@ onBeforeUnmount(() => {
         <div v-if="vis.has('skills') && char.enhKeys.length" ref="enhModuleRef" class="nk-panel nk-enh-module">
           <div class="nk-enh-module__head">
             <span class="nk-enh-module__mark" aria-hidden="true"></span>
-            <span>强化形态</span>
+            <span>{{ t('char.enhForm') }}</span>
             <span class="nk-enh-module__state">{{ enhStateLabel }}</span>
           </div>
-          <div class="nk-enh-tabs" role="group" aria-label="强化模式切换">
+          <div class="nk-enh-tabs" role="group" :aria-label="t('char.enhModeAria')">
             <button
               :class="['nk-enh-tab', { 'nk-enh-tab--active': !char.enhKey && !char.compareOn }]"
               type="button"
               :aria-pressed="!char.enhKey && !char.compareOn"
               @click="char.setEnhKey(null)"
             >
-              原始
+              {{ t('char.state.original') }}
             </button>
             <button
               v-for="k in char.enhKeys"
@@ -273,7 +277,7 @@ onBeforeUnmount(() => {
               :aria-pressed="char.enhKey === k && !char.compareOn"
               @click="char.setEnhKey(k)"
             >
-              <span class="nk-enh-tab__idx">V{{ k }}</span>强化
+              <span class="nk-enh-tab__idx">V{{ k }}</span>{{ t('cmp.enhanced') }}
             </button>
             <span class="nk-enh-tabs__sep" aria-hidden="true"></span>
             <button
@@ -282,11 +286,11 @@ onBeforeUnmount(() => {
               :aria-pressed="char.compareOn"
               @click="char.setCompareOn(true)"
             >
-              对比
+              {{ t('char.state.compare') }}
             </button>
           </div>
           <div v-if="enhNotes.length" class="nk-enh-notes">
-            <span class="nk-enh-notes__title">强化内容</span>
+            <span class="nk-enh-notes__title">{{ t('char.enhNotes') }}</span>
             <ul class="nk-enh-notes__list">
               <li v-for="(n, i) in enhNotes" :key="i" v-html="n"></li>
             </ul>

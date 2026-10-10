@@ -2,6 +2,10 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
 import { bySeasonDesc, mazeDateRange, modeDefaultArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../pages/endgame';
+import cnMessages from '../../../lib/i18n/messages/cn.json';
+
+/** cn 词典键集合：筛选器的 `labelKey` 必须在这里（打错字立刻红）。 */
+const CN_KEYS = new Set(Object.keys(cnMessages));
 
 /* ─── node 内建类型 shim（app tsconfig 无 @types/node；测试运行时由 vitest/node 提供） ─── */
 declare const process: { cwd(): string };
@@ -45,7 +49,7 @@ function matchesFilter(item: Record<string, unknown>, key: string, val: string):
 describe('renderCard', () => {
   it('endgame renderCard 输出紧凑赛季行（玩法图标+编号+名称+状态+日期），不含完整档案行徽章', () => {
     const egPage = CATALOG_PAGES.endgame;
-    const item = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: '进行中', dateRange: '2023.01.01 – 01.15' };
+    const item = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: 'live', dateRange: '2023.01.01 – 01.15' };
     const html = egPage.renderCard(item, 0);
     expect(html).toContain('nk-eg-lrow');
     expect(html).toContain('nk-eg-lrow__icon');
@@ -61,7 +65,7 @@ describe('renderCard', () => {
 
   it('endgame renderCard 把「贪饕污染」徽标挂在赛季名之后（不进状态/日期行）', () => {
     const egPage = CATALOG_PAGES.endgame;
-    const base = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: '进行中', dateRange: '2023.01.01 – 01.15' };
+    const base = { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: 'live', dateRange: '2023.01.01 – 01.15' };
     const html = egPage.renderCard({ ...base, pollution: { count: 2, levels: [1, 2] } }, 0);
     expect(html).toContain('贪饕污染');
     expect(html).not.toContain('含污染');
@@ -77,8 +81,8 @@ describe('renderCard', () => {
   it('endgame renderColumns 按玩法分列（每列一玩法，列头含徽记/名称/英文/数量，列内次序保持）', () => {
     const egPage = CATALOG_PAGES.endgame;
     const items = [
-      { name: '永屹之城遗秘', href: '/endgame/maze/100', mode: 'maze', id: 'ID 100', status: '进行中' },
-      { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: '测试期' },
+      { name: '永屹之城遗秘', href: '/endgame/maze/100', mode: 'maze', id: 'ID 100', status: 'live' },
+      { name: '琥珀恩赐', href: '/endgame/maze/101', mode: 'maze', id: 'ID 101', status: 'weird' },
       { name: '游辞漫说', href: '/endgame/story/2001', mode: 'story', id: 'ID 2001' },
     ];
     const colHtml = egPage.renderColumns!(items, (it, i) => egPage.renderCard(it, i));
@@ -99,12 +103,21 @@ describe('filters validity', () => {
     for (const f of filters) {
       expect(typeof f.key, `${key} filter.key`).toBe('string');
       expect(f.key.length).toBeGreaterThan(0);
-      expect(typeof f.label, `${key} filter.label`).toBe('string');
-      expect(f.label.length).toBeGreaterThan(0);
+      /* 文案两种来源：词典键（界面自造，须在 cn 词典里）或数据派生 label（已本地化）。
+         两边都空 = 筛选器没有可显示的名字；`labelKey` 打错字这里立刻红。 */
+      const hasLabel = typeof f.label === 'string' && f.label.length > 0;
+      const hasKey = typeof f.labelKey === 'string' && f.labelKey.length > 0;
+      expect(hasLabel || hasKey, `${key} filter 必须有 label 或 labelKey`).toBe(true);
+      if (hasKey) expect(CN_KEYS.has(f.labelKey!), `${key} filter.labelKey ${f.labelKey} 应在 cn 词典里`).toBe(true);
       expect(Array.isArray(f.options), `${key} filter.options`).toBe(true);
       for (const opt of f.options) {
         expect(typeof opt.val, `${key} option.val`).toBe('string');
-        expect(typeof opt.label, `${key} option.label`).toBe('string');
+        const optLabel = typeof opt.label === 'string' && opt.label.length > 0;
+        const optKey = typeof opt.labelKey === 'string' && opt.labelKey.length > 0;
+        expect(optLabel || optKey, `${key} option ${opt.val} 必须有 label 或 labelKey`).toBe(true);
+        if (optKey) {
+          expect(CN_KEYS.has(opt.labelKey!), `${key} option.labelKey ${opt.labelKey} 应在 cn 词典里`).toBe(true);
+        }
       }
     }
   }

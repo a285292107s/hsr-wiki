@@ -1,5 +1,4 @@
 import { test, expect, type Locator } from '@playwright/test';
-import { readFileSync } from 'node:fs';
 import { computedNumber, expectNoUnknownOverflow, readJson, splitKnownOverflow } from './helpers';
 
 /**
@@ -320,9 +319,9 @@ export function pollutedSeasonHrefs(): string[] {
    期望文案一律从 characters/*.json 读（族成员 id 原序 → 名），不在断言里写死页面文案；
    族 id 原序与 src/lib/skill-family.ts 同口径（取锚点首个非空 level_up_skill_id 级）。 */
 export function charFamilyIds(charId: string, anchor: string): number[] {
-  const d = JSON.parse(readFileSync(`public/data/cn/characters/${charId}.json`, 'utf8')) as {
+  const d = readJson<{
     skill_trees: Record<string, Record<string, { level_up_skill_id?: number[] }>>;
-  };
+  }>(`public/data/cn/characters/${charId}.json`);
   for (const node of Object.values(d.skill_trees[anchor] || {})) {
     if (node.level_up_skill_id?.length) return node.level_up_skill_id;
   }
@@ -330,9 +329,7 @@ export function charFamilyIds(charId: string, anchor: string): number[] {
 }
 
 export function charSkillNames(charId: string, ids: number[]): string[] {
-  const d = JSON.parse(readFileSync(`public/data/cn/characters/${charId}.json`, 'utf8')) as {
-    skills: Record<string, { name: string }>;
-  };
+  const d = readJson<{ skills: Record<string, { name: string }> }>(`public/data/cn/characters/${charId}.json`);
   return ids.map((id) => d.skills[String(id)].name);
 }
 

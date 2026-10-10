@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { itemIconUrl } from '../../lib/format';
+import { itemIconUrl, fmtNumber } from '../../lib/format';
 import { loadLocalItems } from '../../services/api';
 import type { LocalItemEntry, MazeRewardItem } from '../../services/types';
 
@@ -56,7 +56,7 @@ const rows = computed(() => props.items.map((r) => ({
         >
         <span v-else class="nk-egd-reward__icon nk-egd-reward__icon--void">{{ String(r.id).slice(0, 2) }}</span>
         <span class="nk-egd-reward__name">{{ r.name }}</span>
-        <span v-if="r.num" class="nk-egd-reward__num">×{{ r.num.toLocaleString() }}</span>
+        <span v-if="r.num" class="nk-egd-reward__num">×{{ fmtNumber(r.num) }}</span>
       </span>
     </div>
   </div>

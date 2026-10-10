@@ -10,10 +10,12 @@
 - **`vite build` 可当「磁盘内容是否已更新」的诊断手段**：它独立进程同步全量读磁盘，无 watcher 事件链路与跨进程源码级增量缓存，产物必然反映磁盘内容。**产物流旧 ⇒ 文件根本没落盘**，而不是构建有问题。
 - **rollup 的常量替换不做跨模块摇树**：跨模块导出的 `import.meta.env.DEV` 常量被替换后，dead branch 里的 `() => import(...)` **仍会产出 chunk**（实测研究线 79KB 进产物）。dev 门控必须本文件内 `if (import.meta.env.DEV)` 包裹 `router.addRoute`，**常量一律就近内联、禁止跨模块导出**。
 - **Vue SFC 模板内禁止写 `import.meta.env.DEV`**：模板编译器报 `import.meta may appear only with 'sourceType: "module"'`。必须在 script 侧同文件取 `const IS_DEV = import.meta.env.DEV` 再在模板 `v-if`。
+- **给入口模块新增 import 边后，紧接的第一轮 e2e 可能整片 `page.goto: Test timeout of 30000ms exceeded`**：Vite 对新的模块图做重新预构建（optimize deps），首个页面请求因此远超 30s。判据：失败集中在**导航阶段**（不是断言）、且**复跑同一 spec 全绿**；此时不要改测试或加超时，先复跑确认预热完成（实测 `bootstrap.ts` 新增一条 import 后，mobile 项目两条 goto 超时，复跑 16/16 通过）。
 
 ## 端口与实例
 
 - **e2e 全军覆没（含毫不相干的用例）时先查端口上是谁在服务，不要先怀疑自己的改动**：实测 6188 上挂着前一天启动的旧实例，它不认识新生成的 `public/data/cn/*.json`，把请求回退成 index.html ⇒ `fetchJSON` 报 `Invalid JSON`、整文件 12 条 e2e 全红。用 `Get-NetTCPConnection` 看 PID 与启动时间即可确认。（ADR 0014）
+  - **补记（多语言落地实测）**：旧实例的快照范围是**启动时刻整个 `public/` 目录**——新增的目录（如刚生成的 `public/data/i18n/**`）在该实例上**一律 404 → SPA fallback 返回 index.html**，症状同上（`JSON.parse` 失败 → 页面空白 → 14 条 e2e 全红）；**重启 dev server 后同一批用例 30 条全过（54s）**。同时该实例会把「浏览器半途中断的静态响应」一直挂着：实测 `public/data/cn/items.json` 被独占锁住数十分钟，转换器 `os.replace` 直接 `PermissionError [WinError 5]`。**处置顺序**：先 `Stop-Process` 旧实例（锁随之释放）→ 再跑转换 → 让 Playwright 自起实例跑 e2e；判断依据是「同一请求在旧实例上返回 HTML、在新实例上返回 JSON」。
 - **连接被拒绝不等于页面缺陷**：上一会话遗留的 dev server 中途死亡时，截图/探针取证会拿到连接错误。取证前先探活 6188。
 - **dev server 只监听 `[::1]:6188` ⇒ 必须用 `localhost` 访问，写 `127.0.0.1` 会被拒**：地址族解析差异会让 `Test-NetConnection -InformationLevel Quiet` 报假阴性（它不做地址族回退），只有 `Invoke-WebRequest` 才准。排查「服务到底活着吗」时先解析地址族，别据 `127.0.0.1` refused 判定服务已死。
 

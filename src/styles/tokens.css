@@ -471,24 +471,20 @@
 
 /* 全站环境层（单一事实源）：页面根容器一律透明，只有 #app 画这一层。
    构成 = 右上角光源（高峰值 + 快衰减，读成「有一束光」而不是一片糊）+ 顶部地平线带
-   + 四周暗角（把网格压回背景、给内容让出对比度）+ 96px 档案网格（精密感来源）。
+   + 四周暗角（把网格压回背景、给内容让出对比度）。
    旧版是两块大椭圆主色 wash（ellipse 90% 52% at 72% -8%），低峰值大范围在黑底上
-   只会读成一团脏斑——峰值低、衰减慢是「糊」的两个成因，改的是这两项不是颜色。 */
+   只会读成一团脏斑——峰值低、衰减慢是「糊」的两个成因，改的是这两项不是颜色。
+   曾试过在光晕之上再加一层纹理（120px 点阵、24px 方格纸网格），两者实测都**与本站类型不合**：
+   档案站没有满屏主视觉，纹理只能当「隐隐有格子」的弱信号，而它还须压在页面发丝线之下才不抢亮度，
+   结果就是花了推导与守卫成本、观感上却近乎不可见。结论是**环境层只做光影、不做纹理**；
+   质感预算交给 `#app::after` 的纸感颗粒（`--grain-opacity`）与内容本身。
+   判据与两次实测证据见 docs/memory/ui-tokens.md。 */
 :root {
-  --nk-ambient-lattice: 120px;
-  /* 底纹用**点阵**而不是直线网：页面里到处是 1px 发丝线（`--line-1/2` = 白 7% / 13%），
-     而 `#app` 的底纹是 `background-attachment: fixed`（滚动时不动）⇒ 直线网会与发丝线
-     周期性**并行重合**，读者看到的是忽明忽暗的「重线」；点阵不形成长直线，从根上不与之竞争。
-     模数同时由 96px 放到 120px（更疏），点用 3.2%（比原来的 2% 直线略亮做补偿——同不透明度下
-     一个 1px 点比 1px 线的视觉重量轻得多）。 */
-  --nk-ambient-dot: color-mix(in srgb, var(--text-bright) 3.2%, transparent);
   --nk-ambient-image:
     radial-gradient(56% 26% at 86% -6%, color-mix(in srgb, var(--primary) 15%, transparent) 0%, transparent 72%),
     linear-gradient(180deg, color-mix(in srgb, var(--primary) 5%, transparent) 0%, transparent 240px),
-    radial-gradient(118% 94% at 50% 44%, transparent 50%, color-mix(in srgb, var(--blk-950) 55%, transparent) 100%),
-    radial-gradient(circle at center, var(--nk-ambient-dot) 1px, transparent 1.6px);
-  --nk-ambient-size: auto, auto, auto,
-    var(--nk-ambient-lattice) var(--nk-ambient-lattice);
+    radial-gradient(118% 94% at 50% 44%, transparent 50%, color-mix(in srgb, var(--blk-950) 55%, transparent) 100%);
+  --nk-ambient-size: auto, auto, auto;
 }
 #app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background-color: var(--bg); background-image: var(--nk-ambient-image); background-size: var(--nk-ambient-size); background-attachment: fixed; -webkit-font-smoothing: antialiased; scrollbar-color: var(--border2) transparent; }
 /* 外壳级细节三件：选区 / 光标 / 滚动条。

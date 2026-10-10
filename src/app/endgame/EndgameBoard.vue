@@ -2,7 +2,7 @@
 import StageContent from './StageContent.vue';
 import EndgameBuffGroup from './EndgameBuffGroup.vue';
 import EndgameFloorBuff from './EndgameFloorBuff.vue';
-import { FALLBACK_SYSTEM_NAME } from './guide';
+import { fallbackSystemName } from './guide';
 import type { MazeBossGuide, MazeBuffInfo, MazeStageDetail } from '../../services/types';
 
 /** 战斗看板（层 tab 的半场看板 / 星启看板的节点看板共用）：一次只渲染当前这一场战斗。
@@ -34,7 +34,7 @@ defineProps<{
   >
     <div class="nk-egd-board__body nk-egd-children">
       <EndgameFloorBuff :buff="buff" />
-      <EndgameBuffGroup v-if="buffs.length" :title="systemName || FALLBACK_SYSTEM_NAME" :items="buffs" />
+      <EndgameBuffGroup v-if="buffs.length" :title="systemName || fallbackSystemName()" :items="buffs" />
       <StageContent :stage="stage" :guides="guides" />
     </div>
   </div>

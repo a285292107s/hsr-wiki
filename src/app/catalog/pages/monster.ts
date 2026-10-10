@@ -1,21 +1,34 @@
-import { ELEM } from '../../../lib/constants';
+
+import { elemLabel } from '../../../lib/enum-labels';
 import { elementIconUrl, escHtml, monsterIconUrl } from '../../../lib/format';
+import { activeHref } from '../../../lib/i18n/active';
 import { groupMonsterFamilies } from '../../../lib/monster-family';
+import { labelText } from '../../../lib/label-translator';
 import { loadLocalMonsterList } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
+import { translate } from '../../i18n';
 
-const MON_TYPE: Record<string, string> = {
-  BOSS: '首领', ELITE: '精英', MINION: '喽啰',
+/** 模板与脚本统一走词典 */
+const t = translate;
+
+/* 怪物分类：目录侧用的是大写枚举（BOSS/ELITE/MINION），映射到与详情页同一批词典键
+   ⇒ 同一分类在两页文案一致（此前目录写「喽啰」、详情写「普通」，属既有不一致，本次统一）。 */
+const RANK_KEY: Record<string, string> = {
+  BOSS: 'monster.rank.boss',
+  ELITE: 'monster.rank.elite',
+  MINION: 'monster.rank.minion',
 };
+
+const rankLabel = (rank: string): string => (RANK_KEY[rank] ? labelText(RANK_KEY[rank]) : rank);
 
 /** 弱点元素固定 7 项（不按数据现取：某属性当批无弱点怪时选项会消失，筛选栏会跳） */
 const WEAK_ELEMS = ['Physical', 'Fire', 'Ice', 'Thunder', 'Wind', 'Quantum', 'Imaginary'];
 
 export const monsterPage: CatalogPageConfig = {
   id: 'monster',
-  title: '敌对物种',
+  titleKey: 'catalog.monster.title',
   subtitle: 'HOSTILE SPECIES',
-  searchPlaceholder: '搜索敌对物种、弱点或阵营...',
+  searchKey: 'catalog.monster.search',
   gridClass: 'nk-cat-grid nk-mob-grid',
   cardClass: '',
   virtualImgRatio: 5 / 4,
@@ -36,16 +49,16 @@ export const monsterPage: CatalogPageConfig = {
       const type = info.type || '';
       const weak = info.weak || [];
       const camp = info.camp || '';
-      const weakNames = weak.map((e) => ELEM[e] || e);
+      const weakNames = weak.map((e) => elemLabel(e));
       const variant = variantOf.get(String(info.id));
       const variantCount = variant?.count ?? 1;
       items.push({
         id: String(info.id),
         name: info.name,
-        href: `/monster/${info.id}`,
+        href: activeHref(`/monster/${info.id}`),
         img: monsterIconUrl(info.icon),
         type,
-        typeLabel: MON_TYPE[type] || '',
+        typeLabel: rankLabel(type),
         weak,
         weakNames,
         camp,
@@ -63,23 +76,23 @@ export const monsterPage: CatalogPageConfig = {
     const camps = [...new Set(data.map((c) => String(c.camp || '')).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
     return [
       {
-        key: 'type', label: '分类',
+        key: 'type', labelKey: 'catalog.filter.category',
         options: [
-          { val: '', label: '全部' },
-          ...types.map((t) => ({ val: t, label: MON_TYPE[t] || t })),
+          { val: '', labelKey: 'catalog.all' },
+          ...types.map((t) => ({ val: t, label: rankLabel(t) })),
         ],
       },
       {
-        key: 'weak', label: '弱点',
+        key: 'weak', labelKey: 'catalog.filter.weak',
         options: [
-          { val: '', label: '全部' },
-          ...WEAK_ELEMS.map((e) => ({ val: e, label: ELEM[e] || e, icon: elementIconUrl(e) })),
+          { val: '', labelKey: 'catalog.all' },
+          ...WEAK_ELEMS.map((e) => ({ val: e, label: elemLabel(e), icon: elementIconUrl(e) })),
         ],
       },
       {
-        key: 'camp', label: '阵营',
+        key: 'camp', labelKey: 'catalog.filter.camp',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           ...camps.map((c) => ({ val: c, label: c })),
         ],
       },
@@ -93,16 +106,18 @@ export const monsterPage: CatalogPageConfig = {
     const camp = String(item.camp || '');
     const variantCount = Number(item.variantCount) || 1;
     const variantIndex = Number(item.variantIndex) || 1;
-    const variantText = variantCount > 1 ? `变体 ${variantIndex}/${variantCount}` : '';
+    const variantText = variantCount > 1
+    ? t('mob.badge.variant', { i: variantIndex, n: variantCount })
+    : '';
     const weakHtml = weakKeys.length
       ? weakKeys.map((e, k) => `<img src="${escHtml(elementIconUrl(e))}" alt="${escHtml(weakNames[k] || e)}" loading="lazy">`).join('')
-      : `<span class="nk-mob-card__none">无弱点</span>`;
+      : `<span class="nk-mob-card__none">${escHtml(t('mob.noWeak'))}</span>`;
     /* 卡级 title：一是触屏/截断时那几行文本的永久复原手段（`layout-catalog` 断言：任何被
        nowrap+ellipsis 截掉的叶子自身或 5 层祖先要有含该文本的 title/aria-label），
        二是「这只怪弱什么、哪来的、第几档」在一处说全。 */
     const title = [
       item.name,
-      weakNames.length ? `弱点 ${weakNames.join('/')}` : '无弱点',
+      weakNames.length ? t('mob.card.weak', { list: weakNames.join('/') }) : t('mob.noWeak'),
       typeLabel,
       camp,
       variantText,
@@ -115,7 +130,7 @@ export const monsterPage: CatalogPageConfig = {
         <span class="nk-mob-card__name">${escHtml(item.name)}</span>
         <span class="nk-mob-card__weak">${weakHtml}${camp ? `<span class="nk-mob-card__camp">${escHtml(camp)}</span>` : ''}</span>
         <span class="nk-mob-card__meta">
-          <span class="nk-mob-card__type">${escHtml(typeLabel || '未知')}</span>
+          <span class="nk-mob-card__type">${escHtml(typeLabel || t('common.unknown'))}</span>
           ${variantText ? `<span class="nk-mob-card__var">${escHtml(variantText)}</span>` : ''}
         </span>
       </span>

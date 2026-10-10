@@ -1,7 +1,6 @@
 
 import type { AchievementList, AchievementSeriesList } from '../types';
-import { LOCAL_DATA_BASE } from './base';
-import { singletonLoad } from './singleton';
+import { singletonLocalData } from './local';
 
-export const loadLocalAchievements = singletonLoad<AchievementList>(`${LOCAL_DATA_BASE}/achievements.json`);
-export const loadLocalAchievementSeries = singletonLoad<AchievementSeriesList>(`${LOCAL_DATA_BASE}/achievement_series.json`);
+export const loadLocalAchievements = singletonLocalData<AchievementList>('achievements.json');
+export const loadLocalAchievementSeries = singletonLocalData<AchievementSeriesList>('achievement_series.json');

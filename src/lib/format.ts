@@ -1,6 +1,9 @@
 
 import { gameTagsToHtml } from './html';
-import { CHAR_STAGE_LEVEL_CAPS, MAX_CHAR_LEVEL, STANCE_LABEL, STANCE_TAG } from './constants';
+import { stanceTagLabel } from './enum-labels';
+import { activeLocale } from './i18n/active';
+import { findLocale } from './i18n/locales';
+import { CHAR_STAGE_LEVEL_CAPS, MAX_CHAR_LEVEL, STANCE_LABEL } from './constants';
 import { NkError } from './errors';
 import type { CharacterData, CharStats, Skill } from '../services/types';
 
@@ -23,12 +26,24 @@ export function fmtVal(v: number | null | undefined, tag: string, isPct: boolean
 /* 面板数值的统一呈现：≥4 位加千分位。此前同一类「角色 / 敌人面板数值」两处写法不同——
    光锥 hero 与终局奖励走 `toLocaleString()`，角色属性面板与敌人战斗数值直接输出 `{{ st.v }}`，
    于是同一档内容里「1,058」与「25377.9」并存。字符串原样返回（百分比 `25.0%`、占位符 `—` 等
-   已格式化过的文本不能被再格式化）；纯数字串则按数值格式化（converter 有把数值写成字符串的字段）。 */
+   已格式化过的文本不能被再格式化）；纯数字串则按数值格式化（converter 有把数值写成字符串的字段）。
+   **分组符按站点语言**：`toLocaleString()` 不带参数时用的是**浏览器**语言 ⇒ 德语站点配英文浏览器会
+   输出 `1,234.5`（德语应为 `1.234,5`）。统一走 `fmtNumber`。 */
+export function localeCulture(): string {
+  return findLocale(activeLocale())?.culture ?? 'en-US';
+}
+
+/** 数字按**站点语言**格式化（不是浏览器语言）。 */
+export function fmtNumber(v: number | string): string {
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? n.toLocaleString(localeCulture()) : String(v);
+}
+
 export function fmtStatValue(v: number | string | null | undefined): string {
   if (v == null) return '';
-  if (typeof v === 'number') return Number.isFinite(v) ? v.toLocaleString() : String(v);
+  if (typeof v === 'number') return Number.isFinite(v) ? fmtNumber(v) : String(v);
   const t = v.trim();
-  if (t !== '' && /^-?\d+(\.\d+)?$/.test(t)) return Number(t).toLocaleString();
+  if (t !== '' && /^-?\d+(\.\d+)?$/.test(t)) return fmtNumber(t);
   return v;
 }
 
@@ -123,7 +138,7 @@ export function fmtToughness(sk: Skill): string {
   const parts = list
     .map((v, i) => {
       if (!v) return '';
-      const label = STANCE_TAG[STANCE_LABEL[i]] || STANCE_LABEL[i];
+      const label = stanceTagLabel(STANCE_LABEL[i]);
       const val = Math.round((v / 3) * 100) / 100;
       return `${label}: ${val}`;
     })

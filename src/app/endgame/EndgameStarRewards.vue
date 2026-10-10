@@ -3,6 +3,10 @@ import { computed } from 'vue';
 import EndgameReward from './EndgameReward.vue';
 import type { MazeStarReward } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 /** 赛季级「星数奖励」阶梯（ADR 0051）：累计星数 → 该档奖励。
  *
  *  口径＝官方玩法说明：每达成 1 个挑战目标计 1 星（忘却之庭「印记星数」/ 虚构叙事
@@ -26,8 +30,8 @@ const groups = computed<[string, MazeStarReward[]][]>(() => {
 <template>
   <section v-if="items.length" class="nk-egd-starrewards" :class="{ 'nk-egd-starrewards--head': head }">
     <header class="nk-egd-starrewards__head">
-      <h2 class="nk-egd-starrewards__title">星数奖励 STAR REWARDS</h2>
-      <span class="nk-egd-starrewards__note">每达成 1 个挑战目标计 1 星，累计达下列档位可领取</span>
+      <h2 class="nk-egd-starrewards__title">{{ t('egd.starRewards') }}</h2>
+      <span class="nk-egd-starrewards__note">{{ t('egd.starRewardsNote') }}</span>
     </header>
     <div v-for="[label, rows] in groups" :key="label" class="nk-egd-starrewards__group">
       <span v-if="label" class="nk-egd-head__label">{{ label }}</span>

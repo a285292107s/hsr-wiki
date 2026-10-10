@@ -1,4 +1,5 @@
 import { ref, shallowRef, type Ref } from 'vue';
+import { userErrorDetail } from '../../lib/errors';
 import { useDelayedSkeleton } from './use-delayed-skeleton';
 import { useLoadGeneration } from './use-load-generation';
 
@@ -28,7 +29,7 @@ export function usePageData<T>(loader: () => Promise<T>): PageData<T> {
       data.value = d;
     } catch (e) {
       if (!loadGen.isCurrent(gen)) return;
-      error.value = e instanceof Error ? e.message : String(e);
+      error.value = userErrorDetail(e);
     } finally {
       if (loadGen.isCurrent(gen)) loading.value = false;
     }

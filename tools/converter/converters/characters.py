@@ -4,6 +4,7 @@ import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR, RARITY_MAP, PATH_NAME_FALLBACK
 from converters.version import read_source_version_label
+from enum_labels import trailblazer_name_ref
 from release_version import apply_release_versions, load_baseline_versions, tag_release_versions
 from textmap import resolve_text
 from utils import load_json, save_json, map_icon_path, unwrap_value, sort_by_id
@@ -35,8 +36,7 @@ def convert() -> None:
         full_name = resolve_text(item.get("AvatarFullName", {}))
         path_key = item.get("AvatarBaseType", "")
         if name == "开拓者" and path_key:
-            path_name = PATH_NAME_FALLBACK.get(path_key, path_key)
-            name = f"开拓者·{path_name}"
+            name = trailblazer_name_ref(path_key, PATH_NAME_FALLBACK.get(path_key, path_key))
             if full_name == "开拓者":
                 full_name = name
         rarity_key = item.get("Rarity", "")

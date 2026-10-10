@@ -1,5 +1,6 @@
 import { escHtml, gridFightEquipIconUrl } from '../../../lib/format';
 import { propLabel, propValue } from '../../../lib/currency-role';
+import { cwCostKey } from '../../../lib/enum-labels';
 import { loadLocalCurrencyEquipment } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 import { loadCwCatalogCss } from './shared';
@@ -82,9 +83,10 @@ function renderEquipCard(item: CatalogItem, index = 0): string {
 
 export const currencyEquipmentPage: CatalogPageConfig = {
   id: 'currency-equipment',
-  title: '货币战争 · 装备图鉴',
+  titleKey: 'catalog.titleWithMode',
+  titleArgs: { mode: 'catalog.currencyWar', name: 'nav.cwEquipment' },
   subtitle: 'EQUIPMENT',
-  searchPlaceholder: '搜索装备…',
+  searchKey: 'catalog.cwEquipment.search',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',
   styles: [loadCwCatalogCss],
@@ -108,18 +110,17 @@ export const currencyEquipmentPage: CatalogPageConfig = {
   buildFilters(items: CatalogItem[]) {
     const filters: CatalogFilter[] = [];
     const COST_ORDER = ['1', '2', '3', '4', '5', '6+'];
-    const COST_LABEL: Record<string, string> = {
-      '1': '1费', '2': '2费', '3': '3费', '4': '4费', '5': '5费', '6+': '特殊',
-    };
+    /* 费用档 → 词典键（官方词条「N-Cost」；更高档位无词条时回退数值本身） */
+    
     const costSet = new Set(items.map((it) => it.cost as string));
     const costOpts = COST_ORDER.filter((c) => costSet.has(c));
     if (costOpts.length > 1) {
       filters.push({
         key: 'cost',
-        label: '费用',
+        labelKey: 'catalog.filter.cost',
         options: [
-          { val: '', label: '全部' },
-          ...costOpts.map((c) => ({ val: c, label: COST_LABEL[c] || c })),
+          { val: '', labelKey: 'catalog.all' },
+          ...costOpts.map((c) => (cwCostKey(c) ? { val: c, labelKey: cwCostKey(c) } : { val: c, label: c })),
         ],
       });
     }
@@ -132,9 +133,9 @@ export const currencyEquipmentPage: CatalogPageConfig = {
     if (cats.size) {
       filters.push({
         key: 'category',
-        label: '分类',
+        labelKey: 'catalog.filter.category',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           ...[...cats.entries()].map(([val, label]) => ({ val, label })),
         ],
       });
@@ -148,9 +149,9 @@ export const currencyEquipmentPage: CatalogPageConfig = {
     if (tagMap.size) {
       filters.push({
         key: 'tag',
-        label: '标签',
+        labelKey: 'catalog.filter.tag',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           ...[...tagMap.entries()].sort((a, b) => a[0] - b[0]).map(([id, desc]) => ({ val: String(id), label: desc })),
         ],
       });

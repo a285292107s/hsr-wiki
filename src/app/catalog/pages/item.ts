@@ -1,3 +1,4 @@
+import { translate } from '../../i18n';
 import { escHtml, itemIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalItems, RARITY_NUM_TO_KEY } from '../../../services/api';
@@ -11,40 +12,22 @@ const ITEM_RARITY_MAP: Record<string, { stars: number; label: string; color: str
   Normal: { stars: 1, label: '1★', color: 'var(--rarity-1)' },
 };
 
-const ITEM_TYPE_NAMES: Record<string, string> = {
-  Material: '材料',
-  ComposeMaterial: '合成素材',
-  CommonMonsterDrop: '怪物掉落',
-  WeeklyMonsterDrop: '周本掉落',
-  TracePath: '行迹素材',
-  AvatarRank: '星魂素材',
-  AvatarExp: '角色经验',
-  EquipmentExp: '光锥经验',
-  RelicExp: '遗器经验',
-  PlanetFesItem: '星穹电影节道具',
-  MuseumStuff: '博物馆藏品',
-  MuseumExhibit: '博物馆展件',
-  AetherSkill: '以太战线·技能',
-  AetherSpirit: '以太战线·精灵',
-  ElfRestaurantItem: '精灵餐厅道具',
-  HipplenOutfit: '希儿朋服装',
-  FightFestSkill: '角斗大会技能',
-  DiceCombatDice: '模拟宇宙·战斗骰',
-  DiceCombatAvatar: '模拟宇宙·命途骰',
-  IdleLiveItem: '摸鱼道具',
-  MatchThreeV2: '三消道具',
-  PixAirMaterial: '像素飞机道具',
-  Virtual: '货币',
-  Book: '书籍',
-  Food: '食物',
-  Gift: '礼物',
-  Formula: '配方',
-  TravelBrochurePaster: '旅行手帐贴纸',
-  ChessRogueDiceSurface: '诡弈骰子面',
-  ForceOpitonalGift: '剧情赠礼',
-  RogueMedal: '模拟宇宙勋章',
-  FindChest: '寻宝道具',
-  Mission: '任务道具',
+/* 物品类别展示名只在词典里（官方无对应词条 ⇒ 词典值是人工撰写，见 tools/fill-ui-messages.py）。
+   未登记的枚举回退枚举值本身而不是显示原始词典键——词典缺键时界面仍可读。 */
+function labelOfDict(prefix: string, value: string): string {
+  const key = `${prefix}.${value}`;
+  const got = translate(key);
+  return got === key ? value : got;
+}
+const itemTypeLabel = (v: string): string => labelOfDict('itemType', v);
+/** 主类别的 Material / Virtual 与 sub-type 同名同义 ⇒ 复用 itemType.* 键（同一事实只一处） */
+const MAIN_TYPE_KEY: Record<string, string> = {
+  Material: 'itemType.Material', Virtual: 'itemType.Virtual',
+  Usable: 'itemMainType.Usable', Mission: 'itemMainType.Mission',
+};
+const mainTypeLabel = (mt: string): string => {
+  const k = MAIN_TYPE_KEY[mt];
+  return k ? translate(k) : mt;
 };
 
 const ITEM_TYPE_PREFERRED = [
@@ -53,9 +36,6 @@ const ITEM_TYPE_PREFERRED = [
 ];
 
 const MAIN_TYPE_ORDER = ['Material', 'Virtual', 'Usable', 'Mission'];
-const MAIN_TYPE_NAMES: Record<string, string> = {
-  Material: '材料', Virtual: '货币', Usable: '可用', Mission: '任务',
-};
 
 const ITEM_NO_ICON_SVG =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
@@ -65,9 +45,9 @@ const ITEM_NO_ICON_SVG =
 
 export const itemPage: CatalogPageConfig = {
   id: 'item',
-  title: '物品',
+  titleKey: 'nav.item',
   subtitle: 'ITEMS',
-  searchPlaceholder: '搜索物品...',
+  searchKey: 'catalog.item.search',
   gridClass: 'nk-cat-grid nk-item-grid',
   cardClass: '.nk-item-card',
   virtualMinColW: 110,
@@ -146,34 +126,34 @@ export const itemPage: CatalogPageConfig = {
       groupCount.set(mt, (groupCount.get(mt) || 0) + 1);
     }
     const subTypeOptions = [
-      { val: '', label: '全部' },
+      { val: '', labelKey: 'catalog.all' },
       ...grouped.map((st) => {
         const mt = mainOf.get(st) ?? '';
         return {
           val: st,
-          label: ITEM_TYPE_NAMES[st] || st,
-          group: `${MAIN_TYPE_NAMES[mt] || mt} · ${groupCount.get(mt)}`,
+          label: itemTypeLabel(st),
+          group: `${mainTypeLabel(mt)} · ${groupCount.get(mt)}`,
         };
       }),
     ];
     return [
       {
-        key: 'rarity', label: '稀有度',
+        key: 'rarity', labelKey: 'catalog.filter.rarity',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           { val: 'SuperRare', label: '5★' },
           { val: 'VeryRare', label: '4★' },
           { val: 'Rare', label: '3★' },
           { val: 'NotNormal', label: '2★' },
         ],
       },
-      { key: 'subType', label: '类型', options: subTypeOptions },
+      { key: 'subType', labelKey: 'catalog.filter.type', options: subTypeOptions },
     ];
   },
   renderCard(item, i) {
     const r = ITEM_RARITY_MAP[String(item.rarity)] || ITEM_RARITY_MAP.Normal;
     const subType = String(item.subType || '');
-    const typeName = ITEM_TYPE_NAMES[subType] || subType;
+    const typeName = itemTypeLabel(subType);
     const hasIcon = Boolean(item.icon);
     /* 描述（`descTip`：功能描述优先，无则背景故事）挂在卡根上：栅格里放不下正文，但悬停可读。
        卡上还有名字自己的 title（第 13 轮，长名被截断时可复原），两者作用域不同、互不冲突。 */

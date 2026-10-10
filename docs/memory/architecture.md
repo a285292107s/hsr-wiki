@@ -48,11 +48,21 @@
 - **带开关的机制每次移除消费方后必须重问「开关还有人用吗」**：竖轨的 `--rail-w: 0` 开关在最后一个消费方退场后变成伺候空集的默认值，整条机制连同语义色覆写一起删除，原语收窄为纯缩进。
 - **写进 DOM 的自定义属性先查消费者再上工**：`use-card-tilt` 每帧写 `--rx/--ry` 而全仓无 CSS 消费它们；注释说「3D tilt」但消费者从未出生或被后续重构删掉，属纯死代码＋每帧主线程工作。
 - **删「零消费原语」前先查它是不是某个孤儿的唯一消费者**：只看 `grep 类名` 会以为原语还活着，实际消费点在死文件里；视图 + 其 CSS 同批删除，living docs 的原语清单同步改名。`docs/agents/ui-design.md`
+- **「代码引用了不存在的词典键」守卫曾经漏检两参调用**：原正则只匹配 `t('k')`，于是 `t('mob.stage', { n })` 这类带插值的键写错也照样通过（实测漏掉一个键并让页面渲染出原始键名）。现为 `\b(?:t|translate)\(\s*'…'`，抓两参调用与 `translate(...)`；**新增 i18n 相关的机检时先确认它覆盖了所有调用形态**，否则守卫给的是虚假安全感。
 
 ## 研究线 /debug
 
 - **研究线禁止反向引用 `src/app/` 业务模块与 stores**：调试台只共享 `spine/` + `services/` + `lib/`；反向引用会把生产模块拖进 dev-only 依赖图，摇树前提直接失效。（dev 门控写法与摇树陷阱见 [build-deploy.md](build-deploy.md)）
 - **摇树后残留的恒 false 分支不是缺陷**：主包残留约 150B 的侧栏 dev 分支（含 `/debug` 字符串与 svg）属接受项，别为它做二次改造。
+- **`NkError` 的 message 是内部诊断，不进界面**：机检白名单把 `new Error` / `NkError` 文案按「内部诊断」归类（文案为中文），但 `CatalogPage` / `EndgameView` / `EndgameModeView` 曾把它直接渲染进错误态的详情行 ⇒ 非缺省语言用户在界面看到中文诊断。现在统一走 `lib/errors.ts` 的 `userErrorDetail()`：**operational 错误只 `console.warn` 留痕、详情行返回空串**（界面用本地化标题 + 重试），非 NkError（编程错误）原样暴露。
+- **目录卡 href 带前缀、JS 点击必须先剥前缀再 `router.push`**：卡片 href 由 `activeHref()` 生成（原生导航与爬虫需要前缀），而 router 的 history base **也是**那个前缀 ⇒ 直接 `push(href)` 会拼两次，实测得到 `/en/en/character/1513`（用户报障）。判据：`router.push(stripLocalePrefix(href))`；`e2e/layout-locales-smoke.spec.ts` 已对 12 个带前缀语言逐个点卡验证（回退修复即失败并打印重复前缀）。
+- **非 `RouterLink` 的内链必须走 `activeHref()`**：目录卡与模板里的普通 `<a href>` 不经路由 history base，写死 `/lightcone/23001` 这类路径在非缺省语言下点一下就会**静默跳回缺省语言**（实测漏点：`BuildsPanel.vue` 的推荐光锥卡）。字段命名约定：`RouterLink` 用 `to`、普通 `<a>` 用 `href`——`check-languages.mjs` 按「`href` 后直接跟 `/…` 字面量且未经 `activeHref`」判失败，故喂给 `:to` 的字段不能叫 `href`。
+- **模板拼接的键（`t('itemType.' + v)`）必须随数据枚举一起登记**：静态扫描只看得到前缀，缺键时 vue-i18n 静默回退（先回退到源语言，源语言也没有就把**键名本身**渲染到界面）⇒ 用户看到 `itemType.ComposeMaterial` 这种原始键。本轮一次扫出四类：`itemType.ComposeMaterial`（13 语言全缺）、`monster.rank.bigBoss`（词典里叫 `.boss`，映射表写错）、`skillType.Assist` / `skillType.ElationDamage`（数据里有、词典没有）、`endgame.status.unknown`（兜底分支可达却无键）。`check-i18n-messages.mjs` 现按数据取值域兜底（`items.sub_type` / 货币战争 `property_type` / 角色 `skills[].type`）并对代码枚举族固定断言（`monster.rank.*` / `endgame.status.*` / `propGroup.*`）；运行期由 `layout-locales-smoke.spec.ts` 的 vue-i18n 缺键告警兜住。
+- **计数类文案用 vue-i18n 的 `|` 复数形式**（`"{n} stage | {n} stages"`）：`{n}` 即隐式复数键，**调用点无需改动**（值里带 `|` 且具名参数含 `n` 时自动选形）。英语/德/法/西/葡两形式开箱即用。**俄语三形式取不到**——实测 `pluralizationRules` 的函数零调用、`Intl.PluralRules` 的 one/few/many 也没被采用，故俄语只能用两形式（1 与 5+ 正确，2–4 走复数）。词典守卫的占位符判据按此细化：比较**去重集合**，并要求每个形式自身的占位符集合一致。
+- **词典值里的花括号只能是 `{占位符}`**：vue-i18n 会把 `{…}` 当占位符编译，官方文本里的性别变体（德语「开拓者」= `{M#Trailblazer}{F#Trailblazerin}`）与日文 ruby 标记（`{RUBY_B#…}`）直接进词典会抛 `SyntaxError: Invalid token in placeholder`，并连带 `Cannot set properties of null (setting '__vnode')` 让**整页渲染异常**。写入路径统一过 `tools/fill-ui-messages.py` 的 `sanitize_message()`（口径同转换器 `textmap._neutralize_gender`：独占整段的变体取第一支、ruby 标记去除），并由 `check-i18n-messages.mjs` 兜底。判据：`{` 之后必须是合法标识符并紧接 `}`。
+- **「代码里还有中文」不等于「漏译」——有意保留清单已做成机检**：判据是「这段文字是否按当前语言渲染给用户看」（是 ⇒ 必须走词典或数据源）。**清单与理由的唯一落位是守卫脚本头部** [check-ui-chinese.mjs](../../tools/check-ui-chinese.mjs)（品牌名 / 语言母语自称 / 中文→枚举解析表 / `console.warn` 诊断 / 内部校验 `Error`·`NkError` 文本 / 含中文的正则字面量 / `src/spine/**` 诊断文本），`pnpm build` 前置跑；本文件不复述清单——新增豁免只改脚本白名单并在脚本里写理由。审计残留先跑该守卫，别把「有意的中文」当缺陷反复重报。
+- **同一中文措辞的「近义词」不得合并成同一个键**：`回合上限 CYCLES`（层内通关条件）与 `回合限制 CYCLES`（赛季级规则）措辞不同、出现位置不同，合并会让缺省语言的界面文案静默改变——既有 e2e 断言（逐字 `toHaveText`）会抓住它。**先查断言里的原文再决定合并**。
+- **`t` 会被模板作用域里的同名变量遮蔽，且只有类型层看得见（已复发四次）**：`v-for="(t, i) in …"`、`v-for="t in …"`、`const t = …` 都会让 `{{ t('key') }}` 变成「拿非函数调用」，报错形如 `Type 'X' has no call signatures`。固定修法：该处改用显式 `translate('key', …)`；批量为组件补 `const t = translate` 时要**按完整 import 语句定位**（多行 `import type { … }` 会把新导入插进类型清单里，直接语法错误）。
 
 ## CSS 拆分纪律
 

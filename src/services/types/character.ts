@@ -110,6 +110,8 @@ export interface CharStats {
 
 export interface RelicProp {
   relic_type: string;
+  /** 部位名（官方词条，随语言包切语言）；缺字段时调用方回退 `relic_type` 枚举键 */
+  relic_type_name?: string;
   property_type: string;
 }
 
@@ -169,7 +171,7 @@ export interface CharacterData {
   /** 拉丁转写（converter 由 TextMapEN × AvatarName 解析）。开拓者形态名为 `{NICKNAME}` 占位
    *  ⇒ 上游无译名，输出空串，消费方须按「缺字段」处理（不渲染），禁止回退拼造。 */
   name_en?: string;
-  desc?: string;
+  /** 角色档案（`chara_info.stories`）第一篇的首行由前端派生（`CharHero`），产物不再带组合好的简介 */
   chara_info?: {
     /** 所属阵营（如「星穹列车」「星核猎手」） */
     camp?: string | null;
@@ -243,7 +245,8 @@ export type LocalCharList = LocalCharEntry[];
 /** 单条技能动画条目 */
 export interface SkillAnimEntry {
   url: string;
-  /** 多段技能子标题（如终结技分段名） */
+  /** 多段技能子标题：命中官方技能名时是**名称令牌**（随语言解析，见 docs/spine/米游社技能动画抓取流程.md）；
+   *  无官方词条的 wiki 变体小标题不写入（前端回落序号），避免中文进非中文语言的选择器 */
   title?: string;
 }
 

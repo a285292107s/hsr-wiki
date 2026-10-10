@@ -1,5 +1,7 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, type Locator, type Page } from '@playwright/test';
+import { hasTextToken, resolveTextTokens, type TextPack } from '../src/lib/i18n/text-ref';
 
 export interface ConsoleIssues {
   pageErrors: string[];
@@ -184,9 +186,48 @@ export async function resolveTokenColor(page: Page, name: string, host = 'html')
   }, raw);
 }
 
-/** 读取随站分发的数据 JSON（相对仓库根路径），供期望值从数据派生。 */
+const packCache = new Map<string, TextPack>();
+
+/** 指定语言的语言包合并表（各分组包并成一张 `键 → 正文` 表）；目录不存在时为空的表。 */
+export function textPackOf(locale: string): TextPack {
+  const hit = packCache.get(locale);
+  if (hit) return hit;
+  const merged: Record<string, string> = {};
+  const dir = join('public', 'data', 'i18n', locale);
+  if (existsSync(dir)) {
+    for (const f of readdirSync(dir)) {
+      if (f.endsWith('.json')) {
+        Object.assign(merged, JSON.parse(readFileSync(join(dir, f), 'utf8')) as TextPack);
+      }
+    }
+  }
+  packCache.set(locale, merged);
+  return merged;
+}
+
+/**
+ * 缺省语言（cn）的语言包合并表。
+ * 结构层未令牌化时目录不存在 ⇒ 返回空表，`readJson` 行为与改造前一致。
+ */
+export function defaultTextPack(): TextPack {
+  return textPackOf('cn');
+}
+
+/**
+ * 读随站分发的数据 JSON 并**按指定语言**解析令牌（多语言契约取证用，如断言英文页正文）。
+ */
+export function readJsonIn<T>(locale: string, relPath: string): T {
+  const raw = JSON.parse(readFileSync(relPath, 'utf8')) as T;
+  return hasTextToken(raw) ? resolveTextTokens(raw, textPackOf(locale)) : raw;
+}
+
+/**
+ * 读取随站分发的数据 JSON（相对仓库根路径），供期望值从数据派生。
+ * 结构层里的文本是引用令牌（ADR 0052）⇒ 先解析成缺省语言正文再交给断言；未令牌化时原样返回。
+ */
 export function readJson<T>(relPath: string): T {
-  return JSON.parse(readFileSync(relPath, 'utf8')) as T;
+  const raw = JSON.parse(readFileSync(relPath, 'utf8')) as T;
+  return hasTextToken(raw) ? resolveTextTokens(raw, defaultTextPack()) : raw;
 }
 
 /** 未知横向溢出断言：已登记项过滤后必须为空（全站布局根统一判据）。 */

@@ -20,6 +20,8 @@ export {
   loadLocalEndgameGuide,
 } from './endgame';
 export { loadLocalAchievements, loadLocalAchievementSeries } from './achievements';
+export { loadLocalProperties } from './properties';
+export { loadLocalElements, loadLocalPaths } from './lookups';
 export { loadLocalVoracity } from './voracity';
 export {
   loadLocalCurrencyRoles, loadLocalCurrencyRole,

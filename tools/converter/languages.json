@@ -1,0 +1,20 @@
+{
+  "_comment": "多语言站点的语言清单（单一事实源）。代码取自 vendor ExcelOutput/AllowedTextLanguage.json 的 TextLanguageKey，culture 取自同表的 LanguageCultureCode；textmap 为该语言的 TextMap 分片（按顺序合并，kr/ru/th 在源侧被切成 _0/_1 两片）。转换器经 languages.py 读取本文件，前端 src/lib/i18n/locales.ts 是 UI 侧镜像，两侧一致性由 tools/check-languages.mjs 守卫。",
+  "source": "vendor/TurnBasedGameData/ExcelOutput/AllowedTextLanguage.json",
+  "default": "cn",
+  "languages": [
+    { "code": "cn",  "culture": "zh-CN", "native": "简体中文",        "textmap": ["TextMapCHS.json", "TextMapMainCHS.json"] },
+    { "code": "cht", "culture": "zh-TW", "native": "繁體中文",        "textmap": ["TextMapCHT.json", "TextMapMainCHT.json"] },
+    { "code": "en",  "culture": "en-US", "native": "English",         "textmap": ["TextMapEN.json", "TextMapMainEN.json"] },
+    { "code": "kr",  "culture": "ko-KR", "native": "한국어",          "textmap": ["TextMapKR_0.json", "TextMapKR_1.json", "TextMapMainKR.json"] },
+    { "code": "jp",  "culture": "ja-JP", "native": "日本語",          "textmap": ["TextMapJP.json", "TextMapMainJP.json"] },
+    { "code": "es",  "culture": "es-MX", "native": "Español",         "textmap": ["TextMapES.json", "TextMapMainES.json"] },
+    { "code": "ru",  "culture": "ru-RU", "native": "Русский",         "textmap": ["TextMapRU_0.json", "TextMapRU_1.json", "TextMapMainRU.json"] },
+    { "code": "th",  "culture": "th-TH", "native": "ไทย",             "textmap": ["TextMapTH_0.json", "TextMapTH_1.json", "TextMapMainTH.json"] },
+    { "code": "vi",  "culture": "vi-VN", "native": "Tiếng Việt",      "textmap": ["TextMapVI.json", "TextMapMainVI.json"] },
+    { "code": "id",  "culture": "id-ID", "native": "Bahasa Indonesia", "textmap": ["TextMapID.json", "TextMapMainID.json"] },
+    { "code": "fr",  "culture": "fr-FR", "native": "Français",        "textmap": ["TextMapFR.json", "TextMapMainFR.json"] },
+    { "code": "de",  "culture": "de-DE", "native": "Deutsch",         "textmap": ["TextMapDE.json", "TextMapMainDE.json"] },
+    { "code": "pt",  "culture": "pt-BR", "native": "Português",       "textmap": ["TextMapPT.json", "TextMapMainPT.json"] }
+  ]
+}

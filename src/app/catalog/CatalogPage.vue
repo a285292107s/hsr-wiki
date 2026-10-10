@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { stripLocalePrefix } from '../../lib/i18n/locales';
+import { userErrorDetail } from '../../lib/errors';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../stores/app';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useLoadGeneration } from '../composables/use-load-generation';
@@ -14,6 +17,7 @@ const props = defineProps<{ config: CatalogPageConfig }>();
 const app = useAppStore();
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
 
 const VIRTUAL_THRESHOLD = 400;
 
@@ -45,6 +49,16 @@ const filters = computed(() =>
     ? props.config.buildFilters(items.value)
     : props.config.filters || [],
 );
+
+/* 标题文案：词典键 + 可选插值（插值参数本身也是词典键，如「货币战争 · 投资策略」= 模式名 + 图鉴名）。
+   配置在模块加载期求值，故解析放在视图里（否则会冻住缺省语言）。 */
+const pageTitle = computed(() => {
+  const args = props.config.titleArgs;
+  if (!args) return t(props.config.titleKey);
+  return t(props.config.titleKey, Object.fromEntries(
+    Object.entries(args).map(([name, key]) => [name, t(key)]),
+  ));
+});
 
 const useVirtual = computed(() => items.value.length > VIRTUAL_THRESHOLD);
 
@@ -110,7 +124,7 @@ async function load(): Promise<void> {
     props.config.prefetch?.({ version: app.version });
   } catch (e) {
     if (cancelled.value || !loadGen.isCurrent(gen)) return;
-    errorMsg.value = e instanceof Error ? e.message : String(e);
+    errorMsg.value = userErrorDetail(e);
     phase.value = 'error';
     // 就地错误态已经是完整信号，不再叠 toast（toast 只留给「结果不在视口内」的动作，如复制/下载）
   }
@@ -221,7 +235,9 @@ function onContentClick(e: MouseEvent): void {
   const href = a.getAttribute('href') || '';
   if (!href || href === '#' || href.startsWith('http')) return;
   e.preventDefault();
-  void router.push(href);
+  /* 卡片 href 由 `activeHref()` 生成、**已带语言前缀**（原生导航/爬虫需要），而 router 的 history base
+     也是该前缀 ⇒ 直接 push 会再拼一次，得到 `/en/en/character/1513`（用户实测）。故先剥前缀。 */
+  void router.push(stripLocalePrefix(href));
 }
 
 function onCardImgError(e: Event): void {
@@ -259,16 +275,16 @@ onBeforeUnmount(() => {
           <path d="M12 9v4"/><path d="M12 17h.01"/>
         </svg>
       </div>
-      <div class="nk-error-state__title">数据加载失败</div>
+      <div class="nk-error-state__title">{{ t('catalog.loadError') }}</div>
       <div v-if="errorMsg" class="nk-error-state__detail">{{ errorMsg }}</div>
       <button class="nk-error-state__retry" @click="load">RETRY</button>
     </div>
 
     <template v-else>
       <CatalogToolbar
-        :title="config.title"
+        :title="pageTitle"
         :subtitle="config.subtitle"
-        :placeholder="config.searchPlaceholder"
+        :placeholder="t(config.searchKey)"
         :query="query"
         :count-text="phase === 'loading' ? '—' : `${filtered.length} / ${items.length}`"
         :filters="filters"
@@ -283,7 +299,7 @@ onBeforeUnmount(() => {
         class="nk-skeleton nk-skeleton--catalog"
         role="status"
         aria-live="polite"
-        :aria-label="`${config.title}加载中`"
+        :aria-label="t('catalog.loadingAria', { title: pageTitle })"
       >
         <div class="nk-skeleton__grid" :class="config.gridClass">
           <div v-for="i in 16" :key="i" class="nk-skeleton__card">
@@ -326,7 +342,7 @@ onBeforeUnmount(() => {
         </span>
         <span class="nk-cat-empty__text">NO MATCH FOUND</span>
         <p class="nk-cat-empty__sub">
-          {{ hasQuery || hasFilters ? '当前搜索或筛选条件下没有匹配条目。' : '该分类暂无可展示的条目。' }}
+          {{ hasQuery || hasFilters ? t('catalog.emptyFiltered') : t('catalog.emptyAll') }}
         </p>
         <button
           v-if="hasQuery || hasFilters"
@@ -334,7 +350,7 @@ onBeforeUnmount(() => {
           class="nk-cat-empty__reset"
           @click="resetSearchAndFilters"
         >
-          清除搜索与筛选
+          {{ t('catalog.clearFilters') }}
         </button>
       </div>
       </template>

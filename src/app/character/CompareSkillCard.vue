@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { elemLabel, skillTypeLabel } from '../../lib/enum-labels';
 import { fmtDesc, skillIconUrl, fmtToughness } from '../../lib/format';
-import { ELEM, TYPE } from '../../lib/constants';
+
 import type { CharacterData, Skill } from '../../services/types';
 import type { SkillDiff } from '../../lib/compare';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   diff: SkillDiff;
   charId: string;
@@ -38,7 +43,7 @@ const enhHtml = computed(() => sideHtml(props.diff.enh));
 
 /* 图标用 base 确保可用；名称/标签用强化侧新形态 */
 
-const typeName = computed(() => props.diff.enh.type_name || TYPE[props.diff.enh.type ?? ''] || '');
+const typeName = computed(() => props.diff.enh.type_name || skillTypeLabel(props.diff.enh.type ?? '', ''));
 const tagLabel = computed(() => props.diff.enh.tag || '');
 const icon = computed(() => skillIconUrl(props.diff.base, props.charId, props.charData));
 const typeKey = computed(() => props.diff.enh.type || '');
@@ -52,31 +57,31 @@ const metricDiffs = computed<MetricDiff[]>(() => {
   const fmtTough = (sk: Skill): string => {
     const stType = sk.stance_damage_type;
     const stDisp = sk.stance_damage_display;
-    if (stType && stDisp != null) return `${ELEM[stType] || stType} ${stDisp}`.trim();
+    if (stType && stDisp != null) return `${elemLabel(stType)} ${stDisp}`.trim();
     return fmtToughness(sk) || '—';
   };
-  if (has('sp_base')) out.push({ label: '能量', base: fmt(b.sp_base), enh: fmt(e.sp_base) });
+  if (has('sp_base')) out.push({ label: t('skill.energy'), base: fmt(b.sp_base), enh: fmt(e.sp_base) });
   if (has('stance_damage_display') || has('show_stance_list')) {
-    out.push({ label: '削韧', base: fmtTough(b), enh: fmtTough(e) });
+    out.push({ label: t('cwRole.stance'), base: fmtTough(b), enh: fmtTough(e) });
   }
   // 战技点对比：正值 = 消耗 N（-N），-1 = 不消耗哨兵（非产出）
   const fmtBP = (v: number | null | undefined): string => {
     if (v == null) return '—';
-    return v === -1 ? '不消耗' : '-' + String(v);
+    return v === -1 ? t('skill.noCost') : '-' + String(v);
   };
-  if (has('bp_need')) out.push({ label: '战技点', base: fmtBP(b.bp_need), enh: fmtBP(e.bp_need) });
+  if (has('bp_need')) out.push({ label: t('catalog.charge.sp'), base: fmtBP(b.bp_need), enh: fmtBP(e.bp_need) });
   return out;
 });
 </script>
 
 <template>
   <div class="nk-skill" :data-type="typeKey">
-    <span class="nk-cmp-badge">变化</span>
+    <span class="nk-cmp-badge">{{ t('cmp.changed') }}</span>
     <div class="nk-skill__head">
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">
         <span class="nk-slider__val">Lv.{{ lv }}<template v-if="maxLv > 1">/{{ maxLv }}</template></span>
-        <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :aria-label="`${diff.enh.name} 等级`" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
+        <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :aria-label="t('skill.levelAria', { name: diff.enh.name })" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
       </div>
     </div>
     <div class="nk-skill__body">
@@ -91,11 +96,11 @@ const metricDiffs = computed<MetricDiff[]>(() => {
         </div>
       </div>
       <div class="nk-cmp-row">
-        <span class="nk-cmp-tag">原始</span>
+        <span class="nk-cmp-tag">{{ t('char.state.original') }}</span>
         <div class="nk-skill__desc nk-cmp__orig" v-html="baseHtml"></div>
       </div>
       <div class="nk-cmp-row">
-        <span class="nk-cmp-tag">强化</span>
+        <span class="nk-cmp-tag">{{ t('cmp.enhanced') }}</span>
         <div class="nk-skill__desc nk-cmp__enh" v-html="enhHtml"></div>
       </div>
       <div v-if="metricDiffs.length" class="nk-cmp-metrics">

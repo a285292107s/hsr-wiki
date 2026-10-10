@@ -5,14 +5,17 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { CDN, setUseOfficialPaths } from '../constants';
+import { setActiveLocale } from '../i18n/active';
 import { JS_DELIVR_BASE, NANOKA_HUD } from '../../services/cdn';
 import { NkError } from '../errors';
+import { setLabelTranslator } from '../label-translator';
+import cnMessages from '../i18n/messages/cn.json';
 import {
   escHtml, gameTagsToHtml, stripTags, fmtVal, fmtDesc, fmtDescWithFormat, fmtDescMerged, fmtDescStar, fmtToughness,
   deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
   avatarDrawCardUrl, avatarDrawCardJdUrl, itemName, itemIconUrl, validateCharData,
-  fmtStatValue, levelStatValue, charStageForLevel,
+  fmtStatValue, levelStatValue, charStageForLevel, fmtNumber, localeCulture,
 } from '../format';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
 
@@ -21,6 +24,10 @@ import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/typ
 const NANOKA_BASE = `${CDN}${NANOKA_HUD}`;
 beforeAll(() => {
   setUseOfficialPaths(false);
+  /* 词典翻译由 app 层注入（lib 不引应用层）：测试用 cn 词典当翻译器，
+     于是断言既覆盖「架势标签走词典」也钉住词典键确实存在。 */
+  const dict = cnMessages as Record<string, string>;
+  setLabelTranslator((key: string) => dict[key] ?? key);
 });
 
 /* ─── fixture（最小化 CharacterData，结构对齐本地转换数据角色 JSON） ─── */
@@ -481,5 +488,42 @@ describe('fmtStatValue：面板数值统一加千分位', () => {
     expect(fmtStatValue(null)).toBe('');
     expect(fmtStatValue(undefined)).toBe('');
     expect(fmtStatValue(Number.NaN)).toBe('NaN');
+  });
+});
+
+describe('fmtNumber 按站点语言（不是浏览器语言）', () => {
+  it('分组符 / 小数点随站点语言切换', () => {
+    setActiveLocale('en');
+    expect(localeCulture()).toBe('en-US');
+    expect(fmtNumber(1234.5)).toBe('1,234.5');
+    setActiveLocale('de');
+    expect(localeCulture()).toBe('de-DE');
+    expect(fmtNumber(1234.5)).toBe('1.234,5');
+    setActiveLocale('cn');
+  });
+
+  it('非有限值原样返回字符串', () => {
+    setActiveLocale('en');
+    expect(fmtNumber(Number.NaN)).toBe('NaN');
+    expect(fmtNumber('25377.9')).toBe('25,377.9');
+  });
+});
+
+describe('{PROP:} 占位符（ADR 0053 方案 A：自造属性名的译文只住在 UI 词典里）', () => {
+  it('按词典解析；缺键时回退枚举键（不吞字）', () => {
+    setLabelTranslator((k) => (k === 'prop.ExtraQuantumResonance' ? 'Synchronized Frequency' : k));
+    expect(gameTagsToHtml('{PROP:ExtraQuantumResonance} enhances this effect.')).toBe('Synchronized Frequency enhances this effect.');
+    expect(gameTagsToHtml('{PROP:NoSuchKey} x')).toBe('NoSuchKey x');
+  });
+
+  it('拉丁标签与相邻拉丁字母之间补空格（源文本按 CJK 排版书写）', () => {
+    setLabelTranslator((k) => (k === 'prop.ExtraLuckDamage' ? 'Lucky Strike DMG' : k));
+    expect(gameTagsToHtml('{PROP:ExtraLuckDamage}Increases DMG by 8%.')).toBe('Lucky Strike DMG Increases DMG by 8%.');
+    expect(gameTagsToHtml('X{PROP:ExtraLuckDamage}Y')).toBe('X Lucky Strike DMG Y');
+  });
+
+  it('CJK 标签保持源排版，不补空格', () => {
+    setLabelTranslator((k) => (k === 'prop.ExtraLuckDamage' ? '幸运伤害' : k));
+    expect(gameTagsToHtml('【星徽】{PROP:ExtraLuckDamage}幸运一击伤害提高8%。')).toBe('【星徽】幸运伤害幸运一击伤害提高8%。');
   });
 });

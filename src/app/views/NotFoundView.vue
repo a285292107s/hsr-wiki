@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
+import { translate } from '../i18n';
+
+const t = translate;
 </script>
 
 <template>
   <div class="nk-notfound">
     <div class="nk-notfound__card">
       <p class="nk-notfound__rubric">404 · NOT FOUND</p>
-      <h1 class="nk-notfound__title">数据节点未连接</h1>
-      <p class="nk-notfound__desc">请求的路径不存在或已被移除。</p>
+      <h1 class="nk-notfound__title">{{ t('notfound.title') }}</h1>
+      <p class="nk-notfound__desc">{{ t('notfound.desc') }}</p>
       <RouterLink to="/" class="nk-notfound__btn">
-        返回首页
+        {{ t('notfound.back') }}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M5 12h13" /><path d="M12.5 6.5 18 12l-5.5 5.5" />
         </svg>

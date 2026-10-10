@@ -30,14 +30,26 @@ from converters import monster_guide as mg  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
-    """mock TextMap，避免加载真实大文件；共享聚合模块（monster_common / monster_guide）同步 mock。"""
+    """mock TextMap：哈希键 → 「名N」，与各处 `fake_resolve` 同口径。
+
+    令牌化 / 组合器（**按语言**从文本表取值）读的是 `textmap._text_map`，故这里补**文本表本身**；
+    `__contains__` 保持为空（字面量引用的 xxhash 探测不命中）⇒ 字面量引用仍原样返回，
+    只有 `{"Hash": N}` 形态走「名N」。
+    """
     import textmap
     import converters.monster_common as mc
-    monkeypatch.setattr(textmap, "_text_map", {})
+
+    class FakeTextMap(dict):
+        def get(self, k, default=None):
+            return f"名{k}" if isinstance(k, str) and k.isdigit() else default
+
+        def __getitem__(self, k):
+            return f"名{k}"
+
+    monkeypatch.setattr(textmap, "_text_map", FakeTextMap())
     fake_resolve = lambda ref, clean=False: "" if not ref else f"名{ref.get('Hash', 0)}"  # noqa: E731
     monkeypatch.setattr(eg, "resolve_text", fake_resolve)
     monkeypatch.setattr(mc, "resolve_text", fake_resolve)
-    monkeypatch.setattr(mg, "resolve_text", fake_resolve)
     return mc
 
 class TestLoadSchedules:
@@ -204,8 +216,12 @@ class TestAuxTables:
         assert eg._monster_out(2, {2: no_mod})["stance"] == 60
         assert eg._monster_out(2, {2: no_mod})["speed"] == 100
 
-    def test_load_targets_clean(self, monkeypatch):
-        """目标表：文本清洗 + 参数补全 + 类型输出（ChallengeTargetType）。"""
+    def test_load_targets_params_and_type(self, monkeypatch):
+        """目标表：参数补全 + 类型输出（ChallengeTargetType）。
+
+        文本清洗由 `resolve_text(clean=True)` 单次完成（原先 `clean_text(resolve_text(...))`
+        是冗余二次清洗，会把携带 TextMap 键的 TextRef 退化成普通字符串，多语言令牌化因此失效）。
+        """
         monkeypatch.setattr(eg, "load_json", lambda _p: [
             {"ID": 251, "ChallengeTargetName": {"Hash": 1},
              "ChallengeTargetParam1": 20, "ChallengeTargetType": "ROUNDS_LEFT"},
@@ -214,11 +230,10 @@ class TestAuxTables:
              "ChallengeTargetType": "ROUNDS_LEFT"},
             {"ID": 0},
         ])
-        monkeypatch.setattr(eg, "clean_text", lambda s: f"cleaned:{s}" if s else "")
         out = eg._load_targets()
-        assert out[251] == {"text": "cleaned:名1", "param": 20, "type": "ROUNDS_LEFT"}
-        assert out[252] == {"text": "cleaned:名2", "param": None}
-        assert out[253] == {"text": "cleaned:名1", "param": 20, "type": "ROUNDS_LEFT"}
+        assert out[251] == {"text": "名1", "param": 20, "type": "ROUNDS_LEFT"}
+        assert out[252] == {"text": "名2", "param": None}
+        assert out[253] == {"text": "名1", "param": 20, "type": "ROUNDS_LEFT"}
         assert 0 not in out
 
     def test_load_permanent_groups(self, monkeypatch):
@@ -768,6 +783,13 @@ class TestRewards:
             ],
         }
         monkeypatch.setattr(eg, "load_json", lambda p: rows[Path(p).name])
+        # 标签本身取自官方文本表（enum_labels 的 ui_label 类）：夹具里补上那两条
+        import textmap
+        import enum_labels
+        monkeypatch.setattr(textmap, "_text_map", {
+            enum_labels.textmap_key("ui_label", "peakStarKnight"): "骑士星数",
+            enum_labels.textmap_key("ui_label", "peakStarKing"): "王棋星数",
+        })
         items = {100: [{"id": 1, "num": 60}], 200: [{"id": 226001, "num": 1}],
                  300: [{"id": 263, "num": 100}]}
         assert eg._load_peak_star_rewards(items) == {
@@ -987,9 +1009,8 @@ class TestPeakSeasons:
              "TargetParam": 9},
             {"ID": 3002, "Type": "ChallengeTarget", "TargetName": {}},
         ])
-        monkeypatch.setattr(eg, "clean_text", lambda s: f"c:{s}" if s else "")
         out = eg._load_battle_targets()
-        assert out == {3000: {"text": "c:名1", "param": 4}}
+        assert out == {3000: {"text": "名1", "param": 4}}
 
     def test_stage_monsters_by_id_only_wanted(self, monkeypatch):
         """StageConfig：仅提取关心的 StageID，波次结构保序保留（含波内重复）+ 关卡绑定增益。"""

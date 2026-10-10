@@ -5,6 +5,8 @@ import { elemRow, lastWaveBoss } from './renders';
 import { tabNextIndex } from './tabs';
 import type { MazeStageDetail } from '../../services/types';
 
+
+import { translate } from '../i18n';
 /** 战斗卡片行（层 tab 的半场卡片 / 星启看板的节点卡片共用）：
  *  卡片兼作子切换与身份位——一场战斗的「打谁（末波首领图）/ 什么属性 / 多少级 / 几回合」同屏可比，
  *  看板内因此不再复述这四项。 */
@@ -90,15 +92,15 @@ function onKeydown(e: KeyboardEvent, i: number): void {
       <span class="nk-egd-nodecard__body">
         <span class="nk-egd-nodecard__name">{{ t.label }}</span>
         <span v-if="t.elems" class="nk-egd-nodecard__row nk-egd-nodecard__row--elems">
-          <span class="nk-egd-nodecard__label">推荐属性</span>
+          <span class="nk-egd-nodecard__label">{{ translate('egd.label.attr') }}</span>
           <span class="nk-egd-nodecard__elems" v-html="t.elems"></span>
         </span>
         <span v-if="t.level" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
-          <span class="nk-egd-nodecard__label">等级</span>
+          <span class="nk-egd-nodecard__label">{{ translate('egd.label.level') }}</span>
           <span class="nk-egd-nodecard__val">{{ t.level }}</span>
         </span>
         <span v-if="t.countdown" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
-          <span class="nk-egd-nodecard__label">回合</span>
+          <span class="nk-egd-nodecard__label">{{ translate('egd.score.rounds') }}</span>
           <span class="nk-egd-nodecard__val">{{ t.countdown }}</span>
         </span>
       </span>

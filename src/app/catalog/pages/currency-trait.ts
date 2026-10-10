@@ -1,17 +1,20 @@
 import { escHtml, gridFightTraitIconUrl } from '../../../lib/format';
+import { activeHref } from '../../../lib/i18n/active';
 import { loadLocalCurrencyTraits } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 import { loadCwCatalogCss } from './shared';
+import { cwTraitCatKey } from '../../../lib/enum-labels';
+import { translate } from '../../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 
 type TraitCat = 'faction' | 'combat' | 'special';
-const CAT_LABEL: Record<TraitCat, string> = {
-  faction: '阵营', combat: '流派', special: '特殊',
-};
 
 function renderTraitCard(item: CatalogItem, index = 0): string {
   const icon = gridFightTraitIconUrl(item.icon as string);
   const cat = (item.cat as TraitCat) || 'special';
-  const catLabel = CAT_LABEL[cat] || cat;
+  const catLabel = cwTraitCatKey(cat) ? translate(cwTraitCatKey(cat)!) : cat;
   const layers = (item.layers as Array<{ layer: number }>) || [];
   const layerCount = layers.length;
   const simpleDesc = escHtml(
@@ -23,13 +26,13 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
     (item.simple_desc as string || '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim(),
   );
 
-  return `<a class="nk-cw-trait-card" href="/currency/trait/${escHtml(item.id)}" data-cat="${escHtml(cat)}" title="${escHtml(item.name as string)}：${fullDesc}" style="--i:${index}">
+  return `<a class="nk-cw-trait-card" href="${escHtml(activeHref(`/currency/trait/${item.id}`))}" data-cat="${escHtml(cat)}" title="${escHtml(item.name as string)}：${fullDesc}" style="--i:${index}">
       <div class="nk-cw-trait-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
       <div class="nk-cw-trait-card__body">
         <div class="nk-cw-trait-card__name">${escHtml(item.name)}</div>
         <div class="nk-cw-trait-card__meta">
           <span class="nk-cw-tag nk-cw-tag--${cat}">${escHtml(catLabel)}</span>
-          ${layerCount ? `<span class="nk-cw-trait-card__layers">${layerCount}层</span>` : ''}
+          ${layerCount ? `<span class="nk-cw-trait-card__layers">${escHtml(t('cwTrait.layerCount', { n: layerCount }))}</span>` : ''}
         </div>
         <div class="nk-cw-trait-card__desc">${simpleDesc}${descTruncated}</div>
       </div>
@@ -38,9 +41,10 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
 
 export const currencyTraitPage: CatalogPageConfig = {
   id: 'currency-trait',
-  title: '货币战争 · 羁绊图鉴',
+  titleKey: 'catalog.titleWithMode',
+  titleArgs: { mode: 'catalog.currencyWar', name: 'nav.cwTrait' },
   subtitle: 'TRAITS',
-  searchPlaceholder: '搜索羁绊…',
+  searchKey: 'catalog.cwTrait.search',
   gridClass: 'nk-cat-grid nk-cw-trait-grid',
   cardClass: '.nk-cw-trait-card',
   styles: [loadCwCatalogCss],
@@ -68,10 +72,10 @@ export const currencyTraitPage: CatalogPageConfig = {
     if (cats.length) {
       filters.push({
         key: 'cat',
-        label: '分类',
+        labelKey: 'catalog.filter.category',
         options: [
-          { val: '', label: '全部' },
-          ...cats.map((c) => ({ val: c, label: CAT_LABEL[c as TraitCat] || c })),
+          { val: '', labelKey: 'catalog.all' },
+          ...cats.map((c) => (cwTraitCatKey(c) ? { val: c, labelKey: cwTraitCatKey(c) } : { val: c, label: c })),
         ],
       });
     }

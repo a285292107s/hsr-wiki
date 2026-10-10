@@ -1,10 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { ACCENTS, DEFAULT_ACCENT, getSavedAccent, setAccent, type AccentKey } from '../../lib/theme';
 import {
   DEFAULT_TRAILBLAZER_GENDER, getSavedTrailblazerGender, setTrailblazerGender,
   type TrailblazerGender,
 } from '../../lib/trailblazer';
+import { LOCALES, localizedPath } from '../../lib/i18n/locales';
+import { activeLocale } from '../../lib/i18n/active';
+
+const route = useRoute();
+const { t } = useI18n();
+const currentLocale = activeLocale();
+
+/* 切换语言走**整页导航**而非客户端路由：数据层单例、请求缓存与 store 都按语言持有状态
+   （`local.ts` 的缓存键带语言维度、`singletonOf` 的 generation = 当前语言），整页重载让它们
+   整体重建；客户端改前缀做不到（router history base 只在创建时固定），且会留下半新半旧的数据。 */
+function chooseLocale(code: string): void {
+  if (code === currentLocale) return;
+  window.location.assign(localizedPath(code, route.fullPath));
+}
 
 const current = ref<AccentKey>(getSavedAccent());
 
@@ -28,17 +44,17 @@ interface SwatchSection {
 
 const accentSections: SwatchSection[] = [
   {
-    id: 'accent-title', idx: '01', title: '主题色', listboxLabel: '主题强调色',
-    items: ACCENTS,
+    id: 'accent-title', idx: '01', title: t('settings.accentTitle'), listboxLabel: t('settings.accentListbox'),
+    items: ACCENTS.map((a) => ({ ...a, label: t(a.labelKey) })),
     currentValue: () => current.value,
     onChoose: choose,
-    defaultKey: DEFAULT_ACCENT, defaultHintText: '当前使用默认主题 · 赤陶',
+    defaultKey: DEFAULT_ACCENT, defaultHintText: t('settings.accentDefaultHint'),
   },
 ];
 
 const GENDER_OPTIONS: ReadonlyArray<{ key: TrailblazerGender; label: string; icon: string }> = [
-  { key: 'female', label: '女性开拓者', icon: '♀' },
-  { key: 'male', label: '男性开拓者', icon: '♂' },
+  { key: 'female', label: t('settings.genderFemale'), icon: '♀' },
+  { key: 'male', label: t('settings.genderMale'), icon: '♂' },
 ];
 
 const currentGender = ref<TrailblazerGender>(getSavedTrailblazerGender());
@@ -48,9 +64,10 @@ function chooseGender(gender: TrailblazerGender): void {
   currentGender.value = gender;
 }
 
-const activeProfile = computed(() => ACCENTS.find((a) => a.key === current.value) ?? ACCENTS[0]);
-
-const headDesc = '调整全站主色调与开拓者形象。选择即时生效并自动保存——全站（含货币战争）共用这一套配色。';
+const activeProfile = computed(() => {
+  const a = ACCENTS.find((x) => x.key === current.value) ?? ACCENTS[0];
+  return { ...a, label: t(a.labelKey) };
+});
 
 const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
 </script>
@@ -59,12 +76,12 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   <div class="nk-settings">
     <header class="nk-settings__head">
       <div class="nk-settings__head-copy">
-        <p class="nk-settings__kicker">设置 · SETTINGS</p>
-        <h1>偏好档案</h1>
-        <p class="nk-settings__desc">{{ headDesc }}</p>
+        <p class="nk-settings__kicker">{{ t('settings.kicker') }}</p>
+        <h1>{{ t('settings.title') }}</h1>
+        <p class="nk-settings__desc">{{ t('settings.desc') }}</p>
       </div>
-      <div class="nk-settings__tag" aria-label="当前主题">
-        <span class="nk-settings__tag-label">当前主题 · ACTIVE THEME</span>
+      <div class="nk-settings__tag" :aria-label="t('settings.currentThemeTag')">
+        <span class="nk-settings__tag-label">{{ t('settings.currentThemeLabel') }}</span>
         <span class="nk-settings__tag-name">{{ activeProfile.label }}</span>
         <span class="nk-settings__tag-row">
           <span class="nk-settings__tag-swatch" v-for="(c, i) in activeProfile.swatch" :key="i" :style="{ background: c }" aria-hidden="true"></span>
@@ -112,9 +129,9 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
     <section class="nk-settings__section" aria-labelledby="trailblazer-title">
       <h2 id="trailblazer-title" class="nk-title">
         <span class="nk-title__idx">02</span>
-        开拓者形态
+        {{ t('settings.trailblazerTitle') }}
       </h2>
-      <div class="nk-seg" role="listbox" aria-label="开拓者性别">
+      <div class="nk-seg" role="listbox" :aria-label="t('settings.trailblazerListbox')">
         <button
           v-for="g in GENDER_OPTIONS"
           :key="g.key"
@@ -132,7 +149,30 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
           <span class="nk-seg__mark" aria-hidden="true"></span>
         </button>
       </div>
-      <p class="nk-settings__hint">角色列表仅显示选中的开拓者形态。<template v-if="currentGender === DEFAULT_TRAILBLAZER_GENDER">当前使用默认形态 · 女性</template></p>
+      <p class="nk-settings__hint">{{ t('settings.genderHint') }}<template v-if="currentGender === DEFAULT_TRAILBLAZER_GENDER">{{ t('settings.genderDefaultHint') }}</template></p>
+    </section>
+
+    <section class="nk-settings__section" aria-labelledby="locale-title">
+      <h2 id="locale-title" class="nk-title">
+        <span class="nk-title__idx">03</span>
+        {{ t('settings.languageTitle') }}
+      </h2>
+      <div class="nk-lang" role="listbox" :aria-label="t('settings.languageListbox')">
+        <button
+          v-for="l in LOCALES"
+          :key="l.code"
+          type="button"
+          class="nk-lang__opt"
+          :class="{ 'nk-lang__opt--on': l.code === currentLocale }"
+          :aria-pressed="l.code === currentLocale"
+          :lang="l.culture"
+          @click="chooseLocale(l.code)"
+        >
+          <span class="nk-lang__native">{{ l.native }}</span>
+          <span class="nk-lang__code">{{ l.culture }}</span>
+        </button>
+      </div>
+      <p class="nk-settings__hint">{{ t('settings.languageHint') }}</p>
     </section>
   </div>
 </template>
@@ -420,6 +460,50 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   height: 12px;
   border-radius: 1.5px;
   background: color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+/* 语言选择器（ADR 0052）：13 种语言的母语自称 + culture 码；选中态沿用外壳激活令牌。 */
+.nk-lang {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  gap: 10px;
+  max-width: 1480px;
+}
+.nk-lang__opt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  text-align: left;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--nk-sheet-item-bg);
+  border: 1px solid var(--nk-sheet-item-border);
+  border-radius: var(--nk-radius-card);
+  cursor: pointer;
+  transition: border-color 0.18s var(--nk-ease-out), background 0.18s var(--nk-ease-out);
+}
+.nk-lang__opt:hover {
+  border-color: var(--line-2);
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+.nk-lang__opt--on {
+  border-color: var(--nk-shell-active-border);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.nk-lang__native {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+.nk-lang__opt--on .nk-lang__native { color: var(--metric-val); }
+.nk-lang__code {
+  font-family: var(--font-hud);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+  text-transform: uppercase;
 }
 
 </style>

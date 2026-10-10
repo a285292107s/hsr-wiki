@@ -1,4 +1,7 @@
-import { ELEM, MON_RANK } from '../../lib/constants';
+
+import { elemLabel } from '../../lib/enum-labels';
+import { translate } from '../i18n';
+import { monsterRankKey } from '../../lib/enum-labels';
 import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
 import type {
@@ -39,9 +42,9 @@ export function seasonRules(data: MazeListEntry): SeasonRule[] {
   const rules: SeasonRule[] = [];
   const cd = data.countdown || 0;
   if (cd && !(perFloor.length > 0 && perFloor.every((c) => c === cd))) {
-    rules.push({ label: '回合限制 CYCLES', value: cd });
+    rules.push({ label: translate('egd.rule.cycles'), value: cd });
   }
-  if (data.clear_score) rules.push({ label: '通关分数线 SCORE', value: data.clear_score });
+  if (data.clear_score) rules.push({ label: translate('egd.rule.score'), value: data.clear_score });
   return rules;
 }
 
@@ -57,7 +60,7 @@ export function elemRow(types: string[]): string {
   return types.map((d) => {
     const src = elementIconUrl(d);
     return src
-      ? `<img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(ELEM[d] || d)}" title="${escHtml(ELEM[d] || d)}" loading="lazy">`
+      ? `<img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(elemLabel(d))}" title="${escHtml(elemLabel(d))}" loading="lazy">`
       : '';
   }).join('');
 }
@@ -73,14 +76,14 @@ export function lastWaveBoss(mons: MazeMonsterInfo[] | undefined): MazeMonsterIn
 
 export function monTitle(m: MazeMonsterInfo): string {
   const parts = [m.name];
-  const r = m.rank ? (MON_RANK[m.rank] || '') : '';
+  const r = m.rank ? translate(monsterRankKey(m.rank)) : '';
   if (r) parts.push(r);
   if (m.camp) parts.push(m.camp);
-  if (m.stance) parts.push(`韧性 ${m.stance}`);
-  if (m.speed) parts.push(`速度 ${m.speed}`);
-  if (m.weak?.length) parts.push(`弱点：${m.weak.map((d) => ELEM[d] || d).join(' / ')}`);
+  if (m.stance) parts.push(translate('card.value.stance', { v: m.stance }));
+  if (m.speed) parts.push(translate('card.value.speed', { v: m.speed }));
+  if (m.weak?.length) parts.push(translate('card.weak', { list: m.weak.map((d) => elemLabel(d)).join(' / ') }));
   const es = Object.entries(m.resist || {});
-  if (es.length) parts.push(`抗性：${es.map(([d, v]) => `${ELEM[d] || d} ${Math.round(v * 100)}%`).join(' / ')}`);
+  if (es.length) parts.push(translate('card.resist', { list: es.map(([d, v]) => `${elemLabel(d)} ${Math.round(v * 100)}%`).join(' / ') }));
   return parts.join(' · ');
 }
 
@@ -105,7 +108,7 @@ export function monWaveGroups(mons: MazeMonsterInfo[]): { wave: number; items: M
 export function monCountLabel(mons: MazeMonsterInfo[] | undefined): string {
   if (!mons?.length) return '';
   const waves = new Set(mons.map((m) => m.wave || 1)).size;
-  return `${waves} 波 · ${mons.length} 敌`;
+  return translate('egd.wavesEnemies', { waves, mons: mons.length });
 }
 
 export function peakTagsHtml(tags: string[]): string {
@@ -113,9 +116,9 @@ export function peakTagsHtml(tags: string[]): string {
 }
 
 export const TARGET_TYPE_LABEL: Record<string, string> = {
-  TOTAL_SCORE: '分数',
-  ROUNDS_LEFT: '回合',
-  DEAD_AVATAR: '减员',
+  TOTAL_SCORE: translate('egd.score.total'),
+  ROUNDS_LEFT: translate('egd.score.rounds'),
+  DEAD_AVATAR: translate('egd.score.dead'),
 };
 
 /** 挑战目标类型语义 SVG（子仓库解包无对应图标，自制语义化内联图标） */

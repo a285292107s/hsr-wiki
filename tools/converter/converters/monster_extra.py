@@ -25,9 +25,11 @@
 """
 import logging
 import re
+from typing import Any
 
 from config import EXCEL_DIR
-from textmap import resolve_text
+from textmap import clean_text, current_textmap, resolve_text, text_key_of
+from textpack import composed_ref
 from utils import load_json, unwrap_value
 from converters.items import item_name_icon
 
@@ -85,12 +87,26 @@ def _load_table(name: str) -> list[dict]:
         return []
 
 
+def _activity_name_ref(ref: Any) -> Any:
+    """活动名 / 活动页签名：官方文本**剥外层「」**后仍必须可令牌化。
+
+    坑位：在已解析文本上做 `.strip("「」")` 会把携带 TextMap 键的 `TextRef` 退化成普通字符串
+    ⇒ 这片文案（活动名 + 页签名）在多语言下恒为中文。改为登记组合器：各语言各剥一次，
+    产物里是普通文本 ⇒ 前端与快照生成器零改动（见 textpack.composed_ref）。
+    """
+    key = text_key_of(ref)
+    if not key:
+        return ""
+    composer = lambda tm, k=key: clean_text(tm.get(k, ""), dict(tm)).strip("「」")  # noqa: E731 —— 按值绑定键
+    return composed_ref(f"composed:actname:{key}", composer, composer(current_textmap()))
+
+
 def _activity_panel_names() -> dict[int, str]:
     """`{ActivityPanel.PanelID: 活动名}`（`TitleName` 剥「」）。"""
     out: dict[int, str] = {}
     for rec in _load_table("ActivityPanel"):
         pid = rec.get("PanelID")
-        name = resolve_text(rec.get("TitleName") or {}).strip("「」")
+        name = _activity_name_ref(rec.get("TitleName") or {})
         if pid is not None and name:
             out[pid] = name
     return out
@@ -146,9 +162,9 @@ def load_activity_stage_names() -> dict[str, dict[int, dict]]:
     """
     panels = _activity_panel_names()
     festival = {
-        (p.get("UIPrefab") or "").rsplit("/", 1)[-1].replace("Panel.prefab", ""): resolve_text(
+        (p.get("UIPrefab") or "").rsplit("/", 1)[-1].replace("Panel.prefab", ""): _activity_name_ref(
             p.get("TitleName") or {}
-        ).strip("「」")
+        )
         for p in _load_table("ActivityPanel")
     }
     tv_stage = {r.get("TelevisionID"): r for r in _load_table("ActivityTelevisionStage")}
@@ -572,7 +588,7 @@ def load_event_sources() -> dict[int, dict]:
     panels_by_token: dict[str, dict] = {}
     for p in panels:
         token = (p.get("UIPrefab") or "").rsplit("/", 1)[-1].replace("Panel.prefab", "")
-        name = resolve_text(p.get("TitleName") or {}).strip("「」")
+        name = _activity_name_ref(p.get("TitleName") or {})
         if token and name:
             panels_by_token[token] = {"panel_id": p.get("PanelID"), "name": name}
 
@@ -601,7 +617,7 @@ def load_event_sources() -> dict[int, dict]:
         module = str(r.get("ActivityModuleID") or "")
         for panel in panels_by_token.values():
             if module.startswith(str(panel["panel_id"])):
-                tab = resolve_text(r.get("QuestTabName") or {}).strip("「」")
+                tab = _activity_name_ref(r.get("QuestTabName") or {})
                 for rec in out.values():
                     if rec["name"] == panel["name"] and tab and tab not in rec["tabs"]:
                         rec["tabs"].append(tab)

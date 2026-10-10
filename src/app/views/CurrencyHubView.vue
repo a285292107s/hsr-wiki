@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 import { useCwReleaseShowcase } from '../composables/use-release-showcase';
 import '../../styles/currency-hub.css';
 
@@ -19,16 +22,16 @@ onMounted(() => { void load(); });
       <div class="nk-hub-brand__scrim" aria-hidden="true"></div>
       <div class="nk-hub-brand__content">
         <p class="nk-hub-brand__supra">CURRENCY WAR · GRID FIGHT</p>
-        <h1 class="nk-hub-brand__title">货币战争</h1>
+        <h1 class="nk-hub-brand__title">{{ t('catalog.currencyWar') }}</h1>
         <p class="nk-hub-brand__tagline">
-          赢者通吃的零和博弈。招募、羁绊、站位、策略，构筑你的最强阵容。
+          {{ t('cwHub.tagline') }}
         </p>
       </div>
     </header>
 
     <main class="nk-hub-release">
       <div class="nk-hub-release__head">
-        <h2 class="nk-hub-release__title">本赛季新增</h2>
+        <h2 class="nk-hub-release__title">{{ t('cwHub.releaseTitle') }}</h2>
         <span class="nk-hub-release__rule" aria-hidden="true"></span>
       </div>
 
@@ -39,7 +42,7 @@ onMounted(() => { void load(); });
         class="nk-hub-release__sk"
         role="status"
         aria-live="polite"
-        aria-label="本赛季新增加载中"
+        :aria-label="t('cwHub.loadingAria')"
       >
         <div v-for="(label, i) in labels" :key="label" class="nk-hub-release__sk-row" :data-sk="skKinds[i]">
           <div class="nk-hub-release__label">{{ label }}</div>
@@ -56,15 +59,15 @@ onMounted(() => { void load(); });
             <path d="M12 9v4" /><path d="M12 17h.01" />
           </svg>
         </div>
-        <div class="nk-error-state__title">赛季索引加载失败</div>
-        <div class="nk-error-state__detail">{{ labels.join(' / ') }}索引都没取到，无法判定本赛季新增，重试即可恢复。</div>
-        <button class="nk-error-state__retry" type="button" @click="load">重试</button>
+        <div class="nk-error-state__title">{{ t('cwHub.errorTitle') }}</div>
+        <div class="nk-error-state__detail">{{ t('cwHub.errorDetail', { labels: labels.join(' / ') }) }}</div>
+        <button class="nk-error-state__retry" type="button" @click="load">{{ t('common.retry') }}</button>
       </div>
 
       <template v-else-if="sections.length">
         <p v-if="partialFailed" class="nk-hub-release__notice" role="status">
-          有 {{ failedCount }} 类索引未取到，本次未包含其分区。
-          <button class="nk-error-state__retry" type="button" @click="load">重试</button>
+          {{ t('home.partialDetail', { n: failedCount }) }}
+          <button class="nk-error-state__retry" type="button" @click="load">{{ t('common.retry') }}</button>
         </p>
 
         <section
@@ -77,18 +80,18 @@ onMounted(() => { void load(); });
           <div class="nk-hub-release__sechead">
             <h3 class="nk-hub-release__label">{{ s.label }} <span class="nk-hub-release__label-count">{{ s.count }}</span></h3>
             <RouterLink class="nk-hub-release__all" :to="s.listHref">
-              全部{{ s.label }}
+              {{ t('home.viewAll', { label: s.label }) }}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </RouterLink>
           </div>
           <div class="nk-hub-release__band" v-html="s.html"></div>
         </section>
       </template>
-      <p v-else class="nk-hub-release__empty">本赛季暂无新增条目</p>
+      <p v-else class="nk-hub-release__empty">{{ t('cwHub.empty') }}</p>
     </main>
 
     <footer class="nk-hub-footer">
-      <p class="nk-hub-footer__motto">愿此行，终抵群星</p>
+      <p class="nk-hub-footer__motto">{{ t('ui.footerMotto') }}</p>
       <p class="nk-hub-footer__latin">PER ASPERA AD ASTRA</p>
     </footer>
   </div>

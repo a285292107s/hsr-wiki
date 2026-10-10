@@ -4,6 +4,10 @@ import EndgameReward from './EndgameReward.vue';
 import EndgameTargetRow from './EndgameTargetRow.vue';
 import type { StarTierRow } from './renders';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 /** 星级奖励列表（层 tab 与星启看板共用，ADR 0051 补记四）：**一档一行**，
  *  行内 = 档位徽章 + 该档条件（星级目标，逐目标一行）+ 该档奖励 chips，条件与奖励之间一条引导虚线。
  *  一档吃多个目标时（忘却之庭：3 星一档）条件块右侧加**跨越这些目标的括号**——括号把「这几个目标
@@ -14,8 +18,9 @@ const props = defineProps<{ rows: StarTierRow[] }>();
  *  含回合 / 减员档（忘却之庭）时是「挑战目标」。 */
 const label = computed(() => {
   const targets = props.rows.flatMap((r) => r.targets);
-  const name = targets.length > 0 && targets.every((t) => t.type === 'TOTAL_SCORE') ? '星级目标' : '挑战目标';
-  return `${name} · 星级奖励`;
+  const name = targets.length > 0 && targets.every((x) => x.type === 'TOTAL_SCORE')
+    ? translate('egd.starGoal') : translate('egd.challengeGoal');
+  return translate('egd.starTierTitle', { name });
 });
 </script>
 
@@ -25,7 +30,7 @@ const label = computed(() => {
     <ul class="nk-egd-tiers">
       <li v-for="(row, i) in rows" :key="i" class="nk-egd-tier">
         <span class="nk-egd-tier__badge" :class="{ 'nk-egd-tier__badge--prism': row.prism }">
-          {{ row.prism ? '棱彩星' : `累计 ${row.star}★` }}
+          {{ row.prism ? t('egd.prismStar') : t('egd.accumStars', { n: row.star }) }}
         </span>
         <span class="nk-egd-tier__cond">
           <!-- 一档吃多个目标时逐目标标星（忘却之庭一层 3 目标 = 3 星推一档），见 EndgameTargetRow -->

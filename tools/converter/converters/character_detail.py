@@ -4,7 +4,9 @@ import logging
 import re
 from collections import defaultdict
 
-from config import EXCEL_DIR, OUTPUT_DIR, SKILL_TYPE_MAP, PATH_NAME_FALLBACK
+from config import EXCEL_DIR, OUTPUT_DIR, RELIC_TYPE_MAP, SKILL_TYPE_MAP, PATH_NAME_FALLBACK
+from enum_labels import resolve as resolve_label
+from enum_labels import trailblazer_name_ref
 from textmap import ensure_textmap_en, resolve_text, resolve_text_en
 from utils import load_json, save_json, map_icon_path, unwrap_value
 
@@ -338,6 +340,12 @@ def _build_relics(relic_data: list[dict], avatar_id: int) -> dict:
                 "property_list": [
                     {
                         "relic_type": p.get("RelicType", ""),
+                        # 部位名取官方词条令牌：前端不再自带中文部位表（enum_labels 单点登记）
+                        "relic_type_name": resolve_label(
+                            "relic_slot",
+                            p.get("RelicType", ""),
+                            RELIC_TYPE_MAP.get(p.get("RelicType", ""), p.get("RelicType", "")),
+                        ),
                         "property_type": p.get("PropertyType", ""),
                     }
                     for p in item.get("PropertyList", [])
@@ -508,17 +516,12 @@ def convert() -> None:
         skill_ids = item.get("SkillList", [])
 
         if name == "开拓者" and base_type:
-            path_name = PATH_NAME_FALLBACK.get(base_type, base_type)
-            name = f"开拓者·{path_name}"
+            name = trailblazer_name_ref(base_type, PATH_NAME_FALLBACK.get(base_type, base_type))
 
-        desc = ""
         stories: dict[str, str | None] = {"0": None, "1": None, "2": None, "3": None, "4": None}
         avatar_stories = sorted(stories_by_avatar.get(avatar_id, []), key=lambda x: x.get("StoryID", 0))
         for idx, s in enumerate(avatar_stories[:5]):
-            text = resolve_text(s.get("Story", {}))
-            if idx == 0:
-                desc = text.split("\\n")[0].strip() if text else ""
-            stories[str(idx)] = text
+            stories[str(idx)] = resolve_text(s.get("Story", {}))
 
         atlas = atlas_by_id.get(avatar_id, {})
         camp_id = atlas.get("CampID", 0)
@@ -553,7 +556,6 @@ def convert() -> None:
         char_data = {
             "name": name,
             "name_en": name_en,
-            "desc": desc,
             "chara_info": chara_info,
             "rarity": rarity,
             "avatar_vo_tag": avatar_vo_tag,

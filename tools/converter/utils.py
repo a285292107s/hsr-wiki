@@ -7,13 +7,57 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Optional
 
-from config import ICON_PATH_MAP, OFFICIAL_ICON_RULES
+from config import ICON_PATH_MAP, OFFICIAL_ICON_RULES, OUTPUT_DIR
+from textpack import TextRef, group_of, is_token, record, token, token_key
 
 logger = logging.getLogger("converter")
 
 COMPACT_OUTPUT = True
 
 _USE_OFFICIAL_PATHS = False
+
+_TEXT_TOKENS = False
+"""令牌模式开关（`convert.py --tokens`）。关闭时序列化路径与多语言改造前逐字节一致。"""
+
+
+def set_text_tokens(enabled: bool) -> None:
+    """切换令牌模式（由 CLI 控制）。"""
+    global _TEXT_TOKENS
+    _TEXT_TOKENS = enabled
+
+
+def text_tokens_enabled() -> bool:
+    return _TEXT_TOKENS
+
+
+def _pack_group(filepath: Path) -> str:
+    """由输出路径推出语言包分组；路径不在 OUTPUT_DIR 内（测试等）时退回文件名。"""
+    try:
+        rel = filepath.resolve().relative_to(OUTPUT_DIR.resolve())
+    except ValueError:
+        return group_of(filepath.name)
+    return group_of(rel.as_posix())
+
+
+def _tokenize(obj: Any, group: str) -> Any:
+    """把文本写入令牌化：`TextRef` 换成令牌，**透传的既有令牌也登记键**。
+
+    透传场景真实存在——`endgame_catalog` 从已令牌化的 `maze*.json` 派生 catalog，
+    那里拿到的是普通字符串 `"$t:…"`（不是 TextRef）。只登记 TextRef 会让这些分组没有语言包，
+    前端解析时抛缺键错误；判据是「结构层里出现过的令牌 = 必须被语言包覆盖的键」，与来源无关。
+    """
+    if isinstance(obj, TextRef):
+        record(group, obj.key)
+        return token(obj.key)
+    if isinstance(obj, str):
+        if is_token(obj):
+            record(group, token_key(obj))
+        return obj
+    if isinstance(obj, dict):
+        return {k: _tokenize(v, group) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_tokenize(v, group) for v in obj]
+    return obj
 
 def set_pretty(enabled: bool) -> None:
     """设置输出模式（由 CLI --pretty 控制）。enabled=True 时缩进输出。"""
@@ -34,15 +78,19 @@ def load_json(filepath: Path) -> Any:
 def save_json(data: Any, filepath: Path) -> None:
     """保存 JSON 文件，中文不转义。默认紧凑模式，--pretty 时缩进。
 
+    令牌模式下先把 `TextRef` 写成 `"$t:<键>"` 并登记语言包键集合（多语言改造见 ADR 0052）；
+    关闭时不做任何遍历，输出与改造前逐字节一致。
+
     先写同目录临时文件再原子替换，避免进程中断留下半截 JSON。
     """
+    payload = _tokenize(data, _pack_group(filepath)) if _TEXT_TOKENS else data
     filepath.parent.mkdir(parents=True, exist_ok=True)
     tmp = filepath.with_suffix(filepath.suffix + ".tmp")
     with open(tmp, "w", encoding="utf-8") as f:
         if COMPACT_OUTPUT:
-            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+            json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
         else:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+            json.dump(payload, f, ensure_ascii=False, indent=2)
     os.replace(tmp, filepath)
     logger.info("已保存 %s（%s 条）", filepath, len(data) if isinstance(data, (list, dict)) else "?")
 

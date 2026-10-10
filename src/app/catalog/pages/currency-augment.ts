@@ -2,16 +2,18 @@ import { escHtml, gridFightIconUrl, fmtDesc } from '../../../lib/format';
 import { loadLocalCurrencyAugments } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 import { loadCwCatalogCss } from './shared';
+import { translate } from '../../i18n';
 
-const QUALITY_LABEL: Record<string, string> = {
-  Silver: '银色', Gold: '金色', Prismatic: '棱彩',
+/* 品质枚举 → 词典键（展示文案只在词典里；复用 lib 的货币枚举映射语义） */
+const QUALITY_KEY: Record<string, string> = {
+  Silver: 'catalog.quality.silver', Gold: 'catalog.quality.gold', Prismatic: 'catalog.quality.prismatic',
 };
 const QUALITY_ORDER = ['Silver', 'Gold', 'Prismatic'];
 
 function renderAugmentCard(item: CatalogItem, index = 0): string {
   const icon = gridFightIconUrl(item.icon as string) || gridFightIconUrl(item.mini_icon as string);
   const quality = (item.quality as string) || '';
-  const qLabel = QUALITY_LABEL[quality] || quality;
+  const qLabel = QUALITY_KEY[quality] ? translate(QUALITY_KEY[quality]) : quality;
   const desc = fmtDesc(item.desc as string, item.params as number[]);
   return `<div class="nk-cw-card nk-cw-augment-card" data-quality="${escHtml(quality)}" style="--i:${index}">
       <div class="nk-cw-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
@@ -25,9 +27,10 @@ function renderAugmentCard(item: CatalogItem, index = 0): string {
 
 export const currencyAugmentPage: CatalogPageConfig = {
   id: 'currency-augment',
-  title: '货币战争 · 投资策略',
+  titleKey: 'catalog.titleWithMode',
+  titleArgs: { mode: 'catalog.currencyWar', name: 'nav.cwAugment' },
   subtitle: 'AUGMENTS',
-  searchPlaceholder: '搜索投资策略…',
+  searchKey: 'catalog.cwAugment.search',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   cardClass: '.nk-cw-card',
   styles: [loadCwCatalogCss],
@@ -52,10 +55,10 @@ export const currencyAugmentPage: CatalogPageConfig = {
     if (qualities.length) {
       filters.push({
         key: 'quality',
-        label: '品质',
+        labelKey: 'catalog.filter.quality',
         options: [
-          { val: '', label: '全部' },
-          ...qualities.map((q) => ({ val: q, label: QUALITY_LABEL[q] || q })),
+          { val: '', labelKey: 'catalog.all' },
+          ...qualities.map((q) => (QUALITY_KEY[q] ? { val: q, labelKey: QUALITY_KEY[q] } : { val: q, label: q })),
         ],
       });
     }

@@ -99,3 +99,44 @@ class TestIndexGenderOverride:
             {},
         ]
         assert cur._index_gender_override(data) == {}
+
+
+class TestAugmentDescComposer:
+    """货币词条描述走组合器（textpack.composed_ref）：模板 + 内嵌名称必须**按语言**各自组合。"""
+
+    def test_each_entry_binds_its_own_template(self, monkeypatch):
+        """闭包**按值**绑定模板键：曾因 `lambda` 捕获循环变量，全部词条解析成同一条描述。"""
+        import textmap
+        import textpack
+        from converters import currency_catalog as cc
+
+        monkeypatch.setattr(textmap, "_text_map", {"11": "模板甲#1[i]", "22": "模板乙#2[i]"})
+        textpack.begin()
+        try:
+            a = cc._augment_desc_ref({"HexDesc": {"Hash": 11}}, {}, {})
+            b = cc._augment_desc_ref({"HexDesc": {"Hash": 22}}, {}, {})
+            assert a.key == "composed:cwaug:11"
+            assert b.key == "composed:cwaug:22"
+            builders = textpack.session()
+            assert builders is not None
+            engine = {"11": "甲#1[i]", "22": "乙#2[i]"}
+            assert builders._composers[a.key](engine) == "甲#1[i]"
+            assert builders._composers[b.key](engine) == "乙#2[i]"
+        finally:
+            textpack.end()
+
+    def test_gridfightinfo_substituted_per_language(self):
+        """`<gridfightinfo>` 内嵌名称按语言取值——同一模板在两种语言表下产出不同正文。"""
+        from converters import currency_catalog as cc
+
+        template = "获得<gridfightinfo type=item id=7/>"
+        cn = cc._augment_desc({"1": "星琼×7", "2": template}, "2", {7: "1"}, {})
+        en = cc._augment_desc({"1": "Stellar Jade ×7", "2": template}, "2", {7: "1"}, {})
+        assert cn == "获得星琼×7"
+        assert en == "获得Stellar Jade ×7"
+
+    def test_missing_target_name_removed(self):
+        from converters import currency_catalog as cc
+
+        out = cc._augment_desc({"2": "获得<gridfightinfo type=item id=99/>"}, "2", {}, {})
+        assert out == "获得"

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 import { useAppStore } from '../stores/app';
 import { useReleaseShowcase } from '../composables/use-release-showcase';
 import { prefetchHighPriority } from '../router/chunks';
@@ -9,7 +12,9 @@ const app = useAppStore();
 const { sections, loaded, failedCount, labels, load } = useReleaseShowcase();
 
 const releaseTitle = computed(() =>
-  app.versionLabel ? `${app.versionLabel} 版本上新` : '版本上新',
+  app.versionLabel
+    ? t('home.releaseTitle', { version: app.versionLabel })
+    : t('home.releaseTitleNoVersion'),
 );
 
 /* 三份索引全失败 ⇒「本版本有没有新增」根本不可判定，必须给错误态：
@@ -31,7 +36,7 @@ onMounted(() => {
       <div class="nk-hub-brand__content">
         <p class="nk-hub-brand__supra">HSR DATA ARCHIVE</p>
         <h1 class="nk-hub-brand__title">{{ SITE_NAME }}</h1>
-        <p class="nk-hub-brand__tagline">角色 · 光锥 · 遗器，全图鉴数据</p>
+        <p class="nk-hub-brand__tagline">{{ t('home.tagline') }}</p>
       </div>
     </header>
 
@@ -42,7 +47,7 @@ onMounted(() => {
           <h2 class="nk-hub-release__title">{{ releaseTitle }}</h2>
         </div>
         <span class="nk-hub-release__rule" aria-hidden="true"></span>
-        <p class="nk-hub-release__edition" aria-label="角色、光锥与遗器">
+        <p class="nk-hub-release__edition" :aria-label="t('home.editionAria')">
           <span class="nk-hub-release__edition-item">CHARACTER</span>
           <span class="nk-hub-release__edition-item">LIGHT CONE</span>
           <span class="nk-hub-release__edition-item">RELIC</span>
@@ -56,7 +61,7 @@ onMounted(() => {
         class="nk-hub-release__sk"
         role="status"
         aria-live="polite"
-        aria-label="版本上新加载中"
+        :aria-label="t('home.loadingAria')"
       >
         <div v-for="label in labels" :key="label" class="nk-hub-release__sk-row">
           <div class="nk-hub-release__label">{{ label }}</div>
@@ -73,15 +78,15 @@ onMounted(() => {
             <path d="M12 9v4" /><path d="M12 17h.01" />
           </svg>
         </div>
-        <div class="nk-error-state__title">版本索引加载失败</div>
-        <div class="nk-error-state__detail">{{ labels.join(' / ') }}三类索引都没取到，无法判定本版本新增，重试即可恢复。</div>
-        <button class="nk-error-state__retry" type="button" @click="load">重试</button>
+        <div class="nk-error-state__title">{{ t('home.errorTitle') }}</div>
+        <div class="nk-error-state__detail">{{ t('home.errorDetail', { labels: labels.join(' / ') }) }}</div>
+        <button class="nk-error-state__retry" type="button" @click="load">{{ t('common.retry') }}</button>
       </div>
 
       <template v-else-if="sections.length">
         <p v-if="partialFailed" class="nk-hub-release__notice" role="status">
-          有 {{ failedCount }} 类索引未取到，本次未包含其分区。
-          <button class="nk-error-state__retry" type="button" @click="load">重试</button>
+          {{ t('home.partialDetail', { n: failedCount }) }}
+          <button class="nk-error-state__retry" type="button" @click="load">{{ t('common.retry') }}</button>
         </p>
 
         <section
@@ -95,7 +100,7 @@ onMounted(() => {
           <div class="nk-hub-release__sechead">
             <h3 class="nk-hub-release__label">{{ s.label }} <span class="nk-hub-release__label-count">{{ s.count }}</span></h3>
             <RouterLink class="nk-hub-release__all" :to="s.listHref">
-              全部{{ s.label }}
+              {{ t('home.viewAll', { label: s.label }) }}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </RouterLink>
           </div>
@@ -109,7 +114,7 @@ onMounted(() => {
               <h4 class="nk-hub-release__spec-name">{{ s.leadMeta.name }}</h4>
               <p v-if="s.leadMeta.brief" class="nk-hub-release__spec-brief" v-html="s.leadMeta.brief"></p>
               <RouterLink v-if="s.leadMeta.href" class="nk-hub-release__spec-link" :to="s.leadMeta.href">
-                查看档案
+                {{ t('home.viewArchive') }}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </RouterLink>
             </aside>
@@ -117,11 +122,11 @@ onMounted(() => {
           <div v-else class="nk-hub-release__band" v-html="s.html"></div>
         </section>
       </template>
-      <p v-else class="nk-hub-release__empty">本版本暂无新增条目</p>
+      <p v-else class="nk-hub-release__empty">{{ t('home.empty') }}</p>
     </main>
 
     <footer class="nk-hub-footer">
-      <p class="nk-hub-footer__motto">愿此行，终抵群星</p>
+      <p class="nk-hub-footer__motto">{{ t('ui.footerMotto') }}</p>
       <p class="nk-hub-footer__latin">PER ASPERA AD ASTRA</p>
     </footer>
   </div>

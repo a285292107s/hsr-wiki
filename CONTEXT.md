@@ -9,7 +9,7 @@
 **术语纪律**：该目录是本地副本（CI 每日 `git clone --depth 1`），**禁止称其为「git 子模块」**（仓库无 `.gitmodules`）。
 
 ### 目标格式（Target Format）
-converter 输出到 `public/data/[lang]/` 的 JSON 数据格式：列表索引（`characters.json` 等）+ 详情子目录（`characters/{id}.json` 等），结构扁平、字段精简。早期以 Mar-7th/StarRailRes 仓库索引 JSON 为格式标准（见 ADR 0006），输出结构已演进；StarRailRes 现在仅作「字段基线」参照（见数据筛选节）。
+converter 输出到 `public/data/cn/` 的 JSON 数据格式：**语言无关的结构层**（列表索引 `characters.json` 等 + 详情子目录 `characters/{id}.json` 等，结构扁平、字段精简）与 **各语言文本包**（`public/data/i18n/<lang>/<group>.json`）分离——语言相关文本在结构层以「文本引用令牌」占位，由语言包按语言供给（见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）。结构层目录名的 `cn` 段是**历史路径**：令牌化后该目录已与语言无关，改名要动数千个产物文件与数十处冻结文档引用，故保留并在词条处标明语义（见该 ADR 决策 2）。早期以 Mar-7th/StarRailRes 仓库索引 JSON 为格式标准（见 ADR 0006），输出结构已演进；StarRailRes 现在仅作「字段基线」参照（见数据筛选节）。
 
 ### 转换工具（Converter）
 将源数据转换为目标格式的 Python 脚本，位于 `tools/converter/`。读源数据 → 输出纯净 JSON。
@@ -27,6 +27,24 @@ converter 输出到 `public/data/[lang]/` 的 JSON 数据格式：列表索引�
 
 ### 数值包装（Value Wrapper）
 源数据中所有数值字段都包装为 `{ "Value": <number> }` 结构，转换时需递归扁平化为纯数字。
+
+### 文本引用令牌（Text Reference Token）
+结构层 JSON 里代表「一段来自 TextMap 的文本」的字符串占位符，形态 `"$t:<TextMap 键>"`。转换器产出、前端数据层解析为当前语言文本；令牌本身不含语言信息，故结构层单份可服务全部语言（见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）。
+
+### 语言包（Text Pack）
+按语言切分的文本映射 `{<键>: <该语言文本>}`，与结构层同源生成，**缺键已从缺省语言回填**，因此自包含、运行期不需要第二份回退包。键可带**变体后缀** `~raw`：普通键存清洗后正文，`~raw` 存保留游戏标记的原文（技能 / 剧情描述由前端 `gameTagsToHtml` 渲染）。
+
+### 文本变体（Text Variant）
+同一个 TextMap 键在产物里的两种形态：默认清洗后正文，与 `~raw` 原文。判据是转换器调用 `resolve_text(clean=)`——清洗必须发生在**语言包生成期**，否则 `<unbreak>` 等标记会被当正文上屏。
+
+### 语言清单（Language Registry）
+站点支持的文本语言全集，含语言代码 / culture / 母语名 / TextMap 分片。唯一事实源是 `tools/converter/languages.json`，前端镜像为 `src/lib/i18n/locales.ts`，两侧由 `node tools/check-languages.mjs` 比对。
+
+### 缺省语言（Default Locale）
+回退链终点与 URL 无前缀的那一种语言，本站为 `cn`（不做 `/cn/**` 别名，避免同一内容出现两个可索引 URL）。
+
+### 语言前缀（Locale Prefix）
+非缺省语言在 URL 首段的标记（`/en/`、`/jp/`…）。实现在 **router history base** 而非路由表复制：路由名唯一、站内链接按无前缀路径书写即自动带前缀；语言在页面加载期确定，切换走整页导航（见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md) 决策 2 / 5）。
 
 ## 数据分类
 

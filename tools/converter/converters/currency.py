@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
+from enum_labels import resolve as resolve_label
+from enum_labels import trailblazer_name_ref
 from season_delta import apply_season_new, mark_season_new
 from textmap import resolve_text
 from utils import load_json, save_json
@@ -280,8 +282,7 @@ def convert() -> None:
         path_key = cfg.get("AvatarBaseType", "")
         if name == "开拓者" and path_key:
             from config import PATH_NAME_FALLBACK
-            fallback = PATH_NAME_FALLBACK.get(path_key, path_key)
-            name = f"开拓者·{fallback}"
+            name = trailblazer_name_ref(path_key, PATH_NAME_FALLBACK.get(path_key, path_key))
         if name:
             name_map[aid] = name
 
@@ -526,7 +527,8 @@ def _build_skill(
             if ex_desc or ex_simple:
                 extra = {
                     "condition": {
-                        "name": "触发条件",
+                        # 固定标签也取官方词条（enum_labels 单点登记），不自造中文
+                        "name": resolve_label("ui_label", "conditionTrigger", "触发条件"),
                         "desc": ex_desc or ex_simple,
                         "param": [_unwrap(p, 0) for p in (ex.get("ParamList") or [])],
                     }

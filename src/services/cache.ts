@@ -122,3 +122,11 @@ async function cachedRequest<T>(
 export function cachedFetch<T>(url: string, cacheKey: string): Promise<T> {
   return cachedRequest(url, cacheKey, (u) => fetchJSON<T>(u));
 }
+
+/**
+ * 同 `cachedFetch`，但由调用方决定「取回来之后怎么加工」（本地数据要先按当前语言解析文本令牌）。
+ * 加工结果进 L1、并享 in-flight 去重与 15s 超时——缓存的是加工后的值，故缓存键必须带上语言维度。
+ */
+export function cachedLoad<T>(url: string, cacheKey: string, load: (url: string) => Promise<T>): Promise<T> {
+  return cachedRequest(url, cacheKey, load);
+}

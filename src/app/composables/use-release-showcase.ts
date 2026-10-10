@@ -8,7 +8,9 @@ import {
   loadLocalRelicSets, loadLocalRelicDetail,
 } from '../../services/api';
 import { fmtDesc } from '../../lib/format';
+import { characterBlurb } from '../../lib/character-blurb';
 import type { CatalogContext, CatalogItem, CatalogPageConfig } from '../catalog/types';
+import { translate } from '../i18n';
 
 export type ReleaseKind = 'character' | 'lightcone' | 'relic' | 'role' | 'trait';
 
@@ -146,7 +148,7 @@ export function buildReleaseSections(
     空串 / 抛错 = 该条没有正文，规格块保底为名字 + 入口。 */
 async function characterBrief(item: CatalogItem): Promise<string> {
   const d = await loadLocalCharacter(String(item.id));
-  return fmtDesc(d.desc || '');
+  return fmtDesc(characterBlurb(d.chara_info?.stories));
 }
 
 /* 光锥技能参数取最低档（叠影 1）：与详情页 rank 默认值同口径（stores/lightcone rank ref(1)） */
@@ -175,7 +177,7 @@ const RELEASE_SOURCES: Array<{
   loadBrief: (item: CatalogItem) => Promise<string>;
 }> = [
   {
-    kind: 'character', label: '角色', listHref: '/character', page: characterPage, loadTagged: () => loadLocalCharacterList(),
+    kind: 'character', label: translate('nav.character'), listHref: '/character', page: characterPage, loadTagged: () => loadLocalCharacterList(),
     loadBrief: characterBrief,
     leadMeta: (item) => ({
       name: String(item.name || ''),
@@ -183,7 +185,7 @@ const RELEASE_SOURCES: Array<{
     }),
   },
   {
-    kind: 'lightcone', label: '光锥', listHref: '/lightcone', page: lightconePage, loadTagged: () => loadLocalLightCones(),
+    kind: 'lightcone', label: translate('nav.lightcone'), listHref: '/lightcone', page: lightconePage, loadTagged: () => loadLocalLightCones(),
     loadBrief: lightconeBrief,
     leadMeta: (item) => ({
       name: String(item.name || ''),
@@ -191,7 +193,7 @@ const RELEASE_SOURCES: Array<{
     }),
   },
   {
-    kind: 'relic', label: '遗器', listHref: '/relic', page: relicPage, loadTagged: () => loadLocalRelicSets(),
+    kind: 'relic', label: translate('nav.relic'), listHref: '/relic', page: relicPage, loadTagged: () => loadLocalRelicSets(),
     loadBrief: relicBrief,
     leadMeta: (item) => ({
       name: String(item.name || ''),
@@ -213,13 +215,13 @@ const CW_RELEASE_SOURCES: Array<{
 }> = [
   {
     kind: 'role',
-    label: '角色图鉴',
+    label: translate('nav.cwRole'),
     listHref: '/currency/role',
     loadPage: () => import('../catalog/pages/currency-role').then((m) => m.currencyRolePage),
   },
   {
     kind: 'trait',
-    label: '羁绊图鉴',
+    label: translate('nav.cwTrait'),
     listHref: '/currency/trait',
     loadPage: () => import('../catalog/pages/currency-trait').then((m) => m.currencyTraitPage),
   },

@@ -3,6 +3,7 @@
 import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR, RARITY_MAP, RELIC_TYPE_MAP
+from enum_labels import resolve as resolve_label
 from textmap import resolve_text
 from utils import load_json, save_json, map_icon_path, unwrap_value
 
@@ -40,7 +41,8 @@ def convert() -> None:
         set_pieces[set_id].append({
             "id": relic.get("ID", 0),
             "type": piece_type,
-            "type_name": RELIC_TYPE_MAP.get(piece_type, piece_type),
+            # 部位名取自官方词条（令牌化）而非写死中文：产物随语言包切语言
+            "type_name": resolve_label("relic_slot", piece_type, RELIC_TYPE_MAP.get(piece_type, piece_type)),
             "rarity": rarity,
             "max_level": relic.get("MaxLevel", 0),
             "main_affix_group": relic.get("MainAffixGroup", 0),

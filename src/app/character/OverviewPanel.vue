@@ -3,10 +3,15 @@ import { computed, ref } from 'vue';
 import { extraTerms } from './utils';
 import { escHtml, fmtDesc, iconUrl, iconImgAttrs } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
-import { PROP_ICON, PROP_NAMES } from '../../lib/constants';
+import { PROP_ICON } from '../../lib/constants';
+import { propLabel } from '../../lib/enum-labels';
 import { SECTION_IDX, hasBonusNodes, hasProfile, hasStories, hasTalentNodes } from './sections';
 import type { CharacterData, SkillExtra, SkillTree } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 type OverviewSection = 'profile' | 'bonuses' | 'talents' | 'stories';
 
 const props = withDefaults(
@@ -25,8 +30,8 @@ const profileRows = computed<ProfileRow[]>(() => {
   const va = info.va;
   if (va) {
     const defs: [string, string | null | undefined][] = [
-      ['CV · 中文', va.chinese], ['CV · 日语', va.japanese],
-      ['CV · 韩语', va.korean], ['CV · 英语', va.english],
+      [t('char.cv.zh'), va.chinese], [t('char.cv.ja'), va.japanese],
+      [t('char.cv.ko'), va.korean], [t('char.cv.en'), va.english],
     ];
     for (const [label, v] of defs) {
       if (v) rows.push({ label, value: v });
@@ -84,7 +89,7 @@ const attrBonuses = computed<AttrBonus[]>(() => {
   return [...agg.entries()].map(([type, b]) => {
     const key = PROP_ICON[type];
     return {
-      name: PROP_NAMES[type] || (b.name && b.name !== '{}' ? b.name : type),
+      name: propLabel(type, b.name && b.name !== '{}' ? b.name : type),
       v: fmtBonus(type, b.sum),
       icon: key ? cdnUri('trace', `Icon${key}.webp`) : '',
     };
@@ -152,7 +157,7 @@ const abilities = computed<Ability[]>(() => {
         <img v-if="ab.icon" class="nk-skill__icon" v-bind="iconImgAttrs(ab.icon)" alt="">
         <div class="nk-skill__title">
           <span class="nk-skill__name">{{ ab.name }}</span>
-          <span class="nk-skill__tag">附加能力 {{ ab.idx + 1 }}</span>
+          <span class="nk-skill__tag">{{ t('char.bonusAbility', { n: ab.idx + 1 }) }}</span>
         </div>
       </div>
       <div class="nk-skill__desc" v-html="ab.descHtml"></div>
@@ -178,7 +183,7 @@ const abilities = computed<Ability[]>(() => {
           @click="toggleStory(s.key)"
         >
           <span class="nk-story__num">{{ String(s.idx).padStart(2, '0') }}</span>
-          <span class="nk-story__label">角色档案 · {{ s.idx }}</span>
+          <span class="nk-story__label">{{ t('char.storyLabel', { idx: s.idx }) }}</span>
           <span class="nk-story__arrow"></span>
         </button>
         <div class="nk-story__clip">

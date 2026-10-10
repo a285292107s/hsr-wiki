@@ -55,13 +55,19 @@ def ref(key: str) -> dict:
 
 @pytest.fixture(autouse=True)
 def fake_textmap(monkeypatch):
-    """mock TextMap 查询（未命中返回空串）；clean_text 保持真实实现以验证标签剥除。"""
+    """mock TextMap 查询（未命中返回空串）。
+
+    mock 必须与真实 `resolve_text` 同契约：默认 `clean=True` 时返回**已清洗**正文
+    （标签剥除由 resolve_text 内部完成，转换器不再补第二次清洗
+    ——那一步会把携带 TextMap 键的 TextRef 退化成普通字符串，令多语言令牌化失效）。
+    """
+    from textmap import clean_text
+
     def fake_resolve(value, clean=True):
         if not value:
             return ""
-        if isinstance(value, dict):
-            return _TEXT.get(str(value.get("Hash")), "")
-        return str(value)
+        text = _TEXT.get(str(value.get("Hash")), "") if isinstance(value, dict) else str(value)
+        return clean_text(text) if clean else text
 
     monkeypatch.setattr(vor, "resolve_text", fake_resolve)
 

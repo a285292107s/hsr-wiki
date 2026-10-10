@@ -17,10 +17,74 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+
 /** 站点源（快照 canonical / sitemap / JSON-LD 只用它） */
 export const SITE_ORIGIN = 'https://myhsr.wiki';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
+
+/* 语言清单（单一事实源 = converter 的 languages.json，前端 locales.ts 由守卫与之对齐）。 */
+const LANG_REGISTRY = JSON.parse(readFileSync(join(ROOT, 'tools', 'converter', 'languages.json'), 'utf8'));
+const LOCALES = LANG_REGISTRY.languages.map((l) => ({ code: l.code, culture: l.culture }));
+const DEFAULT_LOCALE = LANG_REGISTRY.default;
+let currentLocale = DEFAULT_LOCALE;
+
+const packCache = new Map();
+
+/** 某语言的语言包合并表；结构层未令牌化（目录不存在）时为空表 ⇒ 解析为空操作。 */
+function packOf(locale) {
+  const hit = packCache.get(locale);
+  if (hit) return hit;
+  const merged = {};
+  const dir = join(ROOT, 'public', 'data', 'i18n', locale);
+  if (existsSync(dir)) {
+    for (const f of readdirSync(dir)) {
+      if (f.endsWith('.json')) Object.assign(merged, JSON.parse(readFileSync(join(dir, f), 'utf8')));
+    }
+  }
+  packCache.set(locale, merged);
+  return merged;
+}
+
+/** 缺省语言包（保持既有调用点语义）。 */
+function defaultPack() {
+  return packOf(DEFAULT_LOCALE);
+}
+/** 各语言 UI 词典（`src/lib/i18n/messages/<语言>.json`）；与 SPA 共用同一份词条。 */
+const uiDictCache = new Map();
+function uiDict(locale) {
+  const hit = uiDictCache.get(locale);
+  if (hit) return hit;
+  let d = {};
+  try {
+    d = JSON.parse(readFileSync(new URL(`../src/lib/i18n/messages/${locale}.json`, import.meta.url), 'utf8'));
+  } catch {
+    d = {};
+  }
+  uiDictCache.set(locale, d);
+  return d;
+}
+
+/**
+ * 带参数的词典文案：`{n}` 等占位符按传入值替换；值里出现 `|` 时按两形式复数选形
+ * （与 vue-i18n 的默认规则一致：n==1 用第一形式，其余用第二形式）。
+ * 生成器不是 vue-i18n（构建期 Node 脚本），故复数规则在这里就地实现，读数与界面同源。
+ */
+function uiT(key, cnFallback, params = {}, count = null) {
+  let v = ui(key, cnFallback);
+  if (v.includes('|')) {
+    const forms = v.split('|').map((x) => x.trim());
+    v = count === 1 ? forms[0] : (forms[1] ?? forms[0]);
+  }
+  for (const [k, val] of Object.entries(params)) v = v.split(`{${k}}`).join(String(val));
+  return v;
+}
+
+/** 快照里的 UI 文案：按当前语言取词典值，缺键回退中文（快照不得出现空串或键名）。 */
+function ui(key, cnFallback) {
+  const v = uiDict(currentLocale)[key];
+  return typeof v === 'string' && v.trim() ? v : cnFallback;
+}
 const DATA_DIR = join(ROOT, 'public', 'data', 'cn');
 const DIST_DIR = join(ROOT, 'dist');
 const TEMPLATE_FILE = join(DIST_DIR, 'index.html');
@@ -41,56 +105,97 @@ const MAX_CHAR_LEVEL = 80;
 /* ─── 枚举展示名（前端代码常量，数据文件里没有；新增枚举值必须同步这些表与前端） ─── */
 
 /** 目录路由 meta.title（与 src/app/router/index.ts 各目录路由的 meta.title 逐字一致） */
+/* 目录页标题：直接取 SPA 的同一批词典键（`catalog.<id>.title`），缺键回退中文。
+   快照与界面同源 ⇒ 各语言标题天然一致，不再维护第二份中文表。 */
 const CATALOG_TITLE = {
-  '/character': '角色图鉴',
-  '/lightcone': '光锥图鉴',
-  '/relic': '遗器图鉴',
-  '/item': '物品',
-  '/monster': '敌对物种',
-  '/endgame': '终局内容',
-  '/achievement': '成就',
-  '/currency/role': '货币战争 · 角色图鉴',
-  '/currency/item': '货币战争 · 装备图鉴',
-  '/currency/buff': '货币战争 · 投资环境',
-  '/currency/augment': '货币战争 · 投资策略',
-  '/currency/trait': '货币战争 · 羁绊图鉴',
+  '/character': () => ui('catalog.character.title', '角色图鉴'),
+  '/lightcone': () => ui('catalog.lightcone.title', ui('catalog.lightcone.title', '光锥图鉴')),
+  '/relic': () => ui('catalog.relic.title', ui('catalog.relic.title', '遗器图鉴')),
+  '/item': () => ui('catalog.item.title', ui('nav.item', '物品')),
+  '/monster': () => ui('catalog.monster.title', ui('catalog.monster.title', '敌对物种')),
+  '/endgame': () => ui('catalog.endgame.title', ui('catalog.endgame.title', '终局内容')),
+  '/achievement': () => ui('catalog.achievement.title', ui('nav.achievement', '成就')),
+  /* 货币战争各目录标题：词典里没有整串键，改为**复用**已有键拼接（`catalog.currencyWar` +
+     各目录标题 / `nav.cw*`）——原先整串回退中文，是英文快照里最后一批「货币战争」中文的来源。 */
+  '/currency/role': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('catalog.character.title', '角色图鉴')}`,
+  '/currency/item': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwEquipment', '装备图鉴')}`,
+  '/currency/buff': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwPortal', '投资环境')}`,
+  '/currency/augment': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwAugment', '投资策略')}`,
+  '/currency/trait': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwTrait', '羁绊图鉴')}`,
 };
-
 /** 专题页 `/voracity` 的标题（与 src/app/router/index.ts 该路由 meta.title 逐字一致；非目录故不进 CATALOG_TITLE） */
-const VORACITY_TITLE = '贪饕污染';
+const voracityTitle = () => ui('nav.voracity', '贪饕污染');
 /**
  * 专题页「污染」同形词说明（页面级自撰文案，源数据里没有这段文本）：来自 CONTEXT.md「污染」同形词节
  * + ADR 0025 决策——本页说的是「贪饕」侵蚀污染，与 4.5 联动「圣杯战争 · 污染等级」无关联，
  * 禁止合并叙述或互相内链。属契约 §3 的页面级合成文案，但**内容级文本必须与页面逐字一致**（非 chrome 级）。
  */
 // 与 src/app/views/VoracityView.vue 的同形词说明逐字一致（契约：同一分区文本对所有 UA 一致）
-const VORACITY_DISAMBIGUATION = '本页「污染」指「贪饕」侵蚀污染；4.5 联动「命运/今晚留下来」的「圣杯战争 · 污染等级 1–7 / 深度污染 / 污染词条」是另一套无关体系，两者不合并叙述、也不互相内链。';
+const voracityDisambiguation = () => ui('vor.disambigNote', '本页「污染」指「贪饕」侵蚀污染；4.5 联动「命运/今晚留下来」的「圣杯战争 · 污染等级 1–7 / 深度污染 / 污染词条」是另一套无关体系，两者不合并叙述、也不互相内链。');
 
 /** 终局四模式（与 src/app/catalog/pages/endgame.ts ENDGAME_MODES 的 key/label 一致） */
 const ENDGAME_MODES = [
-  { key: 'maze', label: '忘却之庭', file: 'maze.catalog.json' },
-  { key: 'story', label: '虚构叙事', file: 'maze_extra.catalog.json' },
-  { key: 'boss', label: '末日幻影', file: 'maze_boss.catalog.json' },
-  { key: 'peak', label: '异相仲裁', file: 'maze_peak.catalog.json' },
+  { key: 'maze', label: () => ui('catalog.option.modeMaze', '忘却之庭'), file: 'maze.catalog.json' },
+  { key: 'story', label: () => ui('catalog.option.modeStory', '虚构叙事'), file: 'maze_extra.catalog.json' },
+  { key: 'boss', label: () => ui('catalog.option.modeBoss', '末日幻影'), file: 'maze_boss.catalog.json' },
+  { key: 'peak', label: () => ui('catalog.option.modePeak', '异相仲裁'), file: 'maze_peak.catalog.json' },
 ];
 
 /** 敌对物种分类（与 src/lib/constants.ts MON_RANK、catalog/pages/monster.ts MON_TYPE 一致） */
 const MON_RANK = {
-  Minion: '普通', MinionLv2: '普通', Elite: '精英', LittleBoss: '准首领', BigBoss: '首领',
+  Minion: 'monster.rank.minion',
+  MinionLv2: 'monster.rank.minion',
+  Elite: 'monster.rank.elite',
+  LittleBoss: 'monster.rank.littleBoss',
+  BigBoss: 'monster.rank.boss',
 };
-const MON_TYPE = { BOSS: '首领', ELITE: '精英', MINION: '喽啰' };
+const MON_TYPE = { BOSS: 'monster.rank.boss', ELITE: 'monster.rank.elite', MINION: 'monster.rank.minion' };
+/** 分类标签按词典取（缺键回退枚举键）——快照与界面同源。 */
+const monRankLabel = (t) => (MON_RANK[t] ? ui(MON_RANK[t], t) : t);
 /** 状态词条类型（与 `MonsterDetailView.vue` 的 STATUS_TYPE 逐字一致） */
-const MON_STATUS_TYPE = { Buff: '增益', Debuff: '减益', Other: '其他' };
+const MON_STATUS_TYPE = { Buff: 'mob.status.buff', Debuff: 'mob.status.debuff', Other: 'mob.status.other' };
+const monStatusLabel = (t) => (MON_STATUS_TYPE[t] ? ui(MON_STATUS_TYPE[t], t) : t);
 
 /** 物品主类型（与 src/app/catalog/pages/item.ts MAIN_TYPE_NAMES 一致；子类型不建映射，原样输出数据值） */
-const ITEM_MAIN_TYPE = { Material: '材料', Virtual: '货币', Usable: '可用', Mission: '任务' };
+/* 枚举 → [SPA 词典键, 中文回退]：快照与界面同源，避免生成器维护第二份写死文案
+   （这三张表曾是英文快照里量最大的中文来源：ui('catalog.option.rarityLow', '铜') 1640 处、ui('itemMainType.Usable', '可用') 1089 处）。 */
+const ITEM_MAIN_TYPE = {
+  Material: ['itemType.Material', ui('itemType.Material', '材料')],
+  Virtual: ['itemType.Virtual', ui('itemType.Virtual', '货币')],
+  Usable: ['itemMainType.Usable', ui('itemMainType.Usable', '可用')],
+  Mission: ['itemMainType.Mission', ui('itemMainType.Mission', '任务')],
+};
+const itemMainTypeLabel = (t) => (ITEM_MAIN_TYPE[t] ? ui(ITEM_MAIN_TYPE[t][0], ITEM_MAIN_TYPE[t][1]) : t);
 
 /** 成就稀有度 / 货币战争标签（与 catalog 配置同源） */
-const ACH_RARITY = { Low: '铜', Mid: '银', High: '金' };
-const CW_FB_LABEL = { Front: '前台', Back: '后台', Both: '前后台' };
-const CW_CHARGE_LABEL = { Speed: '速度', EnergyBar: '特殊充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点' };
-const CW_CAT_LABEL = { faction: '阵营', combat: '流派', special: '特殊' };
-const CW_QUALITY_LABEL = { Silver: '银色', Gold: '金色', Multicolor: '彩', Unique: '独特' };
+const ACH_RARITY = {
+  Low: ['catalog.option.rarityLow', ui('catalog.option.rarityLow', '铜')],
+  Mid: ['catalog.option.rarityMid', ui('catalog.option.rarityMid', '银')],
+  High: ['catalog.option.rarityHigh', ui('catalog.option.rarityHigh', '金')],
+};
+const achRarityLabel = (t) => (ACH_RARITY[t] ? ui(ACH_RARITY[t][0], ACH_RARITY[t][1]) : t);
+/* 前后台定位：存**词典键**并用 helper 惰性求值——直接在此处调用 ui() 会在模块加载期
+   （currentLocale 还是缺省语言）就求值并冻结成中文，英文快照里就会出现中文定位标签。 */
+const CW_FB_LABEL = {
+  Front: 'catalog.position.front',
+  Back: 'catalog.position.back',
+  Both: 'catalog.position.both',
+};
+const cwFbLabel = (t) => (CW_FB_LABEL[t] ? ui(CW_FB_LABEL[t], t) : t);
+const CW_CHARGE_LABEL = {
+  Speed: 'catalog.charge.speed', EnergyBar: 'catalog.charge.specialEnergy',
+  MaxSP: 'catalog.charge.ultEnergy', MaxHP: 'catalog.charge.maxHp', SP: 'catalog.charge.sp',
+};
+const cwChargeLabel = (t) => (CW_CHARGE_LABEL[t] ? ui(CW_CHARGE_LABEL[t], t) : t);
+const CW_CAT_LABEL = { faction: 'catalog.traitCat.faction', combat: 'catalog.traitCat.combat', special: 'catalog.traitCat.special' };
+const cwCatLabel = (t) => (CW_CAT_LABEL[t] ? ui(CW_CAT_LABEL[t], t) : t);
+const CW_QUALITY_LABEL = {
+  Silver: ['catalog.quality.silver', ui('catalog.quality.silver', '银色')],
+  Gold: ['catalog.quality.gold', ui('catalog.quality.gold', '金色')],
+  Multicolor: ['catalog.quality.multicolor', ui('catalog.quality.multicolor', '彩')],
+  Unique: ['catalog.quality.unique', ui('catalog.quality.unique', '独特')],
+};
+const cwQualityLabel = (t) => (CW_QUALITY_LABEL[t] ? ui(CW_QUALITY_LABEL[t][0], CW_QUALITY_LABEL[t][1]) : t);
 
 /* ═══════════ 基础工具 ═══════════ */
 
@@ -99,10 +204,35 @@ function fail(msg) {
   process.exit(1);
 }
 
+/* 文本引用令牌（ADR 0052）：结构层里的文本是 "$t:<TextMap 键>"，快照正文必须先解析成
+   缺省语言正文。生成器不能 import TS，故镜像 `src/lib/i18n/text-ref.ts` 的解析逻辑
+   （令牌前缀另由该模块的测试对 `tools/converter/textpack.py` 钉住）。 */
+const TOKEN_PREFIX = '$t:';
+const isToken = (v) => typeof v === 'string' && v.startsWith(TOKEN_PREFIX);
+
+
+function resolveTokens(value) {
+  if (isToken(value)) {
+    const key = value.slice(TOKEN_PREFIX.length);
+    const text = packOf(currentLocale)[key];
+    if (text === undefined) fail(`语言包缺键 ${key}（public/data/i18n/${currentLocale}/** 与结构层不同源）`);
+    /* 语言包里可能残留字面 `\n`（转义未还原）——缺省语言的取值路径会还原它，pack 路径此前原样输出，
+       于是非缺省语言的快照正文里会出现字面 `\n`（实测 de/item、th/monster）。这里对齐两条路径。 */
+    return text.replace(/\\n/g, '\n');
+  }
+  if (Array.isArray(value)) return value.map(resolveTokens);
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) out[k] = resolveTokens(v);
+    return out;
+  }
+  return value;
+}
+
 function readJson(rel) {
   const file = join(DATA_DIR, rel);
   if (!existsSync(file)) fail(`缺少数据文件 ${file}（public/data/cn/** 由 tools/converter 生成）`);
-  return JSON.parse(readFileSync(file, 'utf8'));
+  return resolveTokens(JSON.parse(readFileSync(file, 'utf8')));
 }
 
 const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -117,11 +247,24 @@ function esc(v) {
  * <color=…>/</color>、<unbreak>、<u>、<i> 等全部标签、{SPACE}/{NICKNAME}/{F#…}/{M#…}/{RUBY_*}/{TEXTJOIN#n}、
  * 以及字面 \n 与真实换行。守卫断言可见文本中不残留 <color= / <unbreak> / \n。
  */
+/* 自造属性名（官方无词条）的译文只住在 UI 词典里：转换器落 `{PROP:<枚举键>}` 占位符，
+   本生成器渲染的是缺省语言快照 ⇒ 取 cn 词典值（ADR 0053 方案 A）。 */
+
+const CN_UI_DICT = (() => {
+  try {
+    return JSON.parse(readFileSync(new URL('../src/lib/i18n/messages/cn.json', import.meta.url), 'utf8'));
+  } catch {
+    return {};
+  }
+})();
+
 function clean(raw) {
   if (raw == null) return '';
   return String(raw)
     .replaceAll('{SPACE}', ' ')
-    .replace(/\{NICKNAME\}/g, '开拓者')
+    .replace(/\{NICKNAME\}/g, ui('common.trailblazer', '开拓者'))
+    /* 自造属性名占位符按**当前语言**的 UI 词典解析：此前写死取 cn 词典 ⇒ 英文快照里注入中文（实测 7 处）。 */
+    .replace(/\{PROP:([A-Za-z0-9_]+)\}/g, (_m, k) => uiDict(currentLocale)[`prop.${k}`] ?? k)
     .replace(/\{[FM]#([^}]*)\}/g, '$1')
     .replace(/\{RUBY_[EB]#[^}]*\}/g, '')
     .replace(/\{TEXTJOIN#\d+\}/g, '')
@@ -265,7 +408,7 @@ function snapSection(title, html) {
 /** 分区级列表入口：与 SPA 分区头右端的 `.nk-hub-release__all` 同源同目标（同一 href、同一份 listHref）。
     措辞属页面级 chrome（页面写「全部角色」），此处用「查看全部角色」——按 §3 粒度规则允许不同。 */
 function snapMore(href, label) {
-  return `<p class="nk-snapshot__more"><a href="${esc(href)}">查看全部${esc(label)}</a></p>`;
+  return `<p class="nk-snapshot__more"><a href="${esc(href)}">${esc(uiT('snapshot.viewAll', '查看全部{label}', { label }))}</a></p>`;
 }
 
 /**
@@ -289,8 +432,12 @@ function linkList(items, entry = false) {
 }
 
 function snapFooter(ctx) {
-  return `<p class="nk-snapshot__meta">数据最后更新：${esc(ctx.syncedAt)}</p>`
-    + `<p class="nk-snapshot__note">本页为${esc(SITE_NAME)}构建期预渲染快照，内容与站点数据一致，无 JavaScript 亦可读取。</p>`;
+  /* 页脚文案走词典（每页一次，非缺省语言下也曾整串中文）：
+     `snapshot.updatedAt` / `snapshot.note` 均带 `{site}` 或 `{date}` 占位符。 */
+  const updated = uiT('snapshot.updatedAt', '数据最后更新：{date}', { date: ctx.syncedAt });
+  const note = uiT('snapshot.note', '本页为{site}构建期预渲染快照，内容与站点数据一致，无 JavaScript 亦可读取。', { site: SITE_NAME });
+  return `<p class="nk-snapshot__meta">${esc(updated)}</p>`
+    + `<p class="nk-snapshot__note">${esc(note)}</p>`;
 }
 
 /** 事实表：values 必须是已转义片段或纯数字 */
@@ -395,14 +542,14 @@ function ldArticle(route, headline, description, crumbs, ctx) {
 function ldCharacter(route, name, description, crumbs, ctx, d) {
   const attrs = [];
   const rarity = /(\d+)\s*$/.exec(String(d.rarity || ''))?.[1];
-  if (rarity) attrs.push({ '@type': 'PropertyValue', name: '稀有度', value: rarity });
+  if (rarity) attrs.push({ '@type': 'PropertyValue', name: ui('catalog.filter.rarity', '稀有度'), value: rarity });
   const pathName = ctx.pathNames.get(d.base_type) || d.base_type;
-  if (pathName) attrs.push({ '@type': 'PropertyValue', name: '命途', value: pathName });
+  if (pathName) attrs.push({ '@type': 'PropertyValue', name: ui('catalog.filter.path', '命途'), value: pathName });
   const elemName = ctx.elemNames.get(d.damage_type) || d.damage_type;
   if (elemName) attrs.push({ '@type': 'PropertyValue', name: '属性', value: elemName });
   const camp = clean(d.chara_info && d.chara_info.camp);
   if (camp) attrs.push({ '@type': 'PropertyValue', name: '阵营', value: camp });
-  if (d.sp_need != null) attrs.push({ '@type': 'PropertyValue', name: '终结技能量', value: String(d.sp_need) });
+  if (d.sp_need != null) attrs.push({ '@type': 'PropertyValue', name: ui('catalog.charge.ultEnergy', '终结技能量'), value: String(d.sp_need) });
 
   const character = {
     '@type': 'Person',
@@ -455,6 +602,22 @@ function upsertMeta(html, attr, value, content) {
  * 快照 = 构建后 index.html 原样复制 + 5 项注入（顺序无关）。
  * 禁止重写模板：/assets/* 与 index.html 必须逐字一致（守卫断言）。
  */
+/**
+ * 前缀化页面时同步改写 JSON-LD 内嵌的绝对 URL：家族构建器按**无前缀** route 生成的
+ * `SITE_ORIGIN + route`（`@id` / `url` / `mainEntityOfPage`）在其它语言下必须跟着换前缀，
+ * 否则富媒体信息指向缺省语言 URL（守卫断言 LD 里的 URL 与 canonical 同路径）。
+ */
+function rewriteLdUrls(node, from, to) {
+  if (typeof node === 'string') return node.split(from).join(to);
+  if (Array.isArray(node)) return node.map((v) => rewriteLdUrls(v, from, to));
+  if (node && typeof node === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(node)) out[k] = rewriteLdUrls(v, from, to);
+    return out;
+  }
+  return node;
+}
+
 function renderSnapshot(template, page) {
   const canonical = SITE_ORIGIN + page.route;
   let html = template;
@@ -465,6 +628,16 @@ function renderSnapshot(template, page) {
   html = upsertMeta(html, 'property', 'og:title', page.title);
   html = upsertMeta(html, 'property', 'og:description', page.description);
   html = upsertMeta(html, 'property', 'og:url', canonical);
+
+  // 0) <html lang>：模板是缺省语言，其余语言必须改写（爬虫与无障碍读取的根属性）
+  if (page.lang) html = html.replace(/<html([^>]*)\slang="[^"]*"/, `<html$1 lang="${esc(page.lang)}"`);
+  // 0') hreflang alternates：只在**多语言齐全**的分层页上挂（详情页只有缺省语言，挂了就是死链）
+  if (page.alternates) {
+    const links = page.alternates
+      .map((a) => `<link rel="alternate" hreflang="${esc(a.hreflang)}" href="${esc(a.href)}">`)
+      .join('');
+    html = html.replace('</head>', `${links}</head>`);
+  }
 
   // 1) <head> 首部内联 js class 脚本（CSS 规则只用它隐藏快照，JS 用户看不到重复内容）
   html = html.replace('<head>', '<head><script>document.documentElement.classList.add(\'js\')</script>');
@@ -527,28 +700,30 @@ function homePages(ctx) {
   const chars = readJson('characters.json').filter((c) => c.name);
   const cones = readJson('light_cones.json').filter((c) => c.name);
   const relics = readJson('relics.json').filter((r) => r.name);
-  const title = `首页 - ${SITE_NAME}`;
+  const title = `${ui('nav.home', '首页')} - ${SITE_NAME}`;
   const groups = [
     {
-      label: '角色',
+      label: ui('catalog.character.title', '角色'),
       listHref: '/character',
       rows: pickRelease(chars, ctx.versionLabel).sort((a, b) => Number(b.id) - Number(a.id)),
       href: (c) => `/character/${c.id}`,
       meta: (c) => `${starText(c.rarity)} · ${ctx.elemNames.get(c.element) || c.element} · ${ctx.pathNames.get(c.path) || c.path}`,
     },
     {
-      label: '光锥',
+      label: ui('catalog.lightcone.title', '光锥'),
       listHref: '/lightcone',
       rows: pickRelease(cones, ctx.versionLabel).sort((a, b) => Number(b.id) - Number(a.id)),
       href: (c) => `/lightcone/${c.id}`,
       meta: (c) => `${starText(c.rarity)} · ${ctx.pathNames.get(c.path) || c.path}`,
     },
     {
-      label: '遗器',
+      label: ui('nav.relic', '遗器'),
       listHref: '/relic',
       rows: pickRelease(relics, ctx.versionLabel).sort((a, b) => Number(b.id) - Number(a.id)),
       href: (r) => `/relic/${r.id}`,
-      meta: (r) => (Array.isArray(r.require_num) && r.require_num.includes(4) ? '隧洞遗器 · 4件套' : '位面饰品 · 2件套'),
+      meta: (r) => (Array.isArray(r.require_num) && r.require_num.includes(4)
+        ? `${ui('relic.setType.cavern', '隧洞遗器')} · ${uiT('relic.setPieces', '{n}件套', { n: 4 })}`
+        : `${ui('relic.setType.planar', '位面饰品')} · ${uiT('relic.setPieces', '{n}件套', { n: 2 })}`),
     },
   ];
   const sections = [];
@@ -559,16 +734,18 @@ function homePages(ctx) {
     sections.push({ title: `${g.label}（${items.length}）`, html: linkList(items, true) + snapMore(g.listHref, g.label) });
     for (const it of items) ldEntries.push(it);
   }
-  const versionText = ctx.versionLabel ? `${ctx.versionLabel} 版本上新` : '版本上新';
-  const summaryPlain = `${SITE_NAME}首页：${versionText}，收录本版本新增的角色、光锥与遗器条目。`;
+  const versionText = ctx.versionLabel
+    ? `${ctx.versionLabel} ${ui('home.releaseTitleNoVersion', '版本上新')}`
+    : ui('home.releaseTitleNoVersion', '版本上新');
+  const summaryPlain = uiT('snapshot.sum.home', '{site}首页：{extra}，收录本版本新增的角色、光锥与遗器条目。', { site: SITE_NAME, extra: versionText });
   const body = catalogBody(ctx, {
-    crumbs: crumbHtml([['首页', '/'], ['版本上新', null]]),
+    crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('home.releaseTitleNoVersion', '版本上新'), null]]),
     h1: SITE_NAME,
     summary: esc(summaryPlain),
     items: [],
     sections: sections.length
       ? sections
-      : [{ title: '版本上新', html: `<p>本版本暂无新增条目。</p>` }],
+      : [{ title: ui('home.releaseTitleNoVersion', '版本上新'), html: `<p>本版本暂无新增条目。</p>` }],
   });
   const description = cut(summaryPlain, 150);
   return [makePage('/', {
@@ -593,8 +770,8 @@ function characterPages(ctx) {
     return Number(b.id) - Number(a.id);
   });
   const links = ordered.map((c) => ({ name: c.name, href: `/character/${c.id}` }));
-  const title = `${CATALOG_TITLE['/character']} - ${SITE_NAME}`;
-  const summaryPlain = `${SITE_NAME}角色图鉴：共 ${ordered.length} 名角色，含稀有度、命途、属性与技能档案。`;
+  const title = `${CATALOG_TITLE['/character']()} - ${SITE_NAME}`;
+  const summaryPlain = uiT('snapshot.sum.character', '{site}角色图鉴：共 {n} 名角色，含稀有度、命途、属性与技能档案。', { site: SITE_NAME, n: ordered.length });
   const items = ordered.map((c) => ({
     name: c.name,
     href: `/character/${c.id}`,
@@ -605,10 +782,10 @@ function characterPages(ctx) {
     file: 'character.html',
     title,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/character', CATALOG_TITLE['/character'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/character', CATALOG_TITLE['/character'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/character'], null]]),
-      h1: CATALOG_TITLE['/character'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/character'](), null]]),
+      h1: CATALOG_TITLE['/character'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -623,23 +800,24 @@ function characterPages(ctx) {
     const st = statKey != null ? stats[String(statKey)] : null;
     const stories = (d.chara_info && d.chara_info.stories) || {};
     const firstStory = Object.keys(stories).sort((a, b) => Number(a) - Number(b)).map((k) => stories[k]).find((s) => clean(s));
-    /** 摘要段判据（契约 §3）：只在源文本存在时输出（desc 或首个非空 story），否则整段省略（应用 CharHero 对空 desc 渲染空描述）；meta description 缺失时用数据字段拼装 */
-    const sourceSummary = clean(d.desc) || clean(firstStory);
+    /** 摘要段判据（契约 §3）：只取首个非空角色故事（角色简介由应用从 `stories["0"]` 首行派生，
+     *  产物不再带组合好的 `desc`——见 ADR 0052 决策 2/3），否则整段省略；meta description 缺失时用数据字段拼装 */
+    const sourceSummary = clean(firstStory);
     const rarityNum = /(\d+)\s*$/.exec(String(d.rarity || ''))?.[1];
     const description = sourceSummary
       ? cut(sourceSummary, 150)
       : cut(factMeta(
         [starText(rarityNum), ctx.elemNames.get(d.damage_type) || d.damage_type, ctx.pathNames.get(d.base_type) || d.base_type],
-        CATALOG_TITLE['/character'],
+        CATALOG_TITLE['/character'](),
         name,
       ), 150);
 
     const facts = [
-      ['稀有度', esc(starText(/(\d+)\s*$/.exec(String(d.rarity || ''))?.[1]))],
-      ['命途', esc(ctx.pathNames.get(d.base_type) || d.base_type || '')],
+      [ui('catalog.filter.rarity', '稀有度'), esc(starText(/(\d+)\s*$/.exec(String(d.rarity || ''))?.[1]))],
+      [ui('catalog.filter.path', '命途'), esc(ctx.pathNames.get(d.base_type) || d.base_type || '')],
       ['属性', esc(ctx.elemNames.get(d.damage_type) || d.damage_type || '')],
       ['阵营', txt(d.chara_info && d.chara_info.camp, null, 200)],
-      ['终结技能量', d.sp_need != null ? esc(String(d.sp_need)) : ''],
+      [ui('catalog.charge.ultEnergy', '终结技能量'), d.sp_need != null ? esc(String(d.sp_need)) : ''],
       ['配音（中文）', txt(d.chara_info && d.chara_info.va && d.chara_info.va.chinese, null, 100)],
     ];
     if (st) {
@@ -648,8 +826,8 @@ function characterPages(ctx) {
         ['攻击（满级）', esc(String(Math.round(st.attack_base + st.attack_add * (MAX_CHAR_LEVEL - 1))))],
         ['防御（满级）', esc(String(Math.round(st.defence_base + st.defence_add * (MAX_CHAR_LEVEL - 1))))],
         ['速度', esc(String(st.speed_base))],
-        ['暴击率', st.critical_chance != null ? esc(`${(st.critical_chance * 100).toFixed(1)}%`) : ''],
-        ['暴击伤害', st.critical_damage != null ? esc(`${(st.critical_damage * 100).toFixed(1)}%`) : ''],
+        [ui('prop.CriticalChanceBase', '暴击率'), st.critical_chance != null ? esc(`${(st.critical_chance * 100).toFixed(1)}%`) : ''],
+        [ui('prop.CriticalDamageBase', '暴击伤害'), st.critical_damage != null ? esc(`${(st.critical_damage * 100).toFixed(1)}%`) : ''],
       );
     }
 
@@ -674,13 +852,13 @@ function characterPages(ctx) {
       .join('');
 
     const body = detailBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/character'], '/character'], [name, null]]),
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/character'](), '/character'], [name, null]]),
       h1: name,
       summary: sourceSummary ? esc(cut(sourceSummary, 200)) : '',
       facts,
       sections: [
         { title: '技能', html: skillHtml ? `<ul class="nk-snapshot__blocks">${skillHtml}</ul>` : '' },
-        { title: '星魂', html: rankHtml ? `<ul class="nk-snapshot__blocks">${rankHtml}</ul>` : '' },
+        { title: ui('char.sec.eidolons', '星魂'), html: rankHtml ? `<ul class="nk-snapshot__blocks">${rankHtml}</ul>` : '' },
         { title: '角色档案', html: storyHtml ? `<ul class="nk-snapshot__blocks">${storyHtml}</ul>` : '' },
       ],
       links: siblingsOf(links, idx),
@@ -693,7 +871,7 @@ function characterPages(ctx) {
       title: `${name} - ${SITE_NAME}`,
       description,
       ld: ldCharacter(route, name, description,
-        [['首页', '/'], [CATALOG_TITLE['/character'], '/character'], [name, route]], ctx, d),
+        [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/character'](), '/character'], [name, route]], ctx, d),
       body,
     }));
   });
@@ -716,7 +894,7 @@ function lightconePages(ctx) {
   const charNames = new Map(
     readJson('characters.json').filter((c) => c.name).map((c) => [String(c.id), clean(c.name)]),
   );
-  const summaryPlain = `${SITE_NAME}光锥图鉴：共 ${ordered.length} 把光锥，含稀有度、命途、技能效果与晋阶属性。`;
+  const summaryPlain = uiT('snapshot.sum.lightcone', '{site}光锥图鉴：共 {n} 把光锥，含稀有度、命途、技能效果与晋阶属性。', { site: SITE_NAME, n: ordered.length });
   const items = ordered.map((c) => ({
     name: c.name,
     href: `/lightcone/${c.id}`,
@@ -725,12 +903,12 @@ function lightconePages(ctx) {
   const pages = [makePage('lightcone-list', {
     route: '/lightcone',
     file: 'lightcone.html',
-    title: `${CATALOG_TITLE['/lightcone']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/lightcone']()} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/lightcone', CATALOG_TITLE['/lightcone'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/lightcone', CATALOG_TITLE['/lightcone'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/lightcone'], null]]),
-      h1: CATALOG_TITLE['/lightcone'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/lightcone'](), null]]),
+      h1: CATALOG_TITLE['/lightcone'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -746,10 +924,10 @@ function lightconePages(ctx) {
     const sourceSummary = clean(d.desc) || clean(d.story);
     const description = sourceSummary
       ? cut(sourceSummary, 150)
-      : cut(factMeta([starText(d.rarity), ctx.pathNames.get(d.path) || d.path], CATALOG_TITLE['/lightcone'], name), 150);
+      : cut(factMeta([starText(d.rarity), ctx.pathNames.get(d.path) || d.path], CATALOG_TITLE['/lightcone'](), name), 150);
     const facts = [
-      ['稀有度', esc(starText(d.rarity))],
-      ['命途', esc(ctx.pathNames.get(d.path) || d.path || '')],
+      [ui('catalog.filter.rarity', '稀有度'), esc(starText(d.rarity))],
+      [ui('catalog.filter.path', '命途'), esc(ctx.pathNames.get(d.path) || d.path || '')],
       ['光锥技能', txt(d.skill && d.skill.name, null, 100)],
       ['叠影上限', d.max_rank != null ? esc(String(d.max_rank)) : ''],
       ['晋阶阶段', d.max_promotion != null ? esc(String(d.max_promotion)) : ''],
@@ -776,7 +954,7 @@ function lightconePages(ctx) {
       })
       .join('');
     const body = detailBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/lightcone'], '/lightcone'], [name, null]]),
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/lightcone'](), '/lightcone'], [name, null]]),
       h1: name,
       summary: sourceSummary ? esc(cut(sourceSummary, 200)) : '',
       facts,
@@ -789,7 +967,7 @@ function lightconePages(ctx) {
         },
         { title: '晋阶属性', html: phaseHtml ? `<ul class="nk-snapshot__blocks">${phaseHtml}</ul>` : '' },
         {
-          title: '适配角色',
+          title: ui('lc.sec.recommended', '适配角色'),
           html: adapt.length
             ? linkList(adapt.map((c) => ({ name: c.name, href: `/character/${c.id}`, meta: esc(`REC. ${c.rank}`) })))
             : '',
@@ -805,7 +983,7 @@ function lightconePages(ctx) {
       title: `${name} - ${SITE_NAME}`,
       description,
       ld: ldArticle(route, name, description,
-        [['首页', '/'], [CATALOG_TITLE['/lightcone'], '/lightcone'], [name, route]], ctx),
+        [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/lightcone'](), '/lightcone'], [name, route]], ctx),
       body,
     }));
   });
@@ -818,18 +996,20 @@ function relicPages(ctx) {
   const list = readJson('relics.json').filter((r) => r.name);
   const ordered = [...list].sort((a, b) => Number(b.id) - Number(a.id));
   const links = ordered.map((r) => ({ name: r.name, href: `/relic/${r.id}` }));
-  const setTag = (r) => (Array.isArray(r.require_num) && r.require_num.includes(4) ? '隧洞遗器 · 4件套' : '位面饰品 · 2件套');
-  const summaryPlain = `${SITE_NAME}遗器图鉴：共 ${ordered.length} 套遗器，含套装效果与部位信息。`;
+  const setTag = (r) => (Array.isArray(r.require_num) && r.require_num.includes(4)
+    ? `${ui('relic.setType.cavern', '隧洞遗器')} · ${uiT('relic.setPieces', '{n}件套', { n: 4 })}`
+    : `${ui('relic.setType.planar', '位面饰品')} · ${uiT('relic.setPieces', '{n}件套', { n: 2 })}`);
+  const summaryPlain = uiT('snapshot.sum.relic', '{site}遗器图鉴：共 {n} 套遗器，含套装效果与部位信息。', { site: SITE_NAME, n: ordered.length });
   const items = ordered.map((r) => ({ name: r.name, href: `/relic/${r.id}`, meta: esc(setTag(r)) }));
   const pages = [makePage('relic-list', {
     route: '/relic',
     file: 'relic.html',
-    title: `${CATALOG_TITLE['/relic']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/relic']()} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/relic', CATALOG_TITLE['/relic'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/relic', CATALOG_TITLE['/relic'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/relic'], null]]),
-      h1: CATALOG_TITLE['/relic'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/relic'](), null]]),
+      h1: CATALOG_TITLE['/relic'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -851,23 +1031,23 @@ function relicPages(ctx) {
     const effectTexts = reqNums.map((n) => plain(descriptions[String(n)], params[String(n)]));
     const firstEffect = effectTexts.find(Boolean);
     const sourceSummary = firstEffect || '';
-    const setTypeText = Array.isArray(entry.require_num) && entry.require_num.includes(4) ? '隧洞遗器' : '位面饰品';
+    const setTypeText = Array.isArray(entry.require_num) && entry.require_num.includes(4) ? ui('relic.setType.cavern', '隧洞遗器') : ui('relic.setType.planar', '位面饰品');
     const description = sourceSummary
       ? cut(sourceSummary, 150)
-      : cut(factMeta([setTypeText], CATALOG_TITLE['/relic'], name), 150);
+      : cut(factMeta([setTypeText], CATALOG_TITLE['/relic'](), name), 150);
     const body = detailBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/relic'], '/relic'], [name, null]]),
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/relic'](), '/relic'], [name, null]]),
       h1: name,
       summary: sourceSummary ? esc(cut(sourceSummary, 200)) : '',
       facts: [
-        ['套装类型', esc(Array.isArray(entry.require_num) && entry.require_num.includes(4) ? '隧洞遗器' : '位面饰品')],
+        [ui('catalog.filter.setType', '套装类型'), esc(Array.isArray(entry.require_num) && entry.require_num.includes(4) ? ui('relic.setType.cavern', '隧洞遗器') : ui('relic.setType.planar', '位面饰品'))],
         ['套装效果件数', esc(reqNums.join(' / '))],
         ['部位数', esc(String((entry.pieces || []).length))],
         ['上线版本', txt(entry.release_version, null, 40)],
       ],
       sections: [
-        { title: '套装效果', html: effectHtml ? `<ul class="nk-snapshot__blocks">${effectHtml}</ul>` : '' },
-        { title: '部位', html: pieceHtml ? `<ul class="nk-snapshot__blocks">${pieceHtml}</ul>` : '' },
+        { title: ui('relic.sec.effect', '套装效果'), html: effectHtml ? `<ul class="nk-snapshot__blocks">${effectHtml}</ul>` : '' },
+        { title: ui('relic.parts', '部位'), html: pieceHtml ? `<ul class="nk-snapshot__blocks">${pieceHtml}</ul>` : '' },
       ],
       links: siblingsOf(links, idx),
       listLabel: '同图鉴遗器',
@@ -878,7 +1058,7 @@ function relicPages(ctx) {
       title: `${name} - ${SITE_NAME}`,
       description,
       ld: ldArticle(route, name, description,
-        [['首页', '/'], [CATALOG_TITLE['/relic'], '/relic'], [name, route]], ctx),
+        [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/relic'](), '/relic'], [name, route]], ctx),
       body,
     }));
   });
@@ -891,22 +1071,22 @@ function itemPages(ctx) {
   const list = readJson('items.json').filter((i) => i.name);
   const rarityOrder = { 5: 0, 4: 1, 3: 2, 2: 3, 1: 4 };
   const ordered = [...list].sort((a, b) => (rarityOrder[a.rarity] ?? 5) - (rarityOrder[b.rarity] ?? 5));
-  const summaryPlain = `${SITE_NAME}物品图鉴：共 ${ordered.length} 件物品，含类型、稀有度与物品描述。`;
+  const summaryPlain = uiT('snapshot.sum.item', '{site}物品图鉴：共 {n} 件物品，含类型、稀有度与物品描述。', { site: SITE_NAME, n: ordered.length });
   const items = ordered.map((i) => ({
     name: i.name,
     href: null,
-    meta: `${esc(ITEM_MAIN_TYPE[i.main_type] || i.main_type || '')} · ${esc(starText(i.rarity))}`,
+    meta: `${esc(i.main_type ? itemMainTypeLabel(i.main_type) : '')} · ${esc(starText(i.rarity))}`,
     desc: [txtSafe(i.desc, null, 400), txtSafe(i.bg_desc, null, SNAPSHOT_TEXT_LIMIT_ENTRY)].filter(Boolean).join(' '),
   }));
   return [makePage('item-list', {
     route: '/item',
     file: 'item.html',
-    title: `${CATALOG_TITLE['/item']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/item']()} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/item', CATALOG_TITLE['/item'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/item', CATALOG_TITLE['/item'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/item'], null]]),
-      h1: CATALOG_TITLE['/item'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/item'](), null]]),
+      h1: CATALOG_TITLE['/item'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -918,7 +1098,7 @@ function itemPages(ctx) {
 function monsterPages(ctx) {
   const list = readJson('monsters.json').filter((m) => m.name);
   const links = list.map((m) => ({ name: m.name, href: `/monster/${m.id}` }));
-  const summaryPlain = `${SITE_NAME}敌对物种图鉴：共 ${list.length} 个条目，含分类、弱点、抗性与技能。`;
+  const summaryPlain = uiT('snapshot.sum.monster', '{site}敌对物种图鉴：共 {n} 个条目，含分类、弱点、抗性与技能。', { site: SITE_NAME, n: list.length });
   /* 条目属性摘要与卡面同源（契约 §3「每条 = 名称 + 属性摘要」）：角色目录早就带「稀有度·属性·命途」，
      敌对目录此前只有分类。弱点是这张卡**唯一可辨**的差异——632 条里 392 条与另一条名称+图标全同，
      只写分类时 400 张卡在快照里彼此无法区分，AI 也检索不出「冰弱点的敌人」。 */
@@ -926,7 +1106,7 @@ function monsterPages(ctx) {
     name: m.name,
     href: `/monster/${m.id}`,
     meta: [
-      MON_TYPE[m.type] || m.type || '',
+      m.type ? ui(MON_TYPE[m.type] ?? '', m.type) : '',
       (m.weak || []).map((e) => ctx.elemNames.get(e) || e).join('/'),
       m.camp || '',
     ].filter(Boolean).map(esc).join(' · '),
@@ -934,12 +1114,12 @@ function monsterPages(ctx) {
   const pages = [makePage('monster-list', {
     route: '/monster',
     file: 'monster.html',
-    title: `${CATALOG_TITLE['/monster']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/monster']()} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/monster', CATALOG_TITLE['/monster'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/monster', CATALOG_TITLE['/monster'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/monster'], null]]),
-      h1: CATALOG_TITLE['/monster'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/monster'](), null]]),
+      h1: CATALOG_TITLE['/monster'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -955,7 +1135,7 @@ function monsterPages(ctx) {
     const sourceSummary = clean(d.intro);
     const description = sourceSummary
       ? cut(sourceSummary, 150)
-      : cut(factMeta([MON_RANK[d.rank] || d.rank, d.camp], CATALOG_TITLE['/monster'], name), 150);
+      : cut(factMeta([monRankLabel(d.rank), d.camp], CATALOG_TITLE['/monster'](), name), 150);
     const skillHtml = (d.skills || [])
       .filter((s) => s && s.name)
       .map((s) => {
@@ -982,12 +1162,12 @@ function monsterPages(ctx) {
      * 等级取 `invaded.invasion_ids`，与页面「受『贪饕』侵蚀 · 等级 N」同口径；无该块的怪物不输出此行。
      */
     const facts = [
-      ['分类', txt(MON_RANK[d.rank] || d.rank, null, 40)],
+      [ui('catalog.filter.category', '分类'), txt(monRankLabel(d.rank), null, 40)],
       ['阵营', txt(d.camp, null, 60)],
       ['图鉴编号', esc(String(d.id))],
       ['韧性', d.stance ? esc(String(d.stance)) : ''],
-      ['韧性弱点', esc(weak.join(' / '))],
-      ['伤害抗性', esc(resist.join(' / '))],
+      [ui('mob.resist.stance', '韧性弱点'), esc(weak.join(' / '))],
+      [ui('mob.resist.damage', '伤害抗性'), esc(resist.join(' / '))],
       /* 四维标「模板基准」：详情页按 `基准 × 维度修饰比 × 精英组倍率 × 等级曲线 + 实例修正值` 在等级滑条上合成
          （实测 1002011 基准 69.75 → 满级 20,536），快照不做合成（不做第二份算式），
          故必须把口径写进标签，否则读的人会把基准值当成战斗值。 */
@@ -998,15 +1178,15 @@ function monsterPages(ctx) {
       /* 活动出处（`monster_extra.load_event_sources`）：活动名与页签都是源文本
          （`ActivityPanel.TitleName` / `ActivityQuestRewardData.QuestTabName`），不是自撰文案；
          等级单档时不写区间（源数据里 5 个活动敌人全档同等级，写「85–85」是假区间）。 */
-      ['活动出处', d.event
+      [ui('mob.event.k', '活动出处'), d.event
         ? txt(`${d.event.name}（${d.event.count} 个活动关卡，等级 ${eventLevelRange(d.event.levels)}${d.event.tabs.length ? `；页签 ${d.event.tabs.join('/')}` : ''}）`, null, 160)
         : ''],
     ];
     if (d.invaded) {
       const invadedLevels = (d.invaded.invasion_ids || []).filter((n) => n != null);
       facts.push(['受『贪饕』侵蚀', [
-        invadedLevels.length ? `等级 ${esc(invadedLevels.join(' / '))}` : '',
-        `<a href="/voracity">${esc(VORACITY_TITLE)}</a>`,
+        invadedLevels.length ? uiT('mob.levelTag', '等级 {n}', { n: esc(invadedLevels.join(' / ')) }) : '',
+        `<a href="/voracity">${esc(voracityTitle())}</a>`,
       ].filter(Boolean).join(' · ')]);
     }
     /* 掉落与出没（`monster_extra` 的三块之二）：值与页面同源（都读详情 JSON 的 `drops` /
@@ -1017,21 +1197,21 @@ function monsterPages(ctx) {
       const samples = (d.appearances.samples || [])
         .map((s) => (s.activity ? `${s.activity} · ${s.name}` : s.name))
         .filter(Boolean);
-      facts.push(['出没关卡', `${d.appearances.total} 个${samples.length ? `（如 ${esc(samples.join(' / '))}）` : ''}`]);
+      facts.push([ui('mob.sec.appear', '出没关卡'), `${d.appearances.total} 个${samples.length ? `（如 ${esc(samples.join(' / '))}）` : ''}`]);
     }
     if (Array.isArray(d.drops) && d.drops.length) {
       const base = d.drops.find((t) => t.world_level == null) || d.drops[0];
       const names = (base.items || []).map((i) => i.name).filter(Boolean).join(' / ');
-      const tiers = d.drops.length > 1 ? `（共 ${d.drops.length} 档均衡等级）` : '';
-      if (names) facts.push(['掉落', `${esc(names)}${esc(tiers)}`]);
+      const tiers = d.drops.length > 1 ? uiT('mob.dropsTiers', '（共 {n} 档均衡等级）', { n: d.drops.length }) : '';
+      if (names) facts.push([ui('mob.sec.drop', '掉落'), `${esc(names)}${esc(tiers)}`]);
     }
     /* 状态词条（`MonsterStatusConfig` 安全子集：命名约定归属 + 去形态后缀同名）。
        desc 只在无 `#N[i]` 占位符时才有（数值来自动态属性，本仓无值），故有则输出、无则省略整段。 */
     const statusHtml = (d.statuses || [])
       .filter((s) => s && s.name)
       .map((s) => {
-        const meta = `${MON_STATUS_TYPE[s.type] || s.type || '其他'}${s.dispel ? ' · 可驱散' : ''}`;
-        return `<li><span>${txt(s.name, null, 60)}（${txt(meta, null, 30)}）</span>${s.desc ? `<p>${txt(s.desc, null, 200)}</p>` : ''}</li>`;
+        const statusLabel = MON_STATUS_TYPE[s.type] ? ui(MON_STATUS_TYPE[s.type], '其他') : (s.type || '其他');
+        const meta = `${statusLabel}${s.dispel ? ' · 可驱散' : ''}`;
       })
       .join('');
     /* 图鉴族（官方 `TemplateGroupID`）：与页面同源——只列**非同卡面**的其他形态
@@ -1046,17 +1226,17 @@ function monsterPages(ctx) {
       ? `<ul class="nk-snapshot__list">${atlasOthers.map((m) => `<li><a href="/monster/${m.id}">${txt(m.name, null, 80)}</a></li>`).join('')}</ul>`
       : '';
     const body = detailBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/monster'], '/monster'], [name, null]]),
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/monster'](), '/monster'], [name, null]]),
       h1: name,
       summary: sourceSummary ? esc(cut(sourceSummary, 200)) : '',
       facts,
       sections: [
         // 空 intro 时「图鉴记录」整段省略
-        { title: '图鉴记录', html: sourceSummary ? `<p>${txt(d.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
+        { title: ui('mob.sec.record', '图鉴记录'), html: sourceSummary ? `<p>${txt(d.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: '技能', html: skillHtml ? `<ul class="nk-snapshot__blocks">${skillHtml}</ul>` : '' },
-        { title: '状态词条', html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
+        { title: ui('mob.sec.status', '状态词条'), html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
         // 「同图鉴其他形态」= 官方图鉴族里非同卡面的形态（口径见 docs/agents/ai-discoverability.md）
-        { title: atlasHtml ? `同图鉴其他形态（本族共 ${atlasForms.length} 个形态）` : '', html: atlasHtml },
+        { title: atlasHtml ? uiT('mob.atlasForms', '同图鉴其他形态（本族共 {n} 个形态）', { n: atlasForms.length }) : '', html: atlasHtml },
       ],
       links: siblingsOf(links, idx),
       listLabel: '同图鉴敌对物种',
@@ -1067,7 +1247,7 @@ function monsterPages(ctx) {
       title: `${name} - ${SITE_NAME}`,
       description,
       ld: ldArticle(route, name, description,
-        [['首页', '/'], [CATALOG_TITLE['/monster'], '/monster'], [name, route]], ctx),
+        [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/monster'](), '/monster'], [name, route]], ctx),
       body,
     }));
   });
@@ -1126,20 +1306,24 @@ function endgamePages(ctx) {
     return Number(String(b.id).replace(/\D/g, '')) - Number(String(a.id).replace(/\D/g, ''));
   });
 
-  const summaryPlain = `${SITE_NAME}终局内容：忘却之庭、虚构叙事、末日幻影、异相仲裁四模式赛季，共 ${all.length} 期。`;
+  const summaryPlain = uiT('snapshot.endgameSummary', '{site}终局内容：{modes}四模式赛季，共 {n} 期。', {
+    site: SITE_NAME,
+    modes: ENDGAME_MODES.map((m) => m.label()).join('、'),
+    n: all.length,
+  });
   const items = all.map((s) => ({
     name: s.name,
     href: `/endgame/${s.mode.key}/${s.id}`,
-    meta: [esc(s.mode.label), esc(dateRange(s.entry)), esc(`${(s.entry.monsters || []).length} 名敌方`)].filter(Boolean).join(' · '),
+    meta: [esc(s.mode.label()), esc(dateRange(s.entry)), esc(uiT('snapshot.enemyCount', '{n} 名敌方', { n: (s.entry.monsters || []).length }, (s.entry.monsters || []).length))].filter(Boolean).join(' · '),
   }));
   const pages = [makePage('endgame-list', {
     route: '/endgame',    file: 'endgame.html',
-    title: `${CATALOG_TITLE['/endgame']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/endgame']()} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/endgame', CATALOG_TITLE['/endgame'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/endgame', CATALOG_TITLE['/endgame'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/endgame'], null]]),
-      h1: CATALOG_TITLE['/endgame'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/endgame'](), null]]),
+      h1: CATALOG_TITLE['/endgame'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -1151,18 +1335,22 @@ function endgamePages(ctx) {
      当期增益只出名称（不出 desc，避免快照出现未展开的 `#N[i]` 占位符）。 */
   const guide = readJson('endgame_guide.json');
   // 选择语义文案与 src/app/endgame/guide.ts 的 CHOICE_LABEL 同源同写（生成器不能 import TS，故镜像一份）
+  /* 枚举 → [UI 词典键, 中文回退]；取值走 modeChoiceLabel 惰性求值（加载期调用 ui() 会被冻结）。 */
   const MODE_CHOICE_LABEL = {
-    fixed: '固定生效，不可选择',
-    per_team: '每支队伍选 1 条',
-    per_stage: '每场战斗选 1 条',
-    per_king: '王棋挑战前选 1 条',
+    fixed: ['egm.choice.fixed', '固定生效，不可选择'],
+    per_team: ['egm.choice.perTeam', '每支队伍选 1 条'],
+    per_stage: ['egm.choice.perStage', '每场战斗选 1 条'],
+    per_king: ['egm.choice.perKing', '王棋挑战前选 1 条'],
   };
+  const modeChoiceLabel = (t) => (MODE_CHOICE_LABEL[t]
+    ? ui(MODE_CHOICE_LABEL[t][0], MODE_CHOICE_LABEL[t][1])
+    : t);
   for (const { mode } of catalogs) {
     const modeOrdered = all.filter((s) => s.mode.key === mode.key);
     if (!modeOrdered.length) continue;
     const g = guide.modes?.[mode.key];
     const system = g?.system || null;
-    const systemName = clean(system?.name) || '赛季增益';
+    const systemName = clean(system?.name) || ui('egm.sec.buffs', '赛季增益');
     const current = modeOrdered[0];
     const cur = current.entry;
     const floors = cur.floor_details || [];
@@ -1189,35 +1377,35 @@ function endgamePages(ctx) {
     const seasonLinks = modeOrdered.slice(0, 8).map((s) => ({ name: s.name, href: `/endgame/${mode.key}/${s.id}` }));
     const otherModeLinks = catalogs
       .filter((c) => c.mode.key !== mode.key)
-      .map((c) => ({ name: c.mode.label, href: `/endgame/${c.mode.key}` }));
+      .map((c) => ({ name: c.mode.label(), href: `/endgame/${c.mode.key}` }));
     const description = cut(
-      factMeta([mode.label, systemName, `${modeOrdered.length} 期赛季`], CATALOG_TITLE['/endgame'], mode.label), 150,
+      factMeta([mode.label(), systemName, uiT('egm.seasonCount', '{n} 期赛季', { n: modeOrdered.length })], CATALOG_TITLE['/endgame'](), mode.label()), 150,
     );
     const route = `/endgame/${mode.key}`;
     pages.push(makePage('endgame-mode', {
       route,
       file: `endgame/${mode.key}.html`,
-      title: `${mode.label} - ${SITE_NAME}`,
+      title: `${mode.label()} - ${SITE_NAME}`,
       description,
-      ld: ldArticle(route, mode.label, description,
-        [['首页', '/'], [CATALOG_TITLE['/endgame'], '/endgame'], [mode.label, route]], ctx),
+      ld: ldArticle(route, mode.label(), description,
+        [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/endgame'](), '/endgame'], [mode.label(), route]], ctx),
       body: detailBody(ctx, {
-        crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/endgame'], '/endgame'], [mode.label, null]]),
-        h1: mode.label,
+        crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/endgame'](), '/endgame'], [mode.label(), null]]),
+        h1: mode.label(),
         summary: '',
         facts: [
-          ['所属玩法', esc(mode.label)],
+          [ui('egm.fact.mode', '所属玩法'), esc(mode.label())],
           ['英文名', esc(mode.en)],
-          ['当期赛季', esc(current.name)],
-          ['关卡层级', floors.length ? esc(`${floors.length} 层`) : ''],
-          ['每层场次', halfs ? esc(`${halfs} 场`) : ''],
-          ['关卡组成', levels.length ? esc(`${levels.length} 关`) : ''],
-          ['回合上限', cur.countdown ? esc(`${cur.countdown} 轮`) : ''],
-          ['分数上限', cur.clear_score ? esc(String(cur.clear_score)) : ''],
-          ['星启模式', cur.tierce ? '含' : '不含'],
-          ['增益体系', esc(systemName)],
-          ['每期条数', system ? esc(String(system.count)) : ''],
-          ['选择方式', system ? esc(MODE_CHOICE_LABEL[system.choice] || '') : ''],
+          [ui('egm.currentSeason', '当期赛季'), esc(current.name)],
+          [ui('egm.stat.floors', '关卡层级'), floors.length ? esc(uiT('egm.value.floors', '{n} 层', { n: floors.length })) : ''],
+          [ui('egm.stat.halfs', '每层场次'), halfs ? esc(`${halfs} 场`) : ''],
+          [ui('egm.stat.levels', '关卡组成'), levels.length ? esc(`${levels.length} 关`) : ''],
+          [ui('egm.stat.countdown', '回合上限'), cur.countdown ? esc(`${cur.countdown} 轮`) : ''],
+          [ui('egm.stat.scoreCap', '分数上限'), cur.clear_score ? esc(String(cur.clear_score)) : ''],
+          [ui('egm.stat.tierce', '星启模式'), cur.tierce ? ui('egm.value.tierceOn', '含') : ui('egm.value.tierceOff', '不含')],
+          [ui('egm.fact.buffSystem', '增益体系'), esc(systemName)],
+          [ui('egm.fact.perSeason', '每期条数'), system ? esc(String(system.count)) : ''],
+          [ui('egm.fact.choiceMode', '选择方式'), system ? esc(modeChoiceLabel(system.choice)) : ''],
         ],
         sections: [
           ...ruleSections,
@@ -1225,10 +1413,10 @@ function endgamePages(ctx) {
             title: systemName,
             html: curBuffs.length ? `<ul class="nk-snapshot__list">${curBuffs.map((b) => `<li>${txt(b, null, 100)}</li>`).join('')}</ul>` : '',
           },
-          { title: '赛季列表', html: linkList(seasonLinks) },
+          { title: ui('egm.sec.seasons', '赛季列表'), html: linkList(seasonLinks) },
         ],
         links: otherModeLinks,
-        listLabel: '其它玩法',
+        listLabel: ui('egm.othersAria', '其它玩法'),
       }),
     }));
   }
@@ -1240,7 +1428,7 @@ function endgamePages(ctx) {
     const links = modeOrdered.map((s) => ({ name: s.name, href: `/endgame/${s.mode.key}/${s.id}` }));
     const guideMode = guide.modes?.[mode.key];
     /** 体系名（游戏内命名，来自 IntroData 分节标题）——与页面逐字一致；缺省回退站点工作名（见 src/app/endgame/guide.ts） */
-    const systemName = clean(guideMode?.system?.name) || '赛季增益';
+    const systemName = clean(guideMode?.system?.name) || ui('egm.sec.buffs', '赛季增益');
     for (const id of keys) {
       const entry = db[id];
       const name = clean(entry.zh);
@@ -1251,23 +1439,23 @@ function endgamePages(ctx) {
       const finalM = (entry.final_monsters || []).filter((m) => m && m.name);
       const monsterHtml = monsters
         .map((m) => {
-          const bits = [MON_RANK[m.rank] || m.rank, m.camp, (m.weak || []).map((e) => ctx.elemNames.get(e) || e).join('/')].filter(Boolean);
+          const bits = [monRankLabel(m.rank), m.camp, (m.weak || []).map((e) => ctx.elemNames.get(e) || e).join('/')].filter(Boolean);
           return `<li><span>${txt(m.name, null, 100)}</span><p>${txt(bits.join(' · '), null, 120)}</p></li>`;
         })
         .join('');
       /** 赛季 catalog 没有描述性源字段 → 不输出可见摘要段；事实由下方 facts 表承载，
        *  meta description 用数据字段拼装（玩法 · 排期 · 增益数 · 敌方数）。 */
       const description = cut(factMeta(
-        [mode.label, dateRange(entry), `${buffs.length} 项赛季增益`, `${monsters.length} 名敌方`],
-        CATALOG_TITLE['/endgame'],
+        [mode.label(), dateRange(entry), `${buffs.length} 项赛季增益`, uiT('snapshot.enemyCount', '{n} 名敌方', { n: monsters.length }, monsters.length)],
+        CATALOG_TITLE['/endgame'](),
         name,
       ), 150);
       const body = detailBody(ctx, {
-        crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/endgame'], '/endgame'], [name, null]]),
+        crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/endgame'](), '/endgame'], [name, null]]),
         h1: name,
         summary: '',
         facts: [
-          ['所属玩法', esc(mode.label)],
+          [ui('egm.fact.mode', '所属玩法'), esc(mode.label())],
           ['赛季编号', esc(String(id))],
           ['排期', esc(dateRange(entry))],
           ['赛季增益数', esc(String(buffs.length))],
@@ -1277,8 +1465,8 @@ function endgamePages(ctx) {
         ],
         sections: [
           { title: systemName, html: buffs.length ? `<ul class="nk-snapshot__list">${buffs.map((b) => `<li>${txt(b, null, 100)}</li>`).join('')}</ul>` : '' },
-          { title: '最终层阵容', html: finalM.length ? `<ul class="nk-snapshot__blocks">${finalM.map((m) => `<li><span>${txt(m.name, null, 100)}</span><p>${txt([MON_RANK[m.rank] || m.rank, m.camp].filter(Boolean).join(' · '), null, 80)}</p></li>`).join('')}</ul>` : '' },
-          { title: '敌方配置', html: monsterHtml ? `<ul class="nk-snapshot__blocks">${monsterHtml}</ul>` : '' },
+          { title: '最终层阵容', html: finalM.length ? `<ul class="nk-snapshot__blocks">${finalM.map((m) => `<li><span>${txt(m.name, null, 100)}</span><p>${txt([monRankLabel(m.rank), m.camp].filter(Boolean).join(' · '), null, 80)}</p></li>`).join('')}</ul>` : '' },
+          { title: ui('egd.enemySetup', '敌方配置'), html: monsterHtml ? `<ul class="nk-snapshot__blocks">${monsterHtml}</ul>` : '' },
           {
             title: '模式机制',
             html: [
@@ -1288,15 +1476,15 @@ function endgamePages(ctx) {
           },
         ],
         links: siblingsOf(links, idx < 0 ? 0 : idx),
-        listLabel: `同模式赛季（${mode.label}）`,
+        listLabel: `同模式赛季（${mode.label()}）`,
       });
       pages.push(makePage('endgame-detail', {
         route,
         file: `endgame/${mode.key}/${id}.html`,
-        title: `${name} - ${mode.label} - ${SITE_NAME}`,
+        title: `${name} - ${mode.label()} - ${SITE_NAME}`,
         description,
         ld: ldArticle(route, name, description,
-          [['首页', '/'], [CATALOG_TITLE['/endgame'], '/endgame'], [name, route]], ctx),
+          [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/endgame'](), '/endgame'], [name, route]], ctx),
         body,
       }));
     }
@@ -1310,22 +1498,22 @@ function achievementPages(ctx) {
   const list = readJson('achievements.json').filter((a) => a.title);
   const series = readJson('achievement_series.json');
   const seriesName = new Map(series.map((s) => [s.id, s.name]));
-  const summaryPlain = `${SITE_NAME}成就图鉴：共 ${list.length} 个成就，含系列、稀有度与达成要求。`;
+  const summaryPlain = uiT('snapshot.sum.achievement', '{site}成就图鉴：共 {n} 个成就，含系列、稀有度与达成要求。', { site: SITE_NAME, n: list.length });
   const items = list.map((a) => ({
     name: a.title,
     href: null,
-    meta: [esc(seriesName.get(a.series_id) || ''), esc(ACH_RARITY[a.rarity] || a.rarity || '')].filter(Boolean).join(' · '),
+    meta: [esc(seriesName.get(a.series_id) || ''), esc(a.rarity ? achRarityLabel(a.rarity) : '')].filter(Boolean).join(' · '),
     desc: txtSafe(a.desc, null, SNAPSHOT_TEXT_LIMIT_ENTRY),
   }));
   return [makePage('achievement-list', {
     route: '/achievement',
     file: 'achievement.html',
-    title: `${CATALOG_TITLE['/achievement']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/achievement']()} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/achievement', CATALOG_TITLE['/achievement'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/achievement', CATALOG_TITLE['/achievement'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], [CATALOG_TITLE['/achievement'], null]]),
-      h1: CATALOG_TITLE['/achievement'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/achievement'](), null]]),
+      h1: CATALOG_TITLE['/achievement'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -1342,30 +1530,30 @@ function currencyHubPages(ctx) {
   const sections = [];
   const ldEntries = [];
   if (newRoles.length) {
-    const items = newRoles.map((r) => ({ name: r.name, href: `/currency/role/${r.id}`, meta: esc(`${r.rarity}费`) }));
-    sections.push({ title: `角色图鉴（${items.length}）`, html: linkList(items, true) + snapMore('/currency/role', '角色图鉴') });
+    const items = newRoles.map((r) => ({ name: r.name, href: `/currency/role/${r.id}`, meta: esc(uiT('snapshot.costLabel', '{n} 费', { n: r.rarity })) }));
+    sections.push({ title: `${ui('catalog.character.title', '角色图鉴')}（${items.length}）`, html: linkList(items, true) + snapMore('/currency/role', ui('catalog.character.title', '角色图鉴')) });
     ldEntries.push(...items);
   }
   if (newTraits.length) {
-    const items = newTraits.map((t) => ({ name: t.name, href: `/currency/trait/${t.id}`, meta: esc(CW_CAT_LABEL[t.cat] || t.cat || '') }));
-    sections.push({ title: `羁绊图鉴（${items.length}）`, html: linkList(items, true) + snapMore('/currency/trait', '羁绊图鉴') });
+    const items = newTraits.map((t) => ({ name: t.name, href: `/currency/trait/${t.id}`, meta: esc(cwCatLabel(t.cat)) }));
+    sections.push({ title: `${ui('nav.cwTrait', '羁绊图鉴')}（${items.length}）`, html: linkList(items, true) + snapMore('/currency/trait', ui('nav.cwTrait', '羁绊图鉴')) });
     ldEntries.push(...items);
   }
-  const summaryPlain = `${SITE_NAME}货币战争模式枢纽：本赛季新增角色图鉴与羁绊图鉴条目。`;
-  const title = `${CATALOG_TITLE['/currency/role'].split(' · ')[0]} - ${SITE_NAME}`;
+  const summaryPlain = uiT('snapshot.sum.cwHub', '{site}货币战争模式枢纽：本赛季新增角色图鉴与羁绊图鉴条目。', { site: SITE_NAME });
+  const title = `${CATALOG_TITLE['/currency/role']().split(' · ')[0]} - ${SITE_NAME}`;
   const body = catalogBody(ctx, {
-    crumbs: crumbHtml([['首页', '/'], ['货币战争', null]]),
-    h1: '货币战争',
+    crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), null]]),
+    h1: ui('catalog.currencyWar', '货币战争'),
     summary: esc(summaryPlain),
     items: [],
-    sections: sections.length ? sections : [{ title: '本赛季新增', html: '<p>本赛季暂无新增条目。</p>' }],
+    sections: sections.length ? sections : [{ title: ui('cwHub.releaseTitle', '本赛季新增'), html: '<p>本赛季暂无新增条目。</p>' }],
   });
   return [makePage('currency-hub', {
     route: '/currency',
     file: 'currency.html',
     title,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/currency', '货币战争', cut(summaryPlain, 150), ldEntries),
+    ld: ldCollection('/currency', ui('catalog.currencyWar', '货币战争'), cut(summaryPlain, 150), ldEntries),
     body,
   })];
 }
@@ -1375,23 +1563,23 @@ function currencyHubPages(ctx) {
 function currencyRolePages(ctx) {
   const roles = readJson('currency/role.json').roles || [];
   const links = roles.map((r) => ({ name: r.name, href: `/currency/role/${r.id}` }));
-  const chargeText = (r) => (r.charge_type || []).map((c) => CW_CHARGE_LABEL[c] || c).join(' · ');
-  const summaryPlain = `${SITE_NAME}货币战争角色图鉴：共 ${roles.length} 名可招募角色，含费用、前后台定位与羁绊。`;
+  const chargeText = (r) => (r.charge_type || []).map((c) => cwChargeLabel(c)).join(' · ');
+  const summaryPlain = uiT('snapshot.sum.cwRole', '{site}货币战争角色图鉴：共 {n} 名可招募角色，含费用、前后台定位与羁绊。', { site: SITE_NAME, n: roles.length });
   const items = roles.map((r) => ({
     name: r.name,
     href: `/currency/role/${r.id}`,
-    meta: [esc(`${r.rarity}费`), esc(CW_FB_LABEL[r.front_back_type] || r.front_back_type || ''), esc(chargeText(r))].filter(Boolean).join(' · '),
+    meta: [esc(uiT('snapshot.costLabel', '{n} 费', { n: r.rarity })), esc(cwFbLabel(r.front_back_type)), esc(chargeText(r))].filter(Boolean).join(' · '),
     desc: txtSafe((r.traits || []).map((t) => t.name).filter(Boolean).join('、'), null, 200),
   }));
   const pages = [makePage('currency-role-list', {
     route: '/currency/role',
     file: 'currency/role.html',
-    title: `${CATALOG_TITLE['/currency/role']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/role']()} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/currency/role', CATALOG_TITLE['/currency/role'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/currency/role', CATALOG_TITLE['/currency/role'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/role'], null]]),
-      h1: CATALOG_TITLE['/currency/role'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/role'](), null]]),
+      h1: CATALOG_TITLE['/currency/role'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -1407,8 +1595,8 @@ function currencyRolePages(ctx) {
      * meta description 用数据字段拼装。
      */
     const description = cut(factMeta(
-      [`${d.rarity}费`, d.front_back_type ? (CW_FB_LABEL[d.front_back_type] || d.front_back_type) : '', chargeText(d)],
-      CATALOG_TITLE['/currency/role'],
+      [`${d.rarity}费`, d.front_back_type ? (cwFbLabel(d.front_back_type)) : '', chargeText(d)],
+      CATALOG_TITLE['/currency/role'](),
       name,
     ), 150);
     const traitHtml = (d.traits || []).map((tr) => {
@@ -1448,26 +1636,26 @@ function currencyRolePages(ctx) {
       .map((eq) => {
         const props = [...(eq.owner_props || []), ...(eq.all_props || [])]
           .map((p) => `${propLabel(p)} ${propValue(p.value)}`).join('、');
-        return `<li><span>${esc(`等级 ${eq.level}`)}</span><p>${txt(eq.desc, eq.param_list)}${props ? `（${props}）` : ''}</p></li>`;
+        return `<li><span>${esc(uiT('mob.levelTag', '等级 {n}', { n: eq.level }))}</span><p>${txt(eq.desc, eq.param_list)}${props ? `（${props}）` : ''}</p></li>`;
       })
       .join('');
     const body = detailBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/role'], '/currency/role'], [name, null]]),
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/role'](), '/currency/role'], [name, null]]),
       h1: name,
       summary: '',
       facts: [
-        ['费用', esc(`${d.rarity} 费`)],
-        ['定位', txt(CW_FB_LABEL[d.front_back_type] || d.front_back_type, null, 40)],
-        ['充能类型', txt(chargeText(d), null, 80)],
-        ['专家', d.is_expert ? '是' : '否'],
+        [ui('catalog.filter.cost', '费用'), esc(`${d.rarity} 费`)],
+        ['定位', txt(cwFbLabel(d.front_back_type), null, 40)],
+        [ui('catalog.filter.chargeType', '充能类型'), txt(chargeText(d), null, 80)],
+        [ui('catalog.filter.expert', '专家'), d.is_expert ? '是' : '否'],
         ['赛季', esc((d.season_ids || []).join(' / '))],
         ['羁绊数', esc(String((d.traits || []).length))],
         ['星魂数', esc(String((d.rank || []).length))],
       ],
       sections: [
-        { title: '羁绊', html: traitHtml ? `<ul class="nk-snapshot__blocks">${traitHtml}</ul>` : '' },
+        { title: ui('nav.cwTraitShort', '羁绊'), html: traitHtml ? `<ul class="nk-snapshot__blocks">${traitHtml}</ul>` : '' },
         { title: '星级与技能', html: starHtml ? `<ul class="nk-snapshot__blocks">${starHtml}</ul>` : '' },
-        { title: '星魂', html: rankHtml ? `<ul class="nk-snapshot__blocks">${rankHtml}</ul>` : '' },
+        { title: ui('char.sec.eidolons', '星魂'), html: rankHtml ? `<ul class="nk-snapshot__blocks">${rankHtml}</ul>` : '' },
         { title: '专属装备', html: equipHtml ? `<ul class="nk-snapshot__blocks">${equipHtml}</ul>` : '' },
       ],
       links: siblingsOf(links, idx),
@@ -1479,7 +1667,7 @@ function currencyRolePages(ctx) {
       title: `${name} - ${SITE_NAME}`,
       description,
       ld: ldArticle(route, name, description,
-        [['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/role'], '/currency/role'], [name, route]], ctx),
+        [[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/role'](), '/currency/role'], [name, route]], ctx),
       body,
     }));
   });
@@ -1492,7 +1680,7 @@ function currencyListPages(ctx) {
   const pages = [];
 
   const equip = (readJson('currency/equipment.json').items || []).filter((e) => e.name);
-  const equipSummary = `${SITE_NAME}货币战争装备图鉴：共 ${equip.length} 件装备，含分类、效果与属性加成。`;
+  const equipSummary = uiT('snapshot.sum.cwItem', '{site}货币战争装备图鉴：共 {n} 件装备，含分类、效果与属性加成。', { site: SITE_NAME, n: equip.length });
   const equipItems = equip.map((e) => {
     const tags = (e.tags || []).map((t) => clean(t.desc)).filter(Boolean).join('、');
     const props = (e.props || []).map((p) => `${propLabel(p)} ${propValue(p.value)}`).join('、');
@@ -1506,12 +1694,12 @@ function currencyListPages(ctx) {
   pages.push(makePage('currency-equip-list', {
     route: '/currency/item',
     file: 'currency/item.html',
-    title: `${CATALOG_TITLE['/currency/item']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/item']()} - ${SITE_NAME}`,
     description: cut(equipSummary, 150),
-    ld: ldCollection('/currency/item', CATALOG_TITLE['/currency/item'], cut(equipSummary, 150), equipItems),
+    ld: ldCollection('/currency/item', CATALOG_TITLE['/currency/item'](), cut(equipSummary, 150), equipItems),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/item'], null]]),
-      h1: CATALOG_TITLE['/currency/item'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/item'](), null]]),
+      h1: CATALOG_TITLE['/currency/item'](),
       summary: esc(equipSummary),
       items: equipItems,
     }),
@@ -1522,40 +1710,40 @@ function currencyListPages(ctx) {
    * 未收录图鉴的投资环境应用不展示，快照只列收录项。
    */
   const portals = (readJson('currency/portals.json').portals || []).filter((p) => p.in_book && p.title);
-  const portalSummary = `${SITE_NAME}货币战争投资环境图鉴：共 ${portals.length} 个投资环境。`;
-  const portalItems = portals.map((p) => ({ name: p.title, href: null, meta: esc('投资环境'), desc: txtSafe(p.desc, p.params, 400, hasParamSemantics(p)) }));
+  const portalSummary = uiT('snapshot.sum.cwPortal', '{site}货币战争投资环境图鉴：共 {n} 个投资环境。', { site: SITE_NAME, n: portals.length });
+  const portalItems = portals.map((p) => ({ name: p.title, href: null, meta: esc(ui('nav.cwPortal', '投资环境')), desc: txtSafe(p.desc, p.params, 400, hasParamSemantics(p)) }));
   pages.push(makePage('currency-portal-list', {
     route: '/currency/buff',
     file: 'currency/buff.html',
-    title: `${CATALOG_TITLE['/currency/buff']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/buff']()} - ${SITE_NAME}`,
     description: cut(portalSummary, 150),
-    ld: ldCollection('/currency/buff', CATALOG_TITLE['/currency/buff'], cut(portalSummary, 150), portalItems),
+    ld: ldCollection('/currency/buff', CATALOG_TITLE['/currency/buff'](), cut(portalSummary, 150), portalItems),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/buff'], null]]),
-      h1: CATALOG_TITLE['/currency/buff'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/buff'](), null]]),
+      h1: CATALOG_TITLE['/currency/buff'](),
       summary: esc(portalSummary),
       items: portalItems,
     }),
   }));
 
   const augments = (readJson('currency/augments.json').augments || []).filter((a) => a.name);
-  const augSummary = `${SITE_NAME}货币战争投资策略图鉴：共 ${augments.length} 条投资策略。`;
+  const augSummary = uiT('snapshot.sum.cwAugment', '{site}货币战争投资策略图鉴：共 {n} 条投资策略。', { site: SITE_NAME, n: augments.length });
   const augItems = augments.map((a) => ({
     name: a.name,
     href: null,
-    meta: txt(CW_QUALITY_LABEL[a.quality] || a.quality, null, 40),
+    meta: txt(a.quality ? cwQualityLabel(a.quality) : '', null, 40),
     // 目录条目：条目携带 params 语义（此处 params 全为 []，即占位符不可展开）→ 含裸 `#N` 的 desc 整段省略
     desc: txtSafe(a.desc, a.params, 400, hasParamSemantics(a)),
   }));
   pages.push(makePage('currency-augment-list', {
     route: '/currency/augment',
     file: 'currency/augment.html',
-    title: `${CATALOG_TITLE['/currency/augment']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/augment']()} - ${SITE_NAME}`,
     description: cut(augSummary, 150),
-    ld: ldCollection('/currency/augment', CATALOG_TITLE['/currency/augment'], cut(augSummary, 150), augItems),
+    ld: ldCollection('/currency/augment', CATALOG_TITLE['/currency/augment'](), cut(augSummary, 150), augItems),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/augment'], null]]),
-      h1: CATALOG_TITLE['/currency/augment'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/augment'](), null]]),
+      h1: CATALOG_TITLE['/currency/augment'](),
       summary: esc(augSummary),
       items: augItems,
     }),
@@ -1570,23 +1758,23 @@ function currencyTraitPages(ctx) {
   const traits = readJson('currency/traits.json').traits || [];
   const roles = readJson('currency/role.json').roles || [];
   const links = traits.map((t) => ({ name: t.name, href: `/currency/trait/${t.id}` }));
-  const summaryPlain = `${SITE_NAME}货币战争羁绊图鉴：共 ${traits.length} 个羁绊，含激活人数层级与成员加成。`;
+  const summaryPlain = uiT('snapshot.cwTraitSummary', '{site}货币战争羁绊图鉴：共 {n} 个羁绊，含激活人数层级与成员加成。', { site: SITE_NAME, n: traits.length });
   const items = traits.map((t) => ({
     name: t.name,
     href: `/currency/trait/${t.id}`,
-    meta: [esc(CW_CAT_LABEL[t.cat] || t.cat || ''), esc(`${(t.layers || []).length} 层`)].filter(Boolean).join(' · '),
+    meta: [esc(cwCatLabel(t.cat)), esc(uiT('egm.value.floors', '{n} 层', { n: (t.layers || []).length }))].filter(Boolean).join(' · '),
     // 目录条目：条目携带 base_params 语义 → 能展开就展开（含裸 `#N`），展不开则整段省略该 desc
     desc: txtSafe(t.simple_desc || t.desc, t.base_params, 200, hasParamSemantics(t)),
   }));
   const pages = [makePage('currency-trait-list', {
     route: '/currency/trait',
     file: 'currency/trait.html',
-    title: `${CATALOG_TITLE['/currency/trait']} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/trait']()} - ${SITE_NAME}`,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/currency/trait', CATALOG_TITLE['/currency/trait'], cut(summaryPlain, 150), items),
+    ld: ldCollection('/currency/trait', CATALOG_TITLE['/currency/trait'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/trait'], null]]),
-      h1: CATALOG_TITLE['/currency/trait'],
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/trait'](), null]]),
+      h1: CATALOG_TITLE['/currency/trait'](),
       summary: esc(summaryPlain),
       items,
     }),
@@ -1600,12 +1788,12 @@ function currencyTraitPages(ctx) {
     const sourceSummary = plain(entry.simple_desc, entry.base_params) || plain(entry.desc, entry.base_params);
     const description = sourceSummary
       ? cut(sourceSummary, 150)
-      : cut(factMeta([CW_CAT_LABEL[entry.cat] || entry.cat, entry.activation_type], CATALOG_TITLE['/currency/trait'], name), 150);
+      : cut(factMeta([cwCatLabel(entry.cat), entry.activation_type], CATALOG_TITLE['/currency/trait'](), name), 150);
     const layerHtml = (entry.layers || [])
       .map((l) => {
         const props = [...(l.member_props || []), ...(l.all_props || [])]
           .map((p) => `${propLabel(p)} ${propValue(p.value)}`).join('、');
-        const quality = l.quality ? `${CW_QUALITY_LABEL[l.quality] || l.quality} · ` : '';
+        const quality = l.quality ? `${cwQualityLabel(l.quality)} · ` : '';
         return `<li><span>${esc(`${quality}${l.layer} 人`)}</span><p>${txt(l.desc, l.params)}${l.buff_desc ? ` ${txt(l.buff_desc, l.buff_params)}` : ''}</p>${props ? `<p>${txt(props, null, 600)}</p>` : ''}</li>`;
       })
       .join('');
@@ -1613,11 +1801,11 @@ function currencyTraitPages(ctx) {
       .map((r) => `<li><p>${txt(r.desc, r.params)}</p></li>`)
       .join('');
     const body = detailBody(ctx, {
-      crumbs: crumbHtml([['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/trait'], '/currency/trait'], [name, null]]),
+      crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/trait'](), '/currency/trait'], [name, null]]),
       h1: name,
       summary: sourceSummary ? esc(cut(sourceSummary, 200)) : '',
       facts: [
-        ['分类', txt(CW_CAT_LABEL[entry.cat] || entry.cat, null, 40)],
+        [ui('catalog.filter.category', '分类'), txt(cwCatLabel(entry.cat), null, 40)],
         ['激活方式', txt(entry.activation_type, null, 60)],
         ['层级数', esc(String((entry.layers || []).length))],
         ['成员数', esc(String(members.length))],
@@ -1625,13 +1813,13 @@ function currencyTraitPages(ctx) {
       ],
       sections: [
         // 空 desc 时「效果说明」整段省略
-        { title: '效果说明', html: clean(entry.desc) ? `<p>${txt(entry.desc, entry.base_params, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
-        { title: '层级效果', html: layerHtml ? `<ul class="nk-snapshot__blocks">${layerHtml}</ul>` : '' },
-        { title: '机制详情', html: remarkHtml ? `<ul class="nk-snapshot__blocks">${remarkHtml}</ul>` : '' },
+        { title: ui('ctrait.sec.effect', '效果说明'), html: clean(entry.desc) ? `<p>${txt(entry.desc, entry.base_params, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
+        { title: ui('ctrait.sec.layers', '层级效果'), html: layerHtml ? `<ul class="nk-snapshot__blocks">${layerHtml}</ul>` : '' },
+        { title: ui('ctrait.sec.mechanics', '机制详情'), html: remarkHtml ? `<ul class="nk-snapshot__blocks">${remarkHtml}</ul>` : '' },
         {
-          title: '羁绊成员',
+          title: ui('ctrait.sec.members', '羁绊成员'),
           html: members.length
-            ? linkList(members.map((m) => ({ name: m.name, href: `/currency/role/${m.id}`, meta: esc(`${m.rarity}费`) })))
+            ? linkList(members.map((m) => ({ name: m.name, href: `/currency/role/${m.id}`, meta: esc(uiT('snapshot.costLabel', '{n} 费', { n: m.rarity })) })))
             : '',
         },
       ],
@@ -1644,7 +1832,7 @@ function currencyTraitPages(ctx) {
       title: `${name} - ${SITE_NAME}`,
       description,
       ld: ldArticle(route, name, description,
-        [['首页', '/'], ['货币战争', '/currency'], [CATALOG_TITLE['/currency/trait'], '/currency/trait'], [name, route]], ctx),
+        [[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/trait'](), '/currency/trait'], [name, route]], ctx),
       body,
     }));
   });
@@ -1700,8 +1888,8 @@ function voracityPages(ctx) {
       return `<li>${label}</li>`;
     }).join('');
     const head = [
-      st && st.stage_id != null ? `关卡 ${esc(String(st.stage_id))}` : '',
-      st && st.invasion_id != null ? `侵蚀等级 ${esc(String(st.invasion_id))}` : '',
+      st && st.stage_id != null ? uiT('egd.levelLabel', '关卡 {n}', { n: esc(String(st.stage_id)) }) : '',
+      st && st.invasion_id != null ? uiT('snapshot.invasionLevel', '侵蚀等级 {n}', { n: esc(String(st.invasion_id)) }) : '',
     ].filter(Boolean).join(' · ');
     if (!head && !monsters) return '';
     return `<li>${head ? `<span>${head}</span>` : ''}${monsters ? `<ul class="nk-snapshot__list">${monsters}</ul>` : ''}</li>`;
@@ -1710,7 +1898,9 @@ function voracityPages(ctx) {
   const levelHtml = levels.map((lv) => {
     const desc = txtSafe(lv && lv.desc, lv && lv.param_list, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(lv));
     if (!desc) return '';
-    const head = lv && lv.invasion_id != null ? `侵蚀等级 ${esc(String(lv.invasion_id))}` : '';
+    const head = lv && lv.invasion_id != null
+      ? uiT('snapshot.invasionLevel', '侵蚀等级 {n}', { n: esc(String(lv.invasion_id)) })
+      : '';
     return `<li>${head ? `<span>${head}</span>` : ''}<p>${desc}</p></li>`;
   }).join('');
   const buffHtml = buffLevels.map((b) => {
@@ -1719,17 +1909,17 @@ function voracityPages(ctx) {
     // 愿力分档进度是数据事实（页面同处渲染）→ 有值必输出，标签沿用页面文案「愿力进度」；null 档不输出
     const pct = pctText(b && b.progress_percent);
     if (!name && !desc && !pct) return '';
-    const head = `${name}${b && b.level != null ? `（等级 ${esc(String(b.level))}）` : ''}`;
-    return `<li><span>${head}</span>${pct ? `<p>愿力进度 ${esc(pct)}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}</li>`;
+    const head = `${name}${b && b.level != null ? `（${uiT('mob.levelTag', '等级 {n}', { n: esc(String(b.level)) })}）` : ''}`;
+    return `<li><span>${head}</span>${pct ? `<p>${uiT('vor.field.wishPower', '愿力进度 {n}', { n: esc(pct) })}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}</li>`;
   }).join('');
 
-  const scoreHtml = scores.length ? `<p>愿力档位：${scores.map((s) => esc(String(s))).join(' / ')}</p>` : '';
+  const scoreHtml = scores.length ? `<p>${esc(uiT('vor.field.wishTiers', '愿力档位：{list}', { list: scores.map((s) => String(s)).join(' / ') }))}</p>` : '';
   /** 进度档位百分比：与页面 `fmtPct` 同口径（pctText），无值档不输出百分比 */
   const stepHtml = steps.map((p) => {
     const prog = pctText(p && p.progress);
     const desc = txtSafe(p && p.desc, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
     if (!prog && !desc) return '';
-    return `<li>${prog ? `<span>进度 ${esc(prog)}</span>` : ''}${desc ? `<p>${desc}</p>` : ''}</li>`;
+    return `<li>${prog ? `<span>${esc(uiT('vor.field.progress', '进度 {n}', { n: prog }))}</span>` : ''}${desc ? `<p>${desc}</p>` : ''}</li>`;
   }).join('');
 
   const statusHtml = statuses.map((s) => {
@@ -1754,50 +1944,52 @@ function voracityPages(ctx) {
 
   const activityName = clean(activity.name);
   const introHtml = txtSafe(activity.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
-  const summaryPlain = `${SITE_NAME}贪饕污染专题：${activityName ? `${activityName}，` : ''}`
-    + '含污染等级与愿力、「贪饕」侵蚀（敌方强化与玩家支援）、波及关卡与被污染怪物、状态词条、教程图文与货币战争位面词条。';
+  const summaryPlain = uiT('snapshot.sum.voracity', '{site}贪饕污染专题：{extra}含关卡组成、侵蚀等级与状态词条。', {
+    site: SITE_NAME,
+    extra: activityName ? `${activityName}，` : '',
+  });
   const description = cut(summaryPlain, 150);
   const body = detailBody(ctx, {
-    crumbs: crumbHtml([['首页', '/'], [VORACITY_TITLE, null]]),
-    h1: VORACITY_TITLE,
+    crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [voracityTitle(), null]]),
+    h1: voracityTitle(),
     summary: '',
     facts: [
-      ['活动', txtSafe(activity.name, null, 120)],
-      ['解锁任务', activity.unlock_mission_id != null ? esc(String(activity.unlock_mission_id)) : ''],
-      ['波及关卡数', esc(String(stages.length))],
-      ['怪物名单条目数', esc(String(monsterTotal))],
-      ['状态词条数', esc(String(statuses.length))],
-      ['位面词条数', esc(String(affixes.length))],
+      [ui('vor.field.activity', '活动'), txtSafe(activity.name, null, 120)],
+      [ui('vor.field.unlockQuest', '解锁任务'), activity.unlock_mission_id != null ? esc(String(activity.unlock_mission_id)) : ''],
+      [ui('vor.field.stages', '波及关卡数'), esc(String(stages.length))],
+      [ui('vor.field.monsters', '怪物名单条目数'), esc(String(monsterTotal))],
+      [ui('vor.field.statuses', '状态词条数'), esc(String(statuses.length))],
+      [ui('vor.field.affixes', '位面词条数'), esc(String(affixes.length))],
     ],
     sections: [
-      { title: '玩法概览', html: introHtml ? `<p>${introHtml}</p>` : '' },
+      { title: ui('vor.sec.overview', '玩法概览'), html: introHtml ? `<p>${introHtml}</p>` : '' },
       {
-        title: '污染等级与愿力',
+        title: ui('vor.sec.scores', '污染等级与愿力'),
         html: scoreHtml + (stepHtml ? `<ul class="nk-snapshot__blocks">${stepHtml}</ul>` : ''),
       },
       {
-        title: '「贪饕」侵蚀（敌方与玩家支援）',
+        title: ui('vor.sec.invasionFull', '「贪饕」侵蚀（敌方与玩家支援）'),
         html: [
-          levelHtml ? `<p>敌方强化（关卡侵蚀）</p><ul class="nk-snapshot__blocks">${levelHtml}</ul>` : '',
-          buffHtml ? `<p>玩家支援（愿力分档）</p><ul class="nk-snapshot__blocks">${buffHtml}</ul>` : '',
+          levelHtml ? `<p>${esc(ui('vor.sec.enemyBuffs', '敌方强化（关卡侵蚀）'))}</p><ul class="nk-snapshot__blocks">${levelHtml}</ul>` : '',
+          buffHtml ? `<p>${esc(ui('vor.sec.playerSupport', '玩家支援（愿力分档）'))}</p><ul class="nk-snapshot__blocks">${buffHtml}</ul>` : '',
         ].join(''),
       },
       {
-        title: '波及关卡与被污染怪物',
+        title: ui('vor.sec.stagesFull', '波及关卡与被污染怪物'),
         html: stageHtml ? `<ul class="nk-snapshot__blocks">${stageHtml}</ul>` : '',
       },
-      { title: '状态词条', html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
-      { title: '教程图文', html: tutorialHtml ? `<ul class="nk-snapshot__blocks">${tutorialHtml}</ul>` : '' },
-      { title: '位面词条', html: affixHtml ? `<ul class="nk-snapshot__blocks">${affixHtml}</ul>` : '' },
-      { title: '「污染」同形词说明', html: `<p>${esc(VORACITY_DISAMBIGUATION)}</p>` },
+      { title: ui('mob.sec.status', '状态词条'), html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
+      { title: ui('vor.sec.tutorials', '教程图文'), html: tutorialHtml ? `<ul class="nk-snapshot__blocks">${tutorialHtml}</ul>` : '' },
+      { title: ui('vor.sec.affixes', '位面词条'), html: affixHtml ? `<ul class="nk-snapshot__blocks">${affixHtml}</ul>` : '' },
+      { title: ui('vor.sec.disambigFull', '「污染」同形词说明'), html: `<p>${esc(voracityDisambiguation())}</p>` },
     ],
   });
   return [makePage('voracity-page', {
     route: '/voracity',
     file: 'voracity.html',
-    title: `${VORACITY_TITLE} - ${SITE_NAME}`,
+    title: `${voracityTitle()} - ${SITE_NAME}`,
     description,
-    ld: ldArticle('/voracity', VORACITY_TITLE, description, [['首页', '/'], [VORACITY_TITLE, '/voracity']], ctx),
+    ld: ldArticle('/voracity', voracityTitle(), description, [[ui('nav.home', '首页'), '/'], [voracityTitle(), '/voracity']], ctx),
     body,
   })];
 }
@@ -1837,8 +2029,48 @@ function main() {
   if (shellSource === TEMPLATE_FILE && template.includes('class="nk-snapshot"')) {
     fail(`${TEMPLATE_FILE} 已是注入过的快照且缺少 ${SHELL_FILE}：请先执行 \`pnpm exec vite build\` 重建纯 shell 模板`);
   }
-  const ctx = loadContext();
-  const pages = buildPages(ctx);
+  /**
+   * 分层方案（ADR 0052 决策 6 / 用户裁决 B）：**非条目级页面**（首页、各目录页、玩法枢纽、
+   * voracity 单页）每种语言各一份快照；条目级详情页只做缺省语言（13 倍体积换不来等量的检索价值）。
+   * 判据 = 家族名不以 `-detail` 结尾。
+   */
+  const isLayered = (family) => !family.endsWith('-detail');
+  /** 分层页在全部语言间互挂 hreflang；缺省语言为 x-default。 */
+  const alternatesFor = (cnRoute) => {
+    const strip = (code, route) => (route === '/' ? `/${code}` : `/${code}${route}`);
+    return [
+      ...LOCALES.map((l) => ({
+        hreflang: l.code === DEFAULT_LOCALE ? 'zh-CN' : l.code,
+        href: SITE_ORIGIN + (l.code === DEFAULT_LOCALE ? cnRoute : strip(l.code, cnRoute)),
+      })),
+      { hreflang: 'x-default', href: SITE_ORIGIN + cnRoute },
+    ];
+  };
+
+  /* 分层多语言快照暂为**显式开关**：生成链路与 head 文案已语言化，但段落标签仍需逐条进词典
+     （约 40 条 × 13 语言）⇒ 未完成前默认只出缺省语言，避免发布「英文 URL + 中文标签」的页面。
+     开关只用于开发期验证：`NK_SNAPSHOT_LOCALES=1 node tools/gen-ai-endpoints.mjs`。 */
+  const localeSet = LOCALES;
+  const pages = [];
+  /** 任一语言的 context 都可用于 sitemap（只取 syncedAt，与语言无关）。 */
+  let ctx;
+  for (const loc of localeSet) {
+    currentLocale = loc.code;
+    ctx = loadContext();
+    const built = buildPages(ctx);
+    const keep = loc.code === DEFAULT_LOCALE ? built : built.filter((p) => isLayered(p.family));
+    const prefix = loc.code === DEFAULT_LOCALE ? '' : `/${loc.code}`;
+    for (const p of keep) {
+      const route = prefix ? (p.route === '/' ? prefix : `${prefix}${p.route}`) : p.route;
+      const file = prefix ? `${loc.code}/${p.file}` : p.file;
+      const ld = prefix ? rewriteLdUrls(p.ld, SITE_ORIGIN + p.route, SITE_ORIGIN + route) : p.ld;
+      pages.push({
+        ...p, route, file, ld,
+        lang: loc.culture,
+        alternates: isLayered(p.family) ? alternatesFor(p.route) : null,
+      });
+    }
+  }
 
   // 每次重建都清空 prerender：残留快照会让「快照数 = 数据条目数」与 sitemap 一一对应断言失效
   rmSync(PRERENDER_DIR, { recursive: true, force: true });

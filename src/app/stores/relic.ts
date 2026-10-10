@@ -5,6 +5,7 @@ import {
 } from '../../services/api';
 import { createDetailCore } from './detail-core';
 import { SITE_NAME } from '../../lib/constants';
+import { translate } from '../i18n';
 import type {
   LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
 } from '../../services/types';
@@ -17,10 +18,10 @@ export const useRelicStore = defineStore('relic', () => {
 
   type RelicTab = 'effect' | 'main' | 'sub' | 'story';
   const TABS: ReadonlyArray<{ key: RelicTab; label: string }> = [
-    { key: 'effect', label: '套装效果' },
-    { key: 'main', label: '主词条' },
-    { key: 'sub', label: '副词条' },
-    { key: 'story', label: '来历' },
+    { key: 'effect', label: translate('relic.sec.effect') },
+    { key: 'main', label: translate('relic.sec.main') },
+    { key: 'sub', label: translate('relic.sec.sub') },
+    { key: 'story', label: translate('relic.sec.story') },
   ];
   const activeTab = ref<RelicTab>('effect');
   function setTab(key: string): void {

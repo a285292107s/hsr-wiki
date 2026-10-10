@@ -1,4 +1,5 @@
 import type { MazeFloorDetail, MazeListEntry, PeakLevelInfo } from '../../services/types';
+import { translate } from '../i18n';
 
 /** 关卡子 tab 的三种形态：常规层级 / 星启模式 / 异相仲裁单关 */
 export type LevelTabKind = 'floor' | 'tierce' | 'peak';
@@ -37,15 +38,15 @@ export function buildLevelTabs(data: MazeListEntry | null): LevelTab[] {
     // id / label 的缺省回退按**源序**推导（与 levelTabPeak 的 id 解析同源），只反转展示顺序
     const peakTabs: LevelTab[] = data.levels.map((l, i) => {
       const id = l.id ?? i + 1;
-      return { key: peakKey(id), kind: 'peak' as const, label: l.name || `关卡 ${i + 1}`, peakId: id };
+      return { key: peakKey(id), kind: 'peak' as const, label: l.name || translate('egd.levelLabel', { n: i + 1 }), peakId: id };
     });
     return peakTabs.reverse();
   }
   const tabs: LevelTab[] = [...(data.floor_details || [])]
     .map((f) => f.floor)
     .sort((a, b) => b - a)
-    .map((floor) => ({ key: floorKey(floor), kind: 'floor' as const, label: `第 ${floor} 层`, floor }));
-  if (data.tierce) tabs.unshift({ key: 'tierce', kind: 'tierce', label: '星启模式' });
+    .map((floor) => ({ key: floorKey(floor), kind: 'floor' as const, label: translate('egd.floorLabel', { n: floor }), floor }));
+  if (data.tierce) tabs.unshift({ key: 'tierce', kind: 'tierce', label: translate('egm.stat.tierce') });
   return tabs;
 }
 

@@ -54,7 +54,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/cn/ tools/converter/DATA_CATALOG.md tools/converter/DATA_CATALOG.parts/
+          # 语言包必须与结构层同批提交：结构层里的文本是引用令牌，缺包会让前端解析报缺键；
+          # `pnpm build` 前置的 check-i18n-packs.mjs 会把这种提交拦在部署之前（见 ADR 0052）。
+          git add public/data/cn/ public/data/i18n/ tools/converter/DATA_CATALOG.md tools/converter/DATA_CATALOG.parts/
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0

@@ -9,7 +9,11 @@ import { useScrollSpy } from '../composables/use-scroll-spy';
 import { BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl } from '../endgame/renders';
 import { pollutionPosition } from '../endgame/pollution';
 import { ENDGAME_MODES } from '../catalog/pages/endgame';
+import { translate } from '../i18n';
 import '../../styles/voracity.css';
+
+/** 脚本内文案（如区块清单 label）走 translate；模板内用 t() */
+const t = translate;
 
 const { data, error, loading, showSkeleton, run: load, retry } = usePageData<VoracityDb>(loadLocalVoracity);
 
@@ -30,14 +34,14 @@ const stageGroups = computed<{ invasionId: number; stages: VoracityStage[] }[]>(
 });
 
 const SECTION_DEFS: { id: string; label: string }[] = [
-  { id: 'overview', label: '玩法概览' },
-  { id: 'scores', label: '污染等级与愿力' },
-  { id: 'invasion', label: '「贪饕」侵蚀' },
-  { id: 'stages', label: '波及关卡' },
-  { id: 'statuses', label: '状态词条' },
-  { id: 'tutorials', label: '教程图文' },
-  { id: 'affixes', label: '位面词条' },
-  { id: 'disambig', label: '同形词说明' },
+  { id: 'overview', label: t('vor.sec.overview') },
+  { id: 'scores', label: t('vor.sec.scores') },
+  { id: 'invasion', label: t('vor.sec.invasion') },
+  { id: 'stages', label: t('vor.sec.stages') },
+  { id: 'statuses', label: t('vor.sec.statuses') },
+  { id: 'tutorials', label: t('vor.sec.tutorials') },
+  { id: 'affixes', label: t('vor.sec.affixes') },
+  { id: 'disambig', label: t('vor.sec.disambig') },
 ];
 
 const sections = computed(() => {
@@ -116,7 +120,8 @@ function buffIconError(e: Event): void {
 
 /** 终局模式中文名（与终局目录页共用 ENDGAME_MODES 单一来源） */
 function modeLabel(mode: string): string {
-  return ENDGAME_MODES.find((m) => m.key === mode)?.label || mode;
+  const hit = ENDGAME_MODES.find((m) => m.key === mode);
+  return hit ? translate(hit.labelKey) : mode;
 }
 
 /** 关卡在该赛季中的位置（与终局详情页的污染节点文案同一实现） */
@@ -151,7 +156,7 @@ onMounted(() => { void load(); });
       class="nk-skeleton nk-vor-skeleton"
       role="status"
       aria-live="polite"
-      aria-label="贪饕污染数据加载中"
+      :aria-label="t('vor.loadingAria')"
     >
       <div class="nk-skeleton__body">
         <div class="nk-sk nk-sk--shimmer nk-sk--title"></div>
@@ -167,7 +172,7 @@ onMounted(() => { void load(); });
           <path d="M12 9v4" /><path d="M12 17h.01" />
         </svg>
       </div>
-      <div class="nk-error-state__title">贪饕污染数据加载失败</div>
+      <div class="nk-error-state__title">{{ t('vor.errorTitle') }}</div>
       <div class="nk-error-state__detail">{{ error }}</div>
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
@@ -175,7 +180,7 @@ onMounted(() => { void load(); });
     <template v-else-if="data">
       <div class="nk-vor-bar">
         <div class="nk-vor-bar__inner">
-          <nav class="nk-secnav nk-vor-secnav" aria-label="内容区块导航">
+          <nav class="nk-secnav nk-vor-secnav" :aria-label="t('cwRole.navAria')">
             <button
               v-for="s in sections"
               :key="s.id"
@@ -197,14 +202,14 @@ onMounted(() => { void load(); });
         v-show="showTop"
         class="nk-top-btn"
         type="button"
-        aria-label="返回顶部"
+        :aria-label="t('cwRole.topAria')"
         @click="scrollTop"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
 
       <header class="nk-vor-hero">
-        <h1 class="nk-vor-hero__title">贪饕污染</h1>
+        <h1 class="nk-vor-hero__title">{{ t('nav.voracity') }}</h1>
         <p v-if="activity?.name" class="nk-vor-hero__act">{{ activity.name }}</p>
       </header>
 
@@ -212,15 +217,15 @@ onMounted(() => { void load(); });
         <div class="nk-panel nk-panel--active">
           <!-- 01 玩法概览 -->
           <section v-if="shownSections.has('overview')" id="vor-overview" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('overview') }}</span>玩法概览 OVERVIEW</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('overview') }}</span>{{ t('vor.sec.overview') }} OVERVIEW</h2>
             <p v-if="introHtml" class="nk-vor-intro" v-html="introHtml"></p>
             <dl class="nk-vor-facts">
               <div v-if="activity?.panel_id != null" class="nk-vor-fact">
-                <dt>活动编号</dt>
+                <dt>{{ t('vor.field.actId') }}</dt>
                 <dd>{{ activity.panel_id }}</dd>
               </div>
               <div v-if="activity?.unlock_mission_id != null" class="nk-vor-fact">
-                <dt>解锁任务</dt>
+                <dt>{{ t('vor.field.unlockQuest') }}</dt>
                 <dd>{{ activity.unlock_mission_id }}</dd>
               </div>
             </dl>
@@ -228,9 +233,9 @@ onMounted(() => { void load(); });
 
           <!-- 02 污染等级与愿力 -->
           <section v-if="shownSections.has('scores')" id="vor-scores" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('scores') }}</span>污染等级与愿力 WILL</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('scores') }}</span>{{ t('vor.sec.scores') }} WILL</h2>
             <div v-if="activity?.scores?.length" class="nk-vor-scores">
-              <span class="nk-vor-scores__label">愿力档位</span>
+              <span class="nk-vor-scores__label">{{ t('vor.willTier') }}</span>
               <span v-for="(v, i) in activity.scores" :key="i" class="nk-vor-score">{{ v }}</span>
             </div>
             <ol v-if="progressSteps.length" class="nk-vor-steps">
@@ -251,10 +256,10 @@ onMounted(() => { void load(); });
 
           <!-- 03 「贪饕」侵蚀 -->
           <section v-if="shownSections.has('invasion')" id="vor-invasion" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('invasion') }}</span>「贪饕」侵蚀 INVASION</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('invasion') }}</span>{{ t('vor.sec.invasion') }} INVASION</h2>
 
             <div v-if="levels.length" class="nk-vor-group">
-              <h3 class="nk-vor-group__title">敌方强化</h3>
+              <h3 class="nk-vor-group__title">{{ t('vor.enemyBoost') }}</h3>
               <div class="nk-vor-levels">
                 <article v-for="l in levels" :key="l.invasion_id" class="nk-vor-level">
                   <header class="nk-vor-level__head">
@@ -266,7 +271,7 @@ onMounted(() => { void load(); });
                       loading="lazy"
                       @error="buffIconError"
                     >
-                    <span class="nk-vor-level__no">污染等级 {{ l.invasion_id }}</span>
+                    <span class="nk-vor-level__no">{{ t('vor.invasionLevel', { n: l.invasion_id }) }}</span>
                     <span v-if="l.maze_buff_id != null" class="nk-vor-code">#{{ l.maze_buff_id }}</span>
                     <span v-if="l.binding" class="nk-vor-code nk-vor-code--bind">{{ l.binding }}</span>
                   </header>
@@ -276,7 +281,7 @@ onMounted(() => { void load(); });
             </div>
 
             <div v-if="buffLevels.length" class="nk-vor-group">
-              <h3 class="nk-vor-group__title">玩家支援</h3>
+              <h3 class="nk-vor-group__title">{{ t('vor.playerSupport') }}</h3>
               <div class="nk-vor-buffs">
                 <article v-for="b in buffLevels" :key="b.buff_id" class="nk-vor-buff">
                   <header class="nk-vor-buff__head">
@@ -294,7 +299,7 @@ onMounted(() => { void load(); });
                   </header>
                   <p v-if="b.html" class="nk-vor-buff__desc" v-html="b.html"></p>
                   <div v-if="b.progress_percent != null" class="nk-vor-buff__pct">
-                    愿力进度 <span class="nk-vor-buff__pctval">{{ fmtPct(b.progress_percent) }}</span>
+                    {{ t('vor.willProgress') }} <span class="nk-vor-buff__pctval">{{ fmtPct(b.progress_percent) }}</span>
                   </div>
                 </article>
               </div>
@@ -303,11 +308,11 @@ onMounted(() => { void load(); });
 
           <!-- 04 波及关卡 -->
           <section v-if="shownSections.has('stages')" id="vor-stages" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('stages') }}</span>波及关卡与被污染怪物 STAGES</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('stages') }}</span>{{ t('vor.sec.stagesFull') }} STAGES</h2>
             <div v-for="g in stageGroups" :key="g.invasionId" class="nk-vor-stgroup">
               <header class="nk-vor-stgroup__head">
-                <span class="nk-vor-stgroup__badge">污染等级 {{ g.invasionId }}</span>
-                <span class="nk-vor-stgroup__count">{{ g.stages.length }} 关</span>
+                <span class="nk-vor-stgroup__badge">{{ t('vor.invasionLevel', { n: g.invasionId }) }}</span>
+                <span class="nk-vor-stgroup__count">{{ t('vor.stageCount', { n: g.stages.length }) }}</span>
               </header>
               <div class="nk-vor-stages">
                 <article v-for="s in g.stages" :key="s.stage_id" class="nk-vor-stage">
@@ -350,7 +355,7 @@ onMounted(() => { void load(); });
 
           <!-- 05 状态词条 -->
           <section v-if="shownSections.has('statuses')" id="vor-statuses" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('statuses') }}</span>状态词条 STATUS</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('statuses') }}</span>{{ t('vor.sec.statuses') }} STATUS</h2>
             <div class="nk-vor-statuses">
               <article v-for="st in statuses" :key="st.status_id" class="nk-vor-status">
                 <header class="nk-vor-status__head">
@@ -370,7 +375,7 @@ onMounted(() => { void load(); });
                   <span class="nk-vor-code">#{{ st.status_id }}</span>
                   <span v-if="st.modifier" class="nk-vor-code">{{ st.modifier }}</span>
                   <span v-if="st.can_dispel != null" class="nk-vor-status__flag">
-                    {{ st.can_dispel ? '可驱散' : '不可驱散' }}
+                    {{ st.can_dispel ? t('mob.status.dispel') : t('vor.noDispel') }}
                   </span>
                 </div>
               </article>
@@ -379,7 +384,7 @@ onMounted(() => { void load(); });
 
           <!-- 06 教程图文 -->
           <section v-if="shownSections.has('tutorials')" id="vor-tutorials" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('tutorials') }}</span>教程图文 TUTORIAL</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('tutorials') }}</span>{{ t('vor.sec.tutorials') }} TUTORIAL</h2>
             <div class="nk-vor-tutorials">
               <figure v-for="t in tutorials" :key="t.id" class="nk-vor-tutorial">
                 <div v-if="t.image" class="nk-vor-tutorial__frame">
@@ -401,7 +406,7 @@ onMounted(() => { void load(); });
 
           <!-- 07 货币战争位面词条 -->
           <section v-if="shownSections.has('affixes')" id="vor-affixes" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('affixes') }}</span>货币战争位面词条 AFFIX</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('affixes') }}</span>{{ t('vor.sec.affixesFull') }} AFFIX</h2>
             <div class="nk-vor-affixes">
               <article v-for="a in affixes" :key="a.id" class="nk-vor-affix">
                 <header class="nk-vor-affix__head">
@@ -418,7 +423,7 @@ onMounted(() => { void load(); });
                 </header>
                 <p v-if="a.html" class="nk-vor-affix__desc" v-html="a.html"></p>
                 <div v-if="a.params?.length" class="nk-vor-params">
-                  <span class="nk-vor-params__label">参数</span>
+                  <span class="nk-vor-params__label">{{ t('common.param') }}</span>
                   <span v-for="(p, i) in a.params" :key="i" class="nk-vor-param">{{ p }}</span>
                 </div>
               </article>
@@ -427,10 +432,10 @@ onMounted(() => { void load(); });
 
           <!-- 08 「污染」同形词说明 -->
           <section v-if="shownSections.has('disambig')" id="vor-disambig" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('disambig') }}</span>「污染」同形词说明 NOTE</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('disambig') }}</span>{{ t('vor.sec.disambigFull') }} NOTE</h2>
             <!-- 与 tools/gen-ai-endpoints.mjs 的 VORACITY_DISAMBIGUATION 逐字一致（契约：同一分区文本对所有 UA 一致） -->
             <p class="nk-vor-note">
-              本页「污染」指「贪饕」侵蚀污染；4.5 联动「命运/今晚留下来」的「圣杯战争 · 污染等级 1–7 / 深度污染 / 污染词条」是另一套无关体系，两者不合并叙述、也不互相内链。
+              {{ t('vor.disambigNote') }}
             </p>
           </section>
         </div>

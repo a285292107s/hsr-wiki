@@ -3,12 +3,18 @@
  * 仅在数据就绪后由父组件挂载（加载期模板整体卸载），故 Spine 生命周期跟随组件挂载/卸载。
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { elemLabel, pathLabel } from '../../lib/enum-labels';
 import { useParallax } from '../composables/use-parallax';
 import { initSpineViewer } from './spine';
 import { avatarDrawCardUrl, escHtml } from '../../lib/format';
-import { CDN, ELEM, PATH } from '../../lib/constants';
+import { characterBlurb } from '../../lib/character-blurb';
+import {CDN} from '../../lib/constants';
 import type { CharacterData } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   d: CharacterData;
   charId: string;
@@ -25,7 +31,8 @@ const stars = computed(() =>
   '★'.repeat(parseInt(props.d.rarity.replace(/\D/g, ''), 10) || 5),
 );
 
-const heroDesc = computed(() => escHtml(props.d.desc || '').replace(/\\n/g, '<br>'));
+/** 简介：从角色档案派生（口径唯一落在 `lib/character-blurb.ts`，见该文件注释与 ADR 0052 决策 2/3） */
+const heroDesc = computed(() => escHtml(characterBlurb(props.d.chara_info?.stories)));
 
 const heroRef = ref<HTMLElement | null>(null);
 const heroBgRef = ref<HTMLElement | null>(null);
@@ -92,11 +99,11 @@ onBeforeUnmount(() => {
       <button
         class="nk-hero__toggle"
         :class="{ off: !spineVisible, 'has-anim': spineReady }"
-        :title="spineReady ? undefined : '该角色暂无动画展示'"
+        :title="spineReady ? undefined : t('char.noAnimation')"
         type="button"
         @click="toggleSpine"
       >
-        <span class="dot"></span>动画
+        <span class="dot"></span>{{ t('char.animation') }}
       </button>
     </div>
     <div class="nk-hero__panel">
@@ -110,11 +117,11 @@ onBeforeUnmount(() => {
           <span class="nk-hero__stars">{{ stars }}</span>
           <span class="nk-hero__badge">
             <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`" alt="">
-            <span>{{ ELEM[d.damage_type] || d.damage_type }}</span>
+            <span>{{ elemLabel(d.damage_type) }}</span>
           </span>
           <span class="nk-hero__badge">
             <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`" alt="">
-            <span>{{ PATH[d.base_type] || d.base_type }}</span>
+            <span>{{ pathLabel(d.base_type) }}</span>
           </span>
           <button
             v-if="enhanceable"
@@ -123,7 +130,7 @@ onBeforeUnmount(() => {
             @click="emit('go-enh')"
           >
             <span class="nk-hero__badge-mark" aria-hidden="true"></span>
-            <span>强化形态</span>
+            <span>{{ t('char.enhForm') }}</span>
           </button>
         </div>
         <div class="nk-hero__title">

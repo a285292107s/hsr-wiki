@@ -1,23 +1,18 @@
 import { cdnUri } from '../../../services/cdn';
+import { activeHref } from '../../../lib/i18n/active';
 import { escHtml, avatarShopIconUrl, gridFightTraitIconById } from '../../../lib/format';
 import { loadLocalCurrencyRoles } from '../../../services/api';
 import { getSavedTrailblazerGender, shouldUseFemaleAvatar } from '../../../lib/trailblazer';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 import { loadCwCatalogCss, STAR_SVG } from './shared';
+import { translate } from '../../i18n';
 
-const FB_LABEL: Record<string, string> = {
-  Front: '前台', Back: '后台', Both: '前后台',
-};
+/** 模板与脚本统一走词典 */
+const t = translate;
+import { cwChargeKey, cwCostKey, cwPositionKey, cwTraitCatKey } from '../../../lib/enum-labels';
 
-const CHARGE_LABEL: Record<string, string> = {
-  Speed: '速度', EnergyBar: '特殊充能', MaxSP: '终结技能量', MaxHP: '生命上限', SP: '战技点',
-};
-
-/* ─── 特质分类（与 converter _trait_cat 对齐） ─── */
+/* 前后台 / 充能类型 / 特质分类 / 费用档的枚举 → 词典键映射收在 lib/enum-labels.ts（与卡面共用一份） */
 type TraitCat = 'faction' | 'combat' | 'special';
-const TRAIT_CAT_LABEL: Record<TraitCat, string> = {
-  faction: '阵营', combat: '流派', special: '特殊',
-};
 
 const FB_SVG_FRONT = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-front);fill-opacity:.15;stroke:var(--cw-fb-front);stroke-opacity:.62" stroke-width="1.5"/></svg>`;
 const FB_SVG_BACK = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-back);fill-opacity:.15;stroke:var(--cw-fb-back);stroke-opacity:.62" stroke-width="1.5"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-back)"/></svg>`;
@@ -33,15 +28,16 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const avatar = item.avatar || avatarShopIconUrl(id);
   const rarity = Number(item.rarity) || 0;
   const fbType = (item.front_back_type as string) ?? 'Both';
-  const charge = (item.charge_type || []).map((c) => CHARGE_LABEL[c] ?? c).join(' · ');
-  const expert = item.is_expert ? '<span class="nk-crole-card__exp">专家</span>' : '';
+  const charge = (item.charge_type || []).map((c) => { const k = cwChargeKey(c); return k ? translate(k) : c; }).join(' · ');
+  const expert = item.is_expert
+    ? `<span class="nk-crole-card__exp">${escHtml(translate('catalog.filter.expert'))}</span>` : '';
   const chargeEl = charge ? `<span class="nk-crole-card__charge" title="${escHtml(charge)}">${escHtml(charge)}</span>` : '';
   const fbIcon = fbType === 'Both' ? FB_SVG_BOTH
     : fbType === 'Front' ? FB_SVG_FRONT
     : fbType === 'Back' ? FB_SVG_BACK
     : '';
   const fbBadge = fbIcon ? `<span class="nk-crole-card__fb">${fbIcon}</span>` : '';
-  const costBadge = rarity >= 1 ? `<span class="nk-crole-card__cost" title="${rarity}费"><b>${rarity}</b></span>` : '';
+  const costBadge = rarity >= 1 ? `<span class="nk-crole-card__cost" title="${escHtml(t(String(cwCostKey(String(rarity)))))}"><b>${rarity}</b></span>` : '';
   const traits = (item.traits as Array<{ id: number; name: string; cat: TraitCat }>) || [];
   const traitChips = traits
     .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}"><img class="nk-crole-tcard-trait__icon" src="${cdnUri('gridfight-icon', `${t.id}.webp`)}" alt="" loading="lazy">${escHtml(t.name || `#${t.id}`)}</span>`)
@@ -61,9 +57,10 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
 
 export const currencyRolePage: CatalogPageConfig = {
   id: 'currency-role',
-  title: '货币战争 · 角色图鉴',
+  titleKey: 'catalog.titleWithMode',
+  titleArgs: { mode: 'catalog.currencyWar', name: 'nav.cwRole' },
   subtitle: 'ROLES',
-  searchPlaceholder: '搜索角色…',
+  searchKey: 'catalog.cwRole.search',
   gridClass: 'nk-cat-grid nk-crole-grid',
   cardClass: '.nk-crole-card',
   /* 拆分块须按级联顺序串行加载（styles 数组各 loader 并行执行，顺序不保） */
@@ -83,7 +80,7 @@ export const currencyRolePage: CatalogPageConfig = {
       return {
         id: String(r.id),
         name: r.name,
-        href: `/currency/role/${r.id}`,
+        href: activeHref(`/currency/role/${r.id}`),
         avatar: avatarShopIconUrl(avatarId || r.id),
         rarity: r.rarity,
         front_back_type: r.front_back_type ?? 'Both',
@@ -106,10 +103,12 @@ export const currencyRolePage: CatalogPageConfig = {
     if (rarities.length) {
       filters.push({
         key: 'rarity',
-        label: '稀有度',
+        labelKey: 'catalog.filter.rarity',
         options: [
-          { val: '', label: '全部' },
-          ...rarities.map((v) => ({ val: String(v), label: `${STAR_SVG}${v}费` })),
+          { val: '', labelKey: 'catalog.all' },
+          ...rarities.map((v) => (cwCostKey(String(v))
+        ? { val: String(v), label: STAR_SVG, labelKey: cwCostKey(String(v)) }
+        : { val: String(v), label: `${STAR_SVG}${v}` })),
         ],
       });
     }
@@ -130,9 +129,9 @@ export const currencyRolePage: CatalogPageConfig = {
       if (!entries.length) continue;
       filters.push({
         key: `trait_${cat}`,
-        label: TRAIT_CAT_LABEL[cat],
+        labelKey: cwTraitCatKey(cat),
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           ...entries.map(([id, name]) => ({ val: String(id), label: name, icon: gridFightTraitIconById(id) })),
         ],
       });
@@ -143,11 +142,13 @@ export const currencyRolePage: CatalogPageConfig = {
     if (positions.length) {
       filters.push({
         key: 'front_back_type',
-        label: '位置',
+        labelKey: 'catalog.filter.position',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           ...positions.sort((a, b) => (POS_ORDER[a] ?? 99) - (POS_ORDER[b] ?? 99))
-            .map((v) => ({ val: v, label: `${FB_OPTION_SVG[v] ?? ''}${FB_LABEL[v] ?? v}` })),
+            .map((v) => (cwPositionKey(v)
+          ? { val: v, label: FB_OPTION_SVG[v] ?? '', labelKey: cwPositionKey(v) }
+          : { val: v, label: `${FB_OPTION_SVG[v] ?? ''}${v}` })),
         ],
       });
     }
@@ -157,29 +158,29 @@ export const currencyRolePage: CatalogPageConfig = {
     if (charge.size) {
       filters.push({
         key: 'charge_type',
-        label: '充能类型',
+        labelKey: 'catalog.filter.chargeType',
         options: [
-          { val: '', label: '全部' },
-          ...[...charge].sort().map((v) => ({ val: v, label: CHARGE_LABEL[v] ?? v })),
+          { val: '', labelKey: 'catalog.all' },
+          ...[...charge].sort().map((v) => (cwChargeKey(v) ? { val: v, labelKey: cwChargeKey(v) } : { val: v, label: v })),
         ],
       });
     }
 
     filters.push({
       key: 'is_expert',
-      label: '专家',
+      labelKey: 'catalog.filter.expert',
       options: [
-        { val: '', label: '全部' },
-        { val: 'true', label: '仅专家' },
+        { val: '', labelKey: 'catalog.all' },
+        { val: 'true', labelKey: 'catalog.option.expertOnly' },
       ],
     });
 
     filters.push({
       key: 'has_equipment',
-      label: '光锥',
+      labelKey: 'catalog.filter.lightcone',
       options: [
-        { val: '', label: '全部' },
-        { val: 'true', label: '有后台光锥' },
+        { val: '', labelKey: 'catalog.all' },
+        { val: 'true', labelKey: 'catalog.option.hasBackLightcone' },
       ],
     });
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { CatalogFilterOption } from './types';
 
 const props = withDefaults(
@@ -13,6 +14,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{ change: [val: string] }>();
+
+const { t } = useI18n();
 
 const open = ref(false);
 /** 菜单打开时刻：滚动关闭引入 120ms 时间窗，吸收点击按钮瞬间容器/页面的滚动校正（
@@ -92,7 +95,7 @@ onBeforeUnmount(() => {
       :disabled="disabled"
       :aria-haspopup="true"
       :aria-expanded="open"
-      :aria-label="`${label}筛选`"
+      :aria-label="t('catalog.filterAria', { name: label })"
       @click="toggle"
     >
       <img v-if="hasValue && current?.icon" class="nk-cat-select__icon" :src="current.icon" alt="">

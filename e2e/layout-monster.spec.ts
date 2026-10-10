@@ -663,9 +663,11 @@ test.describe('布局验收：敌方详情页', () => {
       /* 4034013 的那条形态行名字 = 同条目成员 4034015「无缘黎明」卡厄斯兰那 ⇒ 不摆到本页；
          但入口不能丢：「图鉴族」互链必须仍然给出它（撤块 ≠ 用户走不到）。 */
       const sibling = 4034015;
+      await page.goto(`/monster/4034013`);
+      // 形态块（含图鉴族互链）是异步加载的：必须等它就位再采样，否则会读到空数组假失败
+      await expect(page.locator('.nk-mob-atlas__links')).toBeVisible();
       expect(
-        (await page.goto(`/monster/4034013`).then(() => page.locator('.nk-mob-atlas__link').allTextContents()))
-          .map((t) => t.trim()),
+        (await page.locator('.nk-mob-atlas__link').allTextContents()).map((t) => t.trim()),
         '同条目成员必须仍在「图鉴族」互链里',
       ).toContain(detailOf(sibling).name);
       await checkPhases(4034013); // 形态块被撤（名字命中的是同条目另一个条目页）

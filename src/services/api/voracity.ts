@@ -1,6 +1,5 @@
 
 import type { VoracityDb } from '../types';
-import { LOCAL_DATA_BASE } from './base';
-import { singletonLoad } from './singleton';
+import { singletonLocalData } from './local';
 
-export const loadLocalVoracity = singletonLoad<VoracityDb>(`${LOCAL_DATA_BASE}/voracity.json`);
+export const loadLocalVoracity = singletonLocalData<VoracityDb>('voracity.json');

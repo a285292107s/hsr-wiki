@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { elemLabel } from '../../lib/enum-labels';
 import { useRoute } from 'vue-router';
-import { ELEM, MON_RANK, SITE_NAME } from '../../lib/constants';
-import {
-  elementIconUrl, escHtml, fmtDesc, itemIconUrl, monsterFigureUrl, monsterIconUrl,
-} from '../../lib/format';
+import { useI18n } from 'vue-i18n';
+import { translate } from '../i18n';
+import { SITE_NAME } from '../../lib/constants';
+import { monsterRankKey } from '../../lib/enum-labels';
+import { elementIconUrl, escHtml, fmtDesc, itemIconUrl, monsterFigureUrl, monsterIconUrl } from '../../lib/format';
 import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
 import { monsterEliteRatiosProduct, monsterMaxLevel, monsterStanceValue, monsterStatAt } from '../../lib/monster-stats';
 import { fmtStatValue } from '../../lib/format';
@@ -15,6 +17,7 @@ import { usePageData } from '../composables/use-page-data';
 import '../../styles/monster-detail.css';
 
 const route = useRoute();
+const { t } = useI18n();
 
 const { data, error, showSkeleton, run: load, retry } = usePageData<MonsterDetail>(() =>
   loadLocalMonsterDetail(String(route.params.id)),
@@ -90,7 +93,7 @@ const figureUrl = computed(() => {
   if (!d.value) return '';
   return monsterFigureUrl(d.value.figure) || monsterIconUrl(d.value.icon);
 });
-const rankLabel = computed(() => (d.value ? MON_RANK[d.value.rank] || '' : ''));
+const rankLabel = computed(() => (d.value?.rank ? t(monsterRankKey(d.value.rank)) : ''));
 const invaded = computed(() => d.value?.invaded ?? null);
 /** 侵蚀等级序号（同一怪物可被多个等级点名） */
 const invadedLevels = computed(() => {
@@ -108,12 +111,15 @@ type VariantSigKey =
   | 'weak' | 'resist' | 'stance' | 'hp' | 'atk' | 'def' | 'speed'
   | 'skills' | 'camp' | 'rank' | 'intro' | 'figure' | 'invaded';
 
-const VARIANT_SIG_LABEL: Record<VariantSigKey, string> = {
-  weak: '弱点', resist: '抗性', stance: '韧性', hp: 'HP', atk: '攻击', def: '防御', speed: '速度',
-  skills: '技能', camp: '阵营', rank: '分类', intro: '图鉴介绍', figure: '立绘', invaded: '侵蚀名单',
+/** 差异签名 → 词典键（同一批词复用既有键：弱点 / 阵营 / 分类 / 速度） */
+const VARIANT_SIG_KEY: Record<VariantSigKey, string> = {
+  weak: 'catalog.filter.weak', resist: 'catalog.sig.resist', stance: 'catalog.sig.stance',
+  hp: 'catalog.sig.hp', atk: 'catalog.sig.atk', def: 'catalog.sig.def', speed: 'catalog.charge.speed',
+  skills: 'catalog.sig.skills', camp: 'catalog.filter.camp', rank: 'catalog.filter.category',
+  intro: 'catalog.sig.intro', figure: 'catalog.sig.figure', invaded: 'catalog.sig.invaded',
 };
 /** 详情页会渲染出来的一切（除 id）——「差分」标注必须覆盖全部，否则会谎报「与当前档一致」 */
-const VARIANT_SIG_KEYS = Object.keys(VARIANT_SIG_LABEL) as VariantSigKey[];
+const VARIANT_SIG_KEYS = Object.keys(VARIANT_SIG_KEY) as VariantSigKey[];
 /** 行内直接展示的 5 格；这 5 格才是会被高亮的值格 */
 const VARIANT_CELL_KEYS: VariantSigKey[] = ['weak', 'stance', 'hp', 'speed', 'skills'];
 
@@ -214,10 +220,10 @@ const variants = computed(() => {  const cur = data.value;
     const diffCells = diffAll.filter((k) => VARIANT_CELL_KEYS.includes(k));
     const isCurrent = key === String(cur.id);
     const flag = isCurrent
-      ? '当前档'
+      ? t('mob.variant.current')
       : diffAll.length
-        ? `差分 ${diffAll.map((k) => VARIANT_SIG_LABEL[k]).join(' / ')}`
-        : '与当前档一致';
+        ? t('catalog.variantDiff', { list: diffAll.map((k) => t(VARIANT_SIG_KEY[k])).join(' / ') })
+        : t('mob.variant.same');
     return { row, det, isCurrent, diffCells, flag };
   });
 });
@@ -239,18 +245,18 @@ const eventLevelText = computed(() => {
 });
 
 function elemTag(elem: string): string {
-  const name = ELEM[elem] || elem;
+  const name = elemLabel(elem);
   return `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(elem))}" alt="" loading="lazy">${escHtml(name)}</span>`;
 }
 const weakHtml = computed(() => (d.value?.weak ?? []).map(elemTag).join(''));
 const resistHtml = computed(() =>
   Object.entries(d.value?.resist ?? {})
-    .map(([k, v]) => `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(ELEM[k] || k)} ${Math.round(v * 100)}%</span>`)
+    .map(([k, v]) => `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
     .join(''));
 const introHtml = computed(() => {
   if (!d.value) return '';
   const t = fmtDesc(d.value.intro, []);
-  return t || '<span class="nk-mob-empty">暂无图鉴介绍</span>';
+  return t || `<span class="nk-mob-empty">${translate('mob.empty.intro')}</span>`;
 });
 function skillHtml(s: MonsterSkillDetail): string {
   return fmtDesc(s.desc, s.param_list);
@@ -258,7 +264,7 @@ function skillHtml(s: MonsterSkillDetail): string {
 function skillMeta(s: MonsterSkillDetail): string {
   const parts: string[] = [];
   if (s.damage_type) {
-    const name = ELEM[s.damage_type] || s.damage_type;
+    const name = elemLabel(s.damage_type);
     parts.push(
       `<span class="nk-mob-skill__elem"><img src="${escHtml(elementIconUrl(s.damage_type))}" alt="${escHtml(name)}" title="${escHtml(name)}" loading="lazy">${escHtml(name)}</span>`,
     );
@@ -275,10 +281,13 @@ function fxHtml(fx: MonsterExtraEffect): string {
 }
 
 /** 状态词条类型：源字段枚举 → 中文（与 ELEM / MON_RANK 同类的枚举映射，不是自建数据源） */
-const STATUS_TYPE: Record<string, string> = { Buff: '增益', Debuff: '减益', Other: '其他' };
+const STATUS_TYPE_KEY: Record<string, string> = {
+  Buff: 'mob.status.buff', Debuff: 'mob.status.debuff', Other: 'mob.status.other',
+};
 
 function statusTypeLabel(type: string): string {
-  return STATUS_TYPE[type] || type || '其他';
+  const key = STATUS_TYPE_KEY[type];
+  return key ? t(key) : (type || t('mob.status.other'));
 }
 
 /** 阶段编号的中文序数（官方阶段名把「第几阶段」写在名字里：实测 36 条阶段行里 28 条带「阶段N：」前缀，
@@ -290,7 +299,12 @@ const CN_ORDINAL = ['一', '二', '三', '四', '五', '六', '七', '八', '九
  *  **保留原样**：宁可重复，不可标错号。名字本身不动（源文本保真），这里只是取它的一段。 */
 function guidePhaseName(p: MazeBossPhase, i: number): string {
   const m = p.name.match(/^阶段\s*([一二三四五六七八九十\d]+)\s*[：:]\s*/);
-  return m && m[1] === CN_ORDINAL[i] ? p.name.slice(m[0].length) : p.name;
+  if (m) return m[1] === CN_ORDINAL[i] ? p.name.slice(m[0].length) : p.name;
+  /* 非中文语言包里阶段名已是译文（如 `Phase 1: …`）⇒ 中文前缀正则必然落空，
+     而编号另有独立标记位，不剥就会把「第几阶段」说两遍。故按「短标签 + 数字 + 冒号」剥；
+     数字正确性不依赖此处（标记位才是权威），符合「宁可重复，不可标错号」。 */
+  const any = p.name.match(/^\s*[^\s:：]{1,12}\s*(\d{1,2})\s*[：:]\s*/);
+  return any ? p.name.slice(any[0].length) : p.name;
 }
 
 /** 状态词条描述：本仓只落**无 `#N[i]` 占位符**的描述，故按普通富文本渲染（换行仍走 fmtDesc） */
@@ -394,14 +408,14 @@ const phases = computed(() => {
 });
 
 function tierLabel(worldLevel: number | null): string {
-  return worldLevel == null ? '基准档' : `均衡等级 ${worldLevel}`;
+  return worldLevel == null ? t('mob.levelBase') : t('mob.levelBalance', { n: worldLevel });
 }
 
 /** 一个阶段的弱点/抗性标签（与本体行同一渲染口径：元素图标 + 名称/百分比） */
 function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
   if (kind === 'weak') return (phase.weak ?? []).map(elemTag).join('');
   return Object.entries(phase.resist ?? {})
-    .map(([k, v]) => `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(ELEM[k] || k)} ${Math.round(v * 100)}%</span>`)
+    .map(([k, v]) => `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
     .join('');
 }
 </script>
@@ -423,8 +437,8 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
           <path d="M12 9v4" /><path d="M12 17h.01" />
         </svg>
       </div>
-      <div class="nk-error-state__title">怪物数据加载失败</div>
-      <div class="nk-error-state__detail">可能是网络波动或该条目暂时不可用，重试即可恢复。</div>
+      <div class="nk-error-state__title">{{ t('mob.error.title') }}</div>
+      <div class="nk-error-state__detail">{{ t('common.loadErrorDetail') }}</div>
       <div class="nk-error-state__tech">{{ error }}</div>
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
@@ -439,30 +453,30 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             <span class="nk-mob-hero__no">ARCHIVE · № {{ d.id }}</span>
             <span v-if="rankLabel">{{ rankLabel }}</span>
             <span v-if="d.camp">{{ d.camp }}</span>
-            <span v-if="d.stance">韧性 {{ d.stance }}</span>
+            <span v-if="d.stance">{{ t('mob.stat.stance') }} {{ d.stance }}</span>
           </div>
           <h1 class="nk-mob-hero__name">{{ d.name }}</h1>
           <RouterLink v-if="invaded" class="nk-mob-invaded" to="/voracity">
-            <span class="nk-mob-invaded__text">受『贪饕』侵蚀</span>
-            <span v-if="invadedLevels" class="nk-mob-invaded__lv">· 等级 {{ invadedLevels }}</span>
+            <span class="nk-mob-invaded__text">{{ t('nav.voracity') }}</span>
+            <span v-if="invadedLevels" class="nk-mob-invaded__lv">· {{ t('mob.level', { n: invadedLevels }) }}</span>
           </RouterLink>
           <!-- 弱点与抗性上收进 hero 信息列：条数有限、占位固定，不像图鉴正文那样会把 hero 撑长 -->
           <section class="nk-mob-hero__sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">弱点与抗性</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.weakness') }}</h2>
               <span class="nk-mob-sec__en">VULNERABILITY</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
             <div class="nk-mob-resist">
               <div class="nk-mob-resist__row">
-                <span class="nk-mob-resist__label">韧性弱点</span>
+                <span class="nk-mob-resist__label">{{ t('mob.resist.stance') }}</span>
                 <span v-if="weakHtml" class="nk-mob-resist__tags" v-html="weakHtml"></span>
-                <span v-else class="nk-mob-empty">无弱点信息</span>
+                <span v-else class="nk-mob-empty">{{ t('mob.empty.weak') }}</span>
               </div>
               <div class="nk-mob-resist__row">
-                <span class="nk-mob-resist__label">伤害抗性</span>
+                <span class="nk-mob-resist__label">{{ t('mob.resist.damage') }}</span>
                 <span v-if="resistHtml" class="nk-mob-resist__tags" v-html="resistHtml"></span>
-                <span v-else class="nk-mob-empty">无抗性信息</span>
+                <span v-else class="nk-mob-empty">{{ t('mob.empty.resist') }}</span>
               </div>
             </div>
             <!-- 其他形态（源表 MonsterAtlasExtraPhase(s)）：该图鉴条目另有立绘形态，各有自己的弱点/抗性。
@@ -472,17 +486,17 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
               <div v-for="p in phases" :key="p.phase_ids[0]" class="nk-mob-phase">
                 <div class="nk-mob-phase__head">
                   <span v-if="p.name" class="nk-mob-phase__name">{{ p.name }}</span>
-                  <span v-else class="nk-mob-phase__label">其他形态</span>
+                  <span v-else class="nk-mob-phase__label">{{ t('mob.phase.other') }}</span>
                 </div>
                 <div class="nk-mob-resist__row">
-                  <span class="nk-mob-resist__label">韧性弱点</span>
+                  <span class="nk-mob-resist__label">{{ t('mob.resist.stance') }}</span>
                   <span v-if="(p.weak || []).length" class="nk-mob-resist__tags" v-html="phaseTags(p, 'weak')"></span>
-                  <span v-else class="nk-mob-empty">无弱点信息</span>
+                  <span v-else class="nk-mob-empty">{{ t('mob.empty.weak') }}</span>
                 </div>
                 <div class="nk-mob-resist__row">
-                  <span class="nk-mob-resist__label">伤害抗性</span>
+                  <span class="nk-mob-resist__label">{{ t('mob.resist.damage') }}</span>
                   <span v-if="Object.keys(p.resist || {}).length" class="nk-mob-resist__tags" v-html="phaseTags(p, 'resist')"></span>
-                  <span v-else class="nk-mob-empty">无抗性信息</span>
+                  <span v-else class="nk-mob-empty">{{ t('mob.empty.resist') }}</span>
                 </div>
               </div>
             </div>
@@ -495,7 +509,7 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
           <!-- 图鉴正文回文档流：长度不可控（目录里 0~356 字），不该由 hero 承担 -->
           <section class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">图鉴记录</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.record') }}</h2>
               <span class="nk-mob-sec__en">DOSSIER</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
@@ -507,14 +521,14 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                仅 22 个目录条目登记了这套文案，其余不渲染整块。 -->
           <section v-if="d.guide_phases?.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">阶段机制</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.guide') }}</h2>
               <span class="nk-mob-sec__en">BOSS GUIDE</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
             <div class="nk-mob-guides">
               <article v-for="(g, i) in d.guide_phases" :key="g.id" class="nk-mob-guide">
                 <header class="nk-mob-guide__head">
-                  <span class="nk-mob-guide__no">阶段 {{ i + 1 }}</span>
+                  <span class="nk-mob-guide__no">{{ t('mob.stage', { n: i + 1 }) }}</span>
                   <h3 class="nk-mob-guide__name">{{ guidePhaseName(g, i) }}</h3>
                 </header>
                 <p v-if="g.desc" class="nk-mob-guide__desc" v-html="fmtDesc(g.desc, [])"></p>
@@ -531,16 +545,16 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
 
           <section class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">战斗数值</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.stats') }}</h2>
               <span class="nk-mob-sec__en">COMBAT STATS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
             <!-- 等级档滑条：复用光锥页「叠影」range 原语（.nk-skill__slider），页级字号口径 -->
             <div v-if="maxLevel > 1" class="nk-mob-level">
-              <span class="nk-mob-level__label">等级 {{ combatLevel }}</span>
+              <span class="nk-mob-level__label">{{ t('mob.level', { n: combatLevel }) }}</span>
               <input
                 type="range"
-                aria-label="敌人等级"
+                :aria-label="t('mob.levelAria')"
                 :min="1"
                 :max="maxLevel"
                 :value="combatLevel"
@@ -548,35 +562,35 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 @input="levelOverride = Number(($event.target as HTMLInputElement).value)"
               >
             </div>
-            <p v-else class="nk-mob-empty">该怪物的等级曲线暂缺组 {{ d?.level_group ?? 1 }}，仅展示档案基准值。</p>
+            <p v-else class="nk-mob-empty">{{ t('mob.levelMissing', { n: d?.level_group ?? 1 }) }}</p>
             <dl class="nk-mob-stats">
               <div class="nk-mob-stat">
-                <dt class="nk-mob-stat__label">HP 生命</dt>
+                <dt class="nk-mob-stat__label">{{ t('mob.stat.hp') }}</dt>
                 <dd class="nk-mob-stat__val" data-prop="hp">{{ fmtStatValue(combatStats?.hp ?? d.stats.hp) }}</dd>
               </div>
               <div class="nk-mob-stat">
-                <dt class="nk-mob-stat__label">ATK 攻击</dt>
+                <dt class="nk-mob-stat__label">{{ t('mob.stat.atk') }}</dt>
                 <dd class="nk-mob-stat__val" data-prop="atk">{{ fmtStatValue(combatStats?.atk ?? d.stats.atk) }}</dd>
               </div>
               <div class="nk-mob-stat">
-                <dt class="nk-mob-stat__label">DEF 防御</dt>
+                <dt class="nk-mob-stat__label">{{ t('mob.stat.def') }}</dt>
                 <dd class="nk-mob-stat__val" data-prop="def">{{ fmtStatValue(combatStats?.def ?? d.stats.def) }}</dd>
               </div>
               <div class="nk-mob-stat">
-                <dt class="nk-mob-stat__label">SPD 速度</dt>
+                <dt class="nk-mob-stat__label">{{ t('mob.stat.spd') }}</dt>
                 <dd class="nk-mob-stat__val" data-prop="spd">{{ fmtStatValue(combatStats?.speed ?? d.stats.speed) }}</dd>
               </div>
               <div v-if="d.stance" class="nk-mob-stat nk-mob-stat--stance">
-                <dt class="nk-mob-stat__label">韧性</dt>
+                <dt class="nk-mob-stat__label">{{ t('mob.stat.stance') }}</dt>
                 <dd class="nk-mob-stat__val">{{ fmtStatValue(stanceValue ?? d.stance) }}</dd>
               </div>
             </dl>
-            <p class="nk-mob-stat-note">口径：模板基准 × 维度修饰比 × 精英组倍率（组 {{ d.elite_group ?? 1 }}）× 等级曲线（难度组 {{ d.level_group ?? 1 }}）＋ 实例修正值；<strong>韧性不入该曲线</strong>（韧性 = 韧性基准 × 精英组韧性倍率 + 实例修正值，不随等级变化，故在上方单独一行）；基准值 {{ d.stats.hp }} / {{ d.stats.atk }} / {{ d.stats.def }} / {{ d.stats.speed }}<template v-if="d.stance_modify != null || d.speed_modify != null">，本档修正 <template v-if="d.stance_modify != null">韧性 {{ d.stance_modify > 0 ? '+' : '' }}{{ d.stance_modify }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">速度 {{ d.speed_modify > 0 ? '+' : '' }}{{ d.speed_modify }}</template></template>，未含关卡侧精英组指派（侵蚀隧洞、拟造花萼等副本的额外倍率）与剧情系数。</p>
+            <p class="nk-mob-stat-note">{{ t('mob.statNoteA', { a: d.elite_group ?? 1, b: d.level_group ?? 1 }) }}<strong>{{ t('mob.statNoteStance') }}</strong>{{ t('mob.statNoteStanceNote') }}{{ t('mob.statNoteBase') }} {{ d.stats.hp }} / {{ d.stats.atk }} / {{ d.stats.def }} / {{ d.stats.speed }}<template v-if="d.stance_modify != null || d.speed_modify != null">{{ t('mob.statNoteModify') }} <template v-if="d.stance_modify != null">{{ t('mob.statNoteStanceMod', { v: (d.stance_modify > 0 ? '+' : '') + d.stance_modify }) }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">{{ t('mob.statNoteSpeedMod', { v: (d.speed_modify > 0 ? '+' : '') + d.speed_modify }) }}</template></template>{{ t('mob.statNoteTail') }}</p>
           </section>
 
           <section v-if="d.skills.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">技能</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.skills') }}</h2>
               <span class="nk-mob-sec__en">SKILLS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
@@ -592,13 +606,13 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                      供对照，缺行比重复更困惑（描述常只写「大概率」不说值）；值间「 / 」分隔，
                      防止 1 与 1 连读成 11。官方 ParamList 是无标注数组，不声称任何语义含义。 -->
                 <div v-if="s.param_list?.length" class="nk-mob-skill__params">
-                  <span class="nk-mob-skill__paramsk">参数</span>
+                  <span class="nk-mob-skill__paramsk">{{ t('common.param') }}</span>
                   <span class="nk-mob-skill__paramsvals">{{ s.param_list.map((p) => fmtStatValue(p)).join(' / ') }}</span>
                 </div>
                 <!-- 附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键）：技能另外施加的机制，
                      名称 + 描述都是数据文本；图标在两侧 CDN 全 404，故不落图标 -->
                 <div v-if="s.extra_effects?.length" class="nk-mob-skill__fx">
-                  <span class="nk-mob-skill__fxk">附带效果</span>
+                  <span class="nk-mob-skill__fxk">{{ t('mob.fx') }}</span>
                   <span v-for="fx in s.extra_effects" :key="fx.id" class="nk-mob-skill__fxitem">
                     <span class="nk-mob-skill__fxname">{{ fx.name }}</span>
                     <span v-if="fxHtml(fx)" class="nk-mob-skill__fxdesc" v-html="fxHtml(fx)"></span>
@@ -610,14 +624,14 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
 
           <section v-if="d.statuses?.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">状态词条</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.status') }}</h2>
               <span class="nk-mob-sec__en">STATUSES</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
             <!-- 口径：归属靠命名约定（`MonsterStatusConfig.ModifierName` 含怪物配置名），不是外键；
                  只保留「该配置名下的模板去形态后缀后同名」的词条（宁可少归不可错归）。
                  带 `#N[i]` 的描述（数值来自动态属性）本仓无值，按仓规整段省略——故有些词条只有名称与类型。 -->
-            <p class="nk-mob-status__lead">口径：按状态配置名与怪物配置名的命名约定归属；数值或动态名称未公开的词条只列名称与类型。</p>
+            <p class="nk-mob-status__lead">{{ t('mob.statusLead') }}</p>
             <div class="nk-mob-statuses">
               <article v-for="s in d.statuses" :key="s.id" class="nk-mob-status" :data-type="s.type">
                 <header class="nk-mob-status__head">
@@ -635,7 +649,7 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                   </span>
                   <span class="nk-mob-status__name">{{ s.name }}</span>
                   <span class="nk-mob-status__type">{{ statusTypeLabel(s.type) }}</span>
-                  <span v-if="s.dispel" class="nk-mob-status__dispel">可驱散</span>
+                  <span v-if="s.dispel" class="nk-mob-status__dispel">{{ t('mob.status.dispel') }}</span>
                 </header>
                 <p v-if="s.desc" class="nk-mob-status__desc" v-html="statusDesc(s.desc)"></p>
               </article>
@@ -644,7 +658,7 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
 
           <section class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">出没关卡</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.appear') }}</h2>
               <span class="nk-mob-sec__en">ENCOUNTERS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
@@ -652,53 +666,53 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                  空态与「有计数无样本」都显式：源数据里没有关卡名的关卡只计数、不以敌人名替代（ADR 0047）。 -->
             <template v-if="appearances">
               <p class="nk-mob-appear__count">
-                出现在 <strong>{{ appearances.total }}</strong> 个关卡<template v-if="appearances.samples.length">，以下为其中几处：</template><template v-else>。</template>
+                {{ t('mob.appearIn') }} <strong>{{ appearances.total }}</strong>{{ t('mob.appearStages') }}<template v-if="appearances.samples.length">{{ t('mob.appearSamples') }}</template><template v-else>。</template>
               </p>
               <ul v-if="appearances.samples.length" class="nk-mob-appear__samples">
                 <li v-for="s in appearances.samples" :key="s.id" class="nk-mob-appear__sample">
                   <span class="nk-mob-appear__sample-name"><template v-if="s.activity"><span class="nk-mob-appear__sample-from">{{ s.activity }}</span> · </template>{{ s.name }}</span>
                   <!-- 单行插值：textContent 逐字可断言（等级 + 四维，千分位同 fmtStatValue 口径） -->
-                  <span v-if="samplePanels?.[s.id]" class="nk-mob-appear__sample-panel"><span class="nk-mob-appear__sample-panel-lv">等级 {{ s.level }}</span> · HP {{ fmtStatValue(samplePanels[s.id]!.hp) }} / ATK {{ fmtStatValue(samplePanels[s.id]!.atk) }} / DEF {{ fmtStatValue(samplePanels[s.id]!.def) }} / SPD {{ fmtStatValue(samplePanels[s.id]!.speed) }}</span>
+                  <span v-if="samplePanels?.[s.id]" class="nk-mob-appear__sample-panel"><span class="nk-mob-appear__sample-panel-lv">{{ t('mob.level', { n: s.level }) }}</span> · HP {{ fmtStatValue(samplePanels[s.id]!.hp) }} / ATK {{ fmtStatValue(samplePanels[s.id]!.atk) }} / DEF {{ fmtStatValue(samplePanels[s.id]!.def) }} / SPD {{ fmtStatValue(samplePanels[s.id]!.speed) }}</span>
                 </li>
               </ul>
               <p class="nk-mob-appear__tip">
-                <template v-if="appearances.samples.length">关卡名取自游戏内（活动关卡 / 终局层级 / 侵蚀隧洞 · 凝滞虚影 / 强敌挑战 · 剑试），至多列 3 处。</template>
-                <template v-else>这些关卡在游戏内没有关卡名，只计入上面的数量。</template>
+                <template v-if="appearances.samples.length">{{ t('mob.appearSourceNote') }}</template>
+                <template v-else>{{ t('mob.appearNoNameNote') }}</template>
               </p>
             </template>
-            <p v-else class="nk-mob-appear__count nk-mob-appear__count--none">暂无关卡出场记录。</p>
+            <p v-else class="nk-mob-appear__count nk-mob-appear__count--none">{{ t('mob.empty.appear') }}</p>
             <details class="nk-mob-appear__how">
-              <summary>统计口径</summary>
-              <p>按关卡波次统计，被其他敌人召唤出场的关卡也算；同一个关卡只算一次，一个关卡名可能覆盖多个难度档或上下半场。无限波次玩法里随机抽取的编组不算关卡，不计入。</p>
+              <summary>{{ t('mob.census.k') }}</summary>
+              <p>{{ t('mob.appearCensus') }}</p>
             </details>
             <!-- 活动出处（判据见 ADR 0048）：活动名/页签名是源文本；「美术复用」按转换器给的
                  `art_shared`（同卡面图标 + 立绘是否相同两个维度）表述，**不写站点证不了的「技能组复用」**。 -->
             <div v-if="d.event" class="nk-mob-event">
-              <p class="nk-mob-event__k">活动出处</p>
+              <p class="nk-mob-event__k">{{ t('mob.event.k') }}</p>
               <p class="nk-mob-event__line">
-                <template v-if="d.event.count !== (appearances?.total ?? -1)">其中 {{ d.event.count }} 个在「{{ d.event.name }}」活动里，</template>
-                <template v-else>全部关卡都在「{{ d.event.name }}」活动里，</template>
-                等级 {{ eventLevelText }}<template v-if="d.event.tabs.length">；页签：{{ d.event.tabs.join(' / ') }}</template>。
+                <template v-if="d.event.count !== (appearances?.total ?? -1)">{{ t('mob.eventSome', { n: d.event.count, name: d.event.name }) }}</template>
+                <template v-else>{{ t('mob.eventAll', { name: d.event.name }) }}</template>
+                {{ t('mob.level', { n: eventLevelText }) }}<template v-if="d.event.tabs.length">{{ t('mob.eventTabs', { tabs: d.event.tabs.join(' / ') }) }}</template>。
               </p>
               <p v-if="d.art_shared" class="nk-mob-event__line">
-                <template v-if="d.art_shared.figure">本形态没有独立美术：卡面与立绘与「{{ d.art_shared.name }}」共用（同卡面共 {{ d.art_shared.forms }} 个形态）。</template>
-                <template v-else>本形态与「{{ d.art_shared.name }}」等 {{ d.art_shared.forms }} 个形态同卡面图标，立绘不同。</template>
+                <template v-if="d.art_shared.figure">{{ t('mob.artSharedFigure', { name: d.art_shared.name, n: d.art_shared.forms }) }}</template>
+                <template v-else>{{ t('mob.artSharedIcon', { name: d.art_shared.name, n: d.art_shared.forms }) }}</template>
               </p>
             </div>
           </section>
 
           <section v-if="drops.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">掉落</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.drop') }}</h2>
               <span class="nk-mob-sec__en">DROPS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
-            <p class="nk-mob-drop__lead">按均衡等级分档；「基准档」为无均衡等级限制的那一档。</p>
+            <p class="nk-mob-drop__lead">{{ t('mob.dropLead') }}</p>
             <div class="nk-mob-drops">
               <div v-for="t in drops" :key="String(t.world_level)" class="nk-mob-drop">
                 <div class="nk-mob-drop__head">
                   <span class="nk-mob-drop__tier">{{ tierLabel(t.world_level) }}</span>
-                  <span v-if="t.avatar_exp" class="nk-mob-drop__exp">角色经验 {{ t.avatar_exp }}</span>
+                  <span v-if="t.avatar_exp" class="nk-mob-drop__exp">{{ translate('itemType.AvatarExp') }} {{ t.avatar_exp }}</span>
                 </div>
                 <div class="nk-mob-drop__items">
                   <span v-for="it in t.items" :key="it.id" class="nk-mob-drop__item" :title="it.name">
@@ -712,14 +726,14 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
 
           <section v-if="variants.length || atlasOthers.length" class="nk-mob-sec">
             <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">同族变体</h2>
+              <h2 class="nk-mob-sec__title">{{ t('mob.sec.variants') }}</h2>
               <span class="nk-mob-sec__en">VARIANTS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
-              <span v-if="variants.length" class="nk-mob-var__count">{{ variants.length }} 档</span>
+              <span v-if="variants.length" class="nk-mob-var__count">{{ t('mob.variantCount', { n: variants.length }) }}</span>
             </header>
             <p v-if="variants.length" class="nk-mob-var__lead">
-              名称与卡面相同的 {{ variants.length }} 个数值档，弱点／韧性／数值／技能各不相同。
-              「差分」列出的字段是本档与本页当前档不同的全部差异。
+              {{ t('mob.variantLead', { n: variants.length }) }}
+              {{ t('catalog.variantDiffHelp') }}
             </p>
             <div class="nk-mob-var">
               <RouterLink
@@ -737,31 +751,31 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 <span class="nk-mob-var__id">№ {{ v.row.id }}</span>
                 <span class="nk-mob-var__cells">
                   <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('weak') }">
-                    <span class="nk-mob-var__k">弱点</span>
+                    <span class="nk-mob-var__k">{{ t('catalog.filter.weak') }}</span>
                     <span v-if="v.det" class="nk-mob-var__weak">
                       <img
                         v-for="e in v.det.weak"
                         :key="e"
                         :src="elementIconUrl(e)"
-                        :alt="ELEM[e] || e"
-                        :title="ELEM[e] || e"
+                        :alt="elemLabel(e)"
+                        :title="elemLabel(e)"
                         loading="lazy"
                       >
-                      <span v-if="!v.det.weak.length" class="nk-mob-var__none">无</span>
+                      <span v-if="!v.det.weak.length" class="nk-mob-var__none">{{ t('common.none') }}</span>
                     </span>
                     <span v-else class="nk-mob-var__none">—</span>
                   </span>
                   <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('stance') }">
-                    <span class="nk-mob-var__k">韧性</span>{{ variantCell(v.det, 'stance') }}
+                    <span class="nk-mob-var__k">{{ t('catalog.sig.stance') }}</span>{{ variantCell(v.det, 'stance') }}
                   </span>
                   <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('hp') }">
                     <span class="nk-mob-var__k">HP</span>{{ variantCell(v.det, 'hp') }}
                   </span>
                   <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('speed') }">
-                    <span class="nk-mob-var__k">速度</span>{{ variantCell(v.det, 'speed') }}
+                    <span class="nk-mob-var__k">{{ t('catalog.charge.speed') }}</span>{{ variantCell(v.det, 'speed') }}
                   </span>
                   <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('skills') }">
-                    <span class="nk-mob-var__k">技能</span>{{ variantCell(v.det, 'skills') }}
+                    <span class="nk-mob-var__k">{{ t('catalog.sig.skills') }}</span>{{ variantCell(v.det, 'skills') }}
                   </span>
                 </span>
                 <span class="nk-mob-var__flag">{{ v.flag }}</span>
@@ -771,9 +785,9 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                  各具名形态」并组，比卡面判据粗（12 个多成员组连卡面图标都不同）。此处只列非同卡面的
                  形态，且**不用它排变体序号**。官方 `AtlasSortID` 不作序（169/472 有值、仅 2/113 组齐全）。 -->
             <div v-if="atlasOthers.length" class="nk-mob-atlas">
-              <span class="nk-mob-atlas__k">图鉴族</span>
+              <span class="nk-mob-atlas__k">{{ t('mob.atlas.k') }}</span>
               <span class="nk-mob-atlas__note">
-                官方登记的同一条目下另有 {{ atlasOthers.length }} 个形态（共 {{ atlasRows.length }} 个，含本页）
+                {{ t('mob.atlasOthers', { n: atlasOthers.length, m: atlasRows.length }) }}
               </span>
               <span class="nk-mob-atlas__links">
                 <RouterLink

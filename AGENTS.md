@@ -35,13 +35,17 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 ```bash
 pnpm install            # 依赖安装（版本口径唯一落位 tech-stack.md）
 pnpm dev                # → http://localhost:6188/（固定端口 strictPort；禁止改回 5173；「改了不生效」先自愈，见 commands.md）
-pnpm build              # 三守卫（色彩收口 / Spine 清单 / 对比度）→ vue-tsc -b → vite build → AI 端点生成 + AI 端点守卫
+pnpm build              # 七守卫（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文）→ vue-tsc -b → vite build → AI 端点生成 + AI 端点守卫
 pnpm test               # 运行全部测试（Vitest）
 pnpm vitest run <文件>   # 运行单个测试文件
 pnpm test:e2e:affected  # 只跑按 git diff 推导出的受影响用例（「禁全量 e2e」的落地命令）
 pnpm test:e2e:ci        # e2e CI 层（layout + a11y）
 node tools/gen-ai-endpoints.mjs   # 单独重建 AI 快照（读 dist/index.html 为模板，须先 vite build）
 node tools/check-ai-endpoints.mjs # AI 端点守卫（快照正文/内链/sitemap/robots 覆盖率；pnpm build 末步自动跑）
+node tools/check-languages.mjs   # 语言清单守卫（converter languages.json ↔ 前端 locales.ts + 上游语言交叉校验；pnpm build 前置自动跑）
+node tools/check-i18n-packs.mjs  # 语言包覆盖守卫（结构层令牌 ↔ 13 语言语言包，含缺包/缺键/非中文语言包不得残留中文「开拓者」/含汉字条目数只降不升；pnpm build 前置自动跑）
+node tools/check-i18n-messages.mjs # UI 词典守卫（13 语言键集对齐 / 空值 / 漏译 / 代码里 t() 的键拼写；pnpm build 前置自动跑）
+node tools/check-ui-chinese.mjs  # 界面中文守卫（代码里不得写死面向用户的中文文案；有意保留清单以白名单固化，pnpm build 前置自动跑）
 node tools/check-doc-links.mjs   # 文档链接校验（断链或误删引用即非零退出；仅手动，未进 CI）
 node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由登记 / 版本号 / 汇报腔；改文档后跑）
 ```
@@ -53,7 +57,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
 > 只留「动手前必须知道、且子文件不便替代」的判据；细节与决策经过见子文件与 ADR——**同一事实不在两处重述**。
 
 - **配置驱动目录页**：列表页一律 `CatalogPageConfig`（`src/app/catalog/pages/` + `pages.ts` 注册，目录清单以注册表为准）+ 单一 `CatalogView` 按 `route.meta.catalog` 渲染；专属样式在配置 `styles` 声明，随路由并行加载。
-- **本地优先数据**：目录 / 详情数据全部是预转换 JSON（`public/data/cn/`）；仅图片与 Spine 动画运行期走 CDN（基址 `src/lib/constants.ts → CDN`）。
+- **本地优先数据**：目录 / 详情数据全部是预转换 JSON（结构层 `public/data/cn/` + 语言包 `public/data/i18n/<语言>/<分组>.json`；结构层里文本是引用令牌 `"$t:<键>"`，唯一解析入口 `src/services/api/local.ts`，见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）；仅图片与 Spine 动画运行期走 CDN（基址 `src/lib/constants.ts → CDN`）。
 - **单强调色主题**：全站（含货币战争）共用一套可切换强调色，开关 `<html data-accent>`；`meta.cw` → `<html data-theme="cw">` 只是**模式标记**，不重映射颜色（[ADR 0041](docs/adr/0041-主题色统一为单强调色通道.md)）。色板、缺省值与令牌分层见 [ui-design.md](docs/agents/ui-design.md) §2/§3。
 - **样式随路由懒加载**：页面 CSS 随视图 import 拆独立 chunk；全局仅 tokens.css + catalog.css。
 - **首页＝版本上新页**：`/` 与 `/currency` **全断点渲染导航条**；`/` 为品牌带 + 角色 / 光锥 / 遗器三分区 + 页脚，跨模式只走侧栏「交换」（[ADR 0019](docs/adr/0019-枢纽页导航条回归与首页改为版本上新页.md)）。
@@ -111,7 +115,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
   - 守卫：`node tools/check-colors.mjs --strict` 与 `node tools/check-contrast.mjs --strict` 必须全绿；四层定义、豁免与新增流程见 [ui-design.md](docs/agents/ui-design.md) §2/§5。
 - **构建守卫**：每次变更必须 `pnpm build`（含 vue-tsc 类型检查）+ `pnpm test` 全绿后方可提交。
 - **版本号禁入叙述性文档**：README / 本文件 / `docs/agents/` 子文件只写**选型名**；版本口径唯一落位 [tech-stack.md](docs/agents/tech-stack.md)，由 `node tools/doc-audit.mjs` 与 `package.json` / `requirements.txt` / CI 工作流逐字比对。
-- **依赖准入**：新增依赖（含 devDependencies）与已有依赖大版本升级都先经用户确认，并说明「为何现有依赖 / 原生实现不够」。运行时依赖维持 `vue` / `pinia` / `vue-router` 三件——前端数据 / UI / 工具类一律不引库（禁用清单见 [tech-stack.md](docs/agents/tech-stack.md) §5）。
+- **依赖准入**：新增依赖（含 devDependencies）与已有依赖大版本升级都先经用户确认，并说明「为何现有依赖 / 原生实现不够」。运行时依赖维持 `vue` / `pinia` / `vue-router` / `vue-i18n` 四件（`vue-i18n` 为 UI 文案多语言的**一次性放开**，见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md) 决策 4）——前端数据 / UI / 工具类一律不引库（禁用清单见 [tech-stack.md](docs/agents/tech-stack.md) §5）。
 - **改动范围最小化**：只改任务明确要求的内容，**禁止顺手重构 / 改名 / 「优化」任务外代码**；交付记录不得出现范围外改动。仅两类例外需显式登记：① 阻断本任务的硬错误；② 已登记的漂移修正——且须在交付记录中单列。范围外缺陷记入「待用户裁决」清单，不自动修。
 - **helper 先查再用**：新增工具函数 / composable / 选择器 / 原语前，先查 `src/lib/`、`src/services/`、既有共享原语与 `CatalogPageConfig` 注册表；有则复用，**禁止跨目录重复封装**（跨文件复制 CSS 同罪，见 [ui-design.md](docs/agents/ui-design.md) §1）。
 - **文档体量红线（AI 可读性）**：面向 AI 的单文件超约 5 万 token（≈120 KB 中文）即失去「整读」价值——持续增长的内容必须在生成器里拆成「小总索引 + 按需分片」，禁止堆到只能靠 grep 捞；口径与手法见 [conventions.md](docs/agents/conventions.md)。

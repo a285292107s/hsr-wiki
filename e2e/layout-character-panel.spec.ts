@@ -69,7 +69,7 @@ test.describe('布局验收：角色详情页', () => {
     });
     expect(rule.style, '分界线须为实线（本页唯一线语言）').toBe('solid');
     expect(rule.w, '分界线须为发丝线').toBeLessThanOrEqual(1);
-    expect(rule.others, '分界只走一条上边线，不得四面加框').toEqual(['0px', '0px', '0px']);
+    expect(rule.others, '分界只走一条上边线，不得四面加框').toEqual(['0px', '0px', '0px']); // e2e-literal-ok: 0px 在这里是「不得加框」的定义性契约值（语义即值），不是可漂移的设计值
     expect(rule.color, '分界线须为发丝线令牌色').not.toBe('rgba(0, 0, 0, 0)');
 
     // ③ 列轴：两层**列宽逐列相等**（≥768 面板层占 5 列栅格的前 3 列，空列由注记占用），且面板层不得留空列。

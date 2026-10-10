@@ -6,12 +6,16 @@
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import re
 from pathlib import Path
+from typing import Any, Mapping
 
 from config import EXCEL_DIR, OUTPUT_DIR
-from textmap import resolve_text
+from textmap import clean_text, current_textmap, resolve_text, text_key_of
+from textpack import composed_ref
 from utils import load_json, save_json, unwrap_value
 
 logger = logging.getLogger("converter")
@@ -20,33 +24,42 @@ _TEXTJOIN_RE = re.compile(r"\{TEXTJOIN#(\d+)\}")
 _PARAM_RE = re.compile(r"#(\d+)\[([a-z0-9]+)\](%?)")
 
 def _load_textjoin() -> dict[int, str]:
-    """构建 TEXTJOIN 索引：TextJoinID → 默认形态文本（DefaultItem → TextJoinItem → TextMap）。
+    """构建 TEXTJOIN 索引：TextJoinID → DefaultItem 的 **TextMap 键**。
 
     仅取 DefaultItem（默认形态），TextJoinItemList 的其他形态（性别/命名等变体）省略。
+    存**键而非文本**：简介是「模板 + 参数」的组合文案，必须按语言各自组合（见 textpack 的
+    `composed_ref`）——先解析成文本再组合，多语言下就只会得到中文那一份。
     """
     config = load_json(EXCEL_DIR / "TextJoinConfig.json")
     items = load_json(EXCEL_DIR / "TextJoinItem.json")
-    item_text: dict[int, str] = {}
+    item_key: dict[int, str] = {}
     for it in items:
         iid = it.get("TextJoinItemID")
         if iid is None:
             continue
-        item_text[iid] = resolve_text(it.get("TextJoinText", {}))
+        key = text_key_of(it.get("TextJoinText", {}))
+        if key:
+            item_key[iid] = key
     out: dict[int, str] = {}
     for c in config:
         tid = c.get("TextJoinID")
         default = c.get("DefaultItem")
         if tid is None or default is None:
             continue
-        out[tid] = item_text.get(default, "")
+        key = item_key.get(default)
+        if key:
+            out[tid] = key
     return out
 
-def _expand_textjoin(text: str, textjoin: dict[int, str]) -> str:
-    """替换 {TEXTJOIN#id} 为默认形态文本；无对应配置时保留原占位符。"""
+def _expand_textjoin(text: str, tm: Mapping[str, str], textjoin: dict[int, str]) -> str:
+    """用**指定语言**的文本表替换 {TEXTJOIN#id}；无对应配置时保留原占位符。"""
 
     def _replace(m: "re.Match[str]") -> str:
-        text_get = textjoin.get(int(m.group(1)))
-        return text_get if text_get else m.group(0)
+        key = textjoin.get(int(m.group(1)))
+        if not key:
+            return m.group(0)
+        got = tm.get(key, "")
+        return clean_text(got, dict(tm)) if got else m.group(0)
 
     return _TEXTJOIN_RE.sub(_replace, text)
 
@@ -71,20 +84,35 @@ def _fill_params(text: str, param_list: list) -> str:
 
     return _PARAM_RE.sub(_replace, text)
 
-def _format_desc(text: str, param_list: list, textjoin: dict[int, str]) -> str:
-    """描写处理流水线：TEXTJOIN 展开 → 参数替换 → 字面 \n 转真实换行。"""
-    text = _expand_textjoin(text, textjoin)
+def _desc_text(tm: Mapping[str, str], desc_key: str | None, param_list: list, textjoin: dict[int, str]) -> str:
+    """**语言无关**的简介组合实现：模板 → TEXTJOIN 展开 → 参数替换 → 字面 \\n 转真实换行。
+
+    缺省语言正文与各语言语言包都走这一份实现（`tm` 决定语言），不存在第二份组合逻辑。
+    """
+    text = clean_text(tm.get(desc_key, ""), dict(tm)) if desc_key else ""
+    text = _expand_textjoin(text, tm, textjoin)
     text = _fill_params(text, [unwrap_value(p) for p in param_list])
     return text.replace(r"\n", "\n")
+
+def _desc_ref(item: dict, textjoin: dict[int, str]) -> Any:
+    """成就简介 → 组合文本引用（语言包按语言现算，前端与快照生成器零改动）。"""
+    desc_ref = item.get("AchievementDesc", {})
+    desc_key = text_key_of(desc_ref)
+    param_list = item.get("ParamList", []) or []
+    composer = lambda tm: _desc_text(tm, desc_key, param_list, textjoin)  # noqa: E731
+    cn_text = _desc_text(current_textmap(), desc_key, param_list, textjoin)
+    # 键里带参数签名：同一模板 + 不同参数是不同文案，必须各自缓存
+    sig = hashlib.sha1(
+        json.dumps(
+            [unwrap_value(p) for p in param_list], ensure_ascii=False, separators=(",", ":"),
+        ).encode("utf-8"),
+    ).hexdigest()[:12]
+    return composed_ref(f"composed:ach:{desc_key or 'lit'}:{sig}", composer, cn_text)
 
 def _parse_achievement(item: dict, textjoin: dict[int, str]) -> dict:
     """单条成就记录 → achievements.json 条目。"""
     title = resolve_text(item.get("AchievementTitle", {}))
-    desc = _format_desc(
-        resolve_text(item.get("AchievementDesc", {})),
-        item.get("ParamList", []) or [],
-        textjoin,
-    )
+    desc = _desc_ref(item, textjoin)
     return {
         "id": item.get("AchievementID", 0),
         "title": title,

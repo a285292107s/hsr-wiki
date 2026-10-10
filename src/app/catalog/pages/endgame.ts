@@ -1,4 +1,9 @@
 import { OFFICIAL_ICON_BASE } from '../../../lib/constants';
+import { activeHref } from '../../../lib/i18n/active';
+import { translate } from '../../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 import { escHtml, stripAllTags } from '../../../lib/format';
 import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
 
@@ -64,7 +69,9 @@ import {
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import type { MazeCatalogDb, MazeListEntry } from '../../../services/types';
 
-export function mazeStatus(info: MazeListEntry): string {
+export type MazeStatus = 'live' | 'ended' | 'upcoming' | 'unknown';
+
+export function mazeStatus(info: MazeListEntry): MazeStatus {
   const parse = (s: string | undefined): number | null => {
     if (!s) return null;
     const t = new Date(s).getTime();
@@ -73,10 +80,10 @@ export function mazeStatus(info: MazeListEntry): string {
   const start = parse(info.live_begin) ?? parse(info.begin);
   const end = parse(info.live_end) ?? parse(info.end);
   const now = Date.now();
-  if (start != null && now < start) return '未开始';
-  if (end != null && now > end) return '已结束';
-  if (start != null || end != null) return '进行中';
-  return '未知';
+  if (start != null && now < start) return 'upcoming';
+  if (end != null && now > end) return 'ended';
+  if (start != null || end != null) return 'live';
+  return 'unknown';
 }
 
 export function mazeDateRange(info: MazeListEntry): string {
@@ -94,16 +101,23 @@ export function mazeDateRange(info: MazeListEntry): string {
   return '';
 }
 
-export const MAZE_STATUS_CLASS: Record<string, string> = {
-  '进行中': 'live',
-  '已结束': 'ended',
-  '未开始': 'upcoming',
-  '未知': 'unknown',
+/** 状态 → CSS 类名（与枚举同名；枚举值即类名，保留下标兜底未知值）。 */
+export const MAZE_STATUS_CLASS: Record<MazeStatus, string> = {
+  live: 'live',
+  ended: 'ended',
+  upcoming: 'upcoming',
+  unknown: 'unknown',
 };
+
+/** 状态 → 展示文案的词典键（界面不再出现用中文当内部键的写法）。 */
+export function mazeStatusLabelKey(status: MazeStatus): string {
+  return `endgame.status.${status}`;
+}
 
 export interface EndgameMode {
   key: string;
-  label: string;
+  /** 展示名（官方玩法名）的词典键：中文正文只在词典里，配置/常量不再写一份 */
+  labelKey: string;
   en: string;
   /** 玩法入口图（SpriteOutput 路径：ChallangeGeneralConfig TabImgPath 三模 + 仲裁人工延展
    *  Img4；筛选选项 icon 消费，经 endgameArtUrl + UI/ChallengeBoss 白名单解析） */
@@ -111,10 +125,10 @@ export interface EndgameMode {
 }
 
 export const ENDGAME_MODES: EndgameMode[] = [
-  { key: 'maze', label: '忘却之庭', en: 'FORGOTTEN HALL', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png' },
-  { key: 'story', label: '虚构叙事', en: 'PURE FICTION', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png' },
-  { key: 'boss', label: '末日幻影', en: 'APOCALYPSE', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg3.png' },
-  { key: 'peak', label: '异相仲裁', en: 'ANOMALY', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg4.png' },
+  { key: 'maze', labelKey: 'catalog.option.modeMaze', en: 'FORGOTTEN HALL', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg1.png' },
+  { key: 'story', labelKey: 'catalog.option.modeStory', en: 'PURE FICTION', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg2.png' },
+  { key: 'boss', labelKey: 'catalog.option.modeBoss', en: 'APOCALYPSE', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg3.png' },
+  { key: 'peak', labelKey: 'catalog.option.modePeak', en: 'ANOMALY', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg4.png' },
 ];
 
 // 玩法级默认图标 URL（模式统一用玩法入口默认图：抛弃每季 `arts.tab` 页签图——
@@ -151,9 +165,9 @@ function seasonSortKey(item: CatalogItem): { date: string; isBegin: boolean } {
 
 export const endgamePage: CatalogPageConfig = {
   id: 'endgame',
-  title: '终局内容',
+  titleKey: 'catalog.endgame.title',
   subtitle: 'ENDGAME',
-  searchPlaceholder: '搜索赛季...',
+  searchKey: 'catalog.endgame.search',
   gridClass: 'nk-cat-grid nk-eg-grid',
   cardClass: '.nk-eg-card',
   styles: [() => import('../../../../src/styles/endgame.css')],
@@ -170,8 +184,8 @@ export const endgamePage: CatalogPageConfig = {
           id: `ID ${key}`,
           mode: mode.key,
           name: stripAllTags(info.zh),
-          searchText: mode.label,
-          href: `/endgame/${mode.key}/${key}`,
+          searchText: translate(mode.labelKey),
+          href: activeHref(`/endgame/${mode.key}/${key}`),
           liveBegin: info.live_begin,
           liveEnd: info.live_end,
           status: mazeStatus(info),
@@ -197,20 +211,23 @@ export const endgamePage: CatalogPageConfig = {
     return items;
   },
   renderCard(item, i) {
-    const st = String(item.status || '未知');
-    const stCls = MAZE_STATUS_CLASS[st] || 'unknown';
+    const raw = String(item.status || 'unknown');
+    /* 状态取值来自 `mazeStatus`（枚举）；未登记取值归入 unknown，避免拼出查不到的词典键 */
+    const st: MazeStatus = MAZE_STATUS_CLASS[raw as MazeStatus] ? (raw as MazeStatus) : 'unknown';
+    const stCls = MAZE_STATUS_CLASS[st];
+    const stText = translate(mazeStatusLabelKey(st));
     const no = String(item.id || '').replace(/^ID\s*/i, '');
     const noHtml = no ? `<span class="nk-eg-lrow__no">№ ${escHtml(no)}</span>` : '';
     const date = item.dateRange ? `<span class="nk-eg-lrow__date">${escHtml(String(item.dateRange))}</span>` : '';
-    const badge = st !== '未知'
-      ? `<span class="nk-eg-lrow__status"><span class="nk-eg-lrow__dot"></span>${escHtml(st)}</span>` : '';
-    const name = String(item.name || '未命名赛季');
+    const badge = st !== 'unknown'
+      ? `<span class="nk-eg-lrow__status" data-status="${stCls}"><span class="nk-eg-lrow__dot"></span>${escHtml(stText)}</span>` : '';
+    const name = String(item.name || translate('common.unknown'));
     const idStr = String(item.id || '');
     const pollInfo = item.pollution as { count?: number; levels?: number[] } | undefined;
     const pollLevels = (pollInfo?.levels || []).join(' / ');
     // 徽标挂赛季名之后（不随状态/日期行——被日期夹住会被读成排期信息）
     const poll = pollInfo?.count
-      ? `<span class="nk-eg-lrow__poll" title="${escHtml(`本季 ${pollInfo.count} 处污染关卡 · 等级 ${pollLevels}`)}">贪饕污染</span>`
+      ? `<span class="nk-eg-lrow__poll" title="${escHtml(t('egd.pollutionTitle', { n: pollInfo.count, levels: pollLevels }))}">${escHtml(t('nav.voracity'))}</span>`
       : '';
     const meta = (badge || date) ? `<span class="nk-eg-lrow__meta">${badge}${date}</span>` : '';
     const iconSrc = modeDefaultArtUrl(String(item.mode || ''));
@@ -229,12 +246,13 @@ export const endgamePage: CatalogPageConfig = {
     for (const m of ENDGAME_MODES) {
       const col = items.filter((it) => it.mode === m.key);
       if (!col.length) continue;
+      const modeLabel = translate(m.labelKey);
       html += `<section class="nk-eg-col" data-mode="${m.key}">
         <h2 class="nk-eg-col__head">
-          <span class="nk-eg-col__name">${escHtml(m.label)}</span>
+          <span class="nk-eg-col__name">${escHtml(modeLabel)}</span>
           <span class="nk-eg-col__en">${escHtml(m.en)}</span>
           <span class="nk-eg-col__count">${col.length}</span>
-          <a class="nk-guide-link" href="/endgame/${escHtml(m.key)}" aria-label="${escHtml(m.label)}玩法说明"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>玩法说明</a>
+          <a class="nk-guide-link" href="${escHtml(activeHref(`/endgame/${m.key}`))}" aria-label="${escHtml(translate('catalog.modeGuideAria', { name: modeLabel }))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>${escHtml(translate('catalog.modeGuideAria', { name: modeLabel }))}</a>
         </h2>
         <div class="nk-eg-col__list">${col.map((it, ci) => renderCard(it, ci)).join('')}</div>
       </section>`;

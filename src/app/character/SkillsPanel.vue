@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { skillTypeLabel } from '../../lib/enum-labels';
 import SkillCard from './SkillCard.vue';
 import SectionIndex from './SectionIndex.vue';
 import { groupSkillsByFamily } from '../../lib/skill-family';
 import { assignAnimEntries, memoAnimKey } from '../../lib/skill-anim';
 import { SECTION_IDX } from './sections';
-import { TYPE } from '../../lib/constants';
+
 import type { CharacterData, Skill, SkillAnimEntry, SkillAnimationsDb } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   d: CharacterData;
   charId: string;
@@ -66,19 +71,19 @@ const indexItems = computed(() => [
   ...skillFamilies.value.map((g) => ({
     id: skillAnchor(g.main.id),
     label: g.main.name,
-    note: TYPE[g.main.type ?? ''] || g.main.type_name || '',
+    note: skillTypeLabel(g.main.type ?? '', g.main.type_name || ''),
   })),
   ...memoSkills.value.map((ms) => ({
     id: skillAnchor(ms.id),
     label: ms.name,
-    note: TYPE[ms.type ?? ''] || ms.type_name || '',
+    note: skillTypeLabel(ms.type ?? '', ms.type_name || ''),
   })),
 ]);
 </script>
 
 <template>
   <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.skills }}</span>SKILLS</h2>
-  <SectionIndex v-if="indexItems.length > 1" :items="indexItems" label="技能索引" />
+  <SectionIndex v-if="indexItems.length > 1" :items="indexItems" :label="t('char.skillIndex')" />
   <SkillCard
     v-for="g in skillFamilies"
     :key="`${enhKey}|${g.main.id}`"

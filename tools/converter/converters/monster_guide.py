@@ -8,10 +8,28 @@
 + 难度序号），故本模块按模板聚合一次：实测同模板的 4 个难度实例 TagList 与 PhaseList 都逐字相同（21/21）。
 """
 from collections import defaultdict
+import hashlib
+from typing import Any
 
 from config import EXCEL_DIR
-from textmap import resolve_text
+from textmap import current_textmap, resolve_text, text_key_of
+from textpack import composed_ref
 from utils import load_json, unwrap_value
+
+
+def _joined_ref(keys: list[str]) -> Any:
+    """多条官方文本 **join 成一段**的小节正文（组合文案，按语言各自拼接）。
+
+    坑位：`" ".join(resolve_text(...) ...)` 会把携带键的文本退化成普通字符串 ⇒ 多语言下恒为中文。
+    取值口径与原先一致（`clean=False`：保留游戏标记，由前端 `fmtDesc` 处理），只是**逐语言各拼一次**。
+    """
+    if not keys:
+        return ""
+    composer = lambda tm, ks=tuple(keys): " ".join(  # noqa: E731 —— 按值绑定键列表
+        t for t in (tm.get(k, "") for k in ks) if t
+    )
+    sig = hashlib.sha1("|".join(keys).encode("utf-8")).hexdigest()[:12]
+    return composed_ref(f"composed:guideskill:{sig}", composer, composer(current_textmap()))
 
 
 def load_guide_phases() -> dict[int, dict]:
@@ -27,15 +45,19 @@ def load_guide_phases() -> dict[int, dict]:
     for rec in load_json(EXCEL_DIR / "MonsterGuideSkillText.json"):
         tid = rec.get("SkillTextID")
         if tid is not None:
-            texts[tid] = resolve_text(rec.get("SkillDescription", {}), clean=False)
+            # 存**键**而非文本：小节正文是「多条文本 join」的组合文案，必须按语言各自拼接
+            key = text_key_of(rec.get("SkillDescription", {}))
+            if key:
+                texts[tid] = key
     skills: dict[int, dict] = {}
     for rec in load_json(EXCEL_DIR / "MonsterGuideSkill.json"):
         sid = rec.get("SkillID")
         if sid is None:
             continue
+        keys = [texts[t] for t in (rec.get("SkillTextIDList") or []) if t in texts]
         skills[sid] = {
             "name": resolve_text(rec.get("SkillName", {})),
-            "desc": " ".join(t for t in (texts.get(t) for t in (rec.get("SkillTextIDList") or [])) if t),
+            "desc": _joined_ref(keys),
         }
     out: dict[int, dict] = {}
     for rec in load_json(EXCEL_DIR / "MonsterGuidePhase.json"):

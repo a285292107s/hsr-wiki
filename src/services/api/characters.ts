@@ -1,20 +1,18 @@
 
-import { cachedFetch } from '../cache';
 import type { CharacterData, LocalCharList, NameCache, SkillAnimationsDb } from '../types';
-import { LOCAL_DATA_BASE } from './base';
+import { loadLocalJSON, singletonLocalData } from './local';
 import { loadLocalLightCones } from './items';
 import { loadLocalRelicSets } from './relics';
-import { singletonLoad } from './singleton';
 /** 角色列表（共享单例：只请求一次，失败自动重置允许重试） */
-export const loadLocalCharacterList = singletonLoad<LocalCharList>(`${LOCAL_DATA_BASE}/characters.json`);
+export const loadLocalCharacterList = singletonLocalData<LocalCharList>('characters.json');
 
 export function loadLocalCharacter(charId: string): Promise<CharacterData> {
   // 详情走请求缓存（内存 → in-flight 去重 → 网络）：二次进入免网络往返
-  return cachedFetch<CharacterData>(`${LOCAL_DATA_BASE}/characters/${charId}.json`, `char_${charId}`);
+  return loadLocalJSON<CharacterData>(`characters/${charId}.json`, `char_${charId}`);
 }
 
 /** 技能动画（米游社 Wiki 抓取数据；共享单例） */
-export const loadSkillAnimations = singletonLoad<SkillAnimationsDb>(`${LOCAL_DATA_BASE}/skill_animations.json`);
+export const loadSkillAnimations = singletonLocalData<SkillAnimationsDb>('skill_animations.json');
 
 /* 从本地 JSON 加载配装名称（光锥/遗器套装/队伍成员）。
    返回合并后的新 NameCache（不修改入参）。失败项回退为 '#id'。 */

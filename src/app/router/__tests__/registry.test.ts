@@ -28,7 +28,7 @@ describe('site map consistency', () => {
       if (!catalogId) continue;
       const cfg = CATALOG_PAGES[catalogId];
       expect(cfg, `route ${route.path} catalog "${catalogId}" should exist in CATALOG_PAGES`).toBeDefined();
-      expect(route.meta.title, `route ${route.path} title should match catalog config`).toBe(cfg.title);
+      expect(route.meta.titleKey, `route ${route.path} title should match catalog config`).toBe(cfg.titleKey);
     }
   });
 

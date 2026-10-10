@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { pathLabel } from '../../lib/enum-labels';
 import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';
 import { useDetailView } from '../composables/use-detail-view';
-import {
-  avatarRoundIconUrl, fmtDesc, fmtVal, gameTagsToHtml, iconImgAttrs, itemName, lightconeIconUrl, pathIconUrl,
-} from '../../lib/format';
+import { avatarRoundIconUrl, fmtDesc, fmtNumber, fmtVal, gameTagsToHtml, iconImgAttrs, itemName, lightconeIconUrl, pathIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
 import { loadLocalCharacterList } from '../../services/api';
-import { PATH } from '../../lib/constants';
+import '../../lib/constants';
 import type { LightConeStats } from '../../services/types';
 import '../../styles/skill-card.css';
 import '../../styles/lightcone.css';
+import { translate } from '../i18n';
+
+/** 模板与脚本内统一走词典（脚本内不宜用 useI18n，见 i18n.ts 的 translate） */
+const t = translate;
 
 const app = useAppStore();
 const lc = useLightconeStore();
@@ -90,7 +93,7 @@ const statRows = computed<StatRow[]>(() => {
       cost: (s.cost || []).map((c) => ({
         id: c.ItemID,
         num: c.ItemNum,
-        name: c.ItemID === 2 ? '信用点' : itemName(c.ItemID, app.nameCache, app.itemDb),
+        name: c.ItemID === 2 ? t('common.credits') : itemName(c.ItemID, app.nameCache, app.itemDb),
       })),
     }));
 });
@@ -179,7 +182,7 @@ onBeforeUnmount(() => {
       class="nk-skeleton nk-skeleton--lc"
       role="status"
       aria-live="polite"
-      aria-label="光锥详情加载中"
+      :aria-label="t('lc.loadingAria')"
     >
       <div class="nk-skeleton__hero">
         <div class="nk-skeleton__hero-visual">
@@ -210,7 +213,7 @@ onBeforeUnmount(() => {
           <path d="M12 9v4" /><path d="M12 17h.01" />
         </svg>
       </div>
-      <div class="nk-error-state__title">光锥数据加载失败</div>
+      <div class="nk-error-state__title">{{ t('lc.errorTitle') }}</div>
       <div v-if="lc.error" class="nk-error-state__detail">{{ lc.error }}</div>
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
@@ -231,7 +234,7 @@ onBeforeUnmount(() => {
               <span class="nk-hero__stars">{{ stars }}</span>
               <span class="nk-hero__tag">
                 <img v-bind="iconImgAttrs(pathIconUrl(d.path))" alt="">
-                {{ PATH[d.path] || d.path }}
+                {{ pathLabel(d.path) }}
               </span>
             </div>
           </header>
@@ -239,7 +242,7 @@ onBeforeUnmount(() => {
           <section v-if="maxStats" class="nk-hero__section">
             <div class="nk-hero__section-title">
               <span class="nk-hero__section-bar"></span>
-              <span>满级属性</span>
+              <span>{{ t('lc.maxStats') }}</span>
             </div>
             <div class="nk-hero__stats nk-hero__stats--lc">
               <div class="nk-hero__stat">
@@ -249,8 +252,8 @@ onBeforeUnmount(() => {
                   alt=""
                   aria-hidden="true"
                 >
-                <span class="nk-hero__stat-label">生命值</span>
-                <span class="nk-hero__stat-val">{{ maxStats.hp.toLocaleString() }}</span>
+                <span class="nk-hero__stat-label">{{ t('common.stat.hp') }}</span>
+                <span class="nk-hero__stat-val">{{ fmtNumber(maxStats.hp) }}</span>
               </div>
               <div class="nk-hero__stat">
                 <img
@@ -259,8 +262,8 @@ onBeforeUnmount(() => {
                   alt=""
                   aria-hidden="true"
                 >
-                <span class="nk-hero__stat-label">攻击力</span>
-                <span class="nk-hero__stat-val">{{ maxStats.atk.toLocaleString() }}</span>
+                <span class="nk-hero__stat-label">{{ t('common.stat.atk') }}</span>
+                <span class="nk-hero__stat-val">{{ fmtNumber(maxStats.atk) }}</span>
               </div>
               <div class="nk-hero__stat">
                 <img
@@ -269,8 +272,8 @@ onBeforeUnmount(() => {
                   alt=""
                   aria-hidden="true"
                 >
-                <span class="nk-hero__stat-label">防御力</span>
-                <span class="nk-hero__stat-val">{{ maxStats.def.toLocaleString() }}</span>
+                <span class="nk-hero__stat-label">{{ t('common.stat.def') }}</span>
+                <span class="nk-hero__stat-val">{{ fmtNumber(maxStats.def) }}</span>
               </div>
             </div>
           </section>
@@ -279,16 +282,16 @@ onBeforeUnmount(() => {
 
       <div class="nk-panels">
         <div class="nk-panel nk-panel--active">
-          <h2 class="nk-title"><span class="nk-title__idx">01</span>技能 SKILL</h2>
+          <h2 class="nk-title"><span class="nk-title__idx">01</span>{{ t('lc.sec.skill') }} SKILL</h2>
           <div class="nk-skill nk-lc-skill">
             <div class="nk-skill__head">
               <span class="nk-skill__type-dot" aria-hidden="true"></span>
               <div class="nk-skill__slider nk-lc-rank-slider">
                 <!-- 当前叠影等级并入左端标签：右端悬浮的孤值读不出上下文 -->
-                <span class="nk-lc-rank-label">叠影 {{ lc.rank }}</span>
+                <span class="nk-lc-rank-label">{{ t('lc.superimpose', { n: lc.rank }) }}</span>
                 <input
                   type="range"
-                  aria-label="叠影等级"
+                  :aria-label="t('lc.superimposeAria')"
                   :min="1"
                   :max="rankLevels.length || 5"
                   :value="lc.rank"
@@ -310,10 +313,10 @@ onBeforeUnmount(() => {
             <div class="nk-skill__desc" v-html="skillDescHtml"></div>
             <div v-if="rankTable.length" class="nk-lc-rank-table-wrap" ref="rankWrapRef" :class="{ 'is-scrollable': rankScrollable }" @scroll.passive="onRankScroll">
               <table class="nk-lc-rank-table">
-                <caption style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;">光锥技能各叠影等级参数</caption>
+                <caption style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;">{{ t('lc.rankTableCaption') }}</caption>
                 <thead>
                   <tr>
-                    <th class="nk-lc-rank-table__param" scope="col">参数</th>
+                    <th class="nk-lc-rank-table__param" scope="col">{{ t('common.param') }}</th>
                     <th
                       v-for="lv in rankLevels"
                       :key="lv"
@@ -337,7 +340,7 @@ onBeforeUnmount(() => {
           </div>
 
           <template v-if="statRows.length">
-            <h2 class="nk-title"><span class="nk-title__idx">02</span>晋阶 ASCENSION</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">02</span>{{ t('lc.sec.ascension') }} ASCENSION</h2>
             <div class="nk-lc-asc-grid">
               <div
                 v-for="row in statRows"
@@ -347,21 +350,21 @@ onBeforeUnmount(() => {
                 :data-rarity="d.rarity"
               >
                 <div class="nk-lc-phase__head">
-                  <span class="nk-lc-phase__idx">晋阶 {{ row.phase }}</span>
+                  <span class="nk-lc-phase__idx">{{ t('lc.phase', { n: row.phase }) }}</span>
                   <span class="nk-lc-phase__lv">Lv. {{ row.maxLevel }}</span>
                 </div>
                 <div class="nk-lc-phase__stats">
                   <div class="nk-lc-phase__stat">
-                    <span class="nk-lc-phase__stat-label">生命值</span>
-                    <span class="nk-lc-phase__stat-val">{{ row.hp.toLocaleString() }}</span>
+                    <span class="nk-lc-phase__stat-label">{{ t('common.stat.hp') }}</span>
+                    <span class="nk-lc-phase__stat-val">{{ fmtNumber(row.hp) }}</span>
                   </div>
                   <div class="nk-lc-phase__stat">
-                    <span class="nk-lc-phase__stat-label">攻击力</span>
-                    <span class="nk-lc-phase__stat-val">{{ row.atk.toLocaleString() }}</span>
+                    <span class="nk-lc-phase__stat-label">{{ t('common.stat.atk') }}</span>
+                    <span class="nk-lc-phase__stat-val">{{ fmtNumber(row.atk) }}</span>
                   </div>
                   <div class="nk-lc-phase__stat">
-                    <span class="nk-lc-phase__stat-label">防御力</span>
-                    <span class="nk-lc-phase__stat-val">{{ row.def.toLocaleString() }}</span>
+                    <span class="nk-lc-phase__stat-label">{{ t('common.stat.def') }}</span>
+                    <span class="nk-lc-phase__stat-val">{{ fmtNumber(row.def) }}</span>
                   </div>
                 </div>
                 <div v-if="row.cost.length" class="nk-lc-phase__cost">
@@ -378,17 +381,17 @@ onBeforeUnmount(() => {
                       loading="lazy"
                       @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
                     >
-                    <span v-else class="nk-lc-phase__credit" title="信用点" aria-label="信用点">¤</span>
-                    <span class="nk-lc-phase__cost-num">×{{ c.num.toLocaleString() }}</span>
+                    <span v-else class="nk-lc-phase__credit" :title="t('common.credits')" :aria-label="t('common.credits')">¤</span>
+                    <span class="nk-lc-phase__cost-num">×{{ fmtNumber(c.num) }}</span>
                   </span>
                 </div>
-                <div v-else class="nk-lc-phase__cost nk-lc-phase__cost--none">无晋阶材料</div>
+                <div v-else class="nk-lc-phase__cost nk-lc-phase__cost--none">{{ t('lc.noAscendMaterial') }}</div>
               </div>
             </div>
           </template>
 
           <template v-if="adaptChars.length">
-            <h2 class="nk-title"><span class="nk-title__idx">03</span>适配角色 RECOMMENDED</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">03</span>{{ t('lc.sec.recommended') }} RECOMMENDED</h2>
             <div class="nk-lc-adapt">
               <RouterLink
                 v-for="c in adaptChars"
@@ -410,7 +413,7 @@ onBeforeUnmount(() => {
           </template>
 
           <template v-if="storyHtml">
-            <h2 class="nk-title"><span class="nk-title__idx">04</span>卡面 STORY</h2>
+            <h2 class="nk-title"><span class="nk-title__idx">04</span>{{ t('lc.sec.story') }} STORY</h2>
             <div class="nk-lc-story" v-html="storyHtml"></div>
           </template>
         </div>

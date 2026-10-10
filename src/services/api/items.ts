@@ -1,9 +1,7 @@
 /** 物品 / 光锥 / 敌对物种加载器 */
-import { cachedFetch } from '../cache';
 import type { ItemDb, LocalItemList, LocalLightConeList, LocalMonsterList, LightConeDetail, MonsterDetail } from '../types';
 import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
-import { LOCAL_DATA_BASE } from './base';
-import { singletonLoad } from './singleton';
+import { loadLocalJSON, singletonLocalData } from './local';
 
 /** 数字稀有度 → 字符串键（与 ItemInfo.rarity 及目录页 ITEM_RARITY_MAP 对齐） */
 export const RARITY_NUM_TO_KEY: Record<number, string> = {
@@ -11,7 +9,7 @@ export const RARITY_NUM_TO_KEY: Record<number, string> = {
 };
 
 /** 物品列表（共享单例：只请求一次，失败自动重置允许重试） */
-export const loadLocalItems = singletonLoad<LocalItemList>(`${LOCAL_DATA_BASE}/items.json`);
+export const loadLocalItems = singletonLocalData<LocalItemList>('items.json');
 
 /** 物品库（Record 形态，供角色详情页 itemName 解析；由本地数组转换） */
 export async function loadLocalItemDb(): Promise<ItemDb> {
@@ -29,23 +27,23 @@ export async function loadLocalItemDb(): Promise<ItemDb> {
   return db;
 }
 /** 敌对物种列表（共享单例：只请求一次，失败自动重置允许重试） */
-export const loadLocalMonsterList = singletonLoad<LocalMonsterList>(`${LOCAL_DATA_BASE}/monsters.json`);
+export const loadLocalMonsterList = singletonLocalData<LocalMonsterList>('monsters.json');
 
 /** 怪物等级曲线（共享单例：745 行共享一份，详情页按难度组取行做战斗数值合成） */
-export const loadLocalMonsterLevelCurve = singletonLoad<MonsterLevelCurve>(`${LOCAL_DATA_BASE}/monster-level-curve.json`);
+export const loadLocalMonsterLevelCurve = singletonLocalData<MonsterLevelCurve>('monster-level-curve.json');
 
 /** 怪物精英组倍率（共享单例：EliteGroup 全量 1,423 组一份，详情页按 elite_group 取行做战斗数值合成） */
-export const loadLocalMonsterEliteGroups = singletonLoad<MonsterEliteGroups>(`${LOCAL_DATA_BASE}/monster-elite-group.json`);
+export const loadLocalMonsterEliteGroups = singletonLocalData<MonsterEliteGroups>('monster-elite-group.json');
 
 /** 敌对物种详情（monsters/{id}.json，按 ID 按需加载，走请求缓存） */
 export function loadLocalMonsterDetail(id: string): Promise<MonsterDetail> {
-  return cachedFetch<MonsterDetail>(`${LOCAL_DATA_BASE}/monsters/${id}.json`, `monster_${id}`);
+  return loadLocalJSON<MonsterDetail>(`monsters/${id}.json`, `monster_${id}`);
 }
 
 /** 光锥列表（共享单例：只请求一次，失败自动重置允许重试） */
-export const loadLocalLightCones = singletonLoad<LocalLightConeList>(`${LOCAL_DATA_BASE}/light_cones.json`);
+export const loadLocalLightCones = singletonLocalData<LocalLightConeList>('light_cones.json');
 
 export function loadLocalLightConeDetail(id: string): Promise<LightConeDetail> {
   // 详情走请求缓存：二次进入免网络往返
-  return cachedFetch<LightConeDetail>(`${LOCAL_DATA_BASE}/light_cones/${id}.json`, `lightcone_${id}`);
+  return loadLocalJSON<LightConeDetail>(`light_cones/${id}.json`, `lightcone_${id}`);
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { userErrorDetail } from '../../lib/errors';
 import { useRoute } from 'vue-router';
 import { seasonPosterTabUrl } from '../catalog/pages/endgame';
 import { SITE_NAME } from '../../lib/constants';
@@ -27,6 +28,10 @@ import '../../styles/endgame-levels.css';
 import '../../styles/endgame-breakpoints.css';
 import '../../styles/endgame-pollution.css';
 import '../../styles/endgame-type-scale.css';
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 
 const route = useRoute();
 
@@ -55,7 +60,7 @@ async function load(mode: string, id: string): Promise<void> {
   const loader = MODE_LOADERS[mode];
   if (!loader) {
     phase.value = 'error';
-    error.value = `未知的终局模式: ${mode}`;
+    error.value = t('egd.unknownMode', { mode });
     return;
   }
   phase.value = 'loading';
@@ -68,7 +73,7 @@ async function load(mode: string, id: string): Promise<void> {
     const entry = db[id];
     if (!entry || !entry.zh) {
       phase.value = 'error';
-      error.value = `未找到赛季 ${mode}/${id}`;
+      error.value = t('egd.seasonNotFound', { mode, id });
       return;
     }
     data.value = entry;
@@ -90,7 +95,7 @@ async function load(mode: string, id: string): Promise<void> {
       requestAnimationFrame(settleReady);
     }
   } catch (e) {
-    error.value = e instanceof Error ? e.message : String(e);
+    error.value = userErrorDetail(e);
     phase.value = 'error';
   }
 }
@@ -145,14 +150,14 @@ const prevSeason = computed(() => {
   if (i <= 0 || !listDb.value) return null;
   const key = seasonKeys.value[i - 1];
   if (!key) return null;
-  return { key, href: `/endgame/${modeKey.value}/${key}`, posterTab: listDb.value[key]?.arts?.poster_tab };
+  return { key, to: `/endgame/${modeKey.value}/${key}`, posterTab: listDb.value[key]?.arts?.poster_tab };
 });
 const nextSeason = computed(() => {
   const i = seasonIndex.value;
   if (i < 0 || i >= seasonKeys.value.length - 1 || !listDb.value) return null;
   const key = seasonKeys.value[i + 1];
   if (!key) return null;
-  return { key, href: `/endgame/${modeKey.value}/${key}`, posterTab: listDb.value[key]?.arts?.poster_tab };
+  return { key, to: `/endgame/${modeKey.value}/${key}`, posterTab: listDb.value[key]?.arts?.poster_tab };
 });
 
 const pageRef = ref<HTMLElement | null>(null);
@@ -173,7 +178,7 @@ onBeforeUnmount(() => {
       class="nk-skeleton nk-skeleton--egd"
       role="status"
       aria-live="polite"
-      aria-label="赛季详情加载中"
+      :aria-label="t('egd.loadingAria')"
     >
       <div class="nk-skeleton__hero">
         <div class="nk-egd-sk nk-sk--shimmer"></div>
@@ -192,7 +197,7 @@ onBeforeUnmount(() => {
           <path d="M12 9v4" /><path d="M12 17h.01" />
         </svg>
       </div>
-      <div class="nk-error-state__title">赛季数据加载失败</div>
+      <div class="nk-error-state__title">{{ t('egd.errorTitle') }}</div>
       <div v-if="error" class="nk-error-state__detail">{{ error }}</div>
       <button class="nk-error-state__retry" type="button" @click="retry">RETRY</button>
     </div>
@@ -202,7 +207,7 @@ onBeforeUnmount(() => {
         v-show="showTop"
         class="nk-top-btn"
         type="button"
-        aria-label="返回顶部"
+        :aria-label="t('cwRole.topAria')"
         @click="scrollTop"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -239,13 +244,13 @@ onBeforeUnmount(() => {
             />
           </template>
 
-          <div v-else class="nk-slot-empty">本赛季暂无关卡数据</div>
+          <div v-else class="nk-slot-empty">{{ t('egd.empty.stages') }}</div>
 
-          <nav v-if="prevSeason || nextSeason" class="nk-egd-nav" aria-label="相邻赛季">
+          <nav v-if="prevSeason || nextSeason" class="nk-egd-nav" :aria-label="t('egd.navAria')">
             <router-link
               v-if="prevSeason"
               class="nk-egd-nav__item nk-egd-nav__item--prev"
-              :to="prevSeason.href"
+              :to="prevSeason.to"
             >
               <img
                 v-if="prevSeason.posterTab"
@@ -256,7 +261,7 @@ onBeforeUnmount(() => {
                 @error="($event.target as HTMLImageElement).style.display='none'"
               >
               <span class="nk-egd-nav__body">
-                <span class="nk-egd-nav__dir">← 上一赛季</span>
+                <span class="nk-egd-nav__dir">{{ t('egd.prevSeason') }}</span>
                 <span class="nk-egd-nav__id">{{ prevSeason.key }}</span>
               </span>
             </router-link>
@@ -264,10 +269,10 @@ onBeforeUnmount(() => {
             <router-link
               v-if="nextSeason"
               class="nk-egd-nav__item nk-egd-nav__item--next"
-              :to="nextSeason.href"
+              :to="nextSeason.to"
             >
               <span class="nk-egd-nav__body">
-                <span class="nk-egd-nav__dir">下一赛季 →</span>
+                <span class="nk-egd-nav__dir">{{ t('egd.nextSeason') }}</span>
                 <span class="nk-egd-nav__id">{{ nextSeason.key }}</span>
               </span>
               <img

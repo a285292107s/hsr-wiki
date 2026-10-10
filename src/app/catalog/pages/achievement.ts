@@ -1,18 +1,25 @@
 import { cdnUri } from '../../../services/cdn';
 import { escHtml } from '../../../lib/html';
+import { translate } from '../../i18n';
 import { loadLocalAchievements, loadLocalAchievementSeries } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 
-const RARITY_LABEL: Record<string, string> = { Low: '铜', Mid: '银', High: '金' };
+/* 稀有度 / 显示状态的**展示文案只在词典里**（配置里存键）：卡片渲染是模板字符串（非组件），
+   故用 `translate()`（非组件模块入口）——切语言走整页导航，无需响应式。 */
+const RARITY_KEY: Record<string, string> = {
+  Low: 'catalog.option.rarityLow',
+  Mid: 'catalog.option.rarityMid',
+  High: 'catalog.option.rarityHigh',
+};
 
-/** 显示状态 → 筛选文案（ShowType 值域：None 常显 / ShowAfterFinish / HiddenDesc）。
+/** 显示状态 → 词典键（ShowType 值域：None 常显 / ShowAfterFinish / HiddenDesc）。
  *  注意：converter 将 None 归一为空串产出（见 tools/converter/converters/achievements.py 专测），
  *  而 CatalogPage 过滤把空 val 视为「不筛」（与「全部」同 val），故前端在 fetchData/buildFilters
  *  统一把空值归一为哨兵 'None'——否则「常显」与「全部」撞 val 双高亮且永远筛不出常显成就 */
-const SHOW_LABEL: Record<string, string> = {
-  None: '常显',
-  ShowAfterFinish: '完成后显示',
-  HiddenDesc: '隐藏描述',
+const SHOW_KEY: Record<string, string> = {
+  None: 'catalog.option.showNone',
+  ShowAfterFinish: 'catalog.option.showAfterFinish',
+  HiddenDesc: 'catalog.option.showHidden',
 };
 
 function renderAchievementCard(item: CatalogItem, index = 0): string {
@@ -20,7 +27,9 @@ function renderAchievementCard(item: CatalogItem, index = 0): string {
   const series = (item.series_name as string) || '';
   const img = (item.series_icon as string) || '';
   const hidden = item.show_type === 'HiddenDesc';
-  const gemTitle = rarity ? `${RARITY_LABEL[rarity]}稀有度` : '';
+  const gemTitle = RARITY_KEY[rarity]
+    ? translate('catalog.rarityGem', { rarity: translate(RARITY_KEY[rarity]) })
+    : '';
   const gem = rarity
     ? `<span class="nk-ach-card__gem" role="img" aria-label="${gemTitle}" title="${gemTitle}"></span>`
     : '';
@@ -39,7 +48,7 @@ function renderAchievementCard(item: CatalogItem, index = 0): string {
         <div class="nk-ach-card__title">${escHtml(item.name)}</div>
         <div class="nk-ach-card__desc" title="${escHtml(descTip)}">${descHtml}</div>
         <div class="nk-ach-card__meta">
-          <span class="nk-ach-card__series">${escHtml(series) || '未知系列'}</span>
+          <span class="nk-ach-card__series">${escHtml(series) || translate('catalog.unknownSeries')}</span>
         </div>
       </div>
     </div>`;
@@ -47,9 +56,9 @@ function renderAchievementCard(item: CatalogItem, index = 0): string {
 
 export const achievementPage: CatalogPageConfig = {
   id: 'achievement',
-  title: '成就',
+  titleKey: 'nav.achievement',
   subtitle: 'ACHIEVEMENT INDEX',
-  searchPlaceholder: '搜索成就标题或描述…',
+  searchKey: 'catalog.achievement.search',
   gridClass: 'nk-cat-grid nk-ach-grid',
   cardClass: '.nk-ach-card',
   styles: [() => import('../../../../src/styles/achievement.css')],
@@ -94,14 +103,16 @@ export const achievementPage: CatalogPageConfig = {
     const seenSeries = new Map<number, string>();
     items.forEach((it) => {
       const sid = Number(it.series_id);
-      if (sid && !seenSeries.has(sid)) seenSeries.set(sid, String(it.series_name || `系列 ${sid}`));
+      if (sid && !seenSeries.has(sid)) {
+        seenSeries.set(sid, String(it.series_name || `${translate('catalog.filter.series')} ${sid}`));
+      }
     });
     if (seenSeries.size) {
       filters.push({
         key: 'series_id',
-        label: '系列',
+        labelKey: 'catalog.filter.series',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           ...[...seenSeries.entries()].map(([id, name]) => ({ val: String(id), label: name })),
         ],
       });
@@ -111,10 +122,10 @@ export const achievementPage: CatalogPageConfig = {
     if (rarities.length) {
       filters.push({
         key: 'rarity',
-        label: '稀有度',
+        labelKey: 'catalog.filter.rarity',
         options: [
-          { val: '', label: '全部' },
-          ...rarities.map((r) => ({ val: r, label: RARITY_LABEL[r] ?? r })),
+          { val: '', labelKey: 'catalog.all' },
+          ...rarities.map((r) => (RARITY_KEY[r] ? { val: r, labelKey: RARITY_KEY[r] } : { val: r, label: r })),
         ],
       });
     }
@@ -123,10 +134,10 @@ export const achievementPage: CatalogPageConfig = {
     if (shows.length) {
       filters.push({
         key: 'show_type',
-        label: '显示状态',
+        labelKey: 'catalog.filter.showType',
         options: [
-          { val: '', label: '全部' },
-          ...shows.map((s) => ({ val: s, label: SHOW_LABEL[s] ?? s })),
+          { val: '', labelKey: 'catalog.all' },
+          ...shows.map((s) => (SHOW_KEY[s] ? { val: s, labelKey: SHOW_KEY[s] } : { val: s, label: s })),
         ],
       });
     }

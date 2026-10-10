@@ -1,23 +1,18 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
+import { pathLabel } from '../../lib/enum-labels';
 import { useRoute } from 'vue-router';
-import {
-  fmtDescWithFormat, fmtDescStar, avatarShopIconUrl, avatarDrawCardUrl,
-  gridFightEquipIconWithFallback, gridFightTraitIconById, gridFightSkillIconSrc,
-  gridFightPropIconUrl, lightconeIconUrl,
-} from '../../lib/format';
+import { useI18n } from 'vue-i18n';
+import { fmtDescWithFormat, fmtDescStar, avatarShopIconUrl, avatarDrawCardUrl, gridFightEquipIconWithFallback, gridFightTraitIconById, gridFightSkillIconSrc, gridFightPropIconUrl, lightconeIconUrl } from '../../lib/format';
 import { resolveCdnUri } from '../../services/cdn';
-import { SITE_NAME, PATH } from '../../lib/constants';
-import {
-  CHARGE_LABEL, propLabel, propValue,
-  mergeSkillGroups, buildGrowthMatrix, matrixUp,
-  resolveRecommend, buildRecommendRows, groupTraits,
-  buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceLine,
-} from '../../lib/currency-role';
+import { SITE_NAME } from '../../lib/constants';
+import { cwChargeKey, cwCostKey } from '../../lib/enum-labels';
+import { propLabel, propValue, mergeSkillGroups, buildGrowthMatrix, matrixUp, resolveRecommend, buildRecommendRows, groupTraits, buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceLine } from '../../lib/currency-role';
 import type { MergedSkill } from '../../lib/currency-role';
 import { usePageData } from '../composables/use-page-data';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import { loadLocalCurrencyRole, loadLocalCharacter, loadLocalCurrencyPropIcons, loadLocalLightCones } from '../../services/api';
+import { recommendPriorityKey } from '../../lib/currency-role';
 import { getSavedTrailblazerGender, shouldUseFemaleAvatar } from '../../lib/trailblazer';
 import { getSavedCwSkillDescMode, setCwSkillDescMode } from '../../lib/cw-skill-desc';
 import type { CwSkillDescMode } from '../../lib/cw-skill-desc';
@@ -32,6 +27,7 @@ import '../../styles/currency-role-gear.css';
 import '../../styles/currency-role-skills.css';
 
 const route = useRoute();
+const { t } = useI18n();
 const roleId = computed(() => String(route.params.id));
 
 const descMode = ref<CwSkillDescMode>(getSavedCwSkillDescMode());
@@ -74,8 +70,8 @@ const roleLines = computed(() => {
   const s = firstKey ? stars[firstKey] : null;
   if (!s) return [];
   const lines: Array<{ pos: string; text: string }> = [];
-  if (s.front_one_word_desc) lines.push({ pos: '前台', text: s.front_one_word_desc });
-  if (s.back_one_word_desc) lines.push({ pos: '后台', text: s.back_one_word_desc });
+  if (s.front_one_word_desc) lines.push({ pos: t('catalog.position.front'), text: s.front_one_word_desc });
+  if (s.back_one_word_desc) lines.push({ pos: t('catalog.position.back'), text: s.back_one_word_desc });
   return lines;
 });
 
@@ -170,11 +166,11 @@ function skillIconAttrs(sk: MergedSkill): Record<string, string | undefined> {
 }
 
 const SECTIONS = [
-  { id: 'stars', label: '成长总览' },
-  { id: 'skills', label: '技能详情' },
-  { id: 'ranks', label: '后台星魂' },
-  { id: 'cones', label: '专属光锥' },
-  { id: 'equips', label: '推荐装备' },
+  { id: 'stars', label: t('cwRole.sec.growth') },
+  { id: 'skills', label: t('cwRole.sec.skills') },
+  { id: 'ranks', label: t('cwRole.sec.ranks') },
+  { id: 'cones', label: t('cwRole.sec.cones') },
+  { id: 'equips', label: t('cwRole.sec.equips') },
 ] as const;
 
 const pageRef = ref<HTMLElement | null>(null);
@@ -206,7 +202,7 @@ function hideOnError(e: Event) {
 <template>
   <div ref="pageRef" class="nk-page--detail nk-crole" :aria-busy="loading">
 
-    <div v-if="showSkeleton" class="nk-crole__skeleton" role="status" aria-live="polite" aria-label="角色详情加载中">
+    <div v-if="showSkeleton" class="nk-crole__skeleton" role="status" aria-live="polite" :aria-label="t('cwRole.loadingAria')">
       <div class="nk-crole__skeleton-hero">
         <div class="nk-crole__skeleton-portrait nk-sk nk-sk--shimmer"></div>
         <div class="nk-crole__skeleton-info">
@@ -231,8 +227,8 @@ function hideOnError(e: Event) {
           <path d="M12 9v4" /><path d="M12 17h.01" />
         </svg>
       </div>
-      <div class="nk-error-state__title">角色数据加载失败</div>
-      <div class="nk-error-state__detail">可能是网络波动或该条目暂时不可用，重试即可恢复。</div>
+      <div class="nk-error-state__title">{{ t('cwRole.errorTitle') }}</div>
+      <div class="nk-error-state__detail">{{ t('common.loadErrorDetail') }}</div>
       <div class="nk-error-state__tech">{{ error }}</div>
       <button class="nk-error-state__retry" type="button" @click="load">RETRY</button>
     </div>
@@ -245,8 +241,8 @@ function hideOnError(e: Event) {
           <div class="nk-crole-hero__info">
             <div class="nk-crole-hero__line">
               <span class="nk-crole-hero__id">NO.{{ data.id }}</span>
-              <span v-if="data.season_ids && data.season_ids.length" class="nk-crole-hero__season">赛季 {{ data.season_ids.join(' / ') }}</span>
-              <span v-if="data.rarity >= 1" class="nk-crole-hero__fee">{{ data.rarity }}费</span>
+              <span v-if="data.season_ids && data.season_ids.length" class="nk-crole-hero__season">{{ t('cwRole.season', { list: data.season_ids.join(' / ') }) }}</span>
+              <span v-if="data.rarity >= 1" class="nk-crole-hero__fee">{{ cwCostKey(String(data.rarity)) ? t(cwCostKey(String(data.rarity))!) : data.rarity }}</span>
             </div>
             <h1 class="nk-crole-hero__name">{{ data.name }}</h1>
             <div v-if="roleLines.length" class="nk-crole-hero__role">
@@ -256,8 +252,8 @@ function hideOnError(e: Event) {
               </p>
             </div>
             <div class="nk-crole-hero__tags">
-              <span v-for="c in data.charge_type" :key="c" class="nk-crole-chip nk-crole-chip--charge">充能·{{ CHARGE_LABEL[c] || c }}</span>
-              <span v-if="data.is_expert" class="nk-crole-chip nk-crole-chip--exp">专家</span>
+              <span v-for="c in data.charge_type" :key="c" class="nk-crole-chip nk-crole-chip--charge">{{ t('catalog.chargeChip', { name: cwChargeKey(c) ? t(cwChargeKey(c)!) : c }) }}</span>
+              <span v-if="data.is_expert" class="nk-crole-chip nk-crole-chip--exp">{{ t('catalog.filter.expert') }}</span>
             </div>
             <div v-if="traitGroups.length" class="nk-crole-hero__traits">
               <div v-for="grp in traitGroups" :key="grp.cat" class="nk-crole-traitgrp">
@@ -284,7 +280,7 @@ function hideOnError(e: Event) {
 
       <div ref="barRef" class="nk-crole-bar">
         <div class="nk-crole-bar__inner">
-          <nav class="nk-secnav" aria-label="内容区块导航">
+          <nav class="nk-secnav" :aria-label="t('cwRole.navAria')">
             <button
               v-for="s in SECTIONS"
               :key="s.id"
@@ -305,7 +301,7 @@ function hideOnError(e: Event) {
         v-show="showTop"
         class="nk-top-btn"
         type="button"
-        aria-label="返回顶部"
+        :aria-label="t('cwRole.topAria')"
         @click="scrollTop"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -316,8 +312,8 @@ function hideOnError(e: Event) {
         <div class="nk-panel" data-panel="stars">
           <template v-if="growthMatrix.length">
             <div class="nk-crole-gm-head">
-              <h2 class="nk-crole-section__title">成长总览</h2>
-              <div class="nk-crole-gm-pills" role="group" aria-label="星级切换">
+              <h2 class="nk-crole-section__title">{{ t('cwRole.sec.growth') }}</h2>
+              <div class="nk-crole-gm-pills" role="group" :aria-label="t('cwRole.starSwitchAria')">
                 <button
                   v-for="k in starKeys"
                   :key="k"
@@ -334,7 +330,7 @@ function hideOnError(e: Event) {
               <table class="nk-crole-gm__table">
                 <thead>
                   <tr>
-                    <th class="nk-crole-gm__corner" scope="col">属性</th>
+                    <th class="nk-crole-gm__corner" scope="col">{{ t('catalog.filter.element') }}</th>
                     <th
                       v-for="c in starKeys"
                       :key="c"
@@ -365,28 +361,28 @@ function hideOnError(e: Event) {
               </table>
             </div>
           </template>
-          <div v-else class="nk-slot-empty">该角色没有成长数据</div>
+          <div v-else class="nk-slot-empty">{{ t('cwRole.empty.growth') }}</div>
         </div>
 
         <div class="nk-panel" data-panel="skills">
           <template v-if="mergedSkillGroups.length">
             <div class="nk-crole-skills-head">
-              <h2 class="nk-crole-section__title">技能详情</h2>
-              <div class="nk-crole-desc-toggle" role="group" aria-label="技能描述模式">
+              <h2 class="nk-crole-section__title">{{ t('cwRole.sec.skills') }}</h2>
+              <div class="nk-crole-desc-toggle" role="group" :aria-label="t('cwRole.descModeAria')">
                 <button
                   type="button"
                   class="nk-crole-desc-seg"
                   :class="{ 'is-active': descMode === 'simple' }"
                   :aria-pressed="descMode === 'simple'"
                   @click="setDescMode('simple')"
-                >简略</button>
+                >{{ t('cwRole.simple') }}</button>
                 <button
                   type="button"
                   class="nk-crole-desc-seg"
                   :class="{ 'is-active': descMode === 'full' }"
                   :aria-pressed="descMode === 'full'"
                   @click="setDescMode('full')"
-                >详细</button>
+                >{{ t('cwRole.full') }}</button>
               </div>
             </div>
             <div v-if="servantAttrs.length" class="nk-crole-servantattrs">
@@ -414,11 +410,11 @@ function hideOnError(e: Event) {
                     </span>
                   </div>
                   <div class="nk-crole-skill__cost" v-if="sk.sp_base != null || sk.sp_need != null || (sk.bp_need != null && sk.bp_need > 0) || (sk.bp_add != null && sk.bp_add > 0) || stanceLine(sk)">
-                    <span v-if="sk.sp_base != null">获得能量 <b>{{ sk.sp_base }}</b></span>
-                    <span v-if="sk.sp_need != null">消耗能量 <b>{{ sk.sp_need }}</b></span>
-                    <span v-if="sk.bp_need != null && sk.bp_need > 0">战技点 <b>-{{ sk.bp_need }}</b></span>
-                    <span v-if="sk.bp_add != null && sk.bp_add > 0">战技点 <b>+{{ sk.bp_add }}</b></span>
-                    <span v-if="stanceLine(sk)">削韧 <b>{{ stanceLine(sk) }}</b></span>
+                    <span v-if="sk.sp_base != null">{{ t('cwRole.gainEnergy') }} <b>{{ sk.sp_base }}</b></span>
+                    <span v-if="sk.sp_need != null">{{ t('cwRole.costEnergy') }} <b>{{ sk.sp_need }}</b></span>
+                    <span v-if="sk.bp_need != null && sk.bp_need > 0">{{ t('catalog.charge.sp') }} <b>-{{ sk.bp_need }}</b></span>
+                    <span v-if="sk.bp_add != null && sk.bp_add > 0">{{ t('catalog.charge.sp') }} <b>+{{ sk.bp_add }}</b></span>
+                    <span v-if="stanceLine(sk)">{{ t('cwRole.stance') }} <b>{{ stanceLine(sk) }}</b></span>
                   </div>
                   <div v-if="skillStarIdx(sk) >= 0">
                     <p v-if="descMode === 'simple'" class="nk-crole-skill__simple" v-html="fmtDescStar(sk.simple_desc, sk.paramSets, skillStarIdx(sk))"></p>
@@ -431,16 +427,16 @@ function hideOnError(e: Event) {
                       </ul>
                     </template>
                   </div>
-                  <div v-else class="nk-crole-skill__unlock">该技能于 <b>{{ sk.stars.join(' / ') }}★</b> 解锁</div>
+                  <div v-else class="nk-crole-skill__unlock">{{ t('cwRole.unlockAt', { stars: sk.stars.join(' / ') }) }}</div>
                 </div>
               </div>
             </div>
           </template>
-          <div v-else class="nk-slot-empty">该角色没有技能数据</div>
+          <div v-else class="nk-slot-empty">{{ t('cwRole.empty.skills') }}</div>
         </div>
 
         <div class="nk-panel" data-panel="ranks">
-          <h2 class="nk-crole-section__title">后台星魂</h2>
+          <h2 class="nk-crole-section__title">{{ t('cwRole.sec.ranks') }}</h2>
           <template v-if="data.rank.length">
             <div class="nk-crole-timeline">
             <div v-for="rk in data.rank" :key="rk.rank_id" class="nk-crole-timeline__item">
@@ -460,13 +456,13 @@ function hideOnError(e: Event) {
                 <p v-if="rankMechText(rk)" class="nk-crole-timeline__mech">{{ rankMechText(rk) }}</p>
                 <ul v-if="rk.owner_props.length || rk.all_props.length" class="nk-crole-layer__props">
                   <li v-for="(p, pi) in rk.owner_props" :key="'o' + pi">
-                    <span class="nk-crole-layer__scope">自身</span>
+                    <span class="nk-crole-layer__scope">{{ t('cwRole.scopeSelf') }}</span>
                     <img v-if="p.icon" :src="gridFightPropIconUrl(p.icon)" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
                     <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
                     <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
                   </li>
                   <li v-for="(p, pi) in rk.all_props" :key="'a' + pi">
-                    <span class="nk-crole-layer__scope nk-crole-layer__scope--all">全员</span>
+                    <span class="nk-crole-layer__scope nk-crole-layer__scope--all">{{ t('cwRole.scopeAll') }}</span>
                     <img v-if="p.icon" :src="gridFightPropIconUrl(p.icon)" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
                     <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
                     <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
@@ -476,12 +472,12 @@ function hideOnError(e: Event) {
             </div>
             </div>
           </template>
-          <div v-else class="nk-slot-empty">该角色没有后台星魂数据</div>
+          <div v-else class="nk-slot-empty">{{ t('cwRole.empty.ranks') }}</div>
         </div>
 
         <div class="nk-panel" data-panel="cones">
-          <h2 class="nk-crole-section__title">专属光锥</h2>
-          <p class="nk-crole-section__hint">角色放置在后台时，拥有对应光锥可获得特殊加成。</p>
+          <h2 class="nk-crole-section__title">{{ t('cwRole.sec.cones') }}</h2>
+          <p class="nk-crole-section__hint">{{ t('cwRole.coneHint') }}</p>
           <template v-if="data.equipment.length">
             <div v-if="coneInfo" class="nk-crole-cone">
               <img :src="lightconeIconUrl(coneInfo.id)" :alt="coneInfo.name" class="nk-crole-cone__icon" loading="lazy" @error="hideOnError" />
@@ -489,7 +485,7 @@ function hideOnError(e: Event) {
                 <div class="nk-crole-cone__name">{{ coneInfo.name }}</div>
                 <div class="nk-crole-cone__meta">
                   <span v-if="coneInfo.rarity >= 1" class="nk-crole-cone__rarity">{{ '★'.repeat(coneInfo.rarity) }}</span>
-                  <span v-if="coneInfo.path" class="nk-crole-cone__path">{{ PATH[coneInfo.path] || coneInfo.path }}</span>
+                  <span v-if="coneInfo.path" class="nk-crole-cone__path">{{ pathLabel(coneInfo.path) }}</span>
                   <span class="nk-crole-cone__id">NO.{{ coneInfo.id }}</span>
                 </div>
               </div>
@@ -504,13 +500,13 @@ function hideOnError(e: Event) {
                 <p class="nk-crole-equip__desc" v-html="fmtDescWithFormat(eq.desc, eq.param_list, eq.param_format)"></p>
                 <ul v-if="eq.owner_props.length || eq.all_props.length" class="nk-crole-layer__props">
                   <li v-for="(p, pi) in eq.owner_props" :key="'o' + pi">
-                    <span class="nk-crole-layer__scope">自身</span>
+                    <span class="nk-crole-layer__scope">{{ t('cwRole.scopeSelf') }}</span>
                     <img v-if="p.icon" :src="gridFightPropIconUrl(p.icon)" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
                     <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
                     <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
                   </li>
                   <li v-for="(p, pi) in eq.all_props" :key="'a' + pi">
-                    <span class="nk-crole-layer__scope nk-crole-layer__scope--all">全员</span>
+                    <span class="nk-crole-layer__scope nk-crole-layer__scope--all">{{ t('cwRole.scopeAll') }}</span>
                     <img v-if="p.icon" :src="gridFightPropIconUrl(p.icon)" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
                     <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
                     <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
@@ -520,20 +516,20 @@ function hideOnError(e: Event) {
             </div>
           </div>
           </template>
-          <div v-else class="nk-slot-empty">该角色没有专属光锥数据</div>
+          <div v-else class="nk-slot-empty">{{ t('cwRole.empty.cones') }}</div>
         </div>
 
         <div class="nk-panel" data-panel="equips">
           <template v-if="recommendRows.length">
-            <h2 class="nk-crole-section__title">推荐装备</h2>
+            <h2 class="nk-crole-section__title">{{ t('cwRole.sec.equips') }}</h2>
             <div class="nk-crole-recs">
               <div v-for="row in recommendRows" :key="row.pos" class="nk-crole-rec">
                 <div class="nk-crole-rec__head">
-                  <span class="nk-crole-rec__pos">{{ row.pos }}推荐</span>
+                  <span class="nk-crole-rec__pos">{{ t('cwRole.recFor', { pos: row.pos }) }}</span>
                 </div>
                 <div class="nk-crole-rec__row">
                   <div v-for="grp in row.groups" :key="grp.priority" class="nk-crole-rec__grp">
-                    <span class="nk-crole-rec__prio" :class="grp.priority === '首选' ? 'is-first' : 'is-second'">{{ grp.priority }}</span>
+                    <span class="nk-crole-rec__prio" :class="grp.priority === 'first' ? 'is-first' : 'is-second'">{{ t(recommendPriorityKey(grp.priority)) }}</span>
                     <div class="nk-crole-rec__items">
                       <div v-for="eq in grp.items" :key="eq.id" class="nk-crole-recitem">
                         <div class="nk-crole-recitem__icon">
@@ -548,7 +544,7 @@ function hideOnError(e: Event) {
             </div>
           </template>
 
-          <div v-if="!recommendRows.length" class="nk-slot-empty">该角色没有推荐装备数据</div>
+          <div v-if="!recommendRows.length" class="nk-slot-empty">{{ t('cwRole.empty.equips') }}</div>
         </div>
 
       </div>

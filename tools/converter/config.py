@@ -14,6 +14,10 @@ TEXTMAP_DIR = SOURCE_DIR / "TextMap"
 
 OUTPUT_DIR = PROJECT_ROOT / "public" / "data" / "cn"
 
+PACK_DIR = PROJECT_ROOT / "public" / "data" / "i18n"
+"""语言包输出根目录（`<语言>/<分组>.json`）。与结构层分开：结构层目录名是历史路径，
+语言包是按语言新增的产物，见 docs/adr/0052。"""
+
 TEXTMAP_FILE = TEXTMAP_DIR / "TextMapCHS.json"
 TEXTMAP_EN_FILE = TEXTMAP_DIR / "TextMapEN.json"
 
@@ -99,6 +103,13 @@ PROPERTY_MAP = {
     "WindAddedRatio": "风属性伤害提高",
     "QuantumAddedRatio": "量子属性伤害提高",
     "ImaginaryAddedRatio": "虚数属性伤害提高",
+    # 上游 PropertyType 的历史别名：与上列同义、但确实出现在产物里（前端曾各自维护一份中文），
+    # 补进本表才能让 properties.json 覆盖它们（否则界面会漏成原始枚举键）
+    "BreakDamageAddedRatio": "击破特攻",
+    "LightningAddedRatio": "雷属性伤害提高",
+    "EffectHitRateBase": "效果命中",
+    "EffectResistBase": "效果抵抗",
+    "ElationDamageAddedRatioBase": "欢愉伤害提高",
 }
 
 ICON_PATH_MAP = {

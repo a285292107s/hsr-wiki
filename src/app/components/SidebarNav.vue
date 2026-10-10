@@ -1,18 +1,27 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM, SWAP_ITEM, type NavItem } from './nav-items';
 import { prefetchByPath } from '../router/chunks';
 import { DEBUG_PATH } from '../debug';
+import { SITE_NAME } from '../../lib/constants';
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
+
+/* 显示文案一律经词典：nav-items 只留结构（路径 / 图标 / 拉丁副标）与**完整词典键**（`nav.*`）。
+   注：`ui-sidebar-link__cn` 是既有的主标类名（e2e 与样式依赖），现在承载的是**当前语言**主标。 */
+const itemLabel = (item: NavItem): string => t(item.key);
+const itemShort = (item: NavItem): string => t(item.shortKey ?? item.key);
 
 const isCw = computed(() => !!route.meta.cw);
 
 /** 跨模式入口的可见文案 = 目的地模式名（常规模式页显示「货币战争」，反之显示「常规模式」） */
 const swapLabel = computed(() => (isCw.value ? SWAP_ITEM.inCw : SWAP_ITEM.inNormal));
-const swapDest = computed(() => (isCw.value ? '常规模式' : '货币战争'));
+const swapDest = computed(() => t(swapLabel.value.key));
+const swapAria = computed(() => t('nav.goto', { dest: swapDest.value }));
 
 const navItems = computed<NavItem[]>(() =>
   isCw.value ? [CW_HUB_ITEM, ...CW_NAV_ITEMS] : [NORMAL_HUB_ITEM, ...NORMAL_NAV_ITEMS],
@@ -134,13 +143,13 @@ const DEBUG_ITEM = {
 </script>
 
 <template>
-  <nav ref="sidebarRef" class="ui-sidebar" :class="{ 'ui-sidebar--cw': isCw, 'ui-sidebar--swap-anim': swapping }" aria-label="主导航">
-    <RouterLink to="/" class="ui-sidebar-brand" title="星铁档案馆 · 首页">
+  <nav ref="sidebarRef" class="ui-sidebar" :class="{ 'ui-sidebar--cw': isCw, 'ui-sidebar--swap-anim': swapping }" :aria-label="t('nav.ariaMain')">
+    <RouterLink to="/" class="ui-sidebar-brand" :title="`${SITE_NAME} · ${t('nav.home')}`">
       <span class="ui-sidebar-brand__mark" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c.7 4 2.3 7.2 4.9 8.6-2.6 1.4-4.2 4.6-4.9 8.6-.7-4-2.3-7.2-4.9-8.6C9.7 9.2 11.3 6 12 2z"/><circle cx="18.4" cy="5.6" r="1.1"/><circle cx="5.2" cy="18.6" r="0.9"/></svg>
       </span>
       <span class="ui-sidebar-brand__text">
-        <span class="ui-sidebar-brand__cn">星铁档案馆</span>
+        <span class="ui-sidebar-brand__cn">{{ SITE_NAME }}</span>
         <span class="ui-sidebar-brand__en">HSR Archive</span>
       </span>
     </RouterLink>
@@ -151,23 +160,23 @@ const DEBUG_ITEM = {
       v-for="item in visibleItems"
       :key="item.path"
       :to="item.path"
-      :title="`${item.title} · ${item.en}`"
+      :title="`${itemLabel(item)} · ${item.en}`"
       :aria-current="isActive(item) ? 'page' : undefined"
       :class="['ui-sidebar-link', { 'ui-sidebar-link--active': isActive(item) }]"
       @pointerenter="prefetchByPath(item.path)"
     >
       <span class="ui-sidebar-link__icon" v-html="item.icon" />
       <span class="ui-sidebar-link__text">
-        <span class="ui-sidebar-link__cn">{{ item.title }}</span>
+        <span class="ui-sidebar-link__cn">{{ itemLabel(item) }}</span>
         <span class="ui-sidebar-link__en">{{ item.en }}</span>
       </span>
-      <span class="ui-sidebar-link__label">{{ item.short || item.title }}</span>
+      <span class="ui-sidebar-link__label">{{ itemShort(item) }}</span>
     </RouterLink>
 
     <button
       ref="moreBtnRef"
       type="button"
-      title="更多 · MORE"
+      :title="t('nav.titleMore')"
       class="ui-sidebar-link ui-sidebar-more"
       :class="{
         'ui-sidebar-link--active': moreActive || moreOpen,
@@ -178,78 +187,78 @@ const DEBUG_ITEM = {
       @click="moreOpen = !moreOpen"
     >
       <span class="ui-sidebar-link__icon" v-html="MORE_ICON" />
-      <span class="ui-sidebar-link__label">更多</span>
+      <span class="ui-sidebar-link__label">{{ t('nav.more') }}</span>
     </button>
 
     <RouterLink
       v-for="item in foldedItems"
       :key="item.path"
       :to="item.path"
-      :title="`${item.title} · ${item.en}`"
+      :title="`${itemLabel(item)} · ${item.en}`"
       :aria-current="isActive(item) ? 'page' : undefined"
       :class="['ui-sidebar-link', 'ui-sidebar-link--in-more', { 'ui-sidebar-link--active': isActive(item) }]"
       @pointerenter="prefetchByPath(item.path)"
     >
       <span class="ui-sidebar-link__icon" v-html="item.icon" />
       <span class="ui-sidebar-link__text">
-        <span class="ui-sidebar-link__cn">{{ item.title }}</span>
+        <span class="ui-sidebar-link__cn">{{ itemLabel(item) }}</span>
         <span class="ui-sidebar-link__en">{{ item.en }}</span>
       </span>
-      <span class="ui-sidebar-link__label">{{ item.short || item.title }}</span>
+      <span class="ui-sidebar-link__label">{{ itemShort(item) }}</span>
     </RouterLink>
 
     <div class="ui-sidebar-tools">
       <RouterLink
         v-if="IS_DEV"
         :to="DEBUG_PATH"
-        title="调试台 · DEBUG"
+        :title="t('nav.titleDebug')"
         class="ui-sidebar-link ui-sidebar-debug"
         :class="{ 'ui-sidebar-link--active': route.path === DEBUG_PATH }"
         @pointerenter="prefetchByPath(DEBUG_PATH)"
       >
         <span class="ui-sidebar-link__icon" v-html="DEBUG_ITEM.icon" />
         <span class="ui-sidebar-link__text">
-          <span class="ui-sidebar-link__cn">调试台</span>
+          <span class="ui-sidebar-link__cn">{{ t('nav.debug') }}</span>
           <span class="ui-sidebar-link__en">DEBUG</span>
         </span>
-        <span class="ui-sidebar-link__label">调试台</span>
+        <span class="ui-sidebar-link__label">{{ t('nav.debug') }}</span>
       </RouterLink>
 
       <!-- 跨模式入口：属「工具」位而非内容章节，故与设置同组、紧贴设置之上 -->
       <button
         type="button"
         class="ui-sidebar-link ui-sidebar-swap"
-        :title="`前往${swapDest}`"
-        :aria-label="`前往${swapDest}`"
+        :title="swapAria"
+        :aria-label="swapAria"
         @click="onSwap"
       >
         <span class="ui-sidebar-link__icon" v-html="SWAP_ITEM.icon" />
         <span class="ui-sidebar-link__text">
-          <span class="ui-sidebar-link__cn">{{ swapLabel.title }}</span>
+          <span class="ui-sidebar-link__cn">{{ swapDest }}</span>
           <span class="ui-sidebar-link__en">{{ swapLabel.en }}</span>
         </span>
-        <span class="ui-sidebar-link__label">{{ swapLabel.title }}</span>
+        <span class="ui-sidebar-link__label">{{ swapDest }}</span>
       </button>
 
       <RouterLink
         :to="settingsPath"
-        title="设置 · SETTINGS"
+        :title="t('nav.titleSettings')"
         class="ui-sidebar-link ui-sidebar-settings"
         :class="{ 'ui-sidebar-link--active': route.path === settingsPath }"
       >
         <span class="ui-sidebar-link__icon" v-html="SETTINGS_ITEM.icon" />
         <span class="ui-sidebar-link__text">
-          <span class="ui-sidebar-link__cn">设置</span>
+          <span class="ui-sidebar-link__cn">{{ t('nav.settings') }}</span>
           <span class="ui-sidebar-link__en">SETTINGS</span>
         </span>
-        <span class="ui-sidebar-link__label">设置</span>
+        <span class="ui-sidebar-link__label">{{ t('nav.settings') }}</span>
       </RouterLink>
     </div>
   </nav>
 
   <Transition name="ui-more">
     <div v-if="moreOpen" class="ui-more" @click.self="moreOpen = false">
-      <div id="ui-more-sheet" ref="sheetRef" class="ui-more__sheet" role="dialog" aria-label="更多导航">
+      <div id="ui-more-sheet" ref="sheetRef" class="ui-more__sheet" role="dialog" :aria-label="t('nav.ariaMore')">
         <RouterLink
           v-for="item in foldedItems"
           :key="item.path"
@@ -257,7 +266,7 @@ const DEBUG_ITEM = {
           :class="['ui-more__item', { 'ui-more__item--active': isActive(item) }]"
         >
           <span class="ui-more__icon" v-html="item.icon" />
-          <span class="ui-more__label">{{ item.title }}</span>
+          <span class="ui-more__label">{{ itemLabel(item) }}</span>
           <span class="ui-more__en">{{ item.en }}</span>
         </RouterLink>
       </div>

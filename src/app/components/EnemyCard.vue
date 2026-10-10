@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import EndgameSummons from '../endgame/EndgameSummons.vue';
+import { elemLabel } from '../../lib/enum-labels';
 import EndgameBossGuide from '../endgame/EndgameBossGuide.vue';
 import { pollutionLabel } from '../endgame/pollution';
 import type { MazeBossGuide, MazeMonsterInfo } from '../../services/types';
-import { ELEM, MON_RANK } from '../../lib/constants';
+
+import { monsterRankKey } from '../../lib/enum-labels';
 import { escHtml, elementIconUrl } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   monster: MazeMonsterInfo;
   /** 该敌方**实例**受「贪饕」污染时的污染等级（同场次 InvasionID，1–3）；未受污染不传。
@@ -21,19 +27,19 @@ function elemRow(types: string[]): string {
   return types.map((d) => {
     const src = elementIconUrl(d);
     return src
-      ? `<img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(ELEM[d] || d)}" title="${escHtml(ELEM[d] || d)}" loading="lazy">`
+      ? `<img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(elemLabel(d))}" title="${escHtml(elemLabel(d))}" loading="lazy">`
       : '';
   }).join('');
 }
 
 function monRank(rank?: string): string {
-  return rank ? (MON_RANK[rank] || '') : '';
+  return rank ? translate(monsterRankKey(rank)) : '';
 }
 
 function resistText(m: MazeMonsterInfo): string {
   const es = Object.entries(m.resist || {});
   if (!es.length) return '';
-  return es.map(([d, v]) => `${ELEM[d] || d} ${Math.round(v * 100)}%`).join(' / ');
+  return es.map(([d, v]) => `${elemLabel(d)} ${Math.round(v * 100)}%`).join(' / ');
 }
 
 function resistRowHtml(m: MazeMonsterInfo): string {
@@ -42,7 +48,7 @@ function resistRowHtml(m: MazeMonsterInfo): string {
   return es.map(([d, v]) => {
     const src = elementIconUrl(d);
     if (!src) return '';
-    const label = ELEM[d] || d;
+    const label = elemLabel(d);
     const pct = `${Math.round(v * 100)}%`;
     return `<span class="nk-egd-mon__resitem"><img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(label)}" title="${escHtml(label)} ${pct}" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
   }).join('');
@@ -55,7 +61,7 @@ function debuffResistHtml(m: MazeMonsterInfo): string {
   return (m.debuff_resist || []).map((d) => {
     const src = cdnUri('statusimmune', `${d.icon}.webp`);
     const pct = `${Math.round(d.value * 100)}%`;
-    const label = `效果抵抗 ${pct}`;
+    const label = t('card.effectRes', { v: pct });
     return `<span class="nk-egd-mon__resitem" title="${escHtml(label)}"><img class="nk-egd-mon__immicon" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="" aria-hidden="true" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
   }).join('');
 }
@@ -65,11 +71,11 @@ function monTitle(m: MazeMonsterInfo): string {
   const r = monRank(m.rank);
   if (r) parts.push(r);
   if (m.camp) parts.push(m.camp);
-  if (m.stance) parts.push(`韧性 ${m.stance}`);
-  if (m.speed) parts.push(`速度 ${m.speed}`);
-  if (m.weak?.length) parts.push(`弱点：${m.weak.map((d) => ELEM[d] || d).join(' / ')}`);
+  if (m.stance) parts.push(t('card.value.stance', { v: m.stance }));
+  if (m.speed) parts.push(t('card.value.speed', { v: m.speed }));
+  if (m.weak?.length) parts.push(t('card.weak', { list: m.weak.map((d) => elemLabel(d)).join(' / ') }));
   const rs = resistText(m);
-  if (rs) parts.push(`抗性：${rs}`);
+  if (rs) parts.push(t('card.resist', { list: rs }));
   return parts.join(' · ');
 }
 </script>
@@ -84,8 +90,8 @@ function monTitle(m: MazeMonsterInfo): string {
       <router-link
         class="nk-egd-mon__figlink"
         :to="`/monster/${monster.tpl || monster.id}`"
-        :title="`查看 ${monster.name} 详情`"
-        :aria-label="`查看 ${monster.name} 详情`"
+        :title="t('card.viewDetail', { name: monster.name })"
+        :aria-label="t('card.viewDetail', { name: monster.name })"
       >
         <img
           class="nk-egd-mon__img"
@@ -103,25 +109,25 @@ function monTitle(m: MazeMonsterInfo): string {
         <span class="nk-egd-mon__tags">
           <span v-if="polluted" class="nk-egd-pollchip" :data-level="polluted">{{ pollutionLabel({ level: polluted }) }}</span>
           <span v-if="monster.camp" class="nk-egd-mon__tag">{{ monster.camp }}</span>
-          <span v-if="monster.stance" class="nk-egd-mon__tag">韧性 {{ monster.stance }}</span>
-          <span v-if="monster.speed" class="nk-egd-mon__tag">速度 {{ monster.speed }}</span>
+          <span v-if="monster.stance" class="nk-egd-mon__tag">{{ t('card.value.stance', { v: monster.stance }) }}</span>
+          <span v-if="monster.speed" class="nk-egd-mon__tag">{{ t('card.value.speed', { v: monster.speed }) }}</span>
         </span>
       </div>
       <!-- 弱点/抗性行：有数据展示图标，无数据显式占位“无”（源数据空 = 游戏内无弱点/全 0% 抗性，
            如蕉研组本体等召唤型机制怪；避免误读为数据缺失） -->
       <div v-if="monster.name" class="nk-egd-mon__rows">
         <div class="nk-egd-mon__row">
-          <span class="nk-egd-mon__label">弱点</span>
+          <span class="nk-egd-mon__label">{{ t('catalog.filter.weak') }}</span>
           <span v-if="monster.weak?.length" class="nk-egd-mon__weak" v-html="elemRow(monster.weak)"></span>
-          <span v-else class="nk-egd-mon__none">无</span>
+          <span v-else class="nk-egd-mon__none">{{ t('common.none') }}</span>
         </div>
         <div class="nk-egd-mon__row">
-          <span class="nk-egd-mon__label">抗性</span>
+          <span class="nk-egd-mon__label">{{ t('catalog.sig.resist') }}</span>
           <span v-if="resistText(monster)" class="nk-egd-mon__resist" v-html="resistRowHtml(monster)"></span>
-          <span v-else class="nk-egd-mon__none">无</span>
+          <span v-else class="nk-egd-mon__none">{{ t('common.none') }}</span>
         </div>
         <div v-if="monster.debuff_resist?.length" class="nk-egd-mon__row">
-          <span class="nk-egd-mon__label">效果抵抗</span>
+          <span class="nk-egd-mon__label">{{ t('card.effectResLabel') }}</span>
           <span class="nk-egd-mon__resist" v-html="debuffResistHtml(monster)"></span>
         </div>
       </div>

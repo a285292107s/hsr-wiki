@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync } from 'node:fs';
 import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor } from './helpers';
 import {
   charFamilyIds,
@@ -23,10 +22,7 @@ test.describe('布局验收：角色详情页', () => {
 
   test('/lightcone/首个 id：光锥技能卡不受技能族改动波及（标题行图标在，无图标列）', { tag: '@viewport-independent' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
-    const cones = JSON.parse(readFileSync('public/data/cn/light_cones.json', 'utf8')) as Record<
-      string,
-      { id: number }
-    >;
+    const cones = readJson<Record<string, { id: number }>>('public/data/cn/light_cones.json');
     const lcId = Object.values(cones)[0].id;
     await page.goto(`/lightcone/${lcId}`);
     const icon = page.locator('.nk-lc-skill .nk-skill__title-row .nk-skill__icon');

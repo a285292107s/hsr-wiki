@@ -156,7 +156,7 @@ test.describe('玩法页「当期赛季」判据（不得取未开始的那一�
       const r = await page.evaluate(() => {
         const link = document.querySelector('.nk-egm__note .nk-egm__link');
         const rows = [...document.querySelectorAll('.nk-egm__seasons .nk-eg-lrow')];
-        const live = rows.find((x) => x.getAttribute('data-status') === '进行中');
+        const live = rows.find((x) => x.getAttribute('data-status') === 'live');
         return {
           note: link?.closest('.nk-egm__note')?.textContent?.trim().replace(/\s+/g, ' ') ?? null,
           href: link?.getAttribute('href') ?? null,
@@ -184,7 +184,7 @@ test.describe('终局详情页 Hero 大图口径（赛季 banner 翻转铺底）
   /** Hero 大图口径（用户裁决，含一次当天改主意后的回退）：有 `theme_banner` 的期（maze / story / boss）
    *  用它**左右翻转**后当背景（不再出右侧画框）；无该字段的期（peak 只有 `handbook_banner`）回退
    *  赛季大图且不翻。左栏徽标盘保留（用户看版后要求回到这一版）。 */
-  test('/endgame 详情页 Hero：赛季 banner 翻转作背景（保留徽标盘、无右侧画框），无 banner 的期不翻', async ({ page }) => {
+  test('/endgame 详情页 Hero：赛季 banner 翻转作背景（保留徽标盘、无右侧画框），无 banner 的期不翻', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     const bannerOf = (file: string, id: string) => readJson<Record<string, { arts?: { theme_banner?: string } }>>(

@@ -24,31 +24,9 @@ export const MAX_CHAR_LEVEL = 80;
  */
 export const CHAR_STAGE_LEVEL_CAPS: readonly number[] = [20, 30, 40, 50, 60, 70];
 
-export const PATH: Record<string, string> = {
-  Knight: '存护', Rogue: '巡猎', Mage: '智识', Warlock: '虚无',
-  Warrior: '毁灭', Shaman: '同谐', Priest: '丰饶', Memory: '记忆', Elation: '欢愉',
-  knight: '存护', rogue: '巡猎', mage: '智识', warlock: '虚无',
-  warrior: '毁灭', shaman: '同谐', priest: '丰饶', memory: '记忆', elation: '欢愉',
-};
-
-export const ELEM: Record<string, string> = {
-  Wind: '风', Fire: '火', Ice: '冰', Thunder: '雷',
-  Quantum: '量子', Imaginary: '虚数', Physical: '物理',
-};
-
-export const MON_RANK: Record<string, string> = {
-  Minion: '普通', MinionLv2: '普通',
-  Elite: '精英', LittleBoss: '准首领', BigBoss: '首领',
-};
-
-export const TYPE: Record<string, string> = {
-  Normal: '普攻', BPSkill: '战技', Ultra: '终结技', Passive: '天赋',
-  Maze: '秘技', Servant: '忆灵技', ServantPassive: '忆灵天赋',
-};
-
-export const STANCE_TAG: Record<string, string> = {
-  SingleAttack: '单攻', AoEAttack: '群攻', Blast: '扩散',
-};
+/* 枚举展示名（命途 / 元素 / 技能类型 / 削韧架势）不在此登记：
+   命途与元素取数据源（paths.json / elements.json 令牌），技能类型与架势取词典，
+   统一经 lib/enum-labels.ts 的 pathLabel / elemLabel / skillTypeLabel / stanceTagLabel 读取。 */
 
 export const SKILL_ICON_KEY: Record<string, string> = {
   Normal: 'Normal', BPSkill: 'BP', Ultra: 'Ultra',
@@ -89,28 +67,11 @@ export const SKILL_ORDER: (string | null)[] = ['Normal', 'BPSkill', 'Ultra', 'Pa
 
 export const CHAR_TABS = ['overview', 'skills', 'eidolons', 'builds'] as const;
 
-export const PROP_NAMES: Record<string, string> = {
-  CriticalDamageBase: '暴击伤害', CriticalChanceBase: '暴击率', SpeedDelta: '速度',
-  HPAddedRatio: '生命值%', AttackAddedRatio: '攻击力%', SPRatioBase: '能量恢复效率',
-  BreakDamageAddedRatio: '击破特攻', BreakDamageAddedRatioBase: '击破特攻',
-  FireAddedRatio: '火属性伤害提高',
-  PhysicalAddedRatio: '物理属性伤害提高', IceAddedRatio: '冰属性伤害提高',
-  LightningAddedRatio: '雷属性伤害提高', ThunderAddedRatio: '雷属性伤害提高',
-  WindAddedRatio: '风属性伤害提高',
-  QuantumAddedRatio: '量子属性伤害提高', ImaginaryAddedRatio: '虚数属性伤害提高',
-  HPDelta: '生命值', AttackDelta: '攻击力', DefenceDelta: '防御力',
-  DefenceAddedRatio: '防御力%', HealRatioBase: '治疗量加成',
-  EffectHitRateBase: '效果命中', EffectResistBase: '效果抵抗',
-  StatusProbabilityBase: '效果命中', StatusResistanceBase: '效果抵抗',
-  ElationDamageAddedRatioBase: '欢愉伤害提高',
-};
+/* 属性名 / 部位名不在此登记：展示名取官方词条（随语言包切语言），见 lib/enum-labels.ts。
+   此处只留与语言无关的资源映射（图标 / 序号）。 */
 
 export const SLOT_ICONS: Record<string, string> = {
   BODY: 'IconRelicBody', FOOT: 'IconRelicFoot', NECK: 'IconRelicNeck', OBJECT: 'IconRelicGoods',
-};
-
-export const SLOT_NAMES: Record<string, string> = {
-  HEAD: '头部', HAND: '手部', BODY: '躯干', FOOT: '脚部', NECK: '位面球', OBJECT: '连结绳',
 };
 
 export const SLOT_INDEX: Record<string, number> = {

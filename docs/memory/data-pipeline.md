@@ -14,6 +14,10 @@
 ## TextMap 与描述渲染
 
 - **`resolve_text_en` 命中英文后仍须过 `clean_text`**：否则游戏内富文本标签（`<unbreak>999</unbreak>`）原样写进 `name_en`，产出非法长串且不报错。`tools/converter/textmap.py`
+- **`clean_text` 必须拿到「该文本所属语言」的文本表**：`{NICKNAME}` 这类占位符的取值是**分语言**的（官方词条 `4036035618718239522`：Trailblazer / 開拓者 / 개척자 / Первопроходец…），而 `clean_text` 曾无条件写成中文「开拓者」⇒ 9 种语言包 568 处中文泄漏（英文页显示 `The 开拓者 Paradox`）。修法：`clean_text(text, textmap=None)` 第二参传语言表（缺省 = 缺省语言，行为不变），**语言包 writer 与所有组合器调用点都要传**（`_fill` → `cleaner(text, textmap)`；组合器内 `_expand_textjoin`/`_desc_text`/`_gridfightinfo` 等同理）——只在 writer 传而组合器漏传，泄漏会从 568 降到 9 而不归零。判据：**任何在「按语言现算」路径里的文本清洗，都必须显式带上该语言表**。
+- **属性名 `<property type=X>` 同样按语言取**：`_PROPERTY_LABEL`（32 项）是缺省语言兜底，非缺省语言先查 `_PROPERTY_HASH`（属性类型 → 官方词条键，13 语言文本表均有）——两条一起才算修完：只改占位符不改属性名，语言包仍有 2000+ 处中文（实测 3750）。
+- **官方没有词条的自造属性名是另一类，别指望文本表**：全伤害 / 护盾量 / 治疗量 / 初始战技点 / 战技点上限 / 幸运触发率 / 幸运伤害 / 量子共鸣 / 终结技伤害 / 追加攻击伤害 / 普攻伤害 / 战技伤害 / 属性伤害（15 项）在官方 CN/EN 文本表里**没有干净词条**（子串命中的都是整句，如「治疗量提高」）。这类只能走前端词典 `prop.*`，两条候选路径（converter 发 `{PROP:<键>}` 占位符由前端解析 / converter 写 `$t:prop.<键>` 并从 UI 词典取包值）都会新增跨层契约，属需用户裁决的设计选择——先别私自选一条。
+- **性别变体标记 `{M#…}{F#…}` 独占整段时只取第一支**：转换器不知道玩家性别，而前端按出现顺序把两段都拼出来 ⇒ 原样带入会得到「TrailblazerTrailblazerin」（官方 DE/FR/PT 的「开拓者」正是这种形态）。
 - **占位符判定必须排在 `clean_text` 之前**：顺序反了 `{NICKNAME}` 会被清洗成中文「开拓者」，产出假英文名——比留空更糟。
 - **探针脚本直接 `import resolve_text` 会静默返回空串**：`_text_map` 未加载时是空字典，据此会误判整个字段为空；`convert.py` 的「先 `load_textmap()`」是隐式前提，探针必须自己补。`resolve_text` / `load_textmap`
 - **裸 `#N` 的语义取决于该条目是否携带 `params`**：携带（数组存在即便为空）即占位符，展不开就整段省略该描述；不携带（角色 `desc`/`stories`、成就 `desc`、物品名、敌对 `intro`）即上游字面，必须原样保留；`{TEXTJOIN#61}` 属上游合并标记须放行。
@@ -96,6 +100,9 @@
 - **备选队友槽的键是 `backup_list1..N`（按位编号、无数组字段可枚举）**：只收 `member_list` 会让备选槽名称永远落回退串 `#id`，图片正常、仅 `title` / `alt` 错且不报错。`loadLocalBuildNames`
 - **wiki 技能标签映射漏项会静默丢技能**：`欢愉技` → `ElationDamage`、`忆灵技` / `忆灵天赋` → `Servant` / `ServantPassive`；新增 tag 必须同时改抓取侧映射表与前端查表键（`SkillsPanel` 按 `sk.type` 查表）。
 - **「可选增强 + 失败静默」的链路必须产出覆盖报告**：按 `characters.json` 逐技能、与 `SkillsPanel` 同口径核对缺失类型与参考站侧原因，否则缺口无声累积。
+- **抓取产物的「文案字段」也要按语言落地**：`skill_animations.json` 的 `title` 曾是 wiki 中文小标题，被前端同时用于**匹配技能**（`a.title === sk.name`）与**展示** ⇒ 非中文语言下既挂错技能又露中文。修法：抓取端命中官方技能名时写名称令牌 `$t:<hash>`（**未命中则一律不写**——中文原文比回落序号更差），并**由同一脚本产出该分组的 13 语言包**（值借用 `characters` 分组）——令牌按同分组包解析，缺包时界面直接显示 `$t:…` 且 `check-i18n-packs.mjs` 报缺包。
+- **语言包质量要一条「只降不升」的棘轮**：同类泄漏在本仓复发过两次（`{NICKNAME}` 写成中文 568 处、货币战争属性名 2000+ 处），而既有守卫只看「键是否存在」⇒ 新写入的写死中文或缺词条回退中文一律静默通过。`tools/check-i18n-packs.mjs` 现按 `tools/i18n-han-baseline.json` 记录「非汉字语言包含汉字的条目数」，回涨即失败（`--write-baseline` 重写，只允许下调）。**kr 基线偏高是合法的**：官方韩文自带汉字注音（`세검(細劍)`）。
+- **合并语义要区分「身份」与「元数据」**：条目身份由 `url` 决定（媒体不变即同一条），`title` 属元数据、应随最新抓取更新；「既有优先」会让文案改造永远不生效（改标题那次实测踩到）。整表覆盖用 `--fresh`，代价是丢掉本轮 wiki 不再下发的条目（主角页实测少 6 条）。
 - **抓取产物一律「读既有 → 按 key 取并集 → 写」**：覆盖须显式 `--fresh`，静默丢键比报错更危险。`public/data/cn/skill_animations.json`
 
 ## 产物形态与排查路径
@@ -103,3 +110,7 @@
 - **轻形态与全量形态的字段差异要按产物回答，别猜页面**：`maze.json` 的层级敌方全部不带 `intro`，星启节点与 `maze_boss.json` / `maze_peak.json` 全带；期级合并列表必须走 `_lean_monster` 去掉 `wave` / `intro` / `skills`，只有单关卡才传 `full_monsters=True`。
 - **「缺少某内容」可能落在数据两端，先分清「没产出」与「上游没有」**：`StageConfigData` 缺 `_BindingMazeBuff`（忘却之庭附加关）是上游未登记，末日幻影则是转换器整块没写；只从关卡取值在忘却之庭是恒空分支。
 - **删数据层兜底分支前，先用全量产物量该分支是否可达**：四份产物所有期的 `floor_details` / `tierce` / `levels` 无一期全空 ⇒ 固定条与其 `v-if` 兜底永不触发，属数据层已死的分支。
+- **「重跑产物 vs 已提交产物」逐字节对比有三个恒定伪差异，先排除再下结论**：① `characters.json` / `light_cones.json` 的 `release_version` 由 `release_version.py` 读**上次产物自身**推导，临时输出目录为空时必然退化成 `''`（对比前先把这两份已提交文件预置进临时目录）；② `version.json` 的 `synced_at` / `build` 取自 vendor 的 git HEAD，本机 vendor 落后于已提交产物时会整体不同（对比时排除该文件）；③ `assets/**`（含 `cw-hero.mp4`）不由转换器产出，会以「已提交有、本次未产出」出现。三条排除干净后仍不一致才是真回归。
+- **转换器里 `clean_text(resolve_text(...))` 是双洗，会静默吞掉文本的 TextMap 键**：`resolve_text` 默认已 `clean=True`，再包一层 `clean_text` 会把携带键的 `TextRef` 退化成普通 `str`（见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md) 的令牌化）。`convert.py --tokens` 结束时打印的「结构层残留中文」清单里，凡 `text` / `desc` 字段成片出现且形如游戏模板（带 `#1[i]`）的，先查这类冗余二次加工与字符串拼接，不要先怀疑 TextMap 缺键。
+
+- **联合模式保留旧值时必须配套「末尾清洗」**：`skill_animations.json` 的旧 `title`（wiki 中文小标题）会随「既有优先」一直留着，脚本末尾按不变量（`title` 只能是非令牌则删除）统一清洗后，结构层残留中文从 16 处降到 2 处（仅剩已登记的属性回退）。

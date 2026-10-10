@@ -2,6 +2,8 @@
 
 > 本域 memory 只补 [docs/agents/testing.md](../agents/testing.md)（分层与配置）与 [docs/agents/verification.md](../agents/verification.md)（职责边界与执行纪律）**写不进去的东西**：静默失效的坑位、反常直觉、必须实测才知道的事实，以及判据背后的理由。规则与配置以那两个文件为准，此处不重复。
 
+- **「错误态文案」这条路径在 e2e 里两条触发方式都不成立**：① 不存在的详情 id（`/relic/99999999`）**走不到** `.nk-error-state`（实测 20s 内元素不存在）；② `page.route` 拦截详情数据文件返回 500 也打不中——数据层是**按 URL 缓存**的，同一会话里角色页的配装面板已取过同一文件。故该断言改由 `src/lib/__tests__/errors.test.ts` 的纯函数单测覆盖（`userErrorDetail`），不要在 e2e 里再试这两条路。
+
 ## 静默失效（不报错但结果错）
 
 - **「节点在」≠「度量稳定」**：`goto` / `waitForSelector` 后立刻取值，dev 下路由 chunk 与数据 JSON 都在 load 之后才发起 ⇒ 取到 `null` 或量到回退字体度量。凡「立刻取 DOM / 量几何」的用例都要先等就绪。
@@ -109,6 +111,7 @@
 - **一个 flake 用例「单跑绿、并发红」时，先确认它不是暴露了真实的时序依赖**：热缓存会让顺序对它有利，单次 A/B 的提速数据不足以支撑改配置。
 - **自钉视口的用例必须把 `@viewport-pinned` 写在 `test(...)` 第二参的静态位置**：`grepInvert` 在**收集期**过滤，动态 annotation 不生效；漏标签会让 mobile project 用触摸仿真重跑桌面契约，`boundingBox()` 稳定不变却拖到测试超时（重试也全红）。但**必须留至少一条不打标签的用例**——它的 `setViewportSize` 是被测对象，是唯一验证 `isMobile` 让 `<meta viewport>` 参与布局的哨兵；机检只判「自钉视口 ⇒ 必须有标签」这一个方向。
 - **`import { chromium } from 'playwright'` 必然 `ERR_MODULE_NOT_FOUND`**：`package.json` 只直接依赖 `@playwright/test`，pnpm 严格结构下传递依赖无法从根 `node_modules` 解析，与脚本放置位置无关。统一写 `from '@playwright/test'`（入口全量 re-export playwright API）。
+- **整批运行时偶发的溢出用例：先单独复跑再决定是不是缺陷**。实测 `layout-character-nav.spec.ts` 的「极端视口矩阵（320 / 834 / 矮横屏 / 2560）四条不变量」在**全量 254 条**里失败一次（`expectNoUnknownOverflow` 报未知溢出），单独复跑两条全绿 ⇒ 判为批内时序/布局抖动，**不要改断言、也不要加 retries**（`--retries` 是禁止手法，见上）。判据：同一用例单跑必过、整批偶发、失败点是几何测量而非文本/数量断言。
 
 ## 强制色模式（Windows 高对比）
 

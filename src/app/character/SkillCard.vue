@@ -3,12 +3,20 @@
  * 数据表 .nk-skill__table-wrap 必须占内容列（grid-column: 2/-1）：跨图标列会让层级线擦过表头首列文字。
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { elemLabel, skillTypeLabel } from '../../lib/enum-labels';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
 import {
   fmtDesc, fmtToughness, skillIconUrl, iconUrl, iconImgAttrs,
 } from '../../lib/format';
-import { ELEM, TYPE } from '../../lib/constants';
+
 import { extraTerms } from './utils';
+
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
+/** 文案统一走词典（脚本内不易用 useI18n；见 i18n.ts 的 translate） */
+
 
 const props = defineProps<{
   sk: Skill;
@@ -76,31 +84,31 @@ interface Metric {
 const metrics = computed<Metric[]>(() => {
   const met: Metric[] = [];
   if (props.sk.sp_base != null) {
-    met.push({ label: '能量', html: String(props.sk.sp_base) });
+    met.push({ label: t('skill.energy'), html: String(props.sk.sp_base) });
   }
   if (props.sk.sp_need != null) {
-    met.push({ label: '能量需求', html: String(props.sk.sp_need) });
+    met.push({ label: t('skill.energyNeed'), html: String(props.sk.sp_need) });
   }
   // 削韧：优先官方直出字段（属性 + 显示值），缺失时回退 show_stance_list 换算
   const stType = props.sk.stance_damage_type;
   const stDisp = props.sk.stance_damage_display;
   if (stType && stDisp != null) {
     met.push({
-      label: '削韧',
-      html: `${ELEM[stType] || stType} ${stDisp ?? ''}`.trim(),
+      label: t('cwRole.stance'),
+      html: `${elemLabel(stType)} ${stDisp ?? ''}`.trim(),
     });
   } else {
     const tough = fmtToughness(props.sk);
     if (tough) {
-      met.push({ label: '韧性', html: tough });
+      met.push({ label: t('catalog.sig.stance'), html: tough });
     }
   }
   // 战技点：正值 = 消耗 N（战技 1/饮月强化普攻 1-3），-1 = 不消耗哨兵（不显示，非产出）；获得在 bp_add（普攻 +1）
   if (props.sk.bp_need != null && props.sk.bp_need > 0) {
-    met.push({ label: '战技点', html: '-' + String(props.sk.bp_need) });
+    met.push({ label: t('catalog.charge.sp'), html: '-' + String(props.sk.bp_need) });
   }
   if (props.sk.bp_add != null && props.sk.bp_add > 0) {
-    met.push({ label: '战技点', html: '+' + String(props.sk.bp_add) });
+    met.push({ label: t('catalog.charge.sp'), html: '+' + String(props.sk.bp_add) });
   }
   return met;
 });
@@ -182,7 +190,7 @@ const isEnhanced = computed(() =>
 /* ─── 官方技能最高等级（max_level；缺失时回退 level 表长度） ─── */
 const officialMaxLv = computed(() => props.sk.max_level ?? maxLv.value);
 
-const typeName = computed(() => props.sk.type_name || TYPE[props.sk.type ?? ''] || '');
+const typeName = computed(() => props.sk.type_name || skillTypeLabel(props.sk.type ?? '', ''));
 const tagLabel = computed(() => props.sk.tag || '');
 const icon = computed(() => skillIconUrl(props.sk, props.charId, props.charData));
 const iconAttrs = computed(() => iconImgAttrs(icon.value));
@@ -281,7 +289,7 @@ function onImgLoad(): void { imgDone.value = true; }
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">
         <span class="nk-slider__val">Lv.{{ lv }}<template v-if="officialMaxLv > 1">/{{ officialMaxLv }}</template></span>
-        <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :aria-label="`${sk.name} 等级`" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
+        <input type="range" :min="maxLv <= 1 ? 0 : 1" :max="maxLv" :value="lv" :disabled="maxLv <= 1" :aria-label="t('skill.levelAria', { name: sk.name })" :style="{ '--fill': fillPct + '%' }" @input="onSlider">
       </div>
     </div>
     <div class="nk-skill__body">
@@ -301,7 +309,7 @@ function onImgLoad(): void { imgDone.value = true; }
         </div>
         <div class="nk-skill__desc" v-html="descHtml"></div>
         <div v-if="needHtml" class="nk-skill__need">
-          <span class="nk-skill__need-label">消耗</span>
+          <span class="nk-skill__need-label">{{ t('skill.consume') }}</span>
           <span class="nk-skill__need-val" v-html="needHtml"></span>
         </div>
         <div v-if="metrics.length" class="nk-skill__metrics">
@@ -317,7 +325,7 @@ function onImgLoad(): void { imgDone.value = true; }
             type="button"
             @click="toggleLinks"
           >
-            <span class="arrow">▶</span> {{ linksOpen ? '收起强化来源' : '强化来源' }}
+            <span class="arrow">▶</span> {{ t(linksOpen ? 'skill.enhSourcesOpen' : 'skill.enhSources') }}
           </button>
           <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
           <div class="nk-links-clip" :class="{ open: linksOpen }">
@@ -354,7 +362,7 @@ function onImgLoad(): void { imgDone.value = true; }
             type="button"
             @click="toggleAnim"
           >
-            <span class="arrow">▶</span> {{ animOpen ? '收起技能预览' : '技能预览' }}
+            <span class="arrow">▶</span> {{ t(animOpen ? 'skill.animOpen' : 'skill.anim') }}
           </button>
           <div class="nk-skill__anim-clip" :class="{ open: animOpen }">
             <div v-if="everOpened" class="nk-skill__anim-inner">
@@ -373,7 +381,7 @@ function onImgLoad(): void { imgDone.value = true; }
                   v-if="curAnim"
                   class="nk-skill__anim-img"
                   :src="curAnim"
-                  :alt="`${sk.name} 技能预览`"
+                  :alt="t('skill.animAlt', { name: sk.name })"
                   loading="lazy"
                   @load="onImgLoad"
                 >
@@ -391,7 +399,7 @@ function onImgLoad(): void { imgDone.value = true; }
           type="button"
           @click="toggleTable"
         >
-          <span class="arrow">▶</span> {{ tableOpen ? '收起技能数据' : '技能数据' }}
+          <span class="arrow">▶</span> {{ t(tableOpen ? 'skill.tableOpen' : 'skill.table') }}
         </button>
         <div class="nk-table-clip" :class="{ open: tableOpen }">
           <div v-if="tableEverOpened" class="nk-table-inner">

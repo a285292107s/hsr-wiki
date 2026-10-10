@@ -3,17 +3,26 @@
  * lib/currency-role.ts 纯函数单元测试
  * 合成 fixture（结构对齐 CurrencyRoleDetail 类型），不依赖真实数据。
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import {
   propLabel, propValue, mergeSkillGroups, buildGrowthMatrix, matrixUp,
-  resolveRecommend, buildRecommendRows, catOfTrait, groupTraits,
+  resolveRecommend, buildRecommendRows, recommendPriorityKey, catOfTrait, groupTraits,
   resolveServantAttr, buildServantAttrs, buildSkillNameMap, rankMech, rankDesc,
   stanceText,
 } from '../currency-role';
+import { setLabelTranslator } from '../label-translator';
 import type {
   CharacterData, CurrencyRoleRank, CurrencyRoleRecommend, CurrencyRoleSkill,
   CurrencyRoleStar, CurrencyRoleTrait,
 } from '../../services/types';
+import cnMessages from '../../lib/i18n/messages/cn.json';
+
+/* 词典翻译由 app 层注入（lib 不引应用层）：测试里用 cn 词典当翻译器，
+   于是断言既覆盖「属性名兜底走词典」也钉住词典键确实存在。 */
+beforeAll(() => {
+  const dict = cnMessages as Record<string, string>;
+  setLabelTranslator((key: string) => dict[key] ?? key);
+});
 
 /* ─── fixture ─── */
 
@@ -326,8 +335,12 @@ describe('resolveRecommend / buildRecommendRows', () => {
     const rows = buildRecommendRows(rec());
     expect(rows).toHaveLength(2);
     expect(rows[0].pos).toBe('前台');
-    expect(rows[0].groups.map((g) => g.priority)).toEqual(['首选']);
-    expect(rows[1].groups.map((g) => g.priority)).toEqual(['次选']);
+    /* 优先级是**稳定枚举**（不是文案）：视图按它选样式、文案另取词典。
+       曾因返回中文文案而让视图的 `=== '首选'` 在多语言下恒假（首/次选样式失效） ⇒ 这里钉住枚举。 */
+    expect(rows[0].groups.map((g) => g.priority)).toEqual(['first']);
+    expect(rows[1].groups.map((g) => g.priority)).toEqual(['second']);
+    expect(recommendPriorityKey('first')).toBe('cwRole.priorityFirst');
+    expect(recommendPriorityKey('second')).toBe('cwRole.prioritySecond');
   });
 
   it('returns [] for null', () => {

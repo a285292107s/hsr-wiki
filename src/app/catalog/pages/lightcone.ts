@@ -1,4 +1,6 @@
-import { PATH } from '../../../lib/constants';
+
+import { pathLabel } from '../../../lib/enum-labels';
+import { activeHref } from '../../../lib/i18n/active';
 import { escHtml, lightconeIconUrl, pathIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalLightCones } from '../../../services/api';
@@ -7,9 +9,9 @@ import { STAR_SVG } from './shared';
 
 export const lightconePage: CatalogPageConfig = {
   id: 'lightcone',
-  title: '光锥图鉴',
+  titleKey: 'catalog.lightcone.title',
   subtitle: 'LIGHT CONES',
-  searchPlaceholder: '搜索光锥...',
+  searchKey: 'catalog.lightcone.search',
   gridClass: 'nk-cat-grid nk-lc-grid',
   cardClass: '.nk-lc-card',
   async fetchData() {
@@ -21,7 +23,7 @@ export const lightconePage: CatalogPageConfig = {
       items.push({
         id: String(info.id),
         name: info.name,
-        href: `/lightcone/${info.id}`,
+        href: activeHref(`/lightcone/${info.id}`),
         img: lightconeIconUrl(String(info.id)),
         pathImg: pathIconUrl(path),
         path,
@@ -48,19 +50,19 @@ export const lightconePage: CatalogPageConfig = {
     const paths = [...new Set(data.map((c) => String(c.path || '')).filter(Boolean))];
     return [
       {
-        key: 'rarity', label: '稀有度',
+        key: 'rarity', labelKey: 'catalog.filter.rarity',
         options: [
-          { val: '', label: '全部' },
+          { val: '', labelKey: 'catalog.all' },
           { val: '5', label: STAR_SVG + '5' },
           { val: '4', label: STAR_SVG + '4' },
           { val: '3', label: STAR_SVG + '3' },
         ],
       },
       {
-        key: 'path', label: '命途',
+        key: 'path', labelKey: 'catalog.filter.path',
         options: [
-          { val: '', label: '全部' },
-          ...paths.map((p) => ({ val: p, label: PATH[p] || p, icon: pathIconMap[p] })),
+          { val: '', labelKey: 'catalog.all' },
+          ...paths.map((p) => ({ val: p, label: pathLabel(p), icon: pathIconMap[p] })),
         ],
       },
     ];
@@ -73,7 +75,7 @@ export const lightconePage: CatalogPageConfig = {
       <div class="nk-lc-card__img">
         <img class="lc-avatar" src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
         <div class="nk-sk nk-sk--shimmer nk-lc-card__shimmer" aria-hidden="true"></div>
-        ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${PATH[path] || path}"></div>` : ''}
+        ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${pathLabel(path)}"></div>` : ''}
         <div class="nk-lc-card__info">
           <span class="nk-lc-card__stars">${stars}</span>
           <span class="nk-lc-card__name">${escHtml(item.name)}</span>

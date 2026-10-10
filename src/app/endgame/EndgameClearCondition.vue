@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { translate } from '../i18n';
+
+/** 模板统一走词典 */
+const t = translate;
 /** 面板顶部奖励板左栏（层 tab / 星启看板共用）：「通关条件」。
  *
  *  只渲染**数据里有的门槛**（值 + 口径标签，与「赛季规则」同一套 HUD 语言）：
@@ -13,7 +17,7 @@ defineProps<{ rows: { value: string; label: string }[] }>();
 
 <template>
   <div class="nk-egd-head__col nk-egd-clear">
-    <span class="nk-egd-head__label">通关条件</span>
+    <span class="nk-egd-head__label">{{ t('egd.clearCondition') }}</span>
     <span v-for="r in rows" :key="r.label" class="nk-egd-rules__item">
       <span class="nk-egd-rules__val">{{ r.value }}</span>
       <span class="nk-egd-rules__label">{{ r.label }}</span>

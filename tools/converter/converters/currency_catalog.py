@@ -13,7 +13,8 @@ from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
 from season_delta import apply_season_new, mark_season_new
-from textmap import resolve_text, clean_text
+from textmap import clean_text, current_textmap, resolve_text, text_key_of
+from textpack import composed_ref
 from utils import load_json, save_json
 from converters.currency import _build_prop_names
 
@@ -169,68 +170,102 @@ def _convert_portals(out_dir: Path) -> int:
 _GRIDFIGHTINFO_RE = re.compile(r"<gridfightinfo\s+type=(\w+)\s+id=(\d+)\s*/?>")
 
 def _build_name_indexes() -> tuple[dict[int, str], dict[int, str]]:
-    """构建物品名称索引和角色名称索引，用于解析 <gridfightinfo> 标签。
+    """构建物品 / 角色的 **TextMap 键**索引，用于解析 <gridfightinfo> 标签。
+
+    存键而非文本：词条描述是「模板 + 内嵌名称」的组合文案，必须按语言各自组合
+    （见 textpack 的 `composed_ref`）；先解析成文本再组合，多语言下只会得到中文那一份。
 
     Returns:
-        (item_names, role_names): ID → 名称 映射
+        (item_keys, role_keys): ID → TextMap 键 映射
     """
     items_raw = _load_excel("GridFightItems.json")
-    item_names: dict[int, str] = {}
+    item_keys: dict[int, str] = {}
     for item in items_raw:
         iid = item["ID"]
-        name = resolve_text(item.get("ItemName", {}))
-        if name:
-            item_names[iid] = name
+        key = text_key_of(item.get("ItemName", {}))
+        if key:
+            item_keys[iid] = key
 
     role_raw = _load_excel("GridFightRoleBasicInfo.json")
     avatar_raw = _load_excel("AvatarConfig.json")
     ld_path = EXCEL_DIR / "AvatarConfigLD.json"
     if ld_path.exists():
         avatar_raw = avatar_raw + load_json(ld_path)
-    avatar_names: dict[int, str] = {}
+    avatar_keys: dict[int, str] = {}
     for av in avatar_raw:
         aid = av.get("AvatarID")
         if aid:
-            name = resolve_text(av.get("AvatarName", {}))
-            if name:
-                avatar_names[aid] = name
+            key = text_key_of(av.get("AvatarName", {}))
+            if key:
+                avatar_keys[aid] = key
 
-    role_names: dict[int, str] = {}
+    role_keys: dict[int, str] = {}
     for role in role_raw:
         rid = role["ID"]
         avatar_id = role.get("AvatarID", rid)
-        name = avatar_names.get(avatar_id, "")
-        if name:
-            role_names[rid] = name
+        key = avatar_keys.get(avatar_id)
+        if key:
+            role_keys[rid] = key
 
-    return item_names, role_names
+    return item_keys, role_keys
 
 def _resolve_gridfightinfo(
     text: str,
-    item_names: dict[int, str],
-    role_names: dict[int, str],
+    item_keys: dict[int, str],
+    role_keys: dict[int, str],
+    tm: Any,
 ) -> str:
-    """将 <gridfightinfo type=item|role id=N> 标签替换为实际名称。"""
+    """将 <gridfightinfo type=item|role id=N> 标签替换为**该语言**的实际名称（文本表由 `tm` 决定）。"""
     def _repl(m: re.Match) -> str:
         typ, sid = m.group(1), int(m.group(2))
-        if typ == "item":
-            return item_names.get(sid, "")
-        if typ == "role":
-            return role_names.get(sid, "")
-        return ""
+        keys = item_keys if typ == "item" else role_keys if typ == "role" else None
+        key = keys.get(sid) if keys else None
+        return tm.get(key, "") if key else ""
     return _GRIDFIGHTINFO_RE.sub(_repl, text)
+
+def _augment_desc(
+    tm: Any,
+    desc_key: str | None,
+    item_keys: dict[int, str],
+    role_keys: dict[int, str],
+) -> str:
+    """**语言无关**的词条描述组合实现：标签替换 → 清洗（数值参数由前端 `fmtDesc` 展开）。
+
+    缺省语言正文与各语言语言包共用这一份实现（`tm` 决定语言）。
+    """
+    text = tm.get(desc_key, "") if desc_key else ""
+    text = _resolve_gridfightinfo(text, item_keys, role_keys, tm)
+    # 必须带语言表：内嵌名可能是 `{NICKNAME}`（开拓者的 AvatarName），不带表会洗成中文
+    return clean_text(text, dict(tm))
+
+def _augment_desc_ref(
+    entry: dict,
+    item_keys: dict[int, str],
+    role_keys: dict[int, str],
+) -> Any:
+    """词条 → 描述的组合文本引用（语言包按语言现算）。
+
+    **闭包必须按值绑定模板键**：`lambda` 若直接引用外层循环变量，包生成时它已指向最后一条，
+    全部词条会解析成同一条描述（实测踩到过，靠逐条零回归探针发现）。
+    """
+    desc_key = text_key_of(entry.get("HexDesc", {}))
+    composer = lambda tm, k=desc_key: _augment_desc(tm, k, item_keys, role_keys)  # noqa: E731
+    return composed_ref(
+        f"composed:cwaug:{desc_key or 'lit'}",
+        composer,
+        _augment_desc(current_textmap(), desc_key, item_keys, role_keys),
+    )
+
 
 def _convert_augments(out_dir: Path) -> int:
     raw = _load_excel("GridFightAugment.json")
-    item_names, role_names = _build_name_indexes()
+    item_keys, role_keys = _build_name_indexes()
 
     out: list[dict] = []
     for entry in raw:
         aid = entry["ID"]
         name = resolve_text(entry.get("HexName", {}))
-        raw_desc = resolve_text(entry.get("HexDesc", {}), clean=False)
-        raw_desc = _resolve_gridfightinfo(raw_desc, item_names, role_names)
-        desc = clean_text(raw_desc)
+        desc = _augment_desc_ref(entry, item_keys, role_keys)
         icon = entry.get("IconPath", "")
         mini_icon = entry.get("MiniIconPath", "")
         quality = entry.get("Quality", "")

@@ -2,6 +2,7 @@ import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '../stores/app';
 import { useDelayedSkeleton } from './use-delayed-skeleton';
+import { translate } from '../i18n';
 
 export interface DetailViewOptions {
   /** store 是否已有数据（就绪判定） */
@@ -32,7 +33,7 @@ export function useDetailView(options: DetailViewOptions) {
       await options.load(id);
       options.onLoaded?.();
     } catch {
-      app.toast('error', `加载失败: ${options.error() || '未知错误'}`);
+      app.toast('error', translate('common.loadFailed', { msg: options.error() || translate('common.unknownError') }));
     }
   }
   function retry(): void {

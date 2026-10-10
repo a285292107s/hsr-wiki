@@ -28,7 +28,7 @@ import re
 from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
-from textmap import clean_text, resolve_text
+from textmap import resolve_text
 from utils import load_json, save_json, unwrap_value
 from converters.monster_common import load_monsters
 
@@ -53,8 +53,8 @@ _SCOPE_TABLES = (
 
 
 def _text(ref: Any) -> str:
-    """文本引用 → 清洗后正文（剥除 color/unbreak 标签，保留 #N[i] 占位符）。"""
-    return clean_text(resolve_text(ref))
+    """文本引用 → 清洗后正文（resolve_text 已剥除 color/unbreak 标签，保留 #N[i] 占位符）。"""
+    return resolve_text(ref)
 
 
 def _strip_icon(path: str) -> str:

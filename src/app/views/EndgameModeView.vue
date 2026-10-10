@@ -4,10 +4,12 @@
 // + 当期增益（仅名称与图标）+ 该玩法赛季列表（复用目录页卡片 HTML）+ 其它玩法入口。
 // 不使用 nk-snapshot__entry：单页数据页无条目级覆盖率断言（见 docs/agents/ai-discoverability.md）。
 import { computed, onMounted, ref, watch } from 'vue';
+import { userErrorDetail } from '../../lib/errors';
 import { useRoute, RouterLink } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { SITE_NAME } from '../../lib/constants';
 import {
-  ENDGAME_MODES, endgamePage, mazeStatus, modeDefaultArtUrl,
+  ENDGAME_MODES, endgamePage, mazeStatus, mazeStatusLabelKey, modeDefaultArtUrl,
 } from '../catalog/pages/endgame';
 import {
   loadLocalBossList, loadLocalEndgameGuide, loadLocalMazeList,
@@ -21,6 +23,8 @@ import type { CatalogItem } from '../catalog/types';
 import { seasonBuffChoiceLabel, seasonBuffCount } from '../endgame/guide';
 import '../../styles/endgame.css';
 import '../../styles/endgame-mode.css';
+
+const { t } = useI18n();
 
 const route = useRoute();
 const modeKey = computed(() => String(route.params.mode || ''));
@@ -57,7 +61,7 @@ const currentSeasonInfo = computed<{ id: string; entry: MazeListEntry | null; li
   };
   for (const card of seasonCards.value) {
     const { id, entry } = pick(card);
-    if (entry && mazeStatus(entry) === '进行中') return { id, entry, live: true };
+    if (entry && mazeStatus(entry) === 'live') return { id, entry, live: true };
   }
   const { id, entry } = pick(seasonCards.value[0]);
   return { id, entry, live: false };
@@ -65,10 +69,13 @@ const currentSeasonInfo = computed<{ id: string; entry: MazeListEntry | null; li
 const currentSeason = computed<MazeListEntry | null>(() => currentSeasonInfo.value.entry);
 const currentSeasonId = computed(() => currentSeasonInfo.value.id);
 const currentSeasonLive = computed(() => currentSeasonInfo.value.live);
-/** 非进行中时的状态词（未开始 / 已结束 / 未知），用于把「最新一期」说清楚 */
-const currentSeasonStatus = computed(
-  () => (currentSeason.value ? mazeStatus(currentSeason.value) : '未知'),
+/** 非进行中时的状态**枚举**（notStarted / ended / unknown）——判定与文案分离：
+ *  曾把 `t(...)` 后的状态词拿去和中文 '未知' 比较，多语言下该分支恒假。 */
+const currentSeasonStatusKey = computed(() =>
+  currentSeason.value ? mazeStatus(currentSeason.value) : 'unknown',
 );
+/** 状态词文案（走词典） */
+const currentSeasonStatus = computed(() => t(mazeStatusLabelKey(currentSeasonStatusKey.value)));
 
 /** 结构事实（全部取自当期赛季，页面上显式标注「以当期赛季为准」） */
 const structure = computed<Array<{ label: string; value: string }>>(() => {
@@ -77,25 +84,25 @@ const structure = computed<Array<{ label: string; value: string }>>(() => {
   const rows: Array<{ label: string; value: string }> = [];
   const floors = s.floor_details || [];
   if (floors.length) {
-    rows.push({ label: '关卡层级', value: `${floors.length} 层` });
+    rows.push({ label: t('egm.stat.floors'), value: t('egm.value.floors', { n: floors.length }) });
     const halfs = (floors[0].stage1 ? 1 : 0) + (floors[0].stage2 ? 1 : 0);
-    if (halfs) rows.push({ label: '每层场次', value: `${halfs} 场` });
+    if (halfs) rows.push({ label: t('egm.stat.halfs'), value: t('egm.value.halfs', { n: halfs }) });
   }
   const levels = s.levels || [];
   if (levels.length) {
-    rows.push({ label: '关卡组成', value: `${levels.length} 关` });
+    rows.push({ label: t('egm.stat.levels'), value: t('vor.stageCount', { n: levels.length }) });
     // 异相仲裁没有「层级」概念，关卡分两类（骑士试炼 / 王棋）——分开列，否则事实栏只剩两格、
     // 与另外三个玩法（4–5 格）疏密失衡，也说不清这 4 关是什么
     const knights = levels.filter((l) => l.kind === 'knight').length;
     const kings = levels.filter((l) => l.kind === 'king').length;
-    if (knights) rows.push({ label: '骑士试炼', value: `${knights} 关` });
-    if (kings) rows.push({ label: '王棋关卡', value: `${kings} 关` });
+    if (knights) rows.push({ label: t('egm.stat.knights'), value: t('vor.stageCount', { n: knights }) });
+    if (kings) rows.push({ label: t('egm.stat.kings'), value: t('vor.stageCount', { n: kings }) });
     const withTargets = levels.filter((l) => (l.targets || []).length).length;
-    if (withTargets) rows.push({ label: '设挑战目标', value: `${withTargets} 关` });
+    if (withTargets) rows.push({ label: t('egm.stat.targets'), value: t('vor.stageCount', { n: withTargets }) });
   }
-  if (s.countdown) rows.push({ label: '回合上限', value: `${s.countdown} 轮` });
-  if (s.clear_score) rows.push({ label: '分数上限', value: String(s.clear_score) });
-  rows.push({ label: '星启模式', value: s.tierce ? '含' : '不含' });
+  if (s.countdown) rows.push({ label: t('egm.stat.countdown'), value: t('egm.value.countdown', { n: s.countdown }) });
+  if (s.clear_score) rows.push({ label: t('egm.stat.scoreCap'), value: String(s.clear_score) });
+  rows.push({ label: t('egm.stat.tierce'), value: t(s.tierce ? 'egm.value.tierceOn' : 'egm.value.tierceOff') });
   return rows;
 });
 
@@ -127,7 +134,7 @@ async function load(): Promise<void> {
   const loader = MODE_LIST_LOADERS[modeKey.value];
   if (!loader) {
     phase.value = 'error';
-    error.value = `未知的终局玩法: ${modeKey.value}`;
+    error.value = t('egm.unknownMode', { key: modeKey.value });
     return;
   }
   phase.value = 'loading';
@@ -142,10 +149,10 @@ async function load(): Promise<void> {
     guide.value = guideDb;
     listDb.value = list;
     seasonCards.value = cards.filter((c) => c.mode === modeKey.value);
-    document.title = `${mode.value?.label || modeKey.value} - ${SITE_NAME}`;
+    document.title = `${mode.value ? t(mode.value.labelKey) : modeKey.value} - ${SITE_NAME}`;
     phase.value = 'ready';
   } catch (e) {
-    error.value = e instanceof Error ? e.message : String(e);
+    error.value = userErrorDetail(e);
     phase.value = 'error';
   }
 }
@@ -162,24 +169,24 @@ function cardHtml(item: CatalogItem, i: number): string {
   <div class="nk-page--detail nk-egm" :aria-busy="phase === 'loading'">
     <template v-if="phase === 'ready'">
       <header class="nk-egm__hero" :data-mode="modeKey">
-        <nav class="nk-egm__crumbs" aria-label="面包屑">
-          <RouterLink to="/">首页</RouterLink>
+        <nav class="nk-egm__crumbs" :aria-label="t('egm.crumbsAria')">
+          <RouterLink to="/">{{ t('nav.home') }}</RouterLink>
           <span class="nk-egm__sep">›</span>
-          <RouterLink to="/endgame">终局内容</RouterLink>
+          <RouterLink to="/endgame">{{ t('nav.endgame') }}</RouterLink>
           <span class="nk-egm__sep">›</span>
-          <span>{{ mode?.label }}</span>
+          <span>{{ mode ? t(mode.labelKey) : '' }}</span>
         </nav>
         <div class="nk-egm__head">
           <img v-if="heroArt" class="nk-egm__emblem" :src="heroArt" alt="" width="48" height="48">
           <div>
-            <h1 class="nk-egm__title">{{ mode?.label }}</h1>
+            <h1 class="nk-egm__title">{{ mode ? t(mode.labelKey) : '' }}</h1>
             <p class="nk-egm__en">{{ mode?.en }}</p>
           </div>
         </div>
       </header>
 
       <section class="nk-egm__panel">
-        <h2 class="nk-title"><span class="nk-title__idx">01</span>玩法规则 RULES</h2>
+        <h2 class="nk-title"><span class="nk-title__idx">01</span>{{ t('egm.sec.rules') }} RULES</h2>
         <article v-for="(block, bi) in ruleBlocks" :key="bi" class="nk-egm__rule">
           <h3 class="nk-egm__rule-title">{{ block.title }}</h3>
           <p v-for="(p, pi) in block.paras" :key="pi" class="nk-egm__para">{{ p }}</p>
@@ -190,8 +197,8 @@ function cardHtml(item: CatalogItem, i: number): string {
       </section>
 
       <section class="nk-egm__panel">
-        <h2 class="nk-title"><span class="nk-title__idx">02</span>结构口径 STRUCTURE</h2>
-        <p class="nk-egm__note">以当期赛季为准（层数与场次历史上变动过，故不取多季统计值）</p>
+        <h2 class="nk-title"><span class="nk-title__idx">02</span>{{ t('egm.sec.structure') }} STRUCTURE</h2>
+        <p class="nk-egm__note">{{ t('egm.note') }}</p>
         <dl class="nk-egm__facts">
           <div v-for="row in structure" :key="row.label" class="nk-egm__fact">
             <dt>{{ row.label }}</dt>
@@ -199,33 +206,33 @@ function cardHtml(item: CatalogItem, i: number): string {
           </div>
         </dl>
         <p class="nk-egm__note">
-          {{ currentSeasonLive ? '当期赛季' : (currentSeasonStatus === '未知' ? '最新赛季' : `最新赛季（${currentSeasonStatus}）`) }}：<RouterLink class="nk-egm__link" :to="`/endgame/${modeKey}/${currentSeasonId}`">{{ currentSeason?.zh }}</RouterLink>
+          {{ currentSeasonLive ? t('egm.currentSeason') : (currentSeasonStatusKey === 'unknown' ? t('egm.latestSeason') : t('egm.latestSeasonWith', { status: currentSeasonStatus })) }}：<RouterLink class="nk-egm__link" :to="`/endgame/${modeKey}/${currentSeasonId}`">{{ currentSeason?.zh }}</RouterLink>
         </p>
       </section>
 
       <section class="nk-egm__panel">
-        <h2 class="nk-title"><span class="nk-title__idx">03</span>{{ system?.name || '赛季增益' }}</h2>
+        <h2 class="nk-title"><span class="nk-title__idx">03</span>{{ system?.name || t('egm.sec.buffs') }}</h2>
         <!-- 条数与选法是这个区块的**规格**（读者最需要先知道的两件事），故做成可读的规格行，
              不用 0.72rem / --text3 的小字注脚（用户反馈：太小）。 -->
         <p v-if="system" class="nk-egm__system">
-          <span class="nk-egm__system-count">每期 {{ seasonBuffCount(guide, modeKey) }} 条</span>
+          <span class="nk-egm__system-count">{{ t('egm.buffCount', { n: seasonBuffCount(guide, modeKey) }) }}</span>
           <span class="nk-egm__system-choice">{{ seasonBuffChoiceLabel(guide, modeKey) }}</span>
         </p>
         <!-- 条目与效果留在赛季页（那里有半场/关卡上下文）：本页给一个明确的入口，不复制一份残缺的清单 -->
         <RouterLink class="nk-guide-link nk-egm__system-cta" :to="`/endgame/${modeKey}/${currentSeasonId}`">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          查看{{ currentSeasonLive ? '当期' : '最新' }}赛季（{{ currentSeason?.zh }}）的增益
+          {{ t('egm.viewSeasonBuffs', { which: currentSeasonLive ? t('egm.whichCurrent') : t('egm.whichLatest'), name: currentSeason?.zh }) }}
         </RouterLink>
       </section>
 
       <section class="nk-egm__panel">
-        <h2 class="nk-title"><span class="nk-title__idx">04</span>赛季列表 SEASONS</h2>
+        <h2 class="nk-title"><span class="nk-title__idx">04</span>{{ t('egm.sec.seasons') }} SEASONS</h2>
         <div class="nk-egm__seasons" v-html="seasonCards.map(cardHtml).join('')"></div>
       </section>
 
-      <nav class="nk-egm__others" aria-label="其它玩法">
+      <nav class="nk-egm__others" :aria-label="t('egm.othersAria')">
         <RouterLink v-for="m in otherModes" :key="m.key" class="nk-egm__other" :to="`/endgame/${m.key}`">
-          <span class="nk-egm__other-cn">{{ m.label }}</span>
+          <span class="nk-egm__other-cn">{{ t(m.labelKey) }}</span>
           <span class="nk-egm__other-en">{{ m.en }}</span>
         </RouterLink>
       </nav>
@@ -243,9 +250,9 @@ function cardHtml(item: CatalogItem, i: number): string {
     </div>
 
     <div v-else-if="phase === 'error'" class="nk-error-state">
-      <p class="nk-error-state__title">玩法说明加载失败</p>
+      <p class="nk-error-state__title">{{ t('egm.errorTitle') }}</p>
       <p class="nk-error-state__desc">{{ error }}</p>
-      <button class="nk-error-state__retry" type="button" @click="load">重试</button>
+      <button class="nk-error-state__retry" type="button" @click="load">{{ t('common.retry') }}</button>
     </div>
   </div>
 </template>

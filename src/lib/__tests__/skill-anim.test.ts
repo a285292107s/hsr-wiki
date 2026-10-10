@@ -62,3 +62,22 @@ describe('assignAnimEntries', () => {
     expect(skills[0].name).toBe('甲');
   });
 });
+
+describe('多语言：标题为技能名令牌（抓取端改写）', () => {
+  it('标题与译文技能名相等时仍能匹配（令牌解析后两侧同源）', () => {
+    const skills = [sk(61, 'King of Storms', 'Servant'), sk(62, 'Golden Authority', 'Servant')];
+    const map = assignAnimEntries(
+      [entry('b', 'Golden Authority'), entry('a', 'King of Storms')],
+      skills,
+    );
+    expect(map[61].map((a) => a.url)).toEqual(['a']);
+    expect(map[62].map((a) => a.url)).toEqual(['b']);
+  });
+
+  it('标题不匹配任何技能名时按顺序补位（变体小标题的中文原文属既有行为）', () => {
+    const skills = [sk(71, 'A', 'Servant'), sk(72, 'B', 'Servant')];
+    const map = assignAnimEntries([entry('x', '解放的金色王权'), entry('y')], skills);
+    expect(map[71].map((a) => a.url)).toEqual(['x']);
+    expect(map[72].map((a) => a.url)).toEqual(['y']);
+  });
+});

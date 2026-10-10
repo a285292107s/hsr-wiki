@@ -23,6 +23,13 @@ import { CHAR_STAGE_LEVEL_CAPS, MAX_CHAR_LEVEL } from '../../lib/constants';
 import { SECTION_IDX } from './sections';
 import type { CharacterData } from '../../services/types';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
+/** 文案统一走词典（脚本内不易用 useI18n；见 i18n.ts 的 translate） */
+
+
 const props = defineProps<{ d: CharacterData }>();
 
 /** k = 属性键，供 data-prop 消费领域层 --prop-* 身份色（character-hero.css） */
@@ -74,21 +81,21 @@ const tiers = computed<StatTier[]>(() => {
     {
       id: 'panel',
       items: [
-        mk(grow(cur.hp_base, cur.hp_add), '生命值', 'hp', cdnUri('trace', 'IconMaxHP.webp'), cur.hp_add),
-        mk(grow(cur.attack_base, cur.attack_add), '攻击力', 'atk', cdnUri('trace', 'IconAttack.webp'), cur.attack_add),
-        mk(grow(cur.defence_base, cur.defence_add), '防御力', 'def', cdnUri('trace', 'IconDefence.webp'), cur.defence_add),
+        mk(grow(cur.hp_base, cur.hp_add), t('common.stat.hp'), 'hp', cdnUri('trace', 'IconMaxHP.webp'), cur.hp_add),
+        mk(grow(cur.attack_base, cur.attack_add), t('common.stat.atk'), 'atk', cdnUri('trace', 'IconAttack.webp'), cur.attack_add),
+        mk(grow(cur.defence_base, cur.defence_add), t('common.stat.def'), 'def', cdnUri('trace', 'IconDefence.webp'), cur.defence_add),
       ],
     },
     {
       id: 'param',
       items: [
-        mk(maxStat.speed_base, '速度', 'spd', cdnUri('trace', 'IconSpeed.webp')),
-        mk(fmtPct(maxStat.critical_chance), '暴击率', 'crit-rate', cdnUri('trace', 'IconCriticalChance.webp')),
-        mk(fmtPct(maxStat.critical_damage), '暴击伤害', 'crit-dmg', cdnUri('trace', 'IconCriticalDamage.webp')),
-        mk(maxStat.base_aggro ?? 0, '嘲讽', 'taunt', TRACE_TAUNT_SVG),
+        mk(maxStat.speed_base, t('catalog.charge.speed'), 'spd', cdnUri('trace', 'IconSpeed.webp')),
+        mk(fmtPct(maxStat.critical_chance), t('prop.CriticalChanceBase'), 'crit-rate', cdnUri('trace', 'IconCriticalChance.webp')),
+        mk(fmtPct(maxStat.critical_damage), t('prop.CriticalDamageBase'), 'crit-dmg', cdnUri('trace', 'IconCriticalDamage.webp')),
+        mk(maxStat.base_aggro ?? 0, t('stat.taunt'), 'taunt', TRACE_TAUNT_SVG),
         // 遐蝶（1407）是全量 98 只里唯一没有 `sp_need` 的：此处不能回退成 0——「能量上限 0」是**假数据**；
         // 占位符 `—` 才是「该字段确实为空」的诚实表达（`fmtStatValue` 对已格式化字符串原样输出）。
-        mk(props.d.sp_need ?? '—', '能量上限', 'energy', cdnUri('trace', 'IconEnergyLimit.webp')),
+        mk(props.d.sp_need ?? '—', t('stat.energyCap'), 'energy', cdnUri('trace', 'IconEnergyLimit.webp')),
       ],
     },
   ];
@@ -110,14 +117,14 @@ function fmtAdd(n: number): string {
     <div v-if="sliderEnabled" class="nk-stats__level">
       <div class="nk-skill__slider">
         <span class="nk-slider__val nk-stats__level-val">Lv.{{ level }}/{{ MAX_CHAR_LEVEL }}</span>
-        <span class="nk-stats__level-stage">突破 {{ stage }}</span>
+        <span class="nk-stats__level-stage">{{ t('stat.stage', { n: stage }) }}</span>
         <input
           type="range"
           min="1"
           :max="MAX_CHAR_LEVEL"
           :value="level"
-          aria-label="角色等级"
-          :aria-valuetext="`Lv.${level} 突破 ${stage}`"
+          :aria-label="t('stat.levelAria')"
+          :aria-valuetext="t('stat.levelValue', { level, stage })"
           :style="{ '--fill': fillPct + '%' }"
           @input="onSlider"
         >
@@ -137,12 +144,12 @@ function fmtAdd(n: number): string {
         </dt>
         <dd class="nk-stats__readout">
           <span class="nk-stats__val">{{ fmtStatValue(st.v) }}</span>
-          <span v-if="st.add" class="nk-stats__add">每级 +{{ fmtAdd(st.add) }}</span>
+          <span v-if="st.add" class="nk-stats__add">{{ t('stat.perLevel', { v: fmtAdd(st.add) }) }}</span>
         </dd>
       </div>
     </dl>
     <!-- 注记文案受列宽约束：≥768 它占面板层尾随两列，768 档该槽仅 238px ⇒ 必须 ≤20 字（22 字实测 258.5px
          会折成两行并留下「成。」这样的孤字行）。故压到 19 字，单行留 15px 余量。 -->
-    <p class="nk-stats__note">口径：基础面板，不含光锥与遗器加成。</p>
+    <p class="nk-stats__note">{{ t('stat.note') }}</p>
   </section>
 </template>

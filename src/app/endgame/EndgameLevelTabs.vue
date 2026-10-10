@@ -3,6 +3,10 @@ import { nextTick, ref } from 'vue';
 import { tabNextIndex } from './tabs';
 import type { LevelTab } from './levels';
 
+import { translate } from '../i18n';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   tabs: LevelTab[];
   active: string;
@@ -26,7 +30,7 @@ function onKeydown(e: KeyboardEvent, i: number): void {
 </script>
 
 <template>
-  <div id="egd-level-tabs" ref="listRef" class="nk-egd-tabs" role="tablist" aria-label="关卡层级">
+  <div id="egd-level-tabs" ref="listRef" class="nk-egd-tabs" role="tablist" :aria-label="t('egm.stat.floors')">
     <button
       v-for="(t, i) in tabs"
       :id="`egd-level-tab-${t.key}`"

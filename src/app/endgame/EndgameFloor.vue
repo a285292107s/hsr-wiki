@@ -11,6 +11,11 @@ import type {
   MazeBuffInfo, MazeFloorDetail, MazeListEntry, MazeStageDetail,
 } from '../../services/types';
 
+import { translate } from '../i18n';
+import { fmtNumber } from '../../lib/format';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
   floor: MazeFloorDetail;
@@ -76,12 +81,12 @@ const tierRows = computed(() => starTierRows(targets.value, starTiers.value));
 const clearRows = computed(() => {
   const rows: { value: string; label: string }[] = [];
   if (props.data.clear_score) {
-    rows.push({ value: props.data.clear_score.toLocaleString(), label: '通关分数线 SCORE' });
+    rows.push({ value: fmtNumber(props.data.clear_score), label: t('egd.rule.score') });
   }
   const cd = props.floor.countdown || props.data.countdown || 0;
-  if (cd) rows.push({ value: String(cd), label: '回合上限 CYCLES' });
+  if (cd) rows.push({ value: String(cd), label: t('egd.rule.cyclesCap') });
   if (!rows.length && nodes.value.length) {
-    rows.push({ value: String(nodes.value.length), label: '击败首领 ENEMIES' });
+    rows.push({ value: String(nodes.value.length), label: t('egd.rule.enemies') });
   }
   return rows;
 });
@@ -92,7 +97,7 @@ const clearRows = computed(() => {
     <!-- 面板顶部奖励板：通关条件｜通关奖励 两栏 + 星级奖励列表（一档一行，跨满整行） -->
     <div v-if="targets.length || floorReward.length" class="nk-egd-head">
       <EndgameClearCondition :rows="clearRows" />
-      <EndgameReward v-if="floorReward.length" label="通关奖励" :items="floorReward" />
+      <EndgameReward v-if="floorReward.length" :label="t('egd.rewards')" :items="floorReward" />
       <EndgameStarTierList :rows="tierRows" />
     </div>
 
@@ -101,7 +106,7 @@ const clearRows = computed(() => {
       :items="cards"
       :active="activeHalf"
       id-prefix="egd-floor-half-tab"
-      tabs-label="半场"
+      :tabs-label="t('egd.halfTabs')"
       panel-id="egd-floor-board"
       @select="selectHalf"
     />

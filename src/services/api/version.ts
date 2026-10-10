@@ -1,8 +1,7 @@
 
-import { LOCAL_DATA_BASE } from './base';
-import { singletonLoad } from './singleton';
+import { singletonLocalData } from './local';
 import type { LocalVersionInfo } from '../types';
 
-export const loadLocalVersion: () => Promise<LocalVersionInfo> = singletonLoad<LocalVersionInfo>(
-  `${LOCAL_DATA_BASE}/version.json`,
+export const loadLocalVersion: () => Promise<LocalVersionInfo> = singletonLocalData<LocalVersionInfo>(
+  'version.json',
 );

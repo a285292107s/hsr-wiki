@@ -9,6 +9,11 @@ import { seasonBuffList, starTierRows } from './renders';
 import EnemyCard from '../components/EnemyCard.vue';
 import type { MazeBuffInfo, MazeListEntry, MazeTierceNode } from '../../services/types';
 
+import { translate } from '../i18n';
+import { fmtNumber } from '../../lib/format';
+
+/** 模板与脚本统一走词典 */
+const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
   /** 增益体系名（自上而下透传；缺省回退站点工作名） */
@@ -23,9 +28,9 @@ const tierceMonsters = computed(() => props.data.tierce?.monsters || []);
 const tierceNodes = computed<MazeTierceNode[]>(() => props.data.tierce?.nodes || []);
 
 /** 节点号：子切换口径（游戏内文案作「节点一/节点二」） */
-const NODE_ZH: Record<number, string> = { 1: '节点一', 2: '节点二', 3: '节点三' };
+const NODE_KEY: Record<number, string> = { 1: 'egd.node.1', 2: 'egd.node.2', 3: 'egd.node.3' };
 function nodeLabel(nd: MazeTierceNode): string {
-  return NODE_ZH[nd.idx] || `节点${nd.idx}`;
+  return NODE_KEY[nd.idx] ? translate(NODE_KEY[nd.idx]) : translate('egd.node.n', { n: nd.idx });
 }
 
 /** 卡片行 = 子切换导航 + 节点自身属性（节点号 + 末波首领图 + 推荐属性 + 等级）。 */
@@ -71,10 +76,10 @@ const prismReward = computed(() => props.data.tierce?.prism_reward || []);
  *  两者都无时退到节点数（异相仲裁/末日幻影的星启＝完成 3 个节点） */
 const clearRows = computed(() => {
   const rows: { value: string; label: string }[] = [];
-  if (tierceScore.value) rows.push({ value: tierceScore.value.toLocaleString(), label: '通关分数线 SCORE' });
-  if (tierceCountdown.value) rows.push({ value: String(tierceCountdown.value), label: '回合上限 CYCLES' });
+  if (tierceScore.value) rows.push({ value: fmtNumber(tierceScore.value), label: t('egd.rule.score') });
+  if (tierceCountdown.value) rows.push({ value: String(tierceCountdown.value), label: t('egd.rule.cyclesCap') });
   if (!rows.length && tierceNodes.value.length) {
-    rows.push({ value: String(tierceNodes.value.length), label: '通关节点 NODES' });
+    rows.push({ value: String(tierceNodes.value.length), label: t('egd.rule.nodes') });
   }
   return rows;
 });
@@ -112,7 +117,7 @@ watch(
         class="nk-egd-head"
       >
         <EndgameClearCondition :rows="clearRows" />
-        <EndgameReward v-if="tierceRewards.length" label="通关奖励" :items="tierceRewards" />
+        <EndgameReward v-if="tierceRewards.length" :label="t('egd.rewards')" :items="tierceRewards" />
         <EndgameStarTierList :rows="tierRows" />
       </div>
       <EndgameNodeCards
@@ -120,7 +125,7 @@ watch(
         :items="cardItems"
         :active="activeKey"
         id-prefix="egd-tierce-node-tab"
-        tabs-label="星启节点"
+        :tabs-label="t('egd.tierceNodes')"
         panel-id="egd-tierce-board"
         @select="selectNode"
       />
