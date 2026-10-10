@@ -6,6 +6,8 @@
 
 - **改转换器代码不会触发增量重跑**：签名只看源数据文件 mtime/size，改 `endgame.py` 等模块后不加 `--force` 会输出「跳过（未变更）」，现象是「代码改了页面没变」，极易误读成实现没生效。`tools/converter/convert.py --only <模块> --force`
 - **新增或变更静态表读取必须同批登记 `incremental.MODULE_SOURCES`**：漏登记不报错，只让增量判断失真；同一张表被跨模块读取时两个模块都要登记（`monster_common` 读 `HardLevelGroup.json` 之后 `monster_detail` 也要登记）。`test_incremental.py` 的 AST 覆盖校验会抓到漏配
+- **AST 守卫有两个叠加盲区，走 helper 的读取路径等于零覆盖**：① 函数名闸——表名作为实参传给**本文件自定义 helper**（`_load_table("X")`、`_absorb_*(out, "X", …)`、`for table in ("X", …)`）时函数名不在白名单，整个调用点不可见；② 实参闸——`load_json(EXCEL_DIR / <形参>)` 这类转发即使函数名在册也取不到字面量。**两层是复合的**：helper 体内那一跳（`load_json(EXCEL_DIR / f"{name}.json")` 的 `JoinedStr`）同样被挡 ⇒ 该路径**两头都盲**，只能靠人工审查（历史上 `monster_extra` 因此整批漏了 18 张表）。**登记判据是「被导入函数读到的表」，按全量保守登记、不区分对本模块产物是否真的有效**（多登记只多跑一次，漏登记是静默陈旧）；有效性要另做 patch 对照实验判定，不要凭调用链想当然。
+- **聚合型模块（`monster_detail` 这类只 import 别人的 `load_*` 来拼装、自己零字面量读取）的依赖要按「被导入函数读到的表全集」登记**：它对每张表都是「传递依赖」，漏一张就有一块产物静默陈旧；写登记时附上调用链（如 `EliteGroup ← monster_common.load_elite_groups`），下一个人才能核对。
 - **模块归属要用 `MODULE_SOURCES` 复核，别信二手结论**：`traits.json` / `equipment.json` 出自 `currency_catalog.py` 而非 `currency.py`，只跑 `--only currency` 不会更新它们。
 - **未登记源表 = 站点零覆盖且转换不报错**：`StageInvasionBuff/Config`、`MazeBuff` 3034xxx、`GridFightAffixConfig` 在快照里数据完整存在却一张都没登记，站点无任何输出——新数据域先查登记表，再查数据。
 - **共享表落盘要排在依赖它的循环之前**：`save_json(curve, OUTPUT_DIR / 'monster-level-curve.json')` 必须放在详情循环之前，曲线缺组才不带坏全部详情，且 `--only <详情目标>` 能独立产出它。
