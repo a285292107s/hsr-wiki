@@ -985,6 +985,14 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
     background: var(--nk-sheet-bg);
     border: none; border-right: 1px solid var(--line-1);
     box-shadow: none;
+    /* 主标改换行后，最长项由 1 行变 2~3 行，侧栏内容自然高最高 +114px（实测 ru 普通模式 667→781）。
+       视口高不足时 `margin-top: auto` 的底部工具组（跨模式入口 / 设置）会被推到视口下沿之外——
+       实测 657~720px 档 12 组出现「导航项既不在视口内也无法点击」（改前 0 组）。
+       故本档让侧栏自身可纵向滚动：内容再高也只滚动，导航项永远可达（P3 的另一半——能到才算没被截）。
+       `overflow-x: hidden` 是必需的：只写 `overflow-y` 时 `overflow-x` 会按规范计算成 `auto`，
+       而激活态指示条在 `left: -1px` 会诱出横向滚动条；它落在侧栏内距盒内，隐藏不会裁掉指示条。
+       只加在 ≥1024 档：768~1023 是竖排图标栏（`__text` 不显示），不换行、无此增长。 */
+    overflow-y: auto; overflow-x: hidden;
   }
   .ui-sidebar-link {
     flex: none; width: auto; height: auto;
@@ -994,7 +1002,14 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   }
   .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
   .ui-sidebar-link__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-  .ui-sidebar-link__cn { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text); white-space: nowrap; transition: color 0.2s var(--nk-ease-out); }
+  /* 多语言：侧栏主标是**导航标签**，按分级口径属 P3（禁止截断，必须完整显示）。
+     原先只有 `white-space: nowrap` 而没有 `overflow: hidden`（旁边的 `__en` 反而有 ellipsis）
+     ⇒ 译文比中文长时文字直接压到侧栏外（实测 de/ru/th × 16 路由共 120 次外溢，
+     `Verbesserungen` 103.9 > 可用 73px）。处置取「换行 + 断词」而非加宽侧栏：
+     13 语言单行完整显示需侧栏 140→237px，代价是全站内容宽 + 5 处 e2e 契约值（`--nk-content-offset` 三档重标）。
+     `hyphens: auto` 让 de 复合词得到「Währungs-krieg」而不用 `anywhere`（后者会把 CJK 也任意断行，
+     回归面要求 cn/cht/jp/kr 换行行为不变）；本站 `<html lang>` 已由 ADR 0052 同步，故断词规则可用。 */
+  .ui-sidebar-link__cn { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text); white-space: normal; overflow-wrap: break-word; hyphens: auto; transition: color 0.2s var(--nk-ease-out); }
   .ui-sidebar-link__en { font-family: var(--font-mono); font-size: var(--nk-fs-1); letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ui-sidebar-link:hover { background: var(--nk-shell-hover); }
   .ui-sidebar-link:hover .ui-sidebar-link__cn { color: var(--text-bright); }

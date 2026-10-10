@@ -112,6 +112,8 @@
 - **自钉视口的用例必须把 `@viewport-pinned` 写在 `test(...)` 第二参的静态位置**：`grepInvert` 在**收集期**过滤，动态 annotation 不生效；漏标签会让 mobile project 用触摸仿真重跑桌面契约，`boundingBox()` 稳定不变却拖到测试超时（重试也全红）。但**必须留至少一条不打标签的用例**——它的 `setViewportSize` 是被测对象，是唯一验证 `isMobile` 让 `<meta viewport>` 参与布局的哨兵；机检只判「自钉视口 ⇒ 必须有标签」这一个方向。
 - **`import { chromium } from 'playwright'` 必然 `ERR_MODULE_NOT_FOUND`**：`package.json` 只直接依赖 `@playwright/test`，pnpm 严格结构下传递依赖无法从根 `node_modules` 解析，与脚本放置位置无关。统一写 `from '@playwright/test'`（入口全量 re-export playwright API）。
 - **整批运行时偶发的溢出用例：先单独复跑再决定是不是缺陷**。实测 `layout-character-nav.spec.ts` 的「极端视口矩阵（320 / 834 / 矮横屏 / 2560）四条不变量」在**全量 254 条**里失败一次（`expectNoUnknownOverflow` 报未知溢出），单独复跑两条全绿 ⇒ 判为批内时序/布局抖动，**不要改断言、也不要加 retries**（`--retries` 是禁止手法，见上）。判据：同一用例单跑必过、整批偶发、失败点是几何测量而非文本/数量断言。
+- **`shell.spec.ts` 的「下拉框（select）」是真 flake（约 3/5 红），且与卡片 CSS 无关**：失败值 400ms 来自 `tokens.css` 的 `.theme-transitioning` 全局 `!important` 覆盖，`App.vue` 进出 `meta.cw` 路由时加该类、约 450ms 后移除；用例只等「该类不在场」+`waitForTimeout(250)`，而 `watch(isCw)` 回调可能在 `waitForFunction` 通过**之后**才加类 ⇒ 采集落进窗口。**归因判据**：单次 PASS 在 3/5 失败率下不构成证明（曾据此误判「与我无关」后又自行撤回）；正确做法是静态证据（规则逐字未改）+ 多次复现 + 本文件既有记载。修法属测试侧（先等它出现再等它消失，或采集前 `classList.remove`），**不要为它改 400ms**（那是主题切换的设计意图）。
+- **临时还原（`git stash` / `git checkout HEAD -- <file>`）会污染全队共享工作区的测量窗口**：同一 worktree 里有人取 clean baseline 时，别人的扫描会读到「没有修复的树」。取基线要么**先广播时间窗**，要么改用**注入式 A/B**（注入原声明再撤，不动工作树）。**为「同一结论的第二次确认」而做临时还原不划算**——尤其当静态证据已充分时。
 
 ## 强制色模式（Windows 高对比）
 

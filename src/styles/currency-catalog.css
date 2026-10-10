@@ -1,6 +1,13 @@
 
 .nk-cw-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 .nk-cw-grid--wide { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+/* 网格项的自动最小尺寸是 min-content（`min-width: auto`）：卡内名字带 `nowrap` 时
+   min-content = 整串文本宽，轨道会被撑到远超容器——实测 390px 容器 358px、轨 542.9px
+   （ru `Профессиональные перчатки администратора`），卡片右缘 434/549 越出视口；
+   1280px 羁绊 4 列同理（轨合计 1194 > 容器 1108）。
+   逐条禁用取证：**只**把此项归零即回到 358px；清内层 header/body 的 min-width 无效。 */
+.nk-cw-grid > .nk-cw-card,
+.nk-cw-trait-grid > .nk-cw-trait-card { min-width: 0; }
 
 .nk-cw-card {
   display: flex;
@@ -54,9 +61,15 @@
   font-weight: 600;
   color: var(--text);
   line-height: 1.3;
+  /* 卡名是**主标识**（用户在网格里靠它区分条目），单行 nowrap 会把区分性后缀整段切掉：
+     实测 ru「Уникальные акции Межзвёздные путешественники」350px 墨迹挤进 178px 容器
+     （+172px），读起来与「…Экипаж экспресса」无从区分 ⇒ 按 P1 放宽为 2 行。
+     `break-word` 而非 `anywhere`：后者会让 CJK 任意断行（见 i18n-layout-policy §2）。 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
   max-width: 100%;
 }
 .nk-cw-card__cat {
@@ -167,9 +180,12 @@
   font-weight: 700;
   color: var(--text-bright);
   line-height: 1.3;
-  white-space: nowrap;
+  /* 同 `.nk-cw-card__name`：羁绊名是主标识（实测 ru「Прорицательница судьбы」+61px）。 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: break-word;
 }
 .nk-cw-trait-card__meta {
   display: flex;
@@ -265,9 +281,13 @@
   font-weight: 700;
   color: var(--text);
   line-height: 1.3;
+  /* 同 `.nk-cw-card__name`：装备名是主标识，单行截断会把区分性后缀切掉
+     （实测 de「Emblem des Heiligen Kelchs des Schicksals」316px 挤进 170px，+146px）。 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 .nk-cw-equip-cat {
   font-size: var(--nk-fs-3);

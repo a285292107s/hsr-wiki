@@ -32,6 +32,11 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const expert = item.is_expert
     ? `<span class="nk-crole-card__exp">${escHtml(translate('catalog.filter.expert'))}</span>` : '';
   const chargeEl = charge ? `<span class="nk-crole-card__charge" title="${escHtml(charge)}">${escHtml(charge)}</span>` : '';
+  /* 卡面主名称在 `__name-row` 里被 2 行 clamp（该元素是头像上的绝对定位浮层，不宜无限增高）——
+     长译文下 13 语言实测最长需 4 行，故必须挂 `title` 复原全文；
+     title 与实际 textContent 逐字一致（含专家角标），否则 `e2e/layout-i18n-overflow.spec.ts`
+     的「截断必须有复原文本」判据（要求 title 包含元素文本）不成立。 */
+  const nameRowTitle = item.is_expert ? `${item.name}${translate('catalog.filter.expert')}` : item.name;
   const fbIcon = fbType === 'Both' ? FB_SVG_BOTH
     : fbType === 'Front' ? FB_SVG_FRONT
     : fbType === 'Back' ? FB_SVG_BACK
@@ -47,7 +52,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
         <img loading="lazy" src="${escHtml(avatar)}" alt="${escHtml(item.name)}">
         ${fbBadge}
         ${costBadge}
-        <span class="nk-crole-card__name"><span class="nk-crole-card__name-row">${escHtml(item.name)}${expert}</span>${chargeEl}</span>
+        <span class="nk-crole-card__name"><span class="nk-crole-card__name-row" title="${escHtml(nameRowTitle)}">${escHtml(item.name)}${expert}</span>${chargeEl}</span>
       </div>
       <div class="nk-crole-card__body">
         ${traitChips ? `<div class="nk-crole-card__traits">${traitChips}</div>` : ''}

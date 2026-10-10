@@ -309,10 +309,14 @@
   color: var(--text);
   text-align: center;
   line-height: 1.3;
+  /* 成员名是 P1 主标识，且长译文溢出极陡：ru `Серебряный Волк ур. 999` 需 150px / 原盒宽 79px
+     （**溢出 90%**）、de `Silberwolf St. 999` 需 99px。
+     **自由换行、不设 clamp**：13 语言实测最长需 4 行（ru/fr/pt，如 `Louve d'argent Niv. 999`），
+     2 行 clamp 会继续吃掉 `ур. 999` 这类区分性后缀；而本元素的模板在
+     `CurrencyTraitView.vue`（不在本任务写入范围）⇒ 无法补 `title` 复原，故必须**不截断**。
+     成员卡是 `auto-fill minmax(72px,1fr)` 网格，行高自适应，增高不影响横向布局。 */
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 .nk-ctrait-member__cost {
   font-size: var(--nk-fs-2);

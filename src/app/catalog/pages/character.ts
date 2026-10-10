@@ -93,7 +93,10 @@ export const characterPage: CatalogPageConfig = {
     const avatar = roundSrc
       ? `<picture><source media="(max-width: 767px)" srcset="${escHtml(roundSrc)}"><img src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy"></picture>`
       : `<img src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy">`;
-    return `<a class="nk-idx-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" style="--i:${i}">
+    /* 卡名放宽为 2 行后仍可能被 clamp 省略（P1：名字是最长字段），故把全文挂到卡根 `title`
+       上——触屏没有 hover，没有它就等于那段字永久读不到（e2e/layout-catalog.spec.ts:74-127
+       与 e2e/layout-i18n-overflow.spec.ts 的「截断必须有复原手段」判据）。 */
+    return `<a class="nk-idx-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" title="${escHtml(item.name)}" style="--i:${i}">
     <span class="nk-idx-card__portrait">
       ${avatar}
     </span>

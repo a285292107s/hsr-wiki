@@ -58,16 +58,18 @@ function renderEquipCard(item: CatalogItem, index = 0): string {
   const statRows = props.length
     ? `<div class="nk-cw-equip-stats">${props.map((p) => {
         const color = propColor(p.property_type || p.name);
+        const label = propLabel(p);
+        /* 属性名是次要元信息（P2）：保留单行省略，但完整名挂自身 title 供键盘 / 读屏取用。 */
         return `<div class="nk-cw-equip-stat">
           <span class="nk-cw-equip-stat__dot" style="background:${color}"></span>
-          <span class="nk-cw-equip-stat__name">${escHtml(propLabel(p))}</span>
+          <span class="nk-cw-equip-stat__name" title="${escHtml(label)}">${escHtml(label)}</span>
           <span class="nk-cw-equip-stat__val">${propValue(p.value)}</span>
         </div>`;
       }).join('')}</div>`
     : '';
   const fallbackDesc = props.length ? '' : ((item.desc as string) || '').split('\\n')[0];
   const descHtml = fallbackDesc ? `<div class="nk-cw-equip-desc">${escHtml(fallbackDesc)}</div>` : '';
-  return `<div class="nk-cw-card nk-cw-equip-card" style="--i:${index}">
+  return `<div class="nk-cw-card nk-cw-equip-card" style="--i:${index}" title="${escHtml(item.name)}">
       <div class="nk-cw-equip-header">
         <div class="nk-cw-equip-icon" style="border-color:${borderColor}"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
         <div class="nk-cw-equip-title">

@@ -370,7 +370,13 @@
 .nk-char-page .nk-stats__icon { width: var(--nk-stats-icon); height: var(--nk-stats-icon); opacity: 0.9; }
 .nk-char-page .nk-stats__label {
   color: var(--text3); font-weight: 600; letter-spacing: 0.1em;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  /* 多语言：属性名是**每项读数的标识**（用户靠它知道这个数是生命还是速度），按分级口径属 P1。
+     原先 `nowrap + overflow: hidden + ellipsis` 在长译文下把名字整个切掉且**无复原文本**
+     （实测 ru `Максимальная энергия` 1280 档 161>141px、390 档 161>77px；
+     th `DMG คริติคอล`、de `Max. Energie` 同命中；**cn 不命中**）。
+     处置按 policy §3「先让它换行」：`overflow-wrap: break-word` 让 ru 的 `Максимальная` / th 的长串
+     在窄列内断开（`--nk-stats-cols` 在 ≤767 是 2 列、列宽仅 77px）。 */
+  white-space: normal; overflow-wrap: break-word;
 }
 .nk-char-page .nk-stats__readout {
   margin: 4px 0 0; padding-left: var(--nk-stats-gutter);
@@ -388,7 +394,10 @@
 .nk-char-page .nk-stats__add {
   display: block; margin-top: 4px;
   font-family: var(--font-hud); font-size: var(--nk-fs-2); line-height: 1.4;
-  letter-spacing: 0.02em; color: var(--text3); white-space: nowrap;
+  letter-spacing: 0.02em; color: var(--text3);
+  /* 同 `__label`：注记（`每级 +N`）也是读数的一部分，长译文下 `nowrap` 会溢出到相邻列
+     （实测 390 档 ru/de 各 3 处墨迹越界）。改可换行是 P2 的正确形态（内容短，换行代价为零）。 */
+  white-space: normal; overflow-wrap: break-word;
 }
 .nk-char-page .nk-stats__note {
   margin: 20px 0 0;
