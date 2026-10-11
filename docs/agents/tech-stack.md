@@ -39,7 +39,7 @@
 
 ## 四、依赖现状
 
-维护纪律：**运行时依赖只有四个**（`vue` / `pinia` / `vue-router` / `vue-i18n`）——前端零数据 / UI / 工具类三方库；`vue-i18n` 是经用户批准的一次性放开（UI 文案多语言，复数 / 插值 / 分层词典自建成本高于引入成本，见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md) 决策 4）。devDependencies 限于构建（`vite` / `@vitejs/plugin-vue` / `vue-tsc` / `typescript`）、测试（`vitest` / `@vitest/coverage-v8` / `happy-dom` / `@playwright/test` / `@axe-core/playwright`）。全量清单与版本以 `package.json` 为唯一权威，本文件只登记上表被引用到的那些（避免抄成第二份清单）。
+维护纪律：**运行时依赖只有五个**（`vue` / `pinia` / `vue-router` / `vue-i18n` / `@vercel/speed-insights`）——前端零数据 / UI / 工具类三方库。两条放开各经用户一次性批准：`vue-i18n` 为 UI 文案多语言（复数 / 插值 / 分层词典自建成本高于引入成本，见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md) 决策 4）；`@vercel/speed-insights` 为真实用户性能取证（RUM，官方 Vue 一等公民支持、MIT 许可；团队自研等价物需自建采集端点与聚合存储，成本远高于引入成本；**免费层仅 RES 一个分数**，见 [memory/build-deploy.md](../memory/build-deploy.md)）。devDependencies 限于构建（`vite` / `@vitejs/plugin-vue` / `vue-tsc` / `typescript`）、测试（`vitest` / `@vitest/coverage-v8` / `happy-dom` / `@playwright/test` / `@axe-core/playwright`）。全量清单与版本以 `package.json` 为唯一权威，本文件只登记上表被引用到的那些（避免抄成第二份清单）。
 
 ## 五、禁用清单（负向约束索引）
 

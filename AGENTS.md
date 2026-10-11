@@ -115,7 +115,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
   - 守卫：`node tools/check-colors.mjs --strict` 与 `node tools/check-contrast.mjs --strict` 必须全绿；四层定义、豁免与新增流程见 [ui-design.md](docs/agents/ui-design.md) §2/§5。
 - **构建守卫**：每次变更必须 `pnpm build`（含 vue-tsc 类型检查）+ `pnpm test` 全绿后方可提交。
 - **版本号禁入叙述性文档**：README / 本文件 / `docs/agents/` 子文件只写**选型名**；版本口径唯一落位 [tech-stack.md](docs/agents/tech-stack.md)，由 `node tools/doc-audit.mjs` 与 `package.json` / `requirements.txt` / CI 工作流逐字比对。
-- **依赖准入**：新增依赖（含 devDependencies）与已有依赖大版本升级都先经用户确认，并说明「为何现有依赖 / 原生实现不够」。运行时依赖维持 `vue` / `pinia` / `vue-router` / `vue-i18n` 四件（`vue-i18n` 为 UI 文案多语言的**一次性放开**，见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md) 决策 4）——前端数据 / UI / 工具类一律不引库（禁用清单见 [tech-stack.md](docs/agents/tech-stack.md) §5）。
+- **依赖准入**：新增依赖（含 devDependencies）与已有依赖大版本升级都先经用户确认，并说明「为何现有依赖 / 原生实现不够」。运行时依赖维持 `vue` / `pinia` / `vue-router` / `vue-i18n` / `@vercel/speed-insights` 五件（两件为**经用户一次性放开**：`vue-i18n` 为 UI 文案多语言，见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md) 决策 4；`@vercel/speed-insights` 为真实用户性能取证，理由与免费层边界见 [tech-stack.md](docs/agents/tech-stack.md) 4 节）——前端数据 / UI / 工具类一律不引库（禁用清单见 [tech-stack.md](docs/agents/tech-stack.md) §5）。
 - **改动范围最小化**：只改任务明确要求的内容，**禁止顺手重构 / 改名 / 「优化」任务外代码**；交付记录不得出现范围外改动。仅两类例外需显式登记：① 阻断本任务的硬错误；② 已登记的漂移修正——且须在交付记录中单列。范围外缺陷记入「待用户裁决」清单，不自动修。
 - **helper 先查再用**：新增工具函数 / composable / 选择器 / 原语前，先查 `src/lib/`、`src/services/`、既有共享原语与 `CatalogPageConfig` 注册表；有则复用，**禁止跨目录重复封装**（跨文件复制 CSS 同罪，见 [ui-design.md](docs/agents/ui-design.md) §1）。
 - **文档体量红线（AI 可读性）**：面向 AI 的单文件超约 5 万 token（≈120 KB 中文）即失去「整读」价值——持续增长的内容必须在生成器里拆成「小总索引 + 按需分片」，禁止堆到只能靠 grep 捞；口径与手法见 [conventions.md](docs/agents/conventions.md)。

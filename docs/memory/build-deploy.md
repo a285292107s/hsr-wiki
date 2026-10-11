@@ -33,7 +33,9 @@
 
 - **产物布局必须服从托管平台的真实求值顺序，不能靠直觉**：Vercel **先命中文件系统、再走 rewrites**，因此 `{"source":"/"}` 那条 rewrite **永不生效**（`/` 命中 `dist/index.html`）。**「构建产物都对」≠「线上投递正确」——必须用真实 UA 在生产环境验收**，仅在本地跑 build + 守卫必然漏检（投递模型与 `_shell.html` 布局见 ai-discoverability.md）。
 - **给托管平台写 rewrite 前先判定「该 URL 在产物里是否已有对应文件」**：有文件则 rewrite 是死规则；无文件才轮到 rewrite。判据可直接用「`/character/99999` 因文件系统无对应文件才落到 rewrite」这类旁证验证。
-- **不可逆的产物布局决策（快照数量、rewrite、sitemap）要先算产物量级再决定**：为 2606 个物品新增详情页等于把 1200 个预渲染 HTML 翻近三倍，且必须同步 sitemap / vercel rewrite / 快照覆盖三处（跨模块契约）。**凡「零路由成本」的替代路径（检索 + 悬停）能达成同一目的，就不要开新路由形态。**
+- **不可逆的产物布局决策（快照数量、rewrite、sitemap）要先算产物量级再决定**：为 2606 个物品新增详情页等于把 1200 个预渲染 HTML 翻近三倍，且必须同步 sitemap / vercel rewrite / 快照覆盖三处（跨模块契约）。**凡「零路由成本」的替代路径（检索 + 悬停）即能达成同一目的，就不要开新路由形态。**
+- **平台注入路由（`/_vercel/*`）优先于项目 rewrites——正则「匹配」不等于「会被 rewrite」**：本仓 catch-all `/((?!data/|assets/|…).*)` 在正则上**确实匹配** `/_vercel/speed-insights/script.js`，静态分析极易据此得出「接入分析会被投递成 HTML 外壳」的结论。线上实测反证：在**未加任何排除**的旧部署上，`/_vercel/insights/script.js` 与 `/_vercel/speed-insights/script.js` 均返回 `200 application/javascript` 真实包体，而同期 `/this-path-should-404` 仍返回 HTML 外壳（证明 catch-all 生效中）。判据：**「该 URL 被某条 rewrite 的 source 匹配」∧「该规则在此优先级生效」** 才是结论；平台保留路径这一层不减。凡对平台保留路径的判断，**一律用线上/预览实测终结，不要只做正则推演**（`/.well-known/*` 是另一处文档明示的保留路径）。
+- **探针必须有阳性对照组，否则假阴性会把你推向错误结论**：本次首版探针因把 `path.slice(1)` 后再去匹配「含前导 `/` 的 source 正则」，导致**全部路径报 EXCLUDED**（含 `/_vercel/*`），若就此收工会得出与事实相反的「无需处理」。是对照组 `/character/1308`（**必须 CAUGHT**）与 `/data/**`（**必须 EXCLUDED**）暴露了矛盾。**凡「判定 A 会被 B 影响」类探针，必须同时纳入一条确定应当命中的样本与一条确定应当放行的样本**，两侧都符合预期才采信结果。
 
 ## 增量与确定性
 
