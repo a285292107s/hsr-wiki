@@ -259,7 +259,6 @@ export const endgamePage: CatalogPageConfig = {
           <span class="nk-eg-col__meta">
             <span class="nk-eg-col__name">${escHtml(modeLabel)}</span>
             <span class="nk-eg-col__en">${escHtml(m.en)}</span>
-            <span class="nk-eg-col__count">${col.length}</span>
           </span>
           <a class="nk-guide-link" href="${escHtml(activeHref(`/endgame/${m.key}`))}" aria-label="${escHtml(translate('catalog.modeGuideAria', { name: modeLabel }))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>${escHtml(translate('egd.guideLabel'))}</a>
         </h2>

@@ -65,7 +65,7 @@ test.describe('布局验收：终局合并单页', () => {
             const over = head.getBoundingClientRect().right - cr.right;
             if (over > 1) out.push(`${col.getAttribute('data-mode')} .nk-eg-col__head 越出列框 ${Math.round(over)}px`);
           }
-          for (const sel of ['.nk-eg-col__name', '.nk-eg-col__en', '.nk-eg-col__count', '.nk-guide-link']) {
+          for (const sel of ['.nk-eg-col__name', '.nk-eg-col__en', '.nk-guide-link']) {
             const el = col.querySelector(sel);
             if (!el) continue;
             const r = el.getBoundingClientRect();
@@ -100,7 +100,7 @@ test.describe('布局验收：终局合并单页', () => {
    * ⇒ 轨高由共享轨决定：整排放得下就是一行，某列过长才整排等长。
    *
    * **判定必须含「放得下就必须一行」这一条**（本用例的第二组断言）。缺它时「无条件两行」也全绿——
-   * 曾经就是这么漏的：列头写成固定两行、徽章恒在第二行，cn 的元信息自然宽仅 198px、宽列可用 249px+
+   * 曾经就是这么漏的：列头写成固定两行、徽章恒在第二行，cn 的元信息自然宽仅 95~198px、宽列可用 249px+
    * 明明放得下却仍占两行。所以两组断言都要有：① 放得下 ⇒ 盒高回到一行、徽章与文字同一视觉行；
    * ② 有列过长 ⇒ 排内四项参差为 0。真值随语言与视口变，故按长译文语言逐个跑。
    */
@@ -134,43 +134,63 @@ test.describe('布局验收：终局合并单页', () => {
             if (band.cols.length < 2) continue; // 单列排无「排内一致性」可言
             const spread = (xs: number[]) => Math.max(...xs) - Math.min(...xs);
             const modes = band.cols.map((c) => c.getAttribute('data-mode')).join('/');
-            /* 元信息（名 / en / 计数）的**视觉行数**：按各子项底边聚类，相邻 < 6px 视为同一行。
-               它决定该排应当是一行还是多行 —— 这是「放得下就必须一行」判据的输入。 */
-            const metaLines = (c: Element) => {
+            /* 元信息（名 / en）的**视觉文字行数**。它决定该排应当是一行还是多行 —— 这是
+               「放得下就必须一行」判据的输入。
+
+               **必须数「文字行盒」（Range.getClientRects），不能数子元素的盒底。**
+               子项是 flex 项（blockified）：名字自己折成两行时，它的**盒底仍只有一个**
+               ⇒ 按盒底去重恒得 1 行，判据会误判成「放得下」。这个错一度被 `__count` 的存在
+               掩盖（那项停在第 1 行、名字占第 2 行，两个子项盒底不同，侥幸得 2 行）；
+               `__count` 移除后同一仪器立刻开始假红。**仪器错与布局错要分开归因**。 */
+            const metaGeom = (c: Element) => {
               const meta = c.querySelector('.nk-eg-col__meta')!;
               const kids = [...meta.children].filter((el) => getComputedStyle(el).display !== 'none');
-              if (!kids.length) return 1;
-              const bottoms = [...new Set(kids.map((el) => Math.round(el.getBoundingClientRect().bottom)))]
-                .sort((x, y) => x - y);
-              return bottoms.reduce<number[]>((acc, b) => {
-                if (!acc.length || b - acc[acc.length - 1] > 6) acc.push(b);
-                else acc[acc.length - 1] = Math.max(acc[acc.length - 1], b);
-                return acc;
-              }, []).length;
-            };
-            const maxLines = Math.max(...band.cols.map(metaLines));
-
-            if (maxLines === 1) {
-              /* ① 放得下 ⇒ 必须真的一行：盒高回到一行量级（内距 25 + 文字行高 ≤ 60）、
-                    且徽章与首行文字**纵向重叠**（不是被顶到第二行去）。 */
-              for (const c of band.cols) {
-                const h = headOf(c);
-                if (h.height > 60) {
-                  out.push(`${modes} 元信息放得下却非一行（列头高 ${Math.round(h.height)}px，期望 ≤60）`);
-                }
-                const lr = linkOf(c);
-                const meta = c.querySelector('.nk-eg-col__meta')!;
-                const kids = [...meta.children].filter((el) => getComputedStyle(el).display !== 'none');
-                if (kids.length) {
-                  const top = Math.min(...kids.map((el) => el.getBoundingClientRect().top));
-                  const bottom = Math.max(...kids.map((el) => el.getBoundingClientRect().bottom));
-                  const onLine = lr.top < bottom && lr.bottom > top;
-                  // 徽章比文字高，允许它上下各探出一点；只在「完全错开」时判失败
-                  if (!onLine && Math.abs(lr.top - top) > 12) {
-                    out.push(`${modes} 一行形态下徽章不在文字所在行（徽章 top ${Math.round(lr.top)} vs 文字 ${Math.round(top)}~${Math.round(bottom)}）`);
-                  }
+              const boxes: { top: number; bottom: number }[] = [];
+              for (const el of kids) {
+                const r = document.createRange();
+                r.selectNodeContents(el);
+                for (const rect of r.getClientRects()) {
+                  if (rect.width > 0 && rect.height > 0) boxes.push({ top: rect.top, bottom: rect.bottom });
                 }
               }
+              if (!boxes.length) return { lines: 1, lineH: 0, top: 0, bottom: 0 };
+              boxes.sort((a, b) => a.top - b.top);
+              const merged: { top: number; bottom: number }[] = [];
+              for (const b of boxes) {
+                // 纵向重叠 ⇒ 同一视觉行（en 与 name 基线对齐时即为此情形）
+                const hit = merged.find((l) => b.top < l.bottom - 2 && b.bottom > l.top + 2);
+                if (hit) { hit.top = Math.min(hit.top, b.top); hit.bottom = Math.max(hit.bottom, b.bottom); }
+                else merged.push({ top: b.top, bottom: b.bottom });
+              }
+              return {
+                lines: merged.length,
+                lineH: merged[0].bottom - merged[0].top,
+                top: merged[0].top,
+                bottom: merged[merged.length - 1].bottom,
+              };
+            };
+            const geoms = band.cols.map(metaGeom);
+            const maxLines = Math.max(...geoms.map((g) => g.lines));
+
+            if (maxLines === 1) {
+              /* ① 放得下 ⇒ 必须真的一行。判据**全部来自实测几何**（不外写 px）：
+                    一行列头的盒高 = 上下内距 + 一个文字行高；而徽章必须与文字**同一视觉行**
+                    （被顶到第二行去正是上一版「无条件两行」的形态）。 */
+              band.cols.forEach((c, i) => {
+                const g = geoms[i];
+                const head = c.querySelector('.nk-eg-col__head')!;
+                const cs = getComputedStyle(head);
+                const pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+                const h = headOf(c);
+                if (h.height > pad + g.lineH + 2) {
+                  out.push(`${modes} 元信息放得下却非一行（列头高 ${Math.round(h.height)}px > 内距 ${Math.round(pad)} + 行高 ${Math.round(g.lineH)}px）`);
+                }
+                const lr = linkOf(c);
+                // 徽章比文字高，允许上下各探出一点；只在「完全错开」时判失败
+                if (!(lr.top < g.bottom && lr.bottom > g.top) && Math.abs(lr.top - g.top) > 12) {
+                  out.push(`${modes} 一行形态下徽章不在文字所在行（徽章 top ${Math.round(lr.top)} vs 文字 ${Math.round(g.top)}~${Math.round(g.bottom)}）`);
+                }
+              });
             }
 
             const checks: [string, number[]][] = [

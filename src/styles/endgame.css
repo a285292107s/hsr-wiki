@@ -29,7 +29,9 @@
 .nk-eg-col[data-mode="story"] { --eg-color: var(--eg-story); }
 .nk-eg-col[data-mode="boss"] { --eg-color: var(--eg-boss); }
 .nk-eg-col[data-mode="peak"] { --eg-color: var(--eg-peak); }
-/* 列头是一行 4 个**都不可收缩**的项（名 / en / 计数 / 徽章），可用宽仅 243~299px。
+/* 列头原是一行 4 个**都不可收缩**的项（名 / en / 条目计数 / 徽章），可用宽仅 243~299px。
+   （条目计数已按用户裁决移除：价值不大，且它 `margin-left: auto` 把元信息行右端占住，
+   少一项即少一个不可收缩项，宽列更容易回到一行。）
    长译文下列头会被撑破，而 `.nk-eg-col`、`.nk-eg-col__head` 与祖先链全是 `overflow: visible`
    ⇒ 越出的部分直接压到**相邻列**上（实测 145/208 个列头的徽章越出列框，最重 de +216px）。
 
@@ -44,7 +46,7 @@
    高度，轨高 = 该排最高列头，且与语言无关（实测盒高参差 0/156、徽章行位参差 0/156、列表起点 0/156）。
 
    **列头内部是「两列网格」而非「固定两行」**——这一条是形态的关键，写错过一次：
-   列 1 = `.nk-eg-col__meta`（名 / en / 计数，内部 `flex-wrap`），列 2 = 徽章，
+   列 1 = `.nk-eg-col__meta`（名 / en，内部 `flex-wrap`），列 2 = 徽章，
    行轨 `1fr` 撑满该排**共享轨**高。于是：
      · 整排都放得下 → 轨高 = 一行 → 列头**一行**（徽章与文字同行，~52px）
      · 某列标题过长 → 轨高 = 多行 → **整排等长**，元信息贴顶、徽章落到末行
@@ -52,7 +54,7 @@
    也不需要按语种写规则。**放得下就一行、放不下才整排统一**，正是这条设计的目的。
 
    **反例（勿回改）**：曾写成 `grid-template-rows: auto auto` + 徽章恒 `grid-row: 2`，那是
-   **无条件两行**——cn 的「名+en+计数」自然宽仅 198px、宽列可用 249~354px 本来就放得下，
+   **无条件两行**——cn 的「名+en」自然宽仅 95~198px、宽列可用 249~354px 本来就放得下，
    却仍然占两行、行 1 与徽章之间空一大段（cn 在全部 12 个宽度都是 81px）。判据缺失的原因见下条。
 
    徽章的对齐用 `align-self: end` + `justify-self: end`（钉共享轨右下角）：实测长标题时
@@ -79,11 +81,10 @@
    只有 `display: none` 能做到**，收缩类方案换不来高度。 */
 .nk-eg-col__head { grid-row: 1; container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 1fr; align-items: start; column-gap: 9px; margin-bottom: calc(-1 * var(--nk-eg-rowgap)); padding: 12px 8px 13px; border-bottom: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); position: relative; }
 .nk-eg-col__head::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 13px; width: 2px; border-radius: 1px; background: color-mix(in srgb, var(--eg-color) 72%, transparent); }
-/* 列 1：名 / en / 计数。（可换行，故 de 的 285px 长名在自己的轨内折行，不会去挤压 en） */
+/* 列 1：名 / en。（可换行，故 de 的 285px 长名在自己的轨内折行，不会去挤压 en） */
 .nk-eg-col__meta { grid-column: 1; grid-row: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; }
 .nk-eg-col__name { font-size: 1.12rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; }
 .nk-eg-col__en { font-family: var(--font-hud); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, var(--eg-color) 66%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nk-eg-col__count { margin-left: auto; font-family: var(--font-hud); font-size: 0.62rem; letter-spacing: 0.06em; color: var(--text2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 /* 列 2：徽章钉在该排共享轨的**右下角**（`align-self: end` 落末行、`justify-self: end` 保持自然宽）。
    `flex-basis: 100%` 做不到「保持自然宽」——它会把徽章拉成整列宽的横条。 */
 .nk-eg-col__head .nk-guide-link { grid-column: 2; grid-row: 1; align-self: end; justify-self: end; }
