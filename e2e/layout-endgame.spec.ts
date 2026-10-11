@@ -57,6 +57,14 @@ test.describe('布局验收：终局合并单页', () => {
         const out: string[] = [];
         for (const col of document.querySelectorAll('.nk-eg-col')) {
           const cr = col.getBoundingClientRect();
+          /* 必须先量**列头盒本身**：`.nk-eg-col` 改 grid 后其内部那一列是隐式 auto 轨，
+             最小尺寸函数是 min-content，会被最长列头项撑开 ⇒ 列头盒比列框宽、子项却不越出列头盒。
+             只量子项会漏判（旧形态列头是块级盒、宽度恒等于列框，故这条是 subgrid 结构带进来的回归）。 */
+          const head = col.querySelector('.nk-eg-col__head');
+          if (head) {
+            const over = head.getBoundingClientRect().right - cr.right;
+            if (over > 1) out.push(`${col.getAttribute('data-mode')} .nk-eg-col__head 越出列框 ${Math.round(over)}px`);
+          }
           for (const sel of ['.nk-eg-col__name', '.nk-eg-col__en', '.nk-eg-col__count', '.nk-guide-link']) {
             const el = col.querySelector(sel);
             if (!el) continue;
@@ -78,6 +86,93 @@ test.describe('布局验收：终局合并单页', () => {
     }
 
     expect(failures, '列头子项越出列框（会压到相邻列）').toEqual([]);
+    assertNoErrors();
+  });
+
+  /**
+   * 并排各列的列头必须**结构一致**：盒高、徽章行位、徽章底缘、列表起点四项都齐平。
+   *
+   * 用户报的原始现象是「有的列徽章在第一行、有的在第二行」——这是**整排**性质，不是单列性质。
+   * 成因是列头「折几行」由各列自己的内容决定：并排四列各折各的（实测 13 语言 × 12 宽度下 33/156
+   * 组合参差）。治法不是逐列硬压，而是让整排**共用行轨**（`.nk-eg-col` 跨父网格两轨 +
+   * `grid-template-rows: subgrid`），再由 `align-content: space-between` 把徽章钉在该排共享轨底边。
+   *
+   * 为什么是「整排」而不是「逐列」：只要有一列挤不下，整排就不统一，故结构统一为
+   * 「名 / en / 计数」一行 + 徽章一行，与语言无关。**判定必须用几何相对关系**（同一排内各列的
+   * 差值），不写死 px——真值随语言与视口变，故与上一条用例同样按长译文语言逐个跑。
+   */
+  test('/endgame：并排列的列头结构一致（盒高 / 徽章行位 / 徽章底缘 / 列表起点）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    test.setTimeout(180_000);
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const failures: string[] = [];
+
+    for (const code of ['cn', 'de', 'ru', 'es', 'fr', 'pt', 'vi', 'th'] as const) {
+      for (const width of [1024, 1280, 1440, 1920]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(code === 'cn' ? '/endgame' : `/${code}/endgame`);
+        await waitForCatalogCards(page);
+        await page.waitForFunction(() => document.fonts.status === 'loaded', undefined, { timeout: 5000 }).catch(() => {});
+        const bad = await page.evaluate(() => {
+          const out: string[] = [];
+          const grid = document.querySelector('.nk-eg-grid');
+          if (!grid) return ['找不到 .nk-eg-grid'];
+          const cols = [...grid.querySelectorAll(':scope > .nk-eg-col')];
+          // 按列框顶边把列分「排」：同排 = 顶边差 ≤ 10px（auto-fit 换行后可能有第二排）
+          const bands: { top: number; cols: Element[] }[] = [];
+          for (const col of cols) {
+            const t = Math.round(col.getBoundingClientRect().top);
+            const b = bands.find((x) => Math.abs(x.top - t) <= 10);
+            if (b) b.cols.push(col); else bands.push({ top: t, cols: [col] });
+          }
+          const headOf = (c: Element) => c.querySelector('.nk-eg-col__head')!.getBoundingClientRect();
+          const linkOf = (c: Element) => c.querySelector('.nk-guide-link')!.getBoundingClientRect();
+          const listOf = (c: Element) => c.querySelector('.nk-eg-col__list')!.getBoundingClientRect();
+          for (const band of bands) {
+            if (band.cols.length < 2) continue; // 单列排无「排内一致性」可言
+            const spread = (xs: number[]) => Math.max(...xs) - Math.min(...xs);
+            const modes = band.cols.map((c) => c.getAttribute('data-mode')).join('/');
+            const checks: [string, number[]][] = [
+              ['列头盒高', band.cols.map((c) => headOf(c).height)],
+              ['徽章行位', band.cols.map((c) => linkOf(c).top - headOf(c).top)],
+              ['徽章底缘', band.cols.map((c) => headOf(c).bottom - linkOf(c).bottom)],
+              ['列表起点', band.cols.map((c) => listOf(c).top - headOf(c).bottom)],
+            ];
+            for (const [label, vals] of checks) {
+              const d = spread(vals);
+              if (d > 2) out.push(`${modes} 排内${label}参差 ${Math.round(d)}px（${vals.map((v) => Math.round(v)).join('/')}）`);
+            }
+            /* 英文副题的显隐在容器查询下**逐列**求值，故必须另断言「同排结论一致」：
+               若哪天阈值调得比列宽粗（例如改成挂 `.nk-eg-col` 或按视口断点），同排四列就会
+               有的隐有的显，正好重演用户报的「有的这样有的那样」。列宽相同 ⇒ 结论必须相同。
+               注意本断言**不能**加强成「有收益才隐藏」：容器查询看不见「模式名多长」，
+               同列宽下必然有一部分语言被一并隐藏（已知代价，见 `endgame.css` 列头注释）。 */
+            const enFlags = band.cols.map((c) => {
+              const en = c.querySelector('.nk-eg-col__en');
+              return en && getComputedStyle(en).display !== 'none' ? 1 : 0;
+            });
+            if (enFlags.some((f) => f !== enFlags[0])) {
+              out.push(`${modes} 排内英文副题显隐不一致（${enFlags.join('/')}）`);
+            }
+            /* 容器查询不得改变列头盒的宽度：`.nk-eg-col` 一旦成为容器，subgrid 行轨会塌陷。 */
+            for (const c of band.cols) {
+              const cw = c.getBoundingClientRect().width;
+              const hw = headOf(c).width;
+              if (Math.abs(hw - cw) > 2) out.push(`${modes} 列头盒宽 ${Math.round(hw)}px ≠ 列框宽 ${Math.round(cw)}px`);
+            }
+            // 徽章必须保持自然宽（紧凑胶囊），不得被拉成整列宽
+            const colW = band.cols[0].getBoundingClientRect().width;
+            for (const c of band.cols) {
+              const lw = linkOf(c).width;
+              if (lw > colW - 40) out.push(`${modes} 徽章被拉宽到 ${Math.round(lw)}px（列宽 ${Math.round(colW)}px）`);
+            }
+          }
+          return out;
+        });
+        for (const b of bad) failures.push(`${code}@${width}: ${b}`);
+      }
+    }
+
+    expect(failures, '并排列的列头结构不一致（参差即为回归）').toEqual([]);
     assertNoErrors();
   });
 
