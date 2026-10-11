@@ -31,6 +31,56 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
+  /**
+   * 列头 4 个子项都不得越出列框。
+   *
+   * 为什么必须逐项量而不是只测整页溢出：`<html>` 上是 `overflow: clip`，长文本被撑出列框时
+   * 整页 `scrollWidth` 恒等于 `clientWidth`（页面级断言永远是 0），而列框与祖先链全是
+   * `overflow: visible` ⇒ 越出的部分**直接压到相邻列**上。这是本仓已踩过的坑：
+   * `layout-locales-smoke.spec.ts` 曾把同一现象（`.nk-guide-link` 在 1280 下 right=1422）
+   * 记成「检测口径问题」，实际是真实缺陷（i18n 迁移把含模式名的 aria 模板当成了可见文本，
+   * 徽章宽度涨成「名宽 + 前缀」，145/208 个列头被撑破、最重 de +216px）。
+   *
+   * 判据用**几何相对关系**（不写死 px）：子项右缘 ≤ 所属列框右缘 + 1。真值随语言与视口变，
+   * 故按 `RISK_LOCALES`（长译文语言）逐个跑，而不是只跑缺省语言。
+   */
+  test('/endgame：列头子项不越出列框（长译文语言）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    test.setTimeout(180_000);
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const failures: string[] = [];
+
+    for (const code of ['cn', 'de', 'ru', 'es', 'fr', 'pt', 'vi', 'th'] as const) {
+      await page.goto(code === 'cn' ? '/endgame' : `/${code}/endgame`);
+      await waitForCatalogCards(page);
+      await page.waitForFunction(() => document.fonts.status === 'loaded', undefined, { timeout: 5000 }).catch(() => {});
+      const bad = await page.evaluate(() => {
+        const out: string[] = [];
+        for (const col of document.querySelectorAll('.nk-eg-col')) {
+          const cr = col.getBoundingClientRect();
+          for (const sel of ['.nk-eg-col__name', '.nk-eg-col__en', '.nk-eg-col__count', '.nk-guide-link']) {
+            const el = col.querySelector(sel);
+            if (!el) continue;
+            const r = el.getBoundingClientRect();
+            const over = r.right - cr.right;
+            if (over > 1) {
+              // 该子项是否自身在被裁剪（有 ellipsis 的有意省略不算越界）
+              const cs = getComputedStyle(el);
+              const clippedByEllipsis = cs.textOverflow === 'ellipsis' && (el as HTMLElement).scrollWidth > (el as HTMLElement).clientWidth + 1;
+              if (!clippedByEllipsis) {
+                out.push(`${col.getAttribute('data-mode')} ${sel} 越出列框 ${Math.round(over)}px「${(el.textContent || '').trim().slice(0, 28)}」`);
+              }
+            }
+          }
+        }
+        return out;
+      });
+      for (const b of bad) failures.push(`${code}: ${b}`);
+    }
+
+    expect(failures, '列头子项越出列框（会压到相邻列）').toEqual([]);
+    assertNoErrors();
+  });
+
   test('/endgame/boss/3021：层级子 tab（ADR 0026 / 0030）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/boss/3021');

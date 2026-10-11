@@ -247,12 +247,19 @@ export const endgamePage: CatalogPageConfig = {
       const col = items.filter((it) => it.mode === m.key);
       if (!col.length) continue;
       const modeLabel = translate(m.labelKey);
+      /* 徽章的**可见文本**用 `egd.guideLabel`（`Instrucciones` / `Spielweise` / `玩法说明`），
+         `aria-label` 用含名的 `catalog.modeGuideAria`（`Guía de {name}`）。
+         两者分工的理由：读屏看不到「徽章紧邻模式名」这层视觉相邻性，故 aria 必须自带名字；
+         而可见文本若也带名，徽章就会把紧邻的 `__name` 又说一遍，宽度涨成「名宽 + 前缀」——
+         实测 de 徽章 268px > 列头可用 243px，13 语言里 12 种的列头因此被撑破
+         （145/208 个列头徽章越出列框，最重 +216px，且列框无裁剪 ⇒ 直接压到相邻列上）。
+         i18n 迁移前这里是硬编码的「玩法说明」（不含名），迁移时误把 aria 模板当成了可见文本。 */
       html += `<section class="nk-eg-col" data-mode="${m.key}">
         <h2 class="nk-eg-col__head">
           <span class="nk-eg-col__name">${escHtml(modeLabel)}</span>
           <span class="nk-eg-col__en">${escHtml(m.en)}</span>
           <span class="nk-eg-col__count">${col.length}</span>
-          <a class="nk-guide-link" href="${escHtml(activeHref(`/endgame/${m.key}`))}" aria-label="${escHtml(translate('catalog.modeGuideAria', { name: modeLabel }))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>${escHtml(translate('catalog.modeGuideAria', { name: modeLabel }))}</a>
+          <a class="nk-guide-link" href="${escHtml(activeHref(`/endgame/${m.key}`))}" aria-label="${escHtml(translate('catalog.modeGuideAria', { name: modeLabel }))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>${escHtml(translate('egd.guideLabel'))}</a>
         </h2>
         <div class="nk-eg-col__list">${col.map((it, ci) => renderCard(it, ci)).join('')}</div>
       </section>`;

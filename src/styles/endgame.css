@@ -17,9 +17,15 @@
 .nk-eg-col[data-mode="story"] { --eg-color: var(--eg-story); }
 .nk-eg-col[data-mode="boss"] { --eg-color: var(--eg-boss); }
 .nk-eg-col[data-mode="peak"] { --eg-color: var(--eg-peak); }
-.nk-eg-col__head { display: flex; align-items: baseline; gap: 9px; padding: 12px 8px 13px; border-bottom: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); position: relative; }
+/* 列头是一行 4 个**都不可收缩**的项（名 / en / 计数 / 徽章），可用宽仅 243~299px。
+   长译文下列头会被撑破，而 `.nk-eg-col`、`.nk-eg-col__head` 与祖先链全是 `overflow: visible`
+   ⇒ 越出的部分直接压到**相邻列**上（实测 145/208 个列头的徽章越出列框，最重 de +216px）。
+   `flex-wrap: wrap` 让放不下的项折到第二行（代价：长语言下列头由 53px 长到 86~112px）。
+   两处根因正交，只治一处不够：徽章宽 ≈「名宽 + 前缀」（de 268px > 可用 243px，单它一项就超），
+   而 de 的 `Schiedsspruch der Gegensätze` 模式名自己也达 285px ⇒ 名也必须能换行。 */
+.nk-eg-col__head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; padding: 12px 8px 13px; border-bottom: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); position: relative; }
 .nk-eg-col__head::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 13px; width: 2px; border-radius: 1px; background: color-mix(in srgb, var(--eg-color) 72%, transparent); }
-.nk-eg-col__name { font-size: 1.12rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright); white-space: nowrap; }
+.nk-eg-col__name { font-size: 1.12rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; }
 .nk-eg-col__en { font-family: var(--font-hud); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, var(--eg-color) 66%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nk-eg-col__count { margin-left: auto; font-family: var(--font-hud); font-size: 0.62rem; letter-spacing: 0.06em; color: var(--text2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .nk-eg-col__list { display: flex; flex-direction: column; }

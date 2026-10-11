@@ -185,9 +185,14 @@ test.describe('全语言冒烟', () => {
         /* 路由标题（`meta.titleKey` → translate）也不得残留未解析令牌 */
         expect(await page.title(), `${code} ${path} 标题残留未解析令牌`).not.toContain('$t:');
         /* 全路由只测**整页**横向溢出（长文本最集中的目录卡与规则正文都在这批页面上）。
-           不用元素级的 `expectNoUnknownOverflow`：它会把横向滚动容器内的元素判为未知溢出
-           （`.nk-guide-link` 是 `white-space:nowrap` 的列头链，实测在 1280 视口下 right=1422
-           但整页 `scrollWidth` 并未超出 ⇒ 属检测口径问题，而该白名单按纪律不得为「修绿」堆条目）。 */
+           不用元素级的 `expectNoUnknownOverflow`：它会把横向滚动容器内的元素判为未知溢出，口径不同。
+           但整页口径**查不到「被撑出列框」这类缺陷**：`<html>` 上是 `overflow: clip`，长文本撑破
+           列框时 `scrollWidth` 恒等于 `clientWidth`（本行断言永远为 0），而列框与祖先链全是
+           `overflow: visible` ⇒ 越出的部分直接压到相邻列上。此前把 `.nk-guide-link` 在 1280 下
+           right=1422 记成「检测口径问题」是**误判**：那是 i18n 迁移把含模式名的 aria 模板当成了
+           可见文本，实测 145/208 个终局列头被撑破、最重 +216px。该类缺陷现由
+           `layout-endgame.spec.ts`（列头逐子项几何）与 `layout-i18n-overflow.spec.ts`
+           （多语言长文案）分别覆盖，本文件不重复建断言。 */
         const pageOverflow = await page.evaluate(
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
         );
