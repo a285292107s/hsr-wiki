@@ -374,7 +374,7 @@
      原先 `nowrap + overflow: hidden + ellipsis` 在长译文下把名字整个切掉且**无复原文本**
      （实测 ru `Максимальная энергия` 1280 档 161>141px、390 档 161>77px；
      th `DMG คริติคอล`、de `Max. Energie` 同命中；**cn 不命中**）。
-     处置按 policy §3「先让它换行」：`overflow-wrap: break-word` 让 ru 的 `Максимальная` / th 的长串
+     处置取「先让它换行」：`overflow-wrap: break-word` 让 ru 的 `Максимальная` / th 的长串
      在窄列内断开（`--nk-stats-cols` 在 ≤767 是 2 列、列宽仅 77px）。 */
   white-space: normal; overflow-wrap: break-word;
 }

@@ -8,10 +8,20 @@ import { collectConsoleIssues, readJsonIn, waitForSettled } from './helpers';
  * 泰语无词间空格），原先按中文长度调好的容器成片失效。既有 e2e 只在**缺省语言**上跑溢出断言
  * ⇒ 这类缺陷在 de/ru/th 下真实存在却零覆盖。本文件把「长文案下的破损」建成契约。
  *
- * 三类判据（口径见 `docs/audit/UI质量验收标准.md` A5 与 `docs/memory/ui-tokens.md`）：
+ * 处置分级（本文件与相关 CSS 注释里出现的 P0~P3 即指这四档；判据只在本处声明一次）：
+ *   **P0 硬裁切**——文字被容器吃掉或压到相邻元素上（`overflow: hidden` 且墨迹越界、`nowrap`
+ *     且 `overflow: visible` 的横向外溢）。用户既看不到也读不到 ⇒ **一律修到 0**。
+ *   **P1 卡主名称**——卡片里用于区分条目的主标识（名称）。放宽到 2 行仍不够时，必须挂
+ *     `title` / `aria-label` 复原（②③ 两类断言共同覆盖）。
+ *   **P2 次要元信息**——元素 / 命途 / 属性名 / 副标等二级信息。**允许保留 ellipsis**，
+ *     但必须有 `title` / `aria-label` 复原；换行代价为零时优先换行。
+ *   **P3 导航标签**——侧栏 / 底栏 / 区块导航 / 页签。**禁止截断**（被截的导航等于失效导航），
+ *     且「能点到」才算没被截：内容变高把导航项推出视口同样违规。
+ *
+ * 三类判据（口径见 `docs/audit/UI质量验收标准.md` A5.6 与 `docs/memory/ui-tokens.md`）：
  *   ① **硬裁切 / 外溢**（`overflow != visible` 且 `scrollWidth > clientWidth` 且**无** ellipsis；
  *      `nowrap` + `overflow: visible` 的横向外溢；纵向硬裁切）——文字被吃掉或压到别人身上，恒为缺陷。
- *   ② **导航标签不得被省略**（policy P3）：导航是骨架，被截的导航等于失效导航。
+ *   ② **导航标签不得被省略**（P3）：导航是骨架，被截的导航等于失效导航。
  *   ③ **截断必须有复原手段**：任何被截断的叶子（含有意 ellipsis / line-clamp）必须能在自身或
  *      5 层祖先上找到含该文本的 `title` / `aria-label`（触屏没有 hover，否则那段字永久读不到）。
  *      这一条沿用 `e2e/layout-catalog.spec.ts` 的既有判据，本文件把它扩到**多语言 + 迭代全范围**。

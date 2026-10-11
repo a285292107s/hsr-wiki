@@ -167,7 +167,7 @@
 /* 卡主名称（P1）：单行 `nowrap + ellipsis` 会把**区分性后缀**切掉——实测 1280 档 de 下
    `Der erste Tag meines neuen Lebens` 在 121px 里只剩前半、`Dan Heng – Permansor Terrae`
    `226 > 136`（+90px）；而 `Einladung des Galaktischen Reisend…` 与 `…Gelehrten` 单行读起来一样。
-   放宽为 2 行（policy §1 P1 的处置口径）+ `overflow-wrap: break-word` 让 de/ru 的复合词能断，
+   放宽为 2 行（卡主名称的处置：截断到 2 行仍保留区分性片段）+ `overflow-wrap: break-word` 让 de/ru 的复合词能断，
    并用 `title`（见 character.ts / lightcone.ts / relic.ts 的卡根）保留全文可访问名。 */
 .nk-idx-card__name {
   flex: 1;
@@ -199,7 +199,8 @@
 /* 卡副行（元素 · 命途）改可换行：改前是 `nowrap` + `overflow: hidden` 且**无 ellipsis**，
    即真正的横向硬裁切（P0）——实测 1280 档 de 下 `Imaginary · Die Gelehrsamkeit` `210 > 185`
    （+25px）、`Quantum · Die Gelehrsamkeit` `207 > 185`，共 13 处；且因无 ellipsis，
-   用户**无从得知**被吃掉了文字。按 policy §3 优先级 1「让它换行」处置（不用省略号兜底）：
+   用户**无从得知**被吃掉了文字。处置取「让它换行」而非省略号兜底
+   （副行是两项枚举拼接，没有被截断的语义需求）：
    `flex-wrap: wrap` 让「元素 · 命途」在放不下时折到第二行，`overflow-wrap: break-word` 兜住
    de/ru 的单个长复合词（如 `Gelehrsamkeit`）。 */
 .nk-idx-card__meta {

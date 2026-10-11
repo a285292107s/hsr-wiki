@@ -63,8 +63,8 @@
   line-height: 1.3;
   /* 卡名是**主标识**（用户在网格里靠它区分条目），单行 nowrap 会把区分性后缀整段切掉：
      实测 ru「Уникальные акции Межзвёздные путешественники」350px 墨迹挤进 178px 容器
-     （+172px），读起来与「…Экипаж экспресса」无从区分 ⇒ 按 P1 放宽为 2 行。
-     `break-word` 而非 `anywhere`：后者会让 CJK 任意断行（见 i18n-layout-policy §2）。 */
+     （+172px），读起来与「…Экипаж экспресса」无从区分 ⇒ 放宽为 2 行。
+     `break-word` 而非 `anywhere`：后者允许在任意字符间断行，会改动 CJK 既有的折行位置。 */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

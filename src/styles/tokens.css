@@ -1006,7 +1006,8 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
      原先只有 `white-space: nowrap` 而没有 `overflow: hidden`（旁边的 `__en` 反而有 ellipsis）
      ⇒ 译文比中文长时文字直接压到侧栏外（实测 de/ru/th × 16 路由共 120 次外溢，
      `Verbesserungen` 103.9 > 可用 73px）。处置取「换行 + 断词」而非加宽侧栏：
-     13 语言单行完整显示需侧栏 140→237px，代价是全站内容宽 + 5 处 e2e 契约值（`--nk-content-offset` 三档重标）。
+     13 语言单行完整显示需侧栏 140→190px（实测最长 vi `Chiến tranh Tiền tệ` 固有宽 122.67px
+     而文本区仅 73px ⇒ +35%），代价是全站内容宽 + 5 处 e2e 契约值（`--nk-content-offset` 三档重标）。
      `hyphens: auto` 让 de 复合词得到「Währungs-krieg」而不用 `anywhere`（后者会把 CJK 也任意断行，
      回归面要求 cn/cht/jp/kr 换行行为不变）；本站 `<html lang>` 已由 ADR 0052 同步，故断词规则可用。 */
   .ui-sidebar-link__cn { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text); white-space: normal; overflow-wrap: break-word; hyphens: auto; transition: color 0.2s var(--nk-ease-out); }
