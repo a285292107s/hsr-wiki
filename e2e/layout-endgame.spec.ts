@@ -90,18 +90,21 @@ test.describe('布局验收：终局合并单页', () => {
   });
 
   /**
-   * 并排各列的列头必须**结构一致**：盒高、徽章行位、徽章底缘、列表起点四项都齐平。
+   * 并排各列的列头必须**结构一致**：放得下时一行，有列过长时整排等长（盒高 / 徽章行位 /
+   * 徽章底缘 / 列表起点四项齐平）。
    *
    * 用户报的原始现象是「有的列徽章在第一行、有的在第二行」——这是**整排**性质，不是单列性质。
    * 成因是列头「折几行」由各列自己的内容决定：并排四列各折各的（实测 13 语言 × 12 宽度下 33/156
    * 组合参差）。治法不是逐列硬压，而是让整排**共用行轨**（`.nk-eg-col` 跨父网格两轨 +
-   * `grid-template-rows: subgrid`），再由 `align-content: space-between` 把徽章钉在该排共享轨底边。
+   * `grid-template-rows: subgrid`），列头内部再排成「两列网格」（列 1 元信息 / 列 2 徽章，行轨 `1fr`）
+   * ⇒ 轨高由共享轨决定：整排放得下就是一行，某列过长才整排等长。
    *
-   * 为什么是「整排」而不是「逐列」：只要有一列挤不下，整排就不统一，故结构统一为
-   * 「名 / en / 计数」一行 + 徽章一行，与语言无关。**判定必须用几何相对关系**（同一排内各列的
-   * 差值），不写死 px——真值随语言与视口变，故与上一条用例同样按长译文语言逐个跑。
+   * **判定必须含「放得下就必须一行」这一条**（本用例的第二组断言）。缺它时「无条件两行」也全绿——
+   * 曾经就是这么漏的：列头写成固定两行、徽章恒在第二行，cn 的元信息自然宽仅 198px、宽列可用 249px+
+   * 明明放得下却仍占两行。所以两组断言都要有：① 放得下 ⇒ 盒高回到一行、徽章与文字同一视觉行；
+   * ② 有列过长 ⇒ 排内四项参差为 0。真值随语言与视口变，故按长译文语言逐个跑。
    */
-  test('/endgame：并排列的列头结构一致（盒高 / 徽章行位 / 徽章底缘 / 列表起点）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame：并排列的列头结构一致（放得下即一行；过长则整排等长）', { tag: '@viewport-pinned' }, async ({ page }) => {
     test.setTimeout(180_000);
     const { assertNoErrors } = collectConsoleIssues(page);
     const failures: string[] = [];
@@ -131,6 +134,45 @@ test.describe('布局验收：终局合并单页', () => {
             if (band.cols.length < 2) continue; // 单列排无「排内一致性」可言
             const spread = (xs: number[]) => Math.max(...xs) - Math.min(...xs);
             const modes = band.cols.map((c) => c.getAttribute('data-mode')).join('/');
+            /* 元信息（名 / en / 计数）的**视觉行数**：按各子项底边聚类，相邻 < 6px 视为同一行。
+               它决定该排应当是一行还是多行 —— 这是「放得下就必须一行」判据的输入。 */
+            const metaLines = (c: Element) => {
+              const meta = c.querySelector('.nk-eg-col__meta')!;
+              const kids = [...meta.children].filter((el) => getComputedStyle(el).display !== 'none');
+              if (!kids.length) return 1;
+              const bottoms = [...new Set(kids.map((el) => Math.round(el.getBoundingClientRect().bottom)))]
+                .sort((x, y) => x - y);
+              return bottoms.reduce<number[]>((acc, b) => {
+                if (!acc.length || b - acc[acc.length - 1] > 6) acc.push(b);
+                else acc[acc.length - 1] = Math.max(acc[acc.length - 1], b);
+                return acc;
+              }, []).length;
+            };
+            const maxLines = Math.max(...band.cols.map(metaLines));
+
+            if (maxLines === 1) {
+              /* ① 放得下 ⇒ 必须真的一行：盒高回到一行量级（内距 25 + 文字行高 ≤ 60）、
+                    且徽章与首行文字**纵向重叠**（不是被顶到第二行去）。 */
+              for (const c of band.cols) {
+                const h = headOf(c);
+                if (h.height > 60) {
+                  out.push(`${modes} 元信息放得下却非一行（列头高 ${Math.round(h.height)}px，期望 ≤60）`);
+                }
+                const lr = linkOf(c);
+                const meta = c.querySelector('.nk-eg-col__meta')!;
+                const kids = [...meta.children].filter((el) => getComputedStyle(el).display !== 'none');
+                if (kids.length) {
+                  const top = Math.min(...kids.map((el) => el.getBoundingClientRect().top));
+                  const bottom = Math.max(...kids.map((el) => el.getBoundingClientRect().bottom));
+                  const onLine = lr.top < bottom && lr.bottom > top;
+                  // 徽章比文字高，允许它上下各探出一点；只在「完全错开」时判失败
+                  if (!onLine && Math.abs(lr.top - top) > 12) {
+                    out.push(`${modes} 一行形态下徽章不在文字所在行（徽章 top ${Math.round(lr.top)} vs 文字 ${Math.round(top)}~${Math.round(bottom)}）`);
+                  }
+                }
+              }
+            }
+
             const checks: [string, number[]][] = [
               ['列头盒高', band.cols.map((c) => headOf(c).height)],
               ['徽章行位', band.cols.map((c) => linkOf(c).top - headOf(c).top)],
@@ -145,8 +187,7 @@ test.describe('布局验收：终局合并单页', () => {
                若哪天阈值调得比列宽粗（例如改成挂 `.nk-eg-col` 或按视口断点），同排四列就会
                有的隐有的显，正好重演用户报的「有的这样有的那样」。列宽相同 ⇒ 结论必须相同。
                注意本断言**不能**加强成「有收益才隐藏」：容器查询看不见「模式名多长」，
-               同列宽下必然有一部分语言被一并隐藏（已知代价，见 `endgame.css` 列头注释）。 */
-            const enFlags = band.cols.map((c) => {
+               同列宽下必然有一部分语言被一并隐藏（已知代价，见 `endgame.css` 列头注释）。 */            const enFlags = band.cols.map((c) => {
               const en = c.querySelector('.nk-eg-col__en');
               return en && getComputedStyle(en).display !== 'none' ? 1 : 0;
             });

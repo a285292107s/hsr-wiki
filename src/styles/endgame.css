@@ -43,39 +43,50 @@
    再以 `grid-template-rows: subgrid` 把列头 / 列表放回这两条轨。并排各列的列头因此被拉平成同一
    高度，轨高 = 该排最高列头，且与语言无关（实测盒高参差 0/156、徽章行位参差 0/156、列表起点 0/156）。
 
-   列头自身再分两行：行 1 = `.nk-eg-col__meta`（名 / en / 计数，内部仍 `flex-wrap`），行 2 = 徽章，
-   另加 `align-content: space-between` 把徽章钉在该排共享轨的**底边**——否则列头虽等高，徽章仍按各自
-   首行高度落位（实测参差 42/156）。`.nk-eg-col__meta` 这层包裹是必需的：它让「名可换行 / en 可折到
-   次行」的既有折行行为留在行 1 内部，而徽章独占行 2。
+   **列头内部是「两列网格」而非「固定两行」**——这一条是形态的关键，写错过一次：
+   列 1 = `.nk-eg-col__meta`（名 / en / 计数，内部 `flex-wrap`），列 2 = 徽章，
+   行轨 `1fr` 撑满该排**共享轨**高。于是：
+     · 整排都放得下 → 轨高 = 一行 → 列头**一行**（徽章与文字同行，~52px）
+     · 某列标题过长 → 轨高 = 多行 → **整排等长**，元信息贴顶、徽章落到末行
+   「是否升为两行」由**共享轨高**决定（subgrid 给出），不是逐列各判 ⇒ 无需知道兄弟列的内容，
+   也不需要按语种写规则。**放得下就一行、放不下才整排统一**，正是这条设计的目的。
 
-   **不能用 `flex-basis: 100%` 代替这层包裹**：flex 项主尺寸变成 100% 容器宽 ⇒ 徽章被拉成整列宽的横条
-   （实测 624/624 个徽章被拉宽，最宽 588px vs 自然宽 82~157px），紧凑胶囊的形态就没了。
-   `justify-self: start` 才是保持自然宽的那个属性。
+   **反例（勿回改）**：曾写成 `grid-template-rows: auto auto` + 徽章恒 `grid-row: 2`，那是
+   **无条件两行**——cn 的「名+en+计数」自然宽仅 198px、宽列可用 249~354px 本来就放得下，
+   却仍然占两行、行 1 与徽章之间空一大段（cn 在全部 12 个宽度都是 81px）。判据缺失的原因见下条。
+
+   徽章的对齐用 `align-self: end` + `justify-self: end`（钉共享轨右下角）：实测长标题时
+   徽章与末行文字底缘差 0~26px（**不是**与首行对齐——`align-items: baseline` 会让徽章在长标题
+   时浮到首行基线、与末行差 −21~−99px；`last baseline` 则给整排平白多加 5px 且同样不保证齐平）。
+   徽章保持自然宽，**不能用 `flex-basis: 100%`**：flex 项主尺寸会变成容器宽 ⇒ 徽章被拉成整列宽
+   的横条（实测 624/624 个被拉宽，最宽 588px vs 自然宽 82~157px），而**越界类断言对此完全无感**。
 
    **窄列下隐藏英文副题**（`.nk-eg-col__en`，规则在本文件末尾）：它是四种模式**全语言共有**的占位项，
-   在窄列里把行 1 多撑一行。触发信号取**列头自身宽度**而非视口宽——同是 4 列档，列宽随视口从 261px
+   窄列里把元信息多撑一行。触发信号取**列头自身宽度**而非视口宽——同是 4 列档，列宽随视口从 261px
    变到 464px，收益挂钩列宽而不挂钩视口（写视口断点必然在某几档空转）。容器查询以列头**内容盒**
    （列宽 − 16px 内距）为准，故 `max-width: 300px` 对应「列宽 ≲ 316px」这一档：实测 390 / 480 /
    1680 / 1920 / 2560（列宽 358~464px）不触发、列头高分毫不动。容器查询**不能挂 `.nk-eg-col`**：
    那会让列框成为容器、subgrid 行轨塌陷（实测列头炸到 383/556/896px）。
 
-   **这条规则的已知代价（如实记录）**：阈值只能按列宽切，而「EN 是否真多占一行」还取决于模式名多长，
-   故同列宽 261px 下 13 语言里只有 6 种真省 22px，另 7 种（cn/cht/jp/kr/fr/de/pt）省 0px 却一并被隐藏。
-   容器查询看不见「名多长」，这一档**天然会误伤一部分语言**；换来的收益是真的（平均列头高 89→84px），
-   精确性是假的。三种「不隐藏 EN」的替代方案实测都不成立：让 EN 收缩（`flex: 0 1 auto` / `min-width: 0`）
-   在 `flex-wrap: wrap` 下 EN 会**优先换行**而非收缩，收益 0px；改 `nowrap` 让 EN 收缩同样 0px 且列头
-   更高（89px，名被迫折行）。**在 wrap 容器里降行数只有 `display: none` 能做到**，收缩类方案换不来高度。 */
-.nk-eg-col__head { grid-row: 1; container-type: inline-size; display: grid; grid-template-rows: auto auto; align-content: space-between; row-gap: 4px; margin-bottom: calc(-1 * var(--nk-eg-rowgap)); padding: 12px 8px 13px; border-bottom: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); position: relative; }
+   隐藏 en 是**宽列回到一行**的前提：cn 保留 en 时元信息自然宽 198px，而窄列可用仅 151~191px
+   （1280/1366/1440）⇒ 一行放不下、仍是两行；隐藏后自然宽降到 95px，各档全部放得下。
+
+   **这条规则的已知代价（如实记录）**：阈值只能按列宽切，而「EN 是否真多撑一行」还取决于模式名多长，
+   故同列宽 261px 下 13 语言里只有 6 种真省一行，另 7 种（cn/cht/jp/kr/fr/de/pt）省 0 行却一并被隐藏。
+   容器查询看不见「名多长」，这一档**天然会误伤一部分语言**。两种「不隐藏 EN」的替代方案实测都不成立：
+   让 EN 收缩（`flex: 0 1 auto` / `min-width: 0`）在 `flex-wrap: wrap` 下 EN 会**优先换行**而非收缩；
+   改 `nowrap` 让 EN 收缩则名被迫折行、列头反而更高（89px，比不隐藏还高）。**在 wrap 容器里降行数
+   只有 `display: none` 能做到**，收缩类方案换不来高度。 */
+.nk-eg-col__head { grid-row: 1; container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 1fr; align-items: start; column-gap: 9px; margin-bottom: calc(-1 * var(--nk-eg-rowgap)); padding: 12px 8px 13px; border-bottom: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); position: relative; }
 .nk-eg-col__head::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 13px; width: 2px; border-radius: 1px; background: color-mix(in srgb, var(--eg-color) 72%, transparent); }
-/* 行 1：名 / en / 计数。（可换行，故 de 的 285px 长名在自己的轨内折行，不会去挤压 en） */
-.nk-eg-col__meta { grid-row: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; }
+/* 列 1：名 / en / 计数。（可换行，故 de 的 285px 长名在自己的轨内折行，不会去挤压 en） */
+.nk-eg-col__meta { grid-column: 1; grid-row: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; }
 .nk-eg-col__name { font-size: 1.12rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; }
 .nk-eg-col__en { font-family: var(--font-hud); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, var(--eg-color) 66%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nk-eg-col__count { margin-left: auto; font-family: var(--font-hud); font-size: 0.62rem; letter-spacing: 0.06em; color: var(--text2); font-variant-numeric: tabular-nums; white-space: nowrap; }
-/* 行 2：徽章恒占自己的行（宽屏下四项本可挤进一行，但**只要有一列挤不下**整排就不统一，
-   故统一为「名 / en / 计数」一行 + 徽章一行，代价是列头由 53px 长到 81~103px）。
-   `justify-self: start` 保持自然宽 —— 这正是 `flex-basis: 100%` 做不到的那一点。 */
-.nk-eg-col__head .nk-guide-link { grid-row: 2; justify-self: start; }
+/* 列 2：徽章钉在该排共享轨的**右下角**（`align-self: end` 落末行、`justify-self: end` 保持自然宽）。
+   `flex-basis: 100%` 做不到「保持自然宽」——它会把徽章拉成整列宽的横条。 */
+.nk-eg-col__head .nk-guide-link { grid-column: 2; grid-row: 1; align-self: end; justify-self: end; }
 .nk-eg-col__list { grid-row: 2; display: flex; flex-direction: column; }
 /* 窄列（列头内容盒 ≤ 300px）隐藏英文副题：它是全语言共有的占位项，窄列里把行 1 多撑一行。
    阈值与收益、以及这条规则的已知代价见上方列头注释；此处只写「为什么是内容盒」——容器查询取容器
