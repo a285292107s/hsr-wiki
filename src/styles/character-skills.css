@@ -137,6 +137,15 @@
 }
 /* 索引入口 12px 档字距下与技能名易混：索引项的名称不换行（手机上靠整条换行保持可点） */
 .nk-char-page .nk-idxstrip__item { white-space: nowrap; }
+/* 窄档：上一条的 `nowrap` 在**单条本身就宽过容器**时失效——它既不收缩也不换行，
+   整条越出 `.nk-panel`，最终由 `.nk-char-page` 的 `overflow: hidden` 静默裁掉
+   （实测 320 档 fr `Compétence`/`Par le pouvoir de la mignonnerie` 越出至 right=349 > 320，
+   **cn 与其余语言为 0**；390 起消失）。改 `normal` 只在超宽时于项内折行：
+   短项的 flex 基准宽 = max-content，照旧整条换行、可点性不变
+   （实测 320~1280 × 8 语言「换行项数」与改前**逐项相同**，仅缺陷归零）。 */
+@media (max-width: 767px) {
+  .nk-char-page .nk-idxstrip__item { white-space: normal; overflow-wrap: break-word; }
+}
 
 .nk-char-page .nk-skill { padding: 24px; margin-bottom: 0; }
 .nk-char-page .nk-skill__need {

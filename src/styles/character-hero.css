@@ -135,9 +135,22 @@
     linear-gradient(to left, var(--bg) 0%, transparent 14%);
 }
 /* 卷宗抬头：编号 + 阵营。分隔走纵向发丝线——横向下划线长度不可控（面板左对齐、立绘居中，
-   长引导线会正好压在立绘左缘读作杂线）；两端 nowrap + flex none，避免 flex 收缩把编号挤成两行。 */
+   长引导线会正好压在立绘左缘读作杂线）。 */
 .nk-char-page .nk-hero__rubric { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .nk-char-page .nk-hero__rubric-rule { flex: none; width: 1px; height: 12px; background: var(--line-1); }
+/* 窄档（<1024）：抬头两项**必须能收缩**。原声明是「两端 nowrap + flex none」，在长译文下
+   阵营名（`Звёздный экспресс` / `Expresso Astral` / `Đội Tàu Astral`）既不收缩也不换行，
+   连带把 `.nk-hero__rubric` 与 `.nk-hero__head` 撑出面板，最终由 `.nk-char-page` 的
+   `overflow: hidden` 静默裁掉（实测 320 档 fr +29 / ru +41 / pt +23 / th·vi +14 / de +5px，
+   768 档 fr +15 / ru +42px；**cn 恒为 0** ⇒ 长译文触发的既有缺陷，先于本轮存在）。
+   ≥1024 档不在此列：那里 `.nk-hero__rubric` 已改纵排（见下），两项各自独占一行、无互挤，
+   故修复只落在窄档——实测 ≥1024 三个选择器逐属性不变。 */
+@media (max-width: 1023px) {
+  .nk-char-page .nk-hero__rubric { flex-wrap: wrap; }
+  .nk-char-page .nk-hero__camp { flex: 0 1 auto; min-width: 0; white-space: normal; overflow-wrap: break-word; }
+}
+/* 索引条项内的 `nowrap` 是「整条换行、不在项内折行」的设计意图（声明在 character-skills.css，
+   该文件后加载 ⇒ 此处同名声明无效，必须改在那里）。见该处注释。 */
 /* ≥1024 面板与立绘共享横向空间（文字列左对齐、素材居中）：并排时后项必落在立绘亮部上
    （1440 实测立绘左缘 452、阵营起点 483）⇒ 拆两行，两项都退回文字列左缘。
    <1024 面板在媒体下方、重叠为零，保持单行以省面板高度（手机面板本就最高）。 */
