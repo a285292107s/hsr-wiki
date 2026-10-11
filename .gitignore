@@ -103,3 +103,5 @@ test-results
 .bitfun/
 
 .pnpm-store/
+.vercel
+.env*
