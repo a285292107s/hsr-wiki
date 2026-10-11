@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, waitForCatalogCards } from './helpers';
+import { collectConsoleIssues, waitForCatalogCards, waitForSettled } from './helpers';
 import { noUnknownOverflow } from './layout.shared';
 
 /**
@@ -334,14 +334,41 @@ test.describe('布局验收：常规主题', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
 
     const measure = async (delayImages: boolean) => {
+      /* 延迟档必须**真按住**图片响应，且处理器不得跨过本趟导航：
+         · `setTimeout(8_000)` 会让处理器在第二次 `goto('/')` 换掉文档之后才醒来，`route.continue()`
+           抛 `Route is already handled!`——CI 首跑第 3 条失败即此；改用可放行闸门，量完立刻全部放行并解绑。
+         · 闸门按住时 `goto` **不能**等 `load`：被按住的请求本身阻塞 `load`（实测闸门不放行则 6s 超时，
+           而闸门在测量之后才放行 ⇒ 变成 30s 用例超时）。用 `domcontentloaded` 才对得上本用例语义——
+           「图片未就绪时量」，旧写法因等 `load` 实际量的是放行后的态。 */
+      let openGate = () => {};
+      const gate = new Promise<void>((resolve) => { openGate = resolve; });
+      let gated = 0;
+      let pendingResponses = 0;
       if (delayImages) {
         await page.route('**/*.{webp,png}', async (route) => {
-          await new Promise((resolve) => setTimeout(resolve, 8_000));
-          await route.continue();
+          gated += 1;
+          pendingResponses += 1;
+          try {
+            await gate;
+            await route.continue();
+          } finally {
+            pendingResponses -= 1;
+          }
         });
       }
-      await page.goto('/');
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
       await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
+      // 延迟档的前提：确实拦下了图片请求（图片 URL 来自本地 JSON，不依赖 CDN 可达）。
+      // 少了这条，拦截失效时两趟都会是「已加载」，用例会静默退化成空断言。
+      if (delayImages) await expect.poll(() => gated, { timeout: 10_000 }).toBeGreaterThan(0);
+      /* 两趟必须落在**同一稳定态**：本页「查看档案」按钮用的是 webfont 的中文行盒（`line-height: normal`），
+         字体换装会让规格块 +2px、带高随之 +2px（实测 187.75 → 189.75，无规格块的遗器档 Δ0），
+         超 ≤1px 容差——首跑第 3 条 `character：行高不得随图片加载变化` 的真凶就是它（与图片无关）。
+         `waitForSettled` 的字体等待是**非致命**的（5s 上限 + swallow），不足以为 ≤1px 容差定型，故显式断言。 */
+      await waitForSettled(page);
+      await expect
+        .poll(() => page.evaluate(() => document.fonts.status), { timeout: 10_000, message: '字体未就绪：两趟测量不可比' })
+        .toBe('loaded');
       const rows = await page.evaluate(() =>
         [...document.querySelectorAll('.nk-hub-release__section')].map((section) => {
           const band = section.querySelector('.nk-hub-release__band') as HTMLElement;
@@ -361,7 +388,12 @@ test.describe('布局验收：常规主题', () => {
           };
         }),
       );
-      if (delayImages) await page.unroute('**/*.{webp,png}');
+      if (delayImages) {
+        // 量完立刻放行，并等在途处理器退场，再解绑（否则解绑后仍可能有处理器在跑）
+        openGate();
+        await expect.poll(() => pendingResponses, { timeout: 10_000 }).toBe(0);
+        await page.unroute('**/*.{webp,png}');
+      }
       return rows;
     };
 

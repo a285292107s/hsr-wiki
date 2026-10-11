@@ -37,12 +37,15 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     const foldedHrefs = anchors.filter((a) => !a.visible).map((a) => a.href);
     expect(foldedHrefs.length).toBeGreaterThan(0);
     await page.locator('.ui-sidebar-more').click();
+    // `evaluateAll` 无自动等待：抽屉由 `v-if="moreOpen"` 在点击后的下一帧才进 DOM，直接读会
+    // 拿到空数组 ⇒ 先等条目数与「折叠尾部」一致再取 href（期望值不变，见下方 toEqual）。
+    await expect(page.locator('.ui-more__item')).toHaveCount(foldedHrefs.length);
     const drawerHrefs = await page.locator('.ui-more__item').evaluateAll((els) =>
       els.map((el) => el.getAttribute('href')),
     );
     expect(drawerHrefs).toEqual(foldedHrefs);
-    // 320px 低于最小声明断点 374，属未声明支持区间。已知项（.nk-seg 手机宽被裁，登记于
-    // helpers.ts 的 KNOWN_OVERFLOWS）过滤后断言：其余任何溢出仍然失败。
+    // 320px 低于最小声明断点 374，属未声明支持区间。KNOWN_OVERFLOWS 现为空（`.nk-seg` 手机宽
+    // 被裁的既有缺陷已修）⇒ 未经登记的溢出一律失败。
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -51,6 +54,11 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/settings');
+    /* 就绪等待必须先于「入口隐藏」断言：导航尚未挂载时 `.ui-sidebar-more` 同样 `toBeHidden()`、
+       `--in-more` 同样 `toHaveCount(0)`——这两条对空文档恒真，不构成等待。而 `collectNavAnchors`
+       是 `evaluateAll`（无自动等待），首跑 CI 第 2 条失败即此：`anchors.length` 读到 0。
+       锚点用静态导航表渲染（无网络依赖），首个锚点可见即代表侧栏已就绪。 */
+    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
     await expect(page.locator('.ui-sidebar-more')).toBeHidden();
     // 无折叠项渲染；全部导航锚点可见
     await expect(page.locator('a.ui-sidebar-link--in-more')).toHaveCount(0);

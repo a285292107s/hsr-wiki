@@ -62,18 +62,35 @@ test.describe('布局验收：角色详情页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
 
-    // 延迟主数据响应以停在骨架态（use-delayed-skeleton 的展示阈值远小于此）
+    // 延迟主数据响应以停在骨架态（use-delayed-skeleton 的展示阈值远小于此）。用**可释放门**而不是固定
+    // 4s 延时：骨架停多久由用例决定，放行后先等处理器结算再撤拦截——固定延时会让响应在用例交出控制权
+    // **之后**才放行，届时 `route.continue()` 可能撞上已被判为 handled 的 Route 抛
+    // `Route is already handled!`，记在用例头上（而断言其实全绿）；早撤拦截则会把扣住的请求打断，
+    // 就绪态改由第二次请求这条旁路送达，测的就不是「慢响应到达」了。
+    let releaseData = () => {};
+    const dataGate = new Promise<void>((res) => { releaseData = res; });
+    let heldRequests = 0;
     await page.route('**/data/cn/characters/1001.json', async (r) => {
-      await new Promise((res) => setTimeout(res, 4000));
-      await r.continue();
+      heldRequests += 1;
+      try {
+        await dataGate;
+        await r.continue();
+      } finally {
+        heldRequests -= 1;
+      }
     });
     await page.goto('/character/1001');
+    await expect
+      .poll(() => heldRequests, { timeout: 10_000, message: '主数据未被拦下：骨架态不是「数据未达」而是页面坏了' })
+      .toBeGreaterThan(0);
     await page.waitForSelector('.nk-sk--stat', { timeout: 30_000 });
     const skel = await page.locator('.nk-skeleton__hero-panel').evaluate((el) => {
       const r = el.getBoundingClientRect();
       const first = el.firstElementChild as HTMLElement;
       return { w: r.width, h: r.height, barShadow: getComputedStyle(first).boxShadow };
     });
+    releaseData();
+    await expect.poll(() => heldRequests, { timeout: 10_000, message: '放行后主数据处理器未结算' }).toBe(0);
     await page.unroute('**/data/cn/characters/1001.json');
     await page.waitForSelector('.nk-stats__stat', { timeout: 30_000 });
     // 编号行用 hud 字体；worker 并发下量高会跑在字体就位之前（±2px 抖动 ⇒ 1px 容差误报）
@@ -111,13 +128,27 @@ test.describe('布局验收：角色详情页', () => {
       };
     }, rootSel);
 
+    // 同「桌面」条：可释放门 + 处理器结算后再撤拦截（固定延时 + 先撤拦截的竞态见该条注释）
+    let releaseData = () => {};
+    const dataGate = new Promise<void>((res) => { releaseData = res; });
+    let heldRequests = 0;
     await page.route('**/data/cn/characters/1001.json', async (r) => {
-      await new Promise((res) => setTimeout(res, 4000));
-      await r.continue();
+      heldRequests += 1;
+      try {
+        await dataGate;
+        await r.continue();
+      } finally {
+        heldRequests -= 1;
+      }
     });
     await page.goto('/character/1001');
+    await expect
+      .poll(() => heldRequests, { timeout: 10_000, message: '主数据未被拦下：骨架态不是「数据未达」而是页面坏了' })
+      .toBeGreaterThan(0);
     await page.waitForSelector('.nk-sk--stat', { timeout: 30_000 });
     const skel = await measure('.nk-skeleton--char');
+    releaseData();
+    await expect.poll(() => heldRequests, { timeout: 10_000, message: '放行后主数据处理器未结算' }).toBe(0);
     await page.unroute('**/data/cn/characters/1001.json');
     await page.waitForSelector('.nk-stats__stat', { timeout: 30_000 });
     await page.evaluate(() => document.fonts.ready);
@@ -221,9 +252,17 @@ test.describe('布局验收：角色详情页', () => {
         anim: getComputedStyle(v).animationName,
       };
     });
+    /* 落位必须**原子**：`.nk-page--detail` 声明了 `scroll-behavior: smooth`（tokens.css），
+       赋 `scrollTop` 会启动一段滚动动画 ⇒ 每次采样都在读一个移动中的目标。`behavior: 'instant'`
+       才是本条要的语义——「停在 t」，滚动时间轴的进度随之一次到位。 */
     const scrollTo = (top: number) => page.evaluate((t) => {
-      (document.querySelector('.nk-page--detail') as HTMLElement).scrollTop = t;
+      (document.querySelector('.nk-page--detail') as HTMLElement).scrollTo({ top: t, behavior: 'instant' as ScrollBehavior });
     }, top);
+    /* 「位移已稳定」必须跨**真实动画帧**比较：同一帧内两次读取恒等（滚动时间轴还没 tick），
+       那只证明「此刻没人动」，不证明「已经到了」。 */
+    const nextFrames = () => page.evaluate(
+      () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+    );
 
     const atTop = await snap();
     // 渐进增强契约：整条动画必须关在 `@supports (animation-timeline: scroll())` 里。
@@ -254,12 +293,13 @@ test.describe('布局验收：角色详情页', () => {
 
     await scrollTo(600);
     await expect.poll(async () => (await snap()).shift, { timeout: 3_000 }).toBeGreaterThan(mid.shift);
-    // 取值前必须等位移**稳定**（两次采样一致）：只等 `> mid.shift` 会把滚动驱动的中间帧当成末值，
+    // 取值前必须等位移**稳定**（跨两帧仍相等）：只等 `> mid.shift` 会把滚动驱动的中间帧当成末值，
     // 后面「滚到 4000 后应与它相等（±0.5px）」就必然翻成 false——CI 实测 3s 轮询超时的那次 flake 即此。
     let farShift: number | null = null;
     await expect.poll(
       async () => {
         const a = (await snap()).shift;
+        await nextFrames();
         const b = (await snap()).shift;
         if (Math.abs(a - b) > 0.5) return false;
         farShift = a;
