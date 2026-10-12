@@ -76,6 +76,9 @@
 
 @media (max-width: 767px) {
   .nk-egd-floor__targetidx { font-size: 0.78rem; }
+  /* Hero 阵营行「玩法名 · EN」+ 攻略入口在手机档吃满一行：0.78rem 在 320 档把 EN 顶到次行
+     成孤词，降到标签档（与断点块的 0.1em 字距配套，最窄档实测一行放得下）。 */
+  .nk-egd-hero__camp { font-size: 0.72rem; }
   .nk-egd-hero__sid,
   .nk-egd-mon__rank,
   .nk-egd-mon__tag,
