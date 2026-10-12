@@ -23,8 +23,9 @@
   .nk-egd-hero__status { font-size: 0.7rem; padding: 5px 11px; }
   .nk-egd-peak__kind { font-size: 0.7rem; }
   .nk-egd-floor__wavelabel { font-size: 0.7rem; }
-  /* 手机档立绘列收窄：单列敌方卡（卡宽 ~300px）下 104px 立绘 + 数据列会挤到数据列只剩 150px */
-  .nk-egd-mon__img { width: 84px; }
+  /* 手机档立绘列收窄：单列敌方卡（卡宽 ~300px）下 104px 立绘 + 数据列会挤到数据列只剩 150px。
+     改的立绘列宽令牌（立绘图与图下污染徽标都取它，见 `endgame-monsters.css`）——不要再单独声明图片宽度。 */
+  .nk-egd-mon__art { --nk-egd-mon-fig: 84px; }
   .nk-egd-mon { gap: 14px; }
   .nk-egd-node__type { font-size: 0.72rem; padding: 5px 10px; gap: 5px; }
   .nk-egd-node__typeicon { width: 15px; height: 15px; }

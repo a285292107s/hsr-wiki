@@ -292,34 +292,77 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('角色图鉴 /character：手机断点行式卡（圆头像、单列、无溢出）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  /* 角色图鉴在手机与桌面**同一套排版**：曾经 <768 是一整套行式头像卡（单列发丝线行 + 44px 圆头像
+     + 圆环 + `__body` 流式 + 圆头像双源切图），本轮按用户指令退场。判据取「与桌面同构」而不是
+     逐个数值：卡片 `display` / 立绘框比例 / 文字叠压位 / 图源四项逐个与 1440 档比对——
+     光断言「有网格、无溢出」时，行式卡形态同样能满分通过（它也是一个网格的 1 列）。
+     数值档位（列宽下限）仍允许按档收窄，故不断言列数，只断言「列数随可用宽单调不回跳」这一相对关系。 */
+  test('角色图鉴 /character：手机断点与桌面同一套网格卡（无行式头像卡形态）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
-    await page.setViewportSize({ width: 390, height: 844 });
+
+    /** 卡片形态指纹：四项都是「同一套排版」的可判定判据，且都不随列宽变化。
+     *  图源判据取 `currentSrc` 的**目录段**：圆头像与商店立绘的文件名同形（都是 `1513.webp`），
+     *  只有 `avatarroundicon/` 与 `avatarshopicon/` 之分 ⇒ 比文件名等于没比。 */
+    const fingerprint = async () => {
+      await waitForCatalogCards(page);
+      const cards = page.locator('.nk-idx-grid a.nk-idx-card');
+      await expect(cards.first()).toBeVisible();
+      const base = await cards.first().evaluate((el) => {
+        const portrait = el.querySelector('.nk-idx-card__portrait') as HTMLElement;
+        const body = el.querySelector('.nk-idx-card__body') as HTMLElement;
+        const pcs = getComputedStyle(portrait);
+        return {
+          display: getComputedStyle(el).display,
+          portraitAspect: pcs.aspectRatio,
+          portraitRadius: pcs.borderRadius,
+          // 文字叠压在立绘下缘（桌面形态）⇒ body 绝对定位；行式卡是 static 流式
+          bodyPos: getComputedStyle(body).position,
+          // 双源切图（`<picture>` + `source[media]`）整体退场：它是行式卡形态的组成部分
+          hasPicture: !!el.querySelector('picture'),
+          columns: getComputedStyle(el.parentElement as HTMLElement).gridTemplateColumns.split(' ').length,
+        };
+      });
+      // `currentSrc` 要等浏览器**异步**完成资源选择后才有值（元素插入 ≠ 已选源，首读常为空串）
+      const img = cards.first().locator('img').first();
+      await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).currentSrc), { timeout: 10_000 })
+        .toContain('/avatar');
+      const curSrc = await img.evaluate((el) => (el as HTMLImageElement).currentSrc);
+      return { ...base, imgDir: curSrc.includes('avatarroundicon') ? 'avatarroundicon' : 'avatarshopicon' };
+    };
+
+    await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character');
-    await waitForCatalogCards(page);
-    const cards = page.locator('.nk-idx-grid a.nk-idx-card');
-    await expect(cards.first()).toBeVisible();
-    // 单列：第二张卡 top ＞ 第一张（行式堆叠，而非并排）
-    const tops = await cards.evaluateAll((els) =>
-      els.slice(0, 3).map((el) => Math.round(el.getBoundingClientRect().top)),
-    );
-    expect(tops[1]).toBeGreaterThan(tops[0]);
-    // picture 双源命中：手机断点 currentSrc 为 127px 圆头像（非半身立绘）
-    // `currentSrc` 要等浏览器**异步**完成资源选择后才有值（元素插入 ≠ 已选源，实测首读可能是空串），
-    // 故用 poll 等待而不是一次性读——与 `layout-character-skill-data.spec.ts` 的「先等位图真的到位再断言」同一判据。
-    const portraitImg = cards.first().locator('img').first();
-    await expect
-      .poll(() => portraitImg.evaluate((el) => (el as HTMLImageElement).currentSrc), { timeout: 10_000 })
-      .toContain('avatarroundicon');
-    // 行卡：44px 圆头像 + 总高 ≤ 80px（半身立绘大卡让位）
-    const size = await cards.first().locator('.nk-idx-card__portrait').evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      return { w: Math.round(r.width), h: Math.round(r.height) };
-    });
-    expect(size).toEqual({ w: 44, h: 44 });
-    const cardH = await cards.first().evaluate((el) => Math.round(el.getBoundingClientRect().height));
-    expect(cardH).toBeLessThanOrEqual(80);
-    await noUnknownOverflow(page);
+    const wide = await fingerprint();
+    expect(wide.display, '桌面卡应为块级网格卡').toBe('block');
+    expect(wide.portraitAspect, '桌面立绘框为 3:4').toBe('3 / 4');
+    expect(wide.bodyPos, '桌面文字叠压在立绘下缘').toBe('absolute');
+    expect(wide.hasPicture, '不得存在按断点切图的双源 <picture>').toBe(false);
+    expect(wide.imgDir, '桌面图源应为商店立绘').toBe('avatarshopicon');
+
+    // 手机档：形态五项逐项与桌面一致，只有列数变少
+    const narrows = [] as Array<Record<string, unknown>>;
+    for (const w of [767, 390, 320]) {
+      await page.setViewportSize({ width: w, height: 900 });
+      await expect.poll(async () => (await fingerprint()).display).toBe('block');
+      const f = await fingerprint();
+      narrows.push({ w, ...f });
+      expect(f.display, `${w}：手机档卡应为块级网格卡（不得是行式 flex）`).toBe('block');
+      expect(f.portraitAspect, `${w}：立绘框比例应与桌面同值`).toBe(wide.portraitAspect);
+      expect(f.portraitRadius, `${w}：立绘框不得是圆形`).toBe(wide.portraitRadius);
+      expect(f.bodyPos, `${w}：文字应与桌面同套叠压位`).toBe(wide.bodyPos);
+      expect(f.hasPicture, `${w}：不得按断点切圆头像`).toBe(false);
+      expect(f.imgDir, `${w}：图源应与桌面同源（不得切圆头像）`).toBe(wide.imgDir);
+      await noUnknownOverflow(page);
+    }
+
+    // 列数随可用宽单调不回跳（视口由宽到窄取样 ⇒ 列数应非递增），且手机档不再恒为 1 列
+    const cols = narrows.map((n) => n.columns as number);
+    const shape = JSON.stringify(narrows.map((n) => [n.w, n.columns]));
+    expect(cols[0], `767 档应比 320 档列数多：${shape}`).toBeGreaterThan(cols[2]);
+    expect(cols[2], '320 档应至少 1 列').toBeGreaterThanOrEqual(1);
+    for (let i = 1; i < cols.length; i++) {
+      expect(cols[i - 1], `列数随视口变窄不得增加（取样序为宽→窄）：${shape}`).toBeGreaterThanOrEqual(cols[i]);
+    }
     assertNoErrors();
   });
 

@@ -84,7 +84,7 @@ function monTitle(m: MazeMonsterInfo): string {
   <article class="nk-egd-mon" :title="monTitle(monster)">
     <!-- 立绘列（左）：monstermiddleicon 是 376×512 竖版全身像（透明底、Alpha 框紧贴上下边），
          故按原比例整幅铺满列宽，不做圆形裁切——圆形会把竖长立绘裁掉上下大半。
-         甲级徽标骑在立绘列左上角。 -->
+         甲级徽标骑在立绘列左上角；污染徽标挂在**立绘正下方**（用户裁决，不与右侧数据标签抢位）。 -->
     <div class="nk-egd-mon__art">
       <span v-if="monRank(monster.rank)" class="nk-egd-mon__rank" :class="`nk-egd-mon__rank--${monster.rank}`">{{ monRank(monster.rank) }}</span>
       <router-link
@@ -101,13 +101,13 @@ function monTitle(m: MazeMonsterInfo): string {
           @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
         >
       </router-link>
+      <span v-if="polluted" class="nk-egd-pollchip" :data-level="polluted">{{ pollutionLabel({ level: polluted }) }}</span>
     </div>
     <!-- 数据列（右）：名称 → 标签 → 弱点/抗性/效果抵抗 → 首领机制 → 技能 → 召唤物 -->
     <div class="nk-egd-mon__data">
       <div class="nk-egd-mon__meta">
         <span class="nk-egd-mon__name">{{ monster.name }}</span>
         <span class="nk-egd-mon__tags">
-          <span v-if="polluted" class="nk-egd-pollchip" :data-level="polluted">{{ pollutionLabel({ level: polluted }) }}</span>
           <span v-if="monster.camp" class="nk-egd-mon__tag">{{ monster.camp }}</span>
           <span v-if="monster.stance" class="nk-egd-mon__tag">{{ t('card.value.stance', { v: monster.stance }) }}</span>
           <span v-if="monster.speed" class="nk-egd-mon__tag">{{ t('card.value.speed', { v: monster.speed }) }}</span>

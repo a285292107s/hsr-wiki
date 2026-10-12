@@ -235,20 +235,30 @@
   background: color-mix(in srgb, var(--blk-900) 42%, transparent);
 }
 /* 立绘列（左）：固定宽度的窄列，立绘按 376×512 原比例整幅放入。
-   顶部对齐（不居中）——数据列通常高于立绘，居中会让立绘随数据高度上下浮动。 */
+   顶部对齐（不居中）——数据列通常高于立绘，居中会让立绘随数据高度上下浮动。
+   列宽 = 立绘图宽的**唯一声明点**（`--nk-egd-mon-fig`）：立绘与之同宽，立绘下方的污染徽标
+   也以它为上界换行——否则长译文（es / fr / pt / ru 实测宽于 104px 立绘）会把 `auto` 轨反撑宽、
+   挤窄右侧数据列。手机档改令牌值（`endgame-breakpoints.css`），不要再单独声明图片宽度。 */
 .nk-egd-mon__art {
+  --nk-egd-mon-fig: 104px;
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: var(--nk-egd-mon-fig);
 }
 .nk-egd-mon__img {
   display: block;
-  width: 104px;
+  width: 100%;
   height: auto;
   object-fit: contain;
   transition: transform 0.22s var(--nk-ease-out);
 }
 .nk-egd-mon__figlink {
   display: block;
+  width: 100%;
   line-height: 0;
 }
 .nk-egd-mon__figlink:hover .nk-egd-mon__img {

@@ -1,7 +1,7 @@
 
 import { pathLabel } from '../../../lib/enum-labels';
 import { activeHref } from '../../../lib/i18n/active';
-import { escHtml, avatarShopIconUrl, avatarRoundIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
+import { escHtml, avatarShopIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalCharacterList } from '../../../services/api';
 import { getSavedTrailblazerGender, isTrailblazerId, trailblazerGenderOfId } from '../../../lib/trailblazer';
@@ -89,10 +89,10 @@ export const characterPage: CatalogPageConfig = {
     const element = String(item.element || '');
     const path = String(item.path || '');
     const avatarItem = String(item.avatar || '');
-    const roundSrc = avatarRoundIconUrl(String(item.id));
-    const avatar = roundSrc
-      ? `<picture><source media="(max-width: 767px)" srcset="${escHtml(roundSrc)}"><img src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy"></picture>`
-      : `<img src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy">`;
+    /* 单图源：`<picture>` 双源（手机 `<source media="(max-width:767px)">` 切圆头像）
+       随手机档行式头像卡形态一并退场——卡现在是 3:4 立绘网格卡，128×128 的侧头像
+       被拉进 3/4 框必然糊（桌面卡本来就是商店立绘 376×512）。 */
+    const avatar = `<img src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy">`;
     /* 卡名放宽为 2 行后仍可能被 clamp 省略（P1：名字是最长字段），故把全文挂到卡根 `title`
        上——触屏没有 hover，没有它就等于那段字永久读不到（e2e/layout-catalog.spec.ts:74-127
        与 e2e/layout-i18n-overflow.spec.ts 的「截断必须有复原手段」判据）。 */

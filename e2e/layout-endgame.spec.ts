@@ -303,8 +303,8 @@ test.describe('布局验收：终局合并单页', () => {
       expect(polledSummons.length, `第 ${entry.floor} 层 ${half} 应有受污染的召唤物`).toBeGreaterThan(0);
       await expect(page.locator('#egd-floor-board .nk-egd-mon__data .nk-egd-summons .nk-egd-pollchip'))
         .toHaveText(polledSummons.map(summonBadge));
-      // 该层敌方配置里没有登记被污染小怪 → 敌方卡自身不带徽标
-      await expect(page.locator('#egd-floor-board .nk-egd-mon__meta .nk-egd-pollchip')).toHaveCount(0);
+      // 该层敌方配置里没有登记被污染小怪 → 敌方卡自身不带徽标（徽标落点 = 立绘列内，见 ADR 0026 补记三）
+      await expect(page.locator('#egd-floor-board .nk-egd-mon__art .nk-egd-pollchip')).toHaveCount(0);
     }
     await noUnknownOverflow(page);
     assertNoErrors();
@@ -502,7 +502,7 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(board.locator('.nk-egd-tierce__nodefrom')).toHaveCount(0);
     // 3020 节点 1 带污染：面板级徽标已退场（用户裁决）——污染等级只挂到被污染的那一只（此处是召唤物）上
     await expect(board.locator('.nk-egd-board__head, .nk-egd-floor__head .nk-egd-pollchip')).toHaveCount(0);
-    await expect(board.locator('.nk-egd-mon__meta .nk-egd-pollchip')).toHaveCount(0);
+    await expect(board.locator('.nk-egd-mon__art .nk-egd-pollchip')).toHaveCount(0);
     await expect(board).toHaveAttribute('aria-labelledby', 'egd-tierce-node-tab-1');
     await expect(board.locator('.nk-egd-mon__name')).toHaveText(nodeBoss[0]);
     // 看板行头不重复等级与推荐属性（卡片已承载）：只剩敌方配置一行
@@ -1334,8 +1334,31 @@ test.describe('布局验收：终局合并单页', () => {
     const mazeInv = mazeNodeData.invasion!;
     const mazePolledMons = pollutedMonsters(mazeInv, mazeNodeData.monsters);
     expect(mazePolledMons.length, '该星启节点应有登记在敌方配置里的被污染敌方').toBeGreaterThan(0);
-    await expect(page.locator('#egd-tierce-board .nk-egd-mon__meta .nk-egd-pollchip'))
-      .toHaveText(mazePolledMons.map(() => monsterBadge(mazeInv)));
+    const mazePolledCards = page.locator('#egd-tierce-board .nk-egd-mon__art .nk-egd-pollchip');
+    await expect(mazePolledCards).toHaveText(mazePolledMons.map(() => monsterBadge(mazeInv)));
+    // 徽标落点 = 立绘**正下方**、且不出立绘列（用户裁决，ADR 0026 补记三）：
+    // 不与右侧数据标签行抢位；列宽仍由立绘图宽决定（徽标换行而不是把列反撑宽）
+    const mazeCardWithPoll = page.locator('#egd-tierce-board .nk-egd-mon')
+      .filter({ has: page.locator('.nk-egd-mon__art .nk-egd-pollchip') }).first();
+    const badgePlace = await mazeCardWithPoll.evaluate((card) => {
+      const art = card.querySelector('.nk-egd-mon__art') as HTMLElement;
+      const img = card.querySelector('.nk-egd-mon__img') as HTMLElement;
+      const chip = card.querySelector('.nk-egd-mon__art > .nk-egd-pollchip') as HTMLElement;
+      const a = art.getBoundingClientRect();
+      const i = img.getBoundingClientRect();
+      const c = chip.getBoundingClientRect();
+      return {
+        belowFig: c.top - i.bottom,
+        insideLeft: Math.round(c.left - a.left),
+        insideRight: Math.round(a.right - c.right),
+        artW: Math.round(a.width),
+        imgW: Math.round(i.width),
+      };
+    });
+    expect(badgePlace.belowFig, '污染徽标应排在立绘下方').toBeGreaterThanOrEqual(0);
+    expect(badgePlace.insideLeft, '徽标左缘不应越出立绘列').toBeGreaterThanOrEqual(-1);
+    expect(badgePlace.insideRight, '徽标右缘不应越出立绘列').toBeGreaterThanOrEqual(-1);
+    expect(badgePlace.artW, '立绘列宽应贴合立绘图宽（徽标不得反撑列宽）').toBe(badgePlace.imgW);
     // 受污染的召唤物：挂在召唤者自己的敌方卡片里（星启看板一律用敌方卡，四模式共用同一判据，ADR 0036）
     const mazeNodeSummons = summonsOf(mazeNodeData.monsters);
     const mazeNodePolled = pollutedSummons(mazeNodeData.monsters);
@@ -1364,8 +1387,9 @@ test.describe('布局验收：终局合并单页', () => {
     const peakLevelInv = pollLevel!.invasion!;
     const peakLevelPolled = pollutedMonsters(peakLevelInv, pollLevel!.monsters);
     expect(peakLevelPolled.length, '该单关应有登记在敌方配置里的被污染敌方').toBeGreaterThan(0);
-    await expect(page.locator('.nk-egd-peak .nk-egd-mon__meta .nk-egd-pollchip'))
+    await expect(page.locator('.nk-egd-peak .nk-egd-mon__art .nk-egd-pollchip'))
       .toHaveText(peakLevelPolled.map(() => monsterBadge(peakLevelInv)));
+    await expect(page.locator('.nk-egd-peak .nk-egd-mon__meta .nk-egd-pollchip')).toHaveCount(0);
     // 单关面板一次只渲染一关：容器数与 aria-labelledby 都跟随激活 tab
     await expect(page.locator('.nk-egd-peak')).toHaveCount(1);
     await expect(page.locator('#egd-level-panel'))
@@ -1393,6 +1417,82 @@ test.describe('布局验收：终局合并单页', () => {
     // 敌方详情卡的图标格与卡片表格分离：旧图标格形态（圆形小图标 + 格内召唤物）已整批退场
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__moncell')).toHaveCount(0);
     await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  /**
+   * 敌方卡内**元素级**横向溢出：判据 = 任一敌方卡 `scrollWidth > clientWidth`（含 +1px 容差）。
+   *
+   * 存在理由（这条缺陷的可见性极差，值得单列）：召唤物行的行长由「图 26px + 名 + 污染徽标」共同
+   * 决定，flex 项默认 `min-width: auto` 不会缩到 min-content 之下 ⇒ 长译文名会把该行 min-content
+   * 顶到手机档可用宽之外，整行拒绝收缩、溢出沿 `.nk-egd-summon__list → .nk-egd-summons →
+   * .nk-egd-mon__data` 一路撑破卡片。实测 en 4 / es 40 / fr 28 / pt 25 / ru 21px。
+   *
+   * **页面级溢出恒为 0（`html` 上有 `overflow: clip`），`noUnknownOverflow` 与既有溢出守卫全都
+   * 看不见它**——只有逐卡量 `scrollWidth` 才看得见。故判据落在卡片与列表自身，不落在页面上。
+   *
+   * 真值随语言变化，故按长译文语言逐个跑（与「列头子项不越出列框」同一套口径）。
+   */
+  test('/endgame：敌方卡内不横向溢出（长译文语言的召唤物行）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    test.setTimeout(240_000);
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    const failures: string[] = [];
+
+    /** 量之前先等布局定下来：点完 tab 立刻采样会把 reflow 中间态记成溢出（实测假阳性：
+     *  boss/3020 报 19/35px，稳定态恒为 0）。判据只在稳定态成立。 */
+    const measure = async (): Promise<string[]> => {
+      await page.waitForTimeout(600);
+      return page.evaluate(() => {
+        const out: string[] = [];
+        for (const card of document.querySelectorAll('.nk-egd-mon')) {
+          const over = card.scrollWidth - card.clientWidth;
+          if (over > 1) {
+            const path = [...card.querySelectorAll('*')]
+              .filter((el) => el.scrollWidth - el.clientWidth > 0)
+              .map((el) => String(el.className).split(/\s+/)[0]);
+            out.push(`敌方卡内溢出 ${Math.round(over)}px（${path.join(' < ') || '卡自身'}）`);
+          }
+          const list = card.querySelector('.nk-egd-summon__list');
+          if (list && list.scrollWidth - list.clientWidth > 1) {
+            out.push(`召唤物列表溢出 ${Math.round(list.scrollWidth - list.clientWidth)}px`);
+          }
+        }
+        return out;
+      });
+    };
+
+    for (const code of ['cn', 'de', 'ru', 'es', 'fr', 'pt', 'vi', 'th'] as const) {
+      // ① 忘却之庭星启节点：长译文下星启节点 3 是溢出点，逐节点扫全
+      await page.goto(code === 'cn' ? '/endgame/maze/1036' : `/${code}/endgame/maze/1036`);
+      await page.waitForSelector('#egd-level-tabs [role="tab"]', { timeout: 30_000 });
+      await page.locator('#egd-level-tab-tierce').click();
+      await page.waitForSelector('.nk-egd-mon', { timeout: 30_000 });
+      const nodeTabs = page.locator('.nk-egd-nodecards [role="tab"]');
+      const nodeCount = await nodeTabs.count();
+      for (let i = 0; i < nodeCount; i += 1) {
+        await nodeTabs.nth(i).click();
+        for (const b of await measure()) failures.push(`${code} maze/1036 节点${i + 1}: ${b}`);
+      }
+
+      // ② 末日幻影 3020：召唤物名最长的一页（ru 逐字竖排与 ru/id 溢出的实测落点）
+      await page.goto(code === 'cn' ? '/endgame/boss/3020' : `/${code}/endgame/boss/3020`);
+      await page.waitForSelector('#egd-level-tabs [role="tab"]', { timeout: 30_000 });
+      await page.waitForSelector('.nk-egd-mon', { timeout: 30_000 });
+      const levelTabs = page.locator('#egd-level-tabs [role="tab"]');
+      for (let i = 0; i < await levelTabs.count(); i += 1) {
+        await levelTabs.nth(i).click();
+        await page.waitForSelector('.nk-egd-mon', { timeout: 30_000 });
+        const halves = page.locator('.nk-egd-nodecards [role="tab"]');
+        const halfCount = await halves.count();
+        for (let j = 0; j < (halfCount > 1 ? halfCount : 1); j += 1) {
+          if (halfCount > 1) await halves.nth(j).click();
+          for (const b of await measure()) failures.push(`${code} boss/3020 tab${i}/半场${j + 1}: ${b}`);
+        }
+      }
+    }
+
+    expect(failures, '敌方卡 / 召唤物列表横向溢出（页面级溢出看不见它）').toEqual([]);
     assertNoErrors();
   });
 
@@ -1500,6 +1600,17 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(storyHalves.first().locator('.nk-egd-nodecard__label'))
       .toHaveText(['推荐属性', '等级']);
     await expect(storyPanel.locator('.nk-egd-floor__buff')).toHaveCount(0);
+    // 污染徽标落点（用户裁决，ADR 0026 补记三）：本页第 3/4 层下半场有登记在敌方配置里的被污染敌方，
+    // 徽标挂在**立绘正下方**的立绘列内，不再进名称旁的标签行
+    const storyPollFloor = (story.floor_details ?? []).find((f) => f.stage2?.invasion);
+    expect(storyPollFloor, '虚构叙事应有下半场污染关卡').toBeTruthy();
+    await page.locator(`#egd-level-tab-floor-${storyPollFloor!.floor}`).click();
+    await page.locator('#egd-floor-half-tab-stage2').click();
+    const storyPolledMons = pollutedMonsters(storyPollFloor!.stage2!.invasion, storyPollFloor!.stage2!.monsters);
+    expect(storyPolledMons.length, '该半场应有被污染的敌方卡').toBeGreaterThan(0);
+    await expect(storyPanel.locator('.nk-egd-mon__art .nk-egd-pollchip'))
+      .toHaveText(storyPolledMons.map(() => monsterBadge(storyPollFloor!.stage2!.invasion!)));
+    await expect(storyPanel.locator('.nk-egd-mon__meta .nk-egd-pollchip')).toHaveCount(0);
     // 星启 tab 仍在末位，且用同一套节点卡片 + 看板
     await page.locator('#egd-level-tab-tierce').click();
     await expect(storyPanel.locator('.nk-egd-nodecards[aria-label="星启节点"] .nk-egd-nodecard__name'))
