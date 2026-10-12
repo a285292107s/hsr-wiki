@@ -679,8 +679,15 @@ background-position: center 15%;
 }
 .nk-secnav__btn:hover { color: var(--text2); background: transparent; }
 .nk-secnav__btn--active { color: var(--metric-val); background: transparent; }
+/* 落点必须在按钮盒**内**：`.nk-secnav` 是 `overflow-x: auto`，而单轴 `visible` 会被规范算成 `auto`
+   ⇒ padding box 之外一律裁掉。按钮高度 == 导航盒高度（本页横滑档 44 / 桌面档 28，导航盒都被按钮撑满），
+   故原 `bottom: -7px` 的落点整体在容器外——三个消费页（角色 / 货币战争角色 / 贪饕）**从未渲染出激活
+   下划线**，静默到只剩颜色差。`bottom: 0` = 按钮自身下沿，任何断点都落在盒内，不留魔数。
+   检具取计算值 `parseFloat(getComputedStyle(btn, '::after').bottom) >= 0`；**别拿 `scrollHeight >
+   clientHeight` 当判据**——宿主上还有一条 `::before { top/bottom: -7px }` 的隐式热区，它独自就能把
+   `scrollHeight` 顶高 7px，改完落点该比值依旧超标。 */
 .nk-secnav__btn--active::after {
-  content: ''; position: absolute; left: 11px; right: 11px; bottom: -7px;
+  content: ''; position: absolute; left: 11px; right: 11px; bottom: 0;
   height: 2px; border-radius: var(--nk-radius-1); background: var(--primary); box-shadow: none;
 }
 .nk-secnav__idx { font-family: var(--font-hud); font-size: var(--nk-fs-2); opacity: 0.7; }

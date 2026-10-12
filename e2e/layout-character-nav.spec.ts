@@ -275,4 +275,146 @@ test.describe('布局验收：角色详情页', () => {
     }
     assertNoErrors();
   });
+
+  // 吸顶区块导航的「当前位置」契约（<1024 横滑档）。两条判据都来自同一个体验缺陷——**条里看不见当前位置**：
+  //   ① 跟随：区块高亮由页面滚动驱动，条必须自己把高亮项滚进可视区。此前 `nav.scrollLeft` 恒为 0，
+  //      实测页面滚到中段时高亮是「06 队伍」而可视区只覆盖 00~05 ⇒ 10 项里靠后的高亮永远在条外；
+  //   ② 渐隐方向：静态只挂右侧时左端文字被硬切，到底后右端又在渐隐已经滑到头的末项 ⇒ 按实际滚动位置
+  //      双向开关（`data-nav-fade`，CSS 在 character-enhance.css）。
+  // 横滑档的状态用直接改 `scrollLeft` 驱动，不依赖页面能滚到底：页尾两个短区块排在长区块之后、页面已到
+  // 滚动上限，靠页面滚动根本到不了条的末尾档。
+  test('/character/1513：吸顶区块导航跟随当前区块 + 渐隐按滚动位置双向开关', { tag: ['@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/character/1513');
+    await page.waitForSelector('.nk-secnav__btn');
+
+    const nav = page.locator('.nk-secnav');
+    const bar = page.locator('.nk-enh-bar');
+
+    // 渐隐落在哪一端：透明 stop 出现在实心 stop **之前** ⇒ 左端被渐隐；计数给出两端各有几处渐隐。
+    const fadeSides = () =>
+      nav.evaluate((el) => {
+        const m = getComputedStyle(el).maskImage || getComputedStyle(el).webkitMaskImage || '';
+        const clearIdx = m.indexOf('rgba(0, 0, 0, 0)');
+        const solidIdx = m.indexOf('rgb(0, 0, 0)');
+        return {
+          none: m === 'none',
+          left: clearIdx >= 0 && (solidIdx < 0 || clearIdx < solidIdx),
+          clearCount: (m.match(/rgba\(0, 0, 0, 0\)/g) || []).length,
+        };
+      });
+
+    const activeGeom = () =>
+      page.evaluate(() => {
+        const n = document.querySelector('.nk-secnav') as HTMLElement;
+        const b = document.querySelector('.nk-secnav__btn--active') as HTMLElement | null;
+        if (!b) return null;
+        const nb = n.getBoundingClientRect();
+        const bb = b.getBoundingClientRect();
+        return {
+          label: (b.textContent || '').replace(/\s+/g, ''),
+          scrollLeft: n.scrollLeft,
+          insetLeft: bb.left - nb.left,
+          insetRight: nb.right - bb.right,
+        };
+      });
+
+    // ① 跟随：把页面滚到中段（靠后的区块成为当前项），条须自己把那一项滚进可视区（渐隐带以内算可见）
+    await page.evaluate(() => {
+      (document.querySelector('.nk-char-page') as HTMLElement).scrollTo({ top: 8200, behavior: 'instant' });
+    });
+    await expect
+      .poll(
+        async () => {
+          const g = await activeGeom();
+          return g ? g.insetLeft >= 28 && g.insetRight >= 28 : false;
+        },
+        { timeout: 6_000, message: '吸顶条须把当前区块滚进可视区（含渐隐带以内）' },
+      )
+      .toBe(true);
+    const followed = await activeGeom();
+    expect(followed!.scrollLeft, '跟随须真的把条滚起来（此前恒为 0）').toBeGreaterThan(0);
+    expect(followed!.label, '该视口位置须落在靠后的区块上（否则本契约失去区分力）').not.toMatch(/^0[0-3]/);
+
+    // ② 渐隐状态机：起始档只右、中段双端、到底档只左
+    const setNavScrollLeft = (v: number | 'max') =>
+      nav.evaluate((el, x) => { el.scrollLeft = x === 'max' ? el.scrollWidth : (x as number); }, v);
+
+    await setNavScrollLeft(0);
+    await expect.poll(() => bar.getAttribute('data-nav-fade')).toBe('start');
+    const atStart = await fadeSides();
+    expect(atStart.none, '390 档导航须溢出（否则本契约失去区分力）').toBe(false);
+    expect(atStart.left, '起始档左端不得渐隐（左端没有可裁内容）').toBe(false);
+    expect(atStart.clearCount, '起始档只有右端一处渐隐').toBe(1);
+
+    await setNavScrollLeft('max');
+    await expect.poll(() => bar.getAttribute('data-nav-fade')).toBe('end');
+    const atEnd = await fadeSides();
+    expect(atEnd.left, '到底档必须有左端渐隐（否则左端文字被硬切）').toBe(true);
+    expect(atEnd.clearCount, '到底档只有左端一处渐隐').toBe(1);
+
+    await setNavScrollLeft(120);
+    await expect.poll(() => bar.getAttribute('data-nav-fade')).toBe('middle');
+    const atMid = await fadeSides();
+    expect(atMid.left, '中段须有左端渐隐').toBe(true);
+    expect(atMid.clearCount, '中段两端各一处渐隐').toBe(2);
+
+    // ③ 激活下划线必须落在按钮盒**内**：`.nk-secnav` 是 overflow 容器，负的 bottom 偏移会被裁掉——
+    //    共用原语曾写 `bottom: -7px`，三个消费页（角色 / 货币战争角色 / 贪饕）从未渲染出这条下划线。
+    const underlineBottom = await page
+      .locator('.nk-secnav__btn--active')
+      .evaluate((el) => parseFloat(getComputedStyle(el, '::after').bottom));
+    expect(underlineBottom, '激活下划线的 bottom 偏移不得为负').toBeGreaterThanOrEqual(0);
+
+    // ③ 触控目标撑到 44 之后，标签墨迹必须**在按钮内垂直居中**：原语是 `align-items: baseline`，单行 flex
+    //    容器把基线组放在行首 ⇒ 文字停在按钮顶部、吸顶条下半截留一整片空档（实测 0~16 / 44 ⇒ 下方 28px）。
+    //    仅靠「按钮 44 + 条高 47」两条断言抓不到它——两者在贴顶与居中两种形态下都成立。
+    const inkGaps = await page.locator('.nk-secnav__btn').first().evaluate((el) => {
+      const btn = el.getBoundingClientRect();
+      const textNode = [...el.childNodes].find((n) => n.nodeType === 3) as Text;
+      const range = document.createRange();
+      range.selectNodeContents(textNode);
+      const ink = range.getBoundingClientRect();
+      return { above: ink.top - btn.top, below: btn.bottom - ink.bottom };
+    });
+    expect(
+      Math.abs(inkGaps.above - inkGaps.below),
+      `标签墨迹须在按钮内垂直居中（实测上 ${inkGaps.above.toFixed(1)} / 下 ${inkGaps.below.toFixed(1)}）`,
+    ).toBeLessThanOrEqual(2);
+
+    // ④ 768–1023 档：`--nk-content-offset` 把这档的导航可视宽放大到装得下 10 项 ⇒ **不得挂渐隐**。
+    //    这是「溢出状态只在挂载那一刻算一次」唯一可观测的面——实测该档导航可视宽在挂载后由 560 变 648，
+    //    一次性计算会把「本来不溢出」的档永久挂上右侧渐隐；≥1024 档基础规则本来就是 `none`，抓不到它。
+    //    取该档最宽的 1023（余量最大）而不是 900，避免项宽随解析到的回退字体浮动时把这条断言弄成 flaky。
+    await page.setViewportSize({ width: 1023, height: 900 });
+    await page.goto('/character/1513');
+    await page.waitForSelector('.nk-secnav__btn');
+    const roomy = await page.evaluate(() => {
+      const n = document.querySelector('.nk-secnav') as HTMLElement;
+      const b = document.querySelector('.nk-enh-bar') as HTMLElement;
+      return {
+        overflow: n.scrollWidth - n.clientWidth > 1,
+        fade: b.dataset.navFade,
+        mask: getComputedStyle(n).maskImage || getComputedStyle(n).webkitMaskImage,
+      };
+    });
+    expect(roomy.overflow, '1023 档导航不得溢出（否则本契约失去区分力）').toBe(false);
+    expect(roomy.fade, '1023 档无溢出 ⇒ 渐隐状态须为 none（溢出状态必须跟着布局走，不能只在挂载时算一次）').toBe('none');
+    expect(roomy.mask, '1023 档无溢出 ⇒ 不得出现渐隐').toBe('none');
+
+    // ③（续）宽档取的是 tokens.css 的基础下划线落点，与横滑档的页面级覆写同一条不变量
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/character/1513');
+    await page.waitForSelector('.nk-secnav__btn');
+    await page.locator('.nk-secnav__btn').nth(3).click();
+    await expect(page.locator('.nk-secnav__btn--active')).toHaveCount(1);
+    const wideUnderlineBottom = await page
+      .locator('.nk-secnav__btn--active')
+      .evaluate((el) => parseFloat(getComputedStyle(el, '::after').bottom));
+    expect(wideUnderlineBottom, '宽档激活下划线的 bottom 偏移不得为负（与横滑档同一不变量）').toBeGreaterThanOrEqual(0);
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
 });

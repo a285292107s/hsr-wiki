@@ -29,6 +29,9 @@
 - **删「页面级覆写」≠ 取消**：删掉整条规则会**回落到基线更重的值**（光锥 hero 的暗角是覆写基线两层更重的 inset，删规则反而更暗）。必须显式 `box-shadow: none` / `background: none`（`::before` 同理）。`src/styles/lightcone.css`
 - **数字统一格式化时三类不得动**：① 标识符 ID（加千分位后更难核对）；② 数据正文里的数字（那是游戏原文，重排等于改写数据文本）；③ 已带单位的百分比 / 星级 / 费用。`src/lib/format.ts`
 - **只在 hover / focus / active 才换色的元素，其文字对比度从未被默认态扫描覆盖**：「悬停后掉到 4.5:1 以下」只存在于交互态。须逐元素 `hover()` / `focus()` 后**在该状态**跑 `color-contrast`。
+- **落在单轴滚动容器之外的伪元素不报错，只是永远不渲染**：`overflow-x: auto` 会把另一轴的 `visible` 按规范算成 `auto`，padding box 之外一律裁掉。`.nk-secnav__btn--active::after` 写 `bottom: -7px`（本意是挂到吸顶条底边、与容器边框对齐）⇒ 三个消费页（角色 / 货币战争角色 / 贪饕）**从未渲染出激活下划线**，静默到只剩一层颜色差。按钮高度又恒等于导航盒高度（导航盒被按钮撑满），所以任何 `bottom: -N` 都必然落在盒外。修法是让落点落在按钮盒内（`bottom: 0`），判据取**计算值** `parseFloat(getComputedStyle(el,'::after').bottom) >= 0`——**别拿 `scrollHeight > clientHeight` 当判据**：同一宿主上还有一条 `::before { top/bottom: -7px }` 的隐式热区，它独自就能把 `scrollHeight` 顶高 7px，改完落点后该比值依旧超 7px。
+- **「挂载时算一次」的溢出 / 断点判定会永久停在初值：布局在挂载后还会变**：实测角色页吸顶导航的可视宽在挂载后由 560 变 648（首帧与稳定态差 88px），一次性计算把「本来不溢出」的 768–1023 档永久挂上「还有内容」的渐隐——提示相反的事实。正解是跟着布局走（`ResizeObserver` 观察容器盒宽覆盖视口 / 滚动条、观察首个子项宽覆盖字型替换），**不能拿 `document.fonts.ready` 当布局稳定信号**：实测它在目标元素挂载前就已 resolve（同一采样点上 `document.fonts.status` 已是 `loaded`），挂 `await` 等于什么都没等。判据要挑**只有该档能观测到**的视口——≥1024 的基础规则本就是 `none`，在那里断言永远绿。
+- **`min-height` 撑高的 flex 按钮里，`align-items: baseline` 会把内容钉在行首**：单行 flex 容器把基线组放在行首、多余空间全落到尾部 ⇒ 44px 的触控按钮里文字墨迹停在 0~16（上留白 0 / 下留白 28），吸顶条下半截是一整片空档。而「按钮高 44 + 条高 47」两条断言在**贴顶与居中两种形态下都成立**，抓不到它——判据必须取**墨迹的上留白与下留白之差**（≤2px）。修法只有 `align-items: center`：**`align-content: center` 治不了**（对 `flex-wrap: nowrap` 的单行容器无效，实测零变化）。代价是索引号由基线对齐变盒心对齐，实测位移 1.5px。
 
 ## 令牌收口与迁移
 
@@ -122,7 +125,8 @@
 - **CSS 分栏（`columns`）不要给子项覆写 `display` / `width`**：行本身是 flex 行，改成 block 会压成上下堆叠、整页反而变长；分栏只需 `break-inside: avoid`。`src/styles/endgame.css`
 - **别把 UI 页签小图（144×144）用 `cover` 当背景大图**：先量 `naturalWidth` 与显示盒，放大 > 2 倍必然糊；背景用色彩/渐变，图标只在原尺寸内缩处用。`src/app/catalog/pages/endgame.ts`
 - **同一页同类区块必须同左缘，判据取「盒左缘」而不是文字左缘**：区块标题自带 `padding-left` + `border-left`，拿文字左缘比会假红。`src/styles/currency-trait-detail.css`
-- **「横向可滚」不等于「用户能找到」**：横滚容器必须给溢出提示，且提示**只在真溢出时出现**（用 `mask-image` 渐隐，不引入新颜色块）。`src/styles/catalog.css`
+- **「横向可滚」不等于「用户能找到」**：横滚容器必须给溢出提示，且提示**只在真溢出时出现**（用 `mask-image` 渐隐，不引入新颜色块），并且**方向要对**——静态只挂一侧的渐隐是方向盲的：横滑到中段时左端文字被硬切（实测「加成」→「|成」），滑到末尾后右端又在渐隐已经滑到头的末项。状态由容器上的一条 `data-*`（start / middle / end / none）+ 被动滚动监听写入，CSS 按状态切三段渐变；**不要用 `animation-timeline: scroll()`**（滚动驱动动画 Firefox 不支持，缺 `@supports` 门时它按普通时间轴跑完并停在末帧）。`src/styles/catalog.css`、`src/styles/character-enhance.css`
+- **横滚条里的「当前项」高亮必须由条自己滚进可视区**：高亮由页面滚动驱动而条不跟着滚 ⇒ 10 项里靠后的高亮**永远**在条外（实测页面滚到中段时高亮项 left 442、导航可视区只有 16~374），用户读到哪一节在条上完全不可见。判据取「高亮项相对导航可视区的左右内缩都 ≥ 渐隐带宽度」，**不是「`scrollLeft > 0`」**（后者只要滚过一像素就绿）；跟随还要给用户让路——手指按在条上或刚滚过（实测 1.2s 窗口）时不抢位置。
 - **CLS 取证必须 dump 位移节点（`layout-shift.sources[].node`）**，只报数值查不出病根。图片**未解码时不产生盒子**：`max-width` 不定宽 ⇒ 首帧高 0、图到后整块下跳；修法是 `width: X%` + `aspect-ratio`，**不是 `min-height` 魔数**。
 
 ## 排查路径

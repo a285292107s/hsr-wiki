@@ -119,16 +119,102 @@ const { activeId, progress, showTop, jumpTo, scrollTop } = useScrollSpy(
   { offset: () => (enhBarRef.value?.offsetHeight || 0) + 12 },
 );
 
+/* 吸顶区块导航在 <1024 档横向溢出，条内自己还欠两件事：
+   ① **跟随**——区块高亮由页面滚动驱动，而条不跟着滚，等于「读到哪一节」在条上完全不可见（实测页面滚
+      10149px 时高亮项 left 442，导航可视区只有 16~374，10 项里有 5 项的高亮永远在条外）；
+   ② **渐隐状态**——溢出提示必须按实际滚动位置双向开关，见 character-enhance.css 的 data-nav-fade 规则。 */
+/** 与 character-enhance.css 的 mask 渐隐宽同值 */
+const NAV_FADE_EDGE = 28;
+/** 用户主动横滑后的静默期：区间内不抢滚动位置，否则手指还在条上就被拽走 */
+const NAV_PAN_HOLD = 1200;
+const navFade = ref<'none' | 'start' | 'middle' | 'end'>('start');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let navEl: HTMLElement | null = null;
+let navRo: ResizeObserver | null = null;
+let navPanAt = 0;
+let navRaf = 0;
+
+function syncNavFade(): void {
+  if (!navEl) return;
+  const max = navEl.scrollWidth - navEl.clientWidth;
+  const x = navEl.scrollLeft;
+  navFade.value = max <= 1 ? 'none' : x <= 1 ? 'start' : x >= max - 1 ? 'end' : 'middle';
+}
+
+/** 只在激活项跑出可视区（渐隐带以内算不可用）时才动，并把渐隐带按当前是起始/到底档收窄 */
+function revealActive(): void {
+  const nav = navEl;
+  const btn = nav?.querySelector<HTMLElement>('.nk-secnav__btn--active');
+  if (!nav || !btn) return;
+  if (Date.now() - navPanAt < NAV_PAN_HOLD) return;
+  const max = nav.scrollWidth - nav.clientWidth;
+  if (max <= 1) return;
+  const nb = nav.getBoundingClientRect();
+  const bb = btn.getBoundingClientRect();
+  const viewLeft = nb.left + (nav.scrollLeft > 1 ? NAV_FADE_EDGE : 0);
+  const viewRight = nb.right - (nav.scrollLeft < max - 1 ? NAV_FADE_EDGE : 0);
+  if (viewRight - viewLeft <= 0) return;
+  if (bb.left >= viewLeft && bb.right <= viewRight) return;
+  const delta = (bb.left + bb.right) / 2 - (viewLeft + viewRight) / 2;
+  nav.scrollTo({ left: Math.max(0, nav.scrollLeft + delta), behavior: reducedMotion ? 'auto' : 'smooth' });
+}
+
+function onNavScroll(): void {
+  if (navRaf) return;
+  navRaf = requestAnimationFrame(() => { navRaf = 0; syncNavFade(); });
+}
+
+function onNavPan(): void { navPanAt = Date.now(); }
+
+function unbindNav(): void {
+  if (navEl) {
+    navEl.removeEventListener('scroll', onNavScroll);
+    navEl.removeEventListener('pointerdown', onNavPan);
+    navEl.removeEventListener('wheel', onNavPan);
+    navEl = null;
+  }
+  navRo?.disconnect();
+  navRo = null;
+  if (navRaf) { cancelAnimationFrame(navRaf); navRaf = 0; }
+}
+
+function bindNav(): void {
+  unbindNav();
+  const nav = enhBarRef.value?.querySelector<HTMLElement>('.nk-secnav') || null;
+  if (!nav) return;
+  navEl = nav;
+  nav.addEventListener('scroll', onNavScroll, { passive: true });
+  nav.addEventListener('pointerdown', onNavPan, { passive: true });
+  nav.addEventListener('wheel', onNavPan, { passive: true });
+  /* 溢出状态不能只在绑定那一刻算一次：实测 768 档导航可视宽在页面挂载后由 560 变 648（字型替换、
+     滚动条出现都会改它），一次性计算会把「本来不溢出」的档永久挂上右侧渐隐——提示「还有内容」而其实
+     已经到头，正是本次要消灭的那类假提示。故用 ResizeObserver 跟着布局走：导航盒宽变化覆盖视口 /
+     滚动条，首项宽变化覆盖字型替换。**`document.fonts.ready` 顶不住这件事**——实测它在导航挂载前
+     就已 resolve（同一采样点上 `document.fonts.status` 已是 loaded），拿它当布局稳定的信号只会更晚不生效。 */
+  navRo = new ResizeObserver(() => syncNavFade());
+  navRo.observe(nav);
+  const firstBtn = nav.querySelector<HTMLElement>('.nk-secnav__btn');
+  if (firstBtn) navRo.observe(firstBtn);
+  syncNavFade();
+}
+
+// 高亮换节 ⇒ 把那一项滚进可视区（等下一帧拿到 class 已更新的 DOM）
+watch(activeId, async () => {
+  await nextTick();
+  revealActive();
+});
 
 // 数据就绪/对比模式切换后收集面板引用（模板条件渲染，需等下一帧 DOM 稳定）
 watch([d, () => char.compareOn], async (val) => {
   if (val) {
     await nextTick();
     collectPanels();
+    bindNav();
   }
 });
 
 onBeforeUnmount(() => {
+  unbindNav();
   char.reset();
 });
 </script>
@@ -212,7 +298,7 @@ onBeforeUnmount(() => {
     </div>
 
     <template v-else-if="d">
-      <div ref="enhBarRef" class="nk-enh-bar">
+      <div ref="enhBarRef" class="nk-enh-bar" :data-nav-fade="navFade">
         <div class="nk-enh-bar__inner">
           <nav class="nk-secnav" :aria-label="t('cwRole.navAria')">
             <button

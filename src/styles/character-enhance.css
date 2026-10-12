@@ -16,25 +16,49 @@
   max-width: var(--nk-detail-max); margin: 0 auto; padding: 6px 16px; min-height: 44px;
 }
 /* 区块导航在 <1024 档横向溢出（手机 390 实测 scrollWidth 647 / clientWidth 358 ⇒ 10 项只有 5 项可见，
-   且本页没有别的入口能到「遗器 / 档案 / 配音」）⇒ 加右侧渐隐提示「还有内容」，否则被裁的项等于不存在。
+   且本页没有别的入口能到「遗器 / 档案 / 配音」）⇒ 加渐隐提示「还有内容」，否则被裁的项等于不存在。
    mask 是纯几何提示，不引入新颜色（反 AI 味禁令针对的是装饰性色块与渐变头，不是可滚动的可达性提示）。
-   ≥1024 三项全可见、无溢出，故只在溢出档加。 */
+   ≥1024 三项全可见、无溢出，故只在溢出档加。
+   **渐隐必须按实际滚动位置双向开关**：只挂右侧时横滑到中段左端文字被硬切（实测「加成」→「|成」），
+   滑到末尾后右端又在渐隐已经到底的末项。状态由 CharacterView 的被动滚动监听写进 `data-nav-fade`
+   （start / middle / end / none），28px 与那侧的渐隐宽同值。缺省命中 `.nk-secnav` 那条 = start，
+   与「只挂右侧」的既有行为一致 ⇒ 属性尚未落地时也不回归。 */
 .nk-char-page .nk-secnav { -webkit-mask-image: none; mask-image: none; }
 @media (max-width: 1023px) {
-  .nk-char-page .nk-secnav {
+  .nk-char-page .nk-secnav,
+  .nk-char-page .nk-enh-bar[data-nav-fade='start'] .nk-secnav {
     -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
     mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
   }
+  .nk-char-page .nk-enh-bar[data-nav-fade='middle'] .nk-secnav {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent);
+  }
+  .nk-char-page .nk-enh-bar[data-nav-fade='end'] .nk-secnav {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px);
+    mask-image: linear-gradient(to right, transparent 0, #000 28px);
+  }
+  .nk-char-page .nk-enh-bar[data-nav-fade='none'] .nk-secnav {
+    -webkit-mask-image: none; mask-image: none;
+  }
+  /* 激活下划线（tokens.css 已收回按钮盒内）在本档正好压在条底那 2px 进度条上——按钮 44 = 导航盒 44，
+     两条线上下相邻、读成一条粗线。抬 6px 让它落在「标签下沿」与「进度条」之间（上下各留 6）。
+     ≥1024 导航盒 28 居中在 44 内距里、距进度条还有 10px，故只在横滑档抬。 */
+  .nk-char-page .nk-secnav__btn--active::after { bottom: 6px; }
 }
 /* 触控目标：`.nk-secnav__btn` 视觉盒 28px 高（跨页共用原语，动它就是动 4 个详情页的吸顶条），
    故只在本页把按钮撑到 44（WCAG 2.2 AA 目标尺寸）。**只在本页横滑档（<1024）生效**：≥1024 三项全可见、
    指针操作，撑高只会让吸顶条 47→59、连带挪动全页 scroll-margin 与 scrollspy 偏移，属无收益的版面位移。
    <1024 撑到 44 时导航盒 = 44 = `.nk-enh-bar__inner` 已有的 min-height ⇒ **吸顶条总高不变**（实测 47）。
    原 `::before { top/bottom: -7px }` 在 overflow-x:auto 的滚动容器里会被裁掉，抬不高命中区，
-   故这里抬真实高度而不是扩不可见热区。 */
+   故这里抬真实高度而不是扩不可见热区。
+   **撑高之后必须同时居中**：原语是 `align-items: baseline`，而单行 flex 容器把基线组放在**行首**——
+   按钮高 44 而文字墨迹停在 0~16（实测 gapAbove 0 / gapBelow 28），吸顶条下半截是一整片空档。
+   `align-content: center` 治不了它（对 `flex-wrap: nowrap` 的单行容器无效，实测零变化），只能改
+   `align-items: center`；代价是索引号由「基线对齐」变「盒心对齐」，实测位移 1.5px，不可见。 */
 @media (max-width: 1023px) {
   .nk-char-page .nk-secnav { min-height: 44px; }
-  .nk-char-page .nk-secnav__btn { min-height: 44px; padding-top: 0; padding-bottom: 0; }
+  .nk-char-page .nk-secnav__btn { min-height: 44px; align-items: center; padding-top: 0; padding-bottom: 0; }
   /* 导航盒 44 + 原内距 6×2 = 56 > 原条高 44 ⇒ 条会长到 59，而 `.nk-page--detail` 的
      `padding-top: 45px` 是按条高 47 定的 —— 条一长，首屏 hero 就被吸顶条盖住（实测 390 档盖 12px）。
      故同档把内距归零：条高回到 47（44 导航 + 1 边框 + 亚像素），与既有 45px 避让对齐。 */
