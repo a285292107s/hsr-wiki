@@ -20,7 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        # 2 分片：全量矩阵共 41 条用例（13 语言冒烟 13 + 长文案 28），4 片会空跑两片
+        # （实测分片 3/4 各 ~40s 结束、无用例）——按条数切分时片数不必大于「重文件数 + 1」。
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v5
 
