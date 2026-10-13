@@ -1,0 +1,47 @@
+name: CI Full（全语言矩阵，周跑）
+
+# 每次 push 只扫风险语言子集（cn/de/jp/ru）——那是为了墙钟做的**登记在案的覆盖收窄**（见 ci.yml 与
+# docs/agents/testing.md）。本 workflow 把收窄掉的那部分补回来：13 语言 × 25 路由的全语言冒烟，
+# 以及全语言（13 种）的多语言长文案扫描。低频但全量，收窄因此不等于长期失覆盖。
+on:
+  schedule:
+    # 每周日 20:30 UTC（周一 04:30 北京时间）
+    - cron: '30 20 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-full
+  cancel-in-progress: false
+
+jobs:
+  full-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+
+      - name: 全语言矩阵（冒烟 13 语言 × 25 路由 + 长文案 13 语言）
+        run: |
+          pnpm exec playwright test e2e/layout-locales-smoke.spec.ts e2e/layout-i18n-overflow.spec.ts \
+            --shard=${{ matrix.shard }}/4
+        env:
+          SMOKE_SCOPE: all
+          I18N_OVERFLOW_ALL: '1'
+
+      - name: Upload e2e artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-artifacts-full-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            /tmp/hsr-wiki-e2e-results/
+          retention-days: 14

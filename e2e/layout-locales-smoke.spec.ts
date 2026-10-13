@@ -6,7 +6,8 @@
  *      **无未捕获 JS 异常**。第 3 条抓过真缺陷：德语/法语/葡语的词典值带官方性别变体标记
  *      `{M#Trailblazer}`，被 vue-i18n 当占位符编译 ⇒ SyntaxError + 整页渲染异常。
  *   2. **13 语言 × 全部路由族（25 条路径）**——标记类与缺键类缺陷只在「该语言 + 该页」同时命中时才暴露，
- *      实测全量约 2.3 分钟；需要快速一轮时 `SMOKE_FAST=1` 只扫 cn/de/jp/ru。
+ *      实测全量约 2.3 分钟；CI 每次 push 走 `SMOKE_SCOPE=fast`（cn/de/jp/ru），全量矩阵由定时 workflow
+ *      （`.github/workflows/ci-full.yml`）承担。
  *
  * 构建期守卫查键与计数，这里查**用户实际看到的那一份**。断言保持轻量，细节留在 layout-i18n.spec.ts。
  */
@@ -80,14 +81,18 @@ const routeFamilies = (base: string): string[] => [
   `${base}/definitely-not-a-real-path`,
 ];
 
-/* 扫全路由的语言：默认**全部 13 语言**（实测 13×25 条路径约 2.3 分钟，值得）；
-   需要快速一轮时设 `SMOKE_FAST=1` 只扫标记风险最高的四种（cn 缺省 / de 性别变体 / jp ruby / ru 分片）。 */
-const SWEEP_LOCALES = process.env.SMOKE_FAST
-  ? ['cn', 'de', 'jp', 'ru']
-  : LOCALES.map((l) => l.code);
+/* 扫语言范围：本机默认**全部 13 语言**（实测 13×25 条路径约 2.3 分钟）；
+   `SMOKE_SCOPE=fast`（或等价的旧写法 `SMOKE_FAST=1`）只扫标记风险最高的四种
+   （cn 缺省 / de 性别变体 / jp ruby / ru 分片）——CI 每次 push 走 fast，定时 workflow 走全量。
+   两条 describe 共用这一个清单：只缩一条会让「13 语言 × 首页/详情」成为墙钟大头。 */
+const SWEEP_FAST = ['cn', 'de', 'jp', 'ru'];
+const SWEEP_ALL = LOCALES.map((l) => l.code);
+const SWEEP_LOCALES =
+  process.env.SMOKE_SCOPE === 'fast' || process.env.SMOKE_FAST ? SWEEP_FAST : SWEEP_ALL;
+const SWEEP_SET = new Set(SWEEP_LOCALES);
 
 test.describe('全语言冒烟', () => {
-  for (const loc of LOCALES) {
+  for (const loc of LOCALES.filter((l) => SWEEP_SET.has(l.code))) {
     const base = loc.prefix ? `/${loc.prefix}` : '';
     test(`${loc.code}：首页与角色详情无未解析令牌、非中日韩无中文残留`, { tag: ['@viewport-independent'] }, async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
@@ -171,6 +176,11 @@ test.describe('全语言冒烟', () => {
   for (const code of SWEEP_LOCALES) {
     const base = code === 'cn' ? '' : `/${code}`;
     test(`${code}：全部路由族均无未解析令牌、无未捕获异常`, { tag: ['@viewport-independent'] }, async ({ page }) => {
+      /* 用例级预算：本用例把 25 条路由串行走一遍（dev 模式每次 `goto` 都是整页重载），CI 实测
+         29–34s，越过 Playwright 默认 30s ⇒ 表现为「某条路径内容未就位」的**假缺陷**（失败 path
+         随耗尽位置漂移，同一用例 retry 有时 28.9s 通过）。每路由的「内容就位」判据仍是 20s 的
+         `expect.poll`，这里只是把「25 次导航之和」纳入预算——真出现某页挂住仍会在 20s 落到该 path。 */
+      test.setTimeout(120_000);
       const { assertNoErrors } = collectConsoleIssues(page);
       const i18nWarn = collectI18nWarnings(page);
       const paths = routeFamilies(base);

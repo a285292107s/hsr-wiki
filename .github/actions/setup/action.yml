@@ -1,0 +1,39 @@
+name: 环境准备（pnpm + Node + 依赖 + Playwright 浏览器）
+description: >
+  CI 各 job 共用的前置步骤。抽成 composite action 的唯一理由是**防漂移**：分片矩阵会让同一段
+  安装逻辑出现在多个 job 里，任何一处漏改（尤其浏览器清单）都只在 CI 显形、本机恒绿。
+inputs:
+  browsers:
+    description: 传给 `playwright install --with-deps` 的浏览器清单（逗号分隔）；留空则跳过浏览器安装
+    required: false
+    default: chromium
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v6
+
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 22
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    # Playwright 浏览器二进制缓存（版本由 lockfile 锁定；命中后 install 秒级跳过）
+    # key 的 -v2 后缀：缓存需重建一次才含 firefox，否则命中旧缓存后每次 run 都要重下 firefox
+    - name: Cache Playwright browsers
+      if: inputs.browsers != ''
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-v2
+
+    # 浏览器清单必须覆盖 playwright.config.ts 的每个 project（当前 chromium / firefox；
+    # mobile-chromium 复用 chromium 二进制）。漏登记 ⇒ 该 project 全部用例以
+    # browserType.launch「Executable doesn't exist」告负，而本机装了浏览器故全绿——只有 CI 能显形。
+    - name: Install Playwright browsers（${{ inputs.browsers }}）
+      if: inputs.browsers != ''
+      shell: bash
+      run: pnpm exec playwright install --with-deps ${{ inputs.browsers }}

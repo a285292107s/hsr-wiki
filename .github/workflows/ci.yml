@@ -10,71 +10,132 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# 仅跑单测 + e2e（2026-08-14 精简）：
-# - 无 pnpm build：vercel.json buildCommand 同为 pnpm build（含 vue-tsc + 三守卫），Vercel 生产/预览构建即发布门，
-#   失败不部署可回滚；CI 重复跑同命令零增量。push 后类型/构建反馈由 Vercel 承担。
-# - 无 converter 测试：converter 代码变更低频，每次 push 重复跑纯浪费；回归由 data-sync 的 Run converter
-#   兜底（转换失败即失败、diff 判空不推送坏数据）+ 本机 pytest（converter 变更时按 AGENTS.md 流程）。
-# - e2e 分层（2026-08-15 决策）：CI 仅跑 layout + a11y（test:e2e:ci，零外部依赖、环境无关）；
-#   visual 像素基线回本机（判定依赖环境——CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异，
-#   本地跑同样能拦住基线过期，见 docs/memory/testing.md 与 build-deploy.md）。禁止把 visual.spec 加回 CI e2e job。
+# 每次 push 的门禁分层（2026-10 重构；体检数据与取舍判据见 docs/agents/testing.md）：
+#
+# - 五条 job **全部并行**，各自独立报红，红灯可信：
+#     static       七守卫 + vue-tsc（本地 4.5s / 7.7s）。此前只由 Vercel 构建承担，类型错/守卫错会以
+#                  「Vercel 报错」的形式到达（一次实测就把它误当成部署失败排查了半小时）。
+#     unit-tests   Vitest 全量（471 条 / CI 26s）。
+#     invariants   不变量层 = guards + shell + a11y。**此前 guards 与 shell 根本不在 CI 里**——
+#                  `e2e/layout-` 这个路径过滤把它们静默排除了，实测 shell 层因此已在 main 上红了两天。
+#     layout       布局契约，4 分片 × 每片 2 worker（见下）。
+#     smoke        两个重文件（全语言冒烟 / 多语言长文案）单独成 job。
+#
+# - **墙钟靠分片（机器维度），不靠提高并发度**：每台机器的 worker 仍是实测过的 2（见 playwright.config.ts）。
+#   分片把「测试时间总和」摊到多台 runner 上，不改任何一台的单机并发 → 不引入新的 flake 面。
+# - 两个重文件必须独立成 job：Playwright 的 `--shard` 按**条数**切分，而这两个文件各自是单文件串行
+#   （`fullyParallel: false`），留在分片里会把某一片拖成两倍墙钟（实测 4 分片估算 266/437/455/201s）。
+# - 全量矩阵（13 语言 × 25 路由 + 全语言长文案扫描）移出每次 push，由 ci-full.yml 周跑承担；
+#   每次 push 只扫风险语言子集（cn/de/jp/ru）。覆盖收窄是**登记在案的例外**，不是静默降级。
+# - CI 不跑 `pnpm build`（Vercel 的 buildCommand 即发布门，重复跑零增量）；visual 像素基线回本机
+#   （判定依赖环境：CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异）。
 jobs:
-  unit-tests:
+  static:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v5
+      - uses: ./.github/actions/setup
         with:
-          node-version: 22
-          cache: pnpm
+          browsers: ''
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: 构建守卫（色彩 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文 / Spine 清单）
+        run: node tools/check-guards.mjs
+
+      - name: 类型检查（vue-tsc -b）
+        run: pnpm exec vue-tsc -b
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          browsers: ''
 
       - name: Unit tests
         run: pnpm test
 
-  e2e:
+  invariants:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v5
+      - uses: ./.github/actions/setup
         with:
-          node-version: 22
-          cache: pnpm
+          browsers: chromium
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: E2E 不变量层（guards + shell + a11y，环境无关）
+        run: pnpm test:e2e:guards
 
-      # Playwright 浏览器二进制缓存（版本由 lockfile 锁定；命中后 install 秒级跳过）
-      # key 的 -v2 后缀：缓存需重建一次才含 firefox，否则命中旧缓存后每次 run 都要重下 firefox
-      - name: Cache Playwright browsers
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-v2
-
-      # 浏览器清单必须覆盖 playwright.config.ts 的每个 project（当前 chromium / firefox；
-      # mobile-chromium 复用 chromium 二进制）。漏登记 ⇒ 该 project 全部用例以
-      # browserType.launch「Executable doesn't exist」告负，而本机装了浏览器故全绿——只有 CI 能显形。
-      - name: Install Playwright browsers（chromium + firefox）
-        run: pnpm exec playwright install --with-deps chromium firefox
-
-      - name: E2E tests（T1b/T2 布局 + a11y，环境无关守卫；visual 像素基线已回本机，勿加回）
-        run: pnpm test:e2e:ci
-
-      # e2e 失败时上传 HTML report + trace/截图（outputDir 在系统临时目录），供 PR 调试取证
       - name: Upload e2e artifacts
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-artifacts
+          name: playwright-artifacts-invariants
+          path: |
+            playwright-report/
+            /tmp/hsr-wiki-e2e-results/
+          retention-days: 7
+
+  layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          browsers: chromium,firefox
+
+      # 两个重文件由 smoke job 承担（见文件头）：这里只跑其余 layout 分域契约。
+      # 用 glob 而非硬编码清单：新增 layout 分文件自动纳入，漏加会退化成「跑不到用例」而非报错。
+      - name: E2E 布局契约（分片 ${{ matrix.shard }}/4）
+        shell: bash
+        run: |
+          files=$(ls e2e/layout-*.spec.ts | grep -v -e layout-locales-smoke -e layout-i18n-overflow | tr '\n' ' ')
+          echo "本分片文件集：$files"
+          pnpm exec playwright test $files --shard=${{ matrix.shard }}/4
+
+      - name: Upload e2e artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-artifacts-layout-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            /tmp/hsr-wiki-e2e-results/
+          retention-days: 7
+
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+
+      # 风险语言子集（cn 缺省 / de 性别变体 / jp ruby / ru 分片）：全 13 语言矩阵见 ci-full.yml。
+      - name: E2E 全语言冒烟 + 多语言长文案（风险语言子集）
+        run: pnpm exec playwright test e2e/layout-locales-smoke.spec.ts e2e/layout-i18n-overflow.spec.ts
+        env:
+          SMOKE_SCOPE: fast
+
+      - name: Upload e2e artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-artifacts-smoke
           path: |
             playwright-report/
             /tmp/hsr-wiki-e2e-results/

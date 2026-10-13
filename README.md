@@ -36,7 +36,9 @@ pnpm dev            # 本地开发 → http://localhost:6188/（固定端口 str
 pnpm build          # 构建守卫（色彩 / Spine 清单 / 对比度）→ vue-tsc -b → vite build
 pnpm preview        # 预览构建产物
 pnpm test           # Vitest 全量
-pnpm test:e2e:ci    # e2e CI 层（layout + a11y）
+pnpm test:e2e:guards # e2e CI 快层（不变量 + 外壳契约 + a11y）
+pnpm test:e2e:layout # e2e 布局契约层（全部 layout-*）
+pnpm test:e2e:ci    # 上面两层合集（本地一次跑完 CI 的全部 e2e）
 ```
 
 命令全量手册（e2e 分层与像素基线、研究线 `/debug`、converter、dev 缓存自愈、部署与门禁）见 [docs/agents/commands.md](docs/agents/commands.md)。

@@ -99,10 +99,21 @@ function authoritativeVersions() {
     for (const m of req.matchAll(/^([a-zA-Z0-9_-]+)\s*(?:[><=!~]=?\s*)?([0-9][0-9.]*)/gm)) out[m[1]] = m[2];
   } catch { /* requirements.txt 缺失时跳过 */ }
   try {
-    const ci = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8');
-    const m = ci.match(/node-version:\s*['"]?(\d+)/);
-    if (m) out.node = m[1];
-  } catch { /* ci.yml 缺失时跳过 */ }
+    /* Node 版本可能落在 workflow 或 composite action 里（CI 把环境准备收口到 `.github/actions/setup`）：
+       只读 ci.yml 会**静默少一处比对点**（实测加了 composite 后从 20 项掉到 19 项），故两处都扫。 */
+    const nodeFiles = [join(ROOT, '.github', 'workflows', 'ci.yml')];
+    const actionsDir = join(ROOT, '.github', 'actions');
+    if (existsSync(actionsDir)) {
+      for (const d of readdirSync(actionsDir)) {
+        const f = join(actionsDir, d, 'action.yml');
+        if (existsSync(f)) nodeFiles.push(f);
+      }
+    }
+    for (const f of nodeFiles) {
+      const m = readFileSync(f, 'utf8').match(/node-version:\s*['"]?(\d+)/);
+      if (m) { out.node = m[1]; break; }
+    }
+  } catch { /* ci.yml 与 composite action 都缺失时跳过 */ }
   try {
     // 「Node 无 engines 字段」是本仓事实：CI 是唯一 Node 权威源；engines 存在时优先 engines
     const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -227,7 +238,7 @@ const exempt = all.length - living.length;
 console.log(`[文档审核] 受管 md ${all.length} 份｜命中 ${findings.length} 条${strict ? '（strict）' : ''}`);
 console.log(`  覆盖面：写法规则（③④）管辖 ${living.length} 份现行文档；其中版本号禁入（⑤）另辖 ${versionBanned.length} 份（docs/memory/ 豁免⑤，其版本号是技术事实而非现状声明）`);
 console.log(`  豁免 ${exempt} 份历史档案（ADR ${adrFiles.length} / audit / data / spine）——豁免项仍受 ①⑥⑦⑧ 检查`);
-console.log(`  权威源比对：${Object.keys(auth).length} 项（package.json / requirements.txt / ci.yml / data-sync.yml / spine constants）`);
+console.log(`  权威源比对：${Object.keys(auth).length} 项（package.json / requirements.txt / ci.yml + .github/actions/* · data-sync.yml / spine constants）`);
 if (findings.length === 0) {
   console.log('[PASS] 全部通过');
   process.exit(0);

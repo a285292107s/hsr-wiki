@@ -28,7 +28,11 @@ export default defineConfig({
   // 换句话说：2 worker 拿到约 40% 提速，代价为零；再往上买到的是 flake。**勿上调**。
   fullyParallel: false,
   workers: 2,
-  retries: process.env.CI ? 2 : 0,
+  /* CI 也用 0 重试：`--retries` 会把真实红灯转成绿灯（实测 mobile `/endgame/boss` 首跑红、retry 绿），
+     而仓库纪律本就禁止用重试抹平 flake（见 docs/agents/commands.md 与 docs/memory/testing.md）。
+     红 run 的时间成本也随之回落：重试会把失败的 e2e job 从 14.5 分钟拉到 ~20 分钟。
+     提速走「分片」（每台机器 worker 数仍是 2，见 .github/workflows/ci.yml），不是重试。 */
+  retries: 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL: 'http://localhost:6188',

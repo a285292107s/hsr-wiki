@@ -20,16 +20,28 @@ import { join } from 'node:path';
 const PAGE = '/character';
 
 test.describe('应用外壳契约', () => {
-  test('字体由 HTML <link> 承载且 CSS 内无 @import；两款字体真的可用', async ({ page }) => {
+  test('字体由同源入口 CSS 承载且 CSS 内无 @import；两款字体真的可用', async ({ page }) => {
     const html = readFileSync('index.html', 'utf8');
-    expect(html, 'index.html 应 preconnect 字体源').toContain('rel="preconnect" href="https://fonts.gstatic.com"');
-    expect(html, 'index.html 应以 <link rel="stylesheet"> 加载字体').toMatch(/rel="stylesheet"[\s\S]{0,200}fonts\.googleapis\.com/);
+    /* 字体链路已由「HTML `<link>` 直连 Google Fonts」改为**自托管**（`src/styles/fonts.css` 的
+       `@font-face` + `public/fonts/*.woff2`，经 `src/app/bootstrap.ts` 进入口 CSS chunk；动因见
+       index.html 注释：跨域样式表是渲染阻塞，且 fonts.googleapis.com 在中国大陆不可达）。
+       判据随之从「HTML 里有那两条 link」翻成「不得退回那条链路」——两条断言守的是同一件事的两端。 */
+    expect(html, 'index.html 不得直连 Google Fonts 样式表（跨域渲染阻塞 + 大陆不可达）')
+      .not.toContain('fonts.googleapis.com');
+    expect(html, 'index.html 不得残留已下线的 Google Fonts preconnect（死声明）')
+      .not.toContain('fonts.gstatic.com');
 
     const cssDir = 'src/styles';
-    const offenders = readdirSync(cssDir)
-      .filter((f) => f.endsWith('.css'))
-      .filter((f) => /^\s*@import\b/m.test(readFileSync(join(cssDir, f), 'utf8')));
+    const cssFiles = readdirSync(cssDir).filter((f) => f.endsWith('.css'));
+    const offenders = cssFiles.filter((f) => /^\s*@import\b/m.test(readFileSync(join(cssDir, f), 'utf8')));
     expect(offenders, 'CSS 内不得有 @import（串行阻塞字体加载）').toEqual([]);
+    /* 载体必须真实存在：字体声明文件里要有同源 `/fonts/*.woff2` 与两个字体族。
+       只断言「没有旧链路」会放过「字体整体消失」这一形态（那时页面会静默退回系统字体）。 */
+    const fontCss = readFileSync(join(cssDir, 'fonts.css'), 'utf8');
+    expect(fontCss, '字体声明应为同源自托管 woff2').toMatch(/src:\s*url\(\/fonts\/[^)]+\.woff2\)/);
+    for (const family of ['IBM Plex Mono', 'Noto Sans SC']) {
+      expect(fontCss, `自托管声明缺字体族 ${family}`).toContain(`font-family: '${family}'`);
+    }
 
     await page.goto(PAGE);
     const fonts = await page.evaluate(async () => {
