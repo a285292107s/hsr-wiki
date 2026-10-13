@@ -246,7 +246,36 @@ async function afterSkeletonGone(page: Page, timeout = 5_000): Promise<void> {
   );
 }
 
-/** 首屏稳定：字体就绪 + 骨架退场 + 两帧绘制。a11y 扫描与像素基线取值前必须调用（骨架阶段取值会误报）。
+/**
+ * 等待**路由视图真的挂载**（懒加载 chunk 执行完并渲染出页面根）。
+ *
+ * 为什么必须有这一步：`#app` 里先只有外壳（SidebarNav + ToastHost），视图 chunk 到达前
+ * **既没有骨架也没有正文**——此时「无 `.nk-skeleton`」是**空真**，只查它会立刻通过，
+ * 随后的取值拿到 null（CI 实测：骨架检查通过 24ms 后取值，`/endgame/maze` 的 note 链接还不存在；
+ * 实测 DOM 形态：挂载前 `#app` 子节点 = `nav.ui-sidebar` + `div.nk-toast-container`、正文 165 字符、
+ * 标题仍是站点默认；挂载后多出视图根、正文数千字符）。
+ *
+ * 判据 = `#app` 出现**非外壳**子节点。外壳清单（`SHELL_OWNED`）新增成员时必须同步这里，
+ * 否则新外壳元素会被误判成视图（退化成空真）。超时不失败：页面缺陷由用例自己的断言暴露。
+ */
+const SHELL_OWNED = ['.ui-sidebar', '.nk-toast-container'];
+
+export async function waitForViewMounted(page: Page, timeout = 10_000): Promise<void> {
+  await page
+    .waitForFunction(
+      (shell: string[]) => {
+        const app = document.getElementById('app');
+        if (!app) return false;
+        return [...app.children].some((el) => !shell.some((s) => el.matches(s)));
+      },
+      SHELL_OWNED,
+      { timeout },
+    )
+    .catch(() => {});
+}
+
+/** 首屏稳定：字体就绪 + **视图挂载** + 骨架退场 + 两帧绘制。a11y 扫描与像素基线取值前必须调用
+ *  （骨架阶段取值会误报）。
  *  **字体等待不能只查 `document.fonts.status`**：入口 CSS 的 `@font-face` 尚未应用（或首屏还没有对应文本）
  *  时它已经是 `'loaded'`，测量就落在**回退字体**的几何上——CI 实测两次假红：首页被回退字宽撑出
  *  `scrollable-region-focusable`、`shell.spec` 的字体可用性断言为假。故显式 `load()` 两个族的样本文本
@@ -268,6 +297,7 @@ export async function waitForSettled(page: Page): Promise<void> {
     )
     .catch(() => {});
   await page.waitForFunction(() => document.fonts.status === 'loaded', undefined, { timeout: 5_000 }).catch(() => {});
+  await waitForViewMounted(page);
   await afterSkeletonGone(page, 5_000);
 }
 
