@@ -274,6 +274,59 @@ function clean(raw) {
     .trim();
 }
 
+/* 性别变体取支（镜像 src/lib/trailblazer.ts 的 pickGenderVariant）。
+   开拓者形态名在**只有 fr/de/pt** 的语言包里带官方 `{M#…}{F#…}` 标记，而**名字必须二选一**：
+   上面 `clean()` 的 `/\{[FM]#([^}]*)\}/g → '$1'` 是**把两支拼起来**（`PionnierPionnière`），
+   对描述文本是既定口径（被 src/lib/__tests__/format.test.ts 钉住），对名字却会造出一个不存在的词。
+   生成器不能 import TS，故就地镜像；两侧一致性由 tools/check-ai-endpoints.mjs 的
+   「角色名残留性别变体标记」断言兜住——漏改任一侧都会在快照里留下标记而被守卫拦下。 */
+const GENDER_VARIANT_RE = /\{([MF])#([^}]*)\}/g;
+
+function pickGender(text, gender) {
+  if (text == null || text === '') return text;
+  let matched = false;
+  const picked = String(text).replace(GENDER_VARIANT_RE, (_m, flag, body) => {
+    if ((flag === 'M' ? 'male' : 'female') === gender) {
+      matched = true;
+      return body;
+    }
+    return '';
+  });
+  if (matched) return picked;
+  /* 只带单支、且与当前性别不符：保留支内文本、丢掉标记——宁可显示另一性别的名字，也不让名字整段消失 */
+  return String(text).replace(GENDER_VARIANT_RE, '$2');
+}
+
+/** 开拓者判据（镜像 src/lib/trailblazer.ts）：id ≥8000 为开拓者形态，奇=男、偶=女。
+ *  **角色域**（`characters.json` 每个命途男女各一条）按条目自身 id 取支，与用户设置无关。 */
+const isTrailblazerId = (id) => Number(id) >= 8000;
+const genderOfId = (id) => (Number(id) % 2 === 0 ? 'female' : 'male');
+
+/** **货币战争域**每个命途只有一条（`id=8007` 带 `female_avatar_id=8008`），性别由用户设置决定；
+ *  快照无 localStorage ⇒ 取默认值，与「未改过设置的默认应用态」一致（与前端同一默认常量）。 */
+const SNAPSHOT_GENDER = 'female';
+
+/** 角色域形态名（`characters.json` 条目）：按条目自身 id 取支。非开拓者原样返回。 */
+function charName(entry) {
+  return isTrailblazerId(entry.id) ? pickGender(entry.name, genderOfId(entry.id)) : entry.name;
+}
+
+/** 货币战争域形态名（`currency/role.json` 条目）：按快照默认性别取支。非开拓者原样返回。 */
+function cwRoleName(entry) {
+  return isTrailblazerId(entry.id) ? pickGender(entry.name, SNAPSHOT_GENDER) : entry.name;
+}
+
+/** 角色详情页名：**先取支再 `clean()`**——`clean()` 的性别标记替换是把两支拼起来（`PionnierPionnière`），
+ *  对描述文本是既定口径、对名字却会造出一个不存在的词。回退用已取支的列表名，非开拓者行为与改动前逐字一致。 */
+function charDetailName(entry, raw) {
+  return clean(isTrailblazerId(entry.id) ? pickGender(raw, genderOfId(entry.id)) : raw) || charName(entry);
+}
+
+/** 货币战争角色详情页名：同上，性别按快照默认值取支。 */
+function cwRoleDetailName(entry, raw) {
+  return clean(isTrailblazerId(entry.id) ? pickGender(raw, SNAPSHOT_GENDER) : raw) || cwRoleName(entry);
+}
+
 /** 单个 #N[tag]% 占位符取值（对照 src/lib/format.ts fmtVal；取值口径必须与前端一致） */
 function fmtParam(value, tag, pct) {
   if (value == null || Number.isNaN(Number(value))) return null;
@@ -769,11 +822,11 @@ function characterPages(ctx) {
     if (at !== bt) return at - bt;
     return Number(b.id) - Number(a.id);
   });
-  const links = ordered.map((c) => ({ name: c.name, href: `/character/${c.id}` }));
+  const links = ordered.map((c) => ({ name: charName(c), href: `/character/${c.id}` }));
   const title = `${CATALOG_TITLE['/character']()} - ${SITE_NAME}`;
   const summaryPlain = uiT('snapshot.sum.character', '{site}角色图鉴：共 {n} 名角色，含稀有度、命途、属性与技能档案。', { site: SITE_NAME, n: ordered.length });
   const items = ordered.map((c) => ({
-    name: c.name,
+    name: charName(c),
     href: `/character/${c.id}`,
     meta: `${starText(c.rarity)} · ${ctx.elemNames.get(c.element) || c.element} · ${ctx.pathNames.get(c.path) || c.path}`,
   }));
@@ -793,7 +846,7 @@ function characterPages(ctx) {
 
   ordered.forEach((entry, idx) => {
     const d = readJson(`characters/${entry.id}.json`);
-    const name = clean(d.name) || entry.name;
+    const name = charDetailName(entry, d.name);
     const route = `/character/${entry.id}`;
     const stats = d.stats || {};
     const statKey = stats['6'] ? '6' : Object.keys(stats).map(Number).filter((k) => !Number.isNaN(k)).sort((a, b) => b - a)[0];
@@ -892,7 +945,7 @@ function lightconePages(ctx) {
   const links = ordered.map((c) => ({ name: c.name, href: `/lightcone/${c.id}` }));
   // 适配角色的名字来源：converter 只给 id（反向索引），名字在角色列表
   const charNames = new Map(
-    readJson('characters.json').filter((c) => c.name).map((c) => [String(c.id), clean(c.name)]),
+    readJson('characters.json').filter((c) => c.name).map((c) => [String(c.id), clean(charName(c))]),
   );
   const summaryPlain = uiT('snapshot.sum.lightcone', '{site}光锥图鉴：共 {n} 把光锥，含稀有度、命途、技能效果与晋阶属性。', { site: SITE_NAME, n: ordered.length });
   const items = ordered.map((c) => ({
@@ -1531,7 +1584,7 @@ function currencyHubPages(ctx) {
   const sections = [];
   const ldEntries = [];
   if (newRoles.length) {
-    const items = newRoles.map((r) => ({ name: r.name, href: `/currency/role/${r.id}`, meta: esc(uiT('snapshot.costLabel', '{n} 费', { n: r.rarity })) }));
+    const items = newRoles.map((r) => ({ name: cwRoleName(r), href: `/currency/role/${r.id}`, meta: esc(uiT('snapshot.costLabel', '{n} 费', { n: r.rarity })) }));
     sections.push({ title: `${ui('catalog.character.title', '角色图鉴')}（${items.length}）`, html: linkList(items, true) + snapMore('/currency/role', ui('catalog.character.title', '角色图鉴')) });
     ldEntries.push(...items);
   }
@@ -1563,11 +1616,11 @@ function currencyHubPages(ctx) {
 
 function currencyRolePages(ctx) {
   const roles = readJson('currency/role.json').roles || [];
-  const links = roles.map((r) => ({ name: r.name, href: `/currency/role/${r.id}` }));
+  const links = roles.map((r) => ({ name: cwRoleName(r), href: `/currency/role/${r.id}` }));
   const chargeText = (r) => (r.charge_type || []).map((c) => cwChargeLabel(c)).join(' · ');
   const summaryPlain = uiT('snapshot.sum.cwRole', '{site}货币战争角色图鉴：共 {n} 名可招募角色，含费用、前后台定位与羁绊。', { site: SITE_NAME, n: roles.length });
   const items = roles.map((r) => ({
-    name: r.name,
+    name: cwRoleName(r),
     href: `/currency/role/${r.id}`,
     meta: [esc(uiT('snapshot.costLabel', '{n} 费', { n: r.rarity })), esc(cwFbLabel(r.front_back_type)), esc(chargeText(r))].filter(Boolean).join(' · '),
     desc: txtSafe((r.traits || []).map((t) => t.name).filter(Boolean).join('、'), null, 200),
@@ -1588,7 +1641,7 @@ function currencyRolePages(ctx) {
 
   roles.forEach((entry, idx) => {
     const d = readJson(`currency/role/${entry.id}.json`);
-    const name = clean(d.name) || entry.name;
+    const name = cwRoleDetailName(entry, d.name);
     const route = `/currency/role/${entry.id}`;
     const starKeys = Object.keys(d.stars || {}).sort((a, b) => Number(a) - Number(b));
     /**
@@ -1820,7 +1873,7 @@ function currencyTraitPages(ctx) {
         {
           title: ui('ctrait.sec.members', '羁绊成员'),
           html: members.length
-            ? linkList(members.map((m) => ({ name: m.name, href: `/currency/role/${m.id}`, meta: esc(uiT('snapshot.costLabel', '{n} 费', { n: m.rarity })) })))
+            ? linkList(members.map((m) => ({ name: cwRoleName(m), href: `/currency/role/${m.id}`, meta: esc(uiT('snapshot.costLabel', '{n} 费', { n: m.rarity })) })))
             : '',
         },
       ],

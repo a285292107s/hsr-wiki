@@ -1,5 +1,5 @@
 
-import { pathLabel } from '../../../lib/enum-labels';
+import { elemLabel, pathLabel } from '../../../lib/enum-labels';
 import { activeHref } from '../../../lib/i18n/active';
 import { escHtml, avatarShopIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
@@ -7,11 +7,6 @@ import { loadLocalCharacterList } from '../../../services/api';
 import { getSavedTrailblazerGender, isTrailblazerId, trailblazerGenderOfId } from '../../../lib/trailblazer';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import { STAR_SVG } from './shared';
-
-const ELEM_NAMES: Record<string, string> = {
-  fire: 'Fire', ice: 'Ice', thunder: 'Thunder', wind: 'Wind',
-  quantum: 'Quantum', imaginary: 'Imaginary', physical: 'Physical',
-};
 
 export const characterPage: CatalogPageConfig = {
   id: 'character',
@@ -71,7 +66,7 @@ export const characterPage: CatalogPageConfig = {
         key: 'element', labelKey: 'catalog.filter.element',
         options: [
           { val: '', labelKey: 'catalog.all' },
-          ...elems.map((e) => ({ val: e, label: ELEM_NAMES[e] || e, icon: elemIconMap[e] })),
+          ...elems.map((e) => ({ val: e, label: elemLabel(e), icon: elemIconMap[e] })),
         ],
       },
       {
@@ -85,7 +80,10 @@ export const characterPage: CatalogPageConfig = {
     ];
   },
   renderCard(item, i) {
-    const stars = '★'.repeat(Number(item.rarity) || 5);
+    /* 稀有度飘带内容 = `★N`（不是 `★`×N）：带身只有一条、宽度随卡等比缩放，
+       5 个 `★` 在 116px 卡上会挤成噪点且必然越出带身；数字是无语言差异的通用符号，
+       在 13 种语言下宽度几乎不变（`★` 与数字都取自 HUD 字体，见 `__stars-txt`）。 */
+    const starLabel = `★${Number(item.rarity) || 5}`;
     const element = String(item.element || '');
     const path = String(item.path || '');
     const avatarItem = String(item.avatar || '');
@@ -99,18 +97,21 @@ export const characterPage: CatalogPageConfig = {
     return `<a class="nk-idx-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" title="${escHtml(item.name)}" style="--i:${i}">
     <span class="nk-idx-card__portrait">
       ${avatar}
+      <span class="nk-idx-card__stars" aria-hidden="true"><span class="nk-idx-card__stars-txt">${starLabel}</span></span>
     </span>
     <span class="nk-idx-card__body">
       <span class="nk-idx-card__name-row">
         <span class="nk-idx-card__name">${escHtml(item.name)}</span>
-        <span class="nk-idx-card__stars" aria-hidden="true">${stars}</span>
       </span>
       <span class="nk-idx-card__meta">
-        ${item.elemImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.elemImg)}" alt="">` : ''}
-        <span>${ELEM_NAMES[element] || element}</span>
-        <span class="nk-idx-card__sep">·</span>
-        ${item.pathImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.pathImg)}" alt="">` : ''}
-        <span>${pathLabel(path)}</span>
+        <span class="nk-idx-card__tag">
+          ${item.elemImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.elemImg)}" alt="">` : ''}
+          <span class="nk-idx-card__tag-text">${escHtml(elemLabel(element))}</span>
+        </span>
+        <span class="nk-idx-card__tag">
+          ${item.pathImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.pathImg)}" alt="">` : ''}
+          <span class="nk-idx-card__tag-text">${escHtml(pathLabel(path))}</span>
+        </span>
       </span>
     </span>
   </a>`;

@@ -3,12 +3,37 @@ import type { CharacterData, LocalCharList, NameCache, SkillAnimationsDb } from 
 import { loadLocalJSON, singletonLocalData } from './local';
 import { loadLocalLightCones } from './items';
 import { loadLocalRelicSets } from './relics';
-/** 角色列表（共享单例：只请求一次，失败自动重置允许重试） */
-export const loadLocalCharacterList = singletonLocalData<LocalCharList>('characters.json');
+import { isTrailblazerId, pickGenderVariant, trailblazerGenderOfId } from '../../lib/trailblazer';
 
-export function loadLocalCharacter(charId: string): Promise<CharacterData> {
+/* 开拓者形态名取支：官方语言包里这个名字带性别变体标记 `{M#…}{F#…}`（实测 13 语言中**仅 fr/de/pt**
+   的双支；其余 10 语言单支、本函数原样返回）。取支依据是**条目自身的 id**（奇数=男、偶数=女）而不是
+   用户设置——`8002` 这个条目本身**就是**女性形态，两者恒等（列表按设置过滤后只会留下相符的那一个），
+   但用条目自身性别能让取支与缓存维度、与构建期（预渲染无 localStorage）都解耦。
+   放在取数边界而不是各展示面：列表卡、详情 `<h1>`、`document.title`、配装里的队友名全部经此取数，
+   一处修好即全覆盖，避免同一个判据在 4 个视图里各写一遍（`lib/trailblazer.ts` 的 helper 为唯一实现）。 */
+function fixTrailblazerName<T extends { id: number | string; name: string }>(row: T): T {
+  if (!isTrailblazerId(row.id)) return row;
+  const name = pickGenderVariant(row.name, trailblazerGenderOfId(row.id));
+  return name === row.name ? row : { ...row, name };
+}
+
+/** 角色列表（共享单例：只请求一次，失败自动重置允许重试） */
+const charList = singletonLocalData<LocalCharList>('characters.json');
+
+export function loadLocalCharacterList(): Promise<LocalCharList> {
+  /* 取支在此处 map：底层单例已保证只请求一次，map 是 98 条量级的纯内存操作。
+     返回新对象而非就地改，避免污染缓存里的那份（缓存按语言共享，就地改会让二次调用叠加处理）。 */
+  return charList().then((list) => list.map(fixTrailblazerName));
+}
+
+export async function loadLocalCharacter(charId: string): Promise<CharacterData> {
   // 详情走请求缓存（内存 → in-flight 去重 → 网络）：二次进入免网络往返
-  return loadLocalJSON<CharacterData>(`characters/${charId}.json`, `char_${charId}`);
+  const d = await loadLocalJSON<CharacterData>(`characters/${charId}.json`, `char_${charId}`);
+  /* 详情文件的形状里**没有** `id` 字段（见 public/data/cn/characters/8007.json 首键即 `name`），
+     故取支判据用调用方给的 charId——它同时是文件名与条目 id，与列表域同源。 */
+  if (!isTrailblazerId(charId)) return d;
+  const name = pickGenderVariant(d.name, trailblazerGenderOfId(charId));
+  return name === d.name ? d : { ...d, name };
 }
 
 /** 技能动画（米游社 Wiki 抓取数据；共享单例） */

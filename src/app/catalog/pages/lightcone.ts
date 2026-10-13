@@ -68,7 +68,8 @@ export const lightconePage: CatalogPageConfig = {
     ];
   },
   renderCard(item, i) {
-    const stars = '★'.repeat(Number(item.rarity) || 5);
+    /* 稀有度飘带内容 = `★N`（同 character.ts：一条带身放不下 `★`×N，且数字无语言差异）。 */
+    const starLabel = `★${Number(item.rarity) || 5}`;
     const path = String(item.path || '');
     const skillName = String(item.skillName || '');
     /* 卡名放宽为 2 行后仍可能被 clamp 省略（P1），全文挂卡根 `title` 复原（同 character.ts）。 */
@@ -77,8 +78,8 @@ export const lightconePage: CatalogPageConfig = {
         <img class="lc-avatar" src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
         <div class="nk-sk nk-sk--shimmer nk-lc-card__shimmer" aria-hidden="true"></div>
         ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${pathLabel(path)}"></div>` : ''}
+        <span class="nk-lc-card__stars" aria-hidden="true"><span class="nk-lc-card__stars-txt">${starLabel}</span></span>
         <div class="nk-lc-card__info">
-          <span class="nk-lc-card__stars">${stars}</span>
           <span class="nk-lc-card__name">${escHtml(item.name)}</span>
           ${skillName ? `<span class="nk-lc-card__skill" title="${escHtml(skillName)}">${escHtml(skillName)}</span>` : ''}
         </div>

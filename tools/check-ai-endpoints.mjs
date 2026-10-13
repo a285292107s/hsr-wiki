@@ -33,6 +33,26 @@ const DETAIL_CAP = 20;
 /** 快照正文里出现即判失败的游戏标记（契约 §3：必须剥成纯文本） */
 const GAME_MARKERS = ['<color=', '<unbreak>', '<u>'];
 /**
+ * 性别变体标记 `{M#…}{F#…}`：**只对「名字」面断言，禁止全局化**。
+ *
+ * 为什么不能进 GAME_MARKERS：该标记在**描述类文本**里合法保留——`stripTags`/`clean()` 的
+ * `/\{[FM]#([^}]*)\}/g → '$1'` 是把两支拼起来（被 `src/lib/__tests__/format.test.ts` 钉住），
+ * 实测 `achievement.html`(de/es/fr/pt/ru/jp/th) / `item.html` / `relic.html` 的 JSON-LD 条目名
+ * 本来就带标记（**另一种缺陷类别**，与开拓者名无关）。全局断言会因这些既有残留而假红。
+ *
+ * 为什么名字面必须断言：开拓者形态名在**仅 fr/de/pt** 的语言包里带该标记，而名字必须**二选一**
+ * （拼接会得到官方不存在的词 `PionnierPionnière`）。前端 `pickGenderVariant`
+ * （`src/lib/trailblazer.ts`）与生成器 `pickGender`（`tools/gen-ai-endpoints.mjs`）各自取支，
+ * 两侧漏改任一侧都会在下列页面留下标记 ⇒ 本断言即两侧一致性的机械兜底。
+ *
+ * 覆盖页：角色目录 / 角色详情 / 货币战争角色目录 / 货币战争角色详情 / 货币战争羁绊详情
+ * （羁绊详情列成员名，同样来自 `currency/role.json`）。**必须带可选语言前缀**：缺陷只出现在
+ * fr/de/pt 的分层快照（`de/character.html`），漏掉前缀就只扫到 cn 的 12 个页面——而那些页面
+ * 从来不带标记，断言会永远为绿（本守卫首版即踩此坑，由负向注入测试发现）。
+ */
+const GENDER_MARKER_RE = /\{[MF]#[^}]*\}/;
+const GENDER_MARKER_PAGE_RE = /^(?:[a-z]{2,3}\/)?(?:character(?:\.html|\/\d+\.html)|currency\/role(?:\.html|\/\d+\.html)|currency\/trait\/\d+\.html)$/;
+/**
  * 未展开的参数占位符（契约 §3「参数展开保真」/ §6.3）：如 `#1[i]`、`#2[f1]%`——必须由 fillParams 展开，
  * 缺参数时应整段省略。字面 `#81`（无 `[..]`）与 `{TEXTJOIN#61}` 不匹配本正则，必须放行。
  */
@@ -562,6 +582,21 @@ let sitemapCount = -1;
       if (rawScan.includes(marker) || text.includes(marker)) add(`正文残留游戏标记 ${marker}`);
     }
     if (rawScan.includes('\\n') || text.includes('\\n')) add('正文残留字面 \\n 游戏换行标记');
+
+    /* 名字面的性别变体标记（见 GENDER_MARKER_RE 注释）：只扫名字相关的页面，不全局化。
+       扫描面必须**保留 `<script>`**（JSON-LD 就在其中，而它正是爬虫读到的名字面）——
+       `rawScan` 与 `visibleText` 都把 script 剥掉了，用它们会漏判只在 JSON-LD 里残留的标记。
+       只排除 `<style>` 与 HTML 注释：CSS 里的 `{}` 块与注释里的模板片段都不是可见文本。 */
+    const relName = relative(PRERENDER, file).split(sep).join('/');
+    if (GENDER_MARKER_PAGE_RE.test(relName)) {
+      const nameScan = html
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+        .replace(/<!--[\s\S]*?-->/g, ' ');
+      const hit = nameScan.match(GENDER_MARKER_RE);
+      if (hit) {
+        add(`名字残留性别变体标记 ${hit[0]}——名字必须二选一取支（前端 pickGenderVariant / 生成器 pickGender）`);
+      }
+    }
 
     // 未展开参数占位符（契约 §3「参数展开保真」/ §6.3）：同一扫描面；字面 `#81`、`{TEXTJOIN#61}` 不匹配故放行
     const phText = text.match(PARAM_PLACEHOLDER_RE) || [];

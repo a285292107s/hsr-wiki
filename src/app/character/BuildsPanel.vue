@@ -51,7 +51,7 @@ const cones = computed(() =>
       name: itemName(id, props.nameCache, props.itemDb),
       img: cdnUri('lightconemediumicon', `${id}.webp`),
       rarity,
-      stars: '★'.repeat(rarity),
+      stars: `★${rarity}`,
       path,
       pathImg: path ? pathIconUrl(path) : '',
       /* 模板里是普通 `<a :href>`（不走 RouterLink 的 history base）⇒ 必须显式加语言前缀，
@@ -189,8 +189,8 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
           <div v-if="c.pathImg" class="nk-lc-card__badge">
             <img :src="c.pathImg" :alt="c.path">
           </div>
+          <span class="nk-lc-card__stars" aria-hidden="true"><span class="nk-lc-card__stars-txt">{{ c.stars }}</span></span>
           <div class="nk-lc-card__info">
-            <span class="nk-lc-card__stars">{{ c.stars }}</span>
             <span class="nk-lc-card__name">{{ c.name }}</span>
           </div>
         </div>

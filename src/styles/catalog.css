@@ -137,6 +137,10 @@
 }
 .nk-idx-card__portrait {
   display: block;
+  /* `position: relative` 只为给星标角标（`__stars`）当包含块——角标必须锚在**立绘**上而不是文字层上：
+     文字层自身是绝对定位，若角标留在其中，`top` 会以文字层高度为基准（文字层随语言变高 ⇒ 角标位置
+     随语言漂移）。锚到立绘后角标位置与语言、与文字层高度完全解耦。 */
+  position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   background: color-mix(in srgb, var(--blk-900) 55%, transparent);
@@ -155,28 +159,37 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 34px 12px 11px;
+  padding: 26px 12px 10px;
   background: linear-gradient(to top, color-mix(in srgb, var(--blk-950) 92%, transparent) 0%, color-mix(in srgb, var(--blk-900) 62%, transparent) 34%, transparent 84%);
 }
+/* 卡名行：星标已移出文字流（见 `__stars` 的立绘角标），故本行只剩名字一项。
+   **保留这一层结构**而不是把名字直接提到文字层：`__name-row` 是 `__body` 与 `__name` 之间的
+   一个可独立换行/对齐的层，删掉它会让 `.nk-idx-card__name` 的 `max-width: 100%` 失去约束对象
+   （`__body` 有 12px 内距，名字直接作为 flex 子项会按 max-content 撑到内距外）。
+   `display: block` 而非 flex：单子项下 flex 只剩「撑满 + 收缩」两件事，而块级元素天然满足，
+   且省掉 `flex-wrap` 在 `flex: 1 1 auto` 上的隐式行为（星标在时那才是必需的，见下条注释）。 */
 .nk-idx-card__name-row {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+  display: block;
   min-width: 0;
 }
 /* 卡主名称（P1）：单行 `nowrap + ellipsis` 会把**区分性后缀**切掉——实测 1280 档 de 下
    `Der erste Tag meines neuen Lebens` 在 121px 里只剩前半、`Dan Heng – Permansor Terrae`
    `226 > 136`（+90px）；而 `Einladung des Galaktischen Reisend…` 与 `…Gelehrten` 单行读起来一样。
    放宽为 2 行（卡主名称的处置：截断到 2 行仍保留区分性片段）+ `overflow-wrap: break-word` 让 de/ru 的复合词能断，
-   并用 `title`（见 character.ts / lightcone.ts / relic.ts 的卡根）保留全文可访问名。 */
+   并用 `title`（见 character.ts / lightcone.ts / relic.ts 的卡根）保留全文可访问名。
+   `line-height: 1.25` 与 `.nk-lc-card__name` 同值（A4 设计系统一致性：同类元素跨页同规格）——
+   此前这里**不声明**行高，继承 `__body` 的 `1.5`：2 行时白占 0.5 行高（实测 13 语言 × 6 断点
+   最坏文字层 137 → 132.5px），而多出来的行距**不增加可读性**，只把卡名往暗幕的透明区推。
+   取值依据是实测（`temp/char-final2-ab.mjs`）：13 语言 × 6 断点，`inkClip` 恒为 0（该值不会造成
+   墨迹纵向裁切，因为 clamp 元素被 e2e 的 `!isClamp` 判据排除），而 `nameScrim%` 由 51% 降至 52%
+   （卡名墨迹中心落在暗度 ≥62% 的区间内，可读性不变或更好）。 */
 .nk-idx-card__name {
-  flex: 1;
-  min-width: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   font-size: var(--nk-fs-5);
   font-weight: 700;
+  line-height: 1.25;
   letter-spacing: 0.02em;
   color: var(--text-bright);
   text-shadow: 0 1px 6px rgba(0,0,0,0.6);
@@ -187,15 +200,94 @@
   transition: color var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-idx-card:hover .nk-idx-card__name { color: var(--metric-val); }
-.nk-idx-card__stars {
-  flex: none;
-  font-size: var(--nk-fs-1);
-  letter-spacing: 0.06em;
-  line-height: 1;
-  color: var(--rarity-5);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+/* ═══ 稀有度飘带（斜向折角角标）：角色卡与光锥卡共用 ═══
+   立绘右上角一条 45° 斜带，带内 `★N` 沿带身方向排布；带身两端被立绘的上边与右边切断，
+   形成折角形态。两卡差异只在「锚点元素」与「稀有度色来源」，故几何只写一处。
+   ── 为什么不是「旋转带身」──
+   把带身 `rotate(45deg)` 后，**变换后的包围盒会顶大祖先的 scrollWidth**，而立绘是
+   `overflow: hidden` ⇒ 命中 e2e/layout-i18n-overflow.spec.ts 判据①（横向硬裁切：`overflowX`
+   为 hidden/clip 且 `scrollWidth > clientWidth` 且无 ellipsis/clamp 且文本 ≥2 字），实测报
+   `portrait +40px "★5"`。给中间层加 `overflow: clip` 只是把失败从立绘转移到中间层
+   （`clip-path` 既不产生滚动溢出区、也不阻止后代溢出向上传播）。
+   故**带身盒与文字盒都保持轴对齐**：斜向形状由 `clip-path: polygon()` 切出，只有带内文字旋转；
+   两盒都不出立绘盒 ⇒ scrollWidth 不涨（4 档卡宽实测，见交付记录）。
+   ── 几何推导 ──
+   带身盒是与立绘右上角重合的正方形，边长 `--rb-box`。记边长为 S，带身与对角线平行，两条边线为
+   y = x - S + m1 与 y = x - S + m2，在盒内的四点为 (S-m2, 0) (S-m1, 0) (S, m1) (S, m2)。
+   取 m1 = 16%S、m2 = 52%S：带身中心 = 四点均值 = (S - (m1+m2)/4, (m1+m2)/4) = (83%S, 17%S)，
+   即文字锚点；文字沿带身方向 ⇒ `rotate(45deg)`。
+   盒边长取 `clamp(56px, 62%, 104px)` 而**不是**纯百分比：纯百分比下带身垂直宽随卡宽线性增长，
+   而字号受层级约束有上限（名字必须仍是卡上最大的字）⇒ 300px 卡上带身宽 53px 而文字只有 12px，
+   填充率掉到 22%（116px 卡上是 48%），「跨尺寸节奏一致」当场不成立。加 px 上限后填充率收敛到
+   49%–55%（`temp/ribbon-params.mjs` 实测）：上限 104px 的作用是把带身宽度也钉住，让「字号已触顶
+   而带身仍在变宽」这一段不再发生。
+   ── 配色与字号 ──
+   带身填充 = 稀有度色（5★ 金 / 4★ 紫 / 3★ 蓝），文字取 `--blk-900` 深墨：深墨对三档色的对比度
+   实测 7.78:1（3★ 蓝）/ 5.26:1（4★ 紫）/ 11.85:1（5★ 金），均过正文 4.5:1 门禁
+   （`temp/ribbon-contrast.mjs`；该配对不在 `check-contrast.mjs` 的覆盖范围内，故单列取证）。
+   字号 `clamp(9px, 13cqw, var(--rb-fs-max, 12px))`：`cqw` 以带身盒宽为基准
+   ⇒ 与卡宽等比；下限 9px 保证 320 档最小卡（104px）上仍可辨；上限 12px 由层级反推——
+   最紧的是光锥卡名 `--nk-fs-4` = 13.12px，飘带必须留在它之下。`--rb-fs-max` 供上下文收窄
+   （BuildsPanel 卡名只有 `--nk-fs-3` = 11.52px，故该处收到 10px）。
+   `pointer-events: none`：纯装饰，点击必须落到卡链接上。 */
+.nk-idx-card__stars,
+.nk-lc-card__stars {
+  --rb-box: clamp(56px, 62%, 104px);
+  --rb-m1: 16%;
+  --rb-m2: 52%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 6;
+  width: var(--rb-box);
+  aspect-ratio: 1 / 1;
+  clip-path: polygon(
+    calc(100% - var(--rb-m2)) 0%,
+    calc(100% - var(--rb-m1)) 0%,
+    100% var(--rb-m1),
+    100% var(--rb-m2));
+  background: var(--rb-fill, var(--rarity-5));
+  container-type: inline-size;
+  pointer-events: none;
 }
-.nk-idx-card[data-rarity="4"] .nk-idx-card__stars { color: var(--rarity-4); }
+/* 带内文字：全卡唯一旋转的元素。其变换后包围盒必须仍落在带身盒内，
+   否则又会像「旋转带身」那样顶大立绘的 scrollWidth（`--rb-box` 与 m1/m2 的取值即受此约束）。
+   锚点即带身中心：`left` 取 `100% - (m1+m2)/4`、`top` 取 `(m1+m2)/4`（83% / 17%）。 */
+.nk-idx-card__stars-txt,
+.nk-lc-card__stars-txt {
+  position: absolute;
+  left: calc(100% - (var(--rb-m1) + var(--rb-m2)) / 4);
+  top: calc((var(--rb-m1) + var(--rb-m2)) / 4);
+  transform: translate(-50%, -50%) rotate(45deg);
+  font-family: var(--font-hud);
+  font-size: clamp(9px, 13cqw, var(--rb-fs-max, 12px));
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--blk-900);
+  white-space: nowrap;
+}
+/* 掠光：只动 `background-position`（不产生任何布局溢出），悬停时自左上掠向带尾。
+   与 reduced-motion 合并成一条媒体查询——分开写会出现「过渡已禁但位置仍跳变」的中间态。 */
+.nk-idx-card__stars::after,
+.nk-lc-card__stars::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 42%, color-mix(in srgb, white 62%, transparent) 50%, transparent 58%);
+  background-size: 320% 100%;
+  background-position: 140% 0;
+  transition: background-position var(--nk-dur-slow) var(--nk-ease-out);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .nk-idx-card:hover .nk-idx-card__stars::after,
+  .nk-lc-card:hover .nk-lc-card__stars::after { background-position: -60% 0; }
+}
+/* 稀有度色 → 带身填充。角色卡按自身 `data-rarity`（只有 4/5 两档）；
+   光锥卡复用既有的 `--lc-r`（3/4/5 三档已在下方声明），故无需再写三档。 */
+.nk-idx-card[data-rarity="4"] .nk-idx-card__stars { --rb-fill: var(--rarity-4); }
+.nk-lc-card__stars { --rb-fill: var(--lc-r, var(--rarity-5)); }
 /* 卡副行（元素 · 命途）改可换行：改前是 `nowrap` + `overflow: hidden` 且**无 ellipsis**，
    即真正的横向硬裁切（P0）——实测 1280 档 de 下 `Imaginary · Die Gelehrsamkeit` `210 > 185`
    （+25px）、`Quantum · Die Gelehrsamkeit` `207 > 185`，共 13 处；且因无 ellipsis，
@@ -207,16 +299,39 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 2px 6px;
   min-width: 0;
   font-size: var(--nk-fs-3);
+  line-height: 1.2;
   color: var(--text3);
   text-shadow: 0 1px 4px rgba(0,0,0,0.6);
   white-space: normal;
   overflow-wrap: break-word;
 }
+/* 每一项「图标 + 标签」是一个**不可拆的整体**（`.nk-idx-card__tag`）：改前 icon 与文字是
+   `__meta` 的直接子项，两者之间只有 `gap`，故行尾放不下时会出现「图标留在上一行、文字掉到下一行」
+   （`flex-wrap` 下每个直接子项都可独立换行）。包成整体后，换行单位从「图标 / 文字」升为「一项元信息」。
+   `max-width: 100%` 让它永远不越出卡右缘；`min-width: 0` 解除 `min-width: auto` 的内容宽度下限，
+   使 de/ru 的长复合词能在项内断行而不是把项撑破。 */
+.nk-idx-card__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+.nk-idx-card__tag-text { min-width: 0; overflow-wrap: break-word; }
 .nk-idx-card__icon { width: 13px; height: 13px; border-radius: 50%; flex: none; }
-.nk-idx-card__sep { color: var(--text3); opacity: 0.5; margin: 0 2px; }
+/* 分隔符挂在**前一项的尾**（`::after`）而不是后一项的首：折行时「行尾的 `·`」读作续行标记，
+   而「行首的 `·`」是 CJK 禁则里的行头禁则（实测折行时 100% 命中：en@390 38/38、ru@390 82/82、
+   de@390 74/74，见 `temp/char-sep-check.mjs`）。用 `:not(:last-child)` 兜住只有元素（无命途）的条目，
+   避免渲染出「量子 ·」这样没有后继的连接符。 */
+.nk-idx-card__tag:not(:last-child)::after {
+  content: '·';
+  color: var(--text3);
+  opacity: 0.5;
+  flex: none;
+}
 @keyframes nk-idx-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes nk-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes nk-card-fade { from { opacity: 0; } to { opacity: 1; } }
@@ -280,10 +395,13 @@
 .nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 5; border-radius: var(--nk-radius-2); transition: opacity var(--nk-dur-normal) var(--nk-ease-out); }
 .nk-lc-card__img img.loaded ~ .nk-lc-card__shimmer { opacity: 0; pointer-events: none; }
 .nk-lc-card__img img.lc-avatar { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; padding: 4px; transform: none; transform-origin: center center; }
-.nk-lc-card__badge { position: absolute; top: 8px; right: 8px; z-index: 4; }
+/* 命途图标从右上移到左上：右上已被稀有度飘带占用，两者重叠会互相压字。
+   左上是立绘的空白区（光锥图 `object-fit: contain` 居中，四角本就是底色），不遮挡主体。 */
+.nk-lc-card__badge { position: absolute; top: 8px; left: 8px; z-index: 4; }
 .nk-lc-card__badge img { width: 22px; height: 22px; border-radius: 50%; background: transparent; border: none; padding: 2px; box-shadow: 0 1px 5px rgba(0,0,0,0.35); }
 .nk-lc-card__info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 13px 12px 11px; background: linear-gradient(to top, color-mix(in srgb, var(--lc-r, var(--rarity-5)) 16%, transparent) 0%, color-mix(in srgb, var(--blk-900) 72%, transparent) 22%, transparent 64%); }
-.nk-lc-card__stars { font-size: var(--nk-fs-2); letter-spacing: 2px; color: var(--gold); text-shadow: 0 1px 3px rgba(0,0,0,0.7); line-height: 1; }
+/* 光锥卡的星标已改为立绘右上角飘带（见 `.nk-idx-card__stars` 的共用几何），
+   故这里不再有「文字流内星标」的规则；`__info` 因此少一行，星标不再随语言撑高文字层。 */
 /* 光锥名（P1 卡主名称）：单行 `nowrap + ellipsis` 是本 cluster 最大的一处截断——
    实测 1280 档 de/ru/th 共 91 条、390 档 103 条（**含中文 12 条**，故是既有布局缺陷而非纯译文问题），
    最严重 `Neue Überreste des versengenden Fegefeuers` `293 > 147`（+146px，省略掉 50% 的名字）。
@@ -645,7 +763,15 @@
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  .nk-idx-grid { --nk-grid-min: 150px; }
+  /* 平板档列宽下限 150 → 186：**档位倒挂**——768~1023 档的列宽（150 下限 ⇒ 768 档实测 153.5px）
+     比手机档（390 档 172px）还窄，即「屏幕更大、卡里的字更挤」。这是长译文在此档成片截断的直接成因：
+     实测 768 档 en 9 张 / pt 11 张 / de 9 张被 clamp，而同样这些卡在 390 档只 3~8 张。
+     186 与 ≥1024 档同值，取值依据是「两项元信息单行所需宽」：实测最宽的 `Imaginär · Die Gelehrsamkeit`
+     需 `184.2px`、`Электрический · Разрушение` 需 `193.8px`（`temp/char-card-fit.json`），
+     186 ⇒ 768 档落 3 列（实测列宽 209.3px），两项中较短的组合可同行、较长的折行。
+     副作用已核对：768 档列数由 4 → 3（每列更宽、卡更大），`e2e/layout-home.spec.ts` 只断言
+     「列数随可用宽单调不回跳」，768（3 列）> 320（1 列）仍成立。 */
+  .nk-idx-grid { --nk-grid-min: 186px; }
   .nk-lc-grid { --nk-grid-min: 170px; }
 }
 @media (min-width: 1024px) {
@@ -659,9 +785,19 @@
 @media (min-width: 1280px) {
   .nk-idx-grid { --nk-grid-min: 204px; }
 }
+/* 1536 档**只放大间距**，不钉死列数。
+   漂移修正（已登记）：此处原为 `grid-template-columns: repeat(8, 1fr)`，与紧邻注释「1280 / 1536
+   两档继续放大」自相矛盾——`repeat(8, 1fr)` 把列数写死为 8，于是 1440 → 1536 时列宽从 240.8px
+   **掉到** 154.8px（列数 5 → 8），即「屏幕更大、卡更小」，比手机档 390（172px）还窄。
+   实测代价：1536 档成为全断点最坏档（clamp 25 张、立绘最小 69.3px），且 `Dan Heng • Permansor
+   Terrae` 一类长名在此档才成片截断（en/es/vi/id 各 1 张）。
+   改回与其余档同源的 `repeat(auto-fill, minmax(var(--nk-grid-min), 1fr))` 后 1536 落 6 列、
+   列宽 212.3px（1440 的 5 列 240.8 → 1536 的 6 列 212.3，列数增、列宽减，但**不再低于相邻档的手机宽度**
+   且不再低于 1024 档的 201px），该档 clamp 25 → 16 张、立绘最小 69.3 → 146.1px。
+   列数序列（宽→窄）[2,3,4,5,6,7] 仍单调非递增，`e2e/layout-home.spec.ts:358-365` 的不变量保持成立。 */
 @media (min-width: 1536px) {
   .nk-idx-grid,
-  .nk-lc-grid { grid-template-columns: repeat(8, 1fr); --nk-grid-gap: 18px; }
+  .nk-lc-grid { --nk-grid-gap: 18px; }
 }
 @media (min-width: 1024px) {
 }
