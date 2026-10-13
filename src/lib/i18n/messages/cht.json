@@ -369,6 +369,7 @@
   "lc.sec.story": "卡面",
   "lc.superimpose": "疊影 {n}",
   "lc.superimposeAria": "疊影等級",
+  "meta.gameName": "崩壞：星穹鐵道",
   "meta.description": "崩壞：星穹鐵道遊戲資料 Wiki",
   "mob.appearCensus": "按關卡波次統計，被其他敵人召喚出場的關卡也算；同一個關卡只算一次，一個關卡名可能覆蓋多個難度檔或上下半場。無限波次玩法裡隨機抽取的編組不算關卡，不計入。",
   "mob.appearIn": "出現在",

@@ -3,23 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>HSR Wiki</title>
-    <meta property="og:site_name" content="HSR Wiki" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="HSR Wiki" />
+    <title>星铁档案馆</title>
     <meta name="description" content="崩坏：星穹铁道游戏数据 Wiki" />
+    <meta property="og:site_name" content="星铁档案馆" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="星铁档案馆" />
+    <meta property="og:description" content="崩坏：星穹铁道游戏数据 Wiki" />
+    <!-- 社交卡片：这里是 shell 的兜底值（catch-all 投递的 SPA 外壳），
+         每个快照由 tools/gen-ai-endpoints.mjs 按页 upsert title/description/url/locale。
+         og:image 的 origin 必须与生成器的 SITE_ORIGIN 同源——守卫会断言，改域时两处同改。 -->
+    <meta property="og:image" content="https://myhsr.wiki/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="星铁档案馆 · 崩坏：星穹铁道 Wiki" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="星铁档案馆" />
+    <meta name="twitter:description" content="崩坏：星穹铁道游戏数据 Wiki" />
+    <meta name="twitter:image" content="https://myhsr.wiki/og.png" />
     <meta name="google-site-verification" content="5PSScRDejeMnyjRVQTH2t05GY4tmJ2oG3-JMqQZL_cs" />
     <meta name="bytedance-verification-code" content="t6Gjfj4sIk3KBQ+40yv3" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#121214" />
     <meta name="color-scheme" content="dark" />
-    <!-- 字体：`preconnect` 提前建连，`<link>` 与主样式并行发现（此前用 CSS `@import`，是串行的）。 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
-    />
+    <!-- 字体：自托管（src/styles/fonts.css + public/fonts/*.woff2）。此前直引 Google Fonts 的
+         跨域 `<link rel="stylesheet">` 是**渲染阻塞**，且该域在中国大陆不可达——浏览器要等连接超时
+         才继续渲染，FCP/LCP 直接塌掉。字体文件与本站同源，随入口 CSS chunk 走内容哈希缓存。 -->
+    <!-- 图片与 Spine 走 CDN（主源 static.nanoka.cc、回退 cdn.jsdelivr.net）：
+         preconnect 省掉详情页 LCP 图上的 DNS+TLS 往返；回退源只在主源故障时才用，故只 dns-prefetch。 -->
+    <link rel="preconnect" href="https://static.nanoka.cc" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
     <style>html, body { margin: 0; background: #121214; }</style>
   </head>
   <body>

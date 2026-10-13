@@ -369,6 +369,7 @@
   "lc.sec.story": "カード絵",
   "lc.superimpose": "重畳 {n}",
   "lc.superimposeAria": "重畳レベル",
+  "meta.gameName": "崩壊：スターレイル",
   "meta.description": "崩壊：スターレイル ゲームデータ Wiki",
   "mob.appearCensus": "ステージのウェーブ単位で集計。他の敵に召喚されるステージも含む。同じステージは1回だけ数え、1つの名が複数の難易度や前半・後半を指すこともある。無限ウェーブのランダム編成はステージ扱いしない。",
   "mob.appearIn": "出現：",

@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../lib/format';
-import { SITE_NAME } from '../../lib/constants';
+import { pageTitle } from '../seo';
 import { propLabel } from '../../lib/currency-role';
 import { cwTraitCatKey, cwTraitQualityKey, cwCostKey } from '../../lib/enum-labels';
 import { usePageData } from '../composables/use-page-data';
@@ -53,7 +53,7 @@ watch(
   () => void run(),
   { immediate: true },
 );
-watch(data, (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; }, { immediate: true });
+watch(data, (d) => { if (d) document.title = pageTitle(d.name); }, { immediate: true });
 </script>
 
 <template>

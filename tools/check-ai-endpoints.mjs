@@ -80,14 +80,17 @@ const GENERATOR = resolveFromRoot(arg('generator', join('tools', 'gen-ai-endpoin
 
 const rel = (p) => relative(ROOT, p) || p;
 
-/* ─── SITE_ORIGIN 唯一事实源：生成器模块 ─── */
+/* ─── SITE_ORIGIN / OG_IMAGE 唯一事实源：生成器模块 ─── */
 let SITE_ORIGIN = null;
+/** 分享图的 URL 路径（生成器导出）→ 用它定位 dist 里的实际文件，避免在守卫里写死文件名 */
+let OG_IMAGE_PATH = '/og.png';
 let originError = null;
 try {
   if (!existsSync(GENERATOR)) throw new Error(`生成器文件不存在: ${rel(GENERATOR)}`);
   const mod = await import(pathToFileURL(GENERATOR).href);
   if (typeof mod.SITE_ORIGIN !== 'string') throw new Error('生成器未导出字符串常量 SITE_ORIGIN');
   SITE_ORIGIN = new URL(mod.SITE_ORIGIN).origin;
+  if (typeof mod.OG_IMAGE === 'string') OG_IMAGE_PATH = new URL(mod.OG_IMAGE).pathname;
 } catch (e) {
   originError = `无法从 ${rel(GENERATOR)} 读取 SITE_ORIGIN：${e.message}`;
 }
@@ -379,6 +382,35 @@ let sitemapCount = -1;
     entryScripts = scriptSrcs(shellHtml).sort();
     if (!defaultTitle) details.push(`${rel(SHELL)} 无 <title>，无法判定快照默认标题`);
     if (entryScripts.length === 0) details.push(`${rel(SHELL)} 无 <script src> 入口，无法校验快照入口一致性`);
+    /* 外壳承载 `og:image` 的静态兜底（catch-all 投递 SPA 外壳时也要有卡片图，
+       而外壳不经生成器注入）⇒ origin 必须与生成器同源，否则改域时两处漂移且无人报错。 */
+    const shellOg = (shellHtml.match(/<meta[^>]*property="og:image"[^>]*content="([^"]*)"/i) || [])[1] || '';
+    if (!shellOg) details.push(`${rel(SHELL)} 缺 og:image（外壳兜底值，需与生成器 OG_IMAGE 同源）`);
+    else if (!shellOg.startsWith(`${SITE_ORIGIN}/`)) details.push(`${rel(SHELL)} 的 og:image 非同源: ${shellOg}`);
+  }
+  /* og:image 指向的**文件本身**必须存在，且尺寸与 meta 里声明的 `og:image:width/height` 一致。
+     只断言标签不断言文件，删掉 public/og.png 也能全绿——而线上分享卡片会直接变空图。
+     尺寸从 PNG 头直接读（IHDR 宽高在固定偏移），不引入任何图像库。 */
+  const ogFile = join(DIST, OG_IMAGE_PATH);
+  if (!existsSync(ogFile)) {
+    details.push(`缺分享图 ${rel(ogFile)}（og:image 指向它，删了就是线上空图；重跑 node tools/gen-og-image.mjs）`);
+  } else if (existsSync(SHELL)) {
+    const shellForOg = readFileSync(SHELL, 'utf-8');
+    const declW = Number((shellForOg.match(/<meta[^>]*property="og:image:width"[^>]*content="(\d+)"/i) || [])[1]);
+    const declH = Number((shellForOg.match(/<meta[^>]*property="og:image:height"[^>]*content="(\d+)"/i) || [])[1]);
+    const buf = readFileSync(ogFile);
+    const isPng = buf.length > 24 && buf[0] === 0x89 && buf.toString('latin1', 1, 4) === 'PNG';
+    if (!isPng) {
+      details.push(`${rel(ogFile)} 不是 PNG（多平台不认 SVG/WebP 作为 og:image）`);
+    } else if (declW && declH) {
+      const w = buf.readUInt32BE(16);
+      const h = buf.readUInt32BE(20);
+      if (w !== declW || h !== declH) {
+        details.push(`分享图实际 ${w}×${h}，与声明的 og:image:width/height ${declW}×${declH} 不一致（平台会按声明裁剪）`);
+      }
+    } else {
+      details.push(`${rel(SHELL)} 缺 og:image:width/height 声明，无法校验分享图尺寸`);
+    }
   }
   if (snapshotFiles.length === 0) {
     details.push(`未发现任何快照: ${rel(PRERENDER)} 下 0 个 .html（先跑 node tools/gen-ai-endpoints.mjs）`);
@@ -519,6 +551,21 @@ let sitemapCount = -1;
       }
     }
 
+    /* 社交卡片 + 语言标注：分享预览靠 og:image，语言靠 og:locale 与 JSON-LD inLanguage。
+       三者的「语言/来源」必须都与 `<html lang>` / SITE_ORIGIN 同源——否则分享卡片会挂错域，
+       或富媒体声称自己是另一种语言（后者曾真发生：JSON-LD 的 inLanguage 曾硬编码 zh-CN）。 */
+    const langAttrAny = (html.match(/<html[^>]*\slang="([^"]*)"/i) || [])[1] || '';
+    const ogImage = (html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]*)"/i) || [])[1] || '';
+    if (!ogImage) add('缺 og:image（分享出去只有纯文字卡片）');
+    else if (!ogImage.startsWith(`${SITE_ORIGIN}/`)) add(`og:image 非同源: ${ogImage}`);
+    const twTag = (html.match(/<meta[^>]*name="twitter:card"[^>]*>/i) || [])[0] || '';
+    if (!twTag) add('缺 twitter:card');
+    else if (!twTag.includes('summary_large_image')) add(`twitter:card 必须是 summary_large_image，实际：${twTag}`);
+    const expectOgLocale = langAttrAny.replace('-', '_');
+    const ogLoc = (html.match(/<meta[^>]*property="og:locale"[^>]*content="([^"]*)"/i) || [])[1] || '';
+    if (!ogLoc) add('缺 og:locale');
+    else if (ogLoc !== expectOgLocale) add(`og:locale 为 ${ogLoc}，应与 <html lang> ${langAttrAny} 对应（${expectOgLocale}）`);
+
     /* 非 Han 语言的分层快照不得出现中文可见文本（品牌名 `星铁档案馆` 例外，站点名全语言统一）。
        硬断言会因数据侧个别遗留（如 `王棋关`）而红 ⇒ 取**棘轮**：基线缺失时按实测写入，
        之后只降不升（与语言包汉字棘轮同一手法）。 */
@@ -547,6 +594,35 @@ let sitemapCount = -1;
         add(`JSON-LD #${i + 1} JSON.parse 失败: ${e.message}`);
       }
     }
+
+    /* JSON-LD 的 inLanguage 必须与 `<html lang>` 同源。此前它硬编码 `zh-CN`，
+       于是 228 份语言前缀快照的富媒体信息全都声称自己是中文页（而页面正文是英/日/韩…），
+       而且这个错误**任何解析断言都查不出来**——JSON 完全合法。 */
+    if (lds.length > 0) {
+      try {
+        const graph = JSON.parse(lds[0].trim());
+        const nodes = graph['@graph'] || [graph];
+        const ldLangs = [...new Set(nodes.map((n) => n && n.inLanguage).filter(Boolean))];
+        if (!ldLangs.length) add('JSON-LD 缺 inLanguage（页面语言标注）');
+        else {
+          const badLang = ldLangs.filter((l) => l !== langAttrAny);
+          if (badLang.length) add(`JSON-LD inLanguage 为 ${badLang.join(', ')}，应与 <html lang> ${langAttrAny} 一致`);
+        }
+      } catch { /* 解析失败已在上面的断言里报过 */ }
+    }
+
+    /* `Article` 只允许出现在 `/voracity`（站点撰写的叙述性专题长文）。
+       数据条目页（光锥 / 遗器 / 敌对物种 / 终局赛季 / 货币战争条目）用 `Article` 等于
+       告诉机器「这是一篇资讯稿」，条目身份反而拿不到 ⇒ 必须走 WebPage + mainEntity。 */
+    const hasArticle = lds.length > 0 && (() => {
+      try {
+        const g = JSON.parse(lds[0].trim());
+        return (g['@graph'] || [g]).some((n) => n && n['@type'] === 'Article');
+      } catch { return false; }
+    })();
+    const isVoracityPage = /(^|\/)voracity\.html$/.test(String(file).split('\\').join('/'));
+    if (hasArticle && !isVoracityPage) add('JSON-LD 用 Article 描述数据条目页（应改用 WebPage + mainEntity）');
+    if (!hasArticle && isVoracityPage) add('/voracity 的 JSON-LD 应为 Article（它是叙述性专题，不是数据条目）');
 
     // 角色详情页的结构化数据形状（验收标准 B5）：必须是「角色实体」而不是「文章」。
     // 只查形状与必填项，不查具体取值（取值随数据变，锁死会假红）。

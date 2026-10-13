@@ -30,7 +30,7 @@ pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 
 pnpm preview   # 预览构建产物
 ```
 
-`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文七守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml`；逐份断言 title / canonical / 内链 / 中文字符数 / h1 / JSON-LD / 游戏标记 / 未展开参数占位符 `#\d+\[…\]` / **无未解析文本令牌 `$t:…`** / **无原始词典键名**（缺键时 vue-i18n 会把键名本身写进页面），并断言覆盖率。契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
+`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文七守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml`；逐份断言 title / canonical / 内链 / 中文字符数 / h1 / JSON-LD / 游戏标记 / 未展开参数占位符 `#\d+\[…\]` / **无未解析文本令牌 `$t:…`** / **无原始词典键名**（缺键时 vue-i18n 会把键名本身写进页面）/ **社交卡片**（`og:image` 同源 + `twitter:card` + `og:locale` 与 `<html lang>` 一致）/ **JSON-LD `inLanguage` 与 `<html lang>` 同源** / **`Article` 只允许出现在 `/voracity`**（数据条目页必须是 `WebPage` + `mainEntity`），并断言覆盖率。契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
 
 多语言相关三守卫可单独运行（契约见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md)）：
 
@@ -51,6 +51,33 @@ python tools/fill-ui-messages.py --check   # 只检查：官方译文是否与�
 ```
 
 同形多义必须人工指定义项（`OVERRIDE_HASH`）：如「命途」既有剧情义 `Fate` 又有界面义 `Path`，自动取键会取错义项。该脚本需要 vendor 文本表，故不进 `pnpm build` 的守卫链（CI 构建不带 vendor）。
+
+## 字体与分享图（生成物 · 手动执行，**不进 `pnpm build`**）
+
+字体与 `public/og.png` 都是**入库的构建产物**：构建只复制它们，不生成它们（生成要联网 / 要浏览器）。
+
+```bash
+node tools/fetch-fonts.mjs    # 自托管字体：抓 Google 的 unicode-range 分片 woff2 → public/fonts/ + src/styles/fonts.css（可重复执行，已存在的分片不重下）
+node tools/gen-og-image.mjs   # 社交分享图：无头浏览器渲染品牌卡 → public/og.png（1200×630）
+```
+
+`fetch-fonts.mjs` 的存在理由：`index.html` 不再引 `fonts.googleapis.com` —— 那条跨域样式表既**渲染阻塞**
+（FCP/LCP 要等它回来），又在中国大陆**不可达**（要等连接超时才继续渲染），而本站主受众正在大陆。
+改 `src/styles/tokens.css` 的字体栈（`--font-body` / `--font-hud`）后必须同步脚本里的 `FAMILIES` 并重跑，
+否则新字重静默回退系统字体——浏览器不报错，只有排版变了。
+
+`gen-og-image.mjs` 的色值与字体全部取自 `tokens.css` + `fonts.css`（脚本自己起本地静态服务喂给浏览器），
+**不在脚本里写颜色字面量**；主题改色或换字体后需重跑，否则分享图静默过期。版式依据外部技能
+`guizang-social-card-skill` 的 **Editorial Magazine × E-ink**（暗底结构）+ **M01 封面 recipe 的宽幅适配**
+（标题占左安全区、右半给系统视觉＝真 ledger）。它同时把可校验的中间产物写进 `temp/og-card/`
+（HTML + 复制来的 token/字体），因此可以借该技能自带的量化校验器量一遍：
+
+```bash
+node <skill>/validate-social-deck.mjs temp/og-card --style=editorial   # R1 溢出 / R4 最小字号 / R8 边界 / R9 标题间距
+```
+
+**联网**：显示字（Noto Serif SC）站点不使用，故不进 `public/fonts`，而是在生成期按 `text=` 抓恰好覆盖本卡
+字符的极小子集（几 KB，缓存在 `node_modules/.cache/og-card/`）。断网会**显式失败**，不会静默回退成系统字体。
 
 ## 测试
 

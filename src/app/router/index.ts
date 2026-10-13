@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw, type Router } from 'vue-router';
 import { ref } from 'vue';
-import { SITE_NAME } from '../../lib/constants';
+import { pageTitle } from '../seo';
 import { localeBaseFromPath } from '../../lib/i18n/locales';
 import { translate } from '../i18n';
 
@@ -211,7 +211,7 @@ export function createNkRouter(): Router {
         ? translate(key, Object.fromEntries(Object.entries(args).map(([n, k]) => [n, translate(k)])))
         : translate(key))
       : '';
-    document.title = title ? `${title} - ${SITE_NAME}` : SITE_NAME;
+    document.title = title ? pageTitle(title) : pageTitle();
   });
 
   /* 研究线调试台（Spine Lab 迁入主站，dev-only 注册）：

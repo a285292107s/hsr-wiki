@@ -369,6 +369,7 @@
   "lc.sec.story": "카드 일러스트",
   "lc.superimpose": "중첩 {n}",
   "lc.superimposeAria": "중첩 등급",
+  "meta.gameName": "붕괴: 스타레일",
   "meta.description": "붕괴: 스타레일 게임 데이터 위키",
   "mob.appearCensus": "스테이지 웨이브 기준 집계이며 다른 적이 소환한 스테이지도 포함합니다. 같은 스테이지는 1회만 세고, 한 이름이 여러 난이도나 전·후반을 포함할 수 있습니다. 무한 웨이브의 무작위 편성은 제외합니다.",
   "mob.appearIn": "출현:",

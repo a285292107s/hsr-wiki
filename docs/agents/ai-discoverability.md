@@ -55,7 +55,10 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 快照 = **构建后的 `dist/index.html` 原样复制**，再注入 5 项内容（顺序无关）：
 1. `<head>` 首部内联 `<script>document.documentElement.classList.add('js')</script>`；
 2. `<head>` 内 `<style>html.js #app > .nk-snapshot{display:none}</style>`；
-3. 覆盖 `<title>`、`<meta name="description">`、`<meta property="og:title">`、`<meta property="og:description">`、`<meta property="og:url">`，新增 `<link rel="canonical" href="{origin}{route}">`；
+3. 覆盖 `<title>`、`<meta name="description">`、og（`og:title` / `og:description` / `og:url` / `og:image` / `og:locale`）与 `twitter:*`（`card=summary_large_image` / title / description / image），新增 `<link rel="canonical" href="{origin}{route}">`；
+   - `og:image` 固定为**站点级** `public/og.png`（1200×630，生成器 `tools/gen-og-image.mjs`），不做每页一图；
+     `index.html` 另有一份同源静态兜底供 catch-all 投递的 SPA 外壳消费（守卫断言其 origin 与 `SITE_ORIGIN` 同源）。
+   - `og:locale` 取 `culture` 的下划线形（`zh_CN` / `en_US` / `ja_JP`），**必须与页面 `<html lang>` 同源**。
 4. 一段 `<script type="application/ld+json">`（见 §4）；
 5. `<div id="app">` 内注入 `<div class="nk-snapshot">…</div>`（见 §3）。
 
@@ -129,9 +132,13 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 
 每页一个 `<script type="application/ld+json">`，`JSON.parse` 必须成功（守卫断言）：
 
-- 目录页：`CollectionPage`（`name`/`url`/`inLanguage: zh-CN`/`isPartOf: WebSite`）+ `ItemList`（有详情路由的条目给 `url`）。
-- 详情页：`Article`（`headline`/`description`/`dateModified: synced_at`/`inLanguage`）+ `BreadcrumbList`。
-- 专题页（`/voracity`）：与详情页同构——`Article` + `BreadcrumbList`，**不**用 `CollectionPage` + `ItemList`：专题页不是目录，分区是异构条目的叙述性集合，写成 `ItemList` 等于把「收录清单」语义强加给它，与 §3「不收 `nk-snapshot__entry`」的规则自相矛盾。
+- 目录页：`CollectionPage`（`name`/`url`/`inLanguage`/`isPartOf: WebSite`）+ `ItemList`（有详情路由的条目给 `url`）。
+- 角色详情页：`WebPage` + `mainEntity` = `Person`（`@id` 供页面内引用；游戏属性走 `Person.characterAttribute`）。
+- **数据条目页**（光锥 / 遗器 / 敌对物种 / 终局赛季 / 终局玩法 / 货币战争角色与羁绊详情）：`WebPage`（`@id`/`name`/`description`/`dateModified`/`inLanguage`/`mainEntity`）+ `mainEntity: Thing` + `BreadcrumbList`。
+  - 条目类型一律 `Thing`：schema.org 没有「光锥 / 遗器 / 敌对物种」这类类型，自造类型机器不认（要挑 schema.org 有定义的属性）。
+  - **禁止用 `Article` 描述数据条目页**——那等于告诉机器「这是一篇资讯稿」，条目身份与属性都拿不到；`Article` 只允许出现在 `/voracity`（站点撰写的叙述性专题长文）。
+- 专题页（`/voracity`）：`Article` + `BreadcrumbList`，**不**用 `CollectionPage` + `ItemList`：专题页不是目录，分区是异构条目的叙述性集合，写成 `ItemList` 等于把「收录清单」语义强加给它，与 §3「不收 `nk-snapshot__entry`」的规则自相矛盾。
+- **`inLanguage` 按当前构建语言取 `languages.json` 的 `culture`**，与页面 `<html lang>`、`og:locale`（下划线形）三者同源。硬编码 `zh-CN` 会让 228 份语言前缀快照的富媒体信息全部自称中文页，而 JSON 完全合法——任何解析类断言都查不出来。
 - 理由写清：**富结果与实体消歧，不是 AI 引用杠杆**（Ahrefs 1,885 页 DiD 实测无引用提升，见 memory 文档）。
 
 ## 5. robots.txt（Lead 手写，提交入库）
@@ -156,6 +163,7 @@ origin 迁至自有域名 `myhsr.wiki` 后 DNS 归站方控制：GSC 应为 `myh
 1. `public/robots.txt` 存在、含上表 5 个 UA 组、`Disallow: /prerender/`、`Sitemap:` 与生成器 `SITE_ORIGIN` 同源。
 2. `dist/sitemap.xml` 为合法 URL set，`<loc>` 全为绝对 URL 且同源，无重复，URL 数 = 快照数 + 0（快照与 sitemap 一一对应），单文件未超 50,000。
 3. 每个 `dist/prerender/**/*.html`：`<title>` 非空且不等于站点默认标题、有 `<link rel="canonical">`（同源）、有 ≥1 个 `href="/`、去标签后中文字符 ≥ 80、`<h1>` 存在、JSON-LD `JSON.parse` 成功、无残留游戏标记、**无未展开参数标记 `#\d+\[[^\]]*\]`**（缺参数的字段必须整段省略，见 §3「参数展开保真」；字面 `#NN` 编号与 `{TEXTJOIN#…}` 不在此列）、入口 `<script src="/assets/…">` 与 **`dist/prerender/_shell.html`** 一致（`dist/index.html` 现在是 home 快照，不得再当外壳基线）。
+   - **社交卡片与语言标注**：每页必须有 `og:image`（同源）与 `twitter:card=summary_large_image`；`og:locale` 必须等于 `<html lang>` 的下划线形；JSON-LD 的 `inLanguage` 必须等于 `<html lang>`；`Article` 只允许出现在 `/voracity`（数据条目页出现即判红）；`prerender/_shell.html` 的静态 `og:image` 必须与 `SITE_ORIGIN` 同源；`og:image` 指向的**文件本身**必须存在且为 PNG、尺寸与 `og:image:width/height` 声明一致（只断言标签不断言文件，删掉图就是线上空卡片）。这些断言都做过「故意弄坏它」的反向验证。
    - 另：**`currency/item.html`（CW 装备）与 `currency/augment.html`（CW 投资策略）的可见文本不得含裸 `#N`**——该族数据条目携带 `params` 语义（见 §3），裸 `#N` 即占位符；**裸形态无法全局区分字面与占位符**（角色/成就/物品里的「天才俱乐部#81号会员」是上游字面，必须保留），故按页点名而非全局正则。**该断言只扫实体解码后的可见文本**（`html, body { background:#121214 }` 这类 shell 模板色值只出现在注释 / `<style>` / 内联属性里，按原始面断言会永久红）；原始面扫描须先剥 HTML 注释。**已知覆盖边界**：裸 `#N` 断言只点名上列两页——生成器侧已按「条目是否携带 `params`/`base_params`/`param_list`」通用判定（`hasParamSemantics`），若未来在**其它** params 语义族（如 `/currency/buff`）发现泄漏，须把该页加入点名表并复跑守卫。
 4. **覆盖率（文件级 + 条目级）**：① 每族生成文件数 = §2 表内**应用可见**条目数；② 12 个与数据一一对应的目录页，快照内 `<li class="nk-snapshot__entry">` 计数 = 同一可见条目数（防「静默漏条目」——生成器 map 中途异常/上限误用不会被文件数断言发现）；③ `/`、`/currency` 枢纽页断言条目数 ≥1（新版本必定有新条目；`release_version` / 赛季代际判据失效导致的静默空态必须拦住）；④ 单页族中 `/voracity`（专题页）只断言「无 `:id` 的路由各恰好 1 个快照文件」，**无条目级断言**——它不是目录、也不是枢纽页，正文分区不是收录条目集合（见 §3）；⑤ 反向断言：**专题页 `prerender/voracity.html` 的 `nk-snapshot__entry` 计数必须 = 0**（该类名未在此页登记，一旦有人把分区当目录收录清单来标即失败，避免异构条目静默变成覆盖率数字）。期望一律从数据 + 应用可见性判据**实时统计**，禁止写死数字。
 5. 汇总一行 `[PASS] …`/`[FAIL] …`，非零退出即失败。

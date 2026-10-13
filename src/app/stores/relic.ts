@@ -4,7 +4,7 @@ import {
   loadLocalRelicDetail, loadLocalRelicMainAffixes, loadLocalRelicSubAffixes, loadLocalRelicStories,
 } from '../../services/api';
 import { createDetailCore } from './detail-core';
-import { SITE_NAME } from '../../lib/constants';
+import { pageTitle } from '../seo';
 import { translate } from '../i18n';
 import type {
   LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
@@ -42,7 +42,7 @@ export const useRelicStore = defineStore('relic', () => {
       subAffixes.value = sub;
       stories.value = storyMap;
       return d;
-    }, { title: (d) => `${d.name} - ${SITE_NAME}` });
+    }, { title: (d) => pageTitle(d.name) });
   }
 
   function reset(): void {

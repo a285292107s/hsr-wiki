@@ -2,8 +2,8 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { userErrorDetail } from '../../lib/errors';
 import { useRoute } from 'vue-router';
-import { seasonPosterTabUrl } from '../catalog/pages/endgame';
-import { SITE_NAME } from '../../lib/constants';
+import { ENDGAME_MODES, seasonPosterTabUrl } from '../catalog/pages/endgame';
+import { pageTitle } from '../seo';
 import {
   loadLocalMazeList, loadLocalStoryList, loadLocalBossList, loadLocalPeakList,
   loadLocalEndgameGuide,
@@ -78,7 +78,10 @@ async function load(mode: string, id: string): Promise<void> {
     }
     data.value = entry;
     seasonIndex.value = keys.indexOf(id);
-    document.title = `${entry.zh} - ${SITE_NAME}`;
+    /* 玩法名进标题：快照侧同格式（gen-ai-endpoints 的 endgame-detail 用 `${entry} - ${mode} - …`），
+       少这一段会让执行 JS 的爬虫读到的 title 与无 JS 爬虫读到的快照 title 分叉。 */
+    const modeInfo = ENDGAME_MODES.find((m) => m.key === mode);
+    document.title = pageTitle(modeInfo ? `${entry.zh} - ${t(modeInfo.labelKey)}` : entry.zh);
     // 玩法说明同属「按需、不阻塞」：拿不到就回退站点工作名，不因此判页面失败
     loadLocalEndgameGuide()
       .then((g) => { guide.value = g; })

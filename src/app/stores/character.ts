@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref, toRaw } from 'vue';
 import { loadLocalCharacter, loadLocalBuildNames } from '../../services/api';
 import { getEnhancedKeys, getRenderData, validateCharData } from '../../lib/format';
-import { SITE_NAME } from '../../lib/constants';
+import { pageTitle } from '../seo';
 import { useAppStore } from './app';
 import { createDetailCore } from './detail-core';
 import type { CharacterData } from '../../services/types';
@@ -35,7 +35,7 @@ export const useCharacterStore = defineStore('character', () => {
       if (!isCurrent()) return d;
       app.mergeNames(names);
       return d;
-    }, { title: (d) => `${d.name} - ${SITE_NAME}` });
+    }, { title: (d) => pageTitle(d.name) });
   }
 
   function setEnhKey(k: string | null): void {

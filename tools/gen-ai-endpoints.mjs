@@ -21,13 +21,27 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 /** 站点源（快照 canonical / sitemap / JSON-LD 只用它） */
 export const SITE_ORIGIN = 'https://myhsr.wiki';
 
+/** 社交分享图（1200×630，由 tools/gen-og-image.mjs 生成并入库；全站共一张）。
+    `index.html` 里有一份同值的静态兜底（供 catch-all 投递的 SPA 外壳用），
+    守卫断言两者的 origin 与生成器同源。 */
+export const OG_IMAGE = `${SITE_ORIGIN}/og.png`;
+
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 /* 语言清单（单一事实源 = converter 的 languages.json，前端 locales.ts 由守卫与之对齐）。 */
 const LANG_REGISTRY = JSON.parse(readFileSync(join(ROOT, 'tools', 'converter', 'languages.json'), 'utf8'));
 const LOCALES = LANG_REGISTRY.languages.map((l) => ({ code: l.code, culture: l.culture }));
 const DEFAULT_LOCALE = LANG_REGISTRY.default;
+const DEFAULT_CULTURE = LOCALES.find((l) => l.code === DEFAULT_LOCALE)?.culture || 'zh-CN';
 let currentLocale = DEFAULT_LOCALE;
+
+/** `og:locale` 要 `语言_地区`（zh_CN / en_US / ja_JP），而 layout 用的是 BCP 47（zh-CN）。 */
+const ogLocale = (culture) => String(culture || DEFAULT_CULTURE).replace('-', '_');
+
+/** JSON-LD 的 `inLanguage`：取**当前正在构建的语言**的 culture。
+    生成循环是「先设 currentLocale、再 buildPages」，故构建期取值即该语言，无需事后改写。
+    （此前硬编码 `zh-CN`，导致 228 份语言前缀快照的 JSON-LD 都声称自己是中文页面。） */
+const ldLang = () => LOCALES.find((l) => l.code === currentLocale)?.culture || DEFAULT_CULTURE;
 
 const packCache = new Map();
 
@@ -99,6 +113,16 @@ const SNAPSHOT_TEXT_LIMIT_DETAIL = 20000;
 
 /** 站点名（与 src/lib/constants.ts SITE_NAME 一致） */
 const SITE_NAME = '星铁档案馆';
+
+/** 官方游戏名（词典键 `meta.gameName`，13 语言；前端同一份见 src/app/seo.ts）。
+    全站主关键词靠它承载——品牌名不承载搜索需求，游戏名才是自然流量的入口。 */
+const gameName = () => ui('meta.gameName', '崩坏：星穹铁道');
+
+/** 标题尾部：`{页面名} - {游戏名} Wiki | {品牌}`。
+    **与前端 `pageTitle()` 同格式**：改一处必须同改另一处，否则同一 URL 会出现两个标题口径
+    （执行 JS 的爬虫读渲染后的 title，无 JS 的爬虫读快照 title）。品牌排最后是因为标题被
+    搜索引擎截断时丢的是尾部——关键词必须在前。 */
+const titleTail = () => `${gameName()} Wiki | ${SITE_NAME}`;
 /** 角色满级等级（与 src/lib/constants.ts MAX_CHAR_LEVEL 一致；满级属性 = base + add*(N-1)） */
 const MAX_CHAR_LEVEL = 80;
 
@@ -486,7 +510,9 @@ function linkList(items, entry = false) {
 
 function snapFooter(ctx) {
   /* 页脚文案走词典（每页一次，非缺省语言下也曾整串中文）：
-     `snapshot.updatedAt` / `snapshot.note` 均带 `{site}` 或 `{date}` 占位符。 */
+     `snapshot.updatedAt` / `snapshot.note` 均带 `{site}` 或 `{date}` 占位符。
+     `{site}` 的取值**按用途分两种**：描述模板（`snapshot.sum.*`）传 `gameName()`（主关键词），
+     本页脚传 `SITE_NAME`（站点自我指称，游戏名在这里没有意义）。 */
   const updated = uiT('snapshot.updatedAt', '数据最后更新：{date}', { date: ctx.syncedAt });
   const note = uiT('snapshot.note', '本页为{site}构建期预渲染快照，内容与站点数据一致，无 JavaScript 亦可读取。', { site: SITE_NAME });
   return `<p class="nk-snapshot__meta">${esc(updated)}</p>`
@@ -535,7 +561,7 @@ function ldCollection(route, title, description, entries) {
     name: title,
     url: SITE_ORIGIN + route,
     description,
-    inLanguage: 'zh-CN',
+    inLanguage: ldLang(),
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
     mainEntity: {
       '@type': 'ItemList',
@@ -561,6 +587,8 @@ function breadcrumbNode(crumbs) {
   };
 }
 
+/** 叙述性专题长文的 JSON-LD。**当前唯一消费方是 `/voracity`**（站点撰写的专题页）：
+    其它详情页都是数据条目页，走 `ldDataPage`（用 `Article` 描述数据页等于把它说成资讯稿）。 */
 function ldArticle(route, headline, description, crumbs, ctx) {
   return {
     '@context': 'https://schema.org',
@@ -570,7 +598,7 @@ function ldArticle(route, headline, description, crumbs, ctx) {
         headline,
         description,
         dateModified: ctx.syncedAt,
-        inLanguage: 'zh-CN',
+        inLanguage: ldLang(),
         mainEntityOfPage: SITE_ORIGIN + route,
         isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
       },
@@ -580,10 +608,46 @@ function ldArticle(route, headline, description, crumbs, ctx) {
 }
 
 /**
+ * 数据条目页的 JSON-LD（光锥 / 遗器 / 敌对物种 / 终局赛季 / 终局玩法 / 货币战争角色 / 羁绊）。
+ *
+ * 与角色详情页同构：`WebPage`（这是页面）+ `mainEntity`（页面讲的那个条目）+ `BreadcrumbList`。
+ * 为什么不用 `Article`：这些页面是**数据条目页**，不是资讯稿——`Article` 会让机器把页面正文
+ * 当新闻稿读，条目身份反而拿不到（理由与 ldCharacter 的注释同源）。
+ * 为什么条目类型是 `Thing`：schema.org 没有「光锥 / 遗器 / 敌对物种」这样的类型，
+ * 自造类型机器不认，`Thing` 是唯一诚实且被定义的通用类型。
+ *
+ * `/voracity` 不用本函数：那是站点撰写的叙述性专题长文，`Article` 语义正确（见契约 §4）。
+ */
+function ldDataPage(route, name, description, crumbs, ctx) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${SITE_ORIGIN}${route}#page`,
+        name,
+        description,
+        url: SITE_ORIGIN + route,
+        dateModified: ctx.syncedAt,
+        inLanguage: ldLang(),
+        isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
+        mainEntity: {
+          '@type': 'Thing',
+          '@id': `${SITE_ORIGIN}${route}#entry`,
+          name,
+          description,
+        },
+      },
+      breadcrumbNode(crumbs),
+    ],
+  };
+}
+
+/**
  * 角色详情页的 JSON-LD（验收标准 B5）。
  *
- * 与 `ldArticle` 的差别：角色详情页不是「一篇文章」，而是一个**虚构角色实体**。
- * 用 `Article` 描述它等于把数据页说成资讯稿 —— 机器既拿不到角色属性、也拿不到角色身份。
+ * 与 `ldDataPage` 的差别：角色是 schema.org 里有明确定义的类型（`Person`），故能拿到
+ * 结构化属性（`characterAttribute`）；而「光锥 / 遗器 / 敌对物种」没有对应类型，只能落到 `Thing`。
  * 结构：`WebPage`（这是页面）+ `mainEntity` = `Person`（角色本体，`additionalType: VideoGameSeries`
  * 说明它属于哪类虚构世界）+ `BreadcrumbList`（层级位置）。依据：
  * - `Person.characterAttribute`（见 schema.org/VideoGameSeries）：「a piece of data that represents a
@@ -610,7 +674,7 @@ function ldCharacter(route, name, description, crumbs, ctx, d) {
     name,
     additionalType: 'https://schema.org/VideoGameSeries',
     description,
-    inLanguage: 'zh-CN',
+    inLanguage: ldLang(),
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
   };
   const nameEn = clean(d.name_en);
@@ -626,7 +690,7 @@ function ldCharacter(route, name, description, crumbs, ctx, d) {
         name,
         description,
         url: SITE_ORIGIN + route,
-        inLanguage: 'zh-CN',
+        inLanguage: ldLang(),
         isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
         mainEntity: { '@id': `${SITE_ORIGIN}${route}#character` },
       },
@@ -681,6 +745,17 @@ function renderSnapshot(template, page) {
   html = upsertMeta(html, 'property', 'og:title', page.title);
   html = upsertMeta(html, 'property', 'og:description', page.description);
   html = upsertMeta(html, 'property', 'og:url', canonical);
+  /* 3') 社交卡片：og:image / twitter:* / og:locale。
+     这些字段对 AI 检索无杠杆（见 docs/memory/ai-visibility.md），价值在**分享预览**与语言标注：
+     没有 og:image 时任何平台都只渲染纯文字卡片，社交传播的首屏点击率会明显掉一档。
+     图片固定为站点级 `public/og.png`（生成器 tools/gen-og-image.mjs），故只按页 upsert 文案与语言。
+     og:locale 用 `语言_地区`（zh_CN / en_US / ja_JP…），取自同一份 languages.json 的 culture。 */
+  html = upsertMeta(html, 'property', 'og:image', OG_IMAGE);
+  html = upsertMeta(html, 'property', 'og:locale', ogLocale(page.lang));
+  html = upsertMeta(html, 'name', 'twitter:card', 'summary_large_image');
+  html = upsertMeta(html, 'name', 'twitter:title', page.title);
+  html = upsertMeta(html, 'name', 'twitter:description', page.description);
+  html = upsertMeta(html, 'name', 'twitter:image', OG_IMAGE);
 
   // 0) <html lang>：模板是缺省语言，其余语言必须改写（爬虫与无障碍读取的根属性）
   if (page.lang) html = html.replace(/<html([^>]*)\slang="[^"]*"/, `<html$1 lang="${esc(page.lang)}"`);
@@ -753,7 +828,10 @@ function homePages(ctx) {
   const chars = readJson('characters.json').filter((c) => c.name);
   const cones = readJson('light_cones.json').filter((c) => c.name);
   const relics = readJson('relics.json').filter((r) => r.name);
-  const title = `${ui('nav.home', '首页')} - ${SITE_NAME}`;
+  /* 首页标题**不带页面名前缀**：`首页 - …` 里的「首页」零搜索价值，而首页是全站权重最高的页面，
+     标题位必须留给关键词（`titleTail()` 已经是 `{游戏名} Wiki | {品牌}`）。
+     客户端同源：`/` 没有 titleKey，router.afterEach 落 `pageTitle()`，两边逐字一致。 */
+  const title = titleTail();
   const groups = [
     {
       label: ui('catalog.character.title', '角色'),
@@ -790,7 +868,7 @@ function homePages(ctx) {
   const versionText = ctx.versionLabel
     ? `${ctx.versionLabel} ${ui('home.releaseTitleNoVersion', '版本上新')}`
     : ui('home.releaseTitleNoVersion', '版本上新');
-  const summaryPlain = uiT('snapshot.sum.home', '{site}首页：{extra}，收录本版本新增的角色、光锥与遗器条目。', { site: SITE_NAME, extra: versionText });
+  const summaryPlain = uiT('snapshot.sum.home', '{site}首页：{extra}，收录本版本新增的角色、光锥与遗器条目。', { site: gameName(), extra: versionText });
   const body = catalogBody(ctx, {
     crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('home.releaseTitleNoVersion', '版本上新'), null]]),
     h1: SITE_NAME,
@@ -823,8 +901,8 @@ function characterPages(ctx) {
     return Number(b.id) - Number(a.id);
   });
   const links = ordered.map((c) => ({ name: charName(c), href: `/character/${c.id}` }));
-  const title = `${CATALOG_TITLE['/character']()} - ${SITE_NAME}`;
-  const summaryPlain = uiT('snapshot.sum.character', '{site}角色图鉴：共 {n} 名角色，含稀有度、命途、属性与技能档案。', { site: SITE_NAME, n: ordered.length });
+  const title = `${CATALOG_TITLE['/character']()} - ${titleTail()}`;
+  const summaryPlain = uiT('snapshot.sum.character', '{site}角色图鉴：共 {n} 名角色，含稀有度、命途、属性与技能档案。', { site: gameName(), n: ordered.length });
   const items = ordered.map((c) => ({
     name: charName(c),
     href: `/character/${c.id}`,
@@ -921,7 +999,7 @@ function characterPages(ctx) {
     pages.push(makePage('character-detail', {
       route,
       file: `character/${entry.id}.html`,
-      title: `${name} - ${SITE_NAME}`,
+      title: `${name} - ${titleTail()}`,
       description,
       ld: ldCharacter(route, name, description,
         [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/character'](), '/character'], [name, route]], ctx, d),
@@ -947,7 +1025,7 @@ function lightconePages(ctx) {
   const charNames = new Map(
     readJson('characters.json').filter((c) => c.name).map((c) => [String(c.id), clean(charName(c))]),
   );
-  const summaryPlain = uiT('snapshot.sum.lightcone', '{site}光锥图鉴：共 {n} 把光锥，含稀有度、命途、技能效果与晋阶属性。', { site: SITE_NAME, n: ordered.length });
+  const summaryPlain = uiT('snapshot.sum.lightcone', '{site}光锥图鉴：共 {n} 把光锥，含稀有度、命途、技能效果与晋阶属性。', { site: gameName(), n: ordered.length });
   const items = ordered.map((c) => ({
     name: c.name,
     href: `/lightcone/${c.id}`,
@@ -956,7 +1034,7 @@ function lightconePages(ctx) {
   const pages = [makePage('lightcone-list', {
     route: '/lightcone',
     file: 'lightcone.html',
-    title: `${CATALOG_TITLE['/lightcone']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/lightcone']()} - ${titleTail()}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/lightcone', CATALOG_TITLE['/lightcone'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
@@ -1033,9 +1111,9 @@ function lightconePages(ctx) {
     pages.push(makePage('lightcone-detail', {
       route,
       file: `lightcone/${entry.id}.html`,
-      title: `${name} - ${SITE_NAME}`,
+      title: `${name} - ${titleTail()}`,
       description,
-      ld: ldArticle(route, name, description,
+      ld: ldDataPage(route, name, description,
         [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/lightcone'](), '/lightcone'], [name, route]], ctx),
       body,
     }));
@@ -1052,12 +1130,12 @@ function relicPages(ctx) {
   const setTag = (r) => (Array.isArray(r.require_num) && r.require_num.includes(4)
     ? `${ui('relic.setType.cavern', '隧洞遗器')} · ${uiT('relic.setPieces', '{n}件套', { n: 4 })}`
     : `${ui('relic.setType.planar', '位面饰品')} · ${uiT('relic.setPieces', '{n}件套', { n: 2 })}`);
-  const summaryPlain = uiT('snapshot.sum.relic', '{site}遗器图鉴：共 {n} 套遗器，含套装效果与部位信息。', { site: SITE_NAME, n: ordered.length });
+  const summaryPlain = uiT('snapshot.sum.relic', '{site}遗器图鉴：共 {n} 套遗器，含套装效果与部位信息。', { site: gameName(), n: ordered.length });
   const items = ordered.map((r) => ({ name: r.name, href: `/relic/${r.id}`, meta: esc(setTag(r)) }));
   const pages = [makePage('relic-list', {
     route: '/relic',
     file: 'relic.html',
-    title: `${CATALOG_TITLE['/relic']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/relic']()} - ${titleTail()}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/relic', CATALOG_TITLE['/relic'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
@@ -1108,9 +1186,9 @@ function relicPages(ctx) {
     pages.push(makePage('relic-detail', {
       route,
       file: `relic/${entry.id}.html`,
-      title: `${name} - ${SITE_NAME}`,
+      title: `${name} - ${titleTail()}`,
       description,
-      ld: ldArticle(route, name, description,
+      ld: ldDataPage(route, name, description,
         [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/relic'](), '/relic'], [name, route]], ctx),
       body,
     }));
@@ -1124,7 +1202,7 @@ function itemPages(ctx) {
   const list = readJson('items.json').filter((i) => i.name);
   const rarityOrder = { 5: 0, 4: 1, 3: 2, 2: 3, 1: 4 };
   const ordered = [...list].sort((a, b) => (rarityOrder[a.rarity] ?? 5) - (rarityOrder[b.rarity] ?? 5));
-  const summaryPlain = uiT('snapshot.sum.item', '{site}物品图鉴：共 {n} 件物品，含类型、稀有度与物品描述。', { site: SITE_NAME, n: ordered.length });
+  const summaryPlain = uiT('snapshot.sum.item', '{site}物品图鉴：共 {n} 件物品，含类型、稀有度与物品描述。', { site: gameName(), n: ordered.length });
   const items = ordered.map((i) => ({
     name: i.name,
     href: null,
@@ -1134,7 +1212,7 @@ function itemPages(ctx) {
   return [makePage('item-list', {
     route: '/item',
     file: 'item.html',
-    title: `${CATALOG_TITLE['/item']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/item']()} - ${titleTail()}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/item', CATALOG_TITLE['/item'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
@@ -1151,7 +1229,7 @@ function itemPages(ctx) {
 function monsterPages(ctx) {
   const list = readJson('monsters.json').filter((m) => m.name);
   const links = list.map((m) => ({ name: m.name, href: `/monster/${m.id}` }));
-  const summaryPlain = uiT('snapshot.sum.monster', '{site}敌对物种图鉴：共 {n} 个条目，含分类、弱点、抗性与技能。', { site: SITE_NAME, n: list.length });
+  const summaryPlain = uiT('snapshot.sum.monster', '{site}敌对物种图鉴：共 {n} 个条目，含分类、弱点、抗性与技能。', { site: gameName(), n: list.length });
   /* 条目属性摘要与卡面同源（契约 §3「每条 = 名称 + 属性摘要」）：角色目录早就带「稀有度·属性·命途」，
      敌对目录此前只有分类。弱点是这张卡**唯一可辨**的差异——632 条里 392 条与另一条名称+图标全同，
      只写分类时 400 张卡在快照里彼此无法区分，AI 也检索不出「冰弱点的敌人」。 */
@@ -1167,7 +1245,7 @@ function monsterPages(ctx) {
   const pages = [makePage('monster-list', {
     route: '/monster',
     file: 'monster.html',
-    title: `${CATALOG_TITLE['/monster']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/monster']()} - ${titleTail()}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/monster', CATALOG_TITLE['/monster'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
@@ -1298,9 +1376,9 @@ function monsterPages(ctx) {
     pages.push(makePage('monster-detail', {
       route,
       file: `monster/${entry.id}.html`,
-      title: `${name} - ${SITE_NAME}`,
+      title: `${name} - ${titleTail()}`,
       description,
-      ld: ldArticle(route, name, description,
+      ld: ldDataPage(route, name, description,
         [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/monster'](), '/monster'], [name, route]], ctx),
       body,
     }));
@@ -1361,7 +1439,7 @@ function endgamePages(ctx) {
   });
 
   const summaryPlain = uiT('snapshot.endgameSummary', '{site}终局内容：{modes}四模式赛季，共 {n} 期。', {
-    site: SITE_NAME,
+    site: gameName(),
     modes: ENDGAME_MODES.map((m) => m.label()).join('、'),
     n: all.length,
   });
@@ -1372,7 +1450,7 @@ function endgamePages(ctx) {
   }));
   const pages = [makePage('endgame-list', {
     route: '/endgame',    file: 'endgame.html',
-    title: `${CATALOG_TITLE['/endgame']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/endgame']()} - ${titleTail()}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/endgame', CATALOG_TITLE['/endgame'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
@@ -1439,9 +1517,9 @@ function endgamePages(ctx) {
     pages.push(makePage('endgame-mode', {
       route,
       file: `endgame/${mode.key}.html`,
-      title: `${mode.label()} - ${SITE_NAME}`,
+      title: `${mode.label()} - ${titleTail()}`,
       description,
-      ld: ldArticle(route, mode.label(), description,
+      ld: ldDataPage(route, mode.label(), description,
         [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/endgame'](), '/endgame'], [mode.label(), route]], ctx),
       body: detailBody(ctx, {
         crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/endgame'](), '/endgame'], [mode.label(), null]]),
@@ -1535,9 +1613,9 @@ function endgamePages(ctx) {
       pages.push(makePage('endgame-detail', {
         route,
         file: `endgame/${mode.key}/${id}.html`,
-        title: `${name} - ${mode.label()} - ${SITE_NAME}`,
+        title: `${name} - ${mode.label()} - ${titleTail()}`,
         description,
-        ld: ldArticle(route, name, description,
+        ld: ldDataPage(route, name, description,
           [[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/endgame'](), '/endgame'], [name, route]], ctx),
         body,
       }));
@@ -1552,7 +1630,7 @@ function achievementPages(ctx) {
   const list = readJson('achievements.json').filter((a) => a.title);
   const series = readJson('achievement_series.json');
   const seriesName = new Map(series.map((s) => [s.id, s.name]));
-  const summaryPlain = uiT('snapshot.sum.achievement', '{site}成就图鉴：共 {n} 个成就，含系列、稀有度与达成要求。', { site: SITE_NAME, n: list.length });
+  const summaryPlain = uiT('snapshot.sum.achievement', '{site}成就图鉴：共 {n} 个成就，含系列、稀有度与达成要求。', { site: gameName(), n: list.length });
   const items = list.map((a) => ({
     name: a.title,
     href: null,
@@ -1562,7 +1640,7 @@ function achievementPages(ctx) {
   return [makePage('achievement-list', {
     route: '/achievement',
     file: 'achievement.html',
-    title: `${CATALOG_TITLE['/achievement']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/achievement']()} - ${titleTail()}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/achievement', CATALOG_TITLE['/achievement'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
@@ -1593,8 +1671,8 @@ function currencyHubPages(ctx) {
     sections.push({ title: `${ui('nav.cwTrait', '羁绊图鉴')}（${items.length}）`, html: linkList(items, true) + snapMore('/currency/trait', ui('nav.cwTrait', '羁绊图鉴')) });
     ldEntries.push(...items);
   }
-  const summaryPlain = uiT('snapshot.sum.cwHub', '{site}货币战争模式枢纽：本赛季新增角色图鉴与羁绊图鉴条目。', { site: SITE_NAME });
-  const title = `${CATALOG_TITLE['/currency/role']().split(' · ')[0]} - ${SITE_NAME}`;
+  const summaryPlain = uiT('snapshot.sum.cwHub', '{site}货币战争模式枢纽：本赛季新增角色图鉴与羁绊图鉴条目。', { site: gameName() });
+  const title = `${CATALOG_TITLE['/currency/role']().split(' · ')[0]} - ${titleTail()}`;
   const body = catalogBody(ctx, {
     crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), null]]),
     h1: ui('catalog.currencyWar', '货币战争'),
@@ -1618,7 +1696,7 @@ function currencyRolePages(ctx) {
   const roles = readJson('currency/role.json').roles || [];
   const links = roles.map((r) => ({ name: cwRoleName(r), href: `/currency/role/${r.id}` }));
   const chargeText = (r) => (r.charge_type || []).map((c) => cwChargeLabel(c)).join(' · ');
-  const summaryPlain = uiT('snapshot.sum.cwRole', '{site}货币战争角色图鉴：共 {n} 名可招募角色，含费用、前后台定位与羁绊。', { site: SITE_NAME, n: roles.length });
+  const summaryPlain = uiT('snapshot.sum.cwRole', '{site}货币战争角色图鉴：共 {n} 名可招募角色，含费用、前后台定位与羁绊。', { site: gameName(), n: roles.length });
   const items = roles.map((r) => ({
     name: cwRoleName(r),
     href: `/currency/role/${r.id}`,
@@ -1628,7 +1706,7 @@ function currencyRolePages(ctx) {
   const pages = [makePage('currency-role-list', {
     route: '/currency/role',
     file: 'currency/role.html',
-    title: `${CATALOG_TITLE['/currency/role']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/role']()} - ${titleTail()}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/currency/role', CATALOG_TITLE['/currency/role'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
@@ -1718,9 +1796,9 @@ function currencyRolePages(ctx) {
     pages.push(makePage('currency-role-detail', {
       route,
       file: `currency/role/${entry.id}.html`,
-      title: `${name} - ${SITE_NAME}`,
+      title: `${name} - ${titleTail()}`,
       description,
-      ld: ldArticle(route, name, description,
+      ld: ldDataPage(route, name, description,
         [[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/role'](), '/currency/role'], [name, route]], ctx),
       body,
     }));
@@ -1734,7 +1812,7 @@ function currencyListPages(ctx) {
   const pages = [];
 
   const equip = (readJson('currency/equipment.json').items || []).filter((e) => e.name);
-  const equipSummary = uiT('snapshot.sum.cwItem', '{site}货币战争装备图鉴：共 {n} 件装备，含分类、效果与属性加成。', { site: SITE_NAME, n: equip.length });
+  const equipSummary = uiT('snapshot.sum.cwItem', '{site}货币战争装备图鉴：共 {n} 件装备，含分类、效果与属性加成。', { site: gameName(), n: equip.length });
   const equipItems = equip.map((e) => {
     const tags = (e.tags || []).map((t) => clean(t.desc)).filter(Boolean).join('、');
     const props = (e.props || []).map((p) => `${propLabel(p)} ${propValue(p.value)}`).join('、');
@@ -1748,7 +1826,7 @@ function currencyListPages(ctx) {
   pages.push(makePage('currency-equip-list', {
     route: '/currency/item',
     file: 'currency/item.html',
-    title: `${CATALOG_TITLE['/currency/item']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/item']()} - ${titleTail()}`,
     description: cut(equipSummary, 150),
     ld: ldCollection('/currency/item', CATALOG_TITLE['/currency/item'](), cut(equipSummary, 150), equipItems),
     body: catalogBody(ctx, {
@@ -1764,12 +1842,12 @@ function currencyListPages(ctx) {
    * 未收录图鉴的投资环境应用不展示，快照只列收录项。
    */
   const portals = (readJson('currency/portals.json').portals || []).filter((p) => p.in_book && p.title);
-  const portalSummary = uiT('snapshot.sum.cwPortal', '{site}货币战争投资环境图鉴：共 {n} 个投资环境。', { site: SITE_NAME, n: portals.length });
+  const portalSummary = uiT('snapshot.sum.cwPortal', '{site}货币战争投资环境图鉴：共 {n} 个投资环境。', { site: gameName(), n: portals.length });
   const portalItems = portals.map((p) => ({ name: p.title, href: null, meta: esc(ui('nav.cwPortal', '投资环境')), desc: txtSafe(p.desc, p.params, 400, hasParamSemantics(p)) }));
   pages.push(makePage('currency-portal-list', {
     route: '/currency/buff',
     file: 'currency/buff.html',
-    title: `${CATALOG_TITLE['/currency/buff']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/buff']()} - ${titleTail()}`,
     description: cut(portalSummary, 150),
     ld: ldCollection('/currency/buff', CATALOG_TITLE['/currency/buff'](), cut(portalSummary, 150), portalItems),
     body: catalogBody(ctx, {
@@ -1781,7 +1859,7 @@ function currencyListPages(ctx) {
   }));
 
   const augments = (readJson('currency/augments.json').augments || []).filter((a) => a.name);
-  const augSummary = uiT('snapshot.sum.cwAugment', '{site}货币战争投资策略图鉴：共 {n} 条投资策略。', { site: SITE_NAME, n: augments.length });
+  const augSummary = uiT('snapshot.sum.cwAugment', '{site}货币战争投资策略图鉴：共 {n} 条投资策略。', { site: gameName(), n: augments.length });
   const augItems = augments.map((a) => ({
     name: a.name,
     href: null,
@@ -1792,7 +1870,7 @@ function currencyListPages(ctx) {
   pages.push(makePage('currency-augment-list', {
     route: '/currency/augment',
     file: 'currency/augment.html',
-    title: `${CATALOG_TITLE['/currency/augment']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/augment']()} - ${titleTail()}`,
     description: cut(augSummary, 150),
     ld: ldCollection('/currency/augment', CATALOG_TITLE['/currency/augment'](), cut(augSummary, 150), augItems),
     body: catalogBody(ctx, {
@@ -1812,7 +1890,7 @@ function currencyTraitPages(ctx) {
   const traits = readJson('currency/traits.json').traits || [];
   const roles = readJson('currency/role.json').roles || [];
   const links = traits.map((t) => ({ name: t.name, href: `/currency/trait/${t.id}` }));
-  const summaryPlain = uiT('snapshot.cwTraitSummary', '{site}货币战争羁绊图鉴：共 {n} 个羁绊，含激活人数层级与成员加成。', { site: SITE_NAME, n: traits.length });
+  const summaryPlain = uiT('snapshot.cwTraitSummary', '{site}货币战争羁绊图鉴：共 {n} 个羁绊，含激活人数层级与成员加成。', { site: gameName(), n: traits.length });
   const items = traits.map((t) => ({
     name: t.name,
     href: `/currency/trait/${t.id}`,
@@ -1823,7 +1901,7 @@ function currencyTraitPages(ctx) {
   const pages = [makePage('currency-trait-list', {
     route: '/currency/trait',
     file: 'currency/trait.html',
-    title: `${CATALOG_TITLE['/currency/trait']()} - ${SITE_NAME}`,
+    title: `${CATALOG_TITLE['/currency/trait']()} - ${titleTail()}`,
     description: cut(summaryPlain, 150),
     ld: ldCollection('/currency/trait', CATALOG_TITLE['/currency/trait'](), cut(summaryPlain, 150), items),
     body: catalogBody(ctx, {
@@ -1883,9 +1961,9 @@ function currencyTraitPages(ctx) {
     pages.push(makePage('currency-trait-detail', {
       route,
       file: `currency/trait/${entry.id}.html`,
-      title: `${name} - ${SITE_NAME}`,
+      title: `${name} - ${titleTail()}`,
       description,
-      ld: ldArticle(route, name, description,
+      ld: ldDataPage(route, name, description,
         [[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/trait'](), '/currency/trait'], [name, route]], ctx),
       body,
     }));
@@ -1999,7 +2077,7 @@ function voracityPages(ctx) {
   const activityName = clean(activity.name);
   const introHtml = txtSafe(activity.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
   const summaryPlain = uiT('snapshot.sum.voracity', '{site}贪饕污染专题：{extra}含关卡组成、侵蚀等级与状态词条。', {
-    site: SITE_NAME,
+    site: gameName(),
     extra: activityName ? `${activityName}，` : '',
   });
   const description = cut(summaryPlain, 150);
@@ -2041,7 +2119,7 @@ function voracityPages(ctx) {
   return [makePage('voracity-page', {
     route: '/voracity',
     file: 'voracity.html',
-    title: `${voracityTitle()} - ${SITE_NAME}`,
+    title: `${voracityTitle()} - ${titleTail()}`,
     description,
     ld: ldArticle('/voracity', voracityTitle(), description, [[ui('nav.home', '首页'), '/'], [voracityTitle(), '/voracity']], ctx),
     body,

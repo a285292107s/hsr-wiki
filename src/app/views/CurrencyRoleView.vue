@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { fmtDescWithFormat, fmtDescStar, avatarShopIconUrl, avatarDrawCardUrl, gridFightEquipIconWithFallback, gridFightTraitIconById, gridFightSkillIconSrc, gridFightPropIconUrl, lightconeIconUrl } from '../../lib/format';
 import { resolveCdnUri } from '../../services/cdn';
-import { SITE_NAME } from '../../lib/constants';
+import { pageTitle } from '../seo';
 import { cwChargeKey, cwCostKey } from '../../lib/enum-labels';
 import { propLabel, propValue, mergeSkillGroups, buildGrowthMatrix, matrixUp, resolveRecommend, buildRecommendRows, groupTraits, buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceLine } from '../../lib/currency-role';
 import type { MergedSkill } from '../../lib/currency-role';
@@ -134,7 +134,7 @@ const servantAttrs = computed(() => buildServantAttrs(star.value?.servant, charD
 
 watch(
   data,
-  (d) => { if (d) document.title = `${d.name} - ${SITE_NAME}`; },
+  (d) => { if (d) document.title = pageTitle(d.name); },
   { immediate: true },
 );
 

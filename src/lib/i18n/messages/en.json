@@ -369,6 +369,7 @@
   "lc.sec.story": "Card art",
   "lc.superimpose": "Superimposition {n}",
   "lc.superimposeAria": "Superimposition level",
+  "meta.gameName": "Honkai: Star Rail",
   "meta.description": "Honkai: Star Rail game data wiki",
   "mob.appearCensus": "Counted by stage waves; stages where this enemy is summoned by others count too. A stage counts once, and one name may cover several difficulty tiers or halves. Randomly drawn lineups in endless-wave modes are not stages and are excluded.",
   "mob.appearIn": "Appears in",

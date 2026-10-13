@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { loadLocalLightConeDetail } from '../../services/api';
-import { SITE_NAME } from '../../lib/constants';
+import { pageTitle } from '../seo';
 import { createDetailCore } from './detail-core';
 import type { LightConeDetail } from '../../services/types';
 
@@ -15,7 +15,7 @@ export const useLightconeStore = defineStore('lightcone', () => {
       if (!d || !d.name || !d.skill) throw new Error('光锥数据不完整');
       rank.value = 1;
       return d;
-    }, { title: (d) => `${d.name} - ${SITE_NAME}` });
+    }, { title: (d) => pageTitle(d.name) });
   }
 
   function setRank(r: number): void {

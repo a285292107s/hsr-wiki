@@ -12,6 +12,9 @@ import { setActiveLocale } from '../lib/i18n/active';
 import { localeFromPath } from '../lib/i18n/locales';
 import '../styles/tokens.css';
 import '../styles/catalog.css';
+/* 自托管字体声明（生成物，见 tools/fetch-fonts.mjs）：进**入口** CSS chunk，不进懒加载路由包——
+   字体是全站每一页的渲染前提，放路由包里会让未命中路由的字体延迟到 JS 之后才发现。 */
+import '../styles/fonts.css';
 
 export async function bootstrap(): Promise<void> {
   /* 语言在**页面加载期**一次性确定（ADR 0052 决策 5：切语言走整页导航）：数据层按它取对应语言包，

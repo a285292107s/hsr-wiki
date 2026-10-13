@@ -4,7 +4,7 @@ import { elemLabel } from '../../lib/enum-labels';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { translate } from '../i18n';
-import { SITE_NAME } from '../../lib/constants';
+import { pageTitle } from '../seo';
 import { monsterRankKey } from '../../lib/enum-labels';
 import { elementIconUrl, escHtml, fmtDesc, itemIconUrl, monsterFigureUrl, monsterIconUrl } from '../../lib/format';
 import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
@@ -38,7 +38,7 @@ watch(
 
 const d = computed(() => data.value);
 watch(d, (data) => {
-  if (data) document.title = `${data.name} - ${SITE_NAME}`;
+  if (data) document.title = pageTitle(data.name);
 });
 /* 战斗数值合成（ADR 0040 + 0045 + 0049）：曲线与精英组倍率作为共享单例随详情页拉取。
    缺省等级 = **该难度组曲线的最高档**（不再写死 100：曲线各组上限不同——组 1/2 到 100、组 3 到 120、

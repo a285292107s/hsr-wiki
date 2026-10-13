@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { userErrorDetail } from '../../lib/errors';
 import { useRoute, RouterLink } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { SITE_NAME } from '../../lib/constants';
+import { pageTitle } from '../seo';
 import {
   ENDGAME_MODES, endgamePage, mazeStatus, mazeStatusLabelKey, modeDefaultArtUrl,
 } from '../catalog/pages/endgame';
@@ -149,7 +149,7 @@ async function load(): Promise<void> {
     guide.value = guideDb;
     listDb.value = list;
     seasonCards.value = cards.filter((c) => c.mode === modeKey.value);
-    document.title = `${mode.value ? t(mode.value.labelKey) : modeKey.value} - ${SITE_NAME}`;
+    document.title = pageTitle(mode.value ? t(mode.value.labelKey) : modeKey.value);
     phase.value = 'ready';
   } catch (e) {
     error.value = userErrorDetail(e);

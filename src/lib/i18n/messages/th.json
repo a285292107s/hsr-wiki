@@ -369,6 +369,7 @@
   "lc.sec.story": "ภาพการ์ด",
   "lc.superimpose": "ซ้อนทับ {n}",
   "lc.superimposeAria": "ระดับซ้อนทับ",
+  "meta.gameName": "Honkai: Star Rail",
   "meta.description": "วิกิข้อมูลเกม Honkai: Star Rail",
   "mob.appearCensus": "นับตามเวฟของด่าน รวมด่านที่ถูกศัตรูอื่นเรียกออกมา หนึ่งด่านนับครั้งเดียว ชื่อหนึ่งอาจครอบคลุมหลายระดับหรือครึ่งแรก/หลัง การสุ่มจัดทีมในโหมดเวฟไม่จำกัดไม่นับ",
   "mob.appearIn": "ปรากฏใน",
