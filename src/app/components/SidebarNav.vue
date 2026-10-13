@@ -143,20 +143,30 @@ const settingsPath = computed(() => (isCw.value ? '/currency/settings' : '/setti
  *
  * 为什么不用 RouterLink 的默认行为：同址 `push` 被 vue-router 判为 NAVIGATION_DUPLICATED
  * （既无跳转、又照跑一次 `scrollBehavior`）⇒ 再点毫无反应，页面出不去。
- * 兜底：`history.state.back` 由 vue-router 在首次落地时写成 `null`（直接打开 / 新标签页），
- * 此时没有可返回的站内页面，回本模式首页而**不是**把用户弹出站点；用 `replace` 以免在历史里
- * 留下一条「收起后还能前进回设置页」的假入口。
+ * 兜底不能只看 `history.state.back`：那是 vue-router 的内部簿记，实测在 CI 上出现过为空而把用户
+ * 送去本模式枢纽的情形（截图取证：`/en/settings` 上再点，落在 `/en/`），而用户视角是「从
+ * `/en/character` 进来的」。故在**点击进入设置时**记下来源页（仅本 SPA 会话有效，整页加载随文档
+ * 卸载清零）：站内进来过就优先回那一页，真·首次落地才回本模式枢纽。
+ * 记录点放在点击处而非 `watch(route.path)`：初次落地时 vue-router 从 START_LOCATION 解析到目标页，
+ * 那个 `from` 的 path 恰好是 `'/'`，被记成来源页会让「直达设置页回本模式枢纽」的兜底落到常规首页
+ * （实测被 `layout-nav.spec.ts` 的货币战争直达用例当场抓住）。
  * 带修饰键的点击（Ctrl/Cmd/中键）是「新标签页打开设置」，不得劫持。 */
+let settingsEntryPath: string | null = null;
+
 function onSettingsClick(e: MouseEvent): void {
-  if (route.path !== settingsPath.value) return;
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  if (route.path !== settingsPath.value) {
+    // 站内进入设置：记下来源页；跳转仍交给 RouterLink 的默认行为
+    settingsEntryPath = route.path;
+    return;
+  }
   e.preventDefault();
   const back = router.options.history.state.back;
   if (typeof back === 'string' && back.length > 0) {
     router.back();
     return;
   }
-  void router.replace(isCw.value ? '/currency' : '/');
+  void router.replace(settingsEntryPath ?? (isCw.value ? '/currency' : '/'));
 }
 
 const SETTINGS_ITEM = {
