@@ -76,3 +76,5 @@
 ## 路由与外壳交互
 
 - **「再点同一入口收起」不是链接语义，`RouterLink` 自己做不到**：收起的目标态是「不存在」而非另一个 URL，`to` 只能写成当前路径，而 vue-router 把同址 `push` 判为 `NAVIGATION_DUPLICATED`——不跳转、不报错（控制台安静）、却照跑一次 `scrollBehavior`，两次点击之间看不出差别。收起只能显式做：`history.state.back` 有值走 `router.back()`，为 `null` 时 `replace` 回本模式枢纽（`push` 会在历史里留一条「收起后还能前进回该页」的假入口）。判「有无站内历史」不能看 `window.history.length`——它把站外与 about:blank 条目一起算进去。挂在 `RouterLink` 上的 `@click` 必须放行带修饰键的点击（Ctrl/Cmd/中键是新标签页语义），否则被劫持成返回。`src/app/components/SidebarNav.vue`
+- **兜底不能只信 `router.options.history.state.back`，要在**点击进入时**自持一份来源页**：它是 vue-router 的内部簿记，实测在 CI 上出现过为空而把站内进来的用户送去本模式枢纽（截图取证：`/en/settings` 再点落在 `/en/`，而用户是从 `/en/character` 进来的）。记录点必须放在**点击处**而不是 `watch(route.path)`：初次落地时 vue-router 从 `START_LOCATION` 解析到目标页，那个 `from` 的 path 恰好是 `'/'`，被记成来源页会让「直达设置页 → 本模式枢纽」的兜底落到常规首页（既有用例当场抓住）。同理，语言前缀在 **history base** 里而不在 `route.path` 里（`route.path` 已剥离前缀、`location.pathname` 含前缀）⇒ 任何「当前路径 === 路由表路径」的判定都不能把两者混用。
+- **`router.options.history.state` ≠ `window.history.state`**：前者是 vue-router 自己维护的内存 ref，手动 `history.replaceState` 只改后者、绕不过前者 ⇒ 用它做「篡改内部状态再观察行为」的 A/B 探针会得到**假绿**（两条臂都走原分支）。要造这个条件只能重新加载文档（内部状态清零）。
