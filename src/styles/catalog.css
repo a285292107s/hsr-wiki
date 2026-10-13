@@ -322,16 +322,56 @@
 }
 .nk-idx-card__tag-text { min-width: 0; overflow-wrap: break-word; }
 .nk-idx-card__icon { width: 13px; height: 13px; border-radius: 50%; flex: none; }
-/* 分隔符挂在**前一项的尾**（`::after`）而不是后一项的首：折行时「行尾的 `·`」读作续行标记，
-   而「行首的 `·`」是 CJK 禁则里的行头禁则（实测折行时 100% 命中：en@390 38/38、ru@390 82/82、
-   de@390 74/74，见 `temp/char-sep-check.mjs`）。用 `:not(:last-child)` 兜住只有元素（无命途）的条目，
-   避免渲染出「量子 ·」这样没有后继的连接符。 */
-.nk-idx-card__tag:not(:last-child)::after {
-  content: '·';
-  color: var(--text3);
-  opacity: 0.5;
-  flex: none;
+/* 窄卡上的副行只留图标（文字转 sr-only）。
+   **判据**：文字模式下「属性 + 命途」并排所需宽 = 两项文字 + 图标 2×(13px) + 项内 gap 2×(4px) + 行 gap 6px。
+   13 语言**叉积最坏**是 ru `Электрический` + `Разрушение` = 156px 文字 ⇒ 副行需 **196px**。
+   阈值即取该值，且**与语言无关**（不按当前语言的实际宽度判断）——否则切语言会改变卡片密度，
+   与底栏槽位的处置原则一致（[ADR 0054](../../docs/adr/0054-底栏槽位数与语言解耦.md)）。
+   由此保证「显示文字的档位，任何语言都放得下」⇒ 折行恒为 0，是构造保证而非调参结果。
+   实测卡副行可用宽：320(264) / 1440(216.8) / 1920(200.6) 三档 ≥196 ⇒ 显示文字；
+   其余十档 133~188.3px ⇒ 纯图标。改前这十档在 fr/de/ru/en 等语言下成片折行
+   （去掉分隔点后仍余 841 张；en@390 13、pt@390 17、fr@390 40、de@390 52、ru@390 56）。
+   处置取「只给图标」而非改短文案：图标是官方资产、玩家已熟悉，且与文字**同源同义**
+   （`elemLabel` / `pathLabel` 取 `elements.json` / `paths.json` 官方令牌），无信息丢失；
+   这也与光锥卡的命途徽标（`.nk-lc-card__badge`，全档纯图标）同一处置。
+   用 `container-type: inline-size` 而非视口断点：同一张卡有三个宿主，宽度来源互不相同——
+   目录网格随 `--nk-grid-min`/列数、首页品牌带 `min(300px, 82vw)`、枢纽带定宽 `190px`；
+   1440 视口下目录卡副行 216.8px 放得下而枢纽卡 166px 放不下，按视口判断必在其中一处判错。
+   **注意比较的是内容盒**（`__body` 有 12px 左右内距）：阈值写 220（边框盒口径）会误伤 1440 档。
+   本块必须在基础 `.nk-idx-card__icon` 之后：容器查询不提升特异性，
+   写在其前会被后面的 13px 同特异性规则盖掉，放大静默失效。 */
+.nk-idx-card__body { container-type: inline-size; }
+@container (max-width: 195px) {
+  /* sr-only（非 `display: none`）：文字必须留在无障碍树里——`alt=""` 的语义是「此处无需替代文本」，
+     而它在窄卡上恰恰是**唯一**的属性/命途文本载体（图标是图片，读屏只认 alt）。
+     写法与 `LightconeView` 表题注一致（1×1 + clip-path: inset(50%)）。 */
+  .nk-idx-card__tag-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .nk-idx-card__tag { position: relative; }
+  /* 文字隐去后图标独占副行 ⇒ 按可辨识度放大（13 → 16px）。
+     16px 是下限而非审美取值：13px 在 DPR 1 的窄档上仅 13 物理像素，
+     命途图标内的细笔画（如 `Mage` 的星轨）会糊成一团。 */
+  .nk-idx-card__icon { width: 16px; height: 16px; }
+  /* 两项之间留出可分辨的间隔：图标没有文字基线，原 6px 会把它们并成一块。 */
+  .nk-idx-card__meta { gap: 2px 8px; }
 }
+/* 两项之间**不画分隔符**（用户裁决：去掉那个装饰性中点）。
+   原先挂的是前一项尾部的 `::after { content: '·' }`，此处连带两点判据一并记录：
+   ① 它占宽不可忽略——`·` 字形 + 前后各一个 `gap` ≈ 12px，而卡片副行可用宽在 2 列档只有 148px，
+      两项文案本身就常逼近该值 ⇒ 分隔符成了压过折行阈值的那一份重量；
+   ② 语义上它是冗余的：每项都自带图标（元素图标 / 命途图标），归属已经由图标表达，
+      没有它也读不出「第二项是命途吗」的歧义。
+   实测（13 语言 × 7 视口）去掉后折行卡片数显著下降（en@390 47→13、es@390 46→12、
+   vi@390 8→0、th@360 27→1、fr@768 6→0、pt@768 3→0）。
+   **残留**：fr/de/ru 在 2 列档（360~430、部分 ≥768）仍会折行——那是两项文案自身之和
+   超过可用宽（fr `Quantique L'Érudition` 需 ≈171px > 148px），非分隔符所致。
+   该残留已由上方 `@container (max-width: 195px)` 的纯图标处置消除，不靠改文案。 */
 @keyframes nk-idx-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes nk-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes nk-card-fade { from { opacity: 0; } to { opacity: 1; } }

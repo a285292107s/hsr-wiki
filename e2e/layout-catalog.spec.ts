@@ -176,4 +176,62 @@ test.describe('布局验收：目录引擎 · 虚拟网格', () => {
     await noUnknownOverflow(page);
     assertNoErrors();
   });
+
+  /* 副行（属性 + 命途）在任何视口都不得折成两行。
+     折行只在「两项文字并排放不下」时发生，而 13 语言叉积最坏（ru `Электрический` + `Разрушение`
+     = 156px 文字）使副行需 196px，实测十档卡副行仅 133~188px ⇒ 窄卡上文字必然放不下。
+     处置是窄卡只留图标（`.nk-idx-card__tag-text` 转 sr-only），故本用例同时锁两件事：
+     ① 折行数 = 0；② 文字虽不可见但**仍在无障碍树里**（`alt=""` 的语义是「此处无需替代文本」，
+        窄卡上它是属性/命途的唯一文本载体，删掉即信息从无障碍树消失）。
+     跨语言取证：`cn`（最短）与 `pt`（最长）为端点对，同一判据在 13 语言上由会话探针全量覆盖。 */
+  test.describe('角色卡副行：任何视口不折行，且信息不因视觉隐藏而丢失 @viewport-pinned', () => {
+    for (const locale of ['', '/pt']) {
+      for (const width of [390, 1440]) {
+        test(`${locale || '/cn'} @${width}`, async ({ page }) => {
+          await page.setViewportSize({ width, height: 900 });
+          await page.goto(`${locale}/character`);
+          await expect(page.locator('a.nk-idx-card').first()).toBeVisible();
+          await page.waitForTimeout(500);
+
+          const r = await page.evaluate(() => {
+            const cards = [...document.querySelectorAll('a.nk-idx-card')].filter(
+              (c) => c.querySelectorAll('.nk-idx-card__tag').length === 2,
+            );
+            const wrapped: string[] = [];
+            for (const c of cards) {
+              const tops = [...c.querySelectorAll('.nk-idx-card__tag')].map((t) =>
+                Math.round(t.getBoundingClientRect().top),
+              );
+              if (new Set(tops).size > 1) {
+                wrapped.push((c.querySelector('.nk-idx-card__name')?.textContent || '').trim());
+              }
+            }
+            /* 第一张卡的副行文字：可见则必须真有宽度；sr-only 则必须 1×1 且不是 display:none，
+               且其文本出现在卡片的无障碍文本里。 */
+            const t = cards[0]?.querySelector('.nk-idx-card__tag-text');
+            const cs = t ? getComputedStyle(t) : null;
+            const box = t?.getBoundingClientRect();
+            const srOnly = !!cs && cs.display !== 'none' && !!box && box.width <= 2 && box.height <= 2;
+            const vis = !!box && box.width > 2;
+            return {
+              n: cards.length,
+              wrapped,
+              text: (t?.textContent || '').trim(),
+              srOnly,
+              visible: vis,
+              a11yText: (cards[0]?.textContent || '').replace(/\s+/g, ' ').trim(),
+            };
+          });
+
+          expect(r.n, '应渲染出带两项元信息的角色卡').toBeGreaterThan(0);
+          expect(r.wrapped, '副行折成两行的卡片').toEqual([]);
+          expect(r.text.length, '副行文字必须有内容（无论是否可见）').toBeGreaterThan(0);
+          expect(r.srOnly || r.visible, '副行文字须「可见」或「sr-only 隐藏」二者之一').toBe(true);
+          expect(r.a11yText, '属性文本必须在无障碍树中').toContain(r.text);
+
+          await noUnknownOverflow(page);
+        });
+      }
+    }
+  });
 });
