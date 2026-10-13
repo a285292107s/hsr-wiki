@@ -550,7 +550,10 @@ test.describe('布局验收：多语言', () => {
 
     // 设置页：主题色名（强调色列表）
     await page.goto('/en/settings');
+    // `html lang` 由路径前缀决定、**视图挂载前就已就位**，不能当作内容就绪判据：
+    // 只等它就读 `body.innerText()`，拿到的是外壳文本（CI 实测「主题色名应取英文词典值」假红）。
     await expect(page.locator('html')).toHaveAttribute('lang', /^en/);
+    await expect(page.locator('.nk-settings')).toBeVisible();
     const set = await page.locator('body').innerText();
     expect(set, '主题色名应取英文词典值').toContain(en['theme.accent.terracotta']!);
     expect(set, '主题色名不得残留中文').not.toContain(cn['theme.accent.terracotta']!);

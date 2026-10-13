@@ -139,34 +139,45 @@ const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><c
 
 const settingsPath = computed(() => (isCw.value ? '/currency/settings' : '/settings'));
 
-/** 设置位是**可收起的开关**：已在设置页时再点即「收起」＝等同浏览器返回。
+/** 设置位是**可收起的开关**：已在设置页时再点即「收起」＝回到进入设置前那一页。
  *
  * 为什么不用 RouterLink 的默认行为：同址 `push` 被 vue-router 判为 NAVIGATION_DUPLICATED
  * （既无跳转、又照跑一次 `scrollBehavior`）⇒ 再点毫无反应，页面出不去。
- * 兜底不能只看 `history.state.back`：那是 vue-router 的内部簿记，实测在 CI 上出现过为空而把用户
- * 送去本模式枢纽的情形（截图取证：`/en/settings` 上再点，落在 `/en/`），而用户视角是「从
- * `/en/character` 进来的」。故在**点击进入设置时**记下来源页（仅本 SPA 会话有效，整页加载随文档
- * 卸载清零）：站内进来过就优先回那一页，真·首次落地才回本模式枢纽。
- * 记录点放在点击处而非 `watch(route.path)`：初次落地时 vue-router 从 START_LOCATION 解析到目标页，
- * 那个 `from` 的 path 恰好是 `'/'`，被记成来源页会让「直达设置页回本模式枢纽」的兜底落到常规首页
- * （实测被 `layout-nav.spec.ts` 的货币战争直达用例当场抓住）。
+ *
+ * 收起的目标页**自持**，不读 `history.state.back`：后者是 vue-router 的内部簿记，实测在 CI 上
+ * 为空或指错页——站内从 `/en/character` 进设置、再点却落到 `/en/`（截图 + `Received: "/en/"`
+ * 两次取证）。来源页在 `router.afterEach` 里记（`from.fullPath`）：事件参数是**已解析**的路由，
+ * 不像组件里读 `route` 会在初次导航解析完成前读到 START_LOCATION——那样会把 `'/'` 记成来源页，
+ * 使「直达设置页 → 本模式枢纽」的兜底落到常规首页（曾被 `layout-nav.spec.ts` 货币战争直达用例抓住）。
+ * `from.matched.length === 0` 即 START_LOCATION，初次落地不算「站内进入」。
+ * 仅本 SPA 会话有效：整页加载随文档卸载清零，故直达设置页时仍回本模式枢纽。
  * 带修饰键的点击（Ctrl/Cmd/中键）是「新标签页打开设置」，不得劫持。 */
 let settingsEntryPath: string | null = null;
+let offSettingsEntry: (() => void) | null = null;
+
+onMounted(() => {
+  offSettingsEntry = router.afterEach((to, from) => {
+    if (from.matched.length === 0) return;
+    const target = to.meta.cw ? '/currency/settings' : '/settings';
+    if (to.path === target && from.path !== to.path) settingsEntryPath = from.fullPath;
+  });
+});
+onBeforeUnmount(() => offSettingsEntry?.());
 
 function onSettingsClick(e: MouseEvent): void {
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-  if (route.path !== settingsPath.value) {
-    // 站内进入设置：记下来源页；跳转仍交给 RouterLink 的默认行为
-    settingsEntryPath = route.path;
-    return;
-  }
+  // 进入设置：跳转交给 RouterLink，来源页由 afterEach 记录
+  if (route.path !== settingsPath.value) return;
   e.preventDefault();
   const back = router.options.history.state.back;
-  if (typeof back === 'string' && back.length > 0) {
-    router.back();
+  if (settingsEntryPath && back === settingsEntryPath) {
+    router.back(); // 簿记与自持记录一致：走浏览器返回，历史里不留两条相邻同页条目
     return;
   }
-  void router.replace(settingsEntryPath ?? (isCw.value ? '/currency' : '/'));
+  // 簿记缺失/指错页时以自持来源页为准；都没记到（直达设置页）才回本模式枢纽。
+  // `replace` 而非 `push`：免得历史里留下「收起后还能前进回设置页」的假入口。
+  const hub = isCw.value ? '/currency' : '/';
+  void router.replace(settingsEntryPath ?? (typeof back === 'string' && back.length > 0 ? back : hub));
 }
 
 const SETTINGS_ITEM = {
