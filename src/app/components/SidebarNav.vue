@@ -138,6 +138,27 @@ onBeforeUnmount(() => {
 const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>';
 
 const settingsPath = computed(() => (isCw.value ? '/currency/settings' : '/settings'));
+
+/** 设置位是**可收起的开关**：已在设置页时再点即「收起」＝等同浏览器返回。
+ *
+ * 为什么不用 RouterLink 的默认行为：同址 `push` 被 vue-router 判为 NAVIGATION_DUPLICATED
+ * （既无跳转、又照跑一次 `scrollBehavior`）⇒ 再点毫无反应，页面出不去。
+ * 兜底：`history.state.back` 由 vue-router 在首次落地时写成 `null`（直接打开 / 新标签页），
+ * 此时没有可返回的站内页面，回本模式首页而**不是**把用户弹出站点；用 `replace` 以免在历史里
+ * 留下一条「收起后还能前进回设置页」的假入口。
+ * 带修饰键的点击（Ctrl/Cmd/中键）是「新标签页打开设置」，不得劫持。 */
+function onSettingsClick(e: MouseEvent): void {
+  if (route.path !== settingsPath.value) return;
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  e.preventDefault();
+  const back = router.options.history.state.back;
+  if (typeof back === 'string' && back.length > 0) {
+    router.back();
+    return;
+  }
+  void router.replace(isCw.value ? '/currency' : '/');
+}
+
 const SETTINGS_ITEM = {
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
 } as const;
@@ -233,6 +254,7 @@ const DEBUG_ITEM = {
         :title="t('nav.titleSettings')"
         class="ui-sidebar-link ui-sidebar-settings"
         :class="{ 'ui-sidebar-link--active': route.path === settingsPath }"
+        @click="onSettingsClick"
       >
         <span class="ui-sidebar-link__icon" v-html="SETTINGS_ITEM.icon" />
         <span class="ui-sidebar-link__text">

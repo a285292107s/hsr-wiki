@@ -72,3 +72,7 @@
 - **跨文件的媒体查询归属只能靠读包围块或探针确认**：靠「我记得某文件有这条」推断会导向一个不存在的缺陷，进而为一个不存在的 bug 重排版面。`src/styles/character-skeleton.css`
 - **页面 CSS 绝不复制粘贴，共享部分下沉到已声明原语层**：同一批行样式让四个常青页共用 `renderCard`、列改多列时行样式仍全部来自 `endgame.css`，才是「不复制」的正确落法。
 - **改一个 fixed 层的高度前，先找谁按它的高度写死了避让值**：详情页 `padding-top` 是按吸顶条高度定的，导航抬升后条变长即盖住首屏，页面级截图上不易察觉。`src/styles/character.css`
+
+## 路由与外壳交互
+
+- **「再点同一入口收起」不是链接语义，`RouterLink` 自己做不到**：收起的目标态是「不存在」而非另一个 URL，`to` 只能写成当前路径，而 vue-router 把同址 `push` 判为 `NAVIGATION_DUPLICATED`——不跳转、不报错（控制台安静）、却照跑一次 `scrollBehavior`，两次点击之间看不出差别。收起只能显式做：`history.state.back` 有值走 `router.back()`，为 `null` 时 `replace` 回本模式枢纽（`push` 会在历史里留一条「收起后还能前进回该页」的假入口）。判「有无站内历史」不能看 `window.history.length`——它把站外与 about:blank 条目一起算进去。挂在 `RouterLink` 上的 `@click` 必须放行带修饰键的点击（Ctrl/Cmd/中键是新标签页语义），否则被劫持成返回。`src/app/components/SidebarNav.vue`

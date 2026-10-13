@@ -32,7 +32,7 @@
 | [testing.md](testing.md) | [testing.md](../agents/testing.md) + [verification.md](../agents/verification.md) | 静默失效 · 溢出与几何取证 · 竞态与等待 · vitest 环境 · 假结论防治 · 形态与契约判据 · 焦点与可达名 · 取证手法陷阱 · 提速并发 |
 | [build-deploy.md](build-deploy.md) | [commands.md](../agents/commands.md) | dev server「改了不生效」 · 端口与实例 · 构建守卫与门禁 · Vercel 投递 · 增量与确定性 · 静态资产（自托管字体 / 分享图） |
 | [ai-visibility.md](ai-visibility.md) | [ai-discoverability.md](../agents/ai-discoverability.md) | 构建全绿但结果错 · 覆盖率与守卫盲区 · 快照正文保真 · 快照与就绪态类名耦合 · 投递模型 · 反 cloaking · crawler UA 与 robots · 页面元信息（title / og / JSON-LD） · 无 JS 取证与死链 |
-| [architecture.md](architecture.md) | [architecture.md](../agents/architecture.md) | 分层与目录归属 · 共享单例与 barrel · types 按域拆分 · 目录页配置驱动 · 跨文件重复实现 · 研究线 /debug · CSS 拆分纪律 |
+| [architecture.md](architecture.md) | [architecture.md](../agents/architecture.md) | 分层与目录归属 · 共享单例与 barrel · types 按域拆分 · 目录页配置驱动 · 跨文件重复实现 · 研究线 /debug · CSS 拆分纪律 · 路由与外壳交互 |
 | [docs-process.md](docs-process.md) | 本目录 + [conventions.md](../agents/conventions.md) | 渐进式披露与路由表 · ADR 门槛 · memory 写法 · 注释政策 · Agent Teams 并发与写入分工 · 交付流程与验证纪律 · 文档守卫 |
 
 ## 怎么用（给 AI）

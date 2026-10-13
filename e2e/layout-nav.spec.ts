@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { collectConsoleIssues } from './helpers';
 import { collectNavAnchors, noUnknownOverflow } from './layout.shared';
 
@@ -221,5 +221,61 @@ test.describe('布局验收：侧栏各项风格一致', () => {
       }
     }
     assertNoErrors();
+  });
+});
+
+/**
+ * 设置位从「只进不出」改为**可收起**：已在设置页时再点 ＝ 收起（等同浏览器返回）。
+ *
+ * 两条分支必须分别构造，不能用同一路径覆盖：站内历史（`history.state.back` 有值）只能靠站内点击
+ * 进入设置；无站内历史（`back === null`）只在**首次落地**设置页时出现，故必须 `goto` 直达。
+ * 落点判据取「进入设置前的页面」而非固定首页——用**详情页**进入才能把「返回上一页」与
+ * 「兜底回首页」区分开（若从首页进设置，两者结果相同，断言失去判别力）。
+ * 收起前后都判 `pathname`：`route.path` 已剥离语言前缀，故前缀档必须单独跑一条。
+ */
+test.describe('布局验收：设置入口可收起', () => {
+  const pathname = (page: Page) => new URL(page.url()).pathname;
+
+  test('站内从详情页进设置，再点设置 → 回到该详情页', { tag: '@viewport-independent' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/character/1212');
+    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+    await page.locator('.ui-sidebar-settings').click();
+    await expect.poll(() => pathname(page), '首次点击应进入设置页').toBe('/settings');
+    await page.locator('.ui-sidebar-settings').click();
+    await expect.poll(() => pathname(page), '再点设置应收起并回到进入前的详情页').toBe('/character/1212');
+    assertNoErrors();
+  });
+
+  test('直达设置页（无站内历史），再点设置 → 兜底回本模式首页', { tag: '@viewport-independent' }, async ({ page }) => {
+    await page.goto('/settings');
+    await expect(page.locator('.ui-sidebar-settings')).toBeVisible();
+    await page.locator('.ui-sidebar-settings').click();
+    await expect.poll(() => pathname(page), '无站内历史时应兜底回 / 而不是留在设置页').toBe('/');
+    await expect(page.locator('.nk-settings')).toHaveCount(0);
+  });
+
+  test('货币战争模式：站内进入再点回原页；直达则兜底回货币战争枢纽', { tag: '@viewport-independent' }, async ({ page }) => {
+    await page.goto('/currency/role');
+    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+    await page.locator('.ui-sidebar-settings').click();
+    await expect.poll(() => pathname(page)).toBe('/currency/settings');
+    await page.locator('.ui-sidebar-settings').click();
+    await expect.poll(() => pathname(page), '再点设置应收起并回到进入前的货币战争页').toBe('/currency/role');
+
+    // 重新直达：goto 是整页加载，`history.state.back` 归零 ⇒ 走兜底分支
+    await page.goto('/currency/settings');
+    await expect(page.locator('.ui-sidebar-settings')).toBeVisible();
+    await page.locator('.ui-sidebar-settings').click();
+    await expect.poll(() => pathname(page), '兜底落点必须是本模式枢纽（/currency）而非常规首页').toBe('/currency');
+  });
+
+  test('语言前缀档同判据：/en/settings 收起回 /en/character', { tag: '@viewport-independent' }, async ({ page }) => {
+    await page.goto('/en/character');
+    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+    await page.locator('.ui-sidebar-settings').click();
+    await expect.poll(() => pathname(page)).toBe('/en/settings');
+    await page.locator('.ui-sidebar-settings').click();
+    await expect.poll(() => pathname(page), '前缀不得被收起动作吃掉').toBe('/en/character');
   });
 });
