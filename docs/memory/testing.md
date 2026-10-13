@@ -126,6 +126,7 @@
 - **「节点在」不等于「字体就绪」：`document.fonts.status === 'loaded'` 会在入口 CSS 还没应用时就是真**——此时首屏还没有对应文本、字体请求一个都没发出，等待立刻通过，测量就落在**回退字体**的几何上。同一根因在 CI 上以两种面貌出现：① `shell.spec` 的 `document.fonts.check('12px "Noto Sans SC"')` 为假（字体可用性假红）；② 首页 a11y 多出 `scrollable-region-focusable`（回退字宽把枢纽带撑成可滚动区域）。**修法**：就绪门里显式 `document.fonts.load('12px "Noto Sans SC"', '角色图鉴')`（带样本文本）+ 有上限的 `Promise.race`，再等 `ready`——`check()` 也要带同样的样本文本，否则「族存在」与「该段文本可渲染」两件事会被混为一谈。
 - **采集 transition 前的主题窗口等待有顺序要求**：`.theme-transitioning` 是全仓**唯一**能把 `border-color` 变成 400ms 的规则（tokens.css `!important` 覆盖），而它由 `App.vue` 的 `watch(isCw)` 在**路由解析时**加上、450ms 后移除；卡片渲染发生在解析之后。故必须**先等渲染、再等窗口关闭**——顺序反了（先等类不在场、再等卡片）会在窗口内采样，失败值恰为 400ms 而非 `--nk-dur-normal` 的 300ms。cw 路由再加「先等它出现（失败即放行）再等它消失」的兜底：同模式直达时该类根本不出现，硬等会白付等待。判据：**全仓只有一条规则能产出该值**时，先查这条规则的开关条件，别去猜 CSS 优先级。
 - **`Tab` 循环类用例的耗时随「可聚焦元素数 × runner 负载」线性增长，必须显式给预算**：`shell.spec` 的焦点可见性用例最多按 60 次 Tab 走到目标（每次一趟 `evaluate` 往返），CI runner 上单是走到 `/debug` 的下拉框就花 29s ⇒ 越过默认 30s 后连 `page.screenshot` 都开不了（trace 里截图动作停在 29.3s、报 `Test timeout`）。这类「到达成本不可预知」的用例与全路由 sweep 同类：修法是 `test.setTimeout`，不是 retries、也不是改断言。
+- **「骨架退场」在懒加载路由 chunk 执行前是**空真**：视图挂载前 DOM 里既没有 `.nk-skeleton` 也没有正文，`!document.querySelector('.nk-skeleton')` 会立刻通过（实测「检查开始 → 取值」相隔 24ms）。`waitForSettled` 因此**不能当作「页面就绪」的充分条件**——凡紧跟其后读取页面内容的用例，必须先等**自己那个被测对象**出现（如 `await expect(locator).toBeVisible()`），否则拿到 null 会被误判成数据/判据缺陷。判据：失败是「取到 null / 空集」且同一用例重跑偶尔通过时，先查该用例的等待是否落在挂载之前（trace 里 `goto` → 各 wait → `evaluate` 的相对时刻一眼可辨）。
 
 ## 强制色模式（Windows 高对比）
 

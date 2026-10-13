@@ -151,6 +151,10 @@ test.describe('玩法页「当期赛季」判据（不得取未开始的那一�
       await page.goto(`/endgame/${mode}`);
       // 本页正文整体在 `phase === 'ready'` 内，`goto` 的 load 事件早于路由 chunk + 数据 JSON 落地
       // （CI trace 实测：数据请求晚于 load 约 160ms）——不等就取值会拿到 null，属竞态而非数据缺陷。
+      /* 就绪门必须**等到被测对象**：`waitForSettled` 的「骨架退场」在**懒加载路由 chunk 尚未执行**时是
+         空真（此刻 DOM 里既没有骨架也没有内容）——CI trace 实测骨架检查通过 24ms 后本用例就取值，
+         此时 note 链接还不存在（页面稍后才渲染出 `link 来生泅渡 → /endgame/maze/1035`）。 */
+      await expect(page.locator('.nk-egm__note .nk-egm__link')).toBeVisible();
       await waitForSettled(page);
 
       const r = await page.evaluate(() => {
