@@ -55,6 +55,25 @@ const visibleItems = computed(() => navItems.value.slice(0, visibleCount.value))
 const foldedItems = computed(() => navItems.value.slice(visibleCount.value));
 const moreActive = computed(() => foldedItems.value.some(isActive));
 
+/* 底栏槽位数 = 纯视口函数（不参考任何文案宽度），因此**与语言无关**——这是本轮的核心契约。
+   改前「显示几个」由译文固有宽决定：同一 390px 视口 cn 显示 5 项而 pt 只有 3 项。
+   不设「固定 4 项」之类的人为上限：那会把中文/韩文从 5 项压到 4 项，等于用「多数语言没变好」
+   换「少数字语言变好」。上限改为物理值（槽宽 ≥ `--nk-nav-slot-min`）。 */
+
+/** 底栏槽位预算（**只读令牌与视口，不量 DOM**）。
+ *
+ * 为什么不再量 DOM 固有宽：`flex-basis: auto` 下每项的「固有宽」等于该语言标签的像素宽，
+ * 折叠结果因此被译文长度决定。改成等分槽位（CSS `flex: 1 1 0`）后槽宽只由视口决定，
+ * 「显示几个」也就可以用纯算术定下来。
+ * 取数口径必须是 `clientWidth`（= 视口宽）：底栏是 fixed 全宽，量 `offsetWidth` 等于把
+ * 「当前折叠成的窄盒」当输入，会自锁。
+ *
+ * **两段式预算**（次序有意义）：
+ * ① 先问「不收折时全量放得下吗」——放得下就全部平铺、**不占「更多」槽**。
+ *    这一段是 ADR 0007「CW 手机端 6 槽位平铺、无更多抽屉」的落地：若一上来就预留「更多」，
+ *    该项在 390px 档会退成「5 项 + 更多」，等于用可见性换一致性。
+ * ② 放不下才预留「更多」槽，再按同一下限取前缀——此时槽数仍与语言无关。
+ * `--nk-nav-slot-min` 取的是「最宽语言仍能折两行」所需的槽宽，故两段的取值对 13 语言同一。 */
 function recomputeFold(): void {
   const el = sidebarRef.value;
   if (!el) return;
@@ -62,35 +81,22 @@ function recomputeFold(): void {
     visibleCount.value = navItems.value.length;
     return;
   }
-  el.classList.add('ui-sidebar--measure');
-  try {
-    const cs = getComputedStyle(el);
-    const avail = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    const q = (sel: string): number => {
-      const n = el.querySelector<HTMLElement>(sel);
-      if (!n) return 0;
-      const cs = getComputedStyle(n);
-      return n.offsetWidth + parseFloat(cs.marginLeft) + parseFloat(cs.marginRight);
-    };
-    const fixed = q('.ui-sidebar-swap') + q('.ui-sidebar-divider') + q('.ui-sidebar-settings');
-    const moreW = q('.ui-sidebar-more');
-    const navW = Array.from(
-      el.querySelectorAll<HTMLElement>('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)'),
-    ).map((n) => n.offsetWidth);
-    const total = navW.reduce((a, b) => a + b, 0);
-    let k = navW.length;
-    if (fixed + total > avail) {
-      let used = fixed + moreW;
-      k = 0;
-      while (k < navW.length && used + navW[k] <= avail) {
-        used += navW[k];
-        k++;
-      }
-    }
-    visibleCount.value = k;
-  } finally {
-    el.classList.remove('ui-sidebar--measure');
+  const cs = getComputedStyle(el);
+  const avail = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const toolW = parseFloat(cs.getPropertyValue('--nk-nav-tool-w')) || 44;
+  const slotMin = parseFloat(cs.getPropertyValue('--nk-nav-slot-min')) || 44;
+  const dividerW = parseFloat(cs.getPropertyValue('--nk-nav-divider-w')) || 0;
+  const n = navItems.value.length;
+  // ① 全域平铺：固定位只有「跨模式入口 + 设置」+ 分隔线
+  const full = avail - toolW * 2 - dividerW;
+  if (Math.floor(full / slotMin) >= n) {
+    visibleCount.value = n;
+    return;
   }
+  // ② 需要折叠：「更多」入口加入固定位
+  const budget = avail - toolW * 3 - dividerW;
+  /* 下界 2：再窄也不能出现「底栏全是工具位」的无导航形态。 */
+  visibleCount.value = Math.max(2, Math.min(n, Math.floor(budget / slotMin)));
 }
 
 let foldObserver: ResizeObserver | null = null;
@@ -190,27 +196,9 @@ const DEBUG_ITEM = {
       <span class="ui-sidebar-link__label">{{ t('nav.more') }}</span>
     </button>
 
-    <RouterLink
-      v-for="item in foldedItems"
-      :key="item.path"
-      :to="item.path"
-      :title="`${itemLabel(item)} · ${item.en}`"
-      :aria-current="isActive(item) ? 'page' : undefined"
-      :class="['ui-sidebar-link', 'ui-sidebar-link--in-more', { 'ui-sidebar-link--active': isActive(item) }]"
-      @pointerenter="prefetchByPath(item.path)"
-    >
-      <span class="ui-sidebar-link__icon" v-html="item.icon" />
-      <span class="ui-sidebar-link__text">
-        <span class="ui-sidebar-link__cn">{{ itemLabel(item) }}</span>
-        <span class="ui-sidebar-link__en">{{ item.en }}</span>
-      </span>
-      <span class="ui-sidebar-link__label">{{ itemShort(item) }}</span>
-    </RouterLink>
-
     <div class="ui-sidebar-tools">
       <RouterLink
-        v-if="IS_DEV"
-        :to="DEBUG_PATH"
+        v-if="IS_DEV"        :to="DEBUG_PATH"
         :title="t('nav.titleDebug')"
         class="ui-sidebar-link ui-sidebar-debug"
         :class="{ 'ui-sidebar-link--active': route.path === DEBUG_PATH }"

@@ -1081,8 +1081,9 @@
 }
 
 @media (max-width: 767px) {
-  /* 本页走文档流滚动而非 .nk-page--detail，须自己避让 <768 档固定底栏，否则页尾技能描述被永久遮住 */
-  .nk-mob-page { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  /* 本页走文档流滚动而非 .nk-page--detail，须自己避让 <768 档固定底栏，否则页尾技能描述被永久遮住。
+     避让值取令牌而非字面量：栏高是单一事实源（tokens.css `--nk-nav-bar-h`），写死会在栏高变动时静默失效。 */
+  .nk-mob-page { padding-bottom: calc(var(--nk-nav-bar-h) + env(safe-area-inset-bottom, 0px)); }
   .nk-mob-hero {
     flex-direction: column;
   }

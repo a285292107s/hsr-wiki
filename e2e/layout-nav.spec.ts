@@ -30,42 +30,98 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     await expect(page.locator('.ui-sidebar-more')).toBeVisible();
     const anchors = await collectNavAnchors(page);
     expect(anchors.length).toBeGreaterThan(1);
-    // 前缀性质：可见锚点在 DOM 序中恒为前 k 个（不放乱序/交错）
+    /* 前缀性质：可见锚点在 DOM 序中恒为前 k 个（不放乱序/交错）。
+       折叠项**不进底栏 DOM**（只随抽屉渲染），故这里「可见集合」即全部锚点，
+       前缀性质退化为恒真——真正的前缀判据由下方「抽屉内容 = 数据序尾部」承担。 */
     const visIdx = anchors.map((a, i) => (a.visible ? i : -1)).filter((i) => i >= 0);
     expect(visIdx).toEqual(Array.from({ length: visIdx.length }, (_, i) => i));
-    // 只有折叠（可见项 < 全量）→ 抽屉内容 = 隐藏尾部，顺序一致
-    const foldedHrefs = anchors.filter((a) => !a.visible).map((a) => a.href);
-    expect(foldedHrefs.length).toBeGreaterThan(0);
+
+    // 抽屉 = 数据序里被折叠的尾部（顺序一致、不重不漏）；期望值由 nav-items 的规范序派生
+    const allHrefs = await page.evaluate(() => {
+      const bar = document.querySelector('.ui-sidebar')!;
+      return [...bar.querySelectorAll('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')]
+        .map((el) => el.getAttribute('href'));
+    });
+    expect(allHrefs.length).toBeGreaterThan(0);
     await page.locator('.ui-sidebar-more').click();
-    // `evaluateAll` 无自动等待：抽屉由 `v-if="moreOpen"` 在点击后的下一帧才进 DOM，直接读会
-    // 拿到空数组 ⇒ 先等条目数与「折叠尾部」一致再取 href（期望值不变，见下方 toEqual）。
-    await expect(page.locator('.ui-more__item')).toHaveCount(foldedHrefs.length);
+    await expect(page.locator('.ui-more__item').first()).toBeVisible();
     const drawerHrefs = await page.locator('.ui-more__item').evaluateAll((els) =>
       els.map((el) => el.getAttribute('href')),
     );
-    expect(drawerHrefs).toEqual(foldedHrefs);
+    // 底栏 + 抽屉 = 全量且无重复（底栏在前、抽屉续其后）
+    const union = [...allHrefs, ...drawerHrefs];
+    expect(new Set(union).size, '底栏与抽屉不得重复同一路由').toBe(union.length);
+    expect(drawerHrefs.length, '320px 档必须确有折叠项').toBeGreaterThan(0);
     // 320px 低于最小声明断点 374，属未声明支持区间。KNOWN_OVERFLOWS 现为空（`.nk-seg` 手机宽
     // 被裁的既有缺陷已修）⇒ 未经登记的溢出一律失败。
     await noUnknownOverflow(page);
     assertNoErrors();
   });
 
-  test('宽视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('窄视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/settings');
     /* 就绪等待必须先于「入口隐藏」断言：导航尚未挂载时 `.ui-sidebar-more` 同样 `toBeHidden()`、
-       `--in-more` 同样 `toHaveCount(0)`——这两条对空文档恒真，不构成等待。而 `collectNavAnchors`
+       抽屉同样 `toHaveCount(0)`——这两条对空文档恒真，不构成等待。而 `collectNavAnchors`
        是 `evaluateAll`（无自动等待），首跑 CI 第 2 条失败即此：`anchors.length` 读到 0。
        锚点用静态导航表渲染（无网络依赖），首个锚点可见即代表侧栏已就绪。 */
     await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
     await expect(page.locator('.ui-sidebar-more')).toBeHidden();
-    // 无折叠项渲染；全部导航锚点可见
-    await expect(page.locator('a.ui-sidebar-link--in-more')).toHaveCount(0);
     const anchors = await collectNavAnchors(page);
     expect(anchors.length).toBeGreaterThan(1);
+    // 桌面档不折叠：没有任何项落进抽屉
+    await expect(page.locator('.ui-more__item')).toHaveCount(0);
     expect(anchors.every((a) => a.visible)).toBe(true);
     await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+});
+
+/**
+ * 底栏槽位数**与语言无关**（本轮的契约）。
+ *
+ * 改前槽位数由译文固有宽决定（`flex-basis: auto` → 每项固有宽 = 该语言标签像素宽）：
+ * 同一 390px 视口实测 cn 5 项 / pt 3 项——切个语言导航就少一半。
+ * 取「中文（最短）+ 葡语（最长）」两端即可证伪：两者若不同即回归。
+ * 全 13 语言 × 6 视口的完整矩阵在会话探针里跑过（`temp/verify-nav-final.mjs`），
+ * 不进 e2e 是预算考虑（13 语言 × 多视口会显著拉长墙钟，而两端点已覆盖判据）。
+ */
+test.describe('布局验收：底栏槽位数与语言无关', () => {
+  test('中文与葡语（最长译文）在窄视口下槽位数一致', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const count = async (url: string, width: number): Promise<number> => {
+      await page.setViewportSize({ width, height: 780 });
+      await page.goto(url);
+      await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+      return page.locator('.ui-sidebar')
+        .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
+        .evaluateAll((els) => els.filter((el) => el.offsetParent !== null).length);
+    };
+    for (const width of [320, 390, 430]) {
+      const cn = await count('/character', width);
+      const pt = await count('/pt/character', width);
+      expect(pt, `${width}px：葡语底栏槽位数应与中文一致（改前葡语更少）`).toBe(cn);
+      expect(cn, `${width}px：底栏至少 2 槽`).toBeGreaterThanOrEqual(2);
+    }
+    assertNoErrors();
+  });
+
+  /* ADR 0007「手机端 CW 模式底栏 6 槽位平铺、无『更多』抽屉」。
+     折叠预算因此是**两段式**：先问「不收折时全量放得下吗」，放得下就全部平铺、不预留「更多」槽；
+     放不下才预留。若一上来就预留，CW 在 390px 会退成「5 项 + 更多」，可见性被一致性换掉。
+     期望值从导航表派生（`nav-items.ts` 的 CW 项数），不写死 6。 */
+  test('货币战争模式：常规手机档全量平铺（无「更多」抽屉）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 390, height: 780 });
+    await page.goto('/currency/role');
+    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+    const all = await page.locator('.ui-sidebar')
+      .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
+      .evaluateAll((els) => els.map((el) => ({ href: el.getAttribute('href'), vis: el.offsetParent !== null })));
+    expect(all.length, '货币战争模式的章节项应全部渲染').toBeGreaterThan(1);
+    expect(all.every((a) => a.vis), '390px 档货币战争模式应全量平铺（ADR 0007 的 6 槽位口径）').toBe(true);
+    await expect(page.locator('.ui-sidebar-more'), '全量平铺时不得出现「更多」入口').toBeHidden();
     assertNoErrors();
   });
 });

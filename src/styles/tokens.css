@@ -208,6 +208,12 @@
 
   --nk-content-max: 1440px;
   --nk-content-offset: 0;
+  /* 手机底栏栏高（唯一声明处）。56px 只够单行标签（20px 图标 + 3px 间隙 + 1×10.5px 行高）；
+     多语言标签折行后行盒涨到 54.5px（2 行）乃至 65px（3 行，最窄档的 ru），
+     56px 会把图标顶到 1px 贴边。64px 让两行有常规呼吸量、三行也不贴边。
+     消费点：`.ui-sidebar` / `.ui-more` / `.nk-page--detail` / `monster-detail.css` 的页尾避让——
+     **改这里必须同步核对这四处**（避让值小于栏高 = 内容被永久遮住）。 */
+  --nk-nav-bar-h: 64px;
   --nk-detail-max: 1000px;
   --nk-struct-max: 952px;
   /* 字号刻度（唯一来源）：分「界面/正文」8 档与「标题/特写」5 档。
@@ -329,12 +335,26 @@
 .ui-sidebar {
   position: fixed;
   top: auto; bottom: 0; left: 0; right: 0; transform: none;
-  width: 100%; height: calc(56px + env(safe-area-inset-bottom, 0px));
+  width: 100%; height: calc(var(--nk-nav-bar-h) + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: row; align-items: stretch;
   background: var(--nk-shell-bg);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border); border-radius: 0;
   padding: 0 4px env(safe-area-inset-bottom, 0px); z-index: 100000;
+  /* 底栏槽位几何（唯一的声明处；`recomputeFold` 直接读这两个值算折叠，不再量 DOM）。
+     存在理由是**槽位数必须与语言无关**：内容项若按标签固有宽参与分配，`flex-basis: auto`
+     会让「能塞几个」由译文长度决定——实测同一视口 390px 下 cn 显示 6 个而 pt 只有 3 个。
+     故内容项改等分（`flex: 1 1 0`），槽数 = 可用宽 ÷ 槽下限。
+     `--nk-nav-slot-min` 是槽位下限（= 触控目标下限，也是「最宽语言的标签仍能折两行」的实测宽）：
+     槽数 = ⌊(可用宽 − 3×工具位 − 分隔线) ÷ 本值⌋，**与语言无关**。取 44px 不是新值——它就是
+     本文件原有的 `min-width: 44px` 触控下限，原先只被当作最小值、并未参与折叠算术，
+     于是折叠被译文固有宽主导。`--nk-nav-tool-w`：工具位（跨模式入口 / 设置 / 更多）在手机档
+     收成图标档后的定宽，桌面档三项都带文字（实测 pt 三项合计 208px = 可用宽的 54%）。 */
+  --nk-nav-tool-w: 44px;
+  --nk-nav-slot-min: 44px;
+  /* 分隔线的**实际占宽**（1px 线 + 两侧各 3px 外边距）——折叠算术要扣的是盒宽不是线宽，
+     写 1px 会低估 6px，实测因此把槽宽算成 43.3px（低于 44px 的触控下限）而不自知。 */
+  --nk-nav-divider-w: 7px;
 }
 .ui-sidebar-divider {
   flex: none;
@@ -402,6 +422,32 @@
 .ui-sidebar-settings { margin-top: 0; }
 @media (max-width: 767px) {
   .ui-sidebar-debug { display: none; }
+
+  /* 手机底栏的槽位契约（与上面 `--nk-nav-*` 三个令牌是一对，改一处必须改另一处）：
+     ① **章节项等分**——`flex-basis: 0` 让槽宽只由视口决定，不再被译文固有宽牵着走。
+        改前是 `flex: 1 1 auto`，于是「能塞几个」= 该语言标签有多长（cn 6 项 / pt 3 项）。
+        `min-width: 0` 必须显式写回：基类的 `min-width: 44px` 会让槽宽拒绝收缩到 44 以下，
+        窄屏 6 项时反而撑破底栏。
+     ② **工具位定宽**——跨模式入口 / 设置 / 更多三项收成图标档（`flex: 0 0 var(--nk-nav-tool-w)`），
+        文案只留 `aria-label` / `title`。理由不是省地方，是**它们不比章节项更该占宽**：
+        实测 pt 「Guerra das Moedas」一项就吃掉 93px（可用宽的 24%），而它与「设置」在底栏
+        本来就没有可读性负担——图标 + 无障碍名即可（Label in Name 由 `swapAria` 保证）。
+     ③ **标签折两行**——`nowrap` 换成折行 + 断词；P3「导航标签禁止截断」的落地形态。
+        `hyphens: auto` 需要 `<html lang>` 正确（ADR 0052 已同步），de 复合词得到「Währungs-krieg」。 */
+  .ui-sidebar-link:not(.ui-sidebar-swap):not(.ui-sidebar-settings):not(.ui-sidebar-more) {
+    flex: 1 1 0; min-width: 0;
+  }
+  .ui-sidebar-swap,
+  .ui-sidebar-settings,
+  .ui-sidebar-more {
+    flex: 0 0 var(--nk-nav-tool-w); min-width: 0;
+  }
+  .ui-sidebar-swap .ui-sidebar-link__label,
+  .ui-sidebar-settings .ui-sidebar-link__label { display: none; }
+  .ui-sidebar-link__label {
+    white-space: normal; overflow-wrap: break-word; hyphens: auto;
+    text-align: center; line-height: 1.05; max-width: 100%;
+  }
 }
 
 .ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) {
@@ -422,14 +468,10 @@
   .ui-sidebar--swap-anim .ui-sidebar-link:not(.ui-sidebar-swap) { animation: none; }
 }
 
-.ui-sidebar-link--in-more { display: none; }
 .ui-sidebar-more--hidden { display: none; }
-.ui-sidebar--measure .ui-sidebar-link { flex: none !important; width: auto !important; }
-.ui-sidebar--measure .ui-sidebar-link--in-more { display: flex !important; }
-.ui-sidebar--measure .ui-sidebar-more--hidden { display: flex !important; }
 .ui-more {
   position: fixed; left: 0; right: 0; top: 0;
-  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--nk-nav-bar-h) + env(safe-area-inset-bottom, 0px));
   z-index: 99990;
   display: flex; align-items: flex-end;
   background: color-mix(in srgb, var(--blk-900) 55%, transparent);
@@ -522,7 +564,7 @@
   opacity: var(--grain-opacity);
 }
 
-.nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+.nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(var(--nk-nav-bar-h) + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 .nk-page--detail::-webkit-scrollbar { width: 6px; }
 .nk-page--detail::-webkit-scrollbar-thumb { background: var(--border2); border-radius: var(--nk-radius-1); }
 .nk-page--detail::-webkit-scrollbar-track { background: transparent; }
@@ -961,7 +1003,6 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
     background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
   }
   .ui-sidebar-more { display: none; }
-  .ui-sidebar-link--in-more { display: flex; }
   .ui-more { display: none; }
   .ui-sidebar-tools {
     display: flex;

@@ -10,4 +10,4 @@
 - **宿主侧边栏 + CSS 换肤（旧版寄生方案）**：放弃——独立站后宿主 DOM 不再相关，寄生方案要额外维护让位与换肤两套耦合逻辑。
 - **自建侧边栏**（采纳）：导航项单一事实源在本仓 `nav-items.ts`；代价是宿主新页面需手动同步（见上）。
 
-**现状指针**：`src/app/components/SidebarNav.vue` + `nav-items.ts`（导航项单一事实源；≥768px 左侧胶囊 / ≤767px 底部 Tab Bar；dev-only「调试台」入口及其折叠测量排除见 ADR-0015）。
+**现状指针**：`src/app/components/SidebarNav.vue` + `nav-items.ts`（导航项单一事实源；≥768px 左侧胶囊 / ≤767px 底部 Tab Bar；dev-only「调试台」入口及其折叠测量排除见 ADR-0015）。底栏槽位数为**纯视口函数**（与语言解耦）见 [ADR 0054](0054-底栏槽位数与语言解耦.md)。

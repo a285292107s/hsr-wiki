@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { collectConsoleIssues, readJson } from './helpers';
-import { collectNavAnchors, noUnknownOverflow } from './layout.shared';
+import { collectNavAnchors, navEntryReachable, noUnknownOverflow } from './layout.shared';
 
 /**
  * 布局验收：贪饕污染专题页（ADR 0025） —— layout 验收层（语义契约 + 数值规格）分文件之一。
@@ -75,8 +75,9 @@ test.describe('布局验收：贪饕污染专题页（ADR 0025）', () => {
     expect(anchors.length).toBeGreaterThan(1);
     const visIdx = anchors.map((a, i) => (a.visible ? i : -1)).filter((i) => i >= 0);
     expect(visIdx).toEqual(Array.from({ length: visIdx.length }, (_, i) => i));
-    // 当前板块在侧栏内处于激活态（导航第 8 项入口可达）
-    await expect(page.locator('.ui-sidebar a[href="/voracity"]')).toHaveCount(1);
+    // 当前板块入口**可达**（导航第 8 项）——窄档下它可能被折叠进「更多」抽屉，故判据是
+    // 「底栏直连 或 抽屉内可达」，而不是「底栏里恰有 1 条」（后者会把收进抽屉误判成入口丢失）。
+    expect(await navEntryReachable(page, '/voracity'), '/voracity 入口必须可达（底栏或「更多」抽屉）').toBe(true);
     await noUnknownOverflow(page);
     assertNoErrors();
   });

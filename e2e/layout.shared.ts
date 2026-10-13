@@ -40,6 +40,27 @@ export async function collectNavAnchors(page: import('@playwright/test').Page) {
   );
 }
 
+/**
+ * 某路由的导航入口是否**可达**——底栏直连 **或** 折叠进「更多」抽屉。
+ *
+ * 存在理由：窄档下底栏只放得下 n 项（`SidebarNav.recomputeFold` 按槽位预算裁剪），
+ * 其余项**不进底栏 DOM**、只在抽屉打开时渲染。故「入口可达」不能退化成
+ * 「底栏里找得到该 href」——那会把「收进抽屉」（设计形态）误判成「入口丢失」（缺陷）。
+ * 全断点语义：≥768px 无折叠，等价于「侧栏里恰有 1 条」。
+ */
+export async function navEntryReachable(
+  page: import('@playwright/test').Page,
+  href: string,
+): Promise<boolean> {
+  if (await page.locator(`.ui-sidebar a.ui-sidebar-link[href="${href}"]`).count() > 0) return true;
+  const more = page.locator('.ui-sidebar-more');
+  if (!(await more.isVisible())) return false;
+  await more.click();
+  const inDrawer = await page.locator(`.ui-more__item[href="${href}"]`).count() > 0;
+  await page.keyboard.press('Escape');
+  return inDrawer;
+}
+
 /** 读取 <html> 上的内容区避让令牌（断言 --nk-content-offset 的实际落值，单位 px）。
  *  注意：自定义属性按原样返回（手机断点声明为无单位 `0`），故必须 parseFloat 归一化。 */
 export async function readContentOffset(page: import('@playwright/test').Page): Promise<number> {
