@@ -123,6 +123,9 @@
 - **`playwright test e2e/layout-` 这类路径前缀过滤会静默缩小覆盖**：它按**路径子串**匹配，`guards.spec.ts` / `shell.spec.ts` 因此一次都没跑过，而 CI 注释与文档都写着「不变量层永远可跑」。判据：改选定的文件集后用 `--list | grep -c` 数**实际收集条数**，不要相信命令「看起来包含它」。同理，`pnpm test:e2e:ci` 的语义必须与 `.github/workflows/` 里的实际命令逐字对齐（本仓由 ci.yml 的 `static` / `invariants` / `layout` / `smoke` 四条 job 承担）。
 - **分片按「条数」切分，重文件留在里面会拖垮一整片**：`--shard=i/N` 只保证条数均衡，不保证耗时均衡——全部 layout 一起分片时实测估算 266/437/455/201s（`layout-locales-smoke` 是单文件串行的大块）；把两个重文件（冒烟 / 长文案）拆成独立 job、只对剩余文件分片后，条数变成 65/64/61/62 且每片无巨块。**估均衡度用 `--list --shard` 的条数 × 实测每文件耗时**，别看条数就下结论。
 - **`retries` 在 CI 里会把真红转绿、并把红 run 拉长**：实测 mobile `/endgame/boss` 首跑红、retry 绿（假绿），而失败的 e2e job 因重试从 14.5 分钟涨到 ~20 分钟。仓库纪律本就禁止用重试抹平 flake（见上条）⇒ CI 的 `retries` 设为 0，提速走**机器维度的分片**（每台 runner 的 `workers` 恒为 2，单机并发度不动，flake 面不放大）。
+- **「节点在」不等于「字体就绪」：`document.fonts.status === 'loaded'` 会在入口 CSS 还没应用时就是真**——此时首屏还没有对应文本、字体请求一个都没发出，等待立刻通过，测量就落在**回退字体**的几何上。同一根因在 CI 上以两种面貌出现：① `shell.spec` 的 `document.fonts.check('12px "Noto Sans SC"')` 为假（字体可用性假红）；② 首页 a11y 多出 `scrollable-region-focusable`（回退字宽把枢纽带撑成可滚动区域）。**修法**：就绪门里显式 `document.fonts.load('12px "Noto Sans SC"', '角色图鉴')`（带样本文本）+ 有上限的 `Promise.race`，再等 `ready`——`check()` 也要带同样的样本文本，否则「族存在」与「该段文本可渲染」两件事会被混为一谈。
+- **采集 transition 前的主题窗口等待有顺序要求**：`.theme-transitioning` 是全仓**唯一**能把 `border-color` 变成 400ms 的规则（tokens.css `!important` 覆盖），而它由 `App.vue` 的 `watch(isCw)` 在**路由解析时**加上、450ms 后移除；卡片渲染发生在解析之后。故必须**先等渲染、再等窗口关闭**——顺序反了（先等类不在场、再等卡片）会在窗口内采样，失败值恰为 400ms 而非 `--nk-dur-normal` 的 300ms。cw 路由再加「先等它出现（失败即放行）再等它消失」的兜底：同模式直达时该类根本不出现，硬等会白付等待。判据：**全仓只有一条规则能产出该值**时，先查这条规则的开关条件，别去猜 CSS 优先级。
+- **`Tab` 循环类用例的耗时随「可聚焦元素数 × runner 负载」线性增长，必须显式给预算**：`shell.spec` 的焦点可见性用例最多按 60 次 Tab 走到目标（每次一趟 `evaluate` 往返），CI runner 上单是走到 `/debug` 的下拉框就花 29s ⇒ 越过默认 30s 后连 `page.screenshot` 都开不了（trace 里截图动作停在 29.3s、报 `Test timeout`）。这类「到达成本不可预知」的用例与全路由 sweep 同类：修法是 `test.setTimeout`，不是 retries、也不是改断言。
 
 ## 强制色模式（Windows 高对比）
 

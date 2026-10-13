@@ -44,11 +44,20 @@ test.describe('应用外壳契约', () => {
     }
 
     await page.goto(PAGE);
+    /* 判「字体可用」前必须**显式装载**样本文本：入口 CSS 的 `@font-face` 尚未应用时
+       `document.fonts.status` 已是 `'loaded'`，直接 `check()` 读到的是回退字体（CI 首次跑本用例即假红）。 */
     const fonts = await page.evaluate(async () => {
-      await document.fonts.ready;
+      await Promise.race([
+        (async () => {
+          await document.fonts.load('12px "Noto Sans SC"', '角色图鉴');
+          await document.fonts.load('12px "IBM Plex Mono"', '1234');
+          await document.fonts.ready;
+        })(),
+        new Promise((resolve) => setTimeout(resolve, 10_000)),
+      ]);
       return {
-        hud: document.fonts.check('12px "IBM Plex Mono"'),
-        body: document.fonts.check('12px "Noto Sans SC"'),
+        hud: document.fonts.check('12px "IBM Plex Mono"', '1234'),
+        body: document.fonts.check('12px "Noto Sans SC"', '角色'),
       };
     });
     expect(fonts.hud, 'HUD 字体（IBM Plex Mono）应可用').toBe(true);
@@ -129,12 +138,20 @@ test.describe('应用外壳契约', () => {
     const lbl: Array<{ prop: string; dur: number; ease: string; sel: string }> = [];
     for (const route of ['/character', '/relic', '/currency', '/monster']) {
       await page.goto(route);
-      // ① 等主题过渡窗口关闭：强调色/模式在挂载后落到 `data-accent`，`App.vue` 会临时加
-      //    `.theme-transitioning`（400ms `!important` 覆盖所有组件的 transition），窗口内读到的是它
-      await page.waitForFunction(() => !document.documentElement.classList.contains('theme-transitioning'));
-      // ② 等卡片真的渲染出来再采集：并发跑（2 worker）时只在窗口关闭后立刻采集会读到挂载中途的状态
+      // ① 等卡片真的渲染出来：渲染发生在路由解析之后，而主题过渡窗口是**路由解析时**开的
+      //    （`App.vue` 的 `watch(isCw)`：挂载早于首次解析时 `/currency` 会走 非 cw→cw，临时加
+      //    `.theme-transitioning`，tokens.css 用 400ms `!important` 覆盖所有组件的 transition）
       const anyCard = SURFACE.join(', ') + ', ' + LABEL.join(', ') + ', .nk-mob-card, .nk-lc-card, .nk-relic-card';
       await expect(page.locator(anyCard).first()).toBeVisible();
+      /* ② **渲染之后再**等过渡窗口关闭——顺序反了就会在窗口内采样（实测 mobile-chromium 批内偶发，
+         失败值恰为 400ms 而非 `--nk-dur-normal` 的 300ms）。cw 路由再加一道兜底：先等它出现
+         （出现等待失败即放行——同模式直达时根本不加），确保「窗口在渲染后才开」也不会漏。 */
+      if (route.startsWith('/currency')) {
+        await page
+          .waitForFunction(() => document.documentElement.classList.contains('theme-transitioning'), undefined, { timeout: 1_500 })
+          .catch(() => {});
+      }
+      await page.waitForFunction(() => !document.documentElement.classList.contains('theme-transitioning'));
       await page.waitForTimeout(250);
       surf.push(...(await collectOn(route, SURFACE)));
       lbl.push(...(await collectOn(route, LABEL)));
@@ -206,6 +223,10 @@ test.describe('焦点可见性（键盘 Tab 后元素周边像素必须变化）
 
   for (const c of CASES) {
     test(`${c.label}：Tab 到它之后周边像素变化`, async ({ page }) => {
+      /* 预算：到达目标要按真实 Tab 顺序走（最多 60 次，每次一趟 `evaluate` 往返），实测在 CI runner 上
+         单是走到 `/debug` 的下拉框就花 29s ⇒ 越过默认 30s 后连 `page.screenshot` 都开不了（trace 里
+         截图动作停在 29.3s）。判据仍是「60 次内到达」，这里只把「60 次往返之和」纳入预算。 */
+      test.setTimeout(90_000);
       await page.goto(c.route);
       await page.waitForTimeout(900); // 等入场动画与主题过渡结束
 

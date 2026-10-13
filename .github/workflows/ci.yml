@@ -94,7 +94,8 @@ jobs:
 
       - uses: ./.github/actions/setup
         with:
-          browsers: chromium,firefox
+          # 空格分隔（`playwright install --with-deps` 的口径）；逗号会被判为无效目标
+          browsers: chromium firefox
 
       # 两个重文件由 smoke job 承担（见文件头）：这里只跑其余 layout 分域契约。
       # 用 glob 而非硬编码清单：新增 layout 分文件自动纳入，漏加会退化成「跑不到用例」而非报错。

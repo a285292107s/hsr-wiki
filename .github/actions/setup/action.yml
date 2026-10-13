@@ -4,7 +4,7 @@ description: >
   安装逻辑出现在多个 job 里，任何一处漏改（尤其浏览器清单）都只在 CI 显形、本机恒绿。
 inputs:
   browsers:
-    description: 传给 `playwright install --with-deps` 的浏览器清单（逗号分隔）；留空则跳过浏览器安装
+    description: 传给 `playwright install --with-deps` 的浏览器清单（**空格分隔**，逗号会被判为无效目标）；留空则跳过浏览器安装
     required: false
     default: chromium
 runs:

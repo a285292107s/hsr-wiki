@@ -247,8 +247,26 @@ async function afterSkeletonGone(page: Page, timeout = 5_000): Promise<void> {
 }
 
 /** 首屏稳定：字体就绪 + 骨架退场 + 两帧绘制。a11y 扫描与像素基线取值前必须调用（骨架阶段取值会误报）。
- *  两条等待各设 5s 上限：最坏情况（CI 上字体请求卡住 + 骨架不退场）也只花 10s，不会逼近 30s 的用例超时。 */
+ *  **字体等待不能只查 `document.fonts.status`**：入口 CSS 的 `@font-face` 尚未应用（或首屏还没有对应文本）
+ *  时它已经是 `'loaded'`，测量就落在**回退字体**的几何上——CI 实测两次假红：首页被回退字宽撑出
+ *  `scrollable-region-focusable`、`shell.spec` 的字体可用性断言为假。故显式 `load()` 两个族的样本文本
+ *  再等 `ready`。各等待都设上限：最坏情况（字体请求卡住 + 骨架不退场）也只花 ~15s，不逼近用例超时。 */
 export async function waitForSettled(page: Page): Promise<void> {
+  await page
+    .evaluate(
+      (ms) =>
+        Promise.race([
+          (async () => {
+            for (const [family, text] of [['Noto Sans SC', '角色图鉴'], ['IBM Plex Mono', '1234']] as const) {
+              try { await document.fonts.load(`12px "${family}"`, text); } catch { /* 字体缺失不阻断，交给调用方的断言 */ }
+            }
+            await document.fonts.ready;
+          })(),
+          new Promise((resolve) => setTimeout(resolve, ms)),
+        ]),
+      10_000,
+    )
+    .catch(() => {});
   await page.waitForFunction(() => document.fonts.status === 'loaded', undefined, { timeout: 5_000 }).catch(() => {});
   await afterSkeletonGone(page, 5_000);
 }
