@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { collectConsoleIssues } from './helpers';
+import { collectConsoleIssues, waitForCatalogCards } from './helpers';
 import { collectNavAnchors, noUnknownOverflow } from './layout.shared';
 
 /**
@@ -239,7 +239,10 @@ test.describe('布局验收：设置入口可收起', () => {
   test('站内从详情页进设置，再点设置 → 回到该详情页', { tag: '@viewport-independent' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1212');
-    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+    /* 就绪门等**被测页**（详情视图），不能只等外壳：侧栏链属于外壳，首屏路由未解析时也已可见，
+       而那个窗口里 `from` 是 START_LOCATION、收起会落枢纽——恰是本文件要守的缺陷形态。
+       在窗口内点击等于把被测前提交给运气（CI 上冻 chunk 时必红）。 */
+    await waitForCatalogCards(page, '.nk-hero--char');
     await page.locator('.ui-sidebar-settings').click();
     await expect.poll(() => pathname(page), '首次点击应进入设置页').toBe('/settings');
     await page.locator('.ui-sidebar-settings').click();
@@ -249,7 +252,7 @@ test.describe('布局验收：设置入口可收起', () => {
 
   test('直达设置页（无站内历史），再点设置 → 兜底回本模式首页', { tag: '@viewport-independent' }, async ({ page }) => {
     await page.goto('/settings');
-    await expect(page.locator('.ui-sidebar-settings')).toBeVisible();
+    await page.waitForSelector('.nk-settings', { state: 'attached', timeout: 15_000 });
     await page.locator('.ui-sidebar-settings').click();
     await expect.poll(() => pathname(page), '无站内历史时应兜底回 / 而不是留在设置页').toBe('/');
     await expect(page.locator('.nk-settings')).toHaveCount(0);
@@ -257,7 +260,7 @@ test.describe('布局验收：设置入口可收起', () => {
 
   test('货币战争模式：站内进入再点回原页；直达则兜底回货币战争枢纽', { tag: '@viewport-independent' }, async ({ page }) => {
     await page.goto('/currency/role');
-    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+    await waitForCatalogCards(page);
     await page.locator('.ui-sidebar-settings').click();
     await expect.poll(() => pathname(page)).toBe('/currency/settings');
     await page.locator('.ui-sidebar-settings').click();
@@ -265,17 +268,45 @@ test.describe('布局验收：设置入口可收起', () => {
 
     // 重新直达：goto 是整页加载，`history.state.back` 归零 ⇒ 走兜底分支
     await page.goto('/currency/settings');
-    await expect(page.locator('.ui-sidebar-settings')).toBeVisible();
+    await page.waitForSelector('.nk-settings', { state: 'attached', timeout: 15_000 });
     await page.locator('.ui-sidebar-settings').click();
     await expect.poll(() => pathname(page), '兜底落点必须是本模式枢纽（/currency）而非常规首页').toBe('/currency');
   });
 
   test('语言前缀档同判据：/en/settings 收起回 /en/character', { tag: '@viewport-independent' }, async ({ page }) => {
     await page.goto('/en/character');
-    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+    await waitForCatalogCards(page);
     await page.locator('.ui-sidebar-settings').click();
     await expect.poll(() => pathname(page)).toBe('/en/settings');
     await page.locator('.ui-sidebar-settings').click();
     await expect.poll(() => pathname(page), '前缀不得被收起动作吃掉').toBe('/en/character');
+  });
+
+  /* 回归守卫：**首屏 chunk 未就绪**时点设置（CI 上本用例曾以 `Received: "/en/"` 判红，同一 commit 重跑即绿）。
+     机制不是「记晚了」而是「两条来源同时失效」：首屏懒加载 chunk 还在路上时侧栏已可点，此刻 `from` 是
+     START_LOCATION（path 恰为 `'/'`）⇒ 记录被 `from.matched.length === 0` 当成直达跳过；
+     `history.state.back` 也指 `'/'` ⇒ 收起落枢纽（带前缀即 `/en/`）。窗口内**必错**，故必须造出来测：
+     只延迟目录视图 chunk，让「外壳可点、首屏未解析」成为确定状态（实测未修前 4/4 落 `/en/`）。
+     前置断言「窗口确实被制造出来」——若延迟失配（glob 改名 / chunk 已缓存），用例响亮失败而不是退化成空真。 */
+  test('首屏 chunk 就绪前点设置：收起仍须回本页 URL', { tag: '@viewport-independent' }, async ({ page }) => {
+    await page.route('**/CatalogView.vue*', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+      await route.continue();
+    });
+    await page.goto('/en/character', { waitUntil: 'domcontentloaded' });
+    const settings = page.locator('.ui-sidebar-settings');
+    await expect(settings).toBeVisible();
+    const shellOnly = await page.evaluate(() => {
+      const app = document.getElementById('app');
+      return !!app && [...app.children].every((el) => el.matches('.ui-sidebar, .nk-toast-container'));
+    });
+    expect(shellOnly, '前置条件：点进设置时首屏视图尚未挂载（延迟 chunk 生效）').toBe(true);
+    await settings.click();
+    await expect.poll(() => pathname(page)).toBe('/en/settings');
+    await settings.click();
+    /* 收起后落点要等目标 chunk（本用例把目录视图 chunk 延后了 2.5s）——放宽轮询，别把等待不足判成落点错 */
+    await expect
+      .poll(() => pathname(page), { timeout: 15_000, message: '收起必须回本次落地的 URL（路径与语言前缀都不得被吃掉）' })
+      .toBe('/en/character');
   });
 });

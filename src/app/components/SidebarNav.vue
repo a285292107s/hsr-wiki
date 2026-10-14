@@ -6,6 +6,7 @@ import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM, SWAP_ITEM
 import { prefetchByPath } from '../router/chunks';
 import { DEBUG_PATH } from '../debug';
 import { SITE_NAME } from '../../lib/constants';
+import { localeBaseFromPath } from '../../lib/i18n/locales';
 
 const route = useRoute();
 const router = useRouter();
@@ -139,23 +140,49 @@ const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><c
 
 const settingsPath = computed(() => (isCw.value ? '/currency/settings' : '/settings'));
 
+/** 地址栏里的当前站内路径（去掉语言前缀 base）。**开关的两个方向都以它为准，不以 `route.path` 为准**：
+ *  `push` 是「先改 URL、再解析路由」，解析完成前 `route.path` 仍是 START_LOCATION（`'/'`）——
+ *  那时用 `route.path` 判「是否已在设置页」会把收起误判成「进入设置」，落回一次重复 push
+ *  （NAVIGATION_DUPLICATED ⇒ 点了没反应，停留在设置页）。实测：首屏目录 chunk 未就绪时点两次，
+ *  落点从 `/en/` 变成 `/en/settings`，两种都不是来源页。 */
+function locationAppPath(): string {
+  const { pathname } = window.location;
+  const stripped = `/${pathname.slice(localeBaseFromPath(pathname).length)}`.replace(/\/+$/, '');
+  return stripped || '/';
+}
+
+const SETTINGS_PATHS = new Set(['/settings', '/currency/settings']);
+
 /** 设置位是**可收起的开关**：已在设置页时再点即「收起」＝回到进入设置前那一页。
  *
  * 为什么不用 RouterLink 的默认行为：同址 `push` 被 vue-router 判为 NAVIGATION_DUPLICATED
  * （既无跳转、又照跑一次 `scrollBehavior`）⇒ 再点毫无反应，页面出不去。
  *
  * 收起的目标页**自持**，不读 `history.state.back`：后者是 vue-router 的内部簿记，实测在 CI 上
- * 为空或指错页——站内从 `/en/character` 进设置、再点却落到 `/en/`（截图 + `Received: "/en/"`
- * 两次取证）。来源页在 `router.afterEach` 里记（`from.fullPath`）：事件参数是**已解析**的路由，
- * 不像组件里读 `route` 会在初次导航解析完成前读到 START_LOCATION——那样会把 `'/'` 记成来源页，
- * 使「直达设置页 → 本模式枢纽」的兜底落到常规首页（曾被 `layout-nav.spec.ts` 货币战争直达用例抓住）。
- * `from.matched.length === 0` 即 START_LOCATION，初次落地不算「站内进入」。
- * 仅本 SPA 会话有效：整页加载随文档卸载清零，故直达设置页时仍回本模式枢纽。
+ * 为空或指错页。来源页在**点击那一刻**记（`route.fullPath`）——此刻它是唯一确定的来源。
+ * `router.afterEach` 的 `from.fullPath` 只当补充，因为它有一个整段失效的窗口：首屏懒加载
+ * chunk 未到位时侧栏已可点，而那时 `from` 是 START_LOCATION（path 恰为 `'/'`）、
+ * `history.state.back` 也指 `'/'`——记录被 `from.matched.length === 0` 当成「直达设置页」跳过、
+ * 簿记又指错页，**两条来源同时失效**（不是时序抖动：该窗口内必错）。实测延迟目录视图 chunk 后
+ * 点设置两次，4/4 落到枢纽 `/en/`（与 CI 的 `Received: "/en/"` 同值）。
+ * 路由尚未解析时以**本次落地 URL** 兜底（见 LANDING_PATH），落地即设置页时为 null，
+ * 以保留「直达设置页 → 收起回本模式枢纽」的契约。
+ * 仅本 SPA 会话有效：整页加载随文档卸载清零。
  * 带修饰键的点击（Ctrl/Cmd/中键）是「新标签页打开设置」，不得劫持。 */
 let settingsEntryPath: string | null = null;
 let offSettingsEntry: (() => void) | null = null;
 
+/** 本次落地的站内路径，**仅用于「首屏路由尚未解析」这一档**：整页加载后它不再变化，
+ *  解析完成后来源一律取 `route.fullPath`。落地即设置页时为 null（直达没有来源页）。 */
+const LANDING_PATH: string | null = (() => {
+  const path = locationAppPath();
+  const { search, hash } = window.location;
+  return SETTINGS_PATHS.has(path) ? null : `${path}${search}${hash}`;
+})();
+
 onMounted(() => {
+  /* 补充来源：点击之外的入口（历史前进/后退落到设置页）也会经过这里。
+     首屏未解析时 `from` 是 START_LOCATION（path 恰为 '/'）——那一档由点击时的 LANDING 兜底，见上。 */
   offSettingsEntry = router.afterEach((to, from) => {
     if (from.matched.length === 0) return;
     const target = to.meta.cw ? '/currency/settings' : '/settings';
@@ -166,8 +193,12 @@ onBeforeUnmount(() => offSettingsEntry?.());
 
 function onSettingsClick(e: MouseEvent): void {
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-  // 进入设置：跳转交给 RouterLink，来源页由 afterEach 记录
-  if (route.path !== settingsPath.value) return;
+  const here = locationAppPath();
+  // 进入设置：跳转交给 RouterLink，来源**当场**记（理由见上方 settingsEntryPath 注释）
+  if (!SETTINGS_PATHS.has(here)) {
+    settingsEntryPath = route.matched.length > 0 ? route.fullPath : LANDING_PATH;
+    return;
+  }
   e.preventDefault();
   const back = router.options.history.state.back;
   if (settingsEntryPath && back === settingsEntryPath) {
@@ -176,7 +207,8 @@ function onSettingsClick(e: MouseEvent): void {
   }
   // 簿记缺失/指错页时以自持来源页为准；都没记到（直达设置页）才回本模式枢纽。
   // `replace` 而非 `push`：免得历史里留下「收起后还能前进回设置页」的假入口。
-  const hub = isCw.value ? '/currency' : '/';
+  // 枢纽按**地址栏**分模式（不用 `isCw`：路由未解析时它还是常规模式，货币战争直达会落错页）。
+  const hub = here.startsWith('/currency') ? '/currency' : '/';
   void router.replace(settingsEntryPath ?? (typeof back === 'string' && back.length > 0 ? back : hub));
 }
 
