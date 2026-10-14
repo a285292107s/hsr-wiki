@@ -720,16 +720,30 @@ function upsertMeta(html, attr, value, content) {
  * 禁止重写模板：/assets/* 与 index.html 必须逐字一致（守卫断言）。
  */
 /**
- * 前缀化页面时同步改写 JSON-LD 内嵌的绝对 URL：家族构建器按**无前缀** route 生成的
- * `SITE_ORIGIN + route`（`@id` / `url` / `mainEntityOfPage`）在其它语言下必须跟着换前缀，
- * 否则富媒体信息指向缺省语言 URL（守卫断言 LD 里的 URL 与 canonical 同路径）。
+ * 分层快照的 JSON-LD 前缀化（契约 §4）：LD 由家族构建器按**无前缀** route 生成，
+ * 其它语言下所有**同源** URL 都要落到该语言路径下，否则富媒体信息指向缺省语言页面。
+ *
+ * **禁止按字符串前缀拼接**（`from` 的收尾斜杠是段分隔符，`split/join` 会把它吃掉）：
+ * home 的 route 恰是 `/`，旧实现把 `…wiki/character/1503` 粘成 `…wiki/encharacter/1503`
+ * ——实测 12 个语言首页 × 4 条 ItemList URL 全断，而该形态作为 URL 完全合法（能解析、
+ * 能拿到 200 外壳），守卫若按「路径以 `/` 开头」过滤就永远看不见它。
+ * 判据只能是「路径必须落在 `/<locale>` 下」。
+ *
+ * 站点根 `/` 的处置分两种：`path === '/'` 一律前缀化为 `/<locale>`（它同时是首页自身 URL
+ * 与面包屑「首页」项，都必须指向当前语言），**唯一保留站点根的是 `isPartOf` 的 WebSite 本体**
+ * ——那个节点描述的是站点本身，不是某一语言的页面。
  */
-function rewriteLdUrls(node, from, to) {
-  if (typeof node === 'string') return node.split(from).join(to);
-  if (Array.isArray(node)) return node.map((v) => rewriteLdUrls(v, from, to));
+function prefixLdUrls(node, prefix, inWebSite = false) {
+  if (typeof node === 'string') {
+    if (inWebSite || !node.startsWith(SITE_ORIGIN)) return node;
+    const path = node.slice(SITE_ORIGIN.length); // '' 或 '/…'
+    if (path === '') return node;
+    return SITE_ORIGIN + prefix + (path === '/' ? '' : path);
+  }
+  if (Array.isArray(node)) return node.map((v) => prefixLdUrls(v, prefix, inWebSite));
   if (node && typeof node === 'object') {
     const out = {};
-    for (const [k, v] of Object.entries(node)) out[k] = rewriteLdUrls(v, from, to);
+    for (const [k, v] of Object.entries(node)) out[k] = prefixLdUrls(v, prefix, inWebSite || k === 'isPartOf');
     return out;
   }
   return node;
@@ -2168,12 +2182,20 @@ function main() {
    * 判据 = 家族名不以 `-detail` 结尾。
    */
   const isLayered = (family) => !family.endsWith('-detail');
-  /** 分层页在全部语言间互挂 hreflang；缺省语言为 x-default。 */
+  /**
+   * 分层页在全部语言间互挂 hreflang；缺省语言为 x-default。
+   *
+   * `hreflang` 取 **culture（BCP 47）**，不取上游 `TextLanguageKey`：`cht` / `jp` / `kr` 是 vendor 的
+   * 语言键，不是语言码（正确值为 `zh-TW` / `ja-JP` / `ko-KR`）——Google 对无法识别的 hreflang 值
+   * **整条忽略**，日 / 韩 / 繁三个版本会静默脱离 hreflang 簇，而条数断言（14 条）照样全绿。
+   * 依据：`docs/adr/0052-多语言站点架构-路径前缀与语言包.md` 决策 1 与
+   * `src/lib/i18n/locales.ts` 的字段注释（culture 供 `<html lang>` 与 hreflang）。
+   */
   const alternatesFor = (cnRoute) => {
     const strip = (code, route) => (route === '/' ? `/${code}` : `/${code}${route}`);
     return [
       ...LOCALES.map((l) => ({
-        hreflang: l.code === DEFAULT_LOCALE ? 'zh-CN' : l.code,
+        hreflang: l.culture,
         href: SITE_ORIGIN + (l.code === DEFAULT_LOCALE ? cnRoute : strip(l.code, cnRoute)),
       })),
       { hreflang: 'x-default', href: SITE_ORIGIN + cnRoute },
@@ -2196,7 +2218,7 @@ function main() {
     for (const p of keep) {
       const route = prefix ? (p.route === '/' ? prefix : `${prefix}${p.route}`) : p.route;
       const file = prefix ? `${loc.code}/${p.file}` : p.file;
-      const ld = prefix ? rewriteLdUrls(p.ld, SITE_ORIGIN + p.route, SITE_ORIGIN + route) : p.ld;
+      const ld = prefix ? prefixLdUrls(p.ld, prefix) : p.ld;
       pages.push({
         ...p, route, file, ld,
         lang: loc.culture,

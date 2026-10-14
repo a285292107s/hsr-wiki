@@ -4,7 +4,8 @@
  * 断言 7 项：① AI 入口文件：robots.txt 五个 UA 组各自自足 + Disallow: /prerender/ + Sitemap 与生成器同源，
  *    llms.txt 为真文本（非 HTML 外壳）且链接全同源；
  * ② sitemap.xml 合法、loc 全绝对同源无重复、与快照一一对应、≤50000；
- * ③ 每个快照的 title/canonical/内链/中文字符数/h1/JSON-LD/游戏标记/未展开参数占位符 `#\d+\[…\]`/
+ * ③ 每个快照的 title/canonical/内链/中文字符数/h1/JSON-LD（内嵌 URL 语言归属按白名单=必须落在本语言
+ *    前缀下、源与路径之间必须有分隔符、自身 canonical 路径必须在场）/游戏标记/未展开参数占位符 `#\d+\[…\]`/
  *    裸 `#N`（仅 currency/item.html 与 currency/augment.html 按页点名，禁止全局化）/入口 JS，详情页与专题页
  *    voracity.html 禁 nk-snapshot__entry；正文抽取必须非空（抽取为空即判红——抽取恒空会让全部正文类
  *    断言静默失效）；汉字脚本语言（cn/cht/jp/kr）以外的分层快照正文禁汉字（棘轮，基线 `tools/ai-han-baseline.json`）；
@@ -566,22 +567,34 @@ let sitemapCount = -1;
       }
     }
 
-    /* JSON-LD 内嵌 URL 必须与页面同语言同路由：改写漏掉一处就会让富媒体指向别的语言的页面
-       （曾出现 `{PROP:}` 解析走 cn 词典同类问题）。口径取「同源前缀一致」，不比对全路径，
-       以免把 LD 里合法的更深条目 URL 误判。 */
+    /* JSON-LD 内嵌 URL 三项断言（前缀改写的机械兜底，缺一项就会重演静默断链）：
+       ① 形状：同源 URL 去掉站点源后必须为空或以 `/` 开头——`SITE_ORIGIN + href` 少一条前导斜杠会
+          拼出 `https://myhsr.wikicharacter/1503` 这类形态（作为 URL 仍可解析，`new URL()` 查不出）。
+       ② 语言归属（分层快照）：路径必须落在当前语言下（`/<locale>` 或 `/<locale>/…`），
+          **唯一豁免是站点根 `/`**（`isPartOf` 的 WebSite 本体）。
+          **这条才是拦住实测缺陷的那条**：旧前缀改写把 `…wiki/character/1503` 粘成
+          `…wiki/encharacter/1503`——路径以 `/` 开头、能解析、请求能拿到 200 外壳，
+          只有「首段必须是本语言前缀」判得出；此前口径是「首段匹配 `^[a-z]{2,3}$` 且不等于本语言」，
+          而 `encharacter` 有 11 个字母 ⇒ 静默放行（教训：按「已知坏形态的特征」写断言会漏掉坏形态本身）。
+       ③ 自身 URL 必须在场：LD 里至少有一个 URL 等于本页 canonical 路径——整份前缀改写缺失
+          （而非单点漏改）时只有这条能拦住。 */
+    const canonPath = (linkHref(html, 'canonical') ?? '').replace(/^https?:\/\/[^/]+/, '');
+    const ldUrls = [];
+    for (const m of html.matchAll(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+      for (const u of m[1].matchAll(/"(?:@id|url|mainEntityOfPage|item)"\s*:\s*"([^"]+)"/g)) ldUrls.push(u[1]);
+    }
+    const ldPaths = ldUrls.filter((u) => u.startsWith(SITE_ORIGIN)).map((u) => u.slice(SITE_ORIGIN.length));
+    const glued = ldPaths.filter((p) => p !== '' && !p.startsWith('/'));
+    if (glued.length > 0) {
+      add(`JSON-LD 内嵌 URL 与站点源之间缺分隔符 ${glued.length} 处: ${glued.slice(0, 3).join(', ')}`);
+    }
+    if (canonPath && !ldPaths.includes(canonPath)) {
+      add(`JSON-LD 内嵌 URL 里没有本页 canonical 路径 ${canonPath}（前缀改写疑似整份缺失）`);
+    }
     if (!isHanLocale) {
-      const canon = (html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/i) || [])[1] ?? '';
-      const wrong = [];
-      for (const m of html.matchAll(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
-        for (const u of m[1].matchAll(/"(?:@id|url)"\s*:\s*"([^"]+)"/g)) {
-          const path = u[1].replace(/^https?:\/\/[^/]+/, '');
-          if (!path.startsWith('/')) continue;
-          const seg = path.split('/')[1];
-          if (/^[a-z]{2,3}$/.test(seg) && seg !== firstSeg) wrong.push(path);
-        }
-      }
-      if (wrong.length > 0) {
-        add(`JSON-LD 内嵌 URL 指向别的语言前缀 ${wrong.length} 处: ${wrong.slice(0, 3).join(', ')}（canonical ${canon.replace(/^https?:\/\/[^/]+/, '')}）`);
+      const outside = ldPaths.filter((p) => p !== '/' && p !== `/${firstSeg}` && !p.startsWith(`/${firstSeg}/`));
+      if (outside.length > 0) {
+        add(`JSON-LD 内嵌 URL 不在本语言 /${firstSeg} 下（站点根 / 除外）${outside.length} 处: ${outside.slice(0, 3).join(', ')}（canonical ${canonPath}）`);
       }
     }
 
