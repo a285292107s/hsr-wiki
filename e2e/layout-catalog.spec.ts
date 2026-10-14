@@ -184,10 +184,10 @@ test.describe('布局验收：目录引擎 · 虚拟网格', () => {
      ① 折行数 = 0；② 文字虽不可见但**仍在无障碍树里**（`alt=""` 的语义是「此处无需替代文本」，
         窄卡上它是属性/命途的唯一文本载体，删掉即信息从无障碍树消失）。
      跨语言取证：`cn`（最短）与 `pt`（最长）为端点对，同一判据在 13 语言上由会话探针全量覆盖。 */
-  test.describe('角色卡副行：任何视口不折行，且信息不因视觉隐藏而丢失 @viewport-pinned', () => {
+  test.describe('角色卡副行：任何视口不折行，且信息不因视觉隐藏而丢失', () => {
     for (const locale of ['', '/pt']) {
       for (const width of [390, 1440]) {
-        test(`${locale || '/cn'} @${width}`, async ({ page }) => {
+        test(`${locale || '/cn'} @${width}`, { tag: '@viewport-pinned' }, async ({ page }) => {
           await page.setViewportSize({ width, height: 900 });
           await page.goto(`${locale}/character`);
           await expect(page.locator('a.nk-idx-card').first()).toBeVisible();

@@ -7,6 +7,8 @@
  *   用例体内自行 `page.setViewportSize(...)` 固定视口者，**必须**在 `test(...)` 第二参静态声明 `@viewport-pinned`
  *   ——否则 `mobile-chromium` 会用 Pixel 7（`isMobile` + 触摸仿真）重跑一条本已钉死视口的桌面契约，
  *   既是纯重复，也会因仿真环境差异变成 flake（实测一次 30s 超时 × 3 次重试把 CI 拖红）。
+ *   判定只看**用例签名**：写在 `describe(...)` 标题上的标签会被 Playwright 继承、却被本守卫判为未声明
+ *   ——这是有意的（testing.md：三个标签都必须静态写在 `test(...)` 第二参），故此类写法按违规报出。
  *
  * 行内豁免：`// e2e-viewport-ok: 理由`（写在 test 之前的注释块 / 签名行 / 用例体内均可），缺理由不豁免。
  * 唯一在用豁免：`e2e/layout-debug.spec.ts` 的手机档哨兵——它必须留在 mobile project 里跑（`isMobile` 是**被测对象**）。
@@ -30,7 +32,11 @@ const BAD_OK_RE = /\/\/\s*e2e-viewport-ok\s*[:：]?\s*$/;
 const SET_VP_RE = /\bsetViewportSize\s*\(/;
 const PINNED_RE = /@viewport-pinned/;
 const INDEPENDENT_RE = /@viewport-independent/;
-const TEST_RE = /^\s{0,2}test\(/;
+/* 任意缩进：循环里生成的嵌套 `test(` 也是用例。只认顶格（原为 `^\s{0,2}`）会把它们的体内
+   `setViewportSize` 归到**上一个顶格用例**上——报错指错行，且这批用例整条漏检（实测 11 条，
+   其中 1 条自钉视口：`layout-catalog.spec.ts:190`，守卫却报了它上方的 `/item` 用例）。
+   不会误命中 `test.describe(`：本正则要求 `test` 后紧跟 `(`。 */
+const TEST_RE = /^\s*test\(/;
 
 /** 取 test 之前的连续注释块（doc comment 在语法上属于前一个用例的区间，语义上属于下一个用例） */
 function leadingComments(lines, start) {
