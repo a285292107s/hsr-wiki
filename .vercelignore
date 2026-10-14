@@ -1,0 +1,35 @@
+# Vercel 部署忽略清单（CLI 走这份；Git 部署本就不含以下目录，故对生产无影响）。
+#
+# 为什么必须有：本仓根目录同时存在 vendor 上游解包数据（约 2.4 GB / 13.8 万文件）、
+# temp 工作区（约 826 MB）、.pnpm-store（约 645 MB）与 dist（约 161 MB）——
+# 不开忽略时 `vercel deploy` 会把它们算进上传清单，清单体积超过平台 10 MB 上限，
+# 部署在「Creating the deployment」一步直接 400（实测 "Request body too large. Limit: 10mb"）。
+# 构建所需的一切都在 src / public / tools / 根配置里，以下目录一律不参与上传。
+
+.git
+node_modules
+.pnpm-store
+vendor
+temp
+dist
+dist-ssr
+coverage
+coverage-out
+playwright-report
+blob-report
+test-results
+.playwright
+.playwright-cli
+.pytest_cache
+.agents
+.qoder
+.qoder-cn
+.trae
+.reasonix
+.vercel
+*.log
+
+# 转换器本地产物（体积大且与构建无关；languages.json 等小文件仍需上传）
+tools/converter/.textmap-cache.db
+tools/converter/.textmap-cache.db-*
+tools/converter/.converter-state.json
