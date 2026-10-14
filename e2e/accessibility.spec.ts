@@ -44,7 +44,14 @@ const KNOWN_VIOLATION_REVIEW_DAYS = 30;
 const KNOWN_VIOLATIONS: KnownViolation[] = [];
 
 const PAGES = [
-  { path: '/', label: '首页', wait: null },
+  /* 首页必须等「分区 + 至少一条卡片链」渲染出来再扫（原为 `wait: null`，是本文件唯一没有就绪门的页）。
+     为什么不能只靠 `waitForSettled`：`#nk-home-app` 是**视图根滚动容器**（`overflow-y: auto`），
+     内容未到位时它自身 `scrollHeight > clientHeight` 却**没有任何可聚焦内容** ⇒ axe 的
+     `scrollable-region-focusable`（serious）会把「还在加载的骨架」判成违规——实测：阻断自托管字体
+     （回退字宽 + 加载窗口拉长）即稳定复现，命中节点 `#nk-home-app`、当时 `tabbables = 0`，
+     1.2s 后内容到位即消失。CI 上表现为随机假红（同一 commit 重跑即绿，13:19 失败 / 13:28 通过）。
+     与目录页 `waitForCatalogCards` 同一纪律：**骨架退场 ≠ 内容到位**。 */
+  { path: '/', label: '首页', wait: () => (page: Page) => page.waitForSelector('.nk-hub-release__section a[href], .nk-hub-release__empty, .nk-error-state', { timeout: 15_000 }) },
   { path: '/character', label: '角色图鉴', wait: () => waitForCatalogCards },
   { path: '/character/1001', label: '角色详情', wait: () => (page: Page) => waitForCatalogCards(page, '.nk-hero--char') },
   // 等光锥 hero 面板出现即数据就绪（入口数据首条 = 首个 3★ 光锥 id 20000）
