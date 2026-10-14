@@ -1527,12 +1527,13 @@ function endgamePages(ctx) {
         summary: '',
         facts: [
           [ui('egm.fact.mode', '所属玩法'), esc(mode.label())],
-          ['英文名', esc(mode.en)],
+          /* 不输出「英文名」行：`ENDGAME_MODES` 没有 `en` 字段，词典里也没有对应键——
+             旧版写死的中文标签 `'英文名'` 恒不渲染，却是往非中文语言注入中文的隐患。 */
           [ui('egm.currentSeason', '当期赛季'), esc(current.name)],
-          [ui('egm.stat.floors', '关卡层级'), floors.length ? esc(uiT('egm.value.floors', '{n} 层', { n: floors.length })) : ''],
-          [ui('egm.stat.halfs', '每层场次'), halfs ? esc(`${halfs} 场`) : ''],
-          [ui('egm.stat.levels', '关卡组成'), levels.length ? esc(`${levels.length} 关`) : ''],
-          [ui('egm.stat.countdown', '回合上限'), cur.countdown ? esc(`${cur.countdown} 轮`) : ''],
+          [ui('egm.stat.floors', '关卡层级'), floors.length ? esc(uiT('egm.value.floors', '{n} 层', { n: floors.length }, floors.length)) : ''],
+          [ui('egm.stat.halfs', '每层场次'), halfs ? esc(uiT('egm.value.halfs', '{n} 场', { n: halfs }, halfs)) : ''],
+          [ui('egm.stat.levels', '关卡组成'), levels.length ? esc(uiT('vor.stageCount', '{n} 关', { n: levels.length }, levels.length)) : ''],
+          [ui('egm.stat.countdown', '回合上限'), cur.countdown ? esc(uiT('egm.value.countdown', '{n} 轮', { n: cur.countdown }, cur.countdown)) : ''],
           [ui('egm.stat.scoreCap', '分数上限'), cur.clear_score ? esc(String(cur.clear_score)) : ''],
           [ui('egm.stat.tierce', '星启模式'), cur.tierce ? ui('egm.value.tierceOn', '含') : ui('egm.value.tierceOff', '不含')],
           [ui('egm.fact.buffSystem', '增益体系'), esc(systemName)],
@@ -1894,7 +1895,7 @@ function currencyTraitPages(ctx) {
   const items = traits.map((t) => ({
     name: t.name,
     href: `/currency/trait/${t.id}`,
-    meta: [esc(cwCatLabel(t.cat)), esc(uiT('egm.value.floors', '{n} 层', { n: (t.layers || []).length }))].filter(Boolean).join(' · '),
+    meta: [esc(cwCatLabel(t.cat)), esc(uiT('egm.value.floors', '{n} 层', { n: (t.layers || []).length }, (t.layers || []).length))].filter(Boolean).join(' · '),
     // 目录条目：条目携带 base_params 语义 → 能展开就展开（含裸 `#N`），展不开则整段省略该 desc
     desc: txtSafe(t.simple_desc || t.desc, t.base_params, 200, hasParamSemantics(t)),
   }));
@@ -2179,9 +2180,9 @@ function main() {
     ];
   };
 
-  /* 分层多语言快照暂为**显式开关**：生成链路与 head 文案已语言化，但段落标签仍需逐条进词典
-     （约 40 条 × 13 语言）⇒ 未完成前默认只出缺省语言，避免发布「英文 URL + 中文标签」的页面。
-     开关只用于开发期验证：`NK_SNAPSHOT_LOCALES=1 node tools/gen-ai-endpoints.mjs`。 */
+  /* 分层多语言快照**无条件全量**（曾由 `NK_SNAPSHOT_LOCALES=1` 开关控制，收尾时已去掉）：
+     非条目级页面 × 全部语言各一份，条目级详情页仍只做缺省语言（判据见上方 isLayered）。
+     `localeSet` 保留为单一取值点，是为了让「哪些语言出快照」只有一处可改。 */
   const localeSet = LOCALES;
   const pages = [];
   /** 任一语言的 context 都可用于 sitemap（只取 syncedAt，与语言无关）。 */

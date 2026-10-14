@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
  * AI 检索可见性端点守卫（契约 docs/agents/ai-discoverability.md §6；构建末步运行，失败即构建失败）。
- * 断言 7 项：① robots.txt 五个 UA 组各自自足 + Disallow: /prerender/ + Sitemap 与生成器同源；
+ * 断言 7 项：① AI 入口文件：robots.txt 五个 UA 组各自自足 + Disallow: /prerender/ + Sitemap 与生成器同源，
+ *    llms.txt 为真文本（非 HTML 外壳）且链接全同源；
  * ② sitemap.xml 合法、loc 全绝对同源无重复、与快照一一对应、≤50000；
  * ③ 每个快照的 title/canonical/内链/中文字符数/h1/JSON-LD/游戏标记/未展开参数占位符 `#\d+\[…\]`/
  *    裸 `#N`（仅 currency/item.html 与 currency/augment.html 按页点名，禁止全局化）/入口 JS，详情页与专题页
- *    voracity.html 禁 nk-snapshot__entry；
+ *    voracity.html 禁 nk-snapshot__entry；正文抽取必须非空（抽取为空即判红——抽取恒空会让全部正文类
+ *    断言静默失效）；汉字脚本语言（cn/cht/jp/kr）以外的分层快照正文禁汉字（棘轮，基线 `tools/ai-han-baseline.json`）；
  * ④ 文件级覆盖率：每族快照数 = 数据 + 应用可见性判据独立推导的期望（禁写死数字；契约 §2「可见性对齐」）；
  * ⑤ 条目级覆盖率：12 个目录页 nk-snapshot__entry 计数 = 同一条目数、枢纽 ≥1、详情页抽样 = 0（契约 §6.4②③）；
  *    专题页 `/voracity` **不在此列**——它不是目录，正文分区不是「应用收录条目集合」，故无条目级断言（契约 §3/§6.4 注）。
@@ -28,6 +30,9 @@ const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const REQUIRED_ROBOTS_UAS = ['OAI-SearchBot', 'PerplexityBot', 'Claude-SearchBot', 'Googlebot', 'bingbot'];
 const SITEMAP_MAX_URLS = 50000;
 const MIN_CJK_CHARS = 80;
+/** 合法使用汉字的语言（按**脚本**划界，不是按「非缺省语言」）：cn / cht / jp / kr。
+ *  其余语言的分层快照正文出现汉字即判残留——口径边界见正文抽取处。 */
+const HAN_SCRIPT_LOCALES = new Set(['cn', 'cht', 'jp', 'kr']);
 /** 单次运行每条断言的明细上限 */
 const DETAIL_CAP = 20;
 /** 快照正文里出现即判失败的游戏标记（契约 §3：必须剥成纯文本） */
@@ -197,6 +202,10 @@ const snapshotFiles = allPrerenderHtml.filter((f) => !isInternalFile(f));
 const SHELL = join(PRERENDER, '_shell.html');
 const DIST_INDEX = join(DIST, 'index.html');
 const SITEMAP = join(DIST, 'sitemap.xml');
+/** llms.txt（契约 §1 产物表）：`public/llms.txt` 随 vite build 原样复制到 dist 根，由文件系统直接投递
+ *  （早于 rewrites）。它必须是**真文本文件**——一旦缺失，`/llms.txt` 会落回 catch-all 返回 200 的 HTML
+ *  外壳（既不是文件也不是 404），这正是本断言要拦的静默失效。 */
+const LLMS_TXT = join(DIST, 'llms.txt');
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
 /** prerender 内文件 → 路由（契约 §2：home.html 即 `/`） */
@@ -299,7 +308,32 @@ const push = (id, title, details) => checks.push({ id, title, ok: details.length
       if (u.pathname !== '/sitemap.xml') details.push(`robots.txt Sitemap 路径应为 /sitemap.xml，实际 ${u.pathname}`);
     }
   }
-  push('1', `robots.txt（${REQUIRED_ROBOTS_UAS.length} 个 UA 组自足 + Disallow: /prerender/ + Sitemap 同源）`, details);
+
+  /* llms.txt：只断言「真文本文件 + 全部链接同源」，不断言内容清单——把入口清单写死进守卫等于给站点
+     目录造第二个事实源（目录页增减都会让它漂移），本域只保证它不是 HTML 外壳、也没指向旧 origin。 */
+  if (!existsSync(LLMS_TXT)) {
+    details.push(`llms.txt 不存在: ${rel(LLMS_TXT)}（契约 §1：public/llms.txt 提交入库；缺失即落回 catch-all 的 HTML 外壳）`);
+  } else {
+    const txt = readFileSync(LLMS_TXT, 'utf-8');
+    if (!/^#\s+\S/m.test(txt)) details.push('llms.txt 缺 H1 标题（llmstxt.org 规范里唯一必填项）');
+    if (/<(?:html|body|div|script|p)[\s>/]/i.test(txt)) details.push('llms.txt 含 HTML 标签（必须是纯文本 Markdown，不得是外壳的副本）');
+    if (!SITE_ORIGIN) {
+      details.push('llms.txt 未做同源校验（SITE_ORIGIN 不可用）');
+    } else {
+      for (const m of txt.matchAll(/https?:\/\/[^\s)\]"'>]+/g)) {
+        const raw = m[0].replace(/[.,;:]+$/, '');
+        let u = null;
+        try {
+          u = new URL(raw);
+        } catch {
+          details.push(`llms.txt 含非法绝对 URL: ${raw}`);
+          continue;
+        }
+        if (u.origin !== SITE_ORIGIN) details.push(`llms.txt 链接与生成器 SITE_ORIGIN 不同源: ${raw}（期望 ${SITE_ORIGIN}）`);
+      }
+    }
+  }
+  push('1', `AI 入口文件（${REQUIRED_ROBOTS_UAS.length} 个 robots UA 组自足 + Disallow: /prerender/ + Sitemap 同源 + llms.txt 真文本同源）`, details);
 }
 
 /* ═══ 2/5 sitemap.xml ═══ */
@@ -566,14 +600,26 @@ let sitemapCount = -1;
     if (!ogLoc) add('缺 og:locale');
     else if (ogLoc !== expectOgLocale) add(`og:locale 为 ${ogLoc}，应与 <html lang> ${langAttrAny} 对应（${expectOgLocale}）`);
 
-    /* 非 Han 语言的分层快照不得出现中文可见文本（品牌名 `星铁档案馆` 例外，站点名全语言统一）。
-       硬断言会因数据侧个别遗留（如 `王棋关`）而红 ⇒ 取**棘轮**：基线缺失时按实测写入，
-       之后只降不升（与语言包汉字棘轮同一手法）。 */
-    if (!isHanLocale) {
-      /* 口径只看**快照正文**：整页 visibleText 还含 SPA 外壳的固定中文（品牌/兜底文案），
-         会把每个语言都算成 19 个文件，掩盖正文的真实残留。 */
-      const bodyMatch = html.match(/<div class="nk-snapshot">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/);
-      const bodyText = bodyMatch ? visibleText(bodyMatch[1]) : '';
+    /* 快照正文抽取是下面所有「正文类」断言的前提，必须先证明**抽取命中了目标**：
+       取整页 visibleText 会把 SPA 外壳的固定中文算进去（每个语言都成 19 个文件，掩盖真实残留），
+       故只取 `.nk-snapshot` 之后的部分。此前这段用 `/<div class="nk-snapshot">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/`
+       要求**三层** `</div>` 收尾，而快照实际只有两层 ⇒ 正则恒不命中、正文恒为空串 ⇒
+       汉字断言与其棘轮长期静默失效（`tools/ai-han-baseline.json` 因此从未落盘，看上去反而像「残留为 0」）。
+       抽取为空现在**直接判红**，不再当 0 处理。 */
+    const snapStart = html.indexOf('<div class="nk-snapshot">');
+    const bodyText = snapStart >= 0 ? visibleText(html.slice(snapStart)) : '';
+    if (!bodyText) {
+      add('未能抽取 nk-snapshot 正文（标记缺失或正文为空）——所有基于正文的断言都会静默失效');
+    }
+
+    /* 汉字残留判据按**脚本**划界（不是按「非缺省语言」）：
+       `cn` / `cht` / `jp` / `kr` 都合法使用汉字（日文汉字；韩国官方韩文用汉字注音 `세검(細劍)`），
+       对其判「正文汉字为零」会全量误红——实测 jp 19/19、kr 5/19 个分层快照命中。
+       其余 8 种语言（拉丁 / 西里尔 / 泰文）正文出现汉字即残留。
+       **边界**：jp / kr 里「合法汉字」与「中文残留」用码点范围分不开，本断言不覆盖这两种语言；
+       要覆盖需按「仅简体使用的字」建表，属未决项。
+       残留计数走**棘轮**：基线缺失时按实测写入、之后只降不升，以免数据侧个别合法遗留阻塞构建。 */
+    if (!isHanLocale && !HAN_SCRIPT_LOCALES.has(firstSeg)) {
       const hanRuns = bodyText.match(/[\u4e00-\u9fff]+/g) ?? [];
       const hanCount = hanRuns.filter((r) => '星铁档案馆'.indexOf(r) === -1).length;
       if (hanCount > 0) hanByLocale.set(firstSeg, (hanByLocale.get(firstSeg) ?? 0) + 1);
@@ -936,7 +982,9 @@ let sitemapCount = -1;
 
   const title = details.length === 0
     ? `覆盖率（数据实时统计一致：${covered.join(' ')}，单页 ${observedSingle.size}/${singleFamilies.length}）`
-    : '覆盖率（生成文件数与数据实时统计不一致）';
+    /* 失败标题必须囊括本段的**全部**失败来源：覆盖率对不上、或汉字棘轮回涨（曾经只写前者，
+       棘轮失败时会打印一句与事实不符的标题，误导排查方向）。 */
+    : '覆盖率（数据实时统计不一致 / 分层快照汉字残留回涨）';
   push('4', title, details);
 }
 

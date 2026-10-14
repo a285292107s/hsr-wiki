@@ -16,24 +16,16 @@
 - `<locale>/…` 不计入「未登记快照」，其覆盖由**分层总数断言**单独校验（语言集合与 `vercel.json` 前缀改写同源，12 × 19 = 228，缺项逐个列出）；
 - 每页 `<html lang>` 必须等于 `languages.json` 的 `culture`；hreflang 必须 **13 语言 + `x-default` = 14 条**；
 - JSON-LD 内嵌 `@id`/`url` 不得指向**别的语言前缀**；
-- **非 Han 语言可见文本汉字数为 0**（品牌名例外）；若将来出现，用 `tools/ai-han-baseline.json` 棘轮只降不升。
+- **汉字残留判据按脚本划界，不按「非缺省语言」**：`cn` / `cht` / `jp` / `kr` 都合法使用汉字（日文汉字；韩国官方韩文用汉字注音，如 `세검(細劍)`），对其判残留会全量误红（实测 jp 19/19、kr 5/19 命中）；其余语言的分层快照**正文**出现汉字即残留，走 `tools/ai-han-baseline.json` 棘轮（只降不升）。**边界**：jp/kr 的「合法汉字」与「中文残留」用码点范围分不开，本断言不覆盖这两种语言。
+- **正文类断言必须先证明「抽取命中了目标」**：快照正文只取 `.nk-snapshot` 之后的部分（整页 `visibleText` 含 SPA 外壳的固定中文，会把每个语言都算成 19 个文件）。**抽取为空串即判红**——曾因正则写死三层 `</div>` 收尾而快照只有两层，抽取恒空 ⇒ 汉字断言与其棘轮长期静默失效（`tools/ai-han-baseline.json` 从未落盘，看上去反而像「残留为 0」）。
 - 取值路径一致性：语言包里的字面 `\n` 必须还原为换行（此前缺省语言路径会还原、pack 路径原样输出 ⇒ 非缺省语言正文出现字面 `\n`）。
 
 
-**当前状态**：默认只出缺省语言（1204 快照，守卫全绿）；语言展开由 `NK_SNAPSHOT_LOCALES=1` 显式开启（1432 快照）。英文分层快照的可见文本汉字已从 **19,000+ 处降到 171 处（-99.1%）**。
+**当前状态**：分层语言展开**无条件全量**（曾经的 `NK_SNAPSHOT_LOCALES` 开关已去掉）：19 条非条目级路由 × 13 语言 + 条目级详情页仅缺省语言，`dist/prerender` 恒为 **1432** 份、`sitemap.xml` 同步 1432 条。
 
-**剩余（按优先级，均已定位）**：
-1. 7 条手写 summary 模板（成就 / 物品 / 遗器 / 货币战争 ×4，各含 `共 {n} 个…`）→ 各补一个 `snapshot.sum.*` 模板键；
-2. 零散标签：`货币战争`(8) / `进度`(7) / `欢愉`(6) 等（多数可复用既有键，需先按「出现在哪个快照文件的什么上下文」定位再改）；
-3. 之后按顺序收尾：**默认开启**语言展开 → `vercel.json` 补前缀**模式化改写**（`:lang(en|jp|…)` 形式，约 18 条覆盖 12 个前缀）→ 扩 `tools/check-ai-endpoints.mjs`（分层页 × 13 覆盖率 / 每页 `<html lang>` / hreflang 完备性 / JSON-LD URL 与 canonical 同路径）。
+**已完成（曾列为待办，均已落地）**：语言展开无条件全量（`NK_SNAPSHOT_LOCALES` 开关已去掉）；`vercel.json` 前缀**模式化改写**（19 条覆盖 12 个前缀）；`tools/check-ai-endpoints.mjs` 的分层断言（分层总数 / 每页 `<html lang>` / hreflang 完备性 / JSON-LD URL 与 canonical 同路径）；非汉字脚本语言的分层快照正文汉字残留**已归零**（见下「验收判据」）。
 
-**进度（截至本轮）**：英文分层快照的可见文本汉字已从 **19,000+ 处降到 43 处（-99.8%）**。已完成的词条化范围：页面标题 / 页脚 / 面包屑（含货币战争前缀）/ 四张写死映射表（物品主类、成就稀有度、货币战争品质、怪物分类）/ 5+4+1 条手写 summary 模板（角色、光锥、遗器、物品、怪物、成就、终局、货币战争枢纽/角色/装备/投资环境/投资策略/羁绊）/ 事实标签与计数（`所属玩法`、`增益体系`、`期赛季`、`每期条数`、`选择方式`、均衡等级档数、图鉴形态数、`查看全部{label}` 等）/ `{PROP:}` 占位符按语言解析（修掉「按 cn 词典解析导致英文页注入中文」的真缺陷）/ 开拓者形态名的**数据侧**组合文案（`enum_labels._ENUM_TEXTMAP` 补 `path` 段落 9 个命途官方词条键，此前右半段回退本地中文 ⇒ 所有语言都带中文）。
-
-**剩余（下一步顺序）**：
-1. `条`(3) / `等级`(3) / `角色图鉴`(2) / `首页`(2) 等短标签 —— 注：`catalog.character.title` 与 `nav.home` 在词典里**都有译文**（Characters / Home），说明这几处来自生成器里**不走 `ui()` 的旁路**（JSON-LD / 面包屑构造路径），需按「先定位上下文再改」处理；
-2. 内容清零后：**默认开启**语言展开（去掉 `NK_SNAPSHOT_LOCALES` 开关）→ `vercel.json` 补前缀模式化改写 → 扩 `tools/check-ai-endpoints.mjs`（分层页 × 13 覆盖率 / 每页 `<html lang>` / hreflang 完备性 / JSON-LD URL 与 canonical 同路径 / **可见文本汉字归零**）。
-
-**验收判据**：英文分层快照的可见文本汉字数归零（站点品牌名 `星铁档案馆` 除外）。当前口径脚本为临时探针（生成 → 剥注释与标签 → 统计汉字），收尾时应固化成 `check-ai-endpoints.mjs` 的一条断言。
+**验收判据**：汉字脚本语言（`cn` / `cht` / `jp` / `kr`）以外的分层快照**正文**汉字残留为 0（品牌名 `星铁档案馆` 除外）。判据已固化为 `check-ai-endpoints.mjs` 的棘轮断言 + 「抽取非空」兜底，不再依赖临时探针。
 
 
 本站是纯 CSR：所有 URL（含详情页）返回同一份空壳 `index.html`，服务端 HTML 里 **0 个正文字符、0 条内链**。
@@ -50,7 +42,10 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 | 快照页 | `dist/prerender/<route>.html`（下表） | `tools/gen-ai-endpoints.mjs` |
 | 站点地图 | `dist/sitemap.xml` | 同上 |
 | robots | `public/robots.txt`（提交入库，手写） | Lead |
+| llms.txt | `public/llms.txt`（提交入库，手写；vite build 复制到 `dist/llms.txt`） | Lead |
 | 路由投递 | `vercel.json` rewrites（快照规则在 catch-all 之前） | Lead |
+
+llms.txt **不是收录杠杆**（Google 明文忽略它，依据见 [AI检索入口事实清单.md](../audit/AI检索入口事实清单.md) §4）：登记它的唯一目的是让它**以真文本文件投递**——`/llms.txt` 无文件时会落回 catch-all，拿到一份 200 的 HTML 外壳（既不是文件、也不是 404），这是比没有它更差的形态。
 
 快照 = **构建后的 `dist/index.html` 原样复制**，再注入 5 项内容（顺序无关）：
 1. `<head>` 首部内联 `<script>document.documentElement.classList.add('js')</script>`；
@@ -69,6 +64,8 @@ JS 用户仍拿到同一份 HTML（脚本照旧执行、Vue 挂载覆盖快照�
 - 无文件的路由（`/character/1308`）才落到 rewrite → 投递 `prerender/character/1308.html`；
 - **`/` 会命中 `dist/index.html`，`{"source":"/"}` 的 rewrite 永不生效** → 因此 home 快照**必须同时写入 `dist/index.html`**（与 `prerender/home.html` 字节一致），而把**纯 SPA 外壳**放到 `dist/prerender/_shell.html`（下划线前缀 = 非快照，守卫跳过；`/prerender/` 已在 robots 里 Disallow），catch-all rewrite 指向它。
 - rewrite 目标缺文件时**回落到 catch-all**（实测 `/character/99999`、`/endgame/boss/3022` 返回 SPA 外壳而非 404）——未发布/不存在实体的 URL 行为与改造前一致，无回归。
+- **尾斜杠变体由 `trailingSlash: false` 收口**：Vercel **只在显式设置**该项时才生成归一化路由（`@vercel/routing-utils` 的 `convertTrailingSlash`：未设置时一条都不生成），故此前 `/character/1308/`、`/en/`、`/character/` 这类带尾斜杠的写法会绕过全部 rewrite 落到 catch-all，拿到 200 空壳（与规范 URL 并存的重复页）。该路由在 routes 数组里排在 `handle: filesystem` **之前**，故置 `false` 后这些变体先被 308 到无斜杠规范 URL；`/` 不受影响（归一化正则 `^/(.*)/$` 不匹配单斜杠）。
+- **未登记路径返回 200 空壳（soft 404）是有意保留的既有语义，不得改成 404**：catch-all 是 `/settings`、`/maze` 这类客户端路由唯一的投递通道（外壳必须以 200 到达浏览器，Router 才能接手）；要改成真 404 就得把客户端路由逐条显式化并另出 `404.html`。判据与理由见 [docs/memory/ai-visibility.md](../memory/ai-visibility.md)。
 
 ## 2. 路由覆盖（唯一权威清单）
 
@@ -160,9 +157,9 @@ origin 迁至自有域名 `myhsr.wiki` 后 DNS 归站方控制：GSC 应为 `myh
 
 构建后运行（`pnpm build` 末步），失败即构建失败。断言：
 
-1. `public/robots.txt` 存在、含上表 5 个 UA 组、`Disallow: /prerender/`、`Sitemap:` 与生成器 `SITE_ORIGIN` 同源。
+1. `public/robots.txt` 存在、含上表 5 个 UA 组、`Disallow: /prerender/`、`Sitemap:` 与生成器 `SITE_ORIGIN` 同源；`dist/llms.txt` 存在、有 H1、不含 HTML 标签、其中每个绝对 URL 与 `SITE_ORIGIN` 同源（**不断言清单内容**——入口清单会随目录页增减漂移，写进守卫即第二事实源）。
 2. `dist/sitemap.xml` 为合法 URL set，`<loc>` 全为绝对 URL 且同源，无重复，URL 数 = 快照数 + 0（快照与 sitemap 一一对应），单文件未超 50,000。
-3. 每个 `dist/prerender/**/*.html`：`<title>` 非空且不等于站点默认标题、有 `<link rel="canonical">`（同源）、有 ≥1 个 `href="/`、去标签后中文字符 ≥ 80、`<h1>` 存在、JSON-LD `JSON.parse` 成功、无残留游戏标记、**无未展开参数标记 `#\d+\[[^\]]*\]`**（缺参数的字段必须整段省略，见 §3「参数展开保真」；字面 `#NN` 编号与 `{TEXTJOIN#…}` 不在此列）、入口 `<script src="/assets/…">` 与 **`dist/prerender/_shell.html`** 一致（`dist/index.html` 现在是 home 快照，不得再当外壳基线）。
+3. 每个 `dist/prerender/**/*.html`：**正文抽取必须非空**（抽取为空即判红；抽样面 = `.nk-snapshot` 之后的可见文本）、`<title>` 非空且不等于站点默认标题、有 `<link rel="canonical">`（同源）、有 ≥1 个 `href="/`、去标签后中文字符 ≥ 80、`<h1>` 存在、JSON-LD `JSON.parse` 成功、无残留游戏标记、**无未展开参数标记 `#\d+\[[^\]]*\]`**（缺参数的字段必须整段省略，见 §3「参数展开保真」；字面 `#NN` 编号与 `{TEXTJOIN#…}` 不在此列）、**汉字脚本语言（`cn`/`cht`/`jp`/`kr`）以外的分层快照正文禁汉字**（棘轮，口径见上「守卫口径」）、入口 `<script src="/assets/…">` 与 **`dist/prerender/_shell.html`** 一致（`dist/index.html` 现在是 home 快照，不得再当外壳基线）。
    - **社交卡片与语言标注**：每页必须有 `og:image`（同源）与 `twitter:card=summary_large_image`；`og:locale` 必须等于 `<html lang>` 的下划线形；JSON-LD 的 `inLanguage` 必须等于 `<html lang>`；`Article` 只允许出现在 `/voracity`（数据条目页出现即判红）；`prerender/_shell.html` 的静态 `og:image` 必须与 `SITE_ORIGIN` 同源；`og:image` 指向的**文件本身**必须存在且为 PNG、尺寸与 `og:image:width/height` 声明一致（只断言标签不断言文件，删掉图就是线上空卡片）。这些断言都做过「故意弄坏它」的反向验证。
    - 另：**`currency/item.html`（CW 装备）与 `currency/augment.html`（CW 投资策略）的可见文本不得含裸 `#N`**——该族数据条目携带 `params` 语义（见 §3），裸 `#N` 即占位符；**裸形态无法全局区分字面与占位符**（角色/成就/物品里的「天才俱乐部#81号会员」是上游字面，必须保留），故按页点名而非全局正则。**该断言只扫实体解码后的可见文本**（`html, body { background:#121214 }` 这类 shell 模板色值只出现在注释 / `<style>` / 内联属性里，按原始面断言会永久红）；原始面扫描须先剥 HTML 注释。**已知覆盖边界**：裸 `#N` 断言只点名上列两页——生成器侧已按「条目是否携带 `params`/`base_params`/`param_list`」通用判定（`hasParamSemantics`），若未来在**其它** params 语义族（如 `/currency/buff`）发现泄漏，须把该页加入点名表并复跑守卫。
 4. **覆盖率（文件级 + 条目级）**：① 每族生成文件数 = §2 表内**应用可见**条目数；② 12 个与数据一一对应的目录页，快照内 `<li class="nk-snapshot__entry">` 计数 = 同一可见条目数（防「静默漏条目」——生成器 map 中途异常/上限误用不会被文件数断言发现）；③ `/`、`/currency` 枢纽页断言条目数 ≥1（新版本必定有新条目；`release_version` / 赛季代际判据失效导致的静默空态必须拦住）；④ 单页族中 `/voracity`（专题页）只断言「无 `:id` 的路由各恰好 1 个快照文件」，**无条目级断言**——它不是目录、也不是枢纽页，正文分区不是收录条目集合（见 §3）；⑤ 反向断言：**专题页 `prerender/voracity.html` 的 `nk-snapshot__entry` 计数必须 = 0**（该类名未在此页登记，一旦有人把分区当目录收录清单来标即失败，避免异构条目静默变成覆盖率数字）。期望一律从数据 + 应用可见性判据**实时统计**，禁止写死数字。

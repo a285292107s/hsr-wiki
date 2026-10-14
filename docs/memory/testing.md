@@ -107,6 +107,7 @@
 - **背景层次只有 18~26/255 时要做亮度拉伸**：把 `[lo, hi] → [0,255]`（约 21×）才能看清结构；不拉伸时等值线与页面颗粒噪声不可区分。
 - **有 `v-if` 的元素要在采样脚本里判空**：该元素为空时整个不渲染，任何 `querySelector` 未判空都会在跑到那只角色时让整轮崩掉。
 - **探针脚本含正则 / 引号 / `$` 一律写成 `.mjs` / `.ps1` 执行**：PowerShell 转义与 Bash 预展开 `$var` 会静默改写脚本内容。
+- **不要用 `Get-Content -Raw` ↔ `Set-Content` 往返文本文件**：本机 `pwsh` 走 Windows PowerShell 5.1 语义（判据：`-AsByteStream` 参数不存在），默认按 ANSI 解码并按 ANSI 写回——实测一个 31294 字节的 UTF-8 快照往返后变 31183 字节，`<title>` 与 JSON-LD 当场损坏，守卫报「缺 title / JSON.parse 失败」，看起来像产物坏了、其实是夹具坏的。改产物做反向验证时用 Node（`readFileSync`/`writeFileSync`）或显式 `-Encoding utf8`；**还原一律用 `Copy-Item` 覆盖，不要靠重写内容**。
 
 ## 提速与并发
 

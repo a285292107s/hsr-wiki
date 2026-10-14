@@ -1,9 +1,10 @@
 /**
  * UI 词典的**复数形式**契约（vue-i18n 的 `|` 语法，`{n}` 隐式触发）。
  *
- * 计数类文案（`{n} stages` / `{n} уровней`）在 n=1 时必须走单数形式；俄语还要区分
- * 2–4 与 5+ 两档，默认规则给不出来（实测 `1 этапа` / `2 этапов` 皆错），故 i18n 实例
- * 里显式声明了 `pluralizationRules.ru`。这里钉住「词典值 + 规则」合起来的行为。
+ * 计数类文案（`{n} stages` / `{n} уровней`）在 n=1 时必须走单数形式。俄语理论上还要区分
+ * 2–4 与 5+ 两档，但**本配置取不到**：`src/app/i18n.ts` 未声明 `pluralizationRules`，
+ * vue-i18n 也不按 `Intl.PluralRules` 的 one/few/many 选形 ⇒ 词典只给两形式，2–4 走复数。
+ * 这里钉住的就是这个实际行为（快照生成器 `uiT()` 必须与之一致）。
  */
 import { describe, it, expect, afterAll } from 'vitest';
 import { i18n, setI18nLocale } from '../i18n';
