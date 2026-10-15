@@ -62,6 +62,19 @@ describe('resolveCdnUri 双源解析', () => {
     expect(r.source).toBe('nanoka');
   });
 
+  it('monstermiddleicon / monsterfigure（已全量入库）：local-first（怪物图鉴与立绘量大，仍全量随站）', () => {
+    expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/monstermiddleicon/Monster_1002011.webp`,
+      fallback: `${BASE}/monstermiddleicon/Monster_1002011.webp`,
+      source: 'local',
+    });
+    expect(resolveCdnUri('monsterfigure', 'Monster_1002011.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/monsterfigure/Monster_1002011.webp`,
+      fallback: `${BASE}/monsterfigure/Monster_1002011.webp`,
+      source: 'local',
+    });
+  });
+
   it('avatarshopicon / avatardrawcard（已全量入库）：local-first，本地缺失回退远端主源 nanoka', () => {
     expect(resolveCdnUri('avatarshopicon', '1001.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/avatarshopicon/1001.webp`,
@@ -165,7 +178,9 @@ describe('resolveCdnUri 双源解析', () => {
   });
 
   it('jsDelivr 映射分类：monstermiddleicon / relicfigures（套装件不受本地化影响）', () => {
-    expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp').primary)
+    // monstermiddleicon 已随站入库 ⇒ 传合成 spec（不带 local）测 jsDelivr 规则映射本身，
+    // 不读真实注册表：否则该用例随迁移进度失效
+    expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp', { nanoka: 'monstermiddleicon' }).primary)
       .toBe(`${BASE}/monstermiddleicon/Monster_1002011.webp`);
     expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').fallback)
       .toBe(`${JS_DELIVR_BASE}/relicfigures/IconRelic_101_1.png`);

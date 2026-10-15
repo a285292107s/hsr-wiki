@@ -73,8 +73,8 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   pathicon: { nanoka: 'pathicon', local: 'pathicon' },
   trace: { nanoka: 'trace', local: 'trace', jdPrimary: true },
   lightconemediumicon: { nanoka: 'lightconemediumicon', local: 'lightconemediumicon' },
-  monstermiddleicon: { nanoka: 'monstermiddleicon' },
-  monsterfigure: { nanoka: 'monsterfigure' },
+  monstermiddleicon: { nanoka: 'monstermiddleicon', local: 'monstermiddleicon' },
+  monsterfigure: { nanoka: 'monsterfigure', local: 'monsterfigure' },
   // 仅通用部位图标本地化（官方仓库无对应文件、nanoka 唯一源）；套装件图走 jsDelivr
   relicfigures: { nanoka: 'relicfigures', local: 'relicfigures', localFiles: /^IconRelic(?:Body|Foot|Neck|Goods)\.webp$/ },
   rank: { nanoka: 'rank/_dependencies/textures' },
