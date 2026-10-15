@@ -6,9 +6,9 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { elemLabel, pathLabel } from '../../lib/enum-labels';
 import { useParallax } from '../composables/use-parallax';
 import { initSpineViewer } from './spine';
-import { avatarDrawCardUrl, escHtml } from '../../lib/format';
+import { avatarDrawCardUrl, elementIconUrl, escHtml, pathIconUrl } from '../../lib/format';
 import { characterBlurb } from '../../lib/character-blurb';
-import {CDN} from '../../lib/constants';
+import { cdnFallbackFromPrimary } from '../../services/cdn';
 import type { CharacterData } from '../../services/types';
 
 import { translate } from '../i18n';
@@ -30,6 +30,16 @@ const heroBg = computed(() => avatarDrawCardUrl(props.charId));
 const stars = computed(() =>
   '★'.repeat(parseInt(props.d.rarity.replace(/\D/g, ''), 10) || 5),
 );
+
+/* 属性 / 命途徽标图标：必须经 CDN 解析层（`cdnUri` 的 local-first + 回退链），
+   原先直拼 `${CDN}/assets/hsr/{element,pathicon}/…` 绕过了解析层——本地入库与 jsDelivr
+   回退对它全部失效。回退源须一并落 `data-cdn-fallback`：只绑 `:src` 的图标位在主源 404 时
+   读不到第二源，会判死（新命途未入库时正走这条路径）。 */
+function badgeIconAttrs(kind: 'element' | 'pathicon', key: string): Record<string, string | undefined> {
+  const url = kind === 'element' ? elementIconUrl(key) : pathIconUrl(key);
+  if (!url) return {};
+  return { src: url, 'data-cdn-fallback': cdnFallbackFromPrimary(url) || undefined, alt: '' };
+}
 
 /** 简介：从角色档案派生（口径唯一落在 `lib/character-blurb.ts`，见该文件注释与 ADR 0052 决策 2/3） */
 const heroDesc = computed(() => escHtml(characterBlurb(props.d.chara_info?.stories)));
@@ -116,11 +126,11 @@ onBeforeUnmount(() => {
         <div class="nk-hero__meta-row">
           <span class="nk-hero__stars">{{ stars }}</span>
           <span class="nk-hero__badge">
-            <img :src="`${CDN}/assets/hsr/element/${d.damage_type.toLowerCase()}.webp`" alt="">
+            <img v-bind="badgeIconAttrs('element', d.damage_type)">
             <span>{{ elemLabel(d.damage_type) }}</span>
           </span>
           <span class="nk-hero__badge">
-            <img :src="`${CDN}/assets/hsr/pathicon/${d.base_type.toLowerCase()}.webp`" alt="">
+            <img v-bind="badgeIconAttrs('pathicon', d.base_type)">
             <span>{{ pathLabel(d.base_type) }}</span>
           </span>
           <button
