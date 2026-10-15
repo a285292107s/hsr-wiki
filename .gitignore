@@ -60,6 +60,12 @@ tools/converter/.converter-state.json
 tools/converter/.textmap-cache.db
 tools/converter/.textmap-cache.db-*
 
+# Converter 产物临时残留：写入走 `path.with_suffix(suffix + ".tmp")` + os.replace（见
+# tools/converter/utils.py），进程被中断时会在 public/data/ 下留下半成品，被 Vite 原样
+# 复制进 dist 公开发布。`.json.t` 为观测到的同族残留（2 字节 `{}`，来源不明）。
+public/data/**/*.json.tmp
+public/data/**/*.json.t
+
 # Converter 局部索引（全量 DATA_CATALOG.md + DATA_CATALOG.parts/ 入库；--top / --filter 为本地临时输出，勿提交）
 tools/converter/DATA_CATALOG.top*.md
 tools/converter/DATA_CATALOG.filter-*.md
