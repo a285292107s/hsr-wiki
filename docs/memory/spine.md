@@ -35,7 +35,7 @@
 - **nanoka `assets/hsr/trace/*.webp` 全部是 146 字节的占位图**（RIFF/WEBP 头合法但不是真图标）：trace 的真源只有 jsDelivr，本地缺失时的回退必须落到 jsDelivr 而非 nanoka。`src/services/cdn/base.ts`
 - **「双源回退」必须逐分类实测两侧都有资产**：jsDelivr fork 已冻结，新角色与部分分类（如 `avatarroundicon`）在 jsDelivr 侧永久 404；故禁止切回无回退的直拼模式（`USE_OFFICIAL_PATHS=true`），新内容在直拼下必破图。`src/services/cdn/resolve.ts`
 - **`<picture><source>` 的 404 不会退回 `<img>`**：不能把 picture/source 当回退链用——主源 404 就是破图，回退只能靠委托改写 `src`。`src/services/cdn/dom.ts`
-- **入库图标的两个非文档化环节**：字形是纯白 + 透明底，白底预览看不出内容，必须同批生成深底大字预览核对（`naturalWidth > 0` 验不出内容）；转码不引新依赖——用 Playwright 自带 Chromium 的 `canvas.toDataURL('image/webp')`。（裁切口径见 ADR 0044）`public/data/assets/icons/`
+- **入库图标的四个非文档化环节**：① 字形是**纯白 + 透明底**，白底预览看不出内容、`naturalWidth > 0` 也证明不了有内容 ⇒ 必须同批生成**深底大字预览**核对；② 转码走 **PicList 的转码工具**且**必须显式设 `quality=82`**——PicList 缺省 `quality` 是 **100**（`getOutputQuality()` 在 `quality` 缺失/非法时返回 100），不设只能省 32% 而非 83%；③ 参数哨兵：Pillow `Image.open(src).convert('RGBA').save(dst, 'WEBP', quality=82, method=6)` 可**逐字节复现**已入库产物（9/9），但字节只锁 **libwebp 参数、不锁 wrapper**——据此断言「用的是哪个工具」是错的；④ **不要**改用 Chromium 的 `canvas.toDataURL('image/webp')`：实测同输入下 64×64 图标产物约大 1 倍（572 B → 1190 B）且质量 0.8–1.0 全网格无逐字节命中。（裁切口径见 ADR 0044，转码与入库口径决策见 ADR 0057）`public/data/assets/icons/`
 - **`img.currentSrc` 要等浏览器异步完成资源选择才有值，元素插入 ≠ 已选源**：靠固定 sleep 兜底它的断言改成条件等待后会偶发拿到空串；紧跟等待之后的 `currentSrc` / `naturalWidth` / 字体度量读取点都要逐个补条件等待。`e2e/helpers.ts`
 - **CDN 位图断言有两种不同失败，不能用同一个补丁糊**：慢导致的用 `expect.poll(..., { timeout: 15_000 })`；`loading="lazy"` 在视口外或横向滚动区外是「不触发」，poll 救不回来，必须逐张 `scrollIntoViewIfNeeded()`。`e2e/helpers.ts`
 - **`complete` / `naturalWidth` 类断言前面必须有条件等待**：否则它的通过与否取决于跑在它前面的用例是否预热了缓存——Chromium 长期偶然绿、Firefox 立即判红，会被误判成跨引擎缺陷。`e2e/helpers.ts`
