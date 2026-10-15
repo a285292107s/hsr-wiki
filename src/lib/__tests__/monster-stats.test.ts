@@ -117,6 +117,21 @@ describe('精英组倍率（ADR 0049）', () => {
     expect(monsterEliteRatiosProduct()).toEqual({});
   });
 
+  /* ADR 0055：终局敌方卡的 HP 在**转换期**用同一条链落单值（`monster_common.monster_hp_at`）。
+     同一个关卡语境（自身组 1.7 × 关卡组 6.5，L95 / 难度组 3 / 曲线 294.42172）在两侧各算一遍，
+     期望值是**字面量**——转换器侧的同名用例（`tools/converter/tests/test_monster_common.py`）
+     钉的是同一个数，两端公式漂移即红。 */
+  it('Π 关卡精英组：自身组 × 关卡组，与转换器侧字面量同值（ADR 0055）', () => {
+    const stage = {
+      stats: { hp: 102.3, atk: 18, def: 210, speed: 100 },
+      statRatio: null,
+      levelGroup: 3,
+      curve: { '3': { '95': { hp: 294.42172, atk: 1, def: 1, speed: 1 } } },
+      eliteRatios: monsterEliteRatiosProduct({ hp: 1.7 }, { hp: 6.5 }),
+    };
+    expect(monsterStatAt('hp', 95, stage)).toBe(332818.7);
+  });
+
   it('韧性：基准 × 精英组韧性倍率 + 修正值（缺位按 1；当前被怪物引用的组韧性倍率全 1）', () => {
     expect(monsterStanceValue(60, null, 1)).toBe(60);
     expect(monsterStanceValue(60, null, 2)).toBe(120);

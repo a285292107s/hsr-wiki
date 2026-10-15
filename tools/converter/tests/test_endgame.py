@@ -12,6 +12,8 @@
 - _load_summon_index / _summon_out / _monster_summons：召唤物（敌方实例的 SummonIDList，
   轻形态 + 污染等级，按召唤者挂进敌方条目）
 - _season_monsters / _season_targets：敌方按层序收集去重、目标描述去重
+- _infinite_groups / _load_stage_monsters_by_id：∞ 造怪组并入波次（去重取怪种、按位合并、
+  尾部波次不落并 warning；无声明关卡只读 StageConfig，ADR 0056）
 - _group_seasons：名称解析 + 排期合并 + 统计 + 增益/敌方/目标/回合
 - _peak_seasons：异相仲裁弱点属性
 
@@ -1555,3 +1557,182 @@ class TestSummons:
         assert node["monsters"][0]["summons"] == [
             {"id": "5013010", "name": "骑士", "icon": "Monster_C"}]
         assert "summons" not in node
+
+
+class TestEnemyCardHp:
+    """敌方卡的关卡内 HP（ADR 0055）：语境取自**该敌方所属的关卡行**，缺语境不落键，
+    落盘的是单值（合成链输入不外泄，前端零合成逻辑——与 ADR 0045 的 stance/speed 同一取舍）。"""
+
+    CURVE = {"3": {"95": {"hp": 294.42172}}}
+    ELITE = {"1": {"hp": 1.0}, "2": {"hp": 1.7}, "164": {"hp": 6.5}}
+
+    @staticmethod
+    def _info() -> dict:
+        return {"name": "甲", "icon": "I", "weak": [], "resist": {}, "rank": "Elite",
+                "camp": "", "stance": 60,
+                "stats": {"hp": 102.3, "atk": 1, "def": 1, "speed": 100},
+                "stat_ratio": {"hp": 1}, "elite_group": 2}
+
+    def test_single_hp_value_without_chain_inputs(self):
+        out = eg._monster_out(
+            1, {1: self._info()},
+            hp_ctx={"level": 95, "level_group": 3, "elite_group": 164},
+            curve=self.CURVE, elite_groups=self.ELITE)
+        assert out["hp"] == 332818.7, "自身组 1.7 × 关卡组 6.5 叠乘（与 monster_common 字面量同值）"
+        assert "stat_ratio" not in out and "elite_group" not in out and "stats" not in out
+
+    def test_absent_context_leaves_no_hp_key(self):
+        """期级合并列表（无单一等级语境）与关卡行缺 Level 时都不落 hp 键。"""
+        info = self._info()
+        assert "hp" not in eg._monster_out(1, {1: info})
+        assert "hp" not in eg._monster_out(1, {1: info}, hp_ctx={"level": 0})
+        assert "hp" not in eg._monster_out(1, {1: info}, hp_ctx={"level": 95, "level_group": 9})
+
+    def test_stage_waves_hp_is_per_stage_row(self, monkeypatch):
+        """同一敌方出现在两条关卡行下 → 各按那条行的语境算（逐事件，不是整场一个数）。"""
+        monkeypatch.setattr(eg, "_hp_tables", lambda: (self.CURVE, self.ELITE))
+        stages = {
+            1: {"level": 95, "level_group": 3, "elite_group": 164, "waves": [[7]]},
+            2: {"level": 95, "level_group": 3, "waves": [[7]]},
+        }
+        out = eg._stage_waves_monsters([1, 2], stages, {7: self._info()})
+        assert [e["hp"] for e in out] == [332818.7, 51202.9], (
+            "缺关卡精英组 = 不参与叠乘（中性 1），不是缺数据"
+        )
+
+    def test_stage_rows_carry_group_context(self, monkeypatch):
+        """`_load_stage_monsters_by_id` 透出关卡语境（缺位不落键），供 hp_ctx 消费。"""
+        monkeypatch.setattr(eg, "load_json", lambda p: [
+            {"StageID": 1, "Level": 95, "HardLevelGroup": 3, "EliteGroup": 164,
+             "MonsterList": [{"a": 7}]},
+            {"StageID": 2, "Level": 95, "HardLevelGroup": 3, "MonsterList": [{"a": 7}]},
+            {"StageID": 3, "MonsterList": [{"a": 7}]},
+        ])
+        stages = eg._load_stage_monsters_by_id({1, 2, 3})
+        assert stages[1] == {"level": 95, "waves": [[7]], "maze_buff": None,
+                             "level_group": 3, "elite_group": 164}
+        assert stages[2] == {"level": 95, "waves": [[7]], "maze_buff": None, "level_group": 3}
+        assert stages[3] == {"level": 0, "waves": [[7]], "maze_buff": None}
+
+
+class TestInfiniteWaveMerge:
+    """∞ 造怪组并入波次（ADR 0056）：声明 `_StageInfiniteGroup` 的关卡，波次 = 怪种集合。"""
+
+    @staticmethod
+    def _patch_stage_config(monkeypatch):
+        monkeypatch.setattr(eg, "load_json", lambda p: [
+            {"StageID": 1, "Level": 55,
+             "StageConfigData": [{"BFLIFKBEOPJ": "_StageInfiniteGroup", "MNDFOPKBHKP": "30324011"}],
+             "MonsterList": [{"Monster0": 7, "Monster1": 8, "Monster2": 7},
+                              {"Monster0": 9}]},
+            {"StageID": 2, "Level": 55,
+             "StageConfigData": [{"BFLIFKBEOPJ": "_StageInfiniteGroup", "MNDFOPKBHKP": "40401"},
+                                  {"BFLIFKBEOPJ": "_Wave", "MNDFOPKBHKP": "2"}],
+             "MonsterList": [{"Monster0": 7}, {"Monster0": 9}]},
+            {"StageID": 3, "Level": 55, "MonsterList": [{"Monster0": 7}]},
+        ])
+        monkeypatch.setattr(eg, "_PLACEHOLDER_TEMPLATES", frozenset())
+
+    def test_merge_dedupes_preview_slots_then_appends_pool_species(self, monkeypatch):
+        """预览槽位按首现序去重（波次 = 怪种集合）、队列怪种按首现序追加、已在本波的不重复加。"""
+        self._patch_stage_config(monkeypatch)
+        monkeypatch.setattr(eg, "_INFINITE_GROUPS",
+                            {30324011: [[1, 7, 2, 8], [3, 9]]})
+        stages = eg._load_stage_monsters_by_id({1, 2, 3})
+        assert stages[1]["waves"] == [[7, 8, 1, 2], [9, 3]]
+        # 未登记的 ∞ 组（40401）与无声明关卡（3）走原路：不去重、不新增怪种
+        assert stages[2]["waves"] == [[7], [9]]
+        assert stages[3]["waves"] == [[7]]
+
+    def test_dedupe_covers_waves_without_queue(self, monkeypatch):
+        """去重与剔除是**关卡级**的，不按「该波有没有队列」分期（∞ 组波数可少于关卡波数）。"""
+        monkeypatch.setattr(eg, "load_json", lambda p: [
+            {"StageID": 1, "Level": 55,
+             "StageConfigData": [{"BFLIFKBEOPJ": "_StageInfiniteGroup", "MNDFOPKBHKP": "5"}],
+             "MonsterList": [{"Monster0": 7}, {"Monster0": 7, "Monster1": 7},
+                              {"Monster0": 9, "Monster1": 9}]},
+        ])
+        monkeypatch.setattr(eg, "_PLACEHOLDER_TEMPLATES", frozenset())
+        monkeypatch.setattr(eg, "_INFINITE_GROUPS", {5: [[7, 2]]})
+        stages = eg._load_stage_monsters_by_id({1})
+        # 第 1 波被并入队列；第 2/3 波无队列可并，但同属声明 ∞ 的关卡，同样按怪种去重
+        assert stages[1]["waves"] == [[7, 2], [7], [9]]
+
+    def test_placeholder_art_templates_dropped(self, monkeypatch, caplog):
+        """占位美术模板（无独立美术的机制载具）从预览与队列两侧一并剔除，并 warning 留痕。
+
+        剔除只发生在声明 ∞ 的关卡上——未声明关卡的波次是有限出场名单，原样保留。
+        """
+        self._patch_stage_config(monkeypatch)
+        monkeypatch.setattr(eg, "_PLACEHOLDER_TEMPLATES", frozenset({8, 5}))
+        monkeypatch.setattr(eg, "_INFINITE_GROUPS", {30324011: [[5, 1, 7], [3, 9]]})
+        with caplog.at_level("WARNING", logger="converter"):
+            stages = eg._load_stage_monsters_by_id({1, 3})
+        assert stages[1]["waves"] == [[7, 1], [9, 3]]
+        assert stages[3]["waves"] == [[7]]
+        assert any("占位美术模板" in r.message for r in caplog.records)
+
+    def test_placeholder_templates_criterion(self, monkeypatch):
+        """判据 = 三条美术路径任一 basename 为 `Monster_Unknown.png`（头像借用那条不算）。"""
+        monkeypatch.setattr(eg, "load_json", lambda _p: [
+            {"MonsterTemplateID": 1, "IconPath": "SpriteOutput/MosterIcon/Monster_1.png",
+             "RoundIconPath": "SpriteOutput/MonsterRoundIcon/Monster_1.png",
+             "ImagePath": "SpriteOutput/MonsterFigure/Monster_1.png"},
+            {"MonsterTemplateID": 2, "IconPath": "SpriteOutput/BattleEventIcon/Monster_Unknown.png",
+             "RoundIconPath": "SpriteOutput/BattleEventIcon/Monster_Unknown.png",
+             "ImagePath": "SpriteOutput/BattleEventIcon/Monster_Unknown.png"},
+            {"MonsterTemplateID": 3, "IconPath": "SpriteOutput/MosterIcon/Monster_3.png",
+             "ImagePath": "SpriteOutput/BattleEventIcon/Monster_Unknown.png"},
+            {"MonsterTemplateID": 4},
+        ])
+        monkeypatch.setattr(eg, "_PLACEHOLDER_TEMPLATES", None)
+        assert eg._placeholder_templates() == frozenset({2, 3})
+        assert eg._placeholder_templates() == frozenset({2, 3}), "第二次调用应命中进程内缓存"
+
+    def test_extra_infinite_waves_not_materialized(self, monkeypatch, caplog):
+        """∞ 波数多于关卡波数时尾部不并入（不新增「第 3 波」）并 warning 留痕。"""
+        self._patch_stage_config(monkeypatch)
+        monkeypatch.setattr(eg, "_INFINITE_GROUPS", {40401: [[7], [2], [5, 6]]})
+        with caplog.at_level("WARNING", logger="converter"):
+            stages = eg._load_stage_monsters_by_id({2})
+        assert stages[2]["waves"] == [[7], [9, 2]]
+        assert any("超出关卡声明的 2 波" in r.message for r in caplog.records)
+
+    def test_stage_without_declaration_does_not_read_pool_tables(self, monkeypatch):
+        """无 `_StageInfiniteGroup` 的关卡（忘却之庭 / 末日幻影）只读 StageConfig。"""
+        called: list[str] = []
+
+        def fake_load(p):
+            called.append(Path(str(p)).name)
+            return [{"StageID": 3, "Level": 55, "MonsterList": [{"Monster0": 7}]}]
+
+        monkeypatch.setattr(eg, "load_json", fake_load)
+        monkeypatch.setattr(eg, "_INFINITE_GROUPS", {1: [[99]]})
+        stages = eg._load_stage_monsters_by_id({3})
+        assert stages[3]["waves"] == [[7]]
+        assert called == ["StageConfig.json"]
+
+    def test_infinite_groups_takes_species_in_first_seen_order(self, monkeypatch):
+        """三表装配：队列去重取怪种（造怪队列靠重复补位）、空波次不占位、进程内缓存。"""
+        reads: list[str] = []
+
+        def fake_load(p):
+            name = Path(str(p)).name
+            reads.append(name)
+            if name == "StageInfiniteGroup.json":
+                return [{"WaveGroupID": 5, "WaveIDList": [51, 52, 53]}]
+            if name == "StageInfiniteWaveConfig.json":
+                return [{"InfiniteWaveID": 51, "MonsterGroupIDList": [91, 92]},
+                        {"InfiniteWaveID": 52, "MonsterGroupIDList": [93]},
+                        {"InfiniteWaveID": 53, "MonsterGroupIDList": []}]
+            if name == "StageInfiniteMonsterGroup.json":
+                return [{"InfiniteMonsterGroupID": 91, "MonsterList": [1, 2, 1, 2]},
+                        {"InfiniteMonsterGroupID": 92, "MonsterList": [3]},
+                        {"InfiniteMonsterGroupID": 93, "MonsterList": []}]
+            raise AssertionError(f"未预期的表：{name}")
+
+        monkeypatch.setattr(eg, "load_json", fake_load)
+        monkeypatch.setattr(eg, "_INFINITE_GROUPS", None)
+        assert eg._infinite_groups() == {5: [[1, 2, 3]]}
+        assert eg._infinite_groups() == {5: [[1, 2, 3]]}
+        assert reads.count("StageInfiniteGroup.json") == 1, "第二次调用应命中进程内缓存"

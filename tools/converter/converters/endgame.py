@@ -5,6 +5,11 @@
   ——迷宫新赛季指针 291015/291016 已迁全局表且脱离编号约定），忘却之庭回退
   ScheduleDataGlobal 且允许单边日期；早于公测(2023-04-26)或 ≥2030 占位丢弃。
 - 敌方以 StageConfig 波次为准（非关卡表 NpcMonsterIDList 代表怪，仅 61 个、缺 2/3）。
+- 波次在声明 `_StageInfiniteGroup` 的关卡上并入无限波次造怪队列的怪种（ADR 0056；
+  虚构叙事战斗内「敌人被消灭后不断补充」，StageConfig 的 MonsterList 只是配置预览：
+  实测 2026 每半场预览 5/1/1，队列另有「虚构集合体」与波 2/3 各 2 只小怪）。
+  该口径下波次是**怪种集合**：预览槽位按首现序去重、并剔除占位美术的机制载具
+  （「虚构集合体」，见 `_placeholder_templates`）——游戏内节点预览每波每种敌人只出一格。
 - 末日幻影层级敌方只取 EventIDList1/2 波次（ADR 0031）：ChallengeBossMazeExtra 的
   MonsterID1/2/3 是**节点**不是首领形态，末层第 3 项就是星启附加关、第 2 项在影将军
   那场是指南别名，故该表一律不读。
@@ -38,12 +43,33 @@ from config import EXCEL_DIR, OUTPUT_DIR
 from enum_labels import resolve as resolve_label
 from textmap import resolve_text
 from utils import load_json, save_json, map_icon_path, unwrap_value
-from converters.monster_common import load_monsters
+from converters.monster_common import (
+    load_elite_groups, load_level_curve, load_monsters, monster_hp_at, stage_context,
+)
 from converters.monster_guide import load_boss_guides, load_guide_phases
 
 logger = logging.getLogger("converter")
 
 _LAUNCH_TS = datetime(2023, 4, 26, 0, 0, 0)
+
+_HP_TABLES: tuple[dict, dict] | None = None
+
+_INFINITE_GROUPS: dict[int, list[list[int]]] | None = None
+
+_PLACEHOLDER_TEMPLATES: frozenset[int] | None = None
+"""「无独立美术」的敌方模板（占位图）缓存，见 `_placeholder_templates`。"""
+
+
+def _hp_tables() -> tuple[dict, dict]:
+    """战斗数值合成链的两张共享表（HardLevelGroup 等级曲线 / EliteGroup 精英组倍率）。
+
+    终局敌方卡的 HP 在转换期落单值（见 `_monster_out`），两表只服务这一条链；本模块
+    2,337+ 条敌方引用共享同一次读取，进程内缓存（转换器单次运行内源数据不变）。
+    """
+    global _HP_TABLES
+    if _HP_TABLES is None:
+        _HP_TABLES = (load_level_curve(), load_elite_groups())
+    return _HP_TABLES
 
 # RewardData.Hcoin 即星琼：全表 9,515 行无一行把星琼写成 ItemID_1（`ItemConfig` 1 = 星琼），
 # 而 32.6% 的行用它记星琼数量，故解析时并入物品 1。
@@ -128,8 +154,15 @@ def _load_maze_buffs() -> dict[int, dict]:
         }
     return out
 
-def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dict:
-    """敌方输出对象：{id, name, icon, weak, resist, rank, camp, stance, speed}。
+def _monster_out(
+    mid: int,
+    monsters: dict[int, dict],
+    full: bool = False,
+    hp_ctx: dict | None = None,
+    curve: dict | None = None,
+    elite_groups: dict | None = None,
+) -> dict:
+    """敌方输出对象：{id, name, icon, weak, resist, rank, camp, stance, speed[, hp]}。
 
     full=True 追加 intro/skills（星启信息卡消费；层级/赛季波次全量为轻量字段，
     避免图鉴介绍与技能在大量重复引用中膨胀体积）。skills 仅取名称 + 标签
@@ -141,7 +174,12 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
     口径 = 基准 + 修正值，见 ADR 0045），故输出里没有这两个键；详情页因要支持等级滑条而保留
     原值、由前端按 `基准 × 修饰比 × 曲线 + 修正值` 合成。
     stat_ratio / level_group / elite_group（战斗数值合成链，ADR 0040/0049）同样不进终局 payload：
-    终局敌方卡不显示这层合成，随归属详情页；
+    终局敌方卡不显示这层合成，随归属详情页；**但 `hp_ctx` 传入时**（见下）由 `monster_hp_at`
+    直接落一个 `hp` 单值——终局轻形态不带合成链输入，前端无法自行合成，故终局侧的口径是
+    「转换期落单值、前端只渲染」（与 ADR 0045 的 stance/speed 同一取舍，ADR 0055）。
+    hp_ctx = 该敌方所属**关卡行**的语境（`stage_context`：level / level_group / elite_group）：
+    缺语境（期级合并列表，无单一等级）或缺任一段合成输入时不落 `hp` 键（宁缺不假）；
+    `curve` / `elite_groups` 仅供测试注入，缺省读共享表（`_hp_tables`）。
     full=True 追加 intro/skills/debuff_resist（敌方详情卡形态：末日幻影楼层 / 星启节点 /
     异相仲裁单关）；轻形态剥掉这三项——效果抵抗只在详情卡上有位，图标 + 百分比行落卡内。
     """
@@ -172,6 +210,15 @@ def _monster_out(mid: int, monsters: dict[int, dict], full: bool = False) -> dic
     speed_mod = info.get("speed_modify")
     if speed_mod is not None and "speed" in out:
         out["speed"] = out["speed"] + speed_mod
+    # 关卡内实际 HP（ADR 0055）：合成链单点在 monster_common.monster_hp_at（与前端
+    # monster-stats.ts → monsterStatAt('hp', …) 同一算式），此处只落结果单值
+    if hp_ctx:
+        c, e = curve, elite_groups
+        if c is None or e is None:
+            c, e = _hp_tables()
+        hp = monster_hp_at(info, hp_ctx.get("level"), hp_ctx, c, e)
+        if hp is not None:
+            out["hp"] = hp
     return out
 
 def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dict]:
@@ -518,17 +565,119 @@ def _stage_binding_buff(rec: dict) -> int | None:
             return None
     return None
 
+def _stage_infinite_group(rec: dict) -> int | None:
+    """StageConfig 自身声明的无限波次造怪组（`StageConfigData._StageInfiniteGroup`）→ WaveGroupID；无则 None。
+
+    与 `_stage_binding_buff` 同源同形：值在 `MNDFOPKBHKP`，键在 `BFLIFKBEOPJ`。
+    终局四模式里只有虚构叙事全量、异相仲裁少数关卡带它（忘却之庭 / 末日幻影实测 0 条）。
+    """
+    for item in rec.get("StageConfigData") or []:
+        if item.get("BFLIFKBEOPJ") != "_StageInfiniteGroup":
+            continue
+        raw = item.get("MNDFOPKBHKP")
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
+def _infinite_groups() -> dict[int, list[list[int]]]:
+    """StageInfinite* 三表 → {WaveGroupID: [该波怪种（去重保序）]}。进程内缓存。
+
+    链条：`_StageInfiniteGroup` → `StageInfiniteGroup.WaveIDList` →
+    `StageInfiniteWaveConfig.MonsterGroupIDList` → `StageInfiniteMonsterGroup.MonsterList`
+    ——最后一张是**造怪队列**（同一怪种按补位重复多次，如 26 条里只有 4 个怪种），
+    故只取怪种（首现序）。空队列的波次不占位（与 `MonsterList` 的空波次同判据）。
+    """
+    global _INFINITE_GROUPS
+    if _INFINITE_GROUPS is None:
+        wave_ids = {
+            r.get("WaveGroupID"): r.get("WaveIDList") or []
+            for r in load_json(EXCEL_DIR / "StageInfiniteGroup.json")
+        }
+        wave_cfg = {
+            r.get("InfiniteWaveID"): r
+            for r in load_json(EXCEL_DIR / "StageInfiniteWaveConfig.json")
+        }
+        pools = {
+            r.get("InfiniteMonsterGroupID"): r.get("MonsterList") or []
+            for r in load_json(EXCEL_DIR / "StageInfiniteMonsterGroup.json")
+        }
+        out: dict[int, list[list[int]]] = {}
+        for gid, wids in wave_ids.items():
+            if gid is None:
+                continue
+            waves: list[list[int]] = []
+            for wid in wids:
+                seq: list[int] = []
+                for mgid in (wave_cfg.get(wid) or {}).get("MonsterGroupIDList") or []:
+                    seq.extend(pools.get(mgid) or [])
+                species = [m for m in dict.fromkeys(seq) if m]
+                if species:
+                    waves.append(species)
+            if waves:
+                out[gid] = waves
+        _INFINITE_GROUPS = out
+    return _INFINITE_GROUPS
+
+
+def _placeholder_templates() -> frozenset[int]:
+    """「无独立美术」的敌方模板（占位图）→ frozenset；进程内缓存。
+
+    判据 = `MonsterTemplateConfig` 的 `IconPath` / `RoundIconPath` / `ImagePath` 三个字段
+    任一 basename 为 `Monster_Unknown.png`（源路径 `SpriteOutput/BattleEventIcon/`）。
+    实测全表 632 条里**恰有 2 条**命中且三条路径同时是占位图、`ManikinImagePath` 也借
+    8001010 的头像：`5013090`「破晓战队」与 `8003060`「虚构集合体」——两者同为 Elite、
+    共用 `XP_Minion01_00.prefab`，是**机制载具**而非可辨识敌人（8003060 只出现在 140 个
+    ∞ 造怪队列的首位，`StageConfig` 波次槽位里 0 次；5013090 只在 7 条主线关卡里露面）。
+
+    这类模板上屏会显示别只怪的头像（8003060 的 icon 就是 `Monster_8001010`），
+    与游戏内节点预览（不显示它们）不一致，故波次口径里剔除。
+    """
+    global _PLACEHOLDER_TEMPLATES
+    if _PLACEHOLDER_TEMPLATES is None:
+        out: set[int] = set()
+        for rec in load_json(EXCEL_DIR / "MonsterTemplateConfig.json"):
+            tid = rec.get("MonsterTemplateID")
+            if tid is None:
+                continue
+            for field in ("IconPath", "RoundIconPath", "ImagePath"):
+                path = str(rec.get(field) or "")
+                if path.rsplit("/", 1)[-1] == "Monster_Unknown.png":
+                    out.add(tid)
+                    break
+        _PLACEHOLDER_TEMPLATES = frozenset(out)
+    return _PLACEHOLDER_TEMPLATES
+
+
 def _load_stage_monsters_by_id(stage_ids: set[int]) -> dict[int, dict]:
-    """StageConfig 按需提取 → {StageID: {level, waves, maze_buff}}。
+    """StageConfig 按需提取 → {StageID: {level, level_group, elite_group, waves, maze_buff}}。
 
     MonsterList 为波次列表（每波 {Monster0..N: ID} 字典），波内保序保留；
     波次顺序即战斗出场顺序。仅保留调用方关心的 StageID，避免 24MB 表整体驻留。
     maze_buff 为关卡自身绑定的关卡增益（仅星启节点 3 消费）。
+    level_group / elite_group（关卡难度组与关卡指派精英组，`stage_context` 单点解析、
+    缺位不落键）与 level 一起构成敌方卡 HP 的合成语境（`_monster_out` 的 hp_ctx，ADR 0055）。
+
+    **无限波次造怪组并入波次**（ADR 0056）：关卡声明 `_StageInfiniteGroup` 时（虚构叙事全量、
+    异相仲裁少数关卡），把该波 ∞ 造怪队列的怪种**按位并入同一波次**（预览槽位在前、队列
+    怪种在后，已在本波的不重复）；只并入关卡 `_Wave` 声明的波数内的波次，∞ 多出的尾部波次
+    不落并 warning 留痕（实测 16/23 例是前序波次的重复）。无该声明的关卡（忘却之庭 / 末日幻影）
+    波次保持 StageConfig 原样，产物零变更。
+
+    **声明 ∞ 的关卡，波次是「怪种集合」而非「出场槽位」**（ADR 0056 决策 7）：游戏内节点
+    预览每波每种敌人只出一格，而 `MonsterList` 的槽位会重复（2026 第 1 波 `A,B,C,A,B`，
+    5 个槽位只 3 个怪种）⇒ 合并时预览槽位**按首现序去重**再并入队列怪种；同时剔除
+    `_placeholder_templates()`（无独立美术的机制载具，如「虚构集合体」），剔除清单 warning 留痕。
+    未声明 ∞ 的关卡不做这两步：那里的波次是**有限的出场名单**，槽位重复是官方排布
+    （忘却之庭 1,254 个波次带波内重复，是否也要按怪种上屏见 ADR 0056「待裁决」）。
     """
     if not stage_ids:
         return {}
     data = load_json(EXCEL_DIR / "StageConfig.json")
     out: dict[int, dict] = {}
+    dropped: dict[int, set[int]] = {}
     for rec in data:
         sid = rec.get("StageID")
         if sid not in stage_ids:
@@ -538,12 +687,49 @@ def _load_stage_monsters_by_id(stage_ids: set[int]) -> dict[int, dict]:
             mids = [v for v in wave.values() if v]
             if mids:
                 waves.append(mids)
-        out[sid] = {"level": rec.get("Level", 0) or 0, "waves": waves,
-                    "maze_buff": _stage_binding_buff(rec)}
+        gid = _stage_infinite_group(rec)
+        if gid is not None:
+            # 声明 ∞ ⇒ 该关卡**全部**波次都是「怪种集合」：预览槽位按首现序去重 + 剔除占位载具。
+            # 两步都不按「该波有没有队列」分期：46 个关卡的 ∞ 组波数少于关卡波数（如 425001
+            # 关卡 3 波而 ∞ 组 1 波），若只处理被并入的那几波，同一关卡里就会一半去重一半不去重。
+            placeholders = _placeholder_templates()
+            kept: list[list[int]] = []
+            for wave in waves:
+                species = list(dict.fromkeys(wave))
+                for mid in species:
+                    if mid in placeholders:
+                        dropped.setdefault(mid, set()).add(sid)
+                kept.append([m for m in species if m not in placeholders])
+            waves = kept
+            pool = _infinite_groups().get(gid) or []
+            if len(pool) > len(waves):
+                logger.warning(
+                    "StageConfig %s 的 ∞ 造怪组 %s 有 %d 个波次，超出关卡声明的 %d 波"
+                    "（尾部波次不并入，需人工核对是否漏波）",
+                    sid, gid, len(pool), len(waves))
+            for i, species in enumerate(pool[: len(waves)]):
+                for mid in species:
+                    if mid in placeholders:
+                        dropped.setdefault(mid, set()).add(sid)
+                    elif mid not in waves[i]:
+                        waves[i].append(mid)
+        ctx = stage_context(rec)
+        node = {"level": rec.get("Level", 0) or 0, "waves": waves,
+                "maze_buff": _stage_binding_buff(rec)}
+        node.update({k: ctx[k] for k in ("level_group", "elite_group") if k in ctx})
+        out[sid] = node
+    for mid, sids in sorted(dropped.items()):
+        logger.warning(
+            "波次剔除占位美术模板 %s（无独立美术的机制载具）：命中 %d 个关卡（示例 %s）",
+            mid, len(sids), ",".join(str(s) for s in sorted(sids)[:5]))
     return out
 
+
 def _stage_mids(events: list[int], stages: dict[int, dict]) -> list[int]:
-    """EventIDList → StageConfig 波次扁平 ID 列表（波内保序去重，未命中跳过）。"""
+    """EventIDList → StageConfig 波次扁平 ID 列表（波内保序去重，未命中跳过）。
+
+    波次含 ∞ 造怪组并入的怪种（ADR 0056），故赛季级合并列表与层内敌方配置同口径。
+    """
     out: list[int] = []
     for eid in events or []:
         stage = stages.get(eid)
@@ -569,6 +755,8 @@ def _stage_waves_monsters(
     仅星启信息卡 full=True 时输出，控制体积）。summons 传入时，**每个敌方条目**
     附加该实例自己的召唤物 `summons[]`（见 _monster_summons，ADR 0036）——召唤物归属
     召唤者，故不再在场次上单独出行；invasion 同时传入时，命中的召唤物带污染等级。
+    敌方按**自己所属的那条关卡行**（每个 EventID 一行）落 HP：同一敌方在不同关卡行下的
+    等级 / 难度组 / 精英组不同，故 hp 逐事件算（见 `_monster_out` 的 hp_ctx，ADR 0055）。
     """
     polluted = _polluted_index(invasion)
     out: list[dict] = []
@@ -582,7 +770,7 @@ def _stage_waves_monsters(
             for mid in wave:
                 if mid not in monsters:
                     continue
-                entry = {**_monster_out(mid, monsters, full), "wave": wave_no}
+                entry = {**_monster_out(mid, monsters, full, hp_ctx=stage), "wave": wave_no}
                 if summons:
                     items = _monster_summons(mid, monsters, summons, polluted)
                     if items:

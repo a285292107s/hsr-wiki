@@ -32,6 +32,8 @@ from textmap import clean_text, current_textmap, resolve_text, text_key_of
 from textpack import composed_ref
 from utils import load_json, unwrap_value
 from converters.items import item_name_icon
+# 关卡语境三件套的解析单点在 monster_common.stage_context（endgame 的敌方卡 HP 同源消费）
+from converters.monster_common import stage_context as _stage_context
 
 logger = logging.getLogger("converter")
 
@@ -284,29 +286,6 @@ def load_player_stage_names(stage_types: dict[int, str]) -> dict[int, dict]:
     _absorb_id_names(names, "StrongChallengeStage", "EventID", {"StrongChallengeActivity"}, stage_types)
     _absorb_id_names(names, "SwordTrainingExam", "StageID", {"SwordTraining"}, stage_types, "EnemyName")
     return names
-
-
-def _stage_context(rec: dict) -> dict:
-    """StageConfig 行 → 关卡语境 {level, level_group, elite_group}（缺位不落键，ADR 0050）。
-
-    「N 关 M 级怪的实际面板」的原始三件套：等级与难度组定曲线行，关卡精英组与怪物自身组
-    **叠乘**（Π精英组别系数）。只透传关卡行原值，合成留在前端（`monster-stats.ts` 同一算式）；
-    个别行的嵌套 `{Value:…}` 包装逐层解开。
-    """
-    def val(field: str):
-        v = rec.get(field)
-        depth = 0
-        while isinstance(v, dict) and depth < 4:
-            v = v.get("Value")
-            depth += 1
-        return v if isinstance(v, int) else None
-
-    ctx: dict = {}
-    for key, field in (("level", "Level"), ("level_group", "HardLevelGroup"), ("elite_group", "EliteGroup")):
-        v = val(field)
-        if v is not None:
-            ctx[key] = v
-    return ctx
 
 
 def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:

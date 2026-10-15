@@ -15,7 +15,7 @@ import {
   deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
   avatarDrawCardUrl, avatarDrawCardJdUrl, itemName, itemIconUrl, validateCharData,
-  fmtStatValue, levelStatValue, charStageForLevel, fmtNumber, localeCulture,
+  fmtStatValue, levelStatValue, charStageForLevel, fmtNumber, localeCulture, fmtBigNumber,
 } from '../format';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
 
@@ -506,6 +506,55 @@ describe('fmtNumber 按站点语言（不是浏览器语言）', () => {
     setActiveLocale('en');
     expect(fmtNumber(Number.NaN)).toBe('NaN');
     expect(fmtNumber('25377.9')).toBe('25,377.9');
+  });
+});
+
+describe('fmtBigNumber 大数缩写按站点语言取数制（ADR 0055）', () => {
+  it('cn：4 位分组 + 低组补足 4 位 + 四舍五入取整（终局敌方卡 HP 口径）', () => {
+    setActiveLocale('cn');
+    expect(fmtBigNumber(2723430.9)).toBe('272万3431');
+    expect(fmtBigNumber(2723430.4)).toBe('272万3430');
+    expect(fmtBigNumber(80477.1)).toBe('8万0477');
+    expect(fmtBigNumber(963.4)).toBe('963');
+    expect(fmtBigNumber(340.3)).toBe('340');
+    expect(fmtBigNumber(123456789)).toBe('1亿2345万6789');
+    expect(fmtBigNumber(0)).toBe('0');
+  });
+
+  it('cn：尾随零组不占位、中间零组补位（位置信息不丢）', () => {
+    setActiveLocale('cn');
+    expect(fmtBigNumber(10000)).toBe('1万');
+    expect(fmtBigNumber(10001)).toBe('1万0001');
+    expect(fmtBigNumber(1e8)).toBe('1亿');
+    expect(fmtBigNumber(1.0001e8)).toBe('1亿0001万');
+    expect(fmtBigNumber(100010001)).toBe('1亿0001万0001');
+  });
+
+  it('按语言取单位字形：cht 億/萬、jp 億/万、kr 억/만', () => {
+    setActiveLocale('cht');
+    expect(fmtBigNumber(80477)).toBe('8萬0477');
+    setActiveLocale('jp');
+    expect(fmtBigNumber(123456789)).toBe('1億2345万6789');
+    setActiveLocale('kr');
+    expect(fmtBigNumber(123456789)).toBe('1억2345만6789');
+    setActiveLocale('cn');
+  });
+
+  it('无数制语言回退千分位原数（不把汉字单位搬过去）', () => {
+    setActiveLocale('en');
+    expect(fmtBigNumber(2723430.9)).toBe('2,723,431');
+    setActiveLocale('de');
+    expect(fmtBigNumber(2723430.9)).toBe('2.723.431');
+    setActiveLocale('cn');
+  });
+
+  it('缺值 / 非有限值 / 超数制量级都有确定行为', () => {
+    setActiveLocale('cn');
+    expect(fmtBigNumber(null)).toBe('');
+    expect(fmtBigNumber(undefined)).toBe('');
+    expect(fmtBigNumber(Number.NaN)).toBe('NaN');
+    expect(fmtBigNumber(-80477)).toBe('-8万0477');
+    expect(fmtBigNumber(1e12)).toBe(fmtNumber(1e12));
   });
 });
 

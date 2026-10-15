@@ -51,6 +51,10 @@
 .nk-egd-floor__moncount,
 .nk-egd-pollchip { font-size: 0.62rem; }
 .nk-egd-nodecard__val { font-size: 0.86rem; }
+/* 关卡内 HP（ADR 0055）：数值走数值档（卡片上要一眼看到的那个数），
+   标签走徽标档（它是这个数的单位说明，不是行首标签）。 */
+.nk-egd-mon__hp-val { font-size: 0.86rem; }
+.nk-egd-mon__hp-label { font-size: 0.62rem; }
 
 /* 赛季级「星数奖励」阶梯（ADR 0051）：区块标题走区块标题档，注记与星标走标签档；
    层 / 星启板的「星级奖励列表」档位徽章同档 */

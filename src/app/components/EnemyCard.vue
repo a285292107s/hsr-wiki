@@ -6,7 +6,7 @@ import { pollutionLabel } from '../endgame/pollution';
 import type { MazeBossGuide, MazeMonsterInfo } from '../../services/types';
 
 import { monsterRankKey } from '../../lib/enum-labels';
-import { escHtml, elementIconUrl } from '../../lib/format';
+import { escHtml, elementIconUrl, fmtBigNumber } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
 
 import { translate } from '../i18n';
@@ -84,7 +84,8 @@ function monTitle(m: MazeMonsterInfo): string {
   <article class="nk-egd-mon" :title="monTitle(monster)">
     <!-- 立绘列（左）：monstermiddleicon 是 376×512 竖版全身像（透明底、Alpha 框紧贴上下边），
          故按原比例整幅铺满列宽，不做圆形裁切——圆形会把竖长立绘裁掉上下大半。
-         甲级徽标骑在立绘列左上角；污染徽标挂在**立绘正下方**（用户裁决，不与右侧数据标签抢位）。 -->
+         甲级徽标骑在立绘列左上角；**关卡内 HP 紧贴立绘下方**（用户裁决，ADR 0055）；
+         污染徽标挂在立绘列内、HP 之后（用户裁决，不与右侧数据标签抢位）。 -->
     <div class="nk-egd-mon__art">
       <span v-if="monRank(monster.rank)" class="nk-egd-mon__rank" :class="`nk-egd-mon__rank--${monster.rank}`">{{ monRank(monster.rank) }}</span>
       <router-link
@@ -101,6 +102,12 @@ function monTitle(m: MazeMonsterInfo): string {
           @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
         >
       </router-link>
+      <!-- 关卡内 HP：转换器已按该关卡的等级 / 难度组 / 精英组算好单值（ADR 0055），
+           前端只按站点语言选数制呈现；缺键（无等级语境）即不显示，不显示 0 -->
+      <span v-if="monster.hp != null" class="nk-egd-mon__hp">
+        <span class="nk-egd-mon__hp-label">{{ t('catalog.sig.hp') }}</span>
+        <span class="nk-egd-mon__hp-val">{{ fmtBigNumber(monster.hp) }}</span>
+      </span>
       <span v-if="polluted" class="nk-egd-pollchip" :data-level="polluted">{{ pollutionLabel({ level: polluted }) }}</span>
     </div>
     <!-- 数据列（右）：名称 → 标签 → 弱点/抗性/效果抵抗 → 首领机制 → 技能 → 召唤物 -->

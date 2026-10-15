@@ -264,6 +264,31 @@
 .nk-egd-mon__figlink:hover .nk-egd-mon__img {
   transform: translateY(-2px);
 }
+/* 关卡内 HP（ADR 0055）：立绘**下方**、列内居中，与污染徽标同一换行纪律——列宽由立绘图宽
+   唯一声明（`--nk-egd-mon-fig`），数字再长也只能在列内换行，否则 `auto` 轨被反撑宽、挤窄数据列
+   （与 `.nk-egd-mon__art > .nk-egd-pollchip` 同因，见 endgame-pollution.css）。数值用 HUD 字体、
+   强调色（与「波次 · 敌数」同族），标签走标签档、弱化到 `--text3`。 */
+.nk-egd-mon__hp {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.nk-egd-mon__hp-label {
+  letter-spacing: 0.06em;
+  color: var(--text3);
+}
+.nk-egd-mon__hp-val {
+  font-family: var(--font-hud);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--eg-color) 76%, #fff);
+}
 /* 数据列（右）：占满剩余宽，逐块纵向堆叠 */
 .nk-egd-mon__data {
   display: flex;

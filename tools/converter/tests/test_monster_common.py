@@ -308,3 +308,61 @@ class TestLoadEliteGroups:
         out = mc.load_elite_groups()
         assert out["5"]["hp"] == 1.25
         assert list(out) == ["5"]
+
+
+class TestStageContext:
+    """关卡语境三件套（ADR 0050）：Level/HardLevelGroup/EliteGroup 原值透传、缺位不落键、
+    嵌套 `{Value:…}` 逐层解开——endgame 的敌方卡 HP 与出没样本共用本解析。"""
+
+    def test_carries_three_and_unwraps(self):
+        assert mc.stage_context(
+            {"Level": 68, "HardLevelGroup": 3, "EliteGroup": {"Value": {"Value": 273}}}
+        ) == {"level": 68, "level_group": 3, "elite_group": 273}
+
+    def test_missing_fields_not_emitted(self):
+        assert mc.stage_context({"StageID": 1}) == {}
+        assert mc.stage_context({"Level": None, "HardLevelGroup": 0}) == {"level_group": 0}, (
+            "0 是上游原值（不是缺位），照落；None 才是缺位"
+        )
+
+
+class TestMonsterHpAt:
+    """终局敌方卡的关卡内 HP（ADR 0055）：与前端 `monsterStatAt('hp', …)` 同一算式。"""
+
+    CURVE = {"3": {"95": {"hp": 294.42172, "atk": 1, "def": 1, "speed": 1}}}
+    ELITE = {"1": {"hp": 1.0}, "2": {"hp": 1.7}, "164": {"hp": 6.5}}
+
+    def test_pi_of_own_and_stage_elite_groups(self):
+        """Π精英组别系数 = 怪物自身组 × 关卡指派组（ADR 0050）；难度组取关卡行。
+        期望值是**字面量**（与 `src/lib/__tests__/monster-stats.test.ts` 的同数字用例同值），
+        Python 与前端各算一遍都能命中同一个数，两端漂移即红。"""
+        info = {"stats": {"hp": 102.3}, "stat_ratio": {"hp": 1}, "elite_group": 2}
+        got = mc.monster_hp_at(info, 95, {"level_group": 3, "elite_group": 164}, self.CURVE, self.ELITE)
+        assert got == 332818.7
+
+    def test_stage_elite_absent_is_neutral(self):
+        info = {"stats": {"hp": 102.3}, "stat_ratio": {"hp": 1}, "elite_group": 2}
+        assert mc.monster_hp_at(info, 95, {"level_group": 3}, self.CURVE, self.ELITE) == 51202.9
+
+    def test_half_rounds_up_like_js(self):
+        """取一位小数对齐 JS `Math.round`（半值向 +∞）：0.25 → 0.3，不是 Python 内建的 0.2。"""
+        curve = {"1": {"10": {"hp": 0.5}}}
+        info = {"stats": {"hp": 0.5}, "stat_ratio": {"hp": 1}, "elite_group": 1}
+        assert mc.monster_hp_at(info, 10, {"level_group": 1}, curve, self.ELITE) == 0.3
+
+    def test_missing_piece_returns_none(self):
+        """宁缺不假：基准 / 等级 / 曲线行 / 曲线维度任一缺位即 None（调用方不落 hp 键）。"""
+        ok = {"stats": {"hp": 100}, "stat_ratio": {"hp": 1}, "elite_group": 1}
+        stage = {"level_group": 3}
+        assert mc.monster_hp_at({"stats": {"atk": 1}}, 95, stage, self.CURVE, self.ELITE) is None
+        assert mc.monster_hp_at(ok, 0, stage, self.CURVE, self.ELITE) is None
+        assert mc.monster_hp_at(ok, None, stage, self.CURVE, self.ELITE) is None
+        assert mc.monster_hp_at(ok, 95, {"level_group": 9}, self.CURVE, self.ELITE) is None
+        assert mc.monster_hp_at(ok, 94, stage, self.CURVE, self.ELITE) is None
+        no_hp = {"3": {"95": {"atk": 1}}}
+        assert mc.monster_hp_at(ok, 95, stage, no_hp, self.ELITE) is None
+
+    def test_non_positive_ratio_is_neutral(self):
+        """比率缺位 / 非正按中性 1（绝不按 0，ADR 0049）——0 会把一条 HP 显示成 0。"""
+        info = {"stats": {"hp": 102.3}, "stat_ratio": {"hp": 0}, "elite_group": 1}
+        assert mc.monster_hp_at(info, 95, {"level_group": 3}, self.CURVE, self.ELITE) == 30119.3

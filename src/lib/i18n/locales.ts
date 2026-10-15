@@ -38,6 +38,21 @@ export const LOCALES: readonly Locale[] = [
 
 const BY_CODE: ReadonlyMap<string, Locale> = new Map(LOCALES.map((l) => [l.code, l]));
 
+/**
+ * 大数缩写的数制单位（`[亿位, 万位]`，ADR 0055）：只登记**有这套数制**的语言，
+ * 其余语言不在此表（消费侧 `lib/format.ts → fmtBigNumber` 回退千分位原数）。
+ *
+ * 单位是**语言属性**，与 `native` 同类：必须用该语言自己的字形（繁體中文用 億/萬、
+ * 日本語用 億/万、한국어用 억/만），故与语言清单同处一处、不写进 UI 词典（词典的键集
+ * 是 13 语言对齐的，而这里恰恰**只有部分语言有值**）。
+ */
+export const BIG_NUMBER_UNITS: Readonly<Record<string, readonly [string, string]>> = {
+  cn: ['亿', '万'],
+  cht: ['億', '萬'],
+  jp: ['億', '万'],
+  kr: ['억', '만'],
+};
+
 /** 缺省语言对象（回退链终点）。 */
 export const DEFAULT_LOCALE_ENTRY: Locale = BY_CODE.get(DEFAULT_LOCALE) as Locale;
 

@@ -13,8 +13,12 @@ EliteGroup / MonsterStatusResistanceType。
 等级曲线（745 行）与精英组倍率（1,423 组）都不进每怪物 payload，各共享一份，
 由 monster_detail 分别落 monster-level-curve.json / monster-elite-group.json；
 模板页基准值 stats 仍是官方模板原值，供列表与对照。
+关卡语境（`StageConfig` 行的 Level/HardLevelGroup/EliteGroup）由 `stage_context` 单点解析，
+两处消费：monster_extra 的出没样本（透传给前端合成）与 endgame 的敌方卡 HP（`monster_hp_at`
+在转换期落单值——终局轻形态不带合成链输入，前端无法自行合成）。
 """
 import logging
+import math
 
 from config import EXCEL_DIR
 from textmap import resolve_text
@@ -111,6 +115,72 @@ def load_elite_groups() -> dict[str, dict[str, float]]:
             "stance": frac("StanceRatio"),
         }
     return out
+
+
+def stage_context(rec: dict) -> dict:
+    """`StageConfig` 行 → 关卡语境 {level, level_group, elite_group}（缺位不落键，ADR 0050）。
+
+    「N 关 M 级怪的实际面板」的原始三件套：等级与难度组定曲线行，关卡精英组与怪物自身组
+    **叠乘**（Π精英组别系数）。只透传关卡行原值，合成留在消费侧（前端 `monster-stats.ts` /
+    转换期 `monster_hp_at`）。个别行的嵌套 `{Value:…}` 包装逐层解开。
+    """
+    def val(field: str):
+        v = rec.get(field)
+        depth = 0
+        while isinstance(v, dict) and depth < 4:
+            v = v.get("Value")
+            depth += 1
+        return v if isinstance(v, int) and not isinstance(v, bool) else None
+
+    ctx: dict = {}
+    for key, field in (("level", "Level"), ("level_group", "HardLevelGroup"),
+                       ("elite_group", "EliteGroup")):
+        v = val(field)
+        if v is not None:
+            ctx[key] = v
+    return ctx
+
+
+def _hp_ratio(row: dict | None) -> float:
+    """精英组倍率行的生命维（缺行 / 缺位 / 非正 → 中性 1，ADR 0049）。"""
+    v = (row or {}).get("hp")
+    return v if isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0 else 1.0
+
+
+def _js_round1(v: float) -> float:
+    """取一位小数，半值向 +∞——对齐前端 `Math.round(v * 10) / 10`（内建 `round` 是 banker's
+    rounding，`.5` 处逐值不同，见 docs/memory/data-semantics.md）。"""
+    return math.floor(v * 10 + 0.5) / 10
+
+
+def monster_hp_at(info: dict, level: object, stage: dict, curve: dict, elite_groups: dict) -> float | None:
+    """敌方实例在**已知关卡语境**下的生命值（战斗数值合成链，ADR 0040/0049/0050）。
+
+    口径 = `stats.hp × stat_ratio.hp × (自身精英组.hp × 关卡精英组.hp) × 曲线[关卡难度组][等级]`
+    ——与前端 `monster-stats.ts → monsterStatAt('hp', …)` 同一算式；此处供终局敌方卡在**转换期落
+    单值** HP（终局轻形态不带合成链输入，前端无法自行合成，见 `endgame._monster_out`）。
+    任何一段缺位即 None（调用方不落 `hp` 键，宁缺不假）：基准缺失、等级不可用、曲线缺组 / 缺行。
+    关卡精英组缺位等价于「不参与叠乘」（中性 1），与前端 `monsterEliteRatiosProduct` 同判据。
+    """
+    base = (info.get("stats") or {}).get("hp")
+    if not isinstance(base, (int, float)) or isinstance(base, bool):
+        return None
+    if not isinstance(level, int) or isinstance(level, bool) or level <= 0:
+        return None
+    row = (curve.get(str(stage.get("level_group") or 1)) or {}).get(str(level))
+    if not row:
+        return None
+    curve_hp = row.get("hp")
+    if not isinstance(curve_hp, (int, float)) or isinstance(curve_hp, bool):
+        return None
+    ratio = (info.get("stat_ratio") or {}).get("hp")
+    if not isinstance(ratio, (int, float)) or isinstance(ratio, bool) or ratio <= 0:
+        ratio = 1.0
+    out = (base * ratio
+           * _hp_ratio(elite_groups.get(str(info.get("elite_group") or 1)))
+           * _hp_ratio(elite_groups.get(str(stage.get("elite_group") or 1)))
+           * curve_hp)
+    return _js_round1(out) if math.isfinite(out) else None
 
 
 def load_status_resist_icons() -> dict[str, str]:

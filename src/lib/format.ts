@@ -2,7 +2,7 @@
 import { gameTagsToHtml } from './html';
 import { stanceTagLabel } from './enum-labels';
 import { activeLocale } from './i18n/active';
-import { findLocale } from './i18n/locales';
+import { BIG_NUMBER_UNITS, findLocale } from './i18n/locales';
 import { CHAR_STAGE_LEVEL_CAPS, MAX_CHAR_LEVEL, STANCE_LABEL } from './constants';
 import { NkError } from './errors';
 import type { CharacterData, CharStats, Skill } from '../services/types';
@@ -45,6 +45,33 @@ export function fmtStatValue(v: number | string | null | undefined): string {
   const t = v.trim();
   if (t !== '' && /^-?\d+(\.\d+)?$/.test(t)) return fmtNumber(t);
   return v;
+}
+
+/* 大数缩写（终局敌方卡的 HP 这类 5–9 位数字）：按**站点语言**取数制。
+   cn `亿/万`、cht `億/萬`、jp `億/万`、kr `억/만` 走 4 位分组；其余语言没有这套数制（把汉字单位
+   搬过去没人读得出数制），回退 `fmtNumber` 的千分位原数。
+   分组口径（ADR 0055，用户裁决）：四舍五入取整 → 从低位起每 4 位一组 → 低组**补足 4 位**
+   （`8万0477`，不补零会与「8万零477」混淆）、末组为 0 的省略（`1亿0001万`）。
+   示例（cn）：`2723430.9 → 272万3430` / `80477.1 → 8万0477` / `963.4 → 963` /
+   `123456789 → 1亿2345万6789`。≥ 1e12（本站无此量级）超出这套数制，回退千分位原数。 */
+export function fmtBigNumber(v: number | null | undefined): string {
+  if (v == null) return '';
+  if (!Number.isFinite(v)) return String(v);
+  const units = BIG_NUMBER_UNITS[activeLocale()];
+  const n = Math.round(Math.abs(v));
+  if (!units || n >= 1e12) return (v < 0 ? '-' : '') + fmtNumber(n);
+  if (n < 1e4) return (v < 0 ? '-' : '') + String(n);
+  const groups: number[] = [];
+  for (let rest = n; rest > 0; rest = Math.floor(rest / 1e4)) groups.push(rest % 1e4);
+  // 最低非零组：它以下的组全为 0（尾随零不占位）；其上的组一律补足 4 位，位置信息才不丢
+  let lowest = 0;
+  while (lowest < groups.length - 1 && groups[lowest] === 0) lowest++;
+  const parts: string[] = [];
+  for (let i = groups.length - 1; i >= lowest; i--) {
+    const text = i === groups.length - 1 ? String(groups[i]) : String(groups[i]).padStart(4, '0');
+    parts.push(i === 0 ? text : text + (i === 1 ? units[1] : units[0]));
+  }
+  return (v < 0 ? '-' : '') + parts.join('');
 }
 
 export function fmtDescWithFormat(

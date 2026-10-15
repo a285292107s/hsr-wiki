@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, waitForCatalogCards } from './helpers';
-import { CN_NUM, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
+import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
 
 /**
  * 布局验收：终局合并单页（/endgame/<mode>/<id> 的层级与看板） —— layout 验收层（语义契约 + 数值规格）分文件之一。
@@ -1359,6 +1359,27 @@ test.describe('布局验收：终局合并单页', () => {
     expect(badgePlace.insideLeft, '徽标左缘不应越出立绘列').toBeGreaterThanOrEqual(-1);
     expect(badgePlace.insideRight, '徽标右缘不应越出立绘列').toBeGreaterThanOrEqual(-1);
     expect(badgePlace.artW, '立绘列宽应贴合立绘图宽（徽标不得反撑列宽）').toBe(badgePlace.imgW);
+    // 关卡内 HP（ADR 0055）同一纪律：排在立绘下方、留在立绘列内，且**不得反撑列宽**
+    //（`.nk-egd-mon` 是 `auto minmax(0,1fr)` 网格，列内长内容会把 auto 轨撑宽、挤窄数据列）
+    const hpPlace = await mazeCardWithPoll.evaluate((card) => {
+      const art = card.querySelector('.nk-egd-mon__art') as HTMLElement;
+      const img = card.querySelector('.nk-egd-mon__img') as HTMLElement;
+      const hp = card.querySelector('.nk-egd-mon__art > .nk-egd-mon__hp') as HTMLElement;
+      const a = art.getBoundingClientRect();
+      const i = img.getBoundingClientRect();
+      const h = hp.getBoundingClientRect();
+      return {
+        belowFig: Math.round(h.top - i.bottom),
+        insideLeft: Math.round(h.left - a.left),
+        insideRight: Math.round(a.right - h.right),
+        artW: Math.round(a.width),
+        imgW: Math.round(i.width),
+      };
+    });
+    expect(hpPlace.belowFig, 'HP 应排在立绘下方').toBeGreaterThanOrEqual(0);
+    expect(hpPlace.insideLeft, 'HP 左缘不应越出立绘列').toBeGreaterThanOrEqual(-1);
+    expect(hpPlace.insideRight, 'HP 右缘不应越出立绘列').toBeGreaterThanOrEqual(-1);
+    expect(hpPlace.artW, 'HP 不得反撑立绘列宽').toBe(hpPlace.imgW);
     // 受污染的召唤物：挂在召唤者自己的敌方卡片里（星启看板一律用敌方卡，四模式共用同一判据，ADR 0036）
     const mazeNodeSummons = summonsOf(mazeNodeData.monsters);
     const mazeNodePolled = pollutedSummons(mazeNodeData.monsters);
@@ -1554,10 +1575,18 @@ test.describe('布局验收：终局合并单页', () => {
     await expect(mazePanel.locator('.nk-egd-mon__name').first())
       .toHaveText(mazeFloor1.stage1!.monsters![0].name);
     await expect(mazePanel.locator('.nk-egd-floor__label')).toHaveText('敌方配置');
+    // 关卡内 HP（ADR 0055）：每张敌方卡的立绘下方显示**该关卡语境**下的生命值——
+    // 期望值由 payload 的 hp 独立折算（cn 数制），且随半场切换（上下半场等级不同 ⇒ 数值不同）
+    await expect(mazePanel.locator('.nk-egd-mon__hp-label'))
+      .toHaveText(mazeFloor1.stage1!.monsters!.map(() => 'HP'));
+    await expect(mazePanel.locator('.nk-egd-mon__hp-val'))
+      .toHaveText(mazeFloor1.stage1!.monsters!.map((m) => cnBigNumber(m.hp!)));
     // 切半场：换的是当前半场那份战斗数据
     await mazeHalves.nth(1).click();
     await expect(mazePanel.locator('.nk-egd-mon__name').first())
       .toHaveText(mazeFloor1.stage2!.monsters![0].name);
+    await expect(mazePanel.locator('.nk-egd-mon__hp-val'))
+      .toHaveText(mazeFloor1.stage2!.monsters!.map((m) => cnBigNumber(m.hp!)));
     // 星启节点三 = 附加关：增益位与节点 1/2 同源（该关卡自身未登记绑定，回退同赛季末层的层级增益）
     await page.locator('#egd-level-tab-tierce').click();
     await mazePanel.locator('.nk-egd-nodecards[aria-label="星启节点"] [role="tab"]').nth(2).click();

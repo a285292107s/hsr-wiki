@@ -36,8 +36,8 @@ const LINE_ALLOW = [
 
 /** 文件级白名单：整份文件允许出现中文（前缀匹配，登记必须带理由） */
 const FILE_ALLOW = new Map([
-  // 语言列表：母语自称必须用其母语显示
-  ['src/lib/i18n/locales.ts', '语言选择器的母语自称'],
+  // 语言列表：母语自称（语言选择器必须用其母语显示）与大数缩写的数制单位（億/萬 等按语言取字形）
+  ['src/lib/i18n/locales.ts', '语言选择器的母语自称与数制单位字形'],
   // 品牌名
   ['src/lib/constants.ts', 'SITE_NAME 品牌名与「中文技能名 → 枚举」解析表'],
   // Spine 诊断：错误文本只进 console 与 /debug 研究线，不面向用户渲染

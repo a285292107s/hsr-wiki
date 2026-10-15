@@ -91,6 +91,9 @@ export interface MonsterLike {
   weak?: string[];
   resist?: Record<string, number>;
   rank?: string;
+  /** 该敌方在**所属关卡行**语境下的生命值（转换期按合成链落的单值，ADR 0055）；
+   *  期级合并列表不带该键 ⇒ 断言里用 `hp!` 前先确认取的是场次/节点级列表 */
+  hp?: number;
 }
 export interface InvasionLike { level: number; stage_id?: number; monsters?: MonsterLike[] }
 /** 召唤物（ADR 0036 修订）：轻形态 + 受污染者带 polluted（污染等级）；挂在召唤者自己的敌方条目上 */
@@ -210,6 +213,23 @@ export function monCountLabel(mons: MonsterLike[] | undefined): string {
 /** 千分位（页面数值档用 toLocaleString 渲染，断言不依赖运行环境的 locale） */
 export function grouped(n: number): string {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/** 大数缩写的**期望值**（ADR 0055）：payload 的 `hp` → 页面上的 cn 数制文本。
+ *  写法刻意与实现（`src/lib/format.ts → fmtBigNumber` 走整数分组）不同——这里按**字符切片**，
+ *  两处同时改错才会静默通过；单位与补零口径必须一致（低组补足 4 位、尾随零组不占位）。 */
+export function cnBigNumber(v: number): string {
+  const digits = String(Math.round(Math.abs(v)));
+  const chunks: string[] = [];
+  for (let end = digits.length; end > 0; end -= 4) chunks.push(digits.slice(Math.max(0, end - 4), end));
+  let lowest = 0;
+  while (lowest < chunks.length - 1 && chunks[lowest] === '0000') lowest++;
+  const parts: string[] = [];
+  for (let i = chunks.length - 1; i >= lowest; i--) {
+    const text = i === chunks.length - 1 ? String(Number(chunks[i])) : chunks[i];
+    parts.push(text + (i === 0 ? '' : i === 1 ? '万' : '亿'));
+  }
+  return parts.join('');
 }
 
 /** items.json：物品 id → 名称（奖励 chips 的文案断言用；星琼 = 1） */

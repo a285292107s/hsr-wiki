@@ -132,13 +132,21 @@ MODULE_SOURCES: dict[str, list[str]] = {
                  "StageConfig.json", "MonsterConfig.json", "MonsterCamp.json",
                  "MonsterSkillConfig.json", "ChallengeBadgeConfig.json",
                  "ChallengeGeneralConfig.json",
+                 # 无限波次造怪组（ADR 0056）：波次怪种合并读这三张表，漏登记会让
+                 # 上游改队列后本模块被增量跳过、波次怪种静默陈旧
+                 "StageInfiniteGroup.json", "StageInfiniteWaveConfig.json",
+                 "StageInfiniteMonsterGroup.json",
                  "ChallengeMazeRewardLine.json", "ChallengeStoryRewardLine.json",
                  "ChallengeBossRewardLine.json", "ChallengePeakReward.json",
                  "RewardData.json",
                  "StageInvasionConfig.json", "MonsterGuideConfig.json",
                  "MonsterGuideTag.json", "MonsterGuidePhase.json",
                  "MonsterGuideSkill.json", "MonsterGuideSkillText.json",
-                 "MonsterStatusResistanceType.json"],
+                 "MonsterStatusResistanceType.json",
+                 # 传递依赖：敌方卡的 HP 走 monster_common.monster_hp_at（ADR 0055）——
+                 # 曲线与精英组倍率两张表由被导入函数读取，不同批登记则改表后本模块被增量跳过、
+                 # 产物里的 hp 静默陈旧
+                 "HardLevelGroup.json", "EliteGroup.json"],
     "endgame_guide": ["IntroData.json", "ChallengeGroupConfig.json",
                        "ChallengeStoryGroupExtra.json", "ChallengeBossGroupExtra.json",
                        "ChallengePeakBossConfig.json"],
