@@ -401,8 +401,8 @@ describe('URL 构建', () => {
     }
   });
   it('eidolonIconUrl / avatarDrawCardUrl / avatarDrawCardJdUrl', () => {
-    // rank 分类：nanoka 主源 + jsDelivr ui/ui3d/rank 旧档回退（E1-6 全量）
-    expect(eidolonIconUrl('1005', 1)).toBe(`${NANOKA_BASE}/rank/_dependencies/textures/1005/1005_Rank_1.webp`);
+    // rank 分类：local-first（星魂图标已随站入库），本地缺失回退远端主源 nanoka
+    expect(eidolonIconUrl('1005', 1)).toBe(`${LOCAL_ICONS_BASE}/rank/1005/1005_Rank_1.webp`);
     // 立绘：local-first（立绘卡已随站入库）；jsDelivr PNG 直链仅供 HomeView 预载链第二源
     expect(avatarDrawCardUrl('1005')).toBe(`${LOCAL_ICONS_BASE}/avatardrawcard/1005.webp`);
     expect(avatarDrawCardJdUrl('1005')).toBe(`${JS_DELIVR_BASE}/avatardrawcard/1005.png`);

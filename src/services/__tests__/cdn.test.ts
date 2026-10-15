@@ -166,15 +166,24 @@ describe('resolveCdnUri 双源解析', () => {
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/8007/SkillIcon_18007_Servant01.png`);
   });
 
-  it('jsDelivr 映射分类：rank 星魂图标 nanoka 主源，回退官方 ui/ui3d/rank（含 Rank3/5 全套）', () => {
-    const r = resolveCdnUri('rank', '1403/1403_Rank_3.webp');
+  it('jsDelivr 映射分类：rank 星魂图标的 jsDelivr 规则（官方 ui/ui3d/rank，含 Rank3/5 全套）', () => {
+    // rank 已随站入库 ⇒ 传合成 spec（不带 local）测规则映射本身，不读真实注册表
+    const r = resolveCdnUri('rank', '1403/1403_Rank_3.webp', { nanoka: 'rank/_dependencies/textures' });
     expect(r.primary).toBe(`${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`);
     // 回退官方源与 spriteoutput/ 平级 → 用 JS_DELIVR_UI3D_BASE（无 /spriteoutput 段）
     expect(r.fallback).toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1403/1403_Rank_3.png`);
     expect(r.source).toBe('nanoka');
     // E6 同规则
-    expect(resolveCdnUri('rank', '1510/1510_Rank_6.webp').fallback)
+    expect(resolveCdnUri('rank', '1510/1510_Rank_6.webp', { nanoka: 'rank/_dependencies/textures' }).fallback)
       .toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1510/1510_Rank_6.png`);
+  });
+
+  it('rank（星魂图标，全量入库）：local-first，本地缺失回退 nanoka 主源', () => {
+    expect(resolveCdnUri('rank', '1403/1403_Rank_3.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/rank/1403/1403_Rank_3.webp`,
+      fallback: `${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`,
+      source: 'local',
+    });
   });
 
   it('jsDelivr 映射分类：monstermiddleicon / relicfigures（套装件不受本地化影响）', () => {

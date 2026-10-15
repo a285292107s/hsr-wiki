@@ -298,11 +298,12 @@ test.describe('布局验收：货币战争主题', () => {
     const gmIcon = page.locator('.nk-crole-gm__label', { hasText: '基础前台强度' }).first().locator('.nk-crole-gm__icon');
     await expect(gmIcon).toBeVisible();
     await expect(gmIcon).toHaveAttribute('src', /spriteoutput\/gridfight\/attributeicon\/normalicon\/IconFrontRow\.png/);
-    // 星魂展示图：常规模式同源 ui/ui3d/rank（nanoka 主源 + jsDelivr 回退属性）
+    // 星魂展示图：常规模式同源 rank 分类。已随站入库 → 主源为本地 webp；
+    // jsDelivr ui/ui3d/rank 的路径映射由单测（cdn.test.ts 合成 spec）保证，此处不钉域名
     const rankIcon = page.locator('.nk-crole-timeline__icon img').first();
     await expect(rankIcon).toBeVisible();
-    await expect(rankIcon).toHaveAttribute('src', /static\.nanoka\.cc\/assets\/hsr\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.webp/);
-    await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /cdn\.jsdelivr\.net\/gh\/a285292107s\/StarRailTextures@main\/assets\/asbres\/ui\/ui3d\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.png/);
+    await expect(rankIcon).toHaveAttribute('src', /\/rank\/1001\/1001_Rank_1\.webp$/);
+    await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.webp$/);
     // 无内容区块：1001 无专属光锥 → 面板常驻 + 空态提示
     await expect(page.locator('[data-panel="cones"] .nk-slot-empty')).toHaveText('该角色没有专属光锥数据');
     await noUnknownOverflow(page);

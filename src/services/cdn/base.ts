@@ -77,7 +77,7 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   monsterfigure: { nanoka: 'monsterfigure', local: 'monsterfigure' },
   // 仅通用部位图标本地化（官方仓库无对应文件、nanoka 唯一源）；套装件图走 jsDelivr
   relicfigures: { nanoka: 'relicfigures', local: 'relicfigures', localFiles: /^IconRelic(?:Body|Foot|Neck|Goods)\.webp$/ },
-  rank: { nanoka: 'rank/_dependencies/textures' },
+  rank: { nanoka: 'rank/_dependencies/textures', local: 'rank' },
   /* 真珠 1503 圆头像 override：上游解包资产（nanoka 与官方镜像两源）该文件内容为游戏内
      「TEST No.999」占位贴图且返回 HTTP 200——绕过 dom.ts 的 error/挂起回退链，故以本地
      128px 圆像顶替（来源 = 官方 avatarshopicon/1503.webp 裁切，非手绘）。
