@@ -48,8 +48,11 @@ export interface CdnCategorySpec {
 /** nanoka 资源挂载点（/assets/hsr/...） */
 export const NANOKA_HUD = '/assets/hsr';
 
-/** 本地图标资产根（public/data/cn/assets/icons，随站部署，同源加载不经外网） */
-export const LOCAL_ICONS_BASE = '/data/cn/assets/icons';
+/* 本地图标资产根（public/data/assets/icons，随站部署，同源加载不经外网）。
+   **在结构层之外**：`public/data/cn/` 是缺省语言的**结构层**（全令牌化数据），图标是语言
+   中立媒体、消费路径也不经 `LOCAL_DATA_BASE`，故与 `data/cn/`、`data/i18n/` 平级另立
+   `data/assets/`——同时解除「静态媒体被语言包分组规则当成一个分组」的错误耦合。 */
+export const LOCAL_ICONS_BASE = '/data/assets/icons';
 
 /* 官方源基址（预留）。当前无确认可用的官方图片 CDN，置空即全部走 nanoka；
    仅当某分类声明 spec.official 且本基址非空时才启用官方优先。 */
@@ -76,7 +79,7 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
      128px 圆像顶替（来源 = 官方 avatarshopicon/1503.webp 裁切，非手绘）。
      localFiles 白名单把本地化限定为该单文件：其余角色仍走远端主源，新角色不受影响。
      移除时机：nanoka avatarroundicon/1503.webp 内容变为真珠本人后，删除本行 local/localFiles
-     与 public/data/cn/assets/icons/avatarroundicon/1503.webp——**禁止本地覆盖长期压过上游更新**。 */
+     与 public/data/assets/icons/avatarroundicon/1503.webp——**禁止本地覆盖长期压过上游更新**。 */
   avatarroundicon: { nanoka: 'avatarroundicon', local: 'avatarroundicon', localFiles: /^1503\.webp$/ },
   'gridfight-equipment': { nanoka: 'gridfight/equipment' },
   'gridfight-icon': { nanoka: 'gridfight/icon' },

@@ -116,7 +116,7 @@
 - **轻形态与全量形态的字段差异要按产物回答，别猜页面**：`maze.json` 的层级敌方全部不带 `intro`，星启节点与 `maze_boss.json` / `maze_peak.json` 全带；期级合并列表必须走 `_lean_monster` 去掉 `wave` / `intro` / `skills`，只有单关卡才传 `full_monsters=True`。
 - **「缺少某内容」可能落在数据两端，先分清「没产出」与「上游没有」**：`StageConfigData` 缺 `_BindingMazeBuff`（忘却之庭附加关）是上游未登记，末日幻影则是转换器整块没写；只从关卡取值在忘却之庭是恒空分支。
 - **删数据层兜底分支前，先用全量产物量该分支是否可达**：四份产物所有期的 `floor_details` / `tierce` / `levels` 无一期全空 ⇒ 固定条与其 `v-if` 兜底永不触发，属数据层已死的分支。
-- **「重跑产物 vs 已提交产物」逐字节对比有三个恒定伪差异，先排除再下结论**：① `characters.json` / `light_cones.json` 的 `release_version` 由 `release_version.py` 读**上次产物自身**推导，临时输出目录为空时必然退化成 `''`（对比前先把这两份已提交文件预置进临时目录）；② `version.json` 的 `synced_at` / `build` 取自 vendor 的 git HEAD，本机 vendor 落后于已提交产物时会整体不同（对比时排除该文件）；③ `assets/**`（含 `cw-hero.mp4`）不由转换器产出，会以「已提交有、本次未产出」出现。三条排除干净后仍不一致才是真回归。
+- **「重跑产物 vs 已提交产物」逐字节对比有三个恒定伪差异，先排除再下结论**：① `characters.json` / `light_cones.json` 的 `release_version` 由 `release_version.py` 读**上次产物自身**推导，临时输出目录为空时必然退化成 `''`（对比前先把这两份已提交文件预置进临时目录）；② `version.json` 的 `synced_at` / `build` 取自 vendor 的 git HEAD，本机 vendor 落后于已提交产物时会整体不同（对比时排除该文件）；③ `public/data/assets/**`（本地图标，**已移出结构层**，见 ADR 0052 修订注记）不由转换器产出，会以「已提交有、本次未产出」出现。三条排除干净后仍不一致才是真回归。
 - **转换器里 `clean_text(resolve_text(...))` 是双洗，会静默吞掉文本的 TextMap 键**：`resolve_text` 默认已 `clean=True`，再包一层 `clean_text` 会把携带键的 `TextRef` 退化成普通 `str`（见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md) 的令牌化）。`convert.py --tokens` 结束时打印的「结构层残留中文」清单里，凡 `text` / `desc` 字段成片出现且形如游戏模板（带 `#1[i]`）的，先查这类冗余二次加工与字符串拼接，不要先怀疑 TextMap 缺键。
 
 - **联合模式保留旧值时必须配套「末尾清洗」**：`skill_animations.json` 的旧 `title`（wiki 中文小标题）会随「既有优先」一直留着，脚本末尾按不变量（`title` 只能是非令牌则删除）统一清洗后，结构层残留中文从 16 处降到 2 处（仅剩已登记的属性回退）。

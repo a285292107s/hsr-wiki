@@ -9,7 +9,7 @@
 **术语纪律**：该目录是本地副本（CI 每日 `git clone --depth 1`），**禁止称其为「git 子模块」**（仓库无 `.gitmodules`）。
 
 ### 目标格式（Target Format）
-converter 输出到 `public/data/cn/` 的 JSON 数据格式：**语言无关的结构层**（列表索引 `characters.json` 等 + 详情子目录 `characters/{id}.json` 等，结构扁平、字段精简）与 **各语言文本包**（`public/data/i18n/<lang>/<group>.json`）分离——语言相关文本在结构层以「文本引用令牌」占位，由语言包按语言供给（见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）。结构层目录名的 `cn` 段是**历史路径**：令牌化后该目录已与语言无关，改名要动数千个产物文件与数十处冻结文档引用，故保留并在词条处标明语义（见该 ADR 决策 2）。早期以 Mar-7th/StarRailRes 仓库索引 JSON 为格式标准（见 ADR 0006），输出结构已演进；StarRailRes 现在仅作「字段基线」参照（见数据筛选节）。
+converter 输出到 `public/data/cn/` 的 JSON 数据格式：**语言无关的结构层**（列表索引 `characters.json` 等 + 详情子目录 `characters/{id}.json` 等，结构扁平、字段精简）与 **各语言文本包**（`public/data/i18n/<lang>/<group>.json`）分离——语言相关文本在结构层以「文本引用令牌」占位，由语言包按语言供给（见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）。结构层目录名的 `cn` 段是**历史路径**：令牌化后该目录已与语言无关，改名要动数千个产物文件与数十处冻结文档引用，故保留并在词条处标明语义（见该 ADR 决策 2）。早期以 Mar-7th/StarRailRes 仓库索引 JSON 为格式标准（见 ADR 0006），输出结构已演进；StarRailRes 现在仅作「字段基线」参照（见数据筛选节）。**语言中立媒体不在结构层内**：本地图标资产在 `public/data/assets/`，与 `data/cn/`、`data/i18n/` 平级——它不是令牌化数据、消费也不经取数层（走 `services/cdn/`），留在结构层会让静态媒体被语言包分组规则当成一个分组。
 
 ### 转换工具（Converter）
 将源数据转换为目标格式的 Python 脚本，位于 `tools/converter/`。读源数据 → 输出纯净 JSON。
@@ -330,7 +330,7 @@ _Avoid_: 注释比例、注释占比（都不是判据）
 ## 图片资源
 
 ### 图片 CDN
-图片资源解析统一收口于 `src/services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / statusimmune / 遗器通用部位图标，根 = `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`，物理目录 `public/data/cn/assets/icons/`）local-first，未入库的新图标自动回退远端；另有一个单文件例外——真珠 1503 圆头像（`avatarroundicon`）因上游资产为占位贴图而本地顶替，见该分类 `localFiles` 白名单注释；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）；`statusimmune`（效果抵抗免疫图标，ADR 0044）同理——nanoka 无该批文件，故是「本地为主 + jsDelivr 兜底」的第二个 `jdPrimary` 分类。
+图片资源解析统一收口于 `src/services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / statusimmune / 遗器通用部位图标，根 = `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`，物理目录 `public/data/assets/icons/`）local-first，未入库的新图标自动回退远端；另有一个单文件例外——真珠 1503 圆头像（`avatarroundicon`）因上游资产为占位贴图而本地顶替，见该分类 `localFiles` 白名单注释；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）；`statusimmune`（效果抵抗免疫图标，ADR 0044）同理——nanoka 无该批文件，故是「本地为主 + jsDelivr 兜底」的第二个 `jdPrimary` 分类。
 **运行期回退链**：`<img>` 失败由全局事件委托（`src/services/cdn/dom.ts`）接管——主源失败先换第二源（模板须绑 `data-cdn-fallback` 绑定的回退源），两源皆失效才落到「图标占位」（见下条）；CDN 整体不可用（健康探测判定 down）时短路、不上占位。**只绑 `:src` 的图标位读不到回退源，主源 404 即判死**。
 
 ### 图标占位（Icon Placeholder）
