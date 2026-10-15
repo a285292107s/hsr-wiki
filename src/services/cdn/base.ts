@@ -19,6 +19,7 @@ export type CdnCategory =
   | 'avatarroundicon'
   | 'gridfight-equipment'
   | 'gridfight-icon'
+  | 'gridfight-asset'
   | 'gridfight-affix'
   | 'achievement'
   | 'bufficon'
@@ -91,6 +92,14 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
      `affixes[].icon`）：nanoka 无该目录，fork 冻结前也无 Affix 图标 ⇒ 本地入库为主。
      调用方 `gridFightAffixIconUrl` 传 basename 小写（目录段与文件名均小写）。 */
   'gridfight-affix': { nanoka: 'gridfight/battleicon/bufficon', local: 'gridfight-affix' },
+  /* 货币战争其余同构资源（`currency/augments.json` / `portals.json` 的 icon，形如
+     `SpriteOutput/GridFight/AugmentBig/100101.png`）：原先由 `gridFightIconUrl` 用 `cdnRawUrl`
+     **直拼 nanoka 子路径**，既无本地源也拿不到回退 URL（与 `gridFight-affix` 修复前同一缺陷）。
+     改为走本分类后由解析层统一收口：本地为主、缺失回退 nanoka。
+     `spec.nanoka` 只到 `gridfight` 一层 ⇒ 站点 file 形如 `<子目录小写>/<名小写>.webp`
+     （调用方原本就对整段做小写化）。注册表反查按 marker 前缀匹配，本行必须排在
+     gridfight-equipment / -icon / -affix **之后**，否则会抢走它们更具体的 marker。 */
+  'gridfight-asset': { nanoka: 'gridfight', local: 'gridfight-asset' },
   achievement: { nanoka: 'achievement', local: 'achievement' },
   /* 位面增益图标：nanoka **没有该分类**（实测扁平与各子路径全 404），真源是 jsDelivr
      （`BuffIcon/{子目录}/X` → `bufficon/{子目录小写}/X.png`，见

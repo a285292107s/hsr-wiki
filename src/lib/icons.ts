@@ -1,5 +1,5 @@
 
-import { cdnFallbackFromPrimary, cdnUri, cdnRawUrl, nanokaUrl, resolveCdnUri } from '../services/cdn';
+import { cdnFallbackFromPrimary, cdnUri, nanokaUrl, resolveCdnUri } from '../services/cdn';
 import {
   USE_OFFICIAL_PATHS,
   OFFICIAL_ICON_BASE,
@@ -172,12 +172,15 @@ export function monsterFigureUrl(iconPath: string | null | undefined): string {
   return iconPath ? monsterOfficialUrl(iconPath, 'monsterfigure') : '';
 }
 
-/** 货币战争 GridFight 图标：SpriteOutput/GridFight/Equipment/350101.png → CDN webp */
+/* 货币战争其余同构图标：SpriteOutput/GridFight/{子目录}/{名}.png → CDN webp。
+   **必须**经 `cdnUri`（`gridfight-asset` 分类）而非 `cdnRawUrl` 直拼——直拼绕过解析层，
+   既拿不到本地源也拿不到回退 URL，是 `gridFight-affix` 修复前的同一缺陷。
+   站点 file 形态为整段小写（与 nanoka 侧目录约定一致）。 */
 export function gridFightIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
   const m = iconPath.match(/SpriteOutput\/(.+)\.png$/i);
   if (!m) return '';
-  return cdnRawUrl(`${m[1].toLowerCase()}.webp`);
+  return cdnUri('gridfight-asset', `${m[1].toLowerCase()}.webp`);
 }
 
 /* 货币战争位面词条图标（`SpriteOutput/GridFight/BattleIcon/BuffIcon/*`，`voracity.json`
