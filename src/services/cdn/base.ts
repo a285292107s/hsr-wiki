@@ -69,7 +69,7 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   element: { nanoka: 'element', local: 'element' },
   pathicon: { nanoka: 'pathicon', local: 'pathicon' },
   trace: { nanoka: 'trace', local: 'trace', jdPrimary: true },
-  lightconemediumicon: { nanoka: 'lightconemediumicon' },
+  lightconemediumicon: { nanoka: 'lightconemediumicon', local: 'lightconemediumicon' },
   monstermiddleicon: { nanoka: 'monstermiddleicon' },
   monsterfigure: { nanoka: 'monsterfigure' },
   // 仅通用部位图标本地化（官方仓库无对应文件、nanoka 唯一源）；套装件图走 jsDelivr

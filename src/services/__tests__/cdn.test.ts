@@ -54,10 +54,20 @@ describe('nanokaUrl / cdnUri / cdnRawUrl', () => {
 
 describe('resolveCdnUri 双源解析', () => {
   it('jsDelivr 注册分类：nanoka 主源 + jsDelivr 旧档回退', () => {
-    const r = resolveCdnUri('lightconemediumicon', '23000.webp');
+    // 传合成 spec（不带 local）测「无本地 + 已注册 jsDelivr 规则」这一分支本身。
+    // 不读真实注册表：全量本地化推进后，该分支将不再有分类常驻命中，绑定具体分类会让本用例随迁移进度失效。
+    const r = resolveCdnUri('lightconemediumicon', '23000.webp', { nanoka: 'lightconemediumicon' });
     expect(r.primary).toBe(`${BASE}/lightconemediumicon/23000.webp`);
     expect(r.fallback).toBe(`${JS_DELIVR_BASE}/lightconemediumicon/23000.png`);
     expect(r.source).toBe('nanoka');
+  });
+
+  it('lightconemediumicon（光锥图标，全量入库）：local-first，本地缺失回退远端主源 nanoka', () => {
+    expect(resolveCdnUri('lightconemediumicon', '20000.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/lightconemediumicon/20000.webp`,
+      fallback: `${BASE}/lightconemediumicon/20000.webp`,
+      source: 'local',
+    });
   });
 
   it('本地图标分类：element / pathicon local-first，本地缺失回退远端主源（nanoka，新增内容仅此源有）', () => {

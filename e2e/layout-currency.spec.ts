@@ -331,8 +331,10 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(cone.locator('.nk-crole-cone__name')).toHaveText(coneData!.name);
     await expect(cone.locator('.nk-crole-cone__rarity')).toHaveText('★'.repeat(coneData!.rarity));
     await expect(cone.locator('.nk-crole-cone__path')).toHaveText(pathName!);
+    // 只断「指向该光锥的图标」这一事实：源（本地 / nanoka）由解析层决定，不属本用例的布局契约
+    // ——图标已随站入库（local-first），钉死远端域会让用例随迁移进度失效
     await expect(cone.locator('.nk-crole-cone__icon'))
-      .toHaveAttribute('src', new RegExp(`static\\.nanoka\\.cc/.*lightconemediumicon/${coneData!.id}\\.webp`));
+      .toHaveAttribute('src', new RegExp(`/lightconemediumicon/${coneData!.id}\\.webp$`));
     // 等级递进列表保留（5 级）
     await expect(page.locator('[data-panel="cones"] .nk-crole-equip')).toHaveCount(5);
     await noUnknownOverflow(page);
