@@ -4,9 +4,9 @@
  * 内联 fixture 参照本地转换数据真实结构手工构造（测试不读取数据文件，运行时更不依赖）。
  */
 import { describe, it, expect, beforeAll } from 'vitest';
-import { CDN, setUseOfficialPaths } from '../constants';
+import { setUseOfficialPaths } from '../constants';
 import { setActiveLocale } from '../i18n/active';
-import { JS_DELIVR_BASE, LOCAL_ICONS_BASE, NANOKA_HUD } from '../../services/cdn';
+import { JS_DELIVR_BASE, LOCAL_ICONS_BASE } from '../../services/cdn';
 import { NkError } from '../errors';
 import { setLabelTranslator } from '../label-translator';
 import cnMessages from '../i18n/messages/cn.json';
@@ -20,8 +20,8 @@ import {
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
 
 // 本文件验证默认模式（USE_OFFICIAL_PATHS=false）下的图标 URL 构造：
-// nanoka 主源（持续更新）+ jsDelivr 旧档回退（fork 停更，见 services/cdn/resolve.ts）。
-const NANOKA_BASE = `${CDN}${NANOKA_HUD}`;
+// 图标已随站入库 ⇒ local-first（LOCAL_ICONS_BASE）；local 缺失时回退远端主源 nanoka
+// （fork 停更后 jsDelivr 只作旧档补全，见 services/cdn/resolve.ts）。
 beforeAll(() => {
   setUseOfficialPaths(false);
   /* 词典翻译由 app 层注入（lib 不引应用层）：测试用 cn 词典当翻译器，
@@ -418,7 +418,7 @@ describe('itemName / itemIconUrl', () => {
     expect(itemName(999, nameCache, itemDb)).toBe('#999');
   });
   it('itemIconUrl：解析末尾数字 png', () => {
-    expect(itemIconUrl('ItemIcon/12345.png')).toBe(`${NANOKA_BASE}/itemfigures/12345.webp`);
+    expect(itemIconUrl('ItemIcon/12345.png')).toBe(`${LOCAL_ICONS_BASE}/itemfigures/12345.webp`);
     expect(itemIconUrl('abc.png')).toBe('');
     expect(itemIconUrl(null)).toBe('');
   });

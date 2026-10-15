@@ -66,7 +66,7 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
      同分辨率 webp 约 1/4；`avatarDrawCardWebpUrl` 仍是 nanoka webp 直链（移动端专用），
      `avatarDrawCardJdUrl` 仍是 jsDelivr PNG（第二源）——三者互为不同 URL，回退链不退化。 */
   avatardrawcard: { nanoka: 'avatardrawcard', local: 'avatardrawcard' },
-  itemfigures: { nanoka: 'itemfigures' },
+  itemfigures: { nanoka: 'itemfigures', local: 'itemfigures' },
   // 本地化三分类：全站公共小图标（KB 级、高频复用、永不更新）；trace 的 nanoka 源为占位图，
   // 真源是 jsDelivr（ui/avatar/icon/Icon{key}.png），故以 jdPrimary 保持 jsDelivr 主源
   element: { nanoka: 'element', local: 'element' },
