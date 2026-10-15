@@ -43,8 +43,8 @@ describe('nanokaUrl / cdnUri / cdnRawUrl', () => {
     );
   });
 
-  it('cdnUri 返回首选源（当前全部走 nanoka）', () => {
-    expect(cdnUri('bufficon', 'IconBuffAttackUp.webp')).toBe(`${BASE}/bufficon/IconBuffAttackUp.webp`);
+  it('cdnUri 返回首选源（分类已全量本地化 ⇒ 恒为本地主源）', () => {
+    expect(cdnUri('bufficon', 'IconBuffAttackUp.webp')).toBe(`${LOCAL_ICONS_BASE}/bufficon/IconBuffAttackUp.webp`);
   });
 
   it('cdnRawUrl 拼接任意原始子路径（分类子路径不固定的场景）', () => {
@@ -120,16 +120,18 @@ describe('resolveCdnUri 双源解析', () => {
       .toBe(`${JS_DELIVR_BASE}/ui/avatar/icon/IconImmuneFrozen.png`);
   });
 
-  it('/voracity 缺图补入：bufficon / tutorialpic 白名单 local-first，gridfight-affix 整分类本地', () => {
-    // bufficon：nanoka 无该分类（实测全 404），仅 4.5 新增、fork 冻结前不存在的 4 个入库
+  it('/voracity 缺图补入：bufficon / achievement 整分类本地，tutorialpic 白名单 local-first', () => {
+    // bufficon：nanoka 无该分类（实测全 404）⇒ 本站引用的 108 个已**全量入库**，不再有白名单
     expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconBuffShield.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`,
       fallback: `${BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`,
       source: 'local',
     });
     expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconMonster_W5_StageInvasion.webp').source).toBe('local');
-    // 白名单外：仍走远端主源，不得被本地化影响
-    expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconBuffCommon.webp').source).toBe('nanoka');
+    // 白名单已撤：白名单外的引用同样本地优先（本地缺文件时回退 nanoka）
+    expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconBuffCommon.webp').source).toBe('local');
+    // achievement：9 个成就系列图标全量入库
+    expect(resolveCdnUri('achievement', 'ExploreAchievementIcon_s.webp').source).toBe('local');
     // tutorialpic：全量 1504 张 / 960 MB 不入库，仅 4.5 新增的 3 张
     expect(resolveCdnUri('tutorialpic', 'TutorialPic/TutorialPage_1050101.webp').source).toBe('local');
     expect(resolveCdnUri('tutorialpic', 'TutorialPic/TutorialPage_1050202.webp').source).toBe('local');
@@ -213,8 +215,9 @@ describe('resolveCdnUri 双源解析', () => {
     expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').source).toBe('nanoka');
   });
 
-  it('avatarroundicon：仅 1503 白名单走本地 override，其余角色仍走远端主源', () => {
-    // 上游 1503 圆头像为占位贴图（HTTP 200），本地 override 顶替；回退必须可达 nanoka
+  it('avatarroundicon：全量入库（含 1503 真珠 override），本地缺失回退远端主源', () => {
+    // 上游 1503 圆头像为占位贴图（HTTP 200）⇒ 本地库里该文件是真珠圆像（非上游占位图）；
+    // 本分类已全量入库，override 不再靠 localFiles 白名单区分
     expect(resolveCdnUri('avatarroundicon', '1503.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/avatarroundicon/1503.webp`,
       fallback: `${BASE}/avatarroundicon/1503.webp`,
@@ -222,16 +225,17 @@ describe('resolveCdnUri 双源解析', () => {
     });
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/avatarroundicon/1503.webp`))
       .toBe(`${BASE}/avatarroundicon/1503.webp`);
-    // 白名单外：远端 nanoka 主源 + jsDelivr 旧档回退，不得被本地化影响
+    // 其余角色同样本地优先；本地缺文件时回退远端主源 nanoka（jsDelivr 规则的映射由单测另行覆盖）
     expect(resolveCdnUri('avatarroundicon', '1502.webp')).toEqual({
-      primary: `${BASE}/avatarroundicon/1502.webp`,
-      fallback: `${JS_DELIVR_BASE}/avatarroundicon/avatar/1502.png`,
-      source: 'nanoka',
+      primary: `${LOCAL_ICONS_BASE}/avatarroundicon/1502.webp`,
+      fallback: `${BASE}/avatarroundicon/1502.webp`,
+      source: 'local',
     });
   });
 
   it('未注册 jsDelivr 的分类：仅 nanoka 首选，无回退', () => {
-    const r = resolveCdnUri('bufficon', 'IconBuffAttackUp.webp');
+    // bufficon 已整分类入库 ⇒ 传合成 spec（不带 local）测「无 jd 规则 ⇒ 无回退」这一分支本身
+    const r = resolveCdnUri('bufficon', 'IconBuffAttackUp.webp', { nanoka: 'bufficon' });
     expect(r.primary).toBe(`${BASE}/bufficon/IconBuffAttackUp.webp`);
     expect(r.fallback).toBe('');
     expect(r.source).toBe('nanoka');

@@ -78,29 +78,28 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   // 仅通用部位图标本地化（官方仓库无对应文件、nanoka 唯一源）；套装件图走 jsDelivr
   relicfigures: { nanoka: 'relicfigures', local: 'relicfigures', localFiles: /^IconRelic(?:Body|Foot|Neck|Goods)\.webp$/ },
   rank: { nanoka: 'rank/_dependencies/textures', local: 'rank' },
-  /* 真珠 1503 圆头像 override：上游解包资产（nanoka 与官方镜像两源）该文件内容为游戏内
-     「TEST No.999」占位贴图且返回 HTTP 200——绕过 dom.ts 的 error/挂起回退链，故以本地
-     128px 圆像顶替（来源 = 官方 avatarshopicon/1503.webp 裁切，非手绘）。
-     localFiles 白名单把本地化限定为该单文件：其余角色仍走远端主源，新角色不受影响。
-     移除时机：nanoka avatarroundicon/1503.webp 内容变为真珠本人后，删除本行 local/localFiles
-     与 public/data/assets/icons/avatarroundicon/1503.webp——**禁止本地覆盖长期压过上游更新**。 */
-  avatarroundicon: { nanoka: 'avatarroundicon', local: 'avatarroundicon', localFiles: /^1503\.webp$/ },
+  /* 圆头像：全量随站入库（98 个角色）。其中 **1503 真珠是特例**——上游解包资产（nanoka 与
+     官方镜像两源）该文件内容为游戏内「TEST No.999」占位贴图且返回 HTTP 200，绕过 dom.ts 的
+     error/挂起回退链，故本地库里该文件是 128px 真珠圆像（来源 = 官方 avatarshopicon/1503.webp
+     裁切，非手绘），而非上游那个占位图。
+     移除时机：nanoka avatarroundicon/1503.webp 内容变为真珠本人后，**单独替换该本地文件**为
+     上游版本即可（本分类已全量入库，不再靠 localFiles 白名单区分）。 */
+  avatarroundicon: { nanoka: 'avatarroundicon', local: 'avatarroundicon' },
   'gridfight-equipment': { nanoka: 'gridfight/equipment', local: 'gridfight-equipment' },
   'gridfight-icon': { nanoka: 'gridfight/icon', local: 'gridfight-icon' },
   /* 货币战争位面词条图标（SpriteOutput/GridFight/BattleIcon/BuffIcon/*，`voracity.json` 的
      `affixes[].icon`）：nanoka 无该目录，fork 冻结前也无 Affix 图标 ⇒ 本地入库为主。
      调用方 `gridFightAffixIconUrl` 传 basename 小写（目录段与文件名均小写）。 */
   'gridfight-affix': { nanoka: 'gridfight/battleicon/bufficon', local: 'gridfight-affix' },
-  achievement: { nanoka: 'achievement' },
+  achievement: { nanoka: 'achievement', local: 'achievement' },
   /* 位面增益图标：nanoka **没有该分类**（实测扁平与各子路径全 404），真源是 jsDelivr
      （`BuffIcon/{子目录}/X` → `bufficon/{子目录小写}/X.png`，见
-     docs/audit/终局内容图标数据源审计.md §3.6）。本次仅入库 4.5 新增、fork 冻结前不存在的
-     4 个图标，故以 localFiles 限定范围——其余图标仍走远端，避免给全站无谓增加本地 404。 */
-  bufficon: {
-    nanoka: 'bufficon',
-    local: 'bufficon',
-    localFiles: /^BuffIcon\/Inlevel\/(?:IconActivity_StageInvasion_Support|IconBuffShield|IconDeBuffDamageTakenRatioElement|IconMonster_W5_StageInvasion)\.webp$/,
-  },
+     docs/audit/终局内容图标数据源审计.md §3.6）。
+     本站引用的 108 个（`maze*.json` / `voracity.json` 的 `buffIconUrl`）已**全量随站入库**：
+     此前它们在这条链上无任何可用源（nanoka 404、`JS_DELIVR_RULES` 无 bufficon 条目 ⇒
+     fallback 为空），只能落到 SVG 占位。入库后由本地供给，本地缺文件时仍回退 nanoka
+     （对新增内容无效，属已知边界）。 */
+  bufficon: { nanoka: 'bufficon', local: 'bufficon' },
   /* 教程图文（/voracity 06 区块）：调用方传 `TutorialPic/X.webp`（含源表子目录段）。
      该分类全量 1504 张 / 960 MB 不适合入库，仅 4.5 新增的 3 张（nanoka 与 jsDelivr 双侧皆无）
      以 localFiles 入库。 */
