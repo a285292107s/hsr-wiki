@@ -306,7 +306,7 @@ describe('levelStatValue / charStageForLevel（等级滑条口径）', () => {
 
 describe('URL 构建', () => {
   it('iconUrl：png → webp', () => {
-    expect(iconUrl('abc.png')).toBe(`${CDN}/assets/hsr/skillicons/abc.webp`);
+    expect(iconUrl('abc.png')).toBe(`${LOCAL_ICONS_BASE}/skillicons/abc.webp`);
     expect(iconUrl(null)).toBe('');
   });
   it('memospriteId：优先解析 icon 数字，回退 1+charId', () => {
@@ -316,7 +316,7 @@ describe('URL 构建', () => {
     expect(memospriteId('1005', null)).toBe('11005');
   });
   it('skillIconUrl：按类型键拼接；Servant 用忆灵 ID；缺失类型回退映射', () => {
-    const nk = (id: string, key: string) => `${NANOKA_BASE}/skillicons/SkillIcon_${id}_${key}.webp`;
+    const nk = (id: string, key: string) => `${LOCAL_ICONS_BASE}/skillicons/SkillIcon_${id}_${key}.webp`;
     expect(skillIconUrl(sk({ type: 'Normal' }), '1005', null)).toBe(nk('1005', 'Normal'));
     expect(skillIconUrl(sk({ type: 'BPSkill' }), '1005', null)).toBe(nk('1005', 'BP'));
     const d = baseChar();
@@ -334,7 +334,7 @@ describe('URL 构建', () => {
   });
   it('skillIconUrl：忆灵技图标后缀按 ID 映射（CDN 命名不统一）', () => {
     // 文件名保留忆灵 ID（nanoka 平铺主源；jsDelivr 回退才按角色 ID 分目录，见 cdn.test.ts）
-    const nk = (fileId: string, key: string) => `${NANOKA_BASE}/skillicons/SkillIcon_${fileId}_${key}.webp`;
+    const nk = (fileId: string, key: string) => `${LOCAL_ICONS_BASE}/skillicons/SkillIcon_${fileId}_${key}.webp`;
     const mk = (icon: string) => { const d = baseChar(); d.memosprite = { icon }; return d; };
     // 11402 → Servant01
     expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(nk('11402', 'Servant01'));
@@ -346,7 +346,7 @@ describe('URL 构建', () => {
     expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(nk('11413', 'ServantPassive'));
   });
   it('skillIconUrl：开拓者偶数变体回退奇数 ID 图标', () => {
-    const nk = (id: string, key: string) => `${NANOKA_BASE}/skillicons/SkillIcon_${id}_${key}.webp`;
+    const nk = (id: string, key: string) => `${LOCAL_ICONS_BASE}/skillicons/SkillIcon_${id}_${key}.webp`;
     expect(skillIconUrl(sk({ type: 'Normal' }), '8002', null)).toBe(nk('8001', 'Normal'));
     expect(skillIconUrl(sk({ type: 'BPSkill' }), '8004', null)).toBe(nk('8003', 'BP'));
     expect(skillIconUrl(sk({ type: 'Ultra' }), '8006', null)).toBe(nk('8005', 'Ultra'));
@@ -355,7 +355,7 @@ describe('URL 构建', () => {
     expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(nk('8001', 'Normal'));
   });
   it('skillIconUrl：sk.icon 字段优先（源数据事实源，覆盖变体图标命名）', () => {
-    const nk = (file: string) => `${NANOKA_BASE}/skillicons/${file}.webp`;
+    const nk = (file: string) => `${LOCAL_ICONS_BASE}/skillicons/${file}.webp`;
     // 官方相对路径（converter --official-icon-paths 输出）→ 提取文件名走分类规则（nanoka 平铺）
     expect(skillIconUrl(sk({ type: 'Ultra', icon: 'skillicons/avatar/1510/SkillIcon_1510_Normal02.png' }), '1510', null))
       .toBe(nk('SkillIcon_1510_Normal02'));
@@ -375,7 +375,7 @@ describe('URL 构建', () => {
         .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1510/SkillIcon_1510_BP02.png`);
       // 旧短路径（icon/ 开头）仍经 cdnUri 双源解析（开关只影响非 legacy 直拼分支），主源 nanoka
       expect(skillIconUrl(sk({ type: 'Assist', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_AssisSkill02.png' }), '1510', null))
-        .toBe(`${NANOKA_BASE}/skillicons/SkillIcon_1510_AssisSkill02.webp`);
+        .toBe(`${LOCAL_ICONS_BASE}/skillicons/SkillIcon_1510_AssisSkill02.webp`);
     } finally {
       setUseOfficialPaths(false);
     }

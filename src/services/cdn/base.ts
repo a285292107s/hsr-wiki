@@ -61,7 +61,7 @@ export const OFFICIAL_BASE = '';
 
 export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   avatarshopicon: { nanoka: 'avatarshopicon', local: 'avatarshopicon' },
-  skillicons: { nanoka: 'skillicons' },
+  skillicons: { nanoka: 'skillicons', local: 'skillicons' },
   /* 立绘卡（桌面 Hero）：本地为主。官方仓库只有 2048×2048 PNG（实测 2.9–4.9 MB），
      同分辨率 webp 约 1/4；`avatarDrawCardWebpUrl` 仍是 nanoka webp 直链（移动端专用），
      `avatarDrawCardJdUrl` 仍是 jsDelivr PNG（第二源）——三者互为不同 URL，回退链不退化。 */
@@ -85,8 +85,8 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
      移除时机：nanoka avatarroundicon/1503.webp 内容变为真珠本人后，删除本行 local/localFiles
      与 public/data/assets/icons/avatarroundicon/1503.webp——**禁止本地覆盖长期压过上游更新**。 */
   avatarroundicon: { nanoka: 'avatarroundicon', local: 'avatarroundicon', localFiles: /^1503\.webp$/ },
-  'gridfight-equipment': { nanoka: 'gridfight/equipment' },
-  'gridfight-icon': { nanoka: 'gridfight/icon' },
+  'gridfight-equipment': { nanoka: 'gridfight/equipment', local: 'gridfight-equipment' },
+  'gridfight-icon': { nanoka: 'gridfight/icon', local: 'gridfight-icon' },
   /* 货币战争位面词条图标（SpriteOutput/GridFight/BattleIcon/BuffIcon/*，`voracity.json` 的
      `affixes[].icon`）：nanoka 无该目录，fork 冻结前也无 Affix 图标 ⇒ 本地入库为主。
      调用方 `gridFightAffixIconUrl` 传 basename 小写（目录段与文件名均小写）。 */

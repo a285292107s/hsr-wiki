@@ -289,11 +289,12 @@ test.describe('布局验收：货币战争主题', () => {
     // 成长矩阵（结算单）与技能条款卡渲染
     await expect(page.locator('.nk-crole-gm__table')).toBeVisible();
     await expect(page.locator('.nk-crole-skill').first()).toBeVisible();
-    // 技能图标：nanoka 主源 + jsDelivr 回退属性
+    // 技能图标：已随站入库 ⇒ 主源为本地 webp、回退为远端主源 nanoka。
+    // jsDelivr 规则的路径映射属解析层单测职责（cdn.test.ts 合成 spec），此处不钉域名
     const icon = page.locator('.nk-crole-skill__icon').first();
     await expect(icon).toBeVisible();
-    await expect(icon).toHaveAttribute('src', /static\.nanoka\.cc\/assets\/hsr\/skillicons\/SkillIcon_1001_BP\.webp/);
-    await expect(icon).toHaveAttribute('data-cdn-fallback', /cdn\.jsdelivr\.net\/gh\/a285292107s\/StarRailTextures@main\/assets\/asbres\/spriteoutput\/skillicons\/avatar\/1001\/SkillIcon_1001_BP\.png/);
+    await expect(icon).toHaveAttribute('src', /\/skillicons\/SkillIcon_1001_BP\.webp$/);
+    await expect(icon).toHaveAttribute('data-cdn-fallback', /\/skillicons\/SkillIcon_1001_BP\.webp$/);
     // 属性图标：矩阵行（基础前台强度 → IconFrontRow）
     const gmIcon = page.locator('.nk-crole-gm__label', { hasText: '基础前台强度' }).first().locator('.nk-crole-gm__icon');
     await expect(gmIcon).toBeVisible();

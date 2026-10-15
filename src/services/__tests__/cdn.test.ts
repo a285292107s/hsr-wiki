@@ -150,20 +150,35 @@ describe('resolveCdnUri 双源解析', () => {
   });
 
   it('jsDelivr 映射分类：skillicons 主源 nanoka 平铺，回退按角色 id 分目录', () => {
-    const r = resolveCdnUri('skillicons', 'SkillIcon_1001_Normal.webp');
+    // skillicons 已随站入库 ⇒ 传合成 spec（不带 local）测 jsDelivr 规则映射本身
+    const r = resolveCdnUri('skillicons', 'SkillIcon_1001_Normal.webp', { nanoka: 'skillicons' });
     expect(r.primary).toBe(`${BASE}/skillicons/SkillIcon_1001_Normal.webp`);
     expect(r.fallback).toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1001/SkillIcon_1001_Normal.png`);
   });
 
   it('jsDelivr 映射分类：skillicons 回退目录按角色 id（忆灵文件名 id - 10000）', () => {
     // 忆灵图标文件名以忆灵 ID 为前缀，回退仓库目录按角色 ID 组织（11402 → 1402）
-    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_Servant01.webp').fallback)
+    const SKILLICONS_REMOTE = { nanoka: 'skillicons' };
+    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_Servant01.webp', SKILLICONS_REMOTE).fallback)
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1402/SkillIcon_11402_Servant01.png`);
-    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_ServantPassive.webp').fallback)
+    expect(resolveCdnUri('skillicons', 'SkillIcon_11402_ServantPassive.webp', SKILLICONS_REMOTE).fallback)
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1402/SkillIcon_11402_ServantPassive.png`);
     // 开拓者特例：18007 → 8007
-    expect(resolveCdnUri('skillicons', 'SkillIcon_18007_Servant01.webp').fallback)
+    expect(resolveCdnUri('skillicons', 'SkillIcon_18007_Servant01.webp', SKILLICONS_REMOTE).fallback)
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/8007/SkillIcon_18007_Servant01.png`);
+  });
+
+  it('skillicons（技能图标，全量入库）：local-first，本地缺失回退 nanoka 主源', () => {
+    expect(resolveCdnUri('skillicons', 'SkillIcon_1001_Normal.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/skillicons/SkillIcon_1001_Normal.webp`,
+      fallback: `${BASE}/skillicons/SkillIcon_1001_Normal.webp`,
+      source: 'local',
+    });
+  });
+
+  it('gridfight-equipment / gridfight-icon（已全量入库）：local-first', () => {
+    expect(resolveCdnUri('gridfight-equipment', '350101.webp').source).toBe('local');
+    expect(resolveCdnUri('gridfight-icon', '1001.webp').source).toBe('local');
   });
 
   it('jsDelivr 映射分类：rank 星魂图标的 jsDelivr 规则（官方 ui/ui3d/rank，含 Rank3/5 全套）', () => {

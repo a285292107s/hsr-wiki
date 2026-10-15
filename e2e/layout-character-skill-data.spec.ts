@@ -29,8 +29,10 @@ test.describe('布局验收：角色详情页', () => {
     const icons = page.locator('[data-panel="skills"] .nk-skill__icon');
     await expect(icons.first()).toBeVisible();
     await expect.poll(() => icons.count()).toBeGreaterThanOrEqual(5);
-    // 回退属性必须绑上（这条先于占位生效，否则本来能加载的资产会被占位盖住）
-    await expect(icons.first()).toHaveAttribute('data-cdn-fallback', /cdn\.jsdelivr\.net\/.*skillicons\/avatar\//);
+    // 回退属性必须绑上（这条先于占位生效，否则本来能加载的资产会被占位盖住）。
+    // 技能图标已随站入库 ⇒ 本地为主、回退目标为远端主源 nanoka（不再是 jsDelivr）。
+    // 此处只断「回退属性存在且指向 skillicons 分类」——具体回退源由解析层决定，属单测职责
+    await expect(icons.first()).toHaveAttribute('data-cdn-fallback', /^https:\/\/.+\/skillicons\//);
     // **先等位图真的到位再断言**：本用例原先直接读 `complete/naturalWidth`，等于把「图片尚未加载完」
     // 当成「加载失败」。Chromium 上因为有请求缓存与靠前用例预热而长期不显形；Firefox 冷跑必现
     // （实测：立即 5/6 未完成，6s 后 6/6 完成、零宽 0、占位 0 —— 说明是**测试竞态**不是引擎缺陷）。
@@ -51,9 +53,12 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1212：两源皆 404 时显示占位图形（naturalWidth>0）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1212：三个源皆 404 时显示占位图形（naturalWidth>0）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
+    // 技能图标已随站入库 ⇒ 必须**同时**挡掉本地主源，否则本用例只是在验证「本地能加载」，
+    // 丢失了它真正要守的降级契约（回退链耗尽后落内联 SVG 占位）
+    await page.route('**/data/assets/icons/skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.route('**/assets/hsr/skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.route('**/cdn.jsdelivr.net/**skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.goto('/character/1212');
