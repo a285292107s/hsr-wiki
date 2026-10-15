@@ -60,9 +60,12 @@ export const LOCAL_ICONS_BASE = '/data/assets/icons';
 export const OFFICIAL_BASE = '';
 
 export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
-  avatarshopicon: { nanoka: 'avatarshopicon' },
+  avatarshopicon: { nanoka: 'avatarshopicon', local: 'avatarshopicon' },
   skillicons: { nanoka: 'skillicons' },
-  avatardrawcard: { nanoka: 'avatardrawcard' },
+  /* 立绘卡（桌面 Hero）：本地为主。官方仓库只有 2048×2048 PNG（实测 2.9–4.9 MB），
+     同分辨率 webp 约 1/4；`avatarDrawCardWebpUrl` 仍是 nanoka webp 直链（移动端专用），
+     `avatarDrawCardJdUrl` 仍是 jsDelivr PNG（第二源）——三者互为不同 URL，回退链不退化。 */
+  avatardrawcard: { nanoka: 'avatardrawcard', local: 'avatardrawcard' },
   itemfigures: { nanoka: 'itemfigures' },
   // 本地化三分类：全站公共小图标（KB 级、高频复用、永不更新）；trace 的 nanoka 源为占位图，
   // 真源是 jsDelivr（ui/avatar/icon/Icon{key}.png），故以 jdPrimary 保持 jsDelivr 主源

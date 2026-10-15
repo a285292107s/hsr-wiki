@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { CDN, setUseOfficialPaths } from '../constants';
 import { setActiveLocale } from '../i18n/active';
-import { JS_DELIVR_BASE, NANOKA_HUD } from '../../services/cdn';
+import { JS_DELIVR_BASE, LOCAL_ICONS_BASE, NANOKA_HUD } from '../../services/cdn';
 import { NkError } from '../errors';
 import { setLabelTranslator } from '../label-translator';
 import cnMessages from '../i18n/messages/cn.json';
@@ -403,8 +403,8 @@ describe('URL 构建', () => {
   it('eidolonIconUrl / avatarDrawCardUrl / avatarDrawCardJdUrl', () => {
     // rank 分类：nanoka 主源 + jsDelivr ui/ui3d/rank 旧档回退（E1-6 全量）
     expect(eidolonIconUrl('1005', 1)).toBe(`${NANOKA_BASE}/rank/_dependencies/textures/1005/1005_Rank_1.webp`);
-    // 立绘：nanoka webp 主源（双源解析）；jsDelivr PNG 直链仅供 HomeView 预载链第二源
-    expect(avatarDrawCardUrl('1005')).toBe(`${NANOKA_BASE}/avatardrawcard/1005.webp`);
+    // 立绘：local-first（立绘卡已随站入库）；jsDelivr PNG 直链仅供 HomeView 预载链第二源
+    expect(avatarDrawCardUrl('1005')).toBe(`${LOCAL_ICONS_BASE}/avatardrawcard/1005.webp`);
     expect(avatarDrawCardJdUrl('1005')).toBe(`${JS_DELIVR_BASE}/avatardrawcard/1005.png`);
   });
 });

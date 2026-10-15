@@ -62,6 +62,19 @@ describe('resolveCdnUri 双源解析', () => {
     expect(r.source).toBe('nanoka');
   });
 
+  it('avatarshopicon / avatardrawcard（已全量入库）：local-first，本地缺失回退远端主源 nanoka', () => {
+    expect(resolveCdnUri('avatarshopicon', '1001.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/avatarshopicon/1001.webp`,
+      fallback: `${BASE}/avatarshopicon/1001.webp`,
+      source: 'local',
+    });
+    expect(resolveCdnUri('avatardrawcard', '1001.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/avatardrawcard/1001.webp`,
+      fallback: `${BASE}/avatardrawcard/1001.webp`,
+      source: 'local',
+    });
+  });
+
   it('lightconemediumicon（光锥图标，全量入库）：local-first，本地缺失回退远端主源 nanoka', () => {
     expect(resolveCdnUri('lightconemediumicon', '20000.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/lightconemediumicon/20000.webp`,
