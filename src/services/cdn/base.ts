@@ -19,6 +19,7 @@ export type CdnCategory =
   | 'avatarroundicon'
   | 'gridfight-equipment'
   | 'gridfight-icon'
+  | 'gridfight-affix'
   | 'achievement'
   | 'bufficon'
   | 'tutorialpic'
@@ -83,9 +84,28 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   avatarroundicon: { nanoka: 'avatarroundicon', local: 'avatarroundicon', localFiles: /^1503\.webp$/ },
   'gridfight-equipment': { nanoka: 'gridfight/equipment' },
   'gridfight-icon': { nanoka: 'gridfight/icon' },
+  /* 货币战争位面词条图标（SpriteOutput/GridFight/BattleIcon/BuffIcon/*，`voracity.json` 的
+     `affixes[].icon`）：nanoka 无该目录，fork 冻结前也无 Affix 图标 ⇒ 本地入库为主。
+     调用方 `gridFightAffixIconUrl` 传 basename 小写（目录段与文件名均小写）。 */
+  'gridfight-affix': { nanoka: 'gridfight/battleicon/bufficon', local: 'gridfight-affix' },
   achievement: { nanoka: 'achievement' },
-  bufficon: { nanoka: 'bufficon' },
-  tutorialpic: { nanoka: 'tutorialpic' },
+  /* 位面增益图标：nanoka **没有该分类**（实测扁平与各子路径全 404），真源是 jsDelivr
+     （`BuffIcon/{子目录}/X` → `bufficon/{子目录小写}/X.png`，见
+     docs/audit/终局内容图标数据源审计.md §3.6）。本次仅入库 4.5 新增、fork 冻结前不存在的
+     4 个图标，故以 localFiles 限定范围——其余图标仍走远端，避免给全站无谓增加本地 404。 */
+  bufficon: {
+    nanoka: 'bufficon',
+    local: 'bufficon',
+    localFiles: /^BuffIcon\/Inlevel\/(?:IconActivity_StageInvasion_Support|IconBuffShield|IconDeBuffDamageTakenRatioElement|IconMonster_W5_StageInvasion)\.webp$/,
+  },
+  /* 教程图文（/voracity 06 区块）：调用方传 `TutorialPic/X.webp`（含源表子目录段）。
+     该分类全量 1504 张 / 960 MB 不适合入库，仅 4.5 新增的 3 张（nanoka 与 jsDelivr 双侧皆无）
+     以 localFiles 入库。 */
+  tutorialpic: {
+    nanoka: 'tutorialpic',
+    local: 'tutorialpic',
+    localFiles: /^TutorialPic\/TutorialPage_1050(?:101|201|202)\.webp$/,
+  },
   /* 免疫图标（`MonsterStatusResistanceType` 的 `Type → SpriteOutput/UI/Avatar/Icon/IconImmune*.png`，
      128×128 纯白字形 + 透明底，随站入库 11 个 webp）：本地为主（构建期一次性入库、永不更新），
      nanoka 无该批文件故其子路径仅作占位（与 trace 同源目录），缺失时回退 jsDelivr 官方镜像。 */

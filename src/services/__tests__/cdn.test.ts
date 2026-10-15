@@ -84,6 +84,35 @@ describe('resolveCdnUri 双源解析', () => {
       .toBe(`${JS_DELIVR_BASE}/ui/avatar/icon/IconImmuneFrozen.png`);
   });
 
+  it('/voracity 缺图补入：bufficon / tutorialpic 白名单 local-first，gridfight-affix 整分类本地', () => {
+    // bufficon：nanoka 无该分类（实测全 404），仅 4.5 新增、fork 冻结前不存在的 4 个入库
+    expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconBuffShield.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`,
+      fallback: `${BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`,
+      source: 'local',
+    });
+    expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconMonster_W5_StageInvasion.webp').source).toBe('local');
+    // 白名单外：仍走远端主源，不得被本地化影响
+    expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconBuffCommon.webp').source).toBe('nanoka');
+    // tutorialpic：全量 1504 张 / 960 MB 不入库，仅 4.5 新增的 3 张
+    expect(resolveCdnUri('tutorialpic', 'TutorialPic/TutorialPage_1050101.webp').source).toBe('local');
+    expect(resolveCdnUri('tutorialpic', 'TutorialPic/TutorialPage_1050202.webp').source).toBe('local');
+    expect(resolveCdnUri('tutorialpic', 'TutorialPic/TutorialPage_1000001.webp').source).toBe('nanoka');
+    // gridfight-affix：nanoka 无该目录、fork 冻结前无 Affix 图标 ⇒ 整分类本地
+    expect(resolveCdnUri('gridfight-affix', 'icon_gridfight_affix_09.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/gridfight-affix/icon_gridfight_affix_09.webp`,
+      fallback: `${BASE}/gridfight/battleicon/bufficon/icon_gridfight_affix_09.webp`,
+      source: 'local',
+    });
+    // dom 委托现场切换依赖本地主源反查回退，三条路径都必须可反查
+    expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/gridfight-affix/icon_gridfight_affix_09.webp`))
+      .toBe(`${BASE}/gridfight/battleicon/bufficon/icon_gridfight_affix_09.webp`);
+    expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`))
+      .toBe(`${BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`);
+    expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/tutorialpic/TutorialPic/TutorialPage_1050101.webp`))
+      .toBe(`${BASE}/tutorialpic/TutorialPic/TutorialPage_1050101.webp`);
+  });
+
   it('jsDelivr 映射分类：skillicons 主源 nanoka 平铺，回退按角色 id 分目录', () => {
     const r = resolveCdnUri('skillicons', 'SkillIcon_1001_Normal.webp');
     expect(r.primary).toBe(`${BASE}/skillicons/SkillIcon_1001_Normal.webp`);

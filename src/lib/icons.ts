@@ -180,6 +180,16 @@ export function gridFightIconUrl(iconPath: string | null | undefined): string {
   return cdnRawUrl(`${m[1].toLowerCase()}.webp`);
 }
 
+/* 货币战争位面词条图标（`SpriteOutput/GridFight/BattleIcon/BuffIcon/*`，`voracity.json`
+   的 `affixes[].icon`）：该目录 nanoka 没有、fork 冻结前也无 Affix 图标，故走本地入库分类
+   `gridfight-affix`（file 为 basename 小写）。**不可**复用 gridFightIconUrl——它经 cdnRawUrl
+   直拼 nanoka 原始子路径，绕过 resolve 层，既无本地源也拿不到回退 URL。 */
+export function gridFightAffixIconUrl(iconPath: string | null | undefined): string {
+  if (!iconPath) return '';
+  const base = iconPath.split('/').pop()?.replace(/\.png$/i, '');
+  return base ? cdnUri('gridfight-affix', `${base.toLowerCase()}.webp`) : '';
+}
+
 /* 货币战争装备专用图标：CDN 统一存于 gridfight/equipment/{文件名}.webp（保留原始大小写）。
    源路径可能为 Equipment/350101.png 或 GridItem/GridFight_WeaponBox3.png，
    两者均映射到 equipment 目录，且命名图标（非数字 ID）须保留大小写。 */

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { fmtDesc, gridFightIconUrl, monsterIconUrl, refsResolved, tutorialPicUrl } from '../../lib/format';
+import { fmtDesc, gridFightAffixIconUrl, monsterIconUrl, refsResolved, tutorialPicUrl } from '../../lib/format';
 import { cdnFallbackFromPrimary } from '../../services/cdn';
 import { loadLocalVoracity } from '../../services/api';
 import type { MazeBuffInfo, VoracityDb, VoracityStage } from '../../services/types';
@@ -103,7 +103,7 @@ const buffLevels = computed(() =>
 const affixes = computed(() =>
   (data.value?.affixes ?? []).map((a) => ({
     ...a,
-    iconUrl: gridFightIconUrl(a.icon),
+    iconUrl: gridFightAffixIconUrl(a.icon),
     html: plainDesc(a.desc, a.params),
   })));
 const statuses = computed(() =>
