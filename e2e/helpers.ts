@@ -81,16 +81,59 @@ export async function findHorizontalOverflow(page: Page): Promise<string[]> {
   // 其后 5 项（brand / scrim / content / release / footer）是同一棵树的同一位移。10s 留一个数量级余量，
   // 正常路径仍是「条件一满足就返回」（本地实测 <20ms）。
   // 超时只告警不硬失败：真卡住的过渡会在后续断言里以「整页同向位移」现形，且提示语直接给出该指纹。
+  //
+  // **「等到没有 -active」是空真，必须配「测量结果是否稳定」的自检**（2026-10-16 CI 实测）：
+  // 客户端路由跳转后，`waitForFunction` 会在**过渡尚未开始**时立刻通过（此刻旧视图还在场、新视图
+  // 的 chunk 还没到，DOM 里没有任何 -active ⇒ 谓词为真）。随后 `evaluate` 排队执行，而 CSS 过渡由
+  // 合成器驱动、照常推进 ⇒ 测量落进过渡中间态。CI 报出的正是这个：`div right=1282 left=2`
+  // （宽恰 1280 = 布局视口宽、右移恰 2px）+ 诊断 `htmlScrollWidth=1280 #app=0.0..1280.0`
+  // ——**文档根本没溢出**。它是页根 `#nk-catalog-app` 在 `nk-view-fwd` 进入动画
+  // （`translateX(24px)` → 0）里的相位：本地 rAF 采样实测该元素经过 L=4/L=1 两帧，
+  // 且报出的元素**无 class** ⇒ 是「类已摘、位移还在」的合成器尾帧（helpers 只按 className 拼描述，
+  // 带 id 无 class 的页根就被打成了裸 `div`，故本次同时给描述补上 id）。
+  // 与 docs/memory/testing.md 里 `.theme-transitioning` 那条同类（等「不在场」等到的是空真）。
+  //
+  // 判据用**两次采样逐项一致**而不是只看类：类消失与几何归位之间隔着合成器的一帧，只查类会漏。
+  // 稳定态下两次采样必然一致；过渡 / 落位中则不一致 ⇒ 重测。
+  // **这不是 `--retries`**（那会把真红转绿，仓库禁止）：此处只判「量到的时刻是否已经是稳定态」，
+  // 真缺陷的几何是稳态属性，两次采样照样一致、照样上报 ⇒ 真红不会被抹掉。
+  // 重试上限内仍不一致才按当前结果返回，并在诊断里标明「未稳定」。
+  const MAX_ATTEMPTS = 5;
   let transitionTimedOut = false;
-  await page
-    .waitForFunction(() => !document.querySelector('[class*="nk-view-"][class*="-active"]'), undefined, { timeout: 10_000 })
-    .catch(() => {
-      transitionTimedOut = true;
+  for (let attempt = 1; ; attempt += 1) {
+    transitionTimedOut = !(await page
+      .waitForFunction(() => !document.querySelector('[class*="nk-view-"][class*="-active"]'), undefined, { timeout: attempt === 1 ? 10_000 : 5_000 })
+      .then(() => true)
+      .catch(() => false));
+    if (transitionTimedOut) {
       console.warn(
-        '[L3 溢出] 等待视图过渡类消失超时（10s），按当前态测量；若报出整页同向位移（right ≈ 视口 + 24/40）即为过渡未结束，不是布局缺陷',
+        '[L3 溢出] 等待视图过渡类消失超时，按当前态测量；若报出整页同向位移（right ≈ 视口 + 24/40）即为过渡未结束，不是布局缺陷',
       );
-    });
-  const { bad, ctx } = await page.evaluate(() => {
+    }
+    const first = await measureOverflowOnce(page);
+    if (!first.bad.length) return first.bad;
+    const second = await measureOverflowOnce(page);
+    const settled = !first.inFlight && !second.inFlight
+      && first.bad.length === second.bad.length
+      && first.bad.every((s, i) => s === second.bad[i]);
+    if (settled || attempt >= MAX_ATTEMPTS) {
+      return [
+        `<诊断 ${second.ctx}${transitionTimedOut ? ' 过渡等待超时' : ''}`
+        + `${settled ? '' : ` 两次采样不一致（已重试 ${attempt} 次，可能仍在过渡/落位）`}>`,
+        ...second.bad,
+      ];
+    }
+    console.warn(`[L3 溢出] 第 ${attempt} 次测量未稳定（命中 ${first.bad.length} 项），重测`);
+  }
+}
+
+/** 单次横向溢出测量：先等两帧绘制（落在稳定绘帧边界），再量。
+ *  `inFlight` = 测量当刻 DOM 里仍有 `nk-view-*-active`（结果不可信，调用方应重测）。 */
+async function measureOverflowOnce(page: Page): Promise<{ bad: string[]; ctx: string; inFlight: boolean }> {
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  );
+  const { bad, ctx, inFlight } = await page.evaluate(() => {
     const bad: string[] = [];
     const de = document.documentElement;
     // 右边界取**布局视口** `clientWidth`：`innerWidth` 含经典滚动条宽度，做右边界会漏检
@@ -114,8 +157,11 @@ export async function findHorizontalOverflow(page: Page): Promise<string[]> {
       if (rect.right > vw + 1 || rect.left < -1) {
         // 排除固定定位层（spine 全屏画布、侧栏、Toast 等）与可滚动容器内的内容
         if (cs.position !== 'fixed' && !inScrollableAncestor(el)) {
+          // 描述**带 id**：`#app` / `#nk-catalog-app` 这类带 id 无 class 的页根，只按 className
+          // 拼出来是裸 `div`，事后无法定位（2026-10-16 CI 那次 2px 报告正因此无从定性）。
+          const cls = typeof el.className === 'string' ? el.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
           bad.push(
-            `${el.tagName.toLowerCase()}${el.className ? '.' + String(el.className).trim().split(/\s+/).slice(0, 3).join('.') : ''} right=${Math.round(rect.right)} left=${Math.round(rect.left)}`,
+            `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}${cls ? '.' + cls : ''} right=${Math.round(rect.right)} left=${Math.round(rect.left)}`,
           );
         }
       }
@@ -128,16 +174,15 @@ export async function findHorizontalOverflow(page: Page): Promise<string[]> {
     // 包含块（`#app`）的右边界：页根一旦被判越界，根因在包含块宽度而不是页根本身，故两者一起取证。
     const app = document.getElementById('app');
     const appRect = app?.getBoundingClientRect();
+    // 测量当刻过渡是否仍在跑（含「等待通过之后才启动」的窗口）——为真则本次结果不可信
     return {
       bad: bad.slice(0, 20),
+      inFlight: !!document.querySelector('[class*="nk-view-"][class*="-active"]'),
       ctx: `innerWidth=${window.innerWidth} clientWidth=${vw} htmlScrollWidth=${de.scrollWidth}`
         + ` dpr=${window.devicePixelRatio} #app=${appRect ? `${appRect.left.toFixed(1)}..${appRect.right.toFixed(1)}` : 'n/a'}`,
     };
   });
-  if (!bad.length) return bad;
-  // 取证件并入返回值首项：`toEqual([])` 的报错只打印数组本身，没有这些数字就无法区分
-  // 「真实溢出 / 经典滚动条 / DPR / 过渡残留」（2026-10 一次 Linux-only 的 2px 报告事后无从定性）。
-  return [`<诊断 ${ctx}${transitionTimedOut ? ' 过渡等待超时' : ''}>`, ...bad];
+  return { bad, ctx, inFlight };
 }
 
 /**
