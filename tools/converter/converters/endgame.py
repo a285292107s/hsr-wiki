@@ -75,8 +75,12 @@ def _hp_tables() -> tuple[dict, dict]:
 # 而 32.6% 的行用它记星琼数量，故解析时并入物品 1。
 _STAR_JADE_ITEM_ID = 1
 
-# 异相仲裁星数奖励分档类型 → 官方文案（TextMap「骑士星数」/「王棋星数」）。
-_PEAK_STAR_REWARD_TYPES = {"MOB_STAR_REWARD": "peakStarKnight", "BOSS_STAR_REWARD": "peakStarKing"}
+# 异相仲裁星数奖励分档类型 → (口径, 官方文案)：口径即该档归属的关卡类别（MOB=骑士关 / BOSS=王棋关），
+# 是按单关切片的前提（骑士星数只归骑士关、王棋星数只归王棋关）；文案取 TextMap「骑士星数」/「王棋星数」。
+_PEAK_STAR_REWARD_TYPES = {
+    "MOB_STAR_REWARD": ("knight", "peakStarKnight"),
+    "BOSS_STAR_REWARD": ("king", "peakStarKing"),
+}
 
 def _load_schedules(
     group_table: str, schedule_tables: tuple[str, ...]
@@ -198,7 +202,13 @@ def _monster_out(
         if not full and k in ("intro", "skills", "debuff_resist"):
             continue
         if k == "skills":
-            out[k] = [{"name": s["name"], "tag": s.get("tag")} for s in v]
+            # 卡面只出名称 + 标签 + 战斗阶段（阶段用于把技能按阶段分组上屏；全量字段由
+            # monster_detail 输出）。`phase_list` 缺位即该技能无阶段门控，不落键。
+            out[k] = [
+                {"name": s["name"], "tag": s.get("tag"),
+                 **({"phase_list": s["phase_list"]} if s.get("phase_list") else {})}
+                for s in v
+            ]
         else:
             out[k] = v
     # 实例修正值在此**直接并入**：敌方卡没有等级滑条（无等级语境），口径 = 基准 + 修正值
@@ -341,22 +351,46 @@ def _star_reward_ladder(
     return out
 
 def _load_peak_star_rewards(items: dict[int, list[dict]]) -> dict[int, list[dict]]:
-    """`ChallengePeakReward` → {RewardGroupID: [{label, star, items}]}。
+    """`ChallengePeakReward` → {RewardGroupID: [{kind, label, star, items}]}。
 
     只取两类有官方文案的星数档（TextMap「骑士星数」/「王棋星数」）；通关档
     （MOB_PASS_REWARD）/ 极限档（BOSS_STAR_LIMIT_REWARD）/ 彩色目标档
     （BOSS_COLOR_TARGET_REWARD）的档位语义无官方文案，本轮不上屏（ADR 0051）。
+    `kind` 是该档的**口径**（MOB=骑士关 / BOSS=王棋关）——上游没有「哪一关吃哪一档」的
+    指针，两类口径是唯一的归属判据，单关切片（见 `_slice_peak_star_tiers`）靠它分派。
     """
     out: dict[int, list[dict]] = defaultdict(list)
     for rec in load_json(EXCEL_DIR / "ChallengePeakReward.json"):
         # 标签取官方词条（enum_labels 的 ui_label 类），不自造中文
-        label_key = _PEAK_STAR_REWARD_TYPES.get(rec.get("RewardType", ""))
+        entry = _PEAK_STAR_REWARD_TYPES.get(rec.get("RewardType", ""))
+        label_key = entry[1] if entry else None
         label = resolve_label("ui_label", label_key, label_key or "") if label_key else None
         gid, val, rid = rec.get("RewardGroupID"), rec.get("TypeValue"), rec.get("RewardID")
-        if not label or gid is None or val is None or rid not in items:
+        if not entry or not label or gid is None or val is None or rid not in items:
             continue
-        out[int(gid)].append({"label": label, "star": int(val), "items": items[int(rid)]})
+        out[int(gid)].append({
+            "kind": entry[0], "label": label, "star": int(val), "items": items[int(rid)],
+        })
     return {g: sorted(v, key=lambda x: (x["label"], x["star"])) for g, v in out.items()}
+
+def _peak_tier_row(tier: dict) -> dict:
+    """档位行的上屏形态：口径 `kind` 只在转换期用于分派，不写进产物。"""
+    return {"label": tier["label"], "star": tier["star"], "items": tier["items"]}
+
+def _slice_peak_star_tiers(
+    ladder: list[dict], stars_used: int, target_count: int,
+) -> tuple[list[dict], int]:
+    """把某个口径的星数档按**关卡序累计目标数**切给当前关（与 `_season_floors` 同口径）。
+
+    返回 (本关吃到的档位, 累计到本关为止的星数)。异相仲裁实测每关 3 个目标 = 3 星：
+    骑士关逐关累计 3 星（3★/6★/9★ 各落一关），王棋关 3 目标吃到 1★/2★/3★ 三档
+    （每档配一个目标）。上游无「哪一关吃哪一档」的指针，累计目标数是唯一可判据。
+    """
+    cap = stars_used + target_count
+    tier = [
+        _peak_tier_row(t) for t in ladder if stars_used < t["star"] <= cap
+    ]
+    return tier, cap
 
 def _group_maze_buff(filename: str = "ChallengeGroupConfig.json") -> dict[int, list[int]]:
     """忘却之庭分组表 → {GroupID: [MazeBuffID]}（赛季增益单值）。"""
@@ -1568,8 +1602,11 @@ def _peak_seasons(full_monsters: bool = False) -> dict:
     full_monsters=True 时单关敌方输出 intro/skills 全字段（详情页以敌方详情卡展示）；
     期级合并列表 `monsters` 始终轻量——它只服务目录卡代表阵容与 AI 快照
     （渲染名称/阵营/弱点），与另外三种模式的期级列表同口径，不带图鉴介绍与技能。
-    奖励：期表 `RewardGroupID` → `ChallengePeakReward` 的两类星数档落 `star_rewards`
-    （骑士星数 / 王棋星数，见 _load_peak_star_rewards）。
+    奖励：期表 `RewardGroupID` → `ChallengePeakReward` 的两类星数档落期级 `star_rewards`
+    （骑士星数 / 王棋星数，见 _load_peak_star_rewards），**并按单关切到 `levels[].star_rewards`**：
+    两类口径各自按关卡序累计目标数切片（骑士关逐关 3 星、王棋关 3 目标吃到 1★/2★/3★）；
+    绝境变体按官方规则「直接击败绝境难度王棋关卡视同 3 星通关全部骑士关卡」取王棋口径
+    **最高档**（3★），与它自己那 1 个目标配成一行（前端不推关卡序）。
     """
     groups = load_json(EXCEL_DIR / "ChallengePeakGroupConfig.json")
     level_data = load_json(EXCEL_DIR / "ChallengePeakConfig.json")
@@ -1604,10 +1641,20 @@ def _peak_seasons(full_monsters: bool = False) -> dict:
         seen: set[int] = set()
         all_buffs: list[dict] = []
         levels: list[dict] = []
+        ladder = peak_star_rewards.get(g.get("RewardGroupID")) or []
+        # 两类口径各自累计关卡序（骑士星数归骑士关、王棋星数归王棋关）——见 _slice_peak_star_tiers
+        knight_ladder = [t for t in ladder if t["kind"] == "knight"]
+        king_ladder = [t for t in ladder if t["kind"] == "king"]
+        knight_stars = 0
         for lid in g.get("PreLevelIDList", []) or []:
             node = _peak_level_node(
                 level_by_id.get(lid), stages, monsters, buffs, targets, "knight",
                 invasions, summons, full_monsters)
+            if node:
+                tier, knight_stars = _slice_peak_star_tiers(
+                    knight_ladder, knight_stars, len(node.get("targets") or []))
+                if tier:
+                    node["star_rewards"] = tier
             levels.append(node)
             dmg.update(node["damage"])
             for m in node["monsters"]:
@@ -1643,7 +1690,16 @@ def _peak_seasons(full_monsters: bool = False) -> dict:
                 }
                 if hard_stage and hard_stage["level"]:
                     hard["level"] = hard_stage["level"]
+                # 绝境变体：官方「直接击败绝境难度王棋关卡视同 3 星通关全部骑士关卡」，
+                # 故取王棋口径最高档（3★）配它自己那 1 个目标，一档一行
+                top = max((t for t in king_ladder), key=lambda x: x["star"], default=None)
+                if top is not None:
+                    hard["star_rewards"] = [_peak_tier_row(top)]
                 node["hard"] = hard
+            tier, _ = _slice_peak_star_tiers(
+                king_ladder, 0, len(node.get("targets") or []))
+            if tier:
+                node["star_rewards"] = tier
             levels.append(node)
             dmg.update(node["damage"])
             for m in node["monsters"]:
@@ -1674,7 +1730,8 @@ def _peak_seasons(full_monsters: bool = False) -> dict:
             result[str(gid)]["badges"] = badges_map[gid]
         ladder = peak_star_rewards.get(g.get("RewardGroupID"))
         if ladder:
-            result[str(gid)]["star_rewards"] = ladder
+            # 口径 `kind` 只在转换期分派用（见 _peak_tier_row），不进产物
+            result[str(gid)]["star_rewards"] = [_peak_tier_row(t) for t in ladder]
         icon_path = g.get("ThemeIconPicPath") or ""
         if icon_path:
             result[str(gid)].setdefault("arts", {})["tab"] = icon_path

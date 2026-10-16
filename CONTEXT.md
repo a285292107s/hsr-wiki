@@ -393,8 +393,8 @@ _Avoid_: 关卡效果（游戏内指末法余烬）、敌方机制（笼统）�
 _Avoid_: 层级节点（本站层级节点不叫「阶段」）、难度档说明（`MonsterDifficultyGuide` 与首领特性同文，不上屏）
 
 ### 异相仲裁（Anomaly）
-每期 3 骑士试炼 + 1 王棋最终关（含「绝境」困难变体）；挑战目标走 BattleTargetConfig（Type=ChallengeTarget）。段位徽章系统（ChallengeBadgeConfig）：青铜/白银/黄金/彩钻四段，按期分组（部分期缺省）。
-_Avoid_: 徽章奖励、段位
+每期 3 骑士试炼 + 1 王棋最终关（含「绝境」困难变体）；挑战目标走 BattleTargetConfig（Type=ChallengeTarget）。段位徽章系统（ChallengeBadgeConfig）：青铜/白银/黄金/彩钻四段，按期分组（部分期缺省）。**「绝境」是王棋关的困难变体档**：数据挂在王棋关节点的 `hard` 上（name/level/monsters/targets/tags），页面上与主关**并列成独立的关卡子 tab**（`peak-<关卡 ID>-hard`，紧随主关之后），不是主关面板内的子块。
+_Avoid_: 徽章奖励、段位、困难模式（「绝境」是官方变体名，不泛称困难）
 
 ### 星数奖励（Star Reward）
 站点工作名（**非游戏内词**），指「达成挑战目标换来的累计星数奖励」：官方按玩法分称「印记星数 → 印记馈赠」（忘却之庭，每层通关奖励另称「回忆馈赠」）、「故事星数 → 故事馈赠」（虚构叙事），异相仲裁分「骑士星数」「王棋星数」（[ADR 0051](docs/adr/0051-终局赛季奖励进详情页.md)）。判据＝**每达成 1 个挑战目标计 1 星**（实测每层恰好 3 个目标，**星数跨关卡通用**；本期上限 = 层数 × 3），累计星数达到奖励线档位（分组表 `RewardLineGroupID` → `Challenge*RewardLine.StarCount` → `RewardData`）即领该档奖励；异相仲裁走 `ChallengePeakReward`。展示上按**关卡切片**随层展示，并做成**一档一行**（档位徽章 + 该档条件＝星级目标 + 该档奖励 chips，见 [ADR 0051](docs/adr/0051-终局赛季奖励进详情页.md) 补记四）；异相仲裁按星数口径分组挂在赛季级头部，**不含**逐目标奖励（`ChallengeTargetConfig.RewardID` 所指条目在上游缺失）。

@@ -102,6 +102,7 @@
 - **已知的「看似缺字段、实为设计」清单，别重复登记为漏转换**：光锥 `desc` 在多数命途上重复同一句专属说明（已判有意不渲染）、敌方 `figure` 字段全为空（故永远走 `monsterIconUrl` 回退取图，不是缺图）。
 - **类型注释会与数据现状脱节**：`misc.ts` 注释写「星启无 wave」而三模式所有节点的 `monsters` 都带 `wave`；定字段规则前先全量列一遍取值分布，以数据为准。
 - **vendor 没有 peak 排期表**：`ScheduleDataChallenge{Peak}` 不存在（只有 Maze / Story / Boss / Global），异相仲裁赛季恒无起止日期，`mazeStatus` 返回「未知」是正确行为——是数据缺口不是渲染 bug。
+- **「战斗阶段」在上游是 `MonsterSkillConfig.PhaseList`，2026-10-16 起落 `phase_list`**：异相仲裁王棋 boss「反造物主，流溢之恨」的阶段专属技能（如只在中段可用的「神的冠冕将要粉碎」、只在末段可用的「烧尽神国，弃绝世界」）由该字段门控。判据与边界：①阶段号**从 1 起**，空表 = 无阶段门控（不落键），上游另有 1 条记为 `[0]` 是外键哨兵不是阶段（前端只认正数，否则渲染出「阶段 0」）；②实测 2289/2632 条怪物的技能**只吃阶段 1** ⇒ 展示端只在真跨 ≥2 阶段时才分组（否则加一个「阶段 1」小标题是空话）；③**结构 ≠ 文案**：这层是「哪些技能在哪些阶段」，首领机制的阶段**文案**另走 `MonsterGuideConfig`；该 boss 在那张表（84 条）**零登记**，且 `maze_peak` **10 期全无 `boss_guides`**（末日幻影 22 期有），故它只有结构、没有阶段名与应对策略。另有两条易混：`monsters/*.json` 的 `phases` 是 `MonsterAtlasExtraPhases` 的**图鉴形态**（本 boss 仅 1 条，非战斗阶段）；关卡「只有 1 只怪」也正常——`StageConfig.MonsterList = [{Monster0: …}]`，多阶段是**同一实体**战斗内形态切换，不是多只怪。
 - **货币战争角色的 `equipment_id` 指向常规光锥（23059 / 23061），不是 CW 装备（350xxx / 352xxx）**：不能由此推出「新角色带出专属装备」。
 - **备选队友槽的键是 `backup_list1..N`（按位编号、无数组字段可枚举）**：只收 `member_list` 会让备选槽名称永远落回退串 `#id`，图片正常、仅 `title` / `alt` 错且不报错。`loadLocalBuildNames`
 - **wiki 技能标签映射漏项会静默丢技能**：`欢愉技` → `ElationDamage`、`忆灵技` / `忆灵天赋` → `Servant` / `ServantPassive`；新增 tag 必须同时改抓取侧映射表与前端查表键（`SkillsPanel` 按 `sk.type` 查表）。

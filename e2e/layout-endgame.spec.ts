@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, waitForCatalogCards } from './helpers';
-import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
+import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakHardTabId, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
 
 /**
  * 布局验收：终局合并单页（/endgame/<mode>/<id> 的层级与看板） —— layout 验收层（语义契约 + 数值规格）分文件之一。
@@ -1237,22 +1237,49 @@ test.describe('布局验收：终局合并单页', () => {
     assertNoErrors();
   });
 
-  test('/endgame/peak/9：星数奖励按口径分组（骑士星数 / 王棋星数，ADR 0051）', async ({ page }) => {
+  test('/endgame/peak/9：星级奖励列表进关卡头部（按口径分关切片，ADR 0051 补记）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const peak = seasonData('maze_peak.json', '9');
+    /** 赛季级阶梯仍完整产出（单关切片的来源），两类口径都有 */
     const ladder = peak.star_rewards!;
-    /** 两类口径都有（转换器只收 MOB_STAR_REWARD / BOSS_STAR_REWARD） */
     expect(new Set(ladder.map((r) => r.label))).toEqual(new Set(['骑士星数', '王棋星数']));
     await page.goto('/endgame/peak/9');
-    // 段位徽章区块退场 + 星数奖励上提头部（用户裁决，ADR 0043 补记）
+    // 段位徽章区块退场 + 赛季级阶梯块整体退场（星数奖励下放单关头部，用户裁决）
     await expect(page.locator('#egd-badges, .nk-egd-badges')).toHaveCount(0);
-    await expect(page.locator('.nk-egd-panel > .nk-egd-starrewards--head')).toHaveCount(1);
-    await expect(page.locator('.nk-egd-starrewards__group > .nk-egd-head__label'))
-      .toHaveText(['王棋星数', '骑士星数']);
-    await expect(page.locator('.nk-egd-starrewards .nk-egd-reward__star'))
-      .toHaveText(ladder.map((r) => `${r.star}★`));
-    // 单关面板：异相仲裁无卡片行，故层头部不出「通关奖励」列（奖励走赛季阶梯）
-    await expect(page.locator('#egd-level-panel .nk-egd-reward')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-starrewards')).toHaveCount(0);
+    // 异相仲裁无卡片行，故单关头部不出「通关奖励」列（奖励只随星级奖励列表逐档给）
+    await expect(page.locator('#egd-level-panel .nk-egd-head > .nk-egd-reward')).toHaveCount(0);
+    await expect(page.locator('#egd-level-panel .nk-egd-clear')).toHaveCount(0);
+
+    const king = (peak.levels ?? []).find((l) => l.kind === 'king')!;
+    const head = page.locator('.nk-egd-peak .nk-egd-head');
+    const list = head.locator('.nk-egd-tierlist');
+
+    /** 每关面板头部的星级奖励列表 = 该关自己那份切片（口径分关：骑士关吃骑士星数、王棋关吃王棋星数） */
+    const expectHead = async (tab: string, tiers: { star: number }[], targets: number): Promise<void> => {
+      await page.locator(tab).click();
+      await expect(head).toHaveCount(1);
+      await expect(list.locator('.nk-egd-tier__badge'))
+        .toHaveText(tiers.map((t) => `累计 ${t.star}★`));
+      // 一档一行：行内条件即该档吃到的挑战目标
+      await expect(list.locator('.nk-egd-tiers li')).toHaveCount(tiers.length);
+      await expect(list.locator('.nk-egd-node')).toHaveCount(targets);
+    };
+
+    // 王棋关：3 目标 3 档（1★/2★/3★，每档 1 目标）
+    await expectHead(peakTabId(king), king.star_rewards!, king.targets!.length);
+    // 绝境档：取王棋口径最高档 3★，配它自己那 1 个目标（官方「视同 3 星通关全部骑士关卡」）
+    await expectHead(peakHardTabId(king), king.hard!.star_rewards!, king.hard!.targets!.length);
+    // 骑士三关：骑士口径逐关累计 → 3★ / 6★ / 9★ 各落一关
+    for (const lv of (peak.levels ?? []).filter((l) => l.kind === 'knight')) {
+      await expectHead(peakTabId(lv), lv.star_rewards!, lv.targets!.length);
+    }
+    // 全期切片不重不漏：两口径各自的档数 = 该口径在赛季级阶梯里的档数
+    const knightTiers = ladder.filter((r) => r.label === '骑士星数');
+    const kingTiers = ladder.filter((r) => r.label === '王棋星数');
+    expect((peak.levels ?? []).filter((l) => l.kind === 'knight')
+      .flatMap((l) => l.star_rewards!)).toHaveLength(knightTiers.length);
+    expect(king.star_rewards!).toHaveLength(kingTiers.length);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -1403,7 +1430,7 @@ test.describe('布局验收：终局合并单页', () => {
     // 污染等级只出现在被污染的那一关、且只挂到被污染的敌方身上（面板级徽标与赛季级区块均已退场，用户裁决）
     const pollLevel = (peak.levels ?? []).find((l) => l.invasion);
     expect(pollLevel?.name, '当期应有受污染的单关').toBeTruthy();
-    await page.locator('#egd-level-tabs [role="tab"]', { hasText: pollLevel!.name! }).click();
+    await page.locator(peakTabId(pollLevel!)).click();
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__head .nk-egd-pollchip')).toHaveCount(0);
     const peakLevelInv = pollLevel!.invasion!;
     const peakLevelPolled = pollutedMonsters(peakLevelInv, pollLevel!.monsters);
@@ -1418,21 +1445,25 @@ test.describe('布局验收：终局合并单页', () => {
     // 王棋关的层级增益：增益名与描述同渲染位，标签仍不出现（ADR 0033 决策 8）
     const king = (peak.levels ?? []).find((l) => l.kind === 'king');
     expect(king?.buffs?.length, '王棋关应带裁决象限增益').toBeGreaterThan(0);
-    await page.locator('#egd-level-tabs [role="tab"]', { hasText: king!.name! }).click();
+    await page.locator(peakTabId(king!)).click();
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__buffname')).toHaveText(king!.buffs!.map((b) => b.name));
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__bufflabel')).toHaveCount(0);
-    // 单关与绝境变体的敌方走同一套敌方详情卡（与末日幻影层看板同源 `StageContent`）：
-    // 召唤物挂在召唤者卡内，条数由该关数据派生
+    // 单关与「绝境」变体各自是一档，两档的敌方都走同一套敌方详情卡（与末日幻影层看板同源 `StageContent`）：
+    // 召唤物挂在召唤者卡内，条数由**该档**数据派生（档间不串：变体档不再复述主关敌方）
     const peakSummons = (peak.levels ?? []).flatMap(
       (l) => [...summonsOf(l.monsters), ...summonsOf(l.hard?.monsters)],
     );
     expect(peakSummons.length, '异相仲裁应有带召唤物的单关').toBeGreaterThan(0);
     for (const lv of peak.levels ?? []) {
-      await page.locator('#egd-level-tabs [role="tab"]', { hasText: lv.name! }).click();
+      await page.locator(peakTabId(lv)).click();
       await expect(page.locator('.nk-egd-peak .nk-egd-mon .nk-egd-summon'))
-        .toHaveCount(summonsOf(lv.monsters).length + summonsOf(lv.hard?.monsters).length);
+        .toHaveCount(summonsOf(lv.monsters).length);
     }
-    await page.locator('#egd-level-tabs [role="tab"]', { hasText: (peak.levels ?? [])[0].name! }).click();
+    const kingHard = king!.hard!;
+    await page.locator(peakHardTabId(king!)).click();
+    await expect(page.locator('.nk-egd-peak .nk-egd-mon .nk-egd-summon'))
+      .toHaveCount(summonsOf(kingHard.monsters).length);
+    await page.locator(peakTabId((peak.levels ?? [])[0])).click();
     await expect(page.locator('.nk-egd-peak .nk-egd-summons__label').first()).toHaveText('召唤物');
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__row--summons')).toHaveCount(0);
     // 敌方详情卡的图标格与卡片表格分离：旧图标格形态（圆形小图标 + 格内召唤物）已整批退场

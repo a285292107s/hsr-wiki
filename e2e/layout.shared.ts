@@ -87,7 +87,8 @@ export interface MonsterLike {
   debuff_resist?: { key: string; value: number; icon: string }[];
   /** 以下四项只随「全字段」形态出现（末日幻影楼层 / 星启节点 / 异相仲裁单关的敌方详情卡） */
   intro?: string;
-  skills?: { name: string; tag?: string }[];
+  /** 技能：名称 + 标签 + 战斗阶段门控（`phase_list`，阶段号从 1 起；空表不落键） */
+  skills?: { name: string; tag?: string; phase_list?: number[] }[];
   weak?: string[];
   resist?: Record<string, number>;
   rank?: string;
@@ -147,7 +148,17 @@ export interface SeasonLike {
     monsters?: MonsterLike[];
     buffs?: { id: number; name: string }[];
     invasion?: InvasionLike;
-    hard?: { name?: string; level?: number; monsters?: MonsterLike[]; targets?: { param: number | null }[] };
+    /** 该关可达的星级奖励档（两类口径各自按关卡序累计目标数切片，ADR 0051 补记） */
+    star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
+    hard?: {
+      name?: string;
+      level?: number;
+      monsters?: MonsterLike[];
+      targets?: { param: number | null }[];
+      tags?: string[];
+      /** 绝境档的星数档（王棋口径最高档 3★，官方「视同 3 星通关全部骑士关卡」） */
+      star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
+    };
   }[];
   buffs?: { name: string }[];
   pollution?: { count: number; levels: number[] };
@@ -199,10 +210,18 @@ export function seasonTabLabels(season: SeasonLike): string[] {
   return season.tierce ? ['星启模式', ...floors] : floors;
 }
 
-/** 异相仲裁单关 tab 文案：官方关卡名、**倒序**（将杀王棋 → 骑士（三）…（一），与 `buildLevelTabs` 同口径） */
+/** 异相仲裁关卡 tab 文案：官方关卡名、**倒序**（将杀王棋 → 骑士（三）…（一））；
+ *  王棋「绝境」变体紧跟其主关之后独立成一档（与 `buildLevelTabs` 同口径）。 */
 export function peakTabLabels(season: SeasonLike): string[] {
-  return [...(season.levels ?? [])].reverse().map((l) => l.name ?? '');
+  return [...(season.levels ?? [])].reverse().flatMap((l) => (l.hard
+    ? [l.name ?? '', l.hard.name ?? '']
+    : [l.name ?? '']));
 }
+
+/** 关卡 tab 的 DOM id 选择器（**变体名包含主关名时按文案取会命中两个 tab**，故一律按 id 定位） */
+export const peakTabId = (level: { id?: number }): string => `#egd-level-tab-peak-${level.id}`;
+/** 王棋「绝境」变体 tab 的 DOM id 选择器 */
+export const peakHardTabId = (level: { id?: number }): string => `#egd-level-tab-peak-${level.id}-hard`;
 
 /** 「N 波 · M 敌」摘要（与 `src/app/endgame/renders.ts → monCountLabel` 同口径：波数 = wave 去重计数） */
 export function monCountLabel(mons: MonsterLike[] | undefined): string {

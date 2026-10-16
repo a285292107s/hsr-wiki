@@ -18,11 +18,6 @@
 }
 .nk-egd-floor__row--mons > .nk-egd-floor__monswrap { flex: 1 1 100%; width: 100%; min-width: 0; }
 .nk-egd-floor__wave > .nk-egd-mons { flex: 1 1 auto; min-width: 0; }
-.nk-egd-floor__hard .nk-egd-floor__row {
-  margin: 0;
-  padding: 8px 0;
-  border-bottom: none;
-}
 .nk-egd-floor__label {
   flex-shrink: 0;
   min-width: 4.8em;
@@ -99,38 +94,6 @@
 }
 .nk-egd-floor__buffdesc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-floor__buffdesc .nowrap { white-space: nowrap; }
-.nk-egd-floor__targets {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: var(--nk-prose-max);
-}
-/* 各档是同级条目（序号 + 同一句式），靠行距分行——与星启头部同一判据，不画装饰性分隔线 */
-.nk-egd-floor__target {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 4px 0;
-}
-.nk-egd-floor__targetidx {
-  flex-shrink: 0;
-  font-family: var(--font-hud);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--eg-color) 74%, var(--text3));
-  padding-top: 2px;
-  white-space: nowrap;
-}
-.nk-egd-floor__targettext {
-  font-size: 0.84rem;
-  line-height: 1.78;
-  color: var(--text2);
-}
-.nk-egd-floor__targettext .hl { color: var(--highlight); font-weight: 700; }
-
 .nk-egd-peak__kind {
   flex-shrink: 0;
   font-size: 0.66rem;
@@ -183,29 +146,6 @@
   flex-direction: column;
   gap: 0;
 }
-/* 缩进几何取自 .nk-egd-children（父子层级刻度，ADR 0028）；层级竖轨已整条退场，只剩缩进与上边线 */
-.nk-egd-floor__hard {
-  position: relative;
-  margin-top: 18px;
-  padding: 16px 0 2px var(--eg-indent);
-  border-top: 1px solid var(--line-2);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.nk-egd-floor__hardhead {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding-left: 0;
-}
-.nk-egd-floor__hardname {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--text-bright);
-}
-.nk-egd-floor__hard .nk-egd-floor__targets { margin-top: 0; }
 
 .nk-egd-mons {
   display: grid;
@@ -395,6 +335,28 @@
   gap: 6px;
   padding-top: 12px;
   border-top: 1px solid var(--line-1);
+}
+/* 技能分组（`phase_list` 跨 ≥2 个阶段时才有阶段号，见 EnemyCard 的 skillGroups）：
+   平铺形态下小组对布局透明（`display: contents`）⇒ 与分组前的 DOM 渲染完全一致；
+   分组形态外层转纵向列，每组一行「阶段 N + 该阶段技能 chips」。 */
+.nk-egd-mon__skillgroup { display: contents; }
+.nk-egd-mon__skills--grouped {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.nk-egd-mon__skills--grouped .nk-egd-mon__skillgroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+}
+/* 阶段号标签：与卡内其它行首标签同族（小字 + 字距 + text3），不占固定宽（它比「弱点」长） */
+.nk-egd-mon__skillphase {
+  flex-shrink: 0;
+  letter-spacing: 0.05em;
+  color: var(--text3);
+  white-space: nowrap;
 }
 .nk-egd-mon__skill {
   display: inline-flex;

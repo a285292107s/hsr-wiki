@@ -79,6 +79,10 @@
   color: var(--text3);
   white-space: nowrap;
 }
+/* 单关面板（异相仲裁）的头部奖励板：另外三模式的奖励板都是 `.nk-egd-lvl` / `.nk-egd-tierce`
+   的 flex 列子项（块间留白由父级 gap 承担），单关面板体是普通块级流，故这里自带下外边距。 */
+.nk-egd-peak__body > .nk-egd-head { margin-bottom: 18px; }
+
 /* 星级奖励列表（ADR 0051 补记四）：一档一行 = 档位徽章 + 该档条件（逐目标一行）+ 该档奖励 chips。
    窄屏奖励落到条件之下（同列起排），桌面端三列一行、奖励右对齐。 */
 /* 星级奖励列表跨满整行（一档一行要横向空间：条件在左、该档奖励右对齐）
@@ -287,41 +291,6 @@
   color: var(--eg-color);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
-}
-
-/* ─── 赛季级「星数奖励」阶梯（ADR 0051）：关卡面板之后的赛季附录 ─── */
-.nk-egd-starrewards {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line-1);
-}
-.nk-egd-starrewards__head {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.nk-egd-starrewards__title {
-  margin: 0;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--text-bright);
-}
-.nk-egd-starrewards__note { color: var(--text3); }
-.nk-egd-starrewards__group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-/* 赛季级头部位置（异相仲裁）：上无内容故不画分节线，与子 tab 行之间留出节奏 */
-.nk-egd-starrewards--head {
-  margin-top: 0;
-  margin-bottom: 20px;
-  padding-top: 0;
-  border-top: 0;
 }
 
 .nk-egd-nav {

@@ -75,6 +75,9 @@ export interface MonsterSkillDetail {
   desc?: string;
   /** 占位符替换参数 */
   param_list?: number[];
+  /** 战斗阶段门控（`MonsterSkillConfig.PhaseList`，阶段号从 1 起）：该技能在哪些阶段可用。
+   *  空表（无阶段门控）不落键；首领机制的阶段**文案**另走 `guide_phases`。 */
+  phase_list?: number[];
   /** 附带效果（有值才落键；实测覆盖 215/632 个目录模板） */
   extra_effects?: MonsterExtraEffect[];
 }

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import {
-  buildLevelTabs, defaultLevelKey, levelTabFloor, levelTabPeak,
+  buildLevelTabs, defaultLevelKey, levelTabFloor, levelTabPeak, parsePeakKey,
 } from '../levels';
 import type { MazeListEntry } from '../../../services/types';
 
@@ -35,21 +35,37 @@ describe('buildLevelTabs 关卡子 tab 清单', () => {
     ]);
   });
 
-  it('异相仲裁：3 骑士试炼 + 1 王棋最终关，tab 名即官方关卡名、倒序（王棋在最前）', () => {
+  it('异相仲裁：3 骑士试炼 + 1 王棋最终关，tab 名即官方关卡名、倒序（王棋在最前）；绝境变体紧跟其主关之后', () => {
     const peak = {
       id: '9', zh: '军团再临',
       levels: [
         { id: 901, kind: 'knight', name: '骑士（一）' },
         { id: 902, kind: 'knight', name: '骑士（二）' },
         { id: 903, kind: 'knight', name: '骑士（三）' },
-        { id: 904, kind: 'king', name: '将杀王棋' },
+        { id: 904, kind: 'king', name: '将杀王棋', hard: { name: '将杀王棋•绝境' } },
       ],
     } as MazeListEntry;
     expect(buildLevelTabs(peak).map((t) => [t.key, t.kind, t.label, t.peakId])).toEqual([
       ['peak-904', 'peak', '将杀王棋', 904],
+      ['peak-904-hard', 'peak', '将杀王棋•绝境', 904],
       ['peak-903', 'peak', '骑士（三）', 903],
       ['peak-902', 'peak', '骑士（二）', 902],
       ['peak-901', 'peak', '骑士（一）', 901],
+    ]);
+  });
+
+  it('绝境变体只在主关带 hard 时出现；hard 缺名时回退词典的「绝境」', () => {
+    const peak = {
+      id: '9', zh: '军团再临',
+      levels: [
+        { id: 901, kind: 'knight', name: '骑士（一）' },
+        { id: 904, kind: 'king', name: '将杀王棋', hard: {} },
+      ],
+    } as MazeListEntry;
+    expect(buildLevelTabs(peak).map((t) => [t.key, t.label])).toEqual([
+      ['peak-904', '将杀王棋'],
+      ['peak-904-hard', '绝境'],
+      ['peak-901', '骑士（一）'],
     ]);
   });
 
@@ -111,5 +127,29 @@ describe('levelTabPeak 子 tab → 异相仲裁单关', () => {
     expect(levelTabPeak(data, 'floor-1')).toBeNull();
     expect(levelTabPeak(data, 'peak-999')).toBeNull();
     expect(levelTabPeak(null, 'peak-901')).toBeNull();
+  });
+
+  it('绝境变体 key 解析回主关（变体的推荐属性与增益都挂在主关上）', () => {
+    expect(levelTabPeak(data, 'peak-904-hard')?.id).toBe(904);
+    expect(levelTabPeak(data, 'peak-904-hard')?.name).toBe('将杀王棋');
+    expect(levelTabPeak(data, 'peak-999-hard')).toBeNull();
+  });
+});
+
+describe('parsePeakKey 单关 key → 关卡 ID + 变体标记', () => {
+  it('主关与变体共用关卡 ID，靠 -hard 后缀区分；非单关 key 返回 null', () => {
+    expect(parsePeakKey('peak-904')).toEqual({ id: 904, hard: false });
+    expect(parsePeakKey('peak-904-hard')).toEqual({ id: 904, hard: true });
+    expect(parsePeakKey('peak-101-hard')).toEqual({ id: 101, hard: true });
+    expect(parsePeakKey('floor-4')).toBeNull();
+    expect(parsePeakKey('tierce')).toBeNull();
+    expect(parsePeakKey('peak-abc')).toBeNull();
+  });
+
+  it('形态不完整一律返回 null（不得静默落到关卡 0）', () => {
+    expect(parsePeakKey('peak-')).toBeNull();
+    expect(parsePeakKey('peak--hard')).toBeNull();
+    expect(parsePeakKey('peak-904-hardx')).toBeNull();
+    expect(parsePeakKey('peak-904-')).toBeNull();
   });
 });

@@ -291,6 +291,11 @@ def load_monsters() -> dict[int, dict]:
             "attack_type": r.get("AttackType", "") or "",
             "desc": resolve_text(r.get("SkillDesc", {}), clean=False),
             "param_list": [unwrap_value(p) for p in (r.get("ParamList") or [])],
+            # 战斗阶段门控（`MonsterSkillConfig.PhaseList`，阶段号从 1 起）：该技能在哪些阶段可用。
+            # 上游按阶段切换技能表（同族里「阶段 3 专属」的技能只挂后段），这是站内唯一有来源的
+            # 「阶段」结构——首领机制的阶段**文案**另走 `MonsterGuideConfig`（未登记的首领没有，
+            # 见 docs/memory/data-pipeline.md）。空表 = 无阶段门控，按「缺位不落键」不输出。
+            **({"phase_list": [int(p) for p in r["PhaseList"]]} if r.get("PhaseList") else {}),
         }
     cfg_by_id = {r.get("MonsterID"): r for r in configs}
     cfg_by_tpl = {r.get("MonsterTemplateID"): r for r in configs}

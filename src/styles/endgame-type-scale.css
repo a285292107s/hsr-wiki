@@ -27,10 +27,10 @@
 .nk-egd-reward__goal { font-size: 0.84rem; }
 
 .nk-egd-floor__label,
-.nk-egd-floor__targetidx,
 .nk-egd-fury__label,
 .nk-egd-mon__label,
 .nk-egd-summons__label,
+.nk-egd-mon__skillphase,
 .nk-egd-guide__label,
 .nk-egd-phase__label,
 .nk-egd-head__label { font-size: 0.72rem; }
@@ -56,10 +56,8 @@
 .nk-egd-mon__hp-val { font-size: 0.86rem; }
 .nk-egd-mon__hp-label { font-size: 0.62rem; }
 
-/* 赛季级「星数奖励」阶梯（ADR 0051）：区块标题走区块标题档，注记与星标走标签档；
-   层 / 星启板的「星级奖励列表」档位徽章同档 */
-.nk-egd-starrewards__title { font-size: 0.78rem; }
-.nk-egd-starrewards__note,
+/* 层 / 星启 / 单关三处奖励板的「星级奖励列表」档位徽章与星标同走标签档
+    （赛季级「星数奖励」阶梯已退场，见 ADR 0051 补记） */
 .nk-egd-reward__star,
 .nk-egd-tier__badge { font-size: 0.72rem; }
 
@@ -79,7 +77,6 @@
 .nk-egd-mon__rows { gap: 8px; }
 
 @media (max-width: 767px) {
-  .nk-egd-floor__targetidx { font-size: 0.78rem; }
   /* Hero 阵营行「玩法名 · EN」+ 攻略入口在手机档吃满一行：0.78rem 在 320 档把 EN 顶到次行
      成孤词，降到标签档（与断点块的 0.1em 字距配套，最窄档实测一行放得下）。 */
   .nk-egd-hero__camp { font-size: 0.72rem; }
@@ -90,7 +87,8 @@
   .nk-egd-mon__resval,
   .nk-egd-mon__skill { font-size: 0.7rem; }
   .nk-egd-mon__label,
-  .nk-egd-summons__label { font-size: 0.72rem; }
+  .nk-egd-summons__label,
+  .nk-egd-mon__skillphase { font-size: 0.72rem; }
   .nk-egd-node__text { font-size: 0.9rem; }
   .nk-egd-head__label { font-size: 0.72rem; }
   .nk-egd-reward__goal { font-size: 0.84rem; }

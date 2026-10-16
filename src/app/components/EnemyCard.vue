@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import EndgameSummons from '../endgame/EndgameSummons.vue';
 import { elemLabel } from '../../lib/enum-labels';
 import EndgameBossGuide from '../endgame/EndgameBossGuide.vue';
@@ -13,6 +14,9 @@ import { translate } from '../i18n';
 
 /** 模板与脚本统一走词典 */
 const t = translate;
+
+/** 技能条目（`MazeMonsterInfo.skills` 的元素形态，带上游的战斗阶段门控） */
+type MonsterSkill = NonNullable<MazeMonsterInfo['skills']>[number];
 const props = defineProps<{
   monster: MazeMonsterInfo;
   /** 该敌方**实例**受「贪饕」污染时的污染等级（同场次 InvasionID，1–3）；未受污染不传。
@@ -78,6 +82,33 @@ function monTitle(m: MazeMonsterInfo): string {
   if (rs) parts.push(t('card.resist', { list: rs }));
   return parts.join(' · ');
 }
+
+/** 技能的战斗阶段（`phase_list`，阶段号从 1 起）：只认正数——上游有 1 条记为 `[0]`，
+ *  是外键哨兵不是阶段（会给它渲染出「阶段 0」）。空表 = 该技能无阶段门控。 */
+function skillPhases(list?: number[]): number[] {
+  return (list || []).filter((p) => p > 0);
+}
+
+/** 技能按时段分组：**只在真的跨 ≥2 个阶段时**拆行——实测 2289/2632 条怪物的技能只吃阶段 1，
+ *  给它们加一个「阶段 1」小标题是空话（同「1 目标 1 档不逐目标标星」的判据）。
+ *  **每行 = 该阶段可用技能的全集**（`PhaseList` 的字面含义）⇒ 全阶段技能会在多行各出现一次，
+ *  这是刻意的：玩家要的是「进入阶段 N 会面对哪些技能」，少列会低估该阶段的威胁。
+ *  无阶段门控的技能（空表 / 哨兵 0）恒落在 `phase: null` 的尾组，不因分组而消失。 */
+const skillGroups = computed<{ phase: number | null; skills: MonsterSkill[] }[]>(() => {
+  const skills = props.monster.skills || [];
+  const phases = [...new Set(skills.flatMap((s) => skillPhases(s.phase_list)))]
+    .sort((a, b) => a - b);
+  if (phases.length < 2) return [{ phase: null, skills }];
+  const groups: { phase: number | null; skills: MonsterSkill[] }[] = phases.map((p) => ({
+    phase: p,
+    skills: skills.filter((s) => skillPhases(s.phase_list).includes(p)),
+  }));
+  const rest = skills.filter((s) => !skillPhases(s.phase_list).length);
+  if (rest.length) groups.push({ phase: null, skills: rest });
+  return groups;
+});
+/** 是否走分组形态（任一组带阶段号）；否则保持原来的平铺 chip 行 */
+const skillsGrouped = computed(() => skillGroups.value.some((g) => g.phase !== null));
 </script>
 
 <template>
@@ -139,8 +170,22 @@ function monTitle(m: MazeMonsterInfo): string {
         </div>
       </div>
       <EndgameBossGuide v-if="guide" :guide="guide" />
-      <div v-if="monster.skills?.length" class="nk-egd-mon__skills">
-        <span v-for="s in monster.skills" :key="s.name" class="nk-egd-mon__skill" :title="s.tag ? `${s.name} · ${s.tag}` : s.name">{{ s.name }}</span>
+      <div
+        v-if="monster.skills?.length"
+        class="nk-egd-mon__skills"
+        :class="{ 'nk-egd-mon__skills--grouped': skillsGrouped }"
+      >
+        <!-- 跨 ≥2 个阶段时逐阶段拆行（阶段号文案取词典 `mob.stage`，与图鉴页阶段机制同键）；
+             其余情况只有一个无名组，`display: contents` 让它对布局透明 ⇒ 与原来的平铺完全一致 -->
+        <div v-for="g in skillGroups" :key="g.phase ?? 'rest'" class="nk-egd-mon__skillgroup">
+          <span v-if="g.phase !== null" class="nk-egd-mon__skillphase">{{ t('mob.stage', { n: g.phase }) }}</span>
+          <span
+            v-for="s in g.skills"
+            :key="s.name"
+            class="nk-egd-mon__skill"
+            :title="s.tag ? `${s.name} · ${s.tag}` : s.name"
+          >{{ s.name }}</span>
+        </div>
       </div>
       <EndgameSummons :items="monster.summons || []" />
     </div>

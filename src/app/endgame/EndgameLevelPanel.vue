@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import EndgameFloor from './EndgameFloor.vue';
 import EndgameTierce from './EndgameTierce.vue';
 import EndgamePeak from './EndgamePeak.vue';
-import { levelTabFloor, levelTabPeak, type LevelTab } from './levels';
+import { levelTabFloor, levelTabPeak, parsePeakKey, type LevelTab } from './levels';
 import type { MazeListEntry } from '../../services/types';
 
 const props = defineProps<{
@@ -24,6 +24,10 @@ const activeFloor = computed(
 const activePeak = computed(
   () => (activeTab.value?.kind === 'peak' ? levelTabPeak(props.data, activeTab.value.key) : null),
 );
+/** 当前 peak tab 是否为王棋「绝境」变体（`peak-<id>-hard`） */
+const activePeakHard = computed(
+  () => (activeTab.value?.kind === 'peak' ? !!parsePeakKey(activeTab.value.key)?.hard : false),
+);
 </script>
 
 <template>
@@ -35,6 +39,11 @@ const activePeak = computed(
   >
     <EndgameFloor v-if="activeFloor" :data="data" :floor="activeFloor" :system-name="props.systemName" />
     <EndgameTierce v-else-if="activeTab?.kind === 'tierce'" :data="data" :system-name="props.systemName" />
-    <EndgamePeak v-else-if="activePeak" :level="activePeak" :system-name="props.systemName" />
+    <EndgamePeak
+      v-else-if="activePeak"
+      :level="activePeak"
+      :hard="activePeakHard"
+      :system-name="props.systemName"
+    />
   </div>
 </template>

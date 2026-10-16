@@ -90,8 +90,8 @@ export interface MazeMonsterInfo {
   camp?: string;
   /** 图鉴介绍（MonsterConfig.MonsterIntroduction，含 \n 换行） */
   intro?: string;
-  /** 技能列表（MonsterConfig.SkillList → MonsterSkillConfig，名称 + 标签） */
-  skills?: { name: string; tag?: string }[];
+  /** 技能列表（MonsterConfig.SkillList → MonsterSkillConfig，名称 + 标签 + 战斗阶段门控） */
+  skills?: { name: string; tag?: string; phase_list?: number[] }[];
   /** 韧性值（`StanceBase` **+ 该实例的 `StanceModifyValue`**，如 300 − 120 = 180；模板缺失时不输出）。
    *  韧性不入等级曲线链，故只有「基准 + 修正」；修正值在转换期并入（ADR 0045） */
   stance?: number;
@@ -250,6 +250,9 @@ export interface PeakLevelInfo {
   buffs?: MazeBuffInfo[];
   /** 污染等级（异相仲裁无层/半场，污染直接落在单关上；见 MazeStageInvasion） */
   invasion?: MazeStageInvasion;
+  /** 该关可达的星级奖励档（两类口径各自按关卡序累计目标数切片：骑士关吃骑士星数、
+   *  王棋关吃王棋星数；见 MazeStarReward / ADR 0051 补记） */
+  star_rewards?: MazeStarReward[];
   /** 王棋•绝境变体（仅 king） */
   hard?: {
     name?: string;
@@ -257,6 +260,9 @@ export interface PeakLevelInfo {
     monsters?: MazeMonsterInfo[];
     targets?: MazeTargetInfo[];
     tags?: string[];
+    /** 绝境档自己的星数档：官方「直接击败绝境难度王棋关卡视同 3 星通关全部骑士关卡」，
+     *  故取王棋口径最高档（3★），与它自己那 1 个目标配成一行 */
+    star_rewards?: MazeStarReward[];
   };
 }
 

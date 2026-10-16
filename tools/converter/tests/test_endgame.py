@@ -795,9 +795,106 @@ class TestRewards:
         items = {100: [{"id": 1, "num": 60}], 200: [{"id": 226001, "num": 1}],
                  300: [{"id": 263, "num": 100}]}
         assert eg._load_peak_star_rewards(items) == {
-            1: [{"label": "王棋星数", "star": 1, "items": [{"id": 226001, "num": 1}]},
-                {"label": "骑士星数", "star": 3, "items": [{"id": 1, "num": 60}]}],
+            1: [{"kind": "king", "label": "王棋星数", "star": 1,
+                 "items": [{"id": 226001, "num": 1}]},
+                {"kind": "knight", "label": "骑士星数", "star": 3,
+                 "items": [{"id": 1, "num": 60}]}],
         }
+
+    def test_slice_peak_star_tiers_accumulates_by_level_order(self):
+        """单关切片按**关卡序累计目标数**：3 目标 3 星 → 3★/6★/9★ 各落一关。"""
+        ladder = [{"kind": "knight", "label": "骑士星数", "star": s,
+                   "items": [{"id": 1, "num": s}]} for s in (3, 6, 9)]
+        stars_used = 0
+        picked = []
+        for _ in range(3):
+            tier, stars_used = eg._slice_peak_star_tiers(ladder, stars_used, 3)
+            picked.append([t["star"] for t in tier])
+        assert picked == [[3], [6], [9]]
+        # 档位行不带口径 `kind`（它只在转换期分派用）
+        tier, _ = eg._slice_peak_star_tiers(ladder, 0, 3)
+        assert tier == [{"label": "骑士星数", "star": 3, "items": [{"id": 1, "num": 3}]}]
+
+    def test_peak_seasons_slices_star_tiers_per_level_and_口径(self, monkeypatch, setup_textmap):
+        """单关星数档按**口径 × 关卡序**切片：骑士星数归骑士关、王棋星数归王棋关，
+        绝境档取王棋口径最高档；**两端产物都不带内部口径键 `kind`**。"""
+        import textmap
+        import enum_labels
+        monkeypatch.setattr(textmap, "_text_map", {
+            enum_labels.textmap_key("ui_label", "peakStarKnight"): "骑士星数",
+            enum_labels.textmap_key("ui_label", "peakStarKing"): "王棋星数",
+        })
+
+        def fake_load(path):
+            name = str(path)
+            if name.endswith("ChallengePeakGroupConfig.json"):
+                return [{"ID": 1, "Title": {"Hash": 1}, "RewardGroupID": 7,
+                         "PreLevelIDList": [101, 102, 103], "BossLevelID": 104}]
+            if name.endswith("ChallengePeakConfig.json"):
+                # 骑士关目标数 2/1/0；王棋关 2 → 切片边界跨档
+                return [
+                    {"ID": 101, "Title": {"Hash": 10}, "DamageType": [],
+                     "EventIDList": [], "NormalTargetList": [3001, 3000], "TagList": []},
+                    {"ID": 102, "Title": {"Hash": 11}, "DamageType": [],
+                     "EventIDList": [], "NormalTargetList": [3001], "TagList": []},
+                    {"ID": 103, "Title": {"Hash": 12}, "DamageType": [],
+                     "EventIDList": [], "NormalTargetList": [], "TagList": []},
+                    {"ID": 104, "Title": {"Hash": 13}, "DamageType": [],
+                     "EventIDList": [], "NormalTargetList": [3003, 3004], "TagList": []},
+                ]
+            if name.endswith("ChallengePeakBossConfig.json"):
+                return [{"ID": 104, "HardTitle": {"Hash": 2}, "BuffList": [],
+                         "HardTarget": 3007, "HardEventIDList": [], "HardTagList": []}]
+            if name.endswith("BattleTargetConfig.json"):
+                return [
+                    {"ID": 3000, "Type": "ChallengeTarget", "TargetName": {"Hash": 3}},
+                    {"ID": 3001, "Type": "ChallengeTarget", "TargetName": {"Hash": 4}},
+                    {"ID": 3003, "Type": "ChallengeTarget", "TargetName": {"Hash": 5}},
+                    {"ID": 3004, "Type": "ChallengeTarget", "TargetName": {"Hash": 7}},
+                    {"ID": 3007, "Type": "ChallengeTarget", "TargetName": {"Hash": 6}},
+                ]
+            if name.endswith("RewardData.json"):
+                return [{"RewardID": r, "ItemID_1": 263, "Count_1": r} for r in (11, 12, 13, 21, 22)]
+            if name.endswith("ChallengePeakReward.json"):
+                return [
+                    # 通关档不上屏（无官方文案）
+                    {"RewardGroupID": 7, "RewardType": "MOB_PASS_REWARD",
+                     "TypeValue": 1, "RewardID": 11},
+                    {"RewardGroupID": 7, "RewardType": "MOB_STAR_REWARD",
+                     "TypeValue": 1, "RewardID": 11},
+                    {"RewardGroupID": 7, "RewardType": "MOB_STAR_REWARD",
+                     "TypeValue": 3, "RewardID": 12},
+                    {"RewardGroupID": 7, "RewardType": "MOB_STAR_REWARD",
+                     "TypeValue": 5, "RewardID": 13},
+                    {"RewardGroupID": 7, "RewardType": "BOSS_STAR_REWARD",
+                     "TypeValue": 1, "RewardID": 21},
+                    {"RewardGroupID": 7, "RewardType": "BOSS_STAR_REWARD",
+                     "TypeValue": 3, "RewardID": 22},
+                ]
+            return []
+
+        monkeypatch.setattr(eg, "load_json", fake_load)
+        import converters.monster_common as mc
+        monkeypatch.setattr(mc, "load_json", fake_load)
+        entry = eg._peak_seasons()["1"]
+        k1, k2, k3, king = entry["levels"]
+
+        # 骑士关逐关累计：2 目标 → 1★ 档（累计 2）；再 1 目标 → 3★ 档（累计 3）；0 目标 → 无
+        assert [t["star"] for t in k1["star_rewards"]] == [1]
+        assert [t["star"] for t in k2["star_rewards"]] == [3]
+        assert "star_rewards" not in k3, "无目标 ⇒ 吃不到任何档，不落键"
+        assert {t["label"] for t in k1["star_rewards"]} == {"骑士星数"}
+        # 王棋关吃王棋口径：2 目标 → 1★（累计 2 内），5★ 档超出故不落
+        assert [t["star"] for t in king["star_rewards"]] == [1]
+        assert {t["label"] for t in king["star_rewards"]} == {"王棋星数"}
+        # 绝境变体取王棋口径**最高档**（官方「视同 3 星通关全部骑士关卡」）
+        assert [t["star"] for t in king["hard"]["star_rewards"]] == [3]
+        # 内部口径键 `kind` 不得进产物（赛季级与单关两处都不落）
+        for row in entry["star_rewards"]:
+            assert "kind" not in row
+        for lv in entry["levels"]:
+            for row in (lv.get("star_rewards") or []) + (lv.get("hard", {}).get("star_rewards") or []):
+                assert "kind" not in row, "口径只在转换期分派用，不进产物"
 
     def test_season_floors_attaches_floor_reward(self):
         """层记录的 RewardID 命中时落 `reward`；未命中不落键。"""
@@ -1044,6 +1141,21 @@ class TestPeakSeasons:
         light = eg._peak_level_node(rec, stages, monsters, {}, {}, "knight", None, None)
         assert "intro" not in light["monsters"][0]
         assert "skills" not in light["monsters"][0]
+
+    def test_monster_out_skill_keeps_phase_list(self):
+        """卡面技能带战斗阶段门控（`phase_list`）；无阶段门控的技能不落该键。"""
+        monsters = {403501001: {
+            "name": "反造物主", "icon": "I", "skills": [
+                {"name": "阶段1专有", "tag": "技标", "phase_list": [1]},
+                {"name": "末阶段", "tag": "技标", "phase_list": [2, 3]},
+                {"name": "无门控", "tag": "技标"},
+            ]}}
+        out = eg._monster_out(403501001, monsters, full=True)
+        assert out["skills"] == [
+            {"name": "阶段1专有", "tag": "技标", "phase_list": [1]},
+            {"name": "末阶段", "tag": "技标", "phase_list": [2, 3]},
+            {"name": "无门控", "tag": "技标"},
+        ]
 
     def test_lean_monster_strips_wave_and_full_fields(self):
         """期级合并列表用轻形态：wave / intro / skills 都不进（只服务目录卡与 AI 快照；
