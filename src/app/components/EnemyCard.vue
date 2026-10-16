@@ -109,6 +109,19 @@ const skillGroups = computed<{ phase: number | null; skills: MonsterSkill[] }[]>
 });
 /** 是否走分组形态（任一组带阶段号）；否则保持原来的平铺 chip 行 */
 const skillsGrouped = computed(() => skillGroups.value.some((g) => g.phase !== null));
+
+/** 立绘下的生命值行（ADR 0055 / 0058）：逐阶段值齐备时**一阶段一行**，否则退回单值一行。
+ *  两键并存时逐阶段优先——`hp` 只是阶段 1 的同值冗余（`PhaseMaxHPRatio` 阶段间可不等）。
+ *  标签走词典：单值「HP」，逐阶段「阶段 N」（与技能分组同键，读者不必学两套说法）。 */
+const hpRows = computed<{ label: string; value: number }[]>(() => {
+  const phases = props.monster.phase_hp;
+  if (phases?.length) {
+    return phases.map((v, i) => ({ label: t('mob.stage', { n: i + 1 }), value: v }));
+  }
+  return props.monster.hp != null
+    ? [{ label: t('catalog.sig.hp'), value: props.monster.hp }]
+    : [];
+});
 </script>
 
 <template>
@@ -133,11 +146,20 @@ const skillsGrouped = computed(() => skillGroups.value.some((g) => g.phase !== n
           @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
         >
       </router-link>
-      <!-- 关卡内 HP：转换器已按该关卡的等级 / 难度组 / 精英组算好单值（ADR 0055），
-           前端只按站点语言选数制呈现；缺键（无等级语境）即不显示，不显示 0 -->
-      <span v-if="monster.hp != null" class="nk-egd-mon__hp">
-        <span class="nk-egd-mon__hp-label">{{ t('catalog.sig.hp') }}</span>
-        <span class="nk-egd-mon__hp-val">{{ fmtBigNumber(monster.hp) }}</span>
+      <!-- 关卡内 HP：转换器已按该关卡的等级 / 难度组 / 精英组算好数值（ADR 0055），
+           前端只按站点语言选数制呈现；缺数据即整块不显示，不显示 0。
+           跨 ≥2 战斗阶段的敌方为**一阶段一行**（ADR 0058）——上游 `PhaseMaxHPRatio` 是
+           「该阶段最大生命 = 基准 × 比例」，阶段之间可以不同（实测 1 / 1.25 / 1），
+           只出首阶段的数会把后面阶段的血量说少；下标 +1 即阶段号（转换器已保证 1..n 连续）。 -->
+      <span
+        v-if="hpRows.length"
+        class="nk-egd-mon__hp"
+        :class="{ 'nk-egd-mon__hp--phases': hpRows.length > 1 }"
+      >
+        <span v-for="r in hpRows" :key="r.label" class="nk-egd-mon__hprow">
+          <span class="nk-egd-mon__hp-label">{{ r.label }}</span>
+          <span class="nk-egd-mon__hp-val">{{ fmtBigNumber(r.value) }}</span>
+        </span>
       </span>
       <span v-if="polluted" class="nk-egd-pollchip" :data-level="polluted">{{ pollutionLabel({ level: polluted }) }}</span>
     </div>

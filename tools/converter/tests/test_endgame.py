@@ -1672,8 +1672,9 @@ class TestSummons:
 
 
 class TestEnemyCardHp:
-    """敌方卡的关卡内 HP（ADR 0055）：语境取自**该敌方所属的关卡行**，缺语境不落键，
-    落盘的是单值（合成链输入不外泄，前端零合成逻辑——与 ADR 0045 的 stance/speed 同一取舍）。"""
+    """敌方卡的关卡内 HP（ADR 0055 / 0058）：语境取自**该敌方所属的关卡行**，缺语境不落键，
+    落盘的是单值（合成链输入不外泄，前端零合成逻辑——与 ADR 0045 的 stance/speed 同一取舍）；
+    跨 ≥2 战斗阶段的模板另落逐阶段数组。"""
 
     CURVE = {"3": {"95": {"hp": 294.42172}}}
     ELITE = {"1": {"hp": 1.0}, "2": {"hp": 1.7}, "164": {"hp": 6.5}}
@@ -1699,6 +1700,26 @@ class TestEnemyCardHp:
         assert "hp" not in eg._monster_out(1, {1: info})
         assert "hp" not in eg._monster_out(1, {1: info}, hp_ctx={"level": 0})
         assert "hp" not in eg._monster_out(1, {1: info}, hp_ctx={"level": 95, "level_group": 9})
+
+    def test_phase_hp_uses_the_template_ratio_table(self, monkeypatch):
+        """逐阶段生命（ADR 0058）：比例表按**模板 ID** 取（实例别名 id ≠ tpl 时也命中），
+        与单值 `hp` 并存（后者 = 阶段 1 的值）。单阶段模板不落该键。"""
+        monkeypatch.setattr(eg, "_phase_ratios", lambda: {7: [1.0, 1.25, 1.0]})
+        info = self._info()
+        ctx = {"level": 95, "level_group": 3, "elite_group": 164}
+        alias = eg._monster_out(7000007, {7000007: {**info, "_tpl": 7}}, hp_ctx=ctx,
+                                curve=self.CURVE, elite_groups=self.ELITE)
+        assert alias["phase_hp"] == [332818.7, 416023.4, 332818.7], "实例别名也要按模板 ID 命中比例表"
+        assert alias["hp"] == alias["phase_hp"][0]
+        single = eg._monster_out(9, {9: {**info, "_tpl": 9}}, hp_ctx=ctx,
+                                 curve=self.CURVE, elite_groups=self.ELITE)
+        assert "phase_hp" not in single and single["hp"] == 332818.7
+
+    def test_phase_hp_absent_context(self, monkeypatch):
+        monkeypatch.setattr(eg, "_phase_ratios", lambda: {1: [1.0, 1.25]})
+        info = self._info()
+        assert "phase_hp" not in eg._monster_out(1, {1: info})
+        assert "phase_hp" not in eg._monster_out(1, {1: info}, hp_ctx={"level": 95, "level_group": 9})
 
     def test_stage_waves_hp_is_per_stage_row(self, monkeypatch):
         """同一敌方出现在两条关卡行下 → 各按那条行的语境算（逐事件，不是整场一个数）。"""

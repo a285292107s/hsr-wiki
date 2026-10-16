@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from config import EXCEL_DIR, SOURCE_DIR, TEXTMAP_FILE, TEXTMAP_EN_FILE, OUTPUT_DIR
+from config import CHARACTER_CONFIG_DIR, EXCEL_DIR, SOURCE_DIR, TEXTMAP_FILE, TEXTMAP_EN_FILE, OUTPUT_DIR
 
 logger = logging.getLogger("converter")
 
@@ -110,7 +110,12 @@ MODULE_SOURCES: dict[str, list[str]] = {
     "monster_common": ["MonsterTemplateConfig.json", "MonsterConfig.json",
                         "MonsterCamp.json", "MonsterSkillConfig.json",
                         "HardLevelGroup.json", "EliteGroup.json",
-                        "MonsterStatusResistanceType.json"],
+                        "MonsterStatusResistanceType.json",
+                        # 战斗阶段生命（ADR 0058）：`load_phase_hp_ratios` 按 JsonConfig 指针读
+                        # `Config/ConfigCharacter/**`（AST 守卫看不见——那条路径是运行时拼的，
+                        # 且走 `read_text` 而非 `load_json`）⇒ 必须人工登记**整个目录**，
+                        # 漏登记则上游改实体配置后本模块被增量跳过、phase_hp 静默陈旧
+                        CHARACTER_CONFIG_DIR],
     # 首领机制共享装配：endgame 敌方卡与 monster_detail 详情页两处消费（同一份声明）
     "monster_guide": ["MonsterGuideConfig.json", "MonsterGuideTag.json",
                        "MonsterGuidePhase.json", "MonsterGuideSkill.json",

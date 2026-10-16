@@ -95,6 +95,9 @@ export interface MonsterLike {
   /** 该敌方在**所属关卡行**语境下的生命值（转换期按合成链落的单值，ADR 0055）；
    *  期级合并列表不带该键 ⇒ 断言里用 `hp!` 前先确认取的是场次/节点级列表 */
   hp?: number;
+  /** 逐战斗阶段生命值（ADR 0058，下标 i = 阶段 i+1）；**只跨 ≥2 阶段的模板**带该键，
+   *  单阶段敌方仍由 `hp` 承担呈现（前端两键并存时逐阶段优先） */
+  phase_hp?: number[];
 }
 export interface InvasionLike { level: number; stage_id?: number; monsters?: MonsterLike[] }
 /** 召唤物（ADR 0036 修订）：轻形态 + 受污染者带 polluted（污染等级）；挂在召唤者自己的敌方条目上 */

@@ -12,6 +12,13 @@ SOURCE_DIR = PROJECT_ROOT / "vendor" / "TurnBasedGameData"
 EXCEL_DIR = SOURCE_DIR / "ExcelOutput"
 TEXTMAP_DIR = SOURCE_DIR / "TextMap"
 
+CHARACTER_CONFIG_DIR = SOURCE_DIR / "Config" / "ConfigCharacter"
+"""客户端**实体配置**层（`MonsterTemplateConfig.JsonConfig` / `AvatarConfig.JsonPath` 指针的落地目录）。
+
+与 `ExcelOutput` 的分工：数值与文案在 ExcelOutput；**只有这一层**才有引擎态结构
+（战斗阶段 `MaxMonsterPhase` / `PhaseList[].PhaseMaxHPRatio` 等）。产物凡消费该层，
+增量依赖必须登记本目录（`incremental.MODULE_SOURCES`）——它是**目录级**依赖，不是单文件。"""
+
 OUTPUT_DIR = PROJECT_ROOT / "public" / "data" / "cn"
 
 PACK_DIR = PROJECT_ROOT / "public" / "data" / "i18n"

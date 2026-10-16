@@ -12,6 +12,8 @@
 - **未登记源表 = 站点零覆盖且转换不报错**：`StageInvasionBuff/Config`、`MazeBuff` 3034xxx、`GridFightAffixConfig` 在快照里数据完整存在却一张都没登记，站点无任何输出——新数据域先查登记表，再查数据。
 - **共享表落盘要排在依赖它的循环之前**：`save_json(curve, OUTPUT_DIR / 'monster-level-curve.json')` 必须放在详情循环之前，曲线缺组才不带坏全部详情，且 `--only <详情目标>` 能独立产出它。
 - **`os.replace` 会撞 WinError 5**：产物被并发只读进程持有时替换失败；验收改为内存内 `convert()` 后与磁盘逐字节 / sha256 比对——`--force` 重跑字节不变即输出确定性成立。
+- **新增依赖「上层产物字段」的读取路径时，AST 守卫给不出任何信号，必须人工登记整个目录**：`Config/ConfigCharacter/**` 的路径是运行时由 `MonsterTemplateConfig.JsonConfig` 拼出来的，且用 `read_text` 而非 `load_json` ⇒ 既不在函数名白名单也不在实参字面量里（`test_incremental.py` 全绿但零覆盖）。登记时**登记目录本身**（`CHARACTER_CONFIG_DIR`）而不是「已知会读到的几个文件」——指针表的取值会随上游新增模板而变。判据：**凡 `Path` 是运行时拼的、或读法不是 `load_json` 的依赖，都不能指望守卫，只能靠人**。
+- **`JsonConfig` 指针有 5 个是死链，扫描必须容忍**：`5032010` / `5034010` / `5034011` / `8001032` / `8033013` 指向的实体配置文件在 vendor 里不存在（`8001032` 连父目录 `Config/ConfigCharacter/FinalityBattle` 都没有）。这不是本仓能修的，处理方式是跳过 + 汇总 warning；**别把它当成「实现没生效」**，那 5 个模板本来就没有该字段。
 
 ## TextMap 与描述渲染
 

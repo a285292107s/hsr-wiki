@@ -16,11 +16,15 @@ EliteGroup / MonsterStatusResistanceType。
 关卡语境（`StageConfig` 行的 Level/HardLevelGroup/EliteGroup）由 `stage_context` 单点解析，
 两处消费：monster_extra 的出没样本（透传给前端合成）与 endgame 的敌方卡 HP（`monster_hp_at`
 在转换期落单值——终局轻形态不带合成链输入，前端无法自行合成）。
+战斗阶段生命（`PhaseMaxHPRatio`）**只在 `Config/ConfigCharacter` 客户端配置里**
+（ExcelOutput 零命中），由 `load_phase_hp_ratios` 读，`monster_hp_phases` 按它把上面那条链
+展开成逐阶段值（ADR 0058）。
 """
+import json
 import logging
 import math
 
-from config import EXCEL_DIR
+from config import EXCEL_DIR, SOURCE_DIR
 from textmap import resolve_text
 from utils import load_json, unwrap_value
 
@@ -153,14 +157,11 @@ def _js_round1(v: float) -> float:
     return math.floor(v * 10 + 0.5) / 10
 
 
-def monster_hp_at(info: dict, level: object, stage: dict, curve: dict, elite_groups: dict) -> float | None:
-    """敌方实例在**已知关卡语境**下的生命值（战斗数值合成链，ADR 0040/0049/0050）。
+def _monster_hp_raw(info: dict, level: object, stage: dict, curve: dict, elite_groups: dict) -> float | None:
+    """合成链的**未取整**结果（`monster_hp_at` 与 `monster_hp_phases` 共用同一算式）。
 
-    口径 = `stats.hp × stat_ratio.hp × (自身精英组.hp × 关卡精英组.hp) × 曲线[关卡难度组][等级]`
-    ——与前端 `monster-stats.ts → monsterStatAt('hp', …)` 同一算式；此处供终局敌方卡在**转换期落
-    单值** HP（终局轻形态不带合成链输入，前端无法自行合成，见 `endgame._monster_out`）。
-    任何一段缺位即 None（调用方不落 `hp` 键，宁缺不假）：基准缺失、等级不可用、曲线缺组 / 缺行。
-    关卡精英组缺位等价于「不参与叠乘」（中性 1），与前端 `monsterEliteRatiosProduct` 同判据。
+    取整只做一次、且发生在最外层：阶段血量是「未取整基准 × 各阶段比例」后逐项取整，
+    若在中间先取整再乘比例，末位会与「基准 × 比例」的直算值差 0.1（ADR 0058 决策 2）。
     """
     base = (info.get("stats") or {}).get("hp")
     if not isinstance(base, (int, float)) or isinstance(base, bool):
@@ -180,7 +181,174 @@ def monster_hp_at(info: dict, level: object, stage: dict, curve: dict, elite_gro
            * _hp_ratio(elite_groups.get(str(info.get("elite_group") or 1)))
            * _hp_ratio(elite_groups.get(str(stage.get("elite_group") or 1)))
            * curve_hp)
-    return _js_round1(out) if math.isfinite(out) else None
+    return out if math.isfinite(out) else None
+
+
+def monster_hp_at(info: dict, level: object, stage: dict, curve: dict, elite_groups: dict) -> float | None:
+    """敌方实例在**已知关卡语境**下的生命值（战斗数值合成链，ADR 0040/0049/0050）。
+
+    口径 = `stats.hp × stat_ratio.hp × (自身精英组.hp × 关卡精英组.hp) × 曲线[关卡难度组][等级]`
+    ——与前端 `monster-stats.ts → monsterStatAt('hp', …)` 同一算式；此处供终局敌方卡在**转换期落
+    单值** HP（终局轻形态不带合成链输入，前端无法自行合成，见 `endgame._monster_out`）。
+    任何一段缺位即 None（调用方不落 `hp` 键，宁缺不假）：基准缺失、等级不可用、曲线缺组 / 缺行。
+    关卡精英组缺位等价于「不参与叠乘」（中性 1），与前端 `monsterEliteRatiosProduct` 同判据。
+    """
+    out = _monster_hp_raw(info, level, stage, curve, elite_groups)
+    return _js_round1(out) if out is not None else None
+
+
+def monster_hp_phases(
+    info: dict,
+    level: object,
+    stage: dict,
+    curve: dict,
+    elite_groups: dict,
+    ratios: list[float] | None,
+) -> list[float] | None:
+    """敌方实例在**该关卡语境**下、**逐战斗阶段**的生命值（ADR 0058）。
+
+    `ratios` 取自 `load_phase_hp_ratios()[模板 ID]`（该模板的战斗阶段生命倍率，阶段序）；
+    每阶段 = `未取整合成基准 × ratios[i]`，逐项一位小数、半值向 +∞（与 `monster_hp_at` 同取整口径）。
+    单阶段（`ratios` 缺位或长度 < 2）返回 None —— 调用方不落 `phase_hp` 键，由单值 `hp` 承担呈现，
+    避免给单阶段敌方各挂一个「只有一项、值与 `hp` 相同」的数组（实测 473/632 个模板属此列）。
+    合成链缺段（基准 / 等级 / 曲线）或无有效比例时同样 None。
+    """
+    if not ratios or len(ratios) < 2:
+        return None
+    raw = _monster_hp_raw(info, level, stage, curve, elite_groups)
+    if raw is None:
+        return None
+    out: list[float] = []
+    for r in ratios:
+        if not isinstance(r, (int, float)) or isinstance(r, bool) or r <= 0:
+            return None
+        out.append(_js_round1(raw * r))
+    return out
+
+
+_PHASE_HP_RATIOS: dict[int, list[float]] | None = None
+"""`load_phase_hp_ratios` 的进程内缓存（12 MB 客户端配置只扫一遍）。"""
+
+
+def _phase_ratio_expr(ratio: dict, dyn: dict, own_cfg: dict, skills: dict[int, dict]) -> float | None:
+    """`PhaseMaxHPRatio` → 数值（静态字面量直接取，动态表达式沿「读值表」解析到技能参数）。
+
+    上游两种形态（按转换器实际读的口径，402 条阶段条目：331 条未声明、70 条动态、1 条静态）：
+    - 未声明（`PhaseMaxHPRatio` 键缺失）由调用方按中性 1 处理，不走本函数；
+    - 静态：`{"IsDynamic": false, "FixedValue": {"Value": n}}`；
+    - 动态：`{"IsDynamic": true, "PostfixExpr": {"DynamicHashes": [h]}}` —— `h` 指向同文件
+      `DynamicValues.Floats[str(h)].ReadInfo`，形如 `{Type: SkillParam, TriggerKey, Index}`，
+      再经「该模板 `MonsterConfig.SkillList` 里 `SkillTriggerKey` 匹配的技能」的
+      `ParamList[Index].Value` 取到实参。`ReadInfo.Type` 三类实测：`SkillParam`（可解析）、
+      `None`（指向属性而非技能参数）、`ClientOnly`（客户端专有，无实参）；**本用途下 70 条动态
+      表达式全部是 `SkillParam`**，另两类按「解析不出」处理，不猜语义。
+    解析不出即 None（调用方按「该模板整条不落」处理并 warning 留痕，不静默填 1）。
+    """
+    if not ratio.get("IsDynamic"):
+        v = (ratio.get("FixedValue") or {}).get("Value")
+        return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+    for h in ((ratio.get("PostfixExpr") or {}).get("DynamicHashes") or []):
+        info = (dyn.get(str(h)) or {}).get("ReadInfo") or {}
+        if info.get("Type") != "SkillParam":
+            return None
+        tk, idx = info.get("TriggerKey"), info.get("Index")
+        if not isinstance(idx, int):
+            return None
+        for sid in own_cfg.get("SkillList") or []:
+            skill = skills.get(sid)
+            if skill and skill.get("SkillTriggerKey") == tk:
+                params = skill.get("ParamList") or []
+                if idx < len(params):
+                    v = params[idx].get("Value")
+                    return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+                return None
+        return None
+    return None
+
+
+def load_phase_hp_ratios() -> dict[int, list[float]]:
+    """多阶段敌方的**逐战斗阶段生命倍率** → {模板 ID: [阶段 1 比例, 阶段 2 比例, …]}（ADR 0058）。
+
+    源 = `Config/ConfigCharacter/**/*_Config*.json`（经 `MonsterTemplateConfig.JsonConfig` 指针；
+    619/632 指向 `Monster/*`，12 条 `GridFight/*`，1 条 `FinalityBattle/*`）的
+    `PhaseList[].PhaseMaxHPRatio`。该字段**在 ExcelOutput 零命中**（2,253 份全表扫描），
+    是本仓第一处消费客户端实体配置的产物字段，故单点封装在此、增量依赖登记整个目录。
+
+    语义（判据见 ADR 0058）：比例是「该阶段最大生命 = 基准 × 比例」，**不是**「占总量份额」——
+    取值可 > 1（解析后实测 6 / 9 / 2.5 / 2 / 1.9 / 1.66 / 1.5 / 1.4，也有 0.5 / 0.6 / 0.7 / 0.75），
+    且同一模板里阶段 1 未声明而阶段 2 显式 `1`（模板 2004021/2004022）说明**未声明等价 1**。
+    脚本层零消费（`Config/ConfigAbility/**` 里该字段 0 命中）⇒ 由引擎在 `SetMonsterPhase` 时读取；
+    站内只做展示，不做战斗时序推导。
+
+    三条取舍：
+    1. **只落跨 ≥2 阶段的模板**：单阶段（473/632）与无该字段的模板不落键——给单阶段敌方各挂一个
+       「只有一项、值与 `hp` 相同」的数组是纯冗余；
+    2. **阶段序按 `PhaseNum` 排序**，不依赖 `PhaseList` 的数组顺序（上游是保序的，但不做前提）；
+       并要求 `PhaseNum` 恰为 1..n 连续（实测 185/185 满足）——数组下标即阶段号，前端据此出
+       「阶段 N」；有洞即整条不落（同下条，宁缺不假）；
+    3. 比例解析不出即**整条不落**并 warning 留痕（宁可退回单值 `hp`，不填半真数据）。
+    """
+    global _PHASE_HP_RATIOS
+    if _PHASE_HP_RATIOS is not None:
+        return _PHASE_HP_RATIOS
+    skills = {r["SkillID"]: r for r in load_json(EXCEL_DIR / "MonsterSkillConfig.json")}
+    cfg_by_tpl: dict[int, dict] = {}
+    for r in load_json(EXCEL_DIR / "MonsterConfig.json"):
+        cfg_by_tpl.setdefault(r.get("MonsterTemplateID"), r)
+    out: dict[int, list[float]] = {}
+    unparsed: list[int] = []
+    unordered: list[int] = []
+    missing: list[int] = []
+    for rec in load_json(EXCEL_DIR / "MonsterTemplateConfig.json"):
+        tpl = rec.get("MonsterTemplateID")
+        ptr = rec.get("JsonConfig") or ""
+        if tpl is None or not ptr:
+            continue
+        path = SOURCE_DIR / ptr
+        if not path.exists():
+            missing.append(tpl)
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            unparsed.append(tpl)
+            continue
+        phases = data.get("PhaseList")
+        if not phases:
+            continue
+        dyn = ((data.get("DynamicValues") or {}).get("Floats") or {})
+        own = cfg_by_tpl.get(tpl) or {}
+        ordered = sorted((p for p in phases if isinstance(p, dict)),
+                         key=lambda p: p.get("PhaseNum") or 0)
+        # 阶段号必须是 1..n 连续（实测 185/185 个带 PhaseList 的模板全部满足）：前端按
+        # 下标 +1 出「阶段 N」，序号有洞就会错位。不满足即整条不落 + warning（宁缺不假）。
+        if [p.get("PhaseNum") for p in ordered] != list(range(1, len(ordered) + 1)):
+            unordered.append(tpl)
+            continue
+        ratios: list[float] = []
+        for ph in ordered:
+            ratio = ph.get("PhaseMaxHPRatio")
+            # 未声明 = 中性 1（判据：模板 2004021/2004022 里阶段 1 未声明、阶段 2 显式 1，行为一致）
+            value = 1.0 if ratio is None else _phase_ratio_expr(ratio, dyn, own, skills)
+            if value is None or value <= 0:
+                unparsed.append(tpl)
+                ratios = []
+                break
+            ratios.append(value)
+        if len(ratios) >= 2:
+            out[tpl] = ratios
+    if missing:
+        logger.warning("MonsterTemplateConfig 的 JsonConfig 指向不存在的实体配置：%d 个模板（ID：%s）",
+                       len(missing), ",".join(str(i) for i in sorted(missing)))
+    if unparsed:
+        logger.warning("实体配置的 PhaseMaxHPRatio 无法解析，这些模板不落 phase_hp（ID：%s）",
+                       ",".join(str(i) for i in sorted(set(unparsed))))
+    if unordered:
+        logger.warning("实体配置的 PhaseNum 不是 1..n 连续，这些模板不落 phase_hp（ID：%s）",
+                       ",".join(str(i) for i in sorted(set(unordered))))
+    logger.info("战斗阶段生命倍率：%d/%d 个模板跨 ≥2 阶段", len(out), len(cfg_by_tpl))
+    _PHASE_HP_RATIOS = out
+    return out
 
 
 def load_status_resist_icons() -> dict[str, str]:

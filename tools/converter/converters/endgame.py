@@ -44,7 +44,8 @@ from enum_labels import resolve as resolve_label
 from textmap import resolve_text
 from utils import load_json, save_json, map_icon_path, unwrap_value
 from converters.monster_common import (
-    load_elite_groups, load_level_curve, load_monsters, monster_hp_at, stage_context,
+    load_elite_groups, load_level_curve, load_monsters, load_phase_hp_ratios,
+    monster_hp_at, monster_hp_phases, stage_context,
 )
 from converters.monster_guide import load_boss_guides, load_guide_phases
 
@@ -70,6 +71,16 @@ def _hp_tables() -> tuple[dict, dict]:
     if _HP_TABLES is None:
         _HP_TABLES = (load_level_curve(), load_elite_groups())
     return _HP_TABLES
+
+
+def _phase_ratios() -> dict[int, list[float]]:
+    """战斗阶段生命倍率表（`monster_common.load_phase_hp_ratios`，按模板 ID 键）。
+
+    只对跨 ≥2 阶段的模板落键（159 个多阶段模板；单阶段模板不在表里）⇒ **查表未命中即
+    「不落 `phase_hp`」**，与「单阶段不列」同一条判据，调用方无需再数阶段数。
+    缓存由 `monster_common` 自己持有（12 MB 客户端配置只扫一遍），这里只是本模块的取数入口。
+    """
+    return load_phase_hp_ratios()
 
 # RewardData.Hcoin 即星琼：全表 9,515 行无一行把星琼写成 ItemID_1（`ItemConfig` 1 = 星琼），
 # 而 32.6% 的行用它记星琼数量，故解析时并入物品 1。
@@ -229,6 +240,15 @@ def _monster_out(
         hp = monster_hp_at(info, hp_ctx.get("level"), hp_ctx, c, e)
         if hp is not None:
             out["hp"] = hp
+        # 逐战斗阶段生命（ADR 0058）：同一合成基准 × 各阶段比例，逐项一件小数；单阶段模板查不到
+        # 比例表 ⇒ 不落该键（`hp` 单值已够表达）。两者并存：`hp` = 首阶段值（阶段 1 比例恒 1，
+        # 实测现有产物里带 `hp` 的敌方阶段 1 比例全为 1），`phase_hp` 供前端逐阶段列出。
+        phases = monster_hp_phases(
+            info, hp_ctx.get("level"), hp_ctx, c, e,
+            _phase_ratios().get(int(tpl or mid)),
+        )
+        if phases is not None:
+            out["phase_hp"] = phases
     return out
 
 def _load_targets(filename: str = "ChallengeTargetConfig.json") -> dict[int, dict]:

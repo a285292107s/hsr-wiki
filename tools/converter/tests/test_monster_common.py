@@ -4,6 +4,8 @@
 （弱点/抗性/介绍/技能列表）多表合并；技能全量字段解析；缺名跳过；实例别名回退。
 """
 
+import json
+import re
 import sys
 from pathlib import Path
 
@@ -12,6 +14,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pytest  # noqa: E402
 
 from converters import monster_common as mc  # noqa: E402
+
+
+def _ids_in(line: str) -> list[int]:
+    """告警行 ID 名单里的模板编号（升序）。只取 `（ID：…）` 之后那一段——按子串匹配会让
+    「ID 1 不在名单里」假通过（`"1" in "ID：10,15"` 为真），而整行取又会把「不是 1..n 连续」
+    里的那个 1 当编号。"""
+    tail = line.split("（ID：")[-1]
+    return sorted(int(tok) for tok in re.findall(r"\d+", tail))
+
 
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
@@ -366,3 +377,201 @@ class TestMonsterHpAt:
         """比率缺位 / 非正按中性 1（绝不按 0，ADR 0049）——0 会把一条 HP 显示成 0。"""
         info = {"stats": {"hp": 102.3}, "stat_ratio": {"hp": 0}, "elite_group": 1}
         assert mc.monster_hp_at(info, 95, {"level_group": 3}, self.CURVE, self.ELITE) == 30119.3
+
+
+class TestMonsterHpPhases:
+    """逐战斗阶段生命（ADR 0058）：同一未取整基准 × 各阶段倍率，逐项取一位小数。"""
+
+    CURVE = {"3": {"95": {"hp": 294.42172}}}
+    ELITE = {"1": {"hp": 1.0}, "2": {"hp": 1.7}, "164": {"hp": 6.5}}
+
+    INFO = {"stats": {"hp": 102.3}, "stat_ratio": {"hp": 1}, "elite_group": 2}
+
+    def test_each_phase_is_ratio_times_the_same_base(self):
+        stage = {"level_group": 3, "elite_group": 164}
+        got = mc.monster_hp_phases(self.INFO, 95, stage, self.CURVE, self.ELITE, [1.0, 1.25, 1.0])
+        # 基准（未取整） = 102.3 × 1 × 1.7 × 6.5 × 294.42172 = 332818.68…
+        assert got == [332818.7, 416023.4, 332818.7], "阶段 1 的值必须等于单值 hp（同基准 × 1）"
+        assert mc.monster_hp_phases(self.INFO, 95, stage, self.CURVE, self.ELITE, [1.0, 1.25, 1.0])[0] == \
+            mc.monster_hp_at(self.INFO, 95, stage, self.CURVE, self.ELITE)
+
+    def test_rounding_happens_once_at_the_outermost_layer(self):
+        """先取整再乘比例会差 0.1：0.25 × 1.5 = 0.375（→0.4），而 round1(0.25)=0.3 → 0.45（→0.5）。"""
+        curve = {"1": {"10": {"hp": 0.5}}}
+        info = {"stats": {"hp": 0.5}, "stat_ratio": {"hp": 1}, "elite_group": 1}
+        assert mc.monster_hp_phases(info, 10, {"level_group": 1}, curve, self.ELITE, [1.0, 1.5]) == [0.3, 0.4]
+
+    def test_single_phase_and_missing_ratios_return_none(self):
+        """单阶段（含空表）不落 `phase_hp`——单阶段敌方不该挂一个与 `hp` 同值的单元素数组。"""
+        stage = {"level_group": 3, "elite_group": 164}
+        for ratios in (None, [], [1.0]):
+            assert mc.monster_hp_phases(self.INFO, 95, stage, self.CURVE, self.ELITE, ratios) is None
+
+    def test_missing_chain_piece_returns_none(self):
+        """宁缺不假：合成链缺段或无有效比例 → None（调用方不落键）。"""
+        stage = {"level_group": 3, "elite_group": 164}
+        assert mc.monster_hp_phases({"stats": {"atk": 1}}, 95, stage, self.CURVE, self.ELITE, [1, 2]) is None
+        assert mc.monster_hp_phases(self.INFO, 0, stage, self.CURVE, self.ELITE, [1, 2]) is None
+        assert mc.monster_hp_phases(self.INFO, 95, {"level_group": 9}, self.CURVE, self.ELITE, [1, 2]) is None
+        assert mc.monster_hp_phases(self.INFO, 95, stage, self.CURVE, self.ELITE, [1, 0]) is None
+        assert mc.monster_hp_phases(self.INFO, 95, stage, self.CURVE, self.ELITE, [1, None]) is None
+
+
+class TestPhaseHpRatios:
+    """`load_phase_hp_ratios`：读**客户端实体配置**（`Config/ConfigCharacter`）的 `PhaseList`（ADR 0058）。
+
+    该字段在 `ExcelOutput` 零命中，是本仓第一处消费该层的产物字段，故解析规则与三条取舍都钉在这里。
+    """
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self, monkeypatch, tmp_path):
+        """逐用例清进程内缓存：表按模板 ID 缓存，跨用例会串。"""
+        monkeypatch.setattr(mc, "_PHASE_HP_RATIOS", None)
+        self.tmp = tmp_path
+
+    def _setup(self, monkeypatch, cfgs: dict[str, dict], templates: list[dict],
+               skills: list[dict] | None = None, monster_cfg: list[dict] | None = None):
+        """cfgs = {相对 JsonConfig 路径: 实体配置正文}；文件写到 tmp_path 下（`SOURCE_DIR` 被打桩）。"""
+        monkeypatch.setattr(mc, "SOURCE_DIR", self.tmp)
+        for rel, body in cfgs.items():
+            p = self.tmp / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps(body), encoding="utf-8")
+
+        def fake(path):
+            name = str(path)
+            if name.endswith("MonsterTemplateConfig.json"):
+                return templates
+            if name.endswith("MonsterSkillConfig.json"):
+                return skills or []
+            if name.endswith("MonsterConfig.json"):
+                return monster_cfg or []
+            raise AssertionError(f"未预期的表：{name}")
+
+        monkeypatch.setattr(mc, "load_json", fake)
+
+    def test_static_fixed_value_and_undeclared_is_neutral(self, monkeypatch):
+        """静态字面量直取；**未声明 = 1**（判据：模板 2004021/2004022 里阶段 1 未声明、阶段 2 显式 1）。"""
+        self._setup(monkeypatch, {
+            "a_Config.json": {"PhaseList": [
+                {"PhaseNum": 1},
+                {"PhaseNum": 2, "PhaseMaxHPRatio": {"IsDynamic": False, "FixedValue": {"Value": 1.25}}},
+            ]},
+        }, [{"MonsterTemplateID": 1, "JsonConfig": "a_Config.json"}])
+        assert mc.load_phase_hp_ratios() == {1: [1.0, 1.25]}
+
+    def test_phase_order_follows_phase_num_not_array_order(self, monkeypatch):
+        """阶段序按 `PhaseNum` 排（上游保序但不做前提），且必须恰为 1..n 连续。"""
+        self._setup(monkeypatch, {
+            "a_Config.json": {"PhaseList": [
+                {"PhaseNum": 3, "PhaseMaxHPRatio": {"IsDynamic": False, "FixedValue": {"Value": 3}}},
+                {"PhaseNum": 1},
+                {"PhaseNum": 2, "PhaseMaxHPRatio": {"IsDynamic": False, "FixedValue": {"Value": 2}}},
+            ]},
+        }, [{"MonsterTemplateID": 1, "JsonConfig": "a_Config.json"}])
+        assert mc.load_phase_hp_ratios() == {1: [1.0, 2.0, 3.0]}
+
+    def test_dynamic_hash_resolves_through_skill_param(self, monkeypatch):
+        """动态表达式：`PostfixExpr.DynamicHashes → DynamicValues.Floats[h].ReadInfo`
+        （`Type: SkillParam`）→ 同模板 `SkillTriggerKey` 匹配技能的 `ParamList[idx].Value`。"""
+        self._setup(monkeypatch, {
+            "a_Config.json": {
+                "PhaseList": [
+                    {"PhaseNum": 1},
+                    {"PhaseNum": 2, "PhaseMaxHPRatio": {
+                        "IsDynamic": True, "PostfixExpr": {"DynamicHashes": [960730890]}}},
+                ],
+                "DynamicValues": {"Floats": {"960730890": {"ReadInfo": {
+                    "Type": "SkillParam", "TriggerKey": "P3_HpRatioAdded", "Index": 1}}}},
+            },
+        }, [{"MonsterTemplateID": 1, "JsonConfig": "a_Config.json"}],
+            skills=[{"SkillID": 7001, "SkillTriggerKey": "P3_HpRatioAdded",
+                     "ParamList": [{"Value": 0.5}, {"Value": 4}]}],
+            monster_cfg=[{"MonsterTemplateID": 1, "SkillList": [7001]}])
+        assert mc.load_phase_hp_ratios() == {1: [1.0, 4.0]}
+
+    def test_dynamic_without_matching_skill_skips_the_template(self, monkeypatch, caplog):
+        """`SkillList` 里没有 `SkillTriggerKey` 匹配的技能 ⇒ 解析不出、整条不落。"""
+        self._setup(monkeypatch, {
+            "a_Config.json": {
+                "PhaseList": [{"PhaseNum": 1}, {"PhaseNum": 2, "PhaseMaxHPRatio": {
+                    "IsDynamic": True, "PostfixExpr": {"DynamicHashes": [1]}}}],
+                "DynamicValues": {"Floats": {"1": {"ReadInfo": {
+                    "Type": "SkillParam", "TriggerKey": "Other", "Index": 0}}}},
+            },
+        }, [{"MonsterTemplateID": 1, "JsonConfig": "a_Config.json"}],
+            skills=[{"SkillID": 7001, "SkillTriggerKey": "P3_HpRatioAdded", "ParamList": [{"Value": 4}]}],
+            monster_cfg=[{"MonsterTemplateID": 1, "SkillList": [7001]}])
+        assert mc.load_phase_hp_ratios() == {}
+
+    def test_non_skillparam_and_unresolvable_skip_the_whole_template(self, monkeypatch, caplog):
+        """解析不出即**整条不落**并 warning 留痕——宁可退回单值 `hp`，不填半真数据。"""
+        self._setup(monkeypatch, {
+            # 指向 ClientOnly（客户端专有，无实参）⇒ 该模板整条丢
+            "a_Config.json": {
+                "PhaseList": [{"PhaseNum": 1}, {"PhaseNum": 2, "PhaseMaxHPRatio": {
+                    "IsDynamic": True, "PostfixExpr": {"DynamicHashes": [1]}}}],
+                "DynamicValues": {"Floats": {"1": {"ReadInfo": {"Type": "ClientOnly", "Index": 0}}}},
+            },
+            # 动态哈希在 DynamicValues 里找不到 ⇒ 同样整条丢
+            "b_Config.json": {"PhaseList": [
+                {"PhaseNum": 1},
+                {"PhaseNum": 2, "PhaseMaxHPRatio": {"IsDynamic": True, "PostfixExpr": {"DynamicHashes": [7]}}},
+            ]},
+            # 比例非正 ⇒ 整条丢（0 会把一个阶段的血量显示成 0）
+            "c_Config.json": {"PhaseList": [
+                {"PhaseNum": 1},
+                {"PhaseNum": 2, "PhaseMaxHPRatio": {"IsDynamic": False, "FixedValue": {"Value": 0}}},
+            ]},
+            # PhaseNum 不是 1..n 连续（有洞）⇒ 整条丢（前端按下标 +1 出阶段号，会错位）
+            "d_Config.json": {"PhaseList": [
+                {"PhaseNum": 1},
+                {"PhaseNum": 3, "PhaseMaxHPRatio": {"IsDynamic": False, "FixedValue": {"Value": 2}}},
+            ]},
+            # 单阶段 ⇒ 不进表（不落键，不是「解析失败」）
+            "e_Config.json": {"PhaseList": [{"PhaseNum": 1}]},
+        }, [
+            {"MonsterTemplateID": t, "JsonConfig": f"{c}_Config.json"}
+            for t, c in zip((1, 2, 3, 4, 5), "abcde")
+        ])
+        assert mc.load_phase_hp_ratios() == {}
+        warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+        unparsed = [w for w in warnings if "PhaseMaxHPRatio 无法解析" in w]
+        unordered = [w for w in warnings if "PhaseNum 不是 1..n 连续" in w]
+        assert len(unparsed) == 1 and len(unordered) == 1, f"各汇成一行（实际 {warnings}）"
+        assert _ids_in(unparsed[0]) == [1, 2, 3], "动态解析失败的三个模板，不含「有洞」与单阶段"
+        assert _ids_in(unordered[0]) == [4]
+
+    def test_missing_entity_config_warns_and_is_skipped(self, monkeypatch, caplog):
+        """`JsonConfig` 指针指向不存在的实体配置：跳过 + 汇总 warning（实测 5 个模板如此）。"""
+        self._setup(monkeypatch, {
+            "a_Config.json": {"PhaseList": [{"PhaseNum": 1}, {"PhaseNum": 2}]},
+        }, [
+            {"MonsterTemplateID": 1, "JsonConfig": "a_Config.json"},
+            {"MonsterTemplateID": 2, "JsonConfig": "gone_Config.json"},
+            {"MonsterTemplateID": 3},
+        ])
+        assert mc.load_phase_hp_ratios() == {1: [1.0, 1.0]}
+        missing = [r.getMessage() for r in caplog.records if "指向不存在的实体配置" in r.getMessage()]
+        assert len(missing) == 1 and "2" in missing[0] and "3" not in missing[0], "无指针不算「指向不存在」"
+
+    def test_result_is_cached_across_calls(self, monkeypatch):
+        """12 MB 客户端配置只扫一遍：第二次调用不再读表。"""
+        calls: list[str] = []
+
+        def fake(path):
+            name = str(path)
+            calls.append(name)
+            if name.endswith("MonsterTemplateConfig.json"):
+                return [{"MonsterTemplateID": 1, "JsonConfig": "a_Config.json"}]
+            if name.endswith("MonsterSkillConfig.json"):
+                return [{"SkillID": 1}]
+            return []
+        self._setup(monkeypatch, {"a_Config.json": {"PhaseList": [{"PhaseNum": 1}, {"PhaseNum": 2}]}}, [])
+        monkeypatch.setattr(mc, "load_json", fake)
+        first = mc.load_phase_hp_ratios()
+        after_first = len(calls)
+        second = mc.load_phase_hp_ratios()
+        assert first == second == {1: [1.0, 1.0]}
+        assert after_first == 3, f"首次应读 3 张表（实际 {after_first}）"
+        assert len(calls) == after_first, "第二次调用应直接命中缓存、不再读表"

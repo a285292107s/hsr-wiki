@@ -204,11 +204,21 @@
 .nk-egd-mon__figlink:hover .nk-egd-mon__img {
   transform: translateY(-2px);
 }
-/* 关卡内 HP（ADR 0055）：立绘**下方**、列内居中，与污染徽标同一换行纪律——列宽由立绘图宽
+/* 关卡内 HP（ADR 0055 / 0058）：立绘**下方**、列内居中，与污染徽标同一换行纪律——列宽由立绘图宽
    唯一声明（`--nk-egd-mon-fig`），数字再长也只能在列内换行，否则 `auto` 轨被反撑宽、挤窄数据列
    （与 `.nk-egd-mon__art > .nk-egd-pollchip` 同因，见 endgame-pollution.css）。数值用 HUD 字体、
-   强调色（与「波次 · 敌数」同族），标签走标签档、弱化到 `--text3`。 */
+   强调色（与「波次 · 敌数」同族），标签走标签档、弱化到 `--text3`。
+   容器恒为竖向列、每行一个「标签 + 数值」对：单值只有一行（与改前同形），
+   跨 ≥2 战斗阶段时逐阶段一行（`--phases`，行内再竖排——列宽仅 84–104px，
+   「阶段 1」与 9 位缩写数同行必然溢出）。 */
 .nk-egd-mon__hp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+}
+.nk-egd-mon__hprow {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -218,6 +228,10 @@
   white-space: normal;
   overflow-wrap: anywhere;
   text-align: center;
+}
+.nk-egd-mon__hp--phases .nk-egd-mon__hprow {
+  flex-direction: column;
+  gap: 1px;
 }
 .nk-egd-mon__hp-label {
   letter-spacing: 0.06em;

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, readJson, readTokenPx } from './helpers';
-import { monCountLabel, noUnknownOverflow, peakHardTabId, peakTabId, peakTabLabels, seasonData } from './layout.shared';
+import { cnBigNumber, monCountLabel, noUnknownOverflow, peakHardTabId, peakTabId, peakTabLabels, seasonData } from './layout.shared';
 
 /**
  * 布局验收：终局赛季详情页（/endgame/<mode>/<id> 的增益与子 tab） —— layout 验收层（语义契约 + 数值规格）分文件之一。
@@ -235,6 +235,46 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
       .flatMap((m) => (m.skills ?? []).map((s) => s.name));
     expect(flatSkills.length, '该骑士关应有技能（断言前提）').toBeGreaterThan(0);
     await expect(panel.locator('.nk-egd-mon__skill')).toHaveText(flatSkills);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame/peak/9：敌方卡逐战斗阶段列血量（多阶段一行一段，单阶段退回单值）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    const peak = seasonData('maze_peak.json', '9');
+    await page.goto('/endgame/peak/9');
+    const panel = page.locator('.nk-egd-peak');
+    const king = (peak.levels ?? []).find((l) => l.kind === 'king');
+    expect(king, '当期应有王棋关').toBeTruthy();
+
+    // 王棋 boss（默认停在主关档）= 3 个战斗阶段 ⇒ 立绘下方一阶段一行「阶段 N + 数值」，
+    // 期望值全部由该敌方的 `phase_hp` 派生（cn 数制），阶段号即下标 + 1
+    const boss = king!.monsters![0];
+    const phases = boss.phase_hp;
+    expect(phases?.length, '王棋 boss 应带逐阶段血量（断言前提）').toBeGreaterThan(1);
+    const card = panel.locator('.nk-egd-mon').first();
+    await expect(card.locator('.nk-egd-mon__hp')).toHaveCount(1);
+    await expect(card.locator('.nk-egd-mon__hprow')).toHaveCount(phases!.length);
+    await expect(card.locator('.nk-egd-mon__hp-label'))
+      .toHaveText(phases!.map((_, i) => `阶段 ${i + 1}`));
+    await expect(card.locator('.nk-egd-mon__hp-val')).toHaveText(phases!.map((v) => cnBigNumber(v)));
+    // 逐阶段形态只出阶段行：不再另出一个「HP」单值行（两键并存时逐阶段优先）
+    await expect(card.locator('.nk-egd-mon__hp-label').filter({ hasText: /^HP$/ })).toHaveCount(0);
+    // 逐阶段数值确实随阶段变化（否则这条断言等于没测：全等值时会与单值形态同形）
+    expect(new Set(phases!).size, '该 boss 各阶段血量应不全等（断言前提）').toBeGreaterThan(1);
+
+    // 绝境档同形、不同数值（等级 120）
+    await page.locator(peakHardTabId(king!)).click();
+    const hardPhases = king!.hard!.monsters![0].phase_hp!;
+    const hardCard = panel.locator('.nk-egd-mon').first();
+    await expect(hardCard.locator('.nk-egd-mon__hp-val')).toHaveText(hardPhases.map((v) => cnBigNumber(v)));
+
+    // 单阶段敌方（骑士关全档）退回单值一行「HP」：`phase_hp` 缺位即不长阶段行
+    await page.locator(peakTabId(peak.levels![0])).click();
+    expect(peak.levels![0].monsters!.every((m) => !m.phase_hp), '该骑士关不应带 phase_hp').toBe(true);
+    await expect(panel.locator('.nk-egd-mon__hp-label')).toHaveText(
+      peak.levels![0].monsters!.map(() => 'HP'));
+    await expect(panel.locator('.nk-egd-mon__hprow')).toHaveCount(peak.levels![0].monsters!.length);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
