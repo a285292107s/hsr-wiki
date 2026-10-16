@@ -115,7 +115,18 @@ test.describe('布局验收：底栏槽位数与语言无关', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 780 });
     await page.goto('/currency/role');
-    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+    /* 就绪门必须等**被测对象**（侧栏已切到 CW 集），不能等「第一个锚点可见」：
+       `route.meta.cw` 在 router 解析完成前为 false ⇒ 侧栏先渲染**常规模式**那套
+       （`/` `/character` `/lightcone` `/relic` `/endgame`），而它们同样是 `a.ui-sidebar-link`，
+       弱门会立刻通过；随后 `evaluateAll` **无自动等待**，于是把常规集当成 CW 集采样。
+       CI 实测（2026-10-16，分片 3）：读到 5 个常规 href 且 `every(vis)` 为假 ⇒ 第 123 行报红。
+       同文件 ≥768px 那条的注释已记过同一课（「`anchors.length` 读到 0」），此处是它的兄弟形态：
+       **弱门等到的不是缺陷页，而是同一外壳的另一个模式形态。** */
+    await expect(
+      page.locator('.ui-sidebar a.ui-sidebar-link[href="/character"]'),
+      '侧栏应已从常规模式集切到 CW 集（否则后续采样判的不是被测页）',
+    ).toHaveCount(0);
+    await expect(page.locator('.ui-sidebar a.ui-sidebar-link[href="/currency/role"]')).toBeVisible();
     const all = await page.locator('.ui-sidebar')
       .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
       .evaluateAll((els) => els.map((el) => ({ href: el.getAttribute('href'), vis: el.offsetParent !== null })));
