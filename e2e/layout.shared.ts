@@ -40,6 +40,56 @@ export async function collectNavAnchors(page: import('@playwright/test').Page) {
   );
 }
 
+/** 就绪门：等侧栏已切到**指定模式**的导航集。不抛错——就绪门不负责报缺陷（沿用 `waitForViewMounted`
+ *  的纪律），页面缺陷由调用方自己的断言暴露。
+ *
+ *  为什么不能只等「第一个 `a.ui-sidebar-link` 可见」：`route.meta.cw` 在 router 解析完成前为 false
+ *  ⇒ 侧栏先渲染**常规模式**那套（`/` `/character` `/lightcone` `/relic` `/endgame`），而它们同样是
+ *  `a.ui-sidebar-link` ⇒ 弱门立刻通过；随后 `evaluateAll`（**无自动等待**）就把那一套当成目标模式采样。
+ *  CI 实测（2026-10-16 分片 3）：CW 档读到 5 个常规 href 且 `every(vis)` 为假。A/B（390px + CPU 节流 4×，
+ *  各 12 轮）弱门采错 **12/12**、本门 **0/12**。
+ *  判据是**该模式独有的锚点在场 + 另一模式的锚点退场**，而不是「这类元素出现了」——后者在
+ *  「同一外壳的另一个形态」下必假通过（同族坑位见 docs/memory/testing.md）。
+ *
+ *  href **必须按后缀匹配**：带语言前缀时锚点是 `/pt/character`、`/jp/currency/role`（ADR 0052），
+ *  写死 `/character` 会恒不命中 ⇒ 门只能干等超时（本轮实测把这个 bug 打成了 fp/pt 档 4/4 失败）。
+ *  故先取 `pathname` 再比后缀；**不拼语言前缀**，语言清单变化时不必改这里。
+ *  后缀匹配安全性：导航 href 是有限已知集（常规 `/character` 等 9 项、CW `/currency/*` 6 项），
+ *  实测无「一项的路径以另一项路径结尾」的碰撞（`/characters` 这类也不命中 `/character`）。 */
+export async function waitForNavMode(
+  page: import('@playwright/test').Page,
+  mode: 'normal' | 'cw',
+  timeout = 10_000,
+): Promise<void> {
+  const want = mode === 'cw' ? '/currency/role' : '/character';
+  const gone = mode === 'cw' ? '/character' : '/currency/role';
+  await page
+    .waitForFunction(
+      ({ w, g }: { w: string; g: string }) => {
+        const bar = document.querySelector('.ui-sidebar');
+        if (!bar) return false;
+        /** 语言前缀无关：比 pathname 后缀（`/pt/character` 命中 `/character`）。 */
+        const is = (a: Element, suffix: string): boolean => {
+          const raw = a.getAttribute('href') ?? '';
+          let p = raw;
+          try {
+            p = new URL(raw, location.origin).pathname;
+          } catch {
+            /* 取不到 pathname 就退回原值比较（相对 href 也是合法形态） */
+          }
+          return p === suffix || p.endsWith(suffix);
+        };
+        const links = [...bar.querySelectorAll('a.ui-sidebar-link')];
+        if (links.some((a) => is(a, g))) return false;
+        const mine = links.find((a) => is(a, w));
+        return !!mine && (mine as HTMLElement).offsetParent !== null;
+      },
+      { w: want, g: gone },
+      { timeout },
+    )
+    .catch(() => {});
+}
+
 /**
  * 某路由的导航入口是否**可达**——底栏直连 **或** 折叠进「更多」抽屉。
  *

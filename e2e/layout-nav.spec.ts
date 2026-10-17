@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { collectConsoleIssues, waitForCatalogCards } from './helpers';
-import { collectNavAnchors, noUnknownOverflow } from './layout.shared';
+import { collectNavAnchors, noUnknownOverflow, waitForNavMode } from './layout.shared';
 
 /**
  * 布局验收：导航动态溢出折叠 —— layout 验收层（语义契约 + 数值规格）分文件之一。
@@ -65,8 +65,9 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     /* 就绪等待必须先于「入口隐藏」断言：导航尚未挂载时 `.ui-sidebar-more` 同样 `toBeHidden()`、
        抽屉同样 `toHaveCount(0)`——这两条对空文档恒真，不构成等待。而 `collectNavAnchors`
        是 `evaluateAll`（无自动等待），首跑 CI 第 2 条失败即此：`anchors.length` 读到 0。
-       锚点用静态导航表渲染（无网络依赖），首个锚点可见即代表侧栏已就绪。 */
-    await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+       锚点用静态导航表渲染（无网络依赖）；门统一走 `waitForNavMode`（等常规集就位）——
+       与上面两条同源，「等第一个锚点可见」在同一外壳的另一个模式形态下会假通过。 */
+    await waitForNavMode(page, 'normal');
     await expect(page.locator('.ui-sidebar-more')).toBeHidden();
     const anchors = await collectNavAnchors(page);
     expect(anchors.length).toBeGreaterThan(1);
@@ -93,7 +94,10 @@ test.describe('布局验收：底栏槽位数与语言无关', () => {
     const count = async (url: string, width: number): Promise<number> => {
       await page.setViewportSize({ width, height: 780 });
       await page.goto(url);
-      await expect(page.locator('a.ui-sidebar-link').first()).toBeVisible();
+      /* 就绪门等**该模式的导航集**就位，而不是「第一个锚点可见」——后者在同一外壳的另一个模式
+         形态下会假通过（见 `waitForNavMode` 的注释与 CI 取证）。本条两个 URL 都是常规模式、
+         当前测不到模式翻转窗口，但收口成统一门是为了挡住「日后往这张表里加 CW 档」这一类回归。 */
+      await waitForNavMode(page, 'normal');
       return page.locator('.ui-sidebar')
         .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
         .evaluateAll((els) => els.filter((el) => el.offsetParent !== null).length);
@@ -119,14 +123,10 @@ test.describe('布局验收：底栏槽位数与语言无关', () => {
        `route.meta.cw` 在 router 解析完成前为 false ⇒ 侧栏先渲染**常规模式**那套
        （`/` `/character` `/lightcone` `/relic` `/endgame`），而它们同样是 `a.ui-sidebar-link`，
        弱门会立刻通过；随后 `evaluateAll` **无自动等待**，于是把常规集当成 CW 集采样。
-       CI 实测（2026-10-16，分片 3）：读到 5 个常规 href 且 `every(vis)` 为假 ⇒ 第 123 行报红。
+       CI 实测（2026-10-16，分片 3）：读到 5 个常规 href 且 `every(vis)` 为假 ⇒ 报红。
        同文件 ≥768px 那条的注释已记过同一课（「`anchors.length` 读到 0」），此处是它的兄弟形态：
        **弱门等到的不是缺陷页，而是同一外壳的另一个模式形态。** */
-    await expect(
-      page.locator('.ui-sidebar a.ui-sidebar-link[href="/character"]'),
-      '侧栏应已从常规模式集切到 CW 集（否则后续采样判的不是被测页）',
-    ).toHaveCount(0);
-    await expect(page.locator('.ui-sidebar a.ui-sidebar-link[href="/currency/role"]')).toBeVisible();
+    await waitForNavMode(page, 'cw');
     const all = await page.locator('.ui-sidebar')
       .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
       .evaluateAll((els) => els.map((el) => ({ href: el.getAttribute('href'), vis: el.offsetParent !== null })));
