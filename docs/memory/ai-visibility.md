@@ -38,6 +38,9 @@
 - **页面 ↔ 快照的对齐粒度要分事实与 chrome 两类**：**实体级事实标签必须逐字一致**（`<h1>`、实体名、事实行、一切数据派生文本）；**页面级 chrome 允许快照措辞更完整**（分区标题带括号说明、分组标签用全称、装饰性英文不进快照）。两处都保持现状，禁止互相搬字。
 - **计数文案的复数选形也必须与页面同口径**：词典用 `|` 给单/复数（`{n} tier | {n} tiers`），页面走 vue-i18n 的 `t(key, { n })`——n=1 取单数、其余取复数（由 `src/app/__tests__/i18n.test.ts` 钉住）。生成器必须写成 `uiT(key, 兜底, { n }, n)`，**显式把 n 当 count 传**；漏传就恒取复数形式，n=1 时快照出现 `1 tiers`（页面是 `1 tier`），与「事实标签逐字一致」相冲且不报错。判据：脚本枚举 `uiT(` 调用点 × 13 语言词典是否含 `|`，**两侧都成立才需要传 count**（本站 45 处里只有 7 处符合，别按「所有 `{n}` 都要传」批量改）。`tools/gen-ai-endpoints.mjs`
 - **文本上限是有意取舍，不得静默改成全量**：单实体文本上限（目录条目 4000 / 详情页 20000 字符）用于防止大文件把 dist 撑爆；截断行为是契约的一部分。
+- **给快照加合成文案时，新增 i18n 键会撞汉字残留棘轮**：`ui()` 缺键回退中文，于是新键在 12 个非汉字语言的分层快照里就是一行中文，直接判红。首页统计块因此只用**既有词典键 + 纯数字**拼（目录名 + 条目数），不新增键、不写叙述句；确要写就必须 13 语言同批补齐译文。`tools/gen-ai-endpoints.mjs`
+- **空列表是「条目静默漏光」的伪装形态**：`<ul class="nk-snapshot__list"></ul>` 语法合法、任何计数断言都看不见它，故守卫显式禁止空列表，`catalogBody()` 对空 `items` 不落 `<ul>`。
+- **给巨页加 `<h2>` 骨架不改条目集合**：`/item`、`/achievement` 的分组只加结构（`groupSections`），条目仍逐条带 `nk-snapshot__entry`；分组标签取不到时**构建失败**而不是造回退标签——空 `<h2>` 必被守卫拦，兜底命名则等于为数据里没有的分类自撰文本（同「禁止为无数据实体合成通用句」）。`tools/gen-ai-endpoints.mjs`
 
 ## 快照与就绪态类名耦合
 
@@ -53,6 +56,8 @@
 - **rewrite 目标缺文件时回落 catch-all（返回外壳而非 404）**：因此未发布/不存在实体的 URL 行为与改造前一致，无回归——不要把这当成缺陷去「修成 404」，那会改变既有 URL 语义。
 - **平台默认值 ≠ 平台行为：`trailingSlash` 未显式设置时，Vercel 一条归一化路由都不生成**。判据在 `@vercel/routing-utils` 的 `convertTrailingSlash`（`typeof trailingSlash === 'undefined'` 直接跳过），不能按「默认 false 就会去掉尾斜杠」推理。后果：`/character/1308/`、`/en/`、`/character/` 这类带尾斜杠的变体绕过全部 rewrite 落到 catch-all，与规范 URL 并存且返回 200 空壳——而**快照与 sitemap 都不含尾斜杠形态，所有守卫照旧全绿**。取证法：线上同一路径 ± 尾斜杠各取一次，两次结果不一致即中招。`vercel.json`
 - **约定文件名入口（如 `/llms.txt`）最坏的形态是「文件不存在 + catch-all 兜底」**：它返回 200 的 HTML 外壳，于是既不是有效文件、也不是 404，任何只看状态码的审计都会判「文件在」。要么真放一份文本文件（`public/llms.txt`，随构建复制到 dist 根、由文件系统先于 rewrites 投递），要么让它 404；不要让它以 200 空壳存在。`tools/check-ai-endpoints.mjs`
+- **软 404 的合格解是 `noindex`，不是 404**：catch-all 是客户端路由唯一的 200 通道（改成 404 会打断 SPA 路由），而 200 + 零正文在爬虫侧就是 soft 404。故 `dist/prerender/_shell.html` 本体带 `<meta name="robots" content="noindex">`，**公开快照一份都不带**。`vercel.json` / `tools/gen-ai-endpoints.mjs`
+- **shell 的 `noindex` 必须在渲染快照前从模板里剥掉**：`template` 是同一份被用来渲染 1432 份快照的字符串；只在写 shell 时注入、读模板时原样带出的话，**二次构建会把 `noindex` 灌进全部快照**——而首次构建完全看不出来（那时的模板还没有它）。判据：任何快照含 `noindex` 即判红。`tools/gen-ai-endpoints.mjs`
 
 ## 可见性对齐（反 cloaking 的硬约束）
 
@@ -86,6 +91,8 @@
 - **hreflang 的值必须取 `culture`（BCP 47），不能取上游 `TextLanguageKey`**：`cht` / `jp` / `kr` 不是语言码（应为 `zh-TW` / `ja-JP` / `ko-KR`），Google 对无法识别的值**整条忽略**——日 / 韩 / 繁三个版本静默脱离 hreflang 簇，而「14 条 = 13 语言 + x-default」的计数断言照样全绿（**条数正确与取值合法是两个维度**）。ADR 0052 决策 1 与 `src/lib/i18n/locales.ts` 注释都写着取 culture，实现取 code 属分叉。`tools/gen-ai-endpoints.mjs`
 - **`Article` 描述数据条目页＝把数据页说成资讯稿**：机器拿不到条目身份与属性。判据（可反向验证）：`Article` 只允许出现在叙述性专题页，数据条目页出现即判红；条目页必须是 `WebPage` + `mainEntity`（条目没有 schema.org 对应类型时落 `Thing`，**不要自造类型**）。
 - **缺 `og:image` 不报错，只在分享出去时才看出来**：页面、守卫、构建全绿，平台只渲染纯文字卡片。判据：每页断言 `og:image` 存在且与本仓 origin 同源；站点级一张图即可，不必每页一张。
+- **日期只写在可见文本里等于「这页没有日期」**：抽取器与搜索侧（DeepSeek Search 的 `date` 字段）只读结构化日期。判据：每份快照必须同时有可见 `<time datetime="{synced_at}">` 与 JSON-LD `dateModified`，且与 sitemap `<lastmod>` **同源**（三者都取 `version.json.synced_at`）。**守卫只断言前两处的存在与取值**——`lastmod` 的取值当前无断言（第 2 组只校验 URL 集合与同源），改口径时不会报错，属已知盲区。`tools/gen-ai-endpoints.mjs`
+- **`dateModified` 会按「页面类型」漏，而不是按语言漏**：实测曾只有 `ldDataPage`（数据条目页）与 `ldArticle`（专题页）带它，恰好把首页 + 全部目录 / 枢纽 + 98 个角色详情漏在外面——JSON 合法、`JSON.parse` 断言全绿，线上就是「这批页面没有发布时间」。新增页面类型时必须同步该字段，守卫要写成「**每份快照**都必须有」而不是「抽样有几类」。`tools/gen-ai-endpoints.mjs`
 
 ## 无 JS 取证与死链审计
 

@@ -34,6 +34,9 @@ const LOCALES = LANG_REGISTRY.languages.map((l) => ({ code: l.code, culture: l.c
 const DEFAULT_LOCALE = LANG_REGISTRY.default;
 const DEFAULT_CULTURE = LOCALES.find((l) => l.code === DEFAULT_LOCALE)?.culture || 'zh-CN';
 let currentLocale = DEFAULT_LOCALE;
+/** 版本同步日期（converter 的 `version.json.synced_at`）：JSON-LD `dateModified` 的取值来源。
+    设成模块级是因为 `ldCollection()` 有十余处调用点都不带 ctx，而该值与语言无关（同一个 version.json）。 */
+let SNAPSHOT_SYNCED_AT = '';
 
 /** `og:locale` 要 `语言_地区`（zh_CN / en_US / ja_JP），而 layout 用的是 BCP 47（zh-CN）。 */
 const ogLocale = (culture) => String(culture || DEFAULT_CULTURE).replace('-', '_');
@@ -106,6 +109,12 @@ const PRERENDER_DIR = join(DIST_DIR, 'prerender');
 const SITEMAP_FILE = join(DIST_DIR, 'sitemap.xml');
 /** 纯 shell 落点（下划线前缀 = 非快照：不注入 .nk-snapshot/canonical/title，不进 sitemap/覆盖率统计） */
 const SHELL_FILE = join(PRERENDER_DIR, '_shell.html');
+/** 纯 shell 的 noindex：catch-all 把**一切未命中快照的路径**（不存在的实体、垃圾路径、客户端路由）
+    都投向它——`200` + 零正文在爬虫侧就是 soft 404，会稀释整站质量信号。robots.txt 只登记了那几条
+    客户端路由，故在文件本体加 noindex；**快照一份都不加**（守卫反向断言）。
+    必须在生成快照**之前**从模板里剥掉：否则二次构建会把上一轮的 noindex 带进全部快照。 */
+const SHELL_NOINDEX = '<meta name="robots" content="noindex">';
+const withShellNoindex = (html) => (html.includes(SHELL_NOINDEX) ? html : html.replace('</head>', `${SHELL_NOINDEX}</head>`));
 
 /** 单实体文本上限（契约 §3）：目录条目 4000 / 详情页 20000，超出截断并加 … */
 const SNAPSHOT_TEXT_LIMIT_ENTRY = 4000;
@@ -508,14 +517,21 @@ function linkList(items, entry = false) {
   return `<ul class="nk-snapshot__list">${rows.join('')}</ul>`;
 }
 
+/** `<time>` 的日期占位：`{date}` 在各语言模板里的位置不同，故先塞哨兵，
+    再「先转义模板、后把哨兵换成标签」——直接 `esc()` 含标签的整串会把标签自己也转义掉。 */
+const DATE_SLOT = '{{nk-date}}';
+/** 机器可读的更新日期：`<time datetime>` 是抽取器/搜索侧唯一能读到的结构化日期信号
+    （页脚那句可见文本只对人有意义）。取值同 `version.json.synced_at`，与 sitemap `<lastmod>` 同源。 */
+const timeTag = (v) => `<time datetime="${esc(v)}">${esc(v)}</time>`;
+
 function snapFooter(ctx) {
   /* 页脚文案走词典（每页一次，非缺省语言下也曾整串中文）：
      `snapshot.updatedAt` / `snapshot.note` 均带 `{site}` 或 `{date}` 占位符。
      `{site}` 的取值**按用途分两种**：描述模板（`snapshot.sum.*`）传 `gameName()`（主关键词），
      本页脚传 `SITE_NAME`（站点自我指称，游戏名在这里没有意义）。 */
-  const updated = uiT('snapshot.updatedAt', '数据最后更新：{date}', { date: ctx.syncedAt });
+  const updated = uiT('snapshot.updatedAt', '数据最后更新：{date}', { date: DATE_SLOT });
   const note = uiT('snapshot.note', '本页为{site}构建期预渲染快照，内容与站点数据一致，无 JavaScript 亦可读取。', { site: SITE_NAME });
-  return `<p class="nk-snapshot__meta">${esc(updated)}</p>`
+  return `<p class="nk-snapshot__meta">${esc(updated).replace(DATE_SLOT, timeTag(ctx.syncedAt))}</p>`
     + `<p class="nk-snapshot__note">${esc(note)}</p>`;
 }
 
@@ -527,11 +543,35 @@ function factList(facts) {
   return rows.length ? `<dl class="nk-snapshot__facts">${rows.join('')}</dl>` : '';
 }
 
+/**
+ * 按 `labelOf(row)` 把条目分组为 `<section><h2>` 骨架（契约 §3 的页面级 chrome）。
+ *
+ * `entries` 必须与 `rows` **同序等长**：条目字段（meta/desc）是逐条转义过的片段，无法从 rows 反推，
+ * 故两个数组按索引配对；长度不等立即失败（否则分组会静默错位而条目数断言照样全绿）。
+ * `labelOf` 返回空串立即失败：空 `<h2>` 是守卫显式禁止的形态，而给它编一个回退标签即「为数据没有的
+ * 分类自撰文本」，违反「文本必须来自数据」硬约束。
+ */
+function groupSections(rows, labelOf, labelSource, entries) {
+  if (rows.length !== entries.length) {
+    fail(`${labelSource}：分组源与条目数不等（${rows.length} vs ${entries.length}）`);
+  }
+  const groups = new Map();
+  rows.forEach((row, i) => {
+    const label = labelOf(row);
+    if (!label) fail(`${labelSource}：存在取不到分组标签的条目，会产出空 <h2>`);
+    if (!groups.has(label)) groups.set(label, []);
+    groups.get(label).push(entries[i]);
+  });
+  return [...groups.entries()].map(([label, list]) => ({ title: label, html: linkList(list, true) }));
+}
+
 /** 目录页正文 */
 function catalogBody(ctx, o) {
   const parts = ['<div class="nk-snapshot">', o.crumbs, `<h1>${esc(o.h1)}</h1>`];
   if (o.summary) parts.push(`<p class="nk-snapshot__summary">${o.summary}</p>`);
-  parts.push(linkList(o.items, true));
+  /* 空 items 不落 `<ul>`：分组目录页（`/item`、`/achievement`）与首页把条目放进 `sections`，
+     此处若照渲染会留下一个空列表——空列表在语法层无法与「条目静默漏光」区分（守卫断言禁止空列表）。 */
+  if (o.items && o.items.length) parts.push(linkList(o.items, true));
   for (const s of o.sections || []) parts.push(snapSection(s.title, s.html));
   parts.push(snapFooter(ctx));
   parts.push('</div>');
@@ -561,6 +601,9 @@ function ldCollection(route, title, description, entries) {
     name: title,
     url: SITE_ORIGIN + route,
     description,
+    /* 目录页/枢纽页也必须有 `dateModified`：DeepSeek Search 的 `date` 字段与 rerank 的时效性维度
+       只能从页面的日期信号抽取，缺它等于「这页没有发布时间」。取值与 sitemap `<lastmod>` 同源。 */
+    dateModified: SNAPSHOT_SYNCED_AT,
     inLanguage: ldLang(),
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
     mainEntity: {
@@ -690,6 +733,9 @@ function ldCharacter(route, name, description, crumbs, ctx, d) {
         name,
         description,
         url: SITE_ORIGIN + route,
+        /* 与 `ldDataPage` / `ldCollection` 同源：三类页面都带 `dateModified`（缺它的只剩本函数与
+           `ldCollection`，正是「日期只存在于可见文本里」的那批页面）。 */
+        dateModified: ctx.syncedAt,
         inLanguage: ldLang(),
         isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
         mainEntity: { '@id': `${SITE_ORIGIN}${route}#character` },
@@ -812,8 +858,9 @@ function renderSitemap(ctx, pages) {
 
 function loadContext() {
   const version = readJson('version.json');
+  SNAPSHOT_SYNCED_AT = clean(version.synced_at) || '未知';
   return {
-    syncedAt: clean(version.synced_at) || '未知',
+    syncedAt: SNAPSHOT_SYNCED_AT,
     versionLabel: clean(version.version_label),
     pathNames: new Map(readJson('paths.json').map((p) => [p.id, p.name])),
     elemNames: new Map(readJson('elements.json').map((e) => [e.id, e.name])),
@@ -837,6 +884,40 @@ function makePage(family, o) {
 }
 
 /* ─── 首页 `/`（版本上新三分区） ─── */
+
+/**
+ * 首页站点级统计块（契约 §3「页面级摘要」：条目数等集合事实属页面元信息，可合成）。
+ *
+ * 条目数**从同一次构建的目录页正文里数 `nk-snapshot__entry` 得到**，不复刻各族的可见性过滤判据：
+ * 复刻即第二事实源，且会在过滤判据变更时与目录页静默分叉。
+ * 措辞只由 `<a>` 的目录名（既有词典键）+ 一个纯数字组成——**不新增 i18n 键、不合成叙述句**：
+ * `ui()` 缺键回退中文，新键会在 12 个非汉字语言的分层快照里留下中文，直接撞上汉字残留棘轮。
+ */
+const STAT_ROUTES = ['/character', '/lightcone', '/relic', '/item', '/monster', '/achievement'];
+
+function homeStatsBlock(pages) {
+  const rows = [];
+  for (const route of STAT_ROUTES) {
+    const page = pages.find((p) => p.route === route);
+    if (!page) continue;
+    const n = (page.body.match(/nk-snapshot__entry/g) || []).length;
+    if (!n) continue;
+    rows.push(`<li class="nk-snapshot__stat"><a href="${esc(route)}">${esc(CATALOG_TITLE[route]())}</a>`
+      + `<span class="nk-snapshot__stat-n">${n}</span></li>`);
+  }
+  if (rows.length < 5) {
+    fail(`首页站点统计块只取到 ${rows.length} 个目录（期望 ≥5）：目录页正文缺 nk-snapshot__entry 或路由未构建`);
+  }
+  return `<ul class="nk-snapshot__stats">${rows.join('')}</ul>`;
+}
+
+/** 条目数要等目录页构建完才知道 ⇒ 统计块只能在 `buildPages()` 之后注入，位置在页脚之前。 */
+function injectHomeStats(page, block) {
+  const anchor = '<p class="nk-snapshot__meta">';
+  const i = page.body.lastIndexOf(anchor);
+  if (i < 0) fail('首页快照正文缺少页脚锚点，无法注入站点统计块');
+  page.body = page.body.slice(0, i) + block + page.body.slice(i);
+}
 
 function homePages(ctx) {
   const chars = readJson('characters.json').filter((c) => c.name);
@@ -1223,6 +1304,9 @@ function itemPages(ctx) {
     meta: `${esc(i.main_type ? itemMainTypeLabel(i.main_type) : '')} · ${esc(starText(i.rarity))}`,
     desc: [txtSafe(i.desc, null, 400), txtSafe(i.bg_desc, null, SNAPSHOT_TEXT_LIMIT_ENTRY)].filter(Boolean).join(' '),
   }));
+  /* 2412 条挤在一张页里：转 Markdown 后正文没有任何标题层级，抽取器只能整段吞下或按长度硬切。
+     按主类型分组**只给正文加 `<h2>` 骨架**（条目集合、顺序、数量都不变，仍逐条带 `nk-snapshot__entry`），
+     不新增路由——真正的分页/条目级 URL 是另一件事（见交付记录「待用户裁决」）。 */
   return [makePage('item-list', {
     route: '/item',
     file: 'item.html',
@@ -1233,7 +1317,8 @@ function itemPages(ctx) {
       crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/item'](), null]]),
       h1: CATALOG_TITLE['/item'](),
       summary: esc(summaryPlain),
-      items,
+      items: [],
+      sections: groupSections(ordered, (i) => (i.main_type ? itemMainTypeLabel(i.main_type) : ''), 'items.json 的 main_type', items),
     }),
   })];
 }
@@ -1652,6 +1737,7 @@ function achievementPages(ctx) {
     meta: [esc(seriesName.get(a.series_id) || ''), esc(a.rarity ? achRarityLabel(a.rarity) : '')].filter(Boolean).join(' · '),
     desc: txtSafe(a.desc, null, SNAPSHOT_TEXT_LIMIT_ENTRY),
   }));
+  /* 同 `/item`：1950 条按成就系列分组，只加 `<h2>` 骨架，条目集合与数量不变。 */
   return [makePage('achievement-list', {
     route: '/achievement',
     file: 'achievement.html',
@@ -1662,7 +1748,8 @@ function achievementPages(ctx) {
       crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/achievement'](), null]]),
       h1: CATALOG_TITLE['/achievement'](),
       summary: esc(summaryPlain),
-      items,
+      items: [],
+      sections: groupSections(list, (a) => seriesName.get(a.series_id) || '', 'achievements.json 的 series_id', items),
     }),
   })];
 }
@@ -2172,7 +2259,9 @@ function main() {
    * `_shell.html` 缺失且 `dist/index.html` 已被注入时立即失败，避免拿 home 快照当 shell 二次注入。
    */
   const shellSource = existsSync(SHELL_FILE) ? SHELL_FILE : TEMPLATE_FILE;
-  const template = readFileSync(shellSource, 'utf8');
+  /* 剥掉上一轮写进 shell 的 noindex：`template` 同时用于渲染全部快照，
+     带着它会让 1432 份快照一起变成 noindex（守卫反向断言这一条）。 */
+  const template = readFileSync(shellSource, 'utf8').split(SHELL_NOINDEX).join('');
   if (shellSource === TEMPLATE_FILE && template.includes('class="nk-snapshot"')) {
     fail(`${TEMPLATE_FILE} 已是注入过的快照且缺少 ${SHELL_FILE}：请先执行 \`pnpm exec vite build\` 重建纯 shell 模板`);
   }
@@ -2213,6 +2302,9 @@ function main() {
     currentLocale = loc.code;
     ctx = loadContext();
     const built = buildPages(ctx);
+    /* 站点统计块的条目数取自**本次构建的目录页正文**、标签取当前语言词典 ⇒ 逐语言各注入一次。 */
+    const homePage = built.find((p) => p.route === '/');
+    if (homePage) injectHomeStats(homePage, homeStatsBlock(built));
     const keep = loc.code === DEFAULT_LOCALE ? built : built.filter((p) => isLayered(p.family));
     const prefix = loc.code === DEFAULT_LOCALE ? '' : `/${loc.code}`;
     for (const p of keep) {
@@ -2235,7 +2327,7 @@ function main() {
    * 下划线前缀 = 非快照标记：不注入 `.nk-snapshot` / canonical / title / JSON-LD，
    * 守卫与覆盖率统计都跳过 `_` 前缀文件。
    */
-  writeFileSync(SHELL_FILE, template);
+  writeFileSync(SHELL_FILE, withShellNoindex(template));
 
   let bytes = 0;
   let homeHtml = null;

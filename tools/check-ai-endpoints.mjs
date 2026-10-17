@@ -8,12 +8,19 @@
  *    前缀下、源与路径之间必须有分隔符、自身 canonical 路径必须在场）/游戏标记/未展开参数占位符 `#\d+\[…\]`/
  *    裸 `#N`（仅 currency/item.html 与 currency/augment.html 按页点名，禁止全局化）/入口 JS，详情页与专题页
  *    voracity.html 禁 nk-snapshot__entry；正文抽取必须非空（抽取为空即判红——抽取恒空会让全部正文类
- *    断言静默失效）；汉字脚本语言（cn/cht/jp/kr）以外的分层快照正文禁汉字（棘轮，基线 `tools/ai-han-baseline.json`）；
+ *    断言静默失效）；快照禁 noindex（robots noindex 是 `_shell.html` 专属）/ JSON-LD 页面级节点
+ *    `dateModified` = `version.json.synced_at` / 页脚 `<p class="nk-snapshot__meta">` 内
+ *    `<time datetime="{synced_at}">{synced_at}</time>`；汉字脚本语言（cn/cht/jp/kr）以外的分层快照
+ *    正文禁汉字（棘轮，基线 `tools/ai-han-baseline.json`）；
  * ④ 文件级覆盖率：每族快照数 = 数据 + 应用可见性判据独立推导的期望（禁写死数字；契约 §2「可见性对齐」）；
  * ⑤ 条目级覆盖率：12 个目录页 nk-snapshot__entry 计数 = 同一条目数、枢纽 ≥1、详情页抽样 = 0（契约 §6.4②③）；
+ *    `/item` `/achievement`（含 13 语言）的每条 nk-snapshot__entry 必须落在带非空 `<h2>` 的
+ *    `nk-snapshot__section` 内、全站禁空 `<ul class="nk-snapshot__list"></ul>`；
  *    专题页 `/voracity` **不在此列**——它不是目录，正文分区不是「应用收录条目集合」，故无条目级断言（契约 §3/§6.4 注）。
  * ⑥ 外壳与首页：`prerender/_shell.html` 存在且不含 nk-snapshot、`dist/index.html` ≡ `prerender/home.html`（sha256）、
  *    `dist/index.html` 有非空 h1 与中文正文（Vercel 文件系统先于 rewrites，'/' 直接命中它）；
+ *    首页族 13 份（`home.html` + 12 个语言前缀）的 `nk-snapshot__stats` 恰 6 条统计（N = 检查 5 的实时
+ *    条目期望，禁写死），stats 类名不得出现在非首页族；
  * ⑦ 汇总一行 [PASS]/[FAIL]，任一失败退出码 1。prerender 下 `_` 前缀文件为非快照内部文件，扫描跳过并报数。
  * 用法：node tools/check-ai-endpoints.mjs [--dist dist] [--data public/data/cn]
  *        [--robots public/robots.txt] [--generator tools/gen-ai-endpoints.mjs]
@@ -71,6 +78,15 @@ const PARAM_PLACEHOLDER_RE = /#\d+\[[^\]]*\]/g;
  */
 const BARE_HASH_PAGES = ['currency/item.html', 'currency/augment.html'];
 const BARE_HASH_RE = /#\d+/g;
+/**
+ * JSON-LD 里**必须**自带 `dateModified` 的页面级节点类型（契约 §3 时效性信号）：
+ * 生成器 ldCollection / ldDataPage / ldCharacter 与 ldArticle 各写一个页面级节点，
+ * 嵌套实体（Person / BreadcrumbList / ItemList…）不带该字段，不在白名单内。
+ */
+const LD_PAGE_NODE_TYPES = new Set(['WebPage', 'CollectionPage', 'Article']);
+/** 首页站点统计块（契约 §3「页面级摘要」）的目录路由白名单。
+ *  路由是契约常量；条目数 N **禁止写死**——期望值由检查 5 的实时口径（catalogEntryExpect）提供。 */
+const STAT_CATALOG_ROUTES = ['/character', '/lightcone', '/relic', '/item', '/monster', '/achievement'];
 
 /* ─── 参数 ─── */
 function arg(name, fallback) {
@@ -168,13 +184,57 @@ function linkHref(html, relName) {
  * 只认 li 元素且 class token 精确匹配（支持双/单引号、无引号、多 class）；其它标签上的同名 class 不计。
  */
 function countEntryMarks(html) {
+  return countTagClass(html, 'li', 'nk-snapshot__entry');
+}
+
+/** 标签上的 class 属性 → token 数组（双/单引号、无引号都认）；无 class 返回空数组 */
+function classTokensOf(tagText) {
+  const cm = tagText.match(/\bclass\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+  if (!cm) return [];
+  return (((cm[1] ?? cm[2] ?? cm[3]) || '').trim()).split(/\s+/).filter(Boolean);
+}
+
+/** tag 元素上 class token 精确匹配的计数——token 必须整体相等，`nk-snapshot__stat` 不会被
+ *  `nk-snapshot__stat-n` 命中（否则统计块断言会被行内数字 span 污染）。 */
+function countTagClass(html, tag, token) {
   let n = 0;
-  for (const m of html.matchAll(/<li\b[^>]*>/gi)) {
-    const cm = m[0].match(/\bclass\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
-    if (!cm) continue;
-    if (((cm[1] ?? cm[2] ?? cm[3]) || '').split(/\s+/).includes('nk-snapshot__entry')) n++;
+  for (const m of html.matchAll(new RegExp(`<${tag}\\b[^>]*>`, 'gi'))) {
+    if (classTokensOf(m[0]).includes(token)) n++;
   }
   return n;
+}
+
+/**
+ * 成对标签区块（栈式配对 open/close）。`blocks` 只含**最外层**区块，`all` 含全部配对（嵌套也在内）。
+ * 不用 `/<section[\s\S]*?<\/section>/` 这类非贪婪正则：嵌套时它会配错，且配对失败（未闭合/多余闭合）
+ * 会被静默吞掉——本函数把两种情况都报出来，供调用方判红。
+ */
+function pairedTagBlocks(html, tag) {
+  const events = [];
+  for (const m of html.matchAll(new RegExp(`<${tag}\\b[^>]*>`, 'gi'))) {
+    events.push({ i: m.index, end: m.index + m[0].length, tagText: m[0], open: true });
+  }
+  for (const m of html.matchAll(new RegExp(`</${tag}\\s*>`, 'gi'))) events.push({ i: m.index, open: false });
+  events.sort((a, b) => a.i - b.i);
+  const stack = [];
+  const blocks = [];
+  const all = [];
+  let orphanCloses = 0;
+  for (const ev of events) {
+    if (ev.open) {
+      stack.push(ev);
+      continue;
+    }
+    if (stack.length === 0) {
+      orphanCloses++;
+      continue;
+    }
+    const op = stack.pop();
+    const block = { tagText: op.tagText, inner: html.slice(op.end, ev.i), start: op.i, depth: stack.length };
+    all.push(block);
+    if (stack.length === 0) blocks.push(block);
+  }
+  return { blocks, all, unclosed: stack.length, orphanCloses };
 }
 
 /** 详情页路由前缀（带 :id 的族）——`nk-snapshot__entry` 在这些页面上必须为 0（契约 §3 冻结）；
@@ -226,6 +286,11 @@ const LOCALE_CULTURE = Object.fromEntries(
   (LANG_JSON.languages ?? LANG_JSON).map((l) => [l.code, l.culture ?? l.code]),
 );
 const LOCALE_CULTURE_SIZE = Object.keys(LOCALE_CULTURE).length;
+/** 缺省语言（快照落在根目录，其余语言带 `/xx/` 前缀）——取自 languages.json 的 `default` 字段 */
+const DEFAULT_LOCALE = typeof LANG_JSON.default === 'string' ? LANG_JSON.default : 'cn';
+/** 目录页路由 → 应用可见条目数（检查 5 实时推导）。检查 6 的首页统计块断言复用**同一份**期望，
+ *  禁止在别处另算或写死数字——两条断言分叉即第二事实源。 */
+const catalogEntryExpect = new Map();
 /** 分层快照里仍含中文可见文本的**文件数**（按语言累计，供棘轮比对）。 */
 const hanByLocale = new Map();
 const coveredNotes = [];
@@ -417,6 +482,13 @@ let sitemapCount = -1;
     entryScripts = scriptSrcs(shellHtml).sort();
     if (!defaultTitle) details.push(`${rel(SHELL)} 无 <title>，无法判定快照默认标题`);
     if (entryScripts.length === 0) details.push(`${rel(SHELL)} 无 <script src> 入口，无法校验快照入口一致性`);
+    /* ①-a 纯外壳必须自带 robots noindex：catch-all 把**一切未命中快照的路径**（不存在的实体、垃圾路径、
+       客户端路由）都投给这份外壳，不加就是让无限多 URL 进索引。快照一份都不许带该声明
+       （①-b 在逐文件循环里断言）——两侧是同一契约的两半，缺任一半都会漏。 */
+    const shellRobotsMeta = (shellHtml.match(/<meta\b[^>]*\bname\s*=\s*["']robots["'][^>]*>/i) || [])[0] || '';
+    if (!/content\s*=\s*["'][^"']*noindex/i.test(shellRobotsMeta)) {
+      details.push(`${rel(SHELL)} 缺 robots noindex 声明（catch-all 会把 CSR 路由 / 404 / 垃圾路径都投给它，必须挡收录）`);
+    }
     /* 外壳承载 `og:image` 的静态兜底（catch-all 投递 SPA 外壳时也要有卡片图，
        而外壳不经生成器注入）⇒ origin 必须与生成器同源，否则改域时两处漂移且无人报错。 */
     const shellOg = (shellHtml.match(/<meta[^>]*property="og:image"[^>]*content="([^"]*)"/i) || [])[1] || '';
@@ -465,6 +537,16 @@ let sitemapCount = -1;
 
   /** 命中未展开参数占位符的快照数 */
   let phFiles = 0;
+  /* ②③ 的日期唯一事实源：converter 的 `version.json.synced_at`（生成器 SNAPSHOT_SYNCED_AT 与
+     sitemap `<lastmod>` 同源）。取不到即这两条断言没有判据——必须显式报出，不能静默放行。 */
+  const versionProbe = loadJson('version.json');
+  const syncedAt = versionProbe.ok ? String(versionProbe.value?.synced_at ?? '').trim() : '';
+  if (!syncedAt) {
+    details.push(
+      `无法从 ${rel(join(DATA, 'version.json'))} 读取 synced_at，dateModified / <time> 断言失效`
+      + (versionProbe.ok ? '（字段缺失或为空）' : `：${versionProbe.err}`),
+    );
+  }
   /** 命中裸 #N 的 CW 目录页（按页点名，最多 2 页） */
   const bareHashHits = [];
   for (const file of snapshotFiles) {
@@ -490,6 +572,15 @@ let sitemapCount = -1;
     if (keyRe) {
       const hit = html.match(keyRe);
       if (hit) add(`正文出现原始词典键名「${hit[1]}」（缺键或未翻译）`);
+    }
+
+    /* ①-b 快照禁 noindex：外壳的 robots noindex 一旦被带进模板，全部快照会一起从索引里消失，
+       而其它断言（title / canonical / 正文 / 条目数）照旧全绿——只有这条拦得住。
+       扫描面是整份 HTML（含 <script>）：noindex 出现在 JSON-LD 或注释里同样是泄漏。 */
+    const noindexAt = html.search(/noindex/i);
+    if (noindexAt >= 0) {
+      add(`含 noindex（快照必须可收录，该声明只属于 _shell.html）: …${
+        html.slice(Math.max(0, noindexAt - 60), noindexAt + 24).replace(/\s+/g, ' ')}…`);
     }
 
     // title 非空且非站点默认
@@ -654,6 +745,70 @@ let sitemapCount = -1;
       }
     }
 
+    /* ② JSON-LD `dateModified` = `version.json.synced_at`：搜索侧唯一能读到的时效性信号。
+       白名单判据（不是「与已知坏形态不同」）：页面级节点**必须**带该字段，且**任何**声明了
+       dateModified 的节点取值都必须等于 synced_at——漏一处、用了旧日期、或整份前缀改写缺失都在此判红。
+       先证明抽取命中了目标：页面级节点为 0、或整份 JSON-LD 一个 dateModified 都没有时**直接判红**
+       （否则「没抽到 ⇒ 不判」会让这条断言从未生效却全绿）。 */
+    if (syncedAt) {
+      const ldNodes = [];
+      for (const raw of lds) {
+        let graph;
+        try {
+          graph = JSON.parse(raw.trim());
+        } catch {
+          continue; // 解析失败已在上面报过
+        }
+        ldNodes.push(...(graph['@graph'] || [graph]));
+      }
+      const pageNodes = ldNodes.filter((n) => {
+        if (!n || typeof n !== 'object') return false;
+        const types = Array.isArray(n['@type']) ? n['@type'] : [n['@type']];
+        return types.some((t) => LD_PAGE_NODE_TYPES.has(t));
+      });
+      const dmNodes = ldNodes.filter((n) => n && typeof n === 'object' && 'dateModified' in n);
+      if (pageNodes.length === 0) {
+        add(`JSON-LD 无页面级节点（${[...LD_PAGE_NODE_TYPES].join(' / ')}），dateModified 断言无落点`);
+      } else {
+        const noDm = pageNodes.filter((n) => !('dateModified' in n));
+        if (noDm.length > 0) add(`JSON-LD 页面级节点缺 dateModified ${noDm.length} 个（期望 ${syncedAt}）`);
+      }
+      if (dmNodes.length === 0) {
+        add(`JSON-LD 无任何 dateModified（期望页面级节点带 ${syncedAt}）`);
+      } else {
+        const badDm = dmNodes.filter((n) => String(n.dateModified) !== syncedAt);
+        if (badDm.length > 0) {
+          add(`JSON-LD dateModified 为 ${
+            badDm.slice(0, 3).map((n) => JSON.stringify(n.dateModified)).join(', ')
+          }，应为 ${syncedAt}（version.json.synced_at 单一事实源）`);
+        }
+      }
+    }
+
+    /* ③ 页脚 `<time datetime="{synced_at}">{synced_at}</time>`：`<time datetime>` 是抽取器/搜索侧
+       唯一能读到的结构化日期（页脚那句可见文本只对人有意义）。
+       class 匹配走**精确 token**（classTokensOf），不用 `\bnk-snapshot__meta\b`——后者会把
+       `nk-snapshot__meta-x` 也当成命中（`-` 是词边界），于是改名后的段落仍被抽取、断言静默通过
+       （反向注入 M07 实测过这个漏洞）。
+       抽取式断言——先证明抽到了页脚 meta 段：抽不到**直接判红**，不允许当成「没有就不判」。 */
+    {
+      const metaBlock = pairedTagBlocks(html, 'p').all.find((b) => classTokensOf(b.tagText).includes('nk-snapshot__meta'));
+      if (!metaBlock) {
+        add('未抽到页脚 <p class="nk-snapshot__meta"> 段（class token 精确匹配），<time> 断言无抽取目标');
+      } else {
+        const tm = metaBlock.inner.match(/<time\b[^>]*\bdatetime\s*=\s*["']([^"']*)["'][^>]*>([\s\S]*?)<\/time>/i);
+        if (!tm) {
+          add(`页脚 meta 段内无 <time datetime>（更新日期只有可见文本，机器读不到）: ${
+            metaBlock.inner.replace(/\s+/g, ' ').slice(0, 120)}`);
+        } else if (syncedAt) {
+          const shown = visibleText(tm[2]).trim();
+          if (tm[1] !== syncedAt || shown !== syncedAt) {
+            add(`页脚 <time> 为 datetime="${tm[1]}" 文本「${shown}」，应为 ${syncedAt}（与 dateModified / sitemap lastmod 同源）`);
+          }
+        }
+      }
+    }
+
     /* JSON-LD 的 inLanguage 必须与 `<html lang>` 同源。此前它硬编码 `zh-CN`，
        于是 228 份语言前缀快照的富媒体信息全都声称自己是中文页（而页面正文是英/日/韩…），
        而且这个错误**任何解析断言都查不出来**——JSON 完全合法。 */
@@ -785,7 +940,7 @@ let sitemapCount = -1;
     ? `；跳过内部文件 ${internalFiles.length} 个（${internalFiles.map((f) => basename(f)).join(', ')}——非快照，不计入覆盖率/条目数）`
     : '';
   const title = details.length === 0
-    ? `快照正文（${snapshotFiles.length} 个文件 × 11 项断言全通过${skipNote}）`
+    ? `快照正文（${snapshotFiles.length} 个文件 × 14 项断言全通过${skipNote}）`
     : `快照正文（${violations.length} 项文件级违规 + ${preCount} 项前置问题）`;
   push('3', title, details);
 }
@@ -1058,6 +1213,10 @@ let sitemapCount = -1;
   }
   specs.push({ file: 'endgame.html', route: '/endgame', want: endgameOk ? endgameWant : null, note: '四张 maze*.catalog.json 的 zh 真值键并集（endgame.ts:190）' });
 
+  /* 检查 6 的首页站点统计块断言复用**同一份**期望（N = 目录页应用可见条目数），
+     不复制判据、不写死数字：只有 want 推导成功的目录页才进表，缺项时检查 6 会显式判红。 */
+  for (const s of specs) if (s.want !== null) catalogEntryExpect.set(s.route, s.want);
+
   const readSnap = (file) => {
     const p = join(PRERENDER, file);
     if (!existsSync(p)) {
@@ -1078,6 +1237,76 @@ let sitemapCount = -1;
     }
     if (got !== s.want) details.push(`${s.route}: ${ENTRY} 条目 ${got} ≠ 应用可见条目 ${s.want}（${s.note}）`);
     catCounts.push(`${s.route.slice(1)}=${got}/${s.want}`);
+  }
+
+  /* ⑤-a 目录页条目必须落在**带非空 `<h2>` 的分区** `nk-snapshot__section` 内（契约 §3）。
+     条目计数断言对「分区标题丢了 / 条目标记被挪到分区外」完全无感——计数照旧相等，而爬虫拿到的
+     条目清单失去分类语义。覆盖 `/item` 与 `/achievement` 的全部语言（13 个语言 × 2 页）。
+     抽取式断言的纪律：抽不到条目 / 标签配对失败都**判红**，不允许「没抽到就放行」。 */
+  const SECTIONED_PAGES = ['item.html', 'achievement.html'];
+  const sectionedFiles = [];
+  for (const loc of Object.keys(LOCALE_CULTURE)) {
+    for (const f of SECTIONED_PAGES) sectionedFiles.push(loc === DEFAULT_LOCALE ? f : `${loc}/${f}`);
+  }
+  const sectionedChecked = [];
+  for (const relFile of sectionedFiles) {
+    const p = join(PRERENDER, relFile);
+    if (!existsSync(p)) {
+      details.push(`缺快照 prerender/${relFile}，分区结构断言无法执行（文件级覆盖率见检查 4）`);
+      continue;
+    }
+    const html = readFileSync(p, 'utf-8');
+    const { blocks, unclosed, orphanCloses } = pairedTagBlocks(html, 'section');
+    if (unclosed > 0 || orphanCloses > 0) {
+      details.push(`prerender/${relFile}: <section> 标签不配对（未闭合 ${unclosed} / 多余闭合 ${orphanCloses}），分区结构无法判定`);
+    }
+    const marks = countEntryMarks(html);
+    if (marks === 0) {
+      details.push(`prerender/${relFile}: 未抽到任何 ${ENTRY}（抽取目标缺失 ⇒ 分区断言无法生效）`);
+    }
+    let inSection = 0;
+    let titleless = 0;
+    for (const b of blocks) {
+      if (!classTokensOf(b.tagText).includes('nk-snapshot__section')) continue;
+      const n = countEntryMarks(b.inner);
+      if (n === 0) continue;
+      const h2m = b.inner.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
+      const h2text = h2m ? visibleText(h2m[1]).trim() : '';
+      if (!h2text) {
+        titleless++;
+        continue;
+      }
+      inSection += n;
+    }
+    if (titleless > 0) {
+      details.push(`prerender/${relFile}: ${titleless} 个含 ${ENTRY} 的 nk-snapshot__section 没有非空 <h2>（分区丢失标题）`);
+    }
+    if (inSection !== marks) {
+      details.push(`prerender/${relFile}: ${marks - inSection}/${marks} 个 ${ENTRY} 不在带非空 <h2> 的分区 section 内（分区外或无标题）`);
+    }
+    sectionedChecked.push(relFile);
+  }
+
+  /* ⑤-b 全站禁空 `<ul class="nk-snapshot__list"></ul>`（契约 §3；生成器 catalogBody 已跳过空 items）。
+     空清单对爬虫是零信息，它的出现说明某处「条目判据失效却没报错」——条目计数断言对它是盲区
+     （空清单不含 nk-snapshot__entry，计数差为 0）。
+     class 走精确 token；用 pairedTagBlocks 的 `all`（含嵌套 ul）而不是只扫最外层，
+     否则 `<li>…<ul class="nk-snapshot__list"></ul></li>` 这类嵌套空清单会漏判。 */
+  const emptyLists = [];
+  for (const file of snapshotFiles) {
+    let html;
+    try {
+      html = readFileSync(file, 'utf-8');
+    } catch {
+      continue;
+    }
+    const empty = pairedTagBlocks(html, 'ul').all
+      .filter((b) => classTokensOf(b.tagText).includes('nk-snapshot__list') && b.inner.trim() === '');
+    if (empty.length > 0) emptyLists.push(`${relative(PRERENDER, file).split(sep).join('/')}(${empty.length} 处)`);
+  }
+  if (emptyLists.length > 0) {
+    details.push(`空 <ul class="nk-snapshot__list"></ul> ${emptyLists.length} 份快照命中: ${
+      emptyLists.slice(0, 8).join(', ')}${emptyLists.length > 8 ? ' …' : ''}`);
   }
 
   // 枢纽页：分区是 curated 子集，只断言 ≥1（契约 §6.4③）
@@ -1115,8 +1344,8 @@ let sitemapCount = -1;
   }
 
   const title = details.length === 0
-    ? `条目级覆盖率（${catCounts.join(' ')}；枢纽 ${hubCounts.join(' ')}；详情页抽样 ${sampled.join(' ')}）`
-    : '条目级覆盖率（目录条目数 ≠ 应用可见条目数，或枢纽/详情页标记违规）';
+    ? `条目级覆盖率（${catCounts.join(' ')}；枢纽 ${hubCounts.join(' ')}；详情页抽样 ${sampled.join(' ')}；分区结构 ${sectionedChecked.length}/${sectionedFiles.length} 份通过；空 nk-snapshot__list 0 处）`
+    : '条目级覆盖率（目录条目数 ≠ 应用可见条目数 / 枢纽或详情页标记违规 / 分区结构或空清单违规）';
   push('5', title, details);
 }
 
@@ -1150,7 +1379,93 @@ let sitemapCount = -1;
     if (!h1) details.push(`${rel(DIST_INDEX)}: 缺非空 <h1>（'/' 必须投递含正文的 home 快照，不能是纯外壳）`);
     if (countCjk(visibleText(html)) === 0) details.push(`${rel(DIST_INDEX)}: 去标签中文字符 = 0（线上实测 '/' 曾返回 962 B 空壳）`);
   }
-  push('6', '外壳与首页（_shell.html 无 nk-snapshot / dist/index.html ≡ prerender/home.html / index.html 有 h1 与正文）', details);
+  /* ④ 首页族的站点统计块（task-2 冻结契约，「页面级摘要」）：
+     首页族 = `home.html`（缺省语言）+ `<locale>/home.html`（其余 12 个语言）= 13 份。
+     每份必须含**恰好一个** `<ul class="nk-snapshot__stats">`，内含 6 条 `<li class="nk-snapshot__stat">`，
+     每条形如 `<a href="/route">本地化目录名</a><span class="nk-snapshot__stat-n">N</span>`，
+     路由恰为 STAT_CATALOG_ROUTES，N = 该目录页的应用可见条目数（检查 5 实时推导，禁止写死数字）。
+     stats 类名**只允许出现在首页族**——它出现在别处就说明统计块被注入了共用模板。
+     抽取式纪律：抽不到 stats 容器 / 行数不符 / 行结构不符 / 抽不到期望值，全部判红。 */
+  const homeFamily = Object.keys(LOCALE_CULTURE).map((loc) => (loc === DEFAULT_LOCALE ? 'home.html' : `${loc}/home.html`));
+  const homeFamilySet = new Set(homeFamily);
+  const statsElsewhere = [];
+  for (const file of snapshotFiles) {
+    const relFile = relative(PRERENDER, file).split(sep).join('/');
+    if (homeFamilySet.has(relFile)) continue;
+    let html;
+    try {
+      html = readFileSync(file, 'utf-8');
+    } catch {
+      continue;
+    }
+    const nUl = countTagClass(html, 'ul', 'nk-snapshot__stats');
+    const nLi = countTagClass(html, 'li', 'nk-snapshot__stat');
+    if (nUl > 0 || nLi > 0) statsElsewhere.push(`${relFile}(ul ${nUl}/li ${nLi})`);
+  }
+  if (statsElsewhere.length > 0) {
+    details.push(`非首页族快照出现站点统计块 ${statsElsewhere.length} 份: ${
+      statsElsewhere.slice(0, 5).join(', ')}（nk-snapshot__stats 只允许出现在首页族）`);
+  }
+  let homeStatsOk = 0;
+  for (const relFile of homeFamily) {
+    const p = join(PRERENDER, relFile);
+    if (!existsSync(p)) {
+      details.push(`缺首页族快照 prerender/${relFile}，站点统计块无法校验（文件级覆盖率见检查 4）`);
+      continue;
+    }
+    const html = readFileSync(p, 'utf-8');
+    const uls = pairedTagBlocks(html, 'ul').blocks.filter((b) => classTokensOf(b.tagText).includes('nk-snapshot__stats'));
+    if (uls.length !== 1) {
+      details.push(`prerender/${relFile}: nk-snapshot__stats 容器 ${uls.length} 个，应为恰好 1 个`);
+      continue;
+    }
+    const rows = pairedTagBlocks(uls[0].inner, 'li').blocks.filter((b) => classTokensOf(b.tagText).includes('nk-snapshot__stat'));
+    const problems = [];
+    if (rows.length !== STAT_CATALOG_ROUTES.length) {
+      problems.push(`统计条目 ${rows.length} 条，应为 ${STAT_CATALOG_ROUTES.length} 条`);
+    }
+    const seenRoutes = [];
+    for (const row of rows) {
+      const inner = row.inner.trim();
+      const m = inner.match(
+        /^<a\b[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>([\s\S]*?)<\/a>\s*<span\b[^>]*\bclass\s*=\s*"[^"]*\bnk-snapshot__stat-n\b[^"]*"[^>]*>([\s\S]*?)<\/span>$/i,
+      );
+      if (!m) {
+        problems.push(`统计行结构不符（应为 <a href="/route">目录名</a><span class="nk-snapshot__stat-n">N</span>）: ${
+          inner.replace(/\s+/g, ' ').slice(0, 100)}`);
+        continue;
+      }
+      const href = m[1];
+      const name = visibleText(m[2]).trim();
+      const num = visibleText(m[3]).trim();
+      if (!STAT_CATALOG_ROUTES.includes(href)) {
+        problems.push(`统计行路由不在白名单: ${JSON.stringify(href)}`);
+        continue;
+      }
+      if (seenRoutes.includes(href)) {
+        problems.push(`统计行路由重复: ${href}`);
+        continue;
+      }
+      seenRoutes.push(href);
+      if (!name) problems.push(`统计行 ${href} 的目录名为空`);
+      if (!/^\d+$/.test(num)) {
+        problems.push(`统计行 ${href} 的条目数不是纯数字: ${JSON.stringify(num)}`);
+        continue;
+      }
+      const want = catalogEntryExpect.get(href);
+      if (want === undefined) {
+        problems.push(`统计行 ${href} 的期望条目数不可推导（检查 5 数据源不可用），实测 ${num}`);
+      } else if (Number(num) !== want) {
+        problems.push(`统计行 ${href} 条目数 ${num} ≠ 目录页应用可见条目数 ${want}（与目录页实时统计分叉）`);
+      }
+    }
+    const missingRoutes = STAT_CATALOG_ROUTES.filter((r) => !seenRoutes.includes(r));
+    if (missingRoutes.length > 0) problems.push(`统计行缺路由: ${missingRoutes.join(', ')}`);
+    for (const msg of problems.slice(0, 8)) details.push(`prerender/${relFile}: ${msg}`);
+    if (problems.length > 8) details.push(`prerender/${relFile}: …另有 ${problems.length - 8} 项未列出`);
+    if (problems.length === 0) homeStatsOk++;
+  }
+  push('6', `外壳与首页（_shell.html 无 nk-snapshot / dist/index.html ≡ prerender/home.html / index.html 有 h1 与正文 / 首页族 ${homeStatsOk}/${homeFamily.length} 份统计块 N = 实时条目数，非首页 0 份）`, details);
 }
 
 /* ═══ 输出 ═══ */
