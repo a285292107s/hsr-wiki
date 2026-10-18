@@ -1,11 +1,26 @@
 
+/* 终局目录（/endgame）+ 玩法页赛季列表共用的行/列样式。
+   字号与圆角一律走 `--nk-fs-*` / `--nk-radius-*` 刻度（A4.1 / A4.2 / A5.3），映射按「就近、同距离取较小档」：
+   0.55/0.56/0.58/0.6rem → --nk-fs-2(10px)；0.68/0.7/0.72rem → --nk-fs-3；0.78~0.86rem → --nk-fs-4；
+   0.88/0.95rem → --nk-fs-5；1.0/1.02/1.12rem → --nk-fs-6；4px 圆角 → --nk-radius-1(2px)；
+   5/7/8px → --nk-radius-2(6px)；10px → --nk-radius-3(12px)；50% / 999px 是形态不是档位，保留。
+   `.nk-eg-lrow__date` 由 0.58rem 提到 10px 是本文件唯一有**几何后果**的一条：
+   它把 `--nk-grid-min` 从 256 顶到 268（算式见下方分模式列注释）。 */
 .nk-eg-grid { --nk-grid-min: 410px; --nk-grid-gap: 14px; }
 /* 分模式列：列下限 = 一行卡片完整内容宽（行头开销 62 = 内距 16 + 图标 34 + 间距 10 + 边框 2，
-   状态·日期行 186 = 状态 40 + 间距 9 + 「YYYY.MM.DD – YYYY.MM.DD」137，IBM Plex Mono 实测 ≈ 248），
-   取 256 留字体回退余量；列数交给 auto-fit 按可用宽度落档（4 / 3 / 2 / 1），
-   不再按固定 2 / 4 列硬切——1024 宽下四列只剩 197px，日期行溢出到相邻列（实测最右越界 42px）。
+   状态·日期行 196.8 = 状态 40.8 + 间距 9 + 「YYYY.MM.DD – YYYY.MM.DD」147，IBM Plex Mono 实测
+   ≈ 258.8）⇒ 取 268 留字体回退余量，与旧口径 248 → 256 同一算法（内容宽 + 9~10px）。
+   **从 256 上调到 268 的原因只有一个**：日期串由 0.58rem(9.28px) 收到 --nk-fs-2(10px) 后单串
+   137 → 147px、状态 39.5 → 40.8px（同批令牌化），合计 +11.3px。
+   取值副作用（如实记录）：4×268 + 3×22 = 1138 > 1280 档可用 1108 ⇒ 该档由 4 列并排落为 3 列；
+   而列宽随之升到 354.7px，de/ru/vi 更长的状态·日期行（最长 302.3px）在 1280 档由「整串被省略号
+   截断」转为不截断。1024 档列宽 269.3 < de 的 302.3 ⇒ 该语言在该档的日期截断是本轮之前就有的
+   既有缺陷（4 列 260.5px 时代同样截断），要全语言都不截断需 min ≥ 312（代价：1440 档也失去四列
+   并排），不在本轮范围。
+   列数交给 auto-fit 按可用宽度落档（4 / 3 / 2 / 1），不再按固定 2 / 4 列硬切——1024 宽下四列只剩
+   197px，日期行溢出到相邻列（实测最右越界 42px）。
    auto-fit 而非 auto-fill：不足的末行不留空轨，宽屏下四列仍铺满整行。 */
-.nk-eg-grid:has(> .nk-eg-col) { --nk-grid-min: 256px; --nk-eg-rowgap: 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-eg-rowgap); }
+.nk-eg-grid:has(> .nk-eg-col) { --nk-grid-min: 268px; --nk-eg-rowgap: 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-eg-rowgap); }
 /* 列跨父网格两条轨（轨 1 = 列头、轨 2 = 列表）并以 `subgrid` 认领它们，是「整排统一」的机制本体：
    并排各列的列头因此共用轨高 = 该排最高列头，与语言 / 视口无关。
 
@@ -21,7 +36,7 @@
   grid-template-rows: subgrid;
   grid-row: span 2;
   border: 1px solid var(--line-1);
-  border-radius: 12px;
+  border-radius: var(--nk-radius-3);
   padding: 2px 0 6px;
   background: color-mix(in srgb, var(--blk-800) 42%, transparent);
 }
@@ -83,8 +98,8 @@
 .nk-eg-col__head::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 13px; width: 2px; border-radius: 1px; background: color-mix(in srgb, var(--eg-color) 72%, transparent); }
 /* 列 1：名 / en。（可换行，故 de 的 285px 长名在自己的轨内折行，不会去挤压 en） */
 .nk-eg-col__meta { grid-column: 1; grid-row: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; }
-.nk-eg-col__name { font-size: 1.12rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; }
-.nk-eg-col__en { font-family: var(--font-hud); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, var(--eg-color) 66%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nk-eg-col__name { font-size: var(--nk-fs-6); font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; }
+.nk-eg-col__en { font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, var(--eg-color) 66%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* 列 2：徽章钉在该排共享轨的**右下角**（`align-self: end` 落末行、`justify-self: end` 保持自然宽）。
    `flex-basis: 100%` 做不到「保持自然宽」——它会把徽章拉成整列宽的横条。 */
 .nk-eg-col__head .nk-guide-link { grid-column: 2; grid-row: 1; align-self: end; justify-self: end; }
@@ -116,18 +131,18 @@
 .nk-eg-lrow[data-mode="boss"] { --eg-color: var(--eg-boss); }
 .nk-eg-lrow[data-mode="peak"] { --eg-color: var(--eg-peak); }
 .nk-eg-lrow__fig { flex-shrink: 0; align-self: center; }
-.nk-eg-lrow__icon { display: block; width: 34px; height: 34px; border-radius: 8px; object-fit: cover; background: color-mix(in srgb, var(--blk-900) 70%, transparent); border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent); transition: border-color 0.22s var(--nk-ease-out); }
+.nk-eg-lrow__icon { display: block; width: 34px; height: 34px; border-radius: var(--nk-radius-2); object-fit: cover; background: color-mix(in srgb, var(--blk-900) 70%, transparent); border: 1px solid color-mix(in srgb, var(--eg-color) 24%, transparent); transition: border-color 0.22s var(--nk-ease-out); }
 .nk-eg-lrow__head { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
-.nk-eg-lrow__no { flex-shrink: 0; font-family: var(--font-hud); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); white-space: nowrap; font-variant-numeric: tabular-nums; transition: color 0.2s var(--nk-ease-out); }
+.nk-eg-lrow__no { flex-shrink: 0; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 700; letter-spacing: 0.1em; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); white-space: nowrap; font-variant-numeric: tabular-nums; transition: color 0.2s var(--nk-ease-out); }
 .nk-eg-lrow__main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.nk-eg-lrow__name { font-size: 0.88rem; font-weight: 600; line-height: 1.35; color: var(--text1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s var(--nk-ease-out); }
+.nk-eg-lrow__name { font-size: var(--nk-fs-5); font-weight: 600; line-height: 1.35; color: var(--text1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s var(--nk-ease-out); }
 .nk-eg-lrow__meta { display: flex; align-items: center; gap: 9px; min-width: 0; }
-.nk-eg-lrow__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; color: var(--st-color); }
+.nk-eg-lrow__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; color: var(--st-color); }
 .nk-eg-lrow__dot { width: 4px; height: 4px; border-radius: 50%; background: var(--st-color); flex-shrink: 0; }
 /* 赛季含污染关卡（ADR 0026）：等级细节走详情页，列表只给存在性标记；色值走污染族（ADR 0027），不吃模式色。
    徽标挂在赛季名行内（名称靠 overflow:hidden 取得自动最小尺寸 0，可被压缩，故徽标既不会被挤出也不溢出） */
-.nk-eg-lrow__poll { flex-shrink: 0; padding: 1.5px 7px; border: 1px solid color-mix(in srgb, var(--vor-500) 45%, transparent); border-radius: 4px; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; color: var(--vor-300); background: color-mix(in srgb, var(--vor-500) 9%, transparent); }
-.nk-eg-lrow__date { flex: 0 1 auto; min-width: 0; font-family: var(--font-hud); font-size: 0.58rem; letter-spacing: 0.04em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.nk-eg-lrow__poll { flex-shrink: 0; padding: 1.5px 7px; border: 1px solid color-mix(in srgb, var(--vor-500) 45%, transparent); border-radius: var(--nk-radius-1); font-size: var(--nk-fs-2); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; color: var(--vor-300); background: color-mix(in srgb, var(--vor-500) 9%, transparent); }
+.nk-eg-lrow__date { flex: 0 1 auto; min-width: 0; font-family: var(--font-hud); font-size: var(--nk-fs-2); letter-spacing: 0.04em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .nk-eg-lrow--live { --st-color: var(--season-live); }
 .nk-eg-lrow--ended { --st-color: var(--season-ended); }
 .nk-eg-lrow--upcoming { --st-color: var(--season-upcoming); }
@@ -150,141 +165,10 @@
   .nk-eg-lrow { animation: none; }
 }
 
-.nk-eg-card {
-  --eg-color: var(--primary);
-  --st-color: var(--text3);
-  position: relative;
-  display: flex;
-  align-items: stretch;
-  gap: 16px;
-  padding: 14px 10px;
-  background: transparent;
-  border: none;
-  border-top: 1px solid var(--line-1);
-  border-radius: 0;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.28s var(--nk-ease-out), border-color 0.28s var(--nk-ease-out);
-  animation: nk-card-in 0.4s var(--nk-ease-out) backwards;
-  animation-delay: min(calc(var(--i, 0) * 18ms), 600ms);
-}
-.nk-eg-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%) scaleY(0);
-  width: 2px;
-  height: 60%;
-  border-radius: 1px;
-  background: var(--eg-color);
-  transition: transform 0.28s var(--nk-ease-out);
-}
-.nk-eg-card[data-mode="maze"] { --eg-color: var(--eg-maze); }
-.nk-eg-card[data-mode="story"] { --eg-color: var(--eg-story); }
-.nk-eg-card[data-mode="boss"] { --eg-color: var(--eg-boss); }
-.nk-eg-card[data-mode="peak"] { --eg-color: var(--eg-peak); }
-.nk-eg-grid > .nk-eg-card:first-child { border-top: none; }
-
-.nk-eg-card__seal {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-  width: 52px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0;
-  transition: background 0.25s var(--nk-ease-out);
-}
-.nk-eg-card__emblem { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -58%); width: 32px; height: 32px; color: color-mix(in srgb, var(--eg-color) 72%, var(--text2)); transition: color 0.28s var(--nk-ease-out); }
-.nk-eg-card__emblem svg { width: 100%; height: 100%; }
-.nk-eg-card--has-art .nk-eg-card__emblem { visibility: hidden; }
-.nk-eg-card__art {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  border: 1px solid var(--line-1);
-  border-radius: 4px;
-  background: var(--blk-800);
-  object-fit: cover;
-  transition: border-color 0.25s var(--nk-ease-out);
-}
-.nk-eg-card__body { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding: 1px 0 0; }
-.nk-eg-card__idline { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.nk-eg-card__no { font-family: var(--font-hud); font-size: 0.52rem; font-weight: 700; letter-spacing: 0.14em; line-height: 1; color: color-mix(in srgb, var(--eg-color) 78%, var(--text2)); font-variant-numeric: tabular-nums; white-space: nowrap; transition: color 0.28s var(--nk-ease-out); }
-.nk-eg-card__moden { font-family: var(--font-hud); font-size: 0.52rem; font-weight: 600; letter-spacing: 0.18em; color: color-mix(in srgb, var(--eg-color) 62%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.28s var(--nk-ease-out); }
-.nk-eg-card__head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 9px; }
-.nk-eg-card__name { flex: 1 1 auto; min-width: 0; font-size: 1.02rem; font-weight: 800; line-height: 1.35; color: var(--text-bright); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color 0.2s var(--nk-ease-out); }
-.nk-eg-card__tier,
-.nk-eg-card__perm,
-.nk-eg-card__test { flex-shrink: 0; font-family: var(--font-hud); font-size: 0.5rem; font-weight: 600; letter-spacing: 0.1em; white-space: nowrap; }
-.nk-eg-card__tier { color: var(--highlight); }
-.nk-eg-card__perm { color: var(--highlight); opacity: 0.88; }
-.nk-eg-card__test { color: var(--text3); }
-.nk-eg-card__meta { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.nk-eg-card__date { margin-left: auto; font-family: var(--font-hud); font-size: 0.56rem; letter-spacing: 0.05em; color: var(--text3); white-space: nowrap; font-variant-numeric: tabular-nums; }
-
-.nk-eg-card__row { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 5px 0; }
-.nk-eg-card__row + .nk-eg-card__row { border-top: 1px solid var(--line-1); }
-.nk-eg-card__divider { height: 1px; background: var(--line-1); margin: 3px 0 2px; }
-.nk-eg-card__label { flex-shrink: 0; width: 34px; font-size: 0.55rem; font-weight: 600; letter-spacing: 0.14em; color: var(--text3); }
-.nk-eg-card__buffs { display: inline-flex; align-items: center; flex-wrap: wrap; min-width: 0; }
-.nk-eg-card__buff { font-size: 0.58rem; line-height: 1.5; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 100%; }
-.nk-eg-card__buff + .nk-eg-card__buff::before { content: '·'; margin: 0 6px; color: var(--text3); opacity: 0.8; }
-.nk-eg-card__monsters { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-.nk-eg-card__mon { width: 26px; height: 26px; border-radius: 50%; background: color-mix(in srgb, var(--blk-900) 64%, transparent); border: 1px solid var(--line-1); object-fit: cover; transition: transform 0.25s var(--nk-ease-out), border-color 0.25s var(--nk-ease-out); }
-.nk-eg-card__mon:hover { transform: scale(1.1); border-color: color-mix(in srgb, var(--eg-color) 48%, transparent); z-index: 2; }
-.nk-eg-card__more { font-family: var(--font-hud); font-size: 0.52rem; letter-spacing: 0.06em; color: var(--text3); white-space: nowrap; }
-
-.nk-eg-card__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; color: var(--st-color); transition: color 0.25s var(--nk-ease-out); }
-.nk-eg-card__dot { width: 5px; height: 5px; border-radius: 50%; background: var(--st-color); flex-shrink: 0; }
-.nk-eg-card--live { --st-color: var(--season-live); }
-.nk-eg-card--ended { --st-color: var(--season-ended); }
-.nk-eg-card--upcoming { --st-color: var(--season-upcoming); }
-
-.nk-eg-card--ended { opacity: 0.82; }
-.nk-eg-card--ended:hover { opacity: 1; }
-
-@media (hover: hover) and (pointer: fine) {
-  .nk-eg-card:hover { background: color-mix(in srgb, var(--eg-color) 5%, transparent); }
-  .nk-eg-card:hover::before { transform: translateY(-50%) scaleY(1); }
-  .nk-eg-card:hover .nk-eg-card__art { border-color: color-mix(in srgb, var(--eg-color) 55%, transparent); }
-  .nk-eg-card:hover .nk-eg-card__emblem { color: var(--eg-color); }
-  .nk-eg-card:hover .nk-eg-card__no { color: var(--eg-color); }
-  .nk-eg-card:hover .nk-eg-card__moden { color: color-mix(in srgb, var(--eg-color) 85%, var(--text2)); }
-  .nk-eg-card:hover .nk-eg-card__name { color: var(--text-bright); }
-}
-.nk-eg-card:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--eg-color) 50%, transparent); }
-
-.nk-no-reveal .nk-eg-card { animation: none; }
-
 /* 终局目录骨架卡：高度 / 圆角 / aspect-ratio 由本页承担（该网格只在终局目录出现，
    原 tokens.css 里那条 `.nk-eg-grid .nk-skeleton__card-img` 覆盖已是死声明，已并入此处） */
 .nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 132px; border-radius: 0; border-top: 1px solid var(--line-1); }
 
 @media (max-width: 767px) {
   .nk-eg-grid { grid-template-columns: 1fr; }
-  .nk-eg-card { padding: 12px 8px; gap: 12px; }
-  .nk-eg-card__seal { width: 44px; }
-  .nk-eg-card__emblem { width: 28px; height: 28px; }
-  .nk-eg-card__art { width: 44px; height: 44px; }
-  .nk-eg-card__name { font-size: 0.92rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nk-eg-card { animation: none; }
-  .nk-eg-card::before { transition: none; }
-}
-
-@media (hover: none) {
-  .nk-eg-card:hover { background: transparent; }
-  .nk-eg-card:hover::before { transform: translateY(-50%) scaleY(0); }
-  .nk-eg-card:hover .nk-eg-card__art { border-color: var(--line-1); }
-  .nk-eg-card:hover .nk-eg-card__name { color: var(--text-bright); }
-  .nk-eg-card:hover .nk-eg-card__no { color: color-mix(in srgb, var(--eg-color) 78%, var(--text2)); }
-  .nk-eg-card:hover .nk-eg-card__moden { color: color-mix(in srgb, var(--eg-color) 62%, var(--text3)); }
-  .nk-eg-card__mon:hover { transform: none; }
 }

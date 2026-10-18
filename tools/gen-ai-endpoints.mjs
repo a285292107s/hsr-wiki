@@ -166,12 +166,15 @@ const voracityTitle = () => ui('nav.voracity', '贪饕污染');
 // 与 src/app/views/VoracityView.vue 的同形词说明逐字一致（契约：同一分区文本对所有 UA 一致）
 const voracityDisambiguation = () => ui('vor.disambigNote', '本页「污染」指「贪饕」侵蚀污染；4.5 联动「命运/今晚留下来」的「圣杯战争 · 污染等级 1–7 / 深度污染 / 污染词条」是另一套无关体系，两者不合并叙述、也不互相内链。');
 
-/** 终局四模式（与 src/app/catalog/pages/endgame.ts ENDGAME_MODES 的 key/label 一致） */
+/** 终局四模式（与 src/app/catalog/pages/endgame.ts ENDGAME_MODES 的 key/label 一致）。
+ *  `file` = 目录轻量条目（列表/卡片用），`list` = 全量模式表——玩法页的「结构口径」需要
+ *  `floor_details` / `countdown` / `clear_score`，这三者**不在** catalog 轻量条目里（见
+ *  tools/converter/converters/endgame_catalog.py），只读 catalog 会让快照缺行且与运行时分叉。 */
 const ENDGAME_MODES = [
-  { key: 'maze', label: () => ui('catalog.option.modeMaze', '忘却之庭'), file: 'maze.catalog.json' },
-  { key: 'story', label: () => ui('catalog.option.modeStory', '虚构叙事'), file: 'maze_extra.catalog.json' },
-  { key: 'boss', label: () => ui('catalog.option.modeBoss', '末日幻影'), file: 'maze_boss.catalog.json' },
-  { key: 'peak', label: () => ui('catalog.option.modePeak', '异相仲裁'), file: 'maze_peak.catalog.json' },
+  { key: 'maze', label: () => ui('catalog.option.modeMaze', '忘却之庭'), file: 'maze.catalog.json', list: 'maze.json' },
+  { key: 'story', label: () => ui('catalog.option.modeStory', '虚构叙事'), file: 'maze_extra.catalog.json', list: 'maze_extra.json' },
+  { key: 'boss', label: () => ui('catalog.option.modeBoss', '末日幻影'), file: 'maze_boss.catalog.json', list: 'maze_boss.json' },
+  { key: 'peak', label: () => ui('catalog.option.modePeak', '异相仲裁'), file: 'maze_peak.catalog.json', list: 'maze_peak.json' },
 ];
 
 /** 敌对物种分类（与 src/lib/constants.ts MON_RANK、catalog/pages/monster.ts MON_TYPE 一致） */
@@ -1487,24 +1490,66 @@ function monsterPages(ctx) {
 
 /* ─── 终局 `/endgame` + `/endgame/:mode/:id`（数据源 = 四份 *.catalog.json，契约 §2） ─── */
 
+/** 排期串的时区口径（镜像 src/app/catalog/pages/endgame.ts 的 `seasonTimeMs` / `seasonDateParts`，
+ *  判据见 ADR 0060）：裸串按固定 +08:00 解释，带时区 / `Z` 的串按原语义。
+ *  不镜像的后果实测过：构建机在 UTC 时 `2023-06-12 04:00:00` 会被渲染成 `2023.06.11`，
+ *  与页面（+08:00）差一天，且随构建机时区漂移。 */
+const SEASON_TZ_OFFSET = '+08:00';
+const SEASON_TZ_MS = 8 * 3600 * 1000;
+const BARE_SEASON_TIME = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+
+function seasonTimeMs(s) {
+  if (!s) return null;
+  const raw = String(s).trim();
+  if (!raw) return null;
+  const m = BARE_SEASON_TIME.exec(raw);
+  const iso = m
+    ? `${m[1]}-${m[2]}-${m[3]}T${m[4] ?? '00'}:${m[5] ?? '00'}:${m[6] ?? '00'}${SEASON_TZ_OFFSET}`
+    : raw;
+  const t = new Date(iso).getTime();
+  return Number.isNaN(t) ? null : t;
+}
+
+function seasonDateParts(s) {
+  if (!s) return null;
+  const raw = String(s).trim();
+  const m = BARE_SEASON_TIME.exec(raw);
+  if (m) return `${m[1]}.${m[2]}.${m[3]}`;
+  const t = seasonTimeMs(raw);
+  if (t == null) return null;
+  const d = new Date(t + SEASON_TZ_MS);
+  return `${d.getUTCFullYear()}.${String(d.getUTCMonth() + 1).padStart(2, '0')}.${String(d.getUTCDate()).padStart(2, '0')}`;
+}
+
 /** 排期区间格式化（对照 catalog/pages/endgame.ts mazeDateRange） */
 function dateRange(entry) {
-  const fmt = (s) => {
-    if (!s) return null;
-    const d = new Date(s);
-    if (Number.isNaN(d.getTime())) return null;
-    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-  };
-  const start = fmt(entry.live_begin);
-  const end = fmt(entry.live_end);
+  const start = seasonDateParts(entry.live_begin);
+  const end = seasonDateParts(entry.live_end);
   if (start && end) return `${start} – ${end}`;
   if (start) return `${start} –`;
   if (end) return `– ${end}`;
   return '';
 }
 
+/** 赛季状态（镜像 src/app/catalog/pages/endgame.ts `mazeStatus`：live_begin/begin 优先、live_end/end 回退，
+ *  两端皆无 ⇒ unknown）。生成器不能 import TS，故镜像一份；判据一变两处都要改。 */
+function seasonStatus(entry) {
+  const start = seasonTimeMs(entry.live_begin) ?? seasonTimeMs(entry.begin);
+  const end = seasonTimeMs(entry.live_end) ?? seasonTimeMs(entry.end);
+  const now = Date.now();
+  if (start != null && now < start) return 'upcoming';
+  if (end != null && now > end) return 'ended';
+  if (start != null || end != null) return 'live';
+  return 'unknown';
+}
+
+/** 赛季状态文案（镜像 `mazeStatusLabelKey` → `endgame.status.<枚举>`） */
+const seasonStatusLabel = (status) => ui(`endgame.status.${status}`, status);
+
 function endgamePages(ctx) {
   const catalogs = ENDGAME_MODES.map((m) => ({ mode: m, db: readJson(m.file) }));
+  /** 全量模式表（每模式一份）：只被玩法页的「结构口径 / 当期赛季」消费 */
+  const fullLists = new Map(ENDGAME_MODES.map((m) => [m.key, readJson(m.list)]));
   /**
    * 可见性判据 = 应用同一判据（src/app/catalog/pages/endgame.ts:190 `if (!info || !info.zh) continue;`）：
    * 名称为空/空白的赛季应用不展示，且不为其造兜底名——快照与 sitemap 都不生成该 URL（未发布内容不入索引）。
@@ -1582,16 +1627,26 @@ function endgamePages(ctx) {
     const g = guide.modes?.[mode.key];
     const system = g?.system || null;
     const systemName = clean(system?.name) || ui('egm.sec.buffs', '赛季增益');
-    const current = modeOrdered[0];
+    /* 当期赛季 = **进行中**的那一期（与玩法页 EndgameModeView.currentSeasonInfo 同判据）：
+       目录排序「最新在前」，而最新一期常常是「未开始」（实测 maze 首位 1036 未开始、进行中的是 1035），
+       直接取首位会把未上线赛季的层数/增益当现状陈述。无进行中者回落到首位并标注状态。 */
+    const livePick = modeOrdered.find((s) => seasonStatus(s.entry) === 'live') || null;
+    const current = livePick || modeOrdered[0];
+    const currentStatus = seasonStatus(current.entry);
     const cur = current.entry;
-    const floors = cur.floor_details || [];
-    const levels = cur.levels || [];
+    /* 结构口径取**全量**条目：catalog 轻量条目不含 floor_details/countdown/clear_score/levels，
+       只读它会让「关卡层级/每层场次/关卡组成/回合上限」四行在快照里整行消失（实测 5 行 dt 命中 0 次）。 */
+    const curFull = (fullLists.get(mode.key) || {})[current.id] || cur;
+    const floors = curFull.floor_details || [];
+    const levelsFull = curFull.levels || [];
     const halfs = floors.length ? ((floors[0].stage1 ? 1 : 0) + (floors[0].stage2 ? 1 : 0)) : 0;
-    // 当期增益：peak 取王棋关、boss 取分场次表（扁平 buffs 是 1∪2 并集，口径不同，禁用）
-    const rawBuffs = mode.key === 'peak'
-      ? ((levels.find((l) => l.kind === 'king') || levels[levels.length - 1] || {}).buffs || [])
-      : mode.key === 'boss' ? ((cur.buff_groups || {}).stage1 || []) : (cur.buffs || []);
-    const curBuffs = rawBuffs.map((b) => clean(b?.name)).filter(Boolean);
+    const knights = levelsFull.filter((l) => l.kind === 'knight').length;
+    const kings = levelsFull.filter((l) => l.kind === 'king').length;
+    const withTargets = levelsFull.filter((l) => (l.targets || []).length).length;
+    /* 玩法页**不列具体增益条目**（与运行时同口径，见 src/app/views/EndgameModeView.vue 的同名注释）：
+       条目名每期都换、效果依赖上下文，属每期信息，归赛季页；boss 更是上/下半场各一套
+       （扁平 `buffs` 只是并集，只取 stage1 那半套却以整期呈现是**事实错误**）。
+       本页只讲常青规格：体系名 / 条数 / 选法（都在上面的 facts 行里），条目与效果由赛季页承载。 */
     const ruleSections = (g?.sections || []).map((sec) => {
       // 数据里换行是**字面量** `\n`（非真换行），故按两字符序列拆行；`●`/`○` 起首的行归入列表
       const lines = String(sec.text || '').split('\\n').map((l) => l.trim()).filter(Boolean);
@@ -1625,26 +1680,32 @@ function endgamePages(ctx) {
         h1: mode.label(),
         summary: '',
         facts: [
-          [ui('egm.fact.mode', '所属玩法'), esc(mode.label())],
-          /* 不输出「英文名」行：`ENDGAME_MODES` 没有 `en` 字段，词典里也没有对应键——
+          /* 不输出「所属玩法」行：运行时玩法页没有这一行（玩法名已在 h1、面包屑与 <title> 里），
+             只写快照会造出「页面没有的事实行」，违反 ai-discoverability §3 的逐字一致判据。
+             也不输出「英文名」行：`ENDGAME_MODES` 没有 `en` 字段，词典里也没有对应键——
              旧版写死的中文标签 `'英文名'` 恒不渲染，却是往非中文语言注入中文的隐患。 */
-          [ui('egm.currentSeason', '当期赛季'), esc(current.name)],
+          /* 「当期 / 最新」措辞与玩法页逐字同源（有进行中 ⇒ 当期赛季；否则最新赛季，未知状态不加括号） */
+          [
+            livePick ? ui('egm.currentSeason', '当期赛季') : ui('egm.latestSeason', '最新赛季'),
+            !livePick && currentStatus !== 'unknown'
+              ? esc(uiT('egm.latestSeasonWith', '最新赛季（{status}）', { status: seasonStatusLabel(currentStatus) }))
+              : esc(current.name),
+          ],
           [ui('egm.stat.floors', '关卡层级'), floors.length ? esc(uiT('egm.value.floors', '{n} 层', { n: floors.length }, floors.length)) : ''],
           [ui('egm.stat.halfs', '每层场次'), halfs ? esc(uiT('egm.value.halfs', '{n} 场', { n: halfs }, halfs)) : ''],
-          [ui('egm.stat.levels', '关卡组成'), levels.length ? esc(uiT('vor.stageCount', '{n} 关', { n: levels.length }, levels.length)) : ''],
-          [ui('egm.stat.countdown', '回合上限'), cur.countdown ? esc(uiT('egm.value.countdown', '{n} 轮', { n: cur.countdown }, cur.countdown)) : ''],
-          [ui('egm.stat.scoreCap', '分数上限'), cur.clear_score ? esc(String(cur.clear_score)) : ''],
-          [ui('egm.stat.tierce', '星启模式'), cur.tierce ? ui('egm.value.tierceOn', '含') : ui('egm.value.tierceOff', '不含')],
+          [ui('egm.stat.levels', '关卡组成'), levelsFull.length ? esc(uiT('vor.stageCount', '{n} 关', { n: levelsFull.length }, levelsFull.length)) : ''],
+          [ui('egm.stat.knights', '骑士试炼'), knights ? esc(uiT('vor.stageCount', '{n} 关', { n: knights }, knights)) : ''],
+          [ui('egm.stat.kings', '王棋关卡'), kings ? esc(uiT('vor.stageCount', '{n} 关', { n: kings }, kings)) : ''],
+          [ui('egm.stat.targets', '设挑战目标'), withTargets ? esc(uiT('vor.stageCount', '{n} 关', { n: withTargets }, withTargets)) : ''],
+          [ui('egm.stat.countdown', '回合上限'), curFull.countdown ? esc(uiT('egm.value.countdown', '{n} 轮', { n: curFull.countdown }, curFull.countdown)) : ''],
+          [ui('egm.stat.scoreCap', '分数上限'), curFull.clear_score ? esc(String(curFull.clear_score)) : ''],
+          [ui('egm.stat.tierce', '星启模式'), curFull.tierce ? ui('egm.value.tierceOn', '含') : ui('egm.value.tierceOff', '不含')],
           [ui('egm.fact.buffSystem', '增益体系'), esc(systemName)],
           [ui('egm.fact.perSeason', '每期条数'), system ? esc(String(system.count)) : ''],
           [ui('egm.fact.choiceMode', '选择方式'), system ? esc(modeChoiceLabel(system.choice)) : ''],
         ],
         sections: [
           ...ruleSections,
-          {
-            title: systemName,
-            html: curBuffs.length ? `<ul class="nk-snapshot__list">${curBuffs.map((b) => `<li>${txt(b, null, 100)}</li>`).join('')}</ul>` : '',
-          },
           { title: ui('egm.sec.seasons', '赛季列表'), html: linkList(seasonLinks) },
         ],
         links: otherModeLinks,

@@ -1,13 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, waitForCatalogCards, waitForSettled } from './helpers';
+import { collectConsoleIssues, readJson, waitForCatalogCards, waitForSettled } from './helpers';
 import { noUnknownOverflow } from './layout.shared';
 
 /**
  * 布局验收：常规主题 —— layout 验收层（语义契约 + 数值规格）分文件之一。
  *
- * 拆分动因：`fullyParallel: false` 下**文件内**串行，单文件 layout（74 用例 / 469s）把全量墙钟
- * 锁死在 6.6 分钟（a11y 仅 85s 跑完后两个 worker 空转）。按 describe 边界拆开后文件级并行生效，
- * 每条用例的隔离性与拆分前完全一致（文件内本就串行），故已记录的并发 flake 纪律不受影响。
+ * 分文件判据（为何按域拆、单文件该多小）见 docs/agents/testing.md「layout 必须按 describe 边界分文件」。
  *
  * `@viewport-pinned` 标签：凡用例内自行 `setViewportSize(...)` 固定视口者，必须在 `test(...)`
  * 第二参传该标签（mobile-chromium 以 `grepInvert` 跳过，视口已由用例钉死）。标签须静态书写，
@@ -21,13 +19,23 @@ import { noUnknownOverflow } from './layout.shared';
  */
 
 test.describe('布局验收：常规主题', () => {
+  /** 当前版本的 version_label（数据派生；抬头断言与空态断言共用同一来源，不写死版本号） */
+  const versionLabelRaw = String(readJson<{ version_label?: string }>('public/data/cn/version.json').version_label ?? '');
+
   test('首页 /：品牌带标题、版本上新三分区、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/');
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     // 站点名易变，不断言具体文案，只验非空
-    await expect(page.locator('.nk-hub-brand__title')).toHaveText(/\S/);
-    await expect(page.locator('.nk-hub-release__title')).toContainText('版本上新');
+    await expect(page.locator('.nk-hub-masthead__title')).toHaveText(/\S/);
+    /* 版本抬头（2026-10 重构）：版本号是这一页的主语，故它是首屏最大的字，且与
+       `version.json` 的 `version_label` 同源；「版本上新」跟在数字旁当单位。
+       旧形态的 eyebrow（KICKER 小字）与类别索引条（CHARACTER · LIGHT CONE · RELIC）
+       是「小字压在大字上方」与「家具式字符串」，随本轮一并删除，不再有断言对象。 */
+    const versionLabel = String(readJson<{ version_label?: string }>('public/data/cn/version.json').version_label ?? '');
+    expect(versionLabel, 'version.json 缺 version_label：本用例的抬头判据失去数据来源').toBeTruthy();
+    await expect(page.locator('.nk-intake__batch-num')).toHaveText(versionLabel);
+    await expect(page.locator('.nk-intake__batch-note')).toHaveText('版本上新');
     // 已渲染分区数 ≥1 同时是「版本增量打标管线」的端到端哨兵：整页退化为空态必须让本断言变红。
     // 用 `expect.poll` 而不是一次性 `count()`——分区是**数据驱动渲染**（version.json + 版本差集），
     // 上面两条等待只覆盖静态品牌带/标题；慢 runner 上首读可能是 0（就绪竞态，CI 实测首跑红、retry 绿），
@@ -87,11 +95,21 @@ test.describe('布局验收：常规主题', () => {
             const b = a.getBoundingClientRect();
             return { text: a.textContent.replace(/\s+/g, ' ').trim(), href: a.getAttribute('href'), right: Math.round(b.right) };
           })(),
+          /* 入口要对齐的是**内容列的右缘**（= 分区抬头行的右缘），不是「带的右缘」：
+             ≥2 条分区的登记架有轨宽上限，带会比内容列窄（实测遗器架 648 vs 内容列 1252）。 */
+          headRight: Math.round(sec.querySelector('.nk-hub-release__sechead')!.getBoundingClientRect().right),
           specCount: sec.querySelectorAll('.nk-hub-release__spec').length,
           duplicated: spec ? leafTexts(spec).filter((t) => leafTexts(cell ?? band).includes(t)) : [],
           shownName: spec?.querySelector('.nk-hub-release__spec-name')?.textContent?.trim() ?? '',
           briefChars: (spec?.querySelector('.nk-hub-release__spec-brief')?.textContent || '').replace(/\s+/g, '').length,
           trailing: specBox ? Math.round(bandBox.right - specBox.right) : null,
+          // 注释栏压在**内容列的外缘**上：角色分区（板在左）取右缘，光锥分区（镜像版式）取左缘
+          mirrored: sec.getAttribute('data-kind') === 'lightcone',
+          edgeGap: specBox
+            ? (sec.getAttribute('data-kind') === 'lightcone'
+              ? Math.round(specBox.left - bandBox.left)
+              : Math.round(bandBox.right - specBox.right))
+            : null,
           cardLink: cell?.querySelector('a')?.getAttribute('href') ?? null,
           specLink: spec?.querySelector('a')?.getAttribute('href') ?? null,
           bandRight: Math.round(bandBox.right),
@@ -108,9 +126,10 @@ test.describe('布局验收：常规主题', () => {
     expect(rows.length).toBeGreaterThanOrEqual(1);
     type Row = {
       kind: string; count: number; specCount: number; duplicated: string[]; shownName: string; briefChars: number;
-      trailing: number | null; cardLink: string | null; specLink: string | null; bandRight: number;
+      trailing: number | null; mirrored: boolean; edgeGap: number | null;
+      cardLink: string | null; specLink: string | null; bandRight: number;
       plainCards: { isLink: boolean; href: string | null; name: string }[]; bandOverflow: boolean;
-      labelText: string; entry: { text: string; href: string | null; right: number } | null;
+      labelText: string; entry: { text: string; href: string | null; right: number } | null; headRight: number;
     };
     /* 分区级入口：三个分区各指向自己的图鉴页，且右缘与内容列右缘（= 带的右缘）齐平——
        它与特写注释栏共用同一条右基准线，页面只有一条右列。 */
@@ -121,7 +140,7 @@ test.describe('布局验收：常规主题', () => {
       expect(r.entry, `${r.kind}：分区级入口缺失`).toBeTruthy();
       expect(r.entry!.href, `${r.kind}：分区级入口目标应为该族图鉴页`).toBe(LIST_ROUTE[r.kind]);
       expect(r.entry!.text, `${r.kind}：入口文案应与分区标签同源`).toBe(`全部${r.labelText.split(/\s+/)[0]}`);
-      expect(Math.abs(r.bandRight - r.entry!.right), `${r.kind}：入口未与内容列右缘齐平`).toBeLessThanOrEqual(1);
+      expect(Math.abs(r.headRight - r.entry!.right), `${r.kind}：入口未与内容列右缘齐平`).toBeLessThanOrEqual(1);
       if (r.count === 1) {
         singleRows++;
         expect(r.specCount, `${r.kind}：单条目分区应有且只有一个规格块`).toBe(1);
@@ -129,8 +148,8 @@ test.describe('布局验收：常规主题', () => {
           r.duplicated.filter((t) => t !== r.shownName),
           `${r.kind}：特写块复述了卡片内容——注释栏只保留名字、数据正文与入口`,
         ).toEqual([]);
-        // 行骨架（规格块的顶线）必须横跨到整行右缘：否则右下角是一片无来由的空档
-        expect(Math.abs(r.trailing!), `${r.kind}：特写行尾部留空 ${r.trailing}px`).toBeLessThanOrEqual(2);
+        // 注释栏必须**压在内容列的外缘**（角色在右、光锥镜像在左）：否则外缘留出一片无来由的空档
+        expect(Math.abs(r.edgeGap!), `${r.kind}：注释栏离内容列外缘 ${r.edgeGap}px`).toBeLessThanOrEqual(2);
         // 入口指向的必须是这张主卡条目
         expect(r.specLink, `${r.kind}：特写块入口缺失`).toBeTruthy();
         expect(r.specLink).toBe(r.cardLink);
@@ -154,49 +173,62 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：版本抬头的编辑层级与类别索引完整可见', async ({ page }) => {
+  /* 版本抬头的编辑层级（2026-10 重构后）：一级＝版本号（首屏最大的字），二级＝「版本上新」，
+     三级＝一行 claim（件数）。旧形态的 KICKER 小字（eyebrow）与 `CHARACTER · LIGHT CONE · RELIC`
+     类别索引条（家具式字符串 + 小号大写字母距标签）一并删除——两者都在反 AI 味清单里，
+     故本用例的判据从「小字压在大字上方」改成「版本号必须是这一页最大的字」。 */
+  test('首页 /：版本抬头——版本号是首屏最大的字，claim 与分区件数同源', async ({ page }) => {
     await page.goto('/');
-    const kicker = page.locator('.nk-hub-release__kicker');
-    const title = page.locator('.nk-hub-release__title');
-    const edition = page.locator('.nk-hub-release__edition');
-    await expect(kicker).toHaveText('LATEST TRANSMISSION');
-    await expect(title).toBeVisible();
-    await expect(edition).toHaveAttribute('aria-label', '角色、光锥与遗器');
-    await expect(edition).toContainText('CHARACTER');
-    await expect(edition).toContainText('LIGHT CONE');
-    await expect(edition).toContainText('RELIC');
+    const batchNum = page.locator('.nk-intake__batch-num');
+    const batch = page.locator('.nk-intake__batch');
+    const claim = page.locator('.nk-intake__claim');
+    await expect(batchNum).toBeVisible();
+    await expect(claim).toBeVisible();
+    // 可访问名复原成一句完整的话（视觉上拆成「4.6」+「版本上新」两段，读屏要读成一句）
+    await expect(batch).toHaveAttribute('aria-label', /^\S.*版本上新$/);
+
+    // 分区条数之和 == claim 里的件数（两处若各写一份口径就会漂移）
+    const total = await page.locator('.nk-hub-release__label-count').evaluateAll((els) =>
+      els.reduce((n, el) => n + Number(el.textContent?.trim() || '0'), 0),
+    );
+    await expect(claim).toContainText(String(total));
+
+    // 层级判据（数值形态：相对关系）：版本号字号必须严格大于页面里其余任何可见文字
     const geometry = await page.evaluate(() => {
-      const head = document.querySelector('.nk-hub-release__head')!.getBoundingClientRect();
-      const kickerBox = document.querySelector('.nk-hub-release__kicker')!.getBoundingClientRect();
-      const titleBox = document.querySelector('.nk-hub-release__title')!.getBoundingClientRect();
-      const editionBox = document.querySelector('.nk-hub-release__edition')!.getBoundingClientRect();
-      return {
-        stack: kickerBox.bottom <= titleBox.top,
-        editionWithinHead: editionBox.right <= head.right + 1,
-        itemCount: document.querySelectorAll('.nk-hub-release__edition-item').length,
-        itemNames: [...document.querySelectorAll('.nk-hub-release__edition-item')].map((el) => el.textContent?.trim()),
-      };
+      const num = document.querySelector('.nk-intake__batch-num') as HTMLElement;
+      const numSize = parseFloat(getComputedStyle(num).fontSize);
+      let maxOther = 0;
+      let maxOtherText = '';
+      for (const el of document.querySelectorAll('#nk-home-app *')) {
+        if (el.children.length > 0) continue;
+        const text = (el.textContent || '').trim();
+        if (!text || el === num) continue;
+        const size = parseFloat(getComputedStyle(el).fontSize);
+        if (size > maxOther) { maxOther = size; maxOtherText = text.slice(0, 20); }
+      }
+      const numBox = num.getBoundingClientRect();
+      const masthead = document.querySelector('.nk-hub-masthead')!.getBoundingClientRect();
+      return { numSize, maxOther, maxOtherText, belowMasthead: numBox.top >= masthead.bottom - 1 };
     });
-    expect(geometry.stack, '辅助标签应在主标题上方形成层级').toBe(true);
-    expect(geometry.editionWithinHead, '类别索引不得越出标题行').toBe(true);
-    expect(geometry.itemCount).toBe(3);
-    expect(geometry.itemNames).toEqual(['CHARACTER', 'LIGHT CONE', 'RELIC']);
+    expect(geometry.numSize, '版本号应显著大于其余文字').toBeGreaterThan(geometry.maxOther);
+    expect(geometry.belowMasthead, '版本抬头应在报头之下（报头不得被抬头挤掉）').toBe(true);
     await noUnknownOverflow(page);
   });
 
-  test('首页 /：1920×1080 首屏内完整可见品牌带 + 版本上新标题与第一分区首行卡片（ADR 0019 核心验收）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：1920×1080 首屏内完整可见报头 + 版本上新标题与第一分区首行卡片（ADR 0019 核心验收）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto('/');
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
-    // 品牌带不得回到「独占首屏」形态：高度必须显著小于视口
-    const bandH = await page.locator('.nk-hub-brand').evaluate((el) =>
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
+    /* 报头不得退回「带」形态：它必须是紧凑的一行文字，而不是一块带固定高度的面板。
+       上限取 120px（实测约 93px）——旧带是 210~240px，且会在其下沿截断页面地面的材质。 */
+    const mastheadH = await page.locator('.nk-hub-masthead').evaluate((el) =>
       Math.round(el.getBoundingClientRect().height),
     );
-    expect(bandH).toBeLessThanOrEqual(240);
-    // 首屏契约（ADR 0019 决策 11 收窄）：品牌带 + 版本上新标题 + 第一分区标题与首行卡片完整可见。
+    expect(mastheadH).toBeLessThanOrEqual(120);
+    // 首屏契约（ADR 0019 决策 11）：报头 + 版本抬头 + 第一分区标题与首行卡片完整可见。
     // 后续分区随滚动进入（scroll-driven reveal 编排），不再钉进首屏——那会把上新卡压回仪表盘尺度。
-    await expect(page.locator('.nk-hub-release__title')).toBeVisible();
+    await expect(page.locator('.nk-intake__batch-num')).toBeVisible();
     await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
     const marks = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
       els.slice(0, 1).map((el) => ({
@@ -234,7 +266,9 @@ test.describe('布局验收：常规主题', () => {
     await expect(page.locator('.nk-hub-release__sk')).toBeVisible();
     // 骨架行数 = 分区数（标签来自同一份源，与数据无关）
     await expect(page.locator('.nk-hub-release__sk-row')).toHaveCount(3);
-    await expect(page.locator('.nk-hub-release__title')).toHaveText(/版本上新/);
+    // 抬头在任何一态下都必须已经成立：版本号来自 version.json（不被本用例延后），单位行紧随其后
+    await expect(page.locator('.nk-intake__batch-num')).toHaveText(versionLabelRaw);
+    await expect(page.locator('.nk-intake__batch-note')).toHaveText('版本上新');
     await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
     await expect(page.locator('.nk-hub-release__empty')).toHaveCount(0);
     // 数据到位：骨架退场、真实分区上位
@@ -272,9 +306,10 @@ test.describe('布局验收：常规主题', () => {
     await page.goto('/');
     await expect(page.locator('.nk-hub-release__empty')).toHaveCount(1);
     await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
-    await expect(page.locator('.nk-hub-release__title')).toHaveText('版本上新');
+    // 无 version_label ⇒ 抬头落回「版本上新」四个字（版本号缺席时它不是数字位，仍是这一页的主语）
+    await expect(page.locator('.nk-intake__batch-num')).toHaveText('版本上新');
     // 空态不回退板块索引、不改显历史版本；品牌带与共享页脚仍在
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
     await noUnknownOverflow(page);
     assertNoErrors();

@@ -1,6 +1,9 @@
 /* 终局玩法详情页（第四种页面形态：单页数据页）。
    随视图 import 懒加载；只消费 tokens.css 语义层令牌，复用 `.nk-page--detail` / `.nk-title` /
-   `.nk-eg-card`（目录页卡片）等既有原语，不自造重复样式。 */
+   `.nk-eg-lrow`（目录页行；`.nk-eg-card` 家族已随目录卡改行渲染删除）等既有原语，不自造重复样式。
+   字号/圆角一律走 `--nk-fs-*` / `--nk-radius-*` 刻度（与终局目录卡同一批映射，见 endgame.css 头部）：
+   本文件曾自带 14 处字面量字号（0.56~1.9rem，其中 0.56/0.6rem 低于 A5.3 的 0.6rem 合格线下限）
+   与 2 处 10px 越档圆角，已全部收口到令牌。 */
 
 .nk-egm { padding-bottom: 48px; }
 
@@ -45,47 +48,47 @@
 /* 徽记用原图尺寸（144px）内缩到 48px 显示：清晰且不承担背景职责 */
 .nk-egm__emblem { width: 48px; height: 48px; object-fit: contain; flex: none; }
 .nk-egm__head { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
-.nk-egm__crumbs { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text3); }
+.nk-egm__crumbs { display: flex; align-items: center; gap: 6px; font-size: var(--nk-fs-3); color: var(--text3); }
 .nk-egm__crumbs a { color: var(--text2); transition: color var(--nk-dur-hover) var(--nk-ease-out); }
 .nk-egm__crumbs a:hover { color: var(--text-bright); }
 .nk-egm__sep { color: var(--text3); }
-.nk-egm__title { margin: 10px 0 0; font-size: 1.9rem; font-weight: 900; letter-spacing: 0.01em; line-height: 1.15; color: var(--text-bright); }
-.nk-egm__en { margin: 4px 0 0; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text3); }
+.nk-egm__title { margin: 10px 0 0; font-size: var(--nk-fs-title-1); font-weight: 900; letter-spacing: 0.01em; line-height: 1.15; color: var(--text-bright); }
+.nk-egm__en { margin: 4px 0 0; font-family: var(--font-mono); font-size: var(--nk-fs-2); letter-spacing: 0.24em; text-transform: uppercase; color: var(--text3); }
 
 /* ── 面板：规则正文 / 结构口径 / 增益体系 / 赛季列表 */
 .nk-egm__panel { width: 100%; max-width: var(--nk-detail-max); margin: 0 auto; padding: 26px 20px 0; }
 .nk-egm__rule + .nk-egm__rule { margin-top: 18px; }
 .nk-egm__rule-title {
   margin: 0 0 6px;
-  font-size: 0.86rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright);
+  font-size: var(--nk-fs-4); font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright);
 }
 /* 规则正文按阅读列宽收窄：此前没有任何列宽 ⇒ 实测首行铺满 960px 面板、每行 72 全角字，
    是站点里唯一一处长文没有阅读列宽的地方。列宽必须落在**承载正文的那一级**（段落与列表项，
-   字号 0.82rem）——`--nk-prose-max` 是 em 定值，落在字号 1rem 的 `<article>` 上会解析成 704px、
-   只有 53 字/行。 */
-.nk-egm__para { margin: 0 0 8px; max-width: var(--nk-prose-max); font-size: 0.82rem; line-height: 1.95; color: var(--text2); text-wrap: pretty; }
+   字号 --nk-fs-4 = 0.82rem）——`--nk-prose-max` 是 em 定值，落在字号 1rem 的 `<article>` 上会
+   解析成 704px、只有 53 字/行。 */
+.nk-egm__para { margin: 0 0 8px; max-width: var(--nk-prose-max); font-size: var(--nk-fs-4); line-height: 1.95; color: var(--text2); text-wrap: pretty; }
 .nk-egm__list { margin: 0 0 8px; padding: 0 0 0 2px; list-style: none; }
 .nk-egm__list li {
   position: relative; padding-left: 14px; margin-bottom: 4px;
   max-width: var(--nk-prose-max);
-  font-size: 0.82rem; line-height: 1.9; color: var(--text2);
+  font-size: var(--nk-fs-4); line-height: 1.9; color: var(--text2);
 }
 .nk-egm__list li::before {
   content: ''; position: absolute; left: 2px; top: 0.82em;
   width: 4px; height: 4px; border-radius: 50%;
   background: color-mix(in srgb, var(--primary) 70%, transparent);
 }
-.nk-egm__note { margin: 0 0 12px; font-size: 0.72rem; line-height: 1.7; color: var(--text3); }
+.nk-egm__note { margin: 0 0 12px; font-size: var(--nk-fs-3); line-height: 1.7; color: var(--text3); }
 /* 增益体系的「规格行」：条数用 HUD 字体加重（与结构口径的数值同一套读法），选法用正文色可读字号。
-   刻意**不用**注脚字号与 --text3 —— 这两个信息是读者进入该区块最先需要的规格，不是附注。 */
+   刻意**不用**注脚字号（--nk-fs-3）与 --text3 —— 这两个信息是读者进入该区块最先需要的规格，不是附注。 */
 .nk-egm__system { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin: -6px 0 14px; }
 .nk-egm__system-count {
-  font-family: var(--font-hud); font-size: 1.0rem; font-weight: 700;
+  font-family: var(--font-hud); font-size: var(--nk-fs-6); font-weight: 700;
   color: var(--text-bright); font-variant-numeric: tabular-nums;
 }
 .nk-egm__system-choice {
   position: relative; padding-left: 15px;
-  font-size: 0.84rem; font-weight: 600; color: var(--text2);
+  font-size: var(--nk-fs-4); font-weight: 600; color: var(--text2);
 }
 .nk-egm__system-choice::before {
   content: ''; position: absolute; left: 0; top: 50%; width: 9px; height: 1px;
@@ -99,22 +102,33 @@
   display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1px; margin: 0 0 14px;
   background: var(--line-1);
-  border: 1px solid var(--line-1); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--line-1); border-radius: var(--nk-radius-3); overflow: hidden;
 }
 .nk-egm__fact { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; background: var(--card); }
-.nk-egm__fact dt { font-size: 0.68rem; letter-spacing: 0.08em; color: var(--text3); }
+.nk-egm__fact dt { font-size: var(--nk-fs-3); letter-spacing: 0.08em; color: var(--text3); }
 .nk-egm__fact dd {
-  margin: 0; font-family: var(--font-hud); font-size: 1.02rem; font-weight: 700;
+  margin: 0; font-family: var(--font-hud); font-size: var(--nk-fs-6); font-weight: 700;
   color: var(--text-bright); font-variant-numeric: tabular-nums;
 }
 
-/* 玩法页不再列具体增益条目（每期/每半场各不相同，归赛季页）：入口用全站原语 .nk-guide-link，故此处不再需要卡片样式 */
-.nk-egm__system-cta { align-self: flex-start; margin-bottom: 4px; }
+/* 玩法页不再列具体增益条目（每期/每半场各不相同，归赛季页）：入口用全站原语 .nk-guide-link，故此处不再需要卡片样式。
+   但**必须在本页收回原语的 nowrap**：CTA 文案内嵌赛季名，长语言下比面板宽得多——实测越出页面根
+   de/maze@320 +84.7px（元素宽 388.7 / 面板 320）、de@390 +14.7px、ru/story@320 +22px、en/maze@320 +6.9px
+   （cn 为 −95.2px，故只在 cn 取证看不见它），而 `.nk-page--detail { overflow-x: hidden }` 会把它静默硬裁
+   （A5.6 硬裁切），且页面级 scrollWidth 恒为 0 ⇒ 全语言冒烟同样看不见。
+   覆写只落本页类名：`.nk-guide-link` 的 `flex: none` + `nowrap` 是目录页列头「名 + 徽章」折行规则的前提
+   （de 徽章自然宽 268px > 列头可用 243px，靠 wrap 才不撑破），改原语会连带 /endgame 目录页。 */
+.nk-egm__system-cta {
+  align-self: flex-start; margin-bottom: 4px;
+  max-width: 100%; white-space: normal; text-align: start;
+}
 
 
 /* ── 赛季列表：直接复用目录页的行渲染（`.nk-eg-lrow`），但目录页是「每列一个模式」的多列竖表，
    单模式 57 期若单列到底会得到 3500px 的长条、且每行 960px 宽只放三十来个字 ⇒ 这里按同一读法
-   分栏（≥768 两列 / ≥1024 三列），行样式全部仍来自 endgame.css，不复制。 */
+   分栏（≥768 两列 / ≥1024 三列），行样式全部仍来自 endgame.css，不复制。
+   ≤767 档无需声明：`columns: 1` 即默认值。曾有一行 `grid-template-columns: minmax(0, 1fr)` 写在这里，
+   该属性对 multicol 容器无消费者（实测计算值恒为 display:block / columnCount:1/2/3），已删。 */
 .nk-egm__seasons { columns: 1; column-gap: 14px; }
 /* 只声明断页与分栏：**不要**覆写子项的 display/width —— 行本身是 flex 行，改成 block 会把
    「图标 + 文案 + 日期」压成上下堆叠，手机档行高从 62px 涨到 96px（实测整页反而变长 27%）。 */
@@ -130,20 +144,24 @@
 .nk-egm__other {
   display: flex; flex-direction: column; gap: 2px;
   flex: 1 1 180px; padding: 11px 14px;
-  background: var(--card); border: 1px solid var(--line-1); border-radius: 10px;
+  background: var(--card); border: 1px solid var(--line-1); border-radius: var(--nk-radius-3);
   transition: border-color var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-egm__other:hover { border-color: color-mix(in srgb, var(--primary) 34%, transparent); background: var(--nk-shell-hover); }
-.nk-egm__other-cn { font-size: 0.86rem; font-weight: 700; color: var(--text-bright); }
-.nk-egm__other-en { font-family: var(--font-mono); font-size: 0.56rem; letter-spacing: 0.16em; color: var(--text3); }
+.nk-egm__other-cn { font-size: var(--nk-fs-4); font-weight: 700; color: var(--text-bright); }
+.nk-egm__other-en { font-family: var(--font-mono); font-size: var(--nk-fs-2); letter-spacing: 0.16em; color: var(--text3); }
 
 /* ── 骨架（复用 nk-skeleton 原语，只补本页几何） */
 .nk-skeleton--egm .nk-skeleton__hero--egm { display: block; min-height: 168px; max-width: var(--nk-detail-max); margin: 0 auto; }
 .nk-skeleton--egm .nk-sk--title { height: 34px; }
 
 @media (max-width: 767px) {
-  .nk-egm__hero { padding: 18px 16px 16px; }
-  .nk-egm__title { font-size: 1.5rem; }
+  /* Hero 左右内距必须归零、并交给 `> *` 那一级：此前 hero 自身 16px 与子项 `padding-inline: 20px`
+     叠加 ⇒ 面包屑 / h1 文本左缘 36px，而 `.nk-egm__panel` 文本左缘 16px（实测 390/320 两档），
+     同一页出现两套缩进。子项同步收到与 panel / others 同档的 16px 后，
+     `crumbs.left + padL == panel.left + padL`（桌面档原本就相等：hero 内距 0 + 子项 20 == panel 20）。 */
+  .nk-egm__hero { padding: 18px 0 16px; }
+  .nk-egm__hero > * { padding-inline: 16px; }
+  .nk-egm__title { font-size: var(--nk-fs-8); }
   .nk-egm__panel, .nk-egm__others { padding-left: 16px; padding-right: 16px; }
-  .nk-egm__seasons { grid-template-columns: minmax(0, 1fr); }
 }

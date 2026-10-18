@@ -3,7 +3,6 @@
    可用性随宿主变化，字形会偏移或缺失。data URI 内不能用 var()，故取中性灰阶（check-colors
    对严格中性自动豁免）。已有语义更具体的组件级占位（物品卡的立方体线框、终局 buff 的星形、
    遗器部位图的真实通用图标）**不得**被本占位覆盖——它们各自带语义，由 dom.ts 的 opt-out 路径排除。 */
-import { escHtml } from '../../lib/html';
 
 const COLOR = '%23a0a0b0';
 export const MISSING_ICON_SVG =
@@ -13,9 +12,3 @@ export const MISSING_ICON_SVG =
   + `<circle cx='12' cy='17.6' r='1.05' fill='${COLOR}' stroke='none'/></svg>`;
 
 export const MISSING_ICON_SRC = `data:image/svg+xml,${MISSING_ICON_SVG}`;
-
-/* v-html 卡片用（属性值需转义）：与 cdnImgFallbackAttr 同形态，但只画占位图形。
-   宿主容器需自行保证占位尺寸（占位 SVG 为 24×24、随容器缩放）。 */
-export function placeholderImgAttrs(): string {
-  return ` src="${escHtml(MISSING_ICON_SRC)}" data-cdn-placeholder="1"`;
-}

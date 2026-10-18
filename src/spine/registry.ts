@@ -37,7 +37,3 @@ export function disposeSpineEntry(key: string): void {
     /* 已释放或运行时异常均静默 */
   }
 }
-
-export function disposeAllSpineEntries(): void {
-  for (const key of [...entries.keys()]) disposeSpineEntry(key);
-}

@@ -1,21 +1,4 @@
-/** 光锥相关数据类型（lightcone.json 列表端点 + converter 本地列表 + light_cones/{id}.json 详情） */
-
-/* ─── 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
-
-/** lightcone.json 条目（键 = 光锥 ID） */
-export interface LightconeListEntry {
-  /** 稀有度（CombatPowerLightconeRarity3/4/5） */
-  rank?: string;
-  /** 命途（Rogue/Mage/...） */
-  baseType?: string;
-  atk?: number;
-  en?: string;
-  zh?: string;
-  ja?: string;
-  ko?: string;
-  desc?: string | null;
-}
-export type LightconeListDb = Record<string, LightconeListEntry>;
+/** 光锥相关数据类型（converter 本地列表 + light_cones/{id}.json 详情） */
 
 /* ─── 本地目录列表（converter 输出，数组形态） ─── */
 

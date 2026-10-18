@@ -5,9 +5,7 @@ import { noUnknownOverflow } from './layout.shared';
 /**
  * 布局验收：终局玩法常青页（/endgame/<mode>） —— layout 验收层（语义契约 + 数值规格）分文件之一。
  *
- * 拆分动因：`fullyParallel: false` 下**文件内**串行，单文件 layout（74 用例 / 469s）把全量墙钟
- * 锁死在 6.6 分钟（a11y 仅 85s 跑完后两个 worker 空转）。按 describe 边界拆开后文件级并行生效，
- * 每条用例的隔离性与拆分前完全一致（文件内本就串行），故已记录的并发 flake 纪律不受影响。
+ * 分文件判据（为何按域拆、单文件该多小）见 docs/agents/testing.md「layout 必须按 describe 边界分文件」。
  *
  * `@viewport-pinned` 标签：凡用例内自行 `setViewportSize(...)` 固定视口者，必须在 `test(...)`
  * 第二参传该标签（mobile-chromium 以 `grepInvert` 跳过，视口已由用例钉死）。标签须静态书写，
@@ -219,4 +217,36 @@ test.describe('终局详情页 Hero 大图口径（赛季 banner 翻转铺底）
     await expect(bg).not.toHaveClass(/nk-egd-hero__bg--flip/);
     assertNoErrors();
   });
+});
+
+test.describe('玩法页赛季增益 CTA 不被裁切（长语言最坏档）', () => {
+  /* 判据落在**元素右缘 vs 面板右缘**，不落页面级 scrollWidth：`.nk-page--detail` 是
+     `overflow-x: hidden`（tokens.css:567），长译文把 CTA 撑出面板时页面 scrollWidth 恒为 0
+     ——`layout-locales-sweep.spec.ts` 的整页口径与本文件既有的 `noUnknownOverflow` 都看不见它。
+     成因：CTA 是共享原语 `.nk-guide-link`（catalog.css:407/409 的 `flex: none` + `nowrap`）且文案内嵌
+     赛季名；覆写只在本页 `.nk-egm__system-cta`（endgame-mode.css），原语的 nowrap 是 /endgame
+     目录页列头折行规则的前提，不得改。
+     de/maze@320 是实测最坏档（修复前元素宽 388.7px vs 面板 320px、右缘越出页面根 +84.7px）；
+     ru/story@320 原地证过 +22px。cn 为对照（同一断言在缺省语言下为负值，故它不能单独守住这条）。 */
+  for (const [prefix, mode, vw] of [
+    ['/de', 'maze', 320], ['/de', 'maze', 390], ['/ru', 'story', 320], ['', 'maze', 320],
+  ] as const) {
+    test(`玩法页 CTA 不越出面板：${prefix}/endgame/${mode} @${vw}`, { tag: '@viewport-pinned' }, async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      await page.setViewportSize({ width: vw, height: 900 });
+      await page.goto(`${prefix}/endgame/${mode}`);
+      const cta = page.locator('.nk-egm__system-cta');
+      await expect(cta).toBeVisible();
+      const box = await cta.evaluate((el) => {
+        const panel = el.closest('.nk-egm__panel');
+        return {
+          right: el.getBoundingClientRect().right,
+          panelRight: panel?.getBoundingClientRect().right ?? 0,
+        };
+      });
+      expect(box.right, `CTA 右缘 ${box.right.toFixed(1)} 不得越出面板右缘 ${box.panelRight.toFixed(1)}`)
+        .toBeLessThanOrEqual(box.panelRight + 1);
+      assertNoErrors();
+    });
+  }
 });

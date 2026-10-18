@@ -40,7 +40,7 @@ pnpm test               # 运行全部测试（Vitest）
 pnpm vitest run <文件>   # 运行单个测试文件
 pnpm test:e2e:affected  # 只跑按 git diff 推导出的受影响用例（「禁全量 e2e」的落地命令）
 pnpm test:e2e:guards    # CI 快层：不变量 + 外壳契约 + a11y（guards + shell + accessibility）
-pnpm test:e2e:layout    # 布局契约层（全部 layout-*；CI 里按 4 分片跑）
+pnpm test:e2e:layout    # 布局契约层（全部 layout-*；CI 里按 6 分片跑）
 pnpm test:e2e:ci        # 上面两层合集（本地一次跑完 CI 的全部 e2e）
 node tools/gen-ai-endpoints.mjs   # 单独重建 AI 快照（读 dist/index.html 为模板，须先 vite build）
 node tools/check-ai-endpoints.mjs # AI 端点守卫（快照正文/内链/sitemap/robots 覆盖率；pnpm build 末步自动跑）
@@ -142,8 +142,8 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
 | T2 | 模板结构 / v-if / v-for / 数据流 | 守卫 + `pnpm test:e2e`（toHaveText / toHaveCount / a11y 扫描）；较大改动按需 | ≤15 min |
 | T3 | Spine / Canvas / 动画 / 异步编排 | 守卫 + 取证金字塔 L1-L4 按需；先探测 `visibilityState` 与 rAF（后台标签页挂起陷阱） | ≤30 min |
 
-- **降级必须记录**：任何「超预算降级」「跳过某级验证」「豁免项」必须在交付记录 / 回复中写明（原级别、降级原因）；**禁止静默降级**——未记录视为漏测，并作为「任务交付流程」第 5 条的沉淀信号。
-- **验证耗时控制**：`visual.spec` 全量禁止，只跑改动实际影响的用例（`pnpm test:e2e:affected` 或 `--grep <关键词>`）；同一会话内全量 e2e 最多一次；纯 CSS 改动用守卫 + 单探针计算样式断言 + `pnpm test:e2e:ci` 即可，不跑像素基线。
+- **降级必须记录**：超预算降级 / 跳过某级验证 / 豁免项一律写进交付记录（原级别 + 原因），**禁止静默降级**——未记录视为漏测。细则与其余执行纪律见 [verification.md](docs/agents/verification.md)「执行纪律」。
+- **验证耗时控制**：`visual.spec` 全量禁止，只跑改动实际影响的用例（`pnpm test:e2e:affected` 或 `--grep <关键词>`）；同一会话内全量 e2e 最多一次。
 
 ## 本文件维护（防回流）
 

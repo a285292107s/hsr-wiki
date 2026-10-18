@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor, waitForSettled } from './helpers';
 import {
   charFamilyIds,
   charSkillNames,
@@ -25,6 +25,11 @@ test.describe('布局验收：角色详情页', () => {
   test('/character/1503：族内首个为父卡（行笔，临摹断水）+ 2 子卡，子卡缩进一个图标空间、竖轨共线、折角接子图标中线', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1503');
+    /* 本用例断的全是**几何量**（父卡体底 vs 首子卡顶的接缝、竖轨/折角落点、图标列对齐），
+       必须在字体与骨架都就绪后取值：`waitForSelector` 只保证节点存在，此时测到的是**回退字体**
+       的行盒高度，接缝断言（±1px）在双 worker 并发下会翻（本文件实测过 2 次，单跑 3/3 绿）。
+       同一课在 `layout-character-hero.spec.ts` 已记过（那里是字体度量，这里是行盒几何）。 */
+    await waitForSettled(page);
     const firstCard = page.locator('[data-panel="skills"] > .nk-skill').first();
     // 技能名一律从 characters/1503.json 的族数据派生（族 id 原序 → 名），不在断言里写死页面文案
     const familyIds = charFamilyIds('1503', 'Point01');

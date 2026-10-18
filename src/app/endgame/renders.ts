@@ -1,13 +1,33 @@
 
+import { shallowRef } from 'vue';
 import { elemLabel } from '../../lib/enum-labels';
 import { translate } from '../i18n';
 import { monsterRankKey } from '../../lib/enum-labels';
 import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
 import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
+import { loadLocalItems } from '../../services/api';
 import type {
-  MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo, MazeRewardItem,
+  LocalItemEntry, MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo, MazeRewardItem,
   MazeStarReward, MazeTargetInfo,
 } from '../../services/types';
+
+/** 奖励物品 id → 名称 / 图标：**模块级共享**。`loadLocalItems` 是单例取数，但每个消费实例原先各建一份
+ *  全量 Map（items.json 2600+ 条；星数奖励每档渲染一个 `EndgameReward` ⇒ 单页 3~6 份）。
+ *  这里一次构建、全实例共享；失败时清掉 promise 允许重试（与站点共享单例同一纪律）。 */
+export type RewardItemMeta = Pick<LocalItemEntry, 'name' | 'icon'>;
+export const rewardItemMap = shallowRef<Map<number, RewardItemMeta>>(new Map());
+let rewardItemPromise: Promise<void> | null = null;
+
+export function ensureRewardItemMap(): Promise<void> {
+  if (!rewardItemPromise) {
+    rewardItemPromise = loadLocalItems()
+      .then((items) => {
+        rewardItemMap.value = new Map(items.map((it) => [it.id, { name: it.name, icon: it.icon }]));
+      })
+      .catch(() => { rewardItemPromise = null; });
+  }
+  return rewardItemPromise;
+}
 
 export function buffDescHtml(b: MazeBuffInfo): string {
   return fmtDesc(b.desc, b.param_list || []);
@@ -28,24 +48,6 @@ export function seasonBuffList(data: MazeListEntry): MazeBuffInfo[] {
   for (const f of data.floor_details || []) if (f.buff) carried.add(f.buff.id);
   for (const nd of data.tierce?.nodes || []) if (nd.buff) carried.add(nd.buff.id);
   return flat.filter((b) => !carried.has(b.id));
-}
-
-export interface SeasonRule {
-  label: string;
-  value: number;
-}
-
-/** 赛季级规则数值（层面板右栏）：与每层取值完全相同的项不再复述——忘却之庭的回合上限
- *  就是逐层回合上限（已落在半场卡片上），虚构叙事的回合上限与通关分数线才是赛季维度。 */
-export function seasonRules(data: MazeListEntry): SeasonRule[] {
-  const perFloor = (data.floor_details || []).map((f) => f.countdown || 0);
-  const rules: SeasonRule[] = [];
-  const cd = data.countdown || 0;
-  if (cd && !(perFloor.length > 0 && perFloor.every((c) => c === cd))) {
-    rules.push({ label: translate('egd.rule.cycles'), value: cd });
-  }
-  if (data.clear_score) rules.push({ label: translate('egd.rule.score'), value: data.clear_score });
-  return rules;
 }
 
 /** 增益图标 URL（bufficon CDN；资源未就绪时 404，img error 事件兜底 SVG 占位） */
@@ -109,10 +111,6 @@ export function monCountLabel(mons: MazeMonsterInfo[] | undefined): string {
   if (!mons?.length) return '';
   const waves = new Set(mons.map((m) => m.wave || 1)).size;
   return translate('egd.wavesEnemies', { waves, mons: mons.length });
-}
-
-export function peakTagsHtml(tags: string[]): string {
-  return tags.map((t) => `<span class="nk-egd-peak__tag">${escHtml(t)}</span>`).join('');
 }
 
 export const TARGET_TYPE_LABEL: Record<string, string> = {

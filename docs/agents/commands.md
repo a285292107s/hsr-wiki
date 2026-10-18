@@ -59,6 +59,10 @@ python tools/fill-ui-messages.py --check   # 只检查：官方译文是否与�
 ```bash
 node tools/fetch-fonts.mjs    # 自托管字体：抓 Google 的 unicode-range 分片 woff2 → public/fonts/ + src/styles/fonts.css（可重复执行，已存在的分片不重下）
 node tools/gen-og-image.mjs   # 社交分享图：无头浏览器渲染品牌卡 → public/og.png（1200×630）
+python tools/ingest-icons.py --category <分类> [--crop-alpha 4:5] [--jobs 10] [--sheet temp/sheet.jpg]
+                              # 图标入库转码（口径 = ADR 0057）：读解包 spriteoutput PNG → public/data/assets/icons/<分类>/*.webp
+                              # --sheet 同批产出深底大字联系表（人眼核对，ADR 0057 决策 5）；--sheet-only 按已入库目录重建联系表
+                              # --only a,b / --limit N 冒烟；新增分类须同步 src/services/cdn/base.ts 的 CDN_CATEGORIES
 ```
 
 `fetch-fonts.mjs` 的存在理由：`index.html` 不再引 `fonts.googleapis.com` —— 那条跨域样式表既**渲染阻塞**
@@ -92,7 +96,7 @@ e2e（Playwright，webServer 自动起 dev server 并复用已有 6188 实例）
 ```bash
 pnpm test:e2e          # 本机层：全量（含像素基线）
 pnpm test:e2e:guards   # CI 快层：不变量 + 外壳契约 + a11y（guards + shell + accessibility，不受 UI 迭代影响，永远可跑）
-pnpm test:e2e:layout   # 布局契约层：全部 layout-*（CI 里按 4 分片跑；本地即全量单进程）
+pnpm test:e2e:layout   # 布局契约层：全部 layout-*（CI 里按 6 分片跑；本地即全量单进程）
 pnpm test:e2e:ci       # 上面两层合集（本地一次跑完 CI 的全部 e2e；覆盖不得下降，已登记的收窄见 testing.md）
 pnpm test:e2e:affected # 受影响用例层：按 git diff 推导并直接执行（= node tools/e2e-affected.mjs --run）
 pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all；重构期只在收敛后跑一次）
@@ -104,7 +108,7 @@ pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all�
 
 **2026-10 复测的是另一个配置**——`fullyParallel: true` + `workers: 2`（并发页面数与现状**相同**，只把调度粒度从文件降到用例）：CI 层 206 用例 A/B 实测 **341s → 312s（约 8%）**，且提速那一 arm 跑在更热的缓存上（顺序对 `fullyParallel` 有利）。增益不足以承担改配置的 flake 面，故**仍维持 `false`**；要提速走拆分文件那条路（见下条），**不要**再拿这条做「反正并发数没变」的翻案——翻案需要换序复跑的稳定增益，而不是单次 A/B。
 
-**但「不采纳全局并行」≠「接受单文件串行」**：`fullyParallel: false` 并不禁止**文件级**并行（Playwright 始终按文件分派 worker）。layout 曾是单个 74 用例 / 469s 的大文件，等于把全量调度压成一个串行单元——实测墙钟 327s。按 `describe` 边界拆成 `e2e/layout-*.spec.ts` 后墙钟大幅下降，**但这纪律会随用例增长复发**：2026-10 实测全量 180 用例 / 361.6s，`layout-character.spec.ts` 又长回 39 用例单文件、firefox 项目只跑它、它又排在项目数组末尾 ⇒ 末段 168s（占墙钟 46%）只有 1 个 worker 在跑。故再拆成七个 `layout-character-*.spec.ts`，并把 firefox project 提到项目最前（Playwright 按项目顺序分派，最长单元先起跑）。**要提速就走这条路：减用例数、按域拆文件、最长的 project 放最前——禁止提高并发度**（唯一例外是先把 flake 根因修掉，见下条）。
+**但「不采纳全局并行」≠「接受单文件串行」**：`fullyParallel: false` 并不禁止**文件级**并行（Playwright 始终按文件分派 worker）。layout 曾是单个 74 用例 / 469s 的大文件，等于把全量调度压成一个串行单元——实测墙钟 327s。按 `describe` 边界拆成 `e2e/layout-*.spec.ts` 后墙钟大幅下降，**但这纪律会随用例增长复发**：2026-10 实测全量 180 用例 / 361.6s，`layout-character.spec.ts` 又长回 39 用例单文件、firefox 项目只跑它、它又排在项目数组末尾 ⇒ 末段 168s（占墙钟 46%）只有 1 个 worker 在跑。故再拆成七个 `layout-character-*.spec.ts`，并把 firefox project 提到项目最前（Playwright 按项目顺序分派，最长单元先起跑）；`layout-endgame.spec.ts` 同样长回 22 用例 / 251s（占 layout 层三分之一、且是 `--shard` 切不开的单个调度单元），已按目录页 / 层级看板再拆成两个文件。**要提速就走这条路：减用例数、按域拆文件、最长的 project 放最前——禁止提高并发度**（唯一例外是先把 flake 根因修掉，见下条）。
 
 ## 漂移与影响面工具（report-only，默认不阻塞）
 
@@ -172,7 +176,7 @@ python -m pytest tests/ -v               # converter 单元测试
 门禁语义（**软门禁**）：
 
 - main 分支 protection 仅保留防 force push 与防删除（required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过。
-- 推送后 CI 并行跑五条 job，各自独立报红：`static`（七守卫 + `vue-tsc -b`）、`unit-tests`（`pnpm test`）、`invariants`（`pnpm test:e2e:guards`）、`layout`（4 分片 × 每片 2 worker）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集）；失败由 GitHub 通知。CI **不跑** `pnpm build`（Vercel 构建即发布门，重复跑零增量）。
+- 推送后 CI 并行跑六条 job，各自独立报红：`static`（七守卫 + `vue-tsc -b`）、`unit-tests`（`pnpm test`）、`invariants`（`pnpm test:e2e:guards`）、`layout`（6 分片 × 每片 2 worker，只装 chromium）、`firefox`（11 条 `@cross-engine`）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集）；失败由 GitHub 通知。CI **不跑** `pnpm build`（Vercel 构建即发布门，重复跑零增量）。
 - **全量矩阵周跑**：`.github/workflows/ci-full.yml`（周一定时 + 手动触发）跑 13 语言 × 25 路由的冒烟与全语言长文案扫描——这是「每次 push 只跑风险语言子集」这处已登记收窄的补偿。
 - Vercel 生产构建（`pnpm build`，含 vue-tsc 与七守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
 - 本地推送前先跑 `pnpm build` + `pnpm test` 自检——CI 红不会拦 push，但会留失败记录。

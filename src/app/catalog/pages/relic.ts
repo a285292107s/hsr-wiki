@@ -14,7 +14,6 @@ export const relicPage: CatalogPageConfig = {
   subtitle: 'RELICS',
   searchKey: 'catalog.relic.search',
   gridClass: 'nk-cat-grid nk-relic-grid',
-  cardClass: '.nk-relic-card',
   async fetchData() {
     const list = await loadLocalRelicSets();
     const items: CatalogItem[] = [];

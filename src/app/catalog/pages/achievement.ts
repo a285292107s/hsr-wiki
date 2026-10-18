@@ -60,7 +60,6 @@ export const achievementPage: CatalogPageConfig = {
   subtitle: 'ACHIEVEMENT INDEX',
   searchKey: 'catalog.achievement.search',
   gridClass: 'nk-cat-grid nk-ach-grid',
-  cardClass: '.nk-ach-card',
   styles: [() => import('../../../../src/styles/achievement.css')],
   /* 虚拟网格刻度：卡是「无图纯文本」型，行高由文本块决定而不是由列宽 × 图比决定（virtualImgRatio 0）。
      刻度按实测内容高定（详见图例注释）：桌面上 `--nk-grid-min` 不得小于此处的 virtualMinColW，

@@ -665,22 +665,6 @@ background-position: center 15%;
   display: inline-block; width: 4px; height: 14px; border-radius: var(--nk-radius-1);
   background: linear-gradient(180deg, var(--primary), var(--accent));
 }
-.nk-hero__level { display: flex; align-items: center; gap: 12px; }
-.nk-hero__level-label {
-  font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 700;
-  letter-spacing: 0.06em; color: var(--text2); white-space: nowrap;
-}
-.nk-hero__level-track {
-  flex: 1; height: 6px; border-radius: var(--nk-radius-1); overflow: hidden;
-  background: color-mix(in srgb, var(--primary) 10%, transparent);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.35), inset 0 0 0 1px color-mix(in srgb, var(--primary) 14%, transparent);
-}
-.nk-hero__level-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--th-400));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
-  transition: width 0.6s var(--nk-ease-out);
-}
 .nk-hero__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; }
 .nk-hero__stat { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent); transition: background 0.2s var(--nk-ease-out); }
 .nk-hero__stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
@@ -899,87 +883,54 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
 .nk-error-state__retry:active { transform: translateY(1px); }
 .nk-error-state__retry:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
 
-.nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 88px 40px 56px var(--nk-content-offset); text-align: center; }
-.nk-hub-footer::before { content: ''; display: block; width: min(320px, 52%); height: 1px; margin: 0 auto 44px; background: linear-gradient(90deg, transparent, var(--line-2) 30%, var(--line-2) 70%, transparent); }
-.nk-hub-footer__motto { font-family: var(--font-body); font-size: clamp(var(--nk-fs-7), 2.4vw, var(--nk-fs-title-1)); font-weight: 900; letter-spacing: 0.3em; text-indent: 0.3em; color: var(--text-bright); }
-.nk-hub-footer__latin { margin: 14px 0 0; font-family: var(--font-mono); font-size: var(--nk-fs-2); letter-spacing: 0.42em; text-indent: 0.42em; color: var(--text3); }
+/* 枢纽页页脚：**两个枢纽页共用的收束**。
+   形态＝一句话收尾，不做 sitemap、不做居中字距装饰（旧 `::before` 渐变线与
+   `__latin` 等宽拉丁行随首页重构删除：前者是发丝线、后者是「代码外等宽字 + 大字距」。 */
+.nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 56px var(--nk-content-offset); }
+/* 20px 而不是 24px：末行紧跟遗器分区，24px 到手机档就够到 headings 门槛（<600 档门槛 22px），
+   于是上一分区的条目名会被 inspect.mjs 读成「压在这句话上方的小字标签」。收在 20px 后
+   它在任何宽度都不是 heading，这一整类误判消失。 */
+.nk-hub-footer__motto { font-family: var(--font-body); font-size: var(--nk-fs-7); font-weight: 800; letter-spacing: 0; color: var(--text-bright); }
 @media (min-width: 768px) and (max-width: 1023px) {
-  .nk-hub-footer { padding: 64px 32px 44px var(--nk-content-offset); }
-  .nk-hub-footer::before { margin-bottom: 36px; }
+  .nk-hub-footer { padding: 60px 32px 44px var(--nk-content-offset); }
 }
 @media (max-width: 767px) {
-  .nk-hub-footer { padding: 52px 20px calc(76px + env(safe-area-inset-bottom, 0px)); }
-  .nk-hub-footer::before { margin-bottom: 30px; }
+  .nk-hub-footer { padding: 76px 20px calc(76px + env(safe-area-inset-bottom, 0px)); }
 }
 
-.nk-hub-brand {
-  position: relative;
-  min-height: clamp(210px, 22vh, 240px);
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-  background:
-    radial-gradient(42% 130% at 86% -4%, color-mix(in srgb, var(--primary) 20%, transparent) 0%, transparent 66%),
-    radial-gradient(64% 120% at 10% 6%, color-mix(in srgb, var(--primary) 7%, transparent) 0%, transparent 62%),
-    linear-gradient(168deg, var(--hero-bg-deep) 0%, var(--bg) 64%);
-}
-.nk-hub-brand__scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(to bottom, transparent 0%, transparent 58%, color-mix(in srgb, var(--bg) 76%, transparent) 86%, var(--bg) 100%);
-}
-.nk-hub-brand__content {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: var(--nk-content-max);
-  margin: 0 auto;
-  padding: 0 48px 40px var(--nk-content-offset);
-}
-.nk-hub-brand__supra {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 14px;
-  font-family: var(--font-hud);
-  font-size: var(--nk-fs-3);
-  letter-spacing: 0.3em;
-  color: var(--text2);
-  animation: nk-fade 0.8s var(--nk-ease-out) 0.15s backwards;
-}
-.nk-hub-brand__supra::before { content: ''; width: 44px; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
-.nk-hub-brand__title {
+/* 枢纽页抬头（Masthead）：**两个枢纽页共用**的报头文字，**不再自带承载面**。
+ *
+ * 形态＝站名（h1，28–32px）+ 一行定位（20px），直接落在页面地面上，随内容滚动。
+ * 为什么不是原来的「品牌带」（含 210px 盒 + 半透明面板）：
+ *   ① 面板在**有材质的地面**上会截断材质——上面是均匀色面、下面是星野，实测接缝两侧色调只差 Δ12，
+ *      但「材质有无」是 100% 的差，眼睛读成「一条灰条贴在照片上」（用户反馈「太割裂」）；
+ *   ② 站名在 ≥1024px 已由侧栏 `ui-sidebar-brand__cn` 承担，带里再印一遍是同一屏的重复；
+ *   ③ 210px 占掉 900 视口的 23%，却把真正的主语（版本号）压到第二屏边缘。
+ * 不再设 `min-height`、不设底色、不设断点高度：两页仍然同构（同一原语、同一字号），
+ * 所以 `nk-view-swap` 互切时不会出现高度不一致的跳动。高度契约改为「抬头必须是紧凑的一行文字」。
+ *
+ * 定位行**固定 20px（`--nk-fs-7`）且全断点不变**：18px 以下会落进 inspect.mjs 的 eyebrow 判据
+ * （候选上限 = min(18px, 标题字号×0.5)），在手机档「抬头定位行 → 版本号」这段间距内被读成
+ * 「压在大字上方的小字标签」。20px 同时是正文可读档，不需要为它再挑字号。 */
+.nk-hub-masthead { display: grid; gap: 12px; }
+.nk-hub-masthead__title {
   font-family: var(--font-body);
-  font-size: clamp(var(--nk-fs-title-2), 3.6vw, var(--nk-fs-title-4));
+  font-size: clamp(var(--nk-fs-title-1), 2.6vw, var(--nk-fs-title-2));
   font-weight: 900;
-  letter-spacing: 0.03em;
-  line-height: 1.08;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   color: var(--text-bright);
-  text-shadow: 0 2px 28px color-mix(in srgb, var(--primary) 22%, transparent);
-  animation: nk-fade 0.8s var(--nk-ease-out) 0.3s backwards;
+  animation: nk-fade 0.8s var(--nk-ease-out) 0.2s backwards;
 }
-.nk-hub-brand__tagline {
-  margin-top: 14px;
-  font-size: var(--nk-fs-5);
-  letter-spacing: 0.16em;
+.nk-hub-masthead__tagline {
+  font-size: var(--nk-fs-7);
+  letter-spacing: 0;
+  line-height: 1.5;
   color: var(--text2);
-  animation: nk-fade 0.8s var(--nk-ease-out) 0.45s backwards;
-}
-@media (min-width: 768px) and (max-width: 1023px) {
-  .nk-hub-brand { min-height: 210px; }
-  .nk-hub-brand__content { padding: 0 32px 30px var(--nk-content-offset); }
-}
-@media (max-width: 767px) {
-  .nk-hub-brand { min-height: 196px; }
-  .nk-hub-brand__content { padding: 0 20px 24px; }
-  .nk-hub-brand__supra { font-size: var(--nk-fs-1); letter-spacing: 0.22em; gap: 10px; margin-bottom: 10px; }
-  .nk-hub-brand__supra::before { width: 28px; }
-  .nk-hub-brand__title { font-size: clamp(var(--nk-fs-title-2), 8.5vw, var(--nk-fs-title-3)); }
-  .nk-hub-brand__tagline { margin-top: 10px; font-size: var(--nk-fs-4); letter-spacing: 0.1em; }
+  animation: nk-fade 0.8s var(--nk-ease-out) 0.35s backwards;
 }
 @media (prefers-reduced-motion: reduce) {
-  .nk-hub-brand__supra, .nk-hub-brand__title, .nk-hub-brand__tagline { animation: none; }
+  .nk-hub-masthead__title, .nk-hub-masthead__tagline { animation: none; }
 }
 
 @media (min-width: 768px) {

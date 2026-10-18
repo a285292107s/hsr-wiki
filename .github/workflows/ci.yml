@@ -10,21 +10,28 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# 每次 push 的门禁分层（2026-10 重构；体检数据与取舍判据见 docs/agents/testing.md）：
+# 每次 push 的门禁分层（2026-10 重构；判据见 docs/agents/testing.md）：
 #
-# - 五条 job **全部并行**，各自独立报红，红灯可信：
-#     static       七守卫 + vue-tsc（本地 4.5s / 7.7s）。此前只由 Vercel 构建承担，类型错/守卫错会以
-#                  「Vercel 报错」的形式到达（一次实测就把它误当成部署失败排查了半小时）。
-#     unit-tests   Vitest 全量（471 条 / CI 26s）。
+# - 六条 job **全部并行**，各自独立报红，红灯可信：
+#     static       七守卫 + vue-tsc。此前只由 Vercel 构建承担，类型错 / 守卫错会以「Vercel 报错」
+#                  的形式到达——一次实测就把它误当成部署失败排查了半小时。
+#     unit-tests   Vitest 全量。
 #     invariants   不变量层 = guards + shell + a11y。**此前 guards 与 shell 根本不在 CI 里**——
 #                  `e2e/layout-` 这个路径过滤把它们静默排除了，实测 shell 层因此已在 main 上红了两天。
-#     layout       布局契约，4 分片 × 每片 2 worker（见下）。
-#     smoke        两个重文件（全语言冒烟 / 多语言长文案）单独成 job。
+#     layout       布局契约，6 分片跑（见下），只装 chromium。
+#     firefox      跨引擎契约（11 条 `@cross-engine`）。**独立成 job 而不是塞进 layout 分片**：
+#                  `--shard` 按组均分，那 11 条全落在第 1 片 ⇒ 其余 5 片仍得照装 firefox
+#                  （~100MB + 解压），而只有第 1 片用得上。
+#     smoke        三个重文件（全语言冒烟 ×2 / 多语言长文案 ×4）单独成 job，4 分片跑。
 #
 # - **墙钟靠分片（机器维度），不靠提高并发度**：每台机器的 worker 仍是实测过的 2（见 playwright.config.ts）。
 #   分片把「测试时间总和」摊到多台 runner 上，不改任何一台的单机并发 → 不引入新的 flake 面。
-# - 两个重文件必须独立成 job：Playwright 的 `--shard` 按**条数**切分，而这两个文件各自是单文件串行
-#   （`fullyParallel: false`），留在分片里会把某一片拖成两倍墙钟（实测 4 分片估算 266/437/455/201s）。
+# - **片数由「最慢文件」定，不由总条数定**：`--shard` 的切分单位是「文件 × project」组，不是文件里的
+#   用例——同一文件的多条永远落在同一片。所以调片数前先取「每文件实测耗时」（`--reporter=json` 后按
+#   file 聚合），按 `片数 × 单机可用时长 ≥ 最慢文件时长` 定下界。**一个巨型文件就是墙钟下界**。
+#   片数还不得超过组数，否则多出的片空跑（实测 4 文件分 2 片 = 15 条全挤进第 1 片）。
+# - 冒烟族必须独立成 job：它们各自是单文件串行（`fullyParallel: false`），留在 layout 分片里会把
+#   某一片拖成两倍墙钟。
 # - 全量矩阵（13 语言 × 25 路由 + 全语言长文案扫描）移出每次 push，由 ci-full.yml 周跑承担；
 #   每次 push 只扫风险语言子集（cn/de/jp/ru）。覆盖收窄是**登记在案的例外**，不是静默降级。
 # - CI 不跑 `pnpm build`（Vercel 的 buildCommand 即发布门，重复跑零增量）；visual 像素基线回本机
@@ -62,6 +69,10 @@ jobs:
   invariants:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v5
 
@@ -69,14 +80,19 @@ jobs:
         with:
           browsers: chromium
 
-      - name: E2E 不变量层（guards + shell + a11y，环境无关）
-        run: pnpm test:e2e:guards
+      # 3 个文件（guards / shell / a11y）分 2 片：按条数均分后一片是 a11y + guards、另一片是
+      # shell 的剩余——两片都比单跑快，而 3 个文件分 3 片会有一片只剩 guards（短文件，空跑）。
+      - name: E2E 不变量层（guards + shell + a11y，分片 ${{ matrix.shard }}/2）
+        run: >-
+          pnpm exec playwright test
+          e2e/guards.spec.ts e2e/shell.spec.ts e2e/accessibility.spec.ts
+          --shard=${{ matrix.shard }}/2
 
       - name: Upload e2e artifacts
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-artifacts-invariants
+          name: playwright-artifacts-invariants-${{ matrix.shard }}
           path: |
             playwright-report/
             /tmp/hsr-wiki-e2e-results/
@@ -88,23 +104,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6]
     steps:
       - uses: actions/checkout@v5
 
       - uses: ./.github/actions/setup
         with:
-          # 空格分隔（`playwright install --with-deps` 的口径）；逗号会被判为无效目标
-          browsers: chromium firefox
+          # 空格分隔（`playwright install --with-deps` 的口径）；逗号会被判为无效目标。
+          # 这里只装 chromium：firefox 的 11 条 `@cross-engine` 用例由下面的 firefox job 单独跑。
+          browsers: chromium
 
-      # 两个重文件由 smoke job 承担（见文件头）：这里只跑其余 layout 分域契约。
+      # 冒烟族（locales-smoke / locales-sweep / i18n-overflow* / endgame-overflow*）由 smoke job 承担。
       # 用 glob 而非硬编码清单：新增 layout 分文件自动纳入，漏加会退化成「跑不到用例」而非报错。
-      - name: E2E 布局契约（分片 ${{ matrix.shard }}/4）
+      # **排除模式必须与 smoke job 的清单同源**：smoke 新增文件时这里不加排除，它会同时被两个
+      # job 跑到（重复计费且分片被拖偏）。判据是「layout 文件集 = 全部 layout-*.spec.ts − smoke 清单」。
+      - name: E2E 布局契约（分片 ${{ matrix.shard }}/6）
         shell: bash
         run: |
-          files=$(ls e2e/layout-*.spec.ts | grep -v -e layout-locales-smoke -e layout-i18n-overflow | tr '\n' ' ')
+          files=$(ls e2e/layout-*.spec.ts | grep -v -e layout-locales-smoke -e layout-locales-sweep -e layout-i18n-overflow -e layout-endgame-overflow | tr '\n' ' ')
           echo "本分片文件集：$files"
-          pnpm exec playwright test $files --shard=${{ matrix.shard }}/4
+          pnpm exec playwright test $files --shard=${{ matrix.shard }}/6
+                --project=chromium --project=mobile-chromium
 
       - name: Upload e2e artifacts
         if: failure()
@@ -116,9 +136,41 @@ jobs:
             /tmp/hsr-wiki-e2e-results/
           retention-days: 7
 
+  # 跨引擎契约（firefox 只收集 `@cross-engine`，全仓 11 条）。**独立成 job 而不是塞进 layout 分片**：
+  # `--shard` 按组均分，那 11 条全落在第 1 片 ⇒ 其余 5 片仍得照装 firefox（~100MB + 解压），
+  # 而只有第 1 片用得上。拆出来后 6 个 layout 分片只装 chromium，firefox 只装一台。
+  firefox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          browsers: chromium firefox
+
+      - name: E2E 跨引擎契约（firefox，@cross-engine）
+        run: >-
+          pnpm exec playwright test
+          --project=firefox-layout-contract
+
+      - name: Upload e2e artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-artifacts-firefox
+          path: |
+            playwright-report/
+            /tmp/hsr-wiki-e2e-results/
+          retention-days: 7
+
   smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v5
 
@@ -127,8 +179,22 @@ jobs:
           browsers: chromium
 
       # 风险语言子集（cn 缺省 / de 性别变体 / jp ruby / ru 分片）：全 13 语言矩阵见 ci-full.yml。
-      - name: E2E 全语言冒烟 + 多语言长文案（风险语言子集）
-        run: pnpm exec playwright test e2e/layout-locales-smoke.spec.ts e2e/layout-i18n-overflow.spec.ts
+      # **片数 = 4 不是随手取的**：`--shard` 只在「文件 × project」组之间按**条数**均分，所以
+      # ① 组数少于片数时多出的片空跑；② 条数均衡 ≠ 耗时均衡（一条 gross 用例循环 5 语言能顶
+      # 20 条短用例）。故用例一律做成「一语言一条」，拆到单条 ≤ 20s 后分片才有意义。
+      # 改文件数 / 用例数后先用 `--list --shard=i/N` 数**每片实际条数**。
+      - name: E2E 全语言冒烟 + 多语言长文案（风险语言子集，分片 ${{ matrix.shard }}/4）
+        run: >-
+          pnpm exec playwright test
+          e2e/layout-locales-smoke.spec.ts
+          e2e/layout-locales-sweep.spec.ts
+          e2e/layout-i18n-overflow.spec.ts
+          e2e/layout-i18n-overflow-alt.spec.ts
+          e2e/layout-i18n-overflow-mobile.spec.ts
+          e2e/layout-i18n-overflow-narrow.spec.ts
+          e2e/layout-endgame-overflow.spec.ts
+          e2e/layout-endgame-overflow-alt.spec.ts
+          --shard=${{ matrix.shard }}/4
         env:
           SMOKE_SCOPE: fast
 
@@ -136,7 +202,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-artifacts-smoke
+          name: playwright-artifacts-smoke-${{ matrix.shard }}
           path: |
             playwright-report/
             /tmp/hsr-wiki-e2e-results/

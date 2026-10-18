@@ -28,17 +28,28 @@ interface GuardRoute {
 }
 
 const ROUTES: GuardRoute[] = [
-  { path: '/', roots: ['#nk-home-app', '.nk-hub-brand__title', '.nk-hub-release__title'] },
+  { path: '/', roots: ['#nk-home-app', '.nk-hub-masthead__title', '.nk-intake__batch-num'] },
   { path: '/character', roots: ['#nk-catalog-app', '.nk-cat-toolbar'], catalog: true },
   { path: '/character/1001', roots: ['.nk-hero--char', '.nk-hero__archive'] },
   { path: '/endgame', roots: ['#nk-catalog-app', '.nk-cat-toolbar'], catalog: true },
-  { path: '/currency', roots: ['.nk-hub-brand__title', '.nk-hub-release__title'] },
+  // 终局四个玩法页（第四种页面形态「单页数据页」）：关键容器取 Hero + 规则正文分节
+  // （`.nk-egm__rule` 只在 `endgame_guide.json` 对应模式的分节渲染出来，取它即「数据到位」）
+  { path: '/endgame/maze', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
+  { path: '/endgame/story', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
+  { path: '/endgame/boss', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
+  { path: '/endgame/peak', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
+  { path: '/currency', roots: ['.nk-hub-masthead__title', '.nk-hub-release__title'] },
   { path: '/currency/role/1001', roots: ['.nk-crole-hero__name', '.nk-crole-bar'] },
   { path: '/settings', roots: ['#accent-title', '.ui-sidebar'] },
   // 末日幻影默认停在星启模式（用户裁决）：关键容器取两条分支共有的看板，不取只在层分支下存在的 `.nk-egd-lvl`
   { path: '/endgame/boss/3020', roots: ['.nk-egd-tabs', '.nk-egd-board'] },
   // 异相仲裁默认停在首个关卡 tab（无星启）：关键容器取子 tab 行与单关面板（ADR 0043）
   { path: '/endgame/peak/9', roots: ['#egd-level-tabs', '.nk-egd-peak'] },
+  // 赛季页再补两条，使**四个玩法各有一条赛季路由**在本层可达（原表只有 boss / peak）：
+  // 忘却之庭取层级 tab + 看板（默认落在有星启的层或星启节点上，两者都渲染 `.nk-egd-board`），
+  // 虚构叙事取上下半场看板同源容器。
+  { path: '/endgame/maze/1034', roots: ['.nk-egd-tabs', '.nk-egd-board'] },
+  { path: '/endgame/story/2026', roots: ['.nk-egd-tabs', '.nk-egd-board'] },
 ];
 
 test.describe('不变量守卫（视觉改动不得让其变红）', () => {

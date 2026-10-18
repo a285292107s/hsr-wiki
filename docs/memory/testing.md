@@ -21,6 +21,8 @@
 
 - **`findHorizontalOverflow` 看不见字符串截断**：卡描述是「字符串级 60 字截断 + 省略号」时不产生任何 CSS 溢出，两类缺陷要两种探针；后者用「`title` 含全文」的数据派生断言锁。
 - **整页溢出检测会被已定性的 Spine 画布判红**：canvas 恒带 `matrix(1.15,…)` 越出容器约 75px，被 `.nk-hero{overflow:clip}` 裁掉 ⇒ `scrollWidth` 不越界、用户看不到。判定前先看祖先是否已裁切。
+- **同一条「祖先已裁切」还有反向的假绿：页根裁切会让整页断言恒等于 0**。`.nk-page--detail{overflow-x:hidden}` 把越界内容静默吃掉——元素不可达、无滚动条、`documentElement.scrollWidth` 零增长，于是「页面无横向溢出」在真缺陷下照样全绿（实测终局赛季页 de@320 奖励 chip 右缘越出 208.6px 而整页断言无恙）。判据要落到**逐个元素「右缘 vs 页根右缘」**，且必须**排除祖先 `overflow-x ∈ {auto, scroll}` 的滚动容器**：单行横滚的页签行属设计如此（终局关架子 tab），不排除会把几十个正常项报成缺陷——同一判据的两面，缺任一面就是假绿或假红。
+- **`min-width: auto` 的 flex 项 + 子元素 `white-space: nowrap` ⇒ min-content 成为硬下界**：容器再窄也不会压缩该项，只会整块越界并被页根裁掉；而这类越界**不产生任何文本溢出信号**（它压根不换行），`overflow != visible` 类容器判据也抓不到（该项自身 `overflow: visible`）。长文案 chip 的判据是「项 `min-width: 0` + `max-width: 100%`，名称允许换行或省略号 + `title`」，缺任一环即命中。
 - **`scrollHeight − clientHeight` 会把伪元素的绝对定位出血算进去**：`inset-bottom: -30px` 让面板恒报「溢出 30px」，那不是内容溢出。用该指标前先排除伪元素出血。
 - **`space-between` 在负剩余时静默退化为 `flex-start`**：它与 `gap` 并用时只在剩余空间为正时生效。「固定盒高 + 均分」必须同时保证内容总高 ≤ 盒内容高。
 - **`margin-top: auto` 钉住卡脚后，「内容高」不能再用 `meta.bottom − card.top` 量**：它恒等于卡高。正确量法＝各部分自然相加（内距 + 行高 + N×描述行高 + 卡脚高 + 底部内距）。
@@ -81,8 +83,11 @@
 - **数组语义的 locator 一律按「解析出的元素逐个对应」理解**：`toContainText(['a','b','c'])` 在单个 locator 上不是「含全部子串」，而是期望解析出 3 个元素。要「含多个子串」就写循环或正则。
 - **`:not([to="/"])` 在真实 DOM 里匹配不到任何元素**：RouterLink 渲染的是 `href`，必须写 `:not([href="/"])`。此类「过滤器等于没过滤」的写法不报错，只会让断言失去靶点。
 - **按文案定位 tab 前先确认文案不会互相包含**：派生档名常是「主档名 + 后缀」（「将杀王棋」/「将杀王棋•绝境」）⇒ `[role="tab"]` + `hasText: 主档名` 同时命中两档，`click()` 直接报 strict mode violation（或更糟：命中先出现的那一档而断言照样过）。**按 DOM id 定位**（id 由数据 ID 派生、天然唯一），每个多档页面配一个 `xxxTabId(entity)` 派生原语放在 `e2e/layout.shared.ts`。
+- **「关档」与「档内子切换」是两套定位原语，别用同一套循环兼容**：异相仲裁的两个关卡档（王棋 / 骑士试炼）都是**节点合并档**，档内再切节点卡片——`peakTabId` 只到「王棋档」这一级，节点一律走 `peakNodeTabId(key)`（王棋档 `king` / `hard`）或 `peakKnightNodeTabId(level, i)`；星启 / 层看板的节点卡片同理走 `#egd-tierce-node-tab-*` / `#egd-floor-half-tab-*`。**按数据 `levels` 遍历拼 tab 选择器**是最容易漏的写法：合并后会静默指向不存在的元素（`-hard` 后缀的 tab 形态已整批退场）。
 - **`&nbsp;`（U+00A0）会污染 `textContent`**：模板里写字面 `&nbsp;` 分隔符后，用普通空格比较的「文本 == 数据拼接」断言会红。要逐字可断言就用普通空格 + 条件渲染。
 - **语义结构类改动必须先证明现状有问题**：实测标题层级已是 `h1×1 + h2×10` 无跳级时，就不该凭「应该有层级」动模板。
+- **标题层级（A1.2）判的是「文档序相邻层级递增 ≤1」，不是「DOM 祖先」**：页面上 h2 分区标题与 h3 条目名**互为兄弟**是常态（标题元素不可能包住块级卡片），按祖先上溯写探针会把合法结构成片判红。终局赛季页曾因此被误判 —— 探针要求「h3+ 必须有 h2 祖先」，逼得实现把条目名从标题降级为 `span`（语义反而变差）；换成文档序判据后同一页面 0 违规。判据三件套：h1 恰 1、相邻递增 ≤1、h3+ 之前出现过更浅标题。**探针本身写错时会以「实现有问题」的形态伪装**，改模板前先复核判据。
+- **`clamp()` 与「字号必须来自刻度」天然冲突**：`clamp(--nk-fs-title-1, 2.3vw, --nk-fs-title-3)` 的中间值在任何视口都是连续量、必然落在刻度之外 ⇒ 该判据的取值域必须限定到**自有节点**（页面根之内），并把共享外壳的 clamp 标题登记为豁免；否则判决只能靠「不算它」而失去探针意义。
 - **「线太多 / 装饰太多」的判据必须同时抓住「边框画的线」与「背景色画的线」**：`height: 1px` + `background: var(--line-1)` 的空元素是发丝线与引导线的主要形态之一，它没有任何 `border` ⇒ 只统计 `border-*-width` 的探针会把删掉的线判成「已清零」。可行判定：遍历区块子树，统计「≤1.5px 且 `style ≠ none` 的边框边」+「`width > 12 && height ≤ 2` 且底色非透明」的元素；同时给旧形态的承载元素（行索引 / 引导线 span）单立 `toHaveCount(0)` —— 元素级「不许回来」比几何计数更难绕过。
 
 ## 焦点、键盘与可达名
@@ -96,6 +101,7 @@
 
 ## 取证手法本身的陷阱
 
+- **`readTokenPx` 对以 `rem` 声明的令牌返回的是「声明里的数字」，不是 px**：`getComputedStyle` 读自定义属性**不做单位解析**，`--nk-fs-1: 0.5rem` 读出 `"0.5rem"` ⇒ `parseFloat` 得 `0.5`。若拿它当期望值与 computed `font-size`（px）比，会得到「全站字号都不在刻度上」的假红（实测）；反过来写成「两者相等即通过」则会变成恒真断言。判据：长度类令牌先按其**声明单位**折算（`rem` × 根字号），或用 `readToken` 取原始串自行判单位；只对 `px` 声明的令牌（如 `--nk-grid-min`）可以直接用 `readTokenPx`。
 - **每个路由对开跑前先断言「落地 path == 目标 + 无 404 视图 + 预期根组件存在」**：`BASE` 带尾斜杠会拼出 `//character`（协议相对 URL）→ host 被吞 → 落到 404 页取假证，全程不报错。
 - **行导向正则 `/…$/` 作用在多行拼接串上时 `$` 跨不过换行** ⇒ 豁免永远匹配不上，而工具照样打印「违规 0 / 豁免 0」看着正常。自检办法：给一条真豁免跑一遍，确认它出现在「已豁免」而不是「违规」里。
 - **未被 `content` 生成的伪元素，`getComputedStyle(el, '::before')` 的 width / height 返回声明侧数值**：据此会误判「元素还在」。只有计算 `content` 能判生成与否（`none` = 不生成 / `""` = 生成），并用像素 diff 兜底。
@@ -110,6 +116,8 @@
 - **有 `v-if` 的元素要在采样脚本里判空**：该元素为空时整个不渲染，任何 `querySelector` 未判空都会在跑到那只角色时让整轮崩掉。
 - **探针脚本含正则 / 引号 / `$` 一律写成 `.mjs` / `.ps1` 执行**：PowerShell 转义与 Bash 预展开 `$var` 会静默改写脚本内容。
 - **不要用 `Get-Content -Raw` ↔ `Set-Content` 往返文本文件**：本机 `pwsh` 走 Windows PowerShell 5.1 语义（判据：`-AsByteStream` 参数不存在），默认按 ANSI 解码并按 ANSI 写回——实测一个 31294 字节的 UTF-8 快照往返后变 31183 字节，`<title>` 与 JSON-LD 当场损坏，守卫报「缺 title / JSON.parse 失败」，看起来像产物坏了、其实是夹具坏的。改产物做反向验证时用 Node（`readFileSync`/`writeFileSync`）或显式 `-Encoding utf8`；**还原一律用 `Copy-Item` 覆盖，不要靠重写内容**。
+- **本应用的真实滚动容器是 `#nk-home-app`，不是 `window`**（外壳把内容区做成自己的滚动盒，`document.scrollHeight` 恒等于视口高）。任何「滚动驱动」的东西都会因此失真：① `window.scrollTo()` 是空操作 ⇒ 视口以外的内容永远不进视口；② `loading="lazy"` 的图**永远不开始取**（`complete=false`、`naturalWidth=0`，且**不算** broken image，所以静默）；③ `animation-timeline: view()` 的进度停在 0 ⇒ 视口以下的元素停在入场动画的起始态（`opacity: 0` + 位移）。自写取证脚本必须 `document.querySelector('#nk-home-app').scrollTop = y` 逐屏走；第三方按 `window` 走的工具（如 tasteskill 的 `inspect.mjs`）**只能看到首屏**，其「图片数 / 空白屏 / 逐屏动效」结论都据此打折。
+- **位移中的元素不能用 `getBoundingClientRect()` 判间距**：入场动画（`animation-timeline: view()` + `fill: both`）会把视口以下的元素整体平移 +20~26px，于是「上一分区的文字」到「下一分区的标题」的实测间距比布局值小 26px，足以把一条正常的排版读成缺陷。判间距前先 `animation: none`，或只量同一动画状态下的两个元素。
 
 ## 提速与并发
 
@@ -125,6 +133,11 @@
 - **「内容未就位」这类 poll 文案会冒充页面缺陷，实际是**用例预算耗尽**：`layout-locales-smoke.spec.ts` 把 25 条路由串进一个用例，CI 实测 29–34s > Playwright 默认 30s ⇒ 报 `cn /voracity 内容未就位` + `Test timeout of 30000ms exceeded`。**归因判据**（三条同时成立即判预算、不判页面）：① 失败 path 在多次运行间**漂移**（实测一次落 `/voracity`、复跑落 `/cht/settings`）；② 错误里同时出现 poll 的 message 与用例级超时；③ trace 里失败前最后一个文档请求刚发出 ~1s，且**全部请求 200/304、p95 数十毫秒**（判「网络/服务端慢」会指向错误方向——trace 的 `time` 字段是**毫秒**，按秒读会把 18.6ms 读成 18.6s）。修法是给该用例显式预算（`test.setTimeout`），**不是**加 retries、也不是改断言；同一用例 retry 曾 28.9s 通过，正说明它卡在预算线上。
 - **`playwright test e2e/layout-` 这类路径前缀过滤会静默缩小覆盖**：它按**路径子串**匹配，`guards.spec.ts` / `shell.spec.ts` 因此一次都没跑过，而 CI 注释与文档都写着「不变量层永远可跑」。判据：改选定的文件集后用 `--list | grep -c` 数**实际收集条数**，不要相信命令「看起来包含它」。同理，`pnpm test:e2e:ci` 的语义必须与 `.github/workflows/` 里的实际命令逐字对齐（本仓由 ci.yml 的 `static` / `invariants` / `layout` / `smoke` 四条 job 承担）。
 - **分片按「条数」切分，重文件留在里面会拖垮一整片**：`--shard=i/N` 只保证条数均衡，不保证耗时均衡——全部 layout 一起分片时实测估算 266/437/455/201s（`layout-locales-smoke` 是单文件串行的大块）；把两个重文件（冒烟 / 长文案）拆成独立 job、只对剩余文件分片后，条数变成 65/64/61/62 且每片无巨块。**估均衡度用 `--list --shard` 的条数 × 实测每文件耗时**，别看条数就下结论。
+- **浏览器清单是 per-job 的安装成本，不该跟分片矩阵绑死**：`@cross-engine` 只有 11 条且全落在第 1 片，但 firefox 会因此被**每个** layout 分片各装一遍（~100MB + 解压），5 台 runner 白装。拆成独立 job + layout 各片 `--project=chromium --project=mobile-chromium` 后，只有那一个 job 装 firefox。判据：某个 project 的用例若只落在少数分片里，就单独成 job——别让「分片数」决定「装几次浏览器」。
+- **`--shard` 的切分单位是「文件 × project」组，不是一个 job 里的全部用例**：同一文件的多条用例永远进同一片。两个连带后果都实测过：① 文件数少于片数时多出的片**空跑**（2 文件分 2 片 → 15 条全进第 1 片、第 2 片 0 条；4 文件分 3 片同理）；② **片数够多也切不开一个重文件**——重块（单条 126s）与同文件其余 7 条（各 2~6s）只要还在一个文件里，那 7 条就被它按文件内串行钉住。判据：调片数前先看「每文件耗时」与「组数」，两个都不满足就先拆文件、再谈片数。
+- **跨语言 `for` 循环写成一条 gross 用例 = 主动放弃分片**：`--shard` 均分条数，而一条循环 5 语言的用例在条数上是 1，在耗时上却是 5 份。拆成「一语言一用例」后同一批断言从「一片独占」变成可摊到多台 runner。新增跨语言 / 跨视口扫描时一律**参数化生成多条 `test()`**。
+- **断「几何接缝」的用例同样需要就绪门，症状与字体度量类一模一样**：`layout-character-skill-family.spec.ts` 断的是「父卡体底 = 首子卡卡顶（±1px）」「竖轨/折角落点」「图标列对齐」，`waitForSelector` 只保证节点存在，此时行盒按**回退字体**算 ⇒ 并发下接缝差 >1px 翻红（实测分片跑翻 2 次、单跑 3/3 绿）。补 `waitForSettled` 后同一分片连跑 3 轮全绿。判据：**只要断言里出现「两个盒子的边缘相等 / 相接」，就属于需要就绪门的一类**——别只把就绪门理解成「字体类断言才要」。
+- **layout 的「最慢文件」会反复长回来，且每次都在同一个位置**：单文件 74 条 → 拆；`layout-character` 39 条 → 拆；`layout-endgame` 22 条 → 拆；`layout-endgame-board` 16 条 → 拆。每次拆完都以为收工了，实测几轮后又被新用例填回。判据别再盯「15 条」这个数字，改盯**该层最慢调度单元**：它等于 CI 墙钟下界，超过其它片的耗时就是下一轮要拆的对象。
 - **`retries` 在 CI 里会把真红转绿、并把红 run 拉长**：实测 mobile `/endgame/boss` 首跑红、retry 绿（假绿），而失败的 e2e job 因重试从 14.5 分钟涨到 ~20 分钟。仓库纪律本就禁止用重试抹平 flake（见上条）⇒ CI 的 `retries` 设为 0，提速走**机器维度的分片**（每台 runner 的 `workers` 恒为 2，单机并发度不动，flake 面不放大）。
 - **「节点在」不等于「字体就绪」：`document.fonts.status === 'loaded'` 会在入口 CSS 还没应用时就是真**——此时首屏还没有对应文本、字体请求一个都没发出，等待立刻通过，测量就落在**回退字体**的几何上。同一根因在 CI 上以两种面貌出现：① `shell.spec` 的 `document.fonts.check('12px "Noto Sans SC"')` 为假（字体可用性假红）；② 首页 a11y 多出 `scrollable-region-focusable`——**命中节点是视图根 `#nk-home-app`**（`overflow-y: auto`）：内容到位前它自身 `scrollHeight > clientHeight` 却**没有任何可聚焦内容**，axe 于是把「还在加载的骨架」判成 serious。**别把它归给「回退字宽撑破枢纽带」**（实测把 `.nk-hub-release__band` 强行压到 320px 也不报：该规则 `any: [focusable-content, focusable-element]`，含链接的滚动区会被豁免）；真因是**该页缺就绪门**——`PAGES` 里 `/` 原为 `wait: null`，是本文件唯一没有门的页，字体变慢只是把窗口拉宽。取证：阻断 `/fonts/**` 即稳定复现（`tabbables = 0` 且 `nk-view-fade-enter-active` 在场，1.2s 后自动消失），补上「等到分区 + 至少一条卡片链」的门后同一条件 4/4 全绿。**修法**：就绪门里显式 `document.fonts.load('12px "Noto Sans SC"', '角色图鉴')`（带样本文本）+ 有上限的 `Promise.race`，再等 `ready`——`check()` 也要带同样的样本文本，否则「族存在」与「该段文本可渲染」两件事会被混为一谈。`e2e/accessibility.spec.ts`
 - **采集 transition 前的主题窗口等待有顺序要求**：`.theme-transitioning` 是全仓**唯一**能把 `border-color` 变成 400ms 的规则（tokens.css `!important` 覆盖），而它由 `App.vue` 的 `watch(isCw)` 在**路由解析时**加上、450ms 后移除；卡片渲染发生在解析之后。故必须**先等渲染、再等窗口关闭**——顺序反了（先等类不在场、再等卡片）会在窗口内采样，失败值恰为 400ms 而非 `--nk-dur-normal` 的 300ms。cw 路由再加「先等它出现（失败即放行）再等它消失」的兜底：同模式直达时该类根本不出现，硬等会白付等待。判据：**全仓只有一条规则能产出该值**时，先查这条规则的开关条件，别去猜 CSS 优先级。

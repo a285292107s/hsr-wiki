@@ -37,7 +37,6 @@
 .nk-ach-card--mid::before  { background: color-mix(in srgb, var(--ach-rarity-mid) 45%, transparent); }
 .nk-ach-card--low::before  { background: color-mix(in srgb, var(--ach-rarity-low) 45%, transparent); }
 
-.nk-ach-card__side { display: none; }
 .nk-ach-card__icon {
   width: 20px;
   height: 20px;
@@ -135,14 +134,6 @@
      把这截空间放到位（而不是在末尾留白），系列行因此在整行/整列对齐成一条基线。 */
   margin-top: auto;
   padding-top: 6px;
-}
-.nk-ach-card__series-icon {
-  display: none;
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  object-fit: contain;
-  opacity: 0.85;
 }
 .nk-ach-card__series {
   font-family: var(--font-mono);

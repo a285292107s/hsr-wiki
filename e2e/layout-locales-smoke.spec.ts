@@ -1,97 +1,21 @@
-/**
- * 全语言冒烟：语言包完整性的**端到端**兜底。
- *
- * 两级覆盖：
- *   1. **13 语言 × 「首页 + 一个角色详情」**——断言无未解析 `$t:` 令牌、首页无非中日韩中文残留、
- *      **无未捕获 JS 异常**。第 3 条抓过真缺陷：德语/法语/葡语的词典值带官方性别变体标记
- *      `{M#Trailblazer}`，被 vue-i18n 当占位符编译 ⇒ SyntaxError + 整页渲染异常。
- *   2. **13 语言 × 全部路由族（25 条路径）**——标记类与缺键类缺陷只在「该语言 + 该页」同时命中时才暴露，
- *      实测全量约 2.3 分钟；CI 每次 push 走 `SMOKE_SCOPE=fast`（cn/de/jp/ru），全量矩阵由定时 workflow
- *      （`.github/workflows/ci-full.yml`）承担。
- *
- * 构建期守卫查键与计数，这里查**用户实际看到的那一份**。断言保持轻量，细节留在 layout-i18n.spec.ts。
- */
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, expectNoUnknownOverflow, readJsonIn, waitForSettled } from './helpers';
+import {
+  HAN_OK, HAN_RE, SWEEP_SET, charId, collectI18nWarnings, dictOf, roleId,
+} from './locales-smoke.shared';
 import { LOCALES } from '../src/lib/i18n/locales';
 import { SITE_NAME } from '../src/lib/constants';
-import { readFileSync } from 'node:fs';
-
-/** UI 词典（源语言文件即键集基准；各语言值用于比对文档级元信息）。 */
-const dictOf = (code: string): Record<string, string> =>
-  JSON.parse(readFileSync(`src/lib/i18n/messages/${code}.json`, 'utf8')) as Record<string, string>;
-
-/** 允许出现汉字的语言（韩语译文自带汉字注音，故 kr 单独按「括号内」放行） */
-const HAN_OK = new Set(['cn', 'cht', 'jp']);
-const HAN_RE = /[\u4e00-\u9fff]/;
-
-const firstId = (file: string, listKey?: string): string => {
-  const raw = readJsonIn<Record<string, unknown> | unknown[]>('cn', `public/data/cn/${file}`);
-  const arr = Array.isArray(raw) ? raw : (raw as Record<string, unknown[]>)[listKey ?? '']!;
-  const first = (Array.isArray(raw) ? raw[0] : arr[0]) as { id: number | string };
-  return String(first.id);
-};
+import { collectConsoleIssues, expectNoUnknownOverflow, waitForSettled } from './helpers';
 
 /**
- * 收集 vue-i18n 的**缺键告警**（`[intlify] Not found '…' key`）。
- * 动态拼的键（`t('itemType.' + v)` 这类）静态守卫查不到，只有运行期会以 warn 暴露 ⇒ 这里兜住。
+ * 全语言冒烟 —— 首页与角色详情。
+ *
+ * 完整存在理由与判据见 `locales-smoke.shared.ts` 文件头（本文件同口径，不重复）。
+ * 本文件只承担 **语言包令牌 / culture / 站点描述 / 中文残留**：这两项是所有语言都必须成立的最小面，缺键与未解析令牌在这里最先暴露。
+ *
+ * 拆文件而非加片：`--shard` 只在**文件**边界生效，单文件内的 for 循环无论几条都挤在一片里。
+ * 风险语言子集由 `SMOKE_SCOPE=fast` 控制，全量矩阵见 `ci-full.yml`。
  */
-const collectI18nWarnings = (page: import('@playwright/test').Page): (() => string[]) => {
-  const warns: string[] = [];
-  page.on('console', (msg) => {
-    const text = msg.text();
-    if (/\[intlify\]/.test(text) || /Not found .* key/.test(text)) warns.push(text.slice(0, 200));
-  });
-  return () => warns;
-};
-
-const charId = (): string => firstId('characters.json');
-const lightconeId = (): string => firstId('light_cones.json');
-const relicId = (): string => firstId('relics.json');
-const monsterId = (): string => firstId('monsters.json');
-const roleId = (): string => firstId('currency/role.json', 'roles');
-const traitId = (): string => firstId('currency/traits.json', 'traits');
-
-/** 全路由族（每个族取一条代表性路径） */
-const routeFamilies = (base: string): string[] => [
-  `${base}/`,
-  `${base}/character`,
-  `${base}/character/${charId()}`,
-  `${base}/lightcone`,
-  `${base}/lightcone/${lightconeId()}`,
-  `${base}/relic`,
-  `${base}/relic/${relicId()}`,
-  `${base}/item`,
-  `${base}/monster`,
-  `${base}/monster/${monsterId()}`,
-  `${base}/achievement`,
-  `${base}/endgame`,
-  `${base}/endgame/maze`,
-  `${base}/currency`,
-  `${base}/currency/role`,
-  `${base}/currency/role/${roleId()}`,
-  `${base}/currency/trait`,
-  `${base}/currency/trait/${traitId()}`,
-  `${base}/currency/item`,
-  `${base}/currency/buff`,
-  `${base}/currency/augment`,
-  `${base}/currency/settings`,
-  `${base}/voracity`,
-  `${base}/settings`,
-  `${base}/definitely-not-a-real-path`,
-];
-
-/* 扫语言范围：本机默认**全部 13 语言**（实测 13×25 条路径约 2.3 分钟）；
-   `SMOKE_SCOPE=fast`（或等价的旧写法 `SMOKE_FAST=1`）只扫标记风险最高的四种
-   （cn 缺省 / de 性别变体 / jp ruby / ru 分片）——CI 每次 push 走 fast，定时 workflow 走全量。
-   两条 describe 共用这一个清单：只缩一条会让「13 语言 × 首页/详情」成为墙钟大头。 */
-const SWEEP_FAST = ['cn', 'de', 'jp', 'ru'];
-const SWEEP_ALL = LOCALES.map((l) => l.code);
-const SWEEP_LOCALES =
-  process.env.SMOKE_SCOPE === 'fast' || process.env.SMOKE_FAST ? SWEEP_FAST : SWEEP_ALL;
-const SWEEP_SET = new Set(SWEEP_LOCALES);
-
-test.describe('全语言冒烟', () => {
+test.describe('全语言冒烟 · 首页与角色详情', () => {
   for (const loc of LOCALES.filter((l) => SWEEP_SET.has(l.code))) {
     const base = loc.prefix ? `/${loc.prefix}` : '';
     test(`${loc.code}：首页与角色详情无未解析令牌、非中日韩无中文残留`, { tag: ['@viewport-independent'] }, async ({ page }) => {
@@ -167,46 +91,6 @@ test.describe('全语言冒烟', () => {
         const path = new URL(page.url()).pathname;
         expect(path.startsWith(`/${loc.prefix}/${loc.prefix}/`), `语言前缀被拼了两次：${page.url()}`).toBe(false);
         expect(path, `应落在 ${loc.code} 的角色详情页`).toMatch(new RegExp(`^/${loc.prefix}/character/\\d+$`));
-      }
-      expect(i18nWarn(), `缺键告警：${i18nWarn().slice(0, 3)}`).toEqual([]);
-      assertNoErrors();
-    });
-  }
-
-  for (const code of SWEEP_LOCALES) {
-    const base = code === 'cn' ? '' : `/${code}`;
-    test(`${code}：全部路由族均无未解析令牌、无未捕获异常`, { tag: ['@viewport-independent'] }, async ({ page }) => {
-      /* 用例级预算：本用例把 25 条路由串行走一遍（dev 模式每次 `goto` 都是整页重载），CI 实测
-         29–34s，越过 Playwright 默认 30s ⇒ 表现为「某条路径内容未就位」的**假缺陷**（失败 path
-         随耗尽位置漂移，同一用例 retry 有时 28.9s 通过）。每路由的「内容就位」判据仍是 20s 的
-         `expect.poll`，这里只是把「25 次导航之和」纳入预算——真出现某页挂住仍会在 20s 落到该 path。 */
-      test.setTimeout(120_000);
-      const { assertNoErrors } = collectConsoleIssues(page);
-      const i18nWarn = collectI18nWarnings(page);
-      const paths = routeFamilies(base);
-      for (const path of paths) {
-        await page.goto(path);
-        await expect(page.locator('#app')).toBeVisible();
-        await expect.poll(async () => (await page.locator('body').innerText()).length, {
-          message: `${code} ${path} 内容未就位`, timeout: 20000,
-        }).toBeGreaterThan(150);
-        const body = await page.locator('body').innerText();
-        expect(body, `${code} ${path} 出现未解析令牌`).not.toContain('$t:');
-        /* 路由标题（`meta.titleKey` → translate）也不得残留未解析令牌 */
-        expect(await page.title(), `${code} ${path} 标题残留未解析令牌`).not.toContain('$t:');
-        /* 全路由只测**整页**横向溢出（长文本最集中的目录卡与规则正文都在这批页面上）。
-           不用元素级的 `expectNoUnknownOverflow`：它会把横向滚动容器内的元素判为未知溢出，口径不同。
-           但整页口径**查不到「被撑出列框」这类缺陷**：`<html>` 上是 `overflow: clip`，长文本撑破
-           列框时 `scrollWidth` 恒等于 `clientWidth`（本行断言永远为 0），而列框与祖先链全是
-           `overflow: visible` ⇒ 越出的部分直接压到相邻列上。此前把 `.nk-guide-link` 在 1280 下
-           right=1422 记成「检测口径问题」是**误判**：那是 i18n 迁移把含模式名的 aria 模板当成了
-           可见文本，实测 145/208 个终局列头被撑破、最重 +216px。该类缺陷现由
-           `layout-endgame.spec.ts`（列头逐子项几何）与 `layout-i18n-overflow.spec.ts`
-           （多语言长文案）分别覆盖，本文件不重复建断言。 */
-        const pageOverflow = await page.evaluate(
-          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        );
-        expect(pageOverflow, `${code} ${path} 整页横向溢出 ${pageOverflow}px`).toBeLessThanOrEqual(1);
       }
       expect(i18nWarn(), `缺键告警：${i18nWarn().slice(0, 3)}`).toEqual([]);
       assertNoErrors();

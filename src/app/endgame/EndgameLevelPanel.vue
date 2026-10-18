@@ -2,8 +2,8 @@
 import { computed } from 'vue';
 import EndgameFloor from './EndgameFloor.vue';
 import EndgameTierce from './EndgameTierce.vue';
-import EndgamePeak from './EndgamePeak.vue';
-import { levelTabFloor, levelTabPeak, parsePeakKey, type LevelTab } from './levels';
+import EndgamePeakNodes from './EndgamePeakNodes.vue';
+import { levelTabFloor, levelTabPeakNodes, type LevelTab } from './levels';
 import type { MazeListEntry } from '../../services/types';
 
 const props = defineProps<{
@@ -21,12 +21,9 @@ const activeTab = computed(
 const activeFloor = computed(
   () => (activeTab.value?.kind === 'floor' ? levelTabFloor(props.data, activeTab.value.key) : null),
 );
-const activePeak = computed(
-  () => (activeTab.value?.kind === 'peak' ? levelTabPeak(props.data, activeTab.value.key) : null),
-);
-/** 当前 peak tab 是否为王棋「绝境」变体（`peak-<id>-hard`） */
-const activePeakHard = computed(
-  () => (activeTab.value?.kind === 'peak' ? !!parsePeakKey(activeTab.value.key)?.hard : false),
+/** 异相仲裁合并档的节点清单（王棋档 = 节点一普通 / 节点二绝境；骑士档 = 三关骑士） */
+const activePeakNodes = computed(
+  () => (activeTab.value?.kind === 'peakNodes' ? levelTabPeakNodes(props.data, activeTab.value.key) : []),
 );
 </script>
 
@@ -39,10 +36,10 @@ const activePeakHard = computed(
   >
     <EndgameFloor v-if="activeFloor" :data="data" :floor="activeFloor" :system-name="props.systemName" />
     <EndgameTierce v-else-if="activeTab?.kind === 'tierce'" :data="data" :system-name="props.systemName" />
-    <EndgamePeak
-      v-else-if="activePeak"
-      :level="activePeak"
-      :hard="activePeakHard"
+    <EndgamePeakNodes
+      v-else-if="activePeakNodes.length"
+      :nodes="activePeakNodes"
+      :tabs-label="activeTab?.label || ''"
       :system-name="props.systemName"
     />
   </div>

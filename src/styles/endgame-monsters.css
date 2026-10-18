@@ -43,7 +43,6 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.66rem;
   letter-spacing: 0.05em;
   color: var(--text3);
   padding-top: 2px;
@@ -85,9 +84,12 @@
   font-weight: 700;
   color: var(--text-bright);
 }
+/* 异相仲裁面板的分区名＝h2（赛季增益的系统名 / 机制）：标题元素的 UA 字重是 700，按原
+   `div.nk-egd-floor__label` 的继承值 400 归位——提升为标题前后外观不变（字号仍归
+   `endgame-type-scale.css` 的标签档）。 */
+.nk-egd-peak__seclabel { font-weight: 400; }
 .nk-egd-floor__buffdesc {
   margin: 0;
-  font-size: 0.84rem;
   line-height: 1.8;
   color: var(--text2);
   max-width: var(--nk-prose-max);
@@ -96,7 +98,6 @@
 .nk-egd-floor__buffdesc .nowrap { white-space: nowrap; }
 .nk-egd-peak__kind {
   flex-shrink: 0;
-  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   color: color-mix(in srgb, var(--eg-color) 82%, #fff);
@@ -116,23 +117,33 @@
   border-color: color-mix(in srgb, var(--diff-del) 60%, transparent);
   background: color-mix(in srgb, var(--diff-del) 14%, transparent);
 }
-.nk-egd-floor__tagsrow {
+/* 机制（MazeBuff 关卡词条，如韧甲/反相/吸能）：分区名与赛季增益同档，条目 = 名称胶囊 + 效果说明。
+   说明与名称同屏直出（上游文案是短句，折叠或悬停展开只会让读者多点一次）；
+   名称沿用原标签行的胶囊形，故与上方增益条目靠「不套盒子」区分，而不是再造一种胶囊。 */
+.nk-egd-floor__mechs {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 14px;
-  flex-wrap: wrap;
   min-width: 0;
 }
 .nk-egd-floor__tags {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.nk-egd-peak__mech {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   min-width: 0;
 }
 .nk-egd-peak__tag {
-  font-size: 0.76rem;
+  align-self: flex-start;
   line-height: 1;
   color: var(--text2);
   padding: 5px 12px;
@@ -141,6 +152,13 @@
   background: color-mix(in srgb, var(--blk-900) 52%, transparent);
   white-space: nowrap;
 }
+.nk-egd-peak__mechdesc {
+  margin: 0;
+  line-height: 1.75;
+  color: var(--text2);
+  max-width: var(--nk-prose-max);
+}
+.nk-egd-peak__mechdesc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-floor__buffs {
   display: flex;
   flex-direction: column;
@@ -166,7 +184,7 @@
   padding: 16px;
   background: color-mix(in srgb, var(--blk-900) 30%, transparent);
   border: 1px solid var(--line-1);
-  border-radius: 10px;
+  border-radius: var(--nk-radius-3);
   cursor: default;
   transition: border-color 0.22s ease, background 0.22s ease;
 }
@@ -274,7 +292,7 @@
   line-height: 1;
   letter-spacing: 0.03em;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-1);
   color: var(--text2);
   background: color-mix(in srgb, var(--blk-800) 70%, transparent);
   border: 1px solid var(--line-1);
@@ -287,7 +305,7 @@
   line-height: 1;
   letter-spacing: 0.04em;
   padding: 2.5px 6px;
-  border-radius: 4px;
+  border-radius: var(--nk-radius-1);
   color: var(--text2);
   background: color-mix(in srgb, var(--blk-800) 88%, transparent);
   border: 1px solid var(--line-1);
@@ -298,14 +316,22 @@
   padding-top: 12px;
   border-top: 1px solid var(--line-1);
 }
+/* 行首标签（弱点 / 抗性 / 效果抵抗）跨语言收口（P0）：`.nk-egd-mon` 的数据列只有 minmax(0,1fr)
+   的剩余宽（320 档实测 144px），而标签 `flex-shrink:0` 让它停在 max-content、`min-width:28px`
+   又压不住单行长词（ru「Сопротивление эффектам」），整行 min-content 顶到 222px 越出卡片与视口。
+   治法 = 允许整行折行 + 标签可收缩到 min-content 以内（anywhere 保证长词自身也能断，
+   否则单个长词仍是硬下界），值列（`.nk-egd-mon__resist` 已 flex-wrap）因此拿到整行宽。 */
 .nk-egd-mon__row {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 .nk-egd-mon__label {
-  flex-shrink: 0;
+  flex-shrink: 1;
   min-width: 28px;
+  overflow-wrap: anywhere;
   letter-spacing: 0.05em;
   color: var(--text3);
 }
@@ -372,12 +398,17 @@
   color: var(--text3);
   white-space: nowrap;
 }
+/* 技能 chip 的德语复合词收口：数据列只有 144px（320 档），单个长词（de「Treustachel」一类复合名）
+   的 min-content 就是硬下界 ⇒ chip 反撑到 147px、溢出数据列（rect 仍在卡内，故越界探针看不见）。
+   `anywhere` 让词内可断（与 `.nk-egd-mon__art > .nk-egd-pollchip` 同法），只在放不下时才断。 */
 .nk-egd-mon__skill {
   display: inline-flex;
   align-items: center;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   line-height: 1;
   padding: 5px 9px;
-  border-radius: 6px;
+  border-radius: var(--nk-radius-2);
   color: var(--text2);
   background: color-mix(in srgb, var(--blk-900) 55%, transparent);
   border: 1px solid var(--line-1);
@@ -402,6 +433,9 @@
 .nk-egd-phase__label {
   letter-spacing: 0.05em;
   color: var(--text3);
+  /* 分区名＝h2（标题层级）：标题元素的 UA 字重是 700，本处按原 span 的 400 归位，
+     提升前后外观不变（字号归 `endgame-type-scale.css` 的标签档）。 */
+  font-weight: 400;
 }
 .nk-egd-trait,
 .nk-egd-phase__item {

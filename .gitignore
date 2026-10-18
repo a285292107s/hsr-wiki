@@ -95,6 +95,8 @@ temp/
 .reasonix
 # AI skill toolchain (local-only)
 .agents
+# 设计评审技能的本地取证产物（截图 + report.json），与 temp/ 同类，不入库
+.taste-skill
 # Playwright
 playwright-report
 blob-report

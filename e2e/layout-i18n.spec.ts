@@ -443,7 +443,7 @@ test.describe('布局验收：多语言', () => {
 
     // 首页：品牌文案
     await page.goto('/en/');
-    await expect(page.locator('.nk-hub-brand__tagline')).toHaveText(en['home.tagline']!);
+    await expect(page.locator('.nk-hub-masthead__tagline')).toHaveText(en['home.tagline']!);
     const home = await page.locator('#nk-home-app').innerText();
     expect(home, '首页不应残留中文品牌文案').not.toContain(cn['home.tagline']!);
   });
@@ -520,8 +520,8 @@ test.describe('布局验收：多语言', () => {
 
     // 货币战争枢纽页：标题 + 标语 + 空态/新增标题
     await page.goto('/en/currency');
-    await expect(page.locator('.nk-hub-brand__tagline')).toHaveText(en['cwHub.tagline']!);
-    await expect(page.locator('.nk-hub-brand__title')).toHaveText(en['catalog.currencyWar']!);
+    await expect(page.locator('.nk-hub-masthead__tagline')).toHaveText(en['cwHub.tagline']!);
+    await expect(page.locator('.nk-hub-masthead__title')).toHaveText(en['catalog.currencyWar']!);
     const cw = await page.locator('#nk-home-app, .nk-cw-hub, body').first().innerText();
     expect(cw, '枢纽页不得残留中文标语').not.toContain(cn['cwHub.tagline']!);
 

@@ -1542,11 +1542,12 @@ def _peak_level_node(
     summons: dict[int, list[int]] | None = None,
     full: bool = False,
 ) -> dict:
-    """异相仲裁单关节点：名称 / 弱点 / 敌人 / 目标 / 机制标签。
+    """异相仲裁单关节点：名称 / 弱点 / 敌人 / 目标 / 机制。
 
     kind 为官方术语：knight=骑士试炼 / king=王棋最终关；敌人取自
     EventIDList 首项引用的 StageConfig；目标取自 NormalTargetList 引用的
-    BattleTargetConfig；标签 TagList 解析为 MazeBuff 名称。invasions 传入时，
+    BattleTargetConfig；机制 TagList 解析为 MazeBuff 条目（名称 + 效果描述 +
+    占位参数——与王棋增益同一张表，故描述口径同 `buffs`）。invasions 传入时，
     污染关卡附加 invasion（异相仲裁无层/半场，污染直接落在单关上）；summons
     传入时召唤物按召唤者挂进敌方条目（见 _monster_summons）。
     full=True 时单关敌方输出 intro/skills 全字段（详情页以敌方详情卡展示，
@@ -1569,7 +1570,9 @@ def _peak_level_node(
             for t in (rec.get("NormalTargetList", []) or []) if t in targets
         ],
         "tags": [
-            buffs[t]["name"] for t in (rec.get("TagList", []) or []) if t in buffs
+            {"id": t, "name": buffs[t]["name"], "desc": buffs[t]["desc"],
+             "param_list": buffs[t]["param_list"]}
+            for t in (rec.get("TagList", []) or []) if t in buffs
         ],
     }
     if stage and stage["level"]:
@@ -1704,7 +1707,8 @@ def _peak_seasons(full_monsters: bool = False) -> dict:
                         for t in [ext.get("HardTarget")] if t in targets
                     ],
                     "tags": [
-                        buffs[t]["name"]
+                        {"id": t, "name": buffs[t]["name"], "desc": buffs[t]["desc"],
+                         "param_list": buffs[t]["param_list"]}
                         for t in (ext.get("HardTagList", []) or []) if t in buffs
                     ],
                 }

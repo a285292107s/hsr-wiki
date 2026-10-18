@@ -6,6 +6,13 @@
 
 - **新增 `public/` 资产在运行中的 dev server 上一律返回 `index.html`（200 + `text/html`，SPA fallback），放进已存在的目录同样如此**：新建子目录与新建文件都会命中，表现是页面「代码没生效」——本地图解码失败后回退链正常工作、也没有 `data-cdn-down`，看起来像实现写错。`Invoke-WebRequest` 比对 `Content-Type` 与字节数即可定性；`refresh-vite-cache.mjs` 对 public 二进制无效，**只能重启 dev server**。
 - **public 快照与源文件 transform 缓存是两个独立坑，且前者已复发两次**：改 `refresh-vite-cache.mjs` 或只看 commands.md「dev 缓存自愈」一节的人不会知道 public 情形。凡涉及新增 public 资源，**第一时间用 `curl -o NUL -w "%{http_code} %{content_type} %{size_download}"` 与磁盘字节比对**，不要先看状态码——返回 200 不等于文件正确（实测外壳 793B vs 磁盘 JSON 10453B）。
+- **CSS `background-image` 是这条坑里唯一**完全静默**的消费方，也是最容易自欺的一处**：`<img>` 至少有 error 事件、回退链与占位降级可观测，而背景图失败时**没有事件、没有回退、没有占位**，页面只是少了一层材质（看起来像「设计就是这样」）。故判据必须是**取回并解码**，不能是看状态码、也不能是「截图里好像有光影」——后者会把 `#app` 的环境径向渐变误认成新加的材质（本轮实测踩过：把环境光影读成星野，据此宣布已验证）。正解：
+  ```js
+  const res = await fetch('/data/assets/icons/bgpic/BgWiki.webp');
+  const bmp = await createImageBitmap(await res.blob()).catch(() => null);
+  return { status: res.status, type: res.headers.get('content-type'), bytes: (await res.clone().blob()).size, decoded: bmp && `${bmp.width}x${bmp.height}` };
+  ```
+  `status=200` + `type=text/html` + `decoded=null` 即命中本坑（实测 200 / HTML / 2785B，而磁盘 164940B）。**判定顺序固定：先解码成功，再谈观感**。
 - **dev 的 transform 缓存无 mtime 兜底，事件丢失即该文件「永久」陈旧，不受后续无关请求影响**：「.vue 新鲜 .css 陈旧」是假象，实际取决于该文件最后一次成功事件与磁盘修改的先后，与扩展名无关。所有自动失效方案已废弃且禁止重试（`invalidateAll()` 打不通 rust 内核、`utimes` 只认内容/size、多进程内容触碰会把源文件写成空白壳）。顺序固定：诊断 → 自愈工具 → 重启；**build 进行中禁止运行自愈工具**。
 - **`vite build` 可当「磁盘内容是否已更新」的诊断手段**：它独立进程同步全量读磁盘，无 watcher 事件链路与跨进程源码级增量缓存，产物必然反映磁盘内容。**产物流旧 ⇒ 文件根本没落盘**，而不是构建有问题。
 - **rollup 的常量替换不做跨模块摇树**：跨模块导出的 `import.meta.env.DEV` 常量被替换后，dead branch 里的 `() => import(...)` **仍会产出 chunk**（实测研究线 79KB 进产物）。dev 门控必须本文件内 `if (import.meta.env.DEV)` 包裹 `router.addRoute`，**常量一律就近内联、禁止跨模块导出**。

@@ -62,14 +62,3 @@ export function seasonBuffChoiceLabel(
   if (!system) return '';
   return CHOICE_LABEL[system.choice] ?? '';
 }
-
-/** 一句话口径：`每期 3 条 · 每场首领挑战前选 1 条（上/下半场各一套）`。
- *  条数与选法都是**常青规格**（不随赛季轮换），故口径行不带「本期」字样——带「本期」会把它说成每期数据。 */
-export function seasonBuffSystemLine(
-  guide: EndgameGuideDb | null | undefined,
-  modeKey: string,
-): string {
-  const count = seasonBuffCount(guide, modeKey);
-  const choice = seasonBuffChoiceLabel(guide, modeKey);
-  return [count ? translate('egm.buffCount', { n: count }) : '', choice].filter(Boolean).join(' · ');
-}

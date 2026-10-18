@@ -17,16 +17,19 @@ defineProps<{ guide: MazeBossGuide }>();
 
 <template>
   <div v-if="guide.traits?.length" class="nk-egd-guide">
-    <span class="nk-egd-guide__label">{{ t('egd.bossTraits') }}</span>
+    <!-- 分区名＝h2（既有的可见分区标题，不是新增文案；ADR 0043 禁的是把关卡名带进面板） -->
+    <h2 class="nk-egd-guide__label">{{ t('egd.bossTraits') }}</h2>
     <article v-for="t in guide.traits" :key="t.id" class="nk-egd-trait">
-      <h4 class="nk-egd-trait__name">{{ t.name }}</h4>
+      <!-- 条目名＝h3：A1.2 判的是**文档序**层级递增 ≤1，与上方 h2 分区标题互为兄弟即合法
+           （标题元素不可能包住块级卡片，故不按 DOM 祖先判）。 -->
+      <h3 class="nk-egd-trait__name">{{ t.name }}</h3>
       <p v-if="t.desc" class="nk-egd-trait__desc" v-html="bossTraitDescHtml(t)"></p>
     </article>
   </div>
   <div v-if="guide.phases?.length" class="nk-egd-phase">
-    <span class="nk-egd-phase__label">{{ t('mob.sec.guide') }}</span>
+    <h2 class="nk-egd-phase__label">{{ t('mob.sec.guide') }}</h2>
     <article v-for="p in guide.phases" :key="p.id" class="nk-egd-phase__item">
-      <h4 class="nk-egd-phase__name">{{ p.name }}</h4>
+      <h3 class="nk-egd-phase__name">{{ p.name }}</h3>
       <p v-if="p.desc" class="nk-egd-phase__desc" v-html="fmtDesc(p.desc, [])"></p>
       <p v-if="p.answer" class="nk-egd-phase__answer" v-html="fmtDesc(p.answer, [])"></p>
       <ul v-if="p.skills?.length" class="nk-egd-phase__skills">

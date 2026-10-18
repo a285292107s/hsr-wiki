@@ -256,24 +256,4 @@ export interface SkillAnimEntry {
  *  写入侧见 spine-lab/tools/wiki-anim-scraper.mjs，消费侧见 src/app/character/SkillsPanel.vue */
 export type SkillAnimationsDb = Record<string, Record<string, SkillAnimEntry[]>>;
 
-/* ─── character.json 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
 
-/** character.json 条目（键 = 角色 ID） */
-export interface CharListEntry {
-  /** 实装时间戳（未实装角色缺省） */
-  release?: number;
-  icon?: string;
-  /** 稀有度（CombatPowerAvatarRarityType4/5） */
-  rank?: string;
-  /** 命途（Knight/Mage/...） */
-  baseType?: string;
-  /** 属性（Ice/Quantum/...） */
-  damageType?: string;
-  en?: string;
-  zh?: string;
-  ja?: string;
-  ko?: string;
-  enhance?: unknown[];
-  desc?: string;
-}
-export type CharListDb = Record<string, CharListEntry>;

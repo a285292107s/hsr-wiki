@@ -5,9 +5,7 @@ import { expectTokenNumber, noUnknownOverflow, readContentOffset } from './layou
 /**
  * 布局验收：枢纽页导航条回归（ADR 0019） —— layout 验收层（语义契约 + 数值规格）分文件之一。
  *
- * 拆分动因：`fullyParallel: false` 下**文件内**串行，单文件 layout（74 用例 / 469s）把全量墙钟
- * 锁死在 6.6 分钟（a11y 仅 85s 跑完后两个 worker 空转）。按 describe 边界拆开后文件级并行生效，
- * 每条用例的隔离性与拆分前完全一致（文件内本就串行），故已记录的并发 flake 纪律不受影响。
+ * 分文件判据（为何按域拆、单文件该多小）见 docs/agents/testing.md「layout 必须按 describe 边界分文件」。
  *
  * `@viewport-pinned` 标签：凡用例内自行 `setViewportSize(...)` 固定视口者，必须在 `test(...)`
  * 第二参传该标签（mobile-chromium 以 `grepInvert` 跳过，视口已由用例钉死）。标签须静态书写，
@@ -26,16 +24,16 @@ test.describe('布局验收：枢纽页导航条回归（ADR 0019）', () => {
     await page.setViewportSize({ width: 1280, height: 720 });
 
     await page.goto('/');
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await expect(page.locator('.ui-sidebar')).toBeVisible();
     // 无侧栏枢纽形态已移除——data-nav 属性与避让回退一并退场
     await expect(page.locator('html')).not.toHaveAttribute('data-nav');
     expect(await readContentOffset(page)).toBe(148);
-    // 令牌真实生效：品牌带标题区左缘 = 侧栏避让令牌落值
-    await expectTokenNumber(page.locator('.nk-hub-brand__content'), 'padding-left', await readContentOffset(page), '品牌带内容区左避让');
+    // 令牌真实生效：首页内容容器左缘 = 侧栏避让令牌落值（报头已并入容器，不再是自带上/左内的「带」）
+    await expectTokenNumber(page.locator('.nk-intake'), 'padding-left', await readContentOffset(page), '首页内容区左避让');
 
     await page.goto('/currency');
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await expect(page.locator('.ui-sidebar')).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-nav');
     expect(await readContentOffset(page)).toBe(148);
@@ -59,7 +57,8 @@ test.describe('布局验收：枢纽页导航条回归（ADR 0019）', () => {
     await expect(page.locator('.ui-sidebar')).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-nav');
     expect(await readContentOffset(page)).toBe(88);
-    await expectTokenNumber(page.locator('.nk-hub-release'), 'padding-left', await readContentOffset(page), '平板档枢纽版块左避让');
+    // 首页自 2026-10 重构起内容容器是 `.nk-intake`（`.nk-hub-release` 只留给 /currency）
+    await expectTokenNumber(page.locator('.nk-intake'), 'padding-left', await readContentOffset(page), '平板档枢纽版块左避让');
     await noUnknownOverflow(page);
     assertNoErrors();
   });

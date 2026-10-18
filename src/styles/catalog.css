@@ -569,8 +569,6 @@
 .nk-mob-card[data-type="BOSS"] .nk-mob-card__type { color: var(--accent); }
 .nk-mob-card[data-type="ELITE"] .nk-mob-card__type { color: var(--text2); }
 
-.nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-
 #nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
 /* 此处曾有一条 `#nk-home-app h1, h2, p { margin: 0; padding: 0 }`：UA 默认边距已由
@@ -790,7 +788,6 @@
   .nk-relic-card__name { font-size: var(--nk-fs-3); }
   .nk-item-grid { --nk-grid-min: 90px; --nk-grid-gap: 8px; }
   .nk-mob-grid { --nk-grid-min: 100px; }
-  .nk-maze-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
 @media (max-width: 374px) {
   /* `:not(.nk-idx-grid)`：角色目录的骨架同时带 `nk-skeleton__grid` 与 `nk-idx-grid`，

@@ -67,7 +67,6 @@ export const currencyRolePage: CatalogPageConfig = {
   subtitle: 'ROLES',
   searchKey: 'catalog.cwRole.search',
   gridClass: 'nk-cat-grid nk-crole-grid',
-  cardClass: '.nk-crole-card',
   /* 拆分块须按级联顺序串行加载（styles 数组各 loader 并行执行，顺序不保） */
   styles: [loadCwCatalogCss, async () => {
     await import('../../../../src/styles/currency-role-hero.css');

@@ -29,7 +29,11 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
   avatarshopicon: (f) => `avatarshopicon/avatar/${f.replace(/\.webp$/i, '')}.png`,
   avatarroundicon: (f) => `avatarroundicon/avatar/${f.replace(/\.webp$/i, '')}.png`,
   avatardrawcard: (f) => `avatardrawcard/${f.replace(/\.webp$/i, '')}.png`,
+  // 立绘切入图与光锥全图：目录段与文件名与仓库一致，无额外子目录段（fork 冻结前的资产）
+  avatarcutinfigures: (f) => `avatarcutinfigures/${f.replace(/\.webp$/i, '')}.png`,
+  lightconemaxfigures: (f) => `lightconemaxfigures/${f.replace(/\.webp$/i, '')}.png`,
   itemfigures: (f) => `itemfigures/${f.replace(/\.webp$/i, '')}.png`,
+  bgpic: (f) => `bgpic/${f.replace(/\.webp$/i, '')}.png`,
   lightconemediumicon: (f) => `lightconemediumicon/${f.replace(/\.webp$/i, '')}.png`,
   achievement: (f) => `achievement/${f.replace(/\.webp$/i, '')}.png`,
   trace: (f) => `ui/avatar/icon/${f.replace(/\.webp$/i, '')}.png`,

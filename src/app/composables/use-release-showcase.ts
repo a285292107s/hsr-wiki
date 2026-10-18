@@ -8,6 +8,8 @@ import {
   loadLocalRelicSets, loadLocalRelicDetail,
 } from '../../services/api';
 import { fmtDesc } from '../../lib/format';
+import { avatarCutinFigureUrl, avatarDrawCardUrl, lightConeMaxFigureUrl } from '../../lib/icons';
+import { elemLabel, pathLabel } from '../../lib/enum-labels';
 import { characterBlurb } from '../../lib/character-blurb';
 import type { CatalogContext, CatalogItem, CatalogPageConfig } from '../catalog/types';
 import { translate } from '../i18n';
@@ -45,6 +47,18 @@ export interface ReleaseLeadMeta {
   /** 特写行的数据正文（fmtDesc 产出的 HTML）：只允许「卡上没有的」内容——
       角色一句话简介 / 光锥技能效果 / 遗器四件套效果。与分区同批就绪（骨架期完成取数，无 CLS）。 */
   brief?: string;
+  /** 该条目的**立绘原画** URL（仅角色有：2048² 本地 webp）。
+      「看立绘」对话框按需取它——卡内头像（376×512）放不满一屏，立绘才是原画。
+      非角色族不设此字段（光锥上限 348×408、遗器上限 256²，没有更大的原画可看）。 */
+  artSrc?: string;
+  /** 单条目分区的**主图**（首页大板）。角色＝切入图（1560×1650），光锥＝全图（904×1260）。
+      两者都比卡片图源大一档以上，故大板能在原分辨率内呈现。 */
+  plateSrc?: string;
+  /** 该条目的定义性标签（元素 / 命途）：卡上也有，但首页的大板不再渲染卡面上的文字层，
+      故这些标签由注释栏承接——**仅当条目以 plate 呈现时**（≥2 条的分区仍是共享卡片，卡自带标签）。 */
+  facts?: string[];
+  /** 星级（数字）。注释栏用它 + 星形 SVG 表达稀有度（`★` 字符会被反 AI 味门禁记成 emoji）。 */
+  rarity?: number;
 }
 
 /* 特写规格（count ≤ 2）的**文字块**：只放条目自身可推出、且卡上没有的事实。
@@ -182,6 +196,10 @@ const RELEASE_SOURCES: Array<{
     leadMeta: (item) => ({
       name: String(item.name || ''),
       href: item.href ? String(item.href) : undefined,
+      artSrc: avatarDrawCardUrl(String(item.id)),
+      plateSrc: avatarCutinFigureUrl(String(item.id)),
+      facts: [elemLabel(String(item.element || '')), pathLabel(String(item.path || ''))].filter(Boolean),
+      rarity: Number(item.rarity) || undefined,
     }),
   },
   {
@@ -190,6 +208,9 @@ const RELEASE_SOURCES: Array<{
     leadMeta: (item) => ({
       name: String(item.name || ''),
       href: item.href ? String(item.href) : undefined,
+      plateSrc: lightConeMaxFigureUrl(String(item.id)),
+      facts: [pathLabel(String(item.path || ''))].filter(Boolean),
+      rarity: Number(item.rarity) || undefined,
     }),
   },
   {

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import {
-  buildLevelTabs, defaultLevelKey, levelTabFloor, levelTabPeak, parsePeakKey,
+  buildLevelTabs, defaultLevelKey, levelTabFloor, levelTabPeakNodes,
 } from '../levels';
 import type { MazeListEntry } from '../../../services/types';
 
@@ -35,7 +35,7 @@ describe('buildLevelTabs 关卡子 tab 清单', () => {
     ]);
   });
 
-  it('异相仲裁：3 骑士试炼 + 1 王棋最终关，tab 名即官方关卡名、倒序（王棋在最前）；绝境变体紧跟其主关之后', () => {
+  it('异相仲裁：只剩两个节点合并档（王棋档打头 + 骑士试炼档），王棋/绝境不再各占一档', () => {
     const peak = {
       id: '9', zh: '军团再临',
       levels: [
@@ -46,37 +46,43 @@ describe('buildLevelTabs 关卡子 tab 清单', () => {
       ],
     } as MazeListEntry;
     expect(buildLevelTabs(peak).map((t) => [t.key, t.kind, t.label, t.peakId])).toEqual([
-      ['peak-904', 'peak', '将杀王棋', 904],
-      ['peak-904-hard', 'peak', '将杀王棋•绝境', 904],
-      ['peak-903', 'peak', '骑士（三）', 903],
-      ['peak-902', 'peak', '骑士（二）', 902],
-      ['peak-901', 'peak', '骑士（一）', 901],
+      ['peak-904', 'peakNodes', '将杀王棋', 904],
+      ['peak-knights', 'peakNodes', '骑士试炼', undefined],
     ]);
   });
 
-  it('绝境变体只在主关带 hard 时出现；hard 缺名时回退词典的「绝境」', () => {
+  it('王棋没有绝境变体时仍是一档（节点一即全部）；王棋缺名时回退「关卡 N」', () => {
     const peak = {
       id: '9', zh: '军团再临',
       levels: [
         { id: 901, kind: 'knight', name: '骑士（一）' },
-        { id: 904, kind: 'king', name: '将杀王棋', hard: {} },
+        { id: 904, kind: 'king' },
       ],
     } as MazeListEntry;
     expect(buildLevelTabs(peak).map((t) => [t.key, t.label])).toEqual([
-      ['peak-904', '将杀王棋'],
-      ['peak-904-hard', '绝境'],
-      ['peak-901', '骑士（一）'],
+      ['peak-904', '关卡 2'],
+      ['peak-knights', '骑士试炼'],
     ]);
   });
 
-  it('无 id 的单关：key/label 的缺省回退按源序推导，不随倒序漂移', () => {
+  it('王棋缺 id 时 key 按源序推导（不随排序漂移）', () => {
     const peak = {
       id: '9', zh: '军团再临',
-      levels: [{ kind: 'knight', name: '骑士（一）' }, { kind: 'king' }],
+      levels: [{ kind: 'knight', name: '骑士（一）' }, { kind: 'king', name: '将杀王棋' }],
     } as MazeListEntry;
     expect(buildLevelTabs(peak).map((t) => [t.key, t.label])).toEqual([
-      ['peak-2', '关卡 2'],
-      ['peak-1', '骑士（一）'],
+      ['peak-2', '将杀王棋'],
+      ['peak-knights', '骑士试炼'],
+    ]);
+  });
+
+  it('只有骑士关时合并档是唯一 tab（不产生空的王棋档）', () => {
+    const peak = {
+      id: '9', zh: '军团再临',
+      levels: [{ id: 901, kind: 'knight', name: '骑士（一）' }],
+    } as MazeListEntry;
+    expect(buildLevelTabs(peak).map((t) => [t.key, t.kind, t.label])).toEqual([
+      ['peak-knights', 'peakNodes', '骑士试炼'],
     ]);
   });
 
@@ -87,7 +93,7 @@ describe('buildLevelTabs 关卡子 tab 清单', () => {
 });
 
 describe('defaultLevelKey 默认激活的子 tab', () => {
-  it('含星启的赛季默认星启；不含星启的赛季（含全部异相仲裁期）退回清单首位（该模式最高关）', () => {
+  it('含星启的赛季默认星启；不含星启的赛季（含全部异相仲裁期）退回清单首位（该模式最高一档）', () => {
     const withTierce = { id: '3020', zh: '仙客天狼', floor_details: floors, tierce: { id: 30205 } } as MazeListEntry;
     expect(defaultLevelKey(buildLevelTabs(withTierce))).toBe('tierce');
     const noTierce = { id: '3001', zh: '冽风骑士', floor_details: floors } as MazeListEntry;
@@ -115,41 +121,45 @@ describe('levelTabFloor 子 tab → 层级详情', () => {
   });
 });
 
-describe('levelTabPeak 子 tab → 异相仲裁单关', () => {
-  const data = {
+describe('levelTabPeakNodes 合并档 → 节点清单', () => {
+  const peak = {
     id: '9', zh: '军团再临',
-    levels: [{ id: 901, kind: 'knight', name: '骑士（一）' }, { id: 904, kind: 'king', name: '将杀王棋' }],
+    levels: [
+      { id: 901, kind: 'knight', name: '骑士（一）' },
+      { id: 902, kind: 'knight', name: '骑士（二）' },
+      { id: 903, kind: 'knight', name: '骑士（三）' },
+      { id: 904, kind: 'king', name: '将杀王棋', hard: { name: '将杀王棋•绝境' } },
+    ],
   } as MazeListEntry;
 
-  it('单关 key 命中对应关；层级 key 与缺关返回 null', () => {
-    expect(levelTabPeak(data, 'peak-904')?.kind).toBe('king');
-    expect(levelTabPeak(data, 'peak-901')?.name).toBe('骑士（一）');
-    expect(levelTabPeak(data, 'floor-1')).toBeNull();
-    expect(levelTabPeak(data, 'peak-999')).toBeNull();
-    expect(levelTabPeak(null, 'peak-901')).toBeNull();
+  it('王棋档 = 普通难度 / 绝境难度，两节点都指向主关', () => {
+    const nodes = levelTabPeakNodes(peak, 'peak-904');
+    expect(nodes.map((n) => [n.key, n.label, n.hard, n.level.id])).toEqual([
+      ['king', '普通难度', false, 904],
+      ['hard', '绝境难度', true, 904],
+    ]);
+    // 绝境节点不复制主关数据：推荐属性与裁决象限增益在数据上挂主关，面板按 hard 取那一场
+    expect(nodes[1].level).toBe(nodes[0].level);
   });
 
-  it('绝境变体 key 解析回主关（变体的推荐属性与增益都挂在主关上）', () => {
-    expect(levelTabPeak(data, 'peak-904-hard')?.id).toBe(904);
-    expect(levelTabPeak(data, 'peak-904-hard')?.name).toBe('将杀王棋');
-    expect(levelTabPeak(data, 'peak-999-hard')).toBeNull();
-  });
-});
-
-describe('parsePeakKey 单关 key → 关卡 ID + 变体标记', () => {
-  it('主关与变体共用关卡 ID，靠 -hard 后缀区分；非单关 key 返回 null', () => {
-    expect(parsePeakKey('peak-904')).toEqual({ id: 904, hard: false });
-    expect(parsePeakKey('peak-904-hard')).toEqual({ id: 904, hard: true });
-    expect(parsePeakKey('peak-101-hard')).toEqual({ id: 101, hard: true });
-    expect(parsePeakKey('floor-4')).toBeNull();
-    expect(parsePeakKey('tierce')).toBeNull();
-    expect(parsePeakKey('peak-abc')).toBeNull();
+  it('王棋没有绝境变体时只有普通难度一个节点', () => {
+    const noHard = {
+      id: '9', zh: '军团再临',
+      levels: [{ id: 904, kind: 'king', name: '将杀王棋' }],
+    } as MazeListEntry;
+    expect(levelTabPeakNodes(noHard, 'peak-904').map((n) => n.key)).toEqual(['king']);
   });
 
-  it('形态不完整一律返回 null（不得静默落到关卡 0）', () => {
-    expect(parsePeakKey('peak-')).toBeNull();
-    expect(parsePeakKey('peak--hard')).toBeNull();
-    expect(parsePeakKey('peak-904-hardx')).toBeNull();
-    expect(parsePeakKey('peak-904-')).toBeNull();
+  it('骑士档 = 三关骑士逐关一个节点（key 取关卡 ID、label 取官方关名）', () => {
+    expect(levelTabPeakNodes(peak, 'peak-knights').map((n) => [n.key, n.label, n.hard]))
+      .toEqual([['901', '骑士（一）', false], ['902', '骑士（二）', false], ['903', '骑士（三）', false]]);
+  });
+
+  it('非合并档 key / 缺数据返回空数组（不渲染卡片行）', () => {
+    expect(levelTabPeakNodes(peak, 'floor-3')).toEqual([]);
+    expect(levelTabPeakNodes(peak, 'peak-999')).toEqual([]);
+    expect(levelTabPeakNodes(null, 'peak-knights')).toEqual([]);
+    expect(levelTabPeakNodes({ id: '3020', zh: '仙客天狼', floor_details: floors } as MazeListEntry, 'peak-1'))
+      .toEqual([]);
   });
 });

@@ -1214,10 +1214,12 @@ class TestPeakSeasons:
                 ]
             if name.endswith("MazeBuff.json"):
                 return [
-                    {"ID": 3033001, "BuffName": {"Hash": 20}},
+                    {"ID": 3033001, "BuffName": {"Hash": 20},
+                     "BuffDesc": {"Hash": 24}, "ParamList": [{"Value": 500}]},
                     {"ID": 3033003, "BuffName": {"Hash": 21}},
                     {"ID": 3033006, "BuffName": {"Hash": 22}},
-                    {"ID": 3033010, "BuffName": {"Hash": 23}},
+                    {"ID": 3033010, "BuffName": {"Hash": 23},
+                     "BuffDesc": {"Hash": 25}, "ParamList": [{"Value": 2}]},
                 ]
             if name.endswith("MonsterTemplateConfig.json"):
                 return [
@@ -1270,7 +1272,10 @@ class TestPeakSeasons:
                                     "camp": "名40", "stance": 240, "wave": 1}]
         assert k1["targets"] == [{"text": "名4", "param": 4},
                                   {"text": "名3", "param": None}]
-        assert k1["tags"] == ["名20"]
+        # 机制词条 = MazeBuff 条目（TagList 只给 ID）：名称 + 效果描述 + 占位参数一并落地，
+        # 前端据此渲染「机制」的详情说明（描述与王棋增益同口径，走 fmtDesc）
+        assert k1["tags"] == [{"id": 3033001, "name": "名20", "desc": "名24",
+                               "param_list": [500]}]
         assert "level" not in k2 and k2["monsters"] == []
         assert k3["damage"] == [] and k3["targets"] == [] and k3["tags"] == []
         assert king["kind"] == "king" and king["name"] == "名13"
@@ -1284,7 +1289,8 @@ class TestPeakSeasons:
                                       "resist": {}, "rank": "BigBoss", "camp": "名40",
                                       "stance": 720, "wave": 1}]
         assert hard["targets"] == [{"text": "名6", "param": 2}]
-        assert hard["tags"] == ["名23"]
+        assert hard["tags"] == [{"id": 3033010, "name": "名23", "desc": "名25",
+                                 "param_list": [2]}]
         assert entry["monsters"] == [
             {"id": "1003010", "name": "名30", "icon": "Monster_1003010",
              "weak": ["Physical"], "resist": {"Fire": 0.2}, "rank": "Elite",

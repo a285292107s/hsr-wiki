@@ -69,6 +69,11 @@ const currentSeasonInfo = computed<{ id: string; entry: MazeListEntry | null; li
 const currentSeason = computed<MazeListEntry | null>(() => currentSeasonInfo.value.entry);
 const currentSeasonId = computed(() => currentSeasonInfo.value.id);
 const currentSeasonLive = computed(() => currentSeasonInfo.value.live);
+/** 有没有**可用的**当期/最新赛季：id 与条目缺一不可。
+ *  id 从卡片 href 解析、条目从 listDb 取——两者可能单边缺失（目录与详情数据不同源），
+ *  此时 `:to` 会退化成 `/endgame/<mode>/`（vue-router 非 strict，静默解析回本页自链接），
+ *  文案里的赛季名也会变成空。故 §02 赛季行与 §03 CTA 一律以本判据为渲染前提。 */
+const hasCurrentSeason = computed(() => Boolean(currentSeasonId.value && currentSeason.value));
 /** 非进行中时的状态**枚举**（notStarted / ended / unknown）——判定与文案分离：
  *  曾把 `t(...)` 后的状态词拿去和中文 '未知' 比较，多语言下该分支恒假。 */
 const currentSeasonStatusKey = computed(() =>
@@ -100,7 +105,14 @@ const structure = computed<Array<{ label: string; value: string }>>(() => {
     const withTargets = levels.filter((l) => (l.targets || []).length).length;
     if (withTargets) rows.push({ label: t('egm.stat.targets'), value: t('vor.stageCount', { n: withTargets }) });
   }
-  if (s.countdown) rows.push({ label: t('egm.stat.countdown'), value: t('egm.value.countdown', { n: s.countdown }) });
+  /* 「回合上限」= countdown，必须是**存在且 > 0** 才成行。旧写法 `if (s.countdown)` 用真值判断，
+     把「0」与「没有这个字段」混为一谈；两者在本站数据里同时存在且含义不同：
+     boss 全 22 期 countdown 恒为 0 = 该玩法**不设**回合上限（官方通关判据是击败首领，
+     见赛季页 egd.rule.enemies），peak 全 10 期**没有**该字段。行为不变（0 依旧不出行），
+     判据显式化后，后人不会再把 0 误读成「有值却没渲染」。 */
+  if (s.countdown != null && s.countdown > 0) {
+    rows.push({ label: t('egm.stat.countdown'), value: t('egm.value.countdown', { n: s.countdown }) });
+  }
   if (s.clear_score) rows.push({ label: t('egm.stat.scoreCap'), value: String(s.clear_score) });
   rows.push({ label: t('egm.stat.tierce'), value: t(s.tierce ? 'egm.value.tierceOn' : 'egm.value.tierceOff') });
   return rows;
@@ -194,40 +206,50 @@ function cardHtml(item: CatalogItem, i: number): string {
             <li v-for="(it, ii) in block.items" :key="ii">{{ it }}</li>
           </ul>
         </article>
+        <!-- 三态之 empty：规则正文来自 endgame_guide.json，取不到时上面那条 v-for 渲染出零个分节，
+             整块只剩标题（静默空白）。空态与另外两处共用同一个通用键。 -->
+        <div v-if="!ruleBlocks.length" class="nk-slot-empty">{{ t('egm.empty') }}</div>
       </section>
 
       <section class="nk-egm__panel">
         <h2 class="nk-title"><span class="nk-title__idx">02</span>{{ t('egm.sec.structure') }} STRUCTURE</h2>
-        <p class="nk-egm__note">{{ t('egm.note') }}</p>
-        <dl class="nk-egm__facts">
+        <!-- `egm.note` 的措辞是「以当期赛季为准」：没有进行中的一期时该句不成立（异相仲裁全 10 期无排期、
+             状态恒 unknown，实际取的是最新一期），故只在真有当期赛季时才声明这条口径——
+             无当期时由下一行的 `egm.latestSeason*` 如实标注状态。 -->
+        <p v-if="currentSeasonLive" class="nk-egm__note">{{ t('egm.note') }}</p>
+        <dl v-if="structure.length" class="nk-egm__facts">
           <div v-for="row in structure" :key="row.label" class="nk-egm__fact">
             <dt>{{ row.label }}</dt>
             <dd>{{ row.value }}</dd>
           </div>
         </dl>
-        <p class="nk-egm__note">
+        <div v-else class="nk-slot-empty">{{ t('egm.empty') }}</div>
+        <p v-if="hasCurrentSeason" class="nk-egm__note">
           {{ currentSeasonLive ? t('egm.currentSeason') : (currentSeasonStatusKey === 'unknown' ? t('egm.latestSeason') : t('egm.latestSeasonWith', { status: currentSeasonStatus })) }}：<RouterLink class="nk-egm__link" :to="`/endgame/${modeKey}/${currentSeasonId}`">{{ currentSeason?.zh }}</RouterLink>
         </p>
       </section>
 
       <section class="nk-egm__panel">
-        <h2 class="nk-title"><span class="nk-title__idx">03</span>{{ system?.name || t('egm.sec.buffs') }}</h2>
+        <h2 class="nk-title"><span class="nk-title__idx">03</span>{{ system?.name || t('egm.sec.buffs') }} BUFFS</h2>
         <!-- 条数与选法是这个区块的**规格**（读者最需要先知道的两件事），故做成可读的规格行，
              不用 0.72rem / --text3 的小字注脚（用户反馈：太小）。 -->
         <p v-if="system" class="nk-egm__system">
           <span class="nk-egm__system-count">{{ t('egm.buffCount', { n: seasonBuffCount(guide, modeKey) }) }}</span>
           <span class="nk-egm__system-choice">{{ seasonBuffChoiceLabel(guide, modeKey) }}</span>
         </p>
-        <!-- 条目与效果留在赛季页（那里有半场/关卡上下文）：本页给一个明确的入口，不复制一份残缺的清单 -->
-        <RouterLink class="nk-guide-link nk-egm__system-cta" :to="`/endgame/${modeKey}/${currentSeasonId}`">
+        <!-- 条目与效果留在赛季页（那里有半场/关卡上下文）：本页给一个明确的入口，不复制一份残缺的清单。
+             没有可用赛季时**隐藏**（而非改写 href）：`egm.viewSeasonBuffs` 必须带 name，缺 name 会渲染出
+             带空括号的文案，改写 href 又会变成 `/endgame/<mode>/` 自链接。 -->
+        <RouterLink v-if="hasCurrentSeason" class="nk-guide-link nk-egm__system-cta" :to="`/endgame/${modeKey}/${currentSeasonId}`">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           {{ t('egm.viewSeasonBuffs', { which: currentSeasonLive ? t('egm.whichCurrent') : t('egm.whichLatest'), name: currentSeason?.zh }) }}
         </RouterLink>
       </section>
 
-      <section class="nk-egm__panel">
-        <h2 class="nk-title"><span class="nk-title__idx">04</span>{{ t('egm.sec.seasons') }} SEASONS</h2>
-        <div class="nk-egm__seasons" v-html="seasonCards.map(cardHtml).join('')"></div>
+      <section class="nk-egm__panel" aria-labelledby="egm-sec-seasons">
+        <h2 id="egm-sec-seasons" class="nk-title"><span class="nk-title__idx">04</span>{{ t('egm.sec.seasons') }} SEASONS</h2>
+        <div v-if="seasonCards.length" class="nk-egm__seasons" v-html="seasonCards.map(cardHtml).join('')"></div>
+        <div v-else class="nk-slot-empty">{{ t('egm.empty') }}</div>
       </section>
 
       <nav class="nk-egm__others" :aria-label="t('egm.othersAria')">

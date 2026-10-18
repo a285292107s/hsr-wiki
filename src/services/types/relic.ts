@@ -80,17 +80,3 @@ export interface RelicPieceStory {
 
 /** set_id → { piece_type → RelicPieceStory } */
 export type RelicStoriesMap = Record<string, Record<string, RelicPieceStory>>;
-
-/* ─── relicset.json 列表端点（standalone 目录页数据源；注意：无 /zh/ 路径段） ─── */
-
-/** relicset.json 条目（键 = 遗器套装 ID） */
-export interface RelicsetListEntry {
-  /** 图标路径（SpriteOutput/ItemIcon/71000.png → itemfigures/71000.webp） */
-  icon?: string;
-  en?: string;
-  zh?: string;
-  ja?: string;
-  ko?: string;
-  set?: Record<string, unknown>;
-}
-export type RelicsetListDb = Record<string, RelicsetListEntry>;

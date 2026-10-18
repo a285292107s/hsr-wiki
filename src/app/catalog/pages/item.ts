@@ -49,7 +49,6 @@ export const itemPage: CatalogPageConfig = {
   subtitle: 'ITEMS',
   searchKey: 'catalog.item.search',
   gridClass: 'nk-cat-grid nk-item-grid',
-  cardClass: '.nk-item-card',
   virtualMinColW: 110,
   virtualImgRatio: 1,
   async fetchData() {

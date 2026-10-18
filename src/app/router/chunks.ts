@@ -3,12 +3,9 @@ import { loadSpineRuntime } from '../../spine/runtime';
 export const preloadCatalog = () => import('../views/CatalogView.vue');
 
 export const preloadCharacterDetail = () => import('../views/CharacterView.vue');
-export const preloadLightconeDetail = () => import('../views/LightconeView.vue');
-export const preloadRelicDetail = () => import('../views/RelicView.vue');
 
 export const preloadHome = () => import('../views/HomeView.vue');
 export const preloadCurrencyHub = () => import('../views/CurrencyHubView.vue');
-export const preloadCurrencyRoleDetail = () => import('../views/CurrencyRoleView.vue');
 export const preloadVoracity = () => import('../views/VoracityView.vue');
 export const preloadEndgameMode = () => import('../views/EndgameModeView.vue');
 

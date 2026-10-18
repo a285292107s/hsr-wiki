@@ -1,0 +1,406 @@
+/* 首页 ＝ 版本入库登记（ADR 0019 形态）。
+ *
+ * 版式语言：整页由**批次抬头**开场——版本号是本页主语，故它是首屏最大的字（`--nk-fs-hero`）；
+ * 「版本上新」跟在数字旁当单位，不做压在大字上方的小字标签。三个分区刻意用三种版式
+ * （角色＝立绘板 + 注释栏 / 光锥＝镜像 + 字段色 / 遗器＝平权登记格），相邻不重样。
+ *
+ * 为什么本文件存在而不是改写 catalog.css：`.nk-hub-release*` 是**两个枢纽页共用**的原语
+ * （货币战争 Hub 仍按原位横向卡带渲染）。首页细化一律挂 `#nk-home-app` 作用域，
+ * 与 `currency-hub.css` 的 `#nk-cwhub-app` 同一手法——单点声明留在共享层，页面只在自有作用域内收敛。
+ *
+ * 颜色只消费语义层（`--bg` / `--surface` / `--card` / `--text*` / `--primary` / `--metric-val`），
+ * 字号与圆角只用 `--nk-fs-*` / `--nk-radius-*` 档位：两处都由 tools/check-*.mjs 强制。
+ */
+
+#nk-home-app {
+  /* 立绘板宽度唯一刻度：它决定单条目分区的排版权重，也决定首屏高度（见 e2e 首屏契约）。 */
+  --nk-intake-plate: clamp(228px, 27vw, 470px);
+  --nk-intake-plate-lc: clamp(196px, 22vw, 316px);
+  /* ── 地面材料 ──
+     游戏自己的 Wiki 背景图（星野 + 左上暖调星云）铺满内容盒、**不随内容滚动**
+     （`#nk-home-app` 是滚动容器，`background-attachment: scroll` 即「贴着元素盒」而不是贴着内容）。
+     为什么不是渐变：渐变是本轮逐条清掉的机器感来源，而这是一张真实美术资产；
+     为什么不叠 scrim：实测最亮区对 `--text2` 仍有 5.23:1，够用就不加层。
+     下面是承载面**半透明**的原因——平色会把这层材料整个盖掉，那正是上一轮「纯色块」的成因。 */
+  background-image: var(--nk-home-ground);
+  background-size: cover;
+  background-position: 50% 0;
+  background-repeat: no-repeat;
+}
+
+.nk-intake {
+  max-width: var(--nk-content-max);
+  margin: 0 auto;
+  padding: 44px 40px 24px var(--nk-content-offset);
+}
+/* 报头与批次抬头之间的间距由报头承担；用 margin 而不是 padding——
+   这样报头自身的盒高只等于它的文字（`getBoundingClientRect().height` 不含 margin），
+   否则「报头必须是紧凑的一行文字」这条断言会把间距一起量进去。 */
+.nk-intake > .nk-hub-masthead { margin-bottom: 44px; }
+
+/* ── 批次抬头：版本号 + 单位 + 一行 claim，共用同一条左基准线 ───────────────────── */
+.nk-intake__head { display: grid; gap: 10px; padding-bottom: 36px; }
+.nk-intake__batch { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+.nk-intake__batch-num {
+  font-size: var(--nk-fs-hero);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+}
+.nk-intake__batch-note { font-size: var(--nk-fs-8); font-weight: 700; color: var(--text2); }
+.nk-intake__claim { font-size: var(--nk-fs-6); line-height: 1.5; color: var(--text2); }
+
+/* ── 分区骨架：三种版式共用 ──────────────────────────────────────────────────── */
+#nk-home-app .nk-hub-release__section { margin-top: 132px; }
+#nk-home-app .nk-hub-release__section:first-of-type { margin-top: 0; }
+#nk-home-app .nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 96px; }
+
+#nk-home-app .nk-hub-release__sechead {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+#nk-home-app .nk-hub-release__label,
+#nk-home-app .nk-hub-release__sk-row > .nk-hub-release__label {
+  margin-bottom: 0;
+  font-family: var(--font-body);
+  font-size: var(--nk-fs-8);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.2;
+  color: var(--text-bright);
+}
+#nk-home-app .nk-hub-release__label-count {
+  margin-left: 8px;
+  font-family: var(--font-body);
+  font-size: var(--nk-fs-4);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+  vertical-align: 2px;
+}
+#nk-home-app .nk-hub-release__all {
+  font-family: var(--font-body);
+  font-size: var(--nk-fs-5);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--text2);
+}
+#nk-home-app .nk-hub-release__all:hover { color: var(--metric-val); }
+#nk-home-app .nk-hub-release__band { display: block; padding: 0; overflow: visible; }
+
+/* ── 版式一：角色 —— 立绘板在左，注释栏在右并撑满行高（名字在上、动作落在板的下沿）── */
+#nk-home-app .nk-hub-release__band--feature {
+  display: grid;
+  grid-template-columns: minmax(0, var(--nk-intake-plate)) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(28px, 4vw, 76px);
+}
+#nk-home-app .nk-hub-release__cell { min-width: 0; }
+/* 大板：一张自己的大图（角色切入图 1560×1650 裁到 4:5 / 光锥全图 904×1260），**不套卡片**——
+   方角、无边框、无遮罩，靠页面底色当展台；板本身是入口链接，名字在注释栏。 */
+/* `aspect-ratio` 不是装饰而是**防位移契约**：板高必须由图源比例先占位，否则图未到时板高为 0、
+   到达后整页下推（实测带高差 250px，由 e2e「行高不得随图片加载变化」抓出）。
+   两个比例是**分类常量**（入库裁剪口径与源图尺寸决定，见 `src/services/cdn/base.ts` 两分类注释），
+   `object-fit: cover` 保证换任何图都不留黑边。 */
+#nk-home-app .nk-hub-release__plate { display: block; width: 100%; overflow: hidden; }
+#nk-home-app .nk-hub-release__section[data-kind='character'] .nk-hub-release__plate { aspect-ratio: 4 / 5; }
+#nk-home-app .nk-hub-release__section[data-kind='lightcone'] .nk-hub-release__plate { aspect-ratio: 904 / 1260; }
+#nk-home-app .nk-hub-release__plate-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+  transition: opacity var(--nk-dur-normal) var(--nk-ease-out);
+}
+#nk-home-app .nk-hub-release__plate:hover .nk-hub-release__plate-img { opacity: 0.86; }
+#nk-home-app .nk-hub-release__plate:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+/* 定义性标签行（元素 · 命途 · 星级）：大板不渲染卡面文字层，这些事实由注释栏承接 */
+#nk-home-app .nk-hub-release__spec-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+#nk-home-app .nk-hub-release__spec-fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--nk-fs-5);
+  color: var(--text2);
+}
+#nk-home-app .nk-hub-release__spec-star { display: inline-flex; }
+#nk-home-app .nk-hub-release__spec-star svg { width: 1em; height: 1em; color: var(--gold-sem); }
+#nk-home-app .nk-hub-release__spec-rarity { color: var(--gold-sem); font-variant-numeric: tabular-nums; }
+/* 单条目分区的卡名收进注释栏（注释栏的名字就是这一行的标题），卡上不再重复一遍——
+   同一屏里同一信息出现两次是 e2e 明确记过的「没做完」观感。属性/元素/技能名留在卡上：
+   它们是卡自己的标签，注释栏不复述。 */
+#nk-home-app .nk-hub-release__band--feature .nk-idx-card__name-row,
+#nk-home-app .nk-hub-release__band--feature .nk-lc-card__name { display: none; }
+
+#nk-home-app .nk-hub-release__band--feature .nk-hub-release__spec {
+  display: grid;
+  grid-auto-rows: min-content;
+  align-self: stretch;
+  align-content: start;
+  gap: 20px;
+  padding-top: 0;
+  border-top: 0;
+}
+/* 28px 是**上限而不是偏好**：注释栏顶边距 26px 落在 inspect.mjs 的 eyebrow 判据窗口内，
+   而判据候选上限是「标题字号的一半且 ≤18px」——标题 32px 时 15px 的分区入口就成了候选
+   （实测被判成「小字压在大字上方」）。收在 28px 后候选上限降到 14px，入口 15px 自然出局。 */
+#nk-home-app .nk-hub-release__spec-name {
+  font-size: clamp(var(--nk-fs-8), 2vw, var(--nk-fs-title-1));
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+  color: var(--text-bright);
+}
+#nk-home-app .nk-hub-release__spec-brief {
+  max-width: var(--nk-prose-max);
+  font-size: var(--nk-fs-6);
+  line-height: 1.7;
+  color: var(--text);
+}
+#nk-home-app .nk-hub-release__spec-brief :where(.hl) { color: var(--highlight); font-weight: 700; }
+#nk-home-app .nk-hub-release__spec-acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+}
+#nk-home-app .nk-hub-release__spec-link {
+  padding: 11px 20px;
+  border-radius: var(--nk-radius-2);
+  /* 底色压暗 10%：纯 `--primary` 上的 `--text-bright` 实测 4.4:1（差 0.1 到正文线） */
+  background: color-mix(in srgb, var(--primary) 90%, var(--bg) 10%);
+  border: 0;
+  color: var(--text-bright);
+  font-family: var(--font-body);
+  font-size: var(--nk-fs-5);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+#nk-home-app .nk-hub-release__spec-link:hover {
+  background: var(--primary);
+  color: var(--text-bright);
+}
+/* 次级动作：纯文字按钮，不带第二个填充块（一屏只有一个实心动作） */
+#nk-home-app .nk-hub-release__art {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: var(--nk-fs-5);
+  color: var(--text2);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  cursor: pointer;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out);
+}
+#nk-home-app .nk-hub-release__art:hover { color: var(--metric-val); }
+#nk-home-app .nk-hub-release__art:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+/* ── 版式二：光锥 —— 镜像（注释在左、板在右）并改字段色，与角色分区不重样 ────────── */
+#nk-home-app .nk-hub-release__section[data-kind='lightcone'] {
+  padding: clamp(30px, 4vw, 64px) clamp(20px, 3.4vw, 56px);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+}
+#nk-home-app .nk-hub-release__section[data-kind='lightcone'] .nk-hub-release__band--feature {
+  grid-template-columns: minmax(0, 1fr) minmax(0, var(--nk-intake-plate-lc));
+}
+/* 显式落格而不是 order：两列轨由本规则给出，auto-placement 用 order 更序会与轨宽错位。
+   注释栏在镜像分区里**落在这行的下沿**（贴着板的下基线），与角色分区的「注释在上」不同——
+   相邻分区不重样，两处留白也各在一角而不是同一角。 */
+#nk-home-app .nk-hub-release__section[data-kind='lightcone'] .nk-hub-release__cell { grid-area: 1 / 2; }
+#nk-home-app .nk-hub-release__section[data-kind='lightcone'] .nk-hub-release__spec { grid-area: 1 / 1; align-content: end; }
+
+/* ── 版式三：≥2 条分区 —— 平权登记架（每条自己是链接、名字在卡上），不横向滚动 ────
+   两列上限 648px 是**判据**：本批次遗器只有 2 套，铺满 1252px 会变成「两张小图漂在大片空地」；
+   收成一台两列登记架后，右侧空档读成「架外」而不是「没做完」。板宽上限 300px 同时把遗器图标
+   （原生 256²）保持在 0.89× 以内，不再向上采样。 */
+#nk-home-app .nk-hub-release__band:not(.nk-hub-release__band--feature) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 300px));
+  max-width: 648px;
+  gap: 24px;
+}
+/* 图放大到 76%：板内 66% 时遗器图标只有 139px（面积 19321，刚过 inspect.mjs 的 19200 门槛） */
+#nk-home-app .nk-hub-release__band .nk-relic-card__img { width: 76%; height: 76%; }
+#nk-home-app .nk-hub-release__band .nk-relic-card__info { text-align: left; }
+
+/* ── 页内去装饰：共享卡片自带的三处机器感（等宽字 / 文字投影 / 渐变底）在首页收敛 ──
+   判据来自 `probe-tells` 取证：等宽字 4 处、文字投影 6 处、渐变底 3 处全部落在卡内部。
+   这里只按「平色 + 正文体」重述，不改共享层的声明——目录页仍是原形态（范围见交付记录）。 */
+#nk-home-app .nk-idx-card__stars-txt,
+#nk-home-app .nk-lc-card__stars-txt,
+#nk-home-app .nk-lc-card__skill,
+#nk-home-app .nk-relic-card__tag { font-family: var(--font-body); letter-spacing: 0; }
+#nk-home-app .nk-idx-card__name,
+#nk-home-app .nk-idx-card__meta,
+#nk-home-app .nk-idx-card__tag,
+#nk-home-app .nk-idx-card__tag-text,
+#nk-home-app .nk-idx-card__icon,
+#nk-home-app .nk-lc-card__name { text-shadow: none; }
+#nk-home-app .nk-idx-card__body,
+#nk-home-app .nk-lc-card__info { background-image: none; background-color: color-mix(in srgb, var(--bg) 88%, transparent); }
+#nk-home-app .nk-relic-card__plate { border: 0; background: color-mix(in srgb, var(--card) 90%, transparent); }
+/* 悬停用「色调升一档」而不是边框提亮：板已经靠 `--card` 与页面底色分开了，再加 1px 边线
+   就是被 inspect.mjs 记成 outlined-box 的那两个盒子（实测 220×220）。 */
+#nk-home-app .nk-relic-card:hover .nk-relic-card__plate,
+#nk-home-app .nk-relic-card:focus-visible .nk-relic-card__plate {
+  background: color-mix(in srgb, var(--card) 78%, var(--text-bright) 22%);
+}
+/* 立绘底下的稀有度渐变：只在美术自带透明区露出来，首页登记区按平色处理（图已 eager，无占位期） */
+#nk-home-app .nk-idx-card[data-rarity] .nk-idx-card__portrait img { background: none; }
+
+/* ── 「看立绘」对话框：本页唯一的活物 ─────────────────────────────────────────── */
+.nk-intake__art {
+  max-width: 100vw;
+  max-height: 100vh;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: visible;
+}
+.nk-intake__art::backdrop {
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  animation: nk-intake-art-veil var(--nk-dur-normal) var(--nk-ease-out);
+}
+.nk-intake__art-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(86vw, 780px);
+  max-height: 84vh;
+  animation: nk-intake-art-in var(--nk-dur-zoom) var(--nk-ease-out);
+}
+.nk-intake__art-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--nk-radius-2);
+  background: var(--card);
+  color: var(--text-bright);
+  cursor: pointer;
+  transition: background var(--nk-dur-hover) var(--nk-ease-out);
+}
+.nk-intake__art-close svg { width: 20px; height: 20px; }
+.nk-intake__art-close:hover { background: var(--primary); }
+.nk-intake__art-close:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
+
+/* ── 三态：与全站同形态，只把 HUD 等宽字与大字距收回正文字体 ──────────────────── */
+#nk-home-app .nk-error-state__retry {
+  padding: 10px 22px;
+  border-radius: var(--nk-radius-2);
+  font-family: var(--font-body);
+  font-size: var(--nk-fs-5);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+#nk-home-app .nk-error-state__title { font-size: var(--nk-fs-7); }
+#nk-home-app .nk-error-state__detail { font-size: var(--nk-fs-6); color: var(--text2); }
+#nk-home-app .nk-hub-release__notice { font-size: var(--nk-fs-6); }
+#nk-home-app .nk-hub-release__empty { padding: 40px 0; font-size: var(--nk-fs-6); letter-spacing: 0; }
+
+/* ── 动效层 ────────────────────────────────────────────────────────────────────
+   ① 入场：每个分区的「标题 → 图 → 名字 → 正文 → 动作」按序错峰上浮（滚动驱动，零 JS）；
+   ② 一张会动的图：立绘板极慢漂移，只有它在本页做持续运动；
+   ③ 控件反馈见上方各 :hover / :active / :focus-visible。
+   全部只动 transform / opacity；reduced-motion 下本节整体退化为「直接就位」。 */
+@keyframes nk-intake-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes nk-intake-drift {
+  from { transform: scale(1); }
+  to { transform: scale(1.035); }
+}
+@keyframes nk-intake-art-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes nk-intake-art-veil {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #nk-home-app .nk-hub-release__sechead,
+  #nk-home-app .nk-hub-release__band--feature > *,
+  #nk-home-app .nk-hub-release__spec-name,
+  #nk-home-app .nk-hub-release__spec-brief,
+  #nk-home-app .nk-hub-release__spec-acts,
+  #nk-home-app .nk-hub-release__band:not(.nk-hub-release__band--feature) > *,
+  .nk-intake__head > * {
+    animation: nk-intake-in linear both;
+    animation-timeline: view();
+  }
+  #nk-home-app .nk-hub-release__sechead { animation-range: entry 0% entry 26%; }
+  #nk-home-app .nk-hub-release__band--feature > * { animation-range: entry 6% entry 40%; }
+  #nk-home-app .nk-hub-release__spec-name { animation-range: entry 12% entry 46%; }
+  #nk-home-app .nk-hub-release__spec-brief { animation-range: entry 18% entry 52%; }
+  #nk-home-app .nk-hub-release__spec-acts { animation-range: entry 24% entry 58%; }
+  #nk-home-app .nk-hub-release__band:not(.nk-hub-release__band--feature) > * { animation-range: entry 8% entry 42%; }
+
+  #nk-home-app .nk-hub-release__cell img {
+    animation: nk-intake-drift 18s var(--nk-ease-out) 1s infinite alternate;
+    transform-origin: 50% 42%;
+  }
+  #nk-home-app .nk-hub-release__section:hover .nk-hub-release__cell img { animation-play-state: paused; }
+}
+
+/* ── 断点：与全站同档（768 / 767 手机档） ─────────────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-intake { padding: 30px 32px 20px var(--nk-content-offset); }
+  #nk-home-app .nk-hub-release__section { margin-top: 104px; }
+}
+@media (max-width: 767px) {
+  .nk-intake { padding: 32px 20px 16px; }
+  .nk-intake > .nk-hub-masthead { margin-bottom: 32px; }
+  #nk-home-app .nk-hub-release__section { margin-top: 84px; }
+  #nk-home-app .nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 64px; }
+  .nk-intake__head { padding-bottom: 26px; gap: 6px; }
+  .nk-intake__batch { gap: 10px; }
+  .nk-intake__batch-num { font-size: var(--nk-fs-title-5); }
+  .nk-intake__batch-note { font-size: var(--nk-fs-6); }
+  .nk-intake__claim { font-size: var(--nk-fs-5); }
+  #nk-home-app .nk-hub-release__band--feature,
+  #nk-home-app .nk-hub-release__section[data-kind='lightcone'] .nk-hub-release__band--feature {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  #nk-home-app .nk-hub-release__section[data-kind='lightcone'] .nk-hub-release__cell { grid-area: 1 / 1; }
+  #nk-home-app .nk-hub-release__section[data-kind='lightcone'] .nk-hub-release__spec { grid-area: 2 / 1; }
+  #nk-home-app .nk-hub-release__band--feature .nk-hub-release__spec { grid-template-rows: auto auto auto; }
+  #nk-home-app .nk-hub-release__band--feature .nk-idx-card { width: 100%; }
+  #nk-home-app .nk-hub-release__band--feature .nk-lc-card { width: 100%; }
+  #nk-home-app .nk-hub-release__band:not(.nk-hub-release__band--feature) {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    max-width: none;
+    gap: 16px;
+  }
+  #nk-home-app .nk-hub-release__spec { gap: 16px; }
+  .nk-intake__art-img { max-width: 92vw; max-height: 76vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #nk-home-app .nk-hub-release__sechead,
+  #nk-home-app .nk-hub-release__band--feature > *,
+  #nk-home-app .nk-hub-release__spec-name,
+  #nk-home-app .nk-hub-release__spec-brief,
+  #nk-home-app .nk-hub-release__spec-acts,
+  #nk-home-app .nk-hub-release__band:not(.nk-hub-release__band--feature) > *,
+  #nk-home-app .nk-hub-release__cell img,
+  .nk-intake__head > *,
+  .nk-intake__art-img,
+  .nk-intake__art::backdrop {
+    animation: none;
+  }
+}

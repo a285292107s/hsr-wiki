@@ -94,13 +94,6 @@ const clearRows = computed(() => {
 
 <template>
   <div class="nk-egd-lvl">
-    <!-- 面板顶部奖励板：通关条件｜通关奖励 两栏 + 星级奖励列表（一档一行，跨满整行） -->
-    <div v-if="targets.length || floorReward.length" class="nk-egd-head">
-      <EndgameClearCondition :rows="clearRows" />
-      <EndgameReward v-if="floorReward.length" :label="t('egd.rewards')" :items="floorReward" />
-      <EndgameStarTierList :rows="tierRows" />
-    </div>
-
     <EndgameNodeCards
       v-if="cards.length > 1"
       :items="cards"
@@ -121,5 +114,14 @@ const clearRows = computed(() => {
       :buffs="nodeBuffs"
       :system-name="props.systemName"
     />
+
+    <!-- 面板底部奖励板：通关条件｜通关奖励 两栏 + 星级奖励列表（一档一行，跨满整行）。
+         垫底的理由：奖励载荷逐期恒定（同玩法各期同层同奖励、回合上限也不变），首屏让给
+         当期会变的增益与敌方配置；回合上限在半场卡片上已有一份，此处不再与看板争首屏。 -->
+    <div v-if="targets.length || floorReward.length" class="nk-egd-head">
+      <EndgameClearCondition :rows="clearRows" />
+      <EndgameReward v-if="floorReward.length" :label="t('egd.rewards')" :items="floorReward" />
+      <EndgameStarTierList :rows="tierRows" />
+    </div>
   </div>
 </template>

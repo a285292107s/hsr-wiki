@@ -65,8 +65,6 @@ export const STANCE_LABEL = ['SingleAttack', 'AoEAttack', 'Blast'] as const;
 
 export const SKILL_ORDER: (string | null)[] = ['Normal', 'BPSkill', 'Ultra', 'Passive', 'ElationDamage', null, 'Maze', 'Assist'];
 
-export const CHAR_TABS = ['overview', 'skills', 'eidolons', 'builds'] as const;
-
 /* 属性名 / 部位名不在此登记：展示名取官方词条（随语言包切语言），见 lib/enum-labels.ts。
    此处只留与语言无关的资源映射（图标 / 序号）。 */
 

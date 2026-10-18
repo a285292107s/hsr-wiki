@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
-import { bySeasonDesc, mazeDateRange, modeDefaultArtUrl, seasonBannerUrl, seasonThemeIconUrl, seasonPosterTabUrl, seasonHeroBgUrl } from '../pages/endgame';
+import { bySeasonDesc, mazeDateRange, mazeStatus, modeDefaultArtUrl, seasonBannerUrl, seasonDateParts, seasonHeroBgUrl, seasonPosterTabUrl, seasonTimeMs } from '../pages/endgame';
 import cnMessages from '../../../lib/i18n/messages/cn.json';
 
 /** cn 词典键集合：筛选器的 `labelKey` 必须在这里（打错字立刻红）。 */
@@ -56,11 +56,14 @@ describe('renderCard', () => {
     expect(html).toContain('ChallengeBossQuestTabImg1.png');
     expect(html).toContain('№ 101');
     expect(html).toContain('琥珀恩赐');
+    /* A5.6：名称是 nowrap + 省略号的叶子，长语言（en 目录 30/115 行、de 等）下会被硬截断——
+       `title` 是唯一的复原途径，缺了它就是「截断且无从得知全文」。 */
+    expect(html).toContain('class="nk-eg-lrow__name" title="琥珀恩赐">琥珀恩赐</span>');
     expect(html).toContain('进行中');
     expect(html).toContain('2023.01.01 – 01.15');
-    expect(html).not.toContain('nk-eg-card__perm');
-    expect(html).not.toContain('nk-eg-card__test');
-    expect(html).not.toContain('nk-eg-card__tier');
+    expect(html).not.toContain('nk-eg-card');
+    /* 日期行同样会被窄列截断（nowrap + 省略号）：与赛季名同判据，须带复原文本 */
+    expect(html).toContain('title="2023.01.01 – 01.15"');
   });
 
   it('endgame renderCard 把「贪饕污染」徽标挂在赛季名之后（不进状态/日期行）', () => {
@@ -70,7 +73,7 @@ describe('renderCard', () => {
     expect(html).toContain('贪饕污染');
     expect(html).not.toContain('含污染');
     // 徽标紧贴赛季名（同一 head 行内），且整段位于 __meta（状态 + 日期）之前
-    expect(html).toContain('<span class="nk-eg-lrow__name">琥珀恩赐</span><span class="nk-eg-lrow__poll"');
+    expect(html).toContain('<span class="nk-eg-lrow__name" title="琥珀恩赐">琥珀恩赐</span><span class="nk-eg-lrow__poll"');
     expect(html.indexOf('nk-eg-lrow__poll')).toBeLessThan(html.indexOf('nk-eg-lrow__meta'));
     // 无污染不落徽标，日期行照旧
     const plain = egPage.renderCard(base, 0);
@@ -222,6 +225,41 @@ describe('endgame 赛季排序与日期区间（ADR 0038）', () => {
     expect(mazeDateRange({ live_begin: '', live_end: '2026-11-02 04:00:00' })).toBe('– 2026.11.02');
     expect(mazeDateRange({ live_begin: '', live_end: '' })).toBe('');
   });
+
+  /* ADR 0060：上游排期是无时区的裸本地串，旧实现按**运行环境本地时区**解释 ⇒ 同一个赛季边界
+     在 UTC / Asia Shanghai / America New York 下相差 8 / 0 / 13 小时（实测），预渲染快照（构建机）
+     与页面（访客）于是对「当期赛季」给出不同答案。判据：裸串一律按固定 +08:00 解释。 */
+  it('seasonTimeMs / seasonDateParts：裸串按 +08:00 解释，带时区串按原语义（ADR 0060）', () => {
+    expect(seasonTimeMs('2026-11-02 04:00:00')).toBe(Date.parse('2026-11-02T04:00:00+08:00'));
+    expect(seasonTimeMs('2026-11-02')).toBe(Date.parse('2026-11-02T00:00:00+08:00'));
+    expect(seasonTimeMs('2026-11-02T04:00:00Z')).toBe(Date.parse('2026-11-02T04:00:00Z'));
+    expect(seasonTimeMs('')).toBeNull();
+    expect(seasonTimeMs('not-a-date')).toBeNull();
+    /* 展示日期取排期时区墙钟：带时区串跨零点时按 +08:00 归日（不取访客本地日期） */
+    expect(seasonDateParts('2026-11-02 04:00:00')).toBe('2026.11.02');
+    expect(seasonDateParts('2026-11-02T21:30:00Z')).toBe('2026.11.03');
+    expect(seasonDateParts('')).toBeNull();
+  });
+
+  it('mazeStatus 的当期判据锚在排期时区边界（不是运行环境边界）', () => {
+    vi.useFakeTimers();
+    try {
+      const ending = { live_begin: '', live_end: '2026-12-14 04:00:00' };
+      vi.setSystemTime(Date.parse('2026-12-14T03:00:00+08:00'));
+      expect(mazeStatus(ending)).toBe('live');
+      vi.setSystemTime(Date.parse('2026-12-14T05:00:00+08:00'));
+      expect(mazeStatus(ending)).toBe('ended');
+      const starting = { live_begin: '2026-11-02 04:00:00', live_end: '' };
+      vi.setSystemTime(Date.parse('2026-11-02T03:00:00+08:00'));
+      expect(mazeStatus(starting)).toBe('upcoming');
+      vi.setSystemTime(Date.parse('2026-11-02T05:00:00+08:00'));
+      expect(mazeStatus(starting)).toBe('live');
+      /* 两端皆无 ⇒ unknown（peak 全期无排期） */
+      expect(mazeStatus({ live_begin: '', live_end: '' })).toBe('unknown');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
 
 describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
@@ -245,14 +283,6 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
       .toBe(`${BASE}/dailymission/banner/ChallengeThemeBanner_2001.png`);
     expect(seasonBannerUrl({ theme_banner: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png' })).toBe('');
     expect(seasonBannerUrl(null)).toBe('');
-  });
-
-  it('seasonThemeIconUrl 解析主题图标（ChallengeTheme / ChallengeBoss）', () => {
-    expect(seasonThemeIconUrl({ theme_icon: 'SpriteOutput/ChallengeTheme/ThemeIcon/ChallengeThemeIcon_2001.png' }))
-      .toBe(`${BASE}/challengetheme/themeicon/ChallengeThemeIcon_2001.png`);
-    expect(seasonThemeIconUrl({ theme_icon: 'SpriteOutput/ChallengeBoss/ChallengeBossIcon_3001.png' }))
-      .toBe(`${BASE}/challengeboss/ChallengeBossIcon_3001.png`);
-    expect(seasonThemeIconUrl({})).toBe('');
   });
 
   it('seasonPosterTabUrl 解析海报页签（Quest/TabIcon）', () => {

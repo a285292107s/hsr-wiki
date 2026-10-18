@@ -11,7 +11,7 @@ import { NkError } from '../errors';
 import { setLabelTranslator } from '../label-translator';
 import cnMessages from '../i18n/messages/cn.json';
 import {
-  escHtml, gameTagsToHtml, stripTags, fmtVal, fmtDesc, fmtDescWithFormat, fmtDescMerged, fmtDescStar, fmtToughness,
+  escHtml, gameTagsToHtml, stripTags, fmtVal, fmtDesc, fmtDescWithFormat, fmtDescStar, fmtToughness,
   deepClone, getEnhancedKeys, buildEnhancedView, getRenderData,
   maxLevelStat, maxLevelValue, iconUrl, memospriteId, skillIconUrl, eidolonIconUrl,
   avatarDrawCardUrl, avatarDrawCardJdUrl, itemName, itemIconUrl, validateCharData,
@@ -424,22 +424,17 @@ describe('itemName / itemIconUrl', () => {
   });
 });
 
-/* ─── CW 技能描述：跨星级合并 / 单星级取值 ─── */
+/* ─── CW 技能描述：按星级取值 ─── */
 
-describe('fmtDescMerged / fmtDescStar', () => {
+describe('fmtDescStar', () => {
   const desc = '造成 #1[i]% 伤害，并回复 #2[i] 点能量';
   // 真实语义：有 % 尾缀的参数为比率（0.2 → 20%），无尾缀为绝对值
   const sets = [[0.2, 30], [0.4, 60], [0.4, 90]];
-  it('fmtDescMerged：各星级值斜杠分隔，全相同仅单值', () => {
-    expect(fmtDescMerged(desc, sets)).toContain('20/40/40%');
-    expect(fmtDescMerged(desc, sets)).toContain('30/60/90');
-    expect(fmtDescMerged(desc, [[0.5], [0.5]])).toContain('50%');
-  });
-  it('fmtDescStar：只替换指定星级参数', () => {
+  it('只替换指定星级参数', () => {
     expect(fmtDescStar(desc, sets, 0)).toBe('造成 <span class="hl">20%</span> 伤害，并回复 <span class="hl">30</span> 点能量');
     expect(fmtDescStar(desc, sets, 2)).toContain('40%');
   });
-  it('fmtDescStar：下标越界 / 参数缺失回退 ? 占位', () => {
+  it('下标越界 / 参数缺失回退 ? 占位', () => {
     expect(fmtDescStar(desc, sets, 9)).toContain('?%');
     expect(fmtDescStar(desc, [], 0)).toContain('?%');
     expect(fmtDescStar(null, sets, 0)).toBe('');

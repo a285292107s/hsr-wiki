@@ -30,7 +30,6 @@ export const monsterPage: CatalogPageConfig = {
   subtitle: 'HOSTILE SPECIES',
   searchKey: 'catalog.monster.search',
   gridClass: 'nk-cat-grid nk-mob-grid',
-  cardClass: '',
   virtualImgRatio: 5 / 4,
   virtualMinColW: 130,
   virtualInfoH: 70,

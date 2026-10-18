@@ -50,7 +50,7 @@ async function waitImages(page: Page) {
 test.describe('视觉基线', () => {
   test('首页 /', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await waitImages(page);
     await expect(page).toHaveScreenshot('home.png', { maxDiffPixelRatio: 0.05, animations: 'disabled' });
   });
@@ -71,7 +71,7 @@ test.describe('视觉基线', () => {
 
   test('货币战争 Hub /currency', async ({ page }) => {
     await page.goto('/currency');
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await waitImages(page);
     await expect(page).toHaveScreenshot('currency.png', { maxDiffPixelRatio: 0.05, animations: 'disabled' });
   });

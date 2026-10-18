@@ -18,18 +18,14 @@ onMounted(() => { void load(); });
 
 <template>
   <div id="nk-cwhub-app">
-    <header class="nk-hub-brand">
-      <div class="nk-hub-brand__scrim" aria-hidden="true"></div>
-      <div class="nk-hub-brand__content">
-        <p class="nk-hub-brand__supra">CURRENCY WAR · GRID FIGHT</p>
-        <h1 class="nk-hub-brand__title">{{ t('catalog.currencyWar') }}</h1>
-        <p class="nk-hub-brand__tagline">
-          {{ t('cwHub.tagline') }}
-        </p>
-      </div>
-    </header>
-
     <main class="nk-hub-release">
+      <!-- 报头与首页同一条共享原语（`.nk-hub-masthead`）：纯文字、无底面、无固定高度，
+           材质从顶端连续到底。两页同构 ⇒ `nk-view-swap` 互切时不会因高度差跳动。 -->
+      <header class="nk-hub-masthead">
+        <h1 class="nk-hub-masthead__title">{{ t('catalog.currencyWar') }}</h1>
+        <p class="nk-hub-masthead__tagline">{{ t('cwHub.tagline') }}</p>
+      </header>
+
       <div class="nk-hub-release__head">
         <h2 class="nk-hub-release__title">{{ t('cwHub.releaseTitle') }}</h2>
         <span class="nk-hub-release__rule" aria-hidden="true"></span>
@@ -92,7 +88,6 @@ onMounted(() => { void load(); });
 
     <footer class="nk-hub-footer">
       <p class="nk-hub-footer__motto">{{ t('ui.footerMotto') }}</p>
-      <p class="nk-hub-footer__latin">PER ASPERA AD ASTRA</p>
     </footer>
   </div>
 </template>

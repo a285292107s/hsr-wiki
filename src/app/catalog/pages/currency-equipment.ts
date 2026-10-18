@@ -90,7 +90,6 @@ export const currencyEquipmentPage: CatalogPageConfig = {
   subtitle: 'EQUIPMENT',
   searchKey: 'catalog.cwEquipment.search',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
-  cardClass: '.nk-cw-card',
   styles: [loadCwCatalogCss],
   async fetchData() {
     const { items } = await loadLocalCurrencyEquipment();

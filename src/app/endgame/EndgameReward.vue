@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { itemIconUrl, fmtNumber } from '../../lib/format';
-import { loadLocalItems } from '../../services/api';
-import type { LocalItemEntry, MazeRewardItem } from '../../services/types';
+import { ensureRewardItemMap, rewardItemMap } from './renders';
+import type { MazeRewardItem } from '../../services/types';
 
-/** 奖励条目（层 / 星启头部的「通关奖励」栏与赛季「星数奖励」每档共用）：
+/** 奖励条目（层 / 星启面板底部奖励板的「通关奖励」栏与赛季「星数奖励」每档共用）：
  *  物品 id 经 items.json 单例（`loadLocalItems`）映射名称与图标，
- *  查不到时名称回退 `#id`、图标位退化为占位块（不破图）。 */
+ *  查不到时名称回退 `#id`、图标位退化为占位块（不破图）。
+ *  id → 名称/图标的映射**提到 `renders.ts` 的模块级共享**（本组件每档一个实例，
+ *  原先每实例各建一份全量 Map）。 */
 const props = defineProps<{
   items: MazeRewardItem[];
   /** 栏名（缺省不渲染栏名行） */
@@ -17,14 +19,11 @@ const props = defineProps<{
   star?: number;
 }>();
 
-const itemMap = ref<Map<number, Pick<LocalItemEntry, 'name' | 'icon'>>>(new Map());
 watch(
   () => props.items,
   (list) => {
-    if (!list.length || itemMap.value.size) return;
-    loadLocalItems()
-      .then((items) => { itemMap.value = new Map(items.map((it) => [it.id, { name: it.name, icon: it.icon }])); })
-      .catch(() => {});
+    if (!list.length) return;
+    void ensureRewardItemMap();
   },
   { immediate: true },
 );
@@ -32,7 +31,7 @@ watch(
 const rows = computed(() => props.items.map((r) => ({
   id: r.id,
   num: r.num,
-  ...(itemMap.value.get(r.id) || { name: `#${r.id}`, icon: '' }),
+  ...(rewardItemMap.value.get(r.id) || { name: `#${r.id}`, icon: '' }),
 })));
 </script>
 

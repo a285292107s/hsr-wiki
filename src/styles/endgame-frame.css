@@ -95,7 +95,7 @@
   align-self: center;
   background: color-mix(in srgb, var(--blk-900) 55%, transparent);
   border: 1px solid var(--line-1);
-  border-radius: 10px;
+  border-radius: var(--nk-radius-3);
   padding: 12px 10px;
   box-sizing: border-box;
 }
@@ -131,7 +131,6 @@
   align-items: center;
   gap: 10px;
   font-family: var(--font-hud);
-  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.2em;
   color: color-mix(in srgb, var(--eg-color) 70%, var(--text2));
@@ -143,7 +142,6 @@
   background: var(--line-2);
 }
 .nk-egd-hero__name {
-  font-size: 1.82rem;
   font-weight: 900;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -159,7 +157,6 @@
 .nk-egd-hero__status {
   display: inline-flex;
   align-items: center;
-  font-size: 0.66rem;
   font-weight: 600;
   padding: 5px 12px;
   line-height: 1.1;
@@ -176,15 +173,16 @@
   display: inline-flex;
   align-items: center;
   font-family: var(--font-hud);
-  font-size: 0.72rem;
   line-height: 1.1;
   letter-spacing: 0.08em;
   color: var(--text3);
   padding: 5px 0;
 }
 /* 字号归 `endgame-type-scale.css` 的收口刻度（末块导入、同特异性覆写）：本文件只声明非字号属性，
-   重述字号 = 死声明（改它不生效，且会误导后来的修改）。见 ADR 0034 决策 2。 */
-.nk-egd-hero__sid {
+   重述字号 = 死声明（改它不生效，且会误导后来的修改）。见 ADR 0034 决策 2。
+   `__scale`（本季层数/关数读数）与 `__sid` 同形同规格：都是 Hero 元信息行里的小胶囊读数。 */
+.nk-egd-hero__sid,
+.nk-egd-hero__scale {
   display: inline-flex;
   align-items: center;
   font-family: var(--font-hud);

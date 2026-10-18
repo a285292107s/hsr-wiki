@@ -7,6 +7,9 @@ export type CdnCategory =
   | 'avatarshopicon'
   | 'skillicons'
   | 'avatardrawcard'
+  | 'avatarcutinfigures'
+  | 'lightconemaxfigures'
+  | 'bgpic'
   | 'itemfigures'
   | 'element'
   | 'pathicon'
@@ -67,7 +70,20 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
      同分辨率 webp 约 1/4；`avatarDrawCardWebpUrl` 仍是 nanoka webp 直链（移动端专用），
      `avatarDrawCardJdUrl` 仍是 jsDelivr PNG（第二源）——三者互为不同 URL，回退链不退化。 */
   avatardrawcard: { nanoka: 'avatardrawcard', local: 'avatardrawcard' },
+  /* 立绘「切入图」（首页登记区单条目分区的**主图**）：1560×1650 PNG，四周大片透明
+     （实测包围盒只占画布 50%~100% 宽、47%~100% 高），故入库时按 alpha 包围盒裁到统一 4:5
+     —— 同一分区的各条板才是同一裁切比（tools/ingest-icons.py --crop-alpha 4:5）。
+     `avatarshopicon`（376×512 商店头像）仍是**卡片**图源，本分类只服务首页的大板。 */
+  avatarcutinfigures: { nanoka: 'avatarcutinfigures', local: 'avatarcutinfigures' },
+  /* 光锥全图（首页登记区光锥主图）：904×1260，包围盒 = 整张画布（无透明边），故入库不裁。
+     比 lightconemediumicon（348×408）大 2.6 倍，是首页大板能保持原生的前提。 */
+  lightconemaxfigures: { nanoka: 'lightconemaxfigures', local: 'lightconemaxfigures' },
   itemfigures: { nanoka: 'itemfigures', local: 'itemfigures' },
+  /* 全屏底图（游戏自己的界面背景，1600×900）：`BgWiki` 是**星铁自己的 Wiki 背景**——
+     星野 + 左上暖调星云，实测均亮度 32/255、12px 模糊后最亮区对 `--text2` 仍有 5.23:1，
+     故可作页面地面直接压字，**不需要叠 scrim**（少一层渐变就少一条机器感）。
+     首页用它当 `#nk-home-app` 的 `background-image`（见 `src/styles/home.css`）。 */
+  bgpic: { nanoka: 'bgpic', local: 'bgpic' },
   // 本地化三分类：全站公共小图标（KB 级、高频复用、永不更新）；trace 的 nanoka 源为占位图，
   // 真源是 jsDelivr（ui/avatar/icon/Icon{key}.png），故以 jdPrimary 保持 jsDelivr 主源
   element: { nanoka: 'element', local: 'element' },

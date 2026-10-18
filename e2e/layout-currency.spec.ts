@@ -6,9 +6,7 @@ import { noUnknownOverflow } from './layout.shared';
 /**
  * 布局验收：货币战争主题 —— layout 验收层（语义契约 + 数值规格）分文件之一。
  *
- * 拆分动因：`fullyParallel: false` 下**文件内**串行，单文件 layout（74 用例 / 469s）把全量墙钟
- * 锁死在 6.6 分钟（a11y 仅 85s 跑完后两个 worker 空转）。按 describe 边界拆开后文件级并行生效，
- * 每条用例的隔离性与拆分前完全一致（文件内本就串行），故已记录的并发 flake 纪律不受影响。
+ * 分文件判据（为何按域拆、单文件该多小）见 docs/agents/testing.md「layout 必须按 describe 边界分文件」。
  *
  * `@viewport-pinned` 标签：凡用例内自行 `setViewportSize(...)` 固定视口者，必须在 `test(...)`
  * 第二参传该标签（mobile-chromium 以 `grepInvert` 跳过，视口已由用例钉死）。标签须静态书写，
@@ -27,7 +25,7 @@ test.describe('布局验收：货币战争主题', () => {
     await page.goto('/currency');
     // meta.cw → <html data-theme="cw">
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'cw');
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     // 标题恒不带赛季号 / 版本号
     await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
     // 等释放块就位再采样：`goto` 后立即读 `data-kind` 会与数据加载赛跑（曾因此在慢启动下假失败）
@@ -75,12 +73,13 @@ test.describe('布局验收：货币战争主题', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto('/currency');
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
-    // 品牌带不得回到「独占首屏」形态（与 `/` 同口径）
-    const bandH = await page.locator('.nk-hub-brand').evaluate((el) =>
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
+    // 报头不得退回「带」形态（与 `/` 同口径）：它是紧凑的一行文字，不是一块带固定高度的面板。
+    // 上限取 120px 而不是旧带的 240：抬头 = 28–32px 标题 + 20px 定位 + 间距，实测约 93px。
+    const mastheadH = await page.locator('.nk-hub-masthead').evaluate((el) =>
       Math.round(el.getBoundingClientRect().height),
     );
-    expect(bandH).toBeLessThanOrEqual(240);
+    expect(mastheadH).toBeLessThanOrEqual(120);
     // 首屏契约（ADR 0019 决策 11 同步收窄）：标题 + 第一分区标题与首行卡片完整可见；
     // 后续分区随滚动进入，不再钉进首屏。
     await expect(page.locator('.nk-hub-release__title')).toBeVisible();
@@ -118,7 +117,7 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
     // 空态不回退板块索引；品牌带与共享页脚仍在
     await expect(page.locator('.nk-cwhub-index')).toHaveCount(0);
-    await expect(page.locator('.nk-hub-brand__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
     await noUnknownOverflow(page);
     assertNoErrors();

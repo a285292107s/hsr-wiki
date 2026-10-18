@@ -18,7 +18,6 @@ export interface MonsterListEntry {
   ko?: string;
   desc?: string;
 }
-export type MonsterListDb = Record<string, MonsterListEntry>;
 
 /* ─── 本地目录列表（converter 输出，数组形态） ─── */
 

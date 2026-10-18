@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { bossTraitDescHtml, seasonBuffList, seasonRules } from '../renders';
+import { bossTraitDescHtml, seasonBuffList } from '../renders';
 import type { MazeBossTrait, MazeListEntry } from '../../../services/types';
 
 const buff = (id: number, name: string) => ({ id, name });
@@ -64,35 +64,6 @@ describe('seasonBuffList 赛季增益（与逐层已呈现的同 ID 项不复述
 
   it('无增益返回空数组', () => {
     expect(seasonBuffList({ id: '1', zh: 'x' } as MazeListEntry)).toEqual([]);
-  });
-});
-
-describe('seasonRules 赛季级规则数值', () => {
-  it('忘却之庭：回合上限与每层一致 → 不进赛季规则右栏（由半场卡片承担）', () => {
-    const data = {
-      id: '1036', zh: '物竞天择', countdown: 30,
-      floor_details: [{ floor: 1, countdown: 30 }, { floor: 2, countdown: 30 }],
-    } as MazeListEntry;
-    expect(seasonRules(data)).toEqual([]);
-  });
-
-  it('虚构叙事：回合限制与通关分数线都是赛季维度', () => {
-    const data = {
-      id: '2026', zh: '立界开篇', countdown: 5, clear_score: 30000,
-      floor_details: [{ floor: 1, countdown: 0 }],
-    } as MazeListEntry;
-    expect(seasonRules(data)).toEqual([
-      { label: '回合限制 CYCLES', value: 5 },
-      { label: '通关分数线 SCORE', value: 30000 },
-    ]);
-  });
-
-  it('末日幻影：赛季回合上限为 0 → 规则栏退场（基准页形态不变）', () => {
-    const data = {
-      id: '3020', zh: '仙客天狼', countdown: 0,
-      floor_details: [{ floor: 1, countdown: 0 }, { floor: 2, countdown: 0 }],
-    } as MazeListEntry;
-    expect(seasonRules(data)).toEqual([]);
   });
 });
 

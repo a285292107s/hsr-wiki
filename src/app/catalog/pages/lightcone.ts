@@ -13,7 +13,6 @@ export const lightconePage: CatalogPageConfig = {
   subtitle: 'LIGHT CONES',
   searchKey: 'catalog.lightcone.search',
   gridClass: 'nk-cat-grid nk-lc-grid',
-  cardClass: '.nk-lc-card',
   async fetchData() {
     const list = await loadLocalLightCones();
     const items: CatalogItem[] = [];

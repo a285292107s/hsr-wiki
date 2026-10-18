@@ -249,8 +249,9 @@ export interface PeakLevelInfo {
   monsters?: MazeMonsterInfo[];
   /** 挑战目标（BattleTargetConfig，text + param） */
   targets?: MazeTargetInfo[];
-  /** 机制标签（MazeBuff 名称，如韧甲/反相/吸能） */
-  tags?: string[];
+  /** 机制词条（`ChallengePeakConfig.TagList` → MazeBuff：名称 + 效果描述 + 占位参数，
+   *  如韧甲/反相/吸能；与 `buffs` 同一张表、同一描述口径，前端 fmtDesc 渲染） */
+  tags?: MazeBuffInfo[];
   /** 王棋增益（仅 king：出奇制胜/步骑协同/锤砧战术） */
   buffs?: MazeBuffInfo[];
   /** 污染等级（异相仲裁无层/半场，污染直接落在单关上；见 MazeStageInvasion） */
@@ -264,7 +265,8 @@ export interface PeakLevelInfo {
     level?: number;
     monsters?: MazeMonsterInfo[];
     targets?: MazeTargetInfo[];
-    tags?: string[];
+    /** 绝境档自己的机制词条（`ChallengePeakBossConfig.HardTagList` → MazeBuff，口径同主关） */
+    tags?: MazeBuffInfo[];
     /** 绝境档自己的星数档：官方「直接击败绝境难度王棋关卡视同 3 星通关全部骑士关卡」，
      *  故取王棋口径最高档（3★），与它自己那 1 个目标配成一行 */
     star_rewards?: MazeStarReward[];
@@ -346,8 +348,8 @@ export interface MazeListEntry {
   /** 赛季海报/标签图（BackGroundPath/TabPicPath 等源字段原样保留；tab = 赛季专属图标、
    *  default = 玩法级默认图标——二者已弃用于图标位：目录卡/详情 Hero 图标统一用玩法级
    *  默认图标（ENDGAME_MODES.icon，前端 modeDefaultArtUrl），规避每季页签图漂移；
-   *  tab_select/theme_banner/theme_icon/theme_bg/poster_tab/handbook_banner 为补转字段，
-   *  经 endgameArtUrl 白名单消费） */
+   *  补转字段中只有 theme_banner / theme_bg / poster_tab / handbook_banner 经 endgameArtUrl
+   *  白名单消费，其余（tab_select / theme_icon / theme_toast）只保留数据不渲染） */
   arts?: {
     background?: string;
     tab?: string;
@@ -358,7 +360,8 @@ export interface MazeListEntry {
     theme_banner?: string;
     /** 主题小图（虚构叙事 ChallengeThemePic_20xx） */
     theme_toast?: string;
-    /** 主题图标（虚构 ChallengeThemeIcon_20xx / 末日 ChallengeBossIcon_30xx） */
+    /** 主题图标（虚构 ChallengeThemeIcon_20xx / 末日 ChallengeBossIcon_30xx）：原用于赛季增益标题图标，
+     *  该图标位已退场——只保留数据不渲染 */
     theme_icon?: string;
     /** 海报背景（虚构叙事 ChallengeThemeBg_20xx） */
     theme_bg?: string;
@@ -435,9 +438,6 @@ export interface MazeCatalogEntry {
 
 /** 目录卡轻量赛季表（键 = 赛季 ID） */
 export type MazeCatalogDb = Record<string, MazeCatalogEntry>;
-
-/** zh/maze/version.json：版本 → 赛季 ID 列表（键按版本降序） */
-export type MazeVersionMap = Record<string, (number | string)[]>;
 
 /** 增益体系的选择语义（`endgame_guide.json` 的 `system.choice`；展示文案在前端 `endgame/guide.ts`） */
 export type EndgameSystemChoice = 'fixed' | 'per_team' | 'per_stage' | 'per_king';

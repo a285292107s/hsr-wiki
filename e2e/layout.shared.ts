@@ -174,6 +174,8 @@ export interface FloorLike {
   stage1?: StageLike;
   stage2?: StageLike;
 }
+/** 异相仲裁机制词条（`ChallengePeakConfig.TagList` → MazeBuff：名称 + 效果描述 + 占位参数） */
+export interface MechanicLike { id?: number; name: string; desc?: string; param_list?: number[] }
 export interface SeasonLike {
   id: string;
   zh?: string;
@@ -200,6 +202,8 @@ export interface SeasonLike {
     targets?: { text?: string; param: number | null }[];
     monsters?: MonsterLike[];
     buffs?: { id: number; name: string }[];
+    /** 该关的机制词条（名称 + 效果描述；绝境档各一份） */
+    tags?: MechanicLike[];
     invasion?: InvasionLike;
     /** 该关可达的星级奖励档（两类口径各自按关卡序累计目标数切片，ADR 0051 补记） */
     star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
@@ -208,7 +212,7 @@ export interface SeasonLike {
       level?: number;
       monsters?: MonsterLike[];
       targets?: { param: number | null }[];
-      tags?: string[];
+      tags?: MechanicLike[];
       /** 绝境档的星数档（王棋口径最高档 3★，官方「视同 3 星通关全部骑士关卡」） */
       star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
     };
@@ -263,18 +267,30 @@ export function seasonTabLabels(season: SeasonLike): string[] {
   return season.tierce ? ['星启模式', ...floors] : floors;
 }
 
-/** 异相仲裁关卡 tab 文案：官方关卡名、**倒序**（将杀王棋 → 骑士（三）…（一））；
- *  王棋「绝境」变体紧跟其主关之后独立成一档（与 `buildLevelTabs` 同口径）。 */
+/** 异相仲裁关卡 tab 文案：王棋档（官方关名）+ 骑士试炼档（三关骑士合并）。
+ *  王棋 / 绝境不再各占一档——两档都在合并档内由节点卡片切换（ADR 0043 补记八）。 */
 export function peakTabLabels(season: SeasonLike): string[] {
-  return [...(season.levels ?? [])].reverse().flatMap((l) => (l.hard
-    ? [l.name ?? '', l.hard.name ?? '']
-    : [l.name ?? '']));
+  const king = (season.levels ?? []).find((l) => l.kind === 'king');
+  const labels = king ? [king.name ?? ''] : [];
+  return (season.levels ?? []).some((l) => l.kind === 'knight') ? [...labels, '骑士试炼'] : labels;
 }
 
 /** 关卡 tab 的 DOM id 选择器（**变体名包含主关名时按文案取会命中两个 tab**，故一律按 id 定位） */
 export const peakTabId = (level: { id?: number }): string => `#egd-level-tab-peak-${level.id}`;
-/** 王棋「绝境」变体 tab 的 DOM id 选择器 */
-export const peakHardTabId = (level: { id?: number }): string => `#egd-level-tab-peak-${level.id}-hard`;
+/** 三关骑士合并档的 tab 选择器（三关不再各占一个 tab） */
+export const peakKnightsTabId = '#egd-level-tab-peak-knights';
+/** 王棋合并档两个节点的 key（节点一 = 普通王棋 / 节点二 = 绝境王棋，ADR 0043 补记八） */
+export const PEAK_KING_NODE = 'king';
+export const PEAK_HARD_NODE = 'hard';
+/** 合并档节点卡片的选择器（`id-prefix` = `egd-peak-node-tab`；王棋档传节点 key，骑士档见下） */
+export const peakNodeTabId = (key: string): string => `#egd-peak-node-tab-${key}`;
+/** 骑士档节点卡片的选择器（key = 关卡 ID，缺 id 时按源序 +1） */
+export const peakKnightNodeTabId = (level: { id?: number }, i = 0): string =>
+  `#egd-peak-node-tab-${level.id ?? i + 1}`;
+/** 合并档的三关骑士（源序，与 `levelTabPeakNodes` 同口径） */
+export function peakKnightLevels(season: SeasonLike): NonNullable<SeasonLike['levels']> {
+  return (season.levels ?? []).filter((l) => l.kind === 'knight');
+}
 
 /** 「N 波 · M 敌」摘要（与 `src/app/endgame/renders.ts → monCountLabel` 同口径：波数 = wave 去重计数） */
 export function monCountLabel(mons: MonsterLike[] | undefined): string {

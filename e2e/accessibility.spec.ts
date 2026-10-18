@@ -68,10 +68,12 @@ const PAGES = [
     await page.locator('#egd-level-tab-tierce').click();
     await page.waitForSelector('.nk-egd-guide .nk-egd-trait', { state: 'attached', timeout: 15_000 });
   } },
-  // 异相仲裁（ADR 0043）：头部星数奖励 + 关卡子 tab + 单关面板；先切到绝境变体 tab（其敌方/机制/目标只在那一档）
+  // 异相仲裁（ADR 0043 补记八）：两个节点合并档（王棋档 + 骑士试炼档），王棋档内再切到节点二（绝境，
+  // 其敌方 / 机制 / 目标只在那一节点）
   { path: '/endgame/peak/9', label: '终局详情·异相仲裁单关', wait: () => async (page: Page) => {
-    await page.locator('#egd-level-tab-peak-904-hard').click();
-    await page.waitForSelector('.nk-egd-peak .nk-egd-peak__kind--hard', { state: 'attached', timeout: 15_000 });
+    await page.locator('#egd-level-tab-peak-904').click();
+    await page.locator('#egd-peak-node-tab-hard').click();
+    await page.waitForSelector('#egd-peak-board[aria-labelledby="egd-peak-node-tab-hard"]', { state: 'attached', timeout: 15_000 });
   } },
   { path: '/currency', label: '货币战争 Hub', wait: null },
   // 专题页（ADR 0025）：等分区导航出现即数据就绪；无分区导航时首屏仍是骨架屏
@@ -140,6 +142,59 @@ test('a11y 扫描：角色详情 390×844（手机档底栏文字标签的对比
     violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, help: v.help })),
     '手机档 WCAG 2.2 AA：不得有 serious/critical 违规',
   ).toEqual([]);
+});
+
+/**
+ * 终局两层页面的**手机档（390×844）**与「全部关架子 tab」轮扫。
+ *
+ * 存在理由（两条覆盖缺口）：
+ *  - 上方 `PAGES` 走项目默认桌面视口，而全文件只有角色详情一条手机档 ⇒ `/endgame/:mode` 与
+ *    `/endgame/:mode/:id` 的 390 档从未被 axe 扫过，可 A2.8 目标尺寸、单行横滚的层级 tab 行、
+ *    卡片内换行都**只在手机档成立**。
+ *  - `PAGES` 里终局赛季页各只扫**当前 tab**（3020 / 3021 各点一次），而 `#egd-level-panel` 是同一个
+ *    panel 换内容（`aria-labelledby` 指向活动 tab）⇒ 其余 N-1 个状态零覆盖。此处按层级子 tab 逐档扫全。
+ *
+ * 标签集与 impact 过滤与文件现状**逐字相同**（`WCAG_TAGS` + `critical || serious`），只额外开启
+ * `target-size`——那是收紧而非放宽（A2.8 的判据本体，见本文件文件头）。
+ */
+test('a11y 扫描：终局玩法页 390×844', { tag: '@viewport-pinned' }, async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/endgame/maze');
+  await page.waitForSelector('.nk-egm__rule', { state: 'attached', timeout: 15_000 });
+  await waitForSettled(page);
+  const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).options(AXE_OPTIONS).analyze();
+  const violations = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
+  expect(
+    violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, help: v.help })),
+    '终局玩法页 390 档：不得有 serious/critical 违规',
+  ).toEqual([]);
+});
+
+test('a11y 扫描：终局赛季页 390×844 + 全部关架子 tab', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/endgame/maze/1034');
+  const tabs = page.locator('#egd-level-tabs [role="tab"]');
+  await tabs.first().waitFor({ state: 'attached', timeout: 20_000 });
+  await waitForSettled(page);
+  const count = await tabs.count();
+  expect(count, '/endgame/maze/1034 必须渲染层级子 tab，否则这条轮扫没有被测对象').toBeGreaterThan(1);
+
+  const failures: string[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const tab = tabs.nth(i);
+    const label = (await tab.textContent())?.trim() || `#${i}`;
+    await tab.click();
+    // 面板已切到该档：点完立刻扫会把切换中间态记成违规（与溢出用例同一纪律）
+    await expect(tab, `第 ${i + 1} 个 tab 应成为活动档`).toHaveAttribute('aria-selected', 'true');
+    await waitForSettled(page);
+    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).options(AXE_OPTIONS).analyze();
+    for (const v of results.violations.filter((x) => x.impact === 'critical' || x.impact === 'serious')) {
+      const targets = v.nodes.map((n) => n.target.join(' ')).slice(0, 2).join(' | ');
+      failures.push(`${label}: ${v.id}(${v.impact}) ${v.nodes.length} 节点 @ ${targets}`);
+    }
+  }
+  expect(failures, '终局赛季页 390 档：每个关架子 tab 都不得有 serious/critical 违规').toEqual([]);
 });
 
 /**

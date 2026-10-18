@@ -62,7 +62,7 @@ function selectNode(key: string): void {
 }
 
 /** 星启通关奖励（EGEEJLHBALB）：名称与图标由共享件 `EndgameReward` 经 items.json 单例映射
- *  （与层头部的「通关奖励」同源同渲染，避免两处各写一份 chips 模板）。 */
+ *  （与层看板底部奖励板的「通关奖励」同源同渲染，避免两处各写一份 chips 模板）。 */
 const tierceRewards = computed(() => props.data.tierce?.rewards || []);
 
 /** 星级目标 = 3 个节点目标（3 星）；满分档（`prism`）从它里面拆出来——它是**棱彩星**条件
@@ -111,15 +111,6 @@ watch(
     <div class="nk-egd-tierce">
       <!-- 赛季级统计条退场（用户裁决）：回合限制与分数限制已在「通关条件」格里给出，
            同一事实只留一处 -->
-      <!-- 面板顶部奖励板：通关条件｜通关奖励 两栏 + 星级奖励列表（一档一行，含棱彩星档） -->
-      <div
-        v-if="starTargets.length || tierceRewards.length || starTiers.length"
-        class="nk-egd-head"
-      >
-        <EndgameClearCondition :rows="clearRows" />
-        <EndgameReward v-if="tierceRewards.length" :label="t('egd.rewards')" :items="tierceRewards" />
-        <EndgameStarTierList :rows="tierRows" />
-      </div>
       <EndgameNodeCards
         v-if="cardItems.length > 1"
         :items="cardItems"
@@ -146,6 +137,17 @@ watch(
           :monster="m"
           :guide="m.boss_guide ? props.data.boss_guides?.[m.boss_guide] : undefined"
         />
+      </div>
+
+      <!-- 面板底部奖励板：通关条件｜通关奖励 两栏 + 星级奖励列表（一档一行，含棱彩星档）。
+           垫底的理由同层看板（`EndgameFloor`）：奖励载荷逐期恒定，首屏让给当期会变的内容。 -->
+      <div
+        v-if="starTargets.length || tierceRewards.length || starTiers.length"
+        class="nk-egd-head"
+      >
+        <EndgameClearCondition :rows="clearRows" />
+        <EndgameReward v-if="tierceRewards.length" :label="t('egd.rewards')" :items="tierceRewards" />
+        <EndgameStarTierList :rows="tierRows" />
       </div>
     </div>
   </template>

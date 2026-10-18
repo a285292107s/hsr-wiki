@@ -53,7 +53,6 @@ export interface CatalogPageConfig {
   searchKey: string;
   subtitle?: string;
   gridClass?: string;
-  cardClass?: string;
   virtualMinColW?: number;
   virtualImgRatio?: number;
   virtualInfoH?: number;

@@ -93,6 +93,7 @@
 - **参考站是前端渲染站，抓 HTML 拿不到条目真值**：须用 headless 逐档读渲染后文本（它只接受模板 ID 路由，实例 ID 返 404）；同一页 JSON 里可能并存两种口径（`boss_monster_id2` 是 extra、`event_id_list2.monster_list` 是战斗口径），页面显示后者。`hsr.nanoka.cc/boss/3020`
 - **参考站占位贴图会以 HTTP 200（甚至合法 WEBP 头）返回**：绕过 error / 挂起回退链，状态码检查查不出；须比对全量同类文件字节数 + 用不存在的 404 排除缓存。nanoka 的 `assets/hsr/trace/*.webp` 全是占位图 ⇒ trace 本地缺失时回退必须走 jsDelivr。`src/services/cdn/base.ts`
 - **参考站条目落地前先找到承载它的上游表与字段**：对照站的「关卡效果」= `MonsterGuideConfig × MonsterGuideTag`（`TagList` → 名称 + 简述 + `ParameterList`），不是独立数据源；参考图 / 截图里的每一项也先过「上游有没有这个字段」——星启看板截图上的「通关目标：击败 N 个首领」在 `targets` 里无对应字段（全是 4 档 `TOTAL_SCORE` 分数），按「展示文本必须来自数据源」不落。
+- **同名「机制」在两套表里，别互相套用**：末日幻影首领机制（首领特性 / 阶段）走 `MonsterGuideConfig × MonsterGuideTag`；异相仲裁的关卡机制词条（血嗜 / 洞穿 / 不屈…）走 `ChallengePeakConfig.TagList` / `ChallengePeakBossConfig.HardTagList` → **`MazeBuff`**（与王棋增益同一张表，名称 + 效果描述 + `ParamList` 俱全）。只取 `BuffName` 会把描述留在源表里、页面上就只剩一行无从解释的词条名。
 - **社群表格只能逐行对表**：米游社《数据机制通论》与现行 vendor 存在不符行（组 3 ATK 文章 0.85 / vendor 0.70，vendor 全表无 0.85），整表照抄会把旧版本系数带进库；反查社群公式时只采纳能与仓内表逐字段对齐的部分。
 - **游戏内教程 TextMap 是术语权威，优先于对照站与口述**：教程 hash `7039255158974959772` 把随难度追加的首领机制称「首领特性」（对照站标成关卡效果）；改术语要连字段、类型、渲染函数、section id 一起改，只改标题会被读成两套东西。
 - **米游社 `content/info` 同 URL 有结构化与 OBC 预渲染 HTML 两种形态**：结构化字段为空 ≠ 无数据，须再查 HTML（`.obc-tmpl-character__trace__role` 里藏着 avatarId）。

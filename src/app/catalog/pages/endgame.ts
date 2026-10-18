@@ -47,10 +47,6 @@ export function seasonBannerUrl(arts?: { theme_banner?: string } | null): string
   return endgameArtUrl(arts?.theme_banner, ART_PREFIXES);
 }
 
-export function seasonThemeIconUrl(arts?: { theme_icon?: string } | null): string {
-  return endgameArtUrl(arts?.theme_icon, ART_PREFIXES);
-}
-
 export function seasonPosterTabUrl(arts?: { poster_tab?: string } | null): string {
   return endgameArtUrl(arts?.poster_tab, ART_PREFIXES);
 }
@@ -71,14 +67,44 @@ import type { MazeCatalogDb, MazeListEntry } from '../../../services/types';
 
 export type MazeStatus = 'live' | 'ended' | 'upcoming' | 'unknown';
 
+/** 赛季排期的时区口径（判据，见 ADR 0060）：
+ *  上游给的是**无时区的裸本地时间串** `YYYY-MM-DD HH:mm:ss`（实测 186/186 条排期串零时区标记），
+ *  而 `new Date('2026-11-02 04:00:00')` 按**运行环境本地时区**解析 ⇒ 同一 URL 的「当期赛季」与
+ *  日期文案会在 ±14h 内随访客时区分叉；构建机在 UTC 时预渲染快照还会比页面少一天。
+ *  排期属游戏官方服务器时间，故裸串一律按**固定 +08:00** 解释；已带时区 / `Z` 的串按原语义。 */
+export const SEASON_TZ_OFFSET = '+08:00';
+const SEASON_TZ_MS = 8 * 3600 * 1000;
+/** 裸排期串：日期必选，时间可选（`2026-11-02` / `2026-11-02 04:00:00` / `2026-11-02T04:00:00`） */
+const BARE_SEASON_TIME = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+
+/** 排期串 → 毫秒时间戳（裸串按 +08:00 解释；非法 / 空 ⇒ null）。导出供单测锁定口径。 */
+export function seasonTimeMs(s?: string): number | null {
+  if (!s) return null;
+  const raw = String(s).trim();
+  if (!raw) return null;
+  const m = BARE_SEASON_TIME.exec(raw);
+  const iso = m
+    ? `${m[1]}-${m[2]}-${m[3]}T${m[4] ?? '00'}:${m[5] ?? '00'}:${m[6] ?? '00'}${SEASON_TZ_OFFSET}`
+    : raw;
+  const t = new Date(iso).getTime();
+  return Number.isNaN(t) ? null : t;
+}
+
+/** 排期串 → 展示用日期 `YYYY.MM.DD`（取**排期时区**的墙钟日期，不取访客本地日期；非法 ⇒ null）。 */
+export function seasonDateParts(s?: string): string | null {
+  if (!s) return null;
+  const raw = String(s).trim();
+  const m = BARE_SEASON_TIME.exec(raw);
+  if (m) return `${m[1]}.${m[2]}.${m[3]}`;
+  const t = seasonTimeMs(raw);
+  if (t == null) return null;
+  const d = new Date(t + SEASON_TZ_MS);
+  return `${d.getUTCFullYear()}.${String(d.getUTCMonth() + 1).padStart(2, '0')}.${String(d.getUTCDate()).padStart(2, '0')}`;
+}
+
 export function mazeStatus(info: MazeListEntry): MazeStatus {
-  const parse = (s: string | undefined): number | null => {
-    if (!s) return null;
-    const t = new Date(s).getTime();
-    return Number.isNaN(t) ? null : t;
-  };
-  const start = parse(info.live_begin) ?? parse(info.begin);
-  const end = parse(info.live_end) ?? parse(info.end);
+  const start = seasonTimeMs(info.live_begin) ?? seasonTimeMs(info.begin);
+  const end = seasonTimeMs(info.live_end) ?? seasonTimeMs(info.end);
   const now = Date.now();
   if (start != null && now < start) return 'upcoming';
   if (end != null && now > end) return 'ended';
@@ -87,14 +113,8 @@ export function mazeStatus(info: MazeListEntry): MazeStatus {
 }
 
 export function mazeDateRange(info: MazeListEntry): string {
-  const fmt = (s: string | undefined): string | null => {
-    if (!s) return null;
-    const d = new Date(s);
-    if (Number.isNaN(d.getTime())) return null;
-    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-  };
-  const start = fmt(info.live_begin) ?? fmt(info.begin);
-  const end = fmt(info.live_end) ?? fmt(info.end);
+  const start = seasonDateParts(info.live_begin) ?? seasonDateParts(info.begin);
+  const end = seasonDateParts(info.live_end) ?? seasonDateParts(info.end);
   if (start && end) return `${start} – ${end}`;
   if (start) return `${start} –`;
   if (end) return `– ${end}`;
@@ -169,7 +189,6 @@ export const endgamePage: CatalogPageConfig = {
   subtitle: 'ENDGAME',
   searchKey: 'catalog.endgame.search',
   gridClass: 'nk-cat-grid nk-eg-grid',
-  cardClass: '.nk-eg-card',
   styles: [() => import('../../../../src/styles/endgame.css')],
   async fetchData() {
     const [maze, story, boss, peak] = await Promise.all([
@@ -218,7 +237,9 @@ export const endgamePage: CatalogPageConfig = {
     const stText = translate(mazeStatusLabelKey(st));
     const no = String(item.id || '').replace(/^ID\s*/i, '');
     const noHtml = no ? `<span class="nk-eg-lrow__no">№ ${escHtml(no)}</span>` : '';
-    const date = item.dateRange ? `<span class="nk-eg-lrow__date">${escHtml(String(item.dateRange))}</span>` : '';
+    /* A5.6：日期行同样是 nowrap + 省略号的叶子（窄列下 en/de/ru 会被截断）——与赛季名一样挂 `title`，
+       否则那段排期永久读不到（触屏没有 hover，但键盘 / 读屏 / 长按仍可取到）。 */
+    const date = item.dateRange ? `<span class="nk-eg-lrow__date" title="${escHtml(String(item.dateRange))}">${escHtml(String(item.dateRange))}</span>` : '';
     const badge = st !== 'unknown'
       ? `<span class="nk-eg-lrow__status" data-status="${stCls}"><span class="nk-eg-lrow__dot"></span>${escHtml(stText)}</span>` : '';
     const name = String(item.name || translate('common.unknown'));
@@ -236,7 +257,7 @@ export const endgamePage: CatalogPageConfig = {
     return `<a class="nk-eg-lrow nk-eg-lrow--${stCls}" href="${escHtml(String(item.href || ''))}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(name)} ${escHtml(idStr)}" data-status="${escHtml(st)}" style="--i:${i}">
       ${iconHtml}
       <span class="nk-eg-lrow__main">
-        <span class="nk-eg-lrow__head">${noHtml}<span class="nk-eg-lrow__name">${escHtml(name)}</span>${poll}</span>
+        <span class="nk-eg-lrow__head">${noHtml}<span class="nk-eg-lrow__name" title="${escHtml(name)}">${escHtml(name)}</span>${poll}</span>
         ${meta}
       </span>
     </a>`;

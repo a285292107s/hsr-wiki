@@ -97,6 +97,18 @@ export function avatarDrawCardWebpUrl(charId: string | number): string {
   return charId ? nanokaUrl('avatardrawcard', `${charId}.webp`) : '';
 }
 
+/* 角色立绘「切入图」（1560×1650，入库时按 alpha 包围盒裁到 4:5）：首页登记区单条目分区的**主图**。
+   与 `avatarshopicon`（376×512 商店头像，卡片图源）不是同一张图——切入图是动态全身立绘。 */
+export function avatarCutinFigureUrl(charId: string | number): string {
+  return charId ? cdnUri('avatarcutinfigures', `${charId}.webp`) : '';
+}
+
+/* 光锥全图（904×1260）：首页登记区光锥主图。比 `lightconemediumicon`（348×408）大 2.6 倍，
+   是首页大板不需要向上采样的前提；卡片图源仍是 mediumicon（目录页几何未变）。 */
+export function lightConeMaxFigureUrl(coneId: string | number): string {
+  return coneId ? cdnUri('lightconemaxfigures', `${coneId}.webp`) : '';
+}
+
 export function itemIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
   if (USE_OFFICIAL_PATHS && !isLegacyIconPath(iconPath)) {
