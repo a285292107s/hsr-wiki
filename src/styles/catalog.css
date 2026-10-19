@@ -1,38 +1,13 @@
-
 #nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 var(--cat-pad-x) 80px var(--nk-content-offset); --cat-max: 1440px; --cat-pad-x: 24px; }
 #nk-catalog-app::-webkit-scrollbar { width: 6px; }
 #nk-catalog-app::-webkit-scrollbar-thumb { background: var(--border2); border-radius: var(--nk-radius-1); }
 #nk-catalog-app::-webkit-scrollbar-track { background: transparent; }
 
-/* 报头 v2（编辑部级）：主标题升口径，改为「底部整线 + 左端主色起笔」承担分区，
-   删除原先藏在标题里、随标题变长的那个自由渐变腰线——腰线把主字与读数钉在同一行
-   基线上，主字一升口径就会把读数挤到视口边。 */
 .nk-cat-masthead { display: flex; align-items: flex-end; gap: 18px; padding: 44px 0 16px; position: relative; border-bottom: 1px solid var(--line-2); }
 .nk-cat-masthead::before { content: ''; position: absolute; left: 0; bottom: -1px; width: 96px; height: 2px; background: linear-gradient(90deg, var(--primary), transparent 88%); }
-/* 报头主标题：只受「行盒必须容得下字体内容盒」与「长译文必须能换行」两条约束。
-   ① `line-height: 1.12` 是纵向硬裁切的根因（**中文也命中**，8 个目录页 × 4 语言实测 1280 下
-      `scrollHeight=37 > clientHeight=33`、390 下 `22 > 19`）：它是按**字号**给的，而渲染高度由
-      **字体内容盒**（ascent+descent，实测 29.44px 字号下 42px、17px 字号下 25px）决定，
-      两者之比在小字号下更大（1.47），故 1.12 恒定裁掉基线下沿。`1.5` 是覆盖两档实测比值
-      （1280 档 1.427 / 390 档 1.471）的单一取值——**不缩小字号**，只给行盒足够的垂直空间。
-      实测：`line-height: 1.4/1.5` 下 `scrollHeight === clientHeight`（裁切归零）。
-   ② `white-space: nowrap` + `overflow: hidden` 在长译文下把标题横向**吃掉**（390 档 de
-      `Währungskrieg · Verbesserungen` 实测 `325 > 295`，+30px 且无 ellipsis ⇒ 用户无从得知）；
-      改为可换行（`normal` + `break-word`）。断词用 `break-word` 而非 `anywhere`：`anywhere` 连
-      **断行机会**都允许在任意字符间插入，而 CJK 本就逐字可断、拉丁词内不可断 ⇒ 用 `anywhere`
-      会改变既有中文的折行位置（回归面要求 cn/cht/jp/kr 换行行为不变）。`flex-wrap: wrap` 让副标
-      在标题换行时整体落到下一行，不与主字抢行。 */
 .nk-cat-title { flex: 1; min-width: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 14px; font-family: var(--font-body); font-size: clamp(var(--nk-fs-title-1), 2.3vw, var(--nk-fs-title-3)); font-weight: 900; letter-spacing: 0.015em; line-height: 1.5; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; overflow: hidden; }
 #nk-catalog-app .nk-cat-subtitle { display: inline-block; font-family: var(--font-mono); font-size: var(--nk-fs-2); font-weight: 500; letter-spacing: 0.26em; text-transform: uppercase; color: var(--text3); border-left: 1px solid var(--line-2); padding-left: 10px; margin-left: 2px; flex-shrink: 0; transform: translateY(-0.32em); }
 .nk-cat-count { flex-shrink: 0; margin-left: auto; font-family: var(--font-mono); font-size: var(--nk-fs-3); letter-spacing: 0.12em; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; padding-bottom: 0.28em; }
-/* 工具栏（吸顶控制条）。三处调整的理由：
-   ① **左右 8px 内距**：此前内距为 0，搜索框那圈边框直接贴在内容区左缘（下方卡片因格子自带
-      `padding: 0 5px` 反而有视觉内距），看着像被裁掉一截。内距只作用在内容上——
-      条带背景与接缝放在伪元素里并向两侧各扩 `--cat-pad-x`（= 容器内距），仍**满出血**。
-   ② **背景改冷色压暗**：`--nk-header-bg` 原是同色相暖调的浅板（比页面底色更亮），在冷黑页面上
-      像贴了一块别的材质；改为略带强调色的**冷色压暗**，配 `backdrop-filter` 读作「磨砂玻璃」。
-   ③ **接缝改实心**：原来是「两端 8% 渐隐」的 accent 线，两端消失会在满出血条带下显得没画完；
-      改为整条实心（仍用 `--nk-header-border` 的强调色调），与下方卡片发丝线同一族的观感。 */
 .nk-cat-toolbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 12px; padding: 10px 8px 12px; margin-top: 0; }
 .nk-cat-toolbar::before {
   content: ''; position: absolute; inset: 0 calc(-1 * var(--cat-pad-x)); z-index: -1;
@@ -47,7 +22,6 @@
 .nk-cat-search:hover:not(:focus-within) { border-color: color-mix(in srgb, var(--primary) 34%, transparent); }
 .nk-cat-search:focus-within { border-color: var(--primary); background: var(--nk-shell-hover); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent), 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
 .nk-cat-search svg { width: 14px; height: 14px; color: var(--text3); flex-shrink: 0; }
-/* input 撑满宿主高度：点击域 = 视觉域（旧形态只有中间 21px 可点，边缘与放大镜点不动）。 */
 .nk-cat-search input { flex: 1; min-width: 0; height: 100%; background: none; border: none; outline: none; color: var(--text); font-size: var(--nk-fs-4); font-family: var(--font-body); }
 .nk-cat-search input::placeholder { color: var(--text3); }
 .nk-cat-filters-bar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
@@ -93,13 +67,6 @@
 
 .nk-cat-grid,
 .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 14px; }
-/* 目录骨架与卡片网格必须同宽同列，否则加载完成时整块重排：
-   ① 骨架**不得**再声明一层页面内距（它渲染在 `#nk-catalog-app` 之内，后者已声明
-      `padding: 0 24px 80px var(--nk-content-offset)`）——双层内距会让骨架右移 148px 且窄 172px；
-   ② 走虚拟滚动的目录页（成就 / 物品 / 敌对物种）列数由引擎算（`use-virtual-grid.ts` 的 minColW
-      + **固定 10px** 间距常量），其页级 `--nk-grid-gap` 因此按 10px 对齐；不走虚拟滚动的页
-      （角色 / 光锥 / 遗器 / 终局）列数由 `--nk-grid-min` 主导，沿用各自档位。
-   ③ `--nk-grid-min` 必须与各页 `virtualMinColW` 同值（骨架走 CSS 网格、卡片走引擎）。 */
 .nk-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); padding-top: 16px; }
 .nk-virtual-grid { display: block; position: relative; }
 .nk-virtual-cell .nk-item-card,
@@ -137,9 +104,6 @@
 }
 .nk-idx-card__portrait {
   display: block;
-  /* `position: relative` 只为给星标角标（`__stars`）当包含块——角标必须锚在**立绘**上而不是文字层上：
-     文字层自身是绝对定位，若角标留在其中，`top` 会以文字层高度为基准（文字层随语言变高 ⇒ 角标位置
-     随语言漂移）。锚到立绘后角标位置与语言、与文字层高度完全解耦。 */
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
@@ -162,27 +126,10 @@
   padding: 26px 12px 10px;
   background: linear-gradient(to top, color-mix(in srgb, var(--blk-950) 92%, transparent) 0%, color-mix(in srgb, var(--blk-900) 62%, transparent) 34%, transparent 84%);
 }
-/* 卡名行：星标已移出文字流（见 `__stars` 的立绘角标），故本行只剩名字一项。
-   **保留这一层结构**而不是把名字直接提到文字层：`__name-row` 是 `__body` 与 `__name` 之间的
-   一个可独立换行/对齐的层，删掉它会让 `.nk-idx-card__name` 的 `max-width: 100%` 失去约束对象
-   （`__body` 有 12px 内距，名字直接作为 flex 子项会按 max-content 撑到内距外）。
-   `display: block` 而非 flex：单子项下 flex 只剩「撑满 + 收缩」两件事，而块级元素天然满足，
-   且省掉 `flex-wrap` 在 `flex: 1 1 auto` 上的隐式行为（星标在时那才是必需的，见下条注释）。 */
 .nk-idx-card__name-row {
   display: block;
   min-width: 0;
 }
-/* 卡主名称（P1）：单行 `nowrap + ellipsis` 会把**区分性后缀**切掉——实测 1280 档 de 下
-   `Der erste Tag meines neuen Lebens` 在 121px 里只剩前半、`Dan Heng – Permansor Terrae`
-   `226 > 136`（+90px）；而 `Einladung des Galaktischen Reisend…` 与 `…Gelehrten` 单行读起来一样。
-   放宽为 2 行（卡主名称的处置：截断到 2 行仍保留区分性片段）+ `overflow-wrap: break-word` 让 de/ru 的复合词能断，
-   并用 `title`（见 character.ts / lightcone.ts / relic.ts 的卡根）保留全文可访问名。
-   `line-height: 1.25` 与 `.nk-lc-card__name` 同值（A4 设计系统一致性：同类元素跨页同规格）——
-   此前这里**不声明**行高，继承 `__body` 的 `1.5`：2 行时白占 0.5 行高（实测 13 语言 × 6 断点
-   最坏文字层 137 → 132.5px），而多出来的行距**不增加可读性**，只把卡名往暗幕的透明区推。
-   取值依据是实测（`temp/char-final2-ab.mjs`）：13 语言 × 6 断点，`inkClip` 恒为 0（该值不会造成
-   墨迹纵向裁切，因为 clamp 元素被 e2e 的 `!isClamp` 判据排除），而 `nameScrim%` 由 51% 降至 52%
-   （卡名墨迹中心落在暗度 ≥62% 的区间内，可读性不变或更好）。 */
 .nk-idx-card__name {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -200,101 +147,18 @@
   transition: color var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-idx-card:hover .nk-idx-card__name { color: var(--metric-val); }
-/* ═══ 稀有度飘带（斜向折角角标）：角色卡与光锥卡共用 ═══
-   立绘右上角一条 45° 斜带，带内 `★N` 沿带身方向排布；带身两端被立绘的上边与右边切断，
-   形成折角形态。两卡差异只在「锚点元素」与「稀有度色来源」，故几何只写一处。
-   ── 为什么不是「旋转带身」──
-   把带身 `rotate(45deg)` 后，**变换后的包围盒会顶大祖先的 scrollWidth**，而立绘是
-   `overflow: hidden` ⇒ 命中 e2e/layout-i18n-overflow.spec.ts 判据①（横向硬裁切：`overflowX`
-   为 hidden/clip 且 `scrollWidth > clientWidth` 且无 ellipsis/clamp 且文本 ≥2 字），实测报
-   `portrait +40px "★5"`。给中间层加 `overflow: clip` 只是把失败从立绘转移到中间层
-   （`clip-path` 既不产生滚动溢出区、也不阻止后代溢出向上传播）。
-   故**带身盒与文字盒都保持轴对齐**：斜向形状由 `clip-path: polygon()` 切出，只有带内文字旋转；
-   两盒都不出立绘盒 ⇒ scrollWidth 不涨（4 档卡宽实测，见交付记录）。
-   ── 几何推导 ──
-   带身盒是与立绘右上角重合的正方形，边长 `--rb-box`。记边长为 S，带身与对角线平行，两条边线为
-   y = x - S + m1 与 y = x - S + m2，在盒内的四点为 (S-m2, 0) (S-m1, 0) (S, m1) (S, m2)。
-   取 m1 = 16%S、m2 = 52%S：带身中心 = 四点均值 = (S - (m1+m2)/4, (m1+m2)/4) = (83%S, 17%S)，
-   即文字锚点；文字沿带身方向 ⇒ `rotate(45deg)`。
-   盒边长取 `clamp(56px, 62%, 104px)` 而**不是**纯百分比：纯百分比下带身垂直宽随卡宽线性增长，
-   而字号受层级约束有上限（名字必须仍是卡上最大的字）⇒ 300px 卡上带身宽 53px 而文字只有 12px，
-   填充率掉到 22%（116px 卡上是 48%），「跨尺寸节奏一致」当场不成立。加 px 上限后填充率收敛到
-   49%–55%（`temp/ribbon-params.mjs` 实测）：上限 104px 的作用是把带身宽度也钉住，让「字号已触顶
-   而带身仍在变宽」这一段不再发生。
-   ── 配色与字号 ──
-   带身填充 = 稀有度色（5★ 金 / 4★ 紫 / 3★ 蓝），文字取 `--blk-900` 深墨：深墨对三档色的对比度
-   实测 7.78:1（3★ 蓝）/ 5.26:1（4★ 紫）/ 11.85:1（5★ 金），均过正文 4.5:1 门禁
-   （`temp/ribbon-contrast.mjs`；该配对不在 `check-contrast.mjs` 的覆盖范围内，故单列取证）。
-   字号 `clamp(9px, 13cqw, var(--rb-fs-max, 12px))`：`cqw` 以带身盒宽为基准
-   ⇒ 与卡宽等比；下限 9px 保证 320 档最小卡（104px）上仍可辨；上限 12px 由层级反推——
-   最紧的是光锥卡名 `--nk-fs-4` = 13.12px，飘带必须留在它之下。`--rb-fs-max` 供上下文收窄
-   （BuildsPanel 卡名只有 `--nk-fs-3` = 11.52px，故该处收到 10px）。
-   `pointer-events: none`：纯装饰，点击必须落到卡链接上。 */
-.nk-idx-card__stars,
-.nk-lc-card__stars {
-  --rb-box: clamp(56px, 62%, 104px);
-  --rb-m1: 16%;
-  --rb-m2: 52%;
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 6;
-  width: var(--rb-box);
-  aspect-ratio: 1 / 1;
-  clip-path: polygon(
-    calc(100% - var(--rb-m2)) 0%,
-    calc(100% - var(--rb-m1)) 0%,
-    100% var(--rb-m1),
-    100% var(--rb-m2));
-  background: var(--rb-fill, var(--rarity-5));
-  container-type: inline-size;
-  pointer-events: none;
-}
-/* 带内文字：全卡唯一旋转的元素。其变换后包围盒必须仍落在带身盒内，
-   否则又会像「旋转带身」那样顶大立绘的 scrollWidth（`--rb-box` 与 m1/m2 的取值即受此约束）。
-   锚点即带身中心：`left` 取 `100% - (m1+m2)/4`、`top` 取 `(m1+m2)/4`（83% / 17%）。 */
-.nk-idx-card__stars-txt,
-.nk-lc-card__stars-txt {
-  position: absolute;
-  left: calc(100% - (var(--rb-m1) + var(--rb-m2)) / 4);
-  top: calc((var(--rb-m1) + var(--rb-m2)) / 4);
-  transform: translate(-50%, -50%) rotate(45deg);
-  font-family: var(--font-hud);
-  font-size: clamp(9px, 13cqw, var(--rb-fs-max, 12px));
-  font-weight: 700;
+.nk-idx-card__stars-row,
+.nk-lc-card__stars-row {
+  display: block;
+  font-size: clamp(10px, 7cqw, 13px);
   line-height: 1;
-  letter-spacing: 0.02em;
-  color: var(--blk-900);
+  letter-spacing: 0.12em;
+  color: var(--rarity-5);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--blk-950) 78%, transparent);
   white-space: nowrap;
 }
-/* 掠光：只动 `background-position`（不产生任何布局溢出），悬停时自左上掠向带尾。
-   与 reduced-motion 合并成一条媒体查询——分开写会出现「过渡已禁但位置仍跳变」的中间态。 */
-.nk-idx-card__stars::after,
-.nk-lc-card__stars::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 42%, color-mix(in srgb, white 62%, transparent) 50%, transparent 58%);
-  background-size: 320% 100%;
-  background-position: 140% 0;
-  transition: background-position var(--nk-dur-slow) var(--nk-ease-out);
-  pointer-events: none;
-}
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .nk-idx-card:hover .nk-idx-card__stars::after,
-  .nk-lc-card:hover .nk-lc-card__stars::after { background-position: -60% 0; }
-}
-/* 稀有度色 → 带身填充。角色卡按自身 `data-rarity`（只有 4/5 两档）；
-   光锥卡复用既有的 `--lc-r`（3/4/5 三档已在下方声明），故无需再写三档。 */
-.nk-idx-card[data-rarity="4"] .nk-idx-card__stars { --rb-fill: var(--rarity-4); }
-.nk-lc-card__stars { --rb-fill: var(--lc-r, var(--rarity-5)); }
-/* 卡副行（元素 · 命途）改可换行：改前是 `nowrap` + `overflow: hidden` 且**无 ellipsis**，
-   即真正的横向硬裁切（P0）——实测 1280 档 de 下 `Imaginary · Die Gelehrsamkeit` `210 > 185`
-   （+25px）、`Quantum · Die Gelehrsamkeit` `207 > 185`，共 13 处；且因无 ellipsis，
-   用户**无从得知**被吃掉了文字。处置取「让它换行」而非省略号兜底
-   （副行是两项枚举拼接，没有被截断的语义需求）：
-   `flex-wrap: wrap` 让「元素 · 命途」在放不下时折到第二行，`overflow-wrap: break-word` 兜住
-   de/ru 的单个长复合词（如 `Gelehrsamkeit`）。 */
+.nk-idx-card[data-rarity="4"] .nk-idx-card__stars-row { color: var(--rarity-4); }
+.nk-lc-card__stars-row { color: var(--lc-r, var(--rarity-5)); }
 .nk-idx-card__meta {
   display: flex;
   align-items: center;
@@ -308,11 +172,6 @@
   white-space: normal;
   overflow-wrap: break-word;
 }
-/* 每一项「图标 + 标签」是一个**不可拆的整体**（`.nk-idx-card__tag`）：改前 icon 与文字是
-   `__meta` 的直接子项，两者之间只有 `gap`，故行尾放不下时会出现「图标留在上一行、文字掉到下一行」
-   （`flex-wrap` 下每个直接子项都可独立换行）。包成整体后，换行单位从「图标 / 文字」升为「一项元信息」。
-   `max-width: 100%` 让它永远不越出卡右缘；`min-width: 0` 解除 `min-width: auto` 的内容宽度下限，
-   使 de/ru 的长复合词能在项内断行而不是把项撑破。 */
 .nk-idx-card__tag {
   display: inline-flex;
   align-items: center;
@@ -322,29 +181,8 @@
 }
 .nk-idx-card__tag-text { min-width: 0; overflow-wrap: break-word; }
 .nk-idx-card__icon { width: 13px; height: 13px; border-radius: 50%; flex: none; }
-/* 窄卡上的副行只留图标（文字转 sr-only）。
-   **判据**：文字模式下「属性 + 命途」并排所需宽 = 两项文字 + 图标 2×(13px) + 项内 gap 2×(4px) + 行 gap 6px。
-   13 语言**叉积最坏**是 ru `Электрический` + `Разрушение` = 156px 文字 ⇒ 副行需 **196px**。
-   阈值即取该值，且**与语言无关**（不按当前语言的实际宽度判断）——否则切语言会改变卡片密度，
-   与底栏槽位的处置原则一致（[ADR 0054](../../docs/adr/0054-底栏槽位数与语言解耦.md)）。
-   由此保证「显示文字的档位，任何语言都放得下」⇒ 折行恒为 0，是构造保证而非调参结果。
-   实测卡副行可用宽：320(264) / 1440(216.8) / 1920(200.6) 三档 ≥196 ⇒ 显示文字；
-   其余十档 133~188.3px ⇒ 纯图标。改前这十档在 fr/de/ru/en 等语言下成片折行
-   （去掉分隔点后仍余 841 张；en@390 13、pt@390 17、fr@390 40、de@390 52、ru@390 56）。
-   处置取「只给图标」而非改短文案：图标是官方资产、玩家已熟悉，且与文字**同源同义**
-   （`elemLabel` / `pathLabel` 取 `elements.json` / `paths.json` 官方令牌），无信息丢失；
-   这也与光锥卡的命途徽标（`.nk-lc-card__badge`，全档纯图标）同一处置。
-   用 `container-type: inline-size` 而非视口断点：同一张卡有三个宿主，宽度来源互不相同——
-   目录网格随 `--nk-grid-min`/列数、首页品牌带 `min(300px, 82vw)`、枢纽带定宽 `190px`；
-   1440 视口下目录卡副行 216.8px 放得下而枢纽卡 166px 放不下，按视口判断必在其中一处判错。
-   **注意比较的是内容盒**（`__body` 有 12px 左右内距）：阈值写 220（边框盒口径）会误伤 1440 档。
-   本块必须在基础 `.nk-idx-card__icon` 之后：容器查询不提升特异性，
-   写在其前会被后面的 13px 同特异性规则盖掉，放大静默失效。 */
 .nk-idx-card__body { container-type: inline-size; }
 @container (max-width: 195px) {
-  /* sr-only（非 `display: none`）：文字必须留在无障碍树里——`alt=""` 的语义是「此处无需替代文本」，
-     而它在窄卡上恰恰是**唯一**的属性/命途文本载体（图标是图片，读屏只认 alt）。
-     写法与 `LightconeView` 表题注一致（1×1 + clip-path: inset(50%)）。 */
   .nk-idx-card__tag-text {
     position: absolute;
     width: 1px;
@@ -354,24 +192,9 @@
     white-space: nowrap;
   }
   .nk-idx-card__tag { position: relative; }
-  /* 文字隐去后图标独占副行 ⇒ 按可辨识度放大（13 → 16px）。
-     16px 是下限而非审美取值：13px 在 DPR 1 的窄档上仅 13 物理像素，
-     命途图标内的细笔画（如 `Mage` 的星轨）会糊成一团。 */
   .nk-idx-card__icon { width: 16px; height: 16px; }
-  /* 两项之间留出可分辨的间隔：图标没有文字基线，原 6px 会把它们并成一块。 */
   .nk-idx-card__meta { gap: 2px 8px; }
 }
-/* 两项之间**不画分隔符**（用户裁决：去掉那个装饰性中点）。
-   原先挂的是前一项尾部的 `::after { content: '·' }`，此处连带两点判据一并记录：
-   ① 它占宽不可忽略——`·` 字形 + 前后各一个 `gap` ≈ 12px，而卡片副行可用宽在 2 列档只有 148px，
-      两项文案本身就常逼近该值 ⇒ 分隔符成了压过折行阈值的那一份重量；
-   ② 语义上它是冗余的：每项都自带图标（元素图标 / 命途图标），归属已经由图标表达，
-      没有它也读不出「第二项是命途吗」的歧义。
-   实测（13 语言 × 7 视口）去掉后折行卡片数显著下降（en@390 47→13、es@390 46→12、
-   vi@390 8→0、th@360 27→1、fr@768 6→0、pt@768 3→0）。
-   **残留**：fr/de/ru 在 2 列档（360~430、部分 ≥768）仍会折行——那是两项文案自身之和
-   超过可用宽（fr `Quantique L'Érudition` 需 ≈171px > 148px），非分隔符所致。
-   该残留已由上方 `@container (max-width: 195px)` 的纯图标处置消除，不靠改文案。 */
 @keyframes nk-idx-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes nk-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes nk-card-fade { from { opacity: 0; } to { opacity: 1; } }
@@ -399,16 +222,10 @@
 .nk-cat-empty__reset:active { transform: translateY(1px); }
 .nk-cat-empty__reset:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* 玩法说明入口（全站原语）：目录页列头与赛季详情页 Hero 共用。
-   此前「玩法说明」只有目录页列标题一个隐藏入口（标题本身就是链接、零提示性），赛季详情页完全没有入口。
-   形态 = 带图标的显式文字链（不是仅有下划线的文本链接）：有边框、有图标、hover 变主色，才具备可发现性。
-   两处调用点分属「模板字符串」与「Vue 模板」两条渲染路径，故样式收在这里、图标 SVG 各自内联。 */
 .nk-guide-link {
   display: inline-flex; align-items: center; gap: 5px; flex: none;
   padding: 3px 9px 3px 7px; border: 1px solid var(--line-2); border-radius: 999px;
   font-size: var(--nk-fs-3); font-weight: 600; line-height: 1.5; color: var(--text2); white-space: nowrap;
-  /* 原语必须在任何上下文里都成立：宿主可能带 letter-spacing / HUD 字体（如赛季 Hero 的 camp 行），
-     故这两项显式归位，避免出现「字距被拉开的按钮」这种宿主泄漏。 */
   font-family: var(--font-body); letter-spacing: normal;
   transition: color var(--nk-dur-hover) var(--nk-ease-out), border-color var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out);
 }
@@ -435,17 +252,9 @@
 .nk-lc-card__shimmer { position: absolute; inset: 0; z-index: 5; border-radius: var(--nk-radius-2); transition: opacity var(--nk-dur-normal) var(--nk-ease-out); }
 .nk-lc-card__img img.loaded ~ .nk-lc-card__shimmer { opacity: 0; pointer-events: none; }
 .nk-lc-card__img img.lc-avatar { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; padding: 4px; transform: none; transform-origin: center center; }
-/* 命途图标从右上移到左上：右上已被稀有度飘带占用，两者重叠会互相压字。
-   左上是立绘的空白区（光锥图 `object-fit: contain` 居中，四角本就是底色），不遮挡主体。 */
 .nk-lc-card__badge { position: absolute; top: 8px; left: 8px; z-index: 4; }
 .nk-lc-card__badge img { width: 22px; height: 22px; border-radius: 50%; background: transparent; border: none; padding: 2px; box-shadow: 0 1px 5px rgba(0,0,0,0.35); }
-.nk-lc-card__info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 13px 12px 11px; background: linear-gradient(to top, color-mix(in srgb, var(--lc-r, var(--rarity-5)) 16%, transparent) 0%, color-mix(in srgb, var(--blk-900) 72%, transparent) 22%, transparent 64%); }
-/* 光锥卡的星标已改为立绘右上角飘带（见 `.nk-idx-card__stars` 的共用几何），
-   故这里不再有「文字流内星标」的规则；`__info` 因此少一行，星标不再随语言撑高文字层。 */
-/* 光锥名（P1 卡主名称）：单行 `nowrap + ellipsis` 是本 cluster 最大的一处截断——
-   实测 1280 档 de/ru/th 共 91 条、390 档 103 条（**含中文 12 条**，故是既有布局缺陷而非纯译文问题），
-   最严重 `Neue Überreste des versengenden Fegefeuers` `293 > 147`（+146px，省略掉 50% 的名字）。
-   放宽为 2 行 + `break-word`，全文由卡根 `title`（lightcone.ts）复原。 */
+.nk-lc-card__info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 13px 12px 11px; container-type: inline-size; background: linear-gradient(to top, color-mix(in srgb, var(--lc-r, var(--rarity-5)) 16%, transparent) 0%, color-mix(in srgb, var(--blk-900) 72%, transparent) 22%, transparent 64%); }
 .nk-lc-card__name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: var(--nk-fs-4); font-weight: 700; line-height: 1.25; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-shadow: 0 1px 4px rgba(0,0,0,0.7); transition: color var(--nk-dur-hover) var(--nk-ease-out); }
 .nk-lc-card__skill { font-family: var(--font-hud); font-size: var(--nk-fs-1); font-weight: 600; letter-spacing: 0.08em; color: var(--text3); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
@@ -500,10 +309,6 @@
   pointer-events: none;
 }
 .nk-relic-card__info { text-align: center; padding: 0 2px; }
-/* 遗器名已有 `-webkit-line-clamp: 2`（纵向口径正确），但缺断词能力：单个长复合词放不下时
-   仍会横向溢出——实测 390 档 de/ru/th 共 12 条，`Himmelweitreichender Wahrsager` `131 > 109`
-   （+22px）、`Вестник, блуждающий в хакерском пространстве` `111 > 109`。补 `overflow-wrap: break-word`
-   让长词在 2 行内断开（不引入 `anywhere`，避免改坏 CJK 换行）。 */
 .nk-relic-card__name {
   font-size: var(--nk-fs-4);
   font-weight: 600;
@@ -520,7 +325,6 @@
 .nk-relic-card:hover .nk-relic-card__name,
 .nk-relic-card:focus-visible .nk-relic-card__name { color: var(--metric-val); }
 .nk-relic-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-/* 键盘聚焦只给内高光 + 边框提亮：外投影会和焦点环叠成「卡片浮起来」，与 hover 的观感混在一起 */
 .nk-relic-card:focus-visible .nk-relic-card__plate {
   border-color: color-mix(in srgb, var(--rarity-5) 42%, transparent);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
@@ -556,9 +360,6 @@
 .nk-mob-card__fig img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--nk-dur-zoom) var(--nk-ease-out); }
 .nk-mob-card__info { display: flex; flex-direction: column; gap: 5px; padding: 12px 4px 4px; }
 .nk-mob-card__name { font-size: var(--nk-fs-4); font-weight: 700; letter-spacing: 0.02em; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color var(--nk-dur-hover) var(--nk-ease-out); }
-/* 卡面三层：名称 / 弱点元素+阵营 / 分类+同族序号。
-   632 条目录里 400 张卡在「只有名称+分类」时与另一张完全无法区分（392 条落在 147 个同名同图
-   的簇内），弱点与阵营是卡面唯一的可辨差异；`.nk-mob-card` 的 title 汇总同一份文本。 */
 .nk-mob-card__weak { display: flex; align-items: center; gap: 3px; height: 15px; min-width: 0; }
 .nk-mob-card__weak img { flex: none; width: 13px; height: 13px; object-fit: contain; }
 .nk-mob-card__none { font-family: var(--font-mono); font-size: var(--nk-fs-2); letter-spacing: 0.12em; color: var(--text3); }
@@ -571,10 +372,6 @@
 
 #nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
-/* 此处曾有一条 `#nk-home-app h1, h2, p { margin: 0; padding: 0 }`：UA 默认边距已由
-   `tokens.css` 的 `:where(#app) h1…p` 统一清空，这条只是重复，**却带着 ID 特异度 (1,0,1)**
-   —— 它把区块内三条类选择器的间距全部压死（品牌带副标题 14px、页脚拉丁行 14px、
-   空态 `padding 22px 0 6px`，探针实测三者皆为 0）。删掉重复，别再写成 `#id 元素` 形态。 */
 
 .nk-hub-release { max-width: var(--nk-content-max); margin: 0 auto; padding: 32px 40px 72px var(--nk-content-offset); }
 .nk-hub-release__head { display: flex; align-items: flex-end; gap: 20px; margin-bottom: 22px; }
@@ -588,45 +385,19 @@
 .nk-hub-release__section + .nk-hub-release__section,
 .nk-hub-release__sk-row + .nk-hub-release__sk-row { margin-top: 22px; }
 .nk-hub-release__label { margin-bottom: 10px; font-size: var(--nk-fs-4); font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; color: var(--text2); }
-/* 分区头：标签在左、**分区级入口**（该族图鉴页）在右，中间是留白。
-   入口是任何条数下唯一且不偏袒条目的显式动作（多条目的卡带里"特写哪一条"没有判据，故不给条目再加入口）；
-   它的右缘与单条目行的「名字 + 查看档案」同一条右列（内容列右缘），页面因此只有一条右基准线。
-   骨架仍用 `__label` 自带的下外边距，故这里把标签的 margin 归零、由本行承担间距——两者相差 0px。 */
 .nk-hub-release__sechead { display: flex; align-items: baseline; gap: 16px; margin-bottom: 10px; }
 .nk-hub-release__sechead > .nk-hub-release__label { margin-bottom: 0; }
 .nk-hub-release__all { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-hud); font-size: var(--nk-fs-3); font-weight: 600; letter-spacing: 0.12em; color: var(--text2); text-decoration: none; transition: color var(--nk-dur-hover) var(--nk-ease-out); }
 .nk-hub-release__all svg { width: 12px; height: 12px; transition: transform var(--nk-dur-hover) var(--nk-ease-out); }
 .nk-hub-release__all:hover { color: var(--metric-val); }
 .nk-hub-release__all:hover svg { transform: translateX(2px); }
-/* 按压反馈与全站动作语言同档（translateY(1px)：nk-guide-link / nk-cat-empty__reset 同款） */
 .nk-hub-release__all:active { transform: translateY(1px); }
 .nk-hub-release__all:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-hub-release__label-count { margin-left: 6px; font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.08em; color: color-mix(in srgb, var(--metric-val) 72%, transparent); vertical-align: 1px; font-variant-numeric: tabular-nums; }
-/* 平权卡带（分区 ≥2 条）：卡宽 `clamp(210px, 24%, 306px)`——1440 档 = 300px，**恰好 4 张铺满一带**
-   （4×300+3×16 = 1248 / 带宽 1252），5 张起横向滚动；与特写档的 306px 同档（ADR 0019 决策 11 的
-   「编辑级卡宽 210–300px」区间顶端）。旧档位 `17%/300px` 在 1440 档只给 213px：3~4 条的新版本
-   既没有名字与入口，卡还比单条版本小一圈（实测 306 → 213），一条数据的差别换来两种体量。 */
 .nk-hub-release__band { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(210px, 24%, 306px); align-items: start; gap: 16px; padding: 8px 0 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scroll-snap-type: x proximity; scroll-padding-inline: 2px; }
 .nk-hub-release__band > * { scroll-snap-align: start; }
-/* 特写档（**恰 1 条**）：主卡列 + 规格列的 1fr 轨。规格块占第二轨 ⇒ 它的顶线横跨到本行右缘，
-   成为这一行的骨架（旧形态是紧贴主卡的一小块重复信息：实测 1440 档卡片文字「真珠/★★★★★/冰/欢愉」
-   与规格块「真珠/冰/欢愉」逐字重复）。
-   第二轨**必须是确定宽度**，不能写 `max-content`：轨的 max-content 由卡内懒加载图的固有宽度决定，
-   图未加载时（`naturalWidth = 0`）塌成卡名文字宽（实测遗器卡 96.1px、图就绪后 240px）⇒ 首页每次都有
-   一次 **144px 的布局位移**（1440 档实测列轨 `306│95.84│818` → `306│240│674`）。
-   卡片列写死 306px 后盒宽与图片加载无关，也不再有位移。 */
 .nk-hub-release__band--feature { grid-auto-flow: row; grid-auto-columns: unset; grid-template-columns: minmax(0, 306px) minmax(0, 1fr); align-items: start; justify-content: start; overflow-x: hidden; }
-/* 此处曾有一条「单条目档放宽为 `minmax(0, 420px)` 单列」的规则，选择器是
-   `.nk-hub-release__section--feature:has(.nk-hub-release__cell:last-child:first-child)`。
-   它自写下的那一轮起**从未命中过一次**：特写档的规格块 `<aside>` 与卡片同级，卡片永远不是 `:last-child`
-   （实测命中 0 个分区），而修好选择器也不可取——420px 档的卡高 = 420×4/3 = 560px，
-   1024×768 实测第一张卡底部 883px > 768px（306px 档 731px），会顶掉「第一分区首行卡片完整可见」。
-   判据留在这里，规则删除：留着它等于给下一次误读留一个假入口。 */
 .nk-hub-release__cell { min-width: 0; }
-/* 特写规格块（只属于恰 1 条的分区）：编辑式「图 + 注释栏」——名字领先、数据正文承中、入口殿后。
-   名字是排版权重；正文是该条目**卡上没有**的定义性事实（角色一句话简介 / 光锥技能效果 /
-   遗器四件套效果，fmtDesc 渲染，随分区同批就绪 ⇒ 无后到 CLS）；入口是卡之外唯一的显式动作。
-   元素 / 命途 / 技能名 / 套装标签一律不再重复（卡上已有）。顶线与主卡顶对齐、横跨到本行右缘。 */
 .nk-hub-release__spec {
   grid-column: 2;
   display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
@@ -646,12 +417,8 @@
 .nk-hub-release__band::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--nk-radius-1); }
 .nk-hub-release__band .nk-relic-card { max-width: 240px; }
 .nk-hub-release__empty { padding: 22px 0 6px; font-size: var(--nk-fs-5); letter-spacing: 0.06em; color: var(--text2); }
-/* 加载期骨架：分区标签与卡片位按就绪态规格占位（桌面 306×408 = 单条目特写档的卡），
-   行距复用上面的分区间距声明。骨架不带 `.nk-hub-release__section`——那个类名是「数据已就绪」的判定依据，
-   骨架若带上它，就绪竞态（e2e 的 poll 等待）会被自己的占位骗过。 */
 .nk-hub-release__sk-band { padding: 8px 0 12px; }
 .nk-hub-release__sk-card { display: block; width: 306px; aspect-ratio: 3 / 4; border-radius: var(--nk-radius-card); }
-/* 部分索引未取到：好数据照常渲染，只用一行说明缺了什么（静默少一个分区会被读成「本版本没有」） */
 .nk-hub-release__notice { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; font-size: var(--nk-fs-4); letter-spacing: 0.02em; color: var(--text2); }
 .nk-hub-release__notice .nk-error-state__retry { margin-top: 0; }
 @supports (animation-timeline: view()) {
@@ -673,16 +440,6 @@
   .nk-hub-release__kicker { font-size: var(--nk-fs-1); }
   .nk-hub-release__title { font-size: var(--nk-fs-6); }
   .nk-hub-release__rule { display: none; }
-  /* 手机档：`flex: none`（基线第 427 行）把 `flex-shrink` 钉成 0，而 `__heading` 同样是
-     `flex: none` 不肯收缩 —— 两者自然宽之和超过可用宽时，`__edition` 被挤出**父容器右缘**
-     （`.nk-hub-release__head` 实测 `scrollWidth=393 > clientWidth=350`），
-     再被 `#nk-home-app` 的 `overflow-x: hidden` 静默裁掉最右一项。
-     实测（390 档，`#nk-home-app` 的 scrollWidth-clientWidth）：de +23px / fr +45px / pt +5px，
-     中文本就为 0 ⇒ 是长译文触发的既有缺陷。故显式允许它收缩：
-     `min-width: 0` 解除内容最小宽下限（flex 项默认 `min-width: auto` 不允许收到内容宽以下），
-     `flex-shrink: 1` 覆盖基线的 `flex: none`。
-     只在本断点声明：桌面档实测本就 0 溢出，不碰它 = 桌面渲染不变。
-     注意 `max-width: 42%` 是设计意图（edition 不与主标题抢位），保留不动。 */
   .nk-hub-release__edition { align-self: flex-end; flex-wrap: wrap; justify-content: flex-end; gap: 2px 10px; margin: 0 0 3px auto; font-size: var(--nk-fs-1); letter-spacing: 0.04em; white-space: normal; text-align: right; max-width: 42%; line-height: 1.6; min-width: 0; flex-shrink: 1; }
   .nk-hub-release__edition-item + .nk-hub-release__edition-item::before { left: -6px; }
   .nk-hub-release__section + .nk-hub-release__section,
@@ -690,37 +447,20 @@
   .nk-hub-release__label { margin-bottom: 8px; font-size: var(--nk-fs-4); }
   .nk-hub-release__sechead { margin-bottom: 8px; gap: 12px; }
   .nk-hub-release__sechead > .nk-hub-release__label { margin-bottom: 0; }
-  /* 手机档分区头一行放得下：标签 13.12px + 入口 11.52px（实测 390 档最长的「全部角色图鉴 →」仍余量充足）。
-     入口的命中区补到 24px 高（WCAG 2.5.8 下限）用负外边距抵消，行高与桌面档一致、不推挤下方卡片带。
-     注意只写上下两向：`margin` 简写会把基线的 `margin-left: auto`（靠右的本体）一起清掉。 */
   .nk-hub-release__all { font-size: var(--nk-fs-2); letter-spacing: 0.1em; padding: 6px 0; margin-top: -6px; margin-bottom: -6px; }
   .nk-hub-release__band { display: flex; align-items: flex-start; gap: 10px; scrollbar-width: none; }
   .nk-hub-release__band::-webkit-scrollbar { display: none; }
-  /* 特写档（恰 1 条）：手机上纵向栈，主条目在上、规格行在下。
-     注意：它必须排在上面那条 `display: flex` 之后 —— flex 规则若晚于本组会让本组失效。
-     规格块 `1 / -1` 跨过全部显式轨 ⇒ 顶线横跨整行。 */
   .nk-hub-release__band--feature { display: grid; grid-template-columns: minmax(0, 1fr); overflow-x: visible; gap: 6px; }
   .nk-hub-release__band--feature .nk-hub-release__cell .nk-idx-card { width: min(300px, 82vw); }
   .nk-hub-release__band--feature .nk-hub-release__cell .nk-lc-card { width: min(230px, 62vw); }
   .nk-hub-release__band--feature .nk-hub-release__cell .nk-relic-card { max-width: min(220px, 60vw); }
   .nk-hub-release__spec { grid-column: 1 / -1; gap: 14px; margin-top: 8px; padding-top: 12px; }
-  /* 卡内已写名（手机档卡是名行），读数列不再复述 */
   .nk-hub-release__spec-name { display: none; }
-  /* 横滚带里的卡需要**确定宽度**（flex 项无定宽会塌成内容宽；轨内是懒加载图，见文件上方 max-content 那条坑位）。
-     此前 `.nk-idx-card` 后面还挂着一层「补表面」的覆写（`padding: 8px 10px` / 1px 边框 / `--card` 底 / 圆角 / `min-height: 0`）——
-     那是给手机档行式头像卡补的（行式卡本身无底无框、靠发丝线分隔）。行式卡形态退场后卡回到目录页同一套网格卡，
-     再补这层会变成双描边（网格卡自带 `::after` 边框）且 3:4 立绘被 padding 挤变形，故整层删除；
-     本行只留宽度。**新值只影响平权卡带**：特写档（恰 1 条）另有上面的 `min(300px, 82vw)`，
-     而本版本 4.6 的角色 / 光锥各恰 1 条 ⇒ 走特写档（390 档实测 300×400），角色卡的 190px 档当前无数据命中。 */
   .nk-hub-release__band .nk-idx-card { width: 190px; }
   .nk-hub-release__band .nk-lc-card { width: 116px; }
   .nk-hub-release__band .nk-relic-card { width: 104px; }
   .nk-hub-release__band .nk-cw-card { width: 132px; }
   .nk-hub-release__empty { padding: 18px 0 4px; }
-  /* 骨架卡宽跟上面那条平权卡带的卡宽对齐（190px）。**高度不必与三类卡族一一对齐**：
-     骨架行不是跨帧持久的元素（它是被替换掉的节点），位移不计入 CLS。
-     （本条原先写「跟目录同档的手机卡」——那个说法随手机档行式卡退场而失效：目录卡现在是网格卡，
-     卡宽随列宽变（320 档 288px / 390 档 172px），与这里的 190px 不再同源。骨架只与平权卡带同宽。） */
   .nk-hub-release__sk-card { width: 190px; }
 }
 
@@ -730,17 +470,13 @@
 }
 
 @media (max-width: 767px) {
-  /* 手机档：`--nk-content-offset` 为 0（侧栏变底栏），左侧留白必须显式给回 16px，
-     否则工具栏/搜索框/卡片会一起贴到屏幕左缘（`--cat-pad-x` 只决定条带的出血宽度与右内距）。 */
   #nk-catalog-app { --cat-pad-x: 16px; padding-left: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
   .nk-cat-masthead { padding: 18px 0 12px; gap: 10px; }
   .nk-cat-title { font-size: var(--nk-fs-6); letter-spacing: 0.06em; }
   .nk-cat-count { font-size: var(--nk-fs-1); letter-spacing: 0.14em; }
-  /* 手机档条带不透明、关掉毛玻璃（性能），内距与桌面一致，搜索框不再贴容器边缘 */
   .nk-cat-toolbar { gap: 8px; padding: 6px 8px 10px; flex-wrap: wrap; }
   .nk-cat-toolbar::before { background: color-mix(in srgb, var(--blk-850) 94%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
   .nk-cat-search { flex: 1 1 100%; max-width: none; min-width: 0; }
-  /* 搜索占满一整行后，筛选 chip 行在第二行完整排出（不再被 360px 搜索框挤到只剩半枚可点 chip） */
   .nk-cat-filters-bar { flex: 1 1 100%; justify-content: flex-start; overflow-x: auto; }
   .nk-cat-filters-bar .nk-cat-select { flex-shrink: 0; }
   .nk-cat-select__btn { padding: 6px 8px; }
@@ -748,17 +484,6 @@
   .nk-lc-grid { grid-template-columns: repeat(3, 1fr); }
   .nk-lc-card__info { padding: 10px 8px 8px; }
   .nk-lc-card__name { font-size: var(--nk-fs-4); }
-  /* 角色图鉴卡在手机断点**与桌面同一套排版**（3:4 立绘 + 文字叠压的网格卡）：
-     曾经这里是一整套行式头像卡（单列发丝线行、44px 圆头像、`__body` 流式、`--idx-r` 稀有度色 ring），
-     由 `0495f3d0` 引入、本轮按用户指令退场。退场范围含骨架覆写——骨架必须与就绪同构，
-     否则数据到达时整块从行条重排成网格卡（`nk-skeleton__card-img` 的行高覆写已在同一批删除）。
-     手机只保留一个**数值档位**：网格列宽下限。基线与 ≥768 同源（`--nk-grid-min` + `repeat(auto-fill, minmax())`），
-     故「同一套排版」在窄屏退化为「列数随可用宽自然减少」，不再有第二种卡片形态。
-     取值不等式（320 档最紧）：可用宽 = 320 - 16×2 内距 = 288 ⇒ `150px` 档落在 1 列（288 < 2×150+10 = 310），
-     375 档可用 343 ⇒ 2 列（310 ≤ 343），实测列宽 164.5px，与桌面 768 档 153.5px 同量级。
-     **gap 必须与基线同值（14px）**：骨架元素同时带 `nk-skeleton__grid` 与 `nk-idx-grid` 两个类，
-     而上面那条 `.nk-cat-grid, .nk-skeleton__grid` 的 10px 在后源位会盖掉基线的 14px ⇒ 骨架 2 列 174px
-     对就绪 2 列 172px（本项目实测 390 档差 2px/列）。骨架与就绪同列同距是既有硬判据（见文件头注释②③）。 */
   .nk-idx-grid { --nk-grid-min: 150px; --nk-grid-gap: 14px; }
   .nk-mob-grid { grid-template-columns: 1fr; gap: 1px; }
   .nk-mob-card {
@@ -790,48 +515,23 @@
   .nk-mob-grid { --nk-grid-min: 100px; }
 }
 @media (max-width: 374px) {
-  /* `:not(.nk-idx-grid)`：角色目录的骨架同时带 `nk-skeleton__grid` 与 `nk-idx-grid`，
-     而它的就绪网格**不在**本规则的选择器里（只有一个 `nk-idx-grid` 类）⇒ 不排除的话
-     320 档骨架被强制 2 列（140px×2）、就绪按 `--nk-grid-min: 150px` 自动排版得 1 列（288px），
-     数据到达时整块重排（本项目实测）。骨架与就绪必须同列同距是 `catalog.css` 头部 ③ 的既有判据。
-     其余目录族的骨架都带 `nk-cat-grid`，行为不变。 */
   .nk-cat-grid, .nk-skeleton__grid:not(.nk-idx-grid) { grid-template-columns: repeat(2, 1fr); --nk-grid-gap: 8px; }
   .nk-item-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* 平板档列宽下限 150 → 186：**档位倒挂**——768~1023 档的列宽（150 下限 ⇒ 768 档实测 153.5px）
-     比手机档（390 档 172px）还窄，即「屏幕更大、卡里的字更挤」。这是长译文在此档成片截断的直接成因：
-     实测 768 档 en 9 张 / pt 11 张 / de 9 张被 clamp，而同样这些卡在 390 档只 3~8 张。
-     186 与 ≥1024 档同值，取值依据是「两项元信息单行所需宽」：实测最宽的 `Imaginär · Die Gelehrsamkeit`
-     需 `184.2px`、`Электрический · Разрушение` 需 `193.8px`（`temp/char-card-fit.json`），
-     186 ⇒ 768 档落 3 列（实测列宽 209.3px），两项中较短的组合可同行、较长的折行。
-     副作用已核对：768 档列数由 4 → 3（每列更宽、卡更大），`e2e/layout-home.spec.ts` 只断言
-     「列数随可用宽单调不回跳」，768（3 列）> 320（1 列）仍成立。 */
   .nk-idx-grid { --nk-grid-min: 186px; }
   .nk-lc-grid { --nk-grid-min: 170px; }
 }
 @media (min-width: 1024px) {
   .nk-idx-grid,
   .nk-lc-grid { --nk-grid-gap: 16px; }
-  /* 角色卡承担整页视觉重量：桌面卡宽 168 → 竖屏曼陀罗立绘大到能看清表情，
-     才对得起「图鉴」而不是缩略图墙；1280 / 1536 两档继续放大。 */
   .nk-lc-grid { --nk-grid-min: 168px; }
   .nk-idx-grid { --nk-grid-min: 186px; }
 }
 @media (min-width: 1280px) {
   .nk-idx-grid { --nk-grid-min: 204px; }
 }
-/* 1536 档**只放大间距**，不钉死列数。
-   漂移修正（已登记）：此处原为 `grid-template-columns: repeat(8, 1fr)`，与紧邻注释「1280 / 1536
-   两档继续放大」自相矛盾——`repeat(8, 1fr)` 把列数写死为 8，于是 1440 → 1536 时列宽从 240.8px
-   **掉到** 154.8px（列数 5 → 8），即「屏幕更大、卡更小」，比手机档 390（172px）还窄。
-   实测代价：1536 档成为全断点最坏档（clamp 25 张、立绘最小 69.3px），且 `Dan Heng • Permansor
-   Terrae` 一类长名在此档才成片截断（en/es/vi/id 各 1 张）。
-   改回与其余档同源的 `repeat(auto-fill, minmax(var(--nk-grid-min), 1fr))` 后 1536 落 6 列、
-   列宽 212.3px（1440 的 5 列 240.8 → 1536 的 6 列 212.3，列数增、列宽减，但**不再低于相邻档的手机宽度**
-   且不再低于 1024 档的 201px），该档 clamp 25 → 16 张、立绘最小 69.3 → 146.1px。
-   列数序列（宽→窄）[2,3,4,5,6,7] 仍单调非递增，`e2e/layout-home.spec.ts:358-365` 的不变量保持成立。 */
 @media (min-width: 1536px) {
   .nk-idx-grid,
   .nk-lc-grid { --nk-grid-gap: 18px; }

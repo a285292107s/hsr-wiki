@@ -1,5 +1,3 @@
-/* 角色详情页 · 星魂 / 能力加成 / 配装 / 档案 / 故事。拆分块 3/6。 */
-
 .nk-char-page .nk-eidolon { padding: 24px; }
 .nk-char-page .nk-eidolon__head { display: flex; align-items: flex-start; gap: 24px; }
 .nk-char-page .nk-eidolon__icon {
@@ -51,14 +49,6 @@
 .nk-char-page .nk-build__cones { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 16px; margin-bottom: 0; }
 .nk-char-page .nk-build__cones .nk-lc-card__info { padding: 12px; gap: 4px; }
 .nk-char-page .nk-build__cones .nk-lc-card__name { font-size: var(--nk-fs-3); }
-/* 星标已改为立绘右上角飘带（几何由 `catalog.css` 的 `.nk-lc-card__stars` 单点声明），
-   本处不再覆盖字号——飘带字号随卡宽 `cqw` 等比缩放，覆盖字号会破坏该等比关系。
-   只收窄字号上限：本区卡名是 `--nk-fs-3`（11.52px），比光锥列表页的 `--nk-fs-4` 更小，
-   飘带上限须跟着降到它之下（层级：名字必须是卡上最大的字）。 */
-.nk-char-page .nk-build__cones .nk-lc-card__stars { --rb-fs-max: 10px; }
-/* 左上角两个角标共处：`REC. N` 是「推荐序」注解、命途图标是数据角标，二者都不能丢，
-   故改为纵向堆叠（图标在序注之下，同左对齐）。图标改为 `top: 38px`：序注盒高 ≈16px
-   （`--nk-fs-1` 8px + 上下 padding 2px + 上下描边 1px）叠在 `top: 10px` 上，留 6px 呼吸位。 */
 .nk-char-page .nk-build__cones .nk-lc-card__badge { top: 38px; left: 10px; }
 .nk-char-page .nk-lc-mini__rec {
   position: absolute; left: 10px; top: 10px; z-index: 3;
@@ -69,7 +59,6 @@
   pointer-events: none;
 }
 .nk-char-page .nk-build__teams { display: flex; flex-direction: column; gap: 16px; margin-bottom: 0; }
-/* 面板底色 / 描边 / 圆角由 `character-skills.css` 顶部的面板表面组单点声明（本文件只排布盒内） */
 .nk-char-page .nk-build__team { display: flex; align-items: center; padding: 20px 24px; }
 .nk-char-page .nk-build__team-head { display: none; }
 .nk-char-page .nk-build__team-slot { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
@@ -164,7 +153,6 @@
 .nk-char-page .nk-story__clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s var(--nk-ease-out); }
 .nk-char-page .nk-story--open .nk-story__clip { grid-template-rows: 1fr; }
 .nk-char-page .nk-story__inner { overflow: hidden; min-height: 0; }
-/* 正文测度（max-width）由 character-compare.css 的 `__story__text / __skill__terms` 组单点声明 */
 .nk-char-page .nk-story__text {
   font-size: var(--nk-fs-4); line-height: 1.9; color: var(--text2);
   border-top: 1px dashed var(--line-1);

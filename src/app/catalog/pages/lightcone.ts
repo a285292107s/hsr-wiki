@@ -30,7 +30,6 @@ export const lightconePage: CatalogPageConfig = {
         skillName: info.skill_name,
       });
     }
-    // 排序：id 降序（新光锥在前），黑塔商店特殊光锥（id ≥ 24000）排在尾部
     items.sort((a, b) => {
       const aId = Number(a.id);
       const bId = Number(b.id);
@@ -67,19 +66,17 @@ export const lightconePage: CatalogPageConfig = {
     ];
   },
   renderCard(item, i) {
-    /* 稀有度飘带内容 = `★N`（同 character.ts：一条带身放不下 `★`×N，且数字无语言差异）。 */
-    const starLabel = `★${Number(item.rarity) || 5}`;
+    const stars = '★'.repeat(Number(item.rarity) || 5);
     const path = String(item.path || '');
     const skillName = String(item.skillName || '');
-    /* 卡名放宽为 2 行后仍可能被 clamp 省略（P1），全文挂卡根 `title` 复原（同 character.ts）。 */
     return `<a class="nk-lc-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-path="${escHtml(path)}" title="${escHtml(item.name)}" style="--i:${i}">
       <div class="nk-lc-card__img">
         <img class="lc-avatar" src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
         <div class="nk-sk nk-sk--shimmer nk-lc-card__shimmer" aria-hidden="true"></div>
         ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${pathLabel(path)}"></div>` : ''}
-        <span class="nk-lc-card__stars" aria-hidden="true"><span class="nk-lc-card__stars-txt">${starLabel}</span></span>
         <div class="nk-lc-card__info">
           <span class="nk-lc-card__name">${escHtml(item.name)}</span>
+          <span class="nk-lc-card__stars-row" aria-hidden="true">${stars}</span>
           ${skillName ? `<span class="nk-lc-card__skill" title="${escHtml(skillName)}">${escHtml(skillName)}</span>` : ''}
         </div>
       </div>

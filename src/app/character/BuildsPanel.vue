@@ -11,14 +11,12 @@ import type { CharacterData, ItemDb, NameCache, RelicSetData } from '../../servi
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 type BuildSection = 'cones' | 'teams' | 'relics';
 
 const props = withDefaults(
   defineProps<{
     d: CharacterData;
-    /** base 数据（char.data；套装描述异步加载的触发源，加强切换不变） */
     baseData: CharacterData | null;
     charId: string;
     nameCache: NameCache;
@@ -28,7 +26,6 @@ const props = withDefaults(
   { sections: () => ['cones', 'teams', 'relics'] },
 );
 
-/** 光锥元数据（id → rarity/path，来自共享单例 light_cones.json；推荐卡片星级/命途徽章用） */
 const lcMeta = ref<Record<string, { rarity: number; path: string }>>({});
 onMounted(() => {
   void loadLocalLightCones()
@@ -37,7 +34,7 @@ onMounted(() => {
       for (const it of list) map[String(it.id)] = { rarity: it.rarity, path: it.path || '' };
       lcMeta.value = map;
     })
-    .catch(() => { /* 元数据缺失时回退默认星级/无徽章，不阻塞 */ });
+    .catch(() => { });
 });
 
 const cones = computed(() =>
@@ -51,11 +48,9 @@ const cones = computed(() =>
       name: itemName(id, props.nameCache, props.itemDb),
       img: cdnUri('lightconemediumicon', `${id}.webp`),
       rarity,
-      stars: `★${rarity}`,
+      stars: '★'.repeat(rarity),
       path,
       pathImg: path ? pathIconUrl(path) : '',
-      /* 模板里是普通 `<a :href>`（不走 RouterLink 的 history base）⇒ 必须显式加语言前缀，
-         否则非缺省语言下点推荐光锥会静默跳回缺省语言（activeHref 的存在意义即此）。 */
       href: activeHref(`/lightcone/${id}`),
     };
   }),
@@ -67,7 +62,6 @@ interface TeamSlot {
   img: string;
   backups: { id: number; name: string; img: string }[];
 }
-/** 主槽「当前角色」名（手机端行内展示；直接取渲染数据 name 字段——nameCache 不含 charId 自身） */
 const mainName = computed(() => props.d.name || '');
 const teams = computed<{ teamId: number; members: TeamSlot[] }[]>(() => {
   const dd = props.d;
@@ -109,14 +103,11 @@ const buildsEmpty = computed(() =>
   !cones.value.length && !teams.value.length && !hasRelics(props.d),
 );
 
-/* ─── 遗器套装描述异步加载（base data 变化时触发；加强切换不重复） ───
- * 代际保护：角色快速切换时，迟到的旧套装响应直接丢弃，避免混入/覆盖新角色数据。 */
 const relicSets = ref<Record<string, RelicSetData | null>>({});
 let relicGen = 0;
 watch(
   () => props.baseData,
   (data) => {
-    // 平铺拆分布局下本实例可能不渲染遗器块（如 cones+teams 实例）：跳过加载
     if (!props.sections.includes('relics')) return;
     const gen = ++relicGen;
     relicSets.value = {};
@@ -130,7 +121,6 @@ watch(
         try {
           return [String(s.id), await loadLocalRelicSet(s.id)] as const;
         } catch {
-          // 加载失败静默：名称回退 itemName，描述留空，不阻塞页面
           return [String(s.id), null] as const;
         }
       }),
@@ -139,9 +129,8 @@ watch(
       relicSets.value = Object.fromEntries(entries);
     });
   },
-  { immediate: true }, // 面板在数据就绪后才挂载，需立即执行一次
+  { immediate: true },
 );
-// 卸载后飞行中的响应一律过期（写入已销毁组件的 ref 无意义）
 onBeforeUnmount(() => {
   relicGen++;
 });
@@ -156,9 +145,6 @@ function setIcon(data: RelicSetData | null | undefined): string {
 function setName(id: number, data: RelicSetData | null | undefined): string {
   return (data && data.name) || itemName(id, props.nameCache, props.itemDb);
 }
-/* 队列表的 `#id` 是上游未解析时的回退串（`itemName` 的最后一跳），只承载「这是哪个 id」的调试信息。
-   备选队友头像没有可见文字，`title` / `alt` 就是它唯一对外的话 ⇒ 把回退串当名字念给读屏用户毫无意义，
-   故回退串归空，模板据此走「图片装饰化 + 用 href 里的 id 兜底」。 */
 function isIdFallback(name: string): boolean {
   return /^#\d+$/.test(name);
 }
@@ -189,9 +175,9 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
           <div v-if="c.pathImg" class="nk-lc-card__badge">
             <img :src="c.pathImg" :alt="c.path">
           </div>
-          <span class="nk-lc-card__stars" aria-hidden="true"><span class="nk-lc-card__stars-txt">{{ c.stars }}</span></span>
           <div class="nk-lc-card__info">
             <span class="nk-lc-card__name">{{ c.name }}</span>
+            <span class="nk-lc-card__stars-row" aria-hidden="true">{{ c.stars }}</span>
           </div>
         </div>
       </a>
@@ -201,7 +187,6 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
     <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.teams }}</span>TEAMS</h2>
     <div class="nk-build__teams">
       <div v-for="t in teams" :key="t.teamId" class="nk-build__team">
-        <!-- 配队标头：多队角色显示编号锚点（编号取数据 team_id，非数组下标）；桌面隐藏，手机断点启用 -->
         <div v-if="teams.length > 1" class="nk-build__team-head">
           {{ translate('build.team') }} <span class="nk-build__team-head__num">{{ String(t.teamId).padStart(2, '0') }}</span>
           <span class="nk-build__team-head__total">/ {{ String(teams.length).padStart(2, '0') }}</span>
@@ -216,12 +201,10 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
         <template v-for="(m, i) in t.members" :key="m.mid">
           <div class="nk-build__team-slot">
             <RouterLink :to="`/character/${m.mid}`" class="nk-build__team-link" :title="slotLabel(m.name, m.mid)">
-              <!-- 成员槽带可见角色名 ⇒ 头像装饰化（同名 alt 会触发 axe image-redundant-alt） -->
               <img :src="m.img" alt="">
               <span class="nk-build__team-name">{{ m.name }}</span>
             </RouterLink>
             <div v-if="m.backups.length" class="nk-build__team-alt">
-              <!-- 备选队友槽**没有**可见文字 ⇒ alt/title 是它唯一的可达名 -->
               <RouterLink v-for="b in m.backups" :key="b.id" :to="`/character/${b.id}`" class="nk-build__team-link" :title="slotLabel(b.name, b.id)">
                 <img :src="b.img" :alt="slotLabel(b.name, b.id)">
               </RouterLink>
