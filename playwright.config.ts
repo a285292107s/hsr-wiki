@@ -36,9 +36,6 @@ export default defineConfig({
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'] },
       testIgnore: [/visual\.spec\.ts/, /accessibility\.spec\.ts/],
-      grepInvert: process.env.CI
-        ? [/@viewport-pinned/, /@viewport-independent/, fontCalibrated]
-        : [/@viewport-pinned/, /@viewport-independent/],
     },
   ],
   webServer: {

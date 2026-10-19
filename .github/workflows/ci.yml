@@ -123,8 +123,8 @@ jobs:
         run: |
           files=$(ls e2e/layout-*.spec.ts | grep -v -e layout-locales-smoke -e layout-locales-sweep -e layout-i18n-overflow -e layout-endgame-overflow | tr '\n' ' ')
           echo "本分片文件集：$files"
-          pnpm exec playwright test $files --shard=${{ matrix.shard }}/6
-                --project=chromium --project=mobile-chromium
+          pnpm exec playwright test $files --shard=${{ matrix.shard }}/6 \
+            --project=chromium --project=mobile-chromium
 
       - name: Upload e2e artifacts
         if: failure()

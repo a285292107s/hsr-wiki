@@ -7,9 +7,9 @@
 .nk-egd-mon__hp-label,
 .nk-egd-mon__label { font-size: var(--nk-fs-2); }
 
-.nk-egd-group__title,
 .nk-egd-floor__label,
 .nk-egd-fury__label,
+.nk-egd-group__title,
 .nk-egd-summons__label,
 .nk-egd-mon__skillphase,
 .nk-egd-guide__label,
@@ -76,7 +76,10 @@
   .nk-egd-peak__kind,
   .nk-egd-floor__wavelabel { font-size: var(--nk-fs-3); }
   .nk-egd-peak__tag { font-size: var(--nk-fs-4); }
-  .nk-egd-mon__label { font-size: var(--nk-fs-3); }
+  .nk-egd-mon__label { font-size: var(--nk-fs-2); }
+  .nk-egd-group__title,
+  .nk-egd-floor__row--mons > .nk-egd-floor__label { font-size: var(--nk-fs-4); }
+  .nk-egd-trait__desc { font-size: var(--nk-fs-5); }
   .nk-egd-node__text { font-size: var(--nk-fs-5); }
   .nk-egd-nodecard__name { font-size: var(--nk-fs-4); }
   .nk-egd-tabs .nk-tab { font-size: var(--nk-fs-3); }

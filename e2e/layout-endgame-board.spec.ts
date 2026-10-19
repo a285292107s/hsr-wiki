@@ -67,7 +67,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：层级只为上下半场 + 星启单节点看板（ADR 0029 / 0030 / 0031 / 0032 / 0033）', async ({ page }) => {
+  test('/endgame/boss/3020：层级只为上下半场 + 星启单节点看板（ADR 0029 / 0030 / 0031 / 0032 / 0033）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/boss/3020');
     const season = seasonData('maze_boss.json', '3020');
@@ -266,10 +266,28 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       };
     });
     expect(scale.monsTitle, '敌方配置标题与区块标题同档').toBe(scale.groupTitle);
+    await page.setViewportSize({ width: 390, height: 844 });
+    const narrowScale = await page.evaluate(() => {
+      const fs = (sel: string) => {
+        const el = document.querySelector(sel);
+        return el ? parseFloat(getComputedStyle(el).fontSize) : 0;
+      };
+      return {
+        groupTitle: fs('.nk-egd-board .nk-egd-group__title'),
+        monsTitle: fs('.nk-egd-board .nk-egd-floor__row--mons > .nk-egd-floor__label'),
+        rowLabel: fs('.nk-egd-board .nk-egd-mon__label'),
+        prose: fs('.nk-egd-board .nk-egd-trait__desc'),
+      };
+    });
+    expect(narrowScale.monsTitle, '手机档敌方配置标题与区块标题同档').toBe(narrowScale.groupTitle);
+    expect(narrowScale.groupTitle, '手机档区块标题必须高于卡片内行首标签').toBeGreaterThan(narrowScale.rowLabel + 0.5);
+    expect(narrowScale.prose, '手机档正文必须高于卡片内行首标签').toBeGreaterThan(narrowScale.rowLabel + 0.5);
+    expect(narrowScale.prose, '手机档正文必须高于区块标题').toBeGreaterThan(narrowScale.groupTitle + 0.5);
+    await page.setViewportSize({ width: 1280, height: 720 });
     for (const [name, lower, higher] of [
-      ['卡片节点号 > 区块标题', scale.groupTitle, scale.card],
       ['区块标题 > 卡片内行首标签', scale.rowLabel, scale.groupTitle],
       ['正文 > 卡片内行首标签', scale.rowLabel, scale.prose],
+      ['卡片节点号 > 卡片内行首标签', scale.rowLabel, scale.card],
     ] as const) {
       expect(higher, `${name}（${higher} vs ${lower}）`).toBeGreaterThan(lower + 0.5);
     }
@@ -759,6 +777,28 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     const node1Elems = await nodeCardTabs.nth(0).locator('.nk-egd-nodecard__elems').innerHTML();
     expect(node3Elems).not.toBe(node1Elems);
     await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame/boss/3020：区块标题与敌方配置标题同档（桌面 / 手机），且高于卡片内行首标签', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/endgame/boss/3020');
+    await page.locator('#egd-level-tab-floor-1').click();
+    const board = page.locator('#egd-floor-board');
+    await expect(board.locator('.nk-egd-group__title')).toHaveText(['终焉公理']);
+    await expect(board.locator('.nk-egd-mon__label').first()).toBeVisible();
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      const groupTitle = await fontPx(board.locator('.nk-egd-group__title'));
+      const monsTitle = await fontPx(board.locator('.nk-egd-floor__row--mons > .nk-egd-floor__label'));
+      const rowLabel = await fontPx(board.locator('.nk-egd-mon__label').first());
+      expect(groupTitle, `${width} 档敌方配置标题与区块标题同档`).toBe(monsTitle);
+      expect(groupTitle, `${width} 档区块标题必须高于卡片内行首标签（${groupTitle} vs ${rowLabel}）`)
+        .toBeGreaterThan(rowLabel + 0.5);
+    }
+    const guideLabel = await fontPx(board.locator('.nk-egd-guide__label').first());
+    const summonsLabel = await fontPx(board.locator('.nk-egd-summons__label').first());
+    expect(guideLabel, '首领机制标签与召唤物标签同档').toBe(summonsLabel);
     assertNoErrors();
   });
 
