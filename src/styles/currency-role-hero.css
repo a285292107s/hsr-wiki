@@ -1,8 +1,3 @@
-/* 货币战争角色详情 · Hero / 吸顶条 / 图鉴卡。拆分块 1/4：四块必须按导入顺序级联。 */
-
-/* 本页局部令牌：主题位一律走语义令牌（全站单强调色通道，见 ADR 0041）；
-   领域位（派系 / 战斗 / 增益 / 阶位）保留各自语义色——领域色不随主题合并。
-   `.nk-crole-card` 也挂一份：图鉴卡不在 `.nk-crole` 之内（目录页 / 枢纽带独立渲染）。 */
 .nk-crole,
 .nk-crole-hero,
 .nk-crole-card {
@@ -176,10 +171,6 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   pointer-events: none;
 }
-/* P1：角色名是卡片主标识（玩家靠它区分条目），单行省略会把区分性后缀切掉
-   （`Dan Heng – Permansor Terrae` 需 190px / 盒宽 188px；ru `Дань Хэн: Пожиратель Луны` 需 191px）。
-   **必须保留 2 行 clamp**：`__name` 是头像上的**绝对定位浮层**，自由换行会越高越遮立绘
-   （13 语言实测最长需 4 行）。截断的复原手段由模板补 `title`（见 currency-role.ts）。 */
 .nk-crole-card__name-row {
   min-width: 0;
   display: -webkit-box;
@@ -217,10 +208,6 @@
   letter-spacing: 0.02em;
   color: var(--text3);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-  /* 充能标签链（`Ultimative Energie · Spezialaufladung · GES`）是多项枚举拼接，
-     实测 de 需 183px / 盒宽 122px（溢出 61px，远超前缀预算）⇒ 单行放不下，按「让它换行」处理。
-     **保留 2 行 clamp**：与 `__name-row` 同属头像上的绝对定位浮层，自由换行会遮立绘。
-     复原手段同 `__name-row`（模板补 `title`）。 */
   white-space: normal;
   overflow-wrap: break-word;
   display: -webkit-box;
@@ -245,16 +232,6 @@
   grid-auto-columns: 1fr;
   gap: 2px;
 }
-/* 羁绊标签是**卡面识别信息**（玩家靠它区分同名卡的不同派系/战斗/专属），按 P1 放宽。
-   原先 nowrap + ellipsis 把区分性后缀整个切掉：de `Heiliger Kelch des Schicksals` 需 95px 而列宽仅 62px、
-   ru `Межзвёздные путешественники` 需 97px（另一实例列需 103px，溢出 24px）。
-   列宽由 grid 的 1fr 决定（标签 2 个时每列 95px、3 个时每列 64px），加宽无从下手 ⇒ 只能换行。
-   **不设 line-clamp**：标签同时含 `__icon` 与文本，用 `-webkit-box` 会把图标一并纳入行盒计算。
-   **`align-items` 必须是 `stretch` 而非 `center`**：本块是**纵向** flex，`center` 下文本匿名项的
-   宽度取 fit-content = 最长不可断词的 min-content（de `Fertigkeitspunkt` = 46px > 30px 列），
-   于是文本项永远比列宽、`break-word` 无处可断 ⇒ 反而把列撑破（枢纽页 78px 小卡实测 +7px hardClipX）。
-   `stretch` 让文本项宽度等于列内宽，`break-word` 才有断点；图标改用 `align-self: center` 保持居中。
-   `overflow-wrap: break-word` 只在单词放不下时断，不改动 CJK 的任意断行行为。 */
 .nk-crole-tcard-trait {
   display: flex;
   flex-direction: column;
@@ -272,7 +249,6 @@
   transition: color var(--nk-dur-hover) var(--nk-ease-out);
 }
 .nk-crole-tcard-trait__icon {
-  /* 标签块改用 `align-items: stretch` 后（见上），图标靠自身声明保持居中 */
   align-self: center;
   width: 20px;
   height: 20px;
@@ -407,7 +383,6 @@
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.55);
 }
-/* 赛季号比费用更弱一档（它是辅助坐标，不是读数），故单独声明而不是靠后覆盖 */
 .nk-crole-hero__season {
   font-family: var(--font-hud);
   font-size: var(--nk-fs-3);
@@ -507,11 +482,6 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.62);
   letter-spacing: 0.02em;
-  /* hero 羁绊名是 P1 主标识：de `Express-Kohorte` 需 81px / 原盒宽 56px（**溢出 50%**）、
-     ru `Экипаж экспресса` 需 96px、th `เพื่อนร่วมขบวน` 需 70px —— 单行省略等于把羁绊名吃掉一半。
-     56px 上限保留（它维持羁绊组的横向节奏），但**自由换行、不设 clamp**：
-     曾试 2 行 clamp，vi `Đồng Hành Đội Tàu` 仍需 3 行（实测仍裁 +2px）⇒ clamp 在最长语言下依然丢字。
-     羁绊名本身极短，自由换行即可完整显示；不 clamp 也就无需 title 复原。 */
   max-width: 56px;
   overflow-wrap: break-word;
   text-align: center;

@@ -41,6 +41,7 @@
 - **计数文案的复数选形也必须与页面同口径**：词典用 `|` 给单/复数（`{n} tier | {n} tiers`），页面走 vue-i18n 的 `t(key, { n })`——n=1 取单数、其余取复数（由 `src/app/__tests__/i18n.test.ts` 钉住）。生成器必须写成 `uiT(key, 兜底, { n }, n)`，**显式把 n 当 count 传**；漏传就恒取复数形式，n=1 时快照出现 `1 tiers`（页面是 `1 tier`），与「事实标签逐字一致」相冲且不报错。判据：脚本枚举 `uiT(` 调用点 × 13 语言词典是否含 `|`，**两侧都成立才需要传 count**（本站 45 处里只有 7 处符合，别按「所有 `{n}` 都要传」批量改）。`tools/gen-ai-endpoints.mjs`
 - **文本上限是有意取舍，不得静默改成全量**：单实体文本上限（目录条目 4000 / 详情页 20000 字符）用于防止大文件把 dist 撑爆；截断行为是契约的一部分。
 - **给快照加合成文案时，新增 i18n 键会撞汉字残留棘轮**：`ui()` 缺键回退中文，于是新键在 12 个非汉字语言的分层快照里就是一行中文，直接判红。首页统计块因此只用**既有词典键 + 纯数字**拼（目录名 + 条目数），不新增键、不写叙述句；确要写就必须 13 语言同批补齐译文。`tools/gen-ai-endpoints.mjs`
+- **生成器里的文案表只能存「词典键 + 惰性求值的 helper」，不能在建表时直接调 `ui()`**：模块加载期 `currentLocale` 还是缺省语言，值会被当场求值并**冻结成中文**，于是非缺省语言快照里整片中文——而这类错误在常规断言下全部合法（正文非空、无 `$t:` 令牌、无原始键名），只有汉字棘轮偶尔兜住。`tools/gen-ai-endpoints.mjs`
 - **空列表是「条目静默漏光」的伪装形态**：`<ul class="nk-snapshot__list"></ul>` 语法合法、任何计数断言都看不见它，故守卫显式禁止空列表，`catalogBody()` 对空 `items` 不落 `<ul>`。
 - **给巨页加 `<h2>` 骨架不改条目集合**：`/item`、`/achievement` 的分组只加结构（`groupSections`），条目仍逐条带 `nk-snapshot__entry`；分组标签取不到时**构建失败**而不是造回退标签——空 `<h2>` 必被守卫拦，兜底命名则等于为数据里没有的分类自撰文本（同「禁止为无数据实体合成通用句」）。`tools/gen-ai-endpoints.mjs`
 
@@ -90,7 +91,7 @@
 - **静态模板里的 `og:*` 不会被生成器顺手覆盖**：生成器只 upsert 它点名的那几个字段，其余原样继承模板 ⇒ 改名 / 换品牌后模板里的 `og:site_name` 会继续挂着**旧项目名**，且没有任何断言察觉。判据：模板里每个 `og:*` 要么被生成器按页覆盖，要么在守卫里有同源/取值断言。
 - **JSON-LD 的 `inLanguage` 硬编码时，语言前缀快照会全部自称缺省语言页**：JSON 完全合法，`JSON.parse` 断言与前缀 URL 断言都过。判据：逐份断言 `inLanguage === <html lang>`，且两者与 `og:locale` 由**同一个 culture** 派生。
 - **`og:locale` 是 `语言_地区`（下划线），`<html lang>` 是 BCP 47（连字符）**：两侧都写死会在新增语言时静默错位。
-- **hreflang 的值必须取 `culture`（BCP 47），不能取上游 `TextLanguageKey`**：`cht` / `jp` / `kr` 不是语言码（应为 `zh-TW` / `ja-JP` / `ko-KR`），Google 对无法识别的值**整条忽略**——日 / 韩 / 繁三个版本静默脱离 hreflang 簇，而「14 条 = 13 语言 + x-default」的计数断言照样全绿（**条数正确与取值合法是两个维度**）。ADR 0052 决策 1 与 `src/lib/i18n/locales.ts` 注释都写着取 culture，实现取 code 属分叉。`tools/gen-ai-endpoints.mjs`
+- **hreflang 的值必须取 `culture`（BCP 47），不能取上游 `TextLanguageKey`**：`cht` / `jp` / `kr` 不是语言码（应为 `zh-TW` / `ja-JP` / `ko-KR`），Google 对无法识别的值**整条忽略**——日 / 韩 / 繁三个版本静默脱离 hreflang 簇，而「14 条 = 13 语言 + x-default」的计数断言照样全绿（**条数正确与取值合法是两个维度**）。ADR 0052 决策 1 要求取 culture，实现曾取 code 属分叉。`tools/gen-ai-endpoints.mjs`
 - **`Article` 描述数据条目页＝把数据页说成资讯稿**：机器拿不到条目身份与属性。判据（可反向验证）：`Article` 只允许出现在叙述性专题页，数据条目页出现即判红；条目页必须是 `WebPage` + `mainEntity`（条目没有 schema.org 对应类型时落 `Thing`，**不要自造类型**）。
 - **缺 `og:image` 不报错，只在分享出去时才看出来**：页面、守卫、构建全绿，平台只渲染纯文字卡片。判据：每页断言 `og:image` 存在且与本仓 origin 同源；站点级一张图即可，不必每页一张。
 - **日期只写在可见文本里等于「这页没有日期」**：抽取器与搜索侧（DeepSeek Search 的 `date` 字段）只读结构化日期。判据：每份快照必须同时有可见 `<time datetime="{synced_at}">` 与 JSON-LD `dateModified`，且与 sitemap `<lastmod>` **同源**（三者都取 `version.json.synced_at`）。**守卫只断言前两处的存在与取值**——`lastmod` 的取值当前无断言（第 2 组只校验 URL 集合与同源），改口径时不会报错，属已知盲区。`tools/gen-ai-endpoints.mjs`
@@ -102,4 +103,6 @@
 - **`tools/dead-links.test.ts` 只收集被登记的 URL 构造函数，未登记的一族会无声上线**：同类资源（如 `avatarRoundIconUrl`）漏进收集表时，死链审计永远查不出缺口——新增资源族必须同步登记进审计收集表。
 - **以 HTTP 200 提供的占位图会绕过前端 error/挂起回退链**：上游用测试贴图顶替缺失资产时状态码全绿，「状态码检查」类工具（含死链审计）永远查不出——判据须比对**字节数/内容**而非状态码。
 - **依赖目标服务器对探测 IP 响应的判定型任务，上 CI 前先实测该 IP 可用性**：CI 数据中心 IP 对 CDN 返回 403 会让全部 URL 判 env、缓存后每天重测，形成永远推不完的空转烧预算；死链是静态事实，保留本机按需跑即可。
+- **jsDelivr 对探测有硬限流，并发与请求头都不能「优化」**：审计并发上限 3（UI 只允许 1/2/3），浏览器不得自定义 UA；429/503 退避重试（0/2s/5s），403 是持续信号（数据中心 IP）直接判 env、重试无意义；冷文件 302 → `raw.githubusercontent.com`，必须跟随重定向再判；HEAD 404 直接判 dead（省一半请求）。违反的形态是「探测越跑越慢直到全 env」，不报错。`src/app/debug/dead-links.ts`
+- **死链结果只能靠本地缓存复用，不能指望 HTTP 缓存**：jsDelivr 的 404 带 `no-cache,no-store`，每次探测都会回源 GitHub ⇒ 已知结果落 localStorage，并用「来源 JSON 文件 sha1 签名」决定是否重测；来源文件内容变了（converter 重跑）就重测，签名一致则复用。来源文件读不到时必须标 `unreadable` 而不是静默丢签名，否则 `planProbe` 会把整族 URL 判成可复用。`src/app/debug/dead-links.ts`
 - **JS 用户的「就绪/加载中」状态类与快照的关系必须在改测试前想清楚**：快照隐藏依赖 `html.js`，而页面自身的加载态由独立的渲染分支控制——两者混为一谈会导致「快照闪现」或「加载态被判定为内容缺失」两类误判。

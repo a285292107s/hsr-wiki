@@ -1,15 +1,4 @@
 #!/usr/bin/env node
-/**
- * UI 词典守卫：node tools/check-i18n-messages.mjs
- *
- * 四条判据（[ADR 0052](../docs/adr/0052-多语言站点架构-路径前缀与语言包.md) 决策 4）：
- *   1. `src/lib/i18n/messages/*.json` 的语言集合 == `tools/converter/languages.json` 声明集合（双向）
- *   2. 每份词典的键集与源语言 `cn` **逐键相等**（缺译会被 fallback 掩盖成中文，必须构建前拦下）
- *   3. 无空值；非中日韩语言不得出现汉字（抓「复制源语言忘了翻」这类静默泄漏）
- *   4. 代码里静态写出的 `t('…')` 键必须存在于 `cn`（抓拼写错误；动态键 `t(`a.${x}`)` 不在此列）
- *
- * 退出码：违反 1；全绿 0。
- */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, posix } from 'node:path';
@@ -21,13 +10,11 @@ const REGISTRY = join(ROOT, 'tools', 'converter', 'languages.json');
 const SRC_DIR = join(ROOT, 'src');
 
 const SOURCE_LOCALE = 'cn';
-/** 允许出现汉字的语言：源语言 + 繁体 + 日文（日文正文含汉字属正常） */
 const HAN_ALLOWED = new Set(['cn', 'cht', 'jp']);
 const HAN_RE = /[\u3400-\u4dbf\u4e00-\u9fff]/;
 
 const problems = [];
 
-/* ─── 1. 词典集合 == 语言清单 ─── */
 if (!existsSync(REGISTRY)) {
   console.error(`[FAIL] 缺少语言清单 ${REGISTRY}`);
   process.exit(1);
@@ -50,7 +37,6 @@ if (!files.includes(SOURCE_LOCALE)) {
   process.exit(1);
 }
 
-/* ─── 2/3. 键集相等 + 空值 + 汉字泄漏 ─── */
 const dicts = {};
 for (const code of files) {
   try {
@@ -77,9 +63,6 @@ for (const code of files) {
       problems.push(`${code}.json 的 ${k} 含汉字（疑似漏译）：${v.slice(0, 24)}`);
     }
   }
-  // 插值占位符必须与源语言一致（漏掉 {dest} 会让界面出现原文括号）
-  // 复数形式（vue-i18n 的 `|`）会在每个形式里重复同一占位符 ⇒ 比较**去重后的集合**；
-  // 并要求每个形式自身的占位符集合一致（少写会让该形式少插一个值，比总数不一致更隐蔽）。
   const phSet = (v) => [...new Set(v.match(/\{\w+\}/g) ?? [])].sort().join(',');
   for (const k of sourceKeys) {
     if (!(k in dict)) continue;
@@ -92,10 +75,6 @@ for (const code of files) {
   }
 }
 
-/* ─── 3.5 词典值里的花括号只能是占位符 ─── */
-/* vue-i18n 会把 `{…}` 当占位符编译：德语「开拓者」官方写法是 `{M#Trailblazer}{F#Trailblazerin}`
-   （性别变体标记），直接进词典会抛 `SyntaxError: Invalid token in placeholder` 并让页面渲染异常。
-   占位符只允许 `{name}` 形态；含其它花括号即失败（要字面花括号须走 vue-i18n 的转义写法）。 */
 const PLACEHOLDER_OK = /^\{[A-Za-z_][A-Za-z0-9_]*\}$/;
 for (const [code, dict] of Object.entries(dicts)) {
   for (const [k, v] of Object.entries(dict)) {
@@ -107,10 +86,6 @@ for (const [code, dict] of Object.entries(dicts)) {
   }
 }
 
-/* ─── 3.6 数据驱动键：模板拼接的键静态查不到，按数据枚举值兜底 ─── */
-/* `t('itemType.' + v)` / `propLabel('prop.' + k)` 这类键的**取值域来自数据**，
-   静态扫描只看得到前缀 ⇒ 新增一个枚举值时界面会静默显示原始键名。
-   本轮 `itemType.ComposeMaterial` 就是这样漏的（13 语言全缺，物品页显示键名）。 */
 const DATA = join(ROOT, 'public', 'data', 'cn');
 const base = dicts[SOURCE_LOCALE] ?? {};
 const readJsonSafe = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); } catch { return null; } };
@@ -125,7 +100,6 @@ const readJsonSafe = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); 
       problems.push(`items.json 的 sub_type 缺词典键 ${missing.length} 个（例：itemType.${missing[0]}）`);
     }
   }
-  /* 技能类型：`skillType.<skills[].type>`（角色与忆灵两处） */
   const charDir = join(DATA, 'characters');
   if (existsSync(charDir)) {
     const types = new Set();
@@ -138,8 +112,6 @@ const readJsonSafe = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); 
     const missing = [...types].filter((v) => base[`skillType.${v}`] === undefined).sort();
     if (missing.length) problems.push(`角色技能类型缺词典键 ${missing.length} 个（例：skillType.${missing[0]}）`);
   }
-  /* 固定枚举族：键由代码常量产出（`MAZE_STATUS_CLASS` / `GROUP_ORDER`），数据里没有取值域，
-     只能按代码侧的枚举固定断言。 */
   for (const k of ['endgame.status.live', 'endgame.status.ended', 'endgame.status.upcoming', 'endgame.status.unknown']) {
     if (base[k] === undefined) problems.push(`终局状态缺词典键（mazeStatusLabelKey 会产出它）：${k}`);
   }
@@ -147,8 +119,6 @@ const readJsonSafe = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); 
     if (base[k] === undefined) problems.push(`货币战争属性分组缺词典键（groupLabel 会产出它）：${k}`);
   }
 
-  /* 怪物分类：键由 enum-labels 的映射表产出（枚举值与数据值不同名，无法从数据直接推），
-     故按映射表的**输出**固定断言。 */
   for (const k of ['monster.rank.boss', 'monster.rank.littleBoss', 'monster.rank.elite', 'monster.rank.minion']) {
     if (base[k] === undefined) problems.push(`怪物分类缺词典键（enum-labels 会产出它）：${k}`);
   }
@@ -167,11 +137,6 @@ const readJsonSafe = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); 
   }
 }
 
-/* ─── 3.7 结构层「中文回退」的可达性 ─── */
-/* `properties.json` 里有两条官方无独立词条的属性名（`SpeedAddedRatio` / `MaxSP`），落成
-   **未令牌化的中文**⇒ 只有缺省语言一份。当前它们不可达（遗器数据不含、CW 行走令牌或词典），
-   但这是**数据现状**而非保证：一旦某个属性 id 在数据里被用到，非缺省语言就会露中文。
-   判据：被数据用到的回退行必须同时有 `prop.<id>` 词典键（词典是本地化兜底）。 */
 {
   const propsFile = join(DATA, 'properties.json');
   const rows = existsSync(propsFile) ? (readJsonSafe(propsFile) ?? []) : [];
@@ -199,7 +164,6 @@ const readJsonSafe = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); 
   }
 }
 
-/* ─── 4. 代码里静态 `t('…')` 的键必须存在 ─── */
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     if (name === '__tests__' || name === 'node_modules') continue;
@@ -210,8 +174,6 @@ function walk(dir, out = []) {
   return out;
 }
 
-/* 静态键：`t('k')` / `t('k', {...})` / `translate('k', …)` 都算（两参调用曾漏检，
-   于是 `t('mob.stage', { n })` 这种带插值的键拼错时守卫静默放过）。动态键（模板字符串）不在列。 */
 const T_RE = /\b(?:t|translate)\(\s*'([A-Za-z][\w.]*)'/g;
 const used = new Map();
 for (const file of walk(SRC_DIR)) {
@@ -228,16 +190,8 @@ for (const [key, where] of used) {
   problems.push(`代码引用了不存在的词典键 ${key}（${[...new Set(where)].slice(0, 2).join(', ')}）`);
 }
 
-/* ─── 4.5 死键报告（信息级，不阻塞） ─── */
-/* 反向视图：词典里有、代码里从未被引用的键。它们会让「漏译/拼错」的排查变难（改了一处、
-   另一处留着旧值），也会随功能下线不断堆积。**只报告不失败**——引用方式有多种（`labelKey` /
-   `titleKey` / 数据驱动族），漏扫会误判，故不进 CI 门禁。 */
 {
   const referenced = new Set();
-  /* 判据：键以**引号包裹的字符串**出现在源码里即视为已引用。
-     这比只认 `t('k')` 稳得多——键也常出现在映射表 / 数组 / 配置对象里
-     （`{ 1: 'catalog.cost.1' }`、`RARITY_LABEL[key]`），逐种写法去识别必漏。
-     动态拼接（`t(`a.${n}`)`）与数据驱动族另算，见下。 */
   const KEY_RE = new RegExp(`(['"\`])((?:${sourceKeys.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')}))\\1`, 'g');
   const DYN_PREFIX_RE = /`([A-Za-z][\w.]*)\.\$\{/g;
   const dynPrefixes = new Set();
@@ -246,7 +200,6 @@ for (const [key, where] of used) {
     for (const m of text.matchAll(KEY_RE)) referenced.add(m[2]);
     for (const m of text.matchAll(DYN_PREFIX_RE)) dynPrefixes.add(m[1] + '.');
   }
-  /* 数据驱动族：前缀即引用（取值域由上面的数据断言兜住） */
   const DYN = ['itemType.', 'prop.', 'skillType.', 'monster.rank.', 'endgame.status.', 'propGroup.', 'stanceTag.'];
   for (const k of sourceKeys) {
     if (DYN.some((p) => k.startsWith(p)) || [...dynPrefixes].some((p) => k.startsWith(p))) referenced.add(k);
@@ -258,7 +211,6 @@ for (const [key, where] of used) {
   }
 }
 
-/* ─── 汇总 ─── */
 if (problems.length > 0) {
   console.error(`\n[FAIL] UI 词典校验失败，共 ${problems.length} 处：`);
   for (const p of problems.slice(0, 25)) console.error(`  - ${p}`);

@@ -121,8 +121,6 @@ export function buildAuditPlayerConfig(resolved: SpineResolved, sceneLayer?: num
   };
 }
 
-// atlas 格式：page 块以顶格 `<名>.png` 行开头，其后紧跟缩进的 `size: w, h` 行；
-// region 块与属性行均缩进。判据 = 顶格 + 下一行以 size: 开头。
 export function parseAtlasPages(atlasText: string): string[] {
   const lines = atlasText.split(/\r?\n/);
   const pages: string[] = [];
@@ -258,7 +256,6 @@ async function renderOnce(
   cfg: AuditPlayerConfig,
   opts: AuditRenderOptions,
 ): Promise<void> {
-  // 隐藏舞台：实例化前容器尺寸即确定（480×270 = 16:9，规避 buffer 比例错位陷阱）
   const host = document.createElement('div');
   host.style.cssText = 'position:fixed;left:-99999px;top:0;width:480px;height:270px;';
   document.body.appendChild(host);
@@ -365,7 +362,6 @@ function judgeMetaHealth(entry: AuditEntry): void {
   }
 }
 
-/** 帧内像素采样（draw 回调中调用，preserveDrawingBuffer 关闭也可读） */
 function sampleFrame(p: SpinePlayerInstance, anim: string, layer: number | null): FrameSample | null {
   const canvas = p.canvas;
   const gl = p.context?.gl;

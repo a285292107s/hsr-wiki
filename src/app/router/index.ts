@@ -84,8 +84,6 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 2, catalog: 'endgame', titleKey: 'catalog.endgame.title' },
   },
   {
-    // 玩法详情页（第四种页面形态：单页数据页）——规则正文 + 结构口径 + 增益体系 + 赛季列表。
-    // 正则白名单保证 `/endgame/xyz` 落到 catch-all 404，不吃掉未登记的玩法名。
     path: '/endgame/:mode(maze|story|boss|peak)',
     name: 'endgame-mode',
     component: () => import('../views/EndgameModeView.vue'),
@@ -183,14 +181,9 @@ const routes: RouteRecordRaw[] = [
 
 export function createNkRouter(): Router {
   const router = createRouter({
-    /* 语言前缀落在 history base（`/en/` 或 `/`）而不是复制 12 套路由表：
-       路由名保持唯一、`router-link` / `router.push('/character')` 一律自动带上前缀。
-       前缀在**页面加载期**由 URL 首段解析（ADR 0052：切语言走整页导航，见 SettingsView）。 */
     history: createWebHistory(localeBaseFromPath(window.location.pathname)),
     routes,
     scrollBehavior(_to, _from, savedPosition) {
-      // 不指定 behavior: 'instant'：本站目录页为内部容器滚动（window 不滚），
-      // instant 会在卡片初渲染的关键路径上强制同步回流，拖慢首屏。
       return savedPosition ?? { top: 0 };
     },
   });
@@ -203,7 +196,6 @@ export function createNkRouter(): Router {
   });
 
   router.afterEach((to) => {
-    /* 标题存**词典键**（不是中文正文）：切语言走整页导航，故这里按当前语言解析一次即可 */
     const key = to.meta.titleKey as string | undefined;
     const args = to.meta.titleArgs as Record<string, string> | undefined;
     const title = key
@@ -214,11 +206,6 @@ export function createNkRouter(): Router {
     document.title = title ? pageTitle(title) : pageTitle();
   });
 
-  /* 研究线调试台（Spine Lab 迁入主站，dev-only 注册）：
-     仅开发环境 addRoute——生产构建下 import.meta.env.DEV 被编译为 false，
-     本块连同调试台视图的懒加载 chunk 一并被摇树移除（与 zzz wiki devRoutes
-     同模式，实测：跨模块常量 + 数组展开分支无法消除 dynamic import，必须
-     本文件内 if(DEV) 注册）。prod 无 /debug 路由：深链直接落 404、零打包。 */
   if (import.meta.env.DEV) {
     router.addRoute({
       path: '/debug',

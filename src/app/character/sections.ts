@@ -1,6 +1,5 @@
 import type { CharacterData } from '../../services/types';
 
-/** 区块 id（对应面板 data-panel 值） */
 export type SectionId =
   | 'stats'
   | 'skills'

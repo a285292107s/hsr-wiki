@@ -1,5 +1,3 @@
-"""光锥索引转换器。"""
-
 import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR, RARITY_MAP
@@ -11,7 +9,6 @@ from utils import load_json, save_json, map_icon_path, sort_by_id
 logger = logging.getLogger("converter")
 
 def convert() -> None:
-    """转换 EquipmentConfig.json + EquipmentSkillConfig.json → light_cones.json。"""
     baseline = load_baseline_versions(OUTPUT_DIR / "light_cones.json")
 
     equip_data = load_json(EXCEL_DIR / "EquipmentConfig.json")

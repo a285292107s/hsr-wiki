@@ -1,8 +1,4 @@
 // @vitest-environment node
-/**
- * 忆灵技能预览分配（skill-anim.ts）纯函数契约测试
- * 覆盖：按 subTitle 匹配技能名、无标题条目顺序补位、多余条目并入首技能、空池/空技能降级。
- */
 import { describe, it, expect } from 'vitest';
 import { assignAnimEntries, memoAnimKey } from '../skill-anim';
 import type { Skill, SkillAnimEntry } from '../../services/types';

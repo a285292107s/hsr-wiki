@@ -1,10 +1,3 @@
-"""version 模块纯函数契约测试（不依赖真实 git）。
-
-覆盖：提交标题解析（官方客户端版本标识 → 版本对象）、异常输入降级。
-incremental 依赖声明一致性由 test_incremental.py 的 AST 扫描统一保障
-（version.py 无 load_json 静态调用，git:HEAD 声明满足 test_all_modules_declared）。
-"""
-
 import sys
 from pathlib import Path
 

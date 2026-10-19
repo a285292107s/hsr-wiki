@@ -1,11 +1,3 @@
-"""enum_labels 登记表契约测试（合成 TextMap，不依赖真实源数据）。
-
-守的是三件容易静默退化的事：
-1. 登记表与 `config` 的本地映射**键集一致**——漏登记会让界面显示原始枚举键（`CriticalChanceBase`）；
-2. 未登记枚举**必须**走本地回退（而不是空串）；
-3. `resolve` 产出的引用可令牌化（带 `.key`），否则多语言会退回单一语言。
-"""
-
 import sys
 from pathlib import Path
 
@@ -19,7 +11,6 @@ from config import PROPERTY_MAP, RELIC_TYPE_MAP  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
-    """mock TextMap，避免加载真实大文件。"""
     import textmap
     monkeypatch.setattr(textmap, "_text_map", {})
 
@@ -38,7 +29,6 @@ class TestRegistry:
                 assert key.isdigit(), f"{kind}.{name} 的键不是文本表 hash：{key}"
 
     def test_ui_labels_registered(self):
-        """转换器自用的固定标签（如「触发条件」）必须有官方词条，不许写死中文。"""
         assert enum_labels.textmap_key("ui_label", "conditionTrigger") is not None
 
 
@@ -55,13 +45,11 @@ class TestResolve:
 
     def test_falls_back_when_not_registered(self):
         assert enum_labels.resolve("property", "SpeedAddedRatio", "速度百分比") == "速度百分比"
+        assert enum_labels.textmap_key("property", "MaxSP") == "3862044039590256962", "MaxSP 官方词条 = 能量上限，必须登记而不得回退"
 
 
 class TestCoverage:
-    """登记表必须覆盖本地映射的键；未覆盖的必须在下面显式列出（新增键时强制做决定）。"""
-
-    # 官方文本表里没有独立词条的枚举（保留本地中文回退 ⇒ 落成普通字符串被残留清单点名）
-    NO_OFFICIAL_TERM = {"SpeedAddedRatio", "MaxSP"}
+    NO_OFFICIAL_TERM = {"SpeedAddedRatio"}
     NO_OFFICIAL_RANK = {"LittleBoss"}
 
     def test_property_keys_covered(self):

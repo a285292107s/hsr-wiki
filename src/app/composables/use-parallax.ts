@@ -1,4 +1,3 @@
-// 仅精确指针设备生效（触屏滚动会模拟 mousemove，导致抖动）。
 import { onScopeDispose, type Ref } from 'vue';
 
 export interface ParallaxOptions {

@@ -1,9 +1,3 @@
-"""货币战争 · 装备/环境/策略/羁绊图鉴转换器
-
-完整表→字段→输出映射见 docs/data/转换器字段映射.md（currency_catalog 段）。
-数据来自 vendor/TurnBasedGameData/ExcelOutput/；文本经 TextMap 解析为中文。
-输出：public/data/cn/currency/{equipment,portals,augments,traits}.json。
-"""
 from __future__ import annotations
 
 import logging
@@ -36,11 +30,6 @@ def _unwrap(v: Any, default: Any = None) -> Any:
     return v
 
 def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None = None) -> list[dict]:
-    """将 [{PropertyType: ..., Value: {Value: ...}}, ...] → 标准化列表。
-
-    prop_names 提供 PropertyType → 官方名（TextMap）时，额外输出 prop_name 字段；
-    未收录的属性类型不输出，由前端映射表兜底。
-    """
     if not lst:
         return []
     out = []
@@ -170,14 +159,6 @@ def _convert_portals(out_dir: Path) -> int:
 _GRIDFIGHTINFO_RE = re.compile(r"<gridfightinfo\s+type=(\w+)\s+id=(\d+)\s*/?>")
 
 def _build_name_indexes() -> tuple[dict[int, str], dict[int, str]]:
-    """构建物品 / 角色的 **TextMap 键**索引，用于解析 <gridfightinfo> 标签。
-
-    存键而非文本：词条描述是「模板 + 内嵌名称」的组合文案，必须按语言各自组合
-    （见 textpack 的 `composed_ref`）；先解析成文本再组合，多语言下只会得到中文那一份。
-
-    Returns:
-        (item_keys, role_keys): ID → TextMap 键 映射
-    """
     items_raw = _load_excel("GridFightItems.json")
     item_keys: dict[int, str] = {}
     for item in items_raw:
@@ -215,7 +196,6 @@ def _resolve_gridfightinfo(
     role_keys: dict[int, str],
     tm: Any,
 ) -> str:
-    """将 <gridfightinfo type=item|role id=N> 标签替换为**该语言**的实际名称（文本表由 `tm` 决定）。"""
     def _repl(m: re.Match) -> str:
         typ, sid = m.group(1), int(m.group(2))
         keys = item_keys if typ == "item" else role_keys if typ == "role" else None
@@ -229,13 +209,8 @@ def _augment_desc(
     item_keys: dict[int, str],
     role_keys: dict[int, str],
 ) -> str:
-    """**语言无关**的词条描述组合实现：标签替换 → 清洗（数值参数由前端 `fmtDesc` 展开）。
-
-    缺省语言正文与各语言语言包共用这一份实现（`tm` 决定语言）。
-    """
     text = tm.get(desc_key, "") if desc_key else ""
     text = _resolve_gridfightinfo(text, item_keys, role_keys, tm)
-    # 必须带语言表：内嵌名可能是 `{NICKNAME}`（开拓者的 AvatarName），不带表会洗成中文
     return clean_text(text, dict(tm))
 
 def _augment_desc_ref(
@@ -243,11 +218,6 @@ def _augment_desc_ref(
     item_keys: dict[int, str],
     role_keys: dict[int, str],
 ) -> Any:
-    """词条 → 描述的组合文本引用（语言包按语言现算）。
-
-    **闭包必须按值绑定模板键**：`lambda` 若直接引用外层循环变量，包生成时它已指向最后一条，
-    全部词条会解析成同一条描述（实测踩到过，靠逐条零回归探针发现）。
-    """
     desc_key = text_key_of(entry.get("HexDesc", {}))
     composer = lambda tm, k=desc_key: _augment_desc(tm, k, item_keys, role_keys)  # noqa: E731
     return composed_ref(
@@ -270,7 +240,6 @@ def _convert_augments(out_dir: Path) -> int:
         mini_icon = entry.get("MiniIconPath", "")
         quality = entry.get("Quality", "")
         category_id = entry.get("CategoryID", 0)
-        # GridFightAugment 无 `DescParamList`（同表族其它表有，勿按命名惯例改回）
         params = [_unwrap(p, 0) for p in (entry.get("EffectParamList") or [])]
         chapter_limit = list(entry.get("ChapterLimitList") or [])
 

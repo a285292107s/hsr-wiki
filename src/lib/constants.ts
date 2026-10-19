@@ -17,16 +17,7 @@ export const SPINE_MANIFEST_VERSION = 19;
 
 export const MAX_CHAR_LEVEL = 80;
 
-/**
- * 角色突破档位的等级上限（`AvatarPromotionConfig` 的 `MaxLevel`，全角色同一套）。
- * 档位下标与此数组一一对应：0 = 上限 20、1 = 30 …、6 = 80（满级档，不再解锁新档位故不列入）。
- * 角色详情页的等级滑条靠它把「等级」映射到「可突破到的最高档位」——见 `charStageForLevel`。
- */
 export const CHAR_STAGE_LEVEL_CAPS: readonly number[] = [20, 30, 40, 50, 60, 70];
-
-/* 枚举展示名（命途 / 元素 / 技能类型 / 削韧架势）不在此登记：
-   命途与元素取数据源（paths.json / elements.json 令牌），技能类型与架势取词典，
-   统一经 lib/enum-labels.ts 的 pathLabel / elemLabel / skillTypeLabel / stanceTagLabel 读取。 */
 
 export const SKILL_ICON_KEY: Record<string, string> = {
   Normal: 'Normal', BPSkill: 'BP', Ultra: 'Ultra',
@@ -64,9 +55,6 @@ export const PROP_ICON: Record<string, string> = {
 export const STANCE_LABEL = ['SingleAttack', 'AoEAttack', 'Blast'] as const;
 
 export const SKILL_ORDER: (string | null)[] = ['Normal', 'BPSkill', 'Ultra', 'Passive', 'ElationDamage', null, 'Maze', 'Assist'];
-
-/* 属性名 / 部位名不在此登记：展示名取官方词条（随语言包切语言），见 lib/enum-labels.ts。
-   此处只留与语言无关的资源映射（图标 / 序号）。 */
 
 export const SLOT_ICONS: Record<string, string> = {
   BODY: 'IconRelicBody', FOOT: 'IconRelicFoot', NECK: 'IconRelicNeck', OBJECT: 'IconRelicGoods',

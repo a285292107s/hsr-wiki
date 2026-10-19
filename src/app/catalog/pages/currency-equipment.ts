@@ -59,7 +59,6 @@ function renderEquipCard(item: CatalogItem, index = 0): string {
     ? `<div class="nk-cw-equip-stats">${props.map((p) => {
         const color = propColor(p.property_type || p.name);
         const label = propLabel(p);
-        /* 属性名是次要元信息（P2）：保留单行省略，但完整名挂自身 title 供键盘 / 读屏取用。 */
         return `<div class="nk-cw-equip-stat">
           <span class="nk-cw-equip-stat__dot" style="background:${color}"></span>
           <span class="nk-cw-equip-stat__name" title="${escHtml(label)}">${escHtml(label)}</span>
@@ -111,7 +110,6 @@ export const currencyEquipmentPage: CatalogPageConfig = {
   buildFilters(items: CatalogItem[]) {
     const filters: CatalogFilter[] = [];
     const COST_ORDER = ['1', '2', '3', '4', '5', '6+'];
-    /* 费用档 → 词典键（官方词条「N-Cost」；更高档位无词条时回退数值本身） */
     
     const costSet = new Set(items.map((it) => it.cost as string));
     const costOpts = COST_ORDER.filter((c) => costSet.has(c));

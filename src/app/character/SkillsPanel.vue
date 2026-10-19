@@ -11,16 +11,11 @@ import type { CharacterData, Skill, SkillAnimEntry, SkillAnimationsDb } from '..
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 const props = defineProps<{
   d: CharacterData;
   charId: string;
-  /** 当前强化键（SkillCard key 组成，切换时重置卡片内部状态） */
   enhKey: string | null;
-  /** 强化角标数据（强化模式下被强化技能 ID 集合；原始模式为 null） */
-  enhMark: { skillIds: Set<number>; rankIds: Set<number> } | null;
-  /** 技能动画映射（可选，未就绪为 null） */
   animDb: SkillAnimationsDb | null;
 }>();
 
@@ -61,12 +56,10 @@ const memoAnimMap = computed<Record<number, SkillAnimEntry[]>>(() => {
   return map;
 });
 
-/** 技能族锚点：技能 id 唯一，前缀可避免与页面其它 id 冲突 */
 function skillAnchor(id: number): string {
   return `nk-skill-${id}`;
 }
 
-/** 区块内索引项（技能 1808px 长区块的定位层）：note 用技能类型词，label 用技能名 */
 const indexItems = computed(() => [
   ...skillFamilies.value.map((g) => ({
     id: skillAnchor(g.main.id),
@@ -92,8 +85,6 @@ const indexItems = computed(() => [
     :child-skills="g.children"
     :char-id="charId"
     :char-data="d"
-    :enh-mark="enhMark"
-    :enh-label="enhKey ? `V${enhKey}` : ''"
     :anim-entries="animFor(g.main)"
   />
   <SkillCard
@@ -103,8 +94,6 @@ const indexItems = computed(() => [
     :sk="ms"
     :char-id="charId"
     :char-data="d"
-    :enh-mark="enhMark"
-    :enh-label="enhKey ? `V${enhKey}` : ''"
     :anim-entries="memoAnimMap[ms.id] || null"
   />
 </template>

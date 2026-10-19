@@ -1,9 +1,6 @@
 export interface NavItem {
-  /** 词典键：显示文案的唯一来源是 `src/lib/i18n/messages/*.json`（`nav.<key>`）。 */
   key: string;
-  /** 折叠态短标签的词典键（`nav.<shortKey>`）；缺省时用 `key`。 */
   shortKey?: string;
-  /** 拉丁副标：**设计元素，不翻译**（侧栏每项下方的英文大写描述，与主标形成双语排版）。 */
   en: string;
   path: string;
   activePaths?: string[];
@@ -11,9 +8,6 @@ export interface NavItem {
   icon: string;
 }
 
-/** 侧栏/底栏首项：跨模式入口。可见文案写的是**目的地模式名**而非「交换」——
- *  按钮自身不解释「交换什么」，玩家看到的就是点进去会到哪（`inNormal` = 当前在常规模式时显示，
- *  `inCw` = 当前在货币战争模式时显示）。无障碍文案在此基础上补动词「前往…」，保持 Label in Name。 */
 export const SWAP_ITEM = {
   inNormal: { key: 'nav.swapToCw', en: 'CURRENCY WAR' },
   inCw: { key: 'nav.swapToNormal', en: 'NORMAL MODE' },

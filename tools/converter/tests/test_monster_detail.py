@@ -1,8 +1,3 @@
-"""monster_detail 详情转换器契约测试（合成数据，不依赖真实源数据）。
-
-验证 convert()：按模板 ID 升序逐文件输出，字段结构与共享聚合表对齐。
-"""
-
 import sys
 from pathlib import Path
 
@@ -14,8 +9,6 @@ from converters import monster_detail as md  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def fake_monsters(monkeypatch):
-    """mock 共享聚合表 + 侵入归属 + save_json 捕获输出（不读真实源数据）。
-    战斗数值合成链字段（ADR 0040/0049）：聚合表直供 stat_ratio / level_group / elite_group。"""
     monkeypatch.setattr(md, "load_level_curve", lambda: {
         "1": {"80": {"hp": 148.01102, "atk": 30.684488, "def": 4.761905, "speed": 1.2}},
     })
@@ -24,7 +17,6 @@ def fake_monsters(monkeypatch):
         "2": {"hp": 1.7, "atk": 0.8, "def": 1.0, "speed": 1.0, "stance": 1.0},
     })
     monkeypatch.setattr(md, "load_invasion_map", lambda _monsters: {})
-    # 三块附加数据（monster_extra）也要挡掉：否则测试会去读真实源表（既慢又与合成数据无关）
     monkeypatch.setattr(md, "load_drops", lambda: {
         8013010: [{"world_level": None, "avatar_exp": 36, "items": [{"id": 2, "name": "信用点", "icon": "icon/item/2.png"}]}],
     })
@@ -34,10 +26,7 @@ def fake_monsters(monkeypatch):
     monkeypatch.setattr(md, "load_phases", lambda: {
         1002011: [{"phase_id": 1, "weak": ["Ice"], "resist": {"Fire": 0.2}}],
     })
-    # 首领阶段（共享装配 monster_guide.load_boss_guides）默认空表：不挡会去读真实 MonsterGuide* 四表
     monkeypatch.setattr(md, "load_boss_guides", lambda: {})
-    # 技能附带效果（同一 FK 联结）也要挡掉，否则会去读真实源表；默认空表，
-    # 「有效果才落键」由 test_skill_extra_effects_attached_per_skill 自己补桩
     monkeypatch.setattr(md, "load_skill_extra_effects", lambda: {})
     monkeypatch.setattr(md, "load_monsters", lambda: {
         8013010: {
@@ -50,7 +39,6 @@ def fake_monsters(monkeypatch):
             "stat_ratio": {"hp": 1.2, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 3,
             "elite_group": 2,
-            # 实例修正值：**不在转换期合成**，原值随 payload 给前端（等级滑条要实时合成）
             "stance_modify": 30, "speed_modify": -44,
             "skills": [{
                 "id": 801301001, "name": "践踏", "tag": "单攻",
@@ -68,8 +56,6 @@ def fake_monsters(monkeypatch):
             "level_group": 1,
             "skills": [],
         },
-        # 上游缺 StanceBase / SpeedBase 的模板（实测 33 / 13 条）：聚合表里**不落该键** ⇒
-        # 详情 payload 也不得落键，且不得 KeyError（写 0 会把「未知」显示成 0）
         1002013: {
             "name": "虚卒·掠夺者（缺基准）", "icon": "Monster_1002013",
             "figure": "Monster_1002013", "rank": "MinionLv2", "camp": "",
@@ -79,7 +65,6 @@ def fake_monsters(monkeypatch):
             "level_group": 1,
             "skills": [],
         },
-        # 同卡面三人组：8013011 立绘相同、8013012 立绘不同（`_art_shared` 的两个分支都要能测到）
         8013011: {
             "name": "反物质军团·践踏者（完整）", "icon": "Monster_8013010",
             "figure": "Monster_8013010", "rank": "Elite", "camp": "",
@@ -97,7 +82,6 @@ def fake_monsters(monkeypatch):
             "level_group": 1, "skills": [],
         },
     })
-    # 目录全集（`monsters.catalog_rows`）要挡掉，否则会去读真实 MonsterTemplateConfig
     monkeypatch.setattr(md, "catalog_rows", lambda _facets=None: [
         {"id": 8013010, "name": "反物质军团·践踏者", "icon": "Monster_8013010"},
         {"id": 8013011, "name": "反物质军团·践踏者（完整）", "icon": "Monster_8013010"},
@@ -111,13 +95,11 @@ def fake_monsters(monkeypatch):
 
 class TestConvert:
     def test_output_structure(self, fake_monsters):
-        """每怪物一个文件：字段完整、技能为全量、intro 为空串仍输出；曲线单点另落一份。"""
         md.convert()
         assert set(fake_monsters.keys()) == {
             "8013010.json", "8013011.json", "8013012.json", "1002011.json", "1002013.json",
             "monster-level-curve.json", "monster-elite-group.json",
         }
-        # 曲线与精英组倍率都是独立共享单点（供 2722 份详情与目录共用），不进任何怪物 payload
         assert fake_monsters["monster-level-curve.json"] == {
             "1": {"80": {"hp": 148.01102, "atk": 30.684488, "def": 4.761905, "speed": 1.2}},
         }
@@ -132,7 +114,6 @@ class TestConvert:
         assert d["stat_ratio"] == {"hp": 1.2, "atk": 1.0, "def": 1.0, "speed": 1.0}
         assert d["level_group"] == 3
         assert d["elite_group"] == 2
-        # 实例修正值原值落盘（前端在等级滑条上实时合成，见 ADR 0045）；模板无修正则不落键
         assert d["stance_modify"] == 30 and d["speed_modify"] == -44
         assert "stance_modify" not in fake_monsters["1002011.json"]
         assert "speed_modify" not in fake_monsters["1002011.json"]
@@ -145,22 +126,14 @@ class TestConvert:
         assert fake_monsters["1002011.json"]["skills"] == []
 
     def test_missing_base_keys_are_omitted_not_zero(self, fake_monsters):
-        """上游缺 StanceBase / SpeedBase ⇒ 详情 payload **不落该键**（不是 `"stance": 0`）。
-
-        判据与 `monster_common._base_stat` 同源：0 从来不是官方数值（实测这两个字段只要存在就
-        从不取 0），落 0 会让页面把「未知」显示成 0；`stats` 键恒在（hp/atk/def 全量有值），
-        缺的只是内部维度。直接下标 `info["stance"]` 会 KeyError，故必须走 `.get` 判存在。
-        """
         md.convert()
         d = fake_monsters["1002013.json"]
         assert "stance" not in d, "缺 StanceBase ⇒ 不落键"
         assert d["stats"] == {"hp": 100, "atk": 10, "def": 20}, "有值的维度保留，缺的不落键"
         assert "speed" not in d["stats"]
-        # 有值的模板不受影响（原值不变）
         assert fake_monsters["1002011.json"]["stats"] == {"hp": 100, "atk": 10, "def": 20, "speed": 90}
 
     def test_extra_blocks_keyed_by_template(self, fake_monsters):
-        """掉落/出没/阶段三块按**模板归属**写入；无数据的怪物不落键（不是空数组占位）。"""
         md.convert()
         d = fake_monsters["8013010.json"]
         assert d["drops"] == [{
@@ -174,9 +147,6 @@ class TestConvert:
         ]
 
     def test_guide_phases_keyed_by_template(self, fake_monsters, monkeypatch):
-        """首领阶段（MonsterGuideConfig × MonsterGuidePhase，共享装配 monster_guide）按**模板**落
-        `guide_phases`：阶段名自带「阶段一：…」前缀，是站内唯一有来源的阶段号。只登记了首领特性、
-        没有阶段的模板不落键（本页只呈现阶段）。"""
         monkeypatch.setattr(md, "load_boss_guides", lambda: {
             8013010: {
                 "traits": [{"id": 1, "name": "坚防守备"}],
@@ -194,8 +164,6 @@ class TestConvert:
         assert "traits" not in fake_monsters["8013010.json"], "首领特性不进详情 payload（只取阶段）"
 
     def test_art_shared_prefers_same_figure_peer(self, fake_monsters):
-        """同卡面图标（名字不同）→ `art_shared`：优先点名**立绘相同**的同伴；只有立绘不同的同伴时
-        明说 `figure: false`（页面据此改口径——不能把「同卡面」说成「共用美术」）。"""
         md.convert()
         assert fake_monsters["8013010.json"]["art_shared"] == {
             "id": 8013011, "name": "反物质军团·践踏者（完整）", "figure": True, "forms": 3,
@@ -209,7 +177,6 @@ class TestConvert:
         assert "art_shared" not in fake_monsters["1002011.json"], "没有同卡面同伴 → 不落键"
 
     def test_skill_extra_effects_attached_per_skill(self, fake_monsters, monkeypatch):
-        """附带效果按技能 ID 挂在该技能条目上；无效果的技能不落键（不是空数组占位）。"""
         monkeypatch.setattr(md, "load_skill_extra_effects", lambda: {
             801301001: [{"id": 10000027, "name": "额外回合", "desc": "描述", "param_list": [0.3]}],
         })

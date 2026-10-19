@@ -5,20 +5,13 @@ import { useDelayedSkeleton } from './use-delayed-skeleton';
 import { translate } from '../i18n';
 
 export interface DetailViewOptions {
-  /** store 是否已有数据（就绪判定） */
   hasData(): boolean;
-  /** 最近一次加载错误（falsy = 无） */
   error(): string | null;
-  /** 当前已加载 id（空串 = 未加载），供路由参数变化比对 */
   currentId(): string;
-  /** 触发加载；reject 视为失败 */
   load(id: string): Promise<void>;
-  /** 加载成功后的附加动作（失败自理，不影响错误态） */
   onLoaded?(): void;
 }
 
-/** 详情视图引导：phase / skeleton / 失败 toast + 重试 / mount 首载 / 路由参数变化重载。
- *  数据本体由调用方 store 持有（跨导航保留），这里只做编排。 */
 export function useDetailView(options: DetailViewOptions) {
   const route = useRoute();
   const app = useAppStore();

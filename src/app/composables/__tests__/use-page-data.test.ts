@@ -1,10 +1,8 @@
-// 数据加载编排测试：fake timers + Vue 响应式，loader 全部注入，不依赖 DOM
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePageData } from '../use-page-data';
 
 beforeEach(() => {
-  // 非组件上下文调用 onScopeDispose（useDelayedSkeleton 内部）会告警：静默
   vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 

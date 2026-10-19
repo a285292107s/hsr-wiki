@@ -1,20 +1,3 @@
-/* 终局详情页 · 排版刻度收口：字号**只走 `--nk-fs-*` 令牌** + 4px 间距节奏。
-   拆分块第 7 块，**必须最后导入**：本块是终局详情页**唯一的字号声明点**——
-   前六块（frame / panels / monsters / levels / breakpoints / pollution）已不再声明 `font-size`
-   （同特异性下会被本块覆盖 = 死声明，改它不生效；ADR 0034 决策 2 踩过这个坑）。
-   例外只有一处不在本块：`.nk-egd-floor__row--mons > .nk-egd-floor__label` 的特异性 (0,2,0) > 本块
-   (0,1,0)，本块压不住它，故它的标题档留在 `endgame-panels.css` 显式声明（令牌同为 `--nk-fs-3`）。
-   值来源：原 rem 字面量按「就近、同距离取较小档」映射到刻度——
-   0.62/0.66→fs-2、0.68/0.7/0.72/0.76→fs-3、0.78/0.8/0.84/0.86→fs-4、0.88/0.9/0.95→fs-5、
-   1.0→fs-6、1.22/1.35→fs-7、1.82→fs-title-1。
-   **两处按既有相对序契约落在相邻低档**（映射表按「就近」会落高档，但那会与 e2e 钉住的
-   「区块标题 > 行首标签」「正文 > 区块标题」撞成同值，见 `layout-endgame-board.spec.ts:330-337 / 800-801`）：
-   ① 分区标题 0.78 → fs-3（不是 fs-4）；② 敌方卡行首标签 0.68 → fs-2（不是 fs-3，手机档回 fs-3）。
-   刻度外的既有契约（ADR 0028 父子层级缩进）：`.nk-egd-children` 缩进 16px（手机 12px）——不随本刻度调整。
-   间距：卡片内边距 16px 18px；同族卡片列表 gap 10px；区块间 16px；大区块之间 24px（窄屏 18px 由断点块承担）。
-   本节声明在既有 `max-width: 767px` 块之后，故手机值必须在本节末重述，否则会被桌面值覆盖。 */
-
-/* ─── fs-2（10px）：状态徽标 / 计数 / 值下注脚 / 敌方卡行首标签 ─── */
 .nk-egd-hero__status,
 .nk-egd-floor__wavelabel,
 .nk-egd-peak__kind,
@@ -24,10 +7,6 @@
 .nk-egd-mon__hp-label,
 .nk-egd-mon__label { font-size: var(--nk-fs-2); }
 
-/* ─── fs-3（11.52px）：行首标签 / 小字正文 / 星级徽章 / 分区标题 ───
-   分区标题（`.nk-egd-group__title` 与 panels 里那处更高特异性的「敌方配置」）取本档而不是 fs-4：
-   ADR 0034 的相对序契约（区块标题 > 行首标签、正文 > 区块标题，e2e 钉住）在 fs-4 档上会与正文
-   撞成同值 —— 该契约的判据出自 `layout-endgame-board.spec.ts:331-337 / 800-801`，不得为收口而放宽。 */
 .nk-egd-group__title,
 .nk-egd-floor__label,
 .nk-egd-fury__label,
@@ -55,7 +34,6 @@
 .nk-egd-tier__badge,
 .nk-egd-phase__skilldesc { font-size: var(--nk-fs-3); }
 
-/* ─── fs-4（13.12px）：正文档（描述 / 目标 / 段落）与卡片值 ─── */
 .nk-egd-buff__desc,
 .nk-egd-floor__buffdesc,
 .nk-egd-peak__mechdesc,
@@ -70,7 +48,6 @@
 .nk-egd-hero__camp,
 .nk-egd-summon__name { font-size: var(--nk-fs-4); }
 
-/* ─── fs-5（15px）：卡片标题 / 实体名（读者要扫的那一层） ─── */
 .nk-egd-buff__name,
 .nk-egd-trait__name,
 .nk-egd-phase__name,
@@ -80,13 +57,10 @@
 .nk-egd-reward__name,
 .nk-egd-nav__id { font-size: var(--nk-fs-5); }
 
-/* ─── fs-6（17px）：节点卡片名（原为继承值 1rem＝刻度外的 16px） ─── */
 .nk-egd-nodecard__name { font-size: var(--nk-fs-6); }
 
-/* ─── fs-7（20px）：规则读数（回合 / 分数线） ─── */
 .nk-egd-rules__val { font-size: var(--nk-fs-7); }
 
-/* ─── title-1（28px）：赛季名 ─── */
 .nk-egd-hero__name { font-size: var(--nk-fs-title-1); }
 
 .nk-egd-buff { padding: 16px 18px; gap: 8px; }
@@ -96,26 +70,14 @@
 .nk-egd-mon__rows { gap: 8px; }
 
 @media (max-width: 767px) {
-  /* Hero 阵营行「玩法名 · EN」+ 攻略入口在手机档吃满一行：fs-4 在 320 档把 EN 顶到次行
-     成孤词，降到标签档（与断点块的 0.1em 字距配套，最窄档实测一行放得下）。 */
   .nk-egd-hero__camp { font-size: var(--nk-fs-3); }
-  /* 赛季名与规则读数在手机档收一档（title-1 → fs-7） */
   .nk-egd-hero__name { font-size: var(--nk-fs-7); }
-  /* 徽标档在手机档提一档（fs-2 → fs-3）：320 档小字更吃紧，且这是唯一「比桌面更大」的一组——
-     它们承担状态 / 类别 / 波次的可读性，桌面靠空间、手机靠字号 */
   .nk-egd-hero__status,
   .nk-egd-peak__kind,
   .nk-egd-floor__wavelabel { font-size: var(--nk-fs-3); }
-  /* 机制标签提一档（fs-3 → fs-4）：窄屏胶囊换行后仍要读得出 */
   .nk-egd-peak__tag { font-size: var(--nk-fs-4); }
-  /* 敌方卡行首标签在手机档回到标签档（桌面 fs-2 → 手机 fs-3）：手机档小字更吃紧，
-     且 e2e 钉住「手机档不小于桌面档」（`layout-endgame-board.spec.ts:824-830`）。 */
   .nk-egd-mon__label { font-size: var(--nk-fs-3); }
-  /* 挑战目标正文提一档（fs-4 → fs-5）：手机档正文最大档，长句在该档最省行 */
   .nk-egd-node__text { font-size: var(--nk-fs-5); }
-  /* 节点卡片名回落一档（fs-6 → fs-4）：三卡均分一屏宽后卡内容区仅 ~79px */
   .nk-egd-nodecard__name { font-size: var(--nk-fs-4); }
-  /* 关架子 tab：必须压过 `tokens.css` 手机档的 `.nk-tab { font-size: var(--nk-fs-4) }`
-     （特异性 (0,2,0) > (0,1,0)），保持标签档——页签是导航，不吃正文档。 */
   .nk-egd-tabs .nk-tab { font-size: var(--nk-fs-3); }
 }

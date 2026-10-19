@@ -1,14 +1,8 @@
-/* 请求缓存引擎（内存级）
-     L1 内存 Map（80 条上限，淘汰最早 20%）
-     L2 in-flight 去重（同 cacheKey 并发请求复用同一 Promise）
-     L3 网络（15s 超时）
-   数据均为同域静态 JSON（Vercel CDN 托管），跨刷新持久化由 HTTP 缓存承担，无需 IndexedDB 持久层。 */
 import { NkError } from '../lib/errors';
 
 const FETCH_TIMEOUT = 15000;
 const MEM_MAX = 80;
 
-/* 网络请求（最底层） */
 async function requestText(url: string): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT);
@@ -18,7 +12,6 @@ async function requestText(url: string): Promise<string> {
     return await r.text();
   } catch (e) {
     if (e instanceof NkError) throw e;
-    // 20 = DOMException.ABORT_ERR（超时中止）
     if (e instanceof Error && (e.name === 'AbortError' || (e as DOMException).code === 20)) {
       throw new NkError(`Request timed out: ${url}`, true);
     }
@@ -37,21 +30,16 @@ export async function fetchJSON<T>(url: string): Promise<T> {
   }
 }
 
-/** 纯文本获取（诊断页 atlas 解析等用途），复用 15s 超时与 NkError 包装 */
 export function fetchText(url: string): Promise<string> {
   return requestText(url);
 }
 
 export interface ResourceStatus {
   ok: boolean;
-  /** HTTP 状态码（网络失败/超时为 0） */
   status: number;
-  /** 往返耗时 ms */
   ms: number;
 }
 
-/* 资源可达性检查（Spine 审核台等诊断用途）：只取响应头不消费 body（立即取消传输，不产生下载流量）。
-   不抛异常，超时/网络失败统一归一为 { ok:false, status:0 }，调用方按诊断语境解读。 */
 export async function fetchResourceStatus(url: string, timeoutMs = 15000): Promise<ResourceStatus> {
   const t0 = performance.now();
   const ctrl = new AbortController();
@@ -59,9 +47,8 @@ export async function fetchResourceStatus(url: string, timeoutMs = 15000): Promi
   try {
     const r = await fetch(url, { signal: ctrl.signal });
     try {
-      // 只取响应头：取消 body 流，避免下载大文件（skel/png 可达数 MB）
       if (r.body && typeof r.body.cancel === 'function') r.body.cancel();
-    } catch { /* 已消费或不可取消均静默 */ }
+    } catch { }
     return { ok: r.ok, status: r.status, ms: Math.round(performance.now() - t0) };
   } catch {
     return { ok: false, status: 0, ms: Math.round(performance.now() - t0) };
@@ -70,12 +57,10 @@ export async function fetchResourceStatus(url: string, timeoutMs = 15000): Promi
   }
 }
 
-/* L1 内存缓存（SPA 生命周期内只请求一次） */
 const mem = new Map<string, unknown>();
 
 function memSet(key: string, data: unknown): void {
   if (mem.size >= MEM_MAX) {
-    // 淘汰最早的 20% 条目（角色 JSON ~200KB，总内存约 16MB 上限）
     const evict = Math.ceil(MEM_MAX * 0.2);
     const it = mem.keys();
     for (let i = 0; i < evict; i++) {
@@ -90,12 +75,10 @@ export function memHas(key: string): boolean {
   return mem.has(key);
 }
 
-/** 供预取路径直接写入（跳过网络） */
 export function memStore(key: string, data: unknown): void {
   memSet(key, data);
 }
 
-/* 带缓存的 fetch：内存 → in-flight 去重 → 网络 */
 const pending = new Map<string, Promise<unknown>>();
 
 async function cachedRequest<T>(
@@ -103,12 +86,9 @@ async function cachedRequest<T>(
   cacheKey: string,
   load: (u: string) => Promise<T>,
 ): Promise<T> {
-  // L1: 内存
   if (mem.has(cacheKey)) return mem.get(cacheKey) as T;
-  // L2: in-flight 去重
   const inflight = pending.get(cacheKey);
   if (inflight) return inflight as Promise<T>;
-  // L3: 网络
   const p = load(url)
     .then((data) => {
       memSet(cacheKey, data);
@@ -123,10 +103,6 @@ export function cachedFetch<T>(url: string, cacheKey: string): Promise<T> {
   return cachedRequest(url, cacheKey, (u) => fetchJSON<T>(u));
 }
 
-/**
- * 同 `cachedFetch`，但由调用方决定「取回来之后怎么加工」（本地数据要先按当前语言解析文本令牌）。
- * 加工结果进 L1、并享 in-flight 去重与 15s 超时——缓存的是加工后的值，故缓存键必须带上语言维度。
- */
 export function cachedLoad<T>(url: string, cacheKey: string, load: (url: string) => Promise<T>): Promise<T> {
   return cachedRequest(url, cacheKey, load);
 }

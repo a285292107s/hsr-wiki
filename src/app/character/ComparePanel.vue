@@ -9,16 +9,12 @@ import type { CompareResult, RankDiff, TreeDiff } from '../../lib/compare';
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
-/** 文案统一走词典（脚本内不易用 useI18n；见 i18n.ts 的 translate） */
 
 
 const props = withDefaults(
   defineProps<{
-    /** 基座角色数据（对比的「原始」侧；强化包随其 enhanced 字段） */
     base: CharacterData | null;
-    /** 当前强化键（对比对象；null 时面板无内容） */
     enhKey: string | null;
     charId: string;
     sections?: string[];
@@ -37,7 +33,6 @@ interface RankCard {
   img: string;
   baseHtml: string;
   enhHtml: string;
-  /** 名称是否变化（数据上星魂名不变，字段对比已覆盖；占位防呆） */
   nameChanged: boolean;
 }
 const rankCards = computed<RankCard[]>(() =>
@@ -60,7 +55,6 @@ interface TreeCard {
   baseHtml: string;
   enhHtml: string;
   nameChanged: boolean;
-  /** 行迹节点多等级时显示等级徽章（绝大多数为 Lv.1） */
   levelLabel: string;
 }
 const treeCards = computed<TreeCard[]>(() =>
@@ -107,7 +101,6 @@ const spNote = computed<string | null>(() => {
         :key="c.num"
         class="nk-cmp-rank"
       >
-        <span class="nk-cmp-badge">{{ t('cmp.changed') }}</span>
         <div class="nk-cmp-rank__head">
           <img class="nk-cmp-rank__icon" :src="c.img" :alt="c.name" loading="lazy">
           <div class="nk-cmp-rank__meta">
@@ -143,7 +136,6 @@ const spNote = computed<string | null>(() => {
         :key="c.diff.anchor + '|' + c.diff.level"
         class="nk-cmp-tree"
       >
-        <span class="nk-cmp-badge">{{ t('cmp.changed') }}</span>
         <div class="nk-skill__title-row">
           <img v-if="c.icon" class="nk-skill__icon" v-bind="iconImgAttrs(c.icon)" alt="">
           <div class="nk-skill__title">
@@ -171,3 +163,4 @@ const spNote = computed<string | null>(() => {
     <div v-else class="nk-cmp-empty">{{ t('cmp.noChange') }}</div>
   </template>
 </template>
+

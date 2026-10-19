@@ -1,19 +1,11 @@
-/**
- * createSpinePlayer 兜底结算测试（整体超时 + error 回调路径）。
- * - 资源加载挂起（success/error 均不触发，模拟 CDN 连接黑洞）：20s 整体超时按失败结算
- * - error 回调：立即按失败结算并释放已创建实例（不依赖超时）
- * 通过 vi.mock('../runtime') 注入不结算/可结算的 fake 构造器。
- */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { fakeCtor, failingCtor } = vi.hoisted(() => {
   class FakeCtor {
     static __tag = 'fake';
     constructor(_container: HTMLElement, _config: unknown) {
-      /* 挂起：不触发 success/error */
     }
     dispose(): void {
-      /* noop */
     }
   }
   class FailingCtor {
@@ -21,7 +13,6 @@ const { fakeCtor, failingCtor } = vi.hoisted(() => {
       config.error?.(this, 'simulated failure');
     }
     dispose(): void {
-      /* noop */
     }
   }
   return { fakeCtor: FakeCtor, failingCtor: FailingCtor };

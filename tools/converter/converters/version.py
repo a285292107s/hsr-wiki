@@ -1,13 +1,3 @@
-"""游戏版本信息转换器
-
-数据来源：vendor/TurnBasedGameData 本地副本的 git 提交信息（CI 为浅克隆，禁止写「子模块」）。
-提交标题携带官方客户端版本标识（如 OSPRODWin4.4.0_D15909703_A15802547_L15874300），
-是数据源中唯一权威的全局版本号（ExcelOutput / TextMap 均无集中版本表；
-RelicSetConfig.ReleaseVersion 仅覆盖遗器且无子版本号）。
-
-输出：
-  - public/data/cn/version.json（git 不可用或提交标题无法解析时输出空对象）
-"""
 from __future__ import annotations
 
 import logging
@@ -23,7 +13,6 @@ logger = logging.getLogger("converter.version")
 _COMMIT_TITLE_PATTERN = re.compile(r"^OSPRODWin(\d+\.\d+\.\d+)_(D\d+)_(A\d+)_(L\d+)$")
 
 def parse_commit_title(title: str) -> dict | None:
-    """解析提交标题为版本对象；无法解析时返回 None。"""
     m = _COMMIT_TITLE_PATTERN.match(title.strip())
     if not m:
         return None
@@ -36,7 +25,6 @@ def parse_commit_title(title: str) -> dict | None:
     }
 
 def _read_head_commit() -> tuple[str, str] | None:
-    """读取子模块最新提交（标题, 日期）；git 不可用时返回 None。"""
     try:
         proc = subprocess.run(
             ["git", "-C", str(SOURCE_DIR), "log", "-1", "--format=%s%x1f%ad", "--date=short"],
@@ -58,11 +46,6 @@ def _read_head_commit() -> tuple[str, str] | None:
 
 @lru_cache(maxsize=1)
 def read_source_version_label() -> str:
-    """读取子模块 HEAD 提交标题解析出的 version_label（如 "4.6"）；不可用时返回空串。
-
-    供 release_version 打标（characters / light_cones）复用，禁止在别处复制一份提交标题
-    解析实现；也不得改读上一轮 version.json——那是上一版数据，标出的版本会落后一版。
-    """
     head = _read_head_commit()
     if head is None:
         logger.warning("无法读取子模块 git 提交，版本号留空")

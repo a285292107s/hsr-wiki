@@ -30,7 +30,6 @@ const t = translate;
   padding: 24px;
 }
 
-/* 写档卡：与全站面板同一套发丝线语言，深链落点时不像一张报错海报 */
 .nk-notfound__card {
   position: relative;
   display: flex;

@@ -1,5 +1,3 @@
-"""角色索引转换器。"""
-
 import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR, RARITY_MAP, PATH_NAME_FALLBACK
@@ -12,7 +10,6 @@ from utils import load_json, save_json, map_icon_path, unwrap_value, sort_by_id
 logger = logging.getLogger("converter")
 
 def convert() -> None:
-    """转换 AvatarConfig.json + AvatarConfigLD.json → characters.json。"""
     baseline = load_baseline_versions(OUTPUT_DIR / "characters.json")
 
     data = load_json(EXCEL_DIR / "AvatarConfig.json")

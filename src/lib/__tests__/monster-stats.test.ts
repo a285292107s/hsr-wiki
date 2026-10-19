@@ -27,7 +27,6 @@ describe('monsterStatAt', () => {
   it('维度修饰比参与合成（0.266667 = 弱体档位）', () => {
     const weak = { ...DETAIL, statRatio: { hp: 0.266667 } };
     expect(monsterStatAt('hp', 80, weak)).toBe(r1(69.75 * 0.266667 * 148.01102));
-    // 未声明的维度回退中性 1
     expect(monsterStatAt('atk', 80, weak)).toBe(r1(18 * 30.684488));
   });
 
@@ -55,13 +54,9 @@ describe('monsterMaxLevel', () => {
   });
 });
 
-/* ADR 0045：实例修正值（`MonsterConfig.{Stance,Speed}ModifyValue`）**加在曲线之后、不再被缩放**。
-   算式由参考站逐项反推验证：同族同模板 `144×1.32=190` 带 −44 修正的那一档显示 146
-   （若先加减再乘曲线会得到 132），韧性 `90 + 30 = 120`。 */
 describe('实例修正值（ADR 0045）', () => {
   it('速度：基准 × 曲线 **+ 修正值**（加在最后，不被曲线缩放）', () => {
     const speed = { ...DETAIL, modify: { speed: -44 } };
-    // 100 × 1.43 − 44 = 99（先加会得到 (100−44)×1.43 = 80.1，两者可区分）
     expect(monsterStatAt('speed', 100, speed)).toBe(r1(100 * 1.43 - 44));
     expect(monsterStatAt('speed', 100, speed)).not.toBe(r1((100 - 44) * 1.43));
   });
@@ -77,10 +72,6 @@ describe('实例修正值（ADR 0045）', () => {
   });
 });
 
-/* ADR 0049：精英组倍率段（`基准 × 修饰比 × 精英组 × 曲线 + 修正值`）。
-   判据由参考站变体卡实测逐位验证：银鬃射手 #100205006（精英组 2 · 难度组 1，L95）
-   显示 51,203 / 574 / 1,150 / 132 —— 与 `102.3×1.7×曲线` / `18×0.8×曲线` 吻合，
-   不含精英组的旧链会算出 30,119 / 718。 */
 describe('精英组倍率（ADR 0049）', () => {
   const CURVE95: MonsterLevelCurve = {
     '1': { '95': { hp: 294.42172, atk: 39.889835, def: 5.47619, speed: 1.32 } },
@@ -117,10 +108,6 @@ describe('精英组倍率（ADR 0049）', () => {
     expect(monsterEliteRatiosProduct()).toEqual({});
   });
 
-  /* ADR 0055：终局敌方卡的 HP 在**转换期**用同一条链落单值（`monster_common.monster_hp_at`）。
-     同一个关卡语境（自身组 1.7 × 关卡组 6.5，L95 / 难度组 3 / 曲线 294.42172）在两侧各算一遍，
-     期望值是**字面量**——转换器侧的同名用例（`tools/converter/tests/test_monster_common.py`）
-     钉的是同一个数，两端公式漂移即红。 */
   it('Π 关卡精英组：自身组 × 关卡组，与转换器侧字面量同值（ADR 0055）', () => {
     const stage = {
       stats: { hp: 102.3, atk: 18, def: 210, speed: 100 },

@@ -1,4 +1,3 @@
-// atlas 解析/像素统计/诊断建议纯函数测试，不依赖 DOM
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import {
@@ -42,7 +41,6 @@ describe('parseAtlasPages', () => {
 });
 
 describe('analyzePixels', () => {
-  /** 构造 RGBA 缓冲：alphaAt(x, bufRow) 返回 true 的行填 alpha=255（y 为 WebGL readPixels 行序，底部为 0） */
   const mk = (w: number, h: number, alphaAt: (x: number, bufRow: number) => boolean): Uint8Array => {
     const buf = new Uint8Array(w * h * 4);
     for (let row = 0; row < h; row++) {

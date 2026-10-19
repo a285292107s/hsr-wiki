@@ -1,10 +1,8 @@
-
 .nk-hero__visual[data-rarity='3'], .nk-lc-phase[data-rarity='3'] { --lc-r: var(--rarity-3); }
 .nk-hero__visual[data-rarity='4'], .nk-lc-phase[data-rarity='4'] { --lc-r: var(--rarity-4); }
 .nk-hero__visual[data-rarity='5'], .nk-lc-phase[data-rarity='5'] { --lc-r: var(--rarity-5); }
 
 .nk-hero--lc .nk-hero__visual { min-height: 240px; aspect-ratio: 2 / 1; }
-/* hero 名称升档：660px 画室里 2rem 折损了图鉴口吻；保持基线一族字重/字距 */
 .nk-hero--lc .nk-hero__name { font-size: clamp(var(--nk-fs-title-1), 2.8vw, var(--nk-fs-title-3)); }
 .nk-hero--lc .nk-hero__visual::after {
   content: '';
@@ -12,10 +10,6 @@
   border: 1px solid var(--line-1);
 }
 .nk-hero--lc .nk-hero__visual {
-  /* 8bit 等值线：这两层浅 inset 暗角整幅只有 ~3.7/255 深（实测中心 16.7 → 边缘 13.0），
-     摊在 ~200px 上必然塌成 2~3 条圆角矩形等值线，即用户报的「一圈一圈的圆角矩形印记」
-     （与角色 hero 同类缺陷，2026-09 已按同一判据去掉）。必须显式 none：删掉整条规则会回落
-     tokens.css 基线那两层更重的暗角（85% / 50%），不是「取消」。 */
   box-shadow: none;
 }
 .nk-hero__bg--lc {
@@ -26,18 +20,11 @@
 .nk-hero--lc .nk-hero__visual::before {
   content: '';
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  /* 稀有度椭圆晕染只有 ~4/255 深却铺满全幅（实测中心 22.7 → 边缘 18.7），等值线同样可见，
-     故一并退场；仅移除本条规则会回落基线的左右渐隐（同样是浅渐变）。 */
   background: none;
 }
 .nk-hero--lc .nk-hero__panel {
-  /* 基线 90deg 渐变整幅只跨 ~8/255（660px），塌成 7~8 条竖直色带：实测无文字区列向噪声 SD
-     1.34 / 行向 0.10（列行比 ≈ 12），即用户报的「竖立的条纹」。改为等平均深度的纯色
-     （70% ≈ 原渐变面积均值 13.0，实测同值），去渐变即去色带。 */
   background: color-mix(in srgb, var(--blk-900) 70%, transparent);
 }
-/* 光锥属性恒为 HP/ATK/DEF 三项：宽屏一行三列，需解除基线两列网格「末项满行」规则，
-   否则第 3 项（DEF）会被 grid-column: 1/-1 挤到独立整行；窄屏放不下三列时回落两列并保留满行。 */
 .nk-hero__stats--lc { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .nk-hero__stats--lc .nk-hero__stat:last-child:nth-child(odd) { grid-column: auto; }
 @media (max-width: 359px) {
@@ -51,7 +38,6 @@
   font-family: var(--font-hud);
 }
 
-/* 参数表横滚提示：机制与 relic.css 词条表同款（溢出时才亮右缘渐隐，滚到尽头熄灭） */
 .nk-lc-rank-table-wrap {
   position: relative;
   margin-top: 16px; overflow-x: auto;
@@ -189,10 +175,6 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
   font-style: normal; color: var(--text-bright);
 }
 
-/* 适配角色：与角色页「推荐光锥」互为镜像——圆头像 + 名 + 推荐顺位，整块是导航性内链。
-   列宽下限按「角色名最长 6 个全角字」定：条目固定开销 = 左右内距 18 + 头像 36 + 间距 10 +
-   顺位徽标 ~49 + 名与徽标间距 10 = 109px，故 208px 列给名字留 ~99px（最长名「开拓者·同谐」实测需 75px）。
-   旧值 168px 只留 59px，把这类名字截成「开拓者·同…」。 */
 .nk-lc-adapt {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(208px, 1fr));
@@ -220,8 +202,6 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 .nk-lc-adapt__name {
   flex: 1; min-width: 0;
   font-size: var(--nk-fs-4); font-weight: 600; color: var(--text);
-  /* 名字是这张卡的主信息：宁可换行也不截断。`-webkit-line-clamp` 只作为超长名的兜底——
-     当前数据里最长的名字（8 字符宽）在 208px 列里仍是单行显示。 */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -239,10 +219,6 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 }
 
 .nk-skeleton--lc .nk-skeleton__stat-grid { grid-template-columns: repeat(3, 1fr); }
-/* 骨架 hero 必须与真实 hero 同档高度：共享的 `.nk-skeleton__hero` 与它的 `__hero-visual` 都是
-   480px（为角色详情那档竖向 hero 定的），而光锥 hero 只有 240/320 ⇒ 加载完成时整页上跳 160px。
-   两个盒子都要改（visual 自带 `min-height: 480px`，只改外层无效）。档位照抄下方
-   `.nk-hero--lc .nk-hero__visual` 的规则（基准 240 / ≥1024 为 320）。 */
 .nk-skeleton--lc .nk-skeleton__hero,
 .nk-skeleton--lc .nk-skeleton__hero-visual { min-height: 240px; }
 @media (min-width: 1024px) {

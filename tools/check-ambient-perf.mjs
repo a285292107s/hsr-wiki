@@ -1,26 +1,4 @@
 #!/usr/bin/env node
-/**
- * 环境层性能守卫（A3.3 可重复取证）：node tools/check-ambient-perf.mjs
- *
- * 为什么单独成守卫：A3.3 的判据是「滚动长任务单次 ≤50ms、掉帧 <1%」，而环境层是**唯一常驻全站、
- * 且用 `background-attachment: fixed` 的合成层**——它一旦变贵，会让每一页都掉帧，且不会有任何报错。
- * 手工探针只在当次会话有效，故固化成可重复命令（阈值与判据来源见 docs/audit/UI质量验收标准.md A3.3）。
- *
- * 判据（全部可断言）：
- *   1. 长任务：最差单次 ≤ 50ms（目标线）
- *   2. 掉帧率：< 1%（目标线）
- *   3. **环境层贡献**：把 `--nk-ambient-image`（光晕 / 地平线 / 暗角）整层摘掉重跑同一路径，
- *      中位帧时长差 ≤ 0.5ms、掉帧率差 ≤ 0.5%
- *      —— 这一条是本守卫的核心：它把「环境层没拖慢滚动」变成可重复断言，
- *         而不是靠「看起来不卡」。
- *
- * 掉帧判据说明：阈值取 `中位帧时长 × 1.5`（≈漏一次 vsync）。**不能拿 16.7 当阈值**——
- * 中位恰好落在 16.7 时会把一半正常帧判成掉帧（本守卫开发时实测踩过，报出过 52% 的假掉帧率）。
- *
- * 用法：先确保有可访问的实例（默认 http://localhost:6188/，`pnpm dev` 或 `pnpm preview`），
- *   node tools/check-ambient-perf.mjs [--url=http://localhost:6188] [--json]
- * 退出码：0 全绿 / 1 有超线项 / 2 环境不可用（未能连上实例或无 Chromium）
- */
 import { spawnSync } from 'node:child_process';
 
 const arg = (k, d) => {
@@ -30,15 +8,11 @@ const arg = (k, d) => {
 const BASE = arg('url', 'http://localhost:6188');
 const AS_JSON = process.argv.includes('--json');
 
-/* 阈值：A3.3 目标线（docs/audit/UI质量验收标准.md） */
 const MAX_LONG_TASK_MS = 50;
 const MAX_DROP_RATE_PCT = 1;
 const MAX_MEDIAN_DELTA_MS = 0.5;
 const MAX_DROP_RATE_DELTA_PCT = 0.5;
 
-/* ── 用 playwright（项目已有的 e2e 依赖，不新增任何依赖）驱动 ──
-   注意：本仓只装了 `@playwright/test`（它 re-export `chromium`），**没有**裸 `playwright` 包；
-   `require('playwright')` 会 MODULE_NOT_FOUND。 */
 const PROBE = `
 const { chromium } = require('@playwright/test');
 const BASE = ${JSON.stringify(BASE)};
@@ -82,12 +56,10 @@ const measure = async (page) => page.evaluate(async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const out = {};
-  // 目录页：卡片墙 + 虚拟滚动，是滚动最贵的代表页
   await page.goto(BASE + '/character', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForTimeout(3000);
   out.withAmbient = await measure(page);
 
-  // 对照：把环境层整层摘掉（只留 --bg 纯色），量同一滚动路径
   await page.addStyleTag({ content: '#app{background-image:none !important}' });
   await page.waitForTimeout(500);
   out.noAmbient = await measure(page);
@@ -103,7 +75,6 @@ const measure = async (page) => page.evaluate(async () => {
 `;
 
 const r = spawnSync(process.execPath, ['-e', PROBE], { encoding: 'utf8', cwd: process.cwd() });
-/** 取 stderr 里最有信息量的一行（最后一行常是 Node 版本号，故往上找 Error/Cannot/ERR 开头的行） */
 const errLine = (s) => {
   const lines = (s || '').split('\n').map((l) => l.trim()).filter(Boolean);
   const hit = [...lines].reverse().find((l) => /Error|Cannot|ERR_|not found|MODULE_NOT/i.test(l));

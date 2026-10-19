@@ -13,7 +13,6 @@ import '../../styles/skill-card.css';
 import '../../styles/lightcone.css';
 import { translate } from '../i18n';
 
-/** 模板与脚本内统一走词典（脚本内不宜用 useI18n，见 i18n.ts 的 translate） */
 const t = translate;
 
 const app = useAppStore();
@@ -43,11 +42,6 @@ const skillDescHtml = computed(() => {
   return fmtDesc(d.value.skill.desc, lv ? lv.param_list : []);
 });
 
-/**
- * 参数表：只渲染描述实际引用的槽位（param_list 含上游预留未用槽，如 23060 #1 恒 0）；
- * 单位/精度按描述里的 `#N[tag]%/fN` 标记走 fmtVal——与描述数值同管线，
- * 禁止自造启发式（旧版 v<1 即 ×100 会把 f1 的 2.5 渲染成 3，21034 的 f2 0.2% 渲染成 0）。
- */
 interface RankRow { idx: number; values: string[] }
 
 const rankTable = computed<RankRow[]>(() => {
@@ -56,7 +50,6 @@ const rankTable = computed<RankRow[]>(() => {
   if (!levels.length) return [];
   const first = d.value.skill.level[String(levels[0])];
   if (!first) return [];
-  // 描述中的 `#N` 引用集 → 表行集合；`#N[i]%` / `#N[f1]%` 的 tag+单位 → 每槽位格式
   const refs = new Map<number, { tag: string; pct: boolean }>();
   const re = /#(\d+)\[([^\]]*)\](%?)/g;
   for (const m of d.value.skill.desc.matchAll(re)) {
@@ -103,14 +96,10 @@ const maxStats = computed(() => {
   return rows.length ? rows[rows.length - 1] : null;
 });
 
-/** 卡面故事：与其他卡面文本同管线（gameTagsToHtml 剥 <unbreak> 等游戏标签、保留 <i> 对话斜体） */
 const storyHtml = computed(() =>
   d.value?.story ? gameTagsToHtml(d.value.story).replace(/\\n/g, '<br>') : '',
 );
 
-/* 适配角色：官方配装推荐（AvatarEquipRecommend）的反向索引——与角色页 BuildsPanel 的「推荐光锥」
-   是同一张表的正反两面（rank 同源）。角色名走 characters.json 共享单例（对称于角色页用光锥
-   列表反解光锥名）；名字未就绪时整块不渲染，不落 '#id' 占位。 */
 const charNames = ref<Record<string, string>>({});
 let charNamesRequested = false;
 watch(
@@ -125,7 +114,7 @@ watch(
         charNames.value = map;
       })
       .catch(() => {
-        charNamesRequested = false; // 名单拉取失败：保留块不渲染，下次进页重试
+        charNamesRequested = false;
       });
   },
   { immediate: true },
@@ -136,7 +125,6 @@ const adaptChars = computed(() =>
     .map((c) => ({ id: c.id, rank: c.rank, name: charNames.value[String(c.id)] })),
 );
 
-/* 参数表横滚提示（机制同 RelicView 词条表：溢出时才亮右缘渐隐） */
 const rankWrapRef = ref<HTMLElement | null>(null);
 const rankScrollable = ref(false);
 let rankRo: ResizeObserver | null = null;
@@ -287,7 +275,6 @@ onBeforeUnmount(() => {
             <div class="nk-skill__head">
               <span class="nk-skill__type-dot" aria-hidden="true"></span>
               <div class="nk-skill__slider nk-lc-rank-slider">
-                <!-- 当前叠影等级并入左端标签：右端悬浮的孤值读不出上下文 -->
                 <span class="nk-lc-rank-label">{{ t('lc.superimpose', { n: lc.rank }) }}</span>
                 <input
                   type="range"

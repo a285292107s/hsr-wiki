@@ -20,7 +20,6 @@ const QUALITY_CSS: Record<string, string> = {
   Silver: 'silver', Gold: 'gold', Multicolor: 'multicolor', Unique: 'unique',
 };
 
-/** 属性值格式化：羁绊层级属性均为比率值（0.2=20%, 1.5=150%, 3.2=320%） */
 function propValue(v: number): string {
   return `${(v * 100).toFixed(0)}%`;
 }

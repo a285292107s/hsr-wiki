@@ -1,19 +1,4 @@
 #!/usr/bin/env node
-/**
- * 令牌对比度审计
- *
- * 读取 tokens.css 的 `:root` 令牌，并逐个读取强调色通道 `[data-accent="…"]`（全站唯一的主题色通道，
- * ADR 0041 之前货币战争另有一套 `[data-theme="cw"]`，该层已退场），
- * 解析 var() / color-mix() / rgba 直值，计算文本色令牌对 --bg 的 WCAG 对比度。
- *
- * 验收标准：
- *   - 正文类（--text / --text2 / --text3 / --highlight / --gold-sem / --metric-val）≥ 4.5:1
- *   - 主色文字（--primary：编号 / 激活态 / 焦点——装饰与大字豁免）≥ 3:1
- *
- * 用法：
- *   node tools/check-contrast.mjs            # 输出报告，超阈值退出码 0（仅提示）
- *   node tools/check-contrast.mjs --strict   # 低于阈值时退出码 1（CI 用）
- */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -23,9 +8,7 @@ const strict = process.argv.includes('--strict');
 const BODY_MIN = 4.5;
 const PRIMARY_MIN = 3.0;
 
-/** 正文类令牌（超阈值即失败）；--vor-300 为「贪饕」污染色的文字亮端（ADR 0027） */
 const BODY_TOKENS = ['--text', '--text2', '--text3', '--text-bright', '--highlight', '--gold-sem', '--metric-val', '--vor-300'];
-/** 主色文字令牌（装饰/大字豁免位，≥3:1） */
 const PRIMARY_TOKENS = ['--primary'];
 
 function parseRgb(v) {
@@ -45,7 +28,6 @@ function parseRgb(v) {
   return m ? [Number(m[1]), Number(m[2]), Number(m[3]), m[4] === undefined ? 1 : Number(m[4])] : null;
 }
 
-/** 返回 str 中 openIdx 处 '(' 的匹配右括号索引 */
 function findClosingParen(str, openIdx) {
   let depth = 0;
   for (let i = openIdx; i < str.length; i++) {
@@ -58,7 +40,6 @@ function findClosingParen(str, openIdx) {
   return -1;
 }
 
-/** 按顶层逗号分割（忽略括号内逗号） */
 function splitTopLevel(str, sep) {
   const out = [];
   let depth = 0;
@@ -77,7 +58,6 @@ function splitTopLevel(str, sep) {
   return out;
 }
 
-/** color-mix(in srgb, A p%, B q%) 预乘插值 → 非预乘还原（transparent 视为透明黑） */
 function parseColorMix(v, resolve, depth) {
   const start = v.indexOf('color-mix(') + 10;
   const close = findClosingParen(v, start - 1);
@@ -148,7 +128,6 @@ function contrast(a, b) {
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
-/** 提取令牌块（`:root`）：先剥离注释避免干扰，跳过无底色的局部覆盖块 */
 function extractBlocks(css) {
   const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   const blocks = new Map();
@@ -159,13 +138,11 @@ function extractBlocks(css) {
       if (mm) tokens[mm[1]] = mm[2].trim();
     }
     const key = m[1].trim();
-    // :root 可出现多次（局部覆盖块），同主题合并
     blocks.set(key, { ...(blocks.get(key) || {}), ...tokens });
   }
   return blocks;
 }
 
-/** 强调色通道块：`[data-accent="…"] { --th-*: … }`（不含 --bg，须叠在 :root 基上解析） */
 function extractAccentBlocks(css) {
   const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   const out = [];
@@ -186,7 +163,7 @@ const rootTokens = blocks.get(':root') || {};
 let failures = 0;
 
 for (const [theme, tokens] of blocks) {
-  if (!tokens['--bg']) continue; // 跳过无底色的局部 :root 覆盖块
+  if (!tokens['--bg']) continue;
   const resolve = makeResolver(tokens);
   const bg = composite(resolve(tokens['--bg']), [0, 0, 0, 1]);
   console.log(`\n════ ${theme}（底色 ${tokens['--bg']}） ════`);
@@ -204,8 +181,6 @@ for (const [theme, tokens] of blocks) {
   }
 }
 
-// 强调色通道逐个验收：统一后它是全站唯一的主题色通道（货币战争同样吃这一套），
-// 故 5 个色板都必须过——只验缺省的 :root 会漏掉「换色后某档文字掉到 4.5:1 以下」。
 const rootTokensForAccent = blocks.get(':root') || {};
 const accents = extractAccentBlocks(css);
 if (accents.length) {

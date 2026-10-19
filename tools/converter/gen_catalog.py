@@ -1,22 +1,3 @@
-"""生成 ExcelOutput 数据目录索引（DATA_CATALOG.md 总索引 + DATA_CATALOG.parts/ 分片）。
-
-扫描 vendor/TurnBasedGameData/ExcelOutput/ 下所有 JSON 文件，
-提取每个文件的：记录数、字段列表（schema）、文件大小、首条记录摘要。
-
-**分片机制（体量红线，见 AGENTS.md「强制规则」）**：全量索引约 25–30 万 token，
-超出任何模型的上下文预算，禁止以单文件形式交付。故全量模式输出：
-- `DATA_CATALOG.md`：总索引（分片表 + TextMap 清单 + 定位流程），保持 KB 级；
-- `DATA_CATALOG.parts/<分片>.md`：按文件名首字母切分的字段明细，单片控制在 ~150 KB 内。
-定位流程：`query.py --list <关键词>` 列出文件名 → 按首字母打开对应分片；
-或直接 `query.py <文件名> --schema` 取单表字段全集（零文档读取）。
-
-用法:
-    cd tools/converter
-    python gen_catalog.py              # 全量索引 → DATA_CATALOG.md + DATA_CATALOG.parts/*.md
-    python gen_catalog.py --top 50     # 局部索引前 50 个最大文件 → DATA_CATALOG.top50.md（勿提交）
-    python gen_catalog.py --filter Avatar  # 局部索引文件名含 Avatar 的 → DATA_CATALOG.filter-avatar.md（勿提交）
-"""
-
 import argparse
 import json
 import sys
@@ -32,8 +13,6 @@ from config import EXCEL_DIR, TEXTMAP_DIR
 OUTPUT_FILE = Path(__file__).resolve().parent / "DATA_CATALOG.md"
 PARTS_DIR = OUTPUT_FILE.parent / "DATA_CATALOG.parts"
 
-# 分片方案：按文件名首字母聚簇。小字母合并、大字母独立，单片不超过约 150 KB（≈5 万 token）。
-# 未覆盖的字母（当前数据没有，未来上游新增）按实际出现的字母自动成片，命名沿用区间写法。
 SHARDS: list[tuple[str, frozenset[str]]] = [
     ("a", frozenset("A")),
     ("b-d", frozenset("BCD")),
@@ -52,7 +31,6 @@ def get_file_size_mb(path: Path) -> float:
 
 
 def inspect_json_file(path: Path) -> dict:
-    """检查单个 JSON 文件，返回元信息。"""
     size_mb = get_file_size_mb(path)
 
     try:
@@ -96,11 +74,6 @@ def inspect_json_file(path: Path) -> dict:
 
 
 def truncate_record(record: dict, max_str_len: int = 40) -> dict:
-    """截断记录中的长字段，用于样例展示。
-
-    长字符串加省略号；长列表/字典改为结构化摘要（如 "<list[123]>"），
-    保证样例输出始终是合法 JSON（此前直接截断 JSON 文本会产生非法片段）。
-    """
     result = {}
     for k, v in record.items():
         if isinstance(v, str) and len(v) > max_str_len:
@@ -117,7 +90,6 @@ def truncate_record(record: dict, max_str_len: int = 40) -> dict:
 
 
 def shard_of(name: str) -> str:
-    """文件名 → 分片 id（按首字母）。未覆盖字母动态成片（`x-z` 区间写法）。"""
     letter = name[:1].upper()
     for shard_id, letters in SHARDS:
         if letter in letters:
@@ -126,7 +98,6 @@ def shard_of(name: str) -> str:
 
 
 def format_entry(e: dict) -> list[str]:
-    """单个文件小节（分片与局部索引共用）。"""
     lines: list[str] = []
     if "error" in e:
         lines.append(f"### {e['name']} ({e['size_mb']:.2f} MB) ⚠️ 解析失败")
@@ -158,7 +129,6 @@ def format_entry(e: dict) -> list[str]:
 
 
 def format_shard(shard_id: str, letters: str, entries: list[dict]) -> str:
-    """生成单个分片的 Markdown（自带返回总索引的链接）。"""
     lines = [
         f"# DATA_CATALOG 分片：文件名首字母 {letters}",
         "",
@@ -174,7 +144,6 @@ def format_shard(shard_id: str, letters: str, entries: list[dict]) -> str:
 
 
 def format_master(shards: list[tuple[str, str, list[dict]]], textmap_info: list[dict]) -> str:
-    """生成总索引 Markdown（KB 级：TextMap 清单 + 分片表 + 定位流程）。"""
     entries = [e for _, _, group in shards for e in group]
     errors = [e for e in entries if "error" in e]
     total_mb = sum(e["size_mb"] for e in entries)
@@ -224,7 +193,6 @@ def format_master(shards: list[tuple[str, str, list[dict]]], textmap_info: list[
 
 
 def format_catalog(entries: list[dict], textmap_info: dict) -> str:
-    """生成 Markdown 格式的目录索引（局部索引模式，单文件）。"""
     errors = [e for e in entries if "error" in e]
     lines = [
         "# ExcelOutput 数据目录索引",
@@ -265,7 +233,6 @@ def format_catalog(entries: list[dict], textmap_info: dict) -> str:
 
 
 def inspect_textmap() -> list[dict]:
-    """检查 TextMap 目录下的文件。"""
     results = []
     if not TEXTMAP_DIR.exists():
         return results
@@ -288,7 +255,6 @@ def inspect_textmap() -> list[dict]:
 
 
 def group_by_shard(entries: list[dict]) -> list[tuple[str, str, list[dict]]]:
-    """把条目按分片 id 聚簇，返回 (分片 id, 字母区间, 条目) 列表，按首字母排序。"""
     groups: dict[str, list[dict]] = {}
     for e in entries:
         groups.setdefault(shard_of(e["name"]), []).append(e)
@@ -297,7 +263,6 @@ def group_by_shard(entries: list[dict]) -> list[tuple[str, str, list[dict]]]:
         for sid, letters in SHARDS:
             if sid == shard_id:
                 return "".join(sorted(letters))
-        # 动态分片：字母区间由实际出现的首字母构成（单字母即该字母）
         present = sorted({e["name"][:1].upper() for e in groups[shard_id]})
         if len(present) == 1:
             return present[0]
@@ -350,16 +315,13 @@ def main():
     )
 
     if suffix:
-        # 局部索引（--top / --filter）：单文件、体量可控，保持旧行为，勿提交
         print("生成索引 ...")
         catalog = format_catalog(entries, textmap_info)
-        # newline="\n"：Windows 上禁用 \n→CRLF 翻译（全仓锁定 LF，见 .gitattributes）
         output_file.write_text(catalog, encoding="utf-8", newline="\n")
         print(f"✅ 已生成 {output_file} ({len(catalog) / 1024:.0f} KB)")
         print(f"⚠️ 局部索引（{len(entries)} 个文件），请勿提交到版本控制")
         return
 
-    # 全量模式：总索引 + 首字母分片（清掉过期分片，避免动态字母残留孤儿文件）
     print("生成总索引与分片 ...")
     shards = group_by_shard(entries)
     PARTS_DIR.mkdir(exist_ok=True)

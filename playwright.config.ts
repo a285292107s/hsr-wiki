@@ -2,10 +2,6 @@ import { defineConfig, devices } from '@playwright/test';
 import os from 'node:os';
 import path from 'node:path';
 
-// CI 层不收集 `@font-calibrated`（当前 2 条「骨架↔就绪同框」）：它们比「骨架盒高 == 就绪面板内容高」，
-// 而就绪内容高由若干 `line-height: normal` 行盒求和而成，比例随**解析到的回退字体**变——Linux runner 上
-// Firefox 实测比标定源（Windows）高 3.0 / 2.0px，故判定依赖平台。按「环境相关判定不进 CI」（与像素基线
-// 移出 CI 同一条理由，见 docs/agents/testing.md）只在 CI 下不收集；本机 `pnpm test:e2e` 全量仍判。
 const fontCalibrated = /@font-calibrated/;
 const ciFontCalibratedExclude = process.env.CI ? fontCalibrated : undefined;
 
@@ -13,25 +9,8 @@ export default defineConfig({
   testDir: './e2e',
   outputDir: path.join(os.tmpdir(), 'hsr-wiki-e2e-results'),
   snapshotPathTemplate: './e2e/snapshots/{testFilePath}/{arg}{ext}',
-  // `fullyParallel: false` 只禁**文件内**并行；文件级并行始终生效。layout 按域拆成 `layout-*.spec.ts`
-  // 后，单文件不再是唯一调度单元，每条用例的隔离性与拆分前一致（文件内本就串行，未新增并发面）。
-  // **但一条巨型文件仍能锁死墙钟**：2026-10 实测全量 180 用例 / 361.6s，其中 `layout-character.spec.ts`
-  // 单文件 39 用例、firefox 项目只跑它、而它排在项目列表末尾 ⇒ 末段 168s（占墙钟 46%）只有 1 个 worker
-  // 在跑（另一个空转）。故角色详情页再按域拆成 `layout-character-*.spec.ts` 七个文件，
-  // 并把 firefox 项目提到项目列表最前（Playwright 按项目顺序分派，最长单元要先起跑）。
-  //
-  // `workers: 2` 是实测的「无 flake 又有收益」平衡点：
-  //  - 不限并发（Playwright 取 CPU 半数，本机 12 核 → 6）：84 用例必现 4 条 30s 超时，单独复跑全绿；
-  //  - 3 worker：仍偶发 1 条超时（角色详情 1212 强化图标，实测该用例在**未拆分的 HEAD 原文件**上
-  //    4 跑挂 3，与本次拆分无关，属既有 CDN 竞态——见 docs/memory/2026-10 的坑位记录）；
-  //  - 2 worker：连续 3 轮全量 84/84 全绿，墙钟约 5.3 分钟。
-  // 换句话说：2 worker 拿到约 40% 提速，代价为零；再往上买到的是 flake。**勿上调**。
   fullyParallel: false,
   workers: 2,
-  /* CI 也用 0 重试：`--retries` 会把真实红灯转成绿灯（实测 mobile `/endgame/boss` 首跑红、retry 绿），
-     而仓库纪律本就禁止用重试抹平 flake（见 docs/agents/commands.md 与 docs/memory/testing.md）。
-     红 run 的时间成本也随之回落：重试会把失败的 e2e job 从 14.5 分钟拉到 ~20 分钟。
-     提速走「分片」（每台机器 worker 数仍是 2，见 .github/workflows/ci.yml），不是重试。 */
   retries: 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
@@ -41,13 +20,6 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    // Firefox 只跑 `@cross-engine`（判定可能随引擎差异变化的用例；`@viewport-pinned` 用例自钉视口，
-    // 不受项目默认视口影响）。标签须静态写在 `test(...)` 第二参，动态 annotation 对收集期过滤无效。
-    // 存在理由：滚动驱动动画在 Firefox **不支持**（`CSS.supports('animation-timeline','scroll()')` = false），
-    // 而缺 `@supports` 门时动画会退回普通时间轴跑完并停在末帧 ⇒ 媒体层永久下移 36px（实测到的真实缺陷）；
-    // 同类的引擎相关面还有 mask-image 渐变提示、焦点环绘制、极端视口溢出。
-    // **不扩到全部 layout 用例**：那是「三引擎 × 全量」，墙钟与既有 flake 面都会成倍放大，收益不匹配。
-    // 未覆盖：WebKit 与其余 spec —— 见 docs/audit/角色详情页验收标准.md 的 B3 条目。
     {
       name: 'firefox-layout-contract',
       use: { ...devices['Desktop Firefox'] },
@@ -64,8 +36,6 @@ export default defineConfig({
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'] },
       testIgnore: [/visual\.spec\.ts/, /accessibility\.spec\.ts/],
-      // `@viewport-pinned`：用例自钉视口；`@viewport-independent`：断言与断点无关（数据 / 结构 / 网络来源），
-      // 手机档重跑只是重复同一条断言。手机档只补「非固定视口下的手机断点面」。
       grepInvert: process.env.CI
         ? [/@viewport-pinned/, /@viewport-independent/, fontCalibrated]
         : [/@viewport-pinned/, /@viewport-independent/],

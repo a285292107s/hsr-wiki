@@ -8,8 +8,6 @@ import '../../styles/currency-hub.css';
 
 const { sections, loaded, failedCount, labels, skKinds, load } = useCwReleaseShowcase();
 
-/* 与首页同一套三态判据（共享 splitSources）：全失败 ⇒「本赛季有没有新增」不可判定，
-   必须给错误态；部分失败 ⇒ 已拿到的分区照常渲染 + 一行说明。 */
 const allFailed = computed(() => labels.length > 0 && failedCount.value >= labels.length);
 const partialFailed = computed(() => failedCount.value > 0 && !allFailed.value);
 
@@ -19,8 +17,6 @@ onMounted(() => { void load(); });
 <template>
   <div id="nk-cwhub-app">
     <main class="nk-hub-release">
-      <!-- 报头与首页同一条共享原语（`.nk-hub-masthead`）：纯文字、无底面、无固定高度，
-           材质从顶端连续到底。两页同构 ⇒ `nk-view-swap` 互切时不会因高度差跳动。 -->
       <header class="nk-hub-masthead">
         <h1 class="nk-hub-masthead__title">{{ t('catalog.currencyWar') }}</h1>
         <p class="nk-hub-masthead__tagline">{{ t('cwHub.tagline') }}</p>
@@ -31,8 +27,6 @@ onMounted(() => { void load(); });
         <span class="nk-hub-release__rule" aria-hidden="true"></span>
       </div>
 
-      <!-- 加载期骨架与首页同一套原语；骨架行带 data-sk，页面 CSS 据此按该族真实卡形定几何。
-           骨架不渲染 `.nk-hub-release__section` —— 该选择器是「数据已就绪」的判定依据。 -->
       <div
         v-if="!loaded"
         class="nk-hub-release__sk"

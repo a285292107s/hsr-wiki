@@ -1,17 +1,3 @@
-"""增量依赖一致性测试。
-
-核心保障：converters/<module>.py 中静态可见的源文件加载调用（load_json / _load_excel /
-_maybe_load / _load_optional 且文件名是字面量）必须全部出现在 incremental.MODULE_SOURCES
-的对应声明中。
-
-覆盖上限：helper 把文件名当形参再交给 load_json（`load_json(EXCEL_DIR / filename)`、
-`load_json(ld_path)`）时首实参不是字面量，守卫看不见 ⇒ 该形态须在新增 helper 时人工核对。
-
-否则该源文件变更时模块不会重跑，产生静默数据过期（历史事故：currency/character_detail/
-monsters/endgame 的声明与实际读取曾长期漂移）。
-
-"""
-
 import ast
 import sys
 from pathlib import Path
@@ -27,7 +13,6 @@ CONVERTERS_DIR = Path(__file__).resolve().parent.parent / "converters"
 _LOAD_CALL_NAMES = {"load_json", "_load_excel", "_maybe_load", "_load_optional"}
 
 def _extract_static_sources(path: Path) -> set[str]:
-    """AST 提取文件中静态可见的源文件名（字面量参数）。"""
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     found: set[str] = set()
     for node in ast.walk(tree):
@@ -61,7 +46,6 @@ def _module_files() -> list[Path]:
     ids=[p.stem for p in _module_files()],
 )
 def test_module_sources_cover_static_loads(conv_file: Path) -> None:
-    """代码中静态可见的加载调用必须被 MODULE_SOURCES 声明覆盖。"""
     module_name = conv_file.stem
     declared = set(MODULE_SOURCES.get(module_name, []))
     static = _extract_static_sources(conv_file)
@@ -73,7 +57,6 @@ def test_module_sources_cover_static_loads(conv_file: Path) -> None:
     )
 
 def test_all_modules_declared() -> None:
-    """convert.py 注册的所有模块都必须有 MODULE_SOURCES 声明（防新增模块漏配）。"""
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     import convert
 

@@ -1,20 +1,13 @@
 // @vitest-environment node
-/**
- * services/api API 层测试
- * 内联 fixture 参照真实响应结构手工构造（manifest / spine manifest 的 "bg|a|b" 多段格式）。
- * 二期数据源已统一为本地：此处覆盖本地数据加载（loadLocal*）、物品库转换与纯函数。
- */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { CDN } from '../../lib/constants';
 import type { Manifest } from '../types';
 
-/** 全新模块实例（api 依赖 cache 的模块级状态，一并重置） */
 async function freshApi() {
   vi.resetModules();
   return await import('../api');
 }
 
-/** 按 URL 子串路由的 fetch mock；failUrls 中的路径抛网络异常 */
 function routeFetch(routes: Record<string, unknown>, failUrls: string[] = []) {
   return vi.fn(async (url: string) => {
     const u = String(url);
@@ -35,8 +28,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-/* ─── 纯函数：URL 构建 / 版本解析 ─── */
-
 describe('URL 构建与版本解析', () => {
   it('spineBaseUrl 拼装正确', async () => {
     const api = await freshApi();
@@ -51,8 +42,6 @@ describe('URL 构建与版本解析', () => {
   });
 });
 
-/* ─── manifest / 本地数据加载 ─── */
-
 describe('数据加载', () => {
   it('loadManifest 返回清单并走缓存', async () => {
     const api = await freshApi();
@@ -60,7 +49,7 @@ describe('数据加载', () => {
     vi.stubGlobal('fetch', fetchMock);
     await expect(api.loadManifest()).resolves.toEqual(manifestFixture);
     await api.loadManifest();
-    expect(fetchMock).toHaveBeenCalledTimes(1); // 第二次命中内存
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('loadLocalItems 返回本地物品数组', async () => {
@@ -99,7 +88,6 @@ describe('数据加载', () => {
       'light_cones.json': [],
       'relics.json': [],
     }));
-    // 队列表的键按位编号：backup_list1 对应 member_list[0]
     const d = {
       lightcones: [], relics: null,
       teams: [{ team_id: 1, member_list: [1313], backup_list1: [8007, 9999] }],
@@ -140,7 +128,7 @@ describe('数据加载', () => {
     await expect(api.loadLocalCharacter('1001')).resolves.toEqual(charFixture);
     await expect(api.loadLocalLightConeDetail('23003')).resolves.toEqual(lcFixture);
     await expect(api.loadLocalMonsterDetail('3011010')).resolves.toEqual(monFixture);
-    expect(fetchMock).toHaveBeenCalledTimes(3); // 每个 cacheKey 仅一次网络请求
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it('共享列表走单例：同会话二次调用不重复请求（items/monsters）', async () => {
@@ -158,11 +146,8 @@ describe('数据加载', () => {
   });
 });
 
-/* ─── Spine 双清单解析（official 优先，缺失/失效回退 nanoka） ─── */
-
 describe('resolveSpine', () => {
   const BASE = 'https://act-webstatic.mihoyo.com/puzzle/hkrpg/';
-  /** 官方源清单（折叠格式） */
   const officialManifest = {
     version: 15,
     base: BASE,
@@ -183,7 +168,6 @@ describe('resolveSpine', () => {
       },
     },
   };
-  /** nanoka 源清单（仅 skel；与官方重叠的 key 为回退条目） */
   const nanokaManifest = {
     version: 15,
     entries: {
@@ -203,7 +187,7 @@ describe('resolveSpine', () => {
     const api = await freshApi();
     vi.stubGlobal('fetch', route());
     await expect(api.resolveSpine('1005')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1005/kafuka` });
-    await expect(api.resolveSpine('1403')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1403/tibao1` }); // 跳过 bg
+    await expect(api.resolveSpine('1403')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1403/tibao1` });
     await expect(api.resolveSpine('9999')).resolves.toBeNull();
   });
 
@@ -243,7 +227,6 @@ describe('resolveSpine', () => {
       json: `${BASE}pz_0gxSMfsWEq/resource/puzzle/2026/08/07/b.json`,
       textures: { 'x.png': `${BASE}pz_0gxSMfsWEq/resource/puzzle/2026/08/07/x1.png` },
     });
-    // 分派收口：无标记 official → 4.2；带标记 → 4.1；skel → 4.1；场景 → 4.2
     expect(api.spineRuntimeFor(resolved!)).toBe('4.1');
     expect(api.spineRuntimeFor((await api.resolveSpine('1508'))!)).toBe('4.2');
     expect(api.spineRuntimeFor((await api.resolveSpine('1005'))!)).toBe('4.1');
@@ -262,7 +245,7 @@ describe('resolveSpine', () => {
   it('强制 nanoka 源：resolveSpine(key, \'nanoka\') 忽略官方条目（渲染层失效回退用）', async () => {
     const api = await freshApi();
     vi.stubGlobal('fetch', route());
-    await expect(api.resolveSpine('1508', 'nanoka')).resolves.toBeNull(); // 官方有而 nanoka 无
+    await expect(api.resolveSpine('1508', 'nanoka')).resolves.toBeNull();
     await expect(api.resolveSpine('1005', 'nanoka')).resolves.toEqual({ kind: 'skel', base: `${CDN}/assets/hsr/spine/1005/kafuka` });
   });
 
@@ -304,7 +287,6 @@ describe('resolveSpine', () => {
     const { official, nanoka } = await api.loadSpineManifests();
     expect(official?.entries['1508']).toBeDefined();
     expect(nanoka?.entries['1005']).toBeDefined();
-    // 官方清单请求失败 → official 为 null，nanoka 不受影响（freshApi 重置内存缓存）
     const api2 = await freshApi();
     vi.stubGlobal('fetch', routeFetch({ 'spine-manifest-nanoka.json': nanokaManifest }));
     const partial = await api2.loadSpineManifests();
@@ -327,15 +309,13 @@ describe('resolveSpine', () => {
   });
 });
 
-/* ─── 单例缓存：静态 JSON 只请求一次，失败后重试 ─── */
-
 describe('单例缓存', () => {
   it('loadLocalRelicSets 多次调用只触发一次 fetch', async () => {
     const api = await freshApi();
     const fetchMock = routeFetch({ 'relics.json': [{ id: 1, name: '测试' }] });
     vi.stubGlobal('fetch', fetchMock);
     const [a, b] = await Promise.all([api.loadLocalRelicSets(), api.loadLocalRelicSets()]);
-    expect(a).toBe(b); // 同一引用
+    expect(a).toBe(b);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

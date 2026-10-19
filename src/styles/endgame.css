@@ -1,34 +1,5 @@
-
-/* 终局目录（/endgame）+ 玩法页赛季列表共用的行/列样式。
-   字号与圆角一律走 `--nk-fs-*` / `--nk-radius-*` 刻度（A4.1 / A4.2 / A5.3），映射按「就近、同距离取较小档」：
-   0.55/0.56/0.58/0.6rem → --nk-fs-2(10px)；0.68/0.7/0.72rem → --nk-fs-3；0.78~0.86rem → --nk-fs-4；
-   0.88/0.95rem → --nk-fs-5；1.0/1.02/1.12rem → --nk-fs-6；4px 圆角 → --nk-radius-1(2px)；
-   5/7/8px → --nk-radius-2(6px)；10px → --nk-radius-3(12px)；50% / 999px 是形态不是档位，保留。
-   `.nk-eg-lrow__date` 由 0.58rem 提到 10px 是本文件唯一有**几何后果**的一条：
-   它把 `--nk-grid-min` 从 256 顶到 268（算式见下方分模式列注释）。 */
 .nk-eg-grid { --nk-grid-min: 410px; --nk-grid-gap: 14px; }
-/* 分模式列：列下限 = 一行卡片完整内容宽（行头开销 62 = 内距 16 + 图标 34 + 间距 10 + 边框 2，
-   状态·日期行 196.8 = 状态 40.8 + 间距 9 + 「YYYY.MM.DD – YYYY.MM.DD」147，IBM Plex Mono 实测
-   ≈ 258.8）⇒ 取 268 留字体回退余量，与旧口径 248 → 256 同一算法（内容宽 + 9~10px）。
-   **从 256 上调到 268 的原因只有一个**：日期串由 0.58rem(9.28px) 收到 --nk-fs-2(10px) 后单串
-   137 → 147px、状态 39.5 → 40.8px（同批令牌化），合计 +11.3px。
-   取值副作用（如实记录）：4×268 + 3×22 = 1138 > 1280 档可用 1108 ⇒ 该档由 4 列并排落为 3 列；
-   而列宽随之升到 354.7px，de/ru/vi 更长的状态·日期行（最长 302.3px）在 1280 档由「整串被省略号
-   截断」转为不截断。1024 档列宽 269.3 < de 的 302.3 ⇒ 该语言在该档的日期截断是本轮之前就有的
-   既有缺陷（4 列 260.5px 时代同样截断），要全语言都不截断需 min ≥ 312（代价：1440 档也失去四列
-   并排），不在本轮范围。
-   列数交给 auto-fit 按可用宽度落档（4 / 3 / 2 / 1），不再按固定 2 / 4 列硬切——1024 宽下四列只剩
-   197px，日期行溢出到相邻列（实测最右越界 42px）。
-   auto-fit 而非 auto-fill：不足的末行不留空轨，宽屏下四列仍铺满整行。 */
 .nk-eg-grid:has(> .nk-eg-col) { --nk-grid-min: 268px; --nk-eg-rowgap: 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-eg-rowgap); }
-/* 列跨父网格两条轨（轨 1 = 列头、轨 2 = 列表）并以 `subgrid` 认领它们，是「整排统一」的机制本体：
-   并排各列的列头因此共用轨高 = 该排最高列头，与语言 / 视口无关。
-
-   `grid-template-columns: minmax(0, 1fr)` 不是可选装饰：内部那一列默认是隐式 `auto` 轨，其最小尺寸
-   函数为 min-content，会被最长的列头项撑开 ⇒ **列头盒比列框还宽**（实测 es@320 headW=383 vs colW=288，
-   de 最大 +345px，34/48 组合命中），列头子项于是不越出「列头盒」却整体压出列框。旧形态 `.nk-eg-col`
-   是块级盒、列头宽度恒等于列框，故这是 `display: grid` 带进来的回归，`minmax(0, …)` 关掉该下界即消除
-   （实测 34/48 → 0/48）。 */
 .nk-eg-col {
   min-width: 0;
   display: grid;
@@ -44,69 +15,13 @@
 .nk-eg-col[data-mode="story"] { --eg-color: var(--eg-story); }
 .nk-eg-col[data-mode="boss"] { --eg-color: var(--eg-boss); }
 .nk-eg-col[data-mode="peak"] { --eg-color: var(--eg-peak); }
-/* 列头原是一行 4 个**都不可收缩**的项（名 / en / 条目计数 / 徽章），可用宽仅 243~299px。
-   （条目计数已按用户裁决移除：价值不大，且它 `margin-left: auto` 把元信息行右端占住，
-   少一项即少一个不可收缩项，宽列更容易回到一行。）
-   长译文下列头会被撑破，而 `.nk-eg-col`、`.nk-eg-col__head` 与祖先链全是 `overflow: visible`
-   ⇒ 越出的部分直接压到**相邻列**上（实测 145/208 个列头的徽章越出列框，最重 de +216px）。
-
-   两个正交的病，须两处分别治：
-   ① 单列内部放不下 → `flex-wrap: wrap` 让放不下的项折行（名可换行、徽章独占一行）。
-   ② **折几行由各列自己的内容决定**——并排四列各折各的，于是有的列徽章在第一行、有的在第二行
-      （实测 13 语言 × 12 宽度：33/156 组合参差）。硬把徽章压到第二行治不了 ②，反而更乱
-      （14/48 → 23/48）：因为**第一行自己**也逐列折行。
-
-   ② 的解法是让整排**共用行轨**：`.nk-eg-col` 跨父网格两条行轨（轨 1 = 列头、轨 2 = 列表），
-   再以 `grid-template-rows: subgrid` 把列头 / 列表放回这两条轨。并排各列的列头因此被拉平成同一
-   高度，轨高 = 该排最高列头，且与语言无关（实测盒高参差 0/156、徽章行位参差 0/156、列表起点 0/156）。
-
-   **列头内部是「两列网格」而非「固定两行」**——这一条是形态的关键，写错过一次：
-   列 1 = `.nk-eg-col__meta`（名 / en，内部 `flex-wrap`），列 2 = 徽章，
-   行轨 `1fr` 撑满该排**共享轨**高。于是：
-     · 整排都放得下 → 轨高 = 一行 → 列头**一行**（徽章与文字同行，~52px）
-     · 某列标题过长 → 轨高 = 多行 → **整排等长**，元信息贴顶、徽章落到末行
-   「是否升为两行」由**共享轨高**决定（subgrid 给出），不是逐列各判 ⇒ 无需知道兄弟列的内容，
-   也不需要按语种写规则。**放得下就一行、放不下才整排统一**，正是这条设计的目的。
-
-   **反例（勿回改）**：曾写成 `grid-template-rows: auto auto` + 徽章恒 `grid-row: 2`，那是
-   **无条件两行**——cn 的「名+en」自然宽仅 95~198px、宽列可用 249~354px 本来就放得下，
-   却仍然占两行、行 1 与徽章之间空一大段（cn 在全部 12 个宽度都是 81px）。判据缺失的原因见下条。
-
-   徽章的对齐用 `align-self: end` + `justify-self: end`（钉共享轨右下角）：实测长标题时
-   徽章与末行文字底缘差 0~26px（**不是**与首行对齐——`align-items: baseline` 会让徽章在长标题
-   时浮到首行基线、与末行差 −21~−99px；`last baseline` 则给整排平白多加 5px 且同样不保证齐平）。
-   徽章保持自然宽，**不能用 `flex-basis: 100%`**：flex 项主尺寸会变成容器宽 ⇒ 徽章被拉成整列宽
-   的横条（实测 624/624 个被拉宽，最宽 588px vs 自然宽 82~157px），而**越界类断言对此完全无感**。
-
-   **窄列下隐藏英文副题**（`.nk-eg-col__en`，规则在本文件末尾）：它是四种模式**全语言共有**的占位项，
-   窄列里把元信息多撑一行。触发信号取**列头自身宽度**而非视口宽——同是 4 列档，列宽随视口从 261px
-   变到 464px，收益挂钩列宽而不挂钩视口（写视口断点必然在某几档空转）。容器查询以列头**内容盒**
-   （列宽 − 16px 内距）为准，故 `max-width: 300px` 对应「列宽 ≲ 316px」这一档：实测 390 / 480 /
-   1680 / 1920 / 2560（列宽 358~464px）不触发、列头高分毫不动。容器查询**不能挂 `.nk-eg-col`**：
-   那会让列框成为容器、subgrid 行轨塌陷（实测列头炸到 383/556/896px）。
-
-   隐藏 en 是**宽列回到一行**的前提：cn 保留 en 时元信息自然宽 198px，而窄列可用仅 151~191px
-   （1280/1366/1440）⇒ 一行放不下、仍是两行；隐藏后自然宽降到 95px，各档全部放得下。
-
-   **这条规则的已知代价（如实记录）**：阈值只能按列宽切，而「EN 是否真多撑一行」还取决于模式名多长，
-   故同列宽 261px 下 13 语言里只有 6 种真省一行，另 7 种（cn/cht/jp/kr/fr/de/pt）省 0 行却一并被隐藏。
-   容器查询看不见「名多长」，这一档**天然会误伤一部分语言**。两种「不隐藏 EN」的替代方案实测都不成立：
-   让 EN 收缩（`flex: 0 1 auto` / `min-width: 0`）在 `flex-wrap: wrap` 下 EN 会**优先换行**而非收缩；
-   改 `nowrap` 让 EN 收缩则名被迫折行、列头反而更高（89px，比不隐藏还高）。**在 wrap 容器里降行数
-   只有 `display: none` 能做到**，收缩类方案换不来高度。 */
 .nk-eg-col__head { grid-row: 1; container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 1fr; align-items: start; column-gap: 9px; margin-bottom: calc(-1 * var(--nk-eg-rowgap)); padding: 12px 8px 13px; border-bottom: 1px solid color-mix(in srgb, var(--eg-color) 26%, transparent); position: relative; }
 .nk-eg-col__head::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 13px; width: 2px; border-radius: 1px; background: color-mix(in srgb, var(--eg-color) 72%, transparent); }
-/* 列 1：名 / en。（可换行，故 de 的 285px 长名在自己的轨内折行，不会去挤压 en） */
 .nk-eg-col__meta { grid-column: 1; grid-row: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; }
 .nk-eg-col__name { font-size: var(--nk-fs-6); font-weight: 800; letter-spacing: 0.02em; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; }
 .nk-eg-col__en { font-family: var(--font-hud); font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.16em; color: color-mix(in srgb, var(--eg-color) 66%, var(--text3)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* 列 2：徽章钉在该排共享轨的**右下角**（`align-self: end` 落末行、`justify-self: end` 保持自然宽）。
-   `flex-basis: 100%` 做不到「保持自然宽」——它会把徽章拉成整列宽的横条。 */
 .nk-eg-col__head .nk-guide-link { grid-column: 2; grid-row: 1; align-self: end; justify-self: end; }
 .nk-eg-col__list { grid-row: 2; display: flex; flex-direction: column; }
-/* 窄列（列头内容盒 ≤ 300px）隐藏英文副题：它是全语言共有的占位项，窄列里把行 1 多撑一行。
-   阈值与收益、以及这条规则的已知代价见上方列头注释；此处只写「为什么是内容盒」——容器查询取容器
-   **内容盒**宽度，列头左右内距合计 16px，故 300px 对应列宽 ≈316px。 */
 @container (max-width: 300px) {
   .nk-eg-col__en { display: none; }
 }
@@ -139,8 +54,6 @@
 .nk-eg-lrow__meta { display: flex; align-items: center; gap: 9px; min-width: 0; }
 .nk-eg-lrow__status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: var(--nk-fs-2); font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; color: var(--st-color); }
 .nk-eg-lrow__dot { width: 4px; height: 4px; border-radius: 50%; background: var(--st-color); flex-shrink: 0; }
-/* 赛季含污染关卡（ADR 0026）：等级细节走详情页，列表只给存在性标记；色值走污染族（ADR 0027），不吃模式色。
-   徽标挂在赛季名行内（名称靠 overflow:hidden 取得自动最小尺寸 0，可被压缩，故徽标既不会被挤出也不溢出） */
 .nk-eg-lrow__poll { flex-shrink: 0; padding: 1.5px 7px; border: 1px solid color-mix(in srgb, var(--vor-500) 45%, transparent); border-radius: var(--nk-radius-1); font-size: var(--nk-fs-2); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; color: var(--vor-300); background: color-mix(in srgb, var(--vor-500) 9%, transparent); }
 .nk-eg-lrow__date { flex: 0 1 auto; min-width: 0; font-family: var(--font-hud); font-size: var(--nk-fs-2); letter-spacing: 0.04em; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .nk-eg-lrow--live { --st-color: var(--season-live); }
@@ -165,8 +78,6 @@
   .nk-eg-lrow { animation: none; }
 }
 
-/* 终局目录骨架卡：高度 / 圆角 / aspect-ratio 由本页承担（该网格只在终局目录出现，
-   原 tokens.css 里那条 `.nk-eg-grid .nk-skeleton__card-img` 覆盖已是死声明，已并入此处） */
 .nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 132px; border-radius: 0; border-top: 1px solid var(--line-1); }
 
 @media (max-width: 767px) {

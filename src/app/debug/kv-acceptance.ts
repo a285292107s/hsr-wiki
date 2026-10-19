@@ -1,6 +1,6 @@
 
-export const NEAR_BLACK_WARN = 3;  // ≥3% 提示疑似暗块（夜景底色波动区间）
-export const NEAR_BLACK_FAIL = 6;  // ≥6% 判 FAIL（实测：正常合并渲染 ≈1.4%，透明画布黑块 ≈9%）
+export const NEAR_BLACK_WARN = 3;
+export const NEAR_BLACK_FAIL = 6;
 
 export interface AcceptSceneSnapshot {
   key: string;

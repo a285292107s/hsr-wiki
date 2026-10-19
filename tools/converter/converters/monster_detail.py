@@ -1,32 +1,3 @@
-"""敌对物种详情转换器：从共享聚合表拼装每个怪物的完整详情数据。
-
-输出：public/data/cn/monsters/{id}.json（按模板 ID 每怪物一文件，与目录页 href 一致）
-数据源（经 monster_common.load_monsters 聚合）：
-- MonsterTemplateConfig.json  名称 / 头像 / 全身立绘 / 分类 Rank / 阵营 / 韧性值 / 基础属性
-- MonsterConfig.json          韧性弱点 / 伤害抗性 / 图鉴介绍 / 技能列表 / 维度修饰比 / HardLevelGroup
-- MonsterCamp.json            阵营名称
-- MonsterSkillConfig.json     技能全量（名称 / 标签 / 类型 / 伤害与攻击类型 / 描述 / 参数）
-- HardLevelGroup.json         等级曲线（单例落 monster-level-curve.json，与详情页共用）
-- EliteGroup.json             精英组倍率（单例落 monster-elite-group.json，与详情页共用）
-
-附加块（`monster_extra.py`，**不进**共享聚合表——该聚合被 endgame/voracity 共用，加键会漏进
-它们的 payload）：`drops`（MonsterDrop × ItemConfig，按均衡等级分档）/ `appearances`
-（StageConfig 波次 + 召唤链，关卡数与样本）/ `phases`（MonsterAtlasExtraPhase(s)，按
-TemplateGroupID 归属）。三者与 `invaded` 一样**按模板归属**写入——实例别名页与模板页同值。
-
-另按模板写入 `art_shared`（同卡面图标但名字不同的其他形态，含立绘是否相同与形态数；判据见
-`_art_shared`）——活动出处备注要用它，且**判据必须在数据层**（视图只拿得到自己的立绘，
-比不了同伴的）。
-
-输出在传统字段基础上追加 `stat_ratio`（维度修饰比）、`level_group`（难度组号）与
-`elite_group`（精英组号），战斗数值在**前端**合成：
-stat = stats × stat_ratio × elite_ratio × curve[level_group][level]（ADR 0040/0045/0049）。
-
-技能描述保留原始富文本（#N[i] 参数占位 + color/unbreak 标签），前端 fmtDesc 渲染；
-param_list 为 ParamList 的 Value 数组（占位符替换参数）。
-侵入名单内的怪物附可选块 invaded（污染归属，解析与专题页共用 voracity 侧实现；模板页与实例
-别名页同值）。
-"""
 import logging
 
 from config import OUTPUT_DIR
@@ -44,13 +15,6 @@ logger = logging.getLogger("converter")
 
 
 def _art_shared(monsters: dict, rows: list[dict]) -> dict[int, dict]:
-    """同卡面图标（`icon` 同一份资源）但**名字不同**的其他形态 → `{模板ID: {id, name, figure, forms}}`。
-
-    `figure` = 被点名那个同伴的**立绘**是否与本形态相同 —— 同卡面**不等于**共用立绘（实测 42 个
-    活动敌人里 40 个立绘相同、2 个不同，如「王下一桶」与「王下一桶（投影）」），两个维度分开给，
-    页面上才既能把「为什么立绘是别的怪」说清，又不会过度断言。优先点名**立绘相同**的同伴。
-    `forms` = 同卡面形态数（含自己），供页面写「同卡面的 N 个形态共用这一套」。
-    """
     by_stem: dict[str, list[dict]] = {}
     for row in rows:
         stem = (row.get("icon") or "").rsplit("/", 1)[-1].removesuffix(".png")
@@ -82,28 +46,18 @@ def _art_shared(monsters: dict, rows: list[dict]) -> dict[int, dict]:
 
 
 def convert() -> None:
-    """转换敌对物种详情数据 → monsters/{id}.json + 共享等级曲线 monster-level-curve.json。"""
     monsters = load_monsters()
     curve = load_level_curve()
-    # 等级曲线单独落盘：745 行共享一份，详情页按需取（shared single），避免 632 份 payload 各带一份
     save_json(curve, OUTPUT_DIR / "monster-level-curve.json")
-    # 精英组倍率同理共享落盘（1,423 组；落全量——关卡侧指派的组不被怪物配置引用，ADR 0049）
     save_json(load_elite_groups(), OUTPUT_DIR / "monster-elite-group.json")
     invaded = load_invasion_map(monsters)
     art_shared = _art_shared(monsters, catalog_rows(monsters))
     drops = load_drops()
     appearances = load_appearances()
     phases = load_phases()
-    # 技能附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键）：按技能 ID 挂在技能条目上，
-    # 有值才落键（实测覆盖 215/632 个目录模板、937 次引用）
     extra_effects = load_skill_extra_effects()
-    # 状态词条（MonsterStatusConfig，安全子集：命名约定桥 + 去形态后缀同名才归属；实测 234/632 个模板）
     statuses = load_statuses()
-    # 活动出处（仅"有活动关卡引用"的怪物有值；判据见 monster_extra.load_event_sources）
     events = load_event_sources()
-    # 首领机制（MonsterGuideConfig × MonsterGuidePhase，官方文案）：只取**阶段**一段落进详情页——
-    # 阶段名自带「阶段一：…」前缀，这是站内唯一有来源的阶段号（源表 `MonsterAtlasExtraPhase.PhaseID`
-    # 只是组内行键，**不是**阶段号）。与末日幻影敌方卡的 `boss_guides` 同一装配函数。
     guides = load_boss_guides()
     output_dir = OUTPUT_DIR / "monsters"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -122,27 +76,18 @@ def convert() -> None:
             "figure": info["figure"],
             "rank": info["rank"],
             "camp": info["camp"],
-            # 韧性基准：上游缺 StanceBase 的模板（实测 33/632）**不落键**，与 `monster_common._base_stat`
-            # 的「缺位不落键」一致——直接下标会 KeyError，写 0 会把未知显示成 0。`stats` 键恒在
-            # （hp/atk/def 全量有值），内部 speed 缺位时自然不落该键。
             **({"stance": info["stance"]} if "stance" in info else {}),
             "weak": info["weak"],
             "resist": info["resist"],
             "intro": info["intro"],
             "stats": info["stats"],
             "skills": skills,
-            # 实例自带的修正值（`{Stance,Speed}ModifyValue`）：**不在转换期合成**，原值随 payload 给前端——
-            # 数值要在 1..组上限 的等级滑条上实时合成，故合成链留在 `src/lib/monster-stats.ts`
-            # （判据：`最终值 = 基准 × 维度修饰比 × 等级曲线 + 修正值`，修正值加在曲线之后、不再被缩放；
-            #  该算式的验证见 ADR 0045）。缺位不落键。
             **({"stance_modify": info["stance_modify"]} if info.get("stance_modify") is not None else {}),
             **({"speed_modify": info["speed_modify"]} if info.get("speed_modify") is not None else {}),
-            # 战斗数值合成链第二/三/四段（ADR 0040/0049）：基准 stats × 维度修饰比 × 精英组倍率 × level_group 曲线
             "stat_ratio": info["stat_ratio"],
             "level_group": info["level_group"],
             "elite_group": info.get("elite_group", 1),
         }
-        # 实例别名页与模板页同源（_tpl 指向模板 ID）：附加块一律按模板归属写入，避免同怪两页不一致
         tpl = info.get("_tpl") or mid
         if tpl in invaded:
             detail["invaded"] = invaded[tpl]

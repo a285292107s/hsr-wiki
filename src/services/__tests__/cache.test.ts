@@ -1,12 +1,6 @@
 // @vitest-environment node
-/**
- * cache.ts 请求缓存引擎测试（内存 L1 + in-flight 去重 + 网络）
- *
- * 模块级状态（mem Map / pending）通过 vi.resetModules() + 动态 import 获取全新实例隔离。
- */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-/** 全新模块实例（隔离 mem/pending） */
 async function fresh() {
   vi.resetModules();
   return await import('../cache');
@@ -21,8 +15,6 @@ afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
-
-/* ─── fetchJSON（网络层） ─── */
 
 describe('fetchJSON', () => {
   it('成功解析 JSON 文本', async () => {
@@ -74,7 +66,6 @@ describe('fetchJSON', () => {
     ));
     vi.useFakeTimers();
     const p = c.fetchJSON('https://x/slow.json');
-    // 先挂断言再推进时钟，避免 reject 发生在 handler 挂载前触发 unhandled rejection
     const assertion = expect(p).rejects.toMatchObject({
       name: 'NkError',
       operational: true,
@@ -84,8 +75,6 @@ describe('fetchJSON', () => {
     await assertion;
   });
 });
-
-/* ─── L1 内存 + memStore / memHas ─── */
 
 describe('L1 内存缓存', () => {
   it('memStore 后 memHas 为 true，cachedFetch 命中内存不发请求', async () => {
@@ -103,15 +92,13 @@ describe('L1 内存缓存', () => {
     vi.stubGlobal('fetch', vi.fn());
     for (let i = 0; i < 80; i++) c.memStore(`evict_${i}`, i);
     expect(c.memHas('evict_0')).toBe(true);
-    c.memStore('evict_80', 80); // 触发淘汰 evict_0..15
+    c.memStore('evict_80', 80);
     expect(c.memHas('evict_0')).toBe(false);
     expect(c.memHas('evict_15')).toBe(false);
     expect(c.memHas('evict_16')).toBe(true);
     expect(c.memHas('evict_80')).toBe(true);
   });
 });
-
-/* ─── in-flight 去重 + 写回 ─── */
 
 describe('in-flight 去重 / 写回', () => {
   it('并发同 key 请求共享同一 Promise', async () => {
@@ -126,7 +113,6 @@ describe('in-flight 去重 / 写回', () => {
     const [r1, r2] = await Promise.all([p1, p2]);
     expect(r1).toEqual({ v: 1 });
     expect(r2).toEqual({ v: 1 });
-    // 完成后第三次调用命中 L1 内存
     await expect(c.cachedFetch('https://x/a.json', 'dup_key')).resolves.toEqual({ v: 1 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -141,8 +127,6 @@ describe('in-flight 去重 / 写回', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
-
-/* ─── fetchResourceStatus / fetchText（诊断页资源检查） ─── */
 
 describe('fetchResourceStatus', () => {
   const statusFetch = (status: number) =>

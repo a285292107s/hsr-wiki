@@ -78,7 +78,7 @@ export const NODES: MapNode[] = [
   { id: 'router', name: '路由层', en: 'ROUTER', layer: 'router', gx: 2, gy: 1, shape: 'twin', h: 2,
     files: ['src/app/router/index.ts', 'src/app/router/chunks.ts'], desc: 'History 路由表（meta.depth 过渡方向 / meta.cw 主题）+ chunk 预加载' },
   { id: 'theme', name: '主题系统', en: 'THEME', layer: 'theme', gx: 3, gy: 1, shape: 'bank', h: 2,
-    files: ['src/lib/theme.ts'], desc: '单强调色通道（5 色板，缺省赤陶）+ data-accent；全站含货币战争共用（ADR 0041）' },
+    files: ['src/lib/theme.ts'], desc: '单强调色通道（5 色板，缺省橄榄青）+ data-accent；全站含货币战争共用（ADR 0041）' },
   { id: 'home', name: '首页', en: 'HOME', layer: 'views', gx: 0, gy: 2, shape: 'flat', h: 1,
     files: ['src/app/views/HomeView.vue'], desc: 'KV Spine Hero（≥1024px）+ 板块索引 + idle 预加载' },
   { id: 'catalog', name: '目录引擎', en: 'CATALOG ENGINE', layer: 'engine', gx: 1, gy: 2, shape: 'factory', h: 2,

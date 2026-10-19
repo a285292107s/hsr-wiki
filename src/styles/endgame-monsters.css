@@ -1,17 +1,8 @@
-/* 终局详情页 · 楼层内容与敌方卡：敌方配置行 / 波次 / 图标格 / 层级增益 / 挑战目标 / 异相仲裁徽章 / 敌方信息卡。
-   拆分块第 3 块（接区块原语块之后、层级模式块之前）。 */
-/* 敌方配置行 = 「区块标题 + 敌方卡」上下结构（用户裁决）：原「左标签列 + 右卡片」在桌面端会让标签
-   下方整列留空（卡片越高空列越长，实测 270px）。标题提到卡组上方，字号/字重/字距/颜色与
-   `.nk-egd-group__title` 同点声明（同一套区块标题语言）；卡组用 `flex: 1 1 100%` 独占次行，
-   标题行右侧留给「波次 · 敌数」——异相仲裁的敌方行带该计数，故不能用 column 方向把它挤成独立一行。
-   手机端本就换行堆叠，此形态顺带省掉标签行那一档留白。 */
 .nk-egd-floor__row--mons {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px 14px;
 }
-/* align-self 归 `endgame-panels.css` 的区块标题档位组（`.nk-egd-group__title` 同点声明）——此处不再重述，
-   否则两块样式表谁后加载谁生效：本文件在 EndgameView 的 import 序里排在 panels 之后，等于静默吃掉档位声明。 */
 .nk-egd-floor__row--mons > .nk-egd-floor__label {
   min-width: 0;
   padding: 0;
@@ -84,9 +75,6 @@
   font-weight: 700;
   color: var(--text-bright);
 }
-/* 异相仲裁面板的分区名＝h2（赛季增益的系统名 / 机制）：标题元素的 UA 字重是 700，按原
-   `div.nk-egd-floor__label` 的继承值 400 归位——提升为标题前后外观不变（字号仍归
-   `endgame-type-scale.css` 的标签档）。 */
 .nk-egd-peak__seclabel { font-weight: 400; }
 .nk-egd-floor__buffdesc {
   margin: 0;
@@ -117,9 +105,6 @@
   border-color: color-mix(in srgb, var(--diff-del) 60%, transparent);
   background: color-mix(in srgb, var(--diff-del) 14%, transparent);
 }
-/* 机制（MazeBuff 关卡词条，如韧甲/反相/吸能）：分区名与赛季增益同档，条目 = 名称胶囊 + 效果说明。
-   说明与名称同屏直出（上游文案是短句，折叠或悬停展开只会让读者多点一次）；
-   名称沿用原标签行的胶囊形，故与上方增益条目靠「不套盒子」区分，而不是再造一种胶囊。 */
 .nk-egd-floor__mechs {
   display: flex;
   flex-direction: column;
@@ -171,9 +156,6 @@
   gap: 12px;
   margin-bottom: 8px;
 }
-/* 敌方卡网格的 8px 下外边距只服务「多波之间」（`.nk-egd-floor__monswrap` 的 9px gap 与它叠加）；
-   末波网格下方没有后续内容，是纯尾随留白，归零（用户点名「敌方配置下方的多余空间」）。
-   **只收口末位，不删基础声明**：整类删掉会连带把多波间隔压掉 8px。 */
 .nk-egd-floor__monswrap > .nk-egd-floor__wave:last-child > .nk-egd-mons { margin-bottom: 0; }
 .nk-egd-mon {
   position: relative;
@@ -192,11 +174,6 @@
   border-color: var(--line-2);
   background: color-mix(in srgb, var(--blk-900) 42%, transparent);
 }
-/* 立绘列（左）：固定宽度的窄列，立绘按 376×512 原比例整幅放入。
-   顶部对齐（不居中）——数据列通常高于立绘，居中会让立绘随数据高度上下浮动。
-   列宽 = 立绘图宽的**唯一声明点**（`--nk-egd-mon-fig`）：立绘与之同宽，立绘下方的污染徽标
-   也以它为上界换行——否则长译文（es / fr / pt / ru 实测宽于 104px 立绘）会把 `auto` 轨反撑宽、
-   挤窄右侧数据列。手机档改令牌值（`endgame-breakpoints.css`），不要再单独声明图片宽度。 */
 .nk-egd-mon__art {
   --nk-egd-mon-fig: 104px;
   position: relative;
@@ -222,13 +199,6 @@
 .nk-egd-mon__figlink:hover .nk-egd-mon__img {
   transform: translateY(-2px);
 }
-/* 关卡内 HP（ADR 0055 / 0058）：立绘**下方**、列内居中，与污染徽标同一换行纪律——列宽由立绘图宽
-   唯一声明（`--nk-egd-mon-fig`），数字再长也只能在列内换行，否则 `auto` 轨被反撑宽、挤窄数据列
-   （与 `.nk-egd-mon__art > .nk-egd-pollchip` 同因，见 endgame-pollution.css）。数值用 HUD 字体、
-   强调色（与「波次 · 敌数」同族），标签走标签档、弱化到 `--text3`。
-   容器恒为竖向列、每行一个「标签 + 数值」对：单值只有一行（与改前同形），
-   跨 ≥2 战斗阶段时逐阶段一行（`--phases`，行内再竖排——列宽仅 84–104px，
-   「阶段 1」与 9 位缩写数同行必然溢出）。 */
 .nk-egd-mon__hp {
   display: flex;
   flex-direction: column;
@@ -261,7 +231,6 @@
   letter-spacing: 0.02em;
   color: color-mix(in srgb, var(--eg-color) 76%, #fff);
 }
-/* 数据列（右）：占满剩余宽，逐块纵向堆叠 */
 .nk-egd-mon__data {
   display: flex;
   flex-direction: column;
@@ -274,7 +243,6 @@
   gap: 6px;
   min-width: 0;
 }
-/* 敌方名由父级行头承担时（星启看板）元信息列只剩标签；空容器会在头像右侧留出空洞 */
 .nk-egd-mon__meta:empty { display: none; }
 .nk-egd-mon__name {
   font-weight: 600;
@@ -316,11 +284,6 @@
   padding-top: 12px;
   border-top: 1px solid var(--line-1);
 }
-/* 行首标签（弱点 / 抗性 / 效果抵抗）跨语言收口（P0）：`.nk-egd-mon` 的数据列只有 minmax(0,1fr)
-   的剩余宽（320 档实测 144px），而标签 `flex-shrink:0` 让它停在 max-content、`min-width:28px`
-   又压不住单行长词（ru「Сопротивление эффектам」），整行 min-content 顶到 222px 越出卡片与视口。
-   治法 = 允许整行折行 + 标签可收缩到 min-content 以内（anywhere 保证长词自身也能断，
-   否则单个长词仍是硬下界），值列（`.nk-egd-mon__resist` 已 flex-wrap）因此拿到整行宽。 */
 .nk-egd-mon__row {
   display: flex;
   align-items: center;
@@ -357,8 +320,6 @@
   gap: 3px;
 }
 .nk-egd-mon__resitem .nk-egd-elem { width: 16px; height: 16px; }
-/* 效果抵抗的免疫图标：上游是 128×128 纯白字形（透明底，已按 alpha 包围盒裁到本地 webp），
-   字形是「状态图案 + 禁止斜杠」的细节图，比元素图标大一档才认得出；无底色块，靠白字在暗卡上成像。 */
 .nk-egd-mon__immicon {
   width: 20px;
   height: 20px;
@@ -376,9 +337,6 @@
   padding-top: 12px;
   border-top: 1px solid var(--line-1);
 }
-/* 技能分组（`phase_list` 跨 ≥2 个阶段时才有阶段号，见 EnemyCard 的 skillGroups）：
-   平铺形态下小组对布局透明（`display: contents`）⇒ 与分组前的 DOM 渲染完全一致；
-   分组形态外层转纵向列，每组一行「阶段 N + 该阶段技能 chips」。 */
 .nk-egd-mon__skillgroup { display: contents; }
 .nk-egd-mon__skills--grouped {
   flex-direction: column;
@@ -391,16 +349,12 @@
   align-items: baseline;
   gap: 6px;
 }
-/* 阶段号标签：与卡内其它行首标签同族（小字 + 字距 + text3），不占固定宽（它比「弱点」长） */
 .nk-egd-mon__skillphase {
   flex-shrink: 0;
   letter-spacing: 0.05em;
   color: var(--text3);
   white-space: nowrap;
 }
-/* 技能 chip 的德语复合词收口：数据列只有 144px（320 档），单个长词（de「Treustachel」一类复合名）
-   的 min-content 就是硬下界 ⇒ chip 反撑到 147px、溢出数据列（rect 仍在卡内，故越界探针看不见）。
-   `anywhere` 让词内可断（与 `.nk-egd-mon__art > .nk-egd-pollchip` 同法），只在放不下时才断。 */
 .nk-egd-mon__skill {
   display: inline-flex;
   align-items: center;
@@ -418,9 +372,6 @@
   border-color: var(--line-2);
   color: var(--text1);
 }
-/* 首领机制（末日幻影，ADR 0029 修订）：首领特性与阶段机制两个卡内分区，与「技能」「召唤物」
-   同一套语言——上方发丝线 + 上内距 + 区块标签。归属由 converter 写到敌方条目的 `boss_guide`
-   指针上，故同场只有首领本体长出这两段（召唤物与护卫没有指针，也不接收该分区）。 */
 .nk-egd-mon__data > .nk-egd-guide,
 .nk-egd-mon__data > .nk-egd-phase {
   display: flex;
@@ -433,8 +384,6 @@
 .nk-egd-phase__label {
   letter-spacing: 0.05em;
   color: var(--text3);
-  /* 分区名＝h2（标题层级）：标题元素的 UA 字重是 700，本处按原 span 的 400 归位，
-     提升前后外观不变（字号归 `endgame-type-scale.css` 的标签档）。 */
   font-weight: 400;
 }
 .nk-egd-trait,
@@ -461,7 +410,6 @@
   max-width: var(--nk-prose-max);
 }
 .nk-egd-trait__desc .hl { color: var(--highlight); font-weight: 700; }
-/* 官方应对策略原文自带「应对策略：」前缀，故只用左侧发丝线区分，不另加标签 */
 .nk-egd-phase__answer {
   padding-left: 10px;
   border-left: 1px solid var(--line-2);
@@ -491,4 +439,3 @@
   color: var(--text3);
   max-width: var(--nk-prose-max);
 }
-

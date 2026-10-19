@@ -6,7 +6,6 @@ import { loadCwCatalogCss } from './shared';
 import { cwTraitCatKey } from '../../../lib/enum-labels';
 import { translate } from '../../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 
 type TraitCat = 'faction' | 'combat' | 'special';
@@ -21,7 +20,6 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
     (item.simple_desc as string || '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60),
   );
   const descTruncated = simpleDesc.length >= 60 ? '…' : '';
-  /* 截断复原（触屏没有 hover 也要可达）：名条 nowrap+ellipsis 与描述 60 字截断的完整原文都挂卡根 title */
   const fullDesc = escHtml(
     (item.simple_desc as string || '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim(),
   );

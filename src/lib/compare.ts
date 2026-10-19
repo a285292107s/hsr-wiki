@@ -40,6 +40,10 @@ export function baseSkillId(enhId: number): number {
   return enhId - 1_000_000;
 }
 
+export function enhancedIdOf(baseId: number): number {
+  return baseId + 1_000_000;
+}
+
 function eq(a: unknown, b: unknown): boolean {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
@@ -113,12 +117,12 @@ export function buildCompare(base: CharacterData | null | undefined, enhKey: str
   if (!enh) return empty;
 
   const skills: SkillDiff[] = [];
-  for (const id of enh.skill_ids || []) {
-    const bs = base.skills[String(baseSkillId(id))];
-    const es = enh.skills ? enh.skills[String(id)] : undefined;
+  for (const baseId of enh.skill_ids || []) {
+    const bs = base.skills[String(baseId)];
+    const es = enh.skills ? enh.skills[String(enhancedIdOf(baseId))] : undefined;
     if (!bs || !es) continue;
     const kinds = diffSkill(bs, es);
-    if (kinds.length) skills.push({ id, base: bs, enh: es, kinds });
+    if (kinds.length) skills.push({ id: enhancedIdOf(baseId), base: bs, enh: es, kinds });
   }
 
   const ranks: RankDiff[] = [];

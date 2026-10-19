@@ -1,5 +1,3 @@
-"""角色详情转换器：从多张源表拼装 CDN CharacterData 格式。"""
-
 import logging
 import re
 from collections import defaultdict
@@ -25,7 +23,6 @@ _TRIGGER_TYPE_MAP = {
 }
 
 def _build_skills(skill_data: list[dict], skill_ids: list[int], avatar_id: int) -> dict[str, dict]:
-    """从 AvatarSkillConfig 构建 skills 字典，含所有等级的 param_list。"""
     by_id: dict[int, list[dict]] = defaultdict(list)
     for item in skill_data:
         sid = item.get("SkillID", 0)
@@ -95,11 +92,6 @@ def _build_skills(skill_data: list[dict], skill_ids: list[int], avatar_id: int) 
     return result
 
 def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int], avatar_id: int) -> dict[str, dict]:
-    """从 AvatarServantSkillConfig 构建忆灵技能字典。
-
-    与角色技能不同：不做 HideInUI/TriggerKey 过滤（CDN 包含全部忆灵技能），
-    type 仅取 AttackType==Servant → 'Servant'，否则 null；tag 取 SkillEffect。
-    """
     by_id: dict[int, list[dict]] = defaultdict(list)
     for item in servant_skill_data:
         sid = item.get("SkillID", 0)
@@ -157,11 +149,6 @@ def _build_servant_skills(servant_skill_data: list[dict], skill_ids: list[int], 
     return result
 
 def _build_memosprite(servant_config: list[dict], servant_skill_data: list[dict], avatar_id: int) -> dict | None:
-    """从 AvatarServantConfig + AvatarServantSkillConfig 构建 memosprite。
-
-    角色→忆灵映射：ServantID - 10000 = 基础角色 ID；
-    开拓者（8xxx）同时分配给配对奇偶变体（如 18007 → 8007 & 8008）。
-    """
     for s in servant_config:
         servant_id = s.get("ServantID", 0)
         owner_base = servant_id - 10000
@@ -186,7 +173,6 @@ def _build_memosprite(servant_config: list[dict], servant_skill_data: list[dict]
     return None
 
 def _build_ranks(rank_data: list[dict], rank_ids: list[int], avatar_id: int) -> dict[str, dict]:
-    """从 AvatarRankConfig 构建 ranks 字典。"""
     result: dict[str, dict] = {}
     for item in rank_data:
         rid = item.get("RankID", 0)
@@ -215,18 +201,16 @@ _PSEUDO_SKILL_ICON_RE = re.compile(r"^((?:SpriteOutput/SkillIcons/Avatar|icon/sk
 与已映射的旧短路径（icon/skill/Avatar/，仅为兼容既有调用）。
 """
 
+_ENHANCED_ID_OFFSET = 1_000_000
+"""强化版技能 / 星魂 id = 基础 id + 该偏移（`1121201` ↔ `121201`）。
+
+`AvatarConfigEnhanced.SkillList/RankIDList` 登记的是**强化版 id**，而 `d.ranks` 的键与
+`Rank.id` 都是**基础 id**，故角标判定前必须换算回基础 id；前端 `lib/compare.ts` 的
+`baseSkillId()` 是同一换算的前端镜像，两处必须同步改。实测 10 个强化角色的
+`SkillList` / `RankIDList` 逐条满足该偏移。
+"""
+
 def _normalize_tree_icon(icon: str, avatar_id: int) -> str:
-    """将技能/星魂/行迹图标的 1{avatar_id} 伪目录归一到角色自身 ID 目录。
-
-    部分源数据存在「进阶」重复行（EnhancedID）与加强技能/星魂，其图标指向
-    1{avatar_id} 伪目录（如卡芙卡 1005 → 11005，文件名亦为 SkillIcon_11005_*），
-    该资产在 CDN 上不存在，导致技能卡/星魂/附加能力图标 404。这里把目录与文件名
-    中的 id 一并归一，落到与基础行同名的真实资产（SkillIcon_1005_*）。
-
-    注意：其他跨 ID 引用是有意为之、不能改动。例如开拓者偶数变体（8002/8004…）
-    自身无图标资产，源数据引用配对奇数 ID（8001/8003…）的真实图标；忆灵技能的
-    SkillIcon_11402_Servant* 文件名用的是忆灵 ID，目录本就是角色自身 ID。
-    """
     if not icon:
         return icon
     m = _PSEUDO_SKILL_ICON_RE.match(icon)
@@ -239,21 +223,9 @@ def _normalize_tree_icon(icon: str, avatar_id: int) -> str:
     return f"{prefix}{avatar_id}/{filename}"
 
 def _map_skill_icon(source_path: str, avatar_id: int) -> str:
-    """技能/星魂/行迹图标：源路径先归一伪目录，再映射为 CDN 路径。
-
-    顺序不可颠倒：--official-icon-paths 模式下 map_icon_path 产出
-    skillicons/avatar/{id}/... 前缀，_normalize_tree_icon 的匹配式覆盖不到，
-    归一会被静默跳过（技能/星魂/行迹三处同款洞，故统一收口到本函数）。
-    """
     return map_icon_path(_normalize_tree_icon(source_path, avatar_id))
 
 def _build_skill_trees(tree_data: list[dict], avatar_id: int, enhanced_id: int | None = None) -> dict[str, dict[str, dict]]:
-    """从 AvatarSkillTreeConfig 构建 skill_trees。
-    输出格式：{ anchor_key: { level_str: node } }
-
-    enhanced_id 参数：源表同时含基础（EnhancedID 缺失/None）与加强（EnhancedID=1）
-    两套行迹，按 EnhancedID 分流——基础行迹默认输出，加强行迹供 enhanced 包构建。
-    """
     by_anchor: dict[str, list[dict]] = defaultdict(list)
     for item in tree_data:
         if item.get("AvatarID") != avatar_id:
@@ -303,7 +275,6 @@ def _build_skill_trees(tree_data: list[dict], avatar_id: int, enhanced_id: int |
     return result
 
 def _build_stats(promo_data: list[dict], avatar_id: int) -> dict[str, dict]:
-    """从 AvatarPromotionConfig 构建 stats（0→6 突破阶段）。"""
     entries = sorted(
         [x for x in promo_data if x.get("AvatarID") == avatar_id],
         key=lambda x: x.get("MaxLevel", 0),
@@ -326,7 +297,6 @@ def _build_stats(promo_data: list[dict], avatar_id: int) -> dict[str, dict]:
     return result
 
 def _build_relics(relic_data: list[dict], avatar_id: int) -> dict:
-    """从 AvatarRelicRecommend 构建 relics。"""
     for item in relic_data:
         if item.get("AvatarID") == avatar_id:
             return {
@@ -340,7 +310,6 @@ def _build_relics(relic_data: list[dict], avatar_id: int) -> dict:
                 "property_list": [
                     {
                         "relic_type": p.get("RelicType", ""),
-                        # 部位名取官方词条令牌：前端不再自带中文部位表（enum_labels 单点登记）
                         "relic_type_name": resolve_label(
                             "relic_slot",
                             p.get("RelicType", ""),
@@ -356,11 +325,6 @@ def _build_relics(relic_data: list[dict], avatar_id: int) -> dict:
     return {}
 
 def _build_teams(records: list[dict]) -> list[dict]:
-    """从 TeamBuildConfig 记录构建配队推荐列表（与前端 BuildsPanel 契约对齐）。
-
-    每条记录 = 一个推荐队伍：MemberList 为推荐队友，BackupListN 为第 N 个队友槽位的备选。
-    输出结构：{ team_id, member_list, backup_list1..3 }
-    """
     teams: list[dict] = []
     for t in records:
         member_list = [m for m in t.get("MemberList", []) if m]
@@ -375,18 +339,14 @@ def _build_teams(records: list[dict]) -> list[dict]:
     return teams
 
 def _enhanced_descs(hint_data: list[dict], avatar_id: int, enh_key: int) -> list[str]:
-    """从 AvatarEnhancedHintConfig 提取强化摘要（EnhancedDesc1..N）。
-
-    保留原始标签（clean=False），前端以 gameTagsToHtml 渲染官方 <color> 强调词。
-    """
     for h in hint_data:
         if h.get("AvatarID") != avatar_id or h.get("EnhancedID") != enh_key:
             continue
         n = h.get("EnhancedDescNum", 0) or 0
         return [
-            resolve_text(h.get(f"EnhancedDesc{i}", {}), clean=False)
+            resolve_text(h.get(f"EnhancedDesc{i}", {}))
             for i in range(1, n + 1)
-            if resolve_text(h.get(f"EnhancedDesc{i}", {}), clean=False)
+            if resolve_text(h.get(f"EnhancedDesc{i}", {}))
         ]
     return []
 
@@ -398,13 +358,6 @@ def _build_enhanced(
     tree_config: list[dict],
     avatar_id: int,
 ) -> dict[str, dict] | None:
-    """从 AvatarConfigEnhanced 构建 enhanced 包（加强键 → EnhancedBundle）。
-
-    加强技能/星魂与基础同表（AvatarSkillConfig / AvatarRankConfig，ID 为 1xxx 前缀）；
-    加强行迹按 EnhancedID 从 AvatarSkillTreeConfig 分流。
-    输出：{ skills, ranks, skill_trees, descs, sp_need, skill_ids, rank_ids }
-    （skill_ids / rank_ids 供前端渲染「强化角标」）
-    """
     result: dict[str, dict] = {}
     for e in enhanced_config:
         if e.get("AvatarID") != avatar_id:
@@ -420,13 +373,12 @@ def _build_enhanced(
             "skill_trees": _build_skill_trees(tree_config, avatar_id, enhanced_id=enh_key),
             "descs": _enhanced_descs(hint_data, avatar_id, enh_key),
             "sp_need": unwrap_value(e.get("SPNeed")),
-            "skill_ids": skill_ids,
-            "rank_ids": rank_ids,
+            "skill_ids": [i - _ENHANCED_ID_OFFSET for i in skill_ids],
+            "rank_ids": [i - _ENHANCED_ID_OFFSET for i in rank_ids],
         }
     return result or None
 
 def convert() -> None:
-    """拼装完整 CharacterData 并输出到 characters/{id}.json。"""
     ensure_textmap_en()
     avatar_config = load_json(EXCEL_DIR / "AvatarConfig.json")
     ld_path = EXCEL_DIR / "AvatarConfigLD.json"
@@ -504,7 +456,6 @@ def convert() -> None:
         name = resolve_text(item.get("AvatarName", {}))
         if not name:
             continue
-        # 开拓者形态名的拉丁转写留空：上游 AvatarName 为 {NICKNAME} 占位符（见 textmap.resolve_text_en）
         name_en = resolve_text_en(item.get("AvatarName", {}))
 
         rarity = item.get("Rarity", "")

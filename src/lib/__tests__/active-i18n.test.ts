@@ -1,9 +1,4 @@
 // @vitest-environment node
-/**
- * active.ts（当前语言状态 + 模板字符串卡片的站内链接）单元测试。
- * `activeHref` 是目录卡这类**非 RouterLink** 场合的唯一取址入口——漏加前缀会让非缺省语言的
- * 卡片静默跳回缺省语言（e2e 另有 DOM 断言兜底）。
- */
 import { describe, it, expect, afterEach } from 'vitest';
 import { activeHref, activeLocale, resetActiveLocale, setActiveLocale } from '../i18n/active';
 import { localizedPath } from '../i18n/locales';

@@ -1,13 +1,7 @@
 // @vitest-environment node
-/**
- * compare.ts（对比模式纯函数）单元测试
- * 内联 fixture 参照本地转换数据真实结构手工构造（ID 前缀规则：强化 ID = base ID + 1000000）。
- */
 import { describe, it, expect } from 'vitest';
-import { baseSkillId, buildCompare } from '../compare';
+import { baseSkillId, buildCompare, enhancedIdOf } from '../compare';
 import type { CharacterData, Skill } from '../../services/types';
-
-/* ─── fixture ─── */
 
 const sk = (over: Partial<Skill> = {}): Skill => ({
   id: 100501,
@@ -18,7 +12,6 @@ const sk = (over: Partial<Skill> = {}): Skill => ({
   ...over,
 });
 
-/** 基础角色：技能 100501（普攻，无变化）+ 100502（战技，desc/level 变化）+ 星魂 1-2 + 行迹 */
 const baseChar = (): CharacterData => ({
   name: '测试角色',
   rarity: 'CombatPowerAvatarRarityType5',
@@ -53,9 +46,8 @@ const baseChar = (): CharacterData => ({
   },
 });
 
-/** 附加强化包（默认：技能 100502 desc/level 变、星魂 1 desc 变、行迹 point02 desc 变、sp_need 变） */
 const withEnh = (d: CharacterData, over: Partial<NonNullable<CharacterData['enhanced']>[string]> = {}): CharacterData => ({
-  ...d, // base.sp_need 保持 120，与包内 140 形成实际差异
+  ...d,
   enhanced: {
     '1': {
       skills: {
@@ -78,23 +70,25 @@ const withEnh = (d: CharacterData, over: Partial<NonNullable<CharacterData['enha
       },
       descs: ['强化摘要'],
       sp_need: 140,
-      skill_ids: [1100501, 1100502],
-      rank_ids: [1105101, 1105102],
+      skill_ids: [100501, 100502],
+      rank_ids: [105101, 105102],
       ...over,
     },
   },
 });
-
-/* ─── ID 映射 ─── */
 
 describe('baseSkillId', () => {
   it('加强技能 ID 去 11 前缀得到 base ID', () => {
     expect(baseSkillId(1100501)).toBe(100501);
     expect(baseSkillId(1131001)).toBe(131001);
   });
-});
 
-/* ─── buildCompare ─── */
+  it('baseSkillId 与 enhancedIdOf 互为逆运算（转换器落的是 base ID）', () => {
+    for (const base of [100501, 121201, 131001]) {
+      expect(baseSkillId(enhancedIdOf(base))).toBe(base);
+    }
+  });
+});
 
 describe('buildCompare', () => {
   it('无增强包 / 键不存在 → 全空结果', () => {
@@ -104,13 +98,9 @@ describe('buildCompare', () => {
   });
 
   it('仅冗余字段差异的技能不判定为变化（无变化条目排除）', () => {
-    // 普攻 1100501 注册在案但 base/enh 内容一致（仅 id/icon 前缀差异 + rated 关联变化）→ 不输出；
-    // 战技 1100502 保持默认变化版本 → 仍输出
     const d = withEnh(baseChar(), {
       skills: {
-        // 1100501：仅冗余字段差异（id/icon 前缀 + rated 关联 + combo 无消费）→ 不输出
         '1100501': sk({ id: 1100501, icon: 'en/11005.png', rated_rank_id: [1105101], rated_skill_tree_id: [1105102], skill_combo_value_delta: { Value: 10 } }),
-        // 1100502：保持变化版本（desc/level 与 base 不同）→ 仍须输出
         '1100502': sk({
           id: 1100502, name: '强化战技', type: 'BPSkill', type_name: '战技',
           desc: '对全体造成攻击力 #1[i]% 伤害',
@@ -121,7 +111,6 @@ describe('buildCompare', () => {
         }),
       },
     });
-    // base 侧普攻带 rated 关联（模拟 base 也有关联），两侧仅 rated/id/icon/combo 不同 → 无变化
     d.skills['100501'] = sk({ id: 100501, icon: 'base/1005.png', rated_rank_id: [1005101], rated_skill_tree_id: [1005102], skill_combo_value_delta: null });
     const r = buildCompare(d, '1');
     expect(r.skills.map((s) => s.id)).toEqual([1100502]);
@@ -143,7 +132,6 @@ describe('buildCompare', () => {
     expect(r.ranks.map((x) => x.key)).toEqual(['1']);
     expect(r.ranks[0].kinds).toContain('desc');
     expect(r.ranks[0].kinds).toContain('param');
-    // 星魂名变化兜底：kinds 不含 name，但 base/enh.name 可直接取用
     expect(r.ranks[0].base.name).toBe('星魂一');
   });
 
@@ -152,7 +140,6 @@ describe('buildCompare', () => {
     expect(r.trees.map((t) => t.anchor)).toEqual(['point02']);
     expect(r.trees[0].kinds).toContain('point_desc');
     expect(r.trees[0].kinds).toContain('param');
-    // point01 的 point_id 前缀差异（1005101 → 1105101）不算变化
   });
 
   it('point_name / status_add_list 变化检出', () => {

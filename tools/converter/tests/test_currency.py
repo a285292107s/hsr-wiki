@@ -1,11 +1,3 @@
-"""currency 转换器纯函数契约测试。
-
-用合成数据验证（不依赖真实源数据）：
-- _build_prop_names：PropertyType → 官方名（TextMap 解析），空名跳过
-- _flatten_property_mods：prop_names 注入时输出 prop_name；未收录 key 不输出
-
-"""
-
 import sys
 from pathlib import Path
 
@@ -17,7 +9,6 @@ from converters import currency as cur  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
-    """mock TextMap，避免加载真实 50MB 文件。"""
     import textmap
     monkeypatch.setattr(textmap, "_text_map", {
         "9774490082531591747": "初始能量",
@@ -102,10 +93,7 @@ class TestIndexGenderOverride:
 
 
 class TestAugmentDescComposer:
-    """货币词条描述走组合器（textpack.composed_ref）：模板 + 内嵌名称必须**按语言**各自组合。"""
-
     def test_each_entry_binds_its_own_template(self, monkeypatch):
-        """闭包**按值**绑定模板键：曾因 `lambda` 捕获循环变量，全部词条解析成同一条描述。"""
         import textmap
         import textpack
         from converters import currency_catalog as cc
@@ -126,7 +114,6 @@ class TestAugmentDescComposer:
             textpack.end()
 
     def test_gridfightinfo_substituted_per_language(self):
-        """`<gridfightinfo>` 内嵌名称按语言取值——同一模板在两种语言表下产出不同正文。"""
         from converters import currency_catalog as cc
 
         template = "获得<gridfightinfo type=item id=7/>"

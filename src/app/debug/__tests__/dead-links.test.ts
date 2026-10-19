@@ -1,4 +1,3 @@
-// 死链审计纯逻辑测试：fetch/哈希/时钟全部注入式替换，不依赖 DOM
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -291,8 +290,6 @@ describe('prepareAudit（数据加载 + 内容签名）', () => {
 });
 
 describe('computeSourceHashes', () => {
-  /* 引用了未读取到的来源文件必须标 unreadable（而非静默丢签名）——否则 planProbe 会把
-     「来源读不到」误判成「来源未变」，死链缓存永远不再重测 */
   it('仅对引用的 .json 来源计算；缺失来源标记 unreadable', async () => {
     const urls = new Map([
       ['https://cdn.jsdelivr.net/a.png', 'characters.json#x'],

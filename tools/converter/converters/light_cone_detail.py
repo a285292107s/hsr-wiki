@@ -1,14 +1,3 @@
-"""光锥详情转换器：从多张源表拼装每个光锥的完整详情数据。
-
-输出：public/data/cn/light_cones/{id}.json
-数据源：
-- EquipmentConfig.json        基础配置（名称/稀有度/命途/技能ID/图标）
-- EquipmentSkillConfig.json   光锥技能（名称/描述/各叠影等级参数）
-- EquipmentPromotionConfig.json 晋阶属性（HP/ATK/DEF base+add / 晋阶消耗 / 等级上限）
-- ItemConfigEquipment.json    物品描述（ItemDesc 简介 / ItemBGDesc 卡面故事）
-- AvatarEquipRecommend.json   适配角色（官方配装推荐，反向索引；角色页「推荐光锥」的正向同表）
-"""
-
 import logging
 from typing import Any
 from collections import defaultdict
@@ -26,12 +15,6 @@ def _load_optional(name: str) -> list[Any]:
 
 
 def _build_recommend_index(equip_records: list[dict]) -> dict[int, list[dict]]:
-    """AvatarEquipRecommend(+LD) → 光锥 ID → 适配角色列表。
-
-    `rank` = 该光锥在这个角色的推荐列表中的顺位（1 起，与角色页 REC. 序号同源）；
-    同一 AvatarID 在 LD 表重复登记时以 LD 为准（与 character_detail 的 equip_by_id 同序）。
-    列表按 (rank, id) 排序，保证产物稳定可 diff。
-    """
     equip_by_avatar: dict[int, list[int]] = {}
     for e in equip_records:
         avatar_id = e.get("AvatarID", 0)
@@ -48,7 +31,6 @@ def _build_recommend_index(equip_records: list[dict]) -> dict[int, list[dict]]:
 
 
 def convert() -> None:
-    """转换光锥详情数据 → light_cones/{id}.json。"""
     equip_data = load_json(EXCEL_DIR / "EquipmentConfig.json")
     skill_data = load_json(EXCEL_DIR / "EquipmentSkillConfig.json")
     promo_data = load_json(EXCEL_DIR / "EquipmentPromotionConfig.json")

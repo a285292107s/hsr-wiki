@@ -1,17 +1,10 @@
 // @vitest-environment node
-/**
- * local.ts（本地数据取数 + 令牌解析）契约测试。
- *
- * 模块级状态（请求缓存 / 单例槽位 / 语言包槽位）用 `vi.resetModules()` + 动态 import 隔离。
- * 覆盖两个方向：**未令牌化**结构层零语言包请求（迁移期与语言无关数据），**已令牌化**结构层按语言取包并解析。
- */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
 const DATA = '/data/cn/characters.json';
 const PACK_CN = '/data/i18n/cn/characters.json';
 const PACK_EN = '/data/i18n/en/characters.json';
 
-/** 按 URL 片段路由的 fetch 桩；未登记的路径返回 404。 */
 function routedFetch(routes: Record<string, unknown>) {
   return vi.fn(async (url: string) => {
     const hit = Object.keys(routes).find((k) => url.includes(k));

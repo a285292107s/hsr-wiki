@@ -1,7 +1,3 @@
-/**
- * 主题强调色（theme.ts）纯函数契约测试
- * 覆盖：默认值回退、localStorage 持久化读写、<html data-accent> 应用与缺省清理。
- */
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   DEFAULT_ACCENT,
@@ -56,7 +52,6 @@ describe('theme accents', () => {
     localStorage.setItem(STORAGE_KEY, 'olive');
     initAccent();
     expect(document.documentElement.dataset.accent).toBeUndefined();
-    // 非缺省色板仍必须显式落属性（否则切色失效）
     applyAccent('terracotta');
     expect(document.documentElement.dataset.accent).toBe('terracotta');
     applyAccent('olive');

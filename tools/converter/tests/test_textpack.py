@@ -1,10 +1,3 @@
-"""文本引用令牌与语言包（textpack.py）契约测试。
-
-用合成 TextMap 覆盖：令牌编解码、键登记、语言包生成与回填、缺键中断、递归替换、
-语言包落盘顺序稳定。**令牌格式同时被前端镜像测试钉住**
-（`src/lib/__tests__/text-ref.test.ts` 读本模块源的 TOKEN_PREFIX 做跨侧比对）。
-"""
-
 import json
 import re
 import sys
@@ -36,7 +29,6 @@ EN = {"111": "March 7th", "222": "Ice", "333": "Skill"}
 
 @pytest.fixture
 def fake_textmaps(monkeypatch):
-    """按语言返回合成 TextMap；未登记语言沿用 languages.py 的真实分支。"""
     table = {"cn": CHS, "en": EN}
 
     def _load(code):
@@ -105,7 +97,6 @@ class TestBuildPack:
         assert pack == {"111": "March 7th", "222": "Ice", "333": "Skill"}
 
     def test_missing_keys_filled_from_default(self, fake_textmaps):
-        """键 444 英文表没有 → 从 cn 回填，语言包必须自包含。"""
         pack, filled = textpack.build_pack(["111", "444"], "en", IDENT)
         assert filled == ["444"]
         assert pack == {"111": "March 7th", "444": "毁灭"}
@@ -117,7 +108,6 @@ class TestBuildPack:
         assert pack["222"] == "冰"
 
     def test_cleaner_applies_to_plain_key_but_not_raw_variant(self, fake_textmaps, monkeypatch):
-        """变体分工：普通键出清洗后正文，`~raw` 变体键保留原文（含游戏标记）。"""
         monkeypatch.setitem(fake_textmaps, "en", {"111": "<unbreak>7</unbreak> March", "222": "<color=#F>Ice</color>"})
         pack, _ = textpack.build_pack(["111", textpack.raw_variant("222")], "en", CLEAN)
         assert pack["111"] == "7 March"
@@ -160,7 +150,7 @@ class TestSubstitute:
             "n": 5,
             "nested": {"d": "March 7th"},
         }
-        assert src["name"] == "$t:111"  # 原结构不被改写
+        assert src["name"] == "$t:111"
 
     def test_missing_key_raises_with_path(self, fake_textmaps):
         pack, _ = textpack.build_pack(["111"], "en", IDENT)
@@ -170,8 +160,6 @@ class TestSubstitute:
 
 
 class TestGroupOf:
-    """分组规则是前后端共用契约（首屏成本），逐例钉住。"""
-
     def test_dir_first_segment(self):
         assert textpack.group_of("characters/1310.json") == "characters"
         assert textpack.group_of("currency/role/1502.json") == "currency"
@@ -198,7 +186,6 @@ class TestTextRef:
         assert ref.key == "111"
 
     def test_composition_loses_key(self):
-        """f-string 拼接会退化成普通 str——这正是「残留中文」的判据，必须显式暴露。"""
         ref = textpack.TextRef("三月七", "111")
         composed = f"开拓者·{ref}"
         assert composed == "开拓者·三月七"
@@ -241,7 +228,7 @@ class TestPackBuilder:
     def test_writes_grouped_packs_with_fallback(self, tmp_path, fake_textmaps):
         builder = textpack.PackBuilder()
         builder.record("characters", "111")
-        builder.record("characters", "444")   # en 缺 → 回填 cn
+        builder.record("characters", "444")
         builder.record("maze", "333")
         stats = builder.write(tmp_path, ["cn", "en"], IDENT)
 
@@ -260,7 +247,6 @@ class TestPackBuilder:
             builder.write(tmp_path, ["cn"], IDENT)
 
     def test_textmap_loaded_once_per_language(self, tmp_path, monkeypatch):
-        """13 语言各 50–70 MB：必须每语言只加载一次，不能按分组反复加载。"""
         loads: list[str] = []
 
         def _load(code):
@@ -277,7 +263,6 @@ class TestPackBuilder:
 
 @pytest.fixture
 def token_mode(tmp_path, monkeypatch):
-    """开启令牌模式 + 把 OUTPUT_DIR 指向临时目录，测试结束复原全局开关。"""
     import utils
 
     monkeypatch.setattr(utils, "OUTPUT_DIR", tmp_path)
@@ -320,7 +305,6 @@ class TestSaveJsonTokenMode:
         assert token_mode.groups == ("maze",)
 
     def test_passthrough_token_is_recorded(self, token_mode):
-        """透传的既有令牌（catalog 从已令牌化结构层派生）也必须登记键，否则该分组没有语言包。"""
         import utils
 
         utils.save_json({"zh": "$t:222", "n": 1}, utils.OUTPUT_DIR / "maze.catalog.json")
@@ -328,7 +312,6 @@ class TestSaveJsonTokenMode:
         assert token_mode.keys_of("maze.catalog") == frozenset({"222"})
 
     def test_plain_text_with_cjk_is_left_verbatim(self, token_mode):
-        """写死中文不报错但会被盘点出来（survey_tree），不会被误当成令牌。"""
         import utils
 
         target = utils.OUTPUT_DIR / "monsters.json"
@@ -339,8 +322,6 @@ class TestSaveJsonTokenMode:
 
 
 class TestComposer:
-    """组合器：键不由 TextMap 直接供给，而是**逐语言现算**（成就简介 = 模板 + TEXTJOIN + 参数）。"""
-
     def test_composer_evaluated_per_language(self, tmp_path, fake_textmaps):
         builder = textpack.PackBuilder()
         key = "composed:ach:222:abcd1234"
@@ -353,7 +334,6 @@ class TestComposer:
         assert en[key] == "[Ice]"
 
     def test_composer_bypasses_cleaner_and_fallback(self, tmp_path, fake_textmaps):
-        """组合器自带清洗与回退责任：不套 cleaner、也不走缺键回填。"""
         builder = textpack.PackBuilder()
         key = "composed:ach:333:x"
         builder.record("achievements", key)
@@ -382,7 +362,6 @@ class TestComposer:
             textpack.end()
 
     def test_composed_ref_without_session_still_returns_text_ref(self):
-        """`--raw` 模式（无会话）下组合器无处登记，返回值仍带键、按文本落盘。"""
         textpack.end()
         ref = textpack.composed_ref("composed:ach:1:sig", lambda _tm: "x", "纯文本")
         assert ref == "纯文本" and ref.key == "composed:ach:1:sig"
@@ -399,6 +378,6 @@ class TestCollectAndWrite:
         write_pack(path, {"333": "Skill", "111": "March 7th", "222": "Ice"})
         raw = path.read_text(encoding="utf-8")
         assert raw.index('"111"') < raw.index('"222"') < raw.index('"333"')
-        assert " " not in raw.split('"111"')[0]  # 紧凑输出（无缩进）
+        assert " " not in raw.split('"111"')[0]
         assert json.loads(raw) == {"111": "March 7th", "222": "Ice", "333": "Skill"}
-        assert not list(path.parent.glob("*.tmp"))  # 原子替换，无残留临时文件
+        assert not list(path.parent.glob("*.tmp"))

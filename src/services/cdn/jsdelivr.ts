@@ -1,35 +1,20 @@
-/* jsDelivr 源（自建 fork StarRailTextures 镜像）：当前为回退源，仅补 nanoka 缺失旧档。
-   fork 已冻结（仅含冻结前资产），主源必须是 nanoka（持续更新）；**禁止**把 jsDelivr 重新设为
-   任何分类首选源——例外只有两个：trace（nanoka 为占位图，经 base.ts spec.jdPrimary 保持主源）
-   与 statusimmune（nanoka 无该批免疫图标，本地为主、jsDelivr 兜底，同样经 jdPrimary 让回退落到它）。
-   路径规则：SpriteOutput/{SubDir} → spriteoutput/{subdir}（目录小写 / 文件名保大小写）；
-   skillicons 按角色 id 分目录（avatar/{id}/）、trace 与 statusimmune 在 ui/avatar/icon/、
-   element 在 icondamagetype/、pathicon 在 professioniconmiddle/（Priest→Pirest、Elation→Joy 官方拼写差异）。 */
 import type { CdnCategory } from './base';
 import { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH, OFFICIAL_ICON_BASE } from '../../lib/constants';
 
-/** 分支与仓库基址（已统一收口到 lib/constants.ts，此处 re-export 保持路径兼容） */
 export { USE_OFFICIAL_PATHS, JS_DELIVR_BRANCH };
 export const JS_DELIVR_BASE = OFFICIAL_ICON_BASE;
 
-/* 星魂图标官方源基址：ui/ui3d/rank/ 位于 assets/asbres/ 下，与 spriteoutput/ 平级
-   （JS_DELIVR_BASE 含 /spriteoutput 后缀，故独立收口；供 resolve 层 rank 分类特判）。 */
 export const JS_DELIVR_UI3D_BASE = JS_DELIVR_BASE.replace(/\/spriteoutput$/, '');
 
-/** 官方拼写差异（AvatarBaseType 数据源验证：Priest 官方写作 Pirest，Elation 官方写作 Joy）；键为项目传入的小写 baseType */
 const PROFESSION_MAP: Record<string, string> = { priest: 'Pirest', elation: 'Joy' };
 const PROFESSION_MAP_REV: Record<string, string> = Object.fromEntries(
   Object.entries(PROFESSION_MAP).map(([k, v]) => [v, k]),
 );
 
-/* 分类 → jsDelivr 仓库相对路径（file 为项目 nanoka 文件名，含 .webp 后缀）。
-   仅注册经核对脚本验证全命中的分类；新增分类前先跑核对脚本。
-   返回 null 表示该文件名不适用 jsDelivr 规则（如无角色 id 的虚构名），调用方回退 nanoka。 */
 export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => string | null>> = {
   avatarshopicon: (f) => `avatarshopicon/avatar/${f.replace(/\.webp$/i, '')}.png`,
   avatarroundicon: (f) => `avatarroundicon/avatar/${f.replace(/\.webp$/i, '')}.png`,
   avatardrawcard: (f) => `avatardrawcard/${f.replace(/\.webp$/i, '')}.png`,
-  // 立绘切入图与光锥全图：目录段与文件名与仓库一致，无额外子目录段（fork 冻结前的资产）
   avatarcutinfigures: (f) => `avatarcutinfigures/${f.replace(/\.webp$/i, '')}.png`,
   lightconemaxfigures: (f) => `lightconemaxfigures/${f.replace(/\.webp$/i, '')}.png`,
   itemfigures: (f) => `itemfigures/${f.replace(/\.webp$/i, '')}.png`,
@@ -37,13 +22,11 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
   lightconemediumicon: (f) => `lightconemediumicon/${f.replace(/\.webp$/i, '')}.png`,
   achievement: (f) => `achievement/${f.replace(/\.webp$/i, '')}.png`,
   trace: (f) => `ui/avatar/icon/${f.replace(/\.webp$/i, '')}.png`,
-  // 免疫图标与行迹图标同目录（ui/avatar/icon/），文件名自带 IconImmune 前缀
   statusimmune: (f) => `ui/avatar/icon/${f.replace(/\.webp$/i, '')}.png`,
   monstermiddleicon: (f) => `monstermiddleicon/${f.replace(/\.webp$/i, '')}.png`,
   monsterfigure: (f) => `monsterfigure/${f.replace(/\.webp$/i, '')}.png`,
   relicfigures: (f) => {
     const base = f.replace(/\.webp$/i, '');
-    // 通用部位图标（IconRelicBody/Foot/Neck/Goods）仓库无对应文件（官方仅套装件 1~4），回退 nanoka
     return /^IconRelic(?:Body|Foot|Neck|Goods)$/.test(base) ? null : `relicfigures/${base}.png`;
   },
   element: (f) => {
@@ -59,27 +42,18 @@ export const JS_DELIVR_RULES: Partial<Record<CdnCategory, (file: string) => stri
     const base = f.replace(/\.webp$/i, '');
     const id = base.match(/\d+/)?.[0];
     if (!id) return null;
-    // 忆灵技能文件名以忆灵 ID 为前缀（SkillIcon_11402_Servant*），仓库目录却按角色 ID 组织
-    // （skillicons/avatar/1402/）；忆灵 ID = 角色 ID + 10000（18007 → 8007 开拓者特例）
     const dir = /_Servant/.test(base) && Number(id) > 10000 ? String(Number(id) - 10000) : id;
     return `skillicons/avatar/${dir}/${base}.png`;
   },
-  // 星魂本体展示图标：官方仓库位于 ui/ui3d/rank/_dependencies/textures/{charId}/{charId}_Rank_{num}.png
-  // （与 nanoka rank 分类同构，官方 E1-6 全量收录，含 skillicons 目录缺失的 Rank3/5）
-  // 注意：该目录与 spriteoutput/ 平级（assets/asbres/ui/...），resolve 层用 JS_DELIVR_UI3D_BASE 拼接
   rank: (f) => `ui/ui3d/rank/_dependencies/textures/${f.replace(/\.webp$/i, '')}.png`,
 };
 
-/* 通用转换规则：官方 SpriteOutput 完整路径 → 仓库相对路径（目录段小写、文件名保留）。
-   与 converter config.py _rule_dir_lower 规则对齐；
-   供输入为完整 SpriteOutput 路径、未注册 JS_DELIVR_RULES 分类的场景复用（如终局赛季页签图）。 */
 export function spriteOutputToRel(path: string): string {
   const rel = path.replace(/^SpriteOutput\//i, '');
   const parts = rel.split('/');
   return [...parts.slice(0, -1).map((s) => s.toLowerCase()), parts[parts.length - 1]].join('/');
 }
 
-/** jsDelivr URL → nanoka 等价文件名（cdnFallbackFromPrimary 反查用；未命中返回空串） */
 export function jsdelivrToNanokaFile(category: CdnCategory, url: string): string {
   const name = url.split('/').pop()?.replace(/\.png$/i, '') ?? '';
   if (!name) return '';
@@ -92,7 +66,6 @@ export function jsdelivrToNanokaFile(category: CdnCategory, url: string): string
       return `${orig.toLowerCase()}.webp`;
     }
     case 'rank': {
-      // 官方路径 {charId}/{charId}_Rank_{num}.png → nanoka 等价文件（保留 charId 子目录）
       const m = url.match(/(\d+)\/(\d+_Rank_\d+)\.png$/i);
       return m ? `${m[1]}/${m[2]}.webp` : `${name}.webp`;
     }

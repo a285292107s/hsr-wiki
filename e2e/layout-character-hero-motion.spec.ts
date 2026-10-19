@@ -10,18 +10,8 @@ import {
   tableBoxWithinCard,
 } from './layout.shared';
 
-/**
- * 布局验收：角色详情页 —— hero 动效与断点（入场编排 / 骨架同框 / 视差 / 重挂 / 命中区）。
- *
- * `layout-character-*.spec.ts` 按域拆分文件之一（文件级并行是唯一被采纳的提速手段：
- * `fullyParallel: false` 只禁文件内并行）。标签语义（`@viewport-pinned` / `@cross-engine` /
- * `@viewport-independent`）与数值断言纪律见 docs/agents/testing.md。
- */
-
 test.describe('布局验收：角色详情页', () => {
 
-  // 触控热区契约：视觉盒 59×26 靠 `::before { inset: -12px }` 扩到 ≥44×44（WCAG 2.2 AA 目标尺寸）。
-  // 判定必须按**命中区**：伪元素不返回自身、`elementFromPoint` 只返回宿主，故只能从中心向外扫边界。
   test('/character/1001：hero「动画」开关命中区不小于 44×44', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1001');
@@ -43,30 +33,18 @@ test.describe('布局验收：角色详情页', () => {
       const r = scan(1, 0);
       const u = scan(0, -1);
       const dn = scan(0, 1);
-      // 扫描得到的是自中心的半径，命中尺寸必须 left+right+1（把半径当宽度会得出翻倍的假值）
       return { w: l + r + 1, h: u + dn + 1 };
     });
-    const MIN_TARGET = 44; // 跨会话不得漂移的契约值（WCAG 2.2 AA 目标尺寸）
+    const MIN_TARGET = 44;
     expect(extent.w, '命中区宽度').toBeGreaterThanOrEqual(MIN_TARGET);
     expect(extent.h, '命中区高度').toBeGreaterThanOrEqual(MIN_TARGET);
     assertNoErrors();
   });
 
-  // 骨架态只代理「盒子」：同一角色下骨架面板与就绪面板必须同宽同高，且两态都不给媒体加底板
-  // （底板绝对定位在面板上 ⇒ 面板一变高、底板顶边就跳；2026-09 记过同类 204px 高度跳变）。
-  // 高度一处比对的是骨架盒高（`--nk-hero-panel-h`，全量中位数上取整）与就绪面板高——就绪侧同值
-  // min-height 兜底，故这条断言 = 「就绪内容不得高过骨架盒高」，与字体度量无关（见 character-skeleton.css）。
-  // `@font-calibrated`：就绪内容高仍是若干 `line-height: normal` 行盒之和（比例随解析到的回退字体变，
-  // Linux runner 比标定源高 2~3px）⇒ 该断言判定依赖平台，CI 层不收集、本机全量判（见 docs/agents/testing.md）。
   test('/character/1001 桌面：骨架态与就绪态 hero 面板同框且两态均不给媒体加底板', { tag: ['@viewport-pinned', '@font-calibrated'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
 
-    // 延迟主数据响应以停在骨架态（use-delayed-skeleton 的展示阈值远小于此）。用**可释放门**而不是固定
-    // 4s 延时：骨架停多久由用例决定，放行后先等处理器结算再撤拦截——固定延时会让响应在用例交出控制权
-    // **之后**才放行，届时 `route.continue()` 可能撞上已被判为 handled 的 Route 抛
-    // `Route is already handled!`，记在用例头上（而断言其实全绿）；早撤拦截则会把扣住的请求打断，
-    // 就绪态改由第二次请求这条旁路送达，测的就不是「慢响应到达」了。
     let releaseData = () => {};
     const dataGate = new Promise<void>((res) => { releaseData = res; });
     let heldRequests = 0;
@@ -93,7 +71,6 @@ test.describe('布局验收：角色详情页', () => {
     await expect.poll(() => heldRequests, { timeout: 10_000, message: '放行后主数据处理器未结算' }).toBe(0);
     await page.unroute('**/data/cn/characters/1001.json');
     await page.waitForSelector('.nk-stats__stat', { timeout: 30_000 });
-    // 编号行用 hud 字体；worker 并发下量高会跑在字体就位之前（±2px 抖动 ⇒ 1px 容差误报）
     await page.evaluate(() => document.fonts.ready);
     const ready = await page.locator('.nk-hero__panel').evaluate((el) => {
       const r = el.getBoundingClientRect();
@@ -108,9 +85,6 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  // 平板档（768~1023）版式契约：改为「文字在左 · 媒体在右」并排（媒体竖幅）——竖排会在文字块右侧
-  // 留近半个面板宽的空洞、媒体带居中后左右各留 113px，读作「手机版式被拉宽」。骨架态必须逐项同框。
-  // 注：骨架/就绪之间恒有 ~1.4px 横向差（既有、三档一致、加载期不可见），故 x/y 取 2px 容差。
   test('/character/1001 平板档：文字与媒体并排且骨架同框', { tag: ['@viewport-pinned', '@font-calibrated', '@cross-engine'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 768, height: 1024 });
@@ -128,7 +102,6 @@ test.describe('布局验收：角色详情页', () => {
       };
     }, rootSel);
 
-    // 同「桌面」条：可释放门 + 处理器结算后再撤拦截（固定延时 + 先撤拦截的竞态见该条注释）
     let releaseData = () => {};
     const dataGate = new Promise<void>((res) => { releaseData = res; });
     let heldRequests = 0;
@@ -172,8 +145,6 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  // 边界断点契约：最窄桌面档（1024×768）与矮横屏（1440×460，hero 取 min-height 560 会超出视口）下，
-  // 面板必须整体留在 hero 内且不引出横向溢出。
   test('/character/1001：hero 面板在 1024 与矮横屏下仍落在 hero 内', { tag: ['@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     for (const vp of [{ width: 1024, height: 768 }, { width: 1440, height: 460 }]) {
@@ -201,9 +172,6 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  // 入场编排契约：四行同一关键帧、一次性、延迟递增（stagger）；reduced-motion 下整体关闭——
-  // 只断言 `animation-duration` 被压到 0.01ms 不够（tokens.css 的全局降级就是这么做的），
-  // 故这里断言动画名归 none，证明页面级 opt-out 生效。
   test('/character/1001：hero 封面入场编排（延迟递增 + reduced-motion 关闭）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1001');
@@ -233,9 +201,6 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  // 滚动视差契约：媒体层（含 Spine）随页面滚动滞后，文字面板不动 ⇒ 文字与素材分层。
-  // 断言的是「timeline 驱动的位移随滚动推进、越界后封顶、面板不随动」；
-  // reduced-motion 必须靠页面级 opt-out——全局降级只压 animation-duration，而 timeline 进度不看 duration。
   test('/character/1001 桌面：hero 媒体滚动视差（推进 / 封顶 / 面板不动 / reduced-motion 关闭）', { tag: ['@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -252,23 +217,14 @@ test.describe('布局验收：角色详情页', () => {
         anim: getComputedStyle(v).animationName,
       };
     });
-    /* 落位必须**原子**：`.nk-page--detail` 声明了 `scroll-behavior: smooth`（tokens.css），
-       赋 `scrollTop` 会启动一段滚动动画 ⇒ 每次采样都在读一个移动中的目标。`behavior: 'instant'`
-       才是本条要的语义——「停在 t」，滚动时间轴的进度随之一次到位。 */
     const scrollTo = (top: number) => page.evaluate((t) => {
       (document.querySelector('.nk-page--detail') as HTMLElement).scrollTo({ top: t, behavior: 'instant' as ScrollBehavior });
     }, top);
-    /* 「位移已稳定」必须跨**真实动画帧**比较：同一帧内两次读取恒等（滚动时间轴还没 tick），
-       那只证明「此刻没人动」，不证明「已经到了」。 */
     const nextFrames = () => page.evaluate(
       () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
     );
 
     const atTop = await snap();
-    // 渐进增强契约：整条动画必须关在 `@supports (animation-timeline: scroll())` 里。
-    // 不支持滚动时间轴的引擎（实测 Firefox）会忽略 `animation-timeline`，动画退回普通时间轴跑完并停在末帧
-    // （`fill: both`）⇒ 媒体层被**永久下移 36px**，那不是「少个动效」而是构图位移 + 与文字列错层。
-    // 故分两路断言：支持 ⇒ 挂上动画且首屏 0；不支持 ⇒ 必须**完全没有动画**且位移恒 0（静态构图）。
     const supportsScrollTimeline = await page.evaluate(() => CSS.supports('animation-timeline', 'scroll(nearest)'));
     if (supportsScrollTimeline) {
       expect(atTop.anim, '媒体须挂上滚动驱动动画').toBe('nk-hero-lag');
@@ -278,7 +234,6 @@ test.describe('布局验收：角色详情页', () => {
     expect(atTop.shift, '首屏不得有位移（与静态版面一致）').toBeCloseTo(0, 1);
 
     if (!supportsScrollTimeline) {
-      // 不支持档：滚动任何距离都不得产生位移（静态构图），这正是本条存在的原因
       await scrollTo(4000);
       expect((await snap()).shift, '不支持滚动时间轴时媒体位移须恒为 0').toBeCloseTo(0, 1);
       await noUnknownOverflow(page);
@@ -293,8 +248,6 @@ test.describe('布局验收：角色详情页', () => {
 
     await scrollTo(600);
     await expect.poll(async () => (await snap()).shift, { timeout: 3_000 }).toBeGreaterThan(mid.shift);
-    // 取值前必须等位移**稳定**（跨两帧仍相等）：只等 `> mid.shift` 会把滚动驱动的中间帧当成末值，
-    // 后面「滚到 4000 后应与它相等（±0.5px）」就必然翻成 false——CI 实测 3s 轮询超时的那次 flake 即此。
     let farShift: number | null = null;
     await expect.poll(
       async () => {
@@ -308,7 +261,6 @@ test.describe('布局验收：角色详情页', () => {
       { timeout: 5_000 },
     ).toBe(true);
 
-    // 滚过 animation-range 后位移封顶：继续滚不得再增长（容 0.5px 次像素）
     await scrollTo(4000);
     await expect.poll(
       async () => Math.abs((await snap()).shift - farShift!) <= 0.5,
@@ -324,8 +276,6 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  // 内容切换编排契约：换角色时 hero 必须**重挂**——store 的 load 先清 data ⇒ hero 卸载 → 数据到位后新挂载，  // 入场编排随之重播。判据用 DOM 节点身份（不依赖动画时序，慢机也不 flake）；
-  // 若日后改成跨角色复用 data（不重置），本条会红——那正是要拦住的回归。
   test('/character/1001：换角色后 hero 重挂（入场编排随之重播）', { tag: '@viewport-independent' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1001');
@@ -353,8 +303,6 @@ test.describe('布局验收：角色详情页', () => {
     );
     expect(remounted, '换角色后 hero 须重挂（入场编排重播）').toBe(true);
 
-    // 不断言整页无溢出：换角色后 Spine 画布已在场，而该画布（scale 1.15）恒被整页扫描判红，
-    // 属已定性但未登记的既有缺陷（见 docs/memory/2026-09.md）——要断言须先由 Hero/spine 域裁决。
     assertNoErrors();
   });
 });

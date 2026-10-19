@@ -2,23 +2,10 @@ import { OFFICIAL_ICON_BASE } from '../../../lib/constants';
 import { activeHref } from '../../../lib/i18n/active';
 import { translate } from '../../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 import { escHtml, stripAllTags } from '../../../lib/format';
 import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
 
-// 终局官方素材 URL（jsDelivr 加速自建 fork GitHub 源，基址统一收口 OFFICIAL_ICON_BASE，跟 main 分支最新）。
-// 白名单 = 语义闸门：仅放行「赛季主题/页签/横幅类」路径，排除开关图/场景背景等 UI 素材；
-// 全部前缀均实测在 StarRailTextures 仓库可命中：
-// - TabIcon/** → tabicon/**（虚构 ChallengeThemeTabIcon / 末日 ChallengeBossTabIcon）
-// - ChallengePeak/** → challengepeak/**（异相仲裁每期 ThemeIconPicPath）
-// - UI/ChallengeBoss/** → ui/challengeboss/**（玩法级默认 QuestTabImg）
-// - DailyMission/Banner/** → dailymission/banner/**（赛季横幅 ChallengeThemeBanner/BossBanner/PeakPanelBanner）
-// - ChallengeTheme/** → challengetheme/**（虚构主题素材 ThemeIcon/ThemePic/ThemeBg）
-// - ChallengeBoss/** → challengeboss/**（末日主题图标 ChallengeBossIcon_30xx）
-// - Quest/TabIcon/** → quest/tabicon/**（海报页签 BtnChallengeStoryAlternation/BtnChallengeBoss/BtnChallengePeak）
-// - Abyss/** → abyss/**（忘却之庭场景背景 Abyss/UI3D_SceneBg，仅 Hero 背景用）
-// 未列入的（如忘却之庭 AbyssSwitch 共用开关图 / Quest 其他素材）返回空串不渲染；
 const ART_PREFIXES = [
   'TabIcon',
   'ChallengePeak',
@@ -29,9 +16,6 @@ const ART_PREFIXES = [
   'Quest/TabIcon',
   'Abyss',
 ] as const;
-/** 玩法级默认图标白名单（modeDefaultArtUrl / 模式筛选选项 icon 专用）：在 ART_PREFIXES 基础上
- *  放行忘却之庭专属/通用开关图 UI/Abyss/Process/TypeIcon（常驻关卡 W01/W02、赛季 Loop）——
- *  装饰素材函数（banner/poster/hero bg）保持原白名单不放行开关图 */
 const TAB_ART_PREFIXES = [
   ...ART_PREFIXES,
   'UI/Abyss',
@@ -51,9 +35,6 @@ export function seasonPosterTabUrl(arts?: { poster_tab?: string } | null): strin
   return endgameArtUrl(arts?.poster_tab, ART_PREFIXES);
 }
 
-// 赛季 Hero 背景 URL（按模式取唯一大图：maze=background 场景背景 2048×1024 /
-// story=theme_bg 海报背景 2048×1152 / peak=handbook_banner 图鉴横幅 1103×737；
-// boss 无大图字段返回空串保持透明底）。低透明度铺底，保证文字对比度。
 export function seasonHeroBgUrl(arts?: { background?: string; theme_bg?: string; handbook_banner?: string } | null): string {
   return endgameArtUrl(arts?.background, ART_PREFIXES)
     || endgameArtUrl(arts?.theme_bg, ART_PREFIXES)
@@ -67,17 +48,10 @@ import type { MazeCatalogDb, MazeListEntry } from '../../../services/types';
 
 export type MazeStatus = 'live' | 'ended' | 'upcoming' | 'unknown';
 
-/** 赛季排期的时区口径（判据，见 ADR 0060）：
- *  上游给的是**无时区的裸本地时间串** `YYYY-MM-DD HH:mm:ss`（实测 186/186 条排期串零时区标记），
- *  而 `new Date('2026-11-02 04:00:00')` 按**运行环境本地时区**解析 ⇒ 同一 URL 的「当期赛季」与
- *  日期文案会在 ±14h 内随访客时区分叉；构建机在 UTC 时预渲染快照还会比页面少一天。
- *  排期属游戏官方服务器时间，故裸串一律按**固定 +08:00** 解释；已带时区 / `Z` 的串按原语义。 */
 export const SEASON_TZ_OFFSET = '+08:00';
 const SEASON_TZ_MS = 8 * 3600 * 1000;
-/** 裸排期串：日期必选，时间可选（`2026-11-02` / `2026-11-02 04:00:00` / `2026-11-02T04:00:00`） */
 const BARE_SEASON_TIME = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
 
-/** 排期串 → 毫秒时间戳（裸串按 +08:00 解释；非法 / 空 ⇒ null）。导出供单测锁定口径。 */
 export function seasonTimeMs(s?: string): number | null {
   if (!s) return null;
   const raw = String(s).trim();
@@ -90,7 +64,6 @@ export function seasonTimeMs(s?: string): number | null {
   return Number.isNaN(t) ? null : t;
 }
 
-/** 排期串 → 展示用日期 `YYYY.MM.DD`（取**排期时区**的墙钟日期，不取访客本地日期；非法 ⇒ null）。 */
 export function seasonDateParts(s?: string): string | null {
   if (!s) return null;
   const raw = String(s).trim();
@@ -121,7 +94,6 @@ export function mazeDateRange(info: MazeListEntry): string {
   return '';
 }
 
-/** 状态 → CSS 类名（与枚举同名；枚举值即类名，保留下标兜底未知值）。 */
 export const MAZE_STATUS_CLASS: Record<MazeStatus, string> = {
   live: 'live',
   ended: 'ended',
@@ -129,18 +101,14 @@ export const MAZE_STATUS_CLASS: Record<MazeStatus, string> = {
   unknown: 'unknown',
 };
 
-/** 状态 → 展示文案的词典键（界面不再出现用中文当内部键的写法）。 */
 export function mazeStatusLabelKey(status: MazeStatus): string {
   return `endgame.status.${status}`;
 }
 
 export interface EndgameMode {
   key: string;
-  /** 展示名（官方玩法名）的词典键：中文正文只在词典里，配置/常量不再写一份 */
   labelKey: string;
   en: string;
-  /** 玩法入口图（SpriteOutput 路径：ChallangeGeneralConfig TabImgPath 三模 + 仲裁人工延展
-   *  Img4；筛选选项 icon 消费，经 endgameArtUrl + UI/ChallengeBoss 白名单解析） */
   icon?: string;
 }
 
@@ -151,18 +119,11 @@ export const ENDGAME_MODES: EndgameMode[] = [
   { key: 'peak', labelKey: 'catalog.option.modePeak', en: 'ANOMALY', icon: 'SpriteOutput/UI/ChallengeBoss/ChallengeBossQuestTabImg4.png' },
 ];
 
-// 玩法级默认图标 URL（模式统一用玩法入口默认图：抛弃每季 `arts.tab` 页签图——
-// 4 类玩法图标恒定，不随新赛季迭代而漂移，规避 jsDelivr fork 冻结后的新赛季破图残留）。
-// 数据源 = ENDGAME_MODES[].icon（模式筛选选项 icon 同源，单一事实来源；peak 为人工延展 Img4）。
-// 经 endgameArtUrl + TAB_ART_PREFIXES 白名单解析；空串由调用方降级徽记。
 export function modeDefaultArtUrl(modeKey: string): string {
   const mode = ENDGAME_MODES.find((m) => m.key === modeKey);
   return mode?.icon ? endgameArtUrl(mode.icon, TAB_ART_PREFIXES) : '';
 }
 
-// 排序键 = 首个已知端点（live_begin 优先、回退 live_end：新赛季排期可能只有单边日期）；
-// 同日平局开始端在前（当天开始的赛季新于当天结束的）；两端皆无者按编号降序沉底。
-// 镜像副本：tools/gen-ai-endpoints.mjs endgamePages 的 all.sort。
 export function bySeasonDesc(a: CatalogItem, b: CatalogItem): number {
   const ka = seasonSortKey(a);
   const kb = seasonSortKey(b);
@@ -195,7 +156,6 @@ export const endgamePage: CatalogPageConfig = {
       loadLocalMazeCatalog(), loadLocalStoryCatalog(), loadLocalBossCatalog(), loadLocalPeakCatalog(),
     ]);
     const items: CatalogItem[] = [];
-    // 数据源为 *.catalog.json 轻量条目：仅含目录卡字段，大幅削减目录首载体积（详情页仍走全量）。
     const collect = (mode: EndgameMode, db: MazeCatalogDb): void => {
       for (const [key, info] of Object.entries(db)) {
         if (!info || !info.zh) continue;
@@ -213,11 +173,9 @@ export const endgamePage: CatalogPageConfig = {
           test: info.test,
           buffs: info.buffs || [],
           monsters: info.monsters || [],
-          /** 卡片敌方：最终层（最高层）代表阵容优先，回退全赛季（converter final_monsters） */
           finalMonsters: info.final_monsters || [],
           tierce: info.tierce,
           levels: info.levels,
-          /** 赛季级污染汇总（ADR 0026）：卡片「贪饕污染」标记的唯一判据 */
           pollution: info.pollution,
         });
       }
@@ -231,14 +189,11 @@ export const endgamePage: CatalogPageConfig = {
   },
   renderCard(item, i) {
     const raw = String(item.status || 'unknown');
-    /* 状态取值来自 `mazeStatus`（枚举）；未登记取值归入 unknown，避免拼出查不到的词典键 */
     const st: MazeStatus = MAZE_STATUS_CLASS[raw as MazeStatus] ? (raw as MazeStatus) : 'unknown';
     const stCls = MAZE_STATUS_CLASS[st];
     const stText = translate(mazeStatusLabelKey(st));
     const no = String(item.id || '').replace(/^ID\s*/i, '');
     const noHtml = no ? `<span class="nk-eg-lrow__no">№ ${escHtml(no)}</span>` : '';
-    /* A5.6：日期行同样是 nowrap + 省略号的叶子（窄列下 en/de/ru 会被截断）——与赛季名一样挂 `title`，
-       否则那段排期永久读不到（触屏没有 hover，但键盘 / 读屏 / 长按仍可取到）。 */
     const date = item.dateRange ? `<span class="nk-eg-lrow__date" title="${escHtml(String(item.dateRange))}">${escHtml(String(item.dateRange))}</span>` : '';
     const badge = st !== 'unknown'
       ? `<span class="nk-eg-lrow__status" data-status="${stCls}"><span class="nk-eg-lrow__dot"></span>${escHtml(stText)}</span>` : '';
@@ -246,7 +201,6 @@ export const endgamePage: CatalogPageConfig = {
     const idStr = String(item.id || '');
     const pollInfo = item.pollution as { count?: number; levels?: number[] } | undefined;
     const pollLevels = (pollInfo?.levels || []).join(' / ');
-    // 徽标挂赛季名之后（不随状态/日期行——被日期夹住会被读成排期信息）
     const poll = pollInfo?.count
       ? `<span class="nk-eg-lrow__poll" title="${escHtml(t('egd.pollutionTitle', { n: pollInfo.count, levels: pollLevels }))}">${escHtml(t('nav.voracity'))}</span>`
       : '';
@@ -268,13 +222,6 @@ export const endgamePage: CatalogPageConfig = {
       const col = items.filter((it) => it.mode === m.key);
       if (!col.length) continue;
       const modeLabel = translate(m.labelKey);
-      /* 徽章的**可见文本**用 `egd.guideLabel`（`Instrucciones` / `Spielweise` / `玩法说明`），
-         `aria-label` 用含名的 `catalog.modeGuideAria`（`Guía de {name}`）。
-         两者分工的理由：读屏看不到「徽章紧邻模式名」这层视觉相邻性，故 aria 必须自带名字；
-         而可见文本若也带名，徽章就会把紧邻的 `__name` 又说一遍，宽度涨成「名宽 + 前缀」——
-         实测 de 徽章 268px > 列头可用 243px，13 语言里 12 种的列头因此被撑破
-         （145/208 个列头徽章越出列框，最重 +216px，且列框无裁剪 ⇒ 直接压到相邻列上）。
-         i18n 迁移前这里是硬编码的「玩法说明」（不含名），迁移时误把 aria 模板当成了可见文本。 */
       html += `<section class="nk-eg-col" data-mode="${m.key}">
         <h2 class="nk-eg-col__head">
           <span class="nk-eg-col__meta">

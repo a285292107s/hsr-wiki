@@ -1,14 +1,3 @@
-"""season_delta 纯函数契约测试（ADR 0020）。
-
-用合成数据验证（不依赖真实源数据）：
-- 差集正确：当前有、上一代无 → true；上一代有 → false
-- 旧代有、当前代无（轮换出）→ 不参与标记
-- `*Old` 表缺失 / 空 / 只有一代 → 全部 false + 告警（禁止退化为全 true）
-- 上一代只取 `ExistSeason` **最大**一代（更早代的存在不使条目「不新」）
-- apply_season_new 的 id 字段与缺字段降级
-
-"""
-
 import logging
 import sys
 from pathlib import Path

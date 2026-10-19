@@ -1,4 +1,3 @@
-/** 遗器套装 / 词条 / 来历加载器 */
 import { NkError } from '../../lib/errors';
 import type {
   LocalRelicList, LocalRelicEntry, RelicSetData,
@@ -6,10 +5,8 @@ import type {
 } from '../types';
 import { singletonLocalData } from './local';
 
-/** 遗器套装列表（共享单例：只请求一次，失败自动重置允许重试） */
 export const loadLocalRelicSets = singletonLocalData<LocalRelicList>('relics.json');
 
-/** 从本地 relics.json 加载单个遗器套装详情（按 ID 查找） */
 export async function loadLocalRelicDetail(id: string): Promise<LocalRelicEntry> {
   const list = await loadLocalRelicSets();
   const item = list.find((r) => String(r.id) === String(id));
@@ -17,16 +14,12 @@ export async function loadLocalRelicDetail(id: string): Promise<LocalRelicEntry>
   return item;
 }
 
-/** 遗器主词条表（relic_main_affixes.json；共享单例） */
 export const loadLocalRelicMainAffixes = singletonLocalData<RelicMainAffixList>('relic_main_affixes.json');
 
-/** 遗器副词条表（relic_sub_affixes.json；共享单例） */
 export const loadLocalRelicSubAffixes = singletonLocalData<RelicSubAffixList>('relic_sub_affixes.json');
 
-/** 遗器来历表（relic_stories.json，set_id → 部位类型 → 故事；共享单例） */
 export const loadLocalRelicStories = singletonLocalData<RelicStoriesMap>('relic_stories.json');
 
-/** 从本地 relics.json 加载遗器套装信息，返回与 CDN RelicSetData 兼容的结构 */
 export async function loadLocalRelicSet(id: number | string): Promise<RelicSetData | null> {
   try {
     const list = await loadLocalRelicSets();

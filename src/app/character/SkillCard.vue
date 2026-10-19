@@ -1,7 +1,4 @@
 <script setup lang="ts">
-/**
- * 数据表 .nk-skill__table-wrap 必须占内容列（grid-column: 2/-1）：跨图标列会让层级线擦过表头首列文字。
- */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { elemLabel, skillTypeLabel } from '../../lib/enum-labels';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
@@ -13,9 +10,7 @@ import { extraTerms } from './utils';
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
-/** 文案统一走词典（脚本内不易用 useI18n；见 i18n.ts 的 translate） */
 
 
 const props = defineProps<{
@@ -24,16 +19,9 @@ const props = defineProps<{
   charData: CharacterData | null;
   isChild?: boolean;
   childSkills?: Skill[];
-  /** 区块内索引的跳转落点（仅父卡传入；子卡不参与索引） */
   anchor?: string;
-  /** 父卡片的当前等级（子技能共用父级滑条） */
   parentLv?: number;
-  /** 技能动画列表（米游社 Wiki 数据，仅父卡片传入） */
   animEntries?: SkillAnimEntry[] | null;
-  /** 强化角标（强化模式下被强化技能 ID 集合；原始模式为 null） */
-  enhMark?: { skillIds: Set<number>; rankIds: Set<number> } | null;
-  /** 强化角标文本（版本金章 V1…；仅强化模式非空） */
-  enhLabel?: string;
 }>();
 
 const maxLv = computed(() => (props.sk.level ? Object.keys(props.sk.level).length : 1));
@@ -45,20 +33,13 @@ const lv = ref(defaultLv.value);
 function onSlider(e: Event): void {
   lv.value = Number((e.target as HTMLInputElement).value);
 }
-/** 滑条填充百分比（驱动分段块状背景；单等级技能视为满级） */
 const fillPct = computed(() =>
   maxLv.value <= 1 ? 100 : ((lv.value - 1) / (maxLv.value - 1)) * 100,
 );
-/** 生效等级：子技能跟随父卡片滑条（钳位到自身最大等级） */
 const effLv = computed(() =>
   props.isChild ? Math.min(props.parentLv ?? 1, maxLv.value) : lv.value,
 );
 
-/**
- * 手机断点图标内联开关（与 character.css 的 `max-width: 767px` 块同断点）。
- * 图标必须换宿主才能内联——`.nk-skill__rail` 与 `.nk-skill__title-row` 是兄弟节点，
- * 纯 CSS（含 display: contents）只能让图标成为 body 的 grid item，抬不进标题行的 flex 行。
- */
 const MQ_MOBILE = '(max-width: 767px)';
 const isMobile = ref(typeof window !== 'undefined' && window.matchMedia(MQ_MOBILE).matches);
 let mq: MediaQueryList | null = null;
@@ -89,7 +70,6 @@ const metrics = computed<Metric[]>(() => {
   if (props.sk.sp_need != null) {
     met.push({ label: t('skill.energyNeed'), html: String(props.sk.sp_need) });
   }
-  // 削韧：优先官方直出字段（属性 + 显示值），缺失时回退 show_stance_list 换算
   const stType = props.sk.stance_damage_type;
   const stDisp = props.sk.stance_damage_display;
   if (stType && stDisp != null) {
@@ -100,10 +80,9 @@ const metrics = computed<Metric[]>(() => {
   } else {
     const tough = fmtToughness(props.sk);
     if (tough) {
-      met.push({ label: t('catalog.sig.stance'), html: tough });
+      met.push({ label: t('cwRole.stance'), html: tough });
     }
   }
-  // 战技点：正值 = 消耗 N（战技 1/饮月强化普攻 1-3），-1 = 不消耗哨兵（不显示，非产出）；获得在 bp_add（普攻 +1）
   if (props.sk.bp_need != null && props.sk.bp_need > 0) {
     met.push({ label: t('catalog.charge.sp'), html: '-' + String(props.sk.bp_need) });
   }
@@ -120,7 +99,6 @@ const needHtml = computed(() => {
   return fmtDesc(raw, (lvData && lvData.param_list) || []);
 });
 
-/* 用户可见文案「强化来源」，与强化模式角标「强化」区分（前者=被什么强化，后者=处于加强形态） */
 interface RatedLink {
   kind: 'rank' | 'tree';
   num: string;
@@ -132,7 +110,6 @@ const ratedLinks = computed<RatedLink[]>(() => {
   const links: RatedLink[] = [];
   const data = props.charData;
   if (!data) return links;
-  // 星魂：ranks 对象按 E 编号为键，匹配 rated_rank_id（如 130806 → E6）
   const rankIds = props.sk.rated_rank_id || [];
   if (rankIds.length && data.ranks) {
     for (const [num, rk] of Object.entries(data.ranks)) {
@@ -145,7 +122,6 @@ const ratedLinks = computed<RatedLink[]>(() => {
       }
     }
   }
-  // 行迹：point_id → point_name/point_desc 反查；上游数据旧角色缺前缀（如 1005101 vs point_id 11005101），补位容错
   const treeIds = props.sk.rated_skill_tree_id || [];
   if (treeIds.length && data.skill_trees) {
     const byId = new Map<number, { name: string; desc: string; params: number[]; icon: string }>();
@@ -175,7 +151,6 @@ const ratedLinks = computed<RatedLink[]>(() => {
   return links;
 });
 
-/* 惰性渲染：内容在首次展开后才挂载并常驻（DOM 瘦身——折叠态不渲染内部条目） */
 const linksOpen = ref(false);
 const linksEverOpened = ref(false);
 function toggleLinks(): void {
@@ -183,11 +158,6 @@ function toggleLinks(): void {
   if (linksOpen.value) linksEverOpened.value = true;
 }
 
-const isEnhanced = computed(() =>
-  !!(props.enhMark && props.enhMark.skillIds.has(props.sk.id)),
-);
-
-/* ─── 官方技能最高等级（max_level；缺失时回退 level 表长度） ─── */
 const officialMaxLv = computed(() => props.sk.max_level ?? maxLv.value);
 
 const typeName = computed(() => props.sk.type_name || skillTypeLabel(props.sk.type ?? '', ''));
@@ -223,25 +193,17 @@ function toggleTable(): void {
   if (tableOpen.value) tableEverOpened.value = true;
 }
 
-/* clip 整体惰性挂载：首次展开后才渲染并常驻（避免折叠态下残留空轨道容器）；
- * everOpened 同时驱动 img 挂载（避免重复解码大体积动画） */
 const animOpen = ref(false);
 const everOpened = ref(false);
 const animIdx = ref(0);
 const imgDone = ref(false);
 
-/** GIF 走 OSS 实时 webp 转换（带宽优化）；webp 直连 */
 function animSrc(entry: SkillAnimEntry): string {
   return entry.url.endsWith('.gif')
     ? `${entry.url}?x-oss-process=image%2Fformat%2Cwebp`
     : entry.url;
 }
 
-/** 本技能自身分得的动画：
- *  · 父卡且组内仅 1 个技能 → 拿全部（多段动画用 tab 切换）
- *  · 父卡且组内多个技能 → 只拿首条（其余按索引分发给子技能）
- *  · 子卡 → 父卡已按索引切好传入（单个）
- */
 const myAnims = computed<SkillAnimEntry[]>(() => {
   const entries = props.animEntries;
   if (!entries || !entries.length) return [];
@@ -249,8 +211,6 @@ const myAnims = computed<SkillAnimEntry[]>(() => {
   return hasChildren ? entries.slice(0, 1) : entries;
 });
 
-/** 按索引分发动画给子技能：child[ci] → anim[ci + 1]
- * computed 缓存：避免每次父级渲染产生新数组引用导致子卡无谓更新 */
 const childAnimMap = computed<Record<number, SkillAnimEntry[] | null>>(() => {
   const entries = props.animEntries;
   const children = props.childSkills;
@@ -284,7 +244,6 @@ function onImgLoad(): void { imgDone.value = true; }
     :data-type="typeKey"
     :id="!isChild && anchor ? anchor : undefined"
   >
-    <span v-if="isEnhanced" class="nk-skill__enh-badge">{{ enhLabel }}</span>
     <div v-if="!isChild" class="nk-skill__head">
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">
@@ -327,7 +286,6 @@ function onImgLoad(): void { imgDone.value = true; }
           >
             <span class="arrow">▶</span> {{ t(linksOpen ? 'skill.enhSourcesOpen' : 'skill.enhSources') }}
           </button>
-          <!-- 惰性渲染：clip 轨道常驻（保持 grid-rows 折叠动画），内容首次展开后才挂载 -->
           <div class="nk-links-clip" :class="{ open: linksOpen }">
             <div v-if="linksEverOpened" class="nk-links-inner">
               <div
@@ -426,7 +384,6 @@ function onImgLoad(): void { imgDone.value = true; }
         </div>
       </div>
     </div>
-    <!-- 子技能（同族形态技能，嵌套在父卡片内；动画按索引分发）；末位子卡加 nk-skill--child-last 供 └ 收口 -->
     <SkillCard
       v-for="(c, ci) in childSkills || []"
       :key="c.id"
@@ -436,7 +393,6 @@ function onImgLoad(): void { imgDone.value = true; }
       :parent-lv="lv"
       :char-id="charId"
       :char-data="charData"
-      :enh-mark="enhMark"
       :anim-entries="childAnimMap[ci] || null"
     />
   </div>

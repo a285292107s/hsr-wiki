@@ -1,5 +1,3 @@
-"""物品数据转换器。"""
-
 import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR, RARITY_MAP
@@ -30,15 +28,9 @@ def _is_excluded(item: dict) -> bool:
     return False
 
 def item_name_icon(item: dict) -> tuple[str, str]:
-    """单条 ItemConfig 记录 → (名称, 图标官方路径)。
-
-    单点声明物品的名称/图标取法：`items.json` 与敌对物种掉落（`monster_extra.load_drops`）共用，
-    避免两处各写一份解析而漂移（掉落的 `DisplayItemList` 只给 ItemID，名称与图标必须回到本表取）。
-    """
     return resolve_text(item.get("ItemName", {})), map_icon_path(item.get("ItemIconPath", ""))
 
 def _parse_item(item: dict) -> dict:
-    """单条 ItemConfig 记录 → items.json 条目。"""
     item_id = item.get("ID", 0)
     rarity_key = item.get("Rarity", "")
     name, icon = item_name_icon(item)
@@ -56,7 +48,6 @@ def _parse_item(item: dict) -> dict:
     }
 
 def convert() -> None:
-    """转换 ItemConfig.json → items.json（剔除非物品类型）。"""
     data = load_json(EXCEL_DIR / "ItemConfig.json")
     result = []
     excluded = 0

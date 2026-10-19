@@ -7,7 +7,6 @@ import { sampleNearBlackPct } from './pixels';
 
 export const ACCEPT_SCENE_TIMEOUT_MS = 90_000;
 const POLL_MS = 300;
-/** 结算后额外等待一拍，确保合并画布已绘制首帧（像素采样需要） */
 const SETTLE_DELAY_MS = 500;
 
 export interface AcceptBridge {

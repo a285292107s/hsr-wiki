@@ -2,22 +2,6 @@ import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, readJson, readTokenPx, waitForSettled } from './helpers';
 import { noUnknownOverflow } from './layout.shared';
 
-/**
- * 布局验收：终局玩法常青页（/endgame/<mode>） —— layout 验收层（语义契约 + 数值规格）分文件之一。
- *
- * 分文件判据（为何按域拆、单文件该多小）见 docs/agents/testing.md「layout 必须按 describe 边界分文件」。
- *
- * `@viewport-pinned` 标签：凡用例内自行 `setViewportSize(...)` 固定视口者，必须在 `test(...)`
- * 第二参传该标签（mobile-chromium 以 `grepInvert` 跳过，视口已由用例钉死）。标签须静态书写，
- * 动态 annotation 对收集期过滤无效。
- *
- * 数值断言的三种合法形态：① 令牌派生（`readTokenPx` / `computedNumber`）；② 相对关系（序、等值、
- * 整数倍、跨断点只放大不缩小）；③ 数据派生（期望值从 `public/data/cn/**.json` 读）。
- * 绝对 px 只允许出现在跨会话不得漂移的契约值。**禁止新增** `toHaveCSS(<绝对值>)` 一类断言。
- *
- * 跨块共用的取值原语与数据派生在 `e2e/layout.shared.ts`；不变量层在 `e2e/guards.spec.ts`。
- */
-
 test.describe('布局验收：终局玩法详情页（第四种页面形态）', () => {
   const MODES = [
     { key: 'maze', label: '忘却之庭', system: '记忆紊流' },
@@ -31,9 +15,6 @@ test.describe('布局验收：终局玩法详情页（第四种页面形态）',
       const { assertNoErrors } = collectConsoleIssues(page);
       await page.goto(`/endgame/${m.key}`);
 
-      // h1 = 玩法名；正文分节数与体系名都来自产物（endgame_guide.json），故期望值从产物读。
-      // 必须用 toBeVisible + 盒模型，不能只 toHaveText：h1 被 Hero 的 overflow 裁掉时 toHaveText
-      // 依然通过（实测踩过：Hero 缺 `flex: none` 被压成 51px、h1 不可见而用例全绿）。
       const h1 = page.locator('.nk-egm__hero h1');
       await expect(h1).toBeVisible();
       await expect(h1).toHaveText(m.label);
@@ -54,9 +35,6 @@ test.describe('布局验收：终局玩法详情页（第四种页面形态）',
       expect(g, `产物应含模式 ${m.key}`).toBeTruthy();
       expect(await page.locator('.nk-egm__rule').count(), '规则分节数应与产物一致').toBe(g.sections.length);
 
-      /* 阅读列宽：规则正文此前没有任何 max-width ⇒ 实测首行铺满 960px 面板、每行 72 全角字
-         （站点里唯一一处长文没有阅读列宽）。判据取「每行全角字数」而非 px——列宽令牌是 em 定值、
-         随字号缩放，字数是读者真正感知的量；期望上限从令牌读，不写绝对值。 */
       const proseMax = await page.evaluate(() =>
         getComputedStyle(document.documentElement).getPropertyValue('--nk-prose-max').trim(),
       );
@@ -80,24 +58,18 @@ test.describe('布局验收：终局玩法详情页（第四种页面形态）',
           .toBeLessThanOrEqual(parseFloat(proseMax) + 2);
       }
 
-      // 体系名必须上屏：区块标题含体系名，且与产物逐字一致
       const sysTitle = page.locator('.nk-egm__panel .nk-title').filter({ hasText: g.system!.name });
       await expect(sysTitle.first()).toBeVisible();
       expect(g.system!.name, `该玩法体系名应为 ${m.system}`).toBe(m.system);
 
-      // 玩法页是**常青页**：只讲规格（条数/时机/作用范围），**不得列具体增益条目**
-      // （条目每期都换，boss 同期上/下半场还各一套——列一份必然误导；条目与效果由赛季页承载）
       await expect(page.locator('.nk-egm__system')).toContainText('每期');
       await expect(page.locator('.nk-egm__buffs .nk-egm__buff')).toHaveCount(0);
       const cta = page.locator('.nk-egm__system-cta');
       await expect(cta).toBeVisible();
-      // 入口必须指向当期（进行中的）赛季详情页，而不是泛泛回目录
       await expect(cta).toHaveAttribute('href', new RegExp(`^/endgame/${m.key}/\\d+$`));
 
-      // 赛季内链 ≥3 条 + 其它玩法入口 3 条
       expect(await page.locator('.nk-egm__seasons a[href^="/endgame/"]').count()).toBeGreaterThanOrEqual(3);
       await expect(page.locator('.nk-egm__other')).toHaveCount(3);
-      // 单页数据页形态：不得出现条目级覆盖率的标记
       await expect(page.locator('.nk-snapshot__entry')).toHaveCount(0);
 
       await noUnknownOverflow(page);
@@ -118,7 +90,6 @@ test.describe('玩法说明入口可发现性（目录页列头 + 赛季详情�
   test('两处入口都可见、命中区达标，且点击进入玩法页', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
 
-    // ① 目录页：每个模式列头一个显式入口（此前只有「列标题即链接」这一零提示性入口）
     await page.goto('/endgame');
     const chips = page.locator('.nk-eg-col__head .nk-guide-link');
     await expect(chips.first()).toBeVisible();
@@ -129,7 +100,6 @@ test.describe('玩法说明入口可发现性（目录页列头 + 赛季详情�
     const chipBox = await chips.first().boundingBox();
     expect(chipBox?.height ?? 0, '入口命中区应达 WCAG 2.2 下限 24px').toBeGreaterThanOrEqual(24);
 
-    // ② 赛季详情页：Hero 的模式行此前是纯文本、完全没有入口
     await page.goto('/endgame/boss/3020');
     const heroLink = page.locator('.nk-egd-hero__camp .nk-guide-link');
     await expect(heroLink).toBeVisible();
@@ -147,11 +117,6 @@ test.describe('玩法页「当期赛季」判据（不得取未开始的那一�
     test(`/endgame/${mode}：当期 = 列表中状态为「进行中」的那一期`, async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
       await page.goto(`/endgame/${mode}`);
-      // 本页正文整体在 `phase === 'ready'` 内，`goto` 的 load 事件早于路由 chunk + 数据 JSON 落地
-      // （CI trace 实测：数据请求晚于 load 约 160ms）——不等就取值会拿到 null，属竞态而非数据缺陷。
-      /* 就绪门必须**等到被测对象**：`waitForSettled` 的「骨架退场」在**懒加载路由 chunk 尚未执行**时是
-         空真（此刻 DOM 里既没有骨架也没有内容）——CI trace 实测骨架检查通过 24ms 后本用例就取值，
-         此时 note 链接还不存在（页面稍后才渲染出 `link 来生泅渡 → /endgame/maze/1035`）。 */
       await expect(page.locator('.nk-egm__note .nk-egm__link')).toBeVisible();
       await waitForSettled(page);
 
@@ -168,11 +133,9 @@ test.describe('玩法页「当期赛季」判据（不得取未开始的那一�
       });
       expect(r.note, '必须显式标注是当期还是最新一期').toBeTruthy();
       if (r.liveHref) {
-        // 有进行中的一期：必须选它，且文案说「当期赛季」（不能把未开始的那期当现状陈述）
         expect(r.href, `当期应取进行中的 ${r.liveHref}（列表首行状态 ${r.firstStatus}）`).toBe(r.liveHref);
         expect(r.note).toContain('当期赛季');
       } else {
-        // 赛季间隙：回落到最新一期，但必须如实标注，不得冒充当期
         expect(r.note, '没有进行中的赛季时不得写成「当期赛季」').not.toContain('当期赛季');
         expect(r.note).toContain('最新赛季');
       }
@@ -183,9 +146,6 @@ test.describe('玩法页「当期赛季」判据（不得取未开始的那一�
 });
 
 test.describe('终局详情页 Hero 大图口径（赛季 banner 翻转铺底）', () => {
-  /** Hero 大图口径（用户裁决，含一次当天改主意后的回退）：有 `theme_banner` 的期（maze / story / boss）
-   *  用它**左右翻转**后当背景（不再出右侧画框）；无该字段的期（peak 只有 `handbook_banner`）回退
-   *  赛季大图且不翻。左栏徽标盘保留（用户看版后要求回到这一版）。 */
   test('/endgame 详情页 Hero：赛季 banner 翻转作背景（保留徽标盘、无右侧画框），无 banner 的期不翻', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -201,16 +161,13 @@ test.describe('终局详情页 Hero 大图口径（赛季 banner 翻转铺底）
       await expect(bg, `${route} 应以赛季 banner 铺底`).toHaveCount(1);
       await expect(bg).toHaveAttribute('src', new RegExp(bannerOf(file, id).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
       await expect(bg).toHaveClass(/nk-egd-hero__bg--flip/);
-      // 翻转是关系而非绝对值：x 轴缩放为负（镜像）
       const m = await bg.evaluate((el) => getComputedStyle(el).transform);
       expect(m, `期望镜像矩阵，实得 ${m}`).toMatch(/^matrix\(-/);
       await expect(page.locator('.nk-egd-hero__banner'), 'banner 已改作背景，右侧画框退场').toHaveCount(0);
       await expect(page.locator('.nk-egd-hero__plate'), '徽标盘保留').toHaveCount(1);
-      // 徽标盘只放官方玩法图标：自绘 EMBLEMS 圆环曾叠在它上面，已删（用户裁决）
       await expect(page.locator('.nk-egd-hero__plate .nk-egd-hero__art')).toHaveCount(1);
       await expect(page.locator('.nk-egd-hero__emblem')).toHaveCount(0);
     }
-    // 异相仲裁无 theme_banner：回退 handbook_banner，不翻转
     await page.goto('/endgame/peak/9');
     const bg = page.locator('.nk-egd-hero__bg');
     await expect(bg).toHaveCount(1);
@@ -220,14 +177,6 @@ test.describe('终局详情页 Hero 大图口径（赛季 banner 翻转铺底）
 });
 
 test.describe('玩法页赛季增益 CTA 不被裁切（长语言最坏档）', () => {
-  /* 判据落在**元素右缘 vs 面板右缘**，不落页面级 scrollWidth：`.nk-page--detail` 是
-     `overflow-x: hidden`（tokens.css:567），长译文把 CTA 撑出面板时页面 scrollWidth 恒为 0
-     ——`layout-locales-sweep.spec.ts` 的整页口径与本文件既有的 `noUnknownOverflow` 都看不见它。
-     成因：CTA 是共享原语 `.nk-guide-link`（catalog.css:407/409 的 `flex: none` + `nowrap`）且文案内嵌
-     赛季名；覆写只在本页 `.nk-egm__system-cta`（endgame-mode.css），原语的 nowrap 是 /endgame
-     目录页列头折行规则的前提，不得改。
-     de/maze@320 是实测最坏档（修复前元素宽 388.7px vs 面板 320px、右缘越出页面根 +84.7px）；
-     ru/story@320 原地证过 +22px。cn 为对照（同一断言在缺省语言下为负值，故它不能单独守住这条）。 */
   for (const [prefix, mode, vw] of [
     ['/de', 'maze', 320], ['/de', 'maze', 390], ['/ru', 'story', 320], ['', 'maze', 320],
   ] as const) {

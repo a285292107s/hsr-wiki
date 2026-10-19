@@ -2,22 +2,6 @@ import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, waitForCatalogCards } from './helpers';
 import { expectTokenNumber, noUnknownOverflow, readContentOffset } from './layout.shared';
 
-/**
- * 布局验收：枢纽页共享页脚原语 —— layout 验收层（语义契约 + 数值规格）分文件之一。
- *
- * 分文件判据（为何按域拆、单文件该多小）见 docs/agents/testing.md「layout 必须按 describe 边界分文件」。
- *
- * `@viewport-pinned` 标签：凡用例内自行 `setViewportSize(...)` 固定视口者，必须在 `test(...)`
- * 第二参传该标签（mobile-chromium 以 `grepInvert` 跳过，视口已由用例钉死）。标签须静态书写，
- * 动态 annotation 对收集期过滤无效。
- *
- * 数值断言的三种合法形态：① 令牌派生（`readTokenPx` / `computedNumber`）；② 相对关系（序、等值、
- * 整数倍、跨断点只放大不缩小）；③ 数据派生（期望值从 `public/data/cn/**.json` 读）。
- * 绝对 px 只允许出现在跨会话不得漂移的契约值。**禁止新增** `toHaveCSS(<绝对值>)` 一类断言。
- *
- * 跨块共用的取值原语与数据派生在 `e2e/layout.shared.ts`；不变量层在 `e2e/guards.spec.ts`。
- */
-
 test.describe('布局验收：枢纽页共享页脚原语', () => {
   test('/ 与 /currency 共用 .nk-hub-footer（声明于 tokens.css），全断点留白正确', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
@@ -26,25 +10,18 @@ test.describe('布局验收：枢纽页共享页脚原语', () => {
       await page.goto(path);
       const footer = page.locator('.nk-hub-footer');
       await expect(footer).toHaveCount(1);
-      // 旧首页命名类必须已消失（跨页原语中性化的回归防线）
       await expect(page.locator('.nk-home-footer')).toHaveCount(0);
-      // 桌面：左缘 = 侧栏避让令牌；右缘 = 版块同一栅格（与枢纽版块的右留白逐值一致，改一处两处同步）
       await expectTokenNumber(footer, 'padding-left', await readContentOffset(page), '页脚左避让');
-      // 首页内容容器是 `.nk-intake`（2026-10 重构起；`.nk-hub-release` 只留给 /currency）
       const gutterFrom = path === '/' ? '.nk-intake' : '.nk-hub-release';
       const releaseGutter = await computedNumber(page.locator(gutterFrom).first(), 'padding-right');
       expect(releaseGutter).toBeGreaterThan(0);
       await expectTokenNumber(footer, 'padding-right', releaseGutter, '页脚右留白（=枢纽版块右留白）');
-      // 枢纽页脚 = 一句收束，正文体（旧 `.nk-hub-footer__latin` 等宽拉丁行随首页重构删除）：
-      // 两条判据一起锁住「页脚不再出现等宽装饰文本」——只锁字体族的话，把等宽改成大写间距仍会漏过。
       const mottoFont = await footer.locator('.nk-hub-footer__motto').evaluate(
         (el) => getComputedStyle(el).fontFamily,
       );
       expect(mottoFont).toContain('Noto Sans SC');
       await expect(footer.locator('.nk-hub-footer__latin')).toHaveCount(0);
     }
-    // 手机：页脚底部留白必须容得下底部导航栏——预留低于栏体实际高度时页脚会被压在栏下。
-    // 判据取「≥ 实测栏高」而非写死 56：栏高本身随设计变动，页脚被压才是要防的缺陷。
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
     await expect(page.locator('.ui-sidebar')).toBeVisible();
@@ -61,7 +38,6 @@ test.describe('布局验收：枢纽页共享页脚原语', () => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/character');
     await waitForCatalogCards(page);
-    // 令牌缺失时 var(--font-mono) 会静默继承父级字体（视觉不易察觉），故同时锁声明点与一个消费方
     const token = await page.evaluate(() =>
       getComputedStyle(document.documentElement).getPropertyValue('--font-mono'),
     );

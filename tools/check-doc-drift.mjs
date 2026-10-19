@@ -1,14 +1,4 @@
 #!/usr/bin/env node
-/**
- * living docs 与代码的漂移检查（report-only）。
- * 用法：node tools/check-doc-drift.mjs [--strict]
- * 只扫 docs/agents/** 与 CONTEXT.md（docs/memory/** 是历史档案，不在扫描面）；
- * 比对反引号里的 nk-/ui- CSS 类名与 src|e2e 路径是否仍存在于代码（例外见下方 EXIST_SURFACE）。
- * 句中带「已退场 / 已移除 / 不复用 / 历史 …」等标记的条目降级为「历史提及」，不计入 --strict。
- * 行内 `<!-- doc-drift-ok: 理由 -->` 可整体豁免该行。
- * 退出码：默认恒 0；--strict 有未降级漂移退出 1。
- * 硬约束：只用 node 内置模块；只读不改写；不重复 check-doc-links（这里不查 markdown 链接）。
- */
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,9 +6,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const strict = process.argv.includes('--strict');
 
-/** 扫描面：只含 living docs */
 const DOC_ENTRIES = [posix.join('docs', 'agents'), 'CONTEXT.md'];
-/** 存在性依据：代码与生成器（docs/** 自身不算依据） */
 const CODE_ROOTS = ['src', 'tools', 'e2e'];
 const CODE_ROOT_FILES = ['index.html', 'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', 'package.json', 'vercel.json'];
 const SKIP_DIR = new Set(['node_modules', 'dist', '.git', 'temp', 'vendor', 'public', 'docs', '.playwright', 'playwright-report']);
@@ -33,7 +21,6 @@ const walk = (abs, out = []) => {
   return out;
 };
 
-/* ═══ 文档面 ═══ */
 const docs = [];
 for (const entry of DOC_ENTRIES) {
   const abs = join(ROOT, ...entry.split('/'));
@@ -44,7 +31,6 @@ for (const entry of DOC_ENTRIES) {
 }
 docs.sort();
 
-/* ═══ 存在性依据（一次性读入） ═══ */
 const codeTexts = [];
 const existingPaths = new Set();
 for (const root of CODE_ROOTS) {
@@ -56,7 +42,7 @@ for (const root of CODE_ROOTS) {
     if (SEARCH_EXT.has(rel.slice(rel.lastIndexOf('.')))) {
       try {
         codeTexts.push(readFileSync(f, 'utf8'));
-      } catch { /* 二进制/不可读跳过 */ }
+      } catch { }
     }
   }
 }
@@ -68,15 +54,13 @@ for (const rel of CODE_ROOT_FILES) {
 }
 const codeBlob = codeTexts.join('\n');
 
-/* ═══ 提取 ═══ */
 const CLASS_RE = /(?<![\w-])((?:nk|ui)-[A-Za-z0-9][A-Za-z0-9_-]*)/g;
 const PATH_RE = /(?:^|[\s（(【，,、;；:：])((?:src|e2e)\/[\w./@-]+)/g;
 const WILDCARD = /[*<>{}…]/;
-/** 历史语境标记：命中则不判漂移（docs/memory 之外，living docs 也常带历史说明） */
 const HISTORICAL = /已退场|已移除|已删除|已作废|已下线|不复用|不再出现|不再|历史|曾用|当时|旧形态|退场|作废/;
 const EXEMPT = /<!--\s*doc-drift-ok\s*[:：]\s*(\S.*?)\s*-->/;
 
-const items = []; // { kind, rel, line, token, historical, why }
+const items = [];
 let classCount = 0;
 let pathCount = 0;
 let exemptCount = 0;
@@ -110,7 +94,6 @@ for (const rel of docs) {
   });
 }
 
-/* ═══ 报告 ═══ */
 const B = (s) => `\x1b[1m${s}\x1b[0m`;
 const drift = items.filter((x) => !x.historical);
 const soft = items.filter((x) => x.historical);

@@ -1,25 +1,4 @@
 #!/usr/bin/env node
-/**
- * CSS 重复选择器审计（report-only）。
- * 用法：node tools/check-css-dup-selectors.mjs [--strict]
- *
- * 判据：同一条选择器在**同一 at-rule 上下文**（base / 同一个 @media / @supports）里被声明多次，
- * 且两处**声明了同一个属性** ⇒ 后写静默覆盖前写。同一选择器多次出现但属性不重叠是合法分组，不计入。
- * 扫描面：src/styles/**.css 与 src/app/**.vue（含 `<style scoped>`）。
- *
- * 命中分三类：
- *   A. 同文件重复 —— 必为静默覆盖（同文件同上下文，后写生效），计为 conflict。
- *   B. 跨文件重复 —— 两块样式表都进同一路由包时由加载序决定生效者，计为 conflict；
- *                    若两边都是 scoped SFC（编译期加 scope 属性，运行时不冲突），降级为 C 段。
- *
- * 退出码：默认恒 0；--strict 存在 A/B 段命中时退出 1。
- * 硬约束：只用 node 内置模块；只读不改写；刻意不接入 `pnpm build`（见 docs/agents/commands.md）。
- *
- * 坑位（改本文件前先读）：本文件用**逐字符 tokenizer**，不是按行解析。按行解析有两个必踩的坑：
- *   ① 选择器组常「一行一个选择器、行尾逗号、声明在最后一行」→ 声明只会记到最后一个选择器（漏报）；
- *   ② 声明值跨行（`background: linear-gradient(…,\n …);`）→ 续行被误当选择器（假阳性）。
- *   tokenizer 以 `{` / `}` / `;` 三个定界符为界，跨行选择器与跨行值都天然正确。
- */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,10 +24,8 @@ const propsOf = (text) => {
   for (const m of text.matchAll(/(^|;)\s*([a-zA-Z-][\w-]*)\s*:/g)) set.add(m[2]);
   return set;
 };
-/** 注释替换为等长空白但**保留换行**：否则行号会随被删掉的注释行整体前移（报告里的行号必须能直接跳转） */
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
 
-/** @type {Map<string, Map<string, {file:string,line:number,props:Set<string>}>>} */
 const seen = new Map();
 
 const addProps = (rule, props) => {
@@ -63,12 +40,11 @@ const addProps = (rule, props) => {
   }
 };
 
-/** 逐字符解析 CSS：以 { } ; 为界，跨行选择器 / 跨行声明值都正确 */
 function parseCss(text, file, offsetLine = 1) {
   let i = 0;
   let line = offsetLine;
   const n = text.length;
-  const stack = []; // {type:'at'|'rule'|'skip', cond?, keyframes?, rule?}
+  const stack = [];
   let buf = '';
   const ctxOf = () => stack.filter((s) => s.type === 'at' && !s.keyframes).map((s) => s.cond).join(' && ');
   const inKeyframes = () => stack.some((s) => s.keyframes);
@@ -93,7 +69,6 @@ function parseCss(text, file, offsetLine = 1) {
         if (text[j] === '\\') j++;
         j++;
       }
-      // 引号内容必须留在 buf 里：属性选择器 [data-theme="cw"] 的值是选择器身份的一部分
       buf += text.slice(i, j + 1);
       advanceTo(j + 1);
       continue;
@@ -151,7 +126,6 @@ for (const f of files) {
   }
   const attrs = [...raw.matchAll(/<style([^>]*)>/g)].map((m) => m[1]);
   if (attrs.length > 0 && attrs.every((a) => /\bscoped\b/.test(a))) scopedSfc.add(f);
-  // 逐块解析：用行号偏移保证报告中行号对应源文件
   let cursor = 0;
   for (const m of raw.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) {
     const start = raw.indexOf(m[1], cursor);

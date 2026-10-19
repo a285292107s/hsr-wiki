@@ -2,30 +2,11 @@ import { test, expect } from '@playwright/test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-/**
- * 应用外壳层契约（与像素/文案无关，视觉迭代不得让其变红）。
- *
- * 覆盖三类「外壳级」事实：
- *   1) **字体加载链路**：字体必须由 `index.html` 的 `<link>` 承载，**CSS 里不得出现 `@import`**——
- *      CSS 内的 `@import` 是串行的（先取到并解析本文件才会去请求被导入的样式表），实测把字体 CSS
- *      推到 +65ms（应用 CSS 之后）、往返 531ms；改为 HTML `<link>` + `preconnect` 后提前到 +10ms。
- *   2) **深色方案声明**：`color-scheme: dark` 决定原生滚动条 / 表单控件下拉 / iOS 过度滚动背景的
- *      绘制色，漏声明时它们按浅色画（目录页滚动条、原生 select 弹层会是白的）。
- *   3) **输入光标随强调色**：`caret-color` 必须等于当前 `--primary`（强调色可切换，故按运行时取值比）。
- *   4) **动效分档**：同类交互必须同曲线、同时长档 —— 全都从令牌读（不写字面量），见文件末尾用例。
- *      动因：目录卡悬停曾同时存在 `0.2s+ease`（浏览器默认曲线）/0.24s/0.25s/0.28s/0.3s 五种，
- *      侧栏与标签页的裸时长也走默认 `ease`，与自定义曲线的手感不同。
- */
-
 const PAGE = '/character';
 
 test.describe('应用外壳契约', () => {
   test('字体由同源入口 CSS 承载且 CSS 内无 @import；两款字体真的可用', async ({ page }) => {
     const html = readFileSync('index.html', 'utf8');
-    /* 字体链路已由「HTML `<link>` 直连 Google Fonts」改为**自托管**（`src/styles/fonts.css` 的
-       `@font-face` + `public/fonts/*.woff2`，经 `src/app/bootstrap.ts` 进入口 CSS chunk；动因见
-       index.html 注释：跨域样式表是渲染阻塞，且 fonts.googleapis.com 在中国大陆不可达）。
-       判据随之从「HTML 里有那两条 link」翻成「不得退回那条链路」——两条断言守的是同一件事的两端。 */
     expect(html, 'index.html 不得直连 Google Fonts 样式表（跨域渲染阻塞 + 大陆不可达）')
       .not.toContain('fonts.googleapis.com');
     expect(html, 'index.html 不得残留已下线的 Google Fonts preconnect（死声明）')
@@ -35,8 +16,6 @@ test.describe('应用外壳契约', () => {
     const cssFiles = readdirSync(cssDir).filter((f) => f.endsWith('.css'));
     const offenders = cssFiles.filter((f) => /^\s*@import\b/m.test(readFileSync(join(cssDir, f), 'utf8')));
     expect(offenders, 'CSS 内不得有 @import（串行阻塞字体加载）').toEqual([]);
-    /* 载体必须真实存在：字体声明文件里要有同源 `/fonts/*.woff2` 与两个字体族。
-       只断言「没有旧链路」会放过「字体整体消失」这一形态（那时页面会静默退回系统字体）。 */
     const fontCss = readFileSync(join(cssDir, 'fonts.css'), 'utf8');
     expect(fontCss, '字体声明应为同源自托管 woff2').toMatch(/src:\s*url\(\/fonts\/[^)]+\.woff2\)/);
     for (const family of ['IBM Plex Mono', 'Noto Sans SC']) {
@@ -44,8 +23,6 @@ test.describe('应用外壳契约', () => {
     }
 
     await page.goto(PAGE);
-    /* 判「字体可用」前必须**显式装载**样本文本：入口 CSS 的 `@font-face` 尚未应用时
-       `document.fonts.status` 已是 `'loaded'`，直接 `check()` 读到的是回退字体（CI 首次跑本用例即假红）。 */
     const fonts = await page.evaluate(async () => {
       await Promise.race([
         (async () => {
@@ -80,7 +57,6 @@ test.describe('应用外壳契约', () => {
     const r = await page.evaluate(() => {
       const input = document.querySelector('.nk-cat-search input');
       if (!input) return null;
-      // 把 hex 令牌与 rgb 计算值都归一成 "r,g,b" 再比（两者写法不同）
       const toRgb = (value: string): string => {
         const s = value.trim();
         const hex = s.match(/^#([0-9a-f]{6})$/i);
@@ -100,21 +76,13 @@ test.describe('应用外壳契约', () => {
   });
 
   test('同类交互的动效同曲线、同时长档（时长与曲线都从令牌读）', async ({ page }) => {
-    /* 判据：① 任何交互反馈的 `transitionTimingFunction` 都必须等于 `--nk-ease-out`（不允许裸时长
-       落到浏览器默认 `ease`）；② 目录卡「表面反馈」（border-color/box-shadow/transform）时长必须等于
-       `--nk-dur-normal`，「标签反馈」（color）等于 `--nk-dur-hover`。期望值全部从 `:root` 令牌读，
-       故调整分档不会让用例变红、只有「某个组件自己写了别的值」才会。 */
     await page.goto('/character');
     await expect(page.locator('.nk-idx-card').first()).toBeVisible();
 
-    /* 目录卡各族分布在不同页面（角色/遗器/货币战争/敌人），必须逐页采集后再比较。
-       只读**该元素自身**的 transition（不递归子树）：卡片子树里还有各自的微交互
-       （图片放大走 zoom 档、揭示淡入等），把它们混进来会把不同档误判成不一致。 */
     const collectOn = (route: string, selectors: string[]) =>
       page.evaluate(
         ({ selectors }) => {
           const ms = (v: string) => (v.trim().endsWith('ms') ? parseFloat(v) : parseFloat(v) * 1000);
-          // 注意：`cubic-bezier(0.16, 1, 0.3, 1)` 自带逗号，必须只按**顶层**逗号切分
           const splitTop = (s: string) => s.split(/,(?![^(]*\))/).map((x) => x.trim());
           const out: Array<{ prop: string; dur: number; ease: string; sel: string }> = [];
           for (const sel of selectors) {
@@ -138,14 +106,8 @@ test.describe('应用外壳契约', () => {
     const lbl: Array<{ prop: string; dur: number; ease: string; sel: string }> = [];
     for (const route of ['/character', '/relic', '/currency', '/monster']) {
       await page.goto(route);
-      // ① 等卡片真的渲染出来：渲染发生在路由解析之后，而主题过渡窗口是**路由解析时**开的
-      //    （`App.vue` 的 `watch(isCw)`：挂载早于首次解析时 `/currency` 会走 非 cw→cw，临时加
-      //    `.theme-transitioning`，tokens.css 用 400ms `!important` 覆盖所有组件的 transition）
       const anyCard = SURFACE.join(', ') + ', ' + LABEL.join(', ') + ', .nk-mob-card, .nk-lc-card, .nk-relic-card';
       await expect(page.locator(anyCard).first()).toBeVisible();
-      /* ② **渲染之后再**等过渡窗口关闭——顺序反了就会在窗口内采样（实测 mobile-chromium 批内偶发，
-         失败值恰为 400ms 而非 `--nk-dur-normal` 的 300ms）。cw 路由再加一道兜底：先等它出现
-         （出现等待失败即放行——同模式直达时根本不加），确保「窗口在渲染后才开」也不会漏。 */
       if (route.startsWith('/currency')) {
         await page
           .waitForFunction(() => document.documentElement.classList.contains('theme-transitioning'), undefined, { timeout: 1_500 })
@@ -182,8 +144,6 @@ test.describe('应用外壳契约', () => {
     for (const t of [...surf, ...lbl]) {
       expect(t.ease, `${t.sel} 的 ${t.prop} 缓动应为 --nk-ease-out（不得落到浏览器默认 ease）`).toBe(r.easeOut);
     }
-    // 分档判据：表面（border-color / box-shadow）落在 normal 档；文字（color）落在 hover 档；
-    // 其余（transform / opacity / filter / background）只要求**落在既有分档内**（不得自造值）
     for (const t of surf) {
       if (t.prop === 'border-color' || t.prop === 'box-shadow') {
         expect(t.dur, `${t.sel} 的 ${t.prop} 表面反馈应落在 --nk-dur-normal 档（${r.durNormal}ms）`).toBe(r.durNormal);
@@ -200,17 +160,6 @@ test.describe('应用外壳契约', () => {
   });
 });
 
-/**
- * 焦点可见性契约（像素差法，实现无关）。
- *
- * 为什么不查 `outline`：指示可能落在**宿主**上（如 `.nk-cat-search:focus-within` 改边框+内投影，
- * 内部 `input` 本身 `outline: none`）——只读被聚焦元素的计算样式会误报。像素差对「自身环」与
- * 「宿主变化」一视同仁。
- * 为什么必须真按 Tab：合成 `el.focus()` 不触发 `:focus-visible`（仓库既有先例）。
- * 为什么用「聚焦态 vs blur 后」而不是「聚焦前 vs 后」：Tab 会把目标滚进视野，两次截图的取景会漂移；
- * blur 不滚动，取景完全一致。
- * 覆盖面：外壳（a/button）、目录卡片、表单控件（input/select）、玩法页内链。
- */
 test.describe('焦点可见性（键盘 Tab 后元素周边像素必须变化）', () => {
   const CASES = [
     { route: '/', label: '侧栏链接', sel: '.ui-sidebar-link' },
@@ -223,14 +172,10 @@ test.describe('焦点可见性（键盘 Tab 后元素周边像素必须变化）
 
   for (const c of CASES) {
     test(`${c.label}：Tab 到它之后周边像素变化`, async ({ page }) => {
-      /* 预算：到达目标要按真实 Tab 顺序走（最多 60 次，每次一趟 `evaluate` 往返），实测在 CI runner 上
-         单是走到 `/debug` 的下拉框就花 29s ⇒ 越过默认 30s 后连 `page.screenshot` 都开不了（trace 里
-         截图动作停在 29.3s）。判据仍是「60 次内到达」，这里只把「60 次往返之和」纳入预算。 */
       test.setTimeout(90_000);
       await page.goto(c.route);
-      await page.waitForTimeout(900); // 等入场动画与主题过渡结束
+      await page.waitForTimeout(900);
 
-      // 真按 Tab 走到目标（最多 60 次，覆盖目录页大量卡片）
       let reached = false;
       for (let i = 0; i < 60 && !reached; i += 1) {
         await page.keyboard.press('Tab');
@@ -250,7 +195,6 @@ test.describe('焦点可见性（键盘 Tab 后元素周边像素必须变化）
         height: Math.min(Math.round(box!.height + 20), 220, vp.height - Math.max(0, Math.round(box!.y - 10))),
       };
       const focused = await page.screenshot({ clip: region });
-      // blur 不滚动 ⇒ 取景不变，只少了焦点指示
       await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
       await page.waitForTimeout(150);
       const blurred = await page.screenshot({ clip: region });
@@ -258,21 +202,11 @@ test.describe('焦点可见性（键盘 Tab 后元素周边像素必须变化）
     });
   }
 });
-/**
- * 最窄宽度重排契约（320px ≈ iPhone SE 1 代 / 桌面 200% 缩放等效）。
- *
- * 为什么单独钉 320px：e2e 的 mobile-chromium 项目是 Pixel 7（412px），320px 此前没有任何契约——
- * 横向溢出会让整页左右滑动，是最容易被一眼看到的重排缺陷。
- * 断言口径：① `scrollWidth ≤ clientWidth + 1`；② 越界元素扫描为空（遍历所有元素，排除被祖先
- * `overflow-x` 裁剪者，失败时打印元凶，比单纯溢出值更有诊断力，且不依赖任何类名）。
- * 注意：用例在**顶层 for 里声明**（缩进 2 空格），守卫 `check-e2e-viewport-tags` 只识别 ≤2 空格
- * 缩进的 `test(`，放进 `describe → for` 会让它把 setViewportSize 误归属给上一个用例。
- */
 for (const route of ['/', '/character', '/character/1212', '/endgame/maze', '/currency', '/voracity']) {
   test(`${route}：320px 无横向溢出且无未裁剪越界元素`, { tag: '@viewport-pinned' }, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await page.goto(route);
-    await page.waitForTimeout(900); // 等入场动画结束，避免动画中间态误判
+    await page.waitForTimeout(900);
     const r = await page.evaluate(() => {
       const de = document.documentElement;
       const culprits: string[] = [];
@@ -291,16 +225,6 @@ for (const route of ['/', '/character', '/character/1212', '/endgame/maze', '/cu
     expect(r.culprits, `${route} 320px 不得有未裁剪的越界元素`).toEqual([]);
   });
 }
-/**
- * 强制色模式（Windows 高对比 / `forced-colors: active`）冒烟契约。
- *
- * 这一档此前完全没有覆盖：本站大量用 `color-mix()` 与渐变做层次，若某处文字依赖「低不透明度」
- * 表达次要层级，进入强制色模式后会变成不可读或消失。判据只用两件实现无关的事实：
- * ① 可见文本不得是半透明（α < 0.5）——强制色模式下 UA 会把 `color` 换成系统色，**仍半透明**
- *    说明作者用 `opacity` 或 rgba 把文字压淡了；
- * ② 不得横向溢出（系统字体/边框宽度变化会挤破版心）。
- * 自带正控：先断言 body 背景确实被 UA 换成了白色——否则说明模拟没生效，用例会静静地假绿。
- */
 for (const route of ['/', '/character', '/character/1212', '/endgame/maze', '/currency', '/settings']) {
   test(`${route}：强制色模式可读且不溢出`, async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: 'zh-CN', forcedColors: 'active' });
@@ -325,7 +249,6 @@ for (const route of ['/', '/character', '/character/1212', '/endgame/maze', '/cu
         }
         return { bodyBg, dim, samples, overflow: de.scrollWidth - de.clientWidth };
       });
-      // 正控：模拟必须真的生效（UA 强制底色）
       expect(r.bodyBg, 'forcedColors 模拟未生效，本用例会假绿').toBe('rgb(255, 255, 255)');
       expect(r.dim, `${route} 强制色模式下不得有半透明文字：${r.samples.join(' / ')}`).toBe(0);
       expect(r.overflow, `${route} 强制色模式不得横向溢出`).toBeLessThanOrEqual(1);

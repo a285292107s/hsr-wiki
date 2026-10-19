@@ -12,7 +12,6 @@ import { ENDGAME_MODES } from '../catalog/pages/endgame';
 import { translate } from '../i18n';
 import '../../styles/voracity.css';
 
-/** 脚本内文案（如区块清单 label）走 translate；模板内用 t() */
 const t = translate;
 
 const { data, error, loading, showSkeleton, run: load, retry } = usePageData<VoracityDb>(loadLocalVoracity);
@@ -22,7 +21,6 @@ const pageRef = ref<HTMLElement | null>(null);
 const activity = computed(() => data.value?.activity ?? null);
 const invasion = computed(() => data.value?.invasion ?? null);
 
-/** 波及关卡按侵蚀等级分组（组内保持数据原序） */
 const stageGroups = computed<{ invasionId: number; stages: VoracityStage[] }[]>(() => {
   const groups: { invasionId: number; stages: VoracityStage[] }[] = [];
   for (const s of [...(invasion.value?.stages ?? [])].sort((a, b) => a.invasion_id - b.invasion_id)) {
@@ -73,12 +71,10 @@ const { activeId, progress, showTop, jumpTo, scrollTop, refresh } = useScrollSpy
   { offset: 64, fallbackFirst: true },
 );
 
-/** 描述正文（占位符引用缺参时整段省略，不落残缺 `#N[...]` 与 `?`） */
 function plainDesc(desc: string | null | undefined, params?: number[] | null): string {
   return refsResolved(desc, params) ? fmtDesc(desc, params) : '';
 }
 
-/** 增益类条目适配成 MazeBuffInfo，复用终局页的图标与描述原语 */
 function buffView(id: number, name: string | undefined, desc: string | undefined, params: number[] | undefined, icon: string | undefined): MazeBuffInfo {
   return { id, name: name ?? '', desc, param_list: params, icon };
 }
@@ -118,13 +114,11 @@ function buffIconError(e: Event): void {
   (e.target as HTMLImageElement).src = BUFF_ICON_FALLBACK;
 }
 
-/** 终局模式中文名（与终局目录页共用 ENDGAME_MODES 单一来源） */
 function modeLabel(mode: string): string {
   const hit = ENDGAME_MODES.find((m) => m.key === mode);
   return hit ? translate(hit.labelKey) : mode;
 }
 
-/** 关卡在该赛季中的位置（与终局详情页的污染节点文案同一实现） */
 function scopePosition(sc: { half: string; floor?: number; title?: string }): string {
   return pollutionPosition(sc);
 }
@@ -133,7 +127,6 @@ function iconFallback(url: string): string | undefined {
   return cdnFallbackFromPrimary(url) || undefined;
 }
 
-/** 比例字段（0~1）→ 百分比数值；源值已是百分数时原样透传 */
 function ratioPct(v: number | null | undefined): number {
   if (v == null) return 0;
   return Math.max(0, Math.min(100, v <= 1 ? v * 100 : v));
@@ -215,7 +208,6 @@ onMounted(() => { void load(); });
 
       <div class="nk-panels">
         <div class="nk-panel nk-panel--active">
-          <!-- 01 玩法概览 -->
           <section v-if="shownSections.has('overview')" id="vor-overview" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('overview') }}</span>{{ t('vor.sec.overview') }} OVERVIEW</h2>
             <p v-if="introHtml" class="nk-vor-intro" v-html="introHtml"></p>
@@ -231,7 +223,6 @@ onMounted(() => { void load(); });
             </dl>
           </section>
 
-          <!-- 02 污染等级与愿力 -->
           <section v-if="shownSections.has('scores')" id="vor-scores" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('scores') }}</span>{{ t('vor.sec.scores') }} WILL</h2>
             <div v-if="activity?.scores?.length" class="nk-vor-scores">
@@ -254,7 +245,6 @@ onMounted(() => { void load(); });
             </ol>
           </section>
 
-          <!-- 03 「贪饕」侵蚀 -->
           <section v-if="shownSections.has('invasion')" id="vor-invasion" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('invasion') }}</span>{{ t('vor.sec.invasion') }} INVASION</h2>
 
@@ -306,7 +296,6 @@ onMounted(() => { void load(); });
             </div>
           </section>
 
-          <!-- 04 波及关卡 -->
           <section v-if="shownSections.has('stages')" id="vor-stages" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('stages') }}</span>{{ t('vor.sec.stagesFull') }} STAGES</h2>
             <div v-for="g in stageGroups" :key="g.invasionId" class="nk-vor-stgroup">
@@ -353,7 +342,6 @@ onMounted(() => { void load(); });
             </div>
           </section>
 
-          <!-- 05 状态词条 -->
           <section v-if="shownSections.has('statuses')" id="vor-statuses" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('statuses') }}</span>{{ t('vor.sec.statuses') }} STATUS</h2>
             <div class="nk-vor-statuses">
@@ -382,7 +370,6 @@ onMounted(() => { void load(); });
             </div>
           </section>
 
-          <!-- 06 教程图文 -->
           <section v-if="shownSections.has('tutorials')" id="vor-tutorials" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('tutorials') }}</span>{{ t('vor.sec.tutorials') }} TUTORIAL</h2>
             <div class="nk-vor-tutorials">
@@ -404,7 +391,6 @@ onMounted(() => { void load(); });
             </div>
           </section>
 
-          <!-- 07 货币战争位面词条 -->
           <section v-if="shownSections.has('affixes')" id="vor-affixes" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('affixes') }}</span>{{ t('vor.sec.affixesFull') }} AFFIX</h2>
             <div class="nk-vor-affixes">
@@ -430,10 +416,8 @@ onMounted(() => { void load(); });
             </div>
           </section>
 
-          <!-- 08 「污染」同形词说明 -->
           <section v-if="shownSections.has('disambig')" id="vor-disambig" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('disambig') }}</span>{{ t('vor.sec.disambigFull') }} NOTE</h2>
-            <!-- 与 tools/gen-ai-endpoints.mjs 的 VORACITY_DISAMBIGUATION 逐字一致（契约：同一分区文本对所有 UA 一致） -->
             <p class="nk-vor-note">
               {{ t('vor.disambigNote') }}
             </p>

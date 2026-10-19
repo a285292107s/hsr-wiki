@@ -5,7 +5,6 @@ export interface AccentOption {
 
   key: AccentKey;
 
-  /** 词典键（模块加载期不能翻译，展示时由视图解析） */
   labelKey: string;
 
   swatch: [string, string, string];
@@ -13,7 +12,6 @@ export interface AccentOption {
 
 const STORAGE_KEY = 'HSR_WIKI_ACCENT';
 
-/** 缺省主题色 = 橄榄青（`--th-*` 默认块同样指向 `--ol-*`，两处必须一致；改一处即视为契约变更） */
 export const DEFAULT_ACCENT: AccentKey = 'olive';
 
 export const ACCENTS: AccentOption[] = [
@@ -47,7 +45,6 @@ export function setAccent(accent: AccentKey): void {
   try {
     localStorage.setItem(STORAGE_KEY, accent);
   } catch {
-    // 存储不可用（隐私模式/配额）：仅本次会话生效，忽略
   }
   applyAccent(accent);
 }

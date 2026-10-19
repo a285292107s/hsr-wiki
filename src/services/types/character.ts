@@ -1,7 +1,3 @@
-/** 角色相关数据类型（character/{charId}.json 详情 + character.json 列表端点 + converter 本地列表 + 技能动画映射） */
-
-/* ─── character/{charId}.json ─── */
-
 export interface SkillExtra {
   name: string;
   desc: string;
@@ -26,31 +22,18 @@ export interface Skill {
   simple_desc?: string;
   type: SkillType;
   type_name: string;
-  /** 技能图标（源数据 SkillIcon 映射路径，事实源）：覆盖大世界攻击复用普攻图标、
-   * Normal02/BP02/AssisSkill01-03 等 type 无法推断的变体命名；空串回退 type 推断 */
   icon?: string;
-  /** 技能标签：官方 SkillTag 中文文本（如「单攻」「召唤」），空则无标签 */
   tag?: string | null;
   sp_base?: number | null;
-  /** 技能级能量需求（忆灵终结技独有 + 双段能量角色） */
   sp_need?: number | null;
-  /** 战技点消耗（BPNeed：正值 = 消耗 N，如战技 1/饮月强化普攻 1-3；-1 = 不消耗哨兵，非产出） */
   bp_need?: number | null;
-  /** 战技点获得（BPAdd，有值恒 1 = 施放后获得 1 战技点，普攻） */
   bp_add?: number | null;
-  /** 韧性消耗 [单攻, 群攻, 扩散] */
   show_stance_list?: number[] | null;
-  /** 削韧属性（7 种元素枚举） */
   stance_damage_type?: string | null;
-  /** 削韧显示值 */
   stance_damage_display?: number | null;
-  /** 技能资源消耗描述（如「#5点【新蕊】」） */
   skill_need?: string | null;
-  /** 技能最高等级（10/15） */
   max_level?: number | null;
-  /** 技能→星魂关联（被哪些星魂强化） */
   rated_rank_id?: number[] | null;
-  /** 技能→行迹点关联 */
   rated_skill_tree_id?: number[] | null;
   skill_combo_value_delta?: unknown;
   extra?: Record<string, SkillExtra>;
@@ -66,7 +49,6 @@ export interface Rank {
   extra?: Record<string, SkillExtra>;
 }
 
-/** 行迹节点属性加成（总属性加成聚合数据源） */
 export interface StatusAdd {
   property_type: string;
   value: number;
@@ -84,7 +66,6 @@ export interface SkillTree {
   max_level?: number;
   param_list?: number[];
   point_id?: number;
-  /** 附加能力名称（行迹树节点） */
   point_name?: string | null;
   point_desc?: string | null;
   point_trigger_key?: number;
@@ -110,7 +91,6 @@ export interface CharStats {
 
 export interface RelicProp {
   relic_type: string;
-  /** 部位名（官方词条，随语言包切语言）；缺字段时调用方回退 `relic_type` 枚举键 */
   relic_type_name?: string;
   property_type: string;
 }
@@ -119,9 +99,7 @@ export interface CharRelics {
   avatar_id?: number;
   set4_id_list?: number[];
   set2_id_list?: number[];
-  /** 主词条（按部位） */
   property_list?: RelicProp[];
-  /** 推荐副词条 */
   sub_affix_property_list?: string[];
   property_list3?: string[];
   property_list4?: string[];
@@ -144,79 +122,54 @@ export interface Team {
 }
 
 export interface Memosprite {
-  /** 忆灵图标路径（解析忆灵 ID：SpriteOutput/ServantIconTeam/11415B.png → 11415） */
   icon?: string;
   skills?: Record<string, Skill>;
   [k: string]: unknown;
 }
 
-/** 加强版本数据包：覆盖 base 的 skills/ranks/skill_trees（「砺烁新辉」角色强化，见 ADR 0010） */
 export interface EnhancedBundle {
   skills?: Record<string, Skill>;
   ranks?: Record<string, Rank>;
   skill_trees?: Record<string, Record<string, SkillTree>>;
-  /** 强化摘要（EnhancedDesc1..N，保留官方 <color> 标签，前端 gameTagsToHtml 渲染） */
   descs?: string[] | null;
-  /** 强化后终结技能量需求（与基础不同时输出，前端覆盖 hero 展示） */
   sp_need?: number | null;
-  /** 被强化技能 ID 列表（驱动强化角标） */
   skill_ids?: number[];
-  /** 被强化星魂 ID 列表（驱动强化角标） */
   rank_ids?: number[];
   [k: string]: unknown;
 }
 
 export interface CharacterData {
   name: string;
-  /** 拉丁转写（converter 由 TextMapEN × AvatarName 解析）。开拓者形态名为 `{NICKNAME}` 占位
-   *  ⇒ 上游无译名，输出空串，消费方须按「缺字段」处理（不渲染），禁止回退拼造。 */
   name_en?: string;
-  /** 角色档案（`chara_info.stories`）第一篇的首行由前端派生（`CharHero`），产物不再带组合好的简介 */
   chara_info?: {
-    /** 所属阵营（如「星穹列车」「星核猎手」） */
     camp?: string | null;
-    /** 四语配音演员 */
     va?: {
       chinese?: string | null;
       japanese?: string | null;
       korean?: string | null;
       english?: string | null;
     };
-    /** 角色故事（键 "0"~"4"，对应游戏内档案第 1~5 篇） */
     stories?: Record<string, string | null>;
     voicelines?: unknown[];
   };
-  /** 稀有度（CombatPowerAvatarRarityType4/5） */
   rarity: string;
   avatar_vo_tag?: string;
-  /** 终结技能量需求（部分角色如遐蝶无此字段，输出 null，前端以 ?? 0 兑底） */
   sp_need?: number | null;
-  /** 命途（Mage/Knight/...） */
   base_type: string;
-  /** 属性（Quantum/Wind/...） */
   damage_type: string;
-  /** 星魂 1-6 */
   ranks: Record<string, Rank>;
   skills: Record<string, Skill>;
-  /** 行迹树：pointKey → 等级 → 节点（tree['1'] 取首级节点） */
   skill_trees: Record<string, Record<string, SkillTree>>;
-  /** 加强版本（键如 "1"；空 = 无加强） */
   enhanced?: Record<string, EnhancedBundle>;
-  /** 忆灵（记忆命途召唤物） */
   memosprite?: Memosprite;
   unique?: Record<string, unknown>;
-  /** 属性表：突破阶段 0-6 → 基础属性 */
   stats: Record<string, CharStats>;
   relics?: CharRelics;
-  /** 推荐光锥 ID */
   lightcones?: number[];
   teams?: Team[];
   skin?: Record<string, unknown>;
 }
 
-/* ─── 本地角色列表（TurnBasedGameData 转换） ─── */
-
-/** 本地角色列表条目（converter 输出格式） */
 export interface LocalCharEntry {
   id: number;
   name: string;
@@ -224,7 +177,6 @@ export interface LocalCharEntry {
   rarity: number;
   path: string;
   element: string;
-  /** 终结技能量需求（部分角色如遐蝶无此字段，输出 null） */
   sp_need: number | null;
   vo_tag: string;
   icon: string;
@@ -233,27 +185,13 @@ export interface LocalCharEntry {
   icon_cutin: string;
   rank_ids: number[];
   skill_ids: number[];
-  /** 版本上新判据（ADR 0019）：首次出现在数据快照中的版本号，如 "4.6"。
-   *  converter 由「与上一版已提交输出的 id 差集」推导；无可追溯基线时为空串（旧数据文件可能缺该字段）。
-   *  遗器同理但来源为源数据权威字段（RelicSetConfig.ReleaseVersion）。 */
   release_version?: string;
 }
 export type LocalCharList = LocalCharEntry[];
 
-/* ─── skill_animations.json（米游社 Wiki 技能动画映射） ─── */
-
-/** 单条技能动画条目 */
 export interface SkillAnimEntry {
   url: string;
-  /** 多段技能子标题：命中官方技能名时是**名称令牌**（随语言解析，见 docs/spine/米游社技能动画抓取流程.md）；
-   *  无官方词条的 wiki 变体小标题不写入（前端回落序号），避免中文进非中文语言的选择器 */
   title?: string;
 }
 
-/** 技能动画数据库：charId → 键 → 动画列表。
- *  键空间：主技能 type（Normal/BPSkill/Ultra/Passive/Maze/Assist 变体、欢愉技 ElationDamage）
- *  + 忆灵技能合成键 Servant（忆灵技）/ ServantPassive（忆灵天赋，角色数据 type 为空串）；
- *  写入侧见 spine-lab/tools/wiki-anim-scraper.mjs，消费侧见 src/app/character/SkillsPanel.vue */
 export type SkillAnimationsDb = Record<string, Record<string, SkillAnimEntry[]>>;
-
-

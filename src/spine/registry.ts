@@ -34,6 +34,5 @@ export function disposeSpineEntry(key: string): void {
   try {
     entry.dispose();
   } catch {
-    /* 已释放或运行时异常均静默 */
   }
 }

@@ -6,7 +6,6 @@ import { loadCwCatalogCss } from './shared';
 function renderPortalCard(item: CatalogItem, index = 0): string {
   const icon = gridFightIconUrl(item.icon as string);
   const desc = fmtDesc(item.desc as string, item.params as number[]);
-  /* 卡名 2 行截断（P1）后长译文的全文仍需可达：完整名挂卡根 title（触屏无 hover 时唯一复原通道）。 */
   return `<div class="nk-cw-card nk-cw-portal-card" style="--i:${index}" title="${escHtml(item.name)}">
       <div class="nk-cw-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
       <div class="nk-cw-card__body">

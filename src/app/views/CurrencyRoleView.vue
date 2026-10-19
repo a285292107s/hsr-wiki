@@ -20,7 +20,6 @@ import type {
   CurrencyRoleDetail, CurrencyRoleStar,
   CurrencyRoleRank, CharacterData, CurrencyPropIconMap, LocalLightConeEntry,
 } from '../../services/types';
-/* 拆分块按级联顺序导入，不得乱序 */
 import '../../styles/currency-role-hero.css';
 import '../../styles/currency-role-sections.css';
 import '../../styles/currency-role-gear.css';
@@ -53,7 +52,6 @@ const star = computed<CurrencyRoleStar | null>(() =>
   data.value ? (data.value.stars[selectedStar.value] || null) : null,
 );
 
-/** 展示用 AvatarID：选女性开拓者时切 female_avatar_id（仅立绘；随从 #N 解析仍走数据 avatar_id） */
 const displayAvatarId = computed(() => {
   const d = data.value;
   if (!d) return 0;
@@ -61,8 +59,6 @@ const displayAvatarId = computed(() => {
   return shouldUseFemaleAvatar(gender, d.female_avatar_id) ? d.female_avatar_id! : (d.avatar_id || d.id);
 });
 
-/** Hero 定位描述：front/back_one_word_desc 跨星级一致（75 角色全量验证，2026-08-15），
- *  取首星级即可，不绑定 selectedStar（避免星级切换触发无关重渲染）。 */
 const roleLines = computed(() => {
   const stars = data.value?.stars;
   if (!stars) return [];
@@ -85,13 +81,11 @@ void loadLocalCurrencyPropIcons()
   .then((m) => { propIcons.value = m; })
   .catch(() => {});
 
-/** 常规模式光锥表（共享单例；专属光锥本体查名，全量验证 33/33 命中） */
 const lightCones = ref<LocalLightConeEntry[] | null>(null);
 void loadLocalLightCones()
   .then((l) => { lightCones.value = l; })
   .catch(() => {});
 
-/** 专属光锥本体（EquipmentID → 常规模式光锥表；取首个等级条目 ID，各等级同 ID） */
 const coneInfo = computed(() => {
   const id = data.value?.equipment?.[0]?.equipment_id;
   if (!id || !lightCones.value) return null;
@@ -152,13 +146,10 @@ function rankIconAttrs(rk: CurrencyRoleRank): Record<string, string | undefined>
   return { src: primary, 'data-cdn-fallback': fallback || undefined, alt: rk.name || '', loading: 'lazy' };
 }
 
-/** 技能在当前选中星级下的参数下标（技能可能仅在部分星级出现；-1 = 选中星级未解锁） */
 function skillStarIdx(sk: MergedSkill): number {
   return sk.stars.indexOf(Number(selectedStar.value));
 }
 
-/** 技能卡图标属性（jsDelivr 优先 + nanoka 兜底）：不绑 hideOnError，
- *  回退与最终隐藏由全局 CDN 委托（installCdnImgFallback）完成——绑了会抢在回退前隐藏。 */
 function skillIconAttrs(sk: MergedSkill): Record<string, string | undefined> {
   const { src, fb } = gridFightSkillIconSrc(sk.icon);
   if (!src) return {};

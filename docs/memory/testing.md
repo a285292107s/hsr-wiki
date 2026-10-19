@@ -16,6 +16,10 @@
 - **跨层「透传」漏传是静默退化，构建与测试全绿也查不出**：开关类参数（如 `firstStageLayers`）没到消费点时分阶段加载静默退回单阶段，唯一证据是网络时序 ⇒ 开关落地后必须做一次运行时取证。
 - **接口可选字段的静默丢失**：给接口加了可选字段但某个构造点的字面量没带它 ⇒ TS 不报错、运行时恒 `undefined`、内容静默缺席。「可选」只免除类型检查，不免除构造责任。
 - **源码扫描型守卫先要「归属」正确，再谈条数**：`check-e2e-viewport-tags.mjs` 原只认顶格 `test(`（`^\s{0,2}`），循环里生成的嵌套用例整批漏检（实测全仓 11 条），其中自钉视口那条的 `setViewportSize` 被归到**上一个顶格用例**上 ⇒ 违规报到错行（报了 `layout-catalog.spec.ts` 的 `/item`，真身在它下方 60 行的 `/cn @390`）。判据两条：① 守卫的正则改宽后，「test 声明数」应与 `--list` 的收集条数一致（177→188）；② 造一条自钉视口且未标标签的**嵌套**临时用例，必须被报到**它自己的行**。另一处静默源：标签写在 `describe(...)` 标题上会被 runner 继承、静态守卫却看不到——纪律是三个标签一律写在 `test(...)` 第二参，故此类写法按违规报出（副行用例已从 describe 标题移回用例签名）。
+- **happy-dom 里模拟「图片挂起」必须 `defineProperty` 覆盖 `img.complete`**：happy-dom 的 `complete` 恒为 `true`，只让 `load` 事件永不发生也造不出「未完成」态——挂起定时器在首帧就被跳过，用例假绿。`src/services/__tests__/cdn.test.ts`
+- **真要打网络的审计用例必须 `environment: 'node'`**：死链审计走 Node 原生 `fetch`（undici，无 CORS）；happy-dom 的浏览器式 `fetch` 会先发 `OPTIONS` 预检，而 CDN 对预检直接 403 ⇒ 全量被判成环境性信号（`env`），看起来像「一个死链都没查到」。`tools/dead-links.vitest.config.ts`
+- **测「本地化之前的远端分支」要传合成 spec，不要绑定真实分类**：全量本地化推进后真实分类都 local-first，原分支不再常驻命中，绑定具体分类的用例会随迁移进度失效；合成 spec 只带 `nanoka` 即可。`src/services/__tests__/cdn.test.ts`
+- **`spine-manifest` 单测不要再重复清单结构断言**：version 一致性 / 键集合 / 排序 / 格式 / textures 扩展名已由构建守卫 `tools/check-spine-manifest.mjs` 逐项校验（含 `--fetch` 在线可达性），单测只锁「官方角色的 nanoka 回退链不能整体消失」；两处维护同一规则 = 改一条要改两处。`src/services/__tests__/spine-manifest.test.ts`
 
 ## 溢出与几何取证
 
@@ -24,6 +28,8 @@
 - **同一条「祖先已裁切」还有反向的假绿：页根裁切会让整页断言恒等于 0**。`.nk-page--detail{overflow-x:hidden}` 把越界内容静默吃掉——元素不可达、无滚动条、`documentElement.scrollWidth` 零增长，于是「页面无横向溢出」在真缺陷下照样全绿（实测终局赛季页 de@320 奖励 chip 右缘越出 208.6px 而整页断言无恙）。判据要落到**逐个元素「右缘 vs 页根右缘」**，且必须**排除祖先 `overflow-x ∈ {auto, scroll}` 的滚动容器**：单行横滚的页签行属设计如此（终局关架子 tab），不排除会把几十个正常项报成缺陷——同一判据的两面，缺任一面就是假绿或假红。
 - **`min-width: auto` 的 flex 项 + 子元素 `white-space: nowrap` ⇒ min-content 成为硬下界**：容器再窄也不会压缩该项，只会整块越界并被页根裁掉；而这类越界**不产生任何文本溢出信号**（它压根不换行），`overflow != visible` 类容器判据也抓不到（该项自身 `overflow: visible`）。长文案 chip 的判据是「项 `min-width: 0` + `max-width: 100%`，名称允许换行或省略号 + `title`」，缺任一环即命中。
 - **`scrollHeight − clientHeight` 会把伪元素的绝对定位出血算进去**：`inset-bottom: -30px` 让面板恒报「溢出 30px」，那不是内容溢出。用该指标前先排除伪元素出血。
+- **元素右缘的视口基准是 `document.documentElement.clientWidth`，不是 `window.innerWidth`**：`innerWidth` 含经典滚动条宽度，拿它当右边界会漏检「内容压在滚动条下」的真实溢出，也与文档级判据（`scrollWidth` vs `clientWidth`）口径不一致。`e2e/helpers.ts`
+- **已登记溢出项（`KNOWN_OVERFLOWS`）的告警必须按缺陷条目聚合，不能按元素**：一条登记常命中整棵子树的多个元素（实测 `.nk-seg` 同源 5 个），逐元素打印会把同一条 note 刷 N 遍；元素级细节留在 trace / HTML report。`e2e/helpers.ts`
 - **`space-between` 在负剩余时静默退化为 `flex-start`**：它与 `gap` 并用时只在剩余空间为正时生效。「固定盒高 + 均分」必须同时保证内容总高 ≤ 盒内容高。
 - **`margin-top: auto` 钉住卡脚后，「内容高」不能再用 `meta.bottom − card.top` 量**：它恒等于卡高。正确量法＝各部分自然相加（内距 + 行高 + N×描述行高 + 卡脚高 + 底部内距）。
 - **判断文字对齐不能看元素盒**：flex 拉伸后所有盒子左缘都一样。必须取文字 ink——`Range.selectNodeContents(el).getBoundingClientRect()`。
@@ -38,12 +44,16 @@
 - **等待条件必须带「样本数 ≥ N」前缀**：把「全部卡片都在界内」写成 `[].every(...)` 时，**空数组恒 true** ⇒ `waitForFunction` 秒过、给出假绿。同批还要：过滤入场动画未 reveal 的卡片（`backwards` + delay 期 `opacity: 0` / `translateY(14px)` 会给 `getBoundingClientRect` 多出位移量），且门槛不得高于稳定 reveal 的条数（IntersectionObserver threshold 0.5 时缓冲行不触发）。`e2e/helpers.ts`
 - **骨架不得复用「就绪判定类名」**：那个类名同时是 e2e 与视图的「等就绪」条件，骨架自己带上就会骗过所有等待、静默通过。骨架与就绪态的类名必须分开。`ReleaseShowcase.vue`
 - **`getComputedStyle` 在 `border-style: none` 下仍会返回颜色**（等于元素文字色）⇒ 描边断言必须连 `width` / `style` 一起比，只比颜色会误报「有描边」。`e2e/layout-endgame*.spec.ts`
-- **`check-e2e-viewport-tags` 的 `TEST_RE` 只认 ≤2 空格缩进的 `test(`**：把自钉视口的用例写进 `describe → for`（4 空格）会让守卫误归属给上一个用例并报「缺 `@viewport-pinned`」。这类用例在**顶层 for** 里声明。
+- **`check-e2e-viewport-tags` 的用例归属判据（正则在任意缩进下都要命中）见本节「源码扫描型守卫先要『归属』正确」条**：`describe → for` 里的用例必须被报到它自己的行。
 - **CWV 量测口径**：必须对 `dist` 产物量（dev 的传输量是未压缩形态，数字无意义）；跨源资源无 TAO 时 `transferSize` 恒为 0；LCP 取 `startTime` **最大**的一条而不是首条。`docs/audit/UI质量验收标准.md`
 - **「等某个状态」的守卫，其等待上限必须与该现象的真实时长同量级**：上限过短 + 超时后继续测量 = **把合法中间态判成缺陷，比不加等待更危险**（只在高负载 CI 偶发，本地复现不出）。
 - **本地复现中间态要模拟「现象本身」（拉长真实过渡时长），不要手工拼框架类名**：`-active` 会被框架清理，拼出来的状态与真实状态机不等价，会得出「加长上限也没用」的假结论。
 - **测试助手会与产品判据悄悄漂移**：`lastWaveMonster` = 末波最后一只 vs 产品 `lastWaveBoss` = 末波**第 1 只**——基准页上两者恒等所以从不暴露，扩展到新页面才红。**恒等关系不能证明判据相同。**`e2e/layout.shared.ts`
 - **混排字号的 flex 行里，「同一行 / 同一基线」判据不能用 top 相等表达**：`align-items: center` 会让同行两项的 top 差半个行高；应改判「纵向区间相交」。
+- **`<html lang>` 不是内容就绪判据**：它由路径前缀在**视图挂载之前**就写好，只等它就读 `body.innerText()` 拿到的是外壳文本（CI 实测「主题色名应取英文词典值」假红）；就绪门必须等视图根或具体内容。
+- **按「延迟图片」造未就绪态时，拦截只能是「按住再放行」，不能 `route.abort()`**：abort 会把页面推向 CDN 降级链，测到的是降级而不是「图还没到」。按住期间 `goto` 必须等 `domcontentloaded`（被按住的请求本身就阻塞 `load`，等 `load` 会变成用例超时），且**不能在 `setTimeout` 到点后再 `route.continue()`**——处理器会在下一次导航换掉文档之后才醒来并抛 `Route is already handled!`。正确形态：可放行闸门 + 量完立刻全部放行并解绑。`e2e/layout-home.spec.ts`
+- **`waitForSettled` 的字体等待是「有上限、不抛错」的，±1px 级容差断言不能只靠它**：字体换装会让行盒再变 2px 级（实测 187.75 → 189.75，足以越过 1px 容差），两趟比较类用例必须自己保证两趟都落在字体落定之后。`e2e/layout-hub.spec.ts`
+- **图片 `naturalWidth` 类断言在冷跑下会假红**：Chromium 靠请求缓存与靠前用例预热而不显形，Firefox 冷跑必现「立即读到 5/6 未完成、6s 后 6/6、占位图为 0」——这是**测试竞态**，不是引擎缺陷或加载失败；判据是先看占位图为 0，再轮询 `naturalWidth`。`e2e/layout-character-skill-data.spec.ts`
 
 ## vitest 与单测环境
 
@@ -71,6 +81,8 @@
 - **断言翻红先问「它判的是环境还是契约」**：判环境的（字体度量 / 渲染差异 / 外部服务）不进 CI 层；判契约的才允许用改设计去满足。且**绝对值断言在定修法之前必须先定方向**——「加了兜底但红值一字未变」本身就是「内容偏高」的方向判据（兜底只对实际值偏矮有效）。**禁止**为把环境断言塞进 CI 而改全局视觉。
 - **新验收面会把一直存在的缺陷报成「新增违规」**：某共享组件首次出现在被扫描页面时即如此。判断口径是「该组件在别处是否也不达标」，不是「本次 diff 是否碰过它」。
 - **机制假设必须先用同一元素的 computed 值证伪/证实，再动手**：曾假设「侧栏不透明是根因」，注入不透明底色实测 3.0 → 3.01，假设当场被证伪。
+- **空令牌会让「元素颜色 = 令牌」类断言恒真**：把令牌原值挂到离线探针上解析颜色时，令牌未声明读到的是探针**继承的父级颜色**，于是断言在一个未生效的令牌上照样通过——派生原语必须在空值处抛错，不要返回默认值。`e2e/helpers.ts`
+- **期望值必须独立算一遍，不能复用被测实现的计算路径**：与实现同式的派生（同一函数、同一切片写法）在实现自身出错时会同步跟着错，断言恒绿。做法是刻意换一条路径（例：页面用 `fmtBigNumber` 整数分组，断言按字符切片），两处**同时**改错才会静默通过；独立性要在代码里看得出，不靠一句「这里不一样」的说明。`e2e/layout.shared.ts`
 
 ## 形态与契约判据
 
@@ -118,6 +130,7 @@
 - **不要用 `Get-Content -Raw` ↔ `Set-Content` 往返文本文件**：本机 `pwsh` 走 Windows PowerShell 5.1 语义（判据：`-AsByteStream` 参数不存在），默认按 ANSI 解码并按 ANSI 写回——实测一个 31294 字节的 UTF-8 快照往返后变 31183 字节，`<title>` 与 JSON-LD 当场损坏，守卫报「缺 title / JSON.parse 失败」，看起来像产物坏了、其实是夹具坏的。改产物做反向验证时用 Node（`readFileSync`/`writeFileSync`）或显式 `-Encoding utf8`；**还原一律用 `Copy-Item` 覆盖，不要靠重写内容**。
 - **本应用的真实滚动容器是 `#nk-home-app`，不是 `window`**（外壳把内容区做成自己的滚动盒，`document.scrollHeight` 恒等于视口高）。任何「滚动驱动」的东西都会因此失真：① `window.scrollTo()` 是空操作 ⇒ 视口以外的内容永远不进视口；② `loading="lazy"` 的图**永远不开始取**（`complete=false`、`naturalWidth=0`，且**不算** broken image，所以静默）；③ `animation-timeline: view()` 的进度停在 0 ⇒ 视口以下的元素停在入场动画的起始态（`opacity: 0` + 位移）。自写取证脚本必须 `document.querySelector('#nk-home-app').scrollTop = y` 逐屏走；第三方按 `window` 走的工具（如 tasteskill 的 `inspect.mjs`）**只能看到首屏**，其「图片数 / 空白屏 / 逐屏动效」结论都据此打折。
 - **位移中的元素不能用 `getBoundingClientRect()` 判间距**：入场动画（`animation-timeline: view()` + `fill: both`）会把视口以下的元素整体平移 +20~26px，于是「上一分区的文字」到「下一分区的标题」的实测间距比布局值小 26px，足以把一条正常的排版读成缺陷。判间距前先 `animation: none`，或只量同一动画状态下的两个元素。
+- **判目录卡渲染完成的类选择器只能写子串 `[class*="-grid"]`，不能写属性结尾 `[class$="-grid"]`**：网格的 class 是数组绑定（`gridClass + nk-virtual-grid` + `nk-fast-jump` / `nk-no-reveal` 条件类），尾随类一挂上属性串就不再以 `-grid` 结尾 ⇒ 等卡片退化成 15s 超时；骨架的 `nk-skeleton__grid` 不含该子串，不会误命中。`e2e/helpers.ts`
 
 ## 提速与并发
 
@@ -144,7 +157,7 @@
 - **`Tab` 循环类用例的耗时随「可聚焦元素数 × runner 负载」线性增长，必须显式给预算**：`shell.spec` 的焦点可见性用例最多按 60 次 Tab 走到目标（每次一趟 `evaluate` 往返），CI runner 上单是走到 `/debug` 的下拉框就花 29s ⇒ 越过默认 30s 后连 `page.screenshot` 都开不了（trace 里截图动作停在 29.3s、报 `Test timeout`）。这类「到达成本不可预知」的用例与全路由 sweep 同类：修法是 `test.setTimeout`，不是 retries、也不是改断言。
 - **「骨架退场」在懒加载路由 chunk 执行前是**空真**（已由 `waitForViewMounted` 收口）**：视图挂载前 DOM 里既没有 `.nk-skeleton` 也没有正文，`!document.querySelector('.nk-skeleton')` 会立刻通过（实测「检查开始 → 取值」相隔 24ms；实测外壳态正文仅 **165** 字符、`#app` 子节点只有 `nav.ui-sidebar` + `div.nk-toast-container`，而挂载后正文 5352 字符）。判据 = `#app` 出现**非外壳**子节点（`e2e/helpers.ts → waitForViewMounted`，已并入 `waitForSettled`）；**外壳清单新增成员时必须同步该清单**（`SHELL_OWNED`），否则新外壳元素会被当成视图、退化成空真。仍要记住：就绪门不替代用例自己的「等被测对象」——失败是「取到 null / 空集」且重跑偶尔通过时，先查该用例的等待是否落在挂载之前（trace 里 `goto` → 各 wait → `evaluate` 的相对时刻一眼可辨）。
 - **`waitForSettled` 的三件事各自会假真，缺一不可**：字体（`document.fonts.status` 在入口 CSS 未应用时即为 `'loaded'`）、**视图挂载**（骨架不在场在 chunk 未执行时为空真）、骨架退场。三者都设上限且**不抛错**——等待不负责报缺陷，页面缺陷交给用例自己的断言。
-- **「等过渡类不在场」也是空真，而且类消失后几何还会再飘一帧**（2026-10-16 CI 实测，`layout-hub.spec.ts` 桌面档）：客户端路由跳转后，`findHorizontalOverflow` 的 `waitForFunction(![class*="nk-view-"][class*="-active"])` 会在**过渡尚未开始**时立刻通过（旧视图还在场、新视图 chunk 未到，DOM 里没有 -active）。随后 `evaluate` 排队执行，CSS 过渡由合成器驱动照常推进 ⇒ 测量落进动画相位。证据形态很有辨识度：报出的元素**恰为视口宽、位移恰 ±2px**（`div right=1282 left=2`，1280 视口）且诊断里 `htmlScrollWidth=1280 #app=0.0..1280.0`（**文档无溢出**）——即 `nk-view-fwd` 的 `translateX(24px)→0` 走到 ~92%。**判据**：同时满足「命中项 = 视口宽 ± 小位移」「`htmlScrollWidth == clientWidth`」「失败列表全是同一视图树的同向位移」即过渡残留，不是布局缺陷。修法是**两次采样逐项一致才认**（稳定态必然一致；过渡/落位中不一致 ⇒ 重测），**不是 `--retries`**（真缺陷的几何是稳态属性，两帧一致、照样上报，故不掩盖真红）。**别只查类**：实测报出时类已摘、位移还在（合成器尾帧）。`e2e/helpers.ts`
+- **「等过渡类不在场」也是空真，而且类消失后几何还会再飘一帧**（2026-10-16 CI 实测，`layout-hub.spec.ts` 桌面档）：客户端路由跳转后，`findHorizontalOverflow` 的 `waitForFunction(![class*="nk-view-"][class*="-active"])` 会在**过渡尚未开始**时立刻通过（旧视图还在场、新视图 chunk 未到，DOM 里没有 -active）。随后 `evaluate` 排队执行，CSS 过渡由合成器驱动照常推进 ⇒ 测量落进动画相位。证据形态很有辨识度：报出的元素**恰为视口宽、位移恰 ±2px**（`div right=1282 left=2`，1280 视口）且诊断里 `htmlScrollWidth=1280 #app=0.0..1280.0`（**文档无溢出**）——即 `nk-view-fwd` 的 `translateX(24px)→0` 走到 ~92%。**判据**：同时满足「命中项 = 视口宽 ± 小位移」「`htmlScrollWidth == clientWidth`」「失败列表全是同一视图树的同向位移」即过渡残留，不是布局缺陷。修法是**两次采样逐项一致才认**（稳定态必然一致；过渡/落位中不一致 ⇒ 重测），**不是 `--retries`**（真缺陷的几何是稳态属性，两帧一致、照样上报，故不掩盖真红）。**别只查类**：实测报出时类已摘、位移还在（合成器尾帧）。等待过渡类消失的上限取 10s——1s 在慢 runner 上实测不够（超时只告警不失败，正常路径仍是条件一满足就返回）。`e2e/helpers.ts`
 - **跨窗口取证的描述必须带 id**：`findHorizontalOverflow` 原按 `className` 拼元素描述，而 `#app` / `#nk-catalog-app` 这类**带 id 无 class 的页根**会被打成裸 `div`——CI 上那个 2px 报告因此事后无从定性（连续两次踩到，已在描述里补 id）。判据：凡是会被写进**离线日志**（CI 报告）供事后归因的字符串，必须让读者能唯一定位元素。
 - **就绪门选错「同一外壳的另一个形态」＝判的根本不是被测页**（2026-10-16 CI 实测，`layout-nav.spec.ts` CW 手机档）：`route.meta.cw` 在 router 解析完成前为 false ⇒ 侧栏先渲染**常规模式**那套 href（`/` `/character` `/lightcone` `/relic` `/endgame`），而它们同样是 `a.ui-sidebar-link` ——「等第一个锚点可见」这种**弱门会立刻通过**，随后的 `evaluateAll`（无自动等待）就把常规集当 CW 集采样。CI trace 直接坐实：失败那次的实测结果里 href 全是常规集、`every(vis)` 为假。**A/B 实测**（390px + CPU 节流 4×）：弱门采错 **12/12**，强门（`waitForNavMode`，等目标模式锚点在场 + 另一模式退场）**0/12**。判据：**门必须指向被测形态独有的特征**（只在该模式存在的元素 / 属性），而不是「这类元素出现了」。同族反例见上面两条与本文件 `.theme-transitioning` 那条——四者同源：**等一个「不在场」、或等「出现了一个同类」，都是在赌被测对象已就位**。
 - **把这类门收口成共享原语时，第一个坑是 href 的语言前缀**：`waitForNavMode` 首版按 `[href="/character"]` 精确匹配，而带前缀时锚点是 `/pt/character` ⇒ **恒不命中、只能干等超时**，被它掩护的用例从此稳定红（实测 fp/pt 档 4/4 挂）。修法是取 `new URL(href, origin).pathname` 再比后缀，**不要拼语言前缀**（拼了就得跟语言清单联动）。判据：凡按属性值选元素的共享门，**先用一个带前缀的路由验证它真能命中**——「门不命中」与「门等到了」在调用处长得一样，都得靠「耗时」区分（正常 <1s，超时才是 10s）。

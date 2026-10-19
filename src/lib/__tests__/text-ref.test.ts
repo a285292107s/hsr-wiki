@@ -1,9 +1,4 @@
 // @vitest-environment node
-/**
- * text-ref.ts（文本引用令牌解析层）单元测试。
- * 同时钉住与转换器侧 `tools/converter/textpack.py` 的令牌格式一致性——两侧互为镜像，
- * 格式漂移会让产物里的令牌全部解析失败，故在这里做跨侧比对。
- */
 import { describe, it, expect } from 'vitest';
 import {
   TEXT_TOKEN_PREFIX,
@@ -15,7 +10,6 @@ import {
 } from '../i18n/text-ref';
 import { NkError } from '../errors';
 
-// ?raw 导入避免 node fs 依赖（vue-tsc 门禁无 @types/node，见 text-ref 同目录既有约定）
 const textpackPy = (await import('../../../tools/converter/textpack.py?raw')).default;
 
 const PACK = { '111': 'March 7th', '222': 'Ice', '333': 'Skill' } as const;
@@ -96,7 +90,7 @@ describe('hasTextToken', () => {
 
   it('无令牌（未令牌化 / 语言无关数据）返回 false', () => {
     expect(hasTextToken({ a: '三月七', b: [1, 2, null] })).toBe(false);
-    expect(hasTextToken({ $t: '111' })).toBe(false); // 对象形态不是令牌
+    expect(hasTextToken({ $t: '111' })).toBe(false);
     expect(hasTextToken(null)).toBe(false);
     expect(hasTextToken(undefined)).toBe(false);
     expect(hasTextToken(0)).toBe(false);

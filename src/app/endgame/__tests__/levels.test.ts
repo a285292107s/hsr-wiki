@@ -138,7 +138,6 @@ describe('levelTabPeakNodes 合并档 → 节点清单', () => {
       ['king', '普通难度', false, 904],
       ['hard', '绝境难度', true, 904],
     ]);
-    // 绝境节点不复制主关数据：推荐属性与裁决象限增益在数据上挂主关，面板按 hard 取那一场
     expect(nodes[1].level).toBe(nodes[0].level);
   });
 

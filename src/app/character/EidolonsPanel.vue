@@ -8,15 +8,10 @@ import type { CharacterData, SkillExtra } from '../../services/types';
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 const props = defineProps<{
   d: CharacterData;
   charId: string;
-  /** 强化角标（强化模式下被强化星魂 ID 集合；原始模式为 null） */
-  enhMark: { skillIds: Set<number>; rankIds: Set<number> } | null;
-  /** 强化角标文本（版本金章 V1…；仅强化模式非空） */
-  enhLabel?: string;
 }>();
 
 interface EidolonCard {
@@ -24,7 +19,6 @@ interface EidolonCard {
   name: string;
   img: string;
   descHtml: string;
-  enhanced: boolean;
   terms: SkillExtra[];
 }
 const eidolons = computed<EidolonCard[]>(() => {
@@ -32,21 +26,16 @@ const eidolons = computed<EidolonCard[]>(() => {
   return Object.entries(dd.ranks || {}).map(([num, rk]) => ({
     num,
     name: rk.name,
-    // 本体展示图标：Rank{num} 专属文件（nanoka rank 分类 E1-6 全量）；
-    // 与 rk.icon（源数据 IconPath，buff 栏用图标，E3/E5 复用技能图标）不同源
     img: eidolonIconUrl(props.charId, num),
     descHtml: fmtDesc(rk.desc, rk.param_list || []),
-    enhanced: !!(props.enhMark && props.enhMark.rankIds.has(rk.id)),
     terms: extraTerms(rk),
   }));
 });
 
-/** 星魂锚点：星魂编号（ranks 的键）在角色内唯一 */
 function eidolonAnchor(num: string): string {
   return `nk-eidolon-${num}`;
 }
 
-/** 区块内索引项（星魂 1481px 长区块的定位层）：no 用 E 编号，label 用星魂名 */
 const indexItems = computed(() =>
   eidolons.value.map((e) => ({ id: eidolonAnchor(e.num), label: e.name, note: `E${e.num}` })),
 );
@@ -61,9 +50,7 @@ const indexItems = computed(() =>
     :id="eidolonAnchor(e.num)"
     class="nk-eidolon"
   >
-    <span v-if="e.enhanced" class="nk-eidolon__enh-badge">{{ enhLabel }}</span>
     <div class="nk-eidolon__head">
-      <!-- 星魂大图 = 官方 ui/ui3d/rank 3D 渲染源（2048² 正方形） -->
       <img class="nk-eidolon__icon" :src="e.img" :alt="e.name" loading="lazy">
       <div class="nk-eidolon__info">
         <div class="nk-eidolon__meta">

@@ -6,28 +6,16 @@ import type { MazeBossGuide, MazeStageDetail, MazeStageInvasion } from '../../se
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 
-/** 战斗看板的「推荐属性 + 敌方配置」块（敌方一律走敌方详情卡，ADR 0036）：场次身份与推荐属性
- *  通常由上方卡片行承担，故 `damage` / `showCount` 只由**没有卡片行**的调用方传——异相仲裁单关
- *  面板没有卡片行，推荐属性与「N 波 · M 敌」摘要都只能落在面板内。
- *  污染等级不再由面板头承载（用户裁决）：只挂到**被污染的那一只**敌方卡上。
- *  首领机制随敌方卡走：`guides` 是赛季级正文表，按敌方条目上的 `boss_guide` 指针取（末日幻影）。 */
 const props = defineProps<{
   stage: MazeStageDetail;
-  /** 该场次推荐属性（仅无卡片行的调用方传） */
   damage?: string[];
-  /** 显示「N 波 · M 敌」摘要（层级看板的该统计随看板行头退场，ADR 0033 决策 11；异相仲裁保留） */
   showCount?: boolean;
-  /** 污染名单（缺省取 `stage.invasion`；异相仲裁「绝境」变体与主关共用本关名单） */
   invasion?: MazeStageInvasion;
-  /** 赛季级首领机制正文（仅末日幻影有；缺省即所有卡都无该分区） */
   guides?: Record<string, MazeBossGuide>;
 }>();
 
-/** 被污染敌方的实例 ID → 污染等级（与转换器 `_polluted_index` 同源：实例级精确匹配，
- *  未注册进本场次敌方配置的实例（末日幻影的被污染小怪）不在此列，它们只以召唤物形式出现）。 */
 const pollutedById = computed<Map<string, number>>(() => {
   const inv = props.invasion ?? props.stage.invasion;
   const level = inv?.level;

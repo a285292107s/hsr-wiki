@@ -8,21 +8,12 @@ import type {
   CurrencyRoleSkill, CurrencyRoleStar, CurrencyRoleTrait,
 } from '../services/types';
 
-
-/* 充能类型标签：用词依据 TextMap 官方文本——EnergyBar →「特殊充能」（技能描述「获得充能/充能达到N点」）、
-   MaxSP →「终结技能量」（「初始终结技能量/恢复N终结技能量」） */
 const SKILL_GROUP_KEY: Record<string, string> = {
   front_show_skill: 'skillGroup.front',
   back_show_skill: 'skillGroup.back',
   servant_show_skill: 'skillGroup.servant',
 };
 
-/* 属性名称映射：对齐 GridFightRolePropertyConfig.PropertyName（TextMap 官方名称）。
-   无前缀键 = 常规模式属性体系（GridFightRolePropertyConfig 未收录 → 数据无 prop_name，改查词典 `prop.*`）；
-   词典值取自官方词条（见 tools/fill-ui-messages.py 的 PROP_LABEL 回填块）。 */
-/** 属性名解析：优先 converter 落地的 prop_name（TextMap 官方名，官方改称呼自动同步）；
-    缺失时查词典 `prop.*`，再回退去前缀（Extra/AddedRatio 噪声）。
-    参数为结构化类型（非 Record）：调用方传 CurrencyPropMod / CurrencyEquipProp 等 interface 无需索引签名。 */
 export function propLabel(m: { prop_name?: unknown; property_type?: unknown; name?: unknown }): string {
   const official = m.prop_name;
   if (typeof official === 'string' && official) return official;
@@ -31,16 +22,13 @@ export function propLabel(m: { prop_name?: unknown; property_type?: unknown; nam
   return key ? trAuto(`prop.${key}`, cleaned) : cleaned;
 }
 
-/** 属性值格式化：绝对值 < 1 视为比率转百分比 */
 export function propValue(v: number): string {
   return Math.abs(v) < 1 ? `${(v * 100).toFixed(0)}%` : String(v);
 }
 
-/** 跨星级合并技能：同名技能在各星级的参数集合并，描述以斜杠分隔多星级值 */
 export interface MergedSkill {
   key: string;
   name: string;
-  /** 技能图标源路径（透传首星级；gridFightSkillIconSrc 解析双源） */
   icon: string;
   type: string | null;
   tag: string | null;
@@ -51,11 +39,8 @@ export interface MergedSkill {
   bp_need: number | null;
   bp_add: number | null;
   show_stance_list: number[] | null;
-  /** 削韧属性（官方展示值配套，ELEM 映射中文） */
   stance_damage_type: string | null;
-  /** 削韧显示值（官方 UI 展示值；show_stance_list 为引擎参数，两者无对应关系） */
   stance_damage_display: number | null;
-  /** 该技能存在的星级（与 paramSets 一一对应，升序；技能可能仅在部分星级出现） */
   stars: number[];
   paramSets: number[][];
   extraSets: Array<{ name: string; desc: string; paramSets: number[][] }>;
@@ -273,7 +258,6 @@ export function buildGrowthMatrix(
     powerRows.push({ key: '__back_power', label: tr('cwRole.backPowerBase'), values: powOf('back_power_base'), icon: propIcons?.['ExtraBackPowerBase'] });
   }
   const out: MatrixGroup[] = [];
-  /* 分组字段输出**译文**（内部按枚举归并）：`propGroup.*` 是界面分类名，与属性名同源走词典 */
   const groupLabel = (g: string): string => trAuto(`propGroup.${g}`, g);
   if (powerRows.length) {
     out.push({ group: groupLabel('power'), rows: [...powerRows, ...(groupMap.get('power') || [])] });
@@ -309,8 +293,6 @@ export function resolveRecommend(
   return null;
 }
 
-/** 推荐优先级：**稳定枚举**（不是文案）——视图按它选样式，文案由视图取词典。
- *  旧实现返回中文文案并让视图拿它做 `=== '首选'` 比较，多语言后该分支恒假（首/次选样式失效）。 */
 export type RecommendPriority = 'first' | 'second';
 
 export function buildRecommendRows(
@@ -335,7 +317,6 @@ export function buildRecommendRows(
   return rows;
 }
 
-/** 推荐优先级 → 展示文案的词典键。 */
 export function recommendPriorityKey(p: RecommendPriority): string {
   return p === 'first' ? 'cwRole.priorityFirst' : 'cwRole.prioritySecond';
 }

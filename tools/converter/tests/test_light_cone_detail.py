@@ -1,11 +1,3 @@
-"""light_cone_detail 转换器纯函数契约测试。
-
-用合成数据验证（不依赖真实源数据）：
-- _build_recommend_index：AvatarEquipRecommend(+LD) → 光锥 ID → 适配角色
-  （rank 取角色推荐列表顺位、同 AvatarID 后写覆盖、按 (rank, id) 排序、无 ID 记录跳过）
-
-"""
-
 import sys
 from pathlib import Path
 
@@ -40,7 +32,6 @@ class TestBuildRecommendIndex:
         assert index[24002] == [{"id": 1001, "rank": 2}]
 
     def test_later_record_overrides_same_avatar(self):
-        """LD 表后写：同一 AvatarID 重复登记时整表覆盖，不是并集。"""
         index = lcd._build_recommend_index([
             {"AvatarID": 1014, "EquipmentList": [21001]},
             {"AvatarID": 1014, "EquipmentList": [23045, 24000]},

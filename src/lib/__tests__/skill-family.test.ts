@@ -1,16 +1,9 @@
 // @vitest-environment node
-/**
- * 技能族推导（skill-family.ts）契约测试（ADR 0022）。
- * 必须读真实数据 public/data/cn/characters/*.json：全量不变量是「换分组不丢技能」的端到端哨兵，禁止改用纯手写夹具。
- * 镜流 1212 是反例锚点：AvatarConfig.SkillList 顺序把形态 121209 排在基座 121202 之前，期望值一律以 skill_trees 为准。
- * 禁止改用 node:fs：项目未装 @types/node，node:* 具名导入过不了 vue-tsc 门禁；glob 同样读磁盘真实文件。
- */
 import { describe, it, expect } from 'vitest';
 import { groupSkillsByFamily } from '../skill-family';
 import { SKILL_ORDER } from '../constants';
 import type { CharacterData, Skill, SkillTree } from '../../services/types';
 
-/** 全部真实角色 JSON（glob 键即文件路径，此处归一为 charId → 数据） */
 const CHARS: Record<string, CharacterData> = Object.fromEntries(
   Object.entries(
     import.meta.glob<string>('../../../public/data/cn/characters/*.json', {
@@ -30,7 +23,6 @@ function load(id: number): CharacterData {
   return d;
 }
 
-/** 可见技能（与实现同判据，供全量不变量比对） */
 function visibleIds(d: CharacterData): number[] {
   return Object.values(d.skills)
     .filter((s) => !!s.type_name && SKILL_ORDER.includes(s.type))
@@ -54,7 +46,6 @@ describe('技能族（真实数据：族序 / 交集过滤）', () => {
     const { fams, fam } = familyOf(1503, 150301);
     expect(fam?.anchor).toBe('Point01');
     expect(fam?.children.map((c) => c.id)).toEqual([150308, 150310]);
-    // 欢愉技（SKILL_ORDER 下标 4）必须排在秘技（下标 6）之前，null 分隔位不产卡
     expect(fams.map((f) => f.main.id)).toEqual([150301, 150302, 150303, 150304, 150320, 150307]);
   });
 
@@ -68,7 +59,6 @@ describe('技能族（真实数据：族序 / 交集过滤）', () => {
     const { fams, fam } = familyOf(1212, 121202);
     expect(fam?.anchor).toBe('Point02');
     expect(fam?.children.map((c) => c.id)).toEqual([121209]);
-    // 形态不得同时充当平级卡的基座
     expect(fams.some((f) => f.main.id === 121209)).toBe(false);
   });
 
@@ -128,7 +118,6 @@ describe('全量不变量（遍历全部角色 JSON）', () => {
       }
     }
 
-    // 防护：全量不变量若退化成「全部单卡」会假绿，必须真实存在成族项
     expect(withChildren).toBeGreaterThanOrEqual(30);
   });
 });
@@ -193,7 +182,6 @@ describe('技能族（合成输入：先到先得 / 原序 / 覆盖）', () => {
     const only = groupSkillsByFamily({ '1': sk(1, 'BPSkill') }, trees({ Point02: [1] }));
     expect(only).toEqual([{ anchor: '', main: sk(1, 'BPSkill'), children: [] }]);
 
-    // 锚点内含非可见技能（type_name 空）→ 可见交集仍为 1 条
     const mixed = groupSkillsByFamily(
       { '1': sk(1, 'Ultra'), '2': sk(2, 'Normal', '') },
       trees({ Point01: [1, 2] }),
@@ -210,7 +198,6 @@ describe('技能族（合成输入：先到先得 / 原序 / 覆盖）', () => {
       },
       trees({ Point01: [99] }),
     );
-    // type=null 命中 SKILL_ORDER 分隔位（下标 5），故排在 Ultra（下标 2）之后
     expect(shape(fams)).toEqual([
       ['', 1, []],
       ['', 2, []],

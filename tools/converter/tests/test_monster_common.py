@@ -1,9 +1,3 @@
-"""monster_common 共享聚合函数契约测试（endgame 赛季敌方 / monster_detail 详情页共用）。
-
-用合成数据验证：模板表（名称/头像/全身立绘/Rank/阵营/韧性/属性）+ 配置表
-（弱点/抗性/介绍/技能列表）多表合并；技能全量字段解析；缺名跳过；实例别名回退。
-"""
-
 import json
 import re
 import sys
@@ -17,16 +11,12 @@ from converters import monster_common as mc  # noqa: E402
 
 
 def _ids_in(line: str) -> list[int]:
-    """告警行 ID 名单里的模板编号（升序）。只取 `（ID：…）` 之后那一段——按子串匹配会让
-    「ID 1 不在名单里」假通过（`"1" in "ID：10,15"` 为真），而整行取又会把「不是 1..n 连续」
-    里的那个 1 当编号。"""
     tail = line.split("（ID：")[-1]
     return sorted(int(tok) for tok in re.findall(r"\d+", tail))
 
 
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
-    """mock TextMap，避免加载真实大文件。"""
     monkeypatch.setattr(mc, "resolve_text", lambda ref, clean=False: "" if not ref else f"名{ref.get('Hash', 0)}")
 
 def _fake_load(path):
@@ -83,8 +73,6 @@ def _fake_load(path):
 
 class TestLoadMonsters:
     def test_full_fields(self, monkeypatch):
-        """模板表 + 配置表 + 技能表全字段合并；弱点去重保序。
-        战斗数值合成链字段（ADR 0040）：本模板自带 config 记录但无修饰比字段 → 中性 1 / 组 1。"""
         monkeypatch.setattr(mc, "load_json", _fake_load)
         out = mc.load_monsters()
         assert out[8013010] == {
@@ -106,20 +94,16 @@ class TestLoadMonsters:
             "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 1,
             "elite_group": 1,
-            # 效果抵抗：只留图标表里登记的状态类别（无图标 / 未登记的 key 跳过）
             "debuff_resist": [{"key": "STAT_CTRL_Frozen", "value": 0.75, "icon": "IconImmuneFrozen"}],
         }
 
     def test_missing_config_and_icon(self, monkeypatch):
-        """无配置记录 → 弱点/抗性/介绍空；无全身立绘 → figure 空；
-        基准字段缺失 → **该键不落**（不再写 0，见 `_base_stat`）。"""
         monkeypatch.setattr(mc, "load_json", _fake_load)
         out = mc.load_monsters()
         assert out[3024012] == {
             "name": "名2", "icon": "Monster_3024010", "figure": "",
             "weak": [], "resist": {}, "rank": "MinionLv2",
             "camp": "", "intro": "", "skills": [],
-            # 该条四个基准字段全缺 → `stats` 内四维全不落键（键仍在，值空）
             "stats": {},
             "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
             "level_group": 1,
@@ -129,25 +113,15 @@ class TestLoadMonsters:
         assert "stance" not in out[3024012], "缺 StanceBase ⇒ 不落键（0 是伪造值）"
 
     def test_missing_base_fields_omit_key_and_warn(self, monkeypatch, caplog):
-        """缺字段 / 非数值 ⇒ **不落键**且**出 warning**（仓规：缺位要 write 日志，不能悄悄按 1 / 0 过）。
-
-        告警按**字段汇总**成一行并列出模板 ID（可定位），不逐条刷屏：源表实测只有
-        StanceBase(33) / SpeedBase(13) 会缺，逐条会刷 46+ 行。真值 0 必须原样保留——
-        基准值没有中性值可言，0 只是「官方就是 0」，不得当成缺位抹掉。
-        """
         tpls = [
-            # 缺 StanceBase + SpeedBase，其余有值
             {"MonsterTemplateID": 1001, "MonsterName": {"Hash": 1},
              "HPBase": {"Value": 100}, "AttackBase": {"Value": 10}, "DefenceBase": {"Value": 20}},
-            # 非数值 / None 包装 / 空包装 → 与缺字段同待遇
             {"MonsterTemplateID": 1002, "MonsterName": {"Hash": 2},
              "StanceBase": "not-a-number", "SpeedBase": {"Value": None},
              "HPBase": {"Value": 100}, "AttackBase": {}, "DefenceBase": {"Value": 20}},
-            # 真值 0：原样保留，绝不与缺位同形
             {"MonsterTemplateID": 1003, "MonsterName": {"Hash": 3},
              "StanceBase": {"Value": 0}, "HPBase": {"Value": 0}, "AttackBase": {"Value": 0},
              "DefenceBase": {"Value": 0}, "SpeedBase": {"Value": 0}},
-            # 双层 ValueWrap 也要解开
             {"MonsterTemplateID": 1004, "MonsterName": {"Hash": 4},
              "StanceBase": {"Value": {"Value": 240}}, "HPBase": {"Value": {"Value": 1}},
              "AttackBase": {"Value": 2}, "DefenceBase": {"Value": 3}, "SpeedBase": {"Value": 4}},
@@ -158,22 +132,18 @@ class TestLoadMonsters:
         with caplog.at_level("WARNING", logger="converter"):
             out = mc.load_monsters()
 
-        # 缺位 ⇒ 不落键（顶层 stance 与 stats 四维各自独立判断）
         assert "stance" not in out[1001] and "speed" not in out[1001]["stats"]
         assert out[1001]["stats"] == {"hp": 100, "atk": 10, "def": 20}, "有值的维度一个不少"
         assert "stance" not in out[1002] and "speed" not in out[1002]["stats"]
         assert "atk" not in out[1002]["stats"], "空包装 {} 与非数值同待遇"
         assert out[1002]["stats"] == {"hp": 100, "def": 20}
 
-        # 真值 0 原样保留（不是缺位）
         assert out[1003]["stance"] == 0
         assert out[1003]["stats"] == {"hp": 0, "atk": 0, "def": 0, "speed": 0}
 
-        # 双层包装解开后取内层数值
         assert out[1004]["stance"] == 240 and out[1004]["stats"]["hp"] == 1
         assert out[1004]["stats"] == {"hp": 1, "atk": 2, "def": 3, "speed": 4}
 
-        # 告警：按字段汇总成一行，带模板 ID 可定位；不逐条刷屏
         warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         stance_logs = [w for w in warnings if "StanceBase" in w]
         assert len(stance_logs) == 1, f"StanceBase 缺位应汇成 1 行（实际 {stance_logs}）"
@@ -181,16 +151,12 @@ class TestLoadMonsters:
         assert "1003" not in stance_logs[0] and "1004" not in stance_logs[0], "有值（含 0）的模板不进缺位名单"
         speed_logs = [w for w in warnings if "SpeedBase" in w]
         assert len(speed_logs) == 1 and "1001" in speed_logs[0] and "1002" in speed_logs[0]
-        # 1002 的 AttackBase 是空包装 {} ⇒ 同样按缺位处理并单独汇总一行
         atk_logs = [w for w in warnings if "AttackBase" in w]
         assert len(atk_logs) == 1 and "1002" in atk_logs[0] and "1001" not in atk_logs[0]
-        # 每个缺位字段恰好一行（hp/def 全有值 ⇒ 不出行）
         assert len(warnings) == 3, f"应为 SpeedBase / StanceBase / AttackBase 各一行（实际 {warnings}）"
         assert not any("HPBase" in w or "DefenceBase" in w for w in warnings), "有值字段不得告警"
 
     def test_instance_alias_and_skip(self, monkeypatch):
-        """实例别名：MonsterID（9001）≠ 模板 ID → 指向同模板信息（波次引用命中）；
-        无名称模板不入表。"""
         monkeypatch.setattr(mc, "load_json", _fake_load)
         out = mc.load_monsters()
         assert out[9002]["weak"] == ["Quantum"]
@@ -200,8 +166,6 @@ class TestLoadMonsters:
         assert 9999999 not in out
 
     def test_alias_carries_own_variant_ratios(self, monkeypatch):
-        """别名变体的修饰比/难度组/精英组用**它自己**的 config 记录，不沿用模板（ADR 0040 决策 3 /
-        ADR 0049）：同模板不同档位正是靠这几项区分；效果抵抗同理逐实例取（双层 ValueWrap 一并解开）。"""
         extra_cfg = {
             **_fake_load(Path("MonsterConfig.json"))[0],
             "MonsterID": 801301099, "MonsterTemplateID": 8013010,
@@ -217,7 +181,7 @@ class TestLoadMonsters:
         out = mc.load_monsters()
         variant = out[801301099]
         assert variant["_tpl"] == 8013010
-        assert variant["name"] == "名1"          # 名称/立绘等仍是模板家族信息
+        assert variant["name"] == "名1"
         assert variant["stat_ratio"] == {"hp": 0.266667, "atk": 1.5, "def": 0.5, "speed": 1.0}
         assert variant["level_group"] == 3
         assert variant["elite_group"] == 2, "精英组不继承模板的组 1（1002050 vs 100205006 的判据）"
@@ -226,12 +190,8 @@ class TestLoadMonsters:
         ]
 
     def test_scene_modify_transparency(self, monkeypatch):
-        """场景修正值（`{Stance,Speed}ModifyValue`）只作**透明度**透出：原值落盘（含负值）、
-        非空才落键、**实例以自己的记录为准且不继承模板的**（否则会给该实例凭空多出一个标注）；
-        绝不并入 stance / stats.speed（ADR 0040：场景系数不合成，加法位置无据可验）。"""
         tpl_cfg = {**_fake_load(Path("MonsterConfig.json"))[0],
                    "StanceModifyValue": {"Value": 30}, "SpeedModifyValue": None}
-        # 实例 1：自己两条都有（双层包装）；实例 2：template 有 +30 但自己无值 → 不得继承
         inst_a = {"MonsterID": 801301099, "MonsterTemplateID": 8013010,
                   "StanceWeakList": [], "DamageTypeResistance": [],
                   "StanceModifyValue": {"Value": {"Value": -60}},
@@ -251,8 +211,6 @@ class TestLoadMonsters:
         assert "speed_modify" not in out[801301098]
 
     def test_stat_ratio_double_wrap_and_garbage(self, monkeypatch):
-        """双层 ValueWrap（{Value:{Value:n}}）逐层解；非数值按中性 1。
-        数值（含负值）原样透传——语义同样是修正的透明度，不静默改写官方数值。"""
         cfg = {"HPModifyRatio": {"Value": {"Value": 5}},
                "AttackModifyRatio": {"Value": None},
                "DefenceModifyRatio": {"Value": -2},
@@ -264,7 +222,6 @@ class TestLoadMonsters:
 
 class TestLoadLevelCurve:
     def test_curve_groups_and_str_keys(self, monkeypatch):
-        """难度组 → 等级 → 四维曲线；键全部字符串化（JSON 无整型键）。"""
         monkeypatch.setattr(mc, "load_json", lambda p: [
             {"HardLevelGroup": 1, "Level": 1, "HPRatio": {"Value": 0.8},
              "AttackRatio": {"Value": 0.64}, "DefenceRatio": {"Value": 1},
@@ -277,9 +234,7 @@ class TestLoadLevelCurve:
         curve = mc.load_level_curve()
         assert curve["1"]["1"] == {"hp": 0.8, "atk": 0.64, "def": 1.0, "speed": 1.0}
         assert curve["1"]["80"]["hp"] == 148.01102
-        # 缺位曲线值按中性 1 组合：比率维度四项都有键
         assert curve["2"]["40"] == {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0}
-        # 垃圾行（缺组/缺等级）不入表
         monkeypatch.setattr(mc, "load_json", lambda p: [
             {"HardLevelGroup": None, "Level": 1, "HPRatio": {"Value": 1}},
             {"HardLevelGroup": 1, "Level": None},
@@ -287,7 +242,6 @@ class TestLoadLevelCurve:
         assert mc.load_level_curve() == {}
 
     def test_curve_duplicate_key_keeps_first(self, monkeypatch, caplog):
-        """同一 (组, 等级) 重复出现 → 保留首条并告警，不静默覆盖。"""
         monkeypatch.setattr(mc, "load_json", lambda p: [
             {"HardLevelGroup": 1, "Level": 1, "HPRatio": {"Value": 0.8}},
             {"HardLevelGroup": 1, "Level": 1, "HPRatio": {"Value": 99}},
@@ -298,7 +252,6 @@ class TestLoadLevelCurve:
 
 class TestLoadEliteGroups:
     def test_groups_str_keys_and_neutral_fallback(self, monkeypatch):
-        """精英组 → 五维倍率；键字符串化；缺位/垃圾值按中性 1（ADR 0049）。"""
         monkeypatch.setattr(mc, "load_json", lambda p: [
             {"EliteGroup": 1, "HPRatio": {"Value": 1}, "AttackRatio": {"Value": 0.7},
              "DefenceRatio": {"Value": {"Value": 1}}},
@@ -310,7 +263,6 @@ class TestLoadEliteGroups:
         assert out["1"]["stance"] == 1.0, "未登记的维度也落键（中性 1），前端无需判键是否存在"
 
     def test_elite_group_duplicate_and_garbage(self, monkeypatch):
-        """重复组号保留首条并告警；缺组号的垃圾行不入表。"""
         monkeypatch.setattr(mc, "load_json", lambda p: [
             {"EliteGroup": 5, "HPRatio": {"Value": 1.25}},
             {"EliteGroup": 5, "HPRatio": {"Value": 99}},
@@ -322,9 +274,6 @@ class TestLoadEliteGroups:
 
 
 class TestStageContext:
-    """关卡语境三件套（ADR 0050）：Level/HardLevelGroup/EliteGroup 原值透传、缺位不落键、
-    嵌套 `{Value:…}` 逐层解开——endgame 的敌方卡 HP 与出没样本共用本解析。"""
-
     def test_carries_three_and_unwraps(self):
         assert mc.stage_context(
             {"Level": 68, "HardLevelGroup": 3, "EliteGroup": {"Value": {"Value": 273}}}
@@ -338,15 +287,10 @@ class TestStageContext:
 
 
 class TestMonsterHpAt:
-    """终局敌方卡的关卡内 HP（ADR 0055）：与前端 `monsterStatAt('hp', …)` 同一算式。"""
-
     CURVE = {"3": {"95": {"hp": 294.42172, "atk": 1, "def": 1, "speed": 1}}}
     ELITE = {"1": {"hp": 1.0}, "2": {"hp": 1.7}, "164": {"hp": 6.5}}
 
     def test_pi_of_own_and_stage_elite_groups(self):
-        """Π精英组别系数 = 怪物自身组 × 关卡指派组（ADR 0050）；难度组取关卡行。
-        期望值是**字面量**（与 `src/lib/__tests__/monster-stats.test.ts` 的同数字用例同值），
-        Python 与前端各算一遍都能命中同一个数，两端漂移即红。"""
         info = {"stats": {"hp": 102.3}, "stat_ratio": {"hp": 1}, "elite_group": 2}
         got = mc.monster_hp_at(info, 95, {"level_group": 3, "elite_group": 164}, self.CURVE, self.ELITE)
         assert got == 332818.7
@@ -356,13 +300,11 @@ class TestMonsterHpAt:
         assert mc.monster_hp_at(info, 95, {"level_group": 3}, self.CURVE, self.ELITE) == 51202.9
 
     def test_half_rounds_up_like_js(self):
-        """取一位小数对齐 JS `Math.round`（半值向 +∞）：0.25 → 0.3，不是 Python 内建的 0.2。"""
         curve = {"1": {"10": {"hp": 0.5}}}
         info = {"stats": {"hp": 0.5}, "stat_ratio": {"hp": 1}, "elite_group": 1}
         assert mc.monster_hp_at(info, 10, {"level_group": 1}, curve, self.ELITE) == 0.3
 
     def test_missing_piece_returns_none(self):
-        """宁缺不假：基准 / 等级 / 曲线行 / 曲线维度任一缺位即 None（调用方不落 hp 键）。"""
         ok = {"stats": {"hp": 100}, "stat_ratio": {"hp": 1}, "elite_group": 1}
         stage = {"level_group": 3}
         assert mc.monster_hp_at({"stats": {"atk": 1}}, 95, stage, self.CURVE, self.ELITE) is None
@@ -374,14 +316,11 @@ class TestMonsterHpAt:
         assert mc.monster_hp_at(ok, 95, stage, no_hp, self.ELITE) is None
 
     def test_non_positive_ratio_is_neutral(self):
-        """比率缺位 / 非正按中性 1（绝不按 0，ADR 0049）——0 会把一条 HP 显示成 0。"""
         info = {"stats": {"hp": 102.3}, "stat_ratio": {"hp": 0}, "elite_group": 1}
         assert mc.monster_hp_at(info, 95, {"level_group": 3}, self.CURVE, self.ELITE) == 30119.3
 
 
 class TestMonsterHpPhases:
-    """逐战斗阶段生命（ADR 0058）：同一未取整基准 × 各阶段倍率，逐项取一位小数。"""
-
     CURVE = {"3": {"95": {"hp": 294.42172}}}
     ELITE = {"1": {"hp": 1.0}, "2": {"hp": 1.7}, "164": {"hp": 6.5}}
 
@@ -390,25 +329,21 @@ class TestMonsterHpPhases:
     def test_each_phase_is_ratio_times_the_same_base(self):
         stage = {"level_group": 3, "elite_group": 164}
         got = mc.monster_hp_phases(self.INFO, 95, stage, self.CURVE, self.ELITE, [1.0, 1.25, 1.0])
-        # 基准（未取整） = 102.3 × 1 × 1.7 × 6.5 × 294.42172 = 332818.68…
         assert got == [332818.7, 416023.4, 332818.7], "阶段 1 的值必须等于单值 hp（同基准 × 1）"
         assert mc.monster_hp_phases(self.INFO, 95, stage, self.CURVE, self.ELITE, [1.0, 1.25, 1.0])[0] == \
             mc.monster_hp_at(self.INFO, 95, stage, self.CURVE, self.ELITE)
 
     def test_rounding_happens_once_at_the_outermost_layer(self):
-        """先取整再乘比例会差 0.1：0.25 × 1.5 = 0.375（→0.4），而 round1(0.25)=0.3 → 0.45（→0.5）。"""
         curve = {"1": {"10": {"hp": 0.5}}}
         info = {"stats": {"hp": 0.5}, "stat_ratio": {"hp": 1}, "elite_group": 1}
         assert mc.monster_hp_phases(info, 10, {"level_group": 1}, curve, self.ELITE, [1.0, 1.5]) == [0.3, 0.4]
 
     def test_single_phase_and_missing_ratios_return_none(self):
-        """单阶段（含空表）不落 `phase_hp`——单阶段敌方不该挂一个与 `hp` 同值的单元素数组。"""
         stage = {"level_group": 3, "elite_group": 164}
         for ratios in (None, [], [1.0]):
             assert mc.monster_hp_phases(self.INFO, 95, stage, self.CURVE, self.ELITE, ratios) is None
 
     def test_missing_chain_piece_returns_none(self):
-        """宁缺不假：合成链缺段或无有效比例 → None（调用方不落键）。"""
         stage = {"level_group": 3, "elite_group": 164}
         assert mc.monster_hp_phases({"stats": {"atk": 1}}, 95, stage, self.CURVE, self.ELITE, [1, 2]) is None
         assert mc.monster_hp_phases(self.INFO, 0, stage, self.CURVE, self.ELITE, [1, 2]) is None
@@ -418,20 +353,13 @@ class TestMonsterHpPhases:
 
 
 class TestPhaseHpRatios:
-    """`load_phase_hp_ratios`：读**客户端实体配置**（`Config/ConfigCharacter`）的 `PhaseList`（ADR 0058）。
-
-    该字段在 `ExcelOutput` 零命中，是本仓第一处消费该层的产物字段，故解析规则与三条取舍都钉在这里。
-    """
-
     @pytest.fixture(autouse=True)
     def _clear_cache(self, monkeypatch, tmp_path):
-        """逐用例清进程内缓存：表按模板 ID 缓存，跨用例会串。"""
         monkeypatch.setattr(mc, "_PHASE_HP_RATIOS", None)
         self.tmp = tmp_path
 
     def _setup(self, monkeypatch, cfgs: dict[str, dict], templates: list[dict],
                skills: list[dict] | None = None, monster_cfg: list[dict] | None = None):
-        """cfgs = {相对 JsonConfig 路径: 实体配置正文}；文件写到 tmp_path 下（`SOURCE_DIR` 被打桩）。"""
         monkeypatch.setattr(mc, "SOURCE_DIR", self.tmp)
         for rel, body in cfgs.items():
             p = self.tmp / rel
@@ -451,7 +379,6 @@ class TestPhaseHpRatios:
         monkeypatch.setattr(mc, "load_json", fake)
 
     def test_static_fixed_value_and_undeclared_is_neutral(self, monkeypatch):
-        """静态字面量直取；**未声明 = 1**（判据：模板 2004021/2004022 里阶段 1 未声明、阶段 2 显式 1）。"""
         self._setup(monkeypatch, {
             "a_Config.json": {"PhaseList": [
                 {"PhaseNum": 1},
@@ -461,7 +388,6 @@ class TestPhaseHpRatios:
         assert mc.load_phase_hp_ratios() == {1: [1.0, 1.25]}
 
     def test_phase_order_follows_phase_num_not_array_order(self, monkeypatch):
-        """阶段序按 `PhaseNum` 排（上游保序但不做前提），且必须恰为 1..n 连续。"""
         self._setup(monkeypatch, {
             "a_Config.json": {"PhaseList": [
                 {"PhaseNum": 3, "PhaseMaxHPRatio": {"IsDynamic": False, "FixedValue": {"Value": 3}}},
@@ -472,8 +398,6 @@ class TestPhaseHpRatios:
         assert mc.load_phase_hp_ratios() == {1: [1.0, 2.0, 3.0]}
 
     def test_dynamic_hash_resolves_through_skill_param(self, monkeypatch):
-        """动态表达式：`PostfixExpr.DynamicHashes → DynamicValues.Floats[h].ReadInfo`
-        （`Type: SkillParam`）→ 同模板 `SkillTriggerKey` 匹配技能的 `ParamList[idx].Value`。"""
         self._setup(monkeypatch, {
             "a_Config.json": {
                 "PhaseList": [
@@ -491,7 +415,6 @@ class TestPhaseHpRatios:
         assert mc.load_phase_hp_ratios() == {1: [1.0, 4.0]}
 
     def test_dynamic_without_matching_skill_skips_the_template(self, monkeypatch, caplog):
-        """`SkillList` 里没有 `SkillTriggerKey` 匹配的技能 ⇒ 解析不出、整条不落。"""
         self._setup(monkeypatch, {
             "a_Config.json": {
                 "PhaseList": [{"PhaseNum": 1}, {"PhaseNum": 2, "PhaseMaxHPRatio": {
@@ -505,30 +428,24 @@ class TestPhaseHpRatios:
         assert mc.load_phase_hp_ratios() == {}
 
     def test_non_skillparam_and_unresolvable_skip_the_whole_template(self, monkeypatch, caplog):
-        """解析不出即**整条不落**并 warning 留痕——宁可退回单值 `hp`，不填半真数据。"""
         self._setup(monkeypatch, {
-            # 指向 ClientOnly（客户端专有，无实参）⇒ 该模板整条丢
             "a_Config.json": {
                 "PhaseList": [{"PhaseNum": 1}, {"PhaseNum": 2, "PhaseMaxHPRatio": {
                     "IsDynamic": True, "PostfixExpr": {"DynamicHashes": [1]}}}],
                 "DynamicValues": {"Floats": {"1": {"ReadInfo": {"Type": "ClientOnly", "Index": 0}}}},
             },
-            # 动态哈希在 DynamicValues 里找不到 ⇒ 同样整条丢
             "b_Config.json": {"PhaseList": [
                 {"PhaseNum": 1},
                 {"PhaseNum": 2, "PhaseMaxHPRatio": {"IsDynamic": True, "PostfixExpr": {"DynamicHashes": [7]}}},
             ]},
-            # 比例非正 ⇒ 整条丢（0 会把一个阶段的血量显示成 0）
             "c_Config.json": {"PhaseList": [
                 {"PhaseNum": 1},
                 {"PhaseNum": 2, "PhaseMaxHPRatio": {"IsDynamic": False, "FixedValue": {"Value": 0}}},
             ]},
-            # PhaseNum 不是 1..n 连续（有洞）⇒ 整条丢（前端按下标 +1 出阶段号，会错位）
             "d_Config.json": {"PhaseList": [
                 {"PhaseNum": 1},
                 {"PhaseNum": 3, "PhaseMaxHPRatio": {"IsDynamic": False, "FixedValue": {"Value": 2}}},
             ]},
-            # 单阶段 ⇒ 不进表（不落键，不是「解析失败」）
             "e_Config.json": {"PhaseList": [{"PhaseNum": 1}]},
         }, [
             {"MonsterTemplateID": t, "JsonConfig": f"{c}_Config.json"}
@@ -543,7 +460,6 @@ class TestPhaseHpRatios:
         assert _ids_in(unordered[0]) == [4]
 
     def test_missing_entity_config_warns_and_is_skipped(self, monkeypatch, caplog):
-        """`JsonConfig` 指针指向不存在的实体配置：跳过 + 汇总 warning（实测 5 个模板如此）。"""
         self._setup(monkeypatch, {
             "a_Config.json": {"PhaseList": [{"PhaseNum": 1}, {"PhaseNum": 2}]},
         }, [
@@ -556,7 +472,6 @@ class TestPhaseHpRatios:
         assert len(missing) == 1 and "2" in missing[0] and "3" not in missing[0], "无指针不算「指向不存在」"
 
     def test_result_is_cached_across_calls(self, monkeypatch):
-        """12 MB 客户端配置只扫一遍：第二次调用不再读表。"""
         calls: list[str] = []
 
         def fake(path):

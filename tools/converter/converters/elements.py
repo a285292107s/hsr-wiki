@@ -1,5 +1,3 @@
-"""属性数据转换器。"""
-
 import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR, ELEMENT_NAME_FALLBACK
@@ -10,7 +8,6 @@ logger = logging.getLogger("converter")
 
 
 def convert() -> None:
-    """转换 DamageType.json → elements.json。"""
     data = load_json(EXCEL_DIR / "DamageType.json")
     result = []
 

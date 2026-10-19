@@ -1,6 +1,3 @@
-/* 终局详情页 · 断点与动效覆盖 + 父子层级刻度（ADR 0028）。
-   拆分块第 5 块：本块的 max-width / prefers-reduced-motion / hover:none 覆盖必须位于
-   前四块（基础声明）之后、污染块与排版收口块之前，顺序不得调整。 */
 @media (max-width: 767px) {
   .nk-egd-hero {
     flex-direction: column;
@@ -16,13 +13,8 @@
   }
   .nk-egd-hero__art { width: 68px; height: 68px; }
   .nk-egd-hero__bg { display: none; }
-  /* 手机档字号**全部**归 `endgame-type-scale.css` 末段（本块之后导入、同特异性覆写）——
-     本块只声明非字号属性（内距 / 布局）；此处重述字号即死声明，且会让人误以为改这里能生效
-     （ADR 0034 决策 2）。 */
   .nk-egd-hero__sid { padding: 2px 8px; }
   .nk-egd-hero__status { padding: 5px 11px; }
-  /* 手机档立绘列收窄：单列敌方卡（卡宽 ~300px）下 104px 立绘 + 数据列会挤到数据列只剩 150px。
-     改的立绘列宽令牌（立绘图与图下污染徽标都取它，见 `endgame-monsters.css`）——不要再单独声明图片宽度。 */
   .nk-egd-mon__art { --nk-egd-mon-fig: 84px; }
   .nk-egd-mon { gap: 14px; }
   .nk-egd-node__type { padding: 5px 10px; gap: 5px; }
@@ -30,8 +22,6 @@
   .nk-egd-board__body { gap: 12px; }
   .nk-egd-floor__head { flex-wrap: wrap; }
   .nk-egd-floor__data { margin-left: auto; }
-  /* 敌方配置行在手机档不再需要换行开关：标题 / 卡组的上下结构已是基础形态（见 `.nk-egd-floor__row--mons`） */
-  /* 相邻赛季手机断点仍是一行两栏（上一赛季｜下一赛季对称镜像），缩略图收窄腾出文字宽度 */
   .nk-egd-nav { gap: 8px; }
   .nk-egd-nav__item { padding: 10px; gap: 8px; }
   .nk-egd-nav__thumb { width: 56px; }
@@ -40,14 +30,6 @@
   .nk-egd-tabs .nk-tab--active::after { left: 9px; right: 9px; }
   .nk-egd-tabs .nk-tab:first-child::after { left: 0; }
   .nk-egd-lvl { gap: 18px; }
-  /* 星级奖励档：手机档从「徽章｜条件｜括号」三列网格改为**一档一卡**的纵向堆叠。
-     桌面靠「条件在左 → 引导虚线 → 奖励在右」的横轴把一档的三段读成一组；窄屏放不下这条横轴，
-     若只把它们竖着排（无容器），条件与奖励会糊成一团、分不清哪份奖励属于哪一档——尤其忘却之庭
-     一档吃 3 个目标、紧接着一排奖励 chips，边界完全靠留白，读起来累。
-     故给每档一张卡（与本页增益卡 / 敌方卡同一套表面语言：`blk-900` 半透明底 + 发丝边 + 卡圆角），
-     卡内：徽章作行首、条件成列、奖励前一条发丝线分节——把桌面「虚线引导」的分组语义在窄屏换成
-     「卡片 + 分节线」的等价物。括号（多目标同属一档的横向标注）退场：窄屏每目标前的 ★ 与卡边界
-     已各自表达「同属一档」，横括号在这里既放不下也重复点题。 */
   .nk-egd-tiers { gap: 12px; }
   .nk-egd-tier {
     grid-template-columns: minmax(0, 1fr);
@@ -66,27 +48,14 @@
     padding-top: 10px;
     border-top: 1px solid var(--line-1);
   }
-  /* 卡内条件行：桌面 14px 行首缩进在窄卡里偏宽，收到 10px，让目标文案多吃一点宽度。 */
   .nk-egd-tier__cond .nk-egd-node { gap: 10px; }
-  /* Hero 阵营行：手机档收紧字距，让「玩法名 · EN」回到一行（0.2em 字距在 358px 内容宽下把
-     EN 顶到第二行、末词孤立）。只调字距——字号归 type-scale 末块（ADR 0034 决策 2）。 */
   .nk-egd-hero__camp { letter-spacing: 0.1em; }
-  /* 敌方配置行：桌面把「第 N 波」标签与卡组并排（标签占左列、卡组在右）。手机档卡本就单列铺满，
-     左列标签只占一行高、下方随卡高拉出一整条空白（实测 390 命中，非仅最窄档）——空间利用率低。
-     窄档让波次标签独占一行、卡组吃满整幅：与本块星级奖励档「横轴放不下就纵向堆叠」同法，
-     也与 767 档「放得下并排、放不下折行」同一取向。 */
   .nk-egd-floor__wave { flex-direction: column; gap: 6px; }
 }
 
-/* 最窄档（≤360）：阵营行 + 攻略入口同行放不下时，让入口折到次行、阵营标签独占首行——
-   否则「FORGOTTEN HALL」的 HALL 被顶成孤立次行词（实测 320 命中）。折行后入口右对齐仍贴行尾，
-   与桌面「入口在标签行右端」的阅读落点一致。 */
 @media (max-width: 360px) {
   .nk-egd-hero__camp { flex-wrap: wrap; }
   .nk-egd-hero__camp .nk-guide-link { margin-left: auto; }
-  /* 星级档卡在最窄档再收一档内距与行首间距：320 下「★ + 回合胶囊」前缀占掉 ~95px，条件文案框
-     只剩 167px，「取得胜利时，剩余15轮以上」差 ~13px 放不下一行、把「上」甩成孤字行。
-     收内距 12→10、行距 8→6、胶囊横向内距 10→7，凑回 ~180px 让整句回到一行。 */
   .nk-egd-tier { padding: 10px; }
   .nk-egd-tier__cond .nk-egd-node { gap: 6px; }
   .nk-egd-tier__cond .nk-egd-node__type { padding: 4px 7px; }
@@ -108,9 +77,6 @@
   .nk-egd-mon__figlink:hover .nk-egd-mon__img { transform: none; }
 }
 
-/* ─── 父子层级缩进（ADR 0028）：档位按 DOM 嵌套深度落位，子块几何在此单点声明 ───
-   原先挂在 ::before 上的模式色竖轨已整条退场（用户裁决，对齐末日幻影看板：区块分节由
-   「区块标题下沿发丝线 + 区块节奏」承担，通体色线属重复点题）——缩进保留，左基准不变。 */
 .nk-egd { --eg-indent: 16px; }
 .nk-egd-children {
   position: relative;

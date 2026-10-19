@@ -1,13 +1,9 @@
-
 .nk-ctrait {
-  /* 阅读列宽仍按 --nk-prose-max 收窄（文本块各自声明），外层不再复制 800 字面量（它与 --nk-prose-max 同值纯属巧合复制） */
   max-width: var(--nk-detail-max);
   margin: 0 auto;
   padding: 0 16px 60px;
 }
 @media (min-width: 768px) {
-  /* 本页走文档流而非 .nk-page--detail：内容区被 148px 侧栏占据，居中须在「视口 − 侧栏」里做，
-     否则与光锥/遗器/怪物的整卷居中线错位 74px（.nk-page--detail 的 left = offset 面板在余区居中）。 */
   .nk-ctrait {
     margin-left: calc(var(--nk-content-offset) + max(0px, (100vw - var(--nk-content-offset) - var(--nk-detail-max)) / 2));
     margin-right: auto;
@@ -309,12 +305,6 @@
   color: var(--text);
   text-align: center;
   line-height: 1.3;
-  /* 成员名是 P1 主标识，且长译文溢出极陡：ru `Серебряный Волк ур. 999` 需 150px / 原盒宽 79px
-     （**溢出 90%**）、de `Silberwolf St. 999` 需 99px。
-     **自由换行、不设 clamp**：13 语言实测最长需 4 行（ru/fr/pt，如 `Louve d'argent Niv. 999`），
-     2 行 clamp 会继续吃掉 `ур. 999` 这类区分性后缀；而本元素的模板在
-     `CurrencyTraitView.vue`（不在本任务写入范围）⇒ 无法补 `title` 复原，故必须**不截断**。
-     成员卡是 `auto-fill minmax(72px,1fr)` 网格，行高自适应，增高不影响横向布局。 */
   max-width: 100%;
   overflow-wrap: break-word;
 }

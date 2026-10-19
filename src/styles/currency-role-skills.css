@@ -1,5 +1,3 @@
-/* 货币战争角色详情 · 技能 / 分段描述 / 数据表 / 忆灵属性 + 触屏 hover 覆盖。拆分块 4/4。 */
-
 .nk-crole-gm-head,
 .nk-crole-skills-head {
   display: flex;
@@ -114,14 +112,6 @@
   height: 12px;
   background: var(--crole-num);
 }
-/* 行表头是长译文重灾区：列宽在 table-layout:fixed 下固定 118px，而 de `Basisstärke außerhalb des Felds`
-   单行需 176px（溢出 90px）、ru `Базовая сила исцеления` 需 175px —— 原先 nowrap + 固定列宽
-   让文字直接压到右侧数值格上（探针实测 22 处 spillX，de/ru/th 各命中）。
-   处置按「让它换行」：最长不可断词仅 62px（`Basisstärke`）⇒ 118px 列内可断。
-   实测换行后行盒：cn 2 行（30px）/ th 3 行（48px）/ de·ru 4 行（66px），
-   且 `clientHeight === scrollHeight` ⇒ 行高随内容自增，**不产生纵向裁切**（代价是长语言下表格行变高）。
-   注意 `.nk-crole-gm__table th` 的 nowrap 特异性 (0,1,1) 高于 `.nk-crole-gm__label` (0,1,0)，
-   故选择器必须写成 `th.nk-crole-gm__label` 才能生效，而不是只改声明值。 */
 .nk-crole-gm__table th.nk-crole-gm__label {
   text-align: left;
   font-weight: 500;

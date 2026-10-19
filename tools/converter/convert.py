@@ -1,13 +1,3 @@
-"""TurnBasedGameData → 前端 JSON 转换工具主入口。
-
-用法:
-    cd tools/converter
-    pip install -r requirements.txt
-    python convert.py              # 全量转换（紧凑输出）
-    python convert.py --pretty     # 缩进输出（调试用）
-    python convert.py --only characters,relics  # 仅重跑指定模块
-"""
-
 import argparse
 import logging
 import sys
@@ -97,7 +87,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 def _write_language_packs() -> None:
-    """写出各语言语言包，并盘点结构层残留中文（多语言化进度判据）。"""
     builder = textpack.session()
     if builder is None:
         logger.error("令牌会话未开启，跳过语言包生成")
@@ -132,9 +121,6 @@ def main() -> None:
     if args.official_icon_paths:
         set_official_paths(True)
     if not args.raw:
-        # 令牌模式是默认路径（ADR 0052）：结构层写文本引用令牌 + 生成全语言语言包。
-        # 语言包是「整语言产物」：分组可由多个模块写入，部分重跑会写出被截断的包，
-        # 因此令牌模式下禁用增量跳过（一次全量换一份自洽的语言包）。
         if not args.force:
             logger.info("令牌模式：忽略增量跳过，本次全量重跑")
             args.force = True

@@ -1,5 +1,3 @@
-/* 角色详情页 · 骨架屏 / 断点覆盖 / reduced-motion / 触屏。拆分块 6/6，须在本组最后导入。 */
-
 .nk-char-page .nk-skeleton__hero { background: linear-gradient(to top, color-mix(in srgb, var(--blk-900) 85%, transparent) 0%, color-mix(in srgb, var(--blk-900) 30%, transparent) 50%, transparent 100%); }
 .nk-char-page .nk-skeleton__hero-panel { background: linear-gradient(180deg, color-mix(in srgb, var(--blk-800) 50%, transparent), var(--bg)); }
 .nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 4 / 5; }
@@ -7,14 +5,6 @@
   .nk-char-page .nk-skeleton__hero-visual { aspect-ratio: 3 / 2; }
 }
 .nk-char-page .nk-skeleton__stat-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
-/* 属性铭牌骨架：与就绪态**同构**（两层的 2/3/5 列轴 + 注记落位），条块高度逐项对齐
-   （面板三层文字 ≈ 57px、参数两层 ≈ 37px）。旧骨架是 8 行等高条块，数据到达时会在同一位置重排成
-   两层——那是一次可见位移。上分界沿用就绪态的同一处节奏（20 / 1 / 16）：`margin-top` 归零，
-   20px 由 `__body` 的 flex gap 承担。
-   章标 / 滑条 / 注记三处代理同样按就绪态标定，否则区块以下的内容在数据到达时会整体位移：
-   就绪章标行 27px 高 + `margin-bottom` 28px，骨架这里是 27 +（flex gap 20 + 8）= 55px；
-   就绪滑条行 28px 高（range 控件 24px）+ 20px 下边距 = 骨架 28 + flex gap 20；就绪注记行 20.7px，骨架 20px。
-   注记在 ≥768 的就绪态占面板层尾随两列、<768 落在区块末尾 ⇒ 骨架两处各备一枚，各档只显示一枚。 */
 .nk-char-page .nk-skeleton__stats-title { height: 27px; margin-bottom: 8px; }
 .nk-char-page .nk-skeleton__stats-level { height: 28px; }
 .nk-char-page .nk-skeleton__stats-note { height: 20px; }
@@ -37,33 +27,6 @@
   .nk-char-page .nk-skeleton__stats-note--inline { display: block; grid-column: 4 / 6; grid-row: 1; align-self: end; }
   .nk-char-page .nk-skeleton__stats-note--flow { display: none; }
 }
-/* 骨架 hero 面板只代理「盒子」不代理「结构」。盒高 = 实测 **全量 98 只**角色的就绪面板高度
-   **p75 上取整**（旧口径取中位数；2026-10 字体栈由 Orbitron 换成 IBM Plex Mono + Noto Sans SC 后
-   分布被拉宽——桌面 中位 243.8 / p75 243.8，平板 263.0 / 266.5，手机 229.8 / 254.5——
-   中位口径已盖不住本机跨态断言所选的角色 1001（平板内容 266.5 > 263），故改按 p75 定盒高：
-   盒高同时是就绪面板的 `min-height`，取 p75 后**两侧都由构造成立**，覆盖 ≥75% 的角色。
-   同一次重测也把桌面 239.8 → 243.8、手机 223.5 → 229.8 的数字一并更新。
-   **字体/字号一变就要重跑这条标定**（跑法：遍历全量角色量 `.nk-hero__panel` 高，见 memory 第 12 轮）。
-   **这个值同时是就绪面板的高度下限**（`--nk-hero-panel-h` 被 character-hero.css 的 `.nk-hero__panel`
-   当 `min-height` 消费）⇒ 就绪高 = max(内容高, 令牌值)：内容偏矮那一侧两态同框**由构造成立**，
-   不必再依赖「常量恰好等于内容高」这个巧合（Windows 实测内容高 239.813，与常量本就差 0.19px）。
-   **它管不了「内容偏高」那一侧**：就绪内容高由若干 `line-height: normal` 的行盒（HUD 字体 + CJK 回退）
-   求和而成，比例随**实际解析到的回退字体**变——Linux runner 上 Firefox 内容高 242.82 / 平板 264.5
-   （比 Windows 高 3.0 / 2.0px），于是 e2e「骨架↔就绪同框」在 CI 恒红。**这是平台字体差、不是契约破**：
-   该断言标 `@font-calibrated`、CI 层不收集、本机全量仍判（理由与「像素基线移出 CI」同）。
-   **不为它改设计**——把盒高抬到 243 / 265 也能让 CI 变绿，代价是所有平台上文字块上移 3.2px，
-   收益只是一个 3px 级加载瑕疵的消音；加载位移本身由 B1 的记录值背书（下表）。
-   **手机档没有跨态断言**：该档同量级位移未判定，属已登记未覆盖（见 docs/agents/testing.md）。
-
-   固定盒高 + 内距与就绪面板逐档对齐 + 条块均分剩余空间。主字分档（`.nk-hero__name` 的 `data-len`）后
-   名长度不再改变盒高——名称族高度槽 `--nk-hero-name-slot` 按档取本档主字上限的行盒，故同一档内盒高
-   恒定（跨档差见同一探针的 max 列）。gap 归零、间距全交给 space-between：条块总高 98px 恒小于最小盒
-   内容高（768~1023 档 = 263 - 64 padding = 199），故均分不会重叠；**新增条块须同时复核此不等式**。
-
-   令牌仍是**验收标准 B1 的 CLS 代理指标**（见 docs/audit/角色详情页验收标准.md）：骨架→就绪的替换是本页
-   最大的潜在布局位移，e2e「骨架态与就绪态 hero 面板同宽同高（±1px）」把它锁死（该用例 @font-calibrated
-   ⇒ CI 不判、本机全量判）；实测真实 CLS（dev 环境，12 组×3 次）最大 0.0107、14 次里 9 次为 0，远低于 0.1。
-   `--nk-hero-panel-h` 按档声明（本档即手机档；≥768 无独立值——768~1023 与 ≥1024 两个子区间各自覆盖）。 */
 .nk-char-page { --nk-hero-panel-h: 255px; }
 .nk-char-page .nk-skeleton__hero-panel {
   padding: 32px 16px 20px; height: var(--nk-hero-panel-h); gap: 0; justify-content: space-between;
@@ -77,7 +40,6 @@
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-char-page { --nk-hero-panel-h: 267px; }
   .nk-char-page .nk-eidolon__icon { width: 132px; height: 132px; }
-  /* 平板档并排版式（媒体在左 · 文字在右）的骨架镜像：几何逐项对齐就绪态 */
   .nk-char-page .nk-skeleton__hero { flex-direction: row; align-items: flex-start; }
   .nk-char-page .nk-skeleton__hero-visual { flex: 0 0 46%; aspect-ratio: 4 / 5; }
   .nk-char-page .nk-skeleton__hero-panel { flex: 1 1 auto; align-self: center; padding: 0 0 0 32px; }
@@ -87,11 +49,6 @@
   .nk-char-page .nk-hero { min-height: clamp(560px, 76vh, 820px); overflow: clip; }
   .nk-char-page .nk-hero__visual { position: absolute; inset: 0; aspect-ratio: auto; }
   .nk-char-page .nk-hero__visual::before { background: none; }
-  /* 文字可读性只落在字形自身：面板不给底板、媒体上不铺整片压暗。用户判据——底板浓度无论怎么调都会
-     明显影响立绘与 Spine，而文字与立绘重叠本就不多，为 AA 破坏观感得不偿失。
-     面板左对齐（`--nk-hero-panel-edge` / 宽 520）而素材居中：文字列与立绘的横向重叠只出现在最窄桌面档
-     （1024 实测规格行最坏 2.52:1、主字 0%，1440 起抬头行 / 规格行归零），非桌面档面板在媒体下方、零重叠。
-     代价：AA 由硬保证降为记录值（最坏单像素实测见 docs/memory/2026-10.md，此处不复述数值）。 */
   .nk-char-page .nk-hero__panel {
     position: absolute; left: var(--nk-hero-panel-edge); bottom: var(--nk-hero-panel-edge); z-index: 5;
     width: min(520px, 58%);
@@ -101,9 +58,6 @@
   }
   .nk-char-page .nk-hero__head { gap: 16px; }
   .nk-char-page .nk-hero__title { margin-top: 4px; }
-  /* 主字分两档（档位判据与宽度天花板见 character-hero.css 的名称族注释）：单字名 `--nk-fs-hero-lg`、
-     多字名 `--nk-fs-hero`。槽高 = 本档主字上限 × 行距 1.06；同档内槽高恒定，故 hero 面板高度不随
-     名长度变化（骨架屏只代理一个固定盒高，见文件头注释的头一条不等式）。 */
   .nk-char-page .nk-hero__name {
     font-size: clamp(var(--nk-fs-hero), 5.2vw, var(--nk-fs-hero));
     line-height: 1.06;
@@ -131,17 +85,12 @@
     border-top: none; background: none;
   }
 }
-/* 桌面档立绘横向偏移（构图偏移走布局、不走 transform —— transform 留给滚动视差；且构图不得依赖动画在跑）。
-   左右同时外移保持媒体盒宽不变（只改 left/right 会连带缩放盒宽、把偏移量吃掉一半）。
-   取值在 character-hero.css 的 `--nk-hero-media-shift`（≥1440 = 60px，其余档 0）；这里只提供应用通道
-   （left/right + 开关反向补偿），故 ≥1024 与 ≥1440 两档共用同一段代码。 */
 @media (min-width: 1024px) {
   .nk-char-page .nk-hero__visual {
     left: var(--nk-hero-media-shift);
     right: calc(-1 * var(--nk-hero-media-shift));
   }
   .nk-char-page .nk-skeleton__hero-visual { left: var(--nk-hero-media-shift); right: calc(-1 * var(--nk-hero-media-shift)); }
-  /* 媒体右移后开关会跟着移出内容列 ⇒ 反向补偿回原位（与内容列右缘对齐） */
   .nk-char-page .nk-hero__toggle { right: calc(var(--nk-hero-toggle-inset) + var(--nk-hero-media-shift)); }
 }
 @media (max-height: 500px) and (orientation: landscape) {
@@ -149,7 +98,6 @@
 }
 @media (max-width: 767px) {
   .nk-char-page .nk-hero__badge img { width: 17px; height: 17px; }
-  .nk-char-page .nk-hero__badge--enh { padding: 5px 9px 5px 7px; }
   .nk-char-page .nk-eidolon__head { gap: 16px; }
   .nk-char-page .nk-eidolon__icon { width: 104px; height: 104px; }
   .nk-char-page .nk-eidolon__meta { gap: 12px; padding-bottom: 12px; }
@@ -259,5 +207,4 @@
   .nk-char-page .nk-secnav__btn:hover { color: var(--text3); background: transparent; }
   .nk-char-page .nk-secnav__btn--active:hover { color: var(--metric-val); background: transparent; }
   .nk-char-page .nk-hero__badge:hover { color: var(--text2); }
-  .nk-char-page .nk-hero__badge--enh:hover { border-color: color-mix(in srgb, var(--gold-sem) 32%, transparent); background: color-mix(in srgb, var(--gold-sem) 7%, transparent); }
 }

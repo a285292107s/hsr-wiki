@@ -22,6 +22,5 @@ export function setCwSkillDescMode(mode: CwSkillDescMode): void {
   try {
     localStorage.setItem(STORAGE_KEY, mode);
   } catch {
-    // 存储不可用（隐私模式/配额）：仅本次会话生效，忽略
   }
 }

@@ -1,9 +1,3 @@
-/**
- * spine-manifest 双清单静态校验(CI 挂接；node tools/check-spine-manifest.mjs [--fetch])。
- * 校验：① 两清单 JSON+结构；② version 与 src/lib/constants.ts SPINE_MANIFEST_VERSION 一致；
- * ③ 键排序(数字升序/场景在后)无 $ 元键、两清单无重复键；④ official=折叠格式+runtime 合法(4.1/4.2)；
- * ⑤ textures 含 .png；⑥ nanoka=全 skel；⑦ --fetch 附加官方清单 URL HEAD 可达性。退出 0/1。
- */
 import { readFileSync } from 'node:fs';
 
 const ROOT = new URL('../', import.meta.url);
@@ -17,7 +11,6 @@ const errors = [];
 const warn = (msg) => errors.push(`[WARN] ${msg}`);
 const fail = (msg) => errors.push(`[FAIL] ${msg}`);
 
-// ─── 1. JSON 可解析 + 顶层结构 ───
 let official;
 let nanoka;
 try {
@@ -43,7 +36,6 @@ for (const [name, m] of [['official', official], ['nanoka', nanoka]]) {
   if (typeof m.entries !== 'object' || m.entries === null) fail(`${name} 清单 entries 应为对象`);
 }
 
-// ─── 2. version 与 constants.ts 一致 ───
 try {
   const constantsSrc = readFileSync(new URL('src/lib/constants.ts', ROOT), 'utf-8');
   const m = constantsSrc.match(/SPINE_MANIFEST_VERSION\s*=\s*(\d+)/);
@@ -62,7 +54,6 @@ try {
   fail(`无法读取 constants.ts: ${e.message}`);
 }
 
-// ─── 3. entries 键排序 + 无 $ 键 + 无重复键 ───
 const allKeys = [];
 for (const [name, m] of [['official', official], ['nanoka', nanoka]]) {
   const keys = Object.keys(m.entries);
@@ -88,7 +79,6 @@ if (overlap.length > 0) {
   console.log(`[INFO] 两清单重复键 ${overlap.length} 个（${overlap.join(', ')}）：官方优先，失效时回退 nanoka`);
 }
 
-// ─── 4/5. official 折叠格式 + 纹理键约束 ───
 const officialKinds = new Set();
 const urls = [];
 for (const [key, v] of Object.entries(official.entries)) {
@@ -127,13 +117,11 @@ for (const k of ['official', 'official-scene']) {
   if (!officialKinds.has(k)) warn(`官方清单无 ${k} 类型条目`);
 }
 
-// ─── 6. nanoka 全部为 skel ───
 for (const [key, v] of Object.entries(nanoka.entries)) {
   if (v.kind !== 'skel') fail(`nanoka 清单 ${key}: 应为 skel，实际 ${v.kind}`);
   if (!v.name || !v.name.trim()) fail(`${key}: skel name 为空`);
 }
 
-// ─── 7. 在线可达性（可选） ───
 if (FETCH_MODE) {
   const seen = new Set();
   for (const url of urls) {

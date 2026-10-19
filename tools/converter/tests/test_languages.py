@@ -1,9 +1,3 @@
-"""语言清单（languages.json → languages.py）契约测试。
-
-语言清单是多语言改造的单一事实源，前端镜像 `src/lib/i18n/locales.ts` 由
-`tools/check-languages.mjs` 与之比对；本文件只覆盖 Python 侧的解析与收敛语义。
-"""
-
 import json
 import sys
 from pathlib import Path
@@ -28,7 +22,6 @@ EXPECTED_CODES = ("cn", "cht", "en", "kr", "jp", "es", "ru", "th", "vi", "id", "
 
 class TestRegistryShape:
     def test_all_thirteen_text_languages(self):
-        """上游 AllowedTextLanguage.json 声明 13 种文本语言，清单必须全量覆盖。"""
         assert len(LANGUAGES) == 13
         assert codes() == EXPECTED_CODES
 
@@ -55,7 +48,6 @@ class TestRegistryShape:
             assert all(name.startswith("TextMap") and name.endswith(".json") for name in lang.textmap)
 
     def test_split_shards_cover_kr_ru_th(self):
-        """上游把 kr / ru / th 的主文本表切成 _0 / _1 两片，必须两片都列。"""
         for code in ("kr", "ru", "th"):
             shards = by_code(code).textmap
             assert any("_0.json" in s for s in shards), code
@@ -89,7 +81,6 @@ class TestLookup:
 
 class TestVendorShards:
     def test_declared_shards_exist_when_vendor_present(self):
-        """vendor 不在场（未浅克隆 / CI 精简）时跳过——与 check-languages.mjs 同一取舍。"""
         if not VENDOR_TEXTMAP.exists():
             return
         for lang in LANGUAGES:

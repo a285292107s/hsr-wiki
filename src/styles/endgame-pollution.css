@@ -1,7 +1,3 @@
-/* 终局详情页 · 污染标记（ADR 0026 / 0027）与召唤物（ADR 0036）：徽标 / 召唤列表。
-   拆分块第 6 块（接断点与刻度块之后、排版收口块之前）。 */
-/* ─── 污染徽标（ADR 0026）：只挂被污染的敌方卡 / 召唤物条目（无面板级与赛季级渲染位） ─── */
-/* 字号 / 间距归 `endgame-type-scale.css` 末段收口（本块之后导入）：本文件只声明非刻度属性 */
 .nk-egd-pollchip {
   display: inline-flex;
   align-items: center;
@@ -14,15 +10,6 @@
   color: var(--vor-300);
 }
 
-/* 召唤物列表（ADR 0036 修订）：挂在**召唤者自己的**敌方卡片 / 图标格里——归属由 converter 按
-   敌方实例的 `MonsterConfig.SummonIDList` 算好，前端不做 join。受污染者挂 `.nk-egd-pollchip`
-   （未挂即未受污染）。 */
-/* 敌方卡上的徽标落点＝**立绘正下方**（用户裁决，见 ADR 0026 补记三）：列宽由立绘图宽定
-   （`--nk-egd-mon-fig`），故徽标必须**允许换行并居中**——`nowrap` 在 es / fr / pt / ru 下
-   比 104px 立绘还宽，会把立绘列反撑宽、挤窄数据列。
-   `overflow-wrap: anywhere` 是第二道必需：`white-space: normal` 只在**空格**处断行，德语复合词
-   （`Korruptionsstufe` 实测 ink 108px）在 104 / 84px 列里整体放不下，会溢出列框——立绘列是不可
-   裁切的窄列，溢出即压到右侧数据列上。召唤物条目上的同名徽标保持同行内联。 */
 .nk-egd-mon__art > .nk-egd-pollchip {
   max-width: 100%;
   white-space: normal;
@@ -40,7 +27,6 @@
   letter-spacing: 0.05em;
   color: var(--text3);
 }
-/* 敌方卡内与「弱点/抗性」「技能」同构：整段上方发丝线 + 上内距（卡内分区语言） */
 .nk-egd-mon__data > .nk-egd-summons {
   padding-top: 12px;
   border-top: 1px solid var(--line-1);
@@ -52,16 +38,6 @@
   gap: 8px 12px;
   min-width: 0;
 }
-/* 召唤物行允许换行（收口手机档长译文溢出）——**换行对象是「污染徽标」，不是名字**。
-   根因：`.nk-egd-summon` 是 `inline-flex`，行长由「图 26px + 名 + 徽标」共同决定，而 flex 项默认
-   `min-width: auto` 不会缩到自身 min-content 之下 ⇒ 长译文名（es `Mnemoduende de Sangre Dorada:
-   Faisán`）把该行 min-content 顶到手机档可用宽之外，整行拒绝收缩，溢出沿
-   `.nk-egd-summon__list` → `.nk-egd-summons` → `.nk-egd-mon__data` 撑破敌方卡（实测 en 4 /
-   es 40 / fr 28 / pt 25 / ru 21px；页面级溢出恒 0，`noUnknownOverflow` 看不见）。
-   治法 = 让**徽标**在名字需要整行宽时落到次行，而不是去压缩名字。
-   **不要改用 `overflow-wrap: anywhere` 断名字**：它确实能把溢出清零，但名字会被压到 min-content
-   逐字断行（实测 es 名宽 34px / 12 行、en 与 de 6 行），比溢出本身更难看——溢出是「量」的问题，
-   断成竖排是「读不了」的问题。改此行前请量「名称的渲染行数」，只看溢出数字会把它判成修好了。 */
 .nk-egd-summon {
   display: inline-flex;
   align-items: center;

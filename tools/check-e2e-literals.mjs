@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/**
- * e2e 裸 px 字面量统计（report-only）。
- * 用法：node tools/check-e2e-literals.mjs [--strict] [--baseline <文件>] [--write-baseline]
- * 扫 e2e/**&#47;*.spec.ts 的 px 字面量并给出 file:line；行内 `// e2e-literal-ok: 理由` 视为豁免（缺理由不豁免）。
- * 基线默认 tools/e2e-literal-baseline.json：缺失时以当前计数为基线并提示生成。
- * 退出码：默认恒 0；--strict 高于基线（总数或单文件）退出 1。
- * 硬约束：只用 node 内置模块；除 --write-baseline 外不改写任何文件。
- */
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,23 +10,14 @@ const baseArg = process.argv.indexOf('--baseline');
 const baselineRel = baseArg >= 0 && process.argv[baseArg + 1] ? process.argv[baseArg + 1] : posix.join('tools', 'e2e-literal-baseline.json');
 const baselinePath = join(ROOT, baselineRel);
 
-/** px 字面量：前一位不得是标识符/小数点，后一位不得是字母数字（`4.2.43px` 不误切） */
 const PX_RE = /(?<![\w.-])\d+(?:\.\d+)?px(?![A-Za-z0-9])/g;
-/** 行内豁免：注释须带非空理由 */
 const OK_RE = /\/\/\s*e2e-literal-ok\s*[:：]\s*(\S.*)$/;
 const BAD_OK_RE = /\/\/\s*e2e-literal-ok\s*[:：]?\s*$/;
 
-/**
- * 断言位判定（硬约束）：只统计**断言调用里的** px。
- * 注释、用例标题、`setViewportSize` 里的 px 不是裸数值断言，计进去会让守卫对「改一句注释」报警，
- * 反过来逼人改注释去凑绿——守卫噪声本身就是 churn 来源。
- */
 const ASSERT_RE = /\b(?:toHaveCSS|toHaveAttribute|toContain|toMatch|toEqual|toBe|toBeLessThan|toBeGreaterThan|toBeLessThanOrEqual|toBeGreaterThanOrEqual|toBeCloseTo|expect)\b/;
-/** 带非 ASCII 的字符串是断言消息/中文文案（如 `（±2px）`），断言值一律是 ASCII 串（'1px'） */
 const STRING_RE = /('[^'\n]*'|"[^"\n]*"|`[^`\n]*`)/g;
 const NON_ASCII_RE = /[^\x00-\x7F]/;
 
-/** 逐行去注释（块注释跨行按状态机，行注释不误伤 `://`） */
 function stripComments(line, state) {
   let out = '';
   let i = 0;
@@ -61,7 +44,6 @@ function stripComments(line, state) {
   return out;
 }
 
-/** 去掉带中文的字符串（断言消息），保留 ASCII 字符串（断言值） */
 const dropLocalized = (code) => code.replace(STRING_RE, (s) => (NON_ASCII_RE.test(s) ? '' : s));
 
 const specs = [];
@@ -75,7 +57,7 @@ const walk = (dir) => {
 walk(join(ROOT, 'e2e'));
 specs.sort();
 
-const hits = []; // { rel, line, literals[], exempt }
+const hits = [];
 const exempted = [];
 const badReasons = [];
 const state = { inBlock: false };
@@ -84,7 +66,7 @@ for (const abs of specs) {
   state.inBlock = false;
   readFileSync(abs, 'utf8').split(/\r?\n/).forEach((line, i) => {
     const code = stripComments(line, state);
-    if (!ASSERT_RE.test(code)) return; // 非断言行（标题 / 视口 / 注释）不进计数
+    if (!ASSERT_RE.test(code)) return;
     const literals = dropLocalized(code).match(PX_RE);
     if (!literals) return;
     const ok = line.match(OK_RE);
@@ -100,7 +82,6 @@ const total = hits.reduce((n, h) => n + h.literals.length, 0);
 const byFile = new Map();
 for (const h of hits) byFile.set(h.rel, (byFile.get(h.rel) || 0) + h.literals.length);
 
-/* ═══ 基线比对 ═══ */
 const hasBaseline = existsSync(baselinePath);
 let baseline = null;
 if (hasBaseline) {
@@ -127,7 +108,6 @@ if (baseline) {
   }
 }
 
-/* ═══ 报告 ═══ */
 const B = (s) => `\x1b[1m${s}\x1b[0m`;
 console.log(B(`\n[e2e 字面量] 扫描 ${specs.length} 个 spec｜px 字面量 ${total} 处｜豁免 ${exempted.length} 行${badReasons.length ? `｜豁免缺理由 ${badReasons.length} 行` : ''}｜基线 ${hasBaseline ? `${baseline?.total ?? '?'}（${baselineRel}）` : '缺失'}\n`));
 

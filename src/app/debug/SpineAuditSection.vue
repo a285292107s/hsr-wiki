@@ -5,6 +5,7 @@ import type { SpineResolved } from '../../services/types';
 import { toast } from './lib/toast';
 import SpineAuditDetail from './SpineAuditDetail.vue';
 import { copyText, downloadJson } from './report';
+import { GL_WARN_AT } from '../../spine/registry';
 import './spine-audit.css';
 import {
   AuditEntry, AuditKind, buildDiagnosis, classifyStatus,
@@ -28,7 +29,6 @@ const filterKind = ref<'all' | AuditKind>('all');
 const onlyIssue = ref(false);
 const expandedKey = ref<string | null>(null);
 
-const GL_WARN_AT = 14; // 队列 1 实例 + 预览 1 实例，占用上限宽松
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 

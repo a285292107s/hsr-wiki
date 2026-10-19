@@ -8,7 +8,6 @@ import type { SkillDiff } from '../../lib/compare';
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 const props = defineProps<{
   diff: SkillDiff;
@@ -31,7 +30,6 @@ const fillPct = computed(() =>
   maxLv.value <= 1 ? 100 : ((lv.value - 1) / (maxLv.value - 1)) * 100,
 );
 
-/** 双侧描述（各自等级参数；单侧缺级 → '—'） */
 function sideHtml(sk: Skill | undefined): string {
   if (!sk || !sk.desc) return '—';
   const lvData = sk.level ? sk.level[String(lv.value)] : null;
@@ -41,7 +39,6 @@ function sideHtml(sk: Skill | undefined): string {
 const baseHtml = computed(() => sideHtml(props.diff.base));
 const enhHtml = computed(() => sideHtml(props.diff.enh));
 
-/* 图标用 base 确保可用；名称/标签用强化侧新形态 */
 
 const typeName = computed(() => props.diff.enh.type_name || skillTypeLabel(props.diff.enh.type ?? '', ''));
 const tagLabel = computed(() => props.diff.enh.tag || '');
@@ -64,7 +61,6 @@ const metricDiffs = computed<MetricDiff[]>(() => {
   if (has('stance_damage_display') || has('show_stance_list')) {
     out.push({ label: t('cwRole.stance'), base: fmtTough(b), enh: fmtTough(e) });
   }
-  // 战技点对比：正值 = 消耗 N（-N），-1 = 不消耗哨兵（非产出）
   const fmtBP = (v: number | null | undefined): string => {
     if (v == null) return '—';
     return v === -1 ? t('skill.noCost') : '-' + String(v);
@@ -76,7 +72,6 @@ const metricDiffs = computed<MetricDiff[]>(() => {
 
 <template>
   <div class="nk-skill" :data-type="typeKey">
-    <span class="nk-cmp-badge">{{ t('cmp.changed') }}</span>
     <div class="nk-skill__head">
       <span class="nk-skill__type-dot" :title="typeName"></span>
       <div class="nk-skill__slider">

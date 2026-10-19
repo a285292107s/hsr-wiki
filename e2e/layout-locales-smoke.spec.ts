@@ -6,15 +6,6 @@ import { LOCALES } from '../src/lib/i18n/locales';
 import { SITE_NAME } from '../src/lib/constants';
 import { collectConsoleIssues, expectNoUnknownOverflow, waitForSettled } from './helpers';
 
-/**
- * 全语言冒烟 —— 首页与角色详情。
- *
- * 完整存在理由与判据见 `locales-smoke.shared.ts` 文件头（本文件同口径，不重复）。
- * 本文件只承担 **语言包令牌 / culture / 站点描述 / 中文残留**：这两项是所有语言都必须成立的最小面，缺键与未解析令牌在这里最先暴露。
- *
- * 拆文件而非加片：`--shard` 只在**文件**边界生效，单文件内的 for 循环无论几条都挤在一片里。
- * 风险语言子集由 `SMOKE_SCOPE=fast` 控制，全量矩阵见 `ci-full.yml`。
- */
 test.describe('全语言冒烟 · 首页与角色详情', () => {
   for (const loc of LOCALES.filter((l) => SWEEP_SET.has(l.code))) {
     const base = loc.prefix ? `/${loc.prefix}` : '';
@@ -24,44 +15,28 @@ test.describe('全语言冒烟 · 首页与角色详情', () => {
       for (const path of [`${base}/`, `${base}/character/${charId()}`]) {
         await page.goto(path);
         await expect(page.locator('#app')).toBeVisible();
-        /* 内容就位：轮询正文长度而不是等某个类名——同类名在不同页/档下有隐藏实例，
-           `.first()` 会命中不可见元素（fr/de/pt 实测踩到）。 */
         await expect.poll(async () => (await page.locator('body').innerText()).length, {
           message: `${loc.code} ${path} 内容未就位`, timeout: 20000,
         }).toBeGreaterThan(200);
         const body = await page.locator('body').innerText();
         expect(body.length, `${loc.code} ${path} 渲染内容过少`).toBeGreaterThan(200);
         expect(body, `${loc.code} ${path} 出现未解析令牌`).not.toContain('$t:');
-        /* 文档级元信息也要查：`innerText` 取不到 `<title>`，标题里的未解析令牌或原始键名
-           （vue-i18n 缺键时会把键名写进 title）此前完全看不见。 */
         const title = await page.title();
         expect(title, `${loc.code} ${path} 标题为空或残留未解析令牌`).not.toContain('$t:');
         expect(title.trim().length, `${loc.code} ${path} 标题为空`).toBeGreaterThan(0);
         await expect(page.locator('html')).toHaveAttribute('lang', loc.culture);
         if (path === `${base}/`) {
-          /* 站点描述随语言（bootstrap 改写 `<meta name="description">`）：13 语言逐个比对词典值，
-             缺键/漏改都会在这里暴露。 */
           await expect(page.locator('meta[name="description"]'))
             .toHaveAttribute('content', dictOf(loc.code)['meta.description']!);
         }
-        /* 溢出面：译文长度差异最大的一档（德语 / 俄语比中文长约三成）最容易撑破容器，
-           而既有溢出断言只在缺省语言上跑过 ⇒ 这里按语言各测一遍（字体就绪后测，避免换字期间误判）。 */
         await waitForSettled(page);
         await expectNoUnknownOverflow(page);
-        /* 中文残留只在**首页**查：详情页有配音演员专名等合法中文（官方专名，有意保留），
-           首页则全部是站点自产文案 + 数据名，出现中文即漏译。
-           排除：站点品牌名（有意不本地化）；kr 的官方汉字注音（`세검(細劍)`）。 */
         if (path === `${base}/` && !HAN_OK.has(loc.code)) {
           const text = body.split(SITE_NAME).join('');
           const hits = text.match(new RegExp(HAN_RE, 'g')) ?? [];
           expect(hits.length, `${loc.code} 首页有 ${hits.length} 处中文残留：${text.slice(0, 120)}`).toBe(0);
         }
       }
-      /* 错误态不得显示内部诊断：`NkError` 的 message 是中文内部文案（带字段名/ID），
-         operational 错误现在只进控制台、界面只留本地化的错误标题 ⇒ 用不存在的 id 触发这条路径。 */
-      /* 货币战争属性行：结构层有一张「属性枚举 → 名称」表，其中 SpeedAddedRatio / MaxSP 两条
-         官方无独立词条 ⇒ 落成中文回退（转换器已登记）。此处验证这些回退是**惰性**的：
-         非缺省语言下属性行必须走词典译文，不得露中文，也不得露原始枚举键。 */
       if (!HAN_OK.has(loc.code)) {
         await page.goto(`${base}/currency/role/${roleId()}`);
         await expect(page.locator('.nk-crole-layer__pname').first()).toBeVisible({ timeout: 20000 });
@@ -70,8 +45,6 @@ test.describe('全语言冒烟 · 首页与角色详情', () => {
         const bad = names.filter((v) => HAN_RE.test(v) || /^[A-Za-z]+(AddedRatio|Delta|Base|MaxSP)$/.test(v));
         expect(bad, `${loc.code} 属性行露中文或原始枚举键：${bad.slice(0, 3)}`).toEqual([]);
 
-        /* 技能/装备描述里的自造属性名走 `{PROP:<枚举键>}` 占位符（ADR 0053 方案 A）：
-           渲染端必须按词典解析掉——既不能残留占位符，也不能落回中文。 */
         const descText = (await page.locator(
           '.nk-crole-skill__desc, .nk-crole-skill__simple, .nk-crole-equip__desc, .nk-crole-timeline__desc',
         ).allTextContents()).join('\n');
@@ -79,9 +52,6 @@ test.describe('全语言冒烟 · 首页与角色详情', () => {
         const descHan = descText.match(new RegExp(HAN_RE, 'g')) ?? [];
         expect(descHan.length, `${loc.code} 描述里 ${descHan.length} 处中文：${descText.slice(0, 100)}`).toBe(0);
       }
-      /* 目录卡点击：卡片 href 由 `activeHref()` 生成、**已带前缀**，而 JS 点击走 `router.push()`
-         （其 history base 也是该前缀）⇒ 直接推会得到 `/en/en/character/…`（用户实测）。
-         这条回归用例就是当初缺的那一层覆盖。 */
       if (loc.prefix) {
         await page.goto(`${base}/character`);
         const card = page.locator('[class*="-grid"] a').first();

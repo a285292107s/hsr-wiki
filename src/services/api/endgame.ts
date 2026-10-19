@@ -2,7 +2,6 @@
 import type { MazeListDb, MazeCatalogDb, EndgameGuideDb } from '../types';
 import { singletonLocalData } from './local';
 
-/** 终局玩法说明（四玩法规则正文 + 增益体系名/条数/选法；单例，失败可重试） */
 export const loadLocalEndgameGuide = singletonLocalData<EndgameGuideDb>('endgame_guide.json');
 
 export const loadLocalMazeList = singletonLocalData<MazeListDb>('maze.json');

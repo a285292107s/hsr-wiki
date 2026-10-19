@@ -1,9 +1,4 @@
 // @vitest-environment node
-/**
- * locales.ts（语言清单前端镜像 + 纯路径函数）单元测试。
- * 清单本体的一致性由 tools/check-languages.mjs 守卫（需同时读 Python 侧事实源），
- * 本文件覆盖清单形态与路径收敛语义。
- */
 import { describe, it, expect } from 'vitest';
 import {
   DEFAULT_LOCALE,
@@ -58,7 +53,7 @@ describe('localeFromPath / localeBaseFromPath（URL 前缀 → router history ba
     expect(localeFromPath('/character').code).toBe('cn');
     expect(localeBaseFromPath('/character')).toBe('/');
     expect(localeBaseFromPath('/')).toBe('/');
-    expect(localeBaseFromPath('/cn/character')).toBe('/');        // 缺省语言不做 /cn 别名
+    expect(localeBaseFromPath('/cn/character')).toBe('/');
     expect(localeBaseFromPath('/english/character')).toBe('/');
   });
 

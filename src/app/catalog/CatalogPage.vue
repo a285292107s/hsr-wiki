@@ -50,8 +50,6 @@ const filters = computed(() =>
     : props.config.filters || [],
 );
 
-/* 标题文案：词典键 + 可选插值（插值参数本身也是词典键，如「货币战争 · 投资策略」= 模式名 + 图鉴名）。
-   配置在模块加载期求值，故解析放在视图里（否则会冻住缺省语言）。 */
 const pageTitle = computed(() => {
   const args = props.config.titleArgs;
   if (!args) return t(props.config.titleKey);
@@ -84,10 +82,6 @@ const filtered = computed<CatalogItem[]>(() => {
     return true;
   });
   if (!q) return list;
-  /* 检索命中分档：名字前缀 > 名字包含 > **仅描述命中**（`searchText`）。没有这一档时，
-     把描述纳入检索域会让精确同名条目被埋在描述命中之后——实测 /item 搜「信用点」时
-     同名卡排到第 8 位、第一屏首张是「金币」（其描述里提到信用点）。同档保持原序（Array#sort 稳定），
-     故各页既有的稀有度/版本序不受影响。 */
   const rank = (it: CatalogItem): number => {
     const name = String(it.name || '').toLowerCase();
     if (name.startsWith(q)) return 0;
@@ -126,7 +120,6 @@ async function load(): Promise<void> {
     if (cancelled.value || !loadGen.isCurrent(gen)) return;
     errorMsg.value = userErrorDetail(e);
     phase.value = 'error';
-    // 就地错误态已经是完整信号，不再叠 toast（toast 只留给「结果不在视口内」的动作，如复制/下载）
   }
 }
 
@@ -201,7 +194,6 @@ function onSearch(value: string): void {
   onSearchInput();
 }
 
-/** 空态的恢复动作：一次清掉搜索词与全部筛选（URL 同步由既有 watch 负责） */
 const hasQuery = computed(() => query.value.trim().length > 0);
 const hasFilters = computed(() => Object.values(activeFilters.value).some(Boolean));
 function resetSearchAndFilters(): void {
@@ -235,8 +227,6 @@ function onContentClick(e: MouseEvent): void {
   const href = a.getAttribute('href') || '';
   if (!href || href === '#' || href.startsWith('http')) return;
   e.preventDefault();
-  /* 卡片 href 由 `activeHref()` 生成、**已带语言前缀**（原生导航/爬虫需要），而 router 的 history base
-     也是该前缀 ⇒ 直接 push 会再拼一次，得到 `/en/en/character/1513`（用户实测）。故先剥前缀。 */
   void router.push(stripLocalePrefix(href));
 }
 

@@ -1,7 +1,3 @@
-/**
- * 开拓者形态（trailblazer.ts）纯函数契约测试
- * 覆盖：默认值回退、localStorage 持久化读写、ID 段判定（8xxx 开拓者、奇男偶女）。
- */
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   DEFAULT_TRAILBLAZER_GENDER,
@@ -59,8 +55,6 @@ describe('trailblazer ID 判定', () => {
   });
 });
 
-/* pickGenderVariant：官方 fr/de/pt 的开拓者名带 {M#…}{F#…} 双支，名字必须二选一。
-   若走 stripTags 的「两支拼接」口径会得到官方不存在的词（PionnierPionnière）——本组测试即该边界。 */
 describe('pickGenderVariant', () => {
   it('按性别取对应支，且丢掉全部标记', () => {
     const fr = '{M#Pionnier}{F#Pionnière}·Le Souvenir';
@@ -85,7 +79,6 @@ describe('pickGenderVariant', () => {
   });
 
   it('缺对应性别支时退回「保支文本、去标记」，不产出空串', () => {
-    // 现实语言包里两支总是成对；此用例固化兜底语义，避免将来单支数据把名字清空。
     expect(pickGenderVariant('{F#Nur weiblich}', 'male')).toBe('Nur weiblich');
   });
 

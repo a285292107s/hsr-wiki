@@ -4,7 +4,6 @@ import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 import { loadCwCatalogCss } from './shared';
 import { translate } from '../../i18n';
 
-/* 品质枚举 → 词典键（展示文案只在词典里；复用 lib 的货币枚举映射语义） */
 const QUALITY_KEY: Record<string, string> = {
   Silver: 'catalog.quality.silver', Gold: 'catalog.quality.gold', Prismatic: 'catalog.quality.prismatic',
 };

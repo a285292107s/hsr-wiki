@@ -35,6 +35,8 @@
 - **换行与富文本要先两侧归一再判定**：数据里的 `\n` 渲染成 `<br>`、`<color=#…>` 渲染时被剥掉，不归一会把渲染正常的文本判成漏渲染；字面 `\n`（两字符序列）只在货币战争羁绊 `desc` 上出现，须显式归一。
 - **`TextMapCHS` 未命中的 hash 禁止落空串占位名**：`endgame` 的 3034001–03 `BuffName` / `BuffDesc` 四个 hash 无中文，只能不列该字段；`zh` / `name` 为空的未发布条目整条跳过。`endgame.ts` 的 `!zh`、`item.ts` 的 `!name`
 - **成就描述源 JSON 的换行是字面两字符 `\\n`（双反斜杠转义）**：`achievements.py` 用 `text.replace(r"\n", "\n")` 转真换行；用真实换行构造输入永远走不到那一行，删掉该行校验仍绿。`tools/converter/converters/achievements.py`
+- **单语言 TextMap 原始文件 60–70 MB（实测最大 `TextMapVI.json` 69.7 MB）**：加载必须**一次成表 + 按分组单遍产出语言包**，别按分组重复解析或逐键回查——13 语言全量跑一遍的耗时几乎全在这里。
+- **一切文本读写显式写 `encoding="utf-8"`**：转换器在本机（Windows）跑，`open()` 不传 encoding 时取系统默认（GBK）⇒ 含中文的索引 JSON 直接 `UnicodeDecodeError` 或静默乱码；写产物同时要 `newline="\n"`，否则会按 CRLF 落盘、把整份 JSON 变成整文件替换。
 
 ## 字段透传与登记
 

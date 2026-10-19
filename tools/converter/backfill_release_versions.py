@@ -1,17 +1,3 @@
-"""一次性历史引导：回填 characters.json / light_cones.json 的 release_version。
-
-角色 / 光锥的 release_version 由「与上一版已提交输出的 id 差集」推导（release_version.py），
-只能从机制启用后开始积累，故用 git 版本快照（同一 commit 的 version.json version_label +
-该 commit 的两个索引 JSON）按「首次出现的快照版本」一次性回填。
-
-禁止当作常规流程或在浅克隆里跑：本脚本靠 `git show <commit>:...` 读历史快照，CI 的
-actions/checkout 默认 fetch-depth: 1（.github/workflows/data-sync.yml）下必然失败。
-最早可追溯快照（4.4.0）里已存在的条目一律留空串（上线版本先于可追溯区间，不猜）。
-默认只补空串，不覆盖 convert 已打的标；`--overwrite` 才按快照推导值全量重写（仅用于纠错）。
-
-用法：cd tools/converter && python backfill_release_versions.py [--dry-run] [--overwrite]
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -40,10 +26,6 @@ INDEX_FILES = {
 }
 
 def _git(*args: str) -> str:
-    """在项目根执行 git；失败抛 RuntimeError（含 git show 在浅克隆下不可用的提示）。
-
-    必须显式 encoding="utf-8"：Windows 默认 GBK 会让含中文的索引 JSON 解码失败。
-    """
     proc = subprocess.run(
         ["git", "-C", str(PROJECT_ROOT), *args],
         capture_output=True,
@@ -61,13 +43,11 @@ def _git(*args: str) -> str:
 
 @lru_cache(maxsize=None)
 def _version_label(commit: str) -> str:
-    """该 commit 的 version.json 的 version_label；缺失时返回空串。"""
     data = json.loads(_git("show", f"{commit}:{VERSION_JSON}"))
     return str(data.get("version_label", "")) if isinstance(data, dict) else ""
 
 @lru_cache(maxsize=None)
 def _index_ids(commit: str, path: str) -> tuple[int, ...]:
-    """该 commit 的索引 JSON 里的 id 序列（文件不存在 / 空内容 → 空元组）。"""
     try:
         raw = _git("show", f"{commit}:{path}")
     except RuntimeError:
@@ -80,15 +60,10 @@ def _index_ids(commit: str, path: str) -> tuple[int, ...]:
     return tuple(item["id"] for item in data if isinstance(item, dict) and item.get("id") is not None)
 
 def snapshot_commits() -> list[str]:
-    """version.json 的全部提交，按时间**升序**（最早在前）。"""
     out = _git("log", "--reverse", "--format=%H", "--", VERSION_JSON)
     return [line for line in out.splitlines() if line.strip()]
 
 def first_seen_versions(snapshots: Sequence[tuple[str, Sequence[int]]]) -> dict[str, str]:
-    """快照（时间升序，元素为 (version_label, ids)）→ {id: 首次出现的快照版本}。
-
-    最早快照里已存在的 id 记空串（上线版本先于可追溯区间，不猜）；同一 id 只记首次出现。
-    """
     first: dict[str, str] = {}
     for index, (label, ids) in enumerate(snapshots):
         for item_id in ids:

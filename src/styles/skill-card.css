@@ -46,12 +46,6 @@
 }
 .nk-skill__slider input[type=range] {
   --fill: 0%;
-  /* 24px 高度 = WCAG 2.2 Target Size (Minimum) 的下限命中区 */
-  /* 不写 `outline: none`：滑条也是 Tab 可达控件，裸重置会盖过全局焦点环（:where 特异性 0）⇒ 键盘零反馈 */
-  /* `min-width: 0` 必须有：表单控件的 `min-width: auto` 是**固有宽**（Chromium 下 range 约 129px），
-     flex 收缩下不去 ⇒ 320 档英文/印尼文（标签更长）时这一行整体越出页面根 `.nk-page--detail`
-     9~11px，被根的 `overflow-x: hidden` 静默吃掉（实测 hardClipX：en +11px / id +3px）。
-     加它之后 range 可收缩到容器内，滑条仍占满剩余宽度（`flex: 1` 不变）。 */
   flex: 1; min-width: 0; width: auto; height: 24px; -webkit-appearance: none; appearance: none;
   background: transparent; cursor: pointer; opacity: 0.92; transition: opacity 0.2s var(--nk-ease-out);
 }

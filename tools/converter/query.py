@@ -1,12 +1,3 @@
-"""ExcelOutput / TextMap 数据查询 CLI（供 AI/开发者精确查子模块数据，免开 GB 级 JSON）。
-
-常用：python query.py <File> --schema | --id <n> | --where "K=V" --limit N |
-      --fields A,B | --grep "x" | --head N ; 全局：--list [kw] / --resolve <hash> /
-      --search "文本" / --rebuild-textmap。更多示例见下方 argparse epilog。
-数据边界：vendor/TurnBasedGameData 禁止直读，探索一律走本工具；字段结构按需查
-DATA_CATALOG.md 总索引或 DATA_CATALOG.parts/ 分片（全量索引约 30 万 token，禁止整读）。
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -25,8 +16,8 @@ if sys.platform == "win32":
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 if __package__ in (None, ""):
-    from config import EXCEL_DIR  # pyright: ignore[reportImplicitRelativeImport]
-    import textmap_db  # pyright: ignore[reportImplicitRelativeImport]
+    from config import EXCEL_DIR
+    import textmap_db
 else:
     from .config import EXCEL_DIR
     from . import textmap_db
@@ -49,8 +40,6 @@ ID_FIELDS = [
 
 @dataclass
 class QueryArgs:
-    """解析后的查询参数（替代 argparse.Namespace 以消除 Any 泄漏）。"""
-
     id: str | None
     where: str
     fields: str
@@ -60,11 +49,6 @@ class QueryArgs:
 
 @lru_cache(maxsize=4)
 def load_excel(filename: str) -> JSONValue:
-    """加载 ExcelOutput 下的 JSON 文件（进程内缓存，同一文件只解析一次）。
-
-    与 utils.load_json 同理：源数据只读不写，查询运行期文件不会变化，缓存安全；
-    调用方不得原地修改返回的 dict/list。
-    """
     if not filename.endswith(".json"):
         filename += ".json"
     path = EXCEL_DIR / filename
@@ -76,27 +60,18 @@ def load_excel(filename: str) -> JSONValue:
         return cast("JSONValue", json.load(f))
 
 def find_id_field(record: dict[str, JSONValue]) -> str | None:
-    """自动检测记录的 ID 字段名。"""
     for field in ID_FIELDS:
         if field in record:
             return field
     return None
 
 def print_json(data: JSONValue, compact: bool = False) -> None:
-    """格式化输出 JSON。"""
     if compact:
         print(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
     else:
         print(json.dumps(data, ensure_ascii=False, indent=2))
 
 def cmd_schema(data: JSONValue, filename: str) -> None:
-    """显示文件 schema 信息（全量字段统计，非仅首条记录）。
-
-    历史教训：旧实现只基于 data[0] 推断字段，可选字段（如
-    AvatarSkillConfig 的 SPBase/HideInUI）会被漏报，导致审计误判
-    （见 docs/audit/字段审计-AvatarSkillConfig.md F1）。现改为全量扫描：
-    统计每个字段的出现率，并按出现率降序输出。
-    """
     if isinstance(data, list):
         print(f"文件: {filename}")
         print(f"类型: array")
@@ -136,7 +111,6 @@ def cmd_schema(data: JSONValue, filename: str) -> None:
             print(f"值字段 ({len(fields)}): {', '.join(sorted(fields))}")
 
 def cmd_list(keyword: str) -> None:
-    """列出 ExcelOutput 下匹配关键词的文件。"""
     files = sorted(EXCEL_DIR.glob("*.json"))
     if keyword:
         files = [f for f in files if keyword.lower() in f.name.lower()]
@@ -146,7 +120,6 @@ def cmd_list(keyword: str) -> None:
         print(f"  {f.name:<50} {size_mb:>7.2f} MB")
 
 def cmd_resolve(hash_val: str) -> None:
-    """解析 TextMap Hash 值（走 SQLite 缓存）。"""
     result = textmap_db.resolve_hash(hash_val)
     if result is not None:
         print(f"Hash {hash_val} → {result}")
@@ -154,7 +127,6 @@ def cmd_resolve(hash_val: str) -> None:
         print(f"Hash {hash_val} 未命中")
 
 def cmd_search(keyword: str, limit: int = 20) -> None:
-    """在 TextMap 中搜索包含关键词的文本（走 SQLite 缓存）。"""
     results = textmap_db.search_text(keyword, limit=limit)
 
     print(
@@ -166,7 +138,6 @@ def cmd_search(keyword: str, limit: int = 20) -> None:
         print(f"  [{k}] {display}")
 
 def cmd_query(data: JSONValue, args: QueryArgs) -> None:
-    """通用查询逻辑。"""
     if isinstance(data, list):
         records: list[JSONValue] = data
     elif isinstance(data, dict):

@@ -1,9 +1,3 @@
-"""货币战争 · 角色图鉴转换器（从本地 vendor 副本读取）
-
-完整表→字段→输出映射见 docs/data/转换器字段映射.md（currency 段）。
-数据全部来自 vendor/TurnBasedGameData/ExcelOutput/；文本经 TextMap 解析为中文；
-图片（头像/立绘/羁绊图标）仍引用 CDN。输出：public/data/cn/currency/role.json + role/<id>.json。
-"""
 from __future__ import annotations
 
 import logging
@@ -22,7 +16,6 @@ logger = logging.getLogger("converter.currency")
 OUT_SUBDIR = "currency"
 
 def _trait_cat(tid: int) -> str:
-    """特质 ID → 分类：1000系阵营 / 2000系战斗 / 3000系特殊。"""
     if 1000 <= tid < 2000:
         return "faction"
     if 2000 <= tid < 3000:
@@ -30,19 +23,12 @@ def _trait_cat(tid: int) -> str:
     return "special"
 
 def _season_ids(role: dict) -> list[int]:
-    """角色所属赛季：SeasonIDList 优先，空则回退 [SeasonID]。"""
     ids = list(role.get("SeasonIDList") or [])
     if not ids and role.get("SeasonID") is not None:
         ids = [role["SeasonID"]]
     return ids
 
 def _index_gender_override(data: list[dict]) -> dict[int, int]:
-    """GridFightGenderOverride.json → RoleID → 女性形态 AvatarID。
-
-    货币战争开拓者仅收录男形 RoleID（8007/8009），女性形态（8008/8010）由该表
-    运行时覆盖（JsonOverridePath 指向 PlayerGirl 配置）；每个 RoleID 有 Star 1-3
-    三行且 AvatarID 相同，取首行即可。
-    """
     out: dict[int, int] = {}
     for entry in data:
         rid = entry.get("RoleID")
@@ -58,7 +44,6 @@ def _build_index(data: list[dict], key: str = "ID") -> dict[Any, dict]:
     return {item[key]: item for item in data}
 
 def _unwrap(v: Any, default: Any = None) -> Any:
-    """解包 {Value: X} → X；None 或无 Value 字段返回 default。"""
     if v is None:
         return default
     if isinstance(v, dict) and "Value" in v:
@@ -66,7 +51,6 @@ def _unwrap(v: Any, default: Any = None) -> Any:
     return v
 
 def _flatten_stance_list(lst: list | None) -> list[int]:
-    """将 [{Value: 1}, {Value: 2}, ...] → [1, 2, ...]"""
     if not lst:
         return []
     out = []
@@ -75,10 +59,6 @@ def _flatten_stance_list(lst: list | None) -> list[int]:
     return out
 
 def _build_prop_names(data: list[dict]) -> dict[str, str]:
-    """GridFightRolePropertyConfig.json → PropertyType → 官方名（TextMap 解析）。
-
-    官方改称呼时上游 TextMap 更新 → 重跑转换即可自动同步（前端 propLabel 优先消费 prop_name）。
-    """
     out: dict[str, str] = {}
     for e in data:
         t = e.get("PropertyType")
@@ -90,11 +70,6 @@ def _build_prop_names(data: list[dict]) -> dict[str, str]:
     return out
 
 def _build_prop_icons(data: list[dict]) -> dict[str, str]:
-    """GridFightRolePropertyConfig.json → PropertyType → IconPath（原样透传 SpriteOutput 路径）。
-
-    前端 gridFightPropIconUrl 按「目录段全小写 + 文件名保留」规则拼 jsDelivr（官方库唯一源，
-    nanoka 无 GridFight/AttributeIcon 资源）。
-    """
     out: dict[str, str] = {}
     for e in data:
         t = e.get("PropertyType")
@@ -105,12 +80,6 @@ def _build_prop_icons(data: list[dict]) -> dict[str, str]:
 
 def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None = None,
                             prop_icons: dict[str, str] | None = None) -> list[dict]:
-    """将 [{PropertyType: ..., Value: {Value: ...}}, ...] → 标准化列表。
-
-    prop_names 提供 PropertyType → 官方名（TextMap）时，额外输出 prop_name 字段；
-    未收录的属性类型（常规模式属性体系）不输出，由前端映射表兜底。
-    prop_icons 提供 PropertyType → IconPath 时，额外输出 icon 字段（同源属性表）。
-    """
     if not lst:
         return []
     out = []
@@ -134,13 +103,6 @@ def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None =
 def _index_trait_layers(data: list[dict], mazebuff_index: dict[int, dict] | None = None,
                         prop_names: dict[str, str] | None = None,
                         prop_icons: dict[str, str] | None = None) -> dict[int, list[dict]]:
-    """GridFightTraitLayer.json → TraitID → 层级效果列表。
-
-    每层包含：激活人数(layer)、品质(quality)、效果描述(desc)、
-    描述参数(params)、羁绊成员属性(member_props)、全员属性(all_props)。
-    当直接字段为空时，回退到 MazebuffID 对应的 GridFightTraitMazebuff 描述。
-    当直接字段非空且 Mazebuff 有额外描述时，补充 buff_desc/buff_params。
-    """
     if mazebuff_index is None:
         mazebuff_index = {}
     out: dict[int, list[dict]] = {}
@@ -182,7 +144,6 @@ def _index_trait_layers(data: list[dict], mazebuff_index: dict[int, dict] | None
     return out
 
 def _index_equipment(data: list[dict]) -> dict[int, list[dict]]:
-    """GridFightBackEquipment.json → RoleID → 按等级的装备条目列表。"""
     out: dict[int, list[dict]] = {}
     for entry in data:
         rid = entry.get("RoleID")
@@ -194,11 +155,6 @@ def _index_equipment(data: list[dict]) -> dict[int, list[dict]]:
     return out
 
 def _index_recommend(data: list[dict], items_index: dict[int, dict] | None = None) -> dict[int, dict]:
-    """GridFightRoleRecommendEquip.json → RoleID → 推荐装备。
-
-    输出格式：{"front": {"first": [...], "second": [...]}, "back": {...}}
-    每个装备条目为 {"id": ..., "name": ..., "icon": ...}（从 GridFightItems 解析名称/图标）。
-    """
     items_index = items_index or {}
 
     def _equip(eid: int) -> dict:
@@ -225,7 +181,6 @@ def _index_recommend(data: list[dict], items_index: dict[int, dict] | None = Non
     return out
 
 def _index_servant_star(data: list[dict]) -> dict[tuple[int, int], dict]:
-    """GridFightServantStar.json → (ID, Star) → 条目。"""
     out: dict[tuple[int, int], dict] = {}
     for entry in data:
         rid = entry.get("ID")
@@ -494,7 +449,6 @@ def _build_skill(
     overrides: dict[str, Any] | None = None,
     extra_index: dict[int, dict] | None = None,
 ) -> dict:
-    """根据 SkillID 从索引中查找并构建输出格式的技能对象。"""
     sk = skill_index.get(sid)
     if sk is None:
         return {"id": sid, "name": "", "desc": "", "simple_desc": "", "tag": None,
@@ -527,7 +481,6 @@ def _build_skill(
             if ex_desc or ex_simple:
                 extra = {
                     "condition": {
-                        # 固定标签也取官方词条（enum_labels 单点登记），不自造中文
                         "name": resolve_label("ui_label", "conditionTrigger", "触发条件"),
                         "desc": ex_desc or ex_simple,
                         "param": [_unwrap(p, 0) for p in (ex.get("ParamList") or [])],

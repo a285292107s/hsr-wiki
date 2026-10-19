@@ -1,4 +1,3 @@
-// 纯函数测试（版本过滤/分区构建），不依赖 DOM
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import {
@@ -136,7 +135,6 @@ describe('特写档判据 = 恰 1 条（≥2 条不再偏袒第一条）', () =>
     expect(s.feature).toBe(true);
     expect(s.count).toBe(1);
     expect(s.leadMeta).toEqual({ name: '甲', href: '/character/1' });
-    // 分区级入口（图鉴页）在任何条数下都在——它是唯一不偏袒条目的显式动作
     expect(s.listHref).toBe('/character');
   });
 

@@ -1,12 +1,4 @@
 // @vitest-environment node
-/**
- * `userErrorDetail`：错误态「详情行」要不要渲染。
- *
- * 背景：`CatalogPage` / `EndgameView` / `EndgameModeView` 曾把 `e.message` 直接渲染进错误态，
- * 而 `NkError` 的 message 是**内部诊断**（机检白名单按此归类，文案为中文）⇒ 非缺省语言用户
- * 会在界面上看到中文诊断（如「角色数据缺少必要字段: …」）。现在 operational 错误只进控制台，
- * 界面用本地化标题 + 重试；非 NkError（编程错误）仍原样暴露。
- */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { NkError, userErrorDetail } from '../errors';
 

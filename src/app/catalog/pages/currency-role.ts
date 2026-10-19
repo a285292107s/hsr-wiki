@@ -7,11 +7,9 @@ import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 import { loadCwCatalogCss, STAR_SVG } from './shared';
 import { translate } from '../../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 import { cwChargeKey, cwCostKey, cwPositionKey, cwTraitCatKey } from '../../../lib/enum-labels';
 
-/* 前后台 / 充能类型 / 特质分类 / 费用档的枚举 → 词典键映射收在 lib/enum-labels.ts（与卡面共用一份） */
 type TraitCat = 'faction' | 'combat' | 'special';
 
 const FB_SVG_FRONT = `<svg class="nk-cat-select__fb" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="8" rx="3" style="fill:var(--cw-fb-front)"/><rect x="3" y="13" width="18" height="8" rx="3" style="fill:var(--cw-fb-front);fill-opacity:.15;stroke:var(--cw-fb-front);stroke-opacity:.62" stroke-width="1.5"/></svg>`;
@@ -32,10 +30,6 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const expert = item.is_expert
     ? `<span class="nk-crole-card__exp">${escHtml(translate('catalog.filter.expert'))}</span>` : '';
   const chargeEl = charge ? `<span class="nk-crole-card__charge" title="${escHtml(charge)}">${escHtml(charge)}</span>` : '';
-  /* 卡面主名称在 `__name-row` 里被 2 行 clamp（该元素是头像上的绝对定位浮层，不宜无限增高）——
-     长译文下 13 语言实测最长需 4 行，故必须挂 `title` 复原全文；
-     title 与实际 textContent 逐字一致（含专家角标），否则 `e2e/layout-i18n-overflow.spec.ts`
-     的「截断必须有复原文本」判据（要求 title 包含元素文本）不成立。 */
   const nameRowTitle = item.is_expert ? `${item.name}${translate('catalog.filter.expert')}` : item.name;
   const fbIcon = fbType === 'Both' ? FB_SVG_BOTH
     : fbType === 'Front' ? FB_SVG_FRONT
@@ -67,7 +61,6 @@ export const currencyRolePage: CatalogPageConfig = {
   subtitle: 'ROLES',
   searchKey: 'catalog.cwRole.search',
   gridClass: 'nk-cat-grid nk-crole-grid',
-  /* 拆分块须按级联顺序串行加载（styles 数组各 loader 并行执行，顺序不保） */
   styles: [loadCwCatalogCss, async () => {
     await import('../../../../src/styles/currency-role-hero.css');
     await import('../../../../src/styles/currency-role-sections.css');
@@ -76,7 +69,6 @@ export const currencyRolePage: CatalogPageConfig = {
   }],
   async fetchData() {
     const { roles } = await loadLocalCurrencyRoles();
-    // 开拓者：设置选女性时头像用 female_avatar_id（GridFightGenderOverride 映射，仅立绘切换）
     const gender = getSavedTrailblazerGender();
     return roles.map((r) => {
       const traits = r.traits || [];

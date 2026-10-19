@@ -1,5 +1,3 @@
-"""命途数据转换器。"""
-
 import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR, PATH_NAME_FALLBACK
@@ -10,7 +8,6 @@ logger = logging.getLogger("converter")
 
 
 def convert() -> None:
-    """转换 AvatarBaseType.json → paths.json。"""
     data = load_json(EXCEL_DIR / "AvatarBaseType.json")
     result = []
 

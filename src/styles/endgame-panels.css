@@ -1,17 +1,9 @@
-/* 终局详情页 · 区块原语：区块标题 / 战斗卡片行（半场卡与节点卡）/ 赛季增益 / 楼层头。
-   拆分块第 2 块（接骨架块之后、敌方卡块之前）。 */
-/* 面板内容与子 tab 行底边之间留白：面板首元素（目标栏 / 星启统计行）紧贴那条发丝线 */
 .nk-egd-level-panel { scroll-margin-top: 16px; padding-top: 20px; }
 
-/* groups 内层是 flex 项：auto 外边距会取消 stretch，必须显式 width:100% 才能维持
-   .nk-egd-buffs 的 struct-max 宽度（否则各组按内容收缩、宽度不一致） */
 .nk-egd-buffs { display: flex; flex-direction: column; margin-bottom: 8px; width: 100%; }
 .nk-egd-group { display: flex; flex-direction: column; gap: 10px; }
-/* 分组行头：标题与场次标签同行（场次标签的 align-self 在行内向是顶部对齐，须覆写为居中） */
 .nk-egd-group__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; align-self: stretch; }
 .nk-egd-group__head > * { align-self: center; }
-/* 战斗卡片行（层 tab 的半场卡片 / 星启看板的节点卡片共用）：并列一行（名称 + 末波首领图 + 推荐属性 + 等级），
-   手机端也维持一行。卡片兼作当前战斗的身份位，看板内不再重复名称与属性。 */
 .nk-egd-nodecards {
   display: flex;
   gap: 12px;
@@ -51,9 +43,6 @@
 .nk-egd-nodecard__img { width: 100%; height: 100%; object-fit: cover; }
 .nk-egd-nodecard__body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .nk-egd-nodecard__name { font-weight: 700; color: var(--text-bright); }
-/* 卡名与危险标识同行（当前唯一消费方 = 异相仲裁王棋档的「绝境」节点）：标识不换行，
-   窄屏放不下时整行折到次行，绝不挤压卡名本身。图形是自绘 SVG（红三角 + 感叹号），
-   只占图标位、不带文字——语义走 `role="img"` 的无障碍名。 */
 .nk-egd-nodecard__title {
   display: flex;
   align-items: center;
@@ -83,7 +72,6 @@
 .nk-egd-nodecard__val { font-weight: 700; color: var(--text-bright); }
 .nk-egd-nodecard__elems { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 @media (max-width: 767px) {
-  /* 一行三卡：卡片内改上下排版（图在上、信息在下），三张按 flex 均分一屏宽，不横滚 */
   .nk-egd-nodecards { gap: 8px; }
   .nk-egd-nodecard {
     flex: 1 1 0;
@@ -96,25 +84,15 @@
   .nk-egd-nodecard__fig { width: 44px; height: 44px; }
   .nk-egd-nodecard__body { align-items: center; gap: 3px; }
   .nk-egd-nodecard__row { gap: 4px; }
-  /* 推荐属性：标签单独一行、图标下移（4 枚 14px 图标在 100px 卡宽里放得下） */
   .nk-egd-nodecard__row--elems { flex-direction: column; gap: 3px; }
-  /* 卡内标签在窄档必须可换行：三卡均分一屏宽后卡内容区仅 ~79px（320 档），而标签是 nowrap
-     （en「Recommended Type(s)」实测 max-content 126px）⇒ `__body` 的 shrink-to-fit 取到 126px、
-     整块越出卡片与视口。`anywhere` 让 min-content 降到 1 字，卡宽才不会由最长标签反推。 */
   .nk-egd-nodecard__label { white-space: normal; overflow-wrap: anywhere; }
   .nk-egd-nodecard__elems { justify-content: center; gap: 3px; }
   .nk-egd-nodecard__elems .nk-egd-elem { width: 14px; height: 14px; }
 }
-/* 区块标题 = 章节层级，必须压在它所统领的正文之上（正文 0.84rem）——字体最小的字不该是最外层的标题。
-   下沿发丝线是该区块与下一区块的分节依据，取代原先的填充胶囊。 */
 .nk-egd-group__head {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line-2);
 }
-/* 区块标题的统一档位：`.nk-egd-group__title`（赛季增益 / 首领特性）与提为标题的「敌方配置」
-   共用同一套语言。字档归 `endgame-type-scale.css` 收口；但「敌方配置」标签挂的是**更高特异性**的
-   `.nk-egd-floor__row--mons > .nk-egd-floor__label`（0,2,0 > 收口块的 0,1,0），收口块压不住它，
-   故它的 0.78 必须在此显式声明（下一段），否则会被打回标签档 0.72。 */
 .nk-egd-group__title,
 .nk-egd-floor__row--mons > .nk-egd-floor__label {
   align-self: flex-start;
@@ -122,10 +100,6 @@
   letter-spacing: 0.06em;
   color: var(--text-bright);
 }
-/* 「敌方配置」标签的标题档：见上一段注释——它靠特异性压过收口块的标签档。
-   值与收口块里 `.nk-egd-group__title` 同档（`--nk-fs-3`）：ADR 0034 的相对序契约要求
-   「区块标题 > 行首标签」「正文 > 区块标题」，而收口块正文档是 fs-4、行首标签档是 fs-3
-   ⇒ 标题只能落 fs-3（e2e 判据见 `layout-endgame-board.spec.ts:330-337 / 800-801`）。 */
 .nk-egd-floor__row--mons > .nk-egd-floor__label { font-size: var(--nk-fs-3); }
 .nk-egd-buff {
   position: relative;
@@ -186,16 +160,11 @@
 .nk-egd-buff__desc .hl { color: var(--highlight); font-weight: 700; }
 .nk-egd-buff__desc .nowrap { white-space: nowrap; }
 
-/* 异相仲裁单关面板（关卡子 tab 的 tabpanel 内容，ADR 0043）：唯一不挂卡片行的层级面板，也是 `.nk-egd-floor`
-   这个块级类的唯一消费方（`.nk-egd-floor__*` 元素类仍被层 / 星启 / 单关三处共用）。左基准与另外三模式的
-   层级面板一致（`#egd-level-panel` 内容区左缘），子档缩进由 `.nk-egd-children` 承担。 */
 .nk-egd-floor {
   position: relative;
   padding: 0 0 24px;
   animation: nk-fade 0.35s var(--nk-ease-out) backwards;
 }
-/* 单关面板头：非交互（关卡名由激活的 tab 承载），只排「类别胶囊 + 污染徽标 + 敌方等级」。
-   该行是面板自己的身份条（不是独立区块），故内距归零、与面板内容区顶边齐平，只留 12px 接住下方内容块。 */
 .nk-egd-floor__head {
   display: flex;
   align-items: center;

@@ -23,7 +23,6 @@ export const useAppStore = defineStore('app', () => {
   const nameCache = ref<NameCache>({});
   const toasts = ref<ToastItem[]>([]);
   let toastSeq = 0;
-  /** manifest 最近失败时刻（冷却期：CDN 不可用时避免每次进页都等 15s 超时） */
   let manifestFailedAt = 0;
   const MANIFEST_COOLDOWN_MS = 60_000;
 

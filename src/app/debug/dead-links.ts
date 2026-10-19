@@ -1,6 +1,3 @@
-// 429/503 退避重试，403/网络/CORS/超时→env；数据加载改浏览器 fetch(清单由 dataFileIndexDevPlugin 动态生成)。
-// jsDelivr 限流纪律(禁止违反)：404 带 no-cache,no-store→不缓存，每次探测回源 GitHub，已知结果本地缓存(localStorage)+源文件 sha1；
-// 并发硬上限 DEFAULT_CONCURRENCY=3，禁止调高；浏览器禁自定义 UA；重定向自动跟随，HEAD 404 直接判 dead(省一半请求)。
 import {
   avatarDrawCardUrl,
   avatarShopIconUrl,
@@ -39,7 +36,6 @@ export type UrlMap = Map<string, string>;
 export type DataMap = Record<string, unknown>;
 
 export const DATA_INDEX_URL = '/data/cn/data-file-index.json';
-/** jsDelivr burst 限流实证（Node 版结论）：并发硬上限，UI 只允许调低（1/2/3） */
 export const DEFAULT_CONCURRENCY = 3;
 const LOAD_CONCURRENCY = 8;
 const TTL_OK_DEAD_MS = 7 * 24 * 3600 * 1000;
@@ -304,7 +300,6 @@ export function planProbe(
       toProbe.push(url);
       continue;
     }
-    // 来源文件内容签名变化 → 该 URL 重测（converter 确定性重写但内容未变 → 签名一致 → 复用）
     const f = sourceFileOf(url, urls);
     if (f && prevHashes[f] !== sourceHashes[f]) {
       toProbe.push(url);
@@ -322,14 +317,12 @@ async function singleRequest(url: string, fetchImpl: typeof fetch): Promise<Prob
   try {
     const r = await fetchImpl(url, {
       method: 'HEAD',
-      // 重定向跟随（jsDelivr 冷文件 302 → raw.githubusercontent.com，CORS 放行，跟随后 2xx 即存在）
       redirect: 'follow',
       signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
     });
     if (r.ok) return 'ok';
     if (r.status === 404) return 'dead';
     if (r.status === 429 || r.status === 503) return 'throttled';
-    // 403 为持续信号（数据中心 IP 拒用等，Node 版历史实证），退避重试无意义
     if (r.status === 403) return 'env';
     return 'env';
   } catch {
@@ -402,6 +395,5 @@ export function saveCacheToStorage(cf: CacheFile, storage: Storage = localStorag
   try {
     storage.setItem(CACHE_STORAGE_KEY, JSON.stringify(cf));
   } catch {
-    // QuotaExceeded / 隐私模式等：静默丢弃，本轮结果仍保留在内存
   }
 }

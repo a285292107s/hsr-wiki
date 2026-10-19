@@ -11,7 +11,6 @@ const props = defineProps<{
   modeKey: string;
   tabs: LevelTab[];
   active: string;
-  /** 增益体系名（透传给当前节点面板；缺省回退站点工作名） */
   systemName?: string;
 }>();
 
@@ -21,7 +20,6 @@ const activeTab = computed(
 const activeFloor = computed(
   () => (activeTab.value?.kind === 'floor' ? levelTabFloor(props.data, activeTab.value.key) : null),
 );
-/** 异相仲裁合并档的节点清单（王棋档 = 节点一普通 / 节点二绝境；骑士档 = 三关骑士） */
 const activePeakNodes = computed(
   () => (activeTab.value?.kind === 'peakNodes' ? levelTabPeakNodes(props.data, activeTab.value.key) : []),
 );

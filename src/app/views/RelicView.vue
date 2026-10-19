@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { useRelicStore } from '../stores/relic';
 import { fmtDesc, itemIconUrl } from '../../lib/format';
 import { cdnUri } from '../../services/cdn';
@@ -10,7 +10,6 @@ import { useDetailView } from '../composables/use-detail-view';
 import '../../styles/relic.css';
 import { translate } from '../i18n';
 
-/** 文案统一走词典（脚本内不易用 useI18n；见 i18n.ts 的 translate） */
 const t = translate;
 
 const relic = useRelicStore();
@@ -26,7 +25,6 @@ const d = computed(() => relic.data);
 const figureUrl = computed(() => (d.value ? itemIconUrl(d.value.icon) : ''));
 const isCavern = computed(() => (d.value?.require_num || []).includes(4));
 const setTypeLabel = computed(() => t(isCavern.value ? 'relic.setType.cavern' : 'relic.setType.planar'));
-const setTypeEn = computed(() => (isCavern.value ? 'CAVERN RELIC' : 'PLANAR ORNAMENT'));
 
 const setEffects = computed<{ num: number; html: string }[]>(() => {
   if (!d.value) return [];
@@ -43,6 +41,19 @@ const setEffects = computed<{ num: number; html: string }[]>(() => {
 });
 
 const pieces = computed<LocalRelicPiece[]>(() => d.value?.pieces || []);
+
+const pieceNames = computed<Record<string, string>>(() => {
+  if (!d.value) return {};
+  const set = relic.stories[String(d.value.id)] || {};
+  const out: Record<string, string> = {};
+  for (const [type, story] of Object.entries(set)) out[type] = story.name;
+  return out;
+});
+
+const activePieceId = ref<number | null>(null);
+function focusPiece(id: number | null): void {
+  activePieceId.value = id;
+}
 
 function pieceIconUrl(p: LocalRelicPiece): string {
   return cdnUri('relicfigures', `IconRelic_${d.value!.id}_${SLOT_INDEX[p.type] ?? 1}.webp`);
@@ -117,7 +128,6 @@ const subAffixList = computed<RelicSubAffix[]>(() => {
   return relic.subAffixes.filter((a) => a.group_id === group);
 });
 
-/** 副词条数值档位 = step_num + 1（BaseValue 是最高档，每档递减 step_value） */
 function subAffixTierCount(a: RelicSubAffix): number {
   return (a.step_num ?? 0) + 1;
 }
@@ -127,7 +137,6 @@ function subAffixTiers(a: RelicSubAffix): number[] {
   return Array.from({ length: count }, (_, i) => a.base_value - a.step_value * (a.step_num - i));
 }
 
-/** 满级强化信息：+15 遗器在 +3/+6/+9/+12/+15 共 5 次强化，单条满值倍率 = 1 初始 + 5 = 6 */
 const enhanceInfo = computed(() => {
   const maxLevel = pieces.value[0]?.max_level ?? 15;
   const rolls = Math.floor(maxLevel / 3);
@@ -137,6 +146,24 @@ const enhanceInfo = computed(() => {
 function subAffixMax(a: RelicSubAffix): number {
   return a.base_value * enhanceInfo.value.multiplier;
 }
+
+const enhanceStats = computed(() => {
+  const first = subAffixList.value[0];
+  if (!first) return [];
+  return [
+    { key: 'tier', value: String(subAffixTierCount(first)), label: t('relic.tier') },
+    { key: 'level', value: `+${enhanceInfo.value.maxLevel}`, label: t('relic.maxLevel') },
+    { key: 'rolls', value: String(enhanceInfo.value.rolls), label: t('relic.nextEnhance') },
+    { key: 'mult', value: `×${enhanceInfo.value.multiplier}`, label: t('relic.maxMultiplier') },
+  ];
+});
+
+const subAffixTierColumns = computed<number[]>(() => {
+  const first = subAffixList.value[0];
+  return first ? Array.from({ length: subAffixTierCount(first) }, (_, i) => i + 1) : [];
+});
+
+const setRarity = computed(() => pieces.value[0]?.rarity ?? 0);
 
 interface PieceStoryItem {
   piece: LocalRelicPiece;
@@ -167,45 +194,15 @@ const pieceStories = computed<PieceStoryItem[]>(() => {
   return items;
 });
 
-const affixWrapRef = ref<HTMLElement | null>(null);
-const affixScrollable = ref(false);
-let affixRo: ResizeObserver | null = null;
-
-function checkAffixOverflow(): void {
-  const el = affixWrapRef.value;
-  if (!el) { affixScrollable.value = false; return; }
-  affixScrollable.value = el.scrollWidth > el.clientWidth + 2;
-}
-function onAffixScroll(): void {
-  const el = affixWrapRef.value;
-  if (!el) return;
-  const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-  affixScrollable.value = !atEnd && el.scrollWidth > el.clientWidth + 2;
-}
-
-watch(
-  () => [phase.value, mainAffixRows.value.length] as const,
-  () => {
-    void nextTick(() => {
-      if (affixRo) { affixRo.disconnect(); affixRo = null; }
-      if (affixWrapRef.value) {
-        affixRo = new ResizeObserver(checkAffixOverflow);
-        affixRo.observe(affixWrapRef.value);
-      }
-      checkAffixOverflow();
-    });
-  },
-);
-
+const maxLevelNote = computed(() => t('relic.affixNote', { n: pieces.value[0]?.max_level || 15 }));
 
 onBeforeUnmount(() => {
-  if (affixRo) { affixRo.disconnect(); affixRo = null; }
   relic.reset();
 });
 </script>
 
 <template>
-  <div class="nk-page--detail" :aria-busy="phase === 'loading'">
+  <div class="nk-page--detail" tabindex="0" :aria-busy="phase === 'loading'">
     <div
       v-if="phase === 'loading' && showSkeleton"
       class="nk-skeleton nk-skeleton--relic"
@@ -220,14 +217,15 @@ onBeforeUnmount(() => {
         <div class="nk-skeleton__hero-panel">
           <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-lg"></div>
           <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-md"></div>
-          <div style="display:flex;gap:8px;">
-            <div class="nk-sk nk-sk--shimmer nk-sk--chip nk-sk--bar-sm"></div>
-            <div class="nk-sk nk-sk--shimmer nk-sk--chip" style="width:60px;"></div>
+          <div class="nk-relic-sk-pieces">
+            <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
+            <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
           </div>
         </div>
       </div>
       <div class="nk-skeleton__body">
         <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
+        <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
         <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
       </div>
     </div>
@@ -257,99 +255,88 @@ onBeforeUnmount(() => {
           <header class="nk-hero__head">
             <h1 class="nk-hero__name">{{ d.name }}</h1>
             <div class="nk-hero__meta">
-              <span class="nk-hero__tag nk-relic-type-badge" :class="isCavern ? 'nk-relic-type-badge--cavern' : 'nk-relic-type-badge--planar'">
+              <span v-if="setRarity" class="nk-hero__stars">{{ '★'.repeat(setRarity) }}</span>
+              <span class="nk-hero__tag nk-relic-type" :class="isCavern ? 'is-cavern' : 'is-planar'">
                 {{ setTypeLabel }}
               </span>
-              <span v-if="d.release_version" class="nk-hero__tag nk-relic-ver">v{{ d.release_version }}</span>
+              <span class="nk-relic-count">{{ t('relic.pieceCount', { n: pieces.length }) }}</span>
+              <span v-if="d.release_version" class="nk-relic-ver">v{{ d.release_version }}</span>
             </div>
-            <div class="nk-relic-type-en">{{ setTypeEn }}</div>
           </header>
 
-          <section v-if="pieces.length" class="nk-hero__section">
-            <div class="nk-hero__section-title">
-              <span class="nk-hero__section-bar"></span>
-              <span>{{ t('relic.parts') }}</span>
-              <span class="nk-relic-count">{{ t('relic.pieceCount', { n: pieces.length }) }}</span>
-            </div>
-            <div class="nk-relic-hero-pieces">
-              <div
+          <section v-if="pieces.length" class="nk-relic-pieces">
+            <h2 class="nk-relic-pieces__title">{{ t('relic.parts') }}</h2>
+            <ul class="nk-relic-pieces__list">
+              <li
                 v-for="p in pieces"
                 :key="p.id"
-                class="nk-relic-hero-piece"
-                :title="relicSlotLabel(p)"
+                class="nk-relic-piece"
+                :class="{ 'is-active': activePieceId === p.id }"
+                @mouseenter="focusPiece(p.id)"
+                @mouseleave="focusPiece(null)"
               >
-                <div class="nk-relic-hero-piece__img">
-                  <img :src="pieceIconUrl(p)" :alt="relicSlotLabel(p)" @error="onPieceImgError($event, p)">
-                </div>
-                <span class="nk-relic-hero-piece__slot">{{ relicSlotLabel(p) }}</span>
-              </div>
-            </div>
+                <span class="nk-relic-piece__fig">
+                  <img :src="pieceIconUrl(p)" alt="" @error="onPieceImgError($event, p)">
+                </span>
+                <span class="nk-relic-piece__text">
+                  <span class="nk-relic-hero-piece__slot">{{ relicSlotLabel(p) }}</span>
+                  <span v-if="pieceNames[p.type]" class="nk-relic-piece__name" :title="pieceNames[p.type]">
+                    {{ pieceNames[p.type] }}
+                  </span>
+                </span>
+              </li>
+            </ul>
           </section>
         </div>
       </div>
 
-      <div class="nk-tabs">
-        <div class="nk-tabs__bar">
-          <div class="nk-tabs__left">
-            <button
-              v-for="t in relic.TABS"
-              :key="t.key"
-              type="button"
-              :class="['nk-tab', { 'nk-tab--active': relic.activeTab === t.key }]"
-              @click="relic.setTab(t.key)"
-            >{{ t.label }}</button>
-          </div>
-        </div>
-      </div>
-
       <div class="nk-panels">
-        <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'effect' }]" data-panel="effect">
-          <template v-if="setEffects.length">
-            <div class="nk-relic-effects">
-              <div
-                v-for="eff in setEffects"
-                :key="eff.num"
-                class="nk-relic-effect"
-              >
-                <div class="nk-relic-effect__head">
-                  <span class="nk-relic-effect__num">{{ t('relic.setPieces', { n: eff.num }) }}</span>
-                </div>
-                <div class="nk-relic-effect__desc" v-html="eff.html"></div>
-              </div>
-            </div>
-          </template>
-        </div>
+        <div class="nk-panel nk-panel--relic nk-panel--active">
+          <section v-if="setEffects.length" class="nk-relic-section">
+            <h2 class="nk-title"><span class="nk-title__idx">01</span>{{ t('relic.sec.effect') }}</h2>
+            <ul class="nk-relic-effects">
+              <li v-for="eff in setEffects" :key="eff.num" class="nk-relic-effect">
+                <span class="nk-relic-effect__req">{{ t('relic.setPieces', { n: eff.num }) }}</span>
+                <p class="nk-relic-effect__desc" v-html="eff.html"></p>
+              </li>
+            </ul>
+          </section>
 
-        <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'main' }]" data-panel="main">
-          <template v-if="mainAffixRows.length">
-            <div class="nk-relic-affix-note">{{ t('relic.affixNote', { n: pieces[0]?.max_level || 15 }) }}</div>
-            <div
-              ref="affixWrapRef"
-              class="nk-relic-affix-table-wrap"
-              :class="{ 'is-scrollable': affixScrollable }"
-              @scroll.passive="onAffixScroll"
-            >
+          <section v-if="mainAffixRows.length" class="nk-relic-section">
+            <h2 class="nk-title"><span class="nk-title__idx">02</span>{{ t('relic.sec.main') }}</h2>
+            <p class="nk-relic-legend">{{ maxLevelNote }}</p>
+            <div class="nk-relic-table-wrap">
               <table class="nk-relic-affix-table">
+                <caption class="nk-relic-caption">{{ t('relic.sec.main') }}</caption>
                 <thead>
                   <tr>
-                    <th class="nk-relic-affix-table__prop-h">{{ t('relic.affixCol') }}</th>
+                    <th class="nk-relic-affix-table__prop-h" scope="col">{{ t('relic.affixCol') }}</th>
                     <th
                       v-for="p in mainAffixColumns"
                       :key="p.id"
                       class="nk-relic-affix-table__slot-h"
+                      :class="{ 'is-linked': activePieceId === p.id }"
+                      scope="col"
+                      @mouseenter="focusPiece(p.id)"
+                      @mouseleave="focusPiece(null)"
                     >
-                      <img class="nk-relic-affix-table__icon" :src="pieceIconUrl(p)" :alt="relicSlotLabel(p)" @error="onPieceImgError($event, p)">
+                      <img class="nk-relic-affix-table__icon" :src="pieceIconUrl(p)" alt="" @error="onPieceImgError($event, p)">
                       <span class="nk-relic-affix-table__slot-name">{{ relicSlotLabel(p) }}</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="row in mainAffixRows" :key="row.property">
-                    <td class="nk-relic-affix-table__prop">{{ row.name }}</td>
-                    <td v-for="cell in row.cells" :key="cell.piece.id" class="nk-relic-affix-table__cell">
+                    <th class="nk-relic-affix-table__prop" scope="row">{{ row.name }}</th>
+                    <td
+                      v-for="cell in row.cells"
+                      :key="cell.piece.id"
+                      class="nk-relic-affix-table__cell"
+                      :class="{ 'is-linked': activePieceId === cell.piece.id }"
+                    >
                       <template v-if="cell.affix">
                         <span class="nk-relic-affix-table__init">{{ fmtAffix(cell.affix.base_value, row.property, cell.affix.base_value) }}</span>
-                        <span class="nk-relic-affix-table__arrow">→</span>
+                        <span class="nk-relic-affix-table__arrow" aria-hidden="true">→</span>
                         <span class="nk-relic-affix-table__max">{{ fmtAffix(mainAffixMax(cell.affix, cell.piece.max_level), row.property, cell.affix.base_value) }}</span>
                       </template>
                       <span v-else class="nk-relic-affix-table__empty" :aria-label="t('relic.noAffixAria')">—</span>
@@ -358,69 +345,72 @@ onBeforeUnmount(() => {
                 </tbody>
               </table>
             </div>
-          </template>
-        </div>
+          </section>
 
-        <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'sub' }]" data-panel="sub">
-          <template v-if="subAffixList.length">
-            <div class="nk-relic-submeta">
-              <div class="nk-relic-submeta__badges">
-                <span class="nk-relic-submeta__badge">
-                  <span class="nk-relic-submeta__val">{{ subAffixTierCount(subAffixList[0]) }}</span>
-                  <span class="nk-relic-submeta__lbl">{{ t('relic.tier') }}</span>
-                </span>
-                <span class="nk-relic-submeta__badge">
-                  <span class="nk-relic-submeta__val">+{{ enhanceInfo.maxLevel }}</span>
-                  <span class="nk-relic-submeta__lbl">{{ t('relic.maxLevel') }}</span>
-                </span>
-                <span class="nk-relic-submeta__badge">
-                  <span class="nk-relic-submeta__val">{{ enhanceInfo.rolls }}</span>
-                  <span class="nk-relic-submeta__lbl">{{ t('relic.nextEnhance') }}</span>
-                </span>
-                <span class="nk-relic-submeta__badge nk-relic-submeta__badge--accent">
-                  <span class="nk-relic-submeta__val">×{{ enhanceInfo.multiplier }}</span>
-                  <span class="nk-relic-submeta__lbl">{{ t('relic.maxMultiplier') }}</span>
-                </span>
+          <section v-if="subAffixList.length" class="nk-relic-section">
+            <h2 class="nk-title"><span class="nk-title__idx">03</span>{{ t('relic.sec.sub') }}</h2>
+            <dl class="nk-relic-enhance">
+              <div v-for="stat in enhanceStats" :key="stat.key" class="nk-relic-enhance__item">
+                <dt class="nk-relic-enhance__label">{{ stat.label }}</dt>
+                <dd class="nk-relic-enhance__val">{{ stat.value }}</dd>
               </div>
-              <p class="nk-relic-submeta__hint">
-                {{ t('relic.dropNote', { mult: enhanceInfo.multiplier }) }}
-              </p>
+            </dl>
+            <p class="nk-relic-legend">{{ t('relic.dropNote', { mult: enhanceInfo.multiplier }) }}</p>
+            <div class="nk-relic-table-wrap">
+              <table class="nk-relic-sub-table">
+                <caption class="nk-relic-caption">{{ t('relic.sec.sub') }}</caption>
+                <thead>
+                  <tr>
+                    <th class="nk-relic-sub-table__stat-h" scope="col">{{ t('relic.affixCol') }}</th>
+                    <th
+                      v-for="n in subAffixTierColumns"
+                      :key="n"
+                      class="nk-relic-sub-table__tier-h"
+                      scope="col"
+                    >{{ t('relic.tierTitle', { n }) }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="a in subAffixList" :key="a.affix_id">
+                    <th class="nk-relic-sub-table__stat" scope="row">
+                      <span class="nk-relic-sub-table__stat-inner">
+                        <span class="nk-relic-subcell__name">{{ propLabel(a.property) }}</span>
+                        <span class="nk-relic-subcell__max">{{ t('relic.maxValue', { value: fmtAffix(subAffixMax(a), a.property, a.base_value) }) }}</span>
+                      </span>
+                    </th>
+                    <td v-for="(v, n) in subAffixTiers(a)" :key="n" class="nk-relic-sub-table__tier">
+                      {{ fmtAffix(v, a.property, a.base_value) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div class="nk-relic-subgrid">
-              <div v-for="a in subAffixList" :key="a.affix_id" class="nk-relic-subcell">
-                <div class="nk-relic-subcell__head">
-                  <span class="nk-relic-subcell__name">{{ propLabel(a.property) }}</span>
-                  <span class="nk-relic-subcell__max">{{ t('relic.maxValue', { value: fmtAffix(subAffixMax(a), a.property, a.base_value) }) }}</span>
-                </div>
-                <div class="nk-relic-subcell__tiers">
-                  <span
-                    v-for="(t, i) in subAffixTiers(a)"
-                    :key="i"
-                    class="nk-relic-subcell__tier"
-                    :title="translate('relic.tierTitle', { n: i + 1 })"
-                  >{{ fmtAffix(t, a.property, a.base_value) }}</span>
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
+          </section>
 
-        <div :class="['nk-panel nk-panel--relic', { 'nk-panel--active': relic.activeTab === 'story' }]" data-panel="story">
-          <template v-if="pieceStories.length">
+          <section v-if="pieceStories.length" class="nk-relic-section">
+            <h2 class="nk-title"><span class="nk-title__idx">04</span>{{ t('relic.sec.story') }}</h2>
             <div class="nk-relic-stories">
-              <article v-for="s in pieceStories" :key="s.piece.id" class="nk-relic-story">
+              <article
+                v-for="s in pieceStories"
+                :key="s.piece.id"
+                class="nk-relic-story"
+              >
                 <div class="nk-relic-story__head">
-                  <img class="nk-relic-story__icon" :src="pieceIconUrl(s.piece)" :alt="relicSlotLabel(s.piece)" loading="lazy" @error="onPieceImgError($event, s.piece)">
+                  <span class="nk-relic-story__fig">
+                    <img :src="pieceIconUrl(s.piece)" alt="" loading="lazy" @error="onPieceImgError($event, s.piece)">
+                  </span>
                   <div class="nk-relic-story__heading">
                     <div class="nk-relic-story__name">{{ s.name }}</div>
                     <div class="nk-relic-story__slot">{{ relicSlotLabel(s.piece) }}</div>
                   </div>
                 </div>
-                <div v-if="s.descHtml" class="nk-relic-story__desc" v-html="s.descHtml"></div>
-                <div class="nk-relic-story__body" v-html="s.storyHtml"></div>
+                <div class="nk-relic-story__prose">
+                  <p v-if="s.descHtml" class="nk-relic-story__desc" v-html="s.descHtml"></p>
+                  <div class="nk-relic-story__body" v-html="s.storyHtml"></div>
+                </div>
               </article>
             </div>
-          </template>
+          </section>
         </div>
       </div>
     </template>

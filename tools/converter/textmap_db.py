@@ -1,12 +1,3 @@
-"""TextMap SQLite 缓存：跨进程持久化加速 query.py 的 --resolve / --search。
-
-设计要点：
-- DB 文件位于 tools/converter/.textmap-cache.db（已 gitignore）
-- 基于源文件 mtime_ns:size 签名自动检测失效（与 incremental.py 签名风格一致）
-- 首次查询或源文件变更时自动重建（~5-8s），后续查询走索引（<1ms）
-- 仅服务 query.py 开发查询路径，convert.py / textmap.py 不依赖本模块
-"""
-
 from __future__ import annotations
 
 import json
@@ -18,7 +9,7 @@ from pathlib import Path
 from typing import cast
 
 if __package__ in (None, ""):
-    from config import TEXTMAP_FILE  # pyright: ignore[reportImplicitRelativeImport]
+    from config import TEXTMAP_FILE
 else:
     from .config import TEXTMAP_FILE
 
@@ -31,7 +22,6 @@ _BATCH_SIZE = 50_000
 _conn: sqlite3.Connection | None = None
 
 def _source_sig(path: Path) -> str:
-    """源文件签名：mtime_ns:size（与 incremental.py 风格一致）。"""
     try:
         st = path.stat()
         return f"{st.st_mtime_ns}:{st.st_size}"
@@ -39,7 +29,6 @@ def _source_sig(path: Path) -> str:
         return "missing"
 
 def _open_raw() -> sqlite3.Connection:
-    """打开 DB 原始连接（不走自动校验）。损坏时先释放句柄再抛 DatabaseError。"""
     conn = sqlite3.connect(DB_FILE)
     try:
         conn.execute("PRAGMA journal_mode=WAL")
@@ -49,7 +38,6 @@ def _open_raw() -> sqlite3.Connection:
     return conn
 
 def _is_valid(conn: sqlite3.Connection) -> bool:
-    """校验 DB 中记录的源签名是否与当前 TextMap 一致。"""
     try:
         row = conn.execute(
             "SELECT value FROM meta WHERE key = 'source_sig'"
@@ -59,7 +47,6 @@ def _is_valid(conn: sqlite3.Connection) -> bool:
     return bool(row) and row[0] == _source_sig(TEXTMAP_FILE)
 
 def _build(conn: sqlite3.Connection) -> None:
-    """从 TextMapCHS.json 全量重建索引（事务化，失败不留半成品）。"""
     if not TEXTMAP_FILE.exists():
         raise FileNotFoundError(f"TextMap 文件不存在: {TEXTMAP_FILE}")
 
@@ -94,7 +81,6 @@ def _build(conn: sqlite3.Connection) -> None:
     print(f"索引构建完成：{total:,} 条，{size_mb:.1f} MB，耗时 {elapsed:.1f}s")
 
 def _get_conn() -> sqlite3.Connection:
-    """获取可用连接（懒加载 + 自动校验/重建；损坏 DB 自动删除重建）。"""
     global _conn
     if _conn is not None:
         return _conn
@@ -125,11 +111,6 @@ def _get_conn() -> sqlite3.Connection:
     return conn
 
 def _ensure_fresh() -> sqlite3.Connection:
-    """获取连接，并在源签名变化时自动重建（每次查询前校验，成本仅一次 stat）。
-
-    仅靠 _get_conn 的首次校验时，同一进程内源文件变更后不会触发重建；
-    这里在每次 resolve/search 前复查签名，与模块文档“源文件变更时自动重建”一致。
-    """
     global _conn
     if _conn is None:
         return _get_conn()
@@ -140,7 +121,6 @@ def _ensure_fresh() -> sqlite3.Connection:
     return _conn
 
 def resolve_hash(hash_val: str) -> str | None:
-    """按 Hash 查询文本（主键索引，<1ms）。未命中返回 None。"""
     conn = _ensure_fresh()
     row = conn.execute(
         "SELECT text FROM textmap WHERE hash = ?", (hash_val,)
@@ -148,7 +128,6 @@ def resolve_hash(hash_val: str) -> str | None:
     return row[0] if row else None
 
 def search_text(keyword: str, limit: int = 20) -> list[tuple[str, str]]:
-    """按文本子串搜索（LIKE 全表扫描，~100-300ms）。"""
     conn = _ensure_fresh()
     escaped = (
         keyword.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
@@ -160,7 +139,6 @@ def search_text(keyword: str, limit: int = 20) -> list[tuple[str, str]]:
     return [(str(h), str(t)) for h, t in rows]
 
 def rebuild(force: bool = False) -> None:
-    """显式重建索引。force=True 时无视签名强制重建。"""
     global _conn
     if _conn is not None:
         _conn.close()
@@ -182,7 +160,6 @@ def rebuild(force: bool = False) -> None:
         conn.close()
 
 def close() -> None:
-    """关闭连接（CLI 退出时可选调用，主要服务于测试）。"""
     global _conn
     if _conn is not None:
         _conn.close()

@@ -1,8 +1,4 @@
 // @vitest-environment node
-/**
- * format.ts 纯函数单元测试
- * 内联 fixture 参照本地转换数据真实结构手工构造（测试不读取数据文件，运行时更不依赖）。
- */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { setUseOfficialPaths } from '../constants';
 import { setActiveLocale } from '../i18n/active';
@@ -19,18 +15,11 @@ import {
 } from '../format';
 import type { CharacterData, ItemDb, NameCache, Skill } from '../../services/types';
 
-// 本文件验证默认模式（USE_OFFICIAL_PATHS=false）下的图标 URL 构造：
-// 图标已随站入库 ⇒ local-first（LOCAL_ICONS_BASE）；local 缺失时回退远端主源 nanoka
-// （fork 停更后 jsDelivr 只作旧档补全，见 services/cdn/resolve.ts）。
 beforeAll(() => {
   setUseOfficialPaths(false);
-  /* 词典翻译由 app 层注入（lib 不引应用层）：测试用 cn 词典当翻译器，
-     于是断言既覆盖「架势标签走词典」也钉住词典键确实存在。 */
   const dict = cnMessages as Record<string, string>;
   setLabelTranslator((key: string) => dict[key] ?? key);
 });
-
-/* ─── fixture（最小化 CharacterData，结构对齐本地转换数据角色 JSON） ─── */
 
 const sk = (over: Partial<Skill> = {}): Skill => ({
   id: 100501,
@@ -54,8 +43,6 @@ const baseChar = (): CharacterData => ({
     '6': { attack_base: 150, attack_add: 12, defence_base: 80, defence_add: 6, hp_base: 300, hp_add: 24, speed_base: 105, critical_chance: 0.05, critical_damage: 0.5 },
   },
 });
-
-/* ─── HTML 安全 ─── */
 
 describe('escHtml', () => {
   it('转义全部危险字符', () => {
@@ -127,8 +114,6 @@ describe('gameTagsToHtml', () => {
   });
 });
 
-/* ─── 数值格式化 ─── */
-
 describe('fmtVal', () => {
   it('i 标签取整', () => {
     expect(fmtVal(0.499, 'i', false)).toBe('0');
@@ -168,10 +153,8 @@ describe('fmtDesc', () => {
   it('fmtDescWithFormat：ParamFormat [i]% 注入裸 #N（0.12 → 12%）', () => {
     expect(fmtDescWithFormat('独立伤害增幅提高#1。', [0.12], '[i]%'))
       .toBe('独立伤害增幅提高<span class="hl">12%</span>。');
-    // 已带 tag 的占位符不双写
     expect(fmtDescWithFormat('持续 #2[f1] 回合，伤害 #1[i]%', [0.5, 0.123], '[i]%'))
       .toBe('持续 <span class="hl">0.1</span> 回合，伤害 <span class="hl">50%</span>');
-    // 无模板回退 fmtDesc 原样
     expect(fmtDescWithFormat('获得 #1 层', [3], '')).toBe('获得 <span class="hl">3</span> 层');
   });
   it('换行符转 <br>', () => {
@@ -203,8 +186,6 @@ describe('fmtToughness', () => {
   });
 });
 
-/* ─── 强化模式视图构建 ─── */
-
 describe('deepClone / getEnhancedKeys', () => {
   it('深拷贝互不影响', () => {
     const o = { a: { b: 1 } };
@@ -230,9 +211,8 @@ describe('buildEnhancedView / getRenderData', () => {
     d.enhanced = { '1': { skills: { '1100501': enhSkill } } };
     const view = buildEnhancedView(d, '1');
     expect(view.skills['1100501'].name).toBe('强化普攻');
-    expect(view.ranks).toEqual(d.ranks); // 未覆盖
+    expect(view.ranks).toEqual(d.ranks);
     expect(view.name).toBe(d.name);
-    // 深拷贝隔离
     view.skills['1100501'].name = '改';
     expect(d.enhanced!['1'].skills!['1100501'].name).toBe('强化普攻');
   });
@@ -253,12 +233,10 @@ describe('buildEnhancedView / getRenderData', () => {
     const r1 = getRenderData(d, '1');
     expect(r1!.skills['1100501']).toBeDefined();
     expect(getRenderData(d, null)).toBe(d);
-    expect(getRenderData(d, '9')).toBe(d); // 不存在的键
+    expect(getRenderData(d, '9')).toBe(d);
     expect(getRenderData(null, '1')).toBeNull();
   });
 });
-
-/* ─── 属性 / 图标 URL ─── */
 
 describe('maxLevelStat / maxLevelValue', () => {
   it('优先取 stats["6"]', () => {
@@ -291,7 +269,7 @@ describe('levelStatValue / charStageForLevel（等级滑条口径）', () => {
   it('档位 = 上限 ≤ 该等级的档位数（每档上限一到就突破）', () => {
     expect(charStageForLevel(1, 7)).toBe(0);
     expect(charStageForLevel(19, 7)).toBe(0);
-    expect(charStageForLevel(20, 7)).toBe(1);   // 20 是 P0 的上限：此刻已可突破，取突破后的档
+    expect(charStageForLevel(20, 7)).toBe(1);
     expect(charStageForLevel(29, 7)).toBe(1);
     expect(charStageForLevel(30, 7)).toBe(2);
     expect(charStageForLevel(69, 7)).toBe(5);
@@ -321,28 +299,18 @@ describe('URL 构建', () => {
     expect(skillIconUrl(sk({ type: 'BPSkill' }), '1005', null)).toBe(nk('1005', 'BP'));
     const d = baseChar();
     d.memosprite = { icon: 'SpriteOutput/ServantIconTeam/11415B.png' };
-    // 忆灵技能：文件名用忆灵 ID（11415）
     expect(skillIconUrl(sk({ type: 'Servant' }), '1415', d)).toBe(nk('11415', 'Servant'));
-    // Assist CDN 无独立图标资产，回退终结技图标
     expect(skillIconUrl(sk({ type: 'Assist', type_name: '助战技' }), '1005', null)).toBe(nk('1005', 'Ultra'));
-    // MazeNormal（秘技普攻）与普攻共用图标
     expect(skillIconUrl(sk({ type: 'MazeNormal', type_name: '' }), '1508', null)).toBe(nk('1508', 'Normal'));
-    // ElationDamage（欢愉技）对应 CDN 键名 Elation
     expect(skillIconUrl(sk({ type: 'ElationDamage', type_name: '欢愉技' }), '1501', null)).toBe(nk('1501', 'Elation'));
-    // type 为 null 的天赋技能回退 type_name 反查
     expect(skillIconUrl(sk({ type: null as unknown as string, type_name: '天赋' }), '1508', null)).toBe(nk('1508', 'Passive'));
   });
   it('skillIconUrl：忆灵技图标后缀按 ID 映射（CDN 命名不统一）', () => {
-    // 文件名保留忆灵 ID（nanoka 平铺主源；jsDelivr 回退才按角色 ID 分目录，见 cdn.test.ts）
     const nk = (fileId: string, key: string) => `${LOCAL_ICONS_BASE}/skillicons/SkillIcon_${fileId}_${key}.webp`;
     const mk = (icon: string) => { const d = baseChar(); d.memosprite = { icon }; return d; };
-    // 11402 → Servant01
     expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png'))).toBe(nk('11402', 'Servant01'));
-    // 11413 → Servant03
     expect(skillIconUrl(sk({ type: 'Servant' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(nk('11413', 'Servant03'));
-    // 11415 → 无后缀（默认）
     expect(skillIconUrl(sk({ type: 'Servant' }), '1415', mk('SpriteOutput/ServantIconTeam/11415B.png'))).toBe(nk('11415', 'Servant'));
-    // ServantPassive 不受后缀映射影响
     expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png'))).toBe(nk('11413', 'ServantPassive'));
   });
   it('skillIconUrl：开拓者偶数变体回退奇数 ID 图标', () => {
@@ -351,21 +319,16 @@ describe('URL 构建', () => {
     expect(skillIconUrl(sk({ type: 'BPSkill' }), '8004', null)).toBe(nk('8003', 'BP'));
     expect(skillIconUrl(sk({ type: 'Ultra' }), '8006', null)).toBe(nk('8005', 'Ultra'));
     expect(skillIconUrl(sk({ type: 'Maze' }), '8008', null)).toBe(nk('8007', 'Maze'));
-    // 奇数 ID 不受影响
     expect(skillIconUrl(sk({ type: 'Normal' }), '8001', null)).toBe(nk('8001', 'Normal'));
   });
   it('skillIconUrl：sk.icon 字段优先（源数据事实源，覆盖变体图标命名）', () => {
     const nk = (file: string) => `${LOCAL_ICONS_BASE}/skillicons/${file}.webp`;
-    // 官方相对路径（converter --official-icon-paths 输出）→ 提取文件名走分类规则（nanoka 平铺）
     expect(skillIconUrl(sk({ type: 'Ultra', icon: 'skillicons/avatar/1510/SkillIcon_1510_Normal02.png' }), '1510', null))
       .toBe(nk('SkillIcon_1510_Normal02'));
-    // 旧短路径（icon/ 开头）→ 同样提取文件名
     expect(skillIconUrl(sk({ type: 'Assist', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_AssisSkill01.png' }), '1510', null))
       .toBe(nk('SkillIcon_1510_AssisSkill01'));
-    // 大世界攻击（type=Maze）源图标复用普攻图标
     expect(skillIconUrl(sk({ type: 'Maze', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_Normal.png' }), '1510', null))
       .toBe(nk('SkillIcon_1510_Normal'));
-    // 空串回退 type 推断
     expect(skillIconUrl(sk({ type: 'Ultra', icon: '' }), '1510', null)).toBe(nk('SkillIcon_1510_Ultra'));
   });
   it('skillIconUrl（官方路径模式）：sk.icon 官方相对路径直拼，旧短路径回退文件名提取', () => {
@@ -373,7 +336,6 @@ describe('URL 构建', () => {
     try {
       expect(skillIconUrl(sk({ type: 'Ultra', icon: 'skillicons/avatar/1510/SkillIcon_1510_BP02.png' }), '1510', null))
         .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1510/SkillIcon_1510_BP02.png`);
-      // 旧短路径（icon/ 开头）仍经 cdnUri 双源解析（开关只影响非 legacy 直拼分支），主源 nanoka
       expect(skillIconUrl(sk({ type: 'Assist', icon: 'icon/skill/Avatar/1510/SkillIcon_1510_AssisSkill02.png' }), '1510', null))
         .toBe(`${LOCAL_ICONS_BASE}/skillicons/SkillIcon_1510_AssisSkill02.webp`);
     } finally {
@@ -384,16 +346,12 @@ describe('URL 构建', () => {
     setUseOfficialPaths(true);
     try {
       const mk = (icon: string) => { const d = baseChar(); d.memosprite = { icon }; return d; };
-      // 忆灵技：文件名忆灵 ID + 后缀映射，目录角色 ID
       expect(skillIconUrl(sk({ type: 'Servant' }), '1402', mk('SpriteOutput/ServantIconTeam/11402B.png')))
         .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1402/SkillIcon_11402_Servant01.png`);
-      // 忆灵天赋
       expect(skillIconUrl(sk({ type: 'ServantPassive' }), '1413', mk('SpriteOutput/ServantIconTeam/11413B.png')))
         .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1413/SkillIcon_11413_ServantPassive.png`);
-      // 开拓者特例：18007 → 8007
       expect(skillIconUrl(sk({ type: 'Servant' }), '8007', mk('SpriteOutput/ServantIconTeam/18007B.png')))
         .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/8007/SkillIcon_18007_Servant01.png`);
-      // 普通角色不受影响
       expect(skillIconUrl(sk({ type: 'Normal' }), '1005', null))
         .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/1005/SkillIcon_1005_Normal.png`);
     } finally {
@@ -401,9 +359,7 @@ describe('URL 构建', () => {
     }
   });
   it('eidolonIconUrl / avatarDrawCardUrl / avatarDrawCardJdUrl', () => {
-    // rank 分类：local-first（星魂图标已随站入库），本地缺失回退远端主源 nanoka
     expect(eidolonIconUrl('1005', 1)).toBe(`${LOCAL_ICONS_BASE}/rank/1005/1005_Rank_1.webp`);
-    // 立绘：local-first（立绘卡已随站入库）；jsDelivr PNG 直链仅供 HomeView 预载链第二源
     expect(avatarDrawCardUrl('1005')).toBe(`${LOCAL_ICONS_BASE}/avatardrawcard/1005.webp`);
     expect(avatarDrawCardJdUrl('1005')).toBe(`${JS_DELIVR_BASE}/avatardrawcard/1005.png`);
   });
@@ -424,11 +380,8 @@ describe('itemName / itemIconUrl', () => {
   });
 });
 
-/* ─── CW 技能描述：按星级取值 ─── */
-
 describe('fmtDescStar', () => {
   const desc = '造成 #1[i]% 伤害，并回复 #2[i] 点能量';
-  // 真实语义：有 % 尾缀的参数为比率（0.2 → 20%），无尾缀为绝对值
   const sets = [[0.2, 30], [0.4, 60], [0.4, 90]];
   it('只替换指定星级参数', () => {
     expect(fmtDescStar(desc, sets, 0)).toBe('造成 <span class="hl">20%</span> 伤害，并回复 <span class="hl">30</span> 点能量');
@@ -440,8 +393,6 @@ describe('fmtDescStar', () => {
     expect(fmtDescStar(null, sets, 0)).toBe('');
   });
 });
-
-/* ─── 数据校验 ─── */
 
 describe('validateCharData', () => {
   it('null 抛出非运营错误', () => {

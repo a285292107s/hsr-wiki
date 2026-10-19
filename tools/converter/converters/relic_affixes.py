@@ -1,5 +1,3 @@
-"""遗器词条转换器。"""
-
 import logging
 
 from config import EXCEL_DIR, OUTPUT_DIR
@@ -9,7 +7,6 @@ logger = logging.getLogger("converter")
 
 
 def convert_main() -> None:
-    """转换 RelicMainAffixConfig.json → relic_main_affixes.json。"""
     data = load_json(EXCEL_DIR / "RelicMainAffixConfig.json")
     result = []
 
@@ -27,7 +24,6 @@ def convert_main() -> None:
 
 
 def convert_sub() -> None:
-    """转换 RelicSubAffixConfig.json → relic_sub_affixes.json。"""
     data = load_json(EXCEL_DIR / "RelicSubAffixConfig.json")
     result = []
 
@@ -46,6 +42,5 @@ def convert_sub() -> None:
 
 
 def convert() -> None:
-    """转换遗器主副词条。"""
     convert_main()
     convert_sub()

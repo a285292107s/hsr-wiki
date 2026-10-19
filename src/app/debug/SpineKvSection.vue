@@ -9,8 +9,7 @@ import { copyText, downloadCanvas, downloadJson } from './report';
 import { useKvAcceptance, type AcceptBridge } from './use-kv-acceptance';
 import { useMergedPipeline, useSingleLayers, type LayerState } from './use-scene-pipeline';
 import { toast } from './lib/toast';
-/** 浏览器活跃 WebGL 上下文上限约 16，达到此值预警 */
-const GL_WARN_AT = 12;
+import { GL_WARN_AT } from '../../spine/registry';
 
 const props = defineProps<{ active: boolean }>();
 
@@ -102,7 +101,7 @@ function togglePause(): void {
 
 function exportPng(): void {
   try {
-    const canvas = merged.canvas(); // 管线 preserveDrawingBuffer=true，像素稳定可读
+    const canvas = merged.canvas();
     if (canvas) downloadCanvas(canvas, `spine-${sceneKey.value}-merged.png`);
   } catch (e) {
     console.warn('[debug-spine] PNG 导出失败:', e);
@@ -195,7 +194,7 @@ const unsubscribeQuery = subscribeQueryChange(() => {
 onBeforeUnmount(() => {
   unsubscribeQuery();
   accept.markDisposed();
-  merged.dispose(); // 合并渲染的 rAF 循环与 WebGL 上下文必须在此释放（否则离开页面后持续泄漏）
+  merged.dispose();
   layersApi.disposeAll();
 });
 </script>
@@ -548,7 +547,6 @@ onBeforeUnmount(() => {
 .nk-spine-debug__badge.is-warn { color: #ffd9a3; background: rgba(245, 166, 35, 0.1); border: 1px solid rgba(245, 166, 35, 0.45); }
 .nk-spine-debug__badge.is-off { color: var(--text3); background: color-mix(in srgb, var(--text) 10%, transparent); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); }
 
-/* 固定舞台尺寸：实例化前容器即有此尺寸 → canvas buffer 比例恒等于 viewport 比例（规避半屏渲染陷阱） */
 .nk-spine-debug__stage {
   width: 480px;
   height: 270px;

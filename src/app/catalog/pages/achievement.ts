@@ -4,18 +4,12 @@ import { translate } from '../../i18n';
 import { loadLocalAchievements, loadLocalAchievementSeries } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig, CatalogFilter } from '../types';
 
-/* 稀有度 / 显示状态的**展示文案只在词典里**（配置里存键）：卡片渲染是模板字符串（非组件），
-   故用 `translate()`（非组件模块入口）——切语言走整页导航，无需响应式。 */
 const RARITY_KEY: Record<string, string> = {
   Low: 'catalog.option.rarityLow',
   Mid: 'catalog.option.rarityMid',
   High: 'catalog.option.rarityHigh',
 };
 
-/** 显示状态 → 词典键（ShowType 值域：None 常显 / ShowAfterFinish / HiddenDesc）。
- *  注意：converter 将 None 归一为空串产出（见 tools/converter/converters/achievements.py 专测），
- *  而 CatalogPage 过滤把空 val 视为「不筛」（与「全部」同 val），故前端在 fetchData/buildFilters
- *  统一把空值归一为哨兵 'None'——否则「常显」与「全部」撞 val 双高亮且永远筛不出常显成就 */
 const SHOW_KEY: Record<string, string> = {
   None: 'catalog.option.showNone',
   ShowAfterFinish: 'catalog.option.showAfterFinish',
@@ -61,15 +55,9 @@ export const achievementPage: CatalogPageConfig = {
   searchKey: 'catalog.achievement.search',
   gridClass: 'nk-cat-grid nk-ach-grid',
   styles: [() => import('../../../../src/styles/achievement.css')],
-  /* 虚拟网格刻度：卡是「无图纯文本」型，行高由文本块决定而不是由列宽 × 图比决定（virtualImgRatio 0）。
-     刻度按实测内容高定（详见图例注释）：桌面上 `--nk-grid-min` 不得小于此处的 virtualMinColW，
-     否则骨架网格与卡片网格列数不一致（加载完成会跳一档）。 */
   virtualMinColW: 276,
   virtualImgRatio: 0,
   virtualInfoH: 144,
-  /* 手机档 1 列 + 横向行布局（与「敌方物种」目录同构，见 achievement.css 的 <768 块）：
-     行高按「id 行 + 单行标题 + 3 行描述 + 系列行」的实测内容给定——描述 3 行推算 136.2px，
-     单元格 154px（卡 144px）留 ~8px 余量。 */
   virtualMobileRowH: 160,
   async fetchData() {
     const [achievements, series] = await Promise.all([

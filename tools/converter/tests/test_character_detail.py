@@ -1,7 +1,3 @@
-"""character_detail 纯函数契约测试（合成数据，不依赖真实源）：覆盖
-  _build_skills/_build_servant_skills/_build_ranks/_build_stats/_build_relics/_normalize_tree_icon/_build_memosprite。
-运行: cd tools/converter && python -m pytest tests/ -v"""
-
 import sys
 from pathlib import Path
 
@@ -13,7 +9,6 @@ from converters import character_detail as cd  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def setup_textmap(monkeypatch):
-    """mock TextMap，避免加载真实 50MB 文件。"""
     import textmap
     monkeypatch.setattr(textmap, "_text_map", {})
 
@@ -118,14 +113,12 @@ class TestBuildSkills:
         assert result["30"]["icon"] == "icon/skill/Avatar/30/SkillIcon_30_Normal02.png"
 
     def test_skill_icon_pseudo_dir_normalized(self):
-        """加强技能（1{avatar_id} 伪目录 + 伪文件名）归一到角色自身 ID 的真实资产。"""
         data = [{"SkillID": 1100501, "Level": 1, "AttackType": "Normal",
                  "SkillIcon": "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Normal.png"}]
         result = cd._build_skills(data, [1100501], 1005)
         assert result["1100501"]["icon"] == "icon/skill/Avatar/1005/SkillIcon_1005_Normal.png"
 
     def test_cross_id_reference_kept(self):
-        """反向守卫：开拓者偶数变体引用配对奇数 ID 的真实图标，不得归一。"""
         data = [{"SkillID": 800201, "Level": 1, "AttackType": "Normal",
                  "SkillIcon": "SpriteOutput/SkillIcons/Avatar/8001/SkillIcon_8001_Normal.png"}]
         result = cd._build_skills(data, [800201], 8002)
@@ -160,7 +153,6 @@ class TestBuildServantSkills:
         data = [{"SkillID": 14, "Level": 1, "AttackType": "Servant",
                  "SkillIcon": "SpriteOutput/SkillIcons/Avatar/1414/SkillIcon_11414_Servant.png"}]
         result = cd._build_servant_skills(data, [14], 1414)
-        # 忆灵：目录是角色自身 ID（1414）、文件名是忆灵 ID（11414），不得被归一
         assert result["14"]["icon"] == "icon/skill/Avatar/1414/SkillIcon_11414_Servant.png"
 
     def test_audit_fields_same_structure(self):
@@ -220,7 +212,6 @@ class TestNormalizeTreeIcon:
         assert cd._normalize_tree_icon(icon, 1005) == "icon/skill/Avatar/1005/SkillIcon_1005_1.png"
 
     def test_source_path_pseudo_dir_normalized(self):
-        """源路径形态（map_icon_path 之前）同样归一，否则 --official-icon-paths 模式下静默失效。"""
         icon = "SpriteOutput/SkillIcons/Avatar/11005/SkillIcon_11005_Normal.png"
         assert cd._normalize_tree_icon(icon, 1005) == \
             "SpriteOutput/SkillIcons/Avatar/1005/SkillIcon_1005_Normal.png"
@@ -230,7 +221,6 @@ class TestNormalizeTreeIcon:
         assert cd._normalize_tree_icon(icon, 8002) == icon
 
     def test_servant_icon_kept(self):
-        """忆灵：目录 == 角色自身 ID（非 1{id}），文件名忆灵 ID 保持原样。"""
         icon = "SpriteOutput/SkillIcons/Avatar/1402/SkillIcon_11402_Servant01.png"
         assert cd._normalize_tree_icon(icon, 1402) == icon
 
@@ -240,11 +230,6 @@ class TestNormalizeTreeIcon:
         assert cd._normalize_tree_icon(other, 1005) == other
 
 class TestOfficialIconPathsNormalization:
-    """--official-icon-paths 模式：归一必须发生在 map_icon_path 之前，产出官方短路径。
-
-    若把归一写在 map_icon_path 之后，前缀变成 skillicons/avatar/... 匹配不到 → 伪目录漏网。
-    """
-
     @pytest.fixture(autouse=True)
     def official_paths(self, monkeypatch):
         import utils
@@ -335,7 +320,6 @@ class TestBuildEnhanced:
         return enhanced_config, hint_data, skill_config, rank_config, tree_config
 
     def test_enhanced_icons_normalized_to_own_id(self):
-        """加强技能/星魂/行迹的 1{avatar_id} 伪目录一律归一到角色自身 ID 目录。"""
         cfg = self._config()
         bundle = cd._build_enhanced(*cfg, 1005)["1"]
         assert bundle["skills"]["1100501"]["icon"] == "icon/skill/Avatar/1005/SkillIcon_1005_Normal.png"
@@ -344,7 +328,7 @@ class TestBuildEnhanced:
 
     def test_bundle_shape_and_fields(self):
         import textmap
-        textmap._text_map["5001"] = "战技可以使<color=#f29e38>所有攻击目标</color>的持续伤害立即额外触发1次伤害"
+        textmap._text_map["5001"] = "战技可以使所有攻击目标的持续伤害立即额外触发1次伤害"
         textmap._text_map["5002"] = "追加攻击的可触发次数增加"
         cfg = self._config()
         result = cd._build_enhanced(*cfg, 1005)
@@ -354,12 +338,42 @@ class TestBuildEnhanced:
         assert "1" in bundle["ranks"]
         assert bundle["skill_trees"]["Point01"]["1"]["point_id"] == 11005101
         assert bundle["descs"] == [
-            "战技可以使<color=#f29e38>所有攻击目标</color>的持续伤害立即额外触发1次伤害",
+            "战技可以使所有攻击目标的持续伤害立即额外触发1次伤害",
             "追加攻击的可触发次数增加",
         ]
         assert bundle["sp_need"] == 120
-        assert bundle["skill_ids"] == [1100501]
-        assert bundle["rank_ids"] == [1100501]
+        assert bundle["skill_ids"] == [100501]
+        assert bundle["rank_ids"] == [100501]
+
+    def test_registry_ids_normalized_to_base(self):
+        """登记清单落的是 base id：角标判定比对 rank.id（base），前端 buildCompare 反推加强 id。"""
+        cfg = self._config()
+        bundle = cd._build_enhanced(*cfg, 1005)["1"]
+        assert 1100501 not in bundle["skill_ids"]
+        assert 1100501 not in bundle["rank_ids"]
+        for base in bundle["skill_ids"] + bundle["rank_ids"]:
+            assert base == 100501
+        assert cd._ENHANCED_ID_OFFSET == 1_000_000
+
+    def test_desc_clean_variant_keeps_color_tags(self, monkeypatch):
+        import textmap
+        textmap._text_map["5001"] = "技能变为基于<color=#f29e38ff>生命上限</color>造成伤害"
+        textmap._text_map["5002"] = "队伍生命值降低时，<unbreak>#1[i]%</unbreak>暴击伤害提高"
+        monkeypatch.setattr(
+            textmap, "clean_text",
+            lambda text, _tm=None: text.replace("<unbreak>", "").replace("</unbreak>", ""),
+        )
+        enhanced_config = [{
+            "AvatarID": 1005, "EnhancedID": 1, "SPNeed": {"Value": 120},
+            "SkillList": [], "RankIDList": [],
+        }]
+        hint_data = [{"AvatarID": 1005, "EnhancedID": 1, "EnhancedDescNum": 2,
+                      "EnhancedDesc1": {"Hash": 5001}, "EnhancedDesc2": {"Hash": 5002}}]
+        descs = cd._build_enhanced(enhanced_config, hint_data, [], [], [], 1005)["1"]["descs"]
+        assert descs == [
+            "技能变为基于<color=#f29e38ff>生命上限</color>造成伤害",
+            "队伍生命值降低时，#1[i]%暴击伤害提高",
+        ]
 
     def test_no_enhancement_returns_none(self):
         assert cd._build_enhanced([], [], [], [], [], 1005) is None

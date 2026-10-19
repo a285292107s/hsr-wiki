@@ -1,15 +1,3 @@
-"""voracity 转换器契约测试（合成数据，不依赖真实源数据）。
-
-覆盖：
-- _parse_unlock_mission_id / _int_values / _score_values：条件串解析与 ArrayValue 包装
-- _progress_steps / _buff_levels / _invasion_levels：档位排序、回退、字段省略
-- _resolve_detail_id / _invasion_index：实例→模板归一、未命中置 null、侵入归属去重升序
-- _scope_index：关卡 → 所属终局赛季与位置（层级 / 星启附加关 / 异相仲裁；未发布赛季不输出）
-- _status_entries / _tutorial_entries / _affix_entries：筛选口径、图标去前缀、参数展开
-- convert：产物顶层结构、字段缺失即省略（不落空串）
-- monster_detail.convert：侵入名单内怪物附 invaded 块
-"""
-
 import sys
 from pathlib import Path
 
@@ -20,7 +8,6 @@ import pytest  # noqa: E402
 from converters import monster_detail as md  # noqa: E402
 from converters import voracity as vor  # noqa: E402
 
-# _scope_index 会读取的 11 张表（3 关卡表 + 3 分组表 + 3 星启表 + 仲裁 2 表）
 _SCOPE_SOURCE_FILES = (
     "ChallengeMazeConfig.json", "ChallengeStoryMazeConfig.json",
     "ChallengeBossMazeConfig.json", "ChallengePeakConfig.json",
@@ -49,18 +36,11 @@ _TEXT: dict[str, str] = {
 
 
 def ref(key: str) -> dict:
-    """构造 TextMap 引用（Hash 以字符串入表，与 resolve_text 的 str() 查表一致）。"""
     return {"Hash": key}
 
 
 @pytest.fixture(autouse=True)
 def fake_textmap(monkeypatch):
-    """mock TextMap 查询（未命中返回空串）。
-
-    mock 必须与真实 `resolve_text` 同契约：默认 `clean=True` 时返回**已清洗**正文
-    （标签剥除由 resolve_text 内部完成，转换器不再补第二次清洗
-    ——那一步会把携带 TextMap 键的 TextRef 退化成普通字符串，令多语言令牌化失效）。
-    """
     from textmap import clean_text
 
     def fake_resolve(value, clean=True):
@@ -174,7 +154,6 @@ class TestInvasionLevels:
         ]
 
     def test_textmap_miss_omits_name_and_desc_instead_of_empty_string(self):
-        """3034xxx 的 BuffName/BuffDesc 上游未收录 → 不许落空串占位。"""
         rows = [{"InvasionID": 1, "MazeBuffID": 3034001, "InvasionDesc": ref("9999")}]
         maze_buffs = {3034001: {"name": "", "desc": "", "param_list": [0.4],
                                 "icon": "BuffIcon/Inlevel/IconBuffShield",
@@ -195,7 +174,6 @@ class TestResolveDetailId:
         assert vor._resolve_detail_id(5013010, {}, {5013010}) == 5013010
 
     def test_real_instance_pairs_normalize_to_template(self):
-        """实例 ID ≠ 模板 ID 的上游映射；实例 ID 自身也在图鉴键集内，不可据此判对。"""
         pairs = {
             202206017: 2022060, 202303203: 2023032,
             202206018: 2022060, 202303204: 2023032,
@@ -229,7 +207,6 @@ class TestInvasionIndex:
                 {"MonsterID": 202206017, "MonsterTemplateID": 2022060},
                 {"MonsterID": 202206018, "MonsterTemplateID": 2022060},
             ],
-            # 作用域表默认空：本类只测关卡清单本身，作用域由 TestScopeIndex 单测
             **{name: [] for name in _SCOPE_SOURCE_FILES},
         }
         monkeypatch.setattr(vor, "load_json", lambda path: files[Path(path).name])
@@ -266,15 +243,12 @@ class TestInvasionIndex:
 
 
 class TestScopeIndex:
-    """关卡 → 终局赛季归属（ADR 0026）：层级 / 星启附加关 / 异相仲裁三条来源。"""
-
     @pytest.fixture(autouse=True)
     def fake_sources(self, monkeypatch):
         files = {
             "ChallengeMazeConfig.json": [
                 {"ID": 5411, "GroupID": 1035, "Floor": 11,
                  "EventIDList1": [30125111], "EventIDList2": [30125112]},
-                # 星启记录 DLCKKJFMJOB 指向的常规最后一关（5512）→ 反查赛季
                 {"ID": 5512, "GroupID": 1035, "Floor": 12,
                  "EventIDList1": [30125121], "EventIDList2": [30125122]},
             ],
@@ -287,10 +261,8 @@ class TestScopeIndex:
             "ChallengeBossMazeConfig.json": [
                 {"ID": 30203, "GroupID": 3021, "Floor": 3,
                  "EventIDList1": [420533], "EventIDList2": [420534]},
-                # 同一关卡被第二个已发布赛季引用 → 作用域为列表
                 {"ID": 30233, "GroupID": 3023, "Floor": 4,
                  "EventIDList1": [420533], "EventIDList2": [420534]},
-                # 未发布赛季：分组表无 GroupName → 作用域必须整体省略
                 {"ID": 30223, "GroupID": 3022, "Floor": 3,
                  "EventIDList1": [420533], "EventIDList2": [420534]},
             ],
@@ -324,7 +296,6 @@ class TestScopeIndex:
             "mode": "maze", "season_id": "1035", "season_name": "来生泅渡",
             "half": "stage1", "floor": 11,
         }]
-        # 未命中任何关卡表的关卡无作用域
         assert 99999999 not in scopes
 
     def test_tierce_stage_maps_to_same_season_as_last_floor(self):
@@ -342,13 +313,11 @@ class TestScopeIndex:
         }]
 
     def test_unpublished_season_scope_omitted(self):
-        """分组表无 GroupName 的未发布赛季不产出作用域（避免死链）。"""
         scopes = vor._scope_index()
         seasons = {s["season_id"] for s in scopes[420533]}
         assert seasons == {"3021", "3023"}
 
     def test_same_stage_can_belong_to_multiple_seasons(self):
-        """同一关卡被多赛季引用时按列表返回，且按 (mode, season_id, floor, half) 排序。"""
         scopes = vor._scope_index()
         assert [s["season_id"] for s in scopes[420534]] == ["3021", "3023"]
         assert [s["half"] for s in scopes[420534]] == ["stage2", "stage2"]
@@ -383,7 +352,6 @@ class TestStatusEntries:
         assert vor._status_entries(rows, {})[0]["can_dispel"] is True
 
     def test_buff_params_injected_by_level_and_empty_otherwise(self):
-        """66002011-13 借同档 MazeBuff 参数；无档位/本域无源的状态显式空数组。"""
         buf_rows = [
             {"BuffID": 3034011, "BuffLevel": 1},
             {"BuffID": 3034012, "BuffLevel": 2},
@@ -452,7 +420,6 @@ class TestAffixEntries:
             "icon": "SpriteOutput/GridFight/BattleIcon/BuffIcon/Icon_GridFight_Affix_09.png",
             "params": [0.16, 0.16],
         }]
-        # 位面词条图标走完整路径（消费方按完整路径取值），其余字段走去前缀口径
         assert result[0]["icon"].startswith("SpriteOutput/")
         assert result[0]["icon"].endswith(".png")
 
@@ -527,7 +494,6 @@ class TestConvert:
     def fake_sources(self, monkeypatch):
         self.saved: dict = {}
         self.files = dict(_FILES)
-        # 作用域表在 TestConvert 里不参与断言，补空表即可（口径由 TestScopeIndex 覆盖）
         for name in _SCOPE_SOURCE_FILES:
             self.files.setdefault(name, [])
 
@@ -632,11 +598,9 @@ class TestMonsterDetailInvaded:
         assert "invaded" not in saved["5013010.json"]
 
     def test_alias_page_shares_template_invaded_block(self, monkeypatch):
-        """实例别名页（_tpl 指向模板）与模板页同值；模板无标记时别名页也不写该键。"""
         base = {"name": "虚卒·掠夺者", "icon": "A", "figure": "A", "rank": "Minion",
                 "camp": "", "stance": 0, "weak": [], "resist": {}, "intro": "",
                 "stats": {}, "skills": [],
-                # 战斗数值合成链字段（ADR 0040）
                 "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
                 "level_group": 1}
         monsters = {
@@ -664,8 +628,6 @@ class TestMonsterDetailInvaded:
 
 
 class TestMonsterDetailInvadedInvariants:
-    """invaded = 模板级事实的结构化不变量（期望值全部由夹具推导，不硬编码条目数）。"""
-
     _INVADED_VARIANTS = {
         2022060: (202206017, 202206018, 202206019),
         3003014: (300301401, 300301402),
@@ -683,7 +645,6 @@ class TestMonsterDetailInvadedInvariants:
         base = {"name": "甲", "icon": "I", "figure": "F", "rank": "Minion",
                 "camp": "", "stance": 0, "weak": [], "resist": {}, "intro": "",
                 "stats": {}, "skills": [],
-                # 战斗数值合成链字段（ADR 0040）：怪物详情 payload 的两段新增
                 "stat_ratio": {"hp": 1.0, "atk": 1.0, "def": 1.0, "speed": 1.0},
                 "level_group": 1}
         template_of: dict[int, int] = {}
@@ -708,9 +669,6 @@ class TestMonsterDetailInvadedInvariants:
         return saved, template_of, usage
 
     def test_invaded_key_iff_template_in_invasion_list(self, env):
-        """双向：有键 ⇔ 该文件的模板 ID 在侵入名单模板集合内。
-        （曲线 / 精英组两个共享单点 monster-level-curve.json / monster-elite-group.json
-        不计入怪物文件数）"""
         saved, template_of, usage = env
         shared = sum(name in saved for name in ("monster-level-curve.json", "monster-elite-group.json"))
         assert len(saved) - shared == len(template_of)
@@ -718,7 +676,6 @@ class TestMonsterDetailInvadedInvariants:
             assert ("invaded" in saved[f"{mid}.json"]) is (tpl in usage), mid
 
     def test_variants_of_same_template_share_invaded(self, env):
-        """同一模板的全部变体页（含模板页本身）invaded 完全相等，且等于该模板的归属。"""
         saved, template_of, usage = env
         groups: dict[int, list] = {}
         for mid, tpl in template_of.items():
@@ -729,7 +686,6 @@ class TestMonsterDetailInvadedInvariants:
             assert values[0] == usage.get(tpl), tpl
 
     def test_templates_outside_invasion_list_have_no_key(self, env):
-        """侵入名单外的模板（含 4.5 期既有的贪饕相关怪物）及其变体一律无 invaded 键。"""
         saved, template_of, usage = env
         outside = {tpl for tpl in self._OUTSIDE_VARIANTS if tpl not in usage}
         assert outside and not (outside & set(usage))

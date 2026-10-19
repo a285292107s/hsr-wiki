@@ -7,17 +7,8 @@ import { getSpineLib, loadSpineRuntime } from '../../spine/runtime';
 import { mountSpineScene } from '../../spine/scene';
 import type { SpineRuntimeVersion } from '../../spine/types';
 
-/** 播放器注册 key 命名空间（registry 按 key 精确释放，与场景互不干扰） */
 const PLAYER_KEY = (spineKey: string): string => `player:${spineKey}`;
 
-/**
- * 初始化 Spine 查看器。
- * @param container 播放器挂载容器（.nk-hero__spine）
- * @param spineKey 清单条目键（角色 ID 或场景标识如 home-bg）
- * @param onReady 动画就绪回调（视图层据此点亮切换按钮 / 压暗背景）
- * @param opts 可选渲染参数（fit: cover 用于背景场景铺满）
- * @returns 清理函数（组件卸载 / 角色切换时调用，仅释放本 key 实例）
- */
 export function initSpineViewer(
   container: HTMLElement,
   spineKey: string,
@@ -32,20 +23,12 @@ export function initSpineViewer(
   };
 }
 
-/**
- * 初始化多层场景 Spine（official-scene 条目，如 home-bg 群像场景）。
- * **预留能力：当前无生产消费方**。
- * @param container 场景挂载容器（内部自建舞台 + 单画布）
- * @param sceneKey 清单条目键（如 home-bg）
- * @param onReady 场景就绪回调（视图层据此点亮切换按钮 / 压暗背景）
- * @returns 清理函数
- */
 export function initSpineSceneViewer(
   container: HTMLElement,
   sceneKey: string,
   onReady: () => void,
 ): () => void {
-  let cancelled = false; // 清理后终止一切异步行为（加载完成 / 挂载）
+  let cancelled = false;
   let ctrl: { teardown(): void } | null = null;
 
   void (async () => {
@@ -71,22 +54,18 @@ export function initSpineSceneViewer(
   };
 }
 
-/** 单实例渲染（成功/失败 Promise 化）：失败由调用方决定是否回退 nanoka 源 */
 async function renderPlayer(
   container: HTMLElement,
   key: string,
   entry: SpineResolved,
   opts?: { fit?: 'contain' | 'cover' },
 ): Promise<boolean> {
-  // 场景条目不会走到本函数（renderSpineSelf 已拦截）；skel=nanoka 源，official=官网源
   const urls = entry.kind === 'skel'
     ? { skelUrl: `${entry.base}.skel`, atlasUrl: `${entry.base}.atlas` }
     : entry.kind === 'official'
       ? buildOfficialConfig(entry)
       : null;
   if (!urls) return false;
-  // 运行时分派（spineRuntimeFor 收口）：skel（nanoka 4.1 二进制）→ 4.1 备用运行时；
-  // official 官网 JSON 按条目 runtime 标记（4.0 格式导出 → 4.1，缺省 4.2 格式 → 主运行时）
   const runtimeVersion: SpineRuntimeVersion = spineRuntimeFor(entry);
   const ok = await loadSpineRuntime(runtimeVersion);
   if (!ok) return false;
@@ -115,17 +94,15 @@ function renderSpineSelf(
   const key = PLAYER_KEY(charId);
   void (async () => {
     try {
-      disposeSpineEntry(key); // 先释放同 key 上一实例（角色/路由切换），避免 WebGL 上下文与 rAF 循环泄漏
-      // 官方源优先（resolveSpine 官方缺失时自动回退 nanoka）；场景条目走 initSpineSceneViewer
+      disposeSpineEntry(key);
       const entry = await resolveSpine(charId);
       if (!entry || entry.kind === 'official-scene') return onDone(false);
       const ok = await renderPlayer(container, key, entry, opts);
       if (!ok && entry.kind === 'official') {
-        // 官方源失效（404/解析失败）→ 回退 nanoka 源（强制指定源避免再次命中官方）
         console.warn('[nk-wiki] 官方源渲染失败，回退 nanoka 源');
         const fallback = await resolveSpine(charId, 'nanoka');
         if (fallback && fallback.kind === 'skel') {
-          disposeSpineEntry(key); // 释放失败实例的 WebGL 上下文后再重建
+          disposeSpineEntry(key);
           return onDone(await renderPlayer(container, key, fallback, opts));
         }
       }

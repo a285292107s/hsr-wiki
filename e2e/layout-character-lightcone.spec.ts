@@ -10,14 +10,6 @@ import {
   tableBoxWithinCard,
 } from './layout.shared';
 
-/**
- * 布局验收：角色详情页 —— 光锥详情页（hero 属性列 / 视觉层 / 适配角色反向索引）。
- *
- * `layout-character-*.spec.ts` 按域拆分文件之一（文件级并行是唯一被采纳的提速手段：
- * `fullyParallel: false` 只禁文件内并行）。标签语义（`@viewport-pinned` / `@cross-engine` /
- * `@viewport-independent`）与数值断言纪律见 docs/agents/testing.md。
- */
-
 test.describe('布局验收：角色详情页', () => {
 
   test('/lightcone/首个 id：光锥技能卡不受技能族改动波及（标题行图标在，无图标列）', { tag: '@viewport-independent' }, async ({ page }) => {
@@ -28,13 +20,10 @@ test.describe('布局验收：角色详情页', () => {
     const icon = page.locator('.nk-lc-skill .nk-skill__title-row .nk-skill__icon');
     await expect(icon).toHaveCount(1);
     await expect(icon).toBeVisible();
-    // 光锥详情页复用 .nk-skill* 但走标题行内联图标，不得出现角色详情的图标列 / 层级线宿主
     await expect(page.locator('.nk-skill__rail')).toHaveCount(0);
     assertNoErrors();
   });
 
-  // 缺陷史：属性网格是三列，但第 3 项命中基线 `.nk-hero__stat:last-child:nth-child(odd) { grid-column: 1/-1 }`
-  // （两列网格的「末项满行」规则），DEF 被挤成独立整行。此处钉住「三项同行成列 + 网格不横溢」。
   test('/lightcone：hero 属性三项同行成列，窄屏回落两列且 DEF 满行，无溢出', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const cones = readJson<Record<string, { id: number }>>('public/data/cn/light_cones.json');
@@ -62,7 +51,6 @@ test.describe('布局验收：角色详情页', () => {
       await noUnknownOverflow(page);
     }
 
-    // <360px：三列放不下 → 回落两列，DEF 独占第二行满宽（不得横溢）
     await page.setViewportSize({ width: 320, height: 720 });
     await page.goto(`/lightcone/${lcId}`);
     await expect(stats).toHaveCount(3);
@@ -74,9 +62,6 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  // 8bit 等值线：视觉区两层浅 inset 暗角 + 稀有度椭圆晕染（各只有 3.7 / 4.0 每 255 深度却铺满全幅）
-  // 与面板 90deg 浅渐变（整幅 8/255）都会塌成色带——前者是「一圈一圈的圆角矩形印记」，
-  // 后者是「竖立的条纹」。此处钉住「不再有浅渐变覆层」，像素级外观交用户 RunPreview。
   test('/lightcone：hero 视觉层与信息面板不挂浅渐变覆层（等值线来源）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const cones = readJson<Record<string, { id: number }>>('public/data/cn/light_cones.json');
@@ -101,9 +86,6 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  // 「适配角色」= 官方配装推荐（AvatarEquipRecommend）的反向索引，与角色页「推荐光锥」是同一张表的两面：
-  // 这里钉「chip 逐条 = 数据条目、链接指向该角色页、REC. 顺位与数据同源、两端不横滚」。
-  // 数据只覆盖部分光锥（无记录的光锥整块不渲染），故取料按数据找「有记录的那把」。
   test('/lightcone：适配角色区块逐条对应反向索引（链接 / REC. 顺位 / 无溢出）', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const cones = readJson<{ id: number }[]>('public/data/cn/light_cones.json');
@@ -123,7 +105,6 @@ test.describe('布局验收：角色详情页', () => {
       await expect(page.getByRole('heading', { name: /适配角色/ })).toBeVisible();
       const items = page.locator('.nk-lc-adapt__item');
       await expect(items).toHaveCount(hit.chars.length);
-      // 首条即数据首条（converter 按 (rank, id) 排序，前端不再重排）
       await expect(items.first()).toHaveAttribute('href', `/character/${hit.chars[0].id}`);
       await expect(items.first().locator('.nk-lc-adapt__rec')).toHaveText(`REC. ${hit.chars[0].rank}`);
       await noUnknownOverflow(page);

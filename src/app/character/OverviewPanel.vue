@@ -10,7 +10,6 @@ import type { CharacterData, SkillExtra, SkillTree } from '../../services/types'
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 type OverviewSection = 'profile' | 'bonuses' | 'talents' | 'stories';
 
@@ -78,7 +77,6 @@ function aggregateBonuses(
   return agg;
 }
 
-/** 加成值格式化：速度为固定值，其余为百分比（保留 1 位小数） */
 function fmtBonus(type: string, sum: number): string {
   if (type === 'SpeedDelta') return `+${Math.round(sum)}`;
   return `+${Math.round(sum * 1000) / 10}%`;
@@ -97,7 +95,6 @@ const attrBonuses = computed<AttrBonus[]>(() => {
 });
 
 interface Ability {
-  /** 行迹点 ID（唯一标识：作渲染 key；缺失时回退 name） */
   pointId: number | null;
   name: string;
   icon: string;

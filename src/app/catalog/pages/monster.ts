@@ -8,11 +8,8 @@ import { loadLocalMonsterList } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import { translate } from '../../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 
-/* 怪物分类：目录侧用的是大写枚举（BOSS/ELITE/MINION），映射到与详情页同一批词典键
-   ⇒ 同一分类在两页文案一致（此前目录写「喽啰」、详情写「普通」，属既有不一致，本次统一）。 */
 const RANK_KEY: Record<string, string> = {
   BOSS: 'monster.rank.boss',
   ELITE: 'monster.rank.elite',
@@ -21,7 +18,6 @@ const RANK_KEY: Record<string, string> = {
 
 const rankLabel = (rank: string): string => (RANK_KEY[rank] ? labelText(RANK_KEY[rank]) : rank);
 
-/** 弱点元素固定 7 项（不按数据现取：某属性当批无弱点怪时选项会消失，筛选栏会跳） */
 const WEAK_ELEMS = ['Physical', 'Fire', 'Ice', 'Thunder', 'Wind', 'Quantum', 'Imaginary'];
 
 export const monsterPage: CatalogPageConfig = {
@@ -37,8 +33,6 @@ export const monsterPage: CatalogPageConfig = {
   async fetchData() {
     const list = await loadLocalMonsterList();
     const rows = list.filter((info) => info.name);
-    /* 同族（同名 + 同卡面图标）里的序号：632 条里 392 条有同族兄弟，卡面完全一样，
-       没有序号时用户不知道「这张是 4 档中的第几档」，也不知道还有 3 张同款。 */
     const variantOf = new Map<string, { index: number; count: number }>();
     for (const bucket of groupMonsterFamilies(rows).values()) {
       bucket.forEach((row, i) => variantOf.set(String(row.id), { index: i + 1, count: bucket.length }));
@@ -63,8 +57,6 @@ export const monsterPage: CatalogPageConfig = {
         camp,
         variantIndex: variant?.index ?? 1,
         variantCount,
-        /* 检索域：弱点属性名与阵营（默认只搜名称，「冰弱点的怪」是最高频诉求却搜不出来）；
-           与卡面可复原文本同源，供空态/截断断言回溯 */
         searchText: [...weakNames, camp].filter(Boolean).join(' '),
       });
     }
@@ -111,9 +103,6 @@ export const monsterPage: CatalogPageConfig = {
     const weakHtml = weakKeys.length
       ? weakKeys.map((e, k) => `<img src="${escHtml(elementIconUrl(e))}" alt="${escHtml(weakNames[k] || e)}" loading="lazy">`).join('')
       : `<span class="nk-mob-card__none">${escHtml(t('mob.noWeak'))}</span>`;
-    /* 卡级 title：一是触屏/截断时那几行文本的永久复原手段（`layout-catalog` 断言：任何被
-       nowrap+ellipsis 截掉的叶子自身或 5 层祖先要有含该文本的 title/aria-label），
-       二是「这只怪弱什么、哪来的、第几档」在一处说全。 */
     const title = [
       item.name,
       weakNames.length ? t('mob.card.weak', { list: weakNames.join('/') }) : t('mob.noWeak'),

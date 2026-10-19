@@ -115,7 +115,7 @@ function togglePause(): void {
   paused.value = !paused.value;
   try {
     if (paused.value) p.pause();
-    else p.resume ? p.resume() : p.play(); // 4.1 运行时无 resume，退化为 play
+    else p.resume ? p.resume() : p.play();
   } catch {}
 }
 
@@ -124,7 +124,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  disposePreview(); // 预览的 WebGL 上下文必须随组件卸载释放，不超浏览器 16 配额
+  disposePreview();
 });
 </script>
 

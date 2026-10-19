@@ -1,54 +1,29 @@
 #!/usr/bin/env node
-/**
- * AI 检索可见性端点生成器（契约 docs/agents/ai-discoverability.md §1-§4）。
- * 用途：构建期把 dist/index.html 原样复制为每个可索引路由一份快照，注入正文 + 真实内链 +
- * 元信息 + JSON-LD 到 dist/prerender/**.html，并输出 dist/sitemap.xml（rewrite 由 vercel.json 管）。
- * 用法：pnpm exec vite build && node tools/gen-ai-endpoints.mjs（必须先有 dist/index.html）。
- * 禁止：改动 dist/index.html 本身（/assets/* 哈希会漂移，守卫断言入口 JS 逐字一致）；import 本模块产生
- * 任何副作用（守卫只 import SITE_ORIGIN，故主流程由入口判断包住）；自建数据源或写死实体内容
- * （数据只从 public/data/cn/** 读，口径以 src/services/api|app/views|app/catalog/pages 为准）；
- * 把 SNAPSHOT_TEXT_LIMIT_* 截断改成全量输出；输出 # 或 JS 链接。
- * 必须：数据派生文本先 clean()（剥 <color=…>/<unbreak>/<u>/\n）再 esc()（HTML 转义，同前端 escHtml）；
- * 详情页含 h1 + 摘要 + 数据事实表 + 面包屑 + ≥3 条同类内链 + 数据最后更新，目录页含 h1 + 条目清单 + 更新时间，
- * 专题页（/voracity）含 h1 + 面包屑 + 分区 + 数据最后更新（非目录，故无 nk-snapshot__entry 条目标记）。
- */
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 
-/** 站点源（快照 canonical / sitemap / JSON-LD 只用它） */
 export const SITE_ORIGIN = 'https://myhsr.wiki';
 
-/** 社交分享图（1200×630，由 tools/gen-og-image.mjs 生成并入库；全站共一张）。
-    `index.html` 里有一份同值的静态兜底（供 catch-all 投递的 SPA 外壳用），
-    守卫断言两者的 origin 与生成器同源。 */
 export const OG_IMAGE = `${SITE_ORIGIN}/og.png`;
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
-/* 语言清单（单一事实源 = converter 的 languages.json，前端 locales.ts 由守卫与之对齐）。 */
 const LANG_REGISTRY = JSON.parse(readFileSync(join(ROOT, 'tools', 'converter', 'languages.json'), 'utf8'));
 const LOCALES = LANG_REGISTRY.languages.map((l) => ({ code: l.code, culture: l.culture }));
 const DEFAULT_LOCALE = LANG_REGISTRY.default;
 const DEFAULT_CULTURE = LOCALES.find((l) => l.code === DEFAULT_LOCALE)?.culture || 'zh-CN';
 let currentLocale = DEFAULT_LOCALE;
-/** 版本同步日期（converter 的 `version.json.synced_at`）：JSON-LD `dateModified` 的取值来源。
-    设成模块级是因为 `ldCollection()` 有十余处调用点都不带 ctx，而该值与语言无关（同一个 version.json）。 */
 let SNAPSHOT_SYNCED_AT = '';
 
-/** `og:locale` 要 `语言_地区`（zh_CN / en_US / ja_JP），而 layout 用的是 BCP 47（zh-CN）。 */
 const ogLocale = (culture) => String(culture || DEFAULT_CULTURE).replace('-', '_');
 
-/** JSON-LD 的 `inLanguage`：取**当前正在构建的语言**的 culture。
-    生成循环是「先设 currentLocale、再 buildPages」，故构建期取值即该语言，无需事后改写。
-    （此前硬编码 `zh-CN`，导致 228 份语言前缀快照的 JSON-LD 都声称自己是中文页面。） */
 const ldLang = () => LOCALES.find((l) => l.code === currentLocale)?.culture || DEFAULT_CULTURE;
 
 const packCache = new Map();
 
-/** 某语言的语言包合并表；结构层未令牌化（目录不存在）时为空表 ⇒ 解析为空操作。 */
 function packOf(locale) {
   const hit = packCache.get(locale);
   if (hit) return hit;
@@ -63,11 +38,9 @@ function packOf(locale) {
   return merged;
 }
 
-/** 缺省语言包（保持既有调用点语义）。 */
 function defaultPack() {
   return packOf(DEFAULT_LOCALE);
 }
-/** 各语言 UI 词典（`src/lib/i18n/messages/<语言>.json`）；与 SPA 共用同一份词条。 */
 const uiDictCache = new Map();
 function uiDict(locale) {
   const hit = uiDictCache.get(locale);
@@ -82,11 +55,6 @@ function uiDict(locale) {
   return d;
 }
 
-/**
- * 带参数的词典文案：`{n}` 等占位符按传入值替换；值里出现 `|` 时按两形式复数选形
- * （与 vue-i18n 的默认规则一致：n==1 用第一形式，其余用第二形式）。
- * 生成器不是 vue-i18n（构建期 Node 脚本），故复数规则在这里就地实现，读数与界面同源。
- */
 function uiT(key, cnFallback, params = {}, count = null) {
   let v = ui(key, cnFallback);
   if (v.includes('|')) {
@@ -97,7 +65,6 @@ function uiT(key, cnFallback, params = {}, count = null) {
   return v;
 }
 
-/** 快照里的 UI 文案：按当前语言取词典值，缺键回退中文（快照不得出现空串或键名）。 */
 function ui(key, cnFallback) {
   const v = uiDict(currentLocale)[key];
   return typeof v === 'string' && v.trim() ? v : cnFallback;
@@ -107,39 +74,21 @@ const DIST_DIR = join(ROOT, 'dist');
 const TEMPLATE_FILE = join(DIST_DIR, 'index.html');
 const PRERENDER_DIR = join(DIST_DIR, 'prerender');
 const SITEMAP_FILE = join(DIST_DIR, 'sitemap.xml');
-/** 纯 shell 落点（下划线前缀 = 非快照：不注入 .nk-snapshot/canonical/title，不进 sitemap/覆盖率统计） */
 const SHELL_FILE = join(PRERENDER_DIR, '_shell.html');
-/** 纯 shell 的 noindex：catch-all 把**一切未命中快照的路径**（不存在的实体、垃圾路径、客户端路由）
-    都投向它——`200` + 零正文在爬虫侧就是 soft 404，会稀释整站质量信号。robots.txt 只登记了那几条
-    客户端路由，故在文件本体加 noindex；**快照一份都不加**（守卫反向断言）。
-    必须在生成快照**之前**从模板里剥掉：否则二次构建会把上一轮的 noindex 带进全部快照。 */
 const SHELL_NOINDEX = '<meta name="robots" content="noindex">';
 const withShellNoindex = (html) => (html.includes(SHELL_NOINDEX) ? html : html.replace('</head>', `${SHELL_NOINDEX}</head>`));
 
-/** 单实体文本上限（契约 §3）：目录条目 4000 / 详情页 20000，超出截断并加 … */
 const SNAPSHOT_TEXT_LIMIT_ENTRY = 4000;
 const SNAPSHOT_TEXT_LIMIT_DETAIL = 20000;
 
-/** 站点名（与 src/lib/constants.ts SITE_NAME 一致） */
 const SITE_NAME = '星铁档案馆';
 
-/** 官方游戏名（词典键 `meta.gameName`，13 语言；前端同一份见 src/app/seo.ts）。
-    全站主关键词靠它承载——品牌名不承载搜索需求，游戏名才是自然流量的入口。 */
 const gameName = () => ui('meta.gameName', '崩坏：星穹铁道');
 
-/** 标题尾部：`{页面名} - {游戏名} Wiki | {品牌}`。
-    **与前端 `pageTitle()` 同格式**：改一处必须同改另一处，否则同一 URL 会出现两个标题口径
-    （执行 JS 的爬虫读渲染后的 title，无 JS 的爬虫读快照 title）。品牌排最后是因为标题被
-    搜索引擎截断时丢的是尾部——关键词必须在前。 */
 const titleTail = () => `${gameName()} Wiki | ${SITE_NAME}`;
-/** 角色满级等级（与 src/lib/constants.ts MAX_CHAR_LEVEL 一致；满级属性 = base + add*(N-1)） */
 const MAX_CHAR_LEVEL = 80;
 
-/* ─── 枚举展示名（前端代码常量，数据文件里没有；新增枚举值必须同步这些表与前端） ─── */
 
-/** 目录路由 meta.title（与 src/app/router/index.ts 各目录路由的 meta.title 逐字一致） */
-/* 目录页标题：直接取 SPA 的同一批词典键（`catalog.<id>.title`），缺键回退中文。
-   快照与界面同源 ⇒ 各语言标题天然一致，不再维护第二份中文表。 */
 const CATALOG_TITLE = {
   '/character': () => ui('catalog.character.title', '角色图鉴'),
   '/lightcone': () => ui('catalog.lightcone.title', ui('catalog.lightcone.title', '光锥图鉴')),
@@ -148,28 +97,15 @@ const CATALOG_TITLE = {
   '/monster': () => ui('catalog.monster.title', ui('catalog.monster.title', '敌对物种')),
   '/endgame': () => ui('catalog.endgame.title', ui('catalog.endgame.title', '终局内容')),
   '/achievement': () => ui('catalog.achievement.title', ui('nav.achievement', '成就')),
-  /* 货币战争各目录标题：词典里没有整串键，改为**复用**已有键拼接（`catalog.currencyWar` +
-     各目录标题 / `nav.cw*`）——原先整串回退中文，是英文快照里最后一批「货币战争」中文的来源。 */
   '/currency/role': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('catalog.character.title', '角色图鉴')}`,
   '/currency/item': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwEquipment', '装备图鉴')}`,
   '/currency/buff': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwPortal', '投资环境')}`,
   '/currency/augment': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwAugment', '投资策略')}`,
   '/currency/trait': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwTrait', '羁绊图鉴')}`,
 };
-/** 专题页 `/voracity` 的标题（与 src/app/router/index.ts 该路由 meta.title 逐字一致；非目录故不进 CATALOG_TITLE） */
 const voracityTitle = () => ui('nav.voracity', '贪饕污染');
-/**
- * 专题页「污染」同形词说明（页面级自撰文案，源数据里没有这段文本）：来自 CONTEXT.md「污染」同形词节
- * + ADR 0025 决策——本页说的是「贪饕」侵蚀污染，与 4.5 联动「圣杯战争 · 污染等级」无关联，
- * 禁止合并叙述或互相内链。属契约 §3 的页面级合成文案，但**内容级文本必须与页面逐字一致**（非 chrome 级）。
- */
-// 与 src/app/views/VoracityView.vue 的同形词说明逐字一致（契约：同一分区文本对所有 UA 一致）
 const voracityDisambiguation = () => ui('vor.disambigNote', '本页「污染」指「贪饕」侵蚀污染；4.5 联动「命运/今晚留下来」的「圣杯战争 · 污染等级 1–7 / 深度污染 / 污染词条」是另一套无关体系，两者不合并叙述、也不互相内链。');
 
-/** 终局四模式（与 src/app/catalog/pages/endgame.ts ENDGAME_MODES 的 key/label 一致）。
- *  `file` = 目录轻量条目（列表/卡片用），`list` = 全量模式表——玩法页的「结构口径」需要
- *  `floor_details` / `countdown` / `clear_score`，这三者**不在** catalog 轻量条目里（见
- *  tools/converter/converters/endgame_catalog.py），只读 catalog 会让快照缺行且与运行时分叉。 */
 const ENDGAME_MODES = [
   { key: 'maze', label: () => ui('catalog.option.modeMaze', '忘却之庭'), file: 'maze.catalog.json', list: 'maze.json' },
   { key: 'story', label: () => ui('catalog.option.modeStory', '虚构叙事'), file: 'maze_extra.catalog.json', list: 'maze_extra.json' },
@@ -177,7 +113,6 @@ const ENDGAME_MODES = [
   { key: 'peak', label: () => ui('catalog.option.modePeak', '异相仲裁'), file: 'maze_peak.catalog.json', list: 'maze_peak.json' },
 ];
 
-/** 敌对物种分类（与 src/lib/constants.ts MON_RANK、catalog/pages/monster.ts MON_TYPE 一致） */
 const MON_RANK = {
   Minion: 'monster.rank.minion',
   MinionLv2: 'monster.rank.minion',
@@ -186,15 +121,10 @@ const MON_RANK = {
   BigBoss: 'monster.rank.boss',
 };
 const MON_TYPE = { BOSS: 'monster.rank.boss', ELITE: 'monster.rank.elite', MINION: 'monster.rank.minion' };
-/** 分类标签按词典取（缺键回退枚举键）——快照与界面同源。 */
 const monRankLabel = (t) => (MON_RANK[t] ? ui(MON_RANK[t], t) : t);
-/** 状态词条类型（与 `MonsterDetailView.vue` 的 STATUS_TYPE 逐字一致） */
 const MON_STATUS_TYPE = { Buff: 'mob.status.buff', Debuff: 'mob.status.debuff', Other: 'mob.status.other' };
 const monStatusLabel = (t) => (MON_STATUS_TYPE[t] ? ui(MON_STATUS_TYPE[t], t) : t);
 
-/** 物品主类型（与 src/app/catalog/pages/item.ts MAIN_TYPE_NAMES 一致；子类型不建映射，原样输出数据值） */
-/* 枚举 → [SPA 词典键, 中文回退]：快照与界面同源，避免生成器维护第二份写死文案
-   （这三张表曾是英文快照里量最大的中文来源：ui('catalog.option.rarityLow', '铜') 1640 处、ui('itemMainType.Usable', '可用') 1089 处）。 */
 const ITEM_MAIN_TYPE = {
   Material: ['itemType.Material', ui('itemType.Material', '材料')],
   Virtual: ['itemType.Virtual', ui('itemType.Virtual', '货币')],
@@ -203,15 +133,12 @@ const ITEM_MAIN_TYPE = {
 };
 const itemMainTypeLabel = (t) => (ITEM_MAIN_TYPE[t] ? ui(ITEM_MAIN_TYPE[t][0], ITEM_MAIN_TYPE[t][1]) : t);
 
-/** 成就稀有度 / 货币战争标签（与 catalog 配置同源） */
 const ACH_RARITY = {
   Low: ['catalog.option.rarityLow', ui('catalog.option.rarityLow', '铜')],
   Mid: ['catalog.option.rarityMid', ui('catalog.option.rarityMid', '银')],
   High: ['catalog.option.rarityHigh', ui('catalog.option.rarityHigh', '金')],
 };
 const achRarityLabel = (t) => (ACH_RARITY[t] ? ui(ACH_RARITY[t][0], ACH_RARITY[t][1]) : t);
-/* 前后台定位：存**词典键**并用 helper 惰性求值——直接在此处调用 ui() 会在模块加载期
-   （currentLocale 还是缺省语言）就求值并冻结成中文，英文快照里就会出现中文定位标签。 */
 const CW_FB_LABEL = {
   Front: 'catalog.position.front',
   Back: 'catalog.position.back',
@@ -233,16 +160,12 @@ const CW_QUALITY_LABEL = {
 };
 const cwQualityLabel = (t) => (CW_QUALITY_LABEL[t] ? ui(CW_QUALITY_LABEL[t][0], CW_QUALITY_LABEL[t][1]) : t);
 
-/* ═══════════ 基础工具 ═══════════ */
 
 function fail(msg) {
   console.error(`[FAIL] ${msg}`);
   process.exit(1);
 }
 
-/* 文本引用令牌（ADR 0052）：结构层里的文本是 "$t:<TextMap 键>"，快照正文必须先解析成
-   缺省语言正文。生成器不能 import TS，故镜像 `src/lib/i18n/text-ref.ts` 的解析逻辑
-   （令牌前缀另由该模块的测试对 `tools/converter/textpack.py` 钉住）。 */
 const TOKEN_PREFIX = '$t:';
 const isToken = (v) => typeof v === 'string' && v.startsWith(TOKEN_PREFIX);
 
@@ -252,8 +175,6 @@ function resolveTokens(value) {
     const key = value.slice(TOKEN_PREFIX.length);
     const text = packOf(currentLocale)[key];
     if (text === undefined) fail(`语言包缺键 ${key}（public/data/i18n/${currentLocale}/** 与结构层不同源）`);
-    /* 语言包里可能残留字面 `\n`（转义未还原）——缺省语言的取值路径会还原它，pack 路径此前原样输出，
-       于是非缺省语言的快照正文里会出现字面 `\n`（实测 de/item、th/monster）。这里对齐两条路径。 */
     return text.replace(/\\n/g, '\n');
   }
   if (Array.isArray(value)) return value.map(resolveTokens);
@@ -273,18 +194,10 @@ function readJson(rel) {
 
 const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
-/** HTML 转义（与 src/lib/html.ts escHtml 同规则） */
 function esc(v) {
   return v == null ? '' : String(v).replace(/[&<>"']/g, (c) => ESC_MAP[c]);
 }
 
-/**
- * 剥离游戏富文本标记并归一空白（对照 src/lib/html.ts stripTags 的清洗域）：
- * <color=…>/</color>、<unbreak>、<u>、<i> 等全部标签、{SPACE}/{NICKNAME}/{F#…}/{M#…}/{RUBY_*}/{TEXTJOIN#n}、
- * 以及字面 \n 与真实换行。守卫断言可见文本中不残留 <color= / <unbreak> / \n。
- */
-/* 自造属性名（官方无词条）的译文只住在 UI 词典里：转换器落 `{PROP:<枚举键>}` 占位符，
-   本生成器渲染的是缺省语言快照 ⇒ 取 cn 词典值（ADR 0053 方案 A）。 */
 
 const CN_UI_DICT = (() => {
   try {
@@ -299,7 +212,6 @@ function clean(raw) {
   return String(raw)
     .replaceAll('{SPACE}', ' ')
     .replace(/\{NICKNAME\}/g, ui('common.trailblazer', '开拓者'))
-    /* 自造属性名占位符按**当前语言**的 UI 词典解析：此前写死取 cn 词典 ⇒ 英文快照里注入中文（实测 7 处）。 */
     .replace(/\{PROP:([A-Za-z0-9_]+)\}/g, (_m, k) => uiDict(currentLocale)[`prop.${k}`] ?? k)
     .replace(/\{[FM]#([^}]*)\}/g, '$1')
     .replace(/\{RUBY_[EB]#[^}]*\}/g, '')
@@ -310,12 +222,6 @@ function clean(raw) {
     .trim();
 }
 
-/* 性别变体取支（镜像 src/lib/trailblazer.ts 的 pickGenderVariant）。
-   开拓者形态名在**只有 fr/de/pt** 的语言包里带官方 `{M#…}{F#…}` 标记，而**名字必须二选一**：
-   上面 `clean()` 的 `/\{[FM]#([^}]*)\}/g → '$1'` 是**把两支拼起来**（`PionnierPionnière`），
-   对描述文本是既定口径（被 src/lib/__tests__/format.test.ts 钉住），对名字却会造出一个不存在的词。
-   生成器不能 import TS，故就地镜像；两侧一致性由 tools/check-ai-endpoints.mjs 的
-   「角色名残留性别变体标记」断言兜住——漏改任一侧都会在快照里留下标记而被守卫拦下。 */
 const GENDER_VARIANT_RE = /\{([MF])#([^}]*)\}/g;
 
 function pickGender(text, gender) {
@@ -329,41 +235,30 @@ function pickGender(text, gender) {
     return '';
   });
   if (matched) return picked;
-  /* 只带单支、且与当前性别不符：保留支内文本、丢掉标记——宁可显示另一性别的名字，也不让名字整段消失 */
   return String(text).replace(GENDER_VARIANT_RE, '$2');
 }
 
-/** 开拓者判据（镜像 src/lib/trailblazer.ts）：id ≥8000 为开拓者形态，奇=男、偶=女。
- *  **角色域**（`characters.json` 每个命途男女各一条）按条目自身 id 取支，与用户设置无关。 */
 const isTrailblazerId = (id) => Number(id) >= 8000;
 const genderOfId = (id) => (Number(id) % 2 === 0 ? 'female' : 'male');
 
-/** **货币战争域**每个命途只有一条（`id=8007` 带 `female_avatar_id=8008`），性别由用户设置决定；
- *  快照无 localStorage ⇒ 取默认值，与「未改过设置的默认应用态」一致（与前端同一默认常量）。 */
 const SNAPSHOT_GENDER = 'female';
 
-/** 角色域形态名（`characters.json` 条目）：按条目自身 id 取支。非开拓者原样返回。 */
 function charName(entry) {
   return isTrailblazerId(entry.id) ? pickGender(entry.name, genderOfId(entry.id)) : entry.name;
 }
 
-/** 货币战争域形态名（`currency/role.json` 条目）：按快照默认性别取支。非开拓者原样返回。 */
 function cwRoleName(entry) {
   return isTrailblazerId(entry.id) ? pickGender(entry.name, SNAPSHOT_GENDER) : entry.name;
 }
 
-/** 角色详情页名：**先取支再 `clean()`**——`clean()` 的性别标记替换是把两支拼起来（`PionnierPionnière`），
- *  对描述文本是既定口径、对名字却会造出一个不存在的词。回退用已取支的列表名，非开拓者行为与改动前逐字一致。 */
 function charDetailName(entry, raw) {
   return clean(isTrailblazerId(entry.id) ? pickGender(raw, genderOfId(entry.id)) : raw) || charName(entry);
 }
 
-/** 货币战争角色详情页名：同上，性别按快照默认值取支。 */
 function cwRoleDetailName(entry, raw) {
   return clean(isTrailblazerId(entry.id) ? pickGender(raw, SNAPSHOT_GENDER) : raw) || cwRoleName(entry);
 }
 
-/** 单个 #N[tag]% 占位符取值（对照 src/lib/format.ts fmtVal；取值口径必须与前端一致） */
 function fmtParam(value, tag, pct) {
   if (value == null || Number.isNaN(Number(value))) return null;
   let n = Number(value);
@@ -376,11 +271,6 @@ function fmtParam(value, tag, pct) {
   return String(Math.round(n));
 }
 
-/**
- * 替换 #N[tag]% / 裸 #N 占位符（描述文本里的参数必须展开，否则文本不可读）。
- * 坑位：`%` 属于占位符语法（正则把它单独捕获），替换时必须原样补回——前端 fmtDesc 输出
- * `${n}${pct}`；漏补会让「治疗量提高#1[i]%。」变成「治疗量提高10。」（丢百分号）。
- */
 function fillParams(text, params) {
   if (!text || !Array.isArray(params) || !params.length) return text;
   return text
@@ -391,36 +281,24 @@ function fillParams(text, params) {
     .replace(/#(\d+)/g, (raw, i) => fmtParam(params[Number(i) - 1], '', '') ?? raw);
 }
 
-/** 截断到 limit 并加 … */
 function cut(text, limit) {
   return limit && text.length > limit ? `${text.slice(0, limit)}…` : text;
 }
 
-/** 数据派生文本 → 纯文本（已剥离游戏标记、已展开参数） */
 function plain(raw, params, limit) {
   return cut(fillParams(clean(raw), params), limit);
 }
 
-/** 数据派生文本 → 已转义的安全 HTML 文本（正文一律用它，禁止直接拼原始数据） */
 function txt(raw, params, limit = SNAPSHOT_TEXT_LIMIT_DETAIL) {
   return esc(plain(raw, params, limit));
 }
 
-/** 活动出处的等级文案：**单档只写一个数**（源里确有全档同等级的活动敌人，写「85–85」是假区间）。
- *  与页面 `MonsterDetailView.vue → eventLevelText` 同一口径。 */
 function eventLevelRange(levels) {
   const list = Array.isArray(levels) ? levels.filter((n) => n != null) : [];
   if (!list.length) return '';
   return list.length > 1 ? `${list[0]}–${list[list.length - 1]}` : String(list[0]);
 }
 
-/**
- * 目录条目字段的安全渲染（契约 §3「参数展开保真」，含裸 `#N` 语义判据）：
- * 1) 先按 fmtDesc/fmtVal 口径展开 `#N[tag]%`；展开后仍含 `#N[...]` → 省略该字段。
- * 2) 裸 `#N` 的语义取决于该字段所属数据条目是否携带 params 语义（`params` / `base_params` / `param_list` 数组存在，
- *    即便为空数组也算携带）：携带 → 展不开则整个字段省略；不携带 → 是上游字面量，必须原样保留。
- * 判定一律用未截断的展开文本，避免截断把占位符切成半截。
- */
 function txtSafe(raw, params, limit = SNAPSHOT_TEXT_LIMIT_ENTRY, paramsSemantics = false) {
   const expanded = plain(raw, params);
   if (/#\d+\[/.test(expanded)) return '';
@@ -428,14 +306,12 @@ function txtSafe(raw, params, limit = SNAPSHOT_TEXT_LIMIT_ENTRY, paramsSemantics
   return esc(cut(expanded, limit));
 }
 
-/** 条目是否携带参数语义（决定裸 `#N` 是占位符还是上游字面量；见 txtSafe） */
 function hasParamSemantics(entry) {
   return Array.isArray(entry && entry.params)
     || Array.isArray(entry && entry.base_params)
     || Array.isArray(entry && entry.param_list);
 }
 
-/** 通用属性名/属性值（对照 src/lib/currency-role.ts propLabel / propValue） */
 function propLabel(prop) {
   if (prop && typeof prop.prop_name === 'string' && prop.prop_name) return prop.prop_name;
   const key = String((prop && (prop.property_type || prop.name)) || '');
@@ -447,23 +323,16 @@ function propValue(v) {
   return Math.abs(n) < 1 ? `${(n * 100).toFixed(0)}%` : String(n);
 }
 
-/** 稀有度数字 → ★ 串 */
 function starText(n) {
   const num = Number(n) || 0;
   return num > 0 ? '★'.repeat(num) : '';
 }
 
-/**
- * 详情页 meta description 的数据字段拼装（源描述文本缺失时使用）。
- * 禁止在此写合成事实句（形如「X 是某游戏的可玩角色」）——那会成为不存在于数据的实体事实；
- * 只允许把数据字段用「 · 」连接，字段全缺时退化为「图鉴名 · 名称」。
- */
 function factMeta(parts, fallbackLabel, name) {
   const bits = parts.map((p) => clean(p)).filter(Boolean);
   return bits.length ? `${name} · ${bits.join(' · ')}` : `${fallbackLabel} · ${name}`;
 }
 
-/** 取同类条目第 index 个的前后邻居（≥3 条同类内链；越界跳过、去重） */
 function siblingsOf(list, index, count = 4) {
   const out = [];
   const seen = new Set();
@@ -481,7 +350,6 @@ function siblingsOf(list, index, count = 4) {
   return out;
 }
 
-/* ═══════════ HTML 骨架（所有 *_html 参数必须是已转义片段） ═══════════ */
 
 function crumbHtml(parts) {
   const items = parts.map(([label, href]) => (href
@@ -494,19 +362,10 @@ function snapSection(title, html) {
   return html ? `<section class="nk-snapshot__section"><h2>${esc(title)}</h2>${html}</section>` : '';
 }
 
-/** 分区级列表入口：与 SPA 分区头右端的 `.nk-hub-release__all` 同源同目标（同一 href、同一份 listHref）。
-    措辞属页面级 chrome（页面写「全部角色」），此处用「查看全部角色」——按 §3 粒度规则允许不同。 */
 function snapMore(href, label) {
   return `<p class="nk-snapshot__more"><a href="${esc(href)}">${esc(uiT('snapshot.viewAll', '查看全部{label}', { label }))}</a></p>`;
 }
 
-/**
- * 条目清单：name/href 由本函数转义；meta/desc 必须是调用方已转义片段。
- * `entry=true` 给内容面收录条目加稳定标记 class `nk-snapshot__entry`（契约 §3）：
- * 覆盖目录页条目清单 + 枢纽页收录条目分区（`/` 版本上新三分区、`/currency` 本赛季两分区）——
- * 这两类判据失效会静默空态，故必须可被守卫逐条计数。
- * 禁止把它加在详情页的导航性列表上——守卫断言详情页该类名计数 = 0。
- */
 function linkList(items, entry = false) {
   const open = entry ? '<li class="nk-snapshot__entry">' : '<li>';
   const rows = items.map((it) => {
@@ -520,25 +379,16 @@ function linkList(items, entry = false) {
   return `<ul class="nk-snapshot__list">${rows.join('')}</ul>`;
 }
 
-/** `<time>` 的日期占位：`{date}` 在各语言模板里的位置不同，故先塞哨兵，
-    再「先转义模板、后把哨兵换成标签」——直接 `esc()` 含标签的整串会把标签自己也转义掉。 */
 const DATE_SLOT = '{{nk-date}}';
-/** 机器可读的更新日期：`<time datetime>` 是抽取器/搜索侧唯一能读到的结构化日期信号
-    （页脚那句可见文本只对人有意义）。取值同 `version.json.synced_at`，与 sitemap `<lastmod>` 同源。 */
 const timeTag = (v) => `<time datetime="${esc(v)}">${esc(v)}</time>`;
 
 function snapFooter(ctx) {
-  /* 页脚文案走词典（每页一次，非缺省语言下也曾整串中文）：
-     `snapshot.updatedAt` / `snapshot.note` 均带 `{site}` 或 `{date}` 占位符。
-     `{site}` 的取值**按用途分两种**：描述模板（`snapshot.sum.*`）传 `gameName()`（主关键词），
-     本页脚传 `SITE_NAME`（站点自我指称，游戏名在这里没有意义）。 */
   const updated = uiT('snapshot.updatedAt', '数据最后更新：{date}', { date: DATE_SLOT });
   const note = uiT('snapshot.note', '本页为{site}构建期预渲染快照，内容与站点数据一致，无 JavaScript 亦可读取。', { site: SITE_NAME });
   return `<p class="nk-snapshot__meta">${esc(updated).replace(DATE_SLOT, timeTag(ctx.syncedAt))}</p>`
     + `<p class="nk-snapshot__note">${esc(note)}</p>`;
 }
 
-/** 事实表：values 必须是已转义片段或纯数字 */
 function factList(facts) {
   const rows = (facts || [])
     .filter(([, v]) => v != null && String(v) !== '')
@@ -546,14 +396,6 @@ function factList(facts) {
   return rows.length ? `<dl class="nk-snapshot__facts">${rows.join('')}</dl>` : '';
 }
 
-/**
- * 按 `labelOf(row)` 把条目分组为 `<section><h2>` 骨架（契约 §3 的页面级 chrome）。
- *
- * `entries` 必须与 `rows` **同序等长**：条目字段（meta/desc）是逐条转义过的片段，无法从 rows 反推，
- * 故两个数组按索引配对；长度不等立即失败（否则分组会静默错位而条目数断言照样全绿）。
- * `labelOf` 返回空串立即失败：空 `<h2>` 是守卫显式禁止的形态，而给它编一个回退标签即「为数据没有的
- * 分类自撰文本」，违反「文本必须来自数据」硬约束。
- */
 function groupSections(rows, labelOf, labelSource, entries) {
   if (rows.length !== entries.length) {
     fail(`${labelSource}：分组源与条目数不等（${rows.length} vs ${entries.length}）`);
@@ -568,12 +410,9 @@ function groupSections(rows, labelOf, labelSource, entries) {
   return [...groups.entries()].map(([label, list]) => ({ title: label, html: linkList(list, true) }));
 }
 
-/** 目录页正文 */
 function catalogBody(ctx, o) {
   const parts = ['<div class="nk-snapshot">', o.crumbs, `<h1>${esc(o.h1)}</h1>`];
   if (o.summary) parts.push(`<p class="nk-snapshot__summary">${o.summary}</p>`);
-  /* 空 items 不落 `<ul>`：分组目录页（`/item`、`/achievement`）与首页把条目放进 `sections`，
-     此处若照渲染会留下一个空列表——空列表在语法层无法与「条目静默漏光」区分（守卫断言禁止空列表）。 */
   if (o.items && o.items.length) parts.push(linkList(o.items, true));
   for (const s of o.sections || []) parts.push(snapSection(s.title, s.html));
   parts.push(snapFooter(ctx));
@@ -581,7 +420,6 @@ function catalogBody(ctx, o) {
   return parts.join('');
 }
 
-/** 详情页正文：h1 + 摘要 + 事实表 + 章节 + ≥3 条同类内链 + 更新时间 */
 function detailBody(ctx, o) {
   const parts = ['<div class="nk-snapshot">', o.crumbs, `<h1>${esc(o.h1)}</h1>`];
   if (o.summary) parts.push(`<p class="nk-snapshot__summary">${o.summary}</p>`);
@@ -595,7 +433,6 @@ function detailBody(ctx, o) {
   return parts.join('');
 }
 
-/* ═══════════ JSON-LD（契约 §4） ═══════════ */
 
 function ldCollection(route, title, description, entries) {
   return {
@@ -604,8 +441,6 @@ function ldCollection(route, title, description, entries) {
     name: title,
     url: SITE_ORIGIN + route,
     description,
-    /* 目录页/枢纽页也必须有 `dateModified`：DeepSeek Search 的 `date` 字段与 rerank 的时效性维度
-       只能从页面的日期信号抽取，缺它等于「这页没有发布时间」。取值与 sitemap `<lastmod>` 同源。 */
     dateModified: SNAPSHOT_SYNCED_AT,
     inLanguage: ldLang(),
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
@@ -621,7 +456,6 @@ function ldCollection(route, title, description, entries) {
   };
 }
 
-/** 面包屑节点（各页共用同一种形状） */
 function breadcrumbNode(crumbs) {
   return {
     '@type': 'BreadcrumbList',
@@ -633,8 +467,6 @@ function breadcrumbNode(crumbs) {
   };
 }
 
-/** 叙述性专题长文的 JSON-LD。**当前唯一消费方是 `/voracity`**（站点撰写的专题页）：
-    其它详情页都是数据条目页，走 `ldDataPage`（用 `Article` 描述数据页等于把它说成资讯稿）。 */
 function ldArticle(route, headline, description, crumbs, ctx) {
   return {
     '@context': 'https://schema.org',
@@ -653,17 +485,6 @@ function ldArticle(route, headline, description, crumbs, ctx) {
   };
 }
 
-/**
- * 数据条目页的 JSON-LD（光锥 / 遗器 / 敌对物种 / 终局赛季 / 终局玩法 / 货币战争角色 / 羁绊）。
- *
- * 与角色详情页同构：`WebPage`（这是页面）+ `mainEntity`（页面讲的那个条目）+ `BreadcrumbList`。
- * 为什么不用 `Article`：这些页面是**数据条目页**，不是资讯稿——`Article` 会让机器把页面正文
- * 当新闻稿读，条目身份反而拿不到（理由与 ldCharacter 的注释同源）。
- * 为什么条目类型是 `Thing`：schema.org 没有「光锥 / 遗器 / 敌对物种」这样的类型，
- * 自造类型机器不认，`Thing` 是唯一诚实且被定义的通用类型。
- *
- * `/voracity` 不用本函数：那是站点撰写的叙述性专题长文，`Article` 语义正确（见契约 §4）。
- */
 function ldDataPage(route, name, description, crumbs, ctx) {
   return {
     '@context': 'https://schema.org',
@@ -689,19 +510,6 @@ function ldDataPage(route, name, description, crumbs, ctx) {
   };
 }
 
-/**
- * 角色详情页的 JSON-LD（验收标准 B5）。
- *
- * 与 `ldDataPage` 的差别：角色是 schema.org 里有明确定义的类型（`Person`），故能拿到
- * 结构化属性（`characterAttribute`）；而「光锥 / 遗器 / 敌对物种」没有对应类型，只能落到 `Thing`。
- * 结构：`WebPage`（这是页面）+ `mainEntity` = `Person`（角色本体，`additionalType: VideoGameSeries`
- * 说明它属于哪类虚构世界）+ `BreadcrumbList`（层级位置）。依据：
- * - `Person.characterAttribute`（见 schema.org/VideoGameSeries）：「a piece of data that represents a
- *   particular aspect of a fictional character (skill, power, character points, advantage, disadvantage)」
- *   —— 正好是稀有度 / 命途 / 属性 / 阵营 / 终结技能量这类游戏属性。
- * - `Person.alternateName`：拉丁转写名（本仓 `name_en`；开拓者形态为空串，故省略而不是落占位符）。
- * 数据全部来自 `public/data/cn/characters/<id>.json`（不新增数据源；空值一律省略）。
- */
 function ldCharacter(route, name, description, crumbs, ctx, d) {
   const attrs = [];
   const rarity = /(\d+)\s*$/.exec(String(d.rarity || ''))?.[1];
@@ -736,8 +544,6 @@ function ldCharacter(route, name, description, crumbs, ctx, d) {
         name,
         description,
         url: SITE_ORIGIN + route,
-        /* 与 `ldDataPage` / `ldCollection` 同源：三类页面都带 `dateModified`（缺它的只剩本函数与
-           `ldCollection`，正是「日期只存在于可见文本里」的那批页面）。 */
         dateModified: ctx.syncedAt,
         inLanguage: ldLang(),
         isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
@@ -749,14 +555,11 @@ function ldCharacter(route, name, description, crumbs, ctx, d) {
   };
 }
 
-/** JSON-LD 序列化：转义 < 防 </script> 截断 */
 function serializeLd(ld) {
   return JSON.stringify(ld).replace(/</g, '\\u003c');
 }
 
-/* ═══════════ 模板注入（契约 §1 的 5 项） ═══════════ */
 
-/** <meta {attr}="{value}" content="…"> 覆盖或新增 */
 function upsertMeta(html, attr, value, content) {
   const re = new RegExp(`<meta\\s+[^>]*${attr}="${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`);
   const tag = `<meta ${attr}="${value}" content="${esc(content)}">`;
@@ -764,28 +567,10 @@ function upsertMeta(html, attr, value, content) {
   return html.replace('</head>', `${tag}</head>`);
 }
 
-/**
- * 快照 = 构建后 index.html 原样复制 + 5 项注入（顺序无关）。
- * 禁止重写模板：/assets/* 与 index.html 必须逐字一致（守卫断言）。
- */
-/**
- * 分层快照的 JSON-LD 前缀化（契约 §4）：LD 由家族构建器按**无前缀** route 生成，
- * 其它语言下所有**同源** URL 都要落到该语言路径下，否则富媒体信息指向缺省语言页面。
- *
- * **禁止按字符串前缀拼接**（`from` 的收尾斜杠是段分隔符，`split/join` 会把它吃掉）：
- * home 的 route 恰是 `/`，旧实现把 `…wiki/character/1503` 粘成 `…wiki/encharacter/1503`
- * ——实测 12 个语言首页 × 4 条 ItemList URL 全断，而该形态作为 URL 完全合法（能解析、
- * 能拿到 200 外壳），守卫若按「路径以 `/` 开头」过滤就永远看不见它。
- * 判据只能是「路径必须落在 `/<locale>` 下」。
- *
- * 站点根 `/` 的处置分两种：`path === '/'` 一律前缀化为 `/<locale>`（它同时是首页自身 URL
- * 与面包屑「首页」项，都必须指向当前语言），**唯一保留站点根的是 `isPartOf` 的 WebSite 本体**
- * ——那个节点描述的是站点本身，不是某一语言的页面。
- */
 function prefixLdUrls(node, prefix, inWebSite = false) {
   if (typeof node === 'string') {
     if (inWebSite || !node.startsWith(SITE_ORIGIN)) return node;
-    const path = node.slice(SITE_ORIGIN.length); // '' 或 '/…'
+    const path = node.slice(SITE_ORIGIN.length);
     if (path === '') return node;
     return SITE_ORIGIN + prefix + (path === '/' ? '' : path);
   }
@@ -802,17 +587,11 @@ function renderSnapshot(template, page) {
   const canonical = SITE_ORIGIN + page.route;
   let html = template;
 
-  // 3) title / description / og
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(page.title)}</title>`);
   html = upsertMeta(html, 'name', 'description', page.description);
   html = upsertMeta(html, 'property', 'og:title', page.title);
   html = upsertMeta(html, 'property', 'og:description', page.description);
   html = upsertMeta(html, 'property', 'og:url', canonical);
-  /* 3') 社交卡片：og:image / twitter:* / og:locale。
-     这些字段对 AI 检索无杠杆（见 docs/memory/ai-visibility.md），价值在**分享预览**与语言标注：
-     没有 og:image 时任何平台都只渲染纯文字卡片，社交传播的首屏点击率会明显掉一档。
-     图片固定为站点级 `public/og.png`（生成器 tools/gen-og-image.mjs），故只按页 upsert 文案与语言。
-     og:locale 用 `语言_地区`（zh_CN / en_US / ja_JP…），取自同一份 languages.json 的 culture。 */
   html = upsertMeta(html, 'property', 'og:image', OG_IMAGE);
   html = upsertMeta(html, 'property', 'og:locale', ogLocale(page.lang));
   html = upsertMeta(html, 'name', 'twitter:card', 'summary_large_image');
@@ -820,9 +599,7 @@ function renderSnapshot(template, page) {
   html = upsertMeta(html, 'name', 'twitter:description', page.description);
   html = upsertMeta(html, 'name', 'twitter:image', OG_IMAGE);
 
-  // 0) <html lang>：模板是缺省语言，其余语言必须改写（爬虫与无障碍读取的根属性）
   if (page.lang) html = html.replace(/<html([^>]*)\slang="[^"]*"/, `<html$1 lang="${esc(page.lang)}"`);
-  // 0') hreflang alternates：只在**多语言齐全**的分层页上挂（详情页只有缺省语言，挂了就是死链）
   if (page.alternates) {
     const links = page.alternates
       .map((a) => `<link rel="alternate" hreflang="${esc(a.hreflang)}" href="${esc(a.href)}">`)
@@ -830,15 +607,12 @@ function renderSnapshot(template, page) {
     html = html.replace('</head>', `${links}</head>`);
   }
 
-  // 1) <head> 首部内联 js class 脚本（CSS 规则只用它隐藏快照，JS 用户看不到重复内容）
   html = html.replace('<head>', '<head><script>document.documentElement.classList.add(\'js\')</script>');
-  // 2)+3)+4) head 末尾：快照隐藏样式 + canonical + JSON-LD
   const headTail = `<style>html.js #app > .nk-snapshot{display:none}</style>`
     + `<link rel="canonical" href="${esc(canonical)}">`
     + `<script type="application/ld+json">${serializeLd(page.ld)}</script>`;
   html = html.replace('</head>', `${headTail}</head>`);
 
-  // 5) #app 内注入快照正文
   const appRe = /<div id="app">\s*<\/div>/;
   if (!appRe.test(html)) {
     fail('dist/index.html 的 #app 容器不是空 div（模板结构变化），无法注入快照正文');
@@ -848,7 +622,6 @@ function renderSnapshot(template, page) {
 }
 
 function renderSitemap(ctx, pages) {
-  // 同步日期（converter 的 version.json.synced_at）合法才写 <lastmod>
   const lastmod = /^\d{4}-\d{2}-\d{2}/.test(ctx.syncedAt || '')
     ? `<lastmod>${esc(ctx.syncedAt)}</lastmod>` : '';
   const urls = pages
@@ -857,7 +630,6 @@ function renderSitemap(ctx, pages) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>\n`;
 }
 
-/* ═══════════ 各族页面构建 ═══════════ */
 
 function loadContext() {
   const version = readJson('version.json');
@@ -870,14 +642,12 @@ function loadContext() {
   };
 }
 
-/** 首页判据（与 use-release-showcase.ts pickCurrentVersion 同口径） */
 function pickRelease(list, label) {
   const target = String(label || '').trim();
   if (!target) return [];
   return list.filter((item) => String(item.release_version ?? '').trim() === target);
 }
 
-/** 货币战争判据（与 pickSeasonNew 同口径：只读 converter 写入的布尔字段） */
 function pickSeasonNew(list) {
   return list.filter((item) => item.is_season_new === true);
 }
@@ -886,16 +656,7 @@ function makePage(family, o) {
   return { family, route: o.route, file: o.file, title: o.title, description: o.description, ld: o.ld, body: o.body };
 }
 
-/* ─── 首页 `/`（版本上新三分区） ─── */
 
-/**
- * 首页站点级统计块（契约 §3「页面级摘要」：条目数等集合事实属页面元信息，可合成）。
- *
- * 条目数**从同一次构建的目录页正文里数 `nk-snapshot__entry` 得到**，不复刻各族的可见性过滤判据：
- * 复刻即第二事实源，且会在过滤判据变更时与目录页静默分叉。
- * 措辞只由 `<a>` 的目录名（既有词典键）+ 一个纯数字组成——**不新增 i18n 键、不合成叙述句**：
- * `ui()` 缺键回退中文，新键会在 12 个非汉字语言的分层快照里留下中文，直接撞上汉字残留棘轮。
- */
 const STAT_ROUTES = ['/character', '/lightcone', '/relic', '/item', '/monster', '/achievement'];
 
 function homeStatsBlock(pages) {
@@ -914,7 +675,6 @@ function homeStatsBlock(pages) {
   return `<ul class="nk-snapshot__stats">${rows.join('')}</ul>`;
 }
 
-/** 条目数要等目录页构建完才知道 ⇒ 统计块只能在 `buildPages()` 之后注入，位置在页脚之前。 */
 function injectHomeStats(page, block) {
   const anchor = '<p class="nk-snapshot__meta">';
   const i = page.body.lastIndexOf(anchor);
@@ -926,9 +686,6 @@ function homePages(ctx) {
   const chars = readJson('characters.json').filter((c) => c.name);
   const cones = readJson('light_cones.json').filter((c) => c.name);
   const relics = readJson('relics.json').filter((r) => r.name);
-  /* 首页标题**不带页面名前缀**：`首页 - …` 里的「首页」零搜索价值，而首页是全站权重最高的页面，
-     标题位必须留给关键词（`titleTail()` 已经是 `{游戏名} Wiki | {品牌}`）。
-     客户端同源：`/` 没有 titleKey，router.afterEach 落 `pageTitle()`，两边逐字一致。 */
   const title = titleTail();
   const groups = [
     {
@@ -987,11 +744,9 @@ function homePages(ctx) {
   })];
 }
 
-/* ─── 角色 `/character` + `/character/:id` ─── */
 
 function characterPages(ctx) {
   const list = readJson('characters.json').filter((c) => c.name);
-  // 排序镜像 catalog/pages/character.ts：开拓者（id≥8000）垫底，其余 id 降序
   const ordered = [...list].sort((a, b) => {
     const at = Number(a.id) >= 8000 ? 1 : 0;
     const bt = Number(b.id) >= 8000 ? 1 : 0;
@@ -1029,8 +784,6 @@ function characterPages(ctx) {
     const st = statKey != null ? stats[String(statKey)] : null;
     const stories = (d.chara_info && d.chara_info.stories) || {};
     const firstStory = Object.keys(stories).sort((a, b) => Number(a) - Number(b)).map((k) => stories[k]).find((s) => clean(s));
-    /** 摘要段判据（契约 §3）：只取首个非空角色故事（角色简介由应用从 `stories["0"]` 首行派生，
-     *  产物不再带组合好的 `desc`——见 ADR 0052 决策 2/3），否则整段省略；meta description 缺失时用数据字段拼装 */
     const sourceSummary = clean(firstStory);
     const rarityNum = /(\d+)\s*$/.exec(String(d.rarity || ''))?.[1];
     const description = sourceSummary
@@ -1107,11 +860,9 @@ function characterPages(ctx) {
   return pages;
 }
 
-/* ─── 光锥 `/lightcone` + `/lightcone/:id` ─── */
 
 function lightconePages(ctx) {
   const list = readJson('light_cones.json').filter((c) => c.name);
-  // 排序镜像 catalog/pages/lightcone.ts：黑塔商店光锥（id≥24000）垫底，其余 id 降序
   const ordered = [...list].sort((a, b) => {
     const aH = Number(a.id) >= 24000 ? 1 : 0;
     const bH = Number(b.id) >= 24000 ? 1 : 0;
@@ -1119,7 +870,6 @@ function lightconePages(ctx) {
     return Number(b.id) - Number(a.id);
   });
   const links = ordered.map((c) => ({ name: c.name, href: `/lightcone/${c.id}` }));
-  // 适配角色的名字来源：converter 只给 id（反向索引），名字在角色列表
   const charNames = new Map(
     readJson('characters.json').filter((c) => c.name).map((c) => [String(c.id), clean(charName(c))]),
   );
@@ -1149,7 +899,6 @@ function lightconePages(ctx) {
     const route = `/lightcone/${entry.id}`;
     const phases = Object.keys(d.stats || {}).map(Number).filter((n) => !Number.isNaN(n)).sort((a, b) => a - b);
     const lastPhase = phases.length ? d.stats[String(phases[phases.length - 1])] : null;
-    // 摘要段只在源文本（道具说明 / 卡面故事）存在时输出；meta description 缺源文本时用数据字段拼装
     const sourceSummary = clean(d.desc) || clean(d.story);
     const description = sourceSummary
       ? cut(sourceSummary, 150)
@@ -1171,7 +920,6 @@ function lightconePages(ctx) {
     }
     const levels = Object.keys((d.skill && d.skill.level) || {}).map(Number).filter((n) => !Number.isNaN(n)).sort((a, b) => b - a);
     const skillParams = levels.length ? d.skill.level[String(levels[0])]?.param_list : null;
-    // 适配角色：同「推荐光锥」一张表的反向读法，rank = 该光锥在该角色推荐列表中的顺位
     const adapt = (d.recommend_chars || [])
       .map((c) => ({ id: c.id, rank: c.rank, name: charNames.get(String(c.id)) }))
       .filter((c) => c.name);
@@ -1219,7 +967,6 @@ function lightconePages(ctx) {
   return pages;
 }
 
-/* ─── 遗器 `/relic` + `/relic/:id`（详情数据来自 relics.json 条目，无独立详情文件） ─── */
 
 function relicPages(ctx) {
   const list = readJson('relics.json').filter((r) => r.name);
@@ -1256,7 +1003,6 @@ function relicPages(ctx) {
     const pieceHtml = (entry.pieces || [])
       .map((p) => `<li><span>${txt(p.type_name, null, 40)}</span><p>${esc(`最高等级 ${p.max_level} · 稀有度 ${starText(p.rarity)}`)}</p></li>`)
       .join('');
-    // 摘要取套装效果源文本；参数口径同 RelicView（fmtDesc(descriptions[n], param_list[n])）
     const effectTexts = reqNums.map((n) => plain(descriptions[String(n)], params[String(n)]));
     const firstEffect = effectTexts.find(Boolean);
     const sourceSummary = firstEffect || '';
@@ -1294,7 +1040,6 @@ function relicPages(ctx) {
   return pages;
 }
 
-/* ─── 物品 `/item`（无详情路由：输出名称 + 描述文本） ─── */
 
 function itemPages(ctx) {
   const list = readJson('items.json').filter((i) => i.name);
@@ -1307,9 +1052,6 @@ function itemPages(ctx) {
     meta: `${esc(i.main_type ? itemMainTypeLabel(i.main_type) : '')} · ${esc(starText(i.rarity))}`,
     desc: [txtSafe(i.desc, null, 400), txtSafe(i.bg_desc, null, SNAPSHOT_TEXT_LIMIT_ENTRY)].filter(Boolean).join(' '),
   }));
-  /* 2412 条挤在一张页里：转 Markdown 后正文没有任何标题层级，抽取器只能整段吞下或按长度硬切。
-     按主类型分组**只给正文加 `<h2>` 骨架**（条目集合、顺序、数量都不变，仍逐条带 `nk-snapshot__entry`），
-     不新增路由——真正的分页/条目级 URL 是另一件事（见交付记录「待用户裁决」）。 */
   return [makePage('item-list', {
     route: '/item',
     file: 'item.html',
@@ -1326,15 +1068,11 @@ function itemPages(ctx) {
   })];
 }
 
-/* ─── 敌对物种 `/monster` + `/monster/:id` ─── */
 
 function monsterPages(ctx) {
   const list = readJson('monsters.json').filter((m) => m.name);
   const links = list.map((m) => ({ name: m.name, href: `/monster/${m.id}` }));
   const summaryPlain = uiT('snapshot.sum.monster', '{site}敌对物种图鉴：共 {n} 个条目，含分类、弱点、抗性与技能。', { site: gameName(), n: list.length });
-  /* 条目属性摘要与卡面同源（契约 §3「每条 = 名称 + 属性摘要」）：角色目录早就带「稀有度·属性·命途」，
-     敌对目录此前只有分类。弱点是这张卡**唯一可辨**的差异——632 条里 392 条与另一条名称+图标全同，
-     只写分类时 400 张卡在快照里彼此无法区分，AI 也检索不出「冰弱点的敌人」。 */
   const items = list.map((m) => ({
     name: m.name,
     href: `/monster/${m.id}`,
@@ -1364,7 +1102,6 @@ function monsterPages(ctx) {
     const route = `/monster/${entry.id}`;
     const weak = (d.weak || []).map((e) => ctx.elemNames.get(e) || e);
     const resist = Object.entries(d.resist || {}).map(([k, v]) => `${ctx.elemNames.get(k) || k} ${Math.round(Number(v) * 100)}%`);
-    // 摘要段只在 intro 源文本存在时输出；meta description 缺源文本时用 分类+阵营 拼装
     const sourceSummary = clean(d.intro);
     const description = sourceSummary
       ? cut(sourceSummary, 150)
@@ -1373,27 +1110,16 @@ function monsterPages(ctx) {
       .filter((s) => s && s.name)
       .map((s) => {
         const metaParts = [s.tag, s.type_desc, s.damage_type ? (ctx.elemNames.get(s.damage_type) || s.damage_type) : ''].filter(Boolean);
-        /* 附带效果（`MonsterExtraEffect`，完整外键 ExtraEffectIDList × ExtraEffectConfig）：与技能描述同源
-           渲染（`txt` 做 #N[i] 参数替换），实测 215/632 个目录模板的技能带效果——AI 侧与页面同源。 */
         const fx = (s.extra_effects || [])
           .filter((f) => f && f.name)
           .map((f) => `<p>附带效果 ${txt(f.name, null, 60)}${f.desc ? `：${txt(f.desc, f.param_list)}` : ''}</p>`)
           .join('');
-        /* 原始参数行（与页面 MonsterDetailView 同口径：描述引用与否都展示——重复供对照、
-           缺行更困惑）。数值 String() 原样，不做取整/千分位。 */
         const rawParams = Array.isArray(s.param_list) && s.param_list.length
           ? `<p>参数 ${s.param_list.map((v) => esc(String(v))).join(' / ')}</p>`
           : '';
         return `<li><span>${txt(s.name, null, 100)}${metaParts.length ? `（${txt(metaParts.join(' · '), null, 60)}）` : ''}</span><p>${txt(s.desc, s.param_list)}</p>${rawParams}${fx}</li>`;
       })
       .join('');
-    /**
-     * 「贪饕」侵蚀标记与回链（ADR 0025）：怪物详情数据带可选块 `invaded` 时，输出事实行 + `/voracity` 内链。
-     * 判据 = **目录条目自身的详情文件**里该块是否存在（`monsters.json` 条目 → `monsters/{id}.json`）：
-     * 不按 id 白名单硬编码、也不枚举 `monsters/` 目录——该目录下的实例变体页（长号实例 ID）不在
-     * `monsters.json` 目录内，应用不展示、快照也不生成（实测 217 个详情文件带该块，其中仅 24 个是目录条目）。
-     * 等级取 `invaded.invasion_ids`，与页面「受『贪饕』侵蚀 · 等级 N」同口径；无该块的怪物不输出此行。
-     */
     const facts = [
       [ui('catalog.filter.category', '分类'), txt(monRankLabel(d.rank), null, 40)],
       ['阵营', txt(d.camp, null, 60)],
@@ -1401,17 +1127,10 @@ function monsterPages(ctx) {
       ['韧性', d.stance != null ? esc(String(d.stance)) : ''],
       [ui('mob.resist.stance', '韧性弱点'), esc(weak.join(' / '))],
       [ui('mob.resist.damage', '伤害抗性'), esc(resist.join(' / '))],
-      /* 四维标「模板基准」：详情页按 `基准 × 维度修饰比 × 精英组倍率 × 等级曲线 + 实例修正值` 在等级滑条上合成
-         （实测 1002011 基准 69.75 → 满级 20,536），快照不做合成（不做第二份算式），
-         故必须把口径写进标签，否则读的人会把基准值当成战斗值。
-         逐键判断（不是 `d.stats ?`）：上游缺该基准时不落键，对象级判断会渲染出字面量 undefined。 */
       ['生命（模板基准）', d.stats?.hp != null ? esc(String(d.stats.hp)) : ''],
       ['攻击（模板基准）', d.stats?.atk != null ? esc(String(d.stats.atk)) : ''],
       ['防御（模板基准）', d.stats?.def != null ? esc(String(d.stats.def)) : ''],
       ['速度（模板基准）', d.stats?.speed != null ? esc(String(d.stats.speed)) : ''],
-      /* 活动出处（`monster_extra.load_event_sources`）：活动名与页签都是源文本
-         （`ActivityPanel.TitleName` / `ActivityQuestRewardData.QuestTabName`），不是自撰文案；
-         等级单档时不写区间（源数据里 5 个活动敌人全档同等级，写「85–85」是假区间）。 */
       [ui('mob.event.k', '活动出处'), d.event
         ? txt(`${d.event.name}（${d.event.count} 个活动关卡，等级 ${eventLevelRange(d.event.levels)}${d.event.tabs.length ? `；页签 ${d.event.tabs.join('/')}` : ''}）`, null, 160)
         : ''],
@@ -1423,10 +1142,6 @@ function monsterPages(ctx) {
         `<a href="/voracity">${esc(voracityTitle())}</a>`,
       ].filter(Boolean).join(' · ')]);
     }
-    /* 掉落与出没（`monster_extra` 的三块之二）：值与页面同源（都读详情 JSON 的 `drops` /
-       `appearances`，禁止在此另算一遍）；掉落只列基准档物品名，档数在括号里给总量——
-       逐档铺开会把 632 个快照各撑大数百字节，而「掉什么」这一问答所需的信息基准档已足够。
-       出没的样本名与页面同格式：`activity` 有值时拼成「活动名 · 关卡名」（分隔符与页面逐字一致）。 */
     if (d.appearances && d.appearances.total) {
       const samples = (d.appearances.samples || [])
         .map((s) => (s.activity ? `${s.activity} · ${s.name}` : s.name))
@@ -1439,8 +1154,6 @@ function monsterPages(ctx) {
       const tiers = d.drops.length > 1 ? uiT('mob.dropsTiers', '（共 {n} 档均衡等级）', { n: d.drops.length }) : '';
       if (names) facts.push([ui('mob.sec.drop', '掉落'), `${esc(names)}${esc(tiers)}`]);
     }
-    /* 状态词条（`MonsterStatusConfig` 安全子集：命名约定归属 + 去形态后缀同名）。
-       desc 只在无 `#N[i]` 占位符时才有（数值来自动态属性，本仓无值），故有则输出、无则省略整段。 */
     const statusHtml = (d.statuses || [])
       .filter((s) => s && s.name)
       .map((s) => {
@@ -1448,8 +1161,6 @@ function monsterPages(ctx) {
         const meta = `${statusLabel}${s.dispel ? ' · 可驱散' : ''}`;
       })
       .join('');
-    /* 图鉴族（官方 `TemplateGroupID`）：与页面同源——只列**非同卡面**的其他形态
-       （同卡面的档位由 `siblingsOf` 的同类内链与页面「同族变体」承担，两处不重复列同一批卡）。 */
     const atlasForms = entry.atlas_group == null
       ? []
       : list.filter((m) => m.atlas_group === entry.atlas_group)
@@ -1465,11 +1176,9 @@ function monsterPages(ctx) {
       summary: sourceSummary ? esc(cut(sourceSummary, 200)) : '',
       facts,
       sections: [
-        // 空 intro 时「图鉴记录」整段省略
         { title: ui('mob.sec.record', '图鉴记录'), html: sourceSummary ? `<p>${txt(d.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: '技能', html: skillHtml ? `<ul class="nk-snapshot__blocks">${skillHtml}</ul>` : '' },
         { title: ui('mob.sec.status', '状态词条'), html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
-        // 「同图鉴其他形态」= 官方图鉴族里非同卡面的形态（口径见 docs/agents/ai-discoverability.md）
         { title: atlasHtml ? uiT('mob.atlasForms', '同图鉴其他形态（本族共 {n} 个形态）', { n: atlasForms.length }) : '', html: atlasHtml },
       ],
       links: siblingsOf(links, idx),
@@ -1488,12 +1197,7 @@ function monsterPages(ctx) {
   return pages;
 }
 
-/* ─── 终局 `/endgame` + `/endgame/:mode/:id`（数据源 = 四份 *.catalog.json，契约 §2） ─── */
 
-/** 排期串的时区口径（镜像 src/app/catalog/pages/endgame.ts 的 `seasonTimeMs` / `seasonDateParts`，
- *  判据见 ADR 0060）：裸串按固定 +08:00 解释，带时区 / `Z` 的串按原语义。
- *  不镜像的后果实测过：构建机在 UTC 时 `2023-06-12 04:00:00` 会被渲染成 `2023.06.11`，
- *  与页面（+08:00）差一天，且随构建机时区漂移。 */
 const SEASON_TZ_OFFSET = '+08:00';
 const SEASON_TZ_MS = 8 * 3600 * 1000;
 const BARE_SEASON_TIME = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
@@ -1521,7 +1225,6 @@ function seasonDateParts(s) {
   return `${d.getUTCFullYear()}.${String(d.getUTCMonth() + 1).padStart(2, '0')}.${String(d.getUTCDate()).padStart(2, '0')}`;
 }
 
-/** 排期区间格式化（对照 catalog/pages/endgame.ts mazeDateRange） */
 function dateRange(entry) {
   const start = seasonDateParts(entry.live_begin);
   const end = seasonDateParts(entry.live_end);
@@ -1531,8 +1234,6 @@ function dateRange(entry) {
   return '';
 }
 
-/** 赛季状态（镜像 src/app/catalog/pages/endgame.ts `mazeStatus`：live_begin/begin 优先、live_end/end 回退，
- *  两端皆无 ⇒ unknown）。生成器不能 import TS，故镜像一份；判据一变两处都要改。 */
 function seasonStatus(entry) {
   const start = seasonTimeMs(entry.live_begin) ?? seasonTimeMs(entry.begin);
   const end = seasonTimeMs(entry.live_end) ?? seasonTimeMs(entry.end);
@@ -1543,17 +1244,11 @@ function seasonStatus(entry) {
   return 'unknown';
 }
 
-/** 赛季状态文案（镜像 `mazeStatusLabelKey` → `endgame.status.<枚举>`） */
 const seasonStatusLabel = (status) => ui(`endgame.status.${status}`, status);
 
 function endgamePages(ctx) {
   const catalogs = ENDGAME_MODES.map((m) => ({ mode: m, db: readJson(m.file) }));
-  /** 全量模式表（每模式一份）：只被玩法页的「结构口径 / 当期赛季」消费 */
   const fullLists = new Map(ENDGAME_MODES.map((m) => [m.key, readJson(m.list)]));
-  /**
-   * 可见性判据 = 应用同一判据（src/app/catalog/pages/endgame.ts:190 `if (!info || !info.zh) continue;`）：
-   * 名称为空/空白的赛季应用不展示，且不为其造兜底名——快照与 sitemap 都不生成该 URL（未发布内容不入索引）。
-   */
   const all = [];
   for (const { mode, db } of catalogs) {
     for (const [id, entry] of Object.entries(db)) {
@@ -1561,8 +1256,6 @@ function endgamePages(ctx) {
       all.push({ mode, id, entry, name: clean(entry.zh) });
     }
   }
-  // 排序镜像 catalog/pages/endgame.ts bySeasonDesc：首个已知端点降序（live_begin 优先、
-  // 回退 live_end，单边排期也参与排序），同日开始端在前，两端皆无按 ID 降序
   const sortKey = (entry) => {
     const begin = String(entry.live_begin || '');
     if (begin) return { date: begin, isBegin: true };
@@ -1605,13 +1298,7 @@ function endgamePages(ctx) {
     }),
   })];
 
-  /* ── 玩法详情页（第四种页面形态：单页数据页）─────────────────────────────
-     正文逐字来自 endgame_guide.json（IntroData 分节）；结构口径与当期增益取当期赛季（目录排序首位）。
-     形态约定：**不使用 `nk-snapshot__entry`**、无条目级覆盖率断言（见 docs/agents/ai-discoverability.md §3）；
-     当期增益只出名称（不出 desc，避免快照出现未展开的 `#N[i]` 占位符）。 */
   const guide = readJson('endgame_guide.json');
-  // 选择语义文案与 src/app/endgame/guide.ts 的 CHOICE_LABEL 同源同写（生成器不能 import TS，故镜像一份）
-  /* 枚举 → [UI 词典键, 中文回退]；取值走 modeChoiceLabel 惰性求值（加载期调用 ui() 会被冻结）。 */
   const MODE_CHOICE_LABEL = {
     fixed: ['egm.choice.fixed', '固定生效，不可选择'],
     per_team: ['egm.choice.perTeam', '每支队伍选 1 条'],
@@ -1627,15 +1314,10 @@ function endgamePages(ctx) {
     const g = guide.modes?.[mode.key];
     const system = g?.system || null;
     const systemName = clean(system?.name) || ui('egm.sec.buffs', '赛季增益');
-    /* 当期赛季 = **进行中**的那一期（与玩法页 EndgameModeView.currentSeasonInfo 同判据）：
-       目录排序「最新在前」，而最新一期常常是「未开始」（实测 maze 首位 1036 未开始、进行中的是 1035），
-       直接取首位会把未上线赛季的层数/增益当现状陈述。无进行中者回落到首位并标注状态。 */
     const livePick = modeOrdered.find((s) => seasonStatus(s.entry) === 'live') || null;
     const current = livePick || modeOrdered[0];
     const currentStatus = seasonStatus(current.entry);
     const cur = current.entry;
-    /* 结构口径取**全量**条目：catalog 轻量条目不含 floor_details/countdown/clear_score/levels，
-       只读它会让「关卡层级/每层场次/关卡组成/回合上限」四行在快照里整行消失（实测 5 行 dt 命中 0 次）。 */
     const curFull = (fullLists.get(mode.key) || {})[current.id] || cur;
     const floors = curFull.floor_details || [];
     const levelsFull = curFull.levels || [];
@@ -1643,12 +1325,7 @@ function endgamePages(ctx) {
     const knights = levelsFull.filter((l) => l.kind === 'knight').length;
     const kings = levelsFull.filter((l) => l.kind === 'king').length;
     const withTargets = levelsFull.filter((l) => (l.targets || []).length).length;
-    /* 玩法页**不列具体增益条目**（与运行时同口径，见 src/app/views/EndgameModeView.vue 的同名注释）：
-       条目名每期都换、效果依赖上下文，属每期信息，归赛季页；boss 更是上/下半场各一套
-       （扁平 `buffs` 只是并集，只取 stage1 那半套却以整期呈现是**事实错误**）。
-       本页只讲常青规格：体系名 / 条数 / 选法（都在上面的 facts 行里），条目与效果由赛季页承载。 */
     const ruleSections = (g?.sections || []).map((sec) => {
-      // 数据里换行是**字面量** `\n`（非真换行），故按两字符序列拆行；`●`/`○` 起首的行归入列表
       const lines = String(sec.text || '').split('\\n').map((l) => l.trim()).filter(Boolean);
       const paras = lines.filter((l) => !l.startsWith('●') && !l.startsWith('○'));
       const items = lines.filter((l) => l.startsWith('●') || l.startsWith('○')).map((l) => l.replace(/^[●○]\s*/, ''));
@@ -1680,11 +1357,6 @@ function endgamePages(ctx) {
         h1: mode.label(),
         summary: '',
         facts: [
-          /* 不输出「所属玩法」行：运行时玩法页没有这一行（玩法名已在 h1、面包屑与 <title> 里），
-             只写快照会造出「页面没有的事实行」，违反 ai-discoverability §3 的逐字一致判据。
-             也不输出「英文名」行：`ENDGAME_MODES` 没有 `en` 字段，词典里也没有对应键——
-             旧版写死的中文标签 `'英文名'` 恒不渲染，却是往非中文语言注入中文的隐患。 */
-          /* 「当期 / 最新」措辞与玩法页逐字同源（有进行中 ⇒ 当期赛季；否则最新赛季，未知状态不加括号） */
           [
             livePick ? ui('egm.currentSeason', '当期赛季') : ui('egm.latestSeason', '最新赛季'),
             !livePick && currentStatus !== 'unknown'
@@ -1716,11 +1388,9 @@ function endgamePages(ctx) {
 
   for (const { mode, db } of catalogs) {
     const keys = Object.keys(db).filter((k) => db[k] && clean(db[k].zh));
-    // 同模式内按排期开始降序（与目录排序同口径）取相邻赛季作为内链
     const modeOrdered = all.filter((s) => s.mode.key === mode.key);
     const links = modeOrdered.map((s) => ({ name: s.name, href: `/endgame/${s.mode.key}/${s.id}` }));
     const guideMode = guide.modes?.[mode.key];
-    /** 体系名（游戏内命名，来自 IntroData 分节标题）——与页面逐字一致；缺省回退站点工作名（见 src/app/endgame/guide.ts） */
     const systemName = clean(guideMode?.system?.name) || ui('egm.sec.buffs', '赛季增益');
     for (const id of keys) {
       const entry = db[id];
@@ -1736,8 +1406,6 @@ function endgamePages(ctx) {
           return `<li><span>${txt(m.name, null, 100)}</span><p>${txt(bits.join(' · '), null, 120)}</p></li>`;
         })
         .join('');
-      /** 赛季 catalog 没有描述性源字段 → 不输出可见摘要段；事实由下方 facts 表承载，
-       *  meta description 用数据字段拼装（玩法 · 排期 · 增益数 · 敌方数）。 */
       const description = cut(factMeta(
         [mode.label(), dateRange(entry), `${buffs.length} 项赛季增益`, uiT('snapshot.enemyCount', '{n} 名敌方', { n: monsters.length }, monsters.length)],
         CATALOG_TITLE['/endgame'](),
@@ -1785,7 +1453,6 @@ function endgamePages(ctx) {
   return pages;
 }
 
-/* ─── 成就 `/achievement`（无详情路由：名称 + 描述文本） ─── */
 
 function achievementPages(ctx) {
   const list = readJson('achievements.json').filter((a) => a.title);
@@ -1798,7 +1465,6 @@ function achievementPages(ctx) {
     meta: [esc(seriesName.get(a.series_id) || ''), esc(a.rarity ? achRarityLabel(a.rarity) : '')].filter(Boolean).join(' · '),
     desc: txtSafe(a.desc, null, SNAPSHOT_TEXT_LIMIT_ENTRY),
   }));
-  /* 同 `/item`：1950 条按成就系列分组，只加 `<h2>` 骨架，条目集合与数量不变。 */
   return [makePage('achievement-list', {
     route: '/achievement',
     file: 'achievement.html',
@@ -1815,7 +1481,6 @@ function achievementPages(ctx) {
   })];
 }
 
-/* ─── 货币战争枢纽 `/currency`（本赛季新增两分区） ─── */
 
 function currencyHubPages(ctx) {
   const roles = readJson('currency/role.json').roles || [];
@@ -1853,7 +1518,6 @@ function currencyHubPages(ctx) {
   })];
 }
 
-/* ─── 货币战争角色 `/currency/role` + `/currency/role/:id` ─── */
 
 function currencyRolePages(ctx) {
   const roles = readJson('currency/role.json').roles || [];
@@ -1885,10 +1549,6 @@ function currencyRolePages(ctx) {
     const name = cwRoleDetailName(entry, d.name);
     const route = `/currency/role/${entry.id}`;
     const starKeys = Object.keys(d.stars || {}).sort((a, b) => Number(a) - Number(b));
-    /**
-     * 角色详情数据（currency/role/{id}.json）只有结构化字段、无描述性源字段 → 不输出可见摘要段；
-     * meta description 用数据字段拼装。
-     */
     const description = cut(factMeta(
       [`${d.rarity}费`, d.front_back_type ? (cwFbLabel(d.front_back_type)) : '', chargeText(d)],
       CATALOG_TITLE['/currency/role'](),
@@ -1969,7 +1629,6 @@ function currencyRolePages(ctx) {
   return pages;
 }
 
-/* ─── 货币战争装备 / 投资环境 / 投资策略（均无详情路由） ─── */
 
 function currencyListPages(ctx) {
   const pages = [];
@@ -2000,10 +1659,6 @@ function currencyListPages(ctx) {
     }),
   }));
 
-  /**
-   * 可见性判据 = 应用同一判据（src/app/catalog/pages/currency-portal.ts:30 `.filter((p) => p.in_book)`）：
-   * 未收录图鉴的投资环境应用不展示，快照只列收录项。
-   */
   const portals = (readJson('currency/portals.json').portals || []).filter((p) => p.in_book && p.title);
   const portalSummary = uiT('snapshot.sum.cwPortal', '{site}货币战争投资环境图鉴：共 {n} 个投资环境。', { site: gameName(), n: portals.length });
   const portalItems = portals.map((p) => ({ name: p.title, href: null, meta: esc(ui('nav.cwPortal', '投资环境')), desc: txtSafe(p.desc, p.params, 400, hasParamSemantics(p)) }));
@@ -2027,7 +1682,6 @@ function currencyListPages(ctx) {
     name: a.name,
     href: null,
     meta: txt(a.quality ? cwQualityLabel(a.quality) : '', null, 40),
-    // 目录条目：条目携带 params 语义（能展开就展开，含裸 `#N`），展不开则整段省略该 desc
     desc: txtSafe(a.desc, a.params, 400, hasParamSemantics(a)),
   }));
   pages.push(makePage('currency-augment-list', {
@@ -2047,7 +1701,6 @@ function currencyListPages(ctx) {
   return pages;
 }
 
-/* ─── 货币战争羁绊 `/currency/trait` + `/currency/trait/:id` ─── */
 
 function currencyTraitPages(ctx) {
   const traits = readJson('currency/traits.json').traits || [];
@@ -2058,7 +1711,6 @@ function currencyTraitPages(ctx) {
     name: t.name,
     href: `/currency/trait/${t.id}`,
     meta: [esc(cwCatLabel(t.cat)), esc(uiT('egm.value.floors', '{n} 层', { n: (t.layers || []).length }, (t.layers || []).length))].filter(Boolean).join(' · '),
-    // 目录条目：条目携带 base_params 语义 → 能展开就展开（含裸 `#N`），展不开则整段省略该 desc
     desc: txtSafe(t.simple_desc || t.desc, t.base_params, 200, hasParamSemantics(t)),
   }));
   const pages = [makePage('currency-trait-list', {
@@ -2079,7 +1731,6 @@ function currencyTraitPages(ctx) {
     const name = clean(entry.name) || `#${entry.id}`;
     const route = `/currency/trait/${entry.id}`;
     const members = roles.filter((r) => (r.trait_list || []).includes(Number(entry.id)));
-    // 摘要段只在源文本（简述 / 完整描述）存在时输出；参数口径同羁绊详情（desc + base_params）
     const sourceSummary = plain(entry.simple_desc, entry.base_params) || plain(entry.desc, entry.base_params);
     const description = sourceSummary
       ? cut(sourceSummary, 150)
@@ -2107,7 +1758,6 @@ function currencyTraitPages(ctx) {
         ['所属赛季', entry.season_id != null ? esc(String(entry.season_id)) : ''],
       ],
       sections: [
-        // 空 desc 时「效果说明」整段省略
         { title: ui('ctrait.sec.effect', '效果说明'), html: clean(entry.desc) ? `<p>${txt(entry.desc, entry.base_params, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: ui('ctrait.sec.layers', '层级效果'), html: layerHtml ? `<ul class="nk-snapshot__blocks">${layerHtml}</ul>` : '' },
         { title: ui('ctrait.sec.mechanics', '机制详情'), html: remarkHtml ? `<ul class="nk-snapshot__blocks">${remarkHtml}</ul>` : '' },
@@ -2134,28 +1784,13 @@ function currencyTraitPages(ctx) {
   return pages;
 }
 
-/* ─── 专题页 `/voracity`（「贪饕污染」；ADR 0025 的第三种页面形态：非目录、非实体详情） ─── */
 
-/**
- * 比例字段 → 百分比文本（专题页的进度类字段专用）：镜像页面 `src/app/views/VoracityView.vue` 的
- * `ratioPct`/`fmtPct`——0~1 视为比例、>1 原样视为已是百分数、钳到 [0,100]、保留 1 位小数；
- * `null`/非数值返回空串（该档不输出百分比）。用于 `progress_steps[*].progress` 与
- * `activity.buff_levels[*].progress_percent`：数据事实必须与页面同口径（契约 §3「页面 ↔ 快照的对齐粒度」）。
- */
 function pctText(v) {
   if (v == null || !Number.isFinite(Number(v))) return '';
   const n = Number(v);
   return `${Math.round(Math.max(0, Math.min(100, n <= 1 ? n * 100 : n)) * 10) / 10}%`;
 }
 
-/**
- * 专题页正文（契约 §3「专题页正文规则」）：数据全部来自 `voracity.json`（converter 的 voracity 模块单文件产物），
- * 五块分区 + 「污染」同形词说明；**不使用** `nk-snapshot__entry`——该类名被契约 §3 冻结为
- * 「12 个目录页 + 枢纽页的收录条目清单」，专题页的分区列表不是「应用收录条目集合」，标记它会把专题页
- * 误计入条目级覆盖率断言（见 tools/check-ai-endpoints.mjs 检查 5 的注释）。JSON-LD 用 ldArticle：专题页不是目录，
- * 不用 CollectionPage + ItemList。所有描述字段走 txtSafe——按 fmtDesc/fmtVal 口径展开 `#N[tag]%`，
- * 缺参数展开不了的字段整段省略（守卫断言无残留 `#\d+\[…\]`）。
- */
 function voracityPages(ctx) {
   const db = readJson('voracity.json');
   const activity = db.activity || {};
@@ -2169,7 +1804,6 @@ function voracityPages(ctx) {
   const tutorials = Array.isArray(db.tutorials) ? db.tutorials : [];
   const affixes = Array.isArray(db.affixes) ? db.affixes : [];
 
-  /** 名称回退 = 数据自身的 id（禁止为无名条目合成实体文案；id 是数据字段） */
   const nameOrId = (entry, key, fallbackKey) => txtSafe(entry && entry[key], null, 120)
     || (entry && entry[fallbackKey] != null ? esc(String(entry[fallbackKey])) : '');
 
@@ -2177,14 +1811,13 @@ function voracityPages(ctx) {
   const stageHtml = stages.map((st) => {
     const monsters = (Array.isArray(st && st.monsters) ? st.monsters : []).map((m) => {
       const name = txtSafe(m && m.name, null, 120) || (m && m.monster_id != null ? esc(String(m.monster_id)) : '');
-      // detail_id 非空才给真实内链；为空（认不出模板）输出纯文本，禁止造 `#` 链接
       const href = m && m.detail_id != null && String(m.detail_id) !== '' ? `/monster/${m.detail_id}` : null;
       const label = href ? `<a href="${esc(href)}">${name}</a>` : `<span>${name}</span>`;
       return `<li>${label}</li>`;
     }).join('');
     const head = [
       st && st.stage_id != null ? uiT('egd.levelLabel', '关卡 {n}', { n: esc(String(st.stage_id)) }) : '',
-      st && st.invasion_id != null ? uiT('snapshot.invasionLevel', '侵蚀等级 {n}', { n: esc(String(st.invasion_id)) }) : '',
+      st && st.invasion_id != null ? uiT('snapshot.invasionLevel', '污染等级 {n}', { n: esc(String(st.invasion_id)) }) : '',
     ].filter(Boolean).join(' · ');
     if (!head && !monsters) return '';
     return `<li>${head ? `<span>${head}</span>` : ''}${monsters ? `<ul class="nk-snapshot__list">${monsters}</ul>` : ''}</li>`;
@@ -2194,14 +1827,13 @@ function voracityPages(ctx) {
     const desc = txtSafe(lv && lv.desc, lv && lv.param_list, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(lv));
     if (!desc) return '';
     const head = lv && lv.invasion_id != null
-      ? uiT('snapshot.invasionLevel', '侵蚀等级 {n}', { n: esc(String(lv.invasion_id)) })
+      ? uiT('snapshot.invasionLevel', '污染等级 {n}', { n: esc(String(lv.invasion_id)) })
       : '';
     return `<li>${head ? `<span>${head}</span>` : ''}<p>${desc}</p></li>`;
   }).join('');
   const buffHtml = buffLevels.map((b) => {
     const name = nameOrId(b, 'name', 'buff_id');
     const desc = txtSafe(b && b.desc, b && b.param_list, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(b));
-    // 愿力分档进度是数据事实（页面同处渲染）→ 有值必输出，标签沿用页面文案「愿力进度」；null 档不输出
     const pct = pctText(b && b.progress_percent);
     if (!name && !desc && !pct) return '';
     const head = `${name}${b && b.level != null ? `（${uiT('mob.levelTag', '等级 {n}', { n: esc(String(b.level)) })}）` : ''}`;
@@ -2209,7 +1841,6 @@ function voracityPages(ctx) {
   }).join('');
 
   const scoreHtml = scores.length ? `<p>${esc(uiT('vor.field.wishTiers', '愿力档位：{list}', { list: scores.map((s) => String(s)).join(' / ') }))}</p>` : '';
-  /** 进度档位百分比：与页面 `fmtPct` 同口径（pctText），无值档不输出百分比 */
   const stepHtml = steps.map((p) => {
     const prog = pctText(p && p.progress);
     const desc = txtSafe(p && p.desc, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
@@ -2289,7 +1920,6 @@ function voracityPages(ctx) {
   })];
 }
 
-/* ═══════════ 主流程 ═══════════ */
 
 function buildPages(ctx) {
   return [
@@ -2313,34 +1943,12 @@ function main() {
   if (!existsSync(TEMPLATE_FILE)) {
     fail(`缺少 ${TEMPLATE_FILE}：请先执行 \`pnpm exec vite build\`（快照模板必须是构建产物，禁止用源码模板）`);
   }
-  /**
-   * 模板取值（Vercel 投递模型 = 文件系统先于 rewrites，契约 §1）：
-   * 生成后 `dist/index.html` 会被 home 快照覆盖，因此再次运行时禁止拿它当模板——
-   * 优先复用上一轮原样落盘的纯 shell `dist/prerender/_shell.html`。
-   * `_shell.html` 缺失且 `dist/index.html` 已被注入时立即失败，避免拿 home 快照当 shell 二次注入。
-   */
   const shellSource = existsSync(SHELL_FILE) ? SHELL_FILE : TEMPLATE_FILE;
-  /* 剥掉上一轮写进 shell 的 noindex：`template` 同时用于渲染全部快照，
-     带着它会让 1432 份快照一起变成 noindex（守卫反向断言这一条）。 */
   const template = readFileSync(shellSource, 'utf8').split(SHELL_NOINDEX).join('');
   if (shellSource === TEMPLATE_FILE && template.includes('class="nk-snapshot"')) {
     fail(`${TEMPLATE_FILE} 已是注入过的快照且缺少 ${SHELL_FILE}：请先执行 \`pnpm exec vite build\` 重建纯 shell 模板`);
   }
-  /**
-   * 分层方案（ADR 0052 决策 6 / 用户裁决 B）：**非条目级页面**（首页、各目录页、玩法枢纽、
-   * voracity 单页）每种语言各一份快照；条目级详情页只做缺省语言（13 倍体积换不来等量的检索价值）。
-   * 判据 = 家族名不以 `-detail` 结尾。
-   */
   const isLayered = (family) => !family.endsWith('-detail');
-  /**
-   * 分层页在全部语言间互挂 hreflang；缺省语言为 x-default。
-   *
-   * `hreflang` 取 **culture（BCP 47）**，不取上游 `TextLanguageKey`：`cht` / `jp` / `kr` 是 vendor 的
-   * 语言键，不是语言码（正确值为 `zh-TW` / `ja-JP` / `ko-KR`）——Google 对无法识别的 hreflang 值
-   * **整条忽略**，日 / 韩 / 繁三个版本会静默脱离 hreflang 簇，而条数断言（14 条）照样全绿。
-   * 依据：`docs/adr/0052-多语言站点架构-路径前缀与语言包.md` 决策 1 与
-   * `src/lib/i18n/locales.ts` 的字段注释（culture 供 `<html lang>` 与 hreflang）。
-   */
   const alternatesFor = (cnRoute) => {
     const strip = (code, route) => (route === '/' ? `/${code}` : `/${code}${route}`);
     return [
@@ -2352,18 +1960,13 @@ function main() {
     ];
   };
 
-  /* 分层多语言快照**无条件全量**（曾由 `NK_SNAPSHOT_LOCALES=1` 开关控制，收尾时已去掉）：
-     非条目级页面 × 全部语言各一份，条目级详情页仍只做缺省语言（判据见上方 isLayered）。
-     `localeSet` 保留为单一取值点，是为了让「哪些语言出快照」只有一处可改。 */
   const localeSet = LOCALES;
   const pages = [];
-  /** 任一语言的 context 都可用于 sitemap（只取 syncedAt，与语言无关）。 */
   let ctx;
   for (const loc of localeSet) {
     currentLocale = loc.code;
     ctx = loadContext();
     const built = buildPages(ctx);
-    /* 站点统计块的条目数取自**本次构建的目录页正文**、标签取当前语言词典 ⇒ 逐语言各注入一次。 */
     const homePage = built.find((p) => p.route === '/');
     if (homePage) injectHomeStats(homePage, homeStatsBlock(built));
     const keep = loc.code === DEFAULT_LOCALE ? built : built.filter((p) => isLayered(p.family));
@@ -2380,14 +1983,8 @@ function main() {
     }
   }
 
-  // 每次重建都清空 prerender：残留快照会让「快照数 = 数据条目数」与 sitemap 一一对应断言失效
   rmSync(PRERENDER_DIR, { recursive: true, force: true });
   mkdirSync(PRERENDER_DIR, { recursive: true });
-  /**
-   * 纯 shell 原样落盘（供 vercel.json catch-all rewrite 投递 SPA 外壳）。
-   * 下划线前缀 = 非快照标记：不注入 `.nk-snapshot` / canonical / title / JSON-LD，
-   * 守卫与覆盖率统计都跳过 `_` 前缀文件。
-   */
   writeFileSync(SHELL_FILE, withShellNoindex(template));
 
   let bytes = 0;
@@ -2398,7 +1995,6 @@ function main() {
     const html = renderSnapshot(template, page);
     writeFileSync(out, html);
     bytes += Buffer.byteLength(html);
-    // home 快照要同时覆盖 dist/index.html（字节一致）→ `/` 命中正文；此处只渲染一次，避免两份不一致
     if (page.route === '/') homeHtml = html;
   }
   if (homeHtml == null) fail('未构建 route="/" 的 home 页面，无法覆盖 dist/index.html');
@@ -2426,13 +2022,11 @@ function countFiles(dir) {
   for (const name of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, name.name);
     if (name.isDirectory()) n += countFiles(p);
-    // 下划线前缀 = 非快照（_shell.html），不计入快照数
     else if (name.name.endsWith('.html') && !name.name.startsWith('_')) n += 1;
   }
   return n;
 }
 
-/* 入口判断：被 import 取 SITE_ORIGIN 时绝不执行主流程 */
 const isEntry = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntry) {
   main();

@@ -11,9 +11,6 @@ import type {
   MazeStarReward, MazeTargetInfo,
 } from '../../services/types';
 
-/** 奖励物品 id → 名称 / 图标：**模块级共享**。`loadLocalItems` 是单例取数，但每个消费实例原先各建一份
- *  全量 Map（items.json 2600+ 条；星数奖励每档渲染一个 `EndgameReward` ⇒ 单页 3~6 份）。
- *  这里一次构建、全实例共享；失败时清掉 promise 允许重试（与站点共享单例同一纪律）。 */
 export type RewardItemMeta = Pick<LocalItemEntry, 'name' | 'icon'>;
 export const rewardItemMap = shallowRef<Map<number, RewardItemMeta>>(new Map());
 let rewardItemPromise: Promise<void> | null = null;
@@ -33,14 +30,10 @@ export function buffDescHtml(b: MazeBuffInfo): string {
   return fmtDesc(b.desc, b.param_list || []);
 }
 
-/** 首领特性描述（与赛季增益同渲染：#N[i] 参数占位由 fmtDesc 替换） */
 export function bossTraitDescHtml(t: MazeBossTrait): string {
   return fmtDesc(t.desc, t.param_list || []);
 }
 
-/** 赛季增益列表：剔除已由关卡自身承载的同 ID 增益（忘却之庭的「记忆紊流」既是赛季增益
- *  也是每层的层级增益，由层 / 节点看板首块的末法余烬位逐层呈现，赛季级一份不再复述）。
- *  判据用增益 ID 而非文案比对：同 ID 即同一条上游记录。 */
 export function seasonBuffList(data: MazeListEntry): MazeBuffInfo[] {
   const flat = data.buffs || [];
   if (!flat.length) return [];
@@ -50,7 +43,6 @@ export function seasonBuffList(data: MazeListEntry): MazeBuffInfo[] {
   return flat.filter((b) => !carried.has(b.id));
 }
 
-/** 增益图标 URL（bufficon CDN；资源未就绪时 404，img error 事件兜底 SVG 占位） */
 export function buffIconUrl(b: MazeBuffInfo): string {
   return b.icon ? cdnUri('bufficon', `${b.icon}.webp`) : '';
 }
@@ -67,8 +59,6 @@ export function elemRow(types: string[]): string {
   }).join('');
 }
 
-/** 末波首领（最后一波的第 1 只）：战斗卡片「打谁」的唯一判据——
- *  末日幻影每场 1 敌即首领本体，忘却之庭 / 虚构叙事的末波是压轴首领（波 1 是小怪）。 */
 export function lastWaveBoss(mons: MazeMonsterInfo[] | undefined): MazeMonsterInfo | null {
   const list = mons || [];
   if (!list.length) return null;
@@ -119,7 +109,6 @@ export const TARGET_TYPE_LABEL: Record<string, string> = {
   DEAD_AVATAR: translate('egd.score.dead'),
 };
 
-/** 挑战目标类型语义 SVG（子仓库解包无对应图标，自制语义化内联图标） */
 export const TARGET_TYPE_SVG: Record<string, string> = {
   TOTAL_SCORE: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.8-4.3 4.1 1 5.8L12 16.4l-5.2 2.6 1-5.8L3.5 9.1l5.9-.8z"/></svg>`,
   ROUNDS_LEFT: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M12 2v2M12 20v2M5 6h14v3a7 7 0 11-14 0z"/></svg>`,
@@ -138,12 +127,7 @@ export function targetHtml(t: MazeTargetInfo): string {
   return t.text.replace(/#\d+\[[^\]]*\]%?/g, '').replace(/#\d+/g, '');
 }
 
-/** 星级目标 × 星级奖励**按档配对**成一行（ADR 0051 补记四）：档位数与目标数不等时
- *  （忘却之庭一层 3 个目标只推进 1 档），目标按 `ceil(目标数 / 档数)` 成组挂到对应档；
- *  实测逐层恒为 3 个目标，故忘却之庭 = 1 行 3 目标、虚构叙事 / 末日幻影 = 3 行各 1 目标。
- *  无档位（奖励线缺失的期）时退化为每目标一行、不带奖励，不隐藏目标。 */
 export interface StarTierRow {
-  /** 累计星数档位；`prism` 档为 0（徽章走「棱彩星」） */
   star: number;
   label?: string;
   prism?: boolean;

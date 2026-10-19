@@ -7,28 +7,18 @@ import type { MazeStageDetail } from '../../services/types';
 
 
 import { translate } from '../i18n';
-/** 战斗卡片行（层 tab 的半场卡片 / 星启看板的节点卡片共用）：
- *  卡片兼作子切换与身份位——一场战斗的「打谁（末波首领图）/ 什么属性 / 多少级 / 几回合」同屏可比，
- *  看板内因此不再复述这四项。 */
 const props = defineProps<{
   items: {
     key: string;
     label: string;
     stage: MazeStageDetail | undefined;
     level: number;
-    /** 该层回合上限（层共用值，缺省或 0 不渲染——末日幻影层恒为 0） */
     countdown?: number;
-    /** 卡名旁的危险标识（红色三角警告图标；传入的文案作无障碍名与悬停提示，
-     *  如异相仲裁王棋档的「绝境」节点）；缺省不渲染 */
     danger?: string;
   }[];
-  /** 当前选中卡的 key */
   active: string;
-  /** tab id 前缀：`${idPrefix}-${key}`，与看板的 aria-labelledby 同源 */
   idPrefix: string;
-  /** tablist 的无障碍名（星启 =「星启节点」/ 层 =「半场」） */
   tabsLabel: string;
-  /** 卡片 aria-controls 指向的看板 id */
   panelId: string;
 }>();
 
@@ -96,8 +86,6 @@ function onKeydown(e: KeyboardEvent, i: number): void {
       <span class="nk-egd-nodecard__body">
         <span class="nk-egd-nodecard__title">
           <span class="nk-egd-nodecard__name">{{ t.label }}</span>
-          <!-- 危险标识：红三角 + 感叹号（图标自绘，不引库）。文案走 role="img" 的无障碍名 +
-               悬停提示，视觉上不占一行文字 -->
           <span
             v-if="t.danger"
             class="nk-egd-nodecard__danger"

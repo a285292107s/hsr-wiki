@@ -29,7 +29,6 @@ function makeContainer(over: Partial<{ scrollTop: number; scrollHeight: number; 
 }
 
 beforeEach(() => {
-  // 非组件上下文调用 onMounted 会告警：静默（生命周期挂载由真实浏览器 e2e 覆盖）
   vi.spyOn(console, 'warn').mockImplementation(() => {});
   vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }));
 });
@@ -88,7 +87,6 @@ describe('useScrollSpy', () => {
     const els = { a: makeEl(200) };
     const spy = useScrollSpy(container, () => ['a'], (id) => els[id as keyof typeof els], { offset: 64 });
     spy.jumpTo('a');
-    // 200 - 0 + 100 - 64 + 8（LANDING_SLACK，让区块顶边落在偏移线**之上**，避免边界判定被零点几像素抖动翻转）
     expect(scrollTo).toHaveBeenCalledWith({ top: 244, behavior: 'smooth' });
     expect(spy.activeId.value).toBe('a');
   });
@@ -104,12 +102,9 @@ describe('useScrollSpy', () => {
         (id) => els[id as keyof typeof els],
         { offset: 64 },
       );
-      // 跳到 b（真实滚动里 b 的顶边还会动，位置判定此时会判成 a）
       spy.jumpTo('b');
       spy.refresh();
       expect(spy.activeId.value, '滚动停止前须钉住被点项').toBe('b');
-      // 「滚动停止」由 160ms 静默计时驱动；这里直接推进到超过该阈值（jsdom 里未挂载组件，
-      // 拿不到 scroll 监听器，故只验证「钉住会自行释放」这条不变量）
       vi.advanceTimersByTime(400);
       spy.refresh();
       expect(spy.activeId.value, '停止后交回位置判定（两区块都越线 ⇒ 取更靠后的 b）').toBe('b');

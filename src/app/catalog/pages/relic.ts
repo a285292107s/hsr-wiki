@@ -5,7 +5,6 @@ import { loadLocalRelicSets } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import { translate } from '../../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 
 export const relicPage: CatalogPageConfig = {
@@ -45,7 +44,6 @@ export const relicPage: CatalogPageConfig = {
   ],
   renderCard(item, i) {
     const tag = typeof item.set_tag === 'string' ? item.set_tag : '';
-    /* 名已 2 行 clamp，长复合词仍可能被断在词中/省略，全文挂卡根 `title` 复原（同 character.ts）。 */
     return `<a class="nk-relic-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" data-set="${escHtml(String(item.set_type))}" title="${escHtml(item.name)}" style="--i:${i}">
       <div class="nk-relic-card__plate">
         <img class="nk-relic-card__img" src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">

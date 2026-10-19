@@ -1,20 +1,4 @@
 #!/usr/bin/env node
-/**
- * 语言清单一致性守卫：node tools/check-languages.mjs
- *
- * 两侧清单必须同步（[ADR 0052](../docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）：
- *   - 事实源：tools/converter/languages.json（转换器经 languages.py 读取）
- *   - UI 镜像：src/lib/i18n/locales.ts（路由前缀 / 语言选择器）
- *
- * 校验项：
- *   1. 两侧语言代码集合、每个代码的 culture 与母语名、缺省语言完全一致
- *   2. 前缀规则：缺省语言为空串，其余等于语言代码（缺省语言不做 `/cn/**` 别名）
- *   3. vendor 在场时：每个语言声明的 TextMap 分片文件真实存在，且清单与
- *      ExcelOutput/AllowedTextLanguage.json 的上游语言全量对齐（上游新增语言即失败，
- *      强制走一次「要不要支持」的决策，而不是静默漏掉）
- *
- * 退出码：有漂移 1，全绿 0。vendor 不在场（CI 未浅克隆 / Vercel 构建）时跳过第 3 项并提示。
- */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, posix, sep } from 'node:path';
@@ -33,7 +17,6 @@ const note = (msg) => notes.push(msg);
 
 const readText = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 
-/* ─── 事实源 ─── */
 if (!existsSync(join(ROOT, REGISTRY_REL))) {
   console.error(`[FAIL] 缺少语言清单事实源 ${REGISTRY_REL}`);
   process.exit(1);
@@ -58,7 +41,6 @@ for (const lang of registryLangs) {
 }
 if (!seen.has(defaultCode)) fail(`${REGISTRY_REL}: default=${JSON.stringify(defaultCode)} 不在 languages 内`);
 
-/* ─── UI 镜像 ─── */
 if (!existsSync(join(ROOT, LOCALES_REL))) {
   console.error(`[FAIL] 缺少前端语言清单 ${LOCALES_REL}`);
   process.exit(1);
@@ -77,7 +59,6 @@ else if (defaultInTs[1] !== defaultCode) {
   fail(`${LOCALES_REL}: DEFAULT_LOCALE='${defaultInTs[1]}' 与事实源 default='${defaultCode}' 不一致`);
 }
 
-/* ─── 两侧逐项比对 ─── */
 const tsByCode = new Map(localeEntries.map((e) => [e.code, e]));
 for (const lang of registryLangs) {
   const code = String(lang.code);
@@ -98,7 +79,6 @@ for (const leftover of tsByCode.keys()) {
   fail(`前端清单多出未登记语言 ${leftover}（事实源里没有）`);
 }
 
-/* ─── vendor 交叉校验（不在场则跳过） ─── */
 const vendorLangFile = join(ROOT, VENDOR_LANG_REL);
 const textmapDir = join(ROOT, VENDOR_TEXTMAP_REL);
 if (existsSync(vendorLangFile)) {
@@ -132,9 +112,6 @@ if (existsSync(vendorLangFile)) {
   note(`vendor 不在场（${VENDOR_LANG_REL}），跳过上游交叉校验`);
 }
 
-/* ─── 格式化必须按站点语言（不是浏览器语言） ─── */
-/* `toLocaleString()` 不带参数时用**浏览器**语言 ⇒ 德语站点配英文浏览器会输出 `1,234.5`（应为 `1.234,5`）。
-   统一走 `src/lib/format.ts` 的 `fmtNumber()`。debug 研究线不面向用户，不进此判据。 */
 {
   const SRC = join(ROOT, 'src');
   const walk = (dir, out = []) => {
@@ -157,10 +134,6 @@ if (existsSync(vendorLangFile)) {
   }
 }
 
-/* ─── 内链必须带语言前缀（非 RouterLink 场合） ─── */
-/* 目录卡与模板里的普通 `<a href>` 不走路由 history base：写死 `/lightcone/23001` 这类内链，
-   在非缺省语言下点一下就会**静默跳回缺省语言**。唯一正确写法是 `activeHref(...)`（或 RouterLink 的 `to`）。
-   本轮实测漏点：`BuildsPanel.vue` 的推荐光锥卡。 */
 {
   const walk = (dir, out = []) => {
     for (const name of readdirSync(dir)) {
@@ -182,7 +155,6 @@ if (existsSync(vendorLangFile)) {
   }
 }
 
-/* ─── 汇总 ─── */
 for (const n of notes) console.log(`[INFO] ${n}`);
 if (problems.length > 0) {
   console.error(`\n[FAIL] 语言清单漂移 ${problems.length} 处：`);

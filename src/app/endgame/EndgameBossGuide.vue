@@ -5,23 +5,14 @@ import type { MazeBossGuide } from '../../services/types';
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
-/** 敌方卡内的两个首领机制分区：首领特性（战斗机制条目）与阶段机制（阶段说明 + 官方应对策略 +
- *  小节问答）。归属由转换器算好——命中登记的敌方条目带 `boss_guide` 模板指针，正文在赛季级
- *  `boss_guides`（配置表的敌方 ID 未必等于战斗敌方，前端不推导模板）。
- *  两个分区各自成段（与卡内「技能」「召唤物」同一套发丝线语言），只有末日幻影的首领有，
- *  其余模式与杂兵缺省不渲染，零 modeKey 分支。 */
 defineProps<{ guide: MazeBossGuide }>();
 </script>
 
 <template>
   <div v-if="guide.traits?.length" class="nk-egd-guide">
-    <!-- 分区名＝h2（既有的可见分区标题，不是新增文案；ADR 0043 禁的是把关卡名带进面板） -->
     <h2 class="nk-egd-guide__label">{{ t('egd.bossTraits') }}</h2>
     <article v-for="t in guide.traits" :key="t.id" class="nk-egd-trait">
-      <!-- 条目名＝h3：A1.2 判的是**文档序**层级递增 ≤1，与上方 h2 分区标题互为兄弟即合法
-           （标题元素不可能包住块级卡片，故不按 DOM 祖先判）。 -->
       <h3 class="nk-egd-trait__name">{{ t.name }}</h3>
       <p v-if="t.desc" class="nk-egd-trait__desc" v-html="bossTraitDescHtml(t)"></p>
     </article>

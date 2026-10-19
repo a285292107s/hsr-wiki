@@ -2,38 +2,14 @@ import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, readJson, waitForCatalogCards } from './helpers';
 import { CN_NUM, expectTokenNumber, noUnknownOverflow, readContentOffset } from './layout.shared';
 
-/**
- * 布局验收：敌方页（`/monster` 列表 + `/monster/<id>` 详情）。
- *
- * 域独立成文件：本页此前没有任何 layout 分域文件——它的骨架几何由探针背书（第 11 轮），
- * 但「加载态与就绪态不产生位移」这条**契约**一直没人守。第 19 轮抓到真缺陷（见下），故立此文件。
- *
- * 本文件锁两组契约（都属「敌方页」，故同域共存）：
- *  ① 详情页 hero 高度在立绘到达前后不得变化（原判据，保住）；
- *  ② 同族各档必须**在卡面上可辨、在详情页里可对照**（后续新增）。
- *
- * ②的背景（数据实测，判据单点在 `src/lib/monster-family.ts`）：目录 632 条里 392 条与另一条
- * 名称+卡面图标全同，只有弱点火雷/量子、韧性、速度、技能这些**页面上没显示的**字段不同；
- * 卡片只画名称+分类时 400/632 张卡彼此无法区分。故两处断言都从 `public/data/cn/**` 派生期望值，
- * 不写死序号与数值。
- *
- * ①的缺陷原型：`.nk-mob-hero__figure` 桌面档只有 `min-height: 300px`，立绘用 `max-width: 88%`
- * 在**未解码时不产生盒子**（高 0）⇒ hero 首帧 301px，立绘到达后内容高 357px ⇒ hero 变 358px，
- * 把下方 `.nk-panels` 整体推下 57px。实测该页 CLS 0.0288（全 632 个敌方详情页同构）。
- * 判据写法与像素/文案无关：只断言「采样窗口内 hero 高度恒定」——立绘尺寸、字体度量变化都不会让它变红，
- * 而一旦有人把 `aspect-ratio` 摘掉就会立刻变红。
- */
-
 interface MonsterListEntry { id: number; name: string; icon: string; weak?: string[]; atlas_group?: number }
 interface MonsterDropTierJson { world_level: number | null; avatar_exp: number; items: { id: number; name: string; icon: string }[] }
 interface MonsterDetailJson {
   id: number;
   weak: string[];
-  /** 元素抗性（键为元素名，值为 0~1 的比例） */
   resist: Record<string, number>;
   stance: number;
   stats: { hp: number; atk: number; def: number; speed: number };
-  /** 战斗数值合成链字段（ADR 0040/0049）：维度修饰比 / 难度组 / 精英组 / 实例修正值 */
   stat_ratio?: { hp?: number; atk?: number; def?: number; speed?: number };
   level_group?: number;
   elite_group?: number;
@@ -42,17 +18,12 @@ interface MonsterDetailJson {
   skills: {
     id: number;
     name: string;
-    /** 效果描述（原始富文本，含 #N 占位符）与占位符替换参数 */
     desc?: string;
     param_list?: number[];
-    /** 技能附带效果（ExtraEffectIDList × ExtraEffectConfig，完整外键） */
     extra_effects?: { id: number; name: string; desc?: string; param_list?: number[] }[];
   }[];
-  /** 活动出处（仅被活动关卡引用的怪物有值） */
   event?: { name: string; tabs: string[]; levels: number[]; count: number };
-  /** 同卡面图标但名字不同的其他形态（活动出处的「美术复用」用它） */
   art_shared?: { id: number; name: string; figure: boolean; forms: number };
-  /** 掉落 / 出没 / 额外阶段（monster_extra.py 的三块） */
   drops?: MonsterDropTierJson[];
   appearances?: { total: number; samples: { id: number; name: string; activity?: string }[] };
   phases?: { phase_id: number; weak: string[]; resist: Record<string, number>; name?: string; intro?: string }[];
@@ -61,7 +32,6 @@ interface MonsterDetailJson {
 const MONSTER_ID = '1002011';
 const IMG_DELAY_MS = 2500;
 
-/** 同族判据（与 `src/lib/monster-family.ts` 同式：名称 + 卡面图标 stem；e2e 不引 src） */
 const iconStem = (p: string): string => (p.split('/').pop() || '').replace(/\.png$/i, '');
 const familyOf = (id: number): MonsterListEntry[] => {
   const list = readJson<MonsterListEntry[]>('public/data/cn/monsters.json').filter((m) => m.name);
@@ -70,7 +40,6 @@ const familyOf = (id: number): MonsterListEntry[] => {
   return self ? list.filter((m) => key(m) === key(self)).sort((a, b) => a.id - b.id) : [];
 };
 const detailOf = (id: number): MonsterDetailJson => readJson<MonsterDetailJson>(`public/data/cn/monsters/${id}.json`);
-/** 样本 chip 的屏上文本 = 「活动名 · 关卡名」（活动名缺位时只有关卡名；分隔符与视图逐字一致） */
 const sampleLabel = (s: { name: string; activity?: string }): string =>
   s.activity ? `${s.activity} · ${s.name}` : s.name;
 
@@ -78,7 +47,6 @@ test.describe('布局验收：敌方详情页', () => {
   test(`/monster/${MONSTER_ID}：立绘延迟到达时 hero 高度不得变化`, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
 
-    // 采样器要在页面脚本之前装好；只记录几何，不做任何样式注入
     await page.addInitScript(() => {
       const w = window as unknown as { __heroSamples: Array<{ h: number; fig: number; loaded: boolean; fonts: boolean }> };
       w.__heroSamples = [];
@@ -95,7 +63,6 @@ test.describe('布局验收：敌方详情页', () => {
         });
       }, 50);
     });
-    // 延迟而非中断：中断会触发 `<img onerror>` 换备用源，量到的就不是「立绘未到达」了
     await page.route(/\.(webp|png|jpe?g|avif)(\?|$)/, async (route) => {
       await new Promise((r) => setTimeout(r, IMG_DELAY_MS));
       await route.continue().catch(() => {});
@@ -112,18 +79,11 @@ test.describe('布局验收：敌方详情页', () => {
     expect(samples.length, '应采到 hero 高度样本').toBeGreaterThan(5);
     expect(samples.some((s) => s.loaded), '立绘最终应加载完成（否则断言会变成空转）').toBe(true);
 
-    // ① 立绘方框必须恒定——这正是缺陷原型破掉的性质（桌面档 300 → 357）
     expect(
       Math.max(...figures) - Math.min(...figures),
       '立绘方框高度在立绘到达前后必须恒定（`aspect-ratio: 1` 提前给盒子）',
     ).toBe(0);
 
-    /* ② hero 总高只允许 ≤2px 的内容级收尾，且只在**字体落定之后**采样：
-       手机档 hero = 图列 + 信息列**纵向相加**，信息列里 meta 行与章标行的行盒高由字体度量决定
-       （中文回退字体 vs webfont 实测各差 2px，与立绘无关）。原 2px 阈值是在信息列只有一行 meta
-       时标定的，图鉴正文上收进 hero 后多了一行章标 ⇒ 落定位移变 4px。按字体落定过滤采样比放宽阈值
-       更贴近本条契约（判的仍是「立绘到达会不会推动 hero」）；桌面档 hero 由更高的图列钉死、本就无关。
-       缺陷原型是桌面档 +57px，量级差 28 倍，阈值仍能区分。 */
     const settled = samples.filter((s) => s.fonts);
     expect(settled.length, '应采到字体落定后的样本（否则 ② 会变成空转）').toBeGreaterThan(5);
     const heights = settled.map((s) => s.h);
@@ -172,7 +132,6 @@ test.describe('布局验收：敌方详情页', () => {
         const row = seen[i];
         const o = detailOf(m.id);
         const isCur = m.id === Number(MONSTER_ID);
-        // 5 个值格顺序：弱点 / 韧性 / HP / 速度 / 技能
         expect(row.no, `第 ${i + 1} 行必须是同族按 id 升序的第 ${i + 1} 档`).toBe(String(m.id));
         expect(row.current, `${m.id} 的「当前档」标记`).toBe(isCur);
         if (isCur) {
@@ -205,10 +164,6 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      /* ADR 0045：修正值加在曲线**之后**（实测同族同模板 `144×1.32=190` 带 −44 的那一档显示 146，
-         先加后乘会得到 132）。期望值在这里由**原始数据独立算一遍**（payload + 曲线表），
-         与页面合成实现互为对照。100201502 实测带 `stance_modify +30`（目录 632 条都不带修正值，
-         故只能取实例页；该页虽不在目录里，详情文件与路由都存在）。 */
       const id = 100201502;
       const mon = detailOf(id);
       expect(mon.stance_modify, `${id} 应带韧性修正（断言前提）`).toBeGreaterThan(0);
@@ -247,9 +202,6 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      /* ADR 0049：`基准 × 修饰比 × 精英组倍率 × 曲线 + 修正值`。100205006 实测带 EliteGroup 2
-         （银鬃射手家族变体，修饰比全 1、无修正值——面板差异只能来自精英组）；参考站同页该档
-         显示 51,203 / 574，与本仓数据独立折算逐位吻合，不含精英组的旧链会算出 30,119 / 718。 */
       const id = 100205006;
       const mon = detailOf(id);
       expect(mon.elite_group, `${id} 应带精英组 2（断言前提）`).toBe(2);
@@ -290,8 +242,6 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      /* ADR 0050：样本面板 = 基准 × 修饰比 × (自身精英组 × 关卡精英组) × 曲线[关卡难度组][关卡等级] + 修正值。
-         期望值由 payload + 双共享表独立折算；目标条目从数据派生（第一个带完整语境的样本）。 */
       const elite = readJson<Record<string, Record<string, number>>>('public/data/cn/monster-elite-group.json');
       const curve = readJson<Record<string, Record<string, Record<string, number>>>>('public/data/cn/monster-level-curve.json');
       const entry = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json')
@@ -331,8 +281,6 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      /* 期望值全部数据派生：挑第一只带 `event` 的目录条目，断言备注里的活动名、档位数与页签
-         都来自详情 payload；再挑一只没有 `event` 的，断言该块整块不渲染。 */
       const list = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json');
       let target: { id: number; name: string } | undefined;
       for (const m of list.slice(0, 200)) {
@@ -347,7 +295,6 @@ test.describe('布局验收：敌方详情页', () => {
       await expect(note).toHaveCount(1);
       const text = ((await note.innerText()) || '').replace(/\s+/g, ' ');
       expect(text, '活动名来自源 ActivityPanel.TitleName').toContain(`「${ev.name}」`);
-      /* 活动内关卡数只在**与上方总数不同**时才写（相同＝信息重复，此时改说「全部关卡都在…」） */
       if (ev.count === detailOf(target!.id).appearances?.total) {
         expect(text, '数量与总数相同时不重复报数').toContain('全部关卡都在');
         expect(text, '数量与总数相同时不重复报数').not.toContain(`${ev.count} 个`);
@@ -357,8 +304,6 @@ test.describe('布局验收：敌方详情页', () => {
       expect(text, '等级区间单档时只写一个数').not.toMatch(/等级 (\d+)–\1/);
       for (const tab of ev.tabs) expect(text, `页签「${tab}」来自源 ActivityQuestRewardData`).toContain(tab);
 
-      /* 美术复用（ADR 0048）：口径按转换器给的 `art_shared` 两个维度走，且**禁止**声称站点证不了的
-         「技能组复用」（旧文案的过度断言：实测 26/42 个活动敌人的技能集与同伴不同）。 */
       const artTarget = list.slice(0, 200).find((m) => {
         const d = detailOf(m.id);
         return !!d.event && !!d.art_shared;
@@ -401,8 +346,6 @@ test.describe('布局验收：敌方详情页', () => {
           .sort((a, b) => Number(a.id) - Number(b.id))
           .filter((r) => key(r) !== key(self));
 
-      /* 期望值全部数据派生：图鉴族 = 官方 TemplateGroupID 的同组形态，**排除同卡面的档位**
-         （那些已由上方「同族变体」列出，两处不得重复列同一批卡）。 */
       const target = list.find((m) => m.atlas_group != null && othersOf(m).length >= 2);
       expect(target, '应存在带图鉴族且含 ≥2 个非同卡面形态的怪物（断言前提）').toBeTruthy();
       const want = othersOf(target!);
@@ -416,7 +359,6 @@ test.describe('布局验收：敌方详情页', () => {
       expect(links.map((l) => l.name), '图鉴族互链的名称与顺序').toEqual(want.map((r) => r.name));
       expect(links.map((l) => l.href)).toEqual(want.map((r) => `/monster/${r.id}`));
 
-      /* 反向：同组全为同卡面档位的怪 → 该行整块不渲染（否则与同族变体条重复列同一批卡） */
       const soloGroup = list.find((m) => m.atlas_group != null
         && list.filter((r) => r.atlas_group === m.atlas_group).length > 1
         && othersOf(m).length === 0);
@@ -435,9 +377,6 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      /* 归属是命名约定桥（`MonsterStatusConfig.ModifierName` 含怪物配置名 + 去形态后缀同名），
-         不是外键 ⇒ 数据里只有「安全子集」；期望值仍全部从详情 payload 派生。
-         取第一只有词条的目录条目（测试成本：按 id 升序读若干详情文件，通常前几十条即命中）。 */
       const list = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json');
       let target: { id: number; name: string } | undefined;
       for (const m of list.slice(0, 120)) {
@@ -456,7 +395,6 @@ test.describe('布局验收：敌方详情页', () => {
         type: (el.querySelector('.nk-mob-status__type')?.textContent || '').trim(),
         dispel: Boolean(el.querySelector('.nk-mob-status__dispel')),
         desc: (el.querySelector('.nk-mob-status__desc')?.textContent || '').trim(),
-        // 图标位占位：状态图标资源双侧 404，先占住格子（图标入库后换成 <img>）
         iconSlot: Boolean(el.querySelector('.nk-mob-status__icon svg')),
       })));
       rows.forEach((s, i) => {
@@ -464,7 +402,6 @@ test.describe('布局验收：敌方详情页', () => {
         expect(rendered[i].type, `${s.name} 的类型标签`).toBe(TYPE[s.type] || s.type || '其他');
         expect(rendered[i].dispel, `${s.name} 的可驱散标记`).toBe(Boolean(s.dispel));
         expect(rendered[i].iconSlot, `${s.name} 的图标位占位符`).toBe(true);
-        // 描述按「无占位符才落」的规则走：有源文本就该有渲染文本（且不含未替换的占位符残留）
         if (s.desc) expect(rendered[i].desc.length, `${s.name} 的描述应上屏`).toBeGreaterThan(0);
         expect(rendered[i].desc, `${s.name} 不得出现未替换的占位符`).not.toContain('#');
       });
@@ -478,8 +415,6 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      /* 断言前提由数据派生：实测 215/632 个目录模板的技能带附带效果（937 次引用），
-         这里取其中一个（1004014 的「无望冽风 / 逃无可逃」）；数据若变，下面的前提断言先红。 */
       const id = 1004014;
       const mon = detailOf(id);
       const withFx = (mon.skills || []).filter((s) => s.extra_effects?.length);
@@ -503,7 +438,6 @@ test.describe('布局验收：敌方详情页', () => {
         expect(rendered[i].name, `第 ${i + 1} 张技能卡`).toBe(s.name);
         const fx = s.extra_effects || [];
         expect(rendered[i].fx.map((x) => x.name), `${s.name} 的附带效果名与顺序`).toEqual(fx.map((f) => f.name));
-        // 描述经 fmtDesc 渲染（#N[i] 已被参数替换），故只断言「有源文本就该有渲染文本」
         fx.forEach((f, j) => {
           if (f.desc) expect(rendered[i].fx[j].hasDesc, `${f.name} 的描述应上屏`).toBe(true);
         });
@@ -540,9 +474,6 @@ test.describe('布局验收：敌方详情页', () => {
         page.locator('.nk-mob-appear__count strong'),
         '出没关卡数 = 数据 total',
       ).toHaveText(String(dropMon.appearances!.total));
-      /* 样本 chip 的名字必须逐项等于数据：活动关卡的名来自活动表（ADR 0046），
-         不是 `StageConfig.StageName` 的活动级常量——写成别的一律红。名字挂在
-         `.nk-mob-appear__sample-name` 上（chip 内还有 ADR 0050 的关卡面板行）。 */
       const chips = page.locator('.nk-mob-appear__sample');
       await expect(chips, '样本 chip 数 = 数据样本数').toHaveCount(dropMon.appearances!.samples.length);
       expect(
@@ -550,9 +481,6 @@ test.describe('布局验收：敌方详情页', () => {
         '样本名逐项与数据一致（顺序同 DOM；活动关卡为「活动名 · 关卡名」）',
       ).toEqual(dropMon.appearances!.samples.map(sampleLabel));
 
-      /* 活动关卡与终局/入口/强敌表（ADR 0046 / 0047）：以用户报过的 1004015（托帕幻象，星天演武仪典）
-         为回归哨——它的 14 个关卡在 `StageConfig` 里共用同一个 `StageName`「承露天人」（同活动里的
-         另一只敌人），若有人把名称来源退回 `StageConfig.StageName`，这里会读出「承露天人」。 */
       const festMon = detailOf(1004015);
       await page.goto('/monster/1004015');
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
@@ -561,10 +489,6 @@ test.describe('布局验收：敌方详情页', () => {
       expect(festNames, '活动级常量 StageName 不得作为关卡名上屏').not.toContain('承露天人');
       expect(festNames[0], '活动链样本名应带「活动名 · 关卡名」前缀').toMatch(/^星天演武仪典 · /);
 
-      /* 回归哨（ADR 0047）：**自己名字不得作为关卡名上屏**。取用户报过的 1003011（银鬃尉官（错误））
-         与 1003012（银鬃尉官（完整））——它们的关卡全在 VerseSimulation / RogueChallengeActivity，
-         源里没有玩家可见关卡名，`StageConfig.StageName` 只是敌方标识（1003011 那条与自己的名字逐字相同，
-         1003012 那条是另一只怪的名字）。若有人把名称来源退回 StageName，这两条断言立刻红。 */
       for (const id of [1003011, 1003012]) {
         const mon = detailOf(id);
         expect(mon.appearances!.total, `${id} 应有出没计数（断言前提）`).toBeGreaterThan(0);
@@ -576,8 +500,6 @@ test.describe('布局验收：敌方详情页', () => {
         expect(chipNames, `${id} chip 逐项等于数据`).toEqual(mon.appearances!.samples.map(sampleLabel));
       }
 
-      /* 数据派生的一遍补充：任取一个「total>0 且 samples 为空」的目录条目，chips 区整块不渲染、
-         计数照旧、说明行说清「没有关卡名」（与上面两条硬编码哨互不替代：这条跟着数据走，哨跟着规则走）。 */
       const noChipId = readJson<MonsterListEntry[]>('public/data/cn/monsters.json')
         .slice(0, 120)
         .map((m) => m.id)
@@ -596,18 +518,12 @@ test.describe('布局验收：敌方详情页', () => {
         '无样本时必须说明「游戏内没有关卡名」，不能用沉默代替口径',
       ).toContainText('没有关卡名');
 
-      /* 「其他形态」源表 `MonsterAtlasExtraPhase(s)` 按**图鉴条目**（`atlas_group`）挂，且没有阶段号
-         （`PhaseID` 只是组内行键）。故与视图同式地派期望值：丢「等于本体」的行；丢「名字能在条目成员里
-         找到」的行（那个形态本身就是同条目的另一个条目页，如 4034013 的「无缘黎明」卡厄斯兰那 = 4034015，
-         已由「图鉴族」互链给入口）；丢「与条目基准成员（`id === atlas_group`）逐字相同且自身无名字/介绍」
-         的行（源表 12 条里 11 条如此）；行间同签名同名再合并。 */
       const sig = (weak: string[], resist: Record<string, number>): string => JSON.stringify([
         [...(weak || [])].sort(),
         Object.entries(resist || {}).sort(([a], [b]) => a.localeCompare(b)),
       ]);
       const listEntry = (id: number): MonsterListEntry | undefined =>
         readJson<MonsterListEntry[]>('public/data/cn/monsters.json').find((m) => m.id === id);
-      /** 同图鉴条目的全部目录成员（含本页）——形态行名字命中其中之一即「它有自己的页面」 */
       const atlasMembers = (group: number | undefined): MonsterListEntry[] =>
         group == null ? [] : readJson<MonsterListEntry[]>('public/data/cn/monsters.json')
           .filter((m) => m.atlas_group === group);
@@ -635,7 +551,6 @@ test.describe('布局验收：敌方详情页', () => {
         return rows;
       };
 
-      /** 形态块：数量/标签/弱点图标逐项等于数据派生值（`want` 为空时断言整块不渲染） */
       const checkPhases = async (id: number): Promise<void> => {
         const want = phaseRows(id);
         await page.goto(`/monster/${id}`);
@@ -648,7 +563,6 @@ test.describe('布局验收：敌方详情页', () => {
             (el.querySelector('.nk-mob-phase__name, .nk-mob-phase__label')?.textContent || '').trim())),
           '标签只能是官方形态名或「其他形态」——不得出现无来源的阶段号',
         ).toEqual(want.map((r) => r.label));
-        // 取形态块**第一行**（韧性弱点）的图标；直接查块内所有 tags 会把下面的抗性行也算进来
         const firstWeak = await blocks.first().evaluate((el) => {
           const row = el.querySelector('.nk-mob-resist__row');
           return [...(row?.querySelectorAll('.nk-mob-resist__tags img') ?? [])]
@@ -659,20 +573,15 @@ test.describe('布局验收：敌方详情页', () => {
         );
       };
 
-      await checkPhases(3025010); // 具名形态「哲学的胎儿」星期日（不在目录里 ⇒ 唯一上屏处）
-      /* 4034013 的那条形态行名字 = 同条目成员 4034015「无缘黎明」卡厄斯兰那 ⇒ 不摆到本页；
-         但入口不能丢：「图鉴族」互链必须仍然给出它（撤块 ≠ 用户走不到）。 */
+      await checkPhases(3025010);
       const sibling = 4034015;
       await page.goto(`/monster/4034013`);
-      // 形态块（含图鉴族互链）是异步加载的：必须等它就位再采样，否则会读到空数组假失败
       await expect(page.locator('.nk-mob-atlas__links')).toBeVisible();
       expect(
         (await page.locator('.nk-mob-atlas__link').allTextContents()).map((t) => t.trim()),
         '同条目成员必须仍在「图鉴族」互链里',
       ).toContain(detailOf(sibling).name);
-      await checkPhases(4034013); // 形态块被撤（名字命中的是同条目另一个条目页）
-      /* 8015022（乘间抵隙的煽动者）的两条形态行既无名字、又与基准成员「不死神实•幻胧」逐字相同
-         ⇒ 整块不渲染。判定回退成「只丢等于本体的行」时这里立刻红（会冒出 1 个块）。 */
+      await checkPhases(4034013);
       await checkPhases(8015022);
 
       assertNoErrors();
@@ -684,9 +593,6 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      /* 判据与页面同式：param_list 非空即出参数行——描述里 #N 已展开的技能也重复展示
-         （重复供对照，缺行更困惑）。2023030 四个技能带参数、一个空数组；
-         2004013 混有描述带 #1[i] 的「压迫」（值已展开进文本，行照出）。 */
       const wantsRow = (s: MonsterDetailJson['skills'][number]): boolean =>
         (s.param_list?.length ?? 0) > 0;
       const check = async (id: number): Promise<void> => {
@@ -725,14 +631,8 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      /* 官方首领文案（MonsterGuideConfig.PhaseList → MonsterGuidePhase）实测覆盖 22/632 个目录条目。
-         8015022（乘间抵隙的煽动者）是两个阶段的样本；MONSTER_ID 无登记 ⇒ 断言整块零存在
-         （「本站没接」与「官方没有」必须可分辨——不渲染，而不是渲染空壳）。
-         两个样本分工：8015022 的阶段名**带**「阶段N：」前缀（页面把它剥进编号位）；
-         4034013 的名字**不带**前缀（就是怪物名）——那批正好靠编号位才知道是第几阶段。 */
       const norm = (s: string): string => s.replace(/\s+/g, ' ').trim();
       const PREFIX = /^阶段\s*([一二三四五六七八九十\d]+)\s*[：:]\s*/;
-      /** 与视图同式：前缀序号 == 官方顺序时才剥，否则原样 */
       const shownName = (name: string, i: number): string => {
         const m = name.match(PREFIX);
         return m && m[1] === CN_NUM[i] ? name.slice(m[0].length) : name;
@@ -759,8 +659,6 @@ test.describe('布局验收：敌方详情页', () => {
         })));
         phases.forEach((p, i) => {
           const got = seen[i];
-          /* 编号 = 官方 `PhaseList` 顺序（`guide_phases` 的顺序就是它）。前缀里的序号必须与它一致——
-             不一致时视图不剥前缀、编号位照旧上屏，本条即是那条不变量的哨兵（当前 0 例失配）。 */
           const prefix = p.name.match(PREFIX);
           if (prefix) {
             expect(CN_NUM.indexOf(prefix[1]), `「${p.name}」的前缀序号必须等于官方阶段顺序`).toBe(i);
@@ -774,8 +672,8 @@ test.describe('布局验收：敌方详情页', () => {
         });
       };
 
-      await check(8015022); // 名字带「阶段N：」前缀 → 前缀进编号位，标题只剩形态名
-      await check(4034013); // 名字不带前缀（就是怪物名）→ 编号位补出「阶段 1」
+      await check(8015022);
+      await check(4034013);
 
       await page.goto(`/monster/${MONSTER_ID}`);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
@@ -784,9 +682,6 @@ test.describe('布局验收：敌方详情页', () => {
     },
   );
 
-  /* 本页走文档流滚动（不用 `.nk-page--detail` 的绝对定位），侧栏避让要自己声明：此前 768~1279
-     视口下内容被侧栏压住（1024 实测 hero x=12，区块标题与 HP 值被裁）。判据用**几何关系**
-     （内容左缘 ≥ 侧栏右缘）而不是写死 x，令牌落值另判一次。 */
   test(
     '敌方详情页全断点避让侧栏：内容左缘落在侧栏右侧，且无未知横向溢出',
     { tag: '@viewport-pinned' },
@@ -845,11 +740,9 @@ test.describe('布局验收：敌方目录（同族各档必须可辨）', () =>
         const card = cards.find((c) => c.href === `/monster/${m.id}`);
         expect(card, `同族第 ${i + 1} 档 ${m.id} 必须出现在目录里`).toBeTruthy();
         expect(card!.variant, `${m.id} 的档位序号`).toBe(`变体 ${i + 1}/${fam.length}`);
-        // 弱点图标：元素图标名即属性小写（数据源 StanceWeakList 逐项、保序）
         expect(card!.weakIcons, `${m.id} 的卡面弱点图标`).toEqual(
           (m.weak ?? []).map((e) => `${e.toLowerCase()}.webp`),
         );
-        // 同名同图的卡靠 title 才能落全「弱点/分类/阵营/档位」（触屏上尤其如此）
         expect(card!.title).toContain(m.name);
         expect(card!.title).toContain(`变体 ${i + 1}/${fam.length}`);
       });

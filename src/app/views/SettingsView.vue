@@ -14,9 +14,6 @@ const route = useRoute();
 const { t } = useI18n();
 const currentLocale = activeLocale();
 
-/* 切换语言走**整页导航**而非客户端路由：数据层单例、请求缓存与 store 都按语言持有状态
-   （`local.ts` 的缓存键带语言维度、`singletonOf` 的 generation = 当前语言），整页重载让它们
-   整体重建；客户端改前缀做不到（router history base 只在创建时固定），且会留下半新半旧的数据。 */
 function chooseLocale(code: string): void {
   if (code === currentLocale) return;
   window.location.assign(localizedPath(code, route.fullPath));
@@ -387,8 +384,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   transition: background 0.18s, color 0.18s;
 }
 .nk-seg__opt + .nk-seg__opt { border-left: 1px solid var(--nk-sheet-item-border); }
-/* 手机档双列列宽放不下（两选项 min-content ≈ 182px，320/412 实测均裁第二列）。纵栈修掉：
-   两选项全宽直排，溢出源消失；此缺陷原登记在 e2e/helpers.ts KNOWN_OVERFLOWS，已随修复删除。 */
 @media (max-width: 767px) {
   .nk-seg { grid-template-columns: 1fr; max-width: none; }
   .nk-seg__opt + .nk-seg__opt { border-left: none; border-top: 1px solid var(--nk-sheet-item-border); }
@@ -462,7 +457,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   background: color-mix(in srgb, var(--primary) 70%, transparent);
 }
 
-/* 语言选择器（ADR 0052）：13 种语言的母语自称 + culture 码；选中态沿用外壳激活令牌。 */
 .nk-lang {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));

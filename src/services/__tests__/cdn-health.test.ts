@@ -1,11 +1,4 @@
 // @vitest-environment node
-/**
- * CDN 健康探测模块单测。
- * - 探测成功：cdnDown 保持 false，不触发订阅（未发生过 down）
- * - 探测失败（网络错误 / 非 2xx / 超时）：置 down 并通知订阅方；30s 周期重探，恢复后通知
- * - startCdnHealthProbe 幂等：只启动一次探测循环
- * 模块级状态（probeStarted / cdnDown / retryTimer / 订阅）通过 resetCdnHealthForTest 清理。
- */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CDN_PROBE_TIMEOUT_MS,
@@ -16,12 +9,10 @@ import {
   subscribeCdnHealth,
 } from '../cdn/health';
 
-/** flush 微任务队列（探测为 async 链） */
 const flush = async (): Promise<void> => {
   await vi.advanceTimersByTimeAsync(0);
 };
 
-/** 永不结算的 fetch（模拟连接黑洞）：abort 时 reject（与真实 fetch 一致） */
 function hangingFetch(): ReturnType<typeof vi.fn> {
   return vi.fn(
     (_url: string, init?: RequestInit) =>
@@ -75,7 +66,6 @@ describe('startCdnHealthProbe / isCdnDown', () => {
     await flush();
     expect(isCdnDown()).toBe(true);
     expect(fn).toHaveBeenCalledWith(true);
-    // 恢复：重探周期后成功
     ok = true;
     await vi.advanceTimersByTimeAsync(CDN_RETRY_INTERVAL_MS);
     await flush();
@@ -94,7 +84,7 @@ describe('startCdnHealthProbe / isCdnDown', () => {
     vi.stubGlobal('fetch', hangingFetch());
     startCdnHealthProbe();
     await flush();
-    expect(isCdnDown()).toBe(false); // 超时前仍可用
+    expect(isCdnDown()).toBe(false);
     await vi.advanceTimersByTimeAsync(CDN_PROBE_TIMEOUT_MS);
     await flush();
     expect(isCdnDown()).toBe(true);

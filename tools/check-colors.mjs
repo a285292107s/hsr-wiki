@@ -1,9 +1,3 @@
-/**
- * 色彩令牌收口检查器：扫描 src 下裸色值(hex/rgb/rgba)输出未收口清单。
- * 规则：严格中性(三分量差≤4)；var() fallback 内色值纳入检查(禁裸彩色 fallback)；
- * SKIP_FILE 仅豁免 debug 诊断与测试(currency-* 已收编)。
- * 用法：node tools/check-colors.mjs [--strict]（strict 有裸色值即退出 1）。
- */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,31 +6,15 @@ const SRC = fileURLToPath(new URL('../src', import.meta.url));
 const EXT = new Set(['.css', '.vue', '.ts']);
 const strict = process.argv.includes('--strict');
 
-/** 跳过整个文件（debug 诊断色 / 测试数据 / 主题预览数据）：
- *  src/app/debug/ = 研究线调试台（dev-only 路由，生产构建摇树不打包）——
- *  诊断面板状态色板（ok/fail/warn）为研究工具语义，非产品 UI 令牌，目录级豁免 */
 const SKIP_FILE = /(^|[\\/])(__tests__|theme\.ts)|(^|[\\/])debug([\\/]|$)/;
 
-/* ═══ 豁免登记（ADR 0012 §3 三分类） ═══
- * 1. 中性豁免：三分量差 ≤4 的灰阶/黑/白（含 SVG data URI 内联白——物理限制无法 var()）
- * 2. 领域色豁免：数据语义色已全部收编为领域层令牌
- *    （--rarity-* / --prop-* / --elem-* / --skill-* / --eg-* / --diff-* / --season-* /
- *      --cw-* / --crole-* / --ctrait-*），页面只允许 var() 引用，
- *    裸色值在 tokens.css 领域层唯一定义——本清单无裸色条目
- * 3. 导航语义豁免：已退场，本分类当前无条目
- * 若未来确有无法令牌化的裸色值，必须在此登记（带理由 + ADR 引用），禁止静默豁免 */
-const DOMAIN_EXEMPT = [];
-
-/** 严格中性判定：三分量差 ≤4（纯黑/白/灰阶才豁免） */
 const NEUTRAL_DELTA = 4;
 
-/** 合法的色值形态：关键词 */
 const LEGIT_RE =
   /transparent|currentColor|inherit|initial|unset|revert|\b(white|black)\b/i;
 
 const COLOR_RE = /#[\da-fA-F]{3,8}\b|rgba?\([^)]*\)/g;
 
-/** hex / rgb → [r,g,b] */
 function parseRgb(v) {
   if (v.startsWith('#')) {
     const h = v.slice(1);
@@ -48,19 +26,12 @@ function parseRgb(v) {
   return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
 }
 
-/** 严格中性判定：三分量差 ≤NEUTRAL_DELTA（纯黑/白/灰阶；假中性暴露） */
 function isNeutral(v) {
   const rgb = parseRgb(v);
   if (!rgb) return false;
   return Math.abs(rgb[0] - rgb[1]) <= NEUTRAL_DELTA && Math.abs(rgb[1] - rgb[2]) <= NEUTRAL_DELTA;
 }
 
-/**
- * 单行检查：
- * 1. 剥离注释与 color-mix()（color-mix 内部为令牌引用表达式）
- * 2. var() 段整体移除，但其 fallback 内色值单独校验（ADR 0012：fallback 必须中性或令牌）
- * 3. 剩余裸色值必须中性或 LEGIT 关键词
- */
 function checkLine(line) {
   const hits = [];
   let code = line.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/, '');

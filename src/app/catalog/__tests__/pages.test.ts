@@ -4,18 +4,13 @@ import type { CatalogFilter } from '../types';
 import { bySeasonDesc, mazeDateRange, mazeStatus, modeDefaultArtUrl, seasonBannerUrl, seasonDateParts, seasonHeroBgUrl, seasonPosterTabUrl, seasonTimeMs } from '../pages/endgame';
 import cnMessages from '../../../lib/i18n/messages/cn.json';
 
-/** cn 词典键集合：筛选器的 `labelKey` 必须在这里（打错字立刻红）。 */
 const CN_KEYS = new Set(Object.keys(cnMessages));
 
-/* ─── node 内建类型 shim（app tsconfig 无 @types/node；测试运行时由 vitest/node 提供） ─── */
 declare const process: { cwd(): string };
 
 const entries = Object.entries(CATALOG_PAGES);
 
-/* ─── 数据驱动筛选契约工具（真实转换数据） ───
- * fetch 经全局 stub 落到 public/data/cn 本地文件（happy-dom FileReader 读取），不触发网络。 */
 
-/** 读取本地文件为文本（fs/promises 经变量传递规避静态模块解析；happy-dom FileReader 解码） */
 async function readLocalText(filePath: string): Promise<string> {
   const fsp = (await import('node:fs/promises' as string)) as { readFile(p: string): Promise<Uint8Array> };
   const data = await fsp.readFile(filePath);
@@ -23,7 +18,6 @@ async function readLocalText(filePath: string): Promise<string> {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
     reader.onerror = () => reject(reader.error);
-    // Uint8Array 可能带 ArrayBufferLike 泛型，Blob 构造仅接受 ArrayBuffer 视图 → 显式收窄
     reader.readAsText(new Blob([data as unknown as BlobPart]));
   });
 }
@@ -56,13 +50,10 @@ describe('renderCard', () => {
     expect(html).toContain('ChallengeBossQuestTabImg1.png');
     expect(html).toContain('№ 101');
     expect(html).toContain('琥珀恩赐');
-    /* A5.6：名称是 nowrap + 省略号的叶子，长语言（en 目录 30/115 行、de 等）下会被硬截断——
-       `title` 是唯一的复原途径，缺了它就是「截断且无从得知全文」。 */
     expect(html).toContain('class="nk-eg-lrow__name" title="琥珀恩赐">琥珀恩赐</span>');
     expect(html).toContain('进行中');
     expect(html).toContain('2023.01.01 – 01.15');
     expect(html).not.toContain('nk-eg-card');
-    /* 日期行同样会被窄列截断（nowrap + 省略号）：与赛季名同判据，须带复原文本 */
     expect(html).toContain('title="2023.01.01 – 01.15"');
   });
 
@@ -72,10 +63,8 @@ describe('renderCard', () => {
     const html = egPage.renderCard({ ...base, pollution: { count: 2, levels: [1, 2] } }, 0);
     expect(html).toContain('贪饕污染');
     expect(html).not.toContain('含污染');
-    // 徽标紧贴赛季名（同一 head 行内），且整段位于 __meta（状态 + 日期）之前
     expect(html).toContain('<span class="nk-eg-lrow__name" title="琥珀恩赐">琥珀恩赐</span><span class="nk-eg-lrow__poll"');
     expect(html.indexOf('nk-eg-lrow__poll')).toBeLessThan(html.indexOf('nk-eg-lrow__meta'));
-    // 无污染不落徽标，日期行照旧
     const plain = egPage.renderCard(base, 0);
     expect(plain).not.toContain('nk-eg-lrow__poll');
     expect(plain).toContain('2023.01.01 – 01.15');
@@ -106,8 +95,6 @@ describe('filters validity', () => {
     for (const f of filters) {
       expect(typeof f.key, `${key} filter.key`).toBe('string');
       expect(f.key.length).toBeGreaterThan(0);
-      /* 文案两种来源：词典键（界面自造，须在 cn 词典里）或数据派生 label（已本地化）。
-         两边都空 = 筛选器没有可显示的名字；`labelKey` 打错字这里立刻红。 */
       const hasLabel = typeof f.label === 'string' && f.label.length > 0;
       const hasKey = typeof f.labelKey === 'string' && f.labelKey.length > 0;
       expect(hasLabel || hasKey, `${key} filter 必须有 label 或 labelKey`).toBe(true);
@@ -195,9 +182,7 @@ describe('data-driven filter contract (real data)', () => {
     const items = await cfg.fetchData({ version: '' });
     const maze = items.filter((it) => it.mode === 'maze');
     const pos = (id: string) => maze.findIndex((it) => it.id === id);
-    // 1036（开始端 2026-11-02）与 1035（仅结束端 2026-11-02）同日 → 开始端在前
     expect(pos('ID 1036')).toBeLessThan(pos('ID 1035'));
-    // 1035（结束端 2026-11-02）与 1034（仅开始端 2026-08-17）都新于 1033（开始 2026-07-06）
     expect(pos('ID 1035')).toBeLessThan(pos('ID 1033'));
     expect(pos('ID 1034')).toBeLessThan(pos('ID 1033'));
     expect(pos('ID 1034')).toBeGreaterThan(pos('ID 1035'));
@@ -209,12 +194,12 @@ describe('endgame 赛季排序与日期区间（ADR 0038）', () => {
 
   it('bySeasonDesc：排序键取首个已知端点，同日开始端在前，无日期按编号降序沉底', () => {
     const scrambled = [
-      item('ID 900'),                                     // 常驻，无日期
+      item('ID 900'),
       item('ID 1033', '2026-07-06 04:00:00', '2026-08-17 04:00:00'),
-      item('ID 1035', undefined, '2026-11-02 04:00:00'),  // 当期：仅结束端
-      item('ID 100'),                                     // 常驻，无日期
-      item('ID 1036', '2026-11-02 04:00:00'),             // 未来赛季：开始端与 1035 结束端同日
-      item('ID 1034', '2026-08-17 04:00:00'),             // 上期：仅开始端
+      item('ID 1035', undefined, '2026-11-02 04:00:00'),
+      item('ID 100'),
+      item('ID 1036', '2026-11-02 04:00:00'),
+      item('ID 1034', '2026-08-17 04:00:00'),
     ];
     expect([...scrambled].sort(bySeasonDesc).map((it) => it.id))
       .toEqual(['ID 1036', 'ID 1035', 'ID 1034', 'ID 1033', 'ID 900', 'ID 100']);
@@ -226,16 +211,12 @@ describe('endgame 赛季排序与日期区间（ADR 0038）', () => {
     expect(mazeDateRange({ live_begin: '', live_end: '' })).toBe('');
   });
 
-  /* ADR 0060：上游排期是无时区的裸本地串，旧实现按**运行环境本地时区**解释 ⇒ 同一个赛季边界
-     在 UTC / Asia Shanghai / America New York 下相差 8 / 0 / 13 小时（实测），预渲染快照（构建机）
-     与页面（访客）于是对「当期赛季」给出不同答案。判据：裸串一律按固定 +08:00 解释。 */
   it('seasonTimeMs / seasonDateParts：裸串按 +08:00 解释，带时区串按原语义（ADR 0060）', () => {
     expect(seasonTimeMs('2026-11-02 04:00:00')).toBe(Date.parse('2026-11-02T04:00:00+08:00'));
     expect(seasonTimeMs('2026-11-02')).toBe(Date.parse('2026-11-02T00:00:00+08:00'));
     expect(seasonTimeMs('2026-11-02T04:00:00Z')).toBe(Date.parse('2026-11-02T04:00:00Z'));
     expect(seasonTimeMs('')).toBeNull();
     expect(seasonTimeMs('not-a-date')).toBeNull();
-    /* 展示日期取排期时区墙钟：带时区串跨零点时按 +08:00 归日（不取访客本地日期） */
     expect(seasonDateParts('2026-11-02 04:00:00')).toBe('2026.11.02');
     expect(seasonDateParts('2026-11-02T21:30:00Z')).toBe('2026.11.03');
     expect(seasonDateParts('')).toBeNull();
@@ -254,7 +235,6 @@ describe('endgame 赛季排序与日期区间（ADR 0038）', () => {
       expect(mazeStatus(starting)).toBe('upcoming');
       vi.setSystemTime(Date.parse('2026-11-02T05:00:00+08:00'));
       expect(mazeStatus(starting)).toBe('live');
-      /* 两端皆无 ⇒ unknown（peak 全期无排期） */
       expect(mazeStatus({ live_begin: '', live_end: '' })).toBe('unknown');
     } finally {
       vi.useRealTimers();
@@ -269,7 +249,6 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
     expect(modeDefaultArtUrl('maze')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg1.png`);
     expect(modeDefaultArtUrl('story')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg2.png`);
     expect(modeDefaultArtUrl('boss')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg3.png`);
-    // 异相仲裁有人工延展 Img4（ChallengeGeneralConfig 无 Peak 记录，ENDGAME_MODES 兜底）
     expect(modeDefaultArtUrl('peak')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg4.png`);
   });
 
@@ -288,7 +267,6 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
   it('seasonPosterTabUrl 解析海报页签（Quest/TabIcon）', () => {
     expect(seasonPosterTabUrl({ poster_tab: 'SpriteOutput/Quest/TabIcon/BtnChallengePeak_4001.png' }))
       .toBe(`${BASE}/quest/tabicon/BtnChallengePeak_4001.png`);
-    // UI/Abyss 开关图不在白名单（Abyss 前缀仅限场景背景 Abyss/UI3D_SceneBg）
     expect(seasonPosterTabUrl({ poster_tab: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_Off.png' })).toBe('');
     expect(seasonPosterTabUrl(null)).toBe('');
   });
@@ -300,10 +278,8 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
       .toBe(`${BASE}/challengetheme/themebg/ChallengeThemeBg_2001.png`);
     expect(seasonHeroBgUrl({ handbook_banner: 'SpriteOutput/DailyMission/Banner/ChallengePeakPanelBanner_4002.png' }))
       .toBe(`${BASE}/dailymission/banner/ChallengePeakPanelBanner_4002.png`);
-    // 多字段并存时按 background → theme_bg → handbook_banner 优先级
     expect(seasonHeroBgUrl({ theme_bg: 'SpriteOutput/ChallengeTheme/ThemeBg/A.png', handbook_banner: 'SpriteOutput/DailyMission/Banner/B.png' }))
       .toBe(`${BASE}/challengetheme/themebg/A.png`);
-    // boss 无大图 / 白名单外 → 空串
     expect(seasonHeroBgUrl({})).toBe('');
     expect(seasonHeroBgUrl({ background: 'SpriteOutput/UI/Abyss/Process/TypeIcon/AbyssSwitchW01_On.png' })).toBe('');
     expect(seasonHeroBgUrl(null)).toBe('');

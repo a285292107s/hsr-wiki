@@ -1,25 +1,4 @@
 #!/usr/bin/env node
-/**
- * e2e 视口标签守卫（report-only）。
- * 用法：node tools/check-e2e-viewport-tags.mjs [--strict]
- *
- * 判据（单一事实源：docs/agents/testing.md 的标签纪律）：
- *   用例体内自行 `page.setViewportSize(...)` 固定视口者，**必须**在 `test(...)` 第二参静态声明 `@viewport-pinned`
- *   ——否则 `mobile-chromium` 会用 Pixel 7（`isMobile` + 触摸仿真）重跑一条本已钉死视口的桌面契约，
- *   既是纯重复，也会因仿真环境差异变成 flake（实测一次 30s 超时 × 3 次重试把 CI 拖红）。
- *   判定只看**用例签名**：写在 `describe(...)` 标题上的标签会被 Playwright 继承、却被本守卫判为未声明
- *   ——这是有意的（testing.md：三个标签都必须静态写在 `test(...)` 第二参），故此类写法按违规报出。
- *
- * 行内豁免：`// e2e-viewport-ok: 理由`（写在 test 之前的注释块 / 签名行 / 用例体内均可），缺理由不豁免。
- * 唯一在用豁免：`e2e/layout-debug.spec.ts` 的手机档哨兵——它必须留在 mobile project 里跑（`isMobile` 是**被测对象**）。
- *
- * 只判一个方向（自钉视口 ⇒ 必须声明标签）：这是唯一会让 CI 变红的方向。
- * 反方向（声明了标签但用例内没钉视口）是合法用法——该标签同时承担「断言只在项目默认（桌面）视口下成立」
- * 的排他作用，见 docs/agents/testing.md 的标签纪律；对它报警只会变成永久噪声。
- *
- * 退出码：默认恒 0；--strict 有违规退出 1。
- * 硬约束：只用 node 内置模块；只读，不改写任何文件。
- */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -32,13 +11,8 @@ const BAD_OK_RE = /\/\/\s*e2e-viewport-ok\s*[:：]?\s*$/;
 const SET_VP_RE = /\bsetViewportSize\s*\(/;
 const PINNED_RE = /@viewport-pinned/;
 const INDEPENDENT_RE = /@viewport-independent/;
-/* 任意缩进：循环里生成的嵌套 `test(` 也是用例。只认顶格（原为 `^\s{0,2}`）会把它们的体内
-   `setViewportSize` 归到**上一个顶格用例**上——报错指错行，且这批用例整条漏检（实测 11 条，
-   其中 1 条自钉视口：`layout-catalog.spec.ts:190`，守卫却报了它上方的 `/item` 用例）。
-   不会误命中 `test.describe(`：本正则要求 `test` 后紧跟 `(`。 */
 const TEST_RE = /^\s*test\(/;
 
-/** 取 test 之前的连续注释块（doc comment 在语法上属于前一个用例的区间，语义上属于下一个用例） */
 function leadingComments(lines, start) {
   const out = [];
   let inBlock = false;
@@ -76,7 +50,6 @@ const exempted = [];
 let total = 0;
 let pinnedCount = 0;
 
-/** 行级匹配：禁止把行导向的正则作用在多行拼接串上（`$` 跨不过换行，会让豁免静默失效） */
 const findLine = (text, re) => text.split('\n').find((l) => re.test(l));
 
 for (const abs of specs) {
@@ -88,7 +61,6 @@ for (const abs of specs) {
   for (const [k, s] of starts.entries()) {
     const end = k + 1 < starts.length ? starts[k + 1] : lines.length;
     total++;
-    // 签名可能跨行（长标题 + 标签数组）：取签名行起 3 行内、到 `=> {` 之前的部分
     const sigLines = lines.slice(s, s + 3).join('\n').split('=>')[0];
     const bodyLines = lines.slice(s + 1, end);
     const codeLines = bodyLines.filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l));

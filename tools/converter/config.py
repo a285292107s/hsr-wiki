@@ -1,5 +1,3 @@
-"""路径配置、枚举映射表、图片路径映射表。"""
-
 from __future__ import annotations
 
 import re
@@ -101,7 +99,7 @@ PROPERTY_MAP = {
     "StatusResistanceBase": "效果抵抗",
     "BreakDamageAddedRatioBase": "击破特攻",
     "SPRatioBase": "能量恢复效率",
-    "MaxSP": "最大战技点",
+    "MaxSP": "能量上限",
     "AllDamageReduce": "减伤",
     "PhysicalAddedRatio": "物理伤害提高",
     "FireAddedRatio": "火属性伤害提高",
@@ -110,8 +108,6 @@ PROPERTY_MAP = {
     "WindAddedRatio": "风属性伤害提高",
     "QuantumAddedRatio": "量子属性伤害提高",
     "ImaginaryAddedRatio": "虚数属性伤害提高",
-    # 上游 PropertyType 的历史别名：与上列同义、但确实出现在产物里（前端曾各自维护一份中文），
-    # 补进本表才能让 properties.json 覆盖它们（否则界面会漏成原始枚举键）
     "BreakDamageAddedRatio": "击破特攻",
     "LightningAddedRatio": "雷属性伤害提高",
     "EffectHitRateBase": "效果命中",
@@ -146,7 +142,6 @@ ICON_PATH_MAP = {
 }
 
 def _stem(filename: str) -> str:
-    """去掉末尾扩展名（支持 .png / .webp / .jpg 等）。"""
     return filename.rsplit(".", 1)[0] if "." in filename else filename
 
 _PROFESSION_SPELLING = {
@@ -159,18 +154,11 @@ _SKILL_ID_RE = re.compile(r"\d+")
 """技能图标文件名中角色 ID 提取正则（第一个出现的数字串）。"""
 
 def _rule_strip_png(subdir: str, extra_dir: str = "") -> Callable[[str], str]:
-    """通用规则：去扩展名 → 拼子目录前缀 → {subdir}[/{extra_dir}]/{stem}.png。"""
     if extra_dir:
         return lambda f: f"{subdir}/{extra_dir}/{_stem(f)}.png"
     return lambda f: f"{subdir}/{_stem(f)}.png"
 
 def _rule_dir_lower(cat: str) -> Callable[[str], Optional[str]]:
-    """通用规则：SpriteOutput/{Cat}/{SubDir}/... → {cat}/{subdir 全小写}/...，文件名保持大小写。
-
-    事实源：官方 StarRailTextures 仓库目录段统一小写（如 Quest/Museum/MuseumItemIcon →
-    quest/museum/museumitemicon），文件名保持原样。用于未注册分类（Quest / TravelBrochure /
-    DailyMission 等）的完整路径映射。
-    """
     def rule(f: str) -> Optional[str]:
         if not f:
             return None
@@ -198,9 +186,6 @@ def _rule_pathicon(f: str) -> Optional[str]:
     return f"professioniconmiddle/IconProfession{mapped}Middle.png"
 
 def _rule_skillicons(f: str) -> Optional[str]:
-    """输入：SpriteOutput/SkillIcons/Avatar/ 去掉前缀后 = {charId}/SkillIcon_{charId}_{Type|RankN}.png。
-    输出：skillicons/avatar/{id}/{stem_filename}.png；若结构不符返回 None 回退 legacy。
-    """
     parts = f.split("/")
     if len(parts) < 2:
         return None
@@ -216,7 +201,6 @@ def _rule_itemfigures(f: str) -> str:
     return f"itemfigures/{_stem(f)}.png"
 
 def _rule_relicfigures(f: str) -> str:
-    """Q4 选 C：IconRelicBody 等通用部位图标也直接输出，404 交给前端 CSS 占位。"""
     return f"relicfigures/{_stem(f)}.png"
 
 def _rule_trace(f: str) -> str:

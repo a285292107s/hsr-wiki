@@ -205,7 +205,7 @@ renderOrder 相同时保持 spineList 数组顺序——切勿按数组顺序直
 | 4 | atlas 改写为含 `:` 的绝对 URL | Spine 4.2 解析器当属性行吞掉，region 误判为 page | atlas 原样加载，映射走 `rawDataURIs` |
 | 5 | CDX API 超时/限流（498） | 无法查快照 | 直接用浏览器访问 `web.archive.org/web/{ts}000000/...` |
 | 6 | spine-player 依赖 rAF 循环 | 标签页 hidden 时 success 不触发（非缺陷） | 在可见标签页验证 |
-| 7 | `cachedFetch` 的 IndexedDB 缓存 | manifest 修改后不生效 | 改 cacheKey 版本号 |
+| 7 | 请求缓存（`cachedFetch` 的 L1 内存缓存；跨刷新由 HTTP 缓存承担，无 IndexedDB 持久层） | manifest 修改后不生效 | 改 cacheKey 版本号 |
 | 8 | 在 Wayback 页面内 fetch 纹理返回 404 | 误判资源已删 | 是 Wayback 上下文 Referer 触发防盗链，
     用 curl（无 Referer）或 wiki 页面直连验证；act-webstatic 为 Origin 反射策略，任意 Origin 均可 |
 

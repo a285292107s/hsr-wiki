@@ -26,7 +26,6 @@ export function disposePlayer(p: SpinePlayerInstance): void {
     if (gl && typeof gl.getExtension === 'function') gl.getExtension('WEBGL_lose_context')?.loseContext();
     p.dispose();
   } catch {
-    /* 已释放或运行时异常均静默 */
   }
 }
 
@@ -44,7 +43,6 @@ export function applyQualityFixes(p: SpinePlayerInstance): void {
       }
     }
   } catch {
-    /* 过滤覆盖失败不影响播放，仅画质回退 */
   }
 }
 
@@ -74,11 +72,11 @@ export function createSpinePlayer(
       if (runtimeVersion === '4.1') delete finalCfg.fit;
       const player = new Ctor(container, {
         ...finalCfg,
-        alpha: true, // WebGL 上下文开启 alpha 通道
-        backgroundColor: '00000000', // 全透明背景，透出 Hero 视差立绘
+        alpha: true,
+        backgroundColor: '00000000',
         premultipliedAlpha: false,
-        showControls: false, // 隐藏播放器控件条
-        showLoading: false, // 隐藏内置加载屏（由页面骨架屏接管）
+        showControls: false,
+        showLoading: false,
         success(p) {
           applyQualityFixes(p);
 

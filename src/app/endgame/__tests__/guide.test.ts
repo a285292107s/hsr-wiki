@@ -1,6 +1,3 @@
-// guide.ts 纯函数契约：体系名/条数/选法文案与回退口径。
-// 判据：产物缺省（未加载 / 该玩法未命中分节标题）时 `seasonBuffSystemName` 返回**空串**——
-// 由消费方决定回退，避免 truthy 回退串让「无数据」与「体系名恰好叫赛季增益」不可区分。
 import { describe, expect, it } from 'vitest';
 import {
   CHOICE_LABEL, fallbackSystemName, guideMode, seasonBuffChoiceLabel,
@@ -40,10 +37,7 @@ describe('选法文案与口径行', () => {
     expect(Object.keys(CHOICE_LABEL).sort()).toEqual(['fixed', 'per_king', 'per_stage', 'per_team']);
   });
   it('choiceLabel 与无体系数据时的空串', () => {
-    // boss 必须写明「每场首领挑战」与「上/下半场各一套」——数据是每个首领投影一套，
-    // 只写「每场战斗选 1 条」会被读成整期只有一套（判据见 guide.ts 的 CHOICE_LABEL 注释）
     expect(seasonBuffChoiceLabel(db, 'boss')).toBe('每场首领挑战前选 1 条（上/下半场各一套）');
-    // 无体系数据时为空串（调用方据此不渲染该行）
     expect(seasonBuffChoiceLabel(db, 'maze')).toBe('');
   });
   it('条数与模式查询', () => {

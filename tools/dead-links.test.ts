@@ -1,14 +1,3 @@
-/**
- * 死链低频审计（数据变更后本机按需执行，不在 CI 跑——原因见 data-sync.yml）。
- * URL 构造复用前端真实构造函数(src/lib/icons.ts / services/cdn)；
- * 死链判定=明确 HTTP 404(HEAD+Range GET 双重确认)才 FAIL，其余环境性信号仅 WARN。
- * 必须本机跑：CI 数据中心 IP 对 jsDelivr 403→全判 env，真死链发现不了且缓存空转。
- * jsDelivr 限流纪律(禁止违反)：404 带 no-cache,no-store 不缓存→每次回源，已知结果本地缓存+源文件 sha1；
- * 并发硬上限 DEFAULT_CONCURRENCY=3 禁止调高；浏览器禁自定义 UA；重定向自动跟随，HEAD 404 直接判 dead。
- * 缓存策略：失效依据=URL 来源文件内容 sha1(确定性输出零网络复用)；ok/dead 缓存 7 天，env 1 天；落 temp/dead-links-cache.json。
- * 用法：pnpm vitest run --config tools/dead-links.vitest.config.ts（默认增量）；DEAD_LINKS_FORCE=1 全量；
- * DEAD_LINKS_LIMIT=N 抽样；DEAD_LINKS_BUDGET_MS 增量预算(冷缓存全量约40-50min>20min超时，耗尽即停落盘，未覆盖不判失败)。
- */
 import { describe, expect, test } from 'vitest';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
@@ -38,18 +27,13 @@ const DATA = join(import.meta.dirname, '..', 'public', 'data', 'cn');
 const CACHE_FILE = join(import.meta.dirname, '..', 'temp', 'dead-links-cache.json');
 const LIMIT = Number(process.env.DEAD_LINKS_LIMIT || 0);
 const FORCE = process.env.DEAD_LINKS_FORCE === '1';
-/** 增量预算（ms）：探测累计超过预算即停并落盘进度，未覆盖 URL 不判失败（本机分块推进） */
 const BUDGET_MS = Number(process.env.DEAD_LINKS_BUDGET_MS || 0);
 
-/** jsDelivr 对 burst 敏感，并发压到 3；nanoka 同样保守 */
 const CONCURRENCY = 3;
-/** ok/dead 缓存时长（天）；env 环境性信号短缓存 */
 const TTL_OK_DEAD = 7;
 const TTL_ENV = 1;
-/** 标识工具（jsDelivr API 文档建议），回源可追溯 */
 const UA = 'hsr-wiki-dead-link-audit/1.0 (+https://github.com/a285292107s/hsr-wiki)';
 
-/** 递归读取目录下全部 JSON 文件 */
 function walkJson(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
@@ -63,33 +47,27 @@ const load = (rel: string) => JSON.parse(readFileSync(join(DATA, rel), 'utf8'));
 const loadDir = (rel: string) =>
   walkJson(join(DATA, rel)).map((f) => JSON.parse(readFileSync(f, 'utf8')));
 
-/** url → 来源标签（数据文件 + 字段），用于死链报告追溯 */
 type Urls = Map<string, string>;
 
 function add(map: Urls, url: string | undefined | null, source: string): void {
   if (url && !map.has(url)) map.set(url, source);
 }
 
-/** 收集数据中全部渲染 URL（调用点与 src/app 各视图/目录页一致） */
 function collectUrls(): Urls {
   const urls: Urls = new Map();
 
-  // ─── 角色：目录卡片（头像/属性/命途）+ 首页立绘 + 详情 hero ───
   for (const c of load('characters.json')) {
     add(urls, avatarShopIconUrl(c.id), `characters.json#${c.id}.avatar`);
     add(urls, avatarDrawCardUrl(c.id), `characters.json#${c.id}.drawcard`);
     add(urls, elementIconUrl(c.element), `characters.json#${c.id}.element`);
     add(urls, pathIconUrl(c.path), `characters.json#${c.id}.path`);
   }
-  // 角色详情：技能图标（skillIconUrl 内部优先 sk.icon）+ 星魂 + 附加能力
-  // id 取自文件名：详情文件无顶层 id 字段，前端按路由 charId 加载 characters/{id}.json
   for (const f of walkJson(join(DATA, 'characters'))) {
     const d = JSON.parse(readFileSync(f, 'utf8'));
     const id = basename(f, '.json');
     for (const sk of Object.values(d.skills || {})) {
       add(urls, skillIconUrl(sk as never, id, d), `characters/${id}.json#skill.${(sk as { type: string }).type}`);
     }
-    // ranks 为对象（key '1'-'6'）；星魂展示图标 eidolonIconUrl + buff 栏 IconPath 图标
     for (const [rkKey, rk] of Object.entries((d.ranks as Record<string, { icon: string }>) || {})) {
       add(urls, eidolonIconUrl(id, rkKey), `characters/${id}.json#rank${rkKey}`);
       add(urls, iconUrl(rk.icon), `characters/${id}.json#rank${rkKey}.icon`);
@@ -99,13 +77,11 @@ function collectUrls(): Urls {
     }
   }
 
-  // ─── 光锥：目录 + 详情 ───
   for (const lc of load('light_cones.json')) {
     add(urls, lightconeIconUrl(lc.id), `light_cones.json#${lc.id}`);
     add(urls, pathIconUrl(lc.path), `light_cones.json#${lc.id}.path`);
   }
 
-  // ─── 怪物：目录头像 + 详情立绘 ───
   for (const m of load('monsters.json')) {
     add(urls, monsterIconUrl(m.icon), `monsters.json#${m.id}.icon`);
   }
@@ -114,7 +90,6 @@ function collectUrls(): Urls {
     add(urls, monsterIconUrl(d.icon), `monsters/${d.id}.json#icon`);
   }
 
-  // ─── 物品：目录 + 终局奖励 ───
   for (const it of load('items.json')) {
     add(urls, itemIconUrl(it.figure_icon), `items.json#${it.id}.figure_icon`);
     add(urls, itemIconUrl(it.icon), `items.json#${it.id}.icon`);
@@ -125,7 +100,6 @@ function collectUrls(): Urls {
     }
   }
 
-  // ─── 遗器：目录 + 详情（部位图标按 SLOT_INDEX 全量枚举） ───
   for (const r of load('relics.json')) {
     add(urls, itemIconUrl(r.icon), `relics.json#${r.id}.icon`);
     add(urls, itemIconUrl(r.icon_figure), `relics.json#${r.id}.icon_figure`);
@@ -134,7 +108,6 @@ function collectUrls(): Urls {
     }
   }
 
-  // ─── 货币战争：装备 / 强化 / 传送门 / 羁绊 / 角色详情 ───
   for (const it of load('currency/equipment.json').items || []) {
     add(urls, gridFightEquipIconUrl(it.icon), `currency/equipment.json#${it.id}`);
   }
@@ -151,7 +124,6 @@ function collectUrls(): Urls {
     const id = String(d.avatar_id || d.id);
     add(urls, avatarShopIconUrl(id), `currency/role/${id}.json#avatar`);
     add(urls, avatarDrawCardUrl(id), `currency/role/${id}.json#drawcard`);
-    // rank 为数组（IconPath 完整路径）；equipment / traits 为数组（equipment_id / id 主键）
     for (const rk of d.rank || []) {
       add(urls, iconUrl(rk.icon), `currency/role/${id}.json#rank${rk.rank}`);
     }
@@ -165,7 +137,6 @@ function collectUrls(): Urls {
     }
   }
 
-  // ─── 全数据 https 绝对 URL（皮肤图等，mihoyo act-upload） ───
   const scanAbs = (o: unknown, src: string): void => {
     if (!o || typeof o !== 'object') return;
     if (Array.isArray(o)) {
@@ -184,15 +155,12 @@ function collectUrls(): Urls {
   return urls;
 }
 
-/* ─── URL 来源文件内容签名 + 结果缓存（核心：内容未变零网络，只有真变才重测） ─── */
 
-/** source 标签（`file#field`）→ 数据文件相对路径；非 JSON 来源（无）返回 null */
 function sourceFileOf(source: string): string | null {
   const f = source.split('#')[0];
   return f.endsWith('.json') ? f : null;
 }
 
-/** 计算 URL 引用的全部来源文件的内容 sha1（converter 输出确定性：内容未变则签名未变） */
 function computeSourceHashes(urls: Urls): Record<string, string> {
   const files = new Set<string>();
   for (const source of urls.values()) {
@@ -222,7 +190,6 @@ interface CacheFile {
 function loadCache(): CacheFile | null {
   try {
     const c = JSON.parse(readFileSync(CACHE_FILE, 'utf8')) as CacheFile;
-    // 旧格式（目录指纹）无 sourceHashes → 视为无效，冷启动全量一次后写新格式
     return c && typeof c.sourceHashes === 'object' ? c : null;
   } catch {
     return null;
@@ -236,7 +203,6 @@ function saveCache(hashes: Record<string, string>, entries: Record<string, Cache
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/* ─── 探测：HEAD 优先（无 body），404 用 Range GET 确认（1 字节），429/403/503 退避重试 ─── */
 
 type ProbeResult = 'ok' | 'dead' | 'env';
 
@@ -244,8 +210,6 @@ async function singleRequest(url: string, range: boolean): Promise<'ok' | 'dead'
   try {
     const r = await fetch(url, {
       method: range ? 'GET' : 'HEAD',
-      // jsDelivr 冷文件未缓存时 302 回源 GitHub raw：不跟随（本机/CI 直连 raw 超时，实测），
-      // 重定向本身即“文件存在”信号
       redirect: 'manual',
       headers: { 'User-Agent': UA, ...(range ? { Range: 'bytes=0-0' } : {}) },
       signal: AbortSignal.timeout(10_000),
@@ -254,22 +218,19 @@ async function singleRequest(url: string, range: boolean): Promise<'ok' | 'dead'
     if (r.status === 301 || r.status === 302 || r.status === 303 || r.status === 307 || r.status === 308) return 'ok';
     if (r.status === 404) return 'dead';
     if (r.status === 429 || r.status === 503) return 'throttled';
-    // 403 数据中心 IP 拒用是持续信号（历史已实证），退避重试无意义 → 直接判 env
     if (r.status === 403) return 'env';
-    return 'env'; // 其余 4xx/5xx 视为环境性
+    return 'env';
   } catch {
     return 'env';
   }
 }
 
-/** 429/403/503 退避重试（尊重 Retry-After 未实现简化：等 2s/5s），仍失败判 env */
 async function probe(url: string): Promise<ProbeResult> {
   for (const wait of [0, 2_000, 5_000]) {
     if (wait) await sleep(wait);
     const head = await singleRequest(url, false);
     if (head === 'ok') return 'ok';
     if (head === 'dead') {
-      // HEAD 404 → Range GET 二次确认（206/200 = 文件存在；404 = 真死链）
       const get = await singleRequest(url, true);
       if (get === 'throttled') continue;
       return get === 'ok' ? 'ok' : 'dead';
@@ -286,13 +247,11 @@ function domainOf(url: string): string {
   return 'other';
 }
 
-// 全量审计为网络 IO（数千 URL × 并发 3），默认 5s 超时远不够，第三参数显式放宽到 20 分钟
 test('数据全量图标 URL 可达（死链为 0）', async () => {
   const urls = collectUrls();
   const all = [...urls.keys()];
   const limited = LIMIT > 0 ? all.slice(0, LIMIT) : all;
 
-  // 缓存：URL 来源文件内容签名一致 → 复用既有结果（零网络）；签名变化或 FORCE → 重测
   const sourceHashes = computeSourceHashes(urls);
   const cacheFile = FORCE ? null : loadCache();
   const cached: Record<string, CacheEntry> = cacheFile ? cacheFile.entries : {};
@@ -306,7 +265,6 @@ test('数据全量图标 URL 可达（死链为 0）', async () => {
   const toProbe = limited.filter((u) => {
     const e = cached[u];
     if (!e || !fresh(e)) return true;
-    // 来源文件内容签名变化 → 该 URL 重测（converter 确定性重写但内容未变 → 签名一致 → 复用）
     const f = sourceFileOf(urls.get(u)!);
     return f ? prevHashes[f] !== sourceHashes[f] : false;
   });
@@ -321,7 +279,6 @@ test('数据全量图标 URL 可达（死链为 0）', async () => {
 
   const worker = async (): Promise<void> => {
     while (idx < toProbe.length && !budgetExhausted) {
-      // 预算耗尽即停：进度由下方 saveCache 落盘，多次运行间续推，分块推进全量
       if (BUDGET_MS > 0 && Date.now() - now >= BUDGET_MS) {
         budgetExhausted = true;
         break;
@@ -338,12 +295,9 @@ test('数据全量图标 URL 可达（死链为 0）', async () => {
   };
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
 
-  // 落盘缓存（抽样/预算模式也写：支持分块推进全量，避免单次超时）
   saveCache(sourceHashes, results);
-  // 预算模式未覆盖全部待测 → 非失败：进度已缓存下轮继续；确认死链仍 FAIL
   const incomplete = BUDGET_MS > 0 && probedCount < toProbe.length;
 
-  // 分域统计
   const byDomain = (arr: string[]) =>
     arr.reduce<Record<string, number>>((m, u) => {
       const d = domainOf(u);
@@ -364,7 +318,6 @@ test('数据全量图标 URL 可达（死链为 0）', async () => {
     console.log(`  环境性信号 ${env.size} 个（403 数据中心拒用 / 429 限流 / 5xx / 超时），已退避重试仍无法判定`);
   }
   if (dead.length) {
-    // 死链按来源文件分组，便于定位 converter 图标映射问题
     const byFile = new Map<string, string[]>();
     for (const [url, source] of dead) {
       const file = source.split('#')[0];

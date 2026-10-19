@@ -13,7 +13,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 
 | 你要做的事 | 必读（规则） | 坑位（该域 memory） |
 | --- | --- | --- |
-| 任何改动（硬约束 / 验证级别 / 文档落位 / 工作区） | 本文「强制规则」+「验证流程」+「文档分级」+「工作区与提交」 | [docs-process.md](docs/memory/docs-process.md) |
+| 任何改动（硬约束 / 验证级别 / 文档落位 / 注释口径 / 工作区） | 本文「强制规则」+「验证流程」+「文档分级」+「注释与文档」+「工作区与提交」 | [docs-process.md](docs/memory/docs-process.md) |
 | 目录页 / 路由 / 分层结构 / 研究线 / 新增目录端到端 | [architecture.md](docs/agents/architecture.md) | [architecture.md](docs/memory/architecture.md) |
 | 技术栈 / 版本 / 依赖现状与禁用清单 | [tech-stack.md](docs/agents/tech-stack.md) | [build-deploy.md](docs/memory/build-deploy.md) |
 | 数据转换 / 字段探索 / vendor 数据查询 | [data-pipeline.md](docs/agents/data-pipeline.md) | [data-pipeline.md](docs/memory/data-pipeline.md) |
@@ -28,7 +28,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 | UI 样式 / 色彩令牌 / 主题与强调色 / 断点 / 反 AI 味 | [ui-design.md](docs/agents/ui-design.md) | [ui-tokens.md](docs/memory/ui-tokens.md) |
 | UI 质量验收标准（获奖级达标判据 / 分层门禁 / 终止条件） | [UI质量验收标准.md](docs/audit/UI质量验收标准.md) | [testing.md](docs/memory/testing.md) |
 | 视觉职责边界 / 降级与耗时纪律 / 环境性排障 / 取证金字塔 / headless 与 PowerShell 陷阱 | [verification.md](docs/agents/verification.md) | [testing.md](docs/memory/testing.md) |
-| 代码与注释规范 / ADR 门槛 / commit 风格 / 字段审计 | [conventions.md](docs/agents/conventions.md) | [docs-process.md](docs/memory/docs-process.md) |
+| 代码规范 / ADR 门槛 / commit 风格 / 字段审计 | [conventions.md](docs/agents/conventions.md) | [docs-process.md](docs/memory/docs-process.md) |
 
 ## 常用命令
 
@@ -61,7 +61,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
 - **配置驱动目录页**：列表页一律 `CatalogPageConfig`（`src/app/catalog/pages/` + `pages.ts` 注册，目录清单以注册表为准）+ 单一 `CatalogView` 按 `route.meta.catalog` 渲染；专属样式在配置 `styles` 声明，随路由并行加载。
 - **本地优先数据**：目录 / 详情数据全部是预转换 JSON（结构层 `public/data/cn/` + 语言包 `public/data/i18n/<语言>/<分组>.json`；结构层里文本是引用令牌 `"$t:<键>"`，唯一解析入口 `src/services/api/local.ts`，见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）；仅图片与 Spine 动画运行期走 CDN（基址 `src/lib/constants.ts → CDN`）。
 - **单强调色主题**：全站（含货币战争）共用一套可切换强调色，开关 `<html data-accent>`；`meta.cw` → `<html data-theme="cw">` 只是**模式标记**，不重映射颜色（[ADR 0041](docs/adr/0041-主题色统一为单强调色通道.md)）。色板、缺省值与令牌分层见 [ui-design.md](docs/agents/ui-design.md) §2/§3。
-- **样式随路由懒加载**：页面 CSS 随视图 import 拆独立 chunk；全局仅 tokens.css + catalog.css。
+- **样式随路由懒加载**：页面 CSS 随视图 import 拆独立 chunk；全局仅 tokens.css + catalog.css + fonts.css。
 - **首页＝版本上新页**：`/` 与 `/currency` **全断点渲染导航条**；`/` 为品牌带 + 角色 / 光锥 / 遗器三分区 + 页脚，跨模式只走侧栏「交换」（[ADR 0019](docs/adr/0019-枢纽页导航条回归与首页改为版本上新页.md)）。
   - **禁止按 ADR 0018 旧形态回改**（板块索引、无侧栏、「首页 8 行入口首屏可见」断言均已作废）；**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**。
   - 现行断言在 `e2e/layout-home.spec.ts` 与 `e2e/layout-hub.spec.ts`。
@@ -99,6 +99,16 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
 
 **重构期模式**：UI 重构迭代期内展示层反复变动，验收基准从「取值正确」降为「不变量与契约不破」——只跑不变量层与受影响用例，不为可逆改动开 ADR / 同步子文件 / 逐轮刷新像素基线；收敛后一次性重建基线，并补登记本轮真实发生的契约变化。
 
+## 注释与文档
+
+> **代码是唯一不会说谎的真相来源**；注释不是。本节是注释口径与「代码放不下的决定」落位的**唯一来源**；[conventions.md](docs/agents/conventions.md) 只保留指针。
+
+- **注释是「失败」的信号，代码本身应能自解释**：文件头、字段说明、「为什么这么写」的那一句都不留。代码靠精准命名（变量 / 函数 / 类名）与结构直接说清「做什么」和「为什么」，读者不需要旁白——一段逻辑要靠注释才读得懂，说明表达力不足，先改代码本身（换名、拆函数、把约束写进类型或断言），而不是用注释打补丁。
+- **注释是谎言的温床**：代码一直被修改，注释却常被忘在原地；一条过时、甚至与逻辑相悖的注释，危害大于没有注释，因为它会主动误导后来的维护者。
+- **工具指令不属注释**：`@ts-expect-error` / `# noqa` / `# type: ignore` / `@__PURE__` 是给工具的执行指令而非说明文字，**不得删除**。
+- **代码放不下的决定写进领域文档**：判据是「删掉这句说明，只看代码会不会做错事」——外部世界的事实（DSH 契约、第三方 API 行为）、违反后不报错只是悄悄错的不变量、非直觉取舍的理由、改 A 必须改 B 的跨文件耦合。落位按本文「文档分级」那张表选：契约与口径进 `docs/agents/` 对应子文件，不可逆决策进 `docs/adr/`，踩坑进 `docs/memory/`，术语进 [CONTEXT.md](CONTEXT.md)。**同一条规则只写一处，别处引用、不复述**。
+- **记录要回报**：新增或改动这些记录后，当次回复用一两句说清——动了哪份文件、记了什么、为什么代码里放不下。别让记录悄悄沉进仓库。
+
 ## 强制规则（MUST）
 
 > **生成期约束唯一来源**：本节是强制约束的生成期视图，每条只写可判定的判据 + 守卫命令 + 细则出处，不复述子文件。
@@ -113,7 +123,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
 - **文本数据来源**：展示文本必须来自现有数据源（converter 输出 JSON / TextMap），禁止在代码中写死或自建数据源。
 - **禁止手改生成物**：`public/data/**` 是 converter 输出，重跑即整体覆盖——文本 / 数值有误改 `tools/converter/` 后重跑，**禁止直接编辑产物 JSON**；同理禁止手工追加 `DATA_CATALOG.md` 分片。
 - **色彩令牌收口**：颜色必须落入 `tokens.css` 四层令牌（原始层色阶 → `--th-*` 别名层（全站唯一，随 `data-accent`）→ 语义层 → 领域层）；派生色用 `color-mix(in srgb, var(--primary) X%, transparent)`。
-  - 禁令：页面 CSS / 组件内联裸色值；消费层直接引用原始层；领域色引用别名层。
+  - 禁令：页面 CSS / 组件内联裸色值；消费层直接引用彩色原始层（黑阶承载面例外见 ui-design §2）；领域色引用别名层。
   - 守卫：`node tools/check-colors.mjs --strict` 与 `node tools/check-contrast.mjs --strict` 必须全绿；四层定义、豁免与新增流程见 [ui-design.md](docs/agents/ui-design.md) §2/§5。
 - **构建守卫**：每次变更必须 `pnpm build`（含 vue-tsc 类型检查）+ `pnpm test` 全绿后方可提交。
 - **版本号禁入叙述性文档**：README / 本文件 / `docs/agents/` 子文件只写**选型名**；版本口径唯一落位 [tech-stack.md](docs/agents/tech-stack.md)，由 `node tools/doc-audit.mjs` 与 `package.json` / `requirements.txt` / CI 工作流逐字比对。
@@ -121,7 +131,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
 - **改动范围最小化**：只改任务明确要求的内容，**禁止顺手重构 / 改名 / 「优化」任务外代码**；交付记录不得出现范围外改动。仅两类例外需显式登记：① 阻断本任务的硬错误；② 已登记的漂移修正——且须在交付记录中单列。范围外缺陷记入「待用户裁决」清单，不自动修。
 - **helper 先查再用**：新增工具函数 / composable / 选择器 / 原语前，先查 `src/lib/`、`src/services/`、既有共享原语与 `CatalogPageConfig` 注册表；有则复用，**禁止跨目录重复封装**（跨文件复制 CSS 同罪，见 [ui-design.md](docs/agents/ui-design.md) §1）。
 - **文档体量红线（AI 可读性）**：面向 AI 的单文件超约 5 万 token（≈120 KB 中文）即失去「整读」价值——持续增长的内容必须在生成器里拆成「小总索引 + 按需分片」，禁止堆到只能靠 grep 捞；口径与手法见 [conventions.md](docs/agents/conventions.md)。
-- **代码与样式约定（速查）**：Vue SFC 用 `<script setup lang="ts">`；CSS 用 BEM 双前缀（内容 `nk-` / 外壳 `ui-`），不用预处理器，**不引入 ESLint / Prettier**；注释只写「代码与数据都推不出、且 `docs/` 里也不存在」的事实。完整规范见 [conventions.md](docs/agents/conventions.md) 与 [ui-design.md](docs/agents/ui-design.md) §1。
+- **代码与样式约定（速查）**：Vue SFC 用 `<script setup lang="ts">`；CSS 用 BEM 双前缀（内容 `nk-` / 外壳 `ui-`），不用预处理器，**不引入 ESLint / Prettier**；**代码里不写解释性注释**（唯一来源见「注释与文档」节）。完整规范见 [conventions.md](docs/agents/conventions.md) 与 [ui-design.md](docs/agents/ui-design.md) §1。
 
 ## 工作区与提交
 

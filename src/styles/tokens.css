@@ -1,10 +1,4 @@
-/* 字体的加载不放这里：`@import` 在 CSS 里是**串行**的（要先取到并解析本文件，才会去请求被导入的
-   样式表），实测字体 CSS 到 +65ms 才起步、往返 531ms，等于把首屏字体推到应用 CSS 之后。
-   已改为 `index.html` 里的 `<link rel="preconnect">` + `<link rel="stylesheet">`（并行发现 + 预先建连）。 */
-
 :root {
-  /* 本页永远是深色：声明 `color-scheme: dark` 后，浏览器把原生滚动条、表单控件下拉、iOS 过度滚动
-     背景一律按深色绘制。此前没声明，目录页的滚动条与（调试台的）原生 select 弹层都是浅色。 */
   color-scheme: dark;
   --ph-50: #f5eefd;
   --ph-100: #e6d4fb;
@@ -79,8 +73,6 @@
   --gold-500: #D4AF37;
   --gold-600: #A8862E;
   --gold-700: #7A6220;
-  /* 绿松石阶：全部消费点在调试台系统地图（`SystemMapSection.vue` 的 --nk-edge-data 与
-     `map-data.ts` 的「研究线」节点色）——研究工具身份色，非产品 UI 令牌 */
   --em-200: #D3E9DA;
   --em-300: #A9D3B9;
   --em-350: #91C4A4;
@@ -121,8 +113,6 @@
   --skill-servant-passive: #67E8F9;
   --relic-planar: #7DD3FC;
   --relic-planar-deep: #38BDF8;
-  --hero-bg-deep: color-mix(in srgb, var(--blk-900) 86%, var(--th-400) 14%);
-  --hero-bg-tint: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 70%, var(--th-400) 30%) 55%, transparent);
   --cw-faction-core: #A78BFA;
   --cw-faction: #C4B5FD;
   --cw-combat-core: #38BDF8;
@@ -159,9 +149,6 @@
   --ach-rarity-high: var(--gold-600);
   --ach-rarity-high-text: var(--gold-300);
 
-  /* 缺省主题色 = **橄榄青**（`--ol-*`）。切到其它色相写 `<html data-accent="...">`；
-     切回橄榄青时移除该属性即可（`src/lib/theme.ts` 的 applyAccent 对默认值走 delete 分支）。
-     赤陶仍是可选色板，只是不再占据缺省位。 */
   --th-300: var(--ol-300);
   --th-400: var(--ol-400);
   --th-500: var(--ol-500);
@@ -194,53 +181,36 @@
   --eg-story: #2DD4BF;
   --eg-boss: #FB7185;
   --eg-peak: #FBBF24;
-  /* 语境色·污染族（ADR 0027）：500 = 基准位（只承载非文字）/ 300 = 文字亮端（正文对比度门禁） */
   --vor-500: #C40C6A;
   --vor-300: #FC48AC;
   --badge-test: #F59E0B;
-  /* 双族排版：Noto Sans SC 承载中文与正文（含 900 真字重），IBM Plex Mono 承载全部
-     拉丁标签 / 编号 / 读数。此前 --font-mono 走系统 mono 栈、--font-hud 走 Orbitron——
-     前者随操作系统漂移（同一页面在 macOS / Windows 上字形不同），后者是装饰性科技体，
-     两者都不满足「读数与标签必须精确且处处一致」的档案语气。 */
   --font-hud: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
   --font-body: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
 
   --nk-content-max: 1440px;
   --nk-content-offset: 0;
-  /* 手机底栏栏高（唯一声明处）。56px 只够单行标签（20px 图标 + 3px 间隙 + 1×10.5px 行高）；
-     多语言标签折行后行盒涨到 54.5px（2 行）乃至 65px（3 行，最窄档的 ru），
-     56px 会把图标顶到 1px 贴边。64px 让两行有常规呼吸量、三行也不贴边。
-     消费点：`.ui-sidebar` / `.ui-more` / `.nk-page--detail` / `monster-detail.css` 的页尾避让——
-     **改这里必须同步核对这四处**（避让值小于栏高 = 内容被永久遮住）。 */
   --nk-nav-bar-h: 64px;
   --nk-detail-max: 1000px;
   --nk-struct-max: 952px;
-  /* 字号刻度（唯一来源）：分「界面/正文」8 档与「标题/特写」5 档。
-     此前全站有约 40 个临时 rem 乘数（0.55/0.56/0.58/0.62/0.625/0.64…），同一屏里
-     13 / 13.12 / 13.44 / 13.6px 之类差别无人可辨，却让「一套系统」退化成一堆近似值；
-     实测详情页单页用到 17~19 个字号。档位间距约 1.2 倍，全部消费点只允许引用本组令牌。 */
-  --nk-fs-1: 0.5rem;      /* 8px  等宽全大写微标（侧栏英文名、编号角标） */
-  --nk-fs-2: 0.625rem;    /* 10px HUD 读数 / 单位 / 表头 */
-  --nk-fs-3: 0.72rem;     /* 11.5px 标签 / 注脚 */
-  --nk-fs-4: 0.82rem;     /* 13.1px 正文 / 描述（站点事实上的正文档） */
-  --nk-fs-5: 0.9375rem;   /* 15px 强调正文 / 卡名 */
-  --nk-fs-6: 1.0625rem;   /* 17px 区块标题 */
-  --nk-fs-7: 1.25rem;     /* 20px 大号读数 / 小标题 */
-  --nk-fs-8: 1.5rem;      /* 24px 特写标记（星魂号等） */
-  --nk-fs-title-1: 1.75rem;  /* 28px 页面次标题 */
-  --nk-fs-title-2: 2rem;     /* 32px 页面主标题 */
-  --nk-fs-title-3: 2.25rem;  /* 36px 特写标题 */
-  --nk-fs-title-4: 3rem;     /* 48px 枢纽品牌带 */
-  --nk-fs-title-5: 3.75rem;  /* 60px 货币战争角色扉页主名 */
-  --nk-fs-hero: 4.5rem;      /* 72px 角色主名特写 */
-  --nk-fs-hero-lg: 5.5rem;   /* 88px 单字角色名（宽档专用：1 字名与多字名同宽时才同字号） */
-  /* 圆角刻度（唯一来源）：芯片 / 控件 / 面板三档；圆形与胶囊是形态而非档位（50% / 999px）。 */
+  --nk-fs-1: 0.5rem;
+  --nk-fs-2: 0.625rem;
+  --nk-fs-3: 0.72rem;
+  --nk-fs-4: 0.82rem;
+  --nk-fs-5: 0.9375rem;
+  --nk-fs-6: 1.0625rem;
+  --nk-fs-7: 1.25rem;
+  --nk-fs-8: 1.5rem;
+  --nk-fs-title-1: 1.75rem;
+  --nk-fs-title-2: 2rem;
+  --nk-fs-title-3: 2.25rem;
+  --nk-fs-title-4: 3rem;
+  --nk-fs-title-5: 3.75rem;
+  --nk-fs-hero: 4.5rem;
+  --nk-fs-hero-lg: 5.5rem;
   --nk-radius-1: 2px;
   --nk-radius-2: 6px;
   --nk-radius-3: 12px;
-  /* 正文阅读列宽按**字号**缩放（≈44 全角字）。定值 px 会让每行字数随字号漂移，同一站点里
-     13.12px 档 61 字 / 14.08px 档 57 字——都超出长文可回扫的 40 字量级。 */
   --nk-prose-max: 44em;
   --nk-dur-fast: 150ms;
   --nk-dur-hover: 200ms;
@@ -263,10 +233,7 @@
   --nk-sheet-border: color-mix(in srgb, var(--primary) 35%, transparent);
   --nk-sheet-item-bg: color-mix(in srgb, var(--primary) 5%, transparent);
   --nk-sheet-item-border: color-mix(in srgb, var(--primary) 14%, transparent);
-  /* 吸顶控制条（目录工具栏）：此前是「同色相暖调浅板」（blk-800 + 6% 强调色，比页面底色更亮），
-     贴在冷黑页面上像换了一种材质；改为**冷色压暗 + 一点强调色**，与 `backdrop-filter` 合起来读作磨砂玻璃。
-     两个令牌只有 `.nk-cat-toolbar` 一个消费点，故可安全地按它调。 */
-  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-900) 96%, var(--primary) 4%) 86%, transparent);
+  --nk-header-bg: color-mix(in srgb, color-mix(in srgb, var(--blk-800) 96%, var(--primary) 4%) 86%, transparent);
   --nk-header-border: color-mix(in srgb, var(--primary) 16%, transparent);
   --nk-input-bg: color-mix(in srgb, var(--primary) 6%, transparent);
   --nk-input-border: color-mix(in srgb, var(--primary) 18%, transparent);
@@ -283,9 +250,6 @@
   :root { --nk-content-offset: 148px; }
 }
 
-/* 主题色单通道（ADR 0041）：原 `[data-theme="cw"]` 的整层语义重映射与 4 个 CW 专属色板
-   （rose / silver / emerald / copper）已退场——货币战争跟随常规强调色通道 `data-accent` / `--th-*`，
-   全站同一时刻只有一个色相。 */
 [data-accent="olive"] {
   --th-300: var(--ol-300);
   --th-400: var(--ol-400);
@@ -341,19 +305,8 @@
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border); border-radius: 0;
   padding: 0 4px env(safe-area-inset-bottom, 0px); z-index: 100000;
-  /* 底栏槽位几何（唯一的声明处；`recomputeFold` 直接读这两个值算折叠，不再量 DOM）。
-     存在理由是**槽位数必须与语言无关**：内容项若按标签固有宽参与分配，`flex-basis: auto`
-     会让「能塞几个」由译文长度决定——实测同一视口 390px 下 cn 显示 6 个而 pt 只有 3 个。
-     故内容项改等分（`flex: 1 1 0`），槽数 = 可用宽 ÷ 槽下限。
-     `--nk-nav-slot-min` 是槽位下限（= 触控目标下限，也是「最宽语言的标签仍能折两行」的实测宽）：
-     槽数 = ⌊(可用宽 − 3×工具位 − 分隔线) ÷ 本值⌋，**与语言无关**。取 44px 不是新值——它就是
-     本文件原有的 `min-width: 44px` 触控下限，原先只被当作最小值、并未参与折叠算术，
-     于是折叠被译文固有宽主导。`--nk-nav-tool-w`：工具位（跨模式入口 / 设置 / 更多）在手机档
-     收成图标档后的定宽，桌面档三项都带文字（实测 pt 三项合计 208px = 可用宽的 54%）。 */
   --nk-nav-tool-w: 44px;
   --nk-nav-slot-min: 44px;
-  /* 分隔线的**实际占宽**（1px 线 + 两侧各 3px 外边距）——折叠算术要扣的是盒宽不是线宽，
-     写 1px 会低估 6px，实测因此把槽宽算成 43.3px（低于 44px 的触控下限）而不自知。 */
   --nk-nav-divider-w: 7px;
 }
 .ui-sidebar-divider {
@@ -364,9 +317,6 @@
   background: linear-gradient(180deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
   opacity: 0.8;
 }
-/* 手机底栏：分隔线改画在「章节组 ↔ 工具组（调试台 / 跨模式入口 / 设置）」之间。
-   桌面档它是品牌带下的整条发丝线（位置不动），而底栏里品牌带是隐藏的——
-   跨模式入口移入工具组后，分隔线若留在原位会变成最左缘一根无来由的竖线。 */
 @media (max-width: 767px) {
   .ui-sidebar-divider { order: 1; }
   .ui-sidebar-tools > * { order: 2; }
@@ -396,12 +346,6 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   background: transparent; padding: 0;
   border: 1px solid transparent; border-radius: var(--nk-radius-3);
-  /* 内容项是 `<RouterLink>`、交换/「更多」是 `<button>`，两者的文案落位差异由外壳的
-     `:where(#app) button { text-align: inherit }` 收口（见那条注释）；这里不再单独声明。 */
-  /* 非激活态整体 0.72 的不透明度把 10px 标签压到 4.07:1（`--text2` 以 0.72 复合到手机底栏底色
-     `#1e1c1d`）——**低于 WCAG 1.4.3 的 4.5:1**，且只在 <768 档出现（该档底栏不透明、标签可见）。
-     取 0.85：该底色下 5.16:1、页面底色下 5.56:1，仍是明确的「弱化」档（激活态为不透明 + metric-val）。
-     口径：不透明度不保留文本语义，改用显式取值即可同时满足对比度与「弱化」的视觉意图。 */
   color: var(--text2); opacity: 0.85;
   transition: color var(--nk-dur-hover) var(--nk-ease-out), opacity var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out), border-color var(--nk-dur-hover) var(--nk-ease-out), box-shadow var(--nk-dur-hover) var(--nk-ease-out);
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
@@ -423,17 +367,6 @@
 @media (max-width: 767px) {
   .ui-sidebar-debug { display: none; }
 
-  /* 手机底栏的槽位契约（与上面 `--nk-nav-*` 三个令牌是一对，改一处必须改另一处）：
-     ① **章节项等分**——`flex-basis: 0` 让槽宽只由视口决定，不再被译文固有宽牵着走。
-        改前是 `flex: 1 1 auto`，于是「能塞几个」= 该语言标签有多长（cn 6 项 / pt 3 项）。
-        `min-width: 0` 必须显式写回：基类的 `min-width: 44px` 会让槽宽拒绝收缩到 44 以下，
-        窄屏 6 项时反而撑破底栏。
-     ② **工具位定宽**——跨模式入口 / 设置 / 更多三项收成图标档（`flex: 0 0 var(--nk-nav-tool-w)`），
-        文案只留 `aria-label` / `title`。理由不是省地方，是**它们不比章节项更该占宽**：
-        实测 pt 「Guerra das Moedas」一项就吃掉 93px（可用宽的 24%），而它与「设置」在底栏
-        本来就没有可读性负担——图标 + 无障碍名即可（Label in Name 由 `swapAria` 保证）。
-     ③ **标签折两行**——`nowrap` 换成折行 + 断词；P3「导航标签禁止截断」的落地形态。
-        `hyphens: auto` 需要 `<html lang>` 正确（ADR 0052 已同步），de 复合词得到「Währungs-krieg」。 */
   .ui-sidebar-link:not(.ui-sidebar-swap):not(.ui-sidebar-settings):not(.ui-sidebar-more) {
     flex: 1 1 0; min-width: 0;
   }
@@ -443,7 +376,8 @@
     flex: 0 0 var(--nk-nav-tool-w); min-width: 0;
   }
   .ui-sidebar-swap .ui-sidebar-link__label,
-  .ui-sidebar-settings .ui-sidebar-link__label { display: none; }
+  .ui-sidebar-settings .ui-sidebar-link__label,
+  .ui-sidebar-more .ui-sidebar-link__label { display: none; }
   .ui-sidebar-link__label {
     white-space: normal; overflow-wrap: break-word; hyphens: auto;
     text-align: center; line-height: 1.05; max-width: 100%;
@@ -511,16 +445,6 @@
   .ui-more-enter-active .ui-more__sheet, .ui-more-leave-active .ui-more__sheet { transition: none; }
 }
 
-/* 全站环境层（单一事实源）：页面根容器一律透明，只有 #app 画这一层。
-   构成 = 右上角光源（高峰值 + 快衰减，读成「有一束光」而不是一片糊）+ 顶部地平线带
-   + 四周暗角（把网格压回背景、给内容让出对比度）。
-   旧版是两块大椭圆主色 wash（ellipse 90% 52% at 72% -8%），低峰值大范围在黑底上
-   只会读成一团脏斑——峰值低、衰减慢是「糊」的两个成因，改的是这两项不是颜色。
-   曾试过在光晕之上再加一层纹理（120px 点阵、24px 方格纸网格），两者实测都**与本站类型不合**：
-   档案站没有满屏主视觉，纹理只能当「隐隐有格子」的弱信号，而它还须压在页面发丝线之下才不抢亮度，
-   结果就是花了推导与守卫成本、观感上却近乎不可见。结论是**环境层只做光影、不做纹理**；
-   质感预算交给 `#app::after` 的纸感颗粒（`--grain-opacity`）与内容本身。
-   判据与两次实测证据见 docs/memory/ui-tokens.md。 */
 :root {
   --nk-ambient-image:
     radial-gradient(56% 26% at 86% -6%, color-mix(in srgb, var(--primary) 15%, transparent) 0%, transparent 72%),
@@ -529,27 +453,12 @@
   --nk-ambient-size: auto, auto, auto;
 }
 #app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background-color: var(--bg); background-image: var(--nk-ambient-image); background-size: var(--nk-ambient-size); background-attachment: fixed; -webkit-font-smoothing: antialiased; scrollbar-color: var(--border2) transparent; }
-/* 外壳级细节三件：选区 / 光标 / 滚动条。
-   ① `::selection` 此前只写在 `.nk-char-page` 里（`character-hero.css`），其余 100+ 页是浏览器默认蓝，
-      与赤陶强调色不搭 ⇒ 提为全局单点声明，页面级那份删掉（同一事实只留一处）。
-   ② 输入框光标此前是文字色（近白），改随强调色——搜索框是本站最主要的输入点。
-   ③ `scrollbar-color` 是**继承属性**，写在 `#app` 上即可覆盖目录页 / 首页 / 详情页的全部滚动容器；
-      **刻意不设 `scrollbar-width: thin`**：细滚动条会让滚动容器宽出约 7px，虚拟网格的列数/格子宽
-      随之改变（会连带刷新像素基线与目录断言），收益只是滚动条窄一点，不值得。
-      需要隐藏滚动条的地方仍各自 `scrollbar-width: none`（如筛选条、横向卡片带）。 */
 :where(#app) ::selection { background: color-mix(in srgb, var(--primary) 32%, transparent); color: var(--text-bright); }
 :where(#app) input,
 :where(#app) textarea { caret-color: var(--primary); }
-/* h4..h6 与 h1..h3 同批收口（全站 3 个 h4 此前各自漏着 UA 的 1.33em 上下外边距） */
 :where(#app) h1, :where(#app) h2, :where(#app) h3, :where(#app) h4, :where(#app) h5, :where(#app) h6,
 :where(#app) p, :where(#app) dl, :where(#app) dt, :where(#app) dd { margin: 0; padding: 0; }
 :where(#app) * { box-sizing: border-box; }
-/* `text-align: inherit` 是**元素类型差异的收口**：UA 给 `<button>` 声明了 `text-align: center`，而
-   `<a>` / `<div>` 只是继承。类名相同的元素因此按标签表现不同——侧栏「货币战争」看着居中而其余 tab
-   左对齐就是这个原因（≥1024 档 `.ui-sidebar-link__text` 纵向 flex 把两行拉到同宽后，由 `text-align`
-   决定落位）。差分实测（把 11 个按钮族的 `text-align` 逐个内联改掉再比文字 ink 位移）：除侧栏交换项外
-   其余族的居中来自各自的 flex 布局、`text-align` 无可见影响 ⇒ 这条收口**不改变任何现有渲染**，
-   但消除了「下一个纵向拉伸的按钮内文案又会居中」这类隐患。 */
 :where(#app) button { font: inherit; color: inherit; cursor: pointer; text-align: inherit; }
 :where(#app) img { display: inline-block; vertical-align: middle; }
 :where(#app) a { color: inherit; text-decoration: none; }
@@ -705,13 +614,6 @@ background-position: center 15%;
 }
 .nk-secnav__btn:hover { color: var(--text2); background: transparent; }
 .nk-secnav__btn--active { color: var(--metric-val); background: transparent; }
-/* 落点必须在按钮盒**内**：`.nk-secnav` 是 `overflow-x: auto`，而单轴 `visible` 会被规范算成 `auto`
-   ⇒ padding box 之外一律裁掉。按钮高度 == 导航盒高度（本页横滑档 44 / 桌面档 28，导航盒都被按钮撑满），
-   故原 `bottom: -7px` 的落点整体在容器外——三个消费页（角色 / 货币战争角色 / 贪饕）**从未渲染出激活
-   下划线**，静默到只剩颜色差。`bottom: 0` = 按钮自身下沿，任何断点都落在盒内，不留魔数。
-   检具取计算值 `parseFloat(getComputedStyle(btn, '::after').bottom) >= 0`；**别拿 `scrollHeight >
-   clientHeight` 当判据**——宿主上还有一条 `::before { top/bottom: -7px }` 的隐式热区，它独自就能把
-   `scrollHeight` 顶高 7px，改完落点该比值依旧超标。 */
 .nk-secnav__btn--active::after {
   content: ''; position: absolute; left: 11px; right: 11px; bottom: 0;
   height: 2px; border-radius: var(--nk-radius-1); background: var(--primary); box-shadow: none;
@@ -854,10 +756,6 @@ background-position: center 15%;
 .nk-skeleton__body { padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 20px; max-width: var(--nk-detail-max); margin: 0 auto; width: 100%; }
 .nk-skeleton__stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .nk-skeleton__ability { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: var(--nk-radius-3); }
-/* `.nk-skeleton--catalog` 不带内距：它渲染在 `#nk-catalog-app` 之内，而后者已声明
-   `padding: 0 24px 80px var(--nk-content-offset)`。此处再声明一份等于**双层内距**——
-   骨架网格被多推入 148px（桌面）且窄 172px，数据到达时整块内容会向左跳并重排列数。
-   骨架级距由包裹容器（`#nk-catalog-app`）唯一提供，见 CatalogPage.vue 的模板。 */
 .nk-skeleton__header { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .nk-skeleton__filters { padding: 12px 0; }
 .nk-skeleton__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min, 150px), 1fr)); gap: var(--nk-grid-gap, 14px); padding-top: 16px; }
@@ -870,7 +768,6 @@ background-position: center 15%;
 
 img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
 
-/* 面板空槽：虚线框标出「此处本应有数据」，是设计态而不是留白 */
 .nk-slot-empty { padding: 30px 20px; text-align: center; font-size: var(--nk-fs-4); line-height: 1.7; letter-spacing: 0.02em; color: var(--text3); border: 1px dashed var(--line-2); border-radius: var(--nk-radius-2); }
 .nk-error-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 80px 24px; text-align: center; animation: nk-fade 0.3s var(--nk-ease-out); }
 .nk-error-state__icon { width: 48px; height: 48px; color: var(--diff-del); opacity: 0.6; }
@@ -883,13 +780,7 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
 .nk-error-state__retry:active { transform: translateY(1px); }
 .nk-error-state__retry:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
 
-/* 枢纽页页脚：**两个枢纽页共用的收束**。
-   形态＝一句话收尾，不做 sitemap、不做居中字距装饰（旧 `::before` 渐变线与
-   `__latin` 等宽拉丁行随首页重构删除：前者是发丝线、后者是「代码外等宽字 + 大字距」。 */
 .nk-hub-footer { max-width: var(--nk-content-max); margin: 0 auto; padding: 72px 40px 56px var(--nk-content-offset); }
-/* 20px 而不是 24px：末行紧跟遗器分区，24px 到手机档就够到 headings 门槛（<600 档门槛 22px），
-   于是上一分区的条目名会被 inspect.mjs 读成「压在这句话上方的小字标签」。收在 20px 后
-   它在任何宽度都不是 heading，这一整类误判消失。 */
 .nk-hub-footer__motto { font-family: var(--font-body); font-size: var(--nk-fs-7); font-weight: 800; letter-spacing: 0; color: var(--text-bright); }
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-hub-footer { padding: 60px 32px 44px var(--nk-content-offset); }
@@ -898,20 +789,6 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   .nk-hub-footer { padding: 76px 20px calc(76px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* 枢纽页抬头（Masthead）：**两个枢纽页共用**的报头文字，**不再自带承载面**。
- *
- * 形态＝站名（h1，28–32px）+ 一行定位（20px），直接落在页面地面上，随内容滚动。
- * 为什么不是原来的「品牌带」（含 210px 盒 + 半透明面板）：
- *   ① 面板在**有材质的地面**上会截断材质——上面是均匀色面、下面是星野，实测接缝两侧色调只差 Δ12，
- *      但「材质有无」是 100% 的差，眼睛读成「一条灰条贴在照片上」（用户反馈「太割裂」）；
- *   ② 站名在 ≥1024px 已由侧栏 `ui-sidebar-brand__cn` 承担，带里再印一遍是同一屏的重复；
- *   ③ 210px 占掉 900 视口的 23%，却把真正的主语（版本号）压到第二屏边缘。
- * 不再设 `min-height`、不设底色、不设断点高度：两页仍然同构（同一原语、同一字号），
- * 所以 `nk-view-swap` 互切时不会出现高度不一致的跳动。高度契约改为「抬头必须是紧凑的一行文字」。
- *
- * 定位行**固定 20px（`--nk-fs-7`）且全断点不变**：18px 以下会落进 inspect.mjs 的 eyebrow 判据
- * （候选上限 = min(18px, 标题字号×0.5)），在手机档「抬头定位行 → 版本号」这段间距内被读成
- * 「压在大字上方的小字标签」。20px 同时是正文可读档，不需要为它再挑字号。 */
 .nk-hub-masthead { display: grid; gap: 12px; }
 .nk-hub-masthead__title {
   font-family: var(--font-body);
@@ -984,13 +861,6 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
     background: var(--nk-sheet-bg);
     border: none; border-right: 1px solid var(--line-1);
     box-shadow: none;
-    /* 主标改换行后，最长项由 1 行变 2~3 行，侧栏内容自然高最高 +114px（实测 ru 普通模式 667→781）。
-       视口高不足时 `margin-top: auto` 的底部工具组（跨模式入口 / 设置）会被推到视口下沿之外——
-       实测 657~720px 档 12 组出现「导航项既不在视口内也无法点击」（改前 0 组）。
-       故本档让侧栏自身可纵向滚动：内容再高也只滚动，导航项永远可达（P3 的另一半——能到才算没被截）。
-       `overflow-x: hidden` 是必需的：只写 `overflow-y` 时 `overflow-x` 会按规范计算成 `auto`，
-       而激活态指示条在 `left: -1px` 会诱出横向滚动条；它落在侧栏内距盒内，隐藏不会裁掉指示条。
-       只加在 ≥1024 档：768~1023 是竖排图标栏（`__text` 不显示），不换行、无此增长。 */
     overflow-y: auto; overflow-x: hidden;
   }
   .ui-sidebar-link {
@@ -1001,14 +871,6 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   }
   .ui-sidebar-link__icon svg { width: 18px; height: 18px; }
   .ui-sidebar-link__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-  /* 多语言：侧栏主标是**导航标签**，按分级口径属 P3（禁止截断，必须完整显示）。
-     原先只有 `white-space: nowrap` 而没有 `overflow: hidden`（旁边的 `__en` 反而有 ellipsis）
-     ⇒ 译文比中文长时文字直接压到侧栏外（实测 de/ru/th × 16 路由共 120 次外溢，
-     `Verbesserungen` 103.9 > 可用 73px）。处置取「换行 + 断词」而非加宽侧栏：
-     13 语言单行完整显示需侧栏 140→190px（实测最长 vi `Chiến tranh Tiền tệ` 固有宽 122.67px
-     而文本区仅 73px ⇒ +35%），代价是全站内容宽 + 5 处 e2e 契约值（`--nk-content-offset` 三档重标）。
-     `hyphens: auto` 让 de 复合词得到「Währungs-krieg」而不用 `anywhere`（后者会把 CJK 也任意断行，
-     回归面要求 cn/cht/jp/kr 换行行为不变）；本站 `<html lang>` 已由 ADR 0052 同步，故断词规则可用。 */
   .ui-sidebar-link__cn { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text); white-space: normal; overflow-wrap: break-word; hyphens: auto; transition: color 0.2s var(--nk-ease-out); }
   .ui-sidebar-link__en { font-family: var(--font-mono); font-size: var(--nk-fs-1); letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ui-sidebar-link:hover { background: var(--nk-shell-hover); }
@@ -1071,10 +933,6 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   .nk-hero__toggle:hover { border-color: var(--border); color: var(--text2); }
 }
 
-/* 全局焦点环：**表单控件也必须在内**——`input`/`select`/`textarea`/`summary` 都能被 Tab 聚焦，
-   漏掉它们就得依赖各浏览器的 UA 默认环（颜色/形状随平台变，站点无法保证可见与一致）。
-   注意 `:where()` 特异性为 0 ⇒ 组件自己的 `outline: none`（如 `.nk-cat-search input`，改用宿主
-   `:focus-within` 的边框+内投影做指示）依旧能按特异性盖过本规则，不会出现双环。 */
 :where(#app) button:focus-visible,
 :where(#app) a:focus-visible,
 :where(#app) summary:focus-visible,
@@ -1085,12 +943,6 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-/* 全局动效降级（reduce 下动画立即结束、只跑一次）。这里**必须**用 id 选择器 `#app *`
-   （特异性 1,0,0）：组件自己的 `animation: nk-card-in 0.4s` 简写是 (0,1,0)，会盖过
-   `:where(#app) *` 那类零特异性规则——旧写法下「全局降级」对**几乎所有真在动的组件都失效**
-   （实测 reduce 下 `.nk-lc-card` / `.nk-mob-card` 仍跑 0.4s、`.nk-panel` 仍跑 0.3s）。
-   `animation-delay` 同样要归零：目录卡入场用 `backwards` 填充 + 最多 600ms 错峰，
-   只压 duration 会让 reduce 用户先看到一片透明再突然出现。 */
 @media (prefers-reduced-motion: reduce) {
   #app *,
   #app *::before,
@@ -1100,8 +952,6 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
     animation-iteration-count: 1 !important;
   }
 }
-/* 过渡只做**兜底**，故仍用零特异性：页面过渡在 reduce 下有意保留 0.12–0.14s 的淡入
-   （见上方 `.nk-view-*` 规则），颜色/边框类过渡也不属于「运动」，不该被一刀切掉。 */
 @media (prefers-reduced-motion: reduce) {
   :where(#app) *,
   :where(#app) *::before,

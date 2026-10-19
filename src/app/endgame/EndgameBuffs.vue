@@ -1,13 +1,10 @@
 <script setup lang="ts">
-// 战意（Fever）赛季主题机制 + 两阶段效果（官网"战意机制 / 战意效果"对应 SubMazeBuffList：
-// 机制 1 条 + 效果 2 条，仅虚构叙事 Fever 赛季）。
 import { computed } from 'vue';
 import { BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl } from './renders';
 import type { MazeBuffInfo, MazeListEntry } from '../../services/types';
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
@@ -27,7 +24,6 @@ const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.sli
         <article class="nk-egd-buff">
           <div class="nk-egd-buff__head">
             <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" :src="buffIconUrl(subBuffsMech)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-            <!-- 条目名＝h3：A1.2 判的是**文档序**层级递增 ≤1，与上方 h2（战意机制 FURY）互为兄弟即合法 -->
             <h3 class="nk-egd-buff__name">{{ subBuffsMech.name }}</h3>
           </div>
           <p v-if="subBuffsMech.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(subBuffsMech)"></p>

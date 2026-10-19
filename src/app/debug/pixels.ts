@@ -9,7 +9,7 @@ export function analyzePixels(buf: Uint8Array, w: number, h: number): PixelAnaly
   let visible = 0;
   let x0 = w; let y0 = h; let x1 = -1; let y1 = -1;
   for (let y = 0; y < h; y++) {
-    const glY = h - 1 - y; // WebGL readPixels 从底部行开始
+    const glY = h - 1 - y;
     for (let x = 0; x < w; x++) {
       const a = buf[(glY * w + x) * 4 + 3];
       if (a > 0) {

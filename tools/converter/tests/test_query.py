@@ -1,10 +1,3 @@
-"""query.py 查询逻辑与 schema 输出测试。
-
-覆盖：--id / --where / --grep / --fields 过滤、schema 字段出现率
-（可选字段全量扫描，历史教训回归）、dict 型对象字段并集。
-不依赖真实源数据（合成 ExcelOutput 文件 + tmp_path 隔离目录）。
-"""
-
 import json
 
 import pytest
@@ -14,7 +7,6 @@ import query
 
 @pytest.fixture
 def excel_dir(tmp_path, monkeypatch):
-    """隔离的 ExcelOutput 目录；每次清空 lru_cache 防跨测试污染。"""
     query.load_excel.cache_clear()
     monkeypatch.setattr(query, "EXCEL_DIR", tmp_path)
     yield tmp_path
@@ -78,7 +70,6 @@ def test_query_fields(excel_dir, capsys):
 
 
 def test_query_head_alias_of_limit(excel_dir, capsys):
-    """--head 作为 --limit 别名生效。"""
     _write(excel_dir, "AvatarConfig.json", AVATARS)
     data = query.load_excel("AvatarConfig")
     query.cmd_query(data, _args(head=1))
@@ -89,7 +80,6 @@ def test_query_head_alias_of_limit(excel_dir, capsys):
 
 
 def test_schema_reports_optional_field_occurrence(excel_dir, capsys):
-    """可选字段出现率 < 100%（历史教训回归：只扫首条记录会漏字段）。"""
     data = [
         {"ID": 1, "Name": "a"},
         {"ID": 2, "Name": "b", "Optional": 1},
@@ -105,7 +95,6 @@ def test_schema_reports_optional_field_occurrence(excel_dir, capsys):
 
 
 def test_schema_dict_scans_all_value_fields(excel_dir, capsys):
-    """dict 型文件输出全部值对象的字段并集（修复：原仅取首个键）。"""
     data = {
         "a": {"Name": "x", "ID": 1},
         "b": {"Name": "y", "ID": 2, "Extra": True},
@@ -120,7 +109,6 @@ def test_schema_dict_scans_all_value_fields(excel_dir, capsys):
 
 
 def test_schema_recognizes_hash_and_value_wraps(excel_dir, capsys):
-    """HashRef / ValueWrap 特殊类型识别。"""
     data = [
         {"ID": 1, "Desc": {"Hash": 6186714091647966180}, "Param": {"Value": 3}},
     ]

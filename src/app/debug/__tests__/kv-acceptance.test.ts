@@ -1,4 +1,3 @@
-// 判定与报告纯函数测试，不依赖 DOM
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import {

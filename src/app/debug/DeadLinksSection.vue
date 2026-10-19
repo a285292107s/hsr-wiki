@@ -39,7 +39,6 @@ const onlyIssue = ref(false);
 const doneCount = ref(0);
 const totalCount = ref(0);
 
-/** localStorage 批量落盘间隔（条）：死链结果必须持久化（jsDelivr 404 不缓存，复用靠本地） */
 const SAVE_BATCH = 25;
 let saveDirty = 0;
 

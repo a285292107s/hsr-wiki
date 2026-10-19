@@ -23,17 +23,10 @@ export function fmtVal(v: number | null | undefined, tag: string, isPct: boolean
   return String(n);
 }
 
-/* 面板数值的统一呈现：≥4 位加千分位。此前同一类「角色 / 敌人面板数值」两处写法不同——
-   光锥 hero 与终局奖励走 `toLocaleString()`，角色属性面板与敌人战斗数值直接输出 `{{ st.v }}`，
-   于是同一档内容里「1,058」与「25377.9」并存。字符串原样返回（百分比 `25.0%`、占位符 `—` 等
-   已格式化过的文本不能被再格式化）；纯数字串则按数值格式化（converter 有把数值写成字符串的字段）。
-   **分组符按站点语言**：`toLocaleString()` 不带参数时用的是**浏览器**语言 ⇒ 德语站点配英文浏览器会
-   输出 `1,234.5`（德语应为 `1.234,5`）。统一走 `fmtNumber`。 */
 export function localeCulture(): string {
   return findLocale(activeLocale())?.culture ?? 'en-US';
 }
 
-/** 数字按**站点语言**格式化（不是浏览器语言）。 */
 export function fmtNumber(v: number | string): string {
   const n = typeof v === 'number' ? v : Number(v);
   return Number.isFinite(n) ? n.toLocaleString(localeCulture()) : String(v);
@@ -47,13 +40,6 @@ export function fmtStatValue(v: number | string | null | undefined): string {
   return v;
 }
 
-/* 大数缩写（终局敌方卡的 HP 这类 5–9 位数字）：按**站点语言**取数制。
-   cn `亿/万`、cht `億/萬`、jp `億/万`、kr `억/만` 走 4 位分组；其余语言没有这套数制（把汉字单位
-   搬过去没人读得出数制），回退 `fmtNumber` 的千分位原数。
-   分组口径（ADR 0055，用户裁决）：四舍五入取整 → 从低位起每 4 位一组 → 低组**补足 4 位**
-   （`8万0477`，不补零会与「8万零477」混淆）、末组为 0 的省略（`1亿0001万`）。
-   示例（cn）：`2723430.9 → 272万3430` / `80477.1 → 8万0477` / `963.4 → 963` /
-   `123456789 → 1亿2345万6789`。≥ 1e12（本站无此量级）超出这套数制，回退千分位原数。 */
 export function fmtBigNumber(v: number | null | undefined): string {
   if (v == null) return '';
   if (!Number.isFinite(v)) return String(v);
@@ -63,7 +49,6 @@ export function fmtBigNumber(v: number | null | undefined): string {
   if (n < 1e4) return (v < 0 ? '-' : '') + String(n);
   const groups: number[] = [];
   for (let rest = n; rest > 0; rest = Math.floor(rest / 1e4)) groups.push(rest % 1e4);
-  // 最低非零组：它以下的组全为 0（尾随零不占位）；其上的组一律补足 4 位，位置信息才不丢
   let lowest = 0;
   while (lowest < groups.length - 1 && groups[lowest] === 0) lowest++;
   const parts: string[] = [];
@@ -107,7 +92,6 @@ export function fmtDesc(
   return s;
 }
 
-/** 描述的 #N 占位符是否全部有实参：缺参时消费方整段省略，不落残缺占位与 `?` */
 export function refsResolved(
   desc: string | null | undefined,
   params: number[] | null | undefined,
@@ -160,10 +144,6 @@ export function maxLevelStat(stats: Record<string, CharStats> | null | undefined
   return maxK != null ? stats[maxK] : (Object.values(stats).pop() ?? null);
 }
 
-/**
- * 某突破档曲线在指定等级的取值：`AvatarPromotionConfig` 的每档曲线都是 `Base + Add × (等级 − 1)`（等级从 1 起算）。
- * 满级值 = 满级档曲线在 `MAX_CHAR_LEVEL` 处的取值（见 `maxLevelValue`）。
- */
 export function levelStatValue(base: number, add: number, level: number): number {
   return base + add * (level - 1);
 }
@@ -172,16 +152,6 @@ export function maxLevelValue(base: number, add: number): number {
   return levelStatValue(base, add, MAX_CHAR_LEVEL);
 }
 
-/**
- * 某等级**可突破到的最高档位**下标（= `stats` 的下标，0 = 未突破）。
- *
- * 判据（不是随手取的档）：
- * 1. 每档的 `Base/Add` 是**该档自己的曲线**，且相邻档的 `Base` 恰好递进 `8 × Add` —— 即**每次突破立刻加面板**
- *    （满突破 6 次累计 +48 级份）。故同一等级在不同突破状态下有不同面板，「某等级的面板」必须绑定一个突破口径。
- * 2. 取「上限 ≤ 该等级的档位数」= **每档上限一到就突破**的标准养成路径：Lv.20 显示的是突破 1 之后的值。
- *    不取「上限 ≥ 该等级的最小档」——那条曲线意味着「过了上限才跳档」，不是任何可达状态
- *    （Lv.70 未突破 = 下限值，而玩家要升到 Lv.71 必须先突破，届时面板已经跳过了）。
- */
 export function charStageForLevel(level: number, stageCount: number): number {
   let stage = 0;
   for (const cap of CHAR_STAGE_LEVEL_CAPS) if (level >= cap) stage++;
@@ -190,7 +160,7 @@ export function charStageForLevel(level: number, stageCount: number): number {
 
 export function deepClone<T>(o: T): T {
   if (typeof structuredClone === 'function') {
-    try { return structuredClone(o); } catch { /* Proxy 等不可克隆对象走 JSON 回退 */ }
+    try { return structuredClone(o); } catch { }
   }
   return JSON.parse(JSON.stringify(o)) as T;
 }

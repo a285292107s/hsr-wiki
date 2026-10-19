@@ -55,8 +55,8 @@ export function useSingleLayers() {
       ...buildOfficialConfig(layer),
       alpha: true,
       backgroundColor: LAYER_BG,
-      premultipliedAlpha: false, // 与生产基线一致：官网 atlas 无 pma 字段 = 直通 alpha
-      preserveDrawingBuffer: true, // 保留绘制缓冲：像素采样稳定（不受 rAF 暂停影响）
+      premultipliedAlpha: false,
+      preserveDrawingBuffer: true,
       viewport: { ...entry.viewport, padLeft: 0, padRight: 0, padTop: 0, padBottom: 0 },
       showControls: false,
       showLoading: false,
@@ -97,7 +97,7 @@ export function useSingleLayers() {
       if (!p) continue;
       try {
         if (paused) p.pause();
-        else p.resume ? p.resume() : p.play(); // 4.1 运行时无 resume（本页为 4.2 场景语境，存在性判断仅防契约漂移）
+        else p.resume ? p.resume() : p.play();
       } catch {}
     }
   }
@@ -148,7 +148,7 @@ export function useMergedPipeline() {
       viewport: ent.viewport,
       lib: g,
       preserveDrawingBuffer: true,
-      skipWhenHidden: false,       // 验收采样需持续出帧（后台标签 rAF 本身会被浏览器暂停）
+      skipWhenHidden: false,
       stageCss: 'width:100%;max-width:960px;height:auto;aspect-ratio:16/9;display:block;',
       onSettled({ items: settledItems, missing }) {
         missingKeys.value = missing;

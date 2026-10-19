@@ -12,18 +12,12 @@ import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 
-/** 技能条目（`MazeMonsterInfo.skills` 的元素形态，带上游的战斗阶段门控） */
 type MonsterSkill = NonNullable<MazeMonsterInfo['skills']>[number];
 const props = defineProps<{
   monster: MazeMonsterInfo;
-  /** 该敌方**实例**受「贪饕」污染时的污染等级（同场次 InvasionID，1–3）；未受污染不传。
-   *  判据是实例 ID 命中（与转换器 `_polluted_index` 同源）——污染名单按实例登记，
-   *  按模板匹配会把同模板的未污染实例一并标错。 */
   polluted?: number;
-  /** 该敌方的首领机制（由赛季级 `boss_guides` 按 `monster.boss_guide` 指针取，见 EndgameBossGuide） */
   guide?: MazeBossGuide;
 }>();
 
@@ -58,9 +52,6 @@ function resistRowHtml(m: MazeMonsterInfo): string {
   }).join('');
 }
 
-/** 效果抵抗行（`MonsterConfig.DebuffResist` × `MonsterStatusResistanceType`）：上游只有免疫图标、
- *  **没有任何文字名**，故每项只出「图标 + 百分比」——图标是纯白字形（透明底），故只作装饰
- *  （`alt=""` + `aria-hidden`），可读信息由行首标签「效果抵抗」与百分比承担，title 供鼠标查看。 */
 function debuffResistHtml(m: MazeMonsterInfo): string {
   return (m.debuff_resist || []).map((d) => {
     const src = cdnUri('statusimmune', `${d.icon}.webp`);
@@ -83,17 +74,10 @@ function monTitle(m: MazeMonsterInfo): string {
   return parts.join(' · ');
 }
 
-/** 技能的战斗阶段（`phase_list`，阶段号从 1 起）：只认正数——上游有 1 条记为 `[0]`，
- *  是外键哨兵不是阶段（会给它渲染出「阶段 0」）。空表 = 该技能无阶段门控。 */
 function skillPhases(list?: number[]): number[] {
   return (list || []).filter((p) => p > 0);
 }
 
-/** 技能按时段分组：**只在真的跨 ≥2 个阶段时**拆行——实测 2289/2632 条怪物的技能只吃阶段 1，
- *  给它们加一个「阶段 1」小标题是空话（同「1 目标 1 档不逐目标标星」的判据）。
- *  **每行 = 该阶段可用技能的全集**（`PhaseList` 的字面含义）⇒ 全阶段技能会在多行各出现一次，
- *  这是刻意的：玩家要的是「进入阶段 N 会面对哪些技能」，少列会低估该阶段的威胁。
- *  无阶段门控的技能（空表 / 哨兵 0）恒落在 `phase: null` 的尾组，不因分组而消失。 */
 const skillGroups = computed<{ phase: number | null; skills: MonsterSkill[] }[]>(() => {
   const skills = props.monster.skills || [];
   const phases = [...new Set(skills.flatMap((s) => skillPhases(s.phase_list)))]
@@ -107,12 +91,8 @@ const skillGroups = computed<{ phase: number | null; skills: MonsterSkill[] }[]>
   if (rest.length) groups.push({ phase: null, skills: rest });
   return groups;
 });
-/** 是否走分组形态（任一组带阶段号）；否则保持原来的平铺 chip 行 */
 const skillsGrouped = computed(() => skillGroups.value.some((g) => g.phase !== null));
 
-/** 立绘下的生命值行（ADR 0055 / 0058）：逐阶段值齐备时**一阶段一行**，否则退回单值一行。
- *  两键并存时逐阶段优先——`hp` 只是阶段 1 的同值冗余（`PhaseMaxHPRatio` 阶段间可不等）。
- *  标签走词典：单值「HP」，逐阶段「阶段 N」（与技能分组同键，读者不必学两套说法）。 */
 const hpRows = computed<{ label: string; value: number }[]>(() => {
   const phases = props.monster.phase_hp;
   if (phases?.length) {
@@ -126,10 +106,6 @@ const hpRows = computed<{ label: string; value: number }[]>(() => {
 
 <template>
   <article class="nk-egd-mon" :title="monTitle(monster)">
-    <!-- 立绘列（左）：monstermiddleicon 是 376×512 竖版全身像（透明底、Alpha 框紧贴上下边），
-         故按原比例整幅铺满列宽，不做圆形裁切——圆形会把竖长立绘裁掉上下大半。
-         甲级徽标骑在立绘列左上角；**关卡内 HP 紧贴立绘下方**（用户裁决，ADR 0055）；
-         污染徽标挂在立绘列内、HP 之后（用户裁决，不与右侧数据标签抢位）。 -->
     <div class="nk-egd-mon__art">
       <span v-if="monRank(monster.rank)" class="nk-egd-mon__rank" :class="`nk-egd-mon__rank--${monster.rank}`">{{ monRank(monster.rank) }}</span>
       <router-link
@@ -146,11 +122,6 @@ const hpRows = computed<{ label: string; value: number }[]>(() => {
           @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
         >
       </router-link>
-      <!-- 关卡内 HP：转换器已按该关卡的等级 / 难度组 / 精英组算好数值（ADR 0055），
-           前端只按站点语言选数制呈现；缺数据即整块不显示，不显示 0。
-           跨 ≥2 战斗阶段的敌方为**一阶段一行**（ADR 0058）——上游 `PhaseMaxHPRatio` 是
-           「该阶段最大生命 = 基准 × 比例」，阶段之间可以不同（实测 1 / 1.25 / 1），
-           只出首阶段的数会把后面阶段的血量说少；下标 +1 即阶段号（转换器已保证 1..n 连续）。 -->
       <span
         v-if="hpRows.length"
         class="nk-egd-mon__hp"
@@ -163,7 +134,6 @@ const hpRows = computed<{ label: string; value: number }[]>(() => {
       </span>
       <span v-if="polluted" class="nk-egd-pollchip" :data-level="polluted">{{ pollutionLabel({ level: polluted }) }}</span>
     </div>
-    <!-- 数据列（右）：名称 → 标签 → 弱点/抗性/效果抵抗 → 首领机制 → 技能 → 召唤物 -->
     <div class="nk-egd-mon__data">
       <div class="nk-egd-mon__meta">
         <span class="nk-egd-mon__name">{{ monster.name }}</span>
@@ -173,8 +143,6 @@ const hpRows = computed<{ label: string; value: number }[]>(() => {
           <span v-if="monster.speed" class="nk-egd-mon__tag">{{ t('card.value.speed', { v: monster.speed }) }}</span>
         </span>
       </div>
-      <!-- 弱点/抗性行：有数据展示图标，无数据显式占位“无”（源数据空 = 游戏内无弱点/全 0% 抗性，
-           如蕉研组本体等召唤型机制怪；避免误读为数据缺失） -->
       <div v-if="monster.name" class="nk-egd-mon__rows">
         <div class="nk-egd-mon__row">
           <span class="nk-egd-mon__label">{{ t('catalog.filter.weak') }}</span>
@@ -197,8 +165,6 @@ const hpRows = computed<{ label: string; value: number }[]>(() => {
         class="nk-egd-mon__skills"
         :class="{ 'nk-egd-mon__skills--grouped': skillsGrouped }"
       >
-        <!-- 跨 ≥2 个阶段时逐阶段拆行（阶段号文案取词典 `mob.stage`，与图鉴页阶段机制同键）；
-             其余情况只有一个无名组，`display: contents` 让它对布局透明 ⇒ 与原来的平铺完全一致 -->
         <div v-for="g in skillGroups" :key="g.phase ?? 'rest'" class="nk-egd-mon__skillgroup">
           <span v-if="g.phase !== null" class="nk-egd-mon__skillphase">{{ t('mob.stage', { n: g.phase }) }}</span>
           <span

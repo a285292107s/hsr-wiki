@@ -1,7 +1,3 @@
-"""converter 核心工具函数单元测试。
-
-"""
-
 import sys
 from pathlib import Path
 
@@ -15,7 +11,6 @@ class TestUnwrapValue:
         assert unwrap_value({"Value": 42}) == 42
 
     def test_nested_value(self):
-        """只剥离一层，内层 {"Value": 7} 作为纯值返回。"""
         assert unwrap_value({"Value": {"Value": 7}}) == {"Value": 7}
 
     def test_float_value(self):
@@ -25,7 +20,6 @@ class TestUnwrapValue:
         assert unwrap_value({"Value": "hello"}) == "hello"
 
     def test_dict_with_multiple_keys(self):
-        """多键字典不剥离，递归处理值。"""
         obj = {"A": {"Value": 1}, "B": {"Value": 2}}
         assert unwrap_value(obj) == {"A": 1, "B": 2}
 
@@ -85,8 +79,6 @@ class TestSortById:
         assert sort_by_id([]) == []
 
 class TestResolveText:
-    """resolve_text 测试：mock _text_map 避免加载 50MB TextMap。"""
-
     @pytest.fixture(autouse=True)
     def setup_textmap(self, monkeypatch):
         import textmap
@@ -120,8 +112,6 @@ class TestResolveText:
         assert resolve_text({"Hash": 999}, clean=False) == "<color=#FFF>原文</color>"
 
 class TestResolveTextEn:
-    """resolve_text_en：英文 TextMap 的 Hash 查表（只接受 Hash 对象）。"""
-
     @pytest.fixture(autouse=True)
     def setup_textmap_en(self, monkeypatch):
         import textmap
@@ -135,7 +125,6 @@ class TestResolveTextEn:
         assert resolve_text_en({"Hash": 6186714091647966180}) == "March 7th"
 
     def test_nickname_placeholder_returns_empty(self):
-        """开拓者形态名由玩家命名，占位符不得当译名输出。"""
         from textmap import resolve_text_en
         assert resolve_text_en({"Hash": 8001}) == ""
 
@@ -152,8 +141,6 @@ class TestResolveTextEn:
         assert resolve_text_en(None) == ""
 
 class TestMapIconPathOfficial:
-    """OFFICIAL_ICON_RULES 映射：SpriteOutput 前缀 → StarRailTextures 仓库相对路径。"""
-
     @pytest.fixture(autouse=True)
     def toggle_official_mode(self):
         set_official_paths(True)
@@ -189,7 +176,6 @@ class TestMapIconPathOfficial:
         assert map_icon_path(src) == "icondamagetype/IconDamageTypeFire.png"
 
     def test_element_ice_lowercase(self):
-        """官方元素名首字母大写，尾部小写规范化。"""
         src = "SpriteOutput/IconDamageType/IconDamageTypeice.png"
         assert map_icon_path(src) == "icondamagetype/IconDamageTypeIce.png"
 
@@ -202,7 +188,6 @@ class TestMapIconPathOfficial:
         assert map_icon_path(src) == "professioniconmiddle/IconProfessionJoyMiddle.png"
 
     def test_pathicon_normal(self):
-        """无拼写修正的命途（Warrior/Rogue 等）直接保留。"""
         src = "SpriteOutput/ProfessionIconMiddle/IconProfessionWarriorMiddle.png"
         assert map_icon_path(src) == "professioniconmiddle/IconProfessionWarriorMiddle.png"
 
@@ -211,12 +196,10 @@ class TestMapIconPathOfficial:
         assert map_icon_path(src) == "skillicons/avatar/1001/SkillIcon_1001_Ultra.png"
 
     def test_skillicons_rank_eidolon(self):
-        """星魂（Rank）图标同目录 SkillIcon_{id}_RankN.png → skillicons/avatar/{id}/ 下。"""
         src = "SpriteOutput/SkillIcons/Avatar/1001/SkillIcon_1001_Rank6.png"
         assert map_icon_path(src) == "skillicons/avatar/1001/SkillIcon_1001_Rank6.png"
 
     def test_skillicons_no_id_fallback_legacy(self):
-        """不在 Avatar/ 子目录下的 SkillIcons 路径：OFFICIAL 规则未注册 → 走 ICON_PATH_MAP 回退。"""
         src = "SpriteOutput/SkillIcons/skill_common.png"
         assert map_icon_path(src) == "icon/skill/skill_common.png"
 
@@ -229,11 +212,9 @@ class TestMapIconPathOfficial:
         assert map_icon_path(src) == "monsterfigure/Manticore.png"
 
     def test_unregistered_prefix_fallback_legacy(self):
-        """SpriteOutput/AvatarMiniIcon 不在 OFFICIAL_ICON_RULES 中 → 走 ICON_PATH_MAP。"""
         src = "SpriteOutput/AvatarMiniIcon/9001.png"
         assert map_icon_path(src) == "icon/character_mini/9001.png"
 
     def test_element_color_fallback_legacy(self):
-        """IconNatureColor 在旧 ICON_PATH_MAP 中但 OFFICIAL 未注册 → 回退。"""
         src = "SpriteOutput/UI/Nature/IconNatureColor/Fire.png"
         assert map_icon_path(src) == "icon/element_color/Fire.png"

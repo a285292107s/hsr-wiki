@@ -5,7 +5,6 @@ import {
 } from '../../services/api';
 import { createDetailCore } from './detail-core';
 import { pageTitle } from '../seo';
-import { translate } from '../i18n';
 import type {
   LocalRelicEntry, RelicMainAffixList, RelicSubAffixList, RelicStoriesMap,
 } from '../../services/types';
@@ -15,18 +14,6 @@ export const useRelicStore = defineStore('relic', () => {
   const mainAffixes = ref<RelicMainAffixList>([]);
   const subAffixes = ref<RelicSubAffixList>([]);
   const stories = ref<RelicStoriesMap>({});
-
-  type RelicTab = 'effect' | 'main' | 'sub' | 'story';
-  const TABS: ReadonlyArray<{ key: RelicTab; label: string }> = [
-    { key: 'effect', label: translate('relic.sec.effect') },
-    { key: 'main', label: translate('relic.sec.main') },
-    { key: 'sub', label: translate('relic.sec.sub') },
-    { key: 'story', label: translate('relic.sec.story') },
-  ];
-  const activeTab = ref<RelicTab>('effect');
-  function setTab(key: string): void {
-    if (TABS.some((t) => t.key === key)) activeTab.value = key as RelicTab;
-  }
 
   async function load(id: string): Promise<void> {
     await core.load(id, async ({ isCurrent }) => {
@@ -47,8 +34,7 @@ export const useRelicStore = defineStore('relic', () => {
 
   function reset(): void {
     core.reset();
-    activeTab.value = 'effect';
   }
 
-  return { relicId: core.id, data: core.data, mainAffixes, subAffixes, stories, loading: core.loading, error: core.error, load, reset, TABS, activeTab, setTab };
+  return { relicId: core.id, data: core.data, mainAffixes, subAffixes, stories, loading: core.loading, error: core.error, load, reset };
 });

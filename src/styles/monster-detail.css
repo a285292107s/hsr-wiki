@@ -1,8 +1,4 @@
-
 .nk-mob-page {
-  /* 本页走文档流滚动（不用 `.nk-page--detail` 的绝对定位 + `left: var(--nk-content-offset)`），
-     故自己避让侧栏：≥768 侧栏占 88px、≥1024 占 148px；此前没有任何避让 ⇒ 768~1279 视口下内容被
-     侧栏压住（1024 实测 hero x=12、区块标题与 HP 值被裁）。骨架屏与错误态都在本容器内，一并跟随。 */
   padding-left: var(--nk-content-offset);
 }
 
@@ -43,12 +39,6 @@
 .nk-mob-hero__figure img {
   position: relative;
   z-index: 1;
-  /* `width: 88%` + `aspect-ratio: 1` 让**未解码**的立绘也有确定的方框：只用 `max-width: 88%` 时
-     图片未到达前不产生盒子（高 0），figure 只有 `min-height: 300px` 撑着，图片一到就长到 357px
-     ⇒ 整个 hero 由 301 跳到 358、下方 `.nk-panels` 被推下 57px（实测 CLS 0.0288，全 632 个敌方详情页）。
-     取值与 `max-width` 同（原就是 88% 宽），故渲染尺寸不变；立绘实际是 1024² 的图标（`figure` 字段
-     全量为空、走 `monsterIconUrl` 回退），远大于渲染尺寸 ⇒ 不存在被拉大糊掉的问题。
-     手机档 figure 有 `max-height: 240px` 上限、本就不跳，改动对它只是让盒子高也确定。 */
   width: 88%;
   aspect-ratio: 1;
   max-height: 100%;
@@ -131,17 +121,12 @@
   white-space: nowrap;
 }
 
-/* ─── Hero 信息块（弱点与抗性）：信息列内名称之下的定长信息带，发丝线把它与身份行分开。
-     它上收进 hero 的判据是**条数有限、占位固定**（弱点 / 抗性各 ≤7 条 + 罕见的额外阶段），
-     hero 高度不受数据长度摆布；图鉴正文长度不可控（目录里 0~356 字），留在面板区。
-     窄档标签会换行，故 hero 高度仍非逐档恒定——骨架屏同源，见 `.nk-mob-skeleton__hero`。 */
 .nk-mob-hero__sec {
   margin-top: 22px;
   padding-top: 14px;
   border-top: 1px solid var(--line-1);
 }
 
-/* 章标在 hero 内降一档：h1 主字必须是本块唯一的主角（面板区章标仍是 0.98rem） */
 .nk-mob-hero__sec .nk-mob-sec__head {
   gap: 10px;
   margin-bottom: 2px;
@@ -157,7 +142,6 @@
   font-size: 0.54rem;
 }
 
-/* 块内行距收紧：面板区一行 12px 内距是为「长文档的呼吸」定的，hero 里要与身份行贴成一个整体 */
 .nk-mob-hero__sec .nk-mob-resist__row {
   padding: 8px 0;
 }
@@ -209,8 +193,6 @@
   line-height: 2;
   color: var(--text2);
   max-width: var(--nk-prose-max);
-  /* 正文由源文本的 `\n` 切成 `<br>` 段：段内是长中文行，末行只剩「人。」这类孤字很扎眼。
-     `pretty` 只在支持的引擎上把末行摊平，不支持即按原来断行，无副作用。 */
   text-wrap: pretty;
 }
 
@@ -220,9 +202,6 @@
   line-height: 1.6;
 }
 
-/* ─── 同族变体条：名称+卡面相同、数值档不同的兄弟条目 ───
-   差异用两种提示并列：`差分 …` 文本（主判据，不依赖颜色）+ 该值格的强调色（次判据）。
-   只靠颜色会被色觉障碍读者漏掉，故文本必须始终在场。 */
 .nk-mob-var__count {
   flex: none;
   font-family: var(--font-hud);
@@ -358,7 +337,6 @@
   color: var(--accent);
 }
 
-/* ─── 额外阶段（源表 MonsterAtlasExtraPhase）：同一族的其他阶段另有弱点/抗性 ─── */
 .nk-mob-phases {
   margin-top: 18px;
   padding-top: 6px;
@@ -381,7 +359,6 @@
   margin-bottom: 4px;
 }
 
-/* 形态标题：官方给了名字就用名字（主字档），只标「其他形态」的用次级色——不给通用标签主字权重 */
 .nk-mob-phase__label {
   font-size: 0.74rem;
   font-weight: 700;
@@ -395,7 +372,6 @@
   color: var(--text-bright);
 }
 
-/* ─── 掉落：按均衡等级分档 ─── */
 .nk-mob-drop__lead {
   margin: 0 0 10px;
   font-size: 0.72rem;
@@ -461,7 +437,6 @@
   object-fit: contain;
 }
 
-/* ─── 出没关卡：计数 + 关卡名样本 + 折叠口径 ─── */
 .nk-mob-appear__count {
   margin: 0 0 10px;
   font-size: 0.84rem;
@@ -485,7 +460,6 @@
   color: var(--text3);
 }
 
-/* 统计口径折叠块：默认收起，避免把维护者口径当正文压在玩家脸上（`details` 原生可点，移动端同样可用） */
 .nk-mob-appear__how {
   margin-top: 8px;
   font-size: 0.68rem;
@@ -494,7 +468,6 @@
 }
 
 .nk-mob-appear__how > summary {
-  /* 不用 inline-flex：那会吃掉 summary 的 list-item 显示，连带丢掉默认的展开三角（可点性提示） */
   width: fit-content;
   cursor: pointer;
   font-family: var(--font-mono);
@@ -515,7 +488,6 @@
   margin: 6px 0 0;
 }
 
-/* 活动出处备注：与「出没」同区块收尾，左发丝线区分"这是注记不是数据行" */
 .nk-mob-event {
   margin-top: 14px;
   padding: 10px 0 2px 10px;
@@ -559,13 +531,11 @@
   color: var(--text2);
 }
 
-/* 活动名是上下文（弱），关卡名是值（主）——同一胶囊内两级字阶 */
 .nk-mob-appear__sample-from {
   font-size: 0.66rem;
   color: var(--text3);
 }
 
-/* 关卡实战面板行（ADR 0050）：等级与四维按该关语境合成；比关卡名行低一档、数值比标签亮一档 */
 .nk-mob-appear__sample-panel {
   font-size: 0.66rem;
   line-height: 1.6;
@@ -577,8 +547,6 @@
   color: var(--text3);
 }
 
-/* 图鉴族互链（官方 TemplateGroupID）：与「同族变体」并排的第二个维度，语言更轻——
-   只在同族变体条之后一行呈现，不另起区块头。 */
 .nk-mob-atlas {
   display: flex;
   align-items: baseline;
@@ -618,7 +586,6 @@
   text-decoration: underline;
 }
 
-/* ─── 状态词条（MonsterStatusConfig 安全子集）─── */
 .nk-mob-status__lead {
   margin: 0 0 14px;
   font-size: 0.72rem;
@@ -644,8 +611,6 @@
   gap: 8px;
 }
 
-/* 图标位（占位）：状态图标资源双侧 404，先把格子占住——图标入库后这里换成 <img>，尺寸不变。
-   视觉沿用终局增益图标缺图时的同款中性字形（不新造符号）。 */
 .nk-mob-status__icon {
   flex: none;
   align-self: center;
@@ -765,7 +730,6 @@
   grid-column: 1 / -1;
 }
 
-/* 战斗数值口径注记：数值的含义必须与数字一起出现（ADR 0040） */
 .nk-mob-stat-note {
   margin: 14px 0 0;
   font-size: 0.68rem;
@@ -773,7 +737,6 @@
   color: var(--text3);
 }
 
-/* 等级滑条：读数标签 + range 原语在此页独立成段（光锥页原语不随路由到达，不可跨页借用） */
 .nk-mob-level { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; min-width: 0; }
 .nk-mob-level__label {
   font-family: var(--font-hud); font-size: 0.72rem; font-weight: 700;
@@ -781,7 +744,6 @@
 }
 .nk-mob-level input[type=range] {
   --fill: 0%;
-  /* 同 skill-card：不裸重置 outline，焦点环交给全局规则 */
   flex: 1; width: auto; height: 24px; -webkit-appearance: none; appearance: none;
   background: transparent; cursor: pointer; opacity: 0.92;
 }
@@ -883,8 +845,6 @@
   color: var(--text2);
 }
 
-/* 附带效果（技能另外施加的机制）：与技能描述同层但语言更轻——左发丝线 + 次级色，
-   避免读成又一个技能描述段。 */
 .nk-mob-skill__fx {
   display: flex;
   flex-wrap: wrap;
@@ -922,9 +882,6 @@
   color: var(--text3);
 }
 
-/* 技能参数（ParamList 原值，无语义标签，描述引用与否都展示——重复供对照，缺行更困惑）：
-   与附带效果同级——左发丝线 + 次级字阶。值串以「 / 」分隔（防 1/1 连读成 11），
-   数值走 fmtStatValue（≥4 位加千分位）。 */
 .nk-mob-skill__params {
   display: flex;
   flex-wrap: wrap;
@@ -950,9 +907,6 @@
   color: var(--text2);
 }
 
-/* ─── 首领阶段机制（MonsterGuideConfig × MonsterGuidePhase，官方文案）───
-   与「技能」同构：一阶段一段、段间发丝线。三段文本各有身份——机制说明（正文）、
-   官方应对策略（左发丝线，数据自带「应对策略：」前缀故不加标签）、小节问答（问句 + 答句）。 */
 .nk-mob-guides {
   display: flex;
   flex-direction: column;
@@ -974,8 +928,6 @@
   gap: 10px;
 }
 
-/* 阶段编号：官方 `PhaseList` 顺序（实测与前缀序号 100% 一致）——名字不带编号的那批条目
-   （如「末日歧途的盗火者」）靠它才看得出是第几阶段，故用 HUD 数字档而不是次级正文色 */
 .nk-mob-guide__no {
   flex: none;
   font-family: var(--font-hud);
@@ -1045,11 +997,6 @@
 }
 
 .nk-mob-skeleton__hero {
-  /* 与真实 hero 同档：真实高度 = 图列 + 信息列内容（编号行 / 名称 / 弱点与抗性两行）。
-     信息块此后**定长**（弱点、抗性各 ≤7 条；带「其他形态」块的 4 个条目会更高，属离群值不追）。
-     逐档实测中位：≥1150 = 358（图列撑满 400×88% + 内距，信息列更矮）；1024~1149 = 314~358，随
-     版心（视口 − 148）线性放大 ⇒ 取中位 336；768~1023 = 301（图列只剩 `min-height` 300，立绘缩到
-     235 后由图列下限接管）；390px 手机档 = 492（图列 240 + 信息列，抗性 4 条在此档换第二行）。 */
   height: 358px;
   background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-750) 80%, transparent) 50%, transparent 70%);
   background-color: color-mix(in srgb, var(--blk-750) 45%, transparent);
@@ -1081,8 +1028,6 @@
 }
 
 @media (max-width: 767px) {
-  /* 本页走文档流滚动而非 .nk-page--detail，须自己避让 <768 档固定底栏，否则页尾技能描述被永久遮住。
-     避让值取令牌而非字面量：栏高是单一事实源（tokens.css `--nk-nav-bar-h`），写死会在栏高变动时静默失效。 */
   .nk-mob-page { padding-bottom: calc(var(--nk-nav-bar-h) + env(safe-area-inset-bottom, 0px)); }
   .nk-mob-hero {
     flex-direction: column;
@@ -1114,7 +1059,6 @@
     grid-column: 1 / -1;
   }
 
-  /* 窄档：数值格整体换行到第二行，序号与判据标签留在首行 */
   .nk-mob-var__row {
     padding: 10px 12px;
   }
@@ -1143,16 +1087,12 @@
   }
 }
 
-/* 平板档（768~1023）：hero 拿不满 1000px 版心，图列宽度缩到 40% × 视口后立绘比 `min-height` 还矮
-   ⇒ hero 由图列下限 300 接管（实测 301），比桌面档矮一档。不拆这条的话加载完成整块下跳 57px。 */
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-mob-skeleton__hero {
     height: 301px;
   }
 }
 
-/* 窄桌面档（1024~1149）：侧栏避让 148px 后版心仍不足 1000px，hero 随视口线性放大（1024 实测 314、
-   1100 实测 341、1150 起吃满 1000px 版心 = 358）⇒ 取中位 336，最大偏差 ±22px。 */
 @media (min-width: 1024px) and (max-width: 1149px) {
   .nk-mob-skeleton__hero {
     height: 336px;

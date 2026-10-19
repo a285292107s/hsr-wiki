@@ -1,15 +1,3 @@
-"""monsters 目录转换器契约测试（合成数据，不依赖真实源数据）。
-
-锁两件事：
-1. 身份字段（id/name/icon/type）与旧输出一致；
-2. 差异字段（weak/camp）**直取共享聚合表**，聚合表缺该模板时给空值而非崩（模板与
-   MonsterConfig 记录不是一一对应，缺位是真实存在的边缘情形）。
-
-判据来源：632 个模板里 392 条落在同名同图的簇内，卡片只展示名称+分类时 400/632 张卡与
-另一张完全无法区分 —— weak/camp 是卡面唯一的可辨差异。同族判据另在
-`src/lib/monster-family.ts`（名称 + 卡面图标 stem）与前端单测里锁，本文件不重复。
-"""
-
 import sys
 from pathlib import Path
 
@@ -25,7 +13,6 @@ def fake_sources(monkeypatch):
         {"MonsterTemplateID": 1002011, "MonsterName": {"Hash": 1}, "IconPath": "a/Icon_1.png", "Rank": "MinionLv2"},
         {"MonsterTemplateID": 1002012, "MonsterName": {"Hash": 2}, "IconPath": "a/Icon_1.png", "Rank": "MinionLv2"},
         {"MonsterTemplateID": 5001010, "MonsterName": {"Hash": 3}, "IconPath": "a/Icon_9.png", "Rank": "BigBoss"},
-        # 无中文名 / 无图标 → 整条跳过
         {"MonsterTemplateID": 9001010, "MonsterName": {}, "IconPath": "a/Icon_9.png", "Rank": "Elite"},
         {"MonsterTemplateID": 9001020, "MonsterName": {"Hash": 4}, "IconPath": "", "Rank": "Elite"},
     ])
@@ -33,7 +20,6 @@ def fake_sources(monkeypatch):
         1: "冰锋", 2: "冰锋", 3: "首领", 4: "无图",
     }.get((h or {}).get("Hash"), ""))
     monkeypatch.setattr(mo, "map_icon_path", lambda p: p or "")
-    # 共享聚合表只登记前两只；第三只（首领）**故意缺登记** → 差异字段必须落空值
     monkeypatch.setattr(mo, "load_monsters", lambda: {
         1002011: {"weak": ["Fire", "Thunder"], "camp": "雅利洛-Ⅵ", "figure": "Monster_1002011"},
         1002012: {"weak": ["Fire", "Quantum"], "camp": "雅利洛-Ⅵ", "figure": "Monster_1002012"},
@@ -60,8 +46,6 @@ class TestConvert:
         assert (boss["weak"], boss["camp"]) == ([], ""), "聚合表缺登记 → 空值，不得崩、不得造值"
 
     def test_no_derived_identity_fields(self, fake_sources):
-        """同族判据的输入必须只剩**已有身份字段**：不落 figure（立绘是 per-变体的，
-        按立绘分组会把卡面相同的 4 张冰锋拆成 2+2）。"""
         mo.convert()
         a = fake_sources["monsters.json"][0]
         assert "figure" not in a

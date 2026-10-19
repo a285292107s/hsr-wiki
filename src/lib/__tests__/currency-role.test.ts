@@ -1,8 +1,4 @@
 // @vitest-environment node
-/**
- * lib/currency-role.ts 纯函数单元测试
- * 合成 fixture（结构对齐 CurrencyRoleDetail 类型），不依赖真实数据。
- */
 import { describe, it, expect, beforeAll } from 'vitest';
 import {
   propLabel, propValue, mergeSkillGroups, buildGrowthMatrix, matrixUp,
@@ -17,14 +13,10 @@ import type {
 } from '../../services/types';
 import cnMessages from '../../lib/i18n/messages/cn.json';
 
-/* 词典翻译由 app 层注入（lib 不引应用层）：测试里用 cn 词典当翻译器，
-   于是断言既覆盖「属性名兜底走词典」也钉住词典键确实存在。 */
 beforeAll(() => {
   const dict = cnMessages as Record<string, string>;
   setLabelTranslator((key: string) => dict[key] ?? key);
 });
-
-/* ─── fixture ─── */
 
 const skill = (over: Partial<CurrencyRoleSkill> = {}): CurrencyRoleSkill => ({
   id: 1001,
@@ -88,8 +80,6 @@ const rank = (over: Partial<CurrencyRoleRank> = {}): CurrencyRoleRank => ({
   ...over,
 });
 
-/* ─── 标签映射 ─── */
-
 describe('propLabel / propValue', () => {
   it('maps known property keys to official labels', () => {
     expect(propLabel({ property_type: 'ExtraSpeedAddedRatio1' })).toBe('速度增幅');
@@ -102,11 +92,8 @@ describe('propLabel / propValue', () => {
   });
 
   it('prefers converter-provided prop_name (official TextMap name)', () => {
-    // 官方名优先于映射表；映射冲突时以官方为准（如 ExtraInitSP = 初始能量）
     expect(propLabel({ property_type: 'ExtraInitSP', prop_name: '初始能量' })).toBe('初始能量');
-    // 无 prop_name 时回退映射表
     expect(propLabel({ property_type: 'ExtraInitSP' })).toBe('初始能量');
-    // 空 prop_name 视为缺失
     expect(propLabel({ property_type: 'ExtraSpeedAddedRatio1', prop_name: '' })).toBe('速度增幅');
   });
 
@@ -116,8 +103,6 @@ describe('propLabel / propValue', () => {
     expect(propValue(100)).toBe('100');
   });
 });
-
-/* ─── 跨星级技能合并 ─── */
 
 describe('mergeSkillGroups', () => {
   it('returns [] for empty input', () => {
@@ -198,8 +183,6 @@ describe('mergeSkillGroups', () => {
   });
 });
 
-/* ─── 成长矩阵 ─── */
-
 describe('buildGrowthMatrix', () => {
   it('returns [] for empty input', () => {
     expect(buildGrowthMatrix(null)).toEqual([]);
@@ -224,7 +207,6 @@ describe('buildGrowthMatrix', () => {
       }),
     };
     const matrix = buildGrowthMatrix(stars);
-    // 强度（含 power 行 + 无强度属性 → 仅 power 行）→ 生存 → 速度
     expect(matrix.map((g) => g.group)).toEqual(['强度', '生存', '速度']);
     const power = matrix[0];
     expect(power.rows[0]).toMatchObject({ key: '__front_power', label: '基础前台强度' });
@@ -251,7 +233,6 @@ describe('buildGrowthMatrix', () => {
     expect(mech.rows.map((r) => r.key)).toEqual(['BackEnergyBar', 'BackInitialEnergyBar', 'BackMaxSP', 'BackInitialSP']);
     expect(mech.rows[0].label).toBe('后台充能条');
     expect(mech.rows[0].values.map((v) => v.text)).toEqual(['3', '4']);
-    // 全 null 字段不出行（预留字段 back_speed_* 当前无数据）
     const none = buildGrowthMatrix({ '1': star() });
     expect(none.some((g) => g.rows.some((r) => r.key === 'BackEnergyBar'))).toBe(false);
   });
@@ -288,17 +269,12 @@ describe('buildGrowthMatrix', () => {
     };
     const matrix = buildGrowthMatrix(stars, propIcons);
     const byKey = (g: string, k: string) => matrix.find((x) => x.group === g)!.rows.find((r) => r.key === k)!;
-    // power 行：propIcons 查表补图标
     expect(byKey('强度', '__front_power').icon).toBe(propIcons.ExtraFrontPowerBase);
     expect(byKey('强度', '__back_power').icon).toBe(propIcons.ExtraBackPowerBase);
-    // prop mod 自带 icon 优先（不查表）
     expect(byKey('生存', 'ExtraHPAddedRatio1').icon).toBe('SpriteOutput/BuffIcon/Inlevel/IconBuffHPBoost.png');
-    // 独立字段：propIcons 查表补图标
     expect(byKey('机制', 'ExtraLuckDamage').icon).toBe(propIcons.ExtraLuckDamage);
     expect(byKey('生存', 'ExtraHealBase').icon).toBe(propIcons.ExtraHealBase);
-    // 查表缺失：无 icon 字段
     expect(byKey('速度', 'SpeedAddedRatio').icon).toBeUndefined();
-    // 不传 propIcons：power 行无图标
     const noIcons = buildGrowthMatrix(stars);
     expect(noIcons[0].rows[0].icon).toBeUndefined();
   });
@@ -313,8 +289,6 @@ describe('matrixUp', () => {
   });
 });
 
-/* ─── 推荐装备 ─── */
-
 describe('resolveRecommend / buildRecommendRows', () => {
   const rec = (): CurrencyRoleRecommend => ({
     front: { first: [{ id: 1, name: '装A', icon: 'a.png' }], second: [] },
@@ -327,7 +301,6 @@ describe('resolveRecommend / buildRecommendRows', () => {
       '2': star({ recommend: null }),
     };
     expect(resolveRecommend(stars, stars['1'])).toEqual(rec());
-    // 选中星级无 recommend → 回退到首个非空星级（含选中星级本身之前的键）
     expect(resolveRecommend(stars, stars['2'])).toEqual(rec());
   });
 
@@ -335,8 +308,6 @@ describe('resolveRecommend / buildRecommendRows', () => {
     const rows = buildRecommendRows(rec());
     expect(rows).toHaveLength(2);
     expect(rows[0].pos).toBe('前台');
-    /* 优先级是**稳定枚举**（不是文案）：视图按它选样式、文案另取词典。
-       曾因返回中文文案而让视图的 `=== '首选'` 在多语言下恒假（首/次选样式失效） ⇒ 这里钉住枚举。 */
     expect(rows[0].groups.map((g) => g.priority)).toEqual(['first']);
     expect(rows[1].groups.map((g) => g.priority)).toEqual(['second']);
     expect(recommendPriorityKey('first')).toBe('cwRole.priorityFirst');
@@ -347,8 +318,6 @@ describe('resolveRecommend / buildRecommendRows', () => {
     expect(buildRecommendRows(null)).toEqual([]);
   });
 });
-
-/* ─── 特质分类 ─── */
 
 describe('catOfTrait / groupTraits', () => {
   const trait = (id: number): CurrencyRoleTrait => ({
@@ -372,8 +341,6 @@ describe('catOfTrait / groupTraits', () => {
     expect(groupTraits(null)).toEqual([]);
   });
 });
-
-/* ─── 随从 #N 引用解析 ─── */
 
 describe('resolveServantAttr / buildServantAttrs', () => {
   const charData: CharacterData = {
@@ -416,8 +383,6 @@ describe('resolveServantAttr / buildServantAttrs', () => {
   });
 });
 
-/* ─── 星魂辅助 ─── */
-
 describe('buildSkillNameMap / rankMech / rankDesc / stanceText', () => {
   it('maps skill ids across stars and groups', () => {
     const map = buildSkillNameMap({
@@ -438,7 +403,6 @@ describe('buildSkillNameMap / rankMech / rankDesc / stanceText', () => {
   it('renders rank desc with params or renders ? for missing params', () => {
     const withParams = rank({ desc: '造成 #1[i] 伤害', param_list: [150] });
     expect(rankDesc(withParams)).toContain('150');
-    // 无参数时 #1[i] 占位符渲染为 ?（原视图行为：fmtDesc 无参数回退）
     const noParams = rank({ desc: '效果 #1[i]', param_list: [] });
     expect(rankDesc(noParams)).toContain('?');
   });
@@ -446,7 +410,6 @@ describe('buildSkillNameMap / rankMech / rankDesc / stanceText', () => {
   it('formats stance list text', () => {
     expect(stanceText(null)).toBe('');
     expect(stanceText([0, 0])).toBe('');
-    // 原视图行为：非全零列表 join 全部值（含 0 位）
     expect(stanceText([1, 0, 2])).toBe('1 / 0 / 2');
   });
 });

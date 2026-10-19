@@ -1,9 +1,4 @@
 // @vitest-environment node
-/**
- * pack-path.ts（语言包分组规则）单元测试。
- * 规则必须与转换器 `tools/converter/textpack.py: group_of` 一致——算错分组会去取不存在的包，
- * 端到端一致性另由「语言包覆盖」用例对着真实产物验证。
- */
 import { describe, it, expect } from 'vitest';
 import { packGroupOf } from '../i18n/pack-path';
 

@@ -5,7 +5,6 @@ import type { LevelTab } from './levels';
 
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 const props = defineProps<{
   tabs: LevelTab[];
