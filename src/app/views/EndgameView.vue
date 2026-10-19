@@ -19,7 +19,7 @@ import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
 import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
 import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
-/* endgame-detail 拆分块：导入顺序即级联顺序（断点覆盖块在基础块后、排版收口块必须最后），不得乱序 */
+import EndgameSeasonRewards from '../endgame/EndgameSeasonRewards.vue';
 import '../../styles/endgame-frame.css';
 import '../../styles/endgame-panels.css';
 import '../../styles/endgame-monsters.css';
@@ -29,7 +29,6 @@ import '../../styles/endgame-pollution.css';
 import '../../styles/endgame-type-scale.css';
 import { translate } from '../i18n';
 
-/** 模板与脚本统一走词典 */
 const t = translate;
 
 const route = useRoute();
@@ -50,7 +49,6 @@ const data = ref<MazeListEntry | null>(null);
 const listDb = ref<MazeListDb | null>(null);
 const seasonIndex = ref(-1);
 const seasonKeys = ref<string[]>([]);
-/** 玩法说明（endgame_guide.json）：体系名 / 条数 / 选法。缺省不阻塞页面——体系名回退站点工作名「赛季增益」 */
 const guide = ref<EndgameGuideDb | null>(null);
 
 const showSkeleton = useDelayedSkeleton(() => phase.value === 'loading');
@@ -71,12 +69,7 @@ async function load(mode: string, id: string): Promise<void> {
     listDb.value = db;
     const entry = db[id];
     const modeInfo = ENDGAME_MODES.find((m) => m.key === mode);
-    /* 错误文案里的 {mode} 必须是**本地化玩法名**：此前传裸 key（`boss`），13 语言的句子里
-       都会嵌一个英文路由段（「未找到赛季 boss/9999」）。 */
     const modeName = modeInfo ? t(modeInfo.labelKey) : mode;
-    /* 判据分层（P1-11d）：「条目不存在」才是错误态；「条目存在但名称为空」是**官方尚未公布**的
-       赛季（实测 /endgame/boss/3022：4 层 8 敌齐全，只有名字为空）——此前两者同落错误态，
-       等于把「已随版本落地但未公布」当「不存在」。 */
     if (!entry) {
       phase.value = 'error';
       error.value = t('egd.seasonNotFound', { mode: modeName, id });
@@ -84,16 +77,10 @@ async function load(mode: string, id: string): Promise<void> {
     }
     data.value = entry;
     seasonIndex.value = keys.indexOf(id);
-    /* 玩法名进标题：快照侧同格式（gen-ai-endpoints 的 endgame-detail 用 `${entry} - ${mode} - …`），
-       少这一段会让执行 JS 的爬虫读到的 title 与无 JS 爬虫读到的快照 title 分叉。
-       未公布赛季没有快照（生成器对 `!clean(entry.zh)` 的期不造 URL、不入 sitemap），
-       标题用 `No.<id>` 形态，与 Hero 里的「No.{id}」一致。 */
     document.title = pageTitle(`${entry.zh || `No.${id}`} - ${modeName}`);
-    // 玩法说明同属「按需、不阻塞」：拿不到就回退站点工作名，不因此判页面失败
     loadLocalEndgameGuide()
       .then((g) => { guide.value = g; })
       .catch(() => { guide.value = null; });
-    // 后台标签页 rAF 会被浏览器暂停导致永久骨架屏：visibility hidden 时用 setTimeout 兜底推进
     const settleReady = (): void => {
       phase.value = 'ready';
       pageRef.value?.scrollTo({ top: 0 });
@@ -126,18 +113,10 @@ watch(
 
 const modeKey = computed(() => String(route.params.mode || ''));
 
-/** 名称为空的赛季 = 官方尚未公布（关卡数据可能已随版本落地）。快照侧同判据：
- *  `tools/gen-ai-endpoints.mjs` 对 `!clean(entry.zh)` 的期既不生成 URL 也不入 sitemap，
- *  故本页对这类期**不渲染关卡 / 敌方**，只给「尚未公布」主名 + 既有空态（egd.empty.stages）。 */
 const unpublished = computed(() => Boolean(data.value && !data.value.zh));
 
-/** 增益体系名（按玩法取自 endgame_guide.json） */
 const systemName = computed(() => seasonBuffSystemName(guide.value, modeKey.value));
 
-/** 四个玩法的关卡都由子 tab 承载（ADR 0043）：层级模式 = 「第 1..N 层 / 星启模式」，
- *  异相仲裁 = 「将杀王棋 / 骑士试炼」两个**节点合并档**（王棋档内节点一 = 普通王棋、节点二 = 绝境王棋；
- *  骑士档内 = 三关骑士试炼），档内由节点卡片切换（ADR 0043 补记七/八）。
- *  默认激活星启，无星启的模式激活首档（见 `defaultLevelKey`）。 */
 const levelTabs = computed<LevelTab[]>(() => buildLevelTabs(data.value));
 const activeLevel = ref('');
 watch(
@@ -174,7 +153,6 @@ const nextSeason = computed(() => {
 });
 
 const pageRef = ref<HTMLElement | null>(null);
-/** 固定条退场后（ADR 0043）本页没有区块导航：关卡定位由子 tab 承担，滚动定位只剩「返回顶部」圆钮 */
 const NO_BLOCK_NAV: string[] = [];
 const { showTop, scrollTop, refresh } = useScrollSpy(pageRef, () => NO_BLOCK_NAV, () => null);
 
@@ -226,8 +204,6 @@ onBeforeUnmount(() => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
 
-      <!-- 未公布赛季（名称为空）的主名回退：`EndgameHero` 直接渲染 `data.zh`（其文件属 Track A，
-           不在本写域），故在传入前覆写主名，其余字段（id / 排期 / banner）原样。 -->
       <EndgameHero :data="unpublished ? { ...data, zh: t('egd.seasonUnpublished') } : data" :mode-key="modeKey" />
 
       <div class="nk-panels nk-egd-body">
@@ -252,6 +228,8 @@ onBeforeUnmount(() => {
               :active="activeLevel"
               :system-name="systemName"
             />
+
+            <EndgameSeasonRewards :data="data" />
           </template>
 
           <div v-else class="nk-slot-empty">{{ t('egd.empty.stages') }}</div>

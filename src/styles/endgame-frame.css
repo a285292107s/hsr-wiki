@@ -1,15 +1,9 @@
-/* 终局详情页 · 骨架：模式色 / Hero / 面板容器 / 关架子 tab。
-   本文件是 endgame-detail 拆分块的第 1 块：七个拆分块必须按导入顺序级联，不得乱序合并。 */
 .nk-egd[data-mode="maze"] { --eg-color: var(--eg-maze); }
 .nk-egd[data-mode="story"] { --eg-color: var(--eg-story); }
 .nk-egd[data-mode="boss"] { --eg-color: var(--eg-boss); }
 .nk-egd[data-mode="peak"] { --eg-color: var(--eg-peak); }
 
-/* 四个玩法的关卡都由子 tab 承载（ADR 0043）→ 无顶部固定条，页面无需为常驻横条留避让内距 */
 .nk-egd.nk-page--detail { padding-top: 0; }
-/* 关架子 tab（星启模式 + 第 N..1 层 / 异相仲裁单关）：**固定单行、不折行**，层级过多时整行
-   左右滚动（用户裁决）；激活下划线仍骑在行底边上——滚动容器会裁掉超出 content box 的部分，
-   故留 1px 下内距给 `bottom: -1px` 的 `::after`。滚动条不占行高（可滚性由末位半露的页签表达）。 */
 .nk-egd-tabs {
   display: flex; flex-wrap: nowrap; align-items: center; gap: 0 4px;
   width: 100%;
@@ -41,8 +35,6 @@
   background: transparent;
   border-bottom: 1px solid var(--line-2);
 }
-/* 与目录报头同一套语言：左端起笔的模式色短标压在底线上（对称渐变的「腰线」在目录报头已退场，
-   此处同步收掉——模式的识别交给短标 + 立绘/徽标，不靠一条会随标题长度变化的淡带）。 */
 .nk-egd-hero::before {
   content: '';
   position: absolute;
@@ -62,17 +54,12 @@
   object-position: center 30%;
   opacity: 0.3;
   filter: saturate(0.8) brightness(0.92);
-  /* 两侧都收口：只淡左缘时图片会在内容列右缘被切出一刀硬边 */
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 28%, #000 60%, #000 86%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, transparent 28%, #000 60%, #000 86%, transparent 100%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* 赛季 banner 铺成整幅背景时左右翻转：banner 的画面重心在右（原先挂在右缘当画框），
-   直接铺底会与右侧内容抢视线；翻转后主体（水晶）落在右半、文字区落在原图那层**深紫雾**上。
-   实测该口径下文字区背景峰值 ≤ 92（白字对比 ≥6:1），故**不加遮罩、不压不透明度**——
-   底图那套「两侧都收口」的遮罩是给居中场景图调的，套到 banner 上会把主体一起淡掉。 */
 .nk-egd-hero__bg--flip {
   transform: scaleX(-1);
   opacity: 1;
@@ -178,9 +165,6 @@
   color: var(--text3);
   padding: 5px 0;
 }
-/* 字号归 `endgame-type-scale.css` 的收口刻度（末块导入、同特异性覆写）：本文件只声明非字号属性，
-   重述字号 = 死声明（改它不生效，且会误导后来的修改）。见 ADR 0034 决策 2。
-   `__scale`（本季层数/关数读数）与 `__sid` 同形同规格：都是 Hero 元信息行里的小胶囊读数。 */
 .nk-egd-hero__sid,
 .nk-egd-hero__scale {
   display: inline-flex;
@@ -215,5 +199,6 @@
 .nk-egd-body .nk-egd-fury,
 .nk-egd-body .nk-egd-buffs,
 .nk-egd-body .nk-egd-tierce,
+.nk-egd-body .nk-egd-season,
 .nk-egd-body .nk-slot-empty,
 .nk-egd-body .nk-egd-nav { max-width: var(--nk-struct-max); margin-left: auto; margin-right: auto; }

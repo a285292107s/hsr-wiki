@@ -1,36 +1,20 @@
 import { test, expect, type Locator } from '@playwright/test';
 import { computedNumber, expectNoUnknownOverflow, readJson, splitKnownOverflow } from './helpers';
 
-/**
- * layout 验收层的**共享层**：跨 spec 文件复用的取值原语与数据派生。
- *
- * 存在理由：layout 原本是单文件（`fullyParallel: false` 下文件内串行 → 全量墙钟 6.6 分钟）。
- * 按 describe 边界拆成多个 spec 后，文件级并行才能生效；本模块承接被多块共用的符号，
- * 使各 spec 保持「只 import 自己用得到的」而不复制粘贴。
- *
- * 纪律：这里只放**取值与派生**（读令牌 / 量几何 / 从随站 JSON 派生期望值），
- * 不放 `test()` / `expect()` 断言——断言一律留在各 spec 的 describe 内，
- * 否则跨文件断言失败会指不到具体用例。
- */
-
-/* ─── 通用断言辅助（原 layout.spec.ts 文件头）─── */
-
-/** 元素计算样式必须等于令牌落值（令牌缺失时读数为 0，断言随之变红） */
 export async function expectTokenNumber(loc: Locator, prop: string, tokenValue: number, label: string): Promise<void> {
   expect(await computedNumber(loc, prop), `${label} 应等于令牌值 ${tokenValue}`).toBe(tokenValue);
 }
 
-/** 未知横向溢出（整页判据；技能区子树见 expectNoSkillsOverflow） */
+export function seasonRewardGroups(page: import('@playwright/test').Page): Locator {
+  return page.locator('#egd-season-rewards .nk-egd-season-group');
+}
+
 export const noUnknownOverflow = expectNoUnknownOverflow;
 
-/** 技能区子树未知溢出（见 skillsPanelOverflow 注释：Hero spine 画布恒越出视口，整页判据会误伤） */
 export async function expectNoSkillsOverflow(page: import('@playwright/test').Page): Promise<void> {
   expect(splitKnownOverflow(await skillsPanelOverflow(page)).unknown).toEqual([]);
 }
 
-/* ─── 侧栏与内容区避让（原「常规主题」块内，供导航折叠 / 枢纽页 / 页脚三块共用）─── */
-
-/** 收集侧栏导航锚点（排除 设置/跨模式入口/更多/调试台——仅统计 navItems 板块）；返回 DOM 序（= 规范序）下的可见性 */
 export async function collectNavAnchors(page: import('@playwright/test').Page) {
   return page.locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)').evaluateAll((els) =>
     els.map((el) => ({
@@ -40,22 +24,6 @@ export async function collectNavAnchors(page: import('@playwright/test').Page) {
   );
 }
 
-/** 就绪门：等侧栏已切到**指定模式**的导航集。不抛错——就绪门不负责报缺陷（沿用 `waitForViewMounted`
- *  的纪律），页面缺陷由调用方自己的断言暴露。
- *
- *  为什么不能只等「第一个 `a.ui-sidebar-link` 可见」：`route.meta.cw` 在 router 解析完成前为 false
- *  ⇒ 侧栏先渲染**常规模式**那套（`/` `/character` `/lightcone` `/relic` `/endgame`），而它们同样是
- *  `a.ui-sidebar-link` ⇒ 弱门立刻通过；随后 `evaluateAll`（**无自动等待**）就把那一套当成目标模式采样。
- *  CI 实测（2026-10-16 分片 3）：CW 档读到 5 个常规 href 且 `every(vis)` 为假。A/B（390px + CPU 节流 4×，
- *  各 12 轮）弱门采错 **12/12**、本门 **0/12**。
- *  判据是**该模式独有的锚点在场 + 另一模式的锚点退场**，而不是「这类元素出现了」——后者在
- *  「同一外壳的另一个形态」下必假通过（同族坑位见 docs/memory/testing.md）。
- *
- *  href **必须按后缀匹配**：带语言前缀时锚点是 `/pt/character`、`/jp/currency/role`（ADR 0052），
- *  写死 `/character` 会恒不命中 ⇒ 门只能干等超时（本轮实测把这个 bug 打成了 fp/pt 档 4/4 失败）。
- *  故先取 `pathname` 再比后缀；**不拼语言前缀**，语言清单变化时不必改这里。
- *  后缀匹配安全性：导航 href 是有限已知集（常规 `/character` 等 9 项、CW `/currency/*` 6 项），
- *  实测无「一项的路径以另一项路径结尾」的碰撞（`/characters` 这类也不命中 `/character`）。 */
 export async function waitForNavMode(
   page: import('@playwright/test').Page,
   mode: 'normal' | 'cw',
@@ -68,14 +36,12 @@ export async function waitForNavMode(
       ({ w, g }: { w: string; g: string }) => {
         const bar = document.querySelector('.ui-sidebar');
         if (!bar) return false;
-        /** 语言前缀无关：比 pathname 后缀（`/pt/character` 命中 `/character`）。 */
         const is = (a: Element, suffix: string): boolean => {
           const raw = a.getAttribute('href') ?? '';
           let p = raw;
           try {
             p = new URL(raw, location.origin).pathname;
           } catch {
-            /* 取不到 pathname 就退回原值比较（相对 href 也是合法形态） */
           }
           return p === suffix || p.endsWith(suffix);
         };
@@ -90,14 +56,6 @@ export async function waitForNavMode(
     .catch(() => {});
 }
 
-/**
- * 某路由的导航入口是否**可达**——底栏直连 **或** 折叠进「更多」抽屉。
- *
- * 存在理由：窄档下底栏只放得下 n 项（`SidebarNav.recomputeFold` 按槽位预算裁剪），
- * 其余项**不进底栏 DOM**、只在抽屉打开时渲染。故「入口可达」不能退化成
- * 「底栏里找得到该 href」——那会把「收进抽屉」（设计形态）误判成「入口丢失」（缺陷）。
- * 全断点语义：≥768px 无折叠，等价于「侧栏里恰有 1 条」。
- */
 export async function navEntryReachable(
   page: import('@playwright/test').Page,
   href: string,
@@ -111,54 +69,35 @@ export async function navEntryReachable(
   return inDrawer;
 }
 
-/** 读取 <html> 上的内容区避让令牌（断言 --nk-content-offset 的实际落值，单位 px）。
- *  注意：自定义属性按原样返回（手机断点声明为无单位 `0`），故必须 parseFloat 归一化。 */
 export async function readContentOffset(page: import('@playwright/test').Page): Promise<number> {
   return page.locator('html').evaluate((el) =>
     parseFloat(getComputedStyle(el).getPropertyValue('--nk-content-offset')) || 0,
   );
 }
 
-/* ─── 期望值从随站数据派生（沿用 charFamilyIds 模式）───
-   页面文案 / 计数 / 分数档一律不在断言里写死：数据一改，断言跟着数据走；页面写错才红。
-   无法派生的只剩两类：① 站点自创文案（如 H1「贪饕污染」、区块标题「首领特性」）；
-   ② UI 格式（「第 N 层」「污染等级 N」「NO.<id>」的拼装方式）——这两类保留字面量并注明理由。 */
-
 export interface MonsterLike {
-  /** 实例怪物 ID（污染名单与召唤关系都按实例登记，见 `pollutedMonsters`） */
   id?: string;
   name: string;
   icon?: string;
   wave?: number;
   summons?: SummonLike[];
-  /** 首领机制指针（仅末日幻影登记机制条目的首领有；键指向赛季级 `boss_guides`） */
   boss_guide?: string;
-  /** 效果抵抗（`MonsterConfig.DebuffResist` × `MonsterStatusResistanceType`，只随全字段形态输出） */
   debuff_resist?: { key: string; value: number; icon: string }[];
-  /** 以下四项只随「全字段」形态出现（末日幻影楼层 / 星启节点 / 异相仲裁单关的敌方详情卡） */
   intro?: string;
-  /** 技能：名称 + 标签 + 战斗阶段门控（`phase_list`，阶段号从 1 起；空表不落键） */
   skills?: { name: string; tag?: string; phase_list?: number[] }[];
   weak?: string[];
   resist?: Record<string, number>;
   rank?: string;
-  /** 该敌方在**所属关卡行**语境下的生命值（转换期按合成链落的单值，ADR 0055）；
-   *  期级合并列表不带该键 ⇒ 断言里用 `hp!` 前先确认取的是场次/节点级列表 */
   hp?: number;
-  /** 逐战斗阶段生命值（ADR 0058，下标 i = 阶段 i+1）；**只跨 ≥2 阶段的模板**带该键，
-   *  单阶段敌方仍由 `hp` 承担呈现（前端两键并存时逐阶段优先） */
   phase_hp?: number[];
 }
 export interface InvasionLike { level: number; stage_id?: number; monsters?: MonsterLike[] }
-/** 召唤物（ADR 0036 修订）：轻形态 + 受污染者带 polluted（污染等级）；挂在召唤者自己的敌方条目上 */
 export interface SummonLike { id: string; name: string; tpl?: string; polluted?: number }
-/** 首领机制正文（converter 输出：敌方模板 ID → 首领特性 + 阶段机制） */
 export interface BossGuideLike {
   traits?: { name: string; param_list?: number[] }[];
   phases?: { id: number; name: string; desc?: string; answer?: string; skills?: { name: string; desc?: string }[] }[];
 }
 export interface StageLike { monsters?: MonsterLike[]; invasion?: InvasionLike; damage?: string[] }
-/** 奖励物品（RewardData 解析：物品 id + 数量；Hcoin 已在转换期并入星琼 id=1，ADR 0051） */
 export interface RewardItemLike { id: number; num?: number }
 export interface FloorLike {
   floor: number;
@@ -167,14 +106,11 @@ export interface FloorLike {
   countdown?: number;
   buff?: { name: string };
   targets?: { param: number; type?: string }[];
-  /** 该层通关奖励（Challenge*MazeConfig.RewardID → RewardData） */
   reward?: RewardItemLike[];
-  /** 该层可达的星级奖励档（本赛季累计星数阶梯按层序切片，ADR 0051 补记） */
   star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
   stage1?: StageLike;
   stage2?: StageLike;
 }
-/** 异相仲裁机制词条（`ChallengePeakConfig.TagList` → MazeBuff：名称 + 效果描述 + 占位参数） */
 export interface MechanicLike { id?: number; name: string; desc?: string; param_list?: number[] }
 export interface SeasonLike {
   id: string;
@@ -202,10 +138,8 @@ export interface SeasonLike {
     targets?: { text?: string; param: number | null }[];
     monsters?: MonsterLike[];
     buffs?: { id: number; name: string }[];
-    /** 该关的机制词条（名称 + 效果描述；绝境档各一份） */
     tags?: MechanicLike[];
     invasion?: InvasionLike;
-    /** 该关可达的星级奖励档（两类口径各自按关卡序累计目标数切片，ADR 0051 补记） */
     star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
     hard?: {
       name?: string;
@@ -213,18 +147,15 @@ export interface SeasonLike {
       monsters?: MonsterLike[];
       targets?: { param: number | null }[];
       tags?: MechanicLike[];
-      /** 绝境档的星数档（王棋口径最高档 3★，官方「视同 3 星通关全部骑士关卡」） */
       star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
     };
   }[];
   buffs?: { name: string }[];
   pollution?: { count: number; levels: number[] };
-  /** 赛季级累计星数奖励阶梯（主模式按累计星数，异相仲裁按 label 分口径，ADR 0051） */
   star_rewards?: { star: number; label?: string; items: RewardItemLike[] }[];
   badges?: { level: string; name: string; desc?: string; icon: string }[];
 }
 
-/** 读某个终局赛季的原始数据（maze_boss / maze / maze_peak 三表同构） */
 export function seasonData(file: 'maze_boss.json' | 'maze.json' | 'maze_extra.json' | 'maze_peak.json', id: string): SeasonLike {
   const all = readJson<Record<string, SeasonLike>>(`public/data/cn/${file}`);
   const found = all[id];
@@ -232,10 +163,8 @@ export function seasonData(file: 'maze_boss.json' | 'maze.json' | 'maze_extra.js
   return found;
 }
 
-/** 节点卡片序号文案的中文数字（站点自创格式，非数据字段） */
 export const CN_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
 
-/** 末波首领（= 战斗卡片「打谁」的判据，与 `renders.lastWaveBoss` 同源：最后一波的第 1 只） */
 export function lastWaveMonster(stage: { monsters?: MonsterLike[] } | undefined): MonsterLike {
   const mons = stage?.monsters ?? [];
   if (!mons.length) throw new Error('该节点/场次无敌方数据，无法派生末波首领');
@@ -243,69 +172,51 @@ export function lastWaveMonster(stage: { monsters?: MonsterLike[] } | undefined)
   return mons.filter((m) => (m.wave ?? 1) === lastWave)[0];
 }
 
-/** 末波首领名 */
 export function lastWaveBossName(stage: StageLike | undefined): string {
   return lastWaveMonster(stage).name;
 }
 
-/** 层级 tab 文案（倒序口径，用户裁决）：第 N..1 层（不写死层数） */
 function seasonFloorLabels(season: SeasonLike): string[] {
   return [...(season.floor_details ?? [])]
     .sort((a, b) => b.floor - a.floor)
     .map((f) => `第 ${f.floor} 层`);
 }
 
-/** 层级 tab 文案：星启模式在最前 + 第 N..1 层倒序（与 `buildLevelTabs` 同口径） */
 export function levelTabLabels(season: SeasonLike): string[] {
   return ['星启模式', ...seasonFloorLabels(season)];
 }
 
-/** 子 tab 文案（层 tab + 有星启才有的星启 tab；层级模式三玩法共用）。
- *  星启模式排在最前（默认项），层级倒序——与 `buildLevelTabs` 同口径。 */
 export function seasonTabLabels(season: SeasonLike): string[] {
   const floors = seasonFloorLabels(season);
   return season.tierce ? ['星启模式', ...floors] : floors;
 }
 
-/** 异相仲裁关卡 tab 文案：王棋档（官方关名）+ 骑士试炼档（三关骑士合并）。
- *  王棋 / 绝境不再各占一档——两档都在合并档内由节点卡片切换（ADR 0043 补记八）。 */
 export function peakTabLabels(season: SeasonLike): string[] {
   const king = (season.levels ?? []).find((l) => l.kind === 'king');
   const labels = king ? [king.name ?? ''] : [];
   return (season.levels ?? []).some((l) => l.kind === 'knight') ? [...labels, '骑士试炼'] : labels;
 }
 
-/** 关卡 tab 的 DOM id 选择器（**变体名包含主关名时按文案取会命中两个 tab**，故一律按 id 定位） */
 export const peakTabId = (level: { id?: number }): string => `#egd-level-tab-peak-${level.id}`;
-/** 三关骑士合并档的 tab 选择器（三关不再各占一个 tab） */
 export const peakKnightsTabId = '#egd-level-tab-peak-knights';
-/** 王棋合并档两个节点的 key（节点一 = 普通王棋 / 节点二 = 绝境王棋，ADR 0043 补记八） */
 export const PEAK_KING_NODE = 'king';
 export const PEAK_HARD_NODE = 'hard';
-/** 合并档节点卡片的选择器（`id-prefix` = `egd-peak-node-tab`；王棋档传节点 key，骑士档见下） */
 export const peakNodeTabId = (key: string): string => `#egd-peak-node-tab-${key}`;
-/** 骑士档节点卡片的选择器（key = 关卡 ID，缺 id 时按源序 +1） */
 export const peakKnightNodeTabId = (level: { id?: number }, i = 0): string =>
   `#egd-peak-node-tab-${level.id ?? i + 1}`;
-/** 合并档的三关骑士（源序，与 `levelTabPeakNodes` 同口径） */
 export function peakKnightLevels(season: SeasonLike): NonNullable<SeasonLike['levels']> {
   return (season.levels ?? []).filter((l) => l.kind === 'knight');
 }
 
-/** 「N 波 · M 敌」摘要（与 `src/app/endgame/renders.ts → monCountLabel` 同口径：波数 = wave 去重计数） */
 export function monCountLabel(mons: MonsterLike[] | undefined): string {
   if (!mons?.length) return '';
   return `${new Set(mons.map((m) => m.wave ?? 1)).size} 波 · ${mons.length} 敌`;
 }
 
-/** 千分位（页面数值档用 toLocaleString 渲染，断言不依赖运行环境的 locale） */
 export function grouped(n: number): string {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-/** 大数缩写的**期望值**（ADR 0055）：payload 的 `hp` → 页面上的 cn 数制文本。
- *  写法刻意与实现（`src/lib/format.ts → fmtBigNumber` 走整数分组）不同——这里按**字符切片**，
- *  两处同时改错才会静默通过；单位与补零口径必须一致（低组补足 4 位、尾随零组不占位）。 */
 export function cnBigNumber(v: number): string {
   const digits = String(Math.round(Math.abs(v)));
   const chunks: string[] = [];
@@ -320,41 +231,33 @@ export function cnBigNumber(v: number): string {
   return parts.join('');
 }
 
-/** items.json：物品 id → 名称（奖励 chips 的文案断言用；星琼 = 1） */
 export function itemNameMap(): Map<number, string> {
   const list = readJson<{ id: number; name: string }[]>('public/data/cn/items.json');
   return new Map(list.map((it) => [it.id, it.name]));
 }
 
-/** 奖励物品名（按数据序；名称缺失回退 `#id`，与页面占位口径一致） */
 export function rewardNames(items: RewardItemLike[], names: Map<number, string>): string[] {
   return items.map((it) => names.get(it.id) || `#${it.id}`);
 }
 
-/** 奖励数量文案（`×N` 千分位；数量缺省不落键 → 返回 null 由断言侧过滤） */
 export function rewardNums(items: RewardItemLike[]): string[] {
   return items.filter((it) => it.num).map((it) => `×${grouped(it.num!)}`);
 }
 
-/** 某层半场的末波首领名 */
 export function floorBossName(season: SeasonLike, floor: number, half: 'stage1' | 'stage2'): string {
   const f = (season.floor_details ?? []).find((x) => x.floor === floor);
   if (!f) throw new Error(`赛季 ${season.id} 缺少第 ${floor} 层`);
   return lastWaveBossName(f[half]);
 }
 
-/** 星启节点看板的敌方（看板只渲染当前节点，敌方同源于 tierce.nodes） */
 export function tierceNodeBossNames(season: SeasonLike): string[] {
   return (season.tierce?.nodes ?? []).map((nd) => lastWaveMonster(nd).name);
 }
 
-/** 首领机制正文：按敌方条目上的 `boss_guide` 指针取赛季级 `boss_guides`。
- *  召唤物与未登记机制的敌方没有指针（转换器只挂在波次敌方上），故返回 undefined。 */
 export function guideOf(season: SeasonLike, m?: MonsterLike): BossGuideLike | undefined {
   return m?.boss_guide ? season.boss_guides?.[m.boss_guide] : undefined;
 }
 
-/** 该场次的首领机制（末日幻影每场恰好一只首领命中登记，其余模式恒无） */
 export function stageGuide(season: SeasonLike, stage?: StageLike): BossGuideLike | undefined {
   for (const m of stage?.monsters ?? []) {
     const g = guideOf(season, m);
@@ -363,7 +266,6 @@ export function stageGuide(season: SeasonLike, stage?: StageLike): BossGuideLike
   return undefined;
 }
 
-/** 该层半场的首领机制（期望值取自数据，用于卡内「首领特性 / 阶段机制」断言） */
 export function floorGuide(
   season: SeasonLike, floor: number, half: 'stage1' | 'stage2',
 ): BossGuideLike | undefined {
@@ -378,7 +280,6 @@ export interface PollutionEntry {
   invasion: InvasionLike;
 }
 
-/** 污染节点（与 src/app/endgame/pollution.ts 同口径：层序倒置 → 异相仲裁单关 → 星启节点，按 stage_id 去重） */
 export function pollutionEntries(season: SeasonLike): PollutionEntry[] {
   const out: PollutionEntry[] = [];
   const seen = new Set<number>();
@@ -405,31 +306,23 @@ export function pollutionEntries(season: SeasonLike): PollutionEntry[] {
   return out;
 }
 
-/** 某场次/某节点敌方条目上的召唤物（按召唤者分发，见 ADR 0036 修订） */
 export function summonsOf(mons: MonsterLike[] | undefined): SummonLike[] {
   return (mons ?? []).flatMap((m) => m.summons ?? []);
 }
 
-/** 其中受污染的那些（站点在它们身上挂污染等级徽标） */
 export function pollutedSummons(mons: MonsterLike[] | undefined): SummonLike[] {
   return summonsOf(mons).filter((s) => s.polluted);
 }
 
-/** 污染徽标文案（召唤物条目上的 polluted = 该场次 InvasionID） */
 export const summonBadge = (s: SummonLike): string => `污染等级 ${s.polluted}`;
 
-/** 该场次**确实出现在敌方配置里**且被污染的敌方（站点只在它们身上挂污染徽标）。
- *  判据与转换器 `_polluted_index` 一致：**实例 ID 精确匹配**（按模板匹配会把同模板的未污染实例误标）。
- *  末日幻影的被污染小怪不在该层敌方配置内（只作召唤物出现），此处自然返回空。 */
 export function pollutedMonsters(inv: InvasionLike | undefined, mons: MonsterLike[] | undefined): MonsterLike[] {
   const ids = new Set((inv?.monsters ?? []).map((m) => String(m.id)));
   return (mons ?? []).filter((m) => m.id != null && ids.has(String(m.id)));
 }
 
-/** 敌方卡上的污染徽标文案（同一场次共用一个污染等级） */
 export const monsterBadge = (inv: InvasionLike): string => `污染等级 ${inv.level}`;
 
-/** 已登记的污染赛季（四张终局目录的 `pollution` 字段 = 目录页标记的唯一判据；目录文件 → 路由 mode 一一对应） */
 export function pollutedSeasonHrefs(): string[] {
   const sources: [file: string, mode: 'boss' | 'maze' | 'story' | 'peak'][] = [
     ['maze_boss.catalog.json', 'boss'],
@@ -444,9 +337,6 @@ export function pollutedSeasonHrefs(): string[] {
   );
 }
 
-/* ─── 技能族层级（ADR 0022）取证工具 ───
-   期望文案一律从 characters/*.json 读（族成员 id 原序 → 名），不在断言里写死页面文案；
-   族 id 原序与 src/lib/skill-family.ts 同口径（取锚点首个非空 level_up_skill_id 级）。 */
 export function charFamilyIds(charId: string, anchor: string): number[] {
   const d = readJson<{
     skill_trees: Record<string, Record<string, { level_up_skill_id?: number[] }>>;
@@ -462,13 +352,6 @@ export function charSkillNames(charId: string, ids: number[]): string[] {
   return ids.map((id) => d.skills[String(id)].name);
 }
 
-/**
- * 层级线竖轨的页面 x。三种宿主都必须支持：
- * - 子卡自身（竖轨在 `.nk-skill--child::before`，left 用负偏移抵消行缩进）；
- * - 父卡（竖轨在其 `.nk-skill__body::before`）；
- * - 直接传 `.nk-skill__body`。
- * left 是相对宿主 padding box 的值，故必须 host.rect.left + left 换算成页面 x 后比较（父/子宿主不同，不可直接比数值）。
- */
 export async function skillRailX(host: Locator): Promise<number> {
   return host.evaluate((el) => {
     const node = el.classList.contains('nk-skill--child') || el.classList.contains('nk-skill__body')
@@ -482,14 +365,10 @@ export async function skillRailX(host: Locator): Promise<number> {
 export interface PseudoBox {
   top: number;
   height: number;
-  /** 伪元素左端页面 x（宿主 rect.left + 计算 left；宿主与伪元素均无横向边框） */
   left: number;
   width: number;
-  /** 伪元素右端页面 x（left + 计算 width） */
   rightX: number;
-  /** 伪元素顶边页面 y（宿主 rect.top + 计算 top） */
   topY: number;
-  /** 伪元素底边页面 y（宿主 rect.top + 计算 top + 计算 height） */
   bottomY: number;
   borderLeftWidth: string;
   borderLeftColor: string;
@@ -503,9 +382,6 @@ export async function pseudoBox(loc: Locator, pseudo: '::before' | '::after'): P
     const cs = getComputedStyle(el, p);
     const r = el.getBoundingClientRect();
     const hostCs = getComputedStyle(el);
-    // 绝对定位伪元素的包含块是宿主 padding box 的**外缘**（= border box + border 宽度）——
-    // 宿主的 padding 不属于偏移量。曾误按「padding box 内缘」加 paddingTop 换算，整套坐标被抬低
-    // 一个 child-gap，掩盖了「折角必须落在子图标中线」的公式错误（见 docs/memory/2026-09.md「包含块原点实测」）。
     const bt = parseFloat(hostCs.borderTopWidth) || 0;
     const bl = parseFloat(hostCs.borderLeftWidth) || 0;
     const top = parseFloat(cs.top) || 0;
@@ -529,7 +405,6 @@ export async function pseudoBox(loc: Locator, pseudo: '::before' | '::after'): P
   }, pseudo);
 }
 
-/** 技能数据表盒 vs 卡片内容区（左/右缘）——用于断言「表格不侵入图标列、不产生卡片级横向溢出」 */
 export async function tableBoxWithinCard(card: Locator): Promise<{
   left: number;
   right: number;
@@ -550,18 +425,11 @@ export async function tableBoxWithinCard(card: Locator): Promise<{
   });
 }
 
-/**
- * 技能区横向溢出（与 helpers.ts findHorizontalOverflow 同判据，但限定 `[data-panel="skills"]` 子树）。
- * **为何不直接对整页断言**：角色详情页 Hero 的 `canvas.spine-player-canvas` 实测恒越出视口
- * （1212/1503/1509 实测 1280 宽下 right=1289、375 宽下 left=-28 right=403；`.nk-hero__visual { overflow-x: hidden }`
- * 把它裁掉，故 documentElement.scrollWidth 不越界），属 Hero/spine 域的既有条件，与本轮技能层级改动无关；
- * 整页断言会把无关缺陷算进技能区用例。此处只对技能区子树取证。
- */
 export async function skillsPanelOverflow(page: import('@playwright/test').Page): Promise<string[]> {
   return page.evaluate(() => {
     const root = document.querySelector('[data-panel="skills"]');
     if (!root) return ['[data-panel="skills"] 缺失'];
-    const vw = document.documentElement.clientWidth; // 与 helpers.findHorizontalOverflow 同口径（见该处注释）
+    const vw = document.documentElement.clientWidth;
     const bad: string[] = [];
     const inScrollable = (el: Element): boolean => {
       let cur = el.parentElement;
