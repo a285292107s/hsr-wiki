@@ -29,7 +29,7 @@
 | [data-pipeline.md](data-pipeline.md) | [data-pipeline.md](../agents/data-pipeline.md) | 增量转换与缓存 · 字段语义与判据 · 文本与描述渲染 · 数据探索环境 · 前端接线 |
 | [data-semantics.md](data-semantics.md) | [docs/data/](../data/) + ADR 数据裁决 | 版本上新与赛季代际 · 目录卡字段 · 出没样本名与活动出处 · 精英组与合成链 · 连接键与身份 · 口径注记与降级态 · 命名裁决 |
 | [ui-tokens.md](ui-tokens.md) | [ui-design.md](../agents/ui-design.md) | 静默失效 · 令牌收口与迁移 · 字阶与圆角刻度 · 几何与形态判据 · 排查路径 · 坐标系与断点 · 工具链坑位 |
-| [testing.md](testing.md) | [testing.md](../agents/testing.md) + [verification.md](../agents/verification.md) | 静默失效 · 溢出与几何取证 · 竞态与等待 · vitest 环境 · 假结论防治 · 形态与契约判据 · 焦点与可达名 · 取证手法陷阱 · 提速并发 |
+| [testing.md](testing.md) | [testing.md](../agents/testing.md) + [verification.md](../agents/verification.md) | 静默失效 · 溢出与几何取证 · 竞态与等待 · vitest 环境 · 假结论防治 · 形态与契约判据 · 焦点与可达名 · 取证手法陷阱 · 提速并发 · 门禁复杂度与迭代节奏 |
 | [build-deploy.md](build-deploy.md) | [commands.md](../agents/commands.md) | dev server「改了不生效」 · 端口与实例 · 构建守卫与门禁 · Vercel 投递 · 增量与确定性 · 静态资产（自托管字体 / 分享图） |
 | [ai-visibility.md](ai-visibility.md) | [ai-discoverability.md](../agents/ai-discoverability.md) | 构建全绿但结果错 · 覆盖率与守卫盲区 · 快照正文保真 · 快照与就绪态类名耦合 · 投递模型 · 反 cloaking · crawler UA 与 robots · 页面元信息（title / og / JSON-LD） · 无 JS 取证与死链 |
 | [architecture.md](architecture.md) | [architecture.md](../agents/architecture.md) | 分层与目录归属 · 共享单例与 barrel · types 按域拆分 · 目录页配置驱动 · 跨文件重复实现 · 研究线 /debug · CSS 拆分纪律 · 路由与外壳交互 |

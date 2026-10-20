@@ -39,9 +39,9 @@ pnpm build              # 七守卫（色彩收口 / Spine 清单 / 对比度 / 
 pnpm test               # 运行全部测试（Vitest）
 pnpm vitest run <文件>   # 运行单个测试文件
 pnpm test:e2e:affected  # 只跑按 git diff 推导出的受影响用例（「禁全量 e2e」的落地命令）
-pnpm test:e2e:guards    # CI 快层：不变量 + 外壳契约 + a11y（guards + shell + accessibility）
-pnpm test:e2e:layout    # 布局契约层（全部 layout-*；CI 里按 6 分片跑）
-pnpm test:e2e:ci        # 上面两层合集（本地一次跑完 CI 的全部 e2e）
+pnpm test:e2e:guards    # 不变量层：不变量 + 外壳契约 + a11y（guards + shell + accessibility）——CI 慢档之一
+pnpm test:e2e:layout    # 布局契约层（全部 layout-*；CI 慢档里按 6 分片跑）
+pnpm test:e2e:ci        # 上面两层合集（本地一次跑完 CI 慢档的全部 e2e；push 档只跑 static + unit-tests）
 node tools/gen-ai-endpoints.mjs   # 单独重建 AI 快照（读 dist/index.html 为模板，须先 vite build）
 node tools/check-ai-endpoints.mjs # AI 端点守卫（快照正文/内链/sitemap/robots 覆盖率；pnpm build 末步自动跑）
 node tools/check-languages.mjs   # 语言清单守卫（converter languages.json ↔ 前端 locales.ts + 上游语言交叉校验；pnpm build 前置自动跑）

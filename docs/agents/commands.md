@@ -178,7 +178,10 @@ python -m pytest tests/ -v               # converter 单元测试
 门禁语义（**软门禁**）：
 
 - main 分支 protection 仅保留防 force push 与防删除（required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过。
-- 推送后 CI 并行跑六条 job，各自独立报红：`static`（七守卫 + `vue-tsc -b`）、`unit-tests`（`pnpm test`）、`invariants`（`pnpm test:e2e:guards`）、`layout`（6 分片 × 每片 2 worker，只装 chromium）、`firefox`（11 条 `@cross-engine`）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集）；失败由 GitHub 通知。CI **不跑** `pnpm build`（Vercel 构建即发布门，重复跑零增量）。
+- CI 分**两档**（判据见 [testing.md](testing.md)「门禁分层」）：
+  - **push 档**：`static`（七守卫 + `vue-tsc -b`）与 `unit-tests`（`pnpm test`），约 70s 出结果。
+  - **慢档**（`schedule` 每日 + 手动 `workflow_dispatch` + PR）：`invariants`（`pnpm test:e2e:guards`）、`layout`（6 分片 × 每片 2 worker，只装 chromium）、`firefox`（11 条 `@cross-engine`）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集）。发布前手动触发一次 `e2e_scope=full` 取全量结果。
+- CI **不跑** `pnpm build`（Vercel 构建即发布门，重复跑零增量）；失败由 GitHub 通知。
 - **全量矩阵周跑**：`.github/workflows/ci-full.yml`（周一定时 + 手动触发）跑 13 语言 × 25 路由的冒烟与全语言长文案扫描——这是「每次 push 只跑风险语言子集」这处已登记收窄的补偿。
 - Vercel 生产构建（`pnpm build`，含 vue-tsc 与七守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
 - 本地推送前先跑 `pnpm build` + `pnpm test` 自检——CI 红不会拦 push，但会留失败记录。

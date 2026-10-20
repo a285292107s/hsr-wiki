@@ -4,38 +4,42 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+    inputs:
+      e2e_scope:
+        description: 手动跑哪一层 e2e（full = 不变量 + 布局契约 + 跨引擎 + 冒烟）
+        type: choice
+        options: [full, invariants, none]
+        default: full
 
 # 同分支连续 push 串行化，新 run 取消旧 run（省重复 CI 分钟数）
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# 每次 push 的门禁分层（2026-10 重构；判据见 docs/agents/testing.md）：
+# 门禁分两档：push 档（每次）与 慢档（夜间 / 手动 / 发布前）。判据见 docs/agents/testing.md「门禁分层」。
 #
-# - 六条 job **全部并行**，各自独立报红，红灯可信：
-#     static       七守卫 + vue-tsc。此前只由 Vercel 构建承担，类型错 / 守卫错会以「Vercel 报错」
-#                  的形式到达——一次实测就把它误当成部署失败排查了半小时。
-#     unit-tests   Vitest 全量。
-#     invariants   不变量层 = guards + shell + a11y。**此前 guards 与 shell 根本不在 CI 里**——
-#                  `e2e/layout-` 这个路径过滤把它们静默排除了，实测 shell 层因此已在 main 上红了两天。
-#     layout       布局契约，6 分片跑（见下），只装 chromium。
-#     firefox      跨引擎契约（11 条 `@cross-engine`）。**独立成 job 而不是塞进 layout 分片**：
-#                  `--shard` 按组均分，那 11 条全落在第 1 片 ⇒ 其余 5 片仍得照装 firefox
-#                  （~100MB + 解压），而只有第 1 片用得上。
-#     smoke        三个重文件（全语言冒烟 ×2 / 多语言长文案 ×4）单独成 job，4 分片跑。
-#
+# - **push 档只留「不可逆损失」的两条**：static（七守卫 + vue-tsc）与 unit-tests（Vitest），约 70 秒。
+#   它们拦的是站点白屏 / 数据错 / 色彩与对比度不合规这类线上不可逆问题；类型错此前只由 Vercel 构建
+#   承担，会以「Vercel 报错」的形式到达（实测被误当成部署失败排查了半小时）。
+# - **慢档 = invariants / layout / firefox / smoke**，只在 schedule（每日 18:00 UTC）、手动
+#   workflow_dispatch、或 PR 时跑。理由不是省钱，而是**布局契约保护的是「稳定」，而 UI 重构期
+#   的目标是「变化」**：实测近 40 次 push，8 次红里 7 次红在 layout、1 次在 invariants，而 static /
+#   unit-tests / smoke / firefox 一次没红；同期 11 次提交的主题本身就是「修 CI / 修 e2e 自己」。
+#   让布局断言每 push 拦截一次可逆的展示改动，等于用最贵的门禁守最不需要守的东西。
+# - **慢档不是删除**：用例一条没删，只是不再占用 push 反馈环。发布前手动触发一次 full 即可。
 # - **墙钟靠分片（机器维度），不靠提高并发度**：每台机器的 worker 仍是实测过的 2（见 playwright.config.ts）。
-#   分片把「测试时间总和」摊到多台 runner 上，不改任何一台的单机并发 → 不引入新的 flake 面。
-# - **片数由「最慢文件」定，不由总条数定**：`--shard` 的切分单位是「文件 × project」组，不是文件里的
-#   用例——同一文件的多条永远落在同一片。所以调片数前先取「每文件实测耗时」（`--reporter=json` 后按
-#   file 聚合），按 `片数 × 单机可用时长 ≥ 最慢文件时长` 定下界。**一个巨型文件就是墙钟下界**。
-#   片数还不得超过组数，否则多出的片空跑（实测 4 文件分 2 片 = 15 条全挤进第 1 片）。
-# - 冒烟族必须独立成 job：它们各自是单文件串行（`fullyParallel: false`），留在 layout 分片里会把
-#   某一片拖成两倍墙钟。
-# - 全量矩阵（13 语言 × 25 路由 + 全语言长文案扫描）移出每次 push，由 ci-full.yml 周跑承担；
-#   每次 push 只扫风险语言子集（cn/de/jp/ru）。覆盖收窄是**登记在案的例外**，不是静默降级。
+# - **片数由「最慢文件」定，不由总条数定**：`--shard` 的切分单位是「文件 × project」组，同一文件的多条
+#   永远落在同一片；片数还不得超过组数，否则多出的片空跑（实测 4 文件分 2 片 = 15 条全挤进第 1 片）。
+# - 全量语言矩阵（13 语言 × 25 路由 + 全语言长文案扫描）由 ci-full.yml 周跑承担；慢档只扫风险语言
+#   子集（SMOKE_SCOPE=fast = cn/de/jp/ru）。
 # - CI 不跑 `pnpm build`（Vercel 的 buildCommand 即发布门，重复跑零增量）；visual 像素基线回本机
 #   （判定依赖环境：CI IP 对 jsDelivr burst 限流 + Linux/Windows 渲染差异）。
+env:
+  SLOW_SUITE: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' }}
+
 jobs:
   static:
     runs-on: ubuntu-latest
@@ -67,6 +71,7 @@ jobs:
         run: pnpm test
 
   invariants:
+    if: env.SLOW_SUITE == 'true' && (github.event_name != 'workflow_dispatch' || inputs.e2e_scope != 'none')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -99,6 +104,7 @@ jobs:
           retention-days: 7
 
   layout:
+    if: env.SLOW_SUITE == 'true' && (github.event_name != 'workflow_dispatch' || inputs.e2e_scope == 'full')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -140,6 +146,7 @@ jobs:
   # `--shard` 按组均分，那 11 条全落在第 1 片 ⇒ 其余 5 片仍得照装 firefox（~100MB + 解压），
   # 而只有第 1 片用得上。拆出来后 6 个 layout 分片只装 chromium，firefox 只装一台。
   firefox:
+    if: env.SLOW_SUITE == 'true' && (github.event_name != 'workflow_dispatch' || inputs.e2e_scope == 'full')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -165,6 +172,7 @@ jobs:
           retention-days: 7
 
   smoke:
+    if: env.SLOW_SUITE == 'true' && (github.event_name != 'workflow_dispatch' || inputs.e2e_scope == 'full')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
