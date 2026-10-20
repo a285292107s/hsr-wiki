@@ -21,6 +21,9 @@
 - **测「本地化之前的远端分支」要传合成 spec，不要绑定真实分类**：全量本地化推进后真实分类都 local-first，原分支不再常驻命中，绑定具体分类的用例会随迁移进度失效；合成 spec 只带 `nanoka` 即可。`src/services/__tests__/cdn.test.ts`
 - **`spine-manifest` 单测不要再重复清单结构断言**：version 一致性 / 键集合 / 排序 / 格式 / textures 扩展名已由构建守卫 `tools/check-spine-manifest.mjs` 逐项校验（含 `--fetch` 在线可达性），单测只锁「官方角色的 nanoka 回退链不能整体消失」；两处维护同一规则 = 改一条要改两处。`src/services/__tests__/spine-manifest.test.ts`
 
+- **内部滚动容器会让 `fullPage` 截图与 `inspect.mjs` 的「1 screens」同时失真**：站点外壳（首页 / 枢纽页 / 目录页）把内容放在 `position: absolute; overflow-y: auto` 的容器里，`documentElement.scrollHeight === 视口高`、滚动条宽 0——`fullPage` 截图只拿到首屏，覆盖率与「有几句内容」的结论会整体偏小。判据：先找「`overflow-y: auto` 且 `scrollHeight > clientHeight + 4`」的容器，改它的 `scrollTop` 逐屏截图；只看 `documentElement` 会把 2.5 屏的页当成 1 屏。
+- **用 DOM 克隆注入模拟「条目密度」会被双态版式误导**：旧首页「件数 ≤1 展开成 feature、≥2 退目录卡」的分支由数据判据决定，注入节点仍留在当前（1 件）分支里，于是「两卡完全重叠」「角色区纵向翻倍」都是注入伪影，不是真实密度的结论。正确做法是 `page.route` 拦截 `version.json` 与三类索引，换成另一版本的真实数据（如 4.5 的 2 角色 + 2 五星光锥）复现目标密度；判据是「模拟结果的结构分支能由数据判据解释」，不能只看视觉。
+
 ## 溢出与几何取证
 
 - **`findHorizontalOverflow` 看不见字符串截断**：卡描述是「字符串级 60 字截断 + 省略号」时不产生任何 CSS 溢出，两类缺陷要两种探针；后者用「`title` 含全文」的数据派生断言锁。

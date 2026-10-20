@@ -62,7 +62,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
 - **本地优先数据**：目录 / 详情数据全部是预转换 JSON（结构层 `public/data/cn/` + 语言包 `public/data/i18n/<语言>/<分组>.json`；结构层里文本是引用令牌 `"$t:<键>"`，唯一解析入口 `src/services/api/local.ts`，见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）；仅图片与 Spine 动画运行期走 CDN（基址 `src/lib/constants.ts → CDN`）。
 - **单强调色主题**：全站（含货币战争）共用一套可切换强调色，开关 `<html data-accent>`；`meta.cw` → `<html data-theme="cw">` 只是**模式标记**，不重映射颜色（[ADR 0041](docs/adr/0041-主题色统一为单强调色通道.md)）。色板、缺省值与令牌分层见 [ui-design.md](docs/agents/ui-design.md) §2/§3。
 - **样式随路由懒加载**：页面 CSS 随视图 import 拆独立 chunk；全局仅 tokens.css + catalog.css + fonts.css。
-- **首页＝版本上新页**：`/` 与 `/currency` **全断点渲染导航条**；`/` 为品牌带 + 角色 / 光锥 / 遗器三分区 + 页脚，跨模式只走侧栏「交换」（[ADR 0019](docs/adr/0019-枢纽页导航条回归与首页改为版本上新页.md)）。
+- **首页＝版本入册页**：`/` 与 `/currency` **全断点渲染导航条**；`/` 为报头 + 版本钢印与同步日期 + 本期入册清单（整行链接）+ 站内即时搜索 + 角色对页 / 光锥行 / 遗器双联 + 页脚藏书量，跨模式只走侧栏「交换」（[ADR 0063](docs/adr/0063-首页改为版本入册页-清单在前与分区分构图.md)，取代 0019 的首页形态）。
   - **禁止按 ADR 0018 旧形态回改**（板块索引、无侧栏、「首页 8 行入口首屏可见」断言均已作废）；**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**。
   - 现行断言在 `e2e/layout-home.spec.ts` 与 `e2e/layout-hub.spec.ts`。
 - **两页条目判据互斥，禁止混用**：常规首页＝**版本增量**（`release_version` 恰等于 `version.json` 的 `version_label`）；货币战争＝**赛季代际差集**（`is_season_new`，仅角色 + 羁绊，文案不显示赛季号）。
