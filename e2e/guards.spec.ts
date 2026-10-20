@@ -9,7 +9,7 @@ interface GuardRoute {
 }
 
 const ROUTES: GuardRoute[] = [
-  { path: '/', roots: ['#nk-home-app', '.nk-hub-masthead__title', '.nk-intake__batch-num'] },
+  { path: '/', roots: ['#nk-home-app', '.nk-hub-masthead__title', '.nk-home__version'] },
   { path: '/character', roots: ['#nk-catalog-app', '.nk-cat-toolbar'], catalog: true },
   { path: '/character/1001', roots: ['.nk-hero--char', '.nk-hero__archive'] },
   { path: '/endgame', roots: ['#nk-catalog-app', '.nk-cat-toolbar'], catalog: true },

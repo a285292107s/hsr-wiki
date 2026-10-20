@@ -19,7 +19,7 @@ const KNOWN_VIOLATION_REVIEW_DAYS = 30;
 const KNOWN_VIOLATIONS: KnownViolation[] = [];
 
 const PAGES = [
-  { path: '/', label: '首页', wait: () => (page: Page) => page.waitForSelector('.nk-hub-release__section a[href], .nk-hub-release__empty, .nk-error-state', { timeout: 15_000 }) },
+  { path: '/', label: '首页', wait: () => (page: Page) => page.waitForSelector('.nk-home__ledger-item a[href], .nk-home__empty, .nk-error-state', { timeout: 15_000 }) },
   { path: '/character', label: '角色图鉴', wait: () => waitForCatalogCards },
   { path: '/character/1001', label: '角色详情', wait: () => (page: Page) => waitForCatalogCards(page, '.nk-hero--char') },
   { path: '/lightcone/20000', label: '光锥详情', wait: () => (page: Page) => page.waitForSelector('.nk-hero--lc', { timeout: 15_000 }) },
