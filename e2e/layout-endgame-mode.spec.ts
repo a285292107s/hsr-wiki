@@ -159,7 +159,11 @@ test.describe('终局详情页 Hero 大图口径（赛季 banner 翻转铺底）
       await page.goto(route);
       const bg = page.locator('.nk-egd-hero__bg');
       await expect(bg, `${route} 应以赛季 banner 铺底`).toHaveCount(1);
-      await expect(bg).toHaveAttribute('src', new RegExp(bannerOf(file, id).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+      await expect
+        .poll(() => bg.evaluate((el) => (el as HTMLImageElement).dataset.cdnSrc || el.getAttribute('src') || ''), {
+          message: `${route} 应以赛季 banner 铺底（CDN 不可达时读 data-cdn-src，占位图不算换图）`,
+        })
+        .toMatch(new RegExp(bannerOf(file, id).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
       await expect(bg).toHaveClass(/nk-egd-hero__bg--flip/);
       const m = await bg.evaluate((el) => getComputedStyle(el).transform);
       expect(m, `期望镜像矩阵，实得 ${m}`).toMatch(/^matrix\(-/);

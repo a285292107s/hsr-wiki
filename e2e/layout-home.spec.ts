@@ -257,7 +257,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：桌面断点星魂环绕立绘持续旋转（悬停不暂停），reduced-motion 静止', async ({ page }) => {
+  test('首页 /：桌面断点星魂环绕立绘持续旋转（悬停不暂停），reduced-motion 静止', { tag: '@viewport-pinned' }, async ({ page }) => {
     test.skip((page.viewportSize()?.width ?? 0) < 1024, '轨道环仅在桌面断点启用');
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -599,7 +599,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：首屏封面一次只显示一张，双角色轮换（不并排），指示点可手动切换', async ({ page }) => {
+  test('首页 /：首屏封面一次只显示一张，双角色轮换（不并排），指示点可手动切换', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const index = <T extends { release_version?: string; rarity?: number }>(file: string) =>
       readJson<T[]>(file).filter((item) => String(item.release_version ?? '').trim() === '4.5' && Number(item.rarity) === 5);
@@ -661,7 +661,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：prefers-reduced-motion 下封面不自动轮换，手动切换仍可用', async ({ page }) => {
+  test('首页 /：prefers-reduced-motion 下封面不自动轮换，手动切换仍可用', { tag: '@viewport-pinned' }, async ({ page }) => {
     const index = <T extends { release_version?: string; rarity?: number }>(file: string) =>
       readJson<T[]>(file).filter((item) => String(item.release_version ?? '').trim() === '4.5' && Number(item.rarity) === 5);
     await page.route('**/data/cn/version.json', (route) =>
