@@ -85,11 +85,40 @@ for (const abs of specs) {
 }
 
 const B = (s) => `\x1b[1m${s}\x1b[0m`;
+
+const configIssues = [];
+const configPath = join(ROOT, 'playwright.config.ts');
+const configText = readFileSync(configPath, 'utf8');
+const projectBlocks = [];
+for (const m of configText.matchAll(/name:\s*'([a-z-]+)'/g)) {
+  const open = configText.lastIndexOf('\n    {', m.index);
+  const start = open < 0 ? m.index : open;
+  const end = configText.indexOf('\n    },', start);
+  projectBlocks.push({ name: m[1], body: configText.slice(start, end < 0 ? configText.length : end) });
+}
+for (const { name, body } of projectBlocks) {
+  if (name !== 'mobile-chromium') continue;
+  if (!PINNED_RE.test(body)) {
+    configIssues.push(
+      `playwright.config.ts 的 mobile-chromium 缺对 @viewport-pinned 的 grepInvert——自钉视口的桌面契约会被 Pixel 7（isMobile + 触摸仿真）重跑`,
+    );
+  }
+}
+if (!projectBlocks.some((p) => p.name === 'mobile-chromium')) {
+  configIssues.push('playwright.config.ts 未找到 mobile-chromium project（本检查失去作用对象，禁止静默通过）');
+}
+
 console.log(
   B(
-    `\n[e2e 视口标签] 扫描 ${specs.length} 个 spec｜test 声明 ${total}｜@viewport-pinned ${pinnedCount}｜违规 ${violations.length}｜豁免 ${exempted.length}\n`,
+    `\n[e2e 视口标签] 扫描 ${specs.length} 个 spec｜test 声明 ${total}｜@viewport-pinned ${pinnedCount}｜违规 ${violations.length}｜豁免 ${exempted.length}｜配置问题 ${configIssues.length}\n`,
   ),
 );
+
+if (configIssues.length) {
+  console.log(B('── 配置违规（project 的收集过滤） ──'));
+  for (const issue of configIssues) console.log(`  ${issue}`);
+  console.log('');
+}
 
 if (violations.length) {
   console.log(B('── 违规（自钉视口但未声明 @viewport-pinned） ──'));
@@ -110,11 +139,17 @@ if (exempted.length) {
   console.log('');
 }
 
-if (!violations.length) {
-  console.log('[PASS] 所有自钉视口的用例都声明了 @viewport-pinned\n');
+if (!violations.length && !configIssues.length) {
+  console.log('[PASS] 自钉视口用例都声明了 @viewport-pinned，且 mobile project 按标签收起\n');
 } else {
-  console.log(`[FAIL] ${violations.length} 条自钉视口用例缺 @viewport-pinned`);
-  console.log('       正解：在 test(...) 第二参静态声明 { tag: \'@viewport-pinned\' }（动态 annotation 对收集期过滤无效）；');
-  console.log('       若该用例**必须**留在 mobile project（例如 isMobile 就是被测对象），补 `// e2e-viewport-ok: 理由`\n');
+  if (violations.length) {
+    console.log(`[FAIL] ${violations.length} 条自钉视口用例缺 @viewport-pinned`);
+    console.log('       正解：在 test(...) 第二参静态声明 { tag: \'@viewport-pinned\' }（动态 annotation 对收集期过滤无效）；');
+    console.log('       若该用例**必须**留在 mobile project（例如 isMobile 就是被测对象），补 `// e2e-viewport-ok: 理由`');
+  }
+  if (configIssues.length) {
+    console.log(`[FAIL] ${configIssues.length} 处 project 收集过滤缺失`);
+    console.log('       正解：mobile-chromium 的 grepInvert 必须含 /@viewport-pinned/（标签与过滤是一对，缺一即失效）\n');
+  }
 }
-process.exit(strict && (violations.length || badReasons.length) ? 1 : 0);
+process.exit(strict && (violations.length || badReasons.length || configIssues.length) ? 1 : 0);

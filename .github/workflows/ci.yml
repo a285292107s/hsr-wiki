@@ -51,6 +51,12 @@ jobs:
       - name: 构建守卫（色彩 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文 / Spine 清单）
         run: node tools/check-guards.mjs
 
+      # 标签与收集过滤是一对：`@viewport-pinned` 少了标签，或 mobile project 少了 `grepInvert`，
+      # 都表现为「桌面契约被 Pixel 7 触摸仿真重跑」。而 push 档不跑 layout，这类错只会在夜间慢档
+      # 显形（实测连红两个 schedule run）⇒ 在 push 档冷启动成本最低的位置机检（纯文本扫描，秒级）。
+      - name: e2e 视口标签与 project 收集过滤（标签 ⊗ grepInvert 必须成对）
+        run: node tools/check-e2e-viewport-tags.mjs --strict
+
       - name: 类型检查（vue-tsc -b）
         run: pnpm exec vue-tsc -b
 
