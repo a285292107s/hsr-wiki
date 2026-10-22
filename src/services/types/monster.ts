@@ -65,9 +65,21 @@ export interface MonsterAppearanceSample {
   elite_group?: number;
 }
 
+export interface MonsterAppearanceSub {
+  key: string;
+  count: number;
+}
+
+export interface MonsterAppearanceGroup {
+  key: string;
+  count: number;
+  subs?: MonsterAppearanceSub[];
+  samples?: MonsterAppearanceSample[];
+}
+
 export interface MonsterAppearances {
   total: number;
-  samples: MonsterAppearanceSample[];
+  groups: MonsterAppearanceGroup[];
 }
 
 export interface MonsterPhase {

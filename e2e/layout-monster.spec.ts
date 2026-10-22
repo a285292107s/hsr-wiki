@@ -25,7 +25,15 @@ interface MonsterDetailJson {
   event?: { name: string; tabs: string[]; levels: number[]; count: number };
   art_shared?: { id: number; name: string; figure: boolean; forms: number };
   drops?: MonsterDropTierJson[];
-  appearances?: { total: number; samples: { id: number; name: string; activity?: string }[] };
+  appearances?: {
+    total: number;
+    groups: {
+      key: string;
+      count: number;
+      subs?: { key: string; count: number }[];
+      samples?: { id: number; name: string; activity?: string; level?: number; level_group?: number; elite_group?: number }[];
+    }[];
+  };
   phases?: { phase_id: number; weak: string[]; resist: Record<string, number>; name?: string; intro?: string }[];
 }
 
@@ -48,6 +56,8 @@ const familyOf = (id: number): MonsterListEntry[] => {
 const detailOf = (id: number): MonsterDetailJson => readJson<MonsterDetailJson>(`public/data/cn/monsters/${id}.json`);
 const sampleLabel = (s: { name: string; activity?: string }): string =>
   s.activity ? `${s.activity} · ${s.name}` : s.name;
+const appearGroups = (mon: MonsterDetailJson) => mon.appearances?.groups ?? [];
+const appearSamples = (mon: MonsterDetailJson) => appearGroups(mon).flatMap((g) => g.samples ?? []);
 
 test.describe('布局验收：敌方详情页', () => {
   test(`/monster/${MONSTER_ID}：立绘延迟到达时 hero 高度不得变化`, async ({ page }) => {
@@ -474,12 +484,12 @@ test.describe('布局验收：敌方详情页', () => {
       const curve = readJson<Record<string, Record<string, Record<string, number>>>>('public/data/cn/monster-level-curve.json');
       const entry = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json')
         .map((m) => ({ m, mon: detailOf(m.id) }))
-        .find(({ mon }) => (mon.appearances?.samples ?? []).some(
+        .find(({ mon }) => appearSamples(mon).some(
           (s) => s.level != null && s.elite_group != null && curve[String(s.level_group ?? 1)]?.[String(s.level)],
         ));
       expect(entry, '应有样本带完整关卡语境的目录条目（断言前提）').toBeTruthy();
       const { m: entryMeta, mon } = entry!;
-      const sample = mon.appearances!.samples.find(
+      const sample = appearSamples(mon).find(
         (s) => s.level != null && s.elite_group != null && curve[String(s.level_group ?? 1)]?.[String(s.level)],
       )!;
 
@@ -702,30 +712,58 @@ test.describe('布局验收：敌方详情页', () => {
         page.locator('.nk-mob-appear__count strong'),
         '出没关卡数 = 数据 total',
       ).toHaveText(String(dropMon.appearances!.total));
+
+      const cnDict = readJson<Record<string, string>>('src/lib/i18n/messages/cn.json');
+      const dropGroups = appearGroups(dropMon);
+      await expect(
+        page.locator('.nk-mob-appear__group'),
+        '玩法域行数 = 数据域数（少一行就是静默丢玩法）',
+      ).toHaveCount(dropGroups.length);
+      const renderedGroups = await page.locator('.nk-mob-appear__group').evaluateAll((els) => els.map((el) => ({
+        key: el.getAttribute('data-domain'),
+        name: (el.querySelector('.nk-mob-appear__group-name')?.textContent || '').trim(),
+        count: (el.querySelector('.nk-mob-appear__group-count')?.textContent || '').trim(),
+        subs: [...el.querySelectorAll('.nk-mob-appear__sub')].map((s) => ({
+          name: (s.querySelector('.nk-mob-appear__sub-name')?.textContent || '').trim(),
+          count: (s.querySelector('.nk-mob-appear__sub-count')?.textContent || '').trim(),
+        })),
+      })));
+      dropGroups.forEach((g, i) => {
+        expect(renderedGroups[i].key, `第 ${i + 1} 个玩法域键与数据一致`).toBe(g.key);
+        expect(renderedGroups[i].name, `第 ${i + 1} 个玩法域名 = 词典 ${`mob.dom.${g.key}`}`).toBe(cnDict[`mob.dom.${g.key}`]);
+        expect(renderedGroups[i].count, `第 ${i + 1} 个玩法域计数与数据一致`).toBe(String(g.count));
+        expect(renderedGroups[i].subs.map((s) => s.name), `第 ${i + 1} 个玩法域子模式 = 词典`).toEqual(
+          (g.subs ?? []).map((s) => cnDict[`mob.sub.${s.key}`]),
+        );
+        expect(renderedGroups[i].subs.map((s) => s.count), `第 ${i + 1} 个玩法域子模式计数与数据一致`).toEqual(
+          (g.subs ?? []).map((s) => String(s.count)),
+        );
+      });
+
       const chips = page.locator('.nk-mob-appear__sample');
-      await expect(chips, '样本 chip 数 = 数据样本数').toHaveCount(dropMon.appearances!.samples.length);
+      await expect(chips, '样本 chip 数 = 数据样本数').toHaveCount(appearSamples(dropMon).length);
       expect(
         (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim()),
         '样本名逐项与数据一致（顺序同 DOM；活动关卡为「活动名 · 关卡名」）',
-      ).toEqual(dropMon.appearances!.samples.map(sampleLabel));
+      ).toEqual(appearSamples(dropMon).map(sampleLabel));
 
       const festMon = detailOf(1004015);
       await page.goto('/monster/1004015');
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
       const festNames = (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim());
-      expect(festNames, '活动关卡样本名逐项与数据一致').toEqual(festMon.appearances!.samples.map(sampleLabel));
+      expect(festNames, '活动关卡样本名逐项与数据一致').toEqual(appearSamples(festMon).map(sampleLabel));
       expect(festNames, '活动级常量 StageName 不得作为关卡名上屏').not.toContain('承露天人');
       expect(festNames[0], '活动链样本名应带「活动名 · 关卡名」前缀').toMatch(/^星天演武仪典 · /);
 
       for (const id of [1003011, 1003012]) {
         const mon = detailOf(id);
         expect(mon.appearances!.total, `${id} 应有出没计数（断言前提）`).toBeGreaterThan(0);
-        expect(mon.appearances!.samples.map((s) => s.name), `${id} 数据里不得出现自己名字`).not.toContain(mon.name);
+        expect(appearSamples(mon).map((s) => s.name), `${id} 数据里不得出现自己名字`).not.toContain(mon.name);
         await page.goto(`/monster/${id}`);
         await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
         const chipNames = (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim());
         expect(chipNames, `${id} 自己名字不得上屏`).not.toContain(mon.name);
-        expect(chipNames, `${id} chip 逐项等于数据`).toEqual(mon.appearances!.samples.map(sampleLabel));
+        expect(chipNames, `${id} chip 逐项等于数据`).toEqual(appearSamples(mon).map(sampleLabel));
       }
 
       const noChipId = readJson<MonsterListEntry[]>('public/data/cn/monsters.json')
@@ -733,7 +771,7 @@ test.describe('布局验收：敌方详情页', () => {
         .map((m) => m.id)
         .find((id) => {
           const a = detailOf(id).appearances;
-          return !!a && a.total > 0 && a.samples.length === 0;
+          return !!a && a.total > 0 && appearSamples(detailOf(id)).length === 0;
         });
       expect(noChipId, '应有「有计数、无样本」的目录条目（断言前提）').toBeTruthy();
       const noChipMon = detailOf(noChipId!);
@@ -741,6 +779,10 @@ test.describe('布局验收：敌方详情页', () => {
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
       await expect(page.locator('.nk-mob-appear__count strong')).toHaveText(String(noChipMon.appearances!.total));
       await expect(page.locator('.nk-mob-appear__sample'), '无实名源的关卡不得产出 chip').toHaveCount(0);
+      await expect(
+        page.locator('.nk-mob-appear__group'),
+        '无实名源的页面仍按玩法域拆开（只给计数，不臆造关卡名）',
+      ).toHaveCount(appearGroups(noChipMon).length);
       await expect(
         page.locator('.nk-mob-appear__tip'),
         '无样本时必须说明「游戏内没有关卡名」，不能用沉默代替口径',

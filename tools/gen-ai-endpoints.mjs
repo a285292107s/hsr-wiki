@@ -1143,10 +1143,18 @@ function monsterPages(ctx) {
       ].filter(Boolean).join(' · ')]);
     }
     if (d.appearances && d.appearances.total) {
-      const samples = (d.appearances.samples || [])
-        .map((s) => (s.activity ? `${s.activity} · ${s.name}` : s.name))
-        .filter(Boolean);
-      facts.push([ui('mob.sec.appear', '出没关卡'), `${d.appearances.total} 个${samples.length ? `（如 ${esc(samples.join(' / '))}）` : ''}`]);
+      const groups = (d.appearances.groups || []).filter((g) => g.count > 0);
+      const modes = groups
+        .slice(0, 4)
+        .map((g) => `${ui(`mob.dom.${g.key}`, g.key)} ${g.count}`)
+        .join(' / ');
+      const more = groups.length > 4 ? ' …' : '';
+      const samples = groups
+        .flatMap((g) => (g.samples || []).map((s) => (s.activity ? `${s.activity} · ${s.name}` : s.name)))
+        .filter(Boolean)
+        .slice(0, 2);
+      const parts = [`${modes}${more}`, samples.length ? `如 ${esc(samples.join(' / '))}` : ''].filter(Boolean);
+      facts.push([ui('mob.sec.appear', '出没关卡'), `${d.appearances.total} 个${parts.length ? `（${esc(parts.join('；'))}）` : ''}`]);
     }
     if (Array.isArray(d.drops) && d.drops.length) {
       const base = d.drops.find((t) => t.world_level == null) || d.drops[0];

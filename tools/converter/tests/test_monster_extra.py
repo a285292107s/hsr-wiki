@@ -257,21 +257,39 @@ class TestLoadAppearances:
         assert app[1002011]["total"] == 5, "同关两波只计一次；召唤者所在关卡也要计入被召唤者"
         assert app[1005010]["total"] == 1
 
+    def test_groups_split_by_play_mode(self, monkeypatch):
+        _fake_sources(monkeypatch)
+        app = mx.load_appearances()
+        assert app[1002011]["groups"] == [
+            {
+                "key": "endgame",
+                "count": 2,
+                "subs": [{"key": "memory", "count": 1}, {"key": "fiction", "count": 1}],
+                "samples": [{"id": 1, "name": "回忆其一"}, {"id": 2, "name": "虚构其一"}],
+            },
+            {"key": "mainline", "count": 1},
+            {"key": "simulated", "count": 1},
+            {"key": "trial", "count": 1},
+        ], "同一条目跨玩法时按域拆开；平手按固定域序排"
+
     def test_samples_only_from_player_visible_sources(self, monkeypatch):
         _fake_sources(monkeypatch)
         app = mx.load_appearances()
-        assert app[1002011]["samples"] == [{"id": 1, "name": "回忆其一"}]
-        assert app[1005010]["samples"] == [{"id": 2, "name": "虚构其一"}]
+        assert [s["name"] for g in app[1002011]["groups"] for s in g.get("samples", [])] == [
+            "回忆其一", "虚构其一",
+        ]
+        assert [s["name"] for g in app[1005010]["groups"] for s in g.get("samples", [])] == ["虚构其一"]
 
     def test_activity_name_travels_as_its_own_field(self, monkeypatch):
         _fake_sources(monkeypatch)
         app = mx.load_appearances()
-        assert app[1002040]["samples"] == [
-            {"id": 4190010, "name": "擂台赛•其一", "activity": "星天演武仪典", "level": 20}
+        assert app[1002040]["groups"] == [
+            {"key": "activity", "count": 1,
+             "samples": [{"id": 4190010, "name": "擂台赛•其一", "activity": "星天演武仪典", "level": 20}]}
         ], "关卡行带 Level 时样本透传关卡语境（4190010 的夹具行 Level=20）"
-        assert app[1003011]["samples"] == [{"id": 4270010, "name": "花火的千变假面"}], (
-            "ElationActivity 无活动名验证链 → 不落 activity 键"
-        )
+        assert app[1003011]["groups"] == [
+            {"key": "activity", "count": 1, "samples": [{"id": 4270010, "name": "花火的千变假面"}]}
+        ], "ElationActivity 无活动名验证链 → 不落 activity 键"
 
     def test_stage_context_carries_level_group_and_elite_group(self, monkeypatch):
         stages = [
@@ -284,21 +302,108 @@ class TestLoadAppearances:
         ]
         _fake_sources(monkeypatch, **{"StageConfig.json": stages})
         app = mx.load_appearances()
-        assert app[1002011]["samples"][0] == {"id": 1, "name": "回忆其一",
-                                              "level": 68, "level_group": 1, "elite_group": 6}
-        assert app[1002011]["samples"][1] == {"id": 420012, "name": "长生久视的一梦", "elite_group": 35001}
+        groups = {g["key"]: g for g in app[1002011]["groups"]}
+        assert groups["endgame"]["samples"] == [
+            {"id": 1, "name": "回忆其一", "level": 68, "level_group": 1, "elite_group": 6}
+        ]
+        assert groups["activity"]["samples"] == [
+            {"id": 420012, "name": "长生久视的一梦", "elite_group": 35001}
+        ]
 
     def test_stage_context_absent_fields_not_emitted(self, monkeypatch):
         _fake_sources(monkeypatch)
         app = mx.load_appearances()
-        assert app[1002011]["samples"][0] == {"id": 1, "name": "回忆其一"}
+        assert app[1002011]["groups"][0]["samples"][0] == {"id": 1, "name": "回忆其一"}
 
     def test_stage_without_player_visible_name_yields_no_sample(self, monkeypatch):
         _fake_sources(monkeypatch)
         app = mx.load_appearances()
         assert app[1003024]["total"] == 1
-        assert app[1003024]["samples"] == [], "关卡名 == 本怪名字（敌方标识）不得上屏"
-        assert app[1002011]["total"] == 5
+        assert app[1003024]["groups"] == [{"key": "simulated", "count": 1}], (
+            "关卡名 == 本怪名字（敌方标识）不得上屏 → 该域只有计数"
+        )
+
+    def test_dungeon_submode_follows_dungeon_type_and_type_gate(self, monkeypatch):
+        stages = [
+            {"StageID": 9101, "StageType": "Cocoon", "MonsterList": [{"a": 1003020}]},
+            {"StageID": 9102, "StageType": "FarmElement", "MonsterList": [{"a": 1003021}]},
+            {"StageID": 9103, "StageType": "Mainline", "MonsterList": [{"a": 1003024}]},
+        ]
+        _fake_sources(monkeypatch, **{
+            "StageConfig.json": stages,
+            "CocoonConfig.json": [
+                {"ID": 1, "StageIDList": [9101, 9103], "CocoonType": "TYPE_WEEK"},
+            ],
+            "FarmElementConfig.json": [{"ID": 1, "StageID": 9102}],
+            "ChallengeMazeConfig.json": [],
+            "ChallengeStoryMazeConfig.json": [],
+            "ChallengeBossMazeConfig.json": [],
+            "ChallengePeakConfig.json": [],
+        })
+        app = mx.load_appearances()
+        assert app[1003020]["groups"] == [
+            {"key": "farm", "count": 1, "subs": [{"key": "echo", "count": 1}]}
+        ]
+        assert app[1003021]["groups"] == [
+            {"key": "farm", "count": 1, "subs": [{"key": "shadow", "count": 1}]}
+        ]
+        assert app[1003024]["groups"] == [{"key": "mainline", "count": 1}], (
+            "主线关卡被列进 CocoonConfig.StageIDList 也不得挂到常驻副本子模式（类型闸）"
+        )
+
+    def test_unknown_stage_type_falls_back_to_other(self, monkeypatch):
+        _fake_sources(monkeypatch, **{
+            "StageConfig.json": [
+                {"StageID": 9201, "StageType": "BrandNewMode", "MonsterList": [{"a": 1003024}]},
+            ],
+            "ChallengeMazeConfig.json": [],
+            "ChallengeStoryMazeConfig.json": [],
+            "ChallengeBossMazeConfig.json": [],
+            "ChallengePeakConfig.json": [],
+            "CocoonConfig.json": [],
+            "FarmElementConfig.json": [],
+        })
+        app = mx.load_appearances()
+        assert app[1003024]["groups"] == [{"key": "other", "count": 1}]
+
+    def test_challenge_without_config_record_keeps_domain_without_subs(self, monkeypatch):
+        _fake_sources(monkeypatch, **{
+            "StageConfig.json": [
+                {"StageID": 9301, "StageType": "Challenge", "MonsterList": [{"a": 1003020}]},
+            ],
+            "ChallengeMazeConfig.json": [],
+            "ChallengeStoryMazeConfig.json": [],
+            "ChallengeBossMazeConfig.json": [],
+            "ChallengePeakConfig.json": [],
+        })
+        app = mx.load_appearances()
+        assert app[1003020]["groups"] == [{"key": "endgame", "count": 1}], (
+            "四张终局表未归档的关卡只落入终局域，不臆造子模式"
+        )
+
+    def test_samples_capped_per_group(self, monkeypatch):
+        stages = [
+            {"StageID": 1, "StageType": "Challenge", "MonsterList": [{"a": 1003020}]},
+            {"StageID": 2, "StageType": "Challenge", "MonsterList": [{"a": 1003020}]},
+            {"StageID": 3, "StageType": "Challenge", "MonsterList": [{"a": 1003020}]},
+        ]
+        _fake_sources(monkeypatch, **{
+            "StageConfig.json": stages,
+            "ChallengeMazeConfig.json": [
+                {"ID": 2001, "Name": {"Hash": 90}, "EventIDList1": [1], "EventIDList2": []},
+            ],
+            "ChallengeStoryMazeConfig.json": [
+                {"ID": 2002, "Name": {"Hash": 91}, "EventIDList1": [2], "EventIDList2": []},
+            ],
+            "ChallengeBossMazeConfig.json": [
+                {"ID": 2003, "Name": {"Hash": 90}, "EventIDList1": [3], "EventIDList2": []},
+            ],
+        })
+        app = mx.load_appearances()
+        endgame = app[1003020]["groups"][0]
+        assert endgame["count"] == 3
+        assert [s["id"] for s in endgame["samples"]] == [1, 2], "每个域至多 2 条样本"
+
 
 
 class TestPlayerStageNames:

@@ -509,6 +509,67 @@
   color: var(--text2);
 }
 
+.nk-mob-appear__groups {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nk-mob-appear__group {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-2);
+  background: color-mix(in srgb, var(--blk-900) 22%, transparent);
+}
+
+.nk-mob-appear__group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.nk-mob-appear__group-name {
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.nk-mob-appear__group-count {
+  margin-left: auto;
+  font-family: var(--font-hud);
+  font-size: 0.9rem;
+  line-height: 1.2;
+  color: var(--metric-val);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-mob-appear__subs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nk-mob-appear__sub {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 0.68rem;
+  color: var(--text3);
+}
+
+.nk-mob-appear__sub-count {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+
 .nk-mob-appear__samples {
   display: flex;
   flex-wrap: wrap;

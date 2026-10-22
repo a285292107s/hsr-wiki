@@ -362,13 +362,37 @@ function variantCell(det: MonsterDetail | null, key: 'stance' | 'hp' | 'speed' |
 
 const drops = computed(() => d.value?.drops ?? []);
 const appearances = computed(() => d.value?.appearances ?? null);
+const appearGroups = computed(() => (appearances.value?.groups ?? []).filter((g) => g.count > 0));
+const appearSamples = computed(() => appearGroups.value.flatMap((g) => g.samples ?? []));
+const DOMAIN_LABEL_KEY: Record<string, string> = {
+  mainline: 'mob.dom.mainline',
+  simulated: 'mob.dom.simulated',
+  divergent: 'mob.dom.divergent',
+  endgame: 'mob.dom.endgame',
+  farm: 'mob.dom.farm',
+  trial: 'mob.dom.trial',
+  activity: 'mob.dom.activity',
+  other: 'mob.dom.other',
+};
+const SUB_LABEL_KEY: Record<string, string> = {
+  memory: 'mob.sub.memory',
+  fiction: 'mob.sub.fiction',
+  apocalypse: 'mob.sub.apocalypse',
+  anomaly: 'mob.sub.anomaly',
+  calyx: 'mob.sub.calyx',
+  cavern: 'mob.sub.cavern',
+  echo: 'mob.sub.echo',
+  shadow: 'mob.sub.shadow',
+};
+const domainLabel = (key: string): string => t(DOMAIN_LABEL_KEY[key] ?? 'mob.dom.other');
+const subLabel = (key: string): string => t(SUB_LABEL_KEY[key] ?? 'mob.dom.other');
 type MonsterSamplePanel = { hp: number; atk: number; def: number; speed: number };
 const samplePanels = computed<Record<number, MonsterSamplePanel | null> | null>(() => {
   const v = d.value;
   if (!v) return null;
   const own = eliteRef.value?.[String(v.elite_group ?? 1)] ?? null;
   const out: Record<number, MonsterSamplePanel | null> = {};
-  for (const s of v.appearances?.samples ?? []) {
+  for (const s of appearSamples.value) {
     if (s.level == null) {
       out[s.id] = null;
       continue;
@@ -726,16 +750,30 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             </header>
             <template v-if="appearances">
               <p class="nk-mob-appear__count">
-                {{ t('mob.appearIn') }} <strong>{{ appearances.total }}</strong>{{ t('mob.appearStages') }}<template v-if="appearances.samples.length">{{ t('mob.appearSamples') }}</template><template v-else>。</template>
+                {{ t('mob.appearIn') }} <strong>{{ appearances.total }}</strong>{{ t('mob.appearStages') }}<template v-if="appearGroups.length"> · {{ t('mob.appearModes', { n: appearGroups.length }) }}</template>
               </p>
-              <ul v-if="appearances.samples.length" class="nk-mob-appear__samples">
-                <li v-for="s in appearances.samples" :key="s.id" class="nk-mob-appear__sample">
-                  <span class="nk-mob-appear__sample-name"><template v-if="s.activity"><span class="nk-mob-appear__sample-from">{{ s.activity }}</span> · </template>{{ s.name }}</span>
-                  <span v-if="samplePanels?.[s.id]" class="nk-mob-appear__sample-panel"><span class="nk-mob-appear__sample-panel-lv">{{ t('mob.level', { n: s.level }) }}</span> · HP {{ fmtStatValue(samplePanels[s.id]!.hp) }} / ATK {{ fmtStatValue(samplePanels[s.id]!.atk) }} / DEF {{ fmtStatValue(samplePanels[s.id]!.def) }} / SPD {{ fmtStatValue(samplePanels[s.id]!.speed) }}</span>
+              <ul v-if="appearGroups.length" class="nk-mob-appear__groups">
+                <li v-for="g in appearGroups" :key="g.key" class="nk-mob-appear__group" :data-domain="g.key">
+                  <div class="nk-mob-appear__group-head">
+                    <span class="nk-mob-appear__group-name">{{ domainLabel(g.key) }}</span>
+                    <span class="nk-mob-appear__group-count">{{ g.count }}</span>
+                  </div>
+                  <ul v-if="g.subs?.length" class="nk-mob-appear__subs">
+                    <li v-for="sub in g.subs" :key="sub.key" class="nk-mob-appear__sub">
+                      <span class="nk-mob-appear__sub-name">{{ subLabel(sub.key) }}</span>
+                      <span class="nk-mob-appear__sub-count">{{ sub.count }}</span>
+                    </li>
+                  </ul>
+                  <ul v-if="g.samples?.length" class="nk-mob-appear__samples">
+                    <li v-for="s in g.samples" :key="s.id" class="nk-mob-appear__sample">
+                      <span class="nk-mob-appear__sample-name"><template v-if="s.activity"><span class="nk-mob-appear__sample-from">{{ s.activity }}</span> · </template>{{ s.name }}</span>
+                      <span v-if="samplePanels?.[s.id]" class="nk-mob-appear__sample-panel"><span class="nk-mob-appear__sample-panel-lv">{{ t('mob.level', { n: s.level }) }}</span> · HP {{ fmtStatValue(samplePanels[s.id]!.hp) }} / ATK {{ fmtStatValue(samplePanels[s.id]!.atk) }} / DEF {{ fmtStatValue(samplePanels[s.id]!.def) }} / SPD {{ fmtStatValue(samplePanels[s.id]!.speed) }}</span>
+                    </li>
+                  </ul>
                 </li>
               </ul>
               <p class="nk-mob-appear__tip">
-                <template v-if="appearances.samples.length">{{ t('mob.appearSourceNote') }}</template>
+                <template v-if="appearSamples.length">{{ t('mob.appearSourceNote') }}</template>
                 <template v-else>{{ t('mob.appearNoNameNote') }}</template>
               </p>
             </template>

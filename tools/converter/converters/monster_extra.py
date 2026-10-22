@@ -11,6 +11,45 @@ from converters.monster_common import stage_context as _stage_context
 
 logger = logging.getLogger("converter")
 
+_APPEARANCE_DOMAINS: dict[str, str] = {
+    "Mainline": "mainline",
+    "VerseSimulation": "simulated",
+    "RogueChallengeActivity": "simulated",
+    "RogueEndlessActivity": "simulated",
+    "RogueRelic": "divergent",
+    "Challenge": "endgame",
+    "Cocoon": "farm",
+    "FarmElement": "farm",
+    "Trial": "trial",
+    "FightFest": "activity",
+    "TelevisionActivity": "activity",
+    "SummonActivity": "activity",
+    "StarFightActivity": "activity",
+    "ElationActivity": "activity",
+    "BoxingClub": "activity",
+    "TreasureDungeon": "activity",
+    "FightActivity": "activity",
+    "Heliobus": "activity",
+    "FeverTimeActivity": "activity",
+    "EvolveBuildActivity": "activity",
+    "FateRin": "activity",
+    "FateActivity": "activity",
+    "FinalityActivity": "activity",
+    "FantasticStory": "activity",
+    "ClockParkActivity": "activity",
+    "SwordTraining": "activity",
+    "StrongChallengeActivity": "activity",
+    "LocalLegend": "activity",
+    "ExpeditionBattle": "activity",
+    "AetherDivide": "activity",
+    "GridFightActivity": "activity",
+}
+_APPEARANCE_DOMAIN_ORDER = (
+    "mainline", "simulated", "divergent", "endgame", "farm", "trial", "activity", "other",
+)
+_COCOON_SUBMODES = {"TYPE_NORMAL": "calyx", "TYPE_RELIC": "cavern", "TYPE_WEEK": "echo"}
+_SUBMODE_ORDER = ("memory", "fiction", "apocalypse", "anomaly", "calyx", "cavern", "echo", "shadow")
+
 
 def _item_index() -> dict[int, tuple[str, str]]:
     out: dict[int, tuple[str, str]] = {}
@@ -189,11 +228,60 @@ def load_player_stage_names(stage_types: dict[int, str]) -> dict[int, dict]:
     return names
 
 
-def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:
+def _appearance_submodes(stage_types: dict[int, str]) -> dict[int, str]:
+    subs: dict[int, str] = {}
+
+    def put(sid: object, sub: str, allowed: frozenset[str]) -> None:
+        if isinstance(sid, int) and stage_types.get(sid) in allowed:
+            subs.setdefault(sid, sub)
+
+    for table, sub in (
+        ("ChallengeMazeConfig", "memory"),
+        ("ChallengeStoryMazeConfig", "fiction"),
+        ("ChallengeBossMazeConfig", "apocalypse"),
+    ):
+        for rec in _load_table(table):
+            for field in ("EventIDList1", "EventIDList2"):
+                for sid in rec.get(field) or []:
+                    put(sid, sub, frozenset({"Challenge"}))
+    for rec in _load_table("ChallengePeakConfig"):
+        for sid in rec.get("EventIDList") or []:
+            put(sid, "anomaly", frozenset({"Challenge"}))
+    for rec in _load_table("CocoonConfig"):
+        sub = _COCOON_SUBMODES.get(rec.get("CocoonType") or "")
+        if not sub:
+            continue
+        for sid in rec.get("StageIDList") or []:
+            put(sid, sub, frozenset({"Cocoon"}))
+        put(rec.get("StageID"), sub, frozenset({"Cocoon"}))
+    for rec in _load_table("FarmElementConfig"):
+        put(rec.get("StageID"), "shadow", frozenset({"FarmElement"}))
+    return subs
+
+
+def _pick_samples(candidates: list[tuple[str, str, dict]], domain: str, cap: int) -> list[dict]:
+    picked: list[dict] = []
+    slots: set[str] = set()
+    names: set[str] = set()
+    for cand_domain, slot, sample in candidates:
+        if cand_domain != domain or len(picked) >= cap:
+            continue
+        if slot in slots or sample["name"] in names:
+            continue
+        slots.add(slot)
+        names.add(sample["name"])
+        picked.append(sample)
+    return picked
+
+
+def load_appearances(samples_per_group: int = 2) -> dict[int, dict]:
     stages = load_json(EXCEL_DIR / "StageConfig.json")
     configs = load_json(EXCEL_DIR / "MonsterConfig.json")
-    stage_types = {r.get("StageID"): (r.get("StageType") or "") for r in stages}
-    names = load_player_stage_names({k: v for k, v in stage_types.items() if k is not None})
+    stage_types = {
+        r.get("StageID"): (r.get("StageType") or "") for r in stages if isinstance(r.get("StageID"), int)
+    }
+    names = load_player_stage_names(stage_types)
+    submodes = _appearance_submodes(stage_types)
     id2tpl: dict[int, int] = {}
     summons: dict[int, list] = {}
     for rec in configs:
@@ -206,12 +294,17 @@ def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:
         summons[mid] = list(rec.get("SummonIDList") or [])
 
     total: dict[int, int] = {}
-    samples: dict[int, list[dict]] = {}
+    by_domain: dict[int, dict[str, int]] = {}
+    by_sub: dict[int, dict[str, dict[str, int]]] = {}
+    candidates: dict[int, list[tuple[str, str, dict]]] = {}
     for rec in stages:
         sid = rec.get("StageID")
         stype = rec.get("StageType") or ""
+        domain = _APPEARANCE_DOMAINS.get(stype, "other")
+        sub = submodes.get(sid, "")
         named = names.get(sid) or {}
         name = named.get("name", "")
+        slot = sub or named.get("activity") or stype
         tpls: set[int] = set()
         for wave in rec.get("MonsterList") or []:
             for mid in wave.values():
@@ -226,33 +319,41 @@ def load_appearances(sample_kinds: int = 3) -> dict[int, dict]:
                         tpls.add(stpl)
         for tpl in tpls:
             total[tpl] = total.get(tpl, 0) + 1
-            book = samples.setdefault(tpl, [])
-            if (
-                name
-                and len(book) < sample_kinds
-                and all(s["type"] != stype and s["name"] != name for s in book)
-            ):
-                sample = {"id": sid, "name": name, "type": stype}
+            domains = by_domain.setdefault(tpl, {})
+            domains[domain] = domains.get(domain, 0) + 1
+            if sub:
+                subs = by_sub.setdefault(tpl, {}).setdefault(domain, {})
+                subs[sub] = subs.get(sub, 0) + 1
+            if name:
+                sample = {"id": sid, "name": name}
                 if named.get("activity"):
                     sample["activity"] = named["activity"]
                 sample.update(_stage_context(rec))
-                book.append(sample)
+                candidates.setdefault(tpl, []).append((domain, slot, sample))
 
-    return {
-        tpl: {
-            "total": n,
-            "samples": [
-                {
-                    "id": s["id"],
-                    "name": s["name"],
-                    **({"activity": s["activity"]} if s.get("activity") else {}),
-                    **({k: s[k] for k in ("level", "level_group", "elite_group") if k in s}),
-                }
-                for s in samples.get(tpl, [])
-            ],
-        }
-        for tpl, n in total.items()
-    }
+    out: dict[int, dict] = {}
+    for tpl, n in total.items():
+        groups: list[dict] = []
+        ordered = sorted(
+            by_domain[tpl].items(),
+            key=lambda kv: (-kv[1], _APPEARANCE_DOMAIN_ORDER.index(kv[0])),
+        )
+        for key, count in ordered:
+            group: dict = {"key": key, "count": count}
+            subs = by_sub.get(tpl, {}).get(key) or {}
+            if subs:
+                group["subs"] = [
+                    {"key": sub, "count": sub_count}
+                    for sub, sub_count in sorted(
+                        subs.items(), key=lambda kv: (-kv[1], _SUBMODE_ORDER.index(kv[0]))
+                    )
+                ]
+            picked = _pick_samples(candidates.get(tpl, []), key, samples_per_group)
+            if picked:
+                group["samples"] = picked
+            groups.append(group)
+        out[tpl] = {"total": n, "groups": groups}
+    return out
 
 
 def load_phases() -> dict[int, list[dict]]:

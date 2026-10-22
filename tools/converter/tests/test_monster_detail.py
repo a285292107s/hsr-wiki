@@ -21,7 +21,9 @@ def fake_monsters(monkeypatch):
         8013010: [{"world_level": None, "avatar_exp": 36, "items": [{"id": 2, "name": "信用点", "icon": "icon/item/2.png"}]}],
     })
     monkeypatch.setattr(md, "load_appearances", lambda: {
-        8013010: {"total": 12, "samples": [{"id": 1, "name": "于枯冬之中"}]},
+        8013010: {"total": 12, "groups": [
+            {"key": "endgame", "count": 12, "samples": [{"id": 1, "name": "于枯冬之中"}]},
+        ]},
     })
     monkeypatch.setattr(md, "load_phases", lambda: {
         1002011: [{"phase_id": 1, "weak": ["Ice"], "resist": {"Fire": 0.2}}],
@@ -140,7 +142,10 @@ class TestConvert:
             "world_level": None, "avatar_exp": 36,
             "items": [{"id": 2, "name": "信用点", "icon": "icon/item/2.png"}],
         }]
-        assert d["appearances"] == {"total": 12, "samples": [{"id": 1, "name": "于枯冬之中"}]}
+        assert d["appearances"] == {
+            "total": 12,
+            "groups": [{"key": "endgame", "count": 12, "samples": [{"id": 1, "name": "于枯冬之中"}]}],
+        }
         assert "phases" not in d, "阶段只挂在有数据的模板上"
         assert fake_monsters["1002011.json"]["phases"] == [
             {"phase_id": 1, "weak": ["Ice"], "resist": {"Fire": 0.2}},
