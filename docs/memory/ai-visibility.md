@@ -84,7 +84,7 @@
 - **字段要挑 schema.org 有定义的属性，不自己造类型**：角色属性走 `Person.characterAttribute`（其定义正是「虚构角色的某一方面数据」），拉丁转写名走 `alternateName`；`VideoGame` 会把「这个页面」说成「这款游戏」，自定义类型机器不认。
 - **专题页用 `Article` + `BreadcrumbList`，不用 `CollectionPage` + `ItemList`**：专题页是异构条目的叙述性集合，写成 `ItemList` 等于强加「收录清单」语义，并与其 `nk-snapshot__entry` 计数必须为 0 的规则自相矛盾。
 - **AI 检索入口没有提交/申诉页**：OpenAI 无任何提交入口，Perplexity 亦无官方收录申请——进入 ChatGPT 搜索的唯一官方路径是**允许 `OAI-SearchBot` 抓取**；主动入口只有 GSC（Google）与 IndexNow（Bing 侧，Google 未参与）。
-- **站点所有权验证资产必须常驻，删任一即失去数据**：GSC 会周期性复验，且 DNS TXT 与 HTML 文件分属不同验证通道；换 token 必须同步改 shell 模板的 meta 与根目录验证文件两处。
+- **站点所有权验证资产必须常驻，删任一即失去数据**：GSC 会周期性复验，且 DNS TXT 与 HTML 文件分属不同验证通道；换 token 必须同步改 shell 模板的 meta 与根目录验证文件两处。网域资源的 TXT 记录**不在仓库里**（NamesLink 控制台维护，清单见 [ai-discoverability.md](../agents/ai-discoverability.md) §5），且属性域名须逐字 `myhsr.wiki`：拼成 `myhrs.wiki` 得到的是另一个（未注册）域名的 token，加到正确域名上也永远验证不过。
 
 ## 页面元信息：title / og / JSON-LD
 

@@ -155,12 +155,13 @@ llms.txt **不是收录杠杆**（Google 明文忽略它，依据见 [AI检索�
 
 ### 站点所有权验证（Google Search Console，2026-09 落地）
 
-origin 迁至自有域名 `myhsr.wiki` 后 DNS 归站方控制：GSC 应为 `myhsr.wiki` 建 **网域** 资源（DNS TXT 验证，一次覆盖全部协议与子域）；旧 `myhsr.vercel.app` 前缀资源仅余历史数据，新域收录必须走新资源。**两个验证资产都必须常驻**（token 与 HTML 文件属生成它们的 Google 账号、与域名无关，URL 前缀资源可复用），GSC 会周期性复验，删任一即失去数据：
+origin 迁至自有域名 `myhsr.wiki` 后 DNS 归站方控制：GSC 应为 `myhsr.wiki` 建 **网域** 资源（DNS TXT 验证，一次覆盖全部协议与子域）；旧 `myhsr.vercel.app` 前缀资源仅余历史数据，新域收录必须走新资源。**三个验证资产分属三条通道，都必须常驻**（token 与 HTML 文件属生成它们的 Google 账号、与域名无关，URL 前缀资源可复用），GSC 会周期性复验，删任一即失去对应资源的数据：
 
 1. `index.html` 的 `<meta name="google-site-verification" content="5PSScRDejeMnyjRVQTH2t05GY4tmJ2oG3-JMqQZL_cs" />`（随 shell 模板进入全部快照；首页由 `dist/index.html` 直接投递，GSC 抓首页即读到）；
-2. `public/google0415a67deffb7705.html`，内容为 `google-site-verification: google0415a67deffb7705.html`（GSC 推荐/默认自动尝试的方式；文件在 dist 根，文件系统优先命中，不受 catch-all 影响）。
+2. `public/google0415a67deffb7705.html`，内容为 `google-site-verification: google0415a67deffb7705.html`（GSC 推荐/默认自动尝试的方式；文件在 dist 根，文件系统优先命中，不受 catch-all 影响）；
+3. 网域资源的 DNS TXT：主机记录 `@`、类型 `TXT`、值 `google-site-verification=3VzU4GhUPzJQ9E26YsxS0luwxU-zfIZpREBvcHgjXNI`、TTL 600。该记录**不在仓库里**：`myhsr.wiki` 的权威 NS 是 `ns1/ns2.nameslink.com`，只在 NamesLink 控制台（域名管理 → 我的域名 → myhsr.wiki → 解析）维护，保存需安全邮箱 MFA 验证码；仓库任何改动都不会同步它，只能靠本清单留档。
 
-换 token 必须在 GSC 重新获取后**同步改这两处**。验证通过后应在 GSC「站点地图」提交 `https://myhsr.wiki/sitemap.xml`（Google 唯一主动提交入口）。
+网域资源与 meta/文件属**不同验证通道**：换 token 须在 GSC 重新获取后改对应通道的那一处（网域资源改 TXT，URL 前缀资源改 meta 与 HTML 文件），改错通道不会生效。网域资源另有一条硬约束：**属性域名必须逐字 `myhsr.wiki`**——`myhrs.wiki`（m 与 h 换位）是未注册域名（NXDOMAIN），且 GSC 为该属性签发的 token 与本域无关，TXT 加到正确域名上也验证不过。验证通过后应在 GSC「站点地图」提交 `https://myhsr.wiki/sitemap.xml`（Google 唯一主动提交入口）。
 
 ## 6. 守卫：`tools/check-ai-endpoints.mjs`
 
