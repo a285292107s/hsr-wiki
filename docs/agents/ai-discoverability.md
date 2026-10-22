@@ -163,6 +163,15 @@ origin 迁至自有域名 `myhsr.wiki` 后 DNS 归站方控制：GSC 应为 `myh
 
 网域资源与 meta/文件属**不同验证通道**：换 token 须在 GSC 重新获取后改对应通道的那一处（网域资源改 TXT，URL 前缀资源改 meta 与 HTML 文件），改错通道不会生效。网域资源另有一条硬约束：**属性域名必须逐字 `myhsr.wiki`**——`myhrs.wiki`（m 与 h 换位）是未注册域名（NXDOMAIN），且 GSC 为该属性签发的 token 与本域无关，TXT 加到正确域名上也验证不过。验证通过后应在 GSC「站点地图」提交 `https://myhsr.wiki/sitemap.xml`（Google 唯一主动提交入口）。
 
+### 双域名：主域 + `myhsr.vercel.app` 兜底（2026-10 落地）
+
+Vercel 项目的 Domains 里**同时保留** `myhsr.wiki` 与 `myhsr.vercel.app`，两者都是 `Connect to an environment → Production`（直接服务、不做跳转），只有 `www.myhsr.wiki` 是 `308 → 根域`。`myhsr.vercel.app` 的存在理由是**域名到期兜底**：DNS 随域名一起失效时，旧 `.vercel.app` 域不依赖那条 A 记录，站仍可访问。
+
+- **不要顺手移除 `myhsr.vercel.app`**：它是唯一在域名失效后仍可用的入口，删掉就无法兜底；它与「域名到期后该改哪里」耦合，属于删了不报错、只在事故当天才发现的那类损失。
+- **双主机不算重复内容**：canonical / `og:url` / hreflang / JSON-LD 的 URL 全部是**绝对**地址、指向 `SITE_ORIGIN`，故 `myhsr.vercel.app` 上抓到的每一页都自报正式地址为 `myhsr.wiki`。根路由也一样——`dist/index.html` 本身就是 home 快照（与 `prerender/home.html` 字节一致），不存在「相对 canonical 自指」的缺口；守卫第 3 组对每份快照断言 canonical 同源存在，写错即构建失败。
+- **域名到期要切兜底**：改 `tools/gen-ai-endpoints.mjs` 的 `SITE_ORIGIN` 常量 + `index.html` 的 `<meta name="google-site-verification">` 与 `og:image` 两行 + `public/robots.txt` 的 `Sitemap` 行，重新部署；GSC 侧需按新域重建资源或另配验证。origin 在本站是**代码常量**（不是环境变量），所以切换是一次提交，不是改后台。
+- 反向配置会出真故障：根域若被设成 `308 → www`，sitemap 里每条 URL 都落在重定向链上，GSC 判「不允许的网址」（2026-10 在另一站实测到该形态）。
+
 ## 6. 守卫：`tools/check-ai-endpoints.mjs`
 
 构建后运行（`pnpm build` 末步），失败即构建失败。守卫按 **7 组**汇总（`N/7`：1 入口文件 / 2 sitemap / 3 快照正文 / 4 覆盖率 / 5 条目级覆盖率 / 6 外壳与首页 / 7 汇总），下表 1–5 与分组**不是一一对应**——新增断言一律标注其实际组号。断言：
