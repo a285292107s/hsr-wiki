@@ -761,6 +761,7 @@ let sitemapCount = -1;
     ['currency/augment', 'currency/augment.html', '/currency/augment'],
     ['currency/trait', 'currency/trait.html', '/currency/trait'],
     ['voracity', 'voracity.html', '/voracity'],
+    ['formula', 'formula.html', '/formula'],
   ];
 
   const idFamilyDefs = [
@@ -867,7 +868,7 @@ let sitemapCount = -1;
     'home.html', 'character.html', 'lightcone.html', 'relic.html', 'item.html', 'monster.html',
     'endgame.html', 'endgame/maze.html', 'endgame/story.html', 'endgame/boss.html', 'endgame/peak.html',
     'achievement.html', 'currency.html', 'currency/role.html', 'currency/item.html', 'currency/buff.html',
-    'currency/augment.html', 'currency/trait.html', 'voracity.html',
+    'currency/augment.html', 'currency/trait.html', 'voracity.html', 'formula.html',
   ];
   const layeredSeen = new Set();
   for (const f of snapshotFiles) {

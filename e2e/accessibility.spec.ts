@@ -38,6 +38,7 @@ const PAGES = [
   } },
   { path: '/currency', label: '货币战争 Hub', wait: null },
   { path: '/voracity', label: '贪饕污染', wait: () => (page: Page) => page.waitForSelector('.nk-vor-secnav .nk-secnav__btn', { state: 'attached', timeout: 15_000 }) },
+  { path: '/formula', label: '战斗公式', wait: () => (page: Page) => page.waitForSelector('.nk-formula-secnav .nk-secnav__btn', { state: 'attached', timeout: 15_000 }) },
 ] as const;
 
 const isKnown = (id: string, target: string): KnownViolation | undefined =>

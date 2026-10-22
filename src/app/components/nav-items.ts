@@ -58,6 +58,10 @@ export const NORMAL_NAV_ITEMS: NavItem[] = [
     key: 'nav.voracity', en: 'GLUTTONY', path: '/voracity',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21A9 9 0 1 1 21 12"/><path d="M12 17A5 5 0 1 1 17 12"/><circle cx="12" cy="12" r="1.3"/></svg>',
   },
+  {
+    key: 'nav.formula', en: 'FORMULA', path: '/formula',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v17h17"/><path d="M7 17c0-6 3-10 8-10"/></svg>',
+  },
 ];
 
 export const CW_NAV_ITEMS: NavItem[] = [

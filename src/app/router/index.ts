@@ -166,6 +166,12 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 1, titleKey: 'nav.voracity' },
   },
   {
+    path: '/formula',
+    name: 'formula',
+    component: () => import('../views/FormulaView.vue'),
+    meta: { depth: 1, titleKey: 'nav.formula' },
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: () => import('../views/SettingsView.vue'),

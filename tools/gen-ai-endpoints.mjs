@@ -1929,6 +1929,231 @@ function voracityPages(ctx) {
 }
 
 
+const FORMULA_ACTION_VALUE_BASE = 10000;
+const FORMULA_FIRST_CYCLE_AV = 150;
+const FORMULA_CYCLE_AV = 100;
+const FORMULA_SPEED_TABLES = [
+  ['formula.speed.tableFirst', '首轮（150 行动值）', FORMULA_FIRST_CYCLE_AV, [1, 2, 3, 4]],
+  ['formula.speed.tableTwo', '前两轮（250 行动值）', FORMULA_FIRST_CYCLE_AV + FORMULA_CYCLE_AV, [2, 4, 6]],
+];
+const FORMULA_RES_PRESETS = [0, 20, 40, 60];
+
+function formulaSpeedNeed(turns, budget) {
+  return String(Math.round((turns * FORMULA_ACTION_VALUE_BASE * 100) / budget) / 100);
+}
+
+const FORMULA_BREAK_ELEMENTS = [
+  ['Physical', 2],
+  ['Fire', 2],
+  ['Wind', 1.5],
+  ['Ice', 1],
+  ['Thunder', 1],
+  ['Quantum', 0.5],
+  ['Imaginary', 0.5],
+];
+const FORMULA_BREAK_ROWS = [
+  ['formula.row.breakBase', '击破基数', 'base'],
+  ['formula.row.elementBreak', '属性击破倍率', 'x'],
+  ['formula.row.breakEffect', '击破特攻', 'x1plus'],
+  ['formula.row.toughnessLength', '韧性条长度系数', 'x'],
+  ['formula.row.breakBonus', '击破增伤', 'x1plus'],
+  ['formula.row.vuln', '易伤区', 'x'],
+  ['formula.row.defense', '防御区', 'x'],
+  ['formula.row.resist', '抗性区', 'x'],
+  ['formula.row.reduce', '减伤区', 'x'],
+  ['formula.row.toughnessCheck', '韧性减伤', 'x09'],
+];
+const FORMULA_SUPER_BREAK_ROWS = [
+  ['formula.row.breakBase', '击破基数', 'base10'],
+  ['formula.row.breakEffect', '击破特攻', 'x1plus'],
+  ['formula.row.superToughness', '削韧值', 'x'],
+  ['formula.row.superBonus', '超击破伤害提高', 'x1plus'],
+  ['formula.row.vuln', '易伤区', 'x'],
+  ['formula.row.defense', '防御区', 'x'],
+  ['formula.row.resist', '抗性区', 'x'],
+  ['formula.row.reduce', '减伤区', 'x'],
+  ['formula.row.toughnessCheck', '韧性减伤', 'x1'],
+];
+const FORMULA_ELATION_ROWS = [
+  ['formula.row.elationBase', '欢愉基础值', 'base'],
+  ['formula.row.elationMultiplier', '欢愉倍率', 'x'],
+  ['formula.row.elationDegree', '欢愉度', 'x1plus'],
+  ['formula.row.joke', '笑点区', 'x'],
+  ['formula.row.crit', '双爆区', 'x'],
+  ['formula.row.laugh', '增笑区', 'x1plus'],
+  ['formula.row.vuln', '易伤区', 'x'],
+  ['formula.row.resist', '抗性区', 'x'],
+  ['formula.row.toughnessCheck', '韧性减伤', 'x'],
+  ['formula.row.defense', '防御区', 'x'],
+  ['formula.term.dmgReduction', '减伤', 'x1minus'],
+];
+
+function formulaChainTerm(rowKey, fallbackName, kind) {
+  const name = ui(rowKey, fallbackName);
+  if (kind === 'base') return name;
+  if (kind === 'base10') return `${name} ÷ 10`;
+  if (kind === 'x1plus') return `(1 + ${name})`;
+  if (kind === 'x1minus') return `(1 − ${name})`;
+  if (kind === 'x09') return `0.9 (${name})`;
+  if (kind === 'x1') return `1 (${name})`;
+  return name;
+}
+
+function formulaChainLine(rows) {
+  return rows.map(([rowKey, fallbackName, kind]) => formulaChainTerm(rowKey, fallbackName, kind)).join(' × ');
+}
+
+function formulaPages(ctx) {
+  const title = ui('nav.formula', '战斗公式');
+  const itemList = (rows) => `<ul class="nk-snapshot__list">${rows
+    .map(([name, detail]) => `<li><span>${esc(name)}</span><p>${esc(detail)}</p></li>`)
+    .join('')}</ul>`;
+  const cardList = (cards) => `<ul class="nk-snapshot__list">${cards
+    .map(([name, lines]) => `<li><span>${esc(name)}</span>${lines.map((line) => `<p>${esc(line)}</p>`).join('')}</li>`)
+    .join('')}</ul>`;
+  const speedRows = FORMULA_SPEED_TABLES.map(([key, fallback, budget, turnsList]) => [
+    ui(key, fallback),
+    turnsList.map((n) => `${uiT('formula.speed.turnsUnit', '{n} 动', { n })} → ${formulaSpeedNeed(n, budget)}`).join(' · '),
+  ]);
+  const elemName = (id) => ctx.elemNames.get(id) || id;
+  const breakElements = FORMULA_BREAK_ELEMENTS.map(([id, mult]) => [elemName(id), `× ${mult}`]);
+  const entryLinks = [
+    ['/', ui('nav.home', '首页')],
+    ['/character', ui('catalog.character.title', '角色图鉴')],
+    ['/monster', ui('catalog.monster.title', '敌对物种')],
+  ].map(([href, label]) => `<a href="${esc(href)}">${esc(label)}</a>`).join('<span class="nk-snapshot__sep">›</span>');
+  const paragraph = (key, fallback) => `<p>${esc(ui(key, fallback))}</p>`;
+  const summaryPlain = `${title} · ${ui('formula.hero.lead', '把一次直伤拆成六个乘区，逐区调参看读数怎么走。')}`;
+  const description = cut(summaryPlain, 150);
+  const body = detailBody(ctx, {
+    crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [title, null]]),
+    h1: title,
+    summary: esc(ui('formula.hero.lead', '把一次直伤拆成六个乘区，逐区调参看读数怎么走。')),
+    facts: [[ui('formula.chain.toughness', '韧性区'), `${esc(ui('formula.chain.toughnessOff', '未破韧 ×0.9'))} / ${esc(ui('formula.chain.toughnessOn', '已击破 ×1'))}`]],
+    sections: [
+      {
+        title: ui('formula.sec.overview', '伤害链路'),
+        html: paragraph('formula.overview.lead', '乘区之间只有乘法，所以每个乘区的相对提升价值相同。点任一乘区看公式与取值范围，右侧账本显示它相对中性值的偏移。')
+          + `<p>${esc(ui('formula.ledger.title', '乘区账本'))} · ${esc(ui('formula.ledger.note', '以中性值 1.0 为轴：向右为增益、向左为损失；条长按系数与 1 的差值大小计，不代表伤害占比。基础伤害不是系数，单列在顶部。'))}</p>`
+          + paragraph('formula.overview.noCrit', '击破伤害与持续伤害不能暴击，它们的暴击区恒为 1。')
+          + `<p>${esc(ui('formula.chain.toughness', '韧性区'))}：${esc(ui('formula.chain.toughnessOff', '未破韧 ×0.9'))} / ${esc(ui('formula.chain.toughnessOn', '已击破 ×1'))}</p>`
+          + paragraph('formula.zoneNote.toughness', '未破韧时全部伤害 ×0.9；击破后回到 ×1。它是战斗状态，不是可调乘区。')
+          + `<p class="nk-snapshot__note">${esc(ui('formula.hero.note', '口径：直伤、击破与持续伤害；数值取自本站转换数据，机制常量取官方战斗系统。'))}</p>`
+          + `<p class="nk-snapshot__more">${entryLinks}</p>`,
+      },
+      {
+        title: ui('formula.sec.break', '击破链路'),
+        html: paragraph('formula.break.lead', '击破与超击破是两条独立链路：基数是「击破基数 × 属性击破倍率」，不是攻击力。两者最大的差别是韧性减伤——击破瞬伤恒定 ×0.9，超击破只发生在已破韧目标上 ×1。')
+          + `<p>${esc(ui('formula.break.normalTitle', '普通击破'))}</p>`
+          + `<p>${esc(formulaChainLine(FORMULA_BREAK_ROWS))}</p>`
+          + paragraph('formula.break.lengthNote', '韧性条越长，单次击破伤害越高：长度系数 = ((韧性点 ÷ 10) + 2) ÷ 4。击破瞬伤恒定吃 ×0.9 韧性减伤。')
+          + paragraph('formula.break.noCrit', '击破伤害不能暴击，所以没有暴击区。')
+          + paragraph('formula.break.noBonus', '击破伤害不吃增伤区（攻击力、增伤、属性增伤全部无效），但吃击破增伤。')
+          + `<p>${esc(ui('formula.row.elementBreak', '属性击破倍率'))}</p>`
+          + itemList(breakElements)
+          + `<p>${esc(ui('formula.break.effectTitle', '击破效果'))}</p>`
+          + `<ul class="nk-snapshot__list">${['Physical', 'Fire', 'Thunder', 'Wind', 'Ice', 'Quantum', 'Imaginary']
+            .map((el) => `<li><p>${esc(ui(`formula.break.effect${el}`, el))}</p></li>`).join('')}</ul>`
+          + paragraph('formula.break.effectNote', '以上为每次结算的基础值，再乘 (1 + 击破特攻) 与防御 / 抗性 / 易伤 / 减伤区；持续伤害与附加伤害不乘长度系数（裂伤上限与纠缠例外），不能暴击，也不吃攻击力与增伤。')
+          + `<p>${esc(ui('formula.break.superTitle', '超击破'))}</p>`
+          + `<p>${esc(formulaChainLine(FORMULA_SUPER_BREAK_ROWS))}</p>`
+          + paragraph('formula.break.superOff', '超击破只发生在已破韧目标上：基数 = 击破基数 ÷ 10，削韧值按韧性点计，韧性减伤 ×1。打开开关查看结算。')
+          + `<p>${esc(ui('formula.break.result', '击破伤害'))} · ${esc(ui('formula.break.superResult', '超击破伤害'))}</p>`,
+      },
+      {
+        title: ui('formula.sec.elation', '欢愉伤害'),
+        html: paragraph('formula.elation.lead', '欢愉伤害是一条独立链路：基数来自欢愉基础值，由欢愉倍率、欢愉度与笑点区推进，不经过攻击力。')
+          + `<p>${esc(formulaChainLine(FORMULA_ELATION_ROWS))}</p>`
+          + `<p>${esc(`${ui('formula.row.joke', '笑点区')} = 1 + (2 × ${ui('formula.elation.joke', '好活数')}) ÷ 242`)}</p>`
+          + paragraph('formula.elation.jokeNote', '笑点区只看好活数：好活数 240 时约 2.98 倍，好活数 5 时约 1.04 倍。')
+          + `<p class="nk-snapshot__note">${esc(ui('formula.elation.notIncluded', '不参与：攻击力、增伤（含属性增伤与攻击类型增伤）。'))}</p>`
+          + `<p>${esc(ui('formula.elation.result', '暴击伤害'))} · ${esc(ui('formula.elation.expected', '期望伤害'))}</p>`,
+      },
+      {
+        title: ui('formula.sec.true', '真实伤害'),
+        html: paragraph('formula.true.lead', '真实伤害不是独立的伤害类型，而是从已经算好的原伤害里再派生一段，比例由伤害来源决定。')
+          + paragraph('formula.true.noElement', '无属性：不吃抗性，也不吃抗性穿透。')
+          + paragraph('formula.true.derived', '由原伤害派生：原伤害不变，最终 = 原伤害 × (1 + 比例)。')
+          + paragraph('formula.true.noZone', '不进任何乘区：增伤、暴击 / 暴伤、易伤、减防、穿透、减伤全部无效。')
+          + paragraph('formula.true.notAttack', '不视为一次攻击：不削韧，也不触发攻击判定与受击反馈。')
+          + paragraph('formula.true.notLethal', '可能标注【不致命】：该段真实伤害不会击杀目标。')
+          + `<p>${esc(`${ui('formula.true.added', '附加真实伤害')} = ${ui('formula.true.original', '原伤害')} × ${ui('formula.true.ratio', '真实伤害比例')}`)}</p>`
+          + `<p>${esc(`${ui('formula.true.total', '结算后总伤害')} = ${ui('formula.true.original', '原伤害')} × (1 + ${ui('formula.true.ratio', '真实伤害比例')})`)}</p>`
+          + paragraph('formula.true.note', '原伤害本身不变：最终伤害 = 原伤害 × (1 + 比例)。')
+          + `<p>${esc(`${ui('formula.true.compareTitle', '同样比例，换两条路')}：${ui('formula.true.compareBonus', '加到增伤区')} / ${ui('formula.true.compareTrue', '走真实伤害')}`)}</p>`
+          + `<p class="nk-snapshot__note">${esc(ui('formula.true.vsPursued', '与「附加伤害」的区别：附加伤害走完整乘区（可暴击、吃增伤与易伤），真实伤害不进乘区。'))}</p>`,
+      },
+      {
+        title: ui('formula.sec.growth', '属性成长'),
+        html: paragraph('formula.growth.lead', '角色、光锥、敌人是三套不同的线型。角色与光锥按等级线性成长，敌人还要再乘等级曲线与精英组倍率。')
+          + paragraph('formula.growth.charFormula', '属性 = 晋阶基础值 + 每级成长 × (等级 − 1)')
+          + paragraph('formula.growth.charNote', '显示值四舍五入，未显示的零头仍参与计算。')
+          + paragraph('formula.growth.phaseNote', '口径与角色图鉴一致：等级按晋阶分桶，Lv20/30/40/50/60/70 处基础值跳变。')
+          + paragraph('formula.growth.traceNote', '行迹实际提供的属性加成（前 3 项，按数值降序）；条形以最高项为满宽。')
+          + paragraph('formula.growth.skillNote', '战技与终结技各有一条标准线型；第二条线是该技能的真实倍率（1 级 = 100% 归一）。本角色可能使用特殊线型，模型线仅作参照。')
+          + paragraph('formula.growth.enemyFormula', '战斗值 = 基准值 × 实例倍率 × 精英组倍率 × 等级曲线倍率 + 修正值')
+          + paragraph('formula.growth.enemyNote', '战斗值 = 基准值 × 实例倍率 × 精英组倍率 × 等级曲线倍率 + 修正值；同等级敌人防御区约 0.5。')
+          + paragraph('mob.derive.caveat', '未含关卡侧精英组指派（侵蚀隧洞、拟造花萼等副本的额外倍率）与剧情系数。')
+          + paragraph('formula.growth.enemyStanceNote', '韧性不走等级曲线，只由精英组倍率与修正值决定。'),
+      },
+      {
+        title: ui('formula.sec.heal', '治疗与护盾'),
+        html: paragraph('formula.heal.lead', '治疗量与护盾量沿用伤害的结构：一个基础区乘一个修饰区。')
+          + cardList([
+            [ui('formula.heal.healValue', '治疗量'), [
+              ui('formula.heal.baseFormula', '基础治疗区 = 倍率 × 属性 + 固定值'),
+              ui('formula.heal.zoneFormula', '治疗修饰区 = (1 + Σ治疗量加成) × (1 − Σ治疗量降低)'),
+            ]],
+            [ui('formula.heal.shieldValue', '护盾量'), [
+              ui('formula.shield.baseFormula', '基础护盾区 = 倍率 × 属性 + 固定值'),
+              ui('formula.heal.shieldFormula', '护盾修饰区 = 1 + Σ护盾量提高 + Σ获得护盾量提高'),
+            ]],
+          ])
+          + paragraph('formula.heal.note', '不同来源的护盾不叠加（取最高值）；治疗与护盾的修饰区互不影响。'),
+      },
+      {
+        title: ui('formula.sec.speed', '速度与行动值'),
+        html: paragraph('formula.speed.lead', '行动值 = 10000 ÷ 速度；行动值越小越先行动。速度越高，同样的行动预算内行动次数越多。')
+          + paragraph('formula.speed.formula', '行动值 = 10000 ÷ 速度')
+          + paragraph('formula.speed.cyclesNote', '忘却之庭首轮 150 行动值、之后每轮 100；图中的行动次数为整数（向下取整）。')
+          + paragraph('formula.speed.thresholdTitle', '速度阈值')
+          + itemList(speedRows)
+          + `<p>${esc(ui('formula.speed.needSpeed', '所需最低速度'))}（${esc(ui('formula.speed.needTurns', '目标首轮行动次数'))}）</p>`,
+      },
+      {
+        title: ui('formula.sec.extra', '削韧·能量·命中'),
+        html: paragraph('formula.extra.lead', '削韧与负面效果命中不构成伤害乘区，但它们决定伤害能不能打出去。')
+          + `<p>${esc(ui('formula.extra.baseToughness', '基础破韧'))}：${esc(ui('formula.extra.breakFormula', '破韧 = 基础破韧 × (1 + 弱点击破效率)'))}</p>`
+          + paragraph('formula.extra.breakUnit', '归一单位（1 = 普攻破韧）')
+          + paragraph('formula.extra.breakNote', '以敌方韧性条上限为单位：普攻 1 / 战技 2 / 终结技 3；附加伤害与持续伤害不削韧。')
+          + paragraph('formula.extra.energyFormula', '回能 = 基础回能 × (1 + 能量恢复效率)')
+          + paragraph('formula.extra.chanceFormula', '生效概率 = 基础概率 × (1 + 效果命中) × (1 − 效果抵抗) × (1 − 专属抵抗)')
+          + `<p>${esc(ui('formula.extra.hitReverse', '所需效果命中'))}：${esc(ui('formula.extra.hitReverseNote', '按当前基础概率与效果抵抗反推；已达标时显示 0%。'))}</p>`
+          + paragraph('formula.extra.chanceNote', '效果抵抗通常 30%~40%，末日兽可达 100%；生效概率上限 100%。'),
+      },
+      {
+        title: ui('formula.sec.calc', '实战计算器'),
+        html: paragraph('formula.calc.lead', '填入面板值，直接看各乘区如何把基础伤害推到最后；账本显示每个乘区相对中性值的偏移。')
+          + itemList([
+            [ui('formula.calc.toughness', '韧性状态'), `${ui('formula.status.unbroken', '未破韧')} / ${ui('formula.status.broken', '已击破')}`],
+            [ui('formula.calc.swarm', '扑满'), `${ui('formula.status.off', '关')} / ${ui('formula.status.on', '开')}`],
+            [ui('formula.calc.resPreset', '抗性预设'), FORMULA_RES_PRESETS.map((v) => `${v}%`).join(' / ')],
+          ])
+          + `<p>${esc(ui('formula.calc.result', '期望伤害'))} · ${esc(ui('formula.calc.breakdown', '乘区账本'))}</p>`,
+      },
+    ],
+  });
+  return [makePage('formula', {
+    route: '/formula',
+    file: 'formula.html',
+    title: `${title} - ${titleTail()}`,
+    description,
+    ld: ldDataPage('/formula', title, description, [[ui('nav.home', '首页'), '/'], [title, '/formula']], ctx),
+    body,
+  })];
+}
+
+
 function buildPages(ctx) {
   return [
     ...homePages(ctx),
@@ -1944,6 +2169,7 @@ function buildPages(ctx) {
     ...currencyListPages(ctx),
     ...currencyTraitPages(ctx),
     ...voracityPages(ctx),
+    ...formulaPages(ctx),
   ];
 }
 

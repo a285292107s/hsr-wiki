@@ -157,6 +157,10 @@
       "destination": "/prerender/voracity.html"
     },
     {
+      "source": "/formula",
+      "destination": "/prerender/formula.html"
+    },
+    {
       "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)",
       "destination": "/prerender/:lang/home.html"
     },
@@ -231,6 +235,10 @@
     {
       "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/voracity",
       "destination": "/prerender/:lang/voracity.html"
+    },
+    {
+      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/formula",
+      "destination": "/prerender/:lang/formula.html"
     },
     {
       "source": "/((?!data/|assets/|robots\\.txt|sitemap\\.xml|prerender/_shell\\.html).*)",

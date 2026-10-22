@@ -54,6 +54,7 @@ export const routeFamilies = (base: string): string[] => [
   `${base}/endgame/peak`,
   `${base}/endgame/peak/9`,
   `${base}/voracity`,
+  `${base}/formula`,
   `${base}/currency`,
   `${base}/currency/role`,
   `${base}/currency/role/${roleId()}`,
