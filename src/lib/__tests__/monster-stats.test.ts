@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { monsterEliteRatiosProduct, monsterMaxLevel, monsterStanceValue, monsterStatAt, type MonsterLevelCurve } from '../monster-stats';
+import {
+  monsterEliteRatiosProduct,
+  monsterMaxLevel,
+  monsterStanceBreakdown,
+  monsterStanceValue,
+  monsterStatAt,
+  monsterStatBreakdown,
+  type MonsterLevelCurve,
+} from '../monster-stats';
 
 const CURVE: MonsterLevelCurve = {
   '1': {
@@ -139,5 +147,70 @@ describe('monsterStanceValue', () => {
   it('基准缺位 → null（调用方降级，不假数值）', () => {
     expect(monsterStanceValue(null, 30)).toBeNull();
     expect(monsterStanceValue(undefined, 30)).toBeNull();
+  });
+});
+
+describe('monsterStatBreakdown', () => {
+  const CURVE95: MonsterLevelCurve = {
+    '1': { '95': { hp: 294.42172, atk: 39.889835, def: 5.47619, speed: 1.32 } },
+  };
+  const ELITE2 = {
+    stats: { hp: 102.3, atk: 18, def: 210, speed: 100 },
+    statRatio: null,
+    levelGroup: 1,
+    curve: CURVE95,
+    eliteRatios: { hp: 1.7, atk: 0.8 } as const,
+  };
+
+  it('逐因子与最终值同源：基准 / 修饰比 / 精英倍率 / 曲线 / 修正', () => {
+    expect(monsterStatBreakdown('hp', 95, ELITE2)).toEqual({
+      base: 102.3,
+      statRatio: 1,
+      eliteRatio: 1.7,
+      curve: 294.42172,
+      modify: null,
+      value: r1(102.3 * 1.7 * 294.42172),
+    });
+    expect(monsterStatBreakdown('atk', 95, ELITE2).eliteRatio).toBe(0.8);
+    expect(monsterStatBreakdown('def', 95, ELITE2)).toMatchObject({ eliteRatio: 1, curve: 5.47619 });
+  });
+
+  it('修正值单列输出（不被曲线/倍率缩放），最终值与 monsterStatAt 一致', () => {
+    const modified = { ...DETAIL, modify: { speed: -44 } };
+    expect(monsterStatBreakdown('speed', 100, modified)).toEqual({
+      base: 100,
+      statRatio: 1,
+      eliteRatio: 1,
+      curve: 1.43,
+      modify: -44,
+      value: r1(100 * 1.43 - 44),
+    });
+    expect(monsterStatBreakdown('speed', 100, modified).value).toBe(monsterStatAt('speed', 100, modified));
+  });
+
+  it('曲线缺行时 curve/value 为 null，其余因子仍可展示（降级不假数值）', () => {
+    const row = monsterStatBreakdown('hp', 79, DETAIL);
+    expect(row.curve).toBeNull();
+    expect(row.value).toBeNull();
+    expect(row.base).toBe(69.75);
+  });
+
+  it('基准缺位 / 非数值基准 → base 与 value 均 null', () => {
+    expect(monsterStatBreakdown('hp', 80, { ...DETAIL, stats: { hp: null } })).toMatchObject({
+      base: null,
+      value: null,
+    });
+  });
+});
+
+describe('monsterStanceBreakdown', () => {
+  it('逐因子输出：基准 / 精英组韧性倍率 / 修正，不随等级变化', () => {
+    expect(monsterStanceBreakdown(480, null, 1)).toEqual({ base: 480, eliteRatio: 1, modify: null, value: 480 });
+    expect(monsterStanceBreakdown(60, 30, 2)).toEqual({ base: 60, eliteRatio: 2, modify: 30, value: 150 });
+    expect(monsterStanceBreakdown(90, null, Number.NaN).eliteRatio).toBe(1);
+  });
+
+  it('基准缺位 → value null', () => {
+    expect(monsterStanceBreakdown(null, 30, 1)).toMatchObject({ base: null, value: null });
   });
 });

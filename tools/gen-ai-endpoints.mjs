@@ -1127,10 +1127,10 @@ function monsterPages(ctx) {
       ['韧性', d.stance != null ? esc(String(d.stance)) : ''],
       [ui('mob.resist.stance', '韧性弱点'), esc(weak.join(' / '))],
       [ui('mob.resist.damage', '伤害抗性'), esc(resist.join(' / '))],
-      ['生命（模板基准）', d.stats?.hp != null ? esc(String(d.stats.hp)) : ''],
-      ['攻击（模板基准）', d.stats?.atk != null ? esc(String(d.stats.atk)) : ''],
-      ['防御（模板基准）', d.stats?.def != null ? esc(String(d.stats.def)) : ''],
-      ['速度（模板基准）', d.stats?.speed != null ? esc(String(d.stats.speed)) : ''],
+      ['生命（基准值）', d.stats?.hp != null ? esc(String(d.stats.hp)) : ''],
+      ['攻击（基准值）', d.stats?.atk != null ? esc(String(d.stats.atk)) : ''],
+      ['防御（基准值）', d.stats?.def != null ? esc(String(d.stats.def)) : ''],
+      ['速度（基准值）', d.stats?.speed != null ? esc(String(d.stats.speed)) : ''],
       [ui('mob.event.k', '活动出处'), d.event
         ? txt(`${d.event.name}（${d.event.count} 个活动关卡，等级 ${eventLevelRange(d.event.levels)}${d.event.tabs.length ? `；页签 ${d.event.tabs.join('/')}` : ''}）`, null, 160)
         : ''],

@@ -8,7 +8,13 @@ import { pageTitle } from '../seo';
 import { monsterRankKey } from '../../lib/enum-labels';
 import { elementIconUrl, escHtml, fmtDesc, itemIconUrl, monsterFigureUrl, monsterIconUrl } from '../../lib/format';
 import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
-import { monsterEliteRatiosProduct, monsterMaxLevel, monsterStanceValue, monsterStatAt } from '../../lib/monster-stats';
+import {
+  monsterEliteRatiosProduct,
+  monsterMaxLevel,
+  monsterStanceBreakdown,
+  monsterStatAt,
+  monsterStatBreakdown,
+} from '../../lib/monster-stats';
 import { fmtStatValue } from '../../lib/format';
 import { atlasFormsOf, monsterFamilyKey, monsterFamilyOf } from '../../lib/monster-family';
 import { loadLocalMonsterDetail, loadLocalMonsterEliteGroups, loadLocalMonsterLevelCurve, loadLocalMonsterList } from '../../services/api';
@@ -54,10 +60,28 @@ const combatLevel = computed(() => {
   const want = levelOverride.value ?? max;
   return Math.min(Math.max(1, want), max);
 });
-const combatStats = computed(() => {
+type CombatStatProp = 'hp' | 'atk' | 'def' | 'speed';
+
+interface DerivationRow {
+  key: string;
+  labelKey: string;
+  base: number | null;
+  statRatio: number | null;
+  eliteRatio: number;
+  curve: number | null;
+  modify: number | null;
+  value: number | null;
+  blank: boolean;
+}
+
+const STAT_LABEL_KEY: Record<CombatStatProp, string> = {
+  hp: 'mob.stat.hp', atk: 'mob.stat.atk', def: 'mob.stat.def', speed: 'mob.stat.spd',
+};
+
+const enemyMeta = computed(() => {
   const v = d.value;
   if (!v) return null;
-  const meta = {
+  return {
     statRatio: v.stat_ratio ?? null,
     levelGroup: v.level_group ?? 1,
     eliteRatios: eliteRef.value?.[String(v.elite_group ?? 1)] ?? null,
@@ -65,22 +89,76 @@ const combatStats = computed(() => {
     curve: curveRef.value,
     modify: v.speed_modify == null ? null : { speed: v.speed_modify },
   };
-  return {
-    hp: monsterStatAt('hp', combatLevel.value, meta),
-    atk: monsterStatAt('atk', combatLevel.value, meta),
-    def: monsterStatAt('def', combatLevel.value, meta),
-    speed: monsterStatAt('speed', combatLevel.value, meta),
-  };
 });
-const stanceValue = computed(() => (
-  d.value
-    ? monsterStanceValue(
-        d.value.stance,
-        d.value.stance_modify,
-        eliteRef.value?.[String(d.value.elite_group ?? 1)]?.stance ?? null,
-      )
-    : null
-));
+
+const derivationRows = computed<DerivationRow[]>(() => {
+  const v = d.value;
+  const meta = enemyMeta.value;
+  if (!v || !meta) return [];
+  const rows: DerivationRow[] = (['hp', 'atk', 'def', 'speed'] as const).map((prop) => {
+    const b = monsterStatBreakdown(prop, combatLevel.value, meta);
+    return {
+      key: prop,
+      labelKey: STAT_LABEL_KEY[prop],
+      base: b.base,
+      statRatio: b.statRatio,
+      eliteRatio: b.eliteRatio,
+      curve: b.curve,
+      modify: b.modify,
+      value: b.value,
+      blank: b.base == null,
+    };
+  });
+  if (v.stance != null) {
+    const s = monsterStanceBreakdown(
+      v.stance,
+      v.stance_modify,
+      eliteRef.value?.[String(v.elite_group ?? 1)]?.stance ?? null,
+    );
+    rows.push({
+      key: 'stance',
+      labelKey: 'mob.stat.stance',
+      base: s.base,
+      statRatio: null,
+      eliteRatio: s.eliteRatio,
+      curve: null,
+      modify: s.modify,
+      value: s.value,
+      blank: s.base == null,
+    });
+  }
+  return rows;
+});
+
+const DERIVE_TERMS = [
+  { key: 'mob.derive.col.base', desc: 'mob.derive.baseDesc' },
+  { key: 'mob.derive.col.ratio', desc: 'mob.derive.ratioDesc' },
+  { key: 'mob.derive.col.elite', desc: 'mob.derive.eliteDesc' },
+  { key: 'mob.derive.col.curve', desc: 'mob.derive.curveDesc' },
+  { key: 'mob.derive.col.modify', desc: 'mob.derive.modifyDesc' },
+] as const;
+
+function fmtFactor(v: number | null): string {
+  return v == null ? '—' : String(v);
+}
+
+function fmtCurveCell(v: number | null): string {
+  return v == null ? '—' : `×${v}`;
+}
+
+function factorText(row: DerivationRow, value: string): string {
+  return row.blank ? '—' : value;
+}
+
+function fmtRatioCell(v: number | null): string {
+  if (v == null) return '—';
+  return v === 1 ? '×1.00' : `×${v}`;
+}
+
+function fmtModifyCell(v: number | null): string {
+  if (v == null) return '—';
+  return v > 0 ? `+${v}` : v === 0 ? '+0' : String(v);
+}
 const figureUrl = computed(() => {
   if (!d.value) return '';
   return monsterFigureUrl(d.value.figure) || monsterIconUrl(d.value.icon);
@@ -479,42 +557,111 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
               <span class="nk-mob-sec__en">COMBAT STATS</span>
               <span class="nk-mob-sec__rule" aria-hidden="true"></span>
             </header>
-            <div v-if="maxLevel > 1" class="nk-mob-level">
-              <span class="nk-mob-level__label">{{ t('mob.level', { n: combatLevel }) }}</span>
-              <input
-                type="range"
-                :aria-label="t('mob.levelAria')"
-                :min="1"
-                :max="maxLevel"
-                :value="combatLevel"
-                :style="{ '--fill': `${((combatLevel - 1) / (maxLevel - 1)) * 100}%` }"
-                @input="levelOverride = Number(($event.target as HTMLInputElement).value)"
-              >
-            </div>
-            <p v-else class="nk-mob-empty">{{ t('mob.levelMissing', { n: d?.level_group ?? 1 }) }}</p>
-            <dl class="nk-mob-stats">
-              <div class="nk-mob-stat">
-                <dt class="nk-mob-stat__label">{{ t('mob.stat.hp') }}</dt>
-                <dd class="nk-mob-stat__val" data-prop="hp">{{ fmtStatCell(combatStats?.hp ?? d.stats.hp) }}</dd>
+            <template v-if="maxLevel > 1">
+              <div class="nk-mob-level">
+                <span class="nk-mob-level__label">{{ t('mob.level', { n: combatLevel }) }}</span>
+                <input
+                  type="range"
+                  :aria-label="t('mob.levelAria')"
+                  :min="1"
+                  :max="maxLevel"
+                  :value="combatLevel"
+                  :style="{ '--fill': `${((combatLevel - 1) / (maxLevel - 1)) * 100}%` }"
+                  @input="levelOverride = Number(($event.target as HTMLInputElement).value)"
+                >
+                <span class="nk-mob-level__groups">
+                  <span class="nk-mob-level__chip">{{ t('mob.derive.levelGroup', { n: d.level_group ?? 1 }) }}</span>
+                  <span class="nk-mob-level__chip">{{ t('mob.derive.eliteGroup', { n: d.elite_group ?? 1 }) }}</span>
+                </span>
               </div>
-              <div class="nk-mob-stat">
-                <dt class="nk-mob-stat__label">{{ t('mob.stat.atk') }}</dt>
-                <dd class="nk-mob-stat__val" data-prop="atk">{{ fmtStatCell(combatStats?.atk ?? d.stats.atk) }}</dd>
+              <div class="nk-mob-calc">
+                <p class="nk-mob-calc__lead">{{ t('mob.derive.lead') }}</p>
+                <p class="nk-mob-calc__formula">{{ t('mob.derive.formula') }}</p>
+                <div class="nk-mob-calc__wrap">
+                  <table class="nk-mob-calc__table" :aria-label="t('mob.sec.stats')">
+                    <thead>
+                      <tr>
+                        <th scope="col" class="nk-mob-calc__h">{{ t('mob.derive.col.stat') }}</th>
+                        <th scope="col" class="nk-mob-calc__h">{{ t('mob.derive.col.base') }}</th>
+                        <th scope="col" class="nk-mob-calc__h">{{ t('mob.derive.col.ratio') }}</th>
+                        <th scope="col" class="nk-mob-calc__h">{{ t('mob.derive.col.elite') }}</th>
+                        <th scope="col" class="nk-mob-calc__h">
+                          {{ t('mob.derive.col.curve') }}
+                          <span class="nk-mob-calc__h-lv">{{ t('mob.level', { n: combatLevel }) }}</span>
+                        </th>
+                        <th scope="col" class="nk-mob-calc__h">{{ t('mob.derive.col.modify') }}</th>
+                        <th scope="col" class="nk-mob-calc__h nk-mob-calc__h--final">{{ t('mob.derive.col.final') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="row in derivationRows"
+                        :key="row.key"
+                        class="nk-mob-calc__row"
+                        :class="{ 'nk-mob-calc__row--stance': row.key === 'stance', 'nk-mob-calc__row--blank': row.blank }"
+                        :data-prop="row.key"
+                      >
+                        <th scope="row" class="nk-mob-calc__name">{{ t(row.labelKey) }}</th>
+                        <td class="nk-mob-calc__cell nk-mob-calc__cell--base" :data-label="t('mob.derive.col.base')">{{ factorText(row, fmtFactor(row.base)) }}</td>
+                        <td
+                          class="nk-mob-calc__cell nk-mob-calc__cell--ratio"
+                          :class="{ 'is-neutral': row.base == null || row.statRatio === 1 }"
+                          :data-label="t('mob.derive.col.ratio')"
+                        >{{ factorText(row, fmtRatioCell(row.statRatio)) }}</td>
+                        <td
+                          class="nk-mob-calc__cell nk-mob-calc__cell--elite"
+                          :class="{ 'is-neutral': row.base == null || row.eliteRatio === 1 }"
+                          :data-label="t('mob.derive.col.elite')"
+                        >{{ factorText(row, fmtRatioCell(row.eliteRatio)) }}</td>
+                        <td
+                          class="nk-mob-calc__cell nk-mob-calc__cell--curve"
+                          :data-label="t('mob.derive.col.curve')"
+                        >{{ factorText(row, fmtCurveCell(row.curve)) }}</td>
+                        <td
+                          class="nk-mob-calc__cell nk-mob-calc__cell--modify"
+                          :class="{ 'is-neutral': row.base == null || row.modify == null || row.modify === 0 }"
+                          :data-label="t('mob.derive.col.modify')"
+                        >{{ factorText(row, fmtModifyCell(row.modify)) }}</td>
+                        <td class="nk-mob-calc__val" :data-prop="row.key">{{ fmtStatCell(row.value) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p v-if="d.stance != null" class="nk-mob-calc__stance">{{ t('mob.derive.stanceFormula') }}</p>
+                <dl class="nk-mob-calc__terms">
+                  <div v-for="term in DERIVE_TERMS" :key="term.key" class="nk-mob-calc__term">
+                    <dt class="nk-mob-calc__term-k">{{ t(term.key) }}</dt>
+                    <dd class="nk-mob-calc__term-d">{{ t(term.desc) }}</dd>
+                  </div>
+                </dl>
+                <p class="nk-mob-calc__caveat">{{ t('mob.derive.caveat') }}</p>
               </div>
-              <div class="nk-mob-stat">
-                <dt class="nk-mob-stat__label">{{ t('mob.stat.def') }}</dt>
-                <dd class="nk-mob-stat__val" data-prop="def">{{ fmtStatCell(combatStats?.def ?? d.stats.def) }}</dd>
-              </div>
-              <div class="nk-mob-stat">
-                <dt class="nk-mob-stat__label">{{ t('mob.stat.spd') }}</dt>
-                <dd class="nk-mob-stat__val" data-prop="spd">{{ fmtStatCell(combatStats?.speed ?? d.stats.speed) }}</dd>
-              </div>
-              <div v-if="d.stance != null" class="nk-mob-stat nk-mob-stat--stance">
-                <dt class="nk-mob-stat__label">{{ t('mob.stat.stance') }}</dt>
-                <dd class="nk-mob-stat__val">{{ fmtStatCell(stanceValue ?? d.stance) }}</dd>
-              </div>
-            </dl>
-            <p class="nk-mob-stat-note">{{ t('mob.statNoteA', { a: d.elite_group ?? 1, b: d.level_group ?? 1 }) }}<strong>{{ t('mob.statNoteStance') }}</strong>{{ t('mob.statNoteStanceNote') }}{{ t('mob.statNoteBase') }} {{ fmtStatCell(d.stats.hp) }} / {{ fmtStatCell(d.stats.atk) }} / {{ fmtStatCell(d.stats.def) }} / {{ fmtStatCell(d.stats.speed) }}<template v-if="d.stance_modify != null || d.speed_modify != null">{{ t('mob.statNoteModify') }} <template v-if="d.stance_modify != null">{{ t('mob.statNoteStanceMod', { v: (d.stance_modify > 0 ? '+' : '') + d.stance_modify }) }}</template><template v-if="d.stance_modify != null && d.speed_modify != null"> / </template><template v-if="d.speed_modify != null">{{ t('mob.statNoteSpeedMod', { v: (d.speed_modify > 0 ? '+' : '') + d.speed_modify }) }}</template></template>{{ t('mob.statNoteTail') }}</p>
+            </template>
+            <template v-else>
+              <p class="nk-mob-empty">{{ t('mob.levelMissing', { n: d.level_group ?? 1 }) }}</p>
+              <dl class="nk-mob-stats">
+                <div class="nk-mob-stat">
+                  <dt class="nk-mob-stat__label">{{ t('mob.stat.hp') }}</dt>
+                  <dd class="nk-mob-stat__val" data-prop="hp">{{ fmtStatCell(d.stats.hp) }}</dd>
+                </div>
+                <div class="nk-mob-stat">
+                  <dt class="nk-mob-stat__label">{{ t('mob.stat.atk') }}</dt>
+                  <dd class="nk-mob-stat__val" data-prop="atk">{{ fmtStatCell(d.stats.atk) }}</dd>
+                </div>
+                <div class="nk-mob-stat">
+                  <dt class="nk-mob-stat__label">{{ t('mob.stat.def') }}</dt>
+                  <dd class="nk-mob-stat__val" data-prop="def">{{ fmtStatCell(d.stats.def) }}</dd>
+                </div>
+                <div class="nk-mob-stat">
+                  <dt class="nk-mob-stat__label">{{ t('mob.stat.spd') }}</dt>
+                  <dd class="nk-mob-stat__val" data-prop="spd">{{ fmtStatCell(d.stats.speed) }}</dd>
+                </div>
+                <div v-if="d.stance != null" class="nk-mob-stat nk-mob-stat--stance">
+                  <dt class="nk-mob-stat__label">{{ t('mob.stat.stance') }}</dt>
+                  <dd class="nk-mob-stat__val" data-prop="stance">{{ fmtStatCell(d.stance) }}</dd>
+                </div>
+              </dl>
+            </template>
           </section>
 
           <section v-if="d.skills.length" class="nk-mob-sec">

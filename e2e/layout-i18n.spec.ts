@@ -304,10 +304,23 @@ test.describe('布局验收：多语言', () => {
     expect(secs, '节标题应取英文词典值').toContain(en['mob.sec.weakness']!);
     expect(secs, '不得残留中文节标题').not.toContain(cn['mob.sec.weakness']!);
 
-    const stats = (await page.locator('.nk-mob-stat__label').allTextContents()).map((s) => s.trim());
-    expect(stats.length, '战斗数值区应有标签').toBeGreaterThan(0);
-    const keys = ['mob.stat.hp', 'mob.stat.atk', 'mob.stat.def', 'mob.stat.spd', 'mob.stat.stance'];
-    expect(stats.every((s) => keys.some((k) => en[k] === s)), `数值标签应取英文词典值：${stats}`).toBe(true);
+    const statRows = (await page.locator('.nk-mob-calc__name').allTextContents()).map((s) => s.trim());
+    expect(statRows.length, '战斗数值拆解表应列出属性行').toBeGreaterThan(0);
+    const statKeys = ['mob.stat.hp', 'mob.stat.atk', 'mob.stat.def', 'mob.stat.spd', 'mob.stat.stance'];
+    expect(statRows.every((s) => statKeys.some((k) => en[k] === s)), `属性行应取英文词典值：${statRows}`).toBe(true);
+
+    const heads = (await page.locator('.nk-mob-calc__h').allTextContents())
+      .map((s) => s.replace(/\s+/g, ' ').trim());
+    const colKeys = ['mob.derive.col.stat', 'mob.derive.col.base', 'mob.derive.col.ratio',
+      'mob.derive.col.elite', 'mob.derive.col.modify', 'mob.derive.col.final'];
+    colKeys.forEach((k) => {
+      expect(heads, `表头应含英文词典值 ${en[k]}`).toContain(en[k]);
+    });
+    expect(
+      heads.some((h) => h.startsWith(en['mob.derive.col.curve']!)),
+      `等级曲线表头应取英文词典值：${heads}`,
+    ).toBe(true);
+    expect(heads.join(' '), '表头不得残留中文').not.toMatch(/[\u4e00-\u9fff]/);
   });
 
   test('/en/currency/role/N：区块标题 / 导航 / 推荐优先级样式都随语言', { tag: ['@viewport-independent'] }, async ({ page }) => {
@@ -436,19 +449,25 @@ test.describe('布局验收：多语言', () => {
     await expect(page.locator('.nk-relic-affix-table__prop-h')).toHaveText(en['relic.affixCol']!);
   });
 
-  test('/en/monster/N：口径说明与阶段名走词典（阶段序号不重复）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/monster/N：数值口径与术语说明走词典（阶段序号不重复）', { tag: ['@viewport-independent'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
     const list = readJsonIn<{ id: number; guide_phases?: { name: string }[] }[]>('en', 'public/data/cn/monsters.json');
     const withPhases = list.find((m) => (m.guide_phases || []).length);
     const target = withPhases ?? list[0]!;
     await page.goto(`/en/monster/${target.id}`);
-    await expect(page.locator('.nk-mob-stat-note').first()).toBeVisible();
+    await expect(page.locator('.nk-mob-calc__caveat').first()).toBeVisible();
 
-    const note = (await page.locator('.nk-mob-stat-note').first().innerText()).replace(/\s+/g, ' ');
-    expect(note, '口径说明不得残留中文').not.toMatch(/[\u4e00-\u9fff]/);
-    expect(note, `口径说明应含英文词典值 ${en['mob.statNoteBase']}`).toContain(en['mob.statNoteBase']!);
-    expect(note).not.toContain(cn['mob.statNoteTail']!);
+    const caveat = (await page.locator('.nk-mob-calc__caveat').first().innerText()).replace(/\s+/g, ' ');
+    expect(caveat, '口径说明不得残留中文').not.toMatch(/[\u4e00-\u9fff]/);
+    expect(caveat, `口径说明应取英文词典值 ${en['mob.derive.caveat']}`).toContain(en['mob.derive.caveat']!);
+    expect(caveat).not.toContain(cn['mob.derive.caveat']!);
+
+    const terms = (await page.locator('.nk-mob-calc__term-d').allTextContents())
+      .map((s) => s.replace(/\s+/g, ' ').trim());
+    expect(terms, '术语说明应逐项取英文词典值').toContain(en['mob.derive.baseDesc']!);
+    expect(terms, '术语说明应包含精英组倍率释义').toContain(en['mob.derive.eliteDesc']!);
+    expect(terms.join(' '), '术语说明不得残留中文').not.toMatch(/[\u4e00-\u9fff]/);
 
     if (withPhases) {
       const names = (await page.locator('.nk-mob-guide__name').allTextContents()).map((s) => s.trim());

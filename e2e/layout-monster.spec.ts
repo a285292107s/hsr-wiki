@@ -33,6 +33,12 @@ const MONSTER_ID = '1002011';
 const IMG_DELAY_MS = 2500;
 
 const iconStem = (p: string): string => (p.split('/').pop() || '').replace(/\.png$/i, '');
+const statText = (v: number | null): string => (v == null ? '—' : v.toLocaleString('zh-CN'));
+const ratioText = (v: number): string => (v === 1 ? '×1.00' : `×${v}`);
+const modifyText = (v: number | null | undefined): string =>
+  (v == null ? '—' : v > 0 ? `+${v}` : v === 0 ? '+0' : String(v));
+const round1 = (n: number): number => Math.round(n * 10) / 10;
+const numberCell = (s: string): number => (s === '—' ? 0 : Number(s.replace(/^[×+]/, '')));
 const familyOf = (id: number): MonsterListEntry[] => {
   const list = readJson<MonsterListEntry[]>('public/data/cn/monsters.json').filter((m) => m.name);
   const key = (m: MonsterListEntry): string => `${m.name}\u0000${iconStem(m.icon)}`;
@@ -160,22 +166,25 @@ test.describe('布局验收：敌方详情页', () => {
   );
 
   test(
-    '/monster/<实例>：修正值按「基准 × 修饰比 × 曲线 ＋ 修正值」合成，缺省等级 = 该组曲线最高档',
+    '/monster/<实例>：修正值按「基准值 × 实例倍率 × 精英组倍率 × 等级曲线倍率 ＋ 修正值」合成，缺省等级 = 该组曲线最高档',
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
       const id = 100201502;
       const mon = detailOf(id);
       expect(mon.stance_modify, `${id} 应带韧性修正（断言前提）`).toBeGreaterThan(0);
-      const curve = readJson<Record<string, Record<string, { speed: number }>>>(
+      const curve = readJson<Record<string, Record<string, { speed: number; hp: number }>>>(
         'public/data/cn/monster-level-curve.json',
       );
+      const elite = readJson<Record<string, Record<string, number>>>('public/data/cn/monster-elite-group.json');
       const group = String(mon.level_group ?? 1);
+      const eliteRow = elite[String(mon.elite_group ?? 1)] ?? {};
       const maxLevel = Math.max(...Object.keys(curve[group]).map(Number));
+      const levelRow = curve[group][String(maxLevel)];
       const speedRatio = mon.stat_ratio?.speed ?? 1;
-      const wantSpeed = Math.round((mon.stats.speed * speedRatio * curve[group][String(maxLevel)].speed
+      const wantSpeed = Math.round((mon.stats.speed * speedRatio * (eliteRow.speed ?? 1) * levelRow.speed
         + (mon.speed_modify ?? 0)) * 10) / 10;
-      const wantStance = mon.stance + mon.stance_modify!;
+      const wantStance = mon.stance * (eliteRow.stance ?? 1) + mon.stance_modify!;
 
       await page.goto(`/monster/${id}`);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
@@ -184,14 +193,26 @@ test.describe('布局验收：敌方详情页', () => {
         '缺省等级 = 该难度组曲线的最高档（不再写死 100）',
       ).toHaveText(`等级 ${maxLevel}`);
       await expect(
-        page.locator('.nk-mob-stat--stance .nk-mob-stat__val'),
-        '韧性 = 韧性基准 + 修正值',
-      ).toHaveText(String(wantStance));
+        page.locator('.nk-mob-calc__row[data-prop="speed"] .nk-mob-calc__val'),
+        '速度 = 基准 × 修饰比 × 精英组倍率 × 曲线 + 修正值（修正值不被曲线缩放）',
+      ).toHaveText(statText(wantSpeed));
       await expect(
-        page.locator('.nk-mob-stat__val[data-prop="spd"]'),
-        '速度 = 基准 × 修饰比 × 曲线 + 修正值（修正值不被曲线缩放）',
-      ).toHaveText(String(wantSpeed));
-      await expect(page.locator('.nk-mob-stat-note'), '口径注记必须写明含实例修正值').toContainText('实例修正值');
+        page.locator('.nk-mob-calc__row[data-prop="speed"] .nk-mob-calc__cell--curve'),
+        '速度行的等级曲线系数 = 该难度组该等级曲线值（合成因子必须可核对）',
+      ).toHaveText(`×${levelRow.speed}`);
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="speed"] .nk-mob-calc__cell--modify'),
+        '修正值单列展示，供玩家核对加法位置',
+      ).toHaveText(modifyText(mon.speed_modify));
+      await expect(
+        page.locator('.nk-mob-calc__row--stance .nk-mob-calc__val'),
+        '韧性 = 韧性基准 × 精英组韧性倍率 + 修正值',
+      ).toHaveText(statText(wantStance));
+      await expect(
+        page.locator('.nk-mob-calc__row--stance .nk-mob-calc__cell--modify'),
+        '韧性修正值单列展示（+30 不被任何倍率缩放）',
+      ).toHaveText(modifyText(mon.stance_modify));
+      await expect(page.locator('.nk-mob-calc__terms'), '术语口径必须写明修正值').toContainText('修正值');
 
       assertNoErrors();
     },
@@ -214,24 +235,231 @@ test.describe('布局验收：敌方详情页', () => {
       const group = String(mon.level_group ?? 1);
       const maxLevel = Math.max(...Object.keys(curve[group]).map(Number));
       const row = curve[group][String(maxLevel)];
+      const eliteRow = elite['2']!;
       const wantHp = Math.round(
-        mon.stats.hp * (mon.stat_ratio?.hp ?? 1) * elite['2'].hp * row.hp * 10,
+        mon.stats.hp * (mon.stat_ratio?.hp ?? 1) * eliteRow.hp * row.hp * 10,
       ) / 10;
       const wantAtk = Math.round(
-        mon.stats.atk * (mon.stat_ratio?.atk ?? 1) * elite['2'].atk * row.atk * 10,
+        mon.stats.atk * (mon.stat_ratio?.atk ?? 1) * eliteRow.atk * row.atk * 10,
       ) / 10;
 
       await page.goto(`/monster/${id}`);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
       await expect(
-        page.locator('.nk-mob-stat__val[data-prop="hp"]'),
+        page.locator('.nk-mob-calc__row[data-prop="hp"] .nk-mob-calc__val'),
         'HP = 基准 × 修饰比 × 精英组倍率 × 曲线',
-      ).toHaveText(wantHp.toLocaleString('en-US'));
+      ).toHaveText(statText(wantHp));
       await expect(
-        page.locator('.nk-mob-stat__val[data-prop="atk"]'),
+        page.locator('.nk-mob-calc__row[data-prop="atk"] .nk-mob-calc__val'),
         'ATK = 基准 × 修饰比 × 精英组倍率 × 曲线',
-      ).toHaveText(wantAtk.toLocaleString('en-US'));
-      await expect(page.locator('.nk-mob-stat-note'), '口径注记必须写明精英组倍率段').toContainText('精英组倍率');
+      ).toHaveText(statText(wantAtk));
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="hp"] .nk-mob-calc__cell--elite'),
+        'HP 行的精英组倍率因子 = 组 2 的 HPRatio（不是黑箱）',
+      ).toHaveText(ratioText(eliteRow.hp));
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="atk"] .nk-mob-calc__cell--elite'),
+        'ATK 行的精英组倍率因子 = 组 2 的 AttackRatio',
+      ).toHaveText(ratioText(eliteRow.atk));
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="hp"] .nk-mob-calc__cell--curve'),
+        'HP 行的等级曲线系数 = 该难度组该等级曲线值',
+      ).toHaveText(`×${row.hp}`);
+      const heads = (await page.locator('.nk-mob-calc__h').allTextContents())
+        .map((s) => s.replace(/\s+/g, ' ').trim());
+      expect(heads.some((h) => h.includes('精英组倍率')), `表头必须写明精英组倍率段：${heads}`).toBe(true);
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/1004017：战斗数值逐因子上屏，拖动等级时曲线系数与战斗值同步重算',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      const id = 1004017;
+      const mon = detailOf(id);
+      const curve = readJson<Record<string, Record<string, Record<string, number>>>>(
+        'public/data/cn/monster-level-curve.json',
+      );
+      const elite = readJson<Record<string, Record<string, number>>>('public/data/cn/monster-elite-group.json');
+      const group = String(mon.level_group ?? 1);
+      const eliteGroup = String(mon.elite_group ?? 1);
+      const eliteRow = elite[eliteGroup] ?? {};
+      const maxLevel = Math.max(...Object.keys(curve[group]).map(Number));
+      expect(maxLevel, '断言前提：该难度组曲线覆盖到 80 级以上').toBeGreaterThanOrEqual(80);
+      const props = ['hp', 'atk', 'def', 'speed'] as const;
+      const derive = (prop: (typeof props)[number], level: number) => {
+        const levelRow = curve[group][String(level)]!;
+        const base = mon.stats[prop];
+        const ratio = mon.stat_ratio?.[prop] ?? 1;
+        const eliteRatio = eliteRow[prop] ?? 1;
+        const coeff = levelRow[prop]!;
+        const modify = prop === 'speed' ? (mon.speed_modify ?? null) : null;
+        const value = round1(base * ratio * eliteRatio * coeff + (modify ?? 0));
+        return { base, ratio, eliteRatio, coeff, modify, value };
+      };
+
+      await page.goto(`/monster/${id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(page.locator('.nk-mob-level__label')).toHaveText(`等级 ${maxLevel}`);
+      await expect(page.locator('.nk-mob-level__chip')).toHaveText([
+        `难度组 ${group}`,
+        `精英组 ${eliteGroup}`,
+      ]);
+
+      for (const prop of props) {
+        const want = derive(prop, maxLevel);
+        const row = page.locator(`.nk-mob-calc__row[data-prop="${prop}"]`);
+        await expect(row.locator('.nk-mob-calc__cell--base'), `${prop} 行基准值（原始全精度）`)
+          .toHaveText(String(want.base));
+        await expect(row.locator('.nk-mob-calc__cell--ratio'), `${prop} 行实例倍率`).toHaveText(ratioText(want.ratio));
+        await expect(row.locator('.nk-mob-calc__cell--elite'), `${prop} 行精英组倍率`).toHaveText(ratioText(want.eliteRatio));
+        await expect(row.locator('.nk-mob-calc__cell--curve'), `${prop} 行等级曲线系数`).toHaveText(`×${want.coeff}`);
+        await expect(row.locator('.nk-mob-calc__cell--modify'), `${prop} 行修正值`).toHaveText(modifyText(want.modify));
+        await expect(row.locator('.nk-mob-calc__val'), `${prop} 行战斗值`).toHaveText(statText(want.value));
+
+        const shown = await row.evaluate((el) => {
+          const text = (sel: string): string => (el.querySelector(sel)?.textContent ?? '').trim();
+          return {
+            base: text('.nk-mob-calc__cell--base'),
+            ratio: text('.nk-mob-calc__cell--ratio'),
+            elite: text('.nk-mob-calc__cell--elite'),
+            curve: text('.nk-mob-calc__cell--curve'),
+            modify: text('.nk-mob-calc__cell--modify'),
+            value: text('.nk-mob-calc__val'),
+          };
+        });
+        const product = numberCell(shown.base) * numberCell(shown.ratio) * numberCell(shown.elite)
+          * numberCell(shown.curve) + numberCell(shown.modify);
+        expect(
+          shown.value,
+          `${prop} 行「屏上因子相乘」必须复得屏上战斗值（基准值若被舍入就会对不上）`,
+        ).toBe(statText(round1(product)));
+      }
+
+      const stanceRow = page.locator('.nk-mob-calc__row--stance');
+      const wantStance = mon.stance * (eliteRow.stance ?? 1) + (mon.stance_modify ?? 0);
+      await expect(stanceRow.locator('.nk-mob-calc__val'), '韧性不随等级变化').toHaveText(statText(wantStance));
+      await expect(stanceRow.locator('.nk-mob-calc__cell--curve'), '韧性不入等级曲线，曲线格必须留空').toHaveText('—');
+
+      const target = 80;
+      const beforeStance = await stanceRow.locator('.nk-mob-calc__val').innerText();
+      await page.locator('.nk-mob-level input[type="range"]').evaluate((el, v) => {
+        const input = el as HTMLInputElement;
+        input.value = String(v);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }, target);
+      await expect(page.locator('.nk-mob-level__label'), '拖动等级后标签同步').toHaveText(`等级 ${target}`);
+      const wantHp = derive('hp', target);
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="hp"] .nk-mob-calc__cell--curve'),
+        '拖动等级后等级曲线系数同步重算',
+      ).toHaveText(`×${wantHp.coeff}`);
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="hp"] .nk-mob-calc__val'),
+        '拖动等级后战斗值同步重算',
+      ).toHaveText(statText(wantHp.value));
+      await expect(stanceRow.locator('.nk-mob-calc__val'), '拖等级不影响韧性').toHaveText(beforeStance);
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<id>：基准值按源数据全精度上屏（3 位小数截断会让屏上因子乘不出战斗值）',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      const id = 1003014;
+      const mon = detailOf(id);
+      expect(String(mon.stats.hp), `${id} 的基准 HP 应有 4 位以上小数（断言前提）`).toMatch(/\.\d{4,}$/);
+      expect(String(mon.stats.atk), `${id} 的基准 ATK 应有 4 位以上小数（断言前提）`).toMatch(/\.\d{4,}$/);
+
+      await page.goto(`/monster/${id}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="hp"] .nk-mob-calc__cell--base'),
+        'HP 基准值必须原样上屏（不能被 locale 格式化截到 3 位小数）',
+      ).toHaveText(String(mon.stats.hp));
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="atk"] .nk-mob-calc__cell--base'),
+        'ATK 基准值必须原样上屏',
+      ).toHaveText(String(mon.stats.atk));
+
+      const shown = await page.locator('.nk-mob-calc__row[data-prop="hp"]').evaluate((el) => {
+        const text = (sel: string): string => (el.querySelector(sel)?.textContent ?? '').trim();
+        return {
+          base: text('.nk-mob-calc__cell--base'),
+          ratio: text('.nk-mob-calc__cell--ratio'),
+          elite: text('.nk-mob-calc__cell--elite'),
+          curve: text('.nk-mob-calc__cell--curve'),
+          value: text('.nk-mob-calc__val'),
+        };
+      });
+      const product = numberCell(shown.base) * numberCell(shown.ratio) * numberCell(shown.elite)
+        * numberCell(shown.curve);
+      expect(shown.value, '屏上因子相乘必须复得屏上 HP').toBe(statText(round1(product)));
+
+      assertNoErrors();
+    },
+  );
+
+  test(
+    '/monster/<id>：缺基准值不假造因子、负修正值原样上屏',
+    { tag: '@viewport-independent' },
+    async ({ page }) => {
+      const { assertNoErrors } = collectConsoleIssues(page);
+      const blankId = 3004010;
+      const blank = detailOf(blankId);
+      const curve = readJson<Record<string, Record<string, Record<string, number>>>>(
+        'public/data/cn/monster-level-curve.json',
+      );
+      const blankGroup = String(blank.level_group ?? 1);
+      const blankMax = Math.max(...Object.keys(curve[blankGroup]).map(Number));
+      const blankRow = curve[blankGroup][String(blankMax)]!;
+      expect(blank.stats.speed, `${blankId} 应缺速度基准（断言前提）`).toBeUndefined();
+      expect(blank.stance, `${blankId} 应缺韧性（断言前提）`).toBeUndefined();
+
+      await page.goto(`/monster/${blankId}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const speedRow = page.locator('.nk-mob-calc__row[data-prop="speed"]');
+      await expect(speedRow.locator('.nk-mob-calc__cell--base'), '缺基准值的行不得显示因子').toHaveText('—');
+      await expect(speedRow.locator('.nk-mob-calc__cell--curve')).toHaveText('—');
+      await expect(speedRow.locator('.nk-mob-calc__val'), '缺基准值不得给战斗值').toHaveText('—');
+      await expect(
+        page.locator('.nk-mob-calc__row--stance'),
+        '韧性基准与修正都缺时整行不渲染（宁缺不假）',
+      ).toHaveCount(0);
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="hp"] .nk-mob-calc__val'),
+        '其余维度照常合成',
+      ).toHaveText(statText(round1(blank.stats.hp * blankRow.hp)));
+
+      const negId = 401202001;
+      const neg = detailOf(negId);
+      const negGroup = String(neg.level_group ?? 1);
+      const negMax = Math.max(...Object.keys(curve[negGroup]).map(Number));
+      const negRow = curve[negGroup][String(negMax)]!;
+      expect(neg.speed_modify, `${negId} 应带负速度修正（断言前提）`).toBeLessThan(0);
+      expect(neg.stance_modify, `${negId} 应带负韧性修正（断言前提）`).toBeLessThan(0);
+      await page.goto(`/monster/${negId}`);
+      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="speed"] .nk-mob-calc__cell--modify'),
+        '负修正值按源数据原样展示',
+      ).toHaveText(String(neg.speed_modify));
+      await expect(
+        page.locator('.nk-mob-calc__row[data-prop="speed"] .nk-mob-calc__val'),
+        '速度 = 基准 × 曲线 + 负修正（先加后乘会得错值）',
+      ).toHaveText(statText(round1(neg.stats.speed * negRow.speed + neg.speed_modify!)));
+      await expect(
+        page.locator('.nk-mob-calc__row--stance .nk-mob-calc__cell--modify'),
+      ).toHaveText(String(neg.stance_modify));
+      await expect(
+        page.locator('.nk-mob-calc__row--stance .nk-mob-calc__val'),
+      ).toHaveText(statText(neg.stance + neg.stance_modify!));
 
       assertNoErrors();
     },

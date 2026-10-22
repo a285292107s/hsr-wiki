@@ -525,6 +525,14 @@ REMOVED_KEYS: set[str] = {
     # `char.sec.*` 区块改版后遗留；`mob.appear*` 组合句改版后遗留（守卫的「未被引用」报告点出）
     "char.sec.relics",
     "mob.appearTotal",
+    "mob.statNoteA",
+    "mob.statNoteBase",
+    "mob.statNoteModify",
+    "mob.statNoteSpeedMod",
+    "mob.statNoteStance",
+    "mob.statNoteStanceMod",
+    "mob.statNoteStanceNote",
+    "mob.statNoteTail",
 }
 
 AUTHORED: dict[str, dict[str, str]] = {
