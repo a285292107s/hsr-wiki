@@ -106,8 +106,10 @@ test.describe('布局验收：常规主题', () => {
 
   test('首页 /：三分区按增量渲染，计数 / 全部入口 / 条目结构与索引数据对齐', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
     await expect(page.locator('.nk-home__ledger-item').first()).toBeVisible({ timeout: 15_000 });
+    const desktop = (page.viewportSize()?.width ?? 1280) >= 1024;
 
     const present = await page.locator('.nk-home__section').evaluateAll((els) => els.map((el) => el.getAttribute('data-kind')));
     expect(present, '只渲染有增量的分区，且顺序为 角色 / 光锥 / 遗器').toEqual(PRESENT_KINDS);
@@ -129,28 +131,44 @@ test.describe('布局验收：常规主题', () => {
       await expect(all).toHaveAttribute('href', LIST_ROUTE[kind]);
 
       if (kind === 'character') {
-        const cards = await section.locator('.nk-home__char').evaluateAll((els) => els.map((el) => ({
-          name: (el.querySelector('.nk-home__char-name')?.textContent || '').trim(),
-          art: !!el.querySelector('.nk-home__char-art img'),
-          facts: el.querySelectorAll('.nk-home__facts .nk-home__fact').length,
-          rarity: (el.querySelector('.nk-home__rarity')?.textContent || '').replace(/\s+/g, '').trim(),
-          eidolons: el.querySelectorAll('.nk-home__icon-list--eidolon .nk-home__icon').length,
-          eidolonMinWidth: Math.min(
-            ...Array.from(el.querySelectorAll<HTMLImageElement>('.nk-home__icon-list--eidolon img'))
-              .map((img) => Math.round(img.getBoundingClientRect().width)),
-          ),
-          eidolonRows: (() => {
-            const list = el.querySelector('.nk-home__icon-list--eidolon') as HTMLElement | null;
-            if (!list) return 0;
-            const tops = new Set(
-              Array.from(list.children).map((li) => Math.round(li.getBoundingClientRect().top)),
-            );
-            return tops.size;
-          })(),
-          otherIconGroups: el.querySelectorAll('.nk-home__icons:not(:has(.nk-home__icon-list--eidolon))').length,
-          cta: el.querySelector('.nk-home__cta')?.getAttribute('href') ?? null,
-          artLink: (el.querySelector('.nk-home__art-link')?.textContent || '').trim(),
-        })));
+        const cards = await section.locator('.nk-home__char').evaluateAll((els) => els.map((el) => {
+          const art = el.querySelector('.nk-home__char-art') as HTMLElement | null;
+          const artBox = art?.getBoundingClientRect() ?? null;
+          const center = artBox ? { x: artBox.left + artBox.width / 2, y: artBox.top + artBox.height / 2 } : null;
+          const iconBoxes = Array.from(el.querySelectorAll<HTMLImageElement>('.nk-home__icon-list--eidolon img'))
+            .map((img) => {
+              const box = img.getBoundingClientRect();
+              const cx = box.left + box.width / 2;
+              const cy = box.top + box.height / 2;
+              return {
+                w: Math.round(box.width),
+                dx: center ? Math.round(cx - center.x) : 0,
+                dy: center ? Math.round(cy - center.y) : 0,
+                inside: !!artBox && cx > artBox.left && cx < artBox.right && cy > artBox.top && cy < artBox.bottom,
+              };
+            });
+          return {
+            name: (el.querySelector('.nk-home__char-name')?.textContent || '').trim(),
+            art: !!el.querySelector('.nk-home__char-art img'),
+            artWidth: artBox ? Math.round(artBox.width) : 0,
+            facts: el.querySelectorAll('.nk-home__facts .nk-home__fact').length,
+            rarity: (el.querySelector('.nk-home__rarity')?.textContent || '').replace(/\s+/g, '').trim(),
+            eidolons: el.querySelectorAll('.nk-home__icon-list--eidolon .nk-home__icon').length,
+            eidolonMinWidth: iconBoxes.length ? Math.min(...iconBoxes.map((box) => box.w)) : 0,
+            eidolonIcons: iconBoxes,
+            eidolonRows: (() => {
+              const list = el.querySelector('.nk-home__icon-list--eidolon') as HTMLElement | null;
+              if (!list) return 0;
+              const tops = new Set(
+                Array.from(list.children).map((li) => Math.round(li.getBoundingClientRect().top)),
+              );
+              return tops.size;
+            })(),
+            otherIconGroups: el.querySelectorAll('.nk-home__icons:not(:has(.nk-home__icon-list--eidolon))').length,
+            cta: el.querySelector('.nk-home__cta')?.getAttribute('href') ?? null,
+            artLink: (el.querySelector('.nk-home__art-link')?.textContent || '').trim(),
+          };
+        }));
         for (let i = 0; i < expected.length; i += 1) {
           const want = expected[i];
           const got = cards[i];
@@ -160,7 +178,29 @@ test.describe('布局验收：常规主题', () => {
           expect(got.facts, `${kind}：第 ${i + 1} 张卡应有属性 / 命途事实`).toBeGreaterThan(0);
           expect(got.rarity, `${kind}：第 ${i + 1} 张卡应有稀有度`).toMatch(/^\d+$/);
           expect(got.eidolons, `${kind}：第 ${i + 1} 张卡星魂图标数应与详情数据一致`).toBe(icons.eidolons);
-          expect(got.eidolonRows, `${kind}：第 ${i + 1} 张卡星魂应为 2 行（每行 3 枚）`).toBe(2);
+          if (desktop) {
+            const iconsInArt = got.eidolonIcons.every((icon) => icon.inside);
+            expect(iconsInArt, `${kind}：第 ${i + 1} 张卡星魂应全部落在立绘舞台内（环绕轨道，不越界）`).toBe(true);
+            const width = got.artWidth;
+            const xs = got.eidolonIcons.map((icon) => icon.dx);
+            const ys = got.eidolonIcons.map((icon) => icon.dy);
+            expect(Math.max(...xs) - Math.min(...xs), `${kind}：第 ${i + 1} 张卡星魂环应横向铺开（占舞台 60% 以上）`)
+              .toBeGreaterThan(width * 0.6);
+            expect(Math.max(...ys) - Math.min(...ys), `${kind}：第 ${i + 1} 张卡轨道应为倾斜环（纵向跨度小于横向）`)
+              .toBeLessThan(width * 0.45);
+            const radii = got.eidolonIcons.map((icon) => Math.hypot(icon.dx, icon.dy));
+            expect(Math.min(...radii), `${kind}：第 ${i + 1} 张卡星魂应离立绘中心足够远（构成环，非堆叠）`)
+              .toBeGreaterThan(width * 0.18);
+            for (let a = 0; a < radii.length; a += 1) {
+              for (let b = a + 1; b < radii.length; b += 1) {
+                const gap = Math.hypot(got.eidolonIcons[a].dx - got.eidolonIcons[b].dx, got.eidolonIcons[a].dy - got.eidolonIcons[b].dy);
+                expect(gap, `${kind}：第 ${i + 1} 张卡星魂 ${a + 1}/${b + 1} 互相叠压`)
+                  .toBeGreaterThan(got.eidolonIcons[a].w * 0.85);
+              }
+            }
+          } else {
+            expect(got.eidolonRows, `${kind}：第 ${i + 1} 张卡窄屏星魂应为 2 行（每行 3 枚）`).toBe(2);
+          }
           expect(got.eidolonMinWidth, `${kind}：第 ${i + 1} 张卡星魂图宽 ${got.eidolonMinWidth}px 过小，看不清`)
             .toBeGreaterThanOrEqual(80);
           expect(got.otherIconGroups, `${kind}：第 ${i + 1} 张卡只展示星魂，不再展示技能图标`).toBe(0);
@@ -193,32 +233,79 @@ test.describe('布局验收：常规主题', () => {
       }
 
       if (kind === 'relic') {
-        const relics = readJson<RelicEntry[]>('public/data/cn/relics.json')
-          .filter((entry) => String(entry.release_version ?? '').trim() === VERSION_LABEL);
         const cards = await section.locator('.nk-home__relic').evaluateAll((els) => els.map((el) => ({
           name: (el.querySelector('.nk-home__relic-name')?.textContent || '').trim(),
           art: !!el.querySelector('.nk-home__relic-art img'),
           tags: [...el.querySelectorAll('.nk-home__effects dt')].map((node) => (node.textContent || '').trim()),
           descs: [...el.querySelectorAll('.nk-home__effects dd')].map((node) => (node.textContent || '').trim().length),
-          pieces: [...el.querySelectorAll('.nk-home__pieces span')].map((node) => (node.textContent || '').trim()),
           cta: el.querySelector('.nk-home__cta')?.getAttribute('href') ?? null,
         })));
         for (let i = 0; i < expected.length; i += 1) {
           const want = expected[i];
           const got = cards[i];
-          const pieces = (relics[i]?.pieces ?? []).map((piece) => piece.type_name || '').filter(Boolean);
           expect(got.name, `${kind}：第 ${i + 1} 张卡应写着遗器名`).toBe(want.name);
           expect(got.art, `${kind}：第 ${i + 1} 张卡应有图标`).toBe(true);
           expect(got.tags.length, `${kind}：第 ${i + 1} 张卡应有套装效果条目`).toBeGreaterThan(0);
           expect(got.descs.length, `${kind}：第 ${i + 1} 张卡效果标签与描述应成对`).toBe(got.tags.length);
           expect(got.descs.every((len) => len > 0), `${kind}：第 ${i + 1} 张卡不得有空效果描述`).toBe(true);
-          expect(got.pieces, `${kind}：第 ${i + 1} 张卡部位应与数据一致`).toEqual(pieces);
           expect(got.cta, `${kind}：第 ${i + 1} 张卡入口应指向详情`).toBe(`/relic/${want.id}`);
         }
       }
     }
 
     await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('首页 /：桌面断点星魂环绕立绘持续旋转（悬停不暂停），reduced-motion 静止', async ({ page }) => {
+    test.skip((page.viewportSize()?.width ?? 0) < 1024, '轨道环仅在桌面断点启用');
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await expect(page.locator('.nk-home__ledger-item').first()).toBeVisible({ timeout: 15_000 });
+    const eidolons = charIconCounts(RELEASE.character[0]!.id).eidolons;
+    const gear = page.locator('.nk-home__icon-list--eidolon img');
+    await page.locator('.nk-home__char').scrollIntoViewIfNeeded();
+    await expect(gear).toHaveCount(eidolons);
+    await expect
+      .poll(
+        () => gear.first().evaluate((img) => (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0),
+        { timeout: 15_000 },
+      )
+      .toBe(true);
+
+    const centers = () => page.evaluate(() =>
+      Array.from(document.querySelectorAll<HTMLImageElement>('.nk-home__icon-list--eidolon img')).map((img) => {
+        const box = img.getBoundingClientRect();
+        return [box.left + box.width / 2, box.top + box.height / 2] as [number, number];
+      }));
+    const shift = (a: number[][], b: number[][]) =>
+      Math.max(...a.map((point, index) => Math.hypot(point[0]! - b[index]![0]!, point[1]! - b[index]![1]!)));
+
+    const before = await centers();
+    await page.waitForTimeout(1_200);
+    const after = await centers();
+    expect(shift(before, after), '星魂环应在旋转（1.2s 内应有明显位移）').toBeGreaterThan(8);
+
+    await page.locator('.nk-home__char').hover();
+    await page.waitForTimeout(150);
+    const hoverA = await centers();
+    await page.waitForTimeout(900);
+    const hoverB = await centers();
+    expect(shift(hoverA, hoverB), '悬停不得暂停（产品口径：星魂环一直转）').toBeGreaterThan(4);
+
+    await page.mouse.move(2, 2);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+    await expect(page.locator('.nk-home__icon-list--eidolon img').first()).toBeVisible({ timeout: 15_000 });
+    await page.waitForTimeout(300);
+    const stillA = await centers();
+    await page.waitForTimeout(900);
+    const stillB = await centers();
+    expect(shift(stillA, stillB), 'reduced-motion 下星魂环应静止（基态即完整环）').toBeLessThan(1.5);
+    expect(new Set(stillA.map((point) => Math.round(point[1]))).size, '静态环仍应分布在不同高度，而非叠成一堆')
+      .toBeGreaterThan(1);
+
     assertNoErrors();
   });
 

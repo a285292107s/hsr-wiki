@@ -255,7 +255,7 @@ onBeforeUnmount(stopCoverRotation);
                   loading="lazy"
                 >
               </div>
-              <div class="nk-home__char-body">
+              <div class="nk-home__char-copy">
                 <h3 class="nk-home__char-name">{{ character.name }}</h3>
                 <p class="nk-home__facts">
                   <span v-for="fact in character.facts" :key="fact.text" class="nk-home__fact">
@@ -267,23 +267,49 @@ onBeforeUnmount(stopCoverRotation);
                   </span>
                 </p>
                 <p v-if="character.brief" class="nk-home__brief" v-html="character.brief"></p>
-                <div v-if="character.eidolons.length" class="nk-home__icons">
-                  <span class="nk-home__icons-label">{{ t('home.eidolons') }}</span>
+              </div>
+              <div
+                v-if="character.eidolons.length"
+                class="nk-home__orbit"
+                role="group"
+                :aria-labelledby="`nk-home-eidolons-${character.id}`"
+              >
+                <span :id="`nk-home-eidolons-${character.id}`" class="nk-home__orbit-label">{{ t('home.eidolons') }}</span>
+                <div class="nk-home__orbit-stage">
+                  <img
+                    class="nk-home__orbit-plate"
+                    :src="character.plate"
+                    :data-cdn-fallback="character.plateFallback"
+                    :alt="character.name"
+                    loading="lazy"
+                  >
+                  <span class="nk-home__orbit-rail" aria-hidden="true"></span>
                   <ul class="nk-home__icon-list nk-home__icon-list--eidolon">
-                    <li v-for="eidolon in character.eidolons" :key="eidolon.name" class="nk-home__icon">
-                      <img :src="eidolon.icon" :data-cdn-fallback="eidolon.fallback" :alt="eidolon.name" loading="lazy">
+                    <li
+                      v-for="(eidolon, index) in character.eidolons"
+                      :key="eidolon.name"
+                      class="nk-home__icon nk-home__orbit-slot"
+                      :style="{ '--nk-orbit-index': index }"
+                    >
+                      <span class="nk-home__orbit-arm">
+                        <span class="nk-home__orbit-upright">
+                          <span class="nk-home__orbit-face">
+                            <img :src="eidolon.icon" :data-cdn-fallback="eidolon.fallback" :alt="eidolon.name" loading="lazy">
+                          </span>
+                        </span>
+                      </span>
                     </li>
                   </ul>
                 </div>
-                <div class="nk-home__acts">
-                  <RouterLink class="nk-home__cta" :to="character.to">{{ t('home.viewArchive') }}</RouterLink>
-                  <button
-                    v-if="character.art"
-                    class="nk-home__art-link"
-                    type="button"
-                    @click="openArt(character)"
-                  >{{ t('home.viewArt', { name: character.name }) }}</button>
-                </div>
+              </div>
+              <div class="nk-home__char-acts">
+                <RouterLink class="nk-home__cta" :to="character.to">{{ t('home.viewArchive') }}</RouterLink>
+                <button
+                  v-if="character.art"
+                  class="nk-home__art-link"
+                  type="button"
+                  @click="openArt(character)"
+                >{{ t('home.viewArt', { name: character.name }) }}</button>
               </div>
             </article>
           </div>
@@ -350,9 +376,6 @@ onBeforeUnmount(stopCoverRotation);
                     <dd class="nk-home__effect-desc" v-html="relic.set2"></dd>
                   </template>
                 </dl>
-                <p v-if="relic.pieces.length" class="nk-home__pieces">
-                  <span v-for="piece in relic.pieces" :key="piece">{{ piece }}</span>
-                </p>
                 <RouterLink class="nk-home__cta" :to="relic.to">{{ t('home.viewArchive') }}</RouterLink>
               </div>
             </article>

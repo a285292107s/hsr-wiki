@@ -48,7 +48,6 @@ export interface HomeEntry {
   skillDesc: string;
   set2: string;
   set4: string;
-  pieces: string[];
 }
 
 export interface HomeSearchEntry {
@@ -132,7 +131,6 @@ async function buildCharacter(item: LocalCharEntry): Promise<HomeEntry> {
     skillDesc: '',
     set2: '',
     set4: '',
-    pieces: [],
   };
 }
 
@@ -162,7 +160,6 @@ async function buildLightCone(item: LocalLightConeEntry): Promise<HomeEntry> {
       : fmtDesc(item.skill_desc),
     set2: '',
     set4: '',
-    pieces: [],
   };
 }
 
@@ -186,7 +183,6 @@ function buildRelic(item: LocalRelicEntry): HomeEntry {
     skillDesc: '',
     set2: fmtDesc(item.descriptions?.['2'], item.param_list?.['2'] ?? []),
     set4: fmtDesc(item.descriptions?.['4'], item.param_list?.['4'] ?? []),
-    pieces: (item.pieces ?? []).map((piece) => piece.type_name).filter(Boolean),
   };
 }
 

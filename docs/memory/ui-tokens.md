@@ -136,6 +136,9 @@
 - **技能数据表必须占内容列（`grid-column: 2 / -1`）**：技能卡的 `.nk-skill__body` 是「图标列 + 内容列」两列网格；数据表若从第 1 列起，技能层级竖线会擦过表头首列文字（视觉错，构建与测试都不报）。`src/styles/character-skills.css`
 - **属性面板口径注记必须 ≤20 字**：≥768 档它占面板层尾随两列，768 档该槽仅 238px，再长就折成两行并留下孤字行。改注记文案要按 768 档复测。`src/app/character/StatsPanel.vue`
 - **嘲讽图标是站点自绘 SVG，不是官方资产**：`AvatarPropertyConfig` 无 Aggro 条目（`query.py` 实测字段全无）⇒ 官方属性图标族里没有嘲讽，以纯白线性 SVG 顶替。它是组件自有图形，**不绑 `data-cdn-fallback`**、不参与 CDN 回退与占位链。`src/app/character/StatsPanel.vue`
+- **3D 深度排序要求遮挡物与轨道同处一个 `perspective` 容器、且两者都不能带 `z-index`**：首页要让立绘「站在星魂环中间」（近端碎片压到立绘前、远端沉到其后），把 `perspective` / `preserve-3d` 挂到卡片上不行——立绘与轨道是同一 grid 单元格的两个兄弟，任一 `z-index` 都会用显式层序盖掉几何排序，且透视原点落在卡片中心时环会被推歪。落地判据：桌面端把立绘副本放进轨道场景（`translateZ(0)`）、窄屏显示原图，两张同 URL 的图互斥显示（`display: none` 的那份不进 a11y 树），`perspective` 以环心为原点。`src/styles/home.css`、`src/app/views/HomeView.vue`
+- **环形绕转的槽位不能写成整块旋转，否则包围盒随角度涨到 √2 倍**：每个星魂位若写成 `inset: 0` 的整块 `rotate`，元素 bbox 会随旋转角膨胀并越过舞台，触发横向溢出断言（布局本身没错）；正解是槽位 `width: 0; height: 0` 只当旋转原点，半径与碎片尺寸用 `cqw` 直接写进半径臂的 `translate`。附带坑：基态 `.nk-home__icon { width: 100% }` 特异性 (0,2,0) 会盖掉新写的槽位 (0,1,0) 声明 ⇒ 槽位必须写成 `.nk-home__icon-list--eidolon .nk-home__orbit-slot`。`src/styles/home.css`
+- **透视缩水与 reduced-motion 相位会同时拉低几何断言的实测值**：轨道带 `perspective` 时远端碎片宽约为近端的 0.92×，而 reduce 态静止相位的远端落在 60°/120°（不是 0°）⇒「星魂图宽 ≥80px」这类下限必须按**远端**尺寸定值，否则只在 reduce 用例里红。`e2e/layout-home.spec.ts`
 
 ## 排查路径
 
