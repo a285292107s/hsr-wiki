@@ -146,7 +146,7 @@ test.describe('玩法页「当期赛季」判据（不得取未开始的那一�
 });
 
 test.describe('终局详情页 Hero 大图口径（赛季 banner 翻转铺底）', () => {
-  test('/endgame 详情页 Hero：赛季 banner 翻转作背景（保留徽标盘、无右侧画框），无 banner 的期不翻', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame 详情页 Hero：赛季 banner 翻转作背景（保留徽标盘、无右侧画框），无 banner 的期不翻', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     const bannerOf = (file: string, id: string) => readJson<Record<string, { arts?: { theme_banner?: string } }>>(
@@ -184,7 +184,7 @@ test.describe('玩法页赛季增益 CTA 不被裁切（长语言最坏档）', 
   for (const [prefix, mode, vw] of [
     ['/de', 'maze', 320], ['/de', 'maze', 390], ['/ru', 'story', 320], ['', 'maze', 320],
   ] as const) {
-    test(`玩法页 CTA 不越出面板：${prefix}/endgame/${mode} @${vw}`, { tag: '@viewport-pinned' }, async ({ page }) => {
+    test(`玩法页 CTA 不越出面板：${prefix}/endgame/${mode} @${vw}`, { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
       await page.setViewportSize({ width: vw, height: 900 });
       await page.goto(`${prefix}/endgame/${mode}`);

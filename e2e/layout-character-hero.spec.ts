@@ -21,7 +21,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001：hero 素材对位分档（窄桌面档右对齐 / ≥1440 回到居中）', { tag: ['@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1001：hero 素材对位分档（窄桌面档右对齐 / ≥1440 回到居中）', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const read = () =>
       page.evaluate(() => {
@@ -46,7 +46,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001 桌面：hero 文字可读性只落在字形（媒体无底板 / 无整片遮罩）', { tag: ['@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1001 桌面：hero 文字可读性只落在字形（媒体无底板 / 无整片遮罩）', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1001');
@@ -157,7 +157,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001：抬头行断点形态（≥1024 拆两行且分隔退场 / <1024 单行保留分隔）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1001：抬头行断点形态（≥1024 拆两行且分隔退场 / <1024 单行保留分隔）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const read = () => page.evaluate(() => {
       const box = (s: string) => document.querySelector(s)!.getBoundingClientRect();
@@ -201,7 +201,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001 宽档：立绘横向偏移在布局层且不随动效偏好变化', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1001 宽档：立绘横向偏移在布局层且不随动效偏好变化', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1001');
@@ -245,7 +245,7 @@ test.describe('布局验收：角色详情页', () => {
     nameW: number; slotW: number; nameLines: number;
   }
 
-  test('/character：hero 主字按名长度分档（1 字档 > 长名档；同档盒高不随名长度变化）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character：hero 主字按名长度分档（1 字档 > 长名档；同档盒高不随名长度变化）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const read = () =>
       page.evaluate((): NameMetrics => {

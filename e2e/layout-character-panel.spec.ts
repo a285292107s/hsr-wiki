@@ -12,7 +12,7 @@ import {
 
 test.describe('布局验收：角色详情页', () => {
 
-  test('/character/1001：00 属性为规格铭牌（两层各自等分 / 无行索引 / 区块内恰 1 条发丝线）', async ({ page }) => {
+  test('/character/1001：00 属性为规格铭牌（两层各自等分 / 无行索引 / 区块内恰 1 条发丝线）', { tag: '@visual-detail' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1001');
     await page.waitForSelector('.nk-stats__stat');
@@ -185,7 +185,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1208 窄档（320 / 375）：列轴降档正确且文本不侵入相邻列', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1208 窄档（320 / 375）：列轴降档正确且文本不侵入相邻列', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     for (const [w, wantCols] of [[320, 2], [375, 3]] as const) {
       await page.setViewportSize({ width: w, height: 700 });
@@ -232,7 +232,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1204：区块章标压过正文且横线为实心发丝线', async ({ page }) => {
+  test('/character/1204：区块章标压过正文且横线为实心发丝线', { tag: '@visual-detail' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1204');
     await page.waitForSelector('.nk-stats__stat');
@@ -263,7 +263,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1204：页面圆角只走刻度三档（+ 直角与圆形）', async ({ page }) => {
+  test('/character/1204：页面圆角只走刻度三档（+ 直角与圆形）', { tag: '@visual-detail' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1204');
     await page.waitForSelector('.nk-stats__stat');
@@ -298,7 +298,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001：技能卡折叠开关为可点外观（浅底 + 发丝描边 + 6px 圆角）且文案成对', async ({ page }) => {    const { assertNoErrors } = collectConsoleIssues(page);
+  test('/character/1001：技能卡折叠开关为可点外观（浅底 + 发丝描边 + 6px 圆角）且文案成对', { tag: '@visual-detail' }, async ({ page }) => {    const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1001');
     const toggles = page.locator('.nk-skill__toggle');
     await expect(toggles.first()).toBeVisible();
@@ -342,7 +342,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001 手机断点：配队标头渲染、队间距 16px、无溢出', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1001 手机断点：配队标头渲染、队间距 16px、无溢出', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const teams = readJson<{ teams: unknown[] }>('public/data/cn/characters/1001.json').teams;
     expect(teams.length, '1001 应为多队样本（否则标头不渲染）').toBeGreaterThan(1);

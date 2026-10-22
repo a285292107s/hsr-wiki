@@ -67,7 +67,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：层级只为上下半场 + 星启单节点看板（ADR 0029 / 0030 / 0031 / 0032 / 0033）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3020：层级只为上下半场 + 星启单节点看板（ADR 0029 / 0030 / 0031 / 0032 / 0033）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/boss/3020');
     const season = seasonData('maze_boss.json', '3020');
@@ -470,7 +470,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：节点卡片窄屏（375px）一行三卡 + 卡内上下排版', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3020：节点卡片窄屏（375px）一行三卡 + 卡内上下排版', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/endgame/boss/3020');
@@ -517,7 +517,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3021：底部相邻赛季导航窄屏（375px）维持一行两栏', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3021：底部相邻赛季导航窄屏（375px）维持一行两栏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/endgame/boss/3021');
@@ -552,7 +552,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：统一压缩（共享头 + 完整阶梯）+ 星启分组 + 窄屏堆叠', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3020：统一压缩（共享头 + 完整阶梯）+ 星启分组 + 窄屏堆叠', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
@@ -642,7 +642,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：层 tab 单看板 + 面板底部通关条件（奖励在页面底部）与字号五档与间距节奏', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3020：层 tab 单看板 + 面板底部通关条件（奖励在页面底部）与字号五档与间距节奏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
@@ -780,7 +780,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：区块标题与敌方配置标题同档（桌面 / 手机），且高于卡片内行首标签', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/boss/3020：区块标题与敌方配置标题同档（桌面 / 手机），且高于卡片内行首标签', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/boss/3020');
     await page.locator('#egd-level-tab-floor-1').click();

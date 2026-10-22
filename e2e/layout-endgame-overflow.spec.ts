@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, waitForCatalogCards } from './helpers';
 import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
 
-test.describe('布局验收：终局敌方卡内溢出（cn / de / ru / es）', () => {
-  const LANGS = ['cn', 'de', 'ru', 'es'] as const;
+test.describe('布局验收：终局敌方卡内溢出（8 语言，合并自 overflow / overflow-alt）', () => {
+  const LANGS = ['cn', 'de', 'ru', 'es', 'fr', 'pt', 'vi', 'th'] as const;
 
   for (const code of LANGS) {
-    test(`/endgame：敌方卡内不横向溢出（${code}）`, { tag: '@viewport-pinned' }, async ({ page }) => {
+    test(`/endgame：敌方卡内不横向溢出（${code}）`, { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
       test.setTimeout(240_000);
       const { assertNoErrors } = collectConsoleIssues(page);
       await page.setViewportSize({ width: 390, height: 844 });

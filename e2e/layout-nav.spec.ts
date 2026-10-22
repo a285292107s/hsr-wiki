@@ -4,7 +4,7 @@ import { collectNavAnchors, noUnknownOverflow, waitForNavMode } from './layout.s
 
 test.describe('布局验收：导航动态溢出折叠', () => {
 
-  test('窄视口：可见项恒为规范序前缀，尾部折叠进"更多"抽屉', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('窄视口：可见项恒为规范序前缀，尾部折叠进"更多"抽屉', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('/settings');
@@ -32,7 +32,7 @@ test.describe('布局验收：导航动态溢出折叠', () => {
     assertNoErrors();
   });
 
-  test('窄视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('窄视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/settings');
@@ -48,7 +48,7 @@ test.describe('布局验收：导航动态溢出折叠', () => {
 });
 
 test.describe('布局验收：底栏槽位数与语言无关', () => {
-  test('中文与葡语（最长译文）在窄视口下槽位数一致', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('中文与葡语（最长译文）在窄视口下槽位数一致', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const count = async (url: string, width: number): Promise<number> => {
       await page.setViewportSize({ width, height: 780 });
@@ -67,7 +67,7 @@ test.describe('布局验收：底栏槽位数与语言无关', () => {
     assertNoErrors();
   });
 
-  test('货币战争模式：常规手机档全量平铺（无「更多」抽屉）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('货币战争模式：常规手机档全量平铺（无「更多」抽屉）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 780 });
     await page.goto('/currency/role');
@@ -122,7 +122,7 @@ test.describe('布局验收：跨模式入口文案', () => {
 });
 
 test.describe('布局验收：侧栏各项风格一致', () => {
-  test('侧栏文案落位一致：内容项（a）与工具项（button）的两行文案左缘必须对齐', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('侧栏文案落位一致：内容项（a）与工具项（button）的两行文案左缘必须对齐', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character');

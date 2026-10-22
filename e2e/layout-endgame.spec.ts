@@ -13,7 +13,7 @@ test.describe('布局验收：终局目录页', () => {
     assertNoErrors();
   });
 
-  test('/endgame：列头子项不越出列框（长译文语言）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame：列头子项不越出列框（长译文语言）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     test.setTimeout(180_000);
     const { assertNoErrors } = collectConsoleIssues(page);
     const failures: string[] = [];
@@ -54,7 +54,7 @@ test.describe('布局验收：终局目录页', () => {
     assertNoErrors();
   });
 
-  test('/endgame：并排列的列头结构一致（放得下即一行；过长则整排等长）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame：并排列的列头结构一致（放得下即一行；过长则整排等长）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     test.setTimeout(180_000);
     const { assertNoErrors } = collectConsoleIssues(page);
     const failures: string[] = [];
@@ -193,7 +193,7 @@ test.describe('布局验收：终局目录页', () => {
     assertNoErrors();
   });
 
-  test('/endgame：分模式列不窄于 --nk-grid-min（日期整串不被截断也不越到相邻列）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame：分模式列不窄于 --nk-grid-min（日期整串不被截断也不越到相邻列）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     for (const width of [768, 1024, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });

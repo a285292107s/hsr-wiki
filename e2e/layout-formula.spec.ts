@@ -383,7 +383,7 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
     assertNoErrors();
   });
 
-  test('/formula：390×844 触控目标 ≥44px、计算器结果置顶吸顶、分区导航吸顶', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/formula：390×844 触控目标 ≥44px、计算器结果置顶吸顶、分区导航吸顶', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/formula');

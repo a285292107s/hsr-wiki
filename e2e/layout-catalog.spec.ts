@@ -147,7 +147,7 @@ test.describe('布局验收：目录引擎 · 虚拟网格', () => {
   test.describe('角色卡副行：任何视口不折行，且信息不因视觉隐藏而丢失', () => {
     for (const locale of ['', '/pt']) {
       for (const width of [390, 1440]) {
-        test(`${locale || '/cn'} @${width}`, { tag: '@viewport-pinned' }, async ({ page }) => {
+        test(`${locale || '/cn'} @${width}`, { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
           await page.setViewportSize({ width, height: 900 });
           await page.goto(`${locale}/character`);
           await expect(page.locator('a.nk-idx-card').first()).toBeVisible();

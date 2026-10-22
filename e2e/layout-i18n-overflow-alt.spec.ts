@@ -11,7 +11,7 @@ test.describe(`布局验收：多语言长文案 · 桌面档（1280）· ${ALL_
   for (const code of RISK_LOCALES.filter((c) => (ALL_LANGS ? !DESKTOP_MAIN.includes(c) : ['th', 'vi'].includes(c)))) {
     const base = prefixOf(code);
 
-    test(`${code}：迭代全范围长文案无硬裁切 / 外溢 / 截断丢失`, { tag: '@viewport-pinned' }, async ({ page }) => {
+    test(`${code}：迭代全范围长文案无硬裁切 / 外溢 / 截断丢失`, { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
       test.setTimeout(180_000);
       const { assertNoErrors } = collectConsoleIssues(page);
       await page.setViewportSize({ width: 1280, height: 900 });

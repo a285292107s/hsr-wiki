@@ -61,7 +61,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1212：形态卡片在窄档不溢出，三卡等高且触控高度可点', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/character/1212：形态卡片在窄档不溢出，三卡等高且触控高度可点', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     for (const vp of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 1023, height: 800 }]) {
       await page.setViewportSize(vp);

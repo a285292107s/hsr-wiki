@@ -257,7 +257,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：桌面断点星魂环绕立绘持续旋转（悬停不暂停），reduced-motion 静止', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：桌面断点星魂环绕立绘持续旋转（悬停不暂停），reduced-motion 静止', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     test.skip((page.viewportSize()?.width ?? 0) < 1024, '轨道环仅在桌面断点启用');
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -309,7 +309,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：1440/1920 两档首屏内完整可见报头 + 版本号 + 本期入册全部行（首屏契约）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：1440/1920 两档首屏内完整可见报头 + 版本号 + 本期入册全部行（首屏契约）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     expect(TOTAL, `本期入册 ${TOTAL} 行，首屏契约按 4~6 行设计`).toBeGreaterThanOrEqual(4);
     expect(TOTAL, `本期入册 ${TOTAL} 行，首屏契约按 4~6 行设计`).toBeLessThanOrEqual(6);
@@ -371,7 +371,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：390×844 手机档角色名 / 光锥名可见，底栏不遮挡入册末行，搜索按钮在首屏', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：390×844 手机档角色名 / 光锥名可见，底栏不遮挡入册末行，搜索按钮在首屏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
@@ -505,7 +505,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：加载期给骨架、索引全失败给错误态且可重试，都不冒充空态', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：加载期给骨架、索引全失败给错误态且可重试，都不冒充空态', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const INDEXES = '**/data/cn/*.json';
     const isIndex = (url: string) => /(characters|light_cones|relics)\.json$/.test(url);
@@ -577,7 +577,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：三分区皆无增量时只显示一行空态', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：三分区皆无增量时只显示一行空态', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.route('**/data/cn/version.json', (route) =>
       route.fulfill({
@@ -599,7 +599,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：首屏封面一次只显示一张，双角色轮换（不并排），指示点可手动切换', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：首屏封面一次只显示一张，双角色轮换（不并排），指示点可手动切换', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const index = <T extends { release_version?: string; rarity?: number }>(file: string) =>
       readJson<T[]>(file).filter((item) => String(item.release_version ?? '').trim() === '4.5' && Number(item.rarity) === 5);
@@ -661,7 +661,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：prefers-reduced-motion 下封面不自动轮换，手动切换仍可用', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('首页 /：prefers-reduced-motion 下封面不自动轮换，手动切换仍可用', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const index = <T extends { release_version?: string; rarity?: number }>(file: string) =>
       readJson<T[]>(file).filter((item) => String(item.release_version ?? '').trim() === '4.5' && Number(item.rarity) === 5);
     await page.route('**/data/cn/version.json', (route) =>
@@ -705,7 +705,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('角色图鉴 /character：手机断点与桌面同一套网格卡（无行式头像卡形态）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('角色图鉴 /character：手机断点与桌面同一套网格卡（无行式头像卡形态）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
 
     const fingerprint = async () => {

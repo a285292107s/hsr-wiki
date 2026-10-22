@@ -5,7 +5,7 @@ import {
 } from './i18n-overflow.shared';
 
 test.describe('布局验收：多语言长文案 · 最窄档（320）', () => {
-  test('最窄档（320）：长文案不撑破容器亦不被祖先静默裁掉', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('最窄档（320）：长文案不撑破容器亦不被祖先静默裁掉', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     test.setTimeout(180_000);
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 320, height: 720 });

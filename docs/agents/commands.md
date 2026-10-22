@@ -94,10 +94,10 @@ pnpm test:watch                                      # 监听模式
 e2e（Playwright，webServer 自动起 dev server 并复用已有 6188 实例）：
 
 ```bash
-pnpm test:e2e          # 本机层：全量（含像素基线）
+pnpm test:e2e          # 本机层：常规全集（含像素基线；`@visual-detail` / `@i18n-detail` 需 E2E_DETAIL=1 才收集）
 pnpm test:e2e:guards   # CI 快层：不变量 + 外壳契约 + a11y（guards + shell + accessibility，不受 UI 迭代影响，永远可跑）
 pnpm test:e2e:layout   # 布局契约层：全部 layout-*（CI 里按 6 分片跑；本地即全量单进程）
-pnpm test:e2e:ci       # 上面两层合集（本地一次跑完 CI 的全部 e2e；覆盖不得下降，已登记的收窄见 testing.md）
+pnpm test:e2e:ci       # 上面两层合集（本地一次跑完 CI 的 PR + 夜间层；不含 @visual-detail 等慢档标签，收窄登记见 testing.md）
 pnpm test:e2e:affected # 受影响用例层：按 git diff 推导并直接执行（= node tools/e2e-affected.mjs --run）
 pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all；重构期只在收敛后跑一次）
 ```
@@ -180,9 +180,11 @@ python -m pytest tests/ -v               # converter 单元测试
 门禁语义（**软门禁**）：
 
 - main 分支 protection 仅保留防 force push 与防删除（required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过。
-- CI 分**两档**（判据见 [testing.md](testing.md)「门禁分层」）：
-  - **push 档**：`static`（七守卫 + `vue-tsc -b`）与 `unit-tests`（`pnpm test`），约 70s 出结果。
-  - **慢档**（`schedule` 每日 + 手动 `workflow_dispatch` + PR）：`invariants`（`pnpm test:e2e:guards`）、`layout`（6 分片 × 每片 2 worker，只装 chromium）、`firefox`（11 条 `@cross-engine`）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集）。发布前手动触发一次 `e2e_scope=full` 取全量结果。
+- CI 分**三档**（判据见 [testing.md](testing.md)「门禁分层」）：
+  - **push 档**：`static`（七守卫 + 视口标签机检 + `vue-tsc -b`）、`unit-tests`（`pnpm test`）与 `guards`（`e2e/guards.spec.ts --project=chromium`，唯一进 push 档的 e2e，约 30s 量级）。
+  - **PR 档**：`invariants`（`shell` + `accessibility`，2 分片）。**布局契约不进 PR。**
+  - **慢档**（`schedule` 每日 + 手动 `workflow_dispatch`；**不含 PR**）：`layout`（6 分片 × 每片 2 worker，只装 chromium）、`firefox`（`@cross-engine` 标签 11 条，CI 收起 1 条 `@font-calibrated` 后实收 10 条）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集，2 分片 10/8）。发布前手动触发一次 `e2e_scope=full` 取全量结果。
+  - **`@visual-detail` / `@i18n-detail` 不在任何 CI 档**：脆弱几何断言与逐页词典枚举降级为「不常规跑」，判据与证据一条未删，回看走 `E2E_DETAIL=1 pnpm exec playwright test --grep @visual-detail`（`grepInvert` 无 CLI 覆盖开关，不带该变量时连收集都收不到）。
 - CI **不跑** `pnpm build`（Vercel 构建即发布门，重复跑零增量）；失败由 GitHub 通知。
 - **全量矩阵周跑**：`.github/workflows/ci-full.yml`（周一定时 + 手动触发）跑 13 语言 × 25 路由的冒烟与全语言长文案扫描——这是「每次 push 只跑风险语言子集」这处已登记收窄的补偿。
 - Vercel 生产构建（`pnpm build`，含 vue-tsc 与七守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。

@@ -51,7 +51,7 @@ test.describe('布局验收：多语言', () => {
     await expect(page.locator('.ui-sidebar a[href="/en/character"]')).toHaveCount(1);
   });
 
-  test('/en/character：壳层文案走词典（侧栏主标英文），缺省语言仍为中文', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/character：壳层文案走词典（侧栏主标英文），缺省语言仍为中文', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     await page.goto('/en/character');
     await expect(page.locator('.ui-sidebar a[href="/en/character"] .ui-sidebar-link__cn')).toHaveText('Characters');
     await expect(page.locator('.ui-sidebar a[href="/en/character"] .ui-sidebar-link__en')).toHaveText('CHARACTERS');
@@ -59,7 +59,7 @@ test.describe('布局验收：多语言', () => {
     await expect(page.locator('.ui-sidebar a[href="/character"] .ui-sidebar-link__cn')).toHaveText('角色');
   });
 
-  test('/en/character/1001：hero 简介随语言（前端从角色档案首行派生，非转换器组合的中文）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/character/1001：hero 简介随语言（前端从角色档案首行派生，非转换器组合的中文）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = heroDescOf('en', 1001);
     const cn = heroDescOf('cn', 1001);
     expect(en, '英文档案首行应不同于中文').not.toBe(cn);
@@ -69,7 +69,7 @@ test.describe('布局验收：多语言', () => {
     await expect(page.locator('.nk-hero__desc')).not.toContainText(cn);
   });
 
-  test('/en/achievement：成就描述随语言（模板 + TEXTJOIN + 参数在语言包内按语言组合）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/achievement：成就描述随语言（模板 + TEXTJOIN + 参数在语言包内按语言组合）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     interface AchRow { id: number; desc: string; show_type?: string }
     const en = readJsonIn<AchRow[]>('en', 'public/data/cn/achievements.json');
     const cn = readJsonIn<AchRow[]>('cn', 'public/data/cn/achievements.json');
@@ -86,7 +86,7 @@ test.describe('布局验收：多语言', () => {
     await expect(card.locator('.nk-ach-card__desc')).toHaveText(row!.desc);
   });
 
-  test('/en/relic/N：部位名与属性名取官方词条（不是前端中文枚举表）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/relic/N：部位名与属性名取官方词条（不是前端中文枚举表）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     interface Piece { type: string; type_name: string; sub_affix_group: number }
     interface RelicRow { id: number; pieces: Piece[] }
     interface SubAffix { group_id: number; property: string }
@@ -114,7 +114,7 @@ test.describe('布局验收：多语言', () => {
     expect(names, '不得出现中文词条名').not.toContain(cnLabel!);
   });
 
-  test('/en/character + /en/：筛选器与页脚走词典（界面骨架随语言切换）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/character + /en/：筛选器与页脚走词典（界面骨架随语言切换）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -154,7 +154,7 @@ test.describe('布局验收：多语言', () => {
     expect(badges.every((b) => allowed.has(b)), `状态徽标应取英文词典值：${badges.slice(0, 3)}`).toBe(true);
   });
 
-  test('/en/：搜索框占位与怪物分类标签走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/：搜索框占位与怪物分类标签走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     await page.goto('/en/character');
     await expect(page.locator('.nk-cat-search input')).toHaveAttribute('placeholder', en['catalog.character.search']!);
@@ -164,7 +164,7 @@ test.describe('布局验收：多语言', () => {
     expect(rankText, '敌方目录卡不应出现中文分类名').not.toContain('普通');
   });
 
-  test('/en/currency/role：筛选名与卡面充能标签走词典（枚举 → 键）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/currency/role：筛选名与卡面充能标签走词典（枚举 → 键）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
     await page.goto('/en/currency/role');
@@ -185,7 +185,7 @@ test.describe('布局验收：多语言', () => {
     expect(parts.every((p) => chargeNames.includes(p)), `充能标签应取英文词典值：${parts.slice(0, 3)}`).toBe(true);
   });
 
-  test('/en/currency/trait 与 /en/monster/N：详情页标签走词典（羁绊层品质 + 变体差分）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/currency/trait 与 /en/monster/N：详情页标签走词典（羁绊层品质 + 变体差分）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -212,7 +212,7 @@ test.describe('布局验收：多语言', () => {
     }
   });
 
-  test('/en/item：物品类别（主类别分组 + 子类别选项）走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/item：物品类别（主类别分组 + 子类别选项）走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
     await page.goto('/en/item');
@@ -246,7 +246,7 @@ test.describe('布局验收：多语言', () => {
     expect(groups.every((g) => [...enTypes].some((t) => g.startsWith(t))), `分组名应取英文词典值：${groups.slice(0, 2)}`).toBe(true);
   });
 
-  test('/en/currency/role/N：属性名与分组名走词典（官方 prop_name 缺失时的兜底）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/currency/role/N：属性名与分组名走词典（官方 prop_name 缺失时的兜底）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const rolesDb = readJsonIn<{ roles: { id: number }[] }>('en', 'public/data/cn/currency/role.json');
     const id = rolesDb.roles[0]?.id;
     expect(id, '应能取到一个货币角色 id').toBeTruthy();
@@ -265,7 +265,7 @@ test.describe('布局验收：多语言', () => {
     expect(cjk, `属性名/分组名不应残留中文：${cjk.slice(0, 6)}`).toEqual([]);
   });
 
-  test('/en/character/1001：元素与命途名取官方数据令牌（不是前端手写表）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/character/1001：元素与命途名取官方数据令牌（不是前端手写表）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     interface Row { id: string; name: string }
     interface Detail { damage_type: string; base_type: string }
     const en = msgs('en');
@@ -293,7 +293,7 @@ test.describe('布局验收：多语言', () => {
     expect(joined, '类型注记不应残留中文').not.toMatch(/[\u4e00-\u9fff]/);
   });
 
-  test('/en/monster/N：详情页节标题与数值标签走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/monster/N：详情页节标题与数值标签走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
     const detail = readJsonIn<{ id: number }[]>('en', 'public/data/cn/monsters.json');
@@ -323,7 +323,7 @@ test.describe('布局验收：多语言', () => {
     expect(heads.join(' '), '表头不得残留中文').not.toMatch(/[\u4e00-\u9fff]/);
   });
 
-  test('/en/currency/role/N：区块标题 / 导航 / 推荐优先级样式都随语言', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/currency/role/N：区块标题 / 导航 / 推荐优先级样式都随语言', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
     const rolesDb = readJsonIn<{ roles: { id: number }[] }>('en', 'public/data/cn/currency/role.json');
@@ -349,7 +349,7 @@ test.describe('布局验收：多语言', () => {
     }
   });
 
-  test('/en/endgame/<mode> 与 /en/voracity：区块标题与结构口径表走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/endgame/<mode> 与 /en/voracity：区块标题与结构口径表走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -373,7 +373,7 @@ test.describe('布局验收：多语言', () => {
     expect(vorTitles.some((s) => s.includes(cn['vor.sec.overview']!)), '不得残留中文专题页标题').toBe(false);
   });
 
-  test('/en/endgame/maze：赛季名随语言包切语言（字段名 zh 但值是令牌）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/endgame/maze：赛季名随语言包切语言（字段名 zh 但值是令牌）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const raw = readFileSync('public/data/cn/maze.json', 'utf8');
     expect(raw, '结构层赛季名应是令牌').toContain('$t:');
     type MazeDb = Record<string, { zh?: string }>;
@@ -389,7 +389,7 @@ test.describe('布局验收：多语言', () => {
     expect(body, '英文页不应出现中文赛季名').not.toContain(cnName);
   });
 
-  test('/en/lightcone/N 与 /en/：光锥详情与首页文案走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/lightcone/N 与 /en/：光锥详情与首页文案走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -419,7 +419,7 @@ test.describe('布局验收：多语言', () => {
     expect(home, '首页不应残留中文品牌文案').not.toContain(cn['home.tagline']!);
   });
 
-  test('/en/character/1001 /relic/N：区块导航、属性面板与遗器表走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/character/1001 /relic/N：区块导航、属性面板与遗器表走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -449,7 +449,7 @@ test.describe('布局验收：多语言', () => {
     await expect(page.locator('.nk-relic-affix-table__prop-h')).toHaveText(en['relic.affixCol']!);
   });
 
-  test('/en/monster/N：数值口径与术语说明走词典（阶段序号不重复）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/monster/N：数值口径与术语说明走词典（阶段序号不重复）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
     const list = readJsonIn<{ id: number; guide_phases?: { name: string }[] }[]>('en', 'public/data/cn/monsters.json');
@@ -477,7 +477,7 @@ test.describe('布局验收：多语言', () => {
     }
   });
 
-  test('/en/voracity：同形词说明段走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/voracity：同形词说明段走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     await page.goto('/en/voracity');
     await expect(page.locator('.nk-title').first()).toBeVisible();
@@ -486,7 +486,7 @@ test.describe('布局验收：多语言', () => {
       .toContain(en['vor.disambigNote']!.slice(0, 24));
   });
 
-  test('/en/currency 与 /en/endgame/N：枢纽页与赛季页文案走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/currency 与 /en/endgame/N：枢纽页与赛季页文案走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -507,7 +507,7 @@ test.describe('布局验收：多语言', () => {
     expect(body, '赛季页不得残留中文占位').not.toContain(cn['egd.empty.stages']!);
   });
 
-  test('/en/404 与 /en/settings：错误页与主题色名走词典', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/404 与 /en/settings：错误页与主题色名走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -525,7 +525,7 @@ test.describe('布局验收：多语言', () => {
     expect(set, '主题色名不得残留中文').not.toContain(cn['theme.accent.terracotta']!);
   });
 
-  test('/en/endgame/maze/N：终局组件文案走词典（层级 tab、规则标签、奖励区）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/endgame/maze/N：终局组件文案走词典（层级 tab、规则标签、奖励区）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
     const maze = readJsonIn<Record<string, { floor_details?: unknown[] }>>('en', 'public/data/cn/maze.json');
@@ -545,7 +545,7 @@ test.describe('布局验收：多语言', () => {
     expect(body, '不得残留中文层级文案').not.toContain(cn['egd.floorLabel']!.split('{n}')[0]!);
   });
 
-  test('/en/achievement：{NICKNAME} 占位符按语言展开（不是中文「开拓者」）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/achievement：{NICKNAME} 占位符按语言展开（不是中文「开拓者」）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const pack = JSON.parse(readFileSync('public/data/i18n/en/achievements.json', 'utf8')) as Record<string, string>;
     const cnPack = JSON.parse(readFileSync('public/data/i18n/cn/achievements.json', 'utf8')) as Record<string, string>;
     const withName = Object.entries(pack).filter(([, v]) => /Trailblazer/.test(v));
@@ -560,7 +560,7 @@ test.describe('布局验收：多语言', () => {
     expect(body, '英文页不得出现中文「开拓者」').not.toContain('开拓者');
   });
 
-  test('/en/character/1014：技能动画标题随语言解析（令牌而非中文原文）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/character/1014：技能动画标题随语言解析（令牌而非中文原文）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const anims = readJsonIn<Record<string, Record<string, { title?: string }[]>>>(
       'en', 'public/data/cn/skill_animations.json',
     );

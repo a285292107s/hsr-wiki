@@ -203,7 +203,7 @@ test.describe('焦点可见性（键盘 Tab 后元素周边像素必须变化）
   }
 });
 for (const route of ['/', '/character', '/character/1212', '/endgame/maze', '/currency', '/voracity']) {
-  test(`${route}：320px 无横向溢出且无未裁剪越界元素`, { tag: '@viewport-pinned' }, async ({ page }) => {
+  test(`${route}：320px 无横向溢出且无未裁剪越界元素`, { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await page.goto(route);
     await page.waitForTimeout(900);

@@ -46,7 +46,7 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency：1920×1080 首屏内可见本赛季新增（ADR 0020 核心验收）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/currency：1920×1080 首屏内可见本赛季新增（ADR 0020 核心验收）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto('/currency');
@@ -73,7 +73,7 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency：本赛季无新增时只显示一行空态（ADR 0020 决策 6）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/currency：本赛季无新增时只显示一行空态（ADR 0020 决策 6）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     for (const [file, listKey] of [['role', 'roles'], ['traits', 'traits']] as const) {
       await page.route(`**/data/cn/currency/${file}.json`, async (route) => {
@@ -94,7 +94,7 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency：加载期给分区骨架、索引全失败给错误态且可重试，都不冒充空态', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/currency：加载期给分区骨架、索引全失败给错误态且可重试，都不冒充空态', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const INDEXES = '**/data/cn/currency/*.json';
     const isIndex = (url: string) => /(currency\/role|currency\/traits)\.json$/.test(url);
@@ -275,7 +275,7 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency/role/1001 手机断点：方块星级切换、矩阵横向滚动、无溢出', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/currency/role/1001 手机断点：方块星级切换、矩阵横向滚动、无溢出', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/currency/role/1001');
@@ -307,7 +307,7 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency/trait/3006：正文阅读列宽 + 区块内容与标题同左缘', async ({ page }) => {
+  test('/currency/trait/3006：正文阅读列宽 + 区块内容与标题同左缘', { tag: '@visual-detail' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/currency/trait/3006');
     await expect(page.locator('.nk-ctrait-section').first()).toBeVisible();

@@ -22,7 +22,7 @@ const RADIUS_SHAPES = ['50%', '999px'];
 const MAX_TIERS = 10;
 
 for (const [route, label] of ROUTES) {
-  test(`${label}（${route}）：字号与圆角全部来自刻度`, async ({ page }) => {
+  test(`${label}（${route}）：字号与圆角全部来自刻度`, { tag: '@viewport-independent' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto(route);
     await page.waitForSelector('.nk-page--detail');

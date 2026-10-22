@@ -19,17 +19,22 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# 门禁分两档：push 档（每次）与 慢档（夜间 / 手动 / 发布前）。判据见 docs/agents/testing.md「门禁分层」。
+# 门禁分三档：push 档（每次）／PR 档／慢档（夜间 / 手动 / 发布前）。判据见 docs/agents/testing.md「门禁分层」。
 #
-# - **push 档只留「不可逆损失」的两条**：static（七守卫 + vue-tsc）与 unit-tests（Vitest），约 70 秒。
-#   它们拦的是站点白屏 / 数据错 / 色彩与对比度不合规这类线上不可逆问题；类型错此前只由 Vercel 构建
-#   承担，会以「Vercel 报错」的形式到达（实测被误当成部署失败排查了半小时）。
-# - **慢档 = invariants / layout / firefox / smoke**，只在 schedule（每日 18:00 UTC）、手动
-#   workflow_dispatch、或 PR 时跑。理由不是省钱，而是**布局契约保护的是「稳定」，而 UI 重构期
-#   的目标是「变化」**：实测近 40 次 push，8 次红里 7 次红在 layout、1 次在 invariants，而 static /
-#   unit-tests / smoke / firefox 一次没红；同期 11 次提交的主题本身就是「修 CI / 修 e2e 自己」。
-#   让布局断言每 push 拦截一次可逆的展示改动，等于用最贵的门禁守最不需要守的东西。
-# - **慢档不是删除**：用例一条没删，只是不再占用 push 反馈环。发布前手动触发一次 full 即可。
+# - **push 档 = static（七守卫 + 标签机检 + vue-tsc）+ unit-tests（Vitest）+ guards（不变量层，16 条路由）**。
+#   实测 guards 单跑 15.5s / 17.9s 墙钟，加 setup 仍是「~30s 量级」——它是唯一进 push 档的 e2e，因为
+#   白屏 / 未捕获 JS 异常 / 未知横向溢出 / 关键容器消失是**不可逆损失**：改坏了，用户看到的就是坏站。
+#   类型错此前只由 Vercel 构建承担，会以「Vercel 报错」的形式到达（实测被误当成部署失败排查了半小时）。
+# - **PR 档 = invariants（外壳契约 shell + a11y axe 扫描）**：拦截语义与可达性问题，但不跑布局契约。
+# - **慢档 = layout / firefox / smoke**，只在 schedule（每日 18:00 UTC）与手动 workflow_dispatch 跑。
+#   理由不是省钱，而是**布局契约保护的是「稳定」，而 UI 重构期的目标是「变化」**：实测近 40 次 push，
+#   8 次红里 7 次红在 layout、1 次在 invariants，而 static / unit-tests / smoke / firefox 一次没红；
+#   同期 11 次提交的主题本身就是「修 CI / 修 e2e 自己」。让布局断言每 push 拦截一次可逆的展示改动，
+#   等于用最贵的门禁守最不需要守的东西。**慢档不是删除**：用例一条没删，只是不再占用 push 反馈环。
+# - **脆弱几何断言（`@visual-detail`）不在任何 CI 档**：盒子相接 ±1px、发丝线恰 N 条、grid 列宽、
+#   精确 px、断点 / 语言矩阵的逐元素重复——它们锁的是版式快照，判据随展示迭代走，只在需要时回看：
+#   `E2E_DETAIL=1 pnpm exec playwright test --grep @visual-detail`（`grepInvert` 没有 CLI 覆盖开关，
+#   不带这个环境变量时这些用例连收集都收不到）。
 # - **墙钟靠分片（机器维度），不靠提高并发度**：每台机器的 worker 仍是实测过的 2（见 playwright.config.ts）。
 # - **片数由「最慢文件」定，不由总条数定**：`--shard` 的切分单位是「文件 × project」组，同一文件的多条
 #   永远落在同一片；片数还不得超过组数，否则多出的片空跑（实测 4 文件分 2 片 = 15 条全挤进第 1 片）。
@@ -73,6 +78,33 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+  # **push 档唯一的 e2e**：16 条不变量（15 条路由 + /settings 外壳断言：页面可达 / 无未捕获 JS 异常 /
+  # 无未知横向溢出 / 关键容器可达 / 恰一个 h1 / 无错误态）。断言语义一条不减，收成 2 条 test 是为了把
+  # 「每条都重启一次页面 × 15」的重复开销压下来（实测 15.5s 用例 / 17.9s 墙钟，单条 test 内逐路由 goto）。
+  # 只跑 chromium：不变量本身与断点无关，手机档的溢出面由慢档 layout 覆盖。
+  guards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+
+      - name: E2E 不变量层（guards，16 条路由）
+        run: pnpm exec playwright test e2e/guards.spec.ts --project=chromium
+
+      - name: Upload e2e artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-artifacts-guards
+          path: |
+            playwright-report/
+            /tmp/hsr-wiki-e2e-results/
+          retention-days: 7
+
   invariants:
     if: github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope != 'none')
     runs-on: ubuntu-latest
@@ -88,12 +120,13 @@ jobs:
         with:
           browsers: chromium
 
-      # 3 个文件（guards / shell / a11y）分 2 片：按条数均分后一片是 a11y + guards、另一片是
-      # shell 的剩余——两片都比单跑快，而 3 个文件分 3 片会有一片只剩 guards（短文件，空跑）。
-      - name: E2E 不变量层（guards + shell + a11y，分片 ${{ matrix.shard }}/2）
+      # guards 已独立成 push 档 job，这里只留「语义与可达性」两条：外壳契约（shell）+ a11y 扫描。
+      # 2 片按实测：3 个组（a11y 21 / shell-chromium 16 / shell-mobile 16）连续切块成 37 / 16，
+      # 两片都非空；片数不能再加到 3 以上——组数就 3 个，多出的片空跑。
+      - name: E2E 语义契约层（shell + a11y，分片 ${{ matrix.shard }}/2）
         run: >-
           pnpm exec playwright test
-          e2e/guards.spec.ts e2e/shell.spec.ts e2e/accessibility.spec.ts
+          e2e/shell.spec.ts e2e/accessibility.spec.ts
           --shard=${{ matrix.shard }}/2
 
       - name: Upload e2e artifacts
@@ -107,7 +140,7 @@ jobs:
           retention-days: 7
 
   layout:
-    if: github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -126,7 +159,9 @@ jobs:
       # 冒烟族（locales-smoke / locales-sweep / i18n-overflow* / endgame-overflow*）由 smoke job 承担。
       # 用 glob 而非硬编码清单：新增 layout 分文件自动纳入，漏加会退化成「跑不到用例」而非报错。
       # **排除模式必须与 smoke job 的清单同源**：smoke 新增文件时这里不加排除，它会同时被两个
-      # job 跑到（重复计费且分片被拖偏）。判据是「layout 文件集 = 全部 layout-*.spec.ts − smoke 清单」。
+      # job 跑到（重复计费且分片被拖偏）。判据是「layout 文件集 = 全部 layout-*.spec.ts − smoke 清单
+      # − 已整文件降级为 `@visual-detail` 的文件」。`layout-i18n-overflow` 这个模式按子串同时收掉
+      # `-alt` / `-narrow` / `-mobile`——前两者已降级（不常跑），`-mobile` 归 smoke，故匹配它是对的。
       - name: E2E 布局契约（分片 ${{ matrix.shard }}/6）
         shell: bash
         run: |
@@ -149,7 +184,7 @@ jobs:
   # `--shard` 按组均分，那 11 条全落在第 1 片 ⇒ 其余 5 片仍得照装 firefox（~100MB + 解压），
   # 而只有第 1 片用得上。拆出来后 6 个 layout 分片只装 chromium，firefox 只装一台。
   firefox:
-    if: github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -175,13 +210,13 @@ jobs:
           retention-days: 7
 
   smoke:
-    if: github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v5
 
@@ -190,22 +225,23 @@ jobs:
           browsers: chromium
 
       # 风险语言子集（cn 缺省 / de 性别变体 / jp ruby / ru 分片）：全 13 语言矩阵见 ci-full.yml。
-      # **片数 = 4 不是随手取的**：`--shard` 只在「文件 × project」组之间按**条数**均分，所以
-      # ① 组数少于片数时多出的片空跑；② 条数均衡 ≠ 耗时均衡（一条 gross 用例循环 5 语言能顶
-      # 20 条短用例）。故用例一律做成「一语言一条」，拆到单条 ≤ 20s 后分片才有意义。
-      # 改文件数 / 用例数后先用 `--list --shard=i/N` 数**每片实际条数**。
-      - name: E2E 全语言冒烟 + 多语言长文案（风险语言子集，分片 ${{ matrix.shard }}/4）
+      # **片数 = 2 是按实测定的，不是随手取的**：这一层降级后剩 5 个文件，`SMOKE_SCOPE=fast` 下实收
+      # 18 条（locales-smoke 4 / locales-sweep 4 / i18n-overflow 3 / i18n-overflow-mobile 5 /
+      # endgame-overflow 2）。实测 2 片 = 10/8、3 片 = 7/7/4——两档都无空片，取 2 是为了少开一台
+      # runner（均衡度已够）。改文件数 / 用例数后先用 `--list --shard=i/N` 数**每片实际条数**再定片数。
+      # 注意：**报条数必须带 `SMOKE_SCOPE`**——不带时是 13 语言全量的 36 条，与 CI 实跑的不是同一批。
+      # **清单必须是「常规收集里真能收到用例」的文件**：`layout-i18n-overflow-{alt,narrow}` 与
+      # `layout-endgame-overflow` 的 8 语言块已降级为 `@visual-detail`（不在常规收集里），
+      # 留在清单里就是空跑——它们只在 `E2E_DETAIL=1` 下才收集。
+      - name: E2E 全语言冒烟 + 多语言长文案（风险语言子集，分片 ${{ matrix.shard }}/2）
         run: >-
           pnpm exec playwright test
           e2e/layout-locales-smoke.spec.ts
           e2e/layout-locales-sweep.spec.ts
           e2e/layout-i18n-overflow.spec.ts
-          e2e/layout-i18n-overflow-alt.spec.ts
           e2e/layout-i18n-overflow-mobile.spec.ts
-          e2e/layout-i18n-overflow-narrow.spec.ts
           e2e/layout-endgame-overflow.spec.ts
-          e2e/layout-endgame-overflow-alt.spec.ts
-          --shard=${{ matrix.shard }}/4
+          --shard=${{ matrix.shard }}/2
         env:
           SMOKE_SCOPE: fast
 

@@ -3,7 +3,7 @@ import { collectConsoleIssues, computedNumber, waitForCatalogCards } from './hel
 import { expectTokenNumber, noUnknownOverflow, readContentOffset } from './layout.shared';
 
 test.describe('布局验收：枢纽页共享页脚原语', () => {
-  test('/ 与 /currency 共用 .nk-hub-footer（声明于 tokens.css），全断点留白正确', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/ 与 /currency 共用 .nk-hub-footer（声明于 tokens.css），全断点留白正确', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     for (const path of ['/', '/currency'] as const) {

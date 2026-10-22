@@ -954,7 +954,7 @@ test.describe('布局验收：敌方详情页', () => {
 
   test(
     '敌方详情页全断点避让侧栏：内容左缘落在侧栏右侧，且无未知横向溢出',
-    { tag: '@viewport-pinned' },
+    { tag: ['@visual-detail', '@viewport-pinned'] },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
       const cases = [

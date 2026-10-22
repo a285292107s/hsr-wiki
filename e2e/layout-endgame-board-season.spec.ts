@@ -117,7 +117,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     assertNoErrors();
   });
 
-  test('/endgame/maze/1035：层级 tab 固定单行 + 倒序（星启最前），可左右滚动 @viewport-pinned', async ({ page }) => {
+  test('/endgame/maze/1035：层级 tab 固定单行 + 倒序（星启最前），可左右滚动', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const season = seasonData('maze.json', '1035');
     await page.setViewportSize({ width: 1024, height: 800 });
@@ -142,7 +142,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     assertNoErrors();
   });
 
-  test('/endgame/maze/1036 + /endgame/story/2026：层级子 tab + 目标栏 + 半场卡片 + 单半场看板（ADR 0037）', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/maze/1036 + /endgame/story/2026：层级子 tab + 目标栏 + 半场卡片 + 单半场看板（ADR 0037）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
 
@@ -260,7 +260,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     assertNoErrors();
   });
 
-  test('/endgame/maze/1036：父子层级刻度（ADR 0028）桌面', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/maze/1036：父子层级刻度（ADR 0028）桌面', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/maze/1036');
@@ -307,7 +307,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     assertNoErrors();
   });
 
-  test('/endgame/maze/1036：父子层级刻度（ADR 0028）手机断点', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('/endgame/maze/1036：父子层级刻度（ADR 0028）手机断点', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/endgame/maze/1036');

@@ -55,7 +55,7 @@ test.describe('布局验收：贪饕污染专题页（ADR 0025）', () => {
     assertNoErrors();
   });
 
-  test('/voracity：hero 与首区块同轴（含分割线），愿力档位「文案在前、读数在后」', async ({ page }) => {
+  test('/voracity：hero 与首区块同轴（含分割线），愿力档位「文案在前、读数在后」', { tag: '@visual-detail' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/voracity');
     await expect(page.locator('.nk-vor-sec .nk-title').first()).toBeVisible();
