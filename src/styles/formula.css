@@ -242,8 +242,8 @@
 .nk-formula-detail__formula {
   margin-top: 8px;
   font-family: var(--font-hud);
-  font-size: var(--nk-fs-3);
-  line-height: 1.7;
+  font-size: var(--nk-fs-5);
+  line-height: 1.6;
   color: var(--metric-val);
   overflow-wrap: anywhere;
 }
