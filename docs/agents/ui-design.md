@@ -9,7 +9,7 @@
 | 层 | 文件 | 放什么 | 禁止 |
 |---|---|---|---|
 | 令牌 + 全局原语 | `src/styles/tokens.css` | 四层令牌（§2）；跨页全局原语（导航壳 `ui-sidebar*` / 更多抽屉 `ui-more*` / 详情页壳 `nk-page--detail`·Hero `nk-hero*` / `nk-tabs` / `nk-panels`·`nk-panel` / `nk-secnav` / 区块标题 `nk-title` / 回顶 `nk-top-btn` / `nk-skeleton`·`nk-sk--*` / `nk-toast` / `nk-card` / 页面过渡 `nk-view-*` / `nk-hub-footer`·`nk-hub-masthead` / 状态原语 `nk-error-state`·`nk-slot-empty`·`nk-img-error`）；无障碍三件套；纸感颗粒覆层 | 页面专属规则；**页面 CSS 引用彩色原始层** |
-| 目录引擎 | `src/styles/catalog.css` | 目录卡片与网格族（`nk-idx-grid` / `nk-relic-grid` / `nk-item-grid` / `nk-mob-grid`；卡片 HTML 由模板字符串 v-html 注入，scoped 命不中）；**两个枢纽页共用的上新区块原语 `nk-hub-release*`**（特例：页面布局且作用域覆盖目录卡片类，故单点声明留本文件，见 [ADR 0020](../adr/0020-货币战争枢纽页改为本赛季新增页.md) 决策 7） | 页面专属样式；复制该区块 |
+| 目录引擎 | `src/styles/catalog.css` | 目录卡片与网格族（`nk-idx-grid` / `nk-relic-grid` / `nk-item-grid` / `nk-mob-grid`；卡片 HTML 由模板字符串 v-html 注入，scoped 命不中） | 页面专属样式；复制该区块 |
 | 页面 | `src/styles/<page>.css` | 页面专属，由视图组件 `import`，随路由拆 chunk 懒加载 | 跨页复用（先查原语）；复制粘贴其他页面规则 |
 | 组件 | SFC `<style scoped>` | 组件专属（如 CW Hub 导航） | 污染全局命名空间 |
 
@@ -99,7 +99,7 @@
 | 禁霓虹 glow 阴影（`0 0 Npx`）/ 禁渐变填充徽章；hover 用发丝边框 + 墨色分层阴影 + 2px 抬升 | `src/styles/currency-catalog.css` |
 | CW 详情层不设 glow 变量；阴影以物理黑投影 `rgba(0,0,0,…)` 为主；强调色以纯色 / 淡底 / 发丝线为主（例外：详情进度条 2px `primary→accent` 渐变） | `src/styles/currency-role-*.css`（hero / sections / gear / skills 四拆分块） |
 | 内容区无发光点 / 无药丸胶囊 / 无 box-shadow 堆叠；徽标走文字式（页面级状态胶囊例外，见 [ADR 0034 决策 6](../adr/0034-终局节点详情面板字阶与区块节奏.md)） | `src/styles/endgame-*.css`（frame / mode / levels / monsters / panels / type-scale） |
-| 枢纽页报头之上禁新增行情式装饰（霓虹 glow / 金币雨 / 行情板 / div 合成装饰 / 装饰字符 / em-dash / 装饰性 eyebrow）；**禁补回全屏媒体层**，恢复前必须先改 [ADR 0018](../adr/0018-枢纽页改为工具化入口页.md) 决策 2/3（继续有效） | `src/styles/currency-hub.css`、`src/styles/catalog.css`（`nk-hub-release*`）、`src/styles/tokens.css`（`nk-hub-masthead`） |
+| 枢纽页报头之上禁新增行情式装饰（霓虹 glow / 金币雨 / 行情板 / div 合成装饰 / 装饰字符 / em-dash / 装饰性 eyebrow）；**禁补回全屏媒体层**，恢复前必须先改 [ADR 0018](../adr/0018-枢纽页改为工具化入口页.md) 决策 2/3（继续有效） | `src/styles/currency-hub.css`（`nk-hub-release*` / `nk-cwseas*` / `nk-cwrole*` / `nkcwtrait*`）、`src/styles/tokens.css`（`nk-hub-masthead`） |
 | 纸感颗粒禁纤维与云斑（会生成可被眼锁定的条纹与脏 blob）；唯一收口、禁止页面级复制 | `src/styles/tokens.css` |
 | 弱化霓虹：`--primary-glow` 统一 10% 透明度，只保留隐约材质感；禁止新增 glow 类阴影 | `src/styles/tokens.css` |
 | 不做全透白描边的「苹果玻璃」吸顶工具条 | `src/styles/catalog.css` |

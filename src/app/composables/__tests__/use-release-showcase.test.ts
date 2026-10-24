@@ -1,12 +1,13 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import {
+  buildCwSeason,
   buildReleaseSections,
   buildReleaseSectionsBy,
   fillFeatureBriefs,
   pickCurrentVersion,
-  pickSeasonNew,
   splitSources,
+  type CwSeason,
   type ReleaseSource,
   type ReleaseTagged,
 } from '../use-release-showcase';
@@ -191,85 +192,127 @@ describe('fillFeatureBriefs（特写档数据正文：与分区同批就绪，�
   });
 });
 
-describe('pickSeasonNew', () => {
-  const season = (id: number, is_season_new?: boolean): ReleaseTagged => ({ id, is_season_new });
-
-  it('只取 is_season_new === true 的条目，保持入参顺序', () => {
-    const list = [season(1, true), season(2, false), season(3, true), season(4)];
-    expect(pickSeasonNew(list).map((i) => i.id)).toEqual([1, 3]);
+describe('buildCwSeason（本赛季新增账：角色 + 羁绊 + 档案存量）', () => {
+  const roleOf = (id: string, over: Record<string, unknown> = {}): CatalogItem => ({
+    id, name: `角色${id}`, is_season_new: true, ...over,
+  });
+  const traitOf = (id: string, over: Record<string, unknown> = {}): CatalogItem => ({
+    id, name: `羁绊${id}`, is_season_new: true, ...over,
   });
 
-  it('字段缺失（未打标 / *Old 代际表缺失）一律视为 false，禁止退化为全量新增', () => {
-    const list = [season(1), season(2), season(3, false)];
-    expect(pickSeasonNew(list)).toEqual([]);
+  it('只收 is_season_new === true，顺序与入参一致', () => {
+    const season = buildCwSeason([
+      roleOf('1001'),
+      roleOf('1002', { is_season_new: false }),
+      roleOf('1003'),
+      { id: '1004', name: '旧角色' } as CatalogItem,
+    ], [
+      traitOf('3001'),
+      traitOf('3002', { is_season_new: false }),
+      { id: '3003', name: '旧羁绊' } as CatalogItem,
+    ]);
+    expect(season.roles.map((r) => r.id)).toEqual(['1001', '1003']);
+    expect(season.traits.map((t) => t.id)).toEqual(['3001']);
   });
 
-  it('只认布尔 true（真值串 / 1 不算新增）', () => {
-    const list = [{ id: 1, is_season_new: 'true' }, { id: 2, is_season_new: 1 }] as unknown as ReleaseTagged[];
-    expect(pickSeasonNew(list)).toEqual([]);
+  it('字段缺失 / 非布尔真值（"true" / 1）都不算新增，且不退化成全量', () => {
+    const season = buildCwSeason([
+      { id: '1', name: '甲', is_season_new: 'true' } as unknown as CatalogItem,
+      { id: '2', name: '乙', is_season_new: 1 } as unknown as CatalogItem,
+      { id: '3', name: '丙' } as CatalogItem,
+    ], [
+      { id: '10', name: '丁', is_season_new: 'true' } as unknown as CatalogItem,
+    ]);
+    expect(season.roles).toEqual([]);
+    expect(season.traits).toEqual([]);
   });
 
-  it('不修改入参', () => {
-    const list = [season(1, true), season(2)];
-    const snapshot = JSON.stringify(list);
-    pickSeasonNew(list);
-    expect(JSON.stringify(list)).toBe(snapshot);
-  });
-});
-
-describe('CW 两分区（buildReleaseSectionsBy + pickSeasonNew）', () => {
-  const renderCard = (item: CatalogItem, i: number): string =>
-    `<a class="c" data-id="${String(item.id)}" style="--i:${i}"></a>`;
-
-  const cwSource = (
-    kind: ReleaseSource['kind'],
-    label: string,
-    items: readonly CatalogItem[],
-  ): ReleaseSource => ({
-    kind,
-    label,
-    listHref: `/currency/${kind}`,
-    tagged: items.map((it) => ({ id: String(it.id), is_season_new: it.is_season_new === true })),
-    items,
-    renderCard,
+  it('totals = 入参全量档案数（不是新增数，也不是新增条目的派生）', () => {
+    const season = buildCwSeason([
+      roleOf('1'),
+      roleOf('2', { is_season_new: false }),
+      { id: '3', name: '丙' } as CatalogItem,
+    ], [
+      traitOf('10'),
+      { id: '11', name: '旧羁绊' } as CatalogItem,
+    ]);
+    expect(season.totals).toEqual({ roles: 3, traits: 2 });
+    expect(season.roles).toHaveLength(1);
   });
 
-  const items: CatalogItem[] = [
-    { id: '1001', name: '姬子•启行', is_season_new: true },
-    { id: '1002', name: '千冶•刃', is_season_new: true },
-    { id: '1003', name: '旧角色' },
-    { id: '1004', name: '旧角色2', is_season_new: false },
-  ];
-
-  it('两分区按 is_season_new 过滤，data-kind / label 与本页 DOM 契约一致', () => {
-    const sections = buildReleaseSectionsBy([
-      cwSource('role', '角色图鉴', items),
-      cwSource('trait', '羁绊图鉴', [
-        { id: '2001', name: '领航员', is_season_new: true },
-        { id: '2002', name: '旧羁绊' },
-      ]),
-    ], pickSeasonNew);
-    expect(sections.map((s) => s.kind)).toEqual(['role', 'trait']);
-    expect(sections.map((s) => s.label)).toEqual(['角色图鉴', '羁绊图鉴']);
-    expect(sections.map((s) => s.count)).toEqual([2, 1]);
-    expect(sections[0].html).toBe(
-      '<a class="c" data-id="1001" style="--i:0"></a><a class="c" data-id="1002" style="--i:1"></a>',
-    );
+  it('角色字段映射：rarity→cost/costKey、front_back_type→positionKey、charge_type→{key,text}', () => {
+    const [card] = buildCwSeason([roleOf('1510', {
+      href: '/currency/role/1510', rarity: 3, front_back_type: 'Front', charge_type: ['Speed', 'XX'],
+    })], []).roles;
+    expect(card.href).toBe('/currency/role/1510');
+    expect(card.cost).toBe(3);
+    expect(card.costKey).toBe('catalog.cost.3');
+    expect(card.positionKey).toBe('catalog.position.front');
+    expect(card.charges.map((c) => c.text)).toEqual(['Speed', 'XX']);
+    expect(card.charges.map((c) => c.key)).toEqual(['catalog.charge.speed', undefined]);
   });
 
-  it('某分区无新增（字段缺失 / 全 false）→ 该分区不产出', () => {
-    const sections = buildReleaseSectionsBy([
-      cwSource('role', '角色图鉴', [{ id: '1003', name: '旧角色' }]),
-      cwSource('trait', '羁绊图鉴', [{ id: '2001', name: '领航员', is_season_new: true }]),
-    ], pickSeasonNew);
-    expect(sections.map((s) => s.kind)).toEqual(['trait']);
+  it('枚举缺键：无 rarity → cost 0 且无 costKey；无 front_back_type / charge_type → 留空（不落 undefined 键文案）', () => {
+    const [card] = buildCwSeason([roleOf('1')], []).roles;
+    expect(card.cost).toBe(0);
+    expect(card.costKey).toBeUndefined();
+    expect(card.positionKey).toBeUndefined();
+    expect(card.charges).toEqual([]);
   });
 
-  it('两分区皆无新增 → 返回空数组（视图据此渲染唯一一行空态）', () => {
-    const sections = buildReleaseSectionsBy([
-      cwSource('role', '角色图鉴', [{ id: '1003', name: '旧角色' }]),
-      cwSource('trait', '羁绊图鉴', []),
-    ], pickSeasonNew);
-    expect(sections).toEqual([]);
+  it('角色 traits 映射为 chip：isNew 只看该 id 属于本赛季新增羁绊；icon 按 id 派生', () => {
+    const [card] = buildCwSeason([
+      roleOf('1', {
+        traits: [{ id: 3001, name: '领航员' }, { id: 2010, name: '旧羁绊' }],
+      }),
+    ], [
+      traitOf('3001', { name: '领航员' }),
+      traitOf('2010', { name: '旧羁绊', is_season_new: false }),
+    ]).roles;
+    expect(card.traits.map(({ id, name, isNew }) => ({ id, name, isNew }))).toEqual([
+      { id: '3001', name: '领航员', isNew: true },
+      { id: '2010', name: '旧羁绊', isNew: false },
+    ]);
+    for (const chip of card.traits) {
+      expect(chip.icon.endsWith(`/${chip.id}.webp`), `${chip.id} 的 chip 图标应按 id 派生`).toBe(true);
+    }
+  });
+
+  it('carriers 从全量角色（含非新增）里取持有者，isNew 标注该角色是否本赛季新增；顺序跟随角色入参', () => {
+    const season = buildCwSeason([
+      { id: '1001', name: '旧角色', traits: [{ id: 3001, name: '领航员' }] } as CatalogItem,
+      { id: '1002', name: '新角色', is_season_new: true, traits: [{ id: 3001, name: '领航员' }] },
+      {
+        id: '1003', name: '旧角色2', is_season_new: false,
+        traits: [{ id: 3001, name: '领航员' }, { id: 3003, name: '往期羁绊' }],
+      },
+    ], [
+      traitOf('3001', { name: '领航员' }),
+      traitOf('3002', { name: '孤羁绊' }),
+      traitOf('3003', { name: '往期羁绊', is_season_new: false }),
+    ]);
+    const byId = new Map(season.traits.map((t) => [t.id, t]));
+    expect(byId.get('3001')!.carriers).toEqual([
+      { id: '1001', name: '旧角色', isNew: false },
+      { id: '1002', name: '新角色', isNew: true },
+      { id: '1003', name: '旧角色2', isNew: false },
+    ]);
+    expect(byId.get('3002')!.carriers, '无人持有 → 空数组（视图据此不渲染关联角色行）').toEqual([]);
+  });
+
+  it('desc 去噪：字面 \\n 换空格、连续空白折叠、首尾 trim', () => {
+    const [trait] = buildCwSeason([], [
+      traitOf('3001', { simple_desc: '  首行\\n次行   多空格\\n\\n收尾  ' }),
+    ]).traits;
+    expect(trait.desc).toBe('首行 次行 多空格 收尾');
+  });
+
+  it('不修改入参（角色 / 羁绊两侧 JSON 快照一致）', () => {
+    const roles: CatalogItem[] = [roleOf('1', { traits: [{ id: 3001, name: '领航员' }] }), roleOf('2')];
+    const traits: CatalogItem[] = [traitOf('3001', { simple_desc: '甲\\n乙' }), traitOf('3002')];
+    const snapshot = JSON.stringify({ roles, traits });
+    const season: CwSeason = buildCwSeason(roles, traits);
+    expect(season.roles).toHaveLength(2);
+    expect(JSON.stringify({ roles, traits })).toBe(snapshot);
   });
 });

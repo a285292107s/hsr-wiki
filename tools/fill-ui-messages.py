@@ -300,6 +300,8 @@ LABELS: dict[str, str] = {
     "cwHub.errorTitle": "赛季索引加载失败",
     "cwHub.errorDetail": "{labels}索引都没取到，无法判定本赛季新增，重试即可恢复。",
     "cwHub.empty": "本赛季暂无新增条目",
+    "cwHub.holds": "档案存量",
+    "cwHub.carriers": "关联角色：{names}",
     "egd.rule.cycles": "回合限制 CYCLES",
     "egd.rule.score": "通关分数线 SCORE",
     "egd.wavesEnemies": "{waves} 波 · {mons} 敌",
@@ -1625,6 +1627,12 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "cwHub.empty": {
         "cn": "本赛季暂无新增条目", "cht": "本賽季暫無新增條目", "en": "No new entries this season", "jp": "今シーズンの追加項目はありません", "kr": "이번 시즌 추가 항목이 없습니다", "es": "Sin entradas nuevas esta temporada", "fr": "Aucune nouvelle entrée cette saison", "de": "Keine neuen Einträge in dieser Saison", "pt": "Sem entradas novas nesta temporada", "ru": "В этом сезоне новых записей нет", "th": "ไม่มีรายการใหม่ในซีซันนี้", "vi": "Không có mục mới trong mùa này", "id": "Tidak ada entri baru musim ini",
+    },
+    "cwHub.holds": {
+        "cn": "档案存量", "cht": "檔案存量", "en": "Archive holdings", "jp": "収蔵件数", "kr": "보관 수량", "es": "Registros totales", "fr": "Fonds d'archives", "de": "Archivbestand", "pt": "Acervo do arquivo", "ru": "Фонд архива", "th": "จำนวนในคลัง", "vi": "Kho lưu trữ", "id": "Isi arsip",
+    },
+    "cwHub.carriers": {
+        "cn": "关联角色：{names}", "cht": "關聯角色：{names}", "en": "Carried by {names}", "jp": "関連キャラ：{names}", "kr": "연관 캐릭터: {names}", "es": "Personajes: {names}", "fr": "Personnages : {names}", "de": "Charaktere: {names}", "pt": "Personagens: {names}", "ru": "Персонажи: {names}", "th": "ตัวละครที่เกี่ยวข้อง: {names}", "vi": "Nhân vật liên quan: {names}", "id": "Karakter terkait: {names}",
     },
     "egd.rule.cycles": {
         "cn": "回合限制 CYCLES", "cht": "回合限制 CYCLES", "en": "Turn limit CYCLES", "jp": "ターン制限 CYCLES", "kr": "턴 제한 CYCLES", "es": "Límite de turnos CYCLES", "fr": "Limite de tours CYCLES", "de": "Zuglimit CYCLES", "pt": "Limite de turnos CYCLES", "ru": "Лимит ходов CYCLES", "th": "จำกัดเทิร์น CYCLES", "vi": "Giới hạn lượt CYCLES", "id": "Batas giliran CYCLES",

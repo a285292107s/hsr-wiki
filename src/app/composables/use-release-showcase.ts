@@ -1,4 +1,4 @@
-import { ref, shallowRef, type Ref } from 'vue';
+import { ref, shallowRef, type Ref, type ShallowRef } from 'vue';
 import { useAppStore } from '../stores/app';
 import { characterPage } from '../catalog/pages/character';
 import { lightconePage } from '../catalog/pages/lightcone';
@@ -8,8 +8,8 @@ import {
   loadLocalRelicSets, loadLocalRelicDetail,
 } from '../../services/api';
 import { fmtDesc } from '../../lib/format';
-import { avatarCutinFigureUrl, avatarDrawCardUrl, lightConeMaxFigureUrl } from '../../lib/icons';
-import { elemLabel, pathLabel } from '../../lib/enum-labels';
+import { avatarCutinFigureUrl, avatarDrawCardUrl, gridFightTraitIconById, gridFightTraitIconUrl, lightConeMaxFigureUrl } from '../../lib/icons';
+import { cwChargeKey, cwCostKey, cwPositionKey, cwTraitCatKey, elemLabel, pathLabel } from '../../lib/enum-labels';
 import { characterBlurb } from '../../lib/character-blurb';
 import type { CatalogContext, CatalogItem, CatalogPageConfig } from '../catalog/types';
 import { translate } from '../i18n';
@@ -61,10 +61,6 @@ export function pickCurrentVersion<T extends ReleaseTagged>(
   const target = label.trim();
   if (!target) return [];
   return list.filter((item) => String(item.release_version ?? '').trim() === target);
-}
-
-export function pickSeasonNew<T extends ReleaseTagged>(list: readonly T[]): T[] {
-  return list.filter((item) => item.is_season_new === true);
 }
 
 const FEATURE_MAX = 1;
@@ -186,29 +182,6 @@ const RELEASE_SOURCES: Array<{
 const RELEASE_LABELS: readonly string[] = RELEASE_SOURCES.map((s) => s.label);
 const RELEASE_SK_KINDS: readonly ReleaseKind[] = RELEASE_SOURCES.map((s) => s.kind);
 
-const CW_RELEASE_SOURCES: Array<{
-  kind: ReleaseKind;
-  label: string;
-  listHref: string;
-  loadPage: () => Promise<CatalogPageConfig>;
-}> = [
-  {
-    kind: 'role',
-    label: translate('nav.cwRole'),
-    listHref: '/currency/role',
-    loadPage: () => import('../catalog/pages/currency-role').then((m) => m.currencyRolePage),
-  },
-  {
-    kind: 'trait',
-    label: translate('nav.cwTrait'),
-    listHref: '/currency/trait',
-    loadPage: () => import('../catalog/pages/currency-trait').then((m) => m.currencyTraitPage),
-  },
-];
-
-const CW_RELEASE_LABELS: readonly string[] = CW_RELEASE_SOURCES.map((s) => s.label);
-const CW_RELEASE_SK_KINDS: readonly ReleaseKind[] = CW_RELEASE_SOURCES.map((s) => s.kind);
-
 export interface ReleaseShowcase {
   sections: Ref<ReleaseSection[]>;
   loaded: Ref<boolean>;
@@ -257,47 +230,154 @@ export function useReleaseShowcase(): ReleaseShowcase {
   return { sections, loaded, failedCount, labels: RELEASE_LABELS, skKinds: RELEASE_SK_KINDS, load };
 }
 
-export function useCwReleaseShowcase(): ReleaseShowcase {
+export interface CwTraitChip {
+  id: string;
+  name: string;
+  icon: string;
+  isNew: boolean;
+}
+
+export interface CwRoleCard {
+  id: string;
+  name: string;
+  href: string;
+  avatar: string;
+  cost: number;
+  costKey?: string;
+  positionKey?: string;
+  charges: Array<{ key?: string; text: string }>;
+  traits: CwTraitChip[];
+}
+
+export interface CwTraitCard {
+  id: string;
+  name: string;
+  href: string;
+  icon: string;
+  cat: string;
+  catKey: string;
+  layerCount: number;
+  desc: string;
+  carriers: Array<{ id: string; name: string; isNew: boolean }>;
+}
+
+export interface CwSeason {
+  roles: CwRoleCard[];
+  traits: CwTraitCard[];
+  totals: { roles: number; traits: number };
+}
+
+interface CwTraitRef {
+  id: number | string;
+  name?: string;
+}
+
+function seasonTraitRefs(item: CatalogItem): CwTraitRef[] {
+  return Array.isArray(item.traits) ? (item.traits as CwTraitRef[]) : [];
+}
+
+export function buildCwSeason(
+  roleItems: readonly CatalogItem[],
+  traitItems: readonly CatalogItem[],
+): CwSeason {
+  const newTraits = traitItems.filter((item) => item.is_season_new === true);
+  const newTraitIds = new Set(newTraits.map((item) => String(item.id)));
+  const carriersByTrait = new Map<string, CwTraitCard['carriers']>();
+  for (const item of roleItems) {
+    for (const ref of seasonTraitRefs(item)) {
+      const id = String(ref.id);
+      if (!newTraitIds.has(id)) continue;
+      const bucket = carriersByTrait.get(id) ?? [];
+      bucket.push({ id: String(item.id), name: String(item.name ?? ''), isNew: item.is_season_new === true });
+      carriersByTrait.set(id, bucket);
+    }
+  }
+  const roles = roleItems
+    .filter((item) => item.is_season_new === true)
+    .map((item): CwRoleCard => {
+      const rarity = Number(item.rarity) || 0;
+      return {
+        id: String(item.id),
+        name: String(item.name ?? ''),
+        href: String(item.href ?? ''),
+        avatar: String(item.avatar ?? ''),
+        cost: rarity,
+        costKey: cwCostKey(String(rarity)),
+        positionKey: cwPositionKey(String(item.front_back_type ?? '')),
+        charges: (Array.isArray(item.charge_type) ? item.charge_type : []).map((charge) => ({
+          key: cwChargeKey(charge),
+          text: charge,
+        })),
+        traits: seasonTraitRefs(item).map((ref) => {
+          const id = String(ref.id);
+          return {
+            id,
+            name: String(ref.name ?? ''),
+            icon: gridFightTraitIconById(Number(id)),
+            isNew: newTraitIds.has(id),
+          };
+        }),
+      };
+    });
+  const traits = newTraits.map((item): CwTraitCard => {
+    const id = String(item.id);
+    const cat = String(item.cat ?? 'special');
+    return {
+      id,
+      name: String(item.name ?? ''),
+      href: String(item.href ?? ''),
+      icon: gridFightTraitIconUrl(item.icon as string),
+      cat,
+      catKey: cwTraitCatKey(cat) ?? 'catalog.traitCat.special',
+      layerCount: Array.isArray(item.layers) ? (item.layers as unknown[]).length : 0,
+      desc: String(item.simple_desc ?? '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim(),
+      carriers: carriersByTrait.get(id) ?? [],
+    };
+  });
+  return { roles, traits, totals: { roles: roleItems.length, traits: traitItems.length } };
+}
+
+const CW_SEASON_SOURCE_COUNT = 2;
+
+export interface CwSeasonShowcase {
+  season: ShallowRef<CwSeason | null>;
+  loaded: Ref<boolean>;
+  failedCount: Ref<number>;
+  sourceCount: number;
+  load(): Promise<void>;
+}
+
+async function loadSeasonItems(
+  loadPage: () => Promise<CatalogPageConfig>,
+  ctx: CatalogContext,
+): Promise<CatalogItem[] | null> {
+  try {
+    const page = await loadPage();
+    return page.fetchData ? await page.fetchData(ctx) : [];
+  } catch {
+    return null;
+  }
+}
+
+export function useCwSeason(): CwSeasonShowcase {
   const app = useAppStore();
-  const sections = shallowRef<ReleaseSection[]>([]);
+  const season = shallowRef<CwSeason | null>(null);
   const loaded = ref(false);
   const failedCount = ref(0);
 
   async function load(): Promise<void> {
     loaded.value = false;
     failedCount.value = 0;
-    await app.initVersion();
     const ctx: CatalogContext = { version: app.version };
-
-    const sourced = await Promise.all(
-      CW_RELEASE_SOURCES.map(async (spec): Promise<ReleaseSource | null> => {
-        try {
-          const page = await spec.loadPage();
-          await Promise.all((page.styles ?? []).map((loadCss) => loadCss().catch(() => undefined)));
-          const items = page.fetchData ? await page.fetchData(ctx) : [];
-          return {
-            kind: spec.kind,
-            label: spec.label,
-            listHref: spec.listHref,
-            tagged: items.map((item) => ({
-              id: String(item.id),
-              is_season_new: item.is_season_new === true,
-            })),
-            items,
-            renderCard: page.renderCard,
-          };
-        } catch {
-          return null;
-        }
-      }),
-    );
-    const { ok, failed } = splitSources(sourced);
-    failedCount.value = failed;
-    const built = buildReleaseSectionsBy(ok, pickSeasonNew);
-    await fillFeatureBriefs(ok, built);
-    sections.value = built;
+    const sourced = await Promise.all([
+      loadSeasonItems(() => import('../catalog/pages/currency-role').then((m) => m.currencyRolePage), ctx),
+      loadSeasonItems(() => import('../catalog/pages/currency-trait').then((m) => m.currencyTraitPage), ctx),
+    ]);
+    failedCount.value = sourced.filter((items) => items === null).length;
+    const [roles, traits] = sourced;
+    season.value = buildCwSeason(roles ?? [], traits ?? []);
     loaded.value = true;
   }
 
-  return { sections, loaded, failedCount, labels: CW_RELEASE_LABELS, skKinds: CW_RELEASE_SK_KINDS, load };
+  return { season, loaded, failedCount, sourceCount: CW_SEASON_SOURCE_COUNT, load };
 }

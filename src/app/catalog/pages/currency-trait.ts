@@ -50,6 +50,7 @@ export const currencyTraitPage: CatalogPageConfig = {
     return traits.map((t) => ({
       id: String(t.id),
       name: t.name,
+      href: activeHref(`/currency/trait/${t.id}`),
       icon: t.icon,
       mini_icon: t.mini_icon,
       cat: t.cat,

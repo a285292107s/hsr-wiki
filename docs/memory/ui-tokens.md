@@ -25,6 +25,7 @@
 - **删掉一个「死样式 / 死层」会改变它曾遮住的另一层的可见度**：纯 A/B 差值只反映净效果，看不出「原来是它挡着」——左右渐隐 `::before`（`z-index: 1`）画在 inset `box-shadow` 之上，删掉后最外圈暗角反而更明显。**判死代码前先查它是不是某层的唯一遮蔽物。**`src/styles/character-hero.css`
 - **全局重置的双重静默失效**：① `#id 元素` 形态的重复副本特异性 (1,0,1) 会压死类选择器的间距；② 重置清单漏 `h4` / `h5` / `h6` 则 UA 的 `1.33em` 外边距泄漏。`src/styles/tokens.css`、`catalog.css`、`currency-hub.css`
 - **删「页面级覆写」≠ 取消**：删掉整条规则会**回落到基线更重的值**（光锥 hero 的暗角是覆写基线两层更重的 inset，删规则反而更暗）。必须显式 `box-shadow: none` / `background: none`（`::before` 同理）。`src/styles/lightcone.css`
+- **卡片文案里的字面 `\n` 是数据原样，不归一化就会印在界面上**：`traits.json` 的 `simple_desc` 带反斜杠+n（换行转义未还原），直接插值即可见 `\n` 两个字符，且构建与守卫都不报。归一化口径与目录卡 `renderCard` 同一条：`\\n` → 空格 → 空白折叠 → trim。`src/app/composables/use-release-showcase.ts`
 - **数字统一格式化时三类不得动**：① 标识符 ID（加千分位后更难核对）；② 数据正文里的数字（那是游戏原文，重排等于改写数据文本）；③ 已带单位的百分比 / 星级 / 费用。`src/lib/format.ts`
 - **只在 hover / focus / active 才换色的元素，其文字对比度从未被默认态扫描覆盖**：「悬停后掉到 4.5:1 以下」只存在于交互态。须逐元素 `hover()` / `focus()` 后**在该状态**跑 `color-contrast`。
 - **落在单轴滚动容器之外的伪元素不报错，只是永远不渲染**：`overflow-x: auto` 会把另一轴的 `visible` 按规范算成 `auto`，padding box 之外一律裁掉。`.nk-secnav__btn--active::after` 写 `bottom: -7px` 就从未渲染出激活下划线，静默到只剩颜色差；按钮高度又恒等于导航盒高度，故任何 `bottom: -N` 都落在盒外。修法是让落点进按钮盒内（`bottom: 0`），判据取**计算值** `parseFloat(getComputedStyle(el,'::after').bottom) >= 0`——**别拿 `scrollHeight > clientHeight` 当判据**：同宿主上还有一条 `::before` 隐式热区，它独自就能把 `scrollHeight` 顶高。
@@ -139,6 +140,9 @@
 - **3D 深度排序要求遮挡物与轨道同处一个 `perspective` 容器、且两者都不能带 `z-index`**：首页要让立绘「站在星魂环中间」（近端碎片压到立绘前、远端沉到其后），把 `perspective` / `preserve-3d` 挂到卡片上不行——立绘与轨道是同一 grid 单元格的两个兄弟，任一 `z-index` 都会用显式层序盖掉几何排序，且透视原点落在卡片中心时环会被推歪。落地判据：桌面端把立绘副本放进轨道场景（`translateZ(0)`）、窄屏显示原图，两张同 URL 的图互斥显示（`display: none` 的那份不进 a11y 树），`perspective` 以环心为原点。`src/styles/home.css`、`src/app/views/HomeView.vue`
 - **环形绕转的槽位不能写成整块旋转，否则包围盒随角度涨到 √2 倍**：每个星魂位若写成 `inset: 0` 的整块 `rotate`，元素 bbox 会随旋转角膨胀并越过舞台，触发横向溢出断言（布局本身没错）；正解是槽位 `width: 0; height: 0` 只当旋转原点，半径与碎片尺寸用 `cqw` 直接写进半径臂的 `translate`。附带坑：基态 `.nk-home__icon { width: 100% }` 特异性 (0,2,0) 会盖掉新写的槽位 (0,1,0) 声明 ⇒ 槽位必须写成 `.nk-home__icon-list--eidolon .nk-home__orbit-slot`。`src/styles/home.css`
 - **透视缩水与 reduced-motion 相位会同时拉低几何断言的实测值**：轨道带 `perspective` 时远端碎片宽约为近端的 0.92×，而 reduce 态静止相位的远端落在 60°/120°（不是 0°）⇒「星魂图宽 ≥80px」这类下限必须按**远端**尺寸定值，否则只在 reduce 用例里红。`e2e/layout-home.spec.ts`
+- **交叉高亮只能把状态绑到元素自身的 `data-*`**：CSS 写不出按变量值匹配属性的选择器（`[data-hl="<动态 id>"]` 无法声明），只能逐元素绑 `:data-hl="active.includes(id) ? '' : undefined"`；且必须 hover 与 `focusin` 双通道——只做 hover 等于键盘用户拿不到这条关联。`src/app/views/CurrencyHubView.vue`
+- **骨架卡与就绪卡必须共用同一网格，宽度才天然一致**：旧写法是给骨架单独写宽度变量，两处手抄必然漂（A3.5 判据 ≤1px）。做法是把骨架块直接放进就绪网格的同类容器里（`data-sk` 只作测试标记），不复制任何宽度。`src/styles/currency-hub.css`
+- **枢纽页不要复用目录 `renderCard`**：目录卡宽度由目录宿主决定（144 / 190 / 306px 多套），枢纽页沿用就得为个位数条目加载整套目录 CSS 并同步那些定宽；自建页面卡类后宽度只由本页网格列决定，也不会被目录筛选字段牵着走。**复用 `fetchData` 时字段是不齐的**：`href` 只有角色侧映射层带出来（羁绊侧原来没有），枢纽页直接读会得到空串，`RouterLink to=""` 静默回落到当前路由——取数要么补齐映射层，要么在枢纽侧显式兜底，别假设目录卡的字段在全域同形。`src/app/views/CurrencyHubView.vue`、`src/app/catalog/pages/currency-trait.ts`
 
 ## 宽幅桌面排版（专题页）
 

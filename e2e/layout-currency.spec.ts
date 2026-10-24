@@ -4,44 +4,126 @@ import { collectConsoleIssues, readJson, resolveTokenColor } from './helpers';
 import { noUnknownOverflow } from './layout.shared';
 
 test.describe('布局验收：货币战争主题', () => {
-  test('/currency：黑金主题挂载、本赛季新增两分区、无溢出', async ({ page }) => {
+  const CURRENCY_INDEXES = '**/data/cn/currency/*.json';
+  const isSeasonIndex = (url: string): boolean => /(currency\/role|currency\/traits)\.json$/.test(url);
+
+  const normalizeDesc = (s: string): string =>
+    s.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+
+  test('/currency：赛季账头计数 = 分区卡数、两分区结构与入口对齐、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/currency');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'cw');
+    await expect(page.locator('main.nk-hub-release')).toBeVisible();
     await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
-    await expect(page.locator('.nk-hub-release__section, .nk-hub-release__empty').first()).toBeVisible();
+    await expect(page.locator('.nk-cwseas__head .nk-hub-release__rule')).toHaveCount(1);
+    await expect(page.locator('.nk-hub-release__section[data-kind="role"] a.nk-cwrole').first()).toBeVisible();
+
     const kinds = await page
       .locator('.nk-hub-release__section')
       .evaluateAll((els) => els.map((el) => el.getAttribute('data-kind')));
-    if (kinds.length === 0) {
-      await expect(page.locator('.nk-hub-release__empty')).toHaveCount(1);
-    } else {
-      expect(kinds).toContain('role');
-      const hrefs = await page
-        .locator('.nk-hub-release__section[data-kind="role"] .nk-hub-release__band a')
-        .evaluateAll((els) => els.map((el) => el.getAttribute('href') || ''));
-      expect(hrefs.length).toBeGreaterThan(0);
-      expect(hrefs.every((h) => h.startsWith('/currency/role/'))).toBe(true);
-      const entries = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
-        els.map((el) => {
-          const kind = el.getAttribute('data-kind');
-          const a = el.querySelector('.nk-hub-release__all') as HTMLAnchorElement | null;
-          const band = el.querySelector('.nk-hub-release__band')!.getBoundingClientRect();
-          return {
-            kind,
-            text: a ? a.textContent.replace(/\s+/g, ' ').trim() : null,
-            href: a ? a.getAttribute('href') : null,
-            delta: a ? Math.round(band.right - a.getBoundingClientRect().right) : null,
-          };
-        }),
-      );
-      expect(entries.map((e) => e.href)).toEqual(kinds.map((k) => `/currency/${k}`));
-      for (const e of entries) {
-        expect(e.text, `${e.kind}：入口文案应与分区标签同源`).toMatch(/^全部\S+$/);
-        expect(Math.abs(e.delta!), `${e.kind}：入口未与内容列右缘齐平`).toBeLessThanOrEqual(1);
-      }
+    expect(kinds, '分区顺序固定为角色 → 羁绊').toEqual(['role', 'trait']);
+
+    const roleCards = page.locator('.nk-hub-release__section[data-kind="role"] ul.nk-cwseas__roster a.nk-cwrole');
+    const traitCards = page.locator('.nk-hub-release__section[data-kind="trait"] ul.nk-cwseas__traits a.nkcwtrait');
+    const roleCount = await roleCards.count();
+    const traitCount = await traitCards.count();
+    expect(roleCount, '本赛季应至少有一名新增角色').toBeGreaterThan(0);
+    expect(traitCount, '本赛季应至少有一条新增羁绊').toBeGreaterThan(0);
+
+    const figures = await page.locator('.nk-cwseas__figure').evaluateAll((els) =>
+      els.map((el) => ({
+        label: (el.querySelector('.nk-cwseas__figure-label')?.textContent ?? '').trim(),
+        value: Number((el.querySelector('.nk-cwseas__figure-value')?.textContent ?? '').trim()),
+      })),
+    );
+    expect(figures.map((f) => f.label), '两个账头依次是角色 / 羁绊').toEqual(['角色', '羁绊']);
+    expect(figures.map((f) => f.value), '账头数字必须是本赛季新增卡数').toEqual([roleCount, traitCount]);
+
+    const labelCounts = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
+      els.map((el) => Number((el.querySelector('.nk-hub-release__label-count')?.textContent ?? '').trim())),
+    );
+    expect(labelCounts, '分区头计数与账头同源').toEqual([roleCount, traitCount]);
+
+    const roleHrefs = await roleCards.evaluateAll((els) => els.map((el) => el.getAttribute('href') ?? ''));
+    expect(
+      roleHrefs.every((h) => /\/currency\/role\/\d+$/.test(h)),
+      `角色卡 href 应指向角色详情，实测 ${roleHrefs.join(', ')}`,
+    ).toBe(true);
+    const traitHrefs = await traitCards.evaluateAll((els) => els.map((el) => el.getAttribute('href') ?? ''));
+    expect(
+      traitHrefs.every((h) => /\/currency\/trait\/\d+$/.test(h)),
+      `羁绊卡 href 应指向羁绊详情，实测 ${traitHrefs.join(', ')}`,
+    ).toBe(true);
+
+    const cats = await traitCards.evaluateAll((els) =>
+      els.map((el) => ({
+        root: el.getAttribute('data-cat'),
+        badge: (el.querySelector('.nkcwtrait__cat')?.textContent ?? '').trim(),
+      })),
+    );
+    for (const c of cats) {
+      expect(['faction', 'combat', 'special'], `羁绊卡 data-cat 应为已知类别，实测 ${c.root}`).toContain(c.root);
+      expect(c.badge, '羁绊类别徽标不得为空').not.toBe('');
     }
+
+    const entries = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
+      els.map((el) => {
+        const a = el.querySelector('.nk-hub-release__all');
+        const grid = el.querySelector('.nk-cwseas__roster, .nk-cwseas__traits');
+        return {
+          kind: el.getAttribute('data-kind'),
+          text: a ? (a.textContent ?? '').replace(/\s+/g, ' ').trim() : null,
+          href: a ? a.getAttribute('href') : null,
+          delta: a && grid ? Math.round(grid.getBoundingClientRect().right - a.getBoundingClientRect().right) : null,
+        };
+      }),
+    );
+    expect(entries.map((e) => e.href)).toEqual(['/currency/role', '/currency/trait']);
+    for (const e of entries) {
+      expect(e.text ?? '', `${e.kind}：入口文案应与分区标签同源`).toMatch(/^全部\S+$/);
+      expect(Math.abs(e.delta!), `${e.kind}：入口未与内容列右缘齐平（差 ${e.delta}px）`).toBeLessThanOrEqual(1);
+    }
+
+    const holds = await page.locator('.nk-cwseas__hold').evaluateAll((els) =>
+      els.map((el) => ({
+        href: el.getAttribute('href'),
+        num: Number((el.querySelector('.nk-cwseas__hold-num')?.textContent ?? '').trim()),
+      })),
+    );
+    expect(holds, '页脚档案存量恰两条（角色 / 羁绊）').toHaveLength(2);
+    expect(holds.map((h) => h.href)).toEqual(['/currency/role', '/currency/trait']);
+    expect(holds[0].num, '档案存量是全量档案数，不得小于新增数').toBeGreaterThanOrEqual(roleCount);
+    expect(holds[1].num, '档案存量是全量档案数，不得小于新增数').toBeGreaterThanOrEqual(traitCount);
+    await expect(page.locator('.nk-cwseas__holds-label')).toHaveText('档案存量');
+
+    const traitData = readJson<{ traits: { id: number; name: string; layers: unknown[] }[] }>(
+      'public/data/cn/currency/traits.json',
+    ).traits;
+    const roleData = readJson<{ roles: { id: number; name: string; traits: { id: number }[] }[] }>(
+      'public/data/cn/currency/role.json',
+    ).roles;
+    const traitRows = await traitCards.evaluateAll((els) =>
+      els.map((el) => ({
+        name: (el.querySelector('.nkcwtrait__name')?.textContent ?? '').trim(),
+        carriers: (el.querySelector('.nkcwtrait__carriers')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+        layers: (el.querySelector('.nkcwtrait__layers')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+      })),
+    );
+    for (const row of traitRows) {
+      const trait = traitData.find((t) => t.name === row.name);
+      expect(trait, `${row.name}：应能在 currency/traits.json 里按名字定位`).toBeTruthy();
+      const holders = roleData
+        .filter((r) => r.traits.some((t) => t.id === trait!.id))
+        .map((r) => r.name);
+      const expectedCarriers = holders.length ? `关联角色：${holders.join(' · ')}` : '';
+      expect(row.carriers, `${row.name}：关联角色行应列出持有该羁绊的全部角色`).toBe(expectedCarriers);
+      expect(row.layers, `${row.name}：层数文案应与数据层数一致`).toBe(
+        trait!.layers.length ? `${trait!.layers.length}层` : '',
+      );
+    }
+
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -54,21 +136,16 @@ test.describe('布局验收：货币战争主题', () => {
     const mastheadH = await page.locator('.nk-hub-masthead').evaluate((el) =>
       Math.round(el.getBoundingClientRect().height),
     );
-    expect(mastheadH).toBeLessThanOrEqual(120);
+    expect(mastheadH, '报头不得高过 120px').toBeLessThanOrEqual(120);
     await expect(page.locator('.nk-hub-release__title')).toBeVisible();
-    await expect(page.locator('.nk-hub-release__section').first()).toBeVisible();
-    const marks = await page.locator('.nk-hub-release__section').evaluateAll((els) =>
-      els.slice(0, 1).map((el) => ({
-        kind: el.getAttribute('data-kind'),
-        labelBottom: Math.round(el.querySelector('.nk-hub-release__label')!.getBoundingClientRect().bottom),
-        firstCardBottom: Math.round(el.querySelector('.nk-hub-release__band > *')!.getBoundingClientRect().bottom),
-      })),
-    );
-    expect(marks.length).toBeGreaterThanOrEqual(1);
-    for (const m of marks) {
-      expect(m.labelBottom, `第一分区 ${m.kind} 的标题应在首屏内`).toBeLessThanOrEqual(1080);
-      expect(m.firstCardBottom, `第一分区 ${m.kind} 的首行卡片应在首屏内`).toBeLessThanOrEqual(1080);
-    }
+    const first = page.locator('.nk-hub-release__section[data-kind="role"] a.nk-cwrole').first();
+    await expect(first).toBeVisible();
+    const mark = await first.evaluate((el) => ({
+      bottom: Math.round(el.getBoundingClientRect().bottom),
+      artTop: Math.round(el.querySelector('.nk-cwrole__art')!.getBoundingClientRect().top),
+    }));
+    expect(mark.artTop, '首张角色卡（立绘顶边）应落在首屏内').toBeLessThanOrEqual(1080);
+    expect(mark.bottom, '首张角色卡底边应落在首屏内').toBeLessThanOrEqual(1080);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -87,55 +164,69 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(page.locator('.nk-hub-release__empty')).toHaveCount(1);
     await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
     await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
-    await expect(page.locator('.nk-cwhub-index')).toHaveCount(0);
+    await expect(page.locator('.nk-cwseas__figures'), '空态不显示「0 角色 / 0 羁绊」账头').toHaveCount(0);
+    const holds = await page.locator('.nk-cwseas__hold').evaluateAll((els) =>
+      els.map((el) => ({
+        href: el.getAttribute('href'),
+        num: Number((el.querySelector('.nk-cwseas__hold-num')?.textContent ?? '').trim()),
+      })),
+    );
+    const archiveTotals = [
+      readJson<{ roles: unknown[] }>('public/data/cn/currency/role.json').roles.length,
+      readJson<{ traits: unknown[] }>('public/data/cn/currency/traits.json').traits.length,
+    ];
+    expect(holds, '档案存量是页面级全量入口，空态仍保留两条').toHaveLength(2);
+    expect(holds.map((h) => h.href)).toEqual(['/currency/role', '/currency/trait']);
+    expect(holds.map((h) => h.num), '空态档案存量仍是全量档案数，不随本赛季新增归零').toEqual(archiveTotals);
+    await expect(page.locator('.nk-cwseas__holds-label')).toHaveText('档案存量');
     await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
 
-  test('/currency：加载期给分区骨架、索引全失败给错误态且可重试，都不冒充空态', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
+  test('/currency：加载期给两行骨架、索引全失败给错误态且可重试，都不冒充空态', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
-    const INDEXES = '**/data/cn/currency/*.json';
-    const isIndex = (url: string) => /(currency\/role|currency\/traits)\.json$/.test(url);
-
     await page.setViewportSize({ width: 1440, height: 900 });
 
-    await page.route(INDEXES, async (route) => {
-      if (isIndex(route.request().url())) await new Promise((resolve) => setTimeout(resolve, 3_000));
+    await page.route(CURRENCY_INDEXES, async (route) => {
+      if (isSeasonIndex(route.request().url())) await new Promise((resolve) => setTimeout(resolve, 3_000));
       await route.continue();
     });
     await page.goto('/currency', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('.nk-hub-release__sk')).toBeVisible();
-    await expect(page.locator('.nk-hub-release__sk-row')).toHaveCount(2);
+    await expect(page.locator('.nk-cwseas__sk-role')).toHaveCount(4);
+    await expect(page.locator('.nk-cwseas__sk-trait')).toHaveCount(3);
+    await expect(page.locator('[data-sk="role"]')).toHaveCount(4);
+    await expect(page.locator('[data-sk="trait"]')).toHaveCount(3);
     await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
     await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
     await expect(page.locator('.nk-hub-release__empty')).toHaveCount(0);
-    const skRole = await page.locator(".nk-hub-release__sk-row[data-sk='role'] .nk-hub-release__sk-card")
+    const skRole = await page.locator('.nk-cwseas__sk-role').first()
       .evaluate((el) => Math.round(el.getBoundingClientRect().width));
-    const skTrait = await page.locator(".nk-hub-release__sk-row[data-sk='trait'] .nk-hub-release__sk-card")
+    const skTrait = await page.locator('.nk-cwseas__sk-trait').first()
       .evaluate((el) => Math.round(el.getBoundingClientRect().width));
     await expect.poll(() => page.locator('.nk-hub-release__section').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
     await expect(page.locator('.nk-hub-release__sk')).toHaveCount(0);
     const roleCard = await page
-      .locator('.nk-hub-release__section[data-kind="role"] .nk-hub-release__band .nk-crole-card')
+      .locator('.nk-hub-release__section[data-kind="role"] a.nk-cwrole')
       .first().evaluate((el) => Math.round(el.getBoundingClientRect().width));
     const traitCard = await page
-      .locator('.nk-hub-release__section[data-kind="trait"] .nk-hub-release__band .nk-cw-trait-card')
+      .locator('.nk-hub-release__section[data-kind="trait"] a.nkcwtrait')
       .first().evaluate((el) => Math.round(el.getBoundingClientRect().width));
-    expect(Math.abs(skRole - roleCard), `角色行骨架卡 ${skRole}px ↔ 就绪卡 ${roleCard}px 应同宽`).toBeLessThanOrEqual(1);
-    expect(Math.abs(skTrait - traitCard), `羁绊行骨架卡 ${skTrait}px ↔ 就绪卡 ${traitCard}px 应同宽`).toBeLessThanOrEqual(1);
-    await page.unroute(INDEXES);
+    expect(Math.abs(skRole - roleCard), `角色骨架卡 ${skRole}px ↔ 就绪卡 ${roleCard}px 应同宽`).toBeLessThanOrEqual(1);
+    expect(Math.abs(skTrait - traitCard), `羁绊骨架卡 ${skTrait}px ↔ 就绪卡 ${traitCard}px 应同宽`).toBeLessThanOrEqual(1);
+    await page.unroute(CURRENCY_INDEXES);
 
-    await page.route(INDEXES, (route) =>
-      (isIndex(route.request().url()) ? route.abort() : route.continue()));
+    await page.route(CURRENCY_INDEXES, (route) =>
+      (isSeasonIndex(route.request().url()) ? route.abort() : route.continue()));
     await page.goto('/currency');
     await expect(page.locator('.nk-error-state')).toBeVisible();
     await expect(page.locator('.nk-error-state__retry')).toBeVisible();
     await expect(page.locator('.nk-hub-release__empty')).toHaveCount(0);
     await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
 
-    await page.unroute(INDEXES);
+    await page.unroute(CURRENCY_INDEXES);
     await page.locator('.nk-error-state__retry').click();
     await expect.poll(() => page.locator('.nk-hub-release__section').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
     await expect(page.locator('.nk-error-state')).toHaveCount(0);
@@ -144,33 +235,88 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency：羁绊卡描述截断有 title 复原（完整原文可读）', async ({ page }) => {
+  test('/currency：羁绊卡根 title 与卡内正文都是完整 simple_desc（截断只由 CSS 负责）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/currency');
     const section = page.locator('.nk-hub-release__section[data-kind="trait"]');
     await expect(section).toBeVisible();
-    const traits = readJson<{ traits: { name: string; simple_desc: string }[] }>('public/data/cn/currency/traits.json').traits;
-    const normalize = (s: string) => s.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-    const rows = await section.locator('.nk-cw-trait-card').evaluateAll((cards) =>
+    const traits = readJson<{ traits: { name: string; simple_desc: string }[] }>(
+      'public/data/cn/currency/traits.json',
+    ).traits;
+    const rows = await section.locator('a.nkcwtrait').evaluateAll((cards) =>
       cards.map((c) => ({
-        name: (c.querySelector('.nk-cw-trait-card__name')?.textContent || '').trim(),
-        desc: (c.querySelector('.nk-cw-trait-card__desc')?.textContent || '').trim(),
-        title: c.getAttribute('title') || '',
+        name: (c.querySelector('.nkcwtrait__name')?.textContent ?? '').trim(),
+        desc: (c.querySelector('.nkcwtrait__desc')?.textContent ?? '').trim(),
+        title: c.getAttribute('title') ?? '',
       })),
     );
     expect(rows.length, '本赛季新增羁绊卡应在带内渲染').toBeGreaterThanOrEqual(1);
     for (const r of rows) {
-      const full = normalize(traits.find((t) => t.name === r.name)?.simple_desc || '');
+      const full = normalizeDesc(traits.find((t) => t.name === r.name)?.simple_desc ?? '');
       expect(full, `${r.name}：数据里应有 simple_desc`).toBeTruthy();
       expect(
         r.title.includes(full),
         `${r.name}：卡根 title 必须含完整描述原文（实测 title ${r.title.length} 字 / 全文 ${full.length} 字）`,
       ).toBe(true);
-      if (full.length >= 60) {
-        expect(r.desc.endsWith('…'), `${r.name}：超 60 字应以…截断`).toBe(true);
-        expect(full.startsWith(r.desc.replace(/…$/, '')), `${r.name}：截断前缀必须与全文一致`).toBe(true);
-      }
+      expect(r.desc, `${r.name}：卡内正文必须与全文逐字一致（视觉截断不得改写文本）`).toBe(full);
+      expect(r.desc.endsWith('…'), `${r.name}：截断应由 CSS 行数钳制负责，正文不得带省略号`).toBe(false);
     }
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/currency：羁绊卡与角色卡交叉高亮（鼠标进入 / 键盘聚焦，离开归零）', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/currency');
+    await expect(page.locator('a.nkcwtrait').first()).toBeVisible();
+
+    const traitData = readJson<{ traits: { id: number; name: string; is_season_new?: boolean }[] }>(
+      'public/data/cn/currency/traits.json',
+    ).traits;
+    const roleData = readJson<{
+      roles: { id: number; name: string; is_season_new?: boolean; traits: { id: number; name: string }[] }[];
+    }>('public/data/cn/currency/role.json').roles;
+    const newRoles = roleData.filter((r) => r.is_season_new === true);
+    const newTraitIds = new Set(traitData.filter((t) => t.is_season_new === true).map((t) => t.id));
+    expect(newRoles.length, '应有本赛季新增角色').toBeGreaterThan(0);
+
+    const newRoleIds = new Set(newRoles.map((r) => r.id));
+    const renderedHolders = (traitId: number): number[] =>
+      roleData.filter((r) => r.traits.some((t) => t.id === traitId) && newRoleIds.has(r.id)).map((r) => r.id);
+    let target = newRoles[0].traits.filter((t) => newTraitIds.has(t.id))[0];
+    for (const trait of traitData.filter((t) => t.is_season_new === true)) {
+      if (renderedHolders(trait.id).length > renderedHolders(target.id).length) target = trait;
+    }
+    const expectedHolders = renderedHolders(target.id);
+    expect(expectedHolders.length, `${target.name}：应至少有一名本赛季新增角色持有该羁绊（否则无法验证交叉高亮）`)
+      .toBeGreaterThan(0);
+    const expectedHrefs = expectedHolders.map((id) => `/currency/role/${id}`);
+
+    const traitCard = page.locator('a.nkcwtrait').filter({ hasText: target.name }).first();
+    await traitCard.scrollIntoViewIfNeeded();
+    await traitCard.hover();
+    const hlHrefs = await page.locator('a.nk-cwrole[data-hl]').evaluateAll((els) =>
+      els.map((el) => el.getAttribute('href') ?? ''),
+    );
+    expect(hlHrefs, `${target.name}：持有该羁绊的角色卡应被高亮`).toEqual(expectedHrefs);
+    const hlChips = await page.locator('.nk-cwrole__trait[data-hl]').evaluateAll((els) =>
+      els.map((el) => (el.getAttribute('title') ?? el.textContent ?? '').trim()),
+    );
+    expect(hlChips, '每张被高亮的角色卡上，该羁绊 chip 也应被高亮').toHaveLength(expectedHolders.length);
+    for (const title of hlChips) expect(title).toContain(target.name);
+
+    await page.mouse.move(0, 0);
+    await expect(page.locator('[data-hl]')).toHaveCount(0);
+
+    const firstNewTraitNames = newRoles[0].traits.filter((t) => newTraitIds.has(t.id)).map((t) => t.name);
+    expect(firstNewTraitNames.length, '首张角色卡应至少带一枚本赛季新增羁绊 chip').toBeGreaterThan(0);
+    await page.locator('a.nk-cwrole').first().focus();
+    await expect(page.locator('a.nkcwtrait[data-hl]')).toHaveCount(firstNewTraitNames.length);
+    const focusedTraitNames = (await page.locator('a.nkcwtrait[data-hl] .nkcwtrait__name').allTextContents())
+      .map((s) => s.trim())
+      .sort();
+    expect(focusedTraitNames, '聚焦角色卡时，高亮的应恰是它的新增羁绊卡').toEqual([...firstNewTraitNames].sort());
+
     await noUnknownOverflow(page);
     assertNoErrors();
   });
