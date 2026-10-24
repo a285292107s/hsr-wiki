@@ -373,3 +373,90 @@
 #nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
 
+@media (hover: none) {
+  .nk-idx-card:hover::after { border-color: transparent; }
+  .nk-idx-card:hover .nk-idx-card__name { color: var(--text-bright); }
+}
+
+@media (max-width: 767px) {
+  #nk-catalog-app { --cat-pad-x: 16px; padding-left: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  .nk-cat-masthead { padding: 18px 0 12px; gap: 10px; }
+  .nk-cat-title { font-size: var(--nk-fs-6); letter-spacing: 0.06em; }
+  .nk-cat-count { font-size: var(--nk-fs-1); letter-spacing: 0.14em; }
+  .nk-cat-toolbar { gap: 8px; padding: 6px 8px 10px; flex-wrap: wrap; }
+  .nk-cat-toolbar::before { background: color-mix(in srgb, var(--blk-850) 94%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .nk-cat-search { flex: 1 1 100%; max-width: none; min-width: 0; }
+  .nk-cat-filters-bar { flex: 1 1 100%; justify-content: flex-start; overflow-x: auto; }
+  .nk-cat-filters-bar .nk-cat-select { flex-shrink: 0; }
+  .nk-cat-select__btn { padding: 6px 8px; }
+  .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
+  .nk-lc-grid { grid-template-columns: repeat(3, 1fr); }
+  .nk-lc-card__info { padding: 10px 8px 8px; }
+  .nk-lc-card__name { font-size: var(--nk-fs-4); }
+  .nk-idx-grid { --nk-grid-min: 150px; --nk-grid-gap: 14px; }
+  .nk-mob-grid { grid-template-columns: 1fr; gap: 1px; }
+  .nk-mob-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 72px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--line-1);
+  }
+  .nk-mob-card:active { background: color-mix(in srgb, var(--primary) 9%, transparent); }
+  .nk-virtual-grid .nk-mob-card { margin: 0 -5px; padding: 0 5px; }
+  .nk-mob-card__fig { flex: none; width: 44px; height: 44px; aspect-ratio: auto; border-radius: 50%; }
+  .nk-mob-card__fig img { border-radius: 50%; }
+  .nk-mob-card__info { flex: 1; min-width: 0; gap: 4px; padding: 0; }
+  .nk-mob-card__name { font-size: var(--nk-fs-5); }
+  .nk-mob-card__weak { height: 15px; }
+  .nk-mob-card__weak img { width: 14px; height: 14px; }
+  .nk-mob-card__type { font-size: var(--nk-fs-3); letter-spacing: 0.1em; }
+  .nk-mob-card__var { font-size: var(--nk-fs-3); }
+  #nk-catalog-app .nk-cat-subtitle { display: none; }
+  .nk-relic-grid { --nk-grid-min: 106px; --nk-grid-gap: 10px; }
+  .nk-relic-card { gap: 6px; }
+  .nk-relic-card__plate { padding: 10px; }
+  .nk-relic-card__tag { top: 6px; left: 6px; padding: 1.5px 6px; font-size: var(--nk-fs-1); }
+  .nk-relic-card__name { font-size: var(--nk-fs-3); }
+  .nk-item-grid { --nk-grid-min: 90px; --nk-grid-gap: 8px; }
+  .nk-mob-grid { --nk-grid-min: 100px; }
+}
+@media (max-width: 374px) {
+  .nk-cat-grid, .nk-skeleton__grid:not(.nk-idx-grid) { grid-template-columns: repeat(2, 1fr); --nk-grid-gap: 8px; }
+  .nk-item-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .nk-idx-grid { --nk-grid-min: 186px; }
+  .nk-lc-grid { --nk-grid-min: 170px; }
+}
+@media (min-width: 1024px) {
+  .nk-idx-grid,
+  .nk-lc-grid { --nk-grid-gap: 16px; }
+  .nk-lc-grid { --nk-grid-min: 168px; }
+  .nk-idx-grid { --nk-grid-min: 186px; }
+}
+@media (min-width: 1280px) {
+  .nk-idx-grid { --nk-grid-min: 204px; }
+}
+@media (min-width: 1536px) {
+  .nk-idx-grid,
+  .nk-lc-grid { --nk-grid-gap: 18px; }
+}
+@media (min-width: 1600px) {
+  #nk-catalog-app { --cat-max: 1680px; }
+  .nk-cat-masthead,
+  .nk-cat-toolbar { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
+  .nk-idx-grid,
+  .nk-cat-grid,
+  .nk-cat-empty { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
+}
+@media (min-width: 2560px) {
+  #nk-catalog-app { --cat-max: 1920px; }
+}
+
+.nk-idx-card__portrait img, .nk-item-card__img img { background: color-mix(in srgb, var(--blk-750) 60%, transparent); }
+.nk-idx-card[data-rarity="5"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }
+.nk-idx-card[data-rarity="4"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }
+.nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }
