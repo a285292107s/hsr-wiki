@@ -460,3 +460,84 @@
 .nk-idx-card[data-rarity="5"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-5) 8%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }
 .nk-idx-card[data-rarity="4"] .nk-idx-card__portrait img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 8%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }
 .nk-item-card[data-rarity="VeryRare"] .nk-item-card__img img { background: linear-gradient(135deg, color-mix(in srgb, var(--rarity-4) 6%, transparent), color-mix(in srgb, var(--blk-750) 60%, transparent)); }
+
+.nk-skeleton__grid.nk-idx-grid .nk-skeleton__card-body,
+.nk-skeleton__grid.nk-lc-grid .nk-skeleton__card-body { display: none; }
+
+.nk-skeleton__grid.nk-relic-grid .nk-skeleton__card { gap: 8px; }
+.nk-skeleton__grid.nk-relic-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
+.nk-skeleton__grid.nk-relic-grid .nk-skeleton__card-body { padding: 0 2px; }
+.nk-skeleton__grid.nk-relic-grid .nk-skeleton__card-line { height: 18px; }
+.nk-skeleton__grid.nk-relic-grid .nk-skeleton__card-line:not(.nk-skeleton__card-line--1) { display: none; }
+
+.nk-skeleton__grid.nk-item-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
+.nk-skeleton__grid.nk-item-grid .nk-skeleton__card-body { padding: 6px 8px 8px; gap: 2px; }
+.nk-skeleton__grid.nk-item-grid .nk-skeleton__card-line--1 { height: 16px; }
+.nk-skeleton__grid.nk-item-grid .nk-skeleton__card-line--2 { height: 11px; width: 58%; }
+.nk-skeleton__grid.nk-item-grid .nk-skeleton__card-line--3,
+.nk-skeleton__grid.nk-item-grid .nk-skeleton__card-line--4 { display: none; }
+
+.nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-img { aspect-ratio: 4 / 5; border-radius: var(--nk-radius-2); }
+.nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-body { padding: 12px 4px 4px; gap: 5px; }
+.nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-line--1 { height: 19px; width: 78%; }
+.nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-line--2 { height: 15px; width: 46%; }
+.nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-line--3 { height: 13px; width: 62%; }
+.nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-line--4 { display: none; }
+
+.nk-skeleton__grid.nk-ach-grid .nk-skeleton__card { height: 156px; padding: 11px 15px 12px; gap: 4px; }
+.nk-skeleton__grid.nk-ach-grid .nk-skeleton__card-line--1 { height: 20px; width: 42%; }
+.nk-skeleton__grid.nk-ach-grid .nk-skeleton__card-line--2 { height: 19px; width: 62%; margin-top: 3px; }
+.nk-skeleton__grid.nk-ach-grid .nk-skeleton__card-line--3 { height: 19px; width: 88%; }
+.nk-skeleton__grid.nk-ach-grid .nk-skeleton__card-line--4 { height: 17px; width: 28%; margin-top: auto; }
+
+.nk-skeleton__grid.nk-crole-grid .nk-skeleton__card-img { aspect-ratio: 1 / 1; }
+.nk-skeleton__grid.nk-crole-grid .nk-skeleton__card-body { height: 50px; padding: 7px 8px 9px; gap: 4px; }
+.nk-skeleton__grid.nk-crole-grid .nk-skeleton__card-line--1 { height: 19px; width: 70%; }
+.nk-skeleton__grid.nk-crole-grid .nk-skeleton__card-line--2 { height: 10px; width: 56%; }
+.nk-skeleton__grid.nk-crole-grid .nk-skeleton__card-line--3,
+.nk-skeleton__grid.nk-crole-grid .nk-skeleton__card-line--4 { display: none; }
+
+.nk-skeleton__grid.nk-cw-grid .nk-skeleton__card { flex-direction: row; align-items: flex-start; gap: 12px; padding: 12px 14px; }
+.nk-skeleton__grid.nk-cw-grid .nk-skeleton__card-body { flex: 1; gap: 4px; }
+.nk-skeleton__grid.nk-cw-grid .nk-skeleton__card-line--1 { height: 17px; width: 40%; }
+.nk-skeleton__grid.nk-cw-grid .nk-skeleton__card-line--2 { height: 17px; width: 82%; }
+.nk-skeleton__grid.nk-cw-grid .nk-skeleton__card-line--3,
+.nk-skeleton__grid.nk-cw-grid .nk-skeleton__card-line--4 { display: none; }
+.nk-skeleton[data-page="currency-equipment"] .nk-skeleton__card { height: 135px; padding: 14px; gap: 10px; }
+.nk-skeleton[data-page="currency-equipment"] .nk-skeleton__card-thumb { width: 56px; height: 56px; }
+.nk-skeleton[data-page="currency-equipment"] .nk-skeleton__card-line--1 { height: 22px; width: 46%; }
+.nk-skeleton[data-page="currency-equipment"] .nk-skeleton__card-line--2 { height: 39px; width: 92%; margin-top: 10px; }
+.nk-skeleton[data-page="currency-augment"] .nk-skeleton__card { height: 89px; }
+.nk-skeleton[data-page="currency-augment"] .nk-skeleton__card-line--2 { height: 21px; width: 26%; }
+.nk-skeleton[data-page="currency-augment"] .nk-skeleton__card-line--3 { display: block; height: 17px; width: 78%; margin-top: 2px; }
+
+.nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card { flex-direction: row; align-items: flex-start; gap: 10px; height: 105px; padding: 12px 14px; }
+.nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card-thumb { width: 54px; height: 54px; }
+.nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card-body { flex: 1; gap: 3px; }
+.nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card-line--1 { height: 20px; width: 56%; }
+.nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card-line--2 { height: 21px; width: 32%; margin-top: 2px; }
+.nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card-line--3 { height: 32px; width: 88%; margin-top: 3px; }
+.nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card-line--4 { display: none; }
+
+.nk-skeleton__grid.nk-eg-grid { grid-template-columns: repeat(auto-fit, minmax(268px, 1fr)); gap: 22px; }
+.nk-skeleton__col { padding: 2px 0 6px; }
+.nk-skeleton[data-page="currency-portal"] .nk-skeleton__card { min-height: 80px; }
+
+@media (max-width: 767px) {
+  .nk-skeleton__grid.nk-mob-grid .nk-skeleton__card { flex-direction: row; align-items: center; gap: 12px; min-height: 72px; margin-bottom: 10px; padding: 8px 4px; border-bottom: 1px solid var(--line-1); }
+  .nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-img { flex: none; width: 44px; height: 44px; aspect-ratio: auto; border-radius: 50%; }
+  .nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-body { flex: 1; padding: 0; gap: 4px; }
+  .nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-line--1 { height: 16px; width: 62%; }
+  .nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-line--2 { height: 13px; width: 40%; }
+  .nk-skeleton__grid.nk-mob-grid .nk-skeleton__card-line--3 { display: none; }
+  .nk-skeleton__grid.nk-ach-grid .nk-skeleton__card { height: 160px; padding: 10px 12px 12px 14px; }
+  .nk-skeleton__grid.nk-ach-grid .nk-skeleton__card-line--1 { height: 18px; }
+  .nk-skeleton__grid.nk-ach-grid .nk-skeleton__card-line--2 { height: 18px; }
+  .nk-skeleton__grid.nk-cw-grid .nk-skeleton__card { min-height: 70px; padding: 12px 14px; }
+  .nk-skeleton__grid.nk-cw-grid .nk-skeleton__card-thumb { width: 44px; height: 44px; }
+  .nk-skeleton__grid.nk-relic-grid .nk-skeleton__card { gap: 6px; }
+  .nk-skeleton[data-page="currency-equipment"] .nk-skeleton__card { height: 109px; }
+  .nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card { height: 98px; }
+  .nk-skeleton__grid.nk-cw-trait-grid .nk-skeleton__card-thumb { width: 45px; height: 45px; }
+}
+

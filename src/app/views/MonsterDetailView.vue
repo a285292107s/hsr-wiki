@@ -463,10 +463,40 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
 <template>
   <div class="nk-mob-page">
     <div v-if="showSkeleton" class="nk-mob-skeleton" aria-hidden="true">
-      <div class="nk-mob-skeleton__hero"></div>
+      <div class="nk-mob-skeleton__hero">
+        <div class="nk-mob-skeleton__figure">
+          <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__art"></span>
+        </div>
+        <div class="nk-mob-skeleton__info">
+          <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__meta"></span>
+          <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__title"></span>
+          <div class="nk-mob-skeleton__sec">
+            <div class="nk-mob-skeleton__head">
+              <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__sechead"></span>
+              <span class="nk-mob-skeleton__rule"></span>
+            </div>
+            <div class="nk-mob-skeleton__row">
+              <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__label"></span>
+              <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__tags"></span>
+            </div>
+            <div class="nk-mob-skeleton__row nk-mob-skeleton__row--wrap">
+              <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__label"></span>
+              <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__tags"></span>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="nk-mob-skeleton__body">
-        <div class="nk-mob-skeleton__line"></div>
-        <div class="nk-mob-skeleton__line"></div>
+        <div class="nk-mob-skeleton__sec">
+          <div class="nk-mob-skeleton__head">
+            <span class="nk-sk nk-sk--shimmer nk-mob-skeleton__sechead"></span>
+            <span class="nk-mob-skeleton__rule"></span>
+          </div>
+          <div class="nk-mob-skeleton__para">
+            <span class="nk-sk nk-sk--shimmer"></span>
+            <span class="nk-sk nk-sk--shimmer"></span>
+          </div>
+        </div>
       </div>
     </div>
 

@@ -25,21 +25,138 @@
 .nk-ctrait-section:nth-of-type(4) { animation-delay: 240ms; }
 
 .nk-ctrait__skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding-top: 40px;
+  display: block;
+  padding-top: 0;
 }
-.nk-ctrait__sk-icon { width: 64px; height: 64px; border-radius: var(--nk-radius-2); transform: rotate(45deg); }
-.nk-ctrait__sk-title { height: 28px; border-radius: var(--nk-radius-2); }
-.nk-ctrait__sk-line { height: 16px; border-radius: var(--nk-radius-2); }
-.nk-ctrait__skeleton-body {
+.nk-ctrait__sk-hero {
+  position: relative;
+  padding: 52px 28px 36px;
+  margin: 0 -16px 32px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse 50% 70% at 25% 30%, color-mix(in srgb, var(--metric-val) 7%, transparent), transparent 65%),
+    radial-gradient(ellipse 80% 40% at 70% 90%, color-mix(in srgb, var(--primary) 4%, transparent), transparent 60%);
+}
+.nk-ctrait__sk-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.nk-ctrait__sk-icon {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  flex: none;
+  transform: rotate(45deg);
+  border-radius: var(--nk-radius-3);
+  border: 2px solid var(--border2);
+  background: color-mix(in srgb, var(--text-bright) 4%, transparent);
+  overflow: hidden;
+}
+.nk-ctrait__sk-iconfill {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+.nk-ctrait__sk-info {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.nk-ctrait__sk-chip {
+  flex: none;
+  width: 96px;
+  height: 24px;
+  border-radius: var(--nk-radius-2);
+}
+.nk-ctrait__sk-name {
+  flex: none;
+  width: 62%;
+  height: 1.2em;
+  font-size: clamp(var(--nk-fs-8), 2.4vw + var(--nk-fs-1), var(--nk-fs-title-3));
+  border-radius: var(--nk-radius-2);
+}
+.nk-ctrait__sk-rubric {
+  flex: none;
+  width: 128px;
+  height: 13px;
+  margin-top: 8px;
+  border-radius: var(--nk-radius-1);
+}
+.nk-ctrait__sk-section {
+  margin-bottom: 32px;
+}
+.nk-ctrait__sk-sechead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 18px;
+  margin: 0 0 14px;
+  padding-left: 12px;
+  border-left: 3px solid var(--primary);
+}
+.nk-ctrait__sk-title {
+  flex: none;
+  width: 84px;
+  height: 14px;
+  border-radius: var(--nk-radius-1);
+}
+.nk-ctrait__sk-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent 70%);
+  opacity: 0.5;
+}
+.nk-ctrait__sk-desc {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line-1);
+  max-width: var(--nk-prose-max);
+  padding: 16px 18px;
+  border-radius: var(--nk-radius-card);
+  background: color-mix(in srgb, var(--text-bright) 2.5%, transparent);
+  border: 1px solid var(--border);
+  font-size: var(--nk-fs-5);
+}
+.nk-ctrait__sk-line {
+  display: flex;
+  align-items: center;
+  height: 1.8em;
+  font-size: var(--nk-fs-5);
+}
+.nk-ctrait__sk-line > .nk-sk {
+  width: 100%;
+  height: 14px;
+  border-radius: var(--nk-radius-1);
+}
+.nk-ctrait__sk-line:nth-child(3) > .nk-sk {
+  width: 62%;
+}
+@media (max-width: 767px) {
+  .nk-ctrait__sk-hero {
+    padding: 40px 18px 28px;
+    margin: 0 -12px 24px;
+  }
+  .nk-ctrait__sk-icon {
+    width: 60px;
+    height: 60px;
+  }
+  .nk-ctrait__sk-desc {
+    padding: 14px;
+  }
+}
+@media (min-width: 768px) {
+  .nk-ctrait__sk-line:nth-child(4) {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .nk-ctrait__sk-line:nth-child(3) {
+    display: none;
+  }
 }
 
 .nk-ctrait-hero {

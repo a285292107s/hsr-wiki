@@ -8,6 +8,7 @@ import { propLabel, relicSlotLabel } from '../../lib/enum-labels';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
 import { useDetailView } from '../composables/use-detail-view';
 import '../../styles/relic.css';
+import '../../styles/detail-skeleton.css';
 import { translate } from '../i18n';
 
 const t = translate;
@@ -215,11 +216,18 @@ onBeforeUnmount(() => {
           <div class="nk-sk nk-sk--shimmer nk-sk--fill"></div>
         </div>
         <div class="nk-skeleton__hero-panel">
-          <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-lg"></div>
-          <div class="nk-sk nk-sk--shimmer nk-sk--text-sm nk-sk--bar-md"></div>
+          <div class="nk-skeleton__hero-head">
+            <div class="nk-sk nk-sk--shimmer nk-sk--title nk-sk--bar-lg"></div>
+            <div class="nk-skeleton__hero-meta">
+              <div class="nk-sk nk-sk--shimmer nk-sk--chip nk-sk--bar-sm"></div>
+              <div class="nk-sk nk-sk--shimmer nk-sk--chip nk-sk--bar-xs"></div>
+            </div>
+          </div>
           <div class="nk-relic-sk-pieces">
-            <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
-            <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
+            <div class="nk-sk nk-sk--shimmer nk-relic-sk-pieces__title"></div>
+            <div class="nk-relic-sk-pieces__list">
+              <div v-for="i in 4" :key="i" class="nk-sk nk-sk--shimmer nk-relic-sk-piece"></div>
+            </div>
           </div>
         </div>
       </div>

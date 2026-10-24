@@ -102,8 +102,24 @@
 .nk-egm__other-cn { font-size: var(--nk-fs-4); font-weight: 700; color: var(--text-bright); }
 .nk-egm__other-en { font-family: var(--font-mono); font-size: var(--nk-fs-2); letter-spacing: 0.16em; color: var(--text3); }
 
-.nk-skeleton--egm .nk-skeleton__hero--egm { display: block; min-height: 168px; max-width: var(--nk-detail-max); margin: 0 auto; }
-.nk-skeleton--egm .nk-sk--title { height: 34px; }
+.nk-skeleton--egm .nk-skel-crumbs { width: 168px; height: 16px; }
+.nk-skeleton--egm .nk-skel-emblem { flex: none; width: 48px; height: 48px; }
+.nk-skeleton--egm .nk-skel-head { display: flex; flex-direction: column; min-width: 0; }
+.nk-skeleton--egm .nk-skel-h1 { width: 118px; height: 1.15em; }
+.nk-skeleton--egm .nk-skel-en { width: 118px; height: 13px; }
+.nk-skeleton--egm .nk-skel-sec-title { width: 220px; height: 19px; }
+.nk-skeleton--egm .nk-skel-rule-title { width: 240px; height: 19px; margin-bottom: 6px; }
+.nk-skeleton--egm .nk-skel-para { height: 102px; margin-bottom: 8px; }
+.nk-skeleton--egm .nk-skel-para--short { height: 26px; }
+.nk-skeleton--egm .nk-skel-para--long { height: 77px; }
+.nk-skeleton--egm .nk-skel-para--mid { height: 51px; }
+.nk-skeleton--egm .nk-skel-list { height: 112px; }
+@media (min-width: 768px) {
+  .nk-skeleton--egm .nk-skel-para { height: 51px; }
+  .nk-skeleton--egm .nk-skel-para--short { height: 26px; }
+  .nk-skeleton--egm .nk-skel-para--long { height: 51px; }
+  .nk-skeleton--egm .nk-skel-para--mid { height: 26px; }
+}
 
 @media (max-width: 767px) {
   .nk-egm__hero { padding: 18px 0 16px; }

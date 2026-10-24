@@ -1268,7 +1268,35 @@
   text-align: right;
 }
 
-.nk-formula-skeleton { width: 100%; max-width: var(--nk-detail-max); margin: 0 auto; }
+.nk-formula-skeleton { width: 100%; }
+.nk-formula-skeleton .nk-formula-secnav { min-height: calc(var(--nk-formula-nav-h) + 1px); }
+.nk-formula-skeleton .nk-skel-hero-title { height: 1.15em; }
+.nk-formula-skeleton .nk-skel-hero-lead { height: 49px; }
+.nk-formula-skeleton .nk-skel-hero-note { height: 47px; }
+.nk-formula-skeleton .nk-skel-nav { flex: none; align-self: center; width: 92px; height: 12px; }
+.nk-formula-skeleton .nk-skel-sec-title { width: 240px; height: 25px; }
+.nk-formula-skeleton .nk-skel-sec-lead { height: 71px; }
+.nk-formula-skeleton .nk-skel-chain { height: 219px; }
+.nk-formula-skeleton .nk-skel-overview { height: 603px; }
+@media (min-width: 768px) {
+  .nk-formula-skeleton .nk-skel-hero-lead { height: 24px; }
+  .nk-formula-skeleton .nk-skel-hero-note { height: 23px; }
+  .nk-formula-skeleton .nk-skel-sec-lead { height: 47px; }
+  .nk-formula-skeleton .nk-skel-chain { height: 150px; }
+  .nk-formula-skeleton .nk-skel-overview { height: 478px; }
+}
+@media (min-width: 1024px) {
+  .nk-formula-skeleton .nk-skel-hero-lead { height: 27px; }
+  .nk-formula-skeleton .nk-skel-hero-note { height: 47px; }
+  .nk-formula-skeleton .nk-skel-sec-title { height: 29px; }
+  .nk-formula-skeleton .nk-skel-sec-lead { height: 54px; }
+  .nk-formula-skeleton .nk-skel-chain { height: 76px; }
+  .nk-formula-skeleton .nk-skel-overview { height: 431px; }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .nk-formula-skeleton .nk-skel-hero-lead { height: 54px; }
+  .nk-formula-skeleton .nk-skel-overview { height: 477px; }
+}
 
 @media (min-width: 768px) {
   #nk-formula-app {

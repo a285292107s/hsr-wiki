@@ -1254,34 +1254,136 @@
 }
 
 .nk-mob-skeleton__hero {
+  display: flex;
+  align-items: stretch;
   height: 358px;
-  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-750) 80%, transparent) 50%, transparent 70%);
-  background-color: color-mix(in srgb, var(--blk-750) 45%, transparent);
-  background-size: 200% 100%;
-  animation: nk-mob-shimmer 1.4s ease infinite;
+  overflow: hidden;
   border-bottom: 1px solid var(--line-1);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--blk-900) 42%, transparent) 0%, transparent 100%);
+}
+
+.nk-mob-skeleton__figure {
+  position: relative;
+  flex: 0 0 40%;
+  min-height: 300px;
+  padding: 20px;
+}
+
+.nk-mob-skeleton__art {
+  position: absolute;
+  inset: 20px;
+  border-radius: var(--nk-radius-2);
+}
+
+.nk-mob-skeleton__info {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 32px 28px;
+}
+
+.nk-mob-skeleton__meta {
+  flex: none;
+  width: 64%;
+  height: 14px;
+  margin-bottom: 16px;
+  border-radius: var(--nk-radius-1);
+}
+
+.nk-mob-skeleton__title {
+  flex: none;
+  width: 38%;
+  height: 1.15em;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  border-radius: var(--nk-radius-2);
+}
+
+.nk-mob-skeleton__sec {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-1);
+}
+
+.nk-mob-skeleton__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.nk-mob-skeleton__sechead {
+  flex: none;
+  width: 74px;
+  height: 18px;
+  border-radius: var(--nk-radius-1);
+}
+
+.nk-mob-skeleton__rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line-2), transparent);
+}
+
+.nk-mob-skeleton__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.nk-mob-skeleton__row + .nk-mob-skeleton__row {
+  border-top: 1px dashed var(--line-1);
+}
+
+.nk-mob-skeleton__label {
+  flex: 0 0 80px;
+  height: 13px;
+  border-radius: var(--nk-radius-1);
+}
+
+.nk-mob-skeleton__tags {
+  width: 62%;
+  height: 19px;
+  border-radius: var(--nk-radius-1);
 }
 
 .nk-mob-skeleton__body {
-  padding: 20px 16px;
+  padding: 24px 16px 60px;
 }
 
-.nk-mob-skeleton__line {
+.nk-mob-skeleton__body .nk-mob-skeleton__sec {
+  margin-top: 0;
+  padding: 26px 0 6px;
+  border-top: 0;
+}
+
+.nk-mob-skeleton__body .nk-mob-skeleton__head {
+  margin-bottom: 16px;
+}
+
+.nk-mob-skeleton__body .nk-mob-skeleton__sechead {
+  width: 84px;
+  height: 23px;
+}
+
+.nk-mob-skeleton__para {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: var(--nk-prose-max);
+  font-size: 0.88rem;
+}
+
+.nk-mob-skeleton__para .nk-sk {
+  width: 100%;
   height: 14px;
-  margin-bottom: 12px;
-  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--blk-750) 80%, transparent) 50%, transparent 70%);
-  background-color: color-mix(in srgb, var(--blk-750) 45%, transparent);
-  background-size: 200% 100%;
-  animation: nk-mob-shimmer 1.4s ease infinite;
+  border-radius: var(--nk-radius-1);
 }
 
-.nk-mob-skeleton__line:nth-child(2) {
-  width: 70%;
-}
-
-@keyframes nk-mob-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+.nk-mob-skeleton__para .nk-sk:last-child {
+  width: 62%;
 }
 
 @media (max-width: 767px) {
@@ -1447,13 +1549,46 @@
   }
 
   .nk-mob-skeleton__hero {
+    flex-direction: column;
     height: 492px;
+  }
+
+  .nk-mob-skeleton__figure {
+    flex: none;
+    min-height: 0;
+    height: 240px;
+  }
+
+  .nk-mob-skeleton__info {
+    padding: 18px 16px 24px;
+  }
+
+  .nk-mob-skeleton__title {
+    font-size: 1.35rem;
+  }
+
+  .nk-mob-skeleton__row--wrap .nk-mob-skeleton__tags {
+    height: 46px;
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-mob-skeleton__hero {
     height: 301px;
+  }
+
+  .nk-mob-skeleton__body {
+    padding: 28px 24px 60px;
+  }
+
+  .nk-mob-skeleton__row--wrap .nk-mob-skeleton__tags {
+    height: 46px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nk-mob-skeleton__body {
+    padding: 28px 24px 60px;
   }
 }
 

@@ -150,6 +150,7 @@ export const endgamePage: CatalogPageConfig = {
   subtitle: 'ENDGAME',
   searchKey: 'catalog.endgame.search',
   gridClass: 'nk-cat-grid nk-eg-grid',
+  skeleton: { variant: 'columns', rows: 10 },
   styles: [() => import('../../../../src/styles/endgame.css')],
   async fetchData() {
     const [maze, story, boss, peak] = await Promise.all([

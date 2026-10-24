@@ -321,16 +321,23 @@
   .nk-crole-hero__bg { background-position: right center; }
   .nk-crole-hero__content { padding: 44px 32px 34px; }
   .nk-crole-hero__portrait { width: 132px; height: 132px; }
-  .nk-crole__skeleton { padding: 24px; }
-  .nk-crole__skeleton-portrait { width: 140px; height: 140px; }
+  .nk-crole__sk-hero { height: 360px; min-height: 360px; }
+  .nk-crole__sk-content { padding: 44px 32px 34px; }
+  .nk-crole__sk-portrait { width: 132px; height: 132px; }
+  .nk-crole__sk-role > .nk-sk:last-child { display: none; }
 }
 @media (min-width: 1024px) {
   .nk-crole { max-width: calc(1040px + var(--nk-content-offset)); padding-left: var(--nk-content-offset); }
   .nk-crole-hero { min-height: 400px; }
   .nk-crole-hero__content { padding: 48px 40px 38px; }
   .nk-crole-hero__portrait { width: 150px; height: 150px; }
+  .nk-crole__sk-hero { height: 400px; min-height: 400px; }
+  .nk-crole__sk-content { padding: 48px 40px 38px; }
+  .nk-crole__sk-portrait { width: 150px; height: 150px; }
 }
 @media (max-width: 374px) {
   .nk-crole-hero__content { padding: 32px 14px 24px; gap: 14px; }
   .nk-crole-hero__portrait { width: 72px; height: 72px; }
+  .nk-crole__sk-content { padding: 32px 14px 24px; gap: 14px; }
+  .nk-crole__sk-portrait { width: 72px; height: 72px; }
 }

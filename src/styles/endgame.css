@@ -78,8 +78,6 @@
   .nk-eg-lrow { animation: none; }
 }
 
-.nk-eg-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 132px; border-radius: 0; border-top: 1px solid var(--line-1); }
-
 @media (max-width: 767px) {
   .nk-eg-grid { grid-template-columns: 1fr; }
 }

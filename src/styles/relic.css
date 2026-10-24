@@ -222,9 +222,27 @@
 .nk-relic-story__body { font-size: var(--nk-fs-5); line-height: 1.95; color: var(--text); text-wrap: pretty; }
 .nk-relic-story__body i { font-style: normal; color: var(--text-bright); }
 
-.nk-skeleton--relic .nk-skeleton__hero,
-.nk-skeleton--relic .nk-skeleton__hero-visual { min-height: 260px; }
-.nk-relic-sk-pieces { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.nk-skeleton--relic .nk-skeleton__hero { min-height: auto; }
+.nk-skeleton--relic .nk-skeleton__hero-visual { min-height: 210px; aspect-ratio: 16 / 10; }
+.nk-skeleton--relic .nk-skeleton__hero-head .nk-sk--title { height: 28px; }
+.nk-relic-sk-pieces { display: flex; flex-direction: column; }
+.nk-relic-sk-pieces__title { width: 80px; height: 19px; margin: 22px 0 10px; }
+.nk-relic-sk-pieces__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.nk-relic-sk-piece { height: 148px; }
+@media (min-width: 560px) {
+  .nk-relic-sk-piece { height: 88px; }
+}
+@media (max-width: 640px) {
+  .nk-skeleton--relic .nk-skeleton__hero-visual { min-height: 190px; aspect-ratio: 16 / 11; }
+}
+@media (min-width: 768px) {
+  .nk-skeleton--relic .nk-skeleton__hero-head .nk-sk--title { height: 32px; }
+}
+@media (min-width: 1024px) {
+  .nk-skeleton--relic .nk-skeleton__hero-visual { flex: 0 0 44%; min-height: 420px; aspect-ratio: auto; }
+  .nk-skeleton--relic .nk-skeleton__hero-head .nk-sk--title { height: 41px; }
+  .nk-relic-sk-piece { height: 100px; }
+}
 
 @keyframes nk-relic-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
 @supports (animation-timeline: scroll()) {

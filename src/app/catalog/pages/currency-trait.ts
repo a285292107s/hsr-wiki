@@ -44,6 +44,7 @@ export const currencyTraitPage: CatalogPageConfig = {
   subtitle: 'TRAITS',
   searchKey: 'catalog.cwTrait.search',
   gridClass: 'nk-cat-grid nk-cw-trait-grid',
+  skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
   async fetchData() {
     const { traits } = await loadLocalCurrencyTraits();

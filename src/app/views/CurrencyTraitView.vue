@@ -58,13 +58,29 @@ watch(data, (d) => { if (d) document.title = pageTitle(d.name); }, { immediate: 
 <template>
   <div class="nk-ctrait">
     <div v-if="showSkeleton" class="nk-ctrait__skeleton" role="status" aria-live="polite" :aria-label="t('ctrait.loadingAria')">
-      <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-icon"></div>
-      <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-title" style="width:40%"></div>
-      <div class="nk-ctrait__skeleton-body">
-        <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-line" style="width:30%"></div>
-        <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-line" style="width:80%"></div>
-        <div class="nk-sk nk-sk--shimmer nk-ctrait__sk-line" style="width:60%"></div>
-      </div>
+      <header class="nk-ctrait__sk-hero">
+        <div class="nk-ctrait__sk-content">
+          <div class="nk-ctrait__sk-icon">
+            <span class="nk-sk nk-sk--shimmer nk-ctrait__sk-iconfill"></span>
+          </div>
+          <div class="nk-ctrait__sk-info">
+            <span class="nk-sk nk-sk--shimmer nk-ctrait__sk-chip"></span>
+            <span class="nk-sk nk-sk--shimmer nk-ctrait__sk-name"></span>
+            <span class="nk-sk nk-sk--shimmer nk-ctrait__sk-rubric"></span>
+          </div>
+        </div>
+      </header>
+      <section class="nk-ctrait__sk-section">
+        <div class="nk-ctrait__sk-sechead">
+          <span class="nk-sk nk-sk--shimmer nk-ctrait__sk-title"></span>
+          <span class="nk-ctrait__sk-rule"></span>
+        </div>
+        <div class="nk-ctrait__sk-desc">
+          <span v-for="n in 4" :key="n" class="nk-ctrait__sk-line">
+            <span class="nk-sk nk-sk--shimmer"></span>
+          </span>
+        </div>
+      </section>
     </div>
 
     <div v-else-if="error" class="nk-error-state" role="alert">

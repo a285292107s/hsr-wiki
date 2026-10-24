@@ -60,6 +60,10 @@ const pageTitle = computed(() => {
 
 const useVirtual = computed(() => items.value.length > VIRTUAL_THRESHOLD);
 
+const skeletonVariant = computed(() => props.config.skeleton?.variant ?? 'card');
+const skeletonCount = computed(() => props.config.skeleton?.count ?? 16);
+const skeletonRows = computed(() => props.config.skeleton?.rows ?? 6);
+
 const filtered = computed<CatalogItem[]>(() => {
   const q = query.value.trim().toLowerCase();
   const af = activeFilters.value;
@@ -287,14 +291,38 @@ onBeforeUnmount(() => {
       <div
         v-if="phase === 'loading' && showSkeleton"
         class="nk-skeleton nk-skeleton--catalog"
+        :data-page="config.id"
         role="status"
         aria-live="polite"
         :aria-label="t('catalog.loadingAria', { title: pageTitle })"
       >
         <div class="nk-skeleton__grid" :class="config.gridClass">
-          <div v-for="i in 16" :key="i" class="nk-skeleton__card">
-            <div class="nk-sk nk-sk--shimmer nk-skeleton__card-img"></div>
-          </div>
+          <template v-if="skeletonVariant === 'columns'">
+            <section v-for="col in 4" :key="`c${col}`" class="nk-skeleton__col">
+              <div class="nk-sk nk-sk--shimmer nk-skeleton__col-head"></div>
+              <div v-for="row in skeletonRows" :key="`r${row}`" class="nk-skeleton__row">
+                <div class="nk-sk nk-sk--shimmer nk-skeleton__row-fig"></div>
+                <div class="nk-skeleton__row-main">
+                  <div class="nk-sk nk-sk--shimmer nk-skeleton__row-line"></div>
+                  <div class="nk-sk nk-sk--shimmer nk-skeleton__row-line nk-skeleton__row-line--meta"></div>
+                </div>
+              </div>
+            </section>
+          </template>
+          <template v-else>
+            <div v-for="i in skeletonCount" :key="i" class="nk-skeleton__card">
+              <div v-if="skeletonVariant === 'row'" class="nk-sk nk-sk--shimmer nk-skeleton__card-thumb"></div>
+              <div v-else-if="skeletonVariant === 'card'" class="nk-sk nk-sk--shimmer nk-skeleton__card-img"></div>
+              <div class="nk-skeleton__card-body">
+                <span
+                  v-for="line in 4"
+                  :key="line"
+                  class="nk-sk nk-sk--shimmer nk-skeleton__card-line"
+                  :class="`nk-skeleton__card-line--${line}`"
+                ></span>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
 

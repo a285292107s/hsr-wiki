@@ -219,11 +219,29 @@ thead .nk-lc-rank-table--active { color: var(--primary) !important; }
 }
 
 .nk-skeleton--lc .nk-skeleton__stat-grid { grid-template-columns: repeat(3, 1fr); }
+.nk-skeleton--lc .nk-sk--stat { height: 55px; }
+.nk-skeleton--lc .nk-skeleton__hero-head .nk-sk--title { height: 32px; }
+.nk-skeleton--lc .nk-skeleton__hero-section { display: flex; flex-direction: column; gap: 10px; }
+.nk-skeleton--lc .nk-skeleton__hero-section-title { width: 80px; height: 15px; }
 .nk-skeleton--lc .nk-skeleton__hero,
 .nk-skeleton--lc .nk-skeleton__hero-visual { min-height: 240px; }
-@media (min-width: 1024px) {
+.nk-skeleton--lc .nk-skeleton__hero-visual { aspect-ratio: 2 / 1; }
+@media (max-width: 359px) {
+  .nk-skeleton--lc .nk-skeleton__stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
   .nk-skeleton--lc .nk-skeleton__hero,
-  .nk-skeleton--lc .nk-skeleton__hero-visual { min-height: 320px; }
+  .nk-skeleton--lc .nk-skeleton__hero-visual { min-height: 180px; }
+  .nk-skeleton--lc .nk-skeleton__hero-visual { aspect-ratio: 5 / 2; }
+}
+@media (min-width: 768px) {
+  .nk-skeleton--lc .nk-skeleton__hero-visual { aspect-ratio: 21 / 9; }
+  .nk-skeleton--lc .nk-sk--stat { height: 36px; }
+}
+@media (min-width: 1024px) {
+  .nk-skeleton--lc .nk-skeleton__hero { min-height: 320px; }
+  .nk-skeleton--lc .nk-skeleton__hero-visual { flex: 0 0 34%; min-height: 320px; aspect-ratio: auto; }
+  .nk-skeleton--lc .nk-skeleton__hero-head .nk-sk--title { height: 37px; }
 }
 
 @media (max-width: 640px) {

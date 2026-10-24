@@ -194,20 +194,51 @@ function hideOnError(e: Event) {
   <div ref="pageRef" class="nk-page--detail nk-crole" :aria-busy="loading">
 
     <div v-if="showSkeleton" class="nk-crole__skeleton" role="status" aria-live="polite" :aria-label="t('cwRole.loadingAria')">
-      <div class="nk-crole__skeleton-hero">
-        <div class="nk-crole__skeleton-portrait nk-sk nk-sk--shimmer"></div>
-        <div class="nk-crole__skeleton-info">
-          <div class="nk-sk nk-sk--shimmer" style="width: 104px; height: 12px; border-radius: 2px"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width: 56%; height: 36px; border-radius: 6px"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width: 42%; height: 14px; border-radius: 2px"></div>
-          <div class="nk-sk nk-sk--shimmer" style="width: 30%; height: 14px; border-radius: 2px"></div>
+      <div class="nk-crole__sk-bar">
+        <div class="nk-crole__sk-barinner">
+          <span v-for="n in 5" :key="n" class="nk-sk nk-sk--shimmer nk-crole__sk-tab"></span>
         </div>
       </div>
-      <div class="nk-crole__skeleton-tabs">
-        <div class="nk-sk nk-sk--shimmer" v-for="n in 3" :key="n" style="width: 56px; height: 30px; border-radius: 6px"></div>
+      <div class="nk-crole__sk-hero">
+        <span class="nk-sk nk-sk--shimmer nk-crole__sk-art"></span>
+        <div class="nk-crole__sk-content">
+          <div class="nk-crole__sk-info">
+            <span class="nk-sk nk-sk--shimmer nk-crole__sk-id"></span>
+            <span class="nk-sk nk-sk--shimmer nk-crole__sk-name"></span>
+            <div class="nk-crole__sk-role">
+              <span class="nk-sk nk-sk--shimmer"></span>
+              <span class="nk-sk nk-sk--shimmer"></span>
+              <span class="nk-sk nk-sk--shimmer"></span>
+            </div>
+            <div class="nk-crole__sk-tags">
+              <span class="nk-sk nk-sk--shimmer nk-crole__sk-chip"></span>
+              <span class="nk-sk nk-sk--shimmer nk-crole__sk-chip nk-crole__sk-chip--short"></span>
+            </div>
+            <div class="nk-crole__sk-traits">
+              <span v-for="n in 2" :key="n" class="nk-crole__sk-trait">
+                <span class="nk-sk nk-sk--shimmer nk-crole__sk-traiticon"></span>
+                <span class="nk-sk nk-sk--shimmer nk-crole__sk-traitname"></span>
+              </span>
+            </div>
+          </div>
+          <span class="nk-sk nk-sk--shimmer nk-crole__sk-portrait"></span>
+        </div>
       </div>
-      <div class="nk-crole__skeleton-grid">
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-md" v-for="n in 4" :key="n"></div>
+      <div class="nk-crole__sk-panel">
+        <div class="nk-crole__sk-panelhead">
+          <span class="nk-sk nk-sk--shimmer nk-crole__sk-title"></span>
+          <span class="nk-crole__sk-pills">
+            <span v-for="n in 4" :key="n" class="nk-sk nk-sk--shimmer nk-crole__sk-pill"></span>
+          </span>
+        </div>
+        <div class="nk-crole__sk-table">
+          <div class="nk-crole__sk-thead">
+            <span v-for="c in 4" :key="c" class="nk-sk nk-sk--shimmer nk-crole__sk-cell"></span>
+          </div>
+          <div v-for="r in 10" :key="r" class="nk-crole__sk-trow">
+            <span v-for="c in 4" :key="c" class="nk-sk nk-sk--shimmer nk-crole__sk-cell"></span>
+          </div>
+        </div>
       </div>
     </div>
 

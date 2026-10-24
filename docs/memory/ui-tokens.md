@@ -174,6 +174,7 @@
 - **走文档流的页不能用视口级 `margin: 0 auto`**：侧栏偏移后居中基准与侧栏避让页差一个侧栏宽，要用 `calc(offset + max(0px, (100vw - offset - detail-max)/2))`。
 - **走文档流的详情页拿不到 `.nk-page--detail` 的侧栏避让，必须自己声明**：那份避让是 `position: absolute` + `left: var(--nk-content-offset)` 提供的，页面一旦改成文档流滚动，整页就退回「版心以视口居中」⇒ **768~1279 视口被侧栏压住**。修法：页面容器 `padding-left: var(--nk-content-offset)`（该令牌 <768 为 0，无需媒体查询）。**这类缺陷不会报错、只在特定视口可见** ⇒ 新增 / 改造文档流页面时同批补一条「内容左缘 ≥ 侧栏右缘」的几何断言（读令牌落值 + 比 rect，而不是写死 x）。`e2e/layout-monster.spec.ts`
 - **避让一改，hero / 骨架的固定盒高就要按断点重标**：内容区左缘右移会压缩可用宽度，图列驱动的 hero 高度随视口线性变化；骨架屏不拆档就会在加载完成时整块下跳。
+- **目录页骨架屏的尺寸不能从网格类名反推**：虚拟网格目录（/item、/monster、/achievement）的列数与行高由 JS 的 `virtualMinColW` / `virtualImgRatio` / `virtualInfoH` 决定，而真实卡是「图 + 下方 info 文本块」的复合结构（item 名称 + 副标题两行、monster 名称 / 弱点 / 类型三行、achievement 纯文本卡、货币战争目录是矮行卡而非竖幅图块）——统一 3:4 图块占位会让骨架行高与就绪态差到一倍，加载完成时整页跳。判据：骨架按卡型声明变体（`CatalogPageConfig.skeleton`），几何只按网格类与 `data-page` 限定；验收量「骨架 / 就绪同元素矩形差 ≤2px」，不拿截图肉眼判。
 - **覆盖一个方向时必须只写该方向**：负外边距写成 `margin: -6px 0` 简写会把基线的 `margin-left: auto` 一起清成 0，靠右对齐的入口当场退回标签右侧。用 `margin-top/-bottom`。
 - **改导航块序要连带查三处**：① 手机档分隔线是**按序画的**（修法是改画位置而非删线）；② 折叠算法按选择器量宽度预算，**改类名或换标签元素就会静默破坏底栏折叠**；③ 工具组在手机档是 `display: contents`，加减条目会改变底栏槽数，须按最窄档复测槽宽。
 - **「改短文案」必须按最窄档复测**：底栏槽宽有隐性预算（`flex: 1 1 auto; min-width: 44px`、标签 `white-space: nowrap`），2 字变 4 字等于标签宽度翻倍。

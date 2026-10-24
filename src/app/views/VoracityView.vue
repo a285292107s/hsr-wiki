@@ -151,10 +151,39 @@ onMounted(() => { void load(); });
       aria-live="polite"
       :aria-label="t('vor.loadingAria')"
     >
-      <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--shimmer nk-sk--title"></div>
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
+      <div class="nk-vor-bar">
+        <div class="nk-vor-bar__inner">
+          <div class="nk-secnav nk-vor-secnav">
+            <span v-for="def in SECTION_DEFS" :key="def.id" class="nk-sk nk-sk--shimmer nk-skel-nav"></span>
+          </div>
+        </div>
+        <div class="nk-vor-bar__progress"></div>
+      </div>
+      <header class="nk-vor-hero">
+        <div class="nk-sk nk-sk--shimmer nk-vor-hero__title nk-skel-hero-title"></div>
+        <div class="nk-sk nk-sk--shimmer nk-skel-hero-act"></div>
+      </header>
+      <div class="nk-panels">
+        <div class="nk-panel nk-panel--active">
+          <section class="nk-vor-sec">
+            <div class="nk-title">
+              <span class="nk-sk nk-sk--shimmer nk-skel-sec-title"></span>
+            </div>
+            <div class="nk-sk nk-sk--shimmer nk-vor-intro nk-skel-intro"></div>
+            <div class="nk-vor-facts">
+              <span class="nk-sk nk-sk--shimmer nk-skel-fact"></span>
+            </div>
+          </section>
+          <section class="nk-vor-sec">
+            <div class="nk-title">
+              <span class="nk-sk nk-sk--shimmer nk-skel-sec-title"></span>
+            </div>
+            <div class="nk-sk nk-sk--shimmer nk-skel-scores"></div>
+            <div class="nk-skel-rows">
+              <span v-for="i in 4" :key="i" class="nk-sk nk-sk--shimmer nk-skel-row"></span>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
 

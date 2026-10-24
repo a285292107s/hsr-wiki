@@ -1,7 +1,5 @@
 .nk-ach-grid { --nk-grid-min: 276px; --nk-grid-gap: 10px; }
 
-.nk-ach-grid .nk-skeleton__card-img { aspect-ratio: auto; height: 88px; border-radius: 10px; }
-
 .nk-ach-card {
   position: relative;
   display: flex;

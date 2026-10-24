@@ -412,7 +412,19 @@
   color: var(--text2);
 }
 
-.nk-vor-skeleton { width: 100%; max-width: var(--nk-detail-max); margin: 0 auto; }
+.nk-vor-skeleton { width: 100%; }
+.nk-vor-skeleton .nk-skel-nav { flex: none; align-self: center; width: 84px; height: 12px; }
+.nk-vor-skeleton .nk-skel-hero-title { height: 1.15em; }
+.nk-vor-skeleton .nk-skel-hero-act { height: 20px; margin-top: 12px; }
+.nk-vor-skeleton .nk-skel-sec-title { width: 220px; height: 19px; }
+.nk-vor-skeleton .nk-skel-intro { height: 253px; }
+.nk-vor-skeleton .nk-skel-fact { width: 140px; height: 17px; }
+.nk-vor-skeleton .nk-skel-scores { height: 27px; }
+.nk-vor-skeleton .nk-skel-rows { display: flex; flex-direction: column; gap: 20px; margin-top: 24px; }
+.nk-vor-skeleton .nk-skel-row { height: 60px; }
+@media (min-width: 768px) {
+  .nk-vor-skeleton .nk-skel-intro { height: 169px; }
+}
 
 .nk-vor-secnav .nk-secnav__btn--active { color: var(--vor-300); }
 .nk-vor-secnav .nk-secnav__btn--active::after { background: var(--vor-500); }

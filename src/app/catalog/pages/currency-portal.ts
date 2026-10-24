@@ -22,6 +22,7 @@ export const currencyPortalPage: CatalogPageConfig = {
   subtitle: 'PORTALS',
   searchKey: 'catalog.cwPortal.search',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
+  skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
   async fetchData() {
     const { portals } = await loadLocalCurrencyPortals();

@@ -31,6 +31,7 @@ export const currencyAugmentPage: CatalogPageConfig = {
   subtitle: 'AUGMENTS',
   searchKey: 'catalog.cwAugment.search',
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
+  skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
   async fetchData() {
     const { augments } = await loadLocalCurrencyAugments();

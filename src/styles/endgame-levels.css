@@ -397,10 +397,30 @@
   color: var(--eg-color);
 }
 
-.nk-skeleton--egd .nk-egd-sk {
-  width: 100%;
-  max-width: var(--nk-detail-max);
-  margin: 0 auto;
-  height: 210px;
-  border-radius: 0;
+.nk-skeleton--egd .nk-skel-art { width: 68px; height: 68px; }
+.nk-skeleton--egd .nk-skel-camp { width: 180px; height: 25px; }
+.nk-skeleton--egd .nk-skel-name { height: 1.2em; }
+.nk-skeleton--egd .nk-skel-meta { width: 260px; height: 25px; }
+.nk-skeleton--egd .nk-skel-tabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-egd-body .nk-skel-tabs { max-width: var(--nk-struct-max); margin-inline: auto; }
+.nk-skeleton--egd .nk-skel-tab { flex: none; width: 72px; height: 14px; }
+.nk-skeleton--egd .nk-skel-tab:nth-child(2) { width: 60px; }
+.nk-skeleton--egd .nk-skel-tab:nth-child(3) { width: 84px; }
+.nk-skeleton--egd .nk-skel-tab:nth-child(4) { width: 68px; }
+.nk-skeleton--egd .nk-skel-sec-title { width: 220px; height: 19px; }
+.nk-skeleton--egd .nk-skel-board {
+  height: 320px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-2);
+}
+.nk-skeleton--egd .nk-skel-board-tail { height: 180px; margin-top: 18px; }
+@media (min-width: 768px) {
+  .nk-skeleton--egd .nk-skel-art { width: 100px; height: 100px; }
+  .nk-skeleton--egd .nk-skel-tabs { height: 49px; }
 }

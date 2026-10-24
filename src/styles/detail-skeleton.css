@@ -1,0 +1,21 @@
+.nk-skeleton--lc .nk-skeleton__hero-head,
+.nk-skeleton--relic .nk-skeleton__hero-head { display: flex; flex-direction: column; gap: 8px; }
+
+.nk-skeleton--lc .nk-skeleton__hero-meta,
+.nk-skeleton--relic .nk-skeleton__hero-meta { display: flex; gap: 8px; }
+
+.nk-skeleton--lc .nk-skeleton__hero-meta .nk-sk--chip,
+.nk-skeleton--relic .nk-skeleton__hero-meta .nk-sk--chip { height: 28px; }
+
+.nk-skeleton--lc .nk-skeleton__hero-panel,
+.nk-skeleton--relic .nk-skeleton__hero-panel { padding: var(--nk-hero-panel-pad); gap: 16px; }
+
+@media (min-width: 768px) {
+  .nk-skeleton--lc .nk-skeleton__hero-panel,
+  .nk-skeleton--relic .nk-skeleton__hero-panel { padding: 28px 36px; gap: 22px; }
+}
+
+@media (min-width: 1024px) {
+  .nk-skeleton--lc .nk-skeleton__hero-panel,
+  .nk-skeleton--relic .nk-skeleton__hero-panel { padding: 36px 40px; gap: 28px; justify-content: center; }
+}

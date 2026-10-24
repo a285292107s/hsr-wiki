@@ -171,13 +171,32 @@ onBeforeUnmount(() => {
       aria-live="polite"
       :aria-label="t('egd.loadingAria')"
     >
-      <div class="nk-skeleton__hero">
-        <div class="nk-egd-sk nk-sk--shimmer"></div>
-      </div>
-      <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
+      <header class="nk-egd-hero" :data-mode="modeKey">
+        <div class="nk-egd-hero__plate">
+          <span class="nk-sk nk-sk--shimmer nk-skel-art"></span>
+        </div>
+        <div class="nk-egd-hero__panel">
+          <span class="nk-sk nk-sk--shimmer nk-skel-camp"></span>
+          <span class="nk-sk nk-sk--shimmer nk-egd-hero__name nk-skel-name"></span>
+          <span class="nk-sk nk-sk--shimmer nk-skel-meta"></span>
+        </div>
+      </header>
+      <div class="nk-panels nk-egd-body">
+        <div class="nk-egd-panel">
+          <div class="nk-skel-tabs">
+            <span class="nk-sk nk-sk--shimmer nk-skel-tab"></span>
+            <span class="nk-sk nk-sk--shimmer nk-skel-tab"></span>
+            <span class="nk-sk nk-sk--shimmer nk-skel-tab"></span>
+            <span class="nk-sk nk-sk--shimmer nk-skel-tab"></span>
+          </div>
+          <div class="nk-egd-level-panel">
+            <div class="nk-title">
+              <span class="nk-sk nk-sk--shimmer nk-skel-sec-title"></span>
+            </div>
+            <div class="nk-sk nk-sk--shimmer nk-skel-board"></div>
+            <div class="nk-sk nk-sk--shimmer nk-skel-board-tail"></div>
+          </div>
+        </div>
       </div>
     </div>
 

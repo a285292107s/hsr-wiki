@@ -170,11 +170,30 @@ onMounted(() => { void load(); });
       aria-live="polite"
       :aria-label="t('catalog.loadingAria', { title: t('nav.formula') })"
     >
-      <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--shimmer nk-sk--title"></div>
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-md"></div>
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
-        <div class="nk-sk nk-sk--shimmer nk-sk--block-lg"></div>
+      <div class="nk-formula-progress">
+        <div class="nk-formula-progress__fill"></div>
+      </div>
+      <header class="nk-formula-hero">
+        <div class="nk-formula-hero__main">
+          <div class="nk-sk nk-sk--shimmer nk-formula-hero__title nk-skel-hero-title"></div>
+          <div class="nk-sk nk-sk--shimmer nk-formula-hero__lead nk-skel-hero-lead"></div>
+        </div>
+        <div class="nk-formula-hero__aside">
+          <div class="nk-sk nk-sk--shimmer nk-formula-hero__note nk-skel-hero-note"></div>
+        </div>
+      </header>
+      <div class="nk-secnav nk-formula-secnav">
+        <span v-for="sec in sections" :key="sec.id" class="nk-sk nk-sk--shimmer nk-skel-nav"></span>
+      </div>
+      <div class="nk-formula-body">
+        <section class="nk-formula-sec">
+          <div class="nk-formula-sec__title">
+            <span class="nk-sk nk-sk--shimmer nk-skel-sec-title"></span>
+          </div>
+          <div class="nk-sk nk-sk--shimmer nk-formula-sec__lead nk-skel-sec-lead"></div>
+          <div class="nk-sk nk-sk--shimmer nk-formula-chain nk-skel-chain"></div>
+          <div class="nk-sk nk-sk--shimmer nk-formula-overview nk-skel-overview"></div>
+        </section>
       </div>
     </div>
 

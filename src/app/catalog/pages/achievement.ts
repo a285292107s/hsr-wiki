@@ -54,6 +54,7 @@ export const achievementPage: CatalogPageConfig = {
   subtitle: 'ACHIEVEMENT INDEX',
   searchKey: 'catalog.achievement.search',
   gridClass: 'nk-cat-grid nk-ach-grid',
+  skeleton: { variant: 'text' },
   styles: [() => import('../../../../src/styles/achievement.css')],
   virtualMinColW: 276,
   virtualImgRatio: 0,

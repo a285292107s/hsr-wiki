@@ -36,6 +36,14 @@ export interface CatalogTab {
   path: string;
 }
 
+export type CatalogSkeletonVariant = 'card' | 'text' | 'row' | 'columns';
+
+export interface CatalogSkeleton {
+  variant?: CatalogSkeletonVariant;
+  count?: number;
+  rows?: number;
+}
+
 export interface CatalogPageConfig {
   id: string;
   titleKey: string;
@@ -46,6 +54,7 @@ export interface CatalogPageConfig {
   searchKey: string;
   subtitle?: string;
   gridClass?: string;
+  skeleton?: CatalogSkeleton;
   virtualMinColW?: number;
   virtualImgRatio?: number;
   virtualInfoH?: number;

@@ -212,15 +212,42 @@ function cardHtml(item: CatalogItem, i: number): string {
       </nav>
     </template>
 
-    <div v-else-if="phase === 'loading'" class="nk-skeleton nk-skeleton--egm">
-      <div class="nk-skeleton__hero nk-skeleton__hero--egm">
-        <div class="nk-sk nk-skeleton__hero-panel nk-sk--title"></div>
-      </div>
-      <div class="nk-skeleton__body">
-        <div class="nk-sk nk-sk--stat"></div>
-        <div class="nk-sk nk-sk--stat"></div>
-        <div class="nk-sk nk-sk--stat"></div>
-      </div>
+    <div
+      v-else-if="phase === 'loading'"
+      class="nk-skeleton nk-skeleton--egm"
+      role="status"
+      aria-live="polite"
+      :aria-label="t('egd.loadingAria')"
+    >
+      <header class="nk-egm__hero" :data-mode="modeKey">
+        <div class="nk-egm__crumbs">
+          <span class="nk-sk nk-sk--shimmer nk-skel-crumbs"></span>
+        </div>
+        <div class="nk-egm__head">
+          <span class="nk-sk nk-sk--shimmer nk-skel-emblem"></span>
+          <div class="nk-skel-head">
+            <span class="nk-sk nk-sk--shimmer nk-egm__title nk-skel-h1"></span>
+            <span class="nk-sk nk-sk--shimmer nk-egm__en nk-skel-en"></span>
+          </div>
+        </div>
+      </header>
+      <section class="nk-egm__panel">
+        <div class="nk-title">
+          <span class="nk-sk nk-sk--shimmer nk-skel-sec-title"></span>
+        </div>
+        <article class="nk-egm__rule">
+          <div class="nk-sk nk-sk--shimmer nk-skel-rule-title"></div>
+          <div class="nk-sk nk-sk--shimmer nk-egm__para nk-skel-para"></div>
+          <div class="nk-sk nk-sk--shimmer nk-egm__para nk-skel-para nk-skel-para--short"></div>
+          <div class="nk-sk nk-sk--shimmer nk-egm__para nk-skel-para nk-skel-para--long"></div>
+          <div class="nk-sk nk-sk--shimmer nk-egm__para nk-skel-para nk-skel-para--mid"></div>
+          <div class="nk-sk nk-sk--shimmer nk-skel-list"></div>
+        </article>
+        <article class="nk-egm__rule">
+          <div class="nk-sk nk-sk--shimmer nk-skel-rule-title"></div>
+          <div class="nk-sk nk-sk--shimmer nk-egm__para nk-skel-para"></div>
+        </article>
+      </section>
     </div>
 
     <div v-else-if="phase === 'error'" class="nk-error-state">
