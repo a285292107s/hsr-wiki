@@ -197,10 +197,10 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(page.locator('.nk-hub-release__sk')).toBeVisible();
     await expect(page.locator('.nk-cwseas__sk-role')).toHaveCount(4);
     await expect(page.locator('.nk-cwseas__sk-trait')).toHaveCount(3);
-    await expect(page.locator('[data-sk="role"]')).toHaveCount(4);
-    await expect(page.locator('[data-sk="trait"]')).toHaveCount(3);
+    await expect(page.locator('[data-sk="role"]')).toHaveCount(1);
+    await expect(page.locator('[data-sk="trait"]')).toHaveCount(1);
     await expect(page.locator('.nk-hub-release__title')).toHaveText('本赛季新增');
-    await expect(page.locator('.nk-hub-release__section')).toHaveCount(0);
+    await expect(page.locator('.nk-hub-release__section[data-kind]')).toHaveCount(0);
     await expect(page.locator('.nk-hub-release__empty')).toHaveCount(0);
     const skRole = await page.locator('.nk-cwseas__sk-role').first()
       .evaluate((el) => Math.round(el.getBoundingClientRect().width));

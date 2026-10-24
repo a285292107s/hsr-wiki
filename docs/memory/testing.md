@@ -199,3 +199,5 @@
 - **`cubic-bezier(0.16, 1, 0.3, 1)` 自带逗号**：用 `split(',')` 拆 `transitionTimingFunction` 会截断成 `cubic-bezier(0.16`，产生一堆假失败。必须按**顶层逗号**切（`/,(?![^(]*\))/`）。
 - **挂载后根节点会临时加 `.theme-transitioning`（约 400ms + `!important` 覆盖所有组件 transition）**：`goto` 后固定等 300ms 采集会读到它，必须在该窗口关闭后再采集。`src/app/App.vue`
 - **对拍只能证明算式，证明不了呈现**：内核与原文矩阵对拍 331 万组 0 差异，页面上仍有 6 处会算错/误导——默认值把韧性 10% 减伤恒剔除（合计高估 11.1%）、行迹把「单点加成值」错当角色攻击力（放大约 25 倍）、系数被标成「期望伤害」、同一实体与角色页取到不同的晋阶口径、非等距 x 轴刻度按等距均分（偏差 25~36px）。判据：审核除算式外必须同时查「默认值 / 单位标签 / 口径是否与既有页面一致 / 图表坐标是否真按刻度定位」，并优先拿同一实体在两个页面的数字互相对撞。
+- **重命名卡片类会让「同类交互动效」契约静默失配**：`shell.spec.ts` 先 `toBeVisible` 一张卡再量 transition；枢纽页把 `.nk-cw-trait-card` 换成 `.nk-cwrole` / `.nkcwtrait` 后，失败信号是「element(s) not found」而不是动效断言，且只在慢档跑。判据：新增 / 改名卡片类时同步该文件 `SURFACE` / `LABEL` 数组。
+- **`@visual-detail` 用例默认不进收集，改完不回跑就是假绿**：`layout-currency` 的骨架断言把 `[data-sk]` 分区数当卡片数、就绪分区选择器漏了 `[data-kind]`，本机与 push 档都收不到，直到发布前全量才红。判据：动过 `@visual-detail` / `@i18n-detail` 用例后补一次 `E2E_DETAIL=1 pnpm exec playwright test <文件>`。

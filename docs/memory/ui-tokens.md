@@ -205,3 +205,4 @@
 - **「读数 + 流水表」本身就是结构分解图，不必再配曲线**：击破/欢愉这类链路的可变量是**离散选项**（属性、韧性档、好活数），曲线只能画成台阶、玩家也读不出斜率含义；流水表逐行给「×系数 / 本步后伤害 / 增减绝对值」已经是结构分解，再加曲线是重复表达。判据：可变量是离散枚举 ⇒ 用 chip + 流水，不画图。
 - **两卡并排时，高度差超过 3 倍就说明这两块不该并排**：一侧是长流水表（997px）、另一侧是关闭态说明条（202px），右侧会留出近 800px 空白，视觉上像漏渲染。改成**上下两块、每块内部再分「控件 | 流水」两列**（与相邻区块同构）后区块高从 1127 → 849px，空白消失。判据：并排前先估两列内容量级，差一个量级就改纵向。
 - **流水/表格类块必须量「文字右缘到区块右缘」的留白，不能只量容器**：`padding` 落在容器上而 `text-align: right` 的末列贴着内边界时，数字看起来像被裁掉；实测该留白曾为 0px。修法给栅格末列加 `padding-right`，并用 `Range.getBoundingClientRect()` 量**文字墨迹**（不是盒子）到区块右缘的距离，≥16px。`src/styles/formula.css`
+- **卡片正文用单列 `grid` 时隐式列按内容撑开 ⇒ 卡片 `overflow:hidden` 静默硬裁**：`.nk-cwrole` 的徽标名 `white-space: nowrap`、meta 的 `inline-flex` 行都不收缩，列被撑到 168px（容器 133px）；Windows 本机 390 档恰好不裁，Linux CI 字体窄 4px 就报 +4px。判据：卡片正文 grid 写 `grid-template-columns: minmax(0, 1fr)`，可能在无空格长词里越界的 chip 写 `max-width: 100%` + 其 nowrap 子项 `min-width: 0`（ellipsis 才真生效）。`src/styles/currency-hub.css`
