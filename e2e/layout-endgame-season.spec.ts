@@ -172,6 +172,13 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     const bodyKids = await page.locator('.nk-egd-peak .nk-egd-peak__body > *').evaluateAll((els) =>
       els.map((el) => (el as HTMLElement).className));
     expect(bodyKids[1]).toContain('nk-egd-floor__mechs');
+    const mech = await page.locator('.nk-egd-peak .nk-egd-peak__mech').first().evaluate((el) => {
+      const tag = el.querySelector('.nk-egd-peak__tag')!.getBoundingClientRect();
+      const desc = el.querySelector('.nk-egd-peak__mechdesc')!.getBoundingClientRect();
+      return { tagRight: tag.right, descLeft: desc.left, tagTop: tag.top, descTop: desc.top };
+    });
+    expect(mech.descLeft, '机制条目 = 名称列 + 正文列（不是上下堆叠）').toBeGreaterThan(mech.tagRight);
+    expect(Math.abs(mech.tagTop - mech.descTop), '机制名称与正文首行同顶').toBeLessThan(12);
     const stage = await page.locator('.nk-egd-peak .nk-egd-floor__stage').boundingBox();
     expect(stage?.y ?? Infinity, '首屏应带出敌方配置').toBeLessThan(900);
     await noUnknownOverflow(page);

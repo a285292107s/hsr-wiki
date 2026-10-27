@@ -14,6 +14,7 @@
   }
   .nk-egd-row > .nk-egd-buffs,
   .nk-egd-group--row > .nk-egd-buffs { display: flex; flex-direction: column; }
+  .nk-egd-peak__mech { display: flex; flex-direction: column; gap: 6px; }
   .nk-egd-hero__plate {
     width: 112px;
     min-height: 112px;

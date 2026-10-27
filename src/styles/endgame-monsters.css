@@ -116,13 +116,16 @@
   min-width: 0;
 }
 .nk-egd-peak__mech {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: start;
   min-width: 0;
 }
 .nk-egd-peak__tag {
-  align-self: flex-start;
+  align-self: start;
+  justify-self: start;
   line-height: 1;
   color: var(--text2);
   padding: 5px 12px;
