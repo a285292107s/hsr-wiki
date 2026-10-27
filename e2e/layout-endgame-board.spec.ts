@@ -67,6 +67,28 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
+  test('/endgame/boss/3020：终焉公理三卡同排（桌面 1440）', { tag: ['@viewport-pinned'] }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/endgame/boss/3020');
+    const season = seasonData('maze_boss.json', '3020');
+    const sameRow = async (cards: ReturnType<typeof page.locator>): Promise<number> => new Set(
+      await cards.evaluateAll((els) => els.map((el) => Math.round((el as HTMLElement).offsetTop))),
+    ).size;
+    const tierceBoard = page.locator('#egd-tierce-board');
+    await expect(tierceBoard.locator('.nk-egd-group__title')).toHaveText('终焉公理');
+    await expect(tierceBoard.locator('.nk-egd-group .nk-egd-buff'))
+      .toHaveCount(season.buff_groups!.tierce!.length);
+    expect(await sameRow(tierceBoard.locator('.nk-egd-group .nk-egd-buff')), '星启档终焉公理三卡应同排').toBe(1);
+    await page.locator('#egd-level-tab-floor-1').click();
+    const floorBoard = page.locator('#egd-floor-board');
+    await expect(floorBoard.locator('.nk-egd-group .nk-egd-buff'))
+      .toHaveCount(season.buff_groups!.stage1!.length);
+    expect(await sameRow(floorBoard.locator('.nk-egd-group .nk-egd-buff')), '层档终焉公理三卡应同排').toBe(1);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
   test('/endgame/boss/3020：层级只为上下半场 + 星启单节点看板（ADR 0029 / 0030 / 0031 / 0032 / 0033）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/boss/3020');

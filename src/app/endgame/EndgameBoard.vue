@@ -25,7 +25,12 @@ defineProps<{
   >
     <div class="nk-egd-board__body nk-egd-children">
       <EndgameFloorBuff :buff="buff" />
-      <EndgameBuffGroup v-if="buffs.length" :title="systemName || fallbackSystemName()" :items="buffs" />
+      <EndgameBuffGroup
+        v-if="buffs.length"
+        class="nk-egd-group--row"
+        :title="systemName || fallbackSystemName()"
+        :items="buffs"
+      />
       <StageContent :stage="stage" :guides="guides" />
     </div>
   </div>
