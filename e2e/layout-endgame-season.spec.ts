@@ -3,7 +3,7 @@ import { collectConsoleIssues, computedNumber, readJson, readTokenPx } from './h
 import { cnBigNumber, PEAK_HARD_NODE, PEAK_KING_NODE, noUnknownOverflow, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, seasonData, seasonRewardGroups } from './layout.shared';
 import type { MechanicLike, MonsterLike } from './layout.shared';
 
-test.describe('布局验收：赛季增益区（行式排版 + 首屏预算）', () => {
+test.describe('布局验收：赛季级区块（行式排版 + 数据驱动上提）', () => {
   test('/endgame/story/2026：增益三行横排，1440×900 首屏露出关卡子 tab 与节点卡', { tag: ['@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -40,13 +40,39 @@ test.describe('布局验收：赛季增益区（行式排版 + 首屏预算）',
     assertNoErrors();
   });
 
-  test('/endgame/maze/1036：增益体系由当前半场节点看板承载', async ({ page }) => {
+  test('/endgame/maze/1036：该期各节点同 ID → 记忆紊流上提为赛季级区块', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/maze/1036');
-    await expect(page.locator('#egd-buffs')).toHaveCount(0);
+    const maze = seasonData('maze.json', '1036');
+    await expect(page.locator('.nk-egd-buffzone--solo .nk-egd-floor__buffname'))
+      .toHaveText(maze.floor_details![0].buff!.name);
     await page.locator('#egd-level-tab-floor-1').click();
-    await expect(page.locator('#egd-level-panel .nk-egd-floor__buffname')).toHaveText('记忆紊流');
+    await expect(page.locator('#egd-level-panel .nk-egd-floor__buff')).toHaveCount(0);
     await expect(page.locator('#egd-level-panel .nk-egd-group')).toHaveCount(0);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame/maze/100：逐层增益各异 → 保持板内承载、不上提', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/endgame/maze/100');
+    const maze = seasonData('maze.json', '100');
+    expect(new Set(maze.floor_details!.map((f) => f.buff!.id)).size, '该期逐层增益应各异（断言前提）')
+      .toBeGreaterThan(1);
+    await expect(page.locator('.nk-egd-buffzone--solo')).toHaveCount(0);
+    await expect(page.locator('#egd-level-panel .nk-egd-floor__buff')).toHaveCount(1);
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame/story/2001：Normal 期层内增益同 ID → 上提为赛季级区块', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/endgame/story/2001');
+    const story = seasonData('maze_extra.json', '2001');
+    await expect(page.locator('.nk-egd-buffzone--solo .nk-egd-floor__buffname'))
+      .toHaveText(story.floor_details![0].buff!.name);
+    await page.locator('#egd-level-tab-floor-1').click();
+    await expect(page.locator('#egd-level-panel .nk-egd-floor__buff')).toHaveCount(0);
     await noUnknownOverflow(page);
     assertNoErrors();
   });

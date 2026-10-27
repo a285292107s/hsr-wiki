@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
 import { halfLabel } from './pollution';
+import { seasonNodeBuff } from './renders';
 import type {
   MazeBuffInfo, MazeFloorDetail, MazeListEntry, MazeStageDetail,
 } from '../../services/types';
@@ -12,7 +13,6 @@ import { translate } from '../i18n';
 const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
-  modeKey: string;
   floor: MazeFloorDetail;
   systemName?: string;
 }>();
@@ -53,6 +53,8 @@ const nodeBuffs = computed<MazeBuffInfo[]>(() => {
   if (!activeNode.value) return [];
   return props.data.buff_groups?.[activeNode.value.half] ?? [];
 });
+
+const hoistedBuffId = computed(() => seasonNodeBuff(props.data)?.id ?? 0);
 </script>
 
 <template>
@@ -72,7 +74,7 @@ const nodeBuffs = computed<MazeBuffInfo[]>(() => {
       id="egd-floor-board"
       :labelled-by="cards.length > 1 ? `egd-floor-half-tab-${activeHalf}` : undefined"
       :stage="activeNode.stage"
-      :buff="modeKey === 'boss' ? null : floor.buff"
+      :buff="floor.buff?.id === hoistedBuffId ? null : floor.buff"
       :guides="props.data.boss_guides"
       :buffs="nodeBuffs"
       :system-name="props.systemName"

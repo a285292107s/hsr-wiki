@@ -43,6 +43,16 @@ export function seasonBuffList(data: MazeListEntry): MazeBuffInfo[] {
   return flat.filter((b) => !carried.has(b.id));
 }
 
+export function seasonNodeBuff(data: MazeListEntry): MazeBuffInfo | null {
+  const nodes: (MazeBuffInfo | null)[] = [
+    ...(data.floor_details || []).map((floor) => floor.buff ?? null),
+    ...(data.tierce?.nodes || []).map((node) => node.buff ?? null),
+  ];
+  if (!nodes.length || nodes.some((b) => !b)) return null;
+  const first = nodes[0] as MazeBuffInfo;
+  return nodes.every((b) => (b as MazeBuffInfo).id === first.id) ? first : null;
+}
+
 export function buffIconUrl(b: MazeBuffInfo): string {
   return b.icon ? cdnUri('bufficon', `${b.icon}.webp`) : '';
 }

@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
 import EnemyCard from '../components/EnemyCard.vue';
+import { seasonNodeBuff } from './renders';
 import type { MazeBuffInfo, MazeListEntry, MazeTierceNode } from '../../services/types';
 
 import { translate } from '../i18n';
@@ -10,7 +11,6 @@ import { translate } from '../i18n';
 const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
-  modeKey: string;
   systemName?: string;
 }>();
 
@@ -37,6 +37,8 @@ const nodeBuffs = computed<MazeBuffInfo[]>(() => {
   if (!activeNd.value) return [];
   return props.data.buff_groups?.[activeNd.value.origin] ?? [];
 });
+
+const hoistedBuffId = computed(() => seasonNodeBuff(props.data)?.id ?? 0);
 
 function selectNode(key: string): void {
   activeKey.value = key;
@@ -70,7 +72,7 @@ watch(
         id="egd-tierce-board"
         :labelled-by="cardItems.length > 1 ? `egd-tierce-node-tab-${activeKey}` : undefined"
         :stage="activeNd"
-        :buff="modeKey === 'boss' ? null : activeNd.buff"
+        :buff="activeNd.buff?.id === hoistedBuffId ? null : activeNd.buff"
         :guides="props.data.boss_guides"
         :buffs="nodeBuffs"
         :system-name="props.systemName"

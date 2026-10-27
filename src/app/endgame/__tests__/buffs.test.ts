@@ -1,9 +1,40 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { bossTraitDescHtml, seasonBuffList } from '../renders';
+import { bossTraitDescHtml, seasonBuffList, seasonNodeBuff } from '../renders';
 import type { MazeBossTrait, MazeListEntry } from '../../../services/types';
 
 const buff = (id: number, name: string) => ({ id, name });
+
+describe('seasonNodeBuff 赛季级节点增益（所有节点同一条才上提）', () => {
+  it('各层与星启节点全同一条 → 返回该条', () => {
+    const data = {
+      id: '1036', zh: '物竞天择',
+      floor_details: [{ floor: 1, buff: buff(3030149, '记忆紊流') }, { floor: 2, buff: buff(3030149, '记忆紊流') }],
+      tierce: { id: 1, nodes: [{ idx: 3, origin: 'tierce', buff: buff(3030149, '记忆紊流') }] },
+    } as unknown as MazeListEntry;
+    expect(seasonNodeBuff(data)?.id).toBe(3030149);
+  });
+
+  it('逐层不同 ID → null（永屹之城遗秘 100 / 900 这类老期）', () => {
+    const data = {
+      id: '100', zh: '永屹之城遗秘',
+      floor_details: [{ floor: 1, buff: buff(1, '记忆紊流') }, { floor: 2, buff: buff(2, '记忆紊流') }],
+    } as unknown as MazeListEntry;
+    expect(seasonNodeBuff(data)).toBeNull();
+  });
+
+  it('存在无增益节点 → null（不能把缺失节点当作同文）', () => {
+    const data = {
+      id: 'x', zh: 'x',
+      floor_details: [{ floor: 1, buff: buff(1, '记忆紊流') }, { floor: 2 }],
+    } as unknown as MazeListEntry;
+    expect(seasonNodeBuff(data)).toBeNull();
+  });
+
+  it('无节点（异相仲裁）→ null', () => {
+    expect(seasonNodeBuff({ id: '9', zh: 'x' } as MazeListEntry)).toBeNull();
+  });
+});
 
 describe('seasonBuffList 赛季增益（与逐层已呈现的同 ID 项不复述）', () => {
   it('忘却之庭：赛季增益与每层层内增益同一条 → 赛季增益组不再复述（由层看板首块呈现）', () => {

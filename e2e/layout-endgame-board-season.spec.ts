@@ -13,6 +13,8 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     expect(season.floor_details!.map((f) => f.star_rewards![0].star)).toEqual(ladder.map((t) => t.star));
     await page.goto('/endgame/maze/1035');
     await expect(page.locator('#egd-level-panel .nk-egd-head')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-buffzone--solo .nk-egd-floor__buffname')).toHaveText('记忆紊流');
+    await expect(page.locator('#egd-level-panel .nk-egd-floor__buff')).toHaveCount(0);
     const flat = page.locator('#egd-season-rewards .nk-egd-season-flat');
     await expect(flat).toHaveCount(1);
     await expect(flat.locator('.nk-egd-season-flat__conditions .nk-egd-node'))
@@ -35,6 +37,8 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     const own = new Set(permanent.floor_details!.map((f) => JSON.stringify(f.reward)));
     expect(own.size, '该期逐层通关奖励应有两种载荷（用于证明列跟层走）').toBe(2);
     await page.goto('/endgame/maze/100');
+    await expect(page.locator('.nk-egd-buffzone--solo'), '逐层增益各异的期不上提').toHaveCount(0);
+    await expect(page.locator('#egd-level-panel .nk-egd-floor__buff')).toHaveCount(1);
     const permGroups = seasonRewardGroups(page);
     await expect(permGroups).toHaveCount(permanent.floor_details!.length);
     await expect(permGroups.nth(0).locator('.nk-egd-season-group__rewards .nk-egd-reward__num'))
@@ -173,10 +177,10 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
       .toHaveCount(maze.star_rewards!.length);
     await expect(mazeFlat.locator('.nk-egd-season-flat__ladder .nk-egd-tier__brace'))
       .toHaveCount(0);
-    await expect(mazePanel.locator('.nk-egd-floor__buffname')).toHaveText(mazeFloor1.buff!.name);
+    await expect(page.locator('.nk-egd-buffzone--solo .nk-egd-floor__buffname')).toHaveText(mazeFloor1.buff!.name);
     await expect(mazePanel.locator('.nk-egd-group')).toHaveCount(0);
     await expect(mazePanel.locator('.nk-egd-board__body > :first-child'))
-      .toHaveClass(/nk-egd-floor__buff/);
+      .toHaveClass(/nk-egd-floor__stage/);
     const mazeClear = page.locator('#egd-season-rewards .nk-egd-season-shared .nk-egd-clear');
     await expect(mazeClear.locator('.nk-egd-rules__label')).toHaveText('回合上限 CYCLES');
     await expect(mazeClear.locator('.nk-egd-rules__val'))
@@ -207,7 +211,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
       .toHaveText(mazeFloor1.stage2!.monsters!.map((m) => cnBigNumber(m.hp!)));
     await page.locator('#egd-level-tab-tierce').click();
     await mazePanel.locator('.nk-egd-nodecards[aria-label="星启节点"] [role="tab"]').nth(2).click();
-    await expect(mazePanel.locator('.nk-egd-floor__buffname'))
+    await expect(page.locator('.nk-egd-buffzone--solo .nk-egd-floor__buffname'))
       .toHaveText(maze.tierce!.nodes![2].buff!.name);
     await noUnknownOverflow(page);
     assertNoErrors();
