@@ -2,23 +2,14 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { MAX_CHAR_LEVEL } from '../../lib/constants';
 import { levelStatValue, maxLevelStat } from '../../lib/format';
-import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
-import {
-  loadLocalCharacter,
-  loadLocalCharacterList,
-  loadLocalMonsterDetail,
-  loadLocalMonsterEliteGroups,
-  loadLocalMonsterLevelCurve,
-  loadLocalMonsterList,
-} from '../../services/api';
-import type { CharacterData, LocalCharList, LocalMonsterList, MonsterDetail } from '../../services/types';
+import { loadLocalCharacter, loadLocalCharacterList } from '../../services/api';
+import type { CharacterData } from '../../services/types';
 import { usePageData } from '../composables/use-page-data';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import BreakSection from '../formula/BreakSection.vue';
 import CalcSection from '../formula/CalcSection.vue';
 import ElationSection from '../formula/ElationSection.vue';
 import ExtraSection from '../formula/ExtraSection.vue';
-import GrowthSection from '../formula/GrowthSection.vue';
 import HealSection from '../formula/HealSection.vue';
 import OverviewSection from '../formula/OverviewSection.vue';
 import SpeedSection from '../formula/SpeedSection.vue';
@@ -27,12 +18,7 @@ import { translate as t } from '../i18n';
 import '../../styles/formula.css';
 
 interface FormulaSource {
-  chars: LocalCharList;
-  monsters: LocalMonsterList;
-  curve: MonsterLevelCurve;
-  elite: MonsterEliteGroups;
   char: CharacterData | null;
-  monster: MonsterDetail | null;
 }
 
 const SECTION_DEFS = [
@@ -40,7 +26,6 @@ const SECTION_DEFS = [
   { id: 'break', labelKey: 'formula.sec.break' },
   { id: 'elation', labelKey: 'formula.sec.elation' },
   { id: 'true', labelKey: 'formula.sec.true' },
-  { id: 'growth', labelKey: 'formula.sec.growth' },
   { id: 'heal', labelKey: 'formula.sec.heal' },
   { id: 'speed', labelKey: 'formula.sec.speed' },
   { id: 'extra', labelKey: 'formula.sec.extra' },
@@ -48,32 +33,17 @@ const SECTION_DEFS = [
 ];
 
 async function loadSource(): Promise<FormulaSource> {
-  const [chars, monsters, curve, elite] = await Promise.all([
-    loadLocalCharacterList(),
-    loadLocalMonsterList(),
-    loadLocalMonsterLevelCurve(),
-    loadLocalMonsterEliteGroups(),
-  ]);
+  const chars = await loadLocalCharacterList();
   const firstChar = chars[0];
-  const firstMonster = monsters[0];
   const char = firstChar ? await loadLocalCharacter(String(firstChar.id)) : null;
-  const monster = firstMonster ? await loadLocalMonsterDetail(String(firstMonster.id)) : null;
-  return { chars, monsters, curve, elite, char, monster };
+  return { char };
 }
 
 const { data, error, loading, showSkeleton, run: load, retry } = usePageData<FormulaSource>(loadSource);
 
 const pageRef = ref<HTMLElement | null>(null);
-const charId = ref('');
-const monsterId = ref('');
 const charDetail = ref<CharacterData | null>(null);
-const monsterDetail = ref<MonsterDetail | null>(null);
-const charLoading = ref(false);
-const monsterLoading = ref(false);
 const enemyLevel = ref(MAX_CHAR_LEVEL);
-
-let charToken = 0;
-let monsterToken = 0;
 
 const sections = computed(() =>
   SECTION_DEFS.map((def, i) => ({ id: def.id, idx: String(i + 1).padStart(2, '0'), label: t(def.labelKey) })),
@@ -109,51 +79,15 @@ watch(activeSection, (id) => {
   }
 });
 
-const chars = computed(() => data.value?.chars ?? []);
-const monsters = computed(() => data.value?.monsters ?? []);
-const curve = computed<MonsterLevelCurve>(() => data.value?.curve ?? {});
-const elite = computed<MonsterEliteGroups>(() => data.value?.elite ?? {});
-
 const attackStat = computed(() => {
   const row = maxLevelStat(charDetail.value?.stats ?? null);
   if (!row) return 0;
   return levelStatValue(row.attack_base, row.attack_add, MAX_CHAR_LEVEL);
 });
 
-async function pickChar(id: string): Promise<void> {
-  if (!id || id === charId.value) return;
-  charId.value = id;
-  const token = ++charToken;
-  charLoading.value = true;
-  try {
-    const detail = await loadLocalCharacter(id);
-    if (token === charToken) charDetail.value = detail;
-  } catch {
-  } finally {
-    if (token === charToken) charLoading.value = false;
-  }
-}
-
-async function pickMonster(id: string): Promise<void> {
-  if (!id || id === monsterId.value) return;
-  monsterId.value = id;
-  const token = ++monsterToken;
-  monsterLoading.value = true;
-  try {
-    const detail = await loadLocalMonsterDetail(id);
-    if (token === monsterToken) monsterDetail.value = detail;
-  } catch {
-  } finally {
-    if (token === monsterToken) monsterLoading.value = false;
-  }
-}
-
 watch(data, (source) => {
   if (!source) return;
   charDetail.value = source.char;
-  monsterDetail.value = source.monster;
-  charId.value = source.chars[0] ? String(source.chars[0].id) : '';
-  monsterId.value = source.monsters[0] ? String(source.monsters[0].id) : '';
   pageRef.value?.scrollTo({ top: 0 });
   void nextTick(() => { refresh(); });
 });
@@ -255,23 +189,6 @@ onMounted(() => { void load(); });
         <BreakSection :enemy-level="enemyLevel" :idx="sectionIdx('break')" />
         <ElationSection :enemy-level="enemyLevel" :idx="sectionIdx('elation')" />
         <TrueSection :enemy-level="enemyLevel" :idx="sectionIdx('true')" />
-        <GrowthSection
-          :idx="sectionIdx('growth')"
-          :chars="chars"
-          :monsters="monsters"
-          :curve="curve"
-          :elite="elite"
-          :char="charDetail"
-          :monster="monsterDetail"
-          :char-id="charId"
-          :monster-id="monsterId"
-          :char-loading="charLoading"
-          :monster-loading="monsterLoading"
-          :enemy-level="enemyLevel"
-          @update:charId="pickChar"
-          @update:monsterId="pickMonster"
-          @update:enemyLevel="enemyLevel = $event"
-        />
         <HealSection :idx="sectionIdx('heal')" />
         <SpeedSection :idx="sectionIdx('speed')" />
         <ExtraSection :idx="sectionIdx('extra')" />

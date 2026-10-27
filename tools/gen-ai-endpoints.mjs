@@ -2084,19 +2084,6 @@ function formulaPages(ctx) {
           + `<p class="nk-snapshot__note">${esc(ui('formula.true.vsPursued', '与「附加伤害」的区别：附加伤害走完整乘区（可暴击、吃增伤与易伤），真实伤害不进乘区。'))}</p>`,
       },
       {
-        title: ui('formula.sec.growth', '属性成长'),
-        html: paragraph('formula.growth.lead', '角色、光锥、敌人是三套不同的线型。角色与光锥按等级线性成长，敌人还要再乘等级曲线与精英组倍率。')
-          + paragraph('formula.growth.charFormula', '属性 = 晋阶基础值 + 每级成长 × (等级 − 1)')
-          + paragraph('formula.growth.charNote', '显示值四舍五入，未显示的零头仍参与计算。')
-          + paragraph('formula.growth.phaseNote', '口径与角色图鉴一致：等级按晋阶分桶，Lv20/30/40/50/60/70 处基础值跳变。')
-          + paragraph('formula.growth.traceNote', '行迹实际提供的属性加成（前 3 项，按数值降序）；条形以最高项为满宽。')
-          + paragraph('formula.growth.skillNote', '战技与终结技各有一条标准线型；第二条线是该技能的真实倍率（1 级 = 100% 归一）。本角色可能使用特殊线型，模型线仅作参照。')
-          + paragraph('formula.growth.enemyFormula', '战斗值 = 基准值 × 实例倍率 × 精英组倍率 × 等级曲线倍率 + 修正值')
-          + paragraph('formula.growth.enemyNote', '战斗值 = 基准值 × 实例倍率 × 精英组倍率 × 等级曲线倍率 + 修正值；同等级敌人防御区约 0.5。')
-          + paragraph('mob.derive.caveat', '未含关卡侧精英组指派（侵蚀隧洞、拟造花萼等副本的额外倍率）与剧情系数。')
-          + paragraph('formula.growth.enemyStanceNote', '韧性不走等级曲线，只由精英组倍率与修正值决定。'),
-      },
-      {
         title: ui('formula.sec.heal', '治疗与护盾'),
         html: paragraph('formula.heal.lead', '治疗量与护盾量沿用伤害的结构：一个基础区乘一个修饰区。')
           + cardList([

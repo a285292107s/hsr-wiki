@@ -10,7 +10,6 @@ const SECTIONS = [
   ['break', 'formula.sec.break'],
   ['elation', 'formula.sec.elation'],
   ['true', 'formula.sec.true'],
-  ['growth', 'formula.sec.growth'],
   ['heal', 'formula.sec.heal'],
   ['speed', 'formula.sec.speed'],
   ['extra', 'formula.sec.extra'],
@@ -25,7 +24,7 @@ const CALC_ROLES = [
 ] as const;
 
 test.describe('布局验收：战斗公式页（/formula）', () => {
-  test('/formula：hero、九区块导航（吸顶不塌陷）、七节点链路、乘区流水、详情切换、新链路不画图、入口可达、无溢出', async ({ page }) => {
+  test('/formula：hero、八区块导航（吸顶不塌陷）、七节点链路、乘区流水、详情切换、新链路不画图、入口可达、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/formula');
     await waitForSettled(page);
@@ -184,7 +183,7 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
     const overviewFactor = await page
       .locator('#formula-overview .nk-formula-flow__row[data-zone="modifier"] .nk-formula-flow__factor')
       .innerText();
-    expect(overviewFactor.trim(), '09 与 01 共享参数：流水增伤步系数必须跟着变').toBe('×4');
+    expect(overviewFactor.trim(), '08 与 01 共享参数：流水增伤步系数必须跟着变').toBe('×4');
 
     await expect(page.locator('#formula-heal [data-chart]'), '治疗/护盾不画图（纯线性，读数是唯一需求）').toHaveCount(0);
     await expect(page.locator('#formula-heal input[data-role="heal-base"]')).toHaveCount(1);
@@ -199,18 +198,15 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
     const needText = (await page.locator('#formula-speed [data-role="need-speed"]').innerText()).trim();
     expect(Number(needText.replace(/[^\d.]/g, '')), '反解速度必须是数值').toBeGreaterThan(0);
 
-    await expect(page.locator('#formula-growth [data-chart]'), '02 不画图（数字已在属性卡/技能读数里）').toHaveCount(0);
-    await expect(page.locator('#formula-growth .nk-formula-trace__row'), '行迹对比条保留 3 档').toHaveCount(3);
-    await expect(page.locator('#formula-growth [data-role="skill"]')).toHaveCount(1);
-    await expect(page.locator('#formula-growth [data-role="skill-multiplier"]')).toHaveText(/%$/);
+    await expect(page.locator('#formula-growth'), '属性成长区块必须已移出页面').toHaveCount(0);
 
     await expect(page.locator('#formula-extra .nk-formula-break__value')).toHaveText(/\d/);
-    await expect(page.locator('#formula-extra .nk-formula-card'), '08 只保留破韧与命中两张卡').toHaveCount(2);
+    await expect(page.locator('#formula-extra .nk-formula-card'), '07 只保留破韧与命中两张卡').toHaveCount(2);
     await expect(page.locator('#formula-extra [data-role="hit-reverse"]')).toHaveCount(1);
 
     const calcInputs = page.locator('#formula-calc input[type=number][data-role]');
     const calcRoles = await calcInputs.evaluateAll((els) => els.map((el) => el.getAttribute('data-role')));
-    expect(calcRoles, '09 全部数值控件必须是数字输入框（不再有滑杆）').toContain('stat');
+    expect(calcRoles, '08 全部数值控件必须是数字输入框（不再有滑杆）').toContain('stat');
     expect(
       [...new Set(calcRoles.filter((role) => (CALC_ROLES as readonly (string | null)[]).includes(role)))].sort(),
       '计算器 12 个 data-role 必须齐全（按我方/敌方分组，不再要求扁平顺序）',
@@ -226,7 +222,7 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
     expect(enemyRoles, '敌方组必须是受击方等级/易伤/减伤/虚弱/原始抗性').toEqual([
       'defender-level', 'vuln', 'reduce', 'weak', 'res-base',
     ]);
-    await expect(page.locator('#formula-calc input[type=range]'), '09 不得再出现滑杆').toHaveCount(0);
+    await expect(page.locator('#formula-calc input[type=range]'), '08 不得再出现滑杆').toHaveCount(0);
     await expect(page.locator('#formula-calc [data-role="attacker-level"]'), '攻击方等级必须可调').toHaveCount(1);
     await expect(page.locator('#formula-calc [data-role="attacker-level"]')).toHaveAttribute('max', '80');
     await expect(page.locator('#formula-calc [data-role="defender-level"]'), '受击方等级必须可调').toHaveCount(1);
@@ -238,20 +234,20 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
       .toHaveText(dict['formula.calc.groupEnemy']);
     await expect(page.locator('#formula-calc button[data-role="broken"]')).toHaveCount(1);
     await expect(page.locator('#formula-calc button[data-role="swarm"]')).toHaveCount(1);
-    await expect(page.locator('#formula-calc button[data-role="res-preset"]'), '09 抗性预设 4 档').toHaveCount(4);
+    await expect(page.locator('#formula-calc button[data-role="res-preset"]'), '08 抗性预设 4 档').toHaveCount(4);
     await expect(page.locator('#formula-calc .nk-formula-calc__result')).toHaveText(/\d/);
     await expect(page.locator('#formula-calc .nk-formula-ledger'), '旧账本类名必须归零').toHaveCount(0);
     const calcFlowRows = page.locator('#formula-calc .nk-formula-flow__row[data-step]');
-    await expect(calcFlowRows, '09 流水 = 基础伤害 + 六乘区（含韧性，修掉算不平）').toHaveCount(7);
+    await expect(calcFlowRows, '08 流水 = 基础伤害 + 六乘区（含韧性，修掉算不平）').toHaveCount(7);
     expect(
       await calcFlowRows.evaluateAll((els) => els.map((el) => el.getAttribute('data-zone'))),
-      '09 流水顺序必须与 01 一致',
+      '08 流水顺序必须与 01 一致',
     ).toEqual(['base', 'modifier', 'crit', 'defense', 'resist', 'special', 'toughness']);
     const calcFlowLast = (await calcFlowRows.last().locator('.nk-formula-flow__run').innerText()).trim();
     const calcTotal = (await page.locator('.nk-formula-calc__result').innerText()).trim();
     const calcFlowNumber = Number(calcFlowLast.replace(/[^\d.-]/g, ''));
     const calcTotalNumber = Number(calcTotal.replace(/[^\d.-]/g, ''));
-    expect(Math.abs(calcFlowNumber - calcTotalNumber), '09 流水末值必须与期望伤害一致（±0.1）')
+    expect(Math.abs(calcFlowNumber - calcTotalNumber), '08 流水末值必须与期望伤害一致（±0.1）')
       .toBeLessThanOrEqual(0.1);
 
     const calcBefore = (await page.locator('.nk-formula-calc__result').innerText()).trim();
