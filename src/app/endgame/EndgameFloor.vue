@@ -12,6 +12,7 @@ import { translate } from '../i18n';
 const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
+  modeKey: string;
   floor: MazeFloorDetail;
   systemName?: string;
 }>();
@@ -71,7 +72,7 @@ const nodeBuffs = computed<MazeBuffInfo[]>(() => {
       id="egd-floor-board"
       :labelled-by="cards.length > 1 ? `egd-floor-half-tab-${activeHalf}` : undefined"
       :stage="activeNode.stage"
-      :buff="floor.buff"
+      :buff="modeKey === 'boss' ? null : floor.buff"
       :guides="props.data.boss_guides"
       :buffs="nodeBuffs"
       :system-name="props.systemName"

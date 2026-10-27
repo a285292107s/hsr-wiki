@@ -9,7 +9,7 @@ import {
   loadLocalEndgameGuide,
 } from '../../services/api';
 import type {
-  EndgameGuideDb, MazeListDb, MazeListEntry,
+  EndgameGuideDb, MazeBuffInfo, MazeListDb, MazeListEntry,
 } from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
@@ -19,6 +19,7 @@ import { seasonBuffList } from '../endgame/renders';
 import EndgameHero from '../endgame/EndgameHero.vue';
 import EndgameBuffGroup from '../endgame/EndgameBuffGroup.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
+import EndgameFloorBuff from '../endgame/EndgameFloorBuff.vue';
 import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
 import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
 import EndgameSeasonRewards from '../endgame/EndgameSeasonRewards.vue';
@@ -120,6 +121,13 @@ const unpublished = computed(() => Boolean(data.value && !data.value.zh));
 const systemName = computed(() => seasonBuffSystemName(guide.value, modeKey.value));
 
 const seasonBuffs = computed(() => (data.value ? seasonBuffList(data.value) : []));
+
+const seasonFloorBuff = computed<MazeBuffInfo | null>(() => {
+  if (modeKey.value !== 'boss' || !data.value) return null;
+  return data.value.floor_details?.find((floor) => floor.buff)?.buff
+    ?? data.value.tierce?.nodes?.find((node) => node.buff)?.buff
+    ?? null;
+});
 
 const levelTabs = computed<LevelTab[]>(() => buildLevelTabs(data.value));
 const activeLevel = ref('');
@@ -250,6 +258,10 @@ onBeforeUnmount(() => {
                 :title="systemName || fallbackSystemName()"
                 :items="seasonBuffs"
               />
+            </section>
+
+            <section v-if="seasonFloorBuff" class="nk-egd-buffzone nk-egd-buffzone--solo">
+              <EndgameFloorBuff :buff="seasonFloorBuff" />
             </section>
 
             <EndgameLevelTabs

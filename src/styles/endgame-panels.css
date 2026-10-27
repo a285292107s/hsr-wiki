@@ -145,6 +145,7 @@
 
 .nk-egd-buffzone { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
 .nk-egd-buffzone > .nk-title { width: 100%; margin: 0; }
+.nk-egd-buffzone--solo > .nk-egd-floor__buff { margin-top: 0; }
 .nk-egd-fury { display: flex; flex-direction: column; gap: 12px; }
 .nk-egd-row,
 .nk-egd-group--row {

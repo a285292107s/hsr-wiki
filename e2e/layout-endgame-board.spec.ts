@@ -11,7 +11,10 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(page.locator('.nk-egd.nk-page--detail')).toHaveCSS('padding-top', '0px');
     await expect(page.locator('.nk-egd-secnav')).toHaveCount(0);
     await expect(page.locator('#egd-pollution, .nk-egd-poll')).toHaveCount(0);
-    await expect(page.locator('.nk-egd-panel > *').first()).toHaveClass(/nk-egd-tabs/);
+    await expect(page.locator('.nk-egd-panel > .nk-egd-buffzone .nk-egd-floor__buffname')).toHaveText('末法余烬');
+    const panelBlocks = await page.locator('.nk-egd-panel > *').evaluateAll((els) =>
+      els.map((el) => (el as HTMLElement).className.split(' ')[0]));
+    expect(panelBlocks.slice(0, 2), '整期一份的末法余烬在关卡子 tab 之上').toEqual(['nk-egd-buffzone', 'nk-egd-tabs']);
     const tabs = page.locator('.nk-egd-tabs [role="tab"]');
     await expect(tabs).toHaveText(levelTabLabels(season));
     await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
@@ -26,9 +29,10 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(starRows).toHaveCount(floor1Targets.length);
     await expect(starRows.last()).toContainText(String(floor1Targets[floor1Targets.length - 1].param));
     await expect(page.locator('#egd-season-rewards .nk-egd-season-group')).toHaveCount(1);
-    await expect(page.locator('#egd-floor-board > .nk-egd-board__body > .nk-egd-floor__buff .nk-egd-floor__buffhead'))
+    await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__buffhead'))
       .toHaveText(season.floor_details![0].buff!.name);
-    await expect(page.locator('.nk-egd-floor__bufflabel')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__bufflabel')).toHaveCount(0);
+    await expect(page.locator('#egd-floor-board .nk-egd-floor__buff')).toHaveCount(0);
     const tabBoxes = await tabs.evaluateAll((els) => els.map((el) => {
       const r = el.getBoundingClientRect();
       return { x: Math.round(r.x), y: Math.round(r.y) };
@@ -67,21 +71,29 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：终焉公理三卡同排（桌面 1440）', { tag: ['@viewport-pinned'] }, async ({ page }) => {
+  test('/endgame/boss/3020：末法余烬上提赛季级 + 终焉公理三卡同排，1440×900 首屏带出敌方配置', { tag: ['@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
     const season = seasonData('maze_boss.json', '3020');
+    await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__buffhead')).toHaveText('末法余烬');
+    const panelBlocks = await page.locator('.nk-egd-panel > *').evaluateAll((els) =>
+      els.map((el) => (el as HTMLElement).className.split(' ')[0]));
+    expect(panelBlocks.slice(0, 2), '整期一份的末法余烬在关卡子 tab 之上').toEqual(['nk-egd-buffzone', 'nk-egd-tabs']);
     const sameRow = async (cards: ReturnType<typeof page.locator>): Promise<number> => new Set(
       await cards.evaluateAll((els) => els.map((el) => Math.round((el as HTMLElement).offsetTop))),
     ).size;
     const tierceBoard = page.locator('#egd-tierce-board');
+    await expect(tierceBoard.locator('.nk-egd-floor__buff')).toHaveCount(0);
     await expect(tierceBoard.locator('.nk-egd-group__title')).toHaveText('终焉公理');
     await expect(tierceBoard.locator('.nk-egd-group .nk-egd-buff'))
       .toHaveCount(season.buff_groups!.tierce!.length);
     expect(await sameRow(tierceBoard.locator('.nk-egd-group .nk-egd-buff')), '星启档终焉公理三卡应同排').toBe(1);
+    const stage = await tierceBoard.locator('.nk-egd-floor__stage').boundingBox();
+    expect(stage?.y ?? Infinity, '首屏必须带出敌方配置').toBeLessThan(900);
     await page.locator('#egd-level-tab-floor-1').click();
     const floorBoard = page.locator('#egd-floor-board');
+    await expect(floorBoard.locator('.nk-egd-floor__buff')).toHaveCount(0);
     await expect(floorBoard.locator('.nk-egd-group .nk-egd-buff'))
       .toHaveCount(season.buff_groups!.stage1!.length);
     expect(await sameRow(floorBoard.locator('.nk-egd-group .nk-egd-buff')), '层档终焉公理三卡应同排').toBe(1);
@@ -371,8 +383,8 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     expect(monsHeading.fullWidth, '敌方卡组应占满行内容宽').toBe(true);
     expect(await fontPx(board.locator('.nk-egd-trait__desc').first()))
       .toBe(await fontPx(board.locator('.nk-egd-buff__desc').first()));
-    await expect(board.locator('.nk-egd-floor__buffhead')).toHaveText(tierceData.nodes![0].buff!.name);
-    await expect(board.locator('.nk-egd-floor__bufflabel')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__buffhead')).toHaveText(tierceData.nodes![0].buff!.name);
+    await expect(page.locator('.nk-egd-floor__bufflabel')).toHaveCount(0);
     await expect(board.locator('.nk-egd-group__title')).toHaveText(['终焉公理']);
     await expect(board.locator('.nk-egd-buff')).toHaveCount(stageBuffs.length);
     await expect(board.locator('.nk-egd-pilltabs')).toHaveCount(0);
@@ -452,7 +464,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(nodeTabs.nth(2)).toHaveAttribute('aria-selected', 'true');
     await expect(board).toHaveAttribute('aria-labelledby', 'egd-tierce-node-tab-3');
     await expect(board).toContainText(nodeBoss[2]);
-    await expect(board.locator('.nk-egd-floor__buffhead')).toHaveText(tierceData.nodes![2].buff!.name);
+    await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__buffhead')).toHaveText(tierceData.nodes![2].buff!.name);
     await expect(board.locator('.nk-egd-trait__name'))
       .toHaveText(stageGuide(season, tierceData.nodes![2])!.traits!.map((t) => t.name));
     const node3Elems = await nodeTabs.nth(2).locator('.nk-egd-nodecard__elems').innerHTML();
@@ -695,7 +707,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(board.locator('.nk-egd-group__label')).toHaveCount(0);
     const boardBlocks = await board.locator('.nk-egd-board__body').evaluate((el) =>
       [...el.children].map((c) => (c as HTMLElement).className.split(' ')[0]));
-    expect(boardBlocks).toEqual(['nk-egd-floor__buff', 'nk-egd-group', 'nk-egd-floor__stage']);
+    expect(boardBlocks).toEqual(['nk-egd-group', 'nk-egd-floor__stage']);
     const cardBlocks = await board.locator('.nk-egd-mon__data').first().evaluate((el) =>
       [...el.children].map((c) => (c as HTMLElement).className.split(' ')[0]));
     expect(cardBlocks).toEqual([

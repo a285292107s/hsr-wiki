@@ -10,6 +10,7 @@ import { translate } from '../i18n';
 const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
+  modeKey: string;
   systemName?: string;
 }>();
 
@@ -69,7 +70,7 @@ watch(
         id="egd-tierce-board"
         :labelled-by="cardItems.length > 1 ? `egd-tierce-node-tab-${activeKey}` : undefined"
         :stage="activeNd"
-        :buff="activeNd.buff"
+        :buff="modeKey === 'boss' ? null : activeNd.buff"
         :guides="props.data.boss_guides"
         :buffs="nodeBuffs"
         :system-name="props.systemName"

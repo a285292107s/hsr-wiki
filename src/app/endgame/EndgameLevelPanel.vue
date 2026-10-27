@@ -32,8 +32,19 @@ const activePeakNodes = computed(
     role="tabpanel"
     :aria-labelledby="activeTab ? `egd-level-tab-${activeTab.key}` : undefined"
   >
-    <EndgameFloor v-if="activeFloor" :data="data" :floor="activeFloor" :system-name="props.systemName" />
-    <EndgameTierce v-else-if="activeTab?.kind === 'tierce'" :data="data" :system-name="props.systemName" />
+    <EndgameFloor
+      v-if="activeFloor"
+      :data="data"
+      :mode-key="modeKey"
+      :floor="activeFloor"
+      :system-name="props.systemName"
+    />
+    <EndgameTierce
+      v-else-if="activeTab?.kind === 'tierce'"
+      :data="data"
+      :mode-key="modeKey"
+      :system-name="props.systemName"
+    />
     <EndgamePeakNodes
       v-else-if="activePeakNodes.length"
       :nodes="activePeakNodes"
