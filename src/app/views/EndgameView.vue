@@ -13,9 +13,11 @@ import type {
 } from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
-import { seasonBuffSystemName } from '../endgame/guide';
+import { fallbackSystemName, seasonBuffSystemName } from '../endgame/guide';
 import { buildLevelTabs, defaultLevelKey, type LevelTab } from '../endgame/levels';
+import { seasonBuffList } from '../endgame/renders';
 import EndgameHero from '../endgame/EndgameHero.vue';
+import EndgameBuffGroup from '../endgame/EndgameBuffGroup.vue';
 import EndgameBuffs from '../endgame/EndgameBuffs.vue';
 import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
 import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
@@ -116,6 +118,8 @@ const modeKey = computed(() => String(route.params.mode || ''));
 const unpublished = computed(() => Boolean(data.value && !data.value.zh));
 
 const systemName = computed(() => seasonBuffSystemName(guide.value, modeKey.value));
+
+const seasonBuffs = computed(() => (data.value ? seasonBuffList(data.value) : []));
 
 const levelTabs = computed<LevelTab[]>(() => buildLevelTabs(data.value));
 const activeLevel = ref('');
@@ -232,6 +236,13 @@ onBeforeUnmount(() => {
               v-if="modeKey === 'story' && data.sub_buffs?.length"
               :data="data"
               :mode-key="modeKey"
+            />
+
+            <EndgameBuffGroup
+              v-if="modeKey === 'story' && seasonBuffs.length"
+              id="egd-season-buffs"
+              :title="systemName || fallbackSystemName()"
+              :items="seasonBuffs"
             />
 
             <EndgameLevelTabs

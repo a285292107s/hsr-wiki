@@ -3,16 +3,23 @@ import { collectConsoleIssues, computedNumber, readJson, readTokenPx } from './h
 import { cnBigNumber, PEAK_HARD_NODE, PEAK_KING_NODE, noUnknownOverflow, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, seasonData, seasonRewardGroups } from './layout.shared';
 import type { MechanicLike, MonsterLike } from './layout.shared';
 
-test.describe('布局验收：赛季页增益体系在节点面板展示', () => {
-  test('/endgame/story/2026：赛季增益名在节点看板中展示', async ({ page }) => {
+test.describe('布局验收：赛季增益上提为赛季级区块', () => {
+  test('/endgame/story/2026：荒腔走板紧随战意效果、位于关卡子 tab 之前，节点看板不复述', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/story/2026');
-    await expect(page.locator('#egd-buffs')).toHaveCount(0);
     const story = seasonData('maze_extra.json', '2026');
+    const group = page.locator('#egd-season-buffs');
+    await expect(group).toHaveCount(1);
+    await expect(group.locator('.nk-egd-group__title')).toHaveText('荒腔走板');
+    await expect(group.locator('.nk-egd-buff__name')).toHaveText(story.buffs!.map((b) => b.name));
+    const blocks = await page.locator('.nk-egd-panel > *').evaluateAll((els) =>
+      els.map((el) => (el as HTMLElement).className.split(' ')[0]));
+    expect(blocks.indexOf('nk-egd-group')).toBe(blocks.indexOf('nk-egd-fury') + 1);
+    expect(blocks.indexOf('nk-egd-tabs')).toBeGreaterThan(blocks.indexOf('nk-egd-group'));
     await page.locator('#egd-level-tab-floor-1').click();
-    const board = page.locator('#egd-level-panel .nk-egd-board');
-    await expect(board.locator('.nk-egd-group__title')).toHaveText('荒腔走板');
-    await expect(board.locator('.nk-egd-buff__name')).toHaveText(story.buffs!.map((b) => b.name));
+    await expect(page.locator('#egd-level-panel .nk-egd-group')).toHaveCount(0);
+    await page.locator('#egd-level-tab-tierce').click();
+    await expect(page.locator('#egd-level-panel .nk-egd-group')).toHaveCount(0);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -314,14 +321,15 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
   });
 });
 
-test.describe('赛季页增益体系节点展示', () => {
-  test('/endgame/story/2026：增益位于节点面板，玩法说明入口仍可从指南导航访问', async ({ page }) => {
+test.describe('赛季增益上提后节点看板不再复述', () => {
+  test('/endgame/story/2026：切换层级 / 星启节点后看板内均无增益组', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/story/2026');
-    await expect(page.locator('#egd-buffs')).toHaveCount(0);
     await expect(page.locator('#egd-level-tab-floor-1')).toBeVisible();
-    await page.locator('#egd-level-tab-floor-1').click();
-    await expect(page.locator('#egd-level-panel .nk-egd-board .nk-egd-group__title')).toContainText('荒腔走板');
+    for (const tab of ['#egd-level-tab-floor-1', '#egd-level-tab-tierce']) {
+      await page.locator(tab).click();
+      await expect(page.locator('#egd-level-panel .nk-egd-group')).toHaveCount(0);
+    }
     await noUnknownOverflow(page);
     assertNoErrors();
   });

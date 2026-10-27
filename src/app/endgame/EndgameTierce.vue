@@ -2,7 +2,6 @@
 import { computed, ref, watch } from 'vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
-import { seasonBuffList } from './renders';
 import EnemyCard from '../components/EnemyCard.vue';
 import type { MazeBuffInfo, MazeListEntry, MazeTierceNode } from '../../services/types';
 
@@ -35,9 +34,7 @@ const activeNd = computed<MazeTierceNode | null>(
 );
 const nodeBuffs = computed<MazeBuffInfo[]>(() => {
   if (!activeNd.value) return [];
-  const grouped = props.data.buff_groups?.[activeNd.value.origin];
-  if (grouped?.length) return grouped;
-  return seasonBuffList(props.data);
+  return props.data.buff_groups?.[activeNd.value.origin] ?? [];
 });
 
 function selectNode(key: string): void {

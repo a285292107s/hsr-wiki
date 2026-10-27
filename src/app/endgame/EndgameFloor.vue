@@ -3,7 +3,6 @@ import { computed, ref, watch } from 'vue';
 import EndgameNodeCards from './EndgameNodeCards.vue';
 import EndgameBoard from './EndgameBoard.vue';
 import { halfLabel } from './pollution';
-import { seasonBuffList } from './renders';
 import type {
   MazeBuffInfo, MazeFloorDetail, MazeListEntry, MazeStageDetail,
 } from '../../services/types';
@@ -51,9 +50,7 @@ function selectHalf(key: string): void {
 
 const nodeBuffs = computed<MazeBuffInfo[]>(() => {
   if (!activeNode.value) return [];
-  const grouped = props.data.buff_groups?.[activeNode.value.half];
-  if (grouped?.length) return grouped;
-  return seasonBuffList(props.data);
+  return props.data.buff_groups?.[activeNode.value.half] ?? [];
 });
 </script>
 

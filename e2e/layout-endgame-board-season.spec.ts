@@ -216,7 +216,9 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     const story = seasonData('maze_extra.json', '2026');
     const storyFloor1 = story.floor_details![0];
     await expect(page.locator('#egd-sub-buffs')).toBeVisible();
-    await expect(page.locator('#egd-buffs')).toHaveCount(0);
+    await expect(page.locator('#egd-season-buffs .nk-egd-group__title')).toHaveText('荒腔走板');
+    await expect(page.locator('#egd-season-buffs .nk-egd-buff__name'))
+      .toHaveText(story.buffs!.map((b) => b.name));
     await expect(page.locator('.nk-egd-bar')).toHaveCount(0);
     await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveText(seasonTabLabels(story));
 
@@ -234,12 +236,10 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
       .toHaveText(['通关分数线 SCORE', '回合上限 CYCLES']);
     await expect(storyClear.locator('.nk-egd-rules__val'))
       .toHaveText([grouped(story.clear_score!), String(story.countdown)]);
-    await expect(storyPanel.locator('.nk-egd-group__title')).toHaveText('荒腔走板');
-    await expect(storyPanel.locator('.nk-egd-group .nk-egd-buff__name'))
-      .toHaveText(story.buffs!.map((b) => b.name));
+    await expect(storyPanel.locator('.nk-egd-group')).toHaveCount(0);
     const storyBlocks = await storyPanel.locator('.nk-egd-board__body').evaluate((el) =>
       [...el.children].map((c) => (c as HTMLElement).className.split(' ')[0]));
-    expect(storyBlocks).toEqual(['nk-egd-group', 'nk-egd-floor__stage']);
+    expect(storyBlocks).toEqual(['nk-egd-floor__stage']);
     const storyHalves = storyPanel.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]');
     await expect(storyHalves.first().locator('.nk-egd-nodecard__label'))
       .toHaveText(['推荐属性', '等级']);
