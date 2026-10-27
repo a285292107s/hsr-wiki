@@ -104,7 +104,6 @@ const CATALOG_TITLE = {
   '/currency/trait': () => `${ui('catalog.currencyWar', '货币战争')} · ${ui('nav.cwTrait', '羁绊图鉴')}`,
 };
 const voracityTitle = () => ui('nav.voracity', '贪饕污染');
-const voracityDisambiguation = () => ui('vor.disambigNote', '本页「污染」指「贪饕」侵蚀污染；4.5 联动「命运/今晚留下来」的「圣杯战争 · 污染等级 1–7 / 深度污染 / 污染词条」是另一套无关体系，两者不合并叙述、也不互相内链。');
 
 const ENDGAME_MODES = [
   { key: 'maze', label: () => ui('catalog.option.modeMaze', '忘却之庭'), file: 'maze.catalog.json', list: 'maze.json' },
@@ -1804,32 +1803,12 @@ function voracityPages(ctx) {
   const activity = db.activity || {};
   const invasion = db.invasion || {};
   const levels = Array.isArray(invasion.levels) ? invasion.levels : [];
-  const stages = Array.isArray(invasion.stages) ? invasion.stages : [];
   const buffLevels = Array.isArray(activity.buff_levels) ? activity.buff_levels : [];
-  const scores = Array.isArray(activity.scores) ? activity.scores : [];
-  const steps = Array.isArray(activity.progress_steps) ? activity.progress_steps : [];
-  const statuses = Array.isArray(db.statuses) ? db.statuses : [];
   const tutorials = Array.isArray(db.tutorials) ? db.tutorials : [];
   const affixes = Array.isArray(db.affixes) ? db.affixes : [];
 
   const nameOrId = (entry, key, fallbackKey) => txtSafe(entry && entry[key], null, 120)
     || (entry && entry[fallbackKey] != null ? esc(String(entry[fallbackKey])) : '');
-
-  const monsterTotal = stages.reduce((n, st) => n + (Array.isArray(st && st.monsters) ? st.monsters.length : 0), 0);
-  const stageHtml = stages.map((st) => {
-    const monsters = (Array.isArray(st && st.monsters) ? st.monsters : []).map((m) => {
-      const name = txtSafe(m && m.name, null, 120) || (m && m.monster_id != null ? esc(String(m.monster_id)) : '');
-      const href = m && m.detail_id != null && String(m.detail_id) !== '' ? `/monster/${m.detail_id}` : null;
-      const label = href ? `<a href="${esc(href)}">${name}</a>` : `<span>${name}</span>`;
-      return `<li>${label}</li>`;
-    }).join('');
-    const head = [
-      st && st.stage_id != null ? uiT('egd.levelLabel', '关卡 {n}', { n: esc(String(st.stage_id)) }) : '',
-      st && st.invasion_id != null ? uiT('snapshot.invasionLevel', '污染等级 {n}', { n: esc(String(st.invasion_id)) }) : '',
-    ].filter(Boolean).join(' · ');
-    if (!head && !monsters) return '';
-    return `<li>${head ? `<span>${head}</span>` : ''}${monsters ? `<ul class="nk-snapshot__list">${monsters}</ul>` : ''}</li>`;
-  }).join('');
 
   const levelHtml = levels.map((lv) => {
     const desc = txtSafe(lv && lv.desc, lv && lv.param_list, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(lv));
@@ -1848,22 +1827,6 @@ function voracityPages(ctx) {
     return `<li><span>${head}</span>${pct ? `<p>${uiT('vor.field.wishPower', '愿力进度 {n}', { n: esc(pct) })}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}</li>`;
   }).join('');
 
-  const scoreHtml = scores.length ? `<p>${esc(uiT('vor.field.wishTiers', '愿力档位：{list}', { list: scores.map((s) => String(s)).join(' / ') }))}</p>` : '';
-  const stepHtml = steps.map((p) => {
-    const prog = pctText(p && p.progress);
-    const desc = txtSafe(p && p.desc, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
-    if (!prog && !desc) return '';
-    return `<li>${prog ? `<span>${esc(uiT('vor.field.progress', '进度 {n}', { n: prog }))}</span>` : ''}${desc ? `<p>${desc}</p>` : ''}</li>`;
-  }).join('');
-
-  const statusHtml = statuses.map((s) => {
-    const name = nameOrId(s, 'name', 'status_id');
-    const type = txtSafe(s && s.type, null, 40);
-    const desc = txtSafe(s && s.desc, s && s.param_list, SNAPSHOT_TEXT_LIMIT_DETAIL, hasParamSemantics(s));
-    if (!name && !desc) return '';
-    return `<li><span>${name}${type ? `（${type}）` : ''}</span>${desc ? `<p>${desc}</p>` : ''}</li>`;
-  }).join('');
-
   const tutorialHtml = tutorials.map((t) => {
     const desc = txtSafe(t && t.desc, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
     return desc ? `<li><p>${desc}</p></li>` : '';
@@ -1878,7 +1841,7 @@ function voracityPages(ctx) {
 
   const activityName = clean(activity.name);
   const introHtml = txtSafe(activity.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL);
-  const summaryPlain = uiT('snapshot.sum.voracity', '{site}贪饕污染专题：{extra}含关卡组成、侵蚀等级与状态词条。', {
+  const summaryPlain = uiT('snapshot.sum.voracity', '{site}贪饕污染专题：{extra}「贪饕」侵蚀机制、玩家支援、教程图文与位面词条。', {
     site: gameName(),
     extra: activityName ? `${activityName}，` : '',
   });
@@ -1890,17 +1853,10 @@ function voracityPages(ctx) {
     facts: [
       [ui('vor.field.activity', '活动'), txtSafe(activity.name, null, 120)],
       [ui('vor.field.unlockQuest', '解锁任务'), activity.unlock_mission_id != null ? esc(String(activity.unlock_mission_id)) : ''],
-      [ui('vor.field.stages', '波及关卡数'), esc(String(stages.length))],
-      [ui('vor.field.monsters', '怪物名单条目数'), esc(String(monsterTotal))],
-      [ui('vor.field.statuses', '状态词条数'), esc(String(statuses.length))],
       [ui('vor.field.affixes', '位面词条数'), esc(String(affixes.length))],
     ],
     sections: [
       { title: ui('vor.sec.overview', '玩法概览'), html: introHtml ? `<p>${introHtml}</p>` : '' },
-      {
-        title: ui('vor.sec.scores', '污染等级与愿力'),
-        html: scoreHtml + (stepHtml ? `<ul class="nk-snapshot__blocks">${stepHtml}</ul>` : ''),
-      },
       {
         title: ui('vor.sec.invasionFull', '「贪饕」侵蚀（敌方与玩家支援）'),
         html: [
@@ -1908,14 +1864,8 @@ function voracityPages(ctx) {
           buffHtml ? `<p>${esc(ui('vor.sec.playerSupport', '玩家支援（愿力分档）'))}</p><ul class="nk-snapshot__blocks">${buffHtml}</ul>` : '',
         ].join(''),
       },
-      {
-        title: ui('vor.sec.stagesFull', '波及关卡与被污染怪物'),
-        html: stageHtml ? `<ul class="nk-snapshot__blocks">${stageHtml}</ul>` : '',
-      },
-      { title: ui('mob.sec.status', '状态词条'), html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
       { title: ui('vor.sec.tutorials', '教程图文'), html: tutorialHtml ? `<ul class="nk-snapshot__blocks">${tutorialHtml}</ul>` : '' },
       { title: ui('vor.sec.affixes', '位面词条'), html: affixHtml ? `<ul class="nk-snapshot__blocks">${affixHtml}</ul>` : '' },
-      { title: ui('vor.sec.disambigFull', '「污染」同形词说明'), html: `<p>${esc(voracityDisambiguation())}</p>` },
     ],
   });
   return [makePage('voracity-page', {

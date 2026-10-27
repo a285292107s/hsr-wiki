@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { fmtDesc, gridFightAffixIconUrl, monsterIconUrl, refsResolved, tutorialPicUrl } from '../../lib/format';
+import { fmtDesc, gridFightAffixIconUrl, refsResolved, tutorialPicUrl } from '../../lib/format';
 import { cdnFallbackFromPrimary } from '../../services/cdn';
 import { loadLocalVoracity } from '../../services/api';
-import type { MazeBuffInfo, VoracityDb, VoracityStage } from '../../services/types';
+import type { MazeBuffInfo, VoracityDb } from '../../services/types';
 import { usePageData } from '../composables/use-page-data';
 import { useScrollSpy } from '../composables/use-scroll-spy';
 import { BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl } from '../endgame/renders';
-import { pollutionPosition } from '../endgame/pollution';
-import { ENDGAME_MODES } from '../catalog/pages/endgame';
 import { translate } from '../i18n';
 import '../../styles/voracity.css';
 
@@ -21,38 +19,20 @@ const pageRef = ref<HTMLElement | null>(null);
 const activity = computed(() => data.value?.activity ?? null);
 const invasion = computed(() => data.value?.invasion ?? null);
 
-const stageGroups = computed<{ invasionId: number; stages: VoracityStage[] }[]>(() => {
-  const groups: { invasionId: number; stages: VoracityStage[] }[] = [];
-  for (const s of [...(invasion.value?.stages ?? [])].sort((a, b) => a.invasion_id - b.invasion_id)) {
-    const last = groups[groups.length - 1];
-    if (last && last.invasionId === s.invasion_id) last.stages.push(s);
-    else groups.push({ invasionId: s.invasion_id, stages: [s] });
-  }
-  return groups;
-});
-
 const SECTION_DEFS: { id: string; label: string }[] = [
   { id: 'overview', label: t('vor.sec.overview') },
-  { id: 'scores', label: t('vor.sec.scores') },
   { id: 'invasion', label: t('vor.sec.invasion') },
-  { id: 'stages', label: t('vor.sec.stages') },
-  { id: 'statuses', label: t('vor.sec.statuses') },
   { id: 'tutorials', label: t('vor.sec.tutorials') },
   { id: 'affixes', label: t('vor.sec.affixes') },
-  { id: 'disambig', label: t('vor.sec.disambig') },
 ];
 
 const sections = computed(() => {
   const d = data.value;
   const on: Record<string, boolean> = {
     overview: !!d?.activity,
-    scores: !!d?.activity?.scores?.length || !!d?.activity?.progress_steps?.length,
     invasion: !!d?.invasion?.levels?.length || !!d?.activity?.buff_levels?.length,
-    stages: !!d?.invasion?.stages?.length,
-    statuses: !!d?.statuses?.length,
     tutorials: !!d?.tutorials?.length,
     affixes: !!d?.affixes?.length,
-    disambig: true,
   };
   const out: { id: string; idx: string; label: string }[] = [];
   for (const def of SECTION_DEFS) {
@@ -84,8 +64,6 @@ function buffHtml(b: MazeBuffInfo): string {
 }
 
 const introHtml = computed(() => plainDesc(activity.value?.intro, null));
-const progressSteps = computed(() =>
-  (activity.value?.progress_steps ?? []).map((p) => ({ ...p, html: plainDesc(p.desc, null) })));
 const levels = computed(() =>
   (invasion.value?.levels ?? []).map((l) => {
     const buff = buffView(l.maze_buff_id ?? l.invasion_id, undefined, l.desc, l.param_list, l.icon);
@@ -102,25 +80,11 @@ const affixes = computed(() =>
     iconUrl: gridFightAffixIconUrl(a.icon),
     html: plainDesc(a.desc, a.params),
   })));
-const statuses = computed(() =>
-  (data.value?.statuses ?? []).map((s) => {
-    const buff = buffView(s.status_id, s.name, s.desc, s.param_list, s.icon);
-    return { ...s, buff, html: buffHtml(buff) };
-  }));
 const tutorials = computed(() =>
   (data.value?.tutorials ?? []).map((t) => ({ ...t, html: plainDesc(t.desc, null) })));
 
 function buffIconError(e: Event): void {
   (e.target as HTMLImageElement).src = BUFF_ICON_FALLBACK;
-}
-
-function modeLabel(mode: string): string {
-  const hit = ENDGAME_MODES.find((m) => m.key === mode);
-  return hit ? translate(hit.labelKey) : mode;
-}
-
-function scopePosition(sc: { half: string; floor?: number; title?: string }): string {
-  return pollutionPosition(sc);
 }
 
 function iconFallback(url: string): string | undefined {
@@ -172,15 +136,6 @@ onMounted(() => { void load(); });
             <div class="nk-sk nk-sk--shimmer nk-vor-intro nk-skel-intro"></div>
             <div class="nk-vor-facts">
               <span class="nk-sk nk-sk--shimmer nk-skel-fact"></span>
-            </div>
-          </section>
-          <section class="nk-vor-sec">
-            <div class="nk-title">
-              <span class="nk-sk nk-sk--shimmer nk-skel-sec-title"></span>
-            </div>
-            <div class="nk-sk nk-sk--shimmer nk-skel-scores"></div>
-            <div class="nk-skel-rows">
-              <span v-for="i in 4" :key="i" class="nk-sk nk-sk--shimmer nk-skel-row"></span>
             </div>
           </section>
         </div>
@@ -252,28 +207,6 @@ onMounted(() => { void load(); });
             </dl>
           </section>
 
-          <section v-if="shownSections.has('scores')" id="vor-scores" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('scores') }}</span>{{ t('vor.sec.scores') }} WILL</h2>
-            <div v-if="activity?.scores?.length" class="nk-vor-scores">
-              <span class="nk-vor-scores__label">{{ t('vor.willTier') }}</span>
-              <span v-for="(v, i) in activity.scores" :key="i" class="nk-vor-score">{{ v }}</span>
-            </div>
-            <ol v-if="progressSteps.length" class="nk-vor-steps">
-              <li v-for="(p, i) in progressSteps" :key="i" class="nk-vor-step">
-                <span class="nk-vor-step__no">{{ String(i + 1).padStart(2, '0') }}</span>
-                <div class="nk-vor-step__main">
-                  <p v-if="p.html" class="nk-vor-step__desc" v-html="p.html"></p>
-                  <div class="nk-vor-step__meter">
-                    <div v-if="p.progress != null" class="nk-vor-step__track">
-                      <div class="nk-vor-step__fill" :style="{ width: `${ratioPct(p.progress)}%` }"></div>
-                    </div>
-                    <span v-if="p.progress != null" class="nk-vor-step__pct">{{ fmtPct(p.progress) }}</span>
-                  </div>
-                </div>
-              </li>
-            </ol>
-          </section>
-
           <section v-if="shownSections.has('invasion')" id="vor-invasion" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('invasion') }}</span>{{ t('vor.sec.invasion') }} INVASION</h2>
 
@@ -325,80 +258,6 @@ onMounted(() => { void load(); });
             </div>
           </section>
 
-          <section v-if="shownSections.has('stages')" id="vor-stages" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('stages') }}</span>{{ t('vor.sec.stagesFull') }} STAGES</h2>
-            <div v-for="g in stageGroups" :key="g.invasionId" class="nk-vor-stgroup">
-              <header class="nk-vor-stgroup__head">
-                <span class="nk-vor-stgroup__badge">{{ t('vor.invasionLevel', { n: g.invasionId }) }}</span>
-                <span class="nk-vor-stgroup__count">{{ t('vor.stageCount', { n: g.stages.length }) }}</span>
-              </header>
-              <div class="nk-vor-stages">
-                <article v-for="s in g.stages" :key="s.stage_id" class="nk-vor-stage">
-                  <div class="nk-vor-stage__id">{{ s.stage_id }}</div>
-                  <div v-if="s.scopes?.length" class="nk-vor-scopes">
-                    <router-link
-                      v-for="(sc, si) in s.scopes"
-                      :key="si"
-                      class="nk-vor-scope"
-                      :to="`/endgame/${sc.mode}/${sc.season_id}`"
-                      :title="`${modeLabel(sc.mode)} · ${sc.season_name}`"
-                    >
-                      <span class="nk-vor-scope__mode">{{ modeLabel(sc.mode) }}</span>
-                      <span class="nk-vor-scope__name">{{ sc.season_name }}</span>
-                      <span class="nk-vor-scope__pos">{{ scopePosition(sc) }}</span>
-                    </router-link>
-                  </div>
-                  <div v-if="s.monsters?.length" class="nk-vor-mons">
-                    <span v-for="(m, i) in s.monsters" :key="i" class="nk-vor-mon">
-                      <img
-                        v-if="m.icon"
-                        class="nk-vor-mon__icon"
-                        :src="monsterIconUrl(m.icon)"
-                        alt=""
-                        loading="lazy"
-                        :data-cdn-fallback="iconFallback(monsterIconUrl(m.icon))"
-                      >
-                      <router-link
-                        v-if="m.detail_id"
-                        class="nk-vor-mon__name nk-vor-mon__name--link"
-                        :to="`/monster/${m.detail_id}`"
-                      >{{ m.name || `#${m.monster_id}` }}</router-link>
-                      <span v-else class="nk-vor-mon__name">{{ m.name || `#${m.monster_id}` }}</span>
-                    </span>
-                  </div>
-                </article>
-              </div>
-            </div>
-          </section>
-
-          <section v-if="shownSections.has('statuses')" id="vor-statuses" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('statuses') }}</span>{{ t('vor.sec.statuses') }} STATUS</h2>
-            <div class="nk-vor-statuses">
-              <article v-for="st in statuses" :key="st.status_id" class="nk-vor-status">
-                <header class="nk-vor-status__head">
-                  <img
-                    v-if="st.icon"
-                    class="nk-vor-status__icon"
-                    :src="buffIconUrl(st.buff)"
-                    alt=""
-                    loading="lazy"
-                    @error="buffIconError"
-                  >
-                  <h3 class="nk-vor-status__name">{{ st.name }}</h3>
-                  <span v-if="st.type" class="nk-vor-status__type">{{ st.type }}</span>
-                </header>
-                <p v-if="st.html" class="nk-vor-status__desc" v-html="st.html"></p>
-                <div class="nk-vor-status__meta">
-                  <span class="nk-vor-code">#{{ st.status_id }}</span>
-                  <span v-if="st.modifier" class="nk-vor-code">{{ st.modifier }}</span>
-                  <span v-if="st.can_dispel != null" class="nk-vor-status__flag">
-                    {{ st.can_dispel ? t('mob.status.dispel') : t('vor.noDispel') }}
-                  </span>
-                </div>
-              </article>
-            </div>
-          </section>
-
           <section v-if="shownSections.has('tutorials')" id="vor-tutorials" class="nk-vor-sec">
             <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('tutorials') }}</span>{{ t('vor.sec.tutorials') }} TUTORIAL</h2>
             <div class="nk-vor-tutorials">
@@ -443,13 +302,6 @@ onMounted(() => { void load(); });
                 </div>
               </article>
             </div>
-          </section>
-
-          <section v-if="shownSections.has('disambig')" id="vor-disambig" class="nk-vor-sec">
-            <h2 class="nk-title"><span class="nk-title__idx">{{ sectionIdx('disambig') }}</span>{{ t('vor.sec.disambigFull') }} NOTE</h2>
-            <p class="nk-vor-note">
-              {{ t('vor.disambigNote') }}
-            </p>
           </section>
         </div>
       </div>

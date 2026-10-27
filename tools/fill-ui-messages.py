@@ -143,22 +143,16 @@ LABELS: dict[str, str] = {
     # 货币角色详情页的界面文案
     # 贪饕污染专题页 / 终局玩法页的界面文案
     "vor.sec.overview": "玩法概览",
-    "vor.sec.scores": "污染等级与愿力",
     "vor.sec.invasion": "「贪饕」侵蚀",
-    "vor.sec.stages": "波及关卡",
-    "vor.sec.statuses": "状态词条",
     "vor.sec.tutorials": "教程图文",
     "vor.sec.affixes": "位面词条",
-    "vor.sec.disambig": "同形词说明",
     "vor.loadingAria": "贪饕污染数据加载中",
     "vor.errorTitle": "贪饕污染数据加载失败",
     "vor.field.actId": "活动编号",
     "vor.field.unlockQuest": "解锁任务",
-    "vor.willTier": "愿力档位",
     "vor.enemyBoost": "敌方强化",
     "vor.playerSupport": "玩家支援",
     "vor.willProgress": "愿力进度",
-    "vor.noDispel": "不可驱散",
     "egm.stat.floors": "关卡层级",
     "egm.stat.halfs": "每层场次",
     "egm.stat.levels": "关卡组成",
@@ -540,6 +534,20 @@ REMOVED_KEYS: set[str] = {
     # `char.sec.*` 区块改版后遗留；`mob.appear*` 组合句改版后遗留（守卫的「未被引用」报告点出）
     "char.sec.relics",
     "mob.appearTotal",
+    "vor.sec.scores",
+    "vor.sec.stages",
+    "vor.sec.stagesFull",
+    "vor.sec.statuses",
+    "vor.sec.disambig",
+    "vor.sec.disambigFull",
+    "vor.disambigNote",
+    "vor.willTier",
+    "vor.noDispel",
+    "vor.field.stages",
+    "vor.field.monsters",
+    "vor.field.statuses",
+    "vor.field.progress",
+    "vor.field.wishTiers",
     "mob.appearSamples",
     "mob.statNoteA",
     "mob.statNoteBase",
@@ -549,14 +557,6 @@ REMOVED_KEYS: set[str] = {
     "mob.statNoteStanceMod",
     "mob.statNoteStanceNote",
     "mob.statNoteTail",
-}
-
-AUTHORED: dict[str, dict[str, str]] = {
-    "catalog.filter.series": {
-        "cn": "系列", "cht": "系列", "en": "Series", "jp": "シリーズ", "kr": "시리즈",
-        "es": "Serie", "fr": "Série", "de": "Serie", "pt": "Série", "ru": "Серия",
-        "th": "ซีรีส์", "vi": "Chuỗi", "id": "Seri",
-    },
     # `/formula` 05 属性成长区块移除后遗留（整套成长线型由区块自述，页面不再有对应文案）
     "formula.sec.growth",
     "formula.growth.baseValue",
@@ -578,6 +578,14 @@ AUTHORED: dict[str, dict[str, str]] = {
     "formula.growth.tab.enemy",
     "formula.growth.trace",
     "formula.growth.traceNote",
+}
+
+AUTHORED: dict[str, dict[str, str]] = {
+    "catalog.filter.series": {
+        "cn": "系列", "cht": "系列", "en": "Series", "jp": "シリーズ", "kr": "시리즈",
+        "es": "Serie", "fr": "Série", "de": "Serie", "pt": "Série", "ru": "Серия",
+        "th": "ซีรีส์", "vi": "Chuỗi", "id": "Seri",
+    },
     "catalog.filter.showType": {
         "cn": "显示状态", "cht": "顯示狀態", "en": "Visibility", "jp": "表示状態", "kr": "표시 상태",
         "es": "Visibilidad", "fr": "Affichage", "de": "Sichtbarkeit", "pt": "Visibilidade",
@@ -1085,23 +1093,11 @@ AUTHORED: dict[str, dict[str, str]] = {
     "vor.sec.overview": {
         "cn": "玩法概览", "cht": "玩法概覽", "en": "Gameplay Overview", "jp": "玩法概要", "kr": "플레이 개요", "es": "Resumen de juego", "fr": "Aperçu du mode", "de": "Spielübersicht", "pt": "Visão do modo", "ru": "Обзор режима", "th": "ภาพรวมโหมด", "vi": "Tổng quan lối chơi", "id": "Ringkasan mode",
     },
-    "vor.sec.scores": {
-        "cn": "污染等级与愿力", "cht": "污染等級與願力", "en": "Corruption Level & Will", "jp": "汚染レベルと願力", "kr": "오염 등급과 원력", "es": "Nivel de corrupción y voluntad", "fr": "Niveau de corruption et volonté", "de": "Korruptionsstufe & Wille", "pt": "Nível de corrupção e vontade", "ru": "Уровень заражения и воля", "th": "ระดับกัดกร่อนและพลังจิต", "vi": "Cấp ăn mòn & Ý chí", "id": "Tingkat korupsi & Will",
-    },
-    "vor.sec.stages": {
-        "cn": "波及关卡", "cht": "波及關卡", "en": "Affected Stages", "jp": "影響ステージ", "kr": "영향 스테이지", "es": "Etapas afectadas", "fr": "Étapes touchées", "de": "Betroffene Stufen", "pt": "Estágios afetados", "ru": "Затронутые этапы", "th": "ด่านที่ได้รับผล", "vi": "Màn bị ảnh hưởng", "id": "Stage terdampak",
-    },
-    "vor.sec.statuses": {
-        "cn": "状态词条", "cht": "狀態詞條", "en": "Status Effects", "jp": "状態効果", "kr": "상태 효과", "es": "Estados", "fr": "Effets de statut", "de": "Statuseffekte", "pt": "Efeitos de status", "ru": "Эффекты состояния", "th": "เอฟเฟกต์สถานะ", "vi": "Hiệu ứng trạng thái", "id": "Efek status",
-    },
     "vor.sec.tutorials": {
         "cn": "教程图文", "cht": "教程圖文", "en": "Tutorial", "jp": "チュートリアル", "kr": "튜토리얼", "es": "Tutorial", "fr": "Tutoriel", "de": "Tutorial", "pt": "Tutorial", "ru": "Обучение", "th": "บทช่วยสอน", "vi": "Hướng dẫn", "id": "Tutorial",
     },
     "vor.sec.affixes": {
         "cn": "位面词条", "cht": "位面詞條", "en": "Plane Affixes", "jp": "次元アフィックス", "kr": "차원 어픽스", "es": "Afijos de plano", "fr": "Affixes de plan", "de": "Ebenen-Affixe", "pt": "Afixos de plano", "ru": "Аффиксы плана", "th": "คำเสริมระนาบ", "vi": "Chỉ số mặt phẳng", "id": "Afiks bidang",
-    },
-    "vor.sec.disambig": {
-        "cn": "同形词说明", "cht": "同形詞說明", "en": "Homonym Note", "jp": "同形語の注記", "kr": "동형어 설명", "es": "Nota sobre homónimos", "fr": "Note sur les homonymes", "de": "Homonym-Hinweis", "pt": "Nota sobre homônimos", "ru": "Примечание об омонимах", "th": "หมายเหตุคำพ้องรูป", "vi": "Ghi chú từ đồng dạng", "id": "Catatan homonim",
     },
     "vor.loadingAria": {
         "cn": "贪饕污染数据加载中", "cht": "貪食污染資料載入中", "en": "Loading corruption data", "jp": "汚染データを読み込み中", "kr": "오염 데이터 로드 중", "es": "Cargando datos de corrupción", "fr": "Chargement des données", "de": "Korruptionsdaten werden geladen", "pt": "Carregando dados de corrupção", "ru": "Загрузка данных о заражении", "th": "กำลังโหลดข้อมูลการกัดกร่อน", "vi": "Đang tải dữ liệu ăn mòn", "id": "Memuat data korupsi",
@@ -1115,9 +1111,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     "vor.field.unlockQuest": {
         "cn": "解锁任务", "cht": "解鎖任務", "en": "Unlock Quest", "jp": "解放クエスト", "kr": "해금 퀘스트", "es": "Misión de desbloqueo", "fr": "Quête de déblocage", "de": "Freischaltungsquest", "pt": "Missão de desbloqueio", "ru": "Квест открытия", "th": "เควสปลดล็อก", "vi": "Nhiệm vụ mở khóa", "id": "Misi buka",
     },
-    "vor.willTier": {
-        "cn": "愿力档位", "cht": "願力檔位", "en": "Will Tier", "jp": "願力ティア", "kr": "원력 단계", "es": "Nivel de voluntad", "fr": "Palier de volonté", "de": "Will-Stufe", "pt": "Nível de vontade", "ru": "Уровень воли", "th": "ระดับพลังจิต", "vi": "Bậc Ý chí", "id": "Tingkat Will",
-    },
     "vor.enemyBoost": {
         "cn": "敌方强化", "cht": "敵方強化", "en": "Enemy Buffs", "jp": "敵強化", "kr": "적 강화", "es": "Mejoras enemigas", "fr": "Améliorations ennemies", "de": "Gegnerverstärkung", "pt": "Melhorias inimigas", "ru": "Усиления врагов", "th": "เสริมศัตรู", "vi": "Cường hóa kẻ địch", "id": "Penguatan musuh",
     },
@@ -1126,9 +1119,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "vor.willProgress": {
         "cn": "愿力进度", "cht": "願力進度", "en": "Will Progress", "jp": "願力進捗", "kr": "원력 진행도", "es": "Progreso de voluntad", "fr": "Progression de volonté", "de": "Will-Fortschritt", "pt": "Progresso de vontade", "ru": "Прогресс воли", "th": "ความคืบหน้าพลังจิต", "vi": "Tiến độ Ý chí", "id": "Progres Will",
-    },
-    "vor.noDispel": {
-        "cn": "不可驱散", "cht": "不可驅散", "en": "Not dispellable", "jp": "解除不可", "kr": "해제 불가", "es": "No disipable", "fr": "Non dissipable", "de": "Nicht bannbar", "pt": "Não dispensável", "ru": "Не снимается", "th": "ลบไม่ได้", "vi": "Không thể giải", "id": "Tidak dapat dihapus",
     },
     "egm.stat.floors": {
         "cn": "关卡层级", "cht": "關卡層級", "en": "Stage tiers", "jp": "ステージ階層", "kr": "스테이지 층", "es": "Niveles de etapa", "fr": "Paliers d'étape", "de": "Stufenebenen", "pt": "Níveis de estágio", "ru": "Уровни этапов", "th": "ชั้นด่าน", "vi": "Tầng màn", "id": "Tingkat stage",
@@ -1220,14 +1210,8 @@ AUTHORED: dict[str, dict[str, str]] = {
     "egm.latestSeasonWith": {
         "cn": "最新赛季（{status}）", "cht": "最新賽季（{status}）", "en": "Latest season ({status})", "jp": "最新シーズン（{status}）", "kr": "최신 시즌({status})", "es": "Última temporada ({status})", "fr": "Dernière saison ({status})", "de": "Neueste Saison ({status})", "pt": "Última temporada ({status})", "ru": "Последний сезон ({status})", "th": "ซีซันล่าสุด ({status})", "vi": "Mùa mới nhất ({status})", "id": "Musim terbaru ({status})",
     },
-    "vor.sec.stagesFull": {
-        "cn": "波及关卡与被污染怪物", "cht": "波及關卡與被污染怪物", "en": "Affected Stages & Corrupted Monsters", "jp": "影響ステージと汚染モンスター", "kr": "영향 스테이지와 오염 몬스터", "es": "Etapas afectadas y monstruos corrompidos", "fr": "Étapes touchées et monstres corrompus", "de": "Betroffene Stufen & korrumpierte Gegner", "pt": "Estágios afetados e monstros corrompidos", "ru": "Затронутые этапы и заражённые монстры", "th": "ด่านที่ได้รับผลและมอนสเตอร์ปนเปื้อน", "vi": "Màn bị ảnh hưởng & quái nhiễm", "id": "Stage terdampak & monster terkontaminasi",
-    },
     "vor.sec.affixesFull": {
         "cn": "货币战争位面词条", "cht": "貨幣戰爭位面詞條", "en": "Currency Wars Plane Affixes", "jp": "貨幣戦争次元アフィックス", "kr": "화폐 전쟁 차원 어픽스", "es": "Afijos de plano de Currency Wars", "fr": "Affixes de plan de Currency Wars", "de": "Currency-Wars-Ebenen-Affixe", "pt": "Afixos de plano de Currency Wars", "ru": "Аффиксы плана Currency Wars", "th": "คำเสริมระนาบ Currency Wars", "vi": "Chỉ số mặt phẳng Currency Wars", "id": "Afiks bidang Currency Wars",
-    },
-    "vor.sec.disambigFull": {
-        "cn": "「污染」同形词说明", "cht": "「污染」同形詞說明", "en": "Note on the Homonym “Corruption”", "jp": "「汚染」同形語の注記", "kr": "「오염」동형어 설명", "es": "Nota sobre el homónimo «corrupción»", "fr": "Note sur l'homonyme « corruption »", "de": "Hinweis zum Homonym „Korruption“", "pt": "Nota sobre o homônimo “corrupção”", "ru": "Примечание об омониме «заражение»", "th": "หมายเหตุคำพ้องรูป “การกัดกร่อน”", "vi": "Ghi chú từ đồng dạng “ăn mòn”", "id": "Catatan homonim “korupsi”",
     },
     "lc.loadingAria": {
         "cn": "光锥详情加载中", "cht": "光錐詳情載入中", "en": "Loading Light Cone data", "jp": "光円錐詳細を読み込み中", "kr": "광추 상세 로드 중", "es": "Cargando datos del cono de luz", "fr": "Chargement du cône de lumière", "de": "Lichtkegeldaten werden geladen", "pt": "Carregando dados do Cone de Luz", "ru": "Загрузка светового конуса", "th": "กำลังโหลดข้อมูลกรวยแสง", "vi": "Đang tải dữ liệu Nón Ánh Sáng", "id": "Memuat data Light Cone",
@@ -1600,9 +1584,6 @@ AUTHORED: dict[str, dict[str, str]] = {
         "cn": "未含关卡侧精英组指派（侵蚀隧洞、拟造花萼等副本的额外倍率）与剧情系数。", "cht": "未含關卡側精英組指派（侵蝕隧洞、擬造花萼等副本的額外倍率）與劇情係數。", "en": "Excludes stage-side elite group assignment (extra multipliers in instances such as Corrosion Cave and Calyx) and story coefficients.", "jp": "ステージ側の精鋭群指派（侵蝕の洞窟・模造花萼などの追加倍率）とストーリー係数は含みません。", "kr": "스테이지 측 정예 그룹 지정(침식 동굴·모조 화악 등 추가 배율)과 스토리 계수는 제외합니다.",
         "es": "Sin la asignación de élite del lado del nivel (multiplicadores extra en Caverna de corrosión, Cáliz, etc.) ni coeficientes de historia.", "fr": "Hors assignation d'élite côté étape (multiplicateurs de Caverne de corrosion, Calice, etc.) et coefficients scénaristiques.", "de": "Ohne stufenseitige Elitegruppen-Zuweisung (Zusatzfaktoren in Korrosionshöhle, Kelch usw.) und Story-Koeffizienten.", "pt": "Sem atribuição de elite do lado do estágio (multiplicadores extras em Caverna de corrosão, Cálice etc.) nem coeficientes de história.", "ru": "Без назначения элитной группы на этапе (доп. множители в Пещере коррозии, Чаше и т. п.) и сюжетных коэффициентов.",
         "th": "ไม่รวมการกำหนดกลุ่มชั้นสูงฝั่งด่าน (ตัวคูณเพิ่มในถ้ำกัดกร่อน · จอก เป็นต้น) และค่าสัมประสิทธิ์เนื้อเรื่อง", "vi": "Không gồm chỉ định nhóm tinh anh phía màn (hệ số thêm ở Động Ăn Mòn, Đài Sen…) và hệ số cốt truyện.", "id": "Tanpa penetapan grup elit sisi stage (pengali tambahan di Gua Korosi, Cawan, dll.) dan koefisien cerita.",
-    },
-    "vor.disambigNote": {
-        "cn": "本页「污染」指「贪饕」侵蚀污染；4.5 联动「命运/今晚留下来」的「圣杯战争 · 污染等级 1–7 / 深度污染 / 污染词条」是另一套无关体系，两者不合并叙述、也不互相内链。", "cht": "本頁「污染」指「貪饕」侵蝕污染；4.5 聯動「命运/今晚留下来」的「聖杯戰爭 · 污染等級 1–7 / 深度污染 / 污染詞條」是另一套無關體系，兩者不合併敘述、也不互相內鏈。", "en": "“Corruption” on this page means the Voracity's corrosion. The “Holy Grail War · Corruption Level 1–7 / Deep Corruption / corruption affixes” from the 4.5 crossover is a separate, unrelated system: they are not described together and do not cross-link.", "jp": "本ページの「汚染」は「貪食」の侵蝕汚染を指します。4.5 コラボの「聖杯戦争 · 汚染レベル 1–7 / 深層汚染 / 汚染詞条」は別系統であり、併記も相互リンクもしません。", "kr": "이 페이지의 「오염」은 「탐식」 침식 오염을 뜻합니다. 4.5 콜라보의 「성배전쟁 · 오염 등급 1–7 / 심층 오염 / 오염 옵션」은 별개 체계로, 함께 서술하거나 상호 링크하지 않습니다.", "es": "La «corrupción» de esta página es la corrosión de la Gula. El «Guerra del Santo Grial · Nivel de corrupción 1–7 / Corrupción profunda / afijos» del crossover 4.5 es otro sistema: no se narran juntos ni se enlazan.", "fr": "La « corruption » ici désigne la corrosion de la Voracité. La « Guerre du Saint-Graal · Niveau de corruption 1–7 / Corruption profonde / affixes » du crossover 4.5 est un autre système : pas de récit commun ni de liens croisés.", "de": "„Korruption“ meint hier die Verätzung der Völlerei. Der „Heiliger-Gral-Krieg · Korruptionsstufe 1–7 / Tiefe Korruption / Affixe“ aus dem 4.5-Crossover ist ein separates System: keine gemeinsame Darstellung, keine Querverweise.", "pt": "“Corrupção” aqui é a corrosão da Voracidade. A “Guerra do Santo Graal · Nível de corrupção 1–7 / Corrupção profunda / afixos” do crossover 4.5 é outro sistema: não são narrados juntos nem se interligam.", "ru": "«Заражение» здесь — это коррозия Обжорства. «Война за Святой Грааль · Уровень заражения 1–7 / Глубокое заражение / аффиксы» из кроссовера 4.5 — отдельная система: не описываются вместе и не ссылаются друг на друга.", "th": "“การกัดกร่อน” ในหน้านี้หมายถึงการกัดกร่อนของ “ตะกละ” ส่วน “สงครามจอกศักดิ์สิทธิ์ · ระดับกัดกร่อน 1–7 / กัดกร่อนลึก / คำเสริม” จากครอสโอเวอร์ 4.5 เป็นอีกระบบหนึ่ง ไม่รวมเล่าและไม่ลิงก์กัน", "vi": "“Ăn mòn” ở trang này là ăn mòn của “Tham Lam”. “Chiến tranh Chén Thánh · Cấp ăn mòn 1–7 / Ăn mòn sâu / Dòng ăn mòn” của crossover 4.5 là hệ thống khác, không kể chung và không liên kết.", "id": "“Korupsi” di halaman ini berarti korosi Voracity. “Perang Cawan Suci · Tingkat korupsi 1–7 / Korupsi dalam / afiks korupsi” dari crossover 4.5 adalah sistem lain: tidak dibahas bersama dan tidak saling tertaut.",
     },
     "mob.stage": {
         "cn": "阶段 {n}", "cht": "階段 {n}", "en": "Phase {n}", "jp": "フェーズ {n}", "kr": "페이즈 {n}", "es": "Fase {n}", "fr": "Phase {n}", "de": "Phase {n}", "pt": "Fase {n}", "ru": "Фаза {n}", "th": "เฟส {n}", "vi": "Giai đoạn {n}", "id": "Fase {n}",
@@ -2048,7 +2029,7 @@ AUTHORED: dict[str, dict[str, str]] = {
         "cn": "{site}敌对物种图鉴：共 {n} 个条目，含分类、弱点、抗性与技能。", "cht": "{site}敵對物種圖鑑：共 {n} 個條目，含分類、弱點、抗性與技能。", "en": "{site} bestiary: {n} entries with types, weaknesses, resistances and abilities.", "jp": "{site} 敵対種図鑑：{n} 件、分類・弱点・耐性・スキルつき。", "kr": "{site} 적대 종족 도감: {n}개 항목, 분류·약점·내성·스킬 포함.", "es": "{site} bestiario: {n} entradas con tipos, debilidades, resistencias y habilidades.", "fr": "{site} bestiaire : {n} entrées avec types, faiblesses, résistances et compétences.", "de": "{site} Bestiarium: {n} Einträge mit Typen, Schwächen, Resistenzen und Fähigkeiten.", "pt": "{site} bestiário: {n} entradas com tipos, fraquezas, resistências e habilidades.", "ru": "{site} бестиарий: {n} записей с типами, уязвимостями, сопротивлениями и навыками.", "th": "{site} สัตว์ประหลาด: {n} รายการ พร้อมประเภท จุดอ่อน ค่าต้านทาน และสกิล", "vi": "{site} sổ sinh vật: {n} mục với phân loại, điểm yếu, kháng tính và kỹ năng.", "id": "{site} bestiary: {n} entri dengan tipe, kelemahan, resistensi, dan skill.",
     },
     "snapshot.sum.voracity": {
-        "cn": "{site}贪饕污染专题：{extra}含关卡组成、污染等级与状态词条。", "cht": "{site}貪饕污染專題：{extra}含關卡組成、污染等級與狀態詞條。", "en": "{site} Voracity corruption feature: {extra}stage layout, corruption levels and status effects.", "jp": "{site} 貪食汚染特集：{extra}ステージ構成・汚染レベル・状態効果つき。", "kr": "{site} 탐식 오염 특집: {extra}스테이지 구성, 오염 등급, 상태 효과 포함.", "es": "{site} especial de corrupción de la Voracidad: {extra}composición de niveles, niveles de corrupción y estados.", "fr": "{site} dossier corruption de la Voracité : {extra}composition des niveaux, niveaux de corruption et états.", "de": "{site} Verschlingung-Korruption: {extra}Levelaufbau, Korruptionsstufen und Statuseffekte.", "pt": "{site} especial de corrupção da Voracidade: {extra}composição de estágios, níveis de corrupção e estados.", "ru": "{site} тема порчи Прожорливости: {extra}состав этапов, уровни порчи и статусы.", "th": "{site} ธีมการกัดกร่อนของ Voracity: {extra}โครงสร้างด่าน ระดับการกัดกร่อน และสถานะ", "vi": "{site} chuyên đề ăn mòn Voracity: {extra}cấu trúc ải, cấp ăn mòn và hiệu ứng trạng thái.", "id": "{site} fitur korupsi Voracity: {extra}susunan stage, tingkat korupsi, dan efek status.",
+        "cn": "{site}贪饕污染专题：{extra}「贪饕」侵蚀机制、玩家支援、教程图文与位面词条。", "cht": "{site}貪饕污染專題：{extra}「貪饕」侵蝕機制、玩家支援、教程圖文與位面詞條。", "en": "{site} Voracity corruption feature: {extra}corrosion mechanics, player support, tutorial images and plane affixes.", "jp": "{site} 貪食汚染特集：{extra}侵蝕の仕組み・味方支援・チュートリアル画像・次元アフィックス。", "kr": "{site} 탐식 오염 특집: {extra}침식 메커니즘, 아군 지원, 튜토리얼 이미지, 차원 어픽스.", "es": "{site} especial de corrupción de la Voracidad: {extra}mecánicas de corrosión, apoyo aliado, tutoriales y afijos de plano.", "fr": "{site} dossier corruption de la Voracité : {extra}mécaniques de corrosion, soutien allié, tutoriels et affixes de plan.", "de": "{site} Verschlingung-Korruption: {extra}Korrosionsmechanik, Spieler-Support, Tutorials und Ebenen-Affixe.", "pt": "{site} especial de corrupção da Voracidade: {extra}mecânicas de corrosão, apoio ao jogador, tutoriais e afixos de plano.", "ru": "{site} тема порчи Прожорливости: {extra}механика порчи, поддержка игрока, обучающие изображения и аффиксы планов.", "th": "{site} ธีมการกัดกร่อนของ Voracity: {extra}กลไกการกัดกร่อน การสนับสนุนผู้เล่น ภาพสอน และคำเสริมระนาบ", "vi": "{site} chuyên đề ăn mòn Voracity: {extra}cơ chế ăn mòn, hỗ trợ người chơi, hình ảnh hướng dẫn và chỉ số mặt phẳng.", "id": "{site} fitur korupsi Voracity: {extra}mekanisme korosi, dukungan pemain, gambar tutorial, dan afiks bidang.",
     },
     "snapshot.sum.character": {
         "cn": "{site}角色图鉴：共 {n} 名角色，含稀有度、命途、属性与技能档案。", "cht": "{site}角色圖鑑：共 {n} 名角色，含稀有度、命途、屬性與技能檔案。", "en": "{site} character index: {n} characters with rarity, path, element and skill data.", "jp": "{site} キャラ図鑑：{n} 名、レアリティ・運命・属性・スキル付き。", "kr": "{site} 캐릭터 도감: {n}명, 희귀도·운명·속성·스킬 포함.", "es": "{site} índice de personajes: {n} personajes con rareza, Vía, elemento y habilidades.", "fr": "{site} index des personnages : {n} personnages avec rareté, Voie, élément et compétences.", "de": "{site} Charakter-Index: {n} Charaktere mit Seltenheit, Pfad, Element und Fähigkeiten.", "pt": "{site} índice de personagens: {n} personagens com raridade, Via, elemento e habilidades.", "ru": "{site} индекс персонажей: {n} персонажей с редкостью, Пути, элементом и навыками.", "th": "{site} ดัชนีตัวละคร: {n} ตัว พร้อมระดับดาว วิถี ธาตุ และสกิล", "vi": "{site} chỉ mục nhân vật: {n} nhân vật với độ hiếm, Vận mệnh, hệ và kỹ năng.", "id": "{site} indeks karakter: {n} karakter dengan kelangkaan, Path, elemen, dan skill.",
@@ -2058,15 +2039,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "snapshot.invasionLevel": {
         "cn": "污染等级 {n}", "cht": "污染等級 {n}", "en": "Corruption Level {n}", "jp": "汚染レベル {n}", "kr": "오염 등급 {n}", "es": "Nivel de corrupción {n}", "fr": "Niveau de corruption {n}", "de": "Korruptionsstufe {n}", "pt": "Nível de corrupção {n}", "ru": "Уровень порчи {n}", "th": "ระดับการกัดกร่อน {n}", "vi": "Cấp ăn mòn {n}", "id": "Tingkat korupsi {n}",
-    },
-    "vor.field.stages": {
-        "cn": "波及关卡数", "cht": "波及關卡數", "en": "Affected Stages", "jp": "影響ステージ数", "kr": "영향 스테이지 수", "es": "Etapas afectadas", "fr": "Niveaux concernés", "de": "Betroffene Ebenen", "pt": "Estágios afetados", "ru": "Затронуто этапов", "th": "จำนวนด่านที่ได้รับผล", "vi": "Số ải bị ảnh hưởng", "id": "Stage Terdampak",
-    },
-    "vor.field.monsters": {
-        "cn": "怪物名单条目数", "cht": "怪物名單條目數", "en": "Bestiary Entries", "jp": "モンスター登録数", "kr": "몬스터 목록 항목 수", "es": "Entradas del bestiario", "fr": "Entrées du bestiaire", "de": "Bestiariums-Einträge", "pt": "Entradas do bestiário", "ru": "Записей в бестиарии", "th": "จำนวนรายการมอนสเตอร์", "vi": "Số mục sinh vật", "id": "Entri Bestiary",
-    },
-    "vor.field.statuses": {
-        "cn": "状态词条数", "cht": "狀態詞條數", "en": "Status Effects", "jp": "状態効果数", "kr": "상태 효과 수", "es": "Estados", "fr": "Effets de statut", "de": "Statuseffekte", "pt": "Efeitos de status", "ru": "Статусных эффектов", "th": "จำนวนสถานะ", "vi": "Số hiệu ứng trạng thái", "id": "Efek Status",
     },
     "snapshot.sum.achievement": {
         "cn": "{site}成就图鉴：共 {n} 个成就，含系列、稀有度与达成要求。", "cht": "{site}成就圖鑑：共 {n} 個成就，含系列、稀有度與達成要求。", "en": "{site} achievements: {n} entries with series, rarity and requirements.", "jp": "{site} 実績図鑑：{n} 件、シリーズ・レアリティ・達成条件つき。", "kr": "{site} 업적 도감: {n}개, 시리즈·희귀도·달성 조건 포함.", "es": "{site} logros: {n} entradas con serie, rareza y requisitos.", "fr": "{site} succès : {n} entrées avec série, rareté et conditions.", "de": "{site} Erfolge: {n} Einträge mit Serie, Seltenheit und Bedingungen.", "pt": "{site} conquistas: {n} entradas com série, raridade e requisitos.", "ru": "{site} достижения: {n} записей с серией, редкостью и условиями.", "th": "{site} ความสำเร็จ: {n} รายการ พร้อมซีรีส์ ระดับหายาก และเงื่อนไข", "vi": "{site} thành tựu: {n} mục với bộ, độ hiếm và điều kiện.", "id": "{site} achievement: {n} entri dengan seri, kelangkaan, dan syarat.",
@@ -2085,9 +2057,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "snapshot.sum.cwAugment": {
         "cn": "{site}货币战争投资策略图鉴：共 {n} 条投资策略。", "cht": "{site}貨幣戰爭投資策略圖鑑：共 {n} 條投資策略。", "en": "{site} Currency Wars augments: {n} entries.", "jp": "{site} 貨幣戦争の投資戦略図鑑：{n} 件。", "kr": "{site} 통화 전쟁 투자 전략 도감: {n}개.", "es": "{site} mejoras de Guerras Monetarias: {n} entradas.", "fr": "{site} augmentations de Guerre Monétaire : {n} entrées.", "de": "{site} Währungskrieg-Verstärkungen: {n} Einträge.", "pt": "{site} melhorias de Guerra Monetária: {n} entradas.", "ru": "{site} усиления Валютной войны: {n} записей.", "th": "{site} การเสริมแกร่งสงครามcurrency: {n} รายการ", "vi": "{site} cường hóa Chiến tranh Tiền tệ: {n} mục.", "id": "{site} augment Currency Wars: {n} entri.",
-    },
-    "vor.field.progress": {
-        "cn": "进度 {n}", "cht": "進度 {n}", "en": "Progress {n}", "jp": "進行度 {n}", "kr": "진행도 {n}", "es": "Progreso {n}", "fr": "Progression {n}", "de": "Fortschritt {n}", "pt": "Progresso {n}", "ru": "Прогресс {n}", "th": "ความคืบหน้า {n}", "vi": "Tiến độ {n}", "id": "Progres {n}",
     },
     "egm.fact.mode": {
         "cn": "所属玩法", "cht": "所屬玩法", "en": "Mode", "jp": "所属モード", "kr": "소속 모드", "es": "Modo", "fr": "Mode", "de": "Modus", "pt": "Modo", "ru": "Режим", "th": "โหมด", "vi": "Chế độ", "id": "Mode",
@@ -2145,9 +2114,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "vor.field.activity": {
         "cn": "活动", "cht": "活動", "en": "Event", "jp": "イベント", "kr": "이벤트", "es": "Evento", "fr": "Événement", "de": "Event", "pt": "Evento", "ru": "Событие", "th": "กิจกรรม", "vi": "Sự kiện", "id": "Event",
-    },
-    "vor.field.wishTiers": {
-        "cn": "愿力档位：{list}", "cht": "願力檔位：{list}", "en": "Wishpower tiers: {list}", "jp": "願力ティア：{list}", "kr": "원력 단계: {list}", "es": "Niveles de deseo: {list}", "fr": "Paliers de vœu : {list}", "de": "Wunschkraft-Stufen: {list}", "pt": "Níveis de desejo: {list}", "ru": "Уровни силы желания: {list}", "th": "ระดับพลังปรารถนา: {list}", "vi": "Bậc nguyện lực: {list}", "id": "Tingkat kekuatan harapan: {list}",
     },
     "vor.sec.invasionFull": {
         "cn": "「贪饕」侵蚀（敌方与玩家支援）", "cht": "「貪饕」侵蝕（敵方與玩家支援）", "en": "'Voracity' Corruption (enemy and player support)", "jp": "「貪食」侵蝕（敵と味方の支援）", "kr": "'탐식' 침식 (적 및 아군 지원)", "es": "Corrupción de la 'Voracidad' (apoyo enemigo y aliado)", "fr": "Corruption de la « Voracité » (soutien ennemi et allié)", "de": "„Verschlingung“-Korruption (Gegner- und Spieler-Support)", "pt": "Corrupção da 'Voracidade' (apoio inimigo e aliado)", "ru": "Порча «Прожорливости» (усиление врагов и поддержка игрока)", "th": "การกัดกร่อน 'Voracity' (ศัตรูและฝ่ายสนับสนุนผู้เล่น)", "vi": "Ăn mòn 'Voracity' (kẻ địch và hỗ trợ người chơi)", "id": "Korupsi 'Voracity' (dukungan musuh dan pemain)",

@@ -477,15 +477,6 @@ test.describe('布局验收：多语言', () => {
     }
   });
 
-  test('/en/voracity：同形词说明段走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
-    const en = msgs('en');
-    await page.goto('/en/voracity');
-    await expect(page.locator('.nk-title').first()).toBeVisible();
-    const body = await page.locator('body').innerText();
-    expect(body, `说明段应取英文词典值：${en['vor.disambigNote']!.slice(0, 24)}`)
-      .toContain(en['vor.disambigNote']!.slice(0, 24));
-  });
-
   test('/en/currency 与 /en/endgame/N：枢纽页与赛季页文案走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
