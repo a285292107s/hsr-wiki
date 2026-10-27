@@ -361,7 +361,6 @@ LABELS: dict[str, str] = {
     "theme.accent.iris": "暮山紫",
     # 终局组件收尾批
     "egd.bossTraits": "首领特性",
-    "egd.buffs.title": "战意机制 FURY",
     "egd.buffs.mech": "战意机制",
     "egd.buffs.effect": "战意效果",
     "egd.clearCondition": "通关条件",
@@ -532,6 +531,8 @@ OVERRIDE_HASH: dict[str, str] = {
 # JSON 里，见 docs/memory/docs-process.md 的事故记录），故禁止通用剪枝——下线一个键时把它写进这里。
 REMOVED_KEYS: set[str] = {
     # `char.sec.*` 区块改版后遗留；`mob.appear*` 组合句改版后遗留（守卫的「未被引用」报告点出）
+    # `egd.buffs.title` 随虚构叙事增益区改版退场（区块标题改用 `egm.sec.buffs`，体系名改由行标签承担）
+    "egd.buffs.title",
     "char.sec.relics",
     "mob.appearTotal",
     "vor.sec.scores",
@@ -1807,9 +1808,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     "theme.accent.iris": {
         "cn": "暮山紫", "cht": "暮山紫", "en": "Dusk violet", "jp": "トワイライトバイオレット", "kr": "황혼 보라", "es": "Violeta crepuscular", "fr": "Violet crépusculaire", "de": "Dämmerungsviolett", "pt": "Violeta crepuscular", "ru": "Сумеречный фиолет", "th": "ม่วงสนธยา", "vi": "Tím hoàng hôn", "id": "Ungu senja",
     },
-    "egd.buffs.title": {
-        "cn": "战意机制 FURY", "cht": "戰意機制 FURY", "en": "Fury mechanics FURY", "jp": "戦意メカニクス FURY", "kr": "전의 메커니즘 FURY", "es": "Mecánica de furia FURY", "fr": "Mécanique de fureur FURY", "de": "Wutz-Mechanik FURY", "pt": "Mecânica de fúria FURY", "ru": "Механика ярости FURY", "th": "กลไกเพลิงโกรธ FURY", "vi": "Cơ chế cuồng nộ FURY", "id": "Mekanisme amarah FURY",
-    },
     "egd.rule.enemies": {
         "cn": "击败首领 ENEMIES", "cht": "擊敗首領 ENEMIES", "en": "Bosses defeated ENEMIES", "jp": "撃破ボス ENEMIES", "kr": "격파 보스 ENEMIES", "es": "Jefes derrotados ENEMIES", "fr": "Boss vaincus ENEMIES", "de": "Besiegte Bosse ENEMIES", "pt": "Chefes derrotados ENEMIES", "ru": "Побеждено боссов ENEMIES", "th": "บอสที่ปราบ ENEMIES", "vi": "Hạ boss ENEMIES", "id": "Bos dikalahkan ENEMIES",
     },
@@ -2432,6 +2430,7 @@ def main() -> int:
             path.write_text(
                 json.dumps(dict(sorted(data.items())), ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
+                newline="\n",
             )
             written += 1
         if args.check:

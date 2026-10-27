@@ -3,19 +3,35 @@ import { collectConsoleIssues, computedNumber, readJson, readTokenPx } from './h
 import { cnBigNumber, PEAK_HARD_NODE, PEAK_KING_NODE, noUnknownOverflow, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, seasonData, seasonRewardGroups } from './layout.shared';
 import type { MechanicLike, MonsterLike } from './layout.shared';
 
-test.describe('布局验收：赛季增益上提为赛季级区块', () => {
-  test('/endgame/story/2026：荒腔走板紧随战意效果、位于关卡子 tab 之前，节点看板不复述', async ({ page }) => {
+test.describe('布局验收：赛季增益区（行式排版 + 首屏预算）', () => {
+  test('/endgame/story/2026：增益三行横排，1440×900 首屏露出关卡子 tab 与节点卡', { tag: ['@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/story/2026');
     const story = seasonData('maze_extra.json', '2026');
+    const zone = page.locator('.nk-egd-buffzone');
+    await expect(zone).toHaveCount(1);
+    await expect(page.locator('#egd-buffs-title')).toHaveText('赛季增益');
+    await expect(zone.locator('.nk-egd-row__label')).toHaveText(['战意机制', '战意效果']);
     const group = page.locator('#egd-season-buffs');
     await expect(group).toHaveCount(1);
     await expect(group.locator('.nk-egd-group__title')).toHaveText('荒腔走板');
     await expect(group.locator('.nk-egd-buff__name')).toHaveText(story.buffs!.map((b) => b.name));
+    const sameRow = async (cards: ReturnType<typeof page.locator>): Promise<number> => new Set(
+      await cards.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top))),
+    ).size;
+    expect(await sameRow(zone.locator('.nk-egd-row').last().locator('.nk-egd-buff')),
+      '战意效果两卡应同排').toBe(1);
+    expect(await sameRow(group.locator('.nk-egd-buff')), '荒腔走板三卡应同排').toBe(1);
     const blocks = await page.locator('.nk-egd-panel > *').evaluateAll((els) =>
       els.map((el) => (el as HTMLElement).className.split(' ')[0]));
-    expect(blocks.indexOf('nk-egd-group')).toBe(blocks.indexOf('nk-egd-fury') + 1);
-    expect(blocks.indexOf('nk-egd-tabs')).toBeGreaterThan(blocks.indexOf('nk-egd-group'));
+    expect(blocks.indexOf('nk-egd-tabs')).toBe(blocks.indexOf('nk-egd-buffzone') + 1);
+    const tabs = await page.locator('#egd-level-tabs').boundingBox();
+    expect((tabs?.y ?? Infinity) + (tabs?.height ?? 0), '关卡子 tab 必须在首屏内完整可见')
+      .toBeLessThanOrEqual(900);
+    const nodeCards = await page.locator('#egd-level-panel .nk-egd-nodecards').first().boundingBox();
+    expect((nodeCards?.y ?? Infinity) + (nodeCards?.height ?? 0), '首屏必须带出节点卡行')
+      .toBeLessThanOrEqual(900);
     await page.locator('#egd-level-tab-floor-1').click();
     await expect(page.locator('#egd-level-panel .nk-egd-group')).toHaveCount(0);
     await page.locator('#egd-level-tab-tierce').click();

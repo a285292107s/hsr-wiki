@@ -4,6 +4,16 @@
     gap: 14px;
     padding: 26px 16px 22px;
   }
+  .nk-egd-row,
+  .nk-egd-group--row { display: block; }
+  .nk-egd-row__label,
+  .nk-egd-group--row .nk-egd-group__title {
+    display: block;
+    padding-top: 0;
+    margin-bottom: 8px;
+  }
+  .nk-egd-row > .nk-egd-buffs,
+  .nk-egd-group--row > .nk-egd-buffs { display: flex; flex-direction: column; }
   .nk-egd-hero__plate {
     width: 112px;
     min-height: 112px;

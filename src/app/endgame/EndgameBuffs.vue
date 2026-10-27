@@ -16,37 +16,33 @@ const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.sli
 </script>
 
 <template>
-  <template v-if="modeKey === 'story' && subBuffsMech">
-    <h2 id="egd-sub-buffs" class="nk-title">{{ t('egd.buffs.title') }}</h2>
-    <div class="nk-egd-fury">
-      <div class="nk-egd-fury__mech">
-        <span class="nk-egd-fury__label">{{ t('egd.buffs.mech') }}</span>
-        <article class="nk-egd-buff">
+  <div v-if="modeKey === 'story' && subBuffsMech" class="nk-egd-fury">
+    <div class="nk-egd-row">
+      <span class="nk-egd-row__label">{{ t('egd.buffs.mech') }}</span>
+      <article class="nk-egd-buff">
+        <div class="nk-egd-buff__head">
+          <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" :src="buffIconUrl(subBuffsMech)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
+          <h3 class="nk-egd-buff__name">{{ subBuffsMech.name }}</h3>
+        </div>
+        <p v-if="subBuffsMech.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(subBuffsMech)"></p>
+      </article>
+    </div>
+    <div v-if="subBuffsEffects.length" class="nk-egd-row">
+      <span class="nk-egd-row__label">{{ t('egd.buffs.effect') }}</span>
+      <div class="nk-egd-buffs">
+        <article
+          v-for="(b, i) in subBuffsEffects"
+          :key="b.id"
+          class="nk-egd-buff"
+          :style="{ '--i': i + 1 }"
+        >
           <div class="nk-egd-buff__head">
-            <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" :src="buffIconUrl(subBuffsMech)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-            <h3 class="nk-egd-buff__name">{{ subBuffsMech.name }}</h3>
+            <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
+            <h3 class="nk-egd-buff__name">{{ b.name }}</h3>
           </div>
-          <p v-if="subBuffsMech.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(subBuffsMech)"></p>
+          <p v-if="b.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(b)"></p>
         </article>
       </div>
-      <div v-if="subBuffsEffects.length" class="nk-egd-fury__eff">
-        <span class="nk-egd-fury__label">{{ t('egd.buffs.effect') }}</span>
-        <div class="nk-egd-buffs">
-          <article
-            v-for="(b, i) in subBuffsEffects"
-            :key="b.id"
-            class="nk-egd-buff"
-            :style="{ '--i': i + 1 }"
-          >
-            <div class="nk-egd-buff__head">
-              <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
-              <h3 class="nk-egd-buff__name">{{ b.name }}</h3>
-            </div>
-            <p v-if="b.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(b)"></p>
-          </article>
-        </div>
-      </div>
     </div>
-  </template>
-
+  </div>
 </template>

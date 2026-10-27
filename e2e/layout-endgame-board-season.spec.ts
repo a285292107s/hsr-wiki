@@ -215,7 +215,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     await page.goto('/endgame/story/2026');
     const story = seasonData('maze_extra.json', '2026');
     const storyFloor1 = story.floor_details![0];
-    await expect(page.locator('#egd-sub-buffs')).toBeVisible();
+    await expect(page.locator('#egd-buffs-title')).toHaveText('赛季增益');
     await expect(page.locator('#egd-season-buffs .nk-egd-group__title')).toHaveText('荒腔走板');
     await expect(page.locator('#egd-season-buffs .nk-egd-buff__name'))
       .toHaveText(story.buffs!.map((b) => b.name));

@@ -232,18 +232,25 @@ onBeforeUnmount(() => {
       <div class="nk-panels nk-egd-body">
         <div class="nk-egd-panel">
           <template v-if="levelTabs.length && !unpublished">
-            <EndgameBuffs
-              v-if="modeKey === 'story' && data.sub_buffs?.length"
-              :data="data"
-              :mode-key="modeKey"
-            />
-
-            <EndgameBuffGroup
-              v-if="modeKey === 'story' && seasonBuffs.length"
-              id="egd-season-buffs"
-              :title="systemName || fallbackSystemName()"
-              :items="seasonBuffs"
-            />
+            <section
+              v-if="modeKey === 'story' && (seasonBuffs.length || data.sub_buffs?.length)"
+              class="nk-egd-buffzone"
+              aria-labelledby="egd-buffs-title"
+            >
+              <h2 id="egd-buffs-title" class="nk-title">{{ t('egm.sec.buffs') }}</h2>
+              <EndgameBuffs
+                v-if="data.sub_buffs?.length"
+                :data="data"
+                :mode-key="modeKey"
+              />
+              <EndgameBuffGroup
+                v-if="seasonBuffs.length"
+                id="egd-season-buffs"
+                class="nk-egd-group--row"
+                :title="systemName || fallbackSystemName()"
+                :items="seasonBuffs"
+              />
+            </section>
 
             <EndgameLevelTabs
               :tabs="levelTabs"
