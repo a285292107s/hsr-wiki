@@ -75,7 +75,6 @@
   font-weight: 700;
   color: var(--text-bright);
 }
-.nk-egd-peak__seclabel { font-weight: 400; }
 .nk-egd-floor__buffdesc {
   margin: 0;
   line-height: 1.8;
@@ -105,13 +104,8 @@
   border-color: color-mix(in srgb, var(--diff-del) 60%, transparent);
   background: color-mix(in srgb, var(--diff-del) 14%, transparent);
 }
-.nk-egd-floor__mechs {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 14px;
-  min-width: 0;
-}
+.nk-egd-peak__body { display: flex; flex-direction: column; gap: 20px; }
+.nk-egd-floor__mechs > .nk-egd-row__label { padding-top: 4px; }
 .nk-egd-floor__tags {
   display: flex;
   flex-direction: column;
@@ -144,11 +138,6 @@
   max-width: var(--nk-prose-max);
 }
 .nk-egd-peak__mechdesc .hl { color: var(--highlight); font-weight: 700; }
-.nk-egd-floor__buffs {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
 
 .nk-egd-mons {
   display: grid;

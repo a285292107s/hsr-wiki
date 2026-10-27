@@ -323,7 +323,7 @@ test.describe('布局验收：终局目录页', () => {
     const king = (peak.levels ?? []).find((l) => l.kind === 'king');
     expect(king?.buffs?.length, '王棋关应带裁决象限增益').toBeGreaterThan(0);
     await page.locator(peakTabId(king!)).click();
-    await expect(page.locator('.nk-egd-peak .nk-egd-floor__buffname')).toHaveText(king!.buffs!.map((b) => b.name));
+    await expect(page.locator('.nk-egd-peak .nk-egd-buff__name')).toHaveText(king!.buffs!.map((b) => b.name));
     await expect(page.locator('.nk-egd-peak .nk-egd-floor__bufflabel')).toHaveCount(0);
     const peakSummons = (peak.levels ?? []).flatMap(
       (l) => [...summonsOf(l.monsters), ...summonsOf(l.hard?.monsters)],

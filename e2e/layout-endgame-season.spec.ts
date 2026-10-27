@@ -148,15 +148,32 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
 
     await expect(page.locator('#egd-buffs')).toHaveCount(0);
     await page.locator(peakTabId(king!)).click();
-    await expect(page.locator('.nk-egd-peak .nk-egd-floor__label').filter({ hasText: '裁决象限' })).toHaveCount(1);
-    await expect(page.locator('.nk-egd-peak .nk-egd-floor__buffname'))
+    await expect(page.locator('.nk-egd-peak .nk-egd-group__title')).toHaveText('裁决象限');
+    await expect(page.locator('.nk-egd-peak .nk-egd-buff__name'))
       .toHaveText(king!.buffs!.map((b) => b.name));
-    const peakBlocks = await page.locator('.nk-egd-peak .nk-egd-peak__body').evaluate((el) =>
-      [...el.children].map((c) => (c as HTMLElement).className.split(' ')[0]));
-    expect(peakBlocks, '星级奖励列表已移出关卡面板').not.toContain('nk-egd-head');
-    expect(peakBlocks.indexOf('nk-egd-floor__buffs'))
-      .toBeLessThan(peakBlocks.indexOf('nk-egd-floor__stage'));
+    const peakBlocks = await page.locator('.nk-egd-peak .nk-egd-peak__body > *').evaluateAll((els) =>
+      els.map((el) => (el as HTMLElement).className));
+    expect(peakBlocks[0], '裁决象限在最前').toContain('nk-egd-group');
+    expect(peakBlocks[1], '机制应在敌方配置之前').toContain('nk-egd-floor__mechs');
+    expect(peakBlocks[2], '敌方配置在最后').toContain('nk-egd-floor__stage');
 
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/endgame/peak/9：裁决象限三卡同排 + 机制在敌方配置之前（1440×900）', { tag: ['@viewport-pinned'] }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/endgame/peak/9');
+    await page.waitForSelector('#egd-peak-board');
+    const buffTops = await page.locator('.nk-egd-peak .nk-egd-buff')
+      .evaluateAll((els) => els.map((el) => Math.round((el as HTMLElement).offsetTop)));
+    expect(new Set(buffTops).size, '裁决象限三卡应同排').toBe(1);
+    const bodyKids = await page.locator('.nk-egd-peak .nk-egd-peak__body > *').evaluateAll((els) =>
+      els.map((el) => (el as HTMLElement).className));
+    expect(bodyKids[1]).toContain('nk-egd-floor__mechs');
+    const stage = await page.locator('.nk-egd-peak .nk-egd-floor__stage').boundingBox();
+    expect(stage?.y ?? Infinity, '首屏应带出敌方配置').toBeLessThan(900);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -171,10 +188,10 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     await expect(page.locator('#egd-level-tabs [role="tab"]')).toHaveText(peakTabLabels(peak));
     await expect(page.locator('.nk-egd-peak')).toHaveCount(1);
     const king = peak.levels!.find((level) => level.kind === 'king');
-    await expect(page.locator('.nk-egd-peak .nk-egd-floor__buffname'))
+    await expect(page.locator('.nk-egd-peak .nk-egd-buff__name'))
       .toHaveText(king!.buffs!.map((b) => b.name));
     await page.locator(peakKnightsTabId).click();
-    await expect(page.locator('.nk-egd-peak .nk-egd-floor__buffname')).toHaveCount(0);
+    await expect(page.locator('.nk-egd-peak .nk-egd-group')).toHaveCount(0);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -271,7 +288,7 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     ] as const) {
       await page.locator(peakTabId(king!)).click();
       await page.locator(peakNodeTabId(node)).click();
-      await expect(panel.locator('.nk-egd-floor__mechs > .nk-egd-floor__label')).toHaveText('机制');
+      await expect(panel.locator('.nk-egd-floor__mechs > .nk-egd-row__label')).toHaveText('机制');
       await expect(panel.locator('.nk-egd-peak__mech')).toHaveCount(tags.length);
       await expect(panel.locator('.nk-egd-peak__mech > .nk-egd-peak__tag'))
         .toHaveText(tags.map((m) => m.name));
