@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, settleAnimations, waitForCatalogCards } from './helpers';
-import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonRewardGroups, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
+import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonRewardGroups, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierBadges, tierceNodeBossNames, tierRuns, tierUnits } from './layout.shared';
 
 test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
   test('/endgame/boss/3021：层级子 tab（ADR 0026 / 0030）', async ({ page }) => {
@@ -1002,10 +1002,11 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       .toHaveText(rewardNames(floor1.reward!, names));
     await expect(clearReward.locator('.nk-egd-reward__num'))
       .toHaveText(rewardNums(floor1.reward!));
-    await expect(flat.locator('.nk-egd-tier__badge'))
-      .toHaveText(season.star_rewards!.map((t) => `累计 ${t.star}★`));
+    const bossRuns = tierRuns(season.star_rewards!);
+    await expect(flat.locator('.nk-egd-tier__badge')).toHaveText(tierBadges(bossRuns));
+    await expect(flat.locator('.nk-egd-tier__unit')).toHaveText(tierUnits(bossRuns));
     await expect(flat.locator('.nk-egd-tier__reward .nk-egd-reward__name'))
-      .toHaveText(season.star_rewards!.flatMap((t) => rewardNames(t.items, names)));
+      .toHaveText(bossRuns.flatMap((run) => rewardNames(run.items, names)));
     expect(season.floor_details!.flatMap((f) => f.star_rewards!.map((t) => t.star)))
       .toEqual(season.star_rewards!.map((t) => t.star));
     await noUnknownOverflow(page);

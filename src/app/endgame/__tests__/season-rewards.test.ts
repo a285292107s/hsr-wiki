@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { seasonRewardGroups, seasonRewardPlan } from '../season-rewards';
+import { mergeStarTierRuns } from '../renders';
 import type { MazeListEntry } from '../../../services/types';
 
 const target = (param: number) => ({ text: `#1[${param}]`, param });
@@ -119,5 +120,69 @@ describe('seasonRewardPlan 统一赛季压缩', () => {
     const plan = seasonRewardPlan(data);
     expect(plan.uniform).toBe(false);
     expect(plan.groups.map((group) => group.key)).toEqual(['knight-1', 'king-4']);
+  });
+});
+
+describe('星级阶梯同载荷合并', () => {
+  const uniform = (starRewards: { star: number; items: { id: number; num: number }[] }[]) => ({
+    id: 'test', zh: '测试',
+    clear_score: 30000,
+    countdown: 30,
+    floor_details: [
+      { floor: 1, reward: [reward(2, 100)], targets: [target(10)], star_rewards: [{ star: 1, items: [reward(1, 60)] }] },
+      { floor: 2, reward: [reward(2, 100)], targets: [target(10)], star_rewards: [{ star: 2, items: [reward(1, 60)] }] },
+    ],
+    star_rewards: starRewards,
+  }) as unknown as MazeListEntry;
+
+  it('相邻同载荷档合并为区间（档距 1）', () => {
+    const plan = seasonRewardPlan(uniform([
+      { star: 1, items: [reward(1, 60)] },
+      { star: 2, items: [reward(1, 60)] },
+      { star: 3, items: [reward(1, 80)] },
+      { star: 4, items: [reward(1, 80)] },
+    ]));
+    expect(plan.ladder!.map((row) => [row.star, row.starTo ?? null, row.starStep ?? null]))
+      .toEqual([[1, 2, 1], [3, 4, 1]]);
+  });
+
+  it('档距 >1 时带 starStep（忘却之庭 3★ 一档）', () => {
+    const plan = seasonRewardPlan(uniform([
+      { star: 3, items: [reward(1, 60)] },
+      { star: 6, items: [reward(1, 60)] },
+      { star: 9, items: [reward(1, 80)] },
+    ]));
+    expect(plan.ladder!.map((row) => [row.star, row.starTo ?? null, row.starStep ?? null]))
+      .toEqual([[3, 6, 3], [9, null, null]]);
+  });
+
+  it('条件不同不合并（按层/按关分组路径）', () => {
+    const data = {
+      id: 'test', zh: '测试',
+      floor_details: [
+        {
+          floor: 1,
+          reward: [reward(2, 100)],
+          targets: [target(10), target(20)],
+          star_rewards: [{ star: 3, items: [reward(1, 60)] }, { star: 6, items: [reward(1, 60)] }],
+        },
+      ],
+    } as unknown as MazeListEntry;
+    const groups = seasonRewardGroups(data);
+    expect(groups[0].rows).toHaveLength(2);
+    expect(groups[0].rows.every((row) => row.starTo == null)).toBe(true);
+  });
+
+  it('棱彩行与 0 星行不参与合并', () => {
+    const rows = mergeStarTierRuns([
+      { star: 1, targets: [], items: [reward(1, 60)] },
+      { star: 2, targets: [], items: [reward(1, 60)] },
+      { star: 3, targets: [], items: [reward(1, 60)], prism: true },
+      { star: 3, targets: [], items: [reward(1, 60)], prism: true },
+      { star: 0, targets: [], items: [] },
+      { star: 0, targets: [], items: [] },
+    ]);
+    expect(rows.map((row) => [row.star, row.starTo ?? null, !!row.prism]))
+      .toEqual([[1, 2, false], [3, null, true], [3, null, true], [0, null, false], [0, null, false]]);
   });
 });

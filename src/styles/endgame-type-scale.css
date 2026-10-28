@@ -35,6 +35,8 @@
 .nk-egd-tier__badge,
 .nk-egd-phase__skilldesc { font-size: var(--nk-fs-3); }
 
+.nk-egd-tier__unit { font-size: var(--nk-fs-2); }
+
 .nk-egd-buff__desc,
 .nk-egd-floor__buffdesc,
 .nk-egd-peak__mechdesc,

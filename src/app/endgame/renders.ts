@@ -139,10 +139,39 @@ export function targetHtml(t: MazeTargetInfo): string {
 
 export interface StarTierRow {
   star: number;
+  starTo?: number;
+  starStep?: number;
   label?: string;
   prism?: boolean;
   targets: MazeTargetInfo[];
   items: MazeRewardItem[];
+}
+
+function tierSignature(row: StarTierRow): string {
+  const items = row.items.map((item) => `${item.id}:${item.num ?? ''}`).sort().join(',');
+  const targets = row.targets.map((target) => `${target.type ?? ''}|${target.param ?? ''}|${target.text ?? ''}`).join(';');
+  return `${items}#${targets}`;
+}
+
+export function mergeStarTierRuns(rows: StarTierRow[]): StarTierRow[] {
+  const merged: StarTierRow[] = [];
+  for (const row of rows) {
+    const last = merged[merged.length - 1];
+    const continues = last != null
+      && !last.prism && !row.prism
+      && last.star > 0 && row.star > 0
+      && tierSignature(last) === tierSignature(row)
+      && (last.starTo == null
+        ? row.star > last.star
+        : last.starStep != null && row.star - last.starTo === last.starStep);
+    if (!continues) {
+      merged.push({ ...row });
+      continue;
+    }
+    if (last.starTo == null) last.starStep = row.star - last.star;
+    last.starTo = row.star;
+  }
+  return merged;
 }
 
 export function starTierRows(

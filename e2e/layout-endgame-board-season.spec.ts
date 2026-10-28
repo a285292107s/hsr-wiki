@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, waitForCatalogCards } from './helpers';
-import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, PEAK_HARD_NODE, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonRewardGroups, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
+import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, PEAK_HARD_NODE, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonRewardGroups, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierBadges, tierceNodeBossNames, tierRuns, tierUnits } from './layout.shared';
 
 test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙事 / 异相仲裁', () => {
   test('/endgame/maze：统一压缩（共享头 + 完整阶梯）+ 例外回退按层分组', async ({ page }) => {
@@ -21,10 +21,11 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
       .toHaveCount(season.floor_details![0].targets!.length);
     await expect(flat.locator('.nk-egd-season-flat__conditions .nk-egd-node').last())
       .toContainText(String(season.floor_details![0].targets!.at(-1)!.param));
-    await expect(flat.locator('.nk-egd-tier__badge'))
-      .toHaveText(ladder.map((t) => `累计 ${t.star}★`));
+    const ladderRuns = tierRuns(ladder);
+    await expect(flat.locator('.nk-egd-tier__badge')).toHaveText(tierBadges(ladderRuns));
+    await expect(flat.locator('.nk-egd-tier__unit')).toHaveText(tierUnits(ladderRuns));
     await expect(flat.locator('.nk-egd-tier__reward .nk-egd-reward__name'))
-      .toHaveText(ladder.flatMap((t) => rewardNames(t.items, itemNameMap())));
+      .toHaveText(ladderRuns.flatMap((run) => rewardNames(run.items, itemNameMap())));
     await expect(page.locator('#egd-season-rewards .nk-egd-season-shared .nk-egd-season-group__rewards .nk-egd-reward__name'))
       .toHaveText(rewardNames(season.floor_details![0].reward!, itemNameMap()));
     await expect(page.locator('#egd-season-rewards .nk-egd-season__note')).toHaveText('第 1–12 层适用');
@@ -110,10 +111,11 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
       .toHaveCount(story.floor_details![0].targets!.length);
     await expect(flat.locator('.nk-egd-season-flat__conditions .nk-egd-node').first().locator('.nk-egd-node__text'))
       .toContainText(String(story.floor_details![0].targets![0].param));
-    await expect(flat.locator('.nk-egd-tier__badge'))
-      .toHaveText(story.star_rewards!.map((t) => `累计 ${t.star}★`));
+    const storyRuns = tierRuns(story.star_rewards!);
+    await expect(flat.locator('.nk-egd-tier__badge')).toHaveText(tierBadges(storyRuns));
+    await expect(flat.locator('.nk-egd-tier__unit')).toHaveText(tierUnits(storyRuns));
     await expect(flat.locator('.nk-egd-tier__reward .nk-egd-reward__name'))
-      .toHaveText(story.star_rewards!.flatMap((t) => rewardNames(t.items, names)));
+      .toHaveText(storyRuns.flatMap((run) => rewardNames(run.items, names)));
     expect(story.floor_details![3].star_rewards!.map((t) => t.star)).toEqual([10, 11, 12]);
     await expect(page.locator('#egd-season-rewards .nk-egd-season-group')).toHaveCount(1);
     await expect(page.locator('#egd-season-rewards .nk-egd-season-group__title')).toHaveText('星启模式');
@@ -169,12 +171,13 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
       .toContainText(String(mazeFloor1.targets!.at(-1)!.param));
     await expect(mazeFlat.locator('.nk-egd-season-flat__conditions .nk-egd-node__type'))
       .toHaveCount(mazeFloor1.targets!.length);
+    const mazeRuns = tierRuns(maze.star_rewards!);
     await expect(mazeFlat.locator('.nk-egd-season-flat__ladder .nk-egd-tier'))
-      .toHaveCount(maze.star_rewards!.length);
+      .toHaveCount(mazeRuns.length);
     await expect(mazeFlat.locator('.nk-egd-season-flat__ladder .nk-egd-tier__lead'))
-      .toHaveCount(maze.star_rewards!.length);
+      .toHaveCount(mazeRuns.length);
     await expect(mazeFlat.locator('.nk-egd-season-flat__ladder .nk-egd-tier__reward'))
-      .toHaveCount(maze.star_rewards!.length);
+      .toHaveCount(mazeRuns.length);
     await expect(mazeFlat.locator('.nk-egd-season-flat__ladder .nk-egd-tier__brace'))
       .toHaveCount(0);
     await expect(page.locator('.nk-egd-buffzone--solo .nk-egd-floor__buffname')).toHaveText(mazeFloor1.buff!.name);
@@ -233,7 +236,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
       .toHaveText('通关奖励');
     await expect(storyFlat.locator('.nk-egd-season-flat__conditions .nk-egd-node')).toHaveCount(storyFloor1.targets!.length);
     await expect(storyFlat.locator('.nk-egd-season-flat__conditions .nk-egd-node__star')).toHaveCount(storyFloor1.targets!.length);
-    await expect(storyFlat.locator('.nk-egd-season-flat__ladder .nk-egd-tier')).toHaveCount(story.star_rewards!.length);
+    await expect(storyFlat.locator('.nk-egd-season-flat__ladder .nk-egd-tier')).toHaveCount(tierRuns(story.star_rewards!).length);
     await expect(storyFlat.locator('.nk-egd-season-flat__ladder .nk-egd-tier__brace')).toHaveCount(0);
     const storyClear = page.locator('#egd-season-rewards .nk-egd-season-shared .nk-egd-clear');
     await expect(storyClear.locator('.nk-egd-rules__label'))

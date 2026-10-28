@@ -244,6 +244,43 @@ export function rewardNums(items: RewardItemLike[]): string[] {
   return items.filter((it) => it.num).map((it) => `×${grouped(it.num!)}`);
 }
 
+export interface TierRun {
+  from: number;
+  to: number;
+  step: number;
+  items: RewardItemLike[];
+}
+
+export function tierRuns(tiers: { star: number; items: RewardItemLike[] }[]): TierRun[] {
+  const runs: TierRun[] = [];
+  const sig = (items: RewardItemLike[]): string =>
+    items.map((it) => `${it.id}:${it.num ?? ''}`).sort().join(',');
+  for (const tier of tiers) {
+    const last = runs[runs.length - 1];
+    if (last && last.step > 0 && sig(last.items) === sig(tier.items) && tier.star - last.to === last.step) {
+      last.to = tier.star;
+      continue;
+    }
+    if (last && last.from === last.to && sig(last.items) === sig(tier.items) && tier.star > last.to) {
+      last.step = tier.star - last.to;
+      last.to = tier.star;
+      continue;
+    }
+    runs.push({ from: tier.star, to: tier.star, step: 0, items: tier.items });
+  }
+  return runs;
+}
+
+export function tierBadges(runs: TierRun[]): string[] {
+  return runs.map((run) => (run.from === run.to ? `累计 ${run.from}★` : `累计 ${run.from}–${run.to}★`));
+}
+
+export function tierUnits(runs: TierRun[]): string[] {
+  return runs
+    .filter((run) => run.to > run.from)
+    .map((run) => (run.step > 1 ? `每 ${run.step}★ 一档，各 1 份` : '每颗星各 1 份'));
+}
+
 export function floorBossName(season: SeasonLike, floor: number, half: 'stage1' | 'stage2'): string {
   const f = (season.floor_details ?? []).find((x) => x.floor === floor);
   if (!f) throw new Error(`赛季 ${season.id} 缺少第 ${floor} 层`);

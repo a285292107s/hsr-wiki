@@ -1,5 +1,5 @@
 import { translate } from '../i18n';
-import { starTierRows, type StarTierRow } from './renders';
+import { mergeStarTierRuns, starTierRows, type StarTierRow } from './renders';
 import { fmtNumber } from '../../lib/format';
 import type {
   MazeFloorDetail, MazeListEntry, MazeRewardItem, MazeTargetInfo, PeakLevelInfo,
@@ -27,6 +27,10 @@ export interface SeasonRewardPlan {
   conditions?: MazeTargetInfo[];
   ladder?: StarTierRow[];
   tierce?: SeasonRewardGroup | null;
+}
+
+function tierRows(...args: Parameters<typeof starTierRows>): StarTierRow[] {
+  return mergeStarTierRuns(starTierRows(...args));
 }
 
 function floorStages(floor: MazeFloorDetail): number {
@@ -70,7 +74,7 @@ export function seasonRewardGroups(data: MazeListEntry): SeasonRewardGroup[] {
   const floors = [...(data.floor_details || [])].sort((a, b) => a.floor - b.floor);
   for (const floor of floors) {
     const items = floor.reward || [];
-    const rows = starTierRows(floor.targets || [], floor.star_rewards || []);
+    const rows = tierRows(floor.targets || [], floor.star_rewards || []);
     if (!items.length && !rows.length) continue;
     groups.push({
       key: `floor-${floor.floor}`,
@@ -83,7 +87,7 @@ export function seasonRewardGroups(data: MazeListEntry): SeasonRewardGroup[] {
   if (data.tierce) {
     const targets = data.tierce.targets || [];
     const lastFloor = floors[floors.length - 1];
-    const rows = starTierRows(
+    const rows = tierRows(
       targets.filter((t) => !t.prism),
       lastFloor?.star_rewards || [],
       {
@@ -107,7 +111,7 @@ export function seasonRewardGroups(data: MazeListEntry): SeasonRewardGroup[] {
     const king = levels.find((lv) => lv.kind === 'king');
     const ordered = [...knights, ...(king ? [king] : [])];
     ordered.forEach((level, index) => {
-      const rows = starTierRows(level.targets || [], level.star_rewards || []);
+      const rows = tierRows(level.targets || [], level.star_rewards || []);
       if (!rows.length) return;
       groups.push({
         key: `${level.kind}-${level.id ?? index}`,
@@ -118,7 +122,7 @@ export function seasonRewardGroups(data: MazeListEntry): SeasonRewardGroup[] {
       });
     });
     if (king?.hard) {
-      const rows = starTierRows(king.hard.targets || [], king.hard.star_rewards || []);
+      const rows = tierRows(king.hard.targets || [], king.hard.star_rewards || []);
       if (rows.length) {
         groups.push({
           key: `king-${king.id ?? 'hard'}-hard`,
@@ -172,7 +176,7 @@ export function seasonRewardPlan(data: MazeListEntry): SeasonRewardPlan {
     floorTo: floors[floors.length - 1].floor,
     clear: { rules: floorRules(data, first), items: first.reward || [] },
     conditions: first.targets || [],
-    ladder: starTierRows([], data.star_rewards || []),
+    ladder: tierRows([], data.star_rewards || []),
     tierce,
   };
 }

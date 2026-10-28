@@ -17,6 +17,19 @@ const label = computed(() => {
 });
 
 const hasPrism = computed(() => props.rows.some((r) => r.prism));
+
+function badgeText(row: StarTierRow): string {
+  if (row.prism) return t('egd.prismStar');
+  if (row.starTo == null) return t('egd.accumStars', { n: row.star });
+  return t('egd.accumStarsRange', { from: row.star, to: row.starTo });
+}
+
+function unitText(row: StarTierRow): string {
+  if (row.prism || row.starTo == null) return '';
+  return row.starStep != null && row.starStep > 1
+    ? t('egd.accumStarsUnitStep', { step: row.starStep })
+    : t('egd.accumStarsUnit');
+}
 </script>
 
 <template>
@@ -24,8 +37,11 @@ const hasPrism = computed(() => props.rows.some((r) => r.prism));
     <span v-if="!hideLabel" class="nk-egd-head__label">{{ label }}</span>
     <ul class="nk-egd-tiers" :class="{ 'nk-egd-tiers--prism': hasPrism }">
       <li v-for="(row, i) in rows" :key="i" class="nk-egd-tier">
-        <span class="nk-egd-tier__badge" :class="{ 'nk-egd-tier__badge--prism': row.prism }">
-          {{ row.prism ? t('egd.prismStar') : t('egd.accumStars', { n: row.star }) }}
+        <span class="nk-egd-tier__stars">
+          <span class="nk-egd-tier__badge" :class="{ 'nk-egd-tier__badge--prism': row.prism }">
+            {{ badgeText(row) }}
+          </span>
+          <span v-if="unitText(row)" class="nk-egd-tier__unit">{{ unitText(row) }}</span>
         </span>
         <span class="nk-egd-tier__cond">
           <EndgameTargetRow

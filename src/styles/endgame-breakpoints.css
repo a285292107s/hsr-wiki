@@ -42,7 +42,7 @@
   .nk-egd-tabs .nk-tab--active::after { left: 9px; right: 9px; }
   .nk-egd-tabs .nk-tab:first-child::after { left: 0; }
   .nk-egd-lvl { gap: 18px; }
-  .nk-egd-tiers { gap: 12px; }
+  .nk-egd-tiers { gap: 10px; }
   .nk-egd-tier {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto auto;
@@ -52,7 +52,7 @@
     border: 1px solid var(--line-1);
     border-radius: var(--nk-radius-card);
   }
-  .nk-egd-tier__badge { grid-column: 1; grid-row: 1; justify-self: start; }
+  .nk-egd-tier__stars { grid-column: 1; grid-row: 1; justify-self: start; }
   .nk-egd-tier__cond { grid-column: 1; grid-row: 2; gap: 8px; }
   .nk-egd-tier__brace { display: none; }
   .nk-egd-tier__reward {

@@ -48,7 +48,7 @@
   color: var(--text3);
   white-space: nowrap;
 }
-.nk-egd-tiers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.nk-egd-tiers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .nk-egd-tier {
   display: grid;
   grid-template-columns: auto minmax(0, auto) auto;
@@ -56,10 +56,20 @@
   align-items: baseline;
   gap: 6px 12px;
 }
-.nk-egd-tier__badge {
+.nk-egd-tier__stars {
   grid-column: 1;
   grid-row: 1;
   justify-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.nk-egd-tier__unit {
+  letter-spacing: 0.02em;
+  color: var(--text2);
+}
+.nk-egd-tier__badge {
   padding: 2px 8px;
   border: 1px solid color-mix(in srgb, var(--eg-color) 34%, transparent);
   border-radius: var(--nk-radius-1);
@@ -194,16 +204,16 @@
 .nk-egd-reward__items {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 .nk-egd-reward__item {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   max-width: 100%;
   min-width: 0;
-  padding: 4px 10px 4px 4px;
+  padding: 3px 8px 3px 3px;
   background: color-mix(in srgb, var(--blk-900) 14%, transparent);
   border: 1px solid var(--line-1);
   border-radius: var(--nk-radius-card);
@@ -211,8 +221,8 @@
 }
 .nk-egd-reward__item:hover { border-color: var(--line-2); }
 .nk-egd-reward__icon {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border-radius: var(--nk-radius-2);
   object-fit: cover;
   background: color-mix(in srgb, var(--blk-900) 60%, transparent);
