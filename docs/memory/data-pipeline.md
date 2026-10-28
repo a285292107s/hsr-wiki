@@ -126,3 +126,5 @@
 - **转换器里 `clean_text(resolve_text(...))` 是双洗，会静默吞掉文本的 TextMap 键**：`resolve_text` 默认已 `clean=True`，再包一层 `clean_text` 会把携带键的 `TextRef` 退化成普通 `str`（见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md) 的令牌化）。`convert.py --tokens` 结束时打印的「结构层残留中文」清单里，凡 `text` / `desc` 字段成片出现且形如游戏模板（带 `#1[i]`）的，先查这类冗余二次加工与字符串拼接，不要先怀疑 TextMap 缺键。
 
 - **联合模式保留旧值时必须配套「末尾清洗」**：`skill_animations.json` 的旧 `title`（wiki 中文小标题）会随「既有优先」一直留着，脚本末尾按不变量（`title` 只能是非令牌则删除）统一清洗后，结构层残留中文从 16 处降到 2 处（仅剩已登记的属性回退）。
+- **`convert.py --only currency` 会重写 `public/data/i18n/*/currency.json`，但只收角色侧令牌**：`currency/` 语言包同时服务 `currency.py`（角色）与 `currency_catalog.py`（装备 / 环境 / 策略 / 羁绊），单独跑前者会把后者 1100+ 键（含全部 `composed:cwaug:*`）从包里抹掉 ⇒ 必须 `--only currency,currency_catalog` 同跑；`check-i18n-packs.mjs` 会红，别等构建才发现。
+

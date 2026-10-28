@@ -441,7 +441,7 @@ function hideOnError(e: Event) {
                   <div v-if="skillStarIdx(sk) >= 0">
                     <p v-if="descMode === 'simple'" class="nk-crole-skill__simple" v-html="fmtDescStar(sk.simple_desc, sk.paramSets, skillStarIdx(sk))"></p>
                     <template v-else>
-                      <div class="nk-crole-skill__desc" v-html="fmtDescStar(sk.desc, sk.paramSets, skillStarIdx(sk))"></div>
+                      <div class="nk-crole-skill__desc" v-html="fmtDescStar(sk.desc || sk.simple_desc, sk.paramSets, skillStarIdx(sk))"></div>
                       <ul v-if="sk.extraSets.length" class="nk-crole-skill__extra">
                         <li v-for="(ex, ek) in sk.extraSets" :key="ek">
                           <b>{{ ex.name }}：</b><span v-html="fmtDescStar(ex.desc, ex.paramSets, skillStarIdx(sk))"></span>

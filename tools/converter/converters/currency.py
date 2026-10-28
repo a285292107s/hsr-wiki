@@ -43,6 +43,43 @@ def _load_excel(name: str) -> list[dict]:
 def _build_index(data: list[dict], key: str = "ID") -> dict[Any, dict]:
     return {item[key]: item for item in data}
 
+def _index_avatar_skills(data: list[dict]) -> dict[int, dict]:
+    out: dict[int, dict] = {}
+    for entry in data:
+        sid = entry.get("SkillID")
+        if sid is None:
+            continue
+        current = out.get(sid)
+        if current is None or entry.get("Level", 0) < current.get("Level", 0):
+            out[sid] = entry
+    return out
+
+def _avatar_skill_id(skill_id: int, avatar_id: int) -> int | None:
+    s = str(skill_id)
+    for prefix in (f"1{avatar_id}", str(avatar_id)):
+        tail = s[len(prefix):]
+        if s.startswith(prefix) and len(tail) == 4:
+            return avatar_id * 100 + int(tail[:2])
+    return None
+
+def _fallback_skill_text(
+    skill_id: int,
+    name: str,
+    simple_desc: str,
+    base_skills: dict[int, dict] | None,
+    avatar_id: int | None,
+) -> tuple[str, str]:
+    if not base_skills or avatar_id is None or (name and simple_desc):
+        return name, simple_desc
+    base_skill_id = _avatar_skill_id(skill_id, avatar_id)
+    base = base_skills.get(base_skill_id) if base_skill_id is not None else None
+    if base is None:
+        return name, simple_desc
+    return (
+        name or resolve_text(base.get("SkillName", {})),
+        simple_desc or resolve_text(base.get("SimpleSkillDesc", {})),
+    )
+
 def _unwrap(v: Any, default: Any = None) -> Any:
     if v is None:
         return default
@@ -200,6 +237,10 @@ def convert() -> None:
     role_list_raw = _load_excel("GridFightRoleBasicInfo.json")
     avatar_config = _load_excel("AvatarConfig.json")
     avatar_ld = _load_excel("AvatarConfigLD.json") if (EXCEL_DIR / "AvatarConfigLD.json").exists() else []
+    avatar_skill_raw = _load_excel("AvatarSkillConfig.json")
+    if (EXCEL_DIR / "AvatarSkillConfigLD.json").exists():
+        avatar_skill_raw = avatar_skill_raw + _load_excel("AvatarSkillConfigLD.json")
+    avatar_skill_index = _index_avatar_skills(avatar_skill_raw)
     trait_data = _build_index(_load_excel("GridFightTraitBasicInfo.json"), "ID")
     star_data = _load_excel("GridFightRoleStar.json")
     front_skills = _build_index(_load_excel("GridFightFrontSkill.json"), "SkillID")
@@ -357,9 +398,18 @@ def convert() -> None:
             be_skill_ids: list[int] = star_entry.get("BESkillIDList") or []
             back_show_ids: list[int] = star_entry.get("BackShowSkillIDList") or []
 
-            front_skills_out = [_build_skill(sid, front_skills, {}, skill_extra) for sid in front_skill_ids]
-            back_skills_out = [_build_skill(sid, back_skills, {}, skill_extra) for sid in be_skill_ids]
-            back_show_out = [_build_skill(sid, back_skills, {}, skill_extra) for sid in back_show_ids]
+            front_skills_out = [
+                _build_skill(sid, front_skills, {}, skill_extra, avatar_skill_index, avatar_id)
+                for sid in front_skill_ids
+            ]
+            back_skills_out = [
+                _build_skill(sid, back_skills, {}, skill_extra, avatar_skill_index, avatar_id)
+                for sid in be_skill_ids
+            ]
+            back_show_out = [
+                _build_skill(sid, back_skills, {}, skill_extra, avatar_skill_index, avatar_id)
+                for sid in back_show_ids
+            ]
             seen_ids = {sk["id"] for sk in back_skills_out}
             for bsk in back_show_out:
                 if bsk["id"] not in seen_ids:
@@ -380,7 +430,9 @@ def convert() -> None:
                     "speed_skill": sv_entry.get("SpeedSkill"),
                 }
                 for sid in (sv_entry.get("ServantShowSkiilIDList") or []):
-                    servant_skills_out.append(_build_skill(sid, servant_skills, {}, skill_extra))
+                    servant_skills_out.append(
+                        _build_skill(sid, servant_skills, {}, skill_extra, avatar_skill_index, avatar_id)
+                    )
 
             star_node = {
                 "star": star_entry["Star"],
@@ -448,10 +500,13 @@ def _build_skill(
     skill_index: dict[int, dict],
     overrides: dict[str, Any] | None = None,
     extra_index: dict[int, dict] | None = None,
+    base_skills: dict[int, dict] | None = None,
+    avatar_id: int | None = None,
 ) -> dict:
     sk = skill_index.get(sid)
     if sk is None:
-        return {"id": sid, "name": "", "desc": "", "simple_desc": "", "tag": None,
+        name, simple_desc = _fallback_skill_text(sid, "", "", base_skills, avatar_id)
+        return {"id": sid, "name": name, "desc": "", "simple_desc": simple_desc, "tag": None,
                 "icon": "",
                 "type": None, "sp_base": None, "bp_need": None, "bp_add": None,
                 "show_stance_list": [], "stance_damage_type": None, "stance_damage_display": None,
@@ -462,6 +517,7 @@ def _build_skill(
     type_desc = resolve_text(sk.get("SkillTypeDesc", {}))
     desc = resolve_text(sk.get("SkillDesc", {}))
     simple_desc = resolve_text(sk.get("SimpleSkillDesc", {}))
+    name, simple_desc = _fallback_skill_text(sid, name, simple_desc, base_skills, avatar_id)
 
     sp_base = _unwrap(sk.get("SPBase"))
     sp_need = _unwrap(sk.get("SPNeed"), None)

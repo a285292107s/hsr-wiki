@@ -13,6 +13,8 @@ def setup_textmap(monkeypatch):
     monkeypatch.setattr(textmap, "_text_map", {
         "9774490082531591747": "初始能量",
         "14993609201079937303": "伤害增幅",
+        "14911685018109579366": "无间剑树",
+        "9804904030572318046": "消耗自身生命值，对敌方单体造成风属性伤害。",
     })
 
 class TestBuildPropNames:
@@ -127,3 +129,54 @@ class TestAugmentDescComposer:
 
         out = cc._augment_desc({"2": "获得<gridfightinfo type=item id=99/>"}, "2", {}, {})
         assert out == "获得"
+
+class TestAvatarSkillFallback:
+    def test_index_keeps_lowest_level_row(self):
+        data = [
+            {"SkillID": 120508, "Level": 2, "SkillName": {"Hash": 14911685018109579366}},
+            {"SkillID": 120508, "Level": 1, "SkillName": {"Hash": 0}},
+        ]
+        assert cur._index_avatar_skills(data)[120508]["Level"] == 1
+
+    def test_avatar_skill_id_decodes_four_digit_avatar(self):
+        assert cur._avatar_skill_id(112050801, 1205) == 120508
+        assert cur._avatar_skill_id(10060201, 1006) == 100602
+
+    def test_avatar_skill_id_rejects_other_avatar(self):
+        assert cur._avatar_skill_id(112050801, 1101) is None
+
+    def test_fallback_fills_missing_name_and_simple_desc(self):
+        base = {120508: {
+            "SkillName": {"Hash": 14911685018109579366},
+            "SimpleSkillDesc": {"Hash": 9804904030572318046},
+        }}
+        assert cur._fallback_skill_text(112050801, "", "", base, 1205) == (
+            "无间剑树", "消耗自身生命值，对敌方单体造成风属性伤害。")
+
+    def test_fallback_keeps_existing_text(self):
+        base = {120508: {
+            "SkillName": {"Hash": 14911685018109579366},
+            "SimpleSkillDesc": {"Hash": 9804904030572318046},
+        }}
+        assert cur._fallback_skill_text(112050801, "已有名", "已有短述", base, 1205) == ("已有名", "已有短述")
+
+    def test_fallback_without_base_index_is_noop(self):
+        assert cur._fallback_skill_text(112050801, "", "", None, 1205) == ("", "")
+
+    def test_build_skill_uses_fallback(self):
+        base = {120508: {
+            "SkillName": {"Hash": 14911685018109579366},
+            "SimpleSkillDesc": {"Hash": 9804904030572318046},
+        }}
+        out = cur._build_skill(
+            112050801,
+            {112050801: {"SkillIcon": "icon.png", "ParamList": [{"Value": 0.1}]}},
+            {},
+            None,
+            base,
+            1205,
+        )
+        assert out["name"] == "无间剑树"
+        assert out["simple_desc"] == "消耗自身生命值，对敌方单体造成风属性伤害。"
+        assert out["desc"] == ""
+

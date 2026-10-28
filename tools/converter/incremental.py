@@ -128,6 +128,7 @@ MODULE_SOURCES: dict[str, list[str]] = {
     ],
     "currency": [
         "GridFightRoleBasicInfo.json", "AvatarConfig.json", "AvatarConfigLD.json",
+        "AvatarSkillConfig.json", "AvatarSkillConfigLD.json",
         "GridFightRolePropertyConfig.json", "GridFightTraitBasicInfo.json", "GridFightRoleStar.json",
         "GridFightFrontSkill.json", "GridFightBackBESkillConfig.json",
         "GridFightTraitMazebuff.json", "GridFightTraitLayer.json",
