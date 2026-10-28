@@ -25,7 +25,7 @@
 - **canvas buffer 与舞台 CSS 必须恒 1:1**（buffer 比例 = `viewport` 比例），否则整幅半屏错位；高 DPR 下把舞台 CSS 收缩到 buffer 最长边 ≤ 2560（WebGL 内存），舞台再被 cover 缩放铺满容器。官网 KV 主体落在画布 4%~96% 的中央带 ⇒ cover 在宽屏裁上下、窄屏裁两侧都切不到主体。`src/spine/scene.ts`
 - **`camera.position` 是 `Vector3`，`set()` 必须三参全传**：z 传 `undefined` 会污染 view 矩阵（整幅偏斜），而类型上 z 看起来可省、TS 不报。`src/spine/types.ts` `src/spine/scene.ts`
 - **多层共享视口的 `pad*` 必须显式传 0 才能关掉 spine-player 默认的 10% 边距**：不传时各层各留 10%，多层骨架按不同边距缩放、层间错位。`src/app/debug/use-scene-pipeline.ts` `src/spine/types.ts`
-- **镜流 1212（nanoka `jl`）的整幅场景底板在角色页呈硬边黑块，产品决定暂不处理**：该资产 slot `bg` 是「月夜/水面」整幅 KV 导出（平均亮度 65/255、近黑不透明像素 26%），在 `--bg #121214` 上落地成一块矩形；隐藏底板能去黑块但会连带丢掉场景美术（已由用户否决），换带羽化边的资源前保持原样。其余 14 个带 `bg` 底板的角色（1110 玲可 / 1203 罗刹 / 1308 黄泉 …）底板是正常亮度插画（82~212），本来就不成黑块——判据是底板发光度，不是「有 bg slot」本身。`public/data/cn/spine-manifest-nanoka.json`
+- **镜流 1212（nanoka `jl`）的整幅场景底板在角色页呈硬边黑块，产品决定暂不处理**：该资产 slot `bg` 是「月夜/水面」整幅 KV 导出（平均亮度 65/255、近黑不透明像素 26%），在 `--bg #121214` 上落地成一块矩形；隐藏底板能去黑块但会连带丢掉场景美术（已由用户否决），换带羽化边的资源前保持原样。其余带 `bg` 底板的角色（1110 玲可 / 1203 罗刹 / 1308 黄泉 …）底板是正常亮度插画（82~212），本来就不成黑块——判据是底板发光度，不是「有 bg slot」本身。`public/data/cn/spine-manifest-nanoka.json`
 - **真要隐藏底板只能走 `update` 钩子逐帧压 `slot.color.a`**：动画每帧回写 slot 颜色、`setViewport` 还会 `setToSetupPose`，一次性 `color.a = 0` 或 `setAttachment(null)` 都会被冲掉（播放与暂停下表现不同，极易误判成「无效」）；`update` 在 `state.apply` 之后、绘制之前调用。`src/spine/player.ts`
 
 ## 动画与像素取证
@@ -48,7 +48,7 @@
 
 ## CDN 双源与占位
 
-- **占位图以 HTTP 200 下发时会绕过整条回退链，「状态码全绿」类检查（含死链审计）永远查不出来**：nanoka 圆头像 1503 的 200 响应内容是游戏内测试贴图、字节数比同类中位数小一个量级，回退源 jsDelivr 还是同一张 ⇒ 判缺失必须比内容。`src/services/cdn/dom.ts`
+- **占位图以 HTTP 200 下发时会绕过整条回退链，「状态码全绿」类检查（含死链审计）永远查不出来**：nanoka 圆头像 1503 的 200 响应内容是游戏内测试贴图、字节数比同类中位数小一个量级，回退源 jsDelivr 还是同一张 ⇒ 判缺失必须比内容，且比对要排除缓存（同一探针再取一个不存在的路径，确认它真 404）。`src/services/cdn/dom.ts`
 - **nanoka `assets/hsr/trace/*.webp` 全部是 146 字节的占位图**（RIFF/WEBP 头合法但不是真图标）：trace 的真源只有 jsDelivr，本地缺失时的回退必须落到 jsDelivr 而非 nanoka。`src/services/cdn/base.ts`
 - **「双源回退」必须逐分类实测两侧都有资产**：jsDelivr fork 已冻结，新角色与部分分类（如 `avatarroundicon`）在 jsDelivr 侧永久 404；故禁止切回无回退的直拼模式（`USE_OFFICIAL_PATHS=true`），新内容在直拼下必破图。`src/services/cdn/resolve.ts`
 - **玩法入口图标只取玩法级默认图（`modeDefaultArtUrl`），不要改回每季 `arts.tab` 页签图**：4 类玩法图标恒定、不随新赛季漂移；fork 冻结后新赛季的页签图在回退源缺失即破图。`src/app/catalog/pages/endgame.ts` `src/app/endgame/EndgameHero.vue`
@@ -57,7 +57,6 @@
 - **入库图标的四个非文档化环节**：① 字形是**纯白 + 透明底**，白底预览看不出内容、`naturalWidth > 0` 也证明不了有内容 ⇒ 必须同批生成**深底大字预览**核对；② 转码走 **PicList 的转码工具**且**必须显式设 `quality=82`**——PicList 缺省 `quality` 是 **100**（`getOutputQuality()` 在 `quality` 缺失/非法时返回 100），不设只能省 32% 而非 83%；③ 参数哨兵：Pillow `Image.open(src).convert('RGBA').save(dst, 'WEBP', quality=82, method=6)` 可**逐字节复现**已入库产物（9/9），但字节只锁 **libwebp 参数、不锁 wrapper**——据此断言「用的是哪个工具」是错的；④ **不要**改用 Chromium 的 `canvas.toDataURL('image/webp')`：实测同输入下 64×64 图标产物约大 1 倍（572 B → 1190 B）且质量 0.8–1.0 全网格无逐字节命中。（裁切口径见 ADR 0044，转码与入库口径决策见 ADR 0057）`public/data/assets/icons/`
 - **`img.currentSrc` 要等浏览器异步完成资源选择才有值，元素插入 ≠ 已选源**：靠固定 sleep 兜底它的断言改成条件等待后会偶发拿到空串；紧跟等待之后的 `currentSrc` / `naturalWidth` / 字体度量读取点都要逐个补条件等待。`e2e/helpers.ts`
 - **CDN 位图断言有两种不同失败，不能用同一个补丁糊**：慢导致的用 `expect.poll(..., { timeout: 15_000 })`；`loading="lazy"` 在视口外或横向滚动区外是「不触发」，poll 救不回来，必须逐张 `scrollIntoViewIfNeeded()`。`e2e/helpers.ts`
-- **`complete` / `naturalWidth` 类断言前面必须有条件等待**：否则它的通过与否取决于跑在它前面的用例是否预热了缓存——Chromium 长期偶然绿、Firefox 立即判红，会被误判成跨引擎缺陷。`e2e/helpers.ts`
 - **拍含 `loading="lazy"` 图的区块前必须等块内图片 `complete`**：滚进视口后只等固定毫秒就截图，会把「还没加载」拍成「加载失败」，进而去修不存在的问题。`e2e/helpers.ts`
 - **挂起兜底不能把「还没开始拉取」当挂起**：`loading="lazy"` 且尚无 `currentSrc` 的 img 必须等 `loadstart` 后才启动 `CDN_STALL_TIMEOUT_MS` 定时器——屏外图的 `complete` 恒为 false，按它判挂起会把整屏卡片误标 `data-cdn-down` 隐藏。真挂起与真失败同解（降级 + 占位），原 URL 留 `dataset.cdnSrc` 供恢复重载。`src/services/cdn/dom.ts`
 - **分类反查靠 nanoka 前缀匹配，注册表顺序是硬约束**：`cdnFallbackFromPrimary` 用 `rest.startsWith(spec.nanoka + '/')` 找分类 ⇒ 宽前缀分类（`gridfight`）必须排在 `gridfight-equipment` / `-icon` / `-affix` 之后，否则会抢走更具体分类的 marker；新增分类先查前缀关系。`src/services/cdn/base.ts` `src/services/cdn/resolve.ts`

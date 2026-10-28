@@ -33,26 +33,22 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 ## 常用命令
 
 ```bash
-pnpm install            # 依赖安装（版本口径唯一落位 tech-stack.md）
-pnpm dev                # → http://localhost:6188/（固定端口 strictPort；禁止改回 5173；「改了不生效」先自愈，见 commands.md）
-pnpm build              # 七守卫（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文）→ vue-tsc -b → vite build → AI 端点生成 + AI 端点守卫
+pnpm install            # 依赖安装（版本口径 → tech-stack.md）
+pnpm dev                # → http://localhost:6188/（固定端口，禁止换回默认端口；「改了不生效」先自愈，见 commands.md）
+pnpm build              # 守卫链 → vue-tsc -b → vite build → AI 端点生成 + AI 端点守卫（守卫清单唯一落位 commands.md）
 pnpm test               # 运行全部测试（Vitest）
 pnpm vitest run <文件>   # 运行单个测试文件
 pnpm test:e2e:affected  # 只跑按 git diff 推导出的受影响用例（「禁全量 e2e」的落地命令）
-pnpm test:e2e:guards    # 不变量层：不变量 + 外壳契约 + a11y（guards + shell + accessibility）——CI 慢档之一
-pnpm test:e2e:layout    # 布局契约层（全部 layout-*；CI 慢档里按 6 分片跑）
-pnpm test:e2e:ci        # 上面两层合集（本地一次跑完 CI 慢档的全部 e2e；push 档只跑 static + unit-tests）
-node tools/gen-ai-endpoints.mjs   # 单独重建 AI 快照（读 dist/index.html 为模板，须先 vite build）
-node tools/check-ai-endpoints.mjs # AI 端点守卫（快照正文/内链/sitemap/robots 覆盖率；pnpm build 末步自动跑）
-node tools/check-languages.mjs   # 语言清单守卫（converter languages.json ↔ 前端 locales.ts + 上游语言交叉校验；pnpm build 前置自动跑）
-node tools/check-i18n-packs.mjs  # 语言包覆盖守卫（结构层令牌 ↔ 13 语言语言包，含缺包/缺键/非中文语言包不得残留中文「开拓者」/含汉字条目数只降不升；pnpm build 前置自动跑）
-node tools/check-i18n-messages.mjs # UI 词典守卫（13 语言键集对齐 / 空值 / 漏译 / 代码里 t() 的键拼写；pnpm build 前置自动跑）
-node tools/check-ui-chinese.mjs  # 界面中文守卫（代码里不得写死面向用户的中文文案；有意保留清单以白名单固化，pnpm build 前置自动跑）
-node tools/check-doc-links.mjs   # 文档链接校验（断链或误删引用即非零退出；仅手动，未进 CI）
-node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由登记 / 版本号 / 汇报腔；改文档后跑）
+pnpm test:e2e:prod      # 同一批断言跑 build 产物（整层快数倍；判据与边界见 testing.md）
+pnpm test:e2e:guards    # 不变量层：guards + shell + a11y
+pnpm test:e2e:layout    # 布局契约层：全部 layout-*
+pnpm test:e2e:ci        # 上面两层合集（本地一次跑完 CI 慢档的全部 e2e）
+node tools/doc-audit.mjs        # 文档结构化审核（改文档后跑）
+node tools/check-doc-links.mjs  # 文档链接校验（断链或误删引用即非零退出；仅手动，未进 CI）
+node tools/check-field-map.mjs  # 转换器字段映射结构守卫（单行超长 / H2 重复 / 每节契约行 / 索引表一致；默认 report-only，--strict 才失败）
 ```
 
-全量命令手册（e2e 分层与像素基线、研究线 `/debug`、converter、漂移检查器、部署与门禁、dev 缓存自愈）见 [commands.md](docs/agents/commands.md)。
+全量命令手册（守卫逐条、e2e 分层与像素基线、研究线 `/debug`、converter、漂移检查器、部署与门禁、dev 缓存自愈）见 [commands.md](docs/agents/commands.md)。
 
 ## 架构（每次改动前必知）
 
@@ -69,7 +65,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
   - 前端只读字段、判据在 converter——字段见 [转换器字段映射.md](docs/data/转换器字段映射.md)，决策见 [ADR 0019](docs/adr/0019-枢纽页导航条回归与首页改为版本上新页.md) / [ADR 0020](docs/adr/0020-货币战争枢纽页改为本赛季新增页.md)。
 - **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——探索走 `query.py`，字段结构走 `DATA_CATALOG.md` 总索引（按需读 `.parts/` 分片，禁整读），转换走 `convert.py`。
 - **AI 检索可见性＝构建期预渲染快照**：服务端 HTML 决定可见性（实测爬虫零 JS 执行）；`pnpm build` 末步生成 `dist/prerender/**.html`，`vercel.json` 在 catch-all 之前用明确 rewrite 投递，JS 用户与爬虫拿到同一份 HTML（非 cloaking）。
-  - **新增可索引路由必须同步快照 + rewrite + sitemap**，否则末步守卫 `tools/check-ai-endpoints.mjs` 失败（契约见 [ai-discoverability.md](docs/agents/ai-discoverability.md)）。
+  - **新增可索引路由必须同步快照 + rewrite + sitemap**，漏任一处末步守卫即失败；生成器与 `tools/check-ai-endpoints.mjs` 的家族清单不同步同样会被判「未登记快照」，故没有静默漏检（契约见 [ai-discoverability.md](docs/agents/ai-discoverability.md)）。
 
 > 分层结构与依赖矩阵 / 研究线（Spine Lab）/ 新增目录扩展指南（端到端）→ [architecture.md](docs/agents/architecture.md)
 
@@ -153,6 +149,7 @@ node tools/doc-audit.mjs         # 文档结构化审核（体量红线 / 路由
 | T3 | Spine / Canvas / 动画 / 异步编排 | 守卫 + 取证金字塔 L1-L4 按需；先探测 `visibilityState` 与 rAF（后台标签页挂起陷阱） | ≤30 min |
 
 - **降级必须记录**：超预算降级 / 跳过某级验证 / 豁免项一律写进交付记录（原级别 + 原因），**禁止静默降级**——未记录视为漏测。细则与其余执行纪律见 [verification.md](docs/agents/verification.md)「执行纪律」。
+- **e2e 优先跑 build 产物**：需要跑成批 e2e 时用 `pnpm test:e2e:prod`（同批断言实测快 4 倍，判据与边界见 [testing.md](docs/agents/testing.md)），dev 档留给单条调试；两者断言语义相同，`@dev-only` 用例只在 dev 档收集。
 - **验证耗时控制**：`visual.spec` 全量禁止，只跑改动实际影响的用例（`pnpm test:e2e:affected` 或 `--grep <关键词>`）；同一会话内全量 e2e 最多一次。
 
 ## 本文件维护（防回流）

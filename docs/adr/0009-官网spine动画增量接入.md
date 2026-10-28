@@ -12,7 +12,7 @@
 - 双通道快路径：随本次清理删除（采纳 ADR-0002 意图）——独立站无宿主 canvas 可抢，快路径为死代码且空转 2s 宽限期延迟动画出现。
 
 **Consequences**:
-- 运行时为双版本并存（`4.2.43` 官网 JSON/场景 + `4.1.23` nanoka `.skel`），条目可选 `runtime` 标记分派，收口于 `src/services/api/spine.ts`；运行时常量与本地/兜底源清单见 `src/spine/constants.ts`。**禁止按版本串直觉推断兼容性**：4.0 系导出的骨架 JSON 在 4.2 运行线下会静默丢弃骨骼 `transform` 继承字段导致姿态错误（判定与处置见 docs/memory/2026-09.md）。
+- 运行时为双版本并存（`4.2.43` 官网 JSON/场景 + `4.1.23` nanoka `.skel`），条目可选 `runtime` 标记分派，收口于 `src/services/api/spine.ts`；运行时常量与本地/兜底源清单见 `src/spine/constants.ts`。**禁止按版本串直觉推断兼容性**：4.0 系导出的骨架 JSON 在 4.2 运行线下会静默丢弃骨骼 `transform` 继承字段导致姿态错误（判定与处置见 [docs/memory/spine.md](../memory/spine.md)「判兼容性看骨架字段，不看版本串」）。
 - 官网纹理 URL 必须使用原始 png（去掉 `?x-oss-process=image/format,webp/quality,Q_90` 参数）：带参数时 Image 加载卡死、success 永不触发（浏览器实测）。
 - 官网 atlas 的 page 名不可替换为含冒号的绝对 URL（Spine 4.2 atlas 解析器会把含冒号的行当属性行消费）。
 - spine-player 的加载依赖 rAF 循环驱动：标签页不可见（`visibilityState=hidden`）时 rAF 冻结导致 success 不触发——属浏览器节流行为，非代码缺陷。

@@ -4,8 +4,8 @@
 
 ## 增量转换与缓存失效
 
-- **改转换器代码不会触发增量重跑**：签名只看源数据文件 mtime/size，改 `endgame.py` 等模块后不加 `--force` 会输出「跳过（未变更）」，现象是「代码改了页面没变」，极易误读成实现没生效。`tools/converter/convert.py --only <模块> --force`
-- **新增或变更静态表读取必须同批登记 `incremental.MODULE_SOURCES`**：漏登记不报错，只让增量判断失真；同一张表被跨模块读取时两个模块都要登记（`monster_common` 读 `HardLevelGroup.json` 之后 `monster_detail` 也要登记）。`test_incremental.py` 的 AST 覆盖校验会抓到漏配
+- **改转换器代码不会触发增量重跑**：签名只看源数据文件 mtime/size，改 `endgame.py` 等模块后不加 `--force` 会输出「跳过（未变更）」，产物留在旧字段名上，现象是「代码改了页面没变」，极易误读成实现没生效。诊断指令：`tools/converter/convert.py --only <模块> --force`
+- **新增或变更静态表读取必须同批登记 `incremental.MODULE_SOURCES`**：漏登记不报错，只让增量判断失真；同一张表被跨模块读取时两个模块都要登记（`monster_common` 读 `HardLevelGroup.json` 之后 `monster_detail` 也要登记）。登记是纯机械动作，**改 converter 时先登记再跑**，别等守卫报；`test_incremental.py` 的 AST 覆盖校验会抓到一部分漏配，但它有盲区（见下条），不能当兜底
 - **AST 守卫有两个叠加盲区，走 helper 的读取路径等于零覆盖**：① 函数名闸——表名作为实参传给**本文件自定义 helper**（`_load_table("X")`、`_absorb_*(out, "X", …)`、`for table in ("X", …)`）时函数名不在白名单，整个调用点不可见；② 实参闸——`load_json(EXCEL_DIR / <形参>)` 这类转发即使函数名在册也取不到字面量。**两层是复合的**：helper 体内那一跳（`load_json(EXCEL_DIR / f"{name}.json")` 的 `JoinedStr`）同样被挡 ⇒ 该路径**两头都盲**，只能靠人工审查（历史上 `monster_extra` 因此整批漏了 18 张表）。**登记判据是「被导入函数读到的表」，按全量保守登记、不区分对本模块产物是否真的有效**（多登记只多跑一次，漏登记是静默陈旧）；有效性要另做 patch 对照实验判定，不要凭调用链想当然。
 - **聚合型模块（`monster_detail` 这类只 import 别人的 `load_*` 来拼装、自己零字面量读取）的依赖要按「被导入函数读到的表全集」登记**：它对每张表都是「传递依赖」，漏一张就有一块产物静默陈旧；写登记时附上调用链（如 `EliteGroup ← monster_common.load_elite_groups`），下一个人才能核对。
 - **模块归属要用 `MODULE_SOURCES` 复核，别信二手结论**：`traits.json` / `equipment.json` 出自 `currency_catalog.py` 而非 `currency.py`，只跑 `--only currency` 不会更新它们。
@@ -27,9 +27,9 @@
 - **取支必须放在「缓存之外」，否则切性别后名字不更新**：`singletonLocalData` 的代次只有语言，而 `setTrailblazerGender()` **不触发重载也不失效缓存**（`SettingsView.vue`）⇒ 取支只能写在 loader 的 `.then()` 里（每次调用现读设置、返回新对象不污染按语言共享的缓存）。判据：**凡是「按用户设置而变」的派生，都不能落在只按语言分代的缓存里**。
 - **详情类接口的取支判据不能假设响应体自带 id**：`CharacterData` 形状里**没有** `id` 字段（`public/data/cn/characters/8007.json` 首键即 `name`）⇒ 只能用手里的 `charId` 参数（它同时是文件名与条目 id）。凭「列表条目有 id」推断详情也有，会得到恒 `undefined` 而静默不取支。
 - **占位符判定必须排在 `clean_text` 之前**：顺序反了 `{NICKNAME}` 会被清洗成中文「开拓者」，产出假英文名——比留空更糟。
-- **探针脚本直接 `import resolve_text` 会静默返回空串**：`_text_map` 未加载时是空字典，据此会误判整个字段为空；`convert.py` 的「先 `load_textmap()`」是隐式前提，探针必须自己补。`resolve_text` / `load_textmap`
-- **裸 `#N` 的语义取决于该条目是否携带 `params`**：携带（数组存在即便为空）即占位符，展不开就整段省略该描述；不携带（角色 `desc`/`stories`、成就 `desc`、物品名、敌对 `intro`）即上游字面，必须原样保留；`{TEXTJOIN#61}` 属上游合并标记须放行。
-- **占位符展开口径必须与 `fmtDesc` 逐字段对齐**：`#N[i]%` 的 `%` 被正则消费后未补回会全站失真（`治疗量提高10。`）；缺参（`StatusDesc` 有占位符而 `ReadParamList` 只有键名）整段省略，禁止自造 `?` 或补 0。`fmtDesc` / `refsResolved`
+- **探针脚本直接 `import resolve_text` 会静默返回空串**：`_text_map` 未加载时是空字典，据此会误判整个字段为空；`convert.py` 的「先 `load_textmap()`」是隐式前提，探针必须自己补。核源字段走 `query.py`。`resolve_text` / `load_textmap`
+- **裸 `#N` 的语义取决于该条目是否携带 `params`**：携带（数组存在即便为空）即占位符，展不开就整段省略该描述；不携带（角色 `desc`/`stories`、成就 `desc`、物品名、敌对 `intro`）即上游字面，必须原样保留；`{TEXTJOIN#61}` 属上游合并标记须放行。裸形态无法全局区分，守卫只能按页点名。
+- **占位符展开口径必须与前端 `fmtDesc` / `fmtVal` 同源**：`#N[i]%` 的 `%` 被正则消费后未补回会全站失真（`治疗量提高10。`）；**裸 `#N` 不消费尾部 `%`**（前端裸分支的 tag 与 pct 都传空串，那个 `%` 是模板字面字符），×100 只发生在带标签分支；取整必须对齐 JS `Math.round`（半值向 +∞，Python `round()` 是 banker's rounding，`.5` 处逐值不同），否则「小于等于 0.05」会渲染成 `0%`。**裸形态的正则需要负向断言**：同形前缀有 `<color=#hex>` 颜色码、`{TEXTJOIN#n}` 合并标记、`##` 三类；不能用 `\w`（含 CJK），也不能一刀切挡 `=`（`<=#N` / `>=#N` 后跟真占位符）。缺参（`StatusDesc` 有占位符而 `ReadParamList` 只有键名）整段省略，禁止自造 `?` 或补 0。`fmtDesc` / `refsResolved`
 - **数值的单位、百分比与小数位是描述文本的属性，不是数值的属性**：只能由 `desc` 的 `#N[i|%|fN]%` 标记驱动（复用 `fmtVal`）；在 `param_list` 数值侧重造「0<v<1 即 ×100」类启发式会被 `f1`/`f2` 标签打穿，数值错而不报错。
 - **`param_list` 尾部的空槽是上游预留、未被任何 `#\d+` 引用**：参数表行集合必须由描述引用集驱动，按 `param_list` 长度驱动会多渲染空行或错位。
 - **换行与富文本要先两侧归一再判定**：数据里的 `\n` 渲染成 `<br>`、`<color=#…>` 渲染时被剥掉，不归一会把渲染正常的文本判成漏渲染；字面 `\n`（两字符序列）只在货币战争羁绊 `desc` 上出现，须显式归一。
@@ -40,21 +40,18 @@
 
 ## 字段透传与登记
 
-- **`src/services/api/index.ts` 是显式具名 barrel，不是 `export *`**：新增共享单例漏登记 ⇒ 视图 import 到 `undefined`、`onMounted` 抛 TypeError、整页不挂载，现象与「数据缺失」难区分；新增单例后先查 barrel。
 - **给接口加可选字段时所有构造点都要逐个核对**：`RELEASE_SOURCES` 声明了 `loadBrief` 而 `load()` 里的对象字面量没带它，TS 不报错、运行时恒 `undefined`、正文静默缺席——「可选」只免除类型检查，不免除构造责任。
-- **目录卡要用的字段必须在映射层显式带出**：映射层只构造 `searchText` 而没带 `desc` 时，`renderCard` 读 `item.desc` 恒为 `undefined`、卡根 `title` 静默为空且无任何报错。
+- **目录卡要用的字段必须在映射层显式带出**：映射层只构造 `searchText` 而没带 `desc` 时，`renderCard` 读 `item.desc` 恒为 `undefined`、卡根 `title` 静默为空且无任何报错。加字段 = 映射层 + 卡片模板两处同批改。`src/app/catalog/pages/item.ts`
 - **字段改名必须全量搜旧名、连读点一起改**：`summaryPlain` → `sourceSummary` 时漏改 `summary:` 那一行，导致全部角色详情页渲染成目录页摘要；只改声明处不算改完。
-- **字段透传是双向的显式责任**：聚合记录新增键会被下游逐键透传的轻形态自动带上（须在 `endgame.py` 的跳过清单里显式排除），不在聚合记录里的字段则要在每个组装点显式带出；改共享聚合表前先审计「谁的 payload 会带上它 / 谁需要它」。
-- **别名回退 `{**out[tpl], '_tpl'}` 会把模板的比率与难度组一起复制**：变体形态必须显式覆写为自己的 config 记录，否则同模板各档数值相同且不报错——回退只能兜字段缺位，不能兜语义。`monster_common.py` / `load_monsters()`
+- **字段透传是双向的显式责任**：聚合记录新增键会被 `endgame` 轻形态按 key 自动带上（`_lean_monster` 的跳过名单是 `wave` / `intro` / `skills` / `debuff_resist`，新键不登记就产物变大且口径漂移）；不在聚合记录里的字段则要在每个组装点显式带出——改共享聚合表前先审计「谁的 payload 会带上它 / 谁需要它」。
+- **别名回退 `{**out[tpl], '_tpl'}` 会把模板的比率与难度组一起复制**：同模板的档位变体正是靠这些值区分的（`1002011 hpR=1` vs `100201101 hpR=0.266667`），变体形态必须显式覆写为自己的 config 记录，否则同模板各档数值相同且不报错——回退只能兜字段缺位，不能兜语义。`monster_common.py` / `load_monsters()`
 - **`HardLevelGroup.Level` 是整型而 JSON 键必须是字符串**：去重与比较先用 int `lv` 比对会永远 miss，重复键整段覆盖且不告警；先 `str(lv)` 再比对。
 
 ## 哨兵值与缺值约定
 
 - **负值是哨兵不是数值**：`BPNeed = -1` 表示「不消耗」、真正产出是 `BPAdd = 1`、`CoolDown` 恒为 -1；消费侧只认 `bp_need > 0` / `bp_add > 0`，按算术直接代入会渲染出「消耗 -1」。
 - **遇负值先怀疑哨兵，别先怀疑缺数据**：来源数据里 `CoolDown` / `InitCoolDown` 恒 -1 属常见形态；判定字段语义必须做全量值分布 + 跨模式（大世界 / 货币战争）对照，禁止凭单一样例或直觉。
-- **缺值不得静默归零或编造**：修饰比缺位 / 不可解析按中性 1（归 0 会把一条 HP 显示成 0），难度组缺位回退「仅展示档案基准值」并同屏注明口径；「解析不出」与「上游本来没填」在页面上同形，只能靠产物 diff 区分——增益回退值同理，虚构叙事层记录 `MazeBuffID = 3031220` 未注册即不落字段。
-- **等级上限不要写死**：`StageConfig.Level` 最高 120 而 `HardLevelGroup` 9 个组里只有组 1 被引用（上限 100），写死 100 在低上限组（如 1401 只到 40）会取不到曲线行、整页静默回退基准值；应取该怪实际组的组上限。`combatLevel`
-- **`MonsterConfig.HPBase` 是模板基准，不是战斗面板值**：`monsters.json` 列表与终局 payload 里同名的 `stats` 都是它；合成链 = `基准 × 修饰比 × 等级曲线`，**修正值加在曲线之后**（先加减再乘曲线会算错）。`monster-stats.ts` / `stat_ratio`
+- **缺值不得静默归零或编造**：修饰比缺位 / 不可解析按中性 1（归 0 会把一条 HP 显示成 0），难度组缺位回退「仅展示档案基准值」并同屏注明口径；增益回退值同理，虚构叙事层记录 `MazeBuffID = 3031220` 未注册即不落字段。
 
 ## ID 与表连接语义
 
@@ -71,11 +68,11 @@
 - **读去重 / 过滤口径要读条件表达式而不是 docstring**：`load_appearances` 的条件是 `all(s["type"] != stype and s["name"] != name)`，AND 语义实际等于「同一 `StageType` 只取一条」——按注释理解会得出相反的并集口径。
 - **同一上游记录会在多个展示位重复登记，剔重只能做一层**：`seasonBuffList` 与 `floor.buff` 是同一条记录（`buffs[0].id === floor_details[*].buff.id`），在头部列表里删同 ID 会把头部一起删空——同 ID 的呈现位置唯一，被删的应是整块赛季增益组。`renders.seasonBuffList()`
 - **同一源表被两个转换器各读一次时必须刻意同序**：`equip_by_id` 是字典推导（后写覆盖同名 `AvatarID`），另一侧若用并集语义，会让角色页与光锥页对同一角色给出不同推荐集且不报错；靠产物级双向复算证明。`_build_recommend_index`
-- **同名字段的单复数变体可能是两张表**：`MonsterAtlasExtraPhase` 与 `MonsterAtlasExtraPhases` 字段同构，须按（组, 阶段）去重取并集；`PhaseID=1` 的记录立绘就已带 `_Phase2`，不能把 `PhaseID` 当游戏内阶段号。
 
 ## 未消费字段与字段下线
 
 - **「未消费字段」里可能藏着正解，不要直接归档为未解**：`IMCMJHAMMKK` 曾被记为「同表常量、语义未验证」，实为本模式奖励族的 `RewardID`（落在 1019xx / 1021xx / 1017xx 段内）——先看常量是否落在已知 ID 段内，再用 `query.py RewardData --where "RewardID=..."` 验证。
+- **单文件单点放置不足以证明覆盖**：`30126123` 只存在于 `ChallengeMazeTierce`，同类字段还散在 `HFIAAGAKFMD` 与 `ChallengePeakConfig.EventIDList` 里。
 - **未验证语义的字段不消费、不硬列，但必须把「已看过、未消费」写进字段映射**：否则下轮重复排查一遍（`PHOIICMCGIH` 与波数 / 回合 / 目标数 / 满分档全对不上、`LCHKKJDBLGM` 全空、`MLMEGBLDFKE` 均 `[200001]`）。
 - **字段带 `RewardID` 不代表该 ID 存在**：`ChallengeTargetConfig` 的奖励号段在 `RewardData` 里一条都没有、`ItemConfig` 也无同号条目，照字段名直接映射会造出整批假奖励；先验证编号段存在性。
 - **错口径字段留在产物里下轮必被再消费**：确认某字段是错口径（如把节点 ID 当层级敌方）后，只删字段不删读点等于留下诱饵，下线要连消费路径一起删。
@@ -93,7 +90,6 @@
 ## 参考站与社群表格取证
 
 - **参考站是前端渲染站，抓 HTML 拿不到条目真值**：须用 headless 逐档读渲染后文本（它只接受模板 ID 路由，实例 ID 返 404）；同一页 JSON 里可能并存两种口径（`boss_monster_id2` 是 extra、`event_id_list2.monster_list` 是战斗口径），页面显示后者。`hsr.nanoka.cc/boss/3020`
-- **参考站占位贴图会以 HTTP 200（甚至合法 WEBP 头）返回**：绕过 error / 挂起回退链，状态码检查查不出；须比对全量同类文件字节数 + 用不存在的 404 排除缓存。nanoka 的 `assets/hsr/trace/*.webp` 全是占位图 ⇒ trace 本地缺失时回退必须走 jsDelivr。`src/services/cdn/base.ts`
 - **参考站条目落地前先找到承载它的上游表与字段**：对照站的「关卡效果」= `MonsterGuideConfig × MonsterGuideTag`（`TagList` → 名称 + 简述 + `ParameterList`），不是独立数据源；参考图 / 截图里的每一项也先过「上游有没有这个字段」——星启看板截图上的「通关目标：击败 N 个首领」在 `targets` 里无对应字段（全是 4 档 `TOTAL_SCORE` 分数），按「展示文本必须来自数据源」不落。
 - **同名「机制」在两套表里，别互相套用**：末日幻影首领机制（首领特性 / 阶段）走 `MonsterGuideConfig × MonsterGuideTag`；异相仲裁的关卡机制词条（血嗜 / 洞穿 / 不屈…）走 `ChallengePeakConfig.TagList` / `ChallengePeakBossConfig.HardTagList` → **`MazeBuff`**（与王棋增益同一张表，名称 + 效果描述 + `ParamList` 俱全）。只取 `BuffName` 会把描述留在源表里、页面上就只剩一行无从解释的词条名。
 - **社群表格只能逐行对表**：米游社《数据机制通论》与现行 vendor 存在不符行（组 3 ATK 文章 0.85 / vendor 0.70，vendor 全表无 0.85），整表照抄会把旧版本系数带进库；反查社群公式时只采纳能与仓内表逐字段对齐的部分。
@@ -107,7 +103,7 @@
 - **已知的「看似缺字段、实为设计」清单，别重复登记为漏转换**：光锥 `desc` 在多数命途上重复同一句专属说明（已判有意不渲染）、敌方 `figure` 字段全为空（故永远走 `monsterIconUrl` 回退取图，不是缺图）。
 - **类型注释会与数据现状脱节**：`misc.ts` 注释写「星启无 wave」而三模式所有节点的 `monsters` 都带 `wave`；定字段规则前先全量列一遍取值分布，以数据为准。
 - **vendor 没有 peak 排期表**：`ScheduleDataChallenge{Peak}` 不存在（只有 Maze / Story / Boss / Global），异相仲裁赛季恒无起止日期，`mazeStatus` 返回「未知」是正确行为——是数据缺口不是渲染 bug。
-- **「战斗阶段」在上游是 `MonsterSkillConfig.PhaseList`，2026-10-16 起落 `phase_list`**：异相仲裁王棋 boss「反造物主，流溢之恨」的阶段专属技能（如只在中段可用的「神的冠冕将要粉碎」、只在末段可用的「烧尽神国，弃绝世界」）由该字段门控。判据与边界：①阶段号**从 1 起**，空表 = 无阶段门控（不落键），上游另有 1 条记为 `[0]` 是外键哨兵不是阶段（前端只认正数，否则渲染出「阶段 0」）；②实测 2289/2632 条怪物的技能**只吃阶段 1** ⇒ 展示端只在真跨 ≥2 阶段时才分组（否则加一个「阶段 1」小标题是空话）；③**结构 ≠ 文案**：这层是「哪些技能在哪些阶段」，首领机制的阶段**文案**另走 `MonsterGuideConfig`；该 boss 在那张表（84 条）**零登记**，且 `maze_peak` **10 期全无 `boss_guides`**（末日幻影 22 期有），故它只有结构、没有阶段名与应对策略。另有两条易混：`monsters/*.json` 的 `phases` 是 `MonsterAtlasExtraPhases` 的**图鉴形态**（本 boss 仅 1 条，非战斗阶段）；关卡「只有 1 只怪」也正常——`StageConfig.MonsterList = [{Monster0: …}]`，多阶段是**同一实体**战斗内形态切换，不是多只怪。
+- **「战斗阶段」在上游是 `MonsterSkillConfig.PhaseList`，2026-10-16 起落 `phase_list`**：异相仲裁王棋 boss「反造物主，流溢之恨」的阶段专属技能（如只在中段可用的「神的冠冕将要粉碎」、只在末段可用的「烧尽神国，弃绝世界」）由该字段门控。判据与边界：①阶段号**从 1 起**，空表 = 无阶段门控（不落键），上游另有 1 条记为 `[0]` 是外键哨兵不是阶段（前端只认正数，否则渲染出「阶段 0」）；②实测 2289/2632 条怪物的技能**只吃阶段 1** ⇒ 展示端只在真跨 ≥2 阶段时才出阶段切换（否则给单阶段卡加一排 tab 是空话）；③**结构 ≠ 文案**：这层是「哪些技能在哪些阶段」，首领机制的阶段**文案**另走 `MonsterGuideConfig`；该 boss 在那张表（84 条）**零登记**，且 `maze_peak` **10 期全无 `boss_guides`**（末日幻影 22 期有），故它只有结构、没有阶段名与应对策略。另有两条易混：`monsters/*.json` 的 `phases` 是图鉴形态、非战斗阶段（见 [data-semantics.md](data-semantics.md)「`MonsterAtlasExtraPhase(s)`…」）；关卡「只有 1 只怪」也正常——`StageConfig.MonsterList = [{Monster0: …}]`，多阶段是**同一实体**战斗内形态切换，不是多只怪。
 - **货币战争角色的 `equipment_id` 指向常规光锥（23059 / 23061），不是 CW 装备（350xxx / 352xxx）**：不能由此推出「新角色带出专属装备」。
 - **备选队友槽的键是 `backup_list1..N`（按位编号、无数组字段可枚举）**：只收 `member_list` 会让备选槽名称永远落回退串 `#id`，图片正常、仅 `title` / `alt` 错且不报错。`loadLocalBuildNames`
 - **wiki 技能标签映射漏项会静默丢技能**：`欢愉技` → `ElationDamage`、`忆灵技` / `忆灵天赋` → `Servant` / `ServantPassive`；新增 tag 必须同时改抓取侧映射表与前端查表键（`SkillsPanel` 按 `sk.type` 查表）。

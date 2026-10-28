@@ -6,7 +6,7 @@
 
 ```
 src/
-├── main.ts / app/bootstrap.ts → 入口：createApp + Pinia + Router；全局 CSS 仅导入 tokens.css + catalog.css
+├── main.ts / app/bootstrap.ts → 入口：createApp + Pinia + Router；全局 CSS 仅导入 tokens.css + catalog.css + fonts.css
 ├── app/          → 应用层：router（meta.depth 驱动方向过渡、chunks.ts 预加载）、views 路由级页面、catalog 配置驱动目录引擎、character / endgame 详情子组件、stores、composables、components、debug（dev-only 研究线）
 ├── services/     → 数据层：api 按域加载器（index.ts barrel、singleton.ts 单例工厂、base.ts 数据基址）、cache 三级缓存、cdn 双源解析、types 共享接口
 ├── lib/          → 纯函数：constants（CDN 基址与枚举映射）、format / icons / html（转义与富文本清洗）、compare（强化对比）、currency-role、theme（全站唯一强调色通道）、errors
@@ -98,4 +98,4 @@ view / catalog 组件（模板字符串卡片 + escHtml；虚拟滚动）
   1. curl 独立连接探测 URL（单/少量并发 200 即 URL 有效——环境问题，非代码缺陷）；
   2. 渲染态断言改用 `waitForFunction` 轮询等窗口恢复，或改用独立连接 HTTP 探测（`page.request.head`）；
   3. 判定环境限流后**禁止改代码规避**（真实用户网络正常）；新增页面控制单页并发图数可减轻症状。
-- **静态死链（真 404）审计**：归 `tools/dead-links.test.ts`（专用配置 `tools/dead-links.vitest.config.ts`），本机按需跑，**不在 e2e 重做**（重构决策见 `ci.yml` / `data-sync.yml` 注释）。
+- **静态死链（真 404）审计**：归 `tools/dead-links.test.ts`（专用配置 `tools/dead-links.vitest.config.ts`），本机按需跑，**不在 e2e 重做**（重构决策与「CI IP 对 jsDelivr 403」的理由见 `.github/workflows/data-sync.yml` 注释）。

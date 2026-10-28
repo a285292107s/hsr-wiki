@@ -5,10 +5,8 @@
 ## 分层与目录归属
 
 - **跨页借用的共享 class 只能是 `tokens.css` 已声明的原语**：页面级 class 借过去会命中不了样式，元素破相而不报错——`lightcone.css` 只随光锥路由 chunk 到达，怪物页借 `.nk-lc-rank-label` 即静默无样式。`src/styles/`
-- **改页面级样式前先数根类名的写入方，再决定要不要作用域化**：`.nk-title` 被六个页面共享，改 `tokens.css` 等于同时改六个页面版面。`Select-String` 数写入方是「会不会外溢」的最低成本判定，比先跑全量 e2e 快得多。`src/styles/tokens.css`
 - **同一份样式放在哪个文件由消费面决定，不由「放哪都行」决定**：诊断色（`#ff6b6b` 等）只能落在 `src/app/debug/`，因为色彩守卫的 `SKIP_FILE` 只豁免 `debug/` 与测试——挪进 `styles/` 立刻被 `check-colors --strict` 拦下。`src/app/debug/spine-audit.css`
 - **dev-only 研究线的样式不并入产品面令牌体系**：`/debug` 面板的等宽栈与产品面 `--font-mono` 不是同一条栈，dev-only 且无像素基线覆盖，改栈只会引入无从验收的渲染变化；该豁免由本条登记，**收口时禁止当裸字面量一并改掉**。
-- **「UA 默认泄漏」的可见性取决于布局是否把文字盒拉伸**：单行或收缩盒里 `text-align` 是空转，纵向 flex 或 `flex:1` 把子项拉满时才显形，所以不能靠读样式表判定。解法是同类元素跨标签比对计算样式 + 对可疑项做「改掉这个值再量 ink 位移」的差分；判文字对齐只看 `Range` 盒，不看元素盒。
 - **比字体/内距的基准取 `#app` 而不是 `body`**：`font-family` 设在 `#app` 上，`body` 的 computed 是 UA 默认衬线，拿 `body` 当基准会把正常输入框误判成「字体不继承」。
 
 ## 共享单例与 barrel
@@ -36,7 +34,6 @@
 - **catalog 配置 `styles` 数组的多个 loader 是并行执行的，顺序不保**：多块 CSS 有级联覆写关系时必须串成一个 async loader 依序 `await`，否则同特异性覆写顺序随机。`src/app/router/index.ts`
 - **筛选选项的取值域固定写死，不按当批数据现取**：从数据派生选项会在「本批恰好没有该类条目」时让选项消失、筛选栏跳位（如弱点元素恒取 7 项）；数据驱动只用于「有多少种就列多少种」的枚举（阵营 / 系列 / 命途），且须有单测兜「每个非空选项至少命中一条」。`src/app/catalog/pages/monster.ts`
 - **带专属样式的目录在 config `styles` 字段声明，不新增视图**：这条是规则；其盲区是**非列表页的两类例外**（枢纽页与专题页）不适用该断言——专题页无条目级快照，用目录页的断言去框它会得出假失败。`src/app/catalog/pages/shared.ts`
-- **删容器前先点住户名**：用户点名删某个容器里的某一行时，先列该容器的每个子节点，只删点名的那几个，剩下的住户（如无首领特性节点退回的徽标）给一个 `v-if` 专属容器——整块删掉 = 顺手删掉一个没有第二落点的信息位。
 - **删掉 DOM 后钉住它的断言要「搬家」而不是删除**：先问断言锁的是元素还是关系——锁相对序的改成相对序断言、锁身份的改 `aria-labelledby`，直接删干净等于丢掉契约。
 - **删除类任务的任务描述必须附「必须存活的同名资产清单 + 验证命令」**：仓库存在同名不同物的概念（两个 season），只写「注意别删错」无效；给清单加 `git grep -c` 实测比形容词有效。
 
@@ -45,7 +42,6 @@
 - **同一语义状态出现第二份实现即漂移起点**：状态态是最容易被漏的一类——不是组件、没有类型约束、守卫也不看它，只有把「同一状态 / 同一空态」当成审核类别逐页清点才抓得到。收口到单一原语后页面自建态各自删净。
 - **CSS 层的重复实现同样成立，而色彩与对比度守卫完全看不到它**：那两个守卫只查裸色值与原始层引用，查不出「同一条选择器被写两遍」。重复选择器审计工具的必要性在于此，不在色彩。
 - **审计工具报的 A 段要区分「静默覆盖」与「有意覆盖」**：后者（粘性首列必须不透明、媒体右移后开关位置反向补偿）不是重复实现，工具只判「选择器出现两次」且读不到注释 ⇒ 有意的那条按本条登记为豁免，保留覆盖（代码里不留解释性注释）；只有连语义都相同的才是事故。
-- **给某模式补机检前，先确认现有的「反例」是否有意为之**：批量打标签会删掉唯一防线（某条用例自钉视口正是 `isMobile` 影响 `<meta viewport>` 的哨兵）；机检只判「自钉视口 ⇒ 必须有标签」这一个方向，反方向的报警只会变成永久噪声。
 - **合并两处重复实现时才会浮出潜伏 bug**：一处用正斜杠、调用处比较的是 `path.relative` 的原生分隔符 ⇒ Windows 下排除项从未生效。跨平台路径比较统一到正斜杠后再比；「在某平台正常」的实现会让重复代码活得比缺陷久。`tools/doc-scope.mjs`
 - **彼此独立的数据源必须并发取（`Promise.all` + 逐源 `try/catch`）**：`for + await` 是串行往返瀑布（注入 6s 延迟后 12s 仍无第一张卡）。逐源 catch 保序丢弃失败源并计数，才能同时给出「全失败」与「部分失败」两种态。`use-release-showcase.ts → useCwSeason`
 - **反转列表展示顺序时，缺省回退值必须先按源序构造再 `reverse()`**：`id ?? i + 1` /「关卡 N」这类兜底若在反序后计算，序号会跟着倒、切 tab 指向不存在的关卡。`src/app/endgame/levels.ts`
@@ -75,16 +71,15 @@
 
 - **拆分必须按原始物理顺序连续切割**：移动端断点块、`prefers-reduced-motion` / `hover:none` 覆盖块、文件末的「排版刻度收口」块都是同特异性级联覆写，乱序合并 = 静默改视觉。逐行 `Compare-Object`（除新增头注释外零丢失零改动）是最低验收线。
 - **收口块与修饰类的顺序是硬约束**：`.nk-egd-trait { padding }` 声明在文件末收口块内、与修饰类同特异性 ⇒ 修饰类必须写在它之后，手机档值必须写进最后一个 `max-width: 767px` 块，否则被桌面值静默覆盖。
-- **同权重档位规则混写会让断点规则被非媒体规则反压**：把某档规则写成非媒体查询、与另一断点块并列命中时，后写者胜出（平板档恒用手机字号）。判据：每个断点、每一档只允许一条声明；跨文件级联时先确认两个文件的导入序，再决定哪一条该带媒体查询。
 - **跨文件的媒体查询归属只能靠读包围块或探针确认**：靠「我记得某文件有这条」推断会导向一个不存在的缺陷，进而为一个不存在的 bug 重排版面。`src/styles/character-skeleton.css`
 - **页面 CSS 绝不复制粘贴，共享部分下沉到已声明原语层**：同一批行样式让四个常青页共用 `renderCard`、列改多列时行样式仍全部来自 `endgame.css`，才是「不复制」的正确落法。
-- **改一个 fixed 层的高度前，先找谁按它的高度写死了避让值**：详情页 `padding-top` 是按吸顶条高度定的，导航抬升后条变长即盖住首屏，页面级截图上不易察觉。`src/styles/character.css`
+- **改一个 fixed 层的高度前，先找谁按它的高度写死了避让值**：详情页 `padding-top` 是按吸顶条高度定的，导航抬升后条变长即盖住首屏，页面级截图上不易察觉。`src/styles/character-hero.css`
 
 ## 路由与外壳交互
 
 - **「再点同一入口收起」不是链接语义，`RouterLink` 自己做不到**：收起的目标态是「不存在」而非另一个 URL，`to` 只能写成当前路径，而 vue-router 把同址 `push` 判为 `NAVIGATION_DUPLICATED`——不跳转、不报错（控制台安静）、却照跑一次 `scrollBehavior`，两次点击之间看不出差别。收起只能显式做：`history.state.back` 有值走 `router.back()`，为 `null` 时 `replace` 回本模式枢纽（`push` 会在历史里留一条「收起后还能前进回该页」的假入口）。判「有无站内历史」不能看 `window.history.length`——它把站外与 about:blank 条目一起算进去。挂在 `RouterLink` 上的 `@click` 必须放行带修饰键的点击（Ctrl/Cmd/中键是新标签页语义），否则被劫持成返回。`src/app/components/SidebarNav.vue`
-- **收起的目标页必须自持；而「自持来源」与「簿记」是**同一前提下的两条路，会一起失效**：`from.fullPath`（`afterEach`）与 `history.state.back` 都要求**路由已解析过一次**——首屏懒加载 chunk 还在路上时侧栏已可点，此刻 `from` 是 `START_LOCATION`（path 恰为 `'/'`）⇒ 记录被 `from.matched.length === 0` 当成「直达设置页」跳过，簿记又指 `'/'`，收起落枢纽 `/en/`（CI 只报 `Received: "/en/"`，看着像时序抖动，实则**该窗口内必错**：本地延迟目录视图 chunk 后点两次稳定复现 4/4，守卫见 `layout-nav.spec.ts` 的「首屏 chunk 就绪前点设置」）。判据三条：① 来源在**点击那一刻**记（路边没有比 `route.fullPath` 更确定的来源），`afterEach` 只当补充；路由未解析时用**本次落地 URL**（`localeBaseFromPath` 去前缀；落地即设置页则记 null，以保住「直达 → 收起回本模式枢纽」契约）。② 开关的两个方向都按**地址栏**判「是否已在设置页」，不按 `route.path`——`push` 是先改 URL 再解析路由，解析完成前 `route.path` 还是 `START_LOCATION`，按它判会把收起误判成「进入设置」（实测落点从 `/en/` 变成 `/en/settings`，两种都不是来源页）。③ 收起时：记录与簿记一致走 `router.back()`，不一致以记录为准用 `replace`，真·直达才回枢纽（枢纽按地址栏分模式，路由未解析时 `meta.cw` 还是常规模式）；记录为空**且**簿记不可用时不得留在设置页。另：`window.history.length` 不能当「有无站内历史」（算进站外与 about:blank）；挂在 `RouterLink` 上的 `@click` 必须放行带修饰键的点击（Ctrl/Cmd/中键是新标签页语义）。`src/app/components/SidebarNav.vue`
-- **「路径前缀决定了」不等于「内容已就绪」**：语言前缀在 **history base** 里而不在 `route.path` 里（`route.path` 已剥离前缀、`location.pathname` 含前缀）⇒ 任何「当前路径 === 路由表路径」的判定都不能把两者混用；更坑的是 `<html lang>` 在前缀解析时就写好、**视图挂载前就已就位**，拿它当内容就绪判据会读到外壳文本（CI 实测：`layout-i18n.spec.ts` 只等 `html[lang]` 就读 `body.innerText()`，报「主题色名应取英文词典值」）。
+- **收起的目标页必须自持；而「自持来源」与「簿记」是**同一前提下的两条路，会一起失效**：`from.fullPath`（`afterEach`）与 `history.state.back` 都要求**路由已解析过一次**——首屏懒加载 chunk 还在路上时侧栏已可点，此刻 `from` 是 `START_LOCATION`（path 恰为 `'/'`）⇒ 记录被 `from.matched.length === 0` 当成「直达设置页」跳过，簿记又指 `'/'`，收起落枢纽 `/en/`（CI 只报 `Received: "/en/"`，看着像时序抖动，实则**该窗口内必错**：本地延迟目录视图 chunk 后点两次稳定复现 4/4，守卫见 `layout-nav.spec.ts` 的「首屏 chunk 就绪前点设置」）。判据三条：① 来源在**点击那一刻**记（路边没有比 `route.fullPath` 更确定的来源），`afterEach` 只当补充；路由未解析时用**本次落地 URL**（`localeBaseFromPath` 去前缀；落地即设置页则记 null，以保住「直达 → 收起回本模式枢纽」契约）。② 开关的两个方向都按**地址栏**判「是否已在设置页」，不按 `route.path`——`push` 是先改 URL 再解析路由，解析完成前 `route.path` 还是 `START_LOCATION`，按它判会把收起误判成「进入设置」（实测落点从 `/en/` 变成 `/en/settings`，两种都不是来源页）。③ 收起时：记录与簿记一致走 `router.back()`，不一致以记录为准用 `replace`，真·直达才回枢纽（枢纽按地址栏分模式，路由未解析时 `meta.cw` 还是常规模式）；记录为空**且**簿记不可用时不得留在设置页。`src/app/components/SidebarNav.vue`
+- **「路径前缀决定了」不等于「内容已就绪」**：语言前缀在 **history base** 里而不在 `route.path` 里（`route.path` 已剥离前缀、`location.pathname` 含前缀）⇒ 任何「当前路径 === 路由表路径」的判定都不能把两者混用；`<html lang>` 同理不能当内容就绪判据（见 [testing.md](testing.md)「竞态与等待」）。
 - **`router.options.history.state` ≠ `window.history.state`**：前者是 vue-router 自己维护的内存 ref，手动 `history.replaceState` 只改后者、绕不过前者 ⇒ 用它做「篡改内部状态再观察行为」的 A/B 探针会得到**假绿**（两条臂都走原分支）。要造这个条件只能重新加载文档（内部状态清零）。
 - **终局玩法页的「当期赛季」要同时拿到 id 与条目，两者不同源**：id 只能从目录卡 href（`/endgame/<mode>/<id>`）解析（卡片条目本身不带 id），条目另从详情数据取，可能单边缺失。只按 id 渲染时 `:to` 会退化成 `/endgame/<mode>/`，而 vue-router 非 strict 模式会**静默解析成自链接**（页面把自己标成当前页），文案里的赛季名也同时变空——渲染前提必须是两者都在。`src/app/views/EndgameModeView.vue`
 - **`scrollBehavior` 不要写 `behavior: 'instant'`**：目录页是内部容器滚动（window 不滚），显式 instant 会在卡片初渲染的关键路径上强制同步回流；缺省（auto）让浏览器自己挑。`src/app/router/index.ts`

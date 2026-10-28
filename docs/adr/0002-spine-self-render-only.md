@@ -12,5 +12,5 @@
 
 **现状指针**：
 - 引擎层 `src/spine/`（runtime / player / scene / types）；运行时版本常量 `src/spine/constants.ts`；运行时随站本地分发 `public/vendor/spine/`，CDN 仅兜底。
-- 运行时为**双版本并存**：`4.2.43`（官网 JSON 骨架 / 场景）+ `4.1.23`（nanoka `.skel` 二进制）；按清单条目分派，禁止合并为单版本——nanoka skel 为自定义封装格式，4.2 运行时无法加载（探针取证见 docs/memory/2026-08.md）。
+- 运行时为**双版本并存**：`4.2.43`（官网 JSON 骨架 / 场景）+ `4.1.23`（nanoka `.skel` 二进制）；按清单条目分派，禁止合并为单版本——nanoka skel 为自定义封装格式，4.2 运行时无法加载（判据与取证见 [docs/memory/spine.md](../memory/spine.md)「双运行时不可合并」）。
 - 每个角色页独占一个 WebGL 上下文（宿主不再渲染 Spine，无上下文数量冲突）。

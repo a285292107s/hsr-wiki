@@ -1,6 +1,6 @@
 # HSR Wiki · 崩坏：星穹铁道
 
-独立部署于 **Vercel** 的《崩坏：星穹铁道》数据展示型 Wiki（Vue 3 + TypeScript + Vite + Pinia）。全部目录与详情数据由 `tools/converter/` 从官方解包数据离线转换为本地 JSON 随站分发；图片与 Spine 动画在运行期经 `src/services/cdn/` 解析并回退。
+独立部署于 **Vercel** 的《崩坏：星穹铁道》数据展示型 Wiki（Vue + TypeScript + Vite + Pinia）。全部目录与详情数据由 `tools/converter/` 从官方解包数据离线转换为本地 JSON 随站分发；图片与 Spine 动画在运行期经 `src/services/cdn/` 解析并回退。
 
 - **在线访问**：`https://myhsr.wiki/`
 
@@ -16,11 +16,11 @@
 
 - **虚拟滚动目录**：目录卡片以模板字符串渲染，长列表虚拟滚动
 
-- **响应式**：桌面 / 平板 / 手机三档；手机端底部导航；枢纽页（`/` 与 `/currency`）**全断点渲染导航条**，内容为品牌带 + 分区卡片 + 页脚，跨模式只走侧栏「交换」（形态演变见 [ADR 0019](docs/adr/0019-枢纽页导航条回归与首页改为版本上新页.md) / [ADR 0020](docs/adr/0020-货币战争枢纽页改为本赛季新增页.md)；全屏 KV / 视频媒体层不再恢复，[ADR 0018](docs/adr/0018-枢纽页改为工具化入口页.md) 该条继续有效）
+- **响应式**：桌面 / 平板 / 手机三档；手机端底部导航；两处枢纽页（`/` 与 `/currency`）**全断点渲染导航条**，跨模式只走侧栏「交换」——`/` 为版本入册页（报头 + 版本钢印与同步日期 + 本期入册清单 + 站内即时搜索 + 角色对页 / 光锥行 / 遗器双联 + 页脚藏书量）；`/currency` 为本赛季新增页（赛季账头 + 角色名册 + 羁绊卡 + 档案存量页脚，赛季代际差集口径见 [ADR 0020](docs/adr/0020-货币战争枢纽页改为本赛季新增页.md)；首页形态见 [ADR 0063](docs/adr/0063-首页改为版本入册页-清单在前与分区分构图.md)；全屏 KV / 视频媒体层不再恢复，[ADR 0018](docs/adr/0018-枢纽页改为工具化入口页.md) 该条继续有效）
 
 ## 页面地图
 
-- **常规模式**（枢纽页 `/`）：角色 / 光锥 / 遗器 / 终局内容 / 物品 / 成就 / 敌对物种 / 贪饕污染
+- **常规模式**（首页 `/`）：角色 / 光锥 / 遗器 / 终局内容 / 物品 / 成就 / 敌对物种 / 贪饕污染 / 战斗公式
 - **货币战争模式**（枢纽页 `/currency`）：角色图鉴 / 装备图鉴 / 投资环境 / 投资策略 / 羁绊图鉴
 - **调试台**（研究线，dev-only `/debug`）：Spine 清单审核与 KV 场景验收；生产构建不含
 
@@ -31,17 +31,13 @@
 环境要求（Node / pnpm / Python 版本口径）见 [docs/agents/tech-stack.md](docs/agents/tech-stack.md)。
 
 ```bash
-pnpm install        # 安装依赖
-pnpm dev            # 本地开发 → http://localhost:6188/（固定端口 strictPort）
-pnpm build          # 构建守卫（色彩 / Spine 清单 / 对比度）→ vue-tsc -b → vite build
-pnpm preview        # 预览构建产物
-pnpm test           # Vitest 全量
-pnpm test:e2e:guards # e2e CI 快层（不变量 + 外壳契约 + a11y）
-pnpm test:e2e:layout # e2e 布局契约层（全部 layout-*）
-pnpm test:e2e:ci    # 上面两层合集（本地一次跑完 CI 的全部 e2e）
+pnpm install   # 安装依赖
+pnpm dev       # 本地开发 → http://localhost:6188/（固定端口 strictPort）
+pnpm build     # 守卫链 → vue-tsc -b → vite build → AI 端点生成 + 守卫（守卫清单见 commands.md）
+pnpm test      # Vitest 全量
 ```
 
-命令全量手册（e2e 分层与像素基线、研究线 `/debug`、converter、dev 缓存自愈、部署与门禁）见 [docs/agents/commands.md](docs/agents/commands.md)。
+e2e 分层与像素基线、converter、dev 缓存自愈、部署与门禁的全量命令手册见 [docs/agents/commands.md](docs/agents/commands.md)；工程规则总入口是 [AGENTS.md](AGENTS.md)。
 
 ## 技术栈
 
@@ -80,7 +76,7 @@ python convert.py --only characters   # 仅重跑指定模块；全量转换去�
 
 - [CONTEXT.md](CONTEXT.md)：项目术语表
 
-- [docs/agents/](docs/agents/)：按主题拆分的 AI 协作指南（architecture / data-pipeline / testing / commands / ui-design / verification / conventions）
+- [docs/agents/](docs/agents/)：按主题拆分的 AI 协作指南，按任务路由（总索引见 [AGENTS.md](AGENTS.md)「任务 → 必读」）
 
 - [docs/adr/](docs/adr/)：不可逆 / 跨模块架构决策
 

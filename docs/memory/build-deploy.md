@@ -4,8 +4,7 @@
 
 ## dev server：改了不生效的完整形态
 
-- **新增 `public/` 资产在运行中的 dev server 上一律返回 `index.html`（200 + `text/html`，SPA fallback），放进已存在的目录同样如此**：新建子目录与新建文件都会命中，表现是页面「代码没生效」——本地图解码失败后回退链正常工作、也没有 `data-cdn-down`，看起来像实现写错。`Invoke-WebRequest` 比对 `Content-Type` 与字节数即可定性；`refresh-vite-cache.mjs` 对 public 二进制无效，**只能重启 dev server**。
-- **public 快照与源文件 transform 缓存是两个独立坑，且前者已复发两次**：改 `refresh-vite-cache.mjs` 或只看 commands.md「dev 缓存自愈」一节的人不会知道 public 情形。凡涉及新增 public 资源，**第一时间用 `curl -o NUL -w "%{http_code} %{content_type} %{size_download}"` 与磁盘字节比对**，不要先看状态码——返回 200 不等于文件正确（实测外壳 793B vs 磁盘 JSON 10453B）。
+- **新增 `public/` 资产在运行中的 dev server 上一律返回 `index.html`（200 + `text/html`，SPA fallback），放进已存在的目录同样如此**：新建子目录与新建文件都会命中，表现是页面「代码没生效」——本地图解码失败后回退链正常工作、也没有 `data-cdn-down`，看起来像实现写错。`Invoke-WebRequest` 比对 `Content-Type` 与字节数即可定性；`refresh-vite-cache.mjs` 对 public 二进制无效，**只能重启 dev server**。它与源文件 transform 缓存是两个独立坑（public 情形在 `refresh-vite-cache.mjs` 与「dev 缓存自愈」一节里都看不到）：凡新增 public 资源，**第一时间用 `curl -o NUL -w "%{http_code} %{content_type} %{size_download}"` 与磁盘字节比对**，不要先看状态码——返回 200 不等于文件正确（实测外壳 793B vs 磁盘 JSON 10453B）。
 - **CSS `background-image` 是这条坑里唯一**完全静默**的消费方，也是最容易自欺的一处**：`<img>` 至少有 error 事件、回退链与占位降级可观测，而背景图失败时**没有事件、没有回退、没有占位**，页面只是少了一层材质（看起来像「设计就是这样」）。故判据必须是**取回并解码**，不能是看状态码、也不能是「截图里好像有光影」——后者会把 `#app` 的环境径向渐变误认成新加的材质（本轮实测踩过：把环境光影读成星野，据此宣布已验证）。正解：
   ```js
   const res = await fetch('/data/assets/icons/bgpic/BgWiki.webp');
@@ -30,27 +29,22 @@
 
 - **三守卫全绿不等于 CSS 语法正确**：`check-colors` / `check-contrast` / 字号类守卫只看色值与字号，**少一个分号会让该规则的全部声明静默失效而不报错**（实测 `color` + `letter-spacing`、`color` + `font-weight` 四条双双失效）。这类损坏只有 postcss 才报错或被静默合并，改完 CSS 需要人眼过一次声明块。
 - **`var()` 引用不存在的令牌且无 fallback 时，该声明在计算期失效、属性静默退回初始值**——构建守卫**不校验变量是否存在**（实测 `var(--radius-sm)` / `var(--radius-2)` 应为 `--nk-radius-1/2/3/card`，档位徽章圆角因此长期为 0 且无人发现）。写 CSS 变量名前先 grep `tokens.css`。
-- **「守卫通过」只说明没报错，不说明新加的检查真的在跑**（选择器写错、路径判断写错都会静默通过）。凡新增守卫断言，交付前必须做一次「故意弄坏它」的负测——实测把 `dist/prerender/character/1204.html` 的 `"@type":"Person"` 改成 `"Article"` 应如期判红。**「守卫从不响」与「没有守卫」等价。**
 - **守卫只查形状与必填项，不查具体取值**：新断言（如 JSON-LD）若锁死数据取值，数据一变就假红。取值随数据变、形状是契约。
-- **report-only 检查器的计数基线会静默过期**：`check-e2e-literals` 不进 `pnpm build`/CI，漂移长期不可见（实测基线写 5、HEAD 实际 7）。**拆文件顺手 `--write-baseline` 会把别人的漂移一起吞掉**——正确动作是先回放 HEAD 版本单独计数、看清增量归属，能收口为行内豁免（`// e2e-literal-ok: 理由`）就不要抬高基线。
+- **report-only 检查器的计数基线会静默过期**：`check-e2e-literals` 不进 `pnpm build`/CI，漂移长期不可见（实测基线写 5、HEAD 实际 7）；`tools/e2e-literal-baseline.json` 按文件计数，文件改名 / 拆分后旧键消失、新文件按「基线 0」直接判红——**重生成前后都要核对总数**，否则会顺手把真实新增一起豁免掉。**拆文件顺手 `--write-baseline` 会把别人的漂移一起吞掉**——正确动作是先回放 HEAD 版本单独计数、看清增量归属，能收口为行内豁免（`// e2e-literal-ok: 理由`）就不要抬高基线。
 - **某检查器从未运行过时，首次修好它 = 一次性暴露它攒下的全部存量，要预先算进工作量**：`check-doc-links.mjs` 的块注释被 `spine-lab/**/*.md` 里的 `*/` 提前闭合（HEAD 即有），改写后首次实跑立刻报出 3 条指向已删除文件的「误删引用」。**预期是「修好即红」，不是「修好即绿」。**
-- **对 ADR / memory 豁免正文写法规则是对的（历史档案抹平措辞等于篡改历史），但豁免必须是显式声明而非副作用**：检查器**输出必须报告覆盖面与豁免数**，否则「命中 0」会被误读成全覆盖（实测在 `tools/` 放一份含违规内容的 md，命中 0 条）。
 
 ## Vercel 部署与产物投递
 
-- **产物布局必须服从托管平台的真实求值顺序，不能靠直觉**：Vercel **先命中文件系统、再走 rewrites**，因此 `{"source":"/"}` 那条 rewrite **永不生效**（`/` 命中 `dist/index.html`）。**「构建产物都对」≠「线上投递正确」——必须用真实 UA 在生产环境验收**，仅在本地跑 build + 守卫必然漏检（投递模型与 `_shell.html` 布局见 ai-discoverability.md）。
-- **给托管平台写 rewrite 前先判定「该 URL 在产物里是否已有对应文件」**：有文件则 rewrite 是死规则；无文件才轮到 rewrite。判据可直接用「`/character/99999` 因文件系统无对应文件才落到 rewrite」这类旁证验证。
+- **产物布局必须服从托管平台的求值顺序**：平台求值顺序、rewrite 失效形态与「构建产物都对 ≠ 线上投递正确」的判据见 [ai-visibility.md](ai-visibility.md)「投递模型：产物布局服从平台求值顺序」——本文件不重述，只留下面的平台侧工程判据。
 - **不可逆的产物布局决策（快照数量、rewrite、sitemap）要先算产物量级再决定**：为 2606 个物品新增详情页等于把 1200 个预渲染 HTML 翻近三倍，且必须同步 sitemap / vercel rewrite / 快照覆盖三处（跨模块契约）。**凡「零路由成本」的替代路径（检索 + 悬停）即能达成同一目的，就不要开新路由形态。**
 - **平台注入路由（`/_vercel/*`）优先于项目 rewrites——正则「匹配」不等于「会被 rewrite」**：本仓 catch-all `/((?!data/|assets/|…).*)` 在正则上**确实匹配** `/_vercel/speed-insights/script.js`，静态分析极易据此得出「接入分析会被投递成 HTML 外壳」的结论。线上实测反证：在**未加任何排除**的旧部署上，`/_vercel/insights/script.js` 与 `/_vercel/speed-insights/script.js` 均返回 `200 application/javascript` 真实包体，而同期 `/this-path-should-404` 仍返回 HTML 外壳（证明 catch-all 生效中）。判据：**「该 URL 被某条 rewrite 的 source 匹配」∧「该规则在此优先级生效」** 才是结论；平台保留路径这一层不减。凡对平台保留路径的判断，**一律用线上/预览实测终结，不要只做正则推演**（`/.well-known/*` 是另一处文档明示的保留路径）。
 - **探针必须有阳性对照组，否则假阴性会把你推向错误结论**：本次首版探针因把 `path.slice(1)` 后再去匹配「含前导 `/` 的 source 正则」，导致**全部路径报 EXCLUDED**（含 `/_vercel/*`），若就此收工会得出与事实相反的「无需处理」。是对照组 `/character/1308`（**必须 CAUGHT**）与 `/data/**`（**必须 EXCLUDED**）暴露了矛盾。**凡「判定 A 会被 B 影响」类探针，必须同时纳入一条确定应当命中的样本与一条确定应当放行的样本**，两侧都符合预期才采信结果。
 
 ## 增量与确定性
 
-- **converter 的增量签名只看源表 mtime/size，改 converter 代码本身不触发重跑**：不加 `--force` 会输出「跳过（未变更）」，产物留在旧字段名上——**极易被误读成「实现没生效」**，已两轮实踩。诊断指令：`python tools/converter/convert.py --only <模块> --force`。
+- **converter 增量与源表登记纪律**见 [data-pipeline.md](data-pipeline.md)「增量转换与缓存失效」（签名口径、`--force`、`MODULE_SOURCES` 与 AST 守卫盲区）：那一域是唯一落位，本文件只留「构建侧」的确定性验收。
 - **转换产物必须做「重跑两次字节一致」的确定性验收**，否则增量与排序的不确定性会伪装成数据变更。改完 converter 先 `--force` 重跑并比对字节，再做其他验证。
-- **新增源表依赖必须同批登记 `incremental.MODULE_SOURCES`**：`test_incremental.py` 的 AST 静态扫描会当场抓出漏配——但抓出它的代价是当场返工，登记是纯机械动作，**改 converter 时先登记再跑**，别等守卫报。同一个源表被多个模块读取时每个模块都要登记。
 - **落盘顺序会决定「缺一组数据是否带坏整批产物」**：共享表（如等级曲线）必须写在依赖它的详情循环**之前**，否则缺组会污染全部详情。
-- **`tools/e2e-literal-baseline.json` 是按文件计数的**：文件改名/拆分后旧键消失、新文件按「基线 0」直接判红（总量不变，只换键）。重生成前后都要核对总数，否则会顺手把真实新增一起豁免掉。
 - **`check-doc-links.mjs`（硬门禁）把「HEAD 有、工作区无」的旧路径判为「误删引用」**：拆文件 / 删文件时必须同批改 ADR 与 memory 里指向旧路径的反引号路径与 markdown 链接（历史叙述保留、只换路径说法），否则门禁直接红。
 
 ## 静态资产：自托管字体与社交分享图

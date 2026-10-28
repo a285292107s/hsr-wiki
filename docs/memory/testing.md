@@ -13,30 +13,25 @@
 - **测试输入用错转义会让被测行永不触发**：想测 `.replace(r"\n", "\n")`（处理字面两字符）却喂了 Python 转义的真实换行 ⇒ 删掉该行仍绿。被测行是否真被走到只能靠突变实测。
 - **`sorted` 比较 0 次的用例测不到回退值**：只有 1 条数据时 `.get(k, 999)` 的回退值根本不参与排序，改成 0 仍绿。夹具必须让被测分支的真实参与路径 ≥2 条。
 - **「复现生产接线」的同构测试锁不住生产接线**：测试自带一份 `watch`，删掉 `HomeView.vue` 的 `watch` 仍全绿。修法＝用 Vite `?raw` 导入真实源码文本做接线断言。
-- **跨层「透传」漏传是静默退化，构建与测试全绿也查不出**：开关类参数（如 `firstStageLayers`）没到消费点时分阶段加载静默退回单阶段，唯一证据是网络时序 ⇒ 开关落地后必须做一次运行时取证。
-- **接口可选字段的静默丢失**：给接口加了可选字段但某个构造点的字面量没带它 ⇒ TS 不报错、运行时恒 `undefined`、内容静默缺席。「可选」只免除类型检查，不免除构造责任。
 - **源码扫描型守卫先要「归属」正确，再谈条数**：`check-e2e-viewport-tags.mjs` 原只认顶格 `test(`（`^\s{0,2}`），循环里生成的嵌套用例整批漏检（实测全仓 11 条），其中自钉视口那条的 `setViewportSize` 被归到**上一个顶格用例**上 ⇒ 违规报到错行（报了 `layout-catalog.spec.ts` 的 `/item`，真身在它下方 60 行的 `/cn @390`）。判据两条：① 守卫的正则改宽后，「test 声明数」应与 `--list` 的收集条数一致（177→188）；② 造一条自钉视口且未标标签的**嵌套**临时用例，必须被报到**它自己的行**。另一处静默源：标签写在 `describe(...)` 标题上会被 runner 继承、静态守卫却看不到——纪律是三个标签一律写在 `test(...)` 第二参，故此类写法按违规报出（副行用例已从 describe 标题移回用例签名）。
 - **happy-dom 里模拟「图片挂起」必须 `defineProperty` 覆盖 `img.complete`**：happy-dom 的 `complete` 恒为 `true`，只让 `load` 事件永不发生也造不出「未完成」态——挂起定时器在首帧就被跳过，用例假绿。`src/services/__tests__/cdn.test.ts`
 - **真要打网络的审计用例必须 `environment: 'node'`**：死链审计走 Node 原生 `fetch`（undici，无 CORS）；happy-dom 的浏览器式 `fetch` 会先发 `OPTIONS` 预检，而 CDN 对预检直接 403 ⇒ 全量被判成环境性信号（`env`），看起来像「一个死链都没查到」。`tools/dead-links.vitest.config.ts`
 - **测「本地化之前的远端分支」要传合成 spec，不要绑定真实分类**：全量本地化推进后真实分类都 local-first，原分支不再常驻命中，绑定具体分类的用例会随迁移进度失效；合成 spec 只带 `nanoka` 即可。`src/services/__tests__/cdn.test.ts`
 - **`spine-manifest` 单测不要再重复清单结构断言**：version 一致性 / 键集合 / 排序 / 格式 / textures 扩展名已由构建守卫 `tools/check-spine-manifest.mjs` 逐项校验（含 `--fetch` 在线可达性），单测只锁「官方角色的 nanoka 回退链不能整体消失」；两处维护同一规则 = 改一条要改两处。`src/services/__tests__/spine-manifest.test.ts`
 
-- **内部滚动容器会让 `fullPage` 截图与 `inspect.mjs` 的「1 screens」同时失真**：站点外壳（首页 / 枢纽页 / 目录页）把内容放在 `position: absolute; overflow-y: auto` 的容器里，`documentElement.scrollHeight === 视口高`、滚动条宽 0——`fullPage` 截图只拿到首屏，覆盖率与「有几句内容」的结论会整体偏小。判据：先找「`overflow-y: auto` 且 `scrollHeight > clientHeight + 4`」的容器，改它的 `scrollTop` 逐屏截图；只看 `documentElement` 会把 2.5 屏的页当成 1 屏。
 - **用 DOM 克隆注入模拟「条目密度」会被双态版式误导**：旧首页「件数 ≤1 展开成 feature、≥2 退目录卡」的分支由数据判据决定，注入节点仍留在当前（1 件）分支里，于是「两卡完全重叠」「角色区纵向翻倍」都是注入伪影，不是真实密度的结论。正确做法是 `page.route` 拦截 `version.json` 与三类索引，换成另一版本的真实数据（如 4.5 的 2 角色 + 2 五星光锥）复现目标密度；判据是「模拟结果的结构分支能由数据判据解释」，不能只看视觉。
 
 ## 溢出与几何取证
 
 - **`findHorizontalOverflow` 看不见字符串截断**：卡描述是「字符串级 60 字截断 + 省略号」时不产生任何 CSS 溢出，两类缺陷要两种探针；后者用「`title` 含全文」的数据派生断言锁。
-- **整页溢出检测会被已定性的 Spine 画布判红**：canvas 恒带 `matrix(1.15,…)` 越出容器约 75px，被 `.nk-hero{overflow:clip}` 裁掉 ⇒ `scrollWidth` 不越界、用户看不到。判定前先看祖先是否已裁切。
+- **整页横向溢出被 Spine 画布判红**（canvas 恒带 `matrix(1.15,…)` 越出容器、被 hero 的 `overflow: clip` 裁掉）：见 [spine.md](spine.md)「画布几何与对齐」。
 - **同一条「祖先已裁切」还有反向的假绿：页根裁切会让整页断言恒等于 0**。`.nk-page--detail{overflow-x:hidden}` 把越界内容静默吃掉——元素不可达、无滚动条、`documentElement.scrollWidth` 零增长，于是「页面无横向溢出」在真缺陷下照样全绿（实测终局赛季页 de@320 奖励 chip 右缘越出 208.6px 而整页断言无恙）。判据要落到**逐个元素「右缘 vs 页根右缘」**，且必须**排除祖先 `overflow-x ∈ {auto, scroll}` 的滚动容器**：单行横滚的页签行属设计如此（终局关架子 tab），不排除会把几十个正常项报成缺陷——同一判据的两面，缺任一面就是假绿或假红。
 - **`min-width: auto` 的 flex 项 + 子元素 `white-space: nowrap` ⇒ min-content 成为硬下界**：容器再窄也不会压缩该项，只会整块越界并被页根裁掉；而这类越界**不产生任何文本溢出信号**（它压根不换行），`overflow != visible` 类容器判据也抓不到（该项自身 `overflow: visible`）。长文案 chip 的判据是「项 `min-width: 0` + `max-width: 100%`，名称允许换行或省略号 + `title`」，缺任一环即命中。
 - **`scrollHeight − clientHeight` 会把伪元素的绝对定位出血算进去**：`inset-bottom: -30px` 让面板恒报「溢出 30px」，那不是内容溢出。用该指标前先排除伪元素出血。
 - **元素右缘的视口基准是 `document.documentElement.clientWidth`，不是 `window.innerWidth`**：`innerWidth` 含经典滚动条宽度，拿它当右边界会漏检「内容压在滚动条下」的真实溢出，也与文档级判据（`scrollWidth` vs `clientWidth`）口径不一致。`e2e/helpers.ts`
 - **已登记溢出项（`KNOWN_OVERFLOWS`）的告警必须按缺陷条目聚合，不能按元素**：一条登记常命中整棵子树的多个元素（实测 `.nk-seg` 同源 5 个），逐元素打印会把同一条 note 刷 N 遍；元素级细节留在 trace / HTML report。`e2e/helpers.ts`
-- **`space-between` 在负剩余时静默退化为 `flex-start`**：它与 `gap` 并用时只在剩余空间为正时生效。「固定盒高 + 均分」必须同时保证内容总高 ≤ 盒内容高。
 - **`margin-top: auto` 钉住卡脚后，「内容高」不能再用 `meta.bottom − card.top` 量**：它恒等于卡高。正确量法＝各部分自然相加（内距 + 行高 + N×描述行高 + 卡脚高 + 底部内距）。
 - **判断文字对齐不能看元素盒**：flex 拉伸后所有盒子左缘都一样。必须取文字 ink——`Range.selectNodeContents(el).getBoundingClientRect()`。
-- **`loading="lazy"` 的图标在视口外 `naturalWidth` 恒为 0**：用它证明「本地资源路径真的命中」必须先 `scrollIntoViewIfNeeded()`，否则 poll 必超时。
 - **`toHaveText` 不校验可见性**：断言「必须被看见」的标题 / 主图 / 关键数值一律用 `toBeVisible` + 盒模型（高度 > 0、落在容器盒内）；只断文本会放过「被裁掉 / 被压塌 / `display:none`」整类缺陷。
 
 ## 竞态与等待
@@ -45,7 +40,7 @@
 - **依赖平滑滚动的断言必须轮询到稳定态**：固定 `waitForTimeout(700)` 采样，同一动作的可达 `scrollTop` 多次运行间可差 20–40px，会让人误判「改动没生效」。改用 `expect.poll` 或「等连续两次相同再读」。
 - **判「滚动中的位置」不要用 `boundingBox()`**：它等元素「稳定」，平滑滚动期间可能长时间不返回，把用例拖成超时且看不到断言值；改用 `locator.evaluate((el) => el.getBoundingClientRect().y)`。
 - **等待条件必须带「样本数 ≥ N」前缀**：把「全部卡片都在界内」写成 `[].every(...)` 时，**空数组恒 true** ⇒ `waitForFunction` 秒过、给出假绿。同批还要：过滤入场动画未 reveal 的卡片（`backwards` + delay 期 `opacity: 0` / `translateY(14px)` 会给 `getBoundingClientRect` 多出位移量），且门槛不得高于稳定 reveal 的条数（IntersectionObserver threshold 0.5 时缓冲行不触发）。`e2e/helpers.ts`
-- **骨架不得复用「就绪判定类名」**：那个类名同时是 e2e 与视图的「等就绪」条件，骨架自己带上就会骗过所有等待、静默通过。骨架与就绪态的类名必须分开。`ReleaseShowcase.vue`
+- **骨架不得复用「就绪判定类名」**：那个类名同时是 e2e 与视图的「等就绪」条件，骨架自己带上就会骗过所有等待、静默通过。骨架与就绪态的类名必须分开。`e2e/helpers.ts`（`waitForSettled` 的骨架退场门只认 `.nk-skeleton`）
 - **`getComputedStyle` 在 `border-style: none` 下仍会返回颜色**（等于元素文字色）⇒ 描边断言必须连 `width` / `style` 一起比，只比颜色会误报「有描边」。`e2e/layout-endgame*.spec.ts`
 - **`check-e2e-viewport-tags` 的用例归属判据（正则在任意缩进下都要命中）见本节「源码扫描型守卫先要『归属』正确」条**：`describe → for` 里的用例必须被报到它自己的行。
 - **CWV 量测口径**：必须对 `dist` 产物量（dev 的传输量是未压缩形态，数字无意义）；跨源资源无 TAO 时 `transferSize` 恒为 0；LCP 取 `startTime` **最大**的一条而不是首条。`docs/audit/UI质量验收标准.md`
@@ -56,27 +51,25 @@
 - **`<html lang>` 不是内容就绪判据**：它由路径前缀在**视图挂载之前**就写好，只等它就读 `body.innerText()` 拿到的是外壳文本（CI 实测「主题色名应取英文词典值」假红）；就绪门必须等视图根或具体内容。
 - **按「延迟图片」造未就绪态时，拦截只能是「按住再放行」，不能 `route.abort()`**：abort 会把页面推向 CDN 降级链，测到的是降级而不是「图还没到」。按住期间 `goto` 必须等 `domcontentloaded`（被按住的请求本身就阻塞 `load`，等 `load` 会变成用例超时），且**不能在 `setTimeout` 到点后再 `route.continue()`**——处理器会在下一次导航换掉文档之后才醒来并抛 `Route is already handled!`。正确形态：可放行闸门 + 量完立刻全部放行并解绑。`e2e/layout-home.spec.ts`
 - **`waitForSettled` 的字体等待是「有上限、不抛错」的，±1px 级容差断言不能只靠它**：字体换装会让行盒再变 2px 级（实测 187.75 → 189.75，足以越过 1px 容差），两趟比较类用例必须自己保证两趟都落在字体落定之后。`e2e/layout-hub.spec.ts`
-- **图片 `naturalWidth` 类断言在冷跑下会假红**：Chromium 靠请求缓存与靠前用例预热而不显形，Firefox 冷跑必现「立即读到 5/6 未完成、6s 后 6/6、占位图为 0」——这是**测试竞态**，不是引擎缺陷或加载失败；判据是先看占位图为 0，再轮询 `naturalWidth`。`e2e/layout-character-skill-data.spec.ts`
+- **图片 `naturalWidth` 类断言在冷跑下会假红**：Chromium 靠请求缓存与靠前用例预热而不显形，Firefox 冷跑必现「立即读到 5/6 未完成、6s 后 6/6、占位图为 0」——这是**测试竞态**，不是引擎缺陷或加载失败；判据是先看占位图为 0，再轮询 `naturalWidth`；`complete` 类断言同理，前面必须有条件等待。`e2e/layout-character-skill-data.spec.ts`
 
 ## vitest 与单测环境
 
 - **`src/**` 下的测试文件不能 `import 'node:fs'`**：仓库未装 `@types/node`，而 `tsconfig.app.json` include `src/**/*.ts`（含测试），具名 `node:*` 导入会让 `vue-tsc -b` 报 TS2591；改用 `import.meta.glob(..., { eager: true, query: '?raw' })`。`e2e/**` 不受影响。
-- **探针脚本直接 `import resolve_text` 会静默得空串**：TextMap 未加载时 `_text_map` 是空字典。`convert.py` 的加载顺序是隐式前提，探针必须先 `load_textmap()`；核源字段走 `query.py`。
 - **一条用例的价值 = 本地重跑时能否抓到真实回归，与覆盖率数字无关**：锁不同分支 / 不同故障形态的用例不是 padding，**删前必须能说出它锁的是哪条分支**；「能否被上层路径覆盖」必须实测（某分支实测不可达 ⇒ 只能直接测），凭读代码推断会误删唯一防线。恒真断言的共同特征是：不看断言写了什么，只看**删掉被测那行还绿不绿**。`src/services/__tests__/`、`tools/converter/tests/`
 
 ## 假结论防治
 
-- **「守卫从不响」与「没有守卫」等价——新加断言必须负测一次**：临时把缺陷改回去，确认断言真的变红。
+- **「守卫从不响」与「没有守卫」等价——新加断言必须负测一次**：临时把缺陷改回去，确认断言真的变红。选择器写错、路径判断写错、条件永真这三类都会静默通过，负测是唯一能区分「真守住」与「一直在空跑」的手段。
 - **负测必须用「守卫自己的判据」跑，探针另抄一份判据等于没测**：新守卫首版把页面白名单写成锚定正则 `^character\.html$`，但文件名取值用了相对**仓库根**的 `rel()`（得到 `dist/prerender/de/character.html`）⇒ 正则一条都匹配不上，**永远为绿**。同时探针自己抄判据时又漏了语言前缀，于是探针的「全部无标记 ✓」与守卫的绿是**同一个空判**，负测也没能发现。修法两条：判据从守卫源码里**提取**（不另抄），文件名用相对 `PRERENDER` 的路径。判据：**断言「覆盖了 N 个文件」必须打印真实计数——0 与「全部通过」在文字上无法区分**。
 - **锚定正则 + 相对路径是「静默永不匹配」的经典组合**：写路径白名单前先打印一条真实样本路径对照，别凭「文件名应该是 X」推断（分层快照有语言前缀，`de/character.html` 才是真实形态）。
-- **只用「数据派生」的断言不够，必须另配「硬编码规则」哨**：数据自己带错值（如把怪物自己的名字当关卡名）时，UI == 数据的断言照样绿。两类断言各锁一半。
-- **只断言「每族生成文件数」查不出生成器静默漏条目**（map 中途异常 / 上限误用）：要按稳定标记逐目录计数断言相等，并断言详情页该类名 = 0（防污染导航性列表）。
+- **只用「数据派生」的断言不够，必须另配「硬编码规则」哨**：数据自己带错值（如把怪物自己的名字当关卡名）时，UI == 数据的断言照样绿。两类断言各锁一半，哨本身也要负测确认它会咬。
 - **axe impact 低于断言过滤门槛的违规，登记进白名单等于永不生效**：`KNOWN_VIOLATIONS` 只吃 `serious`/`critical`，登记 `moderate` 是死条目。登记前必须先实测 impact 等级。
-- **声明跑某规则集之前，先确认扫描器真的按该规则集在跑**：`new AxeBuilder({ page }).analyze()` 的默认标签只覆盖 WCAG 2.0/2.1 的 A+AA，2.2 新增规则从不执行 ⇒ 必须显式 `withTags`。
-- **口径声明与执行要逐项对齐**：扫描规则集、视口、`testIgnore` 排除项三者任一不符，「我们覆盖了 X」就是假声明——手机独有的对比度路径曾因 mobile 项目排除 a11y 而从未进过流水线。
+- **声明跑某规则集之前，先确认扫描器真的按该规则集在跑**：`new AxeBuilder({ page }).analyze()` 的默认标签只覆盖 WCAG 2.0/2.1 的 A+AA，2.2 新增规则从不执行 ⇒ 必须显式 `withTags`；`enabled: false` 的规则同样静默通过。
+- **口径声明与执行要逐项对齐**：扫描规则集、视口、`testIgnore` 排除项三者任一不符，「我们覆盖了 X」就是假声明——手机独有的对比度路径（底栏标签只在 <768 显示）因 `mobile-chromium.testIgnore` 排除 `accessibility.spec.ts` 而从未进过流水线，须单列取证。`playwright.config.ts`
 - **不给详情页挂 a11y 扫描 = 该类缺陷永远无人发现**：扫描面扩到 `/character/1001` 后 axe 立刻报 critical（5 个 range 无 `aria-label`）。列表页扫描覆盖不到详情页独有的控件形态。
-- **自建对比度探针会系统性偏乐观**：把页面底色 `--bg` 或 `<body>` 当背景，而文字真实落在更亮的容器（底栏 `#1e1c1d`）上 ⇒ 探针算 7.3:1、axe 算 4.07:1。必须取文字所在容器**实际解析出的背景色**；背景取错会让结论偏移一个量级。
-- **`tools/check-contrast.mjs` 只算「文字 × `--bg`」**：文字落在 `--surface` / `--card` / 着色 tag 上时对比度更低，这层只有 e2e 的 axe 兜底。改公共令牌后必须跑 axe，不能只看 token 门禁。
+- **自建对比度探针会系统性偏乐观**：把页面底色 `--bg` 或 `<body>` 当背景，而文字真实落在更亮的容器（底栏 `#1e1c1d`）上 ⇒ 探针算 7.3:1、axe 算 4.07:1。必须取文字所在容器**实际解析出的背景色**；背景取错会让结论偏移一个量级；带 alpha 的令牌要先与紧邻像素合成再算，直接用 rgb 三元组会把文字算亮。
+- **`tools/check-contrast.mjs` 只算「文字 × `--bg`」**：文字落在 `--surface` / `--card` / 着色 tag 上时对比度更低，这层只有 e2e 的 axe 兜底。改公共令牌后必须跑 axe，不能只看 token 门禁——元素内配对（如稀有度色星标 × 信息层渐变最亮处）它同样不看，别把「守卫全绿」当成「新配色也验过了」。
 - **改公共令牌后 a11y 报红，先做 A/B 注入辨别「回归 vs 存量」**：用 `page.addStyleTag` 把重基前的令牌注回 `:root`，同页重跑 axe 对比同一节点比值。没有这一步只能靠猜，容易把存量当自己改坏的或漏掉真回归。
 - **`elementFromPoint` 对 `pointer-events: none` 的元素无效——用它验「装饰层是否遮挡/越界」必然假绿**：给飘带角标验「是否戳出卡的圆角轮廓」时用命中测试找飘带，而飘带是 `pointer-events: none`，命中测试直接跳过它 ⇒ 无论形态对错都返回宿主卡、报出「✓ 已被圆角切掉」。**装饰层（`pointer-events: none`）的几何只能用像素采样或 `getBoundingClientRect` 验，不能用命中测试。**
 - **`elementFromPoint` 也验不了 3D 深度排序，且透明像素与整块 img 盒都会骗人**：验首页「星魂碎片是否被立绘遮挡」时，把 `pointer-events` 改回 auto 再命中测试，近端碎片仍报命中遮挡物/轨道线（3D 上下文里的命中顺序不按几何 z 走，且遮挡物是整块 `<img>` 盒、透明区照样参与命中）。**正解 = 给遮挡物临时上不透明底色的差值法**：`addStyleTag` 注 `.plate{background:#f00}` 后截图，远端碎片会被整块盖住、近端碎片压在红色之上，一图定论；验完即撤，不写进源码。`src/styles/home.css`、`src/app/views/HomeView.vue`
@@ -123,18 +116,14 @@
 - **每个路由对开跑前先断言「落地 path == 目标 + 无 404 视图 + 预期根组件存在」**：`BASE` 带尾斜杠会拼出 `//character`（协议相对 URL）→ host 被吞 → 落到 404 页取假证，全程不报错。
 - **行导向正则 `/…$/` 作用在多行拼接串上时 `$` 跨不过换行** ⇒ 豁免永远匹配不上，而工具照样打印「违规 0 / 豁免 0」看着正常。自检办法：给一条真豁免跑一遍，确认它出现在「已豁免」而不是「违规」里。
 - **未被 `content` 生成的伪元素，`getComputedStyle(el, '::before')` 的 width / height 返回声明侧数值**：据此会误判「元素还在」。只有计算 `content` 能判生成与否（`none` = 不生成 / `""` = 生成），并用像素 diff 兜底。
-- **hero 像素取证必须先冻结动效，否则噪声地板淹没结论**：Spine 就绪即自动播放、parallax 的 lerp 在 mousemove 后持续写 transform ⇒ 同一 CSS 相隔 1.2s 的两张截图差 11.8 万像素。正解＝注入 `.nk-hero__spine{display:none}` + `.nk-hero__bg{opacity:1;transform:none}`。
 - **把指针固定到页面角落不等于冻结视差**：指针不在 hero 上不触发，两次采样状态反而不同。必须显式覆盖 transform / opacity。
 - **去字形必须作用到后代，且顺序在「读取文字颜色」之后**：只写父级会被子元素自身的 `color` 声明压过 ⇒ 把白色字形当底衬量出 `vsWorst = 1.0` 的假失败；顺序反了则把文字色读成透明，稳定得出 ~1.07 的假结论。用 `visibility: hidden` 也不行——会连铭牌自己的底衬一起隐藏。
 - **渐进解码的立绘 webp 必须等 `Image.decode()` 完成再取样**：未等时噪声地板 0.02~0.03，足以淹没 0.002 量级的结论。
-- **后景必须取用户真正看到的那一态**：Spine 就绪时立绘被压到透明 ⇒ 真实运行态后景是动画帧。把立绘卡当后景＝测了一个用户看不到的状态。
-- **判「动画在跑」不能用被覆盖的区域**：面板区在 88% 不透明底板之下，帧间差被压掉 ⇒ 得出「没动」；换「底板之外的自由区」又可能正好在角色剪影之外（帧差 0）。正解＝整幅视觉区逐像素帧差。
-- **必须同时记录 `visibilityState`**：后台标签页 rAF 挂起会让 canvas 静止，得出「稳定但假」的结论。
 - **背景层次只有 18~26/255 时要做亮度拉伸**：把 `[lo, hi] → [0,255]`（约 21×）才能看清结构；不拉伸时等值线与页面颗粒噪声不可区分。
 - **有 `v-if` 的元素要在采样脚本里判空**：该元素为空时整个不渲染，任何 `querySelector` 未判空都会在跑到那只角色时让整轮崩掉。
 - **探针脚本含正则 / 引号 / `$` 一律写成 `.mjs` / `.ps1` 执行**：PowerShell 转义与 Bash 预展开 `$var` 会静默改写脚本内容。
 - **不要用 `Get-Content -Raw` ↔ `Set-Content` 往返文本文件**：本机 `pwsh` 走 Windows PowerShell 5.1 语义（判据：`-AsByteStream` 参数不存在），默认按 ANSI 解码并按 ANSI 写回——实测一个 31294 字节的 UTF-8 快照往返后变 31183 字节，`<title>` 与 JSON-LD 当场损坏，守卫报「缺 title / JSON.parse 失败」，看起来像产物坏了、其实是夹具坏的。改产物做反向验证时用 Node（`readFileSync`/`writeFileSync`）或显式 `-Encoding utf8`；**还原一律用 `Copy-Item` 覆盖，不要靠重写内容**。
-- **本应用的真实滚动容器是 `#nk-home-app`，不是 `window`**（外壳把内容区做成自己的滚动盒，`document.scrollHeight` 恒等于视口高）。任何「滚动驱动」的东西都会因此失真：① `window.scrollTo()` 是空操作 ⇒ 视口以外的内容永远不进视口；② `loading="lazy"` 的图**永远不开始取**（`complete=false`、`naturalWidth=0`，且**不算** broken image，所以静默）；③ `animation-timeline: view()` 的进度停在 0 ⇒ 视口以下的元素停在入场动画的起始态（`opacity: 0` + 位移）。自写取证脚本必须 `document.querySelector('#nk-home-app').scrollTop = y` 逐屏走；第三方按 `window` 走的工具（如 tasteskill 的 `inspect.mjs`）**只能看到首屏**，其「图片数 / 空白屏 / 逐屏动效」结论都据此打折。
+- **本应用的真实滚动容器是页根（首页 `#nk-home-app`、目录页 `#nk-catalog-app`），不是 `window`**（外壳把内容区做成自己的 `position: absolute; overflow-y: auto` 滚动盒，`documentElement.scrollHeight` 恒等于视口高、滚动条宽 0 ⇒ `fullPage` 截图只拿首屏、`inspect.mjs` 报「1 screens」）。任何「滚动驱动」的东西都会因此失真：① `window.scrollTo()` 是空操作 ⇒ 视口以外的内容永远不进视口；② `loading="lazy"` 的图**永远不开始取**（`complete=false`、`naturalWidth=0`，且**不算** broken image，所以静默）；③ `animation-timeline: view()` 的进度停在 0 ⇒ 视口以下的元素停在入场动画的起始态（`opacity: 0` + 位移）。自写取证脚本必须 `document.querySelector('#nk-home-app').scrollTop = y` 逐屏走（通用判据：先找「`overflow-y: auto` 且 `scrollHeight > clientHeight + 4`」的容器再改它的 `scrollTop`；只看 `documentElement` 会把 2.5 屏的页当成 1 屏）；第三方按 `window` 走的工具（如 tasteskill 的 `inspect.mjs`）**只能看到首屏**，其「图片数 / 空白屏 / 逐屏动效」结论都据此打折。
 - **位移中的元素不能用 `getBoundingClientRect()` 判间距**：入场动画（`animation-timeline: view()` + `fill: both`）会把视口以下的元素整体平移 +20~26px，于是「上一分区的文字」到「下一分区的标题」的实测间距比布局值小 26px，足以把一条正常的排版读成缺陷。判间距前先 `animation: none`，或只量同一动画状态下的两个元素。
 - **判目录卡渲染完成的类选择器只能写子串 `[class*="-grid"]`，不能写属性结尾 `[class$="-grid"]`**：网格的 class 是数组绑定（`gridClass + nk-virtual-grid` + `nk-fast-jump` / `nk-no-reveal` 条件类），尾随类一挂上属性串就不再以 `-grid` 结尾 ⇒ 等卡片退化成 15s 超时；骨架的 `nk-skeleton__grid` 不含该子串，不会误命中。`e2e/helpers.ts`
 
@@ -142,15 +131,14 @@
 
 - **提速类配置的验收线是「零新增失败」，不是「更快」**：多 worker 快约两成，但三次全量里出现一次并发竞态 flake ⇒ 不值得。用 `--retries` 把 flake 抹平等于把风险转移到未来某一轮，属禁止手法。
 - **`--list` 不执行用例体，缺 import 只在实跑时炸成 `ReferenceError`**：拆文件时机械搬运 import 易漏，且多 worker 会同时暴露多个文件、看起来像 flake。`--list` 能查条数、查不了符号 ⇒ 靠类型检查或静态比对补。
-- **按文件计数的守卫基线在改名 / 拆分后必须重生成，但重生成前后都要核对总数**：否则会顺手把真实新增一起豁免掉。基线默认只报告、不进 CI ⇒ 漂移长期不可见，正确动作是行内豁免而非抬高基线。
 - **一个 flake 用例「单跑绿、并发红」时，先确认它不是暴露了真实的时序依赖**：热缓存会让顺序对它有利，单次 A/B 的提速数据不足以支撑改配置。
 - **自钉视口的用例必须把 `@viewport-pinned` 写在 `test(...)` 第二参的静态位置**：`grepInvert` 在**收集期**过滤，动态 annotation 不生效；漏标签会让 mobile project 用触摸仿真重跑桌面契约，`boundingBox()` 稳定不变却拖到测试超时（重试也全红）。但**必须留至少一条不打标签的用例**——它的 `setViewportSize` 是被测对象，是唯一验证 `isMobile` 让 `<meta viewport>` 参与布局的哨兵；机检只判「自钉视口 ⇒ 必须有标签」这一个方向。
 - **`import { chromium } from 'playwright'` 必然 `ERR_MODULE_NOT_FOUND`**：`package.json` 只直接依赖 `@playwright/test`，pnpm 严格结构下传递依赖无法从根 `node_modules` 解析，与脚本放置位置无关。统一写 `from '@playwright/test'`（入口全量 re-export playwright API）。
-- **整批运行时偶发的溢出用例：先单独复跑再决定是不是缺陷**。实测 `layout-character-nav.spec.ts` 的「极端视口矩阵（320 / 834 / 矮横屏 / 2560）四条不变量」在**全量 254 条**里失败一次（`expectNoUnknownOverflow` 报未知溢出），单独复跑两条全绿 ⇒ 判为批内时序/布局抖动，**不要改断言、也不要加 retries**（`--retries` 是禁止手法，见上）。判据：同一用例单跑必过、整批偶发、失败点是几何测量而非文本/数量断言。
-- **`shell.spec.ts` 的「下拉框（select）」是真 flake（约 3/5 红），且与卡片 CSS 无关**：失败值 400ms 来自 `tokens.css` 的 `.theme-transitioning` 全局 `!important` 覆盖，`App.vue` 进出 `meta.cw` 路由时加该类、约 450ms 后移除；用例只等「该类不在场」+`waitForTimeout(250)`，而 `watch(isCw)` 回调可能在 `waitForFunction` 通过**之后**才加类 ⇒ 采集落进窗口。**归因判据**：单次 PASS 在 3/5 失败率下不构成证明（曾据此误判「与我无关」后又自行撤回）；正确做法是静态证据（规则逐字未改）+ 多次复现 + 本文件既有记载。修法属测试侧（先等它出现再等它消失，或采集前 `classList.remove`），**不要为它改 400ms**（那是主题切换的设计意图）。
+- **整批运行时偶发的溢出用例：先单独复跑再决定是不是缺陷**。实测 `layout-character-nav.spec.ts` 的「极端视口矩阵（320 / 834 / 矮横屏 / 2560）四条不变量」在整批跑里失败一次（`expectNoUnknownOverflow` 报未知溢出），单独复跑两条全绿 ⇒ 判为批内时序/布局抖动，**不要改断言、也不要加 retries**（`--retries` 是禁止手法，见上）。判据：同一用例单跑必过、整批偶发、失败点是几何测量而非文本/数量断言。
+- **`shell.spec.ts` 的「下拉框（select）」是真 flake（约 3/5 红），且与卡片 CSS 无关**：失败值 400ms 来自 `.theme-transitioning` 窗口（机制与等待顺序见本节「采集 transition 前的主题窗口等待有顺序要求」）；用例只等「该类不在场」+`waitForTimeout(250)`，而 `watch(isCw)` 回调可能在 `waitForFunction` 通过**之后**才加类 ⇒ 采集落进窗口。**归因判据**：单次 PASS 在 3/5 失败率下不构成证明（曾据此误判「与我无关」后又自行撤回）；正确做法是静态证据（规则逐字未改）+ 多次复现 + 本文件既有记载。修法属测试侧（先等它出现再等它消失，或采集前 `classList.remove`），**不要为它改 400ms**（那是主题切换的设计意图）。
 - **临时还原（`git stash` / `git checkout HEAD -- <file>`）会污染全队共享工作区的测量窗口**：同一 worktree 里有人取 clean baseline 时，别人的扫描会读到「没有修复的树」。取基线要么**先广播时间窗**，要么改用**注入式 A/B**（注入原声明再撤，不动工作树）。**为「同一结论的第二次确认」而做临时还原不划算**——尤其当静态证据已充分时。
 - **「内容未就位」这类 poll 文案会冒充页面缺陷，实际是**用例预算耗尽**：`layout-locales-smoke.spec.ts` 把 25 条路由串进一个用例，CI 实测 29–34s > Playwright 默认 30s ⇒ 报 `cn /voracity 内容未就位` + `Test timeout of 30000ms exceeded`。**归因判据**（三条同时成立即判预算、不判页面）：① 失败 path 在多次运行间**漂移**（实测一次落 `/voracity`、复跑落 `/cht/settings`）；② 错误里同时出现 poll 的 message 与用例级超时；③ trace 里失败前最后一个文档请求刚发出 ~1s，且**全部请求 200/304、p95 数十毫秒**（判「网络/服务端慢」会指向错误方向——trace 的 `time` 字段是**毫秒**，按秒读会把 18.6ms 读成 18.6s）。修法是给该用例显式预算（`test.setTimeout`），**不是**加 retries、也不是改断言；同一用例 retry 曾 28.9s 通过，正说明它卡在预算线上。
-- **`playwright test e2e/layout-` 这类路径前缀过滤会静默缩小覆盖**：它按**路径子串**匹配，`guards.spec.ts` / `shell.spec.ts` 因此一次都没跑过，而 CI 注释与文档都写着「不变量层永远可跑」。判据：改选定的文件集后用 `--list | grep -c` 数**实际收集条数**，不要相信命令「看起来包含它」。同理，`pnpm test:e2e:ci` 的语义必须与 `.github/workflows/` 里的实际命令逐字对齐（本仓 ci.yml 现有 `static` / `unit-tests` / `guards` / `invariants` / `layout` / `firefox` / `smoke` 七条 job）。
+- **`playwright test e2e/layout-` 这类路径前缀过滤会静默缩小覆盖**：它按**路径子串**匹配，`guards.spec.ts` / `shell.spec.ts` 因此一次都没跑过，而当时的 CI 注释与文档都写着「不变量层永远可跑」。判据：改选定的文件集后用 `--list | grep -c` 数**实际收集条数**，不要相信命令「看起来包含它」。同理，`pnpm test:e2e:ci` 的语义必须与 `.github/workflows/` 里的实际命令逐字对齐（job 清单以 `ci.yml` 为准，不在文档里复述）。
 - **`run: |`（块标量）里裸换行就是命令分隔，续行必须显式写 `\`**：ci.yml 的 layout 分片步骤曾写成两行、第二行以 `--project=` 开头 ⇒ bash 把参数行当成独立命令，实测 `line 4: --project=chromium: command not found` + 退出码 127，而**上面 59 条用例已全绿**。症状极像「配置错」，实际是「用例全过、命令验证失败」；更坏的是它把同一 run 里另 5 个分片的真红盖住（人只看到「6 片全红」就以为是同一原因）。判据：`127` + `command not found` + 测试统计行已打印 ⇒ 先读 `run:` 块的换行，别去查断言。
 - **标签与收集过滤是一对，删任一半都静默失效，而失效只在夜间慢档显形**：`@viewport-pinned` 写在用例上只是「声明」，真正让它不被 Pixel 7 重跑的是 `mobile-chromium` 的 `grepInvert`；只删 config 那一半时收集量整整翻一档（当轮实测 425 → 611，mobile 108 → 294，多出的全是桌面契约），5 条确定性翻红（骨架同高差 14.28px、父子卡令牌取到 44px/12px、两次 30s 点击超时）。**push 档在门禁分层后只有 static + unit-tests + guards**，layout 只在 `schedule` 跑 ⇒ 这类错可以连红两晚而推送时全绿；手工 `workflow_dispatch` 若选 `e2e_scope=invariants`，layout 直接 skipped，还会造出「手动跑过是绿的」的错觉。判据：改 `playwright.config.ts` 的 project 块后用 `CI=1` 复刻 CI 命令形态数一遍收集量，并跑 `node tools/check-e2e-viewport-tags.mjs --strict`（该工具已进 CI `static`，同时判标签与 `grepInvert` 两侧）。`playwright.config.ts`
 - **`--project` 显式列出不会让 project 的 `grepInvert` 失效**：同一份 config、同一条 `--shard=4/6`，隐式（走 config 的 project 表）与显式 `--project=chromium --project=mobile-chromium` 实测都是 55 条；整仓口径下隐式与显式的差（当轮 435 vs 425，相差 10 条）正好是 `firefox-layout-contract` 的 `@cross-engine` 集（现 11 条）。**旧结论「显式 project 覆盖 grepInvert」是错误归因**：那次条数变化真正来自「config 里的 mobile `grepInvert` 已在同批提交里被删掉」，而后续「回退」提交只改了文档、没改 config（`git show --stat` 只有两份 md）。判据：**回退类提交必须核对被回退的文件是否真在改动清单里**，标题与正文都不是证据。连带：分片内容会随「是否含 firefox 项目」改变组划分，复现 CI 红必须逐字复刻 CI 命令（`CI=1` + 同样的 project 集合 + 同一 `--shard`）。
@@ -164,11 +152,10 @@
 - **断「几何接缝」的用例同样需要就绪门，症状与字体度量类一模一样**：`layout-character-skill-family.spec.ts` 断的是「父卡体底 = 首子卡卡顶（±1px）」「竖轨/折角落点」「图标列对齐」，`waitForSelector` 只保证节点存在，此时行盒按**回退字体**算 ⇒ 并发下接缝差 >1px 翻红（实测分片跑翻 2 次、单跑 3/3 绿）。补 `waitForSettled` 后同一分片连跑 3 轮全绿。判据：**只要断言里出现「两个盒子的边缘相等 / 相接」，就属于需要就绪门的一类**——别只把就绪门理解成「字体类断言才要」。
 - **layout 的「最慢文件」会反复长回来，且每次都在同一个位置**：单文件 74 条 → 拆；`layout-character` 39 条 → 拆；`layout-endgame` 22 条 → 拆；`layout-endgame-board` 16 条 → 拆。每次拆完都以为收工了，实测几轮后又被新用例填回。判据别再盯「15 条」这个数字，改盯**该层最慢调度单元**：它等于 CI 墙钟下界，超过其它片的耗时就是下一轮要拆的对象。
 - **`retries` 在 CI 里会把真红转绿、并把红 run 拉长**：实测 mobile `/endgame/boss` 首跑红、retry 绿（假绿），而失败的 e2e job 因重试从 14.5 分钟涨到 ~20 分钟。仓库纪律本就禁止用重试抹平 flake（见上条）⇒ CI 的 `retries` 设为 0，提速走**机器维度的分片**（每台 runner 的 `workers` 恒为 2，单机并发度不动，flake 面不放大）。
-- **「节点在」不等于「字体就绪」：`document.fonts.status === 'loaded'` 会在入口 CSS 还没应用时就是真**——此时首屏还没有对应文本、字体请求一个都没发出，等待立刻通过，测量就落在**回退字体**的几何上。同一根因在 CI 上以两种面貌出现：① `shell.spec` 的 `document.fonts.check('12px "Noto Sans SC"')` 为假（字体可用性假红）；② 首页 a11y 多出 `scrollable-region-focusable`——**命中节点是视图根 `#nk-home-app`**（`overflow-y: auto`）：内容到位前它自身 `scrollHeight > clientHeight` 却**没有任何可聚焦内容**，axe 于是把「还在加载的骨架」判成 serious。**别把它归给「回退字宽撑破枢纽带」**（实测把 `.nk-hub-release__band` 强行压到 320px 也不报：该规则 `any: [focusable-content, focusable-element]`，含链接的滚动区会被豁免）；真因是**该页缺就绪门**——`PAGES` 里 `/` 原为 `wait: null`，是本文件唯一没有门的页，字体变慢只是把窗口拉宽。取证：阻断 `/fonts/**` 即稳定复现（`tabbables = 0` 且 `nk-view-fade-enter-active` 在场，1.2s 后自动消失），补上「等到分区 + 至少一条卡片链」的门后同一条件 4/4 全绿。**修法**：就绪门里显式 `document.fonts.load('12px "Noto Sans SC"', '角色图鉴')`（带样本文本）+ 有上限的 `Promise.race`，再等 `ready`——`check()` 也要带同样的样本文本，否则「族存在」与「该段文本可渲染」两件事会被混为一谈。`e2e/accessibility.spec.ts`
-- **采集 transition 前的主题窗口等待有顺序要求**：`.theme-transitioning` 是全仓**唯一**能把 `border-color` 变成 400ms 的规则（tokens.css `!important` 覆盖），而它由 `App.vue` 的 `watch(isCw)` 在**路由解析时**加上、450ms 后移除；卡片渲染发生在解析之后。故必须**先等渲染、再等窗口关闭**——顺序反了（先等类不在场、再等卡片）会在窗口内采样，失败值恰为 400ms 而非 `--nk-dur-normal` 的 300ms。cw 路由再加「先等它出现（失败即放行）再等它消失」的兜底：同模式直达时该类根本不出现，硬等会白付等待。判据：**全仓只有一条规则能产出该值**时，先查这条规则的开关条件，别去猜 CSS 优先级。
+- **「节点在」不等于「字体就绪」：`document.fonts.status === 'loaded'` 会在入口 CSS 还没应用时就是真**——此时首屏还没有对应文本、字体请求一个都没发出，等待立刻通过，测量就落在**回退字体**的几何上。同一根因在 CI 上以两种面貌出现：① `shell.spec` 的 `document.fonts.check('12px "Noto Sans SC"')` 为假（字体可用性假红）；② 首页 a11y 多出 `scrollable-region-focusable`——**命中节点是视图根 `#nk-home-app`**（`overflow-y: auto`）：内容到位前它自身 `scrollHeight > clientHeight` 却**没有任何可聚焦内容**，axe 于是把「还在加载的骨架」判成 serious。**别把它归给「回退字宽撑破枢纽带」**（实测把枢纽带强行压到 320px 也不报：该规则 `any: [focusable-content, focusable-element]`，含链接的滚动区会被豁免）；真因是**该页缺就绪门**——`PAGES` 里 `/` 补门前是 `wait: null`（现只剩 `/currency` 无门），字体变慢只是把窗口拉宽。取证：阻断 `/fonts/**` 即稳定复现（`tabbables = 0` 且 `nk-view-fade-enter-active` 在场，1.2s 后自动消失），补上「等到分区 + 至少一条卡片链」的门后同一条件 4/4 全绿。**修法**：就绪门里显式 `document.fonts.load('12px "Noto Sans SC"', '角色图鉴')`（带样本文本）+ 有上限的 `Promise.race`，再等 `ready`——`check()` 也要带同样的样本文本，否则「族存在」与「该段文本可渲染」两件事会被混为一谈。`e2e/accessibility.spec.ts`
+- **采集 transition 前的主题窗口等待有顺序要求**：`.theme-transitioning` 是全仓**唯一**能把 `border-color` 变成 400ms 的规则（tokens.css `!important` 覆盖），而它由 `App.vue` 的 `watch(isCw)` 在**路由解析时**加上、450ms 后移除；卡片渲染发生在解析之后。故必须**先等渲染、再等窗口关闭**——顺序反了（先等类不在场、再等卡片）会在窗口内采样，失败值恰为 400ms 而非 `--nk-dur-normal` 的 300ms。cw 路由再加「先等它出现（失败即放行）再等它消失」的兜底：同模式直达时该类根本不出现，硬等会白付等待。`goto` 后固定等一段延迟（如 300ms）再采集同样会读到它——窗口未关闭与「类不在场」是两件事。判据：**全仓只有一条规则能产出该值**时，先查这条规则的开关条件，别去猜 CSS 优先级。
 - **`Tab` 循环类用例的耗时随「可聚焦元素数 × runner 负载」线性增长，必须显式给预算**：`shell.spec` 的焦点可见性用例最多按 60 次 Tab 走到目标（每次一趟 `evaluate` 往返），CI runner 上单是走到 `/debug` 的下拉框就花 29s ⇒ 越过默认 30s 后连 `page.screenshot` 都开不了（trace 里截图动作停在 29.3s、报 `Test timeout`）。这类「到达成本不可预知」的用例与全路由 sweep 同类：修法是 `test.setTimeout`，不是 retries、也不是改断言。
 - **「骨架退场」在懒加载路由 chunk 执行前是**空真**（已由 `waitForViewMounted` 收口）**：视图挂载前 DOM 里既没有 `.nk-skeleton` 也没有正文，`!document.querySelector('.nk-skeleton')` 会立刻通过（实测「检查开始 → 取值」相隔 24ms；实测外壳态正文仅 **165** 字符、`#app` 子节点只有 `nav.ui-sidebar` + `div.nk-toast-container`，而挂载后正文 5352 字符）。判据 = `#app` 出现**非外壳**子节点（`e2e/helpers.ts → waitForViewMounted`，已并入 `waitForSettled`）；**外壳清单新增成员时必须同步该清单**（`SHELL_OWNED`），否则新外壳元素会被当成视图、退化成空真。仍要记住：就绪门不替代用例自己的「等被测对象」——失败是「取到 null / 空集」且重跑偶尔通过时，先查该用例的等待是否落在挂载之前（trace 里 `goto` → 各 wait → `evaluate` 的相对时刻一眼可辨）。
-- **`waitForSettled` 的三件事各自会假真，缺一不可**：字体（`document.fonts.status` 在入口 CSS 未应用时即为 `'loaded'`）、**视图挂载**（骨架不在场在 chunk 未执行时为空真）、骨架退场。三者都设上限且**不抛错**——等待不负责报缺陷，页面缺陷交给用例自己的断言。
 - **「等过渡类不在场」也是空真，而且类消失后几何还会再飘一帧**（2026-10-16 CI 实测，`layout-hub.spec.ts` 桌面档）：客户端路由跳转后，`findHorizontalOverflow` 的 `waitForFunction(![class*="nk-view-"][class*="-active"])` 会在**过渡尚未开始**时立刻通过（旧视图还在场、新视图 chunk 未到，DOM 里没有 -active）。随后 `evaluate` 排队执行，CSS 过渡由合成器驱动照常推进 ⇒ 测量落进动画相位。证据形态很有辨识度：报出的元素**恰为视口宽、位移恰 ±2px**（`div right=1282 left=2`，1280 视口）且诊断里 `htmlScrollWidth=1280 #app=0.0..1280.0`（**文档无溢出**）——即 `nk-view-fwd` 的 `translateX(24px)→0` 走到 ~92%。**判据**：同时满足「命中项 = 视口宽 ± 小位移」「`htmlScrollWidth == clientWidth`」「失败列表全是同一视图树的同向位移」即过渡残留，不是布局缺陷。修法是**两次采样逐项一致才认**（稳定态必然一致；过渡/落位中不一致 ⇒ 重测），**不是 `--retries`**（真缺陷的几何是稳态属性，两帧一致、照样上报，故不掩盖真红）。**别只查类**：实测报出时类已摘、位移还在（合成器尾帧）。等待过渡类消失的上限取 10s——1s 在慢 runner 上实测不够（超时只告警不失败，正常路径仍是条件一满足就返回）。`e2e/helpers.ts`
 - **跨窗口取证的描述必须带 id**：`findHorizontalOverflow` 原按 `className` 拼元素描述，而 `#app` / `#nk-catalog-app` 这类**带 id 无 class 的页根**会被打成裸 `div`——CI 上那个 2px 报告因此事后无从定性（连续两次踩到，已在描述里补 id）。判据：凡是会被写进**离线日志**（CI 报告）供事后归因的字符串，必须让读者能唯一定位元素。
 - **就绪门选错「同一外壳的另一个形态」＝判的根本不是被测页**（2026-10-16 CI 实测，`layout-nav.spec.ts` CW 手机档）：`route.meta.cw` 在 router 解析完成前为 false ⇒ 侧栏先渲染**常规模式**那套 href（`/` `/character` `/lightcone` `/relic` `/endgame`），而它们同样是 `a.ui-sidebar-link` ——「等第一个锚点可见」这种**弱门会立刻通过**，随后的 `evaluateAll`（无自动等待）就把常规集当 CW 集采样。CI trace 直接坐实：失败那次的实测结果里 href 全是常规集、`every(vis)` 为假。**A/B 实测**（390px + CPU 节流 4×）：弱门采错 **12/12**，强门（`waitForNavMode`，等目标模式锚点在场 + 另一模式退场）**0/12**。判据：**门必须指向被测形态独有的特征**（只在该模式存在的元素 / 属性），而不是「这类元素出现了」。同族反例见上面两条与本文件 `.theme-transitioning` 那条——四者同源：**等一个「不在场」、或等「出现了一个同类」，都是在赌被测对象已就位**。
@@ -197,7 +184,6 @@
 
 - **只读元素自身的 `animationName` 会整套漏掉伪元素动画**：骨架 shimmer 挂在 `::after` 上，只读宿主会报「无动画」。必须同时读 `::before` / `::after` 的计算样式。
 - **`cubic-bezier(0.16, 1, 0.3, 1)` 自带逗号**：用 `split(',')` 拆 `transitionTimingFunction` 会截断成 `cubic-bezier(0.16`，产生一堆假失败。必须按**顶层逗号**切（`/,(?![^(]*\))/`）。
-- **挂载后根节点会临时加 `.theme-transitioning`（约 400ms + `!important` 覆盖所有组件 transition）**：`goto` 后固定等 300ms 采集会读到它，必须在该窗口关闭后再采集。`src/app/App.vue`
 - **对拍只能证明算式，证明不了呈现**：内核与原文矩阵对拍 331 万组 0 差异，页面上仍有 6 处会算错/误导——默认值把韧性 10% 减伤恒剔除（合计高估 11.1%）、行迹把「单点加成值」错当角色攻击力（放大约 25 倍）、系数被标成「期望伤害」、同一实体与角色页取到不同的晋阶口径、非等距 x 轴刻度按等距均分（偏差 25~36px）。判据：审核除算式外必须同时查「默认值 / 单位标签 / 口径是否与既有页面一致 / 图表坐标是否真按刻度定位」，并优先拿同一实体在两个页面的数字互相对撞。
 - **重命名卡片类会让「同类交互动效」契约静默失配**：`shell.spec.ts` 先 `toBeVisible` 一张卡再量 transition；枢纽页把 `.nk-cw-trait-card` 换成 `.nk-cwrole` / `.nkcwtrait` 后，失败信号是「element(s) not found」而不是动效断言，且只在慢档跑。判据：新增 / 改名卡片类时同步该文件 `SURFACE` / `LABEL` 数组。
 - **`@visual-detail` 用例默认不进收集，改完不回跑就是假绿**：`layout-currency` 的骨架断言把 `[data-sk]` 分区数当卡片数、就绪分区选择器漏了 `[data-kind]`，本机与 push 档都收不到，直到发布前全量才红。判据：动过 `@visual-detail` / `@i18n-detail` 用例后补一次 `E2E_DETAIL=1 pnpm exec playwright test <文件>`。

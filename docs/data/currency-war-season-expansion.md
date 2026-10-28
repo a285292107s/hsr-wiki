@@ -1,6 +1,6 @@
 # 货币战争 · 赛季扩充说明（V4.4 · 零和博弈）
 
-> **状态：出处档案（前端不再展示）**——`/currency` 的赛季说明展示已随 ADR 0016 下线，本文仅保留 Hash ↔ 内容对应关系供查询与重建。详见文末「展示状态」。
+> **状态：出处档案（前端不再展示）**——`/currency` 的赛季说明展示已于 2026-09 下线（可逆展示裁决，未开 ADR；坑位见 [docs/memory/data-pipeline.md](../memory/data-pipeline.md)「删转换器模块前先枚举同名不同物」），本文仅保留 Hash ↔ 内容对应关系供查询与重建。详见文末「展示状态」。
 
 > 数据源：`vendor/TurnBasedGameData/TextMap/TextMapCHS.json` 及 `ExcelOutput/GridFight*.json`
 > 检索范围：所有含「货币战争 / 零和博弈 / 赛季扩充」的条目，以及与赛季扩充直接相关的角色、羁绊、专家顾问、奖励、玩法系统文本与配置。
@@ -185,4 +185,4 @@ TextMap（`TextMapCHS.json`）关键 Key：
 
 > 说明：以上条目均来自本地 vendor 副本 `vendor/TurnBasedGameData`（非 git 子模块），未依赖联网。
 >
-> **展示状态（2026-09 裁定）**：货币战争枢纽页（`/currency`）的「赛季扩充说明」展示已下线，转换器 season.py 与产物 currency/season.json 已一并删除（`SEASON_TEXTMAP` 注册表随之消失），决策见 [ADR 0016](../adr/0016-枢纽页模式切换入口的落点分工.md) 与 [docs/memory/data-semantics.md](../memory/data-semantics.md)。**本文档作为出处档案保留**——其价值是 TextMap Hash ↔ 内容的对应关系，与是否在前端展示无关；上文各节的 Hash 仍可直接用 `query.py --resolve` 查询。若日后要重新展示，按 `SEASON_TEXTMAP` 的形态重建「标题 Hash → 正文 + 概览」注册项并恢复 `convert.py` 的 `"season"` 模块即可，文本无需重新检索。
+> **展示状态（2026-09 裁定）**：货币战争枢纽页（`/currency`）的「赛季扩充说明」展示已下线，转换器 season.py 与产物 currency/season.json 已一并删除（`SEASON_TEXTMAP` 注册表随之消失），属可逆展示裁决（未开 ADR），坑位见 [docs/memory/data-pipeline.md](../memory/data-pipeline.md)。**本文档作为出处档案保留**——其价值是 TextMap Hash ↔ 内容的对应关系，与是否在前端展示无关；上文各节的 Hash 仍可直接用 `query.py --resolve` 查询。若日后要重新展示，按 `SEASON_TEXTMAP` 的形态重建「标题 Hash → 正文 + 概览」注册项并恢复 `convert.py` 的 `"season"` 模块即可，文本无需重新检索。
