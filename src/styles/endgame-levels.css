@@ -178,7 +178,7 @@
 .nk-egd-board__body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 24px;
 }
 .nk-egd-board__body > .nk-egd-floor__buff { margin-top: 0; }
 

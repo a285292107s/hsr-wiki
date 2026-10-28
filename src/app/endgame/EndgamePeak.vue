@@ -12,6 +12,7 @@ const props = defineProps<{
   level: PeakLevelInfo;
   hard?: boolean;
   systemName?: string;
+  systemChoice?: string;
   cardsAbove?: boolean;
 }>();
 
@@ -44,26 +45,29 @@ const headLevel = computed(() => (props.hard ? props.level.hard?.level : props.l
     <div class="nk-egd-peak__body nk-egd-children">
       <EndgameBuffGroup
         v-if="buffs.length"
-        class="nk-egd-group--row"
         :title="systemName || t('egm.sec.buffs')"
         :items="buffs"
+        :tail="systemChoice"
       />
 
-      <div v-if="stage.tags?.length" class="nk-egd-floor__mechs nk-egd-row">
-        <h2 class="nk-egd-row__label">{{ t('egd.mechanic') }}</h2>
+      <section v-if="stage.tags?.length" class="nk-egd-mechs">
+        <header class="nk-egd-mechs__head">
+          <h2 class="nk-egd-mechs__title">{{ t('egd.mechanic') }}</h2>
+        </header>
         <ul class="nk-egd-floor__tags">
           <li v-for="m in stage.tags" :key="m.id" class="nk-egd-peak__mech">
-            <span class="nk-egd-peak__tag">{{ m.name }}</span>
+            <h3 class="nk-egd-peak__tag">{{ m.name }}</h3>
             <p v-if="m.desc" class="nk-egd-peak__mechdesc" v-html="buffDescHtml(m)"></p>
           </li>
         </ul>
-      </div>
+      </section>
 
       <StageContent
         :stage="stage"
         :damage="cardsAbove ? undefined : damage"
         :invasion="level.invasion"
         :show-count="!cardsAbove"
+        head
       />
     </div>
   </section>

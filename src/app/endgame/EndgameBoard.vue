@@ -1,19 +1,27 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue';
 import StageContent from './StageContent.vue';
 import EndgameBuffGroup from './EndgameBuffGroup.vue';
 import EndgameFloorBuff from './EndgameFloorBuff.vue';
+import EndgameSeasonBoss from './EndgameSeasonBoss.vue';
 import { fallbackSystemName } from './guide';
+import type { StageKey } from './boss-guide';
 import type { MazeBossGuide, MazeBuffInfo, MazeStageDetail } from '../../services/types';
 
-defineProps<{
+const props = defineProps<{
   id: string;
   labelledBy?: string;
   stage: MazeStageDetail;
+  stageKey: StageKey;
   buffs: MazeBuffInfo[];
   guides?: Record<string, MazeBossGuide>;
   buff?: MazeBuffInfo | null;
   systemName?: string;
+  systemChoice?: string;
 }>();
+
+const phase = ref(1);
+watch(() => props.stage, () => { phase.value = 1; });
 </script>
 
 <template>
@@ -27,11 +35,18 @@ defineProps<{
       <EndgameFloorBuff :buff="buff" />
       <EndgameBuffGroup
         v-if="buffs.length"
-        class="nk-egd-group--row"
         :title="systemName || fallbackSystemName()"
         :items="buffs"
+        :tail="systemChoice"
       />
-      <StageContent :stage="stage" :guides="guides" />
+      <EndgameSeasonBoss
+        :stage="stage"
+        :guides="guides"
+        :stage-key="stageKey"
+        :phase="phase"
+        @update:phase="phase = $event"
+      />
+      <StageContent :stage="stage" :phase="phase" head @update:phase="phase = $event" />
     </div>
   </div>
 </template>

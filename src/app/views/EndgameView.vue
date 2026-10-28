@@ -13,7 +13,7 @@ import type {
 } from '../../services/types';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useScrollSpy } from '../composables/use-scroll-spy';
-import { fallbackSystemName, seasonBuffSystemName } from '../endgame/guide';
+import { fallbackSystemName, seasonBuffSystemName, seasonBuffChoiceLabel } from '../endgame/guide';
 import { buildLevelTabs, defaultLevelKey, type LevelTab } from '../endgame/levels';
 import { seasonBuffList, seasonNodeBuff } from '../endgame/renders';
 import EndgameHero from '../endgame/EndgameHero.vue';
@@ -119,6 +119,8 @@ const modeKey = computed(() => String(route.params.mode || ''));
 const unpublished = computed(() => Boolean(data.value && !data.value.zh));
 
 const systemName = computed(() => seasonBuffSystemName(guide.value, modeKey.value));
+
+const systemChoice = computed(() => seasonBuffChoiceLabel(guide.value, modeKey.value));
 
 const seasonBuffs = computed(() => (data.value ? seasonBuffList(data.value) : []));
 
@@ -271,6 +273,7 @@ onBeforeUnmount(() => {
               :tabs="levelTabs"
               :active="activeLevel"
               :system-name="systemName"
+              :system-choice="systemChoice"
             />
 
             <EndgameSeasonRewards :data="data" />

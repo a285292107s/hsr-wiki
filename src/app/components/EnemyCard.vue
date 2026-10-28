@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, nextTick, ref, useId, watch } from 'vue';
 import EndgameSummons from '../endgame/EndgameSummons.vue';
 import { elemLabel } from '../../lib/enum-labels';
-import EndgameBossGuide from '../endgame/EndgameBossGuide.vue';
 import { pollutionLabel } from '../endgame/pollution';
-import type { MazeBossGuide, MazeMonsterInfo } from '../../services/types';
+import { monsterPhases, phaseHpValue, phaseSkills } from '../endgame/monster-phases';
+import { tabNextIndex } from '../endgame/tabs';
+import type { MazeMonsterInfo } from '../../services/types';
 
 import { monsterRankKey } from '../../lib/enum-labels';
 import { escHtml, elementIconUrl, fmtBigNumber } from '../../lib/format';
@@ -18,8 +19,12 @@ type MonsterSkill = NonNullable<MazeMonsterInfo['skills']>[number];
 const props = defineProps<{
   monster: MazeMonsterInfo;
   polluted?: number;
-  guide?: MazeBossGuide;
+  phase?: number;
 }>();
+
+const uid = useId();
+const panelId = `${uid}-phase-panel`;
+const phaseTabId = (phase: number): string => `${uid}-phase-${phase}`;
 
 function elemRow(types: string[]): string {
   return types.map((d) => {
@@ -74,34 +79,58 @@ function monTitle(m: MazeMonsterInfo): string {
   return parts.join(' · ');
 }
 
-function skillPhases(list?: number[]): number[] {
-  return (list || []).filter((p) => p > 0);
-}
+const phases = computed(() => monsterPhases(props.monster));
+const phased = computed(() => phases.value.length > 1);
+const ownPhase = ref(1);
+const activePhase = computed(() => (phased.value && props.phase ? props.phase : ownPhase.value));
+const phasesRef = ref<HTMLElement | null>(null);
 
-const skillGroups = computed<{ phase: number | null; skills: MonsterSkill[] }[]>(() => {
-  const skills = props.monster.skills || [];
-  const phases = [...new Set(skills.flatMap((s) => skillPhases(s.phase_list)))]
-    .sort((a, b) => a - b);
-  if (phases.length < 2) return [{ phase: null, skills }];
-  const groups: { phase: number | null; skills: MonsterSkill[] }[] = phases.map((p) => ({
-    phase: p,
-    skills: skills.filter((s) => skillPhases(s.phase_list).includes(p)),
-  }));
-  const rest = skills.filter((s) => !skillPhases(s.phase_list).length);
-  if (rest.length) groups.push({ phase: null, skills: rest });
-  return groups;
-});
-const skillsGrouped = computed(() => skillGroups.value.some((g) => g.phase !== null));
+watch(phases, (list) => {
+  if (!list.includes(ownPhase.value)) ownPhase.value = list[0] ?? 1;
+}, { immediate: true });
+watch(() => props.monster, () => { ownPhase.value = 1; });
+
+const emit = defineEmits<{ 'update:phase': [phase: number] }>();
+
+const activeTabId = computed(() => phaseTabId(activePhase.value));
+const hasSkills = computed(() => Boolean(props.monster.skills?.length));
 
 const hpRows = computed<{ label: string; value: number }[]>(() => {
-  const phases = props.monster.phase_hp;
-  if (phases?.length) {
-    return phases.map((v, i) => ({ label: t('mob.stage', { n: i + 1 }), value: v }));
+  const phaseHp = props.monster.phase_hp;
+  if (phaseHp?.length) {
+    const row = (phase: number, value: number) => ({ label: t('mob.stage', { n: phase }), value });
+    if (phased.value) {
+      const phase = activePhase.value;
+      return [row(phase, phaseHpValue(props.monster, phase) ?? phaseHp[0])];
+    }
+    return phaseHp.map((value, i) => row(i + 1, value));
   }
-  return props.monster.hp != null
-    ? [{ label: t('catalog.sig.hp'), value: props.monster.hp }]
-    : [];
+  return props.monster.hp != null ? [{ label: t('catalog.sig.hp'), value: props.monster.hp }] : [];
 });
+const hpStacked = computed(() => hpRows.value.length > 1
+  || (phased.value && Boolean(props.monster.phase_hp?.length)));
+
+const visibleSkills = computed<MonsterSkill[]>(() => {
+  const skills = props.monster.skills || [];
+  return phased.value ? phaseSkills(props.monster, activePhase.value) : skills;
+});
+
+function selectPhase(phase: number): void {
+  ownPhase.value = phase;
+  emit('update:phase', phase);
+}
+
+function onPhaseKeydown(e: KeyboardEvent, i: number): void {
+  const next = tabNextIndex(e.key, i, phases.value.length);
+  if (next < 0) return;
+  e.preventDefault();
+  const phase = phases.value[next];
+  if (!phase) return;
+  selectPhase(phase);
+  void nextTick(() => {
+    phasesRef.value?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+  });
+}
 </script>
 
 <template>
@@ -125,7 +154,7 @@ const hpRows = computed<{ label: string; value: number }[]>(() => {
       <span
         v-if="hpRows.length"
         class="nk-egd-mon__hp"
-        :class="{ 'nk-egd-mon__hp--phases': hpRows.length > 1 }"
+        :class="{ 'nk-egd-mon__hp--phases': hpStacked }"
       >
         <span v-for="r in hpRows" :key="r.label" class="nk-egd-mon__hprow">
           <span class="nk-egd-mon__hp-label">{{ r.label }}</span>
@@ -136,7 +165,31 @@ const hpRows = computed<{ label: string; value: number }[]>(() => {
     </div>
     <div class="nk-egd-mon__data">
       <div class="nk-egd-mon__meta">
-        <span class="nk-egd-mon__name">{{ monster.name }}</span>
+        <div class="nk-egd-mon__head">
+          <span class="nk-egd-mon__name">{{ monster.name }}</span>
+          <div
+            v-if="phased"
+            ref="phasesRef"
+            class="nk-egd-mon__phases"
+            role="tablist"
+            :aria-label="t('egd.monPhases')"
+          >
+            <button
+              v-for="(phase, i) in phases"
+              :id="phaseTabId(phase)"
+              :key="phase"
+              type="button"
+              role="tab"
+              class="nk-egd-mon__phase"
+              :class="{ 'nk-egd-mon__phase--active': phase === activePhase }"
+              :aria-selected="phase === activePhase"
+              :aria-controls="hasSkills ? panelId : undefined"
+              :tabindex="phase === activePhase ? 0 : -1"
+              @click="selectPhase(phase)"
+              @keydown="onPhaseKeydown($event, i)"
+            >{{ t('mob.stage', { n: phase }) }}</button>
+          </div>
+        </div>
         <span class="nk-egd-mon__tags">
           <span v-if="monster.camp" class="nk-egd-mon__tag">{{ monster.camp }}</span>
           <span v-if="monster.stance" class="nk-egd-mon__tag">{{ t('card.value.stance', { v: monster.stance }) }}</span>
@@ -159,21 +212,20 @@ const hpRows = computed<{ label: string; value: number }[]>(() => {
           <span class="nk-egd-mon__resist" v-html="debuffResistHtml(monster)"></span>
         </div>
       </div>
-      <EndgameBossGuide v-if="guide" :guide="guide" />
       <div
         v-if="monster.skills?.length"
+        :id="phased ? panelId : undefined"
         class="nk-egd-mon__skills"
-        :class="{ 'nk-egd-mon__skills--grouped': skillsGrouped }"
+        :role="phased ? 'tabpanel' : undefined"
+        :aria-labelledby="phased ? activeTabId : undefined"
       >
-        <div v-for="g in skillGroups" :key="g.phase ?? 'rest'" class="nk-egd-mon__skillgroup">
-          <span v-if="g.phase !== null" class="nk-egd-mon__skillphase">{{ t('mob.stage', { n: g.phase }) }}</span>
-          <span
-            v-for="s in g.skills"
-            :key="s.name"
-            class="nk-egd-mon__skill"
-            :title="s.tag ? `${s.name} · ${s.tag}` : s.name"
-          >{{ s.name }}</span>
-        </div>
+        <span class="nk-egd-mon__seclabel">{{ t('mob.sec.skills') }}</span>
+        <span
+          v-for="s in visibleSkills"
+          :key="s.name"
+          class="nk-egd-mon__skill"
+          :title="s.tag ? `${s.name} · ${s.tag}` : s.name"
+        >{{ s.name }}</span>
       </div>
       <EndgameSummons :items="monster.summons || []" />
     </div>

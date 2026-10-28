@@ -26,18 +26,24 @@ const emit = defineEmits<{ select: [key: string] }>();
 
 const listRef = ref<HTMLElement | null>(null);
 
-const cards = computed(() => props.items.map((it) => {
-  const boss = lastWaveBoss(it.stage?.monsters);
-  return {
-    key: it.key,
-    label: it.label,
-    icon: boss?.icon ? cdnUri('monstermiddleicon', `${boss.icon}.webp`) : '',
-    elems: it.stage?.damage?.length ? elemRow(it.stage.damage) : '',
-    level: it.level,
-    countdown: it.countdown || 0,
-    danger: it.danger || '',
-  };
-}));
+const cards = computed(() => {
+  const listed = props.items.map((it) => lastWaveBoss(it.stage?.monsters));
+  const names = listed.map((boss) => boss?.name || '');
+  const shared = names.every((n) => n === names[0]) ? names[0] : '';
+  return props.items.map((it, i) => {
+    const boss = listed[i];
+    return {
+      key: it.key,
+      label: it.label,
+      boss: shared ? '' : (boss?.name || ''),
+      icon: boss?.icon ? cdnUri('monstermiddleicon', `${boss.icon}.webp`) : '',
+      elems: it.stage?.damage?.length ? elemRow(it.stage.damage) : '',
+      level: it.level,
+      countdown: it.countdown || 0,
+      danger: it.danger || '',
+    };
+  });
+});
 
 function onKeydown(e: KeyboardEvent, i: number): void {
   const next = tabNextIndex(e.key, i, props.items.length);
@@ -103,17 +109,20 @@ function onKeydown(e: KeyboardEvent, i: number): void {
             </svg>
           </span>
         </span>
-        <span v-if="t.elems" class="nk-egd-nodecard__row nk-egd-nodecard__row--elems">
-          <span class="nk-egd-nodecard__label">{{ translate('egd.label.attr') }}</span>
-          <span class="nk-egd-nodecard__elems" v-html="t.elems"></span>
-        </span>
-        <span v-if="t.level" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
-          <span class="nk-egd-nodecard__label">{{ translate('egd.label.level') }}</span>
-          <span class="nk-egd-nodecard__val">{{ t.level }}</span>
-        </span>
-        <span v-if="t.countdown" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
-          <span class="nk-egd-nodecard__label">{{ translate('egd.score.rounds') }}</span>
-          <span class="nk-egd-nodecard__val">{{ t.countdown }}</span>
+        <span v-if="t.boss" class="nk-egd-nodecard__boss">{{ t.boss }}</span>
+        <span class="nk-egd-nodecard__rows">
+          <span v-if="t.elems" class="nk-egd-nodecard__row nk-egd-nodecard__row--elems">
+            <span class="nk-egd-nodecard__label">{{ translate('egd.label.attr') }}</span>
+            <span class="nk-egd-nodecard__elems" v-html="t.elems"></span>
+          </span>
+          <span v-if="t.level" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
+            <span class="nk-egd-nodecard__label">{{ translate('egd.label.level') }}</span>
+            <span class="nk-egd-nodecard__val">{{ t.level }}</span>
+          </span>
+          <span v-if="t.countdown" class="nk-egd-nodecard__row nk-egd-nodecard__row--level">
+            <span class="nk-egd-nodecard__label">{{ translate('egd.score.rounds') }}</span>
+            <span class="nk-egd-nodecard__val">{{ t.countdown }}</span>
+          </span>
         </span>
       </span>
     </button>

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, readTokenPx, waitForSettled } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, readTokenPx, settleAnimations, waitForSettled } from './helpers';
 import { noUnknownOverflow } from './layout.shared';
 
 test.describe('布局验收：终局玩法详情页（第四种页面形态）', () => {
@@ -91,6 +91,7 @@ test.describe('玩法说明入口可发现性（目录页列头 + 赛季详情�
     const { assertNoErrors } = collectConsoleIssues(page);
 
     await page.goto('/endgame');
+    await settleAnimations(page);
     const chips = page.locator('.nk-eg-col__head .nk-guide-link');
     await expect(chips.first()).toBeVisible();
     expect(await chips.count(), '目录页每个模式列头各一个入口').toBeGreaterThanOrEqual(1);
@@ -188,6 +189,7 @@ test.describe('玩法页赛季增益 CTA 不被裁切（长语言最坏档）', 
       const { assertNoErrors } = collectConsoleIssues(page);
       await page.setViewportSize({ width: vw, height: 900 });
       await page.goto(`${prefix}/endgame/${mode}`);
+      await settleAnimations(page);
       const cta = page.locator('.nk-egm__system-cta');
       await expect(cta).toBeVisible();
       const box = await cta.evaluate((el) => {

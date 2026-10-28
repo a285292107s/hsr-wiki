@@ -199,7 +199,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     await expect(mazePanel.locator('.nk-egd-board__body > .nk-egd-floor__stage')).toHaveCount(1);
     await expect(mazePanel.locator('.nk-egd-mon__name').first())
       .toHaveText(mazeFloor1.stage1!.monsters![0].name);
-    await expect(mazePanel.locator('.nk-egd-floor__label')).toHaveText('敌方配置');
+    await expect(mazePanel.locator('.nk-egd-stage__title')).toHaveText('敌方配置');
     await expect(mazePanel.locator('.nk-egd-mon__hp-label'))
       .toHaveText(mazeFloor1.stage1!.monsters!.map(() => 'HP'));
     await expect(mazePanel.locator('.nk-egd-mon__hp-val'))

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, waitForCatalogCards } from './helpers';
+import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, settleAnimations, waitForCatalogCards } from './helpers';
 import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
 
 test.describe('布局验收：终局敌方卡内溢出（8 语言，合并自 overflow / overflow-alt）', () => {
@@ -83,6 +83,7 @@ test.describe('布局验收：赛季页 + 玩法页根 overflow-x:hidden 硬裁�
         await page.setViewportSize({ width: vw, height: 900 });
         for (const route of ROUTES) {
           await page.goto(`/${code}/endgame/${route.path}`);
+          await settleAnimations(page);
           await page.waitForSelector(route.ready, { timeout: 20_000 });
           const bad = await page.evaluate(() => {
             const root = document.querySelector('.nk-page--detail') as HTMLElement | null;

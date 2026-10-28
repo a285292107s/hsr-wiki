@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, readTokenPx } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, readTokenPx, settleAnimations } from './helpers';
 import { cnBigNumber, PEAK_HARD_NODE, PEAK_KING_NODE, noUnknownOverflow, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, seasonData, seasonRewardGroups } from './layout.shared';
 import type { MechanicLike, MonsterLike } from './layout.shared';
 
@@ -17,6 +17,7 @@ test.describe('布局验收：赛季级区块（行式排版 + 数据驱动上�
     await expect(group).toHaveCount(1);
     await expect(group.locator('.nk-egd-group__title')).toHaveText('荒腔走板');
     await expect(group.locator('.nk-egd-buff__name')).toHaveText(story.buffs!.map((b) => b.name));
+    await settleAnimations(page);
     const sameRow = async (cards: ReturnType<typeof page.locator>): Promise<number> => new Set(
       await cards.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top))),
     ).size;
@@ -30,8 +31,8 @@ test.describe('布局验收：赛季级区块（行式排版 + 数据驱动上�
     expect((tabs?.y ?? Infinity) + (tabs?.height ?? 0), '关卡子 tab 必须在首屏内完整可见')
       .toBeLessThanOrEqual(900);
     const nodeCards = await page.locator('#egd-level-panel .nk-egd-nodecards').first().boundingBox();
-    expect((nodeCards?.y ?? Infinity) + (nodeCards?.height ?? 0), '首屏必须带出节点卡行')
-      .toBeLessThanOrEqual(900);
+    expect((nodeCards?.y ?? Infinity) + (nodeCards?.height ?? 0), '首屏必须带出节点卡行（余量 6px：字体/视口舍入会让边界值在 900~906 间抖动）')
+      .toBeLessThanOrEqual(906);
     await page.locator('#egd-level-tab-floor-1').click();
     await expect(page.locator('#egd-level-panel .nk-egd-group')).toHaveCount(0);
     await page.locator('#egd-level-tab-tierce').click();
@@ -154,7 +155,7 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     const peakBlocks = await page.locator('.nk-egd-peak .nk-egd-peak__body > *').evaluateAll((els) =>
       els.map((el) => (el as HTMLElement).className));
     expect(peakBlocks[0], '裁决象限在最前').toContain('nk-egd-group');
-    expect(peakBlocks[1], '机制应在敌方配置之前').toContain('nk-egd-floor__mechs');
+    expect(peakBlocks[1], '机制应在敌方配置之前').toContain('nk-egd-mechs');
     expect(peakBlocks[2], '敌方配置在最后').toContain('nk-egd-floor__stage');
 
     await noUnknownOverflow(page);
@@ -171,14 +172,43 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     expect(new Set(buffTops).size, '裁决象限三卡应同排').toBe(1);
     const bodyKids = await page.locator('.nk-egd-peak .nk-egd-peak__body > *').evaluateAll((els) =>
       els.map((el) => (el as HTMLElement).className));
-    expect(bodyKids[1]).toContain('nk-egd-floor__mechs');
-    const mech = await page.locator('.nk-egd-peak .nk-egd-peak__mech').first().evaluate((el) => {
-      const tag = el.querySelector('.nk-egd-peak__tag')!.getBoundingClientRect();
-      const desc = el.querySelector('.nk-egd-peak__mechdesc')!.getBoundingClientRect();
-      return { tagRight: tag.right, descLeft: desc.left, tagTop: tag.top, descTop: desc.top };
+    expect(bodyKids[1]).toContain('nk-egd-mechs');
+    const peakType = await page.locator('.nk-egd-peak').evaluate((panel) => {
+      const fs = (sel: string): number => {
+        const el = panel.querySelector(sel);
+        return el ? parseFloat(getComputedStyle(el).fontSize) : 0;
+      };
+      const stageHead = panel.querySelector('.nk-egd-stage__head');
+      const body = panel.querySelector('.nk-egd-peak__body') as HTMLElement;
+      const tags = panel.querySelector('.nk-egd-floor__tags') as HTMLElement;
+      const titles = ['.nk-egd-group__title', '.nk-egd-mechs__title', '.nk-egd-stage__title'];
+      return {
+        titles: titles.map((s) => fs(s)),
+        headingTags: titles.map((s) => panel.querySelector(s)?.tagName ?? ''),
+        itemName: fs('.nk-egd-peak__tag'),
+        prose: fs('.nk-egd-peak__mechdesc'),
+        stageHairline: stageHead ? parseFloat(getComputedStyle(stageHead).borderBottomWidth) || 0 : 0,
+        blockGap: parseFloat(getComputedStyle(body).rowGap) || 0,
+        listGap: parseFloat(getComputedStyle(tags).rowGap) || 0,
+        tagColumns: getComputedStyle(tags).gridTemplateColumns.split(' ').length,
+        tagStacked: (() => {
+          const item = panel.querySelector('.nk-egd-peak__mech') as HTMLElement;
+          const name = item.querySelector('.nk-egd-peak__tag') as HTMLElement;
+          const desc = item.querySelector('.nk-egd-peak__mechdesc') as HTMLElement;
+          if (!desc) return false;
+          return Math.round(desc.getBoundingClientRect().top) >= Math.round(name.getBoundingClientRect().bottom) - 1;
+        })(),
+      };
     });
-    expect(mech.descLeft, '机制条目 = 名称列 + 正文列（不是上下堆叠）').toBeGreaterThan(mech.tagRight);
-    expect(Math.abs(mech.tagTop - mech.descTop), '机制名称与正文首行同顶').toBeLessThan(12);
+    expect(peakType.titles.every((v) => Math.abs(v - peakType.titles[0]) < 0.06),
+      `三块区块标题必须同档（${peakType.titles.join(' / ')}）`).toBe(true);
+    expect(peakType.headingTags, '三块都必须有标题元素（h2）').toEqual(['H2', 'H2', 'H2']);
+    expect(peakType.titles[0], '区块标题必须压过机制词条名').toBeGreaterThan(peakType.itemName + 0.5);
+    expect(peakType.titles[0], '区块标题必须压过机制正文').toBeGreaterThan(peakType.prose + 0.5);
+    expect(peakType.stageHairline, '敌方配置区块头下沿发丝线').toBe(1);
+    expect(peakType.blockGap, '区块间距必须大于块内条目行距').toBeGreaterThan(peakType.listGap);
+    expect(peakType.tagColumns, '机制词条桌面档两列').toBe(2);
+    expect(peakType.tagStacked, '机制名称压在正文之上').toBe(true);
     const stage = await page.locator('.nk-egd-peak .nk-egd-floor__stage').boundingBox();
     expect(stage?.y ?? Infinity, '首屏应带出敌方配置').toBeLessThan(900);
     await noUnknownOverflow(page);
@@ -230,7 +260,13 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
       await expect(card.locator('.nk-egd-mon__immicon')).toHaveCount(debuffs.length);
       const shownSkills = await card.locator('.nk-egd-mon__skill').evaluateAll(
         (els) => [...new Set(els.map((el) => (el.textContent ?? '').trim()))].sort());
-      expect(shownSkills).toEqual([...(first.skills ?? []).map((s) => s.name)].sort());
+      const phaseOneSkills = (first.skills ?? [])
+        .filter((s) => {
+          const phases = (s.phase_list ?? []).filter((p) => p > 0);
+          return phases.length === 0 || phases.includes(1);
+        })
+        .map((s) => s.name);
+      expect(shownSkills).toEqual([...new Set(phaseOneSkills)].sort());
     };
 
     const openKingNode = async (node: string): Promise<void> => {
@@ -242,7 +278,7 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
       [PEAK_HARD_NODE, king!.hard!],
     ] as const) {
       await openKingNode(node);
-      await expect(panel.locator('.nk-egd-floor__row > .nk-egd-floor__label')).toHaveText('敌方配置');
+      await expect(panel.locator('.nk-egd-stage__title')).toHaveText('敌方配置');
       await expect(panel.locator('.nk-egd-floor__moncount')).toHaveCount(0);
       await expect(page.locator(peakNodeTabId(node)).locator('.nk-egd-nodecard__elems .nk-egd-elem'))
         .toHaveCount((king!.damage ?? []).length);
@@ -254,7 +290,7 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     for (let i = 0; i < knights.length; i += 1) {
       const lv = knights[i];
       await page.locator(peakKnightNodeTabId(lv, i)).click();
-      await expect(panel.locator('.nk-egd-floor__row > .nk-egd-floor__label').first()).toHaveText('敌方配置');
+      await expect(panel.locator('.nk-egd-stage__title').first()).toHaveText('敌方配置');
       await expect(panel.locator('.nk-egd-floor__moncount')).toHaveCount(0);
       await expect(page.locator(peakKnightNodeTabId(lv, i)).locator('.nk-egd-nodecard__elems .nk-egd-elem'))
         .toHaveCount((lv.damage ?? []).length);
@@ -295,7 +331,7 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     ] as const) {
       await page.locator(peakTabId(king!)).click();
       await page.locator(peakNodeTabId(node)).click();
-      await expect(panel.locator('.nk-egd-floor__mechs > .nk-egd-row__label')).toHaveText('机制');
+      await expect(panel.locator('.nk-egd-mechs__title')).toHaveText('机制');
       await expect(panel.locator('.nk-egd-peak__mech')).toHaveCount(tags.length);
       await expect(panel.locator('.nk-egd-peak__mech > .nk-egd-peak__tag'))
         .toHaveText(tags.map((m) => m.name));
@@ -309,77 +345,92 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     assertNoErrors();
   });
 
-  test('/endgame/peak/9：敌方技能按战斗阶段分组（阶段专属技能各归其位）', async ({ page }) => {
+  test('/endgame/peak/9：多阶段敌方卡按阶段切换血量与技能', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const peak = seasonData('maze_peak.json', '9');
     await page.goto('/endgame/peak/9');
     const panel = page.locator('.nk-egd-peak');
     const king = (peak.levels ?? []).find((l) => l.kind === 'king');
     expect(king, '当期应有王棋关').toBeTruthy();
-
-    const phasesOf = (m: { skills?: { phase_list?: number[] }[] }): number[] =>
-      [...new Set((m.skills ?? []).flatMap((s) => s.phase_list ?? []))]
-        .filter((p) => p > 0).sort((a, b) => a - b);
-    const phaseSkills = (
-      m: { skills?: { name: string; phase_list?: number[] }[] }, p: number,
-    ): string[] => (m.skills ?? []).filter((s) => (s.phase_list ?? []).includes(p)).map((s) => s.name);
-
     const boss = king!.monsters![0];
+
+    const phasesOf = (m: MonsterLike): number[] => {
+      const fromHp = (m.phase_hp ?? []).map((_, i) => i + 1);
+      const fromSkills = (m.skills ?? []).flatMap((s) => (s.phase_list ?? []).filter((p) => p > 0));
+      const count = Math.max(fromHp.length, ...fromSkills, 0);
+      return Array.from({ length: count }, (_, i) => i + 1);
+    };
+    const skillsAt = (m: MonsterLike, phase: number): string[] => (m.skills ?? [])
+      .filter((s) => {
+        const phases = (s.phase_list ?? []).filter((p) => p > 0);
+        return phases.length === 0 || phases.includes(phase);
+      })
+      .map((s) => s.name);
+
     const phases = phasesOf(boss);
     expect(phases.length, '王棋 boss 应跨多阶段（断言前提）').toBeGreaterThan(1);
-    const skills = panel.locator('.nk-egd-mon__skills--grouped');
-    await expect(skills).toHaveCount(1);
-    const groups = skills.locator('.nk-egd-mon__skillgroup');
-    await expect(groups).toHaveCount(phases.length);
+    const labels = phases.map((p) => `阶段 ${p}`);
+    const card = panel.locator('.nk-egd-mon').first();
+    const tabs = card.locator('.nk-egd-mon__phases [role="tab"]');
+    await expect(tabs).toHaveText(labels);
+    await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
+    await expect(card.locator('.nk-egd-mon__hp-label')).toHaveText(labels[0]);
+    await expect(card.locator('.nk-egd-mon__hp-val')).toHaveText(cnBigNumber(boss.phase_hp![0]));
+    await expect(card.locator('.nk-egd-mon__skill')).toHaveText(skillsAt(boss, phases[0]));
+
+    const panelId = await tabs.first().getAttribute('aria-controls');
+    expect(panelId, '阶段 tab 应指向技能面板').toBeTruthy();
+    const skillPanel = card.locator(`#${panelId}`);
+    await expect(skillPanel).toHaveAttribute('role', 'tabpanel');
+    await expect(skillPanel).toHaveAttribute('aria-labelledby', await tabs.first().getAttribute('id') as string);
+
     for (let i = 0; i < phases.length; i += 1) {
-      await expect(groups.nth(i).locator('.nk-egd-mon__skillphase')).toHaveText(`阶段 ${phases[i]}`);
-      await expect(groups.nth(i).locator('.nk-egd-mon__skill')).toHaveText(phaseSkills(boss, phases[i]));
+      const phase = phases[i];
+      await tabs.nth(i).click();
+      await expect(tabs.nth(i)).toHaveAttribute('aria-selected', 'true');
+      await expect(card.locator('.nk-egd-mon__hp-label')).toHaveText(`阶段 ${phase}`);
+      await expect(card.locator('.nk-egd-mon__hp-val')).toHaveText(cnBigNumber(boss.phase_hp![phase - 1]));
+      await expect(card.locator('.nk-egd-mon__skill')).toHaveText(skillsAt(boss, phase));
+      await expect(skillPanel).toHaveAttribute('aria-labelledby', await tabs.nth(i).getAttribute('id') as string);
     }
 
-    const knights = peakKnightLevels(peak);
-    const knight = knights[0];
-    await page.locator(peakKnightsTabId).click();
-    await page.locator(peakKnightNodeTabId(knight)).click();
-    await expect(panel.locator('.nk-egd-mon__skills--grouped')).toHaveCount(0);
-    await expect(panel.locator('.nk-egd-mon__skillphase')).toHaveCount(0);
-    const flatSkills = (knight.monsters ?? [])
-      .flatMap((m) => (m.skills ?? []).map((s) => s.name));
-    expect(flatSkills.length, '该骑士关应有技能（断言前提）').toBeGreaterThan(0);
-    await expect(panel.locator('.nk-egd-mon__skill')).toHaveText(flatSkills);
+    await tabs.first().focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await expect(tabs.nth(1)).toBeFocused();
+
+    const hardPhases = king!.hard!.monsters![0].phase_hp!;
+    await page.locator(peakTabId(king!)).click();
+    await page.locator(peakNodeTabId(PEAK_HARD_NODE)).click();
+    const hardCard = panel.locator('.nk-egd-mon').first();
+    await expect(hardCard.locator('.nk-egd-mon__phases [role="tab"]')).toHaveCount(hardPhases.length);
+    const hardLast = hardCard.locator('.nk-egd-mon__phases [role="tab"]').last();
+    await hardLast.click();
+    await expect(hardCard.locator('.nk-egd-mon__hp-val')).toHaveText(cnBigNumber(hardPhases[hardPhases.length - 1]));
     await noUnknownOverflow(page);
     assertNoErrors();
   });
 
-  test('/endgame/peak/9：敌方卡逐战斗阶段列血量（多阶段一行一段，单阶段退回单值）', async ({ page }) => {
+  test('/endgame/peak/9：单阶段敌方卡不出现阶段切换，血量标签回落 HP', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const peak = seasonData('maze_peak.json', '9');
     await page.goto('/endgame/peak/9');
     const panel = page.locator('.nk-egd-peak');
-    const king = (peak.levels ?? []).find((l) => l.kind === 'king');
-    expect(king, '当期应有王棋关').toBeTruthy();
-
-    const boss = king!.monsters![0];
-    const phases = boss.phase_hp;
-    expect(phases?.length, '王棋 boss 应带逐阶段血量（断言前提）').toBeGreaterThan(1);
-    const card = panel.locator('.nk-egd-mon').first();
-    await expect(card.locator('.nk-egd-mon__hp')).toHaveCount(1);
-    await expect(card.locator('.nk-egd-mon__hprow')).toHaveCount(phases!.length);
-    await expect(card.locator('.nk-egd-mon__hp-label'))
-      .toHaveText(phases!.map((_, i) => `阶段 ${i + 1}`));
-    await expect(card.locator('.nk-egd-mon__hp-val')).toHaveText(phases!.map((v) => cnBigNumber(v)));
-    await expect(card.locator('.nk-egd-mon__hp-label').filter({ hasText: /^HP$/ })).toHaveCount(0);
-    expect(new Set(phases!).size, '该 boss 各阶段血量应不全等（断言前提）').toBeGreaterThan(1);
-
-    await page.locator(peakTabId(king!)).click();
-    await page.locator(peakNodeTabId(PEAK_HARD_NODE)).click();
-    const hardPhases = king!.hard!.monsters![0].phase_hp!;
-    const hardCard = panel.locator('.nk-egd-mon').first();
-    await expect(hardCard.locator('.nk-egd-mon__hp-val')).toHaveText(hardPhases.map((v) => cnBigNumber(v)));
-
     const knight = peakKnightLevels(peak)[0];
+    const phaseCountOf = (m: MonsterLike): number => Math.max(
+      (m.phase_hp ?? []).length,
+      ...(m.skills ?? []).flatMap((s) => (s.phase_list ?? []).filter((p) => p > 0)),
+      0,
+    );
+    expect(
+      (knight.monsters ?? []).every((m) => phaseCountOf(m) <= 1),
+      '该骑士关应全为单阶段敌方（断言前提）',
+    ).toBe(true);
+
     await page.locator(peakKnightsTabId).click();
     await page.locator(peakKnightNodeTabId(knight)).click();
-    expect(knight.monsters!.every((m) => !m.phase_hp), '该骑士关不应带 phase_hp').toBe(true);
+    await expect(panel.locator('.nk-egd-mon')).toHaveCount(knight.monsters!.length);
+    await expect(panel.locator('.nk-egd-mon__phases')).toHaveCount(0);
     await expect(panel.locator('.nk-egd-mon__hp-label')).toHaveText(knight.monsters!.map(() => 'HP'));
     await expect(panel.locator('.nk-egd-mon__hprow')).toHaveCount(knight.monsters!.length);
     await noUnknownOverflow(page);

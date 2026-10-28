@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, waitForCatalogCards } from './helpers';
+import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, settleAnimations, waitForCatalogCards } from './helpers';
 import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonRewardGroups, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
 
 test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
@@ -71,7 +71,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：末法余烬上提赛季级 + 终焉公理三卡同排，1440×900 首屏带出敌方配置', { tag: ['@viewport-pinned'] }, async ({ page }) => {
+  test('/endgame/boss/3020：末法余烬上提赛季级 + 终焉公理三卡同排，1440×900 首屏带出首领特性', { tag: ['@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
@@ -89,8 +89,52 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(tierceBoard.locator('.nk-egd-group .nk-egd-buff'))
       .toHaveCount(season.buff_groups!.tierce!.length);
     expect(await sameRow(tierceBoard.locator('.nk-egd-group .nk-egd-buff')), '星启档终焉公理三卡应同排').toBe(1);
-    const stage = await tierceBoard.locator('.nk-egd-floor__stage').boundingBox();
-    expect(stage?.y ?? Infinity, '首屏必须带出敌方配置').toBeLessThan(900);
+    const blockType = await tierceBoard.evaluate((board) => {
+      const fs = (sel: string): number => {
+        const el = board.querySelector(sel);
+        return el ? parseFloat(getComputedStyle(el).fontSize) : 0;
+      };
+      const titles = ['.nk-egd-group__title', '.nk-egd-traits__title', '.nk-egd-phase__label', '.nk-egd-stage__title'];
+      const body = board.querySelector('.nk-egd-board__body') as HTMLElement;
+      const traits = board.querySelector('.nk-egd-traits') as HTMLElement;
+      const list = board.querySelector('.nk-egd-traits__list') as HTMLElement;
+      const phaseItem = board.querySelector('.nk-egd-phase__item');
+      const stageHead = board.querySelector('.nk-egd-stage__head');
+      return {
+        titles: titles.map((s) => fs(s)),
+        headingTags: titles.map((s) => board.querySelector(s)?.tagName ?? ''),
+        itemName: fs('.nk-egd-traits__name'),
+        prose: fs('.nk-egd-traits__desc'),
+        stageHairline: stageHead ? parseFloat(getComputedStyle(stageHead).borderBottomWidth) || 0 : 0,
+        blockGap: parseFloat(getComputedStyle(body).rowGap) || 0,
+        listGap: parseFloat(getComputedStyle(list).rowGap) || 0,
+        phaseColumns: phaseItem ? getComputedStyle(phaseItem).gridTemplateColumns.split(' ').length : 0,
+      };
+    });
+    expect(blockType.titles.every((v) => Math.abs(v - blockType.titles[0]) < 0.06),
+      `四块区块标题必须同档（${blockType.titles.join(' / ')}）`).toBe(true);
+    expect(blockType.headingTags, '四块都必须有标题元素（h2）').toEqual(['H2', 'H2', 'H2', 'H2']);
+    expect(blockType.titles[0], '区块标题必须压过其条目名').toBeGreaterThan(blockType.itemName + 0.5);
+    expect(blockType.titles[0], '区块标题必须压过其正文').toBeGreaterThan(blockType.prose + 0.5);
+    expect(blockType.stageHairline, '敌方配置区块头下沿发丝线').toBe(1);
+    expect(blockType.blockGap, '区块间距必须大于块内条目行距').toBeGreaterThan(blockType.listGap);
+    expect(blockType.phaseColumns, '阶段机制桌面档两列（说明 + 技能问答）').toBe(2);
+    const firstScreen = await page.evaluate(() => {
+      const top = (sel: string): number => {
+        const el = document.querySelector(sel);
+        return el ? Math.round(el.getBoundingClientRect().top) : Infinity;
+      };
+      return {
+        tabs: top('.nk-egd-tabs'),
+        traits: top('.nk-egd-traits__title'),
+        phase: top('.nk-egd-phase__label'),
+        stage: top('.nk-egd-floor__stage'),
+      };
+    });
+    expect(firstScreen.tabs, '首屏必须完整见关卡子 tab').toBeLessThan(900);
+    expect(firstScreen.traits, '首领特性区块必须进首屏').toBeLessThan(900);
+    expect(firstScreen.phase, '阶段机制与敌方配置已下沉（首领特性占用首屏预算）').toBeGreaterThanOrEqual(900);
+    expect(firstScreen.stage).toBeGreaterThan(firstScreen.phase);
     await page.locator('#egd-level-tab-floor-1').click();
     const floorBoard = page.locator('#egd-floor-board');
     await expect(floorBoard.locator('.nk-egd-floor__buff')).toHaveCount(0);
@@ -120,6 +164,10 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     const halfCards = page.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]');
     await expect(halfCards).toHaveCount(stageNum);
     await expect(halfCards.locator('.nk-egd-nodecard__name')).toHaveText(['上半场', '下半场']);
+    await expect(halfCards.locator('.nk-egd-nodecard__boss')).toHaveText([
+      floorBossName(season, 1, 'stage1'),
+      floorBossName(season, 1, 'stage2'),
+    ]);
     await expect(halfCards.first()).toHaveAttribute('aria-selected', 'true');
     const floorBoard = page.locator('#egd-floor-board');
     await expect(floorBoard).toHaveCount(1);
@@ -131,31 +179,49 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     const boardGroups = floorBoard.locator('.nk-egd-group');
     await expect(boardGroups).toHaveCount(1);
     await expect(boardGroups.nth(0).locator('.nk-egd-group__title')).toHaveText('终焉公理');
-    await expect(floorBoard.locator('.nk-egd-traits')).toHaveCount(0);
-    const guideSec = floorBoard.locator('.nk-egd-mon__data > .nk-egd-guide');
-    await expect(guideSec).toHaveCount(1);
-    await expect(guideSec.locator('.nk-egd-guide__label')).toHaveText('首领特性');
-    await expect(guideSec.locator('.nk-egd-trait')).toHaveCount(stageTraits.length);
-    const trait0 = guideSec.locator('.nk-egd-trait').first();
-    await expect(trait0).toContainText(stageTraits[0].name);
+    await expect(floorBoard.locator('.nk-egd-traits')).toHaveCount(1);
+    await expect(floorBoard.locator('.nk-egd-mon__data > .nk-egd-traits, .nk-egd-mon__data > .nk-egd-phase'))
+      .toHaveCount(0);
+    const traitsSec = floorBoard.locator('.nk-egd-traits');
+    await expect(traitsSec.locator('.nk-egd-traits__title')).toHaveText('首领特性');
+    await expect(traitsSec.locator('.nk-egd-traits__owner')).toHaveText(
+      `上半场 · ${floorBossName(season, 1, 'stage1')}`,
+    );
+    await expect(traitsSec.locator('.nk-egd-traits__item')).toHaveCount(stageTraits.length);
+    const trait0 = traitsSec.locator('.nk-egd-traits__item').first();
+    await expect(trait0.locator('.nk-egd-traits__name')).toHaveText(stageTraits[0].name);
     await expect(trait0).toContainText(`${stageTraits[0].param_list![0] * 100}%`);
     await expect(trait0).toContainText(`${stageTraits[0].param_list![1] * 100}%`);
-    const phaseSec = floorBoard.locator('.nk-egd-mon__data > .nk-egd-phase');
+    const phaseSec = floorBoard.locator('.nk-egd-phase');
     await expect(phaseSec).toHaveCount(1);
     await expect(phaseSec.locator('.nk-egd-phase__label')).toHaveText('阶段机制');
-    await expect(phaseSec.locator('.nk-egd-phase__item')).toHaveCount(floor1Phases.length);
-    const phase0 = phaseSec.locator('.nk-egd-phase__item').first();
-    await expect(phase0.locator('.nk-egd-phase__name')).toHaveText(floor1Phases[0].name);
-    await expect(phase0).toContainText(floor1Phases[0].desc!);
-    await expect(phase0).toContainText(floor1Phases[0].answer!);
-    await expect(phase0.locator('.nk-egd-phase__skill')).toHaveCount(floor1Phases[0].skills!.length);
-    await expect(phase0.locator('.nk-egd-phase__skillname')).toHaveText(floor1Phases[0].skills!.map((s) => s.name));
+    const phaseTabs = phaseSec.locator('.nk-egd-phase__tabs [role="tab"]');
+    await expect(phaseTabs).toHaveCount(floor1Phases.length);
+    await expect(phaseTabs).toHaveText(floor1Phases.map((p) => p.name));
+    await expect(phaseTabs.first()).toHaveAttribute('aria-selected', 'true');
+    await expect(phaseSec.locator('.nk-egd-phase__item')).toHaveCount(1);
+    await expect(phaseSec.locator('.nk-egd-phase__name')).toHaveText(floor1Phases[0].name);
+    await expect(phaseSec.locator('.nk-egd-phase__skills .nk-egd-phase__skill'))
+      .toHaveCount(floor1Phases[0].skills!.length);
+    await expect(phaseSec.locator('.nk-egd-phase__skillname'))
+      .toHaveText(floor1Phases[0].skills!.map((s) => s.name));
+    await expect(phaseSec).not.toContainText(floor1Phases[1].desc!);
+    await phaseTabs.nth(1).click();
+    await expect(phaseTabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await expect(phaseSec.locator('.nk-egd-phase__name')).toHaveText(floor1Phases[1].name);
+    await expect(phaseSec).toContainText(floor1Phases[1].desc!);
+    await expect(phaseSec).not.toContainText(floor1Phases[0].desc!);
+    await expect(phaseSec.locator('.nk-egd-phase__skillname'))
+      .toHaveText(floor1Phases[1].skills!.map((s) => s.name));
+    await expect(floorBoard.locator('.nk-egd-mon__phase[aria-selected="true"]')).toHaveText('阶段 2');
+    await phaseTabs.first().click();
+    await expect(floorBoard.locator('.nk-egd-mon__phase[aria-selected="true"]')).toHaveText('阶段 1');
+    const boardOrder = await floorBoard.locator('.nk-egd-board__body').evaluate((el) =>
+      [...el.children].map((c) => c.className.split(' ')[0]));
+    expect(boardOrder).toEqual(['nk-egd-group', 'nk-egd-traits', 'nk-egd-phase', 'nk-egd-floor__stage']);
     const dataOrder = await floorBoard.locator('.nk-egd-mon__data').first()
       .evaluate((el) => [...el.children].map((c) => c.className.split(' ')[0]));
-    expect(dataOrder).toEqual([
-      'nk-egd-mon__meta', 'nk-egd-mon__rows',
-      'nk-egd-guide', 'nk-egd-phase', 'nk-egd-mon__skills', 'nk-egd-summons',
-    ]);
+    expect(dataOrder).toEqual(['nk-egd-mon__meta', 'nk-egd-mon__rows', 'nk-egd-mon__skills', 'nk-egd-summons']);
     const floor1Boss = (season.floor_details ?? []).find((f) => f.floor === 1)!.stage1!.monsters![0];
     const debuffs = floor1Boss.debuff_resist ?? [];
     expect(debuffs.length).toBeGreaterThan(0);
@@ -169,7 +235,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await immImg.scrollIntoViewIfNeeded();
     await expect.poll(() => immImg.evaluate((el) => (el as HTMLImageElement).naturalWidth),
       { timeout: 10_000 }).toBeGreaterThan(0);
-    await expect(floorBoard.locator('.nk-egd-buff')).toHaveCount(stageBuffs.length);
+    await expect(floorBoard.locator('.nk-egd-group .nk-egd-buff')).toHaveCount(stageBuffs.length);
     await expect(floorBoard.locator('.nk-egd-board__head, .nk-egd-pollchip')).toHaveCount(0);
     const floor1Stage = (season.floor_details ?? []).find((f) => f.floor === 1)!.stage1!;
     const floor1Summons = summonsOf(floor1Stage.monsters);
@@ -219,6 +285,13 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       tierceData.nodes!.map((nd) => `节点${CN_NUM[nd.idx - 1] ?? nd.idx}`),
     );
     await expect(nodeTabs.first()).toHaveAttribute('aria-selected', 'true');
+    await expect(nodeTabs.locator('.nk-egd-nodecard__boss'))
+      .toHaveText(tierceData.nodes!.map((nd) => lastWaveMonster(nd).name));
+    const cardAccent = await nodeTabs.evaluateAll((els) => els.map(
+      (el) => getComputedStyle(el, '::before').opacity,
+    ));
+    expect(cardAccent[0], '激活卡顶沿强调条可见').toBe('1');
+    expect(new Set(cardAccent.slice(1)), '非激活卡不显示强调条').toEqual(new Set(['0']));
     const cardBoxes = await nodeTabs.evaluateAll((els) => els.map((el) => {
       const r = el.getBoundingClientRect();
       return { y: Math.round(r.y), w: Math.round(r.width) };
@@ -257,6 +330,17 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
         { timeout: 15_000 },
       ).toBeGreaterThan(0);
     }
+    const fig = await nodeTabs.nth(0).locator('.nk-egd-nodecard__fig').evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return {
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+        radius: cs.borderTopLeftRadius,
+      };
+    });
+    expect(fig.w, '头像为圆形（宽高相等）').toBe(fig.h);
+    expect(fig.radius, '头像圆形裁切（径向 50%）').toBe('50%');
     const board = tierce.locator('.nk-egd-board');
     await expect(board).toHaveCount(1);
     await expect(board.locator('.nk-egd-tierce__nodezh')).toHaveCount(0);
@@ -294,12 +378,19 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       return {
         card: fs('.nk-egd-nodecard__name'),
         groupTitle: fs('.nk-egd-board .nk-egd-group__title'),
-        monsTitle: fs('.nk-egd-board .nk-egd-floor__row--mons > .nk-egd-floor__label'),
-        prose: fs('.nk-egd-board .nk-egd-trait__desc'),
+        stageTitle: fs('.nk-egd-board .nk-egd-stage__title'),
+        traitTitle: fs('.nk-egd-board .nk-egd-traits__title'),
+        phaseTitle: fs('.nk-egd-board .nk-egd-phase__label'),
+        itemName: fs('.nk-egd-board .nk-egd-traits__name'),
+        prose: fs('.nk-egd-board .nk-egd-traits__desc'),
         rowLabel: fs('.nk-egd-board .nk-egd-mon__label'),
       };
     });
-    expect(scale.monsTitle, '敌方配置标题与区块标题同档').toBe(scale.groupTitle);
+    expect(scale.stageTitle, '敌方配置标题与区块标题同档').toBe(scale.groupTitle);
+    expect(scale.traitTitle, '四块区块标题同档').toBe(scale.groupTitle);
+    expect(scale.phaseTitle, '四块区块标题同档').toBe(scale.groupTitle);
+    expect(scale.groupTitle, '区块标题必须压过其条目名').toBeGreaterThan(scale.itemName + 0.5);
+    expect(scale.groupTitle, '区块标题必须压过其正文').toBeGreaterThan(scale.prose + 0.5);
     await page.setViewportSize({ width: 390, height: 844 });
     const narrowScale = await page.evaluate(() => {
       const fs = (sel: string) => {
@@ -308,15 +399,20 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       };
       return {
         groupTitle: fs('.nk-egd-board .nk-egd-group__title'),
-        monsTitle: fs('.nk-egd-board .nk-egd-floor__row--mons > .nk-egd-floor__label'),
+        stageTitle: fs('.nk-egd-board .nk-egd-stage__title'),
+        traitTitle: fs('.nk-egd-board .nk-egd-traits__title'),
+        phaseTitle: fs('.nk-egd-board .nk-egd-phase__label'),
+        itemName: fs('.nk-egd-board .nk-egd-traits__name'),
         rowLabel: fs('.nk-egd-board .nk-egd-mon__label'),
-        prose: fs('.nk-egd-board .nk-egd-trait__desc'),
+        prose: fs('.nk-egd-board .nk-egd-traits__desc'),
       };
     });
-    expect(narrowScale.monsTitle, '手机档敌方配置标题与区块标题同档').toBe(narrowScale.groupTitle);
+    expect(narrowScale.stageTitle, '手机档敌方配置标题与区块标题同档').toBe(narrowScale.groupTitle);
+    expect(narrowScale.traitTitle, '手机档四块区块标题同档').toBe(narrowScale.groupTitle);
+    expect(narrowScale.phaseTitle, '手机档四块区块标题同档').toBe(narrowScale.groupTitle);
     expect(narrowScale.groupTitle, '手机档区块标题必须高于卡片内行首标签').toBeGreaterThan(narrowScale.rowLabel + 0.5);
     expect(narrowScale.prose, '手机档正文必须高于卡片内行首标签').toBeGreaterThan(narrowScale.rowLabel + 0.5);
-    expect(narrowScale.prose, '手机档正文必须高于区块标题').toBeGreaterThan(narrowScale.groupTitle + 0.5);
+    expect(narrowScale.groupTitle, '手机档区块标题必须高于正文').toBeGreaterThan(narrowScale.prose + 0.5);
     await page.setViewportSize({ width: 1280, height: 720 });
     for (const [name, lower, higher] of [
       ['区块标题 > 卡片内行首标签', scale.rowLabel, scale.groupTitle],
@@ -364,62 +460,67 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     });
     expect(Math.abs(colFit.sum - colFit.inner), '两列宽度应占满卡内容宽').toBeLessThanOrEqual(20);
     expect(colFit.spill, '两列均不应横向溢出').toBeLessThanOrEqual(1);
-    const monsHeading = await board.locator('.nk-egd-floor__row--mons').evaluate((row) => {
-      const label = row.querySelector('.nk-egd-floor__label') as HTMLElement;
-      const wrap = row.querySelector('.nk-egd-floor__monswrap') as HTMLElement;
-      const cs = getComputedStyle(row);
-      const l = label.getBoundingClientRect();
+    const monsHeading = await board.locator('.nk-egd-floor__stage').first().evaluate((stage) => {
+      const head = stage.querySelector('.nk-egd-stage__head') as HTMLElement;
+      const title = stage.querySelector('.nk-egd-stage__title') as HTMLElement;
+      const wrap = stage.querySelector('.nk-egd-floor__monswrap') as HTMLElement;
+      const cs = getComputedStyle(stage);
+      const l = title.getBoundingClientRect();
       const w = wrap.getBoundingClientRect();
-      const r = row.getBoundingClientRect();
+      const r = stage.getBoundingClientRect();
       const contentW = r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       return {
         stacked: Math.round(w.top) >= Math.round(l.bottom),
         sameLeft: Math.abs(Math.round(w.left) - Math.round(l.left)) <= 1,
         fullWidth: Math.abs(Math.round(w.width) - Math.round(contentW)) <= 1,
+        hairline: head ? parseFloat(getComputedStyle(head).borderBottomWidth) || 0 : 0,
       };
     });
-    expect(monsHeading.stacked, '敌方卡组应排在标题下方').toBe(true);
+    expect(monsHeading.stacked, '敌方卡组应排在区块标题下方').toBe(true);
     expect(monsHeading.sameLeft, '敌方卡组左缘应与标题齐平').toBe(true);
     expect(monsHeading.fullWidth, '敌方卡组应占满行内容宽').toBe(true);
-    expect(await fontPx(board.locator('.nk-egd-trait__desc').first()))
+    expect(monsHeading.hairline, '敌方配置区块头应有一条下沿发丝线').toBe(1);
+    expect(await fontPx(board.locator('.nk-egd-phase__desc').first()))
       .toBe(await fontPx(board.locator('.nk-egd-buff__desc').first()));
     await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__buffhead')).toHaveText(tierceData.nodes![0].buff!.name);
     await expect(page.locator('.nk-egd-floor__bufflabel')).toHaveCount(0);
     await expect(board.locator('.nk-egd-group__title')).toHaveText(['终焉公理']);
-    await expect(board.locator('.nk-egd-buff')).toHaveCount(stageBuffs.length);
+    await expect(board.locator('.nk-egd-group .nk-egd-buff')).toHaveCount(stageBuffs.length);
     await expect(board.locator('.nk-egd-pilltabs')).toHaveCount(0);
-    await expect(board.locator('.nk-egd-traits')).toHaveCount(0);
-    const tierceGuideSec = board.locator('.nk-egd-mon__data > .nk-egd-guide');
+    const tierceGuideSec = board.locator('.nk-egd-traits');
     await expect(tierceGuideSec).toHaveCount(1);
-    const traitItems = tierceGuideSec.locator('.nk-egd-trait');
+    await expect(tierceGuideSec.locator('.nk-egd-traits__owner')).toHaveText(nodeBoss[0]);
+    const traitItems = tierceGuideSec.locator('.nk-egd-traits__item');
     await expect(traitItems).toHaveCount(stageTraits.length);
-    await expect(traitItems.locator('.nk-egd-trait__name')).toHaveText(stageTraits.map((t) => t.name));
+    await expect(traitItems.locator('.nk-egd-traits__name')).toHaveText(stageTraits.map((t) => t.name));
     await expect(traitItems.first()).toContainText(`${stageTraits[0].param_list![0] * 100}%`);
     await expect(traitItems.first()).toContainText(`${stageTraits[0].param_list![1] * 100}%`);
-    expect(await computedNumber(tierceGuideSec, 'border-top-width'), '卡内分区应有上发丝线').toBe(1);
-    expect(await computedNumber(tierceGuideSec, 'padding-top'), '卡内分区应有上内距').toBeGreaterThan(0);
-    expect(await computedNumber(tierceGuideSec, 'border-top-left-radius'), '卡内分区不应套圆角盒子').toBe(0);
-    expect(await tierceGuideSec.evaluate((el) => getComputedStyle(el).backgroundColor), '卡内分区不应再填充')
-      .toBe('rgba(0, 0, 0, 0)');
+    expect(await computedNumber(tierceGuideSec, 'border-top-width'), '看板级区块不带卡内发丝线').toBe(0);
+    expect(await computedNumber(tierceGuideSec.locator('.nk-egd-traits__head'), 'border-bottom-width'),
+      '区块头应有一条分隔线').toBe(1);
     const sectionBorders = await tierceGuideSec.evaluate((el) => {
       const cs = getComputedStyle(el);
-      return [cs.borderTopWidth, cs.borderLeftWidth, cs.borderLeftStyle];
+      return [cs.borderLeftWidth, cs.borderLeftStyle];
     });
-    expect(sectionBorders[0], '分区只有上发丝线').toBe('1px');
-    expect(sectionBorders[1], '分区左沿不得加宽为竖条').toBe('0px');
-    expect(sectionBorders[2]).toBe('none');
+    expect(sectionBorders[0], '区块左沿不得加宽为竖条').toBe('0px');
+    expect(sectionBorders[1]).toBe('none');
     const hairlines = await page.evaluate(() => {
       const cs = (s: string): CSSStyleDeclaration => getComputedStyle(document.querySelector(s) as Element);
-      return [cs('.nk-egd-guide').borderTopColor, cs('.nk-egd-mon__skills').borderTopColor,
-        cs('.nk-egd-summons').borderTopColor];
+      return {
+        traits: cs('.nk-egd-traits__head').borderBottomColor,
+        phase: cs('.nk-egd-phase__head').borderBottomColor,
+        line2: getComputedStyle(document.documentElement).getPropertyValue('--line-2').trim(),
+        line1: getComputedStyle(document.documentElement).getPropertyValue('--line-1').trim(),
+      };
     });
-    expect(hairlines[0], '分区发丝线与「技能」同一支线').toBe(hairlines[1]);
-    expect(hairlines[0], '分区发丝线与「召唤物」同一支线').toBe(hairlines[2]);
-    const sectionGap = await computedNumber(tierceGuideSec, 'row-gap');
+    expect(hairlines.traits, '两个机制区块头分隔线同一条支线').toBe(hairlines.phase);
+    expect(hairlines.traits.replace(/\s/g, ''), '区块头分隔线取 --line-2，不是更弱的 --line-1')
+      .toBe(hairlines.line2.replace(/\s/g, ''));
+    expect(hairlines.line2, '契约前提：--line-2 与 --line-1 必须不同值').not.toBe(hairlines.line1);
+    const sectionGap = await computedNumber(tierceGuideSec.locator('.nk-egd-traits__list'), 'row-gap');
     const itemGap = await computedNumber(traitItems.first(), 'row-gap');
-    expect(sectionGap, '分区内条目间距须大于条目内名行与正文的间距').toBeGreaterThan(itemGap);
-    expect(await computedNumber(traitItems.first(), 'padding-top'), '条目内距归分区承担').toBe(0);
-    const descRatio = await traitItems.first().locator('.nk-egd-trait__desc').evaluate((el) => {
+    expect(sectionGap, '区块内条目间距须大于条目内名行与正文的间距').toBeGreaterThan(itemGap);
+    const descRatio = await traitItems.first().locator('.nk-egd-traits__desc').evaluate((el) => {
       const c = getComputedStyle(el);
       return parseFloat(c.lineHeight) / parseFloat(c.fontSize);
     });
@@ -450,27 +551,29 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     expect(monsSpacing.lastIsMons, '敌方配置应重新成为场次块末行').toBe(true);
     expect(monsSpacing.tail, '场次块末行下方不应有余白').toBe(0);
     expect(monsSpacing.stageIsLast, '敌方配置应为看板体末块（赛季增益在其之前）').toBe(true);
-    expect(monsSpacing.prevGap, '赛季增益与敌方配置的间距 = 看板体 gap').toBe(monsSpacing.gap);
+    expect(monsSpacing.prevGap, '阶段机制与敌方配置的间距 = 看板体 gap').toBe(monsSpacing.gap);
     const node1Elems = await nodeTabs.nth(0).locator('.nk-egd-nodecard__elems').innerHTML();
     expect(node1Elems).toBe(floor4Elems[0]);
-    await expect(board.locator('.nk-egd-buff__name')).toHaveText(floor4Buffs.slice(0, stageBuffs.length));
+    const node1TraitNames = stageGuide(season, tierceData.nodes![0])!.traits!.map((t) => t.name);
+    await expect(board.locator('.nk-egd-traits__name')).toHaveText(node1TraitNames);
+    await expect(board.locator('.nk-egd-group .nk-egd-buff__name')).toHaveText(floor4Buffs.slice(0, stageBuffs.length));
     await nodeTabs.nth(1).click();
     await expect(nodeTabs.nth(1)).toHaveAttribute('aria-selected', 'true');
     await expect(board).toHaveAttribute('aria-labelledby', 'egd-tierce-node-tab-2');
     await expect(board.locator('.nk-egd-mon__name')).toHaveText(nodeBoss[1]);
-    await expect(board.locator('.nk-egd-buff__name'))
+    await expect(board.locator('.nk-egd-group .nk-egd-buff__name'))
       .toHaveText(floor4Buffs.slice(stageBuffs.length, stageBuffs.length * 2));
     await nodeTabs.nth(2).click();
     await expect(nodeTabs.nth(2)).toHaveAttribute('aria-selected', 'true');
     await expect(board).toHaveAttribute('aria-labelledby', 'egd-tierce-node-tab-3');
     await expect(board).toContainText(nodeBoss[2]);
     await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__buffhead')).toHaveText(tierceData.nodes![2].buff!.name);
-    await expect(board.locator('.nk-egd-trait__name'))
+    await expect(board.locator('.nk-egd-traits__name'))
       .toHaveText(stageGuide(season, tierceData.nodes![2])!.traits!.map((t) => t.name));
     const node3Elems = await nodeTabs.nth(2).locator('.nk-egd-nodecard__elems').innerHTML();
     expect(node3Elems.length).toBeGreaterThan(0);
     expect(node3Elems).not.toBe(node1Elems);
-    const node3Buffs = await board.locator('.nk-egd-buff__name')
+    const node3Buffs = await board.locator('.nk-egd-group .nk-egd-buff__name')
       .evaluateAll((els) => els.map((el) => el.textContent?.trim() || ''));
     const tierceBuffs = season.buff_groups!.tierce;
     expect(node3Buffs).toHaveLength(tierceBuffs.length);
@@ -541,6 +644,9 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     expect(narrow.cardsSpill).toBeLessThanOrEqual(1);
     expect(narrow.lastRight).toBeLessThanOrEqual(1);
     expect(narrow.rows).toBe(1);
+    const elemSize = await card.locator('.nk-egd-nodecard__elems .nk-egd-elem').first()
+      .evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    expect(elemSize, '窄屏推荐属性图标不得缩到看不清（≥20px，原为 14px）').toBeGreaterThanOrEqual(20);
     const stacked = await card.evaluate((el) => {
       const fig = el.querySelector('.nk-egd-nodecard__fig')!.getBoundingClientRect();
       const body = el.querySelector('.nk-egd-nodecard__body')!.getBoundingClientRect();
@@ -705,34 +811,49 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(board).toHaveCSS('display', 'flex');
     await expect(board.locator('.nk-egd-group__title')).toHaveText(['终焉公理']);
     await expect(board.locator('.nk-egd-group__label')).toHaveCount(0);
+    const groupForm = await board.locator('.nk-egd-group').evaluate((group) => {
+      const title = group.querySelector('.nk-egd-group__title') as HTMLElement;
+      const head = group.querySelector('.nk-egd-group__head') as HTMLElement;
+      const buffs = group.querySelector('.nk-egd-buffs') as HTMLElement;
+      return {
+        hairline: getComputedStyle(head).borderBottomWidth,
+        titleLeft: Math.round(title.getBoundingClientRect().left),
+        buffsLeft: Math.round(buffs.getBoundingClientRect().left),
+      };
+    });
+    expect(groupForm.hairline, '终焉公理与首领特性 / 阶段机制共用同一套区块头（下沿发丝线）').toBe('1px');
+    expect(Math.abs(groupForm.titleLeft - groupForm.buffsLeft),
+      '终焉公理标题不得退回左侧 84px 标签槽（标题与卡片左缘齐平）').toBeLessThanOrEqual(1);
     const boardBlocks = await board.locator('.nk-egd-board__body').evaluate((el) =>
       [...el.children].map((c) => (c as HTMLElement).className.split(' ')[0]));
-    expect(boardBlocks).toEqual(['nk-egd-group', 'nk-egd-floor__stage']);
+    expect(boardBlocks).toEqual(['nk-egd-group', 'nk-egd-traits', 'nk-egd-phase', 'nk-egd-floor__stage']);
     const cardBlocks = await board.locator('.nk-egd-mon__data').first().evaluate((el) =>
       [...el.children].map((c) => (c as HTMLElement).className.split(' ')[0]));
     expect(cardBlocks).toEqual([
-      'nk-egd-mon__meta', 'nk-egd-mon__rows',
-      'nk-egd-guide', 'nk-egd-phase', 'nk-egd-mon__skills', 'nk-egd-summons',
+      'nk-egd-mon__meta', 'nk-egd-mon__rows', 'nk-egd-mon__skills', 'nk-egd-summons',
     ]);
     await expect(board.locator('.nk-egd-floor__stagelabel')).toHaveCount(0);
     await expect(board.locator('.nk-egd-floor__moncount')).toHaveCount(0);
-    const monsHeading = await board.locator('.nk-egd-floor__row--mons').evaluate((row) => {
-      const label = row.querySelector('.nk-egd-floor__label') as HTMLElement;
-      const wrap = row.querySelector('.nk-egd-floor__monswrap') as HTMLElement;
-      const cs = getComputedStyle(row);
-      const l = label.getBoundingClientRect();
+    const monsHeading = await board.locator('.nk-egd-floor__stage').first().evaluate((stage) => {
+      const head = stage.querySelector('.nk-egd-stage__head') as HTMLElement;
+      const title = stage.querySelector('.nk-egd-stage__title') as HTMLElement;
+      const wrap = stage.querySelector('.nk-egd-floor__monswrap') as HTMLElement;
+      const cs = getComputedStyle(stage);
+      const l = title.getBoundingClientRect();
       const w = wrap.getBoundingClientRect();
-      const r = row.getBoundingClientRect();
+      const r = stage.getBoundingClientRect();
       const contentW = r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       return {
         stacked: Math.round(w.top) >= Math.round(l.bottom),
         sameLeft: Math.abs(Math.round(w.left) - Math.round(l.left)) <= 1,
         fullWidth: Math.abs(Math.round(w.width) - Math.round(contentW)) <= 1,
+        hairline: head ? parseFloat(getComputedStyle(head).borderBottomWidth) || 0 : 0,
       };
     });
-    expect(monsHeading.stacked, '敌方卡组应排在标题下方').toBe(true);
+    expect(monsHeading.stacked, '敌方卡组应排在区块标题下方').toBe(true);
     expect(monsHeading.sameLeft, '敌方卡组左缘应与标题齐平').toBe(true);
     expect(monsHeading.fullWidth, '敌方卡组应占满行内容宽').toBe(true);
+    expect(monsHeading.hairline, '敌方配置区块头应有一条下沿发丝线').toBe(1);
     const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');
     const boardBody = page.locator('.nk-egd-board__body');
     await expectTokenNumber(boardBody, 'padding-left', egIndent, '层看板体缩进');
@@ -740,36 +861,53 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       '层看板体的层级竖轨应归零（缩进保留）').toBe(0);
     const tier = {
       cardName: await fontPx(page.locator('.nk-egd-buff__name').first()),
-      traitName: await fontPx(page.locator('.nk-egd-trait__name').first()),
+      traitName: await fontPx(page.locator('.nk-egd-traits__name').first()),
       phaseName: await fontPx(page.locator('.nk-egd-phase__name').first()),
-      label: await fontPx(page.locator('.nk-egd-floor__label').first()),
       desc: await fontPx(page.locator('.nk-egd-buff__desc').first()),
-      guideLabel: await fontPx(page.locator('.nk-egd-guide__label').first()),
+      title: await fontPx(page.locator('.nk-egd-stage__title').first()),
+      articleProse: await fontPx(page.locator('.nk-egd-traits__desc').first()),
+      traitLabel: await fontPx(page.locator('.nk-egd-traits__title').first()),
+      phaseLabel: await fontPx(page.locator('.nk-egd-phase__label').first()),
       summonsLabel: await fontPx(page.locator('.nk-egd-summons__label').first()),
     };
     expect(tier.cardName, '赛季增益 / 首领特性标题同档').toBe(tier.traitName);
     expect(tier.phaseName, '阶段名与首领特性名同档（都是读者要扫的机制名）').toBe(tier.traitName);
-    expect(tier.guideLabel, '首领机制标签与召唤物标签同档').toBe(tier.summonsLabel);
+    expect(tier.traitLabel, '首领特性区块标题与阶段机制区块标题同档').toBe(tier.phaseLabel);
+    expect(tier.title, '敌方配置标题与其余区块标题同档').toBe(tier.traitLabel);
+    expect(tier.traitLabel, '区块标题必须高于卡片内分区标签').toBeGreaterThan(tier.summonsLabel + 0.5);
+    expect(tier.traitLabel, '区块标题必须高于其统领正文').toBeGreaterThan(tier.articleProse + 0.5);
     expect(tier.cardName).toBeGreaterThan(tier.desc + 0.5);
-    expect(tier.desc).toBeGreaterThan(tier.label + 0.5);
     const padAndGap = await page.evaluate(() => {
       const cs = (s: string): CSSStyleDeclaration => getComputedStyle(document.querySelector(s) as Element);
       return {
         buffPad: [cs('.nk-egd-buff').paddingTop, cs('.nk-egd-buff').paddingLeft],
-        guidePad: [cs('.nk-egd-guide').paddingTop, cs('.nk-egd-guide').paddingLeft],
-        traitPad: [cs('.nk-egd-trait').paddingTop, cs('.nk-egd-trait').paddingLeft],
-        skillsPad: [cs('.nk-egd-mon__skills').paddingTop, cs('.nk-egd-mon__skills').paddingLeft],
-        buffsGap: parseFloat(cs('.nk-egd-buffs').rowGap) || 0,
-        guideGap: parseFloat(cs('.nk-egd-guide').rowGap) || 0,
-        descLh: parseFloat(cs('.nk-egd-trait__desc').lineHeight),
-        descFs: parseFloat(cs('.nk-egd-trait__desc').fontSize),
+        traitsGap: parseFloat(cs('.nk-egd-traits').rowGap) || 0,
+        phaseGap: parseFloat(cs('.nk-egd-phase').rowGap) || 0,
+        descLh: parseFloat(cs('.nk-egd-buff__desc').lineHeight),
+        descFs: parseFloat(cs('.nk-egd-buff__desc').fontSize),
       };
     });
-    expect(padAndGap.guidePad, '卡内分区与「技能」同一套内距（上内距 + 左右归卡）').toEqual(padAndGap.skillsPad);
-    expect(padAndGap.traitPad, '条目内距归分区承担').toEqual(['0px', '0px']); // e2e-literal-ok: 条目内距归分区承担 ⇒ 0px 是语义即值的定义性契约（非可漂移设计值）
-    expect(padAndGap.buffsGap).toBeGreaterThan(0);
-    expect(padAndGap.guideGap).toBeGreaterThan(0);
+    expect(padAndGap.traitsGap, '首领特性区块内间距须声明').toBeGreaterThan(0);
+    expect(padAndGap.phaseGap, '阶段机制区块内间距须声明').toBeGreaterThan(0);
     expect(padAndGap.descLh, '正文档行高不得缩水（≥1.5 倍字号）').toBeGreaterThanOrEqual(padAndGap.descFs * 1.5);
+    const traitsForm = await page.evaluate(() => {
+      const q = (s: string): HTMLElement => document.querySelector(`#egd-floor-board ${s}`) as HTMLElement;
+      const item = q('.nk-egd-traits__item');
+      const name = item.querySelector('.nk-egd-traits__name') as HTMLElement;
+      const desc = item.querySelector('.nk-egd-traits__desc') as HTMLElement;
+      const nameRect = name.getBoundingClientRect();
+      const descRect = desc.getBoundingClientRect();
+      return {
+        columns: getComputedStyle(q('.nk-egd-traits__list')).gridTemplateColumns.split(' ').length,
+        stacked: Math.round(descRect.top) >= Math.round(nameRect.bottom),
+        sameLeft: Math.abs(Math.round(descRect.left) - Math.round(nameRect.left)) <= 1,
+        ownerGap: Math.round(q('.nk-egd-traits__owner').getBoundingClientRect().left - q('.nk-egd-traits__title').getBoundingClientRect().right),
+      };
+    });
+    expect(traitsForm.columns, '首领特性桌面档两列（4 列时中文每行约 15 字，且各条正文左缘随名称宽度参差）').toBe(2);
+    expect(traitsForm.stacked, '首领特性名称压在正文之上，正文不得与名称同排起点').toBe(true);
+    expect(traitsForm.sameLeft, '首领特性正文左缘与名称齐平').toBe(true);
+    expect(traitsForm.ownerGap, '首领特性归属紧跟标题，不得被推到区块头右端（936px 空档）').toBeLessThanOrEqual(24);
     const desktopMonLabel = await fontPx(page.locator('.nk-egd-mon__label').first());
     expect(desktopMonLabel).toBeGreaterThan(0);
     await page.setViewportSize({ width: 390, height: 844 });
@@ -788,6 +926,10 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     expect(mobileCards.scroll).toBeLessThanOrEqual(1);
     expect(mobileCards.rows).toBe(1);
     expect(mobileCards.dir).toBe('column');
+    const mobileTraitsColumns = await page.evaluate(() => getComputedStyle(
+      document.querySelector('#egd-floor-board .nk-egd-traits__list') as HTMLElement,
+    ).gridTemplateColumns.split(' ').length);
+    expect(mobileTraitsColumns, '首领特性窄屏回到单列').toBe(1);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -801,7 +943,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await nodeCardTabs.nth(2).click();
     const board = tierce.locator('.nk-egd-board');
     const season = seasonData('maze_boss.json', '3019');
-    await expect(board.locator('.nk-egd-guide .nk-egd-trait'))
+    await expect(board.locator('.nk-egd-traits__item'))
       .toHaveCount(stageGuide(season, season.tierce!.nodes![2])!.traits!.length);
     await expect(nodeCardTabs.nth(2).locator('.nk-egd-nodecard__label')).toHaveText(['推荐属性', '等级']);
     const node3Elems = await nodeCardTabs.nth(2).locator('.nk-egd-nodecard__elems').innerHTML();
@@ -817,6 +959,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
   test('/endgame/boss/3020：区块标题与敌方配置标题同档（桌面 / 手机），且高于卡片内行首标签', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/endgame/boss/3020');
+    await settleAnimations(page);
     await page.locator('#egd-level-tab-floor-1').click();
     const board = page.locator('#egd-floor-board');
     await expect(board.locator('.nk-egd-group__title')).toHaveText(['终焉公理']);
@@ -824,15 +967,23 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     for (const width of [1280, 390]) {
       await page.setViewportSize({ width, height: 844 });
       const groupTitle = await fontPx(board.locator('.nk-egd-group__title'));
-      const monsTitle = await fontPx(board.locator('.nk-egd-floor__row--mons > .nk-egd-floor__label'));
+      const stageTitle = await fontPx(board.locator('.nk-egd-stage__title'));
+      const traitTitle = await fontPx(board.locator('.nk-egd-traits__title'));
+      const phaseLabel = await fontPx(board.locator('.nk-egd-phase__label'));
       const rowLabel = await fontPx(board.locator('.nk-egd-mon__label').first());
-      expect(groupTitle, `${width} 档敌方配置标题与区块标题同档`).toBe(monsTitle);
+      const prose = await fontPx(board.locator('.nk-egd-traits__desc').first());
+      expect(stageTitle, `${width} 档四块区块标题同档`).toBe(groupTitle);
+      expect(traitTitle, `${width} 档四块区块标题同档`).toBe(groupTitle);
+      expect(phaseLabel, `${width} 档四块区块标题同档`).toBe(groupTitle);
+      expect(groupTitle, `${width} 档区块标题必须高于其统领正文`).toBeGreaterThan(prose + 0.5);
       expect(groupTitle, `${width} 档区块标题必须高于卡片内行首标签（${groupTitle} vs ${rowLabel}）`)
         .toBeGreaterThan(rowLabel + 0.5);
     }
-    const guideLabel = await fontPx(board.locator('.nk-egd-guide__label').first());
+    const guideLabel = await fontPx(board.locator('.nk-egd-phase__label').first());
+    const traitsLabel = await fontPx(board.locator('.nk-egd-traits__title').first());
     const summonsLabel = await fontPx(board.locator('.nk-egd-summons__label').first());
-    expect(guideLabel, '首领机制标签与召唤物标签同档').toBe(summonsLabel);
+    expect(traitsLabel, '首领特性区块标题与阶段机制标签同档').toBe(guideLabel);
+    expect(guideLabel, '区块标题必须高于卡片内分区标签').toBeGreaterThan(summonsLabel + 0.5);
     assertNoErrors();
   });
 
@@ -861,3 +1012,9 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 });
+
+
+
+
+
+

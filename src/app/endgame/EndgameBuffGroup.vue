@@ -5,13 +5,15 @@ import type { MazeBuffInfo } from '../../services/types';
 defineProps<{
   items: MazeBuffInfo[];
   title?: string;
+  tail?: string;
 }>();
 </script>
 
 <template>
   <section class="nk-egd-group">
-    <div v-if="title" class="nk-egd-group__head">
-      <h2 class="nk-egd-group__title">{{ title }}</h2>
+    <div v-if="title || tail" class="nk-egd-group__head">
+      <h2 v-if="title" class="nk-egd-group__title">{{ title }}</h2>
+      <span v-if="tail" class="nk-egd-group__tail">{{ tail }}</span>
     </div>
     <div class="nk-egd-buffs">
       <article

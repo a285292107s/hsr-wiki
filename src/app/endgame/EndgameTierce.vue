@@ -12,6 +12,7 @@ const t = translate;
 const props = defineProps<{
   data: MazeListEntry;
   systemName?: string;
+  systemChoice?: string;
 }>();
 
 const tierceMonsters = computed(() => props.data.tierce?.monsters || []);
@@ -72,17 +73,18 @@ watch(
         id="egd-tierce-board"
         :labelled-by="cardItems.length > 1 ? `egd-tierce-node-tab-${activeKey}` : undefined"
         :stage="activeNd"
+        stage-key="tierce"
         :buff="activeNd.buff?.id === hoistedBuffId ? null : activeNd.buff"
         :guides="props.data.boss_guides"
         :buffs="nodeBuffs"
         :system-name="props.systemName"
+        :system-choice="props.systemChoice"
       />
       <div v-else-if="tierceMonsters.length" class="nk-egd-mons">
         <EnemyCard
           v-for="m in tierceMonsters"
           :key="m.id"
           :monster="m"
-          :guide="m.boss_guide ? props.data.boss_guides?.[m.boss_guide] : undefined"
         />
       </div>
     </div>

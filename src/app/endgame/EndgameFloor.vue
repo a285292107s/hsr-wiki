@@ -15,6 +15,7 @@ const props = defineProps<{
   data: MazeListEntry;
   floor: MazeFloorDetail;
   systemName?: string;
+  systemChoice?: string;
 }>();
 
 type HalfKey = 'stage1' | 'stage2';
@@ -74,10 +75,12 @@ const hoistedBuffId = computed(() => seasonNodeBuff(props.data)?.id ?? 0);
       id="egd-floor-board"
       :labelled-by="cards.length > 1 ? `egd-floor-half-tab-${activeHalf}` : undefined"
       :stage="activeNode.stage"
+      :stage-key="activeNode.half"
       :buff="floor.buff?.id === hoistedBuffId ? null : floor.buff"
       :guides="props.data.boss_guides"
       :buffs="nodeBuffs"
       :system-name="props.systemName"
+      :system-choice="props.systemChoice"
     />
   </div>
 </template>

@@ -11,6 +11,7 @@ const props = defineProps<{
   nodes: PeakNodeEntry[];
   tabsLabel: string;
   systemName?: string;
+  systemChoice?: string;
 }>();
 
 const cards = computed(() => props.nodes.map((n) => {
@@ -63,6 +64,7 @@ function selectNode(key: string): void {
         :hard="activeNode.hard"
         :cards-above="cards.length > 1"
         :system-name="props.systemName"
+        :system-choice="props.systemChoice"
       />
     </div>
   </div>

@@ -13,7 +13,7 @@
     margin-bottom: 8px;
   }
   .nk-egd-row > .nk-egd-buffs,
-  .nk-egd-group--row > .nk-egd-buffs { display: flex; flex-direction: column; }
+  .nk-egd-group > .nk-egd-buffs { display: flex; flex-direction: column; }
   .nk-egd-peak__mech { display: flex; flex-direction: column; gap: 6px; }
   .nk-egd-hero__plate {
     width: 112px;
@@ -30,7 +30,8 @@
   .nk-egd-mon { gap: 14px; }
   .nk-egd-node__type { padding: 5px 10px; gap: 5px; }
   .nk-egd-node__typeicon { width: 15px; height: 15px; }
-  .nk-egd-board__body { gap: 12px; }
+  .nk-egd-group__tail { padding-left: 0; border-left: 0; line-height: normal; }
+  .nk-egd-board__body { gap: 20px; }
   .nk-egd-floor__head { flex-wrap: wrap; }
   .nk-egd-floor__data { margin-left: auto; }
   .nk-egd-nav { gap: 8px; }
@@ -78,7 +79,6 @@
 }
 
 @media (hover: none) {
-  .nk-egd-buff:hover,
   .nk-egd-nav__item:hover,
   .nk-egd-floor__buff:hover {
     border-color: var(--line-1);

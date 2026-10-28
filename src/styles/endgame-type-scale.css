@@ -9,13 +9,15 @@
 
 .nk-egd-floor__label,
 .nk-egd-row__label,
-.nk-egd-group__title,
 .nk-egd-summons__label,
-.nk-egd-mon__skillphase,
-.nk-egd-guide__label,
-.nk-egd-phase__label,
+.nk-egd-group__tail,
+.nk-egd-mon__seclabel,
+.nk-egd-mon__phase,
+.nk-egd-traits__owner,
+.nk-egd-phase__tab,
 .nk-egd-head__label,
 .nk-egd-nodecard__label,
+.nk-egd-nodecard__boss,
 .nk-egd-floor__datalabel,
 .nk-egd-rules__label,
 .nk-egd-hero__sid,
@@ -29,7 +31,6 @@
 .nk-egd-reward__num,
 .nk-egd-node__type,
 .nk-egd-nav__dir,
-.nk-egd-peak__tag,
 .nk-egd-reward__star,
 .nk-egd-tier__badge,
 .nk-egd-phase__skilldesc { font-size: var(--nk-fs-3); }
@@ -37,25 +38,32 @@
 .nk-egd-buff__desc,
 .nk-egd-floor__buffdesc,
 .nk-egd-peak__mechdesc,
-.nk-egd-trait__desc,
+.nk-egd-traits__desc,
 .nk-egd-phase__desc,
 .nk-egd-phase__answer,
 .nk-egd-phase__skillname,
 .nk-egd-node__text,
 .nk-egd-reward__goal,
-.nk-egd-nodecard__val,
 .nk-egd-mon__hp-val,
 .nk-egd-hero__camp,
 .nk-egd-summon__name { font-size: var(--nk-fs-4); }
 
 .nk-egd-buff__name,
-.nk-egd-trait__name,
+.nk-egd-nodecard__val,
+.nk-egd-traits__name,
 .nk-egd-phase__name,
+.nk-egd-peak__tag,
 .nk-egd-floor__buffname,
 .nk-egd-mon__name,
 .nk-egd-floor__dataval,
 .nk-egd-reward__name,
 .nk-egd-nav__id { font-size: var(--nk-fs-5); }
+
+.nk-egd-group__title,
+.nk-egd-traits__title,
+.nk-egd-phase__label,
+.nk-egd-stage__title,
+.nk-egd-mechs__title { font-size: var(--nk-fs-6); }
 
 .nk-egd-nodecard__name { font-size: var(--nk-fs-6); }
 
@@ -75,12 +83,14 @@
   .nk-egd-hero__status,
   .nk-egd-peak__kind,
   .nk-egd-floor__wavelabel { font-size: var(--nk-fs-3); }
-  .nk-egd-peak__tag { font-size: var(--nk-fs-4); }
   .nk-egd-mon__label { font-size: var(--nk-fs-2); }
-  .nk-egd-group__title,
   .nk-egd-floor__row--mons > .nk-egd-floor__label { font-size: var(--nk-fs-4); }
-  .nk-egd-trait__desc { font-size: var(--nk-fs-5); }
+  .nk-egd-phase__desc,
+  .nk-egd-traits__desc,
+  .nk-egd-phase__answer { font-size: var(--nk-fs-5); }
   .nk-egd-node__text { font-size: var(--nk-fs-5); }
   .nk-egd-nodecard__name { font-size: var(--nk-fs-4); }
   .nk-egd-tabs .nk-tab { font-size: var(--nk-fs-3); }
 }
+
+

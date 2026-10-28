@@ -12,6 +12,7 @@ const props = defineProps<{
   tabs: LevelTab[];
   active: string;
   systemName?: string;
+  systemChoice?: string;
 }>();
 
 const activeTab = computed(
@@ -32,13 +33,14 @@ const activePeakNodes = computed(
     role="tabpanel"
     :aria-labelledby="activeTab ? `egd-level-tab-${activeTab.key}` : undefined"
   >
-    <EndgameFloor v-if="activeFloor" :data="data" :floor="activeFloor" :system-name="props.systemName" />
-    <EndgameTierce v-else-if="activeTab?.kind === 'tierce'" :data="data" :system-name="props.systemName" />
+    <EndgameFloor v-if="activeFloor" :data="data" :floor="activeFloor" :system-name="props.systemName" :system-choice="props.systemChoice" />
+    <EndgameTierce v-else-if="activeTab?.kind === 'tierce'" :data="data" :system-name="props.systemName" :system-choice="props.systemChoice" />
     <EndgamePeakNodes
       v-else-if="activePeakNodes.length"
       :nodes="activePeakNodes"
       :tabs-label="activeTab?.label || ''"
       :system-name="props.systemName"
+      :system-choice="props.systemChoice"
     />
   </div>
 </template>
