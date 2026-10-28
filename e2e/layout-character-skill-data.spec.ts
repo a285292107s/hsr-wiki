@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor, settleAnimations } from './helpers';
 import {
   charFamilyIds,
   charSkillNames,
@@ -16,6 +16,7 @@ test.describe('布局验收：角色详情页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1212');
+    await settleAnimations(page);
     const icons = page.locator('[data-panel="skills"] .nk-skill__icon');
     await expect(icons.first()).toBeVisible();
     await expect.poll(() => icons.count()).toBeGreaterThanOrEqual(5);
@@ -44,6 +45,7 @@ test.describe('布局验收：角色详情页', () => {
     await page.route('**/assets/hsr/skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.route('**/cdn.jsdelivr.net/**skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.goto('/character/1212');
+    await settleAnimations(page);
     const icon = page.locator('[data-panel="skills"] .nk-skill__icon').first();
     await expect(icon).toBeVisible();
     await expect.poll(async () => icon.getAttribute('data-cdn-placeholder'), { timeout: 15000 }).toBe('1');
@@ -64,6 +66,7 @@ test.describe('布局验收：角色详情页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1503');
+    await settleAnimations(page);
     const card = page.locator('[data-panel="skills"] > .nk-skill').first();
     const indent = await page
       .locator('.nk-char-page')

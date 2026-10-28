@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor, waitForSettled } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor, settleAnimations, waitForSettled } from './helpers';
 import {
   charFamilyIds,
   charSkillNames,
@@ -118,6 +118,7 @@ test.describe('布局验收：角色详情页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/character/1503');
+    await settleAnimations(page);
     const firstCard = page.locator('[data-panel="skills"] > .nk-skill').first();
     await expect(firstCard).toBeVisible();
     await expect(page.locator('.nk-skill--child').first()).toBeVisible();
@@ -243,6 +244,7 @@ test.describe('布局验收：角色详情页', () => {
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1503');
+    await settleAnimations(page);
     await expect(page.locator('.nk-skill--child').first()).toBeVisible();
     const wide = await measure();
     expect(wide.indent).toBe('48px');
@@ -261,6 +263,7 @@ test.describe('布局验收：角色详情页', () => {
   test('/character/1212：战技族父节点以族序为准（父卡「无罅飞光」；SkillList 首位的「寒川映月」降为子卡）', { tag: '@viewport-independent' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1212');
+    await settleAnimations(page);
     const topCards = page.locator('[data-panel="skills"] > .nk-skill');
     const bp = topCards.filter({ has: page.locator('[data-type="BPSkill"]') });
     await expect(bp).toHaveCount(1);
@@ -281,6 +284,7 @@ test.describe('布局验收：角色详情页', () => {
     expect(ids).toEqual([150904, 150905]);
     const [parentName, childName] = charSkillNames('1509', ids);
     await page.goto('/character/1509');
+    await settleAnimations(page);
     const topCards = page.locator('[data-panel="skills"] > .nk-skill');
     const parent = topCards.filter({ hasText: parentName });
     await expect(parent).toHaveCount(1);
@@ -301,6 +305,7 @@ test.describe('布局验收：角色详情页', () => {
     expect(ids).toEqual([151004, 151022, 151025, 151026]);
     const names = charSkillNames('1510', ids);
     await page.goto('/character/1510');
+    await settleAnimations(page);
     const parent = page.locator('[data-panel="skills"] > .nk-skill[data-type="Passive"]');
     await expect(parent).toHaveCount(1);
     await expect(parent.locator('.nk-skill__name').first()).toHaveText(names[0]);

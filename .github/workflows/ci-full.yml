@@ -1,12 +1,9 @@
 name: CI Full（全语言矩阵，周跑）
 
-# 每次 push 只扫风险语言子集（冒烟 cn/de/jp/ru、长文案 cn/de/ru/th/vi）——那是为了墙钟做的
-# **登记在案的覆盖收窄**（见 ci.yml 与 docs/agents/testing.md）。本 workflow 把收窄掉的那部分补回来：
-# 13 语言 × 25 路由的全语言冒烟，以及全语言（13 种）的多语言长文案扫描（桌面 1280 / 手机 390 / 最窄 320）。
-# 低频但全量，收窄因此不等于长期失覆盖。
+# 把 push 档已登记的覆盖收窄补回来（低频全量 ⇒ 收窄不等于长期失覆盖）：13 语言冒烟 + 全语言三档长文案。
+# 收窄口径与周跑理由见 ci.yml 与 docs/agents/testing.md。
 on:
   schedule:
-    # 每周日 20:30 UTC（周一 04:30 北京时间）
     - cron: '30 20 * * 0'
   workflow_dispatch:
 
@@ -21,8 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 2 分片：`I18N_OVERFLOW_ALL=1` 下共 40 条用例（冒烟 13 + 桌面长文案 3 + 其余 10 语言 10
-        # + 手机 13 + 最窄 1）。分片分母必须与矩阵长度一致——写成 /4 会让 3/4、4/4 永远不执行。
+        # 分片分母必须与矩阵长度一致（写成 /4 会让 3/4、4/4 永远不执行）；条数用 --list 数，不要写死。
         shard: [1, 2]
     steps:
       - uses: actions/checkout@v5
@@ -31,7 +27,7 @@ jobs:
         with:
           browsers: chromium
 
-      - name: 全语言矩阵（冒烟 13 语言 × 25 路由 + 三档长文案全语言）
+      - name: 全语言矩阵（冒烟 + 三档长文案全语言）
         run: |
           pnpm exec playwright test \
             e2e/layout-locales-smoke.spec.ts \

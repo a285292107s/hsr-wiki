@@ -1,4 +1,4 @@
-import { readJsonIn, waitForSettled } from './helpers';
+import { readJsonIn, settleAnimations, waitForQuiet, waitForTextReady } from './helpers';
 
 export const ROUTE_FAMILIES: readonly { name: string; path: (base: string) => string }[] = [
   { name: 'home', path: (b) => `${b}/` },
@@ -35,28 +35,14 @@ export const detailRoutes = (base: string): { name: string; path: string }[] => 
 ];
 
 export async function settleForMeasurement(page: import('@playwright/test').Page): Promise<void> {
-  await waitForSettled(page);
-  await page
-    .waitForFunction(
-      () => {
-        const n = (document.body.innerText || '').length;
-        const w = window as unknown as { __nkStableLen?: number };
-        const stable = w.__nkStableLen === n;
-        w.__nkStableLen = n;
-        return stable && n > 150;
-      },
-      undefined,
-      { timeout: 10_000, polling: 120 },
-    )
-    .catch(() => {});
+  await waitForTextReady(page, 152);
+  await waitForQuiet(page, 150);
+  await settleAnimations(page);
   await page
     .waitForFunction(() => !document.querySelector('[class*="nk-view-"][class*="-active"]'), undefined, {
       timeout: 10_000,
     })
     .catch(() => {});
-  await page.evaluate(
-    () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))),
-  );
 }
 
 export interface Defects {

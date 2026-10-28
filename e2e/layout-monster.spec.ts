@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, readJson, waitForCatalogCards } from './helpers';
+import { collectConsoleIssues, readJson, settleAnimations, waitForCatalogCards } from './helpers';
 import { CN_NUM, expectTokenNumber, noUnknownOverflow, readContentOffset } from './layout.shared';
 
 interface MonsterListEntry { id: number; name: string; icon: string; weak?: string[]; atlas_group?: number }
@@ -128,6 +128,7 @@ test.describe('布局验收：敌方详情页', () => {
       ];
 
       await page.goto(`/monster/${MONSTER_ID}`);
+      await settleAnimations(page);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
       const rows = page.locator('.nk-mob-var__row');
       await expect(rows, '同族条必须列出全部同族档（缺档 = 用户仍然走不到那一档）').toHaveCount(fam.length);
@@ -589,6 +590,7 @@ test.describe('布局验收：敌方详情页', () => {
       const want = othersOf(target!);
 
       await page.goto(`/monster/${target!.id}`);
+      await settleAnimations(page);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
       const links = await page.locator('.nk-mob-atlas__link').evaluateAll((els) => els.map((e) => ({
         name: (e.textContent || '').trim(),
@@ -625,6 +627,7 @@ test.describe('布局验收：敌方详情页', () => {
       const TYPE: Record<string, string> = { Buff: '增益', Debuff: '减益', Other: '其他' };
 
       await page.goto(`/monster/${target!.id}`);
+      await settleAnimations(page);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
       const cards = page.locator('.nk-mob-status');
       await expect(cards, '词条行数 = 数据条数').toHaveCount(rows.length);
@@ -659,6 +662,7 @@ test.describe('布局验收：敌方详情页', () => {
       expect(withFx.length, `${id} 应有带附带效果的技能（断言前提）`).toBeGreaterThan(0);
 
       await page.goto(`/monster/${id}`);
+      await settleAnimations(page);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
       await expect(
         page.locator('.nk-mob-skill__fx'),
@@ -696,6 +700,7 @@ test.describe('布局验收：敌方详情页', () => {
       expect(dropMon.appearances?.total, `${MONSTER_ID} 应有出没统计（断言前提）`).toBeGreaterThan(0);
 
       await page.goto(`/monster/${MONSTER_ID}`);
+      await settleAnimations(page);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
 
       const tiers = page.locator('.nk-mob-drop');
@@ -873,6 +878,7 @@ test.describe('布局验收：敌方详情页', () => {
           `${id} 参数值应全部 <1000（页面按 fmtStatValue 加千分位，样本越界即换样本）`,
         ).toBeLessThan(1000);
         await page.goto(`/monster/${id}`);
+        await settleAnimations(page);
         await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
         await expect(
           page.locator('.nk-mob-skill__params'),
@@ -914,6 +920,7 @@ test.describe('布局验收：敌方详情页', () => {
         expect(phases.length, `${id} 应有阶段机制（断言前提）`).toBeGreaterThan(0);
 
         await page.goto(`/monster/${id}`);
+        await settleAnimations(page);
         await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
         const blocks = page.locator('.nk-mob-guide');
         await expect(blocks, '阶段块数 = 数据阶段数').toHaveCount(phases.length);

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { collectConsoleIssues, waitForCatalogCards } from './helpers';
+import { collectConsoleIssues, settleAnimations, waitForCatalogCards } from './helpers';
 import { collectNavAnchors, noUnknownOverflow, waitForNavMode } from './layout.shared';
 
 test.describe('布局验收：导航动态溢出折叠', () => {
@@ -53,6 +53,7 @@ test.describe('布局验收：底栏槽位数与语言无关', () => {
     const count = async (url: string, width: number): Promise<number> => {
       await page.setViewportSize({ width, height: 780 });
       await page.goto(url);
+      await settleAnimations(page);
       await waitForNavMode(page, 'normal');
       return page.locator('.ui-sidebar')
         .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
@@ -71,6 +72,7 @@ test.describe('布局验收：底栏槽位数与语言无关', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 780 });
     await page.goto('/currency/role');
+    await settleAnimations(page);
     await waitForNavMode(page, 'cw');
     const all = await page.locator('.ui-sidebar')
       .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
@@ -126,6 +128,7 @@ test.describe('布局验收：侧栏各项风格一致', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character');
+    await settleAnimations(page);
     await expect(page.locator('.ui-sidebar-link').first()).toBeVisible();
 
     const rows = await page.evaluate(() => {
@@ -214,7 +217,7 @@ test.describe('布局验收：设置入口可收起', () => {
   });
 
   test('首屏 chunk 就绪前点设置：收起仍须回本页 URL', { tag: '@viewport-independent' }, async ({ page }) => {
-    await page.route('**/CatalogView.vue*', async (route) => {
+    await page.route('**/*CatalogView*', async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 2500));
       await route.continue();
     });

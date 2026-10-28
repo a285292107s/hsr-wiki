@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues } from './helpers';
+import { collectConsoleIssues, settleAnimations } from './helpers';
 
 test.describe('布局验收：角色详情页', () => {
 
@@ -7,6 +7,7 @@ test.describe('布局验收：角色详情页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1212');
+    await settleAnimations(page);
     await page.waitForSelector('.nk-forms__card');
     await page.waitForSelector('.nk-skill');
 
@@ -66,6 +67,7 @@ test.describe('布局验收：角色详情页', () => {
     for (const vp of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 1023, height: 800 }]) {
       await page.setViewportSize(vp);
       await page.goto('/character/1212');
+      await settleAnimations(page);
       await page.waitForSelector('.nk-forms__card');
       const geo = await page.evaluate(() => {
         const slot = document.querySelector('.nk-forms-slot') as HTMLElement;

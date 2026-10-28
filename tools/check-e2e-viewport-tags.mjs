@@ -11,7 +11,12 @@ const BAD_OK_RE = /\/\/\s*e2e-viewport-ok\s*[:：]?\s*$/;
 const SET_VP_RE = /\bsetViewportSize\s*\(/;
 const PINNED_RE = /@viewport-pinned/;
 const INDEPENDENT_RE = /@viewport-independent/;
+const DEV_ONLY_RE = /@dev-only/;
 const TEST_RE = /^\s*test\(/;
+const DEV_ROUTE_RES = [
+  /\bgoto\(\s*[`'"]\/debug\b/,
+  /\*\/(?:CatalogView|[\w-]+View)\.vue/,
+];
 
 function leadingComments(lines, start) {
   const out = [];
@@ -47,6 +52,7 @@ specs.sort();
 const violations = [];
 const badReasons = [];
 const exempted = [];
+const devOnlyViolations = [];
 let total = 0;
 let pinnedCount = 0;
 
@@ -81,6 +87,11 @@ for (const abs of specs) {
         violations.push({ rel, line: s + 1, title, independent });
       }
     }
+
+    const devRoute = DEV_ROUTE_RES.map((re) => findLine(codeLines.join('\n'), re)).find(Boolean);
+    if (devRoute && !DEV_ONLY_RE.test(sigLines)) {
+      devOnlyViolations.push({ rel, line: s + 1, title, hit: devRoute.trim().slice(0, 90) });
+    }
   }
 }
 
@@ -110,9 +121,15 @@ if (!projectBlocks.some((p) => p.name === 'mobile-chromium')) {
 
 console.log(
   B(
-    `\n[e2e 视口标签] 扫描 ${specs.length} 个 spec｜test 声明 ${total}｜@viewport-pinned ${pinnedCount}｜违规 ${violations.length}｜豁免 ${exempted.length}｜配置问题 ${configIssues.length}\n`,
+    `\n[e2e 视口标签] 扫描 ${specs.length} 个 spec｜test 声明 ${total}｜@viewport-pinned ${pinnedCount}｜违规 ${violations.length}｜豁免 ${exempted.length}｜@dev-only 违规 ${devOnlyViolations.length}｜配置问题 ${configIssues.length}\n`,
   ),
 );
+
+if (devOnlyViolations.length) {
+  console.log(B('── 违规（依赖 dev server 产物但未声明 @dev-only） ──'));
+  for (const v of devOnlyViolations) console.log(`  ${v.rel}:${v.line}  ${v.title}\n      ← ${v.hit}`);
+  console.log('');
+}
 
 if (configIssues.length) {
   console.log(B('── 配置违规（project 的收集过滤） ──'));
@@ -139,8 +156,8 @@ if (exempted.length) {
   console.log('');
 }
 
-if (!violations.length && !configIssues.length) {
-  console.log('[PASS] 自钉视口用例都声明了 @viewport-pinned，且 mobile project 按标签收起\n');
+if (!violations.length && !configIssues.length && !devOnlyViolations.length) {
+  console.log('[PASS] 自钉视口用例都声明了 @viewport-pinned，mobile project 按标签收起，dev-only 用例都声明了 @dev-only\n');
 } else {
   if (violations.length) {
     console.log(`[FAIL] ${violations.length} 条自钉视口用例缺 @viewport-pinned`);
@@ -151,5 +168,11 @@ if (!violations.length && !configIssues.length) {
     console.log(`[FAIL] ${configIssues.length} 处 project 收集过滤缺失`);
     console.log('       正解：mobile-chromium 的 grepInvert 必须含 /@viewport-pinned/（标签与过滤是一对，缺一即失效）\n');
   }
+  if (devOnlyViolations.length) {
+    console.log(`[FAIL] ${devOnlyViolations.length} 条用例依赖 dev server 产物却没声明 @dev-only`);
+    console.log('       判据：goto /debug、点击 /debug 下拉框、/debug 专有选择器、或 page.route 拦 *.vue 模块名（build 档产物是 <Name>-<hash>.js）');
+    console.log('       正解：在 test(...) 第二参静态声明 { tag: \'@dev-only\' }，E2E_PREVIEW=1 的 build 档按该标签收起；');
+    console.log('       若该用例在 build 档也有等价断言，去掉 dev 专有路径而不是加标签。\n');
+  }
 }
-process.exit(strict && (violations.length || badReasons.length || configIssues.length) ? 1 : 0);
+process.exit(strict && (violations.length || badReasons.length || configIssues.length || devOnlyViolations.length) ? 1 : 0);

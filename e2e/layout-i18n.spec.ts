@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { collectConsoleIssues, readJsonIn } from './helpers';
+import { collectConsoleIssues, readJsonIn, settleAnimations } from './helpers';
 import { characterBlurb } from '../src/lib/character-blurb';
 
 interface CharRow { id: number; name: string }
@@ -38,6 +38,7 @@ test.describe('布局验收：多语言', () => {
 
   test('/en/character：站内链接保留语言前缀（导航与目录卡都不落回缺省语言）', { tag: ['@viewport-independent'] }, async ({ page }) => {
     await page.goto('/en/character');
+    await settleAnimations(page);
     await expect(page.locator('.ui-sidebar a[href="/en/lightcone"]')).toHaveCount(1);
     await expect(page.locator('a.nk-idx-card').first()).toBeVisible();
     const cardHrefs = await page.locator('a.nk-idx-card').evaluateAll(

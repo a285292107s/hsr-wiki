@@ -100,6 +100,11 @@ pnpm test:e2e:layout   # 布局契约层：全部 layout-*（CI 里按 6 分片�
 pnpm test:e2e:ci       # 上面两层合集（本地一次跑完 CI 的 PR + 夜间层；不含 @visual-detail 等慢档标签，收窄登记见 testing.md）
 pnpm test:e2e:affected # 受影响用例层：按 git diff 推导并直接执行（= node tools/e2e-affected.mjs --run）
 pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all；重构期只在收敛后跑一次）
+
+# build 产物档（推荐用于整层/全量：同 150 条 layout 实测 717.7s → 179.4s，见 testing.md）
+pnpm test:e2e:prod                                      # vite build → vite preview(6189) → playwright（默认 --project=chromium）
+pnpm test:e2e:prod:layout                               # 同上，跑全部 layout-*
+node tools/e2e-prod.mjs --skip-build e2e/layout-nav.spec.ts --grep "设置入口"   # 复用已构建的 dist，只跑命中用例
 ```
 
 **直接调用 playwright 时必须显式传覆盖模式**：`pnpm exec playwright test --update-snapshots=all`——Playwright 默认 `changed` 模式在更新已有基线时静默 pass 不落盘。只跑改动实际影响的用例（`--grep 首页` 等），`visual.spec` 全量禁止。
@@ -110,11 +115,14 @@ pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all�
 
 **但「不采纳全局并行」≠「接受单文件串行」**：`fullyParallel: false` 并不禁止**文件级**并行（Playwright 始终按文件分派 worker）。layout 曾是单个 74 用例 / 469s 的大文件，等于把全量调度压成一个串行单元——实测墙钟 327s。按 `describe` 边界拆成 `e2e/layout-*.spec.ts` 后墙钟大幅下降，**但这纪律会随用例增长复发**：2026-10 实测全量 180 用例 / 361.6s，`layout-character.spec.ts` 又长回 39 用例单文件、firefox 项目只跑它、它又排在项目数组末尾 ⇒ 末段 168s（占墙钟 46%）只有 1 个 worker 在跑。故再拆成七个 `layout-character-*.spec.ts`，并把 firefox project 提到项目最前（Playwright 按项目顺序分派，最长单元先起跑）；`layout-endgame.spec.ts` 同样长回 22 用例 / 251s（占 layout 层三分之一、且是 `--shard` 切不开的单个调度单元），已按目录页 / 层级看板再拆成两个文件。**要提速就走这条路：减用例数、按域拆文件、最长的 project 放最前——禁止提高并发度**（唯一例外是先把 flake 根因修掉，见下条）。
 
+**并发提不动 dev server，但提得动 build 产物**：dev server 是单 Node 进程，2 worker 并发时互相争用——实测同一文件（`layout-locales-sweep`，13 条）dev 上 2 worker **173.8s**、1 worker **149.1s**（并行反而更慢）；同一批用例换 `vite preview` 读 `dist/` 后 2 worker **49.1s**。所以「提速」的第一选择是换服务器（`pnpm test:e2e:prod`，整层实测 717.7s → 179.4s），**不是**调 `workers`；上面「禁止提高并发度」的结论只在 dev 档成立，build 档不存在这条限制，但也**不必**调 `workers`——2 worker 已能跑满。
+
+
 **环境层性能取证＝可重复命令，不是当次会话的探针**：`node tools/check-ambient-perf.mjs [--url=…] [--json]`（须先起可访问实例，默认 `http://localhost:6188/`）。判据（A3.3 目标线，见 [UI质量验收标准.md](../audit/UI质量验收标准.md)）：滚动长任务最差单次 ≤50ms、掉帧率 <1%，且把 `--nk-ambient-image` 整层摘掉重跑同一路径后**中位帧时长差 ≤0.5ms、掉帧率差 ≤0.5%**——环境层是唯一常驻全站、且用 `background-attachment: fixed` 的合成层，它一旦变贵会让每页都掉帧而**不报任何错**，所以这条必须机器判。两条实现约束：掉帧阈值取**中位帧时长 × 1.5**（≈漏一次 vsync），写成固定 16.7ms 会把一半正常帧判成掉帧；chromium 只能从 `@playwright/test` re-export 取（本仓没有裸 `playwright` 包，`import 'playwright'` 会 MODULE_NOT_FOUND）。退出码 `0` 全绿 / `1` 有超线项 / `2` 环境不可用（连不上实例或无 Chromium）——`2` 不是失败，别当产物缺陷排查。
 
 ## 漂移与影响面工具（report-only，默认不阻塞）
 
-六个漂移检查器都**默认不阻塞**（退出码 `0`）：只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）是硬门禁，不属本组。
+七个漂移检查器都**默认不阻塞**（退出码 `0`）：只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）是硬门禁，不属本组。
 
 **唯一例外是 `check-e2e-viewport-tags.mjs --strict`（已进 CI `static` job）**：它判的不是漂移而是「标签与 `grepInvert` 是否成对」，缺任一半都让桌面契约被 Pixel 7 重跑；而 push 档不跑 layout，这类错只能在夜间慢档显形（实测连红两个 schedule run）。它是纯文本扫描、秒级，放进 push 反馈环不增加抖动面。
 
@@ -125,11 +133,13 @@ node tools/check-e2e-viewport-tags.mjs  # 自钉视口的 e2e 用例必须声明
 node tools/check-doc-drift.mjs          # living docs 提到的类名 / 路径 vs 代码现状
 node tools/check-css-dup-selectors.mjs  # 同上下文同属性重叠的选择器（后写静默覆盖 / 重复实现）
 node tools/doc-audit.mjs                # 文档结构化审核：体量红线 / 路由登记 / 概论禁词 / 版本号禁入与一致性 / ADR 否决项 / memory 分片
+node tools/check-field-map.mjs          # 转换器字段映射结构守卫：单行超长 / H2 重复 / 每节契约行 / 索引表与小节 token 一致
 node tools/e2e-affected.mjs             # 按 git diff 推导受影响路由 → 用例（可 --run 直接执行）
 ```
 
 - **退出码**：`0` = 报告完成（含无 `--strict` 时的命中）；`1` = 漂移检查器带 `--strict` 且有命中。
 - `doc-audit.mjs`：九条可断言检查——① 体量红线（估 token >5 万必须「总索引+分片」）② `docs/agents/*` 必须在 AGENTS.md 路由表登记 ③ living docs 禁 AI 汇报腔（「当然，这是 / 以下是为 / 本文将介绍」）④ 禁会过期的断言（「已修复 / 已全部完成」）⑤ **版本号禁入叙述性文档**（README / AGENTS / `docs/agents/` 只写选型名），外加 `tech-stack.md` 的 `<!--ver:包名-->` 标记与 `package.json` / `requirements.txt` / CI 工作流 / spine constants **逐字比对** ⑥ ADR 必须有**结构化**的「替代方案 / 否决」落点（标题或加粗字段；只有行文暗示则报「疑似缺失待复核」）⑦ memory 域索引（每份域文件须在 README 登记、索引无断链、禁止回流出按月/时序命名）⑧ `DATA_CATALOG.md` 引用的分片存在 ⑨ 文档不得把 `temp/` 当引用目标（该目录不入库、随时清空 ⇒ 引用必然烂掉）。**运行时打印覆盖面与豁免数**（哪些文档受写法规则管辖、哪些是历史档案豁免），避免「命中 0」被误读为全覆盖。判据出处：conventions.md「文档体量 / 文档写法」+ AGENTS.md 强制规则。受管范围与跳过名单的唯一来源是 `tools/doc-scope.mjs`（本文件与 `check-doc-links.mjs` 共用，禁止再各写一份）。
+- `check-field-map.mjs`：只查 `docs/data/转换器字段映射.md` 一份文件的四条结构不变量——① 任一物理行 >400 字符即报（长行必须拆成父/子 bullet）② `## ` 标题按模块 token 不得重复 ③ 每个 H2 之后前 2 个非空行内必须有 `> 产物：… ｜ 源：…` 契约行（后半段可省）④ 文首模块索引表的 token 集合与 H2 token 集合**完全一致**（多 / 少都报；token 取 `## ` 后至第一个空格或 `—` 前的连续非空格串）。四条都是「目标 0」判据，故 `--strict` 下任一命中即退出 1；默认 report-only，**刻意不进 `pnpm build` 与 CI**（理由同本节其它工具）。
 - `check-e2e-literals.mjs`：`--baseline <json>` 改计数基线；基线文件缺失时以「当前计数」为基线并提示生成，不报失败；`--write-baseline` 落盘新基线。只统计**断言调用里的** px（注释 / 用例标题 / `setViewportSize` 不计）。行内豁免 `// e2e-literal-ok: 理由`（不可漂移的契约值，如侧栏避让 / 断点）。
 - `check-e2e-viewport-tags.mjs`：两条判据——① `--strict` 时「用例体调用 `page.setViewportSize` 但签名未声明 `@viewport-pinned`」即退出 1（行内豁免 `// e2e-viewport-ok: 理由`，缺理由不豁免）；② `playwright.config.ts` 的 `mobile-chromium` 必须在该 project 块内出现 `@viewport-pinned` 的 `grepInvert`（含 `mobile-chromium` project 本身缺失也算命中）。**不是风格洁癖**：漏标或删掉 `grepInvert` 都让 `mobile-chromium` 用 Pixel 7 的触摸仿真重跑本已钉死视口的桌面契约，实测把 CI 拖成 30s 超时 × 3 次重试、或让 5 条桌面契约在夜间慢档连红（见 [testing.md](../memory/testing.md) 的 `@viewport-pinned` 条）。
 - `check-doc-drift.mjs`：**只扫 living docs**（`docs/agents/` 与 `CONTEXT.md`）；`docs/memory/` 是历史档案，必须排除，否则全是假阳性。句中带「已退场 / 已移除 / 不复用 / 历史 …」等标记的条目降级为「历史提及」，不计入 `--strict`；某一行确属历史说明时补行内 `<!-- doc-drift-ok: 理由 -->` 整体豁免该行。
@@ -186,6 +196,6 @@ python -m pytest tests/ -v               # converter 单元测试
   - **慢档**（`schedule` 每日 + 手动 `workflow_dispatch`；**不含 PR**）：`layout`（6 分片 × 每片 2 worker，只装 chromium）、`firefox`（`@cross-engine` 标签 11 条，CI 收起 1 条 `@font-calibrated` 后实收 10 条）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集，2 分片 10/8）。发布前手动触发一次 `e2e_scope=full` 取全量结果。
   - **`@visual-detail` / `@i18n-detail` 不在任何 CI 档**：脆弱几何断言与逐页词典枚举降级为「不常规跑」，判据与证据一条未删，回看走 `E2E_DETAIL=1 pnpm exec playwright test --grep @visual-detail`（`grepInvert` 无 CLI 覆盖开关，不带该变量时连收集都收不到）。
 - CI **不跑** `pnpm build`（Vercel 构建即发布门，重复跑零增量）；失败由 GitHub 通知。
-- **全量矩阵周跑**：`.github/workflows/ci-full.yml`（周一定时 + 手动触发）跑 13 语言 × 25 路由的冒烟与全语言长文案扫描——这是「每次 push 只跑风险语言子集」这处已登记收窄的补偿。
+- **全量矩阵周跑**：`.github/workflows/ci-full.yml`（周一定时 + 手动触发）跑 13 语言 × 全部路由族（26 条路径）的冒烟与全语言长文案扫描——这是「每次 push 只跑风险语言子集」这处已登记收窄的补偿。
 - Vercel 生产构建（`pnpm build`，含 vue-tsc 与七守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
 - 本地推送前先跑 `pnpm build` + `pnpm test` 自检——CI 红不会拦 push，但会留失败记录。

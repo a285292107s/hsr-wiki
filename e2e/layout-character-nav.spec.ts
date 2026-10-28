@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor, settleAnimations } from './helpers';
 import {
   charFamilyIds,
   charSkillNames,
@@ -113,6 +113,7 @@ test.describe('布局验收：角色详情页', () => {
   test('/character/1204：配队头像的可达名来自随站数据（不得是 #id 回退串）', { tag: '@viewport-independent' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1204');
+    await settleAnimations(page);
     await page.waitForSelector('.nk-build__team-link');
     await expect(page.locator('.nk-build__team-link[title="星期日"]')).toHaveCount(1, { timeout: 10_000 });
 

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor, settleAnimations } from './helpers';
 import {
   charFamilyIds,
   charSkillNames,
@@ -16,6 +16,8 @@ test.describe('布局验收：角色详情页', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1001');
     await page.waitForSelector('.nk-hero__toggle');
+    await page.locator('.nk-hero__toggle').scrollIntoViewIfNeeded();
+    await settleAnimations(page);
     const extent = await page.locator('.nk-hero__toggle').evaluate((btn) => {
       const b = btn.getBoundingClientRect();
       const cx = b.x + b.width / 2;

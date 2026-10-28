@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor } from './helpers';
+import { collectConsoleIssues, computedNumber, readJson, resolveTokenColor, settleAnimations } from './helpers';
 import {
   charFamilyIds,
   charSkillNames,
@@ -190,6 +190,7 @@ test.describe('布局验收：角色详情页', () => {
     for (const [w, wantCols] of [[320, 2], [375, 3]] as const) {
       await page.setViewportSize({ width: w, height: 700 });
       await page.goto('/character/1208');
+      await settleAnimations(page);
       await page.waitForSelector('.nk-stats__stat');
       const r = await page.evaluate(() => {
         const rows = [...document.querySelectorAll('.nk-stats__stat')];

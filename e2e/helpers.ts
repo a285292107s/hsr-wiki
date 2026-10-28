@@ -214,8 +214,10 @@ export async function waitForSettled(page: Page): Promise<void> {
       (ms) =>
         Promise.race([
           (async () => {
-            for (const [family, text] of [['Noto Sans SC', '角色图鉴'], ['IBM Plex Mono', '1234']] as const) {
-              try { await document.fonts.load(`12px "${family}"`, text); } catch { }
+            if (document.fonts.status !== 'loaded') {
+              for (const [family, text] of [['Noto Sans SC', '角色图鉴'], ['IBM Plex Mono', '1234']] as const) {
+                try { await document.fonts.load(`12px "${family}"`, text); } catch { }
+              }
             }
             await document.fonts.ready;
           })(),
@@ -224,9 +226,71 @@ export async function waitForSettled(page: Page): Promise<void> {
       10_000,
     )
     .catch(() => {});
-  await page.waitForFunction(() => document.fonts.status === 'loaded', undefined, { timeout: 5_000 }).catch(() => {});
   await waitForViewMounted(page);
   await afterSkeletonGone(page, 5_000);
+}
+
+export async function settleAnimations(page: Page, timeout = 1_000): Promise<void> {
+  await page.evaluate(
+    (ms) =>
+      new Promise<void>((resolve) => {
+        const t0 = performance.now();
+        const budget = Math.min(Number.isFinite(ms) ? ms : 1000, 1000);
+        const pending = (): number =>
+          document.getAnimations().filter((a) => {
+            if (a.playState === 'finished') return false;
+            const end = a.effect?.getComputedTiming().endTime;
+            return typeof end === 'number' && Number.isFinite(end) && end <= 1200;
+          }).length;
+        const tick = (prev: number): void => {
+          const now = pending();
+          if (now === 0 || performance.now() - t0 > budget) {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          } else if (prev > 0 && now >= prev) {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          } else {
+            requestAnimationFrame(() => tick(now));
+          }
+        };
+        requestAnimationFrame(() => tick(-1));
+      }),
+    timeout,
+  );
+}
+
+export async function waitForQuiet(page: Page, minText = 150, timeout = 10_000): Promise<void> {
+  await page
+    .evaluate(
+      ([min, ms]) =>
+        new Promise<void>((resolve) => {
+          const started = performance.now();
+          let last = -1;
+          let stable = 0;
+          const tick = (): void => {
+            const len = (document.body.innerText || '').length;
+            stable = len === last && len > min ? stable + 1 : 0;
+            last = len;
+            if (stable >= 2 || performance.now() - started > ms) resolve();
+            else requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }),
+      [minText, timeout] as [number, number],
+    )
+    .catch(() => {});
+}
+
+export async function waitForTextReady(page: Page, minText = 152, timeout = 15_000): Promise<number> {
+  const handle = await page.waitForFunction(
+    ([min, ms]) => {
+      const len = (document.body.innerText || '').length;
+      const t = ((window as unknown as { __nkTextT0?: number }).__nkTextT0 ??= performance.now());
+      return len >= (min as number) || performance.now() - t > (ms as number) ? len : false;
+    },
+    [minText, timeout] as [number, number],
+    { timeout: timeout + 5_000, polling: 'raf' },
+  );
+  return Number(await handle.jsonValue());
 }
 
 export async function waitForCatalogCards(page: Page, selector = '[class*="-grid"] a') {

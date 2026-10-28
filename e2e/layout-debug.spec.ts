@@ -3,7 +3,7 @@ import { collectConsoleIssues, waitForCatalogCards } from './helpers';
 import { charFamilyIds, collectNavAnchors, noUnknownOverflow } from './layout.shared';
 
 test.describe('布局验收：研究线调试台 dev 入口', () => {
-  test('平板/桌面（≥768px）：调试台入口可见且位于设置上方', { tag: '@viewport-pinned' }, async ({ page }) => {
+  test('平板/桌面（≥768px）：调试台入口可见且位于设置上方', { tag: ['@viewport-pinned', '@dev-only'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/settings');
@@ -20,7 +20,7 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
   });
 
   // e2e-viewport-ok: 用例内 setViewportSize 是**被测对象**（手机档哨兵），必须留在 mobile project 里跑
-  test('手机（<768px）：调试台入口隐藏，导航折叠不受影响', async ({ page }) => {
+  test('手机（<768px）：调试台入口隐藏，导航折叠不受影响', { tag: '@dev-only' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/character');
@@ -32,7 +32,7 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
     assertNoErrors();
   });
 
-  test('/debug 可达：调试台页挂载、四 Tab 渲染（dev-only 路由）', async ({ page }) => {
+  test('/debug 可达：调试台页挂载、四 Tab 渲染（dev-only 路由）', { tag: '@dev-only' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/debug');
     await expect(page.locator('.nk-spine-debug__head h1')).toHaveText('Spine 调试台');

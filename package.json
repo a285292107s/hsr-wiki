@@ -13,6 +13,8 @@
     "test:e2e:ci": "playwright test e2e/guards.spec.ts e2e/shell.spec.ts e2e/accessibility.spec.ts e2e/layout-",
     "test:e2e:guards": "playwright test e2e/guards.spec.ts e2e/shell.spec.ts e2e/accessibility.spec.ts",
     "test:e2e:layout": "playwright test e2e/layout-",
+    "test:e2e:prod": "node tools/e2e-prod.mjs",
+    "test:e2e:prod:layout": "node tools/e2e-prod.mjs e2e/layout-",
     "test:e2e:affected": "node tools/e2e-affected.mjs --run",
     "test:e2e:update": "playwright test --update-snapshots=all"
   },

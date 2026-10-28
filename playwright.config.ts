@@ -9,9 +9,19 @@ import path from 'node:path';
 // 那些用例就成了不可执行的黑洞——`--grep @visual-detail` 在 grepInvert 下手一条也收不到。
 const detailExcludes = [/@visual-detail/, /@i18n-detail/];
 const calibratedExclude = /@font-calibrated/;
-const routineExclude = process.env.CI ? [...detailExcludes, calibratedExclude] : detailExcludes;
+const E2E_PREVIEW = process.env.E2E_PREVIEW === '1';
+const DEV_ORIGIN = 'http://localhost:6188';
+const PREVIEW_ORIGIN = 'http://localhost:6189';
+// @dev-only：断言对象只在 dev server 存在（/debug 路由与侧栏调试台入口由 import.meta.env.DEV 注册，
+// 缺键告警也只在 dev 打开）。build 档收集必须收起，否则片片恒红；dev 档照常判。
+const devOnlyExclude = /@dev-only/;
+const routineExclude = (process.env.CI ? [...detailExcludes, calibratedExclude] : detailExcludes).concat(
+  E2E_PREVIEW ? [devOnlyExclude] : [],
+);
 const chromiumGrepInvert = process.env.E2E_DETAIL === '1' ? undefined : routineExclude;
-const mobileSlowExcludes = process.env.E2E_DETAIL === '1' ? [] : [...detailExcludes, calibratedExclude];
+const mobileSlowExcludes = (process.env.E2E_DETAIL === '1' ? [] : [...detailExcludes, calibratedExclude]).concat(
+  E2E_PREVIEW ? [devOnlyExclude] : [],
+);
 
 export default defineConfig({
   testDir: './e2e',
@@ -22,7 +32,7 @@ export default defineConfig({
   retries: 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
-    baseURL: 'http://localhost:6188',
+    baseURL: E2E_PREVIEW ? PREVIEW_ORIGIN : DEV_ORIGIN,
     viewport: { width: 1280, height: 720 },
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
@@ -49,10 +59,17 @@ export default defineConfig({
       grepInvert: [/@viewport-pinned/, /@viewport-independent/, ...mobileSlowExcludes],
     },
   ],
-  webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:6188',
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  webServer: E2E_PREVIEW
+    ? {
+        command: `pnpm exec vite preview --port 6189 --strictPort`,
+        url: PREVIEW_ORIGIN,
+        reuseExistingServer: !process.env.CI,
+        timeout: 60_000,
+      }
+    : {
+        command: 'pnpm dev',
+        url: DEV_ORIGIN,
+        reuseExistingServer: !process.env.CI,
+        timeout: 60_000,
+      },
 });
