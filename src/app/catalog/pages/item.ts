@@ -1,5 +1,6 @@
 import { translate } from '../../i18n';
 import { escHtml, itemIconUrl } from '../../../lib/format';
+import { getSavedTrailblazerGender, pickGenderVariant } from '../../../lib/trailblazer';
 import { cdnImgFallbackAttr } from '../../../services/cdn';
 import { loadLocalItems, RARITY_NUM_TO_KEY } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
@@ -34,6 +35,26 @@ const ITEM_TYPE_PREFERRED = [
 
 const MAIN_TYPE_ORDER = ['Material', 'Virtual', 'Usable', 'Mission'];
 
+function purposeSegments(raw: unknown): string[] {
+  return String(raw || '')
+    .split('\\n')
+    .map((seg) => seg.trim())
+    .filter(Boolean);
+}
+
+function plainText(raw: unknown): string {
+  return String(raw || '').replace(/\u00a0/g, ' ');
+}
+
+function tooltipText(raw: unknown): string {
+  const text = pickGenderVariant(String(raw || '').replace(/\r\n?/g, '\n'), getSavedTrailblazerGender());
+  return text
+    .split(/\\n|\n/)
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n');
+}
+
 const ITEM_NO_ICON_SVG =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
   + '<path d="M21 8v8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.73l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/>'
@@ -53,14 +74,19 @@ export const itemPage: CatalogPageConfig = {
     const items: CatalogItem[] = [];
     for (const info of list) {
       if (!info.name) continue;
+      const purposes = purposeSegments(info.purpose);
+      const purposeType = Number(info.purpose_type) || 0;
       items.push({
         id: String(info.id),
-        name: info.name,
+        name: plainText(info.name),
         subType: info.sub_type || '',
         mainType: info.main_type || '',
         rarity: RARITY_NUM_TO_KEY[info.rarity] || 'Normal',
         icon: itemIconUrl(info.figure_icon),
-        searchText: `${info.desc || ''}\n${info.bg_desc || ''}`,
+        purpose: purposes[0] || '',
+        purposeLabel: purposes.join(' / '),
+        purposeKey: purposeType ? String(purposeType) : '',
+        searchText: `${plainText(info.desc)}\n${plainText(info.bg_desc)}\n${purposes.join(' ')}`,
         descTip: String(info.desc || info.bg_desc || ''),
       });
     }
@@ -127,6 +153,18 @@ export const itemPage: CatalogPageConfig = {
         };
       }),
     ];
+    const purposeGroups = new Map<string, { label: string; count: number }>();
+    for (const it of data) {
+      const key = String(it.purposeKey || '');
+      if (!key) continue;
+      const label = String(it.purposeLabel || it.purpose || key);
+      const cur = purposeGroups.get(key);
+      if (cur) cur.count += 1;
+      else purposeGroups.set(key, { label, count: 1 });
+    }
+    const purposeOptions = [...purposeGroups.entries()]
+      .sort((a, b) => b[1].count - a[1].count || a[1].label.localeCompare(b[1].label))
+      .map(([val, v]) => ({ val, label: escHtml(v.label) }));
     return [
       {
         key: 'rarity', labelKey: 'catalog.filter.rarity',
@@ -138,15 +176,22 @@ export const itemPage: CatalogPageConfig = {
           { val: 'NotNormal', label: '2★' },
         ],
       },
+      {
+        key: 'purposeKey', labelKey: 'catalog.filter.purpose',
+        options: [{ val: '', labelKey: 'catalog.all' }, ...purposeOptions],
+      },
       { key: 'subType', labelKey: 'catalog.filter.type', options: subTypeOptions },
     ];
   },
   renderCard(item, i) {
     const r = ITEM_RARITY_MAP[String(item.rarity)] || ITEM_RARITY_MAP.Normal;
     const subType = String(item.subType || '');
-    const typeName = itemTypeLabel(subType);
+    const purpose = String(item.purpose || '');
+    const purposeLabel = String(item.purposeLabel || purpose);
+    const typeName = purpose || itemTypeLabel(subType);
+    const metaTip = purposeLabel || typeName;
     const hasIcon = Boolean(item.icon);
-    const descTip = String(item.descTip || '').replace(/\s+/g, ' ').trim();
+    const descTip = tooltipText(item.descTip);
     const tipAttr = descTip ? ` title="${escHtml(descTip)}"` : '';
     const pic = hasIcon
       ? `<img class="nk-item-card__pic" src="${escHtml(item.icon)}"${cdnImgFallbackAttr(String(item.icon))} alt="${escHtml(item.name)}" loading="lazy" onerror="this.classList.add('is-broken')">`
@@ -158,7 +203,7 @@ export const itemPage: CatalogPageConfig = {
       </div>
       <div class="nk-item-card__info">
         <span class="nk-item-card__name" title="${escHtml(item.name)}">${escHtml(item.name)}</span>
-        <span class="nk-item-card__meta">${typeName} · ${r.label}</span>
+        <span class="nk-item-card__meta" title="${escHtml(metaTip)}">${escHtml(typeName)} · ${r.label}</span>
       </div>
     </div>`;
   },

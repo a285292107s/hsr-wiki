@@ -105,7 +105,11 @@ test.describe('布局验收：目录引擎 · 虚拟网格', () => {
     const names = new Set(items.map((i) => i.name));
     const sample = items
       .map((i) => ({ item: i, desc: String(i.desc || '') }))
-      .find(({ desc }) => desc.length >= 16 && !names.has(desc.slice(6, 12)) && !/[「」]/.test(desc.slice(6, 12)));
+      .find(({ desc }) =>
+        desc.length >= 16
+        && !desc.slice(0, 8).includes('\\n')
+        && !names.has(desc.slice(6, 12))
+        && !/[「」]/.test(desc.slice(6, 12)));
     expect(sample, '数据里应存在可用于检索的描述样本').toBeTruthy();
     const frag = sample!.desc.slice(6, 12);
 
@@ -128,6 +132,7 @@ test.describe('布局验收：目录引擎 · 虚拟网格', () => {
     );
     expect(titled.length, '检索到目标卡片').toBe(1);
     expect(titled[0], '卡片 title 应含描述').toContain(sample!.desc.slice(0, 8));
+    expect(titled[0], '悬浮描述不得把字面 \\n 当正文').not.toContain('\\n');
 
     const order = await page.locator('.nk-item-card').evaluateAll(
       (els, q) => els.map((e) => String(e.getAttribute('data-name') || '').toLowerCase().includes(q)),

@@ -49,6 +49,7 @@
   "catalog.filter.lightcone": "Light Cones",
   "catalog.filter.path": "Path",
   "catalog.filter.position": "Position",
+  "catalog.filter.purpose": "Purpose",
   "catalog.filter.quality": "Quality",
   "catalog.filter.rarity": "Rarity",
   "catalog.filter.series": "Series",

@@ -15,7 +15,7 @@ MODULE_SOURCES: dict[str, list[str]] = {
     "paths": ["AvatarBaseType.json"],
     "elements": ["DamageType.json"],
     "properties": [],
-    "items": ["ItemConfig.json"],
+    "items": ["ItemConfig.json", "ItemPurpose.json", "TextJoinConfig.json", "TextJoinItem.json"],
     "characters": ["AvatarConfig.json", "AvatarConfigLD.json"],
     "character_detail": [
         "AvatarConfig.json", "AvatarConfigLD.json",

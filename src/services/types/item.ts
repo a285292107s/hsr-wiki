@@ -18,6 +18,7 @@ export interface LocalItemEntry {
   sub_type: string;
   rarity: number;
   purpose_type: number;
+  purpose: string;
   icon: string;
   figure_icon: string;
 }

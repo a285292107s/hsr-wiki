@@ -285,3 +285,61 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
     expect(seasonHeroBgUrl(null)).toBe('');
   });
 });
+
+describe('物品卡：用途行与用途筛选', () => {
+  it('副行优先显示用途，缺用途回退子类型，截断时给出完整文本', () => {
+    const itemPage = CATALOG_PAGES.item;
+    const withPurpose = itemPage.renderCard(
+      { name: '无生残刃', rarity: 'Rare', subType: 'TracePath', purpose: '行迹材料', purposeLabel: '行迹材料 / 光锥晋阶材料' },
+      0,
+    );
+    expect(withPurpose).toContain('行迹材料 · 3★');
+    expect(withPurpose).toContain('title="行迹材料 / 光锥晋阶材料"');
+    const fallback = itemPage.renderCard({ name: '某材料', rarity: 'Rare', subType: 'Material' }, 0);
+    expect(fallback).toContain('材料 · 3★');
+  });
+
+  it('悬浮描述把字面 \\n 还原成真实换行，性别分支按开拓者形态取支，不换行空格归一化', () => {
+    const html = CATALOG_PAGES.item.renderCard(
+      { name: '星琼', rarity: 'SuperRare', subType: 'Virtual', descTip: '第一段\\n\\n据{F#她}{M#他}说\u00a0好\n第三段' },
+      0,
+    );
+    expect(html).not.toContain('\\n');
+    expect(html).not.toContain('{F#');
+    expect(html).toContain('title="第一段\n据她说 好\n第三段"');
+  });
+
+  it('真实数据：用途筛选键命中 purposeKey，文案已归一化且不再含字面换行', async () => {
+    vi.stubGlobal('fetch', async (input: unknown) => {
+      const url = input instanceof URL ? input.href : String(input);
+      const text = await readLocalText(urlToFsPath(url));
+      return { ok: true, status: 200, text: async () => text };
+    });
+    const itemPage = CATALOG_PAGES.item;
+    const items = await itemPage.fetchData!({ version: '' });
+    vi.unstubAllGlobals();
+
+    const withPurpose = items.filter((it) => it.purposeKey);
+    expect(withPurpose.length, '大部分物品应有用途').toBeGreaterThan(1000);
+    const labelled = withPurpose.filter((it) => it.purpose);
+    expect(labelled.length / withPurpose.length, '用途文案覆盖率').toBeGreaterThan(0.95);
+    expect(labelled.some((it) => String(it.purpose).includes('\\n')), '用途首段不得含字面换行').toBe(false);
+    expect(labelled.some((it) => String(it.purposeLabel).includes('\\n')), '用途整段不得含字面换行').toBe(false);
+    expect(items.some((it) => String(it.name).includes('\u00a0')), '名称里的不换行空格应归一化').toBe(false);
+    expect(items.some((it) => String(it.name).includes('{TEXTJOIN#')), '名称不得残留 TEXTJOIN 标记').toBe(false);
+    expect(items.some((it) => String(it.descTip).includes('{TEXTJOIN#')), '描述不得残留 TEXTJOIN 标记').toBe(false);
+
+    const filters = itemPage.buildFilters!(items);
+    const purposeFilter = filters.find((f) => f.key === 'purposeKey');
+    expect(purposeFilter, '物品页应提供用途筛选').toBeTruthy();
+    expect(purposeFilter!.labelKey).toBe('catalog.filter.purpose');
+    const vals = purposeFilter!.options.map((o) => o.val).filter(Boolean);
+    expect(vals.length, '用途选项数应接近官方用途枚举').toBeGreaterThan(5);
+    for (const val of vals) {
+      expect(
+        items.some((it) => String(it.purposeKey) === val),
+        `用途选项 ${val} 应命中数据`,
+      ).toBe(true);
+    }
+  });
+});
