@@ -16,6 +16,11 @@ test.describe('布局验收：赛季级区块（行式排版 + 数据驱动上�
     const group = page.locator('#egd-season-buffs');
     await expect(group).toHaveCount(1);
     await expect(group.locator('.nk-egd-group__title')).toHaveText('荒腔走板');
+    const rowLabelFs = await zone.locator('.nk-egd-row__label').first()
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    const rowTitleFs = await group.locator('.nk-egd-group__title')
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(rowTitleFs, '荒腔走板行标签字号必须与战意机制/战意效果一致').toBe(rowLabelFs);
     await expect(group.locator('.nk-egd-buff__name')).toHaveText(story.buffs!.map((b) => b.name));
     await settleAnimations(page);
     const sameRow = async (cards: ReturnType<typeof page.locator>): Promise<number> => new Set(

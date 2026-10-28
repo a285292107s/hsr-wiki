@@ -65,6 +65,8 @@
 .nk-egd-stage__title,
 .nk-egd-mechs__title { font-size: var(--nk-fs-6); }
 
+.nk-egd-group--row .nk-egd-group__title { font-size: var(--nk-fs-3); }
+
 .nk-egd-nodecard__name { font-size: var(--nk-fs-6); }
 
 .nk-egd-rules__val { font-size: var(--nk-fs-7); }
