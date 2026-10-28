@@ -16,6 +16,7 @@ const ROW_LABEL: Record<string, string> = {
   breakBonus: 'formula.row.breakBonus',
   superToughness: 'formula.row.superToughness',
   superBonus: 'formula.row.superBonus',
+  addedBase: 'formula.row.addedBase',
   vuln: 'formula.row.vuln',
   reduce: 'formula.row.reduce',
   elationBase: 'formula.row.elationBase',

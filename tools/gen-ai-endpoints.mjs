@@ -1937,6 +1937,15 @@ const FORMULA_ELATION_ROWS = [
   ['formula.row.defense', '防御区', 'x'],
   ['formula.term.dmgReduction', '减伤', 'x1minus'],
 ];
+const FORMULA_ADDED_ROWS = [
+  ['formula.row.addedBase', '附加伤害基数', 'base'],
+  ['formula.zone.modifier', '伤害修饰区', 'x'],
+  ['formula.zone.crit', '暴击区', 'x'],
+  ['formula.zone.def', '防御区', 'x'],
+  ['formula.zone.res', '抗性区', 'x'],
+  ['formula.zone.special', '特殊乘区', 'x'],
+  ['formula.chain.toughness', '韧性区', 'x'],
+];
 
 function formulaChainTerm(rowKey, fallbackName, kind) {
   const name = ui(rowKey, fallbackName);
@@ -1973,16 +1982,16 @@ function formulaPages(ctx) {
     ['/monster', ui('catalog.monster.title', '敌对物种')],
   ].map(([href, label]) => `<a href="${esc(href)}">${esc(label)}</a>`).join('<span class="nk-snapshot__sep">›</span>');
   const paragraph = (key, fallback) => `<p>${esc(ui(key, fallback))}</p>`;
-  const summaryPlain = `${title} · ${ui('formula.hero.lead', '把一次直伤拆成六个乘区，逐区调参看读数怎么走。')}`;
+  const summaryPlain = `${title} · ${ui('formula.hero.lead', '把一次直伤拆成六个乘区，逐区调参看读数怎么走；击破、欢愉、附加伤害与真实伤害是另外几条链路。')}`;
   const description = cut(summaryPlain, 150);
   const body = detailBody(ctx, {
     crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [title, null]]),
     h1: title,
-    summary: esc(ui('formula.hero.lead', '把一次直伤拆成六个乘区，逐区调参看读数怎么走。')),
+    summary: esc(ui('formula.hero.lead', '把一次直伤拆成六个乘区，逐区调参看读数怎么走；击破、欢愉、附加伤害与真实伤害是另外几条链路。')),
     facts: [[ui('formula.chain.toughness', '韧性区'), `${esc(ui('formula.chain.toughnessOff', '未破韧 ×0.9'))} / ${esc(ui('formula.chain.toughnessOn', '已击破 ×1'))}`]],
     sections: [
       {
-        title: ui('formula.sec.overview', '伤害链路'),
+        title: ui('formula.sec.overview', '直伤链路'),
         html: paragraph('formula.overview.lead', '乘区之间只有乘法，所以每个乘区的相对提升价值相同。点任一乘区看公式与取值范围，右侧账本显示它相对中性值的偏移。')
           + `<p>${esc(ui('formula.ledger.title', '乘区账本'))} · ${esc(ui('formula.ledger.note', '以中性值 1.0 为轴：向右为增益、向左为损失；条长按系数与 1 的差值大小计，不代表伤害占比。基础伤害不是系数，单列在顶部。'))}</p>`
           + paragraph('formula.overview.noCrit', '击破伤害与持续伤害不能暴击，它们的暴击区恒为 1。')
@@ -2011,13 +2020,25 @@ function formulaPages(ctx) {
           + `<p>${esc(ui('formula.break.result', '击破伤害'))} · ${esc(ui('formula.break.superResult', '超击破伤害'))}</p>`,
       },
       {
-        title: ui('formula.sec.elation', '欢愉伤害'),
+        title: ui('formula.sec.elation', '欢愉链路'),
         html: paragraph('formula.elation.lead', '欢愉伤害是一条独立链路：基数来自欢愉基础值，由欢愉倍率、欢愉度与笑点区推进，不经过攻击力。')
           + `<p>${esc(formulaChainLine(FORMULA_ELATION_ROWS))}</p>`
           + `<p>${esc(`${ui('formula.row.joke', '笑点区')} = 1 + (2 × ${ui('formula.elation.joke', '好活数')}) ÷ 242`)}</p>`
           + paragraph('formula.elation.jokeNote', '笑点区只看好活数：好活数 240 时约 2.98 倍，好活数 5 时约 1.04 倍。')
           + `<p class="nk-snapshot__note">${esc(ui('formula.elation.notIncluded', '不参与：攻击力、增伤（含属性增伤与攻击类型增伤）。'))}</p>`
           + `<p>${esc(ui('formula.elation.result', '暴击伤害'))} · ${esc(ui('formula.elation.expected', '期望伤害'))}</p>`,
+      },
+      {
+        title: ui('formula.sec.added', '附加伤害'),
+        html: paragraph('formula.added.lead', '附加伤害是额外多出的一段伤害：它不视为一次攻击，所以不削韧、不回能；但它走完整乘区——可以暴击，也吃增伤、易伤、减防与穿透。')
+          + `<p>${esc(formulaChainLine(FORMULA_ADDED_ROWS))}</p>`
+          + paragraph('formula.added.baseNote', '属性值填来源指定的那一项：攻击力、生命上限或防御力。基数由来源文本给出，来源给多少就是多少，不再另乘技能倍率。')
+          + paragraph('formula.added.ruleNoAttack', '不视为一次攻击：不削韧、不回能，也不触发「攻击后」类效果；它只是让受击者额外掉一次血。')
+          + paragraph('formula.added.ruleFullZones', '走完整乘区：可以暴击，吃属性增伤与伤害类型增伤、易伤、减防、穿透、抗性与减伤；未破韧时同样吃 10% 韧性减伤。')
+          + paragraph('formula.added.ruleAttackType', '攻击类型增伤（普攻 / 战技 / 终结技 / 追加攻击）通常不参与，除非来源文本指明这段伤害视为对应攻击。')
+          + paragraph('formula.added.ruleVsTrue', '与真实伤害的区别：真实伤害不进任何乘区、无属性也不能暴击，附加伤害全吃。')
+          + paragraph('formula.added.exception', '例外：击破附带的冻结 / 纠缠伤害同样写作附加伤害，但走击破链路且不能暴击；个别来源另有限制（如不致命），以技能 / 光锥文本为准。')
+          + `<p>${esc(ui('formula.elation.expected', '期望伤害'))} · ${esc(ui('formula.elation.result', '暴击时伤害'))}</p>`,
       },
       {
         title: ui('formula.sec.true', '真实伤害'),

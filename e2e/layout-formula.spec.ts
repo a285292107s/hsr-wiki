@@ -9,6 +9,7 @@ const SECTIONS = [
   ['overview', 'formula.sec.overview'],
   ['break', 'formula.sec.break'],
   ['elation', 'formula.sec.elation'],
+  ['added', 'formula.sec.added'],
   ['true', 'formula.sec.true'],
   ['heal', 'formula.sec.heal'],
   ['speed', 'formula.sec.speed'],
@@ -24,7 +25,7 @@ const CALC_ROLES = [
 ] as const;
 
 test.describe('布局验收：战斗公式页（/formula）', () => {
-  test('/formula：hero、八区块导航（吸顶不塌陷）、七节点链路、乘区流水、详情切换、新链路不画图、入口可达、无溢出', async ({ page }) => {
+  test('/formula：hero、九区块导航（吸顶不塌陷）、七节点链路、乘区流水、详情切换、新链路不画图、入口可达、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/formula');
     await waitForSettled(page);
@@ -129,17 +130,20 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
     expect(formulaSize, '页面讲的是公式：乘区公式字号必须大于乘区名').toBeGreaterThan(nameSize);
 
     await expect(
-      page.locator('#formula-break [data-chart], #formula-elation [data-chart], #formula-true [data-chart]'),
-      '02/03/04 三条新链路刻意不画图',
+      page.locator('#formula-break [data-chart], #formula-elation [data-chart], #formula-added [data-chart], #formula-true [data-chart]'),
+      '02/03/04/05 四条新链路刻意不画图',
     ).toHaveCount(0);
     await expect(page.locator('#formula-break .nk-formula-flow')).toHaveCount(1);
     await expect(page.locator('#formula-break .nk-formula-flow__row[data-step]'), '普通击破流水 10 行').toHaveCount(10);
     await expect(page.locator('#formula-elation .nk-formula-flow__row[data-step]'), '欢愉流水 11 行').toHaveCount(11);
+    await expect(page.locator('#formula-added .nk-formula-flow__row[data-step]'), '附加伤害流水 7 行').toHaveCount(7);
 
     const breakTerms = page.locator('#formula-break .nk-formula-eq').first().locator('.nk-formula-eq__term');
     await expect(breakTerms, '普通击破的等式项数必须与流水乘步数一致（10）').toHaveCount(10);
     await expect(page.locator('#formula-elation .nk-formula-eq').first().locator('.nk-formula-eq__term'),
       '欢愉的等式项数必须与流水乘步数一致（11）').toHaveCount(11);
+    await expect(page.locator('#formula-added .nk-formula-eq').first().locator('.nk-formula-eq__term'),
+      '附加伤害的等式项数必须与流水乘步数一致（7）').toHaveCount(7);
 
     await expect(
       page.locator('#formula-break .nk-formula-brief .nk-formula-point'),
@@ -184,6 +188,10 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
       .locator('#formula-overview .nk-formula-flow__row[data-zone="modifier"] .nk-formula-flow__factor')
       .innerText();
     expect(overviewFactor.trim(), '08 与 01 共享参数：流水增伤步系数必须跟着变').toBe('×4');
+    const addedFactor = await page
+      .locator('#formula-added .nk-formula-flow__row[data-zone="modifier"] .nk-formula-flow__factor')
+      .innerText();
+    expect(addedFactor.trim(), '04 附加伤害与 01/09 共享参数：增伤步系数必须跟着变').toBe('×4');
 
     await expect(page.locator('#formula-heal [data-chart]'), '治疗/护盾不画图（纯线性，读数是唯一需求）').toHaveCount(0);
     await expect(page.locator('#formula-heal input[data-role="heal-base"]')).toHaveCount(1);
@@ -303,7 +311,7 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
     assertNoErrors();
   });
 
-  test('/formula：02 击破（含超击破）/ 03 欢愉 / 04 真实伤害 三条新链路', async ({ page }) => {
+  test('/formula：02 击破（含超击破）/ 03 欢愉 / 04 附加伤害 / 05 真实伤害 四条新链路', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/formula');
     await waitForSettled(page);
@@ -353,6 +361,40 @@ test.describe('布局验收：战斗公式页（/formula）', () => {
     await expect(page.locator('#formula-elation [data-role="elation-expected"]')).toHaveText(/\d/);
     await expect(page.locator('#formula-elation [data-role="elation-not-included"]'), '必须显式列出不参与的乘区')
       .toContainText(dict['formula.elation.notIncluded']);
+
+    const addedRows = page.locator('#formula-added .nk-formula-flow__row[data-step]');
+    await expect(addedRows, '附加伤害流水 = 基数 + 六乘区').toHaveCount(7);
+    expect(
+      await addedRows.evaluateAll((els) => els.map((el) => el.getAttribute('data-zone'))),
+      '附加伤害流水顺序固定：base → modifier → crit → defense → resist → special → toughness',
+    ).toEqual(['base', 'modifier', 'crit', 'defense', 'resist', 'special', 'toughness']);
+    await expect(addedRows.first().locator('.nk-formula-flow__name'), '流水首行必须写作「附加伤害基数」')
+      .toHaveText(dict['formula.row.addedBase']);
+    const addedLast = (await addedRows.last().locator('.nk-formula-flow__run').innerText()).trim();
+    const addedExpected = (await page.locator('#formula-added [data-role="added-expected"]').innerText()).trim();
+    expect(Math.abs(toNumber(addedLast) - toNumber(addedExpected)), '附加伤害流水末值必须等于期望伤害读数').toBeLessThanOrEqual(0.1);
+    await expect(page.locator('#formula-added [data-role="added-crit"]')).toHaveText(/\d/);
+
+    await expect(page.locator('#formula-added [data-role="added-source"]'), '基数来源两档：属性值 × 倍率 / 固定数值')
+      .toHaveCount(2);
+    await expect(page.locator('#formula-added input[data-role="added-stat"]')).toHaveCount(1);
+    await expect(page.locator('#formula-added input[data-role="added-multiplier"]')).toHaveCount(1);
+    const addedBaseBefore = (await addedRows.first().locator('.nk-formula-flow__run').innerText()).trim();
+    await page.locator('#formula-added [data-role="added-source"][data-value="flat"]').click();
+    await expect(page.locator('#formula-added input[data-role="added-flat"]'), '切到固定数值后出现固定值输入').toHaveCount(1);
+    await expect(page.locator('#formula-added input[data-role="added-stat"]')).toHaveCount(0);
+    await expect(
+      page.locator('#formula-added .nk-formula-flow__row[data-zone="base"] .nk-formula-flow__run'),
+      '切换基数来源后基数必须变化',
+    ).not.toHaveText(addedBaseBefore);
+    await page.locator('#formula-added [data-role="added-source"][data-value="stat"]').click();
+    await expect(page.locator('#formula-added input[data-role="added-stat"]')).toHaveCount(1);
+
+    await expect(page.locator('#formula-added .nk-formula-point'), '附加伤害机制要点 4 条').toHaveCount(4);
+    await expect(page.locator('#formula-added .nk-formula-point').last(), '必须写明与真实伤害的区别')
+      .toContainText(dict['formula.added.ruleVsTrue']);
+    await expect(page.locator('#formula-added .nk-formula-note').last(), '必须写明击破附带附加伤害的例外')
+      .toContainText(dict['formula.added.exception']);
 
     const elationBeforeBonus = (await page.locator('#formula-elation [data-role="elation-total"]').innerText()).trim();
     const bonusField = page.locator('#formula-calc input[data-role="bonus"]');

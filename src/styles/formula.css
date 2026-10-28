@@ -1382,6 +1382,9 @@
   #formula-elation .nk-formula-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
   }
+  #formula-added .nk-formula-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  }
   #formula-true .nk-formula-grid > .nk-formula-panel--flat:last-child { align-content: start; }
   #formula-true .nk-formula-fields { gap: 12px 24px; }
 

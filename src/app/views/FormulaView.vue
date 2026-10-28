@@ -6,6 +6,7 @@ import { loadLocalCharacter, loadLocalCharacterList } from '../../services/api';
 import type { CharacterData } from '../../services/types';
 import { usePageData } from '../composables/use-page-data';
 import { useScrollSpy } from '../composables/use-scroll-spy';
+import AddedSection from '../formula/AddedSection.vue';
 import BreakSection from '../formula/BreakSection.vue';
 import CalcSection from '../formula/CalcSection.vue';
 import ElationSection from '../formula/ElationSection.vue';
@@ -25,6 +26,7 @@ const SECTION_DEFS = [
   { id: 'overview', labelKey: 'formula.sec.overview' },
   { id: 'break', labelKey: 'formula.sec.break' },
   { id: 'elation', labelKey: 'formula.sec.elation' },
+  { id: 'added', labelKey: 'formula.sec.added' },
   { id: 'true', labelKey: 'formula.sec.true' },
   { id: 'heal', labelKey: 'formula.sec.heal' },
   { id: 'speed', labelKey: 'formula.sec.speed' },
@@ -188,6 +190,11 @@ onMounted(() => { void load(); });
         <OverviewSection :stat="attackStat" :idx="sectionIdx('overview')" />
         <BreakSection :enemy-level="enemyLevel" :idx="sectionIdx('break')" />
         <ElationSection :enemy-level="enemyLevel" :idx="sectionIdx('elation')" />
+        <AddedSection
+          :stat="attackStat"
+          :enemy-level="enemyLevel"
+          :idx="sectionIdx('added')"
+        />
         <TrueSection :enemy-level="enemyLevel" :idx="sectionIdx('true')" />
         <HealSection :idx="sectionIdx('heal')" />
         <SpeedSection :idx="sectionIdx('speed')" />
