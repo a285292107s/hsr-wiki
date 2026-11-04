@@ -1,875 +1,746 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import {
-  EDGES, EDGE_KINDS, LAYERS, NODES,
+  DOMAIN_LABEL, DOMAIN_VAR, EDGES, EDGE_KINDS, LAYERS, NODES, TIERS,
   type EdgeKind, type MapEdge, type MapNode,
 } from './system-map/map-data';
+import { degrees } from './system-map/geometry';
+import SystemMapCanvas from './system-map/SystemMapCanvas.vue';
 
-const S = 88;
-const BW = S * 0.48;
-const BHY = BW / 2;
-const ROW_OFFSETS: Record<number, number> = { 0: 0, 1: 44, 2: 84, 3: 126, 4: 166, 5: 208 };
-
-const sel = ref<string | null>(null);
-const hover = ref<string | null>(null);
-const kindFilter = ref<EdgeKind | 'all'>('all');
-const legendOpen = ref(window.matchMedia('(min-width: 768px)').matches);
-const infoOpen = ref(true);
-
-interface Geom {
-  x: number; y: number; h: number; rc: number;
-  top: string; left: string; right: string;
-}
-
-function gridToScreen(gx: number, gy: number): { x: number; y: number } {
-  return { x: (gx - gy) * S, y: (gx + gy) * (S / 2) + (ROW_OFFSETS[gy] ?? 0) };
-}
-
-function nodeGeom(n: MapNode): Geom {
-  const { x, y } = gridToScreen(n.gx, n.gy);
-  const h = n.h * 20;
-  const rc = y - h;
-  return {
-    x, y, h, rc,
-    top: x + ',' + (y - BHY - h) + ' ' + (x + BW) + ',' + (y - h) + ' ' + x + ',' + (y + BHY - h) + ' ' + (x - BW) + ',' + (y - h),
-    left: x + ',' + (y + BHY) + ' ' + (x - BW) + ',' + y + ' ' + (x - BW) + ',' + (y - h) + ' ' + x + ',' + (y + BHY - h),
-    right: x + ',' + (y + BHY) + ' ' + (x + BW) + ',' + y + ' ' + (x + BW) + ',' + (y - h) + ' ' + x + ',' + (y + BHY - h),
-  };
-}
+const props = defineProps<{ active?: boolean }>();
 
 const layerById = new Map(LAYERS.map((l) => [l.id, l]));
-const nodes = NODES.map((n) => ({ node: n, layer: layerById.get(n.layer)!, g: nodeGeom(n) }));
-const byId = new Map(nodes.map((e) => [e.node.id, e]));
-const sortedNodes = [...nodes].sort(
-  (a, b) => (a.node.gx + a.node.gy) - (b.node.gx + b.node.gy) || a.node.gx - b.node.gx,
+const tierByGy = new Map(TIERS.map((t) => [t.gy, t]));
+const nodeById = new Map(NODES.map((n) => [n.id, n]));
+const degreeOf = degrees(EDGES);
+
+const selected = ref<string | null>(null);
+const hovered = ref<string | null>(null);
+const kind = ref<EdgeKind | 'all'>('all');
+const query = ref('');
+const panelOpen = ref(false);
+const bootKey = ref(0);
+
+watch(() => props.active, (on) => {
+  if (on) bootKey.value += 1;
+});
+
+const selNode = computed(() => (selected.value ? nodeById.get(selected.value) ?? null : null));
+const selLayer = computed(() => (selNode.value ? layerById.get(selNode.value.layer) ?? null : null));
+const selTier = computed(() => (selNode.value ? tierByGy.get(selNode.value.gy) ?? null : null));
+const selLayerLabel = computed(() => {
+  const layer = selLayer.value;
+  const node = selNode.value;
+  if (!layer || !node) return '';
+  return layer.name === node.name ? '' : layer.name;
+});
+
+interface LinkRow {
+  edge: MapEdge;
+  dir: '上游' | '下游';
+  other: string;
+  otherName: string;
+}
+
+const selLinks = computed<LinkRow[]>(() => {
+  const id = selected.value;
+  if (!id) return [];
+  const rows: LinkRow[] = [];
+  for (const edge of EDGES) {
+    if (edge.from === id) rows.push({ edge, dir: '下游', other: edge.to, otherName: nodeById.get(edge.to)?.name ?? edge.to });
+    else if (edge.to === id) rows.push({ edge, dir: '上游', other: edge.from, otherName: nodeById.get(edge.from)?.name ?? edge.from });
+  }
+  return rows.sort((a, b) => (a.dir === b.dir ? a.edge.label.localeCompare(b.edge.label) : a.dir === '下游' ? -1 : 1));
+});
+
+const degreeNow = computed(() => (selected.value ? degreeOf.get(selected.value) ?? 0 : 0));
+const upstreamCount = computed(() => selLinks.value.filter((l) => l.dir === '上游').length);
+const downstreamCount = computed(() => selLinks.value.filter((l) => l.dir === '下游').length);
+
+const filters = computed(() => [
+  { id: 'all' as const, label: '全部', count: EDGES.length },
+  ...EDGE_KINDS.map((k) => ({
+    id: k.id,
+    label: k.label,
+    count: EDGES.filter((e) => e.kind === k.id).length,
+  })),
+]);
+
+const hubs = computed(() =>
+  NODES
+    .map((n) => ({ node: n, deg: degreeOf.get(n.id) ?? 0 }))
+    .sort((a, b) => b.deg - a.deg || a.node.name.localeCompare(b.node.name))
+    .slice(0, 5),
 );
 
-const vb = computed(() => {
-  let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
-  const feed = (x: number, y: number): void => {
-    minX = Math.min(minX, x); minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
-  };
-  for (const e of nodes) {
-    feed(e.g.x - BW - 34, e.g.y - BHY - e.g.h - 48);
-    feed(e.g.x + BW + 34, e.g.y + BHY + 8);
-  }
-  const pad = 28;
-  return (minX - pad) + ' ' + (minY - pad) + ' ' + (maxX - minX + pad * 2) + ' ' + (maxY - minY + pad * 2);
-});
+const tierRows = TIERS.map((t) => ({
+  ...t,
+  count: NODES.filter((n) => n.gy === t.gy).length,
+}));
 
-interface EdgeGeom { edge: MapEdge; d: string; mx: number; my: number }
+const selCount = computed(() => selLinks.value.length);
 
-const visibleEdges = computed<EdgeGeom[]>(() =>
-  EDGES
-    .filter((e) => kindFilter.value === 'all' || e.kind === kindFilter.value)
-    .map((e) => {
-      const a = byId.get(e.from)!; const b = byId.get(e.to)!;
-      const dx = b.g.x - a.g.x; const dy = b.g.y - a.g.y;
-      const len = Math.hypot(dx, dy) || 1;
-      const ux = dx / len; const uy = dy / len;
-      const off = BW + 8;
-      const ax = a.g.x + ux * off; const ay = a.g.y + uy * off;
-      const bx = b.g.x - ux * off; const by = b.g.y - uy * off;
-      return { edge: e, d: 'M ' + ax + ' ' + ay + ' L ' + bx + ' ' + by, mx: (ax + bx) / 2, my: (ay + by) / 2 };
-    }),
-);
-
-const activeIds = computed(() => {
-  const s = new Set<string>();
-  if (hover.value) s.add(hover.value);
-  if (sel.value) s.add(sel.value);
-  return s;
-});
-const linked = computed(() => {
-  const s = new Set<string>();
-  for (const id of activeIds.value) {
-    for (const e of EDGES) if (e.from === id || e.to === id) s.add(e.id);
-  }
-  return s;
-});
-const hasActive = computed(() => activeIds.value.size > 0);
-
-const selNode = computed(() => (sel.value ? byId.get(sel.value) ?? null : null));
-const selEdges = computed(() => EDGES.filter((e) => e.from === sel.value || e.to === sel.value));
-
-const kindLabel = (k: EdgeKind): string => EDGE_KINDS.find((s) => s.id === k)?.label ?? k;
-
-const kindCounts = computed(() => {
-  const m = new Map<EdgeKind | 'all', number>();
-  m.set('all', EDGES.length);
-  for (const e of EDGES) m.set(e.kind, (m.get(e.kind) ?? 0) + 1);
-  return m;
-});
-
-const filters: { id: EdgeKind | 'all'; label: string }[] = [
-  { id: 'all', label: '全部' },
-  ...EDGE_KINDS.map((k) => ({ id: k.id, label: k.label })),
-];
-
-function showEdgeLabel(e: MapEdge): boolean {
-  return !!sel.value && linked.value.has(e.id);
+function pick(id: string | null): void {
+  selected.value = id;
+  if (id) panelOpen.value = true;
 }
 
-function select(id: string | null): void {
-  sel.value = sel.value === id ? null : id;
+function closePanel(): void {
+  selected.value = null;
+  panelOpen.value = false;
 }
 
-function onKey(e: KeyboardEvent, id: string): void {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(id); }
+function kindLabel(id: EdgeKind): string {
+  return EDGE_KINDS.find((k) => k.id === id)?.label ?? id;
 }
 
-function onStageClick(e: MouseEvent): void {
-  if (!(e.target as Element | null)?.closest?.('.nk-bld')) select(null);
+function domVarOf(node: MapNode | null): string {
+  if (!node) return DOMAIN_VAR.system;
+  const layer = layerById.get(node.layer);
+  return layer ? DOMAIN_VAR[layer.domain] : DOMAIN_VAR.system;
 }
 
-interface DecorEl {
-  el: 'polygon' | 'line' | 'ellipse' | 'rect' | 'circle' | 'path';
-  cls?: string;
-  a: Record<string, string | number>;
-}
-
-function roofDecor(n: MapNode, g: Geom): DecorEl[] {
-  const { x, rc, h } = g;
-  const out: DecorEl[] = [];
-  const R = BW * 0.72;
-  switch (n.shape) {
-    case 'tower':
-      out.push({ el: 'line', a: { x1: x, y1: rc - 10, x2: x, y2: rc - 26 } });
-      out.push({ el: 'circle', a: { cx: x, cy: rc - 28, r: 2 } });
-      break;
-    case 'spire':
-      out.push({ el: 'polygon', a: { points: (x - R * 0.5) + ',' + (rc - 4) + ' ' + (x + R * 0.5) + ',' + (rc - 4) + ' ' + x + ',' + (rc - 34) } });
-      break;
-    case 'dome':
-      out.push({ el: 'path', a: { d: 'M ' + (x - R) + ' ' + (rc - 2) + ' A ' + R + ' ' + (R * 1.35) + ' 0 0 1 ' + (x + R) + ' ' + (rc - 2) }, cls: 'nk-decor--dome' });
-      break;
-    case 'sat':
-      out.push({ el: 'path', a: { d: 'M ' + (x - R * 0.9) + ' ' + (rc - 4) + ' A ' + (R * 0.9) + ' ' + (R * 0.9) + ' 0 0 1 ' + (x + R * 0.9) + ' ' + (rc - 4) }, cls: 'nk-decor--dish' });
-      out.push({ el: 'line', a: { x1: x, y1: rc - 4, x2: x, y2: rc - 22 } });
-      out.push({ el: 'circle', a: { cx: x, cy: rc - 24, r: 2 } });
-      break;
-    case 'twin': {
-      const mh = Math.round(h * 0.6);
-      const sm = Math.round(BW * 0.6);
-      const rc2 = rc + 2;
-      for (const off of [-BW * 0.52, BW * 0.52]) {
-        const cx = Math.round(x + off);
-        out.push({ el: 'polygon', cls: 'nk-decor--side', a: { points: (cx - sm) + ',' + rc2 + ' ' + cx + ',' + (rc2 + sm / 2) + ' ' + cx + ',' + (rc2 + sm / 2 - mh) + ' ' + (cx - sm) + ',' + (rc2 - mh) } });
-        out.push({ el: 'polygon', cls: 'nk-decor--side2', a: { points: cx + ',' + (rc2 + sm / 2) + ' ' + (cx + sm) + ',' + rc2 + ' ' + (cx + sm) + ',' + (rc2 - mh) + ' ' + cx + ',' + (rc2 + sm / 2 - mh) } });
-        out.push({ el: 'polygon', cls: 'nk-decor--top2', a: { points: (cx - sm) + ',' + rc2 + ' ' + cx + ',' + (rc2 - sm / 2) + ' ' + (cx + sm) + ',' + rc2 + ' ' + cx + ',' + (rc2 + sm / 2) } });
-      }
-      break;
-    }
-    case 'silo':
-      out.push({ el: 'line', a: { x1: x, y1: rc - BHY, x2: x, y2: rc + BHY } });
-      break;
-    case 'factory':
-      out.push({ el: 'rect', a: { x: x + BW * 0.3, y: rc - 20, width: 7, height: 15 } });
-      out.push({ el: 'rect', a: { x: x - BW * 0.55, y: rc - 14, width: 5, height: 9 } });
-      out.push({ el: 'circle', a: { cx: Math.round(x + BW * 0.3 + 3.5), cy: rc - 23, r: 2.5 } });
-      break;
-    case 'bunker':
-      out.push({ el: 'rect', a: { x: x - 7, y: rc - 11, width: 14, height: 6, rx: 1.5 } });
-      out.push({ el: 'line', a: { x1: x - 13, y1: rc - 3, x2: x - 6, y2: rc - 3 } });
-      out.push({ el: 'line', a: { x1: x + 6, y1: rc - 3, x2: x + 13, y2: rc - 3 } });
-      break;
-    case 'bank':
-      out.push({ el: 'polygon', cls: 'nk-decor--pediment', a: { points: x + ',' + (rc + BHY) + ' ' + (x + BW) + ',' + rc + ' ' + (x + BW / 2) + ',' + Math.round(rc + BHY / 2 - 14) } });
-      break;
-    case 'flat':
-    default:
-      break;
-  }
-  return out;
+function domLabelOf(node: MapNode | null): string {
+  if (!node) return DOMAIN_LABEL.system;
+  const layer = layerById.get(node.layer);
+  return layer ? DOMAIN_LABEL[layer.domain] : DOMAIN_LABEL.system;
 }
 </script>
 
 <template>
-  <div
-    class="nk-sysmap"
-    :class="{ 'has-active': hasActive, 'is-legend-open': legendOpen, 'is-info-open': infoOpen }"
-  >
-    <div class="nk-sysmap__grid">
-      <aside class="nk-sysmap__legend">
-        <header class="nk-sysmap__legend-head">
-          <h2 class="nk-sysmap__panel-title">图例</h2>
-          <button
-            type="button"
-            class="nk-sysmap__legend-toggle"
-            :aria-expanded="legendOpen"
-            aria-label="展开或收起图例"
-            @click="legendOpen = !legendOpen"
-          >−</button>
-        </header>
-        <div v-show="legendOpen" class="nk-sysmap__legend-body">
-          <h3 class="nk-sysmap__sub">分层 · 建筑颜色</h3>
-          <div class="nk-sysmap__chips">
-            <button
-              v-for="l in LAYERS"
-              :key="l.id"
-              type="button"
-              class="nk-sysmap__chip"
-              :style="{ '--nk-c': 'var(' + l.color + ')' }"
-              :title="l.desc"
-            >
-              <span class="nk-sysmap__chip-swatch" />
-              <span class="nk-sysmap__chip-text">{{ l.name }}</span>
-              <span class="nk-sysmap__chip-en">{{ l.en }}</span>
-            </button>
-          </div>
-          <h3 class="nk-sysmap__sub">线型 · 路径类型</h3>
-          <ul class="nk-sysmap__kinds">
-            <li v-for="k in EDGE_KINDS" :key="k.id" class="nk-sysmap__kind">
-              <svg class="nk-sysmap__kind-swatch" width="52" height="12" aria-hidden="true">
-                <line x1="2" y1="6" x2="50" y2="6" class="nk-sysmap__kind-line" :class="'is-' + k.id" />
-              </svg>
-              <div class="nk-sysmap__kind-meta">
-                <b>{{ k.label }}</b>
-                <span>{{ k.desc }}</span>
-              </div>
-            </li>
-          </ul>
-          <h3 class="nk-sysmap__sub">路径筛选</h3>
-          <div class="nk-sysmap__filters" role="group" aria-label="按路径类型筛选">
-            <button
-              v-for="f in filters"
-              :key="f.id"
-              type="button"
-              class="nk-sysmap__filter"
-              :class="{ 'is-on': kindFilter === f.id }"
-              @click="kindFilter = f.id"
-            >{{ f.label }}<em>{{ kindCounts.get(f.id) ?? 0 }}</em></button>
-          </div>
-          <p class="nk-sysmap__hint">点击建筑查看解释面板 · Enter/Space 等效 · 色块 = 分层</p>
+  <section class="nk-sysmap" :class="{ 'has-selection': !!selNode, 'is-panel-open': panelOpen }">
+    <header class="nk-sysmap__hud">
+      <div class="nk-sysmap__brand">
+        <p class="nk-sysmap__kicker">SYSTEM ATLAS</p>
+        <h2 class="nk-sysmap__title">系统地图</h2>
+        <p class="nk-sysmap__lede">
+          整站从外部依赖落到本地数据的一条完整链路，按六个层域展开。
+          建筑高度＝该模块的接口数，地形段位＝它所在的层域。
+        </p>
+      </div>
+      <dl class="nk-sysmap__readout">
+        <div class="nk-sysmap__stat">
+          <dt>模块</dt>
+          <dd>{{ NODES.length }}</dd>
         </div>
-      </aside>
+        <div class="nk-sysmap__stat">
+          <dt>路径</dt>
+          <dd>{{ EDGES.length }}</dd>
+        </div>
+        <div class="nk-sysmap__stat">
+          <dt>层域</dt>
+          <dd>{{ TIERS.length }}</dd>
+        </div>
+      </dl>
+    </header>
 
-      <section class="nk-sysmap__stage">
-        <svg
-          class="nk-sysmap__svg"
-          :viewBox="vb"
-          preserveAspectRatio="xMidYMid meet"
-          role="img"
-          aria-label="系统架构等轴测地图：建筑为代码模块，连线为真实控制与数据路径"
-          @click="onStageClick"
+    <div class="nk-sysmap__toolbar">
+      <div class="nk-sysmap__filters" role="group" aria-label="按路径类型筛选">
+        <button
+          v-for="f in filters"
+          :key="f.id"
+          type="button"
+          class="nk-sysmap__filter"
+          :class="{ 'is-on': kind === f.id }"
+          :aria-pressed="kind === f.id"
+          @click="kind = f.id"
         >
-          <defs>
-            <marker
-              v-for="k in EDGE_KINDS"
-              :key="k.id"
-              :id="'nk-arr-' + k.id"
-              viewBox="0 0 8 8"
-              refX="7"
-              refY="4"
-              markerWidth="7"
-              markerHeight="7"
-              orient="auto-start-reverse"
-            >
-              <path d="M0 0 L8 4 L0 8 z" :style="{ fill: 'var(--nk-edge-' + k.id + ')' }" />
-            </marker>
-          </defs>
+          <svg class="nk-sysmap__swatch" viewBox="0 0 26 8" aria-hidden="true">
+            <line x1="1" y1="4" x2="25" y2="4" :class="'is-' + f.id" />
+          </svg>
+          <span>{{ f.label }}</span>
+          <em>{{ f.count }}</em>
+        </button>
+      </div>
 
-          <g class="nk-sysmap__plots">
-            <polygon
-              v-for="en in sortedNodes"
-              :key="en.node.id"
-              class="nk-plot"
-              :points="(en.g.x - BW) + ',' + en.g.y + ' ' + en.g.x + ',' + (en.g.y + BHY) + ' ' + (en.g.x + BW) + ',' + en.g.y + ' ' + en.g.x + ',' + (en.g.y - BHY)"
-            />
-          </g>
-
-          <g class="nk-sysmap__edges">
-            <g
-              v-for="e in visibleEdges"
-              :key="e.edge.id"
-              class="nk-edge"
-              :class="['nk-edge--' + e.edge.kind, { 'is-linked': linked.has(e.edge.id), 'is-dim': hasActive && !linked.has(e.edge.id) }]"
-            >
-              <path class="nk-edge__casing" :d="e.d" />
-              <path class="nk-edge__core" :d="e.d" :marker-end="'url(#nk-arr-' + e.edge.kind + ')'" />
-              <path class="nk-edge__flow" :d="e.d" />
-            </g>
-          </g>
-
-          <g class="nk-sysmap__blds">
-            <g
-              v-for="en in sortedNodes"
-              :key="en.node.id"
-              class="nk-bld"
-              :class="{
-                'is-sel': sel === en.node.id,
-                'is-hover': hover === en.node.id,
-                'is-dim': hasActive && sel !== en.node.id && hover !== en.node.id,
-              }"
-              :style="{ '--nk-c': 'var(' + en.layer.color + ')' }"
-              role="button"
-              tabindex="0"
-              :aria-label="en.node.name + '（' + en.layer.name + '）：' + en.node.desc"
-              :aria-pressed="sel === en.node.id"
-              @click="select(en.node.id)"
-              @keydown="onKey($event, en.node.id)"
-              @mouseenter="hover = en.node.id"
-              @mouseleave="hover = null"
-              @focus="hover = en.node.id"
-              @blur="hover = null"
-            >
-              <polygon class="nk-face nk-face--left" :points="en.g.left" />
-              <polygon class="nk-face nk-face--right" :points="en.g.right" />
-              <ellipse
-                v-if="en.node.shape === 'silo'"
-                class="nk-face nk-face--top"
-                :cx="en.g.x"
-                :cy="en.g.rc"
-                :rx="BW"
-                :ry="BHY * 1.1"
-              />
-              <polygon v-else class="nk-face nk-face--top" :points="en.g.top" />
-
-              <template v-for="(d, i) in roofDecor(en.node, en.g)" :key="i">
-                <polygon v-if="d.el === 'polygon'" v-bind="d.a" class="nk-decor" :class="d.cls ?? ''" />
-                <line v-else-if="d.el === 'line'" v-bind="d.a" class="nk-decor nk-decor--line" :class="d.cls ?? ''" />
-                <ellipse v-else-if="d.el === 'ellipse'" v-bind="d.a" class="nk-decor" :class="d.cls ?? ''" />
-                <rect v-else-if="d.el === 'rect'" v-bind="d.a" class="nk-decor" :class="d.cls ?? ''" />
-                <circle v-else-if="d.el === 'circle'" v-bind="d.a" class="nk-decor" :class="d.cls ?? ''" />
-                <path v-else-if="d.el === 'path'" v-bind="d.a" class="nk-decor" :class="d.cls ?? ''" />
-              </template>
-
-              <rect class="nk-bld__plate" :x="en.g.x - 36" :y="en.g.rc - 10" width="72" height="24" rx="3" />
-              <text class="nk-bld-name" :x="en.g.x" :y="en.g.rc + 1" text-anchor="middle">{{ en.node.name }}</text>
-              <text class="nk-bld-en" :x="en.g.x" :y="en.g.rc + 12" text-anchor="middle">{{ en.node.en }}</text>
-            </g>
-          </g>
-
-          <g class="nk-sysmap__edges nk-sysmap__edges--top">
-            <g
-              v-for="e in visibleEdges"
-              :key="e.edge.id"
-              v-show="linked.has(e.edge.id)"
-              class="nk-edge nk-edge--top"
-              :class="'nk-edge--' + e.edge.kind"
-            >
-              <path class="nk-edge__casing" :d="e.d" />
-              <path class="nk-edge__core" :d="e.d" :marker-end="'url(#nk-arr-' + e.edge.kind + ')'" />
-              <path class="nk-edge__flow" :d="e.d" />
-              <text v-if="showEdgeLabel(e.edge)" class="nk-edge__label" :x="e.mx" :y="e.my" text-anchor="middle">{{ e.edge.label }}</text>
-            </g>
-          </g>
+      <label class="nk-sysmap__find">
+        <svg class="nk-sysmap__find-icon" viewBox="0 0 16 16" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.6" />
+          <line x1="10.4" y1="10.4" x2="14" y2="14" />
         </svg>
-      </section>
+        <input v-model="query" type="search" placeholder="定位模块" aria-label="按名称定位模块" @keydown.esc="query = ''" />
+      </label>
 
-      <aside class="nk-sysmap__info" aria-live="polite">
+      <button
+        type="button"
+        class="nk-sysmap__panel-btn"
+        :aria-expanded="panelOpen"
+        @click="panelOpen = !panelOpen"
+      >{{ panelOpen ? '收起面板' : selNode ? '详情' : '说明' }}</button>
+    </div>
+
+    <div class="nk-sysmap__grid">
+      <div class="nk-sysmap__stage">
+        <SystemMapCanvas
+          :selected="selected"
+          :hovered="hovered"
+          :kind="kind"
+          :query="query"
+          :boot-key="bootKey"
+          @select="pick"
+          @hover="hovered = $event"
+        />
+      </div>
+
+      <aside class="nk-sysmap__panel" :class="{ 'is-open': panelOpen }" aria-live="polite">
         <template v-if="selNode">
-          <header class="nk-sysmap__info-head">
-            <div>
-              <span class="nk-sysmap__info-layer" :style="{ '--nk-c': 'var(' + selNode.layer.color + ')' }">{{ selNode.layer.name }}</span>
-              <h2 class="nk-sysmap__info-name">{{ selNode.node.name }}</h2>
-              <p class="nk-sysmap__info-en">{{ selNode.node.en }}</p>
-            </div>
-            <button type="button" class="nk-sysmap__close" aria-label="关闭详情" @click="select(null)">×</button>
+          <header class="nk-sysmap__panel-head">
+            <span class="nk-sysmap__dom" :style="{ '--nk-dom': domVarOf(selNode) }">{{ domLabelOf(selNode) }}</span>
+            <button type="button" class="nk-sysmap__close" aria-label="关闭详情" @click="closePanel">×</button>
           </header>
-          <p class="nk-sysmap__info-desc">{{ selNode.node.desc }}</p>
+          <h3 class="nk-sysmap__pname">{{ selNode.name }}</h3>
+          <p class="nk-sysmap__pen">{{ selNode.en }}<template v-if="selLayerLabel"><span class="nk-sysmap__pdot">·</span>{{ selLayerLabel }}</template><span class="nk-sysmap__pdot">·</span>{{ selTier?.name }}</p>
+          <p class="nk-sysmap__pdesc">{{ selNode.desc }}</p>
 
-          <h3 class="nk-sysmap__sub">关键文件</h3>
+          <dl class="nk-sysmap__metrics">
+            <div><dt>接口</dt><dd>{{ degreeNow }}</dd></div>
+            <div><dt>上游</dt><dd>{{ upstreamCount }}</dd></div>
+            <div><dt>下游</dt><dd>{{ downstreamCount }}</dd></div>
+          </dl>
+
+          <h4 class="nk-sysmap__sub">关键文件</h4>
           <ul class="nk-sysmap__files">
-            <li v-for="f in selNode.node.files" :key="f"><code>{{ f }}</code></li>
+            <li v-for="f in selNode.files" :key="f"><code>{{ f }}</code></li>
           </ul>
 
-          <h3 class="nk-sysmap__sub">关联路径</h3>
-          <ul class="nk-sysmap__edge-list">
-            <li v-for="e in selEdges" :key="e.id" class="nk-sysmap__edge-item">
-              <span class="nk-sysmap__edge-kind" :class="'is-' + e.kind">{{ kindLabel(e.kind) }}</span>
-              <b>{{ e.label }}</b>
-              <code>{{ e.from }} → {{ e.to }}</code>
+          <h4 class="nk-sysmap__sub">关联路径 <em>{{ selCount }}</em></h4>
+          <ul class="nk-sysmap__links">
+            <li v-for="l in selLinks" :key="l.edge.id">
+              <button type="button" class="nk-sysmap__link" @click="pick(l.other)">
+                <span class="nk-sysmap__link-top">
+                  <span class="nk-sysmap__kind" :class="'is-' + l.edge.kind">{{ kindLabel(l.edge.kind) }}</span>
+                  <span class="nk-sysmap__dir">{{ l.dir }}</span>
+                  <span class="nk-sysmap__link-other">{{ l.otherName }}</span>
+                </span>
+                <span class="nk-sysmap__link-label">{{ l.edge.label }}</span>
+              </button>
             </li>
           </ul>
         </template>
+
         <template v-else>
-          <h2 class="nk-sysmap__info-name">站点架构总览</h2>
-          <p class="nk-sysmap__info-desc">
-            本图由当前 main 分支源码静态推导：{{ NODES.length }} 座建筑（模块）承载 {{ EDGES.length }} 条真实控制/数据路径。
-            建筑颜色对应分层（见图例），线型对应路径类型；选中建筑可查看其关键文件与关联加载链。
+          <header class="nk-sysmap__sheet-head">
+            <button type="button" class="nk-sysmap__close" aria-label="收起面板" @click="panelOpen = false">×</button>
+          </header>
+          <h3 class="nk-sysmap__pname">站点架构总览</h3>
+          <p class="nk-sysmap__pen">OVERVIEW · {{ NODES.length }} 模块 / {{ EDGES.length }} 路径</p>
+          <p class="nk-sysmap__pdesc">
+            本图由当前 main 分支源码静态推导。六段地形自上而下是：外部依赖 → 启动装配 → 页面 → 服务 → 引擎与工具 → 数据生产。
+            连线只画真实存在的调用与数据路径。
           </p>
-          <h3 class="nk-sysmap__sub">读取方式</h3>
-          <ol class="nk-sysmap__guide">
-            <li>云端行（上）＝外部依赖：nanoka / jsDelivr 镜像 / 官网源 / Vercel</li>
-            <li>中段＝运行时：入口 → 壳 → 路由 → 视图 → Store → API → 缓存 → 本地 JSON</li>
-            <li>前沿行（下）＝数据生产：converter 工厂 → public/data/cn 仓库</li>
-            <li>数据路径＝流动虚线；CDN 路径＝点划线；主题＝点线；构建＝粗实线</li>
+
+          <h4 class="nk-sysmap__sub">读图</h4>
+          <ul class="nk-sysmap__guide">
+            <li><b>高度</b>方块越高，接入与接出的路径越多。</li>
+            <li><b>颜色</b>站内模块取当前强调色，外部依赖与交付取金色；最下一层（数据生产）同色更暗。</li>
+            <li><b>线型</b>实线＝装配调用，流动虚线＝数据加载，点划线＝CDN 网络，点线＝令牌传导，粗实线＝构建部署。</li>
+            <li><b>操作</b>拖拽平移、Ctrl/⌘ + 滚轮缩放、双击放大；点方块看文件与上下游，点路径可跳到对端。</li>
+          </ul>
+
+          <h4 class="nk-sysmap__sub">层域分布</h4>
+          <ul class="nk-sysmap__tiers">
+            <li v-for="t in tierRows" :key="t.id" class="nk-sysmap__tierrow">
+              <span class="nk-sysmap__tierrow-name">{{ t.name }}</span>
+              <span class="nk-sysmap__tierrow-en">{{ t.en }}</span>
+              <span class="nk-sysmap__tierrow-n">{{ t.count }}</span>
+            </li>
+          </ul>
+
+          <h4 class="nk-sysmap__sub">接口最密的模块</h4>
+          <ol class="nk-sysmap__hubs">
+            <li v-for="h in hubs" :key="h.node.id">
+              <button type="button" class="nk-sysmap__hub" @click="pick(h.node.id)">
+                <span class="nk-sysmap__hub-name">{{ h.node.name }}</span>
+                <span class="nk-sysmap__hub-deg">{{ h.deg }}</span>
+              </button>
+            </li>
           </ol>
         </template>
       </aside>
     </div>
-
-    <nav class="nk-sysmap__bar" aria-label="面板开关">
-      <button type="button" :aria-expanded="legendOpen" @click="legendOpen = !legendOpen">图例</button>
-      <button type="button" :aria-expanded="infoOpen" @click="infoOpen = !infoOpen">说明</button>
-    </nav>
-  </div>
+  </section>
 </template>
 
 <style scoped>
 .nk-sysmap {
-  --nk-edge-control: var(--ir-400);
-  --nk-edge-data: var(--em-500);
-  --nk-edge-cdn: var(--gold-400);
-  --nk-edge-theme: var(--tc-400);
-  --nk-edge-build: var(--sl-500);
+  --nk-stage-h: clamp(460px, calc(100dvh - 372px), 880px);
+  max-width: 1560px;
   color: var(--text);
 }
 
-.nk-sysmap__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  grid-template-areas: 'legend legend' 'stage info';
-  gap: 14px;
-  margin: 0;
-  padding: 14px;
-  max-width: 1480px;
-  align-items: start;
-}
-.nk-sysmap__legend { grid-area: legend; }
-.nk-sysmap__stage { grid-area: stage; }
-.nk-sysmap__info { grid-area: info; }
-
-@media (min-width: 1536px) {
-  .nk-sysmap__grid {
-    grid-template-columns: 250px minmax(0, 1fr) 340px;
-    grid-template-areas: 'legend stage info';
-  }
-}
-
-.nk-sysmap__legend,
-.nk-sysmap__info {
-  background: var(--nk-sheet-bg);
-  border: 1px solid var(--nk-sheet-border);
-  border-radius: var(--nk-radius-card);
-  box-shadow: var(--nk-shadow-card);
-}
-.nk-sysmap__legend { padding: 12px; }
-.nk-sysmap__info { padding: 16px; }
-
-.nk-sysmap__panel-title,
-.nk-sysmap__info-name {
-  margin: 0;
-  font-family: var(--font-hud);
-  font-size: 13px;
-  letter-spacing: 2px;
-  color: var(--text-bright);
-  text-transform: uppercase;
-}
-.nk-sysmap__legend-head {
+.nk-sysmap__hud {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-1);
+}
+.nk-sysmap__brand { min-width: 0; }
+.nk-sysmap__kicker {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  margin: 0 0 6px;
+  font-family: var(--font-hud);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: var(--primary);
 }
-.nk-sysmap__legend-toggle {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  border: 1px solid var(--nk-sheet-item-border);
-  background: var(--nk-shell-hover);
-  color: var(--text2);
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
+.nk-sysmap__kicker::before {
+  content: '';
+  width: 14px;
+  height: 1px;
+  background: var(--primary);
 }
-.nk-sysmap__legend-toggle:hover {
-  background: var(--nk-shell-press);
+.nk-sysmap__title {
+  margin: 0;
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-7);
+  font-weight: 700;
+  letter-spacing: 0.08em;
   color: var(--text-bright);
 }
-
-.nk-sysmap__sub {
-  margin: 14px 0 8px;
-  font-family: var(--font-hud);
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: var(--text3);
-  text-transform: uppercase;
-}
-.nk-sysmap__sub:first-child { margin-top: 0; }
-
-.nk-sysmap__chips {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-  gap: 6px;
-}
-.nk-sysmap__chip {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 8px;
-  border: 1px solid var(--nk-sheet-item-border);
-  border-radius: 6px;
-  background: var(--nk-sheet-item-bg);
+.nk-sysmap__lede {
+  margin: 7px 0 0;
+  max-width: 68ch;
+  font-size: var(--nk-fs-4);
+  line-height: 1.7;
   color: var(--text2);
-  font-size: 11px;
-  text-align: left;
-  cursor: default;
 }
-.nk-sysmap__chip-swatch {
+
+.nk-sysmap__readout {
+  display: flex;
   flex: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  background: var(--nk-c);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  margin: 0;
+  gap: 26px;
 }
-.nk-sysmap__chip-text { white-space: nowrap; }
-.nk-sysmap__chip-en {
-  margin-left: auto;
+.nk-sysmap__stat { display: grid; gap: 2px; justify-items: end; }
+.nk-sysmap__stat dt {
   font-family: var(--font-hud);
-  font-size: 7px;
-  letter-spacing: 1px;
+  font-size: 9px;
+  letter-spacing: 0.18em;
   color: var(--text3);
 }
+.nk-sysmap__stat dd {
+  margin: 0;
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-6);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+}
 
-.nk-sysmap__kinds { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.nk-sysmap__kind {
+.nk-sysmap__toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding: 5px 8px;
-  border-radius: 6px;
-  background: var(--nk-sheet-item-bg);
+  gap: 8px;
+  padding: 12px 0 14px;
 }
-.nk-sysmap__kind-swatch { flex: none; }
-.nk-sysmap__kind-line {
-  stroke-width: 2.5;
-  stroke: var(--text3);
-}
-.nk-sysmap__kind-line.is-control { stroke: var(--nk-edge-control); }
-.nk-sysmap__kind-line.is-data { stroke: var(--nk-edge-data); stroke-dasharray: 9 6; }
-.nk-sysmap__kind-line.is-cdn { stroke: var(--nk-edge-cdn); stroke-dasharray: 3 5 10 5; }
-.nk-sysmap__kind-line.is-theme { stroke: var(--nk-edge-theme); stroke-dasharray: 0.5 6; stroke-linecap: round; }
-.nk-sysmap__kind-line.is-build { stroke: var(--nk-edge-build); stroke-width: 4; }
-.nk-sysmap__kind-meta { display: flex; flex-direction: column; gap: 1px; }
-.nk-sysmap__kind-meta b { font-size: 11px; font-weight: 600; color: var(--text); }
-.nk-sysmap__kind-meta span { font-size: 10px; color: var(--text3); }
-
 .nk-sysmap__filters { display: flex; flex-wrap: wrap; gap: 6px; }
 .nk-sysmap__filter {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 9px;
-  border-radius: 999px;
+  gap: 6px;
+  padding: 5px 10px 5px 7px;
   border: 1px solid var(--nk-sheet-item-border);
+  border-radius: var(--nk-radius-2);
   background: var(--nk-sheet-item-bg);
   color: var(--text2);
-  font-size: 11px;
+  font-family: inherit;
+  font-size: var(--nk-fs-3);
   cursor: pointer;
+  transition: border-color 0.18s var(--nk-ease-out), color 0.18s var(--nk-ease-out), background 0.18s var(--nk-ease-out);
 }
 .nk-sysmap__filter:hover { color: var(--text-bright); background: var(--nk-shell-hover); }
 .nk-sysmap__filter.is-on {
   color: var(--text-bright);
   background: var(--nk-shell-active-bg);
-  border-color: var(--nk-shell-active-border);
+  border-color: var(--nk-sheet-border);
 }
 .nk-sysmap__filter em {
   font-style: normal;
   font-family: var(--font-hud);
   font-size: 9px;
   color: var(--text3);
+  font-variant-numeric: tabular-nums;
 }
-.nk-sysmap__filter.is-on em { color: var(--highlight); }
-.nk-sysmap__hint { margin: 12px 0 0; font-size: 10px; line-height: 1.6; color: var(--text3); }
+.nk-sysmap__filter.is-on em { color: var(--text2); }
 
-.nk-sysmap__stage {
-  overflow: auto;
-  border: 1px solid var(--nk-sheet-border);
-  border-radius: var(--nk-radius-card);
-  background:
-    radial-gradient(120% 100% at 50% 0%, var(--nk-page-tint), transparent 70%),
-    var(--bg);
-  box-shadow: var(--nk-shadow-card);
-}
-.nk-sysmap__svg {
-  display: block;
-  width: 100%;
-  min-width: 720px;
-  height: auto;
-  user-select: none;
-}
+.nk-sysmap__swatch { flex: none; width: 26px; height: 8px; overflow: visible; }
+.nk-sysmap__swatch line { stroke: var(--text3); stroke-width: 1.6; stroke-linecap: round; }
+.nk-sysmap__swatch .is-all { stroke: var(--text3); }
+.nk-sysmap__swatch .is-control { stroke: var(--primary); }
+.nk-sysmap__swatch .is-data { stroke: var(--em-400); stroke-dasharray: 5 4; }
+.nk-sysmap__swatch .is-cdn { stroke: var(--gold-400); stroke-dasharray: 2 3 7 3; }
+.nk-sysmap__swatch .is-theme { stroke: var(--sl-300); stroke-dasharray: 1 4; }
+.nk-sysmap__swatch .is-build { stroke: var(--text2); stroke-width: 3; }
 
-.nk-sysmap__plots {
-  pointer-events: none;
+.nk-sysmap__find {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 0 10px;
+  height: 30px;
+  border: 1px solid var(--nk-sheet-item-border);
+  border-radius: var(--nk-radius-2);
+  background: var(--nk-input-bg);
+  transition: border-color 0.18s var(--nk-ease-out);
 }
-.nk-plot {
+.nk-sysmap__find:focus-within { border-color: var(--nk-sheet-border); }
+.nk-sysmap__find-icon {
+  flex: none;
+  width: 12px;
+  height: 12px;
   fill: none;
-  stroke: var(--line-1);
-  stroke-width: 1;
-}
-
-.nk-edge { pointer-events: none; }
-.nk-edge__casing {
-  fill: none;
-  stroke: rgba(0, 0, 0, 0.55);
-  stroke-width: 6;
+  stroke: var(--text3);
+  stroke-width: 1.4;
   stroke-linecap: round;
 }
-.nk-edge__core {
-  fill: none;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-}
-.nk-edge--control { --ec: var(--nk-edge-control); }
-.nk-edge--data { --ec: var(--nk-edge-data); }
-.nk-edge--cdn { --ec: var(--nk-edge-cdn); }
-.nk-edge--theme { --ec: var(--nk-edge-theme); }
-.nk-edge--build { --ec: var(--nk-edge-build); }
-.nk-edge--control .nk-edge__core { stroke: var(--ec); }
-.nk-edge--data .nk-edge__core { stroke: var(--ec); stroke-dasharray: 10 8; }
-.nk-edge--cdn .nk-edge__core { stroke: var(--ec); stroke-dasharray: 3 6 12 6; }
-.nk-edge--theme .nk-edge__core { stroke: var(--ec); stroke-dasharray: 0.5 7; stroke-linecap: round; }
-.nk-edge--build .nk-edge__core { stroke: var(--ec); stroke-width: 3.4; }
-.nk-edge__flow {
-  fill: none;
-  stroke: var(--text-bright);
-  stroke-width: 2.4;
-  stroke-dasharray: 12 10;
-  opacity: 0.9;
-  animation: nk-map-flow 0.9s linear infinite;
-  display: none;
-}
-.nk-edge--data .nk-edge__flow,
-.nk-edge--cdn .nk-edge__flow { display: block; }
-
-@keyframes nk-map-flow {
-  to { stroke-dashoffset: -20; }
-}
-
-.nk-sysmap.has-active .nk-sysmap__edges:not(.nk-sysmap__edges--top) .nk-edge:not(.is-linked) { opacity: 0.16; }
-.nk-edge.is-linked .nk-edge__core { stroke-width: 3; }
-
-.nk-sysmap__edges--top { pointer-events: none; }
-.nk-sysmap__edges--top .nk-edge { opacity: 1; }
-.nk-sysmap__edges--top .nk-edge__casing {
-  stroke: rgba(0, 0, 0, 0.72);
-  stroke-width: 7;
-}
-.nk-sysmap__edges--top .nk-edge__core { stroke-width: 3.6; }
-.nk-sysmap__edges--top .nk-edge__flow { display: block; }
-.nk-sysmap__edges--top .nk-edge__core {
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--ec) 55%, transparent));
-}
-.nk-edge--top .nk-edge__label {
-  fill: var(--text-bright);
-  font-size: 9px;
-  font-weight: 700;
-  paint-order: stroke;
-  stroke: rgba(0, 0, 0, 0.75);
-  stroke-width: 3px;
-  pointer-events: none;
-}
-
-.nk-bld {
-  cursor: pointer;
-  transition: transform 0.25s var(--nk-ease-out), opacity 0.2s ease;
+.nk-sysmap__find input {
+  width: 132px;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--nk-fs-3);
   outline: none;
 }
-.nk-bld:hover,
-.nk-bld.is-hover,
-.nk-bld:focus-visible { transform: translateY(-4px); }
-.nk-bld.is-sel { transform: translateY(-8px); }
-.nk-sysmap.has-active .nk-bld:not(.is-sel):not(.is-hover) { opacity: 0.35; }
+.nk-sysmap__find input::placeholder { color: var(--text3); }
+.nk-sysmap__find input::-webkit-search-cancel-button { opacity: 0.6; }
 
-.nk-face {
-  stroke: color-mix(in srgb, var(--nk-c) 38%, var(--blk-900) 62%);
-  stroke-width: 0.8;
-  stroke-linejoin: round;
+.nk-sysmap__panel-btn {
+  display: none;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--nk-sheet-item-border);
+  border-radius: var(--nk-radius-2);
+  background: var(--nk-sheet-item-bg);
+  color: var(--text2);
+  font-family: inherit;
+  font-size: var(--nk-fs-3);
+  cursor: pointer;
 }
-.nk-face--left { fill: color-mix(in srgb, var(--nk-c) 52%, var(--blk-900) 48%); }
-.nk-face--right { fill: color-mix(in srgb, var(--nk-c) 66%, var(--blk-900) 34%); }
-.nk-face--top { fill: color-mix(in srgb, var(--nk-c) 84%, var(--text-bright) 16%); }
+.nk-sysmap__panel-btn:hover { color: var(--text-bright); background: var(--nk-shell-hover); }
 
-.nk-decor {
-  fill: color-mix(in srgb, var(--nk-c) 80%, var(--text-bright) 20%);
-  stroke: color-mix(in srgb, var(--nk-c) 55%, var(--blk-900) 45%);
-  stroke-width: 1;
+.nk-sysmap__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
 }
-.nk-decor--line { fill: none; }
-.nk-decor--dish { fill: none; stroke-width: 1.4; }
-.nk-decor--dome { fill: color-mix(in srgb, var(--nk-c) 72%, var(--text-bright) 28%); }
-.nk-decor--side { fill: color-mix(in srgb, var(--nk-c) 58%, var(--blk-900) 42%); }
-.nk-decor--side2 { fill: color-mix(in srgb, var(--nk-c) 70%, var(--blk-900) 30%); }
-.nk-decor--top2 { fill: color-mix(in srgb, var(--nk-c) 88%, var(--text-bright) 12%); }
-.nk-decor--pediment { fill: color-mix(in srgb, var(--nk-c) 90%, var(--text-bright) 10%); }
-
-.nk-bld__plate {
-  fill: rgba(0, 0, 0, 0.72);
-  stroke: rgba(255, 255, 255, 0.1);
-  stroke-width: 0.5;
-  pointer-events: none;
-}
-.nk-bld-name {
-  fill: var(--text-bright);
-  font-size: 9px;
-  font-weight: 700;
-  font-family: var(--font-body);
-  pointer-events: none;
-}
-.nk-bld-en {
-  fill: var(--text2);
-  font-size: 5.5px;
-  font-family: var(--font-hud);
-  letter-spacing: 1.2px;
-  pointer-events: none;
+.nk-sysmap__stage {
+  min-width: 0;
+  height: var(--nk-stage-h);
 }
 
-.nk-sysmap__info-head {
+.nk-sysmap__panel {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--nk-sheet-border);
+  border-radius: var(--nk-radius-card);
+  background: var(--nk-sheet-bg);
+  box-shadow: var(--nk-shadow-card);
+}
+
+.nk-sysmap__sheet-head { display: none; }
+.nk-sysmap__panel-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
+  margin-bottom: 10px;
 }
-.nk-sysmap__info-layer {
-  display: inline-block;
-  padding: 2px 8px;
+.nk-sysmap__dom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--nk-dom) 45%, transparent);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--nk-c) 24%, var(--blk-900) 76%);
-  border: 1px solid color-mix(in srgb, var(--nk-c) 45%, transparent);
+  background: color-mix(in srgb, var(--nk-dom) 14%, transparent);
   color: var(--text-bright);
-  font-size: 10px;
   font-family: var(--font-hud);
-  letter-spacing: 1px;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
 }
-.nk-sysmap__info-name { margin-top: 8px; font-size: 15px; }
-.nk-sysmap__info-en {
-  margin: 3px 0 0;
-  font-family: var(--font-hud);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
+.nk-sysmap__dom::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--nk-dom);
 }
 .nk-sysmap__close {
   flex: none;
   width: 26px;
   height: 26px;
-  border-radius: 6px;
   border: 1px solid var(--nk-sheet-item-border);
+  border-radius: var(--nk-radius-2);
   background: var(--nk-shell-hover);
   color: var(--text2);
-  font-size: 16px;
+  font-size: var(--nk-fs-5);
   line-height: 1;
   cursor: pointer;
 }
-.nk-sysmap__close:hover { background: var(--nk-shell-press); color: var(--text-bright); }
-.nk-sysmap__info-desc {
-  margin: 10px 0 0;
-  font-size: 12px;
-  line-height: 1.7;
+.nk-sysmap__close:hover { color: var(--text-bright); background: var(--nk-shell-press); }
+
+.nk-sysmap__pname {
+  margin: 0;
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-7);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-bright);
+}
+.nk-sysmap__pen {
+  margin: 5px 0 0;
+  font-family: var(--font-hud);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+.nk-sysmap__pdot { margin: 0 6px; color: var(--line-2); }
+.nk-sysmap__pdesc {
+  margin: 12px 0 0;
+  font-size: var(--nk-fs-4);
+  line-height: 1.75;
   color: var(--text2);
 }
 
-.nk-sysmap__files {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.nk-sysmap__metrics {
   display: grid;
-  gap: 5px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0 0;
 }
-.nk-sysmap__files code,
-.nk-sysmap__edge-item code {
+.nk-sysmap__metrics > div {
+  padding: 8px 10px;
+  border: 1px solid var(--nk-sheet-item-border);
+  border-radius: var(--nk-radius-2);
+  background: var(--nk-sheet-item-bg);
+}
+.nk-sysmap__metrics dt {
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+}
+.nk-sysmap__metrics dd {
+  margin: 3px 0 0;
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-5);
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-sysmap__sub {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 20px 0 8px;
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--text3);
+}
+.nk-sysmap__sub em {
+  font-style: normal;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-sysmap__files { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.nk-sysmap__files code {
   display: block;
   padding: 5px 8px;
-  border-radius: 5px;
-  background: var(--nk-sheet-item-bg);
   border: 1px solid var(--nk-sheet-item-border);
-  font-family: ui-monospace, 'SF Mono', Consolas, monospace;
-  font-size: 10.5px;
-  color: var(--text);
+  border-radius: var(--nk-radius-2);
+  background: var(--nk-sheet-item-bg);
+  font-family: var(--font-hud);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text2);
   word-break: break-all;
 }
 
-.nk-sysmap__edge-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
-.nk-sysmap__edge-item {
+.nk-sysmap__links { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.nk-sysmap__link {
+  width: 100%;
   display: grid;
   gap: 3px;
-  padding: 7px 8px;
-  border-radius: 6px;
+  padding: 7px 9px;
+  border: 1px solid var(--nk-sheet-item-border);
+  border-radius: var(--nk-radius-2);
   background: var(--nk-sheet-item-bg);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s var(--nk-ease-out), background 0.18s var(--nk-ease-out);
 }
-.nk-sysmap__edge-item b { font-size: 11.5px; font-weight: 600; color: var(--text); }
-.nk-sysmap__edge-kind {
-  justify-self: start;
-  padding: 1px 7px;
-  border-radius: 999px;
-  font-size: 9px;
-  font-family: var(--font-hud);
-  letter-spacing: 0.5px;
+.nk-sysmap__link:hover,
+.nk-sysmap__link:focus-visible { border-color: var(--nk-sheet-border); background: var(--nk-shell-hover); }
+.nk-sysmap__link-top { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.nk-sysmap__kind {
+  flex: none;
+  padding: 0 6px;
+  border-radius: var(--nk-radius-1);
+  background: color-mix(in srgb, var(--text3) 26%, transparent);
   color: var(--text-bright);
-  background: var(--nk-edge-control);
+  font-family: var(--font-hud);
+  font-size: 8.5px;
+  line-height: 15px;
+  letter-spacing: 0.04em;
 }
-.nk-sysmap__edge-kind.is-data { background: var(--nk-edge-data); }
-.nk-sysmap__edge-kind.is-cdn { background: var(--nk-edge-cdn); }
-.nk-sysmap__edge-kind.is-theme { background: var(--nk-edge-theme); }
-.nk-sysmap__edge-kind.is-build { background: var(--nk-edge-build); }
+.nk-sysmap__kind.is-data { background: color-mix(in srgb, var(--em-400) 32%, transparent); }
+.nk-sysmap__kind.is-cdn { background: color-mix(in srgb, var(--gold-400) 30%, transparent); }
+.nk-sysmap__kind.is-theme { background: color-mix(in srgb, var(--sl-300) 30%, transparent); }
+.nk-sysmap__kind.is-build { background: color-mix(in srgb, var(--text2) 30%, transparent); }
+.nk-sysmap__dir { color: var(--text3); font-size: var(--nk-fs-2); }
+.nk-sysmap__link-other {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--nk-fs-3);
+  color: var(--text-bright);
+}
+.nk-sysmap__link-label {
+  font-size: var(--nk-fs-2);
+  line-height: 1.5;
+  color: var(--text3);
+}
 
 .nk-sysmap__guide {
   margin: 0;
-  padding-left: 18px;
+  padding: 0;
+  list-style: none;
   display: grid;
-  gap: 6px;
-  font-size: 11.5px;
-  line-height: 1.6;
+  gap: 8px;
+  font-size: var(--nk-fs-3);
+  line-height: 1.65;
   color: var(--text2);
+}
+.nk-sysmap__guide b {
+  display: inline-block;
+  min-width: 34px;
+  font-weight: 600;
+  color: var(--text-bright);
 }
 
-.nk-sysmap__bar {
+.nk-sysmap__tiers { list-style: none; margin: 0; padding: 0; display: grid; }
+.nk-sysmap__tierrow {
   display: flex;
+  align-items: baseline;
   gap: 8px;
-  position: fixed;
-  left: 50%;
-  bottom: 14px;
-  transform: translateX(-50%);
-  z-index: 30;
-  padding: 6px;
-  border-radius: 999px;
-  border: 1px solid var(--nk-sheet-border);
-  background: var(--nk-sheet-bg);
-  box-shadow: var(--nk-shadow-lift);
-}
-.nk-sysmap__bar button {
-  padding: 7px 18px;
-  border-radius: 999px;
-  border: 1px solid var(--nk-sheet-item-border);
-  background: var(--nk-sheet-item-bg);
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--line-1);
+  font-size: var(--nk-fs-3);
   color: var(--text2);
-  font-size: 12px;
+}
+.nk-sysmap__tierrow:last-child { border-bottom: 0; }
+.nk-sysmap__tierrow-name { color: var(--text-bright); }
+.nk-sysmap__tierrow-en {
+  font-family: var(--font-hud);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+}
+.nk-sysmap__tierrow-n {
+  margin-left: auto;
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-2);
+  color: var(--text3);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-sysmap__hubs { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.nk-sysmap__hub {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--nk-radius-2);
+  background: var(--nk-sheet-item-bg);
+  font-family: inherit;
+  color: var(--text2);
+  font-size: var(--nk-fs-3);
+  text-align: left;
   cursor: pointer;
 }
-.nk-sysmap__bar button:hover { color: var(--text-bright); background: var(--nk-shell-hover); }
+.nk-sysmap__hub:hover,
+.nk-sysmap__hub:focus-visible { color: var(--text-bright); border-color: var(--nk-sheet-item-border); }
+.nk-sysmap__hub-deg {
+  flex: none;
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-2);
+  color: var(--text3);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 1280px) {
+  .nk-sysmap__grid { grid-template-columns: minmax(0, 1fr) 320px; }
+  .nk-sysmap__panel { max-height: var(--nk-stage-h); overflow-y: auto; }
+}
+
+@media (max-width: 1279px) {
+  .nk-sysmap__panel-btn { display: inline-flex; align-items: center; }
+  .nk-sysmap__panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 40;
+    max-height: 62dvh;
+    overflow-y: auto;
+    visibility: hidden;
+    transform: translateY(110%);
+    transition: transform 0.32s var(--nk-ease-out), visibility 0.32s;
+  }
+  .nk-sysmap__panel.is-open {
+    visibility: visible;
+    transform: none;
+  }
+  .nk-sysmap__sheet-head {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+}
 
 @media (max-width: 767px) {
-  .nk-sysmap__grid {
-    display: block;
-    padding: 10px;
+  .nk-sysmap { --nk-stage-h: clamp(420px, 60dvh, 620px); }
+  .nk-sysmap__hud { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .nk-sysmap__readout { gap: 22px; }
+  .nk-sysmap__stat { justify-items: start; }
+  .nk-sysmap__toolbar { gap: 6px; }
+  .nk-sysmap__filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
   }
-  .nk-sysmap__legend,
-  .nk-sysmap__info {
-    position: fixed;
-    left: 10px;
-    right: 10px;
-    bottom: 66px;
-    z-index: 20;
-    max-height: 56vh;
-    overflow: auto;
-    transform: translateY(120%);
-    visibility: hidden;
-    transition: transform 0.3s var(--nk-ease-out), visibility 0.3s;
+  .nk-sysmap__filters::-webkit-scrollbar { display: none; }
+  .nk-sysmap__filter { flex: none; }
+  .nk-sysmap__find { margin-left: 0; flex: 1 1 100%; }
+  .nk-sysmap__find input { width: 100%; }
+  .nk-sysmap__panel-btn { margin-left: auto; }
+  .nk-sysmap__panel {
+    bottom: calc(var(--nk-nav-bar-h, 56px) + 14px + env(safe-area-inset-bottom, 0px));
+    max-height: 56dvh;
   }
-  .nk-sysmap.is-legend-open .nk-sysmap__legend,
-  .nk-sysmap.is-info-open .nk-sysmap__info {
-    transform: none;
-    visibility: visible;
-  }
-  .nk-sysmap__stage { min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nk-edge__flow { animation: none; }
-  .nk-bld { transition: none; }
+  .nk-sysmap__panel { transition: none; }
 }
 </style>

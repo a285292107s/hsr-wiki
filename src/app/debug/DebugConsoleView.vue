@@ -42,10 +42,7 @@ onBeforeUnmount(unsubscribe);
       <p class="nk-spine-debug__kicker">SPINE LAB // 研究线</p>
       <h1>Spine 调试台</h1>
       <p class="nk-spine-debug__desc">
-        KV 一键验收：逐层加载 · 合并渲染 · 黑块检测 → PASS/FAIL 报告<br />
-        清单三级诊断：L0 资源 → L1 解析 → L2 渲染<br />
-        死链可达性审计：限流并发 · 结果缓存复用<br />
-        系统地图：加载链路可视化
+        研究线调试台：KV 场景一键验收 · 清单三级诊断 · 死链可达性审计 · 系统地图。
       </p>
       <div class="nk-spine-debug__tabs" role="tablist" aria-label="调试功能">
         <button

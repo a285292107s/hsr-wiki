@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, waitForCatalogCards } from './helpers';
 import { charFamilyIds, collectNavAnchors, noUnknownOverflow } from './layout.shared';
+import { EDGES, NODES, TIERS } from '../src/app/debug/system-map/map-data';
 
 test.describe('布局验收：研究线调试台 dev 入口', () => {
   test('平板/桌面（≥768px）：调试台入口可见且位于设置上方', { tag: ['@viewport-pinned', '@dev-only'] }, async ({ page }) => {
@@ -39,6 +40,32 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
     const tabs = page.locator('.nk-spine-debug__tab');
     await expect(tabs).toHaveCount(4);
     await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
+    assertNoErrors();
+  });
+
+  test('系统地图：地形、缆线、筛选与选中链路（dev-only 路由）', { tag: '@dev-only' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.goto('/debug?tab=map');
+    await expect(page.locator('.nk-sysmap__title')).toHaveText('系统地图');
+    await expect(page.locator('.nk-tier')).toHaveCount(TIERS.length);
+    await expect(page.locator('.nk-mod')).toHaveCount(NODES.length);
+    await expect(page.locator('.nk-wire-group')).toHaveCount(EDGES.length);
+
+    const dataWires = EDGES.filter((e) => e.kind === 'data').length;
+    await page.locator('.nk-sysmap__filter', { hasText: '数据加载' }).click();
+    await expect(page.locator('.nk-wire-group')).toHaveCount(dataWires);
+    await page.locator('.nk-sysmap__filter', { hasText: '全部' }).click();
+    await expect(page.locator('.nk-wire-group')).toHaveCount(EDGES.length);
+
+    const cache = NODES.find((n) => n.id === 'cache')!;
+    const cacheLinks = EDGES.filter((e) => e.from === cache.id || e.to === cache.id);
+    await page.locator(`.nk-mod[aria-label*="${cache.name}"]`).click();
+    await expect(page.locator('.nk-sysmap__pname')).toHaveText(cache.name);
+    await expect(page.locator('.nk-trace')).toHaveCount(cacheLinks.length);
+    await expect(page.locator('.nk-sysmap__link')).toHaveCount(cacheLinks.length);
+
+    await page.locator('.nk-sysmap__find input').fill(cache.name);
+    await expect(page.locator('.nk-mod.is-hit')).toHaveCount(1);
     assertNoErrors();
   });
 });
