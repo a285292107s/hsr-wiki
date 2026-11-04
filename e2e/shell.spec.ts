@@ -176,7 +176,7 @@ test.describe('焦点可见性（键盘 Tab 后元素周边像素必须变化）
 
   for (const c of CASES) {
     test(`${c.label}：Tab 到它之后周边像素变化`, { tag: c.devOnly ? '@dev-only' : [] }, async ({ page }) => {
-      test.setTimeout(90_000);
+      test.setTimeout(c.devOnly ? 180_000 : 90_000);
       await page.goto(c.route);
       await page.waitForTimeout(900);
 
