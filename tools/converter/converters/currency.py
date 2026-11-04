@@ -8,6 +8,7 @@ from config import EXCEL_DIR, OUTPUT_DIR
 from enum_labels import resolve as resolve_label
 from enum_labels import trailblazer_name_ref
 from season_delta import apply_season_new, mark_season_new
+from season_scope import season_meta
 from textmap import resolve_text
 from utils import load_json, save_json
 
@@ -39,6 +40,10 @@ def _index_gender_override(data: list[dict]) -> dict[int, int]:
 
 def _load_excel(name: str) -> list[dict]:
     return load_json(EXCEL_DIR / name)
+
+def _load_optional(name: str) -> list[dict]:
+    path = EXCEL_DIR / name
+    return load_json(path) if path.exists() else []
 
 def _build_index(data: list[dict], key: str = "ID") -> dict[Any, dict]:
     return {item[key]: item for item in data}
@@ -269,6 +274,9 @@ def convert() -> None:
         current_avatar_ids, role_old, id_key="AvatarID", label="GridFightRoleBasicInfoOld 角色名册"
     )
 
+    season = season_meta(_load_optional("GridFightSeasonModule.json"))
+    logger.info("当前赛季：%s（子赛季 %s）", season["id"], season["sub_season_ids"])
+
     name_map: dict[int, str] = {}
     for cfg in avatar_config + avatar_ld:
         aid = cfg.get("AvatarID", 0)
@@ -488,7 +496,7 @@ def convert() -> None:
     n_season_new = apply_season_new(roles_out, season_new_by_avatar, id_field="avatar_id")
     logger.info("赛季新增角色：%d 位", n_season_new)
 
-    list_out = {"roles": roles_out}
+    list_out = {"roles": roles_out, "season": season, "season_new_count": n_season_new}
     save_json(list_out, out_dir / "role.json")
 
     save_json(prop_icons, out_dir / "prop_icons.json")

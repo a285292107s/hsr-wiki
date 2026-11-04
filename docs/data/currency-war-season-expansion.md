@@ -158,6 +158,8 @@
 | --- | --- | --- |
 | 投资环境 | `GridFightPortalBuff.json` / `GridFightPortalMazebuff.json` / `GridFightPortalRemark.json` | 已落地：`currency_catalog.py → _convert_portals()` → `currency/portals.json` |
 | 投资策略 | `GridFightAugment.json` / `GridFightAugmentMazebuff.json` / `GridFightAugmentRemark.json` | 已落地：`currency_catalog.py → _convert_augments()` → `currency/augments.json` |
+| 赛季归属（环境 / 策略属于哪一季） | `GridFightSeasonModule.json` / `GridFightSeasonAugment.json` / `GridFightSeasonPortal.json` | 已落地（2026-11）：`season_scope.py` → 产物顶层 `season` + 条目 `season_id`，元数据不上屏 |
+| 赛季-羁绊一致性 | `GridFightSeasonTraitShow.json` | 部分：仅与 `GridFightTraitBasicInfo.SeasonID` 做一致性校验（覆盖 25/33 条），不新增判据 |
 | 竞争对手阵营 | `GridFightCamp.json` | 未接入 |
 | 敌人词缀 | `GridFightAffixConfig.json` / `GridFightAffixMazebuff.json` | 未接入 |
 | 职级/最高难度 | `GridFightDivisionStage.json` / `GridFightDivisionInfo.json` / `GridFightDivisionLevelShow.json` | 未接入 |

@@ -7,6 +7,13 @@ from typing import Any
 
 from config import EXCEL_DIR, OUTPUT_DIR
 from season_delta import apply_season_new, mark_season_new
+from season_scope import (
+    apply_season_ids,
+    season_meta,
+    season_membership,
+    season_registrations,
+    verify_season_ids,
+)
 from textmap import clean_text, current_textmap, resolve_text, text_key_of
 from textpack import composed_ref
 from utils import load_json, save_json
@@ -18,6 +25,10 @@ OUT_SUBDIR = "currency"
 
 def _load_excel(name: str) -> list[dict]:
     return load_json(EXCEL_DIR / name)
+
+def _load_optional(name: str) -> list[dict]:
+    path = EXCEL_DIR / name
+    return load_json(path) if path.exists() else []
 
 def _build_index(data: list[dict], key: str = "ID") -> dict[Any, dict]:
     return {item[key]: item for item in data}
@@ -44,7 +55,7 @@ def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None =
         out.append(node)
     return out
 
-def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) -> int:
+def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None, season: dict | None = None) -> int:
     items_raw = _load_excel("GridFightItems.json")
     equip_raw = _load_excel("GridFightEquipment.json")
     cat_raw = _load_excel("GridFightEquipCategoryInfo.json")
@@ -127,10 +138,10 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None) 
 
     out.sort(key=lambda x: (x["category"], -x["priority"], x["id"]))
 
-    save_json({"items": out}, out_dir / "equipment.json")
+    save_json({"items": out, "season": season}, out_dir / "equipment.json")
     return len(out)
 
-def _convert_portals(out_dir: Path) -> int:
+def _convert_portals(out_dir: Path, season: dict | None = None) -> int:
     raw = _load_excel("GridFightPortalBuff.json")
 
     out: list[dict] = []
@@ -153,7 +164,13 @@ def _convert_portals(out_dir: Path) -> int:
 
     out.sort(key=lambda x: x["id"])
 
-    save_json({"portals": out}, out_dir / "portals.json")
+    apply_season_ids(
+        out,
+        season_membership(_load_optional("GridFightSeasonPortal.json"), "PortalID"),
+        label="投资环境",
+    )
+
+    save_json({"portals": out, "season": season}, out_dir / "portals.json")
     return len(out)
 
 _GRIDFIGHTINFO_RE = re.compile(r"<gridfightinfo\s+type=(\w+)\s+id=(\d+)\s*/?>")
@@ -227,7 +244,7 @@ def _augment_desc_ref(
     )
 
 
-def _convert_augments(out_dir: Path) -> int:
+def _convert_augments(out_dir: Path, season: dict | None = None) -> int:
     raw = _load_excel("GridFightAugment.json")
     item_keys, role_keys = _build_name_indexes()
 
@@ -257,10 +274,16 @@ def _convert_augments(out_dir: Path) -> int:
 
     out.sort(key=lambda x: (x["category_id"], x["id"]))
 
-    save_json({"augments": out}, out_dir / "augments.json")
+    apply_season_ids(
+        out,
+        season_membership(_load_optional("GridFightSeasonAugment.json"), "AugmentID"),
+        label="投资策略",
+    )
+
+    save_json({"augments": out, "season": season}, out_dir / "augments.json")
     return len(out)
 
-def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> int:
+def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, season: dict | None = None) -> int:
     raw = _load_excel("GridFightTraitBasicInfo.json")
     layer_raw = _load_excel("GridFightTraitLayer.json")
     mazebuff_raw = _load_excel("GridFightTraitMazebuff.json")
@@ -367,9 +390,15 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None) -> 
     )
     logger.info("  赛季新增羁绊: %d 个", n_season_new)
 
+    verify_season_ids(
+        out,
+        season_registrations(_load_optional("GridFightSeasonTraitShow.json"), "TraitID"),
+        label="羁绊",
+    )
+
     out.sort(key=lambda x: x["sort_priority"])
 
-    save_json({"traits": out}, out_dir / "traits.json")
+    save_json({"traits": out, "season": season, "season_new_count": n_season_new}, out_dir / "traits.json")
     return len(out)
 
 def convert() -> None:
@@ -379,16 +408,19 @@ def convert() -> None:
 
     prop_names = _build_prop_names(_load_excel("GridFightRolePropertyConfig.json"))
 
-    n_equip = _convert_equipment(out_dir, prop_names)
+    season = season_meta(_load_optional("GridFightSeasonModule.json"))
+    logger.info("  当前赛季：%s（子赛季 %s）", season["id"], season["sub_season_ids"])
+
+    n_equip = _convert_equipment(out_dir, prop_names, season)
     logger.info("  装备图鉴: %d 条", n_equip)
 
-    n_portal = _convert_portals(out_dir)
+    n_portal = _convert_portals(out_dir, season)
     logger.info("  投资环境: %d 条", n_portal)
 
-    n_augment = _convert_augments(out_dir)
+    n_augment = _convert_augments(out_dir, season)
     logger.info("  投资策略: %d 条", n_augment)
 
-    n_trait = _convert_traits(out_dir, prop_names)
+    n_trait = _convert_traits(out_dir, prop_names, season)
     logger.info("  羁绊图鉴: %d 条", n_trait)
 
     logger.info("货币战争图鉴数据完成")

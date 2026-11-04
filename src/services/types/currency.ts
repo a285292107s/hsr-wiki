@@ -158,8 +158,15 @@ export interface CurrencyRoleEntry {
   is_season_new?: boolean;
 }
 
+export interface CurrencySeasonMeta {
+  id: number | null;
+  sub_season_ids: number[];
+}
+
 export interface CurrencyRoleList {
   roles: CurrencyRoleEntry[];
+  season?: CurrencySeasonMeta;
+  season_new_count?: number;
 }
 
 export interface CurrencyPropIconMap {
@@ -195,6 +202,7 @@ export interface CurrencyEquipEntry {
 
 export interface CurrencyEquipList {
   items: CurrencyEquipEntry[];
+  season?: CurrencySeasonMeta;
 }
 
 export interface CurrencyPortalEntry {
@@ -204,10 +212,12 @@ export interface CurrencyPortalEntry {
   icon: string;
   in_book: boolean;
   params: number[];
+  season_id: number | null;
 }
 
 export interface CurrencyPortalList {
   portals: CurrencyPortalEntry[];
+  season?: CurrencySeasonMeta;
 }
 
 export interface CurrencyAugmentEntry {
@@ -220,10 +230,12 @@ export interface CurrencyAugmentEntry {
   category_id: number;
   params: number[];
   chapter_limit: number[];
+  season_id: number | null;
 }
 
 export interface CurrencyAugmentList {
   augments: CurrencyAugmentEntry[];
+  season?: CurrencySeasonMeta;
 }
 
 export interface CurrencyTraitLayer {
@@ -262,4 +274,6 @@ export interface CurrencyTraitEntry {
 
 export interface CurrencyTraitList {
   traits: CurrencyTraitEntry[];
+  season?: CurrencySeasonMeta;
+  season_new_count?: number;
 }

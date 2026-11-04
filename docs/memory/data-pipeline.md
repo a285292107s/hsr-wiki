@@ -86,6 +86,8 @@
 - **报覆盖率或「覆盖多少」类量词之前先跑全库取值分布**：`AtlasSortID` 只在小部分条目非空，拿它当组内序会让第一项跳到官方位、其余按 id；`MonsterDrop` 里 `DisplayItemList` 为空且 `AvatarExpReward` 为 null 的行大量存在——「有记录」≠「有可展示内容」，必须按取值判非空。
 - **表名不可直译**：`Cocoon` 是拟造花萼（回忆之蕾）、`FarmElement` 是凝滞虚影，游戏内命名与表名不一致；社群术语与 vendor 冲突时以 vendor 实测为准。`CocoonConfig` / `FarmElementConfig`
 - **相对路径依赖脚本所在层级**：`new URL('../public/data/cn/…')` 在脚本迁入子目录后仍「运行成功」但仓库数据停更；脚本挪位必须实跑一次并核对产物时间戳。
+- **`vendor/TurnBasedGameData/` 被 `.gitignore` 忽略 = 源表不入库，换代即永久丢失**：赛季 / 大版本轮转后旧 dump 无法再取，而「上一代名册」「赛季归属」恰恰只存在于旧 dump 里；轮转前必须冻结——`git tag -a cw-season-1`（首个冻结点，指向 a3a25145）+ 全量拷贝 `vendor/TurnBasedGameData-cw-season-1/`（`temp/freeze_cw_season1.py`，含 `manifest.json` 的 rows/bytes/sha256）。冻结副本同样被 `.gitignore` 的 `vendor/TurnBasedGameData-*/` 排除，只存在于本机。
+- **赛季轮转不会报错，只让产物静默混季**：基础表 `GridFightRoleBasicInfo` / `TraitBasicInfo` / `Augment` / `PortalBuff` 当前全为 `SeasonID=1`，而连接表已有下一季行（`GridFightSeasonItem` 225 行里 60 行 `SeasonID=2`、`GridFightSeasonCraft` 80 行里 23 行）——只按 BaseInfo 全量输出，下版 dump 起列表会把两季条目混在一起且无任何告警。
 
 ## 参考站与社群表格取证
 
@@ -121,6 +123,7 @@
   - 反例警示一：`8003060`「虚构集合体」在整个 vendor 里 **0/99,393** 个 `StageConfig` 波次槽位、只出现在 140 个 ∞ 造怪组 —— 拿「波次名单里没有它」推「它不是战斗内的敌方」会得出相反结论。
   - 反例警示二：**「上游有这个字段」不等于「该上屏」**。`8003060` 是可被击杀的合法敌人（7 条 `MonsterDrop`）却没有任何独立美术（三条路径全是占位图、`icon` 借 8001010）⇒ 游戏内预览不显示它。判据落在**美术资源**上而不是「有没有掉落 / 有没有技能」，才能同时覆盖 `5013090` 这种没进任何 ∞ 队列的同类载具。
   - ∞ 表的 `MaxMonsterCount` / `ParamList` / `EliteGroup` 语义未验证（`MaxMonsterCount` 与队列长度并不总相等）⇒ 不消费、不硬列，同 `PHOIICMCGIH` 的处理纪律。
+- **`--only <模块子集>` 会写出「子集语言包」，不是合并**：语言包按本次跑过的模块累积键，`--only currency_catalog` 单跑后 `public/data/i18n/cn/currency.json` 从 5176 键掉到 1451 键（值全对、只是缺键），`git diff` 表现为整行重写。改完某组转换器要重跑时，跑**该产物分组的全部模块**（如 `--only currency,currency_catalog`），或重跑后 `git checkout -- public/data/i18n` 还原，禁止提交子集语言包。
 - **删数据层兜底分支前，先用全量产物量该分支是否可达**：四份产物所有期的 `floor_details` / `tierce` / `levels` 无一期全空 ⇒ 固定条与其 `v-if` 兜底永不触发，属数据层已死的分支。
 - **「重跑产物 vs 已提交产物」逐字节对比有三个恒定伪差异，先排除再下结论**：① `characters.json` / `light_cones.json` 的 `release_version` 由 `release_version.py` 读**上次产物自身**推导，临时输出目录为空时必然退化成 `''`（对比前先把这两份已提交文件预置进临时目录）；② `version.json` 的 `synced_at` / `build` 取自 vendor 的 git HEAD，本机 vendor 落后于已提交产物时会整体不同（对比时排除该文件）；③ `public/data/assets/**`（本地图标，**已移出结构层**，见 ADR 0052 修订注记）不由转换器产出，会以「已提交有、本次未产出」出现。三条排除干净后仍不一致才是真回归。
 - **转换器里 `clean_text(resolve_text(...))` 是双洗，会静默吞掉文本的 TextMap 键**：`resolve_text` 默认已 `clean=True`，再包一层 `clean_text` 会把携带键的 `TextRef` 退化成普通 `str`（见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md) 的令牌化）。`convert.py --tokens` 结束时打印的「结构层残留中文」清单里，凡 `text` / `desc` 字段成片出现且形如游戏模板（带 `#1[i]`）的，先查这类冗余二次加工与字符串拼接，不要先怀疑 TextMap 缺键。
