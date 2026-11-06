@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues } from './helpers';
 import {
-  RISK_LOCALES, detailRoutes, prefixOf, scanDefects, settleForMeasurement,
+  RISK_LOCALES, detailRoutes, prefixOf, scanDefectsStable, settleForMeasurement,
 } from './i18n-overflow.shared';
 
 test.describe('布局验收：多语言长文案 · 最窄档（320）', () => {
@@ -17,7 +17,7 @@ test.describe('布局验收：多语言长文案 · 最窄档（320）', () => {
       for (const route of routes) {
         await page.goto(base + route.path);
         await settleForMeasurement(page);
-        const d = await scanDefects(page);
+        const d = await scanDefectsStable(page);
         if (d.pageOverflow > 1) failures.push(`${code}/${route.name}: 整页横向溢出 ${d.pageOverflow}px`);
         for (const x of d.hardClipX) failures.push(`${code}/${route.name} 横向硬裁切 ${x}`);
         for (const x of d.spillX) failures.push(`${code}/${route.name} 横向外溢 ${x}`);

@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { readJsonIn, settleAnimations, waitForQuiet, waitForTextReady } from './helpers';
 
 export const ROUTE_FAMILIES: readonly { name: string; path: (base: string) => string }[] = [
@@ -34,7 +35,7 @@ export const detailRoutes = (base: string): { name: string; path: string }[] => 
   { name: 'cw-trait-detail', path: `${base}/currency/trait/${firstId('currency/traits.json', 'traits')}` },
 ];
 
-export async function settleForMeasurement(page: import('@playwright/test').Page): Promise<void> {
+export async function settleForMeasurement(page: Page): Promise<void> {
   await waitForTextReady(page, 152);
   await waitForQuiet(page, 150);
   await settleAnimations(page);
@@ -189,4 +190,30 @@ export async function scanDefects(page: import('@playwright/test').Page): Promis
       navClipped: [...new Set(navClipped)].slice(0, 12),
     };
   });
+}
+
+const DEFECT_KEYS = ['hardClipX', 'spillX', 'hardClipY', 'clippedNoFallback', 'navClipped'] as const;
+
+const hasDefects = (d: Defects): boolean => d.pageOverflow > 1 || DEFECT_KEYS.some((k) => d[k].length > 0);
+
+const sameDefects = (a: Defects, b: Defects): boolean =>
+  a.pageOverflow === b.pageOverflow
+  && DEFECT_KEYS.every((k) => a[k].length === b[k].length && a[k].every((v, i) => v === b[k][i]));
+
+export async function scanDefectsStable(page: Page, attempts = 3): Promise<Defects> {
+  let last = await scanDefects(page);
+  for (let i = 0; i < attempts && hasDefects(last); i += 1) {
+    await page
+      .waitForFunction(() => !document.querySelector('[class*="nk-view-"][class*="-active"]'), undefined, {
+        timeout: 2_000,
+      })
+      .catch(() => {});
+    await page.evaluate(
+      () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+    );
+    const next = await scanDefects(page);
+    if (sameDefects(last, next)) return next;
+    last = next;
+  }
+  return last;
 }
