@@ -180,3 +180,75 @@ class TestAvatarSkillFallback:
         assert out["simple_desc"] == "消耗自身生命值，对敌方单体造成风属性伤害。"
         assert out["desc"] == ""
 
+
+class TestTraitCatBase:
+    def test_season_suffixed_id_uses_base(self):
+        from converters import currency_catalog as cc
+
+        assert cc.trait_cat_base(100302) == 1003
+        assert cc.trait_cat_base(200702) == 2007
+        assert cc.trait_cat_base(300602) == 3006
+        assert cc.trait_cat_base(400102) == 4001
+
+    def test_legacy_four_digit_id_unchanged(self):
+        from converters import currency_catalog as cc
+
+        assert cc.trait_cat_base(1006) == 1006
+        assert cc.trait_cat_base(2011) == 2011
+        assert cc.trait_cat_base(3006) == 3006
+
+    def test_category_ranges_after_base_reduction(self):
+        from converters import currency_catalog as cc
+
+        def cat(tid: int) -> str:
+            base = cc.trait_cat_base(tid)
+            return "faction" if 1000 <= base < 2000 else "combat" if 2000 <= base < 3000 else "special"
+
+        assert cat(100102) == "faction"
+        assert cat(200202) == "combat"
+        assert cat(1006) == "faction"
+        assert cat(2011) == "combat"
+        assert cat(300602) == "special"
+        assert cat(400102) == "special"
+
+class TestLinkTraitPackages:
+    NAMES = {1001: "仙舟舰队", 2001: "追击", 3006: "幻乐之主"}
+
+    def test_matches_suffixed_portal_and_augment_names(self):
+        from converters import currency_catalog as cc
+
+        slots = cc.link_trait_packages(
+            self.NAMES,
+            {11: "仙舟舰队邀请", 12: "追击概念股", 13: "提前登场"},
+            {21: "仙舟舰队星徽", 22: "追击星徽"},
+        )
+        assert slots[1001] == {"invite": 11, "stock": None, "badge": 21}
+        assert slots[2001] == {"invite": None, "stock": 12, "badge": 22}
+        assert slots[3006] == {"invite": None, "stock": None, "badge": None}
+
+    def test_full_package_needs_all_three(self):
+        from converters import currency_catalog as cc
+
+        slots = cc.link_trait_packages(
+            {1001: "仙舟舰队"},
+            {11: "仙舟舰队邀请", 12: "仙舟舰队概念股"},
+            {21: "仙舟舰队星徽"},
+        )
+        assert all(slots[1001].values())
+
+    def test_ignores_unrelated_and_partial_names(self):
+        from converters import currency_catalog as cc
+
+        slots = cc.link_trait_packages(
+            {1001: "仙舟"},
+            {11: "仙舟舰队邀请", 12: "星徽"},
+            {21: "舰队星徽"},
+        )
+        assert slots[1001] == {"invite": None, "stock": None, "badge": None}
+
+    def test_empty_names_yield_empty_packages(self):
+        from converters import currency_catalog as cc
+
+        slots = cc.link_trait_packages({1001: "", 1002: "追击"}, {}, {})
+        assert set(slots) == {1001, 1002}
+        assert all(slot["invite"] is None for slot in slots.values())

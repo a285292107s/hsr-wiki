@@ -14,7 +14,7 @@ from season_scope import (
     season_registrations,
     verify_season_ids,
 )
-from textmap import clean_text, current_textmap, resolve_text, text_key_of
+from textmap import clean_text, current_textmap, resolve_text, text_key_of, text_of_key
 from textpack import composed_ref
 from utils import load_json, save_json
 from converters.currency import _build_prop_names
@@ -22,6 +22,29 @@ from converters.currency import _build_prop_names
 logger = logging.getLogger("converter.currency_catalog")
 
 OUT_SUBDIR = "currency"
+
+def trait_cat_base(tid: int) -> int:
+    return tid // 100 if tid >= 100000 else tid
+
+PACKAGE_SUFFIXES = {"invite": "邀请", "stock": "概念股", "badge": "星徽"}
+
+def link_trait_packages(
+    trait_names: dict[int, str],
+    portal_titles: dict[int, str],
+    augment_names: dict[int, str],
+) -> dict[int, dict]:
+    slots: dict[int, dict] = {
+        tid: {"invite": None, "stock": None, "badge": None} for tid in trait_names
+    }
+    for tid, name in trait_names.items():
+        if not name:
+            continue
+        for suffix_key, suffix in PACKAGE_SUFFIXES.items():
+            pool = portal_titles if suffix_key != "badge" else augment_names
+            for rid, label in pool.items():
+                if label == f"{name}{suffix}":
+                    slots[tid][suffix_key] = rid
+    return slots
 
 def _load_excel(name: str) -> list[dict]:
     return load_json(EXCEL_DIR / name)
@@ -348,9 +371,11 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
         remark_by_trait[tid].sort(key=lambda x: x.get("text_order", 0))
 
     out: list[dict] = []
+    trait_names_by_id: dict[int, str] = {}
     for entry in raw:
         tid = entry["ID"]
         name = resolve_text(entry.get("TraitName", {}))
+        trait_names_by_id[tid] = text_of_key(text_key_of(entry.get("TraitName", {})))
         desc = resolve_text(entry.get("TraitBaseDesc", {}))
         simple_desc = resolve_text(entry.get("TraitBaseSimpleDesc", {}))
         icon = entry.get("IconPath", "")
@@ -360,9 +385,9 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
         season_id = entry.get("SeasonID", 0)
         sort_priority = entry.get("TraitSortPriority", 0)
 
-        if 1000 <= tid < 2000:
+        if 1000 <= trait_cat_base(tid) < 2000:
             cat = "faction"
-        elif 2000 <= tid < 3000:
+        elif 2000 <= trait_cat_base(tid) < 3000:
             cat = "combat"
         else:
             cat = "special"
@@ -391,6 +416,36 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
         current_season=(season or {}).get("id"),
     )
     logger.info("  赛季新增羁绊: %d 个", n_season_new)
+
+    current_sid = (season or {}).get("id")
+    portal_membership = season_membership(_load_optional("GridFightSeasonPortal.json"), "PortalID")
+    augment_membership = season_membership(_load_optional("GridFightSeasonAugment.json"), "AugmentID")
+    season_portal_titles = {
+        row["ID"]: text_of_key(text_key_of(row.get("PortalBuffTitle", {})))
+        for row in _load_excel("GridFightPortalBuff.json")
+        if portal_membership.get(row["ID"]) == current_sid
+    }
+    season_augment_names = {
+        row["ID"]: text_of_key(text_key_of(row.get("HexName", {})))
+        for row in _load_excel("GridFightAugment.json")
+        if augment_membership.get(row["ID"]) == current_sid
+    }
+    packages = link_trait_packages(
+        {e["id"]: trait_names_by_id.get(e["id"], "") for e in out if e["season_id"] == current_sid},
+        season_portal_titles,
+        season_augment_names,
+    )
+    for entry in out:
+        entry["package"] = packages.get(entry["id"], {"invite": None, "stock": None, "badge": None})
+    n_complete = sum(1 for slot in packages.values() if all(slot.values()))
+    logger.info(
+        "  羁绊四件套：%d 个完整 / %d 个带部分件（邀请门 %d · 概念股 %d · 星徽 %d）",
+        n_complete,
+        sum(1 for slot in packages.values() if any(slot.values())) - n_complete,
+        sum(1 for slot in packages.values() if slot["invite"] is not None),
+        sum(1 for slot in packages.values() if slot["stock"] is not None),
+        sum(1 for slot in packages.values() if slot["badge"] is not None),
+    )
 
     verify_season_ids(
         out,
