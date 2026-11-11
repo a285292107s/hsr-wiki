@@ -151,7 +151,7 @@ export function gridFightIconUrl(iconPath: string | null | undefined): string {
   if (!iconPath) return '';
   const m = iconPath.match(/SpriteOutput\/(.+)\.png$/i);
   if (!m) return '';
-  return cdnUri('gridfight-asset', `${m[1].toLowerCase()}.webp`);
+  return cdnUri('gridfight-asset', `${m[1].replace(/^gridfight\//i, '').toLowerCase()}.webp`);
 }
 
 export function gridFightAffixIconUrl(iconPath: string | null | undefined): string {
