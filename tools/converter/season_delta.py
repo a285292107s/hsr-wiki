@@ -58,10 +58,17 @@ def apply_season_new(
     entries: Sequence[dict],
     flags: Mapping[Any, bool],
     id_field: str = "id",
+    *,
+    season_field: str | None = None,
+    current_season: int | None = None,
 ) -> int:
     count = 0
     for entry in entries:
         flag = bool(flags.get(entry.get(id_field), False))
+        if flag and season_field and current_season is not None:
+            registered = entry.get(season_field)
+            values = registered if isinstance(registered, (list, tuple, set)) else [registered]
+            flag = current_season in values
         entry["is_season_new"] = flag
         if flag:
             count += 1

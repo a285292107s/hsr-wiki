@@ -47,7 +47,7 @@ def _load_schedules(
     pointers: dict[int, int] = {}
     for rec in load_json(EXCEL_DIR / group_table):
         gid = rec.get("GroupID")
-        sid = rec.get("ScheduleDataID")
+        sid = rec.get("ScheduleDataID") or rec.get("GlobalScheduleID")
         if gid is not None and sid:
             pointers[gid] = sid
     tables: dict[int, dict] = {}
@@ -353,7 +353,7 @@ def _load_group_names(filename: str) -> dict[int, str]:
 def _load_permanent_groups(filename: str = "ChallengeGroupConfig.json") -> set[int]:
     data = load_json(EXCEL_DIR / filename)
     return {r.get("GroupID") for r in data if r.get("GroupID") is not None
-            and not r.get("ScheduleDataID")}
+            and not r.get("ScheduleDataID") and not r.get("GlobalScheduleID")}
 
 _GROUP_ART_FIELDS: dict[str, str] = {
     "BackGroundPath": "background",

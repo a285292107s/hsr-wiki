@@ -30,6 +30,7 @@
 - **探针脚本直接 `import resolve_text` 会静默返回空串**：`_text_map` 未加载时是空字典，据此会误判整个字段为空；`convert.py` 的「先 `load_textmap()`」是隐式前提，探针必须自己补。核源字段走 `query.py`。`resolve_text` / `load_textmap`
 - **裸 `#N` 的语义取决于该条目是否携带 `params`**：携带（数组存在即便为空）即占位符，展不开就整段省略该描述；不携带（角色 `desc`/`stories`、成就 `desc`、物品名、敌对 `intro`）即上游字面，必须原样保留；`{TEXTJOIN#61}` 属上游合并标记须放行。裸形态无法全局区分，守卫只能按页点名。
 - **占位符展开口径必须与前端 `fmtDesc` / `fmtVal` 同源**：`#N[i]%` 的 `%` 被正则消费后未补回会全站失真（`治疗量提高10。`）；**裸 `#N` 不消费尾部 `%`**（前端裸分支的 tag 与 pct 都传空串，那个 `%` 是模板字面字符），×100 只发生在带标签分支；取整必须对齐 JS `Math.round`（半值向 +∞，Python `round()` 是 banker's rounding，`.5` 处逐值不同），否则「小于等于 0.05」会渲染成 `0%`。**裸形态的正则需要负向断言**：同形前缀有 `<color=#hex>` 颜色码、`{TEXTJOIN#n}` 合并标记、`##` 三类；不能用 `\w`（含 CJK），也不能一刀切挡 `=`（`<=#N` / `>=#N` 后跟真占位符）。缺参（`StatusDesc` 有占位符而 `ReadParamList` 只有键名）整段省略，禁止自造 `?` 或补 0。`fmtDesc` / `refsResolved`
+- **4.7.0 起部分货币战争羁绊备注的参数是运行期派生，静态表里恒空**：`GridFightTraitRemark` 这些行 `TraitRemarkParamList` 为 `[]`，另带 `ParamSource: "TraitMazeBuffPlus"`（参数随层级/场内状态现算），`TraitBaseDesc` 那边没有可借的值。判据：**`param` 槽位不够的描述只能整段省略**——快照侧用 `txtSafe`（会连占位符一起丢掉整句）而不是 `txt`，否则 `#n[i]` 原样发布，由 AI 端点守卫第 3 项拦下（实测 3 个 `currency/trait/*` 快照）。**别改用 `base_params` 兜底**：那是基础描述的槽位，与备注里的 `#n` 不对应，填进去就是错数。
 - **数值的单位、百分比与小数位是描述文本的属性，不是数值的属性**：只能由 `desc` 的 `#N[i|%|fN]%` 标记驱动（复用 `fmtVal`）；在 `param_list` 数值侧重造「0<v<1 即 ×100」类启发式会被 `f1`/`f2` 标签打穿，数值错而不报错。
 - **`param_list` 尾部的空槽是上游预留、未被任何 `#\d+` 引用**：参数表行集合必须由描述引用集驱动，按 `param_list` 长度驱动会多渲染空行或错位。
 - **换行与富文本要先两侧归一再判定**：数据里的 `\n` 渲染成 `<br>`、`<color=#…>` 渲染时被剥掉，不归一会把渲染正常的文本判成漏渲染；字面 `\n`（两字符序列）只在货币战争羁绊 `desc` 上出现，须显式归一。
@@ -88,6 +89,8 @@
 - **相对路径依赖脚本所在层级**：`new URL('../public/data/cn/…')` 在脚本迁入子目录后仍「运行成功」但仓库数据停更；脚本挪位必须实跑一次并核对产物时间戳。
 - **`vendor/TurnBasedGameData/` 被 `.gitignore` 忽略 = 源表不入库，换代即永久丢失**：赛季 / 大版本轮转后旧 dump 无法再取，而「上一代名册」「赛季归属」恰恰只存在于旧 dump 里；轮转前必须冻结——`git tag -a cw-season-1`（首个冻结点，指向 a3a25145）+ 全量拷贝 `vendor/TurnBasedGameData-cw-season-1/`（`temp/freeze_cw_season1.py`，含 `manifest.json` 的 rows/bytes/sha256）。冻结副本同样被 `.gitignore` 的 `vendor/TurnBasedGameData-*/` 排除，只存在于本机。
 - **赛季轮转不会报错，只让产物静默混季**：基础表 `GridFightRoleBasicInfo` / `TraitBasicInfo` / `Augment` / `PortalBuff` 当前全为 `SeasonID=1`，而连接表已有下一季行（`GridFightSeasonItem` 225 行里 60 行 `SeasonID=2`、`GridFightSeasonCraft` 80 行里 23 行）——只按 BaseInfo 全量输出，下版 dump 起列表会把两季条目混在一起且无任何告警。
+- **代际差集不会自己「翻篇」**：`*Old` 名册里的最大代是**死数**，而上一代的新增批次从不回写进它 ⇒ 「本赛季新增」会把上一季那批一直算作新增（4.7.0 实测 20 条里 4 条是赛季 1 遗留，且这批在 4.6.0 时也被标成新增）。判据必须再叠一道**当季登记闸门**（角色 `season_ids` 含当前赛季、羁绊 `season_id` 等于当前赛季），否则页面数字只增不减、且越到后面混得越多。
+- **`IsFakeAvatar` 角色在 `AvatarConfig` 里查不到**：4.7.0 起册内出现 `AvatarID 6042` 这类条目（`SpecialAvatarID 3706042` 只能查到 `TYPE_TRIAL`，`GridFightNpcConfig` / `SpecialAvatar` / `AvatarConfigLD` 全无线索），任何 `f"角色 {id}"` 式兜底都会把中文漏进 13 种语言、`avatarShopIconUrl` 还会 404。判据：**名字取不到就整条跳过 + warning**；并且跳过会留下孤儿 `currency/role/<id>.json`，产出后必须按本次产出集合清陈旧文件（否则覆盖率守卫条目数↔快照数失配）。
 
 ## 参考站与社群表格取证
 

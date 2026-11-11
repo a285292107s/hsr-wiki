@@ -387,6 +387,8 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
         out,
         mark_season_new([e["id"] for e in out], trait_old, id_key="TraitID",
                         label="GridFightTraitLayerOld 羁绊名册"),
+        season_field="season_id",
+        current_season=(season or {}).get("id"),
     )
     logger.info("  赛季新增羁绊: %d 个", n_season_new)
 

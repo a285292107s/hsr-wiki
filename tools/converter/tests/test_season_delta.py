@@ -118,6 +118,31 @@ class TestApplySeasonNew:
         assert apply_season_new(entries, {1: False}) == 0
         assert entries[0]["is_season_new"] is False
 
+    def test_season_gate_drops_entries_of_past_seasons(self):
+        multi = [
+            {"id": 1, "season_ids": [2]},
+            {"id": 2, "season_ids": [1]},
+            {"id": 3, "season_ids": [1, 2]},
+            {"id": 4},
+        ]
+        flags = {1: True, 2: True, 3: True, 4: True}
+        assert apply_season_new(multi, flags, season_field="season_ids", current_season=2) == 2
+        assert [e["is_season_new"] for e in multi] == [True, False, True, False]
+
+        single = [{"id": 1, "season_id": 2}, {"id": 2, "season_id": 1}]
+        assert apply_season_new(single, {1: True, 2: True}, season_field="season_id", current_season=2) == 1
+        assert [e["is_season_new"] for e in single] == [True, False]
+
+    def test_season_gate_without_current_season_keeps_diff_result(self):
+        entries = [{"id": 1, "season_ids": [1]}, {"id": 2, "season_id": 1}]
+        assert apply_season_new(entries, {1: True, 2: True}, season_field="season_ids") == 2
+        assert [e["is_season_new"] for e in entries] == [True, True]
+
+    def test_season_gate_without_current_season_keeps_diff_result(self):
+        entries = [{"id": 1, "season_ids": [1]}]
+        assert apply_season_new(entries, {1: True}, season_field="season_ids") == 1
+        assert entries[0]["is_season_new"] is True
+
 @pytest.mark.parametrize("ids", [[], [1]])
 def test_empty_current_ids_returns_empty_mapping(ids):
     result = mark_season_new(ids, _roster((102, 1), (103, 1)), id_key="AvatarID")

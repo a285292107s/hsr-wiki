@@ -304,7 +304,10 @@ def convert() -> None:
             continue
         rid = role_raw["ID"]
         avatar_id = role_raw.get("AvatarID", rid)
-        name = name_map.get(avatar_id, f"角色 {avatar_id}")
+        name = name_map.get(avatar_id)
+        if not name:
+            logger.warning("货币战争角色 %s（AvatarID %s）无官方展示名，整条跳过", rid, avatar_id)
+            continue
 
         trait_ids = [int(t) for t in (role_raw.get("TraitList") or [])]
 
@@ -493,7 +496,19 @@ def convert() -> None:
 
         save_json(detail, detail_dir / f"{rid}.json")
 
-    n_season_new = apply_season_new(roles_out, season_new_by_avatar, id_field="avatar_id")
+    produced = {f"{role['id']}.json" for role in roles_out}
+    for stale in detail_dir.glob("*.json"):
+        if stale.name not in produced:
+            stale.unlink()
+            logger.warning("移除陈旧角色详情 %s（对应条目已不再产出）", stale.name)
+
+    n_season_new = apply_season_new(
+        roles_out,
+        season_new_by_avatar,
+        id_field="avatar_id",
+        season_field="season_ids",
+        current_season=season["id"],
+    )
     logger.info("赛季新增角色：%d 位", n_season_new)
 
     list_out = {"roles": roles_out, "season": season, "season_new_count": n_season_new}
