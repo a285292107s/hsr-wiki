@@ -106,6 +106,8 @@ LABELS: dict[str, str] = {
     "itemType.RogueMedal": "模拟宇宙勋章",
     "itemType.FindChest": "寻宝道具",
     "itemType.Mission": "任务道具",
+    "itemType.AvatarExRankMaterial": "奇缘星魂素材",
+    "itemType.Fiat": "兑换券",
     # 物品主类别：Material / Virtual 与 sub-type 同名同义 ⇒ 直接复用 itemType.* 键（不设第二处事实）
     "itemMainType.Usable": "可用",
     "itemMainType.Mission": "任务",
@@ -982,6 +984,19 @@ AUTHORED: dict[str, dict[str, str]] = {
         "kr": "보물찾기 아이템", "es": "Objeto de búsqueda del tesoro", "fr": "Objet de chasse au trésor",
         "de": "Schatzsuche-Item", "pt": "Item de caça ao tesouro", "ru": "Предмет поиска сокровищ",
         "th": "ไอเทมล่าสมบัติ", "vi": "Vật phẩm tìm kho báu", "id": "Item berburu harta",
+    },
+    "itemType.AvatarExRankMaterial": {
+        "cn": "奇缘星魂素材", "cht": "奇緣星魂素材", "en": "Affinitive Eidolon Material", "jp": "奇縁星魂素材",
+        "kr": "기연 성혼 소재", "es": "Material de eidolón fortuito", "fr": "Matériau d'eidolon d'affinité",
+        "de": "Affines-Eidolon-Material", "pt": "Material de Eidolon do Destino",
+        "ru": "Материал Судьбоносного Эйдолона", "th": "วัสดุ Eidolon สานชะตา",
+        "vi": "Nguyên liệu Tinh Hồn Kỳ Duyên", "id": "Material Eidolon Tali Takdir",
+    },
+    "itemType.Fiat": {
+        "cn": "兑换券", "cht": "兌換券", "en": "Redemption Voucher", "jp": "引換券",
+        "kr": "교환권", "es": "Cupón de canje", "fr": "Bon d'échange", "de": "Einlösebon",
+        "pt": "Cupom de troca", "ru": "Обменный купон", "th": "คูปองแลกเปลี่ยน",
+        "vi": "Phiếu đổi thưởng", "id": "Voucher Penukaran",
     },
     "cwRole.hpInherit": {
         "cn": "生命继承", "cht": "生命繼承", "en": "HP Inheritance", "jp": "HP継承", "kr": "HP 계승", "es": "Herencia de HP", "fr": "Héritage de PV", "de": "HP-Vererbung", "pt": "Herança de HP", "ru": "Наследование HP", "th": "สืบทอด HP", "vi": "Kế thừa HP", "id": "Warisan HP",

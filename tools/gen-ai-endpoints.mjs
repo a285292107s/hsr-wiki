@@ -1751,7 +1751,9 @@ function currencyTraitPages(ctx) {
       })
       .join('');
     const remarkHtml = (entry.remarks || [])
-      .map((r) => `<li><p>${txt(r.desc, r.params)}</p></li>`)
+      .map((r) => txtSafe(r.desc, r.params, SNAPSHOT_TEXT_LIMIT_DETAIL))
+      .filter(Boolean)
+      .map((text) => `<li><p>${text}</p></li>`)
       .join('');
     const body = detailBody(ctx, {
       crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/trait'](), '/currency/trait'], [name, null]]),

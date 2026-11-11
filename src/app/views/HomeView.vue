@@ -158,7 +158,7 @@ onBeforeUnmount(stopCoverRotation);
                 <li v-for="entry in entries" :key="`${entry.kind}-${entry.id}`" class="nk-home__ledger-item">
                   <RouterLink class="nk-home__ledger-link" :to="entry.to">
                     <span class="nk-home__ledger-kind">{{ kindLabel[entry.kind] }}</span>
-                    <span class="nk-home__ledger-name">{{ entry.name }}</span>
+                    <span class="nk-home__ledger-name" :title="entry.name">{{ entry.name }}</span>
                     <span class="nk-home__ledger-facts">
                       <span v-if="factLine(entry)">{{ factLine(entry) }}</span>
                       <span v-if="entry.kind !== 'relic' && entry.rarity" class="nk-home__ledger-rarity">
