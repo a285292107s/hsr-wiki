@@ -13,7 +13,7 @@ export const JS_DELIVR_BRANCH = 'main';
 
 export const OFFICIAL_ICON_BASE = `https://cdn.jsdelivr.net/gh/a285292107s/StarRailTextures@${JS_DELIVR_BRANCH}/assets/asbres/spriteoutput`;
 
-export const SPINE_MANIFEST_VERSION = 19;
+export const SPINE_MANIFEST_VERSION = 20;
 
 export const MAX_CHAR_LEVEL = 80;
 
