@@ -62,3 +62,9 @@
 - **中文显示字折行不会被任何溢出断言抓到**：「星铁档案馆」折成「星铁档案 / 馆」时元素既没溢出也没报错。判据是 `element.getClientRects().length === 1`（一行恰好一个 rect）；修复顺序是缩字号或加宽栏，**不是**放任折行。
 - **设计类产物的「好不好看」要靠外部量化校验器落地**：分享图这类单图产物没有回归断言，可借版式技能自带的校验器量溢出 / 最小字号 / 标题与下一块的间距 / 边界（`validate-social-deck.mjs`）。它的 R9（标题与下一块 ≥24px）是实测最容易踩的一条——肉眼看「有间距」但只有 16px。
 
+## 图标入库：新版本缺口的补数路径
+
+- **`avatarcutinfigures` 是唯一没有远端兜底的图标分类，缺一张就必露占位符**：nanoka 对该分类整体 404（`avatardrawcard` / `avatarroundicon` / `rank` 等分类有），jsDelivr 侧冻结在旧版本；本机 `StarRailTextures` 只是上次导出的快照，目录存在 ≠ 含新版本文件。判据：先按「本地缺 + nanoka 404」定性，再去解包补数，别拿同角色其它分类的 200 当该分类有图的证据。
+- **补数走 AnimeStudio CLI 的 map 定向导出，不要全量扫包**：`AnimeStudio.CLI.exe "<game>\StarRail_Data" <导出目录> --game SR --map_op AssetMap,Load --map_type MessagePack --map_name "<textures>\index\game.map" --group_assets ByContainer --types Sprite --containers "<分类正则>" --dedupe_content`；`--containers` 让 map 只回捞相关包。前提是 `index/game.map` 建时已含当前版本——旧 map 只会回捞到旧资产（「map 里搜不到资产名」即此因，重建 map 等于整盘扫）；`--src` 要给 `<导出目录>/assets/asbres/spriteoutput`（解包根可能多一层 `ui/`，别依赖脚本默认路径）。
+- **`ingest-icons.py --crop-alpha 4:5` 的产物比例并不统一，这是算法而非流程漂移**：裁剪窗口宽高被 `min(w2, W) / min(h2, H)` 夹回画布后不再缩小，所以宽幅或几乎满画布的立绘会原样保留比例——目录里 4:5 与 0.9~1.1 的比例混存是正常形态；判据是「窗口受画布限制」，不要为了凑 4:5 手裁或换源。
+
