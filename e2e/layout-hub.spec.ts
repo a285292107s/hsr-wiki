@@ -19,7 +19,7 @@ test.describe('布局验收：枢纽页导航条回归（ADR 0019）', () => {
     await expect(page.locator('.ui-sidebar')).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-nav');
     expect(await readContentOffset(page)).toBe(148);
-    await expectTokenNumber(page.locator('.nk-hub-release'), 'padding-left', await readContentOffset(page), '枢纽版块左避让');
+    await expectTokenNumber(page.locator('.nk-cwsc'), 'padding-left', await readContentOffset(page), '枢纽版块左避让');
 
     await page.locator('.ui-sidebar a[href="/currency/role"]').first().click();
     await expect(page).toHaveURL(/\/currency\/role$/);

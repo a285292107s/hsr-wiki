@@ -103,7 +103,7 @@ test.describe('应用外壳契约', () => {
 
     const SURFACE = [
       '.nk-idx-card', '.nk-relic-card__plate', '.nk-crole-card', '.nk-cw-trait-card',
-      '.nk-ach-card', '.nk-cwrole', '.nkcwtrait',
+      '.nk-ach-card', '.nk-cwsc-role', '.nk-cwsc-trait',
     ];
     const LABEL = ['.nk-idx-card__name', '.nk-mob-card__name', '.nk-relic-card__name', '.nk-lc-card__name'];
     const surf: Array<{ prop: string; dur: number; ease: string; sel: string }> = [];

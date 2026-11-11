@@ -12,7 +12,7 @@ test.describe('布局验收：枢纽页共享页脚原语', () => {
       await expect(footer).toHaveCount(1);
       await expect(page.locator('.nk-home-footer')).toHaveCount(0);
       await expectTokenNumber(footer, 'padding-left', await readContentOffset(page), '页脚左避让');
-      const gutterFrom = path === '/' ? '.nk-intake' : '.nk-hub-release';
+      const gutterFrom = path === '/' ? '.nk-intake' : '.nk-cwsc';
       const releaseGutter = await computedNumber(page.locator(gutterFrom).first(), 'padding-right');
       expect(releaseGutter).toBeGreaterThan(0);
       await expectTokenNumber(footer, 'padding-right', releaseGutter, '页脚右留白（=枢纽版块右留白）');

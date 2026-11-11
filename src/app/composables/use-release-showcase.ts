@@ -1,4 +1,4 @@
-import { ref, shallowRef, type Ref, type ShallowRef } from 'vue';
+import { ref, shallowRef, type Ref } from 'vue';
 import { useAppStore } from '../stores/app';
 import { characterPage } from '../catalog/pages/character';
 import { lightconePage } from '../catalog/pages/lightcone';
@@ -8,8 +8,8 @@ import {
   loadLocalRelicSets, loadLocalRelicDetail,
 } from '../../services/api';
 import { fmtDesc } from '../../lib/format';
-import { avatarCutinFigureUrl, avatarDrawCardUrl, gridFightTraitIconById, gridFightTraitIconUrl, lightConeMaxFigureUrl } from '../../lib/icons';
-import { cwChargeKey, cwCostKey, cwPositionKey, cwTraitCatKey, elemLabel, pathLabel } from '../../lib/enum-labels';
+import { avatarCutinFigureUrl, avatarDrawCardUrl, lightConeMaxFigureUrl } from '../../lib/icons';
+import { elemLabel, pathLabel } from '../../lib/enum-labels';
 import { characterBlurb } from '../../lib/character-blurb';
 import type { CatalogContext, CatalogItem, CatalogPageConfig } from '../catalog/types';
 import { translate } from '../i18n';
@@ -228,156 +228,4 @@ export function useReleaseShowcase(): ReleaseShowcase {
   }
 
   return { sections, loaded, failedCount, labels: RELEASE_LABELS, skKinds: RELEASE_SK_KINDS, load };
-}
-
-export interface CwTraitChip {
-  id: string;
-  name: string;
-  icon: string;
-  isNew: boolean;
-}
-
-export interface CwRoleCard {
-  id: string;
-  name: string;
-  href: string;
-  avatar: string;
-  cost: number;
-  costKey?: string;
-  positionKey?: string;
-  charges: Array<{ key?: string; text: string }>;
-  traits: CwTraitChip[];
-}
-
-export interface CwTraitCard {
-  id: string;
-  name: string;
-  href: string;
-  icon: string;
-  cat: string;
-  catKey: string;
-  layerCount: number;
-  desc: string;
-  carriers: Array<{ id: string; name: string; isNew: boolean }>;
-}
-
-export interface CwSeason {
-  roles: CwRoleCard[];
-  traits: CwTraitCard[];
-  totals: { roles: number; traits: number };
-}
-
-interface CwTraitRef {
-  id: number | string;
-  name?: string;
-}
-
-function seasonTraitRefs(item: CatalogItem): CwTraitRef[] {
-  return Array.isArray(item.traits) ? (item.traits as CwTraitRef[]) : [];
-}
-
-export function buildCwSeason(
-  roleItems: readonly CatalogItem[],
-  traitItems: readonly CatalogItem[],
-): CwSeason {
-  const newTraits = traitItems.filter((item) => item.is_season_new === true);
-  const newTraitIds = new Set(newTraits.map((item) => String(item.id)));
-  const carriersByTrait = new Map<string, CwTraitCard['carriers']>();
-  for (const item of roleItems) {
-    for (const ref of seasonTraitRefs(item)) {
-      const id = String(ref.id);
-      if (!newTraitIds.has(id)) continue;
-      const bucket = carriersByTrait.get(id) ?? [];
-      bucket.push({ id: String(item.id), name: String(item.name ?? ''), isNew: item.is_season_new === true });
-      carriersByTrait.set(id, bucket);
-    }
-  }
-  const roles = roleItems
-    .filter((item) => item.is_season_new === true)
-    .map((item): CwRoleCard => {
-      const rarity = Number(item.rarity) || 0;
-      return {
-        id: String(item.id),
-        name: String(item.name ?? ''),
-        href: String(item.href ?? ''),
-        avatar: String(item.avatar ?? ''),
-        cost: rarity,
-        costKey: cwCostKey(String(rarity)),
-        positionKey: cwPositionKey(String(item.front_back_type ?? '')),
-        charges: (Array.isArray(item.charge_type) ? item.charge_type : []).map((charge) => ({
-          key: cwChargeKey(charge),
-          text: charge,
-        })),
-        traits: seasonTraitRefs(item).map((ref) => {
-          const id = String(ref.id);
-          return {
-            id,
-            name: String(ref.name ?? ''),
-            icon: gridFightTraitIconById(Number(id)),
-            isNew: newTraitIds.has(id),
-          };
-        }),
-      };
-    });
-  const traits = newTraits.map((item): CwTraitCard => {
-    const id = String(item.id);
-    const cat = String(item.cat ?? 'special');
-    return {
-      id,
-      name: String(item.name ?? ''),
-      href: String(item.href ?? ''),
-      icon: gridFightTraitIconUrl(item.icon as string),
-      cat,
-      catKey: cwTraitCatKey(cat) ?? 'catalog.traitCat.special',
-      layerCount: Array.isArray(item.layers) ? (item.layers as unknown[]).length : 0,
-      desc: String(item.simple_desc ?? '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim(),
-      carriers: carriersByTrait.get(id) ?? [],
-    };
-  });
-  return { roles, traits, totals: { roles: roleItems.length, traits: traitItems.length } };
-}
-
-const CW_SEASON_SOURCE_COUNT = 2;
-
-export interface CwSeasonShowcase {
-  season: ShallowRef<CwSeason | null>;
-  loaded: Ref<boolean>;
-  failedCount: Ref<number>;
-  sourceCount: number;
-  load(): Promise<void>;
-}
-
-async function loadSeasonItems(
-  loadPage: () => Promise<CatalogPageConfig>,
-  ctx: CatalogContext,
-): Promise<CatalogItem[] | null> {
-  try {
-    const page = await loadPage();
-    return page.fetchData ? await page.fetchData(ctx) : [];
-  } catch {
-    return null;
-  }
-}
-
-export function useCwSeason(): CwSeasonShowcase {
-  const app = useAppStore();
-  const season = shallowRef<CwSeason | null>(null);
-  const loaded = ref(false);
-  const failedCount = ref(0);
-
-  async function load(): Promise<void> {
-    loaded.value = false;
-    failedCount.value = 0;
-    const ctx: CatalogContext = { version: app.version };
-    const sourced = await Promise.all([
-      loadSeasonItems(() => import('../catalog/pages/currency-role').then((m) => m.currencyRolePage), ctx),
-      loadSeasonItems(() => import('../catalog/pages/currency-trait').then((m) => m.currencyTraitPage), ctx),
-    ]);
-    failedCount.value = sourced.filter((items) => items === null).length;
-    const [roles, traits] = sourced;
-    season.value = buildCwSeason(roles ?? [], traits ?? []);
-    loaded.value = true;
-  }
-
-  return { season, loaded, failedCount, sourceCount: CW_SEASON_SOURCE_COUNT, load };
 }

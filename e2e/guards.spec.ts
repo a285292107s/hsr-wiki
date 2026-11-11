@@ -17,7 +17,7 @@ const ROUTES: GuardRoute[] = [
   { path: '/endgame/story', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
   { path: '/endgame/boss', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
   { path: '/endgame/peak', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
-  { path: '/currency', roots: ['.nk-hub-masthead__title', '.nk-hub-release__title'] },
+  { path: '/currency', roots: ['.nk-hub-masthead__title', '.nk-cwsc-act__title'] },
   { path: '/currency/role/1001', roots: ['.nk-crole-hero__name', '.nk-crole-bar'] },
   { path: '/settings', roots: ['#accent-title', '.ui-sidebar'] },
   { path: '/endgame/boss/3020', roots: ['.nk-egd-tabs', '.nk-egd-board'] },

@@ -63,6 +63,7 @@ export const currencyTraitPage: CatalogPageConfig = {
       layers: t.layers,
       remarks: t.remarks,
       is_season_new: t.is_season_new === true,
+      package: t.package,
     }));
   },
   buildFilters(items: CatalogItem[]) {

@@ -255,6 +255,12 @@ export interface CurrencyTraitRemark {
   params: number[];
 }
 
+export interface CurrencyTraitPackage {
+  invite: number | null;
+  stock: number | null;
+  badge: number | null;
+}
+
 export interface CurrencyTraitEntry {
   id: number;
   name: string;
@@ -270,6 +276,7 @@ export interface CurrencyTraitEntry {
   layers: CurrencyTraitLayer[];
   remarks: CurrencyTraitRemark[];
   is_season_new?: boolean;
+  package?: CurrencyTraitPackage;
 }
 
 export interface CurrencyTraitList {
